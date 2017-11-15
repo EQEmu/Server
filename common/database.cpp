@@ -200,15 +200,15 @@ int16 Database::CheckStatus(uint32 account_id) {
 	return status;
 }
 
-uint32 Database::CreateAccount(const char* name, const char* password, int16 status, uint32 lsaccount_id) {
+uint32 Database::CreateAccount(const char* name, const char* password, int16 status, const char* loginserver, uint32 lsaccount_id) {
 	std::string query;
 
 	if (password)
-		query = StringFormat("INSERT INTO account SET name='%s', password='%s', status=%i, lsaccount_id=%i, time_creation=UNIX_TIMESTAMP();",name,password,status, lsaccount_id);
+		query = StringFormat("INSERT INTO account SET name='%s', password='%s', status=%i, ls_id='%s', lsaccount_id=%i, time_creation=UNIX_TIMESTAMP();", name, password, status, loginserver, lsaccount_id);
 	else
-		query = StringFormat("INSERT INTO account SET name='%s', status=%i, lsaccount_id=%i, time_creation=UNIX_TIMESTAMP();",name, status, lsaccount_id);
+		query = StringFormat("INSERT INTO account SET name='%s', status=%i, ls_id='%s', lsaccount_id=%i, time_creation=UNIX_TIMESTAMP();",name, status, loginserver, lsaccount_id);
 
-	Log(Logs::General, Logs::World_Server, "Account Attempting to be created: '%s' status: %i", name, status);
+	Log(Logs::General, Logs::World_Server, "Account Attempting to be created: '%s:%s' status: %i", loginserver, name, status);
 	auto results = QueryDatabase(query);
 
 	if (!results.Success()) {
@@ -223,9 +223,9 @@ uint32 Database::CreateAccount(const char* name, const char* password, int16 sta
 	return results.LastInsertedID();
 }
 
-bool Database::DeleteAccount(const char* name) {
-	std::string query = StringFormat("DELETE FROM account WHERE name='%s';",name); 
-	Log(Logs::General, Logs::World_Server, "Account Attempting to be deleted:'%s'", name);
+bool Database::DeleteAccount(const char *loginserver, const char* name) {
+	std::string query = StringFormat("DELETE FROM account WHERE name='%s' AND ls_id='%s'", name, loginserver); 
+	Log(Logs::General, Logs::World_Server, "Account Attempting to be deleted:'%s:%s'", loginserver, name);
 
 	auto results = QueryDatabase(query); 
 	if (!results.Success()) {
@@ -921,18 +921,6 @@ bool Database::SetVariable(const std::string varname, const std::string &varvalu
 	return true;
 }
 
-uint32 Database::GetMiniLoginAccount(char* ip)
-{
-	std::string query = StringFormat("SELECT `id` FROM `account` WHERE `minilogin_ip` = '%s'", ip);
-	auto results = QueryDatabase(query);
-
-	if (!results.Success())
-		return 0;
-
-	auto row = results.begin(); 
-	return atoi(row[0]);
-}
-
 // Get zone starting points from DB
 bool Database::GetSafePoints(const char* short_name, uint32 version, float* safe_x, float* safe_y, float* safe_z, int16* minstatus, uint8* minlevel, char *flag_needed) {
 	
@@ -1194,9 +1182,10 @@ bool Database::AddToNameFilter(const char* name) {
 	return true;
 }
 
-uint32 Database::GetAccountIDFromLSID(uint32 iLSID, char* oAccountName, int16* oStatus) {
+uint32 Database::GetAccountIDFromLSID(const std::string& iLoginServer, uint32 iLSID, char* oAccountName, int16* oStatus) {
 	uint32 account_id = 0;
-	std::string query = StringFormat("SELECT id, name, status FROM account WHERE lsaccount_id=%i", iLSID);
+	//iLoginServer is set by config so don't need to worry about escaping it.
+	std::string query = StringFormat("SELECT id, name, status FROM account WHERE lsaccount_id=%i AND ls_id='%s'", iLSID, iLoginServer.c_str());
 	auto results = QueryDatabase(query);
 
 	if (!results.Success()) {
@@ -1431,9 +1420,9 @@ uint32 Database::GetCharacterInfo(const char* iName, uint32* oAccID, uint32* oZo
 	return charid;
 }
 
-bool Database::UpdateLiveChar(char* charname,uint32 lsaccount_id) {
+bool Database::UpdateLiveChar(char* charname, uint32 account_id) {
 
-	std::string query = StringFormat("UPDATE account SET charname='%s' WHERE id=%i;",charname, lsaccount_id);
+	std::string query = StringFormat("UPDATE account SET charname='%s' WHERE id=%i;", charname, account_id);
 	auto results = QueryDatabase(query);
 
 	if (!results.Success()){

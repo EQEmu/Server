@@ -1957,31 +1957,33 @@ void command_shutdown(Client *c, const Seperator *sep)
 
 void command_delacct(Client *c, const Seperator *sep)
 {
-	if(sep->arg[1][0] == 0)
-		c->Message(0, "Format: #delacct accountname");
-	else
-		if (database.DeleteAccount(sep->arg[1]))
-			c->Message(0, "The account was deleted.");
-		else
-			c->Message(0, "Unable to delete account.");
+	//TODO: REIMPLEMENT
+//	if(sep->arg[1][0] == 0)
+//		c->Message(0, "Format: #delacct accountname");
+//	else
+//		if (database.DeleteAccount(sep->arg[1]))
+//			c->Message(0, "The account was deleted.");
+//		else
+//			c->Message(0, "Unable to delete account.");
 }
 
 void command_setpass(Client *c, const Seperator *sep)
 {
-	if(sep->argnum != 2)
-		c->Message(0, "Format: #setpass accountname password");
-	else {
-		int16 tmpstatus = 0;
-		uint32 tmpid = database.GetAccountIDByName(sep->arg[1], &tmpstatus);
-		if (!tmpid)
-			c->Message(0, "Error: Account not found");
-		else if (tmpstatus > c->Admin())
-			c->Message(0, "Cannot change password: Account's status is higher than yours");
-		else if (database.SetLocalPassword(tmpid, sep->arg[2]))
-			c->Message(0, "Password changed.");
-		else
-			c->Message(0, "Error changing password.");
-	}
+	//TODO: REIMPLEMENT
+	//if(sep->argnum != 2)
+	//	c->Message(0, "Format: #setpass accountname password");
+	//else {
+	//	int16 tmpstatus = 0;
+	//	uint32 tmpid = database.GetAccountIDByName(sep->arg[1], &tmpstatus);
+	//	if (!tmpid)
+	//		c->Message(0, "Error: Account not found");
+	//	else if (tmpstatus > c->Admin())
+	//		c->Message(0, "Cannot change password: Account's status is higher than yours");
+	//	else if (database.SetLocalPassword(tmpid, sep->arg[2]))
+	//		c->Message(0, "Password changed.");
+	//	else
+	//		c->Message(0, "Error changing password.");
+	//}
 }
 
 void command_setlsinfo(Client *c, const Seperator *sep)
@@ -4414,41 +4416,42 @@ void command_uptime(Client *c, const Seperator *sep)
 
 void command_flag(Client *c, const Seperator *sep)
 {
-	if(sep->arg[2][0] == 0) {
-		if (!c->GetTarget() || (c->GetTarget() && c->GetTarget() == c)) {
-			c->UpdateAdmin();
-			c->Message(0, "Refreshed your admin flag from DB.");
-		} else if (c->GetTarget() && c->GetTarget() != c && c->GetTarget()->IsClient()) {
-			c->GetTarget()->CastToClient()->UpdateAdmin();
-			c->Message(0, "%s's admin flag has been refreshed.", c->GetTarget()->GetName());
-			c->GetTarget()->Message(0, "%s refreshed your admin flag.", c->GetName());
-		}
-	}
-	else if (!sep->IsNumber(1) || atoi(sep->arg[1]) < -2 || atoi(sep->arg[1]) > 255 || strlen(sep->arg[2]) == 0)
-		c->Message(0, "Usage: #flag [status] [acctname]");
-
-	else if (c->Admin() < commandChangeFlags) {
-//this check makes banning players by less than this level
-//impossible, but i'll leave it in anyways
-		c->Message(0, "You may only refresh your own flag, doing so now.");
-		c->UpdateAdmin();
-	}
-	else {
-		if (atoi(sep->arg[1]) > c->Admin())
-			c->Message(0, "You cannot set people's status to higher than your own");
-		else if (atoi(sep->arg[1]) < 0 && c->Admin() < commandBanPlayers)
-			c->Message(0, "You have too low of status to suspend/ban");
-		else if (!database.SetAccountStatus(sep->argplus[2], atoi(sep->arg[1])))
-			c->Message(0, "Unable to set GM Flag.");
-		else {
-			c->Message(0, "Set GM Flag on account.");
-			auto pack = new ServerPacket(ServerOP_FlagUpdate, 6);
-			*((uint32*) pack->pBuffer) = database.GetAccountIDByName(sep->argplus[2]);
-			*((int16*) &pack->pBuffer[4]) = atoi(sep->arg[1]);
-			worldserver.SendPacket(pack);
-			delete pack;
-		}
-	}
+	//TODO: REIMPLEMENT
+//	if(sep->arg[2][0] == 0) {
+//		if (!c->GetTarget() || (c->GetTarget() && c->GetTarget() == c)) {
+//			c->UpdateAdmin();
+//			c->Message(0, "Refreshed your admin flag from DB.");
+//		} else if (c->GetTarget() && c->GetTarget() != c && c->GetTarget()->IsClient()) {
+//			c->GetTarget()->CastToClient()->UpdateAdmin();
+//			c->Message(0, "%s's admin flag has been refreshed.", c->GetTarget()->GetName());
+//			c->GetTarget()->Message(0, "%s refreshed your admin flag.", c->GetName());
+//		}
+//	}
+//	else if (!sep->IsNumber(1) || atoi(sep->arg[1]) < -2 || atoi(sep->arg[1]) > 255 || strlen(sep->arg[2]) == 0)
+//		c->Message(0, "Usage: #flag [status] [acctname]");
+//
+//	else if (c->Admin() < commandChangeFlags) {
+////this check makes banning players by less than this level
+////impossible, but i'll leave it in anyways
+//		c->Message(0, "You may only refresh your own flag, doing so now.");
+//		c->UpdateAdmin();
+//	}
+//	else {
+//		if (atoi(sep->arg[1]) > c->Admin())
+//			c->Message(0, "You cannot set people's status to higher than your own");
+//		else if (atoi(sep->arg[1]) < 0 && c->Admin() < commandBanPlayers)
+//			c->Message(0, "You have too low of status to suspend/ban");
+//		else if (!database.SetAccountStatus(sep->argplus[2], atoi(sep->arg[1])))
+//			c->Message(0, "Unable to set GM Flag.");
+//		else {
+//			c->Message(0, "Set GM Flag on account.");
+//			auto pack = new ServerPacket(ServerOP_FlagUpdate, 6);
+//			*((uint32*) pack->pBuffer) = database.GetAccountIDByName(sep->argplus[2]);
+//			*((int16*) &pack->pBuffer[4]) = atoi(sep->arg[1]);
+//			worldserver.SendPacket(pack);
+//			delete pack;
+//		}
+//	}
 }
 
 void command_time(Client *c, const Seperator *sep)

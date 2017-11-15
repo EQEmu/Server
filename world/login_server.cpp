@@ -41,14 +41,15 @@ extern uint32 numzones;
 extern uint32 numplayers;
 extern volatile bool	RunLoops;
 
-LoginServer::LoginServer(const char* iAddress, uint16 iPort, const char* Account, const char* Password, bool legacy)
+LoginServer::LoginServer(const char *Name, const char* iAddress, uint16 iPort, const char* Account, const char* Password, bool legacy)
 {
 	strn0cpy(LoginServerAddress, iAddress, 256);
 	LoginServerPort = iPort;
-	strn0cpy(LoginAccount, Account, 31);
-	strn0cpy(LoginPassword, Password, 31);
+	LoginAccount = Account;
+	LoginPassword = Password;
 	CanAccountUpdate = false;
 	IsLegacy = legacy;
+	LoginName = Name;
 	Connect();
 }
 
@@ -60,7 +61,7 @@ void LoginServer::ProcessUsertoWorldReq(uint16_t opcode, EQ::Net::Packet &p) {
 	Log(Logs::Detail, Logs::World_Server, "Recevied ServerPacket from LS OpCode 0x04x", opcode);
 
 	UsertoWorldRequest_Struct* utwr = (UsertoWorldRequest_Struct*)p.Data();
-	uint32 id = database.GetAccountIDFromLSID(utwr->lsaccountid);
+	uint32 id = database.GetAccountIDFromLSID(LoginName, utwr->lsaccountid);
 	int16 status = database.CheckStatus(id);
 
 	auto outpack = new ServerPacket;
@@ -110,7 +111,7 @@ void LoginServer::ProcessLSClientAuth(uint16_t opcode, EQ::Net::Packet &p) {
 			client_list.EnforceSessionLimit(slsca.lsaccount_id);
 		}
 
-		client_list.CLEAdd(slsca.lsaccount_id, slsca.name, slsca.key, slsca.worldadmin, slsca.ip, slsca.local);
+		client_list.CLEAdd(LoginName.c_str(), slsca.lsaccount_id, slsca.name, slsca.key, slsca.worldadmin, slsca.ip, slsca.local);
 	}
 	catch (std::exception &ex) {
 		LogF(Logs::General, Logs::Error, "Error parsing LSClientAuth packet from world.\n{0}", ex.what());
@@ -154,19 +155,6 @@ void LoginServer::ProcessLSAccountUpdate(uint16_t opcode, EQ::Net::Packet &p) {
 }
 
 bool LoginServer::Connect() {
-	std::string tmp;
-	if (database.GetVariable("loginType", tmp) && strcasecmp(tmp.c_str(), "MinILogin") == 0) {
-		minilogin = true;
-		Log(Logs::Detail, Logs::World_Server, "Setting World to MiniLogin Server type");
-	}
-	else
-		minilogin = false;
-
-	if (minilogin && WorldConfig::get()->WorldAddress.length() == 0) {
-		Log(Logs::Detail, Logs::World_Server, "**** For minilogin to work, you need to set the <address> element in the <world> section.");
-		return false;
-	}
-
 	char errbuf[1024];
 	if ((LoginServerIP = ResolveIP(LoginServerAddress, errbuf)) == 0) {
 		Log(Logs::Detail, Logs::World_Server, "Unable to resolve '%s' to an IP.", LoginServerAddress);
@@ -183,10 +171,7 @@ bool LoginServer::Connect() {
 		legacy_client->OnConnect([this](EQ::Net::ServertalkLegacyClient *client) {
 			if (client) {
 				Log(Logs::Detail, Logs::World_Server, "Connected to Legacy Loginserver: %s:%d", LoginServerAddress, LoginServerPort);
-				if (minilogin)
-					SendInfo();
-				else
-					SendNewInfo();
+				SendInfo();
 				SendStatus();
 				zoneserver_list.SendLSZones();
 
@@ -212,10 +197,7 @@ bool LoginServer::Connect() {
 		client->OnConnect([this](EQ::Net::ServertalkClient *client) {
 			if (client) {
 				Log(Logs::Detail, Logs::World_Server, "Connected to Loginserver: %s:%d", LoginServerAddress, LoginServerPort);
-				if (minilogin)
-					SendInfo();
-				else
-					SendNewInfo();
+				SendInfo();
 				SendStatus();
 				zoneserver_list.SendLSZones();
 
@@ -238,26 +220,8 @@ bool LoginServer::Connect() {
 
 	return true;
 }
+
 void LoginServer::SendInfo() {
-	const WorldConfig *Config = WorldConfig::get();
-
-	auto pack = new ServerPacket;
-	pack->opcode = ServerOP_LSInfo;
-	pack->size = sizeof(ServerLSInfo_Struct);
-	pack->pBuffer = new uchar[pack->size];
-	memset(pack->pBuffer, 0, pack->size);
-	ServerLSInfo_Struct* lsi = (ServerLSInfo_Struct*)pack->pBuffer;
-	strcpy(lsi->protocolversion, EQEMU_PROTOCOL_VERSION);
-	strcpy(lsi->serverversion, LOGIN_VERSION);
-	strcpy(lsi->name, Config->LongName.c_str());
-	strcpy(lsi->account, LoginAccount);
-	strcpy(lsi->password, LoginPassword);
-	strcpy(lsi->address, Config->WorldAddress.c_str());
-	SendPacket(pack);
-	delete pack;
-}
-
-void LoginServer::SendNewInfo() {
 	const WorldConfig *Config = WorldConfig::get();
 
 	auto pack = new ServerPacket;
@@ -270,8 +234,8 @@ void LoginServer::SendNewInfo() {
 	strcpy(lsi->serverversion, LOGIN_VERSION);
 	strcpy(lsi->name, Config->LongName.c_str());
 	strcpy(lsi->shortname, Config->ShortName.c_str());
-	strcpy(lsi->account, LoginAccount);
-	strcpy(lsi->password, LoginPassword);
+	strn0cpy(lsi->account, LoginAccount.c_str(), 30);
+	strn0cpy(lsi->password, LoginPassword.c_str(), 30);
 	if (Config->WorldAddress.length())
 		strcpy(lsi->remote_address, Config->WorldAddress.c_str());
 	if (Config->LocalAddress.length())
@@ -310,8 +274,8 @@ void LoginServer::SendAccountUpdate(ServerPacket* pack) {
 	ServerLSAccountUpdate_Struct* s = (ServerLSAccountUpdate_Struct *)pack->pBuffer;
 	if (CanUpdate()) {
 		Log(Logs::Detail, Logs::World_Server, "Sending ServerOP_LSAccountUpdate packet to loginserver: %s:%d", LoginServerAddress, LoginServerPort);
-		strn0cpy(s->worldaccount, LoginAccount, 30);
-		strn0cpy(s->worldpassword, LoginPassword, 30);
+		strn0cpy(s->worldaccount, LoginAccount.c_str(), 30);
+		strn0cpy(s->worldpassword, LoginPassword.c_str(), 30);
 		SendPacket(pack);
 	}
 }

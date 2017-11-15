@@ -21,8 +21,7 @@ struct ServerClientList_Struct;
 
 class ClientListEntry {
 public:
-	ClientListEntry(uint32 id, uint32 iLSID, const char* iLoginName, const char* iLoginKey, int16 iWorldAdmin = 0, uint32 ip = 0, uint8 local=0);
-	ClientListEntry(uint32 id, uint32 iAccID, const char* iAccName, MD5& iMD5Pass, int16 iAdmin = 0);
+	ClientListEntry(const char* iLoginServer, uint32 id, uint32 iLSID, const char* iLoginName, const char* iLoginKey, int16 iWorldAdmin = 0, uint32 ip = 0, uint8 local=0);
 	ClientListEntry(uint32 id, ZoneServer* iZS, ServerClientList_Struct* scl, int8 iOnline);
 	~ClientListEntry();
 	bool	CheckStale();
@@ -30,8 +29,6 @@ public:
 	void	LSUpdate(ZoneServer* zoneserver);
 	void	LSZoneChange(ZoneToZone_Struct* ztz);
 	bool	CheckAuth(uint32 iLSID, const char* key);
-	bool	CheckAuth(const char* iName, MD5& iMD5Password);
-	bool	CheckAuth(uint32 id, const char* key, uint32 ip);
 	void	SetOnline(ZoneServer* iZS, int8 iOnline);
 	void	SetOnline(int8 iOnline = CLE_Status_Online);
 	void	SetChar(uint32 iCharID, const char* iCharName);
@@ -45,6 +42,7 @@ public:
 	void	Camp(ZoneServer* iZS = 0);
 
 	// Login Server stuff
+	inline const char*  LoginServer() const   { return pLoginServer; }
 	inline uint32		LSID()	const		{ return pLSID; }
 	inline uint32		LSAccountID() const	{ return pLSID; }
 	inline const char*	LSName() const		{ return plsname; }
@@ -97,6 +95,7 @@ private:
 	uint8	stale;
 
 	// Login Server stuff
+	char	pLoginServer[64]; //Loginserver we came from.
 	uint32	pLSID;
 	char	plsname[32];
 	char	plskey[16];

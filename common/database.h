@@ -174,18 +174,17 @@ public:
 
 	/* Account Related */
 
-	bool	DeleteAccount(const char* name);
+	bool	DeleteAccount(const char *loginserver, const char* name);
 	bool	GetLiveChar(uint32 account_id, char* cname);
 	bool	SetAccountStatus(const char* name, int16 status);
 	bool	SetLocalPassword(uint32 accid, const char* password);
-	bool	UpdateLiveChar(char* charname, uint32 lsaccount_id);
+	bool	UpdateLiveChar(char* charname, uint32 account_id);
 
 	int16	CheckStatus(uint32 account_id);
 
 	uint32	CheckLogin(const char* name, const char* password, int16* oStatus = 0);
-	uint32	CreateAccount(const char* name, const char* password, int16 status, uint32 lsaccount_id = 0);
-	uint32	GetAccountIDFromLSID(uint32 iLSID, char* oAccountName = 0, int16* oStatus = 0);
-	uint32	GetMiniLoginAccount(char* ip);
+	uint32	CreateAccount(const char* name, const char* password, int16 status, const char* loginserver, uint32 lsaccount_id);
+	uint32	GetAccountIDFromLSID(const std::string& iLoginServer, uint32 iLSID, char* oAccountName = 0, int16* oStatus = 0);
 	uint8	GetAgreementFlag(uint32 acctid);
 
 	void	GetAccountFromID(uint32 id, char* oAccountName, int16* oStatus);

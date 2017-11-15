@@ -1283,16 +1283,17 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	database.LoadCharacterFactionValues(cid, factionvalues);
 
 	/* Load Character Account Data: Temp until I move */
-	query = StringFormat("SELECT `status`, `name`, `lsaccount_id`, `gmspeed`, `revoked`, `hideme`, `time_creation` FROM `account` WHERE `id` = %u", this->AccountID());
+	query = StringFormat("SELECT `status`, `name`, `ls_id`, `lsaccount_id`, `gmspeed`, `revoked`, `hideme`, `time_creation` FROM `account` WHERE `id` = %u", this->AccountID());
 	auto results = database.QueryDatabase(query);
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		admin = atoi(row[0]);
-		strncpy(account_name, row[1], 30);
-		lsaccountid = atoi(row[2]);
-		gmspeed = atoi(row[3]);
-		revoked = atoi(row[4]);
-		gm_hide_me = atoi(row[5]);
-		account_creation = atoul(row[6]);
+		strn0cpy(account_name, row[1], sizeof(account_name));
+		strn0cpy(loginserver, row[2], sizeof(loginserver));
+		lsaccountid = atoi(row[3]);
+		gmspeed = atoi(row[4]);
+		revoked = atoi(row[5]);
+		gm_hide_me = atoi(row[6]);
+		account_creation = atoul(row[7]);
 	}
 
 	/* Load Character Data */

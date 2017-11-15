@@ -31,19 +31,17 @@
 
 class LoginServer{
 public:
-	LoginServer(const char*, uint16, const char*, const char*, bool legacy);
+	LoginServer(const char *, const char*, uint16, const char*, const char*, bool legacy);
 	~LoginServer();
 
 	bool Connect();
 
 	void SendInfo();
-	void SendNewInfo();
 	void SendStatus();
 
 	void SendPacket(ServerPacket* pack) { if (IsLegacy) legacy_client->SendPacket(pack); else client->SendPacket(pack); }
 	void SendAccountUpdate(ServerPacket* pack);
 	bool Connected() { return IsLegacy ? legacy_client->Connected() : client->Connected(); }
-	bool MiniLogin() { return minilogin; }
 	bool CanUpdate() { return CanAccountUpdate; }
 
 private:
@@ -54,16 +52,16 @@ private:
 	void ProcessLSRemoteAddr(uint16_t opcode, EQ::Net::Packet &p);
 	void ProcessLSAccountUpdate(uint16_t opcode, EQ::Net::Packet &p);
 
-	bool minilogin;
 	std::unique_ptr<EQ::Net::ServertalkClient> client;
 	std::unique_ptr<EQ::Net::ServertalkLegacyClient> legacy_client;
 	std::unique_ptr<EQ::Timer> statusupdate_timer;
 	char	LoginServerAddress[256];
 	uint32	LoginServerIP;
 	uint16	LoginServerPort;
-	char	LoginAccount[32];
-	char	LoginPassword[32];
+	std::string LoginAccount;
+	std::string LoginPassword;
 	bool	CanAccountUpdate;
 	bool    IsLegacy;
+	std::string LoginName;
 };
 #endif

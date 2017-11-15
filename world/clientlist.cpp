@@ -349,8 +349,8 @@ void ClientList::SendCLEList(const int16& admin, const char* to, WorldTCPConnect
 }
 
 
-void ClientList::CLEAdd(uint32 iLSID, const char* iLoginName, const char* iLoginKey, int16 iWorldAdmin, uint32 ip, uint8 local) {
-	auto tmp = new ClientListEntry(GetNextCLEID(), iLSID, iLoginName, iLoginKey, iWorldAdmin, ip, local);
+void ClientList::CLEAdd(const char* iLoginServer, uint32 iLSID, const char* iLoginName, const char* iLoginKey, int16 iWorldAdmin, uint32 ip, uint8 local) {
+	auto tmp = new ClientListEntry(iLoginServer, GetNextCLEID(), iLSID, iLoginName, iLoginKey, iWorldAdmin, ip, local);
 
 	clientlist.Append(tmp);
 }
@@ -410,18 +410,6 @@ void ClientList::CLEKeepAlive(uint32 numupdates, uint32* wid) {
 	}
 }
 
-
-ClientListEntry* ClientList::CheckAuth(uint32 id, const char* iKey, uint32 ip ) {
-	LinkedListIterator<ClientListEntry*> iterator(clientlist);
-
-	iterator.Reset();
-	while(iterator.MoreElements()) {
-		if (iterator.GetData()->CheckAuth(id, iKey, ip))
-			return iterator.GetData();
-		iterator.Advance();
-	}
-	return 0;
-}
 ClientListEntry* ClientList::CheckAuth(uint32 iLSID, const char* iKey) {
 	LinkedListIterator<ClientListEntry*> iterator(clientlist);
 
@@ -430,31 +418,6 @@ ClientListEntry* ClientList::CheckAuth(uint32 iLSID, const char* iKey) {
 		if (iterator.GetData()->CheckAuth(iLSID, iKey))
 			return iterator.GetData();
 		iterator.Advance();
-	}
-	return 0;
-}
-
-ClientListEntry* ClientList::CheckAuth(const char* iName, const char* iPassword) {
-	LinkedListIterator<ClientListEntry*> iterator(clientlist);
-	MD5 tmpMD5(iPassword);
-
-	iterator.Reset();
-	while(iterator.MoreElements()) {
-		if (iterator.GetData()->CheckAuth(iName, tmpMD5))
-			return iterator.GetData();
-		iterator.Advance();
-	}
-	int16 tmpadmin;
-
-	//Log.LogDebugType(Logs::Detail, Logs::World_Server,"Login with '%s' and '%s'", iName, iPassword);
-
-	uint32 accid = database.CheckLogin(iName, iPassword, &tmpadmin);
-	if (accid) {
-		uint32 lsid = 0;
-		database.GetAccountIDByName(iName, &tmpadmin, &lsid);
-		auto tmp = new ClientListEntry(GetNextCLEID(), lsid, iName, tmpMD5, tmpadmin, 0, 0);
-		clientlist.Append(tmp);
-		return tmp;
 	}
 	return 0;
 }

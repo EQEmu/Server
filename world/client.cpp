@@ -395,7 +395,7 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 	if (app->size != sizeof(LoginInfo_Struct)) {
 		return false;
 	}
-
+	
 	LoginInfo_Struct *li=(LoginInfo_Struct *)app->pBuffer;
 
 	// Quagmire - max len for name is 18, pass 15
@@ -405,60 +405,25 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 	strn0cpy(password, (char*)&(li->login_info[strlen(name)+1]), 15);
 
 	if (strlen(password) <= 1) {
-		// TODO: Find out how to tell the client wrong username/password
-		Log(Logs::Detail, Logs::World_Server,"Login without a password");
+		Log(Logs::Detail, Logs::World_Server, "Login without a password");
 		return false;
 	}
 
-	is_player_zoning=(li->zoning==1);
+	is_player_zoning = (li->zoning == 1);
 
-#ifdef IPBASED_AUTH_HACK
-	struct in_addr tmpip;
-	tmpip.s_addr = ip;
-#endif
-	uint32 id=0;
-	bool minilogin = loginserverlist.MiniLogin();
-	if(minilogin){
-		struct in_addr miniip;
-		miniip.s_addr = ip;
-		id = database.GetMiniLoginAccount(inet_ntoa(miniip));
-	}
-	else if(strncasecmp(name, "LS#", 3) == 0)
-		id=atoi(&name[3]);
-	else if(database.GetAccountIDByName(name)){
-		int16 status = 0;
-		uint32 lsid = 0;		
-		id = database.GetAccountIDByName(name, &status, &lsid);
-	}
-	else
-		id=atoi(name);
-	if (loginserverlist.Connected() == false && !is_player_zoning) {
-		Log(Logs::General, Logs::World_Server,"Error: Login server login while not connected to login server.");
+	uint32 id = atoi(name);
+
+	if (id == 0) {
+		Log(Logs::General, Logs::World_Server, "Login ID is 0, disconnecting.");
 		return false;
 	}
-	if (((cle = client_list.CheckAuth(name, password)) || (cle = client_list.CheckAuth(id, password))))
-	{
-		if (cle->AccountID() == 0 || (!minilogin && cle->LSID()==0)) {
-			Log(Logs::General, Logs::World_Server,"ID is 0. Is this server connected to minilogin?");
-			if (!minilogin) {
-				Log(Logs::General, Logs::World_Server, "If so you forget the minilogin variable...");
-			}
-			else {
-				Log(Logs::General, Logs::World_Server, "Could not find a minilogin account, verify ip address logging into minilogin is the same that is in your account table.");
-			}
-			return false;
-		}
 
-		if(minilogin){
-			cle->SetOnline();
-			WorldConfig::DisableStats();
-			Log(Logs::General, Logs::World_Server, "MiniLogin Account #%d",cle->AccountID());
-		}
-		else if (!is_player_zoning) {
+	if (cle = client_list.CheckAuth(id, password)) {
+		if (!is_player_zoning) {
 			// Track who is in and who is out of the game
 			char *inout= (char *) "";
 			
-			if (cle->GetOnline() == CLE_Status_Never){
+			if (cle->GetOnline() == CLE_Status_Never) {
 				// Desktop -> Char Select
 				inout = (char *) "In";
 			}
@@ -466,7 +431,7 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 				// Game -> Char Select
 				inout=(char *) "Out";
 			}
-
+		
 			// Always at Char select at this point.
 			// Either from a fresh client launch or coming back from the game.
 			// Exiting the game entirely does not come through here.
@@ -480,10 +445,10 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 		else {
 			cle->SetOnline();
 		}
-
+		
 		const WorldConfig *Config=WorldConfig::get();
-
-		if(Config->UpdateStats){
+		
+		if(Config->UpdateStats) {
 			auto pack = new ServerPacket;
 			pack->opcode = ServerOP_LSPlayerJoinWorld;
 			pack->size = sizeof(ServerLSPlayerJoinWorld_Struct);
@@ -495,10 +460,10 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 			loginserverlist.SendPacket(pack);
 			safe_delete(pack);
 		}
-
+		
 		if (!is_player_zoning)
 			SendGuildList();
-
+		
 		SendLogServer();
 		SendApproveWorld();
 		SendEnterWorld(cle->name());
@@ -509,18 +474,13 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 			database.LoginIP(cle->AccountID(), long2ip(GetIP()).c_str());
 		}
 
+		cle->SetIP(GetIP());
+		return true;
 	}
 	else {
-		// TODO: Find out how to tell the client wrong username/password
 		Log(Logs::Detail, Logs::World_Server,"Bad/Expired session key '%s'",name);
 		return false;
 	}
-
-	if (!cle)
-		return true;
-
-	cle->SetIP(GetIP());
-	return true;
 }
 
 bool Client::HandleNameApprovalPacket(const EQApplicationPacket *app)

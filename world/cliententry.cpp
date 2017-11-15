@@ -31,7 +31,7 @@ extern LoginServerList loginserverlist;
 extern ClientList		client_list;
 extern volatile bool RunLoops;
 
-ClientListEntry::ClientListEntry(uint32 in_id, uint32 iLSID, const char* iLoginName, const char* iLoginKey, int16 iWorldAdmin, uint32 ip, uint8 local)
+ClientListEntry::ClientListEntry(const char* iLoginServer, uint32 in_id, uint32 iLSID, const char* iLoginName, const char* iLoginKey, int16 iWorldAdmin, uint32 ip, uint8 local)
 : id(in_id)
 {
 	ClearVars(true);
@@ -39,32 +39,12 @@ ClientListEntry::ClientListEntry(uint32 in_id, uint32 iLSID, const char* iLoginN
 	pIP = ip;
 	pLSID = iLSID;
 	if(iLSID > 0)
-		paccountid = database.GetAccountIDFromLSID(iLSID, paccountname, &padmin);
+		paccountid = database.GetAccountIDFromLSID(iLoginServer, iLSID, paccountname, &padmin);
 	strn0cpy(plsname, iLoginName, sizeof(plsname));
 	strn0cpy(plskey, iLoginKey, sizeof(plskey));
+	strn0cpy(pLoginServer, iLoginServer, sizeof(pLoginServer));
 	pworldadmin = iWorldAdmin;
 	plocal=(local==1);
-
-	pinstance = 0;
-	pLFGFromLevel = 0;
-	pLFGToLevel = 0;
-	pLFGMatchFilter = false;
-	memset(pLFGComments, 0, 64);
-}
-
-ClientListEntry::ClientListEntry(uint32 in_id, uint32 iAccID, const char* iAccName, MD5& iMD5Pass, int16 iAdmin)
-: id(in_id)
-{
-	ClearVars(true);
-
-	pIP = 0;
-	pLSID = 0;
-	pworldadmin = 0;
-
-	paccountid = iAccID;
-	strn0cpy(paccountname, iAccName, sizeof(paccountname));
-	pMD5Pass = iMD5Pass;
-	padmin = iAdmin;
 
 	pinstance = 0;
 	pLFGFromLevel = 0;
@@ -278,12 +258,12 @@ bool ClientListEntry::CheckStale() {
 }
 
 bool ClientListEntry::CheckAuth(uint32 iLSID, const char* iKey) {
-	if (strncmp(plskey, iKey,10) == 0) {
-		if (paccountid == 0 && LSID()>0) {
+	if (strncmp(plskey, iKey, 10) == 0) {
+		if (paccountid == 0 && LSID() > 0) {
 			int16 tmpStatus = WorldConfig::get()->DefaultStatus;
-			paccountid = database.CreateAccount(plsname, 0, tmpStatus, LSID());
+			paccountid = database.CreateAccount(plsname, 0, tmpStatus, pLoginServer, LSID());
 			if (!paccountid) {
-				Log(Logs::Detail, Logs::World_Server,"Error adding local account for LS login: '%s', duplicate name?" ,plsname);
+				Log(Logs::Detail, Logs::World_Server,"Error adding local account for LS login: '%s:%s', duplicate name?", pLoginServer, plsname);
 				return false;
 			}
 			strn0cpy(paccountname, plsname, sizeof(paccountname));
@@ -293,21 +273,6 @@ bool ClientListEntry::CheckAuth(uint32 iLSID, const char* iKey) {
 		if (database.GetVariable("honorlsworldadmin", lsworldadmin))
 			if (atoi(lsworldadmin.c_str()) == 1 && pworldadmin != 0 && (padmin < pworldadmin || padmin == 0))
 				padmin = pworldadmin;
-		return true;
-	}
-	return false;
-}
-
-bool ClientListEntry::CheckAuth(const char* iName, MD5& iMD5Password) {
-	if (LSAccountID() == 0 && strcmp(paccountname, iName) == 0 && pMD5Pass == iMD5Password)
-		return true;
-	return false;
-}
-
-bool ClientListEntry::CheckAuth(uint32 id, const char* iKey, uint32 ip) {
-	if (pIP==ip && strncmp(plskey, iKey,10) == 0){
-		paccountid = id;
-		database.GetAccountFromID(id,paccountname,&padmin);
 		return true;
 	}
 	return false;
