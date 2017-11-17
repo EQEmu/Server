@@ -123,8 +123,6 @@ Mob::Mob(const char* in_name,
 	tar_vector=0;
 	currently_fleeing = false;
 
-	last_z = 0;
-
 	last_major_update_position = m_Position;
 
 	AI_Init();
@@ -3437,6 +3435,19 @@ void Mob::SetTarget(Mob* mob) {
 
 	if (this->IsClient() && this->GetTarget() && this->CastToClient()->hp_other_update_throttle_timer.Check())
 		this->GetTarget()->SendHPUpdate(false, true);
+}
+
+// For when we want a Ground Z at a location we are not at yet
+// Like MoveTo.
+float Mob::FindDestGroundZ(glm::vec3 dest, float z_offset)
+{
+	float best_z = BEST_Z_INVALID;
+	if (zone->zonemap != nullptr)
+	{
+		dest.z += z_offset;
+		best_z = zone->zonemap->FindBestZ(dest, nullptr);
+	}
+	return best_z;
 }
 
 float Mob::FindGroundZ(float new_x, float new_y, float z_offset)
