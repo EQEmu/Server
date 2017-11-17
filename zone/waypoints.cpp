@@ -872,9 +872,8 @@ float Mob::GetFixedZ(glm::vec3 dest, int32 z_find_offset)
 		auto duration = timer.elapsed();
 
 		Log(Logs::Moderate, Logs::FixZ,
-			"Mob::FixZ() (%s) returned %4.3f at %4.3f, %4.3f, %4.3f - Took %lf", 
-			this->GetCleanName(), new_z, m_Position.x, m_Position.y, 
-			m_Position.z, duration);
+			"Mob::GetFixedZ() (%s) returned %4.3f at %4.3f, %4.3f, %4.3f - Took %lf", 
+			this->GetCleanName(), new_z, dest.x, dest.y, dest.z, duration);
 	}
 
 	return new_z;
