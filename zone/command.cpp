@@ -376,6 +376,7 @@ int command_init(void)
 		command_add("task", "(subcommand) - Task system commands",  150, command_task) ||
 		command_add("tattoo", "- Change the tattoo of your target (Drakkin Only)", 80, command_tattoo) ||
 		command_add("tempname", "[newname] - Temporarily renames your target. Leave name blank to restore the original name.", 100, command_tempname) ||
+		command_add("petname", "[newname] - Temporarily renames your pet. Leave name blank to restore the original name.", 100, command_petname) ||
 		command_add("texture", "[texture] [helmtexture] - Change your or your target's appearance, use 255 to show equipment", 10, command_texture) ||
 		command_add("time", "[HH] [MM] - Set EQ time", 90, command_time) ||
 		command_add("timers", "- Display persistent timers for target", 200, command_timers) ||
@@ -4147,6 +4148,26 @@ void command_tempname(Client *c, const Seperator *sep)
 	if(!target)
 		c->Message(0, "Usage: #tempname newname (requires a target)");
 	else if(strlen(sep->arg[1]) > 0)
+	{
+		char *oldname = strdup(target->GetName());
+		target->TempName(sep->arg[1]);
+		c->Message(0, "Renamed %s to %s",  oldname, sep->arg[1]);
+		free(oldname);
+	}
+	else {
+		target->TempName();
+		c->Message(0, "Restored the original name");
+	}
+}
+
+void command_petname(Client *c, const Seperator *sep)
+{
+	Mob *target;
+	target = c->GetTarget();
+
+	if(!target)
+		c->Message(0, "Usage: #petname newname (requires a target)");
+	else if(target->IsPet() && (target->GetOwnerID() == c->GetID()) && strlen(sep->arg[1]) > 0)
 	{
 		char *oldname = strdup(target->GetName());
 		target->TempName(sep->arg[1]);
