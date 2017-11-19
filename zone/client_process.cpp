@@ -1055,7 +1055,8 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 			SetMana(0);
 			SetHP(GetMaxHP()/5);
 			int rez_eff = 756;
-			if (GetRace() == BARBARIAN || GetRace() == DWARF || GetRace() == TROLL || GetRace() == OGRE)
+			if (RuleB(Character, UseOldRaceRezEffects) &&
+			    (GetRace() == BARBARIAN || GetRace() == DWARF || GetRace() == TROLL || GetRace() == OGRE))
 				rez_eff = 757;
 			SpellOnTarget(rez_eff, this); // Rezz effects
 		}

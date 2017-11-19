@@ -44,6 +44,7 @@ RULE_INT(Character, DeathExpLossMaxLevel, 255)	// Any level greater than this wi
 RULE_INT(Character, DeathItemLossLevel, 10)
 RULE_INT(Character, DeathExpLossMultiplier, 3) //Adjust how much exp is lost
 RULE_BOOL(Character, UseDeathExpLossMult, false) //Adjust to use the above multiplier or to use code default.
+RULE_BOOL(Character, UseOldRaceRezEffects, false) // older clients had ID 757 for races with high starting STR, but it doesn't seem used anymore
 RULE_INT(Character, CorpseDecayTimeMS, 10800000)
 RULE_INT(Character, CorpseResTimeMS, 10800000) // time before cant res corpse(3 hours)
 RULE_BOOL(Character, LeaveCorpses, true)
