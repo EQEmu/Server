@@ -1433,6 +1433,11 @@ bool ZoneDatabase::SaveCharacterInventorySnapshot(uint32 character_id){
 }
 
 bool ZoneDatabase::SaveCharacterData(uint32 character_id, uint32 account_id, PlayerProfile_Struct* pp, ExtendedProfile_Struct* m_epp){
+	
+	/* If this is ever zero - the client hasn't fully loaded and potentially crashed during zone */
+	if (account_id <= 0)
+		return false;
+	
 	clock_t t = std::clock(); /* Function timer start */
 	std::string query = StringFormat(
 		"REPLACE INTO `character_data` ("
@@ -2953,9 +2958,11 @@ uint32 ZoneDatabase::GetKarma(uint32 acct_id)
 	if (!results.Success())
 		return 0;
 
-	auto row = results.begin();
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		return atoi(row[0]);
+	}
 
-	return atoi(row[0]);
+	return 0;
 }
 
 void ZoneDatabase::UpdateKarma(uint32 acct_id, uint32 amount)

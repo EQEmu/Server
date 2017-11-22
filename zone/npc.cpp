@@ -436,6 +436,26 @@ void NPC::SetTarget(Mob* mob) {
 		//attack_timer.Disable();
 		attack_dw_timer.Disable();
 	}
+
+	// either normal pet and owner is client or charmed pet and owner is client
+	Mob *owner = nullptr;
+	if (IsPet() && IsPetOwnerClient()) {
+		owner = GetOwner();
+	} else if (IsCharmed()) {
+		owner = GetOwner();
+		if (owner && !owner->IsClient())
+			owner = nullptr;
+	}
+
+	if (owner) {
+		auto client = owner->CastToClient();
+		if (client->ClientVersionBit() & EQEmu::versions::bit_UFAndLater) {
+			auto app = new EQApplicationPacket(OP_PetHoTT, sizeof(ClientTarget_Struct));
+			auto ct = (ClientTarget_Struct *)app->pBuffer;
+			ct->new_target = mob ? mob->GetID() : 0;
+			client->FastQueuePacket(&app);
+		}
+	}
 	Mob::SetTarget(mob);
 }
 

@@ -1298,7 +1298,7 @@ void Mob::AI_Process() {
 				if (AI_PursueCastCheck()) {
 					//we did something, so do not process movement.
 				}
-				else if (AI_movement_timer->Check())
+				else if (AI_movement_timer->Check() && target)
 				{
 					if (!IsRooted()) {
 						Log(Logs::Detail, Logs::AI, "Pursuing %s while engaged.", target->GetName());

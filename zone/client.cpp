@@ -331,6 +331,8 @@ Client::Client(EQStreamInterface* ieqs)
 
 	interrogateinv_flag = false;
 
+	trapid = 0;
+
 	for (int i = 0; i < InnateSkillMax; ++i)
 		m_pp.InnateSkills[i] = InnateDisabled;
 
@@ -1220,11 +1222,6 @@ void Client::ChannelMessageSend(const char* from, const char* to, uint8 chan_num
 	if (EffSkill > 100)	// maximum language skill is 100
 		EffSkill = 100;
 	cm->skill_in_language = EffSkill;
-
-	// Garble the message based on listener skill
-	if (ListenerSkill < 100) {
-		GarbleMessage(buffer, (100 - ListenerSkill));
-	}
 
 	cm->chan_num = chan_num;
 	strcpy(&cm->message[0], buffer);

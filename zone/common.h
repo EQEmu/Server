@@ -604,6 +604,11 @@ enum {	//type arguments to DoAnim
 
 };
 
+enum {
+	SKILLUP_UNKNOWN = 0,
+	SKILLUP_SUCCESS = 1,
+	SKILLUP_FAILURE = 2
+};
 
 typedef enum {
 	petFamiliar,		//only listens to /pet get lost

@@ -75,7 +75,6 @@ Mob::Mob(const char* in_name,
 		uint32		in_drakkin_tattoo,
 		uint32		in_drakkin_details,
 		EQEmu::TintProfile	in_armor_tint,
-
 		uint8		in_aa_title,
 		uint8		in_see_invis, // see through invis/ivu
 		uint8		in_see_invis_undead,
@@ -91,24 +90,24 @@ Mob::Mob(const char* in_name,
 		uint8		in_handtexture,
 		uint8		in_legtexture,
 		uint8		in_feettexture
-		) :
+	) :
 		attack_timer(2000),
 		attack_dw_timer(2000),
 		ranged_timer(2000),
 		tic_timer(6000),
 		mana_timer(2000),
 		spellend_timer(0),
-		rewind_timer(30000), //Timer used for determining amount of time between actual player position updates for /rewind.
+		rewind_timer(30000),
 		bindwound_timer(10000),
 		stunned_timer(0),
 		spun_timer(0),
 		bardsong_timer(6000),
 		gravity_timer(1000),
 		viral_timer(0),
-		m_FearWalkTarget(-999999.0f,-999999.0f,-999999.0f),
+		m_FearWalkTarget(-999999.0f, -999999.0f, -999999.0f),
 		m_TargetLocation(glm::vec3()),
 		m_TargetV(glm::vec3()),
-		flee_timer(FLEE_CHECK_TIMER),
+		flee_timer(FLEE_CHECK_TIMER), 
 		m_Position(position),
 		tmHidden(-1),
 		mitigation_ac(0),
@@ -119,45 +118,46 @@ Mob::Mob(const char* in_name,
 		position_update_melee_push_timer(1000)
 {
 	targeted = 0;
-	tar_ndx=0;
-	tar_vector=0;
+	tar_ndx = 0;
+	tar_vector = 0;
 	currently_fleeing = false;
 
 	last_major_update_position = m_Position;
+	is_distance_roamer = false;
 
 	AI_Init();
 	SetMoving(false);
-	moved=false;
+	moved = false;
 	m_RewindLocation = glm::vec3();
 
 	_egnode = nullptr;
-	name[0]=0;
-	orig_name[0]=0;
-	clean_name[0]=0;
-	lastname[0]=0;
-	if(in_name) {
-		strn0cpy(name,in_name,64);
-		strn0cpy(orig_name,in_name,64);
+	name[0] = 0;
+	orig_name[0] = 0;
+	clean_name[0] = 0;
+	lastname[0] = 0;
+	if (in_name) {
+		strn0cpy(name, in_name, 64);
+		strn0cpy(orig_name, in_name, 64);
 	}
-	if(in_lastname)
-		strn0cpy(lastname,in_lastname,64);
-	cur_hp		= in_cur_hp;
-	max_hp		= in_max_hp;
-	base_hp		= in_max_hp;
-	gender		= in_gender;
-	race		= in_race;
-	base_gender	= in_gender;
-	base_race	= in_race;
-	class_		= in_class;
-	bodytype	= in_bodytype;
+	if (in_lastname)
+		strn0cpy(lastname, in_lastname, 64);
+	cur_hp = in_cur_hp;
+	max_hp = in_max_hp;
+	base_hp = in_max_hp;
+	gender = in_gender;
+	race = in_race;
+	base_gender = in_gender;
+	base_race = in_race;
+	class_ = in_class;
+	bodytype = in_bodytype;
 	orig_bodytype = in_bodytype;
-	deity		= in_deity;
-	level		= in_level;
+	deity = in_deity;
+	level = in_level;
 	orig_level = in_level;
-	npctype_id	= in_npctype_id;
-	size		= in_size;
-	base_size	= size;
-	runspeed	= in_runspeed;
+	npctype_id = in_npctype_id;
+	size = in_size;
+	base_size = size;
+	runspeed = in_runspeed;
 	// neotokyo: sanity check
 	if (runspeed < 0 || runspeed > 20)
 		runspeed = 1.25f;
@@ -170,7 +170,8 @@ Mob::Mob(const char* in_name,
 		fearspeed = 0.625f;
 		base_fearspeed = 25;
 		// npcs
-	} else {
+	}
+	else {
 		base_walkspeed = base_runspeed * 100 / 265;
 		walkspeed = ((float)base_walkspeed) * 0.025f;
 		base_fearspeed = base_runspeed * 100 / 127;
@@ -182,7 +183,7 @@ Mob::Mob(const char* in_name,
 
 	current_speed = base_runspeed;
 
-	m_PlayerState	= 0;
+	m_PlayerState = 0;
 
 
 	// sanity check
@@ -194,8 +195,8 @@ Mob::Mob(const char* in_name,
 	m_Light.Type[EQEmu::lightsource::LightActive] = m_Light.Type[EQEmu::lightsource::LightInnate];
 	m_Light.Level[EQEmu::lightsource::LightActive] = m_Light.Level[EQEmu::lightsource::LightInnate];
 
-	texture		= in_texture;
-	helmtexture	= in_helmtexture;
+	texture = in_texture;
+	helmtexture = in_helmtexture;
 	armtexture = in_armtexture;
 	bracertexture = in_bracertexture;
 	handtexture = in_handtexture;
@@ -203,21 +204,21 @@ Mob::Mob(const char* in_name,
 	feettexture = in_feettexture;
 	multitexture = (armtexture || bracertexture || handtexture || legtexture || feettexture);
 
-	haircolor	= in_haircolor;
-	beardcolor	= in_beardcolor;
-	eyecolor1	= in_eyecolor1;
-	eyecolor2	= in_eyecolor2;
-	hairstyle	= in_hairstyle;
-	luclinface	= in_luclinface;
-	beard		= in_beard;
-	drakkin_heritage	= in_drakkin_heritage;
-	drakkin_tattoo		= in_drakkin_tattoo;
-	drakkin_details		= in_drakkin_details;
+	haircolor = in_haircolor;
+	beardcolor = in_beardcolor;
+	eyecolor1 = in_eyecolor1;
+	eyecolor2 = in_eyecolor2;
+	hairstyle = in_hairstyle;
+	luclinface = in_luclinface;
+	beard = in_beard;
+	drakkin_heritage = in_drakkin_heritage;
+	drakkin_tattoo = in_drakkin_tattoo;
+	drakkin_details = in_drakkin_details;
 	attack_speed = 0;
 	attack_delay = 0;
 	slow_mitigation = 0;
-	findable	= false;
-	trackable	= true;
+	findable = false;
+	trackable = true;
 	has_shieldequiped = false;
 	has_twohandbluntequiped = false;
 	has_twohanderequipped = false;
@@ -228,19 +229,19 @@ Mob::Mob(const char* in_name,
 	SpellPowerDistanceMod = 0;
 	last_los_check = false;
 
-	if(in_aa_title>0)
-		aa_title	= in_aa_title;
+	if (in_aa_title > 0)
+		aa_title = in_aa_title;
 	else
-		aa_title	=0xFF;
-	AC		= in_ac;
-	ATK		= in_atk;
-	STR		= in_str;
-	STA		= in_sta;
-	DEX		= in_dex;
-	AGI		= in_agi;
-	INT		= in_int;
-	WIS		= in_wis;
-	CHA		= in_cha;
+		aa_title = 0xFF;
+	AC = in_ac;
+	ATK = in_atk;
+	STR = in_str;
+	STA = in_sta;
+	DEX = in_dex;
+	AGI = in_agi;
+	INT = in_int;
+	WIS = in_wis;
+	CHA = in_cha;
 	MR = CR = FR = DR = PR = Corrup = 0;
 
 	ExtraHaste = 0;
@@ -261,8 +262,8 @@ Mob::Mob(const char* in_name,
 	hidden = false;
 	improved_hidden = false;
 	invulnerable = false;
-	IsFullHP	= (cur_hp == max_hp);
-	qglobal=0;
+	IsFullHP = (cur_hp == max_hp);
+	qglobal = 0;
 	spawned = false;
 
 	InitializeBuffSlots();
@@ -303,7 +304,7 @@ Mob::Mob(const char* in_name,
 	logging_enabled = false;
 	isgrouped = false;
 	israidgrouped = false;
-	
+
 	IsHorse = false;
 
 	entity_id_being_looted = 0;
@@ -374,13 +375,13 @@ Mob::Mob(const char* in_name,
 	}
 
 	destructibleobject = false;
-	wandertype=0;
-	pausetype=0;
+	wandertype = 0;
+	pausetype = 0;
 	cur_wp = 0;
 	m_CurrentWayPoint = glm::vec4();
 	cur_wp_pause = 0;
-	patrol=0;
-	follow=0;
+	patrol = 0;
+	follow = 0;
 	follow_dist = 100;	// Default Distance for Follow
 	no_target_hotkey = false;
 	flee_mode = false;
@@ -394,7 +395,7 @@ Mob::Mob(const char* in_name,
 	rooted = false;
 	charmed = false;
 	has_virus = false;
-	for (i=0; i<MAX_SPELL_TRIGGER*2; i++) {
+	for (i = 0; i < MAX_SPELL_TRIGGER * 2; i++) {
 		viral_spells[i] = 0;
 	}
 	pStandingPetOrder = SPO_Follow;
@@ -425,7 +426,7 @@ Mob::Mob(const char* in_name,
 	nimbus_effect3 = 0;
 	m_targetable = true;
 
-    m_TargetRing = glm::vec3();
+	m_TargetRing = glm::vec3();
 
 	flymode = FlyMode3;
 	// Pathing
@@ -442,7 +443,7 @@ Mob::Mob(const char* in_name,
 	m_AllowBeneficial = false;
 	m_DisableMelee = false;
 	for (int i = 0; i < EQEmu::skills::HIGHEST_SKILL + 2; i++) { SkillDmgTaken_Mod[i] = 0; }
-	for (int i = 0; i < HIGHEST_RESIST+2; i++) { Vulnerability_Mod[i] = 0; }
+	for (int i = 0; i < HIGHEST_RESIST + 2; i++) { Vulnerability_Mod[i] = 0; }
 
 	emoteid = 0;
 	endur_upkeep = false;
@@ -1445,6 +1446,7 @@ void Mob::SendPosition() {
 	if (DistanceSquared(last_major_update_position, m_Position) >= (100 * 100)) {
 		entity_list.QueueClients(this, app, true, true);
 		last_major_update_position = m_Position;
+		is_distance_roamer = true;
 	}
 	else {
 		entity_list.QueueCloseClients(this, app, true, RuleI(Range, MobPositionUpdates), nullptr, false);
@@ -3395,13 +3397,18 @@ int Mob::GetHaste()
 	else // 1-25
 		h += itembonuses.haste > 10 ? 10 : itembonuses.haste;
 
-	// 60+ 100, 51-59 85, 1-50 level+25
-	if (level > 59) // 60+
-		cap = RuleI(Character, HasteCap);
-	else if (level > 50) // 51-59
-		cap = 85;
-	else // 1-50
-		cap = level + 25;
+	// mobs are different!
+	Mob *owner = nullptr;
+	if (IsPet())
+		owner = GetOwner();
+	else if (IsNPC() && CastToNPC()->GetSwarmOwner())
+		owner = entity_list.GetMobID(CastToNPC()->GetSwarmOwner());
+	if (owner) {
+		cap = 10 + level;
+		cap += std::max(0, owner->GetLevel() - 39) + std::max(0, owner->GetLevel() - 60);
+	} else {
+		cap = 150;
+	}
 
 	if(h > cap)
 		h = cap;
@@ -3960,10 +3967,17 @@ int16 Mob::GetHealRate(uint16 spell_id, Mob* caster) {
 
 bool Mob::TryFadeEffect(int slot)
 {
+	if (!buffs[slot].spellid)
+		return false;
+
 	if(IsValidSpell(buffs[slot].spellid))
 	{
 		for(int i = 0; i < EFFECT_COUNT; i++)
 		{
+
+			if (!spells[buffs[slot].spellid].effectid[i])
+				continue;
+
 			if (spells[buffs[slot].spellid].effectid[i] == SE_CastOnFadeEffectAlways ||
 				spells[buffs[slot].spellid].effectid[i] == SE_CastOnRuneFadeEffect)
 			{
