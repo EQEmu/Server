@@ -503,7 +503,7 @@ void NPC::AI_Start(uint32 iMoveDelay) {
 		AIautocastspell_timer->Disable();
 	} else {
 		AIautocastspell_timer = std::unique_ptr<Timer>(new Timer(750));
-		AIautocastspell_timer->Start(RandomTimer(0, 15000), false);
+		AIautocastspell_timer->Start(RandomTimer(0, 300), false);
 	}
 
 	if (NPCTypedata) {
@@ -1582,18 +1582,22 @@ void NPC::AI_DoMovement() {
 					}
 
 					this->FixZ();
-
 					SendPosition();
 
 					//kick off event_waypoint arrive
 					char temp[16];
 					sprintf(temp, "%d", cur_wp);
 					parse->EventNPC(EVENT_WAYPOINT_ARRIVE, CastToNPC(), nullptr, temp, 0);
-					// start moving directly to next waypoint if we're at a 0 pause waypoint and we didn't get quest halted.
-					if (!AI_walking_timer->Enabled())
+					// No need to move as we are there.  Next loop will
+					// take care of normal grids, even at pause 0.
+					// We do need to call and setup a wp if we're cur_wp=-2
+					// as that is where roamer is unset and we don't want
+					// the next trip through to move again based on grid stuff.
+					doMove = false;
+					if (cur_wp == -2) {
 						AI_SetupNextWaypoint();
-					else
-						doMove = false;
+					}
+
 					// wipe feign memory since we reached our first waypoint
 					if(cur_wp == 1)
 						ClearFeignMemory();
@@ -2593,7 +2597,7 @@ void NPC::AddSpellToNPCList(int16 iPriority, int16 iSpellID, uint32 iType,
 
 	// If we're going from an empty list, we need to start the timer
 	if (AIspells.size() == 1)
-		AIautocastspell_timer->Start(RandomTimer(0, 15000), false);
+		AIautocastspell_timer->Start(RandomTimer(0, 300), false);
 }
 
 void NPC::RemoveSpellFromNPCList(int16 spell_id)

@@ -956,7 +956,8 @@ public:
 	void				SendTo(float new_x, float new_y, float new_z);
 	void				SendToFixZ(float new_x, float new_y, float new_z);
 	float				GetZOffset() const;
-	void				FixZ(int32 z_find_offset = 5);
+	void 				FixZ(int32 z_find_offset = 5);
+	float 			GetFixedZ(glm::vec3 position, int32 z_find_offset = 5);
 	void				NPCSpecialAttacks(const char* parse, int permtag, bool reset = true, bool remove = false);
 	inline uint32		DontHealMeBefore() const { return pDontHealMeBefore; }
 	inline uint32		DontBuffMeBefore() const { return pDontBuffMeBefore; }
@@ -1109,8 +1110,6 @@ public:
 	void ResetAssistCap() { npc_assist_cap = 0; }
 	int GetWeaponDamage(Mob *against, const EQEmu::ItemData *weapon_item);
 	int GetWeaponDamage(Mob *against, const EQEmu::ItemInstance *weapon_item, uint32 *hate = nullptr);
-
-	float last_z;
 
 	// Bots HealRotation methods
 #ifdef BOTS
@@ -1270,6 +1269,7 @@ protected:
 	virtual int16 GetFocusEffect(focusType type, uint16 spell_id) { return 0; }
 	void CalculateNewFearpoint();
 	float FindGroundZ(float new_x, float new_y, float z_offset=0.0);
+	float FindDestGroundZ(glm::vec3 dest, float z_offset=0.0);
 	glm::vec3 UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &WaypointChange, bool &NodeReached);
 	void PrintRoute();
 
