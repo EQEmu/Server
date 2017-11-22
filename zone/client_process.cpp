@@ -269,8 +269,17 @@ bool Client::Process() {
 					}
 				}
 
-				if (force_spawn_updates && mob != this && distance <= client_update_range)
-					mob->SendPositionUpdateToClient(this);
+				if (force_spawn_updates && mob != this) {
+
+					if (mob->is_distance_roamer) {
+						Log(Logs::General, Logs::Debug, "Updating distance roamer %s", mob->GetCleanName());
+						mob->SendPositionUpdateToClient(this);
+						continue;
+					}
+
+					if (distance <= client_update_range)
+						mob->SendPositionUpdateToClient(this);
+				}
 
 			}
 		}
