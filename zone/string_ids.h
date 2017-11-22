@@ -19,6 +19,7 @@
 #define PROC_TOOLOW					126		//Your will is not sufficient to command this weapon.
 #define PROC_PETTOOLOW				127		//Your pet's will is not sufficient to command its weapon.
 #define YOU_FLURRY					128		//You unleash a flurry of attacks.
+#define FAILED_DISARM_TRAP			129		//You failed to disarm the trap.
 #define DOORS_LOCKED				130		//It's locked and you're not holding the key.
 #define DOORS_CANT_PICK				131		//This lock cannot be picked.
 #define DOORS_INSUFFICIENT_SKILL	132		//You are not sufficiently skilled to pick this lock.
@@ -98,6 +99,7 @@
 #define DUP_LORE					290		//Duplicate lore items are not allowed.
 #define TGB_ON						293		//Target other group buff is *ON*.
 #define TGB_OFF						294		//Target other group buff is *OFF*.
+#define DISARMED_TRAP				305		//You have disarmed the trap.
 #define LDON_SENSE_TRAP1			306		//You do not Sense any traps.
 #define TRADESKILL_NOCOMBINE		334		//You cannot combine these items in this container type!
 #define TRADESKILL_FAILED			336		//You lacked the skills to fashion the items together.
@@ -114,6 +116,8 @@
 #define MEND_WORSEN					351		//You have worsened your wounds!
 #define MEND_FAIL					352		//You have failed to mend your wounds.
 #define LDON_SENSE_TRAP2			367		//You have not detected any traps.
+#define TRAP_TOO_FAR				368		//You are too far away from that trap to affect it.
+#define FAIL_DISARM_DETECTED_TRAP	370		//You fail to disarm the detected trap.
 #define LOOT_LORE_ERROR				371		//You cannot loot this Lore Item. You already have one.
 #define PICK_LORE					379		//You cannot pick up a lore item you already possess.
 #define CONSENT_DENIED				390		//You do not have consent to summon that corpse.
@@ -421,6 +425,7 @@
 #define SENSE_ANIMAL				12472	//You sense an animal in this direction.
 #define SENSE_SUMMONED				12473	//You sense a summoned being in this direction.
 #define SENSE_NOTHING				12474	//You don't sense anything.
+#define SENSE_TRAP					12475	//You sense a trap in this direction.
 #define LDON_SENSE_TRAP3			12476	//You don't sense any traps.
 #define INTERRUPT_SPELL_OTHER		12478	//%1's casting is interrupted!
 #define YOU_HIT_NONMELEE			12481	//You were hit by non-melee for %1 damage.

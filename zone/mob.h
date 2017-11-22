@@ -162,6 +162,8 @@ public:
 	inline virtual bool IsMob() const { return true; }
 	inline virtual bool InZone() const { return true; }
 
+	bool is_distance_roamer;
+
 	//Somewhat sorted: needs documenting!
 
 	//Attack
@@ -956,7 +958,7 @@ public:
 	void				SendToFixZ(float new_x, float new_y, float new_z);
 	float				GetZOffset() const;
 	void 				FixZ(int32 z_find_offset = 5);
-	float 				GetFixedZ(glm::vec3 position, int32 z_find_offset = 5);
+	float 			GetFixedZ(glm::vec3 position, int32 z_find_offset = 5);
 	void				NPCSpecialAttacks(const char* parse, int permtag, bool reset = true, bool remove = false);
 	inline uint32		DontHealMeBefore() const { return pDontHealMeBefore; }
 	inline uint32		DontBuffMeBefore() const { return pDontBuffMeBefore; }
@@ -1225,7 +1227,8 @@ protected:
 	uint32 npctype_id;
 	glm::vec4 m_Position;
 	/* Used to determine when an NPC has traversed so many units - to send a zone wide pos update */
-	glm::vec4 last_major_update_position; 
+	glm::vec4 last_major_update_position;
+
 	int animation; // this is really what MQ2 calls SpeedRun just packed like (int)(SpeedRun * 40.0f)
 	float base_size;
 	float size;

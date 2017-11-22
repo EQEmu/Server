@@ -391,7 +391,7 @@ namespace UF
 	{
 		SETUP_VAR_ENCODE(BuffIcon_Struct);
 
-		uint32 sz = 12 + (17 * emu->count);
+		uint32 sz = 12 + (17 * emu->count) + emu->name_lengths; // 17 includes nullterm
 		__packet->size = sz;
 		__packet->pBuffer = new unsigned char[sz];
 		memset(__packet->pBuffer, 0, sz);
@@ -407,7 +407,7 @@ namespace UF
 			__packet->WriteUInt32(emu->entries[i].spell_id);
 			__packet->WriteUInt32(emu->entries[i].tics_remaining);
 			__packet->WriteUInt32(emu->entries[i].num_hits);
-			__packet->WriteString("");
+			__packet->WriteString(emu->entries[i].caster);
 		}
 		__packet->WriteUInt8(emu->type);
 

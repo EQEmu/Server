@@ -2573,6 +2573,9 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 	if (other == this)
 		return;
 
+	if (other->IsTrap())
+		return;
+
 	if (damage < 0) {
 		hate = 1;
 	}
@@ -3404,7 +3407,7 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 		// pets that have GHold will never automatically add NPCs
 		// pets that have Hold and no Focus will add NPCs if they're engaged
 		// pets that have Hold and Focus will not add NPCs
-		if (pet && !pet->IsFamiliar() && !pet->GetSpecialAbility(IMMUNE_AGGRO) && !pet->IsEngaged() && attacker && attacker != this && !attacker->IsCorpse() && !pet->IsGHeld())
+		if (pet && !pet->IsFamiliar() && !pet->GetSpecialAbility(IMMUNE_AGGRO) && !pet->IsEngaged() && attacker && attacker != this && !attacker->IsCorpse() && !pet->IsGHeld() && !attacker->IsTrap())
 		{
 			if (!pet->IsHeld()) {
 				Log(Logs::Detail, Logs::Aggro, "Sending pet %s into battle due to attack.", pet->GetName());
@@ -3962,10 +3965,10 @@ void Mob::TryWeaponProc(const EQEmu::ItemInstance *inst, const EQEmu::ItemData *
 		float WPC = ProcChance * (100.0f + // Proc chance for this weapon
 			static_cast<float>(weapon->ProcRate)) / 100.0f;
 		if (zone->random.Roll(WPC)) {	// 255 dex = 0.084 chance of proc. No idea what this number should be really.
-			if (weapon->Proc.Level > ourlevel) {
+			if (weapon->Proc.Level2 > ourlevel) {
 				Log(Logs::Detail, Logs::Combat,
 					"Tried to proc (%s), but our level (%d) is lower than required (%d)",
-					weapon->Name, ourlevel, weapon->Proc.Level);
+					weapon->Name, ourlevel, weapon->Proc.Level2);
 				if (IsPet()) {
 					Mob *own = GetOwner();
 					if (own)
@@ -4002,7 +4005,7 @@ void Mob::TryWeaponProc(const EQEmu::ItemInstance *inst, const EQEmu::ItemData *
 				float APC = ProcChance * (100.0f + // Proc chance for this aug
 					static_cast<float>(aug->ProcRate)) / 100.0f;
 				if (zone->random.Roll(APC)) {
-					if (aug->Proc.Level > ourlevel) {
+					if (aug->Proc.Level2 > ourlevel) {
 						if (IsPet()) {
 							Mob *own = GetOwner();
 							if (own)

@@ -3309,8 +3309,8 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 
 	buffs[emptyslot].spellid = spell_id;
 	buffs[emptyslot].casterlevel = caster_level;
-	if (caster && caster->IsClient())
-		strcpy(buffs[emptyslot].caster_name, caster->GetName());
+	if (caster && !caster->IsAura()) // maybe some other things we don't want to ...
+		strcpy(buffs[emptyslot].caster_name, caster->GetCleanName());
 	else
 		memset(buffs[emptyslot].caster_name, 0, 64);
 	buffs[emptyslot].casterid = caster ? caster->GetID() : 0;
@@ -5548,6 +5548,8 @@ void Client::SendBuffNumHitPacket(Buffs_Struct &buff, int slot)
 	bi->entries[0].spell_id = buff.spellid;
 	bi->entries[0].tics_remaining = buff.ticsremaining;
 	bi->entries[0].num_hits = buff.numhits;
+	strn0cpy(bi->entries[0].caster, buff.caster_name, 64);
+	bi->name_lengths = strlen(bi->entries[0].caster);
 	FastQueuePacket(&outapp);
 }
 
@@ -5633,6 +5635,7 @@ EQApplicationPacket *Mob::MakeBuffsPacket(bool for_target)
 	else
 		buff->type = 0;
 
+	buff->name_lengths = 0; // hacky shit
 	uint32 index = 0;
 	for(int i = 0; i < buff_count; ++i)
 	{
@@ -5642,6 +5645,8 @@ EQApplicationPacket *Mob::MakeBuffsPacket(bool for_target)
 			buff->entries[index].spell_id = buffs[i].spellid;
 			buff->entries[index].tics_remaining = buffs[i].ticsremaining;
 			buff->entries[index].num_hits = buffs[i].numhits;
+			strn0cpy(buff->entries[index].caster, buffs[i].caster_name, 64);
+			buff->name_lengths += strlen(buff->entries[index].caster);
 			++index;
 		}
 	}

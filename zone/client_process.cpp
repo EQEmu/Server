@@ -269,8 +269,17 @@ bool Client::Process() {
 					}
 				}
 
-				if (force_spawn_updates && mob != this && distance <= client_update_range)
-					mob->SendPositionUpdateToClient(this);
+				if (force_spawn_updates && mob != this) {
+
+					if (mob->is_distance_roamer) {
+						Log(Logs::General, Logs::Debug, "Updating distance roamer %s", mob->GetCleanName());
+						mob->SendPositionUpdateToClient(this);
+						continue;
+					}
+
+					if (distance <= client_update_range)
+						mob->SendPositionUpdateToClient(this);
+				}
 
 			}
 		}
@@ -1055,7 +1064,8 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 			SetMana(0);
 			SetHP(GetMaxHP()/5);
 			int rez_eff = 756;
-			if (GetRace() == BARBARIAN || GetRace() == DWARF || GetRace() == TROLL || GetRace() == OGRE)
+			if (RuleB(Character, UseOldRaceRezEffects) &&
+			    (GetRace() == BARBARIAN || GetRace() == DWARF || GetRace() == TROLL || GetRace() == OGRE))
 				rez_eff = 757;
 			SpellOnTarget(rez_eff, this); // Rezz effects
 		}

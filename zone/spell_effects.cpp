@@ -137,6 +137,15 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 		buffs[buffslot].magic_rune = 0;
 		buffs[buffslot].numhits = 0;
 
+		if (spells[spell_id].numhits > 0) {
+
+			int numhit = spells[spell_id].numhits;
+
+			numhit += numhit * caster->GetFocusEffect(focusFcLimitUse, spell_id) / 100;
+			numhit += caster->GetFocusEffect(focusIncreaseNumHits, spell_id);
+			buffs[buffslot].numhits = numhit;
+		}
+
 		if (spells[spell_id].EndurUpkeep > 0)
 			SetEndurUpkeep(true);
 
@@ -184,14 +193,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 		}
 	}
 
-	if(spells[spell_id].numhits > 0 && buffslot >= 0){
-
-		int numhit = spells[spell_id].numhits;
-
-		numhit += numhit*caster->GetFocusEffect(focusFcLimitUse, spell_id)/100;
-		numhit += caster->GetFocusEffect(focusIncreaseNumHits, spell_id);
-		buffs[buffslot].numhits = numhit;
-	}
 
 	if (!IsPowerDistModSpell(spell_id))
 		SetSpellPowerDistanceMod(0);

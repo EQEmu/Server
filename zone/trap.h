@@ -49,11 +49,14 @@ public:
 	NPC * GetHiddenTrigger() { return hiddenTrigger; }
 	void SetHiddenTrigger(NPC* n) { hiddenTrigger = n; }
 	void CreateHiddenTrigger();
-
+	void DestroyHiddenTrigger() { hiddenTrigger = nullptr; }
+	void UpdateTrap(bool respawn = true, bool repopnow = false);
 	//Trap data, leave this unprotected
 	Timer	respawn_timer; //Respawn Time when Trap's been disarmed
 	Timer	chkarea_timer;
-	uint32	trap_id; //Database ID of trap
+	Timer	reset_timer; //How long a trap takes to reset before triggering again.
+	uint32	trap_id; //Original ID of the trap from DB. This value never changes.
+	uint32	db_id; //The DB ID of the trap that currently is spawned.
 	glm::vec3 m_Position;
 	float	maxzdiff;	//maximum z diff to be triggerable
 	float	radius;		//radius around trap to be triggerable
@@ -67,6 +70,12 @@ public:
 	bool	disarmed;
 	uint32	respawn_time;
 	uint32	respawn_var;
+	uint8	triggered_number;
+	uint8	times_triggered;
+	uint8	group;
+	bool	despawn_when_triggered;
+	uint32  charid; //ID of character that triggered trap. This is cleared when the trap despawns are resets.
+	bool	undetectable;
 
 	std::string message;
 protected:
