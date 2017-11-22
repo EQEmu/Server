@@ -849,15 +849,15 @@ float Mob::GetFixedZ(glm::vec3 dest, int32 z_find_offset)
 	timer.reset();
 	float new_z = dest.z;
 
-	if (zone->HasMap() && RuleB(Map, FixZWhenMoving) && 
-									(flymode != 1 && flymode != 2))
+	if (zone->HasMap() && RuleB(Map, FixZWhenMoving) &&
+		(flymode != 1 && flymode != 2))
 	{
-		if (!RuleB(Watermap, CheckForWaterWhenMoving) || !zone->HasWaterMap() 
-			|| (zone->HasWaterMap() && 
-			!zone->watermap->InWater(glm::vec3(m_Position))))
+		if (!RuleB(Watermap, CheckForWaterWhenMoving) || !zone->HasWaterMap()
+			|| (zone->HasWaterMap() &&
+				!zone->watermap->InWater(glm::vec3(m_Position))))
 		{
 			/* Any more than 5 in the offset makes NPC's hop/snap to ceiling in small corridors */
-			new_z = this->FindDestGroundZ(dest,z_find_offset);
+			new_z = this->FindDestGroundZ(dest, z_find_offset);
 			if (new_z != BEST_Z_INVALID)
 			{
 				new_z += this->GetZOffset();
@@ -872,7 +872,7 @@ float Mob::GetFixedZ(glm::vec3 dest, int32 z_find_offset)
 		auto duration = timer.elapsed();
 
 		Log(Logs::Moderate, Logs::FixZ,
-			"Mob::GetFixedZ() (%s) returned %4.3f at %4.3f, %4.3f, %4.3f - Took %lf", 
+			"Mob::GetFixedZ() (%s) returned %4.3f at %4.3f, %4.3f, %4.3f - Took %lf",
 			this->GetCleanName(), new_z, dest.x, dest.y, dest.z, duration);
 	}
 
@@ -882,21 +882,21 @@ float Mob::GetFixedZ(glm::vec3 dest, int32 z_find_offset)
 void Mob::FixZ(int32 z_find_offset /*= 5*/)
 {
 	glm::vec3 current_loc(m_Position);
-	float new_z=GetFixedZ(current_loc, z_find_offset);
+	float new_z = GetFixedZ(current_loc, z_find_offset);
 
 	if (new_z != m_Position.z)
 	{
 		if ((new_z > -2000) && new_z != BEST_Z_INVALID) {
 			if (RuleB(Map, MobZVisualDebug))
 				this->SendAppearanceEffect(78, 0, 0, 0, 0);
-			
+
 			m_Position.z = new_z;
 		}
 		else {
 			if (RuleB(Map, MobZVisualDebug))
 				this->SendAppearanceEffect(103, 0, 0, 0, 0);
 
-			Log(Logs::General, Logs::FixZ, "%s is failing to find Z %f", 
+			Log(Logs::General, Logs::FixZ, "%s is failing to find Z %f",
 				this->GetCleanName(), std::abs(m_Position.z - new_z));
 		}
 	}
