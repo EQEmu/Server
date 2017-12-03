@@ -1480,6 +1480,11 @@ void Mob::SendPositionUpdate(uint8 iSendToSelf) {
 			CastToClient()->FastQueuePacket(&app, false);
 		}
 	}
+	else if (DistanceSquared(last_major_update_position, m_Position) >= (100 * 100)) {
+		entity_list.QueueClients(this, app, true, true);
+		last_major_update_position = m_Position;
+		is_distance_roamer = true;
+	}
 	else {
 		entity_list.QueueCloseClients(this, app, (iSendToSelf == 0), RuleI(Range, MobPositionUpdates), nullptr, false);
 	}
