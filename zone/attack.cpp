@@ -852,16 +852,56 @@ int Mob::ACSum()
 	return ac;
 }
 
+int Mob::GetBestMeleeSkill()
+	{
+	int bestSkill=0;
+	EQEmu::skills::SkillType meleeSkills[]=
+	{	EQEmu::skills::Skill1HBlunt,
+	  	EQEmu::skills::Skill1HSlashing,
+		EQEmu::skills::Skill2HBlunt,
+		EQEmu::skills::Skill2HSlashing,	
+		EQEmu::skills::SkillHandtoHand,
+		EQEmu::skills::Skill1HPiercing,
+		EQEmu::skills::Skill2HPiercing,
+		EQEmu::skills::SkillCount
+	};
+	int i;
+
+	for (i=0; meleeSkills[i] != EQEmu::skills::SkillCount; ++i) {
+		int value;
+		value = GetSkill(meleeSkills[i]);
+		bestSkill = std::max(value, bestSkill);
+	}
+		
+	return bestSkill;
+	}
+
 int Mob::offense(EQEmu::skills::SkillType skill)
 {
 	int offense = GetSkill(skill);
-	int stat_bonus = 0;
-	if (skill == EQEmu::skills::SkillArchery || skill == EQEmu::skills::SkillThrowing)
-		stat_bonus = GetDEX();
-	else
-		stat_bonus = GetSTR();
+	int stat_bonus = GetSTR();
+
+	switch (skill) {
+		case EQEmu::skills::SkillArchery:
+		case EQEmu::skills::SkillThrowing:
+			stat_bonus = GetDEX();
+			break;	
+
+		// Mobs with no weapons default to H2H.
+		// Since H2H is capped at 100 for many many classes,
+		// lets not handicap mobs based on not spawning with a
+		// weapon.
+		//
+		// Maybe we tweak this if Disarm is actually implemented.
+
+		case EQEmu::skills::SkillHandtoHand:
+			offense = GetBestMeleeSkill();
+			break;
+	}
+
 	if (stat_bonus >= 75)
 		offense += (2 * stat_bonus - 150) / 3;
+
 	offense += GetATK();
 	return offense;
 }
