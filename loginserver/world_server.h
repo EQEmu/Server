@@ -133,6 +133,7 @@ private:
 	*/
 	void ProcessNewLSInfo(uint16_t opcode, const EQ::Net::Packet &p);
 	void ProcessLSStatus(uint16_t opcode, const EQ::Net::Packet &p);
+	void ProcessUsertoWorldRespLeg(uint16_t opcode, const EQ::Net::Packet &p);
 	void ProcessUsertoWorldResp(uint16_t opcode, const EQ::Net::Packet &p);
 	void ProcessLSAccountUpdate(uint16_t opcode, const EQ::Net::Packet &p);
 

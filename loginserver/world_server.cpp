@@ -39,6 +39,7 @@ WorldServer::WorldServer(std::shared_ptr<EQ::Net::ServertalkServerConnection> c)
 
 	c->OnMessage(ServerOP_NewLSInfo, std::bind(&WorldServer::ProcessNewLSInfo, this, std::placeholders::_1, std::placeholders::_2));
 	c->OnMessage(ServerOP_LSStatus, std::bind(&WorldServer::ProcessLSStatus, this, std::placeholders::_1, std::placeholders::_2));
+	c->OnMessage(ServerOP_UsertoWorldRespLeg, std::bind(&WorldServer::ProcessUsertoWorldRespLeg, this, std::placeholders::_1, std::placeholders::_2));
 	c->OnMessage(ServerOP_UsertoWorldResp, std::bind(&WorldServer::ProcessUsertoWorldResp, this, std::placeholders::_1, std::placeholders::_2));
 	c->OnMessage(ServerOP_LSAccountUpdate, std::bind(&WorldServer::ProcessLSAccountUpdate, this, std::placeholders::_1, std::placeholders::_2));
 }
@@ -114,6 +115,93 @@ void WorldServer::ProcessLSStatus(uint16_t opcode, const EQ::Net::Packet &p)
 
 	ServerLSStatus_Struct *ls_status = (ServerLSStatus_Struct*)p.Data();
 	Handle_LSStatus(ls_status);
+}
+
+void WorldServer::ProcessUsertoWorldRespLeg(uint16_t opcode, const EQ::Net::Packet &p)
+{
+	if (server.options.IsWorldTraceOn())
+	{
+		Log(Logs::General, Logs::Netcode, "Application packet received from server: 0x%.4X, (size %u)", opcode, p.Length());
+	}
+
+	if (server.options.IsDumpInPacketsOn())
+	{
+		DumpPacket(opcode, p);
+	}
+
+	if (p.Length() < sizeof(UsertoWorldResponseLegacy_Struct))
+	{
+		Log(Logs::General, Logs::Error, "Recieved application packet from server that had opcode ServerOP_UsertoWorldResp, "
+			"but was too small. Discarded to avoid buffer overrun.");
+		return;
+	}
+
+	//I don't use world trace for this and here is why:
+	//Because this is a part of the client login procedure it makes tracking client errors
+	//While keeping world server spam with multiple servers connected almost impossible.
+	if (server.options.IsTraceOn())
+	{
+		Log(Logs::General, Logs::Netcode, "User-To-World Response received.");
+	}
+
+	UsertoWorldResponseLegacy_Struct *utwr = (UsertoWorldResponseLegacy_Struct*)p.Data();
+	Log(Logs::General, Logs::Debug, "Trying to find client with user id of %u.", utwr->lsaccountid);
+	Client *c = server.client_manager->GetClient(utwr->lsaccountid);
+	if (c)
+	{
+		Log(Logs::General, Logs::Debug, "Found client with user id of %u and account name of %s.", utwr->lsaccountid, c->GetAccountName().c_str());
+		EQApplicationPacket *outapp = new EQApplicationPacket(OP_PlayEverquestResponse, sizeof(PlayEverquestResponse_Struct));
+		PlayEverquestResponse_Struct *per = (PlayEverquestResponse_Struct*)outapp->pBuffer;
+		per->Sequence = c->GetPlaySequence();
+		per->ServerNumber = c->GetPlayServerID();
+		Log(Logs::General, Logs::Debug, "Found sequence and play of %u %u", c->GetPlaySequence(), c->GetPlayServerID());
+
+		Log(Logs::General, Logs::Netcode, "[Size: %u] %s", outapp->size, DumpPacketToString(outapp).c_str());
+
+		if (utwr->response > 0)
+		{
+			per->Allowed = 1;
+			SendClientAuth(c->GetConnection()->GetRemoteAddr(), c->GetAccountName(), c->GetKey(), c->GetAccountID());
+		}
+
+		switch (utwr->response)
+		{
+		case 1:
+			per->Message = 101;
+			break;
+		case 0:
+			per->Message = 326;
+			break;
+		case -1:
+			per->Message = 337;
+			break;
+		case -2:
+			per->Message = 338;
+			break;
+		case -3:
+			per->Message = 303;
+			break;
+		}
+
+		if (server.options.IsTraceOn())
+		{
+			Log(Logs::General, Logs::Netcode, "Sending play response with following data, allowed %u, sequence %u, server number %u, message %u",
+				per->Allowed, per->Sequence, per->ServerNumber, per->Message);
+			Log(Logs::General, Logs::Netcode, "[Size: %u] %s", outapp->size, DumpPacketToString(outapp).c_str());
+		}
+
+		if (server.options.IsDumpOutPacketsOn())
+		{
+			DumpPacket(outapp);
+		}
+
+		c->SendPlayResponse(outapp);
+		delete outapp;
+	}
+	else
+	{
+		Log(Logs::General, Logs::Error, "Recieved User-To-World Response for %u but could not find the client referenced!.", utwr->lsaccountid);
+	}
 }
 
 void WorldServer::ProcessUsertoWorldResp(uint16_t opcode, const EQ::Net::Packet &p)
@@ -501,7 +589,7 @@ void WorldServer::Handle_LSStatus(ServerLSStatus_Struct *s)
 void WorldServer::SendClientAuth(std::string ip, std::string account, std::string key, unsigned int account_id)
 {
 	EQ::Net::DynamicPacket outapp;
-	ClientAuth_Struct client_auth;
+	ClientAuthLegacy_Struct client_auth;
 	client_auth.lsaccount_id = account_id;
 	strncpy(client_auth.name, account.c_str(), 30);
 	strncpy(client_auth.key, key.c_str(), 30);
@@ -523,10 +611,10 @@ void WorldServer::SendClientAuth(std::string ip, std::string account, std::strin
 	}
 
 	outapp.PutSerialize(0, client_auth);
-	connection->Send(ServerOP_LSClientAuth, outapp);
+	connection->Send(ServerOP_LSClientAuthLeg, outapp);
 
 	if (server.options.IsDumpInPacketsOn())
 	{
-		DumpPacket(ServerOP_LSClientAuth, outapp);
+		DumpPacket(ServerOP_LSClientAuthLeg, outapp);
 	}
 }

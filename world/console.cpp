@@ -15,18 +15,30 @@ extern ZSList zoneserver_list;
 extern LoginServerList loginserverlist;
 
 struct EQ::Net::ConsoleLoginStatus CheckLogin(const std::string& username, const std::string& password) {
-	//TODO REIMPLEMENT
 	struct EQ::Net::ConsoleLoginStatus ret;
-	//ret.account_id = database.CheckLogin(username.c_str(), password.c_str());
-	//if (ret.account_id == 0) {
-	//	return ret;
-	//}
-	//
-	//char account_name[64];
-	//database.GetAccountName(ret.account_id, account_name);
-	//
-	//ret.account_name = account_name;
-	//ret.status = database.CheckStatus(ret.account_id);
+	std::string prefix = "eqemu";
+	std::string raw_user = "";
+
+	auto split = SplitString(username, ':');
+	if (split.size() == 2) {
+		prefix = split[0];
+		raw_user = split[1];
+	}
+	else {
+		raw_user = split[0];
+	}
+
+	ret.account_id = database.CheckLogin(raw_user.c_str(), password.c_str(), prefix.c_str());
+
+	if (ret.account_id == 0) {
+		return ret;
+	}
+	
+	char account_name[64];
+	database.GetAccountName(ret.account_id, account_name);
+	
+	ret.account_name = account_name;
+	ret.status = database.CheckStatus(ret.account_id);
 	return ret;
 }
 
@@ -380,23 +392,33 @@ void ConsoleFlag(EQ::Net::ConsoleServerConnection* connection, const std::string
 }
 
 void ConsoleSetPass(EQ::Net::ConsoleServerConnection* connection, const std::string& command, const std::vector<std::string>& args) {
-	//TODO: REIMPLEMENT
-	
-	//if (args.size() != 2) {
-	//	connection->SendLine("Format: setpass accountname password");
-	//}
-	//else {
-	//	int16 tmpstatus = 0;
-	//	uint32 tmpid = database.GetAccountIDByName(args[0].c_str(), &tmpstatus);
-	//	if (!tmpid)
-	//		connection->SendLine("Error: Account not found");
-	//	else if (tmpstatus > connection->Admin())
-	//		connection->SendLine("Cannot change password: Account's status is higher than yours");
-	//	else if (database.SetLocalPassword(tmpid, args[1].c_str()))
-	//		connection->SendLine("Password changed.");
-	//	else
-	//		connection->SendLine("Error changing password.");
-	//}
+	if (args.size() != 2) {
+		connection->SendLine("Format: setpass accountname password");
+	}
+	else {
+		std::string prefix = "eqemu";
+		std::string raw_user = "";
+
+		auto split = SplitString(args[0], ':');
+		if (split.size() == 2) {
+			prefix = split[0];
+			raw_user = split[1];
+		}
+		else {
+			raw_user = split[0];
+		}
+
+		int16 tmpstatus = 0;
+		uint32 tmpid = database.GetAccountIDByName(raw_user.c_str(), prefix.c_str(), &tmpstatus);
+		if (!tmpid)
+			connection->SendLine("Error: Account not found");
+		else if (tmpstatus > connection->Admin())
+			connection->SendLine("Cannot change password: Account's status is higher than yours");
+		else if (database.SetLocalPassword(tmpid, args[1].c_str()))
+			connection->SendLine("Password changed.");
+		else
+			connection->SendLine("Error changing password.");
+	}
 }
 
 void ConsoleVersion(EQ::Net::ConsoleServerConnection* connection, const std::string& command, const std::vector<std::string>& args) {

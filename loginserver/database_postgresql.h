@@ -57,7 +57,7 @@ public:
 	* Needed for client login procedure.
 	* Returns true if the record was found, false otherwise.
 	*/
-	virtual bool GetLoginDataFromAccountName(std::string name, std::string &password, unsigned int &id);
+	virtual bool GetLoginDataFromAccountName(std::string name, std::string &password, unsigned int &id, std::string &loginserver);
 
 	/**
 	* Retrieves the world registration from the long and short names provided.

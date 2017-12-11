@@ -27,7 +27,6 @@ struct LoginConfig {
 	std::string LoginPassword;
 	uint16 LoginPort;
 	bool LoginLegacy;
-	std::string LoginName;
 };
 
 class EQEmuConfig : public XMLParser
@@ -45,7 +44,6 @@ class EQEmuConfig : public XMLParser
 		std::string LoginPassword;
 		uint16 LoginPort;
 		bool LoginLegacy;
-		std::string LoginName;
 		uint32 LoginCount;
 		LinkedList<LoginConfig*> loginlist;
 		bool Locked;
@@ -136,7 +134,6 @@ class EQEmuConfig : public XMLParser
 			LoginHost = "login.eqemulator.net";
 			LoginPort = 5998;
 			LoginLegacy = false;
-			LoginName = "eqemu";
 			// World
 			Locked = false;
 			WorldTCPPort = 9000;

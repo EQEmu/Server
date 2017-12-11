@@ -15,7 +15,7 @@ public:
 	LoginServerList();
 	~LoginServerList();
 
-	void	Add(const char*, const char*, uint16, const char*, const char*, bool);
+	void	Add(const char*, uint16, const char*, const char*, bool);
 
 	bool	SendInfo();
 	bool	SendStatus();

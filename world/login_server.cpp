@@ -41,7 +41,7 @@ extern uint32 numzones;
 extern uint32 numplayers;
 extern volatile bool	RunLoops;
 
-LoginServer::LoginServer(const char *Name, const char* iAddress, uint16 iPort, const char* Account, const char* Password, bool legacy)
+LoginServer::LoginServer(const char* iAddress, uint16 iPort, const char* Account, const char* Password, bool legacy)
 {
 	strn0cpy(LoginServerAddress, iAddress, 256);
 	LoginServerPort = iPort;
@@ -49,27 +49,26 @@ LoginServer::LoginServer(const char *Name, const char* iAddress, uint16 iPort, c
 	LoginPassword = Password;
 	CanAccountUpdate = false;
 	IsLegacy = legacy;
-	LoginName = Name;
 	Connect();
 }
 
 LoginServer::~LoginServer() {
 }
 
-void LoginServer::ProcessUsertoWorldReq(uint16_t opcode, EQ::Net::Packet &p) {
+void LoginServer::ProcessUsertoWorldReqLeg(uint16_t opcode, EQ::Net::Packet &p) {
 	const WorldConfig *Config = WorldConfig::get();
 	Log(Logs::Detail, Logs::World_Server, "Recevied ServerPacket from LS OpCode 0x04x", opcode);
 
-	UsertoWorldRequest_Struct* utwr = (UsertoWorldRequest_Struct*)p.Data();
-	uint32 id = database.GetAccountIDFromLSID(LoginName, utwr->lsaccountid);
+	UsertoWorldRequestLegacy_Struct* utwr = (UsertoWorldRequestLegacy_Struct*)p.Data();
+	uint32 id = database.GetAccountIDFromLSID("eqemu", utwr->lsaccountid);
 	int16 status = database.CheckStatus(id);
 
 	auto outpack = new ServerPacket;
-	outpack->opcode = ServerOP_UsertoWorldResp;
-	outpack->size = sizeof(UsertoWorldResponse_Struct);
+	outpack->opcode = ServerOP_UsertoWorldRespLeg;
+	outpack->size = sizeof(UsertoWorldResponseLegacy_Struct);
 	outpack->pBuffer = new uchar[outpack->size];
 	memset(outpack->pBuffer, 0, outpack->size);
-	UsertoWorldResponse_Struct* utwrs = (UsertoWorldResponse_Struct*)outpack->pBuffer;
+	UsertoWorldResponseLegacy_Struct* utwrs = (UsertoWorldResponseLegacy_Struct*)outpack->pBuffer;
 	utwrs->lsaccountid = utwr->lsaccountid;
 	utwrs->ToID = utwr->FromID;
 
@@ -98,6 +97,69 @@ void LoginServer::ProcessUsertoWorldReq(uint16_t opcode, EQ::Net::Packet &p) {
 	delete outpack;
 }
 
+void LoginServer::ProcessUsertoWorldReq(uint16_t opcode, EQ::Net::Packet &p) {
+	const WorldConfig *Config = WorldConfig::get();
+	Log(Logs::Detail, Logs::World_Server, "Recevied ServerPacket from LS OpCode 0x04x", opcode);
+
+	UsertoWorldRequest_Struct* utwr = (UsertoWorldRequest_Struct*)p.Data();
+	uint32 id = database.GetAccountIDFromLSID(utwr->login, utwr->lsaccountid);
+	int16 status = database.CheckStatus(id);
+
+	auto outpack = new ServerPacket;
+	outpack->opcode = ServerOP_UsertoWorldResp;
+	outpack->size = sizeof(UsertoWorldResponse_Struct);
+	outpack->pBuffer = new uchar[outpack->size];
+	memset(outpack->pBuffer, 0, outpack->size);
+	UsertoWorldResponse_Struct* utwrs = (UsertoWorldResponse_Struct*)outpack->pBuffer;
+	utwrs->lsaccountid = utwr->lsaccountid;
+	utwrs->ToID = utwr->FromID;
+	strn0cpy(utwrs->login, utwr->login, 64);
+
+	if (Config->Locked == true)
+	{
+		if ((status == 0 || status < 100) && (status != -2 || status != -1))
+			utwrs->response = 0;
+		if (status >= 100)
+			utwrs->response = 1;
+	}
+	else {
+		utwrs->response = 1;
+	}
+
+	int32 x = Config->MaxClients;
+	if ((int32)numplayers >= x && x != -1 && x != 255 && status < 80)
+		utwrs->response = -3;
+
+	if (status == -1)
+		utwrs->response = -1;
+	if (status == -2)
+		utwrs->response = -2;
+
+	utwrs->worldid = utwr->worldid;
+	SendPacket(outpack);
+	delete outpack;
+}
+
+void LoginServer::ProcessLSClientAuthLeg(uint16_t opcode, EQ::Net::Packet &p) {
+	const WorldConfig *Config = WorldConfig::get();
+	Log(Logs::Detail, Logs::World_Server, "Recevied ServerPacket from LS OpCode 0x04x", opcode);
+
+	try {
+		auto slsca = p.GetSerialize<ClientAuthLegacy_Struct>(0);
+
+		if (RuleI(World, AccountSessionLimit) >= 0) {
+			// Enforce the limit on the number of characters on the same account that can be
+			// online at the same time.
+			client_list.EnforceSessionLimit(slsca.lsaccount_id);
+		}
+
+		client_list.CLEAdd(slsca.lsaccount_id, "eqemu", slsca.name, slsca.key, slsca.worldadmin, slsca.ip, slsca.local);
+	}
+	catch (std::exception &ex) {
+		LogF(Logs::General, Logs::Error, "Error parsing LSClientAuth packet from world.\n{0}", ex.what());
+	}
+}
+
 void LoginServer::ProcessLSClientAuth(uint16_t opcode, EQ::Net::Packet &p) {
 	const WorldConfig *Config = WorldConfig::get();
 	Log(Logs::Detail, Logs::World_Server, "Recevied ServerPacket from LS OpCode 0x04x", opcode);
@@ -111,7 +173,7 @@ void LoginServer::ProcessLSClientAuth(uint16_t opcode, EQ::Net::Packet &p) {
 			client_list.EnforceSessionLimit(slsca.lsaccount_id);
 		}
 
-		client_list.CLEAdd(LoginName.c_str(), slsca.lsaccount_id, slsca.name, slsca.key, slsca.worldadmin, slsca.ip, slsca.local);
+		client_list.CLEAdd(slsca.lsaccount_id, slsca.lsname, slsca.name, slsca.key, slsca.worldadmin, slsca.ip, slsca.local);
 	}
 	catch (std::exception &ex) {
 		LogF(Logs::General, Logs::Error, "Error parsing LSClientAuth packet from world.\n{0}", ex.what());
@@ -184,7 +246,9 @@ bool LoginServer::Connect() {
 			}
 		});
 
+		legacy_client->OnMessage(ServerOP_UsertoWorldReqLeg, std::bind(&LoginServer::ProcessUsertoWorldReqLeg, this, std::placeholders::_1, std::placeholders::_2));
 		legacy_client->OnMessage(ServerOP_UsertoWorldReq, std::bind(&LoginServer::ProcessUsertoWorldReq, this, std::placeholders::_1, std::placeholders::_2));
+		legacy_client->OnMessage(ServerOP_LSClientAuthLeg, std::bind(&LoginServer::ProcessLSClientAuthLeg, this, std::placeholders::_1, std::placeholders::_2));
 		legacy_client->OnMessage(ServerOP_LSClientAuth, std::bind(&LoginServer::ProcessLSClientAuth, this, std::placeholders::_1, std::placeholders::_2));
 		legacy_client->OnMessage(ServerOP_LSFatalError, std::bind(&LoginServer::ProcessLSFatalError, this, std::placeholders::_1, std::placeholders::_2));
 		legacy_client->OnMessage(ServerOP_SystemwideMessage, std::bind(&LoginServer::ProcessSystemwideMessage, this, std::placeholders::_1, std::placeholders::_2));
@@ -210,7 +274,9 @@ bool LoginServer::Connect() {
 			}
 		});
 
+		client->OnMessage(ServerOP_UsertoWorldReqLeg, std::bind(&LoginServer::ProcessUsertoWorldReqLeg, this, std::placeholders::_1, std::placeholders::_2));
 		client->OnMessage(ServerOP_UsertoWorldReq, std::bind(&LoginServer::ProcessUsertoWorldReq, this, std::placeholders::_1, std::placeholders::_2));
+		client->OnMessage(ServerOP_LSClientAuthLeg, std::bind(&LoginServer::ProcessLSClientAuthLeg, this, std::placeholders::_1, std::placeholders::_2));
 		client->OnMessage(ServerOP_LSClientAuth, std::bind(&LoginServer::ProcessLSClientAuth, this, std::placeholders::_1, std::placeholders::_2));
 		client->OnMessage(ServerOP_LSFatalError, std::bind(&LoginServer::ProcessLSFatalError, this, std::placeholders::_1, std::placeholders::_2));
 		client->OnMessage(ServerOP_SystemwideMessage, std::bind(&LoginServer::ProcessSystemwideMessage, this, std::placeholders::_1, std::placeholders::_2));

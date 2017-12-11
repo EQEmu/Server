@@ -142,14 +142,15 @@
 #define ServerOP_ClientVersionSummary 0x0215
 #define ServerOP_LSInfo				0x1000
 #define ServerOP_LSStatus			0x1001
-#define ServerOP_LSClientAuth		0x1002
+#define ServerOP_LSClientAuthLeg	0x1002
 #define ServerOP_LSFatalError		0x1003
 #define ServerOP_SystemwideMessage	0x1005
 #define ServerOP_ListWorlds			0x1006
 #define ServerOP_PeerConnect		0x1007
 #define ServerOP_NewLSInfo			0x1008
 #define ServerOP_LSRemoteAddr		0x1009
-#define ServerOP_LSAccountUpdate		0x100A
+#define ServerOP_LSAccountUpdate	0x100A
+#define ServerOP_LSClientAuth		0x100B
 
 #define ServerOP_EncapPacket		0x2007	// Packet within a packet
 #define ServerOP_WorldListUpdate	0x2008
@@ -169,8 +170,10 @@
 #define ServerOP_LSPlayerJoinWorld	0x3007
 #define ServerOP_LSPlayerZoneChange	0x3008
 
-#define	ServerOP_UsertoWorldReq		0xAB00
-#define	ServerOP_UsertoWorldResp	0xAB01
+#define	ServerOP_UsertoWorldReqLeg	0xAB00
+#define	ServerOP_UsertoWorldRespLeg	0xAB01
+#define	ServerOP_UsertoWorldReq		0xAB02
+#define	ServerOP_UsertoWorldResp	0xAB03
 
 #define ServerOP_LauncherConnectInfo	0x3000
 #define ServerOP_LauncherZoneRequest	0x3001
@@ -513,6 +516,23 @@ struct ServerLSPlayerZoneChange_Struct {
 
 struct ClientAuth_Struct {
 	uint32 lsaccount_id; // ID# in login server's db
+	char lsname[64];
+	char name[30]; // username in login server's db
+	char key[30]; // the Key the client will present
+	uint8 lsadmin; // login server admin level
+	int16 worldadmin; // login's suggested worldadmin level setting for this user, up to the world if they want to obey it
+	uint32 ip;
+	uint8 local; // 1 if the client is from the local network
+
+	template <class Archive>
+	void serialize(Archive &ar)
+	{
+		ar(lsaccount_id, lsname, name, key, lsadmin, worldadmin, ip, local);
+	}
+};
+
+struct ClientAuthLegacy_Struct {
+	uint32 lsaccount_id; // ID# in login server's db
 	char name[30]; // username in login server's db
 	char key[30]; // the Key the client will present
 	uint8 lsadmin; // login server admin level
@@ -651,12 +671,29 @@ struct ServerSyncWorldList_Struct {
 	bool	placeholder;
 };
 
+struct UsertoWorldRequestLegacy_Struct {
+	uint32	lsaccountid;
+	uint32	worldid;
+	uint32	FromID;
+	uint32	ToID;
+	char	IPAddr[64];
+};
+
 struct UsertoWorldRequest_Struct {
 	uint32	lsaccountid;
 	uint32	worldid;
 	uint32	FromID;
 	uint32	ToID;
 	char	IPAddr[64];
+	char	login[64];
+};
+
+struct UsertoWorldResponseLegacy_Struct {
+	uint32	lsaccountid;
+	uint32	worldid;
+	int8	response; // -3) World Full, -2) Banned, -1) Suspended, 0) Denied, 1) Allowed
+	uint32	FromID;
+	uint32	ToID;
 };
 
 struct UsertoWorldResponse_Struct {
@@ -665,6 +702,7 @@ struct UsertoWorldResponse_Struct {
 	int8	response; // -3) World Full, -2) Banned, -1) Suspended, 0) Denied, 1) Allowed
 	uint32	FromID;
 	uint32	ToID;
+	char	login[64];
 };
 
 // generic struct to be used for alot of simple zone->world questions

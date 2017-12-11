@@ -86,7 +86,7 @@ Database::~Database()
 	Return the account id or zero if no account matches.
 	Zero will also be returned if there is a database error.
 */
-uint32 Database::CheckLogin(const char* name, const char* password, int16* oStatus) {
+uint32 Database::CheckLogin(const char* name, const char* password, const char *loginserver, int16* oStatus) {
 
 	if(strlen(name) >= 50 || strlen(password) >= 50)
 		return(0);
@@ -97,9 +97,10 @@ uint32 Database::CheckLogin(const char* name, const char* password, int16* oStat
 	DoEscapeString(tmpUN, name, strlen(name));
 	DoEscapeString(tmpPW, password, strlen(password));
 
-	std::string query = StringFormat("SELECT id, status FROM account WHERE name='%s' AND password is not null "
+	std::string query = StringFormat("SELECT id, status FROM account WHERE name='%s' AND ls_id='%s' AND password is not null "
 		"and length(password) > 0 and (password='%s' or password=MD5('%s'))",
-		tmpUN, tmpPW, tmpPW);
+		tmpUN, EscapeString(loginserver).c_str(), tmpPW, tmpPW);
+
 	auto results = QueryDatabase(query);
 
 	if (!results.Success())
@@ -788,11 +789,12 @@ uint32 Database::GetAccountIDByChar(uint32 char_id) {
 	return atoi(row[0]);
 }
 
-uint32 Database::GetAccountIDByName(const char* accname, int16* status, uint32* lsid) {
+uint32 Database::GetAccountIDByName(const char* accname, const char *loginserver, int16* status, uint32* lsid) {
 	if (!isAlphaNumeric(accname))
 		return 0;
 
-	std::string query = StringFormat("SELECT `id`, `status`, `lsaccount_id` FROM `account` WHERE `name` = '%s' LIMIT 1", accname);
+	std::string query = StringFormat("SELECT `id`, `status`, `lsaccount_id` FROM `account` WHERE `name` = '%s' AND `ls_id`='%s' LIMIT 1", 
+		EscapeString(accname).c_str(), EscapeString(loginserver).c_str());
 	auto results = QueryDatabase(query);
 
 	if (!results.Success()) {

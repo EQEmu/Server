@@ -116,17 +116,6 @@ int main()
 			server.config->GetVariable("database", "db"));
 #endif
 	}
-	else if (server.config->GetVariable("database", "subsystem").compare("PostgreSQL") == 0) {
-#ifdef EQEMU_POSTGRESQL_ENABLED
-		Log(Logs::General, Logs::Login_Server, "PostgreSQL Database Init.");
-		server.db = (Database*)new DatabasePostgreSQL(
-			server.config->GetVariable("database", "user"),
-			server.config->GetVariable("database", "password"),
-			server.config->GetVariable("database", "host"),
-			server.config->GetVariable("database", "port"),
-			server.config->GetVariable("database", "db"));
-#endif
-	}
 
 	/* Make sure our database got created okay, otherwise cleanup and exit. */
 	if (!server.db) {

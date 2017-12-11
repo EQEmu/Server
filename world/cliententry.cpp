@@ -31,18 +31,21 @@ extern LoginServerList loginserverlist;
 extern ClientList		client_list;
 extern volatile bool RunLoops;
 
-ClientListEntry::ClientListEntry(const char* iLoginServer, uint32 in_id, uint32 iLSID, const char* iLoginName, const char* iLoginKey, int16 iWorldAdmin, uint32 ip, uint8 local)
+ClientListEntry::ClientListEntry(uint32 in_id, uint32 iLSID, const char *iLoginServerName, const char* iLoginName, const char* iLoginKey, int16 iWorldAdmin, uint32 ip, uint8 local)
 : id(in_id)
 {
 	ClearVars(true);
 
 	pIP = ip;
 	pLSID = iLSID;
-	if(iLSID > 0)
-		paccountid = database.GetAccountIDFromLSID(iLoginServer, iLSID, paccountname, &padmin);
+	if (iLSID > 0) {
+		
+		paccountid = database.GetAccountIDFromLSID(iLoginServerName, iLSID, paccountname, &padmin);
+	}
+
 	strn0cpy(plsname, iLoginName, sizeof(plsname));
 	strn0cpy(plskey, iLoginKey, sizeof(plskey));
-	strn0cpy(pLoginServer, iLoginServer, sizeof(pLoginServer));
+	strn0cpy(pLoginServer, iLoginServerName, sizeof(pLoginServer));
 	pworldadmin = iWorldAdmin;
 	plocal=(local==1);
 
@@ -258,7 +261,7 @@ bool ClientListEntry::CheckStale() {
 }
 
 bool ClientListEntry::CheckAuth(uint32 iLSID, const char* iKey) {
-	if (strncmp(plskey, iKey, 10) == 0) {
+	if (pLSID == iLSID && strncmp(plskey, iKey, 10) == 0) {
 		if (paccountid == 0 && LSID() > 0) {
 			int16 tmpStatus = WorldConfig::get()->DefaultStatus;
 			paccountid = database.CreateAccount(plsname, 0, tmpStatus, pLoginServer, LSID());

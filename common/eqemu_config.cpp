@@ -70,10 +70,6 @@ void EQEmuConfig::do_world(TiXmlElement *ele)
 		if (text) {
 			LoginLegacy = atoi(text) > 0 ? true : false;
 		}
-		text = ParseTextBlock(sub_ele, "name", true);
-		if (text) {
-			LoginName = text;
-		}
 		text = ParseTextBlock(sub_ele, "account", true);
 		if (text) {
 			LoginAccount = text;
@@ -100,10 +96,6 @@ void EQEmuConfig::do_world(TiXmlElement *ele)
 				text = ParseTextBlock(sub_ele, "legacy", true);
 				if (text) {
 					loginconfig->LoginLegacy = atoi(text) > 0 ? true : false;
-				}
-				text = ParseTextBlock(sub_ele, "name", true);
-				if (text) {
-					loginconfig->LoginName = text;
 				}
 				text = ParseTextBlock(sub_ele, "account", true);
 				if (text) {
@@ -402,9 +394,6 @@ std::string EQEmuConfig::GetByName(const std::string &var_name) const
 	if (var_name == "LoginLegacy") {
 		return (itoa(LoginLegacy ? 1 : 0));
 	}
-	if (var_name == "LoginName") {
-		return LoginName;
-	}
 	if (var_name == "Locked") {
 		return (Locked ? "true" : "false");
 	}
@@ -537,7 +526,6 @@ void EQEmuConfig::Dump() const
 	std::cout << "LoginPassword = " << LoginPassword << std::endl;
 	std::cout << "LoginPort = " << LoginPort << std::endl;
 	std::cout << "LoginLegacy = " << LoginLegacy << std::endl;
-	std::cout << "LoginName = " << LoginName << std::endl;
 	std::cout << "Locked = " << Locked << std::endl;
 	std::cout << "WorldTCPPort = " << WorldTCPPort << std::endl;
 	std::cout << "WorldIP = " << WorldIP << std::endl;

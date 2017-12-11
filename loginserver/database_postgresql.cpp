@@ -53,7 +53,7 @@ DatabasePostgreSQL::~DatabasePostgreSQL()
 	}
 }
 
-bool DatabasePostgreSQL::GetLoginDataFromAccountName(string name, string &password, unsigned int &id)
+bool DatabasePostgreSQL::GetLoginDataFromAccountName(string name, string &password, unsigned int &id, std::string &loginserver)
 {
 	if(!db)
 	{

@@ -349,8 +349,8 @@ void ClientList::SendCLEList(const int16& admin, const char* to, WorldTCPConnect
 }
 
 
-void ClientList::CLEAdd(const char* iLoginServer, uint32 iLSID, const char* iLoginName, const char* iLoginKey, int16 iWorldAdmin, uint32 ip, uint8 local) {
-	auto tmp = new ClientListEntry(iLoginServer, GetNextCLEID(), iLSID, iLoginName, iLoginKey, iWorldAdmin, ip, local);
+void ClientList::CLEAdd(uint32 iLSID, const char *iLoginServerName, const char* iLoginName, const char* iLoginKey, int16 iWorldAdmin, uint32 ip, uint8 local) {
+	auto tmp = new ClientListEntry(GetNextCLEID(), iLSID, iLoginServerName, iLoginName, iLoginKey, iWorldAdmin, ip, local);
 
 	clientlist.Append(tmp);
 }

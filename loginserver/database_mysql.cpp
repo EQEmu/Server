@@ -59,7 +59,7 @@ DatabaseMySQL::~DatabaseMySQL()
 	}
 }
 
-bool DatabaseMySQL::GetLoginDataFromAccountName(std::string name, std::string &password, unsigned int &id)
+bool DatabaseMySQL::GetLoginDataFromAccountName(std::string name, std::string &password, unsigned int &id, std::string &loginserver)
 {
 	if (!database)
 	{
@@ -96,7 +96,7 @@ bool DatabaseMySQL::GetLoginDataFromAccountName(std::string name, std::string &p
 	return false;
 }
 
-bool DatabaseMySQL::GetLoginTokenDataFromToken(const std::string &token, const std::string &ip, unsigned int &db_account_id, std::string &user)
+bool DatabaseMySQL::GetLoginTokenDataFromToken(const std::string &token, const std::string &ip, unsigned int &db_account_id, std::string &db_loginserver, std::string &user)
 {
 	if (!database)
 	{
@@ -120,6 +120,7 @@ bool DatabaseMySQL::GetLoginTokenDataFromToken(const std::string &token, const s
 
 	bool found_username = false;
 	bool found_login_id = false;
+	bool found_login_server_name = false;
 	if (res)
 	{
 		while ((row = mysql_fetch_row(res)) != nullptr)
@@ -135,12 +136,18 @@ bool DatabaseMySQL::GetLoginTokenDataFromToken(const std::string &token, const s
 				found_login_id = true;
 				continue;
 			}
+
+			if (strcmp(row[2], "login_server_name") == 0) {
+				db_loginserver = row[3];
+				found_login_server_name = true;
+				continue;
+			}
 		}
 
 		mysql_free_result(res);
 	}
 
-	return found_username && found_login_id;
+	return found_username && found_login_id && found_login_server_name;
 }
 
 bool DatabaseMySQL::CreateLoginData(const std::string &name, const std::string &password, unsigned int &id)

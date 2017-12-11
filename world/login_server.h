@@ -31,7 +31,7 @@
 
 class LoginServer{
 public:
-	LoginServer(const char *, const char*, uint16, const char*, const char*, bool legacy);
+	LoginServer(const char*, uint16, const char*, const char*, bool legacy);
 	~LoginServer();
 
 	bool Connect();
@@ -45,8 +45,10 @@ public:
 	bool CanUpdate() { return CanAccountUpdate; }
 
 private:
+	void ProcessUsertoWorldReqLeg(uint16_t opcode, EQ::Net::Packet &p);
 	void ProcessUsertoWorldReq(uint16_t opcode, EQ::Net::Packet &p);
 	void ProcessLSClientAuth(uint16_t opcode, EQ::Net::Packet &p);
+	void ProcessLSClientAuthLeg(uint16_t opcode, EQ::Net::Packet &p);
 	void ProcessLSFatalError(uint16_t opcode, EQ::Net::Packet &p);
 	void ProcessSystemwideMessage(uint16_t opcode, EQ::Net::Packet &p);
 	void ProcessLSRemoteAddr(uint16_t opcode, EQ::Net::Packet &p);
@@ -62,6 +64,5 @@ private:
 	std::string LoginPassword;
 	bool	CanAccountUpdate;
 	bool    IsLegacy;
-	std::string LoginName;
 };
 #endif

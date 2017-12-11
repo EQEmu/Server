@@ -129,6 +129,7 @@ private:
 
 	std::string account_name;
 	unsigned int account_id;
+	std::string loginserver_name;
 	unsigned int play_server_id;
 	unsigned int play_sequence_id;
 	std::string key;
