@@ -59,7 +59,7 @@ DatabaseMySQL::~DatabaseMySQL()
 	}
 }
 
-bool DatabaseMySQL::GetLoginDataFromAccountName(std::string name, std::string &password, unsigned int &id, std::string &loginserver)
+bool DatabaseMySQL::GetLoginDataFromAccountInfo(const std::string &name, const std::string &loginserver, std::string &password, unsigned int &id)
 {
 	if (!database)
 	{
@@ -70,7 +70,9 @@ bool DatabaseMySQL::GetLoginDataFromAccountName(std::string name, std::string &p
 	MYSQL_ROW row;
 	std::stringstream query(std::stringstream::in | std::stringstream::out);
 	query << "SELECT LoginServerID, AccountPassword FROM " << server.options.GetAccountTable() << " WHERE AccountName = '";
-	query << name;
+	query << EscapeString(name);
+	query << "' AND AccountLoginserver='";
+	query << EscapeString(loginserver);
 	query << "'";
 
 	if (mysql_query(database, query.str().c_str()) != 0)

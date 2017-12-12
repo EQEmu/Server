@@ -97,6 +97,11 @@ public:
 	unsigned int GetAccountID() const { return account_id; }
 
 	/**
+	* Gets the loginserver name of this client.
+	*/
+	std::string GetLoginServerName() const { return loginserver_name; }
+
+	/**
 	* Gets the account name of this client.
 	*/
 	std::string GetAccountName() const { return account_name; }

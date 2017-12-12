@@ -124,12 +124,12 @@ void ClientManager::ProcessDisconnect()
 	}
 }
 
-void ClientManager::RemoveExistingClient(unsigned int account_id)
+void ClientManager::RemoveExistingClient(unsigned int account_id, const std::string &loginserver)
 {
 	auto iter = clients.begin();
 	while (iter != clients.end())
 	{
-		if ((*iter)->GetAccountID() == account_id)
+		if ((*iter)->GetAccountID() == account_id && (*iter)->GetLoginServerName().compare(loginserver) == 0)
 		{
 			Log(Logs::General, Logs::Login_Server, "Client attempting to log in and existing client already logged in, removing existing client.");
 			delete (*iter);
@@ -142,24 +142,17 @@ void ClientManager::RemoveExistingClient(unsigned int account_id)
 	}
 }
 
-Client *ClientManager::GetClient(unsigned int account_id)
+Client *ClientManager::GetClient(unsigned int account_id, const std::string &loginserver)
 {
-	Client *cur = nullptr;
-	int count = 0;
 	auto iter = clients.begin();
 	while (iter != clients.end())
 	{
-		if ((*iter)->GetAccountID() == account_id)
+		if ((*iter)->GetAccountID() == account_id && (*iter)->GetLoginServerName().compare(loginserver) == 0)
 		{
-			cur = (*iter);
-			count++;
+			return (*iter);
 		}
 		++iter;
 	}
 
-	if (count > 1)
-	{
-		Log(Logs::General, Logs::Error, "More than one client with a given account_id existed in the client list.");
-	}
-	return cur;
+	return nullptr;
 }

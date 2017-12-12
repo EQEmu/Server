@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "login_structures.h"
 #include "../common/misc_functions.h"
 #include "../common/eqemu_logsys.h"
+#include "../common/string_util.h"
 
 extern LoginServer server;
 
@@ -194,6 +195,7 @@ void Client::Handle_Login(const char* data, unsigned int size)
 	char *login_packet_buffer = nullptr;
 
 	unsigned int db_account_id = 0;
+	std::string db_loginserver = "eqemu";
 	std::string db_account_password_hash;
 
 	std::string outbuffer;
@@ -219,54 +221,49 @@ void Client::Handle_Login(const char* data, unsigned int size)
 
 	bool result = false;
 	if (outbuffer[0] == 0 && outbuffer[1] == 0) {
-		//if (server.options.IsTokenLoginAllowed()) {
-		//	cred = (&outbuffer[2 + user.length()]);
-		//	result = server.db->GetLoginTokenDataFromToken(cred, connection->GetRemoteAddr(), db_account_id, user);
-		//}
+		if (server.options.IsTokenLoginAllowed()) {
+			cred = (&outbuffer[2 + user.length()]);
+			result = server.db->GetLoginTokenDataFromToken(cred, connection->GetRemoteAddr(), db_account_id, db_loginserver, user);
+		}
 	}
 	else {
-		//if (server.options.IsPasswordLoginAllowed()) {
-		//	result = false;
-		//	//cred = (&outbuffer[1 + user.length()]);
-		//	//if (server.db->GetLoginDataFromAccountName(user, db_account_password_hash, db_account_id) == false) {
-		//	//	/* If we have auto_create_accounts enabled in the login.ini, we will process the creation of an account on our own*/
-		//	//	if (
-		//	//		server.options.CanAutoCreateAccounts() &&
-		//	//		server.db->CreateLoginData(user, eqcrypt_hash(user, cred, mode), db_account_id) == true
-		//	//		) {
-		//	//		LogF(Logs::General, Logs::Error, "User {0} does not exist in the database, so we created it...", user);
-		//	//		result = true;
-		//	//	}
-		//	//	else {
-		//	//		LogF(Logs::General, Logs::Error, "Error logging in, user {0} does not exist in the database.", user);
-		//	//		result = false;
-		//	//	}
-		//	//}
-		//	//else {
-		//	//	if (eqcrypt_verify_hash(user, cred, db_account_password_hash, mode)) {
-		//	//		result = true;
-		//	//	}
-		//	//	else {
-		//	//		result = false;
-		//	//	}
-		//	//}
-		//}
+		if (server.options.IsPasswordLoginAllowed()) {
+			cred = (&outbuffer[1 + user.length()]);
+			auto components = SplitString(user, '.');
+			if (components.size() == 2) {
+				db_loginserver = components[0];
+				user = components[1];
+			}
+			
+			if (server.db->GetLoginDataFromAccountInfo(user, db_loginserver, db_account_password_hash, db_account_id) == false) {
+
+			}
+			else {
+				if (eqcrypt_verify_hash(user, cred, db_account_password_hash, mode)) {
+					result = true;
+				}
+				else {
+					result = false;
+				}
+			}
+		}
 	}
 
 	/* Login Accepted */
 	if (result) {
 
-		server.client_manager->RemoveExistingClient(db_account_id);
-
+		server.client_manager->RemoveExistingClient(db_account_id, db_loginserver);
+		
 		in_addr in;
 		in.s_addr = connection->GetRemoteIP();
-
+		
 		server.db->UpdateLSAccountData(db_account_id, std::string(inet_ntoa(in)));
 		GenerateKey();
-
+		
 		account_id = db_account_id;
 		account_name = user;
-
+		loginserver_name = db_loginserver;
+		
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_LoginAccepted, 10 + 80);
 		const LoginLoginRequest_Struct* llrs = (const LoginLoginRequest_Struct *)data;
 		LoginAccepted_Struct* login_accepted = (LoginAccepted_Struct *)outapp->pBuffer;
@@ -275,10 +272,10 @@ void Client::Handle_Login(const char* data, unsigned int size)
 		login_accepted->unknown3 = llrs->unknown3;
 		login_accepted->unknown4 = llrs->unknown4;
 		login_accepted->unknown5 = llrs->unknown5;
-
+		
 		LoginFailedAttempts_Struct * login_failed_attempts = new LoginFailedAttempts_Struct;
 		memset(login_failed_attempts, 0, sizeof(LoginFailedAttempts_Struct));
-
+		
 		login_failed_attempts->failed_attempts = 0;
 		login_failed_attempts->message = 0x01;
 		login_failed_attempts->lsid = db_account_id;
@@ -298,22 +295,22 @@ void Client::Handle_Login(const char* data, unsigned int size)
 		login_failed_attempts->unknown11[0] = 0x63;
 		login_failed_attempts->unknown12[0] = 0x01;
 		memcpy(login_failed_attempts->key, key.c_str(), key.size());
-
+		
 		char encrypted_buffer[80] = { 0 };
 		auto rc = eqcrypt_block((const char*)login_failed_attempts, 75, encrypted_buffer, 1);
 		if (rc == nullptr) {
 			LogF(Logs::General, Logs::Debug, "Failed to encrypt eqcrypt block");
 		}
-
+		
 		memcpy(login_accepted->encrypt, encrypted_buffer, 80);
-
+		
 		if (server.options.IsDumpOutPacketsOn()) {
 			DumpPacket(outapp);
 		}
-
+		
 		connection->QueuePacket(outapp);
 		delete outapp;
-
+		
 		status = cs_logged_in;
 	}
 	else {
@@ -358,7 +355,7 @@ void Client::Handle_Play(const char* data)
 	this->play_server_id = (unsigned int)play->ServerNumber;
 	play_sequence_id = sequence_in;
 	play_server_id = server_id_in;
-	server.server_manager->SendUserToWorldRequest(server_id_in, account_id);
+	server.server_manager->SendUserToWorldRequest(server_id_in, account_id, loginserver_name);
 }
 
 void Client::SendServerListPacket(uint32 seq)

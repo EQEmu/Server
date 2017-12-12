@@ -45,7 +45,7 @@ public:
 	/**
 	* Sends a request to world to see if the client is banned or suspended.
 	*/
-	void SendUserToWorldRequest(unsigned int server_id, unsigned int client_account_id);
+	void SendUserToWorldRequest(unsigned int server_id, unsigned int client_account_id, const std::string &client_loginserver);
 
 	/**
 	* Creates a server list packet for the client.

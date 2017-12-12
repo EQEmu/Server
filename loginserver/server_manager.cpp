@@ -206,18 +206,19 @@ EQApplicationPacket *ServerManager::CreateServerListPacket(Client *c, uint32 seq
 	return outapp;
 }
 
-void ServerManager::SendUserToWorldRequest(unsigned int server_id, unsigned int client_account_id)
+void ServerManager::SendUserToWorldRequest(unsigned int server_id, unsigned int client_account_id, const std::string &client_loginserver)
 {
 	auto iter = world_servers.begin();
 	bool found = false;
 	while (iter != world_servers.end()) {
 		if ((*iter)->GetRuntimeID() == server_id) {
 			EQ::Net::DynamicPacket outapp;
-			outapp.Resize(sizeof(UsertoWorldRequestLegacy_Struct));
-			UsertoWorldRequestLegacy_Struct *utwr = (UsertoWorldRequestLegacy_Struct*)outapp.Data();
+			outapp.Resize(sizeof(UsertoWorldRequest_Struct));
+			UsertoWorldRequest_Struct *utwr = (UsertoWorldRequest_Struct*)outapp.Data();
 			utwr->worldid = server_id;
 			utwr->lsaccountid = client_account_id;
-			(*iter)->GetConnection()->Send(ServerOP_UsertoWorldReqLeg, outapp);
+			strncpy(utwr->login, &client_loginserver[0], 64);
+			(*iter)->GetConnection()->Send(ServerOP_UsertoWorldReq, outapp);
 			found = true;
 
 			if (server.options.IsDumpInPacketsOn()) {

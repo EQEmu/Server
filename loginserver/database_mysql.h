@@ -57,7 +57,7 @@ public:
 	* Needed for client login procedure.
 	* Returns true if the record was found, false otherwise.
 	*/
-	virtual bool GetLoginDataFromAccountName(std::string name, std::string &password, unsigned int &id, std::string &loginserver);
+	virtual bool GetLoginDataFromAccountInfo(const std::string &name, const std::string &loginserver, std::string &password, unsigned int &id);
 
 	virtual bool GetLoginTokenDataFromToken(const std::string &token, const std::string &ip, unsigned int &db_account_id, std::string &db_loginserver, std::string &user);
 

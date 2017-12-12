@@ -124,7 +124,7 @@ public:
 	/**
 	* Informs world that there is a client incoming with the following data.
 	*/
-	void SendClientAuth(std::string ip, std::string account, std::string key, unsigned int account_id);
+	void SendClientAuth(std::string ip, std::string account, std::string key, unsigned int account_id, const std::string &loginserver_name);
 
 private:
 

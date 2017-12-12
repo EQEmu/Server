@@ -146,7 +146,7 @@ void WorldServer::ProcessUsertoWorldRespLeg(uint16_t opcode, const EQ::Net::Pack
 
 	UsertoWorldResponseLegacy_Struct *utwr = (UsertoWorldResponseLegacy_Struct*)p.Data();
 	Log(Logs::General, Logs::Debug, "Trying to find client with user id of %u.", utwr->lsaccountid);
-	Client *c = server.client_manager->GetClient(utwr->lsaccountid);
+	Client *c = server.client_manager->GetClient(utwr->lsaccountid, "eqemu");
 	if (c)
 	{
 		Log(Logs::General, Logs::Debug, "Found client with user id of %u and account name of %s.", utwr->lsaccountid, c->GetAccountName().c_str());
@@ -161,7 +161,7 @@ void WorldServer::ProcessUsertoWorldRespLeg(uint16_t opcode, const EQ::Net::Pack
 		if (utwr->response > 0)
 		{
 			per->Allowed = 1;
-			SendClientAuth(c->GetConnection()->GetRemoteAddr(), c->GetAccountName(), c->GetKey(), c->GetAccountID());
+			SendClientAuth(c->GetConnection()->GetRemoteAddr(), c->GetAccountName(), c->GetKey(), c->GetAccountID(), c->GetLoginServerName());
 		}
 
 		switch (utwr->response)
@@ -233,7 +233,7 @@ void WorldServer::ProcessUsertoWorldResp(uint16_t opcode, const EQ::Net::Packet 
 
 	UsertoWorldResponse_Struct *utwr = (UsertoWorldResponse_Struct*)p.Data();
 	Log(Logs::General, Logs::Debug, "Trying to find client with user id of %u.", utwr->lsaccountid);
-	Client *c = server.client_manager->GetClient(utwr->lsaccountid);
+	Client *c = server.client_manager->GetClient(utwr->lsaccountid, utwr->login);
 	if (c)
 	{
 		Log(Logs::General, Logs::Debug, "Found client with user id of %u and account name of %s.", utwr->lsaccountid, c->GetAccountName().c_str());
@@ -248,7 +248,7 @@ void WorldServer::ProcessUsertoWorldResp(uint16_t opcode, const EQ::Net::Packet 
 		if (utwr->response > 0)
 		{
 			per->Allowed = 1;
-			SendClientAuth(c->GetConnection()->GetRemoteAddr(), c->GetAccountName(), c->GetKey(), c->GetAccountID());
+			SendClientAuth(c->GetConnection()->GetRemoteAddr(), c->GetAccountName(), c->GetKey(), c->GetAccountID(), c->GetLoginServerName());
 		}
 
 		switch (utwr->response)
@@ -586,16 +586,17 @@ void WorldServer::Handle_LSStatus(ServerLSStatus_Struct *s)
 	server_status = s->status;
 }
 
-void WorldServer::SendClientAuth(std::string ip, std::string account, std::string key, unsigned int account_id)
+void WorldServer::SendClientAuth(std::string ip, std::string account, std::string key, unsigned int account_id, const std::string &loginserver_name)
 {
 	EQ::Net::DynamicPacket outapp;
-	ClientAuthLegacy_Struct client_auth;
+	ClientAuth_Struct client_auth;
 	client_auth.lsaccount_id = account_id;
 	strncpy(client_auth.name, account.c_str(), 30);
 	strncpy(client_auth.key, key.c_str(), 30);
 	client_auth.lsadmin = 0;
 	client_auth.worldadmin = 0;
 	client_auth.ip = inet_addr(ip.c_str());
+	strncpy(client_auth.lsname, &loginserver_name[0], 64);
 
 	std::string client_address(ip);
 	std::string world_address(connection->Handle()->RemoteIP());
@@ -611,10 +612,10 @@ void WorldServer::SendClientAuth(std::string ip, std::string account, std::strin
 	}
 
 	outapp.PutSerialize(0, client_auth);
-	connection->Send(ServerOP_LSClientAuthLeg, outapp);
+	connection->Send(ServerOP_LSClientAuth, outapp);
 
 	if (server.options.IsDumpInPacketsOn())
 	{
-		DumpPacket(ServerOP_LSClientAuthLeg, outapp);
+		DumpPacket(ServerOP_LSClientAuth, outapp);
 	}
 }

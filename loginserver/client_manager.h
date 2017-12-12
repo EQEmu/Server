@@ -48,12 +48,12 @@ public:
 	/**
 	* Removes a client with a certain account id.
 	*/
-	void RemoveExistingClient(unsigned int account_id);
+	void RemoveExistingClient(unsigned int account_id, const std::string &loginserver);
 
 	/**
 	* Gets a client (if exists) by their account id.
 	*/
-	Client *GetClient(unsigned int account_id);
+	Client *GetClient(unsigned int account_id, const std::string &loginserver);
 private:
 
 	/**
