@@ -3190,6 +3190,12 @@ uint32 Client::GetLastBuffSlot(bool disc, bool song)
 	return GetCurrentBuffSlots();
 }
 
+bool Mob::HasDiscBuff()
+{
+	int slot = GetFirstBuffSlot(true, false);
+	return buffs[slot].spellid != SPELL_UNKNOWN;
+}
+
 // returns the slot the buff was added to, -1 if it wasn't added due to
 // stacking problems, and -2 if this is not a buff
 // if caster is null, the buff will be added with the caster level being
