@@ -327,8 +327,7 @@ void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 		aatotalmod *= zone->newzone_data.zone_exp_multiplier;
 	}
 
-
-
+	// Shouldn't race not affect AA XP?
 	if(RuleB(Character,UseRaceClassExpBonuses))
 	{
 		if(GetBaseRace() == HALFLING){
@@ -338,6 +337,12 @@ void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 		if(GetClass() == ROGUE || GetClass() == WARRIOR){
 			aatotalmod *= 1.05;
 		}
+	}
+
+	// why wasn't this here? Where should it be?
+	if(zone->IsHotzone())
+	{
+		aatotalmod += RuleR(Zone, HotZoneBonus);
 	}
 
 	if(RuleB(Zone, LevelBasedEXPMods)){
