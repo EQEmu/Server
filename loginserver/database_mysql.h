@@ -61,7 +61,11 @@ public:
 
 	virtual bool GetLoginTokenDataFromToken(const std::string &token, const std::string &ip, unsigned int &db_account_id, std::string &db_loginserver, std::string &user);
 
-	virtual bool CreateLoginData(const std::string &name, const std::string &password, unsigned int &id);
+	virtual unsigned int GetFreeID(const std::string &loginserver);
+
+	virtual bool CreateLoginData(const std::string &name, const std::string &password, const std::string &loginserver, unsigned int &id);
+
+	virtual bool CreateLoginDataWithID(const std::string &name, const std::string &password, const std::string &loginserver, unsigned int id);
 
 	/**
 	* Retrieves the world registration from the long and short names provided.

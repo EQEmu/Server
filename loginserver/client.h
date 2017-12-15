@@ -21,9 +21,13 @@
 #include "../common/global_define.h"
 #include "../common/opcodemgr.h"
 #include "../common/random.h"
+#include "../common/eq_stream_intf.h"
+#include "../common/net/dns.h"
+#include "../common/net/daybreak_connection.h"
+
+#include "login_structures.h"
 
 #include <memory>
-#include "../common/eq_stream_intf.h"
 
 enum LSClientVersion
 {
@@ -35,6 +39,7 @@ enum LSClientStatus
 {
 	cs_not_sent_session_ready,
 	cs_waiting_for_login,
+	cs_creating_account,
 	cs_failed_to_login,
 	cs_logged_in
 };
@@ -126,8 +131,33 @@ public:
 	*/
 	std::shared_ptr<EQStreamInterface> GetConnection() { return connection; }
 
-	EQEmu::Random random;
+	/**
+	* Attempts to create a login account
+	*/
+	void AttemptLoginAccountCreation(const std::string &user, const std::string &pass, const std::string &loginserver);
+
+	/**
+	* Does a failed login
+	*/
+	void DoFailedLogin();
+
+	/**
+	* Does a successful login
+	*/
+	void DoSuccessfulLogin(const std::string &user, int db_account_id, const std::string &db_loginserver);
+
+	/**
+	* Creates a local account
+	*/
+	void CreateLocalAccount(const std::string &user, const std::string &pass);
+
+	/**
+	* Creates an eqemu account
+	*/
+	void CreateEQEmuAccount(const std::string &user, const std::string &pass, unsigned int id);
+
 private:
+	EQEmu::Random random;
 	std::shared_ptr<EQStreamInterface> connection;
 	LSClientVersion version;
 	LSClientStatus status;
@@ -138,6 +168,20 @@ private:
 	unsigned int play_server_id;
 	unsigned int play_sequence_id;
 	std::string key;
+
+	std::unique_ptr<EQ::Net::DaybreakConnectionManager> login_connection_manager;
+	std::shared_ptr<EQ::Net::DaybreakConnection> login_connection;
+	LoginLoginRequest_Struct llrs;
+
+	std::string stored_user;
+	std::string stored_pass;
+	void LoginOnNewConnection(std::shared_ptr<EQ::Net::DaybreakConnection> connection);
+	void LoginOnStatusChange(std::shared_ptr<EQ::Net::DaybreakConnection> conn, EQ::Net::DbProtocolStatus from, EQ::Net::DbProtocolStatus to);
+	void LoginOnStatusChangeIgnored(std::shared_ptr<EQ::Net::DaybreakConnection> conn, EQ::Net::DbProtocolStatus from, EQ::Net::DbProtocolStatus to);
+	void LoginOnPacketRecv(std::shared_ptr<EQ::Net::DaybreakConnection> conn, const EQ::Net::Packet &p);
+	void LoginSendSessionReady();
+	void LoginSendLogin();
+	void LoginProcessLoginResponse(const EQ::Net::Packet &p);
 };
 
 #endif

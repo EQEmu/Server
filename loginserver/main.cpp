@@ -71,11 +71,30 @@ int main()
 	if (server.config->GetVariable("security", "allow_token_login").compare("TRUE") == 0)
 		server.options.AllowTokenLogin(true);
 
+	auto eqemu_loginserver_addr = server.config->GetVariable("options", "eqemu_loginserver_address");
+	if (eqemu_loginserver_addr.size() > 0) {
+		server.options.EQEmuLoginServerAddress(eqemu_loginserver_addr);
+	}
+	else {
+		server.options.EQEmuLoginServerAddress("login.eqemulator.net:5999");
+	}
+
+	auto default_loginserver_name = server.config->GetVariable("options", "default_loginserver_name");
+	if (default_loginserver_name.size() > 0) {
+		server.options.DefaultLoginServerName(default_loginserver_name);
+	}
+	else {
+		server.options.DefaultLoginServerName("peq");
+	}
+
 	if (server.config->GetVariable("security", "allow_password_login").compare("FALSE") == 0)
 		server.options.AllowPasswordLogin(false);
 
 	if (server.config->GetVariable("options", "auto_create_accounts").compare("TRUE") == 0)
 		server.options.AutoCreateAccounts(true);
+
+	if (server.config->GetVariable("options", "auto_link_accounts").compare("TRUE") == 0)
+		server.options.AutoLinkAccounts(true);
 
 	std::string mode = server.config->GetVariable("security", "mode");
 	if (mode.size() > 0)

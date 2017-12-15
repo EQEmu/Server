@@ -152,9 +152,59 @@ bool DatabaseMySQL::GetLoginTokenDataFromToken(const std::string &token, const s
 	return found_username && found_login_id && found_login_server_name;
 }
 
-bool DatabaseMySQL::CreateLoginData(const std::string &name, const std::string &password, unsigned int &id)
+unsigned int DatabaseMySQL::GetFreeID(const std::string &loginserver)
+{
+	if (!database)
+	{
+		return false;
+	}
+
+	MYSQL_RES *res;
+	MYSQL_ROW row;
+	std::stringstream query(std::stringstream::in | std::stringstream::out);
+	query << "SELECT MAX(LoginServerID) + 1 FROM " << server.options.GetAccountTable() << " WHERE AccountLoginServer='";
+	query << EscapeString(loginserver) << "'";
+
+	if (mysql_query(database, query.str().c_str()) != 0)
+	{
+		Log(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
+		return 0;
+	}
+
+	res = mysql_use_result(database);
+
+	if (res)
+	{
+		while ((row = mysql_fetch_row(res)) != nullptr)
+		{
+			if (row[0] == nullptr) {
+				mysql_free_result(res);
+				return 1;
+			}
+
+			auto ret = atol(row[0]);
+			mysql_free_result(res);
+			return ret;
+		}
+
+		mysql_free_result(res);
+	}
+
+	return 1;
+}
+
+bool DatabaseMySQL::CreateLoginData(const std::string &name, const std::string &password, const std::string &loginserver, unsigned int &id)
+{
+	return CreateLoginDataWithID(name, password, loginserver, GetFreeID(loginserver));
+}
+
+bool DatabaseMySQL::CreateLoginDataWithID(const std::string & name, const std::string & password, const std::string & loginserver, unsigned int id)
 {
 	if (!database) {
+		return false;
+	}
+
+	if (id == 0) {
 		return false;
 	}
 
@@ -162,20 +212,15 @@ bool DatabaseMySQL::CreateLoginData(const std::string &name, const std::string &
 	MYSQL_ROW row;
 	std::stringstream query(std::stringstream::in | std::stringstream::out);
 
-	query << "INSERT INTO " << server.options.GetAccountTable() << " (AccountName, AccountPassword, AccountEmail, LastLoginDate, LastIPAddress) ";
-	query << " VALUES('" << name << "', '" << password << "', 'local_creation', NOW(), '127.0.0.1'); ";
+	query << "INSERT INTO " << server.options.GetAccountTable() << " (LoginServerID, AccountLoginserver, AccountName, AccountPassword, AccountEmail, LastLoginDate, LastIPAddress) ";
+	query << " VALUES(" << id << ", '" << EscapeString(loginserver) << "', '" << EscapeString(name) << "', '" << EscapeString(password) << "', 'local_creation', NOW(), '127.0.0.1'); ";
 
 	if (mysql_query(database, query.str().c_str()) != 0) {
 		Log(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
 		return false;
 	}
-	else {
-		id = mysql_insert_id(database);
-		return true;
-	}
 
-	Log(Logs::General, Logs::Error, "Mysql query returned no result: %s", query.str().c_str());
-	return false;
+	return true;
 }
 
 bool DatabaseMySQL::GetWorldRegistration(std::string long_name, std::string short_name, unsigned int &id, std::string &desc, unsigned int &list_id,
