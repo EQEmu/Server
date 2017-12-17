@@ -48,99 +48,51 @@ int main()
 
 	Log(Logs::General, Logs::Login_Server, "Logging System Init.");
 
-	/* Parse out login.ini */
-	server.config = new Config();
+	server.config = EQ::JsonConfigFile::Load("login.json");
 	Log(Logs::General, Logs::Login_Server, "Config System Init.");
-	server.config->Parse("login.ini");
 
-	if (server.config->GetVariable("options", "unregistered_allowed").compare("FALSE") == 0)
-		server.options.AllowUnregistered(false);
+	server.options.Trace(server.config.GetVariableBool("general", "trace", false));
+	server.options.WorldTrace(server.config.GetVariableBool("general", "world_trace", false));
+	server.options.DumpInPackets(server.config.GetVariableBool("general", "dump_packets_in", false));
+	server.options.DumpOutPackets(server.config.GetVariableBool("general", "dump_packets_out", false));
+	server.options.LocalNetwork(server.config.GetVariableString("general", "local_network", "192.168.1."));
+	server.options.RejectDuplicateServers(server.config.GetVariableBool("general", "reject_duplicate_servers", false));
+	server.options.AutoCreateAccounts(server.config.GetVariableBool("general", "auto_create_accounts", true));
+	server.options.AutoLinkAccounts(server.config.GetVariableBool("general", "auto_link_accounts", true));
+	server.options.EQEmuLoginServerAddress(server.config.GetVariableString("general", "eqemu_loginserver_address", "login.eqemulator.net:5999"));
+	server.options.DefaultLoginServerName(server.config.GetVariableString("general", "default_loginserver_name", "peq"));
 
-	if (server.config->GetVariable("options", "trace").compare("TRUE") == 0)
-		server.options.Trace(true);
+#ifdef ENABLE_SECURITY
+	server.options.EncryptionMode(server.config.GetVariableInt("security", "mode", 13));
+#else
+	server.options.EncryptionMode(server.config.GetVariableInt("security", "mode", 6));
+#endif
+	server.options.AllowUnregistered(server.config.GetVariableBool("security", "unregistered_allowed", true));
+	server.options.AllowTokenLogin(server.config.GetVariableBool("security", "allow_token_login", false));
+	server.options.AllowPasswordLogin(server.config.GetVariableBool("security", "allow_password_login", true));
+	server.options.UpdateInsecurePasswords(server.config.GetVariableBool("security", "update_insecure_passwords", true));
 
-	if (server.config->GetVariable("options", "world_trace").compare("TRUE") == 0)
-		server.options.WorldTrace(true);
-
-	if (server.config->GetVariable("options", "dump_packets_in").compare("TRUE") == 0)
-		server.options.DumpInPackets(true);
-
-	if (server.config->GetVariable("options", "dump_packets_out").compare("TRUE") == 0)
-		server.options.DumpOutPackets(true);
-
-	if (server.config->GetVariable("security", "allow_token_login").compare("TRUE") == 0)
-		server.options.AllowTokenLogin(true);
-
-	auto eqemu_loginserver_addr = server.config->GetVariable("options", "eqemu_loginserver_address");
-	if (eqemu_loginserver_addr.size() > 0) {
-		server.options.EQEmuLoginServerAddress(eqemu_loginserver_addr);
-	}
-	else {
-		server.options.EQEmuLoginServerAddress("login.eqemulator.net:5999");
-	}
-
-	auto default_loginserver_name = server.config->GetVariable("options", "default_loginserver_name");
-	if (default_loginserver_name.size() > 0) {
-		server.options.DefaultLoginServerName(default_loginserver_name);
-	}
-	else {
-		server.options.DefaultLoginServerName("peq");
-	}
-
-	if (server.config->GetVariable("security", "allow_password_login").compare("FALSE") == 0)
-		server.options.AllowPasswordLogin(false);
-
-	if (server.config->GetVariable("options", "auto_create_accounts").compare("TRUE") == 0)
-		server.options.AutoCreateAccounts(true);
-
-	if (server.config->GetVariable("options", "auto_link_accounts").compare("TRUE") == 0)
-		server.options.AutoLinkAccounts(true);
-
-	std::string mode = server.config->GetVariable("security", "mode");
-	if (mode.size() > 0)
-		server.options.EncryptionMode(atoi(mode.c_str()));
-
-	std::string local_network = server.config->GetVariable("options", "local_network");
-	if (local_network.size() > 0)
-		server.options.LocalNetwork(local_network);
-
-	if (server.config->GetVariable("options", "reject_duplicate_servers").compare("TRUE") == 0)
-		server.options.RejectDuplicateServers(true);
-
-	local_network = server.config->GetVariable("schema", "account_table");
-	if (local_network.size() > 0)
-		server.options.AccountTable(local_network);
-
-	local_network = server.config->GetVariable("schema", "world_registration_table");
-	if (local_network.size() > 0)
-		server.options.WorldRegistrationTable(local_network);
-
-	local_network = server.config->GetVariable("schema", "world_admin_registration_table");
-	if (local_network.size() > 0)
-		server.options.WorldAdminRegistrationTable(local_network);
-
-	local_network = server.config->GetVariable("schema", "world_server_type_table");
-	if (local_network.size() > 0)
-		server.options.WorldServerTypeTable(local_network);
+	server.options.AccountTable(server.config.GetVariableString("schema", "account_table", "tblLoginServerAccounts"));
+	server.options.WorldRegistrationTable(server.config.GetVariableString("schema", "account_table", "tblWorldServerRegistration"));
+	server.options.WorldAdminRegistrationTable(server.config.GetVariableString("schema", "account_table", "tblServerAdminRegistration"));
+	server.options.WorldServerTypeTable(server.config.GetVariableString("schema", "account_table", "tblServerListType"));
 
 	/* Create database connection */
-	if (server.config->GetVariable("database", "subsystem").compare("MySQL") == 0) {
+	if (server.config.GetVariableString("database", "subsystem", "MySQL").compare("MySQL") == 0) {
 #ifdef EQEMU_MYSQL_ENABLED
 		Log(Logs::General, Logs::Login_Server, "MySQL Database Init.");
 		server.db = (Database*)new DatabaseMySQL(
-			server.config->GetVariable("database", "user"),
-			server.config->GetVariable("database", "password"),
-			server.config->GetVariable("database", "host"),
-			server.config->GetVariable("database", "port"),
-			server.config->GetVariable("database", "db"));
+			server.config.GetVariableString("database", "user", "root"),
+			server.config.GetVariableString("database", "password", ""),
+			server.config.GetVariableString("database", "host", "localhost"),
+			server.config.GetVariableString("database", "port", "3306"),
+			server.config.GetVariableString("database", "db", "peq"));
 #endif
 	}
 
 	/* Make sure our database got created okay, otherwise cleanup and exit. */
 	if (!server.db) {
 		Log(Logs::General, Logs::Error, "Database Initialization Failure.");
-		Log(Logs::General, Logs::Login_Server, "Config System Shutdown.");
-		delete server.config;
 		Log(Logs::General, Logs::Login_Server, "Log System Shutdown.");
 		return 1;
 	}
@@ -151,11 +103,8 @@ int main()
 	if (!server.server_manager) {
 		//We can't run without a server manager, cleanup and exit.
 		Log(Logs::General, Logs::Error, "Server Manager Failed to Start.");
-
 		Log(Logs::General, Logs::Login_Server, "Database System Shutdown.");
 		delete server.db;
-		Log(Logs::General, Logs::Login_Server, "Config System Shutdown.");
-		delete server.config;
 		return 1;
 	}
 
@@ -170,8 +119,6 @@ int main()
 
 		Log(Logs::General, Logs::Login_Server, "Database System Shutdown.");
 		delete server.db;
-		Log(Logs::General, Logs::Login_Server, "Config System Shutdown.");
-		delete server.config;
 		return 1;
 	}
 
@@ -199,7 +146,5 @@ int main()
 
 	Log(Logs::General, Logs::Login_Server, "Database System Shutdown.");
 	delete server.db;
-	Log(Logs::General, Logs::Login_Server, "Config System Shutdown.");
-	delete server.config;
 	return 0;
 }

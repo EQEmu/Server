@@ -18,7 +18,7 @@
 #ifndef EQEMU_LOGINSERVER_H
 #define EQEMU_LOGINSERVER_H
 
-#include "config.h"
+#include "../common/json_config.h"
 #include "database.h"
 #include "database_mysql.h"
 #include "encryption.h"
@@ -33,9 +33,9 @@
 struct LoginServer
 {
 public:
-	LoginServer() : config(nullptr), db(nullptr), server_manager(nullptr) { }
+	LoginServer() : db(nullptr), server_manager(nullptr) { }
 
-	Config *config;
+	EQ::JsonConfigFile config;
 	Database *db;
 	Options options;
 	ServerManager *server_manager;

@@ -178,6 +178,9 @@ public:
 	inline void DefaultLoginServerName(std::string v) { default_loginserver_name = v; }
 	inline std::string GetDefaultLoginServerName() const { return default_loginserver_name; }
 
+	inline void UpdateInsecurePasswords(bool b) { update_insecure_passwords = b; }
+	inline bool IsUpdatingInsecurePasswords() const { return update_insecure_passwords; }
+
 private:
 	bool allow_unregistered;
 	bool trace;
@@ -189,6 +192,7 @@ private:
 	bool allow_password_login;
 	bool auto_create_accounts;
 	bool auto_link_accounts;
+	bool update_insecure_passwords;
 	int encryption_mode;
 	std::string local_network;
 	std::string account_table;

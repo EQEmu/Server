@@ -19,7 +19,7 @@ struct EQ::Net::ConsoleLoginStatus CheckLogin(const std::string& username, const
 	std::string prefix = "eqemu";
 	std::string raw_user = "";
 
-	auto split = SplitString(username, ':');
+	auto split = SplitString(username, '.');
 	if (split.size() == 2) {
 		prefix = split[0];
 		raw_user = split[1];
@@ -399,7 +399,7 @@ void ConsoleSetPass(EQ::Net::ConsoleServerConnection* connection, const std::str
 		std::string prefix = "eqemu";
 		std::string raw_user = "";
 
-		auto split = SplitString(args[0], ':');
+		auto split = SplitString(args[0], '.');
 		if (split.size() == 2) {
 			prefix = split[0];
 			raw_user = split[1];

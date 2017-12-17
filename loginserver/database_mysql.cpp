@@ -223,6 +223,25 @@ bool DatabaseMySQL::CreateLoginDataWithID(const std::string & name, const std::s
 	return true;
 }
 
+void DatabaseMySQL::UpdateLoginHash(const std::string &name, const std::string &loginserver, const std::string &hash)
+{
+	if (!database)
+	{
+		return;
+	}
+
+	auto query = fmt::format("UPDATE {0} SET AccountPassword='{1}' WHERE AccountName='{2}' AND AccountLoginserver='{3}'", 
+		server.options.GetAccountTable(),
+		hash,
+		EscapeString(name),
+		EscapeString(loginserver));
+
+	if (mysql_query(database, query.c_str()) != 0)
+	{
+		Log(Logs::General, Logs::Error, "Mysql query failed: %s", query.c_str());
+	}
+}
+
 bool DatabaseMySQL::GetWorldRegistration(std::string long_name, std::string short_name, unsigned int &id, std::string &desc, unsigned int &list_id,
 	unsigned int &trusted, std::string &list_desc, std::string &account, std::string &password)
 {

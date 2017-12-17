@@ -7,6 +7,7 @@ namespace EQ
 	class JsonConfigFile
 	{
 	public:
+		JsonConfigFile();
 		JsonConfigFile(const Json::Value &value);
 		~JsonConfigFile();
 
@@ -19,7 +20,6 @@ namespace EQ
 		
 		Json::Value& RawHandle() { return m_root; }
 	private:
-		JsonConfigFile();
 		Json::Value m_root;
 	};
 

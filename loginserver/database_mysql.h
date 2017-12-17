@@ -67,6 +67,8 @@ public:
 
 	virtual bool CreateLoginDataWithID(const std::string &name, const std::string &password, const std::string &loginserver, unsigned int id);
 
+	virtual void UpdateLoginHash(const std::string &name, const std::string &loginserver, const std::string &hash);
+
 	/**
 	* Retrieves the world registration from the long and short names provided.
 	* Needed for world login procedure.

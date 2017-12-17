@@ -27,7 +27,7 @@ extern bool run_server;
 
 ServerManager::ServerManager()
 {
-	int listen_port = atoi(server.config->GetVariable("options", "listen_port").c_str());
+	int listen_port = server.config.GetVariableInt("general", "listen_port", 5998);
 
 	server_connection.reset(new EQ::Net::ServertalkServer());
 	EQ::Net::ServertalkServerOptions opts;

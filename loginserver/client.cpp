@@ -251,8 +251,37 @@ void Client::Handle_Login(const char* data, unsigned int size)
 				if (eqcrypt_verify_hash(user, cred, db_account_password_hash, mode)) {
 					result = true;
 				}
-				else {
-					result = false;
+				else 
+				{
+					if (server.options.IsUpdatingInsecurePasswords()) {
+						auto len = db_account_password_hash.length();
+						int start = 0;
+						int end = 0;
+						switch (len) {
+						case 32:
+							start = 1;
+							end = 4;
+							break;
+						case 40:
+							start = 5;
+							end = 8;
+							break;
+						case 128:
+							start = 9;
+							end = 12;
+							break;
+						}
+
+						if (start != 0) {
+							for (int i = start; i <= end; ++i) {
+								if (eqcrypt_verify_hash(user, cred, db_account_password_hash, i)) {
+									result = true;
+									server.db->UpdateLoginHash(user, db_loginserver, eqcrypt_hash(user, cred, mode));
+									break;
+								}
+							}
+						}
+					}
 				}
 			}
 		}
@@ -336,7 +365,7 @@ void Client::GenerateKey()
 void Client::AttemptLoginAccountCreation(const std::string &user, const std::string &pass, const std::string &loginserver)
 {
 	if (loginserver == "eqemu") {
-		if (!server.options.CanAutoCreateAccounts()) {
+		if (!server.options.CanAutoLinkAccounts()) {
 			DoFailedLogin();
 			return;
 		}

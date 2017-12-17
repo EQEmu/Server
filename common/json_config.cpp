@@ -3,6 +3,7 @@
 
 EQ::JsonConfigFile::JsonConfigFile()
 {
+
 }
 
 EQ::JsonConfigFile::JsonConfigFile(const Json::Value &value)

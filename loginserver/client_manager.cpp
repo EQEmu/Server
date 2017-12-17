@@ -25,14 +25,14 @@ extern bool run_server;
 
 ClientManager::ClientManager()
 {
-	int titanium_port = atoi(server.config->GetVariable("Titanium", "port").c_str());
+	int titanium_port = server.config.GetVariableInt("Titanium", "port", 5998);
 	EQ::Net::EQStreamManagerOptions titanium_opts(titanium_port, false, false);
 	titanium_stream = new EQ::Net::EQStreamManager(titanium_opts);
 	titanium_ops = new RegularOpcodeManager;
-	if (!titanium_ops->LoadOpcodes(server.config->GetVariable("Titanium", "opcodes").c_str()))
+	if (!titanium_ops->LoadOpcodes(server.config.GetVariableString("Titanium", "opcodes", "login_opcodes.conf").c_str()))
 	{
 		Log(Logs::General, Logs::Error, "ClientManager fatal error: couldn't load opcodes for Titanium file %s.",
-			server.config->GetVariable("Titanium", "opcodes").c_str());
+			server.config.GetVariableString("Titanium", "opcodes", "login_opcodes.conf").c_str());
 		run_server = false;
 	}
 
@@ -43,14 +43,14 @@ ClientManager::ClientManager()
 		clients.push_back(c);
 	});
 
-	int sod_port = atoi(server.config->GetVariable("SoD", "port").c_str());
+	int sod_port = server.config.GetVariableInt("SoD", "port", 5999);
 	EQ::Net::EQStreamManagerOptions sod_opts(sod_port, false, false);
 	sod_stream = new EQ::Net::EQStreamManager(sod_opts);
 	sod_ops = new RegularOpcodeManager;
-	if (!sod_ops->LoadOpcodes(server.config->GetVariable("SoD", "opcodes").c_str()))
+	if (!sod_ops->LoadOpcodes(server.config.GetVariableString("SoD", "opcodes", "login_opcodes.conf").c_str()))
 	{
 		Log(Logs::General, Logs::Error, "ClientManager fatal error: couldn't load opcodes for SoD file %s.",
-			server.config->GetVariable("SoD", "opcodes").c_str());
+			server.config.GetVariableString("SoD", "opcodes", "login_opcodes.conf").c_str());
 		run_server = false;
 	}
 
