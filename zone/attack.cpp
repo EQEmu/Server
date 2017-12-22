@@ -2716,9 +2716,9 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 			// owner must get on list, but he's not actually gained any hate yet
 			if (!owner->GetSpecialAbility(IMMUNE_AGGRO))
 			{
-				hate_list.AddEntToHateList(owner, 0, 0, false, !iBuffTic);
 				if (owner->IsClient() && !CheckAggro(owner))
 					owner->CastToClient()->AddAutoXTarget(this);
+				hate_list.AddEntToHateList(owner, 0, 0, false, !iBuffTic);
 			}
 		}
 	}
