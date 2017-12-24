@@ -4437,6 +4437,36 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 	return false;
 }
 
+int Mob::GetResist(uint8 resist_type)
+{
+	switch(resist_type)
+	{
+	case RESIST_FIRE:
+		return GetFR();
+	case RESIST_COLD:
+		return GetCR();
+	case RESIST_MAGIC:
+		return GetMR();
+	case RESIST_DISEASE:
+		return GetDR();
+	case RESIST_POISON:
+		return GetPR();
+	case RESIST_CORRUPTION:
+		return GetCorrup();
+	case RESIST_PRISMATIC:
+		return (GetFR() + GetCR() + GetMR() + GetDR() + GetPR()) / 5;
+	case RESIST_CHROMATIC:
+		return std::min({GetFR(), GetCR(), GetMR(), GetDR(), GetPR()});
+	case RESIST_PHYSICAL:
+		if (IsNPC())
+			return GetPhR();
+		else
+			return 0;
+	default:
+		return 0;
+	}
+}
+
 //
 // Spell resists:
 // returns an effectiveness index from 0 to 100. for most spells, 100 means
@@ -4520,69 +4550,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 		return 100;
 	}
 
-	int target_resist;
-	switch(resist_type)
-	{
-	case RESIST_FIRE:
-		target_resist = GetFR();
-		break;
-	case RESIST_COLD:
-		target_resist = GetCR();
-		break;
-	case RESIST_MAGIC:
-		target_resist = GetMR();
-		break;
-	case RESIST_DISEASE:
-		target_resist = GetDR();
-		break;
-	case RESIST_POISON:
-		target_resist = GetPR();
-		break;
-	case RESIST_CORRUPTION:
-		target_resist = GetCorrup();
-		break;
-	case RESIST_PRISMATIC:
-		target_resist = (GetFR() + GetCR() + GetMR() + GetDR() + GetPR()) / 5;
-		break;
-	case RESIST_CHROMATIC:
-		{
-			target_resist = GetFR();
-			int temp = GetCR();
-			if(temp < target_resist)
-			{
-				target_resist = temp;
-			}
-
-			temp = GetMR();
-			if(temp < target_resist)
-			{
-				target_resist = temp;
-			}
-
-			temp = GetDR();
-			if(temp < target_resist)
-			{
-				target_resist = temp;
-			}
-
-			temp = GetPR();
-			if(temp < target_resist)
-			{
-				target_resist = temp;
-			}
-		}
-		break;
-	case RESIST_PHYSICAL:
-		{
-			if (IsNPC())
-				target_resist = GetPhR();
-			else
-				target_resist = 0;
-		}
-	default:
-
-		target_resist = 0;
-	}
+	int target_resist = GetResist(resist_type);
 
 	//Setup our base resist chance.
 	int resist_chance = 0;

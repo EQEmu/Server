@@ -281,6 +281,7 @@ public:
 	float ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use_resist_override = false,
 		int resist_override = 0, bool CharismaCheck = false, bool CharmTick = false, bool IsRoot = false,
 		int level_override = -1);
+	int GetResist(uint8 resist_type);
 	int ResistPhysical(int level_diff, uint8 caster_level);
 	int ResistElementalWeaponDmg(const EQEmu::ItemInstance *item);
 	int CheckBaneDamage(const EQEmu::ItemInstance *item);
