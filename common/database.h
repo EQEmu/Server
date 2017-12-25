@@ -174,7 +174,7 @@ public:
 
 	/* Account Related */
 
-	bool	DeleteAccount(const char *loginserver, const char* name);
+	bool	DeleteAccount(const char *name, const char* loginserver);
 	bool	GetLiveChar(uint32 account_id, char* cname);
 	bool	SetAccountStatus(const char* name, int16 status);
 	bool	SetLocalPassword(uint32 accid, const char* password);

@@ -213,24 +213,28 @@ int main(int argc, char** argv) {
 			}
 		}
 		else if (strcasecmp(argv[1], "adduser") == 0) {
-			//TODO: REIMPLEMENT
-			//if (argc == 5) {
-			//	if (Seperator::IsNumber(argv[4])) {
-			//		if (atoi(argv[4]) >= 0 && atoi(argv[4]) <= 255) {
-			//			if (database.CreateAccount(argv[2], argv[3], atoi(argv[4])) == 0) {
-			//				std::cerr << "database.CreateAccount failed." << std::endl;
-			//				return 1;
-			//			}
-			//			else {
-			//				std::cout << "Account created: Username='" << argv[2] << "', Password='" << argv[3] << "', status=" << argv[4] << std::endl;
-			//				return 0;
-			//			}
-			//		}
-			//	}
-			//}
-			//std::cout << "Usage: world adduser username password flag" << std::endl;
-			//std::cout << "flag = 0, 1 or 2" << std::endl;
-			//return 0;
+			if (argc == 5) {
+				if (Seperator::IsNumber(argv[4])) {
+					if (atoi(argv[4]) >= 0 && atoi(argv[4]) <= 255) {
+						std::string user;
+						std::string loginserver;
+
+						ParseAccountString(argv[2], user, loginserver);
+
+						if (database.CreateAccount(argv[2], argv[3], atoi(argv[4]), loginserver.c_str(), 0) == 0) {
+							std::cerr << "database.CreateAccount failed." << std::endl;
+							return 1;
+						}
+						else {
+							std::cout << "Account created: Username='" << argv[2] << "', Password='" << argv[3] << "', status=" << argv[4] << std::endl;
+							return 0;
+						}
+					}
+				}
+			}
+			std::cout << "Usage: world adduser username password flag" << std::endl;
+			std::cout << "flag = 0, 1 or 2" << std::endl;
+			return 0;
 		}
 		else if (strcasecmp(argv[1], "flag") == 0) {
 			if (argc == 4) {

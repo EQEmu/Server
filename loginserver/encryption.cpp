@@ -7,6 +7,8 @@
 #include <sodium.h>
 #endif
 
+#include "encryption.h"
+
 const char* eqcrypt_block(const char *buffer_in, size_t buffer_in_sz, char* buffer_out, bool enc) {
 	DES_key_schedule k;
 	DES_cblock v;
@@ -100,34 +102,34 @@ std::string eqcrypt_scrypt(const std::string &msg)
 std::string eqcrypt_hash(const std::string &username, const std::string &password, int mode) {
 	switch (mode)
 	{
-	case 1:
+	case EncryptionModeMD5:
 		return eqcrypt_md5(password);
-	case 2:
+	case EncryptionModeMD5PassUser:
 		return eqcrypt_md5(password + ":" + username);
-	case 3:
+	case EncryptionModeMD5UserPass:
 		return eqcrypt_md5(username + ":" + password);
-	case 4:
+	case EncryptionModeMD5Triple:
 		return eqcrypt_md5(eqcrypt_md5(username) + eqcrypt_md5(password));
-	case 5:
+	case EncryptionModeSHA:
 		return eqcrypt_sha1(password);
-	case 6:
+	case EncryptionModeSHAPassUser:
 		return eqcrypt_sha1(password + ":" + username);
-	case 7:
+	case EncryptionModeSHAUserPass:
 		return eqcrypt_sha1(username + ":" + password);
-	case 8:
+	case EncryptionModeSHATriple:
 		return eqcrypt_sha1(eqcrypt_sha1(username) + eqcrypt_sha1(password));
-	case 9:
+	case EncryptionModeSHA512:
 		return eqcrypt_sha512(password);
-	case 10:
+	case EncryptionModeSHA512PassUser:
 		return eqcrypt_sha512(password + ":" + username);
-	case 11:
+	case EncryptionModeSHA512UserPass:
 		return eqcrypt_sha512(username + ":" + password);
-	case 12:
+	case EncryptionModeSHA512Triple:
 		return eqcrypt_sha512(eqcrypt_sha512(username) + eqcrypt_sha512(password));
 #ifdef ENABLE_SECURITY
-	case 13:
+	case EncryptionModeArgon2:
 		return eqcrypt_argon2(password);
-	case 14:
+	case EncryptionModeSCrypt:
 		return eqcrypt_scrypt(password);
 #endif
 		//todo bcrypt? pbkdf2?

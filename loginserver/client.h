@@ -142,6 +142,11 @@ public:
 	void DoFailedLogin();
 
 	/**
+	* Verifies a login hash, will also attempt to update a login hash if needed.
+	*/
+	bool VerifyLoginHash(const std::string &user, const std::string &loginserver, const std::string &cred, const std::string &hash);
+
+	/**
 	* Does a successful login
 	*/
 	void DoSuccessfulLogin(const std::string &user, int db_account_id, const std::string &db_loginserver);

@@ -224,7 +224,7 @@ uint32 Database::CreateAccount(const char* name, const char* password, int16 sta
 	return results.LastInsertedID();
 }
 
-bool Database::DeleteAccount(const char *loginserver, const char* name) {
+bool Database::DeleteAccount(const char* name, const char *loginserver) {
 	std::string query = StringFormat("DELETE FROM account WHERE name='%s' AND ls_id='%s'", name, loginserver); 
 	Log(Logs::General, Logs::World_Server, "Account Attempting to be deleted:'%s:%s'", loginserver, name);
 

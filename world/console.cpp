@@ -19,14 +19,7 @@ struct EQ::Net::ConsoleLoginStatus CheckLogin(const std::string& username, const
 	std::string prefix = "eqemu";
 	std::string raw_user = "";
 
-	auto split = SplitString(username, '.');
-	if (split.size() == 2) {
-		prefix = split[0];
-		raw_user = split[1];
-	}
-	else {
-		raw_user = split[0];
-	}
+	ParseAccountString(username, raw_user, prefix);
 
 	ret.account_id = database.CheckLogin(raw_user.c_str(), password.c_str(), prefix.c_str());
 
@@ -399,14 +392,7 @@ void ConsoleSetPass(EQ::Net::ConsoleServerConnection* connection, const std::str
 		std::string prefix = "eqemu";
 		std::string raw_user = "";
 
-		auto split = SplitString(args[0], '.');
-		if (split.size() == 2) {
-			prefix = split[0];
-			raw_user = split[1];
-		}
-		else {
-			raw_user = split[0];
-		}
+		ParseAccountString(args[0], raw_user, prefix);
 
 		int16 tmpstatus = 0;
 		uint32 tmpid = database.GetAccountIDByName(raw_user.c_str(), prefix.c_str(), &tmpstatus);

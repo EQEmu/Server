@@ -180,8 +180,6 @@ void Client::Handle_SessionReady(const char* data, unsigned int size)
 
 void Client::Handle_Login(const char* data, unsigned int size)
 {
-	auto mode = server.options.GetEncryptionMode();
-
 	if (status != cs_waiting_for_login) {
 		Log(Logs::General, Logs::Error, "Login received after already having logged in.");
 		return;
@@ -241,6 +239,8 @@ void Client::Handle_Login(const char* data, unsigned int size)
 				db_loginserver = components[0];
 				user = components[1];
 			}
+
+			ParseAccountString(user, user, db_loginserver);
 			
 			if (server.db->GetLoginDataFromAccountInfo(user, db_loginserver, db_account_password_hash, db_account_id) == false) {
 				status = cs_creating_account;
@@ -248,41 +248,7 @@ void Client::Handle_Login(const char* data, unsigned int size)
 				return;
 			}
 			else {
-				if (eqcrypt_verify_hash(user, cred, db_account_password_hash, mode)) {
-					result = true;
-				}
-				else 
-				{
-					if (server.options.IsUpdatingInsecurePasswords()) {
-						auto len = db_account_password_hash.length();
-						int start = 0;
-						int end = 0;
-						switch (len) {
-						case 32:
-							start = 1;
-							end = 4;
-							break;
-						case 40:
-							start = 5;
-							end = 8;
-							break;
-						case 128:
-							start = 9;
-							end = 12;
-							break;
-						}
-
-						if (start != 0) {
-							for (int i = start; i <= end; ++i) {
-								if (eqcrypt_verify_hash(user, cred, db_account_password_hash, i)) {
-									result = true;
-									server.db->UpdateLoginHash(user, db_loginserver, eqcrypt_hash(user, cred, mode));
-									break;
-								}
-							}
-						}
-					}
-				}
+				result = VerifyLoginHash(user, db_loginserver, cred, db_account_password_hash);
 			}
 		}
 	}
@@ -430,6 +396,50 @@ void Client::DoFailedLogin()
 
 	connection->QueuePacket(&outapp);
 	status = cs_failed_to_login;
+}
+
+bool Client::VerifyLoginHash(const std::string &user, const std::string &loginserver, const std::string &cred, const std::string &hash)
+{
+	auto mode = server.options.GetEncryptionMode();
+	if (eqcrypt_verify_hash(user, cred, hash, mode)) {
+		return true;
+	}
+	else {
+		if (server.options.IsUpdatingInsecurePasswords()) {
+			if (mode < EncryptionModeArgon2) {
+				mode = EncryptionModeArgon2;
+			}
+
+			if (hash.length() == 32) { //md5 is insecure
+				for (int i = EncryptionModeMD5; i <= EncryptionModeMD5Triple; ++i) {
+					if (i != mode && eqcrypt_verify_hash(user, cred, hash, i)) {
+						server.db->UpdateLoginHash(user, loginserver, eqcrypt_hash(user, cred, mode));
+						return true;
+					}
+				}
+			}
+			else if (hash.length() == 40) { //sha1 is insecure
+				for (int i = EncryptionModeSHA; i <= EncryptionModeSHATriple; ++i) {
+					if (i != mode && eqcrypt_verify_hash(user, cred, hash, i)) {
+						server.db->UpdateLoginHash(user, loginserver, eqcrypt_hash(user, cred, mode));
+						return true;
+					}
+				}
+			}
+			else if (hash.length() == 128) { //sha2-512 is insecure
+				for (int i = EncryptionModeSHA512; i <= EncryptionModeSHA512Triple; ++i) {
+					if (i != mode && eqcrypt_verify_hash(user, cred, hash, i)) {
+						server.db->UpdateLoginHash(user, loginserver, eqcrypt_hash(user, cred, mode));
+						return true;
+					}
+				}
+			}
+			//argon2 is still secure
+			//scrypt is still secure
+		}
+	}
+
+	return false;
 }
 
 void Client::DoSuccessfulLogin(const std::string &user, int db_account_id, const std::string &db_loginserver)
