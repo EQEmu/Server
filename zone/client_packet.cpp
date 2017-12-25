@@ -291,6 +291,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_MercenaryTimerRequest] = &Client::Handle_OP_MercenaryTimerRequest;
 	ConnectedOpcodes[OP_MoveCoin] = &Client::Handle_OP_MoveCoin;
 	ConnectedOpcodes[OP_MoveItem] = &Client::Handle_OP_MoveItem;
+	ConnectedOpcodes[OP_MoveMultipleItems] = &Client::Handle_OP_MoveMultipleItems;
 	ConnectedOpcodes[OP_OpenContainer] = &Client::Handle_OP_OpenContainer;
 	ConnectedOpcodes[OP_OpenGuildTributeMaster] = &Client::Handle_OP_OpenGuildTributeMaster;
 	ConnectedOpcodes[OP_OpenInventory] = &Client::Handle_OP_OpenInventory;
@@ -9854,6 +9855,11 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 	}
 
 	return;
+}
+
+void Client::Handle_OP_MoveMultipleItems(const EQApplicationPacket *app)
+{
+	Kick(); // TODO: lets not desync though
 }
 
 void Client::Handle_OP_OpenContainer(const EQApplicationPacket *app)

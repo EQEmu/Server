@@ -852,16 +852,56 @@ int Mob::ACSum()
 	return ac;
 }
 
+int Mob::GetBestMeleeSkill()
+	{
+	int bestSkill=0;
+	EQEmu::skills::SkillType meleeSkills[]=
+	{	EQEmu::skills::Skill1HBlunt,
+	  	EQEmu::skills::Skill1HSlashing,
+		EQEmu::skills::Skill2HBlunt,
+		EQEmu::skills::Skill2HSlashing,	
+		EQEmu::skills::SkillHandtoHand,
+		EQEmu::skills::Skill1HPiercing,
+		EQEmu::skills::Skill2HPiercing,
+		EQEmu::skills::SkillCount
+	};
+	int i;
+
+	for (i=0; meleeSkills[i] != EQEmu::skills::SkillCount; ++i) {
+		int value;
+		value = GetSkill(meleeSkills[i]);
+		bestSkill = std::max(value, bestSkill);
+	}
+		
+	return bestSkill;
+	}
+
 int Mob::offense(EQEmu::skills::SkillType skill)
 {
 	int offense = GetSkill(skill);
-	int stat_bonus = 0;
-	if (skill == EQEmu::skills::SkillArchery || skill == EQEmu::skills::SkillThrowing)
-		stat_bonus = GetDEX();
-	else
-		stat_bonus = GetSTR();
+	int stat_bonus = GetSTR();
+
+	switch (skill) {
+		case EQEmu::skills::SkillArchery:
+		case EQEmu::skills::SkillThrowing:
+			stat_bonus = GetDEX();
+			break;	
+
+		// Mobs with no weapons default to H2H.
+		// Since H2H is capped at 100 for many many classes,
+		// lets not handicap mobs based on not spawning with a
+		// weapon.
+		//
+		// Maybe we tweak this if Disarm is actually implemented.
+
+		case EQEmu::skills::SkillHandtoHand:
+			offense = GetBestMeleeSkill();
+			break;
+	}
+
 	if (stat_bonus >= 75)
 		offense += (2 * stat_bonus - 150) / 3;
+
 	offense += GetATK();
 	return offense;
 }
@@ -2676,9 +2716,9 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 			// owner must get on list, but he's not actually gained any hate yet
 			if (!owner->GetSpecialAbility(IMMUNE_AGGRO))
 			{
-				hate_list.AddEntToHateList(owner, 0, 0, false, !iBuffTic);
 				if (owner->IsClient() && !CheckAggro(owner))
 					owner->CastToClient()->AddAutoXTarget(this);
+				hate_list.AddEntToHateList(owner, 0, 0, false, !iBuffTic);
 			}
 		}
 	}
@@ -5250,19 +5290,30 @@ void Client::DoAttackRounds(Mob *target, int hand, bool IsFromSpell)
 	// extra off hand non-sense, can only double with skill of 150 or above
 	// or you have any amount of GiveDoubleAttack
 	if (candouble && hand == EQEmu::inventory::slotSecondary)
-		candouble = GetSkill(EQEmu::skills::SkillDoubleAttack) > 149 || (aabonuses.GiveDoubleAttack + spellbonuses.GiveDoubleAttack + itembonuses.GiveDoubleAttack) > 0;
+		candouble =
+		    GetSkill(EQEmu::skills::SkillDoubleAttack) > 149 ||
+		    (aabonuses.GiveDoubleAttack + spellbonuses.GiveDoubleAttack + itembonuses.GiveDoubleAttack) > 0;
 
 	if (candouble) {
 		CheckIncreaseSkill(EQEmu::skills::SkillDoubleAttack, target, -10);
 		if (CheckDoubleAttack()) {
 			Attack(target, hand, false, false, IsFromSpell);
+
+			// Modern AA description: Increases your chance of ... performing one additional hit with a 2-handed weapon when double attacking by 2%.
+			if (hand == EQEmu::inventory::slotPrimary) {
+				auto extraattackchance = aabonuses.ExtraAttackChance + spellbonuses.ExtraAttackChance +
+							 itembonuses.ExtraAttackChance;
+				if (extraattackchance && HasTwoHanderEquipped() && zone->random.Roll(extraattackchance))
+					Attack(target, hand, false, false, IsFromSpell);
+			}
+
 			// you can only triple from the main hand
 			if (hand == EQEmu::inventory::slotPrimary && CanThisClassTripleAttack()) {
 				CheckIncreaseSkill(EQEmu::skills::SkillTripleAttack, target, -10);
 				if (CheckTripleAttack()) {
 					Attack(target, hand, false, false, IsFromSpell);
 					auto flurrychance = aabonuses.FlurryChance + spellbonuses.FlurryChance +
-						itembonuses.FlurryChance;
+							    itembonuses.FlurryChance;
 					if (flurrychance && zone->random.Roll(flurrychance)) {
 						Attack(target, hand, false, false, IsFromSpell);
 						if (zone->random.Roll(flurrychance))
@@ -5272,12 +5323,6 @@ void Client::DoAttackRounds(Mob *target, int hand, bool IsFromSpell)
 				}
 			}
 		}
-	}
-
-	if (hand == EQEmu::inventory::slotPrimary) {
-		auto extraattackchance = aabonuses.ExtraAttackChance + spellbonuses.ExtraAttackChance + itembonuses.ExtraAttackChance;
-		if (extraattackchance && HasTwoHanderEquipped() && zone->random.Roll(extraattackchance))
-			Attack(target, hand, false, false, IsFromSpell);
 	}
 }
 

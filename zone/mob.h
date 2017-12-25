@@ -162,6 +162,8 @@ public:
 	inline virtual bool IsMob() const { return true; }
 	inline virtual bool InZone() const { return true; }
 
+	bool is_distance_roamer;
+
 	//Somewhat sorted: needs documenting!
 
 	//Attack
@@ -199,6 +201,7 @@ public:
 	void ApplyMeleeDamageMods(uint16 skill, int &damage, Mob * defender = nullptr, ExtraAttackOptions *opts = nullptr);
 	int ACSum();
 	int offense(EQEmu::skills::SkillType skill);
+	int GetBestMeleeSkill();
 	void CalcAC() { mitigation_ac = ACSum(); }
 	int GetACSoftcap();
 	double GetSoftcapReturns();
@@ -278,6 +281,7 @@ public:
 	float ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use_resist_override = false,
 		int resist_override = 0, bool CharismaCheck = false, bool CharmTick = false, bool IsRoot = false,
 		int level_override = -1);
+	int GetResist(uint8 resist_type);
 	int ResistPhysical(int level_diff, uint8 caster_level);
 	int ResistElementalWeaponDmg(const EQEmu::ItemInstance *item);
 	int CheckBaneDamage(const EQEmu::ItemInstance *item);
@@ -349,6 +353,7 @@ public:
 	virtual int GetMaxSongSlots() const { return 0; }
 	virtual int GetMaxDiscSlots() const { return 0; }
 	virtual int GetMaxTotalSlots() const { return 0; }
+	bool HasDiscBuff();
 	virtual uint32 GetFirstBuffSlot(bool disc, bool song);
 	virtual uint32 GetLastBuffSlot(bool disc, bool song);
 	virtual void InitializeBuffSlots() { buffs = nullptr; current_buff_count = 0; }
@@ -954,7 +959,8 @@ public:
 	void				SendTo(float new_x, float new_y, float new_z);
 	void				SendToFixZ(float new_x, float new_y, float new_z);
 	float				GetZOffset() const;
-	void FixZ(int32 z_find_offset = 5);
+	void 				FixZ(int32 z_find_offset = 5);
+	float 			GetFixedZ(glm::vec3 position, int32 z_find_offset = 5);
 	void				NPCSpecialAttacks(const char* parse, int permtag, bool reset = true, bool remove = false);
 	inline uint32		DontHealMeBefore() const { return pDontHealMeBefore; }
 	inline uint32		DontBuffMeBefore() const { return pDontBuffMeBefore; }
@@ -1108,8 +1114,6 @@ public:
 	int GetWeaponDamage(Mob *against, const EQEmu::ItemData *weapon_item);
 	int GetWeaponDamage(Mob *against, const EQEmu::ItemInstance *weapon_item, uint32 *hate = nullptr);
 
-	float last_z;
-
 	// Bots HealRotation methods
 #ifdef BOTS
 	bool IsHealRotationTarget() { return (m_target_of_heal_rotation.use_count() && m_target_of_heal_rotation.get()); }
@@ -1225,7 +1229,8 @@ protected:
 	uint32 npctype_id;
 	glm::vec4 m_Position;
 	/* Used to determine when an NPC has traversed so many units - to send a zone wide pos update */
-	glm::vec4 last_major_update_position; 
+	glm::vec4 last_major_update_position;
+
 	int animation; // this is really what MQ2 calls SpeedRun just packed like (int)(SpeedRun * 40.0f)
 	float base_size;
 	float size;
@@ -1267,6 +1272,7 @@ protected:
 	virtual int16 GetFocusEffect(focusType type, uint16 spell_id) { return 0; }
 	void CalculateNewFearpoint();
 	float FindGroundZ(float new_x, float new_y, float z_offset=0.0);
+	float FindDestGroundZ(glm::vec3 dest, float z_offset=0.0);
 	glm::vec3 UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &WaypointChange, bool &NodeReached);
 	void PrintRoute();
 

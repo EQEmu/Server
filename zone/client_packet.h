@@ -204,6 +204,7 @@
 	void Handle_OP_MercenaryTimerRequest(const EQApplicationPacket *app);
 	void Handle_OP_MoveCoin(const EQApplicationPacket *app);
 	void Handle_OP_MoveItem(const EQApplicationPacket *app);
+	void Handle_OP_MoveMultipleItems(const EQApplicationPacket *app);
 	void Handle_OP_OpenContainer(const EQApplicationPacket *app);
 	void Handle_OP_OpenGuildTributeMaster(const EQApplicationPacket *app);
 	void Handle_OP_OpenInventory(const EQApplicationPacket *app);

@@ -1827,6 +1827,20 @@ struct MoveItem_Struct
 /*0028*/
 };
 
+struct MultiMoveItemSub_Struct
+{
+/*0000*/ InventorySlot_Struct	from_slot;
+/*0012*/ InventorySlot_Struct	to_slot;
+/*0024*/ uint32			number_in_stack;
+/*0028*/ uint8			unknown[8];
+};
+
+struct MultiMoveItem_Struct
+{
+/*0000*/ uint32	count;
+/*0004*/ MultiMoveItemSub_Struct moves[0];
+};
+
 //
 // from_slot/to_slot
 // -1 - destroy

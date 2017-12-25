@@ -48,6 +48,23 @@ struct EnterWorld_Struct {
 /*068*/	uint32	return_home;		// 01 on "Return Home", 00 if not
 };
 
+// yep, even tit had a version of the new inventory system, used by OP_MoveMultipleItems
+struct InventorySlot_Struct
+{
+/*000*/	int32	Type;		// Worn and Normal inventory = 0, Bank = 1, Shared Bank = 2, Trade = 3, World = 4, Limbo = 5
+/*004*/	int32	Slot;
+/*008*/	int32	SubIndex;	// no aug index in Tit
+/*012*/	int32	Unknown01;
+};
+
+// unsure if they have a version of this, completeness though
+struct TypelessInventorySlot_Struct
+{
+/*000*/	int32	Slot;
+/*004*/	int32	SubIndex;	// no aug index in Tit
+/*008*/	int32	Unknown01;
+};
+
 /* Name Approval Struct */
 /* Len: */
 /* Opcode: 0x8B20*/
@@ -1327,6 +1344,19 @@ struct MoveItem_Struct
 /*0004*/ uint32	to_slot;
 /*0008*/ uint32	number_in_stack;
 /*0012*/
+};
+
+struct MultiMoveItemSub_Struct
+{
+/*0000*/ InventorySlot_Struct	from_slot;
+/*0016*/ uint32 number_in_stack; // so the amount we are moving from the source
+/*0020*/ InventorySlot_Struct	to_slot;
+};
+
+struct MultiMoveItem_Struct
+{
+/*0000*/ uint32	count;
+/*0004*/ MultiMoveItemSub_Struct moves[0];
 };
 
 //

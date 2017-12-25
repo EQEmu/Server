@@ -70,7 +70,7 @@ Object::Object(uint32 id, uint32 type, uint32 icon, const Object_Struct& object,
 
 //creating a re-ocurring ground spawn.
 Object::Object(const EQEmu::ItemInstance* inst, char* name,float max_x,float min_x,float max_y,float min_y,float z,float heading,uint32 respawntimer)
- : respawn_timer(respawntimer), decay_timer(300000)
+ : respawn_timer(respawntimer * 1000), decay_timer(300000)
 {
 
 	user = nullptr;
