@@ -1728,6 +1728,15 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQEmu::skills::Sk
 	if (!RuleB(Character, UseDeathExpLossMult)) {
 		exploss = (int)(GetLevel() * (GetLevel() / 18.0) * 12000);
 	}
+	
+	if (RuleB(Zone, LevelBasedEXPMods)) {
+		// Death in levels with xp_mod (such as hell levels) was resulting
+		// in losing more that appropriate since the loss was the same but
+		// getting it back would take way longer.  This makes the death the
+		// same amount of time to recover.  Will also lose more if level is
+		// granting a bonus.
+		exploss *= zone->level_exp_mod[GetLevel()].ExpMod;
+	}
 
 	if ((GetLevel() < RuleI(Character, DeathExpLossLevel)) || (GetLevel() > RuleI(Character, DeathExpLossMaxLevel)) || IsBecomeNPC())
 	{
