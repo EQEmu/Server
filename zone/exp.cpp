@@ -37,6 +37,50 @@
 
 extern QueryServ* QServ;
 
+static uint32 ScaleAAXPBasedOnCurrentAATotal(int earnedAA, uint32 add_aaxp, float aatotalmod)
+{
+	// TODO: Read from Rules
+	float baseModifier = 1000;
+	int aaMinimum = 0;
+	int aaLimit = 4000;
+
+	// Calculate the current total before checking if we will add additional xp.
+	uint32 totalWithoutExpMod = (uint32)add_aaxp * aatotalmod;
+
+	// Are we within the scaling window?
+	if (earnedAA >= aaLimit || earnedAA < aaMinimum)
+	{
+		Log(Logs::Detail, Logs::None, "Not within AA scaling window.");
+
+		// At or past the limit.  We're done.
+		return totalWithoutExpMod;
+	}
+
+	// We're not at the limit yet.  How close are we?
+	int remainingAA = aaLimit - earnedAA;
+
+	// We might not always be X - 0
+	int scaleRange = aaLimit - aaMinimum;
+
+	// Normalize and get the effectiveness based on the range and the character's
+	// current spent AA.
+	float normalizedScale = (float)remainingAA / scaleRange;
+
+	// Scale.
+	uint32 totalWithExpMod = totalWithoutExpMod * (baseModifier / 100) * normalizedScale;
+
+	// Are we so close to the scale limit that we're earning more XP without scaling?  This
+	// will happen when we get very close to the limit.  In this case, just grant the unscaled
+	// amount.
+	if (totalWithExpMod < totalWithoutExpMod)
+	{
+		return totalWithoutExpMod;
+	}
+
+	Log(Logs::Detail, Logs::None, "Total before the modifier %d :: NewTotal %d :: ScaleRange: %d, SpentAA: %d, RemainingAA: %d, normalizedScale: %0.3f", totalWithoutExpMod, totalWithExpMod, scaleRange, earnedAA, remainingAA, normalizedScale);
+
+	return totalWithExpMod;
+}
 
 static uint32 MaxBankedGroupLeadershipPoints(int Level)
 {
@@ -190,19 +234,21 @@ void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 	if(resexp) {
 		add_aaxp = 0;
 	} else {
-
 		//figure out how much of this goes to AAs
 		add_aaxp = add_exp * m_epp.perAA / 100;
+
 		//take that amount away from regular exp
 		add_exp -= add_aaxp;
 
 		float totalmod = 1.0;
 		float zemmod = 1.0;
+
 		//get modifiers
 		if(RuleR(Character, ExpMultiplier) >= 0){
 			totalmod *= RuleR(Character, ExpMultiplier);
 		}
 
+		//add the zone exp modifier.
 		if(zone->newzone_data.zone_exp_multiplier >= 0){
 			zemmod *= zone->newzone_data.zone_exp_multiplier;
 		}
@@ -218,6 +264,7 @@ void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 			}
 		}
 
+		//add hotzone modifier if one has been set.
 		if(zone->IsHotzone())
 		{
 			totalmod += RuleR(Zone, HotZoneBonus);
@@ -225,6 +272,7 @@ void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 
 		add_exp = uint32(float(add_exp) * totalmod * zemmod);
 
+		//if XP scaling is based on the con of a monster, do that now.
 		if(RuleB(Character,UseXPConScaling))
 		{
 			if (conlevel != 0xFF && !resexp) {
@@ -353,13 +401,32 @@ void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 	}
 
 	uint32 exp = GetEXP() + add_exp;
+	uint32 aaexp = 0;
 
-	uint32 aaexp = (uint32)(RuleR(Character, AAExpMultiplier) * add_aaxp * aatotalmod);
+	// if using modernAA and this character has AA XP enabled.
+	if (true && add_aaxp > 0)
+	{
+		aaexp = ScaleAAXPBasedOnCurrentAATotal(GetAAPoints(), add_aaxp, aatotalmod);
+	}
+	else
+	{
+		// else, do the existing calculation.
+		aaexp = (uint32)(RuleR(Character, AAExpMultiplier) * add_aaxp * aatotalmod);
+	}
+
+	// Get current AA XP total
 	uint32 had_aaexp = GetAAXP();
+
+	// Add it to the XP we just earned.
 	aaexp += had_aaexp;
+
+	// Make sure our new total (existing + just earned) isn't lower than the
+	// existing total.  If it is, we overflowed the bounds of uint32 and wrapped.
+	// Reset to the existing total.
 	if(aaexp < had_aaexp)
 		aaexp = had_aaexp;	//watch for wrap
 
+	// Now update our character's normal and AA xp
 	SetEXP(exp, aaexp, resexp);
 }
 
