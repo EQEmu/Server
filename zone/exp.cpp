@@ -39,10 +39,9 @@ extern QueryServ* QServ;
 
 static uint32 ScaleAAXPBasedOnCurrentAATotal(int earnedAA, uint32 add_aaxp, float aatotalmod)
 {
-	// TODO: Read from Rules
-	float baseModifier = 1000;
-	int aaMinimum = 0;
-	int aaLimit = 4000;
+	float baseModifier = RuleR(Character, ModernAAScalingStartPercent);
+	int aaMinimum = RuleI(Character, ModernAAScalingAAMinimum);
+	int aaLimit = RuleI(Character, ModernAAScalingAALimit);
 
 	// Calculate the current total before checking if we will add additional xp.
 	uint32 totalWithoutExpMod = (uint32)add_aaxp * aatotalmod;
@@ -77,7 +76,10 @@ static uint32 ScaleAAXPBasedOnCurrentAATotal(int earnedAA, uint32 add_aaxp, floa
 		return totalWithoutExpMod;
 	}
 
-	Log(Logs::Detail, Logs::None, "Total before the modifier %d :: NewTotal %d :: ScaleRange: %d, SpentAA: %d, RemainingAA: %d, normalizedScale: %0.3f", totalWithoutExpMod, totalWithExpMod, scaleRange, earnedAA, remainingAA, normalizedScale);
+	Log(Logs::Detail,
+		Logs::None,
+		"Total before the modifier %d :: NewTotal %d :: ScaleRange: %d, SpentAA: %d, RemainingAA: %d, normalizedScale: %0.3f",
+		totalWithoutExpMod, totalWithExpMod, scaleRange, earnedAA, remainingAA, normalizedScale);
 
 	return totalWithExpMod;
 }
@@ -404,7 +406,7 @@ void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 	uint32 aaexp = 0;
 
 	// if using modernAA and this character has AA XP enabled.
-	if (true && add_aaxp > 0)
+	if (RuleB(Character, UseModernAAExperienceScale) && add_aaxp > 0)
 	{
 		aaexp = ScaleAAXPBasedOnCurrentAATotal(GetAAPoints(), add_aaxp, aatotalmod);
 	}
