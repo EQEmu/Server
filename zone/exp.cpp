@@ -406,7 +406,7 @@ void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 	uint32 aaexp = 0;
 
 	// if using modernAA and this character has AA XP enabled.
-	if (RuleB(Character, UseModernAAExperienceScale) && add_aaxp > 0)
+	if (RuleB(Character, ModernAAScalingEnabled) && add_aaxp > 0)
 	{
 		aaexp = ScaleAAXPBasedOnCurrentAATotal(GetAAPoints(), add_aaxp, aatotalmod);
 	}

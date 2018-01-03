@@ -156,7 +156,7 @@ RULE_BOOL(Character, UseOldBindWound, false) // Uses the original bind wound beh
 RULE_BOOL(Character, GrantHoTTOnCreate, false) // Grant Health of Target's Target leadership AA on character creation
 RULE_BOOL(Character, UseOldConSystem, false) // Grant Health of Target's Target leadership AA on character creation
 RULE_BOOL(Character, OPClientUpdateVisualDebug, false) // Shows a pulse and forward directional particle each time the client sends its position to server
-RULE_BOOL(Character, UseModernAAExperienceScale, false) // Uses the newer approach to AA scaling based on total earned AA
+RULE_BOOL(Character, ModernAAScalingEnabled, false) // Uses the newer approach to AA scaling based on total earned AA
 RULE_REAL(Character, ModernAAScalingStartPercent, 1000) // 1000% or 10x AA XP at the start of the scaling range
 RULE_INT(Character, ModernAAScalingAAMinimum, 0) // The minimum number of earned AA before AA XP scaling begins.
 RULE_INT(Character, ModernAAScalingAALimit, 4000) // The number of earned AA when AA XP scaling ends.
