@@ -264,7 +264,7 @@ bool Client::Process() {
 					if (distance <= scan_range) {
 						close_mobs.insert(std::pair<Mob *, float>(mob, distance));
 					}
-					else if (mob->GetAggroRange() > scan_range) {
+					else if ((mob->GetAggroRange() * mob->GetAggroRange()) > scan_range) {
 						close_mobs.insert(std::pair<Mob *, float>(mob, distance));
 					}
 				}
