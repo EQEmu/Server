@@ -1,0 +1,1 @@
+UPDATE spells_new SET components1 = 10307 WHERE name = 'Sun\'s Corona';
