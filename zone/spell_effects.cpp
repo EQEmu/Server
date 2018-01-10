@@ -1796,8 +1796,12 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 								Message_StringID(4, CORPSE_CANT_SENSE);
 							}
 						}
-						else if (caster)
-							caster->Message_StringID(MT_SpellFailure, SPELL_LEVEL_REQ);
+						else if (caster) {
+							char level[4];
+							ConvertArray(effect_value, level);
+							caster->Message_StringID(MT_SpellFailure, 
+								SPELL_LEVEL_REQ, level);
+						}
 					}
 					else {
 						Message_StringID(4, TARGET_NOT_FOUND);
