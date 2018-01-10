@@ -655,10 +655,15 @@ void NPC::SetPetState(SpellBuff_Struct *pet_buffs, uint32 *items) {
 			continue;
 
 		const EQEmu::ItemData* item2 = database.GetItem(items[i]);
-		if (item2 && item2->NoDrop != 0) {
-			//dont bother saving item charges for now, NPCs never use them
-			//and nobody should be able to get them off the corpse..?
-			AddLootDrop(item2, &itemlist, 0, 1, 255, true, true);
+
+		if (item2) {
+			bool noDrop=(item2->NoDrop == 0); // Field is reverse logic
+			bool petCanHaveNoDrop = (RuleB(Pets, CanTakeNoDrop) && 
+				_CLIENTPET(this) && GetPetType() <= petOther);
+
+			if (!noDrop || petCanHaveNoDrop) {
+				AddLootDrop(item2, &itemlist, 0, 1, 255, true, true);
+			}
 		}
 	}
 }
