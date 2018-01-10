@@ -884,7 +884,7 @@ void Mob::FixZ(int32 z_find_offset /*= 5*/)
 	glm::vec3 current_loc(m_Position);
 	float new_z = GetFixedZ(current_loc, z_find_offset);
 
-	if (new_z != m_Position.z)
+	if (!IsClient() && new_z != m_Position.z)
 	{
 		if ((new_z > -2000) && new_z != BEST_Z_INVALID) {
 			if (RuleB(Map, MobZVisualDebug))
