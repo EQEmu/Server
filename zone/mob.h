@@ -298,6 +298,23 @@ public:
 		int32 mana_cost = -1, uint32* oSpellWillFinish = 0, uint32 item_slot = 0xFFFFFFFF,
 		uint32 timer = 0xFFFFFFFF, uint32 timer_duration = 0, int16 resist_adjust = 0,
 		uint32 aa_id = 0);
+
+	bool AreReagentsRequired(Client *c,
+		const int components[],
+		const int component_counts[],
+		uint16 spell_id,
+		int requiredComponents[],
+		int requiredQuantity[],
+		bool consumable[]);
+
+	bool AreNonExpendableReagentsRequired(
+		Client *c,
+		const int components[],
+		uint16 spell_id,
+		int reagents[],
+		int quantity[],
+		bool consumable[]);
+
 	void CastedSpellFinished(uint16 spell_id, uint32 target_id, EQEmu::CastingSlot slot, uint16 mana_used,
 		uint32 inventory_slot = 0xFFFFFFFF, int16 resist_adjust = 0);
 	bool SpellFinished(uint16 spell_id, Mob *target, EQEmu::CastingSlot slot = EQEmu::CastingSlot::Item, uint16 mana_used = 0,

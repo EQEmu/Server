@@ -948,6 +948,109 @@ void Mob::StopCasting()
 	ZeroCastingVars();
 }
 
+bool Mob::AreNonExpendableReagentsRequired(
+	Client *c,
+	const int components[],
+	uint16 spell_id,
+	int reagents[],
+	int quantity[],
+	bool consumable[])
+{
+	bool required = false;
+
+	// Iterate through non-expendable components.
+	for (int i = 0; i < 4; i++)
+	{
+		int component = components[i];
+
+		// is there a component?
+		if (-1 == component)
+		{
+			// No.  Check the next.
+			continue;
+		}
+
+		// Reagents are used.
+		required = true;
+
+		// Is this an item id or an index of a consumable?
+		if (component <= 4 && component >= 1)
+		{
+			// Index.  In this case, the index starts at 1 (because it matches the column names)
+			consumable[component - 1] = false;
+		}
+		else
+		{
+			// Item ID.  This can be an entirely new item requirement or it could match
+			// a consumable, in which case, that consumable is no longer consumed.
+			
+			// find it in the array or add it.
+			for (int j = 0; j < sizeof(reagents); j++)
+			{
+				if (reagents[j] == component)
+				{
+					// Found it, no longer consumable.
+					consumable[j] = false;
+					break;
+				}
+				else if (reagents[j] == -1)
+				{
+					// We didn't find a match.  Add this one since it is new.
+					reagents[j] = component;
+
+					// When only defined in the noexpendable# columns, the required quantity is always
+					// one because there's no place to specify a different value.
+					quantity[j] = 1;
+					consumable[j] = false;
+					break;
+				}
+			}
+		}
+	}
+
+	return required;
+}
+
+bool Mob::AreReagentsRequired(Client *c,
+	const int components[],
+	const int component_counts[],
+	uint16 spell_id,
+	int requiredComponents[],
+	int requiredQuantity[],
+	bool consumable[])
+{
+	int requiredIdx = 0;
+
+	// Iterate through possibly expendable components.
+	for (int i = 0; i < 4; i++)
+	{
+		int component = components[i];
+		int component_count = component_counts[i];
+
+		// is there a component?
+		if (-1 == component)
+		{
+			// No.  Check the next.
+			continue;
+		}
+
+		// Add the components we need and their required quantity.
+		requiredComponents[requiredIdx] = component;
+		requiredQuantity[requiredIdx] = component_count;
+		consumable[requiredIdx] = true;
+
+		// I'm not using the for loop index because nothing in the code requires that
+		// components be added in order in the database (e.g. comp1, comp2).  It could
+		// just as easily be (comp1, comp3) that have values.
+		requiredIdx++;
+	}
+
+	// If the index is greater than 0 then at least one reagent is required.
+	return requiredIdx > 0;
+}
+
+
+
 // this is called after the timer is up and the spell is finished
 // casting. everything goes through here, including items with zero cast time
 // only to be used from SpellProcess
@@ -1133,71 +1236,72 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 
 	// Check for consumables and Reagent focus items
 	// first check for component reduction
-	if(IsClient()) {
-		int reg_focus = CastToClient()->GetFocusEffect(focusReagentCost,spell_id);//Client only
-		if(zone->random.Roll(reg_focus)) {
+	if (IsClient()) {
+		int reg_focus = CastToClient()->GetFocusEffect(focusReagentCost, spell_id);//Client only
+		if (zone->random.Roll(reg_focus)) {
 			Log(Logs::Detail, Logs::Spells, "Spell %d: Reagent focus item prevented reagent consumption (%d chance)", spell_id, reg_focus);
-		} else {
-			if(reg_focus > 0)
+		}
+		else {
+			if (reg_focus > 0)
 				Log(Logs::Detail, Logs::Spells, "Spell %d: Reagent focus item failed to prevent reagent consumption (%d chance)", spell_id, reg_focus);
-			Client *c = this->CastToClient();
-			int component, component_count, inv_slot_id;
-			bool missingreags = false;
-			for(int t_count = 0; t_count < 4; t_count++) {
-				component = spells[spell_id].components[t_count];
-				component_count = spells[spell_id].component_counts[t_count];
 
-				if (component == -1)
-					continue;
+			Client *c = this->CastToClient();
+			int reagents[8] = { -1, -1, -1, -1, -1, -1, -1, -1 };
+			int quantity[8] = { -1, -1, -1, -1, -1, -1, -1, -1 };
+			bool consumable[8] = { false, false, false, false, false, false, false, false };
+
+			if (bard_song_mode)
+			{
+				// bard only checks the 0th element of noexpendreagent
 
 				// bard components are requirements for a certain instrument type, not a specific item
-				if(bard_song_mode) {
+				if (bard_song_mode) {
 					bool HasInstrument = true;
 					int InstComponent = spells[spell_id].NoexpendReagent[0];
 
 					switch (InstComponent) {
-						case -1:
-							continue;		// no instrument required, go to next component
+					case -1:
+						break;
 
 						// percussion songs (13000 = hand drum)
-						case 13000:
-							if(itembonuses.percussionMod == 0) {			// check for the appropriate instrument type
-								HasInstrument = false;
-								c->Message_StringID(13, SONG_NEEDS_DRUM);	// send an error message if missing
-							}
-							break;
+					case 13000:
+						if (itembonuses.percussionMod == 0) {			// check for the appropriate instrument type
+							HasInstrument = false;
+							c->Message_StringID(13, SONG_NEEDS_DRUM);	// send an error message if missing
+						}
+						break;
 
 						// wind songs (13001 = wooden flute)
-						case 13001:
-							if(itembonuses.windMod == 0) {
-								HasInstrument = false;
-								c->Message_StringID(13, SONG_NEEDS_WIND);
-							}
-							break;
+					case 13001:
+						if (itembonuses.windMod == 0) {
+							HasInstrument = false;
+							c->Message_StringID(13, SONG_NEEDS_WIND);
+						}
+						break;
 
 						// string songs (13011 = lute)
-						case 13011:
-							if(itembonuses.stringedMod == 0) {
-								HasInstrument = false;
-								c->Message_StringID(13, SONG_NEEDS_STRINGS);
-							}
-							break;
+					case 13011:
+						if (itembonuses.stringedMod == 0) {
+							HasInstrument = false;
+							c->Message_StringID(13, SONG_NEEDS_STRINGS);
+						}
+						break;
 
 						// brass songs (13012 = horn)
-						case 13012:
-							if(itembonuses.brassMod == 0) {
-								HasInstrument = false;
-								c->Message_StringID(13, SONG_NEEDS_BRASS);
-							}
-							break;
+					case 13012:
+						if (itembonuses.brassMod == 0) {
+							HasInstrument = false;
+							c->Message_StringID(13, SONG_NEEDS_BRASS);
+						}
+						break;
 
-						default:	// some non-instrument component. Let it go, but record it in the log
-							Log(Logs::Detail, Logs::Spells, "Something odd happened: Song %d required component %d", spell_id, component);
+					default:	// some non-instrument component. Let it go, but record it in the log
+						Log(Logs::Detail, Logs::Spells, "Something odd happened: Song %d required component %d", spell_id, InstComponent);
 					}
 
-					if(!HasInstrument) {	// if the instrument is missing, log it and interrupt the song
-						Log(Logs::Detail, Logs::Spells, "Song %d: Canceled. Missing required instrument %d", spell_id, component);
-						if(c->GetGM())
+					if (!HasInstrument) {	// if the instrument is missing, log it and interrupt the song
+						Log(Logs::Detail, Logs::Spells, "Song %d: Canceled. Missing required instrument %d", spell_id, InstComponent);
+						if (c->GetGM())
 							c->Message(0, "Your GM status allows you to finish casting even though you're missing a required instrument.");
 						else {
 							InterruptSpell();
@@ -1205,66 +1309,93 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 						}
 					}
 				}	// end bard component section
+			}
+			else
+			{
+				// Index consumables.
+				bool hasReagents = AreReagentsRequired(
+					c,
+					spells[spell_id].components,
+					spells[spell_id].component_counts,
+					spell_id,
+					reagents,
+					quantity,
+					consumable);
 
-				// handle the components for traditional casters
-				else {
-					if(c->GetInv().HasItem(component, component_count, invWhereWorn|invWherePersonal) == -1) // item not found
-					{
-						if (!missingreags)
-						{
-							c->Message_StringID(13, MISSING_SPELL_COMP);
-							missingreags=true;
+				// Index non-consumables
+				bool hasNonExpendableReagents = AreNonExpendableReagentsRequired(
+					c,
+					spells[spell_id].NoexpendReagent,
+					spell_id,
+					reagents,
+					quantity,
+					consumable);
+
+				// Are there reagents?  They may not be consumed, but we must have them.
+				if (hasReagents || hasNonExpendableReagents)
+				{
+					bool missingreags = false;
+					int sizeOfReagents = sizeof(reagents) / sizeof(*reagents);
+					// Do we have enough of them?
+					for (int i = 0; i < sizeOfReagents; i++) {
+						// Yes.  Do we have enough of them?
+						if (-1 != reagents[i] &&
+							c->GetInv().HasItem(reagents[i], quantity[i], invWhereWorn | invWherePersonal) == -1) {
+							// No.
+							if (!missingreags) {
+								c->Message_StringID(13, MISSING_SPELL_COMP);
+								missingreags = true;
+							}
+
+							const EQEmu::ItemData *item = database.GetItem(reagents[i]);
+							if (item) {
+								c->Message_StringID(13, MISSING_SPELL_COMP_ITEM, item->Name);
+								Log(Logs::Detail, Logs::Spells, "Spell %d: Canceled. Missing required reagent %s (%d)", spell_id, item->Name, reagents[i]);
+							}
+							else {
+								char TempItemName[64];
+								strcpy((char*)&TempItemName, "UNKNOWN");
+								Log(Logs::Detail, Logs::Spells, "Spell %d: Canceled. Missing required reagent %s (%d)", spell_id, TempItemName, reagents[i]);
+							}
 						}
+					}
 
-						const EQEmu::ItemData *item = database.GetItem(component);
-						if(item) {
-							c->Message_StringID(13, MISSING_SPELL_COMP_ITEM, item->Name);
-							Log(Logs::Detail, Logs::Spells, "Spell %d: Canceled. Missing required reagent %s (%d)", spell_id, item->Name, component);
+					if (missingreags) {
+						if (c->GetGM()) {
+							c->Message(0, "Your GM status allows you to finish casting even though you're missing required components.");
 						}
 						else {
-							char TempItemName[64];
-							strcpy((char*)&TempItemName, "UNKNOWN");
-							Log(Logs::Detail, Logs::Spells, "Spell %d: Canceled. Missing required reagent %s (%d)", spell_id, TempItemName, component);
+							InterruptSpell();
+							return;
 						}
 					}
-				} // end bard/not bard ifs
-			} // end reagent loop
+					else {
+						for (int i = 0; i < sizeOfReagents; i++) {
+							if (!consumable[i]) {
+								continue;
+							}
 
-			if (missingreags) {
-				if(c->GetGM())
-					c->Message(0, "Your GM status allows you to finish casting even though you're missing required components.");
-				else {
-					InterruptSpell();
-					return;
-				}
+							Log(Logs::Detail, Logs::Spells, "Spell %d: Consuming %d of spell component item id %d", spell_id, quantity[i], reagents[i]);
+
+							// Components found, Deleting
+							// now we go looking for and deleting the items one by one
+							for (int s = 0; s < quantity[i]; s++)
+							{
+								int inv_slot_id = c->GetInv().HasItem(reagents[i], 1, invWhereWorn | invWherePersonal);
+								if (inv_slot_id != -1)
+								{
+									c->DeleteItemInInventory(inv_slot_id, 1, true);
+								}
+								else
+								{	// some kind of error in the code if this happens
+									c->Message(13, "ERROR: reagent item disappeared while processing?");
+								}
+							}
+						}
+					} // end missingreags/consumption
+				} // end requiresReagents
 			}
-			else if (!bard_song_mode)
-			{
-				int noexpend;
-				for(int t_count = 0; t_count < 4; t_count++) {
-					component = spells[spell_id].components[t_count];
-					noexpend = spells[spell_id].NoexpendReagent[t_count];
-					if (component == -1 || noexpend == component)
-						continue;
-					component_count = spells[spell_id].component_counts[t_count];
-					Log(Logs::Detail, Logs::Spells, "Spell %d: Consuming %d of spell component item id %d", spell_id, component_count, component);
-					// Components found, Deleting
-					// now we go looking for and deleting the items one by one
-					for(int s = 0; s < component_count; s++)
-					{
-						inv_slot_id = c->GetInv().HasItem(component, 1, invWhereWorn|invWherePersonal);
-						if(inv_slot_id != -1)
-						{
-							c->DeleteItemInInventory(inv_slot_id, 1, true);
-						}
-						else
-						{	// some kind of error in the code if this happens
-							c->Message(13, "ERROR: reagent item disappeared while processing?");
-						}
-					}
-				}
-				} // end missingreags/consumption
-			} // end `focus did not help us`
+		} // end `focus did not help us`
 	} // end IsClient() for reagents
 
 	// this is common to both bard and non bard
