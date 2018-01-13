@@ -303,12 +303,12 @@ sub check_xml_to_json_conversion {
 	if(-e "eqemu_config.xml" && !-e "eqemu_config.json") {
 
 		if($OS eq "Windows"){
-			get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/eqemu_config_json/utils/xmltojson/xmltojson-windows-x86.exe", "xmltojson.exe");
+			get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/master/utils/xmltojson/xmltojson-windows-x86.exe", "xmltojson.exe");
 			print "Converting eqemu_config.xml to eqemu_config.json\n";
 			print `xmltojson eqemu_config.xml`;
 		}
 		if($OS eq "Linux"){
-			get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/eqemu_config_json/utils/xmltojson/xmltojson-linux-x86", "xmltojson");
+			get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/master/utils/xmltojson/xmltojson-linux-x86", "xmltojson");
 			print "Converting eqemu_config.xml to eqemu_config.json\n";
 			print `chmod 755 xmltojson`;
 			print `./xmltojson eqemu_config.xml`;
