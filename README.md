@@ -56,4 +56,4 @@ forum, although pull requests will be much quicker and easier on all parties.
 Resources
 ---
 - [EQEmulator Forums](http://www.eqemulator.org/forums)
-- [EQEmulator Wiki](http://wiki.eqemulator.org/i?M=Wiki)
+- [EQEmulator Wiki](https://github.com/EQEmu/Server/wiki)
