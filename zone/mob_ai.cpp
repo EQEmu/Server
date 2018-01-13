@@ -493,6 +493,11 @@ void Client::AI_Start(uint32 iMoveDelay) {
 	SetFeigned(false);
 }
 
+void NPC::AI_RestartSpellTimer() {
+	Log(Logs::Moderate, Logs::Spells, "Triggering RestartSpellTimer :: Mob %s - %u", this->GetCleanName(), 300);
+	AIautocastspell_timer->Start(300, false);
+}
+
 void NPC::AI_Start(uint32 iMoveDelay) {
 	Mob::AI_Start(iMoveDelay);
 	if (!pAIControlled)
@@ -942,6 +947,7 @@ void Mob::AI_Process() {
 		return;
 
 	bool engaged = IsEngaged();
+
 	bool doranged = false;
 
 	if (!zone->CanDoCombat() || IsPetStop() || IsPetRegroup()) {
@@ -1761,6 +1767,10 @@ void Mob::AI_Event_Engaged(Mob* attacker, bool iYellForHelp) {
 		return;
 
 	SetAppearance(eaStanding);
+
+	// Idle timer is huge, gives NPCs an early disadvantage when 1st entering
+	// combat.
+	this->CastToNPC()->AI_RestartSpellTimer();
 
 	if (iYellForHelp) {
 		if(IsPet()) {
