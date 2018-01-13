@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include <stdlib.h>
 #include <signal.h>
 
+#include "../common/string_util.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/queue.h"
 #include "../common/timer.h"
@@ -104,6 +105,12 @@ WebInterfaceList web_interface;
 
 void CatchSignal(int sig_num);
 void CheckForServerScript(bool force_download = false);
+
+inline void UpdateWindowTitle(std::string new_title) {
+#ifdef _WINDOWS
+	SetConsoleTitle(new_title.c_str());
+#endif
+}
 
 int main(int argc, char** argv) {
 	RegisterExecutablePlatform(ExePlatformWorld);
@@ -539,8 +546,7 @@ int main(int argc, char** argv) {
 			database.PurgeExpiredInstances();
 		}
 
-		if (EQTimeTimer.Check())
-		{
+		if (EQTimeTimer.Check()) {
 			TimeOfDay_Struct tod;
 			zoneserver_list.worldclock.GetCurrentEQTimeOfDay(time(0), &tod);
 			if (!database.SaveTime(tod.minute, tod.hour, tod.day, tod.month, tod.year))
@@ -557,6 +563,9 @@ int main(int argc, char** argv) {
 		if (InterserverTimer.Check()) {
 			InterserverTimer.Start();
 			database.ping();
+
+			std::string window_title = StringFormat("World: %s Clients: %i", Config->LongName.c_str(), client_list.GetClientCount());
+			UpdateWindowTitle(window_title);
 		}
 
 		EQ::EventLoop::Get().Process();

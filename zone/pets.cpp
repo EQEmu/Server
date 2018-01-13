@@ -475,22 +475,6 @@ Pet::Pet(NPCType *type_data, Mob *owner, PetType type, uint16 spell_id, int16 po
 	// Class should use npc constructor to set light properties
 }
 
-void Pet::SetTarget(Mob *mob)
-{
-	if (mob == GetTarget())
-		return;
-
-	auto owner = GetOwner();
-	if (owner && owner->IsClient() && owner->CastToClient()->ClientVersionBit() & EQEmu::versions::bit_UFAndLater) {
-		auto app = new EQApplicationPacket(OP_PetHoTT, sizeof(ClientTarget_Struct));
-		auto ct = (ClientTarget_Struct *)app->pBuffer;
-		ct->new_target = mob ? mob->GetID() : 0;
-		owner->CastToClient()->QueuePacket(app);
-		safe_delete(app);
-	}
-	NPC::SetTarget(mob);
-}
-
 bool ZoneDatabase::GetPetEntry(const char *pet_type, PetRecord *into) {
 	return GetPoweredPetEntry(pet_type, 0, into);
 }
@@ -671,10 +655,15 @@ void NPC::SetPetState(SpellBuff_Struct *pet_buffs, uint32 *items) {
 			continue;
 
 		const EQEmu::ItemData* item2 = database.GetItem(items[i]);
-		if (item2 && item2->NoDrop != 0) {
-			//dont bother saving item charges for now, NPCs never use them
-			//and nobody should be able to get them off the corpse..?
-			AddLootDrop(item2, &itemlist, 0, 1, 255, true, true);
+
+		if (item2) {
+			bool noDrop=(item2->NoDrop == 0); // Field is reverse logic
+			bool petCanHaveNoDrop = (RuleB(Pets, CanTakeNoDrop) && 
+				_CLIENTPET(this) && GetPetType() <= petOther);
+
+			if (!noDrop || petCanHaveNoDrop) {
+				AddLootDrop(item2, &itemlist, 0, 1, 255, true, true);
+			}
 		}
 	}
 }

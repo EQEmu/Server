@@ -57,7 +57,11 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 	if(AI_HasSpells() == false)
 		return false;
 
-	if (iChance < 100) {
+	// Rooted mobs were just standing around when tar out of range.
+	// Any sane mob would cast if they can.
+	bool cast_only_option = (IsRooted() && !CombatRange(tar));
+
+	if (!cast_only_option && iChance < 100) {
 		if (zone->random.Int(0, 100) >= iChance)
 			return false;
 	}
@@ -123,7 +127,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 					}
 					case SpellType_Root: {
 						Mob *rootee = GetHateRandom();
-						if (rootee && !rootee->IsRooted() && zone->random.Roll(50)
+						if (rootee && !rootee->IsRooted() && !rootee->IsFeared() && zone->random.Roll(50)
 							&& rootee->DontRootMeBefore() < Timer::GetCurrentTime()
 							&& rootee->CanBuffStack(AIspells[i].spellid, GetLevel(), true) >= 0
 							) {
@@ -499,7 +503,7 @@ void NPC::AI_Start(uint32 iMoveDelay) {
 		AIautocastspell_timer->Disable();
 	} else {
 		AIautocastspell_timer = std::unique_ptr<Timer>(new Timer(750));
-		AIautocastspell_timer->Start(RandomTimer(0, 15000), false);
+		AIautocastspell_timer->Start(RandomTimer(0, 300), false);
 	}
 
 	if (NPCTypedata) {
@@ -1001,10 +1005,9 @@ void Mob::AI_Process() {
 			if (this->GetTarget()) {
 				/* If we are engaged, moving and following client, let's look for best Z more often */
 				float target_distance = DistanceNoZ(this->GetPosition(), this->GetTarget()->GetPosition());
-				if (target_distance >= 25) {
-					this->FixZ();
-				}
-				else if (!this->CheckLosFN(this->GetTarget())) {
+				this->FixZ();
+
+				if (target_distance <= 15 && !this->CheckLosFN(this->GetTarget())) {
 					Mob* target = this->GetTarget();
 
 					m_Position.x = target->GetX();
@@ -1295,7 +1298,7 @@ void Mob::AI_Process() {
 				if (AI_PursueCastCheck()) {
 					//we did something, so do not process movement.
 				}
-				else if (AI_movement_timer->Check())
+				else if (AI_movement_timer->Check() && target)
 				{
 					if (!IsRooted()) {
 						Log(Logs::Detail, Logs::AI, "Pursuing %s while engaged.", target->GetName());
@@ -1388,19 +1391,33 @@ void Mob::AI_Process() {
 						//if(owner->IsClient())
 						//	printf("Pet start pos: (%f, %f, %f)\n", GetX(), GetY(), GetZ());
 
-						float dist = DistanceSquared(m_Position, owner->GetPosition());
-						if (dist >= 400)
+						glm::vec4 ownerPos = owner->GetPosition();
+						float dist = DistanceSquared(m_Position, ownerPos);
+						float distz = ownerPos.z - m_Position.z;
+
+						if (dist >= 400 || distz > 100)
 						{
 							int speed = GetWalkspeed();
 							if (dist >= 5625)
 								speed = GetRunspeed();
 
-							CalculateNewPosition2(owner->GetX(), owner->GetY(), owner->GetZ(), speed);
+							if (distz > 100)
+							{
+								m_Position = ownerPos;
+								SendPositionUpdate();
+								moved = true;
+							}
+							else
+							{
+							CalculateNewPosition2(owner->GetX(), 
+								owner->GetY(), owner->GetZ(), speed);
+							}
 						}
 						else
 						{
 							if(moved)
 							{
+								this->FixZ();
 								SetCurrentSpeed(0);
 								moved = false;
 							}
@@ -1532,16 +1549,17 @@ void NPC::AI_DoMovement() {
 				roambox_movingto_x = zone->random.Real(roambox_min_x+1,roambox_max_x-1);
 			if (roambox_movingto_y > roambox_max_y || roambox_movingto_y < roambox_min_y)
 				roambox_movingto_y = zone->random.Real(roambox_min_y+1,roambox_max_y-1);
+			Log(Logs::Detail, Logs::AI, 
+				"Roam Box: d=%.3f (%.3f->%.3f,%.3f->%.3f): Go To (%.3f,%.3f)",
+				roambox_distance, roambox_min_x, roambox_max_x, roambox_min_y, 
+				roambox_max_y, roambox_movingto_x, roambox_movingto_y);
 		}
 
-		Log(Logs::Detail, Logs::AI, "Roam Box: d=%.3f (%.3f->%.3f,%.3f->%.3f): Go To (%.3f,%.3f)",
-			roambox_distance, roambox_min_x, roambox_max_x, roambox_min_y, roambox_max_y, roambox_movingto_x, roambox_movingto_y);
-
-		float new_z = this->FindGroundZ(m_Position.x, m_Position.y, 5);
-		new_z += (this->GetSize() / 1.55);
-
-		if (!CalculateNewPosition2(roambox_movingto_x, roambox_movingto_y, new_z, walksp, true))
+		// Keep calling with updates, using wherever we are in Z.
+		if (!MakeNewPositionAndSendUpdate(roambox_movingto_x, 
+				roambox_movingto_y, m_Position.z, walksp))
 		{
+			this->FixZ(); // FixZ on final arrival point.
 			roambox_movingto_x = roambox_max_x + 1; // force update
 			pLastFightingDelayMoving = Timer::GetCurrentTime() + RandomTimer(roambox_min_delay, roambox_delay);
 			SetMoving(false);
@@ -1578,18 +1596,22 @@ void NPC::AI_DoMovement() {
 					}
 
 					this->FixZ();
-
 					SendPosition();
 
 					//kick off event_waypoint arrive
 					char temp[16];
 					sprintf(temp, "%d", cur_wp);
 					parse->EventNPC(EVENT_WAYPOINT_ARRIVE, CastToNPC(), nullptr, temp, 0);
-					// start moving directly to next waypoint if we're at a 0 pause waypoint and we didn't get quest halted.
-					if (!AI_walking_timer->Enabled())
+					// No need to move as we are there.  Next loop will
+					// take care of normal grids, even at pause 0.
+					// We do need to call and setup a wp if we're cur_wp=-2
+					// as that is where roamer is unset and we don't want
+					// the next trip through to move again based on grid stuff.
+					doMove = false;
+					if (cur_wp == -2) {
 						AI_SetupNextWaypoint();
-					else
-						doMove = false;
+					}
+
 					// wipe feign memory since we reached our first waypoint
 					if(cur_wp == 1)
 						ClearFeignMemory();
@@ -2589,7 +2611,7 @@ void NPC::AddSpellToNPCList(int16 iPriority, int16 iSpellID, uint32 iType,
 
 	// If we're going from an empty list, we need to start the timer
 	if (AIspells.size() == 1)
-		AIautocastspell_timer->Start(RandomTimer(0, 15000), false);
+		AIautocastspell_timer->Start(RandomTimer(0, 300), false);
 }
 
 void NPC::RemoveSpellFromNPCList(int16 spell_id)

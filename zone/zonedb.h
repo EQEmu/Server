@@ -16,6 +16,7 @@ class NPC;
 class Petition;
 class Spawn2;
 class SpawnGroupList;
+class Trap;
 struct CharacterEventLog_Struct;
 struct Door;
 struct ExtendedProfile_Struct;
@@ -478,7 +479,7 @@ public:
 
 	/* Traps   */
 	bool	LoadTraps(const char* zonename, int16 version);
-	char*	GetTrapMessage(uint32 trap_id);
+	bool	SetTrapData(Trap* trap, bool repopnow = false);
 
 	/* Time   */
 	uint32	GetZoneTZ(uint32 zoneid, uint32 version);

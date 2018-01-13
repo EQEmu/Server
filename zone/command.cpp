@@ -321,6 +321,7 @@ int command_init(void)
 		command_add("reloadqst", " - Clear quest cache (any argument causes it to also stop all timers)", 150, command_reloadqst) ||
 		command_add("reloadrulesworld", "Executes a reload of all rules in world specifically.", 80, command_reloadworldrules) ||
 		command_add("reloadstatic", "- Reload Static Zone Data", 150, command_reloadstatic) ||
+		command_add("reloadtraps", "- Repops all traps in the current zone.", 80, command_reloadtraps) ||
 		command_add("reloadtitles", "- Reload player titles from the database",  150, command_reloadtitles) ||
 		command_add("reloadworld", "[0|1] - Clear quest cache (0 - no repop, 1 - repop)", 255, command_reloadworld) ||
 		command_add("reloadzps", "- Reload zone points from database", 150, command_reloadzps) ||
@@ -375,6 +376,7 @@ int command_init(void)
 		command_add("task", "(subcommand) - Task system commands",  150, command_task) ||
 		command_add("tattoo", "- Change the tattoo of your target (Drakkin Only)", 80, command_tattoo) ||
 		command_add("tempname", "[newname] - Temporarily renames your target. Leave name blank to restore the original name.", 100, command_tempname) ||
+		command_add("petname", "[newname] - Temporarily renames your pet. Leave name blank to restore the original name.", 100, command_petname) ||
 		command_add("texture", "[texture] [helmtexture] - Change your or your target's appearance, use 255 to show equipment", 10, command_texture) ||
 		command_add("time", "[HH] [MM] - Set EQ time", 90, command_time) ||
 		command_add("timers", "- Display persistent timers for target", 200, command_timers) ||
@@ -382,6 +384,7 @@ int command_init(void)
 		command_add("title", "[text] [1 = create title table row] - Set your or your player target's title", 50, command_title) ||
 		command_add("titlesuffix", "[text] [1 = create title table row] - Set your or your player target's title suffix", 50, command_titlesuffix) ||
 		command_add("traindisc", "[level] - Trains all the disciplines usable by the target, up to level specified. (may freeze client for a few seconds)", 150, command_traindisc) ||
+		command_add("trapinfo", "- Gets infomation about the traps currently spawned in the zone.", 81, command_trapinfo) ||
 		command_add("tune",  "Calculate ideal statical values related to combat.",  100, command_tune) ||
 		command_add("undyeme", "- Remove dye from all of your armor slots", 0, command_undyeme) ||
 		command_add("unfreeze", "- Unfreeze your target", 80, command_unfreeze) ||
@@ -4157,6 +4160,26 @@ void command_tempname(Client *c, const Seperator *sep)
 	}
 }
 
+void command_petname(Client *c, const Seperator *sep)
+{
+	Mob *target;
+	target = c->GetTarget();
+
+	if(!target)
+		c->Message(0, "Usage: #petname newname (requires a target)");
+	else if(target->IsPet() && (target->GetOwnerID() == c->GetID()) && strlen(sep->arg[1]) > 0)
+	{
+		char *oldname = strdup(target->GetName());
+		target->TempName(sep->arg[1]);
+		c->Message(0, "Renamed %s to %s",  oldname, sep->arg[1]);
+		free(oldname);
+	}
+	else {
+		target->TempName();
+		c->Message(0, "Restored the original name");
+	}
+}
+
 void command_npcspecialattk(Client *c, const Seperator *sep)
 {
 	if (c->GetTarget()==0 || c->GetTarget()->IsClient() || strlen(sep->arg[1]) <= 0 || strlen(sep->arg[2]) <= 0)
@@ -7257,7 +7280,7 @@ void command_bestz(Client *c, const Seperator *sep) {
 
 		float best_z = zone->zonemap->FindBestZ(me, &hit);
 
-		if (best_z != -999999)
+		if (best_z != BEST_Z_INVALID)
 		{
 			c->Message(0, "Z is %.3f at (%.3f, %.3f).",  best_z, me.x, me.y);
 		}
@@ -10851,6 +10874,16 @@ void command_reloadperlexportsettings(Client *c, const Seperator *sep)
 	}
 }
 
+void command_trapinfo(Client *c, const Seperator *sep)
+{
+	entity_list.GetTrapInfo(c);
+}
+
+void command_reloadtraps(Client *c, const Seperator *sep)
+{
+	entity_list.UpdateAllTraps(true, true);
+	c->Message(CC_Default, "Traps reloaded for %s.", zone->GetShortName());
+}
 
 // All new code added to command.cpp should be BEFORE this comment line. Do no append code to this file below the BOTS code block.
 #ifdef BOTS

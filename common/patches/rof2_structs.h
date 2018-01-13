@@ -131,6 +131,7 @@ static const uint32 MAX_PP_LANGUAGE		= 32;	// was 25
 static const uint32 MAX_PP_SPELLBOOK	= 720;	// was 480
 static const uint32 MAX_PP_MEMSPELL		= 16;	// was 12
 static const uint32 MAX_PP_SKILL		= PACKET_SKILL_ARRAY_SIZE;	// 100 - actual skills buffer size
+static const uint32 MAX_PP_INNATE_SKILL	= 25;
 static const uint32 MAX_PP_AA_ARRAY		= 300;
 static const uint32 MAX_PP_DISCIPLINES	= 300;	// was 200
 static const uint32 MAX_GROUP_MEMBERS	= 6;
@@ -617,7 +618,7 @@ struct NewZone_Struct {
 	/*0704*/	char	zone_short_name2[32];	//zone file name? excludes instance number which can be in previous version.
 	/*0736*/	char	WeatherString[32];
 	/*0768*/	char	SkyString2[32];
-	/*0800*/	int32	SkyRelated2;			//seen -1
+	/*0800*/	int32	SkyRelated2;			//seen -1 -- maybe some default sky time?
 	/*0804*/	char	WeatherString2[32];		//
 	/*0836*/	float	WeatherChangeTime;		// not sure :P
 	/*0840*/	uint32	Climate;
@@ -1155,8 +1156,8 @@ union
 /*01012*/ AA_Array  aa_array[MAX_PP_AA_ARRAY];	// [300] 3600 bytes - AAs 12 bytes each
 /*04612*/ uint32 skill_count;					// Seen 100
 /*04616*/ uint32 skills[MAX_PP_SKILL];			// [100] 400 bytes - List of skills
-/*05016*/ uint32 unknown15_count;				// Seen 25
-/*05020*/ uint32 unknown_rof15[25];				// Most are 255 or 0
+/*05016*/ uint32 InnateSkills_count;			// Seen 25
+/*05020*/ uint32 InnateSkills[MAX_PP_INNATE_SKILL];	// Most are 255 or 0
 /*05120*/ uint32 discipline_count;				// Seen 200
 /*05124*/ Disciplines_Struct  disciplines;		// [200] 800 bytes Known disciplines
 /*05924*/ uint32 timestamp_count;				// Seen 20
@@ -1824,6 +1825,20 @@ struct MoveItem_Struct
 /*0012*/ InventorySlot_Struct	to_slot;
 /*0024*/ uint32			number_in_stack;
 /*0028*/
+};
+
+struct MultiMoveItemSub_Struct
+{
+/*0000*/ InventorySlot_Struct	from_slot;
+/*0012*/ InventorySlot_Struct	to_slot;
+/*0024*/ uint32			number_in_stack;
+/*0028*/ uint8			unknown[8];
+};
+
+struct MultiMoveItem_Struct
+{
+/*0000*/ uint32	count;
+/*0004*/ MultiMoveItemSub_Struct moves[0];
 };
 
 //

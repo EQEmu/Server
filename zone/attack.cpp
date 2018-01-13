@@ -852,16 +852,56 @@ int Mob::ACSum()
 	return ac;
 }
 
+int Mob::GetBestMeleeSkill()
+	{
+	int bestSkill=0;
+	EQEmu::skills::SkillType meleeSkills[]=
+	{	EQEmu::skills::Skill1HBlunt,
+	  	EQEmu::skills::Skill1HSlashing,
+		EQEmu::skills::Skill2HBlunt,
+		EQEmu::skills::Skill2HSlashing,	
+		EQEmu::skills::SkillHandtoHand,
+		EQEmu::skills::Skill1HPiercing,
+		EQEmu::skills::Skill2HPiercing,
+		EQEmu::skills::SkillCount
+	};
+	int i;
+
+	for (i=0; meleeSkills[i] != EQEmu::skills::SkillCount; ++i) {
+		int value;
+		value = GetSkill(meleeSkills[i]);
+		bestSkill = std::max(value, bestSkill);
+	}
+		
+	return bestSkill;
+	}
+
 int Mob::offense(EQEmu::skills::SkillType skill)
 {
 	int offense = GetSkill(skill);
-	int stat_bonus = 0;
-	if (skill == EQEmu::skills::SkillArchery || skill == EQEmu::skills::SkillThrowing)
-		stat_bonus = GetDEX();
-	else
-		stat_bonus = GetSTR();
+	int stat_bonus = GetSTR();
+
+	switch (skill) {
+		case EQEmu::skills::SkillArchery:
+		case EQEmu::skills::SkillThrowing:
+			stat_bonus = GetDEX();
+			break;	
+
+		// Mobs with no weapons default to H2H.
+		// Since H2H is capped at 100 for many many classes,
+		// lets not handicap mobs based on not spawning with a
+		// weapon.
+		//
+		// Maybe we tweak this if Disarm is actually implemented.
+
+		case EQEmu::skills::SkillHandtoHand:
+			offense = GetBestMeleeSkill();
+			break;
+	}
+
 	if (stat_bonus >= 75)
 		offense += (2 * stat_bonus - 150) / 3;
+
 	offense += GetATK();
 	return offense;
 }
@@ -1262,6 +1302,7 @@ int Client::DoDamageCaps(int base_damage)
 	return std::min(cap, base_damage);
 }
 
+// other is the defender, this is the attacker
 void Mob::DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts)
 {
 	if (!other)
@@ -1288,6 +1329,20 @@ void Mob::DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts)
 
 	if (hit.damage_done >= 0) {
 		if (other->CheckHitChance(this, hit)) {
+			if (IsNPC() && other->IsClient() && other->animation > 0 && GetLevel() >= 5 && BehindMob(other, GetX(), GetY())) {
+				// ~ 12% chance
+				if (zone->random.Roll(12)) {
+					int stun_resist2 = other->spellbonuses.FrontalStunResist + other->itembonuses.FrontalStunResist + other->aabonuses.FrontalStunResist;
+					int stun_resist = other->spellbonuses.StunResist + other->itembonuses.StunResist + other->aabonuses.StunResist;
+					if (zone->random.Roll(stun_resist2)) {
+						other->Message_StringID(MT_Stun, AVOID_STUNNING_BLOW);
+					} else if (zone->random.Roll(stun_resist)) {
+						other->Message_StringID(MT_Stun, SHAKE_OFF_STUN);
+					} else {
+						other->Stun(3000); // yuck -- 3 seconds
+					}
+				}
+			}
 			other->MeleeMitigation(this, hit, opts);
 			if (hit.damage_done > 0) {
 				ApplyDamageTable(hit);
@@ -1672,6 +1727,15 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQEmu::skills::Sk
 
 	if (!RuleB(Character, UseDeathExpLossMult)) {
 		exploss = (int)(GetLevel() * (GetLevel() / 18.0) * 12000);
+	}
+	
+	if (RuleB(Zone, LevelBasedEXPMods)) {
+		// Death in levels with xp_mod (such as hell levels) was resulting
+		// in losing more that appropriate since the loss was the same but
+		// getting it back would take way longer.  This makes the death the
+		// same amount of time to recover.  Will also lose more if level is
+		// granting a bonus.
+		exploss *= zone->level_exp_mod[GetLevel()].ExpMod;
 	}
 
 	if ((GetLevel() < RuleI(Character, DeathExpLossLevel)) || (GetLevel() > RuleI(Character, DeathExpLossMaxLevel)) || IsBecomeNPC())
@@ -2518,6 +2582,9 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 	if (other == this)
 		return;
 
+	if (other->IsTrap())
+		return;
+
 	if (damage < 0) {
 		hate = 1;
 	}
@@ -2617,7 +2684,7 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 
 	hate_list.AddEntToHateList(other, hate, damage, bFrenzy, !iBuffTic);
 
-	if (other->IsClient() && !on_hatelist)
+	if (other->IsClient() && !on_hatelist && !IsOnFeignMemory(other->CastToClient()))
 		other->CastToClient()->AddAutoXTarget(this);
 
 #ifdef BOTS
@@ -2658,9 +2725,9 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 			// owner must get on list, but he's not actually gained any hate yet
 			if (!owner->GetSpecialAbility(IMMUNE_AGGRO))
 			{
-				hate_list.AddEntToHateList(owner, 0, 0, false, !iBuffTic);
 				if (owner->IsClient() && !CheckAggro(owner))
 					owner->CastToClient()->AddAutoXTarget(this);
+				hate_list.AddEntToHateList(owner, 0, 0, false, !iBuffTic);
 			}
 		}
 	}
@@ -3349,7 +3416,7 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 		// pets that have GHold will never automatically add NPCs
 		// pets that have Hold and no Focus will add NPCs if they're engaged
 		// pets that have Hold and Focus will not add NPCs
-		if (pet && !pet->IsFamiliar() && !pet->GetSpecialAbility(IMMUNE_AGGRO) && !pet->IsEngaged() && attacker && attacker != this && !attacker->IsCorpse() && !pet->IsGHeld())
+		if (pet && !pet->IsFamiliar() && !pet->GetSpecialAbility(IMMUNE_AGGRO) && !pet->IsEngaged() && attacker && attacker != this && !attacker->IsCorpse() && !pet->IsGHeld() && !attacker->IsTrap())
 		{
 			if (!pet->IsHeld()) {
 				Log(Logs::Detail, Logs::Aggro, "Sending pet %s into battle due to attack.", pet->GetName());
@@ -3907,10 +3974,10 @@ void Mob::TryWeaponProc(const EQEmu::ItemInstance *inst, const EQEmu::ItemData *
 		float WPC = ProcChance * (100.0f + // Proc chance for this weapon
 			static_cast<float>(weapon->ProcRate)) / 100.0f;
 		if (zone->random.Roll(WPC)) {	// 255 dex = 0.084 chance of proc. No idea what this number should be really.
-			if (weapon->Proc.Level > ourlevel) {
+			if (weapon->Proc.Level2 > ourlevel) {
 				Log(Logs::Detail, Logs::Combat,
 					"Tried to proc (%s), but our level (%d) is lower than required (%d)",
-					weapon->Name, ourlevel, weapon->Proc.Level);
+					weapon->Name, ourlevel, weapon->Proc.Level2);
 				if (IsPet()) {
 					Mob *own = GetOwner();
 					if (own)
@@ -3947,7 +4014,7 @@ void Mob::TryWeaponProc(const EQEmu::ItemInstance *inst, const EQEmu::ItemData *
 				float APC = ProcChance * (100.0f + // Proc chance for this aug
 					static_cast<float>(aug->ProcRate)) / 100.0f;
 				if (zone->random.Roll(APC)) {
-					if (aug->Proc.Level > ourlevel) {
+					if (aug->Proc.Level2 > ourlevel) {
 						if (IsPet()) {
 							Mob *own = GetOwner();
 							if (own)
@@ -5232,19 +5299,30 @@ void Client::DoAttackRounds(Mob *target, int hand, bool IsFromSpell)
 	// extra off hand non-sense, can only double with skill of 150 or above
 	// or you have any amount of GiveDoubleAttack
 	if (candouble && hand == EQEmu::inventory::slotSecondary)
-		candouble = GetSkill(EQEmu::skills::SkillDoubleAttack) > 149 || (aabonuses.GiveDoubleAttack + spellbonuses.GiveDoubleAttack + itembonuses.GiveDoubleAttack) > 0;
+		candouble =
+		    GetSkill(EQEmu::skills::SkillDoubleAttack) > 149 ||
+		    (aabonuses.GiveDoubleAttack + spellbonuses.GiveDoubleAttack + itembonuses.GiveDoubleAttack) > 0;
 
 	if (candouble) {
 		CheckIncreaseSkill(EQEmu::skills::SkillDoubleAttack, target, -10);
 		if (CheckDoubleAttack()) {
 			Attack(target, hand, false, false, IsFromSpell);
+
+			// Modern AA description: Increases your chance of ... performing one additional hit with a 2-handed weapon when double attacking by 2%.
+			if (hand == EQEmu::inventory::slotPrimary) {
+				auto extraattackchance = aabonuses.ExtraAttackChance + spellbonuses.ExtraAttackChance +
+							 itembonuses.ExtraAttackChance;
+				if (extraattackchance && HasTwoHanderEquipped() && zone->random.Roll(extraattackchance))
+					Attack(target, hand, false, false, IsFromSpell);
+			}
+
 			// you can only triple from the main hand
 			if (hand == EQEmu::inventory::slotPrimary && CanThisClassTripleAttack()) {
 				CheckIncreaseSkill(EQEmu::skills::SkillTripleAttack, target, -10);
 				if (CheckTripleAttack()) {
 					Attack(target, hand, false, false, IsFromSpell);
 					auto flurrychance = aabonuses.FlurryChance + spellbonuses.FlurryChance +
-						itembonuses.FlurryChance;
+							    itembonuses.FlurryChance;
 					if (flurrychance && zone->random.Roll(flurrychance)) {
 						Attack(target, hand, false, false, IsFromSpell);
 						if (zone->random.Roll(flurrychance))
@@ -5254,12 +5332,6 @@ void Client::DoAttackRounds(Mob *target, int hand, bool IsFromSpell)
 				}
 			}
 		}
-	}
-
-	if (hand == EQEmu::inventory::slotPrimary) {
-		auto extraattackchance = aabonuses.ExtraAttackChance + spellbonuses.ExtraAttackChance + itembonuses.ExtraAttackChance;
-		if (extraattackchance && HasTwoHanderEquipped() && zone->random.Roll(extraattackchance))
-			Attack(target, hand, false, false, IsFromSpell);
 	}
 }
 

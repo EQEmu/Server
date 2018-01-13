@@ -1817,8 +1817,8 @@ void SharedDatabase::LoadBaseData(void *data, int max_level) {
 		bd->base_hp = atof(row[2]);
 		bd->base_mana = atof(row[3]);
 		bd->base_end = atof(row[4]);
-		bd->unk1 = atof(row[5]);
-		bd->unk2 = atof(row[6]);
+		bd->hp_regen = atof(row[5]);
+		bd->end_regen = atof(row[6]);
 		bd->hp_factor = atof(row[7]);
 		bd->mana_factor = atof(row[8]);
 		bd->endurance_factor = atof(row[9]);
