@@ -160,7 +160,7 @@ EOF
 	# Install prereqs
 	yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 	yum -y install deltarpm
-	yum -y install open-vm-tools vim cmake boost-* zlib-devel mariadb-server mariadb-client mariadb-devel mariadb-libs mariadb-compat perl-* lua* dos2unix php-mysql proftpd
+	yum -y install open-vm-tools vim cmake boost-* zlib-devel mariadb-server mariadb-client mariadb-devel mariadb-libs mariadb-compat perl-* lua* dos2unix php-mysql proftpd libuuid-devel
 	yum -y groupinstall "Development Tools" "Basic Web Server" "Compatibility Libraries"
 
 elif [[ "$OS" == "fedora_core" ]]; then
