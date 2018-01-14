@@ -948,109 +948,6 @@ void Mob::StopCasting()
 	ZeroCastingVars();
 }
 
-bool Mob::AreNonExpendableReagentsRequired(
-	Client *c,
-	const int components[],
-	uint16 spell_id,
-	int reagents[],
-	int quantity[],
-	bool consumable[])
-{
-	bool required = false;
-
-	// Iterate through non-expendable components.
-	for (int i = 0; i < 4; i++)
-	{
-		int component = components[i];
-
-		// is there a component?
-		if (-1 == component)
-		{
-			// No.  Check the next.
-			continue;
-		}
-
-		// Reagents are used.
-		required = true;
-
-		// Is this an item id or an index of a consumable?
-		if (component <= 4 && component >= 1)
-		{
-			// Index.  In this case, the index starts at 1 (because it matches the column names)
-			consumable[component - 1] = false;
-		}
-		else
-		{
-			// Item ID.  This can be an entirely new item requirement or it could match
-			// a consumable, in which case, that consumable is no longer consumed.
-			
-			// find it in the array or add it.
-			for (int j = 0; j < sizeof(reagents); j++)
-			{
-				if (reagents[j] == component)
-				{
-					// Found it, no longer consumable.
-					consumable[j] = false;
-					break;
-				}
-				else if (reagents[j] == -1)
-				{
-					// We didn't find a match.  Add this one since it is new.
-					reagents[j] = component;
-
-					// When only defined in the noexpendable# columns, the required quantity is always
-					// one because there's no place to specify a different value.
-					quantity[j] = 1;
-					consumable[j] = false;
-					break;
-				}
-			}
-		}
-	}
-
-	return required;
-}
-
-bool Mob::AreReagentsRequired(Client *c,
-	const int components[],
-	const int component_counts[],
-	uint16 spell_id,
-	int requiredComponents[],
-	int requiredQuantity[],
-	bool consumable[])
-{
-	int requiredIdx = 0;
-
-	// Iterate through possibly expendable components.
-	for (int i = 0; i < 4; i++)
-	{
-		int component = components[i];
-		int component_count = component_counts[i];
-
-		// is there a component?
-		if (-1 == component)
-		{
-			// No.  Check the next.
-			continue;
-		}
-
-		// Add the components we need and their required quantity.
-		requiredComponents[requiredIdx] = component;
-		requiredQuantity[requiredIdx] = component_count;
-		consumable[requiredIdx] = true;
-
-		// I'm not using the for loop index because nothing in the code requires that
-		// components be added in order in the database (e.g. comp1, comp2).  It could
-		// just as easily be (comp1, comp3) that have values.
-		requiredIdx++;
-	}
-
-	// If the index is greater than 0 then at least one reagent is required.
-	return requiredIdx > 0;
-}
-
-
-
 // this is called after the timer is up and the spell is finished
 // casting. everything goes through here, including items with zero cast time
 // only to be used from SpellProcess
@@ -1313,19 +1210,14 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 			else
 			{
 				// Index consumables.
-				bool hasReagents = AreReagentsRequired(
-					c,
-					spells[spell_id].components,
-					spells[spell_id].component_counts,
+				bool hasReagents = c->AreReagentsRequired(
 					spell_id,
 					reagents,
 					quantity,
 					consumable);
 
 				// Index non-consumables
-				bool hasNonExpendableReagents = AreNonExpendableReagentsRequired(
-					c,
-					spells[spell_id].NoexpendReagent,
+				bool hasNonExpendableReagents = c->AreNonExpendableReagentsRequired(
 					spell_id,
 					reagents,
 					quantity,
