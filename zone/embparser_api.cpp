@@ -544,7 +544,7 @@ XS(XS__gmsay)
 	if (items > 4)
 		to_minstatus = (int)SvUV(ST(4));
 
-	quest_manager.gmsay(message, color, send_to_world, to_guilddbid, to_minstatus);
+	quest_manager.gmsay(message, color_id, send_to_world, to_guilddbid, to_minstatus);
 
 	XSRETURN_EMPTY;
 }
@@ -2207,7 +2207,7 @@ XS(XS__task_setselector)
 	dXSARGS;
 	if(items == 1) {
 		int task_setid = (int)SvIV(ST(0));
-		quest_manager.task_setselector(task_setid);
+		quest_manager.tasksetselector(task_setid);
 	} else {
 		Perl_croak(aTHX_ "Usage: task_setselector(task_setid)");
 	}
@@ -2293,7 +2293,7 @@ XS(XS__istaskactivityactive)
 	if(items == 2) {
 		unsigned int task_id = (int)SvIV(ST(0));
 		unsigned int activity_id = (int)SvIV(ST(1));
-		RETVAL = quest_manager.istaskactivityactive(task, activity_id);
+		RETVAL = quest_manager.istaskactivityactive(task_id, activity_id);
 	} else {
 		Perl_croak(aTHX_ "Usage: istaskactivityactive(task_id, activity_id)");
 	}
@@ -2353,9 +2353,11 @@ XS(XS__resettaskactivity)
 	dXSARGS;
 	unsigned int task, activity;
 	if(items == 2) {
-		task_id = (int)SvIV(ST(0));
-		activity_id = (int)SvIV(ST(1));
+		int task_id = (int)SvIV(ST(0));
+		int activity_id = (int)SvIV(ST(1));
+
 		quest_manager.resettaskactivity(task_id, activity_id);
+
 	} else {
 		Perl_croak(aTHX_ "Usage: resettaskactivity(task_id, activity_id)");
 	}
@@ -3323,11 +3325,11 @@ XS(XS__wearchange)
 	uint8		slot = (int)SvUV(ST(0));
 	uint16		texture_id = (int)SvUV(ST(1));
 
-	uint32 hero_forge_model _id= 0;
+	uint32 hero_forge_model_id= 0;
 	uint32 elite_material_id = 0;
 
 	if (items > 2)
-		hero_forge_model _id= (int)SvUV(ST(2));
+		hero_forge_model_id= (int)SvUV(ST(2));
 
 	if (items > 3)
 		elite_material_id = (int)SvUV(ST(3));
