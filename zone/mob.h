@@ -1140,6 +1140,7 @@ protected:
 	virtual bool AI_EngagedCastCheck() { return(false); }
 	virtual bool AI_PursueCastCheck() { return(false); }
 	virtual bool AI_IdleCastCheck() { return(false); }
+	virtual void AI_RestartSpellTimer() { }
 
 	bool IsFullHP;
 	bool moved;
