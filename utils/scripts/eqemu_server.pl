@@ -48,8 +48,8 @@ if(-e "eqemu_server_skip_update.txt"){
 }
 
 #::: Check for script self update
-do_self_update_check_routine() if !$skip_self_update_check;
 check_xml_to_json_conversion() if $ARGV[0] eq "convert_xml";
+do_self_update_check_routine() if !$skip_self_update_check;
 get_windows_wget();
 get_perl_version();
 if(-e "eqemu_config.json") {
