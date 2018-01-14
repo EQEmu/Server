@@ -1391,19 +1391,33 @@ void Mob::AI_Process() {
 						//if(owner->IsClient())
 						//	printf("Pet start pos: (%f, %f, %f)\n", GetX(), GetY(), GetZ());
 
-						float dist = DistanceSquared(m_Position, owner->GetPosition());
-						if (dist >= 400)
+						glm::vec4 ownerPos = owner->GetPosition();
+						float dist = DistanceSquared(m_Position, ownerPos);
+						float distz = ownerPos.z - m_Position.z;
+
+						if (dist >= 400 || distz > 100)
 						{
 							int speed = GetWalkspeed();
 							if (dist >= 5625)
 								speed = GetRunspeed();
 
-							CalculateNewPosition2(owner->GetX(), owner->GetY(), owner->GetZ(), speed);
+							if (distz > 100)
+							{
+								m_Position = ownerPos;
+								SendPositionUpdate();
+								moved = true;
+							}
+							else
+							{
+							CalculateNewPosition2(owner->GetX(), 
+								owner->GetY(), owner->GetZ(), speed);
+							}
 						}
 						else
 						{
 							if(moved)
 							{
+								this->FixZ();
 								SetCurrentSpeed(0);
 								moved = false;
 							}
@@ -1747,6 +1761,12 @@ void Mob::AI_Event_Engaged(Mob* attacker, bool iYellForHelp) {
 		return;
 
 	SetAppearance(eaStanding);
+
+	/*
+		Kick off auto cast timer
+	*/
+	if (this->IsNPC())
+		this->CastToNPC()->AIautocastspell_timer->Start(300, false);
 
 	if (iYellForHelp) {
 		if(IsPet()) {

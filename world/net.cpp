@@ -104,6 +104,7 @@ EQEmuLogSys LogSys;
 WebInterfaceList web_interface;
 
 void CatchSignal(int sig_num);
+void CheckForServerScript(bool force_download = false);
 
 inline void UpdateWindowTitle(std::string new_title) {
 #ifdef _WINDOWS
@@ -115,6 +116,17 @@ int main(int argc, char** argv) {
 	RegisterExecutablePlatform(ExePlatformWorld);
 	LogSys.LoadLogSettingsDefaults();
 	set_exception_handler();
+
+	/* If eqemu_config.json does not exist - create it from conversion... */
+	if (!std::ifstream("eqemu_config.json")) {
+		CheckForServerScript(true);
+		/* Run EQEmu Server script (Checks for database updates) */
+		system("perl eqemu_server.pl convert_xml");
+	}
+	else {
+		/* Download EQEmu Server Maintenance Script if doesn't exist */
+		CheckForServerScript();
+	}
 
 	/* Database Version Check */
 	uint32 Database_Version = CURRENT_BINARY_DATABASE_VERSION;
@@ -173,7 +185,7 @@ int main(int argc, char** argv) {
 		}
 	}
 
-	Log(Logs::General, Logs::World_Server, "Connecting to MySQL...");
+	Log(Logs::General, Logs::World_Server, "Connecting to MySQL %s@%s:%i...", Config->DatabaseUsername.c_str(), Config->DatabaseHost.c_str(), Config->DatabasePort);
 	if (!database.Connect(
 		Config->DatabaseHost.c_str(),
 		Config->DatabaseUsername.c_str(),
@@ -572,4 +584,33 @@ int main(int argc, char** argv) {
 void CatchSignal(int sig_num) {
 	Log(Logs::General, Logs::World_Server, "Caught signal %d", sig_num);
 	RunLoops = false;
+}
+
+void UpdateWindowTitle(char* iNewTitle) {
+#ifdef _WINDOWS
+	char tmp[500];
+	if (iNewTitle) {
+		snprintf(tmp, sizeof(tmp), "World: %s", iNewTitle);
+	}
+	else {
+		snprintf(tmp, sizeof(tmp), "World");
+	}
+	SetConsoleTitle(tmp);
+#endif
+}
+
+void CheckForServerScript(bool force_download) {
+	/* Fetch EQEmu Server script */
+	if (!std::ifstream("eqemu_server.pl") || force_download) {
+
+		if(force_download)
+			std::remove("eqemu_server.pl"); /* Delete local before fetch */
+
+		std::cout << "Pulling down EQEmu Server Maintenance Script (eqemu_server.pl)..." << std::endl;
+#ifdef _WIN32
+		system("perl -MLWP::UserAgent -e \"require LWP::UserAgent;  my $ua = LWP::UserAgent->new; $ua->timeout(10); $ua->env_proxy; my $response = $ua->get('https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/eqemu_server.pl'); if ($response->is_success){ open(FILE, '> eqemu_server.pl'); print FILE $response->decoded_content; close(FILE); }\"");
+#else
+		system("wget -N --no-check-certificate --quiet -O eqemu_server.pl https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/eqemu_server.pl");
+#endif
+	}
 }

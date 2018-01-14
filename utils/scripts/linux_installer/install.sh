@@ -119,6 +119,7 @@ if [[ "$OS" == "Debian" ]]; then
 	apt-get $apt_options install zlibc
 	apt-get $apt_options install libsodium-dev
 	apt-get $apt_options install libsodium18
+	apt-get $apt_options install libjson-perl
 	
 	# If libsodium18 isn't installed (Debian), let's download both that and the dev package and install them.
 	if dpkg-query -s "libsodium18" 1>/dev/null 2>&1; then
@@ -159,7 +160,7 @@ EOF
 	# Install prereqs
 	yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 	yum -y install deltarpm
-	yum -y install open-vm-tools vim cmake boost-* zlib-devel mariadb-server mariadb-client mariadb-devel mariadb-libs mariadb-compat perl-* lua* dos2unix php-mysql proftpd
+	yum -y install open-vm-tools vim cmake boost-* zlib-devel mariadb-server mariadb-client mariadb-devel mariadb-libs mariadb-compat perl-* lua* dos2unix php-mysql proftpd libuuid-devel
 	yum -y groupinstall "Development Tools" "Basic Web Server" "Compatibility Libraries"
 
 elif [[ "$OS" == "fedora_core" ]]; then
