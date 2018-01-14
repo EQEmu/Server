@@ -1762,6 +1762,12 @@ void Mob::AI_Event_Engaged(Mob* attacker, bool iYellForHelp) {
 
 	SetAppearance(eaStanding);
 
+	/*
+		Kick off auto cast timer
+	*/
+	if (this->IsNPC())
+		this->CastToNPC()->AIautocastspell_timer->Start(300, false);
+
 	if (iYellForHelp) {
 		if(IsPet()) {
 			GetOwner()->AI_Event_Engaged(attacker, iYellForHelp);
