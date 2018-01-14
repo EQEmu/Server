@@ -119,6 +119,7 @@ if [[ "$OS" == "Debian" ]]; then
 	apt-get $apt_options install zlibc
 	apt-get $apt_options install libsodium-dev
 	apt-get $apt_options install libsodium18
+	apt-get $apt_options install libjson-perl
 	
 	# If libsodium18 isn't installed (Debian), let's download both that and the dev package and install them.
 	if dpkg-query -s "libsodium18" 1>/dev/null 2>&1; then
