@@ -693,9 +693,14 @@ sub do_install_config_json {
 	else {
 		$db_name = "peq";
 	}
+	
 	$config->{"server"}{"database"}{"username"} = $installation_variables{"mysql_eqemu_user"};
 	$config->{"server"}{"database"}{"password"} = $installation_variables{"mysql_eqemu_password"};
 	$config->{"server"}{"database"}{"db"} = $db_name;
+	
+	$config->{"server"}{"qsdatabase"}{"username"} = $installation_variables{"mysql_eqemu_user"};
+	$config->{"server"}{"qsdatabase"}{"password"} = $installation_variables{"mysql_eqemu_password"};
+	$config->{"server"}{"qsdatabase"}{"db"} = $db_name;
 	
 	$json->canonical(1);
 	$json->indent_length(5);
