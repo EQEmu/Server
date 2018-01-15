@@ -48,8 +48,8 @@ if(-e "eqemu_server_skip_update.txt"){
 }
 
 #::: Check for script self update
-do_self_update_check_routine() if !$skip_self_update_check;
 check_xml_to_json_conversion() if $ARGV[0] eq "convert_xml";
+do_self_update_check_routine() if !$skip_self_update_check;
 get_windows_wget();
 get_perl_version();
 if(-e "eqemu_config.json") {
@@ -288,6 +288,10 @@ sub new_server {
 			print "[New Server] Below is your installation info:\n";
 			
 			show_install_summary_info();
+			
+			if($OS eq "Linux") {
+				unlink('/home/eqemu/install_variables.txt');
+			}
 			
 			rmtree('updates_staged');
 			
@@ -642,7 +646,12 @@ sub do_self_update_check_routine {
 sub get_installation_variables{
 	#::: Fetch installation variables before building the config
 	if($OS eq "Linux"){
-		open (INSTALL_VARS, "../install_variables.txt");
+		if(-e "../install_variables.txt") {
+			open (INSTALL_VARS, "../install_variables.txt");
+		}
+		elsif(-e "install_variables.txt") {
+			open (INSTALL_VARS, "./install_variables.txt");
+		}
 	}
 	if($OS eq "Windows"){
 		open (INSTALL_VARS, "install_variables.txt");
@@ -684,9 +693,14 @@ sub do_install_config_json {
 	else {
 		$db_name = "peq";
 	}
+	
 	$config->{"server"}{"database"}{"username"} = $installation_variables{"mysql_eqemu_user"};
 	$config->{"server"}{"database"}{"password"} = $installation_variables{"mysql_eqemu_password"};
 	$config->{"server"}{"database"}{"db"} = $db_name;
+	
+	$config->{"server"}{"qsdatabase"}{"username"} = $installation_variables{"mysql_eqemu_user"};
+	$config->{"server"}{"qsdatabase"}{"password"} = $installation_variables{"mysql_eqemu_password"};
+	$config->{"server"}{"qsdatabase"}{"db"} = $db_name;
 	
 	$json->canonical(1);
 	$json->indent_length(5);
@@ -1044,7 +1058,7 @@ sub get_remote_file{
 	}
 	
 	#::: wget -O db_update/db_update_manifest.txt https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/db_update_manifest.txt
-	$wget = `wget -N --no-check-certificate --quiet -O $destination_file $request_url`;
+	$wget = `wget -N --cache=no --no-check-certificate --quiet -O $destination_file $request_url`;
 	print "[Download] Saved: (" . $destination_file . ") from " . $request_url . "\n" if !$silent_download;
 	if($wget=~/unable to resolve/i){ 
 		print "Error, no connection or failed request...\n\n";
