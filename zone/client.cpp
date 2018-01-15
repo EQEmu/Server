@@ -9271,7 +9271,7 @@ bool Client::AreNonExpendableReagentsRequired(
 	// Iterate through non-expendable components.
 	for (int i = 0; i < 4; i++)
 	{
-		int component = spell.components[i];
+		int component = spell.NoexpendReagent[i];
 
 		// is there a component?
 		if (-1 == component)
