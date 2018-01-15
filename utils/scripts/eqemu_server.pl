@@ -646,7 +646,12 @@ sub do_self_update_check_routine {
 sub get_installation_variables{
 	#::: Fetch installation variables before building the config
 	if($OS eq "Linux"){
-		open (INSTALL_VARS, "../install_variables.txt");
+		if(-e "../install_variables.txt") {
+			open (INSTALL_VARS, "../install_variables.txt");
+		}
+		elsif(-e "install_variables.txt") {
+			open (INSTALL_VARS, "./install_variables.txt");
+		}
 	}
 	if($OS eq "Windows"){
 		open (INSTALL_VARS, "install_variables.txt");
