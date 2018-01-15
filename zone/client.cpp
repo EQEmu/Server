@@ -9295,7 +9295,7 @@ bool Client::AreNonExpendableReagentsRequired(
 			// a consumable, in which case, that consumable is no longer consumed.
 
 			// find it in the array or add it.
-			for (int j = 0; j < sizeof(reagents); j++)
+			for (int j = 0; j < 4; j++)
 			{
 				if (reagents[j] == component)
 				{
@@ -9357,4 +9357,103 @@ bool Client::AreReagentsRequired(
 
 	// If the index is greater than 0 then at least one reagent is required.
 	return requiredIdx > 0;
+}
+
+bool Client::CheckAndConsumeReagents(int32 spell_id)
+{
+	int reagents[8] = { -1, -1, -1, -1, -1, -1, -1, -1 };
+	int quantity[8] = { -1, -1, -1, -1, -1, -1, -1, -1 };
+	bool consumable[8] = { false, false, false, false, false, false, false, false };
+
+	// Index consumables.
+	bool hasReagents = this->AreReagentsRequired(
+		spell_id,
+		reagents,
+		quantity,
+		consumable);
+
+	// Index non-consumables
+	bool hasNonExpendableReagents = this->AreNonExpendableReagentsRequired(
+		spell_id,
+		reagents,
+		quantity,
+		consumable);
+
+	// Are there reagents for this spell?
+	if (hasReagents || hasNonExpendableReagents)
+	{
+		// Yes.  Consume them.
+		return ConsumeReagents(spell_id, reagents, quantity, consumable, 8);
+	}
+
+	// Success.  No reagents to check.
+	return true;
+}
+
+bool Client::ConsumeReagents(int32 spell_id, int reagents[], int quantity[], bool consumable[], int reagentsLength)
+{
+	bool missingreags = false;
+	// Do we have enough of them?
+	for (int i = 0; i < reagentsLength; i++) {
+		// Yes.  Do we have enough of them?
+		if (-1 != reagents[i] &&
+			this->GetInv().HasItem(reagents[i], quantity[i], invWhereWorn | invWherePersonal) == -1) {
+			// No.
+			if (!missingreags) {
+				this->Message_StringID(13, MISSING_SPELL_COMP);
+				missingreags = true;
+			}
+
+			const EQEmu::ItemData *item = database.GetItem(reagents[i]);
+			if (item) {
+				this->Message_StringID(13, MISSING_SPELL_COMP_ITEM, item->Name);
+				Log(Logs::Detail, Logs::Spells, "Spell %d: Canceled. Missing required reagent %s (%d)", spell_id, item->Name, reagents[i]);
+			}
+			else {
+				char TempItemName[64];
+				strcpy((char*)&TempItemName, "UNKNOWN");
+				Log(Logs::Detail, Logs::Spells, "Spell %d: Canceled. Missing required reagent %s (%d)", spell_id, TempItemName, reagents[i]);
+			}
+		}
+	}
+
+	if (missingreags) {
+		if (this->GetGM()) {
+			this->Message(0, "Your GM status allows you to finish casting even though you're missing required components.");
+		}
+		else {
+			// Missing reagents, casting failed.
+			InterruptSpell();
+			return false;
+		}
+	}
+	else {
+		for (int i = 0; i < reagentsLength; i++) {
+			if (!consumable[i]) {
+				continue;
+			}
+
+			Log(Logs::Detail, Logs::Spells, "Spell %d: Consuming %d of spell component item id %d", spell_id, quantity[i], reagents[i]);
+
+			// Components found, Deleting
+			// now we go looking for and deleting the items one by one
+			for (int s = 0; s < quantity[i]; s++)
+			{
+				int inv_slot_id = this->GetInv().HasItem(reagents[i], 1, invWhereWorn | invWherePersonal);
+				if (inv_slot_id != -1)
+				{
+					this->DeleteItemInInventory(inv_slot_id, 1, true);
+				}
+				else
+				{	// some kind of error in the code if this happens.
+					//
+					// This previously didn't fail the spell, so I'm keeping it like that for now.
+					this->Message(13, "ERROR: reagent item disappeared while processing?");
+				}
+			}
+		}
+	} // end missingreags/consumption
+
+	// Consumption was successful.
+	return true;
 }
