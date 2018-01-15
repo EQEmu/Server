@@ -289,6 +289,10 @@ sub new_server {
 			
 			show_install_summary_info();
 			
+			if($OS eq "Linux") {
+				unlink('/home/eqemu/install_variables.txt');
+			}
+			
 			rmtree('updates_staged');
 			
 			return;
