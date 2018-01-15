@@ -1044,7 +1044,7 @@ sub get_remote_file{
 	}
 	
 	#::: wget -O db_update/db_update_manifest.txt https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/db_update_manifest.txt
-	$wget = `wget -N --no-check-certificate --quiet -O $destination_file $request_url`;
+	$wget = `wget -N --cache=no --no-check-certificate --quiet -O $destination_file $request_url`;
 	print "[Download] Saved: (" . $destination_file . ") from " . $request_url . "\n" if !$silent_download;
 	if($wget=~/unable to resolve/i){ 
 		print "Error, no connection or failed request...\n\n";
