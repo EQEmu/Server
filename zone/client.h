@@ -606,6 +606,10 @@ public:
 	uint32 GetExperienceForKill(Mob *against);
 	void AddEXP(uint32 in_add_exp, uint8 conlevel = 0xFF, bool resexp = false);
 	uint32 CalcEXP(uint8 conlevel = 0xFF);
+	void CalculateNormalizedAAExp(uint32 &add_aaxp, uint8 conlevel, bool resexp);
+	void CalculateStandardAAExp(uint32 &add_aaxp, uint8 conlevel, bool resexp);
+	void CalculateLeadershipExp(uint32 &add_exp, uint8 conlevel);
+	void CalculateExp(uint32 in_add_exp, uint32 &add_exp, uint32 &add_aaxp, uint8 conlevel, bool resexp);
 	void SetEXP(uint32 set_exp, uint32 set_aaxp, bool resexp=false);
 	void AddLevelBasedExp(uint8 exp_percentage, uint8 max_level=0);
 	void SetLeadershipEXP(uint32 group_exp, uint32 raid_exp);

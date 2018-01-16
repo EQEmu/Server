@@ -676,6 +676,12 @@ RULE_CATEGORY_END()
 RULE_CATEGORY(AA)
 RULE_INT(AA, ExpPerPoint, 23976503)	//Amount of exp per AA. Is the same as the amount of exp to go from level 51 to level 52.
 RULE_BOOL(AA, Stacking, true) //Allow AA that belong to the same group to stack on SOF+ clients.
+RULE_BOOL(AA, NormalizedAAEnabled, false) // TSS+ change to AA that normalizes AA XP to a fixed # of white con kills independent of level.
+RULE_INT(AA, NormalizedAANumberOfWhiteConPerAA, 25) // The number of white con kills per AA point.
+RULE_BOOL(AA, ModernAAScalingEnabled, false) // Are we linearly scaling AA XP based on total # of earned AA?
+RULE_REAL(AA, ModernAAScalingStartPercent, 1000) // 1000% or 10x AA XP at the start of the scaling range
+RULE_INT(AA, ModernAAScalingAAMinimum, 0) // The minimum number of earned AA before AA XP scaling begins.
+RULE_INT(AA, ModernAAScalingAALimit, 4000) // The number of earned AA when AA XP scaling ends
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Console)
