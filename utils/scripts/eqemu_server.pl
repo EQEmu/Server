@@ -273,7 +273,7 @@ sub new_server {
 			analytics_insertion("new_server::install", $database_name);
 			
 			if($OS eq "Linux"){
-				build_linux_source();
+				build_linux_source("login");
 			}
 			
 			do_installer_routines();
@@ -397,10 +397,10 @@ sub build_linux_source {
 
 	print "Generating CMake build files...\n";
 	if($os_flavor eq "fedora_core"){
-		print `cmake $cmake_options -DEQEMU_BUILD_LUA=ON -DLUA_INCLUDE_DIR=/usr/include/lua-5.1/ -G "Unix Makefiles" ..`;
+		print `cmake $cmake_options -DEQEMU_BUILD_LOGIN=ON -DEQEMU_BUILD_LUA=ON -DLUA_INCLUDE_DIR=/usr/include/lua-5.1/ -G "Unix Makefiles" ..`;
 	}
 	else { 
-		print `cmake $cmake_options -DEQEMU_BUILD_LUA=ON -G "Unix Makefiles" ..`;
+		print `cmake $cmake_options -DEQEMU_BUILD_LOGIN=ON -DEQEMU_BUILD_LUA=ON -G "Unix Makefiles" ..`;
 	}
 	print "Building EQEmu Server code. This will take a while.";
 
@@ -419,6 +419,7 @@ sub build_linux_source {
 	print `ln -s -f $source_dir/Server/build/bin/ucs .`;
 	print `ln -s -f $source_dir/Server/build/bin/world .`;
 	print `ln -s -f $source_dir/Server/build/bin/zone .`;
+	print `ln -s -f $source_dir/Server/build/bin/loginserver .`;
 }
 
 sub do_installer_routines {
@@ -816,6 +817,7 @@ sub show_menu_prompt {
 		elsif($input eq "setup_loginserver"){ do_windows_login_server_setup(); $dc = 1; }
 		elsif($input eq "new_server"){ new_server(); $dc = 1; }
 		elsif($input eq "setup_bots"){ setup_bots(); $dc = 1; }
+		elsif($input eq "linux_login_server_setup"){ do_linux_login_server_setup(); $dc = 1; }
 		elsif($input eq "exit"){
 			exit;
 		}
@@ -1347,6 +1349,8 @@ sub do_windows_login_server_setup {
 
 sub do_linux_login_server_setup {
 	
+	build_linux_source();
+	
 	for my $file (@files) {
 		$destination_file = $file; 
 		$destination_file =~s/updates_staged\/login_server\///g;
@@ -1367,6 +1371,8 @@ sub do_linux_login_server_setup {
 	get_remote_file($install_repository_request_url . "linux/login.ini", "login_template.ini");
 	get_remote_file($install_repository_request_url . "linux/login_opcodes.conf", "login_opcodes.conf");
 	get_remote_file($install_repository_request_url . "linux/login_opcodes_sod.conf", "login_opcodes_sod.conf");
+	get_remote_file($install_repository_request_url . "linux/server_start_with_login.sh", "server_start_with_login.sh");
+	system("chmod 755 *.sh");
 	
 	get_installation_variables();
 	my $db_name = $installation_variables{"mysql_eqemu_db_name"};
