@@ -928,7 +928,7 @@ sub check_for_database_dump_script{
 				$start_dir
 			);
 			for my $file (@files) {
-				if($file=~/db_dumper/i){ 
+				if($file=~/database_dumper/i){ 
 					$destination_file = $file;
 					$destination_file =~s/updates_staged\///g;
 					print "[Install] Installing :: " . $destination_file . "\n";
