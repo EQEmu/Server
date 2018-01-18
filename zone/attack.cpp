@@ -3363,6 +3363,12 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 		damage = DMG_INVULNERABLE;
 	}
 
+	// this should actually happen MUCH sooner, need to investigate though -- good enough for now
+	if ((skill_used == EQEmu::skills::SkillArchery || skill_used == EQEmu::skills::SkillThrowing) && GetSpecialAbility(IMMUNE_RANGED_ATTACKS)) {
+		Log(Logs::Detail, Logs::Combat, "Avoiding %d damage due to IMMUNE_RANGED_ATTACKS.", damage);
+		damage = DMG_INVULNERABLE;
+	}
+
 	if (spell_id != SPELL_UNKNOWN || attacker == nullptr)
 		avoidable = false;
 
