@@ -46,7 +46,7 @@ public:
 		_chat_config=new queryservconfig;
 		_config=_chat_config;
 
-		return _config->ParseFile(EQEmuConfig::ConfigFile.c_str(),"server");
+		return _config->parseFile();
 	}
 
 };

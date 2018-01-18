@@ -1728,6 +1728,15 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQEmu::skills::Sk
 	if (!RuleB(Character, UseDeathExpLossMult)) {
 		exploss = (int)(GetLevel() * (GetLevel() / 18.0) * 12000);
 	}
+	
+	if (RuleB(Zone, LevelBasedEXPMods)) {
+		// Death in levels with xp_mod (such as hell levels) was resulting
+		// in losing more that appropriate since the loss was the same but
+		// getting it back would take way longer.  This makes the death the
+		// same amount of time to recover.  Will also lose more if level is
+		// granting a bonus.
+		exploss *= zone->level_exp_mod[GetLevel()].ExpMod;
+	}
 
 	if ((GetLevel() < RuleI(Character, DeathExpLossLevel)) || (GetLevel() > RuleI(Character, DeathExpLossMaxLevel)) || IsBecomeNPC())
 	{
@@ -2675,7 +2684,7 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 
 	hate_list.AddEntToHateList(other, hate, damage, bFrenzy, !iBuffTic);
 
-	if (other->IsClient() && !on_hatelist)
+	if (other->IsClient() && !on_hatelist && !IsOnFeignMemory(other->CastToClient()))
 		other->CastToClient()->AddAutoXTarget(this);
 
 #ifdef BOTS

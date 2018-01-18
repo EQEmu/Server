@@ -18,8 +18,9 @@
 #ifndef __EQEmuConfig_H
 #define __EQEmuConfig_H
 
-#include "xml_parser.h"
+#include "json/json.h"
 #include "linked_list.h"
+#include <fstream>
 
 struct LoginConfig {
 	std::string LoginHost;
@@ -29,7 +30,7 @@ struct LoginConfig {
 	bool LoginLegacy;
 };
 
-class EQEmuConfig : public XMLParser
+class EQEmuConfig
 {
 	public:
 		virtual std::string GetByName(const std::string &var_name) const;
@@ -115,88 +116,14 @@ class EQEmuConfig : public XMLParser
 	protected:
 
 		static EQEmuConfig *_config;
-
+		Json::Value _root;
 		static std::string ConfigFile;
 
-#define ELEMENT(name) \
-	void do_##name(TiXmlElement *ele);
-#include "eqemu_config_elements.h"
-
+		void parse_config();
 
 		EQEmuConfig()
-		{
-			// import the needed handler prototypes
-#define ELEMENT(name) \
-	Handlers[#name]=(ElementHandler)&EQEmuConfig::do_##name;
-#include "eqemu_config_elements.h"
-			// Set sane defaults
-			// Login server
-			LoginHost = "login.eqemulator.net";
-			LoginPort = 5998;
-			LoginLegacy = false;
-			// World
-			Locked = false;
-			WorldTCPPort = 9000;
-			TelnetTCPPort = 9001;
-			TelnetEnabled = false;
-			WorldHTTPEnabled = false;
-			WorldHTTPPort = 9080;
-			WorldHTTPMimeFile = "mime.types";
-			SharedKey = "";	//blank disables authentication
-			// Mail
-			ChatHost = "eqchat.eqemulator.net";
-			ChatPort = 7778;
-			// Mail
-			MailHost = "eqmail.eqemulator.net";
-			MailPort = 7779;
-			// Mysql
-			DatabaseHost = "localhost";
-			DatabasePort = 3306;
-			DatabaseUsername = "eq";
-			DatabasePassword = "eq";
-			DatabaseDB = "eq";
-			// QueryServ Database
-			QSDatabaseHost = "localhost";
-			QSDatabasePort = 3306;
-			QSDatabaseUsername = "eq";
-			QSDatabasePassword = "eq";
-			QSDatabaseDB = "eq";
-			// Files
-			SpellsFile = "spells_us.txt";
-			OpCodesFile = "opcodes.conf";
-			PluginPlFile = "plugin.pl";
-			// Dirs
-			MapDir = "Maps/";
-			QuestDir = "quests/";
-			PluginDir = "plugins/";
-			LuaModuleDir = "lua_modules/";
-			PatchDir = "./";
-			SharedMemDir = "shared/";
-			LogDir = "logs/";
+		{			
 
-			// Launcher
-			LogPrefix = "logs/zone-";
-			LogSuffix = ".log";
-			RestartWait = 10000;		//milliseconds
-			TerminateWait = 10000;		//milliseconds
-			InitialBootWait = 20000;	//milliseconds
-			ZoneBootInterval = 2000;	//milliseconds
-			#ifdef WIN32
-			ZoneExe = "zone.exe";
-			#else
-			ZoneExe = "./zone";
-			#endif
-			// Zones
-			ZonePortLow = 7000;
-			ZonePortHigh = 7999;
-			DefaultStatus = 0;
-			// For where zones need to connect to.
-			WorldIP = "127.0.0.1";
-			TelnetIP = "127.0.0.1";
-			// Dynamics to start
-			//DynamicCount=5;
-			MaxClients = -1;
-			LoginCount = 0;
 		}
 		virtual ~EQEmuConfig() {}
 
@@ -205,9 +132,7 @@ class EQEmuConfig : public XMLParser
 		// Produce a const singleton
 		static const EQEmuConfig *get()
 		{
-			if (_config == nullptr) {
-				LoadConfig();
-			}
+			LoadConfig();
 			return (_config);
 		}
 
@@ -221,10 +146,28 @@ class EQEmuConfig : public XMLParser
 		static bool LoadConfig()
 		{
 			if (_config != nullptr) {
-				delete _config;
+				return true;
 			}
 			_config = new EQEmuConfig;
-			return _config->ParseFile(EQEmuConfig::ConfigFile.c_str(), "server");
+
+			return parseFile();
+		}
+
+		// Load config file and parse data
+		static bool parseFile() {
+			if (_config == nullptr) {
+				return LoadConfig();
+			}
+
+			std::ifstream fconfig(EQEmuConfig::ConfigFile, std::ifstream::binary);
+			try {
+				fconfig >> _config->_root;
+				_config->parse_config();
+			}
+			catch (std::exception) {
+				return false;
+			}			
+			return true;
 		}
 
 		void Dump() const;

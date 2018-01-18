@@ -215,7 +215,7 @@ Client::Client(EQStreamInterface* ieqs)
 	linkdead_timer.Disable();
 	zonesummon_id = 0;
 	zonesummon_ignorerestrictions = 0;
-	zoning = false;
+	bZoning = false;
 	zone_mode = ZoneUnsolicited;
 	casting_spell_id = 0;
 	npcflag = false;
@@ -395,7 +395,7 @@ Client::~Client() {
 		GetTarget()->IsTargeted(-1);
 
 	//if we are in a group and we are not zoning, force leave the group
-	if(isgrouped && !zoning && is_zone_loaded)
+	if(isgrouped && !bZoning && is_zone_loaded)
 		LeaveGroup();
 
 	UpdateWho(2);

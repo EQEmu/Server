@@ -198,6 +198,7 @@ RULE_CATEGORY(Pets)
 RULE_REAL(Pets, AttackCommandRange, 150)
 RULE_BOOL(Pets, UnTargetableSwarmPet, false)
 RULE_REAL(Pets, PetPowerLevelCap, 10) // Max number of levels your pet can go up with pet power
+RULE_BOOL(Pets, CanTakeNoDrop, false) // Can everyone trade nodrop gear to pets
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(GM)
@@ -508,6 +509,7 @@ RULE_INT(Combat, NPCAssistCapTimer, 6000) // Time in milliseconds a NPC will tak
 RULE_BOOL(Combat, UseRevampHandToHand, false) // use h2h revamped dmg/delays I believe this was implemented during SoF
 RULE_BOOL(Combat, ClassicMasterWu, false) // classic master wu uses a random special, modern doesn't
 RULE_INT(Combat, LevelToStopDamageCaps, 0) // 1 will effectively disable them, 20 should give basically same results as old incorrect system
+RULE_BOOL(Combat, ClassicNPCBackstab, false) // true disables npc facestab - npcs get normal attack if not behind
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(NPC)
@@ -674,6 +676,12 @@ RULE_CATEGORY_END()
 RULE_CATEGORY(AA)
 RULE_INT(AA, ExpPerPoint, 23976503)	//Amount of exp per AA. Is the same as the amount of exp to go from level 51 to level 52.
 RULE_BOOL(AA, Stacking, true) //Allow AA that belong to the same group to stack on SOF+ clients.
+RULE_BOOL(AA, NormalizedAAEnabled, false) // TSS+ change to AA that normalizes AA XP to a fixed # of white con kills independent of level.
+RULE_INT(AA, NormalizedAANumberOfWhiteConPerAA, 25) // The number of white con kills per AA point.
+RULE_BOOL(AA, ModernAAScalingEnabled, false) // Are we linearly scaling AA XP based on total # of earned AA?
+RULE_REAL(AA, ModernAAScalingStartPercent, 1000) // 1000% or 10x AA XP at the start of the scaling range
+RULE_INT(AA, ModernAAScalingAAMinimum, 0) // The minimum number of earned AA before AA XP scaling begins.
+RULE_INT(AA, ModernAAScalingAALimit, 4000) // The number of earned AA when AA XP scaling ends
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Console)

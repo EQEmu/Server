@@ -164,7 +164,7 @@ namespace RoF2
 			ItemPacket11 = 111,
 			ItemPacket12 = 112,
 			ItemPacketRecovery = 113,
-			ItemPacket14 = 115
+			ItemPacket14 = 115 // Parcel? adds to merchant window too
 		};
 
 	} /*item*/

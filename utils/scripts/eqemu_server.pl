@@ -48,10 +48,18 @@ if(-e "eqemu_server_skip_update.txt"){
 }
 
 #::: Check for script self update
+check_xml_to_json_conversion() if $ARGV[0] eq "convert_xml";
 do_self_update_check_routine() if !$skip_self_update_check;
 get_windows_wget();
 get_perl_version();
-read_eqemu_config_xml();
+if(-e "eqemu_config.json") {
+	read_eqemu_config_json();
+}
+else {
+	#::: This will need to stay for servers who simply haven't updated yet
+	# This script can still update without the server bins being updated
+	read_eqemu_config_xml();
+}
 get_mysql_path();
 
 #::: Remove old eqemu_update.pl
@@ -265,7 +273,7 @@ sub new_server {
 			analytics_insertion("new_server::install", $database_name);
 			
 			if($OS eq "Linux"){
-				build_linux_source();
+				build_linux_source("login");
 			}
 			
 			do_installer_routines();
@@ -281,6 +289,10 @@ sub new_server {
 			
 			show_install_summary_info();
 			
+			if($OS eq "Linux") {
+				unlink('/home/eqemu/install_variables.txt');
+			}
+			
 			rmtree('updates_staged');
 			
 			return;
@@ -289,6 +301,61 @@ sub new_server {
 			print "[New Server] MySQL authorization failed or no MySQL installed\n";
 		}
 	}
+}
+
+sub check_xml_to_json_conversion {
+	if(-e "eqemu_config.xml" && !-e "eqemu_config.json") {
+
+		if($OS eq "Windows"){
+			get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/master/utils/xmltojson/xmltojson-windows-x86.exe", "xmltojson.exe");
+			print "Converting eqemu_config.xml to eqemu_config.json\n";
+			print `xmltojson eqemu_config.xml`;
+		}
+		if($OS eq "Linux"){
+			get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/master/utils/xmltojson/xmltojson-linux-x86", "xmltojson");
+			print "Converting eqemu_config.xml to eqemu_config.json\n";
+			print `chmod 755 xmltojson`;
+			print `./xmltojson eqemu_config.xml`;
+		}
+
+		#::: Prettify and alpha order the config
+		use JSON;
+		my $json = new JSON();
+
+		my $content;
+		open(my $fh, '<', "eqemu_config.json") or die "cannot open file $filename"; {
+			local $/;
+			$content = <$fh>;
+		}
+		close($fh);
+
+		$result = $json->decode($content);
+		$json->canonical(1);
+
+		print $json->pretty->indent_length(5)->utf8->encode($result),"\n";
+		
+		open(my $fh, '>', 'eqemu_config.json');
+		print $fh $json->pretty->indent_length(5)->utf8->encode($result);
+		close $fh;
+		
+		mkdir('backups');
+		copy_file("eqemu_config.xml", "backups/eqemu_config.xml");
+		unlink('eqemu_config.xml');
+		unlink('db_dumper.pl');
+		
+		print "[Server Maintenance] eqemu_config.xml is now DEPRECATED \n";
+		print "[Server Maintenance] eqemu_config.json is now the new Server config format \n";
+		print " A backup of this old config is located in the backups folder of your server directory\n";
+		print " --- \n";
+		print " You may have some plugins and/or applications that still require reference of this config file\n";
+		print " Please update these plugins/applications to use the new configuration format if needed\n";
+		print " --- \n";
+		print " Thanks for your understanding\n";
+		print " The EQEmulator Team\n\n";
+		
+		exit;
+	}
+	
 }
 
 sub build_linux_source {
@@ -330,10 +397,10 @@ sub build_linux_source {
 
 	print "Generating CMake build files...\n";
 	if($os_flavor eq "fedora_core"){
-		print `cmake $cmake_options -DEQEMU_BUILD_LUA=ON -DLUA_INCLUDE_DIR=/usr/include/lua-5.1/ -G "Unix Makefiles" ..`;
+		print `cmake $cmake_options -DEQEMU_BUILD_LOGIN=ON -DEQEMU_BUILD_LUA=ON -DLUA_INCLUDE_DIR=/usr/include/lua-5.1/ -G "Unix Makefiles" ..`;
 	}
 	else { 
-		print `cmake $cmake_options -DEQEMU_BUILD_LUA=ON -G "Unix Makefiles" ..`;
+		print `cmake $cmake_options -DEQEMU_BUILD_LOGIN=ON -DEQEMU_BUILD_LUA=ON -G "Unix Makefiles" ..`;
 	}
 	print "Building EQEmu Server code. This will take a while.";
 
@@ -352,6 +419,7 @@ sub build_linux_source {
 	print `ln -s -f $source_dir/Server/build/bin/ucs .`;
 	print `ln -s -f $source_dir/Server/build/bin/world .`;
 	print `ln -s -f $source_dir/Server/build/bin/zone .`;
+	print `ln -s -f $source_dir/Server/build/bin/loginserver .`;
 }
 
 sub do_installer_routines {
@@ -362,8 +430,8 @@ sub do_installer_routines {
 	mkdir('updates_staged');
 	mkdir('shared');
 	
-	do_install_config_xml();
-	read_eqemu_config_xml();
+	do_install_config_json();
+	read_eqemu_config_json();
 	get_installation_variables();
 	
 	$db_name = "peq";
@@ -579,7 +647,12 @@ sub do_self_update_check_routine {
 sub get_installation_variables{
 	#::: Fetch installation variables before building the config
 	if($OS eq "Linux"){
-		open (INSTALL_VARS, "../install_variables.txt");
+		if(-e "../install_variables.txt") {
+			open (INSTALL_VARS, "../install_variables.txt");
+		}
+		elsif(-e "install_variables.txt") {
+			open (INSTALL_VARS, "./install_variables.txt");
+		}
 	}
 	if($OS eq "Windows"){
 		open (INSTALL_VARS, "install_variables.txt");
@@ -593,73 +666,51 @@ sub get_installation_variables{
 	close (INSTALL_VARS);
 }
 
-sub do_install_config_xml {
+sub do_install_config_json {
 	get_installation_variables();
 	
-	#::: Fetch XML template
-	get_remote_file($install_repository_request_url . "eqemu_config.xml", "eqemu_config_template.xml");
+	#::: Fetch json template
+	get_remote_file($install_repository_request_url . "eqemu_config.json", "eqemu_config_template.json");
 	
-	#::: Open new config file
-	open (NEW_CONFIG, '>', 'eqemu_config.xml');
+	use JSON;
+	my $json = new JSON();
+
+	my $content;
+	open(my $fh, '<', "eqemu_config_template.json") or die "cannot open file $filename"; {
+		local $/;
+		$content = <$fh>;
+	}
+	close($fh);
+
+	$config = $json->decode($content);
 	
-	$in_database_tag = 0;
+	$long_name = "Akkas " . $OS . " PEQ Installer (" . generate_random_password(5) . ')';
+	$config->{"server"}{"world"}{"longname"} = $long_name;
+	$config->{"server"}{"world"}{"key"} = generate_random_password(30);
 	
-	#::: Iterate through template and replace variables...
-	open (FILE_TEMPLATE, "eqemu_config_template.xml");
-	while (<FILE_TEMPLATE>){
-		chomp;
-		$o = $_;
-		
-		#::: Find replace variables
-		
-		if($o=~/\<\!--/i){
-			next; 
-		}
-		
-		if($o=~/database/i && $o=~/\<\//i){
-			$in_database_tag = 0;
-		}
-		if($o=~/database/i){
-			$in_database_tag = 1;
-		}
-		
-		if($o=~/key/i){ 
-			my($replace_key) = $o =~ />(\w+)</;
-			$new_key = generate_random_password(30);
-			$o =~ s/$replace_key/$new_key/g;
-		} 
-		if($o=~/\<longname\>/i){ 
-			my($replace_name) = $o =~ /<longname>(.*)<\/longname>/;
-			$append = '(' . generate_random_password(5) . ')';
-			$o =~ s/$replace_name/Akkas $OS PEQ Installer $append/g;
-		}
-		if($o=~/\<username\>/i && $in_database_tag){
-			my($replace_username) = $o =~ />(\w+)</;
-			$o =~ s/$replace_username/$installation_variables{"mysql_eqemu_user"}/g;
-		}
-		if($o=~/\<password\>/i && $in_database_tag){
-			my($replace_password) = $o =~ />(\w+)</;
-			$o =~ s/$replace_password/$installation_variables{"mysql_eqemu_password"}/g;
-		}
-		if($o=~/\<db\>/i){
-			my($replace_db_name) = $o =~ />(\w+)</;
-			
-			#::: There is really no reason why this shouldn't be set
-			if($installation_variables{"mysql_eqemu_db_name"}){
-				$db_name = $installation_variables{"mysql_eqemu_db_name"};
-			}
-			else {
-				$db_name = "peq";
-			}
-			
-			$o =~ s/$replace_db_name/$db_name/g;
-		}
-		print NEW_CONFIG $o . "\n";
+	if($installation_variables{"mysql_eqemu_db_name"}){
+		$db_name = $installation_variables{"mysql_eqemu_db_name"};
+	}
+	else {
+		$db_name = "peq";
 	}
 	
-	close(FILE_TEMPLATE);
-	close(NEW_CONFIG);
-	unlink("eqemu_config_template.xml");
+	$config->{"server"}{"database"}{"username"} = $installation_variables{"mysql_eqemu_user"};
+	$config->{"server"}{"database"}{"password"} = $installation_variables{"mysql_eqemu_password"};
+	$config->{"server"}{"database"}{"db"} = $db_name;
+	
+	$config->{"server"}{"qsdatabase"}{"username"} = $installation_variables{"mysql_eqemu_user"};
+	$config->{"server"}{"qsdatabase"}{"password"} = $installation_variables{"mysql_eqemu_password"};
+	$config->{"server"}{"qsdatabase"}{"db"} = $db_name;
+	
+	$json->canonical(1);
+	$json->indent_length(5);
+	
+	open(my $fh, '>', 'eqemu_config.json');
+	print $fh $json->pretty->indent_length(5)->utf8->encode($config);
+	close $fh;
+	
+	unlink("eqemu_config_template.json");
 }
 
 sub fetch_utility_scripts {
@@ -766,6 +817,7 @@ sub show_menu_prompt {
 		elsif($input eq "setup_loginserver"){ do_windows_login_server_setup(); $dc = 1; }
 		elsif($input eq "new_server"){ new_server(); $dc = 1; }
 		elsif($input eq "setup_bots"){ setup_bots(); $dc = 1; }
+		elsif($input eq "linux_login_server_setup"){ do_linux_login_server_setup(); $dc = 1; }
 		elsif($input eq "exit"){
 			exit;
 		}
@@ -858,13 +910,13 @@ sub check_for_database_dump_script{
 		return;
 	}
 
-	#::: Check for script changes :: db_dumper.pl
-	get_remote_file($eqemu_repository_request_url . "utils/scripts/db_dumper.pl", "updates_staged/db_dumper.pl", 0, 1, 1);
+	#::: Check for script changes :: database_dumper.pl
+	get_remote_file($eqemu_repository_request_url . "utils/scripts/database_dumper.pl", "updates_staged/database_dumper.pl", 0, 1, 1);
 	
-	if(-e "updates_staged/db_dumper.pl") { 
+	if(-e "updates_staged/database_dumper.pl") { 
 	
-		my $remote_script_size = -s "updates_staged/db_dumper.pl";
-		my $local_script_size = -s "db_dumper.pl";
+		my $remote_script_size = -s "updates_staged/database_dumper.pl";
+		my $local_script_size = -s "database_dumper.pl";
 	
 		if($remote_script_size != $local_script_size){
 			print "[Update] Script has been updated, updating...\n";
@@ -876,14 +928,14 @@ sub check_for_database_dump_script{
 				$start_dir
 			);
 			for my $file (@files) {
-				if($file=~/db_dumper/i){ 
+				if($file=~/database_dumper/i){ 
 					$destination_file = $file;
 					$destination_file =~s/updates_staged\///g;
 					print "[Install] Installing :: " . $destination_file . "\n";
 					unlink($destination_file);
 					copy_file($file, $destination_file); 
 					if($OS eq "Linux"){
-						system("chmod 755 db_dumper.pl");
+						system("chmod 755 database_dumper.pl");
 					}
 				}
 			}
@@ -893,7 +945,7 @@ sub check_for_database_dump_script{
 			print "[Update] No script update necessary...\n";
 		}
 
-		unlink("updates_staged/db_dumper.pl");
+		unlink("updates_staged/database_dumper.pl");
 	}
 	
 	return;
@@ -903,7 +955,7 @@ sub check_for_database_dump_script{
 sub database_dump { 
 	check_for_database_dump_script();
 	print "[Database] Performing database backup....\n";
-	print `perl db_dumper.pl database="$db" loc="backups"`;
+	print `perl database_dumper.pl database="$db" loc="backups"`;
 }
 
 sub database_dump_player_tables { 
@@ -921,7 +973,7 @@ sub database_dump_player_tables {
 	}
 	$tables = substr($tables, 0, -1);
 
-	print `perl db_dumper.pl database="$db" loc="backups" tables="$tables" backup_name="player_tables_export" nolock`;
+	print `perl database_dumper.pl database="$db" loc="backups" tables="$tables" backup_name="player_tables_export" nolock`;
 	
 	print "[Database] Press any key to continue...\n";
 
@@ -932,7 +984,7 @@ sub database_dump_player_tables {
 sub database_dump_compress { 
 	check_for_database_dump_script();
 	print "[Database] Performing database backup....\n";
-	print `perl db_dumper.pl database="$db"  loc="backups" compress`;
+	print `perl database_dumper.pl database="$db"  loc="backups" compress`;
 }
 
 sub script_exit{ 
@@ -1008,7 +1060,7 @@ sub get_remote_file{
 	}
 	
 	#::: wget -O db_update/db_update_manifest.txt https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/db_update_manifest.txt
-	$wget = `wget -N --no-check-certificate --quiet -O $destination_file $request_url`;
+	$wget = `wget -N --cache=no --no-check-certificate --quiet -O $destination_file $request_url`;
 	print "[Download] Saved: (" . $destination_file . ") from " . $request_url . "\n" if !$silent_download;
 	if($wget=~/unable to resolve/i){ 
 		print "Error, no connection or failed request...\n\n";
@@ -1070,6 +1122,26 @@ sub read_eqemu_config_xml {
         }
     }
     close(CONFIG);
+}
+
+sub read_eqemu_config_json {
+	use JSON;
+	my $json = new JSON();
+
+	my $content;
+	open(my $fh, '<', "eqemu_config.json") or die "cannot open file $filename"; {
+		local $/;
+		$content = <$fh>;
+	}
+	close($fh);
+
+	$config = $json->decode($content);
+	
+	$db = $config->{"server"}{"database"}{"db"};
+	$host = $config->{"server"}{"database"}{"host"};
+	$user = $config->{"server"}{"database"}{"username"};
+	$pass = $config->{"server"}{"database"}{"password"};
+
 }
 
 #::: Fetch Latest PEQ AA's
@@ -1277,6 +1349,8 @@ sub do_windows_login_server_setup {
 
 sub do_linux_login_server_setup {
 	
+	build_linux_source();
+	
 	for my $file (@files) {
 		$destination_file = $file; 
 		$destination_file =~s/updates_staged\/login_server\///g;
@@ -1297,6 +1371,8 @@ sub do_linux_login_server_setup {
 	get_remote_file($install_repository_request_url . "linux/login.ini", "login_template.ini");
 	get_remote_file($install_repository_request_url . "linux/login_opcodes.conf", "login_opcodes.conf");
 	get_remote_file($install_repository_request_url . "linux/login_opcodes_sod.conf", "login_opcodes_sod.conf");
+	get_remote_file($install_repository_request_url . "linux/server_start_with_login.sh", "server_start_with_login.sh");
+	system("chmod 755 *.sh");
 	
 	get_installation_variables();
 	my $db_name = $installation_variables{"mysql_eqemu_db_name"};
