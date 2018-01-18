@@ -42,7 +42,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	Bot::ProcessClientZoneChange(this);
 #endif
 
-	zoning = true;
+	bZoning = true;
 	if (app->size != sizeof(ZoneChange_Struct)) {
 		Log(Logs::General, Logs::None, "Wrong size: OP_ZoneChange, size=%d, expected %d", app->size, sizeof(ZoneChange_Struct));
 		return;

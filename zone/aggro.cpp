@@ -253,7 +253,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	//sometimes if a client has some lag while zoning into a dangerous place while either invis or a GM
 	//they will aggro mobs even though it's supposed to be impossible, to lets make sure we've finished connecting
 	if (mob->IsClient()) {
-		if (!mob->CastToClient()->ClientFinishedLoading() || mob->CastToClient()->IsHoveringForRespawn() || mob->CastToClient()->zoning)
+		if (!mob->CastToClient()->ClientFinishedLoading() || mob->CastToClient()->IsHoveringForRespawn() || mob->CastToClient()->bZoning)
 			return false;
 	}
 

@@ -1545,7 +1545,7 @@ private:
 	bool npcflag;
 	uint8 npclevel;
 	bool feigned;
-	bool zoning;
+	bool bZoning;
 	bool tgb;
 	bool instalog;
 	int32 last_reported_mana;
