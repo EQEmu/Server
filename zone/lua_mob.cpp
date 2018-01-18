@@ -2499,7 +2499,8 @@ luabind::scope lua_register_special_abilities() {
 				luabind::value("allow_to_tank", static_cast<int>(ALLOW_TO_TANK)),
 				luabind::value("ignore_root_aggro_rules", static_cast<int>(IGNORE_ROOT_AGGRO_RULES)),
 				luabind::value("casting_resist_diff", static_cast<int>(CASTING_RESIST_DIFF)),
-				luabind::value("counter_avoid_damage", static_cast<int>(COUNTER_AVOID_DAMAGE))
+				luabind::value("counter_avoid_damage", static_cast<int>(COUNTER_AVOID_DAMAGE)),
+				luabind::value("immune_ranged_attacks", static_cast<int>(IMMUNE_RANGED_ATTACKS))
 		];
 }
 
