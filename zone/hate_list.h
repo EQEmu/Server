@@ -31,6 +31,7 @@ struct struct_HateList
 	int32 hatelist_damage;
 	uint32 stored_hate_amount;
 	bool is_entity_frenzy;
+	int8 oor_count; // count on how long we've been out of range
 	uint32 last_modified; // we need to remove this if it gets higher than 10 mins
 };
 
