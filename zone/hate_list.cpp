@@ -200,6 +200,7 @@ void HateList::AddEntToHateList(Mob *in_entity, int32 in_hate, int32 in_damage, 
 		entity->hatelist_damage = (in_damage >= 0) ? in_damage : 0;
 		entity->stored_hate_amount = in_hate;
 		entity->is_entity_frenzy = in_is_entity_frenzied;
+		entity->oor_count = 0;
 		list.push_back(entity);
 		parse->EventNPC(EVENT_HATE_LIST, hate_owner->CastToNPC(), in_entity, "1", 0);
 
@@ -658,8 +659,20 @@ void HateList::RemoveStaleEntries(int time_ms, float dist)
 	while (it != list.end()) {
 		auto m = (*it)->entity_on_hatelist;
 		if (m) {
-			// 10 mins or distance
-			if ((cur_time - (*it)->last_modified > time_ms) || hate_owner->CalculateDistance(m->GetX(), m->GetY(), m->GetZ()) > dist) {
+			bool remove = false;
+
+			if (cur_time - (*it)->last_modified > time_ms)
+				remove = true;
+
+			if (!remove && hate_owner->CalculateDistance(m->GetX(), m->GetY(), m->GetZ()) > dist) {
+				(*it)->oor_count++;
+				if ((*it)->oor_count == 2)
+					remove = true;
+			} else if ((*it)->oor_count != 0) {
+				(*it)->oor_count = 0;
+			}
+
+			if (remove) {
 				parse->EventNPC(EVENT_HATE_LIST, hate_owner->CastToNPC(), m, "0", 0);
 
 				if (m->IsClient()) {
