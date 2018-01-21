@@ -73,9 +73,9 @@ int main()
 	server.options.UpdateInsecurePasswords(server.config.GetVariableBool("security", "update_insecure_passwords", true));
 
 	server.options.AccountTable(server.config.GetVariableString("schema", "account_table", "tblLoginServerAccounts"));
-	server.options.WorldRegistrationTable(server.config.GetVariableString("schema", "account_table", "tblWorldServerRegistration"));
-	server.options.WorldAdminRegistrationTable(server.config.GetVariableString("schema", "account_table", "tblServerAdminRegistration"));
-	server.options.WorldServerTypeTable(server.config.GetVariableString("schema", "account_table", "tblServerListType"));
+	server.options.WorldRegistrationTable(server.config.GetVariableString("schema", "world_registration_table", "tblWorldServerRegistration"));
+	server.options.WorldAdminRegistrationTable(server.config.GetVariableString("schema", "world_admin_registration_table", "tblServerAdminRegistration"));
+	server.options.WorldServerTypeTable(server.config.GetVariableString("schema", "world_server_type_table", "tblServerListType"));
 
 	/* Create database connection */
 	if (server.config.GetVariableString("database", "subsystem", "MySQL").compare("MySQL") == 0) {
