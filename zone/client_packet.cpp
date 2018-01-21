@@ -11700,11 +11700,13 @@ void Client::Handle_OP_RecipesFavorite(const EQApplicationPacket *app)
 		auto item = database.GetItem(tsf->some_id);
 		if (!item)
 		{
-			Log(Logs::General, Logs::Error, "Invalid container ID: %d.  GetItem returned null.\n", tsf->some_id);
-			return;
+			Log(Logs::General, Logs::Error, "Invalid container ID: %d.  GetItem returned null.  Defaulting to BagSlots = 10.\n", tsf->some_id);
+			combineObjectSlots = 10;
 		}
-
-		combineObjectSlots = item->BagSlots;
+		else
+		{
+			combineObjectSlots = item->BagSlots;
+		}
 	}
 
 	std::string favoriteIDs; //gotta be big enough for 500 IDs
@@ -11772,11 +11774,13 @@ void Client::Handle_OP_RecipesSearch(const EQApplicationPacket *app)
 		auto item = database.GetItem(rss->some_id);
 		if (!item)
 		{
-			Log(Logs::General, Logs::Error, "Invalid container ID: %d.  GetItem returned null.\n", rss->some_id);
-			return;
+			Log(Logs::General, Logs::Error, "Invalid container ID: %d.  GetItem returned null.  Defaulting to BagSlots = 10.\n", rss->some_id);
+			combineObjectSlots = 10;
 		}
-
-		combineObjectSlots = item->BagSlots;
+		else
+		{
+			combineObjectSlots = item->BagSlots;
+		}
 	}
 
 	std::string searchClause;
