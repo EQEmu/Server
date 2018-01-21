@@ -424,6 +424,7 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration)
 		npca->GetSwarmInfo()->duration->Start(duration*1000);
 	}
 
+	npca->StartSwarmTimer(duration * 1000);
 	npca->GetSwarmInfo()->owner_id = GetID();
 
 	//give the pet somebody to "love"
