@@ -1605,6 +1605,76 @@ void Lua_Mob::SendIllusionPacket(luabind::adl::object illusion) {
 		beard, aa_title, drakkin_heritage, drakkin_tattoo, drakkin_details, size);
 }
 
+void Lua_Mob::ChangeRace(int in) {
+	Lua_Safe_Call_Void();
+	self->ChangeRace(in);
+}
+
+void Lua_Mob::ChangeGender(int in) {
+	Lua_Safe_Call_Void();
+	self->ChangeGender(in);
+}
+
+void Lua_Mob::ChangeTexture(int in) {
+	Lua_Safe_Call_Void();
+	self->ChangeTexture(in);
+}
+
+void Lua_Mob::ChangeHelmTexture(int in) {
+	Lua_Safe_Call_Void();
+	self->ChangeHelmTexture(in);
+}
+
+void Lua_Mob::ChangeHairColor(int in) {
+	Lua_Safe_Call_Void();
+	self->ChangeHairColor(in);
+}
+
+void Lua_Mob::ChangeBeardColor(int in) {
+	Lua_Safe_Call_Void();
+	self->ChangeBeardColor(in);
+}
+
+void Lua_Mob::ChangeEyeColor1(int in) {
+	Lua_Safe_Call_Void();
+	self->ChangeEyeColor1(in);
+}
+
+void Lua_Mob::ChangeEyeColor2(int in) {
+	Lua_Safe_Call_Void();
+	self->ChangeEyeColor2(in);
+}
+
+void Lua_Mob::ChangeHairStyle(int in) {
+	Lua_Safe_Call_Void();
+	self->ChangeHairStyle(in);
+}
+
+void Lua_Mob::ChangeLuclinFace(int in) {
+	Lua_Safe_Call_Void();
+	self->ChangeLuclinFace(in);
+}
+
+void Lua_Mob::ChangeBeard(int in) {
+	Lua_Safe_Call_Void();
+	self->ChangeBeard(in);
+}
+
+void Lua_Mob::ChangeDrakkinHeritage(int in) {
+	Lua_Safe_Call_Void();
+	self->ChangeDrakkinHeritage(in);
+}
+
+void Lua_Mob::ChangeDrakkinTattoo(int in) {
+	Lua_Safe_Call_Void();
+	self->ChangeDrakkinTattoo(in);
+}
+
+void Lua_Mob::ChangeDrakkinDetails(int in) {
+	Lua_Safe_Call_Void();
+	self->ChangeDrakkinDetails(in);
+}
+
 void Lua_Mob::CameraEffect(uint32 duration, uint32 intensity) {
 	Lua_Safe_Call_Void();
 	self->CameraEffect(duration, intensity);
@@ -2356,6 +2426,20 @@ luabind::scope lua_register_mob() {
 		.def("SetRace", (void(Lua_Mob::*)(int))&Lua_Mob::SetRace)
 		.def("SetGender", (void(Lua_Mob::*)(int))&Lua_Mob::SetGender)
 		.def("SendIllusionPacket", (void(Lua_Mob::*)(luabind::adl::object))&Lua_Mob::SendIllusionPacket)
+		.def("ChangeRace", (void(Lua_Mob::*)(int))&Lua_Mob::ChangeRace)
+		.def("ChangeGender", (void(Lua_Mob::*)(int))&Lua_Mob::ChangeGender)
+		.def("ChangeTexture", (void(Lua_Mob::*)(int))&Lua_Mob::ChangeTexture)
+		.def("ChangeHelmTexture", (void(Lua_Mob::*)(int))&Lua_Mob::ChangeHelmTexture)
+		.def("ChangeHairColor", (void(Lua_Mob::*)(int))&Lua_Mob::ChangeHairColor)
+		.def("ChangeBeardColor", (void(Lua_Mob::*)(int))&Lua_Mob::ChangeBeardColor)
+		.def("ChangeEyeColor1", (void(Lua_Mob::*)(int))&Lua_Mob::ChangeEyeColor1)
+		.def("ChangeEyeColor2", (void(Lua_Mob::*)(int))&Lua_Mob::ChangeEyeColor2)
+		.def("ChangeHairStyle", (void(Lua_Mob::*)(int))&Lua_Mob::ChangeHairStyle)
+		.def("ChangeLuclinFace", (void(Lua_Mob::*)(int))&Lua_Mob::ChangeLuclinFace)
+		.def("ChangeBeard", (void(Lua_Mob::*)(int))&Lua_Mob::ChangeBeard)
+		.def("ChangeDrakkinHeritage", (void(Lua_Mob::*)(int))&Lua_Mob::ChangeDrakkinHeritage)
+		.def("ChangeDrakkinTattoo", (void(Lua_Mob::*)(int))&Lua_Mob::ChangeDrakkinTattoo)
+		.def("ChangeDrakkinDetails", (void(Lua_Mob::*)(int))&Lua_Mob::ChangeDrakkinDetails)
 		.def("CameraEffect", (void(Lua_Mob::*)(uint32,uint32))&Lua_Mob::CameraEffect)
 		.def("CameraEffect", (void(Lua_Mob::*)(uint32,uint32,Lua_Client))&Lua_Mob::CameraEffect)
 		.def("CameraEffect", (void(Lua_Mob::*)(uint32,uint32,Lua_Client,bool))&Lua_Mob::CameraEffect)
