@@ -488,16 +488,6 @@ void Lua_NPC::MerchantCloseShop() {
 	self->MerchantCloseShop();
 }
 
-void Lua_NPC::SetMerchantProbability(uint8 amt) {
-	Lua_Safe_Call_Void();
-	self->SetMerchantProbability(amt);
-}
-
-uint8 Lua_NPC::GetMerchantProbability() {
-	Lua_Safe_Call_Int();
-	return self->GetMerchantProbability();
-}
-
 int Lua_NPC::GetRawAC() {
 	Lua_Safe_Call_Int();
 	return self->GetRawAC();
@@ -608,8 +598,6 @@ luabind::scope lua_register_npc() {
 		.def("GetScore", (int(Lua_NPC::*)(void))&Lua_NPC::GetScore)
 		.def("MerchantOpenShop", (void(Lua_NPC::*)(void))&Lua_NPC::MerchantOpenShop)
 		.def("MerchantCloseShop", (void(Lua_NPC::*)(void))&Lua_NPC::MerchantCloseShop)
-		.def("SetMerchantProbability", (void(Lua_NPC::*)(void))&Lua_NPC::SetMerchantProbability)
-		.def("GetMerchantProbability", (uint8(Lua_NPC::*)(void))&Lua_NPC::GetMerchantProbability)
 		.def("GetRawAC", (int(Lua_NPC::*)(void))&Lua_NPC::GetRawAC)
 		.def("GetAvoidanceRating", &Lua_NPC::GetAvoidanceRating);
 }

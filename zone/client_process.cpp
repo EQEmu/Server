@@ -887,7 +887,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 	uint8 handychance = 0;
 	for (itr = merlist.begin(); itr != merlist.end() && i <= numItemSlots; ++itr) {
 		MerchantList ml = *itr;
-		if (merch->CastToNPC()->GetMerchantProbability() > ml.probability)
+		if (ml.probability != 100 && zone->random.Int(1, 100) > ml.probability)
 			continue;
 
 		if (GetLevel() < ml.level_required)

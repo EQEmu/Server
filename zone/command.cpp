@@ -2998,7 +2998,7 @@ void command_reloadworld(Client *c, const Seperator *sep)
 }
 
 void command_reloadmerchants(Client *c, const Seperator *sep) {
-	zone->ReloadMerchants();
+	entity_list.ReloadMerchants();
 	c->Message(15, "Reloading merchants.");
 }
 
