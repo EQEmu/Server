@@ -439,6 +439,20 @@ public:
 	inline uint8 GetDrakkinHeritage() const { return drakkin_heritage; }
 	inline uint8 GetDrakkinTattoo() const { return drakkin_tattoo; }
 	inline uint8 GetDrakkinDetails() const { return drakkin_details; }
+	inline void ChangeRace(uint16 in) { race = in; }
+	inline void ChangeGender(uint8 in) { gender = in;}
+	inline void ChangeTexture(uint8 in) { texture = in; }
+	inline void ChangeHelmTexture(uint8 in) { helmtexture = in; }
+	inline void ChangeHairColor(uint8 in) { haircolor = in; }
+	inline void ChangeBeardColor(uint8 in) { beardcolor = in; }
+	inline void ChangeEyeColor1(uint8 in) { eyecolor1 = in; }
+	inline void ChangeEyeColor2(uint8 in) { eyecolor2 = in; }
+	inline void ChangeHairStyle(uint8 in) { hairstyle = in; }
+	inline void ChangeLuclinFace(uint8 in) { luclinface = in; }
+	inline void ChangeBeard(uint8 in) { beard = in; }
+	inline void ChangeDrakkinHeritage(uint8 in) { drakkin_heritage = in; }
+	inline void ChangeDrakkinTattoo(uint8 in) { drakkin_tattoo = in; }
+	inline void ChangeDrakkinDetails(uint8 in) { drakkin_details = in; }
 	inline uint32 GetArmorTint(uint8 i) const { return armor_tint.Slot[(i < EQEmu::textures::materialCount) ? i : 0].Color; }
 	inline uint8 GetClass() const { return class_; }
 	inline uint8 GetLevel() const { return level; }
