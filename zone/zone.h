@@ -209,6 +209,7 @@ public:
 	void	LoadAlternateCurrencies();
 	void	LoadNPCEmotes(LinkedList<NPC_Emote_Struct*>* NPCEmoteList);
 	void	ReloadWorld(uint32 Option);
+	void	ReloadMerchants();
 
 	Map*	zonemap;
 	WaterMap* watermap;

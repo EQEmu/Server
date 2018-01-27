@@ -2272,6 +2272,18 @@ void Zone::ReloadWorld(uint32 Option){
 	}
 }
 
+void Zone::ReloadMerchants() {
+	std::list<NPC*> npc_list;
+	entity_list.GetNPCList(npc_list);
+
+	for(std::list<NPC*>::iterator itr = npc_list.begin(); itr != npc_list.end(); ++itr) {
+		NPC* npc = *itr;
+		if (npc->MerchantType != 0) {
+			zone->LoadNewMerchantData(npc->MerchantType);
+		}
+	}
+}
+
 void Zone::LoadTickItems()
 {
 	tick_items.clear();

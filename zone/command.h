@@ -224,6 +224,7 @@ void command_reloadaa(Client *c, const Seperator *sep);
 void command_reloadallrules(Client *c, const Seperator *sep);
 void command_reloademote(Client* c, const Seperator *sep);
 void command_reloadlevelmods(Client *c, const Seperator *sep);
+void command_reloadmerchants(Client *c, const Seperator *sep);
 void command_reloadperlexportsettings(Client *c, const Seperator *sep);
 void command_reloadqst(Client *c, const Seperator *sep);
 void command_reloadstatic(Client *c, const Seperator *sep);

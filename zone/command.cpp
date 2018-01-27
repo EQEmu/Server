@@ -317,6 +317,7 @@ int command_init(void)
 		command_add("reloadallrules", "Executes a reload of all rules.", 80, command_reloadallrules) ||
 		command_add("reloademote", "Reloads NPC Emotes", 80, command_reloademote) ||
 		command_add("reloadlevelmods", nullptr, 255, command_reloadlevelmods) ||
+		command_add("reloadmerchants", nullptr, 255, command_reloadmerchants) ||
 		command_add("reloadperlexportsettings", nullptr, 255, command_reloadperlexportsettings) ||
 		command_add("reloadqst", " - Clear quest cache (any argument causes it to also stop all timers)", 150, command_reloadqst) ||
 		command_add("reloadrulesworld", "Executes a reload of all rules in world specifically.", 80, command_reloadworldrules) ||
@@ -2994,6 +2995,11 @@ void command_reloadworld(Client *c, const Seperator *sep)
 	RW->Option = ((atoi(sep->arg[1]) == 1) ? 1 : 0);
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
+}
+
+void command_reloadmerchants(Client *c, const Seperator *sep) {
+	zone->ReloadMerchants();
+	c->Message(15, "Reloading merchants.");
 }
 
 void command_reloadlevelmods(Client *c, const Seperator *sep)
