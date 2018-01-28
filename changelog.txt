@@ -1,5 +1,14 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 01/28/2018 ==
+Mackal: Spell AI tweaks
+
+AI spells are treated as "innate" spells (devs use this term, and I think this is what they mean by it)
+These spells are spammed by the NPC, lots of encounters on live work like this and this will greatly reduce
+the need to do quest scripting on these types of encounters.
+
+You can safely run update npc_spells_entries set priority = priority + 1 where priority >= 0; if you want to disable this new behavior
+
 == 10/08/2017 ==
 Mackal: Rework regens
 
