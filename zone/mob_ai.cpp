@@ -206,8 +206,8 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes, bool bInnates
 					}
 					case SpellType_Nuke: {
 						if (
-							manaR >= 10 && (bInnates || zone->random.Roll(70))
-							&& tar->CanBuffStack(AIspells[i].spellid, GetLevel(), false) >= 0 // saying it's a nuke here, AI shouldn't care too much if overwriting
+							manaR >= 10 && (bInnates || (zone->random.Roll(70)
+							&& tar->CanBuffStack(AIspells[i].spellid, GetLevel(), false) >= 0)) // saying it's a nuke here, AI shouldn't care too much if overwriting
 							) {
 							if(!checked_los) {
 								if(!CheckLosFN(tar))
