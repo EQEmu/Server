@@ -2669,7 +2669,7 @@ DBnpcspells_Struct* ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID) {
 		return nullptr;
 
 	if (!npc_spells_cache) {
-		npc_spells_maxid = GetMaxNPCSpellsID();
+		npc_spells_maxid = GetMaxNPCSpellsID() + 50; // TODO: make this better, shitfix to allow dev work
 		npc_spells_cache = new DBnpcspells_Struct*[npc_spells_maxid+1];
 		npc_spells_loadtried = new bool[npc_spells_maxid+1];
 		for (uint32 i=0; i<=npc_spells_maxid; i++) {
