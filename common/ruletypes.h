@@ -275,17 +275,10 @@ RULE_INT(Zone, GlobalLootMultiplier, 1) // Sets Global Loot drop multiplier for 
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Map)
-//enable these to help prevent mob hopping when they are pathing
-RULE_BOOL(Map, FixPathingZWhenLoading, true)		//increases zone boot times a bit to reduce hopping.
-RULE_BOOL(Map, FixPathingZAtWaypoints, false)	//alternative to `WhenLoading`, accomplishes the same thing but does it at each waypoint instead of once at boot time.
-RULE_BOOL(Map, FixPathingZWhenMoving, false)		//very CPU intensive, but helps hopping with widely spaced waypoints.
 RULE_BOOL(Map, FixPathingZOnSendTo, false)		//try to repair Z coords in the SendTo routine as well.
 RULE_BOOL(Map, FixZWhenMoving, true)		// Automatically fix NPC Z coordinates when moving/pathing/engaged (Far less CPU intensive than its predecessor)
 RULE_BOOL(Map, MobZVisualDebug, false)		// Displays spell effects determining whether or not NPC is hitting Best Z calcs (blue for hit, red for miss)
-RULE_REAL(Map, FixPathingZMaxDeltaMoving, 20)	//at runtime while pathing: max change in Z to allow the BestZ code to apply.
-RULE_REAL(Map, FixPathingZMaxDeltaWaypoint, 20)	//at runtime at each waypoint: max change in Z to allow the BestZ code to apply.
 RULE_REAL(Map, FixPathingZMaxDeltaSendTo, 20)	//at runtime in SendTo: max change in Z to allow the BestZ code to apply.
-RULE_REAL(Map, FixPathingZMaxDeltaLoading, 45)	//while loading each waypoint: max change in Z to allow the BestZ code to apply.
 RULE_INT(Map, FindBestZHeightAdjust, 1)		// Adds this to the current Z before seeking the best Z position
 RULE_CATEGORY_END()
 
