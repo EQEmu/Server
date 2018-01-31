@@ -2366,10 +2366,10 @@ bool NPC::AI_AddNPCSpells(uint32 iDBSpellsID) {
 #if MobAI_DEBUG_Spells >= 10
 	std::string debug_msg = StringFormat("Loading NPCSpells onto %s: dbspellsid=%u", this->GetName(), iDBSpellsID);
 	if (spell_list) {
-		debug_msg.append(StringFormat(" (found, %u), parentlist=%u", spell_list->numentries, spell_list->parent_list));
+		debug_msg.append(StringFormat(" (found, %u), parentlist=%u", spell_list->entries.size(), spell_list->parent_list));
 		if (spell_list->parent_list) {
 			if (parentlist)
-				debug_msg.append(StringFormat(" (found, %u)", parentlist->numentries));
+				debug_msg.append(StringFormat(" (found, %u)", parentlist->entries.size()));
 			else
 				debug_msg.append(" (not found)");
 		}
