@@ -1437,6 +1437,21 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 	}
 }
 
+void Mob::StopMoving() {
+	FixZ();
+	SetCurrentSpeed(0);
+	if (moved)
+		moved = false;
+}
+
+void Mob::StopMoving(float new_heading) {
+	SetHeading(new_heading);
+	FixZ();
+	SetCurrentSpeed(0);
+	if (moved)
+		moved = false;
+}
+
 /* Used for mobs standing still - this does not send a delta */
 void Mob::SendPosition() {
 	auto app = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));

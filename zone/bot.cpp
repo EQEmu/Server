@@ -2041,18 +2041,6 @@ void Bot::SetTarget(Mob* mob) {
 	}
 }
 
-void Bot::ForceMovementEnd() {
-	FixZ();
-	SetCurrentSpeed(0);
-	if (moved)
-		moved = false;
-}
-
-void Bot::ForceMovementEnd(float new_heading) {
-	SetHeading(new_heading);
-	ForceMovementEnd();
-}
-
 // AI Processing for the Bot object
 void Bot::AI_Process() {
 
@@ -2135,7 +2123,7 @@ void Bot::AI_Process() {
 
 	// Can't move if rooted...
 	if (IsRooted() && IsMoving()) {
-		ForceMovementEnd();
+		StopMoving();
 		return;
 	}
 
@@ -2263,7 +2251,7 @@ void Bot::AI_Process() {
 			SetTarget(nullptr);
 
 			if (IsMoving())
-				ForceMovementEnd();
+				StopMoving();
 			
 			return;
 		}
@@ -2418,7 +2406,7 @@ void Bot::AI_Process() {
 		// We can fight
 		if (atCombatRange) {
 			if (IsMoving()) {
-				ForceMovementEnd(CalculateHeadingToTarget(tar->GetX(), tar->GetY()));
+				StopMoving(CalculateHeadingToTarget(tar->GetX(), tar->GetY()));
 				return;
 			}
 			
@@ -2644,7 +2632,7 @@ void Bot::AI_Process() {
 				}
 				else {
 					if (IsMoving())
-						ForceMovementEnd();
+						StopMoving();
 					else
 						SendPosition();
 
@@ -2698,7 +2686,7 @@ void Bot::AI_Process() {
 		// Leash the bot
 		if (lo_distance > BOT_LEASH_DISTANCE) {
 			if (IsMoving())
-				ForceMovementEnd();
+				StopMoving();
 
 			Warp(glm::vec3(leash_owner->GetPosition()));
 			
@@ -2754,7 +2742,7 @@ void Bot::AI_Process() {
 			}
 			else {
 				if (IsMoving()) {
-					ForceMovementEnd();
+					StopMoving();
 					return;
 				}
 			}
