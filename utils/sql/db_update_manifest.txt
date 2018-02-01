@@ -370,6 +370,7 @@
 9114|2017_07_22_aura.sql|SHOW TABLES LIKE 'auras'|empty|
 9115|2017_10_28_traps.sql|SHOW COLUMNS FROM `traps` LIKE 'triggered_number'|empty|
 9116|2017_12_16_GroundSpawn_Respawn_Timer.sql|SHOW COLUMNS FROM `ground_spawns` WHERE Field = 'respawn_timer' AND Type = 'int(11) unsigned'|empty|
+9117|2018_02_01_NPC_Spells_Min_Max_HP.sql|SHOW COLUMNS FROM `npc_spells_entries` LIKE 'min_hp'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

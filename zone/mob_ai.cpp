@@ -91,6 +91,13 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes, bool bInnates
 			// we define an innate spell as a spell with priority 0
 			continue;
 		}
+
+		if (AIspells[i].min_hp != 0 && GetIntHPRatio() < AIspells[i].min_hp)
+			continue;
+
+		if (AIspells[i].max_hp != 0 && GetIntHPRatio() > AIspells[i].max_hp)
+			continue;
+
 		if (iSpellTypes & AIspells[i].type) {
 			// manacost has special values, -1 is no mana cost, -2 is instant cast (no mana)
 			int32 mana_cost = AIspells[i].manacost;
@@ -2421,7 +2428,7 @@ bool NPC::AI_AddNPCSpells(uint32 iDBSpellsID) {
 			if (GetLevel() >= e.minlevel && GetLevel() <= e.maxlevel && e.spellid > 0) {
 				if (!IsSpellInList(spell_list, e.spellid))
 				{
-					AddSpellToNPCList(e.priority, e.spellid, e.type, e.manacost, e.recast_delay, e.resist_adjust);
+					AddSpellToNPCList(e.priority, e.spellid, e.type, e.manacost, e.recast_delay, e.resist_adjust, e.min_hp, e.max_hp);
 				}
 			}
 		}
@@ -2462,7 +2469,7 @@ bool NPC::AI_AddNPCSpells(uint32 iDBSpellsID) {
 
 	for (auto &e : spell_list->entries) {
 		if (GetLevel() >= e.minlevel && GetLevel() <= e.maxlevel && e.spellid > 0) {
-			AddSpellToNPCList(e.priority, e.spellid, e.type, e.manacost, e.recast_delay, e.resist_adjust);
+			AddSpellToNPCList(e.priority, e.spellid, e.type, e.manacost, e.recast_delay, e.resist_adjust, e.min_hp, e.max_hp);
 		}
 	}
 
@@ -2610,7 +2617,7 @@ bool IsSpellInList(DBnpcspells_Struct* spell_list, int16 iSpellID) {
 
 // adds a spell to the list, taking into account priority and resorting list as needed.
 void NPC::AddSpellToNPCList(int16 iPriority, int16 iSpellID, uint32 iType,
-							int16 iManaCost, int32 iRecastDelay, int16 iResistAdjust)
+							int16 iManaCost, int32 iRecastDelay, int16 iResistAdjust, int8 min_hp, int8 max_hp)
 {
 
 	if(!IsValidSpell(iSpellID))
@@ -2626,6 +2633,8 @@ void NPC::AddSpellToNPCList(int16 iPriority, int16 iSpellID, uint32 iType,
 	t.recast_delay = iRecastDelay;
 	t.time_cancast = 0;
 	t.resist_adjust = iResistAdjust;
+	t.min_hp = min_hp;
+	t.max_hp = max_hp;
 
 	AIspells.push_back(t);
 
@@ -2716,7 +2725,7 @@ DBnpcspells_Struct *ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID)
 		// pulling fixed values from an auto-increment field is dangerous...
 		query = StringFormat(
 		    "SELECT spellid, type, minlevel, maxlevel, "
-		    "manacost, recast_delay, priority, resist_adjust "
+		    "manacost, recast_delay, priority, min_hp, max_hp, resist_adjust "
 #ifdef BOTS
 		    "FROM %s "
 		    "WHERE npc_spells_id=%d ORDER BY minlevel",
@@ -2744,9 +2753,11 @@ DBnpcspells_Struct *ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID)
 			entry.manacost = atoi(row[4]);
 			entry.recast_delay = atoi(row[5]);
 			entry.priority = atoi(row[6]);
+			entry.min_hp = atoi(row[7]);
+			entry.max_hp = atoi(row[8]);
 
-			if (row[7])
-				entry.resist_adjust = atoi(row[7]);
+			if (row[9])
+				entry.resist_adjust = atoi(row[9]);
 			else if (IsValidSpell(spell_id))
 				entry.resist_adjust = spells[spell_id].ResistDiff;
 

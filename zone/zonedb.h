@@ -48,13 +48,15 @@ struct wplist {
 #pragma pack(1)
 struct DBnpcspells_entries_Struct {
 	int16	spellid;
-	uint32	type;
 	uint8	minlevel;
 	uint8	maxlevel;
+	uint32	type;
 	int16	manacost;
-	int32	recast_delay;
 	int16	priority;
+	int32	recast_delay;
 	int16	resist_adjust;
+	int8	min_hp;
+	int8	max_hp;
 };
 #pragma pack()
 
