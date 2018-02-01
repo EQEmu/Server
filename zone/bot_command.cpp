@@ -5146,10 +5146,10 @@ void bot_subcommand_bot_summon(Client *c, const Seperator *sep)
 		if (!bot_iter)
 			continue;
 
-		Bot::BotGroupSay(bot_iter, "Whee!");
+		//Bot::BotGroupSay(bot_iter, "Whee!");
 
 		bot_iter->WipeHateList();
-		bot_iter->SetTarget(bot_iter->GetBotOwner());
+		bot_iter->SetTarget(nullptr);
 		bot_iter->Warp(glm::vec3(c->GetPosition()));
 		bot_iter->DoAnim(0);
 
@@ -5157,7 +5157,7 @@ void bot_subcommand_bot_summon(Client *c, const Seperator *sep)
 			continue;
 
 		bot_iter->GetPet()->WipeHateList();
-		bot_iter->GetPet()->SetTarget(bot_iter);
+		bot_iter->GetPet()->SetTarget(nullptr);
 		bot_iter->GetPet()->Warp(glm::vec3(c->GetPosition()));
 	}
 

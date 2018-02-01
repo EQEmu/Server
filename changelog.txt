@@ -1,5 +1,16 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 01/31/2018 ==
+Uleat: Re-work of Bot::AI_Process(). Overall behavior is much improved.
+	- Removed a 'ton' of unneeded packet updates
+	- Added a 'leash' to the distance a bot can travel
+	- Added a 'main assist' feature to target control (set using group roles)
+	- Added combat 'jitter' movement to complement the existing rogue movement
+	- Attack can now be aborted if target contains no leash owner nor bot hate and leash owner turns off auto-attack
+	- Please report any issues with the bot AI code
+	
+Added a work-around for heal rotations crashing the server - under certain conditions.
+
 == 01/28/2018 ==
 Mackal: Spell AI tweaks
 

@@ -2723,20 +2723,10 @@ bool Mob::HateSummon() {
 		if(summon_level == 1) {
 			entity_list.MessageClose(this, true, 500, MT_Say, "%s says,'You will not evade me, %s!' ", GetCleanName(), target->GetCleanName() );
 
-			if (target->IsClient()) {
+			if (target->IsClient())
 				target->CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), m_Position.x, m_Position.y, m_Position.z, target->GetHeading(), 0, SummonPC);
-			}
-			else {
-#ifdef BOTS
-				if(target && target->IsBot()) {
-					// set pre summoning info to return to (to get out of melee range for caster)
-					target->CastToBot()->SetHasBeenSummoned(true);
-					target->CastToBot()->SetPreSummonLocation(glm::vec3(target->GetPosition()));
-
-				}
-#endif //BOTS
+			else
 				target->GMMove(m_Position.x, m_Position.y, m_Position.z, target->GetHeading());
-			}
 
 			return true;
 		} else if(summon_level == 2) {
