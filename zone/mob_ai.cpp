@@ -2756,6 +2756,10 @@ DBnpcspells_Struct *ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID)
 			entry.min_hp = atoi(row[7]);
 			entry.max_hp = atoi(row[8]);
 
+			// some spell types don't make much since to be priority 0, so fix that
+			if (!(entry.type & SpellTypes_Innate) && entry.priority == 0)
+				entry.priority = 1;
+
 			if (row[9])
 				entry.resist_adjust = atoi(row[9]);
 			else if (IsValidSpell(spell_id))
