@@ -11690,10 +11690,24 @@ void Client::Handle_OP_RecipesFavorite(const EQApplicationPacket *app)
 
 	// make where clause segment for container(s)
 	std::string containers;
-	if (tsf->some_id == 0)
+	uint32 combineObjectSlots;
+	if (tsf->some_id == 0) {
 		containers += StringFormat(" = %u ", tsf->object_type); // world combiner so no item number
-	else
+		combineObjectSlots = 10;
+	}
+	else {
 		containers += StringFormat(" in (%u, %u) ", tsf->object_type, tsf->some_id); // container in inventory
+		auto item = database.GetItem(tsf->some_id);
+		if (!item)
+		{
+			Log(Logs::General, Logs::Error, "Invalid container ID: %d.  GetItem returned null.  Defaulting to BagSlots = 10.\n", tsf->some_id);
+			combineObjectSlots = 10;
+		}
+		else
+		{
+			combineObjectSlots = item->BagSlots;
+		}
+	}
 
 	std::string favoriteIDs; //gotta be big enough for 500 IDs
 	bool first = true;
@@ -11725,8 +11739,8 @@ void Client::Handle_OP_RecipesFavorite(const EQApplicationPacket *app)
 		"((tr.must_learn & 0x3 <> 0 AND crl.madecount IS NOT NULL) "
 		"OR (tr.must_learn & 0x3 = 0)) "
 		"GROUP BY tr.id "
-		"HAVING sum(if(tre.item_id %s AND tre.iscontainer > 0,1,0)) > 0 "
-		"LIMIT 100 ", CharacterID(), favoriteIDs.c_str(), containers.c_str());
+		"HAVING sum(if(tre.item_id %s AND tre.iscontainer > 0,1,0)) > 0 AND SUM(tre.componentcount) <= %u "
+		"LIMIT 100 ", CharacterID(), favoriteIDs.c_str(), containers.c_str(), combineObjectSlots);
 
 	TradeskillSearchResults(query, tsf->object_type, tsf->some_id);
 	return;
@@ -11748,13 +11762,25 @@ void Client::Handle_OP_RecipesSearch(const EQApplicationPacket *app)
 
 	// make where clause segment for container(s)
 	char containers[30];
+	uint32 combineObjectSlots;
 	if (rss->some_id == 0) {
 		// world combiner so no item number
 		snprintf(containers, 29, "= %u", rss->object_type);
+		combineObjectSlots = 10;
 	}
 	else {
 		// container in inventory
 		snprintf(containers, 29, "in (%u,%u)", rss->object_type, rss->some_id);
+		auto item = database.GetItem(rss->some_id);
+		if (!item)
+		{
+			Log(Logs::General, Logs::Error, "Invalid container ID: %d.  GetItem returned null.  Defaulting to BagSlots = 10.\n", rss->some_id);
+			combineObjectSlots = 10;
+		}
+		else
+		{
+			combineObjectSlots = item->BagSlots;
+		}
 	}
 
 	std::string searchClause;
@@ -11779,10 +11805,10 @@ void Client::Handle_OP_RecipesSearch(const EQApplicationPacket *app)
 		"AND crl.madecount IS NOT NULL) "
 		"OR (tr.must_learn & 0x3 = 0)) "
 		"GROUP BY tr.id "
-		"HAVING sum(if(tre.item_id %s AND tre.iscontainer > 0,1,0)) > 0 "
+		"HAVING sum(if(tre.item_id %s AND tre.iscontainer > 0,1,0)) > 0 AND SUM(tre.componentcount) <= %u "
 		"LIMIT 200 ",
 		CharacterID(), searchClause.c_str(),
-		rss->mintrivial, rss->maxtrivial, containers);
+		rss->mintrivial, rss->maxtrivial, containers, combineObjectSlots);
 	TradeskillSearchResults(query, rss->object_type, rss->some_id);
 	return;
 }
