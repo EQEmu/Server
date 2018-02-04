@@ -790,6 +790,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					CastToClient()->AI_Start();
 				} else if(IsNPC()) {
 					CastToNPC()->SetPetSpellID(0);	//not a pet spell.
+					CastToNPC()->ModifyStatsOnCharm(false);
 				}
 
 				bool bBreak = false;
@@ -3966,6 +3967,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 				if(IsNPC())
 				{
 					CastToNPC()->RestoreGuardSpotCharm();
+					CastToNPC()->ModifyStatsOnCharm(true);
 				}
 
 				SendAppearancePacket(AT_Pet, 0, true, true);

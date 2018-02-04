@@ -282,6 +282,8 @@ public:
 	int32 GetNPCHPRegen() const { return hp_regen + itembonuses.HPRegen + spellbonuses.HPRegen; }
 	inline const char* GetAmmoIDfile() const { return ammo_idfile; }
 
+	void ModifyStatsOnCharm(bool bRemoved);
+
 	//waypoint crap
 	int					GetMaxWp() const { return max_wp; }
 	void				DisplayWaypointInfo(Client *to);
@@ -481,6 +483,25 @@ protected:
 	float	healscale;
 	int32 SpellFocusDMG;
 	int32 SpellFocusHeal;
+
+	// stats to switch back to after charm wears off
+	// could probably pick a better name, but these probably aren't taken so ...
+	int default_ac;
+	int default_min_dmg;
+	int default_max_dmg;
+	int default_attack_delay;
+	int default_accuracy_rating;
+	int default_avoidance_rating;
+	int default_atk;
+
+	// when charmed, switch to these
+	int charm_ac;
+	int charm_min_dmg;
+	int charm_max_dmg;
+	int charm_attack_delay;
+	int charm_accuracy_rating;
+	int charm_avoidance_rating;
+	int charm_atk;
 
 	//pet crap:
 	uint16	pet_spell_id;

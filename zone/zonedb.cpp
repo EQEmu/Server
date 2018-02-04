@@ -1962,7 +1962,14 @@ const NPCType* ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		"npc_types.feettexture, "
 		"npc_types.ignore_despawn, "
 		"npc_types.show_name, "
-		"npc_types.untargetable "
+		"npc_types.untargetable, "
+		"npc_types.charm_ac, "
+		"npc_types.charm_min_dmg, "
+		"npc_types.charm_max_dmg, "
+		"npc_types.charm_attack_delay, "
+		"npc_types.charm_accuracy_rating, "
+		"npc_types.charm_avoidance_rating, "
+		"npc_types.charm_atk "
 		"FROM npc_types %s",
 		where_condition.c_str()
 	);
@@ -2140,6 +2147,14 @@ const NPCType* ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		temp_npctype_data->ignore_despawn = atoi(row[97]) == 1 ? true : false;
 		temp_npctype_data->show_name = atoi(row[98]) != 0 ? true : false;
 		temp_npctype_data->untargetable = atoi(row[99]) != 0 ? true : false;
+
+		temp_npctype_data->charm_ac = atoi(row[100]);
+		temp_npctype_data->charm_min_dmg = atoi(row[101]);
+		temp_npctype_data->charm_max_dmg = atoi(row[102]);
+		temp_npctype_data->charm_attack_delay = atoi(row[103]) * 100; // TODO: fix DB
+		temp_npctype_data->charm_accuracy_rating = atoi(row[104]);
+		temp_npctype_data->charm_avoidance_rating = atoi(row[105]);
+		temp_npctype_data->charm_atk = atoi(row[106]);
 
 		// If NPC with duplicate NPC id already in table,
 		// free item we attempted to add.

@@ -89,6 +89,13 @@ struct NPCType
 	EQEmu::TintProfile	armor_tint;
 	uint32	min_dmg;
 	uint32	max_dmg;
+	uint32	charm_ac;
+	uint32	charm_min_dmg;
+	uint32	charm_max_dmg;
+	int		charm_attack_delay;
+	int		charm_accuracy_rating;
+	int		charm_avoidance_rating;
+	int		charm_atk;
 	int16	attack_count;
 	char	special_abilities[512];
 	uint16	d_melee_texture1;
