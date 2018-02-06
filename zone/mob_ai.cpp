@@ -1880,7 +1880,7 @@ void NPC::AI_Event_SpellCastFinished(bool iCastSucceeded, uint16 slot) {
 					recovery_time += spells[AIspells[casting_spell_AIindex].spellid].recovery_time;
 					if (AIspells[casting_spell_AIindex].recast_delay >= 0)
 					{
-						if (AIspells[casting_spell_AIindex].recast_delay < 1000)
+						if (AIspells[casting_spell_AIindex].recast_delay < 10000)
 							AIspells[casting_spell_AIindex].time_cancast = Timer::GetCurrentTime() + (AIspells[casting_spell_AIindex].recast_delay*1000);
 					}
 					else
