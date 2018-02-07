@@ -9960,21 +9960,17 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 	Mob* mypet = this->GetPet();
 	Mob *target = entity_list.GetMob(pet->target);
 
-	if (!mypet || pet->command == PET_LEADER)
-	{
-		if (pet->command == PET_LEADER)
-		{
-			if (mypet && (!GetTarget() || GetTarget() == mypet))
-			{
+	if (!mypet || pet->command == PET_LEADER) {
+		if (pet->command == PET_LEADER) {
+			// we either send the ID of an NPC we're interested in or no ID for our own pet
+			if (target) {
+				auto owner = target->GetOwner();
+				if (owner)
+					target->Say_StringID(PET_LEADERIS, owner->GetCleanName());
+				else
+					target->Say_StringID(I_FOLLOW_NOONE);
+			} else if (mypet) {
 				mypet->Say_StringID(PET_LEADERIS, GetName());
-			}
-			else if ((mypet = GetTarget()))
-			{
-				Mob *Owner = mypet->GetOwner();
-				if (Owner)
-					mypet->Say_StringID(PET_LEADERIS, Owner->GetCleanName());
-				else if (mypet->IsNPC())
-					mypet->Say_StringID(I_FOLLOW_NOONE);
 			}
 		}
 
