@@ -456,7 +456,7 @@ float Mob::CalculateHeadingToTarget(float in_x, float in_y) {
 	return (256 * (360 - angle) / 360.0f);
 }
 
-bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed) {
+bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, bool checkZ, bool calcHeading) {
 	if (GetID() == 0)
 		return true;
 
@@ -500,7 +500,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed) {
 		m_Position.y = new_y;
 		m_Position.z = new_z;
 
-		if(fix_z_timer.Check() && 
+		if(checkZ && fix_z_timer.Check() && 
 			(!this->IsEngaged() || flee_mode || currently_fleeing))
 			this->FixZ();
 
@@ -567,7 +567,8 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed) {
 			m_Position.x = new_x;
 			m_Position.y = new_y;
 			m_Position.z = new_z;
-			m_Position.w = CalculateHeadingToTarget(x, y);
+			if (calcHeading)
+				m_Position.w = CalculateHeadingToTarget(x, y);
 			tar_ndx = 20 - numsteps;
 		}
 		else
@@ -605,10 +606,11 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed) {
 		m_Position.x = new_x;
 		m_Position.y = new_y;
 		m_Position.z = new_z;
-		m_Position.w = CalculateHeadingToTarget(x, y);
+		if (calcHeading)
+			m_Position.w = CalculateHeadingToTarget(x, y);
 	}
 
-	if (fix_z_timer.Check() && !this->IsEngaged())
+	if (checkZ && fix_z_timer.Check() && !this->IsEngaged())
 		this->FixZ();
 
 	SetMoving(true);
@@ -632,7 +634,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed) {
 }
 
 bool Mob::CalculateNewPosition2(float x, float y, float z, int speed, bool checkZ, bool calcHeading) {
-	return MakeNewPositionAndSendUpdate(x, y, z, speed);
+	return MakeNewPositionAndSendUpdate(x, y, z, speed, checkZ, calcHeading);
 }
 
 bool Mob::CalculateNewPosition(float x, float y, float z, int speed, bool checkZ, bool calcHeading) {
