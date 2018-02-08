@@ -1133,138 +1133,84 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 
 	// Check for consumables and Reagent focus items
 	// first check for component reduction
-	if(IsClient()) {
-		int reg_focus = CastToClient()->GetFocusEffect(focusReagentCost,spell_id);//Client only
-		if(zone->random.Roll(reg_focus)) {
+	if (IsClient()) {
+		int reg_focus = CastToClient()->GetFocusEffect(focusReagentCost, spell_id);//Client only
+		if (zone->random.Roll(reg_focus)) {
 			Log(Logs::Detail, Logs::Spells, "Spell %d: Reagent focus item prevented reagent consumption (%d chance)", spell_id, reg_focus);
-		} else {
-			if(reg_focus > 0)
+		}
+		else {
+			if (reg_focus > 0)
 				Log(Logs::Detail, Logs::Spells, "Spell %d: Reagent focus item failed to prevent reagent consumption (%d chance)", spell_id, reg_focus);
+
 			Client *c = this->CastToClient();
-			int component, component_count, inv_slot_id;
-			bool missingreags = false;
-			for(int t_count = 0; t_count < 4; t_count++) {
-				component = spells[spell_id].components[t_count];
-				component_count = spells[spell_id].component_counts[t_count];
 
-				if (component == -1)
-					continue;
-
+			if (bard_song_mode)
+			{
+				// bard only checks the 0th element of noexpendreagent
 				// bard components are requirements for a certain instrument type, not a specific item
-				if(bard_song_mode) {
-					bool HasInstrument = true;
-					int InstComponent = spells[spell_id].NoexpendReagent[0];
+				bool HasInstrument = true;
+				int InstComponent = spells[spell_id].NoexpendReagent[0];
 
-					switch (InstComponent) {
-						case -1:
-							continue;		// no instrument required, go to next component
+				switch (InstComponent) {
+				case -1:
+					break;
 
-						// percussion songs (13000 = hand drum)
-						case 13000:
-							if(itembonuses.percussionMod == 0) {			// check for the appropriate instrument type
-								HasInstrument = false;
-								c->Message_StringID(13, SONG_NEEDS_DRUM);	// send an error message if missing
-							}
-							break;
-
-						// wind songs (13001 = wooden flute)
-						case 13001:
-							if(itembonuses.windMod == 0) {
-								HasInstrument = false;
-								c->Message_StringID(13, SONG_NEEDS_WIND);
-							}
-							break;
-
-						// string songs (13011 = lute)
-						case 13011:
-							if(itembonuses.stringedMod == 0) {
-								HasInstrument = false;
-								c->Message_StringID(13, SONG_NEEDS_STRINGS);
-							}
-							break;
-
-						// brass songs (13012 = horn)
-						case 13012:
-							if(itembonuses.brassMod == 0) {
-								HasInstrument = false;
-								c->Message_StringID(13, SONG_NEEDS_BRASS);
-							}
-							break;
-
-						default:	// some non-instrument component. Let it go, but record it in the log
-							Log(Logs::Detail, Logs::Spells, "Something odd happened: Song %d required component %d", spell_id, component);
+					// percussion songs (13000 = hand drum)
+				case 13000:
+					if (itembonuses.percussionMod == 0) {			// check for the appropriate instrument type
+						HasInstrument = false;
+						c->Message_StringID(13, SONG_NEEDS_DRUM);	// send an error message if missing
 					}
+					break;
 
-					if(!HasInstrument) {	// if the instrument is missing, log it and interrupt the song
-						Log(Logs::Detail, Logs::Spells, "Song %d: Canceled. Missing required instrument %d", spell_id, component);
-						if(c->GetGM())
-							c->Message(0, "Your GM status allows you to finish casting even though you're missing a required instrument.");
-						else {
-							InterruptSpell();
-							return;
-						}
+					// wind songs (13001 = wooden flute)
+				case 13001:
+					if (itembonuses.windMod == 0) {
+						HasInstrument = false;
+						c->Message_StringID(13, SONG_NEEDS_WIND);
 					}
-				}	// end bard component section
+					break;
 
-				// handle the components for traditional casters
-				else {
-					if(c->GetInv().HasItem(component, component_count, invWhereWorn|invWherePersonal) == -1) // item not found
-					{
-						if (!missingreags)
-						{
-							c->Message_StringID(13, MISSING_SPELL_COMP);
-							missingreags=true;
-						}
-
-						const EQEmu::ItemData *item = database.GetItem(component);
-						if(item) {
-							c->Message_StringID(13, MISSING_SPELL_COMP_ITEM, item->Name);
-							Log(Logs::Detail, Logs::Spells, "Spell %d: Canceled. Missing required reagent %s (%d)", spell_id, item->Name, component);
-						}
-						else {
-							char TempItemName[64];
-							strcpy((char*)&TempItemName, "UNKNOWN");
-							Log(Logs::Detail, Logs::Spells, "Spell %d: Canceled. Missing required reagent %s (%d)", spell_id, TempItemName, component);
-						}
+					// string songs (13011 = lute)
+				case 13011:
+					if (itembonuses.stringedMod == 0) {
+						HasInstrument = false;
+						c->Message_StringID(13, SONG_NEEDS_STRINGS);
 					}
-				} // end bard/not bard ifs
-			} // end reagent loop
+					break;
 
-			if (missingreags) {
-				if(c->GetGM())
-					c->Message(0, "Your GM status allows you to finish casting even though you're missing required components.");
-				else {
-					InterruptSpell();
+					// brass songs (13012 = horn)
+				case 13012:
+					if (itembonuses.brassMod == 0) {
+						HasInstrument = false;
+						c->Message_StringID(13, SONG_NEEDS_BRASS);
+					}
+					break;
+
+				default:	// some non-instrument component. Let it go, but record it in the log
+					Log(Logs::Detail, Logs::Spells, "Something odd happened: Song %d required component %d", spell_id, InstComponent);
+				}
+
+				if (!HasInstrument) {	// if the instrument is missing, log it and interrupt the song
+					Log(Logs::Detail, Logs::Spells, "Song %d: Canceled. Missing required instrument %d", spell_id, InstComponent);
+					if (c->GetGM())
+						c->Message(0, "Your GM status allows you to finish casting even though you're missing a required instrument.");
+					else {
+						InterruptSpell();
+						return;
+					}
+				}
+			} // end bard component section
+			else
+			{
+				// Check and consume reagents.
+				if (false == c->CheckAndConsumeReagents(spell_id))
+				{
+					// Reagent check failed.
 					return;
 				}
-			}
-			else if (!bard_song_mode)
-			{
-				int noexpend;
-				for(int t_count = 0; t_count < 4; t_count++) {
-					component = spells[spell_id].components[t_count];
-					noexpend = spells[spell_id].NoexpendReagent[t_count];
-					if (component == -1 || noexpend == component)
-						continue;
-					component_count = spells[spell_id].component_counts[t_count];
-					Log(Logs::Detail, Logs::Spells, "Spell %d: Consuming %d of spell component item id %d", spell_id, component_count, component);
-					// Components found, Deleting
-					// now we go looking for and deleting the items one by one
-					for(int s = 0; s < component_count; s++)
-					{
-						inv_slot_id = c->GetInv().HasItem(component, 1, invWhereWorn|invWherePersonal);
-						if(inv_slot_id != -1)
-						{
-							c->DeleteItemInInventory(inv_slot_id, 1, true);
-						}
-						else
-						{	// some kind of error in the code if this happens
-							c->Message(13, "ERROR: reagent item disappeared while processing?");
-						}
-					}
-				}
-				} // end missingreags/consumption
-			} // end `focus did not help us`
+			} // end non-bard component section
+		} // end `focus did not help us`
 	} // end IsClient() for reagents
 
 	// this is common to both bard and non bard

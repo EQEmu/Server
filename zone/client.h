@@ -319,6 +319,21 @@ public:
 	void SetBuyerWelcomeMessage(const char* WelcomeMessage) { BuyerWelcomeMessage = WelcomeMessage; }
 	const char* GetBuyerWelcomeMessage() { return BuyerWelcomeMessage.c_str(); }
 
+	bool AreReagentsRequired(
+		int32 spellId,
+		int requiredComponents[],
+		int requiredQuantity[],
+		bool consumable[]);
+
+	bool AreNonExpendableReagentsRequired(
+		int32 spellId,
+		int reagents[],
+		int quantity[],
+		bool consumable[]);
+
+	bool CheckAndConsumeReagents(int32 spell_id);
+	bool ConsumeReagents(int32 spell_id, int reagents[], int quantity[], bool consumable[], int reagentsLength);
+
 	void FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho);
 	bool ShouldISpawnFor(Client *c) { return !GMHideMe(c) && !IsHoveringForRespawn(); }
 	virtual bool Process();

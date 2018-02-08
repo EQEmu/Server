@@ -736,9 +736,9 @@ struct SPDat_Spell_Struct
 /* 058 */	int32 components[4]; // reagents -- EXPENDREAGENT1 ... EXPENDREAGENT4
 /* 062 */	int component_counts[4]; // amount of regents used -- EXPENDQTY1 ... EXPENDQTY4
 /* 066 */	int NoexpendReagent[4];	// focus items (Need but not used; Flame Lick has a Fire Beetle Eye focus.)
-											// If it is a number between 1-4 it means components[number] is a focus and not to expend it
-											// If it is a valid itemid it means this item is a focus as well
-											// -- NOEXPENDREAGENT1 ... NOEXPENDREAGENT4
+									// If it is a number between 1-4 it means components[number] is a focus and not to expend it
+									// If it is a valid itemid it means this item is a focus as well
+									// -- NOEXPENDREAGENT1 ... NOEXPENDREAGENT4
 /* 070 */	uint16 formula[EFFECT_COUNT]; // Spell's value formula -- LEVELAFFECT1MOD ... LEVELAFFECT12MOD
 /* 082 */	//int LightType; // probaly another effecttype flag -- LIGHTTYPE
 /* 083 */	int8 goodEffect; //0=detrimental, 1=Beneficial, 2=Beneficial, Group Only -- BENEFICIAL

@@ -9258,3 +9258,202 @@ void Client::InitInnates()
 	}
 }
 
+bool Client::AreNonExpendableReagentsRequired(
+	int32 spellId,
+	int reagents[],
+	int quantity[],
+	bool consumable[])
+{
+	bool required = false;
+
+	const SPDat_Spell_Struct spell = spells[spellId];
+
+	// Iterate through non-expendable components.
+	for (int i = 0; i < 4; i++)
+	{
+		int component = spell.NoexpendReagent[i];
+
+		// is there a component?
+		if (-1 == component)
+		{
+			// No.  Check the next.
+			continue;
+		}
+
+		// Reagents are used.
+		required = true;
+
+		// Is this an item id or an index of a consumable?
+		if (component <= 4 && component >= 1)
+		{
+			// Index.  In this case, the index starts at 1 (because it matches the column names)
+			consumable[component - 1] = false;
+		}
+		else
+		{
+			// Item ID.  This can be an entirely new item requirement or it could match
+			// a consumable, in which case, that consumable is no longer consumed.
+
+			// find it in the array or add it.
+			for (int j = 0; j < 4; j++)
+			{
+				if (reagents[j] == component)
+				{
+					// Found it, no longer consumable.
+					consumable[j] = false;
+					break;
+				}
+				else if (reagents[j] == -1)
+				{
+					// We didn't find a match.  Add this one since it is new.
+					reagents[j] = component;
+
+					// When only defined in the noexpendable# columns, the required quantity is always
+					// one because there's no place to specify a different value.
+					quantity[j] = 1;
+					consumable[j] = false;
+					break;
+				}
+			}
+		}
+	}
+
+	return required;
+}
+
+bool Client::AreReagentsRequired(
+	int32 spellId,
+	int requiredComponents[],
+	int requiredQuantity[],
+	bool consumable[])
+{
+	int requiredIdx = 0;
+
+	const SPDat_Spell_Struct spell = spells[spellId];
+
+	// Iterate through possibly expendable components.
+	for (int i = 0; i < 4; i++)
+	{
+		int component = spell.components[i];
+		int component_count = spell.component_counts[i];
+
+		// is there a component?
+		if (-1 == component)
+		{
+			// No.  Check the next.
+			continue;
+		}
+
+		// Add the components we need and their required quantity.
+		requiredComponents[requiredIdx] = component;
+		requiredQuantity[requiredIdx] = component_count;
+		consumable[requiredIdx] = true;
+
+		// I'm not using the for loop index because nothing in the code requires that
+		// components be added in order in the database (e.g. comp1, comp2).  It could
+		// just as easily be (comp1, comp3) that have values.
+		requiredIdx++;
+	}
+
+	// If the index is greater than 0 then at least one reagent is required.
+	return requiredIdx > 0;
+}
+
+bool Client::CheckAndConsumeReagents(int32 spell_id)
+{
+	int reagents[8] = { -1, -1, -1, -1, -1, -1, -1, -1 };
+	int quantity[8] = { -1, -1, -1, -1, -1, -1, -1, -1 };
+	bool consumable[8] = { false, false, false, false, false, false, false, false };
+
+	// Index consumables.
+	bool hasReagents = this->AreReagentsRequired(
+		spell_id,
+		reagents,
+		quantity,
+		consumable);
+
+	// Index non-consumables
+	bool hasNonExpendableReagents = this->AreNonExpendableReagentsRequired(
+		spell_id,
+		reagents,
+		quantity,
+		consumable);
+
+	// Are there reagents for this spell?
+	if (hasReagents || hasNonExpendableReagents)
+	{
+		// Yes.  Consume them.
+		return ConsumeReagents(spell_id, reagents, quantity, consumable, 8);
+	}
+
+	// Success.  No reagents to check.
+	return true;
+}
+
+bool Client::ConsumeReagents(int32 spell_id, int reagents[], int quantity[], bool consumable[], int reagentsLength)
+{
+	bool missingreags = false;
+	// Do we have enough of them?
+	for (int i = 0; i < reagentsLength; i++) {
+		// Yes.  Do we have enough of them?
+		if (-1 != reagents[i] &&
+			this->GetInv().HasItem(reagents[i], quantity[i], invWhereWorn | invWherePersonal) == -1) {
+			// No.
+			if (!missingreags) {
+				this->Message_StringID(13, MISSING_SPELL_COMP);
+				missingreags = true;
+			}
+
+			const EQEmu::ItemData *item = database.GetItem(reagents[i]);
+			if (item) {
+				this->Message_StringID(13, MISSING_SPELL_COMP_ITEM, item->Name);
+				Log(Logs::Detail, Logs::Spells, "Spell %d: Canceled. Missing required reagent %s (%d)", spell_id, item->Name, reagents[i]);
+			}
+			else {
+				char TempItemName[64];
+				strcpy((char*)&TempItemName, "UNKNOWN");
+				Log(Logs::Detail, Logs::Spells, "Spell %d: Canceled. Missing required reagent %s (%d)", spell_id, TempItemName, reagents[i]);
+			}
+		}
+	}
+
+	if (missingreags) {
+		if (this->GetGM()) {
+			this->Message(0, "Your GM status allows you to finish casting even though you're missing required components.");
+		}
+		else {
+			// Missing reagents, casting failed.
+			InterruptSpell();
+			return false;
+		}
+	}
+	else {
+		for (int i = 0; i < reagentsLength; i++) {
+			if (!consumable[i]) {
+				continue;
+			}
+
+			Log(Logs::Detail, Logs::Spells, "Spell %d: Consuming %d of spell component item id %d", spell_id, quantity[i], reagents[i]);
+
+			// Components found, Deleting
+			// now we go looking for and deleting the items one by one
+			for (int s = 0; s < quantity[i]; s++)
+			{
+				int inv_slot_id = this->GetInv().HasItem(reagents[i], 1, invWhereWorn | invWherePersonal);
+				if (inv_slot_id != -1)
+				{
+					this->DeleteItemInInventory(inv_slot_id, 1, true);
+				}
+				else
+				{	// some kind of error in the code if this happens.
+					//
+					// This previously didn't fail the spell, so I'm keeping it like that for now.
+					this->Message(13, "ERROR: reagent item disappeared while processing?");
+				}
+			}
+		}
+	} // end missingreags/consumption
+
+	// Consumption was successful.
+	return true;
+}
