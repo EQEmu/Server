@@ -2431,8 +2431,8 @@ void Bot::AI_Process() {
 			if (AI_movement_timer->Check() && (!spellend_timer.Enabled() || GetClass() == BARD)) {
 				if (!IsRooted()) {
 					if (HasTargetReflection()) {
-						if (GetClass() == ROGUE) {
-							if (!tar->IsFeared() && !tar->IsStunned()) {
+						if (!tar->IsFeared() && !tar->IsStunned()) {
+							if (GetClass() == ROGUE) {
 								if (evade_timer.Check(false)) { // Attempt to evade
 									int timer_duration = (HideReuseTime - GetSkillReuseTime(EQEmu::skills::SkillHide)) * 1000;
 									if (timer_duration < 0)
@@ -2444,10 +2444,13 @@ void Bot::AI_Process() {
 
 									return;
 								}
-								else if (tar->IsRooted()) { // Move rogue back from rooted mob - out of combat range, if necessary
+							}
+
+							if (tar->IsRooted()) { // Move caster/rogue back from rooted mob - out of combat range, if necessary
+								if (GetArchetype() == ARCHETYPE_CASTER || GetClass() == ROGUE) {
 									if (tar_distance <= melee_distance_max) {
 										if (PlotPositionAroundTarget(this, Goal.x, Goal.y, Goal.z)) {
-											CalculateNewPosition2(Goal.x, Goal.y, Goal.z, GetBotWalkspeed());
+											CalculateNewPosition2(Goal.x, Goal.y, Goal.z, GetBotWalkspeed(), true, false);
 											return;
 										}
 									}
@@ -2456,34 +2459,26 @@ void Bot::AI_Process() {
 						}
 					}
 					else {
-						if (caster_distance_min && tar_distance < caster_distance_min) { // Caster back-off adjustment
+						if (caster_distance_min && tar_distance < caster_distance_min && !tar->IsFeared()) { // Caster back-off adjustment
 							if (PlotPositionAroundTarget(this, Goal.x, Goal.y, Goal.z)) {
 								if (DistanceSquared(Goal, tar->GetPosition()) <= caster_distance_max) {
-									CalculateNewPosition2(Goal.x, Goal.y, Goal.z, GetBotWalkspeed());
+									CalculateNewPosition2(Goal.x, Goal.y, Goal.z, GetBotWalkspeed(), true, false);
 									return;
 								}
-							}
-							else if (!IsFacingMob(tar)) {
-								FaceTarget(tar);
-								return;
 							}
 						}
 						else if (tar_distance < melee_distance_min) { // Melee back-off adjustment
 							if (PlotPositionAroundTarget(this, Goal.x, Goal.y, Goal.z)) {
 								if (DistanceSquared(Goal, tar->GetPosition()) <= melee_distance_max) {
-									CalculateNewPosition2(Goal.x, Goal.y, Goal.z, GetBotWalkspeed());
+									CalculateNewPosition2(Goal.x, Goal.y, Goal.z, GetBotWalkspeed(), true, false);
 									return;
 								}
-							}
-							else if (!IsFacingMob(tar)) {
-								FaceTarget(tar);
-								return;
 							}
 						}
 						else if (backstab_weapon && !behind_mob) { // Move the rogue to behind the mob
 							if (PlotPositionAroundTarget(tar, Goal.x, Goal.y, Goal.z)) {
 								if (DistanceSquared(Goal, tar->GetPosition()) <= melee_distance_max) {
-									CalculateNewPosition2(Goal.x, Goal.y, Goal.z, GetBotRunspeed()); // rogues are agile enough to run in melee range
+									CalculateNewPosition2(Goal.x, Goal.y, Goal.z, GetBotRunspeed(), true, false); // rogues are agile enough to run in melee range
 									return;
 								}
 							}
@@ -2494,10 +2489,15 @@ void Bot::AI_Process() {
 								PlotPositionAroundTarget(tar, Goal.x, Goal.y, Goal.z)) // If we're behind the mob, we can attack when it's enraged
 							{
 								if (DistanceSquared(Goal, tar->GetPosition()) <= melee_distance_max) {
-									CalculateNewPosition2(Goal.x, Goal.y, Goal.z, GetBotWalkspeed());
+									CalculateNewPosition2(Goal.x, Goal.y, Goal.z, GetBotWalkspeed(), true, false);
 									return;
 								}
 							}
+						}
+
+						if (!IsFacingMob(tar)) {
+							FaceTarget(tar);
+							return;
 						}
 					}
 				}
