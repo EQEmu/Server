@@ -3047,13 +3047,7 @@ void bot_command_guard(Client *c, const Seperator *sep)
 
 	sbl.remove(nullptr);
 	for (auto bot_iter : sbl) {
-		bot_iter->WipeHateList();
-		bot_iter->SetFollowID(0);
-		if (!bot_iter->GetPet())
-			continue;
-
-		bot_iter->GetPet()->WipeHateList();
-		bot_iter->GetPet()->SetFollowID(0);
+		bot_iter->SetGuardMode();
 	}
 	if (sbl.size() == 1)
 		Bot::BotGroupSay(sbl.front(), "Guarding this position");
