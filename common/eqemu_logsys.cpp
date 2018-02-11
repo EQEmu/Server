@@ -104,6 +104,7 @@ void EQEmuLogSys::LoadLogSettingsDefaults()
 	log_settings[Logs::MySQLError].log_to_console = Logs::General;
 	log_settings[Logs::Login_Server].log_to_console = Logs::General;
 	log_settings[Logs::Headless_Client].log_to_console = Logs::General;
+	log_settings[Logs::NATS].log_to_console = Logs::General;
 
 	/* Set Category enabled status on defaults */
 	log_settings[Logs::World_Server].is_category_enabled = 1;
@@ -113,6 +114,7 @@ void EQEmuLogSys::LoadLogSettingsDefaults()
 	log_settings[Logs::Crash].is_category_enabled = 1;
 	log_settings[Logs::MySQLError].is_category_enabled = 1;
 	log_settings[Logs::Login_Server].is_category_enabled = 1;
+	log_settings[Logs::NATS].is_category_enabled = 1;
 
 	/*	Declare process file names for log writing
 		If there is no process_file_name declared, no log file will be written, simply

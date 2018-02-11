@@ -216,6 +216,7 @@ public:
 			return it->second;
 		return nullptr;
 	}
+	std::map<uint16, NPC*> ListNPCs();
 	Doors *GetDoorsByDoorID(uint32 id);
 	Doors *GetDoorsByDBID(uint32 id);
 	void RemoveAllCorpsesByCharID(uint32 charid);

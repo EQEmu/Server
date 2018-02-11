@@ -62,6 +62,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "embparser.h"
 #include "lua_parser.h"
 #include "questmgr.h"
+#include "nats_manager.h"
 
 #include "../common/event/event_loop.h"
 #include "../common/event/timer.h"
@@ -100,6 +101,8 @@ WorldServer worldserver;
 uint32 numclients = 0;
 char errorname[32];
 extern Zone* zone;
+NatsManager nats;
+
 npcDecayTimes_Struct npcCorpseDecayTimes[100];
 TitleManager title_manager;
 QueryServ *QServ = 0;
@@ -131,7 +134,7 @@ int main(int argc, char** argv) {
 		std::string filename = Config->MapDir;
 		filename += mapfile;
 
-		auto m = new Map();
+		auto m = new EQEmu::Map();
 		auto success = m->Load(filename, true);
 		delete m;
 		std::cout << mapfile.c_str() << " conversion " << (success ? "succeeded" : "failed") << std::endl;
@@ -148,6 +151,7 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 	Config = ZoneConfig::get();
+	nats.Load();
 
 	const char *zone_name;
 	uint32 instance_id = 0;
@@ -510,10 +514,14 @@ int main(int argc, char** argv) {
 				entity_list.MobProcess();
 				entity_list.BeaconProcess();
 				entity_list.EncounterProcess();
-
+				if (zone->IsLoaded()) {
+					nats.ZoneSubscribe(zone->GetShortName());
+					nats.Process();
+				}
 				if (zone) {
 					if (!zone->Process()) {
 						Zone::Shutdown();
+						nats.Unregister();
 					}
 				}
 
@@ -571,8 +579,10 @@ int main(int argc, char** argv) {
 
 	safe_delete(Config);
 
-	if (zone != 0)
+	if (zone != 0) {
 		Zone::Shutdown(true);
+		nats.Unregister();
+	}
 	//Fix for Linux world server problem.
 	safe_delete(taskmanager);
 	command_deinit();

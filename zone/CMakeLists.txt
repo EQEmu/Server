@@ -61,7 +61,7 @@ SET(zone_sources
 	lua_raid.cpp
 	lua_spawn.cpp
 	lua_spell.cpp
-	lua_stat_bonuses.cpp
+	lua_stat_bonuses.cpp	
 	embperl.cpp
 	embxs.cpp
 	entity.cpp
@@ -80,6 +80,7 @@ SET(zone_sources
 	mob.cpp
 	mob_ai.cpp
 	mod_functions.cpp
+	nats_manager.cpp
 	net.cpp
 	npc.cpp
 	npc_ai.cpp
@@ -187,13 +188,14 @@ SET(zone_headers
 	lua_raid.h
 	lua_spawn.h
 	lua_spell.h
-	lua_stat_bonuses.h
+	lua_stat_bonuses.h	
 	map.h
 	masterentity.h
 	maxskill.h
 	message.h
 	merc.h
 	mob.h
+	nats_manager.h
 	net.h
 	npc.h
 	npc_ai.h

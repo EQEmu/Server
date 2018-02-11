@@ -23,8 +23,10 @@
 #include "quest_parser_collection.h"
 #include "worldserver.h"
 #include "zonedb.h"
+#include "nats_manager.h"
 
 extern WorldServer worldserver;
+extern NatsManager nats;
 
 // @merth: this needs to be touched up
 uint32 Client::NukeItem(uint32 itemnum, uint8 where_to_check) {
@@ -626,6 +628,7 @@ void Client::DropItem(int16 slot_id, bool recurse)
 		invalid_drop = nullptr;
 
 		database.SetHackerFlag(this->AccountName(), this->GetCleanName(), "Tried to drop an item on the ground that was nodrop!");
+		nats.SendAdminMessage(StringFormat("Hacker %s: Tried to drop nodrop item on ground", GetCleanName()));
 		GetInv().DeleteItem(slot_id);
 		return;
 	}

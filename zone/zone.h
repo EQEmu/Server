@@ -211,7 +211,7 @@ public:
 	void	ReloadWorld(uint32 Option);
 	void	ReloadMerchants();
 
-	Map*	zonemap;
+	EQEmu::Map*	zonemap;
 	WaterMap* watermap;
 	PathManager *pathing;
 	NewZone_Struct	newzone_data;

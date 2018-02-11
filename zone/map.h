@@ -30,40 +30,41 @@
 #define BEST_Z_INVALID -99999
 
 extern const ZoneConfig *Config;
-
-class Map
+namespace EQEmu
 {
-public:
-	Map();
-	~Map();
+	class Map
+	{
+	public:
+		Map();
+		~Map();
 
-	float FindBestZ(glm::vec3 &start, glm::vec3 *result) const;
-	float FindClosestZ(glm::vec3 &start, glm::vec3 *result) const;
-	bool LineIntersectsZone(glm::vec3 start, glm::vec3 end, float step, glm::vec3 *result) const;
-	bool LineIntersectsZoneNoZLeaps(glm::vec3 start, glm::vec3 end, float step_mag, glm::vec3 *result) const;
-	bool CheckLoS(glm::vec3 myloc, glm::vec3 oloc) const;
+		float FindBestZ(glm::vec3 &start, glm::vec3 *result) const;
+		float FindClosestZ(glm::vec3 &start, glm::vec3 *result) const;
+		bool LineIntersectsZone(glm::vec3 start, glm::vec3 end, float step, glm::vec3 *result) const;
+		bool LineIntersectsZoneNoZLeaps(glm::vec3 start, glm::vec3 end, float step_mag, glm::vec3 *result) const;
+		bool CheckLoS(glm::vec3 myloc, glm::vec3 oloc) const;
 
 #ifdef USE_MAP_MMFS
-	bool Load(std::string filename, bool force_mmf_overwrite = false);
+		bool Load(std::string filename, bool force_mmf_overwrite = false);
 #else
-	bool Load(std::string filename);
+		bool Load(std::string filename);
 #endif
 
-	static Map *LoadMapFile(std::string file);
-private:
-	void RotateVertex(glm::vec3 &v, float rx, float ry, float rz);
-	void ScaleVertex(glm::vec3 &v, float sx, float sy, float sz);
-	void TranslateVertex(glm::vec3 &v, float tx, float ty, float tz);
-	bool LoadV1(FILE *f);
-	bool LoadV2(FILE *f);
+		static Map *LoadMapFile(std::string file);
+	private:
+		void RotateVertex(glm::vec3 &v, float rx, float ry, float rz);
+		void ScaleVertex(glm::vec3 &v, float sx, float sy, float sz);
+		void TranslateVertex(glm::vec3 &v, float tx, float ty, float tz);
+		bool LoadV1(FILE *f);
+		bool LoadV2(FILE *f);
 
 #ifdef USE_MAP_MMFS
-	bool LoadMMF(const std::string& map_file_name, bool force_mmf_overwrite);
-	bool SaveMMF(const std::string& map_file_name, bool force_mmf_overwrite);
+		bool LoadMMF(const std::string& map_file_name, bool force_mmf_overwrite);
+		bool SaveMMF(const std::string& map_file_name, bool force_mmf_overwrite);
 #endif /*USE_MAP_MMFS*/
 
-	struct impl;
-	impl *imp;
-};
-
+		struct impl;
+		impl *imp;
+	};
+}
 #endif

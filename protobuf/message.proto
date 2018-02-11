@@ -1,0 +1,883 @@
+syntax = "proto3";
+package eqproto;
+
+message ChannelMessage {
+  int32 chan_num = 1;
+  int32 language = 2;
+  string from = 3;
+  string to = 4;
+  string message = 5;
+  int32 guilddbid = 6;
+  string deliverto = 7;
+  int32 type = 8;
+  int32 minstatus = 9;
+  int32 fromadmin = 10;
+  bool noreply = 11;
+  bool is_emote = 12;
+  //0 not queued, 1 queued, 2 queue full, 3 offline
+  int32 queued = 13;
+  //You can specify a zone id if you want a message exclusively to one zone
+  int32 zone_id = 14;
+}
+
+message CommandMessage {
+  string author = 1;
+  string command = 2;
+  repeated string params = 3;
+  string result = 4;
+  bytes payload = 5;
+}
+
+//Daily Gain is a special system for tracking players progression in a daily snapshot.
+message DailyGain  {
+  int32 account_id = 1;
+  int32 character_id  = 2;
+  int32 levels_gained = 3;
+  int32 experience_gained = 4;
+  int32 money_earned = 5;  
+  string identity = 6;
+}
+
+//Entity is full of entity data.
+message Entity {
+  int32 id = 1;
+  string name = 2;
+  int32 type = 3;
+  int32 hp = 4;
+  int32 level = 5;
+  Position position = 6;
+  int32 race = 7;
+  int32 class = 8;
+}
+
+message Entities {
+  repeated Entity entities = 1;
+}
+
+message Position {
+  float x = 1;
+  float y = 2;
+  float z = 3;
+  float h = 4;
+}
+
+message TextureProfile {
+  Texture Head = 1;
+  Texture Chest = 2;
+  Texture Arms = 3;
+  Texture Wrist = 4;
+  Texture Hands = 5;
+  Texture Legs = 6;
+  Texture Feet = 7;
+  Texture Primary = 8;
+  Texture Secondary = 9;
+}
+
+message Texture {
+  uint32 material = 1;
+  uint32 unknown1 = 2;
+  uint32 EliteModel = 3;
+  uint32 HerosForgeModel = 4;
+  uint32 Unknown2 = 5;
+}
+
+message TintProfile {
+  Tint Head = 1;
+  Tint Chest = 2;
+  Tint Arms = 3;
+  Tint Wrist = 4;
+  Tint Hands = 5;
+  Tint Legs = 6;
+  Tint Feet = 7;
+  Tint Primary = 8;
+  Tint Secondary = 9;
+}
+
+message Tint {
+  uint32 Blue = 1;
+	uint32 Green = 2;
+	uint32 Red = 3;
+	uint32 UseTint = 4; // if there's a tint, this is FF
+	uint32 Color = 5;
+}
+
+message Event {
+  OpCode op = 1;
+  bytes payload = 2;
+}
+
+//OP_Death
+message DeathEvent {
+  uint32 spawn_id = 1;
+  uint32 killer_id = 2;
+  uint32 corpse_id = 3;
+  uint32 bind_zone_id = 4;
+  uint32 spell_id = 5;
+  uint32 attack_skill_id = 6;
+  uint32 damage = 7;
+  uint32 unknown028 = 8;
+}
+
+//OP_Damage
+message DamageEvent {
+  uint32 target = 1;
+  uint32 source = 2;
+  uint32 type = 3; //slashing, etc. 231 (0xE7) for spells
+  uint32 spellid = 4;
+  uint32 damage = 5;
+  float force = 6;
+  float meleepush_xy = 7;	// see above notes in Action_Struct
+  float meleepush_z = 8;
+}
+
+//OP_Assist OP_Camp
+message EntityEvent {
+  uint32 entity_id = 1; //source of event trigger. 
+  uint32 target_id = 2; //target or other/source/target entity
+}
+
+//OP_ChannelMessage
+message ChannelMessageEvent {
+  string target_name = 1; // Tell recipient
+  string sender = 2;			// The senders name (len might be wrong)
+  uint32	language = 3;			// Language
+  uint32	chan_num = 4;			// Channel
+  uint32	cm_unknown4 = 5;		// ***Placeholder
+  uint32	skill_in_language = 6;	// The players skill in this language? might be wrong
+  string	message = 7;			// Variable length message
+}
+
+//OP_WearChange
+message WearChangeEvent {
+  uint32 spawn_id = 1;
+  uint32 material = 2;
+  uint32 unknown06 = 3;
+  uint32 elite_material = 4;  // 1 for Drakkin Elite Material
+  uint32 hero_forge_model = 5; // New to VoA
+  uint32 unknown18 = 6; // New to RoF
+  Tint color = 7;
+  uint32 wear_slot_id = 8;
+}
+
+//OP_DeleteSpawn
+message DeleteSpawnEvent {
+  uint32 spawn_id = 1;		// Spawn ID to delete
+  uint32 decay = 2;			// 0 = vanish immediately, 1 = 'Decay' sparklies for corpses.
+}
+
+//OP_MobHealth, OP_HPUpdate
+message HPEvent {
+  uint32 spawn_id = 1;
+  uint32 cur_hp = 2;
+  uint32 max_hp = 3;
+}
+
+//OP_ClientUpdate
+message PlayerPositionUpdateEvent {
+  uint32 spawn_id = 1;
+  int32 delta_heading = 2;	// change in heading
+  int32 x_pos = 3;			// x coord
+	int32 padding0002 = 4;		// ***Placeholder
+  int32	y_pos = 5;			// y coord
+	int32 animation = 6;		// animation
+  int32 padding0006 = 7;		// ***Placeholder
+  int32 z_pos = 8;			// z coord
+	int32 delta_y = 9;			// change in y
+  int32 delta_x = 10;			// change in x
+	int32 heading = 11;			// heading
+	int32 padding0014 = 12;		// ***Placeholder
+  int32 delta_z = 13;			// change in z
+	int32 padding0018 = 14;		// ***Placeholder
+}
+
+//OP_Animation
+message AnimationEvent {
+  uint32 spawnid = 1;
+	uint32 speed = 2;
+  uint32 action = 3;
+}
+
+//OP_ZoneEntry OP_NewSpawn
+message SpawnEvent {
+  uint32 unknown0000= 1;
+  uint32	gm = 2;					// 0=no, 1=gm
+  uint32	unknown0003 = 3;
+  uint32	aaitle = 4;				// 0=none, 1=general, 2=archtype, 3=class
+  uint32	unknown0004 = 5;
+  uint32	anon = 6;				// 0=normal, 1=anon, 2=roleplay
+  uint32	face = 7;				// Face id for players
+  string	name = 8;			// Player's Name
+  uint32	deity = 9;				// Player's Deity
+  uint32 unknown0073 = 10;
+  float	size = 11;				// Model size
+  uint32	unknown0079 = 12;
+  uint32	NPC = 13;				// 0=player,1=npc,2=pc corpse,3=npc corpse,a
+  uint32 invis = 14;				// Invis (0=not, 1=invis)
+  uint32	haircolor = 15;			// Hair color
+  uint32	curHp = 16;				// Current hp %%% wrong
+  uint32	max_hp = 17;				// (name prolly wrong)takes on the value 100 for players, 100 or 110 for NPCs and 120 for PC corpses...
+  uint32	findable = 18;			// 0=can't be found, 1=can be found
+  uint32	unknown0089 = 19;
+  int32	deltaHeading = 20;	// change in heading
+  int32	x = 21;				// x coord
+  int32	padding0054 = 22;		// ***Placeholder
+  int32	y = 23;				// y coord
+  int32	animation = 24;		// animation
+  int32	padding0058 = 25;		// ***Placeholder
+  int32	z = 26;				// z coord
+  int32	deltaY = 27;			// change in y
+  int32	deltaX = 28;			// change in x
+  uint32	heading = 29;		// heading
+  int32	padding0066 = 30;		// ***Placeholder
+  int32	deltaZ = 31;			// change in z
+  int32	padding0070 = 32;		// ***Placeholder
+  uint32	eyecolor1 = 33;			// Player's left eye color
+  uint32	unknown0115 = 34;	// Was [24]
+  uint32	StandState = 35;	// stand state for SoF+ 0x64 for normal animation
+  uint32	drakkin_heritage = 36;	// Added for SoF
+  uint32	drakkin_tattoo = 37;		// Added for SoF
+  uint32	drakkin_details = 38;	// Added for SoF
+  uint32	showhelm = 39;			// 0=no, 1=yes
+  uint32	unknown0140 = 40;
+  uint32	is_npc = 41;				// 0=no, 1=yes
+  uint32	hairstyle = 42;			// Hair style
+  uint32	beard = 43;				// Beard style (not totally, sure but maybe!)
+  uint32	unknown0147 = 44;
+  uint32	level = 45;				// Spawn Level
+  uint32 PlayerState = 46;           // Controls animation stuff // None = 0, Open = 1, WeaponSheathed = 2, Aggressive = 4, ForcedAggressive = 8, InstrumentEquipped = 16, Stunned = 32, PrimaryWeaponEquipped = 64, SecondaryWeaponEquipped = 128
+  uint32	beardcolor = 47;			// Beard color
+  string suffix = 48;			// Player's suffix (of Veeshan, etc.)
+  uint32	petOwnerId = 49;			// If this is a pet, the spawn id of owner
+  uint32	guildrank = 50;			// 0=normal, 1=officer, 2=leader
+  uint32	unknown0194 = 51;
+  TextureProfile equipment = 52;
+  float	runspeed = 53;		// Speed when running
+  uint32	afk = 54;			// 0=no, 1=afk
+  uint32	guildID = 55;		// Current guild
+  string	title = 56;		// Title
+  uint32	unknown0274 = 57;	// non-zero prefixes name with '!'
+  uint32	set_to_0xFF = 58;	// ***Placeholder (all ff)
+  uint32	helm = 59;			// Helm texture
+  uint32	race = 60;			// Spawn race
+  uint32	unknown0288 = 61;
+  string	lastName = 62;	// Player's Lastname
+  float	walkspeed = 63;		// Speed when walking
+  uint32	unknown0328 = 64;
+  uint32	is_pet = 65;			// 0=no, 1=yes
+  uint32	light = 66;			// Spawn's lightsource %%% wrong
+  uint32	class_ = 67;			// Player's class
+  uint32	eyecolor2 = 68;		// Left eye color
+  uint32	flymode = 69;
+  uint32	gender = 70;			// Gender (0=male, 1=female)
+  uint32	bodytype = 71;		// Bodytype
+  uint32 unknown0336 = 72;
+  //union
+  uint32 equip_chest2 = 73;	// Second place in packet for chest texture (usually 0xFF in live packets) // Not sure why there are 2 of them, but it effects chest texture!
+  uint32 mount_color = 74;		// drogmor: 0=white, 1=black, 2=green, 3=red horse: 0=brown, 1=white, 2=black, 3=tan
+  //endunion                            
+  uint32 spawnId = 75;		// Spawn Id
+  uint32 unknown0344 = 76;
+  uint32 IsMercenary = 77;
+  TintProfile equipment_tint = 78;
+  uint32	lfg = 79;			// 0=off, 1=lfg on
+	bool DestructibleObject = 80;	// Only used to flag as a destrible object
+	string DestructibleModel = 82;	// Model of the Destructible Object - Required - Seen "DEST_TNT_G"
+	string DestructibleName2 = 83;	// Secondary name - Not Required - Seen "a_tent"
+	string DestructibleString = 84;	// Unknown - Not Required - Seen "ZoneActor_01186"
+	uint32 DestructibleAppearance = 85;	// Damage Appearance
+	uint32 DestructibleUnk1 = 86;
+	uint32 DestructibleID1 = 87;
+	uint32 DestructibleID2 = 88;
+	uint32 DestructibleID3 = 89;
+	uint32 DestructibleID4 = 90;
+	uint32 DestructibleUnk2 = 91;
+	uint32 DestructibleUnk3 = 92;
+	uint32 DestructibleUnk4 = 93;
+	uint32 DestructibleUnk5 = 94;
+	uint32 DestructibleUnk6 = 95;
+	uint32 DestructibleUnk7 = 96;
+	uint32 DestructibleUnk8 = 97;
+	uint32 DestructibleUnk9 = 98;
+	bool targetable_with_hotkey = 99;
+	bool show_name= 100;
+}
+
+enum OpCode {
+  //option allow_alias = true;
+  OP_Unknown = 0;
+  OP_ExploreUnknown = 1;
+  OP_0x0193 = 2;
+  OP_0x0347 = 3;
+  OP_AAAction = 4;
+  OP_AAExpUpdate = 5;
+  OP_AcceptNewTask = 6;
+  OP_AckPacket = 7;
+  OP_Action = 8;
+  OP_Action2 = 9;
+  OP_AddNimbusEffect = 10;
+  OP_AdventureData = 11;
+  OP_AdventureDetails = 12;
+  OP_AdventureFinish = 13;
+  OP_AdventureInfo = 14;
+  OP_AdventureInfoRequest = 15;
+  OP_AdventureLeaderboardReply = 16;
+  OP_AdventureLeaderboardRequest = 17;
+  OP_AdventureMerchantPurchase = 18;
+  OP_AdventureMerchantRequest = 19;
+  OP_AdventureMerchantResponse = 20;
+  OP_AdventureMerchantSell = 21;
+  OP_AdventurePointsUpdate = 22;
+  OP_AdventureRequest = 23;
+  OP_AdventureStatsReply = 24;
+  OP_AdventureStatsRequest = 25;
+  OP_AdventureUpdate = 26;
+  OP_AggroMeterLockTarget = 27;
+  OP_AggroMeterTargetInfo = 28;
+  OP_AggroMeterUpdate = 29;
+  OP_AltCurrency = 30;
+  OP_AltCurrencyMerchantReply = 31;
+  OP_AltCurrencyMerchantRequest = 32;
+  OP_AltCurrencyPurchase = 33;
+  OP_AltCurrencyReclaim = 34;
+  OP_AltCurrencySell = 35;
+  OP_AltCurrencySellSelection = 36;
+  OP_Animation = 37; //supported
+  OP_AnnoyingZoneUnknown = 38;
+  OP_ApplyPoison = 39;
+  OP_ApproveName = 40;
+  OP_ApproveWorld = 41;
+  OP_ApproveZone = 42;
+  OP_Assist = 43; //supported
+  OP_AssistGroup = 44;
+  OP_AugmentInfo = 45;
+  OP_AugmentItem = 46;
+  OP_AutoAttack = 47;
+  OP_AutoAttack2 = 48;
+  OP_AutoFire = 49;
+  OP_Bandolier = 50;
+  OP_BankerChange = 51;
+  OP_Barter = 52;
+  OP_Bazaar = 53;
+  OP_BazaarInspect = 54;
+  OP_BazaarSearch = 55;
+  OP_BecomeCorpse = 56;
+  OP_BecomeTrader = 57;
+  OP_Begging = 58;
+  OP_BeginCast = 59;
+  OP_Bind_Wound = 60;
+  OP_BlockedBuffs = 61;
+  OP_BoardBoat = 62;
+  OP_Buff = 63;
+  OP_BuffCreate = 64;
+  OP_BuffRemoveRequest = 65;
+  OP_Bug = 66;
+  OP_CameraEffect = 67;
+  OP_Camp = 68; //supported
+  OP_CancelSneakHide = 69;
+  OP_CancelTask = 70;
+  OP_CancelTrade = 71;
+  OP_CastSpell = 72;
+  OP_ChangeSize = 73;
+  OP_ChannelMessage = 74;
+  OP_CharacterCreate = 75;
+  OP_CharacterCreateRequest = 76;
+  OP_CharInventory = 77;
+  OP_Charm = 78;
+  OP_ChatMessage = 79; //used by lua
+  OP_ClearAA = 80;
+  OP_ClearBlockedBuffs = 81;
+  OP_ClearLeadershipAbilities = 82;
+  OP_ClearNPCMarks = 83;
+  OP_ClearObject = 84;
+  OP_ClearSurname = 85;
+  OP_ClickDoor = 86;
+  OP_ClickObject = 87;
+  OP_ClickObjectAction = 88;
+  OP_ClientError = 89;
+  OP_ClientReady = 90;
+  OP_ClientTimeStamp = 91;
+  OP_ClientUpdate = 92; //supported
+  OP_CloseContainer = 93;
+  OP_CloseTributeMaster = 94;
+  OP_ColoredText = 95;
+  OP_CombatAbility = 96;
+  OP_Command = 97;
+  OP_CompletedTasks = 98;
+  OP_ConfirmDelete = 99;
+  OP_Consent = 100;
+  OP_ConsentDeny = 101;
+  OP_ConsentResponse = 102;
+  OP_Consider = 103;
+  OP_ConsiderCorpse = 104;
+  OP_Consume = 105;
+  OP_ControlBoat = 106;
+  OP_CorpseDrag = 107;
+  OP_CorpseDrop = 108;
+  OP_CrashDump = 109;
+  OP_CrystalCountUpdate = 110;
+  OP_CrystalCreate = 111;
+  OP_CrystalReclaim = 112;
+  OP_CustomTitles = 113;
+  OP_Damage = 114;
+  OP_Death = 115;
+  OP_DelegateAbility = 116;
+  OP_DeleteCharacter = 117;
+  OP_DeleteCharge = 118;
+  OP_DeleteItem = 119;
+  OP_DeletePetition = 120;
+  OP_DeleteSpawn = 121; //supported
+  OP_DeleteSpell = 122;
+  OP_DenyResponse = 123;
+  OP_Disarm = 124;
+  OP_DisarmTraps = 125;
+  OP_DisciplineTimer = 126;
+  OP_DisciplineUpdate = 127;
+  OP_DiscordMerchantInventory = 128;
+  OP_DoGroupLeadershipAbility = 129;
+  OP_DuelResponse = 130;
+  OP_DuelResponse2 = 131;
+  OP_DumpName = 132;
+  OP_Dye = 133;
+  OP_DynamicWall = 134;
+  OP_DzAddPlayer = 135;
+  OP_DzChooseZone = 136;
+  OP_DzCompass = 137;
+  OP_DzExpeditionEndsWarning = 138;
+  OP_DzExpeditionInfo = 139;
+  OP_DzExpeditionList = 140;
+  OP_DzJoinExpeditionConfirm = 141;
+  OP_DzJoinExpeditionReply = 142;
+  OP_DzLeaderStatus = 143;
+  OP_DzListTimers = 144;
+  OP_DzMakeLeader = 145;
+  OP_DzMemberList = 146;
+  OP_DzMemberStatus = 147;
+  OP_DzPlayerList = 148;
+  OP_DzQuit = 149;
+  OP_DzRemovePlayer = 150;
+  OP_DzSwapPlayer = 151;
+  OP_Emote = 152;
+  OP_EndLootRequest = 153;
+  OP_EnduranceUpdate = 154;
+  OP_EnterChat = 155;
+  OP_EnterWorld = 156;
+  OP_EnvDamage = 157;
+  OP_ExpansionInfo = 158;
+  OP_ExpUpdate = 159;
+  OP_FaceChange = 160;
+  OP_Feedback = 161;
+  OP_FeignDeath = 162;
+  OP_FellowshipUpdate = 163;
+  OP_FindPersonReply = 164;
+  OP_FindPersonRequest = 165;
+  OP_FinishTrade = 166;
+  OP_FinishWindow = 167;
+  OP_FinishWindow2 = 168;
+  OP_Fishing = 169;
+  OP_Fling = 170;
+  OP_FloatListThing = 171;
+  OP_Forage = 172;
+  OP_ForceFindPerson = 173;
+  OP_FormattedMessage = 174;
+  OP_FriendsWho = 175;
+  OP_GetGuildMOTD = 176;
+  OP_GetGuildMOTDReply = 177;
+  OP_GetGuildsList = 178;
+  OP_GiveMoney = 179;
+  OP_GMApproval = 180;
+  OP_GMBecomeNPC = 181;
+  OP_GMDelCorpse = 182;
+  OP_GMEmoteZone = 183;
+  OP_GMEndTraining = 184;
+  OP_GMEndTrainingResponse = 185;
+  OP_GMFind = 186;
+  OP_GMGoto = 187;
+  OP_GMHideMe = 188;
+  OP_GMKick = 189;
+  OP_GMKill = 190;
+  OP_GMLastName = 191;
+  OP_GMNameChange = 192;
+  OP_GMSearchCorpse = 193;
+  OP_GMServers = 194;
+  OP_GMSummon = 195;
+  OP_GMToggle = 196;
+  OP_GMTraining = 197;
+  OP_GMTrainSkill = 198;
+  OP_GMTrainSkillConfirm = 199;
+  OP_GMZoneRequest = 200;
+  OP_GMZoneRequest2 = 201;
+  OP_GroundSpawn = 202;
+  OP_GroupAcknowledge = 203;
+  OP_GroupCancelInvite = 204;
+  OP_GroupDelete = 205;
+  OP_GroupDisband = 206;
+  OP_GroupDisbandOther = 207;
+  OP_GroupDisbandYou = 208;
+  OP_GroupFollow = 209;
+  OP_GroupFollow2 = 210;
+  OP_GroupInvite = 211;
+  OP_GroupInvite2 = 212;
+  OP_GroupLeaderChange = 213;
+  OP_GroupLeadershipAAUpdate = 214;
+  OP_GroupMakeLeader = 215;
+  OP_GroupMentor = 216;
+  OP_GroupRoles = 217;
+  OP_GroupUpdate = 218;
+  OP_GroupUpdateB = 219;
+  OP_GroupUpdateLeaderAA = 220;
+  OP_GuildBank = 221;
+  OP_GuildBankItemList = 222;
+  OP_GuildCreate = 223;
+  OP_GuildDelete = 224;
+  OP_GuildDemote = 225;
+  OP_GuildInvite = 226;
+  OP_GuildInviteAccept = 227;
+  OP_GuildLeader = 228;
+  OP_GuildManageAdd = 229;
+  OP_GuildManageBanker = 230;
+  OP_GuildManageRemove = 231;
+  OP_GuildManageStatus = 232;
+  OP_GuildMemberLevelUpdate = 233;
+  OP_GuildMemberList = 234;
+  OP_GuildMemberUpdate = 235;
+  OP_GuildMOTD = 236;
+  OP_GuildPeace = 237;
+  OP_GuildPromote = 238;
+  OP_GuildPublicNote = 239;
+  OP_GuildRemove = 240;
+  OP_GuildsList = 241;
+  OP_GuildStatus = 242;
+  OP_GuildTributeInfo = 243;
+  OP_GuildUpdateURLAndChannel = 244;
+  OP_GuildWar = 245;
+  OP_Heartbeat = 246;
+  OP_Hide = 247;
+  OP_HideCorpse = 248;
+  OP_HPUpdate = 249; //supported 
+  OP_Illusion = 250;
+  OP_IncreaseStats = 251;
+  OP_InitialHPUpdate = 252;
+  OP_InitialMobHealth = 253;
+  OP_InspectAnswer = 254;
+  OP_InspectBuffs = 255;
+  OP_InspectMessageUpdate = 256;
+  OP_InspectRequest = 257;
+  OP_InstillDoubt = 258;
+  OP_InterruptCast = 259;
+  OP_ItemLinkClick = 260;
+  OP_ItemLinkResponse = 261;
+  OP_ItemLinkText = 262;
+  OP_ItemName = 263;
+  OP_ItemPacket = 264;
+  OP_ItemPreview = 265;
+  OP_ItemRecastDelay = 266;
+  OP_ItemVerifyReply = 267;
+  OP_ItemVerifyRequest = 268;
+  OP_ItemViewUnknown = 269;
+  OP_Jump = 270;
+  OP_KeyRing = 271;
+  OP_KnowledgeBase = 272;
+  OP_LDoNButton = 273;
+  OP_LDoNDisarmTraps = 274;
+  OP_LDoNInspect = 275;
+  OP_LDoNOpen = 276;
+  OP_LDoNPickLock = 277;
+  OP_LDoNSenseTraps = 278;
+  OP_LeadershipExpToggle = 279;
+  OP_LeadershipExpUpdate = 280;
+  OP_LeaveAdventure = 281;
+  OP_LeaveBoat = 282;
+  OP_LevelAppearance = 283;
+  OP_LevelUpdate = 284;
+  OP_LFGAppearance = 285;
+  OP_LFGCommand = 286;
+  OP_LFGGetMatchesRequest = 287;
+  OP_LFGGetMatchesResponse = 288;
+  OP_LFGResponse = 289;
+  OP_LFGuild = 290;
+  OP_LFPCommand = 291;
+  OP_LFPGetMatchesRequest = 292;
+  OP_LFPGetMatchesResponse = 293;
+  OP_LinkedReuse = 294;
+  OP_LoadSpellSet = 295;
+  OP_LocInfo = 296;
+  OP_LockoutTimerInfo = 297;
+  OP_Login = 298;
+  OP_LoginAccepted = 299;
+  OP_LoginComplete = 300;
+  OP_LoginUnknown1 = 301;
+  OP_LoginUnknown2 = 302;
+  OP_Logout = 303;
+  OP_LogoutReply = 304;
+  OP_LogServer = 305;
+  OP_LootComplete = 306;
+  OP_LootItem = 307;
+  OP_LootRequest = 308;
+  OP_ManaChange = 309;
+  OP_ManaUpdate = 310;
+  OP_MarkNPC = 311;
+  OP_Marquee = 312;
+  OP_MemorizeSpell = 313;
+  OP_Mend = 314;
+  OP_MendHPUpdate = 315;
+  OP_MercenaryAssign = 316;
+  OP_MercenaryCommand = 317;
+  OP_MercenaryDataRequest = 318;
+  OP_MercenaryDataResponse = 319;
+  OP_MercenaryDataUpdate = 320;
+  OP_MercenaryDataUpdateRequest = 321;
+  OP_MercenaryDismiss = 322;
+  OP_MercenaryHire = 323;
+  OP_MercenarySuspendRequest = 324;
+  OP_MercenarySuspendResponse = 325;
+  OP_MercenaryTimer = 326;
+  OP_MercenaryTimerRequest = 327;
+  OP_MercenaryUnknown1 = 328;
+  OP_MercenaryUnsuspendResponse = 329;
+  OP_MobEnduranceUpdate = 330;
+  OP_MobHealth = 331; //supported
+  OP_MobManaUpdate = 332;
+  OP_MobRename = 333;
+  OP_MobUpdate = 334; // not used anymore, here for lecacy reasons eqextractor
+  OP_MoneyOnCorpse = 335;
+  OP_MoneyUpdate = 336;
+  OP_MOTD = 337;
+  OP_MoveCoin = 338;
+  OP_MoveDoor = 339;
+  OP_MoveItem = 340;
+  OP_MoveLogDisregard = 341;
+  OP_MoveLogRequest = 342;
+  OP_MultiLineMsg = 343;
+  OP_NewSpawn = 344; //supported
+  OP_NewTitlesAvailable = 345;
+  OP_NewZone = 346;
+  OP_OnLevelMessage = 347;
+  OP_OpenContainer = 348;
+  OP_OpenDiscordMerchant = 349;
+  OP_OpenGuildTributeMaster = 350;
+  OP_OpenInventory = 351;
+  OP_OpenNewTasksWindow = 352;
+  OP_OpenTributeMaster = 353;
+  OP_PDeletePetition = 354;
+  OP_PetBuffWindow = 355;
+  OP_PetCommands = 356;
+  OP_PetCommandState = 357;
+  OP_PetHoTT = 358;
+  OP_Petition = 359;
+  OP_PetitionBug = 360;
+  OP_PetitionCheckIn = 361;
+  OP_PetitionCheckout = 362;
+  OP_PetitionCheckout2 = 363;
+  OP_PetitionDelete = 364;
+  OP_PetitionQue = 365;
+  OP_PetitionRefresh = 366;
+  OP_PetitionResolve = 367;
+  OP_PetitionSearch = 368;
+  OP_PetitionSearchResults = 369;
+  OP_PetitionSearchText = 370;
+  OP_PetitionUnCheckout = 371;
+  OP_PetitionUpdate = 372;
+  OP_PickPocket = 373;
+  OP_PlayerProfile = 374;
+  OP_PlayerStateAdd = 375;
+  OP_PlayerStateRemove = 376;
+  OP_PlayEverquestRequest = 377;
+  OP_PlayEverquestResponse = 378;
+  OP_PlayMP3 = 379;
+  OP_Poll = 380;
+  OP_PollResponse = 381;
+  OP_PopupResponse = 382;
+  OP_PostEnterWorld = 383; //this is really OP_WorldAccessGrant
+  OP_PotionBelt = 384;
+  OP_PreLogoutReply = 385;
+  OP_PurchaseLeadershipAA = 386;
+  OP_PVPLeaderBoardDetailsReply = 387;
+  OP_PVPLeaderBoardDetailsRequest = 388;
+  OP_PVPLeaderBoardReply = 389;
+  OP_PVPLeaderBoardRequest = 390;
+  OP_PVPStats = 391;
+  OP_QueryResponseThing = 392;
+  OP_RaidInvite = 393;
+  OP_RaidJoin = 394;
+  OP_RaidUpdate = 395;
+  OP_RandomNameGenerator = 396;
+  OP_RandomReply = 397;
+  OP_RandomReq = 398;
+  OP_ReadBook = 399;
+  OP_RecipeAutoCombine = 400;
+  OP_RecipeDetails = 401;
+  OP_RecipeReply = 402;
+  OP_RecipesFavorite = 403;
+  OP_RecipesSearch = 404;
+  OP_ReclaimCrystals = 405;
+  OP_ReloadUI = 406;
+  OP_RemoveAllDoors = 407;
+  OP_RemoveBlockedBuffs = 408;
+  OP_RemoveNimbusEffect = 409;
+  OP_RemoveTrap = 410;
+  OP_Report = 411;
+  OP_ReqClientSpawn = 412;
+  OP_ReqNewZone = 413;
+  OP_RequestClientZoneChange = 414;
+  OP_RequestDuel = 415;
+  OP_RequestKnowledgeBase = 416;
+  OP_RequestTitles = 417;
+  OP_RespawnWindow = 418;
+  OP_RespondAA = 419;
+  OP_RestState = 420;
+  OP_Rewind = 421;
+  OP_RezzAnswer = 422;
+  OP_RezzComplete = 423;
+  OP_RezzRequest = 424;
+  OP_Sacrifice = 425;
+  OP_SafeFallSuccess = 426;
+  OP_SafePoint = 427;
+  OP_Save = 428;
+  OP_SaveOnZoneReq = 429;
+  OP_SelectTribute = 430;
+  OP_SendAAStats = 431;
+  OP_SendAATable = 432;
+  OP_SendCharInfo = 433;
+  OP_SendExpZonein = 434;
+  OP_SendFindableNPCs = 435;
+  OP_SendGuildTributes = 436;
+  OP_SendLoginInfo = 437;
+  OP_SendMaxCharacters = 438;
+  OP_SendMembership = 439;
+  OP_SendMembershipDetails = 440;
+  OP_SendSystemStats = 441;
+  OP_SendTitleList = 442;
+  OP_SendTributes = 443;
+  OP_SendZonepoints = 444;
+  OP_SenseHeading = 445;
+  OP_SenseTraps = 446;
+  OP_ServerListRequest = 447;
+  OP_ServerListResponse = 448;
+  OP_SessionReady = 449;
+  OP_SetChatServer = 450;
+  OP_SetChatServer2 = 451;
+  OP_SetGroupTarget = 452;
+  OP_SetGuildMOTD = 453;
+  OP_SetGuildRank = 454;
+  OP_SetRunMode = 455;
+  OP_SetServerFilter = 456;
+  OP_SetStartCity = 457;
+  OP_SetTitle = 458;
+  OP_SetTitleReply = 459;
+  OP_Shielding = 460;
+  OP_ShopDelItem = 461;
+  OP_ShopEnd = 462;
+  OP_ShopEndConfirm = 463;
+  OP_ShopItem = 464;
+  OP_ShopPlayerBuy = 465;
+  OP_ShopPlayerSell = 466;
+  OP_ShopRequest = 467;
+  OP_SimpleMessage = 468;
+  OP_SkillUpdate = 469;
+  OP_Sneak = 470;
+  OP_Some3ByteHPUpdate = 471;
+  OP_Some6ByteHPUpdate = 472;
+  OP_SomeItemPacketMaybe = 473;
+  OP_Sound = 474;
+  OP_SpawnAppearance = 475;
+  OP_SpawnDoor = 476;
+  OP_SpawnPositionUpdate = 477;
+  OP_SpecialMesg = 478;
+  OP_SpellEffect = 479;
+  OP_Split = 480;
+  OP_Stamina = 481;
+  OP_Stun = 482;
+  OP_Surname = 483;
+  OP_SwapSpell = 484;
+  OP_TargetBuffs = 485;
+  OP_TargetCommand = 486;
+  OP_TargetHoTT = 487;
+  OP_TargetMouse = 488;
+  OP_TargetReject = 489;
+  OP_TaskActivity = 490;
+  OP_TaskActivityComplete = 491;
+  OP_TaskDescription = 492;
+  OP_TaskHistoryReply = 493;
+  OP_TaskHistoryRequest = 494;
+  OP_TaskMemberList = 495;
+  OP_Taunt = 496;
+  OP_TestBuff = 497;
+  OP_TGB = 498;
+  OP_TimeOfDay = 499;
+  OP_Track = 500;
+  OP_TrackTarget = 501;
+  OP_TrackUnknown = 502;
+  OP_TradeAcceptClick = 503;
+  OP_TradeBusy = 504;
+  OP_TradeCoins = 505;
+  OP_TradeMoneyUpdate = 506;
+  OP_Trader = 507;
+  OP_TraderBuy = 508;
+  OP_TraderDelItem = 509;
+  OP_TradeRequest = 510;
+  OP_TradeRequestAck = 511;
+  OP_TraderItemUpdate = 512;
+  OP_TraderShop = 513;
+  OP_TradeSkillCombine = 514;
+  OP_Translocate = 515;
+  OP_TributeInfo = 516;
+  OP_TributeItem = 517;
+  OP_TributeMoney = 518;
+  OP_TributeNPC = 519;
+  OP_TributePointUpdate = 520;
+  OP_TributeTimer = 521;
+  OP_TributeToggle = 522;
+  OP_TributeUpdate = 523;
+  OP_Untargetable = 524;
+  OP_UpdateAA = 525;
+  OP_UpdateAura = 526;
+  OP_UpdateLeadershipAA = 527;
+  OP_VetClaimReply = 528;
+  OP_VetClaimRequest = 529;
+  OP_VetRewardsAvaliable = 530;
+  OP_VoiceMacroIn = 531;
+  OP_VoiceMacroOut = 532;
+  OP_WeaponEquip1 = 533;
+  OP_WearChange = 534; //supported
+  OP_Weather = 535;
+  OP_Weblink = 536;
+  OP_WhoAllRequest = 537;
+  OP_WhoAllResponse = 538;
+  OP_World_Client_CRC1 = 539;
+  OP_World_Client_CRC2 = 540;
+  OP_WorldClientReady = 541;
+  OP_WorldComplete = 542;
+  OP_WorldLogout = 543;
+  OP_WorldObjectsSent = 544;
+  OP_WorldUnknown001 = 545;
+  OP_XTargetAutoAddHaters = 546;
+  OP_XTargetOpen = 547;
+  OP_XTargetOpenResponse = 548;
+  OP_XTargetRequest = 549;
+  OP_XTargetResponse = 550;
+  OP_YellForHelp = 551;
+  OP_ZoneChange = 552;
+  OP_ZoneComplete = 553;
+  OP_ZoneEntry = 554; //supported
+  OP_ZoneGuildList = 555;
+  OP_ZoneInUnknown = 556;
+  OP_ZonePlayerToBind = 557;
+  OP_ZoneServerInfo = 558;
+  OP_ZoneServerReady = 559;
+  OP_ZoneSpawns = 560;
+  OP_ZoneUnavail = 561;
+  OP_ResetAA = 562;
+  OP_Buddy = 563;
+  OP_ChannelAnnounceJoin = 564;
+  OP_ChannelAnnounceLeave = 565;
+  OP_Ignore = 566;
+  OP_Mail = 567;
+  OP_MailboxChange = 568;
+  OP_MailDeliveryStatus = 569;
+  OP_MailHeader = 570;
+  OP_MailHeaderCount = 571;
+  OP_MailLogin = 572;
+  OP_MailNew = 573;
+  OP_MailSendBody = 574;
+
+}

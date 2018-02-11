@@ -1468,3 +1468,58 @@ void ClientList::OnTick(EQ::Timer *t)
 
 	web_interface.SendEvent(out);
 }
+
+std::string ClientList::GetWhoAll() {
+	std::string reply = "";
+
+	LinkedListIterator<ClientListEntry*> iterator(clientlist);
+	ClientListEntry* cle = 0;
+	uint32 x = 0;
+
+	char* output = 0;
+	uint32 outsize = 0, outlen = 0;
+	reply.append("Players on server:\n");
+	iterator.Reset();
+	while (iterator.MoreElements()) {
+		cle = iterator.GetData();
+		const char* tmpZone = database.GetZoneName(cle->zone());
+		if (cle->Online() < CLE_Status_Zoning ||
+			x > 20) {
+			iterator.Advance();
+			continue;
+		}
+		if (cle->Admin() >= 250) reply.append("* GM-Impossible * ");
+		else if (cle->Admin() >= 200) reply.append("* GM-Mgmt * ");
+		else if (cle->Admin() >= 180) reply.append("* GM-Coder * ");
+		else if (cle->Admin() >= 170) reply.append("* GM-Areas * ");
+		else if (cle->Admin() >= 160)  reply.append("* QuestMaster * ");
+		else if (cle->Admin() >= 150) reply.append("* GM-Lead Admin * ");
+		else if (cle->Admin() >= 100) reply.append("* GM-Admin * ");
+		else if (cle->Admin() >= 95) reply.append("* GM-Staff * ");
+		else if (cle->Admin() >= 90) reply.append("* EQ Support * ");
+		else if (cle->Admin() >= 85) reply.append("* GM-Tester * ");
+		else if (cle->Admin() >= 81) reply.append("* Senior Guide * ");
+		else if (cle->Admin() >= 80) reply.append("* QuestTroupe * ");
+		else if (cle->Admin() >= 50) reply.append("* Guide * ");
+		//else if (cle->Admin() >= 20) reply.append("* Apprentice Guide * ");
+		//else if (cle->Admin() >= 10) reply.append("* Steward * ");
+
+
+		if (cle->Anon() == 2) reply.append("[RolePlay");
+		else if (cle->Anon() == 1) reply.append("[ANON");
+		else reply.append("[");
+
+		reply.append(StringFormat(" %i %s ] %s", cle->level(), GetClassIDName(cle->class_(), cle->level()), cle->name()));
+		reply.append(StringFormat(" %s zone: %s", GetRaceIDName(cle->race()), database.GetZoneName(cle->zone())));
+
+		if (guild_mgr.GuildExists(cle->GuildID())) reply.append(StringFormat(" <%s>", guild_mgr.GetGuildName(cle->GuildID())));
+		if (cle->LFG()) reply.append(" LFG");
+		reply.append("\n");
+		x++;
+		iterator.Advance();
+	}
+
+	if (x >= 20) reply.append("First 20 shown, ");
+	reply.append(StringFormat("%u total players online.", x));
+	return reply;
+}

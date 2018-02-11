@@ -46,6 +46,7 @@
 #include "clientlist.h"
 #include "wguild_mgr.h"
 #include "sof_char_create_data.h"
+#include "nats_manager.h"
 
 #include <iostream>
 #include <iomanip>
@@ -84,6 +85,7 @@ extern ClientList client_list;
 extern EQEmu::Random emu_random;
 extern uint32 numclients;
 extern volatile bool RunLoops;
+extern NatsManager nats;
 
 Client::Client(EQStreamInterface* ieqs)
 :	autobootup_timeout(RuleI(World, ZoneAutobootTimeoutMS)),
@@ -799,6 +801,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 			}
 			else {
 				Log(Logs::Detail, Logs::World_Server, "'%s' is trying to go home before they're able...", char_name);
+				nats.SendAdminMessage(StringFormat("Hacker: %s [%s]: MQGoHome: player tried to go home before they were able.", GetAccountName(), char_name));
 				database.SetHackerFlag(GetAccountName(), char_name, "MQGoHome: player tried to go home before they were able.");
 				eqs->Close();
 				return true;
@@ -823,6 +826,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 			}
 			else {
 				Log(Logs::Detail, Logs::World_Server, "'%s' is trying to go to tutorial but are not allowed...", char_name);
+				nats.SendAdminMessage(StringFormat("Hacker %s [%s]: MQTutorial: player tried to enter the tutorial without having tutorial enabled for this character.", GetAccountName(), char_name));
 				database.SetHackerFlag(GetAccountName(), char_name, "MQTutorial: player tried to enter the tutorial without having tutorial enabled for this character.");
 				eqs->Close();
 				return true;

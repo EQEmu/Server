@@ -45,6 +45,7 @@
 #include "../common/string_util.h"
 #include "event_codes.h"
 #include "guild_mgr.h"
+#include "nats_manager.h"
 #include "map.h"
 #include "petitions.h"
 #include "queryserv.h"
@@ -60,6 +61,7 @@ extern volatile bool is_zone_loaded;
 extern WorldServer worldserver;
 extern PetitionList petition_list;
 extern EntityList entity_list;
+extern NatsManager nats;
 
 bool Client::Process() {
 	bool ret = true;
@@ -2199,7 +2201,7 @@ void Client::ClearHover()
 		EQApplicationPacket *outapp = MakeBuffsPacket(false);
 		CastToClient()->FastQueuePacket(&outapp);
 	}
-
+	nats.OnSpawnEvent(OP_ZoneEntry, this->GetID(), &sze->player.spawn);
 	dead = false;
 }
 

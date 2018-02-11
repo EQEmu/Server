@@ -30,6 +30,7 @@
 #include "quest_parser_collection.h"
 #include "string_ids.h"
 #include "worldserver.h"
+#include "nats_manager.h"
 
 #include <math.h>
 
@@ -42,6 +43,7 @@
 extern Zone* zone;
 extern volatile bool is_zone_loaded;
 extern WorldServer worldserver;
+extern NatsManager nats;
 
 
 // the spell can still fail here, if the buff can't stack
@@ -936,6 +938,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						Save();
 						safe_delete(action_packet);
 						safe_delete(message_packet);
+						nats.OnDamageEvent(cd->source, cd);
 					}
 					else
 					{
@@ -987,6 +990,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 								Save();
 								safe_delete(action_packet);
 								safe_delete(message_packet);
+								nats.OnDamageEvent(cd->source, cd);
 							}
 						}
 						else
@@ -1025,6 +1029,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 							Save();
 							safe_delete(action_packet);
 							safe_delete(message_packet);
+							nats.OnDamageEvent(cd->source, cd);
 						}
 					}
 				}

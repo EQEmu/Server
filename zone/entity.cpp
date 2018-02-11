@@ -4879,3 +4879,16 @@ void EntityList::ReloadMerchants() {
 		}
 	}
 }
+
+
+std::map<uint16, NPC *> EntityList::ListNPCs()
+{
+	std::map<uint16, NPC*> npcs;
+	auto it = npc_list.begin();
+	while (it != npc_list.end()) {
+		NPC *n = it->second;
+		npcs[n->id] = n;
+		++it;
+	}
+	return npcs;
+}

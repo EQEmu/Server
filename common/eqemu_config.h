@@ -81,6 +81,10 @@ class EQEmuConfig
 		std::string QSDatabaseDB;
 		uint16 QSDatabasePort;
 
+		// From <nats/>
+		std::string NATSHost;
+		uint16 NATSPort;
+
 		// From <files/>
 		std::string SpellsFile;
 		std::string OpCodesFile;

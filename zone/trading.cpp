@@ -25,7 +25,7 @@
 #include "client.h"
 #include "entity.h"
 #include "mob.h"
-
+#include "nats_manager.h"
 #include "quest_parser_collection.h"
 #include "string_ids.h"
 #include "worldserver.h"
@@ -34,6 +34,7 @@ class QueryServ;
 
 extern WorldServer worldserver;
 extern QueryServ* QServ;
+extern NatsManager nats;
 
 // The maximum amount of a single bazaar/barter transaction expressed in copper.
 // Equivalent to 2 Million plat
@@ -1658,6 +1659,7 @@ void Client::BuyTraderItem(TraderBuy_Struct* tbs, Client* Trader, const EQApplic
 
 	if(!TakeMoneyFromPP(TotalCost)) {
 		database.SetHackerFlag(account_name, name, "Attempted to buy something in bazaar but did not have enough money.");
+		nats.SendAdminMessage(StringFormat("Hacker %s: Attempted to buy something in bazaar but did not have enough money.", GetCleanName()));
 		TradeRequestFailed(app);
 		safe_delete(outapp);
 		return;
