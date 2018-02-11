@@ -1969,7 +1969,9 @@ const NPCType* ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		"npc_types.charm_attack_delay, "
 		"npc_types.charm_accuracy_rating, "
 		"npc_types.charm_avoidance_rating, "
-		"npc_types.charm_atk "
+		"npc_types.charm_atk, "
+		"npc_types.skip_global_loot, "
+		"npc_types.rare_spawn "
 		"FROM npc_types %s",
 		where_condition.c_str()
 	);
@@ -2155,6 +2157,9 @@ const NPCType* ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		temp_npctype_data->charm_accuracy_rating = atoi(row[104]);
 		temp_npctype_data->charm_avoidance_rating = atoi(row[105]);
 		temp_npctype_data->charm_atk = atoi(row[106]);
+
+		temp_npctype_data->skip_global_loot = atoi(row[107]) != 0;
+		temp_npctype_data->rare_spawn = atoi(row[108]) != 0;
 
 		// If NPC with duplicate NPC id already in table,
 		// free item we attempted to add.

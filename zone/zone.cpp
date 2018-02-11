@@ -968,6 +968,8 @@ bool Zone::Init(bool iStaticZone) {
 
 	LoadAlternateAdvancement();
 
+	database.LoadGlobalLoot();
+
 	//Load merchant data
 	zone->GetMerchantDataForZoneLoad();
 
@@ -2229,6 +2231,8 @@ void Zone::DoAdventureActions()
 			{
 				NPC* npc = new NPC(tmp, nullptr, glm::vec4(ds->assa_x, ds->assa_y, ds->assa_z, ds->assa_h), FlyMode3);
 				npc->AddLootTable();
+				if (npc->DropsGlobalLoot())
+					npc->CheckGlobalLootTables();
 				entity_list.AddNPC(npc);
 				npc->Shout("Rarrrgh!");
 				did_adventure_actions = true;

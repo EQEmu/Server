@@ -141,6 +141,8 @@ struct NPCType
 	bool	ignore_despawn;
 	bool	show_name; // should default on
 	bool	untargetable;
+	bool	skip_global_loot;
+	bool	rare_spawn;
 };
 
 namespace player_lootitem {

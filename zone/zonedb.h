@@ -424,6 +424,7 @@ public:
 	uint32		GetMaxNPCSpellsID();
 	uint32		GetMaxNPCSpellsEffectsID();
 	bool GetAuraEntry(uint16 spell_id, AuraRecord &record);
+	void LoadGlobalLoot();
 
 	DBnpcspells_Struct*				GetNPCSpells(uint32 iDBSpellsID);
 	DBnpcspellseffects_Struct*		GetNPCSpellsEffects(uint32 iDBSpellsEffectsID);

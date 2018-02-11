@@ -245,6 +245,8 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, const glm::vec4& position, int if
 	roambox_delay = 1000;
 	p_depop = false;
 	loottable_id = d->loottable_id;
+	skip_global_loot = d->skip_global_loot;
+	rare_spawn = d->rare_spawn;
 
 	no_target_hotkey = d->no_target_hotkey;
 
@@ -938,6 +940,7 @@ bool NPC::SpawnZoneController(){
 	npc_type->d_melee_texture2 = 0;
 	npc_type->merchanttype = 0;
 	npc_type->bodytype = 11;
+	npc_type->skip_global_loot = true;
 
 	if (RuleB(Zone, EnableZoneControllerGlobals)) {
 		npc_type->qglobal = true;

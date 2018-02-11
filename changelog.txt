@@ -1,5 +1,15 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 02/10/2018 ==
+mackal: Add Global Loot system
+
+This will allow us to implement global loot similarly to how it works on live
+This system reuses our current loottable tables which the global_loot table references.
+The limits for the rules to govern if a table should be rolled are min level, max level, rare,
+raid, race, class, bodytype, and zone
+
+race, class, bodytype, and zone are a pipe | separated list of IDs.
+
 == 01/31/2018 ==
 Uleat: Re-work of Bot::AI_Process(). Overall behavior is much improved.
 	- Removed a 'ton' of unneeded packet updates
