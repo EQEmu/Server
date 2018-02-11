@@ -157,7 +157,7 @@ IF(MSVC)
 ELSE(MSVC)
 	
 	SET(NATS_LIBRARY "${NATS_ROOT}/lib_x64/libnats.so")
-	SET(PROTOBUF_LIBRARY "${PROTOBUF_ROOT}/lib_x64/libprotobuf.so")
+	SET(PROTOBUF_LIBRARY "${PROTOBUF_ROOT}/lib_x64/libprotobuf.so.15")
 
 	#Normally set by perl but we don't use the perl flags anymore so we set it.
 	ADD_DEFINITIONS(-DHAS_UNION_SEMUN)

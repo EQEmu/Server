@@ -39,3 +39,4 @@ protobuf/csharp/*
 protobuf/go/*
 protobuf/java/*
 protobuf/python/*
+.vscode

@@ -2,8 +2,8 @@
 #define _NATS_H
 #include "nats.h"
 #include "event_codes.h"
-#include "entity.h";
-#include "mob.h";
+#include "entity.h"
+#include "mob.h"
 
 #include "../common/opcodemgr.h"
 #include "../common/global_define.h"
