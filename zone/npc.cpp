@@ -2130,6 +2130,8 @@ void NPC::LevelScale() {
 		if(level > 15 && level <= 25)
 			scale_adjust = 2;
 
+		AC += (int)(AC * scaling);
+		ATK += (int)(ATK * scaling);
 		base_hp += (int)(base_hp * scaling);
 		max_hp += (int)(max_hp * scaling);
 		cur_hp = max_hp;
