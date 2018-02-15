@@ -373,6 +373,7 @@
 9117|2018_02_01_NPC_Spells_Min_Max_HP.sql|SHOW COLUMNS FROM `npc_spells_entries` LIKE 'min_hp'|empty|
 9118|2018_02_04_Charm_Stats.sql|SHOW COLUMNS FROM `npc_types` LIKE 'charm_ac'|empty|
 9119|2018_02_10_GlobalLoot.sql|SHOW TABLES LIKE 'global_loot'|empty|
+9120|2018_02_13_Heading.sql|SELECT value FROM variables WHERE varname = 'fixed_heading'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

@@ -150,13 +150,13 @@ float GetReciprocalHeading(const float heading)
 	float result = 0;
 
 	// Convert to radians
-	float h = (heading / 256.0f) * 6.283184f;
+	float h = (heading / 512.0f) * 6.283184f;
 
 	// Calculate the reciprocal heading in radians
 	result = h + 3.141592f;
 
 	// Convert back to eq heading from radians
-	result = (result / 6.283184f) * 256.0f;
+	result = (result / 6.283184f) * 512.0f;
 
 	return result;
 }

@@ -1,5 +1,12 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 02/14/2018 ==
+mackal: Fix Heading -- Quests broken
+
+Please report any other issues with heading, most things were tested and worked
+
+Run akkadius' script to fix your quests
+
 == 02/10/2018 ==
 mackal: Add Global Loot system
 

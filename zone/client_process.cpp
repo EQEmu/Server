@@ -1960,57 +1960,40 @@ void Client::CalcRestState() {
 
 void Client::DoTracking()
 {
-	if(TrackingID == 0)
+	if (TrackingID == 0)
 		return;
 
 	Mob *m = entity_list.GetMob(TrackingID);
 
-	if(!m || m->IsCorpse())
-	{
+	if (!m || m->IsCorpse()) {
 		Message_StringID(MT_Skills, TRACK_LOST_TARGET);
-
 		TrackingID = 0;
-
 		return;
 	}
 
 	float RelativeHeading = GetHeading() - CalculateHeadingToTarget(m->GetX(), m->GetY());
 
-	if(RelativeHeading < 0)
-		RelativeHeading += 256;
+	if (RelativeHeading < 0)
+		RelativeHeading += 512;
 
-	if((RelativeHeading <= 16) || (RelativeHeading >= 240))
-	{
+	if (RelativeHeading > 480)
 		Message_StringID(MT_Skills, TRACK_STRAIGHT_AHEAD, m->GetCleanName());
-	}
-	else if((RelativeHeading > 16) && (RelativeHeading <= 48))
-	{
-		Message_StringID(MT_Skills, TRACK_AHEAD_AND_TO, m->GetCleanName(), "right");
-	}
-	else if((RelativeHeading > 48) && (RelativeHeading <= 80))
-	{
-		Message_StringID(MT_Skills, TRACK_TO_THE, m->GetCleanName(), "right");
-	}
-	else if((RelativeHeading > 80) && (RelativeHeading <= 112))
-	{
-		Message_StringID(MT_Skills, TRACK_BEHIND_AND_TO, m->GetCleanName(), "right");
-	}
-	else if((RelativeHeading > 112) && (RelativeHeading <= 144))
-	{
-		Message_StringID(MT_Skills, TRACK_BEHIND_YOU, m->GetCleanName());
-	}
-	else if((RelativeHeading > 144) && (RelativeHeading <= 176))
-	{
-		Message_StringID(MT_Skills, TRACK_BEHIND_AND_TO, m->GetCleanName(), "left");
-	}
-	else if((RelativeHeading > 176) && (RelativeHeading <= 208))
-	{
-		Message_StringID(MT_Skills, TRACK_TO_THE, m->GetCleanName(), "left");
-	}
-	else if((RelativeHeading > 208) && (RelativeHeading < 240))
-	{
+	else if (RelativeHeading > 416)
 		Message_StringID(MT_Skills, TRACK_AHEAD_AND_TO, m->GetCleanName(), "left");
-	}
+	else if (RelativeHeading > 352)
+		Message_StringID(MT_Skills, TRACK_TO_THE, m->GetCleanName(), "left");
+	else if (RelativeHeading > 288)
+		Message_StringID(MT_Skills, TRACK_BEHIND_AND_TO, m->GetCleanName(), "left");
+	else if (RelativeHeading > 224)
+		Message_StringID(MT_Skills, TRACK_BEHIND_YOU, m->GetCleanName());
+	else if (RelativeHeading > 160)
+		Message_StringID(MT_Skills, TRACK_BEHIND_AND_TO, m->GetCleanName(), "right");
+	else if (RelativeHeading > 96)
+		Message_StringID(MT_Skills, TRACK_TO_THE, m->GetCleanName(), "right");
+	else if (RelativeHeading > 32)
+		Message_StringID(MT_Skills, TRACK_AHEAD_AND_TO, m->GetCleanName(), "right");
+	else if (RelativeHeading >= 0)
+		Message_StringID(MT_Skills, TRACK_STRAIGHT_AHEAD, m->GetCleanName());
 }
 
 void Client::HandleRespawnFromHover(uint32 Option)

@@ -50,13 +50,22 @@ uint32	ResolveIP(const char* hostname, char* errbuf = 0);
 bool	ParseAddress(const char* iAddress, uint32* oIP, uint16* oPort, char* errbuf = 0);
 void	CoutTimestamp(bool ms = true);
 float EQ13toFloat(int d);
-float NewEQ13toFloat(int d);
 float EQ19toFloat(int d);
 float EQHtoFloat(int d);
 int FloatToEQ13(float d);
-int NewFloatToEQ13(float d);
 int FloatToEQ19(float d);
 int FloatToEQH(float d);
+
+float EQ12toFloat(int d);
+int FloatToEQ12(float d);
+
+float EQ10toFloat(int d);
+int FloatToEQ10(float d);
+
+// this is also a 10 bit float
+float EQSpeedRunToFloat(int d);
+int FloatToEQSpeedRun(float d);
+
 uint32 SwapBits21and22(uint32 mask);
 uint32 Catch22(uint32 mask);
 

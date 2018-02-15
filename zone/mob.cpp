@@ -1109,7 +1109,7 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 		strn0cpy(ns->spawn.lastName, lastname, sizeof(ns->spawn.lastName));
 	}
 
-	ns->spawn.heading	= FloatToEQ19(m_Position.w);
+	ns->spawn.heading	= FloatToEQ12(m_Position.w);
 	ns->spawn.x			= FloatToEQ19(m_Position.x);//((int32)x_pos)<<3;
 	ns->spawn.y			= FloatToEQ19(m_Position.y);//((int32)y_pos)<<3;
 	ns->spawn.z			= FloatToEQ19(m_Position.z);//((int32)z_pos)<<3;
@@ -1515,12 +1515,12 @@ void Mob::MakeSpawnUpdateNoDelta(PlayerPositionUpdateServer_Struct *spu) {
 	spu->x_pos = FloatToEQ19(m_Position.x);
 	spu->y_pos = FloatToEQ19(m_Position.y);
 	spu->z_pos = FloatToEQ19(m_Position.z);
-	spu->delta_x = NewFloatToEQ13(0);
-	spu->delta_y = NewFloatToEQ13(0);
-	spu->delta_z = NewFloatToEQ13(0);
-	spu->heading = FloatToEQ19(m_Position.w);
+	spu->delta_x = FloatToEQ13(0);
+	spu->delta_y = FloatToEQ13(0);
+	spu->delta_z = FloatToEQ13(0);
+	spu->heading = FloatToEQ12(m_Position.w);
 	spu->animation = 0;
-	spu->delta_heading = NewFloatToEQ13(0);
+	spu->delta_heading = FloatToEQ10(0);
 	spu->padding0002 = 0;
 	spu->padding0006 = 7;
 	spu->padding0014 = 0x7f;
@@ -1534,10 +1534,10 @@ void Mob::MakeSpawnUpdate(PlayerPositionUpdateServer_Struct* spu) {
 	spu->x_pos = FloatToEQ19(m_Position.x);
 	spu->y_pos = FloatToEQ19(m_Position.y);
 	spu->z_pos = FloatToEQ19(m_Position.z);
-	spu->delta_x = NewFloatToEQ13(m_Delta.x);
-	spu->delta_y = NewFloatToEQ13(m_Delta.y);
-	spu->delta_z = NewFloatToEQ13(m_Delta.z);
-	spu->heading = FloatToEQ19(m_Position.w);
+	spu->delta_x = FloatToEQ13(m_Delta.x);
+	spu->delta_y = FloatToEQ13(m_Delta.y);
+	spu->delta_z = FloatToEQ13(m_Delta.z);
+	spu->heading = FloatToEQ12(m_Position.w);
 	spu->padding0002 = 0;
 	spu->padding0006 = 7;
 	spu->padding0014 = 0x7f;
@@ -1551,7 +1551,7 @@ void Mob::MakeSpawnUpdate(PlayerPositionUpdateServer_Struct* spu) {
 	else
 		spu->animation = pRunAnimSpeed;//animation;
 
-	spu->delta_heading = NewFloatToEQ13(m_Delta.w);
+	spu->delta_heading = FloatToEQ10(m_Delta.w);
 }
 
 void Mob::ShowStats(Client* client)
@@ -2438,18 +2438,18 @@ float Mob::MobAngle(Mob *other, float ourx, float oury) const {
 	float mobx = -(other->GetX());	// mob xloc (inverse because eq)
 	float moby = other->GetY();		// mob yloc
 	float heading = other->GetHeading();	// mob heading
-	heading = (heading * 360.0f) / 256.0f;	// convert to degrees
+	heading = (heading * 360.0f) / 512.0f;	// convert to degrees
 	if (heading < 270)
 		heading += 90;
 	else
 		heading -= 270;
 
 	heading = heading * 3.1415f / 180.0f;	// convert to radians
-	vectorx = mobx + (10.0f * cosf(heading));	// create a vector based on heading
-	vectory = moby + (10.0f * sinf(heading));	// of mob length 10
+	vectorx = mobx + (10.0f * std::cos(heading));	// create a vector based on heading
+	vectory = moby + (10.0f * std::sin(heading));	// of mob length 10
 
 	// length of mob to player vector
-	lengthb = (float) sqrtf(((-ourx - mobx) * (-ourx - mobx)) + ((oury - moby) * (oury - moby)));
+	lengthb = (float) std::sqrt(((-ourx - mobx) * (-ourx - mobx)) + ((oury - moby) * (oury - moby)));
 
 	// calculate dot product to get angle
 	// Handle acos domain errors due to floating point rounding errors
@@ -2462,7 +2462,7 @@ float Mob::MobAngle(Mob *other, float ourx, float oury) const {
 	else if (dotp < -1)
 		return 180.0f;
 
-	angle = acosf(dotp);
+	angle = std::acos(dotp);
 	angle = angle * 180.0f / 3.1415f;
 
 	return angle;
@@ -2631,7 +2631,7 @@ bool Mob::PlotPositionAroundTarget(Mob* target, float &x_dest, float &y_dest, fl
 			look_heading = target->GetHeading();
 
 		// Convert to sony heading to radians
-		look_heading = (look_heading / 256.0f) * 6.283184f;
+		look_heading = (look_heading / 512.0f) * 6.283184f;
 
 		float tempX = 0;
 		float tempY = 0;
@@ -4676,16 +4676,16 @@ void Mob::DoKnockback(Mob *caster, uint32 pushback, uint32 pushup)
 		spu->x_pos		= FloatToEQ19(GetX());
 		spu->y_pos		= FloatToEQ19(GetY());
 		spu->z_pos		= FloatToEQ19(GetZ());
-		spu->delta_x	= NewFloatToEQ13(static_cast<float>(new_x));
-		spu->delta_y	= NewFloatToEQ13(static_cast<float>(new_y));
-		spu->delta_z	= NewFloatToEQ13(static_cast<float>(pushup));
-		spu->heading	= FloatToEQ19(GetHeading());
+		spu->delta_x	= FloatToEQ13(static_cast<float>(new_x));
+		spu->delta_y	= FloatToEQ13(static_cast<float>(new_y));
+		spu->delta_z	= FloatToEQ13(static_cast<float>(pushup));
+		spu->heading	= FloatToEQ12(GetHeading());
 		spu->padding0002	=0;
 		spu->padding0006	=7;
 		spu->padding0014	=0x7f;
 		spu->padding0018	=0x5df27;
 		spu->animation = 0;
-		spu->delta_heading = NewFloatToEQ13(0);
+		spu->delta_heading = FloatToEQ10(0);
 		outapp_push->priority = 6;
 		entity_list.QueueClients(this, outapp_push, true);
 		CastToClient()->FastQueuePacket(&outapp_push);
@@ -5003,7 +5003,7 @@ void Mob::DoGravityEffect()
 		}
 
 		if(IsClient())
-			this->CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), cur_x, cur_y, new_ground, GetHeading()*2); // I know the heading thing is weird(chance of movepc to halve the heading value, too lazy to figure out why atm)
+			this->CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), cur_x, cur_y, new_ground, GetHeading());
 		else
 			this->GMMove(cur_x, cur_y, new_ground, GetHeading());
 	}
@@ -5640,8 +5640,7 @@ bool Mob::IsFacingMob(Mob *other)
 	if (!other)
 		return false;
 	float angle = HeadingAngleToMob(other);
-	// what the client uses appears to be 2x our internal heading
-	float heading = GetHeading() * 2.0f;
+	float heading = GetHeading();
 
 	if (angle > 472.0 && heading < 40.0)
 		angle = heading;
@@ -5655,15 +5654,13 @@ bool Mob::IsFacingMob(Mob *other)
 }
 
 // All numbers derived from the client
-float Mob::HeadingAngleToMob(Mob *other)
+float Mob::HeadingAngleToMob(float other_x, float other_y)
 {
-	float mob_x = other->GetX();
-	float mob_y = other->GetY();
 	float this_x = GetX();
 	float this_y = GetY();
 
-	float y_diff = std::abs(this_y - mob_y);
-	float x_diff = std::abs(this_x - mob_x);
+	float y_diff = std::abs(this_y - other_y);
+	float x_diff = std::abs(this_x - other_x);
 	if (y_diff < 0.0000009999999974752427)
 		y_diff = 0.0000009999999974752427;
 
@@ -5671,13 +5668,13 @@ float Mob::HeadingAngleToMob(Mob *other)
 
 	// return the right thing based on relative quadrant
 	// I'm sure this could be improved for readability, but whatever
-	if (this_y >= mob_y) {
-		if (mob_x >= this_x)
+	if (this_y >= other_y) {
+		if (other_x >= this_x)
 			return (90.0f - angle + 90.0f) * 511.5f * 0.0027777778f;
-		if (mob_x <= this_x)
+		if (other_x <= this_x)
 			return (angle + 180.0f) * 511.5f * 0.0027777778f;
 	}
-	if (this_y > mob_y || mob_x > this_x)
+	if (this_y > other_y || other_x > this_x)
 		return angle * 511.5f * 0.0027777778f;
 	else
 		return (90.0f - angle + 270.0f) * 511.5f * 0.0027777778f;

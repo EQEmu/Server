@@ -8759,7 +8759,7 @@ void command_object(Client *c, const Seperator *sep)
 		od.x = c->GetX();
 		od.y = c->GetY();
 		od.z = c->GetZ() - (c->GetSize() * 0.625f);
-		od.heading = c->GetHeading() * 2.0f; // GetHeading() is half of actual. Compensate by doubling.
+		od.heading = c->GetHeading();
 
 		std::string query;
 		if (id) {
@@ -8864,11 +8864,9 @@ void command_object(Client *c, const Seperator *sep)
 
 		// Bump player back to avoid getting stuck inside new object
 
-		// GetHeading() returns half of the actual heading, for some reason, so we'll double it here for
-		// computation
-		x2 = 10.0f * sin(c->GetHeading() * 2.0f / 256.0f * 3.14159265f);
-		y2 = 10.0f * cos(c->GetHeading() * 2.0f / 256.0f * 3.14159265f);
-		c->MovePC(c->GetX() - x2, c->GetY() - y2, c->GetZ(), c->GetHeading() * 2);
+		x2 = 10.0f * sin(c->GetHeading() / 256.0f * 3.14159265f);
+		y2 = 10.0f * cos(c->GetHeading() / 256.0f * 3.14159265f);
+		c->MovePC(c->GetX() - x2, c->GetY() - y2, c->GetZ(), c->GetHeading());
 
 		c->Message(0, "Spawning object with tentative id %u at location (%.1f, %.1f, %.1f heading %.1f). Use "
 			      "'#object Save' to save to database when satisfied with placement.",
@@ -9186,14 +9184,13 @@ void command_object(Client *c, const Seperator *sep)
 			       (c->GetSize() *
 				0.625f); // Compensate for #loc bumping up Z coordinate by 62.5% of character's size.
 
-			o->SetHeading(c->GetHeading() * 2.0f); // Compensate for GetHeading() returning half of actual
+			o->SetHeading(c->GetHeading());
 
 			// Bump player back to avoid getting stuck inside object
 
-			// GetHeading() returns half of the actual heading, for some reason
-			x2 = 10.0f * sin(c->GetHeading() * 2.0f / 256.0f * 3.14159265f);
-			y2 = 10.0f * cos(c->GetHeading() * 2.0f / 256.0f * 3.14159265f);
-			c->MovePC(c->GetX() - x2, c->GetY() - y2, c->GetZ(), c->GetHeading() * 2.0f);
+			x2 = 10.0f * std::sin(c->GetHeading() / 256.0f * 3.14159265f);
+			y2 = 10.0f * std::cos(c->GetHeading() / 256.0f * 3.14159265f);
+			c->MovePC(c->GetX() - x2, c->GetY() - y2, c->GetZ(), c->GetHeading());
 		} // Move to x, y, z [h]
 		else {
 			od.x = atof(sep->arg[3]);

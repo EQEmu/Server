@@ -2115,16 +2115,16 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				spu->x_pos		= FloatToEQ19(GetX());
 				spu->y_pos		= FloatToEQ19(GetY());
 				spu->z_pos		= FloatToEQ19(GetZ());
-				spu->delta_x	= NewFloatToEQ13(new_x);
-				spu->delta_y	= NewFloatToEQ13(new_y);
-				spu->delta_z	= NewFloatToEQ13(toss_amt);
-				spu->heading	= FloatToEQ19(GetHeading());
+				spu->delta_x	= FloatToEQ13(new_x);
+				spu->delta_y	= FloatToEQ13(new_y);
+				spu->delta_z	= FloatToEQ13(toss_amt);
+				spu->heading	= FloatToEQ12(GetHeading());
 				spu->padding0002	=0;
 				spu->padding0006	=7;
 				spu->padding0014	=0x7f;
 				spu->padding0018	=0x5df27;
 				spu->animation = 0;
-				spu->delta_heading = NewFloatToEQ13(0);
+				spu->delta_heading = FloatToEQ10(0);
 				outapp_push->priority = 5;
 				entity_list.QueueClients(this, outapp_push, true);
 				if(IsClient())
@@ -2654,7 +2654,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						float new_ground = GetGroundZ(my_x, my_y);
 
 						if(caster->IsClient())
-							caster->CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), my_x, my_y, new_ground, GetHeading()*2);
+							caster->CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), my_x, my_y, new_ground, GetHeading());
 						else
 							caster->GMMove(my_x, my_y, new_ground, GetHeading());
 					}
