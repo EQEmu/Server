@@ -776,6 +776,13 @@ sub show_menu_prompt {
 			print "Enter a command #> ";
 			$last_menu = trim($input);
 		}
+		elsif($input eq "conversions"){
+			print "\n>>> Conversions Menu\n\n";
+			print " [quest_heading_convert] Converts old heading format in quest scripts to new (live format)\n";
+			print " \n> main - go back to main menu\n";
+			print "Enter a command #> ";
+			$last_menu = trim($input);
+		}
 		elsif($input eq "assets"){
 			print "\n>>> Server Assets Menu\n\n";
 			print " [maps]			Download latest maps\n";
@@ -784,7 +791,7 @@ sub show_menu_prompt {
 			print " [plugins]		Download latest plugins\n";
 			print " [lua_modules]		Download latest lua_modules\n";
 			print " [utility_scripts]	Download utility scripts to run and operate the EQEmu Server\n";
-			if($OS eq "Windows"){
+			if($OS eq "Windows") {
 				print ">>> Windows\n";
 				print " [windows_server_download]	Updates server via latest 'stable' code\n";
 				print " [windows_server_latest]	Updates server via latest commit 'unstable'\n";
@@ -818,6 +825,7 @@ sub show_menu_prompt {
 		elsif($input eq "new_server"){ new_server(); $dc = 1; }
 		elsif($input eq "setup_bots"){ setup_bots(); $dc = 1; }
 		elsif($input eq "linux_login_server_setup"){ do_linux_login_server_setup(); $dc = 1; }
+		elsif($input eq "quest_heading_convert"){ quest_heading_convert(); $dc = 1; }
 		elsif($input eq "exit"){
 			exit;
 		}
@@ -868,6 +876,7 @@ sub print_main_menu {
 	print " [assets]	Manage server assets \n";
 	print " [new_server]	New folder EQEmu/PEQ install - Assumes MySQL/Perl installed \n";
 	print " [setup_bots]	Enables bots on server - builds code and database requirements \n";
+	print " [conversions]	Routines used for conversion of scripts/data \n";
 	print "\n";
 	print " exit \n";
 	print "\n"; 
@@ -2257,3 +2266,134 @@ sub generate_random_password {
     return $randpassword;
 }
 
+sub quest_heading_convert {
+
+	if(trim(get_mysql_result("SELECT value FROM variables WHERE varname = 'new_heading_conversion'")) eq "true") {
+		print "Conversion script has already ran... doing this again would skew proper heading values in function calls...\n";
+		exit;
+	}
+
+	%matches = (
+		0 => ["quest::spawn2", 6],
+		1 => ["eq.spawn2", 6],
+		2 => ["eq.unique_spawn", 6],
+		3 => ["quest::unique_spawn", 6],
+		4 => ["GMMove", 3],
+		5 => ["MovePCInstance", 5],
+		6 => ["MovePC", 4],
+		7 => ["moveto", 3],
+	);
+
+	$total_matches = 0;
+	
+	use Scalar::Util qw(looks_like_number);
+	
+	my @files;
+	my $start_dir = "quests/.";
+	find( 
+		sub { push @files, $File::Find::name unless -d; }, 
+		$start_dir
+	);
+	for my $file (@files) {
+	
+		#::: Skip non script files
+		if($file!~/lua|pl/i){ next; }
+
+		if($file=~/lua|pl/i){
+			$print_buffer = "";
+		
+			$changes_made = 0;
+		
+			#::: Open and read line by line
+			open (FILE, $file);
+			while (<FILE>) {
+				chomp;
+				$line = $_;
+				
+				#::: Loop through matches
+				foreach my $key (sort(keys %matches)) {
+					$argument_position = $matches{$key}[1];
+					$match = $matches{$key}[0];
+				
+					if($line=~/$match/i) {
+						$line_temp = $line;
+						$line_temp =~s/$match\(//g;
+						$line_temp =~s/\(.*?\)//gs;
+						$line_temp =~s/\);.*//;
+						$line_temp =~s/\).*//;
+						$line_temp =~s/\):.*//;
+						$line_temp =~s/\);//g;
+						
+						@line_data = split(",", $line_temp);
+						
+						# use Data::Dumper;
+						# print Dumper(\@line_data);
+						
+						$heading_value = $line_data[$argument_position];
+						$heading_value_clean = trim($heading_value);
+						$heading_value_raw = $line_data[$argument_position];
+						$heading_value_before = $line_data[$argument_position - 1];
+						
+						if (looks_like_number($heading_value) && $heading_value != 0 && ($heading_value * 2) <= 512) {
+							$heading_value_new = $heading_value * 2;
+							
+							$heading_value=~s/$heading_value_clean/$heading_value_new/g;
+
+							$heading_value_search = quotemeta($heading_value_before . "," . $heading_value_raw);
+							$heading_value_replace = $heading_value_before . "," . $heading_value;
+							
+							print $file . "\n";
+							print $line . "\n";
+							$line=~s/$heading_value_search/$heading_value_replace/g;
+							print $line . "\n";
+							print "\n";
+							
+							$changes_made = 1;
+						}
+						elsif ($heading_value == 0){} #::: Do nothing
+						elsif ($heading_value=~/GetHeading|heading|\$h/i){} #::: Do nothing
+						else {
+							if ($file=~/\.pl/i) {
+								if($line_temp=~/#/i) {
+									$line .= " - needs_heading_validation";
+								}
+								else {
+									$line .= " # needs_heading_validation";
+								}
+							}
+							elsif ($file=~/\.lua/i) {
+								if($line_temp=~/--/i) {
+									$line .= " - needs_heading_validation";
+								}
+								else {
+									$line .= " -- needs_heading_validation";
+								}
+							}
+							
+							$changes_made = 1;
+						
+							print $line . "\n";
+						}
+						
+						$total_matches++;
+					}	
+				}
+				
+				$print_buffer .= $line . "\n";
+			}
+			close (FILE);
+			
+			if($changes_made == 1) {
+				#::: Write changes
+				open (NEW_FILE, '>', $file);
+				print NEW_FILE $print_buffer; 
+				close NEW_FILE;
+			}
+		}
+	}
+	
+	#::: Mark conversion as ran
+	print get_mysql_result("INSERT INTO `variables` (varname, value, information, ts) VALUES ('new_heading_conversion', 'true', 'Script ran against quests folder to convert new heading values', NOW())");
+	
+	print "Total matches: " . $total_matches . "\n";
+}
