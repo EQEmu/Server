@@ -68,6 +68,7 @@ SET(zone_sources
 	exp.cpp
 	fearpath.cpp
 	forage.cpp
+	global_loot_manager.cpp
 	groups.cpp
 	guild.cpp
 	guild_mgr.cpp
@@ -159,6 +160,7 @@ SET(zone_headers
 	errmsg.h
 	event_codes.h
 	forage.h
+	global_loot_manager.h
 	groups.h
 	guild_mgr.h
 	hate_list.h

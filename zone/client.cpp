@@ -336,6 +336,8 @@ Client::Client(EQStreamInterface* ieqs)
 	for (int i = 0; i < InnateSkillMax; ++i)
 		m_pp.InnateSkills[i] = InnateDisabled;
 
+	temp_pvp = false;
+
 	AI_Init();
 }
 
@@ -462,8 +464,8 @@ void Client::SendZoneInPackets()
 	if (!GetHideMe()) entity_list.QueueClients(this, outapp, true);
 	safe_delete(outapp);
 	SetSpawned();
-	if (GetPVP())	//force a PVP update until we fix the spawn struct
-		SendAppearancePacket(AT_PVP, GetPVP(), true, false);
+	if (GetPVP(false))	//force a PVP update until we fix the spawn struct
+		SendAppearancePacket(AT_PVP, GetPVP(false), true, false);
 
 	//Send AA Exp packet:
 	if (GetLevel() >= 51)
@@ -1955,7 +1957,7 @@ void Client::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	ns->spawn.gm		= GetGM() ? 1 : 0;
 	ns->spawn.guildID	= GuildID();
 //	ns->spawn.linkdead	= IsLD() ? 1 : 0;
-//	ns->spawn.pvp		= GetPVP() ? 1 : 0;
+//	ns->spawn.pvp		= GetPVP(false) ? 1 : 0;
 	ns->spawn.show_name = true;
 
 
@@ -8889,9 +8891,9 @@ void Client::CheckRegionTypeChanges()
 		return;
 
 	if (last_region_type == RegionTypePVP)
-		SetPVP(true, false);
-	else if (GetPVP())
-		SetPVP(false, false);
+		temp_pvp = true;
+	else if (temp_pvp)
+		temp_pvp = false;
 }
 
 void Client::ProcessAggroMeter()

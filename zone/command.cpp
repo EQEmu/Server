@@ -360,9 +360,11 @@ int command_init(void)
 		command_add("showbonusstats", "[item|spell|all] Shows bonus stats for target from items or spells. Shows both by default.", 50, command_showbonusstats) ||
 		command_add("showbuffs", "- List buffs active on your target or you if no target", 50, command_showbuffs) ||
 		command_add("shownumhits",  "Shows buffs numhits for yourself.",  0, command_shownumhits) ||
+		command_add("shownpcgloballoot", "Show GlobalLoot entires on this npc", 50, command_shownpcgloballoot) ||
 		command_add("showskills", "- Show the values of your or your player target's skills", 50, command_showskills) ||
 		command_add("showspellslist", "Shows spell list of targeted NPC", 100, command_showspellslist) ||
 		command_add("showstats", "- Show details about you or your target", 50, command_showstats) ||
+		command_add("showzonegloballoot", "Show GlobalLoot entires on this zone", 50, command_showzonegloballoot) ||
 		command_add("shutdown", "- Shut this zone process down", 150, command_shutdown) ||
 		command_add("size", "[size] - Change size of you or your target", 50, command_size) ||
 		command_add("spawn", "[name] [race] [level] [material] [hp] [gender] [class] [priweapon] [secweapon] [merchantid] - Spawn an NPC", 10, command_spawn) ||
@@ -2462,7 +2464,9 @@ void command_npctypespawn(Client *c, const Seperator *sep)
 			if (npc && sep->IsNumber(2))
 				npc->SetNPCFactionID(atoi(sep->arg[2]));
 
-				npc->AddLootTable();
+			npc->AddLootTable();
+			if (npc->DropsGlobalLoot())
+				npc->CheckGlobalLootTables();
 			entity_list.AddNPC(npc);
 		}
 		else
@@ -3859,6 +3863,12 @@ void command_showstats(Client *c, const Seperator *sep)
 		c->GetTarget()->ShowStats(c);
 	else
 		c->ShowStats(c);
+}
+
+void command_showzonegloballoot(Client *c, const Seperator *sep)
+{
+	c->Message(0, "GlobalLoot for %s (%d:%d)", zone->GetShortName(), zone->GetZoneID(), zone->GetInstanceVersion());
+	zone->ShowZoneGlobalLoot(c);
 }
 
 void command_mystats(Client *c, const Seperator *sep)
@@ -8753,7 +8763,7 @@ void command_object(Client *c, const Seperator *sep)
 		od.x = c->GetX();
 		od.y = c->GetY();
 		od.z = c->GetZ() - (c->GetSize() * 0.625f);
-		od.heading = c->GetHeading() * 2.0f; // GetHeading() is half of actual. Compensate by doubling.
+		od.heading = c->GetHeading();
 
 		std::string query;
 		if (id) {
@@ -8858,11 +8868,9 @@ void command_object(Client *c, const Seperator *sep)
 
 		// Bump player back to avoid getting stuck inside new object
 
-		// GetHeading() returns half of the actual heading, for some reason, so we'll double it here for
-		// computation
-		x2 = 10.0f * sin(c->GetHeading() * 2.0f / 256.0f * 3.14159265f);
-		y2 = 10.0f * cos(c->GetHeading() * 2.0f / 256.0f * 3.14159265f);
-		c->MovePC(c->GetX() - x2, c->GetY() - y2, c->GetZ(), c->GetHeading() * 2);
+		x2 = 10.0f * sin(c->GetHeading() / 256.0f * 3.14159265f);
+		y2 = 10.0f * cos(c->GetHeading() / 256.0f * 3.14159265f);
+		c->MovePC(c->GetX() - x2, c->GetY() - y2, c->GetZ(), c->GetHeading());
 
 		c->Message(0, "Spawning object with tentative id %u at location (%.1f, %.1f, %.1f heading %.1f). Use "
 			      "'#object Save' to save to database when satisfied with placement.",
@@ -9180,14 +9188,13 @@ void command_object(Client *c, const Seperator *sep)
 			       (c->GetSize() *
 				0.625f); // Compensate for #loc bumping up Z coordinate by 62.5% of character's size.
 
-			o->SetHeading(c->GetHeading() * 2.0f); // Compensate for GetHeading() returning half of actual
+			o->SetHeading(c->GetHeading());
 
 			// Bump player back to avoid getting stuck inside object
 
-			// GetHeading() returns half of the actual heading, for some reason
-			x2 = 10.0f * sin(c->GetHeading() * 2.0f / 256.0f * 3.14159265f);
-			y2 = 10.0f * cos(c->GetHeading() * 2.0f / 256.0f * 3.14159265f);
-			c->MovePC(c->GetX() - x2, c->GetY() - y2, c->GetZ(), c->GetHeading() * 2.0f);
+			x2 = 10.0f * std::sin(c->GetHeading() / 256.0f * 3.14159265f);
+			y2 = 10.0f * std::cos(c->GetHeading() / 256.0f * 3.14159265f);
+			c->MovePC(c->GetX() - x2, c->GetY() - y2, c->GetZ(), c->GetHeading());
 		} // Move to x, y, z [h]
 		else {
 			od.x = atof(sep->arg[3]);
@@ -10443,6 +10450,20 @@ void command_shownumhits(Client *c, const Seperator *sep)
 {
 	c->ShowNumHits();
 	return;
+}
+
+void command_shownpcgloballoot(Client *c, const Seperator *sep)
+{
+	auto tar = c->GetTarget();
+
+	if (!tar || !tar->IsNPC()) {
+		c->Message(0, "You must target an NPC to use this command.");
+		return;
+	}
+
+	auto npc = tar->CastToNPC();
+	c->Message(0, "GlobalLoot for %s (%d)", npc->GetName(), npc->GetNPCTypeID());
+	zone->ShowNPCGlobalLoot(c, npc);
 }
 
 void command_tune(Client *c, const Seperator *sep)

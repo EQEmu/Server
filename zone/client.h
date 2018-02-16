@@ -395,7 +395,7 @@ public:
 	void SetGM(bool toggle);
 	void SetPVP(bool toggle, bool message = true);
 
-	inline bool GetPVP() const { return m_pp.pvp != 0; }
+	inline bool GetPVP(bool inc_temp = true) const { return m_pp.pvp != 0 || (inc_temp && temp_pvp); }
 	inline bool GetGM() const { return m_pp.gm != 0; }
 
 	inline void SetBaseClass(uint32 i) { m_pp.class_=i; }
@@ -1466,6 +1466,7 @@ private:
 	PetInfo m_suspendedminion; // pet data for our suspended minion.
 	MercInfo m_mercinfo[MAXMERCS]; // current mercenary
 	InspectMessage_Struct m_inspect_message;
+	bool temp_pvp;
 
 	void NPCSpawn(const Seperator* sep);
 	uint32 GetEXPForLevel(uint16 level);

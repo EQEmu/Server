@@ -177,7 +177,8 @@ public:
 	inline bool InFrontMob(Mob *other = 0, float ourx = 0.0f, float oury = 0.0f) const
 		{ return (!other || other == this) ? true : MobAngle(other, ourx, oury) < 56.0f; }
 	bool IsFacingMob(Mob *other); // kind of does the same as InFrontMob, but derived from client
-	float HeadingAngleToMob(Mob *other); // to keep consistent with client generated messages
+	float HeadingAngleToMob(Mob *other) { return HeadingAngleToMob(other->GetX(), other->GetY()); }
+	float HeadingAngleToMob(float other_x, float other_y); // to keep consistent with client generated messages
 	virtual void RangedAttack(Mob* other) { }
 	virtual void ThrowingAttack(Mob* other) { }
 	// 13 = Primary (default), 14 = secondary
@@ -689,6 +690,8 @@ public:
 	void SetFollowDistance(uint32 dist) { follow_dist = dist; }
 	uint32 GetFollowID() const { return follow; }
 	uint32 GetFollowDistance() const { return follow_dist; }
+	inline bool IsRareSpawn() const { return rare_spawn; }
+	inline void SetRareSpawn(bool in) { rare_spawn = in; }
 
 	virtual void Message(uint32 type, const char* message, ...) { }
 	virtual void Message_StringID(uint32 type, uint32 string_id, uint32 distance = 0) { }
@@ -968,7 +971,7 @@ public:
 	inline bool IsBlind() { return spellbonuses.IsBlind; }
 
 	inline bool			CheckAggro(Mob* other) {return hate_list.IsEntOnHateList(other);}
-	float				CalculateHeadingToTarget(float in_x, float in_y);
+	float				CalculateHeadingToTarget(float in_x, float in_y) {return HeadingAngleToMob(in_x, in_y); }
 	bool				CalculateNewPosition(float x, float y, float z, int speed, bool checkZ = false, bool calcHeading = true);
 	virtual bool		CalculateNewPosition2(float x, float y, float z, int speed, bool checkZ = true, bool calcHeading = true);
 	float				CalculateDistance(float x, float y, float z);
@@ -1225,6 +1228,7 @@ protected:
 	uint32 follow;
 	uint32 follow_dist;
 	bool no_target_hotkey;
+	bool rare_spawn;
 
 	uint32 m_PlayerState;
 	uint32 GetPlayerState() { return m_PlayerState; }

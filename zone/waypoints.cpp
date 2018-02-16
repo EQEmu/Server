@@ -435,27 +435,6 @@ float Mob::CalculateDistance(float x, float y, float z) {
 	return (float)sqrtf(((m_Position.x - x)*(m_Position.x - x)) + ((m_Position.y - y)*(m_Position.y - y)) + ((m_Position.z - z)*(m_Position.z - z)));
 }
 
-float Mob::CalculateHeadingToTarget(float in_x, float in_y) {
-	float angle;
-
-	if (in_x - m_Position.x > 0)
-		angle = -90 + atan((float)(in_y - m_Position.y) / (float)(in_x - m_Position.x)) * 180 / M_PI;
-	else if (in_x - m_Position.x < 0)
-		angle = +90 + atan((float)(in_y - m_Position.y) / (float)(in_x - m_Position.x)) * 180 / M_PI;
-	else // Added?
-	{
-		if (in_y - m_Position.y > 0)
-			angle = 0;
-		else
-			angle = 180;
-	}
-	if (angle < 0)
-		angle += 360;
-	if (angle > 360)
-		angle -= 360;
-	return (256 * (360 - angle) / 360.0f);
-}
-
 bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, bool checkZ, bool calcHeading) {
 	if (GetID() == 0)
 		return true;

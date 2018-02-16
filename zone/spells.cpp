@@ -2651,7 +2651,7 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 			action->source = caster->GetID();
 			action->target = GetID();
 			action->spell = spell_id;
-			action->sequence = (uint32) (GetHeading() * 2);	// just some random number
+			action->sequence = (uint32) (GetHeading());	// just some random number
 			action->instrument_mod = caster->GetInstrumentMod(spell_id);
 			action->buff_unknown = 0;
 			action->level = buffs[buffs_i].casterlevel;
@@ -2691,16 +2691,16 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 						spu->x_pos		= FloatToEQ19(GetX());
 						spu->y_pos		= FloatToEQ19(GetY());
 						spu->z_pos		= FloatToEQ19(GetZ());
-						spu->delta_x	= NewFloatToEQ13(new_x);
-						spu->delta_y	= NewFloatToEQ13(new_y);
-						spu->delta_z	= NewFloatToEQ13(spells[spell_id].pushup);
-						spu->heading	= FloatToEQ19(GetHeading());
+						spu->delta_x	= FloatToEQ13(new_x);
+						spu->delta_y	= FloatToEQ13(new_y);
+						spu->delta_z	= FloatToEQ13(spells[spell_id].pushup);
+						spu->heading	= FloatToEQ12(GetHeading());
 						spu->padding0002	=0;
 						spu->padding0006	=7;
 						spu->padding0014	=0x7f;
 						spu->padding0018	=0x5df27;
 						spu->animation = 0;
-						spu->delta_heading = NewFloatToEQ13(0);
+						spu->delta_heading = FloatToEQ10(0);
 						outapp_push->priority = 6;
 						entity_list.QueueClients(this, outapp_push, true);
 						CastToClient()->FastQueuePacket(&outapp_push);
@@ -3535,7 +3535,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 	action->level = caster_level;	// caster level, for animation only
 	action->type = 231;	// 231 means a spell
 	action->spell = spell_id;
-	action->sequence = (uint32) (GetHeading() * 2);	// just some random number
+	action->sequence = (uint32) (GetHeading());	// just some random number
 	action->instrument_mod = GetInstrumentMod(spell_id);
 	action->buff_unknown = 0;
 
@@ -3997,16 +3997,16 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 				spu->x_pos		= FloatToEQ19(spelltar->GetX());
 				spu->y_pos		= FloatToEQ19(spelltar->GetY());
 				spu->z_pos		= FloatToEQ19(spelltar->GetZ());
-				spu->delta_x	= NewFloatToEQ13(new_x);
-				spu->delta_y	= NewFloatToEQ13(new_y);
-				spu->delta_z	= NewFloatToEQ13(spells[spell_id].pushup);
-				spu->heading	= FloatToEQ19(spelltar->GetHeading());
+				spu->delta_x	= FloatToEQ13(new_x);
+				spu->delta_y	= FloatToEQ13(new_y);
+				spu->delta_z	= FloatToEQ13(spells[spell_id].pushup);
+				spu->heading	= FloatToEQ12(spelltar->GetHeading());
 				spu->padding0002	=0;
 				spu->padding0006	=7;
 				spu->padding0014	=0x7f;
 				spu->padding0018	=0x5df27;
 				spu->animation = 0;
-				spu->delta_heading = NewFloatToEQ13(0);
+				spu->delta_heading = FloatToEQ10(0);
 				outapp_push->priority = 6;
 				entity_list.QueueClients(this, outapp_push, true);
 				spelltar->CastToClient()->FastQueuePacket(&outapp_push);
@@ -5733,8 +5733,8 @@ void Mob::CalcDestFromHeading(float heading, float distance, float MaxZDiff, flo
 	if (!distance) { return; }
 	if (!MaxZDiff) { MaxZDiff = 5; }
 
-	float ReverseHeading = 256 - heading;
-	float ConvertAngle = ReverseHeading * 1.40625f;
+	float ReverseHeading = 512 - heading;
+	float ConvertAngle = ReverseHeading * 360.0f / 512.0f;
 	if (ConvertAngle <= 270)
 		ConvertAngle = ConvertAngle + 90;
 	else
@@ -5742,8 +5742,8 @@ void Mob::CalcDestFromHeading(float heading, float distance, float MaxZDiff, flo
 
 	float Radian = ConvertAngle * (3.1415927f / 180.0f);
 
-	float CircleX = distance * cos(Radian);
-	float CircleY = distance * sin(Radian);
+	float CircleX = distance * std::cos(Radian);
+	float CircleY = distance * std::sin(Radian);
 	dX = CircleX + StartX;
 	dY = CircleY + StartY;
 	dZ = FindGroundZ(dX, dY, MaxZDiff);
@@ -5808,7 +5808,8 @@ void Mob::BeamDirectional(uint16 spell_id, int16 resist_adjust)
 				maxtarget_count++;
 			}
 
-			if (maxtarget_count >= spells[spell_id].aemaxtargets)
+			// not sure if we need this check, but probably do, need to check if it should be default limited or not
+			if (spells[spell_id].aemaxtargets && maxtarget_count >= spells[spell_id].aemaxtargets)
 				return;
 		}
 		++iter;
@@ -5823,8 +5824,10 @@ void Mob::ConeDirectional(uint16 spell_id, int16 resist_adjust)
 	if (IsBeneficialSpell(spell_id) && IsClient())
 		beneficial_targets = true;
 
-	float angle_start = spells[spell_id].directional_start + (GetHeading() * 360.0f / 256.0f);
-	float angle_end = spells[spell_id].directional_end + (GetHeading() * 360.0f / 256.0f);
+	float heading = GetHeading() * 360.0f / 512.0f; // convert to degrees
+
+	float angle_start = spells[spell_id].directional_start + heading;
+	float angle_end = spells[spell_id].directional_end + heading;
 
 	while (angle_start > 360.0f)
 		angle_start -= 360.0f;
@@ -5845,7 +5848,7 @@ void Mob::ConeDirectional(uint16 spell_id, int16 resist_adjust)
 		}
 
 		float heading_to_target =
-		    (CalculateHeadingToTarget((*iter)->GetX(), (*iter)->GetY()) * 360.0f / 256.0f);
+		    (CalculateHeadingToTarget((*iter)->GetX(), (*iter)->GetY()) * 360.0f / 512.0f);
 
 		while (heading_to_target < 0.0f)
 			heading_to_target += 360.0f;
@@ -5889,7 +5892,8 @@ void Mob::ConeDirectional(uint16 spell_id, int16 resist_adjust)
 			}
 		}
 
-		if (maxtarget_count >= spells[spell_id].aemaxtargets)
+		// my SHM breath could hit all 5 dummies I could summon in arena
+		if (spells[spell_id].aemaxtargets && maxtarget_count >= spells[spell_id].aemaxtargets)
 			return;
 
 		++iter;
