@@ -5,7 +5,8 @@ mackal: Fix Heading -- Quests broken
 
 Please report any other issues with heading, most things were tested and worked
 
-Run akkadius' script to fix your quests
+You can use eqemu_server.pl to run a conversion to fix your headings in quests.
+Some may need manual review.
 
 == 02/10/2018 ==
 mackal: Add Global Loot system
