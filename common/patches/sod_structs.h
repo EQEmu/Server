@@ -3008,24 +3008,6 @@ struct GuildMakeLeader{
 	char	target[64];
 };
 
-struct BugStruct{
-/*0000*/    uint32  type1; //seems to be just a different way of seeing type; seems to be ordered completely differently
-/*0004*/	char	chartype[64];
-/*0068*/	char	name[96];
-/*0164*/	char	ui[128];
-/*0292*/	float	x;
-/*0296*/	float	y;
-/*0300*/	float	z;
-/*0304*/	float	heading;
-/*0308*/	uint32	unknown304;
-/*0312*/	char	unknown308[160];
-/*0472*/	char	target_name[64];
-/*0536*/	uint32	type;
-/*0540*/	char	unknown536[2052];
-/*2588*/	char	bug[2048];
-/*4636*/	char	unknown4632[6];
-/*4642*/	char	system_info[4094];
-};
 struct Make_Pet_Struct { //Simple struct for getting pet info
 	uint8 level;
 	uint8 class_;
@@ -3052,20 +3034,21 @@ struct Ground_Spawn{
 struct Ground_Spawns {
 	struct Ground_Spawn spawn[50]; //Assigned max number to allow
 };
-struct PetitionBug_Struct{
-	uint32	petition_number;
-	uint32	unknown4;
-	char	accountname[64];
-	uint32	zoneid;
-	char	name[64];
-	uint32	level;
-	uint32	class_;
-	uint32	race;
-	uint32	unknown152[3];
-	uint32	time;
-	uint32	unknown168;
-	char	text[1028];
-};
+
+//struct PetitionBug_Struct{
+//	uint32	petition_number;
+//	uint32	unknown4;
+//	char	accountname[64];
+//	uint32	zoneid;
+//	char	name[64];
+//	uint32	level;
+//	uint32	class_;
+//	uint32	race;
+//	uint32	unknown152[3];
+//	uint32	time;
+//	uint32	unknown168;
+//	char	text[1028];
+//};
 
 struct ApproveZone_Struct {
 	char	name[64];

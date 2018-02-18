@@ -126,6 +126,37 @@ namespace EQEmu
 
 	} /*constants*/
 
+	namespace bug {
+		enum CategoryID : uint32 {
+			catOther = 0,
+			catVideo,
+			catAudio,
+			catPathing,
+			catQuest,
+			catTradeskills,
+			catSpellStacking,
+			catDoorsPortals,
+			catItems,
+			catNPC,
+			catDialogs,
+			catLoNTCG,
+			catMercenaries
+		};
+
+		enum OptionalInfoFlag : uint32 {
+			infoNoOptionalInfo = 0x0,
+			infoCanDuplicate = 0x1,
+			infoCrashBug = 0x2,
+			infoTargetInfo = 0x4,
+			infoCharacterFlags = 0x8,
+			infoUnknownValue = 0xFFFFFFF0
+		};
+
+		const char* CategoryIDToCategoryName(CategoryID category_id);
+		CategoryID CategoryNameToCategoryID(const char* category_name);
+
+	} // namespace bug
+
 	enum class CastingSlot : uint32 {
 		Gem1       = 0,
 		Gem2       = 1,

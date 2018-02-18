@@ -3323,23 +3323,32 @@ struct GuildMakeLeader{
 	char	target[64];
 };
 
-struct BugStruct{
-/*0000*/	char	chartype[64];
-/*0064*/	char	name[96];
-/*0160*/	char	ui[128];
-/*0288*/	float	x;
-/*0292*/	float	y;
-/*0296*/	float	z;
-/*0300*/	float	heading;
-/*0304*/	uint32	unknown304;
-/*0308*/	char	unknown308[160];
-/*0468*/	char	target_name[64];
-/*0532*/	uint32	type;
-/*0536*/	char	unknown536[2052];
-/*2584*/	char	bug[2048];
-/*4632*/	char	unknown4632[6];
-/*4638*/	char	system_info[4094];
+struct BugReport_Struct {
+/*0000*/	uint32	category_id;
+/*0004*/	char	category_name[64];
+/*0068*/	char	reporter_name[64];
+/*0132*/	char	unused_0132[32];
+/*0164*/	char	ui_path[128];
+/*0292*/	float	pos_x;
+/*0296*/	float	pos_y;
+/*0300*/	float	pos_z;
+/*0304*/	uint32	heading;
+/*0308*/	uint32	unused_0308;
+/*0312*/	uint32	time_played;
+/*0316*/	char	padding_0316[8];
+/*0324*/	uint32	target_id;
+/*0328*/	char	padding_0328[140];
+/*0468*/	uint32	unknown_0468;	// seems to always be '0'
+/*0472*/	char	target_name[64];
+/*0536*/	uint32	optional_info_mask;
+
+// this looks like a butchered 8k buffer with 2 trailing dword fields
+/*0540*/	char	unused_0540[2052];
+/*2592*/	char	bug_report[2050];
+/*4642*/	char	system_info[4098];
+/*8740*/
 };
+
 struct Make_Pet_Struct { //Simple struct for getting pet info
 	uint8 level;
 	uint8 class_;
@@ -3366,20 +3375,21 @@ struct Ground_Spawn{
 struct Ground_Spawns {
 	struct Ground_Spawn spawn[50]; //Assigned max number to allow
 };
-struct PetitionBug_Struct{
-	uint32	petition_number;
-	uint32	unknown4;
-	char	accountname[64];
-	uint32	zoneid;
-	char	name[64];
-	uint32	level;
-	uint32	class_;
-	uint32	race;
-	uint32	unknown152[3];
-	uint32	time;
-	uint32	unknown168;
-	char	text[1028];
-};
+
+//struct PetitionBug_Struct{
+//	uint32	petition_number;
+//	uint32	unknown4;
+//	char	accountname[64];
+//	uint32	zoneid;
+//	char	name[64];
+//	uint32	level;
+//	uint32	class_;
+//	uint32	race;
+//	uint32	unknown152[3];
+//	uint32	time;
+//	uint32	unknown168;
+//	char	text[1028];
+//};
 
 struct ApproveZone_Struct {
 	char	name[64];

@@ -2933,25 +2933,6 @@ namespace SoD
 		FINISH_DIRECT_DECODE();
 	}
 
-	DECODE(OP_Bug)
-	{
-		DECODE_LENGTH_EXACT(structs::BugStruct);
-		SETUP_DIRECT_DECODE(BugStruct, structs::BugStruct);
-
-		strn0cpy(emu->chartype, eq->chartype, sizeof(emu->chartype));
-		strn0cpy(emu->name, eq->name, sizeof(emu->name));
-		strn0cpy(emu->ui, eq->ui, sizeof(emu->ui));
-		IN(x);
-		IN(y);
-		IN(z);
-		IN(heading);
-		strn0cpy(emu->target_name, eq->target_name, sizeof(emu->target_name));
-		strn0cpy(emu->bug, eq->bug, sizeof(emu->bug));
-		strn0cpy(emu->system_info, eq->system_info, sizeof(emu->system_info));
-
-		FINISH_DIRECT_DECODE();
-	}
-
 	DECODE(OP_CastSpell)
 	{
 		DECODE_LENGTH_EXACT(structs::CastSpell_Struct);

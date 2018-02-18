@@ -2906,23 +2906,31 @@ struct GuildMakeLeader{
 	char	target[64];
 };
 
+struct BugReport_Struct {
+/*0000*/	char	category_name[64];
+/*0064*/	char	character_name[64];
+/*0128*/	char	unused_0128[32];
+/*0160*/	char	ui_path[128];
+/*0288*/	float	pos_x;
+/*0292*/	float	pos_y;
+/*0296*/	float	pos_z;
+/*0300*/	uint32	heading;
+/*0304*/	uint32	unused_0304;
+/*0308*/	uint32	time_played;
+/*0312*/	char	padding_0312[8];
+/*0320*/	uint32	target_id;
+/*0324*/	char	padding_0324[140];
+/*0464*/	uint32	unknown_0464;	// seems to always be '0'
+/*0468*/	char	target_name[64];
+/*0532*/	uint32	optional_info_mask;
 
-
-struct BugStruct{
-/*0000*/	char	chartype[64];
-/*0064*/	char	name[96];
-/*0160*/	char	ui[128];
-/*0288*/	float	x;
-/*0292*/	float	y;
-/*0296*/	float	z;
-/*0300*/	float	heading;
-/*0304*/	uint32	unknown304;
-/*0308*/	uint32	type;
-/*0312*/	char	unknown312[2144];
-/*2456*/	char	bug[1024];
-/*3480*/	char	placeholder[2];
-/*3482*/	char	system_info[4098];
+// this looks like a butchered 8k buffer with 2 trailing dword fields
+/*0536*/	char	unused_0536[2052];
+/*2588*/	char	bug_report[2050];
+/*4638*/	char	system_info[4098];
+/*8736*/
 };
+
 struct Make_Pet_Struct { //Simple struct for getting pet info
 	uint8 level;
 	uint8 class_;
@@ -2949,20 +2957,21 @@ struct Ground_Spawn{
 struct Ground_Spawns {
 	struct Ground_Spawn spawn[50]; //Assigned max number to allow
 };
-struct PetitionBug_Struct{
-	uint32	petition_number;
-	uint32	unknown4;
-	char	accountname[64];
-	uint32	zoneid;
-	char	name[64];
-	uint32	level;
-	uint32	class_;
-	uint32	race;
-	uint32	unknown152[3];
-	uint32	time;
-	uint32	unknown168;
-	char	text[1028];
-};
+
+//struct PetitionBug_Struct{
+//	uint32	petition_number;
+//	uint32	unknown4;
+//	char	accountname[64];
+//	uint32	zoneid;
+//	char	name[64];
+//	uint32	level;
+//	uint32	class_;
+//	uint32	race;
+//	uint32	unknown152[3];
+//	uint32	time;
+//	uint32	unknown168;
+//	char	text[1028];
+//};
 
 struct ApproveZone_Struct {
 	char	name[64];

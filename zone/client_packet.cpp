@@ -3960,12 +3960,23 @@ void Client::Handle_OP_BuffRemoveRequest(const EQApplicationPacket *app)
 
 void Client::Handle_OP_Bug(const EQApplicationPacket *app)
 {
-	if (app->size != sizeof(BugStruct))
-		printf("Wrong size of BugStruct got %d expected %zu!\n", app->size, sizeof(BugStruct));
-	else {
-		BugStruct* bug = (BugStruct*)app->pBuffer;
-		database.UpdateBug(bug);
+	if (!RuleB(Bugs, ReportingSystemActive)) {
+		Message(0, "Bug reporting is disabled on this server.");
+		return;
 	}
+	
+	if (app->size != sizeof(BugReport_Struct)) {
+		printf("Wrong size of BugReport_Struct got %d expected %zu!\n", app->size, sizeof(BugReport_Struct));
+	}
+	else {
+		BugReport_Struct* bug_report = (BugReport_Struct*)app->pBuffer;
+
+		if (RuleB(Bugs, UseOldReportingMethod))
+			database.RegisterBug(bug_report);
+		else
+			database.RegisterBug(this, bug_report);
+	}
+
 	return;
 }
 
@@ -10553,11 +10564,8 @@ void Client::Handle_OP_Petition(const EQApplicationPacket *app)
 
 void Client::Handle_OP_PetitionBug(const EQApplicationPacket *app)
 {
-	if (app->size != sizeof(PetitionBug_Struct))
-		printf("Wrong size of BugStruct! Expected: %zu, Got: %i\n", sizeof(PetitionBug_Struct), app->size);
-	else {
-		Message(0, "Petition Bugs are not supported, please use /bug.");
-	}
+	Message(0, "Petition Bugs are not supported, please use /bug.");
+
 	return;
 }
 

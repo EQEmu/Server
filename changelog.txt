@@ -1,5 +1,13 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 02/18/2018 ==
+Uleat: Bug reporting fix and overhaul.
+	- Fixed bug reporting for SoD+ clients
+	- Added ability to disable bug reporting (set rule 'Bugs:ReportingSystemActive' to 'false')
+	- Implemented a more detailed reporting system (set rule 'Bugs:UseOldReportingMethod' to 'false')
+	-- New system is not currently compatible with script-based monitoring
+	- Soft-removal of defunct 'Petition Bug' system
+
 == 02/14/2018 ==
 mackal: Fix Heading -- Quests broken
 

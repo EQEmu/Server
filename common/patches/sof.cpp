@@ -2385,6 +2385,17 @@ namespace SoF
 		FINISH_DIRECT_DECODE();
 	}
 
+	DECODE(OP_Bug)
+	{
+		DECODE_LENGTH_EXACT(structs::BugReport_Struct);
+		SETUP_DIRECT_DECODE(BugReport_Struct, structs::BugReport_Struct);
+
+		emu->category_id = EQEmu::bug::CategoryNameToCategoryID(eq->category_name);
+		memcpy(emu->category_name, eq, sizeof(structs::BugReport_Struct));
+
+		FINISH_DIRECT_DECODE();
+	}
+
 	DECODE(OP_CastSpell)
 	{
 		DECODE_LENGTH_EXACT(structs::CastSpell_Struct);
