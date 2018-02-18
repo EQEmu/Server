@@ -24,7 +24,7 @@
 #include "emu_legacy.h"
 #include "emu_versions.h"
 
-#include <string>
+#include <string.h>
 
 
 namespace EQEmu
