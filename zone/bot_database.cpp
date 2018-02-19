@@ -273,7 +273,10 @@ bool BotDatabase::LoadBotID(const uint32 owner_id, const std::string& bot_name, 
 	if (!owner_id || bot_name.empty())
 		return false;
 
-	query = StringFormat("SELECT `bot_id` FROM `bot_data` WHERE `name` = '%s' LIMIT 1", bot_name.c_str());
+	query = StringFormat(
+		"SELECT `bot_id` FROM `bot_data` WHERE `owner_id` = '%u' AND `name` = '%s' LIMIT 1",
+		owner_id, bot_name.c_str()
+	);
 	auto results = QueryDatabase(query);
 	if (!results.Success())
 		return false;

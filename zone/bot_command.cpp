@@ -5049,7 +5049,11 @@ void bot_subcommand_bot_spawn(Client *c, const Seperator *sep)
 		return;
 	}
 
-	my_bot->Spawn(c);
+	if (!my_bot->Spawn(c)) {
+		c->Message(m_fail, "Failed to spawn bot '%s' (id: %i)", bot_name.c_str(), bot_id);
+		safe_delete(my_bot);
+		return;
+	}
 
 	static const char* bot_spawn_message[16] = {
 		"A solid weapon is my ally!", // WARRIOR / 'generic'
@@ -5805,18 +5809,22 @@ void bot_subcommand_botgroup_load(Client *c, const Seperator *sep)
 		return;
 	}
 	if (!leader_id) {
-		c->Message(m_fail, "Can not locate bot-group leader id for '%s'", botgroup_name_arg.c_str());
+		c->Message(m_fail, "Cannot locate bot-group leader id for '%s'", botgroup_name_arg.c_str());
 		return;
 	}
 
 	auto botgroup_leader = Bot::LoadBot(leader_id);
 	if (!botgroup_leader) {
-		c->Message(m_fail, "Could not spawn bot-group leader for '%s'", botgroup_name_arg.c_str());
+		c->Message(m_fail, "Could not load bot-group leader for '%s'", botgroup_name_arg.c_str());
 		safe_delete(botgroup_leader);
 		return;
 	}
 
-	botgroup_leader->Spawn(c);
+	if (!botgroup_leader->Spawn(c)) {
+		c->Message(m_fail, "Could not spawn bot-group leader %s for '%s'", botgroup_leader->GetName(), botgroup_name_arg.c_str());
+		safe_delete(botgroup_leader);
+		return;
+	}
 	
 	Group* group_inst = new Group(botgroup_leader);
 
@@ -5835,7 +5843,12 @@ void bot_subcommand_botgroup_load(Client *c, const Seperator *sep)
 			return;
 		}
 
-		botgroup_member->Spawn(c);
+		if (!botgroup_member->Spawn(c)) {
+			c->Message(m_fail, "Could not spawn bot '%s' (id: %i)", botgroup_member->GetName(), member_iter);
+			safe_delete(botgroup_member);
+			return;
+		}
+
 		Bot::AddBotToGroup(botgroup_member, group_inst);
 	}
 
