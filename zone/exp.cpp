@@ -445,7 +445,7 @@ void Client::CalculateExp(uint32 in_add_exp, uint32 &add_exp, uint32 &add_aaxp, 
 			totalmod += RuleR(Zone, HotZoneBonus);
 		}
 
-		add_exp = uint32(float(add_exp) * totalmod * zemmod);
+		if (float(add_exp) >= 0.0f) add_exp = uint32(float(add_exp) * totalmod * zemmod);
 
 		//if XP scaling is based on the con of a monster, do that now.
 		if (RuleB(Character, UseXPConScaling))
