@@ -10835,7 +10835,7 @@ void command_hotfix(Client *c, const Seperator *sep) {
 		}
 		worldserver.SendPacket(&pack);
 
-		c->Message(0, "Hotfix applied");
+		if (c) c->Message(0, "Hotfix applied");
 	});
 
 	t1.detach();
