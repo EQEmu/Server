@@ -753,7 +753,7 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 		char val1[20]={0};
 		char val2[20]={0};
 		char val3[20]={0};
-		Message(15, "[GM] You have gained %u AXP and %u EXP (%u).", set_aaxp, set_exp, GetEXPForLevel(GetLevel() + 1));
+		Message_StringID(MT_Experience, GM_GAINXP, ConvertArrayU(set_aaxp, val1), ConvertArrayU(set_exp, val2), ConvertArray(GetEXPForLevel(GetLevel() + 1), val3));	//[GM] You have gained %1 AXP and %2 EXP (%3).
 	}
 }
 
