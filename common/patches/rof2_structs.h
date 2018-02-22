@@ -430,7 +430,7 @@ struct Spawn_Struct
 /*0000*/ //uint8     nullterm1; // hack to null terminate name
 /*0064*/ uint32 spawnId;
 /*0068*/ uint8  level;
-/*0069*/ float    unknown1;
+/*0069*/ float  bounding_radius; // used in melee, overrides calc
 /*0073*/ uint8  NPC;           // 0=player,1=npc,2=pc corpse,3=npc corpse
 	 Spawn_Struct_Bitfields	Bitfields;
 /*0000*/ uint8  otherData; // & 4 - has title, & 8 - has suffix, & 1 - it's a chest or untargetable

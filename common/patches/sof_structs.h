@@ -326,7 +326,8 @@ union
 /*0725*/ uint8  targetable;			// 1 = Targetable 0 = Not Targetable (is_npc?)
 /*0726*/ uint8  unknown0726[4];
 /*0730*/ uint8  NPC;				// 0=player,1=npc,2=pc corpse,3=npc corpse
-/*0731*/ uint8  unknown0731[11];
+/*0731*/ float  bounding_radius;	// used in melee, overrides calc
+/*0735*/ uint8  unknown0731[7];
 /*0742*/ uint8	targetable_with_hotkey;
 /*0743*/ signed   padding00:12;		// ***Placeholder
 		 signed   x:19;				// x coord

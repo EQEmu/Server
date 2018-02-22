@@ -280,7 +280,7 @@ union
 								// horse: 0=brown, 1=white, 2=black, 3=tan
 };
 /*0340*/ uint32 spawnId;		// Spawn Id
-/*0344*/ uint8 unknown0344[3];
+/*0344*/ float bounding_radius; // used in melee, overrides calc
 /*0347*/ uint8 IsMercenary;
 /*0348*/ EQEmu::TintProfile equipment_tint;
 /*0384*/ uint8	lfg;			// 0=off, 1=lfg on
