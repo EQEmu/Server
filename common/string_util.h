@@ -44,6 +44,7 @@ char *CleanMobName(const char *in, char *out);
 char *RemoveApostrophes(const char *s);
 char* strn0cpy(char* dest, const char* source, uint32 size);
 const char *ConvertArray(int input, char *returnchar);
+const char *ConvertArrayU(uint32 input, char *returnchar);
 const char *ConvertArrayF(float input, char *returnchar);
 const char *MakeLowerString(const char *source);
 int MakeAnyLenString(char** ret, const char* format, ...);
