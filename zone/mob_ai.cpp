@@ -2074,15 +2074,34 @@ bool Mob::Rampage(ExtraAttackOptions *opts)
 		if (m_target) {
 			if (m_target == GetTarget())
 				continue;
-			if (CombatRange(m_target)) {
+			if (DistanceSquaredNoZ(GetPosition(), m_target->GetPosition()) <= NPC_RAMPAGE_RANGE2) {
 				ProcessAttackRounds(m_target, opts);
 				index_hit++;
 			}
 		}
 	}
 
-	if (RuleB(Combat, RampageHitsTarget) && index_hit < rampage_targets)
-		ProcessAttackRounds(GetTarget(), opts);
+	if (RuleB(Combat, RampageHitsTarget)) {
+		if (index_hit < rampage_targets)
+			ProcessAttackRounds(GetTarget(), opts);
+	} else { // let's do correct behavior here, if they set above rule we can assume they want non-live like behavior
+		if (index_hit < rampage_targets) {
+			// so we go over in reverse order and skip range check
+			// lets do it this way to still support non-live-like >1 rampage targets
+			// likely live is just a fall through of the last valid mob
+			for (auto i = RampageArray.crbegin(); i != RampageArray.crend(); ++i) {
+				if (index_hit >= rampage_targets)
+					break;
+				auto m_target = entity_list.GetMob(*i);
+				if (m_target) {
+					if (m_target == GetTarget())
+						continue;
+					ProcessAttackRounds(m_target, opts);
+					index_hit++;
+				}
+			}
+		}
+	}
 
 	m_specialattacks = eSpecialAttacks::None;
 
