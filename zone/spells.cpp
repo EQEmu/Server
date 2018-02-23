@@ -1208,7 +1208,10 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 
 				// handle the components for traditional casters
 				else {
-					if(c->GetInv().HasItem(component, component_count, invWhereWorn|invWherePersonal) == -1) // item not found
+					if (!RuleB(Character, PetsUseReagents) && IsEffectInSpell(spell_id, SE_SummonPet)) {
+						//bypass reagent cost
+					} 
+					else if(c->GetInv().HasItem(component, component_count, invWhereWorn|invWherePersonal) == -1) // item not found
 					{
 						if (!missingreags)
 						{
@@ -1237,6 +1240,9 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 					InterruptSpell();
 					return;
 				}
+			}
+			else if (!RuleB(Character, PetsUseReagents) && IsEffectInSpell(spell_id, SE_SummonPet)) {
+				//bypass reagent cost
 			}
 			else if (!bard_song_mode)
 			{
