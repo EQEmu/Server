@@ -918,29 +918,26 @@ void Client::AI_Process()
 			}
 		}
 
-		if(IsPet())
-		{
-			Mob* owner = GetOwner();
-			if(owner == nullptr)
+		if (IsPet()) {
+			Mob *owner = GetOwner();
+			if (owner == nullptr)
 				return;
 
 			float dist = DistanceSquared(m_Position, owner->GetPosition());
-			if (dist >= 400)
-			{
-				if(AI_movement_timer->Check())
-				{
-					int nspeed = (dist >= 5625 ? GetRunspeed() : GetWalkspeed());
+			if (dist >= 202500) { // >= 450 distance
+				Teleport(static_cast<glm::vec3>(owner->GetPosition()));
+				SendPositionUpdate(); // this shouldn't happen a lot (and hard to make it) so lets not rate limit
+			} else if (dist >= 400) { // >=20
+				if (AI_movement_timer->Check()) {
+					int nspeed = (dist >= 5625 ? GetRunspeed() : GetWalkspeed()); // >= 75
 					animation = nspeed;
 					nspeed *= 2;
 					SetCurrentSpeed(nspeed);
 
 					CalculateNewPosition2(owner->GetX(), owner->GetY(), owner->GetZ(), nspeed);
 				}
-			}
-			else
-			{
-				if(moved)
-				{
+			} else {
+				if (moved) {
 					SetCurrentSpeed(0);
 					moved = false;
 				}
