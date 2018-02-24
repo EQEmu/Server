@@ -175,8 +175,6 @@ namespace EQEmu
 
 		// POTION_BELT_SIZE sets maximum limit..active limit will need to be handled by the appropriate AA or spell (or item?)
 		static const size_t POTION_BELT_ITEM_COUNT = 5;
-
-		static const size_t TEXT_LINK_BODY_LENGTH = 56;
 	}
 
 }

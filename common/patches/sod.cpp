@@ -53,11 +53,11 @@ namespace SoD
 	static inline uint32 SoDToServerSlot(uint32 sodSlot);
 	static inline uint32 SoDToServerCorpseSlot(uint32 sodCorpseSlot);
 
-	// server to client text link converter
-	static inline void ServerToSoDTextLink(std::string& sodTextLink, const std::string& serverTextLink);
+	// server to client say link converter
+	static inline void ServerToSoDSayLink(std::string& sodSayLink, const std::string& serverSayLink);
 
-	// client to server text link converter
-	static inline void SoDToServerTextLink(std::string& serverTextLink, const std::string& sodTextLink);
+	// client to server say link converter
+	static inline void SoDToServerSayLink(std::string& serverSayLink, const std::string& sodSayLink);
 
 	static inline CastingSlot ServerToSoDCastingSlot(EQEmu::CastingSlot slot);
 	static inline EQEmu::CastingSlot SoDToServerCastingSlot(CastingSlot slot);
@@ -346,7 +346,7 @@ namespace SoD
 
 		std::string old_message = emu->message;
 		std::string new_message;
-		ServerToSoDTextLink(new_message, old_message);
+		ServerToSoDSayLink(new_message, old_message);
 
 		in->size = sizeof(ChannelMessage_Struct) + new_message.length() + 1;
 
@@ -625,7 +625,7 @@ namespace SoD
 
 		std::string old_message = emu->message;
 		std::string new_message;
-		ServerToSoDTextLink(new_message, old_message);
+		ServerToSoDSayLink(new_message, old_message);
 
 		//if (new_message.length() > 512) // length restricted in packet building function due vari-length name size (no nullterm)
 		//	new_message = new_message.substr(0, 512);
@@ -677,7 +677,7 @@ namespace SoD
 
 		for (int i = 0; i < 9; ++i) {
 			if (old_message_array[i].length() == 0) { break; }
-			ServerToSoDTextLink(new_message_array[i], old_message_array[i]);
+			ServerToSoDSayLink(new_message_array[i], old_message_array[i]);
 			new_message_size += new_message_array[i].length() + 1;
 		}
 
@@ -2156,7 +2156,7 @@ namespace SoD
 		std::string old_message = &emu->message[strlen(emu->sayer)];
 		std::string new_message;
 
-		ServerToSoDTextLink(new_message, old_message);
+		ServerToSoDSayLink(new_message, old_message);
 
 		//in->size = 3 + 4 + 4 + strlen(emu->sayer) + 1 + 12 + new_message.length() + 1;
 		in->size = strlen(emu->sayer) + new_message.length() + 25;
@@ -2252,7 +2252,7 @@ namespace SoD
 
 		std::string old_message = InBuffer; // start 'Reward' as string
 		std::string new_message;
-		ServerToSoDTextLink(new_message, old_message);
+		ServerToSoDSayLink(new_message, old_message);
 
 		in->size = sizeof(TaskDescriptionHeader_Struct) + sizeof(TaskDescriptionData1_Struct)+
 			sizeof(TaskDescriptionData2_Struct) + sizeof(TaskDescriptionTrailer_Struct)+
@@ -2953,7 +2953,7 @@ namespace SoD
 
 		std::string old_message = (char *)&__eq_buffer[sizeof(ChannelMessage_Struct)];
 		std::string new_message;
-		SoDToServerTextLink(new_message, old_message);
+		SoDToServerSayLink(new_message, old_message);
 
 		__packet->size = sizeof(ChannelMessage_Struct) + new_message.length() + 1;
 		__packet->pBuffer = new unsigned char[__packet->size];
@@ -3067,7 +3067,7 @@ namespace SoD
 
 		std::string old_message = (char *)&__eq_buffer[4]; // unknown01 offset
 		std::string new_message;
-		SoDToServerTextLink(new_message, old_message);
+		SoDToServerSayLink(new_message, old_message);
 
 		__packet->size = sizeof(Emote_Struct);
 		__packet->pBuffer = new unsigned char[__packet->size];
@@ -3917,19 +3917,19 @@ namespace SoD
 		return (sodCorpseSlot - 1);
 	}
 
-	static inline void ServerToSoDTextLink(std::string& sodTextLink, const std::string& serverTextLink)
+	static inline void ServerToSoDSayLink(std::string& sodSayLink, const std::string& serverSayLink)
 	{
-		if ((constants::SayLinkBodySize == EQEmu::legacy::TEXT_LINK_BODY_LENGTH) || (serverTextLink.find('\x12') == std::string::npos)) {
-			sodTextLink = serverTextLink;
+		if ((constants::SayLinkBodySize == EQEmu::constants::SayLinkBodySize) || (serverSayLink.find('\x12') == std::string::npos)) {
+			sodSayLink = serverSayLink;
 			return;
 		}
 
-		auto segments = SplitString(serverTextLink, '\x12');
+		auto segments = SplitString(serverSayLink, '\x12');
 
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {
-				if (segments[segment_iter].length() <= EQEmu::legacy::TEXT_LINK_BODY_LENGTH) {
-					sodTextLink.append(segments[segment_iter]);
+				if (segments[segment_iter].length() <= EQEmu::constants::SayLinkBodySize) {
+					sodSayLink.append(segments[segment_iter]);
 					// TODO: log size mismatch error
 					continue;
 				}
@@ -3939,37 +3939,37 @@ namespace SoD
 				// SoF:  X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX       X  XXXX  X XXXXX XXXXXXXX (50)
 				// Diff:                                       ^^^^^         ^
 
-				sodTextLink.push_back('\x12');
-				sodTextLink.append(segments[segment_iter].substr(0, 31));
-				sodTextLink.append(segments[segment_iter].substr(36, 5));
+				sodSayLink.push_back('\x12');
+				sodSayLink.append(segments[segment_iter].substr(0, 31));
+				sodSayLink.append(segments[segment_iter].substr(36, 5));
 
 				if (segments[segment_iter][41] == '0')
-					sodTextLink.push_back(segments[segment_iter][42]);
+					sodSayLink.push_back(segments[segment_iter][42]);
 				else
-					sodTextLink.push_back('F');
+					sodSayLink.push_back('F');
 
-				sodTextLink.append(segments[segment_iter].substr(43));
-				sodTextLink.push_back('\x12');
+				sodSayLink.append(segments[segment_iter].substr(43));
+				sodSayLink.push_back('\x12');
 			}
 			else {
-				sodTextLink.append(segments[segment_iter]);
+				sodSayLink.append(segments[segment_iter]);
 			}
 		}
 	}
 
-	static inline void SoDToServerTextLink(std::string& serverTextLink, const std::string& sodTextLink)
+	static inline void SoDToServerSayLink(std::string& serverSayLink, const std::string& sodSayLink)
 	{
-		if ((EQEmu::legacy::TEXT_LINK_BODY_LENGTH == constants::SayLinkBodySize) || (sodTextLink.find('\x12') == std::string::npos)) {
-			serverTextLink = sodTextLink;
+		if ((EQEmu::constants::SayLinkBodySize == constants::SayLinkBodySize) || (sodSayLink.find('\x12') == std::string::npos)) {
+			serverSayLink = sodSayLink;
 			return;
 		}
 
-		auto segments = SplitString(sodTextLink, '\x12');
+		auto segments = SplitString(sodSayLink, '\x12');
 
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {
 				if (segments[segment_iter].length() <= constants::SayLinkBodySize) {
-					serverTextLink.append(segments[segment_iter]);
+					serverSayLink.append(segments[segment_iter]);
 					// TODO: log size mismatch error
 					continue;
 				}
@@ -3979,16 +3979,16 @@ namespace SoD
 				// RoF2: X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX X  XXXX XX  XXXXX XXXXXXXX (56)
 				// Diff:                                       ^^^^^         ^
 
-				serverTextLink.push_back('\x12');
-				serverTextLink.append(segments[segment_iter].substr(0, 31));
-				serverTextLink.append("00000");
-				serverTextLink.append(segments[segment_iter].substr(31, 5));
-				serverTextLink.push_back('0');
-				serverTextLink.append(segments[segment_iter].substr(36));
-				serverTextLink.push_back('\x12');
+				serverSayLink.push_back('\x12');
+				serverSayLink.append(segments[segment_iter].substr(0, 31));
+				serverSayLink.append("00000");
+				serverSayLink.append(segments[segment_iter].substr(31, 5));
+				serverSayLink.push_back('0');
+				serverSayLink.append(segments[segment_iter].substr(36));
+				serverSayLink.push_back('\x12');
 			}
 			else {
-				serverTextLink.append(segments[segment_iter]);
+				serverSayLink.append(segments[segment_iter]);
 			}
 		}
 	}

@@ -3565,6 +3565,21 @@ struct LFGuild_GuildToggle_Struct
 //	char ScrollName; // '0'
 //};
 
+struct SayLinkBodyFrame_Struct {
+/*000*/	char ActionID[1];
+/*001*/	char ItemID[5];
+/*006*/	char Augment1[5];
+/*011*/	char Augment2[5];
+/*016*/	char Augment3[5];
+/*021*/	char Augment4[5];
+/*026*/	char Augment5[5];
+/*031*/	char IsEvolving[1];
+/*032*/	char EvolveGroup[4];
+/*036*/	char EvolveLevel[1];
+/*037*/	char Hash[8];
+/*045*/
+};
+
 	}; /*structs*/
 
 }; /*Titanium*/

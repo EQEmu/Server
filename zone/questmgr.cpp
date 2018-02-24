@@ -1319,9 +1319,7 @@ void QuestManager::itemlink(int item_id) {
 		linker.SetLinkType(EQEmu::saylink::SayLinkItemData);
 		linker.SetItemData(item);
 
-		auto item_link = linker.GenerateLink();
-
-		initiator->Message(0, "%s tells you, %s", owner->GetCleanName(), item_link.c_str());
+		initiator->Message(0, "%s tells you, %s", owner->GetCleanName(), linker.GenerateLink().c_str());
 	}
 }
 
@@ -2549,9 +2547,8 @@ const char* QuestManager::varlink(char* perltext, int item_id) {
 	linker.SetLinkType(EQEmu::saylink::SayLinkItemData);
 	linker.SetItemData(item);
 
-	auto item_link = linker.GenerateLink();
-	strcpy(perltext, item_link.c_str()); // link length is currently ranged from 1 to 250 in TextLink::GenerateLink()
-	
+	strcpy(perltext, linker.GenerateLink().c_str());
+
 	return perltext;
 }
 
@@ -2773,8 +2770,7 @@ const char* QuestManager::saylink(char* Phrase, bool silent, const char* LinkNam
 		linker.SetProxyAugment1ID(sayid);
 	linker.SetProxyText(LinkName);
 
-	auto say_link = linker.GenerateLink();
-	strcpy(Phrase, say_link.c_str());  // link length is currently ranged from 1 to 250 in TextLink::GenerateLink()
+	strcpy(Phrase, linker.GenerateLink().c_str());
 
 	return Phrase;
 }

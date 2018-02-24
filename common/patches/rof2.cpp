@@ -57,11 +57,11 @@ namespace RoF2
 	static inline uint32 RoF2ToServerTypelessSlot(structs::TypelessInventorySlot_Struct rof2Slot);
 	static inline uint32 RoF2ToServerCorpseSlot(uint32 rof2CorpseSlot);
 
-	// server to client text link converter
-	static inline void ServerToRoF2TextLink(std::string& rof2TextLink, const std::string& serverTextLink);
+	// server to client say link converter
+	static inline void ServerToRoF2SayLink(std::string& rof2SayLink, const std::string& serverSayLink);
 
-	// client to server text link converter
-	static inline void RoF2ToServerTextLink(std::string& serverTextLink, const std::string& rof2TextLink);
+	// client to server say link converter
+	static inline void RoF2ToServerSayLink(std::string& serverSayLink, const std::string& rof2SayLink);
 
 	static inline CastingSlot ServerToRoF2CastingSlot(EQEmu::CastingSlot slot);
 	static inline EQEmu::CastingSlot RoF2ToServerCastingSlot(CastingSlot slot);
@@ -588,7 +588,7 @@ namespace RoF2
 
 		std::string old_message = emu->message;
 		std::string new_message;
-		ServerToRoF2TextLink(new_message, old_message);
+		ServerToRoF2SayLink(new_message, old_message);
 
 		//in->size = strlen(emu->sender) + 1 + strlen(emu->targetname) + 1 + strlen(emu->message) + 1 + 36;
 		in->size = strlen(emu->sender) + strlen(emu->targetname) + new_message.length() + 39;
@@ -915,7 +915,7 @@ namespace RoF2
 
 		std::string old_message = emu->message;
 		std::string new_message;
-		ServerToRoF2TextLink(new_message, old_message);
+		ServerToRoF2SayLink(new_message, old_message);
 
 		//if (new_message.length() > 512) // length restricted in packet building function due vari-length name size (no nullterm)
 		//	new_message = new_message.substr(0, 512);
@@ -967,7 +967,7 @@ namespace RoF2
 
 		for (int i = 0; i < 9; ++i) {
 			if (old_message_array[i].length() == 0) { break; }
-			ServerToRoF2TextLink(new_message_array[i], old_message_array[i]);
+			ServerToRoF2SayLink(new_message_array[i], old_message_array[i]);
 			new_message_size += new_message_array[i].length() + 1;
 		}
 
@@ -3364,7 +3364,7 @@ namespace RoF2
 		std::string old_message = &emu->message[strlen(emu->sayer)];
 		std::string new_message;
 
-		ServerToRoF2TextLink(new_message, old_message);
+		ServerToRoF2SayLink(new_message, old_message);
 
 		//in->size = 3 + 4 + 4 + strlen(emu->sayer) + 1 + 12 + new_message.length() + 1;
 		in->size = strlen(emu->sayer) + new_message.length() + 25;
@@ -3438,7 +3438,7 @@ namespace RoF2
 
 		std::string old_message = InBuffer; // start 'Reward' as string
 		std::string new_message;
-		ServerToRoF2TextLink(new_message, old_message);
+		ServerToRoF2SayLink(new_message, old_message);
 
 		in->size = sizeof(TaskDescriptionHeader_Struct) + sizeof(TaskDescriptionData1_Struct)+
 			sizeof(TaskDescriptionData2_Struct) + sizeof(TaskDescriptionTrailer_Struct)+
@@ -4595,7 +4595,7 @@ namespace RoF2
 
 		std::string old_message = InBuffer;
 		std::string new_message;
-		RoF2ToServerTextLink(new_message, old_message);
+		RoF2ToServerSayLink(new_message, old_message);
 
 		//__packet->size = sizeof(ChannelMessage_Struct)+strlen(InBuffer) + 1;
 		__packet->size = sizeof(ChannelMessage_Struct) + new_message.length() + 1;
@@ -4729,7 +4729,7 @@ namespace RoF2
 
 		std::string old_message = (char *)&__eq_buffer[4]; // unknown01 offset
 		std::string new_message;
-		RoF2ToServerTextLink(new_message, old_message);
+		RoF2ToServerSayLink(new_message, old_message);
 
 		__packet->size = sizeof(Emote_Struct);
 		__packet->pBuffer = new unsigned char[__packet->size];
@@ -6233,19 +6233,19 @@ namespace RoF2
 		return (rof2CorpseSlot + EQEmu::legacy::CORPSE_BEGIN - 1);
 	}
 
-	static inline void ServerToRoF2TextLink(std::string& rof2TextLink, const std::string& serverTextLink)
+	static inline void ServerToRoF2SayLink(std::string& rof2SayLink, const std::string& serverSayLink)
 	{
-		if ((constants::SayLinkBodySize == EQEmu::legacy::TEXT_LINK_BODY_LENGTH) || (serverTextLink.find('\x12') == std::string::npos)) {
-			rof2TextLink = serverTextLink;
+		if ((constants::SayLinkBodySize == EQEmu::constants::SayLinkBodySize) || (serverSayLink.find('\x12') == std::string::npos)) {
+			rof2SayLink = serverSayLink;
 			return;
 		}
 
-		auto segments = SplitString(serverTextLink, '\x12');
+		auto segments = SplitString(serverSayLink, '\x12');
 
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {
-				if (segments[segment_iter].length() <= EQEmu::legacy::TEXT_LINK_BODY_LENGTH) {
-					rof2TextLink.append(segments[segment_iter]);
+				if (segments[segment_iter].length() <= EQEmu::constants::SayLinkBodySize) {
+					rof2SayLink.append(segments[segment_iter]);
 					// TODO: log size mismatch error
 					continue;
 				}
@@ -6255,29 +6255,29 @@ namespace RoF2
 				// RoF2: X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX X  XXXX XX XXXXX XXXXXXXX (56)
 				// Diff:
 
-				rof2TextLink.push_back('\x12');
-				rof2TextLink.append(segments[segment_iter]);
-				rof2TextLink.push_back('\x12');
+				rof2SayLink.push_back('\x12');
+				rof2SayLink.append(segments[segment_iter]);
+				rof2SayLink.push_back('\x12');
 			}
 			else {
-				rof2TextLink.append(segments[segment_iter]);
+				rof2SayLink.append(segments[segment_iter]);
 			}
 		}
 	}
 
-	static inline void RoF2ToServerTextLink(std::string& serverTextLink, const std::string& rof2TextLink)
+	static inline void RoF2ToServerSayLink(std::string& serverSayLink, const std::string& rof2SayLink)
 	{
-		if ((EQEmu::legacy::TEXT_LINK_BODY_LENGTH == constants::SayLinkBodySize) || (rof2TextLink.find('\x12') == std::string::npos)) {
-			serverTextLink = rof2TextLink;
+		if ((EQEmu::constants::SayLinkBodySize == constants::SayLinkBodySize) || (rof2SayLink.find('\x12') == std::string::npos)) {
+			serverSayLink = rof2SayLink;
 			return;
 		}
 
-		auto segments = SplitString(rof2TextLink, '\x12');
+		auto segments = SplitString(rof2SayLink, '\x12');
 
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {
 				if (segments[segment_iter].length() <= constants::SayLinkBodySize) {
-					serverTextLink.append(segments[segment_iter]);
+					serverSayLink.append(segments[segment_iter]);
 					// TODO: log size mismatch error
 					continue;
 				}
@@ -6287,12 +6287,12 @@ namespace RoF2
 				// RoF2: X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX X  XXXX XX XXXXX XXXXXXXX (56)
 				// Diff:
 
-				serverTextLink.push_back('\x12');
-				serverTextLink.append(segments[segment_iter]);
-				serverTextLink.push_back('\x12');
+				serverSayLink.push_back('\x12');
+				serverSayLink.append(segments[segment_iter]);
+				serverSayLink.push_back('\x12');
 			}
 			else {
-				serverTextLink.append(segments[segment_iter]);
+				serverSayLink.append(segments[segment_iter]);
 			}
 		}
 	}

@@ -8894,6 +8894,8 @@ bool Bot::DyeArmor(int16 slot_id, uint32 rgb, bool all_flag, bool save_flag)
 
 std::string Bot::CreateSayLink(Client* c, const char* message, const char* name)
 {
+	// TODO: review
+
 	int saylink_size = strlen(message);
 	char* escaped_string = new char[saylink_size * 2];
 

@@ -7085,7 +7085,6 @@ void bot_subcommand_inventory_list(Client *c, const Seperator *sep)
 	const EQEmu::ItemData* item = nullptr;
 	bool is2Hweapon = false;
 
-	std::string item_link;
 	EQEmu::SayLinkEngine linker;
 	linker.SetLinkType(EQEmu::saylink::SayLinkItemInst);
 
@@ -7106,8 +7105,7 @@ void bot_subcommand_inventory_list(Client *c, const Seperator *sep)
 		}
 
 		linker.SetItemInst(inst);
-		item_link = linker.GenerateLink();
-		c->Message(m_message, "Using %s in my %s (slot %i)", item_link.c_str(), GetBotEquipSlotName(i), (i == 22 ? EQEmu::inventory::slotPowerSource : i));
+		c->Message(m_message, "Using %s in my %s (slot %i)", linker.GenerateLink().c_str(), GetBotEquipSlotName(i), (i == 22 ? EQEmu::inventory::slotPowerSource : i));
 
 		++inventory_count;
 	}
@@ -7250,8 +7248,8 @@ void bot_subcommand_inventory_window(Client *c, const Seperator *sep)
 
 	std::string window_text;
 	//std::string item_link;
-	//Client::TextLink linker;
-	//linker.SetLinkType(linker.linkItemInst);
+	//EQEmu::SayLinkEngine linker;
+	//linker.SetLinkType(EQEmu::saylink::SayLinkItemInst);
 
 	for (int i = EQEmu::legacy::EQUIPMENT_BEGIN; i <= (EQEmu::legacy::EQUIPMENT_END + 1); ++i) {
 		const EQEmu::ItemData* item = nullptr;
