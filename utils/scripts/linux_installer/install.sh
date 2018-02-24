@@ -121,7 +121,7 @@ if [[ "$OS" == "Debian" ]]; then
 	apt-get $apt_options install libsodium18
 	apt-get $apt_options install libjson-perl
 	
-	# If libsodium18 isn't installed (Debian), let's download both that and the dev package and install them.
+	# Install libsodium
 	wget http://ftp.us.debian.org/debian/pool/main/libs/libsodium/libsodium-dev_1.0.11-1~bpo8+1_amd64.deb -O /home/eqemu/libsodium-dev.deb
 	wget http://ftp.us.debian.org/debian/pool/main/libs/libsodium/libsodium18_1.0.11-1~bpo8+1_amd64.deb -O /home/eqemu/libsodium18.deb
 	dpkg -i /home/eqemu/libsodium*.deb
