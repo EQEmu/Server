@@ -29,6 +29,8 @@ public:
 	~WorldServer();
 	void ProcessMessage(uint16 opcode, EQ::Net::Packet &);
 
+	void ProcessClientVersionRequests(std::list<uint32>& id_list);
+
 private:
 
 	std::unique_ptr<EQ::Net::ServertalkClient> m_connection;

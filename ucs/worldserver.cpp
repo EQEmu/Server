@@ -114,5 +114,23 @@ void WorldServer::ProcessMessage(uint16 opcode, EQ::Net::Packet &p)
 			std::string());
 		break;
 	}
+
+	case ServerOP_UCSClientVersionReply:
+	{
+		UCSClientVersionReply_Struct* cvr = (UCSClientVersionReply_Struct*)pack->pBuffer;
+		g_Clientlist->QueueClientVersionReply(cvr->character_id, cvr->client_version);
+		break;
 	}
+	}
+}
+
+void WorldServer::ProcessClientVersionRequests(std::list<uint32>& id_list) {
+	UCSClientVersionRequest_Struct cvr;
+	EQ::Net::DynamicPacket dp_cvr;
+	for (auto iter : id_list) {
+		cvr.character_id = iter;
+		dp_cvr.PutData(0, &cvr, sizeof(cvr));
+		m_connection->Send(ServerOP_UCSClientVersionRequest, dp_cvr);
+	}
+	id_list.clear();
 }

@@ -28,7 +28,7 @@
 namespace EQEmu
 {
 	namespace versions {
-		enum class ClientVersion {
+		enum class ClientVersion : uint32 {
 			Unknown = 0,
 			Client62,	// Build: 'Aug  4 2005 15:40:59'
 			Titanium,	// Build: 'Oct 31 2005 10:33:37'
@@ -72,7 +72,7 @@ namespace EQEmu
 		uint32 ConvertClientVersionToExpansion(ClientVersion client_version);
 
 
-		enum class MobVersion {
+		enum class MobVersion : uint32 {
 			Unknown = 0,
 			Client62,
 			Titanium,

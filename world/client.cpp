@@ -1215,6 +1215,14 @@ void Client::EnterWorld(bool TryBootup) {
 		wtz->response = 0;
 		zone_server->SendPacket(pack);
 		delete pack;
+
+		UCSClientVersionReply_Struct cvr;
+		cvr.character_id = GetCharID();
+		cvr.client_version = GetClientVersion();
+		EQ::Net::DynamicPacket dp_cvr;
+		dp_cvr.PutData(0, &cvr, sizeof(cvr));
+		zone_server->HandleMessage(ServerOP_UCSClientVersionReply, dp_cvr);
+
 	}
 	else {	// if they havent seen character select screen, we can assume this is a zone
 			// to zone movement, which should be preauthorized before they leave the previous zone

@@ -139,8 +139,13 @@ public:
 	std::string MailBoxName();
 	int GetMailBoxNumber() { return CurrentMailBox; }
 	int GetMailBoxNumber(std::string CharacterName);
+
+	char GetRawConnectionType() { return RawConnectionType; }
 	void SetConnectionType(char c);
 	ConnectionType GetConnectionType() { return TypeOfConnection; }
+	void SetClientVersion(EQEmu::versions::ClientVersion client_version) { ClientVersion_ = client_version; }
+	EQEmu::versions::ClientVersion GetClientVersion() { return ClientVersion_; }
+	
 	inline bool IsMailConnection() { return (TypeOfConnection == ConnectionTypeMail) || (TypeOfConnection == ConnectionTypeCombined); }
 	void SendNotification(int MailBoxNumber, std::string From, std::string Subject, int MessageID);
 	void ChangeMailBox(int NewMailBox);
@@ -167,7 +172,10 @@ private:
 	Timer *GlobalChatLimiterTimer; //60 seconds
 	int AttemptedMessages;
 	bool ForceDisconnect;
+
+	char RawConnectionType;
 	ConnectionType TypeOfConnection;
+	EQEmu::versions::ClientVersion ClientVersion_;
 	bool UnderfootOrLater;
 };
 
@@ -182,11 +190,21 @@ public:
 	Client *IsCharacterOnline(std::string CharacterName);
 	void ProcessOPMailCommand(Client *c, std::string CommandString);
 
+	std::list<uint32> ClientVersionRequestIDs;
+
+	void RequestClientVersion(uint32 character_id);
+	bool QueueClientVersionReply(uint32 character_id, EQEmu::versions::ClientVersion client_version);
+	bool CheckForClientVersionReply(Client* c);
+
 private:
+	typedef std::pair<EQEmu::versions::ClientVersion, uint32> cvt_pair;
 
 	EQ::Net::EQStreamManager *chatsf;
 
 	std::list<Client*> ClientChatConnections;
+
+	std::map<uint32, uint32> ClientVersionRequestQueue;
+	std::map<uint32, cvt_pair> ClientVersionReplyQueue;
 
 	OpcodeManager *ChatOpMgr;
 };

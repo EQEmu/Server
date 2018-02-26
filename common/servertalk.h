@@ -190,6 +190,8 @@
 #define ServerOP_ReloadLogs 0x4010
 #define ServerOP_ReloadPerlExportSettings	0x4011
 #define ServerOP_CZSetEntityVariableByClientName 0x4012
+#define ServerOP_UCSClientVersionRequest	0x4013
+#define ServerOP_UCSClientVersionReply		0x4014
 /* Query Server OP Codes */
 #define ServerOP_QSPlayerLogTrades					0x5010
 #define ServerOP_QSPlayerLogHandins					0x5011
@@ -1276,6 +1278,15 @@ struct ReloadWorld_Struct{
 
 struct ServerRequestTellQueue_Struct {
 	char	name[64];
+};
+
+struct UCSClientVersionRequest_Struct {
+	uint32 character_id;
+};
+
+struct UCSClientVersionReply_Struct {
+	uint32 character_id;
+	EQEmu::versions::ClientVersion client_version;
 };
 
 #pragma pack()

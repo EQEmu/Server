@@ -1813,6 +1813,20 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 
 		break;
 	}
+	case ServerOP_UCSClientVersionRequest:
+	{
+		UCSClientVersionRequest_Struct* cvreq = (UCSClientVersionRequest_Struct*)pack->pBuffer;
+		Client* c = entity_list.GetClientByCharID(cvreq->character_id);
+		if (c) {
+			UCSClientVersionReply_Struct cvrep;
+			cvrep.character_id = c->CharacterID();
+			cvrep.client_version = c->ClientVersion();
+			EQ::Net::DynamicPacket dp_cvrep;
+			dp_cvrep.PutData(0, &cvrep, sizeof(cvrep));
+			worldserver.m_connection->Send(ServerOP_UCSClientVersionReply, dp_cvrep);
+		}
+		break;
+	}
 	case ServerOP_CZSetEntityVariableByNPCTypeID:
 	{
 		CZSetEntVarByNPCTypeID_Struct* CZM = (CZSetEntVarByNPCTypeID_Struct*)pack->pBuffer;

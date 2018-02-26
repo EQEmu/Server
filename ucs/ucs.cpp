@@ -140,11 +140,16 @@ int main() {
 
 	worldserver = new WorldServer;
 
+	// now that we can send packets to world, see if there's a
+	// broadcast opcode that tells the client to relog into ucs
+
 	while(RunLoops) {
 
 		Timer::SetCurrentTime();
 
 		g_Clientlist->Process();
+
+		worldserver->ProcessClientVersionRequests(g_Clientlist->ClientVersionRequestIDs);
 
 		if(ChannelListProcessTimer.Check())
 			ChannelList->Process();
