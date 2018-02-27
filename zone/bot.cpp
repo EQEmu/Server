@@ -5648,7 +5648,7 @@ bool Bot::IsBotAttackAllowed(Mob* attacker, Mob* target, bool& hasRuleDefined) {
 		if(attacker == target) {
 			hasRuleDefined = true;
 			Result = false;
-		} else if(attacker->IsClient() && target->IsBot() && attacker->CanPvP(target->CastToBot()->GetBotOwner()->CastToClient())) {
+		} else if(attacker->IsClient() && target->IsBot() && attacker->CastToClient()->CanPvP(target->CastToBot()->GetBotOwner()->CastToClient())) {
 			hasRuleDefined = true;
 			Result = true;
 		} else if(attacker->IsClient() && target->IsBot()) {
