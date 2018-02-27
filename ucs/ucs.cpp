@@ -140,10 +140,12 @@ int main() {
 
 	worldserver = new WorldServer;
 
-	// now that we can send packets to world, see if there's a
-	// broadcast opcode that tells the client to relog into ucs
+	worldserver->ActivateBroadcastServerReadyTimer();
 
 	while(RunLoops) {
+		// this triggers clients to 'reconnect' to ucs after server crash
+		if (worldserver->HasBroadcastServerReadyTimer())
+			worldserver->ProcessBroadcastServerReady();
 
 		Timer::SetCurrentTime();
 

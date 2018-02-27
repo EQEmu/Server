@@ -72,6 +72,7 @@ class SharedDatabase : public Database
 		void	SaveCharacterInspectMessage(uint32 character_id, const InspectMessage_Struct* message);
 		bool	GetCommandSettings(std::map<std::string, std::pair<uint8, std::vector<std::string>>> &command_settings);
 		uint32	GetTotalTimeEntitledOnAccount(uint32 AccountID);
+		void	SetMailKey(int CharID, int IPAddress, int MailKey);
 
 		/*
 		    Character InventoryProfile

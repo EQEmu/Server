@@ -45,6 +45,8 @@ WorldServer::WorldServer()
 {
 	m_connection.reset(new EQ::Net::ServertalkClient(Config->WorldIP, Config->WorldTCPPort, false, "UCS", Config->SharedKey));
 	m_connection->OnMessage(std::bind(&WorldServer::ProcessMessage, this, std::placeholders::_1, std::placeholders::_2));
+
+	m_bsr_timer = nullptr;
 }
 
 WorldServer::~WorldServer()
@@ -133,4 +135,38 @@ void WorldServer::ProcessClientVersionRequests(std::list<uint32>& id_list) {
 		m_connection->Send(ServerOP_UCSClientVersionRequest, dp_cvr);
 	}
 	id_list.clear();
+}
+
+void WorldServer::ProcessBroadcastServerReady() {
+	if (m_bsr_timer && (*m_bsr_timer) <= Timer::GetCurrentTime()) {
+		UCSBroadcastServerReady_Struct bsr;
+		memset(&bsr, 0, sizeof(UCSBroadcastServerReady_Struct));
+
+		sprintf(bsr.chat_prefix, "%s,%i,%s.",
+			Config->ChatHost.c_str(),
+			Config->ChatPort,
+			Config->ShortName.c_str()
+		);
+		sprintf(bsr.mail_prefix, "%s,%i,%s.",
+			Config->ChatHost.c_str(),
+			Config->MailPort,
+			Config->ShortName.c_str()
+		);
+
+		EQ::Net::DynamicPacket dp_bsr;
+		dp_bsr.PutData(0, &bsr, sizeof(UCSBroadcastServerReady_Struct));
+		m_connection->Send(ServerOP_UCSBroadcastServerReady, dp_bsr);
+
+		safe_delete(m_bsr_timer);
+	}
+}
+
+void WorldServer::ActivateBroadcastServerReadyTimer() {
+	safe_delete(m_bsr_timer);
+	m_bsr_timer = new uint32;
+
+	// clients do not drop their connection to ucs immediately...
+	// it can take upwards of 60 seconds to process the drop
+	// and clients will not re-connect to ucs until that occurs
+	*m_bsr_timer = (Timer::GetCurrentTime() + (RuleI(Chat, UCSBroadcastServerReadyDelay) * 1000));
 }

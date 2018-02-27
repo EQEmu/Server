@@ -1813,6 +1813,57 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 
 		break;
 	}
+	case ServerOP_UCSBroadcastServerReady:
+	{
+		UCSBroadcastServerReady_Struct* bsr = (UCSBroadcastServerReady_Struct*)pack->pBuffer;
+		EQApplicationPacket* outapp = nullptr;
+		std::string buffer;
+
+		for (auto liter : entity_list.GetClientList()) {
+			auto c = liter.second;
+			if (!c)
+				continue;
+
+			int MailKey = zone->random.Int(1, INT_MAX);
+
+			database.SetMailKey(c->CharacterID(), c->GetIP(), MailKey);
+
+			char ConnectionType;
+
+			// chat server packet
+			if (c->ClientVersionBit() & EQEmu::versions::bit_UFAndLater)
+				ConnectionType = 'U';
+			else if (c->ClientVersionBit() & EQEmu::versions::bit_SoFAndLater)
+				ConnectionType = 'S';
+			else
+				ConnectionType = 'C';
+			
+			buffer = bsr->chat_prefix;
+			buffer.append(StringFormat("%s,%c%08X", c->GetName(), ConnectionType, MailKey));
+			
+			outapp = new EQApplicationPacket(OP_SetChatServer, (buffer.length() + 1));
+			memcpy(outapp->pBuffer, buffer.c_str(), buffer.length());
+			outapp->pBuffer[buffer.length()] = '\0';
+
+			c->QueuePacket(outapp);
+			safe_delete(outapp);
+
+			// mail server packet
+			if (c->ClientVersionBit() & EQEmu::versions::bit_TitaniumAndEarlier)
+				ConnectionType = 'M';
+
+			buffer = bsr->mail_prefix;
+			buffer.append(StringFormat("%s,%c%08X", c->GetName(), ConnectionType, MailKey));
+
+			outapp = new EQApplicationPacket(OP_SetChatServer2, (buffer.length() + 1));
+			memcpy(outapp->pBuffer, buffer.c_str(), buffer.length());
+			outapp->pBuffer[buffer.length()] = '\0';
+
+			c->QueuePacket(outapp);
+			safe_delete(outapp);
+		}
+		break;
+	}
 	case ServerOP_UCSClientVersionRequest:
 	{
 		UCSClientVersionRequest_Struct* cvreq = (UCSClientVersionRequest_Struct*)pack->pBuffer;

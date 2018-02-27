@@ -110,6 +110,23 @@ uint32 SharedDatabase::GetTotalTimeEntitledOnAccount(uint32 AccountID) {
 	return EntitledTime;
 }
 
+void SharedDatabase::SetMailKey(int CharID, int IPAddress, int MailKey)
+{
+	char MailKeyString[17];
+
+	if (RuleB(Chat, EnableMailKeyIPVerification) == true)
+		sprintf(MailKeyString, "%08X%08X", IPAddress, MailKey);
+	else
+		sprintf(MailKeyString, "%08X", MailKey);
+
+	std::string query = StringFormat("UPDATE character_data SET mailkey = '%s' WHERE id = '%i'",
+		MailKeyString, CharID);
+	auto results = QueryDatabase(query);
+	if (!results.Success())
+		Log(Logs::General, Logs::Error, "SharedDatabase::SetMailKey(%i, %s) : %s", CharID, MailKeyString, results.ErrorMessage().c_str());
+
+}
+
 bool SharedDatabase::SaveCursor(uint32 char_id, std::list<EQEmu::ItemInstance*>::const_iterator &start, std::list<EQEmu::ItemInstance*>::const_iterator &end)
 {
 	// Delete cursor items

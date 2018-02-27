@@ -52,6 +52,7 @@ void UCSConnection::ProcessPacket(uint16 opcode, EQ::Net::Packet &p)
 			Log(Logs::Detail, Logs::UCS_Server, "Got authentication from UCS when they are already authenticated.");
 			break;
 		}
+		case ServerOP_UCSBroadcastServerReady:
 		case ServerOP_UCSClientVersionRequest:
 		{
 			zoneserver_list.SendPacket(pack);

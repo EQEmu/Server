@@ -192,6 +192,7 @@
 #define ServerOP_CZSetEntityVariableByClientName 0x4012
 #define ServerOP_UCSClientVersionRequest	0x4013
 #define ServerOP_UCSClientVersionReply		0x4014
+#define ServerOP_UCSBroadcastServerReady	0x4015
 /* Query Server OP Codes */
 #define ServerOP_QSPlayerLogTrades					0x5010
 #define ServerOP_QSPlayerLogHandins					0x5011
@@ -1287,6 +1288,11 @@ struct UCSClientVersionRequest_Struct {
 struct UCSClientVersionReply_Struct {
 	uint32 character_id;
 	EQEmu::versions::ClientVersion client_version;
+};
+
+struct UCSBroadcastServerReady_Struct {
+	char chat_prefix[128];
+	char mail_prefix[128];
 };
 
 #pragma pack()
