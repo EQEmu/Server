@@ -235,6 +235,13 @@ RULE_INT(World, ExpansionSettings, 16383) // Sets the expansion settings for the
 RULE_BOOL(World, UseClientBasedExpansionSettings, true) // if true it will overrule World, ExpansionSettings and set someone's expansion based on the client they're using
 RULE_INT(World, PVPSettings, 0) // Sets the PVP settings for the server, 1 = Rallos Zek RuleSet, 2 = Tallon/Vallon Zek Ruleset, 4 = Sullon Zek Ruleset, 6 = Discord Ruleset, anything above 6 is the Discord Ruleset without the no-drop restrictions removed. TODO: Edit IsAttackAllowed in Zone to accomodate for these rules.
 RULE_INT(World, PVPMinLevel, 0) // minimum level to pvp
+RULE_BOOL(World, PVPUseDeityBasedPVP, false) //In PvP, deity is used to determine if a player can attack another.
+RULE_INT(World, PVPLevelDifference, 0) // In PvP, if value is greater than 0, players with a difference greater than value will not be attackable
+RULE_INT(World, PVPLoseExperienceLevelDifference, 0) // In PvP, if value is greater than 0, players lose experience if killed by a player within level difference
+RULE_INT(World, PVPPetDamageMitigation, 50) // In PvP, pet damage is mitigated by this amount
+RULE_INT(World, PVPMeleeMitigation, 67) // In PvP, melee is mitigated by this amount
+RULE_INT(World, PVPSpellMitigation, 67) // In PvP, spells are mitigated by this amount
+RULE_INT(World, PVPRangedMitigation, 80) // In PvP, ranged attacks (archery/throwing) is mitigated by this amount
 RULE_BOOL (World, IsGMPetitionWindowEnabled, false)
 RULE_INT (World, FVNoDropFlag, 0) // Sets the Firiona Vie settings on the client. If set to 2, the flag will be set for GMs only, allowing trading of no-drop items.
 RULE_BOOL (World, IPLimitDisconnectAll, false)

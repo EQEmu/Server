@@ -5648,7 +5648,7 @@ bool Bot::IsBotAttackAllowed(Mob* attacker, Mob* target, bool& hasRuleDefined) {
 		if(attacker == target) {
 			hasRuleDefined = true;
 			Result = false;
-		} else if(attacker->IsClient() && target->IsBot() && attacker->CastToClient()->GetPVP() && target->CastToBot()->GetBotOwner()->CastToClient()->GetPVP()) {
+		} else if(attacker->IsClient() && target->IsBot() && attacker->CanPvP(target->CastToBot()->GetBotOwner()->CastToClient())) {
 			hasRuleDefined = true;
 			Result = true;
 		} else if(attacker->IsClient() && target->IsBot()) {
@@ -5663,14 +5663,15 @@ bool Bot::IsBotAttackAllowed(Mob* attacker, Mob* target, bool& hasRuleDefined) {
 		} else if(attacker->IsPet() && attacker->IsFamiliar()) {
 			hasRuleDefined = true;
 			Result = false;
-		} else if(attacker->IsBot() && attacker->CastToBot()->GetBotOwner() && attacker->CastToBot()->GetBotOwner()->CastToClient()->GetPVP()) {
-			if(target->IsBot() && target->GetOwner() && target->GetOwner()->CastToClient()->GetPVP()) {
+		} else if(attacker->IsBot() && attacker->CastToBot()->GetBotOwner() && attacker->CastToBot()->GetBotOwner()->CastToClient()->GetPVP()) { //this needs a cleanup
+ 			if(target->IsBot() && target->GetOwner() && target->GetOwner()->CastToClient()->CanPVP(attacker->CastToBot()->GetBotOwner()->CastToClient())) {
+  		
 				hasRuleDefined = true;
 				if(target->GetOwner() == attacker->GetOwner())
 					Result = false;
 				else
 					Result = true;
-			} else if(target->IsClient() && target->CastToClient()->GetPVP()) {
+			} else if(target->IsClient() && target->CastToClient()->CanPVP(attacker->CastToBot()->GetBotOwner()->CastToClient())) {  			
 				hasRuleDefined = true;
 				if(target == attacker->GetOwner())
 					Result = false;

@@ -9260,3 +9260,44 @@ void Client::InitInnates()
 	}
 }
 
+//CanPvP returns true if provided player can attack this player
+bool Client::CanPvP(Client *c) {
+	if (c == nullptr) return false;
+
+	//Dueling overrides normal PvP logic
+	if (IsDueling() && c->IsDueling() && 
+		GetDuelTarget() == c->GetID() && 
+		c->GetDuelTarget() == GetID()) return true;
+
+	//If PVPLevelDifference is enabled, only allow PVP if players are of proper range
+	if (RuleI(World, PVPLevelDifference) > 0) {
+		int level_diff = 0;
+		if (c->GetLevel() > GetLevel()) level_diff = c->GetLevel() - GetLevel();
+		else level_diff = GetLevel() - c->GetLevel();
+		if (level_diff > RuleI(World, PVPLevelDifference)) return false;
+	}
+
+	//players need to be proper level for pvp
+	if (RuleI(World, PVPMinLevel) > 0 && (GetLevel() < RuleI(World, PVPMinLevel) || c->GetLevel() < RuleI(World, PVPMinLevel))) return false;
+	//is deity pvp rule enabled? If so, if we're same alignment, don't allow pvp
+	if (RuleB(World, PVPUseDeityBasedPVP) && GetAlignment() == GetAlignment()) return false;
+	
+	//Check if players are flagged pvp. This may need to be removed later
+	if (!GetPVP() || !c->GetPVP()) return false;
+
+	return true;
+}
+
+//GetAlignment returns 0 = neutral, 1 = good, 2 = evil, used for pvp sullon zek rules
+int Client::GetAlignment() {
+	if (GetDeity() == EQEmu::deity::DeityErollisiMarr || 
+		GetDeity() == EQEmu::deity::DeityMithanielMarr ||
+		GetDeity() == EQEmu::deity::DeityRodcetNife || 
+		GetDeity() == EQEmu::deity::DeityQuellious || 
+		GetDeity() == EQEmu::deity::DeityTunare) return 1; //good
+	if (GetDeity() == EQEmu::deity::DeityBertoxxulous ||
+		GetDeity() == EQEmu::deity::DeityCazicThule ||
+		GetDeity() == EQEmu::deity::DeityInnoruuk || 
+		GetDeity() == EQEmu::deity::DeityRallosZek) return 2; //evil
+	return 0; //neutral
+} 

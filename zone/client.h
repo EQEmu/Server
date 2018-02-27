@@ -756,7 +756,8 @@ public:
 	bool TradeskillExecute(DBTradeskillRecipe_Struct *spec);
 	void CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float skillup_modifier, uint16 success_modifier, EQEmu::skills::SkillType tradeskill);
 	void InitInnates();
-
+	bool CanPvP(Client * c);
+ 	int GetAlignment();
 	void GMKill();
 	inline bool IsMedding() const {return medding;}
 	inline uint16 GetDuelTarget() const { return duel_target; }

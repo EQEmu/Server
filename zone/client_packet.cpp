@@ -4779,6 +4779,9 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 		if (!tmob->IsNPC())
 			con->pvpcon = tmob->CastToClient()->GetPVP();
 	}
+	
+	//Disabled until NULL return is figured out
+	//if (tmob->IsClient() && CanPvP(tmob->CastToClient())) con->pvpcon = 1;
 
 	// If we're feigned show NPC as indifferent
 	if (tmob->IsNPC())
