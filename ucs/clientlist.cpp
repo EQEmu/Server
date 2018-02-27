@@ -893,7 +893,7 @@ void Clientlist::RequestClientVersion(uint32 character_id) {
 bool Clientlist::QueueClientVersionReply(uint32 character_id, EQEmu::versions::ClientVersion client_version) {
 	if (!character_id)
 		return true;
-	if (client_version == EQEmu::versions::ClientVersion::Unknown)
+	if (client_version < EQEmu::versions::ClientVersion::Titanium || client_version > EQEmu::versions::ClientVersion::RoF2)
 		return false;
 
 	if (LogSys.log_settings[Logs::UCS_Server].is_category_enabled) {
