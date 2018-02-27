@@ -1987,8 +1987,8 @@ void QuestManager::npcfeature(char *feature, int setting)
 	QuestManagerCurrentQuestVars();
 	uint16 Race = owner->GetRace();
 	uint8 Gender = owner->GetGender();
-	uint8 Texture = 0xFF;
-	uint8 HelmTexture = 0xFF;
+	uint8 Texture = owner->GetTexture();
+	uint8 HelmTexture = owner->GetHelmTexture();
 	uint8 HairColor = owner->GetHairColor();
 	uint8 BeardColor = owner->GetBeardColor();
 	uint8 EyeColor1 = owner->GetEyeColor1();
