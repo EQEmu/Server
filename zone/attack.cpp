@@ -3626,7 +3626,7 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 				auto new_pos = glm::vec3(
 				    m_Position.x + (a->force * std::cos(a->hit_heading) + m_Delta.x),
 				    m_Position.y + (a->force * std::sin(a->hit_heading) + m_Delta.y), m_Position.z);
-				if (position_update_melee_push_timer.Check() && zone->zonemap &&
+				if ((IsNPC() && position_update_melee_push_timer.Check()) && zone->zonemap &&
 				    zone->zonemap->CheckLoS(
 					glm::vec3(m_Position),
 					new_pos)) { // If we have LoS on the new loc it should be reachable.
