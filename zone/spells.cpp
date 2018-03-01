@@ -2663,7 +2663,7 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 
 			action->effect_flag = 4;
 
-			if(spells[spell_id].pushback > 0 || spells[spell_id].pushup > 0)
+			if(spells[spell_id].pushback != 0.0f || spells[spell_id].pushup != 0.0f)
 			{
 				if(IsClient())
 				{
@@ -3937,7 +3937,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 	// the complete sequence is 2 actions and 1 damage message
 	action->effect_flag = 0x04;	// this is a success flag
 
-	if(spells[spell_id].pushback > 0 || spells[spell_id].pushup > 0)
+	if(spells[spell_id].pushback != 0.0f || spells[spell_id].pushup != 0.0f)
 	{
 		if(spelltar->IsClient())
 		{
