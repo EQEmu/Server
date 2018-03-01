@@ -216,7 +216,7 @@ void Trap::Trigger(Mob* trigger)
 				int dmg = zone->random.Int(effectvalue, effectvalue2);
 				trigger->SetHP(trigger->GetHP() - dmg);
 				a->damage = dmg;
-				a->meleepush_xy = zone->random.Int(0, 1234567);
+				a->hit_heading = 0.0f;
 				a->source = GetHiddenTrigger()!=nullptr ? GetHiddenTrigger()->GetID() : trigger->GetID();
 				a->spellid = 0;
 				a->target = trigger->GetID();

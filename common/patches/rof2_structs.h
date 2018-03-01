@@ -1462,17 +1462,17 @@ struct Action_Struct
 {
 /*00*/	uint16 target;			// id of target
 /*02*/	uint16 source;			// id of caster
-/*04*/	uint16 level;			// level of caster - Seen 0
-/*06*/  uint32 unknown06;
+/*04*/	uint16 level;			// level of caster for spells, OSX dump says attack rating, guess spells use it for level
+/*06*/  uint32 unknown06;		// OSX dump says base_damage, was used for bard mod too, this is 0'd :(
 /*10*/	float instrument_mod;
-/*14*/  uint32 bard_focus_id;      // seen 0
-/*18*/  float knockback_angle;  //seems to go from 0-512 then it rolls over again
-/*22*/  uint32 unknown22;
-/*26*/  uint8 type;
-/*27*/  uint32 damage;
-/*31*/  uint16 unknown31;
+/*14*/  float force;
+/*18*/  float hit_heading;
+/*22*/  float hit_pitch;
+/*26*/  uint8 type;				// 231 (0xE7) for spells, skill
+/*27*/  uint32 damage;			// OSX says min_damage
+/*31*/  uint16 unknown31;		// OSX says tohit
 /*33*/	uint32 spell;			// spell id being cast
-/*37*/	uint8 level2;			// level of caster again? Or maybe the castee
+/*37*/	uint8 spell_level;			// level of caster again? Or maybe the castee
 /*38*/	uint8 effect_flag;		// if this is 4, the effect is valid: or if two are sent at the same time?
 /*39*/
 };
@@ -1484,25 +1484,21 @@ struct ActionAlt_Struct
 {
 /*00*/	uint16 target;			// id of target
 /*02*/	uint16 source;			// id of caster
-/*04*/	uint16 level;			// level of caster - Seen 0
-/*06*/  uint32 unknown06;
+/*04*/	uint16 level;			// level of caster for spells, OSX dump says attack rating, guess spells use it for level
+/*06*/  uint32 unknown06;		// OSX dump says base_damage, was used for bard mod too, this is 0'd :(
 /*10*/	float instrument_mod;
-/*14*/  uint32 bard_focus_id;      // seen 0
-/*18*/  float knockback_angle;  //seems to go from 0-512 then it rolls over again
-/*22*/  uint32 unknown22;
-/*26*/  uint8 type;
-/*27*/  uint32 damage;
-/*31*/  uint16 unknown31;
+/*14*/  float force;
+/*18*/  float hit_heading;
+/*22*/  float hit_pitch;
+/*26*/  uint8 type;				// 231 (0xE7) for spells, skill
+/*27*/  uint32 damage;			// OSX says min_damage
+/*31*/  uint16 unknown31;		// OSX says tohit
 /*33*/	uint32 spell;			// spell id being cast
-/*37*/	uint8 level2;			// level of caster again? Or maybe the castee
+/*37*/	uint8 spell_level;		// level of caster again? Or maybe the castee
 /*38*/	uint8 effect_flag;		// if this is 4, the effect is valid: or if two are sent at the same time?
-/*39*/	uint32 unknown39;		// New field to Underfoot - Seen 14
-/*43*/	uint8 unknown43;			// New field to Underfoot - Seen 0
-/*44*/	uint8 unknown44;			// New field to Underfoot - Seen 17
-/*45*/	uint8 unknown45;			// New field to Underfoot - Seen 0
-/*46*/	int32 unknown46;		// New field to Underfoot - Seen -1
-/*50*/	uint32 unknown50;		// New field to Underfoot - Seen 0
-/*54*/	uint16 unknown54;		// New field to Underfoot - Seen 0
+/*39*/	uint8 spell_gem;
+/*40*/	InventorySlot_Struct slot;
+/*52*/	uint32 item_cast_type;	// ItemSpellTypes enum from MQ2
 /*56*/
 };
 
@@ -1517,9 +1513,9 @@ struct CombatDamage_Struct
 /* 05 */	uint32	spellid;
 /* 09 */	int32	damage;
 /* 13 */	float	force;		// cd cc cc 3d
-/* 17 */	float	meleepush_xy;		// see above notes in Action_Struct
-/* 21 */	float	meleepush_z;
-/* 25 */	uint8	unknown25;	// was [9]
+/* 17 */	float	hit_heading;		// see above notes in Action_Struct
+/* 21 */	float	hit_pitch;
+/* 25 */	uint8	secondary;	// 0 for primary hand, 1 for secondary
 /* 26 */	uint32	special; // 2 = Rampage, 1 = Wild Rampage
 /* 30 */
 };

@@ -2652,18 +2652,18 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 			action->source = caster->GetID();
 			action->target = GetID();
 			action->spell = spell_id;
-			action->sequence = (uint32) (GetHeading());	// just some random number
+			action->hit_heading = GetHeading();
 			action->instrument_mod = caster->GetInstrumentMod(spell_id);
-			action->buff_unknown = 0;
-			action->level = buffs[buffs_i].casterlevel;
+			action->effect_flag = 0;
+			action->spell_level = action->level = buffs[buffs_i].casterlevel;
 			action->type = DamageTypeSpell;
 			entity_list.QueueCloseClients(this, packet, false, RuleI(Range, SongMessages), 0, true, IsClient() ? FilterPCSpells : FilterNPCSpells);
 
-			action->buff_unknown = 4;
+			action->effect_flag = 4;
 
 			if(IsEffectInSpell(spell_id, SE_TossUp))
 			{
-				action->buff_unknown = 0;
+				action->effect_flag = 0;
 			}
 			else if(spells[spell_id].pushback > 0 || spells[spell_id].pushup > 0)
 			{
@@ -2673,7 +2673,7 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 					{
 						CastToClient()->SetKnockBackExemption(true);
 
-						action->buff_unknown = 0;
+						action->effect_flag = 0;
 						auto outapp_push = new EQApplicationPacket(
 						    OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 						PlayerPositionUpdateServer_Struct* spu = (PlayerPositionUpdateServer_Struct*)outapp_push->pBuffer;
@@ -2725,7 +2725,7 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 			cd->source = action->source;
 			cd->type = DamageTypeSpell;
 			cd->spellid = action->spell;
-			cd->meleepush_xy = action->sequence;
+			cd->hit_heading = action->hit_heading;
 			cd->damage = 0;
 			if(!IsEffectInSpell(spell_id, SE_BindAffinity))
 			{
@@ -3536,9 +3536,9 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 	action->level = caster_level;	// caster level, for animation only
 	action->type = 231;	// 231 means a spell
 	action->spell = spell_id;
-	action->sequence = (uint32) (GetHeading());	// just some random number
+	action->hit_heading = GetHeading();
 	action->instrument_mod = GetInstrumentMod(spell_id);
-	action->buff_unknown = 0;
+	action->effect_flag = 0;
 
 	if(spelltar != this && spelltar->IsClient())	// send to target
 		spelltar->CastToClient()->QueuePacket(action_packet);
@@ -3965,11 +3965,11 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 	// NOTE: this is what causes the buff icon to appear on the client, if
 	// this is a buff - but it sortof relies on the first packet.
 	// the complete sequence is 2 actions and 1 damage message
-	action->buff_unknown = 0x04;	// this is a success flag
+	action->effect_flag = 0x04;	// this is a success flag
 
 	if(IsEffectInSpell(spell_id, SE_TossUp))
 	{
-		action->buff_unknown = 0;
+		action->effect_flag = 0;
 	}
 	else if(spells[spell_id].pushback > 0 || spells[spell_id].pushup > 0)
 	{
@@ -3979,7 +3979,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 			{
 				spelltar->CastToClient()->SetKnockBackExemption(true);
 
-				action->buff_unknown = 0;
+				action->effect_flag = 0;
 				auto outapp_push =
 				    new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 				PlayerPositionUpdateServer_Struct* spu = (PlayerPositionUpdateServer_Struct*)outapp_push->pBuffer;
@@ -4039,7 +4039,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 	cd->source = action->source;
 	cd->type = action->type;
 	cd->spellid = action->spell;
-	cd->meleepush_xy = action->sequence;
+	cd->hit_heading = action->hit_heading;
 	cd->damage = 0;
 	if(!IsEffectInSpell(spell_id, SE_BindAffinity)){
 		entity_list.QueueCloseClients(
@@ -5722,7 +5722,7 @@ void Client::SendSpellAnim(uint16 targetid, uint16 spell_id)
 	a->source = this->GetID();
 	a->type = 231;
 	a->spell = spell_id;
-	a->sequence = 231;
+	a->hit_heading = GetHeading();
 
 	app.priority = 1;
 	entity_list.QueueCloseClients(this, &app, false, RuleI(Range, SpellParticles));

@@ -3611,15 +3611,15 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 			a->special = 2;
 		else
 			a->special = 0;
-		a->meleepush_xy = attacker ? attacker->GetHeading() : 0.0f;
+		a->hit_heading = attacker ? attacker->GetHeading() : 0.0f;
 		if (RuleB(Combat, MeleePush) && damage > 0 && !IsRooted() &&
 			(IsClient() || zone->random.Roll(RuleI(Combat, MeleePushChance)))) {
 			a->force = EQEmu::skills::GetSkillMeleePushForce(skill_used);
 			if (IsNPC())
 				a->force *= 0.10f; // force against NPCs is divided by 10 I guess? ex bash is 0.3, parsed 0.03 against an NPC
 			// update NPC stuff
-			auto new_pos = glm::vec3(m_Position.x + (a->force * std::cos(a->meleepush_xy) + m_Delta.x),
-				m_Position.y + (a->force * std::sin(a->meleepush_xy) + m_Delta.y), m_Position.z);
+			auto new_pos = glm::vec3(m_Position.x + (a->force * std::cos(a->hit_heading) + m_Delta.x),
+				m_Position.y + (a->force * std::sin(a->hit_heading) + m_Delta.y), m_Position.z);
 			if (zone->zonemap && zone->zonemap->CheckLoS(glm::vec3(m_Position), new_pos)) { // If we have LoS on the new loc it should be reachable.
 				if (IsNPC()) {
 					// Is this adequate?

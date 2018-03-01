@@ -1215,20 +1215,18 @@ struct Action_Struct
 {
  /* 00 */	uint16 target;	// id of target
  /* 02 */	uint16 source;	// id of caster
- /* 04 */	uint16 level; // level of caster
- /* 06 */	uint16 instrument_mod;	// seems to be fixed to 0x0A
- /* 08 */	uint32 unknown08;
- /* 12 */	uint16 unknown16;
-// some kind of sequence that's the same in both actions
-// as well as the combat damage, to tie em together?
- /* 14 */	float sequence;		// was uint32
- /* 18 */	uint32 unknown18;
- /* 22 */	uint8 type;		// 231 (0xE7) for spells
- /* 23 */	uint32 unknown23;
+ /* 04 */	uint16 level; // level of caster for spells, OSX dump says attack rating, guess spells use it for level
+ /* 06 */	uint32 instrument_mod;	// OSX dump says base damage, spells use it for bard song (different from newer clients)
+ /* 10 */	float force;
+ /* 14 */	float hit_heading;
+ /* 18 */	float hit_pitch;
+ /* 22 */	uint8 type;		// 231 (0xE7) for spells, skill
+ /* 23 */	uint16 unknown23; // OSX says min_damage
+ /* 25 */	uint16 unknown25; // OSX says tohit
  /* 27 */	uint16 spell;	// spell id being cast
- /* 29 */	uint8 level2;	// level of caster again? Or maybe the castee
+ /* 29 */	uint8 spell_level;	// level of caster again? Or maybe the castee
 // this field seems to be some sort of success flag, if it's 4
- /* 30 */	uint8 buff_unknown;	// if this is 4, a buff icon is made
+ /* 30 */	uint8 effect_flag;	// if this is 4, a buff icon is made
  /* 31 */
 };
 
@@ -1237,26 +1235,23 @@ struct Action_Struct
 // has to do with buff blocking??
 struct ActionAlt_Struct // ActionAlt_Struct - Size: 56 bytes
 {
-/*0000*/ uint16 target;                 // Target ID
-/*0002*/ uint16 source;                 // SourceID
-/*0004*/ uint16 level;					// level of caster
-/*0006*/ uint16 instrument_mod;				// seems to be fixed to 0x0A
-/*0008*/ uint32 unknown08;
-/*0012*/ uint16 unknown16;
-/*0014*/ uint32 sequence;
-/*0018*/ uint32 unknown18;
-/*0022*/ uint8  type;                   // Casts, Falls, Bashes, etc...
-/*0023*/ uint32  damage;                 // Amount of Damage
-/*0027*/ uint16  spell;                  // SpellID
-/*0029*/ uint8 unknown29;
-/*0030*/ uint8 buff_unknown;				// if this is 4, a buff icon is made
-/*0031*/ uint32 unknown0031;			// seen 00 00 00 00
-/*0035*/ uint8 unknown0035;				// seen 00
-/*0036*/ uint32 unknown0036;			// seen ff ff ff ff
-/*0040*/ uint32 unknown0040;			// seen ff ff ff ff
-/*0044*/ uint32 unknown0044;			// seen ff ff ff ff
-/*0048*/ uint32 unknown0048;			// seen 00 00 00 00
-/*0052*/ uint32 unknown0052;			// seen 00 00 00 00
+/*0000*/ uint16 target;	// id of target
+/*0002*/ uint16 source;	// id of caster
+/*0004*/ uint16 level; // level of caster for spells, OSX dump says attack rating, guess spells use it for level
+/*0006*/ uint32 instrument_mod;	// OSX dump says base damage, spells use it for bard song (different from newer clients)
+/*0010*/ float force;
+/*0014*/ float hit_heading;
+/*0018*/ float hit_pitch;
+/*0022*/ uint8 type;		// 231 (0xE7) for spells, skill
+/*0023*/ uint16 unknown23; // OSX says min_damage
+/*0025*/ uint16 unknown25; // OSX says tohit
+/*0027*/ uint16 spell;	// spell id being cast
+/*0029*/ uint8 spell_level;	// level of caster again? Or maybe the castee
+// this field seems to be some sort of success flag, if it's 4
+/*0030*/ uint8 effect_flag;	// if this is 4, a buff icon is made
+/*0031*/ uint8 spell_slot;
+/*0032*/ uint32 slot[5];
+/*0052*/ uint32 item_cast_type;	// ItemSpellTypes enum from MQ2
 /*0056*/
 };
 
@@ -1271,9 +1266,10 @@ struct CombatDamage_Struct
 /* 05 */	uint16	spellid;
 /* 07 */	int32	damage;
 /* 11 */	float	force;		// cd cc cc 3d
-/* 15 */	float	meleepush_xy;		// see above notes in Action_Struct
-/* 19 */	float	meleepush_z;
-/* 23 */	uint8	unknown23[5];	// was [9] this appears unrelated to the stuff the other clients do here?
+/* 15 */	float	hit_heading;		// see above notes in Action_Struct
+/* 19 */	float	hit_pitch;
+/* 23 */	uint8	secondary;	// 0 for primary hand, 1 for secondary
+/* 24 */	uint32	special; // 2 = Rampage, 1 = Wild Rampage, Report function doesn't seem to check this :P
 /* 28 */
 };
 

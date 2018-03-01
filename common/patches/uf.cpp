@@ -161,29 +161,20 @@ namespace UF
 		OUT(source);
 		OUT(level);
 		eq->instrument_mod = 1.0f + (emu->instrument_mod - 10) / 10.0f;
-		eq->knockback_angle = emu->sequence;
+		OUT(force);
+		OUT(hit_heading);
+		OUT(hit_pitch);
 		OUT(type);
 		OUT(spell);
-		eq->level2 = eq->level;
-		eq->effect_flag = emu->buff_unknown;
-		eq->unknown37 = 0x01;
-		eq->unknown44 = 0xFFFFFFFF;
-		eq->unknown48 = 0xFFFFFFFF;
-		eq->unknown52 = 0xFFFFFFFF;
-
-		/*OUT(target);
-		OUT(source);
-		OUT(level);
-		OUT(instrument_mod);
-		eq->sequence = emu->sequence;
-		OUT(type);
-		//OUT(damage);
-		OUT(spell);
-		eq->level2 = emu->level;
-		OUT(buff_unknown); // if this is 4, a buff icon is made
-		//eq->unknown0036 = -1;
-		//eq->unknown0040 = -1;
-		//eq->unknown0044 = -1;*/
+		OUT(spell_level);
+		OUT(effect_flag);
+		eq->spell_gem = 0;
+		eq->slot[0] = -1; // type
+		eq->slot[1] = -1; // slot
+		eq->slot[2] = -1; // sub index
+		eq->slot[3] = -1; // aug index
+		eq->slot[4] = -1; // unknown
+		eq->item_cast_type = 0;
 
 		FINISH_ENCODE();
 	}
@@ -586,8 +577,8 @@ namespace UF
 		OUT(spellid);
 		OUT(damage);
 		OUT(force);
-		OUT(meleepush_xy);
-		OUT(meleepush_z);
+		OUT(hit_heading);
+		OUT(hit_pitch);
 		OUT(special);
 
 		FINISH_ENCODE();
@@ -3398,7 +3389,7 @@ namespace UF
 		IN(type);
 		IN(spellid);
 		IN(damage);
-		IN(meleepush_xy);
+		IN(hit_heading);
 
 		FINISH_DIRECT_DECODE();
 	}

@@ -913,16 +913,16 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						action->source = caster ? caster->GetID() : GetID();
 						action->level = 65;
 						action->instrument_mod = 10;
-						action->sequence = static_cast<uint32>((GetHeading() * 12345 / 2));
+						action->hit_heading = GetHeading();
 						action->type = 231;
 						action->spell = spell_id;
-						action->buff_unknown = 4;
+						action->effect_flag = 4;
 
 						cd->target = action->target;
 						cd->source = action->source;
 						cd->type = action->type;
 						cd->spellid = action->spell;
-						cd->meleepush_xy = action->sequence;
+						cd->hit_heading = action->hit_heading;
 
 						CastToClient()->QueuePacket(action_packet);
 						if(caster && caster->IsClient() && caster != this)
@@ -964,16 +964,16 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 								action->source = caster ? caster->GetID() : GetID();
 								action->level = 65;
 								action->instrument_mod = 10;
-								action->sequence = static_cast<uint32>((GetHeading() * 12345 / 2));
+								action->hit_heading = GetHeading();
 								action->type = 231;
 								action->spell = spell_id;
-								action->buff_unknown = 4;
+								action->effect_flag = 4;
 
 								cd->target = action->target;
 								cd->source = action->source;
 								cd->type = action->type;
 								cd->spellid = action->spell;
-								cd->meleepush_xy = action->sequence;
+								cd->hit_heading = action->hit_heading;
 
 								CastToClient()->QueuePacket(action_packet);
 								if(caster->IsClient() && caster != this)
@@ -1002,16 +1002,16 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 							action->source = caster ? caster->GetID() : GetID();
 							action->level = 65;
 							action->instrument_mod = 10;
-							action->sequence = static_cast<uint32>((GetHeading() * 12345 / 2));
+							action->hit_heading = GetHeading();
 							action->type = 231;
 							action->spell = spell_id;
-							action->buff_unknown = 4;
+							action->effect_flag = 4;
 
 							cd->target = action->target;
 							cd->source = action->source;
 							cd->type = action->type;
 							cd->spellid = action->spell;
-							cd->meleepush_xy = action->sequence;
+							cd->hit_heading = action->hit_heading;
 
 							CastToClient()->QueuePacket(action_packet);
 							if(caster->IsClient() && caster != this)
