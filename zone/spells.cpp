@@ -2652,7 +2652,9 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 			action->source = caster->GetID();
 			action->target = GetID();
 			action->spell = spell_id;
+			action->force = spells[spell_id].pushback;
 			action->hit_heading = GetHeading();
+			action->hit_pitch = spells[spell_id].pushup;
 			action->instrument_mod = caster->GetInstrumentMod(spell_id);
 			action->effect_flag = 0;
 			action->spell_level = action->level = buffs[buffs_i].casterlevel;
@@ -2661,11 +2663,7 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 
 			action->effect_flag = 4;
 
-			if(IsEffectInSpell(spell_id, SE_TossUp))
-			{
-				action->effect_flag = 0;
-			}
-			else if(spells[spell_id].pushback > 0 || spells[spell_id].pushup > 0)
+			if(spells[spell_id].pushback > 0 || spells[spell_id].pushup > 0)
 			{
 				if(IsClient())
 				{
@@ -2673,38 +2671,6 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 					{
 						CastToClient()->SetKnockBackExemption(true);
 
-						action->effect_flag = 0;
-						auto outapp_push = new EQApplicationPacket(
-						    OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
-						PlayerPositionUpdateServer_Struct* spu = (PlayerPositionUpdateServer_Struct*)outapp_push->pBuffer;
-
-						double look_heading = caster->CalculateHeadingToTarget(GetX(), GetY());
-						look_heading /= 256;
-						look_heading *= 360;
-						if(look_heading > 360)
-							look_heading -= 360;
-
-						//x and y are crossed mkay
-						double new_x = spells[spell_id].pushback * sin(double(look_heading * 3.141592 / 180.0));
-						double new_y = spells[spell_id].pushback * cos(double(look_heading * 3.141592 / 180.0));
-
-						spu->spawn_id	= GetID();
-						spu->x_pos		= FloatToEQ19(GetX());
-						spu->y_pos		= FloatToEQ19(GetY());
-						spu->z_pos		= FloatToEQ19(GetZ());
-						spu->delta_x	= FloatToEQ13(new_x);
-						spu->delta_y	= FloatToEQ13(new_y);
-						spu->delta_z	= FloatToEQ13(spells[spell_id].pushup);
-						spu->heading	= FloatToEQ12(GetHeading());
-						spu->padding0002	=0;
-						spu->padding0006	=7;
-						spu->padding0014	=0x7f;
-						spu->padding0018	=0x5df27;
-						spu->animation = 0;
-						spu->delta_heading = FloatToEQ10(0);
-						outapp_push->priority = 6;
-						entity_list.QueueClients(this, outapp_push, true);
-						CastToClient()->FastQueuePacket(&outapp_push);
 					}
 				}
 			}
@@ -2725,7 +2691,9 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 			cd->source = action->source;
 			cd->type = DamageTypeSpell;
 			cd->spellid = action->spell;
+			cd->force = action->force;
 			cd->hit_heading = action->hit_heading;
+			cd->hit_pitch = action->hit_pitch;
 			cd->damage = 0;
 			if(!IsEffectInSpell(spell_id, SE_BindAffinity))
 			{
@@ -3536,7 +3504,9 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 	action->level = caster_level;	// caster level, for animation only
 	action->type = 231;	// 231 means a spell
 	action->spell = spell_id;
+	action->force = spells[spell_id].pushback;
 	action->hit_heading = GetHeading();
+	action->hit_pitch = spells[spell_id].pushup;
 	action->instrument_mod = GetInstrumentMod(spell_id);
 	action->effect_flag = 0;
 
@@ -3967,50 +3937,13 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 	// the complete sequence is 2 actions and 1 damage message
 	action->effect_flag = 0x04;	// this is a success flag
 
-	if(IsEffectInSpell(spell_id, SE_TossUp))
-	{
-		action->effect_flag = 0;
-	}
-	else if(spells[spell_id].pushback > 0 || spells[spell_id].pushup > 0)
+	if(spells[spell_id].pushback > 0 || spells[spell_id].pushup > 0)
 	{
 		if(spelltar->IsClient())
 		{
 			if(!IsBuffSpell(spell_id))
 			{
 				spelltar->CastToClient()->SetKnockBackExemption(true);
-
-				action->effect_flag = 0;
-				auto outapp_push =
-				    new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
-				PlayerPositionUpdateServer_Struct* spu = (PlayerPositionUpdateServer_Struct*)outapp_push->pBuffer;
-
-				double look_heading = CalculateHeadingToTarget(spelltar->GetX(), spelltar->GetY());
-				look_heading /= 256;
-				look_heading *= 360;
-				if(look_heading > 360)
-					look_heading -= 360;
-
-				//x and y are crossed mkay
-				double new_x = spells[spell_id].pushback * sin(double(look_heading * 3.141592 / 180.0));
-				double new_y = spells[spell_id].pushback * cos(double(look_heading * 3.141592 / 180.0));
-
-				spu->spawn_id	= spelltar->GetID();
-				spu->x_pos		= FloatToEQ19(spelltar->GetX());
-				spu->y_pos		= FloatToEQ19(spelltar->GetY());
-				spu->z_pos		= FloatToEQ19(spelltar->GetZ());
-				spu->delta_x	= FloatToEQ13(new_x);
-				spu->delta_y	= FloatToEQ13(new_y);
-				spu->delta_z	= FloatToEQ13(spells[spell_id].pushup);
-				spu->heading	= FloatToEQ12(spelltar->GetHeading());
-				spu->padding0002	=0;
-				spu->padding0006	=7;
-				spu->padding0014	=0x7f;
-				spu->padding0018	=0x5df27;
-				spu->animation = 0;
-				spu->delta_heading = FloatToEQ10(0);
-				outapp_push->priority = 6;
-				entity_list.QueueClients(this, outapp_push, true);
-				spelltar->CastToClient()->FastQueuePacket(&outapp_push);
 			}
 		}
 	}
@@ -4039,7 +3972,9 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 	cd->source = action->source;
 	cd->type = action->type;
 	cd->spellid = action->spell;
+	cd->force = action->force;
 	cd->hit_heading = action->hit_heading;
+	cd->hit_pitch = action->hit_pitch;
 	cd->damage = 0;
 	if(!IsEffectInSpell(spell_id, SE_BindAffinity)){
 		entity_list.QueueCloseClients(
