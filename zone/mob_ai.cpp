@@ -929,7 +929,7 @@ void Client::AI_Process()
 				SendPositionUpdate(); // this shouldn't happen a lot (and hard to make it) so lets not rate limit
 			} else if (dist >= 400) { // >=20
 				if (AI_movement_timer->Check()) {
-					int nspeed = (dist >= 5625 ? GetRunspeed() : GetWalkspeed()); // >= 75
+					int nspeed = (dist >= 1225 ? GetRunspeed() : GetWalkspeed()); // >= 35
 					animation = nspeed;
 					nspeed *= 2;
 					SetCurrentSpeed(nspeed);
@@ -1425,7 +1425,7 @@ void Mob::AI_Process() {
 						if (dist >= 400 || distz > 100)
 						{
 							int speed = GetWalkspeed();
-							if (dist >= 5625)
+							if (dist >= 1225) // 35
 								speed = GetRunspeed();
 
 							if (dist >= 202500 || distz > 100) // dist >= 450
