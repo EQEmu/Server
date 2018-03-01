@@ -2075,6 +2075,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Toss Up: %d", effect_value);
 #endif
+				if (IsNPC()) {
+					Damage(caster, std::abs(effect_value), spell_id, spell.skill, false, buffslot, false);
+				}
 				break;
 			}
 
