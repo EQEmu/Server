@@ -3501,7 +3501,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 		action->target = spelltar->GetID();
 	}
 
-	action->level = caster_level;	// caster level, for animation only
+	action->spell_level = action->level = caster_level;	// caster level, for animation only
 	action->type = 231;	// 231 means a spell
 	action->spell = spell_id;
 	action->force = spells[spell_id].pushback;
