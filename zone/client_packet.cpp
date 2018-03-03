@@ -72,6 +72,9 @@ extern PetitionList petition_list;
 extern EntityList entity_list;
 typedef void (Client::*ClientPacketProc)(const EQApplicationPacket *app);
 
+#define MIN(x,y) ((x)<y?(x):(y))
+
+
 //Use a map for connecting opcodes since it dosent get used a lot and is sparse
 std::map<uint32, ClientPacketProc> ConnectingOpcodes;
 //Use a static array for connected, for speed
@@ -2861,41 +2864,57 @@ void Client::Handle_OP_ApplyPoison(const EQApplicationPacket *app)
 		DumpPacket(app);
 		return;
 	}
+
 	uint32 ApplyPoisonSuccessResult = 0;
 	ApplyPoison_Struct* ApplyPoisonData = (ApplyPoison_Struct*)app->pBuffer;
 	const EQEmu::ItemInstance* PrimaryWeapon = GetInv().GetItem(EQEmu::inventory::slotPrimary);
 	const EQEmu::ItemInstance* SecondaryWeapon = GetInv().GetItem(EQEmu::inventory::slotSecondary);
 	const EQEmu::ItemInstance* PoisonItemInstance = GetInv()[ApplyPoisonData->inventorySlot];
+	const EQEmu::ItemData* poison=PoisonItemInstance->GetItem();
+	const EQEmu::ItemData* primary=nullptr;
+	const EQEmu::ItemData* secondary=nullptr;
+	bool IsPoison = PoisonItemInstance && 
+					(poison->ItemType == EQEmu::item::ItemTypePoison);
 
-	bool IsPoison = PoisonItemInstance && (PoisonItemInstance->GetItem()->ItemType == EQEmu::item::ItemTypePoison);
-
-	if (!IsPoison)
-	{
-		Log(Logs::Detail, Logs::Spells, "Item used to cast spell effect from a poison item was missing from inventory slot %d "
-			"after casting, or is not a poison!", ApplyPoisonData->inventorySlot);
-
-		Message(0, "Error: item not found for inventory slot #%i or is not a poison", ApplyPoisonData->inventorySlot);
+	if (PrimaryWeapon) {
+		primary=PrimaryWeapon->GetItem();
 	}
-	else if (GetClass() == ROGUE)
-	{
-		if ((PrimaryWeapon && PrimaryWeapon->GetItem()->ItemType == EQEmu::item::ItemType1HPiercing) ||
-			(SecondaryWeapon && SecondaryWeapon->GetItem()->ItemType == EQEmu::item::ItemType1HPiercing)) {
-			float SuccessChance = (GetSkill(EQEmu::skills::SkillApplyPoison) + GetLevel()) / 400.0f;
+
+	if (SecondaryWeapon) {
+		secondary=SecondaryWeapon->GetItem();
+	}
+
+	if (IsPoison && GetClass() == ROGUE) {
+
+		// Live always checks for skillup, even when poison is too high
+		CheckIncreaseSkill(EQEmu::skills::SkillApplyPoison, nullptr, 10);
+
+		if (poison->Proc.Level2 > GetLevel()) {
+			// Poison is too high to apply.
+			Message_StringID(clientMessageTradeskill, POISON_TOO_HIGH);
+		}
+		else if ((primary && 
+				primary->ItemType == EQEmu::item::ItemType1HPiercing) ||
+			(secondary && 
+			secondary->ItemType == EQEmu::item::ItemType1HPiercing)) {
+
 			double ChanceRoll = zone->random.Real(0, 1);
 
-			CheckIncreaseSkill(EQEmu::skills::SkillApplyPoison, nullptr, 10);
+			// Poisons that use this skill (old world poisons) almost
+			// never fail to apply.  I did 25 applies of a trivial 120+
+			// poison with an apply skill of 48 and they all worked.
+			// Poisons that don't proc until a level higher than the
+			// rogue simply won't apply at all, as done above now.
 
-			if (ChanceRoll < SuccessChance) {
+			if (ChanceRoll < .90) {
 				ApplyPoisonSuccessResult = 1;
-				// NOTE: Someone may want to tweak the chance to proc the poison effect that is added to the weapon here.
-				// My thinking was that DEX should be apart of the calculation.
-				AddProcToWeapon(PoisonItemInstance->GetItem()->Proc.Effect, false, (GetDEX() / 100) + 103);
+				AddProcToWeapon(poison->Proc.Effect, false, 
+										(GetDEX() / 100) + 103);
 			}
-
-			DeleteItemInInventory(ApplyPoisonData->inventorySlot, 1, true);
-
-			Log(Logs::General, Logs::None, "Chance to Apply Poison was %f. Roll was %f. Result is %u.", SuccessChance, ChanceRoll, ApplyPoisonSuccessResult);
 		}
+
+		// Live always deletes the item, success or failure. Even if too high.
+		DeleteItemInInventory(ApplyPoisonData->inventorySlot, 1, true);
 	}
 
 	auto outapp = new EQApplicationPacket(OP_ApplyPoison, nullptr, sizeof(ApplyPoison_Struct));
@@ -10790,6 +10809,11 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 	case POPUPID_UPDATE_SHOWSTATSWINDOW:
 		if (GetTarget() && GetTarget()->IsClient())
 			GetTarget()->CastToClient()->SendStatsWindow(this, true);
+		else if (GetTarget() && GetTarget()->IsPet())
+		{
+			Pet *pet = (Pet *) GetTarget();
+			pet->ShowInventory(this);
+		}	
 		else
 			SendStatsWindow(this, true);
 		return;
