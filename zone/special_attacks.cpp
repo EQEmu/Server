@@ -1443,7 +1443,7 @@ void Mob::SendItemAnimation(Mob *to, const EQEmu::ItemData *item, EQEmu::skills:
 
 	//these angle and tilt used together seem to make the arrow/knife throw as straight as I can make it
 
-	as->launch_angle = CalculateHeadingToTarget(to->GetX(), to->GetY()) * 2;
+	as->launch_angle = CalculateHeadingToTarget(to->GetX(), to->GetY());
 	as->tilt = 125;
 	as->arc = 50;
 
