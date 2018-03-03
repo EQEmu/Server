@@ -2903,10 +2903,13 @@ void Client::Handle_OP_ApplyPoison(const EQApplicationPacket *app)
 			// Poisons that use this skill (old world poisons) almost
 			// never fail to apply.  I did 25 applies of a trivial 120+
 			// poison with an apply skill of 48 and they all worked.
+			// Also did 25 straight poisons at apply skill 248 for very
+			// high end and they never failed.
+			// Apply poison ranging from 1-9, 28/30 worked for a level 18..
 			// Poisons that don't proc until a level higher than the
-			// rogue simply won't apply at all, as done above now.
+			// rogue simply won't apply at all, no skill check done.
 
-			if (ChanceRoll < .90) {
+			if (ChanceRoll < (.9 + GetLevel()/1000) {
 				ApplyPoisonSuccessResult = 1;
 				AddProcToWeapon(poison->Proc.Effect, false, 
 										(GetDEX() / 100) + 103);
@@ -10809,11 +10812,6 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 	case POPUPID_UPDATE_SHOWSTATSWINDOW:
 		if (GetTarget() && GetTarget()->IsClient())
 			GetTarget()->CastToClient()->SendStatsWindow(this, true);
-		else if (GetTarget() && GetTarget()->IsPet())
-		{
-			Pet *pet = (Pet *) GetTarget();
-			pet->ShowInventory(this);
-		}	
 		else
 			SendStatsWindow(this, true);
 		return;
