@@ -1747,12 +1747,22 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQEmu::skills::Sk
 	{
 		if (killerMob->IsClient())
 		{
-			if (RuleI(World, PVPLoseExperienceLevelDifference) > 0) {
+			int pvpleveldifference = 0;
+			
+			if (RuleI(World, PVPSettings) == 4) 
+				pvpleveldifference = 5; //Sullon Zek 
+			if (RuleI(World, PVPLoseExperienceLevelDifference) > 0) 
+				pvpleveldifference = RuleI(World, PVPLoseExperienceLevelDifference);
+
+			if (pvpleveldifference > 0) {
  				int level_difference = 0;
- 				if (GetLevel() > killerMob->GetLevel()) level_difference = GetLevel() - killerMob->GetLevel();
- 				else level_difference = killerMob->GetLevel() - GetLevel();
+ 				if (GetLevel() > killerMob->GetLevel()) 
+					level_difference = GetLevel() - killerMob->GetLevel();
+ 				else 
+					level_difference = killerMob->GetLevel() - GetLevel();
  
- 				if (level_difference > RuleI(World, PVPLoseExperienceLevelDifference)) exploss = 0;
+ 				if (level_difference > pvpleveldifference) 
+					exploss = 0;
  			}
  			else 
  			{

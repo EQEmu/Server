@@ -5644,9 +5644,11 @@ Mob* Bot::GetOwner() {
 
 //Is Bot attack allowed between attacker and target
 bool Bot::IsBotAttackAllowed(Mob* attacker, Mob* target, bool& hasRuleDefined) {
-	if (!attacker || !target) return false;	
+	if (!attacker || !target) 
+		return false;	
 	hasRuleDefined = true;
-	if (attacker == target) return false;
+	if (attacker == target) 
+		return false;
 	
 	Client *ac = nullptr;
 	Client *tc = nullptr;
@@ -5660,7 +5662,8 @@ bool Bot::IsBotAttackAllowed(Mob* attacker, Mob* target, bool& hasRuleDefined) {
 		ac = attacker->GetOwner()->CastToClient();
 
 	//Is target controlled by a client?
-	if (target->IsClient()) tc = target->CastToClient();
+	if (target->IsClient()) 
+		tc = target->CastToClient();
 	if (target->IsBot() && target->CastToBot()->GetBotOwner() && target->CastToBot()->GetBotOwner()->IsClient()) 
 		tc = target->CastToBot()->GetBotOwner()->CastToClient();
 	if (target->IsPet() && target->GetOwner() && target->GetOwner()->IsClient()) 

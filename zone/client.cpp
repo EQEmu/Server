@@ -9262,25 +9262,43 @@ void Client::InitInnates()
 
 //CanPvP returns true if provided player can attack this player
 bool Client::CanPvP(Client *c) {
-	if (c == nullptr) return false;
+	if (c == nullptr) 
+		return false;
 
 	//Dueling overrides normal PvP logic
-	if (IsDueling() && c->IsDueling() && 
-		GetDuelTarget() == c->GetID() && 
-		c->GetDuelTarget() == GetID()) return true;
+	if (IsDueling() && c->IsDueling() && GetDuelTarget() == c->GetID() && c->GetDuelTarget() == GetID())
+		return true;
 
 	//If PVPLevelDifference is enabled, only allow PVP if players are of proper range
-	if (RuleI(World, PVPLevelDifference) > 0) {
+	int rule_level_diff = 0;
+	if (RuleI(World, PVPSettings) == 4)
+		rule_level_diff = 100; //Sullon Zek rules can attack anyone of opposing deity.
+	if (RuleI(World, PVPLevelDifference) > 0)
+		rule_level_diff = RuleI(World, PVPLevelDifference);
+
+	if (rule_level_diff > 0) {
 		int level_diff = 0;
-		if (c->GetLevel() > GetLevel()) level_diff = c->GetLevel() - GetLevel();
-		else level_diff = GetLevel() - c->GetLevel();
-		if (level_diff > RuleI(World, PVPLevelDifference)) return false;
+		if (c->GetLevel() > GetLevel())
+			level_diff = c->GetLevel() - GetLevel();
+		else 
+			level_diff = GetLevel() - c->GetLevel();
+		if (level_diff > rule_level_diff)
+			return false;
 	}
 
 	//players need to be proper level for pvp
-	if (RuleI(World, PVPMinLevel) > 0 && (GetLevel() < RuleI(World, PVPMinLevel) || c->GetLevel() < RuleI(World, PVPMinLevel))) return false;
+	int rule_min_level = 0;
+	if (RuleI(World, PVPSettings) == 4)
+		rule_min_level = 6;
+	if (RuleI(World, PVPMinLevel) > 0)
+		rule_min_level = RuleI(World, PVPMinLevel);
+
+	if (rule_min_level > 0 && (GetLevel() < RuleI(World, PVPMinLevel) || c->GetLevel() < RuleI(World, PVPMinLevel)))
+		return false;
+
 	//is deity pvp rule enabled? If so, if we're same alignment, don't allow pvp
-	if (RuleB(World, PVPUseDeityBasedPVP) && GetAlignment() == GetAlignment()) return false;
+	if ((RuleI(World, PVPSettings) == 4 || RuleB(World, PVPUseDeityBasedPVP)) && GetAlignment() == GetAlignment())
+		return false;
 	
 	//Check if players are flagged pvp. This may need to be removed later
 	if (!GetPVP() || !c->GetPVP()) return false;
