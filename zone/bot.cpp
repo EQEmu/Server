@@ -5652,21 +5652,30 @@ bool Bot::IsBotAttackAllowed(Mob* attacker, Mob* target, bool& hasRuleDefined) {
 	Client *tc = nullptr;
 
 	//Is attacker controlled by a client?
-	if (attacker->IsClient()) ac = attacker->CastToClient();
-	if (attacker->IsBot() && attacker->CastToBot()->GetBotOwner() && attacker->CastToBot()->GetBotOwner()->IsClient()) ac = attacker->CastToBot()->GetBotOwner()->CastToClient();
-	if (attacker->IsPet() && attacker->GetOwner() && attacker->GetOwner()->IsClient()) ac = attacker->GetOwner()->CastToClient();
+	if (attacker->IsClient()) 
+		ac = attacker->CastToClient();
+	if (attacker->IsBot() && attacker->CastToBot()->GetBotOwner() && attacker->CastToBot()->GetBotOwner()->IsClient()) 
+		ac = attacker->CastToBot()->GetBotOwner()->CastToClient();
+	if (attacker->IsPet() && attacker->GetOwner() && attacker->GetOwner()->IsClient()) 
+		ac = attacker->GetOwner()->CastToClient();
 
 	//Is target controlled by a client?
 	if (target->IsClient()) tc = target->CastToClient();
-	if (target->IsBot() && target->CastToBot()->GetBotOwner() && target->CastToBot()->GetBotOwner()->IsClient()) tc = target->CastToBot()->GetBotOwner()->CastToClient();
-	if (target->IsPet() && target->GetOwner() && target->GetOwner()->IsClient()) tc = target->GetOwner()->CastToClient();
+	if (target->IsBot() && target->CastToBot()->GetBotOwner() && target->CastToBot()->GetBotOwner()->IsClient()) 
+		tc = target->CastToBot()->GetBotOwner()->CastToClient();
+	if (target->IsPet() && target->GetOwner() && target->GetOwner()->IsClient()) 
+		tc = target->GetOwner()->CastToClient();
 
 	//Familiars can never attack
-	if (attacker->IsPet() && attacker->IsFamiliar()) return false;
-	if (target->IsPet() && target->IsFamiliar()) return false;
+	if (attacker->IsPet() && attacker->IsFamiliar()) 
+		return false;
+	if (target->IsPet() && target->IsFamiliar()) 
+		return false;
 
-	if (ac && tc) return ac->CanPvP(tc); //Player vs Player check
-	if ((ac && target->IsNPC()) || (tc && ac->IsNPC())) return true; //player vs NPC
+	if (ac && tc) 
+		return ac->CanPvP(tc); //Player vs Player check
+	if ((ac && target->IsNPC()) || (tc && ac->IsNPC())) 
+		return true; //player vs NPC
 
 	hasRuleDefined = false;
 	return false;
