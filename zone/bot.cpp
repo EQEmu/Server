@@ -2177,7 +2177,7 @@ void Bot::AI_Process() {
 	if (!guard_mode && !IsEngaged()) {
 		Mob* lo_target = leash_owner->GetTarget();
 
-		if (lo_target && lo_target->IsNPC() &&
+		if (lo_target &&
 			!lo_target->IsMezzed() &&
 			(lo_target->GetHateAmount(leash_owner) || leash_owner->AutoAttackEnabled()) &&
 			lo_distance <= BOT_LEASH_DISTANCE &&
@@ -2262,7 +2262,6 @@ void Bot::AI_Process() {
 		// If we don't, our hate_list is wiped.
 		// Else, it was causing the bot to aggro behind wall etc... causing massive trains.
 		if (guard_mode ||
-			!tar->IsNPC() ||
 			tar->IsMezzed() ||
 			(!tar->GetHateAmount(this) && !tar->GetHateAmount(leash_owner) && !leash_owner->AutoAttackEnabled()) ||
 			lo_distance > BOT_LEASH_DISTANCE ||
@@ -5642,50 +5641,50 @@ Mob* Bot::GetOwner() {
 	return Result;
 }
 
+//Is Bot attack allowed between attacker and target
 bool Bot::IsBotAttackAllowed(Mob* attacker, Mob* target, bool& hasRuleDefined) {
-	bool Result = false;
-	if(attacker && target) {
-		if(attacker == target) {
-			hasRuleDefined = true;
-			Result = false;
-		} else if(attacker->IsClient() && target->IsBot() && attacker->CastToClient()->GetPVP() && target->CastToBot()->GetBotOwner()->CastToClient()->GetPVP()) {
-			hasRuleDefined = true;
-			Result = true;
-		} else if(attacker->IsClient() && target->IsBot()) {
-			hasRuleDefined = true;
-			Result = false;
-		} else if(attacker->IsBot() && target->IsNPC()) {
-			hasRuleDefined = true;
-			Result = true;
-		} else if(attacker->IsBot() && !target->IsNPC()) {
-			hasRuleDefined = true;
-			Result = false;
-		} else if(attacker->IsPet() && attacker->IsFamiliar()) {
-			hasRuleDefined = true;
-			Result = false;
-		} else if(attacker->IsBot() && attacker->CastToBot()->GetBotOwner() && attacker->CastToBot()->GetBotOwner()->CastToClient()->GetPVP()) {
-			if(target->IsBot() && target->GetOwner() && target->GetOwner()->CastToClient()->GetPVP()) {
-				hasRuleDefined = true;
-				if(target->GetOwner() == attacker->GetOwner())
-					Result = false;
-				else
-					Result = true;
-			} else if(target->IsClient() && target->CastToClient()->GetPVP()) {
-				hasRuleDefined = true;
-				if(target == attacker->GetOwner())
-					Result = false;
-				else
-					Result = true;
-			} else if(target->IsNPC()) {
-				hasRuleDefined = true;
-				Result = true;
-			} else if(!target->IsNPC()) {
-				hasRuleDefined = true;
-				Result = false;
-			}
-		}
-	}
-	return Result;
+	if (!attacker || !target) 
+		return false;	
+	hasRuleDefined = true;
+	if (attacker == target) 
+		return false;
+	
+	Client *ac = nullptr;
+	Client *tc = nullptr;
+
+	//Is attacker controlled by a client?
+	if (attacker->IsClient()) 
+		ac = attacker->CastToClient();
+	if (attacker->IsBot() && attacker->CastToBot()->GetBotOwner() && attacker->CastToBot()->GetBotOwner()->IsClient()) 
+		ac = attacker->CastToBot()->GetBotOwner()->CastToClient();
+	if (attacker->IsPet() && attacker->GetOwner() && attacker->GetOwner()->IsClient()) 
+		ac = attacker->GetOwner()->CastToClient();
+	if (attacker->IsPet() && attacker->GetOwner() && attacker->GetOwner()->IsBot() && attacker->GetOwner()->CastToBot()->GetOwner() && attacker->GetOwner()->CastToBot()->GetOwner()->IsClient())
+		ac = attacker->GetOwner()->CastToBot()->GetOwner()->CastToClient();
+
+	//Is target controlled by a client?
+	if (target->IsClient()) 
+		tc = target->CastToClient();
+	if (target->IsBot() && target->CastToBot()->GetBotOwner() && target->CastToBot()->GetBotOwner()->IsClient()) 
+		tc = target->CastToBot()->GetBotOwner()->CastToClient();
+	if (target->IsPet() && target->GetOwner() && target->GetOwner()->IsClient()) 
+		tc = target->GetOwner()->CastToClient();
+	if (target->IsPet() && target->GetOwner() && target->GetOwner()->IsBot() && target->GetOwner()->CastToBot()->GetOwner() && target->GetOwner()->CastToBot()->GetOwner()->IsClient())
+		tc = target->GetOwner()->CastToBot()->GetOwner()->CastToClient();
+
+	//Familiars can never attack
+	if (attacker->IsPet() && attacker->IsFamiliar()) 
+		return false;
+	if (target->IsPet() && target->IsFamiliar()) 
+		return false;
+
+	if (ac && tc) 
+		return ac->CanPvP(tc); //Player vs Player check
+	if ((ac && target->IsNPC()) || (tc && attacker->IsNPC())) 
+		return true; //player vs NPC
+
+	hasRuleDefined = false;
+	return false;
 }
 
 void Bot::EquipBot(std::string* errorMessage) {

@@ -1562,18 +1562,19 @@ void Client::Damage(Mob* other, int32 damage, uint16 spell_id, EQEmu::skills::Sk
 	if (spell_id == 0)
 		spell_id = SPELL_UNKNOWN;
 
-	// cut all PVP spell damage to 2/3
 	// Blasting ourselfs is considered PvP
 	//Don't do PvP mitigation if the caster is damaging himself
 	//should this be applied to all damage? comments sound like some is for spell DMG
 	//patch notes on PVP reductions only mention archery/throwing ... not normal dmg
 	if (other && other->IsClient() && (other != this) && damage > 0) {
-		int PvPMitigation = 100;
-		if (attack_skill == EQEmu::skills::SkillArchery || attack_skill == EQEmu::skills::SkillThrowing)
-			PvPMitigation = 80;
-		else
-			PvPMitigation = 67;
-		damage = std::max((damage * PvPMitigation) / 100, 1);
+		int PvPMitigation = RuleI(World, PVPMeleeMitigation);
+ 		if (attack_skill == EQEmu::skills::SkillAbjuration ||  //spells
+ 			attack_skill == EQEmu::skills::SkillAlteration ||
+ 			attack_skill == EQEmu::skills::SkillConjuration || 
+ 			attack_skill == EQEmu::skills::SkillDivination ||
+ 			attack_skill == EQEmu::skills::SkillEvocation) PvPMitigation = RuleI(World, PVPSpellMitigation);
+ 		if (attack_skill == EQEmu::skills::SkillArchery ||  //ranged
+ 			attack_skill == EQEmu::skills::SkillThrowing) PvPMitigation = RuleI(World, PVPRangedMitigation);
 	}
 
 	if (!ClientFinishedLoading())
@@ -1748,7 +1749,27 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQEmu::skills::Sk
 	{
 		if (killerMob->IsClient())
 		{
-			exploss = 0;
+			int pvpleveldifference = 0;
+			
+			if (RuleI(World, PVPSettings) == 4) 
+				pvpleveldifference = 5; //Sullon Zek 
+			if (RuleI(World, PVPLoseExperienceLevelDifference) > 0) 
+				pvpleveldifference = RuleI(World, PVPLoseExperienceLevelDifference);
+
+			if (pvpleveldifference > 0) {
+ 				int level_difference = 0;
+ 				if (GetLevel() > killerMob->GetLevel()) 
+					level_difference = GetLevel() - killerMob->GetLevel();
+ 				else 
+					level_difference = killerMob->GetLevel() - GetLevel();
+ 
+ 				if (level_difference > pvpleveldifference) 
+					exploss = 0;
+ 			}
+ 			else 
+ 			{
+ 				exploss = 0;
+ 			}
 		}
 		else if (killerMob->GetOwner() && killerMob->GetOwner()->IsClient())
 		{
@@ -2051,10 +2072,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		Log(Logs::Detail, Logs::Combat, "Final damage against %s: %d", other->GetName(), my_hit.damage_done);
 
 		if (other->IsClient() && IsPet() && GetOwner()->IsClient()) {
-			//pets do half damage to clients in pvp
-			my_hit.damage_done /= 2;
-			if (my_hit.damage_done < 1)
-				my_hit.damage_done = 1;
+			my_hit.damage_done = std::max(my_hit.damage_done * RuleI(World, PVPPetDamageMitigation) / 100, 1);
 		}
 	}
 	else {
