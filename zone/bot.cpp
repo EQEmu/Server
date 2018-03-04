@@ -2177,7 +2177,7 @@ void Bot::AI_Process() {
 	if (!guard_mode && !IsEngaged()) {
 		Mob* lo_target = leash_owner->GetTarget();
 
-		if (lo_target && lo_target->IsNPC() &&
+		if (lo_target &&
 			!lo_target->IsMezzed() &&
 			(lo_target->GetHateAmount(leash_owner) || leash_owner->AutoAttackEnabled()) &&
 			lo_distance <= BOT_LEASH_DISTANCE &&
@@ -2262,7 +2262,6 @@ void Bot::AI_Process() {
 		// If we don't, our hate_list is wiped.
 		// Else, it was causing the bot to aggro behind wall etc... causing massive trains.
 		if (guard_mode ||
-			!tar->IsNPC() ||
 			tar->IsMezzed() ||
 			(!tar->GetHateAmount(this) && !tar->GetHateAmount(leash_owner) && !leash_owner->AutoAttackEnabled()) ||
 			lo_distance > BOT_LEASH_DISTANCE ||
@@ -5660,6 +5659,8 @@ bool Bot::IsBotAttackAllowed(Mob* attacker, Mob* target, bool& hasRuleDefined) {
 		ac = attacker->CastToBot()->GetBotOwner()->CastToClient();
 	if (attacker->IsPet() && attacker->GetOwner() && attacker->GetOwner()->IsClient()) 
 		ac = attacker->GetOwner()->CastToClient();
+	if (attacker->IsPet() && attacker->GetOwner() && attacker->GetOwner()->IsBot() && attacker->GetOwner()->CastToBot()->GetOwner() && attacker->GetOwner()->CastToBot()->GetOwner()->IsClient())
+		ac = attacker->GetOwner()->CastToBot()->GetOwner()->CastToClient();
 
 	//Is target controlled by a client?
 	if (target->IsClient()) 
@@ -5668,6 +5669,8 @@ bool Bot::IsBotAttackAllowed(Mob* attacker, Mob* target, bool& hasRuleDefined) {
 		tc = target->CastToBot()->GetBotOwner()->CastToClient();
 	if (target->IsPet() && target->GetOwner() && target->GetOwner()->IsClient()) 
 		tc = target->GetOwner()->CastToClient();
+	if (target->IsPet() && target->GetOwner() && target->GetOwner()->IsBot() && target->GetOwner()->CastToBot()->GetOwner() && target->GetOwner()->CastToBot()->GetOwner()->IsClient())
+		tc = target->GetOwner()->CastToBot()->GetOwner()->CastToClient();
 
 	//Familiars can never attack
 	if (attacker->IsPet() && attacker->IsFamiliar()) 
@@ -5677,7 +5680,7 @@ bool Bot::IsBotAttackAllowed(Mob* attacker, Mob* target, bool& hasRuleDefined) {
 
 	if (ac && tc) 
 		return ac->CanPvP(tc); //Player vs Player check
-	if ((ac && target->IsNPC()) || (tc && ac->IsNPC())) 
+	if ((ac && target->IsNPC()) || (tc && attacker->IsNPC())) 
 		return true; //player vs NPC
 
 	hasRuleDefined = false;
