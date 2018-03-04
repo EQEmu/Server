@@ -157,6 +157,7 @@ RULE_BOOL(Character, GrantHoTTOnCreate, false) // Grant Health of Target's Targe
 RULE_BOOL(Character, UseOldConSystem, false) // Grant Health of Target's Target leadership AA on character creation
 RULE_BOOL(Character, OPClientUpdateVisualDebug, false) // Shows a pulse and forward directional particle each time the client sends its position to server
 RULE_BOOL(Character, PetsUseReagents, true) //Pets use reagent on spells
+RULE_INT(Character, PVPRespawnManaPercent, 100) //How much mana to respawn with
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)
@@ -409,6 +410,7 @@ RULE_BOOL(Spells, IgnoreSpellDmgLvlRestriction, false) // ignore the 5 level spr
 RULE_BOOL(Spells, AllowItemTGB, false) // TGB doesn't work with items on live, custom servers want it though
 RULE_BOOL(Spells, NPCInnateProcOverride, true) //  NPC innate procs override the target type to single target.
 RULE_BOOL(Spells, OldRainTargets, false) // use old incorrectly implemented max targets for rains
+RULE_INT(Spells, PVPRootBreakFromSpells, 75) //Chance for root to break when cast on by a client
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)

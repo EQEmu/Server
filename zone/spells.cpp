@@ -4336,8 +4336,8 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 			}
 			return true;
 		} else if(IsClient() && caster->IsClient() && (caster->CastToClient()->GetGM() == false))
-		{
-			Log(Logs::Detail, Logs::Spells, "Clients cannot fear eachother!");
+		{			
+			Log(Logs::Detail, Logs::Spells, "Clients cannot fear each other!");
 			caster->Message_StringID(MT_Shout, IMMUNE_FEAR);
 			return true;
 		}

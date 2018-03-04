@@ -4935,6 +4935,14 @@ bool Mob::TryRootFadeByDamage(int buffslot, Mob* attacker) {
 
 	if (IsDetrimentalSpell(spellbonuses.Root[1]) && spellbonuses.Root[1] != buffslot) {
 		int BreakChance = RuleI(Spells, RootBreakFromSpells);
+		if (attacker && attacker->IsClient() && IsClient()) {
+			if (RuleI(World, PVPSettings) > 0) //All PVP servers is default 75% chance for root to break
+				BreakChance = 75;
+			
+			if (RuleI(Spells, PVPRootBreakFromSpells) > 0)
+				BreakChance = RuleI(Spells, PVPRootBreakFromSpells);
+		}
+			
 
 		BreakChance -= BreakChance*buffs[spellbonuses.Root[1]].RootBreakChance / 100;
 		int level_diff = attacker->GetLevel() - GetLevel();
