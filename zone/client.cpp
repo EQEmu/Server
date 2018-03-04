@@ -9293,11 +9293,11 @@ bool Client::CanPvP(Client *c) {
 	if (RuleI(World, PVPMinLevel) > 0)
 		rule_min_level = RuleI(World, PVPMinLevel);
 
-	if (rule_min_level > 0 && (GetLevel() < RuleI(World, PVPMinLevel) || c->GetLevel() < RuleI(World, PVPMinLevel)))
+	if (rule_min_level > 0 && (GetLevel() < rule_min_level || c->GetLevel() < rule_min_level))
 		return false;
 
 	//is deity pvp rule enabled? If so, if we're same alignment, don't allow pvp
-	if ((RuleI(World, PVPSettings) == 4 || RuleB(World, PVPUseDeityBasedPVP)) && GetAlignment() == GetAlignment())
+	if ((RuleI(World, PVPSettings) == 4 || RuleB(World, PVPUseDeityBasedPVP)) && GetAlignment() == c->GetAlignment())
 		return false;
 	
 	//Check if players are flagged pvp. This may need to be removed later
