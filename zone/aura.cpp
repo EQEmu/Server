@@ -616,6 +616,7 @@ bool Aura::Process()
 				it = spawned_for.erase(it);
 			}
 		}
+		safe_delete(app);
 	}
 	// TODO: waypoints?
 
