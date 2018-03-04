@@ -337,6 +337,7 @@ Client::Client(EQStreamInterface* ieqs)
 		m_pp.InnateSkills[i] = InnateDisabled;
 
 	temp_pvp = false;
+	is_client_moving = false;
 
 	AI_Init();
 }
