@@ -9261,3 +9261,62 @@ void Client::InitInnates()
 	}
 }
 
+//CanPvP returns true if provided player can attack this player
+bool Client::CanPvP(Client *c) {
+	if (c == nullptr) 
+		return false;
+
+	//Dueling overrides normal PvP logic
+	if (IsDueling() && c->IsDueling() && GetDuelTarget() == c->GetID() && c->GetDuelTarget() == GetID())
+		return true;
+
+	//If PVPLevelDifference is enabled, only allow PVP if players are of proper range
+	int rule_level_diff = 0;
+	if (RuleI(World, PVPSettings) == 4)
+		rule_level_diff = 100; //Sullon Zek rules can attack anyone of opposing deity.
+	if (RuleI(World, PVPLevelDifference) > 0)
+		rule_level_diff = RuleI(World, PVPLevelDifference);
+
+	if (rule_level_diff > 0) {
+		int level_diff = 0;
+		if (c->GetLevel() > GetLevel())
+			level_diff = c->GetLevel() - GetLevel();
+		else 
+			level_diff = GetLevel() - c->GetLevel();
+		if (level_diff > rule_level_diff)
+			return false;
+	}
+
+	//players need to be proper level for pvp
+	int rule_min_level = 0;
+	if (RuleI(World, PVPSettings) == 4)
+		rule_min_level = 6;
+	if (RuleI(World, PVPMinLevel) > 0)
+		rule_min_level = RuleI(World, PVPMinLevel);
+
+	if (rule_min_level > 0 && (GetLevel() < rule_min_level || c->GetLevel() < rule_min_level))
+		return false;
+
+	//is deity pvp rule enabled? If so, if we're same alignment, don't allow pvp
+	if ((RuleI(World, PVPSettings) == 4 || RuleB(World, PVPUseDeityBasedPVP)) && GetAlignment() == c->GetAlignment())
+		return false;
+	
+	//Check if players are flagged pvp. This may need to be removed later
+	if (!GetPVP() || !c->GetPVP()) return false;
+
+	return true;
+}
+
+//GetAlignment returns 0 = neutral, 1 = good, 2 = evil, used for pvp sullon zek rules
+int Client::GetAlignment() {
+	if (GetDeity() == EQEmu::deity::DeityErollisiMarr || 
+		GetDeity() == EQEmu::deity::DeityMithanielMarr ||
+		GetDeity() == EQEmu::deity::DeityRodcetNife || 
+		GetDeity() == EQEmu::deity::DeityQuellious || 
+		GetDeity() == EQEmu::deity::DeityTunare) return 1; //good
+	if (GetDeity() == EQEmu::deity::DeityBertoxxulous ||
+		GetDeity() == EQEmu::deity::DeityCazicThule ||
+		GetDeity() == EQEmu::deity::DeityInnoruuk || 
+		GetDeity() == EQEmu::deity::DeityRallosZek) return 2; //evil
+	return 0; //neutral
+} 
