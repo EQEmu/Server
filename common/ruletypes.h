@@ -614,9 +614,6 @@ RULE_INT(Chat, IntervalDurationMS, 60000)
 RULE_INT(Chat, KarmaUpdateIntervalMS, 1200000)
 RULE_INT(Chat, KarmaGlobalChatLimit, 72) //amount of karma you need to be able to talk in ooc/auction/chat below the level limit
 RULE_INT(Chat, GlobalChatLevelLimit, 8) //level limit you need to of reached to talk in ooc/auction/chat if your karma is too low.
-RULE_INT(Chat, ExpireClientVersionRequests, 3) // time in seconds to keep current cv requests active
-RULE_INT(Chat, ExpireClientVersionReplies, 30) // time in seconds to keep current cv replies active
-RULE_INT(Chat, UCSBroadcastServerReadyDelay, 60) // time in seconds to delay broadcast `server ready` after start-up
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Merchant)

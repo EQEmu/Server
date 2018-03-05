@@ -1,5 +1,12 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 03/04/2018 ==
+Uleat: Updated UCS versioning
+	- SoF and higher clients have a new opcode identified (update your *.conf files)
+	- Rework of previous ucs connectivity code
+	- Unrelated: Zone::weatherSend() now takes an optional parameter for singular updates (as in client entering zone)
+	-- prior to this, every client already in-zone received a weather update packet whenever a new client zoned in
+
 == 02/18/2018 ==
 Uleat: Bug reporting fix and overhaul.
 	- Fixed bug reporting for SoD+ clients

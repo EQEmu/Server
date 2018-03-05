@@ -121,6 +121,20 @@ namespace EQEmu
 		ClientVersion ConvertOfflinePCMobVersionToClientVersion(MobVersion mob_version);
 		MobVersion ConvertClientVersionToOfflinePCMobVersion(ClientVersion client_version);
 
+
+		enum UCSVersion : char {
+			ucsUnknown = '\0',
+			ucsClient62Chat = 'A',
+			ucsClient62Mail = 'a',
+			ucsTitaniumChat = 'B',
+			ucsTitaniumMail = 'b',
+			ucsSoFCombined = 'C',
+			ucsSoDCombined = 'D',
+			ucsUFCombined = 'E',
+			ucsRoFCombined = 'F',
+			ucsRoF2Combined = 'G'
+		};
+
 	} /*versions*/
 
 } /*EQEmu*/

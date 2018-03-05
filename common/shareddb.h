@@ -73,6 +73,7 @@ class SharedDatabase : public Database
 		bool	GetCommandSettings(std::map<std::string, std::pair<uint8, std::vector<std::string>>> &command_settings);
 		uint32	GetTotalTimeEntitledOnAccount(uint32 AccountID);
 		void	SetMailKey(int CharID, int IPAddress, int MailKey);
+		std::string	GetMailKey(int CharID, bool key_only = false);
 
 		/*
 		    Character InventoryProfile

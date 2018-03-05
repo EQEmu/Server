@@ -29,14 +29,7 @@ public:
 	~WorldServer();
 	void ProcessMessage(uint16 opcode, EQ::Net::Packet &);
 
-	void ProcessClientVersionRequests(std::list<uint32>& id_list);
-	
-	void ProcessBroadcastServerReady();
-	bool HasBroadcastServerReadyTimer() { return (m_bsr_timer != nullptr); }
-	void ActivateBroadcastServerReadyTimer();
-
 private:
-	uint32* m_bsr_timer;
 
 	std::unique_ptr<EQ::Net::ServertalkClient> m_connection;
 };

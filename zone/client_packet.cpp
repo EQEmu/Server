@@ -316,6 +316,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_PurchaseLeadershipAA] = &Client::Handle_OP_PurchaseLeadershipAA;
 	ConnectedOpcodes[OP_PVPLeaderBoardDetailsRequest] = &Client::Handle_OP_PVPLeaderBoardDetailsRequest;
 	ConnectedOpcodes[OP_PVPLeaderBoardRequest] = &Client::Handle_OP_PVPLeaderBoardRequest;
+	ConnectedOpcodes[OP_QueryUCSServerStatus] = &Client::Handle_OP_QueryUCSServerStatus;
 	ConnectedOpcodes[OP_RaidInvite] = &Client::Handle_OP_RaidCommand;
 	ConnectedOpcodes[OP_RandomReq] = &Client::Handle_OP_RandomReq;
 	ConnectedOpcodes[OP_ReadBook] = &Client::Handle_OP_ReadBook;
@@ -792,7 +793,7 @@ void Client::CompleteConnect()
 	}
 
 	if (zone)
-		zone->weatherSend();
+		zone->weatherSend(this);
 
 	TotalKarma = database.GetKarma(AccountID());
 	SendDisciplineTimers();
@@ -11003,6 +11004,84 @@ void Client::Handle_OP_PVPLeaderBoardRequest(const EQApplicationPacket *app)
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
+}
+
+void Client::Handle_OP_QueryUCSServerStatus(const EQApplicationPacket *app)
+{
+	if (zone->IsUCSServerAvailable()) {
+		EQApplicationPacket* outapp = nullptr;
+		std::string buffer;
+
+		std::string MailKey = database.GetMailKey(CharacterID(), true);
+		EQEmu::versions::UCSVersion ConnectionType = EQEmu::versions::ucsUnknown;
+
+		// chat server packet
+		switch (ClientVersion()) {
+		case EQEmu::versions::ClientVersion::Titanium:
+			ConnectionType = EQEmu::versions::ucsTitaniumChat;
+			break;
+		case EQEmu::versions::ClientVersion::SoF:
+			ConnectionType = EQEmu::versions::ucsSoFCombined;
+			break;
+		case EQEmu::versions::ClientVersion::SoD:
+			ConnectionType = EQEmu::versions::ucsSoDCombined;
+			break;
+		case EQEmu::versions::ClientVersion::UF:
+			ConnectionType = EQEmu::versions::ucsUFCombined;
+			break;
+		case EQEmu::versions::ClientVersion::RoF:
+			ConnectionType = EQEmu::versions::ucsRoFCombined;
+			break;
+		case EQEmu::versions::ClientVersion::RoF2:
+			ConnectionType = EQEmu::versions::ucsRoF2Combined;
+			break;
+		default:
+			ConnectionType = EQEmu::versions::ucsUnknown;
+			break;
+		}
+
+		buffer = StringFormat("%s,%i,%s.%s,%c%s",
+			Config->ChatHost.c_str(),
+			Config->ChatPort,
+			Config->ShortName.c_str(),
+			GetName(),
+			ConnectionType,
+			MailKey.c_str()
+		);
+
+		outapp = new EQApplicationPacket(OP_SetChatServer, (buffer.length() + 1));
+		memcpy(outapp->pBuffer, buffer.c_str(), buffer.length());
+		outapp->pBuffer[buffer.length()] = '\0';
+
+		QueuePacket(outapp);
+		safe_delete(outapp);
+
+		// mail server packet
+		switch (ClientVersion()) {
+		case EQEmu::versions::ClientVersion::Titanium:
+			ConnectionType = EQEmu::versions::ucsTitaniumMail;
+			break;
+		default:
+			// retain value from previous switch
+			break;
+		}
+
+		buffer = StringFormat("%s,%i,%s.%s,%c%s",
+			Config->MailHost.c_str(),
+			Config->MailPort,
+			Config->ShortName.c_str(),
+			GetName(),
+			ConnectionType,
+			MailKey.c_str()
+		);
+
+		outapp = new EQApplicationPacket(OP_SetChatServer2, (buffer.length() + 1));
+		memcpy(outapp->pBuffer, buffer.c_str(), buffer.length());
+		outapp->pBuffer[buffer.length()] = '\0';
+
+		QueuePacket(outapp);
+		safe_delete(outapp);
+	}
 }
 
 void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
