@@ -66,6 +66,9 @@ int FloatToEQ10(float d);
 float EQSpeedRunToFloat(int d);
 int FloatToEQSpeedRun(float d);
 
+// brings heading back into EQ angles range
+float FixHeading(float in);
+
 uint32 SwapBits21and22(uint32 mask);
 uint32 Catch22(uint32 mask);
 

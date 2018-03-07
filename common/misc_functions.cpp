@@ -242,6 +242,24 @@ int FloatToEQSpeedRun(float d)
 	return static_cast<int>(d * 40.0f);
 }
 
+float FixHeading(float in)
+{
+	int i = 0;
+	if (in >= 512.0f) {
+		do {
+			in -= 512.0f;
+		} while (in >= 512.0f && i++ <= 5);
+	}
+	i = 0;
+	if (in < 0.0f) {
+		do {
+			in += 512.0f;
+		} while (in < 0.0f && i++ <= 5);
+	}
+
+	return in;
+}
+
 /*
 	Heading of 0 points in the pure positive Y direction
 
