@@ -42,6 +42,7 @@ public:
 	bool LineIntersectsZone(glm::vec3 start, glm::vec3 end, float step, glm::vec3 *result) const;
 	bool LineIntersectsZoneNoZLeaps(glm::vec3 start, glm::vec3 end, float step_mag, glm::vec3 *result) const;
 	bool CheckLoS(glm::vec3 myloc, glm::vec3 oloc) const;
+	bool FindClosestLoS(glm::vec3 myloc, glm::vec3 oloc, glm::vec3 &outloc) const;
 
 #ifdef USE_MAP_MMFS
 	bool Load(std::string filename, bool force_mmf_overwrite = false);
