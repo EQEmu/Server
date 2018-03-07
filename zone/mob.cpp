@@ -393,6 +393,7 @@ Mob::Mob(const char* in_name,
 	permarooted = (runspeed > 0) ? false : true;
 
 	movetimercompleted = false;
+	ForcedMovement = 0;
 	roamer = false;
 	rooted = false;
 	charmed = false;

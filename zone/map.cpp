@@ -276,6 +276,14 @@ bool Map::FindClosestLoS(glm::vec3 myloc, glm::vec3 oloc, glm::vec3 &outloc) con
 	return imp->rm->raycast((const RmReal*)&myloc, (const RmReal*)&oloc, (RmReal *)&outloc, nullptr, nullptr);
 }
 
+// returns true if a collision happens
+bool Map::DoCollisionCheck(glm::vec3 myloc, glm::vec3 oloc, glm::vec3 &outnorm, float &distance) const {
+	if(!imp)
+		return false;
+
+	return imp->rm->raycast((const RmReal*)&myloc, (const RmReal*)&oloc, nullptr, (RmReal *)&outnorm, (RmReal *)&distance);
+}
+
 inline bool file_exists(const std::string& name) {
 	std::ifstream f(name.c_str());
 	return f.good();

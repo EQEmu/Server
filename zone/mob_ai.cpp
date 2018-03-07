@@ -29,12 +29,16 @@
 #include "quest_parser_collection.h"
 #include "string_ids.h"
 #include "water_map.h"
+#include "fastmath.h"
 
+#include <glm/gtx/projection.hpp>
 #include <algorithm>
 #include <iostream>
+#include <limits>
 #include <math.h>
 
 extern EntityList entity_list;
+extern FastMath g_Math;
 
 extern Zone *zone;
 
@@ -952,6 +956,68 @@ void Mob::AI_Process() {
 
 	if (!(AI_think_timer->Check() || attack_timer.Check(false)))
 		return;
+
+	// we are being pushed, we will hijack this movement timer
+	// this also needs to be done before casting to have a chance to interrupt
+	// this flag won't be set if the mob can't be pushed (rooted etc)
+	if (ForcedMovement && AI_movement_timer->Check()) {
+		bool bPassed = true;
+		auto z_off = GetZOffset();
+		glm::vec3 normal;
+		glm::vec3 new_pos = m_Position + m_Delta;
+		new_pos.z += z_off;
+
+		// no zone map = fucked
+		if (zone->HasMap()) {
+			// in front
+			m_CollisionBox[0].x = m_Position.x + 3.0f * g_Math.FastSin(0.0f);
+			m_CollisionBox[0].y = m_Position.y + 3.0f * g_Math.FastCos(0.0f);
+			m_CollisionBox[0].z = m_Position.z + z_off;
+
+			// to right
+			m_CollisionBox[1].x = m_Position.x + 3.0f * g_Math.FastSin(128.0f);
+			m_CollisionBox[1].y = m_Position.y + 3.0f * g_Math.FastCos(128.0f);
+			m_CollisionBox[1].z = m_Position.z + z_off;
+
+			// behind
+			m_CollisionBox[2].x = m_Position.x + 3.0f * g_Math.FastSin(256.0f);
+			m_CollisionBox[2].y = m_Position.y + 3.0f * g_Math.FastCos(256.0f);
+			m_CollisionBox[2].z = m_Position.z + z_off;
+
+			// to left
+			m_CollisionBox[3].x = m_Position.x + 3.0f * g_Math.FastSin(384.0f);
+			m_CollisionBox[3].y = m_Position.y + 3.0f * g_Math.FastCos(384.0f);
+			m_CollisionBox[3].z = m_Position.z + z_off;
+
+			// collision happened, need to move along the wall
+			float distance = 0.0f, shortest = std::numeric_limits<float>::infinity();
+			glm::vec3 tmp_nrm;
+			for (auto &vec : m_CollisionBox) {
+				if (zone->zonemap->DoCollisionCheck(vec, new_pos, tmp_nrm, distance)) {
+					bPassed = false; // lets try with new projection next pass
+					if (distance < shortest) {
+						normal = tmp_nrm;
+						shortest = distance;
+					}
+				}
+			}
+		}
+
+		if (bPassed) {
+			ForcedMovement = 0;
+			m_Delta = glm::vec4();
+			Teleport(new_pos);
+			SendPositionUpdate();
+			pLastChange = Timer::GetCurrentTime();
+		} else if (--ForcedMovement) {
+			auto proj = glm::proj(static_cast<glm::vec3>(m_Delta), normal);
+			m_Delta.x -= proj.x;
+			m_Delta.y -= proj.y;
+			m_Delta.z -= proj.z;
+		} else {
+			m_Delta = glm::vec4(); // well, we failed to find a spot to be forced to, lets give up
+		}
+	}
 
 	if (IsCasting())
 		return;

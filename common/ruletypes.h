@@ -402,6 +402,7 @@ RULE_BOOL(Spells, IgnoreSpellDmgLvlRestriction, false) // ignore the 5 level spr
 RULE_BOOL(Spells, AllowItemTGB, false) // TGB doesn't work with items on live, custom servers want it though
 RULE_BOOL(Spells, NPCInnateProcOverride, true) //  NPC innate procs override the target type to single target.
 RULE_BOOL(Spells, OldRainTargets, false) // use old incorrectly implemented max targets for rains
+RULE_BOOL(Spells, NPCSpellPush, false) // enable spell push on NPCs
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)
