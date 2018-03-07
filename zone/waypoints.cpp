@@ -29,9 +29,12 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "npc.h"
 #include "quest_parser_collection.h"
 #include "water_map.h"
+#include "fastmath.h"
 
 #include <math.h>
 #include <stdlib.h>
+
+extern FastMath g_Math;
 
 struct wp_distance
 {
@@ -988,6 +991,35 @@ float Mob::GetZOffset() const {
 	}
 
 	return 0.2 * GetSize() * offset;
+}
+
+// This function will try to move the mob along the relative angle a set distance
+// if it can't be moved, it will lower the distance and try again
+// If we want to move on like say a spawn, we can pass send as false
+void Mob::TryMoveAlong(float distance, float angle, bool send)
+{
+	angle += GetHeading();
+	angle = FixHeading(angle);
+
+	glm::vec3 tmp_pos;
+	glm::vec3 new_pos = GetPosition();
+	new_pos.x += distance * g_Math.FastSin(angle);
+	new_pos.y += distance * g_Math.FastCos(angle);
+	new_pos.z += GetZOffset();
+
+	if (zone->HasMap()) {
+		auto new_z = zone->zonemap->FindClosestZ(new_pos, nullptr);
+		if (new_z != BEST_Z_INVALID)
+			new_pos.z = new_z;
+
+		if (zone->zonemap->FindClosestLoS(GetPosition(), new_pos, tmp_pos))
+			new_pos = tmp_pos;
+	}
+
+	new_pos.z = GetFixedZ(new_pos);
+	Teleport(new_pos);
+	if (send)
+		SendPositionUpdate();
 }
 
 int	ZoneDatabase::GetHighestGrid(uint32 zoneid) {
