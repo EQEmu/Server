@@ -1012,7 +1012,7 @@ void Mob::TryMoveAlong(float distance, float angle, bool send)
 		if (new_z != BEST_Z_INVALID)
 			new_pos.z = new_z;
 
-		if (zone->zonemap->FindClosestLoS(GetPosition(), new_pos, tmp_pos))
+		if (zone->zonemap->LineIntersectsZone(GetPosition(), new_pos, 0.0f, &tmp_pos))
 			new_pos = tmp_pos;
 	}
 

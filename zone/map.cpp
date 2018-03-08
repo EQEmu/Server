@@ -268,14 +268,6 @@ bool Map::CheckLoS(glm::vec3 myloc, glm::vec3 oloc) const {
 	return !imp->rm->raycast((const RmReal*)&myloc, (const RmReal*)&oloc, nullptr, nullptr, nullptr);
 }
 
-// returns true if outloc should be used
-bool Map::FindClosestLoS(glm::vec3 myloc, glm::vec3 oloc, glm::vec3 &outloc) const {
-	if(!imp)
-		return false;
-
-	return imp->rm->raycast((const RmReal*)&myloc, (const RmReal*)&oloc, (RmReal *)&outloc, nullptr, nullptr);
-}
-
 // returns true if a collision happens
 bool Map::DoCollisionCheck(glm::vec3 myloc, glm::vec3 oloc, glm::vec3 &outnorm, float &distance) const {
 	if(!imp)
