@@ -1,5 +1,10 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 03/07/2018 ==
+Uleat: Added command '#ucs' to force a reconnect to UCS server.
+	- Works in place of client auto-reconnect packet in zones where feature is unsupported
+	- Currently, you will need to manually re-join channels
+
 == 03/04/2018 ==
 Uleat: Updated UCS versioning
 	- SoF and higher clients have a new opcode identified (update your *.conf files)
