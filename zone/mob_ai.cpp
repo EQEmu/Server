@@ -1009,6 +1009,7 @@ void Mob::AI_Process() {
 			Teleport(new_pos);
 			SendPositionUpdate();
 			pLastChange = Timer::GetCurrentTime();
+			FixZ(); // so we teleport to the ground locally, we want the client to interpolate falling etc
 		} else if (--ForcedMovement) {
 			auto proj = glm::proj(static_cast<glm::vec3>(m_Delta), normal);
 			m_Delta.x -= proj.x;
