@@ -28,6 +28,8 @@
 #include "pets.h"
 #include "zonedb.h"
 
+#include <string>
+
 #ifdef BOTS
 #include "bot.h"
 #endif
@@ -38,82 +40,33 @@
 #endif
 
 
-const char *GetRandPetName()
+// need to pass in a char array of 64 chars
+void GetRandPetName(char *name)
 {
-	static const char *petnames[] = { "Gabaner","Gabann","Gabantik","Gabarab","Gabarer","Gabarn","Gabartik",
-		"Gabekab","Gabeker","Gabekn","Gaber","Gabn","Gabobab","Gabobn","Gabtik",
-		"Ganer","Gann","Gantik","Garab","Garaner","Garann","Garantik","Gararn",
-		"Garekn","Garer","Garn","Gartik","Gasaner","Gasann","Gasantik","Gasarer",
-		"Gasartik","Gasekn","Gaser","Gebann","Gebantik","Gebarer","Gebarn","Gebartik",
-		"Gebeker","Gebekn","Gebn","Gekab","Geker","Gekn","Genaner","Genann","Genantik",
-		"Genarer","Genarn","Gener","Genn","Genobtik","Gibaner","Gibann","Gibantik",
-		"Gibarn","Gibartik","Gibekn","Giber","Gibn","Gibobtik","Gibtik","Gobaber",
-		"Gobaner","Gobann","Gobarn","Gobartik","Gober","Gobn","Gobober","Gobobn",
-		"Gobobtik","Gobtik","Gonaner","Gonann","Gonantik","Gonarab","Gonarer",
-		"Gonarn","Gonartik","Gonekab","Gonekn","Goner","Gonobtik","Gontik","Gotik",
-		"Jabaner","Jabann","Jabantik","Jabarab","Jabarer","Jabarn","Jabartik",
-		"Jabekab","Jabeker","Jabekn","Jaber","Jabn","Jabobtik","Jabtik","Janab",
-		"Janer","Jann","Jantik","Jarab","Jaranab","Jaraner","Jararer","Jararn",
-		"Jarartik","Jareker","Jarekn","Jarer","Jarn","Jarobn","Jarobtik","Jartik",
-		"Jasab","Jasaner","Jasantik","Jasarer","Jasartik","Jasekab","Jaseker",
-		"Jasekn","Jaser","Jasn","Jasobab","Jasober","Jastik","Jebanab","Jebann",
-		"Jebantik","Jebarab","Jebarar","Jebarer","Jebarn","Jebartik","Jebeker",
-		"Jebekn","Jeber","Jebobn","Jebtik","Jekab","Jeker","Jekn","Jenann",
-		"Jenantik","Jenarer","Jeneker","Jenekn","Jentik","Jibaner","Jibann",
-		"Jibantik","Jibarer","Jibarn","Jibartik","Jibeker","Jibn","Jibobn",
-		"Jibtik","Jobab","Jobaner","Jobann","Jobantik","Jobarn","Jobartik",
-		"Jobekab","Jobeker","Jober","Jobn","Jobtik","Jonanab","Jonaner",
-		"Jonann","Jonantik","Jonarer","Jonarn","Jonartik","Jonekab","Joneker",
-		"Jonekn","Joner","Jonn","Jonnarn","Jonober","Jonobn","Jonobtik","Jontik",
-		"Kabanab","Kabaner","Kabann","Kabantik","Kabarer","Kabarn","Kabartik",
-		"Kabeker","Kabekn","Kaber","Kabn","Kabober","Kabobn","Kabobtik","Kabtik",
-		"Kanab","Kaner","Kann","Kantik","Karab","Karanab","Karaner","Karann",
-		"Karantik","Kararer","Karartik","Kareker","Karer","Karn","Karobab","Karobn",
-		"Kartik","Kasaner","Kasann","Kasarer","Kasartik","Kaseker","Kasekn","Kaser",
-		"Kasn","Kasober","Kastik","Kebann","Kebantik","Kebarab","Kebartik","Kebeker",
-		"Kebekn","Kebn","Kebobab","Kebtik","Kekab","Keker","Kekn","Kenab","Kenaner",
-		"Kenantik","Kenarer","Kenarn","Keneker","Kener","Kenn","Kenobn","Kenobtik",
-		"Kentik","Kibab","Kibaner","Kibantik","Kibarn","Kibartik","Kibekab","Kibeker",
-		"Kibekn","Kibn","Kibobn","Kibobtik","Kobab","Kobanab","Kobaner","Kobann",
-		"Kobantik","Kobarer","Kobarn","Kobartik","Kobeker","Kobekn","Kober","Kobn",
-		"Kobober","Kobobn","Kobtik","Konanab","Konaner","Konann","Konantik","Konarab",
-		"Konarer","Konarn","Konekab","Koneker","Konekn","Koner","Konn","Konobn",
-		"Konobtik","Kontik","Labanab","Labaner","Labann","Labarab","Labarer",
-		"Labarn","Labartik","Labeker","Labekn","Laner","Lann","Larab","Larantik",
-		"Lararer","Lararn","Larartik","Lareker","Larer","Larn","Lartik","Lasaner",
-		"Lasann","Lasarer","Laseker","Laser","Lasik","Lasn","Lastik","Lebaner",
-		"Lebarer","Lebartik","Lebekn","Lebtik","Lekab","Lekn","Lenanab","Lenaner",
-		"Lenann","Lenartik","Lenekab","Leneker","Lenekn","Lentik","Libab","Libaner",
-		"Libann","Libantik","Libarer","Libarn","Libartik","Libeker","Libekn","Lobann",
-		"Lobarab","Lobarn","Lobartik","Lobekn","Lobn","Lobober","Lobobn","Lobtik",
-		"Lonaner","Lonann","Lonantik","Lonarab","Lonarer","Lonarn","Lonartik","Lonekn",
-		"Loner","Lonobtik","Lontik","Vabanab","Vabaner","Vabann","Vabantik","Vabarer",
-		"Vabarn","Vabartik","Vabeker","Vabekn","Vabtik","Vanikk","Vann","Varartik","Varn",
-		"Vartik","Vasann","Vasantik","Vasarab","Vasarer","Vaseker","Vebaner","Vebantik",
-		"Vebarab","Vebeker","Vebekn","Vebobn","Vekab","Veker","Venaner","Venantik","Venar",
-		"Venarn","Vener","Ventik","Vibann","Vibantik","Viber","Vibobtik","Vobann",
-		"Vobarer","Vobartik","Vobekn","Vober","Vobn","Vobtik","Vonaner","Vonann",
-		"Vonantik","Vonarab","Vonarn","Vonartik","Voneker","Vonn","Xabanab","Xabaner",
-		"Xabarer","Xabarn","Xabartik","Xabekab","Xabeker","Xabekn","Xaber","Xabober",
-		"Xaner","Xann","Xarab","Xaranab","Xarann","Xarantik","Xararer","Xarartik","Xarer",
-		"Xarn","Xartik","Xasaner","Xasann","Xasarab","Xasarn","Xasekab","Xaseker",
-		"Xebarer","Xebarn","Xebeker","Xeber","Xebober","Xebtik","Xekab","Xeker",
-		"Xekn","Xenann","Xenantik","Xenarer","Xenartik","Xenekn","Xener","Xenober",
-		"Xentik","Xibantik","Xibarer","Xibekab","Xibeker","Xibobab","Xibober","Xibobn",
-		"Xobaner","Xobann","Xobarab","Xobarn","Xobekab","Xobeker","Xobekn","Xober",
-		"Xobn","Xobobn","Xobtik","Xonaner","Xonann","Xonantik","Xonarer","Xonartik",
-		"Xonekab","Xoneker","Xonekn","Xoner","Xonober","Xtik","Zabaner","Zabantik",
-		"Zabarab","Zabekab","Zabekn","Zaber","Zabn","Zabobab","Zabober","Zabtik",
-		"Zaner","Zantik","Zarann","Zarantik","Zararn","Zarartik","Zareker","Zarekn",
-		"Zarer","Zarn","Zarober","Zartik","Zasaner","Zasarer","Zaseker","Zasekn","Zasn",
-		"Zebantik","Zebarer","Zebarn","Zebartik","Zebobab","Zekab","Zekn","Zenann",
-		"Zenantik","Zenarer","Zenarn","Zenekab","Zeneker","Zenobtik","Zibanab","Zibaner",
-		"Zibann","Zibarer","Zibartik","Zibekn","Zibn","Zibobn","Zobaner","Zobann",
-		"Zobarn","Zober","Zobn","Zonanab","Zonaner","Zonann","Zonantik","Zonarer",
-		"Zonartik","Zonobn","Zonobtik","Zontik","Ztik" };
-	int r = zone->random.Int(0, (sizeof(petnames)/sizeof(const char *))-1);
-	printf("Pet being created: %s\n",petnames[r]); // DO NOT COMMENT THIS OUT!
-	return petnames[r];
+	std::string temp;
+	temp.reserve(64);
+	static const char *part1[] = {"G", "J", "K", "L", "V", "X", "Z"};
+	static const char *part2[] = {nullptr, "ab", "ar", "as", "eb", "en", "ib", "ob", "on"};
+	static const char *part3[] = {nullptr, "an", "ar", "ek", "ob"};
+	static const char *part4[] = {"ab", "er", "n", "tik"};
+
+	const char *first = part1[zone->random.Int(0, (sizeof(part1) / sizeof(const char *)) - 1)];
+	const char *second = part2[zone->random.Int(0, (sizeof(part2) / sizeof(const char *)) - 1)];
+	const char *third = part3[zone->random.Int(0, (sizeof(part3) / sizeof(const char *)) - 1)];
+	const char *fourth = part4[zone->random.Int(0, (sizeof(part4) / sizeof(const char *)) - 1)];
+
+	// if both of these are empty, we would get an illegally short name
+	if (second == nullptr && third == nullptr)
+		fourth = part4[(sizeof(part4) / sizeof(const char *)) - 1];
+
+	temp += first;
+	if (second != nullptr)
+		temp += second;
+	if (third != nullptr)
+		temp += third;
+	temp += fourth;
+
+	strn0cpy(name, temp.c_str(), 64);
 }
 
 //not used anymore
@@ -325,7 +278,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	} else if (record.petnaming == 4) {
 		// Keep the DB name
 	} else if (record.petnaming == 3 && IsClient()) {
-		strcpy(npc_type->name, GetRandPetName());
+		GetRandPetName(npc_type->name);
 	} else if (record.petnaming == 5 && IsClient()) {
 		strcpy(npc_type->name, this->GetName());
 		npc_type->name[24] = '\0';
