@@ -45,10 +45,11 @@ void GetRandPetName(char *name)
 {
 	std::string temp;
 	temp.reserve(64);
+	// note these orders are used to make the exclusions cheap :P
 	static const char *part1[] = {"G", "J", "K", "L", "V", "X", "Z"};
 	static const char *part2[] = {nullptr, "ab", "ar", "as", "eb", "en", "ib", "ob", "on"};
 	static const char *part3[] = {nullptr, "an", "ar", "ek", "ob"};
-	static const char *part4[] = {"ab", "er", "n", "tik"};
+	static const char *part4[] = {"er", "ab", "n", "tik"};
 
 	const char *first = part1[zone->random.Int(0, (sizeof(part1) / sizeof(const char *)) - 1)];
 	const char *second = part2[zone->random.Int(0, (sizeof(part2) / sizeof(const char *)) - 1)];
@@ -58,6 +59,14 @@ void GetRandPetName(char *name)
 	// if both of these are empty, we would get an illegally short name
 	if (second == nullptr && third == nullptr)
 		fourth = part4[(sizeof(part4) / sizeof(const char *)) - 1];
+
+	// "ektik" isn't allowed either I guess?
+	if (third == part3[3] && fourth == part4[3])
+		fourth = part4[zone->random.Int(0, (sizeof(part4) / sizeof(const char *)) - 2)];
+
+	// "Laser" isn't allowed either I guess?
+	if (first == part1[3] && second == part2[3] && third == nullptr && fourth == part4[0])
+		fourth = part4[zone->random.Int(1, (sizeof(part4) / sizeof(const char *)) - 2)];
 
 	temp += first;
 	if (second != nullptr)
