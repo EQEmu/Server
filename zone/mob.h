@@ -581,6 +581,7 @@ public:
 	inline void Teleport(glm::vec3 NewPosition) { m_Position.x = NewPosition.x; m_Position.y = NewPosition.y;
 		m_Position.z = NewPosition.z; };
 	void TryMoveAlong(float distance, float angle, bool send = true);
+	void ProcessForcedMovement();
 
 	//AI
 	static uint32 GetLevelCon(uint8 mylevel, uint8 iOtherLevel);

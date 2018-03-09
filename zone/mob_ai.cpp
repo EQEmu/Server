@@ -950,17 +950,12 @@ void Client::AI_Process()
 	}
 }
 
-void Mob::AI_Process() {
-	if (!IsAIControlled())
-		return;
-
-	if (!(AI_think_timer->Check() || attack_timer.Check(false)))
-		return;
-
+void Mob::ProcessForcedMovement()
+{
 	// we are being pushed, we will hijack this movement timer
 	// this also needs to be done before casting to have a chance to interrupt
 	// this flag won't be set if the mob can't be pushed (rooted etc)
-	if (ForcedMovement && AI_movement_timer->Check()) {
+	if (AI_movement_timer->Check()) {
 		bool bPassed = true;
 		auto z_off = GetZOffset();
 		glm::vec3 normal;
@@ -1019,6 +1014,15 @@ void Mob::AI_Process() {
 			m_Delta = glm::vec4(); // well, we failed to find a spot to be forced to, lets give up
 		}
 	}
+}
+
+void Mob::AI_Process() {
+	if (!IsAIControlled())
+		return;
+
+	if (!(AI_think_timer->Check() || attack_timer.Check(false)))
+		return;
+
 
 	if (IsCasting())
 		return;
