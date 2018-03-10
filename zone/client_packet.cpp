@@ -6728,7 +6728,11 @@ void Client::Handle_OP_GroupFollow2(const EQApplicationPacket *app)
 	// Inviter and Invitee are in the same zone
 	if (inviter != nullptr && inviter->IsClient())
 	{
-		if (GroupFollow(inviter->CastToClient()))
+		if (!inviter->CastToClient()->Connected())
+		{
+			Log(Logs::General, Logs::Error, "%s attempted to join group while leader %s was zoning.", GetName(), inviter->GetName());
+		}
+		else if (GroupFollow(inviter->CastToClient()))
 		{
 			strn0cpy(gf->name1, inviter->GetName(), sizeof(gf->name1));
 			strn0cpy(gf->name2, GetName(), sizeof(gf->name2));
