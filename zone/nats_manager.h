@@ -39,11 +39,6 @@ protected:
 	natsStatus      s;
 	natsOptions *opts = NULL;
 	std::string subscribedZonename;
-	//global zone subscriptions
-	natsSubscription *zoneSub = NULL;
-	natsSubscription *channelMessageSub = NULL;
-	natsSubscription *commandMessageSub = NULL;
-	//zone specific subscriptions
 	natsSubscription *zoneChannelMessageSub = NULL;
 	natsSubscription *zoneCommandMessageSub = NULL;
 	natsSubscription *zoneEntityEventSubscribeAllSub = NULL;

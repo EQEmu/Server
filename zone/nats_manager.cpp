@@ -38,27 +38,14 @@ NatsManager::~NatsManager()
 
 void NatsManager::Process()
 {
-	if (zoneSub == NULL) {
-		return;
-	}
 	if (!connect()) return;
 	natsMsg *msg = NULL;
-
-	s = NATS_OK;
 	std::string pubMessage;
-	for (int count = 0; (s == NATS_OK) && count < 100; count++)
-	{
-		s = natsSubscription_NextMsg(&msg, zoneSub, 1);
-		if (s != NATS_OK) break;
-		Log(Logs::General, Logs::NATS, "got message '%s'", natsMsg_GetData(msg));
-		natsMsg_Destroy(msg);
-	}
-
 
 	s = NATS_OK;
 	for (int count = 0; (s == NATS_OK) && count < 5; count++)
 	{
-		s = natsSubscription_NextMsg(&msg, commandMessageSub, 1);
+		s = natsSubscription_NextMsg(&msg, zoneCommandMessageSub, 1);
 		if (s != NATS_OK) break;
 		Log(Logs::General, Logs::World_Server, "NATS Got Command Message '%s'", natsMsg_GetData(msg));
 		eqproto::CommandMessage message;
@@ -244,16 +231,10 @@ void NatsManager::Process()
 void NatsManager::Unregister()
 {
 	if (!connect()) return;
-	if (commandMessageSub != NULL) {
-		s = natsSubscription_Unsubscribe(commandMessageSub);
-		commandMessageSub = NULL;
-		if (s != NATS_OK) Log(Logs::General, Logs::NATS, "unsubscribe from commandMessageSub failed: %s", nats_GetLastError(&s));
-	}
-
-	if (zoneChannelMessageSub != NULL) {
-		s = natsSubscription_Unsubscribe(zoneChannelMessageSub);
-		zoneChannelMessageSub = NULL;
-		if (s != NATS_OK) Log(Logs::General, Logs::NATS, "unsubscribe from zoneChannelMessageSub failed: %s", nats_GetLastError(&s));
+	if (zoneCommandMessageSub != NULL) {
+		s = natsSubscription_Unsubscribe(zoneCommandMessageSub);
+		zoneCommandMessageSub = NULL;
+		if (s != NATS_OK) Log(Logs::General, Logs::NATS, "unsubscribe from zoneCommandMessageSub failed: %s", nats_GetLastError(&s));
 	}
 
 	if (zoneEntityEventSubscribeAllSub != NULL) {
@@ -296,10 +277,10 @@ void NatsManager::ZoneSubscribe(const char* zonename) {
 	s = natsSubscription_SetPendingLimits(zoneChannelMessageSub, -1, -1);
 	if (s != NATS_OK) Log(Logs::General, Logs::NATS, "failed to set pending limits to zoneChannelMessageSub %s", nats_GetLastError(&s));
 
-	s = natsConnection_SubscribeSync(&commandMessageSub, conn, StringFormat("zone.%s.command_message", subscribedZonename.c_str()).c_str());
-	if (s != NATS_OK) Log(Logs::General, Logs::NATS, "failed to subscribe to commandMessageSub %s", nats_GetLastError(&s));
-	s = natsSubscription_SetPendingLimits(commandMessageSub, -1, -1);
-	if (s != NATS_OK) Log(Logs::General, Logs::NATS, "failed to set pending limits to commandMessageSub %s", nats_GetLastError(&s));
+	s = natsConnection_SubscribeSync(&zoneCommandMessageSub, conn, StringFormat("zone.%s.command_message", subscribedZonename.c_str()).c_str());
+	if (s != NATS_OK) Log(Logs::General, Logs::NATS, "failed to subscribe to zoneCommandMessageSub %s", nats_GetLastError(&s));
+	s = natsSubscription_SetPendingLimits(zoneCommandMessageSub, -1, -1);
+	if (s != NATS_OK) Log(Logs::General, Logs::NATS, "failed to set pending limits to zoneCommandMessageSub %s", nats_GetLastError(&s));
 
 	s = natsConnection_SubscribeSync(&zoneEntityEventSubscribeAllSub, conn, StringFormat("zone.%s.entity.event_subscribe.all", subscribedZonename.c_str()).c_str());
 	if (s != NATS_OK) Log(Logs::General, Logs::NATS, "failed to subscribe to zoneEntityEventSubscribeAllSub %s", nats_GetLastError(&s));
@@ -366,40 +347,6 @@ bool NatsManager::connect() {
 void NatsManager::Load()
 {	
 	if (!connect()) return;	
-
-	s = natsConnection_SubscribeSync(&zoneSub, conn, "zone");
-	if (s != NATS_OK) {
-		Log(Logs::General, Logs::NATS, "failed to subscribe to zone: %s", nats_GetLastError(&s));
-		return;
-	}
-	s = natsSubscription_SetPendingLimits(zoneSub, -1, -1);
-	if (s != NATS_OK) {
-		Log(Logs::General, Logs::NATS, "failed to set pending limits while subscribed to zone %s", nats_GetLastError(&s));
-		return;
-	}
-
-	s = natsConnection_SubscribeSync(&commandMessageSub, conn, "zone.command_message");
-	if (s != NATS_OK) {
-		Log(Logs::General, Logs::NATS, "failed to subscribe to commandMessageSub: %s", nats_GetLastError(&s));
-		return;
-	}
-	s = natsSubscription_SetPendingLimits(commandMessageSub, -1, -1);
-	if (s != NATS_OK) {
-		Log(Logs::General, Logs::NATS, "failed to set pending limits while subscribed to commandMessageSub: %s", nats_GetLastError(&s));
-		return;
-	}
-
-	s = natsConnection_SubscribeSync(&channelMessageSub, conn, "zone.channel_message");
-	if (s != NATS_OK) {
-		Log(Logs::General, Logs::NATS, "failed to subscribe to channel message: %s", nats_GetLastError(&s));
-		return;
-	}
-	s = natsSubscription_SetPendingLimits(channelMessageSub, -1, -1);
-	if (s != NATS_OK) {
-		Log(Logs::General, Logs::NATS, "failed to set pending limits while subscribed to channel message: %s", nats_GetLastError(&s));
-		return;
-	}
-
 	return;
 }
 
@@ -419,7 +366,7 @@ void NatsManager::DailyGain(int account_id, int character_id, const char* identi
 		return;
 	}
 
-	s = natsConnection_PublishString(conn, "DailyGain", pubMessage.c_str());
+	s = natsConnection_PublishString(conn, "daily_gain", pubMessage.c_str());
 	if (s != NATS_OK) Log(Logs::General, Logs::NATS, "failed to send DailyGain: %s", nats_GetLastError(&s));	
 }
 

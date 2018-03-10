@@ -147,11 +147,11 @@ void NatsManager::SendAdminMessage(std::string adminMessage) {
 		Log(Logs::General, Logs::NATS, "Failed to serialize message to string");
 		return;
 	}
-	s = natsConnection_PublishString(conn, "AdminMessage", pubMessage.c_str());
+	s = natsConnection_PublishString(conn, "world.admin_message", pubMessage.c_str());
 	if (s != NATS_OK) {
-		Log(Logs::General, Logs::NATS, "Failed to SendAdminMessage");
+		Log(Logs::General, Logs::NATS, "Failed to publish to world.admin_message");
 	}
-	Log(Logs::General, Logs::NATS, "AdminMessage: %s", adminMessage.c_str());
+	Log(Logs::General, Logs::NATS, "world.admin_message: %s", adminMessage.c_str());
 }
 
 //Send (publish) message to NATS
@@ -163,9 +163,9 @@ void NatsManager::SendChannelMessage(eqproto::ChannelMessage* message) {
 		Log(Logs::General, Logs::NATS, "Failed to serialize message to string");
 		return;
 	}
-	s = natsConnection_PublishString(conn, "ChannelMessage", pubMessage.c_str());
+	s = natsConnection_PublishString(conn, "world.command_message", pubMessage.c_str());
 	if (s != NATS_OK) {
-		Log(Logs::General, Logs::NATS, "Failed to send ChannelMessageEvent");
+		Log(Logs::General, Logs::NATS, "Failed to send world.command_message");
 	}
 }
 
@@ -262,7 +262,7 @@ void NatsManager::Load()
 {
 	if (!connect()) return;
 
-	s = natsConnection_SubscribeSync(&channelMessageSub, conn, "ChannelMessageWorld");
-	s = natsConnection_SubscribeSync(&commandMessageSub, conn, "CommandMessageWorld");
+	s = natsConnection_SubscribeSync(&channelMessageSub, conn, "world.channel_message");
+	s = natsConnection_SubscribeSync(&commandMessageSub, conn, "world.command_message");
 	return;
 }
