@@ -29,12 +29,16 @@
 #include "quest_parser_collection.h"
 #include "string_ids.h"
 #include "water_map.h"
+#include "fastmath.h"
 
+#include <glm/gtx/projection.hpp>
 #include <algorithm>
 #include <iostream>
+#include <limits>
 #include <math.h>
 
 extern EntityList entity_list;
+extern FastMath g_Math;
 
 extern Zone *zone;
 
@@ -918,33 +922,95 @@ void Client::AI_Process()
 			}
 		}
 
-		if(IsPet())
-		{
-			Mob* owner = GetOwner();
-			if(owner == nullptr)
+		if (IsPet()) {
+			Mob *owner = GetOwner();
+			if (owner == nullptr)
 				return;
 
 			float dist = DistanceSquared(m_Position, owner->GetPosition());
-			if (dist >= 400)
-			{
-				if(AI_movement_timer->Check())
-				{
-					int nspeed = (dist >= 5625 ? GetRunspeed() : GetWalkspeed());
+			if (dist >= 202500) { // >= 450 distance
+				Teleport(static_cast<glm::vec3>(owner->GetPosition()));
+				SendPositionUpdate(); // this shouldn't happen a lot (and hard to make it) so lets not rate limit
+			} else if (dist >= 400) { // >=20
+				if (AI_movement_timer->Check()) {
+					int nspeed = (dist >= 1225 ? GetRunspeed() : GetWalkspeed()); // >= 35
 					animation = nspeed;
 					nspeed *= 2;
 					SetCurrentSpeed(nspeed);
 
 					CalculateNewPosition2(owner->GetX(), owner->GetY(), owner->GetZ(), nspeed);
 				}
-			}
-			else
-			{
-				if(moved)
-				{
+			} else {
+				if (moved) {
 					SetCurrentSpeed(0);
 					moved = false;
 				}
 			}
+		}
+	}
+}
+
+void Mob::ProcessForcedMovement()
+{
+	// we are being pushed, we will hijack this movement timer
+	// this also needs to be done before casting to have a chance to interrupt
+	// this flag won't be set if the mob can't be pushed (rooted etc)
+	if (AI_movement_timer->Check()) {
+		bool bPassed = true;
+		auto z_off = GetZOffset();
+		glm::vec3 normal;
+		glm::vec3 new_pos = m_Position + m_Delta;
+
+		// no zone map = fucked
+		if (zone->HasMap()) {
+			// in front
+			m_CollisionBox[0].x = m_Position.x + 3.0f * g_Math.FastSin(0.0f);
+			m_CollisionBox[0].y = m_Position.y + 3.0f * g_Math.FastCos(0.0f);
+			m_CollisionBox[0].z = m_Position.z + z_off;
+
+			// to right
+			m_CollisionBox[1].x = m_Position.x + 3.0f * g_Math.FastSin(128.0f);
+			m_CollisionBox[1].y = m_Position.y + 3.0f * g_Math.FastCos(128.0f);
+			m_CollisionBox[1].z = m_Position.z + z_off;
+
+			// behind
+			m_CollisionBox[2].x = m_Position.x + 3.0f * g_Math.FastSin(256.0f);
+			m_CollisionBox[2].y = m_Position.y + 3.0f * g_Math.FastCos(256.0f);
+			m_CollisionBox[2].z = m_Position.z + z_off;
+
+			// to left
+			m_CollisionBox[3].x = m_Position.x + 3.0f * g_Math.FastSin(384.0f);
+			m_CollisionBox[3].y = m_Position.y + 3.0f * g_Math.FastCos(384.0f);
+			m_CollisionBox[3].z = m_Position.z + z_off;
+
+			// collision happened, need to move along the wall
+			float distance = 0.0f, shortest = std::numeric_limits<float>::infinity();
+			glm::vec3 tmp_nrm;
+			for (auto &vec : m_CollisionBox) {
+				if (zone->zonemap->DoCollisionCheck(vec, new_pos, tmp_nrm, distance)) {
+					bPassed = false; // lets try with new projection next pass
+					if (distance < shortest) {
+						normal = tmp_nrm;
+						shortest = distance;
+					}
+				}
+			}
+		}
+
+		if (bPassed) {
+			ForcedMovement = 0;
+			m_Delta = glm::vec4();
+			Teleport(new_pos);
+			SendPositionUpdate();
+			pLastChange = Timer::GetCurrentTime();
+			FixZ(); // so we teleport to the ground locally, we want the client to interpolate falling etc
+		} else if (--ForcedMovement) {
+			auto proj = glm::proj(static_cast<glm::vec3>(m_Delta), normal);
+			m_Delta.x -= proj.x;
+			m_Delta.y -= proj.y;
+			m_Delta.z -= proj.z;
+		} else {
+			m_Delta = glm::vec4(); // well, we failed to find a spot to be forced to, lets give up
 		}
 	}
 }
@@ -955,6 +1021,7 @@ void Mob::AI_Process() {
 
 	if (!(AI_think_timer->Check() || attack_timer.Check(false)))
 		return;
+
 
 	if (IsCasting())
 		return;
@@ -1428,10 +1495,10 @@ void Mob::AI_Process() {
 						if (dist >= 400 || distz > 100)
 						{
 							int speed = GetWalkspeed();
-							if (dist >= 5625)
+							if (dist >= 1225) // 35
 								speed = GetRunspeed();
 
-							if (distz > 100)
+							if (dist >= 202500 || distz > 100) // dist >= 450
 							{
 								m_Position = ownerPos;
 								SendPositionUpdate();
@@ -2074,15 +2141,34 @@ bool Mob::Rampage(ExtraAttackOptions *opts)
 		if (m_target) {
 			if (m_target == GetTarget())
 				continue;
-			if (CombatRange(m_target)) {
+			if (DistanceSquaredNoZ(GetPosition(), m_target->GetPosition()) <= NPC_RAMPAGE_RANGE2) {
 				ProcessAttackRounds(m_target, opts);
 				index_hit++;
 			}
 		}
 	}
 
-	if (RuleB(Combat, RampageHitsTarget) && index_hit < rampage_targets)
-		ProcessAttackRounds(GetTarget(), opts);
+	if (RuleB(Combat, RampageHitsTarget)) {
+		if (index_hit < rampage_targets)
+			ProcessAttackRounds(GetTarget(), opts);
+	} else { // let's do correct behavior here, if they set above rule we can assume they want non-live like behavior
+		if (index_hit < rampage_targets) {
+			// so we go over in reverse order and skip range check
+			// lets do it this way to still support non-live-like >1 rampage targets
+			// likely live is just a fall through of the last valid mob
+			for (auto i = RampageArray.crbegin(); i != RampageArray.crend(); ++i) {
+				if (index_hit >= rampage_targets)
+					break;
+				auto m_target = entity_list.GetMob(*i);
+				if (m_target) {
+					if (m_target == GetTarget())
+						continue;
+					ProcessAttackRounds(m_target, opts);
+					index_hit++;
+				}
+			}
+		}
+	}
 
 	m_specialattacks = eSpecialAttacks::None;
 

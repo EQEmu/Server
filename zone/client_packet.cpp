@@ -75,6 +75,7 @@ extern NatsManager nats;
 
 typedef void (Client::*ClientPacketProc)(const EQApplicationPacket *app);
 
+
 //Use a map for connecting opcodes since it dosent get used a lot and is sparse
 std::map<uint32, ClientPacketProc> ConnectingOpcodes;
 //Use a static array for connected, for speed
@@ -318,6 +319,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_PurchaseLeadershipAA] = &Client::Handle_OP_PurchaseLeadershipAA;
 	ConnectedOpcodes[OP_PVPLeaderBoardDetailsRequest] = &Client::Handle_OP_PVPLeaderBoardDetailsRequest;
 	ConnectedOpcodes[OP_PVPLeaderBoardRequest] = &Client::Handle_OP_PVPLeaderBoardRequest;
+	ConnectedOpcodes[OP_QueryUCSServerStatus] = &Client::Handle_OP_QueryUCSServerStatus;
 	ConnectedOpcodes[OP_RaidInvite] = &Client::Handle_OP_RaidCommand;
 	ConnectedOpcodes[OP_RandomReq] = &Client::Handle_OP_RandomReq;
 	ConnectedOpcodes[OP_ReadBook] = &Client::Handle_OP_ReadBook;
@@ -794,7 +796,7 @@ void Client::CompleteConnect()
 	}
 
 	if (zone)
-		zone->weatherSend();
+		zone->weatherSend(this);
 
 	TotalKarma = database.GetKarma(AccountID());
 	SendDisciplineTimers();
@@ -2866,41 +2868,60 @@ void Client::Handle_OP_ApplyPoison(const EQApplicationPacket *app)
 		DumpPacket(app);
 		return;
 	}
+
 	uint32 ApplyPoisonSuccessResult = 0;
 	ApplyPoison_Struct* ApplyPoisonData = (ApplyPoison_Struct*)app->pBuffer;
 	const EQEmu::ItemInstance* PrimaryWeapon = GetInv().GetItem(EQEmu::inventory::slotPrimary);
 	const EQEmu::ItemInstance* SecondaryWeapon = GetInv().GetItem(EQEmu::inventory::slotSecondary);
 	const EQEmu::ItemInstance* PoisonItemInstance = GetInv()[ApplyPoisonData->inventorySlot];
+	const EQEmu::ItemData* poison=PoisonItemInstance->GetItem();
+	const EQEmu::ItemData* primary=nullptr;
+	const EQEmu::ItemData* secondary=nullptr;
+	bool IsPoison = PoisonItemInstance && 
+					(poison->ItemType == EQEmu::item::ItemTypePoison);
 
-	bool IsPoison = PoisonItemInstance && (PoisonItemInstance->GetItem()->ItemType == EQEmu::item::ItemTypePoison);
-
-	if (!IsPoison)
-	{
-		Log(Logs::Detail, Logs::Spells, "Item used to cast spell effect from a poison item was missing from inventory slot %d "
-			"after casting, or is not a poison!", ApplyPoisonData->inventorySlot);
-
-		Message(0, "Error: item not found for inventory slot #%i or is not a poison", ApplyPoisonData->inventorySlot);
+	if (PrimaryWeapon) {
+		primary=PrimaryWeapon->GetItem();
 	}
-	else if (GetClass() == ROGUE)
-	{
-		if ((PrimaryWeapon && PrimaryWeapon->GetItem()->ItemType == EQEmu::item::ItemType1HPiercing) ||
-			(SecondaryWeapon && SecondaryWeapon->GetItem()->ItemType == EQEmu::item::ItemType1HPiercing)) {
-			float SuccessChance = (GetSkill(EQEmu::skills::SkillApplyPoison) + GetLevel()) / 400.0f;
+
+	if (SecondaryWeapon) {
+		secondary=SecondaryWeapon->GetItem();
+	}
+
+	if (IsPoison && GetClass() == ROGUE) {
+
+		// Live always checks for skillup, even when poison is too high
+		CheckIncreaseSkill(EQEmu::skills::SkillApplyPoison, nullptr, 10);
+
+		if (poison->Proc.Level2 > GetLevel()) {
+			// Poison is too high to apply.
+			Message_StringID(clientMessageTradeskill, POISON_TOO_HIGH);
+		}
+		else if ((primary && 
+				primary->ItemType == EQEmu::item::ItemType1HPiercing) ||
+			(secondary && 
+			secondary->ItemType == EQEmu::item::ItemType1HPiercing)) {
+
 			double ChanceRoll = zone->random.Real(0, 1);
 
-			CheckIncreaseSkill(EQEmu::skills::SkillApplyPoison, nullptr, 10);
+			// Poisons that use this skill (old world poisons) almost
+			// never fail to apply.  I did 25 applies of a trivial 120+
+			// poison with an apply skill of 48 and they all worked.
+			// Also did 25 straight poisons at apply skill 248 for very
+			// high end and they never failed.
+			// Apply poison ranging from 1-9, 28/30 worked for a level 18..
+			// Poisons that don't proc until a level higher than the
+			// rogue simply won't apply at all, no skill check done.
 
-			if (ChanceRoll < SuccessChance) {
+			if (ChanceRoll < (.9 + GetLevel()/1000)) {
 				ApplyPoisonSuccessResult = 1;
-				// NOTE: Someone may want to tweak the chance to proc the poison effect that is added to the weapon here.
-				// My thinking was that DEX should be apart of the calculation.
-				AddProcToWeapon(PoisonItemInstance->GetItem()->Proc.Effect, false, (GetDEX() / 100) + 103);
+				AddProcToWeapon(poison->Proc.Effect, false, 
+										(GetDEX() / 100) + 103);
 			}
-
-			DeleteItemInInventory(ApplyPoisonData->inventorySlot, 1, true);
-
-			Log(Logs::General, Logs::None, "Chance to Apply Poison was %f. Roll was %f. Result is %u.", SuccessChance, ChanceRoll, ApplyPoisonSuccessResult);
 		}
+
+		// Live always deletes the item, success or failure. Even if too high.
+		DeleteItemInInventory(ApplyPoisonData->inventorySlot, 1, true);
 	}
 
 	auto outapp = new EQApplicationPacket(OP_ApplyPoison, nullptr, sizeof(ApplyPoison_Struct));
@@ -3965,12 +3986,23 @@ void Client::Handle_OP_BuffRemoveRequest(const EQApplicationPacket *app)
 
 void Client::Handle_OP_Bug(const EQApplicationPacket *app)
 {
-	if (app->size != sizeof(BugStruct))
-		printf("Wrong size of BugStruct got %d expected %zu!\n", app->size, sizeof(BugStruct));
-	else {
-		BugStruct* bug = (BugStruct*)app->pBuffer;
-		database.UpdateBug(bug);
+	if (!RuleB(Bugs, ReportingSystemActive)) {
+		Message(0, "Bug reporting is disabled on this server.");
+		return;
 	}
+	
+	if (app->size != sizeof(BugReport_Struct)) {
+		printf("Wrong size of BugReport_Struct got %d expected %zu!\n", app->size, sizeof(BugReport_Struct));
+	}
+	else {
+		BugReport_Struct* bug_report = (BugReport_Struct*)app->pBuffer;
+
+		if (RuleB(Bugs, UseOldReportingMethod))
+			database.RegisterBug(bug_report);
+		else
+			database.RegisterBug(this, bug_report);
+	}
+
 	return;
 }
 
@@ -6716,7 +6748,11 @@ void Client::Handle_OP_GroupFollow2(const EQApplicationPacket *app)
 	// Inviter and Invitee are in the same zone
 	if (inviter != nullptr && inviter->IsClient())
 	{
-		if (GroupFollow(inviter->CastToClient()))
+		if (!inviter->CastToClient()->Connected())
+		{
+			Log(Logs::General, Logs::Error, "%s attempted to join group while leader %s was zoning.", GetName(), inviter->GetName());
+		}
+		else if (GroupFollow(inviter->CastToClient()))
 		{
 			strn0cpy(gf->name1, inviter->GetName(), sizeof(gf->name1));
 			strn0cpy(gf->name2, GetName(), sizeof(gf->name2));
@@ -10573,11 +10609,8 @@ void Client::Handle_OP_Petition(const EQApplicationPacket *app)
 
 void Client::Handle_OP_PetitionBug(const EQApplicationPacket *app)
 {
-	if (app->size != sizeof(PetitionBug_Struct))
-		printf("Wrong size of BugStruct! Expected: %zu, Got: %i\n", sizeof(PetitionBug_Struct), app->size);
-	else {
-		Message(0, "Petition Bugs are not supported, please use /bug.");
-	}
+	Message(0, "Petition Bugs are not supported, please use /bug.");
+
 	return;
 }
 
@@ -10995,6 +11028,84 @@ void Client::Handle_OP_PVPLeaderBoardRequest(const EQApplicationPacket *app)
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
+}
+
+void Client::Handle_OP_QueryUCSServerStatus(const EQApplicationPacket *app)
+{
+	if (zone->IsUCSServerAvailable()) {
+		EQApplicationPacket* outapp = nullptr;
+		std::string buffer;
+
+		std::string MailKey = database.GetMailKey(CharacterID(), true);
+		EQEmu::versions::UCSVersion ConnectionType = EQEmu::versions::ucsUnknown;
+
+		// chat server packet
+		switch (ClientVersion()) {
+		case EQEmu::versions::ClientVersion::Titanium:
+			ConnectionType = EQEmu::versions::ucsTitaniumChat;
+			break;
+		case EQEmu::versions::ClientVersion::SoF:
+			ConnectionType = EQEmu::versions::ucsSoFCombined;
+			break;
+		case EQEmu::versions::ClientVersion::SoD:
+			ConnectionType = EQEmu::versions::ucsSoDCombined;
+			break;
+		case EQEmu::versions::ClientVersion::UF:
+			ConnectionType = EQEmu::versions::ucsUFCombined;
+			break;
+		case EQEmu::versions::ClientVersion::RoF:
+			ConnectionType = EQEmu::versions::ucsRoFCombined;
+			break;
+		case EQEmu::versions::ClientVersion::RoF2:
+			ConnectionType = EQEmu::versions::ucsRoF2Combined;
+			break;
+		default:
+			ConnectionType = EQEmu::versions::ucsUnknown;
+			break;
+		}
+
+		buffer = StringFormat("%s,%i,%s.%s,%c%s",
+			Config->ChatHost.c_str(),
+			Config->ChatPort,
+			Config->ShortName.c_str(),
+			GetName(),
+			ConnectionType,
+			MailKey.c_str()
+		);
+
+		outapp = new EQApplicationPacket(OP_SetChatServer, (buffer.length() + 1));
+		memcpy(outapp->pBuffer, buffer.c_str(), buffer.length());
+		outapp->pBuffer[buffer.length()] = '\0';
+
+		QueuePacket(outapp);
+		safe_delete(outapp);
+
+		// mail server packet
+		switch (ClientVersion()) {
+		case EQEmu::versions::ClientVersion::Titanium:
+			ConnectionType = EQEmu::versions::ucsTitaniumMail;
+			break;
+		default:
+			// retain value from previous switch
+			break;
+		}
+
+		buffer = StringFormat("%s,%i,%s.%s,%c%s",
+			Config->MailHost.c_str(),
+			Config->MailPort,
+			Config->ShortName.c_str(),
+			GetName(),
+			ConnectionType,
+			MailKey.c_str()
+		);
+
+		outapp = new EQApplicationPacket(OP_SetChatServer2, (buffer.length() + 1));
+		memcpy(outapp->pBuffer, buffer.c_str(), buffer.length());
+		outapp->pBuffer[buffer.length()] = '\0';
+
+		QueuePacket(outapp);
+		safe_delete(outapp);
+	}
 }
 
 void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)

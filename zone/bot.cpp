@@ -3053,7 +3053,7 @@ void Bot::Depop() {
 	NPC::Depop(false);
 }
 
-void Bot::Spawn(Client* botCharacterOwner) {
+bool Bot::Spawn(Client* botCharacterOwner) {
 	if(GetBotID() > 0 && _botOwnerCharacterID > 0 && botCharacterOwner && botCharacterOwner->CharacterID() == _botOwnerCharacterID) {
 		// Rename the bot name to make sure that Mob::GetName() matches Mob::GetCleanName() so we dont have a bot named "Jesuschrist001"
 		strcpy(name, GetCleanName());
@@ -3097,7 +3097,11 @@ void Bot::Spawn(Client* botCharacterOwner) {
 					this->SendWearChange(materialFromSlot);
 			}
 		}
+
+		return true;
 	}
+
+	return false;
 }
 
 // Deletes the inventory record for the specified item from the database for this bot.
@@ -3246,16 +3250,20 @@ void Bot::LoadAndSpawnAllZonedBots(Client* botOwner) {
 				if(!ActiveBots.empty()) {
 					for(std::list<uint32>::iterator itr = ActiveBots.begin(); itr != ActiveBots.end(); ++itr) {
 						Bot* activeBot = Bot::LoadBot(*itr);
+						if (!activeBot)
+							continue;
 
-						if(activeBot) {
-							activeBot->Spawn(botOwner);
-							g->UpdatePlayer(activeBot);
-							// follow the bot owner, not the group leader we just zoned with our owner.
-							if(g->IsGroupMember(botOwner) && g->IsGroupMember(activeBot))
-								activeBot->SetFollowID(botOwner->GetID());
+						if (!activeBot->Spawn(botOwner)) {
+							safe_delete(activeBot);
+							continue;
 						}
 
-						if(activeBot && !botOwner->HasGroup())
+						g->UpdatePlayer(activeBot);
+						// follow the bot owner, not the group leader we just zoned with our owner.
+						if (g->IsGroupMember(botOwner) && g->IsGroupMember(activeBot))
+							activeBot->SetFollowID(botOwner->GetID());
+
+						if(!botOwner->HasGroup())
 							database.SetGroupID(activeBot->GetCleanName(), 0, activeBot->GetBotID());
 					}
 				}
@@ -8886,6 +8894,8 @@ bool Bot::DyeArmor(int16 slot_id, uint32 rgb, bool all_flag, bool save_flag)
 
 std::string Bot::CreateSayLink(Client* c, const char* message, const char* name)
 {
+	// TODO: review
+
 	int saylink_size = strlen(message);
 	char* escaped_string = new char[saylink_size * 2];
 

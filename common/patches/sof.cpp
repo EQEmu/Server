@@ -53,11 +53,11 @@ namespace SoF
 	static inline uint32 SoFToServerSlot(uint32 sofSlot);
 	static inline uint32 SoFToServerCorpseSlot(uint32 sofCorpseSlot);
 
-	// server to client text link converter
-	static inline void ServerToSoFTextLink(std::string& sofTextLink, const std::string& serverTextLink);
+	// server to client say link converter
+	static inline void ServerToSoFSayLink(std::string& sofSayLink, const std::string& serverSayLink);
 
-	// client to server text link converter
-	static inline void SoFToServerTextLink(std::string& serverTextLink, const std::string& sofTextLink);
+	// client to server say link converter
+	static inline void SoFToServerSayLink(std::string& serverSayLink, const std::string& sofSayLink);
 
 	static inline CastingSlot ServerToSoFCastingSlot(EQEmu::CastingSlot slot);
 	static inline EQEmu::CastingSlot SoFToServerCastingSlot(CastingSlot slot, uint32 itemlocation);
@@ -161,15 +161,14 @@ namespace SoF
 		OUT(source);
 		OUT(level);
 		OUT(instrument_mod);
-		eq->sequence = emu->sequence;
+		OUT(force);
+		OUT(hit_heading);
+		OUT(hit_pitch);
 		OUT(type);
 		//OUT(damage);
 		OUT(spell);
-		eq->level2 = emu->level;
-		OUT(buff_unknown); // if this is 4, a buff icon is made
-		//eq->unknown0036 = -1;
-		//eq->unknown0040 = -1;
-		//eq->unknown0044 = -1;
+		OUT(spell_level);
+		OUT(effect_flag); // if this is 4, a buff icon is made
 
 		FINISH_ENCODE();
 	}
@@ -328,7 +327,7 @@ namespace SoF
 
 		std::string old_message = emu->message;
 		std::string new_message;
-		ServerToSoFTextLink(new_message, old_message);
+		ServerToSoFSayLink(new_message, old_message);
 
 		in->size = sizeof(ChannelMessage_Struct) + new_message.length() + 1;
 
@@ -440,8 +439,8 @@ namespace SoF
 		OUT(spellid);
 		OUT(damage);
 		OUT(force);
-		OUT(meleepush_xy);
-		OUT(meleepush_z);
+		OUT(hit_heading);
+		OUT(hit_pitch);
 
 		FINISH_ENCODE();
 	}
@@ -613,7 +612,7 @@ namespace SoF
 
 		std::string old_message = emu->message;
 		std::string new_message;
-		ServerToSoFTextLink(new_message, old_message);
+		ServerToSoFSayLink(new_message, old_message);
 
 		//if (new_message.length() > 512) // length restricted in packet building function due vari-length name size (no nullterm)
 		//	new_message = new_message.substr(0, 512);
@@ -665,7 +664,7 @@ namespace SoF
 
 		for (int i = 0; i < 9; ++i) {
 			if (old_message_array[i].length() == 0) { break; }
-			ServerToSoFTextLink(new_message_array[i], old_message_array[i]);
+			ServerToSoFSayLink(new_message_array[i], old_message_array[i]);
 			new_message_size += new_message_array[i].length() + 1;
 		}
 
@@ -1814,7 +1813,7 @@ namespace SoF
 		std::string old_message = &emu->message[strlen(emu->sayer)];
 		std::string new_message;
 
-		ServerToSoFTextLink(new_message, old_message);
+		ServerToSoFSayLink(new_message, old_message);
 
 		//in->size = 3 + 4 + 4 + strlen(emu->sayer) + 1 + 12 + new_message.length() + 1;
 		in->size = strlen(emu->sayer) + new_message.length() + 25;
@@ -1882,7 +1881,7 @@ namespace SoF
 
 		std::string old_message = InBuffer; // start 'Reward' as string
 		std::string new_message;
-		ServerToSoFTextLink(new_message, old_message);
+		ServerToSoFSayLink(new_message, old_message);
 
 		in->size = sizeof(TaskDescriptionHeader_Struct) + sizeof(TaskDescriptionData1_Struct)+
 			sizeof(TaskDescriptionData2_Struct) + sizeof(TaskDescriptionTrailer_Struct)+
@@ -2385,6 +2384,17 @@ namespace SoF
 		FINISH_DIRECT_DECODE();
 	}
 
+	DECODE(OP_Bug)
+	{
+		DECODE_LENGTH_EXACT(structs::BugReport_Struct);
+		SETUP_DIRECT_DECODE(BugReport_Struct, structs::BugReport_Struct);
+
+		emu->category_id = EQEmu::bug::CategoryNameToCategoryID(eq->category_name);
+		memcpy(emu->category_name, eq, sizeof(structs::BugReport_Struct));
+
+		FINISH_DIRECT_DECODE();
+	}
+
 	DECODE(OP_CastSpell)
 	{
 		DECODE_LENGTH_EXACT(structs::CastSpell_Struct);
@@ -2404,7 +2414,7 @@ namespace SoF
 
 		std::string old_message = (char *)&__eq_buffer[sizeof(ChannelMessage_Struct)];
 		std::string new_message;
-		SoFToServerTextLink(new_message, old_message);
+		SoFToServerSayLink(new_message, old_message);
 
 		__packet->size = sizeof(ChannelMessage_Struct) + new_message.length() + 1;
 		__packet->pBuffer = new unsigned char[__packet->size];
@@ -2518,7 +2528,7 @@ namespace SoF
 
 		std::string old_message = (char *)&__eq_buffer[4]; // unknown01 offset
 		std::string new_message;
-		SoFToServerTextLink(new_message, old_message);
+		SoFToServerSayLink(new_message, old_message);
 
 		__packet->size = sizeof(Emote_Struct);
 		__packet->pBuffer = new unsigned char[__packet->size];
@@ -3305,19 +3315,19 @@ namespace SoF
 		return (sofCorpseSlot - 1);
 	}
 
-	static inline void ServerToSoFTextLink(std::string& sofTextLink, const std::string& serverTextLink)
+	static inline void ServerToSoFSayLink(std::string& sofSayLink, const std::string& serverSayLink)
 	{
-		if ((constants::SayLinkBodySize == EQEmu::legacy::TEXT_LINK_BODY_LENGTH) || (serverTextLink.find('\x12') == std::string::npos)) {
-			sofTextLink = serverTextLink;
+		if ((constants::SayLinkBodySize == EQEmu::constants::SayLinkBodySize) || (serverSayLink.find('\x12') == std::string::npos)) {
+			sofSayLink = serverSayLink;
 			return;
 		}
 
-		auto segments = SplitString(serverTextLink, '\x12');
+		auto segments = SplitString(serverSayLink, '\x12');
 
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {
-				if (segments[segment_iter].length() <= EQEmu::legacy::TEXT_LINK_BODY_LENGTH) {
-					sofTextLink.append(segments[segment_iter]);
+				if (segments[segment_iter].length() <= EQEmu::constants::SayLinkBodySize) {
+					sofSayLink.append(segments[segment_iter]);
 					// TODO: log size mismatch error
 					continue;
 				}
@@ -3327,37 +3337,37 @@ namespace SoF
 				// SoF:  X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX       X  XXXX  X XXXXX XXXXXXXX (50)
 				// Diff:                                       ^^^^^         ^
 
-				sofTextLink.push_back('\x12');
-				sofTextLink.append(segments[segment_iter].substr(0, 31));
-				sofTextLink.append(segments[segment_iter].substr(36, 5));
+				sofSayLink.push_back('\x12');
+				sofSayLink.append(segments[segment_iter].substr(0, 31));
+				sofSayLink.append(segments[segment_iter].substr(36, 5));
 
 				if (segments[segment_iter][41] == '0')
-					sofTextLink.push_back(segments[segment_iter][42]);
+					sofSayLink.push_back(segments[segment_iter][42]);
 				else
-					sofTextLink.push_back('F');
+					sofSayLink.push_back('F');
 
-				sofTextLink.append(segments[segment_iter].substr(43));
-				sofTextLink.push_back('\x12');
+				sofSayLink.append(segments[segment_iter].substr(43));
+				sofSayLink.push_back('\x12');
 			}
 			else {
-				sofTextLink.append(segments[segment_iter]);
+				sofSayLink.append(segments[segment_iter]);
 			}
 		}
 	}
 
-	static inline void SoFToServerTextLink(std::string& serverTextLink, const std::string& sofTextLink)
+	static inline void SoFToServerSayLink(std::string& serverSayLink, const std::string& sofSayLink)
 	{
-		if ((EQEmu::legacy::TEXT_LINK_BODY_LENGTH == constants::SayLinkBodySize) || (sofTextLink.find('\x12') == std::string::npos)) {
-			serverTextLink = sofTextLink;
+		if ((EQEmu::constants::SayLinkBodySize == constants::SayLinkBodySize) || (sofSayLink.find('\x12') == std::string::npos)) {
+			serverSayLink = sofSayLink;
 			return;
 		}
 
-		auto segments = SplitString(sofTextLink, '\x12');
+		auto segments = SplitString(sofSayLink, '\x12');
 
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {
 				if (segments[segment_iter].length() <= constants::SayLinkBodySize) {
-					serverTextLink.append(segments[segment_iter]);
+					serverSayLink.append(segments[segment_iter]);
 					// TODO: log size mismatch error
 					continue;
 				}
@@ -3367,16 +3377,16 @@ namespace SoF
 				// RoF2: X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX X  XXXX XX  XXXXX XXXXXXXX (56)
 				// Diff:                                       ^^^^^         ^
 
-				serverTextLink.push_back('\x12');
-				serverTextLink.append(segments[segment_iter].substr(0, 31));
-				serverTextLink.append("00000");
-				serverTextLink.append(segments[segment_iter].substr(31, 5));
-				serverTextLink.push_back('0');
-				serverTextLink.append(segments[segment_iter].substr(36));
-				serverTextLink.push_back('\x12');
+				serverSayLink.push_back('\x12');
+				serverSayLink.append(segments[segment_iter].substr(0, 31));
+				serverSayLink.append("00000");
+				serverSayLink.append(segments[segment_iter].substr(31, 5));
+				serverSayLink.push_back('0');
+				serverSayLink.append(segments[segment_iter].substr(36));
+				serverSayLink.push_back('\x12');
 			}
 			else {
-				serverTextLink.append(segments[segment_iter]);
+				serverSayLink.append(segments[segment_iter]);
 			}
 		}
 	}

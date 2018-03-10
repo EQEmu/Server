@@ -34,7 +34,6 @@ public:
 	int MoveCharacterToBind(int CharID, uint8 bindnum = 0);
 
 	void GetLauncherList(std::vector<std::string> &result);
-	void SetMailKey(int CharID, int IPAddress, int MailKey);
 	bool GetCharacterLevel(const char *name, int &level);
 
 	bool LoadCharacterCreateAllocations();

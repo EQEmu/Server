@@ -121,17 +121,13 @@ if [[ "$OS" == "Debian" ]]; then
 	apt-get $apt_options install libsodium18
 	apt-get $apt_options install libjson-perl
 	
-	# If libsodium18 isn't installed (Debian), let's download both that and the dev package and install them.
-	if dpkg-query -s "libsodium18" 1>/dev/null 2>&1; then
-		echo "Sodium library already installed."
-	else
-		wget http://ftp.us.debian.org/debian/pool/main/libs/libsodium/libsodium-dev_1.0.11-1~bpo8+1_amd64.deb -O /home/eqemu/libsodium-dev.deb
-		wget http://ftp.us.debian.org/debian/pool/main/libs/libsodium/libsodium18_1.0.11-1~bpo8+1_amd64.deb -O /home/eqemu/libsodium18.deb
-		dpkg -i /home/eqemu/libsodium*.deb
-		# Cleanup after ourselves
-		rm -f /home/eqemu/libsodium-dev.deb
-		rm -f /home/eqemu/libsodium18.deb
-	fi
+	# Install libsodium
+	wget http://ftp.us.debian.org/debian/pool/main/libs/libsodium/libsodium-dev_1.0.11-1~bpo8+1_amd64.deb -O /home/eqemu/libsodium-dev.deb
+	wget http://ftp.us.debian.org/debian/pool/main/libs/libsodium/libsodium18_1.0.11-1~bpo8+1_amd64.deb -O /home/eqemu/libsodium18.deb
+	dpkg -i /home/eqemu/libsodium*.deb
+	# Cleanup after ourselves
+	rm -f /home/eqemu/libsodium-dev.deb
+	rm -f /home/eqemu/libsodium18.deb
 	
 	#::: Install FTP for remote FTP access
 	echo "proftpd-basic shared/proftpd/inetd_or_standalone select standalone" | debconf-set-selections

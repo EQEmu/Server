@@ -465,6 +465,8 @@ int main(int argc, char** argv) {
 			connection->Handle()->RemoteIP(), connection->Handle()->RemotePort(), connection->GetUUID());
 
 		UCSLink.SetConnection(connection);
+
+		zoneserver_list.UpdateUCSServerAvailable();
 	});
 
 	server_connection->OnConnectionRemoved("UCS", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
@@ -472,6 +474,8 @@ int main(int argc, char** argv) {
 			connection->GetUUID());
 
 		UCSLink.SetConnection(nullptr);
+
+		zoneserver_list.UpdateUCSServerAvailable(false);
 	});
 
 	server_connection->OnConnectionIdentified("WebInterface", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {

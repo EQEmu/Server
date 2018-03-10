@@ -156,6 +156,7 @@ RULE_BOOL(Character, UseOldBindWound, false) // Uses the original bind wound beh
 RULE_BOOL(Character, GrantHoTTOnCreate, false) // Grant Health of Target's Target leadership AA on character creation
 RULE_BOOL(Character, UseOldConSystem, false) // Grant Health of Target's Target leadership AA on character creation
 RULE_BOOL(Character, OPClientUpdateVisualDebug, false) // Shows a pulse and forward directional particle each time the client sends its position to server
+RULE_BOOL(Character, PetsUseReagents, true) //Pets use reagent on spells
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)
@@ -233,6 +234,7 @@ RULE_INT(World, TitaniumStartZoneID, -1) //Sets the Starting Zone for Titanium C
 RULE_INT(World, ExpansionSettings, 16383) // Sets the expansion settings for the server, This is sent on login to world and affects client expansion settings. Defaults to all expansions enabled up to TSS.
 RULE_BOOL(World, UseClientBasedExpansionSettings, true) // if true it will overrule World, ExpansionSettings and set someone's expansion based on the client they're using
 RULE_INT(World, PVPSettings, 0) // Sets the PVP settings for the server, 1 = Rallos Zek RuleSet, 2 = Tallon/Vallon Zek Ruleset, 4 = Sullon Zek Ruleset, 6 = Discord Ruleset, anything above 6 is the Discord Ruleset without the no-drop restrictions removed. TODO: Edit IsAttackAllowed in Zone to accomodate for these rules.
+RULE_INT(World, PVPMinLevel, 0) // minimum level to pvp
 RULE_BOOL (World, IsGMPetitionWindowEnabled, false)
 RULE_INT (World, FVNoDropFlag, 0) // Sets the Firiona Vie settings on the client. If set to 2, the flag will be set for GMs only, allowing trading of no-drop items.
 RULE_BOOL (World, IPLimitDisconnectAll, false)
@@ -400,6 +402,7 @@ RULE_BOOL(Spells, IgnoreSpellDmgLvlRestriction, false) // ignore the 5 level spr
 RULE_BOOL(Spells, AllowItemTGB, false) // TGB doesn't work with items on live, custom servers want it though
 RULE_BOOL(Spells, NPCInnateProcOverride, true) //  NPC innate procs override the target type to single target.
 RULE_BOOL(Spells, OldRainTargets, false) // use old incorrectly implemented max targets for rains
+RULE_BOOL(Spells, NPCSpellPush, false) // enable spell push on NPCs
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)
@@ -718,6 +721,12 @@ RULE_CATEGORY_END()
 RULE_CATEGORY(Client)
 RULE_BOOL(Client, UseLiveFactionMessage, false) // Allows players to see faction adjustments like Live
 RULE_BOOL(Client, UseLiveBlockedMessage, false) // Allows players to see faction adjustments like Live
+RULE_CATEGORY_END()
+
+RULE_CATEGORY(Bugs)
+RULE_BOOL(Bugs, ReportingSystemActive, true) // Activates bug reporting
+RULE_BOOL(Bugs, UseOldReportingMethod, true) // Forces the use of the old bug reporting system
+RULE_BOOL(Bugs, DumpTargetEntity, false) // Dumps the target entity, if one is provided
 RULE_CATEGORY_END()
 
 #undef RULE_CATEGORY

@@ -28,6 +28,7 @@ SET(zone_sources
 	encounter.cpp
 	entity.cpp
 	exp.cpp
+	fastmath.cpp
 	fearpath.cpp
 	forage.cpp
 	groups.cpp
@@ -159,6 +160,7 @@ SET(zone_headers
 	entity.h
 	errmsg.h
 	event_codes.h
+	fastmath.h
 	forage.h
 	global_loot_manager.h
 	groups.h

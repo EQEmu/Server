@@ -33,6 +33,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "zone.h"
 #include "lua_parser.h"
 #include "nats_manager.h"
+#include "fastmath.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -44,6 +45,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 extern QueryServ* QServ;
 extern WorldServer worldserver;
+extern FastMath g_Math;
 
 #ifdef _WINDOWS
 #define snprintf	_snprintf
@@ -3614,25 +3616,34 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 			a->special = 2;
 		else
 			a->special = 0;
-		a->meleepush_xy = attacker ? attacker->GetHeading() : 0.0f;
+		a->hit_heading = attacker ? attacker->GetHeading() : 0.0f;
 		if (RuleB(Combat, MeleePush) && damage > 0 && !IsRooted() &&
 			(IsClient() || zone->random.Roll(RuleI(Combat, MeleePushChance)))) {
 			a->force = EQEmu::skills::GetSkillMeleePushForce(skill_used);
+			if (IsNPC()) {
+				if (attacker->IsNPC())
+					a->force = 0.0f; // 2013 change that disabled NPC vs NPC push
+				else
+					a->force *= 0.10f; // force against NPCs is divided by 10 I guess? ex bash is 0.3, parsed 0.03 against an NPC
+			}
 			// update NPC stuff
-			auto new_pos = glm::vec3(m_Position.x + (a->force * std::cos(a->meleepush_xy) + m_Delta.x),
-				m_Position.y + (a->force * std::sin(a->meleepush_xy) + m_Delta.y), m_Position.z);
-			if (zone->zonemap && zone->zonemap->CheckLoS(glm::vec3(m_Position), new_pos)) { // If we have LoS on the new loc it should be reachable.
-				if (IsNPC()) {
-					// Is this adequate?
+			if (a->force != 0.0f) {
+				auto new_pos = glm::vec3(
+				    m_Position.x + (a->force * g_Math.FastSin(a->hit_heading) + m_Delta.x),
+				    m_Position.y + (a->force * g_Math.FastCos(a->hit_heading) + m_Delta.y), m_Position.z);
+				if ((!IsNPC() || position_update_melee_push_timer.Check()) && zone->zonemap &&
+				    zone->zonemap->CheckLoS(
+					glm::vec3(m_Position),
+					new_pos)) { // If we have LoS on the new loc it should be reachable.
+					if (IsNPC()) {
+						// Is this adequate?
 
-					Teleport(new_pos);
-					if (position_update_melee_push_timer.Check()) {
+						Teleport(new_pos);
 						SendPositionUpdate();
 					}
+				} else {
+					a->force = 0.0f; // we couldn't move there, so lets not
 				}
-			}
-			else {
-				a->force = 0.0f; // we couldn't move there, so lets not
 			}
 		}
 

@@ -442,8 +442,9 @@ public:
 	bool	DeleteMerc(uint32 merc_id);
 
 	/* Petitions   */
-	void	UpdateBug(BugStruct* bug);
-	void	UpdateBug(PetitionBug_Struct* bug);
+	void	RegisterBug(BugReport_Struct* bug_report); // old method
+	void	RegisterBug(Client* client, BugReport_Struct* bug_report); // new method
+	//void	UpdateBug(PetitionBug_Struct* bug);
 	void	DeletePetitionFromDB(Petition* wpet);
 	void	UpdatePetitionToDB(Petition* wpet);
 	void	InsertPetitionToDB(Petition* wpet);

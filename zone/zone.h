@@ -224,7 +224,7 @@ public:
 	void	SetDate(uint16 year, uint8 month, uint8 day, uint8 hour, uint8 minute);
 	void SetTime(uint8 hour, uint8 minute, bool update_world = true);
 
-	void	weatherSend();
+	void	weatherSend(Client* client = nullptr);
 	bool	CanBind() const { return(can_bind); }
 	bool	IsCity() const { return(is_city); }
 	bool	CanDoCombat() const { return(can_combat); }
@@ -274,6 +274,10 @@ public:
 	inline void AddGlobalLootEntry(GlobalLootEntry &in) { return m_global_loot.AddEntry(in); }
 	inline void ShowZoneGlobalLoot(Client *to) { m_global_loot.ShowZoneGlobalLoot(to); }
 	inline void ShowNPCGlobalLoot(Client *to, NPC *who) { m_global_loot.ShowNPCGlobalLoot(to, who); }
+
+	void RequestUCSServerStatus();
+	void SetUCSServerAvailable(bool ucss_available, uint32 update_timestamp);
+	bool IsUCSServerAvailable() { return m_ucss_available; }
 
 	// random object that provides random values for the zone
 	EQEmu::Random random;
@@ -355,6 +359,9 @@ private:
 	Timer	hotzone_timer;
 
 	GlobalLootManager m_global_loot;
+
+	bool m_ucss_available;
+	uint32 m_last_ucss_update;
 };
 
 #endif

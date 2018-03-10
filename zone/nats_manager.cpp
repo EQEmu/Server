@@ -679,7 +679,6 @@ void NatsManager::OnSpawnEvent(const EmuOpcode op, uint32 entity_id, Spawn_Struc
 	event.set_equip_chest2(spawn->equip_chest2);
 	event.set_mount_color(spawn->mount_color);
 	event.set_spawnid(spawn->spawnId);
-	event.set_unknown0344(*spawn->unknown0344);
 	event.set_ismercenary(spawn->IsMercenary);
 	//event.set_equipment_tint(spawn->equipment_tint);
 	event.set_lfg(spawn->lfg);
@@ -800,8 +799,8 @@ void NatsManager::OnDamageEvent(uint32 entity_id, CombatDamage_Struct *cd) {
 	event.set_spellid(cd->spellid);
 	event.set_damage(cd->damage);
 	event.set_force(cd->force);
-	event.set_meleepush_xy(cd->meleepush_xy);
-	event.set_meleepush_z(cd->meleepush_z);
+	event.set_meleepush_xy(cd->hit_heading);
+	event.set_meleepush_z(cd->hit_pitch);
 	
 	if (!event.SerializeToString(&pubMessage)) { Log(Logs::General, Logs::NATS, "Failed to serialize message to string"); return; }
 	auto finalEvent = eqproto::Event();

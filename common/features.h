@@ -219,6 +219,9 @@ enum {	//some random constants
 //the square of the maximum range at whihc you could possibly use NPC services (shop, tribute, etc)
 #define USE_NPC_RANGE2 200*200		//arbitrary right now
 
+// Squared range for rampage 75.0 * 75.0 for now
+#define NPC_RAMPAGE_RANGE2 5625.0f
+
 //the formula for experience for killing a mob.
 //level is the only valid variable to use
 #define EXP_FORMULA level*level*75*35/10

@@ -165,7 +165,7 @@ void EQ::Net::DaybreakConnectionManager::ProcessResend()
 {
 	auto iter = m_connections.begin();
 	while (iter != m_connections.end()) {
-		auto connection = iter->second;
+		auto &connection = iter->second;
 		auto status = connection->m_status;
 
 		switch (status)

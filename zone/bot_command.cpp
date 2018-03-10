@@ -5049,7 +5049,11 @@ void bot_subcommand_bot_spawn(Client *c, const Seperator *sep)
 		return;
 	}
 
-	my_bot->Spawn(c);
+	if (!my_bot->Spawn(c)) {
+		c->Message(m_fail, "Failed to spawn bot '%s' (id: %i)", bot_name.c_str(), bot_id);
+		safe_delete(my_bot);
+		return;
+	}
 
 	static const char* bot_spawn_message[16] = {
 		"A solid weapon is my ally!", // WARRIOR / 'generic'
@@ -5805,18 +5809,22 @@ void bot_subcommand_botgroup_load(Client *c, const Seperator *sep)
 		return;
 	}
 	if (!leader_id) {
-		c->Message(m_fail, "Can not locate bot-group leader id for '%s'", botgroup_name_arg.c_str());
+		c->Message(m_fail, "Cannot locate bot-group leader id for '%s'", botgroup_name_arg.c_str());
 		return;
 	}
 
 	auto botgroup_leader = Bot::LoadBot(leader_id);
 	if (!botgroup_leader) {
-		c->Message(m_fail, "Could not spawn bot-group leader for '%s'", botgroup_name_arg.c_str());
+		c->Message(m_fail, "Could not load bot-group leader for '%s'", botgroup_name_arg.c_str());
 		safe_delete(botgroup_leader);
 		return;
 	}
 
-	botgroup_leader->Spawn(c);
+	if (!botgroup_leader->Spawn(c)) {
+		c->Message(m_fail, "Could not spawn bot-group leader %s for '%s'", botgroup_leader->GetName(), botgroup_name_arg.c_str());
+		safe_delete(botgroup_leader);
+		return;
+	}
 	
 	Group* group_inst = new Group(botgroup_leader);
 
@@ -5835,7 +5843,12 @@ void bot_subcommand_botgroup_load(Client *c, const Seperator *sep)
 			return;
 		}
 
-		botgroup_member->Spawn(c);
+		if (!botgroup_member->Spawn(c)) {
+			c->Message(m_fail, "Could not spawn bot '%s' (id: %i)", botgroup_member->GetName(), member_iter);
+			safe_delete(botgroup_member);
+			return;
+		}
+
 		Bot::AddBotToGroup(botgroup_member, group_inst);
 	}
 
@@ -7072,7 +7085,6 @@ void bot_subcommand_inventory_list(Client *c, const Seperator *sep)
 	const EQEmu::ItemData* item = nullptr;
 	bool is2Hweapon = false;
 
-	std::string item_link;
 	EQEmu::SayLinkEngine linker;
 	linker.SetLinkType(EQEmu::saylink::SayLinkItemInst);
 
@@ -7093,8 +7105,7 @@ void bot_subcommand_inventory_list(Client *c, const Seperator *sep)
 		}
 
 		linker.SetItemInst(inst);
-		item_link = linker.GenerateLink();
-		c->Message(m_message, "Using %s in my %s (slot %i)", item_link.c_str(), GetBotEquipSlotName(i), (i == 22 ? EQEmu::inventory::slotPowerSource : i));
+		c->Message(m_message, "Using %s in my %s (slot %i)", linker.GenerateLink().c_str(), GetBotEquipSlotName(i), (i == 22 ? EQEmu::inventory::slotPowerSource : i));
 
 		++inventory_count;
 	}
@@ -7237,8 +7248,8 @@ void bot_subcommand_inventory_window(Client *c, const Seperator *sep)
 
 	std::string window_text;
 	//std::string item_link;
-	//Client::TextLink linker;
-	//linker.SetLinkType(linker.linkItemInst);
+	//EQEmu::SayLinkEngine linker;
+	//linker.SetLinkType(EQEmu::saylink::SayLinkItemInst);
 
 	for (int i = EQEmu::legacy::EQUIPMENT_BEGIN; i <= (EQEmu::legacy::EQUIPMENT_END + 1); ++i) {
 		const EQEmu::ItemData* item = nullptr;
