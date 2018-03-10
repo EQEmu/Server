@@ -960,7 +960,6 @@ void Mob::ProcessForcedMovement()
 		auto z_off = GetZOffset();
 		glm::vec3 normal;
 		glm::vec3 new_pos = m_Position + m_Delta;
-		new_pos.z += z_off;
 
 		// no zone map = fucked
 		if (zone->HasMap()) {
