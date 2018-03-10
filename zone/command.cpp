@@ -2323,14 +2323,18 @@ void command_race(Client *c, const Seperator *sep)
 {
 	Mob *t=c->CastToMob();
 
-	// Need to figure out max race for LoY/LDoN: going with upper bound of 500 now for testing
-	if (sep->IsNumber(1) && atoi(sep->arg[1]) >= 0 && atoi(sep->arg[1]) <= 724) {
-		if ((c->GetTarget()) && c->Admin() >= commandRaceOthers)
-			t=c->GetTarget();
-		t->SendIllusionPacket(atoi(sep->arg[1]));
+	if (sep->IsNumber(1)) {
+		auto race = atoi(sep->arg[1]);
+		if ((race >= 0 && race <= 732) || (race >= 2253 && race <= 2259)) {
+			if ((c->GetTarget()) && c->Admin() >= commandRaceOthers)
+				t = c->GetTarget();
+			t->SendIllusionPacket(race);
+		} else {
+			c->Message(0, "Usage: #race [0-732, 2253-2259] (0 for back to normal)");
+		}
+	} else {
+		c->Message(0, "Usage: #race [0-732, 2253-2259] (0 for back to normal)");
 	}
-	else
-		c->Message(0, "Usage: #race [0-724] (0 for back to normal)");
 }
 
 void command_gender(Client *c, const Seperator *sep)
