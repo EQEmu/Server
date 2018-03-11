@@ -38,8 +38,11 @@ NatsManager::~NatsManager()
 
 bool NatsManager::connect() {	
 	auto ncs = natsConnection_Status(conn);
-	if (ncs == CONNECTED) return true;
-	if (nats_timer.Enabled() && !nats_timer.Check()) return false;
+	if (ncs == CONNECTED) 
+		return true;
+	if (nats_timer.Enabled() && !nats_timer.Check()) 
+		return false;
+
 	natsOptions *opts = NULL;
 	natsOptions_Create(&opts);
 	natsOptions_SetMaxReconnect(opts, 0);
@@ -50,7 +53,9 @@ bool NatsManager::connect() {
 	//but since NATS is a second priority I wanted server impact minimum.
 	natsOptions_SetTimeout(opts, 100);
 	std::string connection = StringFormat("nats://%s:%d", worldConfig->NATSHost.c_str(), worldConfig->NATSPort);
-	if (worldConfig->NATSHost.length() == 0) connection = "nats://localhost:4222";
+	if (worldConfig->NATSHost.length() == 0) 
+		connection = "nats://localhost:4222";
+
 	natsOptions_SetURL(opts, connection.c_str());
 	s = natsConnection_Connect(&conn, opts);
 	natsOptions_Destroy(opts);
@@ -61,6 +66,7 @@ bool NatsManager::connect() {
 		nats_timer.SetTimer(20000);
 		return false;
 	}
+
 	Log(Logs::General, Logs::NATS, "connected to %s", connection.c_str());
 	nats_timer.Disable();
 	return true;
@@ -70,7 +76,8 @@ bool NatsManager::connect() {
 void NatsManager::Process()
 {	
 	natsMsg *msg = NULL;
-	if (!connect()) return;
+	if (!connect()) 
+		return;
 	s = NATS_OK;
 	for (int count = 0; (s == NATS_OK) && count < 5; count++)
 	{
@@ -163,7 +170,7 @@ void NatsManager::SendChannelMessage(eqproto::ChannelMessage* message) {
 		Log(Logs::General, Logs::NATS, "Failed to serialize message to string");
 		return;
 	}
-	s = natsConnection_PublishString(conn, "world.command_message", pubMessage.c_str());
+	s = natsConnection_PublishString(conn, "world.channel_message", pubMessage.c_str());
 	if (s != NATS_OK) {
 		Log(Logs::General, Logs::NATS, "Failed to send world.command_message");
 	}
