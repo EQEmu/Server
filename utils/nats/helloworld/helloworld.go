@@ -5,9 +5,9 @@ import (
 	"log"
 	"time"
 
+	"github.com/eqemu/server/protobuf/go/eqproto"
 	"github.com/golang/protobuf/proto"
 	"github.com/nats-io/go-nats"
-	"github.com/xackery/rebuildeq/go/eqproto"
 )
 
 func main() {
@@ -41,8 +41,6 @@ func asyncChannelMessageSubscriber(nc *nats.Conn) {
 		log.Println(message)
 	})
 	log.Println("Waiting on async messages...")
-	time.Sleep(10 * time.Second)
-	log.Println("Timed out after 10 seconds")
 }
 
 // syncChannelMessageSubscriber is an example of how to subscribe
@@ -55,7 +53,7 @@ func syncChannelMessageSubscriber(nc *nats.Conn) {
 	}
 	var m *nats.Msg
 	if m, err = sub.NextMsg(10 * time.Second); err != nil {
-		log.Println("Timed out after 10 seconds", err.Error())
+		log.Println("Timed out after 10 seconds waiting for message", err.Error())
 		return
 	}
 
