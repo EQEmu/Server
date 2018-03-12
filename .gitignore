@@ -34,7 +34,9 @@ x86/
 log/
 logs/
 
-# Proto
+# Protobuf generated files
+*.pb.cc
+*.pb.h
 protobuf/csharp/*
 protobuf/go/*
 protobuf/java/*

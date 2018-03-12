@@ -29,7 +29,7 @@
 
 #We set a fairly new version (as of 2013) because I found finding perl was a bit... buggy on older ones
 #Can change this if you really want but you should upgrade!
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)
 
 #FindMySQL is located here so lets make it so CMake can find it
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/" ${CMAKE_MODULE_PATH})
@@ -54,14 +54,44 @@ ENDIF(MSVC OR MINGW)
 
 # include dirs are universal
 SET(NATS_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/nats")
-SET(PROTOBUF_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/protobuf")
+
+#Try to find protobuf automatically
+FIND_PACKAGE(Protobuf QUIET)
+IF(NOT PROTOBUF_FOUND)
+	SET(Protobuf_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/protobuf" CACHE PATH "Root protobuf directory" FORCE)
+	SET(Protobuf_PROTOC_EXECUTABLE  "${Protobuf_DIR}/bin/protoc.exe" CACHE PATH "Executable path" FORCE)
+	SET(Protobuf_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/protobuf/include" CACHE PATH "Include dir" FORCE)
+	SET(Protobuf_SRC_ROOT_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/protobuf/include" CACHE PATH "Include dir" FORCE)
+	SET(PROTOBUF_FOUND TRUE CACHE BOOL "" FORCE)
+	
+	IF(NOT MSVC)
+		MESSAGE(STATUS "Could not find protobuf library, setting to ${Protobuf_DIR}")
+	ENDIF()
+
+	IF(MSVC)
+		IF(CMAKE_CL_64)
+			SET(Protobuf_LIBRARY_DEBUG "${Protobuf_DIR}/lib_x64/libprotobufd.lib" CACHE PATH "Root protobuf directory" FORCE)
+			SET(Protobuf_LIBRARY_RELEASE "${Protobuf_DIR}/lib_x64/libprotobufd.lib" CACHE PATH "Root protobuf directory" FORCE)
+		ELSE(CMAKE_CL_64)		
+			SET(Protobuf_LIBRARY_DEBUG "${Protobuf_DIR}/lib_x86/libprotobufd.lib" CACHE PATH "Root protobuf directory" FORCE)
+			SET(Protobuf_LIBRARY_RELEASE "${Protobuf_DIR}/lib_x86/libprotobufd.lib" CACHE PATH "Root protobuf directory" FORCE)
+		ENDIF()	
+	ELSE(MSVC)
+		SET(Protobuf_LIBRARY_DEBUG "${Protobuf_DIR}/lib_x64/libprotobuf.so.15" CACHE PATH "Root protobuf directory" FORCE)
+		SET(Protobuf_LIBRARY_RELEASE "${Protobuf_DIR}/lib_x64/libprotobuf.so.15" CACHE PATH "Root protobuf directory" FORCE)
+	ENDIF()
+
+	#SET(Protobuf_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/protobuf/include" CACHE PATH "Include dir")
+	#SET(Protobuf_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/protobuf/include")
+	#SET(Protobuf_PROTOC_EXECUTABLE "${Protobuf_DIR}/bin/protoc.exe")
+	
+ENDIF()
+
+INCLUDE_DIRECTORIES(SYSTEM "${Protobuf_INCLUDE_DIR}")
 
 SET(NATS_INCLUDE_DIR "${NATS_ROOT}/include")
-SET(PROTOBUF_INCLUDE_DIR "${PROTOBUF_ROOT}/include")
 
-IF(MSVC)	
-
-
+IF(MSVC)
 	#Set our default locations for zlib/mysql based on x86/x64
 	IF(CMAKE_CL_64)
 		SET(ZLIB_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/zlib_x64")
@@ -77,7 +107,6 @@ IF(MSVC)
 			SET(SODIUM_LIBRARY_HINTS "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/libsodium/x64/Release/v110/dynamic")
 		ENDIF()
 		SET(NATS_LIBRARY "${NATS_ROOT}/lib_x64/nats.lib")
-		SET(PROTOBUF_LIBRARY "${PROTOBUF_ROOT}/lib_x64/libprotobufd.lib")
 	ELSE(CMAKE_CL_64)
 		SET(ZLIB_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/zlib_x86")
 		SET(MYSQL_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/mysql_x86")
@@ -85,7 +114,6 @@ IF(MSVC)
 		SET(SODIUM_INCLUDE_HINTS "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/libsodium/include")
 		SET(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/openssl_x86")
 		SET(NATS_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/nats_x86")
-		SET(PROTOBUF_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/protobuf_x86")
 		IF(MSVC_VERSION GREATER 1800)
 			SET(SODIUM_LIBRARY_HINTS "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/libsodium/Win32/Release/v140/dynamic")
 		ELSEIF(MSVC_VERSION EQUAL 1800)
@@ -94,7 +122,6 @@ IF(MSVC)
 			SET(SODIUM_LIBRARY_HINTS "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/libsodium/Win32/Release/v110/dynamic")
 		ENDIF()
 		SET(NATS_LIBRARY "${NATS_ROOT}/lib_x86/nats.lib")
-		SET(PROTOBUF_LIBRARY "${PROTOBUF_ROOT}/lib_x86/libprotobufd.lib")
 	ENDIF(CMAKE_CL_64)
 
 	#disable CRT warnings on windows cause they're annoying as shit and we use C functions everywhere
@@ -148,7 +175,6 @@ IF(MSVC)
 ELSE(MSVC)
 	
 	SET(NATS_LIBRARY "${NATS_ROOT}/lib_x64/libnats.so")
-	SET(PROTOBUF_LIBRARY "${PROTOBUF_ROOT}/lib_x64/libprotobuf.so.15")
 
 	#Normally set by perl but we don't use the perl flags anymore so we set it.
 	ADD_DEFINITIONS(-DHAS_UNION_SEMUN)
@@ -328,7 +354,7 @@ IF(EQEMU_BUILD_PERL)
 	INCLUDE_DIRECTORIES(SYSTEM "${PERL_INCLUDE_PATH}")
 ENDIF(EQEMU_BUILD_PERL)
 
-SET(SERVER_LIBS common debug ${MySQL_LIBRARY_DEBUG} optimized ${MySQL_LIBRARY_RELEASE} ${ZLIB_LIBRARY} libuv fmt ${NATS_LIBRARY} ${PROTOBUF_LIBRARY})
+SET(SERVER_LIBS common debug ${MySQL_LIBRARY_DEBUG} optimized ${MySQL_LIBRARY_RELEASE} ${ZLIB_LIBRARY} libuv fmt ${NATS_LIBRARY} ${PROTOBUF_LIBRARY_DEBUG})
 
 FIND_PACKAGE(Sodium REQUIRED)
 IF(SODIUM_FOUND)
@@ -372,12 +398,13 @@ ENDIF(EQEMU_BUILD_LUA)
 INCLUDE_DIRECTORIES(SYSTEM "${ZLIB_INCLUDE_DIRS}")
 INCLUDE_DIRECTORIES(SYSTEM "${MySQL_INCLUDE_DIR}")
 INCLUDE_DIRECTORIES(SYSTEM "${NATS_INCLUDE_DIR}")
-INCLUDE_DIRECTORIES(SYSTEM "${PROTOBUF_INCLUDE_DIR}")
+
 INCLUDE_DIRECTORIES(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/common/glm")
 INCLUDE_DIRECTORIES(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/libs/cereal")
 INCLUDE_DIRECTORIES(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/libs/libuv/include" )
 INCLUDE_DIRECTORIES(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/libs/libuv/src")
 INCLUDE_DIRECTORIES(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/libs/format")
+
 
 IF(EQEMU_BUILD_SERVER OR EQEMU_BUILD_LOGIN OR EQEMU_BUILD_TESTS OR EQEMU_BUILD_HC)
 	ADD_SUBDIRECTORY(common)

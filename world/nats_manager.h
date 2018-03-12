@@ -9,7 +9,7 @@
 #include "../common/timer.h"
 #ifndef PROTO_H
 #define PROTO_H
-#include "../common/proto/message.pb.h"
+#include "../common/message.pb.h"
 #endif
 #include "../common/servertalk.h"
 

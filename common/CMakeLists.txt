@@ -1,4 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+SET(PROTOBUF_GENERATE_CPP_APPEND_PATH "../../")
+
+PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HEADERS message.proto)
 
 SET(common_sources
 	base_packet.cpp
@@ -39,9 +42,10 @@ SET(common_sources
 	item_instance.cpp
 	json_config.cpp
 	light_source.cpp
-	md5.cpp
+	md5.cpp	
 	memory_buffer.cpp
 	memory_mapped_file.cpp
+	message.pb.cc
 	misc.cpp
 	misc_functions.cpp
 	mutex.cpp
@@ -97,8 +101,7 @@ SET(common_sources
 	patches/titanium.cpp
 	patches/titanium_limits.cpp
 	patches/uf.cpp
-	patches/uf_limits.cpp
-	proto/message.pb.cc	
+	patches/uf_limits.cpp	
 	StackWalker/StackWalker.cpp
 	tinyxml/tinystr.cpp
 	tinyxml/tinyxml.cpp
@@ -168,6 +171,7 @@ SET(common_headers
 	md5.h
 	memory_buffer.h
 	memory_mapped_file.h
+	message.pb.h
 	misc.h
 	misc_functions.h
 	mutex.h
@@ -255,7 +259,6 @@ SET(common_headers
 	patches/uf_limits.h
 	patches/uf_ops.h
 	patches/uf_structs.h
-	proto/message.pb.h
 	StackWalker/StackWalker.h
 	tinyxml/tinystr.h
 	tinyxml/tinyxml.h

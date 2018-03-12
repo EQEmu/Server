@@ -13,7 +13,7 @@
 #include "../common/string_util.h"
 #ifndef PROTO_H
 #define PROTO_H
-#include "../common/proto/message.pb.h"
+#include "../common/message.pb.h"
 #endif
 
 const ZoneConfig *zoneConfig;
