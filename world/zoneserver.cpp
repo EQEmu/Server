@@ -411,12 +411,13 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		if (pack->size < sizeof(ServerChannelMessage_Struct))
 			break;
 		ServerChannelMessage_Struct* scm = (ServerChannelMessage_Struct*)pack->pBuffer;
+
+		nats.OnChannelMessage(scm);
 		if (scm->chan_num == 20)
 		{
 			UCSLink.SendMessage(scm->from, scm->message);
 			break;
 		}
-		nats.OnChannelMessage(scm);
 		if (scm->chan_num == 7 || scm->chan_num == 14) {
 			if (scm->deliverto[0] == '*') {
 

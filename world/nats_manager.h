@@ -22,10 +22,11 @@ public:
 	void Process();
 	void OnChannelMessage(ServerChannelMessage_Struct * msg);
 	void OnEmoteMessage(ServerEmoteMessage_Struct * msg);
-	void SendAdminMessage(std::string adminMessage);
-	void ChannelMessageEvent(eqproto::ChannelMessage* message);
-	void CommandMessageEvent(eqproto::CommandMessage* message, const char* reply);
-	void SendChannelMessage(eqproto::ChannelMessage* message);
+	void SendAdminMessage(std::string adminMessage, const char* reply = nullptr);
+	void GetChannelMessage(eqproto::ChannelMessage* message, const char* reply = nullptr);
+	void SendChannelMessage(eqproto::ChannelMessage* message, const char* reply = nullptr);
+	void GetCommandMessage(eqproto::CommandMessage* message, const char* reply = nullptr);
+	void SendCommandMessage(eqproto::CommandMessage* message, const char* reply = nullptr);
 	void Save();
 	void Load();
 protected:

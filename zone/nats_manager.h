@@ -16,7 +16,7 @@ public:
 	~NatsManager();
 	void Process();
 	void Unregister();
-	void ZoneSubscribe(const char * zonename);
+	void ZoneSubscribe(const char * zonename, uint32 instance);
 	void Load();
 	void OnChannelMessageEvent(uint32 entity_id, ChannelMessage_Struct * cm);
 	void OnEntityEvent(const EmuOpcode op, uint32 entity_id, uint32 target_id);
@@ -37,7 +37,8 @@ protected:
 	natsConnection *conn = NULL;
 	natsStatus      s;
 	natsOptions *opts = NULL;
-	std::string subscribedZonename;
+	std::string subscribedZoneName;
+	uint32 subscribedZoneInstance;
 	natsSubscription *zoneChannelMessageSub = NULL;
 	natsSubscription *zoneCommandMessageSub = NULL;
 	natsSubscription *zoneEntityEventSubscribeAllSub = NULL;

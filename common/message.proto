@@ -1,6 +1,9 @@
 syntax = "proto3";
 package eqproto;
 
+option cc_enable_arenas = true;
+option optimize_for = SPEED;
+
 message ChannelMessage {
   int32 chan_num = 1;
   int32 language = 2;
@@ -16,8 +19,7 @@ message ChannelMessage {
   bool is_emote = 12;
   //0 not queued, 1 queued, 2 queue full, 3 offline
   int32 queued = 13;
-  //You can specify a zone id if you want a message exclusively to one zone
-  int32 zone_id = 14;
+  string result = 15;
 }
 
 message CommandMessage {

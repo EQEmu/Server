@@ -47,7 +47,7 @@ func asyncChannelMessageSubscriber(nc *nats.Conn) {
 // and poll for messages syncronously
 func syncChannelMessageSubscriber(nc *nats.Conn) {
 
-	sub, err := nc.SubscribeSync("world.channel_message")
+	sub, err := nc.SubscribeSync("world.channel_message.out")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -72,7 +72,7 @@ func testBroadcastMessage(nc *nats.Conn, msg string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if err = nc.Publish("world.channel_message", d); err != nil {
+	if err = nc.Publish("world.channel_message.in", d); err != nil {
 		log.Println("Failed to publish:", err.Error())
 		return
 	}

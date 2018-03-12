@@ -515,7 +515,7 @@ int main(int argc, char** argv) {
 				entity_list.BeaconProcess();
 				entity_list.EncounterProcess();
 				if (zone->IsLoaded()) {
-					nats.ZoneSubscribe(zone->GetShortName());
+					nats.ZoneSubscribe(zone->GetShortName(), zone->GetInstanceID());
 					nats.Process();
 				}
 				if (zone) {
