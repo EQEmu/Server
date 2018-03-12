@@ -350,27 +350,6 @@ void NatsManager::Load()
 	return;
 }
 
-void NatsManager::DailyGain(int account_id, int character_id, const char* identity, int levels_gained, int experience_gained, int money_earned)
-{	
-	if (!connect()) return;
-	eqproto::DailyGain daily;
-	daily.set_account_id(account_id);
-	daily.set_character_id(character_id);
-	daily.set_identity(identity);
-	daily.set_levels_gained(levels_gained);
-	daily.set_experience_gained(experience_gained);
-	daily.set_money_earned(money_earned);
-	std::string pubMessage;
-	if (!daily.SerializeToString(&pubMessage)) {
-		Log(Logs::General, Logs::NATS, "failed to serialize dailygain to string");
-		return;
-	}
-
-	s = natsConnection_PublishString(conn, "daily_gain", pubMessage.c_str());
-	if (s != NATS_OK) Log(Logs::General, Logs::NATS, "failed to send DailyGain: %s", nats_GetLastError(&s));	
-}
-
-
 /*
 void NatsManager::OnEntityEvent(const EmuOpcode op, Entity *ent, Entity *target) {
 	if (ent == NULL) return;

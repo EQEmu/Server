@@ -18,7 +18,6 @@ public:
 	void Unregister();
 	void ZoneSubscribe(const char * zonename);
 	void Load();
-	void DailyGain(int account_id, int character_id, const char * identity, int levels_gained = 0, int experience_gained = 0, int money_earned = 0);
 	void OnChannelMessageEvent(uint32 entity_id, ChannelMessage_Struct * cm);
 	void OnEntityEvent(const EmuOpcode op, uint32 entity_id, uint32 target_id);
 	void OnSpawnEvent(const EmuOpcode op, uint32 entity_id, Spawn_Struct * spawn);
