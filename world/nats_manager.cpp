@@ -167,20 +167,20 @@ void NatsManager::SendAdminMessage(std::string adminMessage, const char* reply) 
 	message->set_message(adminMessage.c_str());
 	std::string pubMessage;
 	if (!message->SerializeToString(&pubMessage)) {
-		Log(Logs::General, Logs::NATS, "global.admin_message->out: failed to serialize message to string");
+		Log(Logs::General, Logs::NATS, "global.admin_message.out: failed to serialize message to string");
 		return;
 	}
 
 	if (reply && strlen(reply) > 0)
 		s = natsConnection_Publish(conn, reply, (const void*)pubMessage.c_str(), pubMessage.length());
 	else
-		s = natsConnection_Publish(conn, "global.admin_message->out", (const void*)pubMessage.c_str(), pubMessage.length());
+		s = natsConnection_Publish(conn, "global.admin_message.out", (const void*)pubMessage.c_str(), pubMessage.length());
 	
 	if (s != NATS_OK) {
-		Log(Logs::General, Logs::NATS, "global.admin_message->out failed: %s", nats_GetLastError(&s));
+		Log(Logs::General, Logs::NATS, "global.admin_message.out failed: %s", nats_GetLastError(&s));
 		return;
 	}
-	Log(Logs::General, Logs::NATS, "global.admin_message->out: %s", adminMessage.c_str());
+	Log(Logs::General, Logs::NATS, "global.admin_message.out: %s", adminMessage.c_str());
 }
 
 // SendChannelMessage will send a channel message to NATS
@@ -190,20 +190,20 @@ void NatsManager::SendChannelMessage(eqproto::ChannelMessage* message, const cha
 
 	std::string pubMessage;
 	if (!message->SerializeToString(&pubMessage)) {
-		Log(Logs::General, Logs::NATS, "world.channel_message->out: failed to serialize message to string");
+		Log(Logs::General, Logs::NATS, "world.channel_message.out: failed to serialize message to string");
 		return;
 	}
 
 	if (reply && strlen(reply) > 0)
 		s = natsConnection_Publish(conn, reply, (const void*)pubMessage.c_str(), pubMessage.length());
 	else
-		s = natsConnection_Publish(conn, "world.channel_message->out", (const void*)pubMessage.c_str(), pubMessage.length());
+		s = natsConnection_Publish(conn, "world.channel_message.out", (const void*)pubMessage.c_str(), pubMessage.length());
 
 	if (s != NATS_OK) {
-		Log(Logs::General, Logs::NATS, "world.channel_message->out failed: %s");
+		Log(Logs::General, Logs::NATS, "world.channel_message.out failed: %s");
 		return;
 	}
-	Log(Logs::General, Logs::NATS, "world.channel_message->out: %s", message->message().c_str());
+	Log(Logs::General, Logs::NATS, "world.channel_message.out: %s", message->message().c_str());
 }
 
 // SendCommandMessage will send a channel message to NATS
@@ -217,20 +217,21 @@ void NatsManager::SendCommandMessage(eqproto::CommandMessage* message, const cha
 
 	std::string pubMessage;
 	if (!message->SerializeToString(&pubMessage)) {
-		Log(Logs::General, Logs::NATS, "world.command_message->out: failed to serialize message to string");
+		Log(Logs::General, Logs::NATS, "world.command_message.out: failed to serialize message to string");
 		return;
 	}
 
 	if (reply && strlen(reply) > 0)
 		s = natsConnection_Publish(conn, reply, (const void*)pubMessage.c_str(), pubMessage.length());
 	else
-		s = natsConnection_Publish(conn, "world.command_message->out", (const void*)pubMessage.c_str(), pubMessage.length());
+		s = natsConnection_Publish(conn, "world.command_message.out", (const void*)pubMessage.c_str(), pubMessage.length());
 
 	if (s != NATS_OK) {
-		Log(Logs::General, Logs::NATS, "world.command_message->out failed: %s");
+		Log(Logs::General, Logs::NATS, "world.command_message.out failed: %s");
 		return;
 	}
-	Log(Logs::General, Logs::NATS, "world.command_message->out: %s", message->command().c_str());
+
+	Log(Logs::General, Logs::NATS, "world.command_message.in: %s (%s)", message->command().c_str(), message->result().c_str());
 }
 
 // GetCommandMessage is used to process a command message
@@ -239,8 +240,6 @@ void NatsManager::GetCommandMessage(eqproto::CommandMessage* message, const char
 		return;
 
 	std::string pubMessage;
-
-	Log(Logs::General, Logs::NATS, "world.command_message->in: %s", message->command().c_str());
 
 	if (message->command().compare("who") == 0) {
 		message->set_result(client_list.GetWhoAll());

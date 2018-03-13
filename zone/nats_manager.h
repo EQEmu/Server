@@ -40,11 +40,9 @@ protected:
 	std::string subscribedZoneName;
 	uint32 subscribedZoneInstance;
 	natsSubscription *zoneChannelMessageSub = NULL;
+	natsSubscription *zoneInstanceChannelMessageSub = NULL;
 	natsSubscription *zoneCommandMessageSub = NULL;
-	natsSubscription *zoneEntityEventSubscribeAllSub = NULL;
-	natsSubscription *zoneEntityEventSubscribeSub = NULL;
-	natsSubscription *zoneEntityEventListSub = NULL;
-	natsSubscription *zoneEntityEventSub = NULL;
+	natsSubscription *zoneInstanceCommandMessageSub = NULL;
 };
 
 #endif
