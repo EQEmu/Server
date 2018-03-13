@@ -1,11 +1,10 @@
-//Makes a player walk around in ecommons near Guard Reskin
+//Makes a player say a message in local chat
 package main
 
 import (
 	"fmt"
 	"log"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/eqemu/server/protobuf/go/eqproto"
@@ -27,65 +26,57 @@ func main() {
 	defer nc.Close()
 
 	zone := "ecommons"
-	instance := 0
-	entityID := int64(288)
+	instance := int64(0)
 	entities = zoneEntityList(zone, 0)
 
 	fmt.Println(len(entities), "entities known")
 
-	var attackEntityID int64
+	var entityID int32
 	for _, entity := range entities {
-		if entity.Name == "Guard_Reskin000" {
-			fmt.Println("Found guard reskin as ID", entity.Id)
-			attackEntityID = int64(entity.Id)
+		if entity.Name == "Shin" {
+			fmt.Println("Found Shin as ID", entity.Id)
+			entityID = entity.Id
 			break
 		}
 	}
-	if attackEntityID == 0 {
-		log.Fatal("Can't find guard to attack!")
+	if entityID == 0 {
+		log.Fatal("Can't find entity!")
 	}
 
-	entityID = zoneCommandEntity(zone, "spawn", []string{
-		"146.17",
-		"-112.51",
-		"-52.01",
-		"109.6",
-		"GoSpawn",
-	})
-	if entityID == 0 {
-		log.Fatal("failed to get entity ID!")
-	}
-	go testMoveToLoop(zone, entityID)
-	go testAttack(zone, entityID, attackEntityID)
 	go entityEventSubscriber(zone, instance, entityID)
+	zoneChannel(zone, instance, entityID, eqproto.EntityType_Client, 256, "Hello, World!")
 	time.Sleep(1000 * time.Second)
 }
 
-//testMoveToLoop causes an npc to go in a circle in pojustice
-func testMoveToLoop(zone string, entityID int64) {
-	params := []string{}
-	positions := []string{
-		"156.72 -136.71 -52.02 112.8",
-		"116.18 -101.56 -51.56 228.8",
-		"151.37 -102.54 -52.01 228.8",
-	}
-	command := "moveto"
-	curPos := 0
-	for {
-		curPos++
-		fmt.Println("Moving to position", curPos)
-		if len(positions) < curPos+1 {
-			fmt.Println("Resetting position")
-			curPos = 0
-		}
+func zoneChannel(zone string, instance int64, fromEntityID int32, fromEntityType eqproto.EntityType, chanNumber int32, message string) {
 
-		params = []string{}
-		params = append(params, fmt.Sprintf("%d", entityID))
-		params = append(params, strings.Split(positions[curPos], " ")...)
-
-		zoneCommand(zone, command, params)
-		time.Sleep(5 * time.Second)
+	msg := &eqproto.ChannelMessage{
+		Message:        message,
+		ChanNum:        chanNumber,
+		FromEntityId:   fromEntityID,
+		FromEntityType: fromEntityType,
+		Distance:       500,
+		SkipSender:     true,
 	}
+	d, err := proto.Marshal(msg)
+	if err != nil {
+		log.Fatal(err)
+	}
+	channel := fmt.Sprintf("zone.%s.channel_message.in", zone)
+	log.Println(channel, "sending channel request", msg)
+	reply, err := nc.Request(channel, d, 1*time.Second)
+	if err != nil {
+		log.Println("Failed to get request response on zone channel:", err.Error())
+		return
+	}
+
+	err = proto.Unmarshal(reply.Data, msg)
+	if err != nil {
+		fmt.Println("Failed to unmarshal", err.Error())
+		return
+	}
+	fmt.Println("Response:", msg)
+	return
 }
 
 func testAttack(zone string, entityID int64, targetID int64) {
@@ -104,7 +95,7 @@ func zoneEntityList(zone string, instanceID int) (entities []*eqproto.Entity) {
 	msg := &eqproto.CommandMessage{
 		Author:  "xackery",
 		Command: "entitylist",
-		Params:  []string{"npc"},
+		Params:  []string{"client"},
 	}
 
 	d, err := proto.Marshal(msg)
@@ -190,7 +181,7 @@ func zoneCommand(zone string, command string, params []string) {
 	return
 }
 
-func entityEventSubscriber(zone string, instance int, entityID int64) {
+func entityEventSubscriber(zone string, instance int64, entityID int32) {
 
 	/*event := &eqproto.EntityEvent{
 		Entity: &eqproto.Entity{

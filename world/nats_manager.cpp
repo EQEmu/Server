@@ -73,13 +73,13 @@ bool NatsManager::connect() {
 	Log(Logs::General, Logs::NATS, "connected to %s", connection.c_str());
 	nats_timer.Disable();
 
-	s = natsConnection_SubscribeSync(&channelMessageSub, conn, "world.channel_message->in");
+	s = natsConnection_SubscribeSync(&channelMessageSub, conn, "world.channel_message.in");
 	if (s != NATS_OK)
-		Log(Logs::General, Logs::NATS, "world.channel_message->in: failed to subscribe: %s", nats_GetLastError(&s));
+		Log(Logs::General, Logs::NATS, "world.channel_message.in: failed to subscribe: %s", nats_GetLastError(&s));
 
-	s = natsConnection_SubscribeSync(&commandMessageSub, conn, "world.command_message->in");
+	s = natsConnection_SubscribeSync(&commandMessageSub, conn, "world.command_message.in");
 	if (s != NATS_OK)
-		Log(Logs::General, Logs::NATS, "world.command_message->in: failed to subscribe: %s", nats_GetLastError(&s));
+		Log(Logs::General, Logs::NATS, "world.command_message.in: failed to subscribe: %s", nats_GetLastError(&s));
 
 	return true;
 }
@@ -99,7 +99,7 @@ void NatsManager::Process()
 
 		eqproto::ChannelMessage* message = google::protobuf::Arena::CreateMessage<eqproto::ChannelMessage>(&the_arena);
 		if (!message->ParseFromString(natsMsg_GetData(msg))) {
-			Log(Logs::General, Logs::NATS, "world.channel_message->in: failed to parse");
+			Log(Logs::General, Logs::NATS, "world.channel_message.in: failed to parse");
 			natsMsg_Destroy(msg);
 			continue;
 		}
@@ -116,7 +116,7 @@ void NatsManager::Process()
 
 		eqproto::CommandMessage* message = google::protobuf::Arena::CreateMessage<eqproto::CommandMessage>(&the_arena);
 		if (!message->ParseFromString(natsMsg_GetData(msg))) {
-			Log(Logs::General, Logs::NATS, "world.command_message->in: failed to parse");
+			Log(Logs::General, Logs::NATS, "world.command_message.in: failed to parse");
 			natsMsg_Destroy(msg);
 			continue;
 		}		
@@ -183,28 +183,6 @@ void NatsManager::SendAdminMessage(std::string adminMessage, const char* reply) 
 	Log(Logs::General, Logs::NATS, "global.admin_message.out: %s", adminMessage.c_str());
 }
 
-// SendChannelMessage will send a channel message to NATS
-void NatsManager::SendChannelMessage(eqproto::ChannelMessage* message, const char* reply) {
-	if (!connect()) 
-		return;
-
-	std::string pubMessage;
-	if (!message->SerializeToString(&pubMessage)) {
-		Log(Logs::General, Logs::NATS, "world.channel_message.out: failed to serialize message to string");
-		return;
-	}
-
-	if (reply && strlen(reply) > 0)
-		s = natsConnection_Publish(conn, reply, (const void*)pubMessage.c_str(), pubMessage.length());
-	else
-		s = natsConnection_Publish(conn, "world.channel_message.out", (const void*)pubMessage.c_str(), pubMessage.length());
-
-	if (s != NATS_OK) {
-		Log(Logs::General, Logs::NATS, "world.channel_message.out failed: %s");
-		return;
-	}
-	Log(Logs::General, Logs::NATS, "world.channel_message.out: %s", message->message().c_str());
-}
 
 // SendCommandMessage will send a channel message to NATS
 void NatsManager::SendCommandMessage(eqproto::CommandMessage* message, const char* reply) {
@@ -307,8 +285,6 @@ void NatsManager::GetChannelMessage(eqproto::ChannelMessage* message, const char
 	if (!connect())
 		return;
 
-	
-	Log(Logs::General, Logs::NATS, "world.channel_message->in: %s", message->message().c_str());
 	if (message->is_emote()) { //emote message
 		zoneserver_list.SendEmoteMessage(message->to().c_str(), message->guilddbid(), message->minstatus(), message->type(), message->message().c_str());
 		message->set_result("Sent message");
@@ -325,9 +301,39 @@ void NatsManager::GetChannelMessage(eqproto::ChannelMessage* message, const char
 	if (channel < 1) 
 		channel = 5; //default to ooc
 	zoneserver_list.SendChannelMessage(tmpname, 0, channel, message->language(), message->message().c_str());	
-	message->set_result("Sent message");
+	message->set_result("1");
 	SendChannelMessage(message, reply);
 	return;
+}
+
+
+// SendChannelMessage will send a channel message to NATS
+void NatsManager::SendChannelMessage(eqproto::ChannelMessage* message, const char* reply) {
+	if (!connect())
+		return;
+
+	std::string pubMessage;
+	if (!message->SerializeToString(&pubMessage)) {
+		Log(Logs::General, Logs::NATS, "world.channel_message.out: failed to serialize message to string");
+		return;
+	}
+
+	if (reply) {
+		s = natsConnection_Publish(conn, reply, (const void*)pubMessage.c_str(), pubMessage.length());
+	}
+	else {
+		s = natsConnection_Publish(conn, "world.channel_message.out", (const void*)pubMessage.c_str(), pubMessage.length());
+	}
+
+	if (s != NATS_OK) {
+		Log(Logs::General, Logs::NATS, "world.channel_message.out failed: %s", nats_GetLastError(&s));
+		return;
+	}
+
+	if (reply)
+		Log(Logs::General, Logs::NATS, "world.channel_message.in: %s (%s)", message->message().c_str(), message->result().c_str());
+	else
+		Log(Logs::General, Logs::NATS, "world.channel_message.out: %s", message->message().c_str());
 }
 
 void NatsManager::Load()

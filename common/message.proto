@@ -19,22 +19,26 @@ message ChannelMessage {
   bool is_emote = 12;
   //0 not queued, 1 queued, 2 queue full, 3 offline
   int32 queued = 13;
-  string result = 15;
+  string result = 15; //Result of channel request. 1 = Success, Non-numeric = error
+  int32 from_entity_id = 16; //(Only in zone requests) Entity to send message from
+  EntityType from_entity_type = 17; //(Only in zone requests) Entity type the message is from
+  float distance = 18; //(optional, only in zone requests) how far should the message travel? (e.g. say)
+  bool skip_sender = 19; //(optional, only in zone requests) should we skip sender?
 }
 
 message CommandMessage {
-  string author = 1;
-  string command = 2;
-  repeated string params = 3;
-  string result = 4;
-  bytes payload = 5;
+  string author = 1; //Author of command. This can typically be ignored
+  string command = 2; //command to request
+  repeated string params = 3; //Parameters are an array of strings. 
+  string result = 4; //Result of command request. If non-numeric, it is an error message. If it's an integer, and greater than 0, it is a success (1 is default. Some commands return entity id)
+  bytes payload = 5; //Raw Payload to be parsed
 }
 
 //Entity is full of entity data.
 message Entity {
   int32 id = 1;
-  string name = 2;
-  int32 type = 3;
+  string name = 2;  
+  EntityType type = 3; //0 - NPC, 1 - Client
   int32 hp = 4;
   int32 level = 5;
   Position position = 6;
@@ -94,8 +98,9 @@ message Tint {
 }
 
 message Event {
-  OpCode op = 1;
-  bytes payload = 2;
+  OpCode op = 1; //opcode enum
+  bytes payload = 2; //unmarshal based on opcode
+  uint32 entity_id = 3; //target entity_id of event  
 }
 
 //OP_Death
@@ -292,6 +297,18 @@ message SpawnEvent {
 	uint32 DestructibleUnk9 = 98;
 	bool targetable_with_hotkey = 99;
 	bool show_name= 100;
+}
+
+
+//EntityType will attempt to identify an entity to it's upper-most type by default
+enum EntityType {
+  NPC = 0; //Inherits mob
+  Client = 1; //Inherits mob
+  Mob = 2; //Inherits entity
+  Mercenary = 3; //Inherits NPC
+  Corpse = 4; //Inherits mob
+  Door = 5; //Inherits entity
+  Object = 6; //Inherits entity
 }
 
 enum OpCode {
