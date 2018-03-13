@@ -6731,6 +6731,7 @@ void Client::Handle_OP_GroupFollow2(const EQApplicationPacket *app)
 		if (!inviter->CastToClient()->Connected())
 		{
 			Log(Logs::General, Logs::Error, "%s attempted to join group while leader %s was zoning.", GetName(), inviter->GetName());
+			Message(13, "Bubba said you can't follow him.");
 		}
 		else if (GroupFollow(inviter->CastToClient()))
 		{
