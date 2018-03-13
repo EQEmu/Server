@@ -10,7 +10,7 @@
 #include "../common/eqemu_logsys.h"
 #ifndef PROTO_H
 #define PROTO_H
-#include "../common/message->pb.h"
+#include "../common/message.pb.h"
 #endif
 #include "../common/servertalk.h"
 #include "../common/string_util.h"
@@ -39,7 +39,7 @@ NatsManager::~NatsManager()
 	nats_Close();
 }
 
-bool NatsManager::connect() {	
+bool NatsManager::connect() {
 	auto ncs = natsConnection_Status(conn);
 	if (ncs == CONNECTED) 
 		return true;
@@ -154,7 +154,7 @@ void NatsManager::OnEmoteMessage(ServerEmoteMessage_Struct* msg) {
 	message->set_message(msg->message);
 	message->set_to(msg->to);	
 	message->set_is_emote(true);
-	SendChannelMessage(message);
+	//SendChannelMessage(message);
 	return;
 }
 
