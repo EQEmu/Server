@@ -29,7 +29,7 @@ public:
 	void GetCommandMessage(eqproto::CommandMessage* message, const char* reply = nullptr);
 	void SendCommandMessage(eqproto::CommandMessage* message, const char* reply = nullptr);
 	void SendAdminMessage(std::string adminMessage);
-	void SendEvent(eqproto::OpCode op, uint32 entity_id, std::string pubMessage);
+	void SendEvent(eqproto::OpCode op, uint32 entity_id, void * buffer, size_t size);
 
 	void OnChannelMessageEvent(uint32 entity_id, ChannelMessage_Struct * cm);
 	void OnSpecialMessageEvent(uint32 entity_id, SpecialMesg_Struct *sm);
