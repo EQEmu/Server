@@ -582,6 +582,10 @@ public:
 		m_Position.z = NewPosition.z; };
 	void TryMoveAlong(float distance, float angle, bool send = true);
 	void ProcessForcedMovement();
+	inline void IncDeltaX(float in) { m_Delta.x += in; }
+	inline void IncDeltaY(float in) { m_Delta.y += in; }
+	inline void IncDeltaZ(float in) { m_Delta.z += in; }
+	inline void SetForcedMovement(int in) { ForcedMovement = in; }
 
 	//AI
 	static uint32 GetLevelCon(uint8 mylevel, uint8 iOtherLevel);
