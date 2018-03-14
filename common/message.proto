@@ -36,14 +36,65 @@ message CommandMessage {
 
 //Entity is full of entity data.
 message Entity {
-  int32 id = 1;
-  string name = 2;  
-  EntityType type = 3; //0 - NPC, 1 - Client
-  int32 hp = 4;
-  int32 level = 5;
-  Position position = 6;
-  int32 race = 7;
-  int32 class = 8;
+  int32 id = 1; //Entity: Unique entity identifier for zone.
+  string name = 2; //Entity: Name of entity
+  EntityType type = 3; //Type of entity
+  int32 hp = 4; //Mob: Current health
+  int32 level = 5; //Mob: Current level
+  Position position = 6; //Mob: Position
+  int32 race = 7; //Mob: Race
+  int32 class = 8; //Mob: Class  
+  int32 max_hp = 9; //Mob: Maximum Hitpoints
+  int64 spawn_timestamp = 10; //Entity: When entity was spawned
+  //SpecialAbility special_ability = 11; //Mob: Special abilities mob contains
+  //AuraInfo aura_info = 12; //Mob: Aura information
+  string lastname = 13; //Mob: Last name. Surname for clients
+  GenderType gender = 14; //Mob: Gender
+  BodyType bodytype = 15; //Mob: Body Type
+  DeityType deity = 16; //Mob: Deity
+  uint32 npctype_id = 17; //Mob: When npc was spawned from db, this is it's entry for npctype
+  float size = 18; //Mob: size of mob
+  float runspeed = 19; //Mob: runspeed
+  //int32 light = 20; //Mob: Light level
+  int32 texture = 21; //Mob: texture
+  int32 helmtexture = 22; //Mob: helm texture
+	int32 ac = 23; //Mob: Armor class
+	int32 atk = 24; //Mob: Attack
+	int32	str = 25; //Mob: Strength
+	int32 sta = 26; //Mob: Stamina
+	int32 dex = 27; //Mob: Dexterity
+	int32 agi = 28; //Mob: Agility
+	int32 int = 29; //Mob: Intelligence
+	int32 wis = 30; //Mob: Wisdom
+	int32 cha = 31; //Mob: Charisma
+	int32	haircolor = 32; //Mob: Hair color
+	int32	beardcolor = 33; //Mob: beard color
+	int32 eyecolor1 = 34; //Mob: eye color left?
+  int32 eyecolor2 = 35; //Mob: eye color right?
+		/*uint8		in_eyecolor2,
+		uint8		in_hairstyle,
+		uint8		in_luclinface,
+		uint8		in_beard,
+		uint32		in_drakkin_heritage,
+		uint32		in_drakkin_tattoo,
+		uint32		in_drakkin_details,
+		EQEmu::TintProfile	in_armor_tint,
+		uint8		in_aa_title,
+		uint8		in_see_invis, // see through invis
+		uint8		in_see_invis_undead, // see through invis vs. undead
+		uint8		in_see_hide,
+		uint8		in_see_improved_hide,
+		int32		in_hp_regen,
+		int32		in_mana_regen,
+		uint8		in_qglobal,
+		uint8		in_maxlevel,
+		uint32		in_scalerate,
+		uint8		in_armtexture,
+		uint8		in_bracertexture,
+		uint8		in_handtexture,
+		uint8		in_legtexture,
+		uint8		in_feettexture
+*/
 }
 
 message Entities {
@@ -320,6 +371,53 @@ enum EntityType {
   Corpse = 4; //Inherits mob
   Door = 5; //Inherits entity
   Object = 6; //Inherits entity
+  Trap = 7; //Inherits entity
+  Beacon = 9; //Inherits mob
+  Encounter = 10; //Inherits mob
+}
+
+enum DeityType {
+  Unknown = 0;
+  Agnostic_LB = 140;
+  Bertoxxulous = 201;
+  BrellSirilis = 202;
+  CazicThule = 203;
+  ErollisiMarr = 204;
+  Bristlebane = 205;
+  Innoruuk = 206;
+  Karana = 207;
+  MithanielMarr = 208;
+  Prexus = 209;
+  Quellious = 210;
+  RallosZek = 211;
+  RodcetNife = 212;
+  SolusekRo = 213;
+  TheTribunal = 214;
+  Tunare = 215;
+  Veeshan = 216;
+  Agnostic = 396;
+}
+
+enum DeityTypeBit {
+  bit_DeityNone = 0x00000000;
+  bit_DeityAgnostic = 0x00000001;
+  bit_DeityBertoxxulous = 0x00000002;
+  bit_DeityBrellSirilis = 0x00000004;
+  bit_DeityCazicThule = 0x00000008;
+  bit_DeityErollisiMarr = 0x00000010;
+  bit_DeityBristlebane = 0x00000020;
+  bit_DeityInnoruuk = 0x00000040;
+  bit_DeityKarana = 0x00000080;
+  bit_DeityMithanielMarr = 0x00000100;
+  bit_DeityPrexus = 0x00000200;
+  bit_DeityQuellious = 0x00000400;
+  bit_DeityRallosZek = 0x00000800;
+  bit_DeityRodcetNife = 0x00001000;
+  bit_DeitySolusekRo = 0x00002000;
+  bit_DeityTheTribunal = 0x00004000;
+  bit_DeityTunare = 0x00008000;
+  bit_DeityVeeshan = 0x00010000;
+  bit_DeityAll = 0xFFFFFFF;
 }
 
 
@@ -427,6 +525,57 @@ enum MessageType {
   ItemSpeech = 338;
   StrikeThrough = 339;
   Stun = 340;
+}
+
+enum BodyType {  
+  //option allow_alias = true;
+  BT_Unknown = 0;
+  BT_Humanoid			= 1;
+	BT_Lycanthrope		= 2;
+	BT_Undead			= 3;
+	BT_Giant			= 4;
+	BT_Construct		= 5;
+	BT_Extraplanar		= 6;
+	BT_Magical			= 7;	//this name might be a bit off
+	BT_SummonedUndead	= 8;
+	BT_RaidGiant		= 9;
+  
+	BT_NoTarget			= 11;	//no name; can't target this bodytype
+	BT_Vampire			= 12;
+	BT_Atenha_Ra		= 13;
+	BT_Greater_Akheva	= 14;
+	BT_Khati_Sha		= 15;
+	BT_Seru				= 16;	//not confirmed....
+	BT_Draz_Nurakk      = 18;
+	BT_Zek				= 19;
+	BT_Luggald			= 20;
+	BT_Animal			= 21;
+	BT_Insect			= 22;
+	BT_Monster			= 23;
+	BT_Summoned			= 24;	//Elemental?
+	BT_Plant			= 25;
+	BT_Dragon			= 26;
+	BT_Summoned2		= 27;
+	BT_Summoned3		= 28;
+
+	BT_VeliousDragon	= 30;	//might not be a tight set
+  
+	BT_Dragon3			= 32;
+	BT_Boxes			= 33;
+	BT_Muramite			= 34;	//tribal dudes
+  
+	BT_NoTarget2		= 60;
+  
+	BT_SwarmPet			= 63;	//is this valid; or made up?
+  
+	BT_InvisMan			= 66;	//no name; seen on 'InvisMan'; can be /targeted
+	BT_Special = 67;
+}
+
+enum GenderType {
+  Male = 0;
+  Female = 1;
+  Neutral = 2;
 }
 
 enum OpCode {

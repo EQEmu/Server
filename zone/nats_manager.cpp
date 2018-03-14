@@ -325,9 +325,7 @@ void NatsManager::GetCommandMessage(eqproto::CommandMessage* message, const char
 					continue;
 				auto npc = entry.second;
 				auto entity = entities->add_entities();
-				entity->set_id(npc->GetID());
-				entity->set_type(eqproto::EntityType::NPC);
-				entity->set_name(npc->GetName());
+				EncodeEntity(npc, entity);
 			}
 
 			if (!entities->SerializeToString(&entityPayload)) {
@@ -348,11 +346,11 @@ void NatsManager::GetCommandMessage(eqproto::CommandMessage* message, const char
 				if (entry.second == nullptr)
 					continue;
 				auto client = entry.second;
+				
 				auto entity = entities->add_entities();
-
-				entity->set_type(eqproto::EntityType::Client);
+				//EncodeEntity(client, entity);		
+				entity->set_id(client->GetID());
 				entity->set_name(client->GetName());
-				entity->set_id(client->GetID());				
 			}
 
 			if (!entities->SerializeToString(&entityPayload)) {
@@ -374,16 +372,7 @@ void NatsManager::GetCommandMessage(eqproto::CommandMessage* message, const char
 
 				auto mob = entry.second;
 				auto entity = entities->add_entities();
-				entity->set_type(eqproto::EntityType::Mob);
-				if (mob->IsClient())
-					entity->set_type(eqproto::EntityType::Client);
-				if (mob->IsNPC())
-					entity->set_type(eqproto::EntityType::NPC);
-				if (mob->IsMerc())
-					entity->set_type(eqproto::EntityType::Mercenary);
-
-				entity->set_id(mob->GetID());
-				entity->set_name(mob->GetName());
+				EncodeEntity(mob, entity);
 			}
 
 			if (!entities->SerializeToString(&entityPayload)) {
@@ -620,6 +609,92 @@ bool NatsManager::isEntitySubscribed(const uint16 ID) {
 		return false;
 	return true;
 }
+
+void NatsManager::EncodeEntity(Entity * entity, eqproto::Entity * out)
+{	
+	out->set_id(entity->GetID());
+	out->set_name(entity->GetName());
+	out->set_spawn_timestamp(entity->GetSpawnTimeStamp());
+
+	if (entity->IsMob()) {
+		out->set_type(eqproto::EntityType::Mob);
+		Mob* mob = entity->CastToMob();
+		out->set_hp(mob->GetHP());
+		out->set_level(mob->GetLevel());
+		eqproto::Position* pos = google::protobuf::Arena::CreateMessage<eqproto::Position>(&the_arena);
+		pos->set_x(mob->GetX());
+		pos->set_y(mob->GetY());
+		pos->set_z(mob->GetZ());
+		pos->set_h(mob->GetHeading());
+		out->set_allocated_position(pos);
+
+		out->set_race(mob->GetRace());
+		out->set_class_(mob->GetClass());
+		out->set_max_hp(mob->GetMaxHP());
+		//TODO: SpecialAbility
+		//TODO: AuraInfo
+		out->set_lastname(mob->GetLastName());
+		out->set_gender(static_cast<eqproto::GenderType>(mob->GetGender()));
+		out->set_bodytype(static_cast<eqproto::BodyType>(mob->GetBodyType()));
+		out->set_deity(static_cast<eqproto::DeityType>(mob->GetDeity()));
+		out->set_npctype_id(mob->GetNPCTypeID());
+		out->set_size(mob->GetSize());
+		out->set_runspeed(mob->GetRunspeed());
+		//TODO: out->set_light(mob->GetLight)
+		out->set_texture(mob->GetTexture());
+		out->set_helmtexture(mob->GetHelmTexture());
+		out->set_ac(mob->GetAC());
+		out->set_atk(mob->GetATK());
+		out->set_str(mob->GetSTR());
+		out->set_sta(mob->GetSTA());
+		out->set_dex(mob->GetDEX());
+		out->set_agi(mob->GetAGI());
+		out->set_int_(mob->GetINT());
+		out->set_wis(mob->GetWIS());
+		out->set_cha(mob->GetCHA());
+		out->set_haircolor(mob->GetHairColor());
+		out->set_beardcolor(mob->GetBeardColor());
+		out->set_eyecolor1(mob->GetEyeColor1());
+		out->set_eyecolor2(mob->GetEyeColor2());
+		
+		if (mob->IsClient()) {
+			out->set_type(eqproto::EntityType::Client);
+			Client *client = entity->CastToClient();
+		}
+		if (mob->IsNPC()) {
+			out->set_type(eqproto::EntityType::NPC);
+			NPC *npc = entity->CastToNPC();
+
+			if (npc->IsMerc()) {
+				out->set_type(eqproto::EntityType::Mercenary);
+			}
+		}
+		if (mob->IsCorpse()) {
+			out->set_type(eqproto::EntityType::Corpse);
+
+		}
+		if (mob->IsBeacon()) {
+			out->set_type(eqproto::EntityType::Beacon);
+		}
+		if (mob->IsEncounter()) {
+			out->set_type(eqproto::EntityType::Encounter);
+		}
+	}
+
+	if (entity->IsDoor()) {
+		out->set_type(eqproto::EntityType::Door);
+
+	}
+
+	if (entity->IsObject()) {
+		out->set_type(eqproto::EntityType::Object);
+	}
+
+	if (entity->IsTrap()) {
+		out->set_type(eqproto::EntityType::Trap);
+	}
+}
+
 
 
 void NatsManager::OnDeathEvent(Death_Struct* d) {

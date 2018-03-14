@@ -42,7 +42,8 @@ public:
 	void OnClientUpdateEvent(uint32 entity_id, PlayerPositionUpdateServer_Struct * spu);
 	void OnAnimationEvent(uint32 entity_id, Animation_Struct * anim);
 	void OnDeathEvent(Death_Struct * d);
-	
+
+
 protected:
 	bool connect();
 	Timer nats_timer;
@@ -57,6 +58,8 @@ protected:
 	natsSubscription *zoneInstanceChannelMessageSub = NULL;
 	natsSubscription *zoneCommandMessageSub = NULL;
 	natsSubscription *zoneInstanceCommandMessageSub = NULL;
+
+	void EncodeEntity(Entity *entity, eqproto::Entity *out);
 };
 
 #endif
