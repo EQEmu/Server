@@ -386,6 +386,26 @@ message SpawnEvent {
 	bool show_name= 100;
 }
 
+message AlternateAdvancementStatsEvent {
+  uint32 experience = 1;
+  uint32 unspent = 2;
+  uint32 unknown006 = 3;
+  uint32 percentage = 4;
+  uint32 unknown009 = 5;
+}
+
+message ZoneCompleteEvent {
+
+}
+
+message UseAAEvent {
+  uint32 begin = 1;
+	uint32 ability = 2;
+	uint32 end = 3;
+  uint32 action = 4;
+  uint32 target_id = 5;
+  uint32 exp_value = 6;
+}
 
 //EntityType will attempt to identify an entity to it's upper-most type by default
 enum EntityType {
@@ -606,11 +626,11 @@ enum GenderType {
 enum OpCode {
   //option allow_alias = true;
   OP_Unknown = 0;
-  OP_ExploreUnknown = 1;
-  OP_0x0193 = 2;
-  OP_0x0347 = 3;
-  OP_AAAction = 4;
-  OP_AAExpUpdate = 5;
+  OP_ExploreUnknown = 1; //Not used
+  OP_0x0193 = 2; //Not used
+  OP_ZoneCompleted = 3; //supported, internally OP_0x0347
+  OP_AAAction = 4; //supported
+  OP_AAExpUpdate = 5; //supported
   OP_AcceptNewTask = 6;
   OP_AckPacket = 7;
   OP_Action = 8;

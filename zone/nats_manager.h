@@ -31,18 +31,21 @@ public:
 	void SendAdminMessage(std::string adminMessage);
 	void SendEvent(eqproto::OpCode op, uint32 entity_id, void * buffer, size_t size);
 
-	void OnChannelMessageEvent(uint32 entity_id, ChannelMessage_Struct * cm);
-	void OnSpecialMessageEvent(uint32 entity_id, SpecialMesg_Struct *sm);
-	void OnEntityEvent(const EmuOpcode op, uint32 entity_id, uint32 target_id);
-	void OnSpawnEvent(const EmuOpcode op, uint32 entity_id, Spawn_Struct * spawn);
-	void OnWearChangeEvent(uint32 entity_id, WearChange_Struct * wc);
-	void OnDeleteSpawnEvent(uint32 entity_id, DeleteSpawn_Struct * ds);
-	void OnHPEvent(const EmuOpcode op, uint32 entity_id, uint32 cur_hp, uint32 max_hp);
-	void OnDamageEvent(uint32 entity_id, CombatDamage_Struct * cd);
-	void OnClientUpdateEvent(uint32 entity_id, PlayerPositionUpdateServer_Struct * spu);
+	void OnAlternateAdvancementStats(uint32 entity_id, AltAdvStats_Struct * aas);
+	void OnAlternateAdvancementAction(uint32 entity_id, UseAA_Struct * uaas);
+	void OnAlternateAdvancementActionRequest(uint32 entity_id, AA_Action* action);
 	void OnAnimationEvent(uint32 entity_id, Animation_Struct * anim);
+	void OnChannelMessageEvent(uint32 entity_id, ChannelMessage_Struct * cm);
+	void OnClientUpdateEvent(uint32 entity_id, PlayerPositionUpdateServer_Struct * spu);
+	void OnDamageEvent(uint32 entity_id, CombatDamage_Struct * cd);
 	void OnDeathEvent(Death_Struct * d);
-
+	void OnDeleteSpawnEvent(uint32 entity_id, DeleteSpawn_Struct * ds);
+	void OnEntityEvent(const EmuOpcode op, uint32 entity_id, uint32 target_id);
+	void OnHPEvent(const EmuOpcode op, uint32 entity_id, uint32 cur_hp, uint32 max_hp);
+	void OnSpawnEvent(const EmuOpcode op, uint32 entity_id, Spawn_Struct * spawn);
+	void OnSpecialMessageEvent(uint32 entity_id, SpecialMesg_Struct *sm);
+	void OnWearChangeEvent(uint32 entity_id, WearChange_Struct * wc);
+	void OnZoneComplete(uint32 entity_id);
 
 protected:
 	bool connect();

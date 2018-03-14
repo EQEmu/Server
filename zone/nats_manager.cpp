@@ -1276,3 +1276,98 @@ void NatsManager::OnAnimationEvent(uint32 entity_id, Animation_Struct *anim) {
 	}
 	SendEvent(op, entity_id, event_buffer, event_size);
 }
+
+
+void NatsManager::OnAlternateAdvancementStats(uint32 entity_id, AltAdvStats_Struct * aas) {
+	if (!connect())
+		return;
+	if (entity_id == 0)
+		return;
+	if (!isEntityEventAllEnabled && !isEntitySubscribed(entity_id))
+		return;
+
+	auto op = eqproto::OP_AAExpUpdate;
+
+	eqproto::AlternateAdvancementStatsEvent* event = google::protobuf::Arena::CreateMessage<eqproto::AlternateAdvancementStatsEvent>(&the_arena);
+	event->set_experience(aas->experience);
+	event->set_unspent(aas->unspent);
+	event->set_unknown006(aas->unknown006);
+	//event->set_unknown009(aas->unknown009);
+
+	size_t event_size = event->ByteSizeLong();
+	void *event_buffer = malloc(event_size);
+	if (!event->SerializeToArray(event_buffer, event_size)) {
+		Log(Logs::General, Logs::NATS, "zone.%s.%d.entity.%d.event.out: (OP: %d) failed to serialize message", subscribedZoneName.c_str(), subscribedZoneInstance, entity_id, op);
+		return;
+	}
+	SendEvent(op, entity_id, event_buffer, event_size);
+}
+
+
+void NatsManager::OnZoneComplete(uint32 entity_id) {
+	if (!connect())
+		return;
+	if (entity_id == 0)
+		return;
+	if (!isEntityEventAllEnabled && !isEntitySubscribed(entity_id))
+		return;
+
+	auto op = eqproto::OP_ZoneCompleted;
+
+	eqproto::ZoneCompleteEvent* event = google::protobuf::Arena::CreateMessage<eqproto::ZoneCompleteEvent>(&the_arena);
+
+	size_t event_size = event->ByteSizeLong();
+	void *event_buffer = malloc(event_size);
+	if (!event->SerializeToArray(event_buffer, event_size)) {
+		Log(Logs::General, Logs::NATS, "zone.%s.%d.entity.%d.event.out: (OP: %d) failed to serialize message", subscribedZoneName.c_str(), subscribedZoneInstance, entity_id, op);
+		return;
+	}
+	SendEvent(op, entity_id, event_buffer, event_size);
+}
+
+void NatsManager::OnAlternateAdvancementAction(uint32 entity_id, UseAA_Struct * uaas) {
+	if (!connect())
+		return;
+	if (entity_id == 0)
+		return;
+	if (!isEntityEventAllEnabled && !isEntitySubscribed(entity_id))
+		return;
+
+	auto op = eqproto::OP_AAAction;
+
+	eqproto::UseAAEvent* event = google::protobuf::Arena::CreateMessage<eqproto::UseAAEvent>(&the_arena);
+	event->set_begin(uaas->begin);
+	event->set_ability(uaas->ability);
+	event->set_end(uaas->end);
+	size_t event_size = event->ByteSizeLong();
+	void *event_buffer = malloc(event_size);
+	if (!event->SerializeToArray(event_buffer, event_size)) {
+		Log(Logs::General, Logs::NATS, "zone.%s.%d.entity.%d.event.out: (OP: %d) failed to serialize message", subscribedZoneName.c_str(), subscribedZoneInstance, entity_id, op);
+		return;
+	}
+	SendEvent(op, entity_id, event_buffer, event_size);
+}
+
+void NatsManager::OnAlternateAdvancementActionRequest(uint32 entity_id, AA_Action* action) {
+	if (!connect())
+		return;
+	if (entity_id == 0)
+		return;
+	if (!isEntityEventAllEnabled && !isEntitySubscribed(entity_id))
+		return;
+
+	auto op = eqproto::OP_AAAction;
+
+	eqproto::UseAAEvent* event = google::protobuf::Arena::CreateMessage<eqproto::UseAAEvent>(&the_arena);
+	event->set_ability(action->ability);
+	event->set_target_id(action->target_id);
+	event->set_exp_value(action->exp_value);
+	event->set_action(action->action);
+	size_t event_size = event->ByteSizeLong();
+	void *event_buffer = malloc(event_size);
+	if (!event->SerializeToArray(event_buffer, event_size)) {
+		Log(Logs::General, Logs::NATS, "zone.%s.%d.entity.%d.event.out: (OP: %d) failed to serialize message", subscribedZoneName.c_str(), subscribedZoneInstance, entity_id, op);
+		return;
+	}
+	SendEvent(op, entity_id, event_buffer, event_size);
+}
