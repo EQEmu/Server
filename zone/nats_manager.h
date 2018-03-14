@@ -32,6 +32,7 @@ public:
 	void SendEvent(eqproto::OpCode op, uint32 entity_id, std::string pubMessage);
 
 	void OnChannelMessageEvent(uint32 entity_id, ChannelMessage_Struct * cm);
+	void OnSpecialMessageEvent(uint32 entity_id, SpecialMesg_Struct *sm);
 	void OnEntityEvent(const EmuOpcode op, uint32 entity_id, uint32 target_id);
 	void OnSpawnEvent(const EmuOpcode op, uint32 entity_id, Spawn_Struct * spawn);
 	void OnWearChangeEvent(uint32 entity_id, WearChange_Struct * wc);

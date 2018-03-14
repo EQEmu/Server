@@ -5,7 +5,7 @@ option cc_enable_arenas = true;
 option optimize_for = SPEED;
 
 message ChannelMessage {
-  int32 chan_num = 1;
+  MessageType number = 1;
   int32 language = 2;
   string from = 3;
   string to = 4;
@@ -138,10 +138,21 @@ message ChannelMessageEvent {
   string target_name = 1; // Tell recipient
   string sender = 2;			// The senders name (len might be wrong)
   uint32	language = 3;			// Language
-  uint32	chan_num = 4;			// Channel
+  MessageType	number = 4;			// Channel number
   uint32	cm_unknown4 = 5;		// ***Placeholder
   uint32	skill_in_language = 6;	// The players skill in this language? might be wrong
   string	message = 7;			// Variable length message
+}
+
+
+//OP_SpecialMesg
+message SpecialMessageEvent {
+  string header = 1;				// 04 04 00 <-- for #emote style msg
+  MessageType number = 2;				// Color of text (see MT_*** below)
+	uint32	target_spawn_id = 3;		// Who is it being said to?
+  string sayer = 4;				// Who is the source of the info
+  uint32	unknown12 = 5;
+  string	message = 6;				// What is being said?
 }
 
 //OP_WearChange
@@ -309,6 +320,113 @@ enum EntityType {
   Corpse = 4; //Inherits mob
   Door = 5; //Inherits entity
   Object = 6; //Inherits entity
+}
+
+
+enum MessageType {
+  //option allow_alias = true;
+  WhiteSmoke = 0;	// FF|F0F0F0
+  DimGray = 1;	// FF|606060
+	Green = 2;	// FF|008000
+	BrightBlue = 3;	// FF|0040FF
+	Magenta = 5;	// FF|F000F0
+	Gray = 6;	// FF|808080
+	LightGray = 7;	// FF|E0E0E0
+	WhiteSmoke2 = 10;	// FF|F0F0F0
+	DarkGray = 12;	// FF|A0A0A0
+	Red=  13;	// FF|F00000
+	Lime = 14;	// FF|00F000
+	Yellow = 15;	// FF|F0F000
+	Blue = 16;	// FF|0000F0
+	LightNavy = 17;	// FF|0000AF
+	Cyan = 18;	// FF|00F0F0
+	Black = 20;	// FF|000000
+	
+	Say = 256;
+  Tell = 257;
+  Group = 258;
+  Guild = 259;
+  OOC = 260;
+  Auction = 261;
+  Shout = 262;
+  Emote = 263;
+  Spells = 264;
+  YouHitOther = 265;
+  OtherHitsYou = 266;
+  YouMissOther = 267;
+  OtherMissesYou = 268;
+  Broadcasts = 269;
+  Skills = 270;
+  Disciplines = 271;
+  Unused1 = 272;
+  DefaultText = 273;
+  Unused2 = 274;
+  MerchantOffer = 275;
+  MerchantBuySell = 276;
+  YourDeath = 277;
+  OtherDeath = 278;
+  OtherHits = 279;
+  OtherMisses = 280;
+  Who = 281;
+  YellForHelp = 282;
+  NonMelee = 283;
+  WornOff = 284;
+  MoneySplit = 285;
+  LootMessages = 286;
+  DiceRoll = 287;
+  OtherSpells = 288;
+  SpellFailure = 289;
+  Chat = 290;
+  Channel1 = 291;
+  Channel2 = 292;
+  Channel3 = 293;
+  Channel4 = 294;
+  Channel5 = 295;
+  Channel6 = 296;
+  Channel7 = 297;
+  Channel8 = 298;
+  Channel9 = 299;
+  Channel10 = 300;
+  CritMelee = 301;
+  SpellCrits = 302;
+  TooFarAway = 303;
+  NPCRampage = 304;
+  NPCFlurry = 305;
+  NPCEnrage = 306;
+  SayEcho = 307;
+  TellEcho = 308;
+  GroupEcho = 309;
+  GuildEcho = 310;
+  OOCEcho = 311;
+  AuctionEcho = 312;
+  ShoutECho = 313;
+  EmoteEcho = 314;
+  Chat1Echo = 315;
+  Chat2Echo = 316;
+  Chat3Echo = 317;
+  Chat4Echo = 318;
+  Chat5Echo = 319;
+  Chat6Echo = 320;
+  Chat7Echo = 321;
+  Chat8Echo = 322;
+  Chat9Echo = 323;
+  Chat10Echo = 324;
+  DoTDamage = 325;
+  ItemLink = 326;
+  RaidSay = 327;
+  MyPet = 328;
+  DS = 329;
+  Leadership = 330;
+  PetFlurry = 331;
+  PetCrit = 332;
+  FocusEffect = 333;
+  Experience = 334;
+  System = 335;
+  PetSpell = 336;
+  PetResponse = 337;
+  ItemSpeech = 338;
+  StrikeThrough = 339;
+  Stun = 340;
 }
 
 enum OpCode {
@@ -791,7 +909,7 @@ enum OpCode {
   OP_SpawnAppearance = 475;
   OP_SpawnDoor = 476;
   OP_SpawnPositionUpdate = 477;
-  OP_SpecialMesg = 478;
+  OP_SpecialMesg = 478; //supported
   OP_SpellEffect = 479;
   OP_Split = 480;
   OP_Stamina = 481;

@@ -137,9 +137,9 @@ void NatsManager::GetChannelMessage(eqproto::ChannelMessage* message, const char
 	}
 
 	if (message->distance() > 0)
-		entity_list.MessageClose(mob, message->skip_sender(), message->distance(), message->chan_num(), message->message().c_str());
+		entity_list.MessageClose(mob, message->skip_sender(), message->distance(), message->number(), message->message().c_str());
 	else
-		mob->Message(message->chan_num(), message->message().c_str());
+		mob->Message(message->number(), message->message().c_str());
 
 	message->set_result("1");
 	SendChannelMessage(message, reply);
@@ -668,8 +668,8 @@ void NatsManager::OnChannelMessageEvent(uint32 entity_id, ChannelMessage_Struct*
 	
 	event->set_target_name(cm->targetname);
 	event->set_sender(cm->sender);
-	event->set_language(cm->language);
-	event->set_chan_num(cm->chan_num);
+	event->set_language(cm->language);	
+	event->set_number((eqproto::MessageType)cm->chan_num);
 	event->set_cm_unknown4(*cm->cm_unknown4);
 	event->set_skill_in_language(cm->skill_in_language);
 	event->set_message(cm->message);
@@ -679,6 +679,33 @@ void NatsManager::OnChannelMessageEvent(uint32 entity_id, ChannelMessage_Struct*
 		return; 
 	}
 
+}
+
+void NatsManager::OnSpecialMessageEvent(uint32 entity_id, SpecialMesg_Struct* sm) {	
+	if (!connect())
+		return;
+	if (entity_id == 0)
+		return;
+	if (!isEntityEventAllEnabled && !isEntitySubscribed(entity_id))
+		return;
+
+	auto op = eqproto::OP_SpecialMesg;
+
+	std::string pubMessage;
+	eqproto::SpecialMessageEvent* event = google::protobuf::Arena::CreateMessage<eqproto::SpecialMessageEvent>(&the_arena);
+	event->set_header(sm->header);
+	event->set_number(static_cast<eqproto::MessageType>(sm->msg_type));
+	event->set_target_spawn_id(sm->target_spawn_id);
+	event->set_sayer(sm->sayer);
+	event->set_unknown12(*sm->unknown12);
+	event->set_message(sm->message);
+	
+	if (!event->SerializeToString(&pubMessage)) {
+		Log(Logs::General, Logs::NATS, "zone.%s.%d.entity.%d.event.out: (OP: %d) failed to serialize message to string", subscribedZoneName.c_str(), subscribedZoneInstance, entity_id, op);
+		return;
+	}
+
+	SendEvent(op, entity_id, pubMessage);
 }
 
 void NatsManager::OnEntityEvent(const EmuOpcode op, uint32 entity_id, uint32 target_id) {

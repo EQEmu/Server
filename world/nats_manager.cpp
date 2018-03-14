@@ -135,7 +135,7 @@ void NatsManager::OnChannelMessage(ServerChannelMessage_Struct* msg) {
 	message->set_guilddbid(msg->guilddbid);
 	message->set_noreply(msg->noreply);
 	message->set_queued(msg->queued);
-	message->set_chan_num(msg->chan_num);
+	message->set_number(static_cast<eqproto::MessageType>(msg->chan_num));
 	message->set_message(msg->message);
 	message->set_to(msg->to);
 	message->set_language(msg->language);
@@ -297,9 +297,9 @@ void NatsManager::GetChannelMessage(eqproto::ChannelMessage* message, const char
 	tmpname[0] = '*';
 	strcpy(&tmpname[1], message->from().c_str());	
 	//TODO: add To support on tells	
-	int channel = message->chan_num();
+	int channel = message->number();
 	if (channel < 1) 
-		channel = 5; //default to ooc
+		channel = MT_OOC; //default to ooc
 	zoneserver_list.SendChannelMessage(tmpname, 0, channel, message->language(), message->message().c_str());	
 	message->set_result("1");
 	SendChannelMessage(message, reply);

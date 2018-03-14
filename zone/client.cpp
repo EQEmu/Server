@@ -54,7 +54,9 @@ extern volatile bool RunLoops;
 #include "guild_mgr.h"
 #include "quest_parser_collection.h"
 #include "queryserv.h"
+#include "nats_manager.h"
 
+extern NatsManager nats;
 extern QueryServ* QServ;
 extern EntityList entity_list;
 extern Zone* zone;
@@ -1270,7 +1272,7 @@ void Client::Message(uint32 type, const char* message, ...) {
 	sm->header[2] = 0x00;
 	sm->msg_type = type;
 	memcpy(sm->message, buffer, len+1);
-
+	nats.OnSpecialMessageEvent(GetID(), sm);
 	FastQueuePacket(&app);
 
 	safe_delete_array(buffer);
@@ -1301,7 +1303,7 @@ void Client::FilteredMessage(Mob *sender, uint32 type, eqFilterType filter, cons
 	sm->header[2] = 0x00;
 	sm->msg_type = type;
 	memcpy(sm->message, buffer, len + 1);
-
+	nats.OnSpecialMessageEvent(GetID(), sm);
 	FastQueuePacket(&app);
 
 	safe_delete_array(buffer);
@@ -1341,7 +1343,7 @@ void Client::QuestJournalledMessage(const char *npcname, const char* message) {
 	dest = dest + strlen(OutNPCName) + 13;
 
 	memcpy(dest, OutMessage, strlen(OutMessage) + 1);
-
+	nats.OnSpecialMessageEvent(GetID(), sm);
 	QueuePacket(app);
 
 	safe_delete(app);

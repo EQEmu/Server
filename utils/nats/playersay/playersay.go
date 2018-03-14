@@ -44,15 +44,15 @@ func main() {
 	}
 
 	go entityEventSubscriber(zone, instance, entityID)
-	zoneChannel(zone, instance, entityID, eqproto.EntityType_Client, 256, "Hello, World!")
+	zoneChannel(zone, instance, entityID, eqproto.EntityType_Client, eqproto.MessageType_Say, "Hello, World!")
 	time.Sleep(1000 * time.Second)
 }
 
-func zoneChannel(zone string, instance int64, fromEntityID int32, fromEntityType eqproto.EntityType, chanNumber int32, message string) {
+func zoneChannel(zone string, instance int64, fromEntityID int32, fromEntityType eqproto.EntityType, chanNumber eqproto.MessageType, message string) {
 
 	msg := &eqproto.ChannelMessage{
 		Message:        message,
-		ChanNum:        chanNumber,
+		Number:         chanNumber,
 		FromEntityId:   fromEntityID,
 		FromEntityType: fromEntityType,
 		Distance:       500,
@@ -197,7 +197,6 @@ func entityEventSubscriber(zone string, instance int64, entityID int32) {
 		return
 	}*/
 
-	var opCode int64
 	var index int
 	channel := fmt.Sprintf("zone.%s.%d.entity.%d.event.out", zone, instance, entityID)
 	nc.Subscribe(channel, func(m *nats.Msg) {
@@ -225,12 +224,14 @@ func entityEventSubscriber(zone string, instance int64, entityID int32) {
 			eventPayload = &eqproto.DeleteSpawnEvent{}
 		case eqproto.OpCode_OP_Damage:
 			eventPayload = &eqproto.DamageEvent{}
+		case eqproto.OpCode_OP_SpecialMesg:
+			eventPayload = &eqproto.SpecialMessageEvent{}
 		default:
 			return
 		}
 		err = proto.Unmarshal(event.Payload, eventPayload)
 		if err != nil {
-			fmt.Println("Invalid data passed for opcode", eqproto.OpCode(opCode), err.Error(), string(m.Data[index+1:]))
+			fmt.Println("Invalid data passed for opcode", event.Op, err.Error(), string(m.Data[index+1:]))
 			return
 		}
 		fmt.Println(m.Subject, event.Op, eventPayload)

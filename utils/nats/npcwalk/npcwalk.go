@@ -234,6 +234,8 @@ func entityEventSubscriber(zone string, instance int, entityID int64) {
 			eventPayload = &eqproto.DeleteSpawnEvent{}
 		case eqproto.OpCode_OP_Damage:
 			eventPayload = &eqproto.DamageEvent{}
+		case eqproto.OpCode_OP_SpecialMesg:
+			eventPayload = &eqproto.SpecialMessageEvent{}
 		default:
 			return
 		}
