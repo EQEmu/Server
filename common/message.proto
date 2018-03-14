@@ -41,7 +41,7 @@ message Entity {
   EntityType type = 3; //Type of entity
   int32 hp = 4; //Mob: Current health
   int32 level = 5; //Mob: Current level
-  Position position = 6; //Mob: Position
+  Position position = 6; //Mob, Door: Position
   int32 race = 7; //Mob: Race
   int32 class = 8; //Mob: Class  
   int32 max_hp = 9; //Mob: Maximum Hitpoints
@@ -53,7 +53,7 @@ message Entity {
   BodyType bodytype = 15; //Mob: Body Type
   DeityType deity = 16; //Mob: Deity
   uint32 npctype_id = 17; //Mob: When npc was spawned from db, this is it's entry for npctype
-  float size = 18; //Mob: size of mob
+  float size = 18; //Mob, Door: size of mob
   float runspeed = 19; //Mob: runspeed
   //int32 light = 20; //Mob: Light level
   int32 texture = 21; //Mob: texture
@@ -95,6 +95,31 @@ message Entity {
 		uint8		in_legtexture,
 		uint8		in_feettexture
 */
+
+
+//DOOR
+
+  uint32	door_db_id = 100; //Door: databse ID of door
+	uint32	door_id = 101; //Door: Unique ID of door
+	//string door_zone_name = 102; //Door: zone name of door not needed?
+	string door_name = 103;	 //Door: name
+	int32		door_incline = 104; //Door: Incline
+	uint32	door_opentype = 105; //Door: Open type
+	uint32	door_guild_id = 106; //Door: Guild ID
+	uint32	door_lockpick = 107;  //Door: Lockpick
+	uint32	door_keyitem = 108; //Door: Key item
+	uint32	door_nokeyring = 109; //Door: No key ring
+	uint32	door_trigger_door_id = 110; //Door: trigger door
+	uint32	door_trigger_type = 111; //Door: trigger type
+	uint32	door_param = 112; //Door: parameter
+	int32		door_invert_state = 113; //Door: invert state
+	bool	door_disable_timer = 114; //Door: is timer disabled?
+	bool	door_is_open = 115; //Door: is it currently open?	
+	//string	door_destination_zone = 116; //Door: destination zone TODO: not exposed
+	//int32		door_destination_instance_id = 117; //Door: destination instance TODO: not exposed
+	//Position door_destination_position = 118; //Door: destination position TODO: not exposed
+	uint32	door_is_ldon = 119; //Door: is it ldon?
+	uint32	door_client_version_mask = 120; //Door: client version mask
 }
 
 message Entities {

@@ -1,6 +1,9 @@
 #include "entity.h"
 #include "mob.h"
 #include "client.h"
+#include "doors.h"
+#include "corpse.h"
+#include "object.h"
 #include "event_codes.h"
 #include "nats.h"
 #include "zone_config.h"
@@ -318,70 +321,164 @@ void NatsManager::GetCommandMessage(eqproto::CommandMessage* message, const char
 		eqproto::Entities* entities = google::protobuf::Arena::CreateMessage<eqproto::Entities>(&the_arena);
 		if (message->params(0).compare("npc") == 0) {
 
-			auto npcs = entity_list.GetNPCList();
-			auto it = npcs.begin();
-			for (const auto &entry : npcs) {
+			auto ents = entity_list.GetNPCList();
+			auto it = ents.begin();
+			for (const auto &entry : ents) {
 				if (entry.second == nullptr)
 					continue;
-				auto npc = entry.second;
+				auto ent = entry.second;
 				auto entity = entities->add_entities();
-				EncodeEntity(npc, entity);
+				EncodeEntity(ent, entity);
 			}
 
-			if (!entities->SerializeToString(&entityPayload)) {
+			size_t size = entities->ByteSizeLong();
+			void *buffer = malloc(size);			
+			if (!entities->SerializeToArray(buffer, size)) {
 				message->set_result("Failed to serialize entitiy result");
 				SendCommandMessage(message, reply);
 				return;
 			}
-
 			message->set_result("1");
-			message->set_payload(entityPayload.c_str());
+			message->set_payload(buffer, size);
 			SendCommandMessage(message, reply);
 			return;
 		}
 		else if (message->params(0).compare("client") == 0) {
-			auto clients = entity_list.GetClientList();
-			auto it = clients.begin();
-			for (const auto &entry : clients) {
+			auto ents = entity_list.GetClientList();
+			auto it = ents.begin();
+			for (const auto &entry : ents) {
 				if (entry.second == nullptr)
 					continue;
-				auto client = entry.second;
-				
+				auto ent = entry.second;
 				auto entity = entities->add_entities();
-				//EncodeEntity(client, entity);		
-				entity->set_id(client->GetID());
-				entity->set_name(client->GetName());
+				EncodeEntity(ent, entity);
 			}
 
-			if (!entities->SerializeToString(&entityPayload)) {
+			size_t size = entities->ByteSizeLong();
+			void *buffer = malloc(size);
+			if (!entities->SerializeToArray(buffer, size)) {
 				message->set_result("Failed to serialize entitiy result");
 				SendCommandMessage(message, reply);
 				return;
 			}
 			message->set_result("1");
-			message->set_payload(entityPayload.c_str());
+			message->set_payload(buffer, size);
 			SendCommandMessage(message, reply);
 			return;
 		}
 		else if (message->params(0).compare("mob") == 0) {
-			auto mobs = entity_list.GetMobList();
-			auto it = mobs.begin();
-			for (const auto &entry : mobs) {
+			auto ents = entity_list.GetMobList();
+			auto it = ents.begin();
+			for (const auto &entry : ents) {
 				if (entry.second == nullptr)
 					continue;
-
-				auto mob = entry.second;
+				auto ent = entry.second;
 				auto entity = entities->add_entities();
-				EncodeEntity(mob, entity);
+				EncodeEntity(ent, entity);
 			}
 
-			if (!entities->SerializeToString(&entityPayload)) {
+			size_t size = entities->ByteSizeLong();
+			void *buffer = malloc(size);
+			if (!entities->SerializeToArray(buffer, size)) {
 				message->set_result("Failed to serialize entitiy result");
 				SendCommandMessage(message, reply);
 				return;
 			}
 			message->set_result("1");
-			message->set_payload(entityPayload.c_str());
+			message->set_payload(buffer, size);
+			SendCommandMessage(message, reply);
+			return;
+		}
+		else if (message->params(0).compare("mercenary") == 0) {
+			auto ents = entity_list.GetMercList();
+			auto it = ents.begin();
+			for (const auto &entry : ents) {
+				if (entry.second == nullptr)
+					continue;
+				auto ent = entry.second;
+				auto entity = entities->add_entities();
+				EncodeEntity(ent, entity);
+			}
+
+			size_t size = entities->ByteSizeLong();
+			void *buffer = malloc(size);
+			if (!entities->SerializeToArray(buffer, size)) {
+				message->set_result("Failed to serialize entitiy result");
+				SendCommandMessage(message, reply);
+				return;
+			}
+			message->set_result("1");
+			message->set_payload(buffer, size);
+			SendCommandMessage(message, reply);
+			return;
+		}
+		else if (message->params(0).compare("corpse") == 0) {
+			auto ents = entity_list.GetCorpseList();
+			auto it = ents.begin();
+			for (const auto &entry : ents) {
+				if (entry.second == nullptr)
+					continue;
+				Corpse* ent = entry.second;
+				auto entity = entities->add_entities();				
+				EncodeEntity(ent, entity);
+			}
+
+			size_t size = entities->ByteSizeLong();
+			void *buffer = malloc(size);
+			if (!entities->SerializeToArray(buffer, size)) {
+				message->set_result("Failed to serialize entitiy result");
+				SendCommandMessage(message, reply);
+				return;
+			}
+			message->set_result("1");
+			message->set_payload(buffer, size);
+			SendCommandMessage(message, reply);
+			return;
+		}
+		else if (message->params(0).compare("door") == 0) {
+			auto ents = entity_list.GetDoorsList();
+			auto it = ents.begin();
+			for (const auto &entry : ents) {
+				if (entry.second == nullptr)
+					continue;
+				Doors* ent = entry.second;
+				
+				auto entity = entities->add_entities();
+				EncodeEntity(ent, entity);
+			}
+
+			size_t size = entities->ByteSizeLong();
+			void *buffer = malloc(size);
+			if (!entities->SerializeToArray(buffer, size)) {
+				message->set_result("Failed to serialize entitiy result");
+				SendCommandMessage(message, reply);
+				return;
+			}
+			message->set_result("1");
+			message->set_payload(buffer, size);
+			SendCommandMessage(message, reply);
+			return;
+		}
+		else if (message->params(0).compare("object") == 0) {
+			auto ents = entity_list.GetObjectList();
+			auto it = ents.begin();
+			for (const auto &entry : ents) {
+				if (entry.second == nullptr)
+					continue;
+				Object * ent = entry.second;
+				auto entity = entities->add_entities();
+				EncodeEntity(ent, entity);
+			}
+
+			size_t size = entities->ByteSizeLong();
+			void *buffer = malloc(size);
+			if (!entities->SerializeToArray(buffer, size)) {
+				message->set_result("Failed to serialize entitiy result");
+				SendCommandMessage(message, reply);
+				return;
+			}
+			message->set_result("1");
+			message->set_payload(buffer, size);
 			SendCommandMessage(message, reply);
 			return;
 		}
@@ -683,6 +780,35 @@ void NatsManager::EncodeEntity(Entity * entity, eqproto::Entity * out)
 
 	if (entity->IsDoor()) {
 		out->set_type(eqproto::EntityType::Door);
+		Doors * door = entity->CastToDoors();
+		eqproto::Position* pos = google::protobuf::Arena::CreateMessage<eqproto::Position>(&the_arena);
+
+		auto door_pos = door->GetPosition();
+		pos->set_x(door_pos.x);
+		pos->set_y(door_pos.y);
+		pos->set_z(door_pos.z);
+		pos->set_h(door_pos.w);
+		out->set_allocated_position(pos);
+		
+		out->set_door_db_id(door->GetDoorDBID());
+		out->set_door_id(door->GetDoorID());
+		out->set_door_name(door->GetName());
+		out->set_door_incline(door->GetIncline());
+		out->set_door_opentype(door->GetOpenType());
+		out->set_door_guild_id(door->GetGuildID());
+		out->set_door_lockpick(door->GetLockpick());
+		out->set_door_keyitem(door->GetKeyItem());
+		out->set_door_nokeyring(door->GetNoKeyring());
+		out->set_door_trigger_door_id(door->GetTriggerDoorID());
+		out->set_door_trigger_type(door->GetTriggerType());
+		out->set_door_param(door->GetDoorParam());
+		out->set_door_invert_state(door->GetInvertState());
+		out->set_door_disable_timer(door->GetDisableTimer());
+		out->set_door_is_open(door->IsDoorOpen());
+		//TODO: expose door destination properties
+		//out->set_door_destination_zone(door->)
+		out->set_door_is_ldon(door->IsLDoNDoor());
+		out->set_door_client_version_mask(door->GetClientVersionMask());
 
 	}
 
