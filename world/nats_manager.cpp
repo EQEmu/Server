@@ -165,16 +165,18 @@ void NatsManager::SendAdminMessage(std::string adminMessage, const char* reply) 
 	eqproto::ChannelMessage* message = google::protobuf::Arena::CreateMessage<eqproto::ChannelMessage>(&the_arena);
 
 	message->set_message(adminMessage.c_str());
-	std::string pubMessage;
-	if (!message->SerializeToString(&pubMessage)) {
-		Log(Logs::General, Logs::NATS, "global.admin_message.out: failed to serialize message to string");
+
+	size_t event_size = message->ByteSizeLong();
+	void *event_buffer = malloc(event_size);
+	if (!message->SerializeToArray(event_buffer, event_size)) {
+		Log(Logs::General, Logs::NATS, "global.admin_message.out: failed to serialize message");
 		return;
 	}
 
 	if (reply && strlen(reply) > 0)
-		s = natsConnection_Publish(conn, reply, (const void*)pubMessage.c_str(), pubMessage.length());
+		s = natsConnection_Publish(conn, reply, event_buffer, event_size);
 	else
-		s = natsConnection_Publish(conn, "global.admin_message.out", (const void*)pubMessage.c_str(), pubMessage.length());
+		s = natsConnection_Publish(conn, "global.admin_message.out", event_buffer, event_size);
 	
 	if (s != NATS_OK) {
 		Log(Logs::General, Logs::NATS, "global.admin_message.out failed: %s", nats_GetLastError(&s));
@@ -193,16 +195,18 @@ void NatsManager::SendCommandMessage(eqproto::CommandMessage* message, const cha
 		message->set_result("Failed to parse command.");	
 
 
-	std::string pubMessage;
-	if (!message->SerializeToString(&pubMessage)) {
-		Log(Logs::General, Logs::NATS, "world.command_message.out: failed to serialize message to string");
+	size_t event_size = message->ByteSizeLong();
+	void *event_buffer = malloc(event_size);
+	if (!message->SerializeToArray(event_buffer, event_size)) {
+		Log(Logs::General, Logs::NATS, "global.admin_message.out: failed to serialize message");
 		return;
 	}
 
+
 	if (reply && strlen(reply) > 0)
-		s = natsConnection_Publish(conn, reply, (const void*)pubMessage.c_str(), pubMessage.length());
+		s = natsConnection_Publish(conn, reply, event_buffer, event_size);
 	else
-		s = natsConnection_Publish(conn, "world.command_message.out", (const void*)pubMessage.c_str(), pubMessage.length());
+		s = natsConnection_Publish(conn, "world.command_message.out", event_buffer, event_size);
 
 	if (s != NATS_OK) {
 		Log(Logs::General, Logs::NATS, "world.command_message.out failed: %s");
@@ -216,8 +220,6 @@ void NatsManager::SendCommandMessage(eqproto::CommandMessage* message, const cha
 void NatsManager::GetCommandMessage(eqproto::CommandMessage* message, const char* reply) {
 	if (!connect()) 
 		return;
-
-	std::string pubMessage;
 
 	if (message->command().compare("who") == 0) {
 		message->set_result(client_list.GetWhoAll());
@@ -312,17 +314,18 @@ void NatsManager::SendChannelMessage(eqproto::ChannelMessage* message, const cha
 	if (!connect())
 		return;
 
-	std::string pubMessage;
-	if (!message->SerializeToString(&pubMessage)) {
-		Log(Logs::General, Logs::NATS, "world.channel_message.out: failed to serialize message to string");
+	size_t event_size = message->ByteSizeLong();
+	void *event_buffer = malloc(event_size);
+	if (!message->SerializeToArray(event_buffer, event_size)) {
+		Log(Logs::General, Logs::NATS, "global.admin_message.out: failed to serialize message");
 		return;
 	}
 
 	if (reply) {
-		s = natsConnection_Publish(conn, reply, (const void*)pubMessage.c_str(), pubMessage.length());
+		s = natsConnection_Publish(conn, reply, event_buffer, event_size);
 	}
 	else {
-		s = natsConnection_Publish(conn, "world.channel_message.out", (const void*)pubMessage.c_str(), pubMessage.length());
+		s = natsConnection_Publish(conn, "world.channel_message.out", event_buffer, event_size);
 	}
 
 	if (s != NATS_OK) {
