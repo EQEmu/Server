@@ -231,6 +231,46 @@ message SpecialMessageEvent {
   string	message = 6;				// What is being said?
 }
 
+//OP_NewZone
+message NewZoneEvent {
+  string	char_name = 1;			// Character Name
+  string	zone_short_name = 2;	// Zone Short Name
+  string	zone_long_name = 3;	// Zone Long Name
+  uint32	ztype = 4;					// Zone type (usually FF)
+  uint32	fog_red = 5;				// Zone fog (red)
+  uint32	fog_green = 6;			// Zone fog (green)
+  uint32	fog_blue = 7;			// Zone fog (blue)
+  uint32	unknown323 = 8;
+  float	fog_minclip = 9;
+  float	fog_maxclip = 10;
+  float	gravity = 11;
+  uint32	time_type = 12;
+  uint32   rain_chance = 13;
+  uint32   rain_duration = 14;
+  uint32   snow_chance = 15;
+  uint32   snow_duration = 16;
+  uint32	unknown360 = 17;
+  uint32	sky = 18;					// Sky Type
+  uint32	unknown331 = 19;			// ***Placeholder
+  float	zone_exp_multiplier = 20;	// Experience Multiplier
+  float	safe_y = 21;					// Zone Safe Y
+  float	safe_x = 22;					// Zone Safe X
+  float	safe_z = 23;					// Zone Safe Z
+  float	max_z = 24;					// Guessed
+  float	underworld = 25;				// Underworld, min z (Not Sure?)
+  float	minclip = 26;				// Minimum View Distance
+  float	maxclip = 27;				// Maximum View DIstance
+  uint32	unknown_end = 28;		// ***Placeholder
+  string	zone_short_name2 = 29;
+  string	unknown672 = 30;
+  uint32	zone_id = 31;
+  uint32	zone_instance = 32;
+  uint32	unknown688 = 33;
+  uint32	unknown692 = 34;
+  float	fog_density = 35;
+  uint32	suspend_buffs = 36;
+}
+
 //OP_WearChange
 message WearChangeEvent {
   uint32 spawn_id = 1;
@@ -702,7 +742,7 @@ enum OpCode {
   OP_ChannelMessage = 74;
   OP_CharacterCreate = 75;
   OP_CharacterCreateRequest = 76;
-  OP_CharInventory = 77;
+  OP_CharInventory = 77; //uses outbuffer, may not be worth working with
   OP_Charm = 78;
   OP_ChatMessage = 79; //used by lua
   OP_ClearAA = 80;
@@ -739,8 +779,8 @@ enum OpCode {
   OP_CrystalCreate = 111;
   OP_CrystalReclaim = 112;
   OP_CustomTitles = 113;
-  OP_Damage = 114;
-  OP_Death = 115;
+  OP_Damage = 114; //supported
+  OP_Death = 115; //supported
   OP_DelegateAbility = 116;
   OP_DeleteCharacter = 117;
   OP_DeleteCharge = 118;
@@ -971,7 +1011,7 @@ enum OpCode {
   OP_MultiLineMsg = 343;
   OP_NewSpawn = 344; //supported
   OP_NewTitlesAvailable = 345;
-  OP_NewZone = 346;
+  OP_NewZone = 346; //supported
   OP_OnLevelMessage = 347;
   OP_OpenContainer = 348;
   OP_OpenDiscordMerchant = 349;

@@ -45,8 +45,8 @@ public:
 	void OnSpawnEvent(const EmuOpcode op, uint32 entity_id, Spawn_Struct * spawn);
 	void OnSpecialMessageEvent(uint32 entity_id, SpecialMesg_Struct *sm);
 	void OnWearChangeEvent(uint32 entity_id, WearChange_Struct * wc);
-	void OnZoneComplete(uint32 entity_id);
-
+	void OnZoneCompleteEvent(uint32 entity_id);
+	void OnNewZoneEvent(uint32 entity_id, NewZone_Struct * nz);
 protected:
 	bool connect();
 	Timer nats_timer;

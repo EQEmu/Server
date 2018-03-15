@@ -1304,7 +1304,7 @@ void NatsManager::OnAlternateAdvancementStats(uint32 entity_id, AltAdvStats_Stru
 }
 
 
-void NatsManager::OnZoneComplete(uint32 entity_id) {
+void NatsManager::OnZoneCompleteEvent(uint32 entity_id) {
 	if (!connect())
 		return;
 	if (entity_id == 0)
@@ -1363,6 +1363,63 @@ void NatsManager::OnAlternateAdvancementActionRequest(uint32 entity_id, AA_Actio
 	event->set_target_id(action->target_id);
 	event->set_exp_value(action->exp_value);
 	event->set_action(action->action);
+	size_t event_size = event->ByteSizeLong();
+	void *event_buffer = malloc(event_size);
+	if (!event->SerializeToArray(event_buffer, event_size)) {
+		Log(Logs::General, Logs::NATS, "zone.%s.%d.entity.%d.event.out: (OP: %d) failed to serialize message", subscribedZoneName.c_str(), subscribedZoneInstance, entity_id, op);
+		return;
+	}
+	SendEvent(op, entity_id, event_buffer, event_size);
+}
+
+void NatsManager::OnNewZoneEvent(uint32 entity_id, NewZone_Struct * nz) {
+	if (!connect())
+		return;
+	if (entity_id == 0)
+		return;
+	if (!isEntityEventAllEnabled && !isEntitySubscribed(entity_id))
+		return;
+
+	auto op = eqproto::OP_NewZone;
+
+	eqproto::NewZoneEvent* event = google::protobuf::Arena::CreateMessage<eqproto::NewZoneEvent>(&the_arena);
+	
+	event->set_char_name(nz->char_name);
+	event->set_zone_short_name(nz->zone_short_name);
+	event->set_zone_long_name(nz->zone_long_name);
+	event->set_ztype(nz->ztype);
+	event->set_fog_red(*nz->fog_red);
+	event->set_fog_green(*nz->fog_green);
+	event->set_fog_blue(*nz->fog_blue);
+	event->set_unknown323(nz->unknown323);
+	event->set_fog_minclip(*nz->fog_minclip);
+	event->set_fog_maxclip(*nz->fog_maxclip);
+	event->set_gravity(nz->gravity);
+	event->set_time_type(nz->time_type);
+	event->set_rain_chance(*nz->rain_chance);
+	event->set_rain_duration(*nz->rain_duration);
+	event->set_snow_chance(*nz->snow_chance);
+	event->set_snow_duration(*nz->snow_duration);
+	event->set_unknown360(*nz->unknown360);
+	event->set_sky(nz->sky);
+	event->set_unknown331(*nz->unknown331);
+	event->set_zone_exp_multiplier(nz->zone_exp_multiplier);
+	event->set_safe_y(nz->safe_y);
+	event->set_safe_x(nz->safe_x);
+	event->set_safe_z(nz->safe_z);
+	event->set_max_z(nz->max_z);
+	event->set_underworld(nz->underworld);
+	event->set_minclip(nz->minclip);
+	event->set_maxclip(nz->maxclip);
+	event->set_unknown_end(*nz->unknown_end);
+	event->set_zone_short_name2(nz->zone_short_name2);
+	event->set_unknown672(nz->unknown672);
+	event->set_zone_id(nz->zone_id);
+	event->set_zone_instance(nz->zone_instance);
+	event->set_unknown688(nz->unknown688);
+	event->set_unknown692(*nz->unknown692);
+	event->set_fog_density(nz->fog_density);
+	event->set_suspend_buffs(nz->SuspendBuffs);
 	size_t event_size = event->ByteSizeLong();
 	void *event_buffer = malloc(event_size);
 	if (!event->SerializeToArray(event_buffer, event_size)) {

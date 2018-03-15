@@ -1657,7 +1657,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQEmu::skills::Sk
 	d->damage = damage;
 	app.priority = 6;
 	entity_list.QueueClients(this, &app);
-
+	nats.OnDeathEvent(d);
 	/*
 	#2: figure out things that affect the player dying and mark them dead
 	*/

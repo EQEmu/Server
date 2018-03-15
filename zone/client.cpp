@@ -3875,7 +3875,7 @@ void Client::Sacrifice(Client *caster)
 			d->damage = 0;
 			app.priority = 6;
 			entity_list.QueueClients(this, &app);
-
+			nats.OnDeathEvent(d);
 			BuffFadeAll();
 			UnmemSpellAll();
 			Group *g = GetGroup();
