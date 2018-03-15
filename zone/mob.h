@@ -50,7 +50,7 @@ struct AuraRecord;
 struct NewSpawn_Struct;
 struct PlayerPositionUpdateServer_Struct;
 
-const int COLLISION_BOX_SIZE = 4;
+const int COLLISION_BOX_SIZE = 8;
 
 namespace EQEmu
 {

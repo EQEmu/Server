@@ -967,21 +967,40 @@ void Mob::ProcessForcedMovement()
 			m_CollisionBox[0].y = m_Position.y + 3.0f * g_Math.FastCos(0.0f);
 			m_CollisionBox[0].z = m_Position.z + z_off;
 
-			// to right
-			m_CollisionBox[1].x = m_Position.x + 3.0f * g_Math.FastSin(128.0f);
-			m_CollisionBox[1].y = m_Position.y + 3.0f * g_Math.FastCos(128.0f);
+			// 45 right front
+			m_CollisionBox[1].x = m_Position.x + 3.0f * g_Math.FastSin(64.0f);
+			m_CollisionBox[1].y = m_Position.y + 3.0f * g_Math.FastCos(64.0f);
 			m_CollisionBox[1].z = m_Position.z + z_off;
 
-
-			// behind
-			m_CollisionBox[2].x = m_Position.x + 3.0f * g_Math.FastSin(256.0f);
-			m_CollisionBox[2].y = m_Position.y + 3.0f * g_Math.FastCos(256.0f);
+			// to right
+			m_CollisionBox[2].x = m_Position.x + 3.0f * g_Math.FastSin(128.0f);
+			m_CollisionBox[2].y = m_Position.y + 3.0f * g_Math.FastCos(128.0f);
 			m_CollisionBox[2].z = m_Position.z + z_off;
 
-			// to left
-			m_CollisionBox[3].x = m_Position.x + 3.0f * g_Math.FastSin(384.0f);
-			m_CollisionBox[3].y = m_Position.y + 3.0f * g_Math.FastCos(384.0f);
+			// 45 right back
+			m_CollisionBox[3].x = m_Position.x + 3.0f * g_Math.FastSin(192.0f);
+			m_CollisionBox[3].y = m_Position.y + 3.0f * g_Math.FastCos(192.0f);
 			m_CollisionBox[3].z = m_Position.z + z_off;
+
+			// behind
+			m_CollisionBox[4].x = m_Position.x + 3.0f * g_Math.FastSin(256.0f);
+			m_CollisionBox[4].y = m_Position.y + 3.0f * g_Math.FastCos(256.0f);
+			m_CollisionBox[4].z = m_Position.z + z_off;
+
+			// 45 left back
+			m_CollisionBox[5].x = m_Position.x + 3.0f * g_Math.FastSin(320.0f);
+			m_CollisionBox[5].y = m_Position.y + 3.0f * g_Math.FastCos(320.0f);
+			m_CollisionBox[5].z = m_Position.z + z_off;
+
+			// to left
+			m_CollisionBox[6].x = m_Position.x + 3.0f * g_Math.FastSin(384.0f);
+			m_CollisionBox[6].y = m_Position.y + 3.0f * g_Math.FastCos(384.0f);
+			m_CollisionBox[6].z = m_Position.z + z_off;
+
+			// 45 left front
+			m_CollisionBox[7].x = m_Position.x + 3.0f * g_Math.FastSin(448.0f);
+			m_CollisionBox[7].y = m_Position.y + 3.0f * g_Math.FastCos(448.0f);
+			m_CollisionBox[7].z = m_Position.z + z_off;
 
 			// collision happened, need to move along the wall
 			float distance = 0.0f, shortest = std::numeric_limits<float>::infinity();
