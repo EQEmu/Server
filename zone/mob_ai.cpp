@@ -20,7 +20,6 @@
 #include "../common/features.h"
 #include "../common/rulesys.h"
 #include "../common/string_util.h"
-#include "../common/misc_functions.h"
 
 #include "client.h"
 #include "entity.h"
@@ -963,29 +962,25 @@ void Mob::ProcessForcedMovement()
 
 		// no zone map = fucked
 		if (zone->HasMap()) {
-			float angle = GetHeading();
 			// in front
-			m_CollisionBox[0].x = m_Position.x + 3.0f * g_Math.FastSin(angle);
-			m_CollisionBox[0].y = m_Position.y + 3.0f * g_Math.FastCos(angle);
+			m_CollisionBox[0].x = m_Position.x + 3.0f * g_Math.FastSin(0.0f);
+			m_CollisionBox[0].y = m_Position.y + 3.0f * g_Math.FastCos(0.0f);
 			m_CollisionBox[0].z = m_Position.z + z_off;
 
 			// to right
-			angle = FixHeading(GetHeading() - 128.0f);
-			m_CollisionBox[1].x = m_Position.x + 3.0f * g_Math.FastSin(angle);
-			m_CollisionBox[1].y = m_Position.y + 3.0f * g_Math.FastCos(angle);
+			m_CollisionBox[1].x = m_Position.x + 3.0f * g_Math.FastSin(128.0f);
+			m_CollisionBox[1].y = m_Position.y + 3.0f * g_Math.FastCos(128.0f);
 			m_CollisionBox[1].z = m_Position.z + z_off;
 
 
 			// behind
-			angle = FixHeading(GetHeading() - 256.0f);
-			m_CollisionBox[2].x = m_Position.x + 3.0f * g_Math.FastSin(angle);
-			m_CollisionBox[2].y = m_Position.y + 3.0f * g_Math.FastCos(angle);
+			m_CollisionBox[2].x = m_Position.x + 3.0f * g_Math.FastSin(256.0f);
+			m_CollisionBox[2].y = m_Position.y + 3.0f * g_Math.FastCos(256.0f);
 			m_CollisionBox[2].z = m_Position.z + z_off;
 
 			// to left
-			angle = FixHeading(GetHeading() - 384.0f);
-			m_CollisionBox[3].x = m_Position.x + 3.0f * g_Math.FastSin(angle);
-			m_CollisionBox[3].y = m_Position.y + 3.0f * g_Math.FastCos(angle);
+			m_CollisionBox[3].x = m_Position.x + 3.0f * g_Math.FastSin(384.0f);
+			m_CollisionBox[3].y = m_Position.y + 3.0f * g_Math.FastCos(384.0f);
 			m_CollisionBox[3].z = m_Position.z + z_off;
 
 			// collision happened, need to move along the wall
