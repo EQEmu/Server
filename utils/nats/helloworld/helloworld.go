@@ -28,14 +28,14 @@ func main() {
 	//send a channel message to broadcast channel
 	go testBroadcastMessage(nc, "Hello, World!")
 
-	time.Sleep(20 * time.Second)
-	fmt.Println("Exited after 20 seconds")
+	time.Sleep(100 * time.Second)
+	fmt.Println("Exited after 100 seconds")
 }
 
 // asyncChannelMessageSubscriber is an example of how to subscribe
 // and invoke a function when a message is received
 func asyncChannelMessageSubscriber(nc *nats.Conn) {
-	nc.Subscribe("world.channel_message", func(m *nats.Msg) {
+	nc.Subscribe("world.channel_message.out", func(m *nats.Msg) {
 		message := &eqproto.ChannelMessage{}
 		proto.Unmarshal(m.Data, message)
 		log.Println(message)
@@ -66,7 +66,7 @@ func testBroadcastMessage(nc *nats.Conn, msg string) {
 	message := &eqproto.ChannelMessage{
 		From:    "go",
 		Message: msg,
-		ChanNum: 5, //5 is ooc, 6 is bc
+		Number:  5, //5 is ooc, 6 is bc
 	}
 	d, err := proto.Marshal(message)
 	if err != nil {

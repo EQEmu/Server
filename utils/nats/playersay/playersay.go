@@ -30,6 +30,7 @@ func main() {
 	entities = zoneEntityList(zone, 0)
 
 	fmt.Println(len(entities), "entities known")
+	//fmt.Println(entities)
 
 	var entityID int32
 	for _, entity := range entities {
@@ -42,7 +43,7 @@ func main() {
 	if entityID == 0 {
 		log.Fatal("Can't find entity!")
 	}
-
+	go asyncChannelMessageSubscriber(nc) //async is recommended
 	go entityEventSubscriber(zone, instance, entityID)
 	zoneChannel(zone, instance, entityID, eqproto.EntityType_Client, eqproto.MessageType_Say, "Hello, World!")
 	time.Sleep(1000 * time.Second)
@@ -116,6 +117,12 @@ func zoneEntityList(zone string, instanceID int) (entities []*eqproto.Entity) {
 		return
 	}
 
+	if msg.Result != "1" {
+		fmt.Println("Failed response: ", msg.Result)
+		return
+	}
+
+	//fmt.Println("reply", len(msg.Payload), string(msg.Payload))
 	rootEntities := &eqproto.Entities{}
 	err = proto.Unmarshal([]byte(msg.Payload), rootEntities)
 	if err != nil {
@@ -198,6 +205,7 @@ func entityEventSubscriber(zone string, instance int64, entityID int32) {
 	}*/
 
 	var index int
+
 	channel := fmt.Sprintf("zone.%s.%d.entity.%d.event.out", zone, instance, entityID)
 	nc.Subscribe(channel, func(m *nats.Msg) {
 		event := &eqproto.Event{}
@@ -226,6 +234,8 @@ func entityEventSubscriber(zone string, instance int64, entityID int32) {
 			eventPayload = &eqproto.DamageEvent{}
 		case eqproto.OpCode_OP_SpecialMesg:
 			eventPayload = &eqproto.SpecialMessageEvent{}
+		case eqproto.OpCode_OP_ChannelMessage:
+			eventPayload = &eqproto.ChannelMessageEvent{}
 		default:
 			return
 		}
@@ -243,4 +253,20 @@ func entityEventSubscriber(zone string, instance int64, entityID int32) {
 	log.Println("Subscribed to", channel, ", waiting on messages...")
 
 	time.Sleep(500 * time.Second)
+}
+
+// asyncChannelMessageSubscriber is an example of how to subscribe
+// and invoke a function when a message is received
+func asyncChannelMessageSubscriber(nc *nats.Conn) {
+	nc.Subscribe("world.channel_message.out", func(m *nats.Msg) {
+		message := &eqproto.ChannelMessage{}
+		proto.Unmarshal(m.Data, message)
+		log.Println(message)
+	})
+	nc.Subscribe("zone.ecommons.0.channel_message.out", func(m *nats.Msg) {
+		message := &eqproto.ChannelMessage{}
+		proto.Unmarshal(m.Data, message)
+		log.Println(message)
+	})
+	log.Println("Waiting on async messages...")
 }

@@ -168,7 +168,7 @@ void NatsManager::SendChannelMessage(eqproto::ChannelMessage* message, const cha
 	
 
 	if (s != NATS_OK) {
-		Log(Logs::General, Logs::NATS, "world.channel_message.out failed: %s", nats_GetLastError(&s));
+		Log(Logs::General, Logs::NATS, StringFormat("zone.%s.%d.channel_message.out failed: %s", subscribedZoneName.c_str(), subscribedZoneInstance).c_str(), nats_GetLastError(&s));
 		return;
 	}
 
