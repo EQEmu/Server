@@ -1023,6 +1023,8 @@ void Mob::ProcessForcedMovement()
 			pLastChange = Timer::GetCurrentTime();
 			FixZ(); // so we teleport to the ground locally, we want the client to interpolate falling etc
 		} else if (--ForcedMovement) {
+			if (normal.z < -0.15f) // prevent too much wall climbing. ex. OMM's room in anguish
+				normal.z = 0.0f;
 			auto proj = glm::proj(static_cast<glm::vec3>(m_Delta), normal);
 			m_Delta.x -= proj.x;
 			m_Delta.y -= proj.y;
