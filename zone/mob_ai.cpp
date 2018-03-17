@@ -957,7 +957,7 @@ void Mob::ProcessForcedMovement()
 	// this flag won't be set if the mob can't be pushed (rooted etc)
 	if (AI_movement_timer->Check()) {
 		bool bPassed = true;
-		auto z_off = GetZOffset();
+		auto z_off = GetZOffset() / 2.0f;
 		glm::vec3 normal;
 
 		// no zone map = fucked
