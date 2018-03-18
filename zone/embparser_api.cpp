@@ -31,9 +31,11 @@
 #include "queryserv.h"
 #include "questmgr.h"
 #include "zone.h"
+#include "nats_manager.h"
 
 extern Zone* zone;
 extern QueryServ* QServ;
+extern NatsManager nats;
 
 /*
 
@@ -2882,6 +2884,21 @@ XS(XS__varlink) {
 	XSRETURN(1);
 }
 
+XS(XS__adminmessage); // prototype to pass -Wmissing-prototypes
+XS(XS__adminmessage) {
+	dXSARGS;
+
+	if (items == 1)
+		nats.SendAdminMessage(SvPV_nolen(ST(0)));
+	else if (items == 2)
+		nats.SendAdminMessage(SvPV_nolen(ST(0)), (int)SvIV(ST(1)));
+	else
+		Perl_croak(aTHX_ "Usage: adminmessage(message [, min_status])");
+
+	XSRETURN_EMPTY;
+}
+
+
 XS(XS__CreateInstance);
 XS(XS__CreateInstance) {
 	dXSARGS;
@@ -3766,6 +3783,7 @@ EXTERN_C XS(boot_quest)
 		newXS(strcpy(buf, "addldonwin"), XS__addldonpoints, file);
 		newXS(strcpy(buf, "addloot"), XS__addloot, file);
 		newXS(strcpy(buf, "addskill"), XS__addskill, file);
+		newXS(strcpy(buf, "adminmessage"), XS__adminmessage, file);
 		newXS(strcpy(buf, "assigntask"), XS__assigntask, file);
 		newXS(strcpy(buf, "attack"), XS__attack, file);
 		newXS(strcpy(buf, "attacknpc"), XS__attacknpc, file);

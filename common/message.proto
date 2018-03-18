@@ -16,22 +16,28 @@ message ChannelMessage {
   int32 minstatus = 9;
   int32 fromadmin = 10;
   bool noreply = 11;
-  bool is_emote = 12;
-  //0 not queued, 1 queued, 2 queue full, 3 offline
-  int32 queued = 13;
-  string result = 15; //Result of channel request. 1 = Success, Non-numeric = error
+  bool is_emote = 12;  //Is message considered an emote?
+  int32 queued = 13; //only used on channel_message.out events. (*.in uses response_message): 0 not queued, 1 queued, 2 queue full, 3 offline
   int32 from_entity_id = 16; //(Only in zone requests) Entity to send message from
   EntityType from_entity_type = 17; //(Only in zone requests) Entity type the message is from
   float distance = 18; //(optional, only in zone requests) how far should the message travel? (e.g. say)
   bool skip_sender = 19; //(optional, only in zone requests) should we skip sender?
+  string response_message = 20; //Human-readable response message of request.
+  int32 response_value = 21; //Response value. In cases where a single value is returned, this is utilized (like an entity id)
+  ErrorType response_error = 22; //error (if any), ERR_OK (0) is default
+  string response_type = 23; //defines what message type the response_payload is
+  bytes response_payload = 24; //binary payload to be parsed using response_type
 }
 
 message CommandMessage {
   string author = 1; //Author of command. This can typically be ignored
   string command = 2; //command to request
-  repeated string params = 3; //Parameters are an array of strings. 
-  string result = 4; //Result of command request. If non-numeric, it is an error message. If it's an integer, and greater than 0, it is a success (1 is default. Some commands return entity id)
-  bytes payload = 5; //Raw Payload to be parsed
+  repeated string params = 3; //Parameters are an array of strings.   
+  string response_message = 4; //Human-readable response message of request.
+  int32 response_value = 5; //Response value. In cases where a single value is returned, this is utilized (like an entity id)
+  ErrorType response_error = 6; //error (if any), ERR_OK (0) is default
+  string response_type = 7; //defines what message type the response_payload is
+  bytes response_payload = 8; //binary payload to be parsed using response_type
 }
 
 //Entity is full of entity data.
@@ -447,6 +453,14 @@ message UseAAEvent {
   uint32 exp_value = 6;
 }
 
+
+enum ErrorType {
+  ERR_OK = 0; //OK, No error provided
+  ERR_Request = 1; //Request data has something wrong. See response_message for more details.
+  ERR_Internal = 2; //Internal server error. See response message for mode details  
+  ERR_Failed = 3; //Failed request. This is when the request succeeds, there are no internal server errors, but the response is a failure.
+}
+
 //EntityType will attempt to identify an entity to it's upper-most type by default
 enum EntityType {
   NPC = 0; //Inherits mob
@@ -514,7 +528,8 @@ enum MessageType {
 	BrightBlue = 3;	// FF|0040FF
 	Magenta = 5;	// FF|F000F0
 	Gray = 6;	// FF|808080
-	LightGray = 7;	// FF|E0E0E0
+	LightGray = 7;	// FF|E0E0E0 , also tell?
+  SayLocal = 8; //Say when you say it?
 	WhiteSmoke2 = 10;	// FF|F0F0F0
 	DarkGray = 12;	// FF|A0A0A0
 	Red=  13;	// FF|F00000

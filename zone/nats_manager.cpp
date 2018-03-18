@@ -58,7 +58,7 @@ void NatsManager::Process()
 			break;
 
 		eqproto::CommandMessage* message = google::protobuf::Arena::CreateMessage<eqproto::CommandMessage>(&the_arena);
-		if (!message->ParseFromString(natsMsg_GetData(msg))) {
+		if (!message->ParseFromArray(natsMsg_GetData(msg), natsMsg_GetDataLength(msg))) {
 			Log(Logs::General, Logs::NATS, "zone.%s.command_message.in: failed to parse", subscribedZoneName.c_str());
 			natsMsg_Destroy(msg);
 			continue;
@@ -75,7 +75,7 @@ void NatsManager::Process()
 			break;
 
 		eqproto::CommandMessage* message = google::protobuf::Arena::CreateMessage<eqproto::CommandMessage>(&the_arena);
-		if (!message->ParseFromString(natsMsg_GetData(msg))) {
+		if (!message->ParseFromArray(natsMsg_GetData(msg), natsMsg_GetDataLength(msg))) {
 			Log(Logs::General, Logs::NATS, "zone.%s.%dcommand_message.in: failed to parse", subscribedZoneName.c_str(), subscribedZoneInstance);
 			natsMsg_Destroy(msg);
 			continue;
@@ -92,7 +92,7 @@ void NatsManager::Process()
 			break;
 
 		eqproto::ChannelMessage* message = google::protobuf::Arena::CreateMessage<eqproto::ChannelMessage>(&the_arena);
-		if (!message->ParseFromString(natsMsg_GetData(msg))) {
+		if (!message->ParseFromArray(natsMsg_GetData(msg), natsMsg_GetDataLength(msg))) {
 			Log(Logs::General, Logs::NATS, "zone.%s.channel_message.in: failed to parse", subscribedZoneName.c_str());
 			natsMsg_Destroy(msg);
 			continue;
@@ -109,7 +109,7 @@ void NatsManager::Process()
 			break;
 
 		eqproto::ChannelMessage* message = google::protobuf::Arena::CreateMessage<eqproto::ChannelMessage>(&the_arena);
-		if (!message->ParseFromString(natsMsg_GetData(msg))) {
+		if (!message->ParseFromArray(natsMsg_GetData(msg), natsMsg_GetDataLength(msg))) {
 			Log(Logs::General, Logs::NATS, "zone.%s.%d.channel_message.in: failed to parse", subscribedZoneName.c_str(), subscribedZoneInstance);
 			natsMsg_Destroy(msg);
 			continue;
@@ -125,7 +125,8 @@ void NatsManager::GetChannelMessage(eqproto::ChannelMessage* message, const char
 		return;
 
 	if (message->from_entity_id() < 1) {
-		message->set_result("from_entity_id must be set to send zone channel messages.");
+		message->set_response_error(eqproto::ERR_Request);
+		message->set_response_message("from_entity_id must be set to send zone channel messages.");
 		SendChannelMessage(message, reply);
 		return;
 	}
@@ -133,7 +134,8 @@ void NatsManager::GetChannelMessage(eqproto::ChannelMessage* message, const char
 
 	auto mob = entity_list.GetMobID(message->from_entity_id());
 	if (!mob) {
-		message->set_result("from_entity_id not found");
+		message->set_response_error(eqproto::ERR_Failed);
+		message->set_response_message("mob from_entity_id not found");
 		SendChannelMessage(message, reply);
 		return;
 	}
@@ -143,7 +145,8 @@ void NatsManager::GetChannelMessage(eqproto::ChannelMessage* message, const char
 	else
 		mob->Message(message->number(), message->message().c_str());
 
-	message->set_result("1");
+	
+	message->set_response_message("Success");
 	SendChannelMessage(message, reply);
 	return;
 }
@@ -173,7 +176,7 @@ void NatsManager::SendChannelMessage(eqproto::ChannelMessage* message, const cha
 	}
 
 	if (reply) 
-		Log(Logs::General, Logs::NATS, "zone.%s.%d.channel_message.in: %s (%s)", subscribedZoneName.c_str(), subscribedZoneInstance, message->message().c_str(), message->result().c_str());
+		Log(Logs::General, Logs::NATS, "zone.%s.%d.channel_message.in: %s (%d: %s)", subscribedZoneName.c_str(), subscribedZoneInstance, message->message().c_str(), message->response_error(), message->response_message().c_str());
 	else 
 		Log(Logs::General, Logs::NATS, "zone.%s.%d.channel_message.out: %s", subscribedZoneName.c_str(), subscribedZoneInstance, message->message().c_str());
 }
@@ -186,7 +189,8 @@ void NatsManager::GetCommandMessage(eqproto::CommandMessage* message, const char
 
 	if (message->command().compare("npctypespawn") == 0) {
 		if (message->params_size() < 2) {
-			message->set_result("Format: npctypespawn <x> <y> <z> <h> <npctypeid> <factionid>");
+			message->set_response_error(eqproto::ERR_Request);
+			message->set_response_message("Format: npctypespawn <x> <y> <z> <h> <npctypeid> <factionid>");
 			SendCommandMessage(message, reply);
 			return;
 		}
@@ -201,7 +205,8 @@ void NatsManager::GetCommandMessage(eqproto::CommandMessage* message, const char
 		uint32 factionid = atoi(message->params(5).c_str());
 		const NPCType* tmp = 0;
 		if (!(tmp = database.LoadNPCTypesData(npctypeid))) {
-			message->set_result(StringFormat("NPC Type %i not found", npctypeid));
+			message->set_response_error(eqproto::ERR_Failed);
+			message->set_response_message(StringFormat("NPC of typied %i not found", npctypeid));
 			SendCommandMessage(message, reply);
 			return;
 		}
@@ -210,7 +215,8 @@ void NatsManager::GetCommandMessage(eqproto::CommandMessage* message, const char
 
 		auto npc = new NPC(tmp, 0, position, FlyMode3);
 		if (!npc) {
-			message->set_result("failed to instantiate npc");
+			message->set_response_error(eqproto::ERR_Failed);
+			message->set_response_message("Failed to create npc");
 			SendCommandMessage(message, reply);
 			return;
 		}
@@ -219,14 +225,16 @@ void NatsManager::GetCommandMessage(eqproto::CommandMessage* message, const char
 			npc->SetNPCFactionID(factionid);
 		npc->AddLootTable();
 		entity_list.AddNPC(npc);
-		message->set_result(StringFormat("%u", npc->GetID()));
+		message->set_response_message("Success");
+		message->set_response_value(npc->GetID());
 		SendCommandMessage(message, reply);
 		return;
 	}
 
 	if (message->command().compare("spawn") == 0) {
 		if (message->params_size() < 5) {
-			message->set_result("Format: spawn <x> <y> <z> <h> <name> <race> <level> <material> <hp> <gender> <class> <priweapon> <secweapon> <merchantid> <bodytype> - spawns a npc those parameters.");
+			message->set_response_error(eqproto::ERR_Request);
+			message->set_response_message("Requires minimum 5 arguments. Format: spawn <x> <y> <z> <h> <name> <race> <level> <material> <hp> <gender> <class> <priweapon> <secweapon> <merchantid> <bodytype> - spawns a npc those parameters.");
 			SendCommandMessage(message, reply);
 			return;
 		}
@@ -244,19 +252,22 @@ void NatsManager::GetCommandMessage(eqproto::CommandMessage* message, const char
 
 		NPC* npc = NPC::SpawnNPC(argumentString.c_str(), position, NULL);
 		if (!npc) {
-			message->set_result("Format: spawn <x> <y> <z> <h> <name> <race> <level> <material> <hp> <gender> <class> <priweapon> <secweapon> <merchantid> <bodytype> - spawns a npc those parameters.");
+			message->set_response_error(eqproto::ERR_Request);
+			message->set_response_message("Failed to spawn npc with provided arguments.");
 			SendCommandMessage(message, reply);
 			return;
 		}
 
-		message->set_result(StringFormat("%u", npc->GetID()));
+		message->set_response_message("Success");
+		message->set_response_value(npc->GetID());
 		SendCommandMessage(message, reply);
 		return;
 	}
 
 	if (message->command().compare("moveto") == 0) {
 		if (message->params_size() < 5) {
-			message->set_result("Usage: moveto <entityid> <x> <y> <z> <h>.");
+			message->set_response_error(eqproto::ERR_Request);
+			message->set_response_message("Usage: moveto <npcid> <x> <y> <z> <h>.");
 			SendCommandMessage(message, reply);
 			return;
 		}
@@ -270,20 +281,22 @@ void NatsManager::GetCommandMessage(eqproto::CommandMessage* message, const char
 
 		auto npc = entity_list.GetNPCByID(entityid);
 		if (!npc) {
-			message->set_result("Invalid entity ID passed, or not an npc, etc");
+			message->set_response_error(eqproto::ERR_Failed);
+			message->set_response_message("Could not find npcid");
 			SendCommandMessage(message, reply);
 			return;
 		}
 
-		npc->MoveTo(position, true);
-		message->set_result("1");
+		npc->MoveTo(position, true);		
+		message->set_response_message("Success");
 		SendCommandMessage(message, reply);
 		return;
 	}
 
 	if (message->command().compare("attack") == 0) {
 		if (message->params_size() < 3) {
-			message->set_result("Usage: attack <entityid> <targetentityid> <hateamount>.");
+			message->set_response_error(eqproto::ERR_Request);
+			message->set_response_message("Usage: attack <entityid> <targetentityid> <hateamount>.");
 			SendCommandMessage(message, reply);
 			return;
 		}
@@ -293,19 +306,22 @@ void NatsManager::GetCommandMessage(eqproto::CommandMessage* message, const char
 
 		auto npc = entity_list.GetNPCByID(entityID);
 		if (!npc) {
-			message->set_result("Invalid entity ID passed, or not an npc, etc");
+			message->set_response_error(eqproto::ERR_Failed);
+			message->set_response_message("npc ID not found");
 			SendCommandMessage(message, reply);
 			return;
 		}
 
 		auto mob = entity_list.GetMobID(targetEntityID);
 		if (!mob) {
-			message->set_result("Invalid target entitiy ID passed, or not a mob, etc");
+			message->set_response_error(eqproto::ERR_Failed);
+			message->set_response_message("target mob ID not found");
 			SendCommandMessage(message, reply);
 			return;
 		}
 		npc->AddToHateList(mob, hateAmount);
-		message->set_result("1");
+		message->set_response_message("Success");
+		message->set_response_type("CommandMessage");
 		SendCommandMessage(message, reply);
 		return;
 	}
@@ -313,7 +329,8 @@ void NatsManager::GetCommandMessage(eqproto::CommandMessage* message, const char
 	if (message->command().compare("entitylist") == 0) {
 		std::string entityPayload;
 		if (message->params_size() < 1) {
-			message->set_result("Usage: entitylist <type>. Types: npc, client, mob, mercenary, corpse, door, object");
+			message->set_response_error(eqproto::ERR_Request);
+			message->set_response_message("Usage: entitylist <type>. Types: npc, client, mob, mercenary, corpse, door, object");
 			SendCommandMessage(message, reply);
 			return;
 		}
@@ -334,12 +351,14 @@ void NatsManager::GetCommandMessage(eqproto::CommandMessage* message, const char
 			size_t size = entities->ByteSizeLong();
 			void *buffer = malloc(size);			
 			if (!entities->SerializeToArray(buffer, size)) {
-				message->set_result("Failed to serialize entitiy result");
+				message->set_response_message("Failed to serialize entity result");
+				message->set_response_error(eqproto::ERR_Internal);
 				SendCommandMessage(message, reply);
 				return;
 			}
-			message->set_result("1");
-			message->set_payload(buffer, size);
+			message->set_response_message("Success");
+			message->set_response_type("CommandMessage");
+			message->set_response_payload(buffer, size);
 			SendCommandMessage(message, reply);
 			return;
 		}
@@ -357,12 +376,14 @@ void NatsManager::GetCommandMessage(eqproto::CommandMessage* message, const char
 			size_t size = entities->ByteSizeLong();
 			void *buffer = malloc(size);
 			if (!entities->SerializeToArray(buffer, size)) {
-				message->set_result("Failed to serialize entitiy result");
+				message->set_response_message("Failed to serialize entity result");
+				message->set_response_error(eqproto::ERR_Internal);
 				SendCommandMessage(message, reply);
 				return;
 			}
-			message->set_result("1");
-			message->set_payload(buffer, size);
+			message->set_response_message("Success");
+			message->set_response_type("CommandMessage");
+			message->set_response_payload(buffer, size);
 			SendCommandMessage(message, reply);
 			return;
 		}
@@ -380,12 +401,14 @@ void NatsManager::GetCommandMessage(eqproto::CommandMessage* message, const char
 			size_t size = entities->ByteSizeLong();
 			void *buffer = malloc(size);
 			if (!entities->SerializeToArray(buffer, size)) {
-				message->set_result("Failed to serialize entitiy result");
+				message->set_response_message("Failed to serialize entity result");
+				message->set_response_error(eqproto::ERR_Internal);
 				SendCommandMessage(message, reply);
 				return;
 			}
-			message->set_result("1");
-			message->set_payload(buffer, size);
+			message->set_response_message("Success");
+			message->set_response_type("CommandMessage");
+			message->set_response_payload(buffer, size);
 			SendCommandMessage(message, reply);
 			return;
 		}
@@ -403,12 +426,14 @@ void NatsManager::GetCommandMessage(eqproto::CommandMessage* message, const char
 			size_t size = entities->ByteSizeLong();
 			void *buffer = malloc(size);
 			if (!entities->SerializeToArray(buffer, size)) {
-				message->set_result("Failed to serialize entitiy result");
+				message->set_response_message("Failed to serialize entity result");
+				message->set_response_error(eqproto::ERR_Internal);
 				SendCommandMessage(message, reply);
 				return;
 			}
-			message->set_result("1");
-			message->set_payload(buffer, size);
+			message->set_response_message("Success");
+			message->set_response_type("CommandMessage");
+			message->set_response_payload(buffer, size);
 			SendCommandMessage(message, reply);
 			return;
 		}
@@ -426,12 +451,14 @@ void NatsManager::GetCommandMessage(eqproto::CommandMessage* message, const char
 			size_t size = entities->ByteSizeLong();
 			void *buffer = malloc(size);
 			if (!entities->SerializeToArray(buffer, size)) {
-				message->set_result("Failed to serialize entitiy result");
+				message->set_response_message("Failed to serialize entity result");
+				message->set_response_error(eqproto::ERR_Internal);
 				SendCommandMessage(message, reply);
 				return;
 			}
-			message->set_result("1");
-			message->set_payload(buffer, size);
+			message->set_response_message("Success");
+			message->set_response_type("CommandMessage");
+			message->set_response_payload(buffer, size);
 			SendCommandMessage(message, reply);
 			return;
 		}
@@ -450,12 +477,14 @@ void NatsManager::GetCommandMessage(eqproto::CommandMessage* message, const char
 			size_t size = entities->ByteSizeLong();
 			void *buffer = malloc(size);
 			if (!entities->SerializeToArray(buffer, size)) {
-				message->set_result("Failed to serialize entitiy result");
+				message->set_response_message("Failed to serialize entity result");
+				message->set_response_error(eqproto::ERR_Internal);
 				SendCommandMessage(message, reply);
 				return;
 			}
-			message->set_result("1");
-			message->set_payload(buffer, size);
+			message->set_response_message("Success");
+			message->set_response_type("CommandMessage");
+			message->set_response_payload(buffer, size);
 			SendCommandMessage(message, reply);
 			return;
 		}
@@ -473,21 +502,25 @@ void NatsManager::GetCommandMessage(eqproto::CommandMessage* message, const char
 			size_t size = entities->ByteSizeLong();
 			void *buffer = malloc(size);
 			if (!entities->SerializeToArray(buffer, size)) {
-				message->set_result("Failed to serialize entitiy result");
+				message->set_response_message("Failed to serialize entity result");
+				message->set_response_error(eqproto::ERR_Internal);
 				SendCommandMessage(message, reply);
 				return;
 			}
-			message->set_result("1");
-			message->set_payload(buffer, size);
+			message->set_response_message("Success");
+			message->set_response_type("CommandMessage");
+			message->set_response_payload(buffer, size);
 			SendCommandMessage(message, reply);
 			return;
 		}
-		message->set_result("Usage: entitylist <type>. Types: npc, client, mob, mercenary, corpse, door, object");
+		message->set_response_error(eqproto::ERR_Request);
+		message->set_response_message("Usage: entitylist <type>. Types: npc, client, mob, mercenary, corpse, door, object");
 		SendCommandMessage(message, reply);
 		return;
 	}
 
-	message->set_result("Failed to parse command.");
+	message->set_response_message("Failed to parse command.");
+	message->set_response_error(eqproto::ERR_Request);	
 	SendCommandMessage(message, reply);
 	return;
 }
@@ -497,9 +530,6 @@ void NatsManager::GetCommandMessage(eqproto::CommandMessage* message, const char
 void NatsManager::SendCommandMessage(eqproto::CommandMessage* message, const char* reply) {
 	if (!connect())
 		return;
-
-	if (message->result().length() == 0)
-		message->set_result("Failed to parse command.");
 
 
 	size_t size = message->ByteSizeLong();
@@ -521,7 +551,7 @@ void NatsManager::SendCommandMessage(eqproto::CommandMessage* message, const cha
 		return;
 	}
 
-	Log(Logs::General, Logs::NATS, "zone.%s.%d.command_message.in: %s (%s)", subscribedZoneName.c_str(), subscribedZoneInstance, message->command().c_str(), message->result().c_str());
+	Log(Logs::General, Logs::NATS, "zone.%s.%d.command_message.in: %s (%d: %s)", subscribedZoneName.c_str(), subscribedZoneInstance, message->command().c_str(), message->response_error(), message->response_message().c_str());
 }
 
 //Unregister is called when a zone is being put to sleep or being swapped
@@ -570,6 +600,7 @@ void NatsManager::Unregister()
 void NatsManager::SendEvent(eqproto::OpCode op, uint32 entity_id, void * buffer, size_t size) {
 
 	eqproto::Event* event = google::protobuf::Arena::CreateMessage<eqproto::Event>(&the_arena);
+	
 	event->set_payload(buffer, size);
 	event->set_op(op);
 	event->set_entity_id(entity_id);
@@ -638,13 +669,13 @@ void NatsManager::ZoneSubscribe(const char* zonename, uint32 instance) {
 }
 
 
-void NatsManager::SendAdminMessage(std::string adminMessage) {
+void NatsManager::SendAdminMessage(std::string adminMessage, int min_status) {
 	if (!connect()) 
 		return;
 
 	eqproto::ChannelMessage* message = google::protobuf::Arena::CreateMessage<eqproto::ChannelMessage>(&the_arena);
 	message->set_message(adminMessage.c_str());
-
+	message->set_minstatus(min_status);
 
 	size_t size = message->ByteSizeLong();
 	void *buffer = malloc(size);

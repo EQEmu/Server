@@ -28,7 +28,7 @@ public:
 	void SendChannelMessage(eqproto::ChannelMessage* message, const char* reply = nullptr);
 	void GetCommandMessage(eqproto::CommandMessage* message, const char* reply = nullptr);
 	void SendCommandMessage(eqproto::CommandMessage* message, const char* reply = nullptr);
-	void SendAdminMessage(std::string adminMessage);
+	void SendAdminMessage(std::string adminMessage, int min_status = 200);
 	void SendEvent(eqproto::OpCode op, uint32 entity_id, void * buffer, size_t size);
 
 	void OnAlternateAdvancementStats(uint32 entity_id, AltAdvStats_Struct * aas);

@@ -22,6 +22,7 @@
 #include "qglobals.h"
 #include "encounter.h"
 #include "lua_encounter.h"
+#include "nats_manager.h"
 
 struct Events { };
 struct Factions { };
@@ -45,6 +46,7 @@ struct lua_registered_event {
 extern std::map<std::string, std::list<lua_registered_event>> lua_encounter_events_registered;
 extern std::map<std::string, bool> lua_encounters_loaded;
 extern std::map<std::string, Encounter *> lua_encounters;
+extern NatsManager nats;
 
 extern void MapOpcodes();
 extern void ClearMappedOpcode(EmuOpcode op);
@@ -1320,6 +1322,10 @@ void lua_debug(std::string message, int level) {
 	Log(static_cast<Logs::DebugLevel>(level), Logs::QuestDebug, message);
 }
 
+void lua_adminmessage(std::string message) {
+	nats.SendAdminMessage(message);
+}
+
 void lua_update_zone_header(std::string type, std::string value) {
 	quest_manager.UpdateZoneHeader(type, value);
 }
@@ -1698,8 +1704,9 @@ luabind::scope lua_register_general() {
 		luabind::def("reloadzonestaticdata", &lua_reloadzonestaticdata),
 		luabind::def("clock", &lua_clock),
 		luabind::def("create_npc", &lua_create_npc),
-		luabind::def("debug", (void(*)(std::string))&lua_debug),
-		luabind::def("debug", (void(*)(std::string, int))&lua_debug)
+		luabind::def("debug", (void(*)(std::string))&lua_debug),		
+		luabind::def("debug", (void(*)(std::string, int))&lua_debug),
+		luabind::def("adminmessage", &lua_adminmessage)
 	];
 }
 

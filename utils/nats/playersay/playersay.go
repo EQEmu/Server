@@ -4,12 +4,12 @@ package main
 import (
 	"fmt"
 	"log"
-	"strconv"
 	"time"
 
 	"github.com/eqemu/server/protobuf/go/eqproto"
 	"github.com/golang/protobuf/proto"
 	"github.com/nats-io/go-nats"
+	"github.com/pkg/errors"
 )
 
 var (
@@ -28,7 +28,9 @@ func main() {
 	zone := "ecommons"
 	instance := int64(0)
 	entities = zoneEntityList(zone, 0)
-
+	if len(entities) == 0 {
+		return
+	}
 	fmt.Println(len(entities), "entities known")
 	//fmt.Println(entities)
 
@@ -45,35 +47,82 @@ func main() {
 	}
 	go asyncChannelMessageSubscriber(nc) //async is recommended
 	go entityEventSubscriber(zone, instance, entityID)
-	zoneChannel(zone, instance, entityID, eqproto.EntityType_Client, eqproto.MessageType_Say, "Hello, World!")
+	err := zoneChannelMessage(zone, instance, entityID, eqproto.EntityType_Client, eqproto.MessageType_Say, "Hello, World!")
+	//err := tell("shin", "Testing tell")
+	if err != nil {
+		fmt.Println("Failed to send channel message:", err.Error())
+		return
+	}
 	time.Sleep(1000 * time.Second)
 }
 
-func zoneChannel(zone string, instance int64, fromEntityID int32, fromEntityType eqproto.EntityType, chanNumber eqproto.MessageType, message string) {
+func tell(to string, message string) (err error) {
 
 	msg := &eqproto.ChannelMessage{
-		Message:        message,
-		Number:         chanNumber,
-		FromEntityId:   fromEntityID,
-		FromEntityType: fromEntityType,
-		Distance:       500,
-		SkipSender:     true,
+		Message: message,
+		From:    "go",
+		To:      to,
 	}
+
 	d, err := proto.Marshal(msg)
 	if err != nil {
 		log.Fatal(err)
 	}
-	channel := fmt.Sprintf("zone.%s.channel_message.in", zone)
-	log.Println(channel, "sending channel request", msg)
+
+	channel := fmt.Sprintf("world.channel_message.in")
 	reply, err := nc.Request(channel, d, 1*time.Second)
 	if err != nil {
-		log.Println("Failed to get request response on zone channel:", err.Error())
+		err = errors.Wrap(err, "Failed to get request response on zone channel")
 		return
 	}
 
 	err = proto.Unmarshal(reply.Data, msg)
 	if err != nil {
-		fmt.Println("Failed to unmarshal", err.Error())
+		err = errors.Wrap(err, "failed to unmarshal")
+		return
+	}
+
+	if msg.ResponseError > 0 {
+		err = errors.New(msg.ResponseMessage)
+		return
+	}
+	fmt.Println("Response:", msg)
+	return
+}
+
+func zoneChannelMessage(zone string, instance int64, fromEntityID int32, fromEntityType eqproto.EntityType, chanNumber eqproto.MessageType, message string) (err error) {
+
+	msg := &eqproto.ChannelMessage{
+		Message:        message,
+		Number:         eqproto.MessageType_SayLocal, //chanNumber,
+		FromEntityId:   fromEntityID,
+		FromEntityType: fromEntityType,
+		From:           "go",
+		Distance:       500,
+		SkipSender:     false,
+		//To:             "shin",
+	}
+
+	d, err := proto.Marshal(msg)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	channel := fmt.Sprintf("zone.%s.%d.channel_message.in", zone, instance)
+	reply, err := nc.Request(channel, d, 1*time.Second)
+	if err != nil {
+		err = errors.Wrap(err, "Failed to get request response on zone channel")
+		return
+	}
+
+	err = proto.Unmarshal(reply.Data, msg)
+	if err != nil {
+		err = errors.Wrap(err, "failed to unmarshal")
+		return
+	}
+
+	if msg.ResponseError > 0 {
+		err = errors.New(msg.ResponseMessage)
 		return
 	}
 	fmt.Println("Response:", msg)
@@ -107,7 +156,7 @@ func zoneEntityList(zone string, instanceID int) (entities []*eqproto.Entity) {
 	channel := fmt.Sprintf("zone.%s.command_message.in", zone)
 	reply, err := nc.Request(channel, d, 1*time.Second)
 	if err != nil {
-		log.Println("Failed to get response on", channel, "", err.Error())
+		log.Println("Failed to get response on", channel, err.Error())
 		return
 	}
 
@@ -116,15 +165,14 @@ func zoneEntityList(zone string, instanceID int) (entities []*eqproto.Entity) {
 		fmt.Println("Failed to unmarshal", err.Error())
 		return
 	}
-
-	if msg.Result != "1" {
-		fmt.Println("Failed response: ", msg.Result)
+	if msg.ResponseError > 0 {
+		fmt.Println("Failed to get entity list:", msg.ResponseError, msg.ResponseMessage)
 		return
 	}
 
 	//fmt.Println("reply", len(msg.Payload), string(msg.Payload))
 	rootEntities := &eqproto.Entities{}
-	err = proto.Unmarshal([]byte(msg.Payload), rootEntities)
+	err = proto.Unmarshal([]byte(msg.ResponsePayload), rootEntities)
 	if err != nil {
 		fmt.Println("failed to unmarshal entities", err.Error(), msg)
 		return
@@ -133,7 +181,7 @@ func zoneEntityList(zone string, instanceID int) (entities []*eqproto.Entity) {
 	return
 }
 
-func zoneCommandEntity(zone string, command string, params []string) (entityID int64) {
+func zoneCommandEntity(zone string, command string, params []string) (entityID int32) {
 	msg := &eqproto.CommandMessage{
 		Author:  "xackery",
 		Command: command,
@@ -154,12 +202,13 @@ func zoneCommandEntity(zone string, command string, params []string) (entityID i
 		fmt.Println("Failed to unmarshal", err.Error())
 		return
 	}
-	fmt.Println("Response:", msg)
-	entityID, err = strconv.ParseInt(msg.Result, 10, 64)
-	if err != nil {
-		fmt.Println("Failed to parse response", err.Error(), msg.Result)
+	//fmt.Println("Response:", msg)
+	if msg.ResponseError > 0 {
+		fmt.Println("Failed to get response:", msg.ResponseError, msg.ResponseMessage)
 		return
 	}
+
+	entityID = msg.ResponseValue
 	return
 }
 
@@ -190,20 +239,6 @@ func zoneCommand(zone string, command string, params []string) {
 
 func entityEventSubscriber(zone string, instance int64, entityID int32) {
 
-	/*event := &eqproto.EntityEvent{
-		Entity: &eqproto.Entity{
-			Id: 1,
-		},
-	}
-	d, err := proto.Marshal(event)
-	if err != nil {
-		log.Fatal(err)
-	}
-	if err = nc.Publish(fmt.Sprintf("zone.%s.entity.event_subscribe.all", zone), d); err != nil {
-		log.Println("Failed to publish event subscribe:", err.Error())
-		return
-	}*/
-
 	var index int
 
 	channel := fmt.Sprintf("zone.%s.%d.entity.%d.event.out", zone, instance, entityID)
@@ -212,6 +247,7 @@ func entityEventSubscriber(zone string, instance int64, entityID int32) {
 		err = proto.Unmarshal(m.Data, event)
 		if err != nil {
 			fmt.Println("invalid event data passed", m.Data)
+			return
 		}
 
 		var eventPayload proto.Message
