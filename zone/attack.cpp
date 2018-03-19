@@ -3622,24 +3622,10 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 					a->force = 0.0f; // 2013 change that disabled NPC vs NPC push
 				else
 					a->force *= 0.10f; // force against NPCs is divided by 10 I guess? ex bash is 0.3, parsed 0.03 against an NPC
-			}
-			// update NPC stuff
-			if (a->force != 0.0f) {
-				auto new_pos = glm::vec3(
-				    m_Position.x + (a->force * g_Math.FastSin(a->hit_heading) + m_Delta.x),
-				    m_Position.y + (a->force * g_Math.FastCos(a->hit_heading) + m_Delta.y), m_Position.z);
-				if ((!IsNPC() || position_update_melee_push_timer.Check()) && zone->zonemap &&
-				    zone->zonemap->CheckLoS(
-					glm::vec3(m_Position),
-					new_pos)) { // If we have LoS on the new loc it should be reachable.
-					if (IsNPC()) {
-						// Is this adequate?
-
-						Teleport(new_pos);
-						SendPositionUpdate();
-					}
-				} else {
-					a->force = 0.0f; // we couldn't move there, so lets not
+				if (ForcedMovement == 0 && a->force != 0.0f && position_update_melee_push_timer.Check()) {
+					m_Delta.x += a->force * g_Math.FastSin(a->hit_heading);
+					m_Delta.y += a->force * g_Math.FastCos(a->hit_heading);
+					ForcedMovement = 3;
 				}
 			}
 		}
