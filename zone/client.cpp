@@ -7594,10 +7594,10 @@ void Client::JoinGroupXTargets(Group *g)
 	auto g6 = g->GetXTargetAutoMgr()->get_list().rend();
 
 	if (!GetXTargetAutoMgr()->empty()) {
-		Log(Logs::Detail, Logs::Error, "XTarget Merge[clt] empty=%s, size=%u, begin=0x%X, end=0x%X, rbegin=0x%X, rend=0x%X",
-			(c1?"true":"false"), c2, c3, c4, c5, c6);
-		Log(Logs::Detail, Logs::Error, "XTarget Merge[grp] empty=%s, size=%u, begin=0x%X, end=0x%X, rbegin=0x%X, rend=0x%X",
-			(g1?"true":"false"), g2, g3, g4, g5, g6);
+		Log(Logs::Detail, Logs::Error, "XTarget Merge[clt] empty=%s, size=%u, (begin==end)=%s, (rbegin==rend)=%s",
+			(c1?"true":"false"), c2, (c3==c4?"true":"false"), (c5==c6?"true":"false"));
+		Log(Logs::Detail, Logs::Error, "XTarget Merge[grp] empty=%s, size=%u, (begin==end)=%s, (rbegin==rend)=%s",
+			(g1?"true":"false"), g2, (g3==g4?"true":"false"), (g5==g6?"true":"false"));
 
 		g->GetXTargetAutoMgr()->merge(*GetXTargetAutoMgr());
 		GetXTargetAutoMgr()->clear();
