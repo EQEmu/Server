@@ -168,6 +168,8 @@ void Trap::Trigger(Mob* trigger)
 					auto spawnPosition = randomOffset + glm::vec4(m_Position, 0.0f);
 					auto new_npc = new NPC(tmp, nullptr, spawnPosition, FlyMode3);
 					new_npc->AddLootTable();
+					if (new_npc->DropsGlobalLoot())
+						new_npc->CheckGlobalLootTables();
 					entity_list.AddNPC(new_npc);
 					new_npc->AddToHateList(trigger,1);
 				}
@@ -191,6 +193,8 @@ void Trap::Trigger(Mob* trigger)
 					auto spawnPosition = randomOffset + glm::vec4(m_Position, 0.0f);
 					auto new_npc = new NPC(tmp, nullptr, spawnPosition, FlyMode3);
 					new_npc->AddLootTable();
+					if (new_npc->DropsGlobalLoot())
+						new_npc->CheckGlobalLootTables();
 					entity_list.AddNPC(new_npc);
 					new_npc->AddToHateList(trigger,1);
 				}
@@ -212,7 +216,7 @@ void Trap::Trigger(Mob* trigger)
 				int dmg = zone->random.Int(effectvalue, effectvalue2);
 				trigger->SetHP(trigger->GetHP() - dmg);
 				a->damage = dmg;
-				a->meleepush_xy = zone->random.Int(0, 1234567);
+				a->hit_heading = 0.0f;
 				a->source = GetHiddenTrigger()!=nullptr ? GetHiddenTrigger()->GetID() : trigger->GetID();
 				a->spellid = 0;
 				a->target = trigger->GetID();

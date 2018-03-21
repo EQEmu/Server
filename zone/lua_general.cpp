@@ -1464,7 +1464,6 @@ void lua_create_npc(luabind::adl::object table, float x, float y, float z, float
 	LuaCreateNPCParse(healscale, float, 0);
 	LuaCreateNPCParse(no_target_hotkey, bool, false);
 	LuaCreateNPCParse(raid_target, bool, false);
-	LuaCreateNPCParse(probability, uint8, 0);
 
 	NPC* npc = new NPC(npc_type, nullptr, glm::vec4(x, y, z, heading), FlyMode3);
 	npc->GiveNPCTypeData(npc_type);

@@ -644,7 +644,6 @@ void EntityList::AddCorpse(Corpse *corpse, uint32 in_id)
 void EntityList::AddNPC(NPC *npc, bool SendSpawnPacket, bool dontqueue)
 {
 	npc->SetID(GetFreeID());
-	npc->SetMerchantProbability((uint8) zone->random.Int(0, 99));
 
 	parse->EventNPC(EVENT_SPAWN, npc, nullptr, "", 0);
 
@@ -3257,7 +3256,7 @@ void EntityList::AddHealAggro(Mob *target, Mob *caster, uint16 hate)
 
 	for (auto &e : npc_list) {
 		auto &npc = e.second;
-		if (!npc->CheckAggro(target) || npc->IsFeared())
+		if (!npc->CheckAggro(target) || npc->IsFeared() || npc->IsPet())
 			continue;
 
 		if (zone->random.Roll(50)) // witness check -- place holder
@@ -4869,5 +4868,14 @@ void EntityList::SendAlternateAdvancementStats() {
 		c.second->SendAlternateAdvancementTable();
 		c.second->SendAlternateAdvancementStats();
 		c.second->SendAlternateAdvancementPoints();
+	}
+}
+
+void EntityList::ReloadMerchants() {
+	for (auto it = npc_list.begin();it != npc_list.end(); ++it) {
+		NPC *cur = it->second;
+		if (cur->MerchantType != 0) {
+			zone->LoadNewMerchantData(cur->MerchantType);
+		}
 	}
 }

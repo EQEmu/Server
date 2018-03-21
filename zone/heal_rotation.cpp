@@ -169,9 +169,10 @@ bool HealRotation::ClearMemberPool()
 	m_casting_target_poke = false;
 	m_active_heal_target = false;
 	
-	ClearTargetPool();
+	if (!ClearTargetPool())
+		Log(Logs::General, Logs::Error, "HealRotation::ClearTargetPool() failed to clear m_target_pool (size: %u)", m_target_pool.size());
 
-	auto clear_list = m_member_pool;
+	auto clear_list = const_cast<const std::list<Bot*>&>(m_member_pool);
 	for (auto member_iter : clear_list)
 		member_iter->LeaveHealRotationMemberPool();
 
@@ -183,13 +184,23 @@ bool HealRotation::ClearTargetPool()
 	m_hot_target = nullptr;
 	m_hot_active = false;
 	m_is_active = false;
-
-	auto clear_list = m_target_pool;
+	
+	auto clear_list = const_cast<const std::list<Mob*>&>(m_target_pool);
 	for (auto target_iter : clear_list)
 		target_iter->LeaveHealRotationTargetPool();
 
-	m_casting_target_poke = false;
-	bias_targets();
+	//m_casting_target_poke = false;
+	//bias_targets();
+
+	// strange crash point...
+	// bias_targets() should be returning on m_target_pool.empty()
+	// and setting this two properties as below
+	m_casting_target_poke = true;
+	m_active_heal_target = false;
+	// instead, the list retains mob shared_ptrs and
+	// attempts to process them - and crashes program
+	// predominate when adaptive_healing = true
+	// (shared_ptr now has a delayed gc action? this did work before...)
 
 	return m_target_pool.empty();
 }

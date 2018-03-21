@@ -42,7 +42,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	Bot::ProcessClientZoneChange(this);
 #endif
 
-	zoning = true;
+	bZoning = true;
 	if (app->size != sizeof(ZoneChange_Struct)) {
 		Log(Logs::General, Logs::None, "Wrong size: OP_ZoneChange, size=%d, expected %d", app->size, sizeof(ZoneChange_Struct));
 		return;
@@ -308,6 +308,8 @@ void Client::SendZoneCancel(ZoneChange_Struct *zc) {
 
 	//reset to unsolicited.
 	zone_mode = ZoneUnsolicited;
+	// reset since we're not zoning anymore
+	bZoning = false;
 }
 
 void Client::SendZoneError(ZoneChange_Struct *zc, int8 err)
@@ -327,6 +329,8 @@ void Client::SendZoneError(ZoneChange_Struct *zc, int8 err)
 
 	//reset to unsolicited.
 	zone_mode = ZoneUnsolicited;
+	// reset since we're not zoning anymore
+	bZoning = false;
 }
 
 void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instance_id, float dest_x, float dest_y, float dest_z, float dest_h, int8 ignore_r) {

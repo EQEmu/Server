@@ -1719,6 +1719,8 @@ FMT_DEFINE_INT_FORMATTERS(unsigned long)
 FMT_DEFINE_INT_FORMATTERS(LongLong)
 FMT_DEFINE_INT_FORMATTERS(ULongLong)
 
+#define CHAR_WIDTH 1
+
 /**
   \rst
   Returns a string formatter that pads the formatted argument with the fill
@@ -1823,7 +1825,7 @@ class ArgFormatterBase : public ArgVisitor<Impl, void> {
     typedef typename BasicWriter<Char>::CharPtr CharPtr;
     Char fill = internal::CharTraits<Char>::cast(spec_.fill());
     CharPtr out = CharPtr();
-    const unsigned CHAR_WIDTH = 1;
+
     if (spec_.width_ > CHAR_WIDTH) {
       out = writer_.grow_buffer(spec_.width_);
       if (spec_.align_ == ALIGN_RIGHT) {

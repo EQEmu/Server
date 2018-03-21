@@ -513,6 +513,7 @@ Client::Client(std::shared_ptr<EQStreamInterface> eqs) {
 	GlobalChatLimiterTimer = new Timer(RuleI(Chat, IntervalDurationMS));
 
 	TypeOfConnection = ConnectionTypeUnknown;
+	ClientVersion_ = EQEmu::versions::ClientVersion::Unknown;
 
 	UnderfootOrLater = false;
 }
@@ -681,6 +682,7 @@ void Clientlist::Process()
 			it = ClientChatConnections.erase(it);
 			continue;
 		}
+
 		++it;
 	}
 }
@@ -2134,34 +2136,62 @@ void Client::SetConnectionType(char c) {
 
 	switch (c)
 	{
-	case 'S':
-	{
-		TypeOfConnection = ConnectionTypeCombined;
-		Log(Logs::Detail, Logs::UCS_Server, "Connection type is Combined (SoF/SoD)");
-		break;
-	}
-	case 'U':
-	{
-		TypeOfConnection = ConnectionTypeCombined;
-		UnderfootOrLater = true;
-		Log(Logs::Detail, Logs::UCS_Server, "Connection type is Combined (Underfoot+)");
-		break;
-	}
-	case 'M':
-	{
-		TypeOfConnection = ConnectionTypeMail;
-		Log(Logs::Detail, Logs::UCS_Server, "Connection type is Mail (6.2 or Titanium client)");
-		break;
-	}
-	case 'C':
+	case EQEmu::versions::ucsTitaniumChat:
 	{
 		TypeOfConnection = ConnectionTypeChat;
-		Log(Logs::Detail, Logs::UCS_Server, "Connection type is Chat (6.2 or Titanium client)");
+		ClientVersion_ = EQEmu::versions::ClientVersion::Titanium;
+		Log(Logs::Detail, Logs::UCS_Server, "Connection type is Chat (Titanium)");
+		break;
+	}
+	case EQEmu::versions::ucsTitaniumMail:
+	{
+		TypeOfConnection = ConnectionTypeMail;
+		ClientVersion_ = EQEmu::versions::ClientVersion::Titanium;
+		Log(Logs::Detail, Logs::UCS_Server, "Connection type is Mail (Titanium)");
+		break;
+	}
+	case EQEmu::versions::ucsSoFCombined:
+	{
+		TypeOfConnection = ConnectionTypeCombined;
+		ClientVersion_ = EQEmu::versions::ClientVersion::SoF;
+		Log(Logs::Detail, Logs::UCS_Server, "Connection type is Combined (SoF)");
+		break;
+	}
+	case EQEmu::versions::ucsSoDCombined:
+	{
+		TypeOfConnection = ConnectionTypeCombined;
+		ClientVersion_ = EQEmu::versions::ClientVersion::SoD;
+		Log(Logs::Detail, Logs::UCS_Server, "Connection type is Combined (SoD)");
+		break;
+	}
+	case EQEmu::versions::ucsUFCombined:
+	{
+		TypeOfConnection = ConnectionTypeCombined;
+		ClientVersion_ = EQEmu::versions::ClientVersion::UF;
+		UnderfootOrLater = true;
+		Log(Logs::Detail, Logs::UCS_Server, "Connection type is Combined (Underfoot)");
+		break;
+	}
+	case EQEmu::versions::ucsRoFCombined:
+	{
+		TypeOfConnection = ConnectionTypeCombined;
+		ClientVersion_ = EQEmu::versions::ClientVersion::RoF;
+		UnderfootOrLater = true;
+		Log(Logs::Detail, Logs::UCS_Server, "Connection type is Combined (RoF)");
+		break;
+	}
+	case EQEmu::versions::ucsRoF2Combined:
+	{
+		TypeOfConnection = ConnectionTypeCombined;
+		ClientVersion_ = EQEmu::versions::ClientVersion::RoF2;
+		UnderfootOrLater = true;
+		Log(Logs::Detail, Logs::UCS_Server, "Connection type is Combined (RoF2)");
 		break;
 	}
 	default:
 	{
 		TypeOfConnection = ConnectionTypeUnknown;
+		ClientVersion_ = EQEmu::versions::ClientVersion::Unknown;
 		Log(Logs::Detail, Logs::UCS_Server, "Connection type is unknown.");
 	}
 	}

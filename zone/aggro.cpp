@@ -253,7 +253,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	//sometimes if a client has some lag while zoning into a dangerous place while either invis or a GM
 	//they will aggro mobs even though it's supposed to be impossible, to lets make sure we've finished connecting
 	if (mob->IsClient()) {
-		if (!mob->CastToClient()->ClientFinishedLoading() || mob->CastToClient()->IsHoveringForRespawn() || mob->CastToClient()->zoning)
+		if (!mob->CastToClient()->ClientFinishedLoading() || mob->CastToClient()->IsHoveringForRespawn() || mob->CastToClient()->bZoning)
 			return false;
 	}
 
@@ -1005,6 +1005,28 @@ bool Mob::CheckLosFN(float posX, float posY, float posZ, float mobSize) {
 	Log(Logs::General, Logs::None, "LOS from (%.2f, %.2f, %.2f) to (%.2f, %.2f, %.2f) sizes: (%.2f, %.2f)", myloc.x, myloc.y, myloc.z, oloc.x, oloc.y, oloc.z, GetSize(), mobSize);
 #endif
 	return zone->zonemap->CheckLoS(myloc, oloc);
+}
+
+bool Mob::CheckLosFN(glm::vec3 posWatcher, float sizeWatcher, glm::vec3 posTarget, float sizeTarget) {
+	if (zone->zonemap == nullptr) {
+		//not sure what the best return is on error
+		//should make this a database variable, but im lazy today
+#ifdef LOS_DEFAULT_CAN_SEE
+		return(true);
+#else
+		return(false);
+#endif
+	}
+
+#define LOS_DEFAULT_HEIGHT 6.0f
+
+	posWatcher.z += (sizeWatcher == 0.0f ? LOS_DEFAULT_HEIGHT : sizeWatcher) / 2 * HEAD_POSITION;
+	posTarget.z += (sizeTarget == 0.0f ? LOS_DEFAULT_HEIGHT : sizeTarget) / 2 * SEE_POSITION;
+
+#if LOSDEBUG>=5
+	Log(Logs::General, Logs::None, "LOS from (%.2f, %.2f, %.2f) to (%.2f, %.2f, %.2f) sizes: (%.2f, %.2f) [static]", posWatcher.x, posWatcher.y, posWatcher.z, posTarget.x, posTarget.y, posTarget.z, sizeWatcher, sizeTarget);
+#endif
+	return zone->zonemap->CheckLoS(posWatcher, posTarget);
 }
 
 //offensive spell aggro

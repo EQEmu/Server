@@ -70,7 +70,6 @@ Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm
 	SetBotCharmer(false);
 	SetPetChooser(false);
 	SetRangerAutoWeaponSelect(false);
-	SetHasBeenSummoned(false);
 	SetTaunting(GetClass() == WARRIOR);
 	SetDefaultBotStance();
 
@@ -140,7 +139,6 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 	SetBotCharmer(false);
 	SetPetChooser(false);
 	SetRangerAutoWeaponSelect(false);
-	SetHasBeenSummoned(false);
 
 	bool stance_flag = false;
 	if (!botdb.LoadStance(this, stance_flag) && bot_owner)
@@ -2043,70 +2041,106 @@ void Bot::SetTarget(Mob* mob) {
 	}
 }
 
-float Bot::GetMaxMeleeRangeToTarget(Mob* target) {
-	float result = 0;
-	if(target) {
-		float size_mod = GetSize();
-		float other_size_mod = target->GetSize();
+void Bot::SetGuardMode() {
+	WipeHateList();
+	SetTarget(nullptr);
+	SetFollowID(GetID());
+	StopMoving();
+	m_GuardPoint = GetPosition();
 
-		if(GetRace() == 49 || GetRace() == 158 || GetRace() == 196) //For races with a fixed size
-			size_mod = 60.0f;
-		else if (size_mod < 6.0)
-			size_mod = 8.0f;
-
-		if(target->GetRace() == 49 || target->GetRace() == 158 || target->GetRace() == 196) //For races with a fixed size
-			other_size_mod = 60.0f;
-		else if (other_size_mod < 6.0)
-			other_size_mod = 8.0f;
-
-		if (other_size_mod > size_mod)
-			size_mod = other_size_mod;
-
-		if (size_mod > 29)
-			size_mod *= size_mod;
-		else if (size_mod > 19)
-			size_mod *= (size_mod * 2);
-		else
-			size_mod *= (size_mod * 4);
-
-		// prevention of ridiculously sized hit boxes
-		if (size_mod > 10000)
-			size_mod = (size_mod / 7);
-
-		result = size_mod;
+	if (HasPet()) {
+		GetPet()->WipeHateList();
+		GetPet()->SetTarget(nullptr);
+		GetPet()->StopMoving();
 	}
-
-	return result;
 }
 
 // AI Processing for the Bot object
 void Bot::AI_Process() {
-	// TODO: Need to add root checks to all movement code
 
-	if (!IsAIControlled())
-		return;
-	if (GetPauseAI())
+#define TEST_TARGET() if (!GetTarget()) { return; }
+
+	Client* bot_owner = (GetBotOwner() && GetBotOwner()->IsClient() ? GetBotOwner()->CastToClient() : nullptr);
+	Group* bot_group = GetGroup();
+	Mob* follow_mob = entity_list.GetMob(GetFollowID());
+
+	// Primary reasons for not processing AI
+	if (!bot_owner || !bot_group || !follow_mob || !IsAIControlled())
 		return;
 
-	uint8 botClass = GetClass();
-	uint8 botLevel = GetLevel();
+	if (bot_owner->IsDead()) {
+		SetTarget(nullptr);
+		SetBotOwner(nullptr);
+
+		return;
+	}
+
+	// We also need a leash owner (subset of primary AI criteria)
+	Client* leash_owner = (bot_group->GetLeader() && bot_group->GetLeader()->IsClient() ? bot_group->GetLeader()->CastToClient() : bot_owner);
+	if (!leash_owner)
+		return;
+
+	// Berserk updates should occur if primary AI criteria are met
+	if (GetClass() == WARRIOR || GetClass() == BERSERKER) {
+		if (!berserk && GetHP() > 0 && GetHPRatio() < 30.0f) {
+			entity_list.MessageClose_StringID(this, false, 200, 0, BERSERK_START, GetName());
+			berserk = true;
+		}
+
+		if (berserk && GetHPRatio() >= 30.0f) {
+			entity_list.MessageClose_StringID(this, false, 200, 0, BERSERK_END, GetName());
+			berserk = false;
+		}
+	}
+
+	// Secondary reasons for not processing AI
+	if (GetPauseAI() || IsStunned() || IsMezzed() || (GetAppearance() == eaDead)) {
+		if (IsCasting())
+			InterruptSpell();
+		if (IsMyHealRotationSet() || (AmICastingForHealRotation() && m_member_of_heal_rotation->CastingMember() == this)) {
+			AdvanceHealRotation(false);
+			m_member_of_heal_rotation->SetMemberIsCasting(this, false);
+		}
+		
+		return;
+	}
+	
+	bool guard_mode = (follow_mob == this);
+
+	auto fm_dist = DistanceSquared(m_Position, follow_mob->GetPosition());
+	auto lo_distance = DistanceSquared(m_Position, leash_owner->GetPosition());
 
 	if (IsCasting()) {
-		if (
-			IsHealRotationMember() &&
+		if (IsHealRotationMember() &&
 			m_member_of_heal_rotation->CastingOverride() &&
 			m_member_of_heal_rotation->CastingTarget() != nullptr &&
 			m_member_of_heal_rotation->CastingReady() &&
 			m_member_of_heal_rotation->CastingMember() == this &&
-			!m_member_of_heal_rotation->MemberIsCasting(this)
-		) {
+			!m_member_of_heal_rotation->MemberIsCasting(this))
+		{
 			InterruptSpell();
 		}
 		else if (AmICastingForHealRotation() && m_member_of_heal_rotation->CastingMember() == this) {
 			AdvanceHealRotation(false);
 			return;
 		}
-		else if (botClass != BARD) {
+		else if (GetClass() != BARD) {
+			if (IsEngaged())
+				return;
+			if (fm_dist > GetFollowDistance()) // Cancel out-of-combat casting if movement is required
+				InterruptSpell();
+			if (guard_mode) {
+				auto& my_pos = GetPosition();
+				auto& my_guard = GetGuardPoint();
+
+				if (my_pos.x != my_guard.x ||
+					my_pos.y != my_guard.y ||
+					my_pos.z != my_guard.z)
+				{
+					InterruptSpell();
+				}
+			}
+
 			return;
 		}
 	}
@@ -2114,28 +2148,13 @@ void Bot::AI_Process() {
 		m_member_of_heal_rotation->SetMemberIsCasting(this, false);
 	}
 
-	// A bot wont start its AI if not grouped
-	if(!GetBotOwner() || !IsGrouped() || GetAppearance() == eaDead)
-		return;
-
-	Mob* BotOwner = GetBotOwner();
-	if(!BotOwner)
-		return;
-
-	try {
-		if(BotOwner->CastToClient()->IsDead()) {
-			SetTarget(0);
-			SetBotOwner(0);
-			return;
-		}
-	}
-	catch(...) {
-		SetTarget(0);
-		SetBotOwner(0);
+	// Can't move if rooted...
+	if (IsRooted() && IsMoving()) {
+		StopMoving();
 		return;
 	}
 
-	if(IsMyHealRotationSet()) {
+	if (IsMyHealRotationSet()) {
 		Mob* delete_me = HealRotationTarget();
 		if (AIHealRotation(HealRotationTarget(), UseHealRotationFastHeals())) {
 #if (EQDEBUG >= 12)
@@ -2154,432 +2173,651 @@ void Bot::AI_Process() {
 		}
 	}
 
-	if(GetHasBeenSummoned()) {
-		if(IsBotCaster() || IsBotArcher()) {
-			if (AI_movement_timer->Check()) {
-				if(!GetTarget() || (IsBotCaster() && !IsBotCasterAtCombatRange(GetTarget())) || (IsBotArcher() && IsArcheryRange(GetTarget())) || (DistanceSquaredNoZ(static_cast<glm::vec3>(m_Position), m_PreSummonLocation) < 10)) {
-					if(GetTarget())
-						FaceTarget(GetTarget());
+	// Empty hate list - let's find a target
+	if (!guard_mode && !IsEngaged()) {
+		Mob* lo_target = leash_owner->GetTarget();
 
-					SetHasBeenSummoned(false);
-				} else if(!IsRooted()) {
-					if(GetTarget() && GetTarget()->GetHateTop() && GetTarget()->GetHateTop() != this) {
-						Log(Logs::Detail, Logs::AI, "Returning to location prior to being summoned.");
-						CalculateNewPosition2(m_PreSummonLocation.x, m_PreSummonLocation.y, m_PreSummonLocation.z, GetBotRunspeed());
-						SetHeading(CalculateHeadingToTarget(m_PreSummonLocation.x, m_PreSummonLocation.y));
-						return;
-					}
-				}
-
-				if(IsMoving())
-					SendPositionUpdate();
-				else
-					SendPosition();
-			}
-		} else {
-			if(GetTarget())
-				FaceTarget(GetTarget());
-
-			SetHasBeenSummoned(false);
+		if (lo_target && lo_target->IsNPC() &&
+			!lo_target->IsMezzed() &&
+			(lo_target->GetHateAmount(leash_owner) || leash_owner->AutoAttackEnabled()) &&
+			lo_distance <= BOT_LEASH_DISTANCE &&
+			DistanceSquared(m_Position, lo_target->GetPosition()) <= BOT_LEASH_DISTANCE &&
+			(CheckLosFN(lo_target) || leash_owner->CheckLosFN(lo_target)) &&
+			IsAttackAllowed(lo_target))
+		{
+			AddToHateList(lo_target, 1);
+			if (HasPet())
+				GetPet()->AddToHateList(lo_target, 1);
 		}
-		return;
-	}
+		else {
+			for (int counter = 0; counter < bot_group->GroupCount(); counter++) {
+				Mob* bg_member = bot_group->members[counter];
+				if (!bg_member)
+					continue;
 
-	if(!IsEngaged()) {
-		if(GetFollowID()) {
-			if(BotOwner && BotOwner->GetTarget() && BotOwner->GetTarget()->IsNPC() && (BotOwner->GetTarget()->GetHateAmount(BotOwner) || BotOwner->CastToClient()->AutoAttackEnabled()) && IsAttackAllowed(BotOwner->GetTarget())) {
-					AddToHateList(BotOwner->GetTarget(), 1);
-					if(HasPet())
-						GetPet()->AddToHateList(BotOwner->GetTarget(), 1);
-			} else {
-				Group* g = GetGroup();
-				if(g) {
-					for(int counter = 0; counter < g->GroupCount(); counter++) {
-						if(g->members[counter]) {
-							Mob* tar = g->members[counter]->GetTarget();
-							if(tar && tar->IsNPC() && tar->GetHateAmount(g->members[counter]) && IsAttackAllowed(g->members[counter]->GetTarget())) {
-								AddToHateList(tar, 1);
-								if(HasPet())
-									GetPet()->AddToHateList(tar, 1);
+				Mob* bgm_target = bg_member->GetTarget();
+				if (!bgm_target || !bgm_target->IsNPC())
+					continue;
 
-								break;
-							}
-						}
-					}
+				if (!bgm_target->IsMezzed() &&
+					bgm_target->GetHateAmount(bg_member) &&
+					lo_distance <= BOT_LEASH_DISTANCE &&
+					DistanceSquared(m_Position, bgm_target->GetPosition()) <= BOT_LEASH_DISTANCE &&
+					(CheckLosFN(bgm_target) || leash_owner->CheckLosFN(bgm_target)) &&
+					IsAttackAllowed(bgm_target))
+				{
+					AddToHateList(bgm_target, 1);
+					if (HasPet())
+						GetPet()->AddToHateList(bgm_target, 1);
+
+					break;
 				}
 			}
 		}
 	}
 
-	if(IsEngaged()) {
-		if(rest_timer.Enabled())
+	glm::vec3 Goal(0, 0, 0);
+
+	// We have aggro to choose from
+	if (IsEngaged()) {
+		if (rest_timer.Enabled())
 			rest_timer.Disable();
 
-		if(IsRooted())
-			SetTarget(hate_list.GetClosestEntOnHateList(this));
-		else
-			SetTarget(hate_list.GetEntWithMostHateOnList(this));
+		// Group roles can be expounded upon in the future
+		auto assist_mob = entity_list.GetMob(bot_group->GetMainAssistName());
+		bool find_target = true;
+		
+		if (assist_mob) {
+			if (assist_mob->GetTarget()) {
+				if (assist_mob != this) 
+					SetTarget(assist_mob->GetTarget());
 
-		if(!GetTarget())
+				find_target = false;
+			}
+			else if (assist_mob != this) {
+				SetTarget(nullptr);
+				if (HasPet())
+					GetPet()->SetTarget(nullptr);
+
+				find_target = false;
+			}
+		}
+
+		if (find_target) {
+			if (IsRooted())
+				SetTarget(hate_list.GetClosestEntOnHateList(this));
+			else
+				SetTarget(hate_list.GetEntWithMostHateOnList(this));
+		}
+		
+		TEST_TARGET();
+
+		Mob* tar = GetTarget();
+		if (!tar)
 			return;
 
-		if(HasPet())
-			GetPet()->SetTarget(GetTarget());
-
-		if(!IsSitting())
-			FaceTarget(GetTarget());
-
-		if(DivineAura())
-			return;
+		float tar_distance = DistanceSquared(m_Position, tar->GetPosition());
 
 		// Let's check if we have a los with our target.
 		// If we don't, our hate_list is wiped.
 		// Else, it was causing the bot to aggro behind wall etc... causing massive trains.
-		if(GetTarget()->IsMezzed() || !IsAttackAllowed(GetTarget())) {
-			WipeHateList();
-			if(IsMoving()) {
-				SetHeading(0);
-				SetRunAnimSpeed(0);
-				SetCurrentSpeed(GetBotRunspeed());
-				if(moved)
-					SetCurrentSpeed(0);
+		if (guard_mode ||
+			!tar->IsNPC() ||
+			tar->IsMezzed() ||
+			(!tar->GetHateAmount(this) && !tar->GetHateAmount(leash_owner) && !leash_owner->AutoAttackEnabled()) ||
+			lo_distance > BOT_LEASH_DISTANCE ||
+			tar_distance > BOT_LEASH_DISTANCE ||
+			(!CheckLosFN(tar) && !leash_owner->CheckLosFN(tar)) ||
+			!IsAttackAllowed(tar))
+		{
+			if (HasPet()) {
+				GetPet()->RemoveFromHateList(tar);
+				GetPet()->SetTarget(nullptr);
 			}
-			return;
-		}
-		else if (!CheckLosFN(GetTarget())) {
-			if (RuleB(Bots, UsePathing) && zone->pathing) {
-				bool WaypointChanged, NodeReached;
 
-				glm::vec3 Goal = UpdatePath(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ(),
-					GetBotRunspeed(), WaypointChanged, NodeReached);
+			RemoveFromHateList(tar);
+			SetTarget(nullptr);
 
-				if (WaypointChanged)
-					tar_ndx = 20;
-
-				CalculateNewPosition2(Goal.x, Goal.y, Goal.z, GetBotRunspeed());
-			}
-			else {
-				Mob* follow = entity_list.GetMob(GetFollowID());
-				if (follow)
-					CalculateNewPosition2(follow->GetX(), follow->GetY(), follow->GetZ(), GetBotRunspeed());
-			}
+			if (IsMoving())
+				StopMoving();
 			
 			return;
 		}
 
+		if (HasPet()) // this causes conflicts with default pet handler (bounces between targets)
+			GetPet()->SetTarget(tar);
+
+		if (DivineAura())
+			return;
+		
 		if (!(m_PlayerState & static_cast<uint32>(PlayerState::Aggressive)))
 			SendAddPlayerState(PlayerState::Aggressive);
 
 		bool atCombatRange = false;
-		float meleeDistance = GetMaxMeleeRangeToTarget(GetTarget());
-		if(botClass == SHADOWKNIGHT || botClass == PALADIN || botClass == WARRIOR)
-			meleeDistance = (meleeDistance * .30);
-		else
-			meleeDistance *= (float)zone->random.Real(.50, .85);
 
-		bool atArcheryRange = IsArcheryRange(GetTarget());
+		const auto* p_item = GetBotItem(EQEmu::inventory::slotPrimary);
+		const auto* s_item = GetBotItem(EQEmu::inventory::slotSecondary);
 
-		if(GetRangerAutoWeaponSelect()) {
+		bool behind_mob = false;
+		bool backstab_weapon = false;
+		if (GetClass() == ROGUE) {
+			behind_mob = BehindMob(tar, GetX(), GetY()); // can be separated for other future use
+			backstab_weapon = p_item && p_item->GetItemBackstabDamage();
+		}
+
+		// Calculate melee distance
+		float melee_distance_max = 0.0f;
+		{
+			float size_mod = GetSize();
+			float other_size_mod = tar->GetSize();
+
+			if (GetRace() == RT_DRAGON || GetRace() == RT_WURM || GetRace() == RT_DRAGON_7) //For races with a fixed size
+				size_mod = 60.0f;
+			else if (size_mod < 6.0f)
+				size_mod = 8.0f;
+
+			if (tar->GetRace() == RT_DRAGON || tar->GetRace() == RT_WURM || tar->GetRace() == RT_DRAGON_7) //For races with a fixed size
+				other_size_mod = 60.0f;
+			else if (other_size_mod < 6.0f)
+				other_size_mod = 8.0f;
+
+			if (other_size_mod > size_mod)
+				size_mod = other_size_mod;
+
+			if (size_mod > 29.0f)
+				size_mod *= size_mod;
+			else if (size_mod > 19.0f)
+				size_mod *= (size_mod * 2.0f);
+			else
+				size_mod *= (size_mod * 4.0f);
+
+			// prevention of ridiculously sized hit boxes
+			if (size_mod > 10000.0f)
+				size_mod = (size_mod / 7.0f);
+
+			melee_distance_max = size_mod;
+		}
+
+		float melee_distance = 0.0f;
+
+		switch (GetClass()) {
+		case WARRIOR:
+		case PALADIN:
+		case SHADOWKNIGHT:
+			if (p_item && p_item->GetItem()->IsType2HWeapon())
+				melee_distance = melee_distance_max * 0.45f;
+			else if ((s_item && s_item->GetItem()->IsTypeShield()) || (!p_item && !s_item))
+				melee_distance = melee_distance_max * 0.35f;
+			else
+				melee_distance = melee_distance_max * 0.40f;
+
+			break;
+		case NECROMANCER:
+		case WIZARD:
+		case MAGICIAN:
+		case ENCHANTER:
+			if (p_item && p_item->GetItem()->IsType2HWeapon())
+				melee_distance = melee_distance_max * 0.95f;
+			else
+				melee_distance = melee_distance_max * 0.75f;
+
+			break;
+		case ROGUE:
+			if (behind_mob && backstab_weapon) {
+				if (p_item->GetItem()->IsType2HWeapon()) // p_item tested above
+					melee_distance = melee_distance_max * 0.30f;
+				else
+					melee_distance = melee_distance_max * 0.25f;
+
+				break;
+			}
+			// Fall-through
+		default:
+			if (p_item && p_item->GetItem()->IsType2HWeapon())
+				melee_distance = melee_distance_max * 0.70f;
+			else
+				melee_distance = melee_distance_max * 0.50f;
+
+			break;
+		}
+
+		float melee_distance_min = melee_distance / 2.0f;
+
+		// Calculate casting distance
+		float caster_distance_max = 0.0f;
+		{
+			if (GetLevel() >= RuleI(Bots, CasterStopMeleeLevel)) {
+				switch (GetClass()) {
+				case CLERIC:
+					caster_distance_max = 1156.0f; // as DSq value (34 units)
+					break;
+				case DRUID:
+					caster_distance_max = 1764.0f; // as DSq value (42 units)
+					break;
+				case SHAMAN:
+					caster_distance_max = 1444.0f; // as DSq value (38 units)
+					break;
+				case NECROMANCER:
+					caster_distance_max = 2916.0f; // as DSq value (54 units)
+					break;
+				case WIZARD:
+					caster_distance_max = 2304.0f; // as DSq value (48 units)
+					break;
+				case MAGICIAN:
+					caster_distance_max = 2704.0f; // as DSq value (52 units)
+					break;
+				case ENCHANTER:
+					caster_distance_max = 2500.0f; // as DSq value (50 units)
+					break;
+				default:
+					break;
+				}
+			}
+		}
+
+		float caster_distance_min = 0.0f;
+		if (caster_distance_max) {
+			caster_distance_min = melee_distance_max;
+
+			if (caster_distance_max <= caster_distance_min)
+				caster_distance_max = caster_distance_min * 1.25f;
+		}
+
+		bool atArcheryRange = IsArcheryRange(tar);
+
+		if (GetRangerAutoWeaponSelect()) {
 			bool changeWeapons = false;
 
-			if(atArcheryRange && !IsBotArcher()) {
+			if (atArcheryRange && !IsBotArcher()) {
 				SetBotArcher(true);
 				changeWeapons = true;
-			} else if(!atArcheryRange && IsBotArcher()) {
+			}
+			else if (!atArcheryRange && IsBotArcher()) {
 				SetBotArcher(false);
 				changeWeapons = true;
 			}
 
-			if(changeWeapons)
+			if (changeWeapons)
 				ChangeBotArcherWeapons(IsBotArcher());
 		}
 
-		if (IsBotArcher() && atArcheryRange) {
+		if (IsBotArcher() && atArcheryRange)
+			atCombatRange = true;
+		else if (caster_distance_max && tar_distance <= caster_distance_max)
+			atCombatRange = true;
+		else if (tar_distance <= melee_distance)
+			atCombatRange = true;
+
+		// We can fight
+		if (atCombatRange) {
 			if (IsMoving()) {
-				SetHeading(CalculateHeadingToTarget(GetTarget()->GetX(), GetTarget()->GetY()));
-				SetRunAnimSpeed(0);
-				SetCurrentSpeed(0);
-				if (moved) {
-					moved = false;
-					SetCurrentSpeed(0);
-				}
+				StopMoving(CalculateHeadingToTarget(tar->GetX(), tar->GetY()));
+				return;
 			}
-			atCombatRange = true;
-		}
-		else if (GetLevel() >= RuleI(Bots, CasterStopMeleeLevel) && IsBotCasterAtCombatRange(GetTarget())) {
-			atCombatRange = true;
-		}
-		else if (DistanceSquared(m_Position, GetTarget()->GetPosition()) <= meleeDistance) {
-			atCombatRange = true;
-		}
+			
+			// Combat 'jitter' code
+			if (AI_movement_timer->Check() && (!spellend_timer.Enabled() || GetClass() == BARD)) {
+				if (!IsRooted()) {
+					if (HasTargetReflection()) {
+						if (!tar->IsFeared() && !tar->IsStunned()) {
+							if (GetClass() == ROGUE) {
+								if (evade_timer.Check(false)) { // Attempt to evade
+									int timer_duration = (HideReuseTime - GetSkillReuseTime(EQEmu::skills::SkillHide)) * 1000;
+									if (timer_duration < 0)
+										timer_duration = 0;
 
-		if(atCombatRange) {
-			if(IsMoving()) {
-				SetHeading(CalculateHeadingToTarget(GetTarget()->GetX(), GetTarget()->GetY()));
-				SetCurrentSpeed(0);
-				if(moved) {
-					moved = false;
-					SetCurrentSpeed(0);
-				}
-			}
+									evade_timer.Start(timer_duration);
+									if (zone->random.Int(0, 260) < (int)GetSkill(EQEmu::skills::SkillHide))
+										RogueEvade(tar);
 
-			if(AI_movement_timer->Check()) {
-				if (!IsMoving()) {
-					if (GetClass() == ROGUE) {
-						if (HasTargetReflection() && !GetTarget()->IsFeared() && !GetTarget()->IsStunned()) {
-							// Hate redux actions
-							if (evade_timer.Check(false)) {
-								// Attempt to evade
-								int timer_duration = (HideReuseTime - GetSkillReuseTime(EQEmu::skills::SkillHide)) * 1000;
-								if (timer_duration < 0)
-									timer_duration = 0;
-								evade_timer.Start(timer_duration);
-
-								Bot::BotGroupSay(this, "Attempting to evade %s", GetTarget()->GetCleanName());
-								if (zone->random.Int(0, 260) < (int)GetSkill(EQEmu::skills::SkillHide))
-									RogueEvade(GetTarget());
-
-								return;
+									return;
+								}
 							}
-							else if (GetTarget()->IsRooted()) {
-								// Move rogue back from rooted mob - out of combat range, if necessary
-								float melee_distance = GetMaxMeleeRangeToTarget(GetTarget());
-								float current_distance = DistanceSquared(static_cast<glm::vec3>(m_Position), static_cast<glm::vec3>(GetTarget()->GetPosition()));
-								
-								if (current_distance <= melee_distance) {
-									float newX = 0;
-									float newY = 0;
-									float newZ = 0;
-									FaceTarget(GetTarget());
-									if (PlotPositionAroundTarget(this, newX, newY, newZ)) {
-										CalculateNewPosition2(newX, newY, newZ, GetBotRunspeed());
-										return;
+
+							if (tar->IsRooted()) { // Move caster/rogue back from rooted mob - out of combat range, if necessary
+								if (GetArchetype() == ARCHETYPE_CASTER || GetClass() == ROGUE) {
+									if (tar_distance <= melee_distance_max) {
+										if (PlotPositionAroundTarget(this, Goal.x, Goal.y, Goal.z)) {
+											CalculateNewPosition2(Goal.x, Goal.y, Goal.z, GetBotWalkspeed(), true, false);
+											return;
+										}
 									}
 								}
 							}
 						}
-						else if (!BehindMob(GetTarget(), GetX(), GetY())) {
-							// Move the rogue to behind the mob
-							float newX = 0;
-							float newY = 0;
-							float newZ = 0;
-							if (PlotPositionAroundTarget(GetTarget(), newX, newY, newZ)) {
-								CalculateNewPosition2(newX, newY, newZ, GetBotRunspeed());
-								return;
+					}
+					else {
+						if (caster_distance_min && tar_distance < caster_distance_min && !tar->IsFeared()) { // Caster back-off adjustment
+							if (PlotPositionAroundTarget(this, Goal.x, Goal.y, Goal.z)) {
+								if (DistanceSquared(Goal, tar->GetPosition()) <= caster_distance_max) {
+									CalculateNewPosition2(Goal.x, Goal.y, Goal.z, GetBotWalkspeed(), true, false);
+									return;
+								}
 							}
 						}
-					}
-					else if (GetClass() != ROGUE && (DistanceSquaredNoZ(m_Position, GetTarget()->GetPosition()) < GetTarget()->GetSize())) {
-						// If we are not a rogue trying to backstab, let's try to adjust our melee range so we don't appear to be bunched up
-						float newX = 0;
-						float newY = 0;
-						float newZ = 0;
-						if (PlotPositionAroundTarget(GetTarget(), newX, newY, newZ, false) && GetArchetype() != ARCHETYPE_CASTER) {
-							CalculateNewPosition2(newX, newY, newZ, GetBotRunspeed());
+						else if (tar_distance < melee_distance_min) { // Melee back-off adjustment
+							if (PlotPositionAroundTarget(this, Goal.x, Goal.y, Goal.z)) {
+								if (DistanceSquared(Goal, tar->GetPosition()) <= melee_distance_max) {
+									CalculateNewPosition2(Goal.x, Goal.y, Goal.z, GetBotWalkspeed(), true, false);
+									return;
+								}
+							}
+						}
+						else if (backstab_weapon && !behind_mob) { // Move the rogue to behind the mob
+							if (PlotPositionAroundTarget(tar, Goal.x, Goal.y, Goal.z)) {
+								if (DistanceSquared(Goal, tar->GetPosition()) <= melee_distance_max) {
+									CalculateNewPosition2(Goal.x, Goal.y, Goal.z, GetBotRunspeed(), true, false); // rogues are agile enough to run in melee range
+									return;
+								}
+							}
+						}
+						else {
+							if (caster_distance_max == 0.0f && // Not a caster or a caster still below melee stop level (standard combat jitter)
+								zone->random.Int(1, 100) >= 94 && // 7:100 chance
+								PlotPositionAroundTarget(tar, Goal.x, Goal.y, Goal.z)) // If we're behind the mob, we can attack when it's enraged
+							{
+								if (DistanceSquared(Goal, tar->GetPosition()) <= melee_distance_max) {
+									CalculateNewPosition2(Goal.x, Goal.y, Goal.z, GetBotWalkspeed(), true, false);
+									return;
+								}
+							}
+						}
+
+						if (!IsFacingMob(tar)) {
+							FaceTarget(tar);
 							return;
 						}
 					}
 				}
-
-				// TODO: Test RuleB(Bots, UpdatePositionWithTimer)
-				if(IsMoving())
-					SendPositionUpdate();
-				else
-					SendPosition();
+				else {
+					if (!IsSitting() && !IsFacingMob(tar)) {
+						FaceTarget(tar);
+						return;
+					}
+				}
 			}
 
-			if(IsBotArcher() && ranged_timer.Check(false)) {
-				if(GetTarget()->GetHPRatio() <= 99.0f)
-					BotRangedAttack(GetTarget());
+			// Up to this point, GetTarget() has been safe to dereference since the initial
+			// TEST_TARGET() call. Due to the chance of the target dying and our pointer
+			// being nullified, we need to test it before dereferencing to avoid crashes
+
+			if (IsBotArcher() && ranged_timer.Check(false)) { // can shoot mezzed, stunned and dead!?
+				TEST_TARGET();
+				if (GetTarget()->GetHPRatio() <= 99.0f)
+					BotRangedAttack(tar);
 			}
-			else if(!IsBotArcher() && (!(IsBotCaster() && GetLevel() >= RuleI(Bots, CasterStopMeleeLevel))) && GetTarget() && !IsStunned() && !IsMezzed() && (GetAppearance() != eaDead)) {
+			else if (!IsBotArcher() && (!(IsBotCaster() && GetLevel() >= RuleI(Bots, CasterStopMeleeLevel)))) {
 				// we can't fight if we don't have a target, are stun/mezzed or dead..
 				// Stop attacking if the target is enraged
-				if((IsEngaged() && !BehindMob(GetTarget(), GetX(), GetY()) && GetTarget()->IsEnraged()) || GetBotStance() == BotStancePassive)
+				TEST_TARGET();
+				if (GetBotStance() == BotStancePassive || (tar->IsEnraged() && !BehindMob(tar, GetX(), GetY())))
 					return;
 
 				// First, special attack per class (kick, backstab etc..)
-				DoClassAttacks(GetTarget());
-				if(attack_timer.Check()) {
-					Attack(GetTarget(), EQEmu::inventory::slotPrimary);
-					TriggerDefensiveProcs(GetTarget(), EQEmu::inventory::slotPrimary, false);
-					EQEmu::ItemInstance *wpn = GetBotItem(EQEmu::inventory::slotPrimary);
-					TryWeaponProc(wpn, GetTarget(), EQEmu::inventory::slotPrimary);
-					bool tripleSuccess = false;
-					if(BotOwner && GetTarget() && CanThisClassDoubleAttack()) {
-						if(BotOwner && CheckBotDoubleAttack())
-							Attack(GetTarget(), EQEmu::inventory::slotPrimary, true);
+				TEST_TARGET();
+				DoClassAttacks(tar);
 
-						if(BotOwner && GetTarget() && GetSpecialAbility(SPECATK_TRIPLE) && CheckBotDoubleAttack(true)) {
-							tripleSuccess = true;
-							Attack(GetTarget(), EQEmu::inventory::slotPrimary, true);
+				TEST_TARGET();
+				if (attack_timer.Check()) { // Process primary weapon attacks
+					Attack(tar, EQEmu::inventory::slotPrimary);
+
+					TEST_TARGET();
+					TriggerDefensiveProcs(tar, EQEmu::inventory::slotPrimary, false);
+					
+					TEST_TARGET();
+					TryWeaponProc(p_item, tar, EQEmu::inventory::slotPrimary);
+					
+					//bool tripleSuccess = false;
+
+					TEST_TARGET();
+					if (CanThisClassDoubleAttack()) {
+						if (CheckBotDoubleAttack())
+							Attack(tar, EQEmu::inventory::slotPrimary, true);
+						
+						TEST_TARGET();
+						if (GetSpecialAbility(SPECATK_TRIPLE) && CheckBotDoubleAttack(true)) {
+							//tripleSuccess = true;
+							Attack(tar, EQEmu::inventory::slotPrimary, true);
 						}
 
+						TEST_TARGET();
 						//quad attack, does this belong here??
-						if(BotOwner && GetTarget() && GetSpecialAbility(SPECATK_QUAD) && CheckBotDoubleAttack(true))
-							Attack(GetTarget(), EQEmu::inventory::slotPrimary, true);
+						if (GetSpecialAbility(SPECATK_QUAD) && CheckBotDoubleAttack(true))
+							Attack(tar, EQEmu::inventory::slotPrimary, true);
 					}
 
+					TEST_TARGET();
 					//Live AA - Flurry, Rapid Strikes ect (Flurry does not require Triple Attack).
 					int32 flurrychance = (aabonuses.FlurryChance + spellbonuses.FlurryChance + itembonuses.FlurryChance);
-					if (GetTarget() && flurrychance) {
-						if(zone->random.Int(0, 100) < flurrychance) {
+					if (flurrychance) {
+						if (zone->random.Int(0, 100) < flurrychance) {
 							Message_StringID(MT_NPCFlurry, YOU_FLURRY);
-							Attack(GetTarget(), EQEmu::inventory::slotPrimary, false);
-							Attack(GetTarget(), EQEmu::inventory::slotPrimary, false);
+							Attack(tar, EQEmu::inventory::slotPrimary, false);
+							
+							TEST_TARGET();
+							Attack(tar, EQEmu::inventory::slotPrimary, false);
 						}
 					}
 
+					TEST_TARGET();
 					int32 ExtraAttackChanceBonus = (spellbonuses.ExtraAttackChance + itembonuses.ExtraAttackChance + aabonuses.ExtraAttackChance);
-					if (GetTarget() && ExtraAttackChanceBonus) {
-						EQEmu::ItemInstance *wpn = GetBotItem(EQEmu::inventory::slotPrimary);
-						if(wpn) {
-							if (wpn->GetItem()->IsType2HWeapon()) {
-								if(zone->random.Int(0, 100) < ExtraAttackChanceBonus)
-									Attack(GetTarget(), EQEmu::inventory::slotPrimary, false);
-							}
+					if (ExtraAttackChanceBonus) {
+						if (p_item && p_item->GetItem()->IsType2HWeapon()) {
+							if (zone->random.Int(0, 100) < ExtraAttackChanceBonus)
+								Attack(tar, EQEmu::inventory::slotPrimary, false);
 						}
 					}
 				}
 
-				if (GetClass() == WARRIOR || GetClass() == BERSERKER) {
-					if(GetHP() > 0 && !berserk && this->GetHPRatio() < 30) {
-						entity_list.MessageClose_StringID(this, false, 200, 0, BERSERK_START, GetName());
-						this->berserk = true;
-					}
-
-					if (berserk && this->GetHPRatio() > 30) {
-						entity_list.MessageClose_StringID(this, false, 200, 0, BERSERK_END, GetName());
-						this->berserk = false;
-					}
-				}
-
-				//now off hand
-				if(GetTarget() && attack_dw_timer.Check() && CanThisClassDualWield()) {
-					const EQEmu::ItemInstance* instweapon = GetBotItem(EQEmu::inventory::slotSecondary);
-					const EQEmu::ItemData* weapon = nullptr;
+				TEST_TARGET();
+				if (attack_dw_timer.Check() && CanThisClassDualWield()) { // Process secondary weapon attacks
+					const EQEmu::ItemData* s_itemdata = nullptr;
 					//can only dual wield without a weapon if you're a monk
-					if(instweapon || (botClass == MONK)) {
-						if(instweapon)
-							weapon = instweapon->GetItem();
+					if (s_item || (GetClass() == MONK)) {
+						if(s_item)
+							s_itemdata = s_item->GetItem();
 
-						int weapontype = 0; // No weapon type.
-						bool bIsFist = true;
-						if(weapon) {
-							weapontype = weapon->ItemType;
-							bIsFist = false;
+						int weapon_type = 0; // No weapon type.
+						bool use_fist = true;
+						if (s_itemdata) {
+							weapon_type = s_itemdata->ItemType;
+							use_fist = false;
 						}
 
-						if (bIsFist || !weapon->IsType2HWeapon()) {
+						if (use_fist || !s_itemdata->IsType2HWeapon()) {
 							float DualWieldProbability = 0.0f;
+
 							int32 Ambidexterity = (aabonuses.Ambidexterity + spellbonuses.Ambidexterity + itembonuses.Ambidexterity);
 							DualWieldProbability = ((GetSkill(EQEmu::skills::SkillDualWield) + GetLevel() + Ambidexterity) / 400.0f); // 78.0 max
+
 							int32 DWBonus = (spellbonuses.DualWieldChance + itembonuses.DualWieldChance);
 							DualWieldProbability += (DualWieldProbability * float(DWBonus) / 100.0f);
+
 							float random = zone->random.Real(0, 1);
+							
 							if (random < DualWieldProbability){ // Max 78% of DW
-								Attack(GetTarget(), EQEmu::inventory::slotSecondary);	// Single attack with offhand
-								EQEmu::ItemInstance *wpn = GetBotItem(EQEmu::inventory::slotSecondary);
-								TryWeaponProc(wpn, GetTarget(), EQEmu::inventory::slotSecondary);
-								if( CanThisClassDoubleAttack() && CheckBotDoubleAttack()) {
-									if(GetTarget() && GetTarget()->GetHP() > -10)
-										Attack(GetTarget(), EQEmu::inventory::slotSecondary);	// Single attack with offhand
+								Attack(tar, EQEmu::inventory::slotSecondary);	// Single attack with offhand
+								
+								TEST_TARGET();
+								TryWeaponProc(s_item, tar, EQEmu::inventory::slotSecondary);
+
+								TEST_TARGET();
+								if (CanThisClassDoubleAttack() && CheckBotDoubleAttack()) {
+									if (tar->GetHP() > -10)
+										Attack(tar, EQEmu::inventory::slotSecondary);	// Single attack with offhand
 								}
 							}
 						}
 					}
 				}
 			}
-		} else {
-			if(GetTarget()->IsFeared() && !spellend_timer.Enabled()){
-				// This is a mob that is fleeing either because it has been feared or is low on hitpoints
-				if(GetBotStance() != BotStancePassive)
-					AI_PursueCastCheck();
-			}
-
-			if (AI_movement_timer->Check()) {
-				if(!IsRooted()) {
+		}
+		else { // To far away to fight (GetTarget() validity can be iffy below this point - including outer scopes)
+			if (AI_movement_timer->Check() && (!spellend_timer.Enabled() || GetClass() == BARD)) { // Pursue processing
+				if (GetTarget() && !IsRooted()) {
 					Log(Logs::Detail, Logs::AI, "Pursuing %s while engaged.", GetTarget()->GetCleanName());
-					CalculateNewPosition2(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ(), GetBotRunspeed());
+
+					Goal = GetTarget()->GetPosition();
+					
+					if (RuleB(Bots, UsePathing) && zone->pathing) {
+						bool WaypointChanged, NodeReached;
+
+						Goal = UpdatePath(Goal.x, Goal.y, Goal.z,
+							GetBotRunspeed(), WaypointChanged, NodeReached);
+
+						if (WaypointChanged)
+							tar_ndx = 20;
+					}
+					
+					CalculateNewPosition2(Goal.x, Goal.y, Goal.z, GetBotRunspeed());
+
 					return;
 				}
+				else {
+					if (IsMoving())
+						StopMoving();
+					else
+						SendPosition();
 
-				if(IsMoving())
-					SendPositionUpdate();
-				else
-					SendPosition();
+					return;
+				}
+			}
+
+			// Fix Z when following during pull, not when engaged and stationary
+			if (IsMoving() && fix_z_timer_engaged.Check()) {
+				FixZ();
+				return;
+			}
+
+			if (GetTarget() && GetTarget()->IsFeared() && !spellend_timer.Enabled() && AI_think_timer->Check()) {
+				if (!IsFacingMob(GetTarget()))
+					FaceTarget(GetTarget());
+
+				// This is a mob that is fleeing either because it has been feared or is low on hitpoints
+				if (GetBotStance() != BotStancePassive) {
+					AI_PursueCastCheck(); // This appears to always return true..can't trust for success/fail
+					return;
+				}
 			}
 		} // end not in combat range
 
-		if(!IsMoving() && !spellend_timer.Enabled()) {
-			if(GetBotStance() == BotStancePassive)
-				return;
+		if (!IsMoving() && !spellend_timer.Enabled()) { // This may actually need work...
+			SendPosition();
 
-			if(AI_EngagedCastCheck())
+			if (GetBotStance() == BotStancePassive)
+				return;
+			
+			if (GetTarget() && AI_EngagedCastCheck()) 
 				BotMeditate(false);
-			else if(GetArchetype() == ARCHETYPE_CASTER)
+			else if (GetArchetype() == ARCHETYPE_CASTER) 
 				BotMeditate(true);
+			
+			return;
 		}
 	}
-	else {
+	else { // Out-of-combat behavior
 		SetTarget(nullptr);
+
+		if (HasPet()) {
+			GetPet()->WipeHateList();
+			GetPet()->SetTarget(nullptr);
+		}
+		
 		if (m_PlayerState & static_cast<uint32>(PlayerState::Aggressive))
 			SendRemovePlayerState(PlayerState::Aggressive);
 
-		Mob* follow = entity_list.GetMob(GetFollowID());
-		if (!follow)
-			return;
+		// Check guard point
+		if (guard_mode) {
+			auto& my_pos = GetPosition();
+			auto& my_guard = GetGuardPoint();
 
-		if (!IsMoving() && AI_think_timer->Check() && !spellend_timer.Enabled()) {
-			if (GetBotStance() != BotStancePassive) {
-				if (!AI_IdleCastCheck() && !IsCasting() && GetClass() != BARD)
-					BotMeditate(true);
-			}
-			else {
-				if (GetClass() != BARD)
-					BotMeditate(true);
+			if (my_pos.x != my_guard.x ||
+				my_pos.y != my_guard.y ||
+				my_pos.z != my_guard.z)
+			{
+				if (IsMoving())
+					StopMoving();
+
+				Warp(glm::vec3(my_guard));
+
+				if (HasPet())
+					GetPet()->Warp(glm::vec3(my_guard));
+
+				return;
 			}
 		}
+		// Leash the bot
+		else if (lo_distance > BOT_LEASH_DISTANCE) {
+			if (IsMoving())
+				StopMoving();
 
-		if (AI_movement_timer->Check()) {
-			float dist = DistanceSquared(m_Position, follow->GetPosition());
-			int speed = GetBotRunspeed();
+			Warp(glm::vec3(leash_owner->GetPosition()));
+			
+			if (HasPet())
+				GetPet()->Warp(glm::vec3(leash_owner->GetPosition()));
 
-			if (dist < GetFollowDistance() + BOT_FOLLOW_DISTANCE_WALK)
-				speed = GetBotWalkspeed();
+			return;
+		}
 
-			SetRunAnimSpeed(0);
-
-			if (dist > GetFollowDistance()) {
-				if (RuleB(Bots, UsePathing) && zone->pathing) {
-					bool WaypointChanged, NodeReached;
-
-					glm::vec3 Goal = UpdatePath(follow->GetX(), follow->GetY(), follow->GetZ(),
-						speed, WaypointChanged, NodeReached);
-
-					if (WaypointChanged)
-						tar_ndx = 20;
-
-					CalculateNewPosition2(Goal.x, Goal.y, Goal.z, speed);
+		// Ok to idle
+		if (fm_dist <= GetFollowDistance()) {
+			if (!IsMoving() && AI_think_timer->Check() && !spellend_timer.Enabled()) {
+				if (GetBotStance() != BotStancePassive) {
+					if (!AI_IdleCastCheck() && !IsCasting() && GetClass() != BARD)
+						BotMeditate(true);
 				}
 				else {
-					CalculateNewPosition2(follow->GetX(), follow->GetY(), follow->GetZ(), speed);
+					if (GetClass() != BARD)
+						BotMeditate(true);
 				}
 
-				if (rest_timer.Enabled())
-					rest_timer.Disable();
+				return;
+			}
+		}
+		
+		// Non-engaged movement checks
+		if (AI_movement_timer->Check() && (!IsCasting() || GetClass() == BARD)) {
+			if (fm_dist > GetFollowDistance()) {
+				if (!IsRooted()) {
+					if (rest_timer.Enabled())
+						rest_timer.Disable();
+
+					int speed = GetBotRunspeed();
+					if (fm_dist < GetFollowDistance() + BOT_FOLLOW_DISTANCE_WALK)
+						speed = GetBotWalkspeed();
+
+					Goal = follow_mob->GetPosition();
+
+					if (RuleB(Bots, UsePathing) && zone->pathing) {
+						bool WaypointChanged, NodeReached;
+
+						Goal = UpdatePath(Goal.x, Goal.y, Goal.z,
+							speed, WaypointChanged, NodeReached);
+
+						if (WaypointChanged)
+							tar_ndx = 20;
+					}
+
+					CalculateNewPosition2(Goal.x, Goal.y, Goal.z, speed);
+
+					return;
+				}
 			}
 			else {
-				if (moved) {
-					moved = false;
-					SetCurrentSpeed(0);
+				if (IsMoving()) {
+					StopMoving();
+					return;
 				}
 			}
 		}
 		
+		// Basically, bard bots get a chance to cast idle spells while moving
 		if (IsMoving()) {
-			if (GetClass() == BARD && GetBotStance() != BotStancePassive && !spellend_timer.Enabled() && AI_think_timer->Check()) {
-				AI_IdleCastCheck();
+			if (GetBotStance() != BotStancePassive) {
+				if (GetClass() == BARD && !spellend_timer.Enabled() && AI_think_timer->Check()) {
+					AI_IdleCastCheck();
+					return;
+				}
 			}
 		}
 	}
@@ -2589,7 +2827,7 @@ void Bot::AI_Process() {
 void Bot::PetAIProcess() {
 	if( !HasPet() || !GetPet() || !GetPet()->IsNPC())
 		return;
-
+	
 	Mob* BotOwner = this->GetBotOwner();
 	NPC* botPet = this->GetPet()->CastToNPC();
 	if(!botPet->GetOwner() || !botPet->GetID() || !botPet->GetOwnerID()) {
@@ -2815,7 +3053,7 @@ void Bot::Depop() {
 	NPC::Depop(false);
 }
 
-void Bot::Spawn(Client* botCharacterOwner) {
+bool Bot::Spawn(Client* botCharacterOwner) {
 	if(GetBotID() > 0 && _botOwnerCharacterID > 0 && botCharacterOwner && botCharacterOwner->CharacterID() == _botOwnerCharacterID) {
 		// Rename the bot name to make sure that Mob::GetName() matches Mob::GetCleanName() so we dont have a bot named "Jesuschrist001"
 		strcpy(name, GetCleanName());
@@ -2859,7 +3097,11 @@ void Bot::Spawn(Client* botCharacterOwner) {
 					this->SendWearChange(materialFromSlot);
 			}
 		}
+
+		return true;
 	}
+
+	return false;
 }
 
 // Deletes the inventory record for the specified item from the database for this bot.
@@ -3008,16 +3250,20 @@ void Bot::LoadAndSpawnAllZonedBots(Client* botOwner) {
 				if(!ActiveBots.empty()) {
 					for(std::list<uint32>::iterator itr = ActiveBots.begin(); itr != ActiveBots.end(); ++itr) {
 						Bot* activeBot = Bot::LoadBot(*itr);
+						if (!activeBot)
+							continue;
 
-						if(activeBot) {
-							activeBot->Spawn(botOwner);
-							g->UpdatePlayer(activeBot);
-							// follow the bot owner, not the group leader we just zoned with our owner.
-							if(g->IsGroupMember(botOwner) && g->IsGroupMember(activeBot))
-								activeBot->SetFollowID(botOwner->GetID());
+						if (!activeBot->Spawn(botOwner)) {
+							safe_delete(activeBot);
+							continue;
 						}
 
-						if(activeBot && !botOwner->HasGroup())
+						g->UpdatePlayer(activeBot);
+						// follow the bot owner, not the group leader we just zoned with our owner.
+						if (g->IsGroupMember(botOwner) && g->IsGroupMember(activeBot))
+							activeBot->SetFollowID(botOwner->GetID());
+
+						if(!botOwner->HasGroup())
 							database.SetGroupID(activeBot->GetCleanName(), 0, activeBot->GetBotID());
 					}
 				}
@@ -7046,33 +7292,6 @@ bool Bot::IsArcheryRange(Mob *target) {
 	return result;
 }
 
-bool Bot::IsBotCasterAtCombatRange(Mob *target)
-{
-	static const float local[PLAYER_CLASS_COUNT] = {
-		0.0f, // WARRIOR
-		1156.0f,	// CLERIC as DSq value (34 units)
-		0.0f, 0.0f, 0.0f,	// PALADIN, RANGER, SHADOWKNIGHT
-		1764.0f,	// DRUID as DSq value (42 units)
-		0.0f, 0.0f, 0.0f, // MONK, BARD, ROGUE
-		1444.0f,	// SHAMAN as DSq value (38 units)
-		2916.0f,	// NECROMANCER as DSq value (54 units)
-		2304.0f,	// WIZARD as DSq value (48 units)
-		2704.0f,	// MAGICIAN as DSq value (52 units)
-		2500.0f,	// ENCHANTER as DSq value (50 units)
-		0.0f, 0.0f	// BEASTLORD, BERSERKER
-	};
-
-	if (!target)
-		return false;
-	if (GetClass() < WARRIOR || GetClass() > BERSERKER)
-		return false;
-
-	float targetDistance = DistanceSquaredNoZ(m_Position, target->GetPosition());
-	if (targetDistance < local[GetClass() - 1])
-		return true;
-	return false;
-}
-
 void Bot::UpdateGroupCastingRoles(const Group* group, bool disband)
 {
 	if (!group)
@@ -8417,12 +8636,6 @@ bool Bot::HasOrMayGetAggro() {
 	return mayGetAggro;
 }
 
-void Bot::SetHasBeenSummoned(bool wasSummoned) {
-	_hasBeenSummoned = wasSummoned;
-	if(!wasSummoned)
-        m_PreSummonLocation = glm::vec3();
-}
-
 void Bot::SetDefaultBotStance() {
 	BotStanceType defaultStance = BotStanceBalanced;
 	if (GetClass() == WARRIOR)
@@ -8681,6 +8894,8 @@ bool Bot::DyeArmor(int16 slot_id, uint32 rgb, bool all_flag, bool save_flag)
 
 std::string Bot::CreateSayLink(Client* c, const char* message, const char* name)
 {
+	// TODO: review
+
 	int saylink_size = strlen(message);
 	char* escaped_string = new char[saylink_size * 2];
 

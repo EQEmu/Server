@@ -61,6 +61,8 @@ struct AISpells_Struct {
 	int32	recast_delay;
 	int16	priority;
 	int16	resist_adjust;
+	int8	min_hp; // >0 won't cast if HP is below
+	int8	max_hp; // >0 won't cast if HP is above
 };
 
 struct AISpellsEffects_Struct {
@@ -183,6 +185,7 @@ public:
 	void	AddItem(uint32 itemid, uint16 charges, bool equipitem = true, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0);
 	void	AddLootTable();
 	void	AddLootTable(uint32 ldid);
+	void	CheckGlobalLootTables();
 	void	DescribeAggro(Client *towho, Mob *mob, bool verbose);
 	void	RemoveItem(uint32 item_id, uint16 quantity = 0, uint16 slot = 0);
 	void	CheckMinMaxLevel(Mob *them);
@@ -195,6 +198,7 @@ public:
 	uint32	CountLoot();
 	inline uint32	GetLoottableID()	const { return loottable_id; }
 	virtual void UpdateEquipmentLight();
+	inline bool DropsGlobalLoot() const { return !skip_global_loot; }
 
 	inline uint32	GetCopper()		const { return copper; }
 	inline uint32	GetSilver()		const { return silver; }
@@ -279,6 +283,8 @@ public:
 	inline bool IsNotTargetableWithHotkey() const { return no_target_hotkey; }
 	int32 GetNPCHPRegen() const { return hp_regen + itembonuses.HPRegen + spellbonuses.HPRegen; }
 	inline const char* GetAmmoIDfile() const { return ammo_idfile; }
+
+	void ModifyStatsOnCharm(bool bRemoved);
 
 	//waypoint crap
 	int					GetMaxWp() const { return max_wp; }
@@ -378,7 +384,7 @@ public:
 	void NPCSlotTexture(uint8 slot, uint16 texture);	// Sets new material values for slots
 
 	uint32 GetAdventureTemplate() const { return adventure_template_id; }
-	void AddSpellToNPCList(int16 iPriority, int16 iSpellID, uint32 iType, int16 iManaCost, int32 iRecastDelay, int16 iResistAdjust);
+	void AddSpellToNPCList(int16 iPriority, int16 iSpellID, uint32 iType, int16 iManaCost, int32 iRecastDelay, int16 iResistAdjust, int8 min_hp, int8 max_hp);
 	void AddSpellEffectToNPCList(uint16 iSpellEffectID, int32 base, int32 limit, int32 max);
 	void RemoveSpellFromNPCList(int16 spell_id);
 	Timer *GetRefaceTimer() const { return reface_timer; }
@@ -403,8 +409,6 @@ public:
 
 	uint32	GetSpawnKillCount();
 	int	GetScore();
-	void	SetMerchantProbability(uint8 amt) { probability = amt; }
-	uint8	GetMerchantProbability() { return probability; }
 	void	mod_prespawn(Spawn2 *sp);
 	int	mod_npc_damage(int damage, EQEmu::skills::SkillType skillinuse, int hand, const EQEmu::ItemData* weapon, Mob* other);
 	void	mod_npc_killed_merit(Mob* c);
@@ -419,6 +423,8 @@ public:
 	void ResetHPUpdateTimer() { sendhpupdate_timer.Start(); }
 
 	bool IgnoreDespawn() { return ignore_despawn; }
+
+	std::unique_ptr<Timer> AIautocastspell_timer;
 
 protected:
 
@@ -453,11 +459,11 @@ protected:
 
 	uint32	npc_spells_id;
 	uint8	casting_spell_AIindex;
-	std::unique_ptr<Timer> AIautocastspell_timer;
+	
 	uint32*	pDontCastBefore_casting_spell;
 	std::vector<AISpells_Struct> AIspells;
 	bool HasAISpell;
-	virtual bool AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes);
+	virtual bool AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes, bool bInnates = false);
 	virtual bool AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = 0);
 	AISpellsVar_Struct AISpellVar;
 	int16 GetFocusEffect(focusType type, uint16 spell_id);
@@ -479,6 +485,25 @@ protected:
 	float	healscale;
 	int32 SpellFocusDMG;
 	int32 SpellFocusHeal;
+
+	// stats to switch back to after charm wears off
+	// could probably pick a better name, but these probably aren't taken so ...
+	int default_ac;
+	int default_min_dmg;
+	int default_max_dmg;
+	int default_attack_delay;
+	int default_accuracy_rating;
+	int default_avoidance_rating;
+	int default_atk;
+
+	// when charmed, switch to these
+	int charm_ac;
+	int charm_min_dmg;
+	int charm_max_dmg;
+	int charm_attack_delay;
+	int charm_accuracy_rating;
+	int charm_avoidance_rating;
+	int charm_atk;
 
 	//pet crap:
 	uint16	pet_spell_id;
@@ -535,11 +560,11 @@ protected:
 	std::list<MercData> mercDataList;
 
 	bool raid_target;
-	uint8	probability;
 	bool ignore_despawn; //NPCs with this set to 1 will ignore the despawn value in spawngroup
 
 private:
 	uint32	loottable_id;
+	bool	skip_global_loot;
 	bool	p_depop;
 };
 

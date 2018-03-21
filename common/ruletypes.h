@@ -44,6 +44,7 @@ RULE_INT(Character, DeathExpLossMaxLevel, 255)	// Any level greater than this wi
 RULE_INT(Character, DeathItemLossLevel, 10)
 RULE_INT(Character, DeathExpLossMultiplier, 3) //Adjust how much exp is lost
 RULE_BOOL(Character, UseDeathExpLossMult, false) //Adjust to use the above multiplier or to use code default.
+RULE_BOOL(Character, UseOldRaceRezEffects, false) // older clients had ID 757 for races with high starting STR, but it doesn't seem used anymore
 RULE_INT(Character, CorpseDecayTimeMS, 10800000)
 RULE_INT(Character, CorpseResTimeMS, 10800000) // time before cant res corpse(3 hours)
 RULE_BOOL(Character, LeaveCorpses, true)
@@ -155,6 +156,7 @@ RULE_BOOL(Character, UseOldBindWound, false) // Uses the original bind wound beh
 RULE_BOOL(Character, GrantHoTTOnCreate, false) // Grant Health of Target's Target leadership AA on character creation
 RULE_BOOL(Character, UseOldConSystem, false) // Grant Health of Target's Target leadership AA on character creation
 RULE_BOOL(Character, OPClientUpdateVisualDebug, false) // Shows a pulse and forward directional particle each time the client sends its position to server
+RULE_BOOL(Character, PetsUseReagents, true) //Pets use reagent on spells
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)
@@ -197,6 +199,7 @@ RULE_CATEGORY(Pets)
 RULE_REAL(Pets, AttackCommandRange, 150)
 RULE_BOOL(Pets, UnTargetableSwarmPet, false)
 RULE_REAL(Pets, PetPowerLevelCap, 10) // Max number of levels your pet can go up with pet power
+RULE_BOOL(Pets, CanTakeNoDrop, false) // Can everyone trade nodrop gear to pets
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(GM)
@@ -231,6 +234,7 @@ RULE_INT(World, TitaniumStartZoneID, -1) //Sets the Starting Zone for Titanium C
 RULE_INT(World, ExpansionSettings, 16383) // Sets the expansion settings for the server, This is sent on login to world and affects client expansion settings. Defaults to all expansions enabled up to TSS.
 RULE_BOOL(World, UseClientBasedExpansionSettings, true) // if true it will overrule World, ExpansionSettings and set someone's expansion based on the client they're using
 RULE_INT(World, PVPSettings, 0) // Sets the PVP settings for the server, 1 = Rallos Zek RuleSet, 2 = Tallon/Vallon Zek Ruleset, 4 = Sullon Zek Ruleset, 6 = Discord Ruleset, anything above 6 is the Discord Ruleset without the no-drop restrictions removed. TODO: Edit IsAttackAllowed in Zone to accomodate for these rules.
+RULE_INT(World, PVPMinLevel, 0) // minimum level to pvp
 RULE_BOOL (World, IsGMPetitionWindowEnabled, false)
 RULE_INT (World, FVNoDropFlag, 0) // Sets the Firiona Vie settings on the client. If set to 2, the flag will be set for GMs only, allowing trading of no-drop items.
 RULE_BOOL (World, IPLimitDisconnectAll, false)
@@ -273,17 +277,10 @@ RULE_INT(Zone, GlobalLootMultiplier, 1) // Sets Global Loot drop multiplier for 
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Map)
-//enable these to help prevent mob hopping when they are pathing
-RULE_BOOL(Map, FixPathingZWhenLoading, true)		//increases zone boot times a bit to reduce hopping.
-RULE_BOOL(Map, FixPathingZAtWaypoints, false)	//alternative to `WhenLoading`, accomplishes the same thing but does it at each waypoint instead of once at boot time.
-RULE_BOOL(Map, FixPathingZWhenMoving, false)		//very CPU intensive, but helps hopping with widely spaced waypoints.
 RULE_BOOL(Map, FixPathingZOnSendTo, false)		//try to repair Z coords in the SendTo routine as well.
 RULE_BOOL(Map, FixZWhenMoving, true)		// Automatically fix NPC Z coordinates when moving/pathing/engaged (Far less CPU intensive than its predecessor)
 RULE_BOOL(Map, MobZVisualDebug, false)		// Displays spell effects determining whether or not NPC is hitting Best Z calcs (blue for hit, red for miss)
-RULE_REAL(Map, FixPathingZMaxDeltaMoving, 20)	//at runtime while pathing: max change in Z to allow the BestZ code to apply.
-RULE_REAL(Map, FixPathingZMaxDeltaWaypoint, 20)	//at runtime at each waypoint: max change in Z to allow the BestZ code to apply.
 RULE_REAL(Map, FixPathingZMaxDeltaSendTo, 20)	//at runtime in SendTo: max change in Z to allow the BestZ code to apply.
-RULE_REAL(Map, FixPathingZMaxDeltaLoading, 45)	//while loading each waypoint: max change in Z to allow the BestZ code to apply.
 RULE_INT(Map, FindBestZHeightAdjust, 1)		// Adds this to the current Z before seeking the best Z position
 RULE_CATEGORY_END()
 
@@ -405,6 +402,7 @@ RULE_BOOL(Spells, IgnoreSpellDmgLvlRestriction, false) // ignore the 5 level spr
 RULE_BOOL(Spells, AllowItemTGB, false) // TGB doesn't work with items on live, custom servers want it though
 RULE_BOOL(Spells, NPCInnateProcOverride, true) //  NPC innate procs override the target type to single target.
 RULE_BOOL(Spells, OldRainTargets, false) // use old incorrectly implemented max targets for rains
+RULE_BOOL(Spells, NPCSpellPush, false) // enable spell push on NPCs
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)
@@ -507,6 +505,7 @@ RULE_INT(Combat, NPCAssistCapTimer, 6000) // Time in milliseconds a NPC will tak
 RULE_BOOL(Combat, UseRevampHandToHand, false) // use h2h revamped dmg/delays I believe this was implemented during SoF
 RULE_BOOL(Combat, ClassicMasterWu, false) // classic master wu uses a random special, modern doesn't
 RULE_INT(Combat, LevelToStopDamageCaps, 0) // 1 will effectively disable them, 20 should give basically same results as old incorrect system
+RULE_BOOL(Combat, ClassicNPCBackstab, false) // true disables npc facestab - npcs get normal attack if not behind
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(NPC)
@@ -673,6 +672,12 @@ RULE_CATEGORY_END()
 RULE_CATEGORY(AA)
 RULE_INT(AA, ExpPerPoint, 23976503)	//Amount of exp per AA. Is the same as the amount of exp to go from level 51 to level 52.
 RULE_BOOL(AA, Stacking, true) //Allow AA that belong to the same group to stack on SOF+ clients.
+RULE_BOOL(AA, NormalizedAAEnabled, false) // TSS+ change to AA that normalizes AA XP to a fixed # of white con kills independent of level.
+RULE_INT(AA, NormalizedAANumberOfWhiteConPerAA, 25) // The number of white con kills per AA point.
+RULE_BOOL(AA, ModernAAScalingEnabled, false) // Are we linearly scaling AA XP based on total # of earned AA?
+RULE_REAL(AA, ModernAAScalingStartPercent, 1000) // 1000% or 10x AA XP at the start of the scaling range
+RULE_INT(AA, ModernAAScalingAAMinimum, 0) // The minimum number of earned AA before AA XP scaling begins.
+RULE_INT(AA, ModernAAScalingAALimit, 4000) // The number of earned AA when AA XP scaling ends
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Console)
@@ -716,6 +721,12 @@ RULE_CATEGORY_END()
 RULE_CATEGORY(Client)
 RULE_BOOL(Client, UseLiveFactionMessage, false) // Allows players to see faction adjustments like Live
 RULE_BOOL(Client, UseLiveBlockedMessage, false) // Allows players to see faction adjustments like Live
+RULE_CATEGORY_END()
+
+RULE_CATEGORY(Bugs)
+RULE_BOOL(Bugs, ReportingSystemActive, true) // Activates bug reporting
+RULE_BOOL(Bugs, UseOldReportingMethod, true) // Forces the use of the old bug reporting system
+RULE_BOOL(Bugs, DumpTargetEntity, false) // Dumps the target entity, if one is provided
 RULE_CATEGORY_END()
 
 #undef RULE_CATEGORY

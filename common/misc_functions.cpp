@@ -194,32 +194,70 @@ uint32 rnd_hash( time_t t, clock_t c )
 
 float EQ13toFloat(int d)
 {
-	return ( float(d)/float(1<<2));
-}
-
-float NewEQ13toFloat(int d)
-{
-	return ( float(d)/float(1<<6));
+	return static_cast<float>(d) / 64.0f;
 }
 
 float EQ19toFloat(int d)
 {
-	return ( float(d)/float(1<<3));
+	return static_cast<float>(d) / 8.0f;
 }
 
 int FloatToEQ13(float d)
 {
-	return int(d*float(1<<2));
-}
-
-int NewFloatToEQ13(float d)
-{
-	return int(d*float(1<<6));
+	return static_cast<int>(d * 64.0f);
 }
 
 int FloatToEQ19(float d)
 {
-	return int(d*float(1<<3));
+	return static_cast<int>(d * 8.0f);
+}
+
+float EQ12toFloat(int d)
+{
+	return static_cast<float>(d) / 4.0f;
+}
+
+int FloatToEQ12(float d)
+{
+	return static_cast<int>((d + 2048.0f) * 4.0f) % 2048;
+}
+
+float EQ10toFloat(int d)
+{
+	return static_cast<float>(d) / 20.0f;
+}
+
+int FloatToEQ10(float d)
+{
+	return static_cast<int>(d * 20.0f);
+}
+
+float EQSpeedRunToFloat(int d)
+{
+	return static_cast<float>(d) / 40.0f;
+}
+
+int FloatToEQSpeedRun(float d)
+{
+	return static_cast<int>(d * 40.0f);
+}
+
+float FixHeading(float in)
+{
+	int i = 0;
+	if (in >= 512.0f) {
+		do {
+			in -= 512.0f;
+		} while (in >= 512.0f && i++ <= 5);
+	}
+	i = 0;
+	if (in < 0.0f) {
+		do {
+			in += 512.0f;
+		} while (in < 0.0f && i++ <= 5);
+	}
+
+	return in;
 }
 
 /*

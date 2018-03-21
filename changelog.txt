@@ -1,5 +1,63 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 03/07/2018 ==
+Uleat: Added command '#ucs' to force a reconnect to UCS server.
+	- Works in place of client auto-reconnect packet in zones where feature is unsupported
+	- Currently, you will need to manually re-join channels
+
+== 03/04/2018 ==
+Uleat: Updated UCS versioning
+	- SoF and higher clients have a new opcode identified (update your *.conf files)
+	- Rework of previous ucs connectivity code
+	- Unrelated: Zone::weatherSend() now takes an optional parameter for singular updates (as in client entering zone)
+	-- prior to this, every client already in-zone received a weather update packet whenever a new client zoned in
+
+== 02/18/2018 ==
+Uleat: Bug reporting fix and overhaul.
+	- Fixed bug reporting for SoD+ clients
+	- Added ability to disable bug reporting (set rule 'Bugs:ReportingSystemActive' to 'false')
+	- Implemented a more detailed reporting system (set rule 'Bugs:UseOldReportingMethod' to 'false')
+	-- New system is not currently compatible with script-based monitoring
+	- Soft-removal of defunct 'Petition Bug' system
+
+== 02/14/2018 ==
+mackal: Fix Heading -- Quests broken
+
+Please report any other issues with heading, most things were tested and worked
+
+You can use eqemu_server.pl to run a conversion to fix your headings in quests.
+Some may need manual review.
+
+== 02/10/2018 ==
+mackal: Add Global Loot system
+
+This will allow us to implement global loot similarly to how it works on live
+This system reuses our current loottable tables which the global_loot table references.
+The limits for the rules to govern if a table should be rolled are min level, max level, rare,
+raid, race, class, bodytype, and zone
+
+race, class, bodytype, and zone are a pipe | separated list of IDs.
+
+== 01/31/2018 ==
+Uleat: Re-work of Bot::AI_Process(). Overall behavior is much improved.
+	- Removed a 'ton' of unneeded packet updates
+	- Added a 'leash' to the distance a bot can travel
+	- Added a 'main assist' feature to target control (set using group roles)
+	- Added combat 'jitter' movement to complement the existing rogue movement
+	- Attack can now be aborted if target contains no leash owner nor bot hate and leash owner turns off auto-attack
+	- Please report any issues with the bot AI code
+	
+Added a work-around for heal rotations crashing the server - under certain conditions.
+
+== 01/28/2018 ==
+Mackal: Spell AI tweaks
+
+AI spells are treated as "innate" spells (devs use this term, and I think this is what they mean by it)
+These spells are spammed by the NPC, lots of encounters on live work like this and this will greatly reduce
+the need to do quest scripting on these types of encounters.
+
+You can safely run update npc_spells_entries set priority = priority + 1 where priority >= 0; if you want to disable this new behavior
+
 == 10/08/2017 ==
 Mackal: Rework regens
 

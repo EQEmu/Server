@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include <stdio.h>
 #include <iomanip>
 #include <stdarg.h>
+#include <limits.h>
 
 #ifdef _WINDOWS
 #include <process.h>
@@ -338,6 +339,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			if (ztz->response <= 0) {
 				zc2->success = ZONE_ERROR_NOTREADY;
 				entity->CastToMob()->SetZone(ztz->current_zone_id, ztz->current_instance_id);
+				entity->CastToClient()->SetZoning(false);
 			}
 			else {
 				entity->CastToClient()->UpdateWho(1);
@@ -1810,6 +1812,13 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			break;
 		}
 
+		break;
+	}
+	case ServerOP_UCSServerStatusReply:
+	{
+		auto ucsss = (UCSServerStatus_Struct*)pack->pBuffer;
+		if (zone)
+			zone->SetUCSServerAvailable((ucsss->available != 0), ucsss->timestamp);
 		break;
 	}
 	case ServerOP_CZSetEntityVariableByNPCTypeID:

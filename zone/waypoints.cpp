@@ -29,9 +29,12 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "npc.h"
 #include "quest_parser_collection.h"
 #include "water_map.h"
+#include "fastmath.h"
 
 #include <math.h>
 #include <stdlib.h>
+
+extern FastMath g_Math;
 
 struct wp_distance
 {
@@ -176,9 +179,15 @@ void NPC::MoveTo(const glm::vec4& position, bool saveguardspot)
 		cur_wp = -2;		// flag as quest controlled w/no grid
 		Log(Logs::Detail, Logs::AI, "MoveTo %s without a grid.", to_string(static_cast<glm::vec3>(position)).c_str());
 	}
+
+	glm::vec3 dest(position);
+
+	m_CurrentWayPoint = position;
+	m_CurrentWayPoint.z = GetFixedZ(dest);
+
 	if (saveguardspot)
 	{
-		m_GuardPoint = position;
+		m_GuardPoint = m_CurrentWayPoint;
 
 		if (m_GuardPoint.w == 0)
 			m_GuardPoint.w = 0.0001;		//hack to make IsGuarding simpler
@@ -189,7 +198,6 @@ void NPC::MoveTo(const glm::vec4& position, bool saveguardspot)
 		Log(Logs::Detail, Logs::AI, "Setting guard position to %s", to_string(static_cast<glm::vec3>(m_GuardPoint)).c_str());
 	}
 
-	m_CurrentWayPoint = position;
 	cur_wp_pause = 0;
 	pLastFightingDelayMoving = 0;
 	if (AI_walking_timer->Enabled())
@@ -430,28 +438,7 @@ float Mob::CalculateDistance(float x, float y, float z) {
 	return (float)sqrtf(((m_Position.x - x)*(m_Position.x - x)) + ((m_Position.y - y)*(m_Position.y - y)) + ((m_Position.z - z)*(m_Position.z - z)));
 }
 
-float Mob::CalculateHeadingToTarget(float in_x, float in_y) {
-	float angle;
-
-	if (in_x - m_Position.x > 0)
-		angle = -90 + atan((float)(in_y - m_Position.y) / (float)(in_x - m_Position.x)) * 180 / M_PI;
-	else if (in_x - m_Position.x < 0)
-		angle = +90 + atan((float)(in_y - m_Position.y) / (float)(in_x - m_Position.x)) * 180 / M_PI;
-	else // Added?
-	{
-		if (in_y - m_Position.y > 0)
-			angle = 0;
-		else
-			angle = 180;
-	}
-	if (angle < 0)
-		angle += 360;
-	if (angle > 360)
-		angle -= 360;
-	return (256 * (360 - angle) / 360.0f);
-}
-
-bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed) {
+bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, bool checkZ, bool calcHeading) {
 	if (GetID() == 0)
 		return true;
 
@@ -495,7 +482,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed) {
 		m_Position.y = new_y;
 		m_Position.z = new_z;
 
-		if(fix_z_timer.Check() && 
+		if(checkZ && fix_z_timer.Check() && 
 			(!this->IsEngaged() || flee_mode || currently_fleeing))
 			this->FixZ();
 
@@ -562,7 +549,8 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed) {
 			m_Position.x = new_x;
 			m_Position.y = new_y;
 			m_Position.z = new_z;
-			m_Position.w = CalculateHeadingToTarget(x, y);
+			if (calcHeading)
+				m_Position.w = CalculateHeadingToTarget(x, y);
 			tar_ndx = 20 - numsteps;
 		}
 		else
@@ -600,10 +588,11 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed) {
 		m_Position.x = new_x;
 		m_Position.y = new_y;
 		m_Position.z = new_z;
-		m_Position.w = CalculateHeadingToTarget(x, y);
+		if (calcHeading)
+			m_Position.w = CalculateHeadingToTarget(x, y);
 	}
 
-	if (fix_z_timer.Check() && !this->IsEngaged())
+	if (checkZ && fix_z_timer.Check() && !this->IsEngaged())
 		this->FixZ();
 
 	SetMoving(true);
@@ -627,7 +616,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed) {
 }
 
 bool Mob::CalculateNewPosition2(float x, float y, float z, int speed, bool checkZ, bool calcHeading) {
-	return MakeNewPositionAndSendUpdate(x, y, z, speed);
+	return MakeNewPositionAndSendUpdate(x, y, z, speed, checkZ, calcHeading);
 }
 
 bool Mob::CalculateNewPosition(float x, float y, float z, int speed, bool checkZ, bool calcHeading) {
@@ -838,49 +827,61 @@ void Mob::SendToFixZ(float new_x, float new_y, float new_z) {
 	}
 }
 
-void Mob::FixZ(int32 z_find_offset /*= 5*/)
+float Mob::GetFixedZ(glm::vec3 dest, int32 z_find_offset)
 {
-
 	BenchTimer timer;
 	timer.reset();
+	float new_z = dest.z;
 
-	if (zone->HasMap() && RuleB(Map, FixZWhenMoving) && (flymode != 1 && flymode != 2))
+	if (zone->HasMap() && RuleB(Map, FixZWhenMoving) &&
+		(flymode != 1 && flymode != 2))
 	{
-		if (!RuleB(Watermap, CheckForWaterWhenMoving) || !zone->HasWaterMap() ||
-			(zone->HasWaterMap() && !zone->watermap->InWater(glm::vec3(m_Position))))
+		if (!RuleB(Watermap, CheckForWaterWhenMoving) || !zone->HasWaterMap()
+			|| (zone->HasWaterMap() &&
+				!zone->watermap->InWater(glm::vec3(m_Position))))
 		{
 			/* Any more than 5 in the offset makes NPC's hop/snap to ceiling in small corridors */
-			float new_z = this->FindGroundZ(m_Position.x, m_Position.y, z_find_offset);
-			new_z += this->GetZOffset();
+			new_z = this->FindDestGroundZ(dest, z_find_offset);
+			if (new_z != BEST_Z_INVALID)
+			{
+				new_z += this->GetZOffset();
 
-			auto duration = timer.elapsed();
-
-			Log(
-				Logs::Moderate, 
-				Logs::FixZ,
-				"Mob::FixZ() (%s) returned %4.3f at %4.3f, %4.3f, %4.3f - Took %lf", 
-				this->GetCleanName(), 
-				new_z, 
-				m_Position.x, 
-				m_Position.y,
-				m_Position.z,
-				duration
-			);
-
-			if ((new_z > -2000) && new_z != BEST_Z_INVALID) {
-				if (RuleB(Map, MobZVisualDebug))
-					this->SendAppearanceEffect(78, 0, 0, 0, 0);
-				
-				m_Position.z = new_z;
+				// If bad new Z restore old one
+				if (new_z < -2000) {
+					new_z = m_Position.z;
+				}
 			}
-			else {
-				if (RuleB(Map, MobZVisualDebug))
-					this->SendAppearanceEffect(103, 0, 0, 0, 0);
+		}
 
-				Log(Logs::General, Logs::FixZ, "%s is failing to find Z %f", this->GetCleanName(), std::abs(m_Position.z - new_z));
-			}
+		auto duration = timer.elapsed();
 
-			last_z = m_Position.z;
+		Log(Logs::Moderate, Logs::FixZ,
+			"Mob::GetFixedZ() (%s) returned %4.3f at %4.3f, %4.3f, %4.3f - Took %lf",
+			this->GetCleanName(), new_z, dest.x, dest.y, dest.z, duration);
+	}
+
+	return new_z;
+}
+
+void Mob::FixZ(int32 z_find_offset /*= 5*/)
+{
+	glm::vec3 current_loc(m_Position);
+	float new_z = GetFixedZ(current_loc, z_find_offset);
+
+	if (!IsClient() && new_z != m_Position.z)
+	{
+		if ((new_z > -2000) && new_z != BEST_Z_INVALID) {
+			if (RuleB(Map, MobZVisualDebug))
+				this->SendAppearanceEffect(78, 0, 0, 0, 0);
+
+			m_Position.z = new_z;
+		}
+		else {
+			if (RuleB(Map, MobZVisualDebug))
+				this->SendAppearanceEffect(103, 0, 0, 0, 0);
+
+			Log(Logs::General, Logs::FixZ, "%s is failing to find Z %f",
+				this->GetCleanName(), std::abs(m_Position.z - new_z));
 		}
 	}
 }
@@ -990,6 +991,35 @@ float Mob::GetZOffset() const {
 	}
 
 	return 0.2 * GetSize() * offset;
+}
+
+// This function will try to move the mob along the relative angle a set distance
+// if it can't be moved, it will lower the distance and try again
+// If we want to move on like say a spawn, we can pass send as false
+void Mob::TryMoveAlong(float distance, float angle, bool send)
+{
+	angle += GetHeading();
+	angle = FixHeading(angle);
+
+	glm::vec3 tmp_pos;
+	glm::vec3 new_pos = GetPosition();
+	new_pos.x += distance * g_Math.FastSin(angle);
+	new_pos.y += distance * g_Math.FastCos(angle);
+	new_pos.z += GetZOffset();
+
+	if (zone->HasMap()) {
+		auto new_z = zone->zonemap->FindClosestZ(new_pos, nullptr);
+		if (new_z != BEST_Z_INVALID)
+			new_pos.z = new_z;
+
+		if (zone->zonemap->LineIntersectsZone(GetPosition(), new_pos, 0.0f, &tmp_pos))
+			new_pos = tmp_pos;
+	}
+
+	new_pos.z = GetFixedZ(new_pos);
+	Teleport(new_pos);
+	if (send)
+		SendPositionUpdate();
 }
 
 int	ZoneDatabase::GetHighestGrid(uint32 zoneid) {

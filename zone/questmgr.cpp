@@ -210,6 +210,8 @@ Mob* QuestManager::spawn2(int npc_type, int grid, int unused, const glm::vec4& p
 	{
 		auto npc = new NPC(tmp, nullptr, position, FlyMode3);
 		npc->AddLootTable();
+		if (npc->DropsGlobalLoot())
+			npc->CheckGlobalLootTables();
 		entity_list.AddNPC(npc,true,true);
 		if(grid > 0)
 		{
@@ -232,6 +234,8 @@ Mob* QuestManager::unique_spawn(int npc_type, int grid, int unused, const glm::v
 	{
 		auto npc = new NPC(tmp, nullptr, position, FlyMode3);
 		npc->AddLootTable();
+		if (npc->DropsGlobalLoot())
+			npc->CheckGlobalLootTables();
 		entity_list.AddNPC(npc,true,true);
 		if(grid > 0)
 		{
@@ -308,6 +312,8 @@ Mob* QuestManager::spawn_from_spawn2(uint32 spawn2_id)
 
 	found_spawn->SetNPCPointer(npc);
 	npc->AddLootTable();
+	if (npc->DropsGlobalLoot())
+		npc->CheckGlobalLootTables();
 	npc->SetSp2(found_spawn->SpawnGroupID());
 	entity_list.AddNPC(npc);
 	entity_list.LimitAddNPC(npc);
@@ -1313,9 +1319,7 @@ void QuestManager::itemlink(int item_id) {
 		linker.SetLinkType(EQEmu::saylink::SayLinkItemData);
 		linker.SetItemData(item);
 
-		auto item_link = linker.GenerateLink();
-
-		initiator->Message(0, "%s tells you, %s", owner->GetCleanName(), item_link.c_str());
+		initiator->Message(0, "%s tells you, %s", owner->GetCleanName(), linker.GenerateLink().c_str());
 	}
 }
 
@@ -1656,6 +1660,8 @@ void QuestManager::respawn(int npcTypeID, int grid) {
 	{
 		owner = new NPC(npcType, nullptr, owner->GetPosition(), FlyMode3);
 		owner->CastToNPC()->AddLootTable();
+		if (owner->CastToNPC()->DropsGlobalLoot())
+			owner->CastToNPC()->CheckGlobalLootTables();
 		entity_list.AddNPC(owner->CastToNPC(),true,true);
 		if(grid > 0)
 			owner->CastToNPC()->AssignWaypoints(grid);
@@ -1981,8 +1987,8 @@ void QuestManager::npcfeature(char *feature, int setting)
 	QuestManagerCurrentQuestVars();
 	uint16 Race = owner->GetRace();
 	uint8 Gender = owner->GetGender();
-	uint8 Texture = 0xFF;
-	uint8 HelmTexture = 0xFF;
+	uint8 Texture = owner->GetTexture();
+	uint8 HelmTexture = owner->GetHelmTexture();
 	uint8 HairColor = owner->GetHairColor();
 	uint8 BeardColor = owner->GetBeardColor();
 	uint8 EyeColor1 = owner->GetEyeColor1();
@@ -2541,9 +2547,8 @@ const char* QuestManager::varlink(char* perltext, int item_id) {
 	linker.SetLinkType(EQEmu::saylink::SayLinkItemData);
 	linker.SetItemData(item);
 
-	auto item_link = linker.GenerateLink();
-	strcpy(perltext, item_link.c_str()); // link length is currently ranged from 1 to 250 in TextLink::GenerateLink()
-	
+	strcpy(perltext, linker.GenerateLink().c_str());
+
 	return perltext;
 }
 
@@ -2765,8 +2770,7 @@ const char* QuestManager::saylink(char* Phrase, bool silent, const char* LinkNam
 		linker.SetProxyAugment1ID(sayid);
 	linker.SetProxyText(LinkName);
 
-	auto say_link = linker.GenerateLink();
-	strcpy(Phrase, say_link.c_str());  // link length is currently ranged from 1 to 250 in TextLink::GenerateLink()
+	strcpy(Phrase, linker.GenerateLink().c_str());
 
 	return Phrase;
 }

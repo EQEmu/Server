@@ -23,351 +23,112 @@
 #include <iostream>
 #include <sstream>
 
-std::string EQEmuConfig::ConfigFile = "eqemu_config.xml";
+std::string EQEmuConfig::ConfigFile = "eqemu_config.json";
 EQEmuConfig *EQEmuConfig::_config = nullptr;
 
-void EQEmuConfig::do_world(TiXmlElement *ele)
-{
-	const char *text;
-	TiXmlElement * sub_ele;;
-	text = ParseTextBlock(ele, "shortname");
-	if (text) {
-		ShortName = text;
-	}
-	text = ParseTextBlock(ele, "longname");
-	if (text) {
-		LongName = text;
-	}
-	text = ParseTextBlock(ele, "address", true);
-	if (text) {
-		WorldAddress = text;
-	}
-	text = ParseTextBlock(ele, "localaddress", true);
-	if (text) {
-		LocalAddress = text;
-	}
-	text = ParseTextBlock(ele, "maxclients", true);
-	if (text) {
-		MaxClients = atoi(text);
-	}
-	// Get the <key> element
-	text = ParseTextBlock(ele, "key", true);
-	if (text) {
-		SharedKey = text;
-	}
-	// Get the <loginserver> element
-	sub_ele = ele->FirstChildElement("loginserver");
-	if (sub_ele) {
-		text = ParseTextBlock(sub_ele, "host", true);
-		if (text) {
-			LoginHost = text;
-		}
-		text = ParseTextBlock(sub_ele, "port", true);
-		if (text) {
-			LoginPort = atoi(text);
-		}
-		text = ParseTextBlock(sub_ele, "legacy", true);
-		if (text) {
-			LoginLegacy = atoi(text) > 0 ? true : false;
-		}
-		text = ParseTextBlock(sub_ele, "account", true);
-		if (text) {
-			LoginAccount = text;
-		}
-		text = ParseTextBlock(sub_ele, "password", true);
-		if (text) {
-			LoginPassword = text;
-		}
+void EQEmuConfig::parse_config() {
+	
+	ShortName = _root["server"]["world"].get("shortname", "").asString();
+	LongName = _root["server"]["world"].get("longname", "").asString();
+	WorldAddress = _root["server"]["world"].get("address", "").asString();
+	LocalAddress = _root["server"]["world"].get("localaddress", "").asString();
+	MaxClients = atoi(_root["server"]["world"].get("maxclients", "-1").asString().c_str());
+	SharedKey = _root["server"]["world"].get("key", "").asString();
+	LoginCount = 0;
+
+	if (_root["server"]["world"]["loginserver"].isObject()) {
+		LoginHost = _root["server"]["world"]["loginserver"].get("host", "login.eqemulator.net").asString();
+		LoginPort = atoi(_root["server"]["world"]["loginserver"].get("port", "5998").asString().c_str());
+		LoginLegacy = false;
+		if (_root["server"]["world"]["loginserver"].get("legacy", "0").asString() == "1") LoginLegacy = true;
+		LoginAccount = _root["server"]["world"]["loginserver"].get("account", "").asString();
+		LoginPassword = _root["server"]["world"]["loginserver"].get("password", "").asString();
 	} else {
-		char	str[32];
+		char str[32];
+		loginlist.Clear();
 		do {
 			sprintf(str, "loginserver%i", ++LoginCount);
-			sub_ele = ele->FirstChildElement(str);
-			if (sub_ele) {
-				auto loginconfig = new LoginConfig;
-				text = ParseTextBlock(sub_ele, "host", true);
-				if (text) {
-					loginconfig->LoginHost = text;
-				}
-				text = ParseTextBlock(sub_ele, "port", true);
-				if (text) {
-					loginconfig->LoginPort = atoi(text);
-				}
-				text = ParseTextBlock(sub_ele, "legacy", true);
-				if (text) {
-					loginconfig->LoginLegacy = atoi(text) > 0 ? true : false;
-				}
-				text = ParseTextBlock(sub_ele, "account", true);
-				if (text) {
-					loginconfig->LoginAccount = text;
-				}
-				text = ParseTextBlock(sub_ele, "password", true);
-				if (text) {
-					loginconfig->LoginPassword = text;
-				}
-				loginlist.Insert(loginconfig);
+			if (!_root["server"]["world"][str].isObject()) {
+				break;
 			}
-		} while (sub_ele);
-	}
-	// Check for locked
-	sub_ele = ele->FirstChildElement("locked");
-	if (sub_ele != nullptr) {
-		Locked = true;
-	}
-	// Get the <tcp> element
-	sub_ele = ele->FirstChildElement("tcp");
-	if (sub_ele != nullptr) {
-		text = sub_ele->Attribute("ip");
-		if (text) {
-			WorldIP = text;
-		}
-		text = sub_ele->Attribute("port");
-		if (text) {
-			WorldTCPPort = atoi(text);
-		}
-	}
 
-	sub_ele = ele->FirstChildElement("telnet");
-	if (sub_ele != nullptr) {
-		text = sub_ele->Attribute("ip");
-		if (text) {
-			TelnetIP = text;
-		}
-		text = sub_ele->Attribute("port");
-		if (text) {
-			TelnetTCPPort = atoi(text);
-		}
-		text = sub_ele->Attribute("enabled");
-		if (text && !strcasecmp(text, "true")) {
-			TelnetEnabled = true;
-		}
-	}
+			auto loginconfig = new LoginConfig;
+			loginconfig->LoginHost = _root["server"]["world"][str].get("host", "login.eqemulator.net").asString();
+			loginconfig->LoginPort = atoi(_root["server"]["world"][str].get("port", "5998").asString().c_str());
+			loginconfig->LoginAccount = _root["server"]["world"][str].get("account", "").asString();
+			loginconfig->LoginPassword = _root["server"]["world"][str].get("password", "").asString();
 
-	// Get the <http> element
-	sub_ele = ele->FirstChildElement("http");
-	if (sub_ele != nullptr) {
-//		text = sub_ele->Attribute("ip");
-//		if (text)
-//			WorldIP=text;
-		text = sub_ele->Attribute("mimefile");
-		if (text) {
-			WorldHTTPMimeFile = text;
-		}
-		text = sub_ele->Attribute("port");
-		if (text) {
-			WorldHTTPPort = atoi(text);
-		}
-		text = sub_ele->Attribute("enabled");
-		if (text && !strcasecmp(text, "true")) {
-			WorldHTTPEnabled = true;
-		}
+			loginconfig->LoginLegacy = false;
+			if (_root["server"]["world"][str].get("legacy", "0").asString() == "1") loginconfig->LoginLegacy = true;
+			loginlist.Insert(loginconfig);
+		} while (LoginCount < 100);
 	}
+	
+	
+	//<locked> from xml converts to json as locked: "", so i default to "false". 
+	//The only way to enable locked is by switching to true, meaning this value is always false until manually set true
+	Locked = false;
+	if (_root["server"]["world"].get("locked", "false").asString() == "true") Locked = true;
+	WorldIP = _root["server"]["world"]["tcp"].get("host", "127.0.0.1").asString();
+	WorldTCPPort = atoi(_root["server"]["world"]["tcp"].get("port", "9000").asString().c_str());
+	
+	TelnetIP = _root["server"]["world"]["telnet"].get("ip", "127.0.0.1").asString();
+	TelnetTCPPort = atoi(_root["server"]["world"]["telnet"].get("port", "9001").asString().c_str());
+	TelnetEnabled = false;
+	if (_root["server"]["world"]["telnet"].get("enabled", "false").asString() == "true") TelnetEnabled = true;
+
+	WorldHTTPMimeFile = _root["server"]["world"]["http"].get("mimefile", "mime.types").asString();
+	WorldHTTPPort = atoi(_root["server"]["world"]["http"].get("port", "9080").asString().c_str());
+	WorldHTTPEnabled = false;
+	if (_root["server"]["world"]["http"].get("enabled", "false").asString() == "true") WorldHTTPEnabled = true;
+
+	ChatHost = _root["server"]["chatserver"].get("host", "eqchat.eqemulator.net").asString();
+	ChatPort = atoi(_root["server"]["chatserver"].get("port", "7778").asString().c_str());
+
+	MailHost = _root["server"]["mailserver"].get("host", "eqmail.eqemulator.net").asString();
+	MailPort = atoi(_root["server"]["mailserver"].get("port", "7778").asString().c_str());
+
+	DatabaseUsername = _root["server"]["database"].get("username", "eq").asString();
+	DatabasePassword = _root["server"]["database"].get("password", "eq").asString();
+	DatabaseHost = _root["server"]["database"].get("host", "localhost").asString();
+	DatabasePort = atoi(_root["server"]["database"].get("port", "3306").asString().c_str());
+	DatabaseDB = _root["server"]["database"].get("db", "eq").asString();	
+
+	QSDatabaseHost = _root["server"]["qsdatabase"].get("host", "localhost").asString();
+	QSDatabasePort = atoi(_root["server"]["qsdatabase"].get("port", "3306").asString().c_str());
+	QSDatabaseUsername = _root["server"]["qsdatabase"].get("username", "eq").asString();
+	QSDatabasePassword = _root["server"]["qsdatabase"].get("password", "eq").asString();
+	QSDatabaseDB = _root["server"]["qsdatabase"].get("db", "eq").asString();
+
+	DefaultStatus = atoi(_root["server"]["zones"].get("defaultstatus", 0).asString().c_str());
+	ZonePortLow = atoi(_root["server"]["zones"]["ports"].get("low", "7000").asString().c_str());
+	ZonePortHigh = atoi(_root["server"]["zones"]["ports"].get("high", "7999").asString().c_str());
+
+	SpellsFile = _root["server"]["files"].get("spells", "spells_us.txt").asString();
+	OpCodesFile = _root["server"]["files"].get("opcodes", "opcodes.conf").asString();
+	PluginPlFile = _root["server"]["files"].get("plugin.pl", "plugin.pl").asString();
+
+	MapDir = _root["server"]["directories"].get("maps", "Maps/").asString();
+	QuestDir = _root["server"]["directories"].get("quests", "quests/").asString();
+	PluginDir = _root["server"]["directories"].get("plugins", "plugins/").asString();
+	LuaModuleDir = _root["server"]["directories"].get("lua_modules", "lua_modules/").asString();
+	PatchDir = _root["server"]["directories"].get("patches", "./").asString();
+	SharedMemDir = _root["server"]["directories"].get("shared_memory", "shared/").asString();
+	LogDir = _root["server"]["directories"].get("logs", "logs/").asString();
+
+	LogPrefix = _root["server"]["launcher"].get("logprefix", "logs/zone-").asString();
+	LogSuffix = _root["server"]["launcher"].get("logsuffix", ".log").asString();
+	RestartWait = atoi(_root["server"]["launcher"]["timers"].get("restart", "10000").asString().c_str());
+	TerminateWait = atoi(_root["server"]["launcher"]["timers"].get("reterminate", "10000").asString().c_str());
+	InitialBootWait = atoi(_root["server"]["launcher"]["timers"].get("initial", "20000").asString().c_str());
+	ZoneBootInterval = atoi(_root["server"]["launcher"]["timers"].get("interval", "2000").asString().c_str());
+#ifdef WIN32
+	ZoneExe = _root["server"]["launcher"].get("exe", "zone.exe").asString();
+#else
+	ZoneExe = _root["server"]["launcher"].get("exe", "./zone").asString();
+#endif
+
 }
-
-void EQEmuConfig::do_chatserver(TiXmlElement *ele)
-{
-	const char *text;
-	text = ParseTextBlock(ele, "host", true);
-	if (text) {
-		ChatHost = text;
-	}
-	text = ParseTextBlock(ele, "port", true);
-	if (text) {
-		ChatPort = atoi(text);
-	}
-}
-
-void EQEmuConfig::do_mailserver(TiXmlElement *ele)
-{
-	const char *text;
-	text = ParseTextBlock(ele, "host", true);
-	if (text) {
-		MailHost = text;
-	}
-	text = ParseTextBlock(ele, "port", true);
-	if (text) {
-		MailPort = atoi(text);
-	}
-}
-
-void EQEmuConfig::do_database(TiXmlElement *ele)
-{
-	const char *text;
-	text = ParseTextBlock(ele, "host", true);
-	if (text) {
-		DatabaseHost = text;
-	}
-	text = ParseTextBlock(ele, "port", true);
-	if (text) {
-		DatabasePort = atoi(text);
-	}
-	text = ParseTextBlock(ele, "username", true);
-	if (text) {
-		DatabaseUsername = text;
-	}
-	text = ParseTextBlock(ele, "password", true);
-	if (text) {
-		DatabasePassword = text;
-	}
-	text = ParseTextBlock(ele, "db", true);
-	if (text) {
-		DatabaseDB = text;
-	}
-}
-
-
-void EQEmuConfig::do_qsdatabase(TiXmlElement *ele)
-{
-	const char *text;
-	text = ParseTextBlock(ele, "host", true);
-	if (text) {
-		QSDatabaseHost = text;
-	}
-	text = ParseTextBlock(ele, "port", true);
-	if (text) {
-		QSDatabasePort = atoi(text);
-	}
-	text = ParseTextBlock(ele, "username", true);
-	if (text) {
-		QSDatabaseUsername = text;
-	}
-	text = ParseTextBlock(ele, "password", true);
-	if (text) {
-		QSDatabasePassword = text;
-	}
-	text = ParseTextBlock(ele, "db", true);
-	if (text) {
-		QSDatabaseDB = text;
-	}
-}
-
-void EQEmuConfig::do_zones(TiXmlElement *ele)
-{
-	const char *text;
-	TiXmlElement *sub_ele;
-//	TiXmlNode *node,*sub_node;
-	text = ParseTextBlock(ele, "defaultstatus", true);
-	if (text) {
-		DefaultStatus = atoi(text);
-	}
-	// Get the <ports> element
-	sub_ele = ele->FirstChildElement("ports");
-	if (sub_ele != nullptr) {
-		text = sub_ele->Attribute("low");
-		if (text) {
-			ZonePortLow = atoi(text);
-		};
-		text = sub_ele->Attribute("high");
-		if (text) {
-			ZonePortHigh = atoi(text);
-		}
-	}
-}
-
-void EQEmuConfig::do_files(TiXmlElement *ele)
-{
-	const char *text;
-	text = ParseTextBlock(ele, "spells", true);
-	if (text) {
-		SpellsFile = text;
-	}
-	text = ParseTextBlock(ele, "opcodes", true);
-	if (text) {
-		OpCodesFile = text;
-	}
-	text = ParseTextBlock(ele, "plugin.pl", true);
-	if (text) {
-		PluginPlFile = text;
-	}
-}
-
-void EQEmuConfig::do_directories(TiXmlElement *ele)
-{
-	const char *text;
-	text = ParseTextBlock(ele, "maps", true);
-	if (text) {
-		MapDir = text;
-		if ( MapDir.back() != '/' )
-			MapDir += '/';
-	}
-	text = ParseTextBlock(ele, "quests", true);
-	if (text) {
-		QuestDir = text;
-		if ( QuestDir.back() != '/' )
-			QuestDir += '/';
-	}
-	text = ParseTextBlock(ele, "plugins", true);
-	if (text) {
-		PluginDir = text;
-		if ( PluginDir.back() != '/' )
-			PluginDir += '/';
-	}
-	text = ParseTextBlock(ele, "lua_modules", true);
-	if (text) {
-		LuaModuleDir = text;
-		if ( LuaModuleDir.back() != '/' )
-			LuaModuleDir += '/';
-	}
-	text = ParseTextBlock(ele, "patches", true);
-	if (text) {
-		PatchDir = text;
-		if ( PatchDir.back() != '/' )
-			PatchDir += '/';
-	}
-	text = ParseTextBlock(ele, "shared_memory", true);
-	if (text) {
-		SharedMemDir = text;
-		if ( SharedMemDir.back() != '/' )
-			SharedMemDir += '/';
-	}
-	//Not Fully Implemented yet LogDir
-	text = ParseTextBlock(ele, "logs", true);
-	if (text) {
-		LogDir = text;
-		if ( LogDir.back() != '/' )
-			LogDir += '/';
-	}
-}
-
-void EQEmuConfig::do_launcher(TiXmlElement *ele)
-{
-	const char *text;
-	TiXmlElement *sub_ele;
-	text = ParseTextBlock(ele, "logprefix", true);
-	if (text) {
-		LogPrefix = text;
-	}
-	text = ParseTextBlock(ele, "logsuffix", true);
-	if (text) {
-		LogSuffix = text;
-	}
-	// Get the <exe> element
-	text = ParseTextBlock(ele, "exe", true);
-	if (text) {
-		ZoneExe = text;
-	}
-	// Get the <timers> element
-	sub_ele = ele->FirstChildElement("timers");
-	if (sub_ele != nullptr) {
-		text = sub_ele->Attribute("restart");
-		if (text) {
-			RestartWait = atoi(text);
-		}
-		text = sub_ele->Attribute("reterminate");
-		if (text) {
-			TerminateWait = atoi(text);
-		}
-		text = sub_ele->Attribute("initial");
-		if (text) {
-			InitialBootWait = atoi(text);
-		}
-		text = sub_ele->Attribute("interval");
-		if (text) {
-			ZoneBootInterval = atoi(text);
-		}
-	}
-}
-
 std::string EQEmuConfig::GetByName(const std::string &var_name) const
 {
 	if (var_name == "ShortName") {
@@ -564,4 +325,3 @@ void EQEmuConfig::Dump() const
 	std::cout << "DefaultStatus = " << (int)DefaultStatus << std::endl;
 //	std::cout << "DynamicCount = " << DynamicCount << std::endl;
 }
-

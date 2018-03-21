@@ -24,7 +24,7 @@
 #include "emu_legacy.h"
 #include "emu_versions.h"
 
-#include <string>
+#include <string.h>
 
 
 namespace EQEmu
@@ -114,7 +114,11 @@ namespace EQEmu
 		const EQEmu::versions::ClientVersion CharacterCreationClient = EQEmu::versions::ClientVersion::RoF2;
 		const size_t CharacterCreationMax = RoF2::constants::CharacterCreationLimit;
 
+		const size_t SayLinkOpenerSize = 1;
 		const size_t SayLinkBodySize = RoF2::constants::SayLinkBodySize;
+		const size_t SayLinkTextSize = 256; // this may be varied until it breaks something (tested:374) - the others are constant
+		const size_t SayLinkCloserSize = 1;
+		const size_t SayLinkMaximumSize = (SayLinkOpenerSize + SayLinkBodySize + SayLinkTextSize + SayLinkCloserSize);
 
 		const int LongBuffs = RoF2::constants::LongBuffs;
 		const int ShortBuffs = RoF2::constants::ShortBuffs;
@@ -125,6 +129,37 @@ namespace EQEmu
 		const int MercBuffs = RoF2::constants::MercBuffs;
 
 	} /*constants*/
+
+	namespace bug {
+		enum CategoryID : uint32 {
+			catOther = 0,
+			catVideo,
+			catAudio,
+			catPathing,
+			catQuest,
+			catTradeskills,
+			catSpellStacking,
+			catDoorsPortals,
+			catItems,
+			catNPC,
+			catDialogs,
+			catLoNTCG,
+			catMercenaries
+		};
+
+		enum OptionalInfoFlag : uint32 {
+			infoNoOptionalInfo = 0x0,
+			infoCanDuplicate = 0x1,
+			infoCrashBug = 0x2,
+			infoTargetInfo = 0x4,
+			infoCharacterFlags = 0x8,
+			infoUnknownValue = 0xFFFFFFF0
+		};
+
+		const char* CategoryIDToCategoryName(CategoryID category_id);
+		CategoryID CategoryNameToCategoryID(const char* category_name);
+
+	} // namespace bug
 
 	enum class CastingSlot : uint32 {
 		Gem1       = 0,

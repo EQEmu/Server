@@ -560,7 +560,8 @@ void PathManager::SpawnPathNodes()
 		sprintf(npc_type->lastname, "%i", PathNodes[i].id);
 		npc_type->cur_hp = 4000000;
 		npc_type->max_hp = 4000000;
-		npc_type->race = 151;
+		npc_type->race = 2253;
+		npc_type->size = 3.0f;
 		npc_type->gender = 2;
 		npc_type->class_ = 9;
 		npc_type->deity= 1;
@@ -1377,7 +1378,7 @@ void PathManager::ShowPathNodeNeighbours(Client *c)
 		Mob *m = entity_list.GetMob(Name);
 
 		if(m)
-			m->SendIllusionPacket(151);
+			m->ChangeSize(3.0f);
 	}
 
 	std::stringstream Neighbours;
@@ -1401,7 +1402,7 @@ void PathManager::ShowPathNodeNeighbours(Client *c)
 		Mob *m = entity_list.GetMob(Name);
 
 		if(m)
-			m->SendIllusionPacket(46);
+			m->ChangeSize(5.0f);
 	}
 	c->Message(0, "Neighbours: %s", Neighbours.str().c_str());
 }
@@ -1560,7 +1561,8 @@ int32 PathManager::AddNode(float x, float y, float z, float best_z, int32 reques
 		sprintf(npc_type->lastname, "%i", new_id);
 		npc_type->cur_hp = 4000000;
 		npc_type->max_hp = 4000000;
-		npc_type->race = 151;
+		npc_type->race = 2253;
+		npc_type->size = 3.0f;
 		npc_type->gender = 2;
 		npc_type->class_ = 9;
 		npc_type->deity= 1;
@@ -1621,7 +1623,8 @@ int32 PathManager::AddNode(float x, float y, float z, float best_z, int32 reques
 		sprintf(npc_type->lastname, "%i", new_id);
 		npc_type->cur_hp = 4000000;
 		npc_type->max_hp = 4000000;
-		npc_type->race = 151;
+		npc_type->race = 2253;
+		npc_type->size = 3.0f;
 		npc_type->gender = 2;
 		npc_type->class_ = 9;
 		npc_type->deity= 1;

@@ -30,9 +30,9 @@
 	Manifest: https://github.com/EQEmu/Server/blob/master/utils/sql/db_update_manifest.txt
 */
 
-#define CURRENT_BINARY_DATABASE_VERSION 9115
+#define CURRENT_BINARY_DATABASE_VERSION 9122
 #ifdef BOTS
-	#define CURRENT_BINARY_BOTS_DATABASE_VERSION 9017
+	#define CURRENT_BINARY_BOTS_DATABASE_VERSION 9018
 #else
 	#define CURRENT_BINARY_BOTS_DATABASE_VERSION 0 // must be 0
 #endif

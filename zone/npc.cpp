@@ -135,6 +135,9 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, const glm::vec4& position, int if
 	respawn2 = in_respawn;
 	swarm_timer.Disable();
 
+	if (size < 0.0f)
+		size = GetRaceGenderDefaultHeight(race, gender);
+
 	taunting = false;
 	proximity = nullptr;
 	copper = 0;
@@ -208,6 +211,24 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, const glm::vec4& position, int if
 	avoidance_rating = d->avoidance_rating;
 	ATK = d->ATK;
 
+	// used for when switch back to charm
+	default_ac = d->AC;
+	default_min_dmg = min_dmg;
+	default_max_dmg = max_dmg;
+	default_attack_delay = d->attack_delay;
+	default_accuracy_rating = d->accuracy_rating;
+	default_avoidance_rating = d->avoidance_rating;
+	default_atk = d->ATK;
+
+	// used for when getting charmed, if 0, doesn't swap
+	charm_ac = d->charm_ac;
+	charm_min_dmg = d->charm_min_dmg;
+	charm_max_dmg = d->charm_max_dmg;
+	charm_attack_delay = d->charm_attack_delay;
+	charm_accuracy_rating = d->charm_accuracy_rating;
+	charm_avoidance_rating = d->charm_avoidance_rating;
+	charm_atk = d->charm_atk;
+
 	CalcMaxMana();
 	SetMana(GetMaxMana());
 
@@ -227,6 +248,8 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, const glm::vec4& position, int if
 	roambox_delay = 1000;
 	p_depop = false;
 	loottable_id = d->loottable_id;
+	skip_global_loot = d->skip_global_loot;
+	rare_spawn = d->rare_spawn;
 
 	no_target_hotkey = d->no_target_hotkey;
 
@@ -436,6 +459,26 @@ void NPC::SetTarget(Mob* mob) {
 		//attack_timer.Disable();
 		attack_dw_timer.Disable();
 	}
+
+	// either normal pet and owner is client or charmed pet and owner is client
+	Mob *owner = nullptr;
+	if (IsPet() && IsPetOwnerClient()) {
+		owner = GetOwner();
+	} else if (IsCharmed()) {
+		owner = GetOwner();
+		if (owner && !owner->IsClient())
+			owner = nullptr;
+	}
+
+	if (owner) {
+		auto client = owner->CastToClient();
+		if (client->ClientVersionBit() & EQEmu::versions::bit_UFAndLater) {
+			auto app = new EQApplicationPacket(OP_PetHoTT, sizeof(ClientTarget_Struct));
+			auto ct = (ClientTarget_Struct *)app->pBuffer;
+			ct->new_target = mob ? mob->GetID() : 0;
+			client->FastQueuePacket(&app);
+		}
+	}
 	Mob::SetTarget(mob);
 }
 
@@ -543,9 +586,7 @@ void NPC::QueryLoot(Client* to)
 		linker.SetLinkType(EQEmu::saylink::SayLinkLootItem);
 		linker.SetLootData(*cur);
 
-		auto item_link = linker.GenerateLink();
-
-		to->Message(0, "%s, ID: %u, Level: (min: %u, max: %u)", item_link.c_str(), (*cur)->item_id, (*cur)->min_level, (*cur)->max_level);
+		to->Message(0, "%s, ID: %u, Level: (min: %u, max: %u)", linker.GenerateLink().c_str(), (*cur)->item_id, (*cur)->min_level, (*cur)->max_level);
 	}
 
 	to->Message(0, "%i items on %s.", x, GetName());
@@ -724,6 +765,10 @@ bool NPC::Process()
 		reface_timer->Disable();
 	}
 
+	// needs to be done before mez and stun
+	if (ForcedMovement)
+		ProcessForcedMovement();
+
 	if (IsMezzed())
 		return true;
 
@@ -900,6 +945,7 @@ bool NPC::SpawnZoneController(){
 	npc_type->d_melee_texture2 = 0;
 	npc_type->merchanttype = 0;
 	npc_type->bodytype = 11;
+	npc_type->skip_global_loot = true;
 
 	if (RuleB(Zone, EnableZoneControllerGlobals)) {
 		npc_type->qglobal = true;
@@ -2110,6 +2156,8 @@ void NPC::LevelScale() {
 		if(level > 15 && level <= 25)
 			scale_adjust = 2;
 
+		AC += (int)(AC * scaling);
+		ATK += (int)(ATK * scaling);
 		base_hp += (int)(base_hp * scaling);
 		max_hp += (int)(max_hp * scaling);
 		cur_hp = max_hp;
@@ -2616,3 +2664,42 @@ void NPC::DepopSwarmPets()
 		}
 	}
 }
+
+void NPC::ModifyStatsOnCharm(bool bRemoved)
+{
+	if (bRemoved) {
+		if (charm_ac)
+			AC = default_ac;
+		if (charm_attack_delay)
+			attack_delay = default_attack_delay;
+		if (charm_accuracy_rating)
+			accuracy_rating = default_accuracy_rating;
+		if (charm_avoidance_rating)
+			avoidance_rating = default_avoidance_rating;
+		if (charm_atk)
+			ATK = default_atk;
+		if (charm_min_dmg || charm_max_dmg) {
+			base_damage = round((default_max_dmg - default_min_dmg) / 1.9);
+			min_damage = default_min_dmg - round(base_damage / 10.0);
+		}
+	} else {
+		if (charm_ac)
+			AC = charm_ac;
+		if (charm_attack_delay)
+			attack_delay = charm_attack_delay;
+		if (charm_accuracy_rating)
+			accuracy_rating = charm_accuracy_rating;
+		if (charm_avoidance_rating)
+			avoidance_rating = charm_avoidance_rating;
+		if (charm_atk)
+			ATK = charm_atk;
+		if (charm_min_dmg || charm_max_dmg) {
+			base_damage = round((charm_max_dmg - charm_min_dmg) / 1.9);
+			min_damage = charm_min_dmg - round(base_damage / 10.0);
+		}
+	}
+	// the rest of the stats aren't cached, so lets just do these two instead of full CalcBonuses()
+	SetAttackTimer();
+	CalcAC();
+}
+

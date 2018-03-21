@@ -264,13 +264,21 @@ bool Client::Process() {
 					if (distance <= scan_range) {
 						close_mobs.insert(std::pair<Mob *, float>(mob, distance));
 					}
-					else if (mob->GetAggroRange() > scan_range) {
+					else if ((mob->GetAggroRange() * mob->GetAggroRange()) > scan_range) {
 						close_mobs.insert(std::pair<Mob *, float>(mob, distance));
 					}
 				}
 
-				if (force_spawn_updates && mob != this && distance <= client_update_range)
-					mob->SendPositionUpdateToClient(this);
+				if (force_spawn_updates && mob != this) {
+
+					if (mob->is_distance_roamer) {
+						mob->SendPositionUpdateToClient(this);
+						continue;
+					}
+
+					if (distance <= client_update_range)
+						mob->SendPositionUpdateToClient(this);
+				}
 
 			}
 		}
@@ -647,17 +655,17 @@ bool Client::Process() {
 	{
 		//client logged out or errored out
 		//ResetTrade();
-		if (client_state != CLIENT_KICKED && !zoning && !instalog) {
+		if (client_state != CLIENT_KICKED && !bZoning && !instalog) {
 			Save();
 		}
 
 		client_state = CLIENT_LINKDEAD;
-		if (zoning || instalog || GetGM())
+		if (bZoning || instalog || GetGM())
 		{
 			Group *mygroup = GetGroup();
 			if (mygroup)
 			{
-				if (!zoning)
+				if (!bZoning)
 				{
 					entity_list.MessageGroup(this, true, 15, "%s logged out.", GetName());
 					LeaveGroup();
@@ -676,7 +684,7 @@ bool Client::Process() {
 			Raid *myraid = entity_list.GetRaidByClient(this);
 			if (myraid)
 			{
-				if (!zoning)
+				if (!bZoning)
 				{
 					//entity_list.MessageGroup(this,true,15,"%s logged out.",GetName());
 					myraid->MemberZoned(this);
@@ -879,7 +887,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 	uint8 handychance = 0;
 	for (itr = merlist.begin(); itr != merlist.end() && i <= numItemSlots; ++itr) {
 		MerchantList ml = *itr;
-		if (merch->CastToNPC()->GetMerchantProbability() > ml.probability)
+		if (ml.probability != 100 && zone->random.Int(1, 100) > ml.probability)
 			continue;
 
 		if (GetLevel() < ml.level_required)
@@ -1055,7 +1063,8 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 			SetMana(0);
 			SetHP(GetMaxHP()/5);
 			int rez_eff = 756;
-			if (GetRace() == BARBARIAN || GetRace() == DWARF || GetRace() == TROLL || GetRace() == OGRE)
+			if (RuleB(Character, UseOldRaceRezEffects) &&
+			    (GetRace() == BARBARIAN || GetRace() == DWARF || GetRace() == TROLL || GetRace() == OGRE))
 				rez_eff = 757;
 			SpellOnTarget(rez_eff, this); // Rezz effects
 		}
@@ -1951,57 +1960,40 @@ void Client::CalcRestState() {
 
 void Client::DoTracking()
 {
-	if(TrackingID == 0)
+	if (TrackingID == 0)
 		return;
 
 	Mob *m = entity_list.GetMob(TrackingID);
 
-	if(!m || m->IsCorpse())
-	{
+	if (!m || m->IsCorpse()) {
 		Message_StringID(MT_Skills, TRACK_LOST_TARGET);
-
 		TrackingID = 0;
-
 		return;
 	}
 
 	float RelativeHeading = GetHeading() - CalculateHeadingToTarget(m->GetX(), m->GetY());
 
-	if(RelativeHeading < 0)
-		RelativeHeading += 256;
+	if (RelativeHeading < 0)
+		RelativeHeading += 512;
 
-	if((RelativeHeading <= 16) || (RelativeHeading >= 240))
-	{
+	if (RelativeHeading > 480)
 		Message_StringID(MT_Skills, TRACK_STRAIGHT_AHEAD, m->GetCleanName());
-	}
-	else if((RelativeHeading > 16) && (RelativeHeading <= 48))
-	{
-		Message_StringID(MT_Skills, TRACK_AHEAD_AND_TO, m->GetCleanName(), "right");
-	}
-	else if((RelativeHeading > 48) && (RelativeHeading <= 80))
-	{
-		Message_StringID(MT_Skills, TRACK_TO_THE, m->GetCleanName(), "right");
-	}
-	else if((RelativeHeading > 80) && (RelativeHeading <= 112))
-	{
-		Message_StringID(MT_Skills, TRACK_BEHIND_AND_TO, m->GetCleanName(), "right");
-	}
-	else if((RelativeHeading > 112) && (RelativeHeading <= 144))
-	{
-		Message_StringID(MT_Skills, TRACK_BEHIND_YOU, m->GetCleanName());
-	}
-	else if((RelativeHeading > 144) && (RelativeHeading <= 176))
-	{
-		Message_StringID(MT_Skills, TRACK_BEHIND_AND_TO, m->GetCleanName(), "left");
-	}
-	else if((RelativeHeading > 176) && (RelativeHeading <= 208))
-	{
-		Message_StringID(MT_Skills, TRACK_TO_THE, m->GetCleanName(), "left");
-	}
-	else if((RelativeHeading > 208) && (RelativeHeading < 240))
-	{
+	else if (RelativeHeading > 416)
 		Message_StringID(MT_Skills, TRACK_AHEAD_AND_TO, m->GetCleanName(), "left");
-	}
+	else if (RelativeHeading > 352)
+		Message_StringID(MT_Skills, TRACK_TO_THE, m->GetCleanName(), "left");
+	else if (RelativeHeading > 288)
+		Message_StringID(MT_Skills, TRACK_BEHIND_AND_TO, m->GetCleanName(), "left");
+	else if (RelativeHeading > 224)
+		Message_StringID(MT_Skills, TRACK_BEHIND_YOU, m->GetCleanName());
+	else if (RelativeHeading > 160)
+		Message_StringID(MT_Skills, TRACK_BEHIND_AND_TO, m->GetCleanName(), "right");
+	else if (RelativeHeading > 96)
+		Message_StringID(MT_Skills, TRACK_TO_THE, m->GetCleanName(), "right");
+	else if (RelativeHeading > 32)
+		Message_StringID(MT_Skills, TRACK_AHEAD_AND_TO, m->GetCleanName(), "right");
+	else if (RelativeHeading >= 0)
+		Message_StringID(MT_Skills, TRACK_STRAIGHT_AHEAD, m->GetCleanName());
 }
 
 void Client::HandleRespawnFromHover(uint32 Option)

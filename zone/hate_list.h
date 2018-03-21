@@ -31,6 +31,8 @@ struct struct_HateList
 	int32 hatelist_damage;
 	uint32 stored_hate_amount;
 	bool is_entity_frenzy;
+	int8 oor_count; // count on how long we've been out of range
+	uint32 last_modified; // we need to remove this if it gets higher than 10 mins
 };
 
 class HateList
@@ -65,6 +67,7 @@ public:
 	void SetHateOwner(Mob *new_hate_owner) { hate_owner = new_hate_owner; }
 	void SpellCast(Mob *caster, uint32 spell_id, float range, Mob *ae_center = nullptr);
 	void WipeHateList();
+	void RemoveStaleEntries(int time_ms, float dist);
 
 
 protected:
