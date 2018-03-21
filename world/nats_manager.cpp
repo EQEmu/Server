@@ -300,7 +300,7 @@ void NatsManager::GetChannelMessage(eqproto::ChannelMessage* message, const char
 
 	
 	int channel = message->number();
-	if (channel < 1) {
+	if (channel < 1 && message->guilddbid() < 1) {
 		channel = MT_OOC; //default to ooc
 		message->set_number(eqproto::OOC);
 	}
