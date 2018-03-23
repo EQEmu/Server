@@ -512,7 +512,6 @@ Client::Client(std::shared_ptr<EQStreamInterface> eqs) {
 	AccountGrabUpdateTimer = new Timer(60000); //check every minute
 	GlobalChatLimiterTimer = new Timer(RuleI(Chat, IntervalDurationMS));
 
-	RawConnectionType = '\0';
 	TypeOfConnection = ConnectionTypeUnknown;
 	ClientVersion_ = EQEmu::versions::ClientVersion::Unknown;
 
@@ -645,10 +644,6 @@ void Clientlist::Process()
 
 				database.GetAccountStatus((*it));
 
-				// give world packet a chance to arrive and be processed
-				if ((*it)->GetCharID())
-					ClientVersionRequestQueue[(*it)->GetCharID()] = (Timer::GetCurrentTime() + (RuleI(Chat, ExpireClientVersionRequests) * 1000));
-
 				if ((*it)->GetConnectionType() == ConnectionTypeCombined)
 					(*it)->SendFriends();
 
@@ -688,33 +683,7 @@ void Clientlist::Process()
 			continue;
 		}
 
-		// initiate request if we don't already have a reply from 'world enter' (ucs crash recovery protocol)
-		if ((*it)->GetClientVersion() == EQEmu::versions::ClientVersion::Unknown) {
-			if (!CheckForClientVersionReply((*it)))
-				RequestClientVersion((*it)->GetCharID());
-		}
-
 		++it;
-	}
-
-	// delete expired replies
-	auto repiter = ClientVersionReplyQueue.begin();
-	while (repiter != ClientVersionReplyQueue.end()) {
-		if ((*repiter).second.second <= Timer::GetCurrentTime()) {
-			repiter = ClientVersionReplyQueue.erase(repiter);
-			continue;
-		}
-		++repiter;
-	}
-
-	// delete expired requests
-	auto reqiter = ClientVersionRequestQueue.begin();
-	while (reqiter != ClientVersionRequestQueue.end()) {
-		if ((*reqiter).second <= Timer::GetCurrentTime()) {
-			reqiter = ClientVersionRequestQueue.erase(reqiter);
-			continue;
-		}
-		++reqiter;
 	}
 }
 
@@ -871,55 +840,6 @@ void Clientlist::ProcessOPMailCommand(Client *c, std::string CommandString)
 		c->SendHelp();
 		Log(Logs::Detail, Logs::UCS_Server, "Unhandled OP_Mail command: %s", CommandString.c_str());
 	}
-}
-
-void Clientlist::RequestClientVersion(uint32 character_id) {
-	if (!character_id)
-		return;
-
-	if (ClientVersionRequestQueue.find(character_id) != ClientVersionRequestQueue.end()) {
-		if (ClientVersionRequestQueue[character_id] > Timer::GetCurrentTime())
-			return;
-	}
-
-	if (LogSys.log_settings[Logs::UCS_Server].is_category_enabled) {
-		Log(Logs::Detail, Logs::UCS_Server, "Requesting ClientVersion reply for character id: %u",
-			character_id);
-	}
-	ClientVersionRequestIDs.push_back(character_id);
-	ClientVersionRequestQueue[character_id] = (Timer::GetCurrentTime() + (RuleI(Chat, ExpireClientVersionRequests) * 1000));
-}
-
-bool Clientlist::QueueClientVersionReply(uint32 character_id, EQEmu::versions::ClientVersion client_version) {
-	if (!character_id)
-		return true;
-	if (client_version < EQEmu::versions::ClientVersion::Titanium || client_version > EQEmu::versions::ClientVersion::RoF2)
-		return false;
-
-	if (LogSys.log_settings[Logs::UCS_Server].is_category_enabled) {
-		Log(Logs::Detail, Logs::UCS_Server, "Queueing ClientVersion %u reply for character id: %u",
-			static_cast<uint32>(client_version), character_id);
-	}
-	ClientVersionReplyQueue[character_id] = cvt_pair(client_version, (Timer::GetCurrentTime() + (RuleI(Chat, ExpireClientVersionReplies) * 1000)));
-	ClientVersionRequestQueue.erase(character_id);
-
-	return true;
-}
-
-bool Clientlist::CheckForClientVersionReply(Client* c) {
-	if (!c)
-		return true;
-	if (ClientVersionReplyQueue.find(c->GetCharID()) == ClientVersionReplyQueue.end())
-		return false;
-
-	if (LogSys.log_settings[Logs::UCS_Server].is_category_enabled) {
-		Log(Logs::General, Logs::UCS_Server, "Registering ClientVersion %s for stream %s:%u",
-			EQEmu::versions::ClientVersionName(ClientVersionReplyQueue[c->GetCharID()].first), c->ClientStream->GetRemoteAddr().c_str(), c->ClientStream->GetRemotePort());
-	}
-	c->SetClientVersion(ClientVersionReplyQueue[c->GetCharID()].first);
-	ClientVersionReplyQueue.erase(c->GetCharID());
-
-	return true;
 }
 
 void Clientlist::CloseAllConnections() {
@@ -2214,39 +2134,64 @@ void Client::AccountUpdate()
 
 void Client::SetConnectionType(char c) {
 
-	RawConnectionType = c;
-
 	switch (c)
 	{
-	case 'S':
-	{
-		TypeOfConnection = ConnectionTypeCombined;
-		Log(Logs::Detail, Logs::UCS_Server, "Connection type is Combined (SoF/SoD)");
-		break;
-	}
-	case 'U':
-	{
-		TypeOfConnection = ConnectionTypeCombined;
-		UnderfootOrLater = true;
-		Log(Logs::Detail, Logs::UCS_Server, "Connection type is Combined (Underfoot+)");
-		break;
-	}
-	case 'M':
-	{
-		TypeOfConnection = ConnectionTypeMail;
-		Log(Logs::Detail, Logs::UCS_Server, "Connection type is Mail (6.2 or Titanium client)");
-		break;
-	}
-	case 'C':
+	case EQEmu::versions::ucsTitaniumChat:
 	{
 		TypeOfConnection = ConnectionTypeChat;
-		Log(Logs::Detail, Logs::UCS_Server, "Connection type is Chat (6.2 or Titanium client)");
+		ClientVersion_ = EQEmu::versions::ClientVersion::Titanium;
+		Log(Logs::Detail, Logs::UCS_Server, "Connection type is Chat (Titanium)");
+		break;
+	}
+	case EQEmu::versions::ucsTitaniumMail:
+	{
+		TypeOfConnection = ConnectionTypeMail;
+		ClientVersion_ = EQEmu::versions::ClientVersion::Titanium;
+		Log(Logs::Detail, Logs::UCS_Server, "Connection type is Mail (Titanium)");
+		break;
+	}
+	case EQEmu::versions::ucsSoFCombined:
+	{
+		TypeOfConnection = ConnectionTypeCombined;
+		ClientVersion_ = EQEmu::versions::ClientVersion::SoF;
+		Log(Logs::Detail, Logs::UCS_Server, "Connection type is Combined (SoF)");
+		break;
+	}
+	case EQEmu::versions::ucsSoDCombined:
+	{
+		TypeOfConnection = ConnectionTypeCombined;
+		ClientVersion_ = EQEmu::versions::ClientVersion::SoD;
+		Log(Logs::Detail, Logs::UCS_Server, "Connection type is Combined (SoD)");
+		break;
+	}
+	case EQEmu::versions::ucsUFCombined:
+	{
+		TypeOfConnection = ConnectionTypeCombined;
+		ClientVersion_ = EQEmu::versions::ClientVersion::UF;
+		UnderfootOrLater = true;
+		Log(Logs::Detail, Logs::UCS_Server, "Connection type is Combined (Underfoot)");
+		break;
+	}
+	case EQEmu::versions::ucsRoFCombined:
+	{
+		TypeOfConnection = ConnectionTypeCombined;
+		ClientVersion_ = EQEmu::versions::ClientVersion::RoF;
+		UnderfootOrLater = true;
+		Log(Logs::Detail, Logs::UCS_Server, "Connection type is Combined (RoF)");
+		break;
+	}
+	case EQEmu::versions::ucsRoF2Combined:
+	{
+		TypeOfConnection = ConnectionTypeCombined;
+		ClientVersion_ = EQEmu::versions::ClientVersion::RoF2;
+		UnderfootOrLater = true;
+		Log(Logs::Detail, Logs::UCS_Server, "Connection type is Combined (RoF2)");
 		break;
 	}
 	default:
 	{
-		RawConnectionType = '\0';
 		TypeOfConnection = ConnectionTypeUnknown;
+		ClientVersion_ = EQEmu::versions::ClientVersion::Unknown;
 		Log(Logs::Detail, Logs::UCS_Server, "Connection type is unknown.");
 	}
 	}

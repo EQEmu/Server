@@ -32,6 +32,7 @@ extern uint32 numzones;
 extern bool holdzones;
 extern EQEmu::Random emu_random;
 extern WebInterfaceList web_interface;
+volatile bool UCSServerAvailable_ = false;
 void CatchSignal(int sig_num);
 
 ZSList::ZSList()
@@ -667,6 +668,16 @@ void ZSList::GetZoneIDList(std::vector<uint32> &zones) {
 		zones.push_back(zs->GetID());
 		iterator++;
 	}
+}
+
+void ZSList::UpdateUCSServerAvailable(bool ucss_available) {
+	UCSServerAvailable_ = ucss_available;
+	auto outapp = new ServerPacket(ServerOP_UCSServerStatusReply, sizeof(UCSServerStatus_Struct));
+	auto ucsss = (UCSServerStatus_Struct*)outapp->pBuffer;
+	ucsss->available = (ucss_available ? 1 : 0);
+	ucsss->timestamp = Timer::GetCurrentTime();
+	SendPacket(outapp);
+	safe_delete(outapp);
 }
 
 void ZSList::WorldShutDown(uint32 time, uint32 interval)

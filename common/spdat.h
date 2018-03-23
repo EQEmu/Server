@@ -972,7 +972,6 @@ bool IsCastWhileInvis(uint16 spell_id);
 bool IsEffectIgnoredInStacking(int spa);
 
 int CalcPetHp(int levelb, int classb, int STA = 75);
-const char *GetRandPetName();
 int GetSpellEffectDescNum(uint16 spell_id);
 DmgShieldType GetDamageShieldType(uint16 spell_id, int32 DSType = 0);
 bool DetrimentalSpellAllowsRest(uint16 spell_id);

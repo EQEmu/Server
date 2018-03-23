@@ -140,18 +140,11 @@ int main() {
 
 	worldserver = new WorldServer;
 
-	worldserver->ActivateBroadcastServerReadyTimer();
-
 	while(RunLoops) {
-		// this triggers clients to 'reconnect' to ucs after server crash
-		if (worldserver->HasBroadcastServerReadyTimer())
-			worldserver->ProcessBroadcastServerReady();
 
 		Timer::SetCurrentTime();
 
 		g_Clientlist->Process();
-
-		worldserver->ProcessClientVersionRequests(g_Clientlist->ClientVersionRequestIDs);
 
 		if(ChannelListProcessTimer.Check())
 			ChannelList->Process();

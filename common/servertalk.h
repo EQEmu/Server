@@ -190,9 +190,8 @@
 #define ServerOP_ReloadLogs 0x4010
 #define ServerOP_ReloadPerlExportSettings	0x4011
 #define ServerOP_CZSetEntityVariableByClientName 0x4012
-#define ServerOP_UCSClientVersionRequest	0x4013
-#define ServerOP_UCSClientVersionReply		0x4014
-#define ServerOP_UCSBroadcastServerReady	0x4015
+#define ServerOP_UCSServerStatusRequest		0x4013
+#define ServerOP_UCSServerStatusReply		0x4014
 /* Query Server OP Codes */
 #define ServerOP_QSPlayerLogTrades					0x5010
 #define ServerOP_QSPlayerLogHandins					0x5011
@@ -1281,18 +1280,15 @@ struct ServerRequestTellQueue_Struct {
 	char	name[64];
 };
 
-struct UCSClientVersionRequest_Struct {
-	uint32 character_id;
-};
-
-struct UCSClientVersionReply_Struct {
-	uint32 character_id;
-	EQEmu::versions::ClientVersion client_version;
-};
-
-struct UCSBroadcastServerReady_Struct {
-	char chat_prefix[128];
-	char mail_prefix[128];
+struct UCSServerStatus_Struct {
+	uint8 available; // non-zero=true, 0=false
+	union {
+		struct {
+			uint16 port;
+			uint16 unused;
+		};
+		uint32 timestamp;
+	};
 };
 
 #pragma pack()

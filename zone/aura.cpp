@@ -758,6 +758,8 @@ void Mob::MakeAura(uint16 spell_id)
 
 	auto npc = new Aura(npc_type, this, record);
 	npc->SetAuraID(spell_id);
+	if (trap)
+		npc->TryMoveAlong(5.0f, 0.0f, false); // try to place 5 units in front
 	entity_list.AddNPC(npc, false);
 
 	if (trap)

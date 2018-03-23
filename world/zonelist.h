@@ -54,7 +54,8 @@ public:
 	Timer*	reminder;
 	void	NextGroupIDs(uint32 &start, uint32 &end);
 	void	SendLSZones();
-	uint16 GetAvailableZonePort();
+	uint16	GetAvailableZonePort();
+	void	UpdateUCSServerAvailable(bool ucss_available = true);
 
 	int GetZoneCount();
 	void GetZoneIDList(std::vector<uint32> &zones);

@@ -2,13 +2,10 @@
 #include "../common/eqemu_logsys.h"
 #include "ucs.h"
 #include "world_config.h"
-#include "zonelist.h"
 
 #include "../common/misc_functions.h"
 #include "../common/md5.h"
 #include "../common/packet_dump.h"
-
-extern ZSList zoneserver_list;
 
 UCSConnection::UCSConnection()
 {
@@ -50,12 +47,6 @@ void UCSConnection::ProcessPacket(uint16 opcode, EQ::Net::Packet &p)
 		case ServerOP_ZAAuth:
 		{
 			Log(Logs::Detail, Logs::UCS_Server, "Got authentication from UCS when they are already authenticated.");
-			break;
-		}
-		case ServerOP_UCSBroadcastServerReady:
-		case ServerOP_UCSClientVersionRequest:
-		{
-			zoneserver_list.SendPacket(pack);
 			break;
 		}
 		default:

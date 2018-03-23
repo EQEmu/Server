@@ -1623,6 +1623,8 @@ bool ZoneDatabase::SaveCharacterData(uint32 character_id, uint32 account_id, Pla
 	if (account_id <= 0)
 		return false;
 	
+	std::string mail_key = database.GetMailKey(character_id);
+
 	clock_t t = std::clock(); /* Function timer start */
 	std::string query = StringFormat(
 		"REPLACE INTO `character_data` ("
@@ -1719,7 +1721,8 @@ bool ZoneDatabase::SaveCharacterData(uint32 character_id, uint32 account_id, Pla
 		" e_aa_effects,				 "
 		" e_percent_to_aa,			 "
 		" e_expended_aa_spent,		 "
-		" e_last_invsnapshot		 "
+		" e_last_invsnapshot,		 "
+		" mailkey					 "
 		")							 "
 		"VALUES ("
 		"%u,"  // id																" id,                        "
@@ -1815,7 +1818,8 @@ bool ZoneDatabase::SaveCharacterData(uint32 character_id, uint32 account_id, Pla
 		"%u,"  // e_aa_effects
 		"%u,"  // e_percent_to_aa
 		"%u,"  // e_expended_aa_spent
-		"%u"   // e_last_invsnapshot
+		"%u,"  // e_last_invsnapshot
+		"'%s'" // mailkey					  mail_key
 		")",
 		character_id,					  // " id,                        "
 		account_id,						  // " account_id,                "
@@ -1910,7 +1914,8 @@ bool ZoneDatabase::SaveCharacterData(uint32 character_id, uint32 account_id, Pla
 		m_epp->aa_effects,
 		m_epp->perAA,
 		m_epp->expended_aa,
-		m_epp->last_invsnapshot_time
+		m_epp->last_invsnapshot_time,
+		mail_key.c_str()
 	);
 	auto results = database.QueryDatabase(query);
 	Log(Logs::General, Logs::None, "ZoneDatabase::SaveCharacterData %i, done... Took %f seconds", character_id, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);

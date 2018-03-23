@@ -135,6 +135,9 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, const glm::vec4& position, int if
 	respawn2 = in_respawn;
 	swarm_timer.Disable();
 
+	if (size < 0.0f)
+		size = GetRaceGenderDefaultHeight(race, gender);
+
 	taunting = false;
 	proximity = nullptr;
 	copper = 0;
@@ -761,6 +764,10 @@ bool NPC::Process()
 		SendPosition();
 		reface_timer->Disable();
 	}
+
+	// needs to be done before mez and stun
+	if (ForcedMovement)
+		ProcessForcedMovement();
 
 	if (IsMezzed())
 		return true;

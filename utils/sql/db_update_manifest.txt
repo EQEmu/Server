@@ -375,6 +375,7 @@
 9119|2018_02_10_GlobalLoot.sql|SHOW TABLES LIKE 'global_loot'|empty|
 9120|2018_02_13_Heading.sql|SELECT value FROM variables WHERE varname = 'fixed_heading'|empty|
 9121|2018_02_18_bug_reports.sql|SHOW TABLES LIKE 'bug_reports'|empty|
+9122|2018_03_07_ucs_command.sql|SELECT * FROM `command_settings` WHERE `command` LIKE 'ucs'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

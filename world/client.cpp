@@ -84,6 +84,7 @@ extern ClientList client_list;
 extern EQEmu::Random emu_random;
 extern uint32 numclients;
 extern volatile bool RunLoops;
+extern volatile bool UCSServerAvailable_;
 
 Client::Client(EQStreamInterface* ieqs)
 :	autobootup_timeout(RuleI(World, ZoneAutobootTimeoutMS)),
@@ -890,53 +891,84 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 	}
 	QueuePacket(outapp);
 	safe_delete(outapp);
-
+	
+	// set mailkey - used for duration of character session
 	int MailKey = emu_random.Int(1, INT_MAX);
 
 	database.SetMailKey(charid, GetIP(), MailKey);
+	if (UCSServerAvailable_) {
+		const WorldConfig *Config = WorldConfig::get();
+		std::string buffer;
 
-	char ConnectionType;
+		EQEmu::versions::UCSVersion ConnectionType = EQEmu::versions::ucsUnknown;
 
-	if (m_ClientVersionBit & EQEmu::versions::bit_UFAndLater)
-		ConnectionType = 'U';
-	else if (m_ClientVersionBit & EQEmu::versions::bit_SoFAndLater)
-		ConnectionType = 'S';
-	else
-		ConnectionType = 'C';
+		// chat server packet
+		switch (GetClientVersion()) {
+		case EQEmu::versions::ClientVersion::Titanium:
+			ConnectionType = EQEmu::versions::ucsTitaniumChat;
+			break;
+		case EQEmu::versions::ClientVersion::SoF:
+			ConnectionType = EQEmu::versions::ucsSoFCombined;
+			break;
+		case EQEmu::versions::ClientVersion::SoD:
+			ConnectionType = EQEmu::versions::ucsSoDCombined;
+			break;
+		case EQEmu::versions::ClientVersion::UF:
+			ConnectionType = EQEmu::versions::ucsUFCombined;
+			break;
+		case EQEmu::versions::ClientVersion::RoF:
+			ConnectionType = EQEmu::versions::ucsRoFCombined;
+			break;
+		case EQEmu::versions::ClientVersion::RoF2:
+			ConnectionType = EQEmu::versions::ucsRoF2Combined;
+			break;
+		default:
+			ConnectionType = EQEmu::versions::ucsUnknown;
+			break;
+		}
 
-	auto outapp2 = new EQApplicationPacket(OP_SetChatServer);
-	char buffer[112];
+		buffer = StringFormat("%s,%i,%s.%s,%c%08X",
+			Config->ChatHost.c_str(),
+			Config->ChatPort,
+			Config->ShortName.c_str(),
+			GetCharName(),
+			ConnectionType,
+			MailKey
+		);
 
-	const WorldConfig *Config = WorldConfig::get();
+		outapp = new EQApplicationPacket(OP_SetChatServer, (buffer.length() + 1));
+		memcpy(outapp->pBuffer, buffer.c_str(), buffer.length());
+		outapp->pBuffer[buffer.length()] = '\0';
 
-	sprintf(buffer,"%s,%i,%s.%s,%c%08X",
-		Config->ChatHost.c_str(),
-		Config->ChatPort,
-		Config->ShortName.c_str(),
-		this->GetCharName(), ConnectionType, MailKey
-	);
-	outapp2->size=strlen(buffer)+1;
-	outapp2->pBuffer = new uchar[outapp2->size];
-	memcpy(outapp2->pBuffer,buffer,outapp2->size);
-	QueuePacket(outapp2);
-	safe_delete(outapp2);
+		QueuePacket(outapp);
+		safe_delete(outapp);
 
-	outapp2 = new EQApplicationPacket(OP_SetChatServer2);
+		// mail server packet
+		switch (GetClientVersion()) {
+		case EQEmu::versions::ClientVersion::Titanium:
+			ConnectionType = EQEmu::versions::ucsTitaniumMail;
+			break;
+		default:
+			// retain value from previous switch
+			break;
+		}
 
-	if (m_ClientVersionBit & EQEmu::versions::bit_TitaniumAndEarlier)
-		ConnectionType = 'M';
+		buffer = StringFormat("%s,%i,%s.%s,%c%08X",
+			Config->MailHost.c_str(),
+			Config->MailPort,
+			Config->ShortName.c_str(),
+			GetCharName(),
+			ConnectionType,
+			MailKey
+		);
 
-	sprintf(buffer,"%s,%i,%s.%s,%c%08X",
-		Config->MailHost.c_str(),
-		Config->MailPort,
-		Config->ShortName.c_str(),
-		this->GetCharName(), ConnectionType, MailKey
-	);
-	outapp2->size=strlen(buffer)+1;
-	outapp2->pBuffer = new uchar[outapp2->size];
-	memcpy(outapp2->pBuffer,buffer,outapp2->size);
-	QueuePacket(outapp2);
-	safe_delete(outapp2);
+		outapp = new EQApplicationPacket(OP_SetChatServer2, (buffer.length() + 1));
+		memcpy(outapp->pBuffer, buffer.c_str(), buffer.length());
+		outapp->pBuffer[buffer.length()] = '\0';
+
+		QueuePacket(outapp);
+		safe_delete(outapp);
+	}
 
 	EnterWorld();
 
@@ -1215,14 +1247,6 @@ void Client::EnterWorld(bool TryBootup) {
 		wtz->response = 0;
 		zone_server->SendPacket(pack);
 		delete pack;
-
-		UCSClientVersionReply_Struct cvr;
-		cvr.character_id = GetCharID();
-		cvr.client_version = GetClientVersion();
-		EQ::Net::DynamicPacket dp_cvr;
-		dp_cvr.PutData(0, &cvr, sizeof(cvr));
-		zone_server->HandleMessage(ServerOP_UCSClientVersionReply, dp_cvr);
-
 	}
 	else {	// if they havent seen character select screen, we can assume this is a zone
 			// to zone movement, which should be preauthorized before they leave the previous zone
