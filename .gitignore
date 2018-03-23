@@ -34,6 +34,8 @@ x86/
 log/
 logs/
 
+docker/db
+
 # Protobuf generated files
 *.pb.cc
 *.pb.h
