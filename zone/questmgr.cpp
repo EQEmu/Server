@@ -1670,7 +1670,7 @@ void QuestManager::respawn(int npcTypeID, int grid) {
 	}
 }
 
-void QuestManager::set_proximity(float minx, float maxx, float miny, float maxy, float minz, float maxz) {
+void QuestManager::set_proximity(float minx, float maxx, float miny, float maxy, float minz, float maxz, bool bSay) {
 	QuestManagerCurrentQuestVars();
 	if (!owner || !owner->IsNPC())
 		return;
@@ -1683,6 +1683,7 @@ void QuestManager::set_proximity(float minx, float maxx, float miny, float maxy,
 	owner->CastToNPC()->proximity->max_y = maxy;
 	owner->CastToNPC()->proximity->min_z = minz;
 	owner->CastToNPC()->proximity->max_z = maxz;
+	owner->CastToNPC()->proximity->say = bSay;
 }
 
 void QuestManager::clear_proximity() {
