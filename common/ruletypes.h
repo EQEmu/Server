@@ -728,6 +728,9 @@ RULE_BOOL(Inventory, EnforceAugmentWear, true) // Forces augment wear slot valid
 RULE_BOOL(Inventory, DeleteTransformationMold, true) //False if you want mold to last forever
 RULE_BOOL(Inventory, AllowAnyWeaponTransformation, false) //Weapons can use any weapon transformation
 RULE_BOOL(Inventory, TransformSummonedBags, false) //Transforms summoned bags into disenchanted ones instead of deleting
+RULE_INT(Inventory, PVPLootableEquipSlots, 0) //When looting a player's corpse, equipped items in slots listed here are lootable.
+RULE_BOOL(Inventory, PVPCanLootNoTrade, false) //Can players loot no trade items from player corpses?
+RULE_BOOL(Inventory, PVPCanLootContainer, false) //Can players loot bags/containers from player corpses?
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Client)

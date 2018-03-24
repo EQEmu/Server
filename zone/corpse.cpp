@@ -1146,6 +1146,39 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 	}
 
 	if (client && inst) {
+
+		if (GetCharID() != client->CharacterID()) { //PVP Looting
+			if (inst->GetItem()->NoDrop == 0 && !RuleB(Inventory, PVPCanLootNoTrade)) {
+				client->Message(13, "You may not loot NO DROP items from this corpse.");
+				client->QueuePacket(app);
+				SendEndLootErrorPacket(client);
+				ResetLooter();
+				delete inst;
+				return;
+			}
+
+			if (inst->GetItem()->BagSlots > 0 && !RuleB(Inventory, PVPCanLootContainer)) {
+				client->Message(13, "You may not loot containers from this corpse.");
+				client->QueuePacket(app);
+				SendEndLootErrorPacket(client);
+				ResetLooter();
+				delete inst;
+				return;
+			}
+
+			if (RuleI(Inventory, PVPLootableEquipSlots) > 0 && item_data->equip_slot < 23) {
+				int bit = 1 << item_data->equip_slot;
+				if (RuleI(Inventory, PVPLootableEquipSlots) & bit != 1) {
+					client->Message(13, "This item is equipped in a slot you cannot loot from.");
+					client->QueuePacket(app);
+					SendEndLootErrorPacket(client);
+					ResetLooter();
+					delete inst;
+					return;
+				}
+			}
+		}
+
 		if (client->CheckLoreConflict(item)) {
 			client->Message_StringID(0, LOOT_LORE_ERROR);
 			client->QueuePacket(app);
