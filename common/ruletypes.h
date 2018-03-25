@@ -731,6 +731,7 @@ RULE_BOOL(Inventory, TransformSummonedBags, false) //Transforms summoned bags in
 RULE_INT(Inventory, PVPLootableEquipSlots, 0) //When looting a player's corpse, equipped items in slots listed here are lootable.
 RULE_BOOL(Inventory, PVPCanLootNoTrade, false) //Can players loot no trade items from player corpses?
 RULE_BOOL(Inventory, PVPCanLootContainer, false) //Can players loot bags/containers from player corpses?
+RULE_BOOL(Inventory, PVPCanLootCoin, false) //Can players loot coin from player corpses?
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Client)

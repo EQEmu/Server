@@ -905,8 +905,12 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 	uint8 Loot_Request_Type = 1;
 	bool loot_coin = false;
 	std::string tmp;
-	if(database.GetVariable("LootCoin", tmp))
-		loot_coin = tmp[0] == 1 && tmp[1] == '\0';
+	
+	if (RuleB(Inventory, PVPCanLootCoin) == true) 
+		loot_coin = true;
+
+	if (RuleI(World, PVPSettings) > 0) //All server types have coin looting enabled by default
+		loot_coin = true;
 
 	if (DistanceSquaredNoZ(client->GetPosition(), m_Position) > 625) {
 		SendLootReqErrorPacket(client, LootResponse::TooFar);
