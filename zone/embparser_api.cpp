@@ -1542,7 +1542,7 @@ XS(XS__set_proximity);
 XS(XS__set_proximity)
 {
 	dXSARGS;
-	if (items != 4 && items != 6)
+	if (items != 4 && items != 6 && items != 7)
 		Perl_croak(aTHX_ "Usage: set_proximity(min_x, max_x, min_y, max_y [, min_z, max_z], [say])");
 
 	float min_x = (float)SvNV(ST(0));
