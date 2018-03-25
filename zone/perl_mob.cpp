@@ -9402,7 +9402,7 @@ XS(boot_Mob)
 		newXSproto(strcpy(buf, "IsSilenced"), XS_Mob_IsSilenced, file, "$");
 		newXSproto(strcpy(buf, "IsAmnesiad"), XS_Mob_IsAmnesiad, file, "$");
 		newXSproto(strcpy(buf, "GetMeleeMitigation"), XS_Mob_GetMeleeMitigation, file, "$");
-		newXSproto(strcpy(buf, "TryMoveAlong"), XS_Mob_TryMoveAlong, file, "$$;$");
+		newXSproto(strcpy(buf, "TryMoveAlong"), XS_Mob_TryMoveAlong, file, "$$$;$");
 	XSRETURN_YES;
 }
 
