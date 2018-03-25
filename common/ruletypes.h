@@ -237,6 +237,7 @@ RULE_BOOL(World, UseClientBasedExpansionSettings, true) // if true it will overr
 RULE_INT(World, PVPSettings, 0) // Sets the PVP settings for the server, 1 = Rallos Zek RuleSet, 2 = Tallon/Vallon Zek Ruleset, 4 = Sullon Zek Ruleset, 6 = Discord Ruleset, anything above 6 is the Discord Ruleset without the no-drop restrictions removed. TODO: Edit IsAttackAllowed in Zone to accomodate for these rules.
 RULE_INT(World, PVPMinLevel, 0) // minimum level to pvp
 RULE_BOOL(World, PVPUseDeityBasedPVP, false) //In PvP, deity is used to determine if a player can attack another.
+RULE_BOOL(World, PVPUseTeamsBySizeBasedPVP, false) //In PVP, size of a race is used to determine if a player can attack another.
 RULE_INT(World, PVPLevelDifference, 0) // In PvP, if value is greater than 0, players with a difference greater than value will not be attackable
 RULE_INT(World, PVPLoseExperienceLevelDifference, 0) // In PvP, if value is greater than 0, players lose experience if killed by a player within level difference
 RULE_INT(World, PVPPetDamageMitigation, 50) // In PvP, pet damage is mitigated by this amount

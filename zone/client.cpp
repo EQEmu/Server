@@ -9321,6 +9321,10 @@ bool Client::CanPvP(Client *c) {
 	if ((RuleI(World, PVPSettings) == 4 || RuleB(World, PVPUseDeityBasedPVP)) && GetAlignment() == c->GetAlignment())
 		return false;
 	
+	//VZTZ Zek PVP Setting
+	if ((RuleI(World, PVPSettings) == 2 || RuleB(World, PVPUseTeamsBySizeBasedPVP)) && GetPVPRaceTeamBySize() == c->GetPVPRaceTeamBySize())
+		return false;
+
 	//Check if players are flagged pvp. This may need to be removed later
 	if (!GetPVP() || !c->GetPVP()) return false;
 
@@ -9339,4 +9343,17 @@ int Client::GetAlignment() {
 		GetDeity() == EQEmu::deity::DeityInnoruuk || 
 		GetDeity() == EQEmu::deity::DeityRallosZek) return 2; //evil
 	return 0; //neutral
-} 
+}
+
+//GetPVPRaceSize returns based on racial divisions
+int Client::GetPVPRaceTeamBySize() {
+	if (GetRace() == HUMAN || GetRace() == BARBARIAN || GetRace() == ERUDITE || GetRace() == DRAKKIN)
+		return 1;
+	if (GetRace() == GNOME || GetRace() == HALFLING || GetRace() == DWARF || GetRace() == FROGLOK)
+		return 2;
+	if (GetRace() == HIGH_ELF || GetRace() == WOOD_ELF || GetRace() == HALF_ELF || GetRace() == VAHSHIR)
+		return 3;
+	if (GetRace() == DARK_ELF || GetRace() == OGRE || GetRace() == TROLL || GetRace() == IKSAR)
+		return 4;
+	return 1;
+}

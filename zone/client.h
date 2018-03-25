@@ -758,6 +758,7 @@ public:
 	void InitInnates();
 	bool CanPvP(Client * c);
  	int GetAlignment();
+	int GetPVPRaceTeamBySize();
 	void GMKill();
 	inline bool IsMedding() const {return medding;}
 	inline uint16 GetDuelTarget() const { return duel_target; }
