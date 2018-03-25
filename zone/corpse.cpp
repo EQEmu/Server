@@ -1168,7 +1168,7 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 
 			if (RuleI(Inventory, PVPLootableEquipSlots) > 0 && item_data->equip_slot < 23) {
 				int bit = 1 << item_data->equip_slot;
-				if (RuleI(Inventory, PVPLootableEquipSlots) & bit != 1) {
+				if (RuleI(Inventory, PVPLootableEquipSlots) & bit == 0) {
 					client->Message(13, "This item is equipped in a slot you cannot loot from.");
 					client->QueuePacket(app);
 					SendEndLootErrorPacket(client);
