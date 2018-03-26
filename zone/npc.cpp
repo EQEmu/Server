@@ -399,6 +399,19 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, const glm::vec4& position, int if
 	raid_target = d->raid_target;
 	ignore_despawn = d->ignore_despawn;
 	m_targetable = !d->untargetable;
+
+	AISpellVar.fail_recast = RuleI(Spells, AI_SpellCastFinishedFailRecast);
+	AISpellVar.engaged_no_sp_recast_min = RuleI(Spells, AI_EngagedNoSpellMinRecast);
+	AISpellVar.engaged_no_sp_recast_max = RuleI(Spells, AI_EngagedNoSpellMaxRecast);
+	AISpellVar.engaged_beneficial_self_chance = RuleI(Spells, AI_EngagedBeneficialSelfChance);
+	AISpellVar.engaged_beneficial_other_chance = RuleI(Spells, AI_EngagedBeneficialOtherChance);
+	AISpellVar.engaged_detrimental_chance = RuleI(Spells, AI_EngagedDetrimentalChance);
+	AISpellVar.pursue_no_sp_recast_min = RuleI(Spells, AI_PursueNoSpellMinRecast);
+	AISpellVar.pursue_no_sp_recast_max = RuleI(Spells, AI_PursueNoSpellMaxRecast);
+	AISpellVar.pursue_detrimental_chance = RuleI(Spells, AI_PursueDetrimentalChance);
+	AISpellVar.idle_no_sp_recast_min = RuleI(Spells, AI_IdleNoSpellMinRecast);
+	AISpellVar.idle_no_sp_recast_max = RuleI(Spells, AI_IdleNoSpellMaxRecast);
+	AISpellVar.idle_beneficial_chance = RuleI(Spells, AI_IdleBeneficialChance);
 }
 
 NPC::~NPC()

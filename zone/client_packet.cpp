@@ -4833,7 +4833,6 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 	mod_consider(tmob, con);
 
 	QueuePacket(outapp);
-	safe_delete(outapp);
 	// only wanted to check raid target once
 	// and need con to still be around so, do it here!
 	if (tmob->IsRaidTarget()) {
@@ -4879,6 +4878,8 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 	// we are trying to hide but they can see us
 	else if ((invisible || invisible_undead || hidden || invisible_animals) && !IsInvisible(tmob))
 		Message_StringID(10, SUSPECT_SEES_YOU);
+
+	safe_delete(outapp);
 
 	return;
 }
