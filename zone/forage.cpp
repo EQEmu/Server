@@ -278,7 +278,7 @@ void Client::GoFish()
 
 			//check for add NPC
 			if (npc_chance > 0 && npc_id) {
-				if (npc_chance < zone->random.Int(0, 99)) {
+				if (zone->random.Roll(npc_chance)) {
 					const NPCType *tmp = database.LoadNPCTypesData(npc_id);
 					if (tmp != nullptr) {
 						auto positionNPC = GetPosition();
