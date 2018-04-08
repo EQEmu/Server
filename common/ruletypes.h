@@ -513,7 +513,8 @@ RULE_INT(NPC, MinorNPCCorpseDecayTimeMS, 450000) //level<55
 RULE_INT(NPC, MajorNPCCorpseDecayTimeMS, 1500000) //level>=55
 RULE_INT(NPC, CorpseUnlockTimer, 150000)
 RULE_INT(NPC, EmptyNPCCorpseDecayTimeMS, 0)
-RULE_BOOL (NPC, UseItemBonusesForNonPets, true)
+RULE_BOOL(NPC, UseItemBonusesForNonPets, true)
+RULE_BOOL(NPC, UseBaneDamage, false)
 RULE_INT(NPC, SayPauseTimeInSec, 5)
 RULE_INT(NPC, OOCRegen, 0)
 RULE_BOOL(NPC, BuffFriends, false)
