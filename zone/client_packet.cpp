@@ -10046,6 +10046,14 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			break;
 		}
 
+		// default range is 200, takes Z into account
+		// really they do something weird where they're added to the aggro list then remove them
+		// and will attack if they come in range -- too lazy, lets remove exploits for now
+		if (DistanceSquared(mypet->GetPosition(), target->GetPosition()) >= RuleR(Aggro, PetAttackRange)) {
+			// they say they're attacking then remove on live ... so they don't really say anything in this case ...
+			break;
+		}
+
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
 			if (target != this && DistanceSquaredNoZ(mypet->GetPosition(), target->GetPosition()) <= (RuleR(Pets, AttackCommandRange)*RuleR(Pets, AttackCommandRange))) {
 				if (mypet->IsPetStop()) {
