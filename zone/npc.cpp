@@ -1534,7 +1534,8 @@ void NPC::PickPocket(Client* thief)
 	}
 
 	if(zone->random.Roll(5)) {
-		AddToHateList(thief, 50);
+		if (zone->CanDoCombat())
+			AddToHateList(thief, 50);
 		Say("Stop thief!");
 		thief->Message(13, "You are noticed trying to steal!");
 		thief->SendPickPocketResponse(this, 0, PickPocketFailed);
