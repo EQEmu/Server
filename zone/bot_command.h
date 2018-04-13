@@ -612,6 +612,7 @@ void bot_subcommand_bot_out_of_combat(Client *c, const Seperator *sep);
 void bot_subcommand_bot_report(Client *c, const Seperator *sep);
 void bot_subcommand_bot_spawn(Client *c, const Seperator *sep);
 void bot_subcommand_bot_stance(Client *c, const Seperator *sep);
+void bot_subcommand_bot_stop_melee_level(Client *c, const Seperator *sep);
 void bot_subcommand_bot_summon(Client *c, const Seperator *sep);
 void bot_subcommand_bot_tattoo(Client *c, const Seperator *sep);
 void bot_subcommand_bot_toggle_archer(Client *c, const Seperator *sep);
