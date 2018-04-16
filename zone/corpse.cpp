@@ -1253,20 +1253,20 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 		linker.SetLinkType(EQEmu::saylink::SayLinkItemInst);
 		linker.SetItemInst(inst);
 
-		auto item_link = linker.GenerateLink();
+		linker.GenerateLink();
 
-		client->Message_StringID(MT_LootMessages, LOOTED_MESSAGE, item_link.c_str());
+		client->Message_StringID(MT_LootMessages, LOOTED_MESSAGE, linker.Link().c_str());
 
 		if (!IsPlayerCorpse()) {
 			Group *g = client->GetGroup();
 			if (g != nullptr) {
 				g->GroupMessage_StringID(client, MT_LootMessages, OTHER_LOOTED_MESSAGE,
-							 client->GetName(), item_link.c_str());
+							 client->GetName(), linker.Link().c_str());
 			} else {
 				Raid *r = client->GetRaid();
 				if (r != nullptr) {
 					r->RaidMessage_StringID(client, MT_LootMessages, OTHER_LOOTED_MESSAGE,
-								client->GetName(), item_link.c_str());
+								client->GetName(), linker.Link().c_str());
 				}
 			}
 		}

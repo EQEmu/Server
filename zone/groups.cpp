@@ -2471,6 +2471,9 @@ void Group::QueueClients(Mob *sender, const EQApplicationPacket *app, bool ack_r
 			if (!members[i])
 				continue;
 
+			if (!members[i]->IsClient())
+				continue;
+
 			if (ignore_sender && members[i] == sender)
 				continue;
 

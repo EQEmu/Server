@@ -264,13 +264,21 @@ bool Client::Process() {
 					if (distance <= scan_range) {
 						close_mobs.insert(std::pair<Mob *, float>(mob, distance));
 					}
-					else if (mob->GetAggroRange() > scan_range) {
+					else if ((mob->GetAggroRange() * mob->GetAggroRange()) > scan_range) {
 						close_mobs.insert(std::pair<Mob *, float>(mob, distance));
 					}
 				}
 
-				if (force_spawn_updates && mob != this && distance <= client_update_range)
-					mob->SendPositionUpdateToClient(this);
+				if (force_spawn_updates && mob != this) {
+
+					if (mob->is_distance_roamer) {
+						mob->SendPositionUpdateToClient(this);
+						continue;
+					}
+
+					if (distance <= client_update_range)
+						mob->SendPositionUpdateToClient(this);
+				}
 
 			}
 		}
@@ -524,10 +532,9 @@ bool Client::Process() {
 			DoEnduranceUpkeep();
 		}
 
-		if (consume_food_timer.Check()) {
-			m_pp.hunger_level = m_pp.hunger_level - 1;
-			m_pp.thirst_level = m_pp.thirst_level - 1;
-		}
+		// this is independent of the tick timer
+		if (consume_food_timer.Check())
+			DoStaminaHungerUpdate();
 
 		if (tic_timer.Check() && !dead) {
 			CalcMaxHP();
@@ -539,7 +546,6 @@ bool Client::Process() {
 			DoManaRegen();
 			DoEnduranceRegen();
 			BuffProcess();
-			DoStaminaHungerUpdate();
 
 			if (tribute_timer.Check()) {
 				ToggleTribute(true);	//re-activate the tribute.
@@ -648,17 +654,17 @@ bool Client::Process() {
 	{
 		//client logged out or errored out
 		//ResetTrade();
-		if (client_state != CLIENT_KICKED && !zoning && !instalog) {
+		if (client_state != CLIENT_KICKED && !bZoning && !instalog) {
 			Save();
 		}
 
 		client_state = CLIENT_LINKDEAD;
-		if (zoning || instalog || GetGM())
+		if (bZoning || instalog || GetGM())
 		{
 			Group *mygroup = GetGroup();
 			if (mygroup)
 			{
-				if (!zoning)
+				if (!bZoning)
 				{
 					entity_list.MessageGroup(this, true, 15, "%s logged out.", GetName());
 					LeaveGroup();
@@ -677,7 +683,7 @@ bool Client::Process() {
 			Raid *myraid = entity_list.GetRaidByClient(this);
 			if (myraid)
 			{
-				if (!zoning)
+				if (!bZoning)
 				{
 					//entity_list.MessageGroup(this,true,15,"%s logged out.",GetName());
 					myraid->MemberZoned(this);
@@ -880,7 +886,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 	uint8 handychance = 0;
 	for (itr = merlist.begin(); itr != merlist.end() && i <= numItemSlots; ++itr) {
 		MerchantList ml = *itr;
-		if (merch->CastToNPC()->GetMerchantProbability() > ml.probability)
+		if (ml.probability != 100 && zone->random.Int(1, 100) > ml.probability)
 			continue;
 
 		if (GetLevel() < ml.level_required)
@@ -1056,7 +1062,8 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 			SetMana(0);
 			SetHP(GetMaxHP()/5);
 			int rez_eff = 756;
-			if (GetRace() == BARBARIAN || GetRace() == DWARF || GetRace() == TROLL || GetRace() == OGRE)
+			if (RuleB(Character, UseOldRaceRezEffects) &&
+			    (GetRace() == BARBARIAN || GetRace() == DWARF || GetRace() == TROLL || GetRace() == OGRE))
 				rez_eff = 757;
 			SpellOnTarget(rez_eff, this); // Rezz effects
 		}
@@ -1827,7 +1834,7 @@ void Client::OPGMSummon(const EQApplicationPacket *app)
 }
 
 void Client::DoHPRegen() {
-	SetHP(GetHP() + CalcHPRegen() + RestRegenHP);
+	SetHP(GetHP() + CalcHPRegen());
 	SendHPUpdate();
 }
 
@@ -1835,46 +1842,55 @@ void Client::DoManaRegen() {
 	if (GetMana() >= max_mana && spellbonuses.ManaRegen >= 0)
 		return;
 
-	SetMana(GetMana() + CalcManaRegen() + RestRegenMana);
+	if (GetMana() < max_mana && (IsSitting() || CanMedOnHorse()) && HasSkill(EQEmu::skills::SkillMeditate))
+		CheckIncreaseSkill(EQEmu::skills::SkillMeditate, nullptr, -5);
+
+	SetMana(GetMana() + CalcManaRegen());
 	CheckManaEndUpdate();
 }
 
-void Client::DoStaminaHungerUpdate() {
-	if(!stamina_timer.Check())
-		return;
-
+void Client::DoStaminaHungerUpdate()
+{
 	auto outapp = new EQApplicationPacket(OP_Stamina, sizeof(Stamina_Struct));
-	Stamina_Struct* sta = (Stamina_Struct*)outapp->pBuffer;
+	Stamina_Struct *sta = (Stamina_Struct *)outapp->pBuffer;
 
-	Log(Logs::General, Logs::Food, "Client::DoStaminaHungerUpdate() hunger_level: %i thirst_level: %i before loss", m_pp.hunger_level, m_pp.thirst_level);
+	Log(Logs::General, Logs::Food, "Client::DoStaminaHungerUpdate() hunger_level: %i thirst_level: %i before loss",
+	    m_pp.hunger_level, m_pp.thirst_level);
 
-	if (zone->GetZoneID() != 151) {
-		sta->food = m_pp.hunger_level > 6000 ? 6000 : m_pp.hunger_level;
-		sta->water = m_pp.thirst_level > 6000 ? 6000 : m_pp.thirst_level;
-	}
-	else {
+	if (zone->GetZoneID() != 151 && !GetGM()) {
+		int loss = RuleI(Character, FoodLossPerUpdate);
+		if (GetHorseId() != 0)
+			loss *= 3;
+
+		m_pp.hunger_level = EQEmu::Clamp(m_pp.hunger_level - loss, 0, 6000);
+		m_pp.thirst_level = EQEmu::Clamp(m_pp.thirst_level - loss, 0, 6000);
+		if (spellbonuses.hunger) {
+			m_pp.hunger_level = EQEmu::ClampLower(m_pp.hunger_level, 3500);
+			m_pp.thirst_level = EQEmu::ClampLower(m_pp.thirst_level, 3500);
+		}
+		sta->food = m_pp.hunger_level;
+		sta->water = m_pp.thirst_level;
+	} else {
 		// No auto food/drink consumption in the Bazaar
 		sta->food = 6000;
 		sta->water = 6000;
 	}
 
-	Log(Logs::General, Logs::Food, 
-		"Client::DoStaminaHungerUpdate() Current hunger_level: %i = (%i minutes left) thirst_level: %i = (%i minutes left) - after loss", 
-		m_pp.hunger_level, 
-		m_pp.hunger_level,
-		m_pp.thirst_level,
-		m_pp.thirst_level
-	);
+	Log(Logs::General, Logs::Food,
+	    "Client::DoStaminaHungerUpdate() Current hunger_level: %i = (%i minutes left) thirst_level: %i = (%i "
+	    "minutes left) - after loss",
+	    m_pp.hunger_level, m_pp.hunger_level, m_pp.thirst_level, m_pp.thirst_level);
 
 	FastQueuePacket(&outapp);
 }
 
 void Client::DoEnduranceRegen()
 {
-	if(GetEndurance() >= GetMaxEndurance())
-		return;
+	// endurance has some negative mods that could result in a negative regen when starved
+	int regen = CalcEnduranceRegen();
 
-	SetEndurance(GetEndurance() + CalcEnduranceRegen() + RestRegenEndurance);
+	if (regen < 0 || (regen > 0 && GetEndurance() < GetMaxEndurance()))
+		SetEndurance(GetEndurance() + regen);
 }
 
 void Client::DoEnduranceUpkeep() {
@@ -1923,12 +1939,12 @@ void Client::CalcRestState() {
 	// The client must have been out of combat for RuleI(Character, RestRegenTimeToActivate) seconds,
 	// must be sitting down, and must not have any detrimental spells affecting them.
 	//
-	if(!RuleI(Character, RestRegenPercent))
+	if(!RuleB(Character, RestRegenEnabled))
 		return;
 
-	RestRegenHP = RestRegenMana = RestRegenEndurance = 0;
+	ooc_regen = false;
 
-	if(AggroCount || !IsSitting())
+	if(AggroCount || !(IsSitting() || CanMedOnHorse()))
 		return;
 
 	if(!rest_timer.Check(false))
@@ -1943,67 +1959,46 @@ void Client::CalcRestState() {
 		}
 	}
 
-	RestRegenHP = (GetMaxHP() * RuleI(Character, RestRegenPercent) / 100);
+	ooc_regen = true;
 
-	RestRegenMana = (GetMaxMana() * RuleI(Character, RestRegenPercent) / 100);
-
-	if(RuleB(Character, RestRegenEndurance))
-		RestRegenEndurance = (GetMaxEndurance() * RuleI(Character, RestRegenPercent) / 100);
 }
 
 void Client::DoTracking()
 {
-	if(TrackingID == 0)
+	if (TrackingID == 0)
 		return;
 
 	Mob *m = entity_list.GetMob(TrackingID);
 
-	if(!m || m->IsCorpse())
-	{
+	if (!m || m->IsCorpse()) {
 		Message_StringID(MT_Skills, TRACK_LOST_TARGET);
-
 		TrackingID = 0;
-
 		return;
 	}
 
 	float RelativeHeading = GetHeading() - CalculateHeadingToTarget(m->GetX(), m->GetY());
 
-	if(RelativeHeading < 0)
-		RelativeHeading += 256;
+	if (RelativeHeading < 0)
+		RelativeHeading += 512;
 
-	if((RelativeHeading <= 16) || (RelativeHeading >= 240))
-	{
+	if (RelativeHeading > 480)
 		Message_StringID(MT_Skills, TRACK_STRAIGHT_AHEAD, m->GetCleanName());
-	}
-	else if((RelativeHeading > 16) && (RelativeHeading <= 48))
-	{
-		Message_StringID(MT_Skills, TRACK_AHEAD_AND_TO, m->GetCleanName(), "right");
-	}
-	else if((RelativeHeading > 48) && (RelativeHeading <= 80))
-	{
-		Message_StringID(MT_Skills, TRACK_TO_THE, m->GetCleanName(), "right");
-	}
-	else if((RelativeHeading > 80) && (RelativeHeading <= 112))
-	{
-		Message_StringID(MT_Skills, TRACK_BEHIND_AND_TO, m->GetCleanName(), "right");
-	}
-	else if((RelativeHeading > 112) && (RelativeHeading <= 144))
-	{
-		Message_StringID(MT_Skills, TRACK_BEHIND_YOU, m->GetCleanName());
-	}
-	else if((RelativeHeading > 144) && (RelativeHeading <= 176))
-	{
-		Message_StringID(MT_Skills, TRACK_BEHIND_AND_TO, m->GetCleanName(), "left");
-	}
-	else if((RelativeHeading > 176) && (RelativeHeading <= 208))
-	{
-		Message_StringID(MT_Skills, TRACK_TO_THE, m->GetCleanName(), "left");
-	}
-	else if((RelativeHeading > 208) && (RelativeHeading < 240))
-	{
+	else if (RelativeHeading > 416)
 		Message_StringID(MT_Skills, TRACK_AHEAD_AND_TO, m->GetCleanName(), "left");
-	}
+	else if (RelativeHeading > 352)
+		Message_StringID(MT_Skills, TRACK_TO_THE, m->GetCleanName(), "left");
+	else if (RelativeHeading > 288)
+		Message_StringID(MT_Skills, TRACK_BEHIND_AND_TO, m->GetCleanName(), "left");
+	else if (RelativeHeading > 224)
+		Message_StringID(MT_Skills, TRACK_BEHIND_YOU, m->GetCleanName());
+	else if (RelativeHeading > 160)
+		Message_StringID(MT_Skills, TRACK_BEHIND_AND_TO, m->GetCleanName(), "right");
+	else if (RelativeHeading > 96)
+		Message_StringID(MT_Skills, TRACK_TO_THE, m->GetCleanName(), "right");
+	else if (RelativeHeading > 32)
+		Message_StringID(MT_Skills, TRACK_AHEAD_AND_TO, m->GetCleanName(), "right");
+	else if (RelativeHeading >= 0)
+		Message_StringID(MT_Skills, TRACK_STRAIGHT_AHEAD, m->GetCleanName());
 }
 
 void Client::HandleRespawnFromHover(uint32 Option)

@@ -17,7 +17,6 @@ character_bind
 character_corpses
 character_corpse_items
 character_languages
-character_lookup
 character_skills
 character_spells
 character_memmed_spells

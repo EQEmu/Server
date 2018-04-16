@@ -37,6 +37,7 @@ int Mob::GetBaseSkillDamage(EQEmu::skills::SkillType skill, Mob *target)
 	case EQEmu::skills::SkillDragonPunch:
 	case EQEmu::skills::SkillEagleStrike:
 	case EQEmu::skills::SkillTigerClaw:
+	case EQEmu::skills::SkillRoundKick:
 		if (skill_level >= 25)
 			base++;
 		if (skill_level >= 75)
@@ -1442,7 +1443,7 @@ void Mob::SendItemAnimation(Mob *to, const EQEmu::ItemData *item, EQEmu::skills:
 
 	//these angle and tilt used together seem to make the arrow/knife throw as straight as I can make it
 
-	as->launch_angle = CalculateHeadingToTarget(to->GetX(), to->GetY()) * 2;
+	as->launch_angle = CalculateHeadingToTarget(to->GetX(), to->GetY());
 	as->tilt = 125;
 	as->arc = 50;
 

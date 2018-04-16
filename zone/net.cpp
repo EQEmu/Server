@@ -542,7 +542,7 @@ int main(int argc, char** argv) {
 			process_timer.Stop();
 			process_timer.Start(1000, true);
 
-			if (zone) {
+			if (zone && zone->GetZoneID() && zone->GetInstanceVersion()) {
 				uint32 shutdown_timer = database.getZoneShutDownDelay(zone->GetZoneID(), zone->GetInstanceVersion());
 				zone->StartShutdownTimer(shutdown_timer);
 			}

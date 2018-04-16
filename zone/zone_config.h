@@ -49,7 +49,7 @@ class ZoneConfig : public EQEmuConfig {
 		_zone_config=new ZoneConfig;
 		_config=_zone_config;
 
-		return _config->ParseFile(EQEmuConfig::ConfigFile.c_str(),"server");
+		return _config->parseFile();
 	}
 
 	// Accessors for the static private object

@@ -1154,7 +1154,7 @@ void Merc::CalcRestState() {
 	// The bot must have been out of combat for RuleI(Character, RestRegenTimeToActivate) seconds,
 	// must be sitting down, and must not have any detrimental spells affecting them.
 	//
-	if(!RuleI(Character, RestRegenPercent))
+	if(!RuleB(Character, RestRegenEnabled))
 		return;
 
 	RestRegenHP = RestRegenMana = RestRegenEndurance = 0;
@@ -1174,12 +1174,11 @@ void Merc::CalcRestState() {
 		}
 	}
 
-	RestRegenHP = (GetMaxHP() * RuleI(Character, RestRegenPercent) / 100);
+	RestRegenHP = 6 * (GetMaxHP() / RuleI(Character, RestRegenHP));
 
-	RestRegenMana = (GetMaxMana() * RuleI(Character, RestRegenPercent) / 100);
+	RestRegenMana = 6 * (GetMaxMana() / RuleI(Character, RestRegenMana));
 
-	if(RuleB(Character, RestRegenEndurance))
-		RestRegenEndurance = (GetMaxEndurance() * RuleI(Character, RestRegenPercent) / 100);
+	RestRegenEndurance = 6 * (GetMaxEndurance() / RuleI(Character, RestRegenEnd));
 }
 
 bool Merc::HasSkill(EQEmu::skills::SkillType skill_id) const {

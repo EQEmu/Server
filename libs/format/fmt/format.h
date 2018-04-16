@@ -1886,6 +1886,8 @@ FMT_DEFINE_INT_FORMATTERS(unsigned long)
 FMT_DEFINE_INT_FORMATTERS(LongLong)
 FMT_DEFINE_INT_FORMATTERS(ULongLong)
 
+#define CHAR_WIDTH 1
+
 /**
   \rst
   Returns a string formatter that pads the formatted argument with the fill

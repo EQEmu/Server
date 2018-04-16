@@ -2804,8 +2804,7 @@ void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, int SequenceN
 			if (strlen(Tasks[TaskID]->Reward) != 0)
 				linker.SetProxyText(Tasks[TaskID]->Reward);
 
-			auto reward_link = linker.GenerateLink();
-			reward_text.append(reward_link);
+			reward_text.append(linker.GenerateLink());
 		}
 		else {
 			reward_text.append(Tasks[TaskID]->Reward);

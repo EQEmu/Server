@@ -123,8 +123,7 @@ Client::Client(EQStreamInterface* ieqs)
 	hpupdate_timer(2000),
 	camp_timer(29000),
 	process_timer(100),
-	stamina_timer(40000),
-	consume_food_timer(60000),
+	consume_food_timer(CONSUMPTION_TIMER),
 	zoneinpacket_timer(1000),
 	linkdead_timer(RuleI(Zone,ClientLinkdeadMS)),
 	dead_timer(2000),
@@ -161,7 +160,8 @@ Client::Client(EQStreamInterface* ieqs)
 	npc_close_scan_timer(6000),
 	hp_self_update_throttle_timer(300),
 	hp_other_update_throttle_timer(500),
-	position_update_timer(10000)
+	position_update_timer(10000),
+	tmSitting(0)
 {
 
 	for (int client_filter = 0; client_filter < _FilterCount; client_filter++)
@@ -215,7 +215,7 @@ Client::Client(EQStreamInterface* ieqs)
 	linkdead_timer.Disable();
 	zonesummon_id = 0;
 	zonesummon_ignorerestrictions = 0;
-	zoning = false;
+	bZoning = false;
 	zone_mode = ZoneUnsolicited;
 	casting_spell_id = 0;
 	npcflag = false;
@@ -254,7 +254,7 @@ Client::Client(EQStreamInterface* ieqs)
 	mercSlot = 0;
 	InitializeMercInfo();
 	SetMerc(0);
-
+	if (RuleI(World, PVPMinLevel) > 0 && level >= RuleI(World, PVPMinLevel) && m_pp.pvp == 0) SetPVP(true, false);
 	logging_enabled = CLIENT_DEFAULT_LOGGING_ENABLED;
 
 	//for good measure:
@@ -271,9 +271,10 @@ Client::Client(EQStreamInterface* ieqs)
 	m_ClientVersion = EQEmu::versions::ClientVersion::Unknown;
 	m_ClientVersionBit = 0;
 	AggroCount = 0;
-	RestRegenHP = 0;
-	RestRegenMana = 0;
-	RestRegenEndurance = 0;
+	ooc_regen = false;
+	AreaHPRegen = 1.0f;
+	AreaManaRegen = 1.0f;
+	AreaEndRegen = 1.0f;
 	XPRate = 100;
 	current_endurance = 0;
 
@@ -329,6 +330,14 @@ Client::Client(EQStreamInterface* ieqs)
 	SavedRaidRestTimer = 0;
 
 	interrogateinv_flag = false;
+
+	trapid = 0;
+
+	for (int i = 0; i < InnateSkillMax; ++i)
+		m_pp.InnateSkills[i] = InnateDisabled;
+
+	temp_pvp = false;
+	is_client_moving = false;
 
 	AI_Init();
 }
@@ -389,7 +398,7 @@ Client::~Client() {
 		GetTarget()->IsTargeted(-1);
 
 	//if we are in a group and we are not zoning, force leave the group
-	if(isgrouped && !zoning && is_zone_loaded)
+	if(isgrouped && !bZoning && is_zone_loaded)
 		LeaveGroup();
 
 	UpdateWho(2);
@@ -456,8 +465,8 @@ void Client::SendZoneInPackets()
 	if (!GetHideMe()) entity_list.QueueClients(this, outapp, true);
 	safe_delete(outapp);
 	SetSpawned();
-	if (GetPVP())	//force a PVP update until we fix the spawn struct
-		SendAppearancePacket(AT_PVP, GetPVP(), true, false);
+	if (GetPVP(false))	//force a PVP update until we fix the spawn struct
+		SendAppearancePacket(AT_PVP, GetPVP(false), true, false);
 
 	//Send AA Exp packet:
 	if (GetLevel() >= 51)
@@ -1217,18 +1226,18 @@ void Client::ChannelMessageSend(const char* from, const char* to, uint8 chan_num
 		EffSkill = 100;
 	cm->skill_in_language = EffSkill;
 
-	// Garble the message based on listener skill
-	if (ListenerSkill < 100) {
-		GarbleMessage(buffer, (100 - ListenerSkill));
-	}
-
 	cm->chan_num = chan_num;
 	strcpy(&cm->message[0], buffer);
 	QueuePacket(&app);
 
-	if ((chan_num == 2) && (ListenerSkill < 100)) {	// group message in unmastered language, check for skill up
-		if (m_pp.languages[language] <= lang_skill)
-			CheckLanguageSkillIncrease(language, lang_skill);
+	bool senderCanTrainSelf = RuleB(Client, SelfLanguageLearning);
+	bool weAreNotSender = strcmp(this->GetCleanName(), cm->sender);
+
+	if (senderCanTrainSelf || weAreNotSender) {
+		if ((chan_num == 2) && (ListenerSkill < 100)) {	// group message in unmastered language, check for skill up
+			if (m_pp.languages[language] <= lang_skill)
+				CheckLanguageSkillIncrease(language, lang_skill);
+		}
 	}
 }
 
@@ -1949,7 +1958,7 @@ void Client::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	ns->spawn.gm		= GetGM() ? 1 : 0;
 	ns->spawn.guildID	= GuildID();
 //	ns->spawn.linkdead	= IsLD() ? 1 : 0;
-//	ns->spawn.pvp		= GetPVP() ? 1 : 0;
+//	ns->spawn.pvp		= GetPVP(false) ? 1 : 0;
 	ns->spawn.show_name = true;
 
 
@@ -4594,7 +4603,7 @@ void Client::IncrementAggroCount() {
 	//
 	AggroCount++;
 
-	if(!RuleI(Character, RestRegenPercent))
+	if(!RuleB(Character, RestRegenEnabled))
 		return;
 
 	// If we already had aggro before this method was called, the combat indicator should already be up for SoF clients,
@@ -4631,7 +4640,7 @@ void Client::DecrementAggroCount() {
 
 	AggroCount--;
 
-	if(!RuleI(Character, RestRegenPercent))
+	if(!RuleB(Character, RestRegenEnabled))
 		return;
 
 	// Something else is still aggro on us, can't rest yet.
@@ -6718,7 +6727,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 				cap_regen_field = itoa(CalcHPRegenCap());
 				spell_regen_field = itoa(spellbonuses.HPRegen);
 				aa_regen_field = itoa(aabonuses.HPRegen);
-				total_regen_field = itoa(CalcHPRegen());
+				total_regen_field = itoa(CalcHPRegen(true));
 				break;
 			}
 			case 1: {
@@ -6731,7 +6740,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 					cap_regen_field = itoa(CalcManaRegenCap());
 					spell_regen_field = itoa(spellbonuses.ManaRegen);
 					aa_regen_field = itoa(aabonuses.ManaRegen);
-					total_regen_field = itoa(CalcManaRegen());
+					total_regen_field = itoa(CalcManaRegen(true));
 				}
 				else { continue; }
 				break;
@@ -6745,7 +6754,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 				cap_regen_field = itoa(CalcEnduranceRegenCap());
 				spell_regen_field = itoa(spellbonuses.EnduranceRegen);
 				aa_regen_field = itoa(aabonuses.EnduranceRegen);
-				total_regen_field = itoa(CalcEnduranceRegen());
+				total_regen_field = itoa(CalcEnduranceRegen(true));
 				break;
 			}
 			default: { break; }
@@ -7899,7 +7908,7 @@ void Client::GarbleMessage(char *message, uint8 variance)
 	for (size_t i = 0; i < strlen(message); i++) {
 		// Client expects hex values inside of a text link body
 		if (message[i] == delimiter) {
-			if (!(delimiter_count & 1)) { i += EQEmu::legacy::TEXT_LINK_BODY_LENGTH; }
+			if (!(delimiter_count & 1)) { i += EQEmu::constants::SayLinkBodySize; }
 			++delimiter_count;
 			continue;
 		}
@@ -8591,64 +8600,52 @@ void Client::SetConsumption(int32 in_hunger, int32 in_thirst)
 
 void Client::Consume(const EQEmu::ItemData *item, uint8 type, int16 slot, bool auto_consume)
 {
-	if(!item) { return; }
+	if (!item)
+		return;
 
-	/*
-		Spell Bonuses 2 digit form - 10, 20, 25 etc. (10%, 20%, 25%)
-		AA Bonus Ranks, 110, 125, 150 etc. (10%, 25%, 50%)
-	*/
+	int increase = item->CastTime_ * 100;
+	if (!auto_consume) // force feeding is half as effective
+		increase /= 2;
 
-	float aa_bonus = ((float) aabonuses.Metabolism - 100) / 100;
-	float item_bonus = (float) itembonuses.Metabolism / 100;
-	float spell_bonus = (float) spellbonuses.Metabolism / 100;
-
-	float metabolism_mod = 1 + spell_bonus + item_bonus + aa_bonus;
-
-	Log(Logs::General, Logs::Food, "Client::Consume() Metabolism bonuses spell_bonus: (%.2f) item_bonus: (%.2f) aa_bonus: (%.2f) final: (%.2f)",
-		spell_bonus,
-		item_bonus,
-		aa_bonus,
-		metabolism_mod
-	);
+	if (increase < 0) // wasn't food? oh well
+		return;
 
 	if (type == EQEmu::item::ItemTypeFood) {
-	   int hunger_change = item->CastTime_ * metabolism_mod;
-	   hunger_change = mod_food_value(item, hunger_change);
+		increase = mod_food_value(item, increase);
 
-	   if(hunger_change < 0)
-		   return; 
+		if (increase < 0)
+			return;
 
-	   m_pp.hunger_level += hunger_change;
+		m_pp.hunger_level += increase;
 
-	   Log(Logs::General, Logs::Food, "Consuming food, points added to hunger_level: %i - current_hunger: %i", hunger_change, m_pp.hunger_level);
-
-	   DeleteItemInInventory(slot, 1, false);
-
-	   if(!auto_consume) //no message if the client consumed for us
-		   entity_list.MessageClose_StringID(this, true, 50, 0, EATING_MESSAGE, GetName(), item->Name);
-
-       Log(Logs::General, Logs::Food, "Eating from slot: %i", (int)slot);
-
-   }
-   else {
-	   int thirst_change = item->CastTime_ * metabolism_mod;
-	   thirst_change = mod_drink_value(item, thirst_change);
-
-	   if(thirst_change < 0)
-		   return;
-
-		m_pp.thirst_level += thirst_change;
+		Log(Logs::General, Logs::Food, "Consuming food, points added to hunger_level: %i - current_hunger: %i",
+		    increase, m_pp.hunger_level);
 
 		DeleteItemInInventory(slot, 1, false);
 
-		Log(Logs::General, Logs::Food, "Consuming drink, points added to thirst_level: %i current_thirst: %i", thirst_change, m_pp.thirst_level);
+		if (!auto_consume) // no message if the client consumed for us
+			entity_list.MessageClose_StringID(this, true, 50, 0, EATING_MESSAGE, GetName(), item->Name);
 
-		if(!auto_consume) //no message if the client consumed for us
+		Log(Logs::General, Logs::Food, "Eating from slot: %i", (int)slot);
+
+	} else {
+		increase = mod_drink_value(item, increase);
+
+		if (increase < 0)
+			return;
+
+		m_pp.thirst_level += increase;
+
+		DeleteItemInInventory(slot, 1, false);
+
+		Log(Logs::General, Logs::Food, "Consuming drink, points added to thirst_level: %i current_thirst: %i",
+		    increase, m_pp.thirst_level);
+
+		if (!auto_consume) // no message if the client consumed for us
 			entity_list.MessageClose_StringID(this, true, 50, 0, DRINKING_MESSAGE, GetName(), item->Name);
 
-        Log(Logs::General, Logs::Food, "Drinking from slot: %i", (int)slot);
-
-   }
+		Log(Logs::General, Logs::Food, "Drinking from slot: %i", (int)slot);
+	}
 }
 
 void Client::SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string msg)
@@ -8895,9 +8892,9 @@ void Client::CheckRegionTypeChanges()
 		return;
 
 	if (last_region_type == RegionTypePVP)
-		SetPVP(true, false);
-	else if (GetPVP())
-		SetPVP(false, false);
+		temp_pvp = true;
+	else if (temp_pvp)
+		temp_pvp = false;
 }
 
 void Client::ProcessAggroMeter()
@@ -9072,5 +9069,195 @@ void Client::SetPetCommandState(int button, int state)
 	pcs->button_id = button;
 	pcs->state = state;
 	FastQueuePacket(&app);
+}
+
+bool Client::CanMedOnHorse()
+{
+	// no horse is false
+	if (GetHorseId() == 0)
+		return false;
+
+	// can't med while attacking
+	if (auto_attack)
+		return false;
+
+	return animation == 0 && m_Delta.x == 0.0f && m_Delta.y == 0.0f; // TODO: animation is SpeedRun
+}
+
+void Client::EnableAreaHPRegen(int value)
+{
+	AreaHPRegen = value * 0.001f;
+	SendAppearancePacket(AT_AreaHPRegen, value, false);
+}
+
+void Client::DisableAreaHPRegen()
+{
+	AreaHPRegen = 1.0f;
+	SendAppearancePacket(AT_AreaHPRegen, 1000, false);
+}
+
+void Client::EnableAreaManaRegen(int value)
+{
+	AreaManaRegen = value * 0.001f;
+	SendAppearancePacket(AT_AreaManaRegen, value, false);
+}
+
+void Client::DisableAreaManaRegen()
+{
+	AreaManaRegen = 1.0f;
+	SendAppearancePacket(AT_AreaManaRegen, 1000, false);
+}
+
+void Client::EnableAreaEndRegen(int value)
+{
+	AreaEndRegen = value * 0.001f;
+	SendAppearancePacket(AT_AreaEndRegen, value, false);
+}
+
+void Client::DisableAreaEndRegen()
+{
+	AreaEndRegen = 1.0f;
+	SendAppearancePacket(AT_AreaEndRegen, 1000, false);
+}
+
+void Client::EnableAreaRegens(int value)
+{
+	EnableAreaHPRegen(value);
+	EnableAreaManaRegen(value);
+	EnableAreaEndRegen(value);
+}
+
+void Client::DisableAreaRegens()
+{
+	DisableAreaHPRegen();
+	DisableAreaManaRegen();
+	DisableAreaEndRegen();
+}
+
+void Client::InitInnates()
+{
+	// this function on the client also inits the level one innate skills (like swimming, hide, etc)
+	// we won't do that here, lets just do the InnateSkills for now. Basically translation of what the client is doing
+	// A lot of these we could probably have ignored because they have no known use or are 100% client side
+	// but I figured just in case we'll do them all out
+	//
+	// The client calls this in a few places. When you remove a vision buff and in SetHeights, which is called in
+	// illusions, mounts, and a bunch of other cases. All of the calls to InitInnates are wrapped in restoring regen
+	// besides the call initializing the first time
+	auto race = GetRace();
+	auto class_ = GetClass();
+
+	for (int i = 0; i < InnateSkillMax; ++i)
+		m_pp.InnateSkills[i] = InnateDisabled;
+
+	m_pp.InnateSkills[InnateInspect] = InnateEnabled;
+	m_pp.InnateSkills[InnateOpen] = InnateEnabled;
+	if (race >= RT_FROGLOK_3) {
+		if (race == RT_SKELETON_2 || race == RT_FROGLOK_3)
+			m_pp.InnateSkills[InnateUltraVision] = InnateEnabled;
+		else
+			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
+	}
+	switch (race) {
+	case RT_BARBARIAN:
+	case RT_BARBARIAN_2:
+		m_pp.InnateSkills[InnateSlam] = InnateEnabled;
+		break;
+	case RT_ERUDITE:
+	case RT_ERUDITE_2:
+		m_pp.InnateSkills[InnateLore] = InnateEnabled;
+		break;
+	case RT_WOOD_ELF:
+	case RT_GUARD_3:
+		m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
+		break;
+	case RT_HIGH_ELF:
+	case RT_GUARD_2:
+		m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
+		m_pp.InnateSkills[InnateLore] = InnateEnabled;
+		break;
+	case RT_DARK_ELF:
+	case RT_DARK_ELF_2:
+	case RT_VAMPIRE_2:
+		m_pp.InnateSkills[InnateUltraVision] = InnateEnabled;
+		break;
+	case RT_TROLL:
+	case RT_TROLL_2:
+		m_pp.InnateSkills[InnateRegen] = InnateEnabled;
+		m_pp.InnateSkills[InnateSlam] = InnateEnabled;
+		m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
+		break;
+	case RT_DWARF:
+	case RT_DWARF_2:
+		m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
+		break;
+	case RT_OGRE:
+	case RT_OGRE_2:
+		m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
+		m_pp.InnateSkills[InnateSlam] = InnateEnabled;
+		m_pp.InnateSkills[InnateNoBash] = InnateEnabled;
+		m_pp.InnateSkills[InnateBashDoor] = InnateEnabled;
+		break;
+	case RT_HALFLING:
+	case RT_HALFLING_2:
+		m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
+		break;
+	case RT_GNOME:
+		m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
+		m_pp.InnateSkills[InnateLore] = InnateEnabled;
+		break;
+	case RT_IKSAR:
+		m_pp.InnateSkills[InnateRegen] = InnateEnabled;
+		m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
+		break;
+	case RT_VAH_SHIR:
+		m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
+		break;
+	case RT_FROGLOK_2:
+	case RT_GHOST:
+	case RT_GHOUL:
+	case RT_SKELETON:
+	case RT_VAMPIRE:
+	case RT_WILL_O_WISP:
+	case RT_ZOMBIE:
+	case RT_SPECTRE:
+	case RT_GHOST_2:
+	case RT_GHOST_3:
+	case RT_DRAGON_2:
+	case RT_INNORUUK:
+		m_pp.InnateSkills[InnateUltraVision] = InnateEnabled;
+		break;
+	case RT_HUMAN:
+	case RT_GUARD:
+	case RT_BEGGAR:
+	case RT_HUMAN_2:
+	case RT_HUMAN_3:
+	case RT_FROGLOK_3: // client does froglok weird, but this should work out fine
+		break;
+	default:
+		m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
+		break;
+	}
+
+	switch (class_) {
+	case DRUID:
+		m_pp.InnateSkills[InnateHarmony] = InnateEnabled;
+		break;
+	case BARD:
+		m_pp.InnateSkills[InnateReveal] = InnateEnabled;
+		break;
+	case ROGUE:
+		m_pp.InnateSkills[InnateSurprise] = InnateEnabled;
+		m_pp.InnateSkills[InnateReveal] = InnateEnabled;
+		break;
+	case RANGER:
+		m_pp.InnateSkills[InnateAwareness] = InnateEnabled;
+		break;
+	case MONK:
+		m_pp.InnateSkills[InnateSurprise] = InnateEnabled;
+		m_pp.InnateSkills[InnateAwareness] = InnateEnabled;
+	default:
+		break;
+	}
 }
 

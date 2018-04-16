@@ -28,7 +28,7 @@
 namespace EQEmu
 {
 	namespace versions {
-		enum class ClientVersion {
+		enum class ClientVersion : uint32 {
 			Unknown = 0,
 			Client62,	// Build: 'Aug  4 2005 15:40:59'
 			Titanium,	// Build: 'Oct 31 2005 10:33:37'
@@ -72,7 +72,7 @@ namespace EQEmu
 		uint32 ConvertClientVersionToExpansion(ClientVersion client_version);
 
 
-		enum class MobVersion {
+		enum class MobVersion : uint32 {
 			Unknown = 0,
 			Client62,
 			Titanium,
@@ -120,6 +120,20 @@ namespace EQEmu
 		MobVersion ConvertOfflinePCMobVersionToPCMobVersion(MobVersion mob_version);
 		ClientVersion ConvertOfflinePCMobVersionToClientVersion(MobVersion mob_version);
 		MobVersion ConvertClientVersionToOfflinePCMobVersion(ClientVersion client_version);
+
+
+		enum UCSVersion : char {
+			ucsUnknown = '\0',
+			ucsClient62Chat = 'A',
+			ucsClient62Mail = 'a',
+			ucsTitaniumChat = 'B',
+			ucsTitaniumMail = 'b',
+			ucsSoFCombined = 'C',
+			ucsSoDCombined = 'D',
+			ucsUFCombined = 'E',
+			ucsRoFCombined = 'F',
+			ucsRoF2Combined = 'G'
+		};
 
 	} /*versions*/
 

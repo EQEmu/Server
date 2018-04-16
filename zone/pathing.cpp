@@ -42,7 +42,7 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 		bool partial = false;
 		bool stuck = false;
 		Route = zone->pathing->FindRoute(From, To, partial, stuck);
-		AdjustRoute(Route, flymode, GetModelOffset());
+		AdjustRoute(Route, flymode, GetZOffset());
 
 		PathingDestination = To;
 		WaypointChanged = true;
@@ -66,7 +66,7 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 				bool partial = false;
 				bool stuck = false;
 				Route = zone->pathing->FindRoute(From, To, partial, stuck);
-				AdjustRoute(Route, flymode, GetModelOffset());
+				AdjustRoute(Route, flymode, GetZOffset());
 
 				PathingDestination = To;
 				WaypointChanged = true;
@@ -133,7 +133,7 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 				bool partial = false;
 				bool stuck = false;
 				Route = zone->pathing->FindRoute(From, To, partial, stuck);
-				AdjustRoute(Route, flymode, GetModelOffset());
+				AdjustRoute(Route, flymode, GetZOffset());
 				PathingDestination = To;
 				WaypointChanged = true;
 
@@ -192,7 +192,7 @@ glm::vec3 Mob::HandleStuckPath(const glm::vec3 &To, const glm::vec3 &From)
 
 	auto final_node = r.back();
 	Route.push_back(final_node);
-	AdjustRoute(Route, flymode, GetModelOffset());
+	AdjustRoute(Route, flymode, GetZOffset());
 	return (*Route.begin()).pos;
 }
 

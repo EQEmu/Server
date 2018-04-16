@@ -611,6 +611,10 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 		return false;
 	}
 
+	// the client does this check before calling CastSpell, should prevent discs being eaten
+	if (spell.buffdurationformula != 0 && spell.targettype == ST_Self && HasDiscBuff())
+		return false;
+
 	//Check the disc timer
 	pTimerType DiscTimer = pTimerDisciplineReuseStart + spell.EndurTimerIndex;
 	if(!p_timers.Expired(&database, DiscTimer, false)) { // lets not set the reuse timer in case CastSpell fails (or we would have to turn off the timer, but CastSpell will set it as well)

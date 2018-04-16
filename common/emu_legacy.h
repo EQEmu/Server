@@ -78,6 +78,8 @@ namespace EQEmu
 			SLOT_CURSOR_BAG_END = 340,
 			SLOT_TRIBUTE_BEGIN = 400,
 			SLOT_TRIBUTE_END = 404,
+			SLOT_GUILD_TRIBUTE_BEGIN = 450,
+			SLOT_GUILD_TRIBUTE_END = 451,
 			SLOT_BANK_BEGIN = 2000,
 			SLOT_BANK_END = 2023,
 			SLOT_BANK_BAGS_BEGIN = 2031,
@@ -173,8 +175,6 @@ namespace EQEmu
 
 		// POTION_BELT_SIZE sets maximum limit..active limit will need to be handled by the appropriate AA or spell (or item?)
 		static const size_t POTION_BELT_ITEM_COUNT = 5;
-
-		static const size_t TEXT_LINK_BODY_LENGTH = 56;
 	}
 
 }

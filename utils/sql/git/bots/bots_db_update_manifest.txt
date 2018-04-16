@@ -16,6 +16,7 @@
 9015|2017_02_26_bots_spell_casting_chances_update.sql|SHOW COLUMNS FROM `bot_spell_casting_chances` LIKE 'value'|not_empty|
 9016|2017_02_26_bots_spell_casting_chances_update.sql|SHOW TABLES LIKE 'bot_spell_casting_chances'|empty|
 9017|2017_03_26_bots_spells_id_fix_for_saved_shadowknight_bots.sql|SELECT * FROM `bot_data` WHERE `class` = '5' AND `spells_id` = '3004'|not_empty|
+9018|2018_02_02_Bot_Spells_Min_Max_HP.sql|SHOW COLUMNS FROM `bot_spells_entries` LIKE 'min_hp'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

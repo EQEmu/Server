@@ -74,6 +74,8 @@ public:
 	void GMMove(double x, double y, double z);
 	void GMMove(double x, double y, double z, double heading);
 	void GMMove(double x, double y, double z, double heading, bool send_update);
+	void TryMoveAlong(float distance, float heading);
+	void TryMoveAlong(float distance, float heading, bool send);
 	bool HasProcs();
 	bool IsInvisible();
 	bool IsInvisible(Lua_Mob other);
@@ -302,6 +304,20 @@ public:
 	void SetRace(int in);
 	void SetGender(int in);
 	void SendIllusionPacket(luabind::adl::object illusion);
+	void ChangeRace(int in);
+	void ChangeGender(int in);
+	void ChangeTexture(int in);
+	void ChangeHelmTexture(int in);
+	void ChangeHairColor(int in);
+	void ChangeBeardColor(int in);
+	void ChangeEyeColor1(int in);
+	void ChangeEyeColor2(int in);
+	void ChangeHairStyle(int in);
+	void ChangeLuclinFace(int in);
+	void ChangeBeard(int in);
+	void ChangeDrakkinHeritage(int in);
+	void ChangeDrakkinTattoo(int in);
+	void ChangeDrakkinDetails(int in);
 	void CameraEffect(uint32 duration, uint32 intensity);
 	void CameraEffect(uint32 duration, uint32 intensity, Lua_Client c);
 	void CameraEffect(uint32 duration, uint32 intensity, Lua_Client c, bool global);
@@ -321,6 +337,7 @@ public:
 	void SetSlotTint(int material_slot, int red_tint, int green_tint, int blue_tint);
 	void WearChange(int material_slot, int texture, uint32 color);
 	void DoKnockback(Lua_Mob caster, uint32 pushback, uint32 pushup);
+	void AddNimbusEffect(int effect_id);
 	void RemoveNimbusEffect(int effect_id);
 	bool IsRunning();
 	void SetRunning(bool running);

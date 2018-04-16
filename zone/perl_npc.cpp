@@ -1993,7 +1993,7 @@ XS(XS_NPC_AddSpellToNPCList)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->AddSpellToNPCList(priority, spell_id, type, mana_cost, recast_delay, resist_adjust);
+		THIS->AddSpellToNPCList(priority, spell_id, type, mana_cost, recast_delay, resist_adjust, 0, 0);
 	}
 	XSRETURN_EMPTY;
 }
@@ -2300,54 +2300,6 @@ XS(XS_NPC_GetScore)
 
 		RETVAL = THIS->GetScore();
 		XSprePUSH; PUSHi((UV)RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_NPC_SetMerchantProbability);
-XS(XS_NPC_SetMerchantProbability) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: NPC::SetMerchantProbability(THIS, Probability)");
-	{
-		NPC 	*THIS;
-		uint8	Probability = (uint8)SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(NPC *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		THIS->SetMerchantProbability(Probability);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_NPC_GetMerchantProbability);
-XS(XS_NPC_GetMerchantProbability) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::GetMerchantProbability(THIS)");
-	{
-		NPC 	*THIS;
-		uint8	RETVAL;
-		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(NPC *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
-
-		RETVAL = THIS->GetMerchantProbability();
-		XSprePUSH; PUSHu((UV)RETVAL);
 	}
 	XSRETURN(1);
 }
@@ -2677,8 +2629,6 @@ XS(boot_NPC)
 		newXSproto(strcpy(buf, "GetAvoidanceRating"), XS_NPC_GetAvoidanceRating, file, "$");
 		newXSproto(strcpy(buf, "GetSpawnKillCount"), XS_NPC_GetSpawnKillCount, file, "$");
 		newXSproto(strcpy(buf, "GetScore"), XS_NPC_GetScore, file, "$");
-		newXSproto(strcpy(buf, "SetMerchantProbability"), XS_NPC_SetMerchantProbability, file, "$$");
-		newXSproto(strcpy(buf, "GetMerchantProbability"), XS_NPC_GetMerchantProbability, file, "$");
 		newXSproto(strcpy(buf, "AddMeleeProc"), XS_NPC_AddMeleeProc, file, "$$$");
 		newXSproto(strcpy(buf, "AddRangedProc"), XS_NPC_AddRangedProc, file, "$$$");
 		newXSproto(strcpy(buf, "AddDefensiveProc"), XS_NPC_AddDefensiveProc, file, "$$$");

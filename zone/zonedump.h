@@ -89,6 +89,13 @@ struct NPCType
 	EQEmu::TintProfile	armor_tint;
 	uint32	min_dmg;
 	uint32	max_dmg;
+	uint32	charm_ac;
+	uint32	charm_min_dmg;
+	uint32	charm_max_dmg;
+	int		charm_attack_delay;
+	int		charm_accuracy_rating;
+	int		charm_avoidance_rating;
+	int		charm_atk;
 	int16	attack_count;
 	char	special_abilities[512];
 	uint16	d_melee_texture1;
@@ -126,7 +133,6 @@ struct NPCType
 	float	healscale;
 	bool	no_target_hotkey;
 	bool	raid_target;
-	uint8 	probability;
 	uint8	armtexture;
 	uint8	bracertexture;
 	uint8	handtexture;
@@ -135,6 +141,8 @@ struct NPCType
 	bool	ignore_despawn;
 	bool	show_name; // should default on
 	bool	untargetable;
+	bool	skip_global_loot;
+	bool	rare_spawn;
 };
 
 namespace player_lootitem {

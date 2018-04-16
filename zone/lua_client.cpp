@@ -1440,6 +1440,54 @@ void Lua_Client::FilteredMessage(Mob *sender, uint32 type, int filter, const cha
 	self->FilteredMessage(sender, type, (eqFilterType)filter, message);
 }
 
+void Lua_Client::EnableAreaHPRegen(int value)
+{
+	Lua_Safe_Call_Void();
+	self->EnableAreaHPRegen(value);
+}
+
+void Lua_Client::DisableAreaHPRegen()
+{
+	Lua_Safe_Call_Void();
+	self->DisableAreaHPRegen();
+}
+
+void Lua_Client::EnableAreaManaRegen(int value)
+{
+	Lua_Safe_Call_Void();
+	self->EnableAreaManaRegen(value);
+}
+
+void Lua_Client::DisableAreaManaRegen()
+{
+	Lua_Safe_Call_Void();
+	self->DisableAreaManaRegen();
+}
+
+void Lua_Client::EnableAreaEndRegen(int value)
+{
+	Lua_Safe_Call_Void();
+	self->EnableAreaEndRegen(value);
+}
+
+void Lua_Client::DisableAreaEndRegen()
+{
+	Lua_Safe_Call_Void();
+	self->DisableAreaEndRegen();
+}
+
+void Lua_Client::EnableAreaRegens(int value)
+{
+	Lua_Safe_Call_Void();
+	self->EnableAreaRegens(value);
+}
+
+void Lua_Client::DisableAreaRegens()
+{
+	Lua_Safe_Call_Void();
+	self->DisableAreaRegens();
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 		.def(luabind::constructor<>())
@@ -1712,7 +1760,15 @@ luabind::scope lua_register_client() {
 		.def("IsDead", &Lua_Client::IsDead)
 		.def("CalcCurrentWeight", &Lua_Client::CalcCurrentWeight)
 		.def("CalcATK", &Lua_Client::CalcATK)
-		.def("FilteredMessage", &Lua_Client::FilteredMessage);
+		.def("FilteredMessage", &Lua_Client::FilteredMessage)
+		.def("EnableAreaHPRegen", &Lua_Client::EnableAreaHPRegen)
+		.def("DisableAreaHPRegen", &Lua_Client::DisableAreaHPRegen)
+		.def("EnableAreaManaRegen", &Lua_Client::EnableAreaManaRegen)
+		.def("DisableAreaManaRegen", &Lua_Client::DisableAreaManaRegen)
+		.def("EnableAreaEndRegen", &Lua_Client::EnableAreaEndRegen)
+		.def("DisableAreaEndRegen", &Lua_Client::DisableAreaEndRegen)
+		.def("EnableAreaRegens", &Lua_Client::EnableAreaRegens)
+		.def("DisableAreaRegens", &Lua_Client::DisableAreaRegens);
 }
 
 luabind::scope lua_register_inventory_where() {

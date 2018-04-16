@@ -34,28 +34,15 @@ ZoneDatabase::ZoneDatabase(const char* host, const char* user, const char* passw
 
 void ZoneDatabase::ZDBInitVars() {
 	memset(door_isopen_array, 0, sizeof(door_isopen_array));
-	npc_spells_maxid = 0;
-	npc_spellseffects_maxid = 0;
-	npc_spells_cache = 0;
 	npc_spellseffects_cache = 0;
-	npc_spells_loadtried = 0;
 	npc_spellseffects_loadtried = 0;
 	max_faction = 0;
 	faction_array = nullptr;
 }
 
 ZoneDatabase::~ZoneDatabase() {
-	unsigned int x;
-	if (npc_spells_cache) {
-		for (x = 0; x <= npc_spells_maxid; x++) {
-			safe_delete_array(npc_spells_cache[x]);
-		}
-		safe_delete_array(npc_spells_cache);
-	}
-	safe_delete_array(npc_spells_loadtried);
-
 	if (npc_spellseffects_cache) {
-		for (x = 0; x <= npc_spellseffects_maxid; x++) {
+		for (int x = 0; x <= npc_spellseffects_maxid; x++) {
 			safe_delete_array(npc_spellseffects_cache[x]);
 		}
 		safe_delete_array(npc_spellseffects_cache);
@@ -63,7 +50,7 @@ ZoneDatabase::~ZoneDatabase() {
 	safe_delete_array(npc_spellseffects_loadtried);
 
 	if (faction_array != nullptr) {
-		for (x = 0; x <= max_faction; x++) {
+		for (int x = 0; x <= max_faction; x++) {
 			if (faction_array[x] != 0)
 				safe_delete(faction_array[x]);
 		}
@@ -338,61 +325,259 @@ bool ZoneDatabase::logevents(const char* accountname,uint32 accountid,uint8 stat
 	return true;
 }
 
+void ZoneDatabase::RegisterBug(BugReport_Struct* bug_report) {
+	if (!bug_report)
+		return;
 
-void ZoneDatabase::UpdateBug(BugStruct* bug) {
-
-	uint32 len = strlen(bug->bug);
-	char* bugtext = nullptr;
-	if(len > 0)
-	{
-		bugtext = new char[2*len+1];
-		memset(bugtext, 0, 2*len+1);
-		DoEscapeString(bugtext, bug->bug, len);
+	size_t len = 0;
+	char* name_ = nullptr;
+	char* ui_ = nullptr;
+	char* type_ = nullptr;
+	char* target_ = nullptr;
+	char* bug_ = nullptr;
+	
+	len = strlen(bug_report->reporter_name);
+	if (len) {
+		if (len > 63) // check against db column size
+			len = 63;
+		name_ = new char[(2 * len + 1)];
+		memset(name_, 0, (2 * len + 1));
+		DoEscapeString(name_, bug_report->reporter_name, len);
 	}
 
-	len = strlen(bug->ui);
-	char* uitext = nullptr;
-	if(len > 0)
-	{
-		uitext = new char[2*len+1];
-		memset(uitext, 0, 2*len+1);
-		DoEscapeString(uitext, bug->ui, len);
+	len = strlen(bug_report->ui_path);
+	if (len) {
+		if (len > 127)
+			len = 127;
+		ui_ = new char[(2 * len + 1)];
+		memset(ui_, 0, (2 * len + 1));
+		DoEscapeString(ui_, bug_report->ui_path, len);
 	}
 
-	len = strlen(bug->target_name);
-	char* targettext = nullptr;
-	if(len > 0)
-	{
-		targettext = new char[2*len+1];
-		memset(targettext, 0, 2*len+1);
-		DoEscapeString(targettext, bug->target_name, len);
+	len = strlen(bug_report->category_name);
+	if (len) {
+		if (len > 63)
+			len = 63;
+		type_ = new char[(2 * len + 1)];
+		memset(type_, 0, (2 * len + 1));
+		DoEscapeString(type_, bug_report->category_name, len);
 	}
 
-	//x and y are intentionally swapped because eq is inversexy coords
-	std::string query = StringFormat("INSERT INTO bugs (zone, name, ui, x, y, z, type, flag, target, bug, date) "
+	len = strlen(bug_report->target_name);
+	if (len) {
+		if (len > 63)
+			len = 63;
+		target_ = new char[(2 * len + 1)];
+		memset(target_, 0, (2 * len + 1));
+		DoEscapeString(target_, bug_report->target_name, len);
+	}
+
+	len = strlen(bug_report->bug_report);
+	if (len) {
+		if (len > 1023)
+			len = 1023;
+		bug_ = new char[(2 * len + 1)];
+		memset(bug_, 0, (2 * len + 1));
+		DoEscapeString(bug_, bug_report->bug_report, len);
+	}
+
+	//x and y are intentionally swapped because eq is inversexy coords //is this msg out-of-date or are the parameters wrong?
+	std::string query = StringFormat(
+		"INSERT INTO `bugs` (`zone`, `name`, `ui`, `x`, `y`, `z`, `type`, `flag`, `target`, `bug`, `date`) "
 		"VALUES('%s', '%s', '%s', '%.2f', '%.2f', '%.2f', '%s', %d, '%s', '%s', CURDATE())",
-		zone->GetShortName(), bug->name, uitext == nullptr ? "": uitext,
-		bug->x, bug->y, bug->z, bug->chartype, bug->type, targettext == nullptr? "Unknown Target": targettext,
-		bugtext==nullptr?"":bugtext);
-    safe_delete_array(bugtext);
-	safe_delete_array(uitext);
-	safe_delete_array(targettext);
+		zone->GetShortName(),
+		(name_ ? name_ : ""),
+		(ui_ ? ui_ : ""),
+		bug_report->pos_x,
+		bug_report->pos_y,
+		bug_report->pos_z,
+		(type_ ? type_ : ""),
+		bug_report->optional_info_mask,
+		(target_ ? target_ : "Unknown Target"),
+		(bug_ ? bug_ : "")
+	);
+	safe_delete_array(name_);
+	safe_delete_array(ui_);
+	safe_delete_array(type_);
+	safe_delete_array(target_);
+	safe_delete_array(bug_);
+	
 	QueryDatabase(query);
 }
 
-void ZoneDatabase::UpdateBug(PetitionBug_Struct* bug){
+void ZoneDatabase::RegisterBug(Client* client, BugReport_Struct* bug_report) {
+	if (!client || !bug_report)
+		return;
 
-	uint32 len = strlen(bug->text);
-	auto bugtext = new char[2 * len + 1];
-	memset(bugtext, 0, 2*len+1);
-	DoEscapeString(bugtext, bug->text, len);
+	size_t len = 0;
+	char* category_name_ = nullptr;
+	char* reporter_name_ = nullptr;
+	char* ui_path_ = nullptr;
+	char* target_name_ = nullptr;
+	char* bug_report_ = nullptr;
+	char* system_info_ = nullptr;
 
-	std::string query = StringFormat("INSERT INTO bugs (type, name, bugtext, flag) "
-                                    "VALUES('%s', '%s', '%s', %i)",
-                                    "Petition", bug->name, bugtext, 25);
-    safe_delete_array(bugtext);
-    QueryDatabase(query);
+	len = strlen(bug_report->category_name);
+	if (len) {
+		if (len > 63) // check against db column size
+			len = 63;
+		category_name_ = new char[(2 * len + 1)];
+		memset(category_name_, 0, (2 * len + 1));
+		DoEscapeString(category_name_, bug_report->category_name, len);
+	}
+
+	len = strlen(bug_report->reporter_name);
+	if (len) {
+		if (len > 63)
+			len = 63;
+		reporter_name_ = new char[(2 * len + 1)];
+		memset(reporter_name_, 0, (2 * len + 1));
+		DoEscapeString(reporter_name_, bug_report->reporter_name, len);
+	}
+
+	len = strlen(bug_report->ui_path);
+	if (len) {
+		if (len > 127)
+			len = 127;
+		ui_path_ = new char[(2 * len + 1)];
+		memset(ui_path_, 0, (2 * len + 1));
+		DoEscapeString(ui_path_, bug_report->ui_path, len);
+	}
+
+	len = strlen(bug_report->target_name);
+	if (len) {
+		if (len > 63)
+			len = 63;
+		target_name_ = new char[(2 * len + 1)];
+		memset(target_name_, 0, (2 * len + 1));
+		DoEscapeString(target_name_, bug_report->target_name, len);
+	}
+
+	len = strlen(bug_report->bug_report);
+	if (len) {
+		if (len > 1023)
+			len = 1023;
+		bug_report_ = new char[(2 * len + 1)];
+		memset(bug_report_, 0, (2 * len + 1));
+		DoEscapeString(bug_report_, bug_report->bug_report, len);
+	}
+
+	len = strlen(bug_report->system_info);
+	if (len) {
+		if (len > 1023)
+			len = 1023;
+		system_info_ = new char[(2 * len + 1)];
+		memset(system_info_, 0, (2 * len + 1));
+		DoEscapeString(system_info_, bug_report->system_info, len);
+	}
+
+	std::string query = StringFormat(
+		"INSERT INTO `bug_reports` "
+		"(`zone`,"
+		" `client_version_id`,"
+		" `client_version_name`,"
+		" `account_id`,"
+		" `character_id`,"
+		" `character_name`,"
+		" `reporter_spoof`,"
+		" `category_id`,"
+		" `category_name`,"
+		" `reporter_name`,"
+		" `ui_path`,"
+		" `pos_x`,"
+		" `pos_y`,"
+		" `pos_z`,"
+		" `heading`,"
+		" `time_played`,"
+		" `target_id`,"
+		" `target_name`,"
+		" `optional_info_mask`,"
+		" `_can_duplicate`,"
+		" `_crash_bug`,"
+		" `_target_info`,"
+		" `_character_flags`,"
+		" `_unknown_value`,"
+		" `bug_report`,"
+		" `system_info`) "
+		"VALUES "
+		"('%s',"
+		" '%u',"
+		" '%s',"
+		" '%u',"
+		" '%u',"
+		" '%s',"
+		" '%u',"
+		" '%u',"
+		" '%s',"
+		" '%s',"
+		" '%s',"
+		" '%1.1f',"
+		" '%1.1f',"
+		" '%1.1f',"
+		" '%u',"
+		" '%u',"
+		" '%u',"
+		" '%s',"
+		" '%u',"
+		" '%u',"
+		" '%u',"
+		" '%u',"
+		" '%u',"
+		" '%u',"
+		" '%s',"
+		" '%s')",
+		zone->GetShortName(),
+		client->ClientVersion(),
+		EQEmu::versions::ClientVersionName(client->ClientVersion()),
+		client->AccountID(),
+		client->CharacterID(),
+		client->GetName(),
+		(strcmp(client->GetName(), reporter_name_) != 0 ? 1 : 0),
+		bug_report->category_id,
+		(category_name_ ? category_name_ : ""),
+		(reporter_name_ ? reporter_name_ : ""),
+		(ui_path_ ? ui_path_ : ""),
+		bug_report->pos_x,
+		bug_report->pos_y,
+		bug_report->pos_z,
+		bug_report->heading,
+		bug_report->time_played,
+		bug_report->target_id,
+		(target_name_ ? target_name_ : ""),
+		bug_report->optional_info_mask,
+		((bug_report->optional_info_mask & EQEmu::bug::infoCanDuplicate) != 0 ? 1 : 0),
+		((bug_report->optional_info_mask & EQEmu::bug::infoCrashBug) != 0 ? 1 : 0),
+		((bug_report->optional_info_mask & EQEmu::bug::infoTargetInfo) != 0 ? 1 : 0),
+		((bug_report->optional_info_mask & EQEmu::bug::infoCharacterFlags) != 0 ? 1 : 0),
+		((bug_report->optional_info_mask & EQEmu::bug::infoUnknownValue) != 0 ? 1 : 0),
+		(bug_report_ ? bug_report_ : ""),
+		(system_info_ ? system_info_ : "")
+	);
+	safe_delete_array(category_name_);
+	safe_delete_array(reporter_name_);
+	safe_delete_array(ui_path_);
+	safe_delete_array(target_name_);
+	safe_delete_array(bug_report_);
+	safe_delete_array(system_info_);
+	
+	auto result = QueryDatabase(query);
+
+	// TODO: Entity dumping [RuleB(Bugs, DumpTargetEntity)]
 }
+
+//void ZoneDatabase::UpdateBug(PetitionBug_Struct* bug) {
+//
+//	uint32 len = strlen(bug->text);
+//	auto bugtext = new char[2 * len + 1];
+//	memset(bugtext, 0, 2 * len + 1);
+//	DoEscapeString(bugtext, bug->text, len);
+//
+//	std::string query = StringFormat("INSERT INTO bugs (type, name, bugtext, flag) "
+//		"VALUES('%s', '%s', '%s', %i)",
+//		"Petition", bug->name, bugtext, 25);
+//	safe_delete_array(bugtext);
+//	QueryDatabase(query);
+//}
 
 bool ZoneDatabase::SetSpecialAttkFlag(uint8 id, const char* flag) {
 
@@ -1433,6 +1618,13 @@ bool ZoneDatabase::SaveCharacterInventorySnapshot(uint32 character_id){
 }
 
 bool ZoneDatabase::SaveCharacterData(uint32 character_id, uint32 account_id, PlayerProfile_Struct* pp, ExtendedProfile_Struct* m_epp){
+	
+	/* If this is ever zero - the client hasn't fully loaded and potentially crashed during zone */
+	if (account_id <= 0)
+		return false;
+	
+	std::string mail_key = database.GetMailKey(character_id);
+
 	clock_t t = std::clock(); /* Function timer start */
 	std::string query = StringFormat(
 		"REPLACE INTO `character_data` ("
@@ -1529,7 +1721,8 @@ bool ZoneDatabase::SaveCharacterData(uint32 character_id, uint32 account_id, Pla
 		" e_aa_effects,				 "
 		" e_percent_to_aa,			 "
 		" e_expended_aa_spent,		 "
-		" e_last_invsnapshot		 "
+		" e_last_invsnapshot,		 "
+		" mailkey					 "
 		")							 "
 		"VALUES ("
 		"%u,"  // id																" id,                        "
@@ -1625,7 +1818,8 @@ bool ZoneDatabase::SaveCharacterData(uint32 character_id, uint32 account_id, Pla
 		"%u,"  // e_aa_effects
 		"%u,"  // e_percent_to_aa
 		"%u,"  // e_expended_aa_spent
-		"%u"   // e_last_invsnapshot
+		"%u,"  // e_last_invsnapshot
+		"'%s'" // mailkey					  mail_key
 		")",
 		character_id,					  // " id,                        "
 		account_id,						  // " account_id,                "
@@ -1720,7 +1914,8 @@ bool ZoneDatabase::SaveCharacterData(uint32 character_id, uint32 account_id, Pla
 		m_epp->aa_effects,
 		m_epp->perAA,
 		m_epp->expended_aa,
-		m_epp->last_invsnapshot_time
+		m_epp->last_invsnapshot_time,
+		mail_key.c_str()
 	);
 	auto results = database.QueryDatabase(query);
 	Log(Logs::General, Logs::None, "ZoneDatabase::SaveCharacterData %i, done... Took %f seconds", character_id, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
@@ -1970,7 +2165,16 @@ const NPCType* ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		"npc_types.feettexture, "
 		"npc_types.ignore_despawn, "
 		"npc_types.show_name, "
-		"npc_types.untargetable "
+		"npc_types.untargetable, "
+		"npc_types.charm_ac, "
+		"npc_types.charm_min_dmg, "
+		"npc_types.charm_max_dmg, "
+		"npc_types.charm_attack_delay, "
+		"npc_types.charm_accuracy_rating, "
+		"npc_types.charm_avoidance_rating, "
+		"npc_types.charm_atk, "
+		"npc_types.skip_global_loot, "
+		"npc_types.rare_spawn "
 		"FROM npc_types %s",
 		where_condition.c_str()
 	);
@@ -2148,6 +2352,17 @@ const NPCType* ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		temp_npctype_data->ignore_despawn = atoi(row[97]) == 1 ? true : false;
 		temp_npctype_data->show_name = atoi(row[98]) != 0 ? true : false;
 		temp_npctype_data->untargetable = atoi(row[99]) != 0 ? true : false;
+
+		temp_npctype_data->charm_ac = atoi(row[100]);
+		temp_npctype_data->charm_min_dmg = atoi(row[101]);
+		temp_npctype_data->charm_max_dmg = atoi(row[102]);
+		temp_npctype_data->charm_attack_delay = atoi(row[103]) * 100; // TODO: fix DB
+		temp_npctype_data->charm_accuracy_rating = atoi(row[104]);
+		temp_npctype_data->charm_avoidance_rating = atoi(row[105]);
+		temp_npctype_data->charm_atk = atoi(row[106]);
+
+		temp_npctype_data->skip_global_loot = atoi(row[107]) != 0;
+		temp_npctype_data->rare_spawn = atoi(row[108]) != 0;
 
 		// If NPC with duplicate NPC id already in table,
 		// free item we attempted to add.
@@ -2953,9 +3168,11 @@ uint32 ZoneDatabase::GetKarma(uint32 acct_id)
 	if (!results.Success())
 		return 0;
 
-	auto row = results.begin();
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		return atoi(row[0]);
+	}
 
-	return atoi(row[0]);
+	return 0;
 }
 
 void ZoneDatabase::UpdateKarma(uint32 acct_id, uint32 amount)

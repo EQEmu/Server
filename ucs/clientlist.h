@@ -139,8 +139,11 @@ public:
 	std::string MailBoxName();
 	int GetMailBoxNumber() { return CurrentMailBox; }
 	int GetMailBoxNumber(std::string CharacterName);
+
 	void SetConnectionType(char c);
 	ConnectionType GetConnectionType() { return TypeOfConnection; }
+	EQEmu::versions::ClientVersion GetClientVersion() { return ClientVersion_; }
+	
 	inline bool IsMailConnection() { return (TypeOfConnection == ConnectionTypeMail) || (TypeOfConnection == ConnectionTypeCombined); }
 	void SendNotification(int MailBoxNumber, std::string From, std::string Subject, int MessageID);
 	void ChangeMailBox(int NewMailBox);
@@ -167,7 +170,9 @@ private:
 	Timer *GlobalChatLimiterTimer; //60 seconds
 	int AttemptedMessages;
 	bool ForceDisconnect;
+
 	ConnectionType TypeOfConnection;
+	EQEmu::versions::ClientVersion ClientVersion_;
 	bool UnderfootOrLater;
 };
 
@@ -183,7 +188,6 @@ public:
 	void ProcessOPMailCommand(Client *c, std::string CommandString);
 
 private:
-
 	EQ::Net::EQStreamManager *chatsf;
 
 	std::list<Client*> ClientChatConnections;

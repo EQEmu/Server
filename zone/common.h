@@ -194,7 +194,8 @@ enum {
 	CASTING_RESIST_DIFF = 43,
 	COUNTER_AVOID_DAMAGE = 44,
 	PROX_AGGRO = 45,
-	MAX_SPECIAL_ATTACK = 46
+	IMMUNE_RANGED_ATTACKS = 46,
+	MAX_SPECIAL_ATTACK = 47
 };
 
 typedef enum {	//fear states
@@ -550,6 +551,7 @@ struct StatBonuses {
 	int	FeignedMinionChance;				// SPA 281 base1 = chance, just like normal FD
 	int aura_slots;
 	int trap_slots;
+	bool hunger; // Song of Sustenance -- min caps to 3500
 };
 
 typedef struct
@@ -603,6 +605,11 @@ enum {	//type arguments to DoAnim
 
 };
 
+enum {
+	SKILLUP_UNKNOWN = 0,
+	SKILLUP_SUCCESS = 1,
+	SKILLUP_FAILURE = 2
+};
 
 typedef enum {
 	petFamiliar,		//only listens to /pet get lost

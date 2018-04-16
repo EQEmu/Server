@@ -148,6 +148,8 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	UpdateWindowTitle();
 	zone->GetTimeSync();
 
+	zone->RequestUCSServerStatus();
+
 	/* Set Logging */
 
 	LogSys.StartFileLogs(StringFormat("%s_version_%u_inst_id_%u_port_%u", zone->GetShortName(), zone->GetInstanceVersion(), zone->GetInstanceID(), ZoneConfig::get()->ZonePort));
@@ -849,6 +851,9 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 		GuildBanks = new GuildBankManager;
 	else
 		GuildBanks = nullptr;
+
+	m_ucss_available = false;
+	m_last_ucss_update = 0;
 }
 
 Zone::~Zone() {
@@ -969,6 +974,8 @@ bool Zone::Init(bool iStaticZone) {
 	zone->LoadNPCEmotes(&NPCEmoteList);
 
 	LoadAlternateAdvancement();
+
+	database.LoadGlobalLoot();
 
 	//Load merchant data
 	zone->GetMerchantDataForZoneLoad();
@@ -1430,13 +1437,17 @@ void Zone::StartShutdownTimer(uint32 set_time) {
 bool Zone::Depop(bool StartSpawnTimer) {
 	std::map<uint32,NPCType *>::iterator itr;
 	entity_list.Depop(StartSpawnTimer);
-
+	entity_list.ClearTrapPointers();
+	entity_list.UpdateAllTraps(false);
 	/* Refresh npctable (cache), getting current info from database. */
 	while(!npctable.empty()) {
 		itr = npctable.begin();
 		delete itr->second;
 		npctable.erase(itr);
 	}
+
+	// clear spell cache
+	database.ClearNPCSpells();
 
 	return true;
 }
@@ -1498,12 +1509,16 @@ void Zone::Repop(uint32 delay) {
 		iterator.RemoveCurrent();
 	}
 
+	entity_list.ClearTrapPointers();
+
 	quest_manager.ClearAllTimers();
 
 	if (!database.PopulateZoneSpawnList(zoneid, spawn2_list, GetInstanceVersion(), delay))
 		Log(Logs::General, Logs::None, "Error in Zone::Repop: database.PopulateZoneSpawnList failed");
 
 	initgrids_timer.Start();
+
+	entity_list.UpdateAllTraps(true, true);
 
 	//MODDING HOOK FOR REPOP
 	mod_repop();
@@ -1512,7 +1527,7 @@ void Zone::Repop(uint32 delay) {
 void Zone::GetTimeSync()
 {
 	if (worldserver.Connected() && !zone_has_current_time) {
-		auto pack = new ServerPacket(ServerOP_GetWorldTime, 0);
+		auto pack = new ServerPacket(ServerOP_GetWorldTime, 1);
 		worldserver.SendPacket(pack);
 		safe_delete(pack);
 	}
@@ -1855,14 +1870,17 @@ bool ZoneDatabase::GetDecayTimes(npcDecayTimes_Struct* npcCorpseDecayTimes) {
 	return true;
 }
 
-void Zone::weatherSend()
+void Zone::weatherSend(Client* client)
 {
 	auto outapp = new EQApplicationPacket(OP_Weather, 8);
 	if(zone_weather>0)
 		outapp->pBuffer[0] = zone_weather-1;
 	if(zone_weather>0)
 		outapp->pBuffer[4] = zone->weather_intensity;
-	entity_list.QueueClients(0, outapp);
+	if (client)
+		client->QueuePacket(outapp);
+	else
+		entity_list.QueueClients(0, outapp);
 	safe_delete(outapp);
 }
 
@@ -2223,6 +2241,8 @@ void Zone::DoAdventureActions()
 			{
 				NPC* npc = new NPC(tmp, nullptr, glm::vec4(ds->assa_x, ds->assa_y, ds->assa_z, ds->assa_h), FlyMode3);
 				npc->AddLootTable();
+				if (npc->DropsGlobalLoot())
+					npc->CheckGlobalLootTables();
 				entity_list.AddNPC(npc);
 				npc->Shout("Rarrrgh!");
 				did_adventure_actions = true;
@@ -2326,3 +2346,22 @@ void Zone::UpdateHotzone()
     is_hotzone = atoi(row[0]) == 0 ? false: true;
 }
 
+void Zone::RequestUCSServerStatus() {
+	auto outapp = new ServerPacket(ServerOP_UCSServerStatusRequest, sizeof(UCSServerStatus_Struct));
+	auto ucsss = (UCSServerStatus_Struct*)outapp->pBuffer;
+	ucsss->available = 0;
+	ucsss->port = Config->ZonePort;
+	ucsss->unused = 0;
+	worldserver.SendPacket(outapp);
+	safe_delete(outapp);
+}
+
+void Zone::SetUCSServerAvailable(bool ucss_available, uint32 update_timestamp) {
+	if (m_last_ucss_update == update_timestamp && m_ucss_available != ucss_available) {
+		m_ucss_available = false;
+		RequestUCSServerStatus();
+		return;
+	}
+	if (m_last_ucss_update < update_timestamp)
+		m_ucss_available = ucss_available;
+}

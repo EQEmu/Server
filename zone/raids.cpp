@@ -323,6 +323,10 @@ void Raid::SaveRaidLeaderAA()
 
 void Raid::UpdateGroupAAs(uint32 gid)
 {
+
+	if (gid < 0 || gid > MAX_RAID_GROUPS)
+		return;
+
 	Client *gl = GetGroupLeader(gid);
 
 	if (gl)

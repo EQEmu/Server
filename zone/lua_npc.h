@@ -110,6 +110,7 @@ public:
 	void SetSwarmTarget(int target);
 	void ModifyNPCStat(const char *stat, const char *value);
 	void AddAISpell(int priority, int spell_id, int type, int mana_cost, int recast_delay, int resist_adjust);
+	void AddAISpell(int priority, int spell_id, int type, int mana_cost, int recast_delay, int resist_adjust, int min_hp, int max_hp);
 	void RemoveAISpell(int spell_id);
 	void SetSpellFocusDMG(int focus);
 	void SetSpellFocusHeal(int focus);
@@ -123,8 +124,6 @@ public:
 	int GetScore();
 	void MerchantOpenShop();
 	void MerchantCloseShop();
-	void SetMerchantProbability(uint8 amt);
-	uint8 GetMerchantProbability();
 	int GetRawAC();
 	int GetAvoidanceRating();
 };

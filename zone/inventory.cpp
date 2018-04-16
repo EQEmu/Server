@@ -1326,7 +1326,7 @@ int Client::GetItemLinkHash(const EQEmu::ItemInstance* inst) {
 	return hash;
 }
 
-// This appears to still be in use... The core of this should be incorporated into class Client::TextLink
+// This appears to still be in use... The core of this should be incorporated into class EQEmu::SayLinkEngine
 void Client::SendItemLink(const EQEmu::ItemInstance* inst, bool send_to_all)
 {
 /*

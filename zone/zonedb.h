@@ -1,6 +1,8 @@
 #ifndef ZONEDB_H_
 #define ZONEDB_H_
 
+#include <unordered_set>
+
 #include "../common/shareddb.h"
 #include "../common/eq_packet_structs.h"
 #include "position.h"
@@ -16,6 +18,7 @@ class NPC;
 class Petition;
 class Spawn2;
 class SpawnGroupList;
+class Trap;
 struct CharacterEventLog_Struct;
 struct Door;
 struct ExtendedProfile_Struct;
@@ -45,13 +48,15 @@ struct wplist {
 #pragma pack(1)
 struct DBnpcspells_entries_Struct {
 	int16	spellid;
-	uint32	type;
 	uint8	minlevel;
 	uint8	maxlevel;
+	uint32	type;
 	int16	manacost;
-	int32	recast_delay;
 	int16	priority;
+	int32	recast_delay;
 	int16	resist_adjust;
+	int8	min_hp;
+	int8	max_hp;
 };
 #pragma pack()
 
@@ -74,7 +79,6 @@ struct DBnpcspells_Struct {
 	int16	rproc_chance;
 	uint16	defensive_proc;
 	int16	dproc_chance;
-	uint32	numentries;
 	uint32	fail_recast;
 	uint32	engaged_no_sp_recast_min;
 	uint32	engaged_no_sp_recast_max;
@@ -87,7 +91,7 @@ struct DBnpcspells_Struct {
 	uint32  idle_no_sp_recast_min;
 	uint32  idle_no_sp_recast_max;
 	uint8	idle_beneficial_chance;
-	DBnpcspells_entries_Struct entries[0];
+	std::vector<DBnpcspells_entries_Struct> entries;
 };
 
 struct DBnpcspellseffects_Struct {
@@ -420,9 +424,11 @@ public:
 	uint32		GetMaxNPCSpellsID();
 	uint32		GetMaxNPCSpellsEffectsID();
 	bool GetAuraEntry(uint16 spell_id, AuraRecord &record);
+	void LoadGlobalLoot();
 
 	DBnpcspells_Struct*				GetNPCSpells(uint32 iDBSpellsID);
 	DBnpcspellseffects_Struct*		GetNPCSpellsEffects(uint32 iDBSpellsEffectsID);
+	void ClearNPCSpells() { npc_spells_cache.clear(); npc_spells_loadtried.clear(); }
 	const NPCType* LoadNPCTypesData(uint32 id, bool bulk_load = false);
 
 	/* Mercs   */
@@ -436,8 +442,9 @@ public:
 	bool	DeleteMerc(uint32 merc_id);
 
 	/* Petitions   */
-	void	UpdateBug(BugStruct* bug);
-	void	UpdateBug(PetitionBug_Struct* bug);
+	void	RegisterBug(BugReport_Struct* bug_report); // old method
+	void	RegisterBug(Client* client, BugReport_Struct* bug_report); // new method
+	//void	UpdateBug(PetitionBug_Struct* bug);
 	void	DeletePetitionFromDB(Petition* wpet);
 	void	UpdatePetitionToDB(Petition* wpet);
 	void	InsertPetitionToDB(Petition* wpet);
@@ -478,7 +485,7 @@ public:
 
 	/* Traps   */
 	bool	LoadTraps(const char* zonename, int16 version);
-	char*	GetTrapMessage(uint32 trap_id);
+	bool	SetTrapData(Trap* trap, bool repopnow = false);
 
 	/* Time   */
 	uint32	GetZoneTZ(uint32 zoneid, uint32 version);
@@ -523,10 +530,9 @@ protected:
 
 	uint32				max_faction;
 	Faction**			faction_array;
-	uint32 npc_spells_maxid;
 	uint32 npc_spellseffects_maxid;
-	DBnpcspells_Struct** npc_spells_cache;
-	bool*				npc_spells_loadtried;
+	std::unordered_map<uint32, DBnpcspells_Struct> npc_spells_cache;
+	std::unordered_set<uint32> npc_spells_loadtried;
 	DBnpcspellseffects_Struct** npc_spellseffects_cache;
 	bool*				npc_spellseffects_loadtried;
 	uint8 door_isopen_array[255];

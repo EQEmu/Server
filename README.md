@@ -17,10 +17,7 @@
 |:---:|:---:|:---:|
 |**Install Count**|![Windows Install Count](http://analytics.akkadius.com/?install_count&windows_count)|![Linux Install Count](http://analytics.akkadius.com/?install_count&linux_count)| 
 ### > Windows 
-* [Easy Install](http://wiki.eqemulator.org/p?Akkas_PEQ_Server_Installer&frm=Main#from-scratch-installation-instructions-windows)
-* [Advanced Setup](http://wiki.eqemulator.org/p?Complete_Windows-based_Server_Setup_Guide)
-
-
+* [Install](https://github.com/EQEmu/Server/wiki/Windows-Server)
 
 ### > Debian/Ubuntu/CentOS/Fedora
 * You can use curl or wget to kick off the installer (whichever your OS has)
@@ -53,7 +50,23 @@ forum, although pull requests will be much quicker and easier on all parties.
  - **User Discord Channel**: `#general`
  - **Developer Discord Channel**: `#eqemucoders`
 
-Resources
----
+## Resources
 - [EQEmulator Forums](http://www.eqemulator.org/forums)
-- [EQEmulator Wiki](http://wiki.eqemulator.org/i?M=Wiki)
+- [EQEmulator Wiki](https://github.com/EQEmu/Server/wiki)
+
+## Related Repositories
+* [ProjectEQ Quests](https://github.com/ProjectEQ/projecteqquests)
+* [Maps](https://github.com/Akkadius/EQEmuMaps)
+* [Installer Resources](https://github.com/Akkadius/EQEmuInstall)
+* [Zone Utilities](https://github.com/EQEmu/zone-utilities) - Various utilities and libraries for parsing, rendering and manipulating EQ Zone files.
+
+## Other License Info
+
+* The server code and utilities are released under **GPLv3**
+* We also include some small libraries for convienence that may be under different licensing
+  * SocketLib - GPL LibXML
+  * zlib - zlib license
+  * MariaDB/MySQL - GPL
+  * GPL Perl - GPL / ActiveState (under the assumption that this is a free project)
+  * CPPUnit - GLP StringUtilities - Apache
+  * LUA - MIT

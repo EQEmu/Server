@@ -244,6 +244,7 @@ public:
 	void	AddArea(int id, int type, float min_x, float max_x, float min_y, float max_y, float min_z, float max_z);
 	void	RemoveArea(int id);
 	void	ClearAreas();
+	void	ReloadMerchants();
 	void	ProcessProximitySay(const char *Message, Client *c, uint8 language = 0);
 	void	SendAATimer(uint32 charid,UseAA_Struct* uaa);
 	Doors *FindDoor(uint8 door_id);
@@ -365,7 +366,7 @@ public:
 	//trap stuff
 	Mob*	GetTrapTrigger(Trap* trap);
 	void	SendAlarm(Trap* trap, Mob* currenttarget, uint8 kos);
-	Trap*	FindNearbyTrap(Mob* searcher, float max_dist);
+	Trap*	FindNearbyTrap(Mob* searcher, float max_dist, float &curdist, bool detected = false);
 
 	void	AddHealAggro(Mob* target, Mob* caster, uint16 hate);
 	Mob*	FindDefenseNPC(uint32 npcid);
@@ -472,6 +473,10 @@ public:
 	void RefreshClientXTargets(Client *c);
 	void SendAlternateAdvancementStats();
 
+	void GetTrapInfo(Client* client);
+	bool IsTrapGroupSpawned(uint32 trap_id, uint8 group);
+	void UpdateAllTraps(bool respawn, bool repopnow = false);
+	void ClearTrapPointers();
 protected:
 	friend class Zone;
 	void	Depop(bool StartSpawnTimer = false);

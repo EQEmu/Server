@@ -420,7 +420,12 @@ void Lua_NPC::ModifyNPCStat(const char *stat, const char *value) {
 
 void Lua_NPC::AddAISpell(int priority, int spell_id, int type, int mana_cost, int recast_delay, int resist_adjust) {
 	Lua_Safe_Call_Void();
-	self->AddSpellToNPCList(priority, spell_id, type, mana_cost, recast_delay, resist_adjust);
+	self->AddSpellToNPCList(priority, spell_id, type, mana_cost, recast_delay, resist_adjust, 0, 0);
+}
+
+void Lua_NPC::AddAISpell(int priority, int spell_id, int type, int mana_cost, int recast_delay, int resist_adjust, int min_hp, int max_hp) {
+	Lua_Safe_Call_Void();
+	self->AddSpellToNPCList(priority, spell_id, type, mana_cost, recast_delay, resist_adjust, min_hp, max_hp);
 }
 
 void Lua_NPC::RemoveAISpell(int spell_id) {
@@ -486,16 +491,6 @@ void Lua_NPC::MerchantOpenShop() {
 void Lua_NPC::MerchantCloseShop() {
 	Lua_Safe_Call_Void();
 	self->MerchantCloseShop();
-}
-
-void Lua_NPC::SetMerchantProbability(uint8 amt) {
-	Lua_Safe_Call_Void();
-	self->SetMerchantProbability(amt);
-}
-
-uint8 Lua_NPC::GetMerchantProbability() {
-	Lua_Safe_Call_Int();
-	return self->GetMerchantProbability();
 }
 
 int Lua_NPC::GetRawAC() {
@@ -595,6 +590,7 @@ luabind::scope lua_register_npc() {
 		.def("SetSwarmTarget", (void(Lua_NPC::*)(int))&Lua_NPC::SetSwarmTarget)
 		.def("ModifyNPCStat", (void(Lua_NPC::*)(const char*,const char*))&Lua_NPC::ModifyNPCStat)
 		.def("AddAISpell", (void(Lua_NPC::*)(int,int,int,int,int,int))&Lua_NPC::AddAISpell)
+		.def("AddAISpell", (void(Lua_NPC::*)(int,int,int,int,int,int,int,int))&Lua_NPC::AddAISpell)
 		.def("RemoveAISpell", (void(Lua_NPC::*)(int))&Lua_NPC::RemoveAISpell)
 		.def("SetSpellFocusDMG", (void(Lua_NPC::*)(int))&Lua_NPC::SetSpellFocusDMG)
 		.def("SetSpellFocusHeal", (void(Lua_NPC::*)(int))&Lua_NPC::SetSpellFocusHeal)
@@ -608,8 +604,6 @@ luabind::scope lua_register_npc() {
 		.def("GetScore", (int(Lua_NPC::*)(void))&Lua_NPC::GetScore)
 		.def("MerchantOpenShop", (void(Lua_NPC::*)(void))&Lua_NPC::MerchantOpenShop)
 		.def("MerchantCloseShop", (void(Lua_NPC::*)(void))&Lua_NPC::MerchantCloseShop)
-		.def("SetMerchantProbability", (void(Lua_NPC::*)(void))&Lua_NPC::SetMerchantProbability)
-		.def("GetMerchantProbability", (uint8(Lua_NPC::*)(void))&Lua_NPC::GetMerchantProbability)
 		.def("GetRawAC", (int(Lua_NPC::*)(void))&Lua_NPC::GetRawAC)
 		.def("GetAvoidanceRating", &Lua_NPC::GetAvoidanceRating);
 }

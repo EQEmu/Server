@@ -516,23 +516,6 @@ void WorldDatabase::GetLauncherList(std::vector<std::string> &rl) {
 
 }
 
-void WorldDatabase::SetMailKey(int CharID, int IPAddress, int MailKey)
-{
-	char MailKeyString[17];
-
-	if(RuleB(Chat, EnableMailKeyIPVerification) == true)
-		sprintf(MailKeyString, "%08X%08X", IPAddress, MailKey);
-	else
-		sprintf(MailKeyString, "%08X", MailKey);
-
-    std::string query = StringFormat("UPDATE character_data SET mailkey = '%s' WHERE id = '%i'",
-                                    MailKeyString, CharID);
-    auto results = QueryDatabase(query);
-	if (!results.Success())
-		Log(Logs::General, Logs::Error, "WorldDatabase::SetMailKey(%i, %s) : %s", CharID, MailKeyString, results.ErrorMessage().c_str());
-
-}
-
 bool WorldDatabase::GetCharacterLevel(const char *name, int &level)
 {
 	std::string query = StringFormat("SELECT level FROM character_data WHERE name = '%s'", name);
