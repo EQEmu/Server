@@ -4833,7 +4833,6 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 	mod_consider(tmob, con);
 
 	QueuePacket(outapp);
-	safe_delete(outapp);
 	// only wanted to check raid target once
 	// and need con to still be around so, do it here!
 	if (tmob->IsRaidTarget()) {
@@ -4879,6 +4878,8 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 	// we are trying to hide but they can see us
 	else if ((invisible || invisible_undead || hidden || invisible_animals) && !IsInvisible(tmob))
 		Message_StringID(10, SUSPECT_SEES_YOU);
+
+	safe_delete(outapp);
 
 	return;
 }
@@ -10045,6 +10046,14 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			break;
 		}
 
+		// default range is 200, takes Z into account
+		// really they do something weird where they're added to the aggro list then remove them
+		// and will attack if they come in range -- too lazy, lets remove exploits for now
+		if (DistanceSquared(mypet->GetPosition(), target->GetPosition()) >= RuleR(Aggro, PetAttackRange)) {
+			// they say they're attacking then remove on live ... so they don't really say anything in this case ...
+			break;
+		}
+
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
 			if (target != this && DistanceSquaredNoZ(mypet->GetPosition(), target->GetPosition()) <= (RuleR(Pets, AttackCommandRange)*RuleR(Pets, AttackCommandRange))) {
 				if (mypet->IsPetStop()) {
@@ -13702,6 +13711,11 @@ void Client::Handle_OP_Taunt(const EQApplicationPacket *app)
 
 	if (GetTarget() == nullptr || !GetTarget()->IsNPC())
 		return;
+
+	if (!zone->CanDoCombat()) {
+		Message(13, "You cannot taunt in a no combat zone.");
+		return;
+	}
 
 	Taunt(GetTarget()->CastToNPC(), false);
 	return;

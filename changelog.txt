@@ -1,5 +1,10 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 03/28/2018 ==
+Kayen: SE_CastOnFadeEffect, SE_CastOnFadeEffectNPC, SE_CastOnFadeEffectAlway triggered spell will now hit
+the correct targets.
+
+
 == 03/07/2018 ==
 Uleat: Added command '#ucs' to force a reconnect to UCS server.
 	- Works in place of client auto-reconnect packet in zones where feature is unsupported

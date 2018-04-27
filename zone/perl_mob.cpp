@@ -9039,6 +9039,35 @@ XS(XS_Mob_GetMeleeMitigation) {
 	XSRETURN(1);
 }
 
+XS(XS_Mob_TryMoveAlong);
+XS(XS_Mob_TryMoveAlong) {
+	dXSARGS;
+	if (items < 3 || items > 4)
+		Perl_croak(aTHX_ "Usage: Mob::TryMoveAlong(THIS, distance, angle, send?)");
+	{
+		Mob* THIS;
+		float distance = (float)SvNV(ST(1));
+		float angle = (float)SvNV(ST(2));
+		bool send = true;
+
+		if (sv_derived_from(ST(0), "Mob")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Mob *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Mob");
+		
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		if (items == 4)
+			send = (bool)SvTRUE(ST(3));
+
+		THIS->TryMoveAlong(distance, angle, send);
+	}
+	XSRETURN_EMPTY;
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -9373,6 +9402,7 @@ XS(boot_Mob)
 		newXSproto(strcpy(buf, "IsSilenced"), XS_Mob_IsSilenced, file, "$");
 		newXSproto(strcpy(buf, "IsAmnesiad"), XS_Mob_IsAmnesiad, file, "$");
 		newXSproto(strcpy(buf, "GetMeleeMitigation"), XS_Mob_GetMeleeMitigation, file, "$");
+		newXSproto(strcpy(buf, "TryMoveAlong"), XS_Mob_TryMoveAlong, file, "$$$;$");
 	XSRETURN_YES;
 }
 

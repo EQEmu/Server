@@ -278,22 +278,27 @@ void Client::GoFish()
 
 			//check for add NPC
 			if (npc_chance > 0 && npc_id) {
-				if (npc_chance < zone->random.Int(0, 99)) {
-					const NPCType *tmp = database.LoadNPCTypesData(npc_id);
-					if (tmp != nullptr) {
-						auto positionNPC = GetPosition();
-						positionNPC.x = positionNPC.x + 3;
-						auto npc = new NPC(tmp, nullptr, positionNPC, FlyMode3);
-						npc->AddLootTable();
-						if (npc->DropsGlobalLoot())
-							npc->CheckGlobalLootTables();
+				if (zone->random.Roll(npc_chance)) {
+					if (zone->CanDoCombat()) {
+						const NPCType *tmp = database.LoadNPCTypesData(npc_id);
+						if (tmp != nullptr) {
+							auto positionNPC = GetPosition();
+							positionNPC.x = positionNPC.x + 3;
+							auto npc = new NPC(tmp, nullptr, positionNPC, FlyMode3);
+							npc->AddLootTable();
+							if (npc->DropsGlobalLoot())
+								npc->CheckGlobalLootTables();
 
-						npc->AddToHateList(this, 1, 0, false); // no help yelling
+							npc->AddToHateList(this, 1, 0, false); // no help yelling
 
-						entity_list.AddNPC(npc);
+							entity_list.AddNPC(npc);
 
-						Message(MT_Emote,
-							"You fish up a little more than you bargained for...");
+							Message(MT_Emote,
+								"You fish up a little more than you bargained for...");
+						}
+					}
+					else {
+						Message(MT_Emote, "You notice something lurking just below the water's surface...");
 					}
 				}
 			}

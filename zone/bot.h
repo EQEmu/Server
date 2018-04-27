@@ -406,6 +406,8 @@ public:
 	bool AIHealRotation(Mob* tar, bool useFastHeals);
 	bool GetPauseAI() { return _pauseAI; }
 	void SetPauseAI(bool pause_flag) { _pauseAI = pause_flag; }
+	uint8 GetStopMeleeLevel() { return _stopMeleeLevel; }
+	void SetStopMeleeLevel(uint8 level);
 	void SetGuardMode();
 	
 	// Mob AI Virtual Override Methods
@@ -742,6 +744,7 @@ private:
 	bool _altoutofcombatbehavior;
 	bool _showhelm;
 	bool _pauseAI;
+	uint8 _stopMeleeLevel;
 
 	// Private "base stats" Members
 	int32 _baseMR;

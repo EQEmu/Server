@@ -513,7 +513,8 @@ RULE_INT(NPC, MinorNPCCorpseDecayTimeMS, 450000) //level<55
 RULE_INT(NPC, MajorNPCCorpseDecayTimeMS, 1500000) //level>=55
 RULE_INT(NPC, CorpseUnlockTimer, 150000)
 RULE_INT(NPC, EmptyNPCCorpseDecayTimeMS, 0)
-RULE_BOOL (NPC, UseItemBonusesForNonPets, true)
+RULE_BOOL(NPC, UseItemBonusesForNonPets, true)
+RULE_BOOL(NPC, UseBaneDamage, false)
 RULE_INT(NPC, SayPauseTimeInSec, 5)
 RULE_INT(NPC, OOCRegen, 0)
 RULE_BOOL(NPC, BuffFriends, false)
@@ -546,6 +547,7 @@ RULE_INT(Aggro, IntAggroThreshold, 75) // Int <= this will aggro regardless of l
 RULE_BOOL(Aggro, AllowTickPulling, false) // tick pulling is an exploit in an NPC's call for help fixed sometime in 2006 on live
 RULE_BOOL(Aggro, UseLevelAggro, true) // Level 18+ and Undead will aggro regardless of level difference. (this will disabled Rule:IntAggroThreshold if set to true)
 RULE_INT(Aggro, ClientAggroCheckInterval, 6) // Interval in which clients actually check for aggro - in seconds
+RULE_REAL(Aggro, PetAttackRange, 40000.0) // max squared range /pet attack works at default is 200
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(TaskSystem)

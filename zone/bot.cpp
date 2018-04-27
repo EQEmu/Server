@@ -78,6 +78,11 @@ Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm
 	SetPauseAI(false);
 	rest_timer.Disable();
 	SetFollowDistance(BOT_FOLLOW_DISTANCE_DEFAULT);
+	if (IsCasterClass(GetClass()))
+		SetStopMeleeLevel((uint8)RuleI(Bots, CasterStopMeleeLevel));
+	else
+		SetStopMeleeLevel(255);
+
 	// Do this once and only in this constructor
 	GenerateAppearance();
 	GenerateBaseStats();
@@ -151,6 +156,11 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 
 	rest_timer.Disable();
 	SetFollowDistance(BOT_FOLLOW_DISTANCE_DEFAULT);
+	if (IsCasterClass(GetClass()))
+		SetStopMeleeLevel((uint8)RuleI(Bots, CasterStopMeleeLevel));
+	else
+		SetStopMeleeLevel(255);
+
 	strcpy(this->name, this->GetCleanName());
 
 	memset(&_botInspectMessage, 0, sizeof(InspectMessage_Struct));
@@ -2041,6 +2051,13 @@ void Bot::SetTarget(Mob* mob) {
 	}
 }
 
+void Bot::SetStopMeleeLevel(uint8 level) {
+	if (IsCasterClass(GetClass()) || IsSpellFighterClass(GetClass()))
+		_stopMeleeLevel = level;
+	else
+		_stopMeleeLevel = 255;
+}
+
 void Bot::SetGuardMode() {
 	WipeHateList();
 	SetTarget(nullptr);
@@ -2386,10 +2403,19 @@ void Bot::AI_Process() {
 		// Calculate casting distance
 		float caster_distance_max = 0.0f;
 		{
-			if (GetLevel() >= RuleI(Bots, CasterStopMeleeLevel)) {
+			if (GetLevel() >= GetStopMeleeLevel()) {
 				switch (GetClass()) {
 				case CLERIC:
 					caster_distance_max = 1156.0f; // as DSq value (34 units)
+					break;
+				case PALADIN:
+					caster_distance_max = 576.0f; // as DSq value (24 units)
+					break;
+				case RANGER:
+					caster_distance_max = 784.0f; // as DSq value (28 units)
+					break;
+				case SHADOWKNIGHT:
+					caster_distance_max = 676.0f; // as DSq value (26 units)
 					break;
 				case DRUID:
 					caster_distance_max = 1764.0f; // as DSq value (42 units)
@@ -2409,7 +2435,11 @@ void Bot::AI_Process() {
 				case ENCHANTER:
 					caster_distance_max = 2500.0f; // as DSq value (50 units)
 					break;
+				case BEASTLORD:
+					caster_distance_max = 900.0f; // as DSq value (30 units)
+					break;
 				default:
+					// pure melee classes (and BARD) do not get this option
 					break;
 				}
 			}

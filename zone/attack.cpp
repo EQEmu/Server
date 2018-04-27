@@ -2000,14 +2000,17 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		//if NPCs can't inheriently hit the target we don't add bane/magic dmg which isn't exactly the same as PCs
 		int eleBane = 0;
 		if (weapon) {
-			if (weapon->BaneDmgBody == other->GetBodyType()) {
-				eleBane += weapon->BaneDmgAmt;
+			if (RuleB(NPC, UseBaneDamage)) {
+				if (weapon->BaneDmgBody == other->GetBodyType()) {
+					eleBane += weapon->BaneDmgAmt;
+				}
+
+				if (weapon->BaneDmgRace == other->GetRace()) {
+					eleBane += weapon->BaneDmgRaceAmt;
+				}
 			}
 
-			if (weapon->BaneDmgRace == other->GetRace()) {
-				eleBane += weapon->BaneDmgRaceAmt;
-			}
-
+			// I don't think NPCs use this either ....
 			if (weapon->ElemDmgAmt) {
 				eleBane += (weapon->ElemDmgAmt * other->ResistSpell(weapon->ElemDmgType, 0, this) / 100);
 			}

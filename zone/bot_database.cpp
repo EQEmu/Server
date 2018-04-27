@@ -340,7 +340,8 @@ bool BotDatabase::LoadBot(const uint32 bot_id, Bot*& loaded_bot)
 		" `disease`,"			/* not in-use[41] */
 		" `corruption`,"		/* not in-use[42] */
 		" `show_helm`," // 43
-		" `follow_distance`" // 44
+		" `follow_distance`," // 44
+		" `stop_melee_level`" // 45
 		" FROM `bot_data`"
 		" WHERE `bot_id` = '%u'"
 		" LIMIT 1",
@@ -397,13 +398,16 @@ bool BotDatabase::LoadBot(const uint32 bot_id, Bot*& loaded_bot)
 	loaded_bot = new Bot(bot_id, atoi(row[0]), atoi(row[1]), atof(row[14]), atoi(row[6]), tempNPCStruct);
 	if (loaded_bot) {
 		loaded_bot->SetShowHelm((atoi(row[43]) > 0 ? true : false));
+
 		uint32 bfd = atoi(row[44]);
 		if (bfd < 1)
 			bfd = 1;
 		if (bfd > BOT_FOLLOW_DISTANCE_DEFAULT_MAX)
 			bfd = BOT_FOLLOW_DISTANCE_DEFAULT_MAX;
 		loaded_bot->SetFollowDistance(bfd);
-		
+
+		uint8 sml = atoi(row[45]);
+		loaded_bot->SetStopMeleeLevel(sml);
 	}
 
 	return true;
@@ -457,7 +461,8 @@ bool BotDatabase::SaveNewBot(Bot* bot_inst, uint32& bot_id)
 		" `disease`,"
 		" `corruption`,"
 		" `show_helm`,"
-		" `follow_distance`"
+		" `follow_distance`,"
+		" `stop_melee_level`"
 		")"
 		" VALUES ("
 		"'%u',"					/* owner_id */
@@ -501,7 +506,8 @@ bool BotDatabase::SaveNewBot(Bot* bot_inst, uint32& bot_id)
 		" '%i',"				/* disease */
 		" '%i',"				/* corruption */
 		" '1',"					/* show_helm */
-		" '%i'"					/* follow_distance */
+		" '%i',"				/* follow_distance */
+		" '%u'"					/* stop_melee_level */
 		")",
 		bot_inst->GetBotOwnerCharacterID(),
 		bot_inst->GetBotSpellID(),
@@ -540,7 +546,8 @@ bool BotDatabase::SaveNewBot(Bot* bot_inst, uint32& bot_id)
 		bot_inst->GetPR(),
 		bot_inst->GetDR(),
 		bot_inst->GetCorrup(),
-		BOT_FOLLOW_DISTANCE_DEFAULT
+		BOT_FOLLOW_DISTANCE_DEFAULT,
+		(IsCasterClass(bot_inst->GetClass()) ? (uint8)RuleI(Bots, CasterStopMeleeLevel) : 255)
 	);
 	auto results = QueryDatabase(query);
 	if (!results.Success())
@@ -599,7 +606,8 @@ bool BotDatabase::SaveBot(Bot* bot_inst)
 		" `disease` = '%i',"
 		" `corruption` = '%i',"
 		" `show_helm` = '%i',"
-		" `follow_distance` = '%i'"
+		" `follow_distance` = '%i',"
+		" `stop_melee_level` = '%u'"
 		" WHERE `bot_id` = '%u'",
 		bot_inst->GetBotOwnerCharacterID(),
 		bot_inst->GetBotSpellID(),
@@ -641,6 +649,7 @@ bool BotDatabase::SaveBot(Bot* bot_inst)
 		bot_inst->GetBaseCorrup(),
 		((bot_inst->GetShowHelm()) ? (1) : (0)),
 		bot_inst->GetFollowDistance(),
+		bot_inst->GetStopMeleeLevel(),
 		bot_inst->GetBotID()
 	);
 	auto results = QueryDatabase(query);
@@ -2026,7 +2035,8 @@ bool BotDatabase::CreateCloneBot(const uint32 owner_id, const uint32 bot_id, con
 		" `disease`,"
 		" `corruption`,"
 		" `show_helm`,"
-		" `follow_distance`"
+		" `follow_distance`,"
+		" `stop_melee_level`"
 		")"
 		" SELECT"
 		" bd.`owner_id`,"
@@ -2073,7 +2083,8 @@ bool BotDatabase::CreateCloneBot(const uint32 owner_id, const uint32 bot_id, con
 		" bd.`disease`,"
 		" bd.`corruption`,"
 		" bd.`show_helm`,"
-		" bd.`follow_distance`"
+		" bd.`follow_distance`,"
+		" bd.`stop_melee_level`"
 		" FROM `bot_data` bd"
 		" WHERE"
 		" bd.`owner_id` = '%u'"
@@ -2150,6 +2161,27 @@ bool BotDatabase::CreateCloneBotInventory(const uint32 owner_id, const uint32 bo
 		return false;
 	}
 	
+	return true;
+}
+
+bool BotDatabase::SaveStopMeleeLevel(const uint32 owner_id, const uint32 bot_id, const uint8 sml_value)
+{
+	if (!owner_id || !bot_id)
+		return false;
+
+	query = StringFormat(
+		"UPDATE `bot_data`"
+		" SET `stop_melee_level` = '%u'"
+		" WHERE `owner_id` = '%u'"
+		" AND `bot_id` = '%u'",
+		sml_value,
+		owner_id,
+		bot_id
+	);
+	auto results = QueryDatabase(query);
+	if (!results.Success())
+		return false;
+
 	return true;
 }
 
@@ -2852,6 +2884,7 @@ const char* BotDatabase::fail::SaveFollowDistance() { return "Failed to save fol
 const char* BotDatabase::fail::SaveAllFollowDistances() { return "Failed to save all follow distances"; }
 const char* BotDatabase::fail::CreateCloneBot() { return "Failed to create clone bot"; }
 const char* BotDatabase::fail::CreateCloneBotInventory() { return "Failed to create clone bot inventory"; }
+const char* BotDatabase::fail::SaveStopMeleeLevel() { return "Failed to save stop melee level"; }
 
 /* fail::Bot bot-group functions   */
 const char* BotDatabase::fail::QueryBotGroupExistence() { return "Failed to query bot-group existence"; }

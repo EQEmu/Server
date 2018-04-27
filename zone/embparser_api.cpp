@@ -1542,8 +1542,8 @@ XS(XS__set_proximity);
 XS(XS__set_proximity)
 {
 	dXSARGS;
-	if (items != 4 && items != 6)
-		Perl_croak(aTHX_ "Usage: set_proximity(min_x, max_x, min_y, max_y [, min_z, max_z])");
+	if (items != 4 && items != 6 && items != 7)
+		Perl_croak(aTHX_ "Usage: set_proximity(min_x, max_x, min_y, max_y [, min_z, max_z], [say])");
 
 	float min_x = (float)SvNV(ST(0));
 	float max_x = (float)SvNV(ST(1));
@@ -1555,7 +1555,10 @@ XS(XS__set_proximity)
 	else {
 		float min_z = (float)SvNV(ST(4));
 		float max_z = (float)SvNV(ST(5));
-		quest_manager.set_proximity(min_x, max_x, min_y, max_y, min_z, max_z);
+		bool bSay = false;
+		if (items == 7)
+			bSay = (bool)SvTRUE(ST(6));
+		quest_manager.set_proximity(min_x, max_x, min_y, max_y, min_z, max_z, bSay);
 	}
 
 	XSRETURN_EMPTY;
