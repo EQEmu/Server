@@ -41,6 +41,12 @@ class QuestManager {
 		bool depop_npc;
 		std::string encounter;
 	};
+
+	struct PausedTimer {
+		Mob * owner;
+		std::string name;
+		uint32 time;
+	};
 public:
 	QuestManager();
 	virtual ~QuestManager();
@@ -82,6 +88,9 @@ public:
 	void stopalltimers();
 	void stopalltimers(EQEmu::ItemInstance *inst);
 	void stopalltimers(Mob *mob);
+	void pausetimer(const char *timer_name);
+	void resumetimer(const char *timer_name);
+	bool ispausedtimer(const char *timer_name);
 	void emote(const char *str);
 	void shout(const char *str);
 	void shout2(const char *str);
@@ -304,6 +313,7 @@ private:
 	};
 	std::list<QuestTimer>	QTimerList;
 	std::list<SignalTimer>	STimerList;
+	std::list<PausedTimer>	PTimerList;
 	size_t item_timers;
 
 };
