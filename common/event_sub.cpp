@@ -1,5 +1,4 @@
 #include "event_sub.h"
-#include <string.h>
 
 void EventSubscriptionWatcher::Subscribe(const std::string &event_name)
 {
