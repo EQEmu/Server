@@ -84,7 +84,7 @@ IPathfinder::IPath PathfinderNavmesh::FindRoute(const glm::vec3 &start, const gl
 			partial = true;
 
 			auto dist = DistanceSquared(epos, current_location);
-			if (dist < 10.0f) {
+			if (dist < 10000.0f) {
 				stuck = true;
 			}
 		}
