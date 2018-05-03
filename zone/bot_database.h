@@ -143,6 +143,8 @@ public:
 	bool CreateCloneBot(const uint32 owner_id, const uint32 bot_id, const std::string& clone_name, uint32& clone_id);
 	bool CreateCloneBotInventory(const uint32 owner_id, const uint32 bot_id, const uint32 clone_id);
 
+	bool SaveStopMeleeLevel(const uint32 owner_id, const uint32 bot_id, const uint8 sml_value);
+
 
 	/* Bot bot-group functions   */
 	bool QueryBotGroupExistence(const std::string& botgroup_name, bool& extant_flag);
@@ -253,6 +255,7 @@ public:
 		static const char* SaveAllFollowDistances();
 		static const char* CreateCloneBot();
 		static const char* CreateCloneBotInventory();
+		static const char* SaveStopMeleeLevel();
 
 		/* fail::Bot bot-group functions   */
 		static const char* QueryBotGroupExistence();

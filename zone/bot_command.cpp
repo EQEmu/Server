@@ -1349,6 +1349,7 @@ int bot_command_init(void)
 		bot_command_add("botreport", "Orders a bot to report its readiness", 0, bot_subcommand_bot_report) ||
 		bot_command_add("botspawn", "Spawns a created bot", 0, bot_subcommand_bot_spawn) ||
 		bot_command_add("botstance", "Changes the stance of a bot", 0, bot_subcommand_bot_stance) ||
+		bot_command_add("botstopmeleelevel", "Sets the level a caster or spell-casting fighter bot will stop melee combat", 0, bot_subcommand_bot_stop_melee_level) ||
 		bot_command_add("botsummon", "Summons bot(s) to your location", 0, bot_subcommand_bot_summon) ||
 		bot_command_add("bottattoo", "Changes the Drakkin tattoo of a bot", 0, bot_subcommand_bot_tattoo) ||
 		bot_command_add("bottogglearcher", "Toggles a archer bot between melee and ranged weapon use", 0, bot_subcommand_bot_toggle_archer) ||
@@ -2604,6 +2605,7 @@ void bot_command_bot(Client *c, const Seperator *sep)
 	subcommand_list.push_back("botreport");
 	subcommand_list.push_back("botspawn");
 	subcommand_list.push_back("botstance");
+	subcommand_list.push_back("botstopmeleelevel");
 	subcommand_list.push_back("botsummon");
 	subcommand_list.push_back("bottogglearcher");
 	subcommand_list.push_back("bottogglehelm");
@@ -4791,7 +4793,7 @@ void bot_subcommand_bot_list(Client *c, const Seperator *sep)
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
 		c->Message(m_usage, "usage: %s ([class] [value]) ([race] [value]) ([name] [partial-full])", sep->arg[0]);
-		c->Message(m_note, "Note: filter criteria is orderless and optional");
+		c->Message(m_note, "note: filter criteria is orderless and optional");
 		return;
 	}
 
@@ -5123,6 +5125,53 @@ void bot_subcommand_bot_stance(Client *c, const Seperator *sep)
 
 		Bot::BotGroupSay(bot_iter, "My current stance is '%s' (%u)", GetBotStanceName(bot_iter->GetBotStance()), bot_iter->GetBotStance());
 	}
+}
+
+void bot_subcommand_bot_stop_melee_level(Client *c, const Seperator *sep)
+{
+	if (helper_command_alias_fail(c, "bot_subcommand_bot_stop_melee_level", sep->arg[0], "botstopmeleelevel"))
+		return;
+	if (helper_is_help_or_usage(sep->arg[1])) {
+		c->Message(m_usage, "usage: <target_bot> %s [current | reset | sync | value: 0-255]", sep->arg[0]);
+		c->Message(m_note, "note: Only caster and spell-casting fighter class bots may be modified");
+		c->Message(m_note, "note: Use [reset] to set stop melee level to server rule");
+		c->Message(m_note, "note: Use [sync] to set stop melee level to current bot level");
+		return;
+	}
+
+	auto my_bot = ActionableBots::AsTarget_ByBot(c);
+	if (!my_bot) {
+		c->Message(m_fail, "You must <target> a bot that you own to use this command");
+		return;
+	}
+	if (!IsCasterClass(my_bot->GetClass()) && !IsSpellFighterClass(my_bot->GetClass())) {
+		c->Message(m_fail, "You must <target> a caster or spell-casting fighter class bot to use this command");
+		return;
+	}
+
+	uint8 sml = RuleI(Bots, CasterStopMeleeLevel);
+
+	if (sep->IsNumber(1)) {
+		sml = atoi(sep->arg[1]);
+	}
+	else if (!strcasecmp(sep->arg[1], "sync")) {
+		sml = my_bot->GetLevel();
+	}
+	else if (!strcasecmp(sep->arg[1], "current")) {
+		c->Message(m_message, "My current melee stop level is %u", my_bot->GetStopMeleeLevel());
+		return;
+	}
+	else if (strcasecmp(sep->arg[1], "reset")) {
+		c->Message(m_fail, "A [current] or [reset] argument, or numeric [value] is required to use this command");
+		return;
+	}
+	// [reset] falls through with initialization value
+
+	my_bot->SetStopMeleeLevel(sml);
+	if (!botdb.SaveStopMeleeLevel(c->CharacterID(), my_bot->GetBotID(), sml))
+		c->Message(m_fail, "%s for '%s'", BotDatabase::fail::SaveStopMeleeLevel(), my_bot->GetCleanName());
+
+	c->Message(m_action, "Successfully set stop melee level for %s to %u", my_bot->GetCleanName(), sml);
 }
 
 void bot_subcommand_bot_summon(Client *c, const Seperator *sep)
