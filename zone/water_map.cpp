@@ -3,6 +3,7 @@
 #include "water_map.h"
 #include "water_map_v1.h"
 #include "water_map_v2.h"
+#include "../common/eqemu_logsys.h"
 
 #include <algorithm>
 #include <cctype>
@@ -12,7 +13,7 @@
 WaterMap* WaterMap::LoadWaterMapfile(std::string zone_name) {
 	std::transform(zone_name.begin(), zone_name.end(), zone_name.begin(), ::tolower);
 		
-	std::string file_path = Config->MapDir + zone_name + std::string(".wtr");
+	std::string file_path = Config->MapDir + "water/" + zone_name + std::string(".wtr");
 	FILE *f = fopen(file_path.c_str(), "rb");
 	if(f) {
 		char magic[10];
@@ -38,7 +39,9 @@ WaterMap* WaterMap::LoadWaterMapfile(std::string zone_name) {
 				delete wm;
 				wm = nullptr;
 			}
-			
+
+			Log(Logs::General, Logs::Status, "Loaded Water Map V%u file %s", version, file_path.c_str());
+
 			fclose(f);
 			return wm;
 		} else if(version == 2) {
@@ -47,7 +50,9 @@ WaterMap* WaterMap::LoadWaterMapfile(std::string zone_name) {
 				delete wm;
 				wm = nullptr;
 			}
-			
+
+			Log(Logs::General, Logs::Status, "Loaded Water Map V%u file %s", version, file_path.c_str());
+
 			fclose(f);
 			return wm;
 		} else {
