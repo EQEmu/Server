@@ -433,6 +433,7 @@ void Mob::AI_Init()
 	AI_feign_remember_timer.reset(nullptr);
 	AI_scan_area_timer.reset(nullptr);
 	AI_check_signal_timer.reset(nullptr);
+	AI_scan_door_open_timer.reset(nullptr);
 
 	minLastFightingDelayMoving = RuleI(NPC, LastFightingDelayMovingMin);
 	maxLastFightingDelayMoving = RuleI(NPC, LastFightingDelayMovingMax);
@@ -476,15 +477,17 @@ void Mob::AI_Start(uint32 iMoveDelay) {
 	else
 		pLastFightingDelayMoving = 0;
 
-	pAIControlled = true;
+	pAIControlled  = true;
 	AI_think_timer = std::unique_ptr<Timer>(new Timer(AIthink_duration));
 	AI_think_timer->Trigger();
-	AI_walking_timer = std::unique_ptr<Timer>(new Timer(0));
-	AI_movement_timer = std::unique_ptr<Timer>(new Timer(AImovement_duration));
-	AI_target_check_timer = std::unique_ptr<Timer>(new Timer(AItarget_check_duration));
-	AI_feign_remember_timer = std::unique_ptr<Timer>(new Timer(AIfeignremember_delay));
 
-	if(CastToNPC()->WillAggroNPCs())
+	AI_walking_timer        = std::unique_ptr<Timer>(new Timer(0));
+	AI_movement_timer       = std::unique_ptr<Timer>(new Timer(AImovement_duration));
+	AI_target_check_timer   = std::unique_ptr<Timer>(new Timer(AItarget_check_duration));
+	AI_feign_remember_timer = std::unique_ptr<Timer>(new Timer(AIfeignremember_delay));
+	AI_scan_door_open_timer = std::unique_ptr<Timer>(new Timer(AI_scan_door_open_interval));
+
+	if (CastToNPC()->WillAggroNPCs())
 		AI_scan_area_timer = std::unique_ptr<Timer>(new Timer(RandomTimer(RuleI(NPC, NPCToNPCAggroTimerMin), RuleI(NPC, NPCToNPCAggroTimerMax))));
 	
 	AI_check_signal_timer = std::unique_ptr<Timer>(new Timer(AI_check_signal_timer_delay));
@@ -552,6 +555,7 @@ void Mob::AI_Stop() {
 	AI_scan_area_timer.reset(nullptr);
 	AI_feign_remember_timer.reset(nullptr);
 	AI_check_signal_timer.reset(nullptr);
+	AI_scan_door_open_timer.reset(nullptr);
 
 	hate_list.WipeHateList();
 }
@@ -1047,6 +1051,27 @@ void Mob::AI_Process() {
 
 	if (!zone->CanDoCombat() || IsPetStop() || IsPetRegroup()) {
 		engaged = false;
+	}
+
+	if (moving) {
+		if (AI_scan_door_open_timer->Check()) {
+
+			auto &door_list = entity_list.GetDoorsList();
+			for (auto itr : door_list) {
+				Doors* door = itr.second;
+
+				if (door->IsDoorOpen()) {
+					continue;
+				}
+
+				float distance = DistanceSquared(this->m_Position, door->GetPosition());
+				float distance_scan_door_open = 20;
+
+				if (distance <= (distance_scan_door_open * distance_scan_door_open)) {
+					door->ForceOpen(this);
+				}
+			}
+		}
 	}
 
 	// Begin: Additions for Wiz Fear Code

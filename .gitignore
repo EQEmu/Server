@@ -37,3 +37,5 @@ x64/
 x86/
 log/
 logs/
+
+.idea/*
