@@ -20,6 +20,7 @@
 #include "base_packet.h"
 #include "misc.h"
 #include "packet_dump.h"
+#include <limits>
 
 BasePacket::BasePacket(const unsigned char *buf, uint32 len)
 {
@@ -28,7 +29,7 @@ BasePacket::BasePacket(const unsigned char *buf, uint32 len)
 	this->_wpos = 0;
 	this->_rpos = 0;
 	this->timestamp.tv_sec = 0;
-	if (len>0) {
+    if (len > 0 && len < std::numeric_limits<uint32_t>::max()) {
 		this->size=len;
 		pBuffer= new unsigned char[len];
 		if (buf) {
