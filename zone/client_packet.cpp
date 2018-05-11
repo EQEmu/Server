@@ -13102,6 +13102,9 @@ void Client::Handle_OP_ShopRequest(const EQApplicationPacket *app)
 
 void Client::Handle_OP_Sneak(const EQApplicationPacket *app)
 {
+	// A flag to check if the player is underwater.
+	bool is_underwater = (zone->watermap && zone->watermap->InLiquid(glm::vec3(m_Position)));
+
 	if (!HasSkill(EQEmu::skills::SkillSneak) && GetSkill(EQEmu::skills::SkillSneak) == 0) {
 		return; //You cannot sneak if you do not have sneak
 	}
@@ -13118,23 +13121,29 @@ void Client::Handle_OP_Sneak(const EQApplicationPacket *app)
 		hidden = false;
 		improved_hidden = false;
 		auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
-		SpawnAppearance_Struct* sa_out = (SpawnAppearance_Struct*)outapp->pBuffer;
+		SpawnAppearance_Struct *sa_out = (SpawnAppearance_Struct *) outapp->pBuffer;
 		sa_out->spawn_id = GetID();
 		sa_out->type = 0x03;
 		sa_out->parameter = 0;
 		entity_list.QueueClients(this, outapp, true);
 		safe_delete(outapp);
-	}
-	else {
-		CheckIncreaseSkill(EQEmu::skills::SkillSneak, nullptr, 5);
+	} else {
+		// Only possible if not underwater.
+		if (!is_underwater) {
+			CheckIncreaseSkill(EQEmu::skills::SkillSneak, nullptr, 5);
+		} else {
+			Message(0, "You cannot start sneaking underwater.");
+			return;
+		}
 	}
 	float hidechance = ((GetSkill(EQEmu::skills::SkillSneak) / 300.0f) + .25) * 100;
 	float random = zone->random.Real(0, 99);
-	if (!was && random < hidechance) {
+	// If we are underwater, we cannot start sneaking.
+	if (!is_underwater && !was && random < hidechance) {
 		sneaking = true;
 	}
 	auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
-	SpawnAppearance_Struct* sa_out = (SpawnAppearance_Struct*)outapp->pBuffer;
+	SpawnAppearance_Struct *sa_out = (SpawnAppearance_Struct *) outapp->pBuffer;
 	sa_out->spawn_id = GetID();
 	sa_out->type = 0x0F;
 	sa_out->parameter = sneaking;
@@ -13142,12 +13151,11 @@ void Client::Handle_OP_Sneak(const EQApplicationPacket *app)
 	safe_delete(outapp);
 	if (GetClass() == ROGUE) {
 		outapp = new EQApplicationPacket(OP_SimpleMessage, 12);
-		SimpleMessage_Struct *msg = (SimpleMessage_Struct *)outapp->pBuffer;
+		SimpleMessage_Struct *msg = (SimpleMessage_Struct *) outapp->pBuffer;
 		msg->color = 0x010E;
 		if (sneaking) {
 			msg->string_id = 347;
-		}
-		else {
+		} else {
 			msg->string_id = 348;
 		}
 		FastQueuePacket(&outapp);
