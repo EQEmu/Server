@@ -188,12 +188,24 @@ glm::vec3 Mob::HandleStuckPath(const glm::vec3 &To, const glm::vec3 &From)
 	bool partial = false;
 	bool stuck = false;
 	auto r = zone->pathing->FindRoute(To, From, partial, stuck);
-	Route.clear();
+    Route.clear();
+    
+    if (r.size() < 1) {
+        Teleport(To);
+        return To;
+    }
 
-	auto final_node = r.back();
-	Route.push_back(final_node);
-	AdjustRoute(Route, flymode, GetZOffset());
-	return (*Route.begin()).pos;
+    auto iter = r.rbegin();
+    auto final_node = (*iter);
+    Teleport(final_node.pos);
+
+    if (r.size() < 2) {
+        return final_node.pos;
+    }
+    else {
+        iter++;
+        return (*iter).pos;
+    }
 }
 
 void CullPoints(std::vector<FindPerson_Point> &points) {
