@@ -931,7 +931,9 @@ bool Mob::CombatRange(Mob* other)
 	if (size_mod > 10000)
 		size_mod = size_mod / 7;
 
-	float _DistNoRoot = DistanceSquared(m_Position, other->GetPosition());
+	float _DistNoRoot = DistanceSquaredNoZ(m_Position, other->GetPosition());
+	float _zDist = m_Position.z - other->GetZ();
+	_zDist *= _zDist;
 
 	if (GetSpecialAbility(NPC_CHASE_DISTANCE)){
 
@@ -960,6 +962,11 @@ bool Mob::CombatRange(Mob* other)
 
 	if (_DistNoRoot <= size_mod)
 	{
+		//A hack to kill an exploit till we get something better.
+		if (flymode == 0 && _zDist > 500 && !CheckLastLosState()) {
+			return false;
+		}
+
 		return true;
 	}
 	return false;

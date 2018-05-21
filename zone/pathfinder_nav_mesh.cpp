@@ -59,12 +59,12 @@ IPathfinder::IPath PathfinderNavmesh::FindRoute(const glm::vec3 &start, const gl
 	filter.setAreaCost(6, 1.5f); //Ice
 	filter.setAreaCost(7, 3.0f); //V Water (Frigid Water)
 	filter.setAreaCost(8, 1.0f); //General Area
-	filter.setAreaCost(9, 1.0f); //Portal
-	filter.setAreaCost(10, 0.5f); //Prefer
+	filter.setAreaCost(9, 0.1f); //Portal
+	filter.setAreaCost(10, 0.1f); //Prefer
 
 	dtPolyRef start_ref;
 	dtPolyRef end_ref;
-	glm::vec3 ext(15.0f, 100.0f, 15.0f);
+	glm::vec3 ext(5.0f, 100.0f, 5.0f);
 
 	m_impl->query->findNearestPoly(&current_location[0], &ext[0], &filter, &start_ref, 0);
 	m_impl->query->findNearestPoly(&dest_location[0], &ext[0], &filter, &end_ref, 0);
