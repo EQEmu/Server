@@ -50,14 +50,14 @@ IPathfinder::IPath PathfinderNavmesh::FindRoute(const glm::vec3 &start, const gl
 	glm::vec3 dest_location(end.x, end.z, end.y);
 
 	dtQueryFilter filter;
-	filter.setIncludeFlags(65535U);
+	filter.setIncludeFlags(65535U ^ 2048);
 	filter.setAreaCost(0, 1.0f); //Normal
-	filter.setAreaCost(1, 2.0f); //Water
-	filter.setAreaCost(2, 4.0f); //Lava
+	filter.setAreaCost(1, 3.0f); //Water
+	filter.setAreaCost(2, 5.0f); //Lava
 	filter.setAreaCost(4, 1.0f); //PvP
-	filter.setAreaCost(5, 1.5f); //Slime
-	filter.setAreaCost(6, 1.5f); //Ice
-	filter.setAreaCost(7, 3.0f); //V Water (Frigid Water)
+	filter.setAreaCost(5, 2.0f); //Slime
+	filter.setAreaCost(6, 2.0f); //Ice
+	filter.setAreaCost(7, 4.0f); //V Water (Frigid Water)
 	filter.setAreaCost(8, 1.0f); //General Area
 	filter.setAreaCost(9, 0.1f); //Portal
 	filter.setAreaCost(10, 0.1f); //Prefer
