@@ -549,6 +549,7 @@ RULE_BOOL(Aggro, AllowTickPulling, false) // tick pulling is an exploit in an NP
 RULE_BOOL(Aggro, UseLevelAggro, true) // Level 18+ and Undead will aggro regardless of level difference. (this will disabled Rule:IntAggroThreshold if set to true)
 RULE_INT(Aggro, ClientAggroCheckInterval, 6) // Interval in which clients actually check for aggro - in seconds
 RULE_REAL(Aggro, PetAttackRange, 40000.0) // max squared range /pet attack works at default is 200
+RULE_BOOL(Aggro, NPCAggroMaxDistanceEnabled, true) /* If enabled, NPC's will drop aggro beyond 600 units or what is defined at the zone level */
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(TaskSystem)
