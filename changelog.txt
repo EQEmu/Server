@@ -15,6 +15,8 @@ Akkadius: Changed map directory load structure
 
 KLS: Implemented navigation mesh
     - All up to date maps and navs can be found https://github.com/Akkadius/EQEmuMaps
+    - To update maps either check out the maps found in the above repository or use the maintenance command:
+        perl eqemu_server.pl maps
 
 == 03/28/2018 ==
 Kayen: SE_CastOnFadeEffect, SE_CastOnFadeEffectNPC, SE_CastOnFadeEffectAlway triggered spell will now hit
