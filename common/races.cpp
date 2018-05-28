@@ -1596,7 +1596,7 @@ float GetRaceGenderDefaultHeight(int race, int gender)
 
 	const auto size = sizeof(male_height) / sizeof(male_height[0]);
 
-	if (race > size)
+	if (race >= size)
 		return 6.0f;
 
 	if (gender == 1)
