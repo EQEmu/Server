@@ -537,7 +537,7 @@ public:
 	inline const float GetTarVZ() const { return m_TargetV.z; }
 	inline const float GetTarVector() const { return tar_vector; }
 	inline const uint8 GetTarNDX() const { return tar_ndx; }
-	inline const int8 GetFlyMode() const { return flymode; }
+	inline const int8 GetFlyMode() const { return static_cast<const int8>(flymode); }
 	bool IsBoat() const;
 
 	//Group
@@ -986,6 +986,7 @@ public:
 	void				SendTo(float new_x, float new_y, float new_z);
 	void				SendToFixZ(float new_x, float new_y, float new_z);
 	float				GetZOffset() const;
+	float               GetDefaultRaceSize() const;
 	void 				FixZ(int32 z_find_offset = 5);
 	float				GetFixedZ(glm::vec3 position, int32 z_find_offset = 5);
 	
