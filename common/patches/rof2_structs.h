@@ -2346,7 +2346,6 @@ struct AltCurrencySelectItem_Struct
 /*064*/ uint32 unknown064;
 /*068*/ uint32 unknown068;
 /*072*/ uint32 unknown072;
-/*076*/ uint32 unknown076;
 };
 
 //Server -> Client
