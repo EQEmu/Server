@@ -135,7 +135,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, const glm::vec4& position, int if
 	respawn2 = in_respawn;
 	swarm_timer.Disable();
 
-	if (size < 0.0f)
+	if (size <= 0.0f)
 		size = GetRaceGenderDefaultHeight(race, gender);
 
 	taunting = false;
