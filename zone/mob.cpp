@@ -6053,59 +6053,7 @@ void Mob::CommonBreakInvisible()
 }
 
 float Mob::GetDefaultRaceSize() const {
-	switch (race) {
-		case RACE_HUMAN_1:
-			return 6.0;
-			break;
-		case RACE_BARBARIAN_2:
-			return 7.0;
-			break;
-		case RACE_ERUDITE_3:
-			return 6.0;
-			break;
-		case RACE_WOOD_ELF_4:
-			return 5.0;
-			break;
-		case RACE_HIGH_ELF_5:
-			return 6.0;
-			break;
-		case RACE_DARK_ELF_6:
-			return 5.0;
-			break;
-		case RACE_HALF_ELF_7:
-			return 5.5;
-			break;
-		case RACE_DWARF_8:
-			return 4.0;
-			break;
-		case RACE_TROLL_9:
-			return 8.0;
-			break;
-		case RACE_OGRE_10:
-			return 9.0;
-			break;
-		case RACE_HALFLING_11:
-			return 3.5;
-			break;
-		case RACE_GNOME_12:
-			return 3.0;
-			break;
-		case RACE_IKSAR_128:
-			return 6.0;
-			break;
-		case RACE_VAH_SHIR_130:
-			return 7.0;
-			break;
-		case RACE_FROGLOK_330:
-			return 5.0;
-			break;
-		case RACE_DRAKKIN_522:
-			return 5.0;
-			break;
-		default:
-			return 6.0;
-			break;
-	}
+	return GetRaceGenderDefaultHeight(race, gender);
 }
 
 
