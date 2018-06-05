@@ -1187,10 +1187,10 @@ void TaskManager::SendTaskSelectorNew(Client *c, Mob *mob, int TaskCount, int *T
 	auto outapp = new EQApplicationPacket(OP_OpenNewTasksWindow, PacketLength);
 
 	outapp->WriteUInt32(ValidTasks);	// TaskCount
-	outapp->WriteUInt32(2);			// Unknown2
+	outapp->WriteUInt32(2);			// Type
 	outapp->WriteUInt32(mob->GetID());	// TaskGiver
 
-	for(int i=0; i<TaskCount;i++) {
+	for(int i=0; i<TaskCount;i++) { // max 40
 
 		if(!AppropriateLevel(TaskList[i], PlayerLevel)) continue;
 
@@ -1199,14 +1199,14 @@ void TaskManager::SendTaskSelectorNew(Client *c, Mob *mob, int TaskCount, int *T
 		if(!IsTaskRepeatable(TaskList[i]) && c->IsTaskCompleted(TaskList[i])) continue;
 
 		outapp->WriteUInt32(TaskList[i]);	// TaskID
-		outapp->WriteFloat(1.0f);
+		outapp->WriteFloat(1.0f); // affects color, difficulty?
 		outapp->WriteUInt32(Tasks[TaskList[i]]->Duration);
-		outapp->WriteUInt32(0);				// Unknown7
+		outapp->WriteUInt32(0);				// 1 = Short, 2 = Medium, 3 = Long, anything else Unlimited
 
-		outapp->WriteString(Tasks[TaskList[i]]->Title);
-		outapp->WriteString(Tasks[TaskList[i]]->Description);
+		outapp->WriteString(Tasks[TaskList[i]]->Title); // max 64 with null
+		outapp->WriteString(Tasks[TaskList[i]]->Description); // max 4000 with null
 
-		outapp->WriteUInt8(0);				// Unknown10 - Empty string ?
+		outapp->WriteUInt8(0);				// Has reward set flag
 		outapp->WriteUInt32(1);				// ActivityCount - Hard set to 1 for now
 
 		// Activity stuff below - Will need to iterate through each task
@@ -1217,8 +1217,8 @@ void TaskManager::SendTaskSelectorNew(Client *c, Mob *mob, int TaskCount, int *T
 
 		outapp->WriteUInt32(0);				// ActivityNumber
 		outapp->WriteUInt32(1);				// ActivityType
-		outapp->WriteUInt32(0);				// Unknown14
-		outapp->WriteString("Text1 Test");
+		outapp->WriteUInt32(0);				// solo, group, raid?
+		outapp->WriteString("Text1 Test");	// max length 64
 		outapp->WriteUInt32(11);			// Text2Len
 		outapp->WriteString("Text2 Test");
 		outapp->WriteUInt32(1);				// GoalCount
@@ -1227,9 +1227,9 @@ void TaskManager::SendTaskSelectorNew(Client *c, Mob *mob, int TaskCount, int *T
 		outapp->WriteUInt32(3);				// NumString2Len
 		outapp->WriteString("-1");
 		//outapp->WriteString(itoa(Tasks[TaskList[i]]->Activity[ActivityID].ZoneID));
-		outapp->WriteString(StartZone);		// Zone number in ascii
-		outapp->WriteString("Text3 Test");
-		outapp->WriteString(StartZone);		// Zone number in ascii
+		outapp->WriteString(StartZone);		// Zone number in ascii max length 64, can be multiple with separated by ;
+		outapp->WriteString("Text3 Test");	// max length 128
+		outapp->WriteString(StartZone);		// Zone number in ascii max length 64, probably can be separated by ; too, haven't found it used
 	}
 
 	c->QueuePacket(outapp);
