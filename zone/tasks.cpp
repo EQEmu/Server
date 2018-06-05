@@ -1187,7 +1187,7 @@ void TaskManager::SendTaskSelectorNew(Client *c, Mob *mob, int TaskCount, int *T
 	auto outapp = new EQApplicationPacket(OP_OpenNewTasksWindow, PacketLength);
 
 	outapp->WriteUInt32(ValidTasks);	// TaskCount
-	outapp->WriteUInt32(2);			// Type
+	outapp->WriteUInt32(2);			// Type, valid values: 1-3, 1 is shared task
 	outapp->WriteUInt32(mob->GetID());	// TaskGiver
 
 	for(int i=0; i<TaskCount;i++) { // max 40
