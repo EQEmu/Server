@@ -1219,13 +1219,21 @@ void TaskManager::SendTaskSelectorNew(Client *c, Mob *mob, int TaskCount, int *T
 		outapp->WriteUInt32(1);				// ActivityType
 		outapp->WriteUInt32(0);				// solo, group, raid?
 		outapp->WriteString("Text1 Test");	// max length 64
+
+		// this string is item names
 		outapp->WriteUInt32(11);			// Text2Len
 		outapp->WriteString("Text2 Test");
+
 		outapp->WriteUInt32(1);				// GoalCount
+
+		// this string is skill IDs? probably one of the "use on" tasks
 		outapp->WriteUInt32(3);				// NumString1Len
 		outapp->WriteString("-1");
+
+		// this string is spell IDs? probably one of the "use on" tasks
 		outapp->WriteUInt32(3);				// NumString2Len
 		outapp->WriteString("-1");
+
 		//outapp->WriteString(itoa(Tasks[TaskList[i]]->Activity[ActivityID].ZoneID));
 		outapp->WriteString(StartZone);		// Zone number in ascii max length 64, can be multiple with separated by ;
 		outapp->WriteString("Text3 Test");	// max length 128

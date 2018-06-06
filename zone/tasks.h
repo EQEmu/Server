@@ -138,7 +138,7 @@ typedef enum { ActivityHidden = 0, ActivityActive = 1, ActivityCompleted = 2 } A
 
 typedef enum { ActivityDeliver = 1, ActivityKill = 2, ActivityLoot = 3, ActivitySpeakWith = 4, ActivityExplore = 5,
 			ActivityTradeSkill = 6, ActivityFish = 7, ActivityForage = 8, ActivityUse1 = 9, ActivityUse2 = 10,
-			ActivityTouch = 11, ActivityGiveCash = 100 } ActivityType;
+			ActivityTouch = 11, ActivityCollect = 13, ActivityGiveCash = 100 } ActivityType;
 
 
 struct ClientActivityInformation {
