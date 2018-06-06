@@ -1218,7 +1218,7 @@ void TaskManager::SendTaskSelectorNew(Client *c, Mob *mob, int TaskCount, int *T
 		outapp->WriteUInt32(0);				// ActivityNumber
 		outapp->WriteUInt32(1);				// ActivityType
 		outapp->WriteUInt32(0);				// solo, group, raid?
-		outapp->WriteString("Text1 Test");	// max length 64
+		outapp->WriteString("Text1 Test");	// max length 64 -- affects what string ID it will use for the description, should be a name here?
 
 		// this string is item names
 		outapp->WriteUInt32(11);			// Text2Len
@@ -1236,7 +1236,7 @@ void TaskManager::SendTaskSelectorNew(Client *c, Mob *mob, int TaskCount, int *T
 
 		//outapp->WriteString(itoa(Tasks[TaskList[i]]->Activity[ActivityID].ZoneID));
 		outapp->WriteString(StartZone);		// Zone number in ascii max length 64, can be multiple with separated by ;
-		outapp->WriteString("Text3 Test");	// max length 128
+		outapp->WriteString("Text3 Test");	// max length 128 -- overrides the automatic descriptions
 		outapp->WriteString(StartZone);		// Zone number in ascii max length 64, probably can be separated by ; too, haven't found it used
 	}
 
