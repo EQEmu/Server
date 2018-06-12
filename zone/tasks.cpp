@@ -3140,41 +3140,39 @@ bool TaskGoalListManager::LoadLists()
 		listIndex++;
 	}
 
-	for(int listIndex = 0; listIndex < NumberOfLists; listIndex++) {
+	for (int listIndex = 0; listIndex < NumberOfLists; listIndex++) {
 
 		int listID = TaskGoalLists[listIndex].ListID;
 		unsigned int size = TaskGoalLists[listIndex].Size;
-        query = StringFormat("SELECT `entry` from `goallists` "
-                            "WHERE `listid` = %i "
-							"ORDER BY `entry` ASC LIMIT %i",
-							listID, size);
-        results = database.QueryDatabase(query);
-        if (!results.Success()) {
+		query = StringFormat("SELECT `entry` from `goallists` "
+				     "WHERE `listid` = %i "
+				     "ORDER BY `entry` ASC LIMIT %i",
+				     listID, size);
+		results = database.QueryDatabase(query);
+		if (!results.Success()) {
 			TaskGoalLists[listIndex].Size = 0;
 			continue;
-        }
+		}
 
-        // This should only happen if a row is deleted in between us retrieving the counts
-        // at the start of this method and getting to here. It should not be possible for
-        // an INSERT to cause a problem, as the SELECT is used with a LIMIT
-        if(results.RowCount() < size)
-            TaskGoalLists[listIndex].Size = results.RowCount();
+		// This should only happen if a row is deleted in between us retrieving the counts
+		// at the start of this method and getting to here. It should not be possible for
+		// an INSERT to cause a problem, as the SELECT is used with a LIMIT
+		if (results.RowCount() < size)
+			TaskGoalLists[listIndex].Size = results.RowCount();
 
-        int entryIndex = 0;
-        for (auto row = results.begin(); row != results.end(); ++row, ++entryIndex) {
+		int entryIndex = 0;
+		for (auto row = results.begin(); row != results.end(); ++row, ++entryIndex) {
 
-            int entry = atoi(row[0]);
+			int entry = atoi(row[0]);
 
-            if(entry < TaskGoalLists[listIndex].Min)
-                TaskGoalLists[listIndex].Min = entry;
+			if (entry < TaskGoalLists[listIndex].Min)
+				TaskGoalLists[listIndex].Min = entry;
 
-            if(entry > TaskGoalLists[listIndex].Max)
-                TaskGoalLists[listIndex].Max = entry;
+			if (entry > TaskGoalLists[listIndex].Max)
+				TaskGoalLists[listIndex].Max = entry;
 
-            TaskGoalLists[listIndex].GoalItemEntries[entryIndex] = entry;
-
-        }
-
+			TaskGoalLists[listIndex].GoalItemEntries[entryIndex] = entry;
+		}
 	}
 
 	return true;
@@ -3184,24 +3182,13 @@ bool TaskGoalListManager::LoadLists()
 int TaskGoalListManager::GetListByID(int ListID) {
 
 	// Find the list with the specified ListID and return the index
+	auto it = std::find_if(TaskGoalLists.begin(), TaskGoalLists.end(),
+			       [ListID](const TaskGoalList_Struct &t) { return t.ListID == ListID; });
 
-	int FirstEntry = 0;
-	int LastEntry = NumberOfLists - 1;
+	if (it == TaskGoalLists.end())
+		return -1;
 
-	while(FirstEntry <= LastEntry) {
-		int MiddleEntry = (FirstEntry + LastEntry) / 2;
-
-		if(ListID > TaskGoalLists[MiddleEntry].ListID)
-			FirstEntry = MiddleEntry + 1;
-		else if(ListID < TaskGoalLists[MiddleEntry].ListID)
-			LastEntry = MiddleEntry - 1;
-		else
-			return MiddleEntry;
-
-	}
-
-	return -1;
-
+	return std::distance(TaskGoalLists.begin(), it);
 }
 
 int TaskGoalListManager::GetFirstEntry(int ListID) {
