@@ -53,7 +53,6 @@ namespace EQEmu
 
 struct TaskGoalList_Struct {
 	int ListID;
-	int Size;
 	int Min, Max;
 	std::vector<int> GoalItemEntries;
 };
