@@ -55,7 +55,7 @@ struct TaskGoalList_Struct {
 	int ListID;
 	int Size;
 	int Min, Max;
-	int *GoalItemEntries;
+	std::vector<int> GoalItemEntries;
 };
 
 // This is used for handling lists, loading them from the database, searching them.
