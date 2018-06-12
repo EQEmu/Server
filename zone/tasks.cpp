@@ -3153,8 +3153,7 @@ bool TaskGoalListManager::LoadLists()
 			continue;
 		}
 
-		int entryIndex = 0;
-		for (auto row = results.begin(); row != results.end(); ++row, ++entryIndex) {
+		for (auto row = results.begin(); row != results.end(); ++row) {
 
 			int entry = atoi(row[0]);
 
@@ -3164,7 +3163,7 @@ bool TaskGoalListManager::LoadLists()
 			if (entry > TaskGoalLists[listIndex].Max)
 				TaskGoalLists[listIndex].Max = entry;
 
-			TaskGoalLists[listIndex].GoalItemEntries[entryIndex] = entry;
+			TaskGoalLists[listIndex].GoalItemEntries.push_back(entry);
 		}
 	}
 
