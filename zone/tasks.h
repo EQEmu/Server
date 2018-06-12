@@ -117,9 +117,9 @@ typedef enum { ActivitiesSequential = 0, ActivitiesStepped = 1 } SequenceType;
 
 struct TaskInformation {
 	int	Duration;
-	char	*Title;
-	char	*Description;
-	char	*Reward;
+	std::string Title;			// max length 64
+	std::string Description;	// max length 4000
+	std::string Reward;
 	int	RewardID;
 	int	CashReward; // Expressed in copper
 	int	XPReward;

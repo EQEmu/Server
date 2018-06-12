@@ -48,9 +48,6 @@ TaskManager::TaskManager() {
 TaskManager::~TaskManager() {
 	for(int i=0; i<MAXTASKS; i++) {
 		if(Tasks[i] != nullptr) {
-			safe_delete_array(Tasks[i]->Title);
-			safe_delete_array(Tasks[i]->Description);
-			safe_delete_array(Tasks[i]->Reward);
 			safe_delete(Tasks[i]);
 		}
 	}
@@ -93,9 +90,6 @@ bool TaskManager::LoadSingleTask(int TaskID) {
 
 	// If this task already exists in memory, free all the dynamically allocated strings.
 	if(Tasks[TaskID]) {
-		safe_delete_array(Tasks[TaskID]->Title);
-		safe_delete_array(Tasks[TaskID]->Description);
-		safe_delete_array(Tasks[TaskID]->Reward);
 		safe_delete(Tasks[TaskID]);
 	}
 
@@ -153,12 +147,9 @@ bool TaskManager::LoadTasks(int singleTask)
 
 		Tasks[taskID] = new TaskInformation;
 		Tasks[taskID]->Duration = atoi(row[1]);
-		Tasks[taskID]->Title = new char[strlen(row[2]) + 1];
-		strcpy(Tasks[taskID]->Title, row[2]);
-		Tasks[taskID]->Description = new char[strlen(row[3]) + 1];
-		strcpy(Tasks[taskID]->Description, row[3]);
-		Tasks[taskID]->Reward = new char[strlen(row[4]) + 1];
-		strcpy(Tasks[taskID]->Reward, row[4]);
+		Tasks[taskID]->Title = row[2];
+		Tasks[taskID]->Description = row[3];
+		Tasks[taskID]->Reward = row[4];
 		Tasks[taskID]->RewardID = atoi(row[5]);
 		Tasks[taskID]->CashReward = atoi(row[6]);
 		Tasks[taskID]->XPReward = atoi(row[7]);
@@ -174,9 +165,9 @@ bool TaskManager::LoadTasks(int singleTask)
 		Log(Logs::General, Logs::Tasks,
 		    "[GLOBALLOAD] TaskID: %5i, Duration: %8i, StartZone: %3i Reward: %s MinLevel %i MaxLevel %i "
 		    "Repeatable: %s",
-		    taskID, Tasks[taskID]->Duration, Tasks[taskID]->StartZone, Tasks[taskID]->Reward,
+		    taskID, Tasks[taskID]->Duration, Tasks[taskID]->StartZone, Tasks[taskID]->Reward.c_str(),
 		    Tasks[taskID]->MinLevel, Tasks[taskID]->MaxLevel, Tasks[taskID]->Repeatable ? "Yes" : "No");
-		Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] Title: %s", Tasks[taskID]->Title);
+		Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] Title: %s", Tasks[taskID]->Title.c_str());
 	}
 
 	if (singleTask == 0)
@@ -658,7 +649,7 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state) {
 			if(state->ActiveTasks[i].Activity[j].ActivityID != j) {
 				c->Message(13, "Active Task %i, %s. Activity count does not match expected value."
 							"Removing from memory. Contact a GM to resolve this.",
-							taskID, Tasks[taskID]->Title);
+							taskID, Tasks[taskID]->Title.c_str());
 
 				Log(Logs::General, Logs::Error, "[TASKS]Fatal error in character %i task state. Activity %i for "
 						"Task %i either missing from client state or from task.", characterID, j, taskID);
@@ -1043,8 +1034,8 @@ void TaskManager::SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *Task
 
 		ValidTasks++;
 
-		PacketLength = PacketLength + sizeof(AvailableTaskData1_Struct) + strlen(Tasks[TaskList[i]]->Title) + 1 +
-					strlen(Tasks[TaskList[i]]->Description) + 1 + sizeof(AvailableTaskData2_Struct) + 10 +
+		PacketLength = PacketLength + sizeof(AvailableTaskData1_Struct) + Tasks[TaskList[i]]->Title.size() + 1 +
+					Tasks[TaskList[i]]->Description.size() + 1 + sizeof(AvailableTaskData2_Struct) + 10 +
 					sizeof(AvailableTaskTrailer_Struct) + 5;
 	}
 
@@ -1082,11 +1073,11 @@ void TaskManager::SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *Task
 
 		Ptr = (char *)AvailableTaskData1 + sizeof(AvailableTaskData1_Struct);
 
-		sprintf(Ptr, "%s", Tasks[TaskList[i]]->Title);
+		sprintf(Ptr, "%s", Tasks[TaskList[i]]->Title.c_str());
 
 		Ptr = Ptr + strlen(Ptr) + 1;
 
-		sprintf(Ptr, "%s", Tasks[TaskList[i]]->Description);
+		sprintf(Ptr, "%s", Tasks[TaskList[i]]->Description.c_str());
 
 		Ptr = Ptr + strlen(Ptr) + 1;
 
@@ -1158,8 +1149,8 @@ void TaskManager::SendTaskSelectorNew(Client *c, Mob *mob, int TaskCount, int *T
 		ValidTasks++;
 
 		PacketLength += 21;	// Task Data - strings
-		PacketLength += strlen(Tasks[TaskList[i]]->Title) + 1 +
-						strlen(Tasks[TaskList[i]]->Description) + 1;
+		PacketLength += Tasks[TaskList[i]]->Title.size() + 1 +
+						Tasks[TaskList[i]]->Description.size() + 1;
 
 		sprintf(StartZone, "%i", Tasks[TaskList[i]]->StartZone);
 		/*
@@ -1196,8 +1187,8 @@ void TaskManager::SendTaskSelectorNew(Client *c, Mob *mob, int TaskCount, int *T
 		outapp->WriteUInt32(Tasks[TaskList[i]]->Duration);
 		outapp->WriteUInt32(0);				// 1 = Short, 2 = Medium, 3 = Long, anything else Unlimited
 
-		outapp->WriteString(Tasks[TaskList[i]]->Title); // max 64 with null
-		outapp->WriteString(Tasks[TaskList[i]]->Description); // max 4000 with null
+		outapp->WriteString(Tasks[TaskList[i]]->Title.c_str()); // max 64 with null
+		outapp->WriteString(Tasks[TaskList[i]]->Description.c_str()); // max 4000 with null
 
 		outapp->WriteUInt8(0);				// Has reward set flag
 		outapp->WriteUInt32(1);				// ActivityCount - Hard set to 1 for now
@@ -1269,7 +1260,7 @@ void TaskManager::ExplainTask(Client*c, int TaskID) {
 	}
 
 	char Explanation[1000], *ptr;
-	c->Message(0, "Task %4i: Title: %s", TaskID, Tasks[TaskID]->Description);
+	c->Message(0, "Task %4i: Title: %s", TaskID, Tasks[TaskID]->Description.c_str());
 	c->Message(0, "%3i Activities", Tasks[TaskID]->ActivityCount);
 	ptr = Explanation;
 	for(int i=0; i<Tasks[TaskID]->ActivityCount; i++) {
@@ -1851,7 +1842,7 @@ void ClientTaskState::IncrementDoneCount(Client *c, TaskInformation* Task, int T
 		// Send the updated task/activity list to the client
 		taskmanager->SendSingleActiveTaskToClient(c, TaskIndex, TaskComplete, false);
 		// Inform the client the task has been updated, both by a chat message
-		c->Message(0, "Your task '%s' has been updated.", Task->Title);
+		c->Message(0, "Your task '%s' has been updated.", Task->Title.c_str());
 
 		if(Task->Activity[ActivityID].GoalMethod != METHODQUEST) {
 			if (!ignore_quest_update){
@@ -2157,8 +2148,8 @@ void ClientTaskState::ShowClientTasks(Client *c) {
 		if(ActiveTasks[i].TaskID==TASKSLOTEMPTY)
 			continue;
 
-		c->Message(0, "Task: %i %s", ActiveTasks[i].TaskID, taskmanager->Tasks[ActiveTasks[i].TaskID]->Title);
-		c->Message(0, "  Description: [%s]\n", taskmanager->Tasks[ActiveTasks[i].TaskID]->Description);
+		c->Message(0, "Task: %i %s", ActiveTasks[i].TaskID, taskmanager->Tasks[ActiveTasks[i].TaskID]->Title.c_str());
+		c->Message(0, "  Description: [%s]\n", taskmanager->Tasks[ActiveTasks[i].TaskID]->Description.c_str());
 		for(int j=0; j<taskmanager->GetActivityCount(ActiveTasks[i].TaskID); j++) {
 			c->Message(0, "  Activity: %2d, DoneCount: %2d, Status: %d (0=Hidden, 1=Active, 2=Complete)",
 					ActiveTasks[i].Activity[j].ActivityID,
@@ -2466,7 +2457,7 @@ void TaskManager::SendCompletedTasksToClient(Client *c, ClientTaskState *State) 
 	for(int i = FirstTaskToSend; i<LastTaskToSend; i++) {
 		int TaskID = State->CompletedTasks[i].TaskID;
 		if(Tasks[TaskID] == nullptr) continue;
-		PacketLength = PacketLength + 8 + strlen(Tasks[TaskID]->Title) + 1;
+		PacketLength = PacketLength + 8 + Tasks[TaskID]->Title.size() + 1;
 	}
 
 	auto outapp = new EQApplicationPacket(OP_CompletedTasks, PacketLength);
@@ -2483,7 +2474,7 @@ void TaskManager::SendCompletedTasksToClient(Client *c, ClientTaskState *State) 
 		*(uint32 *)buf = TaskID;
 		buf = buf + 4;
 
-		sprintf(buf, "%s", Tasks[TaskID]->Title);
+		sprintf(buf, "%s", Tasks[TaskID]->Title.c_str());
 		buf = buf + strlen(buf) + 1;
 		//*(uint32 *)buf = (*iterator).CompletedTime;
 		*(uint32 *)buf = State->CompletedTasks[i].CompletedTime;
@@ -2774,8 +2765,8 @@ void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, int SequenceN
 	if ((TaskID < 1) || (TaskID >= MAXTASKS) || !Tasks[TaskID])
 		return;
 
-	int PacketLength = sizeof(TaskDescriptionHeader_Struct) + strlen(Tasks[TaskID]->Title) + 1
-				+ sizeof(TaskDescriptionData1_Struct) + strlen(Tasks[TaskID]->Description) + 1
+	int PacketLength = sizeof(TaskDescriptionHeader_Struct) + Tasks[TaskID]->Title.size() + 1
+				+ sizeof(TaskDescriptionData1_Struct) + Tasks[TaskID]->Description.size() + 1
 				+ sizeof(TaskDescriptionData2_Struct) + 1 + sizeof(TaskDescriptionTrailer_Struct);
 
 	std::string reward_text;
@@ -2802,8 +2793,8 @@ void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, int SequenceN
 			linker.SetLinkType(EQEmu::saylink::SayLinkItemData);
 			linker.SetItemData(reward_item);
 			linker.SetTaskUse();
-			if (strlen(Tasks[TaskID]->Reward) != 0)
-				linker.SetProxyText(Tasks[TaskID]->Reward);
+			if (!Tasks[TaskID]->Reward.empty())
+				linker.SetProxyText(Tasks[TaskID]->Reward.c_str());
 
 			reward_text.append(linker.GenerateLink());
 		}
@@ -2841,7 +2832,7 @@ void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, int SequenceN
 
 	Ptr = (char *) tdh + sizeof(TaskDescriptionHeader_Struct);
 
-	sprintf(Ptr, "%s", Tasks[TaskID]->Title);
+	sprintf(Ptr, "%s", Tasks[TaskID]->Title.c_str());
 	Ptr = Ptr + strlen(Ptr) + 1;
 
 	tdd1 = (TaskDescriptionData1_Struct*)Ptr;
@@ -2853,7 +2844,7 @@ void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, int SequenceN
 
 	Ptr = (char *) tdd1 + sizeof(TaskDescriptionData1_Struct);
 
-	sprintf(Ptr, "%s", Tasks[TaskID]->Description);
+	sprintf(Ptr, "%s", Tasks[TaskID]->Description.c_str());
 	Ptr = Ptr + strlen(Ptr) + 1;
 
 	tdd2 = (TaskDescriptionData2_Struct*)Ptr;
@@ -3053,7 +3044,7 @@ void ClientTaskState::AcceptNewTask(Client *c, int TaskID, int NPCID, bool enfor
 	UnlockActivities(c->CharacterID(), FreeSlot);
 	ActiveTaskCount++;
 	taskmanager->SendSingleActiveTaskToClient(c, FreeSlot, false, true);
-	c->Message(0, "You have been assigned the task '%s'.", taskmanager->Tasks[TaskID]->Title);
+	c->Message(0, "You have been assigned the task '%s'.", taskmanager->Tasks[TaskID]->Title.c_str());
 
 	char *buf = 0;
 	MakeAnyLenString(&buf, "%d", TaskID);
