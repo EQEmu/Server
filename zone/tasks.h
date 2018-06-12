@@ -24,6 +24,7 @@ Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
 
 #include <list>
 #include <vector>
+#include <string>
 
 #define MAXTASKS 10000
 #define MAXTASKSETS 1000
@@ -101,9 +102,9 @@ typedef enum { METHODSINGLEID = 0, METHODLIST = 1, METHODQUEST = 2 } TaskMethodT
 struct ActivityInformation {
 	int		StepNumber;
 	int		Type;
-	char	*Text1;
-	char	*Text2;
-	char	*Text3;
+	std::string Text1;
+	std::string Text2;
+	std::string Text3;
 	int		GoalID;
 	TaskMethodType GoalMethod;
 	int		GoalCount;
