@@ -75,7 +75,7 @@ public:
 
 private:
 
-	TaskGoalList_Struct *TaskGoalLists;
+	std::vector<TaskGoalList_Struct> TaskGoalLists;
 	int NumberOfLists;
 };
 
