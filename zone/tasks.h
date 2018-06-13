@@ -228,7 +228,7 @@ private:
 	bool UnlockActivities(int CharID, int TaskIndex);
 	void IncrementDoneCount(Client *c, TaskInformation *Task, int TaskIndex, int ActivityID, int Count = 1, bool ignore_quest_update = false);
 	int ActiveTaskCount;
-	ClientTaskInformation ActiveTasks[MAXACTIVEQUESTS];
+	ClientTaskInformation ActiveQuests[MAXACTIVEQUESTS];
 	std::vector<int> EnabledTasks;
 	std::vector<CompletedTaskInformation> CompletedTasks;
 	int LastCompletedTaskLoaded;
