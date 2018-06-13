@@ -115,16 +115,14 @@ bool TaskManager::LoadTasks(int singleTask)
 		if (!LoadTaskSets())
 			Log(Logs::Detail, Logs::Tasks, "TaskManager::LoadTasks LoadTaskSets failed");
 
-		query = StringFormat("SELECT `id`, `duration`, `title`, `description`, `reward`, "
-				     "`rewardid`, `cashreward`, `xpreward`, `rewardmethod`, "
-				     "`startzone`, `minlevel`, `maxlevel`, `repeatable` "
-				     "FROM `tasks` WHERE `id` < %i",
+		query = StringFormat("SELECT `id`, `type`, `duration`, `duration_code`, `title`, `description`, "
+				     "`reward`, `rewardid`, `cashreward`, `xpreward`, `rewardmethod`, `startzone`, "
+				     "`minlevel`, `maxlevel`, `repeatable` FROM `tasks` WHERE `id` < %i",
 				     MAXTASKS);
 	} else
-		query = StringFormat("SELECT `id`, `duration`, `title`, `description`, `reward`, "
-				     "`rewardid`, `cashreward`, `xpreward`, `rewardmethod`, "
-				     "`startzone`, `minlevel`, `maxlevel`, `repeatable` "
-				     "FROM `tasks` WHERE `id` = %i",
+		query = StringFormat("SELECT `id`, `type`, `duration`, `duration_code`, `title`, `description`, "
+				     "`reward`, `rewardid`, `cashreward`, `xpreward`, `rewardmethod`, `startzone`, "
+				     "`minlevel`, `maxlevel`, `repeatable` FROM `tasks` WHERE `id` = %i",
 				     singleTask);
 
 	const char *ERR_MYSQLERROR = "[TASKS]Error in TaskManager::LoadTasks: %s";
@@ -146,18 +144,20 @@ bool TaskManager::LoadTasks(int singleTask)
 		}
 
 		Tasks[taskID] = new TaskInformation;
-		Tasks[taskID]->Duration = atoi(row[1]);
-		Tasks[taskID]->Title = row[2];
-		Tasks[taskID]->Description = row[3];
-		Tasks[taskID]->Reward = row[4];
-		Tasks[taskID]->RewardID = atoi(row[5]);
-		Tasks[taskID]->CashReward = atoi(row[6]);
-		Tasks[taskID]->XPReward = atoi(row[7]);
-		Tasks[taskID]->RewardMethod = (TaskMethodType)atoi(row[8]);
-		Tasks[taskID]->StartZone = atoi(row[9]);
-		Tasks[taskID]->MinLevel = atoi(row[10]);
-		Tasks[taskID]->MaxLevel = atoi(row[11]);
-		Tasks[taskID]->Repeatable = atoi(row[12]);
+		Tasks[taskID]->type = static_cast<TaskType>(atoi(row[1]));
+		Tasks[taskID]->Duration = atoi(row[2]);
+		Tasks[taskID]->dur_code = static_cast<DurationCode>(atoi(row[3]));
+		Tasks[taskID]->Title = row[4];
+		Tasks[taskID]->Description = row[5];
+		Tasks[taskID]->Reward = row[6];
+		Tasks[taskID]->RewardID = atoi(row[7]);
+		Tasks[taskID]->CashReward = atoi(row[8]);
+		Tasks[taskID]->XPReward = atoi(row[9]);
+		Tasks[taskID]->RewardMethod = (TaskMethodType)atoi(row[10]);
+		Tasks[taskID]->StartZone = atoi(row[11]);
+		Tasks[taskID]->MinLevel = atoi(row[12]);
+		Tasks[taskID]->MaxLevel = atoi(row[13]);
+		Tasks[taskID]->Repeatable = atoi(row[14]);
 		Tasks[taskID]->ActivityCount = 0;
 		Tasks[taskID]->SequenceMode = ActivitiesSequential;
 		Tasks[taskID]->LastStep = 0;
@@ -1069,7 +1069,7 @@ void TaskManager::SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *Task
 
 		AvailableTaskData1->TimeLimit = Tasks[TaskList[i]]->Duration;
 
-		AvailableTaskData1->unknown2 = 0;
+		AvailableTaskData1->unknown2 = static_cast<int>(Tasks[TaskList[i]]->dur_code); // guess
 
 		Ptr = (char *)AvailableTaskData1 + sizeof(AvailableTaskData1_Struct);
 
@@ -1185,7 +1185,7 @@ void TaskManager::SendTaskSelectorNew(Client *c, Mob *mob, int TaskCount, int *T
 		outapp->WriteUInt32(TaskList[i]);	// TaskID
 		outapp->WriteFloat(1.0f); // affects color, difficulty?
 		outapp->WriteUInt32(Tasks[TaskList[i]]->Duration);
-		outapp->WriteUInt32(0);				// 1 = Short, 2 = Medium, 3 = Long, anything else Unlimited
+		outapp->WriteUInt32(static_cast<int>(Tasks[TaskList[i]]->dur_code));	// 1 = Short, 2 = Medium, 3 = Long, anything else Unlimited
 
 		outapp->WriteString(Tasks[TaskList[i]]->Title.c_str()); // max 64 with null
 		outapp->WriteString(Tasks[TaskList[i]]->Description.c_str()); // max 4000 with null

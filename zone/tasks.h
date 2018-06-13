@@ -115,10 +115,26 @@ struct ActivityInformation {
 
 typedef enum { ActivitiesSequential = 0, ActivitiesStepped = 1 } SequenceType;
 
+enum class TaskType {
+	Task = 0,		// can have at max 1
+	Shared = 1,		// can have at max 1
+	Quest = 2,		// can have at max 19 or 29 depending on client
+	E = 3			// can have at max 19 or 29 depending on client, not present in live anymore
+};
+
+enum class DurationCode {
+	None = 0,
+	Short = 1,
+	Medium = 2,
+	Long = 3
+};
+
 struct TaskInformation {
+	TaskType type;
 	int	Duration;
+	DurationCode dur_code; // description for time investment for when Duration == 0
 	std::string Title;			// max length 64
-	std::string Description;	// max length 4000
+	std::string Description;	// max length 4000, 2048 on Tit
 	std::string Reward;
 	int	RewardID;
 	int	CashReward; // Expressed in copper
