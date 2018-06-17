@@ -34,6 +34,7 @@ Copyright (C) 2001-2008 EQEMu Development Team (http://eqemulator.net)
 #include "client.h"
 #include "entity.h"
 #include "mob.h"
+#include "string_ids.h"
 
 #include "queryserv.h"
 #include "quest_parser_collection.h"
@@ -846,6 +847,27 @@ int ClientTaskState::CompletedTasksInSet(int TaskSetID) {
 	return Count;
 }
 
+bool ClientTaskState::HasSlotForTask(TaskInformation *task)
+{
+	if (task == nullptr)
+		return false;
+
+	switch (task->type) {
+	case TaskType::Task:
+		return ActiveTask.TaskID == TASKSLOTEMPTY;
+	case TaskType::Shared:
+		return false; // todo
+	case TaskType::Quest:
+		for (int i = 0; i < MAXACTIVEQUESTS; ++i)
+			if (ActiveQuests[i].TaskID == TASKSLOTEMPTY)
+				return true;
+	case TaskType::E:
+		return false; // removed on live
+	}
+
+	return false;
+}
+
 int TaskManager::FirstTaskInSet(int TaskSetID) {
 
 	if((TaskSetID<=0) || (TaskSetID>=MAXTASKSETS)) return 0;
@@ -917,77 +939,57 @@ int TaskManager::GetTaskMaxLevel(int TaskID)
 	return -1;
 }
 
-void TaskManager::TaskSetSelector(Client *c, ClientTaskState *state, Mob *mob, int TaskSetID) {
-
+void TaskManager::TaskSetSelector(Client *c, ClientTaskState *state, Mob *mob, int TaskSetID)
+{
 	unsigned int EnabledTaskIndex = 0;
 	unsigned int TaskSetIndex = 0;
 	int TaskList[MAXCHOOSERENTRIES];
 	int TaskListIndex = 0;
 	int PlayerLevel = c->GetLevel();
 
-	Log(Logs::General, Logs::Tasks, "[UPDATE] TaskSetSelector called for taskset %i. EnableTaskSize is %i", TaskSetID,
-				state->EnabledTasks.size());
-	if((TaskSetID<=0) || (TaskSetID>=MAXTASKSETS)) return;
+	Log(Logs::General, Logs::Tasks, "[UPDATE] TaskSetSelector called for taskset %i. EnableTaskSize is %i",
+	    TaskSetID, state->EnabledTasks.size());
 
-	if(!TaskSets[TaskSetID].empty()) {
+	if (TaskSetID <= 0 || TaskSetID >= MAXTASKSETS)
+		return;
 
-		// A TaskID of 0 in a TaskSet indicates that all Tasks in the set are enabled for all players.
-
-		if(TaskSets[TaskSetID][0] == 0) {
-
-			Log(Logs::General, Logs::Tasks, "[UPDATE] TaskSets[%i][0] == 0. All Tasks in Set enabled.", TaskSetID);
-			auto Iterator = TaskSets[TaskSetID].begin();
-
-			while((Iterator != TaskSets[TaskSetID].end()) && (TaskListIndex < MAXCHOOSERENTRIES)) {
-				if(AppropriateLevel((*Iterator), PlayerLevel) && !state->IsTaskActive((*Iterator)) &&
-					(IsTaskRepeatable((*Iterator)) || !state->IsTaskCompleted((*Iterator))))
-					TaskList[TaskListIndex++] = (*Iterator);
-
-				++Iterator;
-			}
-			if(TaskListIndex > 0)
-			{
-				SendTaskSelector(c, mob, TaskListIndex, TaskList);
-			}
-
-			return;
-		}
+	if (TaskSets[TaskSetID].empty()) {
+		c->Message_StringID(15, MAX_ACTIVE_TASKS, c->GetName()); // check color
+		return;
 	}
 
+	bool all_enabled = false;
 
-	while((EnabledTaskIndex < state->EnabledTasks.size()) && (TaskSetIndex < TaskSets[TaskSetID].size()) &&
-			(TaskListIndex < MAXCHOOSERENTRIES)) {
-
-		Log(Logs::General, Logs::Tasks, "[UPDATE] Comparing EnabledTasks[%i] (%i) with TaskSets[%i][%i] (%i)",
-				EnabledTaskIndex, state->EnabledTasks[EnabledTaskIndex], TaskSetID, TaskSetIndex,
-				TaskSets[TaskSetID][TaskSetIndex]);
-
-		if((TaskSets[TaskSetID][TaskSetIndex] > 0) &&
-			(state->EnabledTasks[EnabledTaskIndex] == TaskSets[TaskSetID][TaskSetIndex])) {
-
-			if(AppropriateLevel(TaskSets[TaskSetID][TaskSetIndex], PlayerLevel) &&
-				!state->IsTaskActive(TaskSets[TaskSetID][TaskSetIndex]) &&
-				(IsTaskRepeatable(TaskSets[TaskSetID][TaskSetIndex]) ||
-				!state->IsTaskCompleted(TaskSets[TaskSetID][TaskSetIndex]))) {
-
-				TaskList[TaskListIndex++] = TaskSets[TaskSetID][TaskSetIndex];
-
-				EnabledTaskIndex++;
-				TaskSetIndex++;
-				continue;
-			}
-		}
-
-		if(state->EnabledTasks[EnabledTaskIndex] < TaskSets[TaskSetID][TaskSetIndex])
-			EnabledTaskIndex++;
-		else
-			TaskSetIndex++;
+	// A TaskID of 0 in a TaskSet indicates that all Tasks in the set are enabled for all players.
+	if (TaskSets[TaskSetID][0] == 0) {
+		Log(Logs::General, Logs::Tasks, "[UPDATE] TaskSets[%i][0] == 0. All Tasks in Set enabled.", TaskSetID);
+		all_enabled = true;
 	}
 
-	if(TaskListIndex == 0) return;
+	auto Iterator = TaskSets[TaskSetID].begin();
 
-	SendTaskSelector(c, mob, TaskListIndex, TaskList);
+	if (all_enabled)
+		++Iterator; // skip first when all enabled since it's useless data
 
+	while (Iterator != TaskSets[TaskSetID].end() && TaskListIndex < MAXCHOOSERENTRIES) {
+		auto task = *Iterator;
+		// verify level, we're not currently on it, repeatable status, if it's a (shared) task
+		// we aren't currently on another, and if it's enabled if not all_enabled
+		if ((all_enabled || state->IsTaskEnabled(task)) && AppropriateLevel(task, PlayerLevel) &&
+		    !state->IsTaskActive(task) && state->HasSlotForTask(Tasks[task]) && // this slot checking is a bit silly, but we allow mixing of task types ...
+		    (IsTaskRepeatable(task) || !state->IsTaskCompleted(task)))
+			TaskList[TaskListIndex++] = task;
+
+		++Iterator;
+	}
+
+	if (TaskListIndex > 0) {
+		SendTaskSelector(c, mob, TaskListIndex, TaskList);
+	} else {
+		c->Message_StringID(15, MAX_ACTIVE_TASKS, c->GetName()); // check color, I think this might be only for (Shared) Tasks, w/e
+	}
+
+	return;
 }
 
 void TaskManager::SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *TaskList) {
@@ -1998,15 +2000,18 @@ void ClientTaskState::RewardTask(Client *c, TaskInformation *Task) {
 	c->SendSound();
 }
 
-bool ClientTaskState::IsTaskActive(int TaskID) {
+bool ClientTaskState::IsTaskActive(int TaskID)
+{
+	if (ActiveTaskCount == 0 || TaskID == 0)
+		return false;
 
-	if((ActiveTaskCount == 0) || (TaskID == 0)) return false;
-
-	for(int i=0; i<MAXACTIVEQUESTS; i++) {
-
-		if(ActiveQuests[i].TaskID==TaskID) return true;
-
+	for (int i = 0; i < MAXACTIVEQUESTS; i++) {
+		if (ActiveQuests[i].TaskID == TaskID)
+			return true;
 	}
+
+	if (ActiveTask.TaskID == TaskID)
+		return true;
 
 	return false;
 }

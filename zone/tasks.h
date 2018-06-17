@@ -28,7 +28,7 @@ Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
 
 #define MAXTASKS 10000
 #define MAXTASKSETS 1000
-// The Client has a hard cap of 19 active tasks, 29 in RoF2
+// The Client has a hard cap of 19 active quests, 29 in SoD+
 #define MAXACTIVEQUESTS 19
 // The Max Chooser (Task Selector entries) is capped at 40 in the Titanium Client.
 #define MAXCHOOSERENTRIES 40
@@ -222,13 +222,19 @@ public:
 	int ActiveSpeakActivity(int NPCID, int TaskID);
 	int ActiveTasksInSet(int TaskSetID);
 	int CompletedTasksInSet(int TaskSetID);
+	bool HasSlotForTask(TaskInformation *task);
+
+	inline bool HasFreeTaskSlot() { return ActiveTask.TaskID == TASKSLOTEMPTY; }
+
 	friend class TaskManager;
 
 private:
 	bool UnlockActivities(int CharID, int TaskIndex);
 	void IncrementDoneCount(Client *c, TaskInformation *Task, int TaskIndex, int ActivityID, int Count = 1, bool ignore_quest_update = false);
 	int ActiveTaskCount;
+	ClientTaskInformation ActiveTask; // only one
 	ClientTaskInformation ActiveQuests[MAXACTIVEQUESTS];
+	// Shared tasks should be limited to 1 as well
 	std::vector<int> EnabledTasks;
 	std::vector<CompletedTaskInformation> CompletedTasks;
 	int LastCompletedTaskLoaded;
