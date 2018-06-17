@@ -1315,6 +1315,8 @@ ClientTaskState::ClientTaskState() {
 
 	for(int i=0; i<MAXACTIVEQUESTS; i++)
 		ActiveQuests[i].TaskID = TASKSLOTEMPTY;
+
+	ActiveTask.TaskID = TASKSLOTEMPTY;
 }
 
 ClientTaskState::~ClientTaskState() {
