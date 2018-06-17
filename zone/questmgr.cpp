@@ -2149,7 +2149,7 @@ bool QuestManager::createBot(const char *name, const char *lastname, uint8 level
 void QuestManager::taskselector(int taskcount, int *tasks) {
 	QuestManagerCurrentQuestVars();
 	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && owner && taskmanager)
-		taskmanager->SendTaskSelector(initiator, owner, taskcount, tasks);
+		initiator->TaskQuestSetSelector(owner, taskcount, tasks);
 }
 void QuestManager::enabletask(int taskcount, int *tasks) {
 	QuestManagerCurrentQuestVars();

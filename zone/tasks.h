@@ -261,6 +261,7 @@ public:
 	int GetTaskMinLevel(int TaskID);
 	int GetTaskMaxLevel(int TaskID);
 	void TaskSetSelector(Client *c, ClientTaskState *state, Mob *mob, int TaskSetID);
+	void TaskQuestSetSelector(Client *c, ClientTaskState *state, Mob *mob, int count, int *tasks); // task list provided by QuestManager (perl/lua)
 	void SendActiveTasksToClient(Client *c, bool TaskComplete=false);
 	void SendSingleActiveTaskToClient(Client *c, int TaskIndex, bool TaskComplete, bool BringUpTaskJournal=false);
 	void SendTaskActivityShort(Client *c, int TaskID, int ActivityID, int ClientTaskIndex);

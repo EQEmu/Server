@@ -941,8 +941,6 @@ int TaskManager::GetTaskMaxLevel(int TaskID)
 
 void TaskManager::TaskSetSelector(Client *c, ClientTaskState *state, Mob *mob, int TaskSetID)
 {
-	unsigned int EnabledTaskIndex = 0;
-	unsigned int TaskSetIndex = 0;
 	int TaskList[MAXCHOOSERENTRIES];
 	int TaskListIndex = 0;
 	int PlayerLevel = c->GetLevel();
@@ -981,6 +979,38 @@ void TaskManager::TaskSetSelector(Client *c, ClientTaskState *state, Mob *mob, i
 			TaskList[TaskListIndex++] = task;
 
 		++Iterator;
+	}
+
+	if (TaskListIndex > 0) {
+		SendTaskSelector(c, mob, TaskListIndex, TaskList);
+	} else {
+		c->Message_StringID(15, MAX_ACTIVE_TASKS, c->GetName()); // check color, I think this might be only for (Shared) Tasks, w/e
+	}
+
+	return;
+}
+
+// unlike the non-Quest version of this function, it does not check enabled, that is assumed the responsibility of the quest to handle
+// we do however still want it to check the other stuff like level, active, room, etc
+void TaskManager::TaskQuestSetSelector(Client *c, ClientTaskState *state, Mob *mob, int count, int *tasks)
+{
+	int TaskList[MAXCHOOSERENTRIES];
+	int TaskListIndex = 0;
+	int PlayerLevel = c->GetLevel();
+
+	Log(Logs::General, Logs::Tasks, "[UPDATE] TaskQuestSetSelector called for array size %d", count);
+
+	if (count <= 0)
+		return;
+
+	for (int i = 0; i < count; ++i) {
+		auto task = tasks[i];
+		// verify level, we're not currently on it, repeatable status, if it's a (shared) task
+		// we aren't currently on another, and if it's enabled if not all_enabled
+		if (AppropriateLevel(task, PlayerLevel) &&
+		    !state->IsTaskActive(task) && state->HasSlotForTask(Tasks[task]) && // this slot checking is a bit silly, but we allow mixing of task types ...
+		    (IsTaskRepeatable(task) || !state->IsTaskCompleted(task)))
+			TaskList[TaskListIndex++] = task;
 	}
 
 	if (TaskListIndex > 0) {
