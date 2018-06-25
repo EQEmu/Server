@@ -1004,8 +1004,9 @@ public:
 	void SendTaskActivityComplete(int TaskID, int ActivityID, int TaskIndex, int TaskIncomplete=1);
 	void SendTaskFailed(int TaskID, int TaskIndex);
 	void SendTaskComplete(int TaskIndex);
+	inline ClientTaskState *GetTaskState() const { return taskstate; }
 
-	inline void CancelTask(int TaskIndex) { if(taskstate) taskstate->CancelTask(this, TaskIndex); }
+	inline void CancelTask(int TaskIndex, TaskType type) { if(taskstate) taskstate->CancelTask(this, TaskIndex, type); }
 	inline bool SaveTaskState() { return (taskmanager ? taskmanager->SaveClientState(this, taskstate) : false); }
 	inline bool IsTaskStateLoaded() { return taskstate != nullptr; }
 	inline bool IsTaskActive(int TaskID) { return (taskstate ? taskstate->IsTaskActive(TaskID) : false); }

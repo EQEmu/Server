@@ -136,6 +136,7 @@ struct TaskInformation {
 	std::string Title;			// max length 64
 	std::string Description;	// max length 4000, 2048 on Tit
 	std::string Reward;
+	std::string item_link;		// max length 128 older clients, item link gets own string
 	int	RewardID;
 	int	CashReward; // Expressed in copper
 	int	XPReward;
@@ -165,6 +166,7 @@ struct ClientActivityInformation {
 };
 
 struct ClientTaskInformation {
+	int slot; // intrusive, but makes things easier :P
 	int TaskID;
 	int CurrentStep;
 	int AcceptedTime;
@@ -199,9 +201,9 @@ public:
 	ActivityState GetTaskActivityState(int index, int ActivityID);
 	void UpdateTaskActivity(Client *c, int TaskID, int ActivityID, int Count, bool ignore_quest_update = false);
 	void ResetTaskActivity(Client *c, int TaskID, int ActivityID);
-	void CancelTask(Client *c, int SequenceNumber, bool RemoveFromDB = true);
+	void CancelTask(Client *c, int SequenceNumber, TaskType type, bool RemoveFromDB = true);
 	void CancelAllTasks(Client *c);
-	void RemoveTask(Client *c, int SequenceNumber);
+	void RemoveTask(Client *c, int SequenceNumber, TaskType type);
 	bool UpdateTasksByNPC(Client *c, int ActivityType, int NPCTypeID);
 	void UpdateTasksOnKill(Client *c, int NPCTypeID);
 	void UpdateTasksForItem(Client *c, ActivityType Type, int ItemID, int Count=1);
@@ -229,7 +231,7 @@ public:
 	friend class TaskManager;
 
 private:
-	bool UnlockActivities(int CharID, int TaskIndex);
+	bool UnlockActivities(int CharID, ClientTaskInformation &task_info);
 	void IncrementDoneCount(Client *c, TaskInformation *Task, int TaskIndex, int ActivityID, int Count = 1, bool ignore_quest_update = false);
 	int ActiveTaskCount;
 	ClientTaskInformation ActiveTask; // only one
@@ -263,7 +265,7 @@ public:
 	void TaskSetSelector(Client *c, ClientTaskState *state, Mob *mob, int TaskSetID);
 	void TaskQuestSetSelector(Client *c, ClientTaskState *state, Mob *mob, int count, int *tasks); // task list provided by QuestManager (perl/lua)
 	void SendActiveTasksToClient(Client *c, bool TaskComplete=false);
-	void SendSingleActiveTaskToClient(Client *c, int TaskIndex, bool TaskComplete, bool BringUpTaskJournal=false);
+	void SendSingleActiveTaskToClient(Client *c, ClientTaskInformation &task_info, bool TaskComplete, bool BringUpTaskJournal = false);
 	void SendTaskActivityShort(Client *c, int TaskID, int ActivityID, int ClientTaskIndex);
 	void SendTaskActivityLong(Client *c, int TaskID, int ActivityID, int ClientTaskIndex,
 				bool Optional, bool TaskComplete=false);
@@ -283,7 +285,7 @@ private:
 	TaskProximityManager ProximityManager;
 	TaskInformation* Tasks[MAXTASKS];
 	std::vector<int> TaskSets[MAXTASKSETS];
-	void SendActiveTaskDescription(Client *c, int TaskID, int SequenceNumber, int StartTime, int Duration, bool BringUpTaskJournal=false);
+	void SendActiveTaskDescription(Client *c, int TaskID, ClientTaskInformation &task_info, int StartTime, int Duration, bool BringUpTaskJournal=false);
 
 };
 

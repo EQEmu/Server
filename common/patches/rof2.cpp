@@ -3437,13 +3437,16 @@ namespace RoF2
 		InBuffer += description_size;
 		InBuffer += sizeof(TaskDescriptionData2_Struct);
 
-		std::string old_message = InBuffer; // start 'Reward' as string
+		uint32 reward_size = strlen(InBuffer) + 1;
+		InBuffer += reward_size;
+
+		std::string old_message = InBuffer; // start item link string
 		std::string new_message;
 		ServerToRoF2SayLink(new_message, old_message);
 
 		in->size = sizeof(TaskDescriptionHeader_Struct) + sizeof(TaskDescriptionData1_Struct)+
 			sizeof(TaskDescriptionData2_Struct) + sizeof(TaskDescriptionTrailer_Struct)+
-			title_size + description_size + new_message.length() + 1;
+			title_size + description_size + reward_size + new_message.length() + 1;
 
 		in->pBuffer = new unsigned char[in->size];
 

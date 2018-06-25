@@ -4031,7 +4031,7 @@ void Client::Handle_OP_CancelTask(const EQApplicationPacket *app)
 	CancelTask_Struct *cts = (CancelTask_Struct*)app->pBuffer;
 
 	if (RuleB(TaskSystem, EnableTaskSystem) && taskstate)
-		taskstate->CancelTask(this, cts->SequenceNumber);
+		taskstate->CancelTask(this, cts->SequenceNumber, static_cast<TaskType>(cts->type));
 }
 
 void Client::Handle_OP_CancelTrade(const EQApplicationPacket *app)

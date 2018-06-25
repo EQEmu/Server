@@ -3782,7 +3782,7 @@ struct AcceptNewTask_Struct {
 //was all 0's from client, server replied with same op, all 0's
 struct CancelTask_Struct {
 	uint32 SequenceNumber;
-	uint32 unknown4; // Only seen 0x00000002
+	uint32 type; // Only seen 0x00000002
 };
 
 #if 0
@@ -3836,28 +3836,28 @@ struct AvailableTaskTrailer_Struct {
 struct TaskDescriptionHeader_Struct {
 	uint32	SequenceNumber; // The order the tasks appear in the journal. 0 for first task, 1 for second, etc.
 	uint32	TaskID;
-	uint32	unknown2;
-	uint32	unknown3;
-	uint8	unknown4;
+	uint8	open_window;
+	uint32	task_type;
+	uint32	reward_type; // if this != 4 says Ebon Crystals else Radiant Crystals
 };
 
 struct TaskDescriptionData1_Struct {
 	uint32	Duration;
-	uint32	unknown2;
+	uint32	dur_code; // if Duration == 0
 	uint32	StartTime;
 };
 
 struct TaskDescriptionData2_Struct {
-	uint32	RewardCount; // ??
-	uint32	unknown1;
-	uint32	unknown2;
-	uint16	unknown3;
-	//uint8	unknown4;
+	uint8 	has_rewards;
+	uint32	coin_reward;
+	uint32	xp_reward;
+	uint32	unknown3; // don't see it affecting display, faction maybe
 };
 
 struct TaskDescriptionTrailer_Struct {
 	//uint16	unknown1; // 0x0012
 	uint32	Points;
+	uint8	has_reward_selection; // uses newer reward selection window, not in all clients
 };
 
 struct TaskActivityHeader_Struct {
@@ -5302,7 +5302,7 @@ struct MercenaryMerchantResponse_Struct {
 struct ServerLootItem_Struct {
 	uint32	item_id;	  // uint32	item_id;
 	int16	equip_slot;	  // int16	equip_slot;
-	uint16	charges;	  // uint8	charges; 
+	uint16	charges;	  // uint8	charges;
 	uint16	lootslot;	  // uint16	lootslot;
 	uint32	aug_1;		  // uint32	aug_1;
 	uint32	aug_2;		  // uint32	aug_2;
@@ -5330,7 +5330,7 @@ struct ClientMarqueeMessage_Struct {
 	uint32 fade_out_time; //The fade out time, in ms
 	uint32 duration; //in ms
 	char msg[1]; //message plus null terminator
-	
+
 };
 
 typedef std::list<ServerLootItem_Struct*> ItemList;
