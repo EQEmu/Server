@@ -37,5 +37,6 @@ x64/
 x86/
 log/
 logs/
+vcpkg/
 
 .idea/*
