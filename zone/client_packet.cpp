@@ -8248,7 +8248,6 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 		return;
 	}
 
-	DumpPacket(app);
 	ItemViewRequest_Struct *ivrs = (ItemViewRequest_Struct *)app->pBuffer;
 
 	// todo: verify ivrs->link_hash based on a rule, in case we don't care about people being able to sniff data
