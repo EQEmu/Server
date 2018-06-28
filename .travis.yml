@@ -1,32 +1,27 @@
 language: cpp
 compiler: gcc
-sudo: false
-addons:
-  apt:
-    sources:
-    - ubuntu-toolchain-r-test
-    packages:
-    - gcc-4.8
-    - g++-4.8
-    - libmysqlclient-dev
-    - libperl-dev
-    - libboost-dev
-    - liblua5.1-0-dev
-    - zlib1g-dev
-    - uuid-dev
-    - libssl-dev
+dist: trusty
+
+before_install:
+  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+  - sudo apt-get update -qq
+  - mkdir $HOME/usr
+  - export PATH="$HOME/usr/bin:$PATH"
+  - wget https://cmake.org/files/v3.11/cmake-3.11.2-Linux-x86_64.sh
+  - chmod +x cmake-3.11.2-Linux-x86_64.sh
+  - ./cmake-3.11.2-Linux-x86_64.sh --prefix=$HOME/usr --exclude-subdir --skip-license
+
 install:
-  - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
+  - sudo apt-get install -qq g++-7
+  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 90
+  - sudo apt-get install libmysqlclient-dev
+  - sudo apt-get install libperl-dev
+  - sudo apt-get install libboost-dev
+  - sudo apt-get install liblua5.1-0-dev
+  - sudo apt-get install zlib1g-dev
+  - sudo apt-get install uuid-dev
+  - sudo apt-get install libssl-dev  
 script:
   - cmake -G "Unix Makefiles" -DEQEMU_BUILD_TESTS=ON -DEQEMU_ENABLE_BOTS=ON -DEQEMU_BUILD_LOGIN=ON
   - make -j2
   - ./bin/tests
-branches:
-  only:
-    - master
-    - stable
-notifications:
-  email: false
-  irc:
-    channels: "irc.eqemulator.net#eqemucoders"
-os: linux
