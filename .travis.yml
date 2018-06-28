@@ -24,7 +24,7 @@ script:
 branches:
   only:
     - master
-    - stable
+    - build_improvements
 notifications:
   email: false
   irc:
