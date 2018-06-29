@@ -68,8 +68,8 @@ namespace EQ
 			SequencePast
 		};
 
-		typedef std::chrono::high_resolution_clock::time_point Timestamp;
-		typedef std::chrono::high_resolution_clock Clock;
+		typedef std::chrono::steady_clock::time_point Timestamp;
+		typedef std::chrono::steady_clock Clock;
 
 		struct DaybreakConnectionStats
 		{

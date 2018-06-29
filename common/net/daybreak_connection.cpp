@@ -747,7 +747,7 @@ void EQ::Net::DaybreakConnection::ProcessDecodedPacket(const Packet &p)
 				response.zero = 0;
 				response.opcode = OP_SessionStatResponse;
 				response.timestamp = request.timestamp;
-				response.our_timestamp = EQ::Net::HostToNetwork(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count());
+				response.our_timestamp = EQ::Net::HostToNetwork(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count());
 				response.client_sent = request.packets_sent;
 				response.client_recv = request.packets_recv;
 				response.server_sent = EQ::Net::HostToNetwork(m_stats.sent_packets);
