@@ -27,8 +27,7 @@
 #EQEMU_USE_MAP_MMFS
 #EQEMU_MAP_DIR
 
-#Require 3.10.2 as that's the earliest version that vcpkg supports officially which we will use on the build server.
-CMAKE_MINIMUM_REQUIRED(VERSION 3.10.2)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 
 SET(CMAKE_CXX_STANDARD 11)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
