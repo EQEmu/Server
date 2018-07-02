@@ -52,7 +52,7 @@ XS(XS_EntityList_GetMobID) {
 	{
 		EntityList *THIS;
 		Mob        *RETVAL;
-		uint16 id = (uint16) SvUV(ST(1));
+		uint16     id = (uint16) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -63,7 +63,7 @@ XS(XS_EntityList_GetMobID) {
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetMobID(id);
-		ST(0) = sv_newmortal();
+		ST(0)         = sv_newmortal();
 		sv_setref_pv(ST(0), "Mob", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -102,7 +102,7 @@ XS(XS_EntityList_GetMobByID) {
 	{
 		EntityList *THIS;
 		Mob        *RETVAL;
-		uint16 id = (uint16) SvUV(ST(1));
+		uint16     id = (uint16) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -113,7 +113,7 @@ XS(XS_EntityList_GetMobByID) {
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetMob(id);
-		ST(0) = sv_newmortal();
+		ST(0)         = sv_newmortal();
 		sv_setref_pv(ST(0), "Mob", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -127,7 +127,7 @@ XS(XS_EntityList_GetMobByNpcTypeID) {
 	{
 		EntityList *THIS;
 		Mob        *RETVAL;
-		uint32 get_id = (uint32) SvUV(ST(1));
+		uint32     get_id = (uint32) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -138,7 +138,7 @@ XS(XS_EntityList_GetMobByNpcTypeID) {
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetMobByNpcTypeID(get_id);
-		ST(0) = sv_newmortal();
+		ST(0)             = sv_newmortal();
 		sv_setref_pv(ST(0), "Mob", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -151,8 +151,8 @@ XS(XS_EntityList_IsMobSpawnedByNpcTypeID) {
 		Perl_croak(aTHX_ "Usage: EntityList::ValidMobByNpcTypeID(THIS, get_id)");
 	{
 		EntityList *THIS;
-		bool   RETVAL;
-		uint32 get_id = (uint32) SvUV(ST(1));
+		bool       RETVAL;
+		uint32     get_id = (uint32) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -163,7 +163,7 @@ XS(XS_EntityList_IsMobSpawnedByNpcTypeID) {
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->IsMobSpawnedByNpcTypeID(get_id);
-		ST(0)         = boolSV(RETVAL);
+		ST(0)             = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
 	XSRETURN(1);
@@ -177,7 +177,7 @@ XS(XS_EntityList_GetNPCByID) {
 	{
 		EntityList *THIS;
 		NPC        *RETVAL;
-		uint16 id = (uint16) SvUV(ST(1));
+		uint16     id = (uint16) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -188,7 +188,7 @@ XS(XS_EntityList_GetNPCByID) {
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetNPCByID(id);
-		ST(0) = sv_newmortal();
+		ST(0)         = sv_newmortal();
 		sv_setref_pv(ST(0), "NPC", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -202,7 +202,7 @@ XS(XS_EntityList_GetNPCByNPCTypeID) {
 	{
 		EntityList *THIS;
 		NPC        *RETVAL;
-		uint32 npc_id = (uint32) SvUV(ST(1));
+		uint32     npc_id = (uint32) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -213,7 +213,7 @@ XS(XS_EntityList_GetNPCByNPCTypeID) {
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetNPCByNPCTypeID(npc_id);
-		ST(0) = sv_newmortal();
+		ST(0)             = sv_newmortal();
 		sv_setref_pv(ST(0), "NPC", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -252,7 +252,7 @@ XS(XS_EntityList_GetClientByAccID) {
 	{
 		EntityList *THIS;
 		Client     *RETVAL;
-		uint32 accid = (uint32) SvUV(ST(1));
+		uint32     accid = (uint32) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -263,7 +263,7 @@ XS(XS_EntityList_GetClientByAccID) {
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetClientByAccID(accid);
-		ST(0) = sv_newmortal();
+		ST(0)            = sv_newmortal();
 		sv_setref_pv(ST(0), "Client", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -277,7 +277,7 @@ XS(XS_EntityList_GetClientByID) {
 	{
 		EntityList *THIS;
 		Client     *RETVAL;
-		uint16 id = (uint16) SvUV(ST(1));
+		uint16     id = (uint16) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -288,7 +288,7 @@ XS(XS_EntityList_GetClientByID) {
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetClientByID(id);
-		ST(0) = sv_newmortal();
+		ST(0)         = sv_newmortal();
 		sv_setref_pv(ST(0), "Client", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -302,7 +302,7 @@ XS(XS_EntityList_GetClientByCharID) {
 	{
 		EntityList *THIS;
 		Client     *RETVAL;
-		uint32 iCharID = (uint32) SvUV(ST(1));
+		uint32     iCharID = (uint32) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -313,7 +313,7 @@ XS(XS_EntityList_GetClientByCharID) {
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetClientByCharID(iCharID);
-		ST(0) = sv_newmortal();
+		ST(0)              = sv_newmortal();
 		sv_setref_pv(ST(0), "Client", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -327,7 +327,7 @@ XS(XS_EntityList_GetClientByWID) {
 	{
 		EntityList *THIS;
 		Client     *RETVAL;
-		uint32 iWID = (uint32) SvUV(ST(1));
+		uint32     iWID = (uint32) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -338,7 +338,7 @@ XS(XS_EntityList_GetClientByWID) {
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetClientByWID(iWID);
-		ST(0) = sv_newmortal();
+		ST(0)           = sv_newmortal();
 		sv_setref_pv(ST(0), "Client", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -352,7 +352,7 @@ XS(XS_EntityList_GetObjectByDBID) {
 	{
 		EntityList *THIS;
 		Object     *RETVAL;
-		uint32 id = (uint32) SvUV(ST(1));
+		uint32     id = (uint32) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -363,7 +363,7 @@ XS(XS_EntityList_GetObjectByDBID) {
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetObjectByDBID(id);
-		ST(0) = sv_newmortal();
+		ST(0)         = sv_newmortal();
 		sv_setref_pv(ST(0), "Object", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -377,7 +377,7 @@ XS(XS_EntityList_GetObjectByID) {
 	{
 		EntityList *THIS;
 		Object     *RETVAL;
-		uint32 id = (uint32) SvUV(ST(1));
+		uint32     id = (uint32) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -388,7 +388,7 @@ XS(XS_EntityList_GetObjectByID) {
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetObjectByID(id);
-		ST(0) = sv_newmortal();
+		ST(0)         = sv_newmortal();
 		sv_setref_pv(ST(0), "Object", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -402,7 +402,7 @@ XS(XS_EntityList_GetDoorsByDBID) {
 	{
 		EntityList *THIS;
 		Doors      *RETVAL;
-		uint32 id = (uint32) SvUV(ST(1));
+		uint32     id = (uint32) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -413,7 +413,7 @@ XS(XS_EntityList_GetDoorsByDBID) {
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetDoorsByDBID(id);
-		ST(0) = sv_newmortal();
+		ST(0)         = sv_newmortal();
 		sv_setref_pv(ST(0), "Doors", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -427,7 +427,7 @@ XS(XS_EntityList_GetDoorsByDoorID) {
 	{
 		EntityList *THIS;
 		Doors      *RETVAL;
-		uint32 id = (uint32) SvUV(ST(1));
+		uint32     id = (uint32) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -438,7 +438,7 @@ XS(XS_EntityList_GetDoorsByDoorID) {
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetDoorsByDoorID(id);
-		ST(0) = sv_newmortal();
+		ST(0)         = sv_newmortal();
 		sv_setref_pv(ST(0), "Doors", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -452,7 +452,7 @@ XS(XS_EntityList_GetDoorsByID) {
 	{
 		EntityList *THIS;
 		Doors      *RETVAL;
-		uint32 id = (uint32) SvUV(ST(1));
+		uint32     id = (uint32) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -463,7 +463,7 @@ XS(XS_EntityList_GetDoorsByID) {
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetDoorsByID(id);
-		ST(0) = sv_newmortal();
+		ST(0)         = sv_newmortal();
 		sv_setref_pv(ST(0), "Doors", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -477,7 +477,7 @@ XS(XS_EntityList_FindDoor) {
 	{
 		EntityList *THIS;
 		Doors      *RETVAL;
-		uint32 id = (uint32) SvUV(ST(1));
+		uint32     id = (uint32) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -488,7 +488,7 @@ XS(XS_EntityList_FindDoor) {
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->FindDoor(id);
-		ST(0) = sv_newmortal();
+		ST(0)         = sv_newmortal();
 		sv_setref_pv(ST(0), "Doors", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -568,7 +568,7 @@ XS(XS_EntityList_GetGroupByID) {
 	{
 		EntityList *THIS;
 		Group      *RETVAL;
-		uint32 id = (uint32) SvUV(ST(1));
+		uint32     id = (uint32) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -579,7 +579,7 @@ XS(XS_EntityList_GetGroupByID) {
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetGroupByID(id);
-		ST(0) = sv_newmortal();
+		ST(0)         = sv_newmortal();
 		sv_setref_pv(ST(0), "Group", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -618,7 +618,7 @@ XS(XS_EntityList_GetRaidByID) {
 	{
 		EntityList *THIS;
 		Raid       *RETVAL;
-		uint32 id = (uint32) SvUV(ST(1));
+		uint32     id = (uint32) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -629,7 +629,7 @@ XS(XS_EntityList_GetRaidByID) {
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetRaidByID(id);
-		ST(0) = sv_newmortal();
+		ST(0)         = sv_newmortal();
 		sv_setref_pv(ST(0), "Raid", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -709,7 +709,7 @@ XS(XS_EntityList_GetCorpseByID) {
 	{
 		EntityList *THIS;
 		Corpse     *RETVAL;
-		uint16 id = (uint16) SvUV(ST(1));
+		uint16     id = (uint16) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -720,7 +720,7 @@ XS(XS_EntityList_GetCorpseByID) {
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetCorpseByID(id);
-		ST(0) = sv_newmortal();
+		ST(0)         = sv_newmortal();
 		sv_setref_pv(ST(0), "Corpse", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -779,8 +779,8 @@ XS(XS_EntityList_CanAddHateForMob) {
 		Perl_croak(aTHX_ "Usage: EntityList::CanAddHateForMob(THIS, Mob* target)");
 	{
 		EntityList *THIS;
-		bool RETVAL;
-		Mob *p;
+		bool       RETVAL;
+		Mob        *p;
 
 		if (sv_derived_from(ST(0), "EntityList")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -833,8 +833,8 @@ XS(XS_EntityList_RemoveMob) {
 		Perl_croak(aTHX_ "Usage: EntityList::RemoveMob(THIS, delete_id)");
 	{
 		EntityList *THIS;
-		bool   RETVAL;
-		uint16 delete_id = (uint16) SvUV(ST(1));
+		bool       RETVAL;
+		uint16     delete_id = (uint16) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -845,7 +845,7 @@ XS(XS_EntityList_RemoveMob) {
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->RemoveMob(delete_id);
-		ST(0)            = boolSV(RETVAL);
+		ST(0)                = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
 	XSRETURN(1);
@@ -858,8 +858,8 @@ XS(XS_EntityList_RemoveClient) {
 		Perl_croak(aTHX_ "Usage: EntityList::RemoveClient(THIS, delete_id)");
 	{
 		EntityList *THIS;
-		bool   RETVAL;
-		uint16 delete_id = (uint16) SvUV(ST(1));
+		bool       RETVAL;
+		uint16     delete_id = (uint16) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -870,7 +870,7 @@ XS(XS_EntityList_RemoveClient) {
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->RemoveClient(delete_id);
-		ST(0)            = boolSV(RETVAL);
+		ST(0)                = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
 	XSRETURN(1);
@@ -883,8 +883,8 @@ XS(XS_EntityList_RemoveNPC) {
 		Perl_croak(aTHX_ "Usage: EntityList::RemoveNPC(THIS, delete_id)");
 	{
 		EntityList *THIS;
-		bool   RETVAL;
-		uint16 delete_id = (uint16) SvUV(ST(1));
+		bool       RETVAL;
+		uint16     delete_id = (uint16) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -895,7 +895,7 @@ XS(XS_EntityList_RemoveNPC) {
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->RemoveNPC(delete_id);
-		ST(0)            = boolSV(RETVAL);
+		ST(0)                = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
 	XSRETURN(1);
@@ -908,8 +908,8 @@ XS(XS_EntityList_RemoveGroup) {
 		Perl_croak(aTHX_ "Usage: EntityList::RemoveGroup(THIS, delete_id)");
 	{
 		EntityList *THIS;
-		bool   RETVAL;
-		uint32 delete_id = (uint32) SvUV(ST(1));
+		bool       RETVAL;
+		uint32     delete_id = (uint32) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -920,7 +920,7 @@ XS(XS_EntityList_RemoveGroup) {
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->RemoveGroup(delete_id);
-		ST(0)            = boolSV(RETVAL);
+		ST(0)                = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
 	XSRETURN(1);
@@ -933,8 +933,8 @@ XS(XS_EntityList_RemoveCorpse) {
 		Perl_croak(aTHX_ "Usage: EntityList::RemoveCorpse(THIS, delete_id)");
 	{
 		EntityList *THIS;
-		bool   RETVAL;
-		uint16 delete_id = (uint16) SvUV(ST(1));
+		bool       RETVAL;
+		uint16     delete_id = (uint16) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -945,7 +945,7 @@ XS(XS_EntityList_RemoveCorpse) {
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->RemoveCorpse(delete_id);
-		ST(0)            = boolSV(RETVAL);
+		ST(0)                = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
 	XSRETURN(1);
@@ -958,8 +958,8 @@ XS(XS_EntityList_RemoveDoor) {
 		Perl_croak(aTHX_ "Usage: EntityList::RemoveDoor(THIS, delete_id)");
 	{
 		EntityList *THIS;
-		bool   RETVAL;
-		uint16 delete_id = (uint16) SvUV(ST(1));
+		bool       RETVAL;
+		uint16     delete_id = (uint16) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -970,7 +970,7 @@ XS(XS_EntityList_RemoveDoor) {
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->RemoveDoor(delete_id);
-		ST(0)            = boolSV(RETVAL);
+		ST(0)                = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
 	XSRETURN(1);
@@ -983,8 +983,8 @@ XS(XS_EntityList_RemoveTrap) {
 		Perl_croak(aTHX_ "Usage: EntityList::RemoveTrap(THIS, delete_id)");
 	{
 		EntityList *THIS;
-		bool   RETVAL;
-		uint16 delete_id = (uint16) SvUV(ST(1));
+		bool       RETVAL;
+		uint16     delete_id = (uint16) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -995,7 +995,7 @@ XS(XS_EntityList_RemoveTrap) {
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->RemoveTrap(delete_id);
-		ST(0)            = boolSV(RETVAL);
+		ST(0)                = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
 	XSRETURN(1);
@@ -1008,8 +1008,8 @@ XS(XS_EntityList_RemoveObject) {
 		Perl_croak(aTHX_ "Usage: EntityList::RemoveObject(THIS, delete_id)");
 	{
 		EntityList *THIS;
-		bool   RETVAL;
-		uint16 delete_id = (uint16) SvUV(ST(1));
+		bool       RETVAL;
+		uint16     delete_id = (uint16) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -1020,7 +1020,7 @@ XS(XS_EntityList_RemoveObject) {
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->RemoveObject(delete_id);
-		ST(0)            = boolSV(RETVAL);
+		ST(0)                = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
 	XSRETURN(1);
@@ -1201,9 +1201,9 @@ XS(XS_EntityList_Message) {
 		Perl_croak(aTHX_ "Usage: EntityList::Message(THIS, uint32 guild_id, uint32 emote_color_type, string message)");
 	{
 		EntityList *THIS;
-		uint32 to_guilddbid = (uint32) SvUV(ST(1));
-		uint32 type         = (uint32) SvUV(ST(2));
-		char *message = (char *) SvPV_nolen(ST(3));
+		uint32     to_guilddbid = (uint32) SvUV(ST(1));
+		uint32     type         = (uint32) SvUV(ST(2));
+		char       *message     = (char *) SvPV_nolen(ST(3));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -1226,10 +1226,10 @@ XS(XS_EntityList_MessageStatus) {
 		           "Usage: EntityList::MessageStatus(THIS, uint32 guild_id, uint32 emote_color_type, string message)");
 	{
 		EntityList *THIS;
-		uint32 to_guilddbid = (uint32) SvUV(ST(1));
-		int    to_minstatus = (int) SvIV(ST(2));
-		uint32 type         = (uint32) SvUV(ST(3));
-		char *message = (char *) SvPV_nolen(ST(4));
+		uint32     to_guilddbid = (uint32) SvUV(ST(1));
+		int        to_minstatus = (int) SvIV(ST(2));
+		uint32     type         = (uint32) SvUV(ST(3));
+		char       *message     = (char *) SvPV_nolen(ST(4));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -1253,10 +1253,10 @@ XS(XS_EntityList_MessageClose) {
 	{
 		EntityList *THIS;
 		Mob        *sender;
-		bool   skipsender = (bool) SvTRUE(ST(2));
-		float  dist       = (float) SvNV(ST(3));
-		uint32 type       = (uint32) SvUV(ST(4));
-		char *message = (char *) SvPV_nolen(ST(5));
+		bool       skipsender = (bool) SvTRUE(ST(2));
+		float      dist       = (float) SvNV(ST(3));
+		uint32     type       = (uint32) SvUV(ST(4));
+		char       *message   = (char *) SvPV_nolen(ST(5));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -1387,7 +1387,7 @@ XS(XS_EntityList_MakeNameUnique) {
 		EntityList *THIS;
 		char       *RETVAL;
 		dXSTARG;
-		char *name = (char *) SvPV_nolen(ST(1));
+		char       *name = (char *) SvPV_nolen(ST(1));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -1430,8 +1430,8 @@ XS(XS_EntityList_SignalMobsByNPCID) {
 		Perl_croak(aTHX_ "Usage: EntityList::SignalMobsByNPCID(THIS, uint32 npc_type_id, int signal_id)");
 	{
 		EntityList *THIS;
-		uint32 npc_type  = (uint32) SvUV(ST(1));
-		int    signal_id = (int) SvIV(ST(2));
+		uint32     npc_type  = (uint32) SvUV(ST(1));
+		int        signal_id = (int) SvIV(ST(2));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -1453,7 +1453,7 @@ XS(XS_EntityList_RemoveEntity) {
 		Perl_croak(aTHX_ "Usage: EntityList::RemoveEntity(THIS, uint16 id)");
 	{
 		EntityList *THIS;
-		uint16 id = (uint16) SvUV(ST(1));
+		uint16     id = (uint16) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -1475,7 +1475,7 @@ XS(XS_EntityList_DeleteNPCCorpses) {
 		Perl_croak(aTHX_ "Usage: EntityList::DeleteNPCCorpses(THIS)");
 	{
 		EntityList *THIS;
-		int32 RETVAL;
+		int32      RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "EntityList")) {
@@ -1500,7 +1500,7 @@ XS(XS_EntityList_DeletePlayerCorpses) {
 		Perl_croak(aTHX_ "Usage: EntityList::DeletePlayerCorpses(THIS)");
 	{
 		EntityList *THIS;
-		int32 RETVAL;
+		int32      RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "EntityList")) {
@@ -1615,8 +1615,8 @@ XS(XS_EntityList_Fighting) {
 		Perl_croak(aTHX_ "Usage: EntityList::Fighting(THIS, Mob* target)");
 	{
 		EntityList *THIS;
-		bool RETVAL;
-		Mob *targ;
+		bool       RETVAL;
+		Mob        *targ;
 
 		if (sv_derived_from(ST(0), "EntityList")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -1649,7 +1649,7 @@ XS(XS_EntityList_RemoveFromHateLists) {
 	{
 		EntityList *THIS;
 		Mob        *mob;
-		bool settoone;
+		bool       settoone;
 
 		if (sv_derived_from(ST(0), "EntityList")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -1687,9 +1687,9 @@ XS(XS_EntityList_MessageGroup) {
 	{
 		EntityList *THIS;
 		Mob        *sender;
-		bool   skipclose = (bool) SvTRUE(ST(2));
-		uint32 type      = (uint32) SvUV(ST(3));
-		char *message = (char *) SvPV_nolen(ST(4));
+		bool       skipclose = (bool) SvTRUE(ST(2));
+		uint32     type      = (uint32) SvUV(ST(3));
+		char       *message  = (char *) SvPV_nolen(ST(4));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
