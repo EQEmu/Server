@@ -10,6 +10,7 @@ sub usage() {
 	print "   --door       - Prints methods for just door class methods\n";
 	print "   --object     - Prints methods for just object class methods\n";
 	print "   --group      - Prints methods for just group class methods\n";
+	print "   --raid      - Prints methods for just raid class methods\n";
 	print "   --corpse     - Prints methods for just corpse class methods\n";
 	print "   --hateentry  - Prints methods for just hateentry class methods\n";
 	print "   --all        - Prints methods for all classes\n";
@@ -52,7 +53,7 @@ for my $file (@files) {
 		chomp;
 		$line = $_;
 
-		if ($line=~/Client::|Mob::|Corpse::|EntityList::|Doors::|Group::|HateEntry::|NPC::|Object::/i && $line=~/_croak/i) {
+		if ($line=~/Client::|Mob::|Corpse::|EntityList::|Doors::|Group::|HateEntry::|NPC::|Object::|Raid::/i && $line=~/_croak/i) {
 
 			#::: Client export
 			if ($export=~/all|client/i) {
@@ -100,6 +101,12 @@ for my $file (@files) {
 			if ($export=~/all|group/i) {
 				$split_key = "Group::";
 				$object_prefix = "\$group->";
+			}
+
+			#::: Raid export
+			if ($export=~/all|raid/i) {
+				$split_key = "Raid::";
+				$object_prefix = "\$raid->";
 			}
 
 			#::: Hateentry export

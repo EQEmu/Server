@@ -47,7 +47,7 @@ XS(XS_Raid_IsRaidMember)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Raid::IsRaidMember(THIS, name)");
+		Perl_croak(aTHX_ "Usage: Raid::IsRaidMember(THIS, string name)");
 	{
 		Raid *		THIS;
 		bool		RETVAL;
@@ -74,7 +74,7 @@ XS(XS_Raid_CastGroupSpell)
 {
 	dXSARGS;
 	if (items != 4)
-		Perl_croak(aTHX_ "Usage: Raid::CastGroupSpell(THIS, caster, spellid, gid)");
+		Perl_croak(aTHX_ "Usage: Raid::CastGroupSpell(THIS, Mob* caster, uint16 spell_id, uint32 group_id)");
 	{
 		Raid *		THIS;
 		Mob*		caster;
@@ -109,7 +109,7 @@ XS(XS_Raid_GroupCount)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Raid::GroupCount(THIS, gid)");
+		Perl_croak(aTHX_ "Usage: Raid::GroupCount(THIS, uint32 group_id)");
 	{
 		Raid *		THIS;
 		uint8		RETVAL;
@@ -162,7 +162,7 @@ XS(XS_Raid_GetGroup)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Raid::GetGroup(THIS, name)");
+		Perl_croak(aTHX_ "Usage: Raid::GetGroup(THIS, string name)");
 	{
 		Raid *		THIS;
 		uint32		RETVAL;
@@ -189,7 +189,7 @@ XS(XS_Raid_SplitExp)
 {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Raid::SplitExp(THIS, exp, other)");
+		Perl_croak(aTHX_ "Usage: Raid::SplitExp(THIS, uint32 experience, [Mob* other = nullptr])");
 	{
 		Raid *		THIS;
 		uint32		exp = (uint32)SvUV(ST(1));
@@ -223,7 +223,7 @@ XS(XS_Raid_GetTotalRaidDamage)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Raid::GetTotalRaidDamage(THIS, other)");
+		Perl_croak(aTHX_ "Usage: Raid::GetTotalRaidDamage(THIS, [Mob* other = nullptr])");
 	{
 		Raid *		THIS;
 		uint32		RETVAL;
@@ -259,7 +259,7 @@ XS(XS_Raid_SplitMoney)
 {
 	dXSARGS;
 	if (items != 5)
-		Perl_croak(aTHX_ "Usage: Raid::SplitMoney(THIS, copper, silver, gold, platinum)");
+		Perl_croak(aTHX_ "Usage: Raid::SplitMoney(THIS, uint32 copper, uint32 silver, uint32 gold, uint32 platinum)");
 	{
 		Raid *		THIS;
 		uint32		copper = (uint32)SvUV(ST(1));
@@ -286,7 +286,7 @@ XS(XS_Raid_BalanceHP)
 {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Raid::BalanceHP(THIS, penalty, gid)");
+		Perl_croak(aTHX_ "Usage: Raid::BalanceHP(THIS, int32 penalty, uint32 group_id)");
 	{
 		Raid *		THIS;
 		int32		penalty = (int32)SvUV(ST(1));
@@ -311,7 +311,7 @@ XS(XS_Raid_IsLeader)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Raid::IsLeader(THIS, name)");
+		Perl_croak(aTHX_ "Usage: Raid::IsLeader(THIS, string name)");
 	{
 		Raid *		THIS;
 		bool		RETVAL;
@@ -338,7 +338,7 @@ XS(XS_Raid_IsGroupLeader)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Raid::IsGroupLeader(THIS, who)");
+		Perl_croak(aTHX_ "Usage: Raid::IsGroupLeader(THIS, string name)");
 	{
 		Raid *		THIS;
 		bool		RETVAL;
@@ -417,7 +417,7 @@ XS(XS_Raid_GetClientByIndex)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Raid::GetClientByIndex(THIS, index)");
+		Perl_croak(aTHX_ "Usage: Raid::GetClientByIndex(THIS, uint16 raid_indez)");
 	{
 		Raid *		THIS;
 		Client *		RETVAL;
@@ -444,7 +444,7 @@ XS(XS_Raid_TeleportGroup)
 {
 	dXSARGS;
 	if (items != 8)
-		Perl_croak(aTHX_ "Usage: Raid::TeleportGroup(THIS, sender, zoneID, x, y, z, heading, gid)");
+		Perl_croak(aTHX_ "Usage: Raid::TeleportGroup(THIS, Mob* sender, uint32 zone_id, float x, float y, float z, float heading, uint32 group_id)");
 	{
 		Raid *		THIS;
 		Mob*		sender;
@@ -483,7 +483,7 @@ XS(XS_Raid_TeleportRaid)
 {
 	dXSARGS;
 	if (items != 7)
-		Perl_croak(aTHX_ "Usage: Raid::TeleportRaid(THIS, sender, zoneID, x, y, z, heading)");
+		Perl_croak(aTHX_ "Usage: Raid::TeleportRaid(THIS, Mob* sender, uint32 zone_id, float x, float y, float z, float heading)");
 	{
 		Raid *		THIS;
 		Mob*		sender;
@@ -547,7 +547,7 @@ XS(XS_Raid_GetMember)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Raid::GetMember(THIS, index)");
+		Perl_croak(aTHX_ "Usage: Raid::GetMember(THIS, int raid_index)");
 	{
 		Raid * THIS;
 		Client*	RETVAL = nullptr;
