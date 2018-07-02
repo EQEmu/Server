@@ -1,3 +1,9 @@
+#!/usr/bin/perl
+
+# Author:       Akkadius
+# @file:        perl-doc-parser.pl
+# @description: Script meant to parse the source code to build the Perl API list
+
 use File::Find;
 use Data::Dumper;
 
