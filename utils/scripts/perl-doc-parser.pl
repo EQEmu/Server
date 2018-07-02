@@ -8,6 +8,7 @@ sub usage() {
 	print "   --npc        - Prints methods for just npc class methods\n";
 	print "   --entity     - Prints methods for just entity class methods\n";
 	print "   --door       - Prints methods for just door class methods\n";
+	print "   --object     - Prints methods for just object class methods\n";
 	print "   --group      - Prints methods for just group class methods\n";
 	print "   --corpse     - Prints methods for just corpse class methods\n";
 	print "   --hateentry  - Prints methods for just hateentry class methods\n";
@@ -51,7 +52,7 @@ for my $file (@files) {
 		chomp;
 		$line = $_;
 
-		if ($line=~/Client::|Mob::|Corpse::|EntityList::|Doors::|Group::|HateEntry::|NPC::/i && $line=~/_croak/i) {
+		if ($line=~/Client::|Mob::|Corpse::|EntityList::|Doors::|Group::|HateEntry::|NPC::|Object::/i && $line=~/_croak/i) {
 
 			#::: Client export
 			if ($export=~/all|client/i) {
@@ -87,6 +88,12 @@ for my $file (@files) {
 			if ($export=~/all|door/i) {
 				$split_key = "Doors::";
 				$object_prefix = "\$door->";
+			}
+
+			#::: Object export
+			if ($export=~/all|object/i) {
+				$split_key = "Object::";
+				$object_prefix = "\$object->";
 			}
 
 			#::: Group export
