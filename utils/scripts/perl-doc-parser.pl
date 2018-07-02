@@ -10,7 +10,7 @@ sub usage() {
 	print "   --door       - Prints methods for just door class methods\n";
 	print "   --object     - Prints methods for just object class methods\n";
 	print "   --group      - Prints methods for just group class methods\n";
-	print "   --raid      - Prints methods for just raid class methods\n";
+	print "   --raid       - Prints methods for just raid class methods\n";
 	print "   --corpse     - Prints methods for just corpse class methods\n";
 	print "   --hateentry  - Prints methods for just hateentry class methods\n";
 	print "   --all        - Prints methods for all classes\n";
@@ -47,7 +47,7 @@ for my $file (@files) {
 	@methods = ();
 
 	#::: Open File
-	print "Opening '" . $file . "'\n";
+	print "\nOpening '" . $file . "'\n";
 	open (FILE, $file);
 	while (<FILE>) {
 		chomp;
@@ -56,61 +56,61 @@ for my $file (@files) {
 		if ($line=~/Client::|Mob::|Corpse::|EntityList::|Doors::|Group::|HateEntry::|NPC::|Object::|Raid::/i && $line=~/_croak/i) {
 
 			#::: Client export
-			if ($export=~/all|client/i) {
+			if ($export=~/all|client/i && $line=~/Client::/i) {
 				$split_key = "Client::";
 				$object_prefix = "\$client->";
 			}
 
 			#::: Mob export
-			if ($export=~/all|mob/i) {
+			if ($export=~/all|mob/i && $line=~/Mob::/i) {
 				$split_key = "Mob::";
 				$object_prefix = "\$mob->";
 			}
 
 			#::: NPC export
-			if ($export=~/all|npc/i) {
+			if ($export=~/all|npc/i && $line=~/NPC::/i) {
 				$split_key = "NPC::";
 				$object_prefix = "\$npc->";
 			}
 
 			#::: Corpse export
-			if ($export=~/all|corpse/i) {
+			if ($export=~/all|corpse/i && $line=~/Corpse::/i) {
 				$split_key = "Corpse::";
 				$object_prefix = "\$corpse->";
 			}
 
 			#::: Entity export
-			if ($export=~/all|entity/i) {
+			if ($export=~/all|entity/i && $line=~/EntityList::/i) {
 				$split_key = "EntityList::";
 				$object_prefix = "\$entity_list->";
 			}
 
 			#::: Doors export
-			if ($export=~/all|door/i) {
+			if ($export=~/all|door/i && $line=~/Doors::/i) {
 				$split_key = "Doors::";
 				$object_prefix = "\$door->";
 			}
 
 			#::: Object export
-			if ($export=~/all|object/i) {
+			if ($export=~/all|object/i && $line=~/Object::/i) {
 				$split_key = "Object::";
 				$object_prefix = "\$object->";
 			}
 
 			#::: Group export
-			if ($export=~/all|group/i) {
+			if ($export=~/all|group/i && $line=~/Group::/i) {
 				$split_key = "Group::";
 				$object_prefix = "\$group->";
 			}
 
 			#::: Raid export
-			if ($export=~/all|raid/i) {
+			if ($export=~/all|raid/i && $line=~/Raid::/i) {
 				$split_key = "Raid::";
 				$object_prefix = "\$raid->";
 			}
 
 			#::: Hateentry export
-			if ($export=~/all|hateentry/i) {
+			if ($export=~/all|hateentry/i && $line=~/HateEntry::/i) {
 				$split_key = "HateEntry::";
 				$object_prefix = "\$hate_entry->";
 			}
