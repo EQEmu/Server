@@ -105,7 +105,7 @@ XS(XS_Group_CastGroupSpell)
 {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Group::CastGroupSpell(THIS, caster, spellid)");
+		Perl_croak(aTHX_ "Usage: Group::CastGroupSpell(THIS, Mob* caster, uint16 spell_id)");
 	{
 		Group *		THIS;
 		Mob*		caster;
@@ -139,7 +139,7 @@ XS(XS_Group_SplitExp)
 {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Group::SplitExp(THIS, exp, other)");
+		Perl_croak(aTHX_ "Usage: Group::SplitExp(THIS, uint32 exp, Mob* other)");
 	{
 		Group *		THIS;
 		uint32		exp = (uint32)SvUV(ST(1));
@@ -173,7 +173,7 @@ XS(XS_Group_GroupMessage)
 {
 	dXSARGS;
 	if ((items != 3) && (items != 4))	// the 3 item version is kept for backwards compatability
-		Perl_croak(aTHX_ "Usage: Group::GroupMessage(THIS, sender, language, message)");
+		Perl_croak(aTHX_ "Usage: Group::GroupMessage(THIS, Mob* sender, uint8 language, string message)");
 	{
 		Group *		THIS;
 		Mob*		sender;
@@ -218,7 +218,7 @@ XS(XS_Group_GetTotalGroupDamage)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Group::GetTotalGroupDamage(THIS, other)");
+		Perl_croak(aTHX_ "Usage: Group::GetTotalGroupDamage(THIS, Mob* other)");
 	{
 		Group *		THIS;
 		uint32		RETVAL;
@@ -254,7 +254,7 @@ XS(XS_Group_SplitMoney)
 {
 	dXSARGS;
 	if (items != 5)
-		Perl_croak(aTHX_ "Usage: Group::SplitMoney(THIS, copper, silver, gold, platinum)");
+		Perl_croak(aTHX_ "Usage: Group::SplitMoney(THIS, uint32 copper, uint32 silver, uint32 gold, uint32 platinum)");
 	{
 		Group *		THIS;
 		uint32		copper = (uint32)SvUV(ST(1));
@@ -281,7 +281,7 @@ XS(XS_Group_SetLeader)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Group::SetLeader(THIS, newleader)");
+		Perl_croak(aTHX_ "Usage: Group::SetLeader(THIS, Mob* new_leader)");
 	{
 		Group *		THIS;
 		Mob*		newleader;
@@ -366,7 +366,7 @@ XS(XS_Group_SendHPPacketsTo)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Group::SendHPPacketsTo(THIS, newmember)");
+		Perl_croak(aTHX_ "Usage: Group::SendHPPacketsTo(THIS, Mob* new_member)");
 	{
 		Group *		THIS;
 		Mob*		newmember;
@@ -399,7 +399,7 @@ XS(XS_Group_SendHPPacketsFrom)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Group::SendHPPacketsFrom(THIS, newmember)");
+		Perl_croak(aTHX_ "Usage: Group::SendHPPacketsFrom(THIS, Mob* new_member)");
 	{
 		Group *		THIS;
 		Mob*		newmember;
@@ -432,7 +432,7 @@ XS(XS_Group_IsLeader)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Group::IsLeader(THIS, leadertest)");
+		Perl_croak(aTHX_ "Usage: Group::IsLeader(THIS, Mob* target)");
 	{
 		Group *		THIS;
 		bool		RETVAL;
@@ -520,7 +520,7 @@ XS(XS_Group_TeleportGroup)
 {
 	dXSARGS;
 	if (items != 7)
-		Perl_croak(aTHX_ "Usage: Group::TeleportGroup(THIS, sender, zoneID, x, y, z, heading)");
+		Perl_croak(aTHX_ "Usage: Group::TeleportGroup(THIS, Mob* sender, uint32 zone_id, float x, float y, float z, float heading)");
 	{
 		Group *		THIS;
 		Mob*		sender;
@@ -584,7 +584,7 @@ XS(XS_Group_GetMember)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Group::GetMember(THIS, index)");
+		Perl_croak(aTHX_ "Usage: Group::GetMember(THIS, int group_index)");
 	{
 		Group * THIS;
 		Mob* member;

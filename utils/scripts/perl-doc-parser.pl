@@ -7,6 +7,7 @@ sub usage() {
 	print "   --mob        - Prints methods for just mob class methods\n";
 	print "   --entity     - Prints methods for just entity class methods\n";
 	print "   --door       - Prints methods for just door class methods\n";
+	print "   --group      - Prints methods for just group class methods\n";
 	print "   --corpse     - Prints methods for just corpse class methods\n";
 	print "   --all        - Prints methods for all classes\n";
 	exit(1);
@@ -48,7 +49,7 @@ for my $file (@files) {
 		chomp;
 		$line = $_;
 
-		if ($line=~/Client::|Mob::|Corpse::|EntityList::|Doors::/i && $line=~/_croak/i) {
+		if ($line=~/Client::|Mob::|Corpse::|EntityList::|Doors::|Group::/i && $line=~/_croak/i) {
 
 			#::: Client export
 			if ($export=~/all|client/i) {
@@ -78,6 +79,12 @@ for my $file (@files) {
 			if ($export=~/all|door/i) {
 				$split_key = "Doors::";
 				$object_prefix = "\$door->";
+			}
+
+			#::: Group export
+			if ($export=~/all|group/i) {
+				$split_key = "Group::";
+				$object_prefix = "\$group->";
 			}
 
 			#::: Split on croak usage
