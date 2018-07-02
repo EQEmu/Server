@@ -263,7 +263,7 @@ XS(XS_EntityList_GetClientByAccID)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetClientByAccID(THIS, accid)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetClientByAccID(THIS, uint32 account_id)");
 	{
 		EntityList *		THIS;
 		Client *		RETVAL;
@@ -290,7 +290,7 @@ XS(XS_EntityList_GetClientByID)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetClientByID(THIS, id)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetClientByID(THIS, uint16 client_id)");
 	{
 		EntityList *		THIS;
 		Client *		RETVAL;
@@ -317,7 +317,7 @@ XS(XS_EntityList_GetClientByCharID)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetClientByCharID(THIS, iCharID)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetClientByCharID(THIS, uint32 character_id)");
 	{
 		EntityList *		THIS;
 		Client *		RETVAL;
@@ -344,7 +344,7 @@ XS(XS_EntityList_GetClientByWID)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetClientByWID(THIS, iWID)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetClientByWID(THIS, uint32 wid)");
 	{
 		EntityList *		THIS;
 		Client *		RETVAL;
@@ -371,7 +371,7 @@ XS(XS_EntityList_GetObjectByDBID)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetObjectByDBID(THIS, id)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetObjectByDBID(THIS, uint32 database_id)");
 	{
 		EntityList *		THIS;
 		Object *		RETVAL;
@@ -398,7 +398,7 @@ XS(XS_EntityList_GetObjectByID)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetObjectByID(THIS, id)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetObjectByID(THIS, uint32 entity_id)");
 	{
 		EntityList *		THIS;
 		Object *		RETVAL;
@@ -425,7 +425,7 @@ XS(XS_EntityList_GetDoorsByDBID)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetDoorsByDBID(THIS, id)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetDoorsByDBID(THIS, uint32 database_id)");
 	{
 		EntityList *		THIS;
 		Doors *		RETVAL;
@@ -452,7 +452,7 @@ XS(XS_EntityList_GetDoorsByDoorID)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetDoorsByDoorID(THIS, id)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetDoorsByDoorID(THIS, uint32 door_id)");
 	{
 		EntityList *		THIS;
 		Doors *		RETVAL;
@@ -479,7 +479,7 @@ XS(XS_EntityList_GetDoorsByID)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetDoorsByID(THIS, id)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetDoorsByID(THIS, uint32 entity_id)");
 	{
 		EntityList *		THIS;
 		Doors *		RETVAL;
@@ -506,7 +506,7 @@ XS(XS_EntityList_FindDoor)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::FindDoor(THIS, id)");
+		Perl_croak(aTHX_ "Usage: EntityList::FindDoor(THIS, uint32 door_id)");
 	{
 		EntityList *		THIS;
 		Doors *		RETVAL;
@@ -533,7 +533,7 @@ XS(XS_EntityList_GetGroupByMob)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetGroupByMob(THIS, mob)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetGroupByMob(THIS, Mob* mob)");
 	{
 		EntityList *		THIS;
 		Group *		RETVAL;
@@ -569,7 +569,7 @@ XS(XS_EntityList_GetGroupByClient)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetGroupByClient(THIS, client)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetGroupByClient(THIS, Client* client)");
 	{
 		EntityList *		THIS;
 		Group *		RETVAL;
@@ -835,7 +835,7 @@ XS(XS_EntityList_CanAddHateForMob)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::CanAddHateForMob(THIS, p)");
+		Perl_croak(aTHX_ "Usage: EntityList::CanAddHateForMob(THIS, Mob* target)");
 	{
 		EntityList *		THIS;
 		bool		RETVAL;
@@ -1294,7 +1294,7 @@ XS(XS_EntityList_Message)
 {
 	dXSARGS;
 	if (items < 4)
-		Perl_croak(aTHX_ "Usage: EntityList::Message(THIS, to_guilddbid, type, message, ...)");
+		Perl_croak(aTHX_ "Usage: EntityList::Message(THIS, uint32 guild_id, uint32 emote_color_type, string message)");
 	{
 		EntityList *		THIS;
 		uint32		to_guilddbid = (uint32)SvUV(ST(1));
@@ -1320,7 +1320,7 @@ XS(XS_EntityList_MessageStatus)
 {
 	dXSARGS;
 	if (items < 5)
-		Perl_croak(aTHX_ "Usage: EntityList::MessageStatus(THIS, to_guilddbid, to_minstatus, type, message, ...)");
+		Perl_croak(aTHX_ "Usage: EntityList::MessageStatus(THIS, uint32 guild_id, uint32 emote_color_type, string message)");
 	{
 		EntityList *		THIS;
 		uint32		to_guilddbid = (uint32)SvUV(ST(1));
@@ -1347,7 +1347,7 @@ XS(XS_EntityList_MessageClose)
 {
 	dXSARGS;
 	if (items < 6)
-		Perl_croak(aTHX_ "Usage: EntityList::MessageClose(THIS, sender, skipsender, dist, type, message, ...)");
+		Perl_croak(aTHX_ "Usage: EntityList::MessageClose(THIS, Mob* sender, bool skip_sender, float distance, uint32 emote_color_type, string message)");
 	{
 		EntityList *		THIS;
 		Mob*		sender;
@@ -1384,7 +1384,7 @@ XS(XS_EntityList_RemoveFromTargets)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveFromTargets(THIS, mob)");
+		Perl_croak(aTHX_ "Usage: EntityList::RemoveFromTargets(THIS, Mob* target)");
 	{
 		EntityList *		THIS;
 		Mob*		mob;
@@ -1417,7 +1417,7 @@ XS(XS_EntityList_ReplaceWithTarget)
 {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: EntityList::ReplaceWithTarget(THIS, pOldMob, pNewTarget)");
+		Perl_croak(aTHX_ "Usage: EntityList::ReplaceWithTarget(THIS, Mob* old_mob, Mob* new_target)");
 	{
 		EntityList *		THIS;
 		Mob*		pOldMob;
@@ -1460,7 +1460,7 @@ XS(XS_EntityList_OpenDoorsNear)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::OpenDoorsNear(THIS, opener)");
+		Perl_croak(aTHX_ "Usage: EntityList::OpenDoorsNear(THIS, NPC* opener)");
 	{
 		EntityList *		THIS;
 		NPC*		opener;
@@ -1493,7 +1493,7 @@ XS(XS_EntityList_MakeNameUnique)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::MakeNameUnique(THIS, name)");
+		Perl_croak(aTHX_ "Usage: EntityList::MakeNameUnique(THIS, string name)");
 	{
 		EntityList *		THIS;
 		char *		RETVAL;
@@ -1520,7 +1520,7 @@ XS(XS_EntityList_RemoveNumbers)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveNumbers(CLASS, name)");
+		Perl_croak(aTHX_ "Usage: EntityListDeprecated::RemoveNumbers(CLASS, name)");
 	{
 		char *		RETVAL;
 		dXSTARG;
@@ -1537,7 +1537,7 @@ XS(XS_EntityList_SignalMobsByNPCID)
 {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: EntityList::SignalMobsByNPCID(THIS, npc_type, signal_id)");
+		Perl_croak(aTHX_ "Usage: EntityList::SignalMobsByNPCID(THIS, uint32 npc_type_id, int signal_id)");
 	{
 		EntityList *		THIS;
 		uint32		npc_type = (uint32)SvUV(ST(1));
@@ -1562,7 +1562,7 @@ XS(XS_EntityList_RemoveEntity)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveEntity(THIS, id)");
+		Perl_croak(aTHX_ "Usage: EntityList::RemoveEntity(THIS, uint16 id)");
 	{
 		EntityList *		THIS;
 		uint16		id = (uint16)SvUV(ST(1));
@@ -1638,7 +1638,7 @@ XS(XS_EntityList_HalveAggro)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::HalveAggro(THIS, who)");
+		Perl_croak(aTHX_ "Usage: EntityList::HalveAggro(THIS, Mob* target)");
 	{
 		EntityList *		THIS;
 		Mob*		who;
@@ -1671,7 +1671,7 @@ XS(XS_EntityList_DoubleAggro)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::DoubleAggro(THIS, who)");
+		Perl_croak(aTHX_ "Usage: EntityList::DoubleAggro(THIS, *Mob target)");
 	{
 		EntityList *		THIS;
 		Mob*		who;
@@ -1704,7 +1704,7 @@ XS(XS_EntityList_ClearFeignAggro)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::ClearFeignAggro(THIS, targ)");
+		Perl_croak(aTHX_ "Usage: EntityList::ClearFeignAggro(THIS, Mob* target)");
 	{
 		EntityList *		THIS;
 		Mob*		targ;
@@ -1737,7 +1737,7 @@ XS(XS_EntityList_Fighting)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::Fighting(THIS, targ)");
+		Perl_croak(aTHX_ "Usage: EntityList::Fighting(THIS, Mob* target)");
 	{
 		EntityList *		THIS;
 		bool		RETVAL;
@@ -1773,7 +1773,7 @@ XS(XS_EntityList_RemoveFromHateLists)
 {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveFromHateLists(THIS, mob, settoone= false)");
+		Perl_croak(aTHX_ "Usage: EntityList::RemoveFromHateLists(THIS, Mob* mob, [bool set_to_one = false])");
 	{
 		EntityList *		THIS;
 		Mob*		mob;
@@ -1813,7 +1813,7 @@ XS(XS_EntityList_MessageGroup)
 {
 	dXSARGS;
 	if (items < 5)
-		Perl_croak(aTHX_ "Usage: EntityList::MessageGroup(THIS, sender, skipclose, type, message, ...)");
+		Perl_croak(aTHX_ "Usage: EntityList::MessageGroup(THIS, Mob* sender, bool skip_close, uint32 emote_color_type, string message)");
 	{
 		EntityList *		THIS;
 		Mob*		sender;
@@ -1849,7 +1849,7 @@ XS(XS_EntityList_GetRandomClient)
 {
 	dXSARGS;
 	if ((items < 5) || (items > 6))
-		Perl_croak(aTHX_ "Usage: EntityList::GetRandomClient(THIS, x, y, z, distance, excludeclient = nullptr)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetRandomClient(THIS, float x, float y, float z, float distance, [Client* exclude_client = nullptr])");
 	{
 		EntityList *THIS;
 		Client *RETVAL, *c = nullptr;
@@ -2109,7 +2109,7 @@ XS(XS_EntityList_SignalAllClients)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::SignalAllClients(THIS, data)");
+		Perl_croak(aTHX_ "Usage: EntityList::SignalAllClients(THIS, uint32 data)");
 	{
 		EntityList *THIS;
 		uint32 data = (uint32)SvUV(ST(1));
