@@ -245,7 +245,7 @@ XS(XS_Corpse_SetDecayTimer)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Corpse::SetDecayTimer(THIS, decaytime)");
+		Perl_croak(aTHX_ "Usage: Corpse::SetDecayTimer(THIS, uint32 decay_time)");
 	{
 		Corpse *		THIS;
 		uint32		decaytime = (uint32)SvUV(ST(1));
@@ -295,7 +295,7 @@ XS(XS_Corpse_AddItem)
 {
 	dXSARGS;
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: Corpse::AddItem(THIS, itemnum, charges, slot= 0)");
+		Perl_croak(aTHX_ "Usage: Corpse::AddItem(THIS, uint32 item_id, uint16 charges, [unt16 slot = 0])");
 	{
 		Corpse *		THIS;
 		uint32		itemnum = (uint32)SvUV(ST(1));
@@ -354,7 +354,7 @@ XS(XS_Corpse_RemoveItem)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Corpse::RemoveItem(THIS, lootslot)");
+		Perl_croak(aTHX_ "Usage: Corpse::RemoveItem(THIS, uint16 loot_slot)");
 	{
 		Corpse *		THIS;
 		uint16		lootslot = (uint16)SvUV(ST(1));
@@ -378,7 +378,7 @@ XS(XS_Corpse_SetCash)
 {
 	dXSARGS;
 	if (items != 5)
-		Perl_croak(aTHX_ "Usage: Corpse::SetCash(THIS, in_copper, in_silver, in_gold, in_platinum)");
+		Perl_croak(aTHX_ "Usage: Corpse::SetCash(THIS, uint16 copper, uint16 silver, uint16 gold, uint16 platinum)");
 	{
 		Corpse *		THIS;
 		uint16		in_copper = (uint16)SvUV(ST(1));
@@ -581,7 +581,7 @@ XS(XS_Corpse_Summon)
 {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Corpse::Summon(THIS, client, spell)");
+		Perl_croak(aTHX_ "Usage: Corpse::Summon(THIS, Client* client, bool is_spell)");
 	{
 		Corpse *		THIS;
 		Client*		client;
@@ -615,7 +615,7 @@ XS(XS_Corpse_CastRezz)
 {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Corpse::CastRezz(THIS, spellid, Caster)");
+		Perl_croak(aTHX_ "Usage: Corpse::CastRezz(THIS, uint16 spell_id, [Mob* caster = nullptr])");
 	{
 		Corpse *		THIS;
 		uint16		spellid = (uint16)SvUV(ST(1));
@@ -672,7 +672,7 @@ XS(XS_Corpse_CanMobLoot)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Corpse::CanMobLoot(THIS, charid)");
+		Perl_croak(aTHX_ "Usage: Corpse::CanMobLoot(THIS, int character_id)");
 	{
 		Corpse *		THIS;
 		bool		RETVAL;
@@ -699,7 +699,7 @@ XS(XS_Corpse_AllowMobLoot)
 {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Corpse::AllowMobLoot(THIS, them, slot)");
+		Perl_croak(aTHX_ "Usage: Corpse::AllowMobLoot(THIS, Mob* them, uint8 slot)");
 	{
 		Corpse *		THIS;
 		Mob *		them;
@@ -733,7 +733,7 @@ XS(XS_Corpse_AddLooter)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Corpse::AddLooter(THIS, who)");
+		Perl_croak(aTHX_ "Usage: Corpse::AddLooter(THIS, Mob* who)");
 	{
 		Corpse *		THIS;
 		Mob *		who;
