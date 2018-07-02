@@ -14,6 +14,7 @@ sub usage() {
 	print "   --questitem  - Prints methods for just questitem class methods\n";
 	print "   --corpse     - Prints methods for just corpse class methods\n";
 	print "   --hateentry  - Prints methods for just hateentry class methods\n";
+	print "   --quest      - Prints methods for just quest class methods\n";
 	print "   --all        - Prints methods for all classes\n";
 	exit(1);
 }
@@ -25,6 +26,12 @@ if($#ARGV < 0) {
 my $export = $ARGV[0];
 $export=~s/--//g;
 
+my $export_file_search = $export;
+
+if ($export eq "quest") {
+	$export_file_search = "embparser_api";
+}
+
 my @files;
 my $start_dir = "zone/";
 find(
@@ -34,13 +41,13 @@ find(
 for my $file (@files) {
 
 	#::: Skip non Perl files
-	if($file!~/perl_/i){ 
+	if($file!~/perl_|embparser_api/i){ 
 		next; 
 	}
 
 	#::: If we are specifying a specific class type, skip everything else
 	if ($export ne "all" && $export ne "") {
-		if ($file!~/$export/i) {
+		if ($file!~/$export_file_search/i) {
 			next;
 		}
 	}
@@ -56,7 +63,7 @@ for my $file (@files) {
 		chomp;
 		$line = $_;
 
-		if ($line=~/Perl_croak/i && $line=~/Usa/i && $line=~/::/i) {
+		if ($line=~/Perl_croak/i && $line=~/Usa/i && $line=~/::/i && $line!~/::new/i) {
 
 			#::: Client export
 			if ($export=~/all|client/i && $line=~/Client::/i) {
@@ -118,10 +125,16 @@ for my $file (@files) {
 				$object_prefix = "\$hate_entry->";
 			}
 
-			#::: Hateentry export
+			#::: Questitem export
 			if ($export=~/all|questitem/i && $line=~/QuestItem::/i) {
 				$split_key = "QuestItem::";
 				$object_prefix = "\$quest_item->";
+			}
+
+			#::: Quest:: exports
+			if ($export=~/all|quest/i && $line=~/quest::/i) {
+				$split_key = "quest::";
+				$object_prefix = "\quest::";
 			}
 
 			#::: Split on croak usage
