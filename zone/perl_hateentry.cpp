@@ -18,7 +18,9 @@
 
 #include "../common/features.h"
 #include "client.h"
+
 #ifdef EMBPERL_XS_CLASSES
+
 #include "../common/global_define.h"
 #include "embperl.h"
 
@@ -29,84 +31,80 @@
 #include "../common/linked_list.h"
 #include "hate_list.h"
 
-#ifdef THIS		/* this macro seems to leak out on some systems */
+#ifdef THIS        /* this macro seems to leak out on some systems */
 #undef THIS
 #endif
 
 XS(XS_HateEntry_GetEnt); /* prototype to pass -Wmissing-prototypes */
-XS(XS_HateEntry_GetEnt)
-{
+XS(XS_HateEntry_GetEnt) {
 	dXSARGS;
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: HateEntry::GetData(THIS)");
 	{
-		struct_HateList * THIS;
-		Mob * RETVAL;
+		struct_HateList *THIS;
+		Mob             *RETVAL;
 
 		if (sv_derived_from(ST(0), "HateEntry")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(struct_HateList *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(struct_HateList *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type tHateEntry");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->entity_on_hatelist;
 		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "Mob", (void*)RETVAL);
+		sv_setref_pv(ST(0), "Mob", (void *) RETVAL);
 	}
 	XSRETURN(1);
 }
 
 XS(XS_HateEntry_GetHate); /* prototype to pass -Wmissing-prototypes */
-XS(XS_HateEntry_GetHate)
-{
+XS(XS_HateEntry_GetHate) {
 	dXSARGS;
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: HateEntry::GetHate(THIS)");
 	{
-		struct_HateList * THIS;
+		struct_HateList *THIS;
 		int32 RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "HateEntry")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(struct_HateList *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(struct_HateList *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type tHateEntry");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->stored_hate_amount;
-		XSprePUSH; PUSHi((IV)RETVAL);
+		XSprePUSH;
+		PUSHi((IV) RETVAL);
 	}
 	XSRETURN(1);
 }
 
 XS(XS_HateEntry_GetDamage); /* prototype to pass -Wmissing-prototypes */
-XS(XS_HateEntry_GetDamage)
-{
+XS(XS_HateEntry_GetDamage) {
 	dXSARGS;
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: HateEntry::GetDamage(THIS)");
 	{
-		struct_HateList * THIS;
+		struct_HateList *THIS;
 		int32 RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "HateEntry")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(struct_HateList *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(struct_HateList *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type tHateEntry");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->hatelist_damage;
-		XSprePUSH; PUSHi((IV)RETVAL);
+		XSprePUSH;
+		PUSHi((IV) RETVAL);
 	}
 	XSRETURN(1);
 }
@@ -116,24 +114,23 @@ extern "C"
 #endif
 
 XS(boot_HateEntry);
-XS(boot_HateEntry)
-{
+XS(boot_HateEntry) {
 	dXSARGS;
 	char file[256];
 	strncpy(file, __FILE__, 256);
 	file[255] = 0;
 
-	if(items != 1)
+	if (items != 1)
 		fprintf(stderr, "boot_quest does not take any arguments.");
 	char buf[128];
 
 	//add the strcpy stuff to get rid of const warnings....
 
-	XS_VERSION_BOOTCHECK ;
+	XS_VERSION_BOOTCHECK;
 
-		newXSproto(strcpy(buf, "GetEnt"), XS_HateEntry_GetEnt, file, "$");
-		newXSproto(strcpy(buf, "GetDamage"), XS_HateEntry_GetDamage, file, "$");
-		newXSproto(strcpy(buf, "GetHate"), XS_HateEntry_GetHate, file, "$");
+	newXSproto(strcpy(buf, "GetEnt"), XS_HateEntry_GetEnt, file, "$");
+	newXSproto(strcpy(buf, "GetDamage"), XS_HateEntry_GetDamage, file, "$");
+	newXSproto(strcpy(buf, "GetHate"), XS_HateEntry_GetHate, file, "$");
 
 	XSRETURN_YES;
 }
