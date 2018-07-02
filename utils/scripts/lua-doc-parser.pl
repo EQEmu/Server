@@ -36,6 +36,10 @@ if($#ARGV < 0) {
 	usage();
 }
 
+#::: Open File
+my $filename = 'lua-api.md';
+open(my $fh, '>', $filename) or die "Could not open file '$filename' $!";
+
 my $export = $ARGV[0];
 $export=~s/--//g;
 
@@ -210,11 +214,23 @@ for my $file (@files) {
 		}
 	}
 
+	#::: Header
+	$header = $split_key;
+	$header =~s/:://g;
+
+	print $fh "# " . $header . "\n";
+	print $fh "```lua\n";
+
 	@methods = sort @methods;
 	foreach $method (@methods) {
+		print $fh $method;
 		print $method;
 	}
+
+	print $fh "```\n\n";
 }
+
+close $fh;
 
 #::: Trim Whitespaces
 sub trim { 
