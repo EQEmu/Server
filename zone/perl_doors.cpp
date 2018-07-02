@@ -305,7 +305,7 @@ XS(XS_Doors_GetNoKeyring)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Doors::GetNoKeyring(THIS, type)");
+		Perl_croak(aTHX_ "Usage: Doors::GetNoKeyring(THIS, uint8 type)");
 	{
 		Doors *		THIS;
 		uint8		type = (uint8)SvUV(ST(1));
@@ -383,7 +383,7 @@ XS(XS_Doors_SetOpenType)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Doors::SetOpenType(THIS, type)");
+		Perl_croak(aTHX_ "Usage: Doors::SetOpenType(THIS, uint32 open_type)");
 	{
 		Doors *		THIS;
 		uint32		type = (uint32)SvUV(ST(1));
@@ -407,7 +407,7 @@ XS(XS_Doors_SetLockpick)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Doors::SetLockpick(THIS, type)");
+		Perl_croak(aTHX_ "Usage: Doors::SetLockpick(THIS, uint32 lockpick_type)");
 	{
 		Doors *		THIS;
 		uint32		type = (uint32)SvUV(ST(1));
@@ -431,7 +431,7 @@ XS(XS_Doors_SetKeyItem)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Doors::SetKeyItem(THIS, type)");
+		Perl_croak(aTHX_ "Usage: Doors::SetKeyItem(THIS, uint32 key_item_id)");
 	{
 		Doors *		THIS;
 		uint32		type = (uint32)SvUV(ST(1));
@@ -455,7 +455,7 @@ XS(XS_Doors_SetNoKeyring)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Doors::SetNoKeyring(THIS, type)");
+		Perl_croak(aTHX_ "Usage: Doors::SetNoKeyring(THIS, uint8 no_key_ring)");
 	{
 		Doors *		THIS;
 		uint8		type = (uint8)SvUV(ST(1));
@@ -479,7 +479,7 @@ XS(XS_Doors_SetIncline)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Doors::SetIncline(THIS, type)");
+		Perl_croak(aTHX_ "Usage: Doors::SetIncline(THIS, uint32 incline)");
 	{
 		Doors *		THIS;
 		uint32		type = (uint32)SvUV(ST(1));
@@ -503,7 +503,7 @@ XS(XS_Doors_SetSize)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Doors::SetSize(THIS, size)");
+		Perl_croak(aTHX_ "Usage: Doors::SetSize(THIS, uint32 size)");
 	{
 		Doors *		THIS;
 		uint32		type = (uint32)SvUV(ST(1));
@@ -527,7 +527,7 @@ XS(XS_Doors_SetLocation)
 {
 	dXSARGS;
 	if (items != 4)
-		Perl_croak(aTHX_ "Usage: Doors::SetLocation(THIS, x, y, z)");
+		Perl_croak(aTHX_ "Usage: Doors::SetLocation(THIS, float x, float y, float z)");
 	{
 		Doors *		THIS;
 		float		x = (float)SvNV(ST(1));
@@ -553,7 +553,7 @@ XS(XS_Doors_SetX)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Doors::SetX(THIS, XPos)");
+		Perl_croak(aTHX_ "Usage: Doors::SetX(THIS, float x)");
 	{
 		Doors *		THIS;
 		float		x = (float)SvNV(ST(1));
@@ -578,7 +578,7 @@ XS(XS_Doors_SetY)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Doors::SetY(THIS, YPos)");
+		Perl_croak(aTHX_ "Usage: Doors::SetY(THIS, float y)");
 	{
 		Doors *		THIS;
 		float		y = (float)SvNV(ST(1));
@@ -604,7 +604,7 @@ XS(XS_Doors_SetZ)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Doors::SetZ(THIS, ZPos)");
+		Perl_croak(aTHX_ "Usage: Doors::SetZ(THIS, float z)");
 	{
 		Doors *		THIS;
 		float		z = (float)SvNV(ST(1));
@@ -630,7 +630,7 @@ XS(XS_Doors_SetHeading)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Doors::SetHeading(THIS, heading)");
+		Perl_croak(aTHX_ "Usage: Doors::SetHeading(THIS, float heading)");
 	{
 		Doors *		THIS;
 		float		heading = (float)SvNV(ST(1));
@@ -656,7 +656,7 @@ XS(XS_Doors_SetModelName)
 {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Doors::SetModelName(THIS, name)");
+		Perl_croak(aTHX_ "Usage: Doors::SetModelName(THIS, string name)");
 	{
 		Doors *		THIS;
 		char *		name = nullptr;
