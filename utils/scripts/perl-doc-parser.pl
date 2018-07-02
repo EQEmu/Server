@@ -11,6 +11,7 @@ sub usage() {
 	print "   --object     - Prints methods for just object class methods\n";
 	print "   --group      - Prints methods for just group class methods\n";
 	print "   --raid       - Prints methods for just raid class methods\n";
+	print "   --questitem  - Prints methods for just questitem class methods\n";
 	print "   --corpse     - Prints methods for just corpse class methods\n";
 	print "   --hateentry  - Prints methods for just hateentry class methods\n";
 	print "   --all        - Prints methods for all classes\n";
@@ -45,6 +46,8 @@ for my $file (@files) {
 	}
 
 	@methods = ();
+	$split_key = "";
+	$object_prefix = "";
 
 	#::: Open File
 	print "\nOpening '" . $file . "'\n";
@@ -53,7 +56,7 @@ for my $file (@files) {
 		chomp;
 		$line = $_;
 
-		if ($line=~/Client::|Mob::|Corpse::|EntityList::|Doors::|Group::|HateEntry::|NPC::|Object::|Raid::/i && $line=~/_croak/i) {
+		if ($line=~/Perl_croak/i && $line=~/Usa/i && $line=~/::/i) {
 
 			#::: Client export
 			if ($export=~/all|client/i && $line=~/Client::/i) {
@@ -113,6 +116,12 @@ for my $file (@files) {
 			if ($export=~/all|hateentry/i && $line=~/HateEntry::/i) {
 				$split_key = "HateEntry::";
 				$object_prefix = "\$hate_entry->";
+			}
+
+			#::: Hateentry export
+			if ($export=~/all|questitem/i && $line=~/QuestItem::/i) {
+				$split_key = "QuestItem::";
+				$object_prefix = "\$quest_item->";
 			}
 
 			#::: Split on croak usage
