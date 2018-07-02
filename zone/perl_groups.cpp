@@ -71,8 +71,8 @@ XS(XS_Group_IsGroupMember) {
 		Perl_croak(aTHX_ "Usage: Group::IsGroupMember(THIS, client)");
 	{
 		Group *THIS;
-		bool RETVAL;
-		Mob *client;
+		bool  RETVAL;
+		Mob   *client;
 
 		if (sv_derived_from(ST(0), "Group")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -103,8 +103,8 @@ XS(XS_Group_CastGroupSpell) {
 	if (items != 3)
 		Perl_croak(aTHX_ "Usage: Group::CastGroupSpell(THIS, Mob* caster, uint16 spell_id)");
 	{
-		Group *THIS;
-		Mob   *caster;
+		Group  *THIS;
+		Mob    *caster;
 		uint16 spellid = (uint16) SvUV(ST(2));
 
 		if (sv_derived_from(ST(0), "Group")) {
@@ -134,9 +134,9 @@ XS(XS_Group_SplitExp) {
 	if (items != 3)
 		Perl_croak(aTHX_ "Usage: Group::SplitExp(THIS, uint32 exp, Mob* other)");
 	{
-		Group *THIS;
+		Group  *THIS;
 		uint32 exp = (uint32) SvUV(ST(1));
-		Mob *other;
+		Mob    *other;
 
 		if (sv_derived_from(ST(0), "Group")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -168,7 +168,7 @@ XS(XS_Group_GroupMessage) {
 		Group *THIS;
 		Mob   *sender;
 		uint8 language;
-		char *message;
+		char  *message;
 
 		if (sv_derived_from(ST(0), "Group")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -206,10 +206,10 @@ XS(XS_Group_GetTotalGroupDamage) {
 	if (items != 2)
 		Perl_croak(aTHX_ "Usage: Group::GetTotalGroupDamage(THIS, Mob* other)");
 	{
-		Group *THIS;
+		Group  *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-		Mob *other;
+		Mob    *other;
 
 		if (sv_derived_from(ST(0), "Group")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -240,7 +240,7 @@ XS(XS_Group_SplitMoney) {
 	if (items != 5)
 		Perl_croak(aTHX_ "Usage: Group::SplitMoney(THIS, uint32 copper, uint32 silver, uint32 gold, uint32 platinum)");
 	{
-		Group *THIS;
+		Group  *THIS;
 		uint32 copper   = (uint32) SvUV(ST(1));
 		uint32 silver   = (uint32) SvUV(ST(2));
 		uint32 gold     = (uint32) SvUV(ST(3));
@@ -406,8 +406,8 @@ XS(XS_Group_IsLeader) {
 		Perl_croak(aTHX_ "Usage: Group::IsLeader(THIS, Mob* target)");
 	{
 		Group *THIS;
-		bool RETVAL;
-		Mob *leadertest;
+		bool  RETVAL;
+		Mob   *leadertest;
 
 		if (sv_derived_from(ST(0), "Group")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -463,7 +463,7 @@ XS(XS_Group_GetHighestLevel) {
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Group::GetHighestLevel(THIS)");
 	{
-		Group *THIS;
+		Group  *THIS;
 		uint32 RETVAL;
 		dXSTARG;
 
@@ -489,8 +489,8 @@ XS(XS_Group_TeleportGroup) {
 		Perl_croak(aTHX_
 		           "Usage: Group::TeleportGroup(THIS, Mob* sender, uint32 zone_id, float x, float y, float z, float heading)");
 	{
-		Group *THIS;
-		Mob   *sender;
+		Group  *THIS;
+		Mob    *sender;
 		uint32 zoneID  = (uint32) SvUV(ST(2));
 		float  x       = (float) SvNV(ST(3));
 		float  y       = (float) SvNV(ST(4));
@@ -524,7 +524,7 @@ XS(XS_Group_GetID) {
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Group::GetID(THIS)");
 	{
-		Group *THIS;
+		Group  *THIS;
 		uint32 RETVAL;
 		dXSTARG;
 
