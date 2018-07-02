@@ -49,7 +49,7 @@ XS(XS_Object_IsGroundSpawn) {
 		Perl_croak(aTHX_ "Usage: Object::IsGroundSpawn(THIS)");
 	{
 		Object *THIS;
-		bool RETVAL;
+		bool   RETVAL;
 
 		if (sv_derived_from(ST(0), "Object")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -96,7 +96,7 @@ XS(XS_Object_Delete) {
 		Perl_croak(aTHX_ "Usage: Object::Delete(THIS, [bool reset_state = false])");
 	{
 		Object *THIS;
-		bool reset_state;
+		bool   reset_state;
 
 		if (sv_derived_from(ST(0), "Object")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -145,7 +145,7 @@ XS(XS_Object_DeleteItem) {
 		Perl_croak(aTHX_ "Usage: Object::DeleteItem(THIS, uint8 index)");
 	{
 		Object *THIS;
-		uint8 index = (uint8) SvUV(ST(1));
+		uint8  index = (uint8) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Object")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -167,7 +167,7 @@ XS(XS_Object_IsObject) {
 		Perl_croak(aTHX_ "Usage: Object::IsObject(THIS)");
 	{
 		Object *THIS;
-		bool RETVAL;
+		bool   RETVAL;
 
 		if (sv_derived_from(ST(0), "Object")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -192,7 +192,7 @@ XS(XS_Object_Save) {
 		Perl_croak(aTHX_ "Usage: Object::Save(THIS)");
 	{
 		Object *THIS;
-		bool RETVAL;
+		bool   RETVAL;
 
 		if (sv_derived_from(ST(0), "Object")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -312,7 +312,7 @@ XS(XS_Object_GetX) {
 		Perl_croak(aTHX_ "Usage: Object::GetX(THIS)");
 	{
 		Object *THIS;
-		float RETVAL;
+		float  RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Object")) {
@@ -337,7 +337,7 @@ XS(XS_Object_GetY) {
 		Perl_croak(aTHX_ "Usage: Object::GetY(THIS)");
 	{
 		Object *THIS;
-		float RETVAL;
+		float  RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Object")) {
@@ -362,7 +362,7 @@ XS(XS_Object_GetZ) {
 		Perl_croak(aTHX_ "Usage: Object::GetZ(THIS)");
 	{
 		Object *THIS;
-		float RETVAL;
+		float  RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Object")) {
@@ -387,7 +387,7 @@ XS(XS_Object_GetHeading) {
 		Perl_croak(aTHX_ "Usage: Object::GetHeading(THIS)");
 	{
 		Object *THIS;
-		float RETVAL;
+		float  RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Object")) {
@@ -584,9 +584,9 @@ XS(XS_Object_SetLocation) {
 		Perl_croak(aTHX_ "Usage: Object::SetLocation(THIS, float x, float y, float z)");
 	{
 		Object *THIS;
-		float x = (float) SvNV(ST(1));
-		float y = (float) SvNV(ST(2));
-		float z = (float) SvNV(ST(3));
+		float  x = (float) SvNV(ST(1));
+		float  y = (float) SvNV(ST(2));
+		float  z = (float) SvNV(ST(3));
 
 		if (sv_derived_from(ST(0), "Object")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -608,7 +608,7 @@ XS(XS_Object_SetX) {
 		Perl_croak(aTHX_ "Usage: Object::SetX(THIS, float x)");
 	{
 		Object *THIS;
-		float pos = (float) SvNV(ST(1));
+		float  pos = (float) SvNV(ST(1));
 
 		if (sv_derived_from(ST(0), "Object")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -630,7 +630,7 @@ XS(XS_Object_SetY) {
 		Perl_croak(aTHX_ "Usage: Object::SetY(THIS, float y)");
 	{
 		Object *THIS;
-		float pos = (float) SvNV(ST(1));
+		float  pos = (float) SvNV(ST(1));
 
 		if (sv_derived_from(ST(0), "Object")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -652,7 +652,7 @@ XS(XS_Object_SetZ) {
 		Perl_croak(aTHX_ "Usage: Object::SetZ(THIS, float z)");
 	{
 		Object *THIS;
-		float pos = (float) SvNV(ST(1));
+		float  pos = (float) SvNV(ST(1));
 
 		if (sv_derived_from(ST(0), "Object")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -674,7 +674,7 @@ XS(XS_Object_SetHeading) {
 		Perl_croak(aTHX_ "Usage: Object::SetHeading(THIS, float heading)");
 	{
 		Object *THIS;
-		float heading = (float) SvNV(ST(1));
+		float  heading = (float) SvNV(ST(1));
 
 		if (sv_derived_from(ST(0), "Object")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -787,7 +787,7 @@ XS(XS_Object_GetEntityVariable) {
 	if (items != 2)
 		Perl_croak(aTHX_ "Usage: Object::GetEntityVariable(THIS, string key)");
 	{
-		Object *THIS;
+		Object     *THIS;
 		Const_char *id = SvPV_nolen(ST(1));
 		Const_char *RETVAL;
 		dXSTARG;
@@ -814,7 +814,7 @@ XS(XS_Object_EntityVariableExists) {
 	if (items != 2)
 		Perl_croak(aTHX_ "Usage: Object::EntityVariableExists(THIS, string key)");
 	{
-		Object *THIS;
+		Object     *THIS;
 		Const_char *id = SvPV_nolen(ST(1));
 		bool       RETVAL;
 
@@ -827,7 +827,7 @@ XS(XS_Object_EntityVariableExists) {
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->EntityVariableExists(id);
-		ST(0) = boolSV(RETVAL);
+		ST(0)          = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
 	XSRETURN(1);
@@ -839,8 +839,8 @@ XS(XS_Object_SetEntityVariable) {
 	if (items != 3)
 		Perl_croak(aTHX_ "Usage: Object::SetEntityVariable(THIS, string key, string var)");
 	{
-		Object *THIS;
-		Const_char *id = SvPV_nolen(ST(1));
+		Object     *THIS;
+		Const_char *id  = SvPV_nolen(ST(1));
 		const char *var = (const char *) SvPV_nolen(ST(2));
 
 		if (sv_derived_from(ST(0), "Object")) {
@@ -911,7 +911,7 @@ XS(XS_Object_GetSize) {
 		Perl_croak(aTHX_ "Usage: Object::GetSize(THIS)");
 	{
 		Object *THIS;
-		float RETVAL;
+		float  RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Object")) {
@@ -937,7 +937,7 @@ XS(XS_Object_SetSize) {
 		Perl_croak(aTHX_ "Usage: Object::SetSize(THIS, float size)");
 	{
 		Object *THIS;
-		float size = (float) SvNV(ST(1));
+		float  size = (float) SvNV(ST(1));
 
 		if (sv_derived_from(ST(0), "Object")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -959,7 +959,7 @@ XS(XS_Object_SetTiltX) {
 		Perl_croak(aTHX_ "Usage: Object::SetTiltX(THIS, float tilt_x)");
 	{
 		Object *THIS;
-		float pos = (float) SvNV(ST(1));
+		float  pos = (float) SvNV(ST(1));
 
 		if (sv_derived_from(ST(0), "Object")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -981,7 +981,7 @@ XS(XS_Object_SetTiltY) {
 		Perl_croak(aTHX_ "Usage: Object::SetTiltY(THIS, float tilt_y)");
 	{
 		Object *THIS;
-		float pos = (float) SvNV(ST(1));
+		float  pos = (float) SvNV(ST(1));
 
 		if (sv_derived_from(ST(0), "Object")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -1003,7 +1003,7 @@ XS(XS_Object_GetTiltX) {
 		Perl_croak(aTHX_ "Usage: Object::GetSize(THIS)");
 	{
 		Object *THIS;
-		float RETVAL;
+		float  RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Object")) {
@@ -1028,7 +1028,7 @@ XS(XS_Object_GetTiltY) {
 		Perl_croak(aTHX_ "Usage: Object::GetSize(THIS)");
 	{
 		Object *THIS;
-		float RETVAL;
+		float  RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Object")) {
