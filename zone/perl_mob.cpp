@@ -529,7 +529,7 @@ XS(XS_Mob_BehindMob)
 {
 	dXSARGS;
 	if (items < 1 || items > 4)
-		Perl_croak(aTHX_ "Usage: Mob::BehindMob(THIS, other= 0, playerx= 0.0f, playery= 0.0f)");
+		Perl_croak(aTHX_ "Usage: Mob::BehindMob(THIS, Mob* other = 0, [float x = 0.0f], [float y= 0.0f])");
 	{
 		Mob *		THIS;
 		bool		RETVAL;
@@ -583,7 +583,7 @@ XS(XS_Mob_SetLevel)
 {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Mob::SetLevel(THIS, in_level, command= false)");
+		Perl_croak(aTHX_ "Usage: Mob::SetLevel(THIS, uint8 in_level, [bool command = false])");
 	{
 		Mob *		THIS;
 		uint8		in_level = (uint8)SvUV(ST(1));
@@ -614,7 +614,7 @@ XS(XS_Mob_GetSkill)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetSkill(THIS, skill_num)");
+		Perl_croak(aTHX_ "Usage: Mob::GetSkill(THIS, int skill_id)");
 	{
 		Mob *		THIS;
 		uint32		RETVAL;
@@ -641,7 +641,7 @@ XS(XS_Mob_SendWearChange)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SendWearChange(THIS, material_slot)");
+		Perl_croak(aTHX_ "Usage: Mob::SendWearChange(THIS, uint8 material_slot)");
 	{
 		Mob *		THIS;
 		uint8		material_slot = (uint8)SvUV(ST(1));
@@ -665,7 +665,7 @@ XS(XS_Mob_GetEquipment)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetEquipment(THIS, material_slot)");
+		Perl_croak(aTHX_ "Usage: Mob::GetEquipment(THIS, uint8 material_slot)");
 	{
 		Mob *		THIS;
 		int32		RETVAL;
@@ -692,7 +692,7 @@ XS(XS_Mob_GetEquipmentMaterial)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetEquipmentMaterial(THIS, material_slot)");
+		Perl_croak(aTHX_ "Usage: Mob::GetEquipmentMaterial(THIS, uint8 material_slot)");
 	{
 		Mob *		THIS;
 		int32		RETVAL;
@@ -719,7 +719,7 @@ XS(XS_Mob_GetEquipmentColor)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetEquipmentColor(THIS, material_slot)");
+		Perl_croak(aTHX_ "Usage: Mob::GetEquipmentColor(THIS, uint8 material_slot)");
 	{
 		Mob *		THIS;
 		int32		RETVAL;
@@ -746,7 +746,7 @@ XS(XS_Mob_GetArmorTint)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetArmorTint(THIS, material_slot)");
+		Perl_croak(aTHX_ "Usage: Mob::GetArmorTint(THIS, uint8 material_slot)");
 	{
 		Mob *		THIS;
 		int32		RETVAL;
@@ -845,7 +845,7 @@ XS(XS_Mob_Attack)
 {
 	dXSARGS;
 	if (items < 2 || items > 4)
-		Perl_croak(aTHX_ "Usage: Mob::Attack(THIS, other, Hand= 13, FromRiposte= false)");
+		Perl_croak(aTHX_ "Usage: Mob::Attack(THIS, Mob* other, [int hand = 13 [prim|sec]], [bool from_riposte = false])");
 	{
 		Mob *		THIS;
 		bool		RETVAL;
@@ -895,7 +895,7 @@ XS(XS_Mob_Damage)
 {
 	dXSARGS;
 	if (items < 5 || items > 8)
-		Perl_croak(aTHX_ "Usage: Mob::Damage(THIS, from, damage, spell_id, attack_skill, avoidable= true, buffslot= -1, iBuffTic= false)");
+		Perl_croak(aTHX_ "Usage: Mob::Damage(THIS, Mob* from, int32 damage, uint16 spell_id, int attack_skill, [bool avoidable = true], [int8 buffslot = -1], [bool buff_tic = false])");
 	{
 		Mob *		THIS;
 		Mob*		from;
@@ -952,7 +952,7 @@ XS(XS_Mob_RangedAttack)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::RangedAttack(THIS, other)");
+		Perl_croak(aTHX_ "Usage: Mob::RangedAttack(THIS, Mob* other)");
 	{
 		Mob *		THIS;
 		Mob*		other;
@@ -985,7 +985,7 @@ XS(XS_Mob_ThrowingAttack)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::ThrowingAttack(THIS, other)");
+		Perl_croak(aTHX_ "Usage: Mob::ThrowingAttack(THIS, Mob* other)");
 	{
 		Mob *		THIS;
 		Mob*		other;
@@ -1042,7 +1042,7 @@ XS(XS_Mob_HealDamage)
 {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Mob::HealDamage(THIS, amount, caster = 0)");
+		Perl_croak(aTHX_ "Usage: Mob::HealDamage(THIS, int32 amount, [Mob* caster = 0])");
 	{
 		Mob *		THIS;
 		int32	heal_amt = (int32)SvIV(ST(1));
@@ -1102,7 +1102,7 @@ XS(XS_Mob_GetLevelCon)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetLevelCon(THIS, iOtherLevel)");
+		Perl_croak(aTHX_ "Usage: Mob::GetLevelCon(THIS, uint8 other_level)");
 	{
 		Mob *		THIS;
 		uint32		RETVAL;
@@ -1129,7 +1129,7 @@ XS(XS_Mob_SetHP)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetHP(THIS, hp)");
+		Perl_croak(aTHX_ "Usage: Mob::SetHP(THIS, int32 hp)");
 	{
 		Mob *		THIS;
 		int32		hp = (int32)SvIV(ST(1));
@@ -1153,7 +1153,7 @@ XS(XS_Mob_DoAnim)
 {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Mob::DoAnim(THIS, animnum, type=0)");
+		Perl_croak(aTHX_ "Usage: Mob::DoAnim(THIS, int animation_number, [int type = 0])");
 	{
 		Mob *		THIS;
 		int		animnum = (int)SvIV(ST(1));
@@ -1184,7 +1184,7 @@ XS(XS_Mob_ChangeSize)
 {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Mob::ChangeSize(THIS, in_size, bNoRestriction= false)");
+		Perl_croak(aTHX_ "Usage: Mob::ChangeSize(THIS, float in_size, [bool no_restriction = false])");
 	{
 		Mob *		THIS;
 		float		in_size = (float)SvNV(ST(1));
@@ -1215,7 +1215,7 @@ XS(XS_Mob_GMMove)
 {
 	dXSARGS;
 	if (items < 4 || items > 5)
-		Perl_croak(aTHX_ "Usage: Mob::GMMove(THIS, x, y, z, heading= 0.01)");
+		Perl_croak(aTHX_ "Usage: Mob::GMMove(THIS, float x, float y, float z, [float heading = 0.01])");
 	{
 		Mob *		THIS;
 		float		x = (float)SvNV(ST(1));
@@ -1248,7 +1248,7 @@ XS(XS_Mob_SendPosUpdate)
 {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Mob::SendPosUpdate(THIS, iSendToSelf= 0)");
+		Perl_croak(aTHX_ "Usage: Mob::SendPosUpdate(THIS, [uint8 send_to_self = 0])");
 	{
 		Mob *		THIS;
 		uint8		iSendToSelf;
@@ -1327,7 +1327,7 @@ XS(XS_Mob_IsInvisible)
 {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Mob::IsInvisible(THIS, other= 0)");
+		Perl_croak(aTHX_ "Usage: Mob::IsInvisible(THIS, [Mob* other = 0])");
 	{
 		Mob *		THIS;
 		bool		RETVAL;
@@ -1367,7 +1367,7 @@ XS(XS_Mob_SetInvisible)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetInvisible(THIS, state)");
+		Perl_croak(aTHX_ "Usage: Mob::SetInvisible(THIS, uint8 state)");
 	{
 		Mob *		THIS;
 		uint8		state = (uint8)SvUV(ST(1));
@@ -1391,7 +1391,7 @@ XS(XS_Mob_FindBuff)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::FindBuff(THIS, spellid)");
+		Perl_croak(aTHX_ "Usage: Mob::FindBuff(THIS, uint16 spell_id)");
 	{
 		Mob *		THIS;
 		bool		RETVAL;
@@ -1418,7 +1418,7 @@ XS(XS_Mob_FindType)
 {
 	dXSARGS;
 	if (items < 2 || items > 4)
-		Perl_croak(aTHX_ "Usage: Mob::FindType(THIS, type, bOffensive= false, threshold= 100)");
+		Perl_croak(aTHX_ "Usage: Mob::FindType(THIS, uint8 type, [bool offensive = false], [uint16 threshold = 100])");
 	{
 		Mob *		THIS;
 		bool		RETVAL;
@@ -1459,7 +1459,7 @@ XS(XS_Mob_GetBuffSlotFromType)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetBuffSlotFromType(THIS, type)");
+		Perl_croak(aTHX_ "Usage: Mob::GetBuffSlotFromType(THIS, uint16 type)");
 	{
 		Mob *		THIS;
 		int8		RETVAL;
@@ -1486,7 +1486,7 @@ XS(XS_Mob_MakePet)
 {
 	dXSARGS;
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: Mob::MakePet(THIS, spell_id, pettype, name=nullptr)");
+		Perl_croak(aTHX_ "Usage: Mob::MakePet(THIS, uint16 spell_id, string pet_type, [string name = nullptr])");
 	{
 		Mob *		THIS;
 		uint16		spell_id = (uint16)SvUV(ST(1));
@@ -1518,7 +1518,7 @@ XS(XS_Mob_MakeTempPet)
 {
 	dXSARGS;
 	if (items < 2 || items > 6)
-		Perl_croak(aTHX_ "Usage: Mob::MakeTempPet(THIS, spell_id, name=nullptr, duration=0, target=nullptr, sticktarg=0)");
+		Perl_croak(aTHX_ "Usage: Mob::MakeTempPet(THIS, uint16 spell_id, [string name = nullptr], [uint32 duration = 0], [Mob* target = nullptr], [bool sticktarg = 0])");
 	{
 		Mob *		THIS;
 		uint16		spell_id = (uint16)SvUV(ST(1));
@@ -1571,7 +1571,7 @@ XS(XS_Mob_TypesTempPet)
 {
 	dXSARGS;
 	if (items < 2 || items > 7)
-		Perl_croak(aTHX_ "Usage: Mob::TypesTempPet(THIS, typesid, name=nullptr, duration=0, follow=0, target=nullptr, sticktarg=0,)");
+		Perl_croak(aTHX_ "Usage: Mob::TypesTempPet(THIS, uint32 type_id, [string name = nullptr], [uint32 duration = 0], [bool follow = 0], [Mob* target = nullptr], [bool stick_targ = 0])");
 	{
 		Mob *		THIS;
 		uint32		typesid = (uint32)SvUV(ST(1));
@@ -3177,7 +3177,7 @@ XS(XS_Mob_GetActSpellRange)
 {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::GetActSpellRange(THIS, spell_id, range)");
+		Perl_croak(aTHX_ "Usage: Mob::GetActSpellRange(THIS, uint16 spell_id, float range)");
 	{
 		Mob *		THIS;
 		float		RETVAL;
@@ -3205,7 +3205,7 @@ XS(XS_Mob_GetActSpellDamage)
 {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::GetActSpellDamage(THIS, spell_id, value)");
+		Perl_croak(aTHX_ "Usage: Mob::GetActSpellDamage(THIS, uint16 spell_id, int32 value)");
 	{
 		Mob *		THIS;
 		int32		RETVAL;
@@ -3233,7 +3233,7 @@ XS(XS_Mob_GetActSpellHealing)
 {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::GetActSpellHealing(THIS, spell_id, value)");
+		Perl_croak(aTHX_ "Usage: Mob::GetActSpellHealing(THIS, uint16 spell_id, int32 value)");
 	{
 		Mob *		THIS;
 		int32		RETVAL;
@@ -3261,7 +3261,7 @@ XS(XS_Mob_GetActSpellCost)
 {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::GetActSpellCost(THIS, spell_id, cost)");
+		Perl_croak(aTHX_ "Usage: Mob::GetActSpellCost(THIS, uint16 spell_id, int32 cost)");
 	{
 		Mob *		THIS;
 		int32		RETVAL;
@@ -3289,7 +3289,7 @@ XS(XS_Mob_GetActSpellDuration)
 {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::GetActSpellDuration(THIS, spell_id, duration)");
+		Perl_croak(aTHX_ "Usage: Mob::GetActSpellDuration(THIS, uint16 spell_id, int32 duration)");
 	{
 		Mob *		THIS;
 		int32		RETVAL;
@@ -3317,7 +3317,7 @@ XS(XS_Mob_GetActSpellCasttime)
 {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::GetActSpellCasttime(THIS, spell_id, casttime)");
+		Perl_croak(aTHX_ "Usage: Mob::GetActSpellCasttime(THIS, uint16 spell_id, uint32 cast_time)");
 	{
 		Mob *		THIS;
 		int32		RETVAL;
@@ -3345,7 +3345,7 @@ XS(XS_Mob_ResistSpell)
 {
 	dXSARGS;
 	if (items != 4)
-		Perl_croak(aTHX_ "Usage: Mob::ResistSpell(THIS, ressit_type, spell_id, caster)");
+		Perl_croak(aTHX_ "Usage: Mob::ResistSpell(THIS, uint8 resist_type, uint16 spell_id, [Mob* caster = nullptr])");
 	{
 		Mob *		THIS;
 		double		RETVAL;
@@ -3383,7 +3383,7 @@ XS(XS_Mob_GetSpecializeSkillValue)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetSpecializeSkillValue(THIS, spell_id)");
+		Perl_croak(aTHX_ "Usage: Mob::GetSpecializeSkillValue(THIS, uint16 spell_id)");
 	{
 		Mob *		THIS;
 		uint16		RETVAL;
@@ -3823,7 +3823,7 @@ XS(XS_Mob_Message)
 {
 	dXSARGS;
 	if (items < 3)
-		Perl_croak(aTHX_ "Usage: Mob::Message(THIS, type, message, ...)");
+		Perl_croak(aTHX_ "Usage: Mob::Message(THIS, uint32 emote_color_type, string message)");
 	{
 		Mob *		THIS;
 		uint32		type = (uint32)SvUV(ST(1));
@@ -3848,7 +3848,7 @@ XS(XS_Mob_Message_StringID)
 {
 	dXSARGS;
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: Mob::Message_StringID(THIS, type, string_id, distance= 0)");
+		Perl_croak(aTHX_ "Usage: Mob::Message_StringID(THIS, uint32 emote_color_type, uint32 string_id, [uint32 distance = 0])");
 	{
 		Mob *		THIS;
 		uint32		type = (uint32)SvUV(ST(1));
@@ -3880,7 +3880,7 @@ XS(XS_Mob_Say)
 {
 	dXSARGS;
 	if (items < 2)
-		Perl_croak(aTHX_ "Usage: Mob::Say(THIS, format, ...)");
+		Perl_croak(aTHX_ "Usage: Mob::Say(THIS, string message)");
 	{
 		Mob *		THIS;
 		char *		format = (char *)SvPV_nolen(ST(1));
@@ -3904,7 +3904,7 @@ XS(XS_Mob_Shout)
 {
 	dXSARGS;
 	if (items < 2)
-		Perl_croak(aTHX_ "Usage: Mob::Shout(THIS, format, ...)");
+		Perl_croak(aTHX_ "Usage: Mob::Shout(THIS, string message)");
 	{
 		Mob *		THIS;
 		char *		format = (char *)SvPV_nolen(ST(1));
@@ -3928,7 +3928,7 @@ XS(XS_Mob_Emote)
 {
 	dXSARGS;
 	if (items < 2)
-		Perl_croak(aTHX_ "Usage: Mob::Emote(THIS, format, ...)");
+		Perl_croak(aTHX_ "Usage: Mob::Emote(THIS, string message)");
 	{
 		Mob *		THIS;
 		char *		format = (char *)SvPV_nolen(ST(1));
@@ -3952,7 +3952,7 @@ XS(XS_Mob_InterruptSpell)
 {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Mob::InterruptSpell(THIS, spellid= 0xFFFF)");
+		Perl_croak(aTHX_ "Usage: Mob::InterruptSpell(THIS, [uint16 spell_id = 0xFFFF])");
 	{
 		Mob *		THIS;
 		uint16		spellid;
@@ -3982,7 +3982,7 @@ XS(XS_Mob_CastSpell)
 {
 	dXSARGS;
 	if (items < 3 || items > 7)
-		Perl_croak(aTHX_ "Usage: Mob::CastSpell(THIS, spell_id, target_id, slot= 22, casttime= -1, mana_cost= -1, resist_adjust = 0)");
+		Perl_croak(aTHX_ "Usage: Mob::CastSpell(THIS, uint16 spell_id, uint16 target_id, [int slot = 22], [int32 cast_time = -1], [int32 mana_cost = -1], [int16 resist_adjust = 0])");
 	{
 		Mob *		THIS;
 		uint16		spell_id = (uint16)SvUV(ST(1));
@@ -4041,7 +4041,7 @@ XS(XS_Mob_SpellFinished)
 {
 	dXSARGS;
 	if (items < 2 || items > 5)
-		Perl_croak(aTHX_ "Usage: Mob::SpellFinished(spell_id, spell_target = this, mana_cost = 0, resist_diff = 0)");
+		Perl_croak(aTHX_ "Usage: Mob::SpellFinished(uint16 spell_id, [Mob* spell_target = this], [uint16 mana_cost = 0], [uint16 resist_diff = 0])");
 	{
 		Mob *		THIS;
 		uint16		spell_id = (uint16)SvUV(ST(1));
@@ -4095,7 +4095,7 @@ XS(XS_Mob_IsImmuneToSpell)
 {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::IsImmuneToSpell(THIS, spell_id, caster)");
+		Perl_croak(aTHX_ "Usage: Mob::IsImmuneToSpell(THIS, uint16 spell_id, [Mob* caster = nullptr])");
 	{
 		Mob *		THIS;
 		bool		RETVAL;
@@ -4132,7 +4132,7 @@ XS(XS_Mob_BuffFadeBySpellID)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::BuffFadeBySpellID(THIS, spell_id)");
+		Perl_croak(aTHX_ "Usage: Mob::BuffFadeBySpellID(THIS, uint16 spell_id)");
 	{
 		Mob *		THIS;
 		uint16		spell_id = (uint16)SvUV(ST(1));
@@ -4156,7 +4156,7 @@ XS(XS_Mob_BuffFadeByEffect)
 {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Mob::BuffFadeByEffect(THIS, effectid, skipslot= -1)");
+		Perl_croak(aTHX_ "Usage: Mob::BuffFadeByEffect(THIS, int effect_id, int skip_slot = -1)");
 	{
 		Mob *		THIS;
 		int		effectid = (int)SvIV(ST(1));
@@ -4210,7 +4210,7 @@ XS(XS_Mob_BuffFadeBySlot)
 {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Mob::BuffFadeBySlot(THIS, slot, iRecalcBonuses= true)");
+		Perl_croak(aTHX_ "Usage: Mob::BuffFadeBySlot(THIS, int slot, bool recalc_bonuses = true)");
 	{
 		Mob *		THIS;
 		int		slot = (int)SvIV(ST(1));
@@ -4241,7 +4241,7 @@ XS(XS_Mob_CanBuffStack)
 {
 	dXSARGS;
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: Mob::CanBuffStack(THIS, spellid, caster_level, iFailIfOverwrite= false)");
+		Perl_croak(aTHX_ "Usage: Mob::CanBuffStack(THIS, uint16 spell_id, uint8 caster_level, [bool fail_if_overwritten = false])");
 	{
 		Mob *		THIS;
 		int		RETVAL;
@@ -4328,7 +4328,7 @@ XS(XS_Mob_SetAppearance)
 {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Mob::SetAppearance(THIS, app, iIgnoreSelf= true)");
+		Perl_croak(aTHX_ "Usage: Mob::SetAppearance(THIS, int appearance [0|1|2|3|4], [ignore_self = true])");
 	{
 		Mob *		THIS;
 		EmuAppearance		app = (EmuAppearance)SvUV(ST(1));
@@ -4411,7 +4411,7 @@ XS(XS_Mob_SetRunAnimSpeed)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetRunAnimSpeed(THIS, in)");
+		Perl_croak(aTHX_ "Usage: Mob::SetRunAnimSpeed(THIS, int8 speed)");
 	{
 		Mob *		THIS;
 		int8		in = (int8)SvIV(ST(1));
@@ -4435,7 +4435,7 @@ XS(XS_Mob_SetPetID)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetPetID(THIS, NewPetID)");
+		Perl_croak(aTHX_ "Usage: Mob::SetPetID(THIS, uint16 new_pet_id)");
 	{
 		Mob *		THIS;
 		uint16		NewPetID = (uint16)SvUV(ST(1));
@@ -4485,7 +4485,7 @@ XS(XS_Mob_SetOwnerID)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetOwnerID(THIS, NewOwnerID)");
+		Perl_croak(aTHX_ "Usage: Mob::SetOwnerID(THIS, uint16 new_owner_id)");
 	{
 		Mob *		THIS;
 		uint16		NewOwnerID = (uint16)SvUV(ST(1));
@@ -4587,7 +4587,7 @@ XS(XS_Mob_Stun)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::Stun(THIS, duration)");
+		Perl_croak(aTHX_ "Usage: Mob::Stun(THIS, int duration)");
 	{
 		Mob *		THIS;
 		int		duration = (int)SvIV(ST(1));
@@ -4657,7 +4657,7 @@ XS(XS_Mob_SetInvul)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetInvul(THIS, invul)");
+		Perl_croak(aTHX_ "Usage: Mob::SetInvul(THIS, bool set_invulnerable)");
 	{
 		Mob *		THIS;
 		bool		invul = (bool)SvTRUE(ST(1));
@@ -4707,7 +4707,7 @@ XS(XS_Mob_SetExtraHaste)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetExtraHaste(THIS, Haste)");
+		Perl_croak(aTHX_ "Usage: Mob::SetExtraHaste(THIS, int haste)");
 	{
 		Mob *		THIS;
 		int		Haste = (int)SvIV(ST(1));
@@ -5306,7 +5306,7 @@ XS(XS_Mob_AddToHateList)
 {
 	dXSARGS;
 	if (items < 2 || items > 7)
-		Perl_croak(aTHX_ "Usage: Mob::AddToHateList(THIS, other, hate= 0, damage= 0, iYellForHelp= true, bFrenzy= false, iBuffTic= false)");
+		Perl_croak(aTHX_ "Usage: Mob::AddToHateList(THIS, Mob* other, [int32 hate = 0], [int32 damage = 0], [bool yell_for_help = true], [bool frenzy = false], [bool buff_tic = false])");
 	{
 		Mob *		THIS;
 		Mob*		other;
@@ -5374,7 +5374,7 @@ XS(XS_Mob_SetHate)
 {
 	dXSARGS;
 	if (items < 2 || items > 4)
-		Perl_croak(aTHX_ "Usage: Mob::SetHate(THIS, other, hate= 0, damage= 0)");
+		Perl_croak(aTHX_ "Usage: Mob::SetHate(THIS, Mob* other, [int32 hate = 0], [int32 damage = 0])");
 	{
 		Mob *		THIS;
 		Mob*		other;
@@ -5421,7 +5421,7 @@ XS(XS_Mob_HalveAggro)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::HalveAggro(THIS, other)");
+		Perl_croak(aTHX_ "Usage: Mob::HalveAggro(THIS, Mob* other)");
 	{
 		Mob *	THIS;
 		Mob *	other;
@@ -5454,7 +5454,7 @@ XS(XS_Mob_DoubleAggro)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::DoubleAggro(THIS, other)");
+		Perl_croak(aTHX_ "Usage: Mob::DoubleAggro(THIS, Mob* other)");
 	{
 		Mob *	THIS;
 		Mob *	other;
@@ -5487,7 +5487,7 @@ XS(XS_Mob_GetHateAmount)
 {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Mob::GetHateAmount(THIS, tmob, is_dam= false)");
+		Perl_croak(aTHX_ "Usage: Mob::GetHateAmount(THIS, Mob* mob, [bool is_damage = false])");
 	{
 		Mob *		THIS;
 		uint32		RETVAL;
@@ -5530,7 +5530,7 @@ XS(XS_Mob_GetDamageAmount)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetDamageAmount(THIS, tmob)");
+		Perl_croak(aTHX_ "Usage: Mob::GetDamageAmount(THIS, Mob* target_mob)");
 	{
 		Mob *		THIS;
 		uint32		RETVAL;
@@ -5592,7 +5592,7 @@ XS(XS_Mob_GetHateDamageTop)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetHateDamageTop(THIS, other)");
+		Perl_croak(aTHX_ "Usage: Mob::GetHateDamageTop(THIS, Mob* other)");
 	{
 		Mob *		THIS;
 		Mob *		RETVAL;
@@ -5702,34 +5702,31 @@ XS(XS_Mob_HateSummon)
 }
 
 XS(XS_Mob_FaceTarget); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Mob_FaceTarget)
-{
+XS(XS_Mob_FaceTarget) {
 	dXSARGS;
 	if (items < 1 || items > 3)
-		Perl_croak(aTHX_ "Usage: Mob::FaceTarget(THIS, MobToFace= 0)");
+		Perl_croak(aTHX_ "Usage: Mob::FaceTarget(THIS, [Mob* target = 0])");
 	{
-		Mob *		THIS;
-		Mob*		MobToFace;
+		Mob *THIS;
+		Mob *MobToFace;
 
 		if (sv_derived_from(ST(0), "Mob")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Mob *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Mob *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items < 2)
 			MobToFace = 0;
 		else {
 			if (sv_derived_from(ST(1), "Mob")) {
-				IV tmp = SvIV((SV*)SvRV(ST(1)));
-				MobToFace = INT2PTR(Mob *,tmp);
-			}
-			else
+				IV tmp = SvIV((SV *) SvRV(ST(1)));
+				MobToFace = INT2PTR(Mob *, tmp);
+			} else
 				Perl_croak(aTHX_ "MobToFace is not of type Mob");
-			if(MobToFace == nullptr)
+			if (MobToFace == nullptr)
 				Perl_croak(aTHX_ "MobToFace is nullptr, avoiding crash.");
 		}
 
@@ -5743,7 +5740,7 @@ XS(XS_Mob_SetHeading)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetHeading(THIS, iHeading)");
+		Perl_croak(aTHX_ "Usage: Mob::SetHeading(THIS, float heading)");
 	{
 		Mob *		THIS;
 		float		iHeading = (float)SvNV(ST(1));
@@ -5790,7 +5787,7 @@ XS(XS_Mob_CheckAggro)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::CheckAggro(THIS, other)");
+		Perl_croak(aTHX_ "Usage: Mob::CheckAggro(THIS, Mob* other)");
 	{
 		Mob *		THIS;
 		bool		RETVAL;
@@ -5826,7 +5823,7 @@ XS(XS_Mob_CalculateHeadingToTarget)
 {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::CalculateHeadingToTarget(THIS, in_x, in_y)");
+		Perl_croak(aTHX_ "Usage: Mob::CalculateHeadingToTarget(THIS, float x, float y)");
 	{
 		Mob *		THIS;
 		int8		RETVAL;
@@ -5854,7 +5851,7 @@ XS(XS_Mob_CalculateNewPosition)
 {
 	dXSARGS;
 	if (items < 5 || items > 6)
-		Perl_croak(aTHX_ "Usage: Mob::CalculateNewPosition(THIS, x, y, z, speed, checkZ= false)");
+		Perl_croak(aTHX_ "Usage: Mob::CalculateNewPosition(THIS, float x, float y, float z, float speed, [bool check_z = false])");
 	{
 		Mob *		THIS;
 		bool		RETVAL;
@@ -5891,7 +5888,7 @@ XS(XS_Mob_CalculateDistance)
 {
 	dXSARGS;
 	if (items != 4)
-		Perl_croak(aTHX_ "Usage: Mob::CalculateDistance(THIS, x, y, z)");
+		Perl_croak(aTHX_ "Usage: Mob::CalculateDistance(THIS, float x, float y, float z)");
 	{
 		Mob *		THIS;
 		float		RETVAL;
@@ -5920,7 +5917,7 @@ XS(XS_Mob_SendTo)
 {
 	dXSARGS;
 	if (items != 4)
-		Perl_croak(aTHX_ "Usage: Mob::SendTo(THIS, new_x, new_y, new_z)");
+		Perl_croak(aTHX_ "Usage: Mob::SendTo(THIS, float new_x, float new_y, float new_z)");
 	{
 		Mob *		THIS;
 		float		new_x = (float)SvNV(ST(1));
@@ -5946,7 +5943,7 @@ XS(XS_Mob_SendToFixZ)
 {
 	dXSARGS;
 	if (items != 4)
-		Perl_croak(aTHX_ "Usage: Mob::SendToFixZ(THIS, new_x, new_y, new_z)");
+		Perl_croak(aTHX_ "Usage: Mob::SendToFixZ(THIS, float new_x, float new_y, float new_z)");
 	{
 		Mob *		THIS;
 		float		new_x = (float)SvNV(ST(1));
@@ -5972,7 +5969,7 @@ XS(XS_Mob_NPCSpecialAttacks)
 {
 	dXSARGS;
 	if (items < 3 || items > 5)
-		Perl_croak(aTHX_ "Usage: Mob::NPCSpecialAttacks(THIS, parse, permtag, [reset], [remove])");
+		Perl_croak(aTHX_ "Usage: Mob::NPCSpecialAttacks(THIS, string abilities_string, int perm_tag, [bool reset = true], [bool remove = true])");
 	{
 		Mob *		THIS;
 		char*		parse = (char *)SvPV_nolen(ST(1));
@@ -6241,7 +6238,7 @@ XS(XS_Mob_GetLevelHP)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetLevelHP(THIS, tlevel)");
+		Perl_croak(aTHX_ "Usage: Mob::GetLevelHP(THIS, uint8 level)");
 	{
 		Mob *		THIS;
 		uint32		RETVAL;
@@ -6294,7 +6291,7 @@ XS(XS_Mob_CheckAggroAmount)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::CheckAggroAmount(THIS, spellid)");
+		Perl_croak(aTHX_ "Usage: Mob::CheckAggroAmount(THIS, uint16 spell_id)");
 	{
 		Mob *		THIS;
 		uint32		RETVAL;
@@ -6321,7 +6318,7 @@ XS(XS_Mob_CheckHealAggroAmount)
 {
 	dXSARGS;
 	if (items != 2 && items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::CheckHealAggroAmount(THIS, spellid, possible_heal_amt)");
+		Perl_croak(aTHX_ "Usage: Mob::CheckHealAggroAmount(THIS, uint16 spell_id, uint32 possible_heal_amt)");
 	{
 		Mob *		THIS;
 		uint32		RETVAL;
@@ -6354,7 +6351,7 @@ XS(XS_Mob_GetAA)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetAA(THIS, rank_id)");
+		Perl_croak(aTHX_ "Usage: Mob::GetAA(THIS, uint32 rank_id)");
 	{
 		Mob *		THIS;
 		uint32		RETVAL;
@@ -6381,7 +6378,7 @@ XS(XS_Mob_GetAAByAAID)
 {
 	dXSARGS;
 	if(items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetAAByAAID(THIS, aa_id)");
+		Perl_croak(aTHX_ "Usage: Mob::GetAAByAAID(THIS, uint32 aa_id)");
 	{
 		Mob *		THIS;
 		uint32		RETVAL;
@@ -6408,7 +6405,7 @@ XS(XS_Mob_SetAA)
 {
 	dXSARGS;
 	if(items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: Mob::SetAA(THIS, aa_id, points, [charges])");
+		Perl_croak(aTHX_ "Usage: Mob::SetAA(THIS, int aa_id, int points, [int charges = 0])");
 	{
 		Mob *		THIS;
 		bool		RETVAL;
@@ -6463,7 +6460,7 @@ XS(XS_Mob_AddFeignMemory)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::AddFeignMemory(THIS, attacker)");
+		Perl_croak(aTHX_ "Usage: Mob::AddFeignMemory(THIS, Client* attacker)");
 	{
 		Mob *		THIS;
 		Client*		attacker;
@@ -6496,7 +6493,7 @@ XS(XS_Mob_RemoveFromFeignMemory)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::RemoveFromFeignMemory(THIS, attacker)");
+		Perl_croak(aTHX_ "Usage: Mob::RemoveFromFeignMemory(THIS, Client* attacker)");
 	{
 		Mob *		THIS;
 		Client*		attacker;
@@ -6552,7 +6549,7 @@ XS(XS_Mob_SetOOCRegen)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetOOCRegen(THIS, newoocregen)");
+		Perl_croak(aTHX_ "Usage: Mob::SetOOCRegen(THIS, int32 new_ooc_regen)");
 	{
 		Mob *		THIS;
 		int32		newoocregen = (int32)SvIV(ST(1));
@@ -6576,7 +6573,7 @@ XS(XS_Mob_GetEntityVariable)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetEntityVariable(THIS, id)");
+		Perl_croak(aTHX_ "Usage: Mob::GetEntityVariable(THIS, string id)");
 	{
 		Mob *		THIS;
 		Const_char *		id = SvPV_nolen(ST(1));
@@ -6603,7 +6600,7 @@ XS(XS_Mob_EntityVariableExists)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::EntityVariableExists(THIS, id)");
+		Perl_croak(aTHX_ "Usage: Mob::EntityVariableExists(THIS, string id)");
 	{
 		Mob *		THIS;
 		Const_char *		id = SvPV_nolen(ST(1));
@@ -6630,7 +6627,7 @@ XS(XS_Mob_SetEntityVariable)
 {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::SetEntityVariable(THIS, id, var)");
+		Perl_croak(aTHX_ "Usage: Mob::SetEntityVariable(THIS, string id, string var)");
 	{
 		Mob *		THIS;
 		Const_char *		id = SvPV_nolen(ST(1));
@@ -6686,46 +6683,12 @@ XS(XS_Mob_GetHateList)
 	XSRETURN(num_entries);
 }
 
-/*
-	dXSARGS;
-	int num_mobs = 0;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::GetCorpseList(THIS)");
-	{
-		EntityList *THIS;
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		std::list<Corpse*> corpse_list = entity_list.GetCorpseList();
-		std::list<Corpse*>::iterator iter = corpse_list.begin();
-
-		while(iter != corpse_list.end())
-		{
-			Corpse *entry = (*iter);
-			ST(0) = sv_newmortal();
-			sv_setref_pv(ST(0), "Corpse", (void*)entry);
-			XPUSHs(ST(0));
-			num_mobs++;
-			iter++;
-		}
-	}
-	XSRETURN(num_mobs);
-*/
-
 XS(XS_Mob_SignalClient); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SignalClient)
 {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::SignalClient(THIS, client, data)");
+		Perl_croak(aTHX_ "Usage: Mob::SignalClient(THIS, Client* client, uint32 data)");
 	{
 		Mob *		THIS;
 		Client*		client = nullptr;
@@ -6759,7 +6722,7 @@ XS(XS_Mob_CombatRange)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::CombatRange(THIS, target)");
+		Perl_croak(aTHX_ "Usage: Mob::CombatRange(THIS, Mob* target)");
 	{
 		Mob *		THIS;
 		Mob	*		target = nullptr;
@@ -6795,7 +6758,7 @@ XS(XS_Mob_DoSpecialAttackDamage)
 {
 	dXSARGS;
 	if (items < 4 || items > 6)
-		Perl_croak(aTHX_ "Usage: Mob::DoSpecialAttackDamage(THIS, target, skill, max_damage, min_damage = 1, hate_override = -1)");
+		Perl_croak(aTHX_ "Usage: Mob::DoSpecialAttackDamage(THIS, Mob* target, int skill, int32 max_damage, [int32 min_damage = 1], [int32 hate_override = -11])");
 	{
 		Mob *		THIS;
 		Mob*		target;
@@ -6842,7 +6805,7 @@ XS(XS_Mob_CheckLoS)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::CheckLoS(THIS, mob)");
+		Perl_croak(aTHX_ "Usage: Mob::CheckLoS(THIS, Mob*)");
 	{
 		Mob *		THIS;
 		Mob*		mob;
@@ -6878,7 +6841,7 @@ XS(XS_Mob_CheckLoSToLoc)
 {
 	dXSARGS;
 	if (items != 4 && items != 5)
-		Perl_croak(aTHX_ "Usage: Mob::CheckLoSToLoc(THIS, loc_x, loc_y, loc_z, mob_size)");
+		Perl_croak(aTHX_ "Usage: Mob::CheckLoSToLoc(THIS, float x, float y, float z, float mob_size)");
 	{
 		Mob *		THIS;
 		float		loc_x = (float)SvNV(ST(1));
@@ -6915,7 +6878,7 @@ XS(XS_Mob_FindGroundZ)
 {
 	dXSARGS;
 	if (items != 3 && items != 4)
-		Perl_croak(aTHX_ "Usage: Mob::FindGroundZ(THIS, new_x, new_y, z_offset)");
+		Perl_croak(aTHX_ "Usage: Mob::FindGroundZ(THIS, float x, float y, float z_offset)");
 	{
 		Mob *		THIS;
 		float		new_x = (float)SvNV(ST(1));
@@ -6951,7 +6914,7 @@ XS(XS_Mob_ProjectileAnim)
 {
 	dXSARGS;
 	if (items < 3 || items > 9)
-		Perl_croak(aTHX_ "Usage: Mob::ProjectileAnim(THIS, mob, item_id, IsArrow?, speed, angle, tilt, arc)");
+		Perl_croak(aTHX_ "Usage: Mob::ProjectileAnim(THIS, Mob* mob, int item_id, [bool is_arrow = false], [float speed = 0], [float angle = 0], [float tilt = 0], [float arc = 0])");
 
 	{
 		Mob *		THIS;
@@ -7011,7 +6974,7 @@ XS(XS_Mob_HasNPCSpecialAtk)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::HasNPCSpecialAtk(THIS, parse)");
+		Perl_croak(aTHX_ "Usage: Mob::HasNPCSpecialAtk(THIS, string ability_string)");
 	{
 		Mob *		THIS;
 		char*		parse = (char *)SvPV_nolen(ST(1));
@@ -7038,7 +7001,7 @@ XS(XS_Mob_SendAppearanceEffect)
 {
 	dXSARGS;
 	if (items < 2 || items > 7)
-		Perl_croak(aTHX_ "Usage: Mob::SendAppearanceEffect(THIS, parm1, parm2, parm3, parm4, parm5, singleclient)");
+		Perl_croak(aTHX_ "Usage: Mob::SendAppearanceEffect(THIS, int32 param_1, [int32 param_2 = 0], [int32 param_3 = 0], [int32 param_4 = 0], [int32 param_5 = 0], [Client* single_client_to_send_to = null])");
 	{
 		Mob *		THIS;
 		int32		parm1 = (int32)SvIV(ST(1));
@@ -7082,7 +7045,7 @@ XS(XS_Mob_SetFlyMode)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetFlyMode(THIS, 0|1|2|3)");
+		Perl_croak(aTHX_ "Usage: Mob::SetFlyMode(THIS, uint8 flymode[0|1|2|3])");
 	{
 		Mob *		THIS;
 		uint8		flymode = (uint8)SvIV(ST(1));
@@ -7106,7 +7069,7 @@ XS(XS_Mob_SetTexture)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetTexture(THIS, texture)");
+		Perl_croak(aTHX_ "Usage: Mob::SetTexture(THIS, int32 texture)");
 	{
 		Mob *		THIS;
 		int32		texture = (int32)SvIV(ST(1));
@@ -7130,7 +7093,7 @@ XS(XS_Mob_SetRace)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetRace(THIS, race)");
+		Perl_croak(aTHX_ "Usage: Mob::SetRace(THIS, int32 race)");
 	{
 		Mob *		THIS;
 		int32		race = (int32)SvIV(ST(1));
@@ -7154,7 +7117,7 @@ XS(XS_Mob_SetGender)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetGender(THIS, gender)");
+		Perl_croak(aTHX_ "Usage: Mob::SetGender(THIS, int32 gender)");
 	{
 		Mob *		THIS;
 		int32		gender = (int32)SvIV(ST(1));
@@ -7178,7 +7141,7 @@ XS(XS_Mob_SendIllusion)
 {
 	dXSARGS;
 	if (items < 2 || items > 14)
-		Perl_croak(aTHX_ "Usage: Mob::SendIllusion(THIS,race,gender,texture,helmtexture,face,hairstyle,haircolor,beard,beardcolor,drakkin_heritage,drakkin_tattoo,drakkin_details,size)");
+		Perl_croak(aTHX_ "Usage: Mob::SendIllusion(THIS, uint16 race, [uint8 gender = 0xFF], [uint8 texture = 0xFF], [unit8 helmtexture = 0xFF], [unit8 face = 0xFF], [unit8 hairstyle = 0xFF], [uint8 hair_color = 0xFF], [uint8 beard = 0xFF], [uint8 beard_color = 0xFF], [uint32 drakkin_heritage = 0xFFFFFFFF], [uint32 drakkin_tattoo = 0xFFFFFFFF], [uint32 drakkin_details = 0xFFFFFFFF], [float size = -1])");
 	{
 		Mob *		THIS;
 		uint16		race = (uint16)SvIV(ST(1));
@@ -7228,7 +7191,7 @@ XS(XS_Mob_CameraEffect)
 {
 	dXSARGS;
 	if (items < 2 || items > 5)
-		Perl_croak(aTHX_ "Usage: Mob::CameraEffect(THIS, duration, intensity, singleclient, global)");
+		Perl_croak(aTHX_ "Usage: Mob::CameraEffect(THIS, uint32 duration, [uint32 intensity = 0], [Client* single_client = nullptr], [bool is_world_wide = false])");
 	{
 		Mob *		THIS;
 		uint32		duration = (uint32)SvUV(ST(1));
@@ -7273,7 +7236,7 @@ XS(XS_Mob_SpellEffect)
 {
 	dXSARGS;
 	if (items < 2 || items > 8)
-		Perl_croak(aTHX_ "Usage: Mob::SpellEffect(THIS, effect, [duration, finish_delay, zone_wide, unk20, perm_effect, client])");
+		Perl_croak(aTHX_ "Usage: Mob::SpellEffect(THIS, uint32 effect, [uint32 duration = 5000], [uint32 finish_delay = 0], [bool zone_wide = false], [uint32 unk20 = 3000], [bool perm_effect = false], [Client* single_client])");
 	{
 		Mob *		THIS;
 		uint32		effect = (uint32)SvUV(ST(1));
@@ -7322,7 +7285,7 @@ XS(XS_Mob_TempName)
 {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Mob::TempName(THIS, name)");
+		Perl_croak(aTHX_ "Usage: Mob::TempName(THIS, string name)");
 	{
 		Mob *		THIS;
 		char *		name = nullptr;
@@ -7348,7 +7311,7 @@ XS(XS_Mob_GetItemStat)
 {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::GetItemStat(THIS, itemid, stat)");
+		Perl_croak(aTHX_ "Usage: Mob::GetItemStat(THIS, uint32 item_id, string stat)");
 	{
 		Mob *		THIS;
 		int32		RETVAL;
@@ -7376,7 +7339,7 @@ XS(XS_Mob_GetGlobal)
 {
 	dXSARGS;
 	if (items < 2)
-		Perl_croak(aTHX_ "Usage: GetGlobal(THIS, varname)");
+		Perl_croak(aTHX_ "Usage: GetGlobal(THIS, string var_name)");
 	{
 		Mob* THIS;
 		Const_char* varname = (Const_char*)SvPV_nolen(ST(1));
@@ -7407,7 +7370,7 @@ XS(XS_Mob_SetGlobal)
 {
 	dXSARGS;
 	if (items < 5 || items > 6)
-		Perl_croak(aTHX_ "Usage: SetGlobal(THIS, varname, newvalue, options, duration, other=nullptr)");
+		Perl_croak(aTHX_ "Usage: SetGlobal(THIS, string var_name, string new_value, int options, string duration, [Mob* other = nullptr])");
 	{
 		Mob *		THIS;
 		char *		varname = (char *)SvPV_nolen(ST(1));
@@ -7446,7 +7409,7 @@ XS(XS_Mob_TarGlobal)
 {
 	dXSARGS;
 	if (items != 7)
-		Perl_croak(aTHX_ "Usage: TarGlobal(THIS, varname, value, duration, npcid, charid, zoneid)");
+		Perl_croak(aTHX_ "Usage: TarGlobal(THIS, string var_name, string value, string duration, int npc_id, int character_id, int zone_id)");
 	{
 		Mob *		THIS;
 		char *		varname = (char *)SvPV_nolen(ST(1));
@@ -7475,7 +7438,7 @@ XS(XS_Mob_DelGlobal)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: DelGlobal(THIS, varname)");
+		Perl_croak(aTHX_ "Usage: DelGlobal(THIS, string var_name)");
 	{
 		Mob *		THIS;
 		char *		varname = (char *)SvPV_nolen(ST(1));
@@ -7499,7 +7462,7 @@ XS(XS_Mob_SetSlotTint)
 {
 	dXSARGS;
 	if (items != 5)
-		Perl_croak(aTHX_ "Usage: Mob::SetSlotTint(THIS, material_slot, red_tint, green_tint, blue_tint)");
+		Perl_croak(aTHX_ "Usage: Mob::SetSlotTint(THIS, uint8 material_slot, uint8 red_tint, uint8 green_tint, uint8 blue_tint)");
 	{
 		Mob *		THIS;
 		uint8		material_slot = (uint8)SvIV(ST(1));
@@ -7526,7 +7489,7 @@ XS(XS_Mob_WearChange)
 {
 	dXSARGS;
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: Mob::WearChange(THIS, material_slot, texture, [color, hero_forge_model])");
+		Perl_croak(aTHX_ "Usage: Mob::WearChange(THIS, uint8 material_slot, uint16 texture, [uint32 color = 0, uint32 hero_forge_model = 0])");
 	{
 		Mob *		THIS;
 		uint8		material_slot = (uint8)SvIV(ST(1));
@@ -7560,7 +7523,7 @@ XS(XS_Mob_DoKnockback)
 {
 	dXSARGS;
 	if (items != 4)
-		Perl_croak(aTHX_ "Usage: Mob::DoKnockback(THIS, caster, pushback, pushup)");
+		Perl_croak(aTHX_ "Usage: Mob::DoKnockback(THIS, Mob* caster, uint32 push_back_amount, uint32 push_up_amount)");
 	{
 		Mob *		THIS;
 		Mob *		caster;
@@ -7595,7 +7558,7 @@ XS(XS_Mob_RemoveNimbusEffect)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::RemoveNimbusEffect(THIS, effectid)");
+		Perl_croak(aTHX_ "Usage: Mob::RemoveNimbusEffect(THIS, int32 effect_id)");
 	{
 		Mob *		THIS;
 		int32		effectid = (int32)SvIV(ST(1));
@@ -7619,7 +7582,7 @@ XS(XS_Mob_SetRunning)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetRunning(THIS, value)");
+		Perl_croak(aTHX_ "Usage: Mob::SetRunning(THIS, bool value)");
 	{
 		Mob *	THIS;
 		bool value = (bool)SvTRUE(ST(1));
@@ -7670,7 +7633,7 @@ XS(XS_Mob_SetBodyType)
 {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Mob::SetBodyType(THIS, type, overwrite_orig = false)");
+		Perl_croak(aTHX_ "Usage: Mob::SetBodyType(THIS, int32 type, [bool overwrite_orig = false])");
 	{
 		Mob *		THIS;
 		int32		type = (int32)SvIV(ST(1));
@@ -7699,7 +7662,7 @@ XS(XS_Mob_SetDeltas)
 {
 	dXSARGS;
 	if (items != 5)
-		Perl_croak(aTHX_ "Usage: Mob::SetDeltas(THIS, delta_x, delta_y, delta_z, delta_h)");
+		Perl_croak(aTHX_ "Usage: Mob::SetDeltas(THIS, float delta_x, float delta_y, float delta_z, float delta_h)");
 	{
 		Mob *		THIS;
 		auto delta = glm::vec4((float)SvNV(ST(1)), (float)SvNV(ST(2)), (float)SvNV(ST(3)), (float)SvNV(ST(4)));
@@ -7723,7 +7686,7 @@ XS(XS_Mob_SetLD)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetLD(THIS, value)");
+		Perl_croak(aTHX_ "Usage: Mob::SetLD(THIS, bool value)");
 	{
 		Mob *	THIS;
 		bool value = (bool)SvTRUE(ST(1));
@@ -7747,7 +7710,7 @@ XS(XS_Mob_SetTargetDestSteps)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetTargetDestSteps(THIS, target_steps)");
+		Perl_croak(aTHX_ "Usage: Mob::SetTargetDestSteps(THIS, uint8 target_steps)");
 	{
 		Mob *		THIS;
 		uint8		target_steps = (uint8)SvIV(ST(1));
@@ -7771,7 +7734,7 @@ XS(XS_Mob_SetTargetable)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetTargetable(THIS, on)");
+		Perl_croak(aTHX_ "Usage: Mob::SetTargetable(THIS, bool targetable)");
 	{
 		Mob *		THIS;
 		bool on = (bool)SvTRUE(ST(1));
@@ -7795,7 +7758,7 @@ XS(XS_Mob_ModSkillDmgTaken)
 {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::ModSkillDmgTaken(THIS, skill, value)");
+		Perl_croak(aTHX_ "Usage: Mob::ModSkillDmgTaken(THIS, int skill, int16 value)");
 	{
 		Mob *		THIS;
 		EQEmu::skills::SkillType	skill_num = (EQEmu::skills::SkillType)SvUV(ST(1));
@@ -7820,7 +7783,7 @@ XS(XS_Mob_GetModSkillDmgTaken)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetModSkillDmgTaken(THIS, skill_num)");
+		Perl_croak(aTHX_ "Usage: Mob::GetModSkillDmgTaken(THIS, int skill_id)");
 	{
 		Mob *		THIS;
 		int16		RETVAL;
@@ -7847,7 +7810,7 @@ XS(XS_Mob_GetSkillDmgTaken)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetSkillDmgTaken(THIS, skill_num)");
+		Perl_croak(aTHX_ "Usage: Mob::GetSkillDmgTaken(THIS, int skill_id)");
 	{
 		Mob *		THIS;
 		int32		RETVAL;
@@ -7874,7 +7837,7 @@ XS(XS_Mob_SetAllowBeneficial)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetAllowBeneficial(THIS, value)");
+		Perl_croak(aTHX_ "Usage: Mob::SetAllowBeneficial(THIS, bool value)");
 	{
 		Mob *	THIS;
 		bool value = (bool)SvTRUE(ST(1));
@@ -7924,7 +7887,7 @@ XS(XS_Mob_IsBeneficialAllowed)
 {
 	dXSARGS;
 	if (items != 2)
-	Perl_croak(aTHX_ "Usage: Mob::IsBeneficialAllowed(THIS, target)");
+	Perl_croak(aTHX_ "Usage: Mob::IsBeneficialAllowed(THIS, Mob* target)");
 	{
 		dXSTARG;
 		Mob * THIS;
@@ -7961,7 +7924,7 @@ XS(XS_Mob_ModVulnerability)
 {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::ModVulnerability(THIS, resist, value)");
+		Perl_croak(aTHX_ "Usage: Mob::ModVulnerability(THIS, uint8 resist, int16 value)");
 	{
 		Mob *		THIS;
 		uint8		resist = (uint8)SvIV(ST(1));
@@ -7986,7 +7949,7 @@ XS(XS_Mob_GetModVulnerability)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetModVulnerability(THIS, resist)");
+		Perl_croak(aTHX_ "Usage: Mob::GetModVulnerability(THIS, uint8 resist)");
 	{
 		Mob *		THIS;
 		int32		RETVAL;
@@ -8013,7 +7976,7 @@ XS(XS_Mob_DoMeleeSkillAttackDmg)
 {
 	dXSARGS;
 	if (items != 7)
-		Perl_croak(aTHX_ "Usage: Mob::DoMeleeSkillAttackDmg(THIS, target, weapon_damage, skill, chance_mod, focus, CanRiposte)");
+		Perl_croak(aTHX_ "Usage: Mob::DoMeleeSkillAttackDmg(THIS, Mob* target, uint16 weapon_damage, int skill, int16 chance_mod, int16 focus, uint8 can_riposte)");
 	{
 		Mob *		THIS;
 		Mob*		target;
@@ -8051,7 +8014,7 @@ XS(XS_Mob_DoArcheryAttackDmg)
 {
 	dXSARGS;
 	if (items != 7)
-		Perl_croak(aTHX_ "Usage: Mob::DoArcheryAttackDmg(THIS, target, RangeWeapon=nullptr, Ammo=nullptr, weapon_damage, chance_mod, focus)");
+		Perl_croak(aTHX_ "Usage: Mob::DoArcheryAttackDmg(THIS, Mob* target, [range_weapon_item_instance = nullptr], [ammo_item_instance = nullptr], uint16 weapon_damage, int16 chance_mod, int16 focus)");
 	{
 		Mob *		THIS;
 		Mob*		target;
@@ -8089,7 +8052,7 @@ XS(XS_Mob_DoThrowingAttackDmg)
 {
 	dXSARGS;
 	if (items != 7)
-		Perl_croak(aTHX_ "Usage: Mob::DoThrowingAttackDmg(THIS, target, RangeWeapon=nullptr,item=nullptr,weapon_damage, chance_mod, focus)");
+		Perl_croak(aTHX_ "Usage: Mob::DoThrowingAttackDmg(THIS, Mob* target, [range_weapon_item_instance = nullptr], [ammo_item_instance = nullptr], uint16 weapon_damage, int16 chance_mod, int16 focus)");
 	{
 		Mob *		THIS;
 		Mob*		target;
@@ -8127,7 +8090,7 @@ XS(XS_Mob_SetDisableMelee)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetDisableMelee(THIS, value)");
+		Perl_croak(aTHX_ "Usage: Mob::SetDisableMelee(THIS, bool value)");
 	{
 		Mob *	THIS;
 		bool value = (bool)SvTRUE(ST(1));
@@ -8177,7 +8140,7 @@ XS(XS_Mob_SetFlurryChance)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetFlurryChance(THIS, value)");
+		Perl_croak(aTHX_ "Usage: Mob::SetFlurryChance(THIS, uint8 value)");
 	{
 		Mob *		THIS;
 		uint8		value = (uint8)SvIV(ST(1));
@@ -8227,7 +8190,7 @@ XS(XS_Mob_GetSpellStat)
 {
 	dXSARGS;
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: Mob::GetSpellStat(THIS, itemid, stat, slot)");
+		Perl_croak(aTHX_ "Usage: Mob::GetSpellStat(THIS, uint32 spell_id, string stat, uint8 slot)");
 	{
 		Mob *		THIS;
 		int32		RETVAL;
@@ -8259,7 +8222,7 @@ XS(XS_Mob_GetSpecialAbility)
 {
 	dXSARGS;
 	if(items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetSpecialAbility(THIS, special_ability)");
+		Perl_croak(aTHX_ "Usage: Mob::GetSpecialAbility(THIS, int special_ability)");
 	{
 		int RETVAL;
 		Mob* THIS;
@@ -8286,7 +8249,7 @@ XS(XS_Mob_GetSpecialAbilityParam)
 {
 	dXSARGS;
 	if(items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::GetSpecialAbilityParam(THIS, special_ability, param)");
+		Perl_croak(aTHX_ "Usage: Mob::GetSpecialAbilityParam(THIS, int special_ability, int param)");
 	{
 		int RETVAL;
 		Mob* THIS;
@@ -8314,7 +8277,7 @@ XS(XS_Mob_SetSpecialAbility)
 {
 	dXSARGS;
 	if(items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::SetSpecialAbility(THIS, ability, value)");
+		Perl_croak(aTHX_ "Usage: Mob::SetSpecialAbility(THIS, int ability, int value)");
 	{
 		Mob* THIS;
 		int ability = SvIV(ST(1));
@@ -8339,7 +8302,7 @@ XS(XS_Mob_SetSpecialAbilityParam)
 {
 	dXSARGS;
 	if(items != 4)
-		Perl_croak(aTHX_ "Usage: Mob::SetSpecialAbilityParam(THIS, ability, param, value)");
+		Perl_croak(aTHX_ "Usage: Mob::SetSpecialAbilityParam(THIS, int ability, int param, int value)");
 	{
 		Mob* THIS;
 		int ability = SvIV(ST(1));
@@ -8388,7 +8351,7 @@ XS(XS_Mob_ProcessSpecialAbilities)
 {
 	dXSARGS;
 	if(items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::ProcessSpecialAbilities(THIS, str)");
+		Perl_croak(aTHX_ "Usage: Mob::ProcessSpecialAbilities(THIS, string str)");
 	{
 		Mob* THIS;
 		const char *str = (const char*)SvPV_nolen(ST(1));
@@ -8412,7 +8375,7 @@ XS(XS_Mob_CanClassEquipItem)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::CanClassEquipItem(THIS, item_id)");
+		Perl_croak(aTHX_ "Usage: Mob::CanClassEquipItem(THIS, uint32 item_id)");
 	{
 		Mob *		THIS;
 		bool		RETVAL;
@@ -8771,7 +8734,7 @@ XS(XS_Mob_GetHerosForgeModel);
 XS(XS_Mob_GetHerosForgeModel) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetHerosForgeModel(THIS, material_slot)");
+		Perl_croak(aTHX_ "Usage: Mob::GetHerosForgeModel(THIS, uint8 material_slot)");
 	{
 		Mob* THIS;
 		int32 RETVAL;
@@ -8799,7 +8762,7 @@ XS(XS_Mob_IsEliteMaterialItem);
 XS(XS_Mob_IsEliteMaterialItem) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::IsEliteMaterialItem(THIS, material_slot)");
+		Perl_croak(aTHX_ "Usage: Mob::IsEliteMaterialItem(THIS, uint8 material_slot)");
 	{
 		Mob* THIS;
 		uint32 RETVAL;
@@ -9006,7 +8969,7 @@ XS(XS_Mob_TryMoveAlong);
 XS(XS_Mob_TryMoveAlong) {
 	dXSARGS;
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: Mob::TryMoveAlong(THIS, distance, angle, send?)");
+		Perl_croak(aTHX_ "Usage: Mob::TryMoveAlong(THIS, float distance, float angle, bool send)");
 	{
 		Mob* THIS;
 		float distance = (float)SvNV(ST(1));
