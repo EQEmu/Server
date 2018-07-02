@@ -7183,7 +7183,7 @@ XS(XS_Mob_IsRunning); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_IsRunning) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob:::IsRunning(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::IsRunning(THIS)");
 	{
 		Mob *THIS;
 		bool RETVAL;

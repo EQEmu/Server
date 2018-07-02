@@ -1,6 +1,21 @@
 use File::Find;
 use Data::Dumper;
 
+sub usage() {
+	print "Usage:\n";
+	print "   --client     - Prints methods for just client class methods\n";
+	print "   --mob        - Prints methods for just mob class methods\n";
+	print "   --all        - Prints methods for all classes\n";
+	exit(1);
+}
+
+if($#ARGV < 0) {
+	usage();
+}
+
+my $export = $ARGV[0];
+$export=~s/--//g;
+
 my @files;
 my $start_dir = "zone/";
 find(
@@ -14,6 +29,13 @@ for my $file (@files) {
 		next; 
 	}
 
+	#::: If we are specifying a specific class type, skip everything else
+	if ($export ne "all" && $export ne "") {
+		if ($file!~/$export/i) {
+			next;
+		}
+	}
+
 	@methods = ();
 
 	#::: Open File
@@ -23,10 +45,19 @@ for my $file (@files) {
 		chomp;
 		$line = $_;
 
-		if ($line=~/Client::/i) {
+		if ($line=~/Client::|Mob::/i && $line=~/_croak/i) {
 
-			$split_key = "Client::";
-			$object_prefix = "\$client->";
+			#::: Client export
+			if ($export=~/all|client/i) {
+				$split_key = "Client::";
+				$object_prefix = "\$client->";
+			}
+
+			#::: Mob export
+			if ($export=~/all|mob/i) {
+				$split_key = "Mob::";
+				$object_prefix = "\$mob->";
+			}
 
 			#::: Split on croak usage
 			@data  = split($split_key, $line);
