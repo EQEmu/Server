@@ -1219,15 +1219,15 @@ void TaskManager::SendTaskSelectorNew(Client *c, Mob *mob, int TaskCount, int *T
 			buf.WriteString(activity.target_name);	// max length 64, "target name" so like loot x foo from bar (this is bar)
 
 			// this string is item names
-			buf.WriteLengthString(activity.item_list.length(), activity.item_list.c_str());
+			buf.WriteLengthString(activity.item_list);
 
 			buf.WriteUInt32(activity.GoalCount);				// GoalCount
 
 			// this string is skill IDs? probably one of the "use on" tasks
-			buf.WriteLengthString(activity.skill_list.length(), activity.skill_list.c_str());
+			buf.WriteLengthString(activity.skill_list);
 
 			// this string is spell IDs? probably one of the "use on" tasks
-			buf.WriteLengthString(activity.spell_list.length(), activity.spell_list.c_str());
+			buf.WriteLengthString(activity.spell_list);
 
 			//buf.WriteString(itoa(Tasks[TaskList[i]]->Activity[ActivityID].ZoneID));
 			buf.WriteString(activity.zones);		// Zone number in ascii max length 64, can be multiple with separated by ;
@@ -2670,7 +2670,7 @@ void TaskManager::SendTaskActivityNew(Client *c, int TaskID, int ActivityID, int
 	// One of these unknown fields maybe related to the 'Use On' activity types
 	buf.WriteString(Tasks[TaskID]->Activity[ActivityID].target_name); // target name string
 
-	buf.WriteLengthString(Tasks[TaskID]->Activity[ActivityID].item_list.length(), Tasks[TaskID]->Activity[ActivityID].item_list.c_str()); // item name list
+	buf.WriteLengthString(Tasks[TaskID]->Activity[ActivityID].item_list); // item name list
 
 	// Goal Count
 	if(Tasks[TaskID]->Activity[ActivityID].Type != ActivityGiveCash)
@@ -2679,10 +2679,10 @@ void TaskManager::SendTaskActivityNew(Client *c, int TaskID, int ActivityID, int
 		buf.WriteUInt32(1);	// GoalCount
 
 	// skill ID list ; separated
-	buf.WriteLengthString(Tasks[TaskID]->Activity[ActivityID].skill_list.length(), Tasks[TaskID]->Activity[ActivityID].skill_list.c_str());
+	buf.WriteLengthString(Tasks[TaskID]->Activity[ActivityID].skill_list);
 
 	// spelll ID list ; separated -- unsure wtf we're doing here
-	buf.WriteLengthString(Tasks[TaskID]->Activity[ActivityID].spell_list.length(), Tasks[TaskID]->Activity[ActivityID].spell_list.c_str());
+	buf.WriteLengthString(Tasks[TaskID]->Activity[ActivityID].spell_list);
 
 	buf.WriteString(Tasks[TaskID]->Activity[ActivityID].zones);
 	buf.WriteUInt32(0);		// unknown7

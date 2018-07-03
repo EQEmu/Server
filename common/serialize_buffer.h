@@ -170,6 +170,17 @@ public:
 		m_pos += len;
 	}
 
+	void WriteLengthString(const std::string &str)
+	{
+		uint32_t len = str.length();
+		if (m_pos + len + sizeof(uint32_t) > m_capacity)
+			Grow(m_capacity + len + sizeof(uint32_t));
+		*(uint32_t *)(m_buffer + m_pos) = len;
+		m_pos += sizeof(uint32_t);
+		memcpy(m_buffer + m_pos, str.c_str(), len);
+		m_pos += len;
+	}
+
 	size_t size() const { return m_pos; }
 	size_t length() const { return size(); }
 	size_t capacity() const { return m_capacity; }
