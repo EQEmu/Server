@@ -105,11 +105,19 @@ struct ActivityInformation {
 	std::string Text1;
 	std::string Text2;
 	std::string Text3;
+	std::string target_name; // name mob, location -- default empty
+	std::string item_list; // likely defaults to empty
+	std::string skill_list; // IDs ; separated -- default -1
+	std::string spell_list; // IDs ; separated -- default 0
+	std::string desc_override; // overrides auto generated description -- default empty
+	int		skill_id; // older clients, first id from above
+	int		spell_id; // older clients, first id from above
 	int		GoalID;
 	TaskMethodType GoalMethod;
 	int		GoalCount;
 	int		DeliverToNPC;
 	int		ZoneID;
+	std::string zones; // IDs ; searated, ZoneID is the first in this list for older clients -- default empty string
 	bool	Optional;
 };
 
@@ -154,7 +162,7 @@ struct TaskInformation {
 typedef enum { ActivityHidden = 0, ActivityActive = 1, ActivityCompleted = 2 } ActivityState;
 
 typedef enum { ActivityDeliver = 1, ActivityKill = 2, ActivityLoot = 3, ActivitySpeakWith = 4, ActivityExplore = 5,
-			ActivityTradeSkill = 6, ActivityFish = 7, ActivityForage = 8, ActivityUse1 = 9, ActivityUse2 = 10,
+			ActivityTradeSkill = 6, ActivityFish = 7, ActivityForage = 8, ActivityCastOn = 9, ActivitySkillOn = 10,
 			ActivityTouch = 11, ActivityCollect = 13, ActivityGiveCash = 100 } ActivityType;
 
 

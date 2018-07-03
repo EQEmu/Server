@@ -61,6 +61,7 @@ SET(common_sources
 	rdtsc.cpp
 	rulesys.cpp
 	say_link.cpp
+	serialize_buffer.cpp
 	serverinfo.cpp
 	shareddb.cpp
 	skills.cpp
@@ -192,6 +193,7 @@ SET(common_headers
 	ruletypes.h
 	say_link.h
 	seperator.h
+	serialize_buffer.h
 	serverinfo.h
 	servertalk.h
 	shareddb.h

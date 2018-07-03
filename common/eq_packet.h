@@ -20,6 +20,7 @@
 
 #include "base_packet.h"
 #include "platform.h"
+#include "serialize_buffer.h"
 #include <iostream>
 
 #ifdef STATIC_OPCODE

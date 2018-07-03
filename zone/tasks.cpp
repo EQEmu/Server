@@ -172,21 +172,19 @@ bool TaskManager::LoadTasks(int singleTask)
 	}
 
 	if (singleTask == 0)
-		query = StringFormat("SELECT `taskid`, `step`, `activityid`, `activitytype`, "
-				     "`text1`, `text2`, `text3`, `goalid`, `goalmethod`, "
-				     "`goalcount`, `delivertonpc`, `zoneid`, `optional` "
-				     "FROM `activities` "
-				     "WHERE `taskid` < %i AND `activityid` < %i "
-				     "ORDER BY taskid, activityid ASC",
-				     MAXTASKS, MAXACTIVITIESPERTASK);
+		query =
+		    StringFormat("SELECT `taskid`, `step`, `activityid`, `activitytype`, `target_name`, `item_list`, "
+				 "`skill_list`, `spell_list`, `description_override`, `goalid`, `goalmethod`, "
+				 "`goalcount`, `delivertonpc`, `zones`, `optional` FROM `activities` WHERE `taskid` < "
+				 "%i AND `activityid` < %i ORDER BY taskid, activityid ASC",
+				 MAXTASKS, MAXACTIVITIESPERTASK);
 	else
-		query = StringFormat("SELECT `taskid`, `step`, `activityid`, `activitytype`, "
-				     "`text1`, `text2`, `text3`, `goalid`, `goalmethod`, "
-				     "`goalcount`, `delivertonpc`, `zoneid`, `optional` "
-				     "FROM `activities` "
-				     "WHERE `taskid` = %i AND `activityid` < %i "
-				     "ORDER BY taskid, activityid ASC",
-				     singleTask, MAXACTIVITIESPERTASK);
+		query =
+		    StringFormat("SELECT `taskid`, `step`, `activityid`, `activitytype`, `target_name`, `item_list`, "
+				 "`skill_list`, `spell_list`, `description_override`, `goalid`, `goalmethod`, "
+				 "`goalcount`, `delivertonpc`, `zones`, `optional` FROM `activities` WHERE `taskid` = "
+				 "%i AND `activityid` < %i ORDER BY taskid, activityid ASC",
+				 singleTask, MAXACTIVITIESPERTASK);
 	results = database.QueryDatabase(query);
 	if (!results.Success()) {
 		Log(Logs::General, Logs::Error, ERR_MYSQLERROR, results.ErrorMessage().c_str());
@@ -237,38 +235,42 @@ bool TaskManager::LoadTasks(int singleTask)
 
 		Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].Type = atoi(row[3]);
 
-		if (row[4][0])
-			Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].Text1 = row[4];
+		Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].target_name = row[4];
+		Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].item_list = row[5];
+		Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].skill_list = row[6];
+		Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].skill_id = atoi(row[6]); // for older clients
+		Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].spell_list = row[7];
+		Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].spell_id = atoi(row[7]); // for older clients
+		Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].desc_override = row[8];
 
-		if (row[5][0])
-			Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].Text2 = row[5];
-
-		if (row[6][0])
-			Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].Text3 = row[6];
-
-		Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].GoalID = atoi(row[7]);
-		Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].GoalMethod = (TaskMethodType)atoi(row[8]);
-		Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].GoalCount = atoi(row[9]);
-		Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].DeliverToNPC = atoi(row[10]);
-		Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].ZoneID = atoi(row[11]);
-		Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].Optional = atoi(row[12]);
+		Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].GoalID = atoi(row[9]);
+		Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].GoalMethod = (TaskMethodType)atoi(row[10]);
+		Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].GoalCount = atoi(row[11]);
+		Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].DeliverToNPC = atoi(row[12]);
+		Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].zones = row[13];
+		Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].ZoneID = atoi(row[13]); // for older clients
+		Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].Optional = atoi(row[14]);
 
 		Log(Logs::General, Logs::Tasks,
 		    "[GLOBALLOAD] Activity Slot %2i: ID %i for Task %5i. Type: %3i, GoalID: %8i, "
-		    "GoalMethod: %i, GoalCount: %3i, ZoneID:%3i",
+		    "GoalMethod: %i, GoalCount: %3i, Zones:%s",
 		    Tasks[taskID]->ActivityCount, activityID, taskID,
 		    Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].Type,
 		    Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].GoalID,
 		    Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].GoalMethod,
 		    Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].GoalCount,
-		    Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].ZoneID);
+		    Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].zones.c_str());
 
-		Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] Text1: %s",
-		    Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].Text1.c_str());
-		Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] Text2: %s",
-		    Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].Text2.c_str());
-		Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] Text3: %s",
-		    Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].Text3.c_str());
+		Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] target_name: %s",
+		    Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].target_name.c_str());
+		Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] item_list: %s",
+		    Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].item_list.c_str());
+		Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] skill_list: %s",
+		    Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].skill_list.c_str());
+		Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] spell_list: %s",
+		    Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].spell_list.c_str());
+		Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] description_override: %s",
+		    Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].desc_override.c_str());
 
 		Tasks[taskID]->ActivityCount++;
 	}
@@ -1155,109 +1157,87 @@ void TaskManager::SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *Task
 
 }
 
-void TaskManager::SendTaskSelectorNew(Client *c, Mob *mob, int TaskCount, int *TaskList) {
-
+void TaskManager::SendTaskSelectorNew(Client *c, Mob *mob, int TaskCount, int *TaskList)
+{
 	Log(Logs::General, Logs::Tasks, "[UPDATE] TaskSelector for %i Tasks", TaskCount);
 
 	int PlayerLevel = c->GetLevel();
 
 	// Check if any of the tasks exist
-	for(int i=0; i<TaskCount; i++)
-	{
-		if(Tasks[TaskList[i]] != nullptr) break;
-	}
-
-	int PacketLength = 12;	// Header
+	for (int i = 0; i < TaskCount; i++)
+		if (Tasks[TaskList[i]] != nullptr)
+			break;
 
 	int ValidTasks = 0;
 
-	char StartZone[10];
-
-	for(int i=0; i<TaskCount; i++) {
-
-		if(!AppropriateLevel(TaskList[i], PlayerLevel)) continue;
-
-		if(c->IsTaskActive(TaskList[i])) continue;
-
-		if(!IsTaskRepeatable(TaskList[i]) && c->IsTaskCompleted(TaskList[i])) continue;
+	for (int i = 0; i < TaskCount; i++) {
+		if (!AppropriateLevel(TaskList[i], PlayerLevel))
+			continue;
+		if (c->IsTaskActive(TaskList[i]))
+			continue;
+		if (!IsTaskRepeatable(TaskList[i]) && c->IsTaskCompleted(TaskList[i]))
+			continue;
 
 		ValidTasks++;
-
-		PacketLength += 21;	// Task Data - strings
-		PacketLength += Tasks[TaskList[i]]->Title.size() + 1 +
-						Tasks[TaskList[i]]->Description.size() + 1;
-
-		sprintf(StartZone, "%i", Tasks[TaskList[i]]->StartZone);
-		/*
-		PacketLength += strlen(Tasks[TaskList[i]]->Activity[ActivityID].Text1) + 1 +
-						strlen(Tasks[TaskList[i]]->Activity[ActivityID].Text2) +
-						strlen(Tasks[TaskList[i]]->Activity[ActivityID].Text3) + 1 +
-						strlen(itoa(Tasks[TaskList[i]]->Activity[ActivityID].ZoneID)) + 1 +
-						3 + 3 + 5;	// Other strings (Hard set for now)
-		*/
-		PacketLength += 11 + 11 + 11 + 3 + 3 + (strlen(StartZone) * 2) + 2;	// Other strings (Hard set for now)
-		PacketLength += 28;	// Activity Data - strings (Hard set for 1 activity per task for now)
 	}
 
-	if(ValidTasks == 0) return;
+	if (ValidTasks == 0)
+		return;
 
-	auto outapp = new EQApplicationPacket(OP_OpenNewTasksWindow, PacketLength);
+	SerializeBuffer buf(50 * ValidTasks);
 
-	outapp->WriteUInt32(ValidTasks);	// TaskCount
-	outapp->WriteUInt32(2);			// Type, valid values: 0-3. 0 = Task, 1 = Shared Task, 2 = Quest, 3 = ???
+	buf.WriteUInt32(ValidTasks);	// TaskCount
+	buf.WriteUInt32(2);			// Type, valid values: 0-3. 0 = Task, 1 = Shared Task, 2 = Quest, 3 = ??? -- should fix maybe some day, but we let more than 1 type through :P
 	// so I guess an NPC can only offer one type of quests or we can only open a selection with one type :P (so quest call can tell us I guess)
 	// this is also sent in OP_TaskDescription
-	outapp->WriteUInt32(mob->GetID());	// TaskGiver
+	buf.WriteUInt32(mob->GetID());	// TaskGiver
 
-	for(int i=0; i<TaskCount;i++) { // max 40
+	for (int i = 0; i < TaskCount; i++) { // max 40
+		if (!AppropriateLevel(TaskList[i], PlayerLevel))
+			continue;
+		if (c->IsTaskActive(TaskList[i]))
+			continue;
+		if (!IsTaskRepeatable(TaskList[i]) && c->IsTaskCompleted(TaskList[i]))
+			continue;
 
-		if(!AppropriateLevel(TaskList[i], PlayerLevel)) continue;
+		buf.WriteUInt32(TaskList[i]);	// TaskID
+		buf.WriteFloat(1.0f); // affects color, difficulty?
+		buf.WriteUInt32(Tasks[TaskList[i]]->Duration);
+		buf.WriteUInt32(static_cast<int>(Tasks[TaskList[i]]->dur_code));	// 1 = Short, 2 = Medium, 3 = Long, anything else Unlimited
 
-		if(c->IsTaskActive(TaskList[i])) continue;
+		buf.WriteString(Tasks[TaskList[i]]->Title.c_str()); // max 64 with null
+		buf.WriteString(Tasks[TaskList[i]]->Description.c_str()); // max 4000 with null
 
-		if(!IsTaskRepeatable(TaskList[i]) && c->IsTaskCompleted(TaskList[i])) continue;
+		buf.WriteUInt8(0);				// Has reward set flag
+		buf.WriteUInt32(Tasks[TaskList[i]]->ActivityCount);	// ActivityCount
 
-		outapp->WriteUInt32(TaskList[i]);	// TaskID
-		outapp->WriteFloat(1.0f); // affects color, difficulty?
-		outapp->WriteUInt32(Tasks[TaskList[i]]->Duration);
-		outapp->WriteUInt32(static_cast<int>(Tasks[TaskList[i]]->dur_code));	// 1 = Short, 2 = Medium, 3 = Long, anything else Unlimited
+		for (int j = 0; j < Tasks[TaskList[i]]->ActivityCount; ++j) {
+			buf.WriteUInt32(j);				// ActivityNumber
+			auto &activity = Tasks[TaskList[i]]->Activity[j];
+			buf.WriteUInt32(activity.Type);				// ActivityType
+			buf.WriteUInt32(0);				// solo, group, raid?
+			buf.WriteString(activity.target_name);	// max length 64, "target name" so like loot x foo from bar (this is bar)
 
-		outapp->WriteString(Tasks[TaskList[i]]->Title.c_str()); // max 64 with null
-		outapp->WriteString(Tasks[TaskList[i]]->Description.c_str()); // max 4000 with null
+			// this string is item names
+			buf.WriteLengthString(activity.item_list.length(), activity.item_list.c_str());
 
-		outapp->WriteUInt8(0);				// Has reward set flag
-		outapp->WriteUInt32(1);				// ActivityCount - Hard set to 1 for now
+			buf.WriteUInt32(activity.GoalCount);				// GoalCount
 
-		// Activity stuff below - Will need to iterate through each task
-		// Currently hard set for testing
+			// this string is skill IDs? probably one of the "use on" tasks
+			buf.WriteLengthString(activity.skill_list.length(), activity.skill_list.c_str());
 
+			// this string is spell IDs? probably one of the "use on" tasks
+			buf.WriteLengthString(activity.spell_list.length(), activity.spell_list.c_str());
 
-		sprintf(StartZone, "%i", Tasks[TaskList[i]]->StartZone);
-
-		outapp->WriteUInt32(0);				// ActivityNumber
-		outapp->WriteUInt32(1);				// ActivityType
-		outapp->WriteUInt32(0);				// solo, group, raid?
-		outapp->WriteString("Text1 Test");	// max length 64 -- affects what string ID it will use for the description, should be a name here?
-
-		// this string is item names
-		outapp->WriteUInt32(11);			// Text2Len
-		outapp->WriteString("Text2 Test");
-
-		outapp->WriteUInt32(1);				// GoalCount
-
-		// this string is skill IDs? probably one of the "use on" tasks
-		outapp->WriteUInt32(3);				// NumString1Len
-		outapp->WriteString("-1");
-
-		// this string is spell IDs? probably one of the "use on" tasks
-		outapp->WriteUInt32(3);				// NumString2Len
-		outapp->WriteString("-1");
-
-		//outapp->WriteString(itoa(Tasks[TaskList[i]]->Activity[ActivityID].ZoneID));
-		outapp->WriteString(StartZone);		// Zone number in ascii max length 64, can be multiple with separated by ;
-		outapp->WriteString("Text3 Test");	// max length 128 -- overrides the automatic descriptions
-		outapp->WriteString(StartZone);		// Zone number in ascii max length 64, probably can be separated by ; too, haven't found it used
+			//buf.WriteString(itoa(Tasks[TaskList[i]]->Activity[ActivityID].ZoneID));
+			buf.WriteString(activity.zones);		// Zone number in ascii max length 64, can be multiple with separated by ;
+			buf.WriteString(activity.desc_override);	// max length 128 -- overrides the automatic descriptions
+			// this doesn't appear to be shown to the client at all and isn't the same as zones ... defaults to '0' though
+			buf.WriteString(activity.zones);		// Zone number in ascii max length 64, probably can be separated by ; too, haven't found it used
+		}
 	}
+
+	auto outapp = new EQApplicationPacket(OP_OpenNewTasksWindow, buf.buffer(), buf.length());
 
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
@@ -2609,12 +2589,12 @@ void TaskManager::SendTaskActivityLong(Client *c, int TaskID, int ActivityID, in
 	tah->ActivityID = ActivityID;
 	tah->unknown3 = 0x00000000;
 
-	// We send our 'internal' types as ActivityUse1. text3 should be set to the activity description, so it makes
+	// We send our 'internal' types as ActivityCastOn. text3 should be set to the activity description, so it makes
 	// no difference to the client. All activity updates will be done based on our interal activity types.
 	if((Tasks[TaskID]->Activity[ActivityID].Type > 0) && Tasks[TaskID]->Activity[ActivityID].Type < 100)
 		tah->ActivityType = Tasks[TaskID]->Activity[ActivityID].Type;
 	else
-		tah->ActivityType = ActivityUse1;
+		tah->ActivityType = ActivityCastOn;
 
 	tah->Optional = Optional;
 	tah->unknown5 = 0x00000000;
@@ -2667,77 +2647,59 @@ void TaskManager::SendTaskActivityLong(Client *c, int TaskID, int ActivityID, in
 }
 
 // Used only by RoF+ Clients
-void TaskManager::SendTaskActivityNew(Client *c, int TaskID, int ActivityID, int ClientTaskIndex, bool Optional, bool TaskComplete) {
+void TaskManager::SendTaskActivityNew(Client *c, int TaskID, int ActivityID, int ClientTaskIndex, bool Optional, bool TaskComplete)
+{
+	SerializeBuffer buf(100);
 
-	uint32 String2Len = 3;
-	if(TaskComplete)
-		String2Len = 4;
+	buf.WriteUInt32(ClientTaskIndex);	// TaskSequenceNumber
+	buf.WriteUInt32(static_cast<uint32>(Tasks[TaskID]->type));		// task type
+	buf.WriteUInt32(TaskID);
+	buf.WriteUInt32(ActivityID);
+	buf.WriteUInt32(0);		// unknown3
 
-	long PacketLength = 29 + 4 + 8 + 4 + 4 + 5;
-	PacketLength = PacketLength + Tasks[TaskID]->Activity[ActivityID].Text1.size() + 1 +
-				Tasks[TaskID]->Activity[ActivityID].Text2.size() + 1 +
-				Tasks[TaskID]->Activity[ActivityID].Text3.size() + 1 +
-				((strlen(itoa(Tasks[TaskID]->Activity[ActivityID].ZoneID)) + 1) * 2) +
-				3 + String2Len;
-
-	auto outapp = new EQApplicationPacket(OP_TaskActivity, PacketLength);
-
-	outapp->WriteUInt32(ClientTaskIndex);	// TaskSequenceNumber
-	outapp->WriteUInt32(static_cast<uint32>(Tasks[TaskID]->type));		// task type
-	outapp->WriteUInt32(TaskID);
-	outapp->WriteUInt32(ActivityID);
-	outapp->WriteUInt32(0);		// unknown3
-
-	// We send our 'internal' types as ActivityUse1. text3 should be set to the activity description, so it makes
+	// We send our 'internal' types as ActivityCastOn. text3 should be set to the activity description, so it makes
 	// no difference to the client. All activity updates will be done based on our interal activity types.
 	if((Tasks[TaskID]->Activity[ActivityID].Type > 0) && Tasks[TaskID]->Activity[ActivityID].Type < 100)
-		outapp->WriteUInt32(Tasks[TaskID]->Activity[ActivityID].Type);
+		buf.WriteUInt32(Tasks[TaskID]->Activity[ActivityID].Type);
 	else
-		outapp->WriteUInt32(ActivityUse1);
+		buf.WriteUInt32(ActivityCastOn); // w/e!
 
-	outapp->WriteUInt32(Optional);
-	outapp->WriteUInt8(0);		// unknown5
+	buf.WriteUInt8(Optional);
+	buf.WriteUInt32(0);		// solo, group, raid
 
 	// One of these unknown fields maybe related to the 'Use On' activity types
-	outapp->WriteString(Tasks[TaskID]->Activity[ActivityID].Text1.c_str());
+	buf.WriteString(Tasks[TaskID]->Activity[ActivityID].target_name); // target name string
 
-	outapp->WriteUInt32(Tasks[TaskID]->Activity[ActivityID].Text2.length() + 1);	// String Length - Add in null terminator
-	outapp->WriteString(Tasks[TaskID]->Activity[ActivityID].Text2.c_str());
+	buf.WriteLengthString(Tasks[TaskID]->Activity[ActivityID].item_list.length(), Tasks[TaskID]->Activity[ActivityID].item_list.c_str()); // item name list
 
 	// Goal Count
 	if(Tasks[TaskID]->Activity[ActivityID].Type != ActivityGiveCash)
-		outapp->WriteUInt32(Tasks[TaskID]->Activity[ActivityID].GoalCount);
+		buf.WriteUInt32(Tasks[TaskID]->Activity[ActivityID].GoalCount);
 	else
-		outapp->WriteUInt32(1);	// GoalCount
+		buf.WriteUInt32(1);	// GoalCount
 
-	outapp->WriteUInt32(3);		// String Length - Add in null terminator
-	outapp->WriteString("-1");
+	// skill ID list ; separated
+	buf.WriteLengthString(Tasks[TaskID]->Activity[ActivityID].skill_list.length(), Tasks[TaskID]->Activity[ActivityID].skill_list.c_str());
 
-	if(!TaskComplete) {
-		outapp->WriteUInt32(3);	// String Length - Add in null terminator
-		outapp->WriteString("-1");
-	}
-	else
-	{
-		outapp->WriteUInt32(4);	// String Length - Add in null terminator
-		outapp->WriteString("-54");
-	}
+	// spelll ID list ; separated -- unsure wtf we're doing here
+	buf.WriteLengthString(Tasks[TaskID]->Activity[ActivityID].spell_list.length(), Tasks[TaskID]->Activity[ActivityID].spell_list.c_str());
 
-	outapp->WriteString(itoa(Tasks[TaskID]->Activity[ActivityID].ZoneID));
-	outapp->WriteUInt32(0);		// unknown7
+	buf.WriteString(Tasks[TaskID]->Activity[ActivityID].zones);
+	buf.WriteUInt32(0);		// unknown7
 
-	outapp->WriteString(Tasks[TaskID]->Activity[ActivityID].Text3.c_str());
+	buf.WriteString(Tasks[TaskID]->Activity[ActivityID].desc_override); // description override
 
 	if(Tasks[TaskID]->Activity[ActivityID].Type != ActivityGiveCash)
-		outapp->WriteUInt32(c->GetTaskActivityDoneCount(ClientTaskIndex, ActivityID));	// DoneCount
+		buf.WriteUInt32(c->GetTaskActivityDoneCount(ClientTaskIndex, ActivityID));	// DoneCount
 	else
 		// For internal activity types, DoneCount is either 1 if the activity is complete, 0 otherwise.
-		outapp->WriteUInt32((c->GetTaskActivityDoneCount(ClientTaskIndex, ActivityID) >= Tasks[TaskID]->Activity[ActivityID].GoalCount));
+		buf.WriteUInt32((c->GetTaskActivityDoneCount(ClientTaskIndex, ActivityID) >= Tasks[TaskID]->Activity[ActivityID].GoalCount));
 
-	outapp->WriteUInt8(1);	// unknown9
+	buf.WriteUInt8(1);	// unknown9
 
-	outapp->WriteString(itoa(Tasks[TaskID]->Activity[ActivityID].ZoneID));
+	buf.WriteString(Tasks[TaskID]->Activity[ActivityID].zones);
 
+	auto outapp = new EQApplicationPacket(OP_TaskActivity, buf.buffer(), buf.length());
 
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
