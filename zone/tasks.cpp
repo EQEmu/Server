@@ -1036,121 +1036,78 @@ void TaskManager::SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *Task
 	}
 	// Titanium OpCode: 0x5e7c
 	Log(Logs::General, Logs::Tasks, "[UPDATE] TaskSelector for %i Tasks", TaskCount);
-	char *Ptr;
 	int PlayerLevel = c->GetLevel();
 
-	AvailableTaskHeader_Struct*	AvailableTaskHeader;
-	AvailableTaskData1_Struct*	AvailableTaskData1;
-	AvailableTaskData2_Struct*	AvailableTaskData2;
-	AvailableTaskTrailer_Struct*	AvailableTaskTrailer;
-
 	// Check if any of the tasks exist
-
-
-	for(int i=0; i<TaskCount; i++) {
-
-		if(Tasks[TaskList[i]] != nullptr) break;
+	for (int i = 0; i < TaskCount; i++) {
+		if (Tasks[TaskList[i]] != nullptr)
+			break;
 	}
-
-	// FIXME: The 10 and 5 values in this calculation are to account for the string "ABCD" we are putting in 3 times.
-	//
-	// Calculate how big the packet needs to be pased on the number of tasks and the
-	// size of the variable length strings.
-
-	int PacketLength = sizeof(AvailableTaskHeader_Struct);
 
 	int ValidTasks = 0;
 
-	for(int i=0; i<TaskCount; i++) {
-
-		if(!AppropriateLevel(TaskList[i], PlayerLevel)) continue;
-
-		if(c->IsTaskActive(TaskList[i])) continue;
-
-		if(!IsTaskRepeatable(TaskList[i]) && c->IsTaskCompleted(TaskList[i])) continue;
+	for (int i = 0; i < TaskCount; i++) {
+		if (!AppropriateLevel(TaskList[i], PlayerLevel))
+			continue;
+		if (c->IsTaskActive(TaskList[i]))
+			continue;
+		if (!IsTaskRepeatable(TaskList[i]) && c->IsTaskCompleted(TaskList[i]))
+			continue;
 
 		ValidTasks++;
-
-		PacketLength = PacketLength + sizeof(AvailableTaskData1_Struct) + Tasks[TaskList[i]]->Title.size() + 1 +
-					Tasks[TaskList[i]]->Description.size() + 1 + sizeof(AvailableTaskData2_Struct) + 10 +
-					sizeof(AvailableTaskTrailer_Struct) + 5;
 	}
 
-	if(ValidTasks == 0) return;
+	if (ValidTasks == 0)
+		return;
 
-	auto outapp = new EQApplicationPacket(OP_OpenNewTasksWindow, PacketLength);
+	SerializeBuffer buf(50 * ValidTasks);
 
-	AvailableTaskHeader = (AvailableTaskHeader_Struct*)outapp->pBuffer;
 
-	AvailableTaskHeader->TaskCount = ValidTasks;
+	buf.WriteUInt32(ValidTasks);
+	buf.WriteUInt32(2); // task type, live doesn't let you send more than one type, but we do?
+	buf.WriteUInt32(mob->GetID());
 
-	// unknown1 is always 2 in the packets I have ssen. It may be a 'Task Type'. Given that the
-	// task system was apparently first introduced for LDoN missions, type 1 may be for missions.
-	//
-	AvailableTaskHeader->unknown1 = 2;
-	AvailableTaskHeader->TaskGiver = mob->GetID();
+	for (int i = 0; i < TaskCount; i++) {
+		if (!AppropriateLevel(TaskList[i], PlayerLevel))
+			continue;
+		if (c->IsTaskActive(TaskList[i]))
+			continue;
+		if (!IsTaskRepeatable(TaskList[i]) && c->IsTaskCompleted(TaskList[i]))
+			continue;
 
-	Ptr = (char *) AvailableTaskHeader + sizeof(AvailableTaskHeader_Struct);
+		buf.WriteUInt32(TaskList[i]);	// TaskID
+		if (c->ClientVersion() != EQEmu::versions::ClientVersion::Titanium)
+			buf.WriteFloat(1.0f); // affects color, difficulty?
+		buf.WriteUInt32(Tasks[TaskList[i]]->Duration);
+		buf.WriteUInt32(static_cast<int>(Tasks[TaskList[i]]->dur_code));
 
-	for(int i=0; i<TaskCount;i++) {
+		buf.WriteString(Tasks[TaskList[i]]->Title); // max 64 with null
+		buf.WriteString(Tasks[TaskList[i]]->Description); // max 4000 with null
 
-		if(!AppropriateLevel(TaskList[i], PlayerLevel)) continue;
+		if (c->ClientVersion() != EQEmu::versions::ClientVersion::Titanium)
+			buf.WriteUInt8(0); // Has reward set flag
 
-		if(c->IsTaskActive(TaskList[i])) continue;
+		buf.WriteUInt32(Tasks[TaskList[i]]->ActivityCount);
 
-		if(!IsTaskRepeatable(TaskList[i]) && c->IsTaskCompleted(TaskList[i])) continue;
+		for (int j = 0; j < Tasks[TaskList[i]]->ActivityCount; ++j) {
+			buf.WriteUInt32(j);				// ActivityNumber
+			auto &activity = Tasks[TaskList[i]]->Activity[j];
+			buf.WriteUInt32(activity.Type);
+			buf.WriteUInt32(0);				// solo, group, raid?
+			buf.WriteString(activity.target_name);	// max length 64, "target name" so like loot x foo from bar (this is bar)
 
-		AvailableTaskData1 = (AvailableTaskData1_Struct*)Ptr;
+			buf.WriteString(activity.item_list);		// max length 64 in these clients
 
-		AvailableTaskData1->TaskID = TaskList[i];
+			buf.WriteUInt32(activity.GoalCount);
 
-		AvailableTaskData1->TimeLimit = Tasks[TaskList[i]]->Duration;
-
-		AvailableTaskData1->unknown2 = static_cast<int>(Tasks[TaskList[i]]->dur_code); // guess
-
-		Ptr = (char *)AvailableTaskData1 + sizeof(AvailableTaskData1_Struct);
-
-		sprintf(Ptr, "%s", Tasks[TaskList[i]]->Title.c_str());
-
-		Ptr = Ptr + strlen(Ptr) + 1;
-
-		sprintf(Ptr, "%s", Tasks[TaskList[i]]->Description.c_str());
-
-		Ptr = Ptr + strlen(Ptr) + 1;
-
-		AvailableTaskData2 = (AvailableTaskData2_Struct*)Ptr;
-
-		AvailableTaskData2->unknown1 = 1;
-		AvailableTaskData2->unknown2 = 0;
-		AvailableTaskData2->unknown3 = 1;
-		AvailableTaskData2->unknown4 = 0;
-
-		Ptr = (char *)AvailableTaskData2 + sizeof(AvailableTaskData2_Struct);
-
-		// FIXME: In live packets, these two strings appear to be the same as the Text1 and Text2
-		// strings from the first activity in the task, however the task chooser/selector
-		// does not appear to make use of them.
-		sprintf(Ptr, "ABCD");
-		Ptr = Ptr + strlen(Ptr) + 1;
-		sprintf(Ptr, "ABCD");
-		Ptr = Ptr + strlen(Ptr) + 1;
-
-		AvailableTaskTrailer = (AvailableTaskTrailer_Struct*)Ptr;
-
-		// The name of this ItemCount field may be incorrect, but 1 works.
-		AvailableTaskTrailer->ItemCount = 1;
-		AvailableTaskTrailer->unknown1 = 0xFFFFFFFF;
-		AvailableTaskTrailer->unknown2 = 0xFFFFFFFF;
-		AvailableTaskTrailer->StartZone = Tasks[TaskList[i]]->StartZone;
-
-		Ptr = (char *)AvailableTaskTrailer + sizeof(AvailableTaskTrailer_Struct);
-
-		// In some packets, this next string looks like a short task summary, however it doesn't
-		// appear anywhere in the client window.
-		sprintf(Ptr, "ABCD");
-		Ptr = Ptr + strlen(Ptr) + 1;
+			buf.WriteInt32(activity.skill_id);
+			buf.WriteInt32(activity.spell_id);
+			buf.WriteInt32(activity.ZoneID);
+			buf.WriteString(activity.desc_override);
+		}
 	}
 
+	auto outapp = new EQApplicationPacket(OP_OpenNewTasksWindow, buf.buffer(), buf.length());
 
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
@@ -1205,8 +1162,8 @@ void TaskManager::SendTaskSelectorNew(Client *c, Mob *mob, int TaskCount, int *T
 		buf.WriteUInt32(Tasks[TaskList[i]]->Duration);
 		buf.WriteUInt32(static_cast<int>(Tasks[TaskList[i]]->dur_code));	// 1 = Short, 2 = Medium, 3 = Long, anything else Unlimited
 
-		buf.WriteString(Tasks[TaskList[i]]->Title.c_str()); // max 64 with null
-		buf.WriteString(Tasks[TaskList[i]]->Description.c_str()); // max 4000 with null
+		buf.WriteString(Tasks[TaskList[i]]->Title); // max 64 with null
+		buf.WriteString(Tasks[TaskList[i]]->Description); // max 4000 with null
 
 		buf.WriteUInt8(0);				// Has reward set flag
 		buf.WriteUInt32(Tasks[TaskList[i]]->ActivityCount);	// ActivityCount
