@@ -2525,78 +2525,52 @@ void TaskManager::SendTaskActivityLong(Client *c, int TaskID, int ActivityID, in
 		return;
 	}
 
-	char *Ptr;
+	SerializeBuffer buf(100);
 
-	TaskActivityHeader_Struct* tah;
-	TaskActivityData1_Struct* tad1;
-	TaskActivityTrailer_Struct* tat;
-
-	long PacketLength = sizeof(TaskActivityHeader_Struct) + +sizeof(TaskActivityData1_Struct) + sizeof(TaskActivityTrailer_Struct);
-	PacketLength = PacketLength + Tasks[TaskID]->Activity[ActivityID].Text1.size() + 1 +
-				Tasks[TaskID]->Activity[ActivityID].Text2.size() + 1 +
-				Tasks[TaskID]->Activity[ActivityID].Text3.size() + 1;
-
-	auto outapp = new EQApplicationPacket(OP_TaskActivity, PacketLength);
-
-	tah = (TaskActivityHeader_Struct*)outapp->pBuffer;
-
-	tah->TaskSequenceNumber = ClientTaskIndex;
-	tah->unknown2 = 0x00000002;
-	tah->TaskID = TaskID;
-	tah->ActivityID = ActivityID;
-	tah->unknown3 = 0x00000000;
+	buf.WriteUInt32(ClientTaskIndex);
+	buf.WriteUInt32(static_cast<uint32>(Tasks[TaskID]->type));
+	buf.WriteUInt32(TaskID);
+	buf.WriteUInt32(ActivityID);
+	buf.WriteUInt32(0); // unknown3
 
 	// We send our 'internal' types as ActivityCastOn. text3 should be set to the activity description, so it makes
 	// no difference to the client. All activity updates will be done based on our interal activity types.
 	if((Tasks[TaskID]->Activity[ActivityID].Type > 0) && Tasks[TaskID]->Activity[ActivityID].Type < 100)
-		tah->ActivityType = Tasks[TaskID]->Activity[ActivityID].Type;
+		buf.WriteUInt32(Tasks[TaskID]->Activity[ActivityID].Type);
 	else
-		tah->ActivityType = ActivityCastOn;
+		buf.WriteUInt32(ActivityCastOn); // w/e!
 
-	tah->Optional = Optional;
-	tah->unknown5 = 0x00000000;
-	// One of these unknown fields maybe related to the 'Use On' activity types
-	Ptr = (char *) tah + sizeof(TaskActivityHeader_Struct);
-	sprintf(Ptr, "%s", Tasks[TaskID]->Activity[ActivityID].Text1.c_str());
-	Ptr = Ptr + strlen(Ptr) + 1;
+	buf.WriteUInt8(Optional);
+	buf.WriteUInt32(0);		// solo, group, raid
 
-	sprintf(Ptr, "%s", Tasks[TaskID]->Activity[ActivityID].Text2.c_str());
-	Ptr = Ptr + strlen(Ptr) + 1;
-
-	tad1 = (TaskActivityData1_Struct*)Ptr;
-	tat = (TaskActivityTrailer_Struct*)Ptr;
+	buf.WriteString(Tasks[TaskID]->Activity[ActivityID].target_name); // target name string
+	buf.WriteString(Tasks[TaskID]->Activity[ActivityID].item_list); // item name list
 
 	if(Tasks[TaskID]->Activity[ActivityID].Type != ActivityGiveCash)
-		tad1->GoalCount = Tasks[TaskID]->Activity[ActivityID].GoalCount;
+		buf.WriteUInt32(Tasks[TaskID]->Activity[ActivityID].GoalCount);
 	else
 		// For our internal type GiveCash, where the goal count has the amount of cash that must be given,
 		// we don't want the donecount and goalcount fields cluttered up with potentially large numbers, so we just
 		// send a goalcount of 1, and a bit further down, a donecount of 1 if the activity is complete, 0 otherwise.
 		// The text3 field should decribe the exact activity goal, e.g. give 3500gp to Hasten Bootstrutter.
-		tad1->GoalCount = 1;
+		buf.WriteUInt32(1);
 
-	tad1->unknown1 = 0xffffffff;
-	if(!TaskComplete) tad1->unknown2 = 0xffffffff;
-	else
-		tad1->unknown2 = 0xcaffffff;
+	buf.WriteUInt32(Tasks[TaskID]->Activity[ActivityID].skill_id);
+	buf.WriteUInt32(Tasks[TaskID]->Activity[ActivityID].spell_id);
+	buf.WriteUInt32(Tasks[TaskID]->Activity[ActivityID].ZoneID);
+	buf.WriteUInt32(0);
 
-	tad1->ZoneID = Tasks[TaskID]->Activity[ActivityID].ZoneID;
-	tad1->unknown3 = 0x00000000;
-
-	Ptr = (char *) tad1 + sizeof(TaskActivityData1_Struct);
-	sprintf(Ptr, "%s", Tasks[TaskID]->Activity[ActivityID].Text3.c_str());
-	Ptr = Ptr + strlen(Ptr) + 1;
-
-	tat = (TaskActivityTrailer_Struct*)Ptr;
+	buf.WriteString(Tasks[TaskID]->Activity[ActivityID].desc_override);
 
 	if(Tasks[TaskID]->Activity[ActivityID].Type != ActivityGiveCash)
-		tat->DoneCount = c->GetTaskActivityDoneCount(ClientTaskIndex, ActivityID);
+		buf.WriteUInt32(c->GetTaskActivityDoneCount(ClientTaskIndex, ActivityID));
 	else
 		// For internal activity types, DoneCount is either 1 if the activity is complete, 0 otherwise.
-		tat->DoneCount = (c->GetTaskActivityDoneCount(ClientTaskIndex, ActivityID) >= Tasks[TaskID]->Activity[ActivityID].GoalCount);
+		buf.WriteUInt32((c->GetTaskActivityDoneCount(ClientTaskIndex, ActivityID) >= Tasks[TaskID]->Activity[ActivityID].GoalCount));
 
-	tat->unknown1 = 0x00000001;
+	buf.WriteUInt32(1); // unknown
 
+	auto outapp = new EQApplicationPacket(OP_TaskActivity, buf.buffer(), buf.length());
 
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
