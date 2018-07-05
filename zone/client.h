@@ -1011,7 +1011,7 @@ public:
 	inline bool IsTaskStateLoaded() { return taskstate != nullptr; }
 	inline bool IsTaskActive(int TaskID) { return (taskstate ? taskstate->IsTaskActive(TaskID) : false); }
 	inline bool IsTaskActivityActive(int TaskID, int ActivityID) { return (taskstate ? taskstate->IsTaskActivityActive(TaskID, ActivityID) : false); }
-	inline ActivityState GetTaskActivityState(int index, int ActivityID) { return (taskstate ? taskstate->GetTaskActivityState(index, ActivityID) : ActivityHidden); }
+	inline ActivityState GetTaskActivityState(TaskType type, int index, int ActivityID) { return (taskstate ? taskstate->GetTaskActivityState(type, index, ActivityID) : ActivityHidden); }
 	inline void UpdateTaskActivity(int TaskID, int ActivityID, int Count, bool ignore_quest_update = false) { if (taskstate) taskstate->UpdateTaskActivity(this, TaskID, ActivityID, Count, ignore_quest_update); }
 	inline void ResetTaskActivity(int TaskID, int ActivityID) { if(taskstate) taskstate->ResetTaskActivity(this, TaskID, ActivityID); }
 	inline void UpdateTasksOnKill(int NPCTypeID) { if(taskstate) taskstate->UpdateTasksOnKill(this, NPCTypeID); }
@@ -1037,8 +1037,8 @@ public:
 	inline int GetActiveTaskCount() { return (taskstate ? taskstate->GetActiveTaskCount() : 0); }
 	inline int GetActiveTaskID(int index) { return (taskstate ? taskstate->GetActiveTaskID(index) : -1); }
 	inline int GetTaskStartTime(int index) { return (taskstate ? taskstate->GetTaskStartTime(index) : -1); }
-	inline bool IsTaskActivityCompleted(int index, int ActivityID) { return (taskstate ? taskstate->IsTaskActivityCompleted(index, ActivityID) : false); }
-	inline int GetTaskActivityDoneCount(int ClientTaskIndex, int ActivityID) { return (taskstate ? taskstate->GetTaskActivityDoneCount(ClientTaskIndex, ActivityID) :0); }
+	inline bool IsTaskActivityCompleted(TaskType type, int index, int ActivityID) { return (taskstate ? taskstate->IsTaskActivityCompleted(type, index, ActivityID) : false); }
+	inline int GetTaskActivityDoneCount(TaskType type, int ClientTaskIndex, int ActivityID) { return (taskstate ? taskstate->GetTaskActivityDoneCount(type, ClientTaskIndex, ActivityID) :0); }
 	inline int GetTaskActivityDoneCountFromTaskID(int TaskID, int ActivityID) { return (taskstate ? taskstate->GetTaskActivityDoneCountFromTaskID(TaskID, ActivityID) :0); }
 	inline int ActiveTasksInSet(int TaskSet) { return (taskstate ? taskstate->ActiveTasksInSet(TaskSet) :0); }
 	inline int CompletedTasksInSet(int TaskSet) { return (taskstate ? taskstate->CompletedTasksInSet(TaskSet) :0); }

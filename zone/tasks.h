@@ -196,8 +196,8 @@ public:
 	void ShowClientTasks(Client *c);
 	inline int GetActiveTaskCount() { return ActiveTaskCount; }
 	int GetActiveTaskID(int index);
-	bool IsTaskActivityCompleted(int index, int ActivityID);
-	int GetTaskActivityDoneCount(int index, int ActivityID);
+	bool IsTaskActivityCompleted(TaskType type, int index, int ActivityID);
+	int GetTaskActivityDoneCount(TaskType type, int index, int ActivityID);
 	int GetTaskActivityDoneCountFromTaskID(int TaskID, int ActivityID);
 	int GetTaskStartTime(int index);
 	void AcceptNewTask(Client *c, int TaskID, int NPCID, bool enforce_level_requirement = false);
@@ -206,7 +206,7 @@ public:
 	int IsTaskCompleted(int TaskID);
 	bool IsTaskActive(int TaskID);
 	bool IsTaskActivityActive(int TaskID, int ActivityID);
-	ActivityState GetTaskActivityState(int index, int ActivityID);
+	ActivityState GetTaskActivityState(TaskType type, int index, int ActivityID);
 	void UpdateTaskActivity(Client *c, int TaskID, int ActivityID, int Count, bool ignore_quest_update = false);
 	void ResetTaskActivity(Client *c, int TaskID, int ActivityID);
 	void CancelTask(Client *c, int SequenceNumber, TaskType type, bool RemoveFromDB = true);

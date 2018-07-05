@@ -2648,10 +2648,10 @@ void TaskManager::SendTaskActivityLong(Client *c, int TaskID, int ActivityID, in
 	buf.WriteString(Tasks[TaskID]->Activity[ActivityID].desc_override);
 
 	if(Tasks[TaskID]->Activity[ActivityID].Type != ActivityGiveCash)
-		buf.WriteUInt32(c->GetTaskActivityDoneCount(ClientTaskIndex, ActivityID));
+		buf.WriteUInt32(c->GetTaskActivityDoneCount(Tasks[TaskID]->type, ClientTaskIndex, ActivityID));
 	else
 		// For internal activity types, DoneCount is either 1 if the activity is complete, 0 otherwise.
-		buf.WriteUInt32((c->GetTaskActivityDoneCount(ClientTaskIndex, ActivityID) >= Tasks[TaskID]->Activity[ActivityID].GoalCount));
+		buf.WriteUInt32((c->GetTaskActivityDoneCount(Tasks[TaskID]->type, ClientTaskIndex, ActivityID) >= Tasks[TaskID]->Activity[ActivityID].GoalCount));
 
 	buf.WriteUInt32(1); // unknown
 
@@ -2706,10 +2706,10 @@ void TaskManager::SendTaskActivityNew(Client *c, int TaskID, int ActivityID, int
 	buf.WriteString(Tasks[TaskID]->Activity[ActivityID].desc_override); // description override
 
 	if(Tasks[TaskID]->Activity[ActivityID].Type != ActivityGiveCash)
-		buf.WriteUInt32(c->GetTaskActivityDoneCount(ClientTaskIndex, ActivityID));	// DoneCount
+		buf.WriteUInt32(c->GetTaskActivityDoneCount(Tasks[TaskID]->type, ClientTaskIndex, ActivityID));	// DoneCount
 	else
 		// For internal activity types, DoneCount is either 1 if the activity is complete, 0 otherwise.
-		buf.WriteUInt32((c->GetTaskActivityDoneCount(ClientTaskIndex, ActivityID) >= Tasks[TaskID]->Activity[ActivityID].GoalCount));
+		buf.WriteUInt32((c->GetTaskActivityDoneCount(Tasks[TaskID]->type, ClientTaskIndex, ActivityID) >= Tasks[TaskID]->Activity[ActivityID].GoalCount));
 
 	buf.WriteUInt8(1);	// unknown9
 
@@ -2738,7 +2738,7 @@ void TaskManager::SendActiveTasksToClient(Client *c, bool TaskComplete)
 
 		int Sequence = 0;
 		for(int Activity=0; Activity<GetActivityCount(TaskID); Activity++) {
-			if(c->GetTaskActivityState(TaskIndex, Activity) != ActivityHidden) {
+			if(c->GetTaskActivityState(Tasks[TaskID]->type, TaskIndex, Activity) != ActivityHidden) {
 				Log(Logs::General, Logs::Tasks, "[UPDATE]   Long: %i, %i, %i Complete=%i", TaskID, Activity, TaskIndex, TaskComplete);
 				if(Activity==GetActivityCount(TaskID)-1)
 					SendTaskActivityLong(c, TaskID, Activity, TaskIndex,
@@ -2886,21 +2886,57 @@ void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, ClientTaskInf
 	safe_delete(outapp);
 }
 
-bool ClientTaskState::IsTaskActivityCompleted(int index, int ActivityID) {
+bool ClientTaskState::IsTaskActivityCompleted(TaskType type, int index, int ActivityID)
+{
+	switch (type) {
+	case TaskType::Task:
+		if (index != 0)
+			return false;
+		return ActiveTask.Activity[ActivityID].State == ActivityCompleted;
+	case TaskType::Shared:
+		return false; // TODO: shared tasks
+	case TaskType::Quest:
+		if (index < MAXACTIVEQUESTS)
+			return ActiveQuests[index].Activity[ActivityID].State == ActivityCompleted;
+	default:
+		return false;
+	}
 
-	return (ActiveQuests[index].Activity[ActivityID].State == ActivityCompleted);
 }
 
-ActivityState ClientTaskState::GetTaskActivityState(int index, int ActivityID) {
-
-
-	return ActiveQuests[index].Activity[ActivityID].State;
+// should we be defaulting to hidden?
+ActivityState ClientTaskState::GetTaskActivityState(TaskType type, int index, int ActivityID)
+{
+	switch (type) {
+	case TaskType::Task:
+		if (index != 0)
+			return ActivityHidden;
+		return ActiveTask.Activity[ActivityID].State;
+	case TaskType::Shared:
+		return ActivityHidden; // TODO: shared tasks
+	case TaskType::Quest:
+		if (index < MAXACTIVEQUESTS)
+			return ActiveQuests[index].Activity[ActivityID].State;
+	default:
+		return ActivityHidden;
+	}
 }
 
-int ClientTaskState::GetTaskActivityDoneCount(int index, int ActivityID) {
-
-	return ActiveQuests[index].Activity[ActivityID].DoneCount;
-
+int ClientTaskState::GetTaskActivityDoneCount(TaskType type, int index, int ActivityID)
+{
+	switch (type) {
+	case TaskType::Task:
+		if (index != 0)
+			return 0;
+		return ActiveTask.Activity[ActivityID].DoneCount;
+	case TaskType::Shared:
+		return 0; // TODO: shared tasks
+	case TaskType::Quest:
+		if (index < MAXACTIVEQUESTS)
+			return ActiveQuests[index].Activity[ActivityID].DoneCount;
+	default:
+		return 0;
+	}
 }
 
 int ClientTaskState::GetTaskActivityDoneCountFromTaskID(int TaskID, int ActivityID){
