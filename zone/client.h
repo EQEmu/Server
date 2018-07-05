@@ -1001,8 +1001,8 @@ public:
 	// Task System Methods
 	void LoadClientTaskState();
 	void RemoveClientTaskState();
-	void SendTaskActivityComplete(int TaskID, int ActivityID, int TaskIndex, int TaskIncomplete=1);
-	void SendTaskFailed(int TaskID, int TaskIndex);
+	void SendTaskActivityComplete(int TaskID, int ActivityID, int TaskIndex, TaskType type, int TaskIncomplete=1);
+	void SendTaskFailed(int TaskID, int TaskIndex, TaskType type);
 	void SendTaskComplete(int TaskIndex);
 	inline ClientTaskState *GetTaskState() const { return taskstate; }
 

@@ -241,9 +241,33 @@ public:
 private:
 	bool UnlockActivities(int CharID, ClientTaskInformation &task_info);
 	void IncrementDoneCount(Client *c, TaskInformation *Task, int TaskIndex, int ActivityID, int Count = 1, bool ignore_quest_update = false);
+	inline ClientTaskInformation *GetClientTaskInfo(TaskType type, int index)
+	{
+		ClientTaskInformation *info = nullptr;
+		switch (type) {
+		case TaskType::Task:
+			if (index == 0)
+				info = &ActiveTask;
+			break;
+		case TaskType::Shared:
+			break;
+		case TaskType::Quest:
+			if (index < MAXACTIVEQUESTS)
+				info = &ActiveQuests[index];
+			break;
+		default:
+			break;
+		}
+		return info;
+	}
 	int ActiveTaskCount;
-	ClientTaskInformation ActiveTask; // only one
-	ClientTaskInformation ActiveQuests[MAXACTIVEQUESTS];
+	union { // easier to loop over
+		struct {
+			ClientTaskInformation ActiveTask; // only one
+			ClientTaskInformation ActiveQuests[MAXACTIVEQUESTS];
+		};
+		ClientTaskInformation ActiveTasks[MAXACTIVEQUESTS + 1];
+	};
 	// Shared tasks should be limited to 1 as well
 	std::vector<int> EnabledTasks;
 	std::vector<CompletedTaskInformation> CompletedTasks;

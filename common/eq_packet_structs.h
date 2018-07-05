@@ -3897,11 +3897,11 @@ struct TaskActivityShort_Struct {
 
 struct TaskActivityComplete_Struct {
 	uint32	TaskIndex;
-	uint32	unknown2; // 0x00000002
-	uint32	unknown3;
+	uint32	TaskType; // task, shared task, quest
+	uint32	TaskID;		// must match
 	uint32	ActivityID;
-	uint32	unknown4; // 0x00000001
-	uint32	unknown5; // 0x00000001
+	uint32	task_completed; // Broadcasts "Task '%1' Completed" it not 0 and "Task '%1' Failed." if 0
+	uint32	stage_complete; // Broadcasts "Task Stage Completed"
 };
 
 #if 0

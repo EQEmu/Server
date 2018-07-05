@@ -1468,43 +1468,53 @@ bool ClientTaskState::UpdateTasksByNPC(Client *c, int ActivityType, int NPCTypeI
 
 	// If the client has no tasks, there is nothing further to check.
 
-	if(!taskmanager || ActiveTaskCount == 0) return false;
+	if (!taskmanager || (ActiveTaskCount == 0 && ActiveTask.TaskID == TASKSLOTEMPTY)) // could be better ...
+		return false;
 
-	for(int i=0; i<MAXACTIVEQUESTS; i++) {
-		if(ActiveQuests[i].TaskID == TASKSLOTEMPTY) continue;
+	// loop over the union of tasks and quests
+	for (int i = 0; i < MAXACTIVEQUESTS + 1; i++) {
+		auto cur_task = &ActiveTasks[i];
+		if (cur_task->TaskID == TASKSLOTEMPTY)
+			continue;
 
 		// Check if there are any active kill activities for this task
 
-		TaskInformation* Task = taskmanager->Tasks[ActiveQuests[i].TaskID];
+		auto Task = taskmanager->Tasks[cur_task->TaskID];
 
-		if(Task == nullptr) return false;
+		if (Task == nullptr)
+			return false;
 
-		for(int j=0; j<Task->ActivityCount; j++) {
+		for (int j = 0; j < Task->ActivityCount; j++) {
 			// We are not interested in completed or hidden activities
-			if(ActiveQuests[i].Activity[j].State != ActivityActive) continue;
+			if (cur_task->Activity[j].State != ActivityActive)
+				continue;
 			// We are only interested in Kill activities
-			if(Task->Activity[j].Type != ActivityType) continue;
+			if (Task->Activity[j].Type != ActivityType)
+				continue;
 			// Is there a zone restriction on the activity ?
-			if((Task->Activity[j].ZoneID >0) && (Task->Activity[j].ZoneID != (int)zone->GetZoneID())) {
-				Log(Logs::General, Logs::Tasks, "[UPDATE] Char: %s Task: %i, Activity %i, Activity type %i for NPC %i failed zone check",
-							c->GetName(), ActiveQuests[i].TaskID, j, ActivityType, NPCTypeID);
+			if ((Task->Activity[j].ZoneID > 0) && (Task->Activity[j].ZoneID != (int)zone->GetZoneID())) {
+				Log(Logs::General, Logs::Tasks,
+					"[UPDATE] Char: %s Task: %i, Activity %i, Activity type %i for NPC %i failed zone "
+					"check",
+					c->GetName(), cur_task->TaskID, j, ActivityType, NPCTypeID);
 				continue;
 			}
 			// Is the activity to kill this type of NPC ?
-			switch(Task->Activity[j].GoalMethod) {
+			switch (Task->Activity[j].GoalMethod) {
 
-				case METHODSINGLEID:
-					if(Task->Activity[j].GoalID != NPCTypeID) continue;
-					break;
-
-				case METHODLIST:
-					if(!taskmanager->GoalListManager.IsInList(Task->Activity[j].GoalID,
-											NPCTypeID)) continue;
-					break;
-
-				default:
-					// If METHODQUEST, don't update the activity here
+			case METHODSINGLEID:
+				if (Task->Activity[j].GoalID != NPCTypeID)
 					continue;
+				break;
+
+			case METHODLIST:
+				if (!taskmanager->GoalListManager.IsInList(Task->Activity[j].GoalID, NPCTypeID))
+					continue;
+				break;
+
+			default:
+				// If METHODQUEST, don't update the activity here
+				continue;
 			}
 			// We found an active task to kill this type of NPC, so increment the done count
 			Log(Logs::General, Logs::Tasks, "[UPDATE] Calling increment done count ByNPC");
@@ -1521,26 +1531,32 @@ int ClientTaskState::ActiveSpeakTask(int NPCTypeID) {
 	// This method is to be used from Perl quests only and returns the TaskID of the first
 	// active task found which has an active SpeakWith activity for this NPC.
 
-	if(!taskmanager || ActiveTaskCount == 0) return 0;
+	if (!taskmanager || (ActiveTaskCount == 0 && ActiveTask.TaskID == TASKSLOTEMPTY)) // could be better ...
+		return 0;
 
-	for(int i=0; i<MAXACTIVEQUESTS; i++) {
-		if(ActiveQuests[i].TaskID == TASKSLOTEMPTY) continue;
+	// loop over the union of tasks and quests
+	for (int i = 0; i < MAXACTIVEQUESTS + 1; i++) {
+		auto cur_task = &ActiveTasks[i];
+		if (cur_task->TaskID == TASKSLOTEMPTY)
+			continue;
 
-		TaskInformation* Task = taskmanager->Tasks[ActiveQuests[i].TaskID];
+		TaskInformation* Task = taskmanager->Tasks[cur_task->TaskID];
 
-		if(Task == nullptr) continue;
+		if (Task == nullptr)
+			continue;
 
-		for(int j=0; j<Task->ActivityCount; j++) {
+		for (int j = 0; j < Task->ActivityCount; j++) {
 			// We are not interested in completed or hidden activities
-			if(ActiveQuests[i].Activity[j].State != ActivityActive) continue;
-			if(Task->Activity[j].Type != ActivitySpeakWith) continue;
-			// Is there a zone restriction on the activity ?
-			if((Task->Activity[j].ZoneID >0) && (Task->Activity[j].ZoneID != (int)zone->GetZoneID())) {
+			if (cur_task->Activity[j].State != ActivityActive)
 				continue;
-			}
+			if (Task->Activity[j].Type != ActivitySpeakWith)
+				continue;
+			// Is there a zone restriction on the activity ?
+			if (Task->Activity[j].ZoneID > 0 && Task->Activity[j].ZoneID != (int)zone->GetZoneID())
+				continue;
 			// Is the activity to speak with this type of NPC ?
-			if((Task->Activity[j].GoalMethod == METHODQUEST) &&
-				(Task->Activity[j].GoalID == NPCTypeID)) return ActiveQuests[i].TaskID;
+			if (Task->Activity[j].GoalMethod == METHODQUEST && Task->Activity[j].GoalID == NPCTypeID)
+				return cur_task->TaskID;
 		}
 	}
 	return 0;
@@ -1551,27 +1567,34 @@ int ClientTaskState::ActiveSpeakActivity(int NPCTypeID, int TaskID) {
 	// This method is to be used from Perl quests only and returns the ActivityID of the first
 	// active activity found in the specified task which is to SpeakWith this NPC.
 
-	if(!taskmanager || ActiveTaskCount == 0) return -1;
-	if((TaskID<=0) || (TaskID>=MAXTASKS)) return -1;
+	if (!taskmanager || (ActiveTaskCount == 0 && ActiveTask.TaskID == TASKSLOTEMPTY)) // could be better ...
+		return -1;
+	if (TaskID <= 0 || TaskID >= MAXTASKS)
+		return -1;
 
-	for(int i=0; i<MAXACTIVEQUESTS; i++) {
-		if(ActiveQuests[i].TaskID != TaskID) continue;
+	// loop over the union of tasks and quests
+	for (int i = 0; i < MAXACTIVEQUESTS + 1; i++) {
+		auto cur_task = &ActiveTasks[i];
+		if (cur_task->TaskID != TaskID)
+			continue;
 
-		TaskInformation* Task = taskmanager->Tasks[ActiveQuests[i].TaskID];
+		TaskInformation* Task = taskmanager->Tasks[cur_task->TaskID];
 
-		if(Task == nullptr) continue;
+		if (Task == nullptr)
+			continue;
 
-		for(int j=0; j<Task->ActivityCount; j++) {
+		for (int j = 0; j < Task->ActivityCount; j++) {
 			// We are not interested in completed or hidden activities
-			if(ActiveQuests[i].Activity[j].State != ActivityActive) continue;
-			if(Task->Activity[j].Type != ActivitySpeakWith) continue;
-			// Is there a zone restriction on the activity ?
-			if((Task->Activity[j].ZoneID >0) && (Task->Activity[j].ZoneID != (int)zone->GetZoneID())) {
+			if (cur_task->Activity[j].State != ActivityActive)
 				continue;
-			}
+			if (Task->Activity[j].Type != ActivitySpeakWith)
+				continue;
+			// Is there a zone restriction on the activity ?
+			if (Task->Activity[j].ZoneID > 0 && Task->Activity[j].ZoneID != (int)zone->GetZoneID())
+				continue;
 			// Is the activity to speak with this type of NPC ?
-			if((Task->Activity[j].GoalMethod == METHODQUEST) &&
-				(Task->Activity[j].GoalID == NPCTypeID)) return j;
+			if (Task->Activity[j].GoalMethod == METHODQUEST && Task->Activity[j].GoalID == NPCTypeID)
+				return j;
 		}
 		return 0;
 	}
@@ -1588,24 +1611,31 @@ void ClientTaskState::UpdateTasksForItem(Client *c, ActivityType Type, int ItemI
 
 	Log(Logs::General, Logs::Tasks, "[UPDATE] ClientTaskState::UpdateTasksForItem(%d,%d)", Type, ItemID);
 
-	if(ActiveTaskCount == 0) return;
+	if (!taskmanager || (ActiveTaskCount == 0 && ActiveTask.TaskID == TASKSLOTEMPTY)) // could be better ...
+		return;
 
-	for(int i=0; i<MAXACTIVEQUESTS; i++) {
-		if(ActiveQuests[i].TaskID == TASKSLOTEMPTY) continue;
+	// loop over the union of tasks and quests
+	for (int i = 0; i < MAXACTIVEQUESTS + 1; i++) {
+		auto cur_task = &ActiveTasks[i];
+		if (cur_task->TaskID == TASKSLOTEMPTY)
+			continue;
 
 		// Check if there are any active loot activities for this task
 
-		TaskInformation* Task = taskmanager->Tasks[ActiveQuests[i].TaskID];
+		TaskInformation* Task = taskmanager->Tasks[cur_task->TaskID];
 
-		if(Task == nullptr) return;
+		if (Task == nullptr)
+			return;
 
-		for(int j=0; j<Task->ActivityCount; j++) {
+		for (int j = 0; j < Task->ActivityCount; j++) {
 			// We are not interested in completed or hidden activities
-			if(ActiveQuests[i].Activity[j].State != ActivityActive) continue;
+			if (cur_task->Activity[j].State != ActivityActive)
+				continue;
 			// We are only interested in the ActivityType we were called with
-			if(Task->Activity[j].Type != (int)Type) continue;
+			if (Task->Activity[j].Type != (int)Type)
+				continue;
 			// Is there a zone restriction on the activity ?
-			if((Task->Activity[j].ZoneID >0) && (Task->Activity[j].ZoneID != (int)zone->GetZoneID())) {
+			if (Task->Activity[j].ZoneID > 0 && Task->Activity[j].ZoneID != (int)zone->GetZoneID()) {
 				Log(Logs::General, Logs::Tasks, "[UPDATE] Char: %s Activity type %i for Item %i failed zone check",
 							c->GetName(), Type, ItemID);
 				continue;
@@ -1635,114 +1665,133 @@ void ClientTaskState::UpdateTasksForItem(Client *c, ActivityType Type, int ItemI
 	return;
 }
 
-void ClientTaskState::UpdateTasksOnExplore(Client *c, int ExploreID) {
+void ClientTaskState::UpdateTasksOnExplore(Client *c, int ExploreID)
+{
 
 	// If the client has no tasks, there is nothing further to check.
 
 	Log(Logs::General, Logs::Tasks, "[UPDATE] ClientTaskState::UpdateTasksOnExplore(%i)", ExploreID);
-	if(ActiveTaskCount == 0) return;
+	if (!taskmanager || (ActiveTaskCount == 0 && ActiveTask.TaskID == TASKSLOTEMPTY)) // could be better ...
+		return;
 
-	for(int i=0; i<MAXACTIVEQUESTS; i++) {
-		if(ActiveQuests[i].TaskID == TASKSLOTEMPTY) continue;
+	// loop over the union of tasks and quests
+	for (int i = 0; i < MAXACTIVEQUESTS + 1; i++) {
+		auto cur_task = &ActiveTasks[i];
+		if (cur_task->TaskID == TASKSLOTEMPTY)
+			continue;
 
 		// Check if there are any active explore activities for this task
 
-		TaskInformation* Task = taskmanager->Tasks[ActiveQuests[i].TaskID];
+		TaskInformation *Task = taskmanager->Tasks[cur_task->TaskID];
 
-		if(Task == nullptr) return;
+		if (Task == nullptr)
+			return;
 
-		for(int j=0; j<Task->ActivityCount; j++) {
+		for (int j = 0; j < Task->ActivityCount; j++) {
 			// We are not interested in completed or hidden activities
-			if(ActiveQuests[i].Activity[j].State != ActivityActive) continue;
+			if (cur_task->Activity[j].State != ActivityActive)
+				continue;
 			// We are only interested in explore activities
-			if(Task->Activity[j].Type != ActivityExplore) continue;
-			if((Task->Activity[j].ZoneID >0) && (Task->Activity[j].ZoneID != (int)zone->GetZoneID())) {
-				Log(Logs::General, Logs::Tasks, "[UPDATE] Char: %s Explore exploreid %i failed zone check",
-							c->GetName(), ExploreID);
+			if (Task->Activity[j].Type != ActivityExplore)
+				continue;
+			if (Task->Activity[j].ZoneID > 0 && Task->Activity[j].ZoneID != (int)zone->GetZoneID()) {
+				Log(Logs::General, Logs::Tasks,
+				    "[UPDATE] Char: %s Explore exploreid %i failed zone check", c->GetName(),
+				    ExploreID);
 				continue;
 			}
 			// Is the activity to explore this area id ?
-			switch(Task->Activity[j].GoalMethod) {
+			switch (Task->Activity[j].GoalMethod) {
 
-				case METHODSINGLEID:
-					if(Task->Activity[j].GoalID != ExploreID) continue;
-					break;
-
-				case METHODLIST:
-					if(!taskmanager->GoalListManager.IsInList(Task->Activity[j].GoalID,
-											ExploreID)) continue;
-					break;
-
-				default:
-					// If METHODQUEST, don't update the activity here
+			case METHODSINGLEID:
+				if (Task->Activity[j].GoalID != ExploreID)
 					continue;
+				break;
+
+			case METHODLIST:
+				if (!taskmanager->GoalListManager.IsInList(Task->Activity[j].GoalID, ExploreID))
+					continue;
+				break;
+
+			default:
+				// If METHODQUEST, don't update the activity here
+				continue;
 			}
 			// We found an active task to explore this area, so set done count to goal count
 			// (Only a goal count of 1 makes sense for explore activities?)
 			Log(Logs::General, Logs::Tasks, "[UPDATE] Increment on explore");
 			IncrementDoneCount(c, Task, i, j,
-						Task->Activity[j].GoalCount - ActiveQuests[i].Activity[j].DoneCount);
-
+					   Task->Activity[j].GoalCount - cur_task->Activity[j].DoneCount);
 		}
 	}
 
 	return;
 }
 
-bool ClientTaskState::UpdateTasksOnDeliver(Client *c, std::list<EQEmu::ItemInstance*>& Items, int Cash, int NPCTypeID) {
-
+bool ClientTaskState::UpdateTasksOnDeliver(Client *c, std::list<EQEmu::ItemInstance *> &Items, int Cash, int NPCTypeID)
+{
 	bool Ret = false;
 
 	Log(Logs::General, Logs::Tasks, "[UPDATE] ClientTaskState::UpdateTasksForOnDeliver(%d)", NPCTypeID);
 
-	if(ActiveTaskCount == 0) return false;
+	if (!taskmanager || (ActiveTaskCount == 0 && ActiveTask.TaskID == TASKSLOTEMPTY)) // could be better ...
+		return false;
 
-	for(int i=0; i<MAXACTIVEQUESTS; i++) {
-		if(ActiveQuests[i].TaskID == TASKSLOTEMPTY) continue;
+	// loop over the union of tasks and quests
+	for (int i = 0; i < MAXACTIVEQUESTS + 1; i++) {
+		auto cur_task = &ActiveTasks[i];
+		if (cur_task->TaskID == TASKSLOTEMPTY)
+			continue;
 
 		// Check if there are any active deliver activities for this task
 
-		TaskInformation* Task = taskmanager->Tasks[ActiveQuests[i].TaskID];
+		TaskInformation *Task = taskmanager->Tasks[cur_task->TaskID];
 
-		if(Task == nullptr) return false;
+		if (Task == nullptr)
+			return false;
 
-		for(int j=0; j<Task->ActivityCount; j++) {
+		for (int j = 0; j < Task->ActivityCount; j++) {
 			// We are not interested in completed or hidden activities
-			if(ActiveQuests[i].Activity[j].State != ActivityActive) continue;
+			if (cur_task->Activity[j].State != ActivityActive)
+				continue;
 			// We are only interested in Deliver activities
-			if((Task->Activity[j].Type != ActivityDeliver) &&
-				(Task->Activity[j].Type != ActivityGiveCash)) continue;
+			if (Task->Activity[j].Type != ActivityDeliver && Task->Activity[j].Type != ActivityGiveCash)
+				continue;
 			// Is there a zone restriction on the activity ?
-			if((Task->Activity[j].ZoneID >0) && (Task->Activity[j].ZoneID != (int)zone->GetZoneID())) {
-				Log(Logs::General, Logs::Tasks, "[UPDATE] Char: %s Deliver activity failed zone check (current zone %i, need zone %i",
-					c->GetName(), zone->GetZoneID(), Task->Activity[j].ZoneID);
+			if (Task->Activity[j].ZoneID > 0 && Task->Activity[j].ZoneID != (int)zone->GetZoneID()) {
+				Log(Logs::General, Logs::Tasks,
+				    "[UPDATE] Char: %s Deliver activity failed zone check (current zone %i, need zone "
+				    "%i",
+				    c->GetName(), zone->GetZoneID(), Task->Activity[j].ZoneID);
 				continue;
 			}
 			// Is the activity to deliver to this NPCTypeID ?
-			if(Task->Activity[j].DeliverToNPC != NPCTypeID) continue;
+			if (Task->Activity[j].DeliverToNPC != NPCTypeID)
+				continue;
 			// Is the activity related to these items ?
 			//
-			if((Task->Activity[j].Type == ActivityGiveCash) && Cash) {
+			if ((Task->Activity[j].Type == ActivityGiveCash) && Cash) {
 				Log(Logs::General, Logs::Tasks, "[UPDATE] Increment on GiveCash");
 				IncrementDoneCount(c, Task, i, j, Cash);
 				Ret = true;
-			}
-			else {
-				for(auto& k : Items) {
-					switch(Task->Activity[j].GoalMethod) {
+			} else {
+				for (auto &k : Items) {
+					switch (Task->Activity[j].GoalMethod) {
 
-						case METHODSINGLEID:
-							if(Task->Activity[j].GoalID != k->GetID()) continue;
-							break;
-
-						case METHODLIST:
-							if (!taskmanager->GoalListManager.IsInList(Task->Activity[j].GoalID, k->GetID()))
-								continue;
-							break;
-
-						default:
-							// If METHODQUEST, don't update the activity here
+					case METHODSINGLEID:
+						if (Task->Activity[j].GoalID != k->GetID())
 							continue;
+						break;
+
+					case METHODLIST:
+						if (!taskmanager->GoalListManager.IsInList(Task->Activity[j].GoalID,
+											   k->GetID()))
+							continue;
+						break;
+
+					default:
+						// If METHODQUEST, don't update the activity here
+						continue;
 					}
 					// We found an active task related to this item, so increment the done count
 					Log(Logs::General, Logs::Tasks, "[UPDATE] Increment on GiveItem");
@@ -1756,74 +1805,89 @@ bool ClientTaskState::UpdateTasksOnDeliver(Client *c, std::list<EQEmu::ItemInsta
 	return Ret;
 }
 
-void ClientTaskState::UpdateTasksOnTouch(Client *c, int ZoneID) {
-
+void ClientTaskState::UpdateTasksOnTouch(Client *c, int ZoneID)
+{
 	// If the client has no tasks, there is nothing further to check.
 
 	Log(Logs::General, Logs::Tasks, "[UPDATE] ClientTaskState::UpdateTasksOnTouch(%i)", ZoneID);
-	if(ActiveTaskCount == 0) return;
+	if (!taskmanager || (ActiveTaskCount == 0 && ActiveTask.TaskID == TASKSLOTEMPTY)) // could be better ...
+		return;
 
-	for(int i=0; i<MAXACTIVEQUESTS; i++) {
-		if(ActiveQuests[i].TaskID == TASKSLOTEMPTY) continue;
+	// loop over the union of tasks and quests
+	for (int i = 0; i < MAXACTIVEQUESTS + 1; i++) {
+		auto cur_task = &ActiveTasks[i];
+		if (cur_task->TaskID == TASKSLOTEMPTY)
+			continue;
 
 		// Check if there are any active explore activities for this task
 
-		TaskInformation* Task = taskmanager->Tasks[ActiveQuests[i].TaskID];
+		TaskInformation *Task = taskmanager->Tasks[cur_task->TaskID];
 
-		if(Task == nullptr) return;
+		if (Task == nullptr)
+			return;
 
-		for(int j=0; j<Task->ActivityCount; j++) {
+		for (int j = 0; j < Task->ActivityCount; j++) {
 			// We are not interested in completed or hidden activities
-			if(ActiveQuests[i].Activity[j].State != ActivityActive) continue;
+			if (cur_task->Activity[j].State != ActivityActive)
+				continue;
 			// We are only interested in touch activities
-			if(Task->Activity[j].Type != ActivityTouch) continue;
-			if(Task->Activity[j].GoalMethod != METHODSINGLEID) continue;
-			if(Task->Activity[j].ZoneID != ZoneID) {
+			if (Task->Activity[j].Type != ActivityTouch)
+				continue;
+			if (Task->Activity[j].GoalMethod != METHODSINGLEID)
+				continue;
+			if (Task->Activity[j].ZoneID != ZoneID) {
 				Log(Logs::General, Logs::Tasks, "[UPDATE] Char: %s Touch activity failed zone check",
-							c->GetName());
+				    c->GetName());
 				continue;
 			}
 			// We found an active task to zone into this zone, so set done count to goal count
 			// (Only a goal count of 1 makes sense for touch activities?)
 			Log(Logs::General, Logs::Tasks, "[UPDATE] Increment on Touch");
 			IncrementDoneCount(c, Task, i, j,
-						Task->Activity[j].GoalCount - ActiveQuests[i].Activity[j].DoneCount);
+					   Task->Activity[j].GoalCount - cur_task->Activity[j].DoneCount);
 		}
 	}
 
 	return;
 }
-void ClientTaskState::IncrementDoneCount(Client *c, TaskInformation* Task, int TaskIndex, int ActivityID, int Count, bool ignore_quest_update) {
 
+void ClientTaskState::IncrementDoneCount(Client *c, TaskInformation *Task, int TaskIndex, int ActivityID, int Count,
+					 bool ignore_quest_update)
+{
 	Log(Logs::General, Logs::Tasks, "[UPDATE] IncrementDoneCount");
 
-	ActiveQuests[TaskIndex].Activity[ActivityID].DoneCount += Count;
+	auto info = GetClientTaskInfo(Task->type, TaskIndex);
 
-	if(ActiveQuests[TaskIndex].Activity[ActivityID].DoneCount > Task->Activity[ActivityID].GoalCount)
-		ActiveQuests[TaskIndex].Activity[ActivityID].DoneCount = Task->Activity[ActivityID].GoalCount;
+	if (info == nullptr)
+		return;
+
+	info->Activity[ActivityID].DoneCount += Count;
+
+	if(info->Activity[ActivityID].DoneCount > Task->Activity[ActivityID].GoalCount)
+		info->Activity[ActivityID].DoneCount = Task->Activity[ActivityID].GoalCount;
 
 	if (!ignore_quest_update){
 		char buf[24];
-		snprintf(buf, 23, "%d %d %d", ActiveQuests[TaskIndex].Activity[ActivityID].DoneCount, ActiveQuests[TaskIndex].Activity[ActivityID].ActivityID, ActiveQuests[TaskIndex].TaskID);
+		snprintf(buf, 23, "%d %d %d", info->Activity[ActivityID].DoneCount, info->Activity[ActivityID].ActivityID, info->TaskID);
 		buf[23] = '\0';
 		parse->EventPlayer(EVENT_TASK_UPDATE, c, buf, 0);
 	}
 
-	ActiveQuests[TaskIndex].Activity[ActivityID].Updated=true;
+	info->Activity[ActivityID].Updated=true;
 	// Have we reached the goal count for this activity ?
-	if(ActiveQuests[TaskIndex].Activity[ActivityID].DoneCount >= Task->Activity[ActivityID].GoalCount) {
+	if(info->Activity[ActivityID].DoneCount >= Task->Activity[ActivityID].GoalCount) {
 		Log(Logs::General, Logs::Tasks, "[UPDATE] Done (%i) = Goal (%i) for Activity %i",
-				ActiveQuests[TaskIndex].Activity[ActivityID].DoneCount,
+				info->Activity[ActivityID].DoneCount,
 				Task->Activity[ActivityID].GoalCount,
 				ActivityID);
 
 		// Flag the activity as complete
-		ActiveQuests[TaskIndex].Activity[ActivityID].State = ActivityCompleted;
+		info->Activity[ActivityID].State = ActivityCompleted;
 		// Unlock subsequent activities for this task
-		bool TaskComplete = UnlockActivities(c->CharacterID(), ActiveQuests[TaskIndex]); // TODO: fix this function
+		bool TaskComplete = UnlockActivities(c->CharacterID(), *info);
 		Log(Logs::General, Logs::Tasks, "[UPDATE] TaskCompleted is %i", TaskComplete);
 		// and by the 'Task Stage Completed' message
-		c->SendTaskActivityComplete(ActiveQuests[TaskIndex].TaskID, ActivityID, TaskIndex);
+		c->SendTaskActivityComplete(info->TaskID, ActivityID, TaskIndex, Task->type);
 		// Send the updated task/activity list to the client
 		taskmanager->SendSingleActiveTaskToClient(c, ActiveQuests[TaskIndex], TaskComplete, false);
 		// Inform the client the task has been updated, both by a chat message
@@ -1832,13 +1896,13 @@ void ClientTaskState::IncrementDoneCount(Client *c, TaskInformation* Task, int T
 		if(Task->Activity[ActivityID].GoalMethod != METHODQUEST) {
 			if (!ignore_quest_update){
 				char buf[24];
-				snprintf(buf, 23, "%d %d", ActiveQuests[TaskIndex].TaskID, ActiveQuests[TaskIndex].Activity[ActivityID].ActivityID);
+				snprintf(buf, 23, "%d %d", info->TaskID, info->Activity[ActivityID].ActivityID);
 				buf[23] = '\0';
 				parse->EventPlayer(EVENT_TASK_STAGE_COMPLETE, c, buf, 0);
 			}
 			/* QS: PlayerLogTaskUpdates :: Update */
 			if (RuleB(QueryServ, PlayerLogTaskUpdates)){
-				std::string event_desc = StringFormat("Task Stage Complete :: taskid:%i activityid:%i donecount:%i in zoneid:%i instid:%i", ActiveQuests[TaskIndex].TaskID, ActiveQuests[TaskIndex].Activity[ActivityID].ActivityID, ActiveQuests[TaskIndex].Activity[ActivityID].DoneCount, c->GetZoneID(), c->GetInstanceID());
+				std::string event_desc = StringFormat("Task Stage Complete :: taskid:%i activityid:%i donecount:%i in zoneid:%i instid:%i", info->TaskID, info->Activity[ActivityID].ActivityID, info->Activity[ActivityID].DoneCount, c->GetZoneID(), c->GetInstanceID());
 				QServ->PlayerLogEvent(Player_Log_Task_Updates, c->CharacterID(), event_desc);
 			}
 		}
@@ -1848,21 +1912,21 @@ void ClientTaskState::IncrementDoneCount(Client *c, TaskInformation* Task, int T
 		// client. This is the same sequence the packets are sent on live.
 		if(TaskComplete) {
 			char buf[24];
-			snprintf(buf, 23, "%d %d %d", ActiveQuests[TaskIndex].Activity[ActivityID].DoneCount, ActiveQuests[TaskIndex].Activity[ActivityID].ActivityID, ActiveQuests[TaskIndex].TaskID);
+			snprintf(buf, 23, "%d %d %d", info->Activity[ActivityID].DoneCount, info->Activity[ActivityID].ActivityID, info->TaskID);
 			buf[23] = '\0';
 			parse->EventPlayer(EVENT_TASK_COMPLETE, c, buf, 0);
 
 			/* QS: PlayerLogTaskUpdates :: Complete */
 			if (RuleB(QueryServ, PlayerLogTaskUpdates)){
-				std::string event_desc = StringFormat("Task Complete :: taskid:%i activityid:%i donecount:%i in zoneid:%i instid:%i", ActiveQuests[TaskIndex].TaskID, ActiveQuests[TaskIndex].Activity[ActivityID].ActivityID, ActiveQuests[TaskIndex].Activity[ActivityID].DoneCount, c->GetZoneID(), c->GetInstanceID());
+				std::string event_desc = StringFormat("Task Complete :: taskid:%i activityid:%i donecount:%i in zoneid:%i instid:%i", info->TaskID, info->Activity[ActivityID].ActivityID, info->Activity[ActivityID].DoneCount, c->GetZoneID(), c->GetInstanceID());
 				QServ->PlayerLogEvent(Player_Log_Task_Updates, c->CharacterID(), event_desc);
 			}
 
 			taskmanager->SendCompletedTasksToClient(c, this);
-			c->SendTaskActivityComplete(ActiveQuests[TaskIndex].TaskID, 0, TaskIndex, false);
+			c->SendTaskActivityComplete(info->TaskID, 0, TaskIndex, Task->type, 0);
 			taskmanager->SaveClientState(c, this);
 			//c->SendTaskComplete(TaskIndex);
-			c->CancelTask(TaskIndex, TaskType::Quest); // TODO: fix
+			c->CancelTask(TaskIndex, Task->type);
 			//if(Task->RewardMethod != METHODQUEST) RewardTask(c, Task);
 			// If Experience and/or cash rewards are set, reward them from the task even if RewardMethod is METHODQUEST
 			RewardTask(c, Task);
@@ -2007,7 +2071,7 @@ void ClientTaskState::FailTask(Client *c, int TaskID) {
 	for(int i=0; i<MAXACTIVEQUESTS; i++) {
 
 		if(ActiveQuests[i].TaskID==TaskID) {
-			c->SendTaskFailed(ActiveQuests[i].TaskID, i);
+			c->SendTaskFailed(ActiveQuests[i].TaskID, i, TaskType::Quest); // TODO: fix
 			// Remove the task from the client
 			c->CancelTask(i, TaskType::Quest); // TODO: fix
 			return;
@@ -2231,7 +2295,7 @@ void ClientTaskState::TaskPeriodicChecks(Client *c) {
 
 		if(TaskOutOfTime(i)) {
 			// Send Red Task Failed Message
-			c->SendTaskFailed(ActiveQuests[i].TaskID, i);
+			c->SendTaskFailed(ActiveQuests[i].TaskID, i, TaskType::Quest); // TODO: fix
 			// Remove the task from the client
 			c->CancelTask(i, TaskType::Quest); // TODO: Fix
 			// It is a conscious decision to only fail one task per call to this method,
@@ -2362,8 +2426,8 @@ void ClientTaskState::SendTaskHistory(Client *c, int TaskIndex) {
 
 }
 
-void Client::SendTaskActivityComplete(int TaskID, int ActivityID, int TaskIndex, int TaskIncomplete) {
-
+void Client::SendTaskActivityComplete(int TaskID, int ActivityID, int TaskIndex, TaskType type, int TaskIncomplete)
+{
 	// 0x54eb
 
 	TaskActivityComplete_Struct* tac;
@@ -2372,15 +2436,12 @@ void Client::SendTaskActivityComplete(int TaskID, int ActivityID, int TaskIndex,
 
 	tac = (TaskActivityComplete_Struct*)outapp->pBuffer;
 
-	//tac->unknown1 = 0x00000000;
 	tac->TaskIndex = TaskIndex;
-	tac->unknown2 = 0x00000002;
-	//tac->unknown3 = 0x00000000;
-	tac->unknown3 = TaskID; // Correct ?
+	tac->TaskType = static_cast<uint32>(type);
+	tac->TaskID = TaskID;
 	tac->ActivityID = ActivityID;
-	tac->unknown4 = 0x00000001;
-	//tac->unknown5 = 0x00000001;
-	tac->unknown5 = TaskIncomplete;
+	tac->task_completed = 0x00000001;
+	tac->stage_complete = TaskIncomplete;
 
 
 	QueuePacket(outapp);
@@ -2388,8 +2449,8 @@ void Client::SendTaskActivityComplete(int TaskID, int ActivityID, int TaskIndex,
 }
 
 
-void Client::SendTaskFailed(int TaskID, int TaskIndex) {
-
+void Client::SendTaskFailed(int TaskID, int TaskIndex, TaskType type)
+{
 	// 0x54eb
 	char buf[24];
 	snprintf(buf, 23, "%d", TaskID);
@@ -2402,15 +2463,12 @@ void Client::SendTaskFailed(int TaskID, int TaskIndex) {
 
 	tac = (TaskActivityComplete_Struct*)outapp->pBuffer;
 
-	//tac->unknown1 = 0x00000000;
 	tac->TaskIndex = TaskIndex;
-	tac->unknown2 = 0x00000002;
-	//tac->unknown3 = 0x00000000;
-	tac->unknown3 = TaskID; // Correct ?
+	tac->TaskType = static_cast<uint32>(type);
+	tac->TaskID = TaskID;
 	tac->ActivityID = 0;
-	tac->unknown4 = 0x00000000; //Fail
-	//tac->unknown5 = 0x00000001;
-	tac->unknown5 = 0; // 0 for task complete or failed.
+	tac->task_completed = 0; //Fail
+	tac->stage_complete = 0; // 0 for task complete or failed.
 
 	Log(Logs::General, Logs::Tasks, "[UPDATE] TaskFailed");
 
