@@ -2063,24 +2063,33 @@ bool ClientTaskState::IsTaskActive(int TaskID)
 	return false;
 }
 
-void ClientTaskState::FailTask(Client *c, int TaskID) {
-
+void ClientTaskState::FailTask(Client *c, int TaskID)
+{
 	Log(Logs::General, Logs::Tasks, "[UPDATE] FailTask %i, ActiveTaskCount is %i", TaskID, ActiveTaskCount);
-	if(ActiveTaskCount == 0) return;
 
-	for(int i=0; i<MAXACTIVEQUESTS; i++) {
-
-		if(ActiveQuests[i].TaskID==TaskID) {
-			c->SendTaskFailed(ActiveQuests[i].TaskID, i, TaskType::Quest); // TODO: fix
-			// Remove the task from the client
-			c->CancelTask(i, TaskType::Quest); // TODO: fix
-			return;
-		}
-
+	if (ActiveTask.TaskID == TaskID) {
+		c->SendTaskFailed(TaskID, 0, TaskType::Task);
+		// Remove the task from the client
+		c->CancelTask(0, TaskType::Task);
+		return;
 	}
 
+	// TODO: shared tasks
+
+	if (ActiveTaskCount == 0)
+		return;
+
+	for (int i = 0; i < MAXACTIVEQUESTS; i++) {
+		if (ActiveQuests[i].TaskID == TaskID) {
+			c->SendTaskFailed(ActiveQuests[i].TaskID, i, TaskType::Quest);
+			// Remove the task from the client
+			c->CancelTask(i, TaskType::Quest);
+			return;
+		}
+	}
 }
 
+// TODO: tasks
 bool ClientTaskState::IsTaskActivityActive(int TaskID, int ActivityID) {
 
 	Log(Logs::General, Logs::Tasks, "[UPDATE] ClientTaskState IsTaskActivityActive(%i, %i).", TaskID, ActivityID);
@@ -2265,44 +2274,63 @@ bool TaskManager::IsTaskRepeatable(int TaskID) {
 	return Task->Repeatable;
 }
 
-bool ClientTaskState::TaskOutOfTime(int Index) {
-
+bool ClientTaskState::TaskOutOfTime(TaskType type, int Index)
+{
 	// Returns true if the Task in the specified slot has a time limit that has been exceeded.
+	auto info = GetClientTaskInfo(type, Index);
 
-	if((Index < 0) || (Index>=MAXACTIVEQUESTS)) return false;
+	if (info == nullptr)
+		return false;
 
-	if((ActiveQuests[Index].TaskID <= 0) || (ActiveQuests[Index].TaskID >= MAXTASKS)) return false;
+	// make sure the TaskID is at least maybe in our array
+	if (info->TaskID <= 0 || info->TaskID >= MAXTASKS)
+		return false;
 
 	int Now = time(nullptr);
 
-	TaskInformation* Task = taskmanager->Tasks[ActiveQuests[Index].TaskID];
+	TaskInformation *Task = taskmanager->Tasks[info->TaskID];
 
-	if(Task == nullptr) return false;
+	if (Task == nullptr)
+		return false;
 
-	return (Task->Duration && (ActiveQuests[Index].AcceptedTime + Task->Duration <= Now));
-
+	return (Task->Duration && (info->AcceptedTime + Task->Duration <= Now));
 }
 
-void ClientTaskState::TaskPeriodicChecks(Client *c) {
+void ClientTaskState::TaskPeriodicChecks(Client *c)
+{
+	if (ActiveTask.TaskID == TASKSLOTEMPTY) {
+		if (TaskOutOfTime(TaskType::Task, 0)) {
+			// Send Red Task Failed Message
+			c->SendTaskFailed(ActiveTask.TaskID, 0, TaskType::Task);
+			// Remove the task from the client
+			c->CancelTask(0, TaskType::Task);
+			// It is a conscious decision to only fail one task per call to this method,
+			// otherwise the player will not see all the failed messages where multiple
+			// tasks fail at the same time.
+			return;
+		}
+	}
 
-	if(ActiveTaskCount == 0) return;
+	// TODO: shared tasks -- although that will probably be manager in world checking and telling zones to fail us
+
+	if (ActiveTaskCount == 0)
+		return;
 
 	// Check for tasks that have failed because they have not been completed in the specified time
 	//
-	for(int i=0; i<MAXACTIVEQUESTS; i++) {
+	for (int i = 0; i < MAXACTIVEQUESTS; i++) {
+		if (ActiveQuests[i].TaskID == TASKSLOTEMPTY)
+			continue;
 
-		if(ActiveQuests[i].TaskID==TASKSLOTEMPTY) continue;
-
-		if(TaskOutOfTime(i)) {
+		if (TaskOutOfTime(TaskType::Quest, i)) {
 			// Send Red Task Failed Message
-			c->SendTaskFailed(ActiveQuests[i].TaskID, i, TaskType::Quest); // TODO: fix
+			c->SendTaskFailed(ActiveQuests[i].TaskID, i, TaskType::Quest);
 			// Remove the task from the client
-			c->CancelTask(i, TaskType::Quest); // TODO: Fix
+			c->CancelTask(i, TaskType::Quest);
 			// It is a conscious decision to only fail one task per call to this method,
 			// otherwise the player will not see all the failed messages where multiple
 			// tasks fail at the same time.
 			break;
-
 		}
 	}
 
@@ -2310,12 +2338,11 @@ void ClientTaskState::TaskPeriodicChecks(Client *c) {
 	// This is done in this method because it gives an extra few seconds for the client screen to display
 	// the zone before we send the 'Task Activity Completed' message.
 	//
-	if(!CheckedTouchActivities) {
+	if (!CheckedTouchActivities) {
 		UpdateTasksOnTouch(c, zone->GetZoneID());
 		CheckedTouchActivities = true;
 	}
 }
-
 
 #if 0
 void Client::SendTaskComplete(int TaskIndex) {

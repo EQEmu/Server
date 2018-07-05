@@ -220,7 +220,7 @@ public:
 	bool UpdateTasksOnDeliver(Client *c, std::list<EQEmu::ItemInstance*>& Items, int Cash, int NPCTypeID);
 	void UpdateTasksOnTouch(Client *c, int ZoneID);
 	void ProcessTaskProximities(Client *c, float X, float Y, float Z);
-	bool TaskOutOfTime(int Index);
+	bool TaskOutOfTime(TaskType type, int Index);
 	void TaskPeriodicChecks(Client *c);
 	void SendTaskHistory(Client *c, int TaskIndex);
 	void RewardTask(Client *c, TaskInformation *Task);
