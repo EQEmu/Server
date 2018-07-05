@@ -402,7 +402,7 @@ mark_as_advanced(Protobuf_INCLUDE_DIR)
 find_program(Protobuf_PROTOC_EXECUTABLE
     NAMES protoc
     DOC "The Google Protocol Buffers Compiler"
-    PATHS
+    PATHS /usr/bin    
     ${Protobuf_SRC_ROOT_FOLDER}/vsprojects/${_PROTOBUF_ARCH_DIR}Release
     ${Protobuf_SRC_ROOT_FOLDER}/vsprojects/${_PROTOBUF_ARCH_DIR}Debug
 )
