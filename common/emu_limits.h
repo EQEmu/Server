@@ -28,74 +28,95 @@
 namespace EntityLimits
 {
 	namespace NPC {
-		enum : int { Invalid = -1, Null, Safety };
+		const int16 IINVALID = -1;
+		const int16 INULL = 0;
 
-		enum : bool { False = false, True = true };
+		namespace invtype {
+			const int16 TRADE_SIZE = 4;
 
-		const size_t InvTypeTradeSize = 4;
+		} // namespace invtype
 
 	} /*NPC*/
 
 	namespace NPCMerchant {
-		enum : int { Invalid = -1, Null, Safety };
+		const int16 IINVALID = -1;
+		const int16 INULL = 0;
 
-		enum : bool { False = false, True = true };
+		namespace invtype {
+			const int16 TRADE_SIZE = 4;
 
-		const size_t InvTypeTradeSize = 4;
+		} // namespace invtype
 
 	} /*NPCMerchant*/
 
 	namespace Merc {
-		enum : int { Invalid = -1, Null, Safety };
+		const int16 IINVALID = -1;
+		const int16 INULL = 0;
 
-		enum : bool { False = false, True = true };
+		namespace invtype {
+			const int16 TRADE_SIZE = 4;
 
-		const size_t InvTypeTradeSize = 4;
+		} // namespace invtype
 
 	} /*Merc*/
 
 	namespace Bot {
-		enum : int { Invalid = -1, Null, Safety };
+		const int16 IINVALID = -1;
+		const int16 INULL = 0;
 
-		enum : bool { False = false, True = true };
+		namespace invtype {
+			const int16 TRADE_SIZE = 8;
 
-		const size_t InvTypeTradeSize = 8;
+		} // namespace invtype
+
+		namespace invslot {
+			const uint64 POSSESSIONS_BITMASK = 0x00000000007FFFFF; // based on 34-slot count (RoF+)
+
+		} // namespace invslot
 
 	} /*Bot*/
 
 	namespace ClientPet {
-		enum : int { Invalid = -1, Null, Safety };
+		const int16 IINVALID = -1;
+		const int16 INULL = 0;
 
-		enum : bool { False = false, True = true };
+		namespace invtype {
+			const int16 TRADE_SIZE = 4;
 
-		const size_t InvTypeTradeSize = 4;
+		} // namespace invtype
 
 	} /*Pet*/
 
 	namespace NPCPet {
-		enum : int { Invalid = -1, Null, Safety };
+		const int16 IINVALID = -1;
+		const int16 INULL = 0;
 
-		enum : bool { False = false, True = true };
+		namespace invtype {
+			const int16 TRADE_SIZE = 4;
 
-		const size_t InvTypeTradeSize = 4;
+		} // namespace invtype
 
 	} /*Pet*/
 
 	namespace MercPet {
-		enum : int { Invalid = -1, Null, Safety };
+		const int16 IINVALID = -1;
+		const int16 INULL = 0;
 
-		enum : bool { False = false, True = true };
+		namespace invtype {
+			const int16 TRADE_SIZE = 4;
 
-		const size_t InvTypeTradeSize = 4;
+		} // namespace invtype
 
 	} /*Pet*/
 
 	namespace BotPet {
-		enum : int { Invalid = -1, Null, Safety };
+		const int16 IINVALID = -1;
+		const int16 INULL = 0;
 
-		enum : bool { False = false, True = true };
+		namespace invtype {
+			const int16 TRADE_SIZE = 4;
 
-		const size_t InvTypeTradeSize = 4;
+		} // namespace invtype
 
 	} /*Pet*/
 

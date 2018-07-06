@@ -275,7 +275,7 @@ float EQHtoFloat(int d)
 }
 
 // returns a swapped-bit value for use in client translator and inventory functions
-uint32 SwapBits21and22(uint32 mask)
+uint32 SwapBits21And22(uint32 mask)
 {
 	static const uint32 BIT21 = 1 << 21;
 	static const uint32 BIT22 = 1 << 22;

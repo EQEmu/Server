@@ -48,7 +48,7 @@ int Mob::GetBaseSkillDamage(EQEmu::skills::SkillType skill, Mob *target)
 			base++;
 		return base;
 	case EQEmu::skills::SkillFrenzy:
-		if (IsClient() && CastToClient()->GetInv().GetItem(EQEmu::inventory::slotPrimary)) {
+		if (IsClient() && CastToClient()->GetInv().GetItem(EQEmu::invslot::slotPrimary)) {
 			if (GetLevel() > 15)
 				base += GetLevel() - 15;
 			if (base > 23)
@@ -65,7 +65,7 @@ int Mob::GetBaseSkillDamage(EQEmu::skills::SkillType skill, Mob *target)
 		float skill_bonus = skill_level / 9.0f;
 		float ac_bonus = 0.0f;
 		if (IsClient()) {
-			auto inst = CastToClient()->GetInv().GetItem(EQEmu::inventory::slotFeet);
+			auto inst = CastToClient()->GetInv().GetItem(EQEmu::invslot::slotFeet);
 			if (inst)
 				ac_bonus = inst->GetItemArmorClass(true) / 25.0f;
 		}
@@ -78,7 +78,7 @@ int Mob::GetBaseSkillDamage(EQEmu::skills::SkillType skill, Mob *target)
 		float skill_bonus = skill_level / 10.0f;
 		float ac_bonus = 0.0f;
 		if (IsClient()) {
-			auto inst = CastToClient()->GetInv().GetItem(EQEmu::inventory::slotFeet);
+			auto inst = CastToClient()->GetInv().GetItem(EQEmu::invslot::slotFeet);
 			if (inst)
 				ac_bonus = inst->GetItemArmorClass(true) / 25.0f;
 		}
@@ -92,9 +92,9 @@ int Mob::GetBaseSkillDamage(EQEmu::skills::SkillType skill, Mob *target)
 		const EQEmu::ItemInstance *inst = nullptr;
 		if (IsClient()) {
 			if (HasShieldEquiped())
-				inst = CastToClient()->GetInv().GetItem(EQEmu::inventory::slotSecondary);
+				inst = CastToClient()->GetInv().GetItem(EQEmu::invslot::slotSecondary);
 			else if (HasTwoHanderEquipped())
-				inst = CastToClient()->GetInv().GetItem(EQEmu::inventory::slotPrimary);
+				inst = CastToClient()->GetInv().GetItem(EQEmu::invslot::slotPrimary);
 		}
 		if (inst)
 			ac_bonus = inst->GetItemArmorClass(true) / 25.0f;
@@ -109,7 +109,7 @@ int Mob::GetBaseSkillDamage(EQEmu::skills::SkillType skill, Mob *target)
 		base = 3; // There seems to be a base 3 for NPCs or some how BS w/o weapon?
 		// until we get a better inv system for NPCs they get nerfed!
 		if (IsClient()) {
-			auto *inst = CastToClient()->GetInv().GetItem(EQEmu::inventory::slotPrimary);
+			auto *inst = CastToClient()->GetInv().GetItem(EQEmu::invslot::slotPrimary);
 			if (inst && inst->GetItem() && inst->GetItem()->ItemType == EQEmu::item::ItemType1HPiercing) {
 				base = inst->GetItemBackstabDamage(true);
 				if (!inst->GetItemBackstabDamage())
@@ -168,7 +168,7 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQEmu::skills::SkillType skill, int32 
 
 	if (skill == EQEmu::skills::SkillBash) {
 		if (IsClient()) {
-			EQEmu::ItemInstance *item = CastToClient()->GetInv().GetItem(EQEmu::inventory::slotSecondary);
+			EQEmu::ItemInstance *item = CastToClient()->GetInv().GetItem(EQEmu::invslot::slotSecondary);
 			if (item) {
 				if (item->GetItem()->ItemType == EQEmu::item::ItemTypeShield) {
 					hate += item->GetItem()->AC;
@@ -185,10 +185,10 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQEmu::skills::SkillType skill, int32 
 	my_hit.offense = offense(my_hit.skill);
 	my_hit.tohit = GetTotalToHit(my_hit.skill, 0);
 
-	my_hit.hand = EQEmu::inventory::slotPrimary; // Avoid checks hand for throwing/archery exclusion, primary should
+	my_hit.hand = EQEmu::invslot::slotPrimary; // Avoid checks hand for throwing/archery exclusion, primary should
 						  // work for most
 	if (skill == EQEmu::skills::SkillThrowing || skill == EQEmu::skills::SkillArchery)
-		my_hit.hand = EQEmu::inventory::slotRange;
+		my_hit.hand = EQEmu::invslot::slotRange;
 
 	DoAttack(who, my_hit);
 
@@ -259,7 +259,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 	// These two are not subject to the combat ability timer, as they
 	// allready do their checking in conjunction with the attack timer
 	// throwing weapons
-	if (ca_atk->m_atk == EQEmu::inventory::slotRange) {
+	if (ca_atk->m_atk == EQEmu::invslot::slotRange) {
 		if (ca_atk->m_skill == EQEmu::skills::SkillThrowing) {
 			SetAttackTimer();
 			ThrowingAttack(GetTarget());
@@ -309,8 +309,8 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 			DoAnim(animTailRake, 0, false);
 
 			int32 ht = 0;
-			if (GetWeaponDamage(GetTarget(), GetInv().GetItem(EQEmu::inventory::slotSecondary)) <= 0 &&
-			    GetWeaponDamage(GetTarget(), GetInv().GetItem(EQEmu::inventory::slotShoulders)) <= 0)
+			if (GetWeaponDamage(GetTarget(), GetInv().GetItem(EQEmu::invslot::slotSecondary)) <= 0 &&
+			    GetWeaponDamage(GetTarget(), GetInv().GetItem(EQEmu::invslot::slotShoulders)) <= 0)
 				dmg = -5;
 			else
 				ht = dmg = GetBaseSkillDamage(EQEmu::skills::SkillBash, GetTarget());
@@ -366,7 +366,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 			DoAnim(animKick, 0, false);
 
 			int32 ht = 0;
-			if (GetWeaponDamage(GetTarget(), GetInv().GetItem(EQEmu::inventory::slotFeet)) <= 0)
+			if (GetWeaponDamage(GetTarget(), GetInv().GetItem(EQEmu::invslot::slotFeet)) <= 0)
 				dmg = -5;
 			else
 				ht = dmg = GetBaseSkillDamage(EQEmu::skills::SkillKick, GetTarget());
@@ -445,7 +445,7 @@ int Mob::MonkSpecialAttack(Mob *other, uint8 unchecked_type)
 	int32 min_dmg = 0;
 	int reuse = 0;
 	EQEmu::skills::SkillType skill_type; // to avoid casting... even though it "would work"
-	uint8 itemslot = EQEmu::inventory::slotFeet;
+	uint8 itemslot = EQEmu::invslot::slotFeet;
 	if (IsNPC()) {
 		auto *npc = CastToNPC();
 		min_dmg = npc->GetMinDamage();
@@ -462,21 +462,21 @@ int Mob::MonkSpecialAttack(Mob *other, uint8 unchecked_type)
 	case EQEmu::skills::SkillDragonPunch:
 		skill_type = EQEmu::skills::SkillDragonPunch;
 		max_dmg = GetBaseSkillDamage(skill_type);
-		itemslot = EQEmu::inventory::slotHands;
+		itemslot = EQEmu::invslot::slotHands;
 		DoAnim(animTailRake, 0, false);
 		reuse = TailRakeReuseTime;
 		break;
 	case EQEmu::skills::SkillEagleStrike:
 		skill_type = EQEmu::skills::SkillEagleStrike;
 		max_dmg = GetBaseSkillDamage(skill_type);
-		itemslot = EQEmu::inventory::slotHands;
+		itemslot = EQEmu::invslot::slotHands;
 		DoAnim(animEagleStrike, 0, false);
 		reuse = EagleStrikeReuseTime;
 		break;
 	case EQEmu::skills::SkillTigerClaw:
 		skill_type = EQEmu::skills::SkillTigerClaw;
 		max_dmg = GetBaseSkillDamage(skill_type);
-		itemslot = EQEmu::inventory::slotHands;
+		itemslot = EQEmu::invslot::slotHands;
 		DoAnim(animTigerClaw, 0, false);
 		reuse = TigerClawReuseTime;
 		break;
@@ -528,7 +528,7 @@ void Mob::TryBackstab(Mob *other, int ReuseTime) {
 
 	//make sure we have a proper weapon if we are a client.
 	if(IsClient()) {
-		const EQEmu::ItemInstance *wpn = CastToClient()->GetInv().GetItem(EQEmu::inventory::slotPrimary);
+		const EQEmu::ItemInstance *wpn = CastToClient()->GetInv().GetItem(EQEmu::invslot::slotPrimary);
 		if (!wpn || (wpn->GetItem()->ItemType != EQEmu::item::ItemType1HPiercing)){
 			Message_StringID(13, BACKSTAB_WEAPON);
 			return;
@@ -583,7 +583,7 @@ void Mob::TryBackstab(Mob *other, int ReuseTime) {
 		m_specialattacks = eSpecialAttacks::None;
 	}
 	else { //We do a single regular attack if we attack from the front without chaotic stab
-		Attack(other, EQEmu::inventory::slotPrimary);
+		Attack(other, EQEmu::invslot::slotPrimary);
 	}
 }
 
@@ -597,7 +597,7 @@ void Mob::RogueBackstab(Mob* other, bool min_damage, int ReuseTime)
 
 	// make sure we can hit (bane, magical, etc)
 	if (IsClient()) {
-		const EQEmu::ItemInstance *wpn = CastToClient()->GetInv().GetItem(EQEmu::inventory::slotPrimary);
+		const EQEmu::ItemInstance *wpn = CastToClient()->GetInv().GetItem(EQEmu::invslot::slotPrimary);
 		if (!GetWeaponDamage(other, wpn))
 			return;
 	} else if (!GetWeaponDamage(other, (const EQEmu::ItemData*)nullptr)){
@@ -616,7 +616,7 @@ void Mob::RogueAssassinate(Mob* other)
 {
 	//can you dodge, parry, etc.. an assassinate??
 	//if so, use DoSpecialAttackDamage(other, BACKSTAB, 32000); instead
-	if (GetWeaponDamage(other, IsClient() ? CastToClient()->GetInv().GetItem(EQEmu::inventory::slotPrimary) : (const EQEmu::ItemInstance*)nullptr) > 0){
+	if (GetWeaponDamage(other, IsClient() ? CastToClient()->GetInv().GetItem(EQEmu::invslot::slotPrimary) : (const EQEmu::ItemInstance*)nullptr) > 0){
 		other->Damage(this, 32000, SPELL_UNKNOWN, EQEmu::skills::SkillBackstab);
 	}else{
 		other->Damage(this, -5, SPELL_UNKNOWN, EQEmu::skills::SkillBackstab);
@@ -636,20 +636,20 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 		//Message(0, "Error: Timer not up. Attack %d, ranged %d", attack_timer.GetRemainingTime(), ranged_timer.GetRemainingTime());
 		return;
 	}
-	const EQEmu::ItemInstance* RangeWeapon = m_inv[EQEmu::inventory::slotRange];
+	const EQEmu::ItemInstance* RangeWeapon = m_inv[EQEmu::invslot::slotRange];
 
 	//locate ammo
-	int ammo_slot = EQEmu::inventory::slotAmmo;
-	const EQEmu::ItemInstance* Ammo = m_inv[EQEmu::inventory::slotAmmo];
+	int ammo_slot = EQEmu::invslot::slotAmmo;
+	const EQEmu::ItemInstance* Ammo = m_inv[EQEmu::invslot::slotAmmo];
 
 	if (!RangeWeapon || !RangeWeapon->IsClassCommon()) {
-		Log(Logs::Detail, Logs::Combat, "Ranged attack canceled. Missing or invalid ranged weapon (%d) in slot %d", GetItemIDAt(EQEmu::inventory::slotRange), EQEmu::inventory::slotRange);
-		Message(0, "Error: Rangeweapon: GetItem(%i)==0, you have no bow!", GetItemIDAt(EQEmu::inventory::slotRange));
+		Log(Logs::Detail, Logs::Combat, "Ranged attack canceled. Missing or invalid ranged weapon (%d) in slot %d", GetItemIDAt(EQEmu::invslot::slotRange), EQEmu::invslot::slotRange);
+		Message(0, "Error: Rangeweapon: GetItem(%i)==0, you have no bow!", GetItemIDAt(EQEmu::invslot::slotRange));
 		return;
 	}
 	if (!Ammo || !Ammo->IsClassCommon()) {
-		Log(Logs::Detail, Logs::Combat, "Ranged attack canceled. Missing or invalid ammo item (%d) in slot %d", GetItemIDAt(EQEmu::inventory::slotAmmo), EQEmu::inventory::slotAmmo);
-		Message(0, "Error: Ammo: GetItem(%i)==0, you have no ammo!", GetItemIDAt(EQEmu::inventory::slotAmmo));
+		Log(Logs::Detail, Logs::Combat, "Ranged attack canceled. Missing or invalid ammo item (%d) in slot %d", GetItemIDAt(EQEmu::invslot::slotAmmo), EQEmu::invslot::slotAmmo);
+		Message(0, "Error: Ammo: GetItem(%i)==0, you have no ammo!", GetItemIDAt(EQEmu::invslot::slotAmmo));
 		return;
 	}
 
@@ -674,7 +674,7 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 		//first look for quivers
 		int r;
 		bool found = false;
-		for (r = EQEmu::legacy::GENERAL_BEGIN; r <= EQEmu::legacy::GENERAL_END; r++) {
+		for (r = EQEmu::invslot::GENERAL_BEGIN; r <= EQEmu::invslot::GENERAL_END; r++) {
 			const EQEmu::ItemInstance *pi = m_inv[r];
 			if (pi == nullptr || !pi->IsClassBag())
 				continue;
@@ -791,7 +791,7 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQEmu::ItemInstance *RangeWeapon,
 
 			if (!RangeWeapon && !Ammo && range_id && ammo_id) {
 				if (IsClient()) {
-					_RangeWeapon = CastToClient()->m_inv[EQEmu::inventory::slotRange];
+					_RangeWeapon = CastToClient()->m_inv[EQEmu::invslot::slotRange];
 					if (_RangeWeapon && _RangeWeapon->GetItem() &&
 					    _RangeWeapon->GetItem()->ID == range_id)
 						RangeWeapon = _RangeWeapon;
@@ -859,7 +859,7 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQEmu::ItemInstance *RangeWeapon,
 		my_hit.skill = EQEmu::skills::SkillArchery;
 		my_hit.offense = offense(my_hit.skill);
 		my_hit.tohit = GetTotalToHit(my_hit.skill, chance_mod);
-		my_hit.hand = EQEmu::inventory::slotRange;
+		my_hit.hand = EQEmu::invslot::slotRange;
 
 		DoAttack(other, my_hit);
 		TotalDmg = my_hit.damage_done;
@@ -877,7 +877,7 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQEmu::ItemInstance *RangeWeapon,
 		if (ReuseTime)
 			TrySkillProc(other, EQEmu::skills::SkillArchery, ReuseTime);
 		else
-			TrySkillProc(other, EQEmu::skills::SkillArchery, 0, true, EQEmu::inventory::slotRange);
+			TrySkillProc(other, EQEmu::skills::SkillArchery, 0, true, EQEmu::invslot::slotRange);
 	}
 	// end of old fuck
 
@@ -886,20 +886,20 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQEmu::ItemInstance *RangeWeapon,
 
 	// Weapon Proc
 	if (RangeWeapon && other && !other->HasDied())
-		TryWeaponProc(RangeWeapon, other, EQEmu::inventory::slotRange);
+		TryWeaponProc(RangeWeapon, other, EQEmu::invslot::slotRange);
 
 	// Ammo Proc
 	if (ammo_lost)
-		TryWeaponProc(nullptr, ammo_lost, other, EQEmu::inventory::slotRange);
+		TryWeaponProc(nullptr, ammo_lost, other, EQEmu::invslot::slotRange);
 	else if (Ammo && other && !other->HasDied())
-		TryWeaponProc(Ammo, other, EQEmu::inventory::slotRange);
+		TryWeaponProc(Ammo, other, EQEmu::invslot::slotRange);
 
 	// Skill Proc
 	if (HasSkillProcs() && other && !other->HasDied()) {
 		if (ReuseTime)
 			TrySkillProc(other, EQEmu::skills::SkillArchery, ReuseTime);
 		else
-			TrySkillProc(other, EQEmu::skills::SkillArchery, 0, false, EQEmu::inventory::slotRange);
+			TrySkillProc(other, EQEmu::skills::SkillArchery, 0, false, EQEmu::invslot::slotRange);
 	}
 }
 
@@ -1190,7 +1190,7 @@ void NPC::DoRangedAttackDmg(Mob* other, bool Launch, int16 damage_mod, int16 cha
 	my_hit.skill = skill;
 	my_hit.offense = offense(my_hit.skill);
 	my_hit.tohit = GetTotalToHit(my_hit.skill, chance_mod);
-	my_hit.hand = EQEmu::inventory::slotRange;
+	my_hit.hand = EQEmu::invslot::slotRange;
 
 	DoAttack(other, my_hit);
 
@@ -1206,14 +1206,14 @@ void NPC::DoRangedAttackDmg(Mob* other, bool Launch, int16 damage_mod, int16 cha
 	other->Damage(this, TotalDmg, SPELL_UNKNOWN, skillInUse);
 
 	if (TotalDmg > 0 && HasSkillProcSuccess() && !other->HasDied())
-		TrySkillProc(other, skillInUse, 0, true, EQEmu::inventory::slotRange);
+		TrySkillProc(other, skillInUse, 0, true, EQEmu::invslot::slotRange);
 
 	//try proc on hits and misses
 	if(other && !other->HasDied())
-		TrySpellProc(nullptr, (const EQEmu::ItemData*)nullptr, other, EQEmu::inventory::slotRange);
+		TrySpellProc(nullptr, (const EQEmu::ItemData*)nullptr, other, EQEmu::invslot::slotRange);
 
 	if (HasSkillProcs() && other && !other->HasDied())
-		TrySkillProc(other, skillInUse, 0, false, EQEmu::inventory::slotRange);
+		TrySkillProc(other, skillInUse, 0, false, EQEmu::invslot::slotRange);
 }
 
 void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
@@ -1229,19 +1229,19 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 		return;
 	}
 
-	int ammo_slot = EQEmu::inventory::slotRange;
-	const EQEmu::ItemInstance* RangeWeapon = m_inv[EQEmu::inventory::slotRange];
+	int ammo_slot = EQEmu::invslot::slotRange;
+	const EQEmu::ItemInstance* RangeWeapon = m_inv[EQEmu::invslot::slotRange];
 
 	if (!RangeWeapon || !RangeWeapon->IsClassCommon()) {
-		Log(Logs::Detail, Logs::Combat, "Ranged attack canceled. Missing or invalid ranged weapon (%d) in slot %d", GetItemIDAt(EQEmu::inventory::slotRange), EQEmu::inventory::slotRange);
-		Message(0, "Error: Rangeweapon: GetItem(%i)==0, you have nothing to throw!", GetItemIDAt(EQEmu::inventory::slotRange));
+		Log(Logs::Detail, Logs::Combat, "Ranged attack canceled. Missing or invalid ranged weapon (%d) in slot %d", GetItemIDAt(EQEmu::invslot::slotRange), EQEmu::invslot::slotRange);
+		Message(0, "Error: Rangeweapon: GetItem(%i)==0, you have nothing to throw!", GetItemIDAt(EQEmu::invslot::slotRange));
 		return;
 	}
 
 	const EQEmu::ItemData* item = RangeWeapon->GetItem();
 	if (item->ItemType != EQEmu::item::ItemTypeLargeThrowing && item->ItemType != EQEmu::item::ItemTypeSmallThrowing) {
 		Log(Logs::Detail, Logs::Combat, "Ranged attack canceled. Ranged item %d is not a throwing weapon. type %d.", item->ItemType);
-		Message(0, "Error: Rangeweapon: GetItem(%i)==0, you have nothing useful to throw!", GetItemIDAt(EQEmu::inventory::slotRange));
+		Message(0, "Error: Rangeweapon: GetItem(%i)==0, you have nothing useful to throw!", GetItemIDAt(EQEmu::invslot::slotRange));
 		return;
 	}
 
@@ -1249,11 +1249,11 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 
 	if(RangeWeapon->GetCharges() == 1) {
 		//first check ammo
-		const EQEmu::ItemInstance* AmmoItem = m_inv[EQEmu::inventory::slotAmmo];
+		const EQEmu::ItemInstance* AmmoItem = m_inv[EQEmu::invslot::slotAmmo];
 		if(AmmoItem != nullptr && AmmoItem->GetID() == RangeWeapon->GetID()) {
 			//more in the ammo slot, use it
 			RangeWeapon = AmmoItem;
-			ammo_slot = EQEmu::inventory::slotAmmo;
+			ammo_slot = EQEmu::invslot::slotAmmo;
 			Log(Logs::Detail, Logs::Combat, "Using ammo from ammo slot, stack at slot %d. %d in stack.", ammo_slot, RangeWeapon->GetCharges());
 		} else {
 			//look through our inventory for more
@@ -1371,7 +1371,7 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQEmu::ItemInstance *RangeWeapon
 		my_hit.skill = EQEmu::skills::SkillThrowing;
 		my_hit.offense = offense(my_hit.skill);
 		my_hit.tohit = GetTotalToHit(my_hit.skill, chance_mod);
-		my_hit.hand = EQEmu::inventory::slotRange;
+		my_hit.hand = EQEmu::invslot::slotRange;
 
 		DoAttack(other, my_hit);
 		TotalDmg = my_hit.damage_done;
@@ -1390,7 +1390,7 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQEmu::ItemInstance *RangeWeapon
 		if (ReuseTime)
 			TrySkillProc(other, EQEmu::skills::SkillThrowing, ReuseTime);
 		else
-			TrySkillProc(other, EQEmu::skills::SkillThrowing, 0, true, EQEmu::inventory::slotRange);
+			TrySkillProc(other, EQEmu::skills::SkillThrowing, 0, true, EQEmu::invslot::slotRange);
 	}
 	// end old shit
 
@@ -1399,15 +1399,15 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQEmu::ItemInstance *RangeWeapon
 
 	// Throwing item Proc
 	if (ammo_lost)
-		TryWeaponProc(nullptr, ammo_lost, other, EQEmu::inventory::slotRange);
+		TryWeaponProc(nullptr, ammo_lost, other, EQEmu::invslot::slotRange);
 	else if (RangeWeapon && other && !other->HasDied())
-		TryWeaponProc(RangeWeapon, other, EQEmu::inventory::slotRange);
+		TryWeaponProc(RangeWeapon, other, EQEmu::invslot::slotRange);
 
 	if (HasSkillProcs() && other && !other->HasDied()) {
 		if (ReuseTime)
 			TrySkillProc(other, EQEmu::skills::SkillThrowing, ReuseTime);
 		else
-			TrySkillProc(other, EQEmu::skills::SkillThrowing, 0, false, EQEmu::inventory::slotRange);
+			TrySkillProc(other, EQEmu::skills::SkillThrowing, 0, false, EQEmu::invslot::slotRange);
 	}
 }
 
@@ -1766,7 +1766,7 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 		if (ca_target!=this) {
 			DoAnim(animTailRake, 0, false);
 
-			if (GetWeaponDamage(ca_target, GetInv().GetItem(EQEmu::inventory::slotSecondary)) <= 0 && GetWeaponDamage(ca_target, GetInv().GetItem(EQEmu::inventory::slotShoulders)) <= 0)
+			if (GetWeaponDamage(ca_target, GetInv().GetItem(EQEmu::invslot::slotSecondary)) <= 0 && GetWeaponDamage(ca_target, GetInv().GetItem(EQEmu::invslot::slotShoulders)) <= 0)
 				dmg = DMG_INVULNERABLE;
 
 			ReuseTime = (BashReuseTime - 1) / HasteMod;
@@ -1812,7 +1812,7 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 		if(ca_target!=this){
 			DoAnim(animKick, 0, false);
 
-			if (GetWeaponDamage(ca_target, GetInv().GetItem(EQEmu::inventory::slotFeet)) <= 0)
+			if (GetWeaponDamage(ca_target, GetInv().GetItem(EQEmu::invslot::slotFeet)) <= 0)
 				dmg = DMG_INVULNERABLE;
 
 			ReuseTime = KickReuseTime-1;
@@ -2111,7 +2111,7 @@ void Mob::DoMeleeSkillAttackDmg(Mob *other, uint16 weapon_damage, EQEmu::skills:
 		if (skillinuse == EQEmu::skills::SkillBash) {
 			if (IsClient()) {
 				EQEmu::ItemInstance *item =
-				    CastToClient()->GetInv().GetItem(EQEmu::inventory::slotSecondary);
+				    CastToClient()->GetInv().GetItem(EQEmu::invslot::slotSecondary);
 				if (item) {
 					if (item->GetItem()->ItemType == EQEmu::item::ItemTypeShield) {
 						hate += item->GetItem()->AC;
@@ -2131,7 +2131,7 @@ void Mob::DoMeleeSkillAttackDmg(Mob *other, uint16 weapon_damage, EQEmu::skills:
 		my_hit.offense = offense(my_hit.skill);
 		my_hit.tohit = GetTotalToHit(my_hit.skill, chance_mod);
 		// slot range exclude ripe etc ...
-		my_hit.hand = CanRiposte ? EQEmu::inventory::slotRange : EQEmu::inventory::slotPrimary;
+		my_hit.hand = CanRiposte ? EQEmu::invslot::slotRange : EQEmu::invslot::slotPrimary;
 
 		if (IsNPC())
 			my_hit.min_damage = CastToNPC()->GetMinDamage();

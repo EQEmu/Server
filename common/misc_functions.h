@@ -69,7 +69,7 @@ int FloatToEQSpeedRun(float d);
 // brings heading back into EQ angles range
 float FixHeading(float in);
 
-uint32 SwapBits21and22(uint32 mask);
+uint32 SwapBits21And22(uint32 mask);
 uint32 Catch22(uint32 mask);
 
 // macro to catch fp errors (provided by noudness)

@@ -99,7 +99,7 @@ void Trade::AddEntity(uint16 trade_slot_id, uint32 stack_size) {
 
 	// Item always goes into trade bucket from cursor
 	Client* client = owner->CastToClient();
-	EQEmu::ItemInstance* inst = client->GetInv().GetItem(EQEmu::inventory::slotCursor);
+	EQEmu::ItemInstance* inst = client->GetInv().GetItem(EQEmu::invslot::slotCursor);
 
 	if (!inst) {
 		client->Message(13, "Error: Could not find item on your cursor!");
@@ -132,7 +132,7 @@ void Trade::AddEntity(uint16 trade_slot_id, uint32 stack_size) {
 		if (_stack_size > 0)
 			inst->SetCharges(_stack_size);
 		else
-			client->DeleteItemInInventory(EQEmu::inventory::slotCursor);
+			client->DeleteItemInInventory(EQEmu::invslot::slotCursor);
 
 		SendItemData(inst2, trade_slot_id);
 	}
@@ -147,7 +147,7 @@ void Trade::AddEntity(uint16 trade_slot_id, uint32 stack_size) {
 		Log(Logs::Detail, Logs::Trading, "%s added item '%s' to trade slot %i", owner->GetName(), inst->GetItem()->Name, trade_slot_id);
 
 		client->PutItemInInventory(trade_slot_id, *inst);
-		client->DeleteItemInInventory(EQEmu::inventory::slotCursor);
+		client->DeleteItemInInventory(EQEmu::invslot::slotCursor);
 	}
 }
 
@@ -172,13 +172,13 @@ void Trade::SendItemData(const EQEmu::ItemInstance* inst, int16 dest_slot_id)
 	Client* with = mob->CastToClient();
 	Client* trader = owner->CastToClient();
 	if (with && with->IsClient()) {
-		with->SendItemPacket(dest_slot_id - EQEmu::legacy::TRADE_BEGIN, inst, ItemPacketTradeView);
+		with->SendItemPacket(dest_slot_id - EQEmu::invslot::TRADE_BEGIN, inst, ItemPacketTradeView);
 		if (inst->GetItem()->ItemClass == 1) {
-			for (uint16 i = EQEmu::inventory::containerBegin; i < EQEmu::inventory::ContainerCount; i++) {
+			for (uint16 i = EQEmu::invbag::SLOT_BEGIN; i <= EQEmu::invbag::SLOT_END; i++) {
 				uint16 bagslot_id = EQEmu::InventoryProfile::CalcSlotId(dest_slot_id, i);
 				const EQEmu::ItemInstance* bagitem = trader->GetInv().GetItem(bagslot_id);
 				if (bagitem) {
-					with->SendItemPacket(bagslot_id - EQEmu::legacy::TRADE_BEGIN, bagitem, ItemPacketTradeView);
+					with->SendItemPacket(bagslot_id - EQEmu::invslot::TRADE_BEGIN, bagitem, ItemPacketTradeView);
 				}
 			}
 		}
@@ -200,7 +200,7 @@ void Trade::LogTrade()
 	uint8 item_count = 0;
 
 	if (zone->tradevar != 0) {
-		for (uint16 i = EQEmu::legacy::TRADE_BEGIN; i <= EQEmu::legacy::TRADE_END; i++) {
+		for (uint16 i = EQEmu::invslot::TRADE_BEGIN; i <= EQEmu::invslot::TRADE_END; i++) {
 			if (trader->GetInv().GetItem(i))
 				item_count++;
 		}
@@ -252,7 +252,7 @@ void Trade::LogTrade()
 			if (item_count > 0) {
 				strcat(logtext, "items {");
 
-				for (uint16 i = EQEmu::legacy::TRADE_BEGIN; i <= EQEmu::legacy::TRADE_END; i++) {
+				for (uint16 i = EQEmu::invslot::TRADE_BEGIN; i <= EQEmu::invslot::TRADE_END; i++) {
 					const EQEmu::ItemInstance* inst = trader->GetInv().GetItem(i);
 
 					if (!comma)
@@ -268,7 +268,7 @@ void Trade::LogTrade()
 						strcat(logtext, item_num);
 
 						if (inst->IsClassBag()) {
-							for (uint8 j = EQEmu::inventory::containerBegin; j < EQEmu::inventory::ContainerCount; j++) {
+							for (uint8 j = EQEmu::invbag::SLOT_BEGIN; j <= EQEmu::invbag::SLOT_END; j++) {
 								inst = trader->GetInv().GetItem(i, j);
 								if (inst) {
 									strcat(logtext, ",");
@@ -304,7 +304,7 @@ void Trade::DumpTrade()
 		return;
 
 	Client* trader = owner->CastToClient();
-	for (uint16 i = EQEmu::legacy::TRADE_BEGIN; i <= EQEmu::legacy::TRADE_END; i++) {
+	for (uint16 i = EQEmu::invslot::TRADE_BEGIN; i <= EQEmu::invslot::TRADE_END; i++) {
 		const EQEmu::ItemInstance* inst = trader->GetInv().GetItem(i);
 
 		if (inst) {
@@ -313,7 +313,7 @@ void Trade::DumpTrade()
 				i, ((inst->IsClassBag()) ? "True" : "False"));
 
 			if (inst->IsClassBag()) {
-				for (uint8 j = EQEmu::inventory::containerBegin; j < EQEmu::inventory::ContainerCount; j++) {
+				for (uint8 j = EQEmu::invbag::SLOT_BEGIN; j <= EQEmu::invbag::SLOT_END; j++) {
 					inst = trader->GetInv().GetItem(i, j);
 					if (inst) {
 						Log(Logs::Detail, Logs::Trading, "\tBagItem %i (Charges=%i, Slot=%i)",
@@ -333,7 +333,7 @@ void Client::ResetTrade() {
 	AddMoneyToPP(trade->cp, trade->sp, trade->gp, trade->pp, true);
 
 	// step 1: process bags
-	for (int16 trade_slot = EQEmu::legacy::TRADE_BEGIN; trade_slot <= EQEmu::legacy::TRADE_END; ++trade_slot) {
+	for (int16 trade_slot = EQEmu::invslot::TRADE_BEGIN; trade_slot <= EQEmu::invslot::TRADE_END; ++trade_slot) {
 		const EQEmu::ItemInstance* inst = m_inv[trade_slot];
 
 		if (inst && inst->IsClassBag()) {
@@ -352,7 +352,7 @@ void Client::ResetTrade() {
 	}
 
 	// step 2a: process stackables
-	for (int16 trade_slot = EQEmu::legacy::TRADE_BEGIN; trade_slot <= EQEmu::legacy::TRADE_END; ++trade_slot) {
+	for (int16 trade_slot = EQEmu::invslot::TRADE_BEGIN; trade_slot <= EQEmu::invslot::TRADE_END; ++trade_slot) {
 		EQEmu::ItemInstance* inst = GetInv().GetItem(trade_slot);
 
 		if (inst && inst->IsStackable()) {
@@ -360,7 +360,7 @@ void Client::ResetTrade() {
 				// there's no built-in safety check against an infinite loop..but, it should break on one of the conditional checks
 				int16 free_slot = m_inv.FindFreeSlotForTradeItem(inst);
 
-				if ((free_slot == EQEmu::inventory::slotCursor) || (free_slot == INVALID_INDEX))
+				if ((free_slot == EQEmu::invslot::slotCursor) || (free_slot == INVALID_INDEX))
 					break;
 
 				EQEmu::ItemInstance* partial_inst = GetInv().GetItem(free_slot);
@@ -399,11 +399,11 @@ void Client::ResetTrade() {
 
 	// step 2b: adjust trade stack bias
 	// (if any partial stacks exist before the final stack, FindFreeSlotForTradeItem() will return that slot in step 3 and an overwrite will occur)
-	for (int16 trade_slot = EQEmu::legacy::TRADE_END; trade_slot >= EQEmu::legacy::TRADE_BEGIN; --trade_slot) {
+	for (int16 trade_slot = EQEmu::invslot::TRADE_END; trade_slot >= EQEmu::invslot::TRADE_BEGIN; --trade_slot) {
 		EQEmu::ItemInstance* inst = GetInv().GetItem(trade_slot);
 
 		if (inst && inst->IsStackable()) {
-			for (int16 bias_slot = EQEmu::legacy::TRADE_BEGIN; bias_slot <= EQEmu::legacy::TRADE_END; ++bias_slot) {
+			for (int16 bias_slot = EQEmu::invslot::TRADE_BEGIN; bias_slot <= EQEmu::invslot::TRADE_END; ++bias_slot) {
 				if (bias_slot >= trade_slot)
 					break;
 
@@ -433,7 +433,7 @@ void Client::ResetTrade() {
 	}
 
 	// step 3: process everything else
-	for (int16 trade_slot = EQEmu::legacy::TRADE_BEGIN; trade_slot <= EQEmu::legacy::TRADE_END; ++trade_slot) {
+	for (int16 trade_slot = EQEmu::invslot::TRADE_BEGIN; trade_slot <= EQEmu::invslot::TRADE_END; ++trade_slot) {
 		const EQEmu::ItemInstance* inst = m_inv[trade_slot];
 
 		if (inst) {
@@ -488,7 +488,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 			}
 
 			// step 1: process bags
-			for (int16 trade_slot = EQEmu::legacy::TRADE_BEGIN; trade_slot <= EQEmu::legacy::TRADE_END; ++trade_slot) {
+			for (int16 trade_slot = EQEmu::invslot::TRADE_BEGIN; trade_slot <= EQEmu::invslot::TRADE_END; ++trade_slot) {
 				const EQEmu::ItemInstance* inst = m_inv[trade_slot];
 
 				if (inst && inst->IsClassBag()) {
@@ -523,7 +523,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 									else
 										qs_audit->char1_count += detail->charges;
 
-									for (uint8 sub_slot = EQEmu::inventory::containerBegin; (sub_slot < EQEmu::inventory::ContainerCount); ++sub_slot) { // this is to catch ALL items
+									for (uint8 sub_slot = EQEmu::invbag::SLOT_BEGIN; (sub_slot <= EQEmu::invbag::SLOT_END); ++sub_slot) { // this is to catch ALL items
 										const EQEmu::ItemInstance* bag_inst = inst->GetItem(sub_slot);
 
 										if (bag_inst) {
@@ -571,7 +571,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 			}
 
 			// step 2a: process stackables
-			for (int16 trade_slot = EQEmu::legacy::TRADE_BEGIN; trade_slot <= EQEmu::legacy::TRADE_END; ++trade_slot) {
+			for (int16 trade_slot = EQEmu::invslot::TRADE_BEGIN; trade_slot <= EQEmu::invslot::TRADE_END; ++trade_slot) {
 				EQEmu::ItemInstance* inst = GetInv().GetItem(trade_slot);
 
 				if (inst && inst->IsStackable()) {
@@ -579,7 +579,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 						// there's no built-in safety check against an infinite loop..but, it should break on one of the conditional checks
 						int16 partial_slot = other->GetInv().FindFreeSlotForTradeItem(inst);
 
-						if ((partial_slot == EQEmu::inventory::slotCursor) || (partial_slot == INVALID_INDEX))
+						if ((partial_slot == EQEmu::invslot::slotCursor) || (partial_slot == INVALID_INDEX))
 							break;
 
 						EQEmu::ItemInstance* partial_inst = other->GetInv().GetItem(partial_slot);
@@ -653,11 +653,11 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 
 			// step 2b: adjust trade stack bias
 			// (if any partial stacks exist before the final stack, FindFreeSlotForTradeItem() will return that slot in step 3 and an overwrite will occur)
-			for (int16 trade_slot = EQEmu::legacy::TRADE_END; trade_slot >= EQEmu::legacy::TRADE_BEGIN; --trade_slot) {
+			for (int16 trade_slot = EQEmu::invslot::TRADE_END; trade_slot >= EQEmu::invslot::TRADE_BEGIN; --trade_slot) {
 				EQEmu::ItemInstance* inst = GetInv().GetItem(trade_slot);
 
 				if (inst && inst->IsStackable()) {
-					for (int16 bias_slot = EQEmu::legacy::TRADE_BEGIN; bias_slot <= EQEmu::legacy::TRADE_END; ++bias_slot) {
+					for (int16 bias_slot = EQEmu::invslot::TRADE_BEGIN; bias_slot <= EQEmu::invslot::TRADE_END; ++bias_slot) {
 						if (bias_slot >= trade_slot)
 							break;
 
@@ -706,7 +706,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 			}
 
 			// step 3: process everything else
-			for (int16 trade_slot = EQEmu::legacy::TRADE_BEGIN; trade_slot <= EQEmu::legacy::TRADE_END; ++trade_slot) {
+			for (int16 trade_slot = EQEmu::invslot::TRADE_BEGIN; trade_slot <= EQEmu::invslot::TRADE_END; ++trade_slot) {
 				const EQEmu::ItemInstance* inst = m_inv[trade_slot];
 
 				if (inst) {
@@ -742,7 +742,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 										qs_audit->char1_count += detail->charges;
 
 									// 'step 3' should never really see containers..but, just in case...
-									for (uint8 sub_slot = EQEmu::inventory::containerBegin; (sub_slot < EQEmu::inventory::ContainerCount); ++sub_slot) { // this is to catch ALL items
+									for (uint8 sub_slot = EQEmu::invbag::SLOT_BEGIN; (sub_slot <= EQEmu::invbag::SLOT_END); ++sub_slot) { // this is to catch ALL items
 										const EQEmu::ItemInstance* bag_inst = inst->GetItem(sub_slot);
 
 										if (bag_inst) {
@@ -819,7 +819,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 		}
 
 		if(qs_log) { // This can be incorporated below when revisions are made
-			for (int16 trade_slot = EQEmu::legacy::TRADE_BEGIN; trade_slot <= EQEmu::legacy::TRADE_NPC_END; ++trade_slot) {
+			for (int16 trade_slot = EQEmu::invslot::TRADE_BEGIN; trade_slot <= EQEmu::invslot::TRADE_NPC_END; ++trade_slot) {
 				const EQEmu::ItemInstance* trade_inst = m_inv[trade_slot];
 
 				if(trade_inst) {
@@ -840,7 +840,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 					qs_audit->char_count += detail->charges;
 
 					if (trade_inst->IsClassBag()) {
-						for (uint8 sub_slot = EQEmu::inventory::containerBegin; sub_slot < trade_inst->GetItem()->BagSlots; ++sub_slot) {
+						for (uint8 sub_slot = EQEmu::invbag::SLOT_BEGIN; sub_slot < trade_inst->GetItem()->BagSlots; ++sub_slot) {
 							const EQEmu::ItemInstance* trade_baginst = trade_inst->GetItem(sub_slot);
 
 							if(trade_baginst) {
@@ -874,7 +874,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 
 		std::vector<EQEmu::Any> item_list;
 		std::list<EQEmu::ItemInstance*> items;
-		for (int i = EQEmu::legacy::TRADE_BEGIN; i <= EQEmu::legacy::TRADE_NPC_END; ++i) {
+		for (int i = EQEmu::invslot::TRADE_BEGIN; i <= EQEmu::invslot::TRADE_NPC_END; ++i) {
 			EQEmu::ItemInstance *inst = m_inv.GetItem(i);
 			if(inst) {
 				items.push_back(inst);
@@ -894,7 +894,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 					(item->NoDrop != 0 || isPetAndCanHaveNoDrop))) {
 					// pets need to look inside bags and try to equip items found there
 					if (item->IsClassBag() && item->BagSlots > 0) {
-						for (int16 bslot = EQEmu::inventory::containerBegin; bslot < item->BagSlots; bslot++) {
+						for (int16 bslot = EQEmu::invbag::SLOT_BEGIN; bslot < item->BagSlots; bslot++) {
 							const EQEmu::ItemInstance* baginst = inst->GetItem(bslot);
 							if (baginst) {
 								const EQEmu::ItemData* bagitem = baginst->GetItem();
@@ -951,8 +951,8 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 		}
 
 		EQEmu::ItemInstance *insts[4] = { 0 };
-		for (int i = EQEmu::legacy::TRADE_BEGIN; i <= EQEmu::legacy::TRADE_NPC_END; ++i) {
-			insts[i - EQEmu::legacy::TRADE_BEGIN] = m_inv.PopItem(i);
+		for (int i = EQEmu::invslot::TRADE_BEGIN; i <= EQEmu::invslot::TRADE_NPC_END; ++i) {
+			insts[i - EQEmu::invslot::TRADE_BEGIN] = m_inv.PopItem(i);
 			database.SaveInventory(CharacterID(), nullptr, i);
 		}
 
@@ -971,7 +971,7 @@ bool Client::CheckTradeLoreConflict(Client* other)
 	if (!other)
 		return true;
 
-	for (int16 index = EQEmu::legacy::TRADE_BEGIN; index <= EQEmu::legacy::TRADE_END; ++index) {
+	for (int16 index = EQEmu::invslot::TRADE_BEGIN; index <= EQEmu::invslot::TRADE_END; ++index) {
 		const EQEmu::ItemInstance* inst = m_inv[index];
 		if (!inst || !inst->GetItem())
 			continue;
@@ -980,7 +980,7 @@ bool Client::CheckTradeLoreConflict(Client* other)
 			return true;
 	}
 
-	for (int16 index = EQEmu::legacy::TRADE_BAGS_BEGIN; index <= EQEmu::legacy::TRADE_BAGS_END; ++index) {
+	for (int16 index = EQEmu::invbag::TRADE_BAGS_BEGIN; index <= EQEmu::invbag::TRADE_BAGS_END; ++index) {
 		const EQEmu::ItemInstance* inst = m_inv[index];
 		if (!inst || !inst->GetItem())
 			continue;
@@ -994,7 +994,7 @@ bool Client::CheckTradeLoreConflict(Client* other)
 
 bool Client::CheckTradeNonDroppable()
 {
-	for (int16 index = EQEmu::legacy::TRADE_BEGIN; index <= EQEmu::legacy::TRADE_END; ++index){
+	for (int16 index = EQEmu::invslot::TRADE_BEGIN; index <= EQEmu::invslot::TRADE_END; ++index){
 		const EQEmu::ItemInstance* inst = m_inv[index];
 		if (!inst)
 			continue;
@@ -1213,7 +1213,7 @@ void Client::BulkSendTraderInventory(uint32 char_id) {
 
 	TraderCharges_Struct* TraderItems = database.LoadTraderItemWithCharges(char_id);
 
-	for (uint8 i = 0;i < 80; i++) {
+	for (uint8 i = 0;i < 80; i++) { // need to transition away from 'magic number'
 		if((TraderItems->ItemID[i] == 0) || (TraderItems->ItemCost[i] <= 0)) {
 			continue;
 		}
@@ -1249,10 +1249,10 @@ uint32 Client::FindTraderItemSerialNumber(int32 ItemID) {
 
 	EQEmu::ItemInstance* item = nullptr;
 	uint16 SlotID = 0;
-	for (int i = EQEmu::legacy::GENERAL_BEGIN; i <= EQEmu::legacy::GENERAL_END; i++){
+	for (int i = EQEmu::invslot::GENERAL_BEGIN; i <= EQEmu::invslot::GENERAL_END; i++){
 		item = this->GetInv().GetItem(i);
 		if (item && item->GetItem()->ID == 17899){ //Traders Satchel
-			for (int x = EQEmu::inventory::containerBegin; x < EQEmu::inventory::ContainerCount; x++) {
+			for (int x = EQEmu::invbag::SLOT_BEGIN; x <= EQEmu::invbag::SLOT_END; x++) {
 				// we already have the parent bag and a contents iterator..why not just iterate the bag!??
 				SlotID = EQEmu::InventoryProfile::CalcSlotId(i, x);
 				item = this->GetInv().GetItem(SlotID);
@@ -1272,10 +1272,10 @@ EQEmu::ItemInstance* Client::FindTraderItemBySerialNumber(int32 SerialNumber){
 
 	EQEmu::ItemInstance* item = nullptr;
 	uint16 SlotID = 0;
-	for (int i = EQEmu::legacy::GENERAL_BEGIN; i <= EQEmu::legacy::GENERAL_END; i++){
+	for (int i = EQEmu::invslot::GENERAL_BEGIN; i <= EQEmu::invslot::GENERAL_END; i++){
 		item = this->GetInv().GetItem(i);
 		if(item && item->GetItem()->ID == 17899){ //Traders Satchel
-			for (int x = EQEmu::inventory::containerBegin; x < EQEmu::inventory::ContainerCount; x++) {
+			for (int x = EQEmu::invbag::SLOT_BEGIN; x <= EQEmu::invbag::SLOT_END; x++) {
 				// we already have the parent bag and a contents iterator..why not just iterate the bag!??
 				SlotID = EQEmu::InventoryProfile::CalcSlotId(i, x);
 				item = this->GetInv().GetItem(SlotID);
@@ -1303,10 +1303,10 @@ GetItems_Struct* Client::GetTraderItems(){
 
 	uint8 ndx = 0;
 
-	for (int i = EQEmu::legacy::GENERAL_BEGIN; i <= EQEmu::legacy::GENERAL_END; i++) {
+	for (int i = EQEmu::invslot::GENERAL_BEGIN; i <= EQEmu::invslot::GENERAL_END; i++) {
 		item = this->GetInv().GetItem(i);
 		if(item && item->GetItem()->ID == 17899){ //Traders Satchel
-			for (int x = EQEmu::inventory::containerBegin; x < EQEmu::inventory::ContainerCount; x++) {
+			for (int x = EQEmu::invbag::SLOT_BEGIN; x <= EQEmu::invbag::SLOT_END; x++) {
 				SlotID = EQEmu::InventoryProfile::CalcSlotId(i, x);
 
 				item = this->GetInv().GetItem(SlotID);
@@ -1327,10 +1327,10 @@ uint16 Client::FindTraderItem(int32 SerialNumber, uint16 Quantity){
 
 	const EQEmu::ItemInstance* item= nullptr;
 	uint16 SlotID = 0;
-	for (int i = EQEmu::legacy::GENERAL_BEGIN; i <= EQEmu::legacy::GENERAL_END; i++) {
+	for (int i = EQEmu::invslot::GENERAL_BEGIN; i <= EQEmu::invslot::GENERAL_END; i++) {
 		item = this->GetInv().GetItem(i);
 		if(item && item->GetItem()->ID == 17899){ //Traders Satchel
-			for (int x = EQEmu::inventory::containerBegin; x < EQEmu::inventory::ContainerCount; x++){
+			for (int x = EQEmu::invbag::SLOT_BEGIN; x <= EQEmu::invbag::SLOT_END; x++){
 				SlotID = EQEmu::InventoryProfile::CalcSlotId(i, x);
 
 				item = this->GetInv().GetItem(SlotID);

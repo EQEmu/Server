@@ -523,4 +523,18 @@ static const uint8 SkillDamageTypes[EQEmu::skills::HIGHEST_SKILL + 1] = // chang
 
 static const uint32 MAX_SPELL_DB_ID_VAL = 65535;
 
+namespace EQEmu
+{
+	namespace legacy {
+		enum InventorySlot {
+			SLOT_CURSOR_END = (int16)0xFFFE, // I hope no one is using this...
+			SLOT_TRADESKILL = 1000,
+			SLOT_AUGMENT = 1001,
+			//SLOT_INVALID = (int16)0xFFFF,
+		};
+
+	} // namespace legacy
+
+}
+
 #endif /*COMMON_EQ_CONSTANTS_H*/

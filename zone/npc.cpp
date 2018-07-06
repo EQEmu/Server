@@ -837,8 +837,8 @@ void NPC::UpdateEquipmentLight()
 	m_Light.Type[EQEmu::lightsource::LightEquipment] = 0;
 	m_Light.Level[EQEmu::lightsource::LightEquipment] = 0;
 
-	for (int index = EQEmu::inventory::slotBegin; index < EQEmu::legacy::EQUIPMENT_SIZE; ++index) {
-		if (index == EQEmu::inventory::slotAmmo) { continue; }
+	for (int index = EQEmu::invslot::EQUIPMENT_BEGIN; index <= EQEmu::invslot::EQUIPMENT_END; ++index) {
+		if (index == EQEmu::invslot::slotAmmo) { continue; }
 
 		auto item = database.GetItem(equipment[index]);
 		if (item == nullptr) { continue; }

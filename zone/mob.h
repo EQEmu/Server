@@ -184,7 +184,7 @@ public:
 	virtual void RangedAttack(Mob* other) { }
 	virtual void ThrowingAttack(Mob* other) { }
 	// 13 = Primary (default), 14 = secondary
-	virtual bool Attack(Mob* other, int Hand = EQEmu::inventory::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = false,
+	virtual bool Attack(Mob* other, int Hand = EQEmu::invslot::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = false,
 		bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr) = 0;
 	void DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts = nullptr);
 	int MonkSpecialAttack(Mob* other, uint8 skill_used);
@@ -675,7 +675,7 @@ public:
 	inline AuraMgr &GetAuraMgr() { return aura_mgr; } // mainly used for zone db loading/saving
 
 	//Procs
-	void TriggerDefensiveProcs(Mob *on, uint16 hand = EQEmu::inventory::slotPrimary, bool FromSkillProc = false, int damage = 0);
+	void TriggerDefensiveProcs(Mob *on, uint16 hand = EQEmu::invslot::slotPrimary, bool FromSkillProc = false, int damage = 0);
 	bool AddRangedProc(uint16 spell_id, uint16 iChance = 3, uint16 base_spell_id = SPELL_UNKNOWN);
 	bool RemoveRangedProc(uint16 spell_id, bool bAll = false);
 	bool HasRangedProcs() const;
@@ -1286,13 +1286,13 @@ protected:
 	void TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success = false, uint16 hand = 0, bool IsDefensive = false); // hand = SlotCharm?
 	bool PassLimitToSkill(uint16 spell_id, uint16 skill);
 	bool PassLimitClass(uint32 Classes_, uint16 Class_);
-	void TryDefensiveProc(Mob *on, uint16 hand = EQEmu::inventory::slotPrimary);
-	void TryWeaponProc(const EQEmu::ItemInstance* inst, const EQEmu::ItemData* weapon, Mob *on, uint16 hand = EQEmu::inventory::slotPrimary);
-	void TrySpellProc(const EQEmu::ItemInstance* inst, const EQEmu::ItemData* weapon, Mob *on, uint16 hand = EQEmu::inventory::slotPrimary);
-	void TryWeaponProc(const EQEmu::ItemInstance* weapon, Mob *on, uint16 hand = EQEmu::inventory::slotPrimary);
+	void TryDefensiveProc(Mob *on, uint16 hand = EQEmu::invslot::slotPrimary);
+	void TryWeaponProc(const EQEmu::ItemInstance* inst, const EQEmu::ItemData* weapon, Mob *on, uint16 hand = EQEmu::invslot::slotPrimary);
+	void TrySpellProc(const EQEmu::ItemInstance* inst, const EQEmu::ItemData* weapon, Mob *on, uint16 hand = EQEmu::invslot::slotPrimary);
+	void TryWeaponProc(const EQEmu::ItemInstance* weapon, Mob *on, uint16 hand = EQEmu::invslot::slotPrimary);
 	void ExecWeaponProc(const EQEmu::ItemInstance* weapon, uint16 spell_id, Mob *on, int level_override = -1);
-	virtual float GetProcChances(float ProcBonus, uint16 hand = EQEmu::inventory::slotPrimary);
-	virtual float GetDefensiveProcChances(float &ProcBonus, float &ProcChance, uint16 hand = EQEmu::inventory::slotPrimary, Mob *on = nullptr);
+	virtual float GetProcChances(float ProcBonus, uint16 hand = EQEmu::invslot::slotPrimary);
+	virtual float GetDefensiveProcChances(float &ProcBonus, float &ProcChance, uint16 hand = EQEmu::invslot::slotPrimary, Mob *on = nullptr);
 	virtual float GetSkillProcChances(uint16 ReuseTime, uint16 hand = 0); // hand = MainCharm?
 	uint16 GetWeaponSpeedbyHand(uint16 hand);
 #ifdef BOTS

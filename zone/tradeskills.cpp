@@ -69,7 +69,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 
 				// Verify that no more than two items are in container to guarantee no inadvertant wipes.
 				uint8 itemsFound = 0;
-				for (uint8 i = EQEmu::inventory::slotBegin; i < EQEmu::legacy::TYPE_WORLD_SIZE; i++)
+				for (uint8 i = EQEmu::invbag::SLOT_BEGIN; i < EQEmu::invtype::WORLD_SIZE; i++)
 				{
 					const EQEmu::ItemInstance* inst = container->GetItem(i);
 					if (inst)
@@ -222,7 +222,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 		else
 		{
 			// Delete items in our inventory container...
-			for (uint8 i = EQEmu::inventory::slotBegin; i < EQEmu::legacy::TYPE_WORLD_SIZE; i++)
+			for (uint8 i = EQEmu::invbag::SLOT_BEGIN; i < EQEmu::invtype::WORLD_SIZE; i++)
 			{
 				const EQEmu::ItemInstance* inst = container->GetItem(i);
 				if (inst)
@@ -303,7 +303,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 			const EQEmu::ItemData* new_weapon = inst->GetItem();
 			user->DeleteItemInInventory(EQEmu::InventoryProfile::CalcSlotId(in_combine->container_slot, 0), 0, true);
 			container->Clear();
-			user->SummonItem(new_weapon->ID, inst->GetCharges(), inst->GetAugmentItemID(0), inst->GetAugmentItemID(1), inst->GetAugmentItemID(2), inst->GetAugmentItemID(3), inst->GetAugmentItemID(4), inst->GetAugmentItemID(5), inst->IsAttuned(), EQEmu::inventory::slotCursor, container->GetItem()->Icon, atoi(container->GetItem()->IDFile + 2));
+			user->SummonItem(new_weapon->ID, inst->GetCharges(), inst->GetAugmentItemID(0), inst->GetAugmentItemID(1), inst->GetAugmentItemID(2), inst->GetAugmentItemID(3), inst->GetAugmentItemID(4), inst->GetAugmentItemID(5), inst->IsAttuned(), EQEmu::invslot::slotCursor, container->GetItem()->Icon, atoi(container->GetItem()->IDFile + 2));
 			user->Message_StringID(4, TRANSFORM_COMPLETE, inst->GetItem()->Name);
 			if (RuleB(Inventory, DeleteTransformationMold))
 				user->DeleteItemInInventory(in_combine->container_slot, 0, true);
@@ -323,7 +323,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 			const EQEmu::ItemData* new_weapon = inst->GetItem();
 			user->DeleteItemInInventory(EQEmu::InventoryProfile::CalcSlotId(in_combine->container_slot, 0), 0, true);
 			container->Clear();
-			user->SummonItem(new_weapon->ID, inst->GetCharges(), inst->GetAugmentItemID(0), inst->GetAugmentItemID(1), inst->GetAugmentItemID(2), inst->GetAugmentItemID(3), inst->GetAugmentItemID(4), inst->GetAugmentItemID(5), inst->IsAttuned(), EQEmu::inventory::slotCursor, 0, 0);
+			user->SummonItem(new_weapon->ID, inst->GetCharges(), inst->GetAugmentItemID(0), inst->GetAugmentItemID(1), inst->GetAugmentItemID(2), inst->GetAugmentItemID(3), inst->GetAugmentItemID(4), inst->GetAugmentItemID(5), inst->IsAttuned(), EQEmu::invslot::slotCursor, 0, 0);
 			user->Message_StringID(4, TRANSFORM_COMPLETE, inst->GetItem()->Name);
 		}
 		else if (inst) {
@@ -407,7 +407,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		safe_delete(outapp);
 		database.DeleteWorldContainer(worldo->m_id, zone->GetZoneID());
 	} else{
-		for (uint8 i = EQEmu::inventory::slotBegin; i < EQEmu::legacy::TYPE_WORLD_SIZE; i++) {
+		for (uint8 i = EQEmu::invbag::SLOT_BEGIN; i < EQEmu::invtype::WORLD_SIZE; i++) {
 			const EQEmu::ItemInstance* inst = container->GetItem(i);
 			if (inst) {
 				user->DeleteItemInInventory(EQEmu::InventoryProfile::CalcSlotId(in_combine->container_slot, i), 0, true);
@@ -1243,7 +1243,7 @@ bool ZoneDatabase::GetTradeRecipe(const EQEmu::ItemInstance* container, uint8 c_
 	for (auto row = results.begin(); row != results.end(); ++row) {
         int ccnt = 0;
 
-		for (int x = EQEmu::inventory::slotBegin; x < EQEmu::legacy::TYPE_WORLD_SIZE; x++) {
+		for (int x = EQEmu::invbag::SLOT_BEGIN; x < EQEmu::invtype::WORLD_SIZE; x++) {
             const EQEmu::ItemInstance* inst = container->GetItem(x);
             if(!inst)
                 continue;

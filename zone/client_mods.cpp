@@ -552,7 +552,7 @@ int32 Client::GetRawItemAC()
 {
 	int32 Total = 0;
 	// this skips MainAmmo..add an '=' conditional if that slot is required (original behavior)
-	for (int16 slot_id = EQEmu::legacy::EQUIPMENT_BEGIN; slot_id < EQEmu::legacy::EQUIPMENT_END; slot_id++) {
+	for (int16 slot_id = EQEmu::invslot::BONUS_BEGIN; slot_id <= EQEmu::invslot::BONUS_STAT_END; slot_id++) {
 		const EQEmu::ItemInstance* inst = m_inv[slot_id];
 		if (inst && inst->IsClassCommon()) {
 			Total += inst->GetItem()->AC;
@@ -1319,7 +1319,7 @@ uint32 Client::CalcCurrentWeight()
 	EQEmu::ItemInstance* ins = nullptr;
 	uint32 Total = 0;
 	int x;
-	for (x = EQEmu::legacy::EQUIPMENT_BEGIN; x <= EQEmu::inventory::slotCursor; x++) { // include cursor or not?
+	for (x = EQEmu::invslot::POSSESSIONS_BEGIN; x <= EQEmu::invslot::POSSESSIONS_END; x++) {
 		TempItem = 0;
 		ins = GetInv().GetItem(x);
 		if (ins) {
@@ -1329,7 +1329,7 @@ uint32 Client::CalcCurrentWeight()
 			Total += TempItem->Weight;
 		}
 	}
-	for (x = EQEmu::legacy::GENERAL_BAGS_BEGIN; x <= EQEmu::legacy::GENERAL_BAGS_END; x++) { // include cursor bags or not?
+	for (x = EQEmu::invbag::GENERAL_BAGS_BEGIN; x <= EQEmu::invbag::CURSOR_BAG_END; x++) {
 		int TmpWeight = 0;
 		TempItem = 0;
 		ins = GetInv().GetItem(x);
@@ -1342,9 +1342,9 @@ uint32 Client::CalcCurrentWeight()
 		if (TmpWeight > 0) {
 			// this code indicates that weight redux bags can only be in the first general inventory slot to be effective...
 			// is this correct? or can we scan for the highest weight redux and use that? (need client verifications)
-			int bagslot = EQEmu::inventory::slotGeneral1;
+			int bagslot = EQEmu::invslot::slotGeneral1;
 			int reduction = 0;
-			for (int m = EQEmu::legacy::GENERAL_BAGS_BEGIN + 10; m <= EQEmu::legacy::GENERAL_BAGS_END; m += 10) { // include cursor bags or not?
+			for (int m = EQEmu::invbag::GENERAL_BAGS_BEGIN + EQEmu::invbag::SLOT_COUNT; m <= EQEmu::invbag::CURSOR_BAG_END; m += EQEmu::invbag::SLOT_COUNT) {
 				if (x >= m) {
 					bagslot += 1;
 				}
@@ -2293,12 +2293,12 @@ int Client::GetRawACNoShield(int &shield_ac) const
 {
 	int ac = itembonuses.AC + spellbonuses.AC + aabonuses.AC;
 	shield_ac = 0;
-	const EQEmu::ItemInstance *inst = m_inv.GetItem(EQEmu::inventory::slotSecondary);
+	const EQEmu::ItemInstance *inst = m_inv.GetItem(EQEmu::invslot::slotSecondary);
 	if (inst) {
 		if (inst->GetItem()->ItemType == EQEmu::item::ItemTypeShield) {
 			ac -= inst->GetItem()->AC;
 			shield_ac = inst->GetItem()->AC;
-			for (uint8 i = EQEmu::inventory::socketBegin; i < EQEmu::inventory::SocketCount; i++) {
+			for (uint8 i = EQEmu::invaug::SOCKET_BEGIN; i <= EQEmu::invaug::SOCKET_END; i++) {
 				if (inst->GetAugment(i)) {
 					ac -= inst->GetAugment(i)->GetItem()->AC;
 					shield_ac += inst->GetAugment(i)->GetItem()->AC;

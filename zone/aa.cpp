@@ -435,7 +435,7 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration)
 
 	//gear stuff, need to make sure there's
 	//no situation where this stuff can be duped
-	for (int x = EQEmu::legacy::EQUIPMENT_BEGIN; x <= EQEmu::legacy::EQUIPMENT_END; x++) // (< 21) added MainAmmo
+	for (int x = EQEmu::invslot::EQUIPMENT_BEGIN; x <= EQEmu::invslot::EQUIPMENT_END; x++)
 	{
 		uint32 sitem = 0;
 		sitem = CorpseToUse->GetWornItem(x);
