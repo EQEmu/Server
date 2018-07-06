@@ -2534,9 +2534,9 @@ void command_peekinv(Client *c, const Seperator *sep)
 		peekOutOfScope = (peekWorld * 2) // less than
 	};
 
-	static char* scope_prefix[] = { "Equip", "Gen", "Cursor", "Limbo", "Trib", "Bank", "ShBank", "Trade", "World" };
+	static const char* scope_prefix[] = { "equip", "gen", "cursor", "limbo", "trib", "bank", "shbank", "trade", "world" };
 
-	static int16 scope_range[][2] = {
+	static const int16 scope_range[][2] = {
 		{ EQEmu::invslot::EQUIPMENT_BEGIN, EQEmu::invslot::EQUIPMENT_END },
 		{ EQEmu::invslot::GENERAL_BEGIN, EQEmu::invslot::GENERAL_END },
 		{ EQEmu::invslot::slotCursor, EQEmu::invslot::slotCursor },
@@ -2548,7 +2548,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 		{ EQEmu::invslot::SLOT_BEGIN, (EQEmu::invtype::WORLD_SIZE - 1) }
 	};
 
-	static bool scope_bag[] = { false, true, true, true, false, true, true, true, true };
+	static const bool scope_bag[] = { false, true, true, true, false, true, true, true, true };
 
 	if (!c)
 		return;
