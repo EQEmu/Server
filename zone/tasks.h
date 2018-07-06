@@ -199,7 +199,7 @@ public:
 	bool IsTaskActivityCompleted(TaskType type, int index, int ActivityID);
 	int GetTaskActivityDoneCount(TaskType type, int index, int ActivityID);
 	int GetTaskActivityDoneCountFromTaskID(int TaskID, int ActivityID);
-	int GetTaskStartTime(int index);
+	int GetTaskStartTime(TaskType type, int index);
 	void AcceptNewTask(Client *c, int TaskID, int NPCID, bool enforce_level_requirement = false);
 	void FailTask(Client *c, int TaskID);
 	int TaskTimeLeft(int TaskID);
