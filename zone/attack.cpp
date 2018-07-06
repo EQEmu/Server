@@ -136,7 +136,7 @@ EQEmu::skills::SkillType Mob::AttackAnimation(int Hand, const EQEmu::ItemInstanc
 	}
 
 	// If we're attacking with the secondary hand, play the dual wield anim
-	if (Hand == EQEmu::inventory::slotSecondary)	// DW anim
+	if (Hand == EQEmu::invslot::slotSecondary)	// DW anim
 		type = animDualWield;
 
 	DoAnim(type, 0, false);
@@ -386,7 +386,7 @@ bool Mob::AvoidDamage(Mob *other, DamageHitInfo &hit)
 	// riposte -- it may seem crazy, but if the attacker has SPA 173 on them, they are immune to Ripo
 	bool ImmuneRipo = attacker->aabonuses.RiposteChance || attacker->spellbonuses.RiposteChance || attacker->itembonuses.RiposteChance || attacker->IsEnraged();
 	// Need to check if we have something in MainHand to actually attack with (or fists)
-	if (hit.hand != EQEmu::inventory::slotRange && (CanThisClassRiposte() || IsEnraged()) && InFront && !ImmuneRipo) {
+	if (hit.hand != EQEmu::invslot::slotRange && (CanThisClassRiposte() || IsEnraged()) && InFront && !ImmuneRipo) {
 		if (IsEnraged()) {
 			hit.damage_done = DMG_RIPOSTED;
 			Log(Logs::Detail, Logs::Combat, "I am enraged, riposting frontal attack.");
@@ -408,7 +408,7 @@ bool Mob::AvoidDamage(Mob *other, DamageHitInfo &hit)
 			chance -= chance * counter;
 		}
 		// AA Slippery Attacks
-		if (hit.hand == EQEmu::inventory::slotSecondary) {
+		if (hit.hand == EQEmu::invslot::slotSecondary) {
 			int slip = aabonuses.OffhandRiposteFail + itembonuses.OffhandRiposteFail + spellbonuses.OffhandRiposteFail;
 			chance += chance * slip / 100;
 		}
@@ -453,7 +453,7 @@ bool Mob::AvoidDamage(Mob *other, DamageHitInfo &hit)
 	}
 
 	// parry
-	if (CanThisClassParry() && InFront && hit.hand != EQEmu::inventory::slotRange) {
+	if (CanThisClassParry() && InFront && hit.hand != EQEmu::invslot::slotRange) {
 		if (IsClient())
 			CastToClient()->CheckIncreaseSkill(EQEmu::skills::SkillParry, other, -10);
 		// check auto discs ... I guess aa/items too :P
@@ -783,7 +783,7 @@ int Mob::ACSum()
 	int shield_ac = 0;
 	if (HasShieldEquiped() && IsClient()) {
 		auto client = CastToClient();
-		auto inst = client->GetInv().GetItem(EQEmu::inventory::slotSecondary);
+		auto inst = client->GetInv().GetItem(EQEmu::invslot::slotSecondary);
 		if (inst) {
 			if (inst->GetItemRecommendedLevel(true) <= GetLevel())
 				shield_ac = inst->GetItemArmorClass(true);
@@ -1111,7 +1111,7 @@ int Mob::GetWeaponDamage(Mob *against, const EQEmu::ItemInstance *weapon_item, u
 		else {
 			bool MagicGloves = false;
 			if (IsClient()) {
-				const EQEmu::ItemInstance *gloves = CastToClient()->GetInv().GetItem(EQEmu::inventory::slotHands);
+				const EQEmu::ItemInstance *gloves = CastToClient()->GetInv().GetItem(EQEmu::invslot::slotHands);
 				if (gloves)
 					MagicGloves = gloves->GetItemMagical(true);
 			}
@@ -1397,12 +1397,12 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 		return false; // Rogean: How can you attack while feigned? Moved up from Aggro Code.
 
 	EQEmu::ItemInstance* weapon = nullptr;
-	if (Hand == EQEmu::inventory::slotSecondary) {	// Kaiyodo - Pick weapon from the attacking hand
-		weapon = GetInv().GetItem(EQEmu::inventory::slotSecondary);
+	if (Hand == EQEmu::invslot::slotSecondary) {	// Kaiyodo - Pick weapon from the attacking hand
+		weapon = GetInv().GetItem(EQEmu::invslot::slotSecondary);
 		OffHandAtk(true);
 	}
 	else {
-		weapon = GetInv().GetItem(EQEmu::inventory::slotPrimary);
+		weapon = GetInv().GetItem(EQEmu::invslot::slotPrimary);
 		OffHandAtk(false);
 	}
 
@@ -1440,10 +1440,10 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 	if (my_hit.base_damage > 0) {
 		// if we revamp this function be more general, we will have to make sure this isn't
 		// executed for anything BUT normal melee damage weapons from auto attack
-		if (Hand == EQEmu::inventory::slotPrimary || Hand == EQEmu::inventory::slotSecondary)
+		if (Hand == EQEmu::invslot::slotPrimary || Hand == EQEmu::invslot::slotSecondary)
 			my_hit.base_damage = DoDamageCaps(my_hit.base_damage);
 		auto shield_inc = spellbonuses.ShieldEquipDmgMod + itembonuses.ShieldEquipDmgMod + aabonuses.ShieldEquipDmgMod;
-		if (shield_inc > 0 && HasShieldEquiped() && Hand == EQEmu::inventory::slotPrimary) {
+		if (shield_inc > 0 && HasShieldEquiped() && Hand == EQEmu::invslot::slotPrimary) {
 			my_hit.base_damage = my_hit.base_damage * (100 + shield_inc) / 100;
 			hate = hate * (100 + shield_inc) / 100;
 		}
@@ -1465,7 +1465,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 
 		int ucDamageBonus = 0;
 
-		if (Hand == EQEmu::inventory::slotPrimary && GetLevel() >= 28 && IsWarriorClass())
+		if (Hand == EQEmu::invslot::slotPrimary && GetLevel() >= 28 && IsWarriorClass())
 		{
 			// Damage bonuses apply only to hits from the main hand (Hand == MainPrimary) by characters level 28 and above
 			// who belong to a melee class. If we're here, then all of these conditions apply.
@@ -1477,7 +1477,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 		}
 #endif
 		//Live AA - Sinister Strikes *Adds weapon damage bonus to offhand weapon.
-		if (Hand == EQEmu::inventory::slotSecondary) {
+		if (Hand == EQEmu::invslot::slotSecondary) {
 			if (aabonuses.SecondaryDmgInc || itembonuses.SecondaryDmgInc || spellbonuses.SecondaryDmgInc) {
 
 				ucDamageBonus = GetWeaponDamageBonus(weapon ? weapon->GetItem() : (const EQEmu::ItemData*) nullptr, true);
@@ -1927,28 +1927,28 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 	my_hit.skill = EQEmu::skills::SkillHandtoHand;
 	my_hit.hand = Hand;
 	my_hit.damage_done = 1;
-	if (Hand == EQEmu::inventory::slotPrimary) {
+	if (Hand == EQEmu::invslot::slotPrimary) {
 		my_hit.skill = static_cast<EQEmu::skills::SkillType>(GetPrimSkill());
 		OffHandAtk(false);
 	}
-	if (Hand == EQEmu::inventory::slotSecondary) {
+	if (Hand == EQEmu::invslot::slotSecondary) {
 		my_hit.skill = static_cast<EQEmu::skills::SkillType>(GetSecSkill());
 		OffHandAtk(true);
 	}
 
 	//figure out what weapon they are using, if any
 	const EQEmu::ItemData* weapon = nullptr;
-	if (Hand == EQEmu::inventory::slotPrimary && equipment[EQEmu::inventory::slotPrimary] > 0)
-		weapon = database.GetItem(equipment[EQEmu::inventory::slotPrimary]);
-	else if (equipment[EQEmu::inventory::slotSecondary])
-		weapon = database.GetItem(equipment[EQEmu::inventory::slotSecondary]);
+	if (Hand == EQEmu::invslot::slotPrimary && equipment[EQEmu::invslot::slotPrimary] > 0)
+		weapon = database.GetItem(equipment[EQEmu::invslot::slotPrimary]);
+	else if (equipment[EQEmu::invslot::slotSecondary])
+		weapon = database.GetItem(equipment[EQEmu::invslot::slotSecondary]);
 
 	//We dont factor much from the weapon into the attack.
 	//Just the skill type so it doesn't look silly using punching animations and stuff while wielding weapons
 	if (weapon) {
 		Log(Logs::Detail, Logs::Combat, "Attacking with weapon: %s (%d) (too bad im not using it for much)", weapon->Name, weapon->ID);
 
-		if (Hand == EQEmu::inventory::slotSecondary && weapon->ItemType == EQEmu::item::ItemTypeShield) {
+		if (Hand == EQEmu::invslot::slotSecondary && weapon->ItemType == EQEmu::item::ItemTypeShield) {
 			Log(Logs::Detail, Logs::Combat, "Attack with shield canceled.");
 			return false;
 		}
@@ -3896,7 +3896,7 @@ void Mob::TryDefensiveProc(Mob *on, uint16 hand) {
 		float ProcChance, ProcBonus;
 		on->GetDefensiveProcChances(ProcBonus, ProcChance, hand, this);
 
-		if (hand != EQEmu::inventory::slotPrimary)
+		if (hand != EQEmu::invslot::slotPrimary)
 			ProcChance /= 2;
 
 		int level_penalty = 0;
@@ -3969,7 +3969,7 @@ void Mob::TryWeaponProc(const EQEmu::ItemInstance *inst, const EQEmu::ItemData *
 	ProcBonus += static_cast<float>(itembonuses.ProcChance) / 10.0f; // Combat Effects
 	float ProcChance = GetProcChances(ProcBonus, hand);
 
-	if (hand != EQEmu::inventory::slotPrimary) //Is Archery intened to proc at 50% rate?
+	if (hand != EQEmu::invslot::slotPrimary) //Is Archery intened to proc at 50% rate?
 		ProcChance /= 2;
 
 	// Try innate proc on weapon
@@ -4008,7 +4008,7 @@ void Mob::TryWeaponProc(const EQEmu::ItemInstance *inst, const EQEmu::ItemData *
 		proced = false;
 
 	if (!proced && inst) {
-		for (int r = EQEmu::inventory::socketBegin; r < EQEmu::inventory::SocketCount; r++) {
+		for (int r = EQEmu::invaug::SOCKET_BEGIN; r <= EQEmu::invaug::SOCKET_END; r++) {
 			const EQEmu::ItemInstance *aug_i = inst->GetAugment(r);
 			if (!aug_i) // no aug, try next slot!
 				continue;
@@ -4051,11 +4051,11 @@ void Mob::TrySpellProc(const EQEmu::ItemInstance *inst, const EQEmu::ItemData *w
 	float ProcChance = 0.0f;
 	ProcChance = GetProcChances(ProcBonus, hand);
 
-	if (hand != EQEmu::inventory::slotPrimary) //Is Archery intened to proc at 50% rate?
+	if (hand != EQEmu::invslot::slotPrimary) //Is Archery intened to proc at 50% rate?
 		ProcChance /= 2;
 
 	bool rangedattk = false;
-	if (weapon && hand == EQEmu::inventory::slotRange) {
+	if (weapon && hand == EQEmu::invslot::slotRange) {
 		if (weapon->ItemType == EQEmu::item::ItemTypeArrow ||
 			weapon->ItemType == EQEmu::item::ItemTypeLargeThrowing ||
 			weapon->ItemType == EQEmu::item::ItemTypeSmallThrowing ||
@@ -4064,11 +4064,11 @@ void Mob::TrySpellProc(const EQEmu::ItemInstance *inst, const EQEmu::ItemData *w
 		}
 	}
 
-	if (!weapon && hand == EQEmu::inventory::slotRange && GetSpecialAbility(SPECATK_RANGED_ATK))
+	if (!weapon && hand == EQEmu::invslot::slotRange && GetSpecialAbility(SPECATK_RANGED_ATK))
 		rangedattk = true;
 
 	for (uint32 i = 0; i < MAX_PROCS; i++) {
-		if (IsPet() && hand != EQEmu::inventory::slotPrimary) //Pets can only proc spell procs from their primay hand (ie; beastlord pets)
+		if (IsPet() && hand != EQEmu::invslot::slotPrimary) //Pets can only proc spell procs from their primay hand (ie; beastlord pets)
 			continue; // If pets ever can proc from off hand, this will need to change
 
 					  // Not ranged
@@ -4128,7 +4128,7 @@ void Mob::TrySpellProc(const EQEmu::ItemInstance *inst, const EQEmu::ItemData *w
 		}
 	}
 
-	if (HasSkillProcs() && hand != EQEmu::inventory::slotRange) { //We check ranged skill procs within the attack functions.
+	if (HasSkillProcs() && hand != EQEmu::invslot::slotRange) { //We check ranged skill procs within the attack functions.
 		uint16 skillinuse = 28;
 		if (weapon)
 			skillinuse = GetSkillByItemType(weapon->ItemType);
@@ -4451,7 +4451,7 @@ void Mob::DoRiposte(Mob *defender)
 		return;
 	}
 
-	defender->Attack(this, EQEmu::inventory::slotPrimary, true);
+	defender->Attack(this, EQEmu::invslot::slotPrimary, true);
 	if (HasDied())
 		return;
 
@@ -4462,7 +4462,7 @@ void Mob::DoRiposte(Mob *defender)
 	if (DoubleRipChance && zone->random.Roll(DoubleRipChance)) {
 		Log(Logs::Detail, Logs::Combat,
 			"Preforming a double riposted from SE_DoubleRiposte (%d percent chance)", DoubleRipChance);
-		defender->Attack(this, EQEmu::inventory::slotPrimary, true);
+		defender->Attack(this, EQEmu::invslot::slotPrimary, true);
 		if (HasDied())
 			return;
 	}
@@ -4475,7 +4475,7 @@ void Mob::DoRiposte(Mob *defender)
 		Log(Logs::Detail, Logs::Combat,
 			"Preforming a double riposted from SE_GiveDoubleRiposte base1 == 0 (%d percent chance)",
 			DoubleRipChance);
-		defender->Attack(this, EQEmu::inventory::slotPrimary, true);
+		defender->Attack(this, EQEmu::invslot::slotPrimary, true);
 		if (HasDied())
 			return;
 	}
@@ -4888,7 +4888,7 @@ float Mob::GetSkillProcChances(uint16 ReuseTime, uint16 hand) {
 	if (!ReuseTime && hand) {
 		weapon_speed = GetWeaponSpeedbyHand(hand);
 		ProcChance = static_cast<float>(weapon_speed) * (RuleR(Combat, AvgProcsPerMinute) / 60000.0f);
-		if (hand != EQEmu::inventory::slotPrimary)
+		if (hand != EQEmu::invslot::slotPrimary)
 			ProcChance /= 2;
 	}
 
@@ -5182,13 +5182,13 @@ void Client::SetAttackTimer()
 
 	Timer *TimerToUse = nullptr;
 
-	for (int i = EQEmu::inventory::slotRange; i <= EQEmu::inventory::slotSecondary; i++) {
+	for (int i = EQEmu::invslot::slotRange; i <= EQEmu::invslot::slotSecondary; i++) {
 		//pick a timer
-		if (i == EQEmu::inventory::slotPrimary)
+		if (i == EQEmu::invslot::slotPrimary)
 			TimerToUse = &attack_timer;
-		else if (i == EQEmu::inventory::slotRange)
+		else if (i == EQEmu::invslot::slotRange)
 			TimerToUse = &ranged_timer;
-		else if (i == EQEmu::inventory::slotSecondary)
+		else if (i == EQEmu::invslot::slotSecondary)
 			TimerToUse = &attack_dw_timer;
 		else	//invalid slot (hands will always hit this)
 			continue;
@@ -5201,7 +5201,7 @@ void Client::SetAttackTimer()
 			ItemToUse = ci->GetItem();
 
 		//special offhand stuff
-		if (i == EQEmu::inventory::slotSecondary) {
+		if (i == EQEmu::invslot::slotSecondary) {
 			//if we cant dual wield, skip it
 			if (!CanThisClassDualWield() || HasTwoHanderEquipped()) {
 				attack_dw_timer.Disable();
@@ -5276,19 +5276,19 @@ void NPC::SetAttackTimer()
 	else
 		speed = static_cast<int>((attack_delay / haste_mod) + ((hhe / 100.0f) * attack_delay));
 
-	for (int i = EQEmu::inventory::slotRange; i <= EQEmu::inventory::slotSecondary; i++) {
+	for (int i = EQEmu::invslot::slotRange; i <= EQEmu::invslot::slotSecondary; i++) {
 		//pick a timer
-		if (i == EQEmu::inventory::slotPrimary)
+		if (i == EQEmu::invslot::slotPrimary)
 			TimerToUse = &attack_timer;
-		else if (i == EQEmu::inventory::slotRange)
+		else if (i == EQEmu::invslot::slotRange)
 			TimerToUse = &ranged_timer;
-		else if (i == EQEmu::inventory::slotSecondary)
+		else if (i == EQEmu::invslot::slotSecondary)
 			TimerToUse = &attack_dw_timer;
 		else	//invalid slot (hands will always hit this)
 			continue;
 
 		//special offhand stuff
-		if (i == EQEmu::inventory::slotSecondary) {
+		if (i == EQEmu::invslot::slotSecondary) {
 			// SPECATK_QUAD is uncheesable
 			if (!CanThisClassDualWield() || (HasTwoHanderEquipped() && !GetSpecialAbility(SPECATK_QUAD))) {
 				attack_dw_timer.Disable();
@@ -5310,7 +5310,7 @@ void Client::DoAttackRounds(Mob *target, int hand, bool IsFromSpell)
 	bool candouble = CanThisClassDoubleAttack();
 	// extra off hand non-sense, can only double with skill of 150 or above
 	// or you have any amount of GiveDoubleAttack
-	if (candouble && hand == EQEmu::inventory::slotSecondary)
+	if (candouble && hand == EQEmu::invslot::slotSecondary)
 		candouble =
 		    GetSkill(EQEmu::skills::SkillDoubleAttack) > 149 ||
 		    (aabonuses.GiveDoubleAttack + spellbonuses.GiveDoubleAttack + itembonuses.GiveDoubleAttack) > 0;
@@ -5321,7 +5321,7 @@ void Client::DoAttackRounds(Mob *target, int hand, bool IsFromSpell)
 			Attack(target, hand, false, false, IsFromSpell);
 
 			// Modern AA description: Increases your chance of ... performing one additional hit with a 2-handed weapon when double attacking by 2%.
-			if (hand == EQEmu::inventory::slotPrimary) {
+			if (hand == EQEmu::invslot::slotPrimary) {
 				auto extraattackchance = aabonuses.ExtraAttackChance + spellbonuses.ExtraAttackChance +
 							 itembonuses.ExtraAttackChance;
 				if (extraattackchance && HasTwoHanderEquipped() && zone->random.Roll(extraattackchance))
@@ -5329,7 +5329,7 @@ void Client::DoAttackRounds(Mob *target, int hand, bool IsFromSpell)
 			}
 
 			// you can only triple from the main hand
-			if (hand == EQEmu::inventory::slotPrimary && CanThisClassTripleAttack()) {
+			if (hand == EQEmu::invslot::slotPrimary && CanThisClassTripleAttack()) {
 				CheckIncreaseSkill(EQEmu::skills::SkillTripleAttack, target, -10);
 				if (CheckTripleAttack()) {
 					Attack(target, hand, false, false, IsFromSpell);
@@ -5383,9 +5383,9 @@ void Mob::DoMainHandAttackRounds(Mob *target, ExtraAttackOptions *opts)
 	if (RuleB(Combat, UseLiveCombatRounds)) {
 		// A "quad" on live really is just a successful dual wield where both double attack
 		// The mobs that could triple lost the ability to when the triple attack skill was added in
-		Attack(target, EQEmu::inventory::slotPrimary, false, false, false, opts);
+		Attack(target, EQEmu::invslot::slotPrimary, false, false, false, opts);
 		if (CanThisClassDoubleAttack() && CheckDoubleAttack()) {
-			Attack(target, EQEmu::inventory::slotPrimary, false, false, false, opts);
+			Attack(target, EQEmu::invslot::slotPrimary, false, false, false, opts);
 			if ((IsPet() || IsTempPet()) && IsPetOwnerClient()) {
 				int chance = spellbonuses.PC_Pet_Flurry + itembonuses.PC_Pet_Flurry + aabonuses.PC_Pet_Flurry;
 				if (chance && zone->random.Roll(chance))
@@ -5398,16 +5398,16 @@ void Mob::DoMainHandAttackRounds(Mob *target, ExtraAttackOptions *opts)
 	if (IsNPC()) {
 		int16 n_atk = CastToNPC()->GetNumberOfAttacks();
 		if (n_atk <= 1) {
-			Attack(target, EQEmu::inventory::slotPrimary, false, false, false, opts);
+			Attack(target, EQEmu::invslot::slotPrimary, false, false, false, opts);
 		}
 		else {
 			for (int i = 0; i < n_atk; ++i) {
-				Attack(target, EQEmu::inventory::slotPrimary, false, false, false, opts);
+				Attack(target, EQEmu::invslot::slotPrimary, false, false, false, opts);
 			}
 		}
 	}
 	else {
-		Attack(target, EQEmu::inventory::slotPrimary, false, false, false, opts);
+		Attack(target, EQEmu::invslot::slotPrimary, false, false, false, opts);
 	}
 
 	// we use this random value in three comparisons with different
@@ -5418,15 +5418,15 @@ void Mob::DoMainHandAttackRounds(Mob *target, ExtraAttackOptions *opts)
 		// check double attack, this is NOT the same rules that clients use...
 		&&
 		RandRoll < (GetLevel() + NPCDualAttackModifier)) {
-		Attack(target, EQEmu::inventory::slotPrimary, false, false, false, opts);
+		Attack(target, EQEmu::invslot::slotPrimary, false, false, false, opts);
 		// lets see if we can do a triple attack with the main hand
 		// pets are excluded from triple and quads...
 		if ((GetSpecialAbility(SPECATK_TRIPLE) || GetSpecialAbility(SPECATK_QUAD)) && !IsPet() &&
 			RandRoll < (GetLevel() + NPCTripleAttackModifier)) {
-			Attack(target, EQEmu::inventory::slotPrimary, false, false, false, opts);
+			Attack(target, EQEmu::invslot::slotPrimary, false, false, false, opts);
 			// now lets check the quad attack
 			if (GetSpecialAbility(SPECATK_QUAD) && RandRoll < (GetLevel() + NPCQuadAttackModifier)) {
-				Attack(target, EQEmu::inventory::slotPrimary, false, false, false, opts);
+				Attack(target, EQEmu::invslot::slotPrimary, false, false, false, opts);
 			}
 		}
 	}
@@ -5442,9 +5442,9 @@ void Mob::DoOffHandAttackRounds(Mob *target, ExtraAttackOptions *opts)
 		(RuleB(Combat, UseLiveCombatRounds) && GetSpecialAbility(SPECATK_QUAD))) ||
 		GetEquipment(EQEmu::textures::weaponSecondary) != 0) {
 		if (CheckDualWield()) {
-			Attack(target, EQEmu::inventory::slotSecondary, false, false, false, opts);
+			Attack(target, EQEmu::invslot::slotSecondary, false, false, false, opts);
 			if (CanThisClassDoubleAttack() && GetLevel() > 35 && CheckDoubleAttack()) {
-				Attack(target, EQEmu::inventory::slotSecondary, false, false, false, opts);
+				Attack(target, EQEmu::invslot::slotSecondary, false, false, false, opts);
 
 				if ((IsPet() || IsTempPet()) && IsPetOwnerClient()) {
 					int chance = spellbonuses.PC_Pet_Flurry + itembonuses.PC_Pet_Flurry + aabonuses.PC_Pet_Flurry;

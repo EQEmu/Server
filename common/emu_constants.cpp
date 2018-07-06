@@ -20,6 +20,41 @@
 #include "emu_constants.h"
 
 
+int16 EQEmu::invtype::GetInvTypeSize(int16 inv_type) {
+	static const int16 local_array[] = {
+		POSSESSIONS_SIZE,
+		BANK_SIZE,
+		SHARED_BANK_SIZE,
+		TRADE_SIZE,
+		WORLD_SIZE,
+		LIMBO_SIZE,
+		TRIBUTE_SIZE,
+		TROPHY_TRIBUTE_SIZE,
+		GUILD_TRIBUTE_SIZE,
+		MERCHANT_SIZE,
+		DELETED_SIZE,
+		CORPSE_SIZE,
+		BAZAAR_SIZE,
+		INSPECT_SIZE,
+		REAL_ESTATE_SIZE,
+		VIEW_MOD_PC_SIZE,
+		VIEW_MOD_BANK_SIZE,
+		VIEW_MOD_SHARED_BANK_SIZE,
+		VIEW_MOD_LIMBO_SIZE,
+		ALT_STORAGE_SIZE,
+		ARCHIVED_SIZE,
+		MAIL_SIZE,
+		GUILD_TROPHY_TRIBUTE_SIZE,
+		KRONO_SIZE,
+		OTHER_SIZE,
+	};
+
+	if (inv_type < TYPE_BEGIN || inv_type > TYPE_END)
+		return INULL;
+
+	return local_array[inv_type];
+}
+
 const char* EQEmu::bug::CategoryIDToCategoryName(CategoryID category_id) {
 	switch (category_id) {
 	case catVideo:

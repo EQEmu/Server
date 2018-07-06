@@ -861,7 +861,7 @@ void Client::AI_Process()
 			if (GetTarget() && !IsStunned() && !IsMezzed() && !GetFeigned()) {
 				if (attack_timer.Check()) {
 					// Should charmed clients not be procing?
-					DoAttackRounds(GetTarget(), EQEmu::inventory::slotPrimary);
+					DoAttackRounds(GetTarget(), EQEmu::invslot::slotPrimary);
 				}
 			}
 
@@ -869,7 +869,7 @@ void Client::AI_Process()
 				if (attack_dw_timer.Check()) {
 					if (CheckDualWield()) {
 						// Should charmed clients not be procing?
-						DoAttackRounds(GetTarget(), EQEmu::inventory::slotSecondary);
+						DoAttackRounds(GetTarget(), EQEmu::invslot::slotSecondary);
 					}
 				}
 			}
@@ -1275,7 +1275,7 @@ void Mob::AI_Process() {
 				//try main hand first
 				if (attack_timer.Check()) {
 					DoMainHandAttackRounds(target);
-					TriggerDefensiveProcs(target, EQEmu::inventory::slotPrimary, false);
+					TriggerDefensiveProcs(target, EQEmu::invslot::slotPrimary, false);
 
 					bool specialed = false; // NPCs can only do one of these a round
 					if (GetSpecialAbility(SPECATK_FLURRY)) {
@@ -2154,7 +2154,7 @@ bool Mob::Flurry(ExtraAttackOptions *opts)
 		int num_attacks = GetSpecialAbilityParam(SPECATK_FLURRY, 1);
 		num_attacks = num_attacks > 0 ? num_attacks : RuleI(Combat, MaxFlurryHits);
 		for (int i = 0; i < num_attacks; i++)
-			Attack(target, EQEmu::inventory::slotPrimary, false, false, false, opts);
+			Attack(target, EQEmu::invslot::slotPrimary, false, false, false, opts);
 	}
 	return true;
 }

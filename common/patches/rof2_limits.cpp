@@ -22,231 +22,231 @@
 #include "../string_util.h"
 
 
-size_t RoF2::invtype::GetInvTypeSize(int inv_type)
+int16 RoF2::invtype::GetInvTypeSize(int16 inv_type)
 {
 	switch (inv_type) {
-	case invtype::InvTypePossessions:
-		return invtype::InvTypePossessionsSize;
-	case invtype::InvTypeBank:
-		return invtype::InvTypeBankSize;
-	case invtype::InvTypeSharedBank:
-		return invtype::InvTypeSharedBankSize;
-	case invtype::InvTypeTrade:
-		return invtype::InvTypeTradeSize;
-	case invtype::InvTypeWorld:
-		return invtype::InvTypeWorldSize;
-	case invtype::InvTypeLimbo:
-		return invtype::InvTypeLimboSize;
-	case invtype::InvTypeTribute:
-		return invtype::InvTypeTributeSize;
-	case invtype::InvTypeTrophyTribute:
-		return invtype::InvTypeTrophyTributeSize;
-	case invtype::InvTypeGuildTribute:
-		return invtype::InvTypeGuildTributeSize;
-	case invtype::InvTypeMerchant:
-		return invtype::InvTypeMerchantSize;
-	case invtype::InvTypeDeleted:
-		return invtype::InvTypeDeletedSize;
-	case invtype::InvTypeCorpse:
-		return invtype::InvTypeCorpseSize;
-	case invtype::InvTypeBazaar:
-		return invtype::InvTypeBazaarSize;
-	case invtype::InvTypeInspect:
-		return invtype::InvTypeInspectSize;
-	case invtype::InvTypeRealEstate:
-		return invtype::InvTypeRealEstateSize;
-	case invtype::InvTypeViewMODPC:
-		return invtype::InvTypeViewMODPCSize;
-	case invtype::InvTypeViewMODBank:
-		return invtype::InvTypeViewMODBankSize;
-	case invtype::InvTypeViewMODSharedBank:
-		return invtype::InvTypeViewMODSharedBankSize;
-	case invtype::InvTypeViewMODLimbo:
-		return invtype::InvTypeViewMODLimboSize;
-	case invtype::InvTypeAltStorage:
-		return invtype::InvTypeAltStorageSize;
-	case invtype::InvTypeArchived:
-		return invtype::InvTypeArchivedSize;
-	case invtype::InvTypeMail:
-		return invtype::InvTypeMailSize;
-	case invtype::InvTypeGuildTrophyTribute:
-		return invtype::InvTypeGuildTrophyTributeSize;
-	case invtype::InvTypeKrono:
-		return invtype::InvTypeKronoSize;
-	case invtype::InvTypeOther:
-		return invtype::InvTypeOtherSize;
+	case invtype::typePossessions:
+		return invtype::POSSESSIONS_SIZE;
+	case invtype::typeBank:
+		return invtype::BANK_SIZE;
+	case invtype::typeSharedBank:
+		return invtype::SHARED_BANK_SIZE;
+	case invtype::typeTrade:
+		return invtype::TRADE_SIZE;
+	case invtype::typeWorld:
+		return invtype::WORLD_SIZE;
+	case invtype::typeLimbo:
+		return invtype::LIMBO_SIZE;
+	case invtype::typeTribute:
+		return invtype::TRIBUTE_SIZE;
+	case invtype::typeTrophyTribute:
+		return invtype::TROPHY_TRIBUTE_SIZE;
+	case invtype::typeGuildTribute:
+		return invtype::GUILD_TRIBUTE_SIZE;
+	case invtype::typeMerchant:
+		return invtype::MERCHANT_SIZE;
+	case invtype::typeDeleted:
+		return invtype::DELETED_SIZE;
+	case invtype::typeCorpse:
+		return invtype::CORPSE_SIZE;
+	case invtype::typeBazaar:
+		return invtype::BAZAAR_SIZE;
+	case invtype::typeInspect:
+		return invtype::INSPECT_SIZE;
+	case invtype::typeRealEstate:
+		return invtype::REAL_ESTATE_SIZE;
+	case invtype::typeViewMODPC:
+		return invtype::VIEW_MOD_PC_SIZE;
+	case invtype::typeViewMODBank:
+		return invtype::VIEW_MOD_BANK_SIZE;
+	case invtype::typeViewMODSharedBank:
+		return invtype::VIEW_MOD_SHARED_BANK_SIZE;
+	case invtype::typeViewMODLimbo:
+		return invtype::VIEW_MOD_LIMBO_SIZE;
+	case invtype::typeAltStorage:
+		return invtype::ALT_STORAGE_SIZE;
+	case invtype::typeArchived:
+		return invtype::ARCHIVED_SIZE;
+	case invtype::typeMail:
+		return invtype::MAIL_SIZE;
+	case invtype::typeGuildTrophyTribute:
+		return invtype::GUILD_TROPHY_TRIBUTE_SIZE;
+	case invtype::typeKrono:
+		return invtype::KRONO_SIZE;
+	case invtype::typeOther:
+		return invtype::OTHER_SIZE;
 	default:
-		return 0;
+		return INULL;
 	}
 }
 
-const char* RoF2::invtype::GetInvTypeName(int inv_type)
+const char* RoF2::invtype::GetInvTypeName(int16 inv_type)
 {
 	switch (inv_type) {
-	case invtype::InvTypeInvalid:
+	case invtype::TYPE_INVALID:
 		return "Invalid Type";
-	case invtype::InvTypePossessions:
+	case invtype::typePossessions:
 		return "Possessions";
-	case invtype::InvTypeBank:
+	case invtype::typeBank:
 		return "Bank";
-	case invtype::InvTypeSharedBank:
+	case invtype::typeSharedBank:
 		return "Shared Bank";
-	case invtype::InvTypeTrade:
+	case invtype::typeTrade:
 		return "Trade";
-	case invtype::InvTypeWorld:
+	case invtype::typeWorld:
 		return "World";
-	case invtype::InvTypeLimbo:
+	case invtype::typeLimbo:
 		return "Limbo";
-	case invtype::InvTypeTribute:
+	case invtype::typeTribute:
 		return "Tribute";
-	case invtype::InvTypeTrophyTribute:
+	case invtype::typeTrophyTribute:
 		return "Trophy Tribute";
-	case invtype::InvTypeGuildTribute:
+	case invtype::typeGuildTribute:
 		return "Guild Tribute";
-	case invtype::InvTypeMerchant:
+	case invtype::typeMerchant:
 		return "Merchant";
-	case invtype::InvTypeDeleted:
+	case invtype::typeDeleted:
 		return "Deleted";
-	case invtype::InvTypeCorpse:
+	case invtype::typeCorpse:
 		return "Corpse";
-	case invtype::InvTypeBazaar:
+	case invtype::typeBazaar:
 		return "Bazaar";
-	case invtype::InvTypeInspect:
+	case invtype::typeInspect:
 		return "Inspect";
-	case invtype::InvTypeRealEstate:
+	case invtype::typeRealEstate:
 		return "Real Estate";
-	case invtype::InvTypeViewMODPC:
+	case invtype::typeViewMODPC:
 		return "View MOD PC";
-	case invtype::InvTypeViewMODBank:
+	case invtype::typeViewMODBank:
 		return "View MOD Bank";
-	case invtype::InvTypeViewMODSharedBank:
+	case invtype::typeViewMODSharedBank:
 		return "View MOD Shared Bank";
-	case invtype::InvTypeViewMODLimbo:
+	case invtype::typeViewMODLimbo:
 		return "View MOD Limbo";
-	case invtype::InvTypeAltStorage:
+	case invtype::typeAltStorage:
 		return "Alt Storage";
-	case invtype::InvTypeArchived:
+	case invtype::typeArchived:
 		return "Archived";
-	case invtype::InvTypeMail:
+	case invtype::typeMail:
 		return "Mail";
-	case invtype::InvTypeGuildTrophyTribute:
+	case invtype::typeGuildTrophyTribute:
 		return "Guild Trophy Tribute";
-	case invtype::InvTypeKrono:
+	case invtype::typeKrono:
 		return "Krono";
-	case invtype::InvTypeOther:
+	case invtype::typeOther:
 		return "Other";
 	default:
 		return "Unknown Type";
 	}
 }
 
-bool RoF2::invtype::IsInvTypePersistent(int inv_type)
+bool RoF2::invtype::IsInvTypePersistent(int16 inv_type)
 {
 	switch (inv_type) {
-	case invtype::InvTypePossessions:
-	case invtype::InvTypeBank:
-	case invtype::InvTypeSharedBank:
-	case invtype::InvTypeTrade:
-	case invtype::InvTypeWorld:
-	case invtype::InvTypeLimbo:
-	case invtype::InvTypeTribute:
-	case invtype::InvTypeTrophyTribute:
-	case invtype::InvTypeGuildTribute:
+	case invtype::typePossessions:
+	case invtype::typeBank:
+	case invtype::typeSharedBank:
+	case invtype::typeTrade:
+	case invtype::typeWorld:
+	case invtype::typeLimbo:
+	case invtype::typeTribute:
+	case invtype::typeTrophyTribute:
+	case invtype::typeGuildTribute:
 		return true;
 	default:
 		return false;
 	}
 }
 
-const char* RoF2::invslot::GetInvPossessionsSlotName(int inv_slot)
+const char* RoF2::invslot::GetInvPossessionsSlotName(int16 inv_slot)
 {
 	switch (inv_slot) {
-	case invslot::InvSlotInvalid:
+	case invslot::SLOT_INVALID:
 		return "Invalid Slot";
-	case invslot::PossessionsCharm:
+	case invslot::slotCharm:
 		return "Charm";
-	case invslot::PossessionsEar1:
+	case invslot::slotEar1:
 		return "Ear 1";
-	case invslot::PossessionsHead:
+	case invslot::slotHead:
 		return "Head";
-	case invslot::PossessionsFace:
+	case invslot::slotFace:
 		return "Face";
-	case invslot::PossessionsEar2:
+	case invslot::slotEar2:
 		return "Ear 2";
-	case invslot::PossessionsNeck:
+	case invslot::slotNeck:
 		return "Neck";
-	case invslot::PossessionsShoulders:
+	case invslot::slotShoulders:
 		return "Shoulders";
-	case invslot::PossessionsArms:
+	case invslot::slotArms:
 		return "Arms";
-	case invslot::PossessionsBack:
+	case invslot::slotBack:
 		return "Back";
-	case invslot::PossessionsWrist1:
+	case invslot::slotWrist1:
 		return "Wrist 1";
-	case invslot::PossessionsWrist2:
+	case invslot::slotWrist2:
 		return "Wrist 2";
-	case invslot::PossessionsRange:
+	case invslot::slotRange:
 		return "Range";
-	case invslot::PossessionsHands:
+	case invslot::slotHands:
 		return "Hands";
-	case invslot::PossessionsPrimary:
+	case invslot::slotPrimary:
 		return "Primary";
-	case invslot::PossessionsSecondary:
+	case invslot::slotSecondary:
 		return "Secondary";
-	case invslot::PossessionsFinger1:
+	case invslot::slotFinger1:
 		return "Finger 1";
-	case invslot::PossessionsFinger2:
+	case invslot::slotFinger2:
 		return "Finger 2";
-	case invslot::PossessionsChest:
+	case invslot::slotChest:
 		return "Chest";
-	case invslot::PossessionsLegs:
+	case invslot::slotLegs:
 		return "Legs";
-	case invslot::PossessionsFeet:
+	case invslot::slotFeet:
 		return "Feet";
-	case invslot::PossessionsWaist:
+	case invslot::slotWaist:
 		return "Waist";
-	case invslot::PossessionsPowerSource:
+	case invslot::slotPowerSource:
 		return "Power Source";
-	case invslot::PossessionsAmmo:
+	case invslot::slotAmmo:
 		return "Ammo";
-	case invslot::PossessionsGeneral1:
+	case invslot::slotGeneral1:
 		return "General 1";
-	case invslot::PossessionsGeneral2:
+	case invslot::slotGeneral2:
 		return "General 2";
-	case invslot::PossessionsGeneral3:
+	case invslot::slotGeneral3:
 		return "General 3";
-	case invslot::PossessionsGeneral4:
+	case invslot::slotGeneral4:
 		return "General 4";
-	case invslot::PossessionsGeneral5:
+	case invslot::slotGeneral5:
 		return "General 5";
-	case invslot::PossessionsGeneral6:
+	case invslot::slotGeneral6:
 		return "General 6";
-	case invslot::PossessionsGeneral7:
+	case invslot::slotGeneral7:
 		return "General 7";
-	case invslot::PossessionsGeneral8:
+	case invslot::slotGeneral8:
 		return "General 8";
-	case invslot::PossessionsGeneral9:
+	case invslot::slotGeneral9:
 		return "General 9";
-	case invslot::PossessionsGeneral10:
+	case invslot::slotGeneral10:
 		return "General 10";
-	case invslot::PossessionsCursor:
+	case invslot::slotCursor:
 		return "Cursor";
 	default:
 		return "Unknown Slot";
 	}
 }
 
-const char* RoF2::invslot::GetInvSlotName(int inv_type, int inv_slot)
+const char* RoF2::invslot::GetInvSlotName(int16 inv_type, int16 inv_slot)
 {
-	if (inv_type == invtype::InvTypePossessions)
+	if (inv_type == invtype::typePossessions)
 		return invslot::GetInvPossessionsSlotName(inv_slot);
 
-	size_t type_size = invtype::GetInvTypeSize(inv_type);
+	int16 type_size = invtype::GetInvTypeSize(inv_type);
 
-	if (!type_size || inv_slot == invslot::InvSlotInvalid)
+	if (!type_size || inv_slot == invslot::SLOT_INVALID)
 		return "Invalid Slot";
 
-	if ((size_t)(inv_slot + 1) >= type_size)
+	if ((inv_slot + 1) >= type_size)
 		return "Unknown Slot";
 
 	static std::string ret_str;
@@ -255,12 +255,12 @@ const char* RoF2::invslot::GetInvSlotName(int inv_type, int inv_slot)
 	return ret_str.c_str();
 }
 
-const char* RoF2::invbag::GetInvBagIndexName(int bag_index)
+const char* RoF2::invbag::GetInvBagIndexName(int16 bag_index)
 {
-	if (bag_index == invbag::InvBagInvalid)
+	if (bag_index == invbag::SLOT_INVALID)
 		return "Invalid Bag";
 
-	if ((size_t)bag_index >= invbag::ItemBagSize)
+	if (bag_index >= invbag::SLOT_COUNT)
 		return "Unknown Bag";
 
 	static std::string ret_str;
@@ -269,12 +269,12 @@ const char* RoF2::invbag::GetInvBagIndexName(int bag_index)
 	return ret_str.c_str();
 }
 
-const char* RoF2::invaug::GetInvAugIndexName(int aug_index)
+const char* RoF2::invaug::GetInvAugIndexName(int16 aug_index)
 {
-	if (aug_index == invaug::InvAugInvalid)
+	if (aug_index == invaug::SOCKET_INVALID)
 		return "Invalid Augment";
 
-	if ((size_t)aug_index >= invaug::ItemAugSize)
+	if (aug_index >= invaug::SOCKET_COUNT)
 		return "Unknown Augment";
 
 	static std::string ret_str;

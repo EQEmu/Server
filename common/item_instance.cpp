@@ -273,8 +273,8 @@ bool EQEmu::ItemInstance::IsEquipable(int16 slot_id) const
 
 	// another "shouldn't do" fix..will be fixed in future updates (requires code and database work)
 	int16 use_slot = INVALID_INDEX;
-	if (slot_id == inventory::slotPowerSource) { use_slot = inventory::slotGeneral1; }
-	if ((uint16)slot_id <= legacy::EQUIPMENT_END) { use_slot = slot_id; }
+	if (slot_id == invslot::SLOT_POWER_SOURCE) { use_slot = invslot::slotGeneral1; }
+	if ((uint16)slot_id <= invslot::EQUIPMENT_END) { use_slot = slot_id; }
 
 	if (use_slot != INVALID_INDEX) {
 		if (m_item->Slots & (1 << use_slot))
@@ -289,7 +289,7 @@ bool EQEmu::ItemInstance::IsAugmentable() const
 	if (!m_item)
 		return false;
 
-	for (int index = inventory::socketBegin; index < inventory::SocketCount; ++index) {
+	for (int index = invaug::SOCKET_BEGIN; index <= invaug::SOCKET_END; ++index) {
 		if (m_item->AugSlotType[index] != 0)
 			return true;
 	}
@@ -303,8 +303,8 @@ bool EQEmu::ItemInstance::AvailableWearSlot(uint32 aug_wear_slots) const {
 	if (!m_item || !m_item->IsClassCommon())
 		return false;
 
-	int index = legacy::EQUIPMENT_BEGIN;
-	for (; index <= inventory::slotGeneral1; ++index) { // MainGeneral1 should be legacy::EQUIPMENT_END
+	int index = invslot::EQUIPMENT_BEGIN;
+	for (; index <= invslot::slotGeneral1; ++index) { // MainGeneral1 should be legacy::EQUIPMENT_END
 		if (m_item->Slots & (1 << index)) {
 			if (aug_wear_slots & (1 << index))
 				break;
@@ -319,14 +319,14 @@ int8 EQEmu::ItemInstance::AvailableAugmentSlot(int32 augtype) const
 	if (!m_item || !m_item->IsClassCommon())
 		return INVALID_INDEX;
 
-	int index = inventory::socketBegin;
-	for (; index < inventory::SocketCount; ++index) {
+	int index = invaug::SOCKET_BEGIN;
+	for (; index <= invaug::SOCKET_END; ++index) {
 		if (GetItem(index)) { continue; }
 		if (augtype == -1 || (m_item->AugSlotType[index] && ((1 << (m_item->AugSlotType[index] - 1)) & augtype)))
 			break;
 	}
 
-	return (index < inventory::SocketCount) ? index : INVALID_INDEX;
+	return (index <= invaug::SOCKET_END) ? index : INVALID_INDEX;
 }
 
 bool EQEmu::ItemInstance::IsAugmentSlotAvailable(int32 augtype, uint8 slot) const
@@ -469,7 +469,7 @@ uint8 EQEmu::ItemInstance::FirstOpenSlot() const
 		return INVALID_INDEX;
 
 	uint8 slots = m_item->BagSlots, i;
-	for (i = inventory::containerBegin; i < slots; i++) {
+	for (i = invbag::SLOT_BEGIN; i < slots; i++) {
 		if (!GetItem(i))
 			break;
 	}
@@ -486,7 +486,7 @@ uint8 EQEmu::ItemInstance::GetTotalItemCount() const
 
 	if (m_item && !m_item->IsClassBag()) { return item_count; }
 
-	for (int index = inventory::containerBegin; index < m_item->BagSlots; ++index) { if (GetItem(index)) { ++item_count; } }
+	for (int index = invbag::SLOT_BEGIN; index < m_item->BagSlots; ++index) { if (GetItem(index)) { ++item_count; } }
 
 	return item_count;
 }
@@ -496,7 +496,7 @@ bool EQEmu::ItemInstance::IsNoneEmptyContainer()
 	if (!m_item || !m_item->IsClassBag())
 		return false;
 
-	for (int index = inventory::containerBegin; index < m_item->BagSlots; ++index) {
+	for (int index = invbag::SLOT_BEGIN; index < m_item->BagSlots; ++index) {
 		if (GetItem(index))
 			return true;
 	}
@@ -518,7 +518,7 @@ EQEmu::ItemInstance* EQEmu::ItemInstance::GetOrnamentationAug(int32 ornamentatio
 	if (!m_item || !m_item->IsClassCommon()) { return nullptr; }
 	if (ornamentationAugtype == 0) { return nullptr; }
 
-	for (int i = inventory::socketBegin; i < inventory::SocketCount; i++)
+	for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; i++)
 	{
 		if (GetAugment(i) && m_item->AugSlotType[i] == ornamentationAugtype)
 		{
@@ -686,7 +686,7 @@ bool EQEmu::ItemInstance::IsAugmented()
 	if (!m_item || !m_item->IsClassCommon())
 		return false;
 	
-	for (int index = inventory::socketBegin; index < inventory::SocketCount; ++index) {
+	for (int index = invaug::SOCKET_BEGIN; index <= invaug::SOCKET_END; ++index) {
 		if (GetAugmentItemID(index))
 			return true;
 	}
@@ -814,8 +814,8 @@ bool EQEmu::ItemInstance::IsSlotAllowed(int16 slot_id) const {
 	if (!m_item) { return false; }
 	else if (InventoryProfile::SupportsContainers(slot_id)) { return true; }
 	else if (m_item->Slots & (1 << slot_id)) { return true; }
-	else if (slot_id == inventory::slotPowerSource && (m_item->Slots & (1 << 22))) { return true; } // got lazy... <watch>
-	else if (slot_id != inventory::slotPowerSource && slot_id > legacy::EQUIPMENT_END) { return true; }
+	else if (slot_id == invslot::SLOT_POWER_SOURCE && (m_item->Slots & (1 << 22))) { return true; } // got lazy... <watch>
+	else if (slot_id != invslot::SLOT_POWER_SOURCE && slot_id > invslot::EQUIPMENT_END) { return true; }
 	else { return false; }
 }
 
@@ -993,7 +993,7 @@ int EQEmu::ItemInstance::GetItemArmorClass(bool augments) const
 	if (item) {
 		ac = item->AC;
 		if (augments)
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i))
 					ac += GetAugment(i)->GetItemArmorClass();
 	}
@@ -1035,7 +1035,7 @@ int EQEmu::ItemInstance::GetItemElementalDamage(int &magic, int &fire, int &cold
 		}
 
 		if (augments)
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i))
 					GetAugment(i)->GetItemElementalDamage(magic, fire, cold, poison, disease, chromatic, prismatic, physical, corruption);
 	}
@@ -1052,7 +1052,7 @@ int EQEmu::ItemInstance::GetItemElementalFlag(bool augments) const
 			return flag;
 
 		if (augments) {
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i) {
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i) {
 				if (GetAugment(i))
 					flag = GetAugment(i)->GetItemElementalFlag();
 				if (flag)
@@ -1073,7 +1073,7 @@ int EQEmu::ItemInstance::GetItemElementalDamage(bool augments) const
 			return damage;
 
 		if (augments) {
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i) {
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i) {
 				if (GetAugment(i))
 					damage = GetAugment(i)->GetItemElementalDamage();
 				if (damage)
@@ -1092,7 +1092,7 @@ int EQEmu::ItemInstance::GetItemRecommendedLevel(bool augments) const
 		level = item->RecLevel;
 
 		if (augments) {
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i) {
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i) {
 				int temp = 0;
 				if (GetAugment(i)) {
 					temp = GetAugment(i)->GetItemRecommendedLevel();
@@ -1114,7 +1114,7 @@ int EQEmu::ItemInstance::GetItemRequiredLevel(bool augments) const
 		level = item->ReqLevel;
 
 		if (augments) {
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i) {
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i) {
 				int temp = 0;
 				if (GetAugment(i)) {
 					temp = GetAugment(i)->GetItemRequiredLevel();
@@ -1136,7 +1136,7 @@ int EQEmu::ItemInstance::GetItemWeaponDamage(bool augments) const
 		damage = item->Damage;
 
 		if (augments) {
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i))
 					damage += GetAugment(i)->GetItemWeaponDamage();
 		}
@@ -1152,7 +1152,7 @@ int EQEmu::ItemInstance::GetItemBackstabDamage(bool augments) const
 		damage = item->BackstabDmg;
 
 		if (augments) {
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i))
 					damage += GetAugment(i)->GetItemBackstabDamage();
 		}
@@ -1170,7 +1170,7 @@ int EQEmu::ItemInstance::GetItemBaneDamageBody(bool augments) const
 			return body;
 
 		if (augments) {
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i)) {
 					body = GetAugment(i)->GetItemBaneDamageBody();
 					if (body)
@@ -1191,7 +1191,7 @@ int EQEmu::ItemInstance::GetItemBaneDamageRace(bool augments) const
 			return race;
 
 		if (augments) {
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i)) {
 					race = GetAugment(i)->GetItemBaneDamageRace();
 					if (race)
@@ -1211,7 +1211,7 @@ int EQEmu::ItemInstance::GetItemBaneDamageBody(bodyType against, bool augments) 
 			damage += item->BaneDmgAmt;
 
 		if (augments) {
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i))
 					damage += GetAugment(i)->GetItemBaneDamageBody(against);
 		}
@@ -1228,7 +1228,7 @@ int EQEmu::ItemInstance::GetItemBaneDamageRace(uint16 against, bool augments) co
 			damage += item->BaneDmgRaceAmt;
 
 		if (augments) {
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i))
 					damage += GetAugment(i)->GetItemBaneDamageRace(against);
 		}
@@ -1244,7 +1244,7 @@ int EQEmu::ItemInstance::GetItemMagical(bool augments) const
 			return 1;
 
 		if (augments) {
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i) && GetAugment(i)->GetItemMagical())
 					return 1;
 		}
@@ -1259,7 +1259,7 @@ int EQEmu::ItemInstance::GetItemHP(bool augments) const
 	if (item) {
 		hp = item->HP;
 		if (augments)
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i))
 					hp += GetAugment(i)->GetItemHP();
 	}
@@ -1273,7 +1273,7 @@ int EQEmu::ItemInstance::GetItemMana(bool augments) const
 	if (item) {
 		mana = item->Mana;
 		if (augments)
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i))
 					mana += GetAugment(i)->GetItemMana();
 	}
@@ -1287,7 +1287,7 @@ int EQEmu::ItemInstance::GetItemEndur(bool augments) const
 	if (item) {
 		endur = item->Endur;
 		if (augments)
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i))
 					endur += GetAugment(i)->GetItemEndur();
 	}
@@ -1301,7 +1301,7 @@ int EQEmu::ItemInstance::GetItemAttack(bool augments) const
 	if (item) {
 		atk = item->Attack;
 		if (augments)
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i))
 					atk += GetAugment(i)->GetItemAttack();
 	}
@@ -1315,7 +1315,7 @@ int EQEmu::ItemInstance::GetItemStr(bool augments) const
 	if (item) {
 		str = item->AStr;
 		if (augments)
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i))
 					str += GetAugment(i)->GetItemStr();
 	}
@@ -1329,7 +1329,7 @@ int EQEmu::ItemInstance::GetItemSta(bool augments) const
 	if (item) {
 		sta = item->ASta;
 		if (augments)
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i))
 					sta += GetAugment(i)->GetItemSta();
 	}
@@ -1343,7 +1343,7 @@ int EQEmu::ItemInstance::GetItemDex(bool augments) const
 	if (item) {
 		total = item->ADex;
 		if (augments)
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i))
 					total += GetAugment(i)->GetItemDex();
 	}
@@ -1357,7 +1357,7 @@ int EQEmu::ItemInstance::GetItemAgi(bool augments) const
 	if (item) {
 		total = item->AAgi;
 		if (augments)
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i))
 					total += GetAugment(i)->GetItemAgi();
 	}
@@ -1371,7 +1371,7 @@ int EQEmu::ItemInstance::GetItemInt(bool augments) const
 	if (item) {
 		total = item->AInt;
 		if (augments)
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i))
 					total += GetAugment(i)->GetItemInt();
 	}
@@ -1385,7 +1385,7 @@ int EQEmu::ItemInstance::GetItemWis(bool augments) const
 	if (item) {
 		total = item->AWis;
 		if (augments)
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i))
 					total += GetAugment(i)->GetItemWis();
 	}
@@ -1399,7 +1399,7 @@ int EQEmu::ItemInstance::GetItemCha(bool augments) const
 	if (item) {
 		total = item->ACha;
 		if (augments)
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i))
 					total += GetAugment(i)->GetItemCha();
 	}
@@ -1413,7 +1413,7 @@ int EQEmu::ItemInstance::GetItemMR(bool augments) const
 	if (item) {
 		total = item->MR;
 		if (augments)
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i))
 					total += GetAugment(i)->GetItemMR();
 	}
@@ -1427,7 +1427,7 @@ int EQEmu::ItemInstance::GetItemFR(bool augments) const
 	if (item) {
 		total = item->FR;
 		if (augments)
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i))
 					total += GetAugment(i)->GetItemFR();
 	}
@@ -1441,7 +1441,7 @@ int EQEmu::ItemInstance::GetItemCR(bool augments) const
 	if (item) {
 		total = item->CR;
 		if (augments)
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i))
 					total += GetAugment(i)->GetItemCR();
 	}
@@ -1455,7 +1455,7 @@ int EQEmu::ItemInstance::GetItemPR(bool augments) const
 	if (item) {
 		total = item->PR;
 		if (augments)
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i))
 					total += GetAugment(i)->GetItemPR();
 	}
@@ -1469,7 +1469,7 @@ int EQEmu::ItemInstance::GetItemDR(bool augments) const
 	if (item) {
 		total = item->DR;
 		if (augments)
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i))
 					total += GetAugment(i)->GetItemDR();
 	}
@@ -1483,7 +1483,7 @@ int EQEmu::ItemInstance::GetItemCorrup(bool augments) const
 	if (item) {
 		total = item->SVCorruption;
 		if (augments)
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i))
 					total += GetAugment(i)->GetItemCorrup();
 	}
@@ -1497,7 +1497,7 @@ int EQEmu::ItemInstance::GetItemHeroicStr(bool augments) const
 	if (item) {
 		total = item->HeroicStr;
 		if (augments)
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i))
 					total += GetAugment(i)->GetItemHeroicStr();
 	}
@@ -1511,7 +1511,7 @@ int EQEmu::ItemInstance::GetItemHeroicSta(bool augments) const
 	if (item) {
 		total = item->HeroicSta;
 		if (augments)
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i))
 					total += GetAugment(i)->GetItemHeroicSta();
 	}
@@ -1525,7 +1525,7 @@ int EQEmu::ItemInstance::GetItemHeroicDex(bool augments) const
 	if (item) {
 		total = item->HeroicDex;
 		if (augments)
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i))
 					total += GetAugment(i)->GetItemHeroicDex();
 	}
@@ -1539,7 +1539,7 @@ int EQEmu::ItemInstance::GetItemHeroicAgi(bool augments) const
 	if (item) {
 		total = item->HeroicAgi;
 		if (augments)
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i))
 					total += GetAugment(i)->GetItemHeroicAgi();
 	}
@@ -1553,7 +1553,7 @@ int EQEmu::ItemInstance::GetItemHeroicInt(bool augments) const
 	if (item) {
 		total = item->HeroicInt;
 		if (augments)
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i))
 					total += GetAugment(i)->GetItemHeroicInt();
 	}
@@ -1567,7 +1567,7 @@ int EQEmu::ItemInstance::GetItemHeroicWis(bool augments) const
 	if (item) {
 		total = item->HeroicWis;
 		if (augments)
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i))
 					total += GetAugment(i)->GetItemHeroicWis();
 	}
@@ -1581,7 +1581,7 @@ int EQEmu::ItemInstance::GetItemHeroicCha(bool augments) const
 	if (item) {
 		total = item->HeroicCha;
 		if (augments)
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i))
 					total += GetAugment(i)->GetItemHeroicCha();
 	}
@@ -1595,7 +1595,7 @@ int EQEmu::ItemInstance::GetItemHeroicMR(bool augments) const
 	if (item) {
 		total = item->HeroicMR;
 		if (augments)
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i))
 					total += GetAugment(i)->GetItemHeroicMR();
 	}
@@ -1609,7 +1609,7 @@ int EQEmu::ItemInstance::GetItemHeroicFR(bool augments) const
 	if (item) {
 		total = item->HeroicFR;
 		if (augments)
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i))
 					total += GetAugment(i)->GetItemHeroicFR();
 	}
@@ -1623,7 +1623,7 @@ int EQEmu::ItemInstance::GetItemHeroicCR(bool augments) const
 	if (item) {
 		total = item->HeroicCR;
 		if (augments)
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i))
 					total += GetAugment(i)->GetItemHeroicCR();
 	}
@@ -1637,7 +1637,7 @@ int EQEmu::ItemInstance::GetItemHeroicPR(bool augments) const
 	if (item) {
 		total = item->HeroicPR;
 		if (augments)
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i))
 					total += GetAugment(i)->GetItemHeroicPR();
 	}
@@ -1651,7 +1651,7 @@ int EQEmu::ItemInstance::GetItemHeroicDR(bool augments) const
 	if (item) {
 		total = item->HeroicDR;
 		if (augments)
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i))
 					total += GetAugment(i)->GetItemHeroicDR();
 	}
@@ -1665,7 +1665,7 @@ int EQEmu::ItemInstance::GetItemHeroicCorrup(bool augments) const
 	if (item) {
 		total = item->HeroicSVCorrup;
 		if (augments)
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i))
 					total += GetAugment(i)->GetItemHeroicCorrup();
 	}
@@ -1679,7 +1679,7 @@ int EQEmu::ItemInstance::GetItemHaste(bool augments) const
 	if (item) {
 		total = item->Haste;
 		if (augments)
-			for (int i = inventory::socketBegin; i < inventory::SocketCount; ++i)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
 				if (GetAugment(i)) {
 					int temp = GetAugment(i)->GetItemHaste();
 					if (temp > total)

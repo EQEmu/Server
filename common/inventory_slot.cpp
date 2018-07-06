@@ -25,23 +25,23 @@
 int8 EQEmu::inventory::ConvertEquipmentIndexToTextureIndex(int16 slot_index)
 {
 	switch (slot_index) {
-	case slotHead:
+	case invslot::slotHead:
 		return textures::armorHead;
-	case slotChest:
+	case invslot::slotChest:
 		return textures::armorChest;
-	case slotArms:
+	case invslot::slotArms:
 		return textures::armorArms;
-	case slotWrist1:
+	case invslot::slotWrist1:
 		return textures::armorWrist;
-	case slotHands:
+	case invslot::slotHands:
 		return textures::armorHands;
-	case slotLegs:
+	case invslot::slotLegs:
 		return textures::armorLegs;
-	case slotFeet:
+	case invslot::slotFeet:
 		return textures::armorFeet;
-	case slotPrimary:
+	case invslot::slotPrimary:
 		return textures::weaponPrimary;
-	case slotSecondary:
+	case invslot::slotSecondary:
 		return textures::weaponSecondary;
 	default:
 		return textures::textureInvalid;
@@ -50,7 +50,7 @@ int8 EQEmu::inventory::ConvertEquipmentIndexToTextureIndex(int16 slot_index)
 
 int8 EQEmu::inventory::ConvertEquipmentSlotToTextureIndex(const InventorySlot& inventory_slot)
 {
-	if ((!inventory_slot.Typeless() && !inventory_slot.IsTypeIndex(typePossessions)) || !inventory_slot.IsContainerIndex(containerInvalid) || !inventory_slot.IsSocketIndex(socketInvalid))
+	if ((!inventory_slot.Typeless() && !inventory_slot.IsTypeIndex(invtype::typePossessions)) || !inventory_slot.IsContainerIndex(invbag::SLOT_INVALID) || !inventory_slot.IsSocketIndex(invaug::SOCKET_INVALID))
 		return textures::textureInvalid;
 
 	return ConvertEquipmentIndexToTextureIndex(inventory_slot.SlotIndex());
@@ -60,25 +60,25 @@ int16 EQEmu::inventory::ConvertTextureIndexToEquipmentIndex(int8 texture_index)
 {
 	switch (texture_index) {
 	case textures::armorHead:
-		return slotHead;
+		return invslot::slotHead;
 	case textures::armorChest:
-		return slotChest;
+		return invslot::slotChest;
 	case textures::armorArms:
-		return slotArms;
+		return invslot::slotArms;
 	case textures::armorWrist:
-		return slotWrist1;
+		return invslot::slotWrist1;
 	case textures::armorHands:
-		return slotHands;
+		return invslot::slotHands;
 	case textures::armorLegs:
-		return slotLegs;
+		return invslot::slotLegs;
 	case textures::armorFeet:
-		return slotFeet;
+		return invslot::slotFeet;
 	case textures::weaponPrimary:
-		return slotPrimary;
+		return invslot::slotPrimary;
 	case textures::weaponSecondary:
-		return slotSecondary;
+		return invslot::slotSecondary;
 	default:
-		return slotInvalid;
+		return invslot::SLOT_INVALID;
 	}
 }
 
@@ -87,14 +87,14 @@ bool EQEmu::InventorySlot::IsValidSlot() const
 	if (_typeless)
 		return false;
 	
-	int16 slot_count = inventory::SlotCount(_type_index);
-	if (!slot_count || _slot_index < inventory::slotBegin || _slot_index >= slot_count)
+	int16 slot_count = invtype::GetInvTypeSize(_type_index);
+	if (!slot_count || _slot_index < invslot::SLOT_BEGIN || _slot_index >= slot_count)
 		return false;
 
-	if (_container_index < inventory::containerInvalid || _container_index >= inventory::ContainerCount)
+	if (_container_index < invbag::SLOT_INVALID || _container_index >= invbag::SLOT_COUNT)
 		return false;
 
-	if (_socket_index < inventory::socketInvalid || _socket_index >= inventory::SocketCount)
+	if (_socket_index < invaug::SOCKET_INVALID || _socket_index >= invaug::SOCKET_COUNT)
 		return false;
 
 	return true;
@@ -103,16 +103,16 @@ bool EQEmu::InventorySlot::IsValidSlot() const
 bool EQEmu::InventorySlot::IsDeleteSlot() const
 {
 	if (_typeless)
-		return (_slot_index == inventory::slotInvalid && _container_index == inventory::containerInvalid && _socket_index == inventory::socketInvalid);
+		return (_slot_index == invslot::SLOT_INVALID && _container_index == invbag::SLOT_INVALID && _socket_index == invaug::SOCKET_INVALID);
 	else
-		return (_type_index == inventory::typeInvalid && _slot_index == inventory::slotInvalid && _container_index == inventory::containerInvalid && _socket_index == inventory::socketInvalid);
+		return (_type_index == invtype::TYPE_INVALID && _slot_index == invslot::SLOT_INVALID && _container_index == invbag::SLOT_INVALID && _socket_index == invaug::SOCKET_INVALID);
 }
 
 bool EQEmu::InventorySlot::IsEquipmentIndex(int16 slot_index)
 {
 	/*if (slot_index < inventory::EquipmentBegin || slot_index > inventory::EquipmentEnd)
 		return false;*/
-	if ((slot_index < legacy::EQUIPMENT_BEGIN || slot_index > legacy::EQUIPMENT_END) && slot_index != legacy::SLOT_POWER_SOURCE)
+	if ((slot_index < invslot::EQUIPMENT_BEGIN || slot_index > invslot::EQUIPMENT_END) && slot_index != invslot::SLOT_POWER_SOURCE)
 		return false;
 
 	return true;
@@ -122,7 +122,7 @@ bool EQEmu::InventorySlot::IsGeneralIndex(int16 slot_index)
 {
 	/*if (slot_index < inventory::GeneralBegin || slot_index > inventory::GeneralEnd)
 		return false;*/
-	if (slot_index < legacy::GENERAL_BEGIN || slot_index > legacy::GENERAL_END)
+	if (slot_index < invslot::GENERAL_BEGIN || slot_index > invslot::GENERAL_END)
 		return false;
 
 	return true;
@@ -132,7 +132,7 @@ bool EQEmu::InventorySlot::IsCursorIndex(int16 slot_index)
 {
 	/*if (slot_index != inventory::slotCursor)
 		return false;*/
-	if (slot_index != legacy::SLOT_CURSOR)
+	if (slot_index != invslot::slotCursor)
 		return false;
 
 	return true;
@@ -142,7 +142,7 @@ bool EQEmu::InventorySlot::IsWeaponIndex(int16 slot_index)
 {
 	/*if ((slot_index != inventory::slotRange) && (slot_index != inventory::slotPrimary) && (slot_index != inventory::slotSecondary))
 		return false;*/
-	if ((slot_index != legacy::SLOT_RANGE) && (slot_index != legacy::SLOT_PRIMARY) && (slot_index != legacy::SLOT_SECONDARY))
+	if ((slot_index != invslot::slotRange) && (slot_index != invslot::slotPrimary) && (slot_index != invslot::slotSecondary))
 		return false;
 
 	return true;
@@ -151,15 +151,15 @@ bool EQEmu::InventorySlot::IsWeaponIndex(int16 slot_index)
 bool EQEmu::InventorySlot::IsTextureIndex(int16 slot_index)
 {
 	switch (slot_index) {
-	case inventory::slotHead:
-	case inventory::slotChest:
-	case inventory::slotArms:
-	case inventory::slotWrist1:
-	case inventory::slotHands:
-	case inventory::slotLegs:
-	case inventory::slotFeet:
-	case inventory::slotPrimary:
-	case inventory::slotSecondary:
+	case invslot::slotHead:
+	case invslot::slotChest:
+	case invslot::slotArms:
+	case invslot::slotWrist1:
+	case invslot::slotHands:
+	case invslot::slotLegs:
+	case invslot::slotFeet:
+	case invslot::slotPrimary:
+	case invslot::slotSecondary:
 		return true;
 	default:
 		return false;
@@ -169,13 +169,13 @@ bool EQEmu::InventorySlot::IsTextureIndex(int16 slot_index)
 bool EQEmu::InventorySlot::IsTintableIndex(int16 slot_index)
 {
 	switch (slot_index) {
-	case inventory::slotHead:
-	case inventory::slotChest:
-	case inventory::slotArms:
-	case inventory::slotWrist1:
-	case inventory::slotHands:
-	case inventory::slotLegs:
-	case inventory::slotFeet:
+	case invslot::slotHead:
+	case invslot::slotChest:
+	case invslot::slotArms:
+	case invslot::slotWrist1:
+	case invslot::slotHands:
+	case invslot::slotLegs:
+	case invslot::slotFeet:
 		return true;
 	default:
 		return false;
@@ -184,10 +184,10 @@ bool EQEmu::InventorySlot::IsTintableIndex(int16 slot_index)
 
 bool EQEmu::InventorySlot::IsEquipmentSlot() const
 {
-	if (!_typeless && (_type_index != inventory::typePossessions))
+	if (!_typeless && (_type_index != invtype::typePossessions))
 		return false;
 
-	if ((_container_index != inventory::containerInvalid) || (_socket_index != inventory::socketInvalid))
+	if ((_container_index != invbag::SLOT_INVALID) || (_socket_index != invaug::SOCKET_INVALID))
 		return false;
 
 	return IsEquipmentIndex(_slot_index);
@@ -195,10 +195,10 @@ bool EQEmu::InventorySlot::IsEquipmentSlot() const
 
 bool EQEmu::InventorySlot::IsGeneralSlot() const
 {
-	if (!_typeless && (_type_index != inventory::typePossessions))
+	if (!_typeless && (_type_index != invtype::typePossessions))
 		return false;
 
-	if ((_container_index != inventory::containerInvalid) || (_socket_index != inventory::socketInvalid))
+	if ((_container_index != invbag::SLOT_INVALID) || (_socket_index != invaug::SOCKET_INVALID))
 		return false;
 
 	return IsGeneralIndex(_socket_index);
@@ -206,10 +206,10 @@ bool EQEmu::InventorySlot::IsGeneralSlot() const
 
 bool EQEmu::InventorySlot::IsCursorSlot() const
 {
-	if (!_typeless && (_type_index != inventory::typePossessions))
+	if (!_typeless && (_type_index != invtype::typePossessions))
 		return false;
 
-	if ((_container_index != inventory::containerInvalid) || (_socket_index != inventory::socketInvalid))
+	if ((_container_index != invbag::SLOT_INVALID) || (_socket_index != invaug::SOCKET_INVALID))
 		return false;
 
 	return IsCursorIndex(_slot_index);
@@ -217,10 +217,10 @@ bool EQEmu::InventorySlot::IsCursorSlot() const
 
 bool EQEmu::InventorySlot::IsWeaponSlot() const
 {
-	if (!_typeless && (_type_index != inventory::typePossessions))
+	if (!_typeless && (_type_index != invtype::typePossessions))
 		return false;
 
-	if ((_container_index != inventory::containerInvalid) || (_socket_index != inventory::socketInvalid))
+	if ((_container_index != invbag::SLOT_INVALID) || (_socket_index != invaug::SOCKET_INVALID))
 		return false;
 
 	return IsWeaponIndex(_slot_index);
@@ -228,10 +228,10 @@ bool EQEmu::InventorySlot::IsWeaponSlot() const
 
 bool EQEmu::InventorySlot::IsTextureSlot() const
 {
-	if (!_typeless && (_type_index != inventory::typePossessions))
+	if (!_typeless && (_type_index != invtype::typePossessions))
 		return false;
 
-	if ((_container_index != inventory::containerInvalid) || (_socket_index != inventory::socketInvalid))
+	if ((_container_index != invbag::SLOT_INVALID) || (_socket_index != invaug::SOCKET_INVALID))
 		return false;
 
 	return IsTextureIndex(_slot_index);
@@ -239,10 +239,10 @@ bool EQEmu::InventorySlot::IsTextureSlot() const
 
 bool EQEmu::InventorySlot::IsTintableSlot() const
 {
-	if (!_typeless && (_type_index != inventory::typePossessions))
+	if (!_typeless && (_type_index != invtype::typePossessions))
 		return false;
 
-	if ((_container_index != inventory::containerInvalid) || (_socket_index != inventory::socketInvalid))
+	if ((_container_index != invbag::SLOT_INVALID) || (_socket_index != invaug::SOCKET_INVALID))
 		return false;
 
 	return IsTintableIndex(_slot_index);
@@ -250,13 +250,13 @@ bool EQEmu::InventorySlot::IsTintableSlot() const
 
 bool EQEmu::InventorySlot::IsSlot() const
 {
-	if (!_typeless && (_type_index == inventory::typeInvalid))
+	if (!_typeless && (_type_index == invtype::TYPE_INVALID))
 		return false;
-	if (_slot_index == inventory::slotInvalid)
+	if (_slot_index == invslot::SLOT_INVALID)
 		return false;
-	if (_container_index != inventory::containerInvalid)
+	if (_container_index != invbag::SLOT_INVALID)
 		return false;
-	if (_socket_index != inventory::socketInvalid)
+	if (_socket_index != invaug::SOCKET_INVALID)
 		return false;
 
 	return true;
@@ -264,13 +264,13 @@ bool EQEmu::InventorySlot::IsSlot() const
 
 bool EQEmu::InventorySlot::IsSlotSocket() const
 {
-	if (!_typeless && (_type_index == inventory::typeInvalid))
+	if (!_typeless && (_type_index == invtype::TYPE_INVALID))
 		return false;
-	if (_slot_index == inventory::slotInvalid)
+	if (_slot_index == invslot::SLOT_INVALID)
 		return false;
-	if (_container_index != inventory::containerInvalid)
+	if (_container_index != invbag::SLOT_INVALID)
 		return false;
-	if (_socket_index == inventory::socketInvalid)
+	if (_socket_index == invaug::SOCKET_INVALID)
 		return false;
 
 	return true;
@@ -278,13 +278,13 @@ bool EQEmu::InventorySlot::IsSlotSocket() const
 
 bool EQEmu::InventorySlot::IsContainer() const
 {
-	if (!_typeless && (_type_index == inventory::typeInvalid))
+	if (!_typeless && (_type_index == invtype::TYPE_INVALID))
 		return false;
-	if (_slot_index == inventory::slotInvalid)
+	if (_slot_index == invslot::SLOT_INVALID)
 		return false;
-	if (_container_index == inventory::containerInvalid)
+	if (_container_index == invbag::SLOT_INVALID)
 		return false;
-	if (_socket_index != inventory::socketInvalid)
+	if (_socket_index != invaug::SOCKET_INVALID)
 		return false;
 
 	return true;
@@ -292,13 +292,13 @@ bool EQEmu::InventorySlot::IsContainer() const
 
 bool EQEmu::InventorySlot::IsContainerSocket() const
 {
-	if (!_typeless && (_type_index == inventory::typeInvalid))
+	if (!_typeless && (_type_index == invtype::TYPE_INVALID))
 		return false;
-	if (_slot_index == inventory::slotInvalid)
+	if (_slot_index == invslot::SLOT_INVALID)
 		return false;
-	if (_container_index == inventory::containerInvalid)
+	if (_container_index == invbag::SLOT_INVALID)
 		return false;
-	if (_socket_index == inventory::socketInvalid)
+	if (_socket_index == invaug::SOCKET_INVALID)
 		return false;
 
 	return true;
@@ -332,10 +332,10 @@ const std::string EQEmu::InventorySlot::ToName() const
 
 void EQEmu::InventorySlot::SetInvalidSlot()
 {
-	_type_index = inventory::typeInvalid;
-	_slot_index = inventory::slotInvalid;
-	_container_index = inventory::containerInvalid;
-	_socket_index = inventory::socketInvalid;
+	_type_index = invtype::TYPE_INVALID;
+	_slot_index = invslot::SLOT_INVALID;
+	_container_index = invbag::SLOT_INVALID;
+	_socket_index = invaug::SOCKET_INVALID;
 }
 
 //bool EQEmu::InventorySlot::IsBonusIndex(int16 slot_index)

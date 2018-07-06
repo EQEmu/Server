@@ -29,7 +29,7 @@
 bool EQEmu::saylink::DegenerateLinkBody(SayLinkBody_Struct& say_link_body_struct, const std::string& say_link_body)
 {
 	memset(&say_link_body_struct, 0, sizeof(say_link_body_struct));
-	if (say_link_body.length() != EQEmu::constants::SayLinkBodySize)
+	if (say_link_body.length() != EQEmu::constants::SAY_LINK_BODY_SIZE)
 		return false;
 
 	say_link_body_struct.action_id = (uint8)strtol(say_link_body.substr(0, 1).c_str(), nullptr, 16);
@@ -68,7 +68,7 @@ bool EQEmu::saylink::GenerateLinkBody(std::string& say_link_body, const SayLinkB
 		(0xFFFFFFFF & say_link_body_struct.hash)
 	);
 
-	if (say_link_body.length() != EQEmu::constants::SayLinkBodySize)
+	if (say_link_body.length() != EQEmu::constants::SAY_LINK_BODY_SIZE)
 		return false;
 
 	return true;
@@ -88,25 +88,25 @@ const std::string& EQEmu::SayLinkEngine::GenerateLink()
 	generate_body();
 	generate_text();
 
-	if ((m_LinkBody.length() == EQEmu::constants::SayLinkBodySize) && (m_LinkText.length() > 0)) {
+	if ((m_LinkBody.length() == EQEmu::constants::SAY_LINK_BODY_SIZE) && (m_LinkText.length() > 0)) {
 		m_Link.push_back(0x12);
 		m_Link.append(m_LinkBody);
 		m_Link.append(m_LinkText);
 		m_Link.push_back(0x12);
 	}
 
-	if ((m_Link.length() == 0) || (m_Link.length() > (EQEmu::constants::SayLinkMaximumSize))) {
+	if ((m_Link.length() == 0) || (m_Link.length() > (EQEmu::constants::SAY_LINK_MAXIMUM_SIZE))) {
 		m_Error = true;
 		m_Link = "<LINKER ERROR>";
 		Log(Logs::General, Logs::Error, "SayLinkEngine::GenerateLink() failed to generate a useable say link");
 		Log(Logs::General, Logs::Error, ">> LinkType: %i, Lengths: {link: %u(%u), body: %u(%u), text: %u(%u)}",
 			m_LinkType,
 			m_Link.length(),
-			EQEmu::constants::SayLinkMaximumSize,
+			EQEmu::constants::SAY_LINK_MAXIMUM_SIZE,
 			m_LinkBody.length(),
-			EQEmu::constants::SayLinkBodySize,
+			EQEmu::constants::SAY_LINK_BODY_SIZE,
 			m_LinkText.length(),
-			EQEmu::constants::SayLinkTextSize
+			EQEmu::constants::SAY_LINK_TEXT_SIZE
 		);
 		Log(Logs::General, Logs::Error, ">> LinkBody: %s", m_LinkBody.c_str());
 		Log(Logs::General, Logs::Error, ">> LinkText: %s", m_LinkText.c_str());

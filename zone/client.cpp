@@ -33,7 +33,6 @@ extern volatile bool RunLoops;
 
 #include "../common/eqemu_logsys.h"
 #include "../common/features.h"
-#include "../common/emu_legacy.h"
 #include "../common/spdat.h"
 #include "../common/guilds.h"
 #include "../common/rulesys.h"
@@ -2108,7 +2107,7 @@ void Client::ReadBook(BookRequest_Struct *book) {
 
 			const EQEmu::ItemInstance *inst = nullptr;
 
-			if (read_from_slot <= EQEmu::legacy::SLOT_PERSONAL_BAGS_END)
+			if (read_from_slot <= EQEmu::invbag::GENERAL_BAGS_END)
 				{
 				inst = m_inv[read_from_slot];
 				}
@@ -3322,28 +3321,28 @@ void Client::LinkDead()
 uint8 Client::SlotConvert(uint8 slot,bool bracer){
 	uint8 slot2 = 0; // why are we returning MainCharm instead of INVALID_INDEX? (must be a pre-charm segment...)
 	if(bracer)
-		return EQEmu::inventory::slotWrist2;
+		return EQEmu::invslot::slotWrist2;
 	switch(slot) {
 	case EQEmu::textures::armorHead:
-		slot2 = EQEmu::inventory::slotHead;
+		slot2 = EQEmu::invslot::slotHead;
 		break;
 	case EQEmu::textures::armorChest:
-		slot2 = EQEmu::inventory::slotChest;
+		slot2 = EQEmu::invslot::slotChest;
 		break;
 	case EQEmu::textures::armorArms:
-		slot2 = EQEmu::inventory::slotArms;
+		slot2 = EQEmu::invslot::slotArms;
 		break;
 	case EQEmu::textures::armorWrist:
-		slot2 = EQEmu::inventory::slotWrist1;
+		slot2 = EQEmu::invslot::slotWrist1;
 		break;
 	case EQEmu::textures::armorHands:
-		slot2 = EQEmu::inventory::slotHands;
+		slot2 = EQEmu::invslot::slotHands;
 		break;
 	case EQEmu::textures::armorLegs:
-		slot2 = EQEmu::inventory::slotLegs;
+		slot2 = EQEmu::invslot::slotLegs;
 		break;
 	case EQEmu::textures::armorFeet:
-		slot2 = EQEmu::inventory::slotFeet;
+		slot2 = EQEmu::invslot::slotFeet;
 		break;
 	}
 	return slot2;
@@ -3352,25 +3351,25 @@ uint8 Client::SlotConvert(uint8 slot,bool bracer){
 uint8 Client::SlotConvert2(uint8 slot){
 	uint8 slot2 = 0; // same as above...
 	switch(slot){
-	case EQEmu::inventory::slotHead:
+	case EQEmu::invslot::slotHead:
 		slot2 = EQEmu::textures::armorHead;
 		break;
-	case EQEmu::inventory::slotChest:
+	case EQEmu::invslot::slotChest:
 		slot2 = EQEmu::textures::armorChest;
 		break;
-	case EQEmu::inventory::slotArms:
+	case EQEmu::invslot::slotArms:
 		slot2 = EQEmu::textures::armorArms;
 		break;
-	case EQEmu::inventory::slotWrist1:
+	case EQEmu::invslot::slotWrist1:
 		slot2 = EQEmu::textures::armorWrist;
 		break;
-	case EQEmu::inventory::slotHands:
+	case EQEmu::invslot::slotHands:
 		slot2 = EQEmu::textures::armorHands;
 		break;
-	case EQEmu::inventory::slotLegs:
+	case EQEmu::invslot::slotLegs:
 		slot2 = EQEmu::textures::armorLegs;
 		break;
-	case EQEmu::inventory::slotFeet:
+	case EQEmu::invslot::slotFeet:
 		slot2 = EQEmu::textures::armorFeet;
 		break;
 	}
@@ -4425,14 +4424,14 @@ bool Client::GroupFollow(Client* inviter) {
 uint16 Client::GetPrimarySkillValue()
 {
 	EQEmu::skills::SkillType skill = EQEmu::skills::HIGHEST_SKILL; //because nullptr == 0, which is 1H Slashing, & we want it to return 0 from GetSkill
-	bool equiped = m_inv.GetItem(EQEmu::inventory::slotPrimary);
+	bool equiped = m_inv.GetItem(EQEmu::invslot::slotPrimary);
 
 	if (!equiped)
 		skill = EQEmu::skills::SkillHandtoHand;
 
 	else {
 
-		uint8 type = m_inv.GetItem(EQEmu::inventory::slotPrimary)->GetItem()->ItemType; //is this the best way to do this?
+		uint8 type = m_inv.GetItem(EQEmu::invslot::slotPrimary)->GetItem()->ItemType; //is this the best way to do this?
 
 		switch (type) {
 		case EQEmu::item::ItemType1HSlash: // 1H Slashing
@@ -5596,7 +5595,7 @@ bool Client::TryReward(uint32 claim_id)
 	// save
 	uint32 free_slot = 0xFFFFFFFF;
 
-	for (int i = EQEmu::legacy::GENERAL_BEGIN; i <= EQEmu::legacy::GENERAL_END; ++i) {
+	for (int i = EQEmu::invslot::GENERAL_BEGIN; i <= EQEmu::invslot::GENERAL_END; ++i) {
 		EQEmu::ItemInstance *item = GetInv().GetItem(i);
 		if (!item) {
 			free_slot = i;
@@ -5956,30 +5955,30 @@ void Client::ProcessInspectRequest(Client* requestee, Client* requester) {
 			}
 		}
 
-		inst = requestee->GetInv().GetItem(EQEmu::inventory::slotPowerSource);
+		inst = requestee->GetInv().GetItem(EQEmu::invslot::SLOT_POWER_SOURCE);
 
 		if(inst) {
 			item = inst->GetItem();
 			if(item) {
 				// we shouldn't do this..but, that's the way it's coded atm...
 				// (this type of action should be handled exclusively in the client translator)
-				strcpy(insr->itemnames[SoF::invslot::PossessionsPowerSource], item->Name);
-				insr->itemicons[SoF::invslot::PossessionsPowerSource] = item->Icon;
+				strcpy(insr->itemnames[SoF::invslot::slotPowerSource], item->Name);
+				insr->itemicons[SoF::invslot::slotPowerSource] = item->Icon;
 			}
 			else
-				insr->itemicons[SoF::invslot::PossessionsPowerSource] = 0xFFFFFFFF;
+				insr->itemicons[SoF::invslot::slotPowerSource] = 0xFFFFFFFF;
 		}
 
-		inst = requestee->GetInv().GetItem(EQEmu::inventory::slotAmmo);
+		inst = requestee->GetInv().GetItem(EQEmu::invslot::slotAmmo);
 
 		if(inst) {
 			item = inst->GetItem();
 			if(item) {
-				strcpy(insr->itemnames[SoF::invslot::PossessionsAmmo], item->Name);
-				insr->itemicons[SoF::invslot::PossessionsAmmo] = item->Icon;
+				strcpy(insr->itemnames[SoF::invslot::slotAmmo], item->Name);
+				insr->itemicons[SoF::invslot::slotAmmo] = item->Icon;
 			}
 			else
-				insr->itemicons[SoF::invslot::PossessionsAmmo] = 0xFFFFFFFF;
+				insr->itemicons[SoF::invslot::slotAmmo] = 0xFFFFFFFF;
 		}
 
 		strcpy(insr->text, requestee->GetInspectMessage().text);
@@ -7035,7 +7034,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 	}
 
 	EQEmu::skills::SkillType skill = EQEmu::skills::SkillHandtoHand;
-	auto *inst = GetInv().GetItem(EQEmu::inventory::slotPrimary);
+	auto *inst = GetInv().GetItem(EQEmu::invslot::slotPrimary);
 	if (inst && inst->IsClassCommon()) {
 		switch (inst->GetItem()->ItemType) {
 		case EQEmu::item::ItemType1HSlash:
@@ -7908,7 +7907,7 @@ void Client::GarbleMessage(char *message, uint8 variance)
 	for (size_t i = 0; i < strlen(message); i++) {
 		// Client expects hex values inside of a text link body
 		if (message[i] == delimiter) {
-			if (!(delimiter_count & 1)) { i += EQEmu::constants::SayLinkBodySize; }
+			if (!(delimiter_count & 1)) { i += EQEmu::constants::SAY_LINK_BODY_SIZE; }
 			++delimiter_count;
 			continue;
 		}
@@ -8333,17 +8332,17 @@ void Client::TickItemCheck()
 	if(zone->tick_items.empty()) { return; }
 
 	//Scan equip slots for items
-	for (i = EQEmu::legacy::EQUIPMENT_BEGIN; i <= EQEmu::legacy::EQUIPMENT_END; i++)
+	for (i = EQEmu::invslot::EQUIPMENT_BEGIN; i <= EQEmu::invslot::EQUIPMENT_END; i++)
 	{
 		TryItemTick(i);
 	}
 	//Scan main inventory + cursor
-	for (i = EQEmu::legacy::GENERAL_BEGIN; i <= EQEmu::inventory::slotCursor; i++)
+	for (i = EQEmu::invslot::GENERAL_BEGIN; i <= EQEmu::invslot::slotCursor; i++)
 	{
 		TryItemTick(i);
 	}
 	//Scan bags
-	for (i = EQEmu::legacy::GENERAL_BAGS_BEGIN; i <= EQEmu::legacy::CURSOR_BAG_END; i++)
+	for (i = EQEmu::invbag::GENERAL_BAGS_BEGIN; i <= EQEmu::invbag::CURSOR_BAG_END; i++)
 	{
 		TryItemTick(i);
 	}
@@ -8359,7 +8358,7 @@ void Client::TryItemTick(int slot)
 
 	if(zone->tick_items.count(iid) > 0)
 	{
-		if (GetLevel() >= zone->tick_items[iid].level && zone->random.Int(0, 100) >= (100 - zone->tick_items[iid].chance) && (zone->tick_items[iid].bagslot || slot <= EQEmu::legacy::EQUIPMENT_END))
+		if (GetLevel() >= zone->tick_items[iid].level && zone->random.Int(0, 100) >= (100 - zone->tick_items[iid].chance) && (zone->tick_items[iid].bagslot || slot <= EQEmu::invslot::EQUIPMENT_END))
 		{
 			EQEmu::ItemInstance* e_inst = (EQEmu::ItemInstance*)inst;
 			parse->EventItem(EVENT_ITEM_TICK, this, e_inst, nullptr, "", slot);
@@ -8367,9 +8366,9 @@ void Client::TryItemTick(int slot)
 	}
 
 	//Only look at augs in main inventory
-	if (slot > EQEmu::legacy::EQUIPMENT_END) { return; }
+	if (slot > EQEmu::invslot::EQUIPMENT_END) { return; }
 
-	for (int x = EQEmu::inventory::socketBegin; x < EQEmu::inventory::SocketCount; ++x)
+	for (int x = EQEmu::invaug::SOCKET_BEGIN; x <= EQEmu::invaug::SOCKET_END; ++x)
 	{
 		EQEmu::ItemInstance * a_inst = inst->GetAugment(x);
 		if(!a_inst) { continue; }
@@ -8390,17 +8389,17 @@ void Client::TryItemTick(int slot)
 void Client::ItemTimerCheck()
 {
 	int i;
-	for (i = EQEmu::legacy::EQUIPMENT_BEGIN; i <= EQEmu::legacy::EQUIPMENT_END; i++)
+	for (i = EQEmu::invslot::EQUIPMENT_BEGIN; i <= EQEmu::invslot::EQUIPMENT_END; i++)
 	{
 		TryItemTimer(i);
 	}
 
-	for (i = EQEmu::legacy::GENERAL_BEGIN; i <= EQEmu::inventory::slotCursor; i++)
+	for (i = EQEmu::invslot::GENERAL_BEGIN; i <= EQEmu::invslot::slotCursor; i++)
 	{
 		TryItemTimer(i);
 	}
 
-	for (i = EQEmu::legacy::GENERAL_BAGS_BEGIN; i <= EQEmu::legacy::CURSOR_BAG_END; i++)
+	for (i = EQEmu::invbag::GENERAL_BAGS_BEGIN; i <= EQEmu::invbag::CURSOR_BAG_END; i++)
 	{
 		TryItemTimer(i);
 	}
@@ -8422,11 +8421,11 @@ void Client::TryItemTimer(int slot)
 		++it_iter;
 	}
 
-	if (slot > EQEmu::legacy::EQUIPMENT_END) {
+	if (slot > EQEmu::invslot::EQUIPMENT_END) {
 		return;
 	}
 
-	for (int x = EQEmu::inventory::socketBegin; x < EQEmu::inventory::SocketCount; ++x)
+	for (int x = EQEmu::invaug::SOCKET_BEGIN; x <= EQEmu::invaug::SOCKET_END; ++x)
 	{
 		EQEmu::ItemInstance * a_inst = inst->GetAugment(x);
 		if(!a_inst) {
@@ -8715,12 +8714,12 @@ void Client::ShowNumHits()
 int Client::GetQuiverHaste(int delay)
 {
 	const EQEmu::ItemInstance *pi = nullptr;
-	for (int r = EQEmu::legacy::GENERAL_BEGIN; r <= EQEmu::legacy::GENERAL_END; r++) {
+	for (int r = EQEmu::invslot::GENERAL_BEGIN; r <= EQEmu::invslot::GENERAL_END; r++) {
 		pi = GetInv().GetItem(r);
 		if (pi && pi->IsClassBag() && pi->GetItem()->BagType == EQEmu::item::BagTypeQuiver &&
 		    pi->GetItem()->BagWR > 0)
 			break;
-		if (r == EQEmu::legacy::GENERAL_END)
+		if (r == EQEmu::invslot::GENERAL_END)
 			// we will get here if we don't find a valid quiver
 			return 0;
 	}
@@ -8760,7 +8759,7 @@ void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold,
 		AddMoneyToPP(copper, silver, gold, platinum, false);
 
 	if (itemid > 0)
-		SummonItem(itemid, 0, 0, 0, 0, 0, 0, false, EQEmu::inventory::slotPowerSource);
+		SummonItem(itemid, 0, 0, 0, 0, 0, 0, false, EQEmu::invslot::slotCursor);
 
 	if (faction)
 	{
