@@ -293,13 +293,13 @@ bool TaskManager::SaveClientState(Client *c, ClientTaskState *state)
 
 	Log(Logs::Detail, Logs::Tasks, "TaskManager::SaveClientState for character ID %d", characterID);
 
-	if (state->ActiveTaskCount > 0) { // TODO: tasks
-		for (int task = 0; task < MAXACTIVEQUESTS; task++) {
-			int taskID = state->ActiveQuests[task].TaskID;
+	if (state->ActiveTaskCount > 0 || state->ActiveTask.TaskID != TASKSLOTEMPTY) { // TODO: tasks
+		for (int task = 0; task < MAXACTIVEQUESTS + 1; task++) {
+			int taskID = state->ActiveTasks[task].TaskID;
 			if (taskID == TASKSLOTEMPTY)
 				continue;
 
-			if (state->ActiveQuests[task].Updated) {
+			if (state->ActiveTasks[task].Updated) {
 
 				Log(Logs::General, Logs::Tasks,
 				    "[CLIENTSAVE] TaskManager::SaveClientState for character ID %d, Updating TaskIndex "
@@ -310,12 +310,12 @@ bool TaskManager::SaveClientState(Client *c, ClientTaskState *state)
 				    "REPLACE INTO character_tasks (charid, taskid, slot, type, acceptedtime) "
 				    "VALUES (%i, %i, %i, %i, %i)",
 				    characterID, taskID, task, static_cast<int>(Tasks[taskID]->type),
-				    state->ActiveQuests[task].AcceptedTime);
+				    state->ActiveTasks[task].AcceptedTime);
 				auto results = database.QueryDatabase(query);
 				if (!results.Success()) {
 					Log(Logs::General, Logs::Error, ERR_MYSQLERROR, results.ErrorMessage().c_str());
 				} else {
-					state->ActiveQuests[task].Updated = false;
+					state->ActiveTasks[task].Updated = false;
 				}
 			}
 
@@ -326,7 +326,7 @@ bool TaskManager::SaveClientState(Client *c, ClientTaskState *state)
 			int updatedActivityCount = 0;
 			for (int activityIndex = 0; activityIndex < Tasks[taskID]->ActivityCount; ++activityIndex) {
 
-				if (!state->ActiveQuests[task].Activity[activityIndex].Updated)
+				if (!state->ActiveTasks[task].Activity[activityIndex].Updated)
 					continue;
 
 				Log(Logs::General, Logs::Tasks,
@@ -337,14 +337,14 @@ bool TaskManager::SaveClientState(Client *c, ClientTaskState *state)
 				if (updatedActivityCount == 0)
 					query +=
 					    StringFormat("(%i, %i, %i, %i, %i)", characterID, taskID, activityIndex,
-							 state->ActiveQuests[task].Activity[activityIndex].DoneCount,
-							 state->ActiveQuests[task].Activity[activityIndex].State ==
+							 state->ActiveTasks[task].Activity[activityIndex].DoneCount,
+							 state->ActiveTasks[task].Activity[activityIndex].State ==
 							     ActivityCompleted);
 				else
 					query +=
 					    StringFormat(", (%i, %i, %i, %i, %i)", characterID, taskID, activityIndex,
-							 state->ActiveQuests[task].Activity[activityIndex].DoneCount,
-							 state->ActiveQuests[task].Activity[activityIndex].State ==
+							 state->ActiveTasks[task].Activity[activityIndex].DoneCount,
+							 state->ActiveTasks[task].Activity[activityIndex].State ==
 							     ActivityCompleted);
 
 				updatedActivityCount++;
@@ -361,9 +361,9 @@ bool TaskManager::SaveClientState(Client *c, ClientTaskState *state)
 				continue;
 			}
 
-			state->ActiveQuests[task].Updated = false;
+			state->ActiveTasks[task].Updated = false;
 			for (int activityIndex = 0; activityIndex < Tasks[taskID]->ActivityCount; ++activityIndex)
-				state->ActiveQuests[task].Activity[activityIndex].Updated = false;
+				state->ActiveTasks[task].Activity[activityIndex].Updated = false;
 		}
 	}
 
@@ -547,6 +547,7 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state)
 		if (state->ActiveTask.TaskID == taskID)
 			task_info = &state->ActiveTask;
 
+		// wasn't task
 		if (task_info == nullptr)
 			for (int i = 0; i < MAXACTIVEQUESTS; i++)
 				if (state->ActiveQuests[i].TaskID == taskID)
