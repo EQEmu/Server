@@ -1,5 +1,16 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 07/07/2018 ==
+Akkadius: Implemented a much better replacement for qglobals called 'DataBuckets'
+    - A much more detailed example can be found at: https://github.com/EQEmu/Server/wiki/Data-Buckets
+
+== 07/05/2018 ==
+Uleat: Reintegration of inventory-based EQDictionary references
+	- Standardized 'CONSTANT_DECLARATION' and 'enumerationValue' tokens for most of the affected references
+	- Added 'BEGIN' and 'END' constants to many inventory-based ranges to help eliminate '< SIZE'-type comparisons
+	- Eliminated multiple, duplicated reference points of the same value context (bye, bye namespace legacy!)
+	- Most server values are now linked to the implementation client directly through a 'using ##' directive
+
 == 05/28/2018 ==
 Akkadius: Fixed an issue where size 0 NPC's hop in and out of the ground at idle
 Akkadius: NPC's now open doors within proximity given the door doesn't have locked requirements

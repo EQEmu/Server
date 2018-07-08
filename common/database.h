@@ -221,6 +221,8 @@ public:
 	void	GetRaidLeadershipInfo(uint32 rid, char* maintank = nullptr, char* assist = nullptr, char* puller = nullptr, char *marknpc = nullptr, RaidLeadershipAA_Struct* RLAA = nullptr);
 	void	SetRaidGroupLeaderInfo(uint32 gid, uint32 rid);
 
+	void    PurgeAllDeletedDataBuckets();
+
 	/* Database Conversions 'database_conversions.cpp' */
 
 	bool	CheckDatabaseConversions();

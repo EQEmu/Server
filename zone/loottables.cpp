@@ -263,7 +263,7 @@ void NPC::AddLootDrop(const EQEmu::ItemData *item2, ItemList* itemlist, int16 ch
 	item->attuned = 0;
 	item->min_level = minlevel;
 	item->max_level = maxlevel;
-	item->equip_slot = EQEmu::inventory::slotInvalid;
+	item->equip_slot = EQEmu::invslot::SLOT_INVALID;
 
 	if (equipit) {
 		uint8 eslot = 0xFF;
@@ -282,7 +282,7 @@ void NPC::AddLootDrop(const EQEmu::ItemData *item2, ItemList* itemlist, int16 ch
 		// it is an improvement.
 
 		if (!item2->NoPet) {
-			for (int i = 0; !found && i < EQEmu::legacy::EQUIPMENT_SIZE; i++) {
+			for (int i = EQEmu::invslot::EQUIPMENT_BEGIN; !found && i <= EQEmu::invslot::EQUIPMENT_END; i++) {
 				uint32 slots = (1 << i);
 				if (item2->Slots & slots) {
 					if(equipment[i])
@@ -323,7 +323,7 @@ void NPC::AddLootDrop(const EQEmu::ItemData *item2, ItemList* itemlist, int16 ch
 		// @merth: IDFile size has been increased, this needs to change
 		uint16 emat;
 		if(item2->Material <= 0
-			|| item2->Slots & (1 << EQEmu::inventory::slotPrimary | 1 << EQEmu::inventory::slotSecondary)) {
+			|| item2->Slots & (1 << EQEmu::invslot::slotPrimary | 1 << EQEmu::invslot::slotSecondary)) {
 			memset(newid, 0, sizeof(newid));
 			for(int i=0;i<7;i++){
 				if (!isalpha(item2->IDFile[i])){
@@ -337,7 +337,7 @@ void NPC::AddLootDrop(const EQEmu::ItemData *item2, ItemList* itemlist, int16 ch
 			emat = item2->Material;
 		}
 
-		if (foundslot == EQEmu::inventory::slotPrimary) {
+		if (foundslot == EQEmu::invslot::slotPrimary) {
 			if (item2->Proc.Effect != 0)
 				CastToMob()->AddProcToWeapon(item2->Proc.Effect, true);
 
@@ -350,7 +350,7 @@ void NPC::AddLootDrop(const EQEmu::ItemData *item2, ItemList* itemlist, int16 ch
 			if (item2->IsType2HWeapon())
 				SetTwoHanderEquipped(true);
 		}
-		else if (foundslot == EQEmu::inventory::slotSecondary
+		else if (foundslot == EQEmu::invslot::slotSecondary
 			&& (GetOwner() != nullptr || (CanThisClassDualWield() && zone->random.Roll(NPC_DW_CHANCE)) || (item2->Damage==0)) &&
 			(item2->IsType1HWeapon() || item2->ItemType == EQEmu::item::ItemTypeShield))
 		{
@@ -361,25 +361,25 @@ void NPC::AddLootDrop(const EQEmu::ItemData *item2, ItemList* itemlist, int16 ch
 			if (item2->Damage > 0)
 				SendAddPlayerState(PlayerState::SecondaryWeaponEquipped);
 		}
-		else if (foundslot == EQEmu::inventory::slotHead) {
+		else if (foundslot == EQEmu::invslot::slotHead) {
 			eslot = EQEmu::textures::armorHead;
 		}
-		else if (foundslot == EQEmu::inventory::slotChest) {
+		else if (foundslot == EQEmu::invslot::slotChest) {
 			eslot = EQEmu::textures::armorChest;
 		}
-		else if (foundslot == EQEmu::inventory::slotArms) {
+		else if (foundslot == EQEmu::invslot::slotArms) {
 			eslot = EQEmu::textures::armorArms;
 		}
-		else if (foundslot == EQEmu::inventory::slotWrist1 || foundslot == EQEmu::inventory::slotWrist2) {
+		else if (foundslot == EQEmu::invslot::slotWrist1 || foundslot == EQEmu::invslot::slotWrist2) {
 			eslot = EQEmu::textures::armorWrist;
 		}
-		else if (foundslot == EQEmu::inventory::slotHands) {
+		else if (foundslot == EQEmu::invslot::slotHands) {
 			eslot = EQEmu::textures::armorHands;
 		}
-		else if (foundslot == EQEmu::inventory::slotLegs) {
+		else if (foundslot == EQEmu::invslot::slotLegs) {
 			eslot = EQEmu::textures::armorLegs;
 		}
-		else if (foundslot == EQEmu::inventory::slotFeet) {
+		else if (foundslot == EQEmu::invslot::slotFeet) {
 			eslot = EQEmu::textures::armorFeet;
 		}
 

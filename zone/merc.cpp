@@ -217,7 +217,7 @@ void Merc::CalcItemBonuses(StatBonuses* newbon) {
 
 	unsigned int i;
 	//should not include 21 (SLOT_AMMO)
-	for (i = 0; i < EQEmu::inventory::slotAmmo; i++) {
+	for (i = 0; i < EQEmu::invslot::slotAmmo; i++) {
 		if(equipment[i] == 0)
 			continue;
 		const EQEmu::ItemData * itm = database.GetItem(equipment[i]);
@@ -1610,24 +1610,24 @@ void Merc::AI_Process() {
 				//try main hand first
 				if(attack_timer.Check())
 				{
-					Attack(GetTarget(), EQEmu::inventory::slotPrimary);
+					Attack(GetTarget(), EQEmu::invslot::slotPrimary);
 
 					bool tripleSuccess = false;
 
 					if(GetOwner() && GetTarget() && CanThisClassDoubleAttack())
 					{
 						if(GetOwner()) {
-							Attack(GetTarget(), EQEmu::inventory::slotPrimary, true);
+							Attack(GetTarget(), EQEmu::invslot::slotPrimary, true);
 						}
 
 						if(GetOwner() && GetTarget() && GetSpecialAbility(SPECATK_TRIPLE)) {
 							tripleSuccess = true;
-							Attack(GetTarget(), EQEmu::inventory::slotPrimary, true);
+							Attack(GetTarget(), EQEmu::invslot::slotPrimary, true);
 						}
 
 						//quad attack, does this belong here??
 						if(GetOwner() && GetTarget() && GetSpecialAbility(SPECATK_QUAD)) {
-							Attack(GetTarget(), EQEmu::inventory::slotPrimary, true);
+							Attack(GetTarget(), EQEmu::invslot::slotPrimary, true);
 						}
 					}
 
@@ -1639,8 +1639,8 @@ void Merc::AI_Process() {
 						if(zone->random.Roll(flurrychance))
 						{
 							Message_StringID(MT_NPCFlurry, YOU_FLURRY);
-							Attack(GetTarget(), EQEmu::inventory::slotPrimary, false);
-							Attack(GetTarget(), EQEmu::inventory::slotPrimary, false);
+							Attack(GetTarget(), EQEmu::invslot::slotPrimary, false);
+							Attack(GetTarget(), EQEmu::invslot::slotPrimary, false);
 						}
 					}
 
@@ -1649,7 +1649,7 @@ void Merc::AI_Process() {
 					if (GetTarget() && ExtraAttackChanceBonus) {
 						if(zone->random.Roll(ExtraAttackChanceBonus))
 						{
-							Attack(GetTarget(), EQEmu::inventory::slotPrimary, false);
+							Attack(GetTarget(), EQEmu::invslot::slotPrimary, false);
 						}
 					}
 				}
@@ -1685,11 +1685,11 @@ void Merc::AI_Process() {
 						// Max 78% of DW
 						if (zone->random.Roll(DualWieldProbability))
 						{
-							Attack(GetTarget(), EQEmu::inventory::slotSecondary);     // Single attack with offhand
+							Attack(GetTarget(), EQEmu::invslot::slotSecondary);     // Single attack with offhand
 
 							if(CanThisClassDoubleAttack()) {
 								if(GetTarget() && GetTarget()->GetHP() > -10)
-									Attack(GetTarget(), EQEmu::inventory::slotSecondary);     // Single attack with offhand
+									Attack(GetTarget(), EQEmu::invslot::slotSecondary);     // Single attack with offhand
 							}
 						}
 					}
@@ -2614,7 +2614,7 @@ int16 Merc::GetFocusEffect(focusType type, uint16 spell_id) {
 		int16 focus_max_real = 0;
 
 		//item focus
-		for (int x = 0; x < EQEmu::legacy::EQUIPMENT_SIZE; ++x)
+		for (int x = EQEmu::invslot::EQUIPMENT_BEGIN; x <= EQEmu::invslot::EQUIPMENT_END; ++x)
 		{
 			TempItem = nullptr;
 			if (equipment[x] == 0)
@@ -5093,7 +5093,7 @@ void Merc::UpdateMercAppearance() {
 	// Copied from Bot Code:
 	uint32 itemID = 0;
 	uint8 materialFromSlot = EQEmu::textures::materialInvalid;
-	for (int i = EQEmu::legacy::EQUIPMENT_BEGIN; i <= EQEmu::legacy::EQUIPMENT_END; ++i) {
+	for (int i = EQEmu::invslot::EQUIPMENT_BEGIN; i <= EQEmu::invslot::EQUIPMENT_END; ++i) {
 		itemID = equipment[i];
 		if(itemID != 0) {
 			materialFromSlot = EQEmu::InventoryProfile::CalcMaterialFromSlot(i);
@@ -5111,8 +5111,8 @@ void Merc::UpdateEquipmentLight()
 	m_Light.Type[EQEmu::lightsource::LightEquipment] = 0;
 	m_Light.Level[EQEmu::lightsource::LightEquipment] = 0;
 
-	for (int index = EQEmu::inventory::slotBegin; index < EQEmu::legacy::EQUIPMENT_SIZE; ++index) {
-		if (index == EQEmu::inventory::slotAmmo) { continue; }
+	for (int index = EQEmu::invslot::EQUIPMENT_BEGIN; index <= EQEmu::invslot::EQUIPMENT_END; ++index) {
+		if (index == EQEmu::invslot::slotAmmo) { continue; }
 
 		auto item = database.GetItem(equipment[index]);
 		if (item == nullptr) { continue; }

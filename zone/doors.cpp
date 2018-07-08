@@ -210,7 +210,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger) {
 	uint32 player_has_key          = 0;
 	uint32 player_key              = 0;
 
-	const EQEmu::ItemInstance *lock_pick_item = sender->GetInv().GetItem(EQEmu::inventory::slotCursor);
+	const EQEmu::ItemInstance *lock_pick_item = sender->GetInv().GetItem(EQEmu::invslot::slotCursor);
 	player_has_key = static_cast<uint32>(sender->GetInv().HasItem(required_key_item, 1));
 
 	if (player_has_key != INVALID_INDEX) {

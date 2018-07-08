@@ -2403,7 +2403,7 @@ namespace ActionableBots
 				continue;
 
 			mod_skill_value = base_skill_value;
-			for (int16 index = EQEmu::legacy::EQUIPMENT_BEGIN; index <= EQEmu::legacy::EQUIPMENT_END; ++index) {
+			for (int16 index = EQEmu::invslot::EQUIPMENT_BEGIN; index <= EQEmu::invslot::EQUIPMENT_END; ++index) {
 				const EQEmu::ItemInstance* indexed_item = bot_iter->GetBotItem(index);
 				if (indexed_item && indexed_item->GetItem()->SkillModType == skill_type)
 					mod_skill_value += (base_skill_value * (((float)indexed_item->GetItem()->SkillModValue) / 100.0f));
@@ -7137,23 +7137,23 @@ void bot_subcommand_inventory_list(Client *c, const Seperator *sep)
 	linker.SetLinkType(EQEmu::saylink::SayLinkItemInst);
 
 	uint32 inventory_count = 0;
-	for (int i = EQEmu::legacy::EQUIPMENT_BEGIN; i <= (EQEmu::legacy::EQUIPMENT_END + 1); ++i) {
-		if ((i == EQEmu::inventory::slotSecondary) && is2Hweapon)
+	for (int i = EQEmu::invslot::EQUIPMENT_BEGIN; i <= (EQEmu::invslot::EQUIPMENT_END + 1); ++i) {
+		if ((i == EQEmu::invslot::slotSecondary) && is2Hweapon)
 			continue;
 
-		inst = my_bot->CastToBot()->GetBotItem(i == 22 ? EQEmu::inventory::slotPowerSource : i);
+		inst = my_bot->CastToBot()->GetBotItem(i == 22 ? EQEmu::invslot::SLOT_POWER_SOURCE : i);
 		if (!inst || !inst->GetItem()) {
-			c->Message(m_message, "I need something for my %s (slot %i)", GetBotEquipSlotName(i), (i == 22 ? EQEmu::inventory::slotPowerSource : i));
+			c->Message(m_message, "I need something for my %s (slot %i)", GetBotEquipSlotName(i), (i == 22 ? EQEmu::invslot::SLOT_POWER_SOURCE : i));
 			continue;
 		}
 		
 		item = inst->GetItem();
-		if ((i == EQEmu::inventory::slotPrimary) && item->IsType2HWeapon()) {
+		if ((i == EQEmu::invslot::slotPrimary) && item->IsType2HWeapon()) {
 			is2Hweapon = true;
 		}
 
 		linker.SetItemInst(inst);
-		c->Message(m_message, "Using %s in my %s (slot %i)", linker.GenerateLink().c_str(), GetBotEquipSlotName(i), (i == 22 ? EQEmu::inventory::slotPowerSource : i));
+		c->Message(m_message, "Using %s in my %s (slot %i)", linker.GenerateLink().c_str(), GetBotEquipSlotName(i), (i == 22 ? EQEmu::invslot::SLOT_POWER_SOURCE : i));
 
 		++inventory_count;
 	}
@@ -7192,7 +7192,7 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 	}
 
 	int slotId = atoi(sep->arg[1]);
-	if (!sep->IsNumber(1) || ((slotId > EQEmu::legacy::EQUIPMENT_END || slotId < EQEmu::legacy::EQUIPMENT_BEGIN) && slotId != EQEmu::inventory::slotPowerSource)) {
+	if (!sep->IsNumber(1) || ((slotId > EQEmu::invslot::EQUIPMENT_END || slotId < EQEmu::invslot::EQUIPMENT_BEGIN) && slotId != EQEmu::invslot::SLOT_POWER_SOURCE)) {
 		c->Message(m_fail, "Valid slots are 0-21 or 9999");
 		return;
 	}
@@ -7207,7 +7207,7 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 		return;
 	}
 
-	for (int m = EQEmu::inventory::socketBegin; m < EQEmu::inventory::SocketCount; ++m) {
+	for (int m = EQEmu::invaug::SOCKET_BEGIN; m <= EQEmu::invaug::SOCKET_END; ++m) {
 		if (!itminst)
 			break;
 
@@ -7224,7 +7224,7 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 	std::string error_message;
 	if (itm) {
 		c->PushItemOnCursor(*itminst, true);
-		if ((slotId == EQEmu::inventory::slotRange) || (slotId == EQEmu::inventory::slotAmmo) || (slotId == EQEmu::inventory::slotPrimary) || (slotId == EQEmu::inventory::slotSecondary))
+		if ((slotId == EQEmu::invslot::slotRange) || (slotId == EQEmu::invslot::slotAmmo) || (slotId == EQEmu::invslot::slotPrimary) || (slotId == EQEmu::invslot::slotSecondary))
 			my_bot->SetBotArcher(false);
 
 		my_bot->RemoveBotItemBySlot(slotId, &error_message);
@@ -7238,31 +7238,31 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 	}
 
 	switch (slotId) {
-	case EQEmu::inventory::slotCharm:
-	case EQEmu::inventory::slotEar1:
-	case EQEmu::inventory::slotHead:
-	case EQEmu::inventory::slotFace:
-	case EQEmu::inventory::slotEar2:
-	case EQEmu::inventory::slotNeck:
-	case EQEmu::inventory::slotBack:
-	case EQEmu::inventory::slotWrist1:
-	case EQEmu::inventory::slotWrist2:
-	case EQEmu::inventory::slotRange:
-	case EQEmu::inventory::slotPrimary:
-	case EQEmu::inventory::slotSecondary:
-	case EQEmu::inventory::slotFinger1:
-	case EQEmu::inventory::slotFinger2:
-	case EQEmu::inventory::slotChest:
-	case EQEmu::inventory::slotWaist:
-	case EQEmu::inventory::slotPowerSource:
-	case EQEmu::inventory::slotAmmo:
+	case EQEmu::invslot::slotCharm:
+	case EQEmu::invslot::slotEar1:
+	case EQEmu::invslot::slotHead:
+	case EQEmu::invslot::slotFace:
+	case EQEmu::invslot::slotEar2:
+	case EQEmu::invslot::slotNeck:
+	case EQEmu::invslot::slotBack:
+	case EQEmu::invslot::slotWrist1:
+	case EQEmu::invslot::slotWrist2:
+	case EQEmu::invslot::slotRange:
+	case EQEmu::invslot::slotPrimary:
+	case EQEmu::invslot::slotSecondary:
+	case EQEmu::invslot::slotFinger1:
+	case EQEmu::invslot::slotFinger2:
+	case EQEmu::invslot::slotChest:
+	case EQEmu::invslot::slotWaist:
+	case EQEmu::invslot::SLOT_POWER_SOURCE:
+	case EQEmu::invslot::slotAmmo:
 		c->Message(m_message, "My %s is %s unequipped", GetBotEquipSlotName(slotId), ((itm) ? ("now") : ("already")));
 		break;
-	case EQEmu::inventory::slotShoulders:
-	case EQEmu::inventory::slotArms:
-	case EQEmu::inventory::slotHands:
-	case EQEmu::inventory::slotLegs:
-	case EQEmu::inventory::slotFeet:
+	case EQEmu::invslot::slotShoulders:
+	case EQEmu::invslot::slotArms:
+	case EQEmu::invslot::slotHands:
+	case EQEmu::invslot::slotLegs:
+	case EQEmu::invslot::slotFeet:
 		c->Message(m_message, "My %s are %s unequipped", GetBotEquipSlotName(slotId), ((itm) ? ("now") : ("already")));
 		break;
 	default:
@@ -7299,14 +7299,14 @@ void bot_subcommand_inventory_window(Client *c, const Seperator *sep)
 	//EQEmu::SayLinkEngine linker;
 	//linker.SetLinkType(EQEmu::saylink::SayLinkItemInst);
 
-	for (int i = EQEmu::legacy::EQUIPMENT_BEGIN; i <= (EQEmu::legacy::EQUIPMENT_END + 1); ++i) {
+	for (int i = EQEmu::invslot::EQUIPMENT_BEGIN; i <= (EQEmu::invslot::EQUIPMENT_END + 1); ++i) {
 		const EQEmu::ItemData* item = nullptr;
-		const EQEmu::ItemInstance* inst = my_bot->CastToBot()->GetBotItem(i == 22 ? EQEmu::inventory::slotPowerSource : i);
+		const EQEmu::ItemInstance* inst = my_bot->CastToBot()->GetBotItem(i == 22 ? EQEmu::invslot::SLOT_POWER_SOURCE : i);
 		if (inst)
 			item = inst->GetItem();
 
 		window_text.append("<c \"#FFFFFF\">");
-		window_text.append(GetBotEquipSlotName(i == 22 ? EQEmu::inventory::slotPowerSource : i));
+		window_text.append(GetBotEquipSlotName(i == 22 ? EQEmu::invslot::SLOT_POWER_SOURCE : i));
 		window_text.append(": ");
 		if (item) {
 			//window_text.append("</c>");

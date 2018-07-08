@@ -385,12 +385,12 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	// the base items for the pet. These are always loaded
 	// so that a rank 1 suspend minion does not kill things
 	// like the special back items some focused pets may receive.
-	uint32 petinv[EQEmu::legacy::EQUIPMENT_SIZE];
+	uint32 petinv[EQEmu::invslot::EQUIPMENT_COUNT];
 	memset(petinv, 0, sizeof(petinv));
 	const EQEmu::ItemData *item = nullptr;
 
 	if (database.GetBasePetItems(record.equipmentset, petinv)) {
-		for (int i = 0; i < EQEmu::legacy::EQUIPMENT_SIZE; i++)
+		for (int i = EQEmu::invslot::EQUIPMENT_BEGIN; i <= EQEmu::invslot::EQUIPMENT_END; i++)
 			if (petinv[i]) {
 				item = database.GetItem(petinv[i]);
 				npc->AddLootDrop(item, &npc->itemlist, 0, 1, 127, true, true);
@@ -524,7 +524,7 @@ void NPC::GetPetState(SpellBuff_Struct *pet_buffs, uint32 *items, char *name) {
 	strn0cpy(name, GetName(), 64);
 
 	//save their items, we only care about what they are actually wearing
-	memcpy(items, equipment, sizeof(uint32) * EQEmu::legacy::EQUIPMENT_SIZE);
+	memcpy(items, equipment, sizeof(uint32) * EQEmu::invslot::EQUIPMENT_COUNT);
 
 	//save their buffs.
 	for (int i=0; i < GetPetMaxTotalSlots(); i++) {
@@ -612,7 +612,7 @@ void NPC::SetPetState(SpellBuff_Struct *pet_buffs, uint32 *items) {
 	}
 
 	//restore their equipment...
-	for (i = 0; i < EQEmu::legacy::EQUIPMENT_SIZE; i++) {
+	for (i = EQEmu::invslot::EQUIPMENT_BEGIN; i <= EQEmu::invslot::EQUIPMENT_END; i++) {
 		if(items[i] == 0)
 			continue;
 
@@ -679,7 +679,7 @@ bool ZoneDatabase::GetBasePetItems(int32 equipmentset, uint32 *items) {
 			{
 				slot = atoi(row[0]);
 
-				if (slot >= EQEmu::legacy::EQUIPMENT_SIZE)
+				if (slot > EQEmu::invslot::EQUIPMENT_END)
 					continue;
 
 				if (items[slot] == 0)

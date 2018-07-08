@@ -20,7 +20,6 @@
 #ifndef COMMON_EQ_LIMITS_H
 #define COMMON_EQ_LIMITS_H
 
-#include "emu_legacy.h"
 #include "types.h"
 #include "eq_constants.h"
 #include "emu_versions.h"
@@ -37,7 +36,7 @@ namespace EQEmu
 	namespace constants {
 		class LookupEntry {
 		public:
-			size_t CharacterCreationLimit;
+			int16 CharacterCreationLimit;
 			int LongBuffs;
 			int ShortBuffs;
 			int DiscBuffs;
@@ -54,11 +53,17 @@ namespace EQEmu
 	namespace inventory {
 		class LookupEntry {
 		public:
-			size_t InventoryTypeSize[25]; // should reflect EQEmu::inventory::typeCount referenced in emu_constants.h
+			// note: 'PossessionsBitmask' needs to be attuned to the client version with the highest number
+			// of possessions slots and 'InventoryTypeSize[typePossessions]' should reflect the same count
+			// with translators adjusting for valid slot indices. Server-side validations will be performed
+			// against 'PossessionsBitmask' (note: the same applies to Corpse type size and bitmask)
+
+			int16 InventoryTypeSize[25]; // should reflect EQEmu::invtype::TYPE_COUNT referenced in emu_constants.h
 
 			uint64 PossessionsBitmask;
-			size_t ItemBagSize;
-			size_t ItemAugSize;
+			uint64 CorpseBitmask;
+			int16 BagSlotCount;
+			int16 AugSocketCount;
 
 			bool AllowEmptyBagInBag;
 			bool AllowClickCastFromBag;
@@ -84,17 +89,15 @@ namespace EQEmu
 
 namespace ClientUnknown
 {
-	enum : int { Invalid = -1, Null, Safety };
-
-	enum : bool { False = false, True = true };
+	const int16 IINVALID = -1;
+	const int16 INULL = 0;
 
 } /*ClientUnknown*/
 
 namespace Client62
 {
-	enum : int { Invalid = -1, Null, Safety };
-
-	enum : bool { False = false, True = true };
+	const int16 IINVALID = -1;
+	const int16 INULL = 0;
 
 } /*Client62*/
 

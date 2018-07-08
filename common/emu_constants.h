@@ -21,104 +21,173 @@
 #define COMMON_EMU_CONSTANTS_H
 
 #include "eq_limits.h"
-#include "emu_legacy.h"
 #include "emu_versions.h"
 
 #include <string.h>
 
 
+// local definitions are the result of using hybrid-client or server-only values and methods
 namespace EQEmu
 {
+	using RoF2::IINVALID;
+	using RoF2::INULL;
+	
 	namespace inventory {
-		//using namespace RoF2::invtype;
-		//using namespace RoF2::invslot;
-		//using namespace RoF2::invbag;
-		//using namespace RoF2::invaug;
-
-		enum : int16 { typeInvalid = -1, slotInvalid = -1, containerInvalid = -1, socketInvalid = -1 }; // temporary
-		enum : int16 { typeBegin = 0, slotBegin = 0, containerBegin = 0, socketBegin = 0 }; // temporary
-
-		enum PossessionsSlots : int16 { // temporary
-			slotCharm = 0,
-			slotEar1,
-			slotHead,
-			slotFace,
-			slotEar2,
-			slotNeck, // 5
-			slotShoulders,
-			slotArms,
-			slotBack,
-			slotWrist1,
-			slotWrist2, // 10
-			slotRange,
-			slotHands,
-			slotPrimary,
-			slotSecondary,
-			slotFinger1, // 15
-			slotFinger2,
-			slotChest,
-			slotLegs,
-			slotFeet,
-			slotWaist, // 20
-			slotPowerSource = 9999,
-			slotAmmo = 21,
-			slotGeneral1,
-			slotGeneral2,
-			slotGeneral3,
-			slotGeneral4, // 25
-			slotGeneral5,
-			slotGeneral6,
-			slotGeneral7,
-			slotGeneral8,
-			slotCursor, // 30
-			slotCount
-		};
-
-		enum InventoryTypes : int16 { // temporary
-			typePossessions = 0,
-			typeBank,
-			typeSharedBank,
-			typeTrade,
-			typeWorld,
-			typeLimbo, // 5
-			typeTribute,
-			typeTrophyTribute,
-			typeGuildTribute,
-			typeMerchant,
-			typeDeleted, // 10
-			typeCorpse,
-			typeBazaar,
-			typeInspect,
-			typeRealEstate,
-			typeViewMODPC, // 15
-			typeViewMODBank,
-			typeViewMODSharedBank,
-			typeViewMODLimbo,
-			typeAltStorage,
-			typeArchived, // 20
-			typeMail,
-			typeGuildTrophyTribute,
-			typeKrono,
-			typeOther,
-			typeCount
-		};
-
-		static int16 SlotCount(int16 type_index) { return 0; } // temporary
-
-		const int16 ContainerCount = 10; // temporary
-		const int16 SocketCount = 6; // temporary
-
+		
 	} /*inventory*/
 
-	namespace constants {
-		const EQEmu::versions::ClientVersion CharacterCreationClient = EQEmu::versions::ClientVersion::RoF2;
-		const size_t CharacterCreationMax = RoF2::constants::CharacterCreationLimit;
+	namespace invtype {
+		using namespace RoF2::invtype::enum_;
 
-		const size_t SayLinkOpenerSize = 1;
-		const size_t SayLinkBodySize = RoF2::constants::SayLinkBodySize;
-		const size_t SayLinkTextSize = 256; // this may be varied until it breaks something (tested:374) - the others are constant
-		const size_t SayLinkCloserSize = 1;
-		const size_t SayLinkMaximumSize = (SayLinkOpenerSize + SayLinkBodySize + SayLinkTextSize + SayLinkCloserSize);
+		using RoF2::invtype::POSSESSIONS_SIZE;
+		using RoF2::invtype::BANK_SIZE;
+		using RoF2::invtype::SHARED_BANK_SIZE;
+		using RoF2::invtype::TRADE_SIZE;
+		using RoF2::invtype::WORLD_SIZE;
+		using RoF2::invtype::LIMBO_SIZE;
+		using RoF2::invtype::TRIBUTE_SIZE;
+		using RoF2::invtype::TROPHY_TRIBUTE_SIZE;
+		using RoF2::invtype::GUILD_TRIBUTE_SIZE;
+		using RoF2::invtype::MERCHANT_SIZE;
+		using RoF2::invtype::DELETED_SIZE;
+		using RoF2::invtype::CORPSE_SIZE;
+		using RoF2::invtype::BAZAAR_SIZE;
+		using RoF2::invtype::INSPECT_SIZE;
+		using RoF2::invtype::REAL_ESTATE_SIZE;
+		using RoF2::invtype::VIEW_MOD_PC_SIZE;
+		using RoF2::invtype::VIEW_MOD_BANK_SIZE;
+		using RoF2::invtype::VIEW_MOD_SHARED_BANK_SIZE;
+		using RoF2::invtype::VIEW_MOD_LIMBO_SIZE;
+		using RoF2::invtype::ALT_STORAGE_SIZE;
+		using RoF2::invtype::ARCHIVED_SIZE;
+		using RoF2::invtype::MAIL_SIZE;
+		using RoF2::invtype::GUILD_TROPHY_TRIBUTE_SIZE;
+		using RoF2::invtype::KRONO_SIZE;
+		using RoF2::invtype::OTHER_SIZE;
+
+		using Titanium::invtype::TRADE_NPC_SIZE;
+
+		using RoF2::invtype::TYPE_INVALID;
+		using RoF2::invtype::TYPE_BEGIN;
+		using RoF2::invtype::TYPE_END;
+		using RoF2::invtype::TYPE_COUNT;
+
+		int16 GetInvTypeSize(int16 inv_type);
+		using RoF2::invtype::GetInvTypeName;
+
+	} // namespace invtype
+
+	namespace invslot {
+		using namespace Titanium::invslot::enum_;
+
+		const int16 SLOT_POWER_SOURCE = 9999;
+
+		using RoF2::invslot::SLOT_INVALID;
+		using RoF2::invslot::SLOT_BEGIN;
+
+		using Titanium::invslot::POSSESSIONS_BEGIN;
+		using Titanium::invslot::POSSESSIONS_END;
+		using SoF::invslot::POSSESSIONS_COUNT;
+
+		using Titanium::invslot::EQUIPMENT_BEGIN;
+		using Titanium::invslot::EQUIPMENT_END;
+		using Titanium::invslot::EQUIPMENT_COUNT;
+
+		using Titanium::invslot::GENERAL_BEGIN;
+		using Titanium::invslot::GENERAL_END;
+		using Titanium::invslot::GENERAL_COUNT;
+
+		using Titanium::invslot::BONUS_BEGIN;
+		using Titanium::invslot::BONUS_STAT_END;
+		using Titanium::invslot::BONUS_SKILL_END;
+
+		using Titanium::invslot::BANK_BEGIN;
+		using SoF::invslot::BANK_END;
+
+		using Titanium::invslot::SHARED_BANK_BEGIN;
+		using Titanium::invslot::SHARED_BANK_END;
+
+		using Titanium::invslot::TRADE_BEGIN;
+		using Titanium::invslot::TRADE_END;
+
+		using Titanium::invslot::TRADE_NPC_END;
+
+		using Titanium::invslot::WORLD_BEGIN;
+		using Titanium::invslot::WORLD_END;
+
+		using Titanium::invslot::TRIBUTE_BEGIN;
+		using Titanium::invslot::TRIBUTE_END;
+
+		using Titanium::invslot::GUILD_TRIBUTE_BEGIN;
+		using Titanium::invslot::GUILD_TRIBUTE_END;
+
+		const int16 CORPSE_BEGIN = invslot::slotGeneral1;
+		const int16 CORPSE_END = CORPSE_BEGIN + invslot::slotCursor;
+
+		using RoF2::invslot::POSSESSIONS_BITMASK;
+		using RoF2::invslot::CORPSE_BITMASK;
+
+		using RoF2::invslot::GetInvPossessionsSlotName;
+		using RoF2::invslot::GetInvSlotName;
+
+	} // namespace invslot
+
+	namespace invbag {
+		using Titanium::invbag::SLOT_INVALID;
+		using Titanium::invbag::SLOT_BEGIN;
+		using Titanium::invbag::SLOT_END;
+		using Titanium::invbag::SLOT_COUNT;
+
+		using Titanium::invbag::GENERAL_BAGS_BEGIN;
+		const int16 GENERAL_BAGS_COUNT = invslot::GENERAL_COUNT * SLOT_COUNT;
+		const int16 GENERAL_BAGS_END = (GENERAL_BAGS_BEGIN + GENERAL_BAGS_COUNT) - 1;
+
+		const int16 GENERAL_BAGS_8_COUNT = 8 * SLOT_COUNT;
+		const int16 GENERAL_BAGS_8_END = (GENERAL_BAGS_BEGIN + GENERAL_BAGS_8_COUNT) - 1;
+
+		const int16 CURSOR_BAG_BEGIN = 331;
+		const int16 CURSOR_BAG_COUNT = SLOT_COUNT;
+		const int16 CURSOR_BAG_END = (CURSOR_BAG_BEGIN + CURSOR_BAG_COUNT) - 1;
+
+		using Titanium::invbag::BANK_BAGS_BEGIN;
+		const int16 BANK_BAGS_COUNT = (invtype::BANK_SIZE * SLOT_COUNT);
+		const int16 BANK_BAGS_END = (BANK_BAGS_BEGIN + BANK_BAGS_COUNT) - 1;
+
+		const int16 BANK_BAGS_16_COUNT = 16 * SLOT_COUNT;
+		const int16 BANK_BAGS_16_END = (BANK_BAGS_BEGIN + BANK_BAGS_16_COUNT) - 1;
+
+		using Titanium::invbag::SHARED_BANK_BAGS_BEGIN;
+		const int16 SHARED_BANK_BAGS_COUNT = invtype::SHARED_BANK_SIZE * SLOT_COUNT;
+		const int16 SHARED_BANK_BAGS_END = (SHARED_BANK_BAGS_BEGIN + SHARED_BANK_BAGS_COUNT) - 1;
+
+		using Titanium::invbag::TRADE_BAGS_BEGIN;
+		const int16 TRADE_BAGS_COUNT = invtype::TRADE_SIZE * SLOT_COUNT;
+		const int16 TRADE_BAGS_END = (TRADE_BAGS_BEGIN + TRADE_BAGS_COUNT) - 1;
+
+		using Titanium::invbag::GetInvBagIndexName;
+
+	} // namespace invbag
+
+	namespace invaug {
+		using RoF2::invaug::SOCKET_INVALID;
+		using RoF2::invaug::SOCKET_BEGIN;
+		using RoF2::invaug::SOCKET_END;
+		using RoF2::invaug::SOCKET_COUNT;
+
+		using RoF2::invaug::GetInvAugIndexName;
+
+	} // namespace invaug
+
+	namespace constants {
+		const EQEmu::versions::ClientVersion CHARACTER_CREATION_CLIENT = EQEmu::versions::ClientVersion::Titanium;
+
+		using RoF2::constants::CHARACTER_CREATION_LIMIT;
+		
+		const size_t SAY_LINK_OPENER_SIZE = 1;
+		using RoF2::constants::SAY_LINK_BODY_SIZE;
+		const size_t SAY_LINK_TEXT_SIZE = 256; // this may be varied until it breaks something (tested:374) - the others are constant
+		const size_t SAY_LINK_CLOSER_SIZE = 1;
+		const size_t SAY_LINK_MAXIMUM_SIZE = (SAY_LINK_OPENER_SIZE + SAY_LINK_BODY_SIZE + SAY_LINK_TEXT_SIZE + SAY_LINK_CLOSER_SIZE);
 
 		const int LongBuffs = RoF2::constants::LongBuffs;
 		const int ShortBuffs = RoF2::constants::ShortBuffs;
@@ -129,6 +198,21 @@ namespace EQEmu
 		const int MercBuffs = RoF2::constants::MercBuffs;
 
 	} /*constants*/
+
+	namespace profile {
+		using RoF2::profile::BANDOLIERS_SIZE;
+		using RoF2::profile::BANDOLIER_ITEM_COUNT;
+		
+		using RoF2::profile::POTION_BELT_SIZE;
+
+		using RoF2::profile::SKILL_ARRAY_SIZE;
+
+	} // namespace profile
+
+	namespace behavior {
+		using RoF2::behavior::CoinHasWeight;
+
+	} // namespace behavior
 
 	namespace bug {
 		enum CategoryID : uint32 {

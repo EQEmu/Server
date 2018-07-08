@@ -35,10 +35,10 @@ namespace EQEmu
 	
 	class InventorySlot {
 	public:
-		InventorySlot() : _type_index(inventory::typeInvalid), _slot_index(inventory::slotInvalid), _container_index(inventory::containerInvalid), _socket_index(inventory::socketInvalid), _typeless(false) { }
-		InventorySlot(int16 type_index) : _type_index(type_index), _slot_index(inventory::slotInvalid), _container_index(inventory::containerInvalid), _socket_index(inventory::socketInvalid), _typeless(false) { }
-		InventorySlot(int16 type_index, int16 parent_index) : _type_index(type_index), _slot_index(parent_index), _container_index(inventory::containerInvalid), _socket_index(inventory::socketInvalid), _typeless(false) { }
-		InventorySlot(int16 type_index, int16 parent_index, int16 bag_index) : _type_index(type_index), _slot_index(parent_index), _container_index(bag_index), _socket_index(inventory::socketInvalid), _typeless(false) { }
+		InventorySlot() : _type_index(invtype::TYPE_INVALID), _slot_index(invslot::SLOT_INVALID), _container_index(invbag::SLOT_INVALID), _socket_index(invaug::SOCKET_INVALID), _typeless(false) { }
+		InventorySlot(int16 type_index) : _type_index(type_index), _slot_index(invslot::SLOT_INVALID), _container_index(invbag::SLOT_INVALID), _socket_index(invaug::SOCKET_INVALID), _typeless(false) { }
+		InventorySlot(int16 type_index, int16 parent_index) : _type_index(type_index), _slot_index(parent_index), _container_index(invbag::SLOT_INVALID), _socket_index(invaug::SOCKET_INVALID), _typeless(false) { }
+		InventorySlot(int16 type_index, int16 parent_index, int16 bag_index) : _type_index(type_index), _slot_index(parent_index), _container_index(bag_index), _socket_index(invaug::SOCKET_INVALID), _typeless(false) { }
 		InventorySlot(int16 type_index, int16 parent_index, int16 bag_index, int16 aug_index) : _type_index(type_index), _slot_index(parent_index), _container_index(bag_index), _socket_index(aug_index), _typeless(false) { }
 		InventorySlot(const InventorySlot& r) : _type_index(r._type_index), _slot_index(r._slot_index), _container_index(r._container_index), _socket_index(r._socket_index), _typeless(r._typeless) { }
 		InventorySlot(int16 type_index, const InventorySlot& r) : _type_index(type_index), _slot_index(r._slot_index), _container_index(r._container_index), _socket_index(r._socket_index), _typeless(false) { }
@@ -90,15 +90,15 @@ namespace EQEmu
 
 		void SetInvalidSlot();
 
-		void SetTypeInvalid() { _type_index = inventory::typeInvalid; }
-		void SetSlotInvalid() { _slot_index = inventory::slotInvalid; }
-		void SetContainerInvalid() { _container_index = inventory::containerInvalid; }
-		void SetSocketInvalid() { _socket_index = inventory::socketInvalid; }
+		void SetTypeInvalid() { _type_index = invtype::TYPE_INVALID; }
+		void SetSlotInvalid() { _slot_index = invslot::SLOT_INVALID; }
+		void SetContainerInvalid() { _container_index = invbag::SLOT_INVALID; }
+		void SetSocketInvalid() { _socket_index = invaug::SOCKET_INVALID; }
 
-		void SetTypeBegin() { _type_index = inventory::typeBegin; }
-		void SetSlotBegin() { _slot_index = inventory::slotBegin; }
-		void SetContainerBegin() { _container_index = inventory::containerBegin; }
-		void SetSocketBegin() { _socket_index = inventory::socketBegin; }
+		void SetTypeBegin() { _type_index = invtype::TYPE_BEGIN; }
+		void SetSlotBegin() { _slot_index = invslot::SLOT_BEGIN; }
+		void SetContainerBegin() { _container_index = invbag::SLOT_BEGIN; }
+		void SetSocketBegin() { _socket_index = invaug::SOCKET_BEGIN; }
 
 		void IncrementType() { ++_type_index; }
 		void IncrementSlot() { ++_slot_index; }

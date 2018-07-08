@@ -39,8 +39,8 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 	size_t character_limit = EQEmu::constants::Lookup(client_version)->CharacterCreationLimit;
 	
 	// Validate against absolute server max
-	if (character_limit > EQEmu::constants::CharacterCreationMax)
-		character_limit = EQEmu::constants::CharacterCreationMax;
+	if (character_limit > EQEmu::constants::CHARACTER_CREATION_LIMIT)
+		character_limit = EQEmu::constants::CHARACTER_CREATION_LIMIT;
 
 	// Force Titanium clients to use '8'
 	if (client_version == EQEmu::versions::ClientVersion::Titanium)

@@ -212,8 +212,8 @@ void Client::SendMaxCharCreate() {
 	MaxCharacters_Struct* mc = (MaxCharacters_Struct*)outapp->pBuffer;
 
 	mc->max_chars = EQEmu::constants::Lookup(m_ClientVersion)->CharacterCreationLimit;
-	if (mc->max_chars > EQEmu::constants::CharacterCreationMax)
-		mc->max_chars = EQEmu::constants::CharacterCreationMax;
+	if (mc->max_chars > EQEmu::constants::CHARACTER_CREATION_LIMIT)
+		mc->max_chars = EQEmu::constants::CHARACTER_CREATION_LIMIT;
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
@@ -766,8 +766,8 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 	// (This is a literal translation of the original process..I don't see why it can't be changed to a single-target query over account iteration)
 	if (!is_player_zoning) {
 		size_t character_limit = EQEmu::constants::Lookup(eqs->ClientVersion())->CharacterCreationLimit;
-		if (character_limit > EQEmu::constants::CharacterCreationMax) { character_limit = EQEmu::constants::CharacterCreationMax; }
-		if (eqs->ClientVersion() == EQEmu::versions::ClientVersion::Titanium) { character_limit = 8; }
+		if (character_limit > EQEmu::constants::CHARACTER_CREATION_LIMIT) { character_limit = EQEmu::constants::CHARACTER_CREATION_LIMIT; }
+		if (eqs->ClientVersion() == EQEmu::versions::ClientVersion::Titanium) { character_limit = Titanium::constants::CHARACTER_CREATION_LIMIT; }
 
 		std::string tgh_query = StringFormat(
 			"SELECT                     "

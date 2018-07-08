@@ -148,7 +148,7 @@ struct PetInfo {
 	uint32	Mana;
 	float	size;
 	SpellBuff_Struct	Buffs[PET_BUFF_COUNT];
-	uint32	Items[EQEmu::legacy::EQUIPMENT_SIZE];
+	uint32	Items[EQEmu::invslot::EQUIPMENT_COUNT];
 	char	Name[64];
 };
 
