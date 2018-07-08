@@ -2480,10 +2480,10 @@ void ClientTaskState::SendTaskHistory(Client *c, int TaskIndex) {
 		if(CompletedTasks[AdjustedTaskIndex].ActivityDone[i]) {
 			CompletedActivityCount++;
 			PacketLength = PacketLength + sizeof(TaskHistoryReplyData1_Struct) +
-								Task->Activity[i].Text1.size() + 1 +
-								Task->Activity[i].Text2.size() + 1 +
+								Task->Activity[i].target_name.size() + 1 +
+								Task->Activity[i].item_list.size() + 1 +
 								sizeof(TaskHistoryReplyData2_Struct) +
-								Task->Activity[i].Text3.size() + 1;
+								Task->Activity[i].desc_override.size() + 1;
 		}
 	}
 
@@ -2503,8 +2503,8 @@ void ClientTaskState::SendTaskHistory(Client *c, int TaskIndex) {
 			thd1 = (TaskHistoryReplyData1_Struct*)Ptr;
 			thd1->ActivityType = Task->Activity[i].Type;
 			Ptr = (char *)thd1 + sizeof(TaskHistoryReplyData1_Struct);
-			VARSTRUCT_ENCODE_STRING(Ptr, Task->Activity[i].Text1.c_str());
-			VARSTRUCT_ENCODE_STRING(Ptr, Task->Activity[i].Text2.c_str());
+			VARSTRUCT_ENCODE_STRING(Ptr, Task->Activity[i].target_name.c_str());
+			VARSTRUCT_ENCODE_STRING(Ptr, Task->Activity[i].item_list.c_str());
 			thd2 = (TaskHistoryReplyData2_Struct*)Ptr;
 			thd2->GoalCount = Task->Activity[i].GoalCount;
 			thd2->unknown04 = 0xffffffff;
@@ -2512,7 +2512,7 @@ void ClientTaskState::SendTaskHistory(Client *c, int TaskIndex) {
 			thd2->ZoneID = Task->Activity[i].ZoneID;
 			thd2->unknown16 = 0x00000000;
 			Ptr = (char *)thd2 + sizeof(TaskHistoryReplyData2_Struct);
-			VARSTRUCT_ENCODE_STRING(Ptr, Task->Activity[i].Text3.c_str());
+			VARSTRUCT_ENCODE_STRING(Ptr, Task->Activity[i].desc_override.c_str());
 		}
 	}
 
@@ -2799,34 +2799,35 @@ void TaskManager::SendActiveTasksToClient(Client *c, bool TaskComplete)
 	if (!state)
 		return;
 
-	for (int TaskIndex=0; TaskIndex<MAXACTIVEQUESTS; TaskIndex++) {
-		int TaskID = c->GetActiveTaskID(TaskIndex);
-		if((TaskID==0) || (Tasks[TaskID] ==0)) continue;
-		int StartTime = c->GetTaskStartTime(Tasks[TaskID]->type, TaskIndex);
+	for (int TaskIndex = 0; TaskIndex < MAXACTIVEQUESTS + 1; TaskIndex++) {
+		int TaskID = state->ActiveTasks[TaskIndex].TaskID;
+		if ((TaskID == 0) || (Tasks[TaskID] == 0))
+			continue;
+		int StartTime = state->ActiveTasks[TaskIndex].AcceptedTime;
 
-		SendActiveTaskDescription(c, TaskID, state->ActiveQuests[TaskIndex], StartTime, Tasks[TaskID]->Duration, false);
-		Log(Logs::General, Logs::Tasks, "[UPDATE] SendActiveTasksToClient: Task %i, Activities: %i", TaskID, GetActivityCount(TaskID));
+		SendActiveTaskDescription(c, TaskID, state->ActiveTasks[TaskIndex], StartTime, Tasks[TaskID]->Duration,
+					  false);
+		Log(Logs::General, Logs::Tasks, "[UPDATE] SendActiveTasksToClient: Task %i, Activities: %i", TaskID,
+		    GetActivityCount(TaskID));
 
 		int Sequence = 0;
-		for(int Activity=0; Activity<GetActivityCount(TaskID); Activity++) {
-			if(c->GetTaskActivityState(Tasks[TaskID]->type, TaskIndex, Activity) != ActivityHidden) {
-				Log(Logs::General, Logs::Tasks, "[UPDATE]   Long: %i, %i, %i Complete=%i", TaskID, Activity, TaskIndex, TaskComplete);
-				if(Activity==GetActivityCount(TaskID)-1)
+		for (int Activity = 0; Activity < GetActivityCount(TaskID); Activity++) {
+			if (c->GetTaskActivityState(Tasks[TaskID]->type, TaskIndex, Activity) != ActivityHidden) {
+				Log(Logs::General, Logs::Tasks, "[UPDATE]   Long: %i, %i, %i Complete=%i", TaskID,
+				    Activity, TaskIndex, TaskComplete);
+				if (Activity == GetActivityCount(TaskID) - 1)
 					SendTaskActivityLong(c, TaskID, Activity, TaskIndex,
-								Tasks[TaskID]->Activity[Activity].Optional,
-								TaskComplete);
+							     Tasks[TaskID]->Activity[Activity].Optional, TaskComplete);
 				else
 					SendTaskActivityLong(c, TaskID, Activity, TaskIndex,
-								Tasks[TaskID]->Activity[Activity].Optional, 0);
-			}
-			else {
-				Log(Logs::General, Logs::Tasks, "[UPDATE]   Short: %i, %i, %i", TaskID, Activity, TaskIndex);
+							     Tasks[TaskID]->Activity[Activity].Optional, 0);
+			} else {
+				Log(Logs::General, Logs::Tasks, "[UPDATE]   Short: %i, %i, %i", TaskID, Activity,
+				    TaskIndex);
 				SendTaskActivityShort(c, TaskID, Activity, TaskIndex);
 			}
 			Sequence++;
 		}
-
-
 	}
 }
 
@@ -3087,22 +3088,39 @@ void ClientTaskState::CancelTask(Client *c, int SequenceNumber, TaskType type, b
 void ClientTaskState::RemoveTask(Client *c, int sequenceNumber, TaskType type)
 {
 	int characterID = c->CharacterID();
-    Log(Logs::General, Logs::Tasks, "[UPDATE] ClientTaskState Cancel Task %i ", sequenceNumber);
+	Log(Logs::General, Logs::Tasks, "[UPDATE] ClientTaskState Cancel Task %i ", sequenceNumber);
 
-    std::string query = StringFormat("DELETE FROM character_activities WHERE charid=%i AND taskid = %i",
-                                    characterID, ActiveQuests[sequenceNumber].TaskID);
-    auto results = database.QueryDatabase(query);
-	if(!results.Success()) {
-		Log(Logs::General, Logs::Error, "[TASKS] Error in CientTaskState::CancelTask %s", results.ErrorMessage().c_str());
+	int task_id = -1;
+	switch (type) {
+	case TaskType::Task:
+		if (sequenceNumber == 0)
+			task_id = ActiveTask.TaskID;
+		break;
+	case TaskType::Quest:
+		if (sequenceNumber < MAXACTIVEQUESTS)
+			task_id = ActiveQuests[sequenceNumber].TaskID;
+		break;
+	case TaskType::Shared: // TODO:
+	default:
+		break;
+	}
+
+	std::string query = StringFormat("DELETE FROM character_activities WHERE charid=%i AND taskid = %i",
+					 characterID, task_id);
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		Log(Logs::General, Logs::Error, "[TASKS] Error in CientTaskState::CancelTask %s",
+		    results.ErrorMessage().c_str());
 		return;
 	}
-    Log(Logs::General, Logs::Tasks, "[UPDATE] CancelTask: %s", query.c_str());
+	Log(Logs::General, Logs::Tasks, "[UPDATE] CancelTask: %s", query.c_str());
 
-    query = StringFormat("DELETE FROM character_tasks WHERE charid=%i AND taskid = %i AND type=%i",
-                        characterID, ActiveQuests[sequenceNumber].TaskID, static_cast<int>(type));
+	query = StringFormat("DELETE FROM character_tasks WHERE charid=%i AND taskid = %i AND type=%i", characterID,
+			     task_id, static_cast<int>(type));
 	results = database.QueryDatabase(query);
-	if(!results.Success())
-		Log(Logs::General, Logs::Error, "[TASKS] Error in CientTaskState::CancelTask %s", results.ErrorMessage().c_str());
+	if (!results.Success())
+		Log(Logs::General, Logs::Error, "[TASKS] Error in CientTaskState::CancelTask %s",
+		    results.ErrorMessage().c_str());
 
 	Log(Logs::General, Logs::Tasks, "[UPDATE] CancelTask: %s", query.c_str());
 
@@ -3120,7 +3138,6 @@ void ClientTaskState::RemoveTask(Client *c, int sequenceNumber, TaskType type)
 		break;
 	}
 }
-
 
 void ClientTaskState::AcceptNewTask(Client *c, int TaskID, int NPCID, bool enforce_level_requirement)
 {
