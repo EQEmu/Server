@@ -146,7 +146,6 @@ struct TaskInformation {
 	int	CashReward; // Expressed in copper
 	int	XPReward;
 	TaskMethodType RewardMethod;
-	int	StartZone;
 	int	ActivityCount;
 	SequenceType SequenceMode;
 	int	LastStep;

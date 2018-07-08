@@ -117,12 +117,12 @@ bool TaskManager::LoadTasks(int singleTask)
 			Log(Logs::Detail, Logs::Tasks, "TaskManager::LoadTasks LoadTaskSets failed");
 
 		query = StringFormat("SELECT `id`, `type`, `duration`, `duration_code`, `title`, `description`, "
-				     "`reward`, `rewardid`, `cashreward`, `xpreward`, `rewardmethod`, `startzone`, "
+				     "`reward`, `rewardid`, `cashreward`, `xpreward`, `rewardmethod`, "
 				     "`minlevel`, `maxlevel`, `repeatable` FROM `tasks` WHERE `id` < %i",
 				     MAXTASKS);
 	} else
 		query = StringFormat("SELECT `id`, `type`, `duration`, `duration_code`, `title`, `description`, "
-				     "`reward`, `rewardid`, `cashreward`, `xpreward`, `rewardmethod`, `startzone`, "
+				     "`reward`, `rewardid`, `cashreward`, `xpreward`, `rewardmethod`, "
 				     "`minlevel`, `maxlevel`, `repeatable` FROM `tasks` WHERE `id` = %i",
 				     singleTask);
 
@@ -155,18 +155,17 @@ bool TaskManager::LoadTasks(int singleTask)
 		Tasks[taskID]->CashReward = atoi(row[8]);
 		Tasks[taskID]->XPReward = atoi(row[9]);
 		Tasks[taskID]->RewardMethod = (TaskMethodType)atoi(row[10]);
-		Tasks[taskID]->StartZone = atoi(row[11]);
-		Tasks[taskID]->MinLevel = atoi(row[12]);
-		Tasks[taskID]->MaxLevel = atoi(row[13]);
-		Tasks[taskID]->Repeatable = atoi(row[14]);
+		Tasks[taskID]->MinLevel = atoi(row[11]);
+		Tasks[taskID]->MaxLevel = atoi(row[12]);
+		Tasks[taskID]->Repeatable = atoi(row[13]);
 		Tasks[taskID]->ActivityCount = 0;
 		Tasks[taskID]->SequenceMode = ActivitiesSequential;
 		Tasks[taskID]->LastStep = 0;
 
 		Log(Logs::General, Logs::Tasks,
-		    "[GLOBALLOAD] TaskID: %5i, Duration: %8i, StartZone: %3i Reward: %s MinLevel %i MaxLevel %i "
+		    "[GLOBALLOAD] TaskID: %5i, Duration: %8i, Reward: %s MinLevel %i MaxLevel %i "
 		    "Repeatable: %s",
-		    taskID, Tasks[taskID]->Duration, Tasks[taskID]->StartZone, Tasks[taskID]->Reward.c_str(),
+		    taskID, Tasks[taskID]->Duration, Tasks[taskID]->Reward.c_str(),
 		    Tasks[taskID]->MinLevel, Tasks[taskID]->MaxLevel, Tasks[taskID]->Repeatable ? "Yes" : "No");
 		Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] Title: %s", Tasks[taskID]->Title.c_str());
 	}
