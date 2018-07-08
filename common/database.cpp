@@ -1752,6 +1752,15 @@ void Database::ClearRaidDetails(uint32 rid) {
 		std::cout << "Unable to clear raid details: " << results.ErrorMessage() << std::endl;
 }
 
+void Database::PurgeAllDeletedDataBuckets() {
+	std::string query = StringFormat(
+			"DELETE FROM `data_buckets` WHERE (`expires` < %lld AND `expires` > 0)",
+			(long long) std::time(nullptr)
+	);
+
+	QueryDatabase(query);
+}
+
 // returns 0 on error or no raid for that character, or
 // the raid id that the character is a member of.
 uint32 Database::GetRaidID(const char* name)

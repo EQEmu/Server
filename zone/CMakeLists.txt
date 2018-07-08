@@ -19,6 +19,7 @@ SET(zone_sources
 	client_process.cpp
 	command.cpp
 	corpse.cpp
+	data_bucket.cpp
 	doors.cpp
 	effects.cpp
 	embparser.cpp
@@ -155,6 +156,7 @@ SET(zone_headers
 	command.h
 	common.h
 	corpse.h
+   data_bucket.h
 	doors.h
 	embparser.h
 	embperl.h

@@ -63,6 +63,7 @@ public:
 
 private:
 	void OnTick(EQ::Timer *t);
+	void OnKeepAlive(EQ::Timer *t);
 	uint32 NextID;
 	std::list<std::unique_ptr<ZoneServer>> list;
 	uint16	pLockedZones[MaxLockedZones];
@@ -70,6 +71,7 @@ private:
 	uint16 LastAllocatedPort;
 
 	std::unique_ptr<EQ::Timer> m_tick;
+	std::unique_ptr<EQ::Timer> m_keepalive;
 };
 
 #endif /*ZONELIST_H_*/

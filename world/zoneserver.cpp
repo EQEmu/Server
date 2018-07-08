@@ -1400,6 +1400,13 @@ void ZoneServer::SendGroupIDs() {
 	delete pack;
 }
 
+
+void ZoneServer::SendKeepAlive()
+{
+	ServerPacket pack(ServerOP_KeepAlive, 0);
+	SendPacket(&pack);
+}
+
 void ZoneServer::ChangeWID(uint32 iCharID, uint32 iWID) {
 	auto pack = new ServerPacket(ServerOP_ChangeWID, sizeof(ServerChangeWID_Struct));
 	ServerChangeWID_Struct* scw = (ServerChangeWID_Struct*)pack->pBuffer;

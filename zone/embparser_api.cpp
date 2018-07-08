@@ -31,6 +31,7 @@
 #include "queryserv.h"
 #include "questmgr.h"
 #include "zone.h"
+#include "data_bucket.h"
 
 extern Zone      *zone;
 extern QueryServ *QServ;
@@ -3501,6 +3502,54 @@ XS(XS__UpdateZoneHeader) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS__get_data);
+XS(XS__get_data) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::get_data(string bucket_key)");
+
+	dXSTARG;
+	std::string key = (std::string) SvPV_nolen(ST(0));
+
+	sv_setpv(TARG, DataBucket::GetData(key).c_str());
+	XSprePUSH;
+	PUSHTARG;
+	XSRETURN(1);
+}
+
+XS(XS__set_data);
+XS(XS__set_data) {
+	dXSARGS;
+	if (items != 2 && items != 3) {
+		Perl_croak(aTHX_ "Usage: quest::set_data(string key, string value, [uint32 expire_time_unix = 0])");
+	} else {
+		std::string key   = (std::string) SvPV_nolen(ST(0));
+		std::string value = (std::string) SvPV_nolen(ST(1));
+
+		uint32 expires_at_unix = 0;
+		if (items == 3)
+			expires_at_unix = (uint32) SvIV(ST(2));
+
+		DataBucket::SetData(key, value, expires_at_unix);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS__delete_data);
+XS(XS__delete_data) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::delete_data(string bucket_key)");
+
+	dXSTARG;
+	std::string key = (std::string) SvPV_nolen(ST(0));
+
+	XSprePUSH;
+	PUSHu((IV) DataBucket::DeleteData(key));
+
+	XSRETURN(1);
+}
+
 
 /*
 This is the callback perl will look for to setup the
@@ -3548,6 +3597,9 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "GetTimeSeconds"), XS__GetTimeSeconds, file);
 	newXS(strcpy(buf, "GetZoneID"), XS__GetZoneID, file);
 	newXS(strcpy(buf, "GetZoneLongName"), XS__GetZoneLongName, file);
+	newXS(strcpy(buf, "get_data"), XS__get_data, file);
+	newXS(strcpy(buf, "set_data"), XS__set_data, file);
+	newXS(strcpy(buf, "delete_data"), XS__delete_data, file);
 	newXS(strcpy(buf, "IsBeneficialSpell"), XS__IsBeneficialSpell, file);
 	newXS(strcpy(buf, "IsEffectInSpell"), XS__IsEffectInSpell, file);
 	newXS(strcpy(buf, "IsRunning"), XS__IsRunning, file);

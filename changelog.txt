@@ -1,5 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 07/07/2018 ==
+Akkadius: Implemented a much better replacement for qglobals called 'DataBuckets'
+    - A much more detailed example can be found at: https://github.com/EQEmu/Server/wiki/Data-Buckets
+
 == 07/05/2018 ==
 Uleat: Reintegration of inventory-based EQDictionary references
 	- Standardized 'CONSTANT_DECLARATION' and 'enumerationValue' tokens for most of the affected references
