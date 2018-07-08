@@ -22,6 +22,7 @@
 #include "qglobals.h"
 #include "encounter.h"
 #include "lua_encounter.h"
+#include "data_bucket.h"
 
 struct Events { };
 struct Factions { };
@@ -815,6 +816,22 @@ std::string lua_say_link(const char *phrase) {
 	quest_manager.saylink(text, false, text);
 
 	return std::string(text);
+}
+
+std::string lua_get_data(std::string bucket_key) {
+	return DataBucket::GetData(bucket_key);
+}
+
+void lua_set_data(std::string bucket_key, std::string bucket_value) {
+	DataBucket::SetData(bucket_key, bucket_value);
+}
+
+void lua_set_data(std::string bucket_key, std::string bucket_value, uint32 expires_at_unix) {
+	DataBucket::SetData(bucket_key, bucket_value, expires_at_unix);
+}
+
+bool lua_delete_data(std::string bucket_key) {
+	return DataBucket::DeleteData(bucket_key);
 }
 
 const char *lua_get_guild_name_by_id(uint32 guild_id) {
@@ -1658,6 +1675,10 @@ luabind::scope lua_register_general() {
 		luabind::def("say_link", (std::string(*)(const char*,bool,const char*))&lua_say_link),
 		luabind::def("say_link", (std::string(*)(const char*,bool))&lua_say_link),
 		luabind::def("say_link", (std::string(*)(const char*))&lua_say_link),
+		luabind::def("get_data", (std::string(*)(std::string))&lua_get_data),
+		luabind::def("set_data", (void(*)(std::string, std::string))&lua_set_data),
+		luabind::def("set_data", (void(*)(std::string, std::string, uint32))&lua_set_data),
+		luabind::def("delete_data", (bool(*)(std::string))&lua_delete_data),
 		luabind::def("get_guild_name_by_id", &lua_get_guild_name_by_id),
 		luabind::def("create_instance", &lua_create_instance),
 		luabind::def("destroy_instance", &lua_destroy_instance),
