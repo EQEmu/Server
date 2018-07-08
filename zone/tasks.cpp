@@ -2271,27 +2271,48 @@ void ClientTaskState::ShowClientTasks(Client *c) {
 
 }
 
-int ClientTaskState::TaskTimeLeft(int TaskID) {
+// TODO: Shared Task
+int ClientTaskState::TaskTimeLeft(int TaskID)
+{
+	if (ActiveTask.TaskID == TaskID) {
+		int Now = time(nullptr);
 
-	if(ActiveTaskCount == 0) return -1;
+		TaskInformation *Task = taskmanager->Tasks[TaskID];
 
-	for(int i=0; i<MAXACTIVEQUESTS; i++) {
+		if (Task == nullptr)
+			return -1;
 
-		if(ActiveQuests[i].TaskID != TaskID) continue;
+		if (!Task->Duration)
+			return -1;
+
+		int TimeLeft = (ActiveTask.AcceptedTime + Task->Duration - Now);
+
+		return (TimeLeft > 0 ? TimeLeft : 0);
+	}
+
+	if (ActiveTaskCount == 0)
+		return -1;
+
+	for (int i = 0; i < MAXACTIVEQUESTS; i++) {
+
+		if (ActiveQuests[i].TaskID != TaskID)
+			continue;
 
 		int Now = time(nullptr);
 
-		TaskInformation* Task = taskmanager->Tasks[ActiveQuests[i].TaskID];
+		TaskInformation *Task = taskmanager->Tasks[ActiveQuests[i].TaskID];
 
-		if(Task == nullptr) return -1;
+		if (Task == nullptr)
+			return -1;
 
-		if(!Task->Duration) return -1;
+		if (!Task->Duration)
+			return -1;
 
 		int TimeLeft = (ActiveQuests[i].AcceptedTime + Task->Duration - Now);
 
 		// If Timeleft is negative, return 0, else return the number of seconds left
 
-		return (TimeLeft>0 ? TimeLeft : 0);
+		return (TimeLeft > 0 ? TimeLeft : 0);
 	}
 
 	return -1;
@@ -2348,7 +2369,7 @@ bool ClientTaskState::TaskOutOfTime(TaskType type, int Index)
 
 void ClientTaskState::TaskPeriodicChecks(Client *c)
 {
-	if (ActiveTask.TaskID == TASKSLOTEMPTY) {
+	if (ActiveTask.TaskID != TASKSLOTEMPTY) {
 		if (TaskOutOfTime(TaskType::Task, 0)) {
 			// Send Red Task Failed Message
 			c->SendTaskFailed(ActiveTask.TaskID, 0, TaskType::Task);
