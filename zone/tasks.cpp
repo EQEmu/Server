@@ -1889,7 +1889,7 @@ void ClientTaskState::IncrementDoneCount(Client *c, TaskInformation *Task, int T
 		// and by the 'Task Stage Completed' message
 		c->SendTaskActivityComplete(info->TaskID, ActivityID, TaskIndex, Task->type);
 		// Send the updated task/activity list to the client
-		taskmanager->SendSingleActiveTaskToClient(c, ActiveQuests[TaskIndex], TaskComplete, false);
+		taskmanager->SendSingleActiveTaskToClient(c, *info, TaskComplete, false);
 		// Inform the client the task has been updated, both by a chat message
 		c->Message(0, "Your task '%s' has been updated.", Task->Title.c_str());
 
@@ -1934,11 +1934,11 @@ void ClientTaskState::IncrementDoneCount(Client *c, TaskInformation *Task, int T
 
 		}
 
-	}
-	else
+	} else {
 		// Send an update packet for this single activity
-		taskmanager->SendTaskActivityLong(c, ActiveQuests[TaskIndex].TaskID, ActivityID,
-							TaskIndex, Task->Activity[ActivityID].Optional);
+		taskmanager->SendTaskActivityLong(c, info->TaskID, ActivityID, TaskIndex,
+						  Task->Activity[ActivityID].Optional);
+	}
 }
 
 void ClientTaskState::RewardTask(Client *c, TaskInformation *Task) {
@@ -2049,6 +2049,9 @@ void ClientTaskState::RewardTask(Client *c, TaskInformation *Task) {
 
 bool ClientTaskState::IsTaskActive(int TaskID)
 {
+	if (ActiveTask.TaskID == TaskID)
+		return true;
+
 	if (ActiveTaskCount == 0 || TaskID == 0)
 		return false;
 
@@ -2056,9 +2059,6 @@ bool ClientTaskState::IsTaskActive(int TaskID)
 		if (ActiveQuests[i].TaskID == TaskID)
 			return true;
 	}
-
-	if (ActiveTask.TaskID == TaskID)
-		return true;
 
 	return false;
 }
@@ -2089,116 +2089,166 @@ void ClientTaskState::FailTask(Client *c, int TaskID)
 	}
 }
 
-// TODO: tasks
-bool ClientTaskState::IsTaskActivityActive(int TaskID, int ActivityID) {
+// TODO: Shared tasks
+bool ClientTaskState::IsTaskActivityActive(int TaskID, int ActivityID)
+{
 
 	Log(Logs::General, Logs::Tasks, "[UPDATE] ClientTaskState IsTaskActivityActive(%i, %i).", TaskID, ActivityID);
 	// Quick sanity check
-	if(ActivityID<0) return false;
-	if(ActiveTaskCount == 0) return false;
+	if (ActivityID < 0)
+		return false;
+	if (ActiveTaskCount == 0 && ActiveTask.TaskID == TASKSLOTEMPTY)
+		return false;
 
 	int ActiveTaskIndex = -1;
+	auto type = TaskType::Task;
 
-	for(int i=0; i<MAXACTIVEQUESTS; i++) {
-		if(ActiveQuests[i].TaskID==TaskID) {
-			ActiveTaskIndex = i;
-			break;
+	if (ActiveTask.TaskID == TaskID)
+		ActiveTaskIndex = 0;
+
+	if (ActiveTaskIndex == -1) {
+		for (int i = 0; i < MAXACTIVEQUESTS; i++) {
+			if (ActiveQuests[i].TaskID == TaskID) {
+				ActiveTaskIndex = i;
+				type = TaskType::Quest;
+				break;
+			}
 		}
 	}
 
 	// The client does not have this task
-	if(ActiveTaskIndex == -1) return false;
+	if (ActiveTaskIndex == -1)
+		return false;
 
-	TaskInformation* Task = taskmanager->Tasks[ActiveQuests[ActiveTaskIndex].TaskID];
+	auto info = GetClientTaskInfo(type, ActiveTaskIndex);
+
+	if (info == nullptr)
+		return false;
+
+	TaskInformation *Task = taskmanager->Tasks[info->TaskID];
 
 	// The task is invalid
-	if(Task==nullptr) return false;
+	if (Task == nullptr)
+		return false;
 
 	// The ActivityID is out of range
-	if(ActivityID >= Task->ActivityCount) return false;
+	if (ActivityID >= Task->ActivityCount)
+		return false;
 
-	Log(Logs::General, Logs::Tasks, "[UPDATE] ClientTaskState IsTaskActivityActive(%i, %i). State is %i ", TaskID, ActivityID,
-			ActiveQuests[ActiveTaskIndex].Activity[ActivityID].State);
+	Log(Logs::General, Logs::Tasks, "[UPDATE] ClientTaskState IsTaskActivityActive(%i, %i). State is %i ", TaskID,
+	    ActivityID, info->Activity[ActivityID].State);
 
-
-	return (ActiveQuests[ActiveTaskIndex].Activity[ActivityID].State == ActivityActive);
-
+	return (info->Activity[ActivityID].State == ActivityActive);
 }
 
 void ClientTaskState::UpdateTaskActivity(Client *c, int TaskID, int ActivityID, int Count, bool ignore_quest_update /*= false*/)
 {
 
-	Log(Logs::General, Logs::Tasks, "[UPDATE] ClientTaskState UpdateTaskActivity(%i, %i, %i).", TaskID, ActivityID, Count);
+	Log(Logs::General, Logs::Tasks, "[UPDATE] ClientTaskState UpdateTaskActivity(%i, %i, %i).", TaskID, ActivityID,
+	    Count);
 
 	// Quick sanity check
-	if((ActivityID<0) || (ActiveTaskCount==0)) return;
+	if (ActivityID < 0 || (ActiveTaskCount == 0 && ActiveTask.TaskID == TASKSLOTEMPTY))
+		return;
 
 	int ActiveTaskIndex = -1;
+	auto type = TaskType::Task;
 
-	for (int i = 0; i < MAXACTIVEQUESTS; i++) {
-		if (ActiveQuests[i].TaskID == TaskID) {
-			ActiveTaskIndex = i;
-			break;
+	if (ActiveTask.TaskID == TaskID)
+		ActiveTaskIndex = 0;
+
+	if (ActiveTaskIndex == -1) {
+		for (int i = 0; i < MAXACTIVEQUESTS; i++) {
+			if (ActiveQuests[i].TaskID == TaskID) {
+				ActiveTaskIndex = i;
+				type = TaskType::Quest;
+				break;
+			}
 		}
 	}
 
 	// The client does not have this task
-	if(ActiveTaskIndex == -1) return;
+	if (ActiveTaskIndex == -1)
+		return;
 
-	TaskInformation* Task = taskmanager->Tasks[ActiveQuests[ActiveTaskIndex].TaskID];
+	auto info = GetClientTaskInfo(type, ActiveTaskIndex);
+
+	if (info == nullptr)
+		return;
+
+	TaskInformation *Task = taskmanager->Tasks[info->TaskID];
 
 	// The task is invalid
-	if(Task==nullptr) return;
+	if (Task == nullptr)
+		return;
 
 	// The ActivityID is out of range
-	if(ActivityID >= Task->ActivityCount) return;
+	if (ActivityID >= Task->ActivityCount)
+		return;
 
 	// The Activity is not currently active
-	if(ActiveQuests[ActiveTaskIndex].Activity[ActivityID].State != ActivityActive) return;
+	if (info->Activity[ActivityID].State != ActivityActive)
+		return;
 	Log(Logs::General, Logs::Tasks, "[UPDATE] Increment done count on UpdateTaskActivity");
 	IncrementDoneCount(c, Task, ActiveTaskIndex, ActivityID, Count, ignore_quest_update);
-
 }
 
-void ClientTaskState::ResetTaskActivity(Client *c, int TaskID, int ActivityID) {
-
+void ClientTaskState::ResetTaskActivity(Client *c, int TaskID, int ActivityID)
+{
 	Log(Logs::General, Logs::Tasks, "[UPDATE] ClientTaskState UpdateTaskActivity(%i, %i, 0).", TaskID, ActivityID);
 
 	// Quick sanity check
-	if((ActivityID<0) || (ActiveTaskCount==0)) return;
+	if (ActivityID < 0 || (ActiveTaskCount == 0 && ActiveTask.TaskID == TASKSLOTEMPTY))
+		return;
 
 	int ActiveTaskIndex = -1;
+	auto type = TaskType::Task;
 
-	for(int i=0; i<MAXACTIVEQUESTS; i++) {
-		if(ActiveQuests[i].TaskID==TaskID) {
-			ActiveTaskIndex = i;
-			break;
+	if (ActiveTask.TaskID == TaskID)
+		ActiveTaskIndex = 0;
+
+	if (ActiveTaskIndex == -1) {
+		for (int i = 0; i < MAXACTIVEQUESTS; i++) {
+			if (ActiveQuests[i].TaskID == TaskID) {
+				ActiveTaskIndex = i;
+				type = TaskType::Quest;
+				break;
+			}
 		}
 	}
 
 	// The client does not have this task
-	if(ActiveTaskIndex == -1) return;
+	if (ActiveTaskIndex == -1)
+		return;
 
-	TaskInformation* Task = taskmanager->Tasks[ActiveQuests[ActiveTaskIndex].TaskID];
+	auto info = GetClientTaskInfo(type, ActiveTaskIndex);
+
+	if (info == nullptr)
+		return;
+
+	TaskInformation *Task = taskmanager->Tasks[info->TaskID];
 
 	// The task is invalid
-	if(Task==nullptr) return;
+	if (Task == nullptr)
+		return;
 
 	// The ActivityID is out of range
-	if(ActivityID >= Task->ActivityCount) return;
+	if (ActivityID >= Task->ActivityCount)
+		return;
 
 	// The Activity is not currently active
-	if(ActiveQuests[ActiveTaskIndex].Activity[ActivityID].State != ActivityActive) return;
+	if (info->Activity[ActivityID].State != ActivityActive)
+		return;
 
 	Log(Logs::General, Logs::Tasks, "[UPDATE] ResetTaskActivityCount");
 
-	ActiveQuests[ActiveTaskIndex].Activity[ActivityID].DoneCount = 0;
+	info->Activity[ActivityID].DoneCount = 0;
 
-	ActiveQuests[ActiveTaskIndex].Activity[ActivityID].Updated=true;
+	info->Activity[ActivityID].Updated = true;
 
 	// Send an update packet for this single activity
-	taskmanager->SendTaskActivityLong(c, ActiveQuests[ActiveTaskIndex].TaskID, ActivityID,
-						ActiveTaskIndex, Task->Activity[ActivityID].Optional);
+	taskmanager->SendTaskActivityLong(c, info->TaskID, ActivityID, ActiveTaskIndex,
+					  Task->Activity[ActivityID].Optional);
 }
 
 void ClientTaskState::ShowClientTasks(Client *c) {
