@@ -102,9 +102,6 @@ typedef enum { METHODSINGLEID = 0, METHODLIST = 1, METHODQUEST = 2 } TaskMethodT
 struct ActivityInformation {
 	int		StepNumber;
 	int		Type;
-	std::string Text1;
-	std::string Text2;
-	std::string Text3;
 	std::string target_name; // name mob, location -- default empty
 	std::string item_list; // likely defaults to empty
 	std::string skill_list; // IDs ; separated -- default -1
