@@ -456,7 +456,7 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state)
 
 	Log(Logs::General, Logs::Tasks, "[CLIENTLOAD] TaskManager::LoadClientState for character ID %d", characterID);
 
-	std::string query = StringFormat("SELECT `taskid`, `slot`, `acceptedtime` "
+	std::string query = StringFormat("SELECT `taskid`, `slot`,`type`, `acceptedtime` "
 					 "FROM `character_tasks` "
 					 "WHERE `charid` = %i ORDER BY acceptedtime",
 					 characterID);
@@ -470,6 +470,7 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state)
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		int taskID = atoi(row[0]);
 		int slot = atoi(row[1]);
+		TaskType type = static_cast<TaskType>(atoi(row[2]));
 
 		if ((taskID < 0) || (taskID >= MAXTASKS)) {
 			Log(Logs::General, Logs::Error,
@@ -477,29 +478,32 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state)
 			continue;
 		}
 
-		if ((slot < 0) || (slot >= MAXACTIVEQUESTS)) {
+		auto task_info = state->GetClientTaskInfo(type, slot);
+
+		if (task_info == nullptr) {
 			Log(Logs::General, Logs::Error,
 			    "[TASKS] Slot %i out of range while loading character tasks from database", slot);
 			continue;
 		}
 
-		if (state->ActiveQuests[slot].TaskID != TASKSLOTEMPTY) {
+		if (task_info->TaskID != TASKSLOTEMPTY) {
 			Log(Logs::General, Logs::Error, "[TASKS] Slot %i for Task %is is already occupied.", slot,
 			    taskID);
 			continue;
 		}
 
-		int acceptedtime = atoi(row[2]);
+		int acceptedtime = atoi(row[3]);
 
-		state->ActiveQuests[slot].TaskID = taskID;
-		state->ActiveQuests[slot].CurrentStep = -1;
-		state->ActiveQuests[slot].AcceptedTime = acceptedtime;
-		state->ActiveQuests[slot].Updated = false;
+		task_info->TaskID = taskID;
+		task_info->CurrentStep = -1;
+		task_info->AcceptedTime = acceptedtime;
+		task_info->Updated = false;
 
 		for (int i = 0; i < MAXACTIVITIESPERTASK; i++)
-			state->ActiveQuests[slot].Activity[i].ActivityID = -1;
+			task_info->Activity[i].ActivityID = -1;
 
-		++state->ActiveTaskCount;
+		if (type == TaskType::Quest)
+			++state->ActiveTaskCount;
 
 		Log(Logs::General, Logs::Tasks,
 		    "[CLIENTLOAD] TaskManager::LoadClientState. Char: %i Task ID %i, Accepted Time: %8X", characterID,
@@ -538,16 +542,17 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state)
 			continue;
 		}
 
-		// Find Active Task Slot
-		int activeTaskIndex = -1;
+		ClientTaskInformation *task_info = nullptr;
 
-		for (int i = 0; i < MAXACTIVEQUESTS; i++)
-			if (state->ActiveQuests[i].TaskID == taskID) {
-				activeTaskIndex = i;
-				break;
-			}
+		if (state->ActiveTask.TaskID == taskID)
+			task_info = &state->ActiveTask;
 
-		if (activeTaskIndex == -1) {
+		if (task_info == nullptr)
+			for (int i = 0; i < MAXACTIVEQUESTS; i++)
+				if (state->ActiveQuests[i].TaskID == taskID)
+					task_info = &state->ActiveQuests[i];
+
+		if (task_info == nullptr) {
 			Log(Logs::General, Logs::Error,
 			    "[TASKS]Activity %i found for task %i which client does not have.", activityID, taskID);
 			continue;
@@ -555,14 +560,14 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state)
 
 		int doneCount = atoi(row[2]);
 		bool completed = atoi(row[3]);
-		state->ActiveQuests[activeTaskIndex].Activity[activityID].ActivityID = activityID;
-		state->ActiveQuests[activeTaskIndex].Activity[activityID].DoneCount = doneCount;
+		task_info->Activity[activityID].ActivityID = activityID;
+		task_info->Activity[activityID].DoneCount = doneCount;
 		if (completed)
-			state->ActiveQuests[activeTaskIndex].Activity[activityID].State = ActivityCompleted;
+			task_info->Activity[activityID].State = ActivityCompleted;
 		else
-			state->ActiveQuests[activeTaskIndex].Activity[activityID].State = ActivityHidden;
+			task_info->Activity[activityID].State = ActivityHidden;
 
-		state->ActiveQuests[activeTaskIndex].Activity[activityID].Updated = false;
+		task_info->Activity[activityID].Updated = false;
 
 		Log(Logs::General, Logs::Tasks,
 		    "[CLIENTLOAD] TaskManager::LoadClientState. Char: %i Task ID %i, ActivityID: %i, DoneCount: %i, "
@@ -662,8 +667,8 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state)
 	// Check that there is an entry in the client task state for every activity in each task
 	// This should only break if a ServerOP adds or deletes activites for a task that players already
 	// have active, or due to a bug.
-	for (int i = 0; i < MAXACTIVEQUESTS; i++) {
-		int taskID = state->ActiveQuests[i].TaskID;
+	for (int i = 0; i < MAXACTIVEQUESTS + 1; i++) {
+		int taskID = state->ActiveTasks[i].TaskID;
 		if (taskID == TASKSLOTEMPTY)
 			continue;
 		if (!Tasks[taskID]) {
@@ -674,12 +679,12 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state)
 
 			Log(Logs::General, Logs::Error, "[TASKS]Character %i has task %i which does not exist.",
 			    characterID, taskID);
-			state->ActiveQuests[i].TaskID = TASKSLOTEMPTY;
+			state->ActiveTasks[i].TaskID = TASKSLOTEMPTY;
 			continue;
 		}
 		for (int j = 0; j < Tasks[taskID]->ActivityCount; j++) {
 
-			if (state->ActiveQuests[i].Activity[j].ActivityID != j) {
+			if (state->ActiveTasks[i].Activity[j].ActivityID != j) {
 				c->Message(13,
 					   "Active Task %i, %s. Activity count does not match expected value."
 					   "Removing from memory. Contact a GM to resolve this.",
@@ -689,7 +694,7 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state)
 				    "[TASKS]Fatal error in character %i task state. Activity %i for "
 				    "Task %i either missing from client state or from task.",
 				    characterID, j, taskID);
-				state->ActiveQuests[i].TaskID = TASKSLOTEMPTY;
+				state->ActiveTasks[i].TaskID = TASKSLOTEMPTY;
 				break;
 			}
 		}
