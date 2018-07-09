@@ -2045,6 +2045,16 @@ void command_grid(Client *c, const Seperator *sep)
 		}
 
 		/**
+		 * Depop any node npc's already spawned
+		 */
+		auto &mob_list = entity_list.GetMobList();
+		for (auto itr = mob_list.begin(); itr != mob_list.end(); ++itr) {
+			Mob *mob = itr->second;
+			if (mob->IsNPC() && mob->GetRace() == 2254)
+				mob->Depop();
+		}
+
+		/**
 		 * Spawn grid nodes
 		 */
 		for (auto row = results.begin(); row != results.end(); ++row) {
