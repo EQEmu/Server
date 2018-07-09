@@ -2009,10 +2009,68 @@ void command_setlsinfo(Client *c, const Seperator *sep)
 
 void command_grid(Client *c, const Seperator *sep)
 {
-	if (strcasecmp("max", sep->arg[1]) == 0)
-		c->Message(0, "Highest grid ID in this zone: %d",  database.GetHighestGrid(zone->GetZoneID()));
-	else if (strcasecmp("add", sep->arg[1]) == 0)
-		database.ModifyGrid(c, false,atoi(sep->arg[2]),atoi(sep->arg[3]), atoi(sep->arg[4]),zone->GetZoneID());
+	if (strcasecmp("max", sep->arg[1]) == 0) {
+		c->Message(0, "Highest grid ID in this zone: %d", database.GetHighestGrid(zone->GetZoneID()));
+	}
+	else if (strcasecmp("add", sep->arg[1]) == 0) {
+		database.ModifyGrid(c, false, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), zone->GetZoneID());
+	}
+	else if (strcasecmp("show", sep->arg[1]) == 0) {
+
+		Mob *target = c->GetTarget();
+
+		if (!target || !target->IsNPC()) {
+			c->Message(0, "You need a NPC target!");
+			return;
+		}
+
+		std::string query = StringFormat(
+				"SELECT `x`, `y`, `z`, `heading`, `number`, `pause` "
+				"FROM `grid_entries` "
+				"WHERE `zoneid` = %u and `gridid` = %i "
+				"ORDER BY `number` ",
+				zone->GetZoneID(),
+				target->CastToNPC()->GetGrid()
+		);
+
+		auto results = database.QueryDatabase(query);
+		if (!results.Success()) {
+			c->Message(0, "Error querying database.");
+			c->Message(0, query.c_str());
+		}
+
+		if (results.RowCount() == 0) {
+			c->Message(0, "No grid found");
+			return;
+		}
+
+		/**
+		 * Depop any node npc's already spawned
+		 */
+		auto &mob_list = entity_list.GetMobList();
+		for (auto itr = mob_list.begin(); itr != mob_list.end(); ++itr) {
+			Mob *mob = itr->second;
+			if (mob->IsNPC() && mob->GetRace() == 2254)
+				mob->Depop();
+		}
+
+		/**
+		 * Spawn grid nodes
+		 */
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			auto node_position = glm::vec4(atof(row[0]), atof(row[1]), atof(row[2]), atof(row[3]));
+
+			NPC *npc = NPC::SpawnGridNodeNPC(
+					target->GetCleanName(),
+					node_position,
+					static_cast<uint32>(target->CastToNPC()->GetGrid()),
+					static_cast<uint32>(atoi(row[4])),
+					static_cast<uint32>(atoi(row[5]))
+			);
+			npc->SetFlyMode(1);
+			npc->GMMove(node_position.x, node_position.y, node_position.z, node_position.w);
+		}
+	}
 	else if (strcasecmp("delete", sep->arg[1]) == 0)
 		database.ModifyGrid(c, true,atoi(sep->arg[2]),0,0,zone->GetZoneID());
 	else {
@@ -4516,7 +4574,7 @@ void command_goto(Client *c, const Seperator *sep)
 	else if (!(sep->IsNumber(1) && sep->IsNumber(2) && sep->IsNumber(3)))
 		c->Message(0, "Usage: #goto [x y z]");
 	else
-		c->MovePC(zone->GetZoneID(), zone->GetInstanceID(), atof(sep->arg[1]), atof(sep->arg[2]), atof(sep->arg[3]), 0.0f);
+		c->MovePC(zone->GetZoneID(), zone->GetInstanceID(), atof(sep->arg[1]), atof(sep->arg[2]), atof(sep->arg[3]), c->GetHeading());
 }
 
 void command_iteminfo(Client *c, const Seperator *sep)
