@@ -17,3 +17,5 @@ ALTER TABLE `activities` DROP COLUMN `text1`;
 ALTER TABLE `activities` DROP COLUMN `text2`;
 ALTER TABLE `activities` DROP COLUMN `text3`;
 ALTER TABLE `activities` DROP COLUMN `zoneid`;
+ALTER TABLE `tasks` DROP COLUMN `startzone`;
+ALTER TABLE `tasks` ADD `faction_reward` INT(10) NOT NULL DEFAULT '0';

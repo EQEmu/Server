@@ -145,6 +145,7 @@ struct TaskInformation {
 	int	RewardID;
 	int	CashReward; // Expressed in copper
 	int	XPReward;
+	int faction_reward; // just a npc_faction_id
 	TaskMethodType RewardMethod;
 	int	ActivityCount;
 	SequenceType SequenceMode;

@@ -3851,7 +3851,7 @@ struct TaskDescriptionData2_Struct {
 	uint8 	has_rewards;
 	uint32	coin_reward;
 	uint32	xp_reward;
-	uint32	unknown3; // don't see it affecting display, faction maybe
+	uint32	faction_reward;
 };
 
 struct TaskDescriptionTrailer_Struct {

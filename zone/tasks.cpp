@@ -117,12 +117,12 @@ bool TaskManager::LoadTasks(int singleTask)
 			Log(Logs::Detail, Logs::Tasks, "TaskManager::LoadTasks LoadTaskSets failed");
 
 		query = StringFormat("SELECT `id`, `type`, `duration`, `duration_code`, `title`, `description`, "
-				     "`reward`, `rewardid`, `cashreward`, `xpreward`, `rewardmethod`, "
+				     "`reward`, `rewardid`, `cashreward`, `xpreward`, `rewardmethod`, `faction_reward`,"
 				     "`minlevel`, `maxlevel`, `repeatable` FROM `tasks` WHERE `id` < %i",
 				     MAXTASKS);
 	} else
 		query = StringFormat("SELECT `id`, `type`, `duration`, `duration_code`, `title`, `description`, "
-				     "`reward`, `rewardid`, `cashreward`, `xpreward`, `rewardmethod`, "
+				     "`reward`, `rewardid`, `cashreward`, `xpreward`, `rewardmethod`, `faction_reward`,"
 				     "`minlevel`, `maxlevel`, `repeatable` FROM `tasks` WHERE `id` = %i",
 				     singleTask);
 
@@ -155,9 +155,10 @@ bool TaskManager::LoadTasks(int singleTask)
 		Tasks[taskID]->CashReward = atoi(row[8]);
 		Tasks[taskID]->XPReward = atoi(row[9]);
 		Tasks[taskID]->RewardMethod = (TaskMethodType)atoi(row[10]);
-		Tasks[taskID]->MinLevel = atoi(row[11]);
-		Tasks[taskID]->MaxLevel = atoi(row[12]);
-		Tasks[taskID]->Repeatable = atoi(row[13]);
+		Tasks[taskID]->faction_reward = atoi(row[11]);
+		Tasks[taskID]->MinLevel = atoi(row[12]);
+		Tasks[taskID]->MaxLevel = atoi(row[13]);
+		Tasks[taskID]->Repeatable = atoi(row[14]);
 		Tasks[taskID]->ActivityCount = 0;
 		Tasks[taskID]->SequenceMode = ActivitiesSequential;
 		Tasks[taskID]->LastStep = 0;
@@ -2015,6 +2016,11 @@ void ClientTaskState::RewardTask(Client *c, TaskInformation *Task) {
 			break;
 		}
 	}
+
+	// just use normal NPC faction ID stuff
+	if (Task->faction_reward)
+		c->SetFactionLevel(c->CharacterID(), Task->faction_reward, c->GetBaseClass(), c->GetBaseRace(), c->GetDeity());
+
 	if(Task->CashReward) {
 		int Plat, Gold, Silver, Copper;
 
@@ -2975,7 +2981,7 @@ void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, ClientTaskInf
 
 	tdd2->coin_reward = Tasks[TaskID]->CashReward;
 	tdd2->xp_reward = Tasks[TaskID]->XPReward ? 1 : 0; // just booled
-	tdd2->unknown3 = 0; // STRONGLY suspect this is faction reward, also just booled to hide details?
+	tdd2->faction_reward = Tasks[TaskID]->faction_reward ? 1 : 0; // faction booled
 
 	Ptr = (char *) tdd2 + sizeof(TaskDescriptionData2_Struct);
 
