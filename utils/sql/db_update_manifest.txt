@@ -377,6 +377,7 @@
 9121|2018_02_18_bug_reports.sql|SHOW TABLES LIKE 'bug_reports'|empty|
 9122|2018_03_07_ucs_command.sql|SELECT * FROM `command_settings` WHERE `command` LIKE 'ucs'|empty|
 9123|2018_07_07_data_buckets.sql|SHOW TABLES LIKE 'data_buckets'|empty|
+9124|2018_07_09_tasks.sql|SHOW COLUMNS FROM `tasks` LIKE 'type'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

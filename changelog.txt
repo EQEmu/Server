@@ -1,5 +1,17 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 07/09/2018 ==
+mackal: Rework of Task System, Shared Tasks still unsupported
+	- The tables now have better named columns, which hopefully won't need to be explained
+	- Text1 is now target_name, Text2 is now item_list, Text3 is now description_override
+	- Tasks can now reward faction hits, this is just normal NPC Faction ID entries because I was lazy
+	- The "Task" type tasks are now supported, a player can only be doing one of these at a time
+	- Activity IDs for use spell on and use skill on have been identified but not implemented
+	- Identified "duration code" for unlimited duration tasks (None = 0, Short = 1, Medium = 2, Long = 3)
+	- Activities can now have multiple zones separated by ';'
+	- tasks.startzone removed since it actually just uses first activity
+	- skill_list and spell_list are both IDs that can be separated by ';' (still unimplemented though)
+
 == 07/07/2018 ==
 Akkadius: Implemented a much better replacement for qglobals called 'DataBuckets'
     - A much more detailed example can be found at: https://github.com/EQEmu/Server/wiki/Data-Buckets
