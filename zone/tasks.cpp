@@ -2295,24 +2295,32 @@ void ClientTaskState::ResetTaskActivity(Client *c, int TaskID, int ActivityID)
 					  Task->Activity[ActivityID].Optional);
 }
 
-void ClientTaskState::ShowClientTasks(Client *c) {
-
+void ClientTaskState::ShowClientTasks(Client *c)
+{
 	c->Message(0, "Task Information:");
-	//for(int i=0; i<ActiveTaskCount; i++) {
-	for(int i=0; i<MAXACTIVEQUESTS; i++) {
-		if(ActiveQuests[i].TaskID==TASKSLOTEMPTY)
-			continue;
-
-		c->Message(0, "Task: %i %s", ActiveQuests[i].TaskID, taskmanager->Tasks[ActiveQuests[i].TaskID]->Title.c_str());
-		c->Message(0, "  Description: [%s]\n", taskmanager->Tasks[ActiveQuests[i].TaskID]->Description.c_str());
-		for(int j=0; j<taskmanager->GetActivityCount(ActiveQuests[i].TaskID); j++) {
+	if (ActiveTask.TaskID != TASKSLOTEMPTY) {
+		c->Message(0, "Task: %i %s", ActiveTask.TaskID, taskmanager->Tasks[ActiveTask.TaskID]->Title.c_str());
+		c->Message(0, "  Description: [%s]\n", taskmanager->Tasks[ActiveTask.TaskID]->Description.c_str());
+		for (int j = 0; j < taskmanager->GetActivityCount(ActiveTask.TaskID); j++) {
 			c->Message(0, "  Activity: %2d, DoneCount: %2d, Status: %d (0=Hidden, 1=Active, 2=Complete)",
-					ActiveQuests[i].Activity[j].ActivityID,
-					ActiveQuests[i].Activity[j].DoneCount,
-					ActiveQuests[i].Activity[j].State);
+				   ActiveTask.Activity[j].ActivityID, ActiveTask.Activity[j].DoneCount,
+				   ActiveTask.Activity[j].State);
 		}
 	}
 
+	for (int i = 0; i < MAXACTIVEQUESTS; i++) {
+		if (ActiveQuests[i].TaskID == TASKSLOTEMPTY)
+			continue;
+
+		c->Message(0, "Quest: %i %s", ActiveQuests[i].TaskID,
+			   taskmanager->Tasks[ActiveQuests[i].TaskID]->Title.c_str());
+		c->Message(0, "  Description: [%s]\n", taskmanager->Tasks[ActiveQuests[i].TaskID]->Description.c_str());
+		for (int j = 0; j < taskmanager->GetActivityCount(ActiveQuests[i].TaskID); j++) {
+			c->Message(0, "  Activity: %2d, DoneCount: %2d, Status: %d (0=Hidden, 1=Active, 2=Complete)",
+				   ActiveQuests[i].Activity[j].ActivityID, ActiveQuests[i].Activity[j].DoneCount,
+				   ActiveQuests[i].Activity[j].State);
+		}
+	}
 }
 
 // TODO: Shared Task
