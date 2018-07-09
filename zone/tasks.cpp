@@ -1146,7 +1146,7 @@ void TaskManager::SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *Task
 		}
 	}
 
-	auto outapp = new EQApplicationPacket(OP_OpenNewTasksWindow, buf.buffer(), buf.length());
+	auto outapp = new EQApplicationPacket(OP_OpenNewTasksWindow, buf);
 
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
@@ -1233,7 +1233,7 @@ void TaskManager::SendTaskSelectorNew(Client *c, Mob *mob, int TaskCount, int *T
 		}
 	}
 
-	auto outapp = new EQApplicationPacket(OP_OpenNewTasksWindow, buf.buffer(), buf.length());
+	auto outapp = new EQApplicationPacket(OP_OpenNewTasksWindow, buf);
 
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
@@ -2770,7 +2770,7 @@ void TaskManager::SendTaskActivityLong(Client *c, int TaskID, int ActivityID, in
 
 	buf.WriteUInt32(1); // unknown
 
-	auto outapp = new EQApplicationPacket(OP_TaskActivity, buf.buffer(), buf.length());
+	auto outapp = new EQApplicationPacket(OP_TaskActivity, buf);
 
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
@@ -2830,7 +2830,7 @@ void TaskManager::SendTaskActivityNew(Client *c, int TaskID, int ActivityID, int
 
 	buf.WriteString(Tasks[TaskID]->Activity[ActivityID].zones);
 
-	auto outapp = new EQApplicationPacket(OP_TaskActivity, buf.buffer(), buf.length());
+	auto outapp = new EQApplicationPacket(OP_TaskActivity, buf);
 
 	c->QueuePacket(outapp);
 	safe_delete(outapp);

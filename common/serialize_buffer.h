@@ -186,6 +186,8 @@ public:
 	size_t capacity() const { return m_capacity; }
 	const unsigned char *buffer() const { return m_buffer; }
 
+	friend class BasePacket;
+
 private:
 	void Grow(size_t new_size);
 	void Reset();

@@ -19,6 +19,7 @@
 #define BASEPACKET_H_
 
 #include "types.h"
+#include "serialize_buffer.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -85,6 +86,7 @@ protected:
 	virtual ~BasePacket();
 	BasePacket() { pBuffer=nullptr; size=0; _wpos = 0; _rpos = 0; }
 	BasePacket(const unsigned char *buf, const uint32 len);
+	BasePacket(SerializeBuffer &buf);
 };
 
 extern void DumpPacketHex(const BasePacket* app);
