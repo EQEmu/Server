@@ -3521,16 +3521,16 @@ XS(XS__set_data);
 XS(XS__set_data) {
 	dXSARGS;
 	if (items != 2 && items != 3) {
-		Perl_croak(aTHX_ "Usage: quest::set_data(string key, string value, [uint32 expire_time_unix = 0])");
+		Perl_croak(aTHX_ "Usage: quest::set_data(string key, string value, [string expires_at = 0])");
 	} else {
 		std::string key   = (std::string) SvPV_nolen(ST(0));
 		std::string value = (std::string) SvPV_nolen(ST(1));
 
-		uint32 expires_at_unix = 0;
+		std::string expires_at;
 		if (items == 3)
-			expires_at_unix = (uint32) SvIV(ST(2));
+			expires_at = (std::string) SvPV_nolen(ST(2));
 
-		DataBucket::SetData(key, value, expires_at_unix);
+		DataBucket::SetData(key, value, expires_at);
 	}
 	XSRETURN_EMPTY;
 }

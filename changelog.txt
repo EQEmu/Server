@@ -1,5 +1,16 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 07/10/2018 ==
+Akkadius: Adjusted DataBuckets to use other acceptable time formats
+    Example: quest::set_data('key', 'value', '1d');
+        - Acceptable inputs:
+            - 15s = 15 seconds
+            - s15 = 15 seconds
+            - 60m = 60 minutes
+            - 7d  = 7 days
+            - 1y  = 1 year
+            - 600 = 600 seconds
+
 == 07/09/2018 ==
 mackal: Rework of Task System, Shared Tasks still unsupported
 	- The tables now have better named columns, which hopefully won't need to be explained
