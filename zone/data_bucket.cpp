@@ -20,7 +20,6 @@ void DataBucket::SetData(std::string bucket_key, std::string bucket_value, std::
 
 	if (!expires_time.empty()) {
 		if (isalpha(expires_time[0]) || isalpha(expires_time[expires_time.length() - 1])) {
-			Log(Logs::General, Logs::Normal, "String check successful");
 			expires_time_unix = (long long) std::time(nullptr) + DataBucket::ParseStringTimeToInt(expires_time);
 		} else {
 			expires_time_unix = (long long) std::time(nullptr) + atoi(expires_time.c_str());
@@ -134,11 +133,7 @@ uint32 DataBucket::ParseStringTimeToInt(std::string time_string)
 	std::string time_unit = time_string;
 	time_unit.erase(remove_if(time_unit.begin(), time_unit.end(), [](char c) { return !isdigit(c); }), time_unit.end());
 
-	Log(Logs::General, Logs::Normal, "ParseStringTimeToInt after erase %s", time_unit.c_str());
-
 	uint32 unit = static_cast<uint32>(atoi(time_unit.c_str()));
-
-	Log(Logs::General, Logs::Normal, "ParseStringTimeToInt seconds %u string %s", unit, time_string.c_str());
 
 	if (time_string.find('s') != std::string::npos)
 		duration = unit;
@@ -150,8 +145,6 @@ uint32 DataBucket::ParseStringTimeToInt(std::string time_string)
 		duration = unit * 86400;
 	if (time_string.find('y') != std::string::npos)
 		duration = unit * 31556926;
-
-	Log(Logs::General, Logs::Normal, "ParseStringTimeToInt returning %u", duration);
 
 	return duration;
 }
