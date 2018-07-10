@@ -241,44 +241,43 @@ bool MainFrame::LoadGoals()
 	return true;
 }
 
-bool MainFrame::LoadActivities()
-{
-	if(mMysql){
+bool MainFrame::LoadActivities() {
+	if (mMysql) {
 		mErrorLog->Log(eqEmuLogBoth, "Loading Activities...");
 		unsigned int activitiesLoaded = 0;
-		MYSQL_RES *res;
-		MYSQL_ROW row;
+		MYSQL_RES    *res;
+		MYSQL_ROW    row;
 
-		if (mysql_query(mMysql, "SELECT taskid, activityid, step, activitytype, text1, text2, text3, goalid, goalmethod, goalcount, delivertonpc, zoneid, optional FROM activities")) {
+		if (mysql_query(mMysql,
+		                "SELECT taskid, activityid, step, activitytype, text1, text2, text3, goalid, goalmethod, goalcount, delivertonpc, zoneid, optional FROM `task_activities`")) {
 			mErrorLog->Log(eqEmuLogBoth, "MySQL Connection Error: %s", mysql_error(mMysql));
 			return false;
 		}
 
-		res = mysql_use_result(mMysql);
-		while ((row = mysql_fetch_row(res)) != NULL){
+		res         = mysql_use_result(mMysql);
+		while ((row = mysql_fetch_row(res)) != NULL) {
 			eqtask_activities newAL;
 
-			newAL.id = atoi(row[0]);
-			newAL.activityId = atoi(row[1]);
-			newAL.step = atoi(row[2]);
+			newAL.id           = atoi(row[0]);
+			newAL.activityId   = atoi(row[1]);
+			newAL.step         = atoi(row[2]);
 			newAL.activityType = atoi(row[3]);
 			strcpy(newAL.text1, row[4]);
 			strcpy(newAL.text2, row[5]);
 			strcpy(newAL.text3, row[6]);
-			newAL.goalid = atoi(row[7]);
-			newAL.goalmethod = atoi(row[8]);
-			newAL.goalcount = atoi(row[9]);
+			newAL.goalid       = atoi(row[7]);
+			newAL.goalmethod   = atoi(row[8]);
+			newAL.goalcount    = atoi(row[9]);
 			newAL.deliverToNpc = atoi(row[10]);
-			newAL.zoneid = atoi(row[11]);
-			newAL.optional = atoi(row[12]) ? true : false;
+			newAL.zoneid       = atoi(row[11]);
+			newAL.optional     = atoi(row[12]) ? true : false;
 
 			taskActivitiesList.push_back(newAL);
 			activitiesLoaded++;
 		}
 		mErrorLog->Log(eqEmuLogBoth, "%u Successfully Loaded Activities", activitiesLoaded);
 		mysql_free_result(res);
-	}
-	else{
+	} else {
 		mErrorLog->Log(eqEmuLogBoth, "Mysql connection did not exist for activity load.");
 		return false;
 	}

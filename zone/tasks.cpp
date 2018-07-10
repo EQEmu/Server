@@ -175,14 +175,14 @@ bool TaskManager::LoadTasks(int singleTask)
 		query =
 		    StringFormat("SELECT `taskid`, `step`, `activityid`, `activitytype`, `target_name`, `item_list`, "
 				 "`skill_list`, `spell_list`, `description_override`, `goalid`, `goalmethod`, "
-				 "`goalcount`, `delivertonpc`, `zones`, `optional` FROM `activities` WHERE `taskid` < "
+				 "`goalcount`, `delivertonpc`, `zones`, `optional` FROM `task_activities` WHERE `taskid` < "
 				 "%i AND `activityid` < %i ORDER BY taskid, activityid ASC",
 				 MAXTASKS, MAXACTIVITIESPERTASK);
 	else
 		query =
 		    StringFormat("SELECT `taskid`, `step`, `activityid`, `activitytype`, `target_name`, `item_list`, "
 				 "`skill_list`, `spell_list`, `description_override`, `goalid`, `goalmethod`, "
-				 "`goalcount`, `delivertonpc`, `zones`, `optional` FROM `activities` WHERE `taskid` = "
+				 "`goalcount`, `delivertonpc`, `zones`, `optional` FROM `task_activities` WHERE `taskid` = "
 				 "%i AND `activityid` < %i ORDER BY taskid, activityid ASC",
 				 singleTask, MAXACTIVITIESPERTASK);
 	results = database.QueryDatabase(query);
