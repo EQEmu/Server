@@ -4608,6 +4608,7 @@ void Client::IncrementAggroCount(bool raid_target)
 
 	uint32 newtimer = raid_target ? RuleI(Character, RestRegenRaidTimeToActivate) : RuleI(Character, RestRegenTimeToActivate);
 
+	// save the new timer if it's higher
 	m_pp.RestTimer = std::max(m_pp.RestTimer, newtimer);
 
 	// If we already had aggro before this method was called, the combat indicator should already be up for SoF clients,
@@ -4658,6 +4659,36 @@ void Client::DecrementAggroCount()
 		VARSTRUCT_ENCODE_TYPE(uint32, Buffer, m_pp.RestTimer);
 		QueuePacket(outapp);
 		safe_delete(outapp);
+	}
+}
+
+// when we cast a beneficial spell we need to steal our targets current timer
+// That's what we use this for
+void Client::UpdateRestTimer(uint32 new_timer)
+{
+	// their timer was 0, so we don't do anything
+	if (new_timer == 0)
+		return;
+
+	if (!RuleB(Character, RestRegenEnabled))
+		return;
+
+	// so if we're currently on aggro, we check our saved timer
+	if (AggroCount) {
+		if (m_pp.RestTimer < new_timer) // our timer needs to be updated, don't need to update client here
+			m_pp.RestTimer = new_timer;
+	} else { // if we're not aggro, we need to check if current timer needs updating
+		if (rest_timer.GetRemainingTime() < new_timer) {
+			rest_timer.Start(new_timer);
+			if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF) {
+				auto outapp = new EQApplicationPacket(OP_RestState, 5);
+				char *Buffer = (char *)outapp->pBuffer;
+				VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0x00);
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, new_timer);
+				QueuePacket(outapp);
+				safe_delete(outapp);
+			}
+		}
 	}
 }
 

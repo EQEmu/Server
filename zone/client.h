@@ -1397,6 +1397,7 @@ private:
 	void CalcRestState();
 	// if they have aggro (AggroCount != 0) their timer is saved in m_pp.RestTimer, else we need to get current timer
 	inline uint32 GetRestTimer() const { return AggroCount ? m_pp.RestTimer : rest_timer.GetRemainingTime() / 1000; }
+	void UpdateRestTimer(uint32 new_timer);
 
 	uint32 pLastUpdate;
 	uint32 pLastUpdateWZ;
