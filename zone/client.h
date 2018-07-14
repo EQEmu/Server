@@ -1074,7 +1074,7 @@ public:
 	void ClearPendingAdventureData();
 
 	int GetAggroCount();
-	void IncrementAggroCount();
+	void IncrementAggroCount(bool raid_target = false);
 	void DecrementAggroCount();
 	void SendPVPStats();
 	void SendDisciplineTimers();
@@ -1278,9 +1278,6 @@ public:
 	int mod_food_value(const EQEmu::ItemData *item, int change);
 	int mod_drink_value(const EQEmu::ItemData *item, int change);
 
-	void SetEngagedRaidTarget(bool value) { EngagedRaidTarget = value; }
-	bool GetEngagedRaidTarget() const { return EngagedRaidTarget; }
-
 	void ShowNumHits(); // work around function for numhits not showing on buffs
 
 	void TripInterrogateInvState() { interrogateinv_flag = true; }
@@ -1398,6 +1395,8 @@ private:
 	void DoManaRegen();
 	void DoStaminaHungerUpdate();
 	void CalcRestState();
+	// if they have aggro (AggroCount != 0) their timer is saved in m_pp.RestTimer, else we need to get current timer
+	inline uint32 GetRestTimer() const { return AggroCount ? m_pp.RestTimer : rest_timer.GetRemainingTime() / 1000; }
 
 	uint32 pLastUpdate;
 	uint32 pLastUpdateWZ;
@@ -1564,9 +1563,6 @@ private:
 	float AreaHPRegen;
 	float AreaManaRegen;
 	float AreaEndRegen;
-
-	bool EngagedRaidTarget;
-	uint32 SavedRaidRestTimer;
 
 	std::set<uint32> zone_flags;
 

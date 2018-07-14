@@ -325,9 +325,6 @@ Client::Client(EQStreamInterface* ieqs)
 	initial_respawn_selection = 0;
 	alternate_currency_loaded = false;
 
-	EngagedRaidTarget = false;
-	SavedRaidRestTimer = 0;
-
 	interrogateinv_flag = false;
 
 	trapid = 0;
@@ -630,7 +627,7 @@ bool Client::Save(uint8 iCommitNow) {
 	/* Total Time Played */
 	TotalSecondsPlayed += (time(nullptr) - m_pp.lastlogin);
 	m_pp.timePlayedMin = (TotalSecondsPlayed / 60);
-	m_pp.RestTimer = rest_timer.GetRemainingTime() / 1000;
+	m_pp.RestTimer = GetRestTimer();
 
 	/* Save Mercs */
 	if (GetMercInfo().MercTimerRemaining > RuleI(Mercs, UpkeepIntervalMS)) {
@@ -4594,16 +4591,19 @@ int Client::GetAggroCount() {
 	return AggroCount;
 }
 
-void Client::IncrementAggroCount() {
-
+// we pass in for book keeping if RestRegen is enabled
+void Client::IncrementAggroCount(bool raid_target)
+{
 	// This method is called when a client is added to a mob's hate list. It turns the clients aggro flag on so
 	// rest state regen is stopped, and for SoF, it sends the opcode to show the crossed swords in-combat indicator.
-	//
-	//
 	AggroCount++;
 
 	if(!RuleB(Character, RestRegenEnabled))
 		return;
+
+	uint32 newtimer = raid_target ? RuleI(Character, RestRegenRaidTimeToActivate) : RuleI(Character, RestRegenTimeToActivate);
+
+	m_pp.RestTimer = std::max(m_pp.RestTimer, newtimer);
 
 	// If we already had aggro before this method was called, the combat indicator should already be up for SoF clients,
 	// so we don't need to send it again.
@@ -4611,12 +4611,11 @@ void Client::IncrementAggroCount() {
 	if(AggroCount > 1)
 		return;
 
-	// Pause the rest timer
+	// Pause the rest timer, it's possible the new timer is a non-raid timer we're currently ticking down on a raid timer
 	if (AggroCount == 1)
-		SavedRaidRestTimer = rest_timer.GetRemainingTime();
+		m_pp.RestTimer = std::max(m_pp.RestTimer, rest_timer.GetRemainingTime() / 1000);
 
 	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF) {
-
 		auto outapp = new EQApplicationPacket(OP_RestState, 1);
 		char *Buffer = (char *)outapp->pBuffer;
 		VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0x01);
@@ -4626,12 +4625,11 @@ void Client::IncrementAggroCount() {
 
 }
 
-void Client::DecrementAggroCount() {
-
+void Client::DecrementAggroCount()
+{
 	// This should be called when a client is removed from a mob's hate list (it dies or is memblurred).
 	// It checks whether any other mob is aggro on the player, and if not, starts the rest timer.
 	// For SoF, the opcode to start the rest state countdown timer in the UI is sent.
-	//
 
 	// If we didn't have aggro before, this method should not have been called.
 	if(!AggroCount)
@@ -4643,29 +4641,16 @@ void Client::DecrementAggroCount() {
 		return;
 
 	// Something else is still aggro on us, can't rest yet.
-	if(AggroCount) return;
+	if (AggroCount)
+		return;
 
-	uint32 time_until_rest;
-	if (GetEngagedRaidTarget()) {
-		time_until_rest = RuleI(Character, RestRegenRaidTimeToActivate) * 1000;
-		SetEngagedRaidTarget(false);
-	} else {
-		if (SavedRaidRestTimer > (RuleI(Character, RestRegenTimeToActivate) * 1000)) {
-			time_until_rest = SavedRaidRestTimer;
-			SavedRaidRestTimer = 0;
-		} else {
-			time_until_rest = RuleI(Character, RestRegenTimeToActivate) * 1000;
-		}
-	}
-
-	rest_timer.Start(time_until_rest);
+	rest_timer.Start(m_pp.RestTimer * 1000);
 
 	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF) {
-
 		auto outapp = new EQApplicationPacket(OP_RestState, 5);
 		char *Buffer = (char *)outapp->pBuffer;
 		VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0x00);
-		VARSTRUCT_ENCODE_TYPE(uint32, Buffer, (uint32)(time_until_rest / 1000));
+		VARSTRUCT_ENCODE_TYPE(uint32, Buffer, m_pp.RestTimer);
 		QueuePacket(outapp);
 		safe_delete(outapp);
 	}

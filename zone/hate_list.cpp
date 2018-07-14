@@ -207,9 +207,7 @@ void HateList::AddEntToHateList(Mob *in_entity, int32 in_hate, int32 in_damage, 
 		parse->EventNPC(EVENT_HATE_LIST, hate_owner->CastToNPC(), in_entity, "1", 0);
 
 		if (in_entity->IsClient()) {
-			if (hate_owner->CastToNPC()->IsRaidTarget())
-				in_entity->CastToClient()->SetEngagedRaidTarget(true);
-			in_entity->CastToClient()->IncrementAggroCount();
+			in_entity->CastToClient()->IncrementAggroCount(hate_owner->CastToNPC()->IsRaidTarget());
 		}
 	}
 }
