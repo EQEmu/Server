@@ -1546,7 +1546,7 @@ void EntityList::QueueClientsByTarget(Mob *sender, const EQApplicationPacket *ap
 	}
 }
 
-void EntityList::QueueClientsByXTarget(Mob *sender, const EQApplicationPacket *app, bool iSendToSender)
+void EntityList::QueueClientsByXTarget(Mob *sender, const EQApplicationPacket *app, bool iSendToSender, EQEmu::versions::ClientVersionBit client_version_bits)
 {
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
@@ -1554,6 +1554,9 @@ void EntityList::QueueClientsByXTarget(Mob *sender, const EQApplicationPacket *a
 		++it;
 
 		if (!c || ((c == sender) && !iSendToSender))
+			continue;
+
+		if ((c->ClientVersionBit() & client_version_bits) == 0)
 			continue;
 
 		if (!c->IsXTarget(sender))

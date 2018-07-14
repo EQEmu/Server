@@ -1862,6 +1862,9 @@ void Client::CheckManaEndUpdate() {
 		mana_change->stamina = current_endurance;
 		mana_change->spell_id = casting_spell_id;
 		mana_change->keepcasting = 1;
+		mana_change->padding[0] = 0;
+		mana_change->padding[1] = 0;
+		mana_change->padding[2] = 0;
 		outapp->priority = 6;
 		QueuePacket(outapp);
 		safe_delete(outapp);
@@ -1883,8 +1886,9 @@ void Client::CheckManaEndUpdate() {
 			mana_update->cur_mana = GetMana();
 			mana_update->max_mana = GetMaxMana();
 			mana_update->spawn_id = GetID();
-			QueuePacket(mana_packet);
-			entity_list.QueueClientsByXTarget(this, mana_packet, false);
+			if ((ClientVersionBit() & EQEmu::versions::ClientVersionBit::bit_SoDAndLater) != 0)
+				QueuePacket(mana_packet); // do we need this with the OP_ManaChange packet above?
+			entity_list.QueueClientsByXTarget(this, mana_packet, false, EQEmu::versions::ClientVersionBit::bit_SoDAndLater);
 			safe_delete(mana_packet);
 
 			last_reported_mana_percent = this->GetManaPercent();
@@ -1907,8 +1911,9 @@ void Client::CheckManaEndUpdate() {
 			endurance_update->cur_end = GetEndurance();
 			endurance_update->max_end = GetMaxEndurance();
 			endurance_update->spawn_id = GetID();
-			QueuePacket(endurance_packet);
-			entity_list.QueueClientsByXTarget(this, endurance_packet, false);
+			if ((ClientVersionBit() & EQEmu::versions::ClientVersionBit::bit_SoDAndLater) != 0)
+				QueuePacket(endurance_packet); // do we need this with the OP_ManaChange packet above?
+			entity_list.QueueClientsByXTarget(this, endurance_packet, false, EQEmu::versions::ClientVersionBit::bit_SoDAndLater);
 			safe_delete(endurance_packet);
 
 			last_reported_endurance_percent = this->GetEndurancePercent();
