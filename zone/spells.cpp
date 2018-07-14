@@ -3895,7 +3895,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 			spelltar->SetHateAmountOnEnt(this, std::max(newhate, 1));
 		}
 	} else if (IsBeneficialSpell(spell_id) && !IsSummonPCSpell(spell_id)) {
-		if (spelltar->IsClient() && IsClient())
+		if (this != spelltar && spelltar->IsClient() && IsClient())
 			CastToClient()->UpdateRestTimer(spelltar->CastToClient()->GetRestTimer());
 		entity_list.AddHealAggro(
 		    spelltar, this,
