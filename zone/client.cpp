@@ -4678,7 +4678,7 @@ void Client::UpdateRestTimer(uint32 new_timer)
 		if (m_pp.RestTimer < new_timer) // our timer needs to be updated, don't need to update client here
 			m_pp.RestTimer = new_timer;
 	} else { // if we're not aggro, we need to check if current timer needs updating
-		if (rest_timer.GetRemainingTime() < new_timer) {
+		if (rest_timer.GetRemainingTime() / 1000 < new_timer) {
 			rest_timer.Start(new_timer);
 			if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF) {
 				auto outapp = new EQApplicationPacket(OP_RestState, 5);
