@@ -3992,7 +3992,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 
 		m_inv.PutItem(trade_iterator.toBotSlot, *trade_iterator.tradeItemInstance);
 		this->BotAddEquipItem(trade_iterator.toBotSlot, (trade_iterator.tradeItemInstance ? trade_iterator.tradeItemInstance->GetID() : 0));
-		client->DeleteItemInInventory(trade_iterator.fromClientSlot, 0, true);
+		client->DeleteItemInInventory(trade_iterator.fromClientSlot, 0, (trade_iterator.fromClientSlot == EQEmu::invslot::slotCursor));
 		trade_iterator.tradeItemInstance = nullptr;
 	}
 
