@@ -3490,17 +3490,21 @@ EQEmu::ItemInstance* Bot::GetBotItem(uint32 slotID) {
 
 // Adds the specified item it bot to the NPC equipment array and to the bot inventory collection.
 void Bot::BotAddEquipItem(int slot, uint32 id) {
+	// this is being called before bot is assigned an entity id..
+	// ..causing packets to be sent out to zone with an id of '0'
 	if(slot > 0 && id > 0) {
 		uint8 materialFromSlot = EQEmu::InventoryProfile::CalcMaterialFromSlot(slot);
 
 		if (materialFromSlot != EQEmu::textures::materialInvalid) {
 			equipment[slot] = id; // npc has more than just material slots. Valid material should mean valid inventory index
-			SendWearChange(materialFromSlot);
+			if (GetID()) // temp hack fix
+				SendWearChange(materialFromSlot);
 		}
 
 		UpdateEquipmentLight();
 		if (UpdateActiveLight())
-			SendAppearancePacket(AT_Light, GetActiveLightType());
+			if (GetID()) // temp hack fix
+				SendAppearancePacket(AT_Light, GetActiveLightType());
 	}
 }
 
