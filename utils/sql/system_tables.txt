@@ -24,6 +24,7 @@ faction_list_mod
 fear_hints
 fishing
 forage
+global_loot
 goallists
 graveyard
 grid
