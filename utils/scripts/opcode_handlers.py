@@ -14,6 +14,7 @@ values, server handler and whether opcodes are translated on tx/rx, etc...
 
 import sys
 import os
+import fnmatch
 
 from time import time, ctime
 
@@ -23,8 +24,10 @@ VERBOSE = False  # messaging: {False - minimal, True - robust}
 base_path = os.getcwd()[:-14]  # '/utils/scripts'
 base_path = base_path.replace('\\', '/')
 
-client_list = ['6.2', 'Titanium', 'SoF', 'SoD', 'UF', 'RoF', 'RoF2']
-server_list = ['Login', 'World', 'Zone', 'UCS']
+client_list = ['Titanium', 'SoF', 'SoD', 'UF', 'RoF', 'RoF2']
+server_list = ['Login', 'World', 'Zone', 'UCS', 'Common']  # 'Common' is not a server..but, may contain shared functions
+server_dir = {'Login': 'loginserver', 'World': 'world', 'Zone': 'zone', 'UCS': 'ucs', 'Common': 'common'}
+file_exts = ['cpp', 'h']
 
 client_opcodes = {}  # x[key='Client'][key='OP_CodeName'](value='0x####')
 server_opcodes = {}  # x[key='OP_CodeName'](value=<integer>) - opcodes apply to all servers
@@ -86,12 +89,6 @@ def main():
 
             if fault:
                 faults.append('loadclienttranslators()')
-
-        if not fault:
-            fault = not loadserverhandlers()
-
-            if fault:
-                faults.append('loadserverhandlers()')
 
         if not fault:
             fault = not discoverserverhandlers()
@@ -280,18 +277,29 @@ def loadclientopcodes():
                     value = int(data_line[(val_begin + 2):val_end].lower(), 16)
 
                     if value == 0:
+                        if VERBOSE:
+                            uprint('\nUNDEFINED OPCODE FOUND: ../utils/patches{0}({1}:{2}) [{3}][{4}] = {5}\n'.format(
+                                short_name,
+                                line_no,
+                                key_begin,
+                                client,
+                                data_line[key_begin:key_end],
+                                '0x{0}'.format(hex(value)[2:].zfill(4))
+                            ))
+
                         continue
 
                     client_opcodes[client][data_line[key_begin:key_end]] = '0x{0}'.format(hex(value)[2:].zfill(4))
 
-                    dprint('../utils/patches{0}({1}:{2}) [{3}][{4}] = {5}\n'.format(
-                        short_name,
-                        line_no,
-                        key_begin,
-                        client,
-                        data_line[key_begin:key_end],
-                        client_opcodes[client][data_line[key_begin:key_end]]
-                    ))
+                    if VERBOSE:
+                        dprint('../utils/patches{0}({1}:{2}) [{3}][{4}] = {5}\n'.format(
+                            short_name,
+                            line_no,
+                            key_begin,
+                            client,
+                            data_line[key_begin:key_end],
+                            client_opcodes[client][data_line[key_begin:key_end]]
+                        ))
 
             data_file.close()
 
@@ -377,12 +385,13 @@ def loadserveropcodes():
                     server_opcodes[data_line[val_begin:val_end]] = value
                     value += 1
 
-                    dprint('../common/emu_oplist.h({0}:{1}) \'Servers\' [{2}] = {3}\n'.format(
-                        line_no,
-                        val_begin,
-                        data_line[val_begin:val_end],
-                        server_opcodes[data_line[val_begin:val_end]]
-                    ))
+                    if VERBOSE:
+                        dprint('../common/emu_oplist.h({0}:{1}) \'Servers\' [{2}] = {3}\n'.format(
+                            line_no,
+                            val_begin,
+                            data_line[val_begin:val_end],
+                            server_opcodes[data_line[val_begin:val_end]]
+                        ))
 
         data_file.close()
 
@@ -409,12 +418,13 @@ def loadserveropcodes():
                     server_opcodes[data_line[val_begin:val_end]] = value
                     value += 1
 
-                    dprint('../common/mail_oplist.h({0}:{1}) \'Servers\' [{2}] = {3}\n'.format(
-                        line_no,
-                        val_begin,
-                        data_line[val_begin:val_end],
-                        server_opcodes[data_line[val_begin:val_end]]
-                    ))
+                    if VERBOSE:
+                        dprint('../common/mail_oplist.h({0}:{1}) \'Servers\' [{2}] = {3}\n'.format(
+                            line_no,
+                            val_begin,
+                            data_line[val_begin:val_end],
+                            server_opcodes[data_line[val_begin:val_end]]
+                        ))
 
         data_file.close()
 
@@ -454,10 +464,7 @@ def loadclienttranslators():
 
     for client in client_list:
         try:
-            if client == '6.2':
-                short_name = '/client62_ops.h'
-            else:
-                short_name = '/{0}_ops.h'.format(client).lower()
+            short_name = '/{0}_ops.h'.format(client).lower()
 
             file_name = '{0}/common/patches{1}'.format(
                 base_path,
@@ -484,23 +491,25 @@ def loadclienttranslators():
                     if data_line[:1] == 'E':
                         client_encodes[client].append(data_line[val_begin:val_end])
 
-                        dprint('..{0}({1}:{2}) \'ENCODE\' [{3}] = {4}\n'.format(
-                            short_name,
-                            line_no,
-                            val_begin,
-                            client,
-                            data_line[val_begin:val_end]
-                        ))
+                        if VERBOSE:
+                            dprint('..{0}({1}:{2}) \'ENCODE\' [{3}] = {4}\n'.format(
+                                short_name,
+                                line_no,
+                                val_begin,
+                                client,
+                                data_line[val_begin:val_end]
+                            ))
                     elif data_line[:1] == 'D':
                         client_decodes[client].append(data_line[val_begin:val_end])
                         
-                        dprint('..{0}({1}:{2}) \'DECODE\' [{3}] = {4}\n'.format(
-                            short_name,
-                            line_no,
-                            val_begin,
-                            client,
-                            data_line[val_begin:val_end]
-                        ))
+                        if VERBOSE:
+                            dprint('..{0}({1}:{2}) \'DECODE\' [{3}] = {4}\n'.format(
+                                short_name,
+                                line_no,
+                                val_begin,
+                                client,
+                                data_line[val_begin:val_end]
+                            ))
 
             data_file.close()
 
@@ -542,179 +551,9 @@ def loadclienttranslators():
     return True
 
 
-def loadserverhandlers():
-    """ Load pre-designated SERVER OPCODE HANDLERS """
-
-    # TODO: handle remarked out definitions in file (i.e., // and /**/)
-
-    dprint('entering \'loadserverhandlers()\'\n')
-
-    bad_servers = []
-
-    for server in server_list:
-        try:
-            if server == 'Login':
-                vprint('No pre-designated server opcode handlers for \'Login\'')
-                dprint('->pass: \'Login\' server\n')
-
-                continue
-            elif server == 'World':
-                vprint('No pre-designated server opcode handlers for \'World\'')
-                dprint('->pass: \'World\' server\n')
-
-                continue
-            elif server == 'Zone':
-                file_name = '{0}/zone/client_packet.cpp'.format(base_path)
-        
-                vprint(file_name)
-        
-                with open(file_name, 'r') as data_file:
-                    dprint('->open: \'{0}\' in \'r\' mode\n'.format(file_name))
-
-                    server_handlers[server] = {}
-                    handler_assigns = {}
-                    step_1 = False
-                    step_2 = False
-                    line_no = 0
-                    hint = 'Near beginning of file'
-
-                    for data_line in data_file:
-                        line_no += 1
-                        read_begin = 0
-
-                        if step_1 is False:
-                            if data_line[:19] == 'void MapOpcodes() {':
-                                step_1 = True
-
-                            continue
-
-                        if step_2 is False:
-                            if data_line[0:1] == '}':
-                                step_2 = True
-
-                                continue
-
-                            val_begin = data_line.find('OP_', read_begin)
-                            val_end = data_line.find(']', val_begin)
-                
-                            if val_begin < 0 or val_end < 0:
-                                continue
-
-                            if not data_line[val_begin:val_end] in server_opcodes:
-                                dprint('\nILLEGAL OPCODE FOUND: ../zone/client_packet.cpp({0}:{1}) \'{2}\'\n'.format(
-                                    line_no,
-                                    val_begin,
-                                    data_line[val_begin:val_end]
-                                ))
-
-                                continue
-
-                            key_begin = data_line.find('Client::', val_end)
-                            key_end = data_line.find(';', key_begin)
-                
-                            if key_begin < 0 or key_end < 0:
-                                continue
-
-                            if not data_line[key_begin:key_end] in handler_assigns:
-                                handler_assigns[data_line[key_begin:key_end]] = data_line[val_begin:val_end]
-
-                            continue
-
-                        if data_line[:1].isalpha():
-                            hint_begin = 0
-                            hint_end = data_line.find('(')
-
-                            if not hint_end < 0:
-                                hint_begin = hint_end - 1
-
-                                while not hint_begin < 0:
-                                    if data_line[(hint_begin - 1):hint_begin].isspace():
-                                        if not data_line[hint_begin:(hint_begin + 1)].isalpha():
-                                            hint_begin += 1
-
-                                        hint = '[RX] Near {0}'.format(data_line[hint_begin:hint_end])
-
-                                        break
-
-                                    hint_begin -= 1
-                        else:
-                            continue
-
-                        if hint[10:] in handler_assigns:
-                            if not handler_assigns[hint[10:]] in server_handlers[server]:
-                                server_handlers[server][handler_assigns[hint[10:]]] = []
-
-                            server_handlers[server][handler_assigns[hint[10:]]].append(
-                                '../zone/client_packet.cpp({0}:{1}) \'{2}\''.format(
-                                    line_no,
-                                    hint_begin,
-                                    hint
-                                )
-                            )
-
-                            dprint('../zone/client_packet.cpp({0}:{1}) [{2}][{3}] = \'{4}\'\n'.format(
-                                line_no,
-                                hint_begin,
-                                server,
-                                handler_assigns[hint[10:]],
-                                hint
-                            ))
-
-                            del handler_assigns[hint[10:]]
-
-                    if len(handler_assigns) > 0:
-                        for unhandled in handler_assigns:
-                            dprint('\nUNMATCHED DESIGNATED HANDLER FOUND: ../zone/client_packet.cpp \'{0}\'\n'.format(
-                                unhandled
-                            ))
-
-                data_file.close()
-
-                dprint('->close: \'{0}\'\n'.format(file_name))
-            elif server == 'UCS':
-                vprint('No pre-designated server opcode handlers for \'UCS\'')
-                dprint('->pass: \'UCS\' server\n')
-
-                continue
-            else:
-                vprint('No pre-designated server opcode handlers for \'{0}\''.format(server))
-                dprint('->pass: \'{0}\' server\n'.format(server))
-
-                continue
-        except:
-            print('(Exception Error: {0}) loadserverhandlers() [{1}]'.format(
-                sys.exc_info()[0],
-                server
-            ))
-
-            dprint('<-except: \'{0} [{1}]\'\n'.format(
-                sys.exc_info()[0],
-                server
-            ))
-
-            bad_servers.append(server)
-
-    for bad_server in bad_servers:
-        if bad_server in server_handlers:
-            vprint('Deleting stale entries for \'{0}\' server...'.format(bad_server))
-
-            del server_handlers[bad_server]
-
-            dprint('->delete: \'{0}\' server designated handler entries\n'.format(bad_server))
-
-    dprint('leaving \'loadserverhandlers()\'\n\n')
-
-    return True
-
-
 def discoverserverhandlers():
     """
     Load undefined SERVER OPCODE HANDLERS using 'discovery' method
-
-    When adding new servers and/or search locations, use the following format:
-
-        if 'Server' in locations:
-            locations['Server'].append('/<local_path>/<file_name>.<ext>')
 
     Lists are instantiated for all SERVERS in SERVER LIST. The lists are then appended
     with location data based on the presence of the SERVER in the parent dictionary.
@@ -733,60 +572,20 @@ def discoverserverhandlers():
         if not server in locations:
             locations[server] = []
 
-    if 'Login' in locations:
-        locations['Login'].append('/loginserver/client.cpp')
-        locations['Login'].append('/loginserver/server_manager.cpp')
-        locations['Login'].append('/loginserver/world_server.cpp')
+    for server in locations:
+        file_path = '{0}/{1}/'.format(base_path, server_dir[server])
 
-    if 'World' in locations:
-        locations['World'].append('/world/client.cpp')
+        file_list = os.listdir(file_path)
 
-    if 'Zone' in locations:
-        locations['Zone'].append('/zone/aa.cpp')
-        locations['Zone'].append('/zone/attack.cpp')
-        locations['Zone'].append('/zone/bot.cpp')
-        locations['Zone'].append('/zone/bot_command.cpp')
-        locations['Zone'].append('/zone/client.cpp')
-        locations['Zone'].append('/zone/client_packet.cpp')
-        locations['Zone'].append('/zone/client_process.cpp')
-        locations['Zone'].append('/zone/command.cpp')
-        locations['Zone'].append('/zone/corpse.cpp')
-        locations['Zone'].append('/zone/doors.cpp')
-        locations['Zone'].append('/zone/effects.cpp')
-        locations['Zone'].append('/zone/entity.cpp')
-        locations['Zone'].append('/zone/exp.cpp')
-        locations['Zone'].append('/zone/groups.cpp')
-        locations['Zone'].append('/zone/guild.cpp')
-        locations['Zone'].append('/zone/guild_mgr.cpp')
-        locations['Zone'].append('/zone/horse.cpp')
-        locations['Zone'].append('/zone/inventory.cpp')
-        locations['Zone'].append('/zone/loottables.cpp')
-        locations['Zone'].append('/zone/merc.cpp')
-        locations['Zone'].append('/zone/mob.cpp')
-        locations['Zone'].append('/zone/mob_ai.cpp')
-        locations['Zone'].append('/zone/object.cpp')
-        locations['Zone'].append('/zone/pathing.cpp')
-        locations['Zone'].append('/zone/petitions.cpp')
-        locations['Zone'].append('/zone/questmgr.cpp')
-        locations['Zone'].append('/zone/raids.cpp')
-        locations['Zone'].append('/zone/special_attacks.cpp')
-        locations['Zone'].append('/zone/spells.cpp')
-        locations['Zone'].append('/zone/spell_effects.cpp')
-        locations['Zone'].append('/zone/tasks.cpp')
-        locations['Zone'].append('/zone/titles.cpp')
-        locations['Zone'].append('/zone/tradeskills.cpp')
-        locations['Zone'].append('/zone/trading.cpp')
-        locations['Zone'].append('/zone/trap.cpp')
-        locations['Zone'].append('/zone/tribute.cpp')
-        locations['Zone'].append('/zone/worldserver.cpp')
-        locations['Zone'].append('/zone/zone.cpp')
-        locations['Zone'].append('/zone/zonedb.cpp')
-        locations['Zone'].append('/zone/zoning.cpp')
+        for extension in file_exts:
+            dprint('->file discovery: \'{0}*.{1}\'\n'.format(file_path, extension))
 
-    if 'UCS' in locations:
-        locations['UCS'].append('/ucs/clientlist.cpp')
-        locations['UCS'].append('/ucs/database.cpp')
+            for file_name in fnmatch.filter(file_list, '*.{0}'.format(extension)):
+                if file_name in ['emu_oplist.h', 'mail_oplist.h', 'opcode_dispatch.h', 'opcode_map.cpp', 'op_codes.h']:
+                    continue
 
+                locations[server].append('/{0}/{1}'.format(server_dir[server], file_name))
+    
     for server in server_list:
         if not server in server_handlers:
             server_handlers[server] = {}
@@ -831,7 +630,385 @@ def discoverserverhandlers():
                         if op_begin < 0:
                             continue
 
-                        if data_line[(op_begin - 20):op_begin] == 'EQApplicationPacket(':
+                        # exclusions
+                        if data_line[(op_begin - 6):op_begin] == 'Server':
+                            if VERBOSE:
+                                key_begin = op_begin
+                                key_end = key_begin + 3
+
+                                while data_line[key_end:(key_end + 1)].isalnum():
+                                    key_end += 1
+
+                                dprint(
+                                    '\nUNHANDLED SERVER TALK OPCODE REFERENCE FOUND: ..{0}({1}:{2}) \'{3}\'\n'
+                                    '->line: \'{4}\'\n'.format(
+                                        location,
+                                        line_no,
+                                        key_begin,
+                                        data_line[key_begin:key_end],
+                                        data_line[:-1]
+                                    )
+                                )
+
+                            continue
+                        elif data_line[(op_begin - 1):op_begin].isalnum():
+                            continue
+                        elif data_line[read_begin:op_begin].find('//', 0) >= 0:
+                            if VERBOSE:
+                                key_begin = op_begin
+                                key_end = key_begin + 3
+
+                                while data_line[key_end:(key_end + 1)].isalnum():
+                                    key_end += 1
+
+                                dprint(
+                                    '\nREMARKED OPCODE REFERENCE FOUND: ..{0}({1}:{2}) \'{3}\'\n'
+                                    '->line: \'{4}\'\n'.format(
+                                        location,
+                                        line_no,
+                                        key_begin,
+                                        data_line[key_begin:key_end],
+                                        data_line[:-1]
+                                    )
+                                )
+
+                            continue
+                        elif data_line[read_begin:op_begin].find('Log(Logs::', 0) >= 0:
+                            if VERBOSE:
+                                key_begin = op_begin
+                                key_end = key_begin + 3
+
+                                while data_line[key_end:(key_end + 1)].isalnum():
+                                    key_end += 1
+
+                                dprint(
+                                    '\nLOGGING OPCODE REFERENCE FOUND: ..{0}({1}:{2}) \'{3}\'\n'
+                                    '->line: \'{4}\'\n'.format(
+                                        location,
+                                        line_no,
+                                        key_begin,
+                                        data_line[key_begin:key_end],
+                                        data_line[:-1]
+                                    )
+                                )
+
+                            continue
+                        elif data_line[read_begin:op_begin].find('Message', 0) >= 0:
+                            if VERBOSE:
+                                key_begin = op_begin
+                                key_end = key_begin + 3
+
+                                while data_line[key_end:(key_end + 1)].isalnum():
+                                    key_end += 1
+
+                                dprint(
+                                    '\nCLIENT MESSAGE OPCODE REFERENCE FOUND: ..{0}({1}:{2}) \'{3}\'\n'
+                                    '->line: \'{4}\'\n'.format(
+                                        location,
+                                        line_no,
+                                        key_begin,
+                                        data_line[key_begin:key_end],
+                                        data_line[:-1]
+                                    )
+                                )
+
+                            continue
+                        elif data_line[read_begin:op_begin].find('std::cout', 0) >= 0:
+                            if VERBOSE:
+                                key_begin = op_begin
+                                key_end = key_begin + 3
+
+                                while data_line[key_end:(key_end + 1)].isalnum():
+                                    key_end += 1
+
+                                dprint(
+                                    '\nCONSOLE MESSAGE OPCODE REFERENCE FOUND: ..{0}({1}:{2}) \'{3}\'\n'
+                                    '->line: \'{4}\'\n'.format(
+                                        location,
+                                        line_no,
+                                        key_begin,
+                                        data_line[key_begin:key_end],
+                                        data_line[:-1]
+                                    )
+                                )
+
+                            continue
+                        elif data_line[read_begin:op_begin].find('MakeAnyLenString', 0) >= 0:
+                            if VERBOSE:
+                                key_begin = op_begin
+                                key_end = key_begin + 3
+
+                                while data_line[key_end:(key_end + 1)].isalnum():
+                                    key_end += 1
+
+                                dprint(
+                                    '\nSTRING FORMAT OPCODE REFERENCE FOUND: ..{0}({1}:{2}) \'{3}\'\n'
+                                    '->line: \'{4}\'\n'.format(
+                                        location,
+                                        line_no,
+                                        key_begin,
+                                        data_line[key_begin:key_end],
+                                        data_line[:-1]
+                                    )
+                                )
+
+                            continue
+                        elif data_line[read_begin:op_begin].find('printf', 0) >= 0:
+                            if VERBOSE:
+                                key_begin = op_begin
+                                key_end = key_begin + 3
+
+                                while data_line[key_end:(key_end + 1)].isalnum():
+                                    key_end += 1
+
+                                dprint(
+                                    '\nSTRING FORMAT OPCODE REFERENCE FOUND: ..{0}({1}:{2}) \'{3}\'\n'
+                                    '->line: \'{4}\'\n'.format(
+                                        location,
+                                        line_no,
+                                        key_begin,
+                                        data_line[key_begin:key_end],
+                                        data_line[:-1]
+                                    )
+                                )
+
+                            continue
+                        elif data_line[read_begin:op_begin].find('VERIFY_PACKET_LENGTH', 0) >= 0:
+                            if VERBOSE:
+                                key_begin = op_begin
+                                key_end = key_begin + 3
+
+                                while data_line[key_end:(key_end + 1)].isalnum():
+                                    key_end += 1
+
+                                dprint(
+                                    '\nPACKET LENGTH OPCODE REFERENCE FOUND: ..{0}({1}:{2}) \'{3}\'\n'
+                                    '->line: \'{4}\'\n'.format(
+                                        location,
+                                        line_no,
+                                        key_begin,
+                                        data_line[key_begin:key_end],
+                                        data_line[:-1]
+                                    )
+                                )
+
+                            continue
+                        elif data_line[read_begin:op_begin].find('ConnectingOpcodes', 0) >= 0:
+                            if VERBOSE:
+                                key_begin = op_begin
+                                key_end = key_begin + 3
+
+                                while data_line[key_end:(key_end + 1)].isalnum():
+                                    key_end += 1
+
+                                dprint(
+                                    '\nOPCODE HANDLER ASSIGNMENT REFERENCE FOUND: ..{0}({1}:{2}) \'{3}\'\n'
+                                    '->line: \'{4}\'\n'.format(
+                                        location,
+                                        line_no,
+                                        key_begin,
+                                        data_line[key_begin:key_end],
+                                        data_line[:-1]
+                                    )
+                                )
+
+                            continue
+                        elif data_line[read_begin:op_begin].find('ConnectedOpcodes', 0) >= 0:
+                            if VERBOSE:
+                                key_begin = op_begin
+                                key_end = key_begin + 3
+
+                                while data_line[key_end:(key_end + 1)].isalnum():
+                                    key_end += 1
+
+                                dprint(
+                                    '\nOPCODE HANDLER ASSIGNMENT REFERENCE FOUND: ..{0}({1}:{2}) \'{3}\'\n'
+                                    '->line: \'{4}\'\n'.format(
+                                        location,
+                                        line_no,
+                                        key_begin,
+                                        data_line[key_begin:key_end],
+                                        data_line[:-1]
+                                    )
+                                )
+
+                            continue
+                        elif data_line[read_begin:op_begin].find('command_add', 0) >= 0:
+                            if VERBOSE:
+                                key_begin = op_begin
+                                key_end = key_begin + 3
+
+                                while data_line[key_end:(key_end + 1)].isalnum():
+                                    key_end += 1
+
+                                dprint(
+                                    '\nCOMMAND HANDLER ASSIGNMENT OPCODE REFERENCE FOUND: ..{0}({1}:{2}) \'{3}\'\n'
+                                    '->line: \'{4}\'\n'.format(
+                                        location,
+                                        line_no,
+                                        key_begin,
+                                        data_line[key_begin:key_end],
+                                        data_line[:-1]
+                                    )
+                                )
+
+                            continue
+                        elif data_line[read_begin:op_begin].find('luabind::value', 0) >= 0:
+                            if VERBOSE:
+                                key_begin = op_begin
+                                key_end = key_begin + 3
+
+                                while data_line[key_end:(key_end + 1)].isalnum():
+                                    key_end += 1
+
+                                dprint(
+                                    '\nLUA API OPCODE ASSIGNMENT REFERENCE FOUND: ..{0}({1}:{2}) \'{3}\'\n'
+                                    '->line: \'{4}\'\n'.format(
+                                        location,
+                                        line_no,
+                                        key_begin,
+                                        data_line[key_begin:key_end],
+                                        data_line[:-1]
+                                    )
+                                )
+
+                            continue
+                        elif data_line[(op_begin - 3):op_begin] == '!= ':
+                            if VERBOSE:
+                                key_begin = op_begin
+                                key_end = key_begin + 3
+
+                                while data_line[key_end:(key_end + 1)].isalnum():
+                                    key_end += 1
+
+                                dprint(
+                                    '\nILL-DEFINED OPCODE CONDITIONAL FOUND: ..{0}({1}:{2}) \'{3}\'\n'
+                                    '->line: \'{4}\'\n'.format(
+                                        location,
+                                        line_no,
+                                        key_begin,
+                                        data_line[key_begin:key_end],
+                                        data_line[:-1]
+                                    )
+                                )
+
+                            continue
+                        elif data_line[(op_begin - 2):op_begin] == '!=':
+                            if VERBOSE:
+                                key_begin = op_begin
+                                key_end = key_begin + 3
+
+                                while data_line[key_end:(key_end + 1)].isalnum():
+                                    key_end += 1
+
+                                dprint(
+                                    '\nILL-DEFINED OPCODE CONDITIONAL FOUND: ..{0}({1}:{2}) \'{3}\'\n'
+                                    '->line: \'{4}\'\n'.format(
+                                        location,
+                                        line_no,
+                                        key_begin,
+                                        data_line[key_begin:key_end],
+                                        data_line[:-1]
+                                    )
+                                )
+
+                            continue
+                        elif data_line[(op_begin - 3):op_begin] == '>= ':
+                            if VERBOSE:
+                                key_begin = op_begin
+                                key_end = key_begin + 3
+
+                                while data_line[key_end:(key_end + 1)].isalnum():
+                                    key_end += 1
+
+                                dprint(
+                                    '\nILL-DEFINED OPCODE CONDITIONAL FOUND: ..{0}({1}:{2}) \'{3}\'\n'
+                                    '->line: \'{4}\'\n'.format(
+                                        location,
+                                        line_no,
+                                        key_begin,
+                                        data_line[key_begin:key_end],
+                                        data_line[:-1]
+                                    )
+                                )
+
+                            continue
+                        elif data_line[(op_begin - 2):op_begin] == '>=':
+                            if VERBOSE:
+                                key_begin = op_begin
+                                key_end = key_begin + 3
+
+                                while data_line[key_end:(key_end + 1)].isalnum():
+                                    key_end += 1
+
+                                dprint(
+                                    '\nILL-DEFINED OPCODE CONDITIONAL FOUND: ..{0}({1}:{2}) \'{3}\'\n'
+                                    '->line: \'{4}\'\n'.format(
+                                        location,
+                                        line_no,
+                                        key_begin,
+                                        data_line[key_begin:key_end],
+                                        data_line[:-1]
+                                    )
+                                )
+
+                            continue
+                        elif data_line[(op_begin - 3):op_begin] == '<= ':
+                            if VERBOSE:
+                                key_begin = op_begin
+                                key_end = key_begin + 3
+
+                                while data_line[key_end:(key_end + 1)].isalnum():
+                                    key_end += 1
+
+                                dprint(
+                                    '\nILL-DEFINED OPCODE CONDITIONAL FOUND: ..{0}({1}:{2}) \'{3}\'\n'
+                                    '->line: \'{4}\'\n'.format(
+                                        location,
+                                        line_no,
+                                        key_begin,
+                                        data_line[key_begin:key_end],
+                                        data_line[:-1]
+                                    )
+                                )
+
+                            continue
+                        elif data_line[(op_begin - 2):op_begin] == '<=':
+                            if VERBOSE:
+                                key_begin = op_begin
+                                key_end = key_begin + 3
+
+                                while data_line[key_end:(key_end + 1)].isalnum():
+                                    key_end += 1
+
+                                dprint(
+                                    '\nILL-DEFINED OPCODE CONDITIONAL FOUND: ..{0}({1}:{2}) \'{3}\'\n'
+                                    '->line: \'{4}\'\n'.format(
+                                        location,
+                                        line_no,
+                                        key_begin,
+                                        data_line[key_begin:key_end],
+                                        data_line[:-1]
+                                    )
+                                )
+
+                            continue
+                        # inclusions
+                        elif data_line[(op_begin - 20):op_begin] == 'EQApplicationPacket(':
+                            key_begin = op_begin
+                            key_end = key_begin + 3
+                            direction = '[TX]'
+
+                            while data_line[key_end:(key_end + 1)].isalnum():
+                                key_end += 1
+                        elif data_line[(op_begin - 1):op_begin] == '(' and data_line[read_begin:op_begin].find('EQApplicationPacket', 0) >= 0:
+                            key_begin = op_begin
+                            key_end = key_begin + 3
+                            direction = '[TX]'
+
+                            while data_line[key_end:(key_end + 1)].isalnum():
+                                key_end += 1
+                        elif data_line[(op_begin - 2):op_begin] == ' (' and data_line[read_begin:op_begin].find('EQApplicationPacket', 0) >= 0:
                             key_begin = op_begin
                             key_end = key_begin + 3
                             direction = '[TX]'
@@ -845,7 +1022,28 @@ def discoverserverhandlers():
 
                             while data_line[key_end:(key_end + 1)].isalnum():
                                 key_end += 1
+                        elif data_line[(op_begin - 11):op_begin] == '.SetOpcode(':
+                            key_begin = op_begin
+                            key_end = key_begin + 3
+                            direction = '[TX]'
+
+                            while data_line[key_end:(key_end + 1)].isalnum():
+                                key_end += 1
                         elif data_line[(op_begin - 5):op_begin] == 'case ':
+                            key_begin = op_begin
+                            key_end = key_begin + 3
+                            direction = '[RX]'
+
+                            while data_line[key_end:(key_end + 1)].isalnum():
+                                key_end += 1
+                        elif data_line[(op_begin - 7):op_begin] == 'Handle_':
+                            key_begin = op_begin
+                            key_end = key_begin + 3
+                            direction = '[RX]'
+
+                            while data_line[key_end:(key_end + 1)].isalnum():
+                                key_end += 1
+                        elif data_line[(op_begin - 15):op_begin] == 'Handle_Connect_':
                             key_begin = op_begin
                             key_end = key_begin + 3
                             direction = '[RX]'
@@ -866,120 +1064,6 @@ def discoverserverhandlers():
 
                             while data_line[key_end:(key_end + 1)].isalnum():
                                 key_end += 1
-                        elif data_line[(op_begin - 3):op_begin] == '!= ':
-                            key_begin = op_begin
-                            key_end = key_begin + 3
-
-                            while data_line[key_end:(key_end + 1)].isalnum():
-                                key_end += 1
-
-                            dprint(
-                                '\nILL-DEFINED OPCODE CONDITIONAL FOUND: ..{0}({1}:{2}) \'{3}\'\n'
-                                '->line: \'{4}\'\n'.format(
-                                    location,
-                                    line_no,
-                                    key_begin,
-                                    data_line[key_begin:key_end],
-                                    data_line[:-1]
-                                )
-                            )
-
-                            continue
-                        elif data_line[(op_begin - 2):op_begin] == '!=':
-                            key_begin = op_begin
-                            key_end = key_begin + 3
-
-                            while data_line[key_end:(key_end + 1)].isalnum():
-                                key_end += 1
-
-                            dprint(
-                                '\nILL-DEFINED OPCODE CONDITIONAL FOUND: ..{0}({1}:{2}) \'{3}\'\n'
-                                '->line: \'{4}\'\n'.format(
-                                    location,
-                                    line_no,
-                                    key_begin,
-                                    data_line[key_begin:key_end],
-                                    data_line[:-1]
-                                )
-                            )
-
-                            continue
-                        elif data_line[(op_begin - 3):op_begin] == '>= ':
-                            key_begin = op_begin
-                            key_end = key_begin + 3
-
-                            while data_line[key_end:(key_end + 1)].isalnum():
-                                key_end += 1
-
-                            dprint(
-                                '\nILL-DEFINED OPCODE CONDITIONAL FOUND: ..{0}({1}:{2}) \'{3}\'\n'
-                                '->line: \'{4}\'\n'.format(
-                                    location,
-                                    line_no,
-                                    key_begin,
-                                    data_line[key_begin:key_end],
-                                    data_line[:-1]
-                                )
-                            )
-
-                            continue
-                        elif data_line[(op_begin - 2):op_begin] == '>=':
-                            key_begin = op_begin
-                            key_end = key_begin + 3
-
-                            while data_line[key_end:(key_end + 1)].isalnum():
-                                key_end += 1
-
-                            dprint(
-                                '\nILL-DEFINED OPCODE CONDITIONAL FOUND: ..{0}({1}:{2}) \'{3}\'\n'
-                                '->line: \'{4}\'\n'.format(
-                                    location,
-                                    line_no,
-                                    key_begin,
-                                    data_line[key_begin:key_end],
-                                    data_line[:-1]
-                                )
-                            )
-
-                            continue
-                        elif data_line[(op_begin - 3):op_begin] == '<= ':
-                            key_begin = op_begin
-                            key_end = key_begin + 3
-
-                            while data_line[key_end:(key_end + 1)].isalnum():
-                                key_end += 1
-
-                            dprint(
-                                '\nILL-DEFINED OPCODE CONDITIONAL FOUND: ..{0}({1}:{2}) \'{3}\'\n'
-                                '->line: \'{4}\'\n'.format(
-                                    location,
-                                    line_no,
-                                    key_begin,
-                                    data_line[key_begin:key_end],
-                                    data_line[:-1]
-                                )
-                            )
-
-                            continue
-                        elif data_line[(op_begin - 2):op_begin] == '<=':
-                            key_begin = op_begin
-                            key_end = key_begin + 3
-
-                            while data_line[key_end:(key_end + 1)].isalnum():
-                                key_end += 1
-
-                            dprint(
-                                '\nILL-DEFINED OPCODE CONDITIONAL FOUND: ..{0}({1}:{2}) \'{3}\'\n'
-                                '->line: \'{4}\'\n'.format(
-                                    location,
-                                    line_no,
-                                    key_begin,
-                                    data_line[key_begin:key_end],
-                                    data_line[:-1]
-                                )
-                            )
-
-                            continue
                         elif data_line[(op_begin - 2):op_begin] == '= ':
                             key_begin = op_begin
                             key_end = key_begin + 3
@@ -994,6 +1078,7 @@ def discoverserverhandlers():
 
                             while data_line[key_end:(key_end + 1)].isalnum():
                                 key_end += 1
+                        # fall-through
                         else:
                             key_begin = op_begin
                             key_end = key_begin + 3
@@ -1042,15 +1127,16 @@ def discoverserverhandlers():
                             )
                         )
 
-                        dprint('..{0}({1}:{2}) [{3}][{4}] = \'{5} {6}\'\n'.format(
-                            location,
-                            line_no,
-                            key_begin,
-                            server,
-                            data_line[key_begin:key_end],
-                            direction,
-                            hint
-                        ))
+                        if VERBOSE:
+                            dprint('..{0}({1}:{2}) [{3}][{4}] = \'{5} {6}\'\n'.format(
+                                location,
+                                line_no,
+                                key_begin,
+                                server,
+                                data_line[key_begin:key_end],
+                                direction,
+                                hint
+                            ))
 
                 data_file.close()
 
