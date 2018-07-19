@@ -2804,16 +2804,18 @@ bool Mob::RemoveFromHateList(Mob* mob)
 	return bFound;
 }
 
-void Mob::WipeHateList()
+void Mob::WipeHateList(bool npc_only)
 {
 	if(IsEngaged())
 	{
-		hate_list.WipeHateList();
-		AI_Event_NoLongerEngaged();
+		hate_list.WipeHateList(npc_only);
+		if (hate_list.IsHateListEmpty()) {
+			AI_Event_NoLongerEngaged();
+		}
 	}
 	else
 	{
-		hate_list.WipeHateList();
+        hate_list.WipeHateList(npc_only);
 	}
 }
 

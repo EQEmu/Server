@@ -3884,22 +3884,22 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 	if(spelltar->spellbonuses.SpellDamageShield && IsDetrimentalSpell(spell_id))
 		spelltar->DamageShield(this, true);
 
-	if (spelltar->IsAIControlled() && IsDetrimentalSpell(spell_id) && !IsHarmonySpell(spell_id)) {
-		int32 aggro_amount = CheckAggroAmount(spell_id, spelltar, isproc);
-		Log(Logs::Detail, Logs::Spells, "Spell %d cast on %s generated %d hate", spell_id,
-			spelltar->GetName(), aggro_amount);
-		if (aggro_amount > 0) {
-			spelltar->AddToHateList(this, aggro_amount);
-		} else {
-			int32 newhate = spelltar->GetHateAmount(this) + aggro_amount;
-			spelltar->SetHateAmountOnEnt(this, std::max(newhate, 1));
+	if (!(spelltar->IsNPC() && IsNPC() && !(IsPet() && GetOwner()->IsClient()))) {
+		if (spelltar->IsAIControlled() && IsDetrimentalSpell(spell_id) && !IsHarmonySpell(spell_id)) {
+			int32 aggro_amount = CheckAggroAmount(spell_id, spelltar, isproc);
+			Log(Logs::Detail, Logs::Spells, "Spell %d cast on %s generated %d hate", spell_id,
+				spelltar->GetName(), aggro_amount);
+			if (aggro_amount > 0) {
+				spelltar->AddToHateList(this, aggro_amount);
+			} else {
+				int32 newhate = spelltar->GetHateAmount(this) + aggro_amount;
+				spelltar->SetHateAmountOnEnt(this, std::max(newhate, 1));
+			}
+		} else if (IsBeneficialSpell(spell_id) && !IsSummonPCSpell(spell_id)) {
+			entity_list.AddHealAggro(
+				spelltar, this,
+				CheckHealAggroAmount(spell_id, spelltar, (spelltar->GetMaxHP() - spelltar->GetHP())));
 		}
-	} else if (IsBeneficialSpell(spell_id) && !IsSummonPCSpell(spell_id)) {
-		if (this != spelltar && spelltar->IsClient() && IsClient())
-			CastToClient()->UpdateRestTimer(spelltar->CastToClient()->GetRestTimer());
-		entity_list.AddHealAggro(
-		    spelltar, this,
-		    CheckHealAggroAmount(spell_id, spelltar, (spelltar->GetMaxHP() - spelltar->GetHP())));
 	}
 
 	// make sure spelltar is high enough level for the buff
