@@ -118,12 +118,12 @@ bool TaskManager::LoadTasks(int singleTask)
 
 		query = StringFormat("SELECT `id`, `type`, `duration`, `duration_code`, `title`, `description`, "
 				     "`reward`, `rewardid`, `cashreward`, `xpreward`, `rewardmethod`, `faction_reward`,"
-				     "`minlevel`, `maxlevel`, `repeatable` FROM `tasks` WHERE `id` < %i",
+				     "`minlevel`, `maxlevel`, `repeatable`, `completion_emote` FROM `tasks` WHERE `id` < %i",
 				     MAXTASKS);
 	} else
 		query = StringFormat("SELECT `id`, `type`, `duration`, `duration_code`, `title`, `description`, "
 				     "`reward`, `rewardid`, `cashreward`, `xpreward`, `rewardmethod`, `faction_reward`,"
-				     "`minlevel`, `maxlevel`, `repeatable` FROM `tasks` WHERE `id` = %i",
+				     "`minlevel`, `maxlevel`, `repeatable`, `completion_emote` FROM `tasks` WHERE `id` = %i",
 				     singleTask);
 
 	const char *ERR_MYSQLERROR = "[TASKS]Error in TaskManager::LoadTasks: %s";
@@ -159,6 +159,7 @@ bool TaskManager::LoadTasks(int singleTask)
 		Tasks[taskID]->MinLevel = atoi(row[12]);
 		Tasks[taskID]->MaxLevel = atoi(row[13]);
 		Tasks[taskID]->Repeatable = atoi(row[14]);
+		Tasks[taskID]->completion_emote = row[15];
 		Tasks[taskID]->ActivityCount = 0;
 		Tasks[taskID]->SequenceMode = ActivitiesSequential;
 		Tasks[taskID]->LastStep = 0;
@@ -2019,6 +2020,9 @@ void ClientTaskState::RewardTask(Client *c, TaskInformation *Task) {
 			break;
 		}
 	}
+
+	if (!Task->completion_emote.empty())
+		c->SendColoredText(CC_Yellow, Task->completion_emote); // unsure if they use this packet or color, should work
 
 	// just use normal NPC faction ID stuff
 	if (Task->faction_reward)

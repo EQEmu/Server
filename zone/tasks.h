@@ -142,6 +142,7 @@ struct TaskInformation {
 	std::string Description;	// max length 4000, 2048 on Tit
 	std::string Reward;
 	std::string item_link;		// max length 128 older clients, item link gets own string
+	std::string completion_emote; // emote after completing task, yellow. Maybe should make more generic ... but yellow for now!
 	int	RewardID;
 	int	CashReward; // Expressed in copper
 	int	XPReward;
