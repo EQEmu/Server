@@ -278,6 +278,7 @@ public:
 	void	SetTaunting(bool tog) {taunting = tog;}
 	bool	IsTaunting() const { return taunting; }
 	void	PickPocket(Client* thief);
+	void	Disarm(Client* client, int chance);
 	void	StartSwarmTimer(uint32 duration) { swarm_timer.Start(duration); }
 	void	AddLootDrop(const EQEmu::ItemData*dbitem, ItemList* itemlistconst, int16 charges, uint8 minlevel, uint8 maxlevel, bool equipit, bool wearchange = false, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0);
 	virtual void DoClassAttacks(Mob *target);
