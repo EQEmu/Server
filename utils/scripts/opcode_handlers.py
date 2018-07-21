@@ -2015,7 +2015,7 @@ def parseservertalkopcodedata():
         stprint(message)
 
     if VERBOSE:
-        dprint('->parse: ServerTalk\n'.format(server))
+        dprint('->parse: ServerTalk\n')
         dprint('leaving \'parseservertalkopcodedata()\'\n\n')
 
     return True
