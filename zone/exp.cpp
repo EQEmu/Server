@@ -513,7 +513,7 @@ void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 	}
 
 	// AA Sanity Checking for players who set aa exp and deleveled below allowed aa level.
-	if (GetLevel() <= 50 and m_epp.perAA > 0) {
+	if (GetLevel() <= 50 && m_epp.perAA > 0) {
 		Message(15, "You are below the level allowed to gain AA Experience. AA Experience set to 0%");
 		aaexp = 0;
 		m_epp.perAA = 0;
