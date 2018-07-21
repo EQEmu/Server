@@ -958,7 +958,9 @@ public:
 	inline void SetPetStop(bool nState) { pet_stop = nState; }
 	inline const bool IsPetStop() const { return pet_stop; }
 	inline void SetPetRegroup(bool nState) { pet_regroup = nState; }
+	inline void SetPetFeigned(bool nState) { pet_feigned = nState; }
 	inline const bool IsPetRegroup() const { return pet_regroup; }
+	inline const bool IsPetFeigned() const { return pet_feigned; }
 	inline const bool IsRoamer() const { return roamer; }
 	inline const int GetWanderType() const { return wandertype; }
 	inline const bool IsRooted() const { return rooted || permarooted; }
@@ -1281,6 +1283,7 @@ protected:
 	bool pet_stop;
 	bool pet_regroup;
 	bool spawned;
+	bool pet_feigned;
 	void CalcSpellBonuses(StatBonuses* newbon);
 	virtual void CalcBonuses();
 	void TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success = false, uint16 hand = 0, bool IsDefensive = false); // hand = SlotCharm?
