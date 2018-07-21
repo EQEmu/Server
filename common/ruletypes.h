@@ -158,6 +158,7 @@ RULE_BOOL(Character, UseOldConSystem, false) // Grant Health of Target's Target 
 RULE_BOOL(Character, OPClientUpdateVisualDebug, false) // Shows a pulse and forward directional particle each time the client sends its position to server
 RULE_BOOL(Character, AllowCrossClassTrainers, false)
 RULE_BOOL(Character, PetsUseReagents, true) //Pets use reagent on spells
+RULE_BOOL(Character, DismountWater, true) // Dismount horses when entering water
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)
