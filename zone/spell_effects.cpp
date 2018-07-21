@@ -1730,7 +1730,12 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #endif
 				if(IsClient())	// NPCs can't ride
 				{
-					CastToClient()->SummonHorse(spell_id);
+					Client *client = CastToClient();
+
+					// Prevent Feigned players from summoning horses and riding away to freedom.
+					client->SetFeigned(false);
+					client->Stand();
+					client->SummonHorse(spell_id);
 				}
 
 
