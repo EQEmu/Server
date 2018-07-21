@@ -13311,13 +13311,13 @@ void Client::Handle_OP_Split(const EQApplicationPacket *app)
 	//Per the note above, Im not exactly sure what to do on error
 	//to notify the client of the error...
 	if (!isgrouped) {
-		Message(13, "You can not split money if your not in a group.");
+		Message(13, "You can not split money if you're not in a group.");
 		return;
 	}
 	Group *cgroup = GetGroup();
 	if (cgroup == nullptr) {
 		//invalid group, not sure if we should say more...
-		Message(13, "You can not split money if your not in a group.");
+		Message(13, "You can not split money if you're not in a group.");
 		return;
 	}
 
