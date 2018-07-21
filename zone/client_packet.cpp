@@ -4407,8 +4407,7 @@ void Client::Handle_OP_ClientTimeStamp(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 	if (IsAIControlled())
 		return;
 
@@ -4418,18 +4417,19 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 	/* Invalid size check */
 	if (app->size != sizeof(PlayerPositionUpdateClient_Struct)
 		&& app->size != (sizeof(PlayerPositionUpdateClient_Struct) + 1)
-		) {
-		Log(Logs::General, Logs::Error, "OP size error: OP_ClientUpdate expected:%i got:%i", sizeof(PlayerPositionUpdateClient_Struct), app->size);
+			) {
+		Log(Logs::General, Logs::Error, "OP size error: OP_ClientUpdate expected:%i got:%i",
+			sizeof(PlayerPositionUpdateClient_Struct), app->size);
 		return;
 	}
 
-	PlayerPositionUpdateClient_Struct* ppu = (PlayerPositionUpdateClient_Struct*)app->pBuffer;
+	PlayerPositionUpdateClient_Struct *ppu = (PlayerPositionUpdateClient_Struct *) app->pBuffer;
 
 	/* Boat handling */
 	if (ppu->spawn_id != GetID()) {
 		/* If player is controlling boat */
 		if (ppu->spawn_id == controlling_boat_id) {
-			Mob* boat = entity_list.GetMob(controlling_boat_id);
+			Mob *boat = entity_list.GetMob(controlling_boat_id);
 			if (boat == 0) {
 				controlling_boat_id = 0;
 				return;
@@ -4437,9 +4437,9 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 
 			auto boat_delta = glm::vec4(ppu->delta_x, ppu->delta_y, ppu->delta_z, EQ10toFloat(ppu->delta_heading));
 			boat->SetDelta(boat_delta);
-			
+
 			auto outapp = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
-			PlayerPositionUpdateServer_Struct* ppus = (PlayerPositionUpdateServer_Struct*)outapp->pBuffer;
+			PlayerPositionUpdateServer_Struct *ppus = (PlayerPositionUpdateServer_Struct *) outapp->pBuffer;
 			boat->MakeSpawnUpdate(ppus);
 			entity_list.QueueCloseClients(boat, outapp, true, 300, this, false);
 			safe_delete(outapp);
@@ -4447,16 +4447,15 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 			/* Update the boat's position on the server, without sending an update */
 			boat->GMMove(ppu->x_pos, ppu->y_pos, ppu->z_pos, EQ12toFloat(ppu->heading), false);
 			return;
-		}
-		else return;
+		} else return;
 	}
 
 	float dist = 0;
 	float tmp;
 	tmp = m_Position.x - ppu->x_pos;
-	dist += tmp*tmp;
+	dist += tmp * tmp;
 	tmp = m_Position.y - ppu->y_pos;
-	dist += tmp*tmp;
+	dist += tmp * tmp;
 	dist = sqrt(dist);
 
 	/* Hack checks */
@@ -4464,29 +4463,28 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 		if (m_DistanceSinceLastPositionCheck > 0.0) {
 			uint32 cur_time = Timer::GetCurrentTime();
 			if ((cur_time - m_TimeSinceLastPositionCheck) > 0) {
-				float speed = (m_DistanceSinceLastPositionCheck * 100) / (float)(cur_time - m_TimeSinceLastPositionCheck);
+				float speed =
+						(m_DistanceSinceLastPositionCheck * 100) / (float) (cur_time - m_TimeSinceLastPositionCheck);
 				int runs = GetRunspeed();
 				if (speed > (runs * RuleR(Zone, MQWarpDetectionDistanceFactor))) {
-					if (!GetGMSpeed() && (runs >= GetBaseRunspeed() || (speed > (GetBaseRunspeed() * RuleR(Zone, MQWarpDetectionDistanceFactor))))) {
+					if (!GetGMSpeed() && (runs >= GetBaseRunspeed() ||
+										  (speed > (GetBaseRunspeed() * RuleR(Zone, MQWarpDetectionDistanceFactor))))) {
 						if (IsShadowStepExempted()) {
 							if (m_DistanceSinceLastPositionCheck > 800) {
 								CheatDetected(MQWarpShadowStep, ppu->x_pos, ppu->y_pos, ppu->z_pos);
 							}
-						}
-						else if (IsKnockBackExempted()) {
+						} else if (IsKnockBackExempted()) {
 							if (speed > 30.0f) {
 								CheatDetected(MQWarpKnockBack, ppu->x_pos, ppu->y_pos, ppu->z_pos);
 							}
-						}
-						else if (!IsPortExempted()) {
+						} else if (!IsPortExempted()) {
 							if (!IsMQExemptedArea(zone->GetZoneID(), ppu->x_pos, ppu->y_pos, ppu->z_pos)) {
 								if (speed > (runs * 2 * RuleR(Zone, MQWarpDetectionDistanceFactor))) {
 									m_TimeSinceLastPositionCheck = cur_time;
 									m_DistanceSinceLastPositionCheck = 0.0f;
 									CheatDetected(MQWarp, ppu->x_pos, ppu->y_pos, ppu->z_pos);
 									//Death(this, 10000000, SPELL_UNKNOWN, _1H_BLUNT);
-								}
-								else {
+								} else {
 									CheatDetected(MQWarpLight, ppu->x_pos, ppu->y_pos, ppu->z_pos);
 								}
 							}
@@ -4500,43 +4498,39 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 				m_DistanceSinceLastPositionCheck = 0.0f;
 				m_CheatDetectMoved = false;
 			}
-		}
-		else {
+		} else {
 			m_TimeSinceLastPositionCheck = Timer::GetCurrentTime();
 			m_CheatDetectMoved = false;
 		}
-	}
-	else {
+	} else {
 		m_DistanceSinceLastPositionCheck += dist;
 		m_CheatDetectMoved = true;
 		if (m_TimeSinceLastPositionCheck == 0) {
 			m_TimeSinceLastPositionCheck = Timer::GetCurrentTime();
-		}
-		else {
+		} else {
 			uint32 cur_time = Timer::GetCurrentTime();
 			if ((cur_time - m_TimeSinceLastPositionCheck) > 2500) {
-				float speed = (m_DistanceSinceLastPositionCheck * 100) / (float)(cur_time - m_TimeSinceLastPositionCheck);
+				float speed =
+						(m_DistanceSinceLastPositionCheck * 100) / (float) (cur_time - m_TimeSinceLastPositionCheck);
 				int runs = GetRunspeed();
 				if (speed > (runs * RuleR(Zone, MQWarpDetectionDistanceFactor))) {
-					if (!GetGMSpeed() && (runs >= GetBaseRunspeed() || (speed > (GetBaseRunspeed() * RuleR(Zone, MQWarpDetectionDistanceFactor))))) {
+					if (!GetGMSpeed() && (runs >= GetBaseRunspeed() ||
+										  (speed > (GetBaseRunspeed() * RuleR(Zone, MQWarpDetectionDistanceFactor))))) {
 						if (IsShadowStepExempted()) {
 							if (m_DistanceSinceLastPositionCheck > 800) {
 								CheatDetected(MQWarpShadowStep, ppu->x_pos, ppu->y_pos, ppu->z_pos);
 							}
-						}
-						else if (IsKnockBackExempted()) {
+						} else if (IsKnockBackExempted()) {
 							if (speed > 30.0f) {
 								CheatDetected(MQWarpKnockBack, ppu->x_pos, ppu->y_pos, ppu->z_pos);
 							}
-						}
-						else if (!IsPortExempted()) {
+						} else if (!IsPortExempted()) {
 							if (!IsMQExemptedArea(zone->GetZoneID(), ppu->x_pos, ppu->y_pos, ppu->z_pos)) {
 								if (speed > (runs * 2 * RuleR(Zone, MQWarpDetectionDistanceFactor))) {
 									m_TimeSinceLastPositionCheck = cur_time;
 									m_DistanceSinceLastPositionCheck = 0.0f;
 									CheatDetected(MQWarp, ppu->x_pos, ppu->y_pos, ppu->z_pos);
-								}
-								else {
+								} else {
 									CheatDetected(MQWarpLight, ppu->x_pos, ppu->y_pos, ppu->z_pos);
 								}
 							}
@@ -4604,8 +4598,8 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 			improved_hidden = false;
 			if (!invisible) {
 				auto outapp =
-					new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
-				SpawnAppearance_Struct* sa_out = (SpawnAppearance_Struct*)outapp->pBuffer;
+						new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
+				SpawnAppearance_Struct *sa_out = (SpawnAppearance_Struct *) outapp->pBuffer;
 				sa_out->spawn_id = GetID();
 				sa_out->type = 0x03;
 				sa_out->parameter = 0;
@@ -4620,7 +4614,8 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 	is_client_moving = (ppu->y_pos == m_Position.y && ppu->x_pos == m_Position.x) ? false : true;
 
 	if (is_client_moving) {
-		Log(Logs::Detail, Logs::Normal, "ClientUpdate: Client is moving - scan timer is: %u", client_scan_npc_aggro_timer.GetDuration());
+		Log(Logs::Detail, Logs::Normal, "ClientUpdate: Client is moving - scan timer is: %u",
+			client_scan_npc_aggro_timer.GetDuration());
 		if (client_scan_npc_aggro_timer.GetDuration() > 1000) {
 
 			npc_close_scan_timer.Disable();
@@ -4630,9 +4625,9 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 			client_scan_npc_aggro_timer.Start(500);
 
 		}
-	}
-	else {
-		Log(Logs::Detail, Logs::Normal, "ClientUpdate: Client is NOT moving - scan timer is: %u", client_scan_npc_aggro_timer.GetDuration());
+	} else {
+		Log(Logs::Detail, Logs::Normal, "ClientUpdate: Client is NOT moving - scan timer is: %u",
+			client_scan_npc_aggro_timer.GetDuration());
 		if (client_scan_npc_aggro_timer.GetDuration() < 1000) {
 
 			npc_close_scan_timer.Disable();
@@ -4642,7 +4637,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 			client_scan_npc_aggro_timer.Start(3000);
 		}
 	}
-	
+
 	float new_heading = EQ12toFloat(ppu->heading);
 	int32 new_animation = ppu->animation;
 
@@ -4650,10 +4645,11 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 	m_Position.x = ppu->x_pos;
 	m_Position.y = ppu->y_pos;
 	m_Position.z = ppu->z_pos;
-	
+
 	/* Visual Debugging */
 	if (RuleB(Character, OPClientUpdateVisualDebug)) {
-		Log(Logs::General, Logs::Debug, "ClientUpdate: ppu x: %f y: %f z: %f h: %u", ppu->x_pos, ppu->y_pos, ppu->z_pos, ppu->heading);
+		Log(Logs::General, Logs::Debug, "ClientUpdate: ppu x: %f y: %f z: %f h: %u", ppu->x_pos, ppu->y_pos, ppu->z_pos,
+			ppu->heading);
 		this->SendAppearanceEffect(78, 0, 0, 0, 0);
 		this->SendAppearanceEffect(41, 0, 0, 0, 0);
 	}
@@ -4666,14 +4662,13 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 
 		/* Broadcast update to other clients */
 		auto outapp = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
-		PlayerPositionUpdateServer_Struct* position_update = (PlayerPositionUpdateServer_Struct*)outapp->pBuffer;
+		PlayerPositionUpdateServer_Struct *position_update = (PlayerPositionUpdateServer_Struct *) outapp->pBuffer;
 
 		MakeSpawnUpdate(position_update);
 
 		if (gm_hide_me) {
 			entity_list.QueueClientsStatus(this, outapp, true, Admin(), 250);
-		}
-		else {
+		} else {
 			entity_list.QueueCloseClients(this, outapp, true, RuleI(Range, ClientPositionUpdates), nullptr, true);
 		}
 
@@ -4684,8 +4679,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 
 		if (raid) {
 			raid->QueueClients(this, outapp, true, true, (RuleI(Range, ClientPositionUpdates) * -1));
-		}
-		else if (group) {
+		} else if (group) {
 			group->QueueClients(this, outapp, true, true, (RuleI(Range, ClientPositionUpdates) * -1));
 		}
 
@@ -4693,11 +4687,17 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 	}
 
 	if (zone->watermap) {
-		if (zone->watermap->InLiquid(glm::vec3(m_Position)))
+		if (zone->watermap->InLiquid(glm::vec3(m_Position))) {
 			CheckIncreaseSkill(EQEmu::skills::SkillSwimming, nullptr, -17);
+
+			// Dismount horses when entering water
+			if (GetHorseId() && RuleB(Character, DismountWater)) {
+				SetHorseId(0);
+				BuffFadeByEffect(SE_SummonHorse);
+			}
+		}
 		CheckRegionTypeChanges();
 	}
-
 	return;
 }
 
