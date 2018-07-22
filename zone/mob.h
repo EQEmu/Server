@@ -256,6 +256,7 @@ public:
 	inline bool SeeInvisibleUndead() const { return see_invis_undead; }
 	inline bool SeeHide() const { return see_hide; }
 	inline bool SeeImprovedHide() const { return see_improved_hide; }
+	inline bool GetSeeInvisible(uint8 see_invis);
 	bool IsInvisible(Mob* other = 0) const;
 	void SetInvisible(uint8 state);
 	EQEmu::skills::SkillType AttackAnimation(int Hand, const EQEmu::ItemInstance* weapon, EQEmu::skills::SkillType skillinuse = EQEmu::skills::Skill1HBlunt);
