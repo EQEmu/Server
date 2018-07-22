@@ -181,6 +181,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_DeleteItem] = &Client::Handle_OP_DeleteItem;
 	ConnectedOpcodes[OP_DeleteSpawn] = &Client::Handle_OP_DeleteSpawn;
 	ConnectedOpcodes[OP_DeleteSpell] = &Client::Handle_OP_DeleteSpell;
+	ConnectedOpcodes[OP_Disarm] = &Client::Handle_OP_Disarm;
 	ConnectedOpcodes[OP_DisarmTraps] = &Client::Handle_OP_DisarmTraps;
 	ConnectedOpcodes[OP_DoGroupLeadershipAbility] = &Client::Handle_OP_DoGroupLeadershipAbility;
 	ConnectedOpcodes[OP_DuelResponse] = &Client::Handle_OP_DuelResponse;
@@ -5321,6 +5322,97 @@ void Client::Handle_OP_DeleteSpawn(const EQApplicationPacket *app)
 	hate_list.RemoveEntFromHateList(this->CastToMob());
 
 	Disconnect();
+	return;
+}
+
+void Client::Handle_OP_Disarm(const EQApplicationPacket *app) {
+	if (dead || bZoning) return;
+	if (!HasSkill(EQEmu::skills::SkillDisarm))
+		return;
+
+	if (app->size != sizeof(Disarm_Struct)) {
+		Log(Logs::General, Logs::Skills, "Size mismatch for Disarm_Struct packet");
+		return;
+	}
+
+	Disarm_Struct *disarm = (Disarm_Struct *)app->pBuffer;
+
+	if (!p_timers.Expired(&database, pTimerCombatAbility2, false)) {
+		Message(13, "Ability recovery time not yet met.");
+		return;
+	}
+
+	p_timers.Start(pTimerCombatAbility2, 8);
+
+	BreakInvis();
+	Mob* pmob = entity_list.GetMob(disarm->source);
+	Mob* tmob = entity_list.GetMob(disarm->target);
+	if (!pmob || !tmob)
+		return;
+	if (pmob->GetID() != GetID()) {
+		// Client sent a disarm request with an originator ID not matching their own ID.
+		char *hack_str = NULL;
+		MakeAnyLenString(&hack_str, "Player %s (%d) sent OP_Disarm with source ID of: %d", GetCleanName(), GetID(), pmob->GetID());
+		database.SetMQDetectionFlag(this->account_name, this->name, hack_str, zone->GetShortName());
+		safe_delete_array(hack_str);
+		return;
+	}
+	// No disarm on corpses
+	if (tmob->IsCorpse())
+		return;
+	// No target
+	if (!GetTarget())
+		return;
+	// Targets don't match (possible hack, but not flagging)
+	if (GetTarget() != tmob) {
+		return;
+	}
+	// Too far away
+	if (pmob->CalculateDistance(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ()) > 400)
+		return;
+
+	// Can't see mob
+	//if (tmob->BehindMob(pmob))
+	//	return;
+	// How can we disarm someone if we are feigned.
+	if (GetFeigned())
+		return;
+	// We can't disarm someone who is feigned.
+	if (tmob->IsClient() && tmob->CastToClient()->GetFeigned())
+		return;
+	if (GetTarget() == tmob && pmob == this->CastToMob() &&
+		disarm->skill == GetSkill(EQEmu::skills::SkillDisarm) && IsAttackAllowed(tmob)) {
+		int p_level = pmob->GetLevel() ? pmob->GetLevel() : 1;
+		int t_level = tmob->GetLevel() ? tmob->GetLevel() : 1;
+		// We have a disarmable target - sucess or fail, we always aggro the mob
+		if (tmob->IsNPC()) {
+			if (!tmob->CheckAggro(pmob)) {
+				zone->AddAggroMob();
+				tmob->AddToHateList(pmob, p_level);
+			}
+			else {
+				tmob->AddToHateList(pmob, p_level / 3);
+			}
+		}
+		int chance = GetSkill(EQEmu::skills::SkillDisarm); // (1% @ 0 skill) (11% @ 200 skill) - against even con
+		chance /= 2;
+		chance += 10;
+		// Modify chance based on level difference
+		float lvl_mod = p_level / t_level;
+		chance *= lvl_mod;
+		if (chance > 300)
+			chance = 300; // max chance of 30%
+		if (tmob->IsNPC()) {
+			tmob->CastToNPC()->Disarm(this, chance);
+		}
+		else if (tmob->IsClient()) {
+			tmob->CastToClient()->Disarm(this, chance);
+		}
+		return;
+	}
+	// Trying to disarm something we can't disarm
+	Message_StringID(MT_Skills, DISARM_NO_TARGET);
+
 	return;
 }
 

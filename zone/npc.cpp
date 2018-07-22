@@ -1691,6 +1691,65 @@ void NPC::PickPocket(Client* thief)
 	thief->SendPickPocketResponse(this, 0, PickPocketFailed);
 }
 
+void NPC::Disarm(Client* client, int chance) {
+	// disarm primary if available, otherwise disarm secondary
+	const EQEmu::ItemData* weapon = NULL;
+	uint8 eslot = 0xFF;
+	if (equipment[EQEmu::invslot::slotPrimary] != 0)
+		eslot = EQEmu::invslot::slotPrimary;
+	else if (equipment[EQEmu::invslot::slotSecondary] != 0)
+		eslot = EQEmu::invslot::slotSecondary;
+	if (eslot != 0xFF) {
+		if (zone->random.Int(0, 1000) <= chance) {
+			weapon = database.GetItem(equipment[eslot]);
+			if (weapon) {
+				if (!weapon->Magic && weapon->NoDrop == 255) {
+					int16 charges = -1;
+					ItemList::iterator cur, end;
+					cur = itemlist.begin();
+					end = itemlist.end();
+					// Get charges for the item in the loot table
+					for (; cur != end; cur++) {
+						ServerLootItem_Struct* citem = *cur;
+						if (citem->item_id == weapon->ID) {
+							charges = citem->charges;
+							break;
+						}
+					}
+					EQEmu::ItemInstance *inst = NULL;
+					inst = database.CreateItem(weapon->ID, charges);
+					// Remove item from loot table
+					RemoveItem(weapon->ID);
+					CalcBonuses();
+					if (inst) {
+						// create a ground item
+						Object* object = new Object(inst, this->GetX(), this->GetY(), this->GetZ(), 0.0f, 300000);
+						entity_list.AddObject(object, true);
+						object->StartDecay();
+						safe_delete(inst);
+					}
+				}
+			}
+			// Update Appearance
+			equipment[eslot] = 0;
+			int matslot = eslot == EQEmu::invslot::slotPrimary ? EQEmu::textures::weaponPrimary : EQEmu::textures::weaponSecondary;
+			if (matslot != -1)
+				SendWearChange(matslot);
+			if ((CastToMob()->GetBodyType() == BT_Humanoid || CastToMob()->GetBodyType() == BT_Summoned) && eslot == EQEmu::invslot::slotPrimary)
+				Say("Ahh! My weapon!");
+			client->Message_StringID(MT_Skills, DISARM_SUCCESS, this->GetCleanName());
+			if (chance != 1000)
+				client->CheckIncreaseSkill(EQEmu::skills::SkillDisarm, nullptr, 4);
+			return;
+		}
+		client->Message_StringID(MT_Skills, DISARM_FAILED);
+		if (chance != 1000)
+			client->CheckIncreaseSkill(EQEmu::skills::SkillDisarm, nullptr, 2);
+		return;
+	}
+	client->Message_StringID(MT_Skills, DISARM_FAILED);
+}
+
 void Mob::NPCSpecialAttacks(const char* parse, int permtag, bool reset, bool remove) {
 	if(reset)
 	{

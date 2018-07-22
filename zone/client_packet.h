@@ -94,6 +94,7 @@
 	void Handle_OP_DeleteItem(const EQApplicationPacket *app);
 	void Handle_OP_DeleteSpawn(const EQApplicationPacket *app);
 	void Handle_OP_DeleteSpell(const EQApplicationPacket *app);
+	void Handle_OP_Disarm(const EQApplicationPacket *app);
 	void Handle_OP_DisarmTraps(const EQApplicationPacket *app);
 	void Handle_OP_DoGroupLeadershipAbility(const EQApplicationPacket *app);
 	void Handle_OP_DuelResponse(const EQApplicationPacket *app);

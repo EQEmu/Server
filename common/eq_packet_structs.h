@@ -1783,6 +1783,15 @@ struct CombatAbility_Struct {
 	uint32 m_skill;
 };
 
+// Disarm Struct incoming from Client [Size: 16]
+struct Disarm_Struct
+{
+	uint32 source;
+	uint32 target;
+	uint32 skill;
+	uint32 unknown;
+};
+
 //Instill Doubt
 struct Instill_Doubt_Struct {
 	uint8 i_id;

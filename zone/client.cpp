@@ -2682,6 +2682,60 @@ void Client::LogMerchant(Client* player, Mob* merchant, uint32 quantity, uint32 
 	}
 }
 
+void Client::Disarm(Client* disarmer, int chance) {
+	int16 slot = -1;
+	const EQEmu::ItemInstance *inst = this->GetInv().GetItem(EQEmu::invslot::slotPrimary);
+	if (inst && inst->IsWeapon()) {
+		slot = EQEmu::invslot::slotPrimary;
+	}
+	else {
+		inst = this->GetInv().GetItem(EQEmu::invslot::slotSecondary);
+		if (inst && inst->IsWeapon())
+			slot = EQEmu::invslot::slotSecondary;
+	}
+	if (slot != -1 && inst->IsClassCommon()) {
+		// We have an item that can be disarmed.
+		if (zone->random.Int(0, 1000) <= chance) {
+			// Find a free inventory slot
+			int16 slot_id = -1;
+			slot_id = m_inv.FindFreeSlot(false, true, inst->GetItem()->Size, inst->GetItem()->ItemType);
+			if (slot_id != -1)
+			{
+				EQEmu::ItemInstance *InvItem = m_inv.PopItem(slot);
+				if (InvItem) { // there should be no way it is not there, but check anyway
+					EQApplicationPacket* outapp = new EQApplicationPacket(OP_MoveItem, sizeof(MoveItem_Struct));
+					MoveItem_Struct* mi = (MoveItem_Struct*)outapp->pBuffer;
+					mi->from_slot = slot;
+					mi->to_slot = 0xFFFFFFFF;
+					if (inst->IsStackable()) // it should not be stackable
+						mi->number_in_stack = inst->GetCharges();
+					else
+						mi->number_in_stack = 0;
+					FastQueuePacket(&outapp); // this deletes item from the weapon slot on the client
+					if (PutItemInInventory(slot_id, *InvItem, true))
+						database.SaveInventory(this->CharacterID(), NULL, slot);
+					int matslot = slot == EQEmu::invslot::slotPrimary ? EQEmu::textures::weaponPrimary : EQEmu::textures::weaponSecondary;
+					if (matslot != -1)
+						SendWearChange(matslot);
+				}
+				Message_StringID(MT_Skills, DISARMED);
+				if (disarmer != this)
+					disarmer->Message_StringID(MT_Skills, DISARM_SUCCESS, this->GetCleanName());
+				if (chance != 1000)
+					disarmer->CheckIncreaseSkill(EQEmu::skills::SkillDisarm, nullptr, 4);
+				CalcBonuses();
+				// CalcEnduranceWeightFactor();
+				return;
+			}
+			disarmer->Message_StringID(MT_Skills, DISARM_FAILED);
+			if (chance != 1000)
+				disarmer->CheckIncreaseSkill(EQEmu::skills::SkillDisarm, nullptr, 2);
+			return;
+		}
+	}
+	disarmer->Message_StringID(MT_Skills, DISARM_FAILED);
+}
+
 bool Client::BindWound(Mob *bindmob, bool start, bool fail)
 {
 	EQApplicationPacket *outapp = nullptr;
