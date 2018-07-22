@@ -3843,8 +3843,8 @@ uint32 ZoneDatabase::CreateGraveyardRecord(uint32 graveyard_zone_id, const glm::
 }
 uint32 ZoneDatabase::SendCharacterCorpseToGraveyard(uint32 dbid, uint32 zone_id, uint16 instance_id, const glm::vec4& position) {
 
-	float xcorpse = (position.x + zone->random.randfloat(-20,20));
-	float ycorpse = (position.y + zone->random.randfloat(-20,20));
+	double xcorpse = (position.x + zone->random.Real(-20,20));
+	double ycorpse = (position.y + zone->random.Real(-20,20));
 
 	std::string query = StringFormat("UPDATE `character_corpses` "
                                     "SET `zone_id` = %u, `instance_id` = 0, "

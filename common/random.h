@@ -97,33 +97,6 @@ namespace EQEmu {
 			Reseed();
 		}
 
-		//generates a psuedo-random float between 0.0 and 0.999...
-		float randfloat()
-		{
-			return rand()/(float(RAND_MAX)+1);
-		}
-
-		//generates a psuedo-random float between 0.0 and max
-		float randfloat(float max)
-		{
-			return randfloat()*max;
-		}
-
-		//generates a psuedo-random float between min and max
-		float randfloat(float min, float max)
-		{
-			if (min>max)
-				return randfloat()*(min-max)+max;
-			else
-				return randfloat()*(max-min)+min;
-		}
-
-		//generates a psuedo-random double between 0.0 and 0.999...
-		double randdouble()
-		{
-			return rand()/(double(RAND_MAX)+1);
-		}
-
 	private:
 		typedef std::uniform_int_distribution<int>::param_type int_param_t;
 		typedef std::uniform_real_distribution<double>::param_type real_param_t;
