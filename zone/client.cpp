@@ -2718,18 +2718,16 @@ void Client::Disarm(Client* disarmer, int chance) {
 					if (matslot != -1)
 						SendWearChange(matslot);
 				}
-				Message(MT_Skills, "You have been disarmed!");
+				Message_StringID(MT_Skills, DISARMED);
 				if (disarmer != this)
-					disarmer->Message(MT_Skills, StringFormat("You have successfully disarmed %s", this->GetCleanName()).c_str());
-				// Message_StringID(MT_Skills, DISARM_SUCCESS, this->GetCleanName());
+					disarmer->Message_StringID(MT_Skills, DISARM_SUCCESS, this->GetCleanName());
 				if (chance != 1000)
 					disarmer->CheckIncreaseSkill(EQEmu::skills::SkillDisarm, nullptr, 4);
 				CalcBonuses();
 				// CalcEnduranceWeightFactor();
 				return;
 			}
-			disarmer->Message(MT_Skills, StringFormat("You have failed to disarm your target").c_str());
-			//disarmer->Message_StringID(MT_Skills, DISARM_FAILED);
+			disarmer->Message_StringID(MT_Skills, DISARM_FAILED);
 			if (chance != 1000)
 				disarmer->CheckIncreaseSkill(EQEmu::skills::SkillDisarm, nullptr, 2);
 			return;

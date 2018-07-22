@@ -1784,7 +1784,6 @@ struct CombatAbility_Struct {
 };
 
 // Disarm Struct incoming from Client [Size: 16]
-// Haynar - 24 Jan 2011
 struct Disarm_Struct
 {
 	uint32 source;
