@@ -404,10 +404,11 @@ Mob::Mob(const char* in_name,
 	pStandingPetOrder = SPO_Follow;
 	pseudo_rooted = false;
 
-	see_invis = in_see_invis;
-	see_invis_undead = in_see_invis_undead != 0;
-	see_hide = in_see_hide != 0;
-	see_improved_hide = in_see_improved_hide != 0;
+	see_invis = GetSeeInvisible(in_see_invis);
+	see_invis_undead = GetSeeInvisible(in_see_invis_undead);
+	see_hide = GetSeeInvisible(in_see_hide);
+	see_improved_hide = GetSeeInvisible(in_see_improved_hide);
+
 	qglobal = in_qglobal != 0;
 
 	// Bind wound
@@ -5677,6 +5678,21 @@ float Mob::HeadingAngleToMob(float other_x, float other_y)
 		return angle * 511.5f * 0.0027777778f;
 	else
 		return (90.0f - angle + 270.0f) * 511.5f * 0.0027777778f;
+}
+
+bool Mob::GetSeeInvisible(uint8 see_invis)
+{
+	if(see_invis > 0)
+	{
+		if(see_invis == 1)
+			return true;
+		else
+		{
+			if (zone->random.Int(0, 99) < see_invis)
+				return true;
+		}
+	}
+	return false;
 }
 
 int32 Mob::GetSpellStat(uint32 spell_id, const char *identifier, uint8 slot)
