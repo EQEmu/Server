@@ -1414,7 +1414,7 @@ void Merc::AI_Process() {
 		if(DivineAura())
 			return;
 
-		int hateCount = entity_list.GetHatedCount(this, nullptr);
+		int hateCount = entity_list.GetHatedCount(this, nullptr, false);
 		if(GetHatedCount() < hateCount) {
 			SetHatedCount(hateCount);
 
