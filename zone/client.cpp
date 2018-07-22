@@ -2733,7 +2733,7 @@ void Client::Disarm(Client* disarmer, int chance) {
 			return;
 		}
 	}
-	disarmer->Message(MT_Skills, StringFormat("You have failed to disarm your target").c_str());
+	disarmer->Message_StringID(MT_Skills, DISARM_FAILED);
 }
 
 bool Client::BindWound(Mob *bindmob, bool start, bool fail)

@@ -1737,18 +1737,17 @@ void NPC::Disarm(Client* client, int chance) {
 				SendWearChange(matslot);
 			if ((CastToMob()->GetBodyType() == BT_Humanoid || CastToMob()->GetBodyType() == BT_Summoned) && eslot == EQEmu::invslot::slotPrimary)
 				Say("Ahh! My weapon!");
-			client->Message(MT_Skills, "You have successfully disarmed your target.");
-			//client->Message_StringID(MT_Skills, DISARM_SUCCESS, this->GetCleanName());
+			client->Message_StringID(MT_Skills, DISARM_SUCCESS, this->GetCleanName());
 			if (chance != 1000)
 				client->CheckIncreaseSkill(EQEmu::skills::SkillDisarm, nullptr, 4);
 			return;
 		}
-		client->Message(MT_Skills, StringFormat("You have failed to disarm your target").c_str());
+		client->Message_StringID(MT_Skills, DISARM_FAILED);
 		if (chance != 1000)
 			client->CheckIncreaseSkill(EQEmu::skills::SkillDisarm, nullptr, 2);
 		return;
 	}
-	client->Message(MT_Skills, StringFormat("You have failed to disarm your target").c_str());
+	client->Message_StringID(MT_Skills, DISARM_FAILED);
 }
 
 void Mob::NPCSpecialAttacks(const char* parse, int permtag, bool reset, bool remove) {

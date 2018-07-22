@@ -5411,8 +5411,7 @@ void Client::Handle_OP_Disarm(const EQApplicationPacket *app) {
 		return;
 	}
 	// Trying to disarm something we can't disarm
-	Message(13, "Your attempt to disarm your target has failed.");
-	// Message_StringID(MT_Skills, DISARM_FAILED);
+	Message_StringID(MT_Skills, DISARM_NO_TARGET);
 
 	return;
 }
