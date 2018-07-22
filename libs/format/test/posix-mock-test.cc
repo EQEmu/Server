@@ -453,12 +453,6 @@ TEST(BufferedFileTest, FilenoNoRetry) {
   fileno_count = 0;
 }
 
-template <typename Mock>
-struct ScopedMock : testing::StrictMock<Mock> {
-  ScopedMock() { Mock::instance = this; }
-  ~ScopedMock() { Mock::instance = 0; }
-};
-
 struct TestMock {
   static TestMock *instance;
 } *TestMock::instance;
@@ -508,7 +502,7 @@ LocaleType newlocale(int category_mask, const char *locale, LocaleType base) {
   return LocaleMock::instance->newlocale(category_mask, locale, base);
 }
 
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__FreeBSD__)
 typedef int FreeLocaleResult;
 #else
 typedef void FreeLocaleResult;

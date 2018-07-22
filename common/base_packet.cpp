@@ -39,6 +39,18 @@ BasePacket::BasePacket(const unsigned char *buf, uint32 len)
 	}
 }
 
+BasePacket::BasePacket(SerializeBuffer &buf)
+{
+	pBuffer = buf.m_buffer;
+	buf.m_buffer = nullptr;
+	size = buf.m_pos;
+	buf.m_pos = 0;
+	buf.m_capacity = 0;
+	_wpos = 0;
+	_rpos = 0;
+	timestamp.tv_sec = 0;
+}
+
 BasePacket::~BasePacket()
 {
 	if (pBuffer)

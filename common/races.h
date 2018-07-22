@@ -878,415 +878,732 @@ namespace PlayerAppearance
 	bool IsValidWoad(uint16 race_id, uint8 gender_id, uint8 woad_value, bool use_luclin = true);
 }
 
-/*
-
-//pulled from the client by ksmith:
-$races_table = array(
-		1 => "Human",
-		2 => "Barbarian",
-		3 => "Erudite",
-		4 => "Wood Elf",
-		5 => "High Elf",
-		6 => "Dark Elf",
-		7 => "Half Elf",
-		8 => "Dwarf",
-		9 => "Troll",
-		10 => "Ogre",
-		11 => "Halfling",
-		12 => "Gnome",
-		13 => "Aviak",
-		14 => "Were Wolf",
-		15 => "Brownie",
-		16 => "Centaur",
-		17 => "Golem",
-		18 => "Giant / Cyclops",
-		19 => "Trakenon",
-		20 => "Doppleganger",
-		21 => "Evil Eye",
-		22 => "Beetle",
-		23 => "Kerra",
-		24 => "Fish",
-		25 => "Fairy",
-		26 => "Old Froglok",
-		27 => "Old Froglok Ghoul",
-		28 => "Fungusman",
-		29 => "Gargoyle",
-		30 => "Gasbag",
-		31 => "Gelatinous Cube",
-		32 => "Ghost",
-		33 => "Ghoul",
-		34 => "Giant Bat",
-		35 => "Giant Eel",
-		36 => "Giant Rat",
-		37 => "Giant Snake",
-		38 => "Giant Spider",
-		39 => "Gnoll",
-		40 => "Goblin",
-		41 => "Gorilla",
-		42 => "Wolf",
-		43 => "Bear",
-		44 => "Freeport Guards",
-		45 => "Demi Lich",
-		46 => "Imp",
-		47 => "Griffin",
-		48 => "Kobold",
-		49 => "Lava Dragon",
-		50 => "Lion",
-		51 => "Lizard Man",
-		52 => "Mimic",
-		53 => "Minotaur",
-		54 => "Orc",
-		55 => "Human Beggar",
-		56 => "Pixie",
-		57 => "Dracnid",
-		58 => "Solusek Ro",
-		59 => "Bloodgills",
-		60 => "Skeleton",
-		61 => "Shark",
-		62 => "Tunare",
-		63 => "Tiger",
-		64 => "Treant",
-		65 => "Vampire",
-		66 => "Rallos Zek",
-		67 => "Highpass Citizen",
-		68 => "Tentacle",
-		69 => "Will 'O Wisp",
-		70 => "Zombie",
-		71 => "Qeynos Citizen",
-		72 => "Ship",
-		73 => "Launch",
-		74 => "Piranha",
-		75 => "Elemental",
-		76 => "Puma",
-		77 => "Neriak Citizen",
-		78 => "Erudite Citizen",
-		79 => "Bixie",
-		80 => "Reanimated Hand",
-		81 => "Rivervale Citizen",
-		82 => "Scarecrow",
-		83 => "Skunk",
-		84 => "Snake Elemental",
-		85 => "Spectre",
-		86 => "Sphinx",
-		87 => "Armadillo",
-		88 => "Clockwork Gnome",
-		89 => "Drake",
-		90 => "Halas Citizen",
-		91 => "Alligator",
-		92 => "Grobb Citizen",
-		93 => "Oggok Citizen",
-		94 => "Kaladim Citizen",
-		95 => "Cazic Thule",
-		96 => "Cockatrice",
-		97 => "Daisy Man",
-		98 => "Elf Vampire",
-		99 => "Denizen",
-		100 => "Dervish",
-		101 => "Efreeti",
-		102 => "Old Froglok Tadpole",
-		103 => "Kedge",
-		104 => "Leech",
-		105 => "Swordfish",
-		106 => "Felguard",
-		107 => "Mammoth",
-		108 => "Eye of Zomm",
-		109 => "Wasp",
-		110 => "Mermaid",
-		111 => "Harpie",
-		112 => "Fayguard",
-		113 => "Drixie",
-		114 => "Ghost Ship",
-		115 => "Clam",
-		116 => "Sea Horse",
-		117 => "Ghost Dwarf",
-		118 => "Erudite Ghost",
-		119 => "Sabertooth Cat",
-		120 => "Wolf Elemental",
-		121 => "Gorgon",
-		122 => "Dragon Skeleton",
-		123 => "Innoruuk",
-		124 => "Unicorn",
-		125 => "Pegasus",
-		126 => "Djinn",
-		127 => "Invisible Man",
-		128 => "Iksar",
-		129 => "Scorpion",
-		130 => "Vah Shir",
-		131 => "Sarnak",
-		132 => "Draglock",
-		133 => "Lycanthrope",
-		134 => "Mosquito",
-		135 => "Rhino",
-		136 => "Xalgoz",
-		137 => "Kunark Goblin",
-		138 => "Yeti",
-		139 => "Iksar Citizen",
-		140 => "Forest Giant",
-		141 => "Boat",
-		142 => "UNKNOWN RACE",
-		143 => "UNKNOWN RACE",
-		144 => "Burynai",
-		145 => "Goo",
-		146 => "Spectral Sarnak",
-		147 => "Spectral Iksar",
-		148 => "Kunark Fish",
-		149 => "Iksar Scorpion",
-		150 => "Erollisi",
-		151 => "Tribunal",
-		152 => "Bertoxxulous",
-		153 => "Bristlebane",
-		154 => "Fay Drake",
-		155 => "Sarnak Skeleton",
-		156 => "Ratman",
-		157 => "Wyvern",
-		158 => "Wurm",
-		159 => "Devourer",
-		160 => "Iksar Golem",
-		161 => "Iksar Skeleton",
-		162 => "Man Eating Plant",
-		163 => "Raptor",
-		164 => "Sarnak Golem",
-		165 => "Water Dragon",
-		166 => "Iksar Hand",
-		167 => "Succulent",
-		168 => "Flying Monkey",
-		169 => "Brontotherium",
-		170 => "Snow Dervish",
-		171 => "Dire Wolf",
-		172 => "Manticore",
-		173 => "Totem",
-		174 => "Cold Spectre",
-		175 => "Enchanted Armor",
-		176 => "Snow Bunny",
-		177 => "Walrus",
-		178 => "Rock-gem Men",
-		179 => "UNKNOWN RACE",
-		180 => "UNKNOWN RACE",
-		181 => "Yak Man",
-		182 => "Faun",
-		183 => "Coldain",
-		184 => "Velious Dragons",
-		185 => "Hag",
-		186 => "Hippogriff",
-		187 => "Siren",
-		188 => "Frost Giant",
-		189 => "Storm Giant",
-		190 => "Ottermen",
-		191 => "Walrus Man",
-		192 => "Clockwork Dragon",
-		193 => "Abhorent",
-		194 => "Sea Turtle",
-		195 => "Black and White Dragons",
-		196 => "Ghost Dragon",
-		197 => "Ronnie Test",
-		198 => "Prismatic Dragon",
-		199 => "ShikNar",
-		200 => "Rockhopper",
-		201 => "Underbulk",
-		202 => "Grimling",
-		203 => "Vacuum Worm",
-		204 => "Evan Test",
-		205 => "Kahli Shah",
-		206 => "Owlbear",
-		207 => "Rhino Beetle",
-		208 => "Vampyre",
-		209 => "Earth Elemental",
-		210 => "Air Elemental",
-		211 => "Water Elemental",
-		212 => "Fire Elemental",
-		213 => "Wetfang Minnow",
-		214 => "Thought Horror",
-		215 => "Tegi",
-		216 => "Horse",
-		217 => "Shissar",
-		218 => "Fungal Fiend",
-		219 => "Vampire Volatalis",
-		220 => "StoneGrabber",
-		221 => "Scarlet Cheetah",
-		222 => "Zelniak",
-		223 => "Lightcrawler",
-		224 => "Shade",
-		225 => "Sunflower",
-		226 => "Sun Revenant",
-		227 => "Shrieker",
-		228 => "Galorian",
-		229 => "Netherbian",
-		230 => "Akheva",
-		231 => "Spire Spirit",
-		232 => "Sonic Wolf",
-		233 => "Ground Shaker",
-		234 => "Vah Shir Skeleton",
-		235 => "Mutant Humanoid",
-		236 => "Seru",
-		237 => "Recuso",
-		238 => "Vah Shir King",
-		239 => "Vah Shir Guard",
-		240 => "Teleport Man",
-		241 => "Lujein",
-		242 => "Naiad",
-		243 => "Nymph",
-		244 => "Ent",
-		245 => "Fly Man",
-		246 => "Tarew Marr",
-		247 => "Sol Ro",
-		248 => "Clockwork Golem",
-		249 => "Clockwork Brain",
-		250 => "Spectral Banshee",
-		251 => "Guard of Justice",
-		252 => "UNKNOWN RACE",
-		253 => "Disease Boss",
-		254 => "Sol Ro Guard",
-		255 => "New Bertox",
-		256 => "New Tribunal",
-		257 => "Terris Thule",
-		258 => "Vegerog",
-		259 => "Crocodile",
-		260 => "Bat",
-		261 => "Slarghilug",
-		262 => "Tranquilion",
-		263 => "Tin Soldier",
-		264 => "Nightmare Wraith",
-		265 => "Malarian",
-		266 => "Knight of Pestilence",
-		267 => "Lepertoloth",
-		268 => "Bubonian Boss",
-		269 => "Bubonian Underling",
-		270 => "Pusling",
-		271 => "Water Mephit",
-		272 => "Stormrider",
-		273 => "Junk Beast",
-		274 => "Broken Clockwork",
-		275 => "Giant Clockwork",
-		276 => "Clockwork Beetle",
-		277 => "Nightmare Goblin",
-		278 => "Karana",
-		279 => "Blood Raven",
-		280 => "Nightmare Gargoyle",
-		281 => "Mouths of Insanity",
-		282 => "Skeletal Horse",
-		283 => "Saryn",
-		284 => "Fennin Ro",
-		285 => "Tormentor",
-		286 => "Necro Priest",
-		287 => "Nightmare",
-		288 => "New Rallos Zek",
-		289 => "Vallon Zek",
-		290 => "Tallon Zek",
-		291 => "Air Mephit",
-		292 => "Earth Mephit",
-		293 => "Fire Mephit",
-		294 => "Nightmare Mephit",
-		295 => "Zebuxoruk",
-		296 => "Mithaniel Marr",
-		297 => "Undead Knight",
-		298 => "The Rathe",
-		299 => "Xegony",
-		300 => "Fiend",
-		301 => "Test Object",
-		302 => "Crab",
-		303 => "Phoenix",
-		304 => "PoP Dragon",
-		305 => "PoP Bear",
-		306 => "Storm Taarid",
-		307 => "Storm Satuur",
-		308 => "Storm Kuraaln",
-		309 => "Storm Volaas",
-		310 => "Storm Mana",
-		311 => "Storm Fire",
-		312 => "Storm Celestial",
-		313 => "War Wraith",
-		314 => "Wrulon",
-		315 => "Kraken",
-		316 => "Poison Frog",
-		317 => "Queztocoatal",
-		318 => "Valorian",
-		319 => "War Boar",
-		320 => "PoP Efreeti",
-		321 => "War Boar Unarmored",
-		322 => "Black Knight",
-		323 => "Animated Armor",
-		324 => "Undead Footman",
-		325 => "Rallos Zek Minion",
-		326 => "Arachnid",
-		327 => "Crystal Spider",
-		328 => "Zeb Cage",
-		329 => "BoT Portal",
-		330 => "Froglok",
-		331 => "Troll Buccaneer",
-		332 => "Troll Freebooter",
-		333 => "Troll Sea Rover",
-		334 => "Spectre Pirate Boss",
-		335 => "Pirate Boss",
-		336 => "Pirate Dark Shaman",
-		337 => "Pirate Officer",
-		338 => "Gnome Pirate",
-		339 => "Dark Elf Pirate",
-		340 => "Ogre Pirate",
-		341 => "Human Pirate",
-		342 => "Erudite Pirate",
-		343 => "Poison Dart Frog",
-		344 => "Troll Zombie",
-		345 => "Luggald Land",
-		346 => "Luggald Armored",
-		347 => "Luggald Robed",
-		348 => "Froglok Mount",
-		349 => "Froglok Skeleton",
-		350 => "Undead Froglok",
-		351 => "Chosen Warrior",
-		352 => "Chosen Wizard",
-		353 => "Veksar",
-		354 => "Greater Veksar",
-		355 => "Veksar Boss",
-		356 => "Chokadai",
-		357 => "Undead Chokadai",
-		358 => "Undead Veksar",
-		359 => "Vampire Lesser",
-		360 => "Vampire Elite",
-		361 => "Rujakian Orc",
-		362 => "Bone Golem",
-		363 => "Synarcana",
-		364 => "Sand Elf",
-		365 => "Vampire Master",
-		366 => "Rujakian Orc Elite",
-		367 => "Skeleton New",
-		368 => "Mummy New",
-		369 => "Goblin New",
-		370 => "Insect",
-		371 => "Froglok Ghost",
-		372 => "Dervish New",
-		373 => "Shadow Creatue",
-		374 => "Golem New",
-		375 => "Evil Eye New",
-		376 => "Box",
-		377 => "Barrel",
-		378 => "Chest",
-		379 => "Vase",
-		380 => "Table",
-		381 => "Weapons Rack",
-		382 => "Coffin",
-		383 => "Bones",
-		384 => "Jokester",
-		385 => "Talosian Nihil",
-		386 => "Talosian Exile",
-		387 => "Talosian Golem",
-		388 => "Talosian Wolf",
-		389 => "Talosian Amphibian",
-		390 => "Talosian Mountain Beast",
-		391 => "Talosian Trilobyte",
-		392 => "Invader War Hound",
-		393 => "Invader Elite Centaur",
-		394 => "Invader Lamia",
-		395 => "Invader Cyclops",
-		396 => "Kyv",
-		397 => "Invader Soldier",
-		398 => "Invader Brute",
-		399 => "Invader Force Commander",
-		400 => "Invader Lieutenant Boss",
-		401 => "Invader War Beast",
-		402 => "Invader Soldier Elite",
-		403 => "UNKNOWN RACE",
-		404 => "Discord Ship",
-*/
+#define RACE_DOUG_0 0
+#define RACE_HUMAN_1 1
+#define RACE_BARBARIAN_2 2
+#define RACE_ERUDITE_3 3
+#define RACE_WOOD_ELF_4 4
+#define RACE_HIGH_ELF_5 5
+#define RACE_DARK_ELF_6 6
+#define RACE_HALF_ELF_7 7
+#define RACE_DWARF_8 8
+#define RACE_TROLL_9 9
+#define RACE_OGRE_10 10
+#define RACE_HALFLING_11 11
+#define RACE_GNOME_12 12
+#define RACE_AVIAK_13 13
+#define RACE_WEREWOLF_14 14
+#define RACE_BROWNIE_15 15
+#define RACE_CENTAUR_16 16
+#define RACE_GOLEM_17 17
+#define RACE_GIANT_18 18
+#define RACE_TRAKANON_19 19
+#define RACE_VENRIL_SATHIR_20 20
+#define RACE_EVIL_EYE_21 21
+#define RACE_BEETLE_22 22
+#define RACE_KERRAN_23 23
+#define RACE_FISH_24 24
+#define RACE_FAIRY_25 25
+#define RACE_FROGLOK_26 26
+#define RACE_FROGLOK_GHOUL_27 27
+#define RACE_FUNGUSMAN_28 28
+#define RACE_GARGOYLE_29 29
+#define RACE_GASBAG_30 30
+#define RACE_GELATINOUS_CUBE_31 31
+#define RACE_GHOST_32 32
+#define RACE_GHOUL_33 33
+#define RACE_GIANT_BAT_34 34
+#define RACE_GIANT_EEL_35 35
+#define RACE_GIANT_RAT_36 36
+#define RACE_GIANT_SNAKE_37 37
+#define RACE_GIANT_SPIDER_38 38
+#define RACE_GNOLL_39 39
+#define RACE_GOBLIN_40 40
+#define RACE_GORILLA_41 41
+#define RACE_WOLF_42 42
+#define RACE_BEAR_43 43
+#define RACE_FREEPORT_GUARD_44 44
+#define RACE_DEMI_LICH_45 45
+#define RACE_IMP_46 46
+#define RACE_GRIFFIN_47 47
+#define RACE_KOBOLD_48 48
+#define RACE_LAVA_DRAGON_49 49
+#define RACE_LION_50 50
+#define RACE_LIZARD_MAN_51 51
+#define RACE_MIMIC_52 52
+#define RACE_MINOTAUR_53 53
+#define RACE_ORC_54 54
+#define RACE_HUMAN_BEGGAR_55 55
+#define RACE_PIXIE_56 56
+#define RACE_DRACNID_57 57
+#define RACE_SOLUSEK_RO_58 58
+#define RACE_BLOODGILL_59 59
+#define RACE_SKELETON_60 60
+#define RACE_SHARK_61 61
+#define RACE_TUNARE_62 62
+#define RACE_TIGER_63 63
+#define RACE_TREANT_64 64
+#define RACE_VAMPIRE_65 65
+#define RACE_STATUE_OF_RALLOS_ZEK_66 66
+#define RACE_HIGHPASS_CITIZEN_67 67
+#define RACE_TENTACLE_68 68
+#define RACE_WISP_69 69
+#define RACE_ZOMBIE_70 70
+#define RACE_QEYNOS_CITIZEN_71 71
+#define RACE_SHIP_72 72
+#define RACE_LAUNCH_73 73
+#define RACE_PIRANHA_74 74
+#define RACE_ELEMENTAL_75 75
+#define RACE_PUMA_76 76
+#define RACE_NERIAK_CITIZEN_77 77
+#define RACE_ERUDITE_CITIZEN_78 78
+#define RACE_BIXIE_79 79
+#define RACE_REANIMATED_HAND_80 80
+#define RACE_RIVERVALE_CITIZEN_81 81
+#define RACE_SCARECROW_82 82
+#define RACE_SKUNK_83 83
+#define RACE_SNAKE_ELEMENTAL_84 84
+#define RACE_SPECTRE_85 85
+#define RACE_SPHINX_86 86
+#define RACE_ARMADILLO_87 87
+#define RACE_CLOCKWORK_GNOME_88 88
+#define RACE_DRAKE_89 89
+#define RACE_HALAS_CITIZEN_90 90
+#define RACE_ALLIGATOR_91 91
+#define RACE_GROBB_CITIZEN_92 92
+#define RACE_OGGOK_CITIZEN_93 93
+#define RACE_KALADIM_CITIZEN_94 94
+#define RACE_CAZIC_THULE_95 95
+#define RACE_COCKATRICE_96 96
+#define RACE_DAISY_MAN_97 97
+#define RACE_ELF_VAMPIRE_98 98
+#define RACE_DENIZEN_99 99
+#define RACE_DERVISH_100 100
+#define RACE_EFREETI_101 101
+#define RACE_FROGLOK_TADPOLE_102 102
+#define RACE_PHINIGEL_AUTROPOS_103 103
+#define RACE_LEECH_104 104
+#define RACE_SWORDFISH_105 105
+#define RACE_FELGUARD_106 106
+#define RACE_MAMMOTH_107 107
+#define RACE_EYE_OF_ZOMM_108 108
+#define RACE_WASP_109 109
+#define RACE_MERMAID_110 110
+#define RACE_HARPIE_111 111
+#define RACE_FAYGUARD_112 112
+#define RACE_DRIXIE_113 113
+#define RACE_GHOST_SHIP_114 114
+#define RACE_CLAM_115 115
+#define RACE_SEA_HORSE_116 116
+#define RACE_DWARF_GHOST_117 117
+#define RACE_ERUDITE_GHOST_118 118
+#define RACE_SABERTOOTH_119 119
+#define RACE_WOLF_ELEMENTAL_120 120
+#define RACE_GORGON_121 121
+#define RACE_DRAGON_SKELETON_122 122
+#define RACE_INNORUUK_123 123
+#define RACE_UNICORN_124 124
+#define RACE_PEGASUS_125 125
+#define RACE_DJINN_126 126
+#define RACE_INVISIBLE_MAN_127 127
+#define RACE_IKSAR_128 128
+#define RACE_SCORPION_129 129
+#define RACE_VAH_SHIR_130 130
+#define RACE_SARNAK_131 131
+#define RACE_DRAGLOCK_132 132
+#define RACE_LYCANTHROPE_133 133
+#define RACE_MOSQUITO_134 134
+#define RACE_RHINO_135 135
+#define RACE_XALGOZ_136 136
+#define RACE_KUNARK_GOBLIN_137 137
+#define RACE_YETI_138 138
+#define RACE_IKSAR_CITIZEN_139 139
+#define RACE_FOREST_GIANT_140 140
+#define RACE_BOAT_141 141
+#define RACE_MINOR_ILLUSION_142 142
+#define RACE_TREE_ILLUSION_143 143
+#define RACE_BURYNAI_144 144
+#define RACE_GOO_145 145
+#define RACE_SPECTRAL_SARNAK_146 146
+#define RACE_SPECTRAL_IKSAR_147 147
+#define RACE_KUNARK_FISH_148 148
+#define RACE_IKSAR_SCORPION_149 149
+#define RACE_EROLLISI_150 150
+#define RACE_TRIBUNAL_151 151
+#define RACE_BERTOXXULOUS_152 152
+#define RACE_BRISTLEBANE_153 153
+#define RACE_FAY_DRAKE_154 154
+#define RACE_SARNAK_SKELETON_155 155
+#define RACE_RATMAN_156 156
+#define RACE_WYVERN_157 157
+#define RACE_WURM_158 158
+#define RACE_DEVOURER_159 159
+#define RACE_IKSAR_GOLEM_160 160
+#define RACE_IKSAR_SKELETON_161 161
+#define RACE_MAN_EATING_PLANT_162 162
+#define RACE_RAPTOR_163 163
+#define RACE_SARNAK_GOLEM_164 164
+#define RACE_WATER_DRAGON_165 165
+#define RACE_IKSAR_HAND_166 166
+#define RACE_SUCCULENT_167 167
+#define RACE_HOLGRESH_168 168
+#define RACE_BRONTOTHERIUM_169 169
+#define RACE_SNOW_DERVISH_170 170
+#define RACE_DIRE_WOLF_171 171
+#define RACE_MANTICORE_172 172
+#define RACE_TOTEM_173 173
+#define RACE_COLD_SPECTRE_174 174
+#define RACE_ENCHANTED_ARMOR_175 175
+#define RACE_SNOW_BUNNY_176 176
+#define RACE_WALRUS_177 177
+#define RACE_ROCK_GEM_MAN_178 178
+#define RACE_UNKNOWN179_179 179
+#define RACE_UNKNOWN180_180 180
+#define RACE_YAK_MAN_181 181
+#define RACE_FAUN_182 182
+#define RACE_COLDAIN_183 183
+#define RACE_VELIOUS_DRAGON_184 184
+#define RACE_HAG_185 185
+#define RACE_HIPPOGRIFF_186 186
+#define RACE_SIREN_187 187
+#define RACE_FROST_GIANT_188 188
+#define RACE_STORM_GIANT_189 189
+#define RACE_OTTERMAN_190 190
+#define RACE_WALRUS_MAN_191 191
+#define RACE_CLOCKWORK_DRAGON_192 192
+#define RACE_ABHORRENT_193 193
+#define RACE_SEA_TURTLE_194 194
+#define RACE_BLACK_AND_WHITE_DRAGON_195 195
+#define RACE_GHOST_DRAGON_196 196
+#define RACE_RONNIE_TEST_197 197
+#define RACE_PRISMATIC_DRAGON_198 198
+#define RACE_SHIKNAR_199 199
+#define RACE_ROCKHOPPER_200 200
+#define RACE_UNDERBULK_201 201
+#define RACE_GRIMLING_202 202
+#define RACE_VACUUM_WORM_203 203
+#define RACE_EVAN_TEST_204 204
+#define RACE_KAHLI_SHAH_205 205
+#define RACE_OWLBEAR_206 206
+#define RACE_RHINO_BEETLE_207 207
+#define RACE_VAMPYRE_208 208
+#define RACE_EARTH_ELEMENTAL_209 209
+#define RACE_AIR_ELEMENTAL_210 210
+#define RACE_WATER_ELEMENTAL_211 211
+#define RACE_FIRE_ELEMENTAL_212 212
+#define RACE_WETFANG_MINNOW_213 213
+#define RACE_THOUGHT_HORROR_214 214
+#define RACE_TEGI_215 215
+#define RACE_HORSE_216 216
+#define RACE_SHISSAR_217 217
+#define RACE_FUNGAL_FIEND_218 218
+#define RACE_VAMPIRE_VOLATALIS_219 219
+#define RACE_STONEGRABBER_220 220
+#define RACE_SCARLET_CHEETAH_221 221
+#define RACE_ZELNIAK_222 222
+#define RACE_LIGHTCRAWLER_223 223
+#define RACE_SHADE_224 224
+#define RACE_SUNFLOWER_225 225
+#define RACE_KHATI_SHA_226 226
+#define RACE_SHRIEKER_227 227
+#define RACE_GALORIAN_228 228
+#define RACE_NETHERBIAN_229 229
+#define RACE_AKHEVAN_230 230
+#define RACE_SPIRE_SPIRIT_231 231
+#define RACE_SONIC_WOLF_232 232
+#define RACE_GROUND_SHAKER_233 233
+#define RACE_VAH_SHIR_SKELETON_234 234
+#define RACE_MUTANT_HUMANOID_235 235
+#define RACE_LORD_INQUISITOR_SERU_236 236
+#define RACE_RECUSO_237 237
+#define RACE_VAH_SHIR_KING_238 238
+#define RACE_VAH_SHIR_GUARD_239 239
+#define RACE_TELEPORT_MAN_240 240
+#define RACE_LUJEIN_241 241
+#define RACE_NAIAD_242 242
+#define RACE_NYMPH_243 243
+#define RACE_ENT_244 244
+#define RACE_WRINNFLY_245 245
+#define RACE_COIRNAV_246 246
+#define RACE_SOLUSEK_RO_247 247
+#define RACE_CLOCKWORK_GOLEM_248 248
+#define RACE_CLOCKWORK_BRAIN_249 249
+#define RACE_SPECTRAL_BANSHEE_250 250
+#define RACE_GUARD_OF_JUSTICE_251 251
+#define RACE_POM_CASTLE_252 252
+#define RACE_DISEASE_BOSS_253 253
+#define RACE_SOLUSEK_RO_GUARD_254 254
+#define RACE_BERTOXXULOUS_NEW_255 255
+#define RACE_TRIBUNAL_NEW_256 256
+#define RACE_TERRIS_THULE_257 257
+#define RACE_VEGEROG_258 258
+#define RACE_CROCODILE_259 259
+#define RACE_BAT_260 260
+#define RACE_SLARGHILUG_261 261
+#define RACE_TRANQUILION_262 262
+#define RACE_TIN_SOLDIER_263 263
+#define RACE_NIGHTMARE_WRAITH_264 264
+#define RACE_MALARIAN_265 265
+#define RACE_KNIGHT_OF_PESTILENCE_266 266
+#define RACE_LEPERTOLOTH_267 267
+#define RACE_BUBONIAN_BOSS_268 268
+#define RACE_BUBONIAN_UNDERLING_269 269
+#define RACE_PUSLING_270 270
+#define RACE_WATER_MEPHIT_271 271
+#define RACE_STORMRIDER_272 272
+#define RACE_JUNK_BEAST_273 273
+#define RACE_BROKEN_CLOCKWORK_274 274
+#define RACE_GIANT_CLOCKWORK_275 275
+#define RACE_CLOCKWORK_BEETLE_276 276
+#define RACE_NIGHTMARE_GOBLIN_277 277
+#define RACE_KARANA_278 278
+#define RACE_BLOOD_RAVEN_279 279
+#define RACE_NIGHTMARE_GARGOYLE_280 280
+#define RACE_MOUTH_OF_INSANITY_281 281
+#define RACE_SKELETAL_HORSE_282 282
+#define RACE_SARYRN_283 283
+#define RACE_FENNIN_RO_284 284
+#define RACE_TORMENTOR_285 285
+#define RACE_NECROMANCER_PRIEST_286 286
+#define RACE_NIGHTMARE_287 287
+#define RACE_NEW_RALLOS_ZEK_288 288
+#define RACE_VALLON_ZEK_289 289
+#define RACE_TALLON_ZEK_290 290
+#define RACE_AIR_MEPHIT_291 291
+#define RACE_EARTH_MEPHIT_292 292
+#define RACE_FIRE_MEPHIT_293 293
+#define RACE_NIGHTMARE_MEPHIT_294 294
+#define RACE_ZEBUXORUK_295 295
+#define RACE_MITHANIEL_MARR_296 296
+#define RACE_KNIGHTMARE_RIDER_297 297
+#define RACE_RATHE_COUNCILMAN_298 298
+#define RACE_XEGONY_299 299
+#define RACE_DEMON_300 300
+#define RACE_TEST_OBJECT_301 301
+#define RACE_LOBSTER_MONSTER_302 302
+#define RACE_PHOENIX_303 303
+#define RACE_QUARM_304 304
+#define RACE_NEW_BEAR_305 305
+#define RACE_EARTH_GOLEM_306 306
+#define RACE_IRON_GOLEM_307 307
+#define RACE_STORM_GOLEM_308 308
+#define RACE_AIR_GOLEM_309 309
+#define RACE_WOOD_GOLEM_310 310
+#define RACE_FIRE_GOLEM_311 311
+#define RACE_WATER_GOLEM_312 312
+#define RACE_VEILED_GARGOYLE_313 313
+#define RACE_LYNX_314 314
+#define RACE_SQUID_315 315
+#define RACE_FROG_316 316
+#define RACE_FLYING_SERPENT_317 317
+#define RACE_TACTICS_SOLDIER_318 318
+#define RACE_ARMORED_BOAR_319 319
+#define RACE_DJINNI_320 320
+#define RACE_BOAR_321 321
+#define RACE_KNIGHT_OF_MARR_322 322
+#define RACE_ARMOR_OF_MARR_323 323
+#define RACE_NIGHTMARE_KNIGHT_324 324
+#define RACE_RALLOS_OGRE_325 325
+#define RACE_ARACHNID_326 326
+#define RACE_CRYSTAL_ARACHNID_327 327
+#define RACE_TOWER_MODEL_328 328
+#define RACE_PORTAL_329 329
+#define RACE_FROGLOK_330 330
+#define RACE_TROLL_CREW_MEMBER_331 331
+#define RACE_PIRATE_DECKHAND_332 332
+#define RACE_BROKEN_SKULL_PIRATE_333 333
+#define RACE_PIRATE_GHOST_334 334
+#define RACE_ONE_ARMED_PIRATE_335 335
+#define RACE_SPIRITMASTER_NADOX_336 336
+#define RACE_BROKEN_SKULL_TASKMASTER_337 337
+#define RACE_GNOME_PIRATE_338 338
+#define RACE_DARK_ELF_PIRATE_339 339
+#define RACE_OGRE_PIRATE_340 340
+#define RACE_HUMAN_PIRATE_341 341
+#define RACE_ERUDITE_PIRATE_342 342
+#define RACE_FROG_343 343
+#define RACE_UNDEAD_PIRATE_344 344
+#define RACE_LUGGALD_WORKER_345 345
+#define RACE_LUGGALD_SOLDIER_346 346
+#define RACE_LUGGALD_DISCIPLE_347 347
+#define RACE_DROGMOR_348 348
+#define RACE_FROGLOK_SKELETON_349 349
+#define RACE_UNDEAD_FROGLOK_350 350
+#define RACE_KNIGHT_OF_HATE_351 351
+#define RACE_WARLOCK_OF_HATE_352 352
+#define RACE_HIGHBORN_353 353
+#define RACE_HIGHBORN_DIVINER_354 354
+#define RACE_HIGHBORN_CRUSADER_355 355
+#define RACE_CHOKIDAI_356 356
+#define RACE_UNDEAD_CHOKIDAI_357 357
+#define RACE_UNDEAD_VEKSAR_358 358
+#define RACE_UNDEAD_VAMPIRE_359 359
+#define RACE_VAMPIRE_360 360
+#define RACE_RUJARKIAN_ORC_361 361
+#define RACE_BONE_GOLEM_362 362
+#define RACE_SYNARCANA_363 363
+#define RACE_SAND_ELF_364 364
+#define RACE_MASTER_VAMPIRE_365 365
+#define RACE_MASTER_ORC_366 366
+#define RACE_NEW_SKELETON_367 367
+#define RACE_CRYPT_CREEPER_368 368
+#define RACE_NEW_GOBLIN_369 369
+#define RACE_BURROWER_BUG_370 370
+#define RACE_FROGLOK_GHOST_371 371
+#define RACE_VORTEX_372 372
+#define RACE_SHADOW_373 373
+#define RACE_GOLEM_BEAST_374 374
+#define RACE_WATCHFUL_EYE_375 375
+#define RACE_BOX_376 376
+#define RACE_BARREL_377 377
+#define RACE_CHEST_378 378
+#define RACE_VASE_379 379
+#define RACE_FROZEN_TABLE_380 380
+#define RACE_WEAPON_RACK_381 381
+#define RACE_COFFIN_382 382
+#define RACE_SKULL_AND_BONES_383 383
+#define RACE_JESTER_384 384
+#define RACE_TAELOSIAN_NATIVE_385 385
+#define RACE_TAELOSIAN_EVOKER_386 386
+#define RACE_TAELOSIAN_GOLEM_387 387
+#define RACE_TAELOSIAN_WOLF_388 388
+#define RACE_TAELOSIAN_AMPHIBIAN_CREATURE_389 389
+#define RACE_TAELOSIAN_MOUNTAIN_BEAST_390 390
+#define RACE_TAELOSIAN_STONEMITE_391 391
+#define RACE_UKUN_WAR_HOUND_392 392
+#define RACE_IXT_CENTAUR_393 393
+#define RACE_IKAAV_SNAKEWOMAN_394 394
+#define RACE_ANEUK_395 395
+#define RACE_KYV_HUNTER_396 396
+#define RACE_NOC_SPRAYBLOOD_397 397
+#define RACE_RATUK_BRUTE_398 398
+#define RACE_IXT_399 399
+#define RACE_HUVUL_400 400
+#define RACE_MASTRUQ_WARFIEND_401 401
+#define RACE_MASTRUQ_402 402
+#define RACE_TAELOSIAN_403 403
+#define RACE_SHIP_404 404
+#define RACE_NEW_GOLEM_405 405
+#define RACE_OVERLORD_MATA_MURAM_406 406
+#define RACE_LIGHTING_WARRIOR_407 407
+#define RACE_SUCCUBUS_408 408
+#define RACE_BAZU_409 409
+#define RACE_FERAN_410 410
+#define RACE_PYRILEN_411 411
+#define RACE_CHIMERA_412 412
+#define RACE_DRAGORN_413 413
+#define RACE_MURKGLIDER_414 414
+#define RACE_RAT_415 415
+#define RACE_BAT_416 416
+#define RACE_GELIDRAN_417 417
+#define RACE_DISCORDLING_418 418
+#define RACE_GIRPLAN_419 419
+#define RACE_MINOTAUR_420 420
+#define RACE_DRAGORN_BOX_421 421
+#define RACE_RUNED_ORB_422 422
+#define RACE_DRAGON_BONES_423 423
+#define RACE_MURAMITE_ARMOR_PILE_424 424
+#define RACE_CRYSTAL_SHARD_425 425
+#define RACE_PORTAL_426 426
+#define RACE_COIN_PURSE_427 427
+#define RACE_ROCK_PILE_428 428
+#define RACE_MURKGLIDER_EGG_SACK_429 429
+#define RACE_DRAKE_430 430
+#define RACE_DERVISH_431 431
+#define RACE_DRAKE_432 432
+#define RACE_GOBLIN_433 433
+#define RACE_KIRIN_434 434
+#define RACE_DRAGON_435 435
+#define RACE_BASILISK_436 436
+#define RACE_DRAGON_437 437
+#define RACE_DRAGON_438 438
+#define RACE_PUMA_439 439
+#define RACE_SPIDER_440 440
+#define RACE_SPIDER_QUEEN_441 441
+#define RACE_ANIMATED_STATUE_442 442
+#define RACE_UNKNOWN443_443 443
+#define RACE_UNKNOWN444_444 444
+#define RACE_DRAGON_EGG_445 445
+#define RACE_DRAGON_STATUE_446 446
+#define RACE_LAVA_ROCK_447 447
+#define RACE_ANIMATED_STATUE_448 448
+#define RACE_SPIDER_EGG_SACK_449 449
+#define RACE_LAVA_SPIDER_450 450
+#define RACE_LAVA_SPIDER_QUEEN_451 451
+#define RACE_DRAGON_452 452
+#define RACE_GIANT_453 453
+#define RACE_WEREWOLF_454 454
+#define RACE_KOBOLD_455 455
+#define RACE_SPORALI_456 456
+#define RACE_GNOMEWORK_457 457
+#define RACE_ORC_458 458
+#define RACE_CORATHUS_459 459
+#define RACE_CORAL_460 460
+#define RACE_DRACHNID_461 461
+#define RACE_DRACHNID_COCOON_462 462
+#define RACE_FUNGUS_PATCH_463 463
+#define RACE_GARGOYLE_464 464
+#define RACE_WITHERAN_465 465
+#define RACE_DARK_LORD_466 466
+#define RACE_SHILISKIN_467 467
+#define RACE_SNAKE_468 468
+#define RACE_EVIL_EYE_469 469
+#define RACE_MINOTAUR_470 470
+#define RACE_ZOMBIE_471 471
+#define RACE_CLOCKWORK_BOAR_472 472
+#define RACE_FAIRY_473 473
+#define RACE_WITHERAN_474 474
+#define RACE_AIR_ELEMENTAL_475 475
+#define RACE_EARTH_ELEMENTAL_476 476
+#define RACE_FIRE_ELEMENTAL_477 477
+#define RACE_WATER_ELEMENTAL_478 478
+#define RACE_ALLIGATOR_479 479
+#define RACE_BEAR_480 480
+#define RACE_SCALED_WOLF_481 481
+#define RACE_WOLF_482 482
+#define RACE_SPIRIT_WOLF_483 483
+#define RACE_SKELETON_484 484
+#define RACE_SPECTRE_485 485
+#define RACE_BOLVIRK_486 486
+#define RACE_BANSHEE_487 487
+#define RACE_BANSHEE_488 488
+#define RACE_ELDDAR_489 489
+#define RACE_FOREST_GIANT_490 490
+#define RACE_BONE_GOLEM_491 491
+#define RACE_HORSE_492 492
+#define RACE_PEGASUS_493 493
+#define RACE_SHAMBLING_MOUND_494 494
+#define RACE_SCRYKIN_495 495
+#define RACE_TREANT_496 496
+#define RACE_VAMPIRE_497 497
+#define RACE_AYONAE_RO_498 498
+#define RACE_SULLON_ZEK_499 499
+#define RACE_BANNER_500 500
+#define RACE_FLAG_501 501
+#define RACE_ROWBOAT_502 502
+#define RACE_BEAR_TRAP_503 503
+#define RACE_CLOCKWORK_BOMB_504 504
+#define RACE_DYNAMITE_KEG_505 505
+#define RACE_PRESSURE_PLATE_506 506
+#define RACE_PUFFER_SPORE_507 507
+#define RACE_STONE_RING_508 508
+#define RACE_ROOT_TENTACLE_509 509
+#define RACE_RUNIC_SYMBOL_510 510
+#define RACE_SALTPETTER_BOMB_511 511
+#define RACE_FLOATING_SKULL_512 512
+#define RACE_SPIKE_TRAP_513 513
+#define RACE_TOTEM_514 514
+#define RACE_WEB_515 515
+#define RACE_WICKER_BASKET_516 516
+#define RACE_NIGHTMARE_517 517
+#define RACE_HORSE_518 518
+#define RACE_UNICORN_519 519
+#define RACE_BIXIE_520 520
+#define RACE_CENTAUR_521 521
+#define RACE_DRAKKIN_522 522
+#define RACE_GIANT_523 523
+#define RACE_GNOLL_524 524
+#define RACE_GRIFFIN_525 525
+#define RACE_GIANT_SHADE_526 526
+#define RACE_HARPY_527 527
+#define RACE_MAMMOTH_528 528
+#define RACE_SATYR_529 529
+#define RACE_DRAGON_530 530
+#define RACE_DRAGON_531 531
+#define RACE_DYNLETH_532 532
+#define RACE_BOAT_533 533
+#define RACE_WEAPON_RACK_534 534
+#define RACE_ARMOR_RACK_535 535
+#define RACE_HONEY_POT_536 536
+#define RACE_JUM_JUM_BUCKET_537 537
+#define RACE_PLANT_538 538
+#define RACE_PLANT_539 539
+#define RACE_PLANT_540 540
+#define RACE_TOOLBOX_541 541
+#define RACE_WINE_CASK_542 542
+#define RACE_STONE_JUG_543 543
+#define RACE_ELVEN_BOAT_544 544
+#define RACE_GNOMISH_BOAT_545 545
+#define RACE_BARREL_BARGE_SHIP_546 546
+#define RACE_GOO_547 547
+#define RACE_GOO_548 548
+#define RACE_GOO_549 549
+#define RACE_MERCHANT_SHIP_550 550
+#define RACE_PIRATE_SHIP_551 551
+#define RACE_GHOST_SHIP_552 552
+#define RACE_BANNER_553 553
+#define RACE_BANNER_554 554
+#define RACE_BANNER_555 555
+#define RACE_BANNER_556 556
+#define RACE_BANNER_557 557
+#define RACE_AVIAK_558 558
+#define RACE_BEETLE_559 559
+#define RACE_GORILLA_560 560
+#define RACE_KEDGE_561 561
+#define RACE_KERRAN_562 562
+#define RACE_SHISSAR_563 563
+#define RACE_SIREN_564 564
+#define RACE_SPHINX_565 565
+#define RACE_HUMAN_566 566
+#define RACE_CAMPFIRE_567 567
+#define RACE_BROWNIE_568 568
+#define RACE_DRAGON_569 569
+#define RACE_EXOSKELETON_570 570
+#define RACE_GHOUL_571 571
+#define RACE_CLOCKWORK_GUARDIAN_572 572
+#define RACE_MANTRAP_573 573
+#define RACE_MINOTAUR_574 574
+#define RACE_SCARECROW_575 575
+#define RACE_SHADE_576 576
+#define RACE_ROTOCOPTER_577 577
+#define RACE_TENTACLE_TERROR_578 578
+#define RACE_WEREORC_579 579
+#define RACE_WORG_580 580
+#define RACE_WYVERN_581 581
+#define RACE_CHIMERA_582 582
+#define RACE_KIRIN_583 583
+#define RACE_PUMA_584 584
+#define RACE_BOULDER_585 585
+#define RACE_BANNER_586 586
+#define RACE_ELVEN_GHOST_587 587
+#define RACE_HUMAN_GHOST_588 588
+#define RACE_CHEST_589 589
+#define RACE_CHEST_590 590
+#define RACE_CRYSTAL_591 591
+#define RACE_COFFIN_592 592
+#define RACE_GUARDIAN_CPU_593 593
+#define RACE_WORG_594 594
+#define RACE_MANSION_595 595
+#define RACE_FLOATING_ISLAND_596 596
+#define RACE_CRAGSLITHER_597 597
+#define RACE_WRULON_598 598
+#define RACE_SPELL_PARTICLE_1_599 599
+#define RACE_INVISIBLE_MAN_OF_ZOMM_600 600
+#define RACE_ROBOCOPTER_OF_ZOMM_601 601
+#define RACE_BURYNAI_602 602
+#define RACE_FROG_603 603
+#define RACE_DRACOLICH_604 604
+#define RACE_IKSAR_GHOST_605 605
+#define RACE_IKSAR_SKELETON_606 606
+#define RACE_MEPHIT_607 607
+#define RACE_MUDDITE_608 608
+#define RACE_RAPTOR_609 609
+#define RACE_SARNAK_610 610
+#define RACE_SCORPION_611 611
+#define RACE_TSETSIAN_612 612
+#define RACE_WURM_613 613
+#define RACE_BALROG_614 614
+#define RACE_HYDRA_CRYSTAL_615 615
+#define RACE_CRYSTAL_SPHERE_616 616
+#define RACE_GNOLL_617 617
+#define RACE_SOKOKAR_618 618
+#define RACE_STONE_PYLON_619 619
+#define RACE_DEMON_VULTURE_620 620
+#define RACE_WAGON_621 621
+#define RACE_GOD_OF_DISCORD_622 622
+#define RACE_WRULON_MOUNT_623 623
+#define RACE_OGRE_NPC_MALE_624 624
+#define RACE_SOKOKAR_MOUNT_625 625
+#define RACE_GIANT_626 626
+#define RACE_SOKOKAR_MOUNT_627 627
+#define RACE_10TH_ANNIVERSARY_BANNER_628 628
+#define RACE_10TH_ANNIVERSARY_CAKE_629 629
+#define RACE_WINE_CASK_630 630
+#define RACE_HYDRA_MOUNT_631 631
+#define RACE_HYDRA_NPC_632 632
+#define RACE_WEDDING_FLOWERS_633 633
+#define RACE_WEDDING_ARBOR_634 634
+#define RACE_WEDDING_ALTAR_635 635
+#define RACE_POWDER_KEG_636 636
+#define RACE_APEXUS_637 637
+#define RACE_BELLIKOS_638 638
+#define RACE_BRELLS_FIRST_CREATION_639 639
+#define RACE_BRELL_640 640
+#define RACE_CRYSTALSKIN_AMBULOID_641 641
+#define RACE_CLIKNAR_QUEEN_642 642
+#define RACE_CLIKNAR_SOLDIER_643 643
+#define RACE_CLIKNAR_WORKER_644 644
+#define RACE_COLDAIN_645 645
+#define RACE_COLDAIN_646 646
+#define RACE_CRYSTALSKIN_SESSILOID_647 647
+#define RACE_GENARI_648 648
+#define RACE_GIGYN_649 649
+#define RACE_GREKEN_YOUNG_ADULT_650 650
+#define RACE_GREKEN_YOUNG_651 651
+#define RACE_CLIKNAR_MOUNT_652 652
+#define RACE_TELMIRA_653 653
+#define RACE_SPIDER_MOUNT_654 654
+#define RACE_BEAR_MOUNT_655 655
+#define RACE_RAT_MOUNT_656 656
+#define RACE_SESSILOID_MOUNT_657 657
+#define RACE_MORELL_THULE_658 658
+#define RACE_MARIONETTE_659 659
+#define RACE_BOOK_DERVISH_660 660
+#define RACE_TOPIARY_LION_661 661
+#define RACE_ROTDOG_662 662
+#define RACE_AMYGDALAN_663 663
+#define RACE_SANDMAN_664 664
+#define RACE_GRANDFATHER_CLOCK_665 665
+#define RACE_GINGERBREAD_MAN_666 666
+#define RACE_BEEFEATER_667 667
+#define RACE_RABBIT_668 668
+#define RACE_BLIND_DREAMER_669 669
+#define RACE_CAZIC_THULE_670 670
+#define RACE_TOPIARY_LION_MOUNT_671 671
+#define RACE_ROT_DOG_MOUNT_672 672
+#define RACE_GORAL_MOUNT_673 673
+#define RACE_SELYRAN_MOUNT_674 674
+#define RACE_SCLERA_MOUNT_675 675
+#define RACE_BRAXY_MOUNT_676 676
+#define RACE_KANGON_MOUNT_677 677
+#define RACE_ERUDITE_678 678
+#define RACE_WURM_MOUNT_679 679
+#define RACE_RAPTOR_MOUNT_680 680
+#define RACE_INVISIBLE_MAN_681 681
+#define RACE_WHIRLIGIG_682 682
+#define RACE_GNOMISH_BALLOON_683 683
+#define RACE_GNOMISH_ROCKET_PACK_684 684
+#define RACE_GNOMISH_HOVERING_TRANSPORT_685 685
+#define RACE_SELYRAH_686 686
+#define RACE_GORAL_687 687
+#define RACE_BRAXI_688 688
+#define RACE_KANGON_689 689
+#define RACE_INVISIBLE_MAN_690 690
+#define RACE_FLOATING_TOWER_691 691
+#define RACE_EXPLOSIVE_CART_692 692
+#define RACE_BLIMP_SHIP_693 693
+#define RACE_TUMBLEWEED_694 694
+#define RACE_ALARAN_695 695
+#define RACE_SWINETOR_696 696
+#define RACE_TRIUMVIRATE_697 697
+#define RACE_HADAL_698 698
+#define RACE_HOVERING_PLATFORM_699 699
+#define RACE_PARASITIC_SCAVENGER_700 700
+#define RACE_GRENDLAEN_701 701
+#define RACE_SHIP_IN_A_BOTTLE_702 702
+#define RACE_ALARAN_SENTRY_STONE_703 703
+#define RACE_DERVISH_704 704
+#define RACE_REGENERATION_POOL_705 705
+#define RACE_TELEPORTATION_STAND_706 706
+#define RACE_RELIC_CASE_707 707
+#define RACE_ALARAN_GHOST_708 708
+#define RACE_SKYSTRIDER_709 709
+#define RACE_WATER_SPOUT_710 710
+#define RACE_AVIAK_PULL_ALONG_711 711
+#define RACE_GELATINOUS_CUBE_712 712
+#define RACE_CAT_713 713
+#define RACE_ELK_HEAD_714 714
+#define RACE_HOLGRESH_715 715
+#define RACE_BEETLE_716 716
+#define RACE_VINE_MAW_717 717
+#define RACE_RATMAN_718 718
+#define RACE_FALLEN_KNIGHT_719 719
+#define RACE_FLYING_CARPET_720 720
+#define RACE_CARRIER_HAND_721 721
+#define RACE_FALLEN_KNIGHT_722 722
+#define RACE_SERVANT_OF_SHADOW_723 723
+#define RACE_LUCLIN_724 724
+#define RACE_INTERACTIVE_OBJECT_2250 2250
 
 #endif
 

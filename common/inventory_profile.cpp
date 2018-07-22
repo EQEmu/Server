@@ -119,6 +119,21 @@ EQEmu::InventoryProfile::~InventoryProfile()
 	m_trade.clear();
 }
 
+bool EQEmu::InventoryProfile::SetInventoryVersion(versions::MobVersion inventory_version) {
+	if (!m_mob_version_set) {
+		m_mob_version = versions::ValidateMobVersion(inventory_version);
+		m_lookup = inventory::Lookup(m_mob_version);
+		m_mob_version_set = true;
+		return true;
+	}
+	else {
+		m_lookup = inventory::Lookup(versions::MobVersion::Unknown);
+		Log(Logs::General, Logs::Error, "InventoryVersion set request after initial set (old: %u, new: %u)",
+			static_cast<uint32>(m_mob_version), static_cast<uint32>(inventory_version));
+		return false;
+	}
+}
+
 void EQEmu::InventoryProfile::CleanDirty() {
 	auto iter = dirty_inst.begin();
 	while (iter != dirty_inst.end()) {
@@ -140,63 +155,63 @@ EQEmu::ItemInstance* EQEmu::InventoryProfile::GetItem(int16 slot_id) const
 	ItemInstance* result = nullptr;
 
 	// Cursor
-	if (slot_id == inventory::slotCursor) {
+	if (slot_id == invslot::slotCursor) {
 		// Cursor slot
 		result = m_cursor.peek_front();
 	}
 
 	// Non bag slots
-	else if (slot_id >= legacy::TRADE_BEGIN && slot_id <= legacy::TRADE_END) {
+	else if (slot_id >= invslot::TRADE_BEGIN && slot_id <= invslot::TRADE_END) {
 		result = _GetItem(m_trade, slot_id);
 	}
-	else if (slot_id >= legacy::SHARED_BANK_BEGIN && slot_id <= legacy::SHARED_BANK_END) {
+	else if (slot_id >= invslot::SHARED_BANK_BEGIN && slot_id <= invslot::SHARED_BANK_END) {
 		// Shared Bank slots
 		result = _GetItem(m_shbank, slot_id);
 	}
-	else if (slot_id >= legacy::BANK_BEGIN && slot_id <= legacy::BANK_END) {
+	else if (slot_id >= invslot::BANK_BEGIN && slot_id <= invslot::BANK_END) {
 		// Bank slots
 		result = _GetItem(m_bank, slot_id);
 	}
-	else if ((slot_id >= legacy::GENERAL_BEGIN && slot_id <= legacy::GENERAL_END)) {
+	else if ((slot_id >= invslot::GENERAL_BEGIN && slot_id <= invslot::GENERAL_END)) {
 		// Personal inventory slots
 		result = _GetItem(m_inv, slot_id);
 	}
-	else if ((slot_id >= legacy::EQUIPMENT_BEGIN && slot_id <= legacy::EQUIPMENT_END) ||
-		(slot_id >= legacy::TRIBUTE_BEGIN && slot_id <= legacy::TRIBUTE_END) || (slot_id == inventory::slotPowerSource)) {
+	else if ((slot_id >= invslot::EQUIPMENT_BEGIN && slot_id <= invslot::EQUIPMENT_END) ||
+		(slot_id >= invslot::TRIBUTE_BEGIN && slot_id <= invslot::TRIBUTE_END) || (slot_id == invslot::SLOT_POWER_SOURCE)) {
 		// Equippable slots (on body)
 		result = _GetItem(m_worn, slot_id);
 	}
 
 	// Inner bag slots
-	else if (slot_id >= legacy::TRADE_BAGS_BEGIN && slot_id <= legacy::TRADE_BAGS_END) {
+	else if (slot_id >= invbag::TRADE_BAGS_BEGIN && slot_id <= invbag::TRADE_BAGS_END) {
 		// Trade bag slots
 		ItemInstance* inst = _GetItem(m_trade, InventoryProfile::CalcSlotId(slot_id));
 		if (inst && inst->IsClassBag()) {
 			result = inst->GetItem(InventoryProfile::CalcBagIdx(slot_id));
 		}
 	}
-	else if (slot_id >= legacy::SHARED_BANK_BAGS_BEGIN && slot_id <= legacy::SHARED_BANK_BAGS_END) {
+	else if (slot_id >= invbag::SHARED_BANK_BAGS_BEGIN && slot_id <= invbag::SHARED_BANK_BAGS_END) {
 		// Shared Bank bag slots
 		ItemInstance* inst = _GetItem(m_shbank, InventoryProfile::CalcSlotId(slot_id));
 		if (inst && inst->IsClassBag()) {
 			result = inst->GetItem(InventoryProfile::CalcBagIdx(slot_id));
 		}
 	}
-	else if (slot_id >= legacy::BANK_BAGS_BEGIN && slot_id <= legacy::BANK_BAGS_END) {
+	else if (slot_id >= invbag::BANK_BAGS_BEGIN && slot_id <= invbag::BANK_BAGS_END) {
 		// Bank bag slots
 		ItemInstance* inst = _GetItem(m_bank, InventoryProfile::CalcSlotId(slot_id));
 		if (inst && inst->IsClassBag()) {
 			result = inst->GetItem(InventoryProfile::CalcBagIdx(slot_id));
 		}
 	}
-	else if (slot_id >= legacy::CURSOR_BAG_BEGIN && slot_id <= legacy::CURSOR_BAG_END) {
+	else if (slot_id >= invbag::CURSOR_BAG_BEGIN && slot_id <= invbag::CURSOR_BAG_END) {
 		// Cursor bag slots
 		ItemInstance* inst = m_cursor.peek_front();
 		if (inst && inst->IsClassBag()) {
 			result = inst->GetItem(InventoryProfile::CalcBagIdx(slot_id));
 		}
 	}
-	else if (slot_id >= legacy::GENERAL_BAGS_BEGIN && slot_id <= legacy::GENERAL_BAGS_END) {
+	else if (slot_id >= invbag::GENERAL_BAGS_BEGIN && slot_id <= invbag::GENERAL_BAGS_END) {
 		// Personal inventory bag slots
 		ItemInstance* inst = _GetItem(m_inv, InventoryProfile::CalcSlotId(slot_id));
 		if (inst && inst->IsClassBag()) {
@@ -232,7 +247,7 @@ int16 EQEmu::InventoryProfile::PutItem(int16 slot_id, const ItemInstance& inst)
 int16 EQEmu::InventoryProfile::PushCursor(const ItemInstance& inst)
 {
 	m_cursor.push(inst.Clone());
-	return inventory::slotCursor;
+	return invslot::slotCursor;
 }
 
 EQEmu::ItemInstance* EQEmu::InventoryProfile::GetCursorItem()
@@ -254,7 +269,7 @@ bool EQEmu::InventoryProfile::SwapItem(int16 slot_a, int16 slot_b, SwapItemFailS
 			fail_state = swapNotAllowed;
 			return false;
 		}
-		if ((slot_b >= legacy::EQUIPMENT_BEGIN && slot_b <= legacy::EQUIPMENT_END) || slot_b == inventory::slotPowerSource) {
+		if ((slot_b >= invslot::EQUIPMENT_BEGIN && slot_b <= invslot::EQUIPMENT_END) || slot_b == invslot::SLOT_POWER_SOURCE) {
 			auto item_a = inst_a->GetItem();
 			if (!item_a) {
 				fail_state = swapNullData;
@@ -280,7 +295,7 @@ bool EQEmu::InventoryProfile::SwapItem(int16 slot_a, int16 slot_b, SwapItemFailS
 			fail_state = swapNotAllowed;
 			return false;
 		}
-		if ((slot_a >= legacy::EQUIPMENT_BEGIN && slot_a <= legacy::EQUIPMENT_END) || slot_a == inventory::slotPowerSource) {
+		if ((slot_a >= invslot::EQUIPMENT_BEGIN && slot_a <= invslot::EQUIPMENT_END) || slot_a == invslot::SLOT_POWER_SOURCE) {
 			auto item_b = inst_b->GetItem();
 			if (!item_b) {
 				fail_state = swapNullData;
@@ -361,30 +376,30 @@ EQEmu::ItemInstance* EQEmu::InventoryProfile::PopItem(int16 slot_id)
 {
 	ItemInstance* p = nullptr;
 
-	if (slot_id == inventory::slotCursor) {
+	if (slot_id == invslot::slotCursor) {
 		p = m_cursor.pop();
 	}
-	else if ((slot_id >= legacy::EQUIPMENT_BEGIN && slot_id <= legacy::EQUIPMENT_END) || (slot_id == inventory::slotPowerSource)) {
+	else if ((slot_id >= invslot::EQUIPMENT_BEGIN && slot_id <= invslot::EQUIPMENT_END) || (slot_id == invslot::SLOT_POWER_SOURCE)) {
 		p = m_worn[slot_id];
 		m_worn.erase(slot_id);
 	}
-	else if ((slot_id >= legacy::GENERAL_BEGIN && slot_id <= legacy::GENERAL_END)) {
+	else if ((slot_id >= invslot::GENERAL_BEGIN && slot_id <= invslot::GENERAL_END)) {
 		p = m_inv[slot_id];
 		m_inv.erase(slot_id);
 	}
-	else if (slot_id >= legacy::TRIBUTE_BEGIN && slot_id <= legacy::TRIBUTE_END) {
+	else if (slot_id >= invslot::TRIBUTE_BEGIN && slot_id <= invslot::TRIBUTE_END) {
 		p = m_worn[slot_id];
 		m_worn.erase(slot_id);
 	}
-	else if (slot_id >= legacy::BANK_BEGIN && slot_id <= legacy::BANK_END) {
+	else if (slot_id >= invslot::BANK_BEGIN && slot_id <= invslot::BANK_END) {
 		p = m_bank[slot_id];
 		m_bank.erase(slot_id);
 	}
-	else if (slot_id >= legacy::SHARED_BANK_BEGIN && slot_id <= legacy::SHARED_BANK_END) {
+	else if (slot_id >= invslot::SHARED_BANK_BEGIN && slot_id <= invslot::SHARED_BANK_END) {
 		p = m_shbank[slot_id];
 		m_shbank.erase(slot_id);
 	}
-	else if (slot_id >= legacy::TRADE_BEGIN && slot_id <= legacy::TRADE_END) {
+	else if (slot_id >= invslot::TRADE_BEGIN && slot_id <= invslot::TRADE_END) {
 		p = m_trade[slot_id];
 		m_trade.erase(slot_id);
 	}
@@ -404,7 +419,7 @@ bool EQEmu::InventoryProfile::HasSpaceForItem(const ItemData *ItemToTry, int16 Q
 
 	if (ItemToTry->Stackable) {
 
-		for (int16 i = legacy::GENERAL_BEGIN; i <= legacy::GENERAL_END; i++) {
+		for (int16 i = invslot::GENERAL_BEGIN; i <= invslot::GENERAL_END; i++) {
 
 			ItemInstance* InvItem = GetItem(i);
 
@@ -420,9 +435,9 @@ bool EQEmu::InventoryProfile::HasSpaceForItem(const ItemData *ItemToTry, int16 Q
 			}
 			if (InvItem && InvItem->IsClassBag()) {
 
-				int16 BaseSlotID = InventoryProfile::CalcSlotId(i, inventory::containerBegin);
+				int16 BaseSlotID = InventoryProfile::CalcSlotId(i, invbag::SLOT_BEGIN);
 				uint8 BagSize = InvItem->GetItem()->BagSlots;
-				for (uint8 BagSlot = inventory::containerBegin; BagSlot < BagSize; BagSlot++) {
+				for (uint8 BagSlot = invbag::SLOT_BEGIN; BagSlot < BagSize; BagSlot++) {
 
 					InvItem = GetItem(BaseSlotID + BagSlot);
 
@@ -441,7 +456,7 @@ bool EQEmu::InventoryProfile::HasSpaceForItem(const ItemData *ItemToTry, int16 Q
 		}
 	}
 
-	for (int16 i = legacy::GENERAL_BEGIN; i <= legacy::GENERAL_END; i++) {
+	for (int16 i = invslot::GENERAL_BEGIN; i <= invslot::GENERAL_END; i++) {
 
 		ItemInstance* InvItem = GetItem(i);
 
@@ -464,11 +479,11 @@ bool EQEmu::InventoryProfile::HasSpaceForItem(const ItemData *ItemToTry, int16 Q
 		}
 		else if (InvItem->IsClassBag() && CanItemFitInContainer(ItemToTry, InvItem->GetItem())) {
 
-			int16 BaseSlotID = InventoryProfile::CalcSlotId(i, inventory::containerBegin);
+			int16 BaseSlotID = InventoryProfile::CalcSlotId(i, invbag::SLOT_BEGIN);
 
 			uint8 BagSize = InvItem->GetItem()->BagSlots;
 
-			for (uint8 BagSlot = inventory::containerBegin; BagSlot<BagSize; BagSlot++) {
+			for (uint8 BagSlot = invbag::SLOT_BEGIN; BagSlot<BagSize; BagSlot++) {
 
 				InvItem = GetItem(BaseSlotID + BagSlot);
 
@@ -647,14 +662,14 @@ int16 EQEmu::InventoryProfile::HasItemByLoreGroup(uint32 loregroup, uint8 where)
 int16 EQEmu::InventoryProfile::FindFreeSlot(bool for_bag, bool try_cursor, uint8 min_size, bool is_arrow)
 {
 	// Check basic inventory
-	for (int16 i = legacy::GENERAL_BEGIN; i <= legacy::GENERAL_END; i++) {
+	for (int16 i = invslot::GENERAL_BEGIN; i <= invslot::GENERAL_END; i++) {
 		if (!GetItem(i))
 			// Found available slot in personal inventory
 			return i;
 	}
 
 	if (!for_bag) {
-		for (int16 i = legacy::GENERAL_BEGIN; i <= legacy::GENERAL_END; i++) {
+		for (int16 i = invslot::GENERAL_BEGIN; i <= invslot::GENERAL_END; i++) {
 			const ItemInstance* inst = GetItem(i);
 			if (inst && inst->IsClassBag() && inst->GetItem()->BagSize >= min_size)
 			{
@@ -663,11 +678,11 @@ int16 EQEmu::InventoryProfile::FindFreeSlot(bool for_bag, bool try_cursor, uint8
 					continue;
 				}
 
-				int16 base_slot_id = InventoryProfile::CalcSlotId(i, inventory::containerBegin);
+				int16 base_slot_id = InventoryProfile::CalcSlotId(i, invbag::SLOT_BEGIN);
 
 				uint8 slots = inst->GetItem()->BagSlots;
 				uint8 j;
-				for (j = inventory::containerBegin; j<slots; j++) {
+				for (j = invbag::SLOT_BEGIN; j<slots; j++) {
 					if (!GetItem(base_slot_id + j)) {
 						// Found available slot within bag
 						return (base_slot_id + j);
@@ -680,7 +695,7 @@ int16 EQEmu::InventoryProfile::FindFreeSlot(bool for_bag, bool try_cursor, uint8
 	if (try_cursor) {
 		// Always room on cursor (it's a queue)
 		// (we may wish to cap this in the future)
-		return inventory::slotCursor;
+		return invslot::slotCursor;
 	}
 
 	// No available slots
@@ -694,9 +709,9 @@ int16 EQEmu::InventoryProfile::FindFreeSlotForTradeItem(const ItemInstance* inst
 	//
 	// I'll probably implement a bitmask in the new inventory system to avoid having to adjust stack bias
 
-	if ((general_start < legacy::GENERAL_BEGIN) || (general_start > legacy::GENERAL_END))
+	if ((general_start < invslot::GENERAL_BEGIN) || (general_start > invslot::GENERAL_END))
 		return INVALID_INDEX;
-	if (bag_start >= inventory::ContainerCount)
+	if (bag_start > invbag::SLOT_END)
 		return INVALID_INDEX;
 
 	if (!inst || !inst->GetID())
@@ -704,17 +719,17 @@ int16 EQEmu::InventoryProfile::FindFreeSlotForTradeItem(const ItemInstance* inst
 
 	// step 1: find room for bags (caller should really ask for slots for bags first to avoid sending them to cursor..and bag item loss)
 	if (inst->IsClassBag()) {
-		for (int16 free_slot = general_start; free_slot <= legacy::GENERAL_END; ++free_slot) {
+		for (int16 free_slot = general_start; free_slot <= invslot::GENERAL_END; ++free_slot) {
 			if (!m_inv[free_slot])
 				return free_slot;
 		}
 
-		return inventory::slotCursor; // return cursor since bags do not stack and will not fit inside other bags..yet...)
+		return invslot::slotCursor; // return cursor since bags do not stack and will not fit inside other bags..yet...)
 	}
 
 	// step 2: find partial room for stackables
 	if (inst->IsStackable()) {
-		for (int16 free_slot = general_start; free_slot <= legacy::GENERAL_END; ++free_slot) {
+		for (int16 free_slot = general_start; free_slot <= invslot::GENERAL_END; ++free_slot) {
 			const ItemInstance* main_inst = m_inv[free_slot];
 
 			if (!main_inst)
@@ -724,15 +739,15 @@ int16 EQEmu::InventoryProfile::FindFreeSlotForTradeItem(const ItemInstance* inst
 				return free_slot;
 		}
 
-		for (int16 free_slot = general_start; free_slot <= legacy::GENERAL_END; ++free_slot) {
+		for (int16 free_slot = general_start; free_slot <= invslot::GENERAL_END; ++free_slot) {
 			const ItemInstance* main_inst = m_inv[free_slot];
 
 			if (!main_inst)
 				continue;
 
 			if (main_inst->IsClassBag()) { // if item-specific containers already have bad items, we won't fix it here...
-				uint8 _bag_start = (free_slot > general_start) ? inventory::containerBegin : bag_start;
-				for (uint8 free_bag_slot = _bag_start; (free_bag_slot < main_inst->GetItem()->BagSlots) && (free_bag_slot < inventory::ContainerCount); ++free_bag_slot) {
+				uint8 _bag_start = (free_slot > general_start) ? invbag::SLOT_BEGIN : bag_start;
+				for (uint8 free_bag_slot = _bag_start; (free_bag_slot < main_inst->GetItem()->BagSlots) && (free_bag_slot <= invbag::SLOT_END); ++free_bag_slot) {
 					const ItemInstance* sub_inst = main_inst->GetItem(free_bag_slot);
 
 					if (!sub_inst)
@@ -747,14 +762,14 @@ int16 EQEmu::InventoryProfile::FindFreeSlotForTradeItem(const ItemInstance* inst
 
 	// step 3a: find room for container-specific items (ItemClassArrow)
 	if (inst->GetItem()->ItemType == item::ItemTypeArrow) {
-		for (int16 free_slot = general_start; free_slot <= legacy::GENERAL_END; ++free_slot) {
+		for (int16 free_slot = general_start; free_slot <= invslot::GENERAL_END; ++free_slot) {
 			const ItemInstance* main_inst = m_inv[free_slot];
 
 			if (!main_inst || (main_inst->GetItem()->BagType != item::BagTypeQuiver) || !main_inst->IsClassBag())
 				continue;
 
-			uint8 _bag_start = (free_slot > general_start) ? inventory::containerBegin : bag_start;
-			for (uint8 free_bag_slot = _bag_start; (free_bag_slot < main_inst->GetItem()->BagSlots) && (free_bag_slot < inventory::ContainerCount); ++free_bag_slot) {
+			uint8 _bag_start = (free_slot > general_start) ? invbag::SLOT_BEGIN : bag_start;
+			for (uint8 free_bag_slot = _bag_start; (free_bag_slot < main_inst->GetItem()->BagSlots) && (free_bag_slot <= invbag::SLOT_END); ++free_bag_slot) {
 				if (!main_inst->GetItem(free_bag_slot))
 					return InventoryProfile::CalcSlotId(free_slot, free_bag_slot);
 			}
@@ -763,14 +778,14 @@ int16 EQEmu::InventoryProfile::FindFreeSlotForTradeItem(const ItemInstance* inst
 
 	// step 3b: find room for container-specific items (ItemClassSmallThrowing)
 	if (inst->GetItem()->ItemType == item::ItemTypeSmallThrowing) {
-		for (int16 free_slot = general_start; free_slot <= legacy::GENERAL_END; ++free_slot) {
+		for (int16 free_slot = general_start; free_slot <= invslot::GENERAL_END; ++free_slot) {
 			const ItemInstance* main_inst = m_inv[free_slot];
 
 			if (!main_inst || (main_inst->GetItem()->BagType != item::BagTypeBandolier) || !main_inst->IsClassBag())
 				continue;
 
-			uint8 _bag_start = (free_slot > general_start) ? inventory::containerBegin : bag_start;
-			for (uint8 free_bag_slot = _bag_start; (free_bag_slot < main_inst->GetItem()->BagSlots) && (free_bag_slot < inventory::ContainerCount); ++free_bag_slot) {
+			uint8 _bag_start = (free_slot > general_start) ? invbag::SLOT_BEGIN : bag_start;
+			for (uint8 free_bag_slot = _bag_start; (free_bag_slot < main_inst->GetItem()->BagSlots) && (free_bag_slot <= invbag::SLOT_END); ++free_bag_slot) {
 				if (!main_inst->GetItem(free_bag_slot))
 					return InventoryProfile::CalcSlotId(free_slot, free_bag_slot);
 			}
@@ -778,22 +793,22 @@ int16 EQEmu::InventoryProfile::FindFreeSlotForTradeItem(const ItemInstance* inst
 	}
 
 	// step 4: just find an empty slot
-	for (int16 free_slot = general_start; free_slot <= legacy::GENERAL_END; ++free_slot) {
+	for (int16 free_slot = general_start; free_slot <= invslot::GENERAL_END; ++free_slot) {
 		const ItemInstance* main_inst = m_inv[free_slot];
 
 		if (!main_inst)
 			return free_slot;
 	}
 
-	for (int16 free_slot = general_start; free_slot <= legacy::GENERAL_END; ++free_slot) {
+	for (int16 free_slot = general_start; free_slot <= invslot::GENERAL_END; ++free_slot) {
 		const ItemInstance* main_inst = m_inv[free_slot];
 
 		if (main_inst && main_inst->IsClassBag()) {
 			if ((main_inst->GetItem()->BagSize < inst->GetItem()->Size) || (main_inst->GetItem()->BagType == item::BagTypeBandolier) || (main_inst->GetItem()->BagType == item::BagTypeQuiver))
 				continue;
 
-			uint8 _bag_start = (free_slot > general_start) ? inventory::containerBegin : bag_start;
-			for (uint8 free_bag_slot = _bag_start; (free_bag_slot < main_inst->GetItem()->BagSlots) && (free_bag_slot < inventory::ContainerCount); ++free_bag_slot) {
+			uint8 _bag_start = (free_slot > general_start) ? invbag::SLOT_BEGIN : bag_start;
+			for (uint8 free_bag_slot = _bag_start; (free_bag_slot < main_inst->GetItem()->BagSlots) && (free_bag_slot <= invbag::SLOT_END); ++free_bag_slot) {
 				if (!main_inst->GetItem(free_bag_slot))
 					return InventoryProfile::CalcSlotId(free_slot, free_bag_slot);
 			}
@@ -801,7 +816,7 @@ int16 EQEmu::InventoryProfile::FindFreeSlotForTradeItem(const ItemInstance* inst
 	}
 
 	//return INVALID_INDEX; // everything else pushes to the cursor
-	return inventory::slotCursor;
+	return invslot::slotCursor;
 }
 
 // Opposite of below: Get parent bag slot_id from a slot inside of bag
@@ -813,20 +828,20 @@ int16 EQEmu::InventoryProfile::CalcSlotId(int16 slot_id) {
 	//	parent_slot_id = EmuConstants::BANK_BEGIN + (slot_id - EmuConstants::BANK_BEGIN) / EmuConstants::ITEM_CONTAINER_SIZE;
 	//else if (slot_id >= 3100 && slot_id <= 3179) should be {3031..3110}..where did this range come from!!? (verified db save range)
 	
-	if (slot_id >= legacy::GENERAL_BAGS_BEGIN && slot_id <= legacy::GENERAL_BAGS_END) {
-		parent_slot_id = legacy::GENERAL_BEGIN + (slot_id - legacy::GENERAL_BAGS_BEGIN) / inventory::ContainerCount;
+	if (slot_id >= invbag::GENERAL_BAGS_BEGIN && slot_id <= invbag::GENERAL_BAGS_END) {
+		parent_slot_id = invslot::GENERAL_BEGIN + (slot_id - invbag::GENERAL_BAGS_BEGIN) / invbag::SLOT_COUNT;
 	}
-	else if (slot_id >= legacy::CURSOR_BAG_BEGIN && slot_id <= legacy::CURSOR_BAG_END) {
-		parent_slot_id = inventory::slotCursor;
+	else if (slot_id >= invbag::CURSOR_BAG_BEGIN && slot_id <= invbag::CURSOR_BAG_END) {
+		parent_slot_id = invslot::slotCursor;
 	}
-	else if (slot_id >= legacy::BANK_BAGS_BEGIN && slot_id <= legacy::BANK_BAGS_END) {
-		parent_slot_id = legacy::BANK_BEGIN + (slot_id - legacy::BANK_BAGS_BEGIN) / inventory::ContainerCount;
+	else if (slot_id >= invbag::BANK_BAGS_BEGIN && slot_id <= invbag::BANK_BAGS_END) {
+		parent_slot_id = invslot::BANK_BEGIN + (slot_id - invbag::BANK_BAGS_BEGIN) / invbag::SLOT_COUNT;
 	}
-	else if (slot_id >= legacy::SHARED_BANK_BAGS_BEGIN && slot_id <= legacy::SHARED_BANK_BAGS_END) {
-		parent_slot_id = legacy::SHARED_BANK_BEGIN + (slot_id - legacy::SHARED_BANK_BAGS_BEGIN) / inventory::ContainerCount;
+	else if (slot_id >= invbag::SHARED_BANK_BAGS_BEGIN && slot_id <= invbag::SHARED_BANK_BAGS_END) {
+		parent_slot_id = invslot::SHARED_BANK_BEGIN + (slot_id - invbag::SHARED_BANK_BAGS_BEGIN) / invbag::SLOT_COUNT;
 	}
-	else if (slot_id >= legacy::TRADE_BAGS_BEGIN && slot_id <= legacy::TRADE_BAGS_END) {
-		parent_slot_id = legacy::TRADE_BEGIN + (slot_id - legacy::TRADE_BAGS_BEGIN) / inventory::ContainerCount;
+	else if (slot_id >= invbag::TRADE_BAGS_BEGIN && slot_id <= invbag::TRADE_BAGS_END) {
+		parent_slot_id = invslot::TRADE_BEGIN + (slot_id - invbag::TRADE_BAGS_BEGIN) / invbag::SLOT_COUNT;
 	}
 
 	return parent_slot_id;
@@ -839,20 +854,20 @@ int16 EQEmu::InventoryProfile::CalcSlotId(int16 bagslot_id, uint8 bagidx) {
 
 	int16 slot_id = INVALID_INDEX;
 
-	if (bagslot_id == inventory::slotCursor || bagslot_id == 8000) {
-		slot_id = legacy::CURSOR_BAG_BEGIN + bagidx;
+	if (bagslot_id == invslot::slotCursor || bagslot_id == 8000) {
+		slot_id = invbag::CURSOR_BAG_BEGIN + bagidx;
 	}
-	else if (bagslot_id >= legacy::GENERAL_BEGIN && bagslot_id <= legacy::GENERAL_END) {
-		slot_id = legacy::GENERAL_BAGS_BEGIN + (bagslot_id - legacy::GENERAL_BEGIN) * inventory::ContainerCount + bagidx;
+	else if (bagslot_id >= invslot::GENERAL_BEGIN && bagslot_id <= invslot::GENERAL_END) {
+		slot_id = invbag::GENERAL_BAGS_BEGIN + (bagslot_id - invslot::GENERAL_BEGIN) * invbag::SLOT_COUNT + bagidx;
 	}
-	else if (bagslot_id >= legacy::BANK_BEGIN && bagslot_id <= legacy::BANK_END) {
-		slot_id = legacy::BANK_BAGS_BEGIN + (bagslot_id - legacy::BANK_BEGIN) * inventory::ContainerCount + bagidx;
+	else if (bagslot_id >= invslot::BANK_BEGIN && bagslot_id <= invslot::BANK_END) {
+		slot_id = invbag::BANK_BAGS_BEGIN + (bagslot_id - invslot::BANK_BEGIN) * invbag::SLOT_COUNT + bagidx;
 	}
-	else if (bagslot_id >= legacy::SHARED_BANK_BEGIN && bagslot_id <= legacy::SHARED_BANK_END) {
-		slot_id = legacy::SHARED_BANK_BAGS_BEGIN + (bagslot_id - legacy::SHARED_BANK_BEGIN) * inventory::ContainerCount + bagidx;
+	else if (bagslot_id >= invslot::SHARED_BANK_BEGIN && bagslot_id <= invslot::SHARED_BANK_END) {
+		slot_id = invbag::SHARED_BANK_BAGS_BEGIN + (bagslot_id - invslot::SHARED_BANK_BEGIN) * invbag::SLOT_COUNT + bagidx;
 	}
-	else if (bagslot_id >= legacy::TRADE_BEGIN && bagslot_id <= legacy::TRADE_END) {
-		slot_id = legacy::TRADE_BAGS_BEGIN + (bagslot_id - legacy::TRADE_BEGIN) * inventory::ContainerCount + bagidx;
+	else if (bagslot_id >= invslot::TRADE_BEGIN && bagslot_id <= invslot::TRADE_END) {
+		slot_id = invbag::TRADE_BAGS_BEGIN + (bagslot_id - invslot::TRADE_BEGIN) * invbag::SLOT_COUNT + bagidx;
 	}
 
 	return slot_id;
@@ -865,23 +880,23 @@ uint8 EQEmu::InventoryProfile::CalcBagIdx(int16 slot_id) {
 	//else if (slot_id >= EmuConstants::BANK_BEGIN && slot_id <= EmuConstants::BANK_END)
 	//	index = (slot_id - EmuConstants::BANK_BEGIN) % EmuConstants::ITEM_CONTAINER_SIZE;
 
-	if (slot_id >= legacy::GENERAL_BAGS_BEGIN && slot_id <= legacy::GENERAL_BAGS_END) {
-		index = (slot_id - legacy::GENERAL_BAGS_BEGIN) % inventory::ContainerCount;
+	if (slot_id >= invbag::GENERAL_BAGS_BEGIN && slot_id <= invbag::GENERAL_BAGS_END) {
+		index = (slot_id - invbag::GENERAL_BAGS_BEGIN) % invbag::SLOT_COUNT;
 	}
-	else if (slot_id >= legacy::CURSOR_BAG_BEGIN && slot_id <= legacy::CURSOR_BAG_END) {
-		index = (slot_id - legacy::CURSOR_BAG_BEGIN); // % inventory::ContainerCount; - not needed since range is 10 slots
+	else if (slot_id >= invbag::CURSOR_BAG_BEGIN && slot_id <= invbag::CURSOR_BAG_END) {
+		index = (slot_id - invbag::CURSOR_BAG_BEGIN); // % invbag::SLOT_COUNT; - not needed since range is 10 slots
 	}
-	else if (slot_id >= legacy::BANK_BAGS_BEGIN && slot_id <= legacy::BANK_BAGS_END) {
-		index = (slot_id - legacy::BANK_BAGS_BEGIN) % inventory::ContainerCount;
+	else if (slot_id >= invbag::BANK_BAGS_BEGIN && slot_id <= invbag::BANK_BAGS_END) {
+		index = (slot_id - invbag::BANK_BAGS_BEGIN) % invbag::SLOT_COUNT;
 	}
-	else if (slot_id >= legacy::SHARED_BANK_BAGS_BEGIN && slot_id <= legacy::SHARED_BANK_BAGS_END) {
-		index = (slot_id - legacy::SHARED_BANK_BAGS_BEGIN) % inventory::ContainerCount;
+	else if (slot_id >= invbag::SHARED_BANK_BAGS_BEGIN && slot_id <= invbag::SHARED_BANK_BAGS_END) {
+		index = (slot_id - invbag::SHARED_BANK_BAGS_BEGIN) % invbag::SLOT_COUNT;
 	}
-	else if (slot_id >= legacy::TRADE_BAGS_BEGIN && slot_id <= legacy::TRADE_BAGS_END) {
-		index = (slot_id - legacy::TRADE_BAGS_BEGIN) % inventory::ContainerCount;
+	else if (slot_id >= invbag::TRADE_BAGS_BEGIN && slot_id <= invbag::TRADE_BAGS_END) {
+		index = (slot_id - invbag::TRADE_BAGS_BEGIN) % invbag::SLOT_COUNT;
 	}
-	else if (slot_id >= legacy::WORLD_BEGIN && slot_id <= legacy::WORLD_END) {
-		index = (slot_id - legacy::WORLD_BEGIN); // % inventory::ContainerCount; - not needed since range is 10 slots
+	else if (slot_id >= invslot::WORLD_BEGIN && slot_id <= invslot::WORLD_END) {
+		index = (slot_id - invslot::WORLD_BEGIN); // % invbag::SLOT_COUNT; - not needed since range is 10 slots
 	}
 
 	return index;
@@ -892,23 +907,23 @@ int16 EQEmu::InventoryProfile::CalcSlotFromMaterial(uint8 material)
 	switch (material)
 	{
 	case textures::armorHead:
-		return inventory::slotHead;
+		return invslot::slotHead;
 	case textures::armorChest:
-		return inventory::slotChest;
+		return invslot::slotChest;
 	case textures::armorArms:
-		return inventory::slotArms;
+		return invslot::slotArms;
 	case textures::armorWrist:
-		return inventory::slotWrist1;	// there's 2 bracers, only one bracer material
+		return invslot::slotWrist1;	// there's 2 bracers, only one bracer material
 	case textures::armorHands:
-		return inventory::slotHands;
+		return invslot::slotHands;
 	case textures::armorLegs:
-		return inventory::slotLegs;
+		return invslot::slotLegs;
 	case textures::armorFeet:
-		return inventory::slotFeet;
+		return invslot::slotFeet;
 	case textures::weaponPrimary:
-		return inventory::slotPrimary;
+		return invslot::slotPrimary;
 	case textures::weaponSecondary:
-		return inventory::slotSecondary;
+		return invslot::slotSecondary;
 	default:
 		return INVALID_INDEX;
 	}
@@ -918,24 +933,24 @@ uint8 EQEmu::InventoryProfile::CalcMaterialFromSlot(int16 equipslot)
 {
 	switch (equipslot)
 	{
-	case inventory::slotHead:
+	case invslot::slotHead:
 		return textures::armorHead;
-	case inventory::slotChest:
+	case invslot::slotChest:
 		return textures::armorChest;
-	case inventory::slotArms:
+	case invslot::slotArms:
 		return textures::armorArms;
-	case inventory::slotWrist1:
+	case invslot::slotWrist1:
 	//case SLOT_BRACER02: // non-live behavior
 		return textures::armorWrist;
-	case inventory::slotHands:
+	case invslot::slotHands:
 		return textures::armorHands;
-	case inventory::slotLegs:
+	case invslot::slotLegs:
 		return textures::armorLegs;
-	case inventory::slotFeet:
+	case invslot::slotFeet:
 		return textures::armorFeet;
-	case inventory::slotPrimary:
+	case invslot::slotPrimary:
 		return textures::weaponPrimary;
-	case inventory::slotSecondary:
+	case invslot::slotSecondary:
 		return textures::weaponSecondary;
 	default:
 		return textures::materialInvalid;
@@ -962,11 +977,11 @@ bool EQEmu::InventoryProfile::CanItemFitInContainer(const ItemData *ItemToTry, c
 bool EQEmu::InventoryProfile::SupportsClickCasting(int16 slot_id)
 {
 	// there are a few non-potion items that identify as ItemTypePotion..so, we still need to ubiquitously include the equipment range
-	if ((uint16)slot_id <= legacy::GENERAL_END || slot_id == inventory::slotPowerSource)
+	if ((uint16)slot_id <= invslot::GENERAL_END || slot_id == invslot::SLOT_POWER_SOURCE)
 	{
 		return true;
 	}
-	else if (slot_id >= legacy::GENERAL_BAGS_BEGIN && slot_id <= legacy::GENERAL_BAGS_END)
+	else if (slot_id >= invbag::GENERAL_BAGS_BEGIN && slot_id <= invbag::GENERAL_BAGS_END)
 	{
 		if (inventory::Lookup(m_mob_version)->AllowClickCastFromBag)
 			return true;
@@ -977,7 +992,7 @@ bool EQEmu::InventoryProfile::SupportsClickCasting(int16 slot_id)
 
 bool EQEmu::InventoryProfile::SupportsPotionBeltCasting(int16 slot_id)
 {
-	if ((uint16)slot_id <= legacy::GENERAL_END || slot_id == inventory::slotPowerSource || (slot_id >= legacy::GENERAL_BAGS_BEGIN && slot_id <= legacy::GENERAL_BAGS_END))
+	if ((uint16)slot_id <= invslot::GENERAL_END || slot_id == invslot::SLOT_POWER_SOURCE || (slot_id >= invbag::GENERAL_BAGS_BEGIN && slot_id <= invbag::GENERAL_BAGS_END))
 		return true;
 
 	return false;
@@ -986,11 +1001,11 @@ bool EQEmu::InventoryProfile::SupportsPotionBeltCasting(int16 slot_id)
 // Test whether a given slot can support a container item
 bool EQEmu::InventoryProfile::SupportsContainers(int16 slot_id)
 {
-	if ((slot_id == inventory::slotCursor) ||
-		(slot_id >= legacy::GENERAL_BEGIN && slot_id <= legacy::GENERAL_END) ||
-		(slot_id >= legacy::BANK_BEGIN && slot_id <= legacy::BANK_END) ||
-		(slot_id >= legacy::SHARED_BANK_BEGIN && slot_id <= legacy::SHARED_BANK_END) ||
-		(slot_id >= legacy::TRADE_BEGIN && slot_id <= legacy::TRADE_END)
+	if ((slot_id == invslot::slotCursor) ||
+		(slot_id >= invslot::GENERAL_BEGIN && slot_id <= invslot::GENERAL_END) ||
+		(slot_id >= invslot::BANK_BEGIN && slot_id <= invslot::BANK_END) ||
+		(slot_id >= invslot::SHARED_BANK_BEGIN && slot_id <= invslot::SHARED_BANK_END) ||
+		(slot_id >= invslot::TRADE_BEGIN && slot_id <= invslot::TRADE_END)
 		) {
 		return true;
 	}
@@ -1028,7 +1043,7 @@ int EQEmu::InventoryProfile::GetSlotByItemInst(ItemInstance *inst) {
 	}
 
 	if (m_cursor.peek_front() == inst) {
-		return inventory::slotCursor;
+		return invslot::slotCursor;
 	}
 
 	return INVALID_INDEX;
@@ -1039,8 +1054,8 @@ uint8 EQEmu::InventoryProfile::FindBrightestLightType()
 	uint8 brightest_light_type = 0;
 
 	for (auto iter = m_worn.begin(); iter != m_worn.end(); ++iter) {
-		if ((iter->first < legacy::EQUIPMENT_BEGIN || iter->first > legacy::EQUIPMENT_END) && iter->first != inventory::slotPowerSource) { continue; }
-		if (iter->first == inventory::slotAmmo) { continue; }
+		if ((iter->first < invslot::EQUIPMENT_BEGIN || iter->first > invslot::EQUIPMENT_END) && iter->first != invslot::SLOT_POWER_SOURCE) { continue; }
+		if (iter->first == invslot::slotAmmo) { continue; }
 
 		auto inst = iter->second;
 		if (inst == nullptr) { continue; }
@@ -1053,7 +1068,7 @@ uint8 EQEmu::InventoryProfile::FindBrightestLightType()
 
 	uint8 general_light_type = 0;
 	for (auto iter = m_inv.begin(); iter != m_inv.end(); ++iter) {
-		if (iter->first < legacy::GENERAL_BEGIN || iter->first > legacy::GENERAL_END) { continue; }
+		if (iter->first < invslot::GENERAL_BEGIN || iter->first > invslot::GENERAL_END) { continue; }
 
 		auto inst = iter->second;
 		if (inst == nullptr) { continue; }
@@ -1184,33 +1199,33 @@ int16 EQEmu::InventoryProfile::_PutItem(int16 slot_id, ItemInstance* inst)
 	int16 result = INVALID_INDEX;
 	int16 parentSlot = INVALID_INDEX;
 
-	if (slot_id == inventory::slotCursor) {
+	if (slot_id == invslot::slotCursor) {
 		// Replace current item on cursor, if exists
 		m_cursor.pop(); // no memory delete, clients of this function know what they are doing
 		m_cursor.push_front(inst);
 		result = slot_id;
 	}
-	else if ((slot_id >= legacy::EQUIPMENT_BEGIN && slot_id <= legacy::EQUIPMENT_END) || (slot_id == inventory::slotPowerSource)) {
+	else if ((slot_id >= invslot::EQUIPMENT_BEGIN && slot_id <= invslot::EQUIPMENT_END) || (slot_id == invslot::SLOT_POWER_SOURCE)) {
 		m_worn[slot_id] = inst;
 		result = slot_id;
 	}
-	else if ((slot_id >= legacy::GENERAL_BEGIN && slot_id <= legacy::GENERAL_END)) {
+	else if ((slot_id >= invslot::GENERAL_BEGIN && slot_id <= invslot::GENERAL_END)) {
 		m_inv[slot_id] = inst;
 		result = slot_id;
 	}
-	else if (slot_id >= legacy::TRIBUTE_BEGIN && slot_id <= legacy::TRIBUTE_END) {
+	else if (slot_id >= invslot::TRIBUTE_BEGIN && slot_id <= invslot::TRIBUTE_END) {
 		m_worn[slot_id] = inst;
 		result = slot_id;
 	}
-	else if (slot_id >= legacy::BANK_BEGIN && slot_id <= legacy::BANK_END) {
+	else if (slot_id >= invslot::BANK_BEGIN && slot_id <= invslot::BANK_END) {
 		m_bank[slot_id] = inst;
 		result = slot_id;
 	}
-	else if (slot_id >= legacy::SHARED_BANK_BEGIN && slot_id <= legacy::SHARED_BANK_END) {
+	else if (slot_id >= invslot::SHARED_BANK_BEGIN && slot_id <= invslot::SHARED_BANK_END) {
 		m_shbank[slot_id] = inst;
 		result = slot_id;
 	}
-	else if (slot_id >= legacy::TRADE_BEGIN && slot_id <= legacy::TRADE_END) {
+	else if (slot_id >= invslot::TRADE_BEGIN && slot_id <= invslot::TRADE_END) {
 		m_trade[slot_id] = inst;
 		result = slot_id;
 	}
@@ -1248,7 +1263,7 @@ int16 EQEmu::InventoryProfile::_HasItem(std::map<int16, ItemInstance*>& bucket, 
 				return iter->first;
 		}
 
-		for (int index = inventory::socketBegin; index < inventory::SocketCount; ++index) {
+		for (int index = invaug::SOCKET_BEGIN; index <= invaug::SOCKET_END; ++index) {
 			if (inst->GetAugmentItemID(index) == item_id && quantity <= 1)
 				return legacy::SLOT_AUGMENT;
 		}
@@ -1265,7 +1280,7 @@ int16 EQEmu::InventoryProfile::_HasItem(std::map<int16, ItemInstance*>& bucket, 
 					return InventoryProfile::CalcSlotId(iter->first, bag_iter->first);
 			}
 
-			for (int index = inventory::socketBegin; index < inventory::SocketCount; ++index) {
+			for (int index = invaug::SOCKET_BEGIN; index <= invaug::SOCKET_END; ++index) {
 				if (bag_inst->GetAugmentItemID(index) == item_id && quantity <= 1)
 					return legacy::SLOT_AUGMENT;
 			}
@@ -1293,10 +1308,10 @@ int16 EQEmu::InventoryProfile::_HasItem(ItemInstQueue& iqueue, uint32 item_id, u
 		if (inst->GetID() == item_id) {
 			quantity_found += (inst->GetCharges() <= 0) ? 1 : inst->GetCharges();
 			if (quantity_found >= quantity)
-				return inventory::slotCursor;
+				return invslot::slotCursor;
 		}
 
-		for (int index = inventory::socketBegin; index < inventory::SocketCount; ++index) {
+		for (int index = invaug::SOCKET_BEGIN; index <= invaug::SOCKET_END; ++index) {
 			if (inst->GetAugmentItemID(index) == item_id && quantity <= 1)
 				return legacy::SLOT_AUGMENT;
 		}
@@ -1310,10 +1325,10 @@ int16 EQEmu::InventoryProfile::_HasItem(ItemInstQueue& iqueue, uint32 item_id, u
 			if (bag_inst->GetID() == item_id) {
 				quantity_found += (bag_inst->GetCharges() <= 0) ? 1 : bag_inst->GetCharges();
 				if (quantity_found >= quantity)
-					return InventoryProfile::CalcSlotId(inventory::slotCursor, bag_iter->first);
+					return InventoryProfile::CalcSlotId(invslot::slotCursor, bag_iter->first);
 			}
 
-			for (int index = inventory::socketBegin; index < inventory::SocketCount; ++index) {
+			for (int index = invaug::SOCKET_BEGIN; index <= invaug::SOCKET_END; ++index) {
 				if (bag_inst->GetAugmentItemID(index) == item_id && quantity <= 1)
 					return legacy::SLOT_AUGMENT;
 			}
@@ -1370,7 +1385,7 @@ int16 EQEmu::InventoryProfile::_HasItemByUse(ItemInstQueue& iqueue, uint8 use, u
 		if (inst->IsClassCommon() && inst->GetItem()->ItemType == use) {
 			quantity_found += (inst->GetCharges() <= 0) ? 1 : inst->GetCharges();
 			if (quantity_found >= quantity)
-				return inventory::slotCursor;
+				return invslot::slotCursor;
 		}
 
 		if (!inst->IsClassBag()) { continue; }
@@ -1382,7 +1397,7 @@ int16 EQEmu::InventoryProfile::_HasItemByUse(ItemInstQueue& iqueue, uint8 use, u
 			if (bag_inst->IsClassCommon() && bag_inst->GetItem()->ItemType == use) {
 				quantity_found += (bag_inst->GetCharges() <= 0) ? 1 : bag_inst->GetCharges();
 				if (quantity_found >= quantity)
-					return InventoryProfile::CalcSlotId(inventory::slotCursor, bag_iter->first);
+					return InventoryProfile::CalcSlotId(invslot::slotCursor, bag_iter->first);
 			}
 		}
 
@@ -1402,7 +1417,7 @@ int16 EQEmu::InventoryProfile::_HasItemByLoreGroup(std::map<int16, ItemInstance*
 		if (inst->GetItem()->LoreGroup == loregroup)
 			return iter->first;
 
-		for (int index = inventory::socketBegin; index < inventory::SocketCount; ++index) {
+		for (int index = invaug::SOCKET_BEGIN; index <= invaug::SOCKET_END; ++index) {
 			auto aug_inst = inst->GetAugment(index);
 			if (aug_inst == nullptr) { continue; }
 
@@ -1419,7 +1434,7 @@ int16 EQEmu::InventoryProfile::_HasItemByLoreGroup(std::map<int16, ItemInstance*
 			if (bag_inst->IsClassCommon() && bag_inst->GetItem()->LoreGroup == loregroup)
 				return InventoryProfile::CalcSlotId(iter->first, bag_iter->first);
 
-			for (int index = inventory::socketBegin; index < inventory::SocketCount; ++index) {
+			for (int index = invaug::SOCKET_BEGIN; index <= invaug::SOCKET_END; ++index) {
 				auto aug_inst = bag_inst->GetAugment(index);
 				if (aug_inst == nullptr) { continue; }
 
@@ -1440,9 +1455,9 @@ int16 EQEmu::InventoryProfile::_HasItemByLoreGroup(ItemInstQueue& iqueue, uint32
 		if (inst == nullptr) { continue; }
 
 		if (inst->GetItem()->LoreGroup == loregroup)
-			return inventory::slotCursor;
+			return invslot::slotCursor;
 
-		for (int index = inventory::socketBegin; index < inventory::SocketCount; ++index) {
+		for (int index = invaug::SOCKET_BEGIN; index <= invaug::SOCKET_END; ++index) {
 			auto aug_inst = inst->GetAugment(index);
 			if (aug_inst == nullptr) { continue; }
 
@@ -1457,9 +1472,9 @@ int16 EQEmu::InventoryProfile::_HasItemByLoreGroup(ItemInstQueue& iqueue, uint32
 			if (bag_inst == nullptr) { continue; }
 
 			if (bag_inst->IsClassCommon() && bag_inst->GetItem()->LoreGroup == loregroup)
-				return InventoryProfile::CalcSlotId(inventory::slotCursor, bag_iter->first);
+				return InventoryProfile::CalcSlotId(invslot::slotCursor, bag_iter->first);
 
-			for (int index = inventory::socketBegin; index < inventory::SocketCount; ++index) {
+			for (int index = invaug::SOCKET_BEGIN; index <= invaug::SOCKET_END; ++index) {
 				auto aug_inst = bag_inst->GetAugment(index);
 				if (aug_inst == nullptr) { continue; }
 

@@ -655,7 +655,7 @@ struct BandolierItem_Struct
 struct Bandolier_Struct
 {
 	char Name[32];
-	BandolierItem_Struct Items[profile::BandolierItemCount];
+	BandolierItem_Struct Items[profile::BANDOLIER_ITEM_COUNT];
 };
 
 //len = 72
@@ -669,7 +669,7 @@ struct PotionBeltItem_Struct
 //len = 288
 struct PotionBelt_Struct
 {
-	PotionBeltItem_Struct Items[profile::PotionBeltSize];
+	PotionBeltItem_Struct Items[profile::POTION_BELT_SIZE];
 };
 
 static const uint32 MAX_GROUP_LEADERSHIP_AA_ARRAY = 16;
@@ -875,7 +875,7 @@ struct PlayerProfile_Struct
 /*06152*/ uint32  aapoints_spent;           // Number of spent AA points
 /*06156*/ uint32  aapoints;         // Unspent AA points
 /*06160*/ uint8 unknown06160[4];
-/*06164*/ Bandolier_Struct bandoliers[profile::BandoliersSize]; // bandolier contents
+/*06164*/ Bandolier_Struct bandoliers[profile::BANDOLIERS_SIZE]; // bandolier contents
 /*07444*/ uint8 unknown07444[5120];
 /*12564*/ PotionBelt_Struct  potionbelt; // potion belt
 /*12852*/ uint8 unknown12852[8];

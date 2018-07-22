@@ -19,6 +19,7 @@ SET(zone_sources
 	client_process.cpp
 	command.cpp
 	corpse.cpp
+	data_bucket.cpp
 	doors.cpp
 	effects.cpp
 	embparser.cpp
@@ -87,6 +88,10 @@ SET(zone_sources
 	npc_ai.cpp
 	object.cpp
 	oriented_bounding_box.cpp
+	pathfinder_interface.cpp
+	pathfinder_nav_mesh.cpp
+	pathfinder_null.cpp
+	pathfinder_waypoint.cpp
 	pathing.cpp
 	perl_client.cpp
 	perl_doors.cpp
@@ -151,6 +156,7 @@ SET(zone_headers
 	command.h
 	common.h
 	corpse.h
+   data_bucket.h
 	doors.h
 	embparser.h
 	embperl.h
@@ -203,7 +209,10 @@ SET(zone_headers
 	npc_ai.h
 	object.h
 	oriented_bounding_box.h
-	pathing.h
+	pathfinder_interface.h
+	pathfinder_nav_mesh.h
+	pathfinder_null.h
+	pathfinder_waypoint.h
 	perlpacket.h
 	petitions.h
 	pets.h
@@ -250,7 +259,7 @@ TARGET_LINK_LIBRARIES(zone ${SERVER_LIBS})
 
 IF(EQEMU_BUILD_PERL)
 	TARGET_LINK_LIBRARIES(zone ${PERL_LIBRARY})
-ENDIF(EQEMU_BUILD_PERL)
+ENDIF()
 
 IF(EQEMU_BUILD_LUA)
 	TARGET_LINK_LIBRARIES(zone luabind ${LUA_LIBRARY})

@@ -148,7 +148,7 @@ struct PetInfo {
 	uint32	Mana;
 	float	size;
 	SpellBuff_Struct	Buffs[PET_BUFF_COUNT];
-	uint32	Items[EQEmu::legacy::EQUIPMENT_SIZE];
+	uint32	Items[EQEmu::invslot::EQUIPMENT_COUNT];
 	char	Name[64];
 };
 
@@ -469,7 +469,7 @@ public:
 	/* Doors   */
 	bool	DoorIsOpen(uint8 door_id,const char* zone_name);
 	void	SetDoorPlace(uint8 value,uint8 door_id,const char* zone_name);
-	bool	LoadDoors(int32 iDoorCount, Door *into, const char *zone_name, int16 version);
+	bool	LoadDoors(int32 door_count, Door *into, const char *zone_name, int16 version);
 	bool	CheckGuildDoor(uint8 doorid,uint16 guild_id, const char* zone);
 	bool	SetGuildDoor(uint8 doorid,uint16 guild_id, const char* zone);
 	uint32	GetGuildEQID(uint32 guilddbid);

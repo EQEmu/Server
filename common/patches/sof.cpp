@@ -1060,118 +1060,6 @@ namespace SoF
 		FINISH_ENCODE();
 	}
 
-	ENCODE(OP_OpenNewTasksWindow)
-	{
-		AvailableTaskHeader_Struct*	__emu_AvailableTaskHeader;
-		AvailableTaskData1_Struct* 	__emu_AvailableTaskData1;
-		AvailableTaskData2_Struct* 	__emu_AvailableTaskData2;
-		AvailableTaskTrailer_Struct* 	__emu_AvailableTaskTrailer;
-
-		structs::AvailableTaskHeader_Struct*	__eq_AvailableTaskHeader;
-		structs::AvailableTaskData1_Struct* 	__eq_AvailableTaskData1;
-		structs::AvailableTaskData2_Struct* 	__eq_AvailableTaskData2;
-		structs::AvailableTaskTrailer_Struct* 	__eq_AvailableTaskTrailer;
-
-		EQApplicationPacket *in = *p;
-		*p = nullptr;
-
-		unsigned char *__emu_buffer = in->pBuffer;
-
-		__emu_AvailableTaskHeader = (AvailableTaskHeader_Struct*)__emu_buffer;
-
-		// For each task, SoF has an extra uint32 and what appears to be space for a null terminated string.
-		//
-		in->size = in->size + (__emu_AvailableTaskHeader->TaskCount * 5);
-
-		in->pBuffer = new unsigned char[in->size];
-
-		unsigned char *__eq_buffer = in->pBuffer;
-
-		__eq_AvailableTaskHeader = (structs::AvailableTaskHeader_Struct*)__eq_buffer;
-
-		char *__eq_ptr, *__emu_Ptr;
-
-		// Copy Header
-		//
-		//
-
-		__eq_AvailableTaskHeader->TaskCount = __emu_AvailableTaskHeader->TaskCount;
-		__eq_AvailableTaskHeader->unknown1 = __emu_AvailableTaskHeader->unknown1;
-		__eq_AvailableTaskHeader->TaskGiver = __emu_AvailableTaskHeader->TaskGiver;
-
-		__emu_Ptr = (char *)__emu_AvailableTaskHeader + sizeof(AvailableTaskHeader_Struct);
-		__eq_ptr = (char *)__eq_AvailableTaskHeader + sizeof(structs::AvailableTaskHeader_Struct);
-
-		for (uint32 i = 0; i<__emu_AvailableTaskHeader->TaskCount; i++) {
-
-			__emu_AvailableTaskData1 = (AvailableTaskData1_Struct*)__emu_Ptr;
-			__eq_AvailableTaskData1 = (structs::AvailableTaskData1_Struct*)__eq_ptr;
-
-			__eq_AvailableTaskData1->TaskID = __emu_AvailableTaskData1->TaskID;
-			// This next unknown seems to affect the colour of the task title. 0x3f80000 is what I have seen
-			// in Live packets. Changing it to 0x3f000000 makes the title red.
-			__eq_AvailableTaskData1->unknown1 = 0x3f800000;
-			__eq_AvailableTaskData1->TimeLimit = __emu_AvailableTaskData1->TimeLimit;
-			__eq_AvailableTaskData1->unknown2 = __emu_AvailableTaskData1->unknown2;
-
-			__emu_Ptr += sizeof(AvailableTaskData1_Struct);
-			__eq_ptr += sizeof(structs::AvailableTaskData1_Struct);
-
-			strcpy(__eq_ptr, __emu_Ptr); // Title
-
-			__emu_Ptr += strlen(__emu_Ptr) + 1;
-			__eq_ptr += strlen(__eq_ptr) + 1;
-
-			strcpy(__eq_ptr, __emu_Ptr); // Description
-
-			__emu_Ptr += strlen(__emu_Ptr) + 1;
-			__eq_ptr += strlen(__eq_ptr) + 1;
-
-			__eq_ptr[0] = 0;
-			__eq_ptr += strlen(__eq_ptr) + 1;
-
-			__emu_AvailableTaskData2 = (AvailableTaskData2_Struct*)__emu_Ptr;
-			__eq_AvailableTaskData2 = (structs::AvailableTaskData2_Struct*)__eq_ptr;
-
-			__eq_AvailableTaskData2->unknown1 = __emu_AvailableTaskData2->unknown1;
-			__eq_AvailableTaskData2->unknown2 = __emu_AvailableTaskData2->unknown2;
-			__eq_AvailableTaskData2->unknown3 = __emu_AvailableTaskData2->unknown3;
-			__eq_AvailableTaskData2->unknown4 = __emu_AvailableTaskData2->unknown4;
-
-			__emu_Ptr += sizeof(AvailableTaskData2_Struct);
-			__eq_ptr += sizeof(structs::AvailableTaskData2_Struct);
-
-			strcpy(__eq_ptr, __emu_Ptr); // Unknown string
-
-			__emu_Ptr += strlen(__emu_Ptr) + 1;
-			__eq_ptr += strlen(__eq_ptr) + 1;
-
-			strcpy(__eq_ptr, __emu_Ptr); // Unknown string
-
-			__emu_Ptr += strlen(__emu_Ptr) + 1;
-			__eq_ptr += strlen(__eq_ptr) + 1;
-
-			__emu_AvailableTaskTrailer = (AvailableTaskTrailer_Struct*)__emu_Ptr;
-			__eq_AvailableTaskTrailer = (structs::AvailableTaskTrailer_Struct*)__eq_ptr;
-
-			__eq_AvailableTaskTrailer->ItemCount = __emu_AvailableTaskTrailer->ItemCount;
-			__eq_AvailableTaskTrailer->unknown1 = __emu_AvailableTaskTrailer->unknown1;
-			__eq_AvailableTaskTrailer->unknown2 = __emu_AvailableTaskTrailer->unknown2;
-			__eq_AvailableTaskTrailer->StartZone = __emu_AvailableTaskTrailer->StartZone;
-
-			__emu_Ptr += sizeof(AvailableTaskTrailer_Struct);
-			__eq_ptr += sizeof(structs::AvailableTaskTrailer_Struct);
-
-			strcpy(__eq_ptr, __emu_Ptr); // Unknown string
-
-			__emu_Ptr += strlen(__emu_Ptr) + 1;
-			__eq_ptr += strlen(__eq_ptr) + 1;
-		}
-
-		delete[] __emu_buffer;
-		dest->FastQueuePacket(&in, ack_req);
-	}
-
 	ENCODE(OP_PetBuffWindow)
 	{
 		ENCODE_LENGTH_EXACT(PetBuff_Struct);
@@ -1303,18 +1191,18 @@ namespace SoF
 		//	OUT(unknown06160[4]);
 
 		// Copy bandoliers where server and client indexes converge
-		for (r = 0; r < EQEmu::legacy::BANDOLIERS_SIZE && r < profile::BandoliersSize; ++r) {
+		for (r = 0; r < EQEmu::profile::BANDOLIERS_SIZE && r < profile::BANDOLIERS_SIZE; ++r) {
 			OUT_str(bandoliers[r].Name);
-			for (uint32 k = 0; k < profile::BandolierItemCount; ++k) { // Will need adjusting if 'server != client' is ever true
+			for (uint32 k = 0; k < profile::BANDOLIER_ITEM_COUNT; ++k) { // Will need adjusting if 'server != client' is ever true
 				OUT(bandoliers[r].Items[k].ID);
 				OUT(bandoliers[r].Items[k].Icon);
 				OUT_str(bandoliers[r].Items[k].Name);
 			}
 		}
 		// Nullify bandoliers where server and client indexes diverge, with a client bias
-		for (r = EQEmu::legacy::BANDOLIERS_SIZE; r < profile::BandoliersSize; ++r) {
+		for (r = EQEmu::profile::BANDOLIERS_SIZE; r < profile::BANDOLIERS_SIZE; ++r) {
 			eq->bandoliers[r].Name[0] = '\0';
-			for (uint32 k = 0; k < profile::BandolierItemCount; ++k) { // Will need adjusting if 'server != client' is ever true
+			for (uint32 k = 0; k < profile::BANDOLIER_ITEM_COUNT; ++k) { // Will need adjusting if 'server != client' is ever true
 				eq->bandoliers[r].Items[k].ID = 0;
 				eq->bandoliers[r].Items[k].Icon = 0;
 				eq->bandoliers[r].Items[k].Name[0] = '\0';
@@ -1324,13 +1212,13 @@ namespace SoF
 		//	OUT(unknown07444[5120]);
 
 		// Copy potion belt where server and client indexes converge
-		for (r = 0; r < EQEmu::legacy::POTION_BELT_ITEM_COUNT && r < profile::PotionBeltSize; ++r) {
+		for (r = 0; r < EQEmu::profile::POTION_BELT_SIZE && r < profile::POTION_BELT_SIZE; ++r) {
 			OUT(potionbelt.Items[r].ID);
 			OUT(potionbelt.Items[r].Icon);
 			OUT_str(potionbelt.Items[r].Name);
 		}
 		// Nullify potion belt where server and client indexes diverge, with a client bias
-		for (r = EQEmu::legacy::POTION_BELT_ITEM_COUNT; r < profile::PotionBeltSize; ++r) {
+		for (r = EQEmu::profile::POTION_BELT_SIZE; r < profile::POTION_BELT_SIZE; ++r) {
 			eq->potionbelt.Items[r].ID = 0;
 			eq->potionbelt.Items[r].Icon = 0;
 			eq->potionbelt.Items[r].Name[0] = '\0';
@@ -1618,8 +1506,8 @@ namespace SoF
 			eq->CharCount = emu->CharCount;
 			eq->TotalChars = emu->TotalChars;
 
-			if (eq->TotalChars > constants::CharacterCreationLimit)
-				eq->TotalChars = constants::CharacterCreationLimit;
+			if (eq->TotalChars > constants::CHARACTER_CREATION_LIMIT)
+				eq->TotalChars = constants::CHARACTER_CREATION_LIMIT;
 
 			FINISH_ENCODE();
 			return;
@@ -1631,7 +1519,7 @@ namespace SoF
 
 		size_t names_length = 0;
 		size_t character_count = 0;
-		for (; character_count < emu->CharCount && character_count < constants::CharacterCreationLimit; ++character_count) {
+		for (; character_count < emu->CharCount && character_count < constants::CHARACTER_CREATION_LIMIT; ++character_count) {
 			emu_cse = (CharacterSelectEntry_Struct *)emu_ptr;
 			names_length += strlen(emu_cse->Name);
 			emu_ptr += sizeof(CharacterSelectEntry_Struct);
@@ -1647,8 +1535,8 @@ namespace SoF
 		eq->CharCount = character_count;
 		eq->TotalChars = emu->TotalChars;
 
-		if (eq->TotalChars > constants::CharacterCreationLimit)
-			eq->TotalChars = constants::CharacterCreationLimit;
+		if (eq->TotalChars > constants::CHARACTER_CREATION_LIMIT)
+			eq->TotalChars = constants::CHARACTER_CREATION_LIMIT;
 
 		emu_ptr = __emu_buffer;
 		emu_ptr += sizeof(CharacterSelect_Struct);
@@ -1879,13 +1767,16 @@ namespace SoF
 		InBuffer += description_size;
 		InBuffer += sizeof(TaskDescriptionData2_Struct);
 
-		std::string old_message = InBuffer; // start 'Reward' as string
+		uint32 reward_size = strlen(InBuffer) + 1;
+		InBuffer += reward_size;
+
+		std::string old_message = InBuffer; // start item link string
 		std::string new_message;
 		ServerToSoFSayLink(new_message, old_message);
 
 		in->size = sizeof(TaskDescriptionHeader_Struct) + sizeof(TaskDescriptionData1_Struct)+
 			sizeof(TaskDescriptionData2_Struct) + sizeof(TaskDescriptionTrailer_Struct)+
-			title_size + description_size + new_message.length() + 1;
+			title_size + description_size + reward_size + new_message.length() + 1;
 
 		in->pBuffer = new unsigned char[in->size];
 
@@ -2976,7 +2867,7 @@ namespace SoF
 		ibs.nodrop = item->NoDrop;
 		ibs.attune = item->Attuneable;
 		ibs.size = item->Size;
-		ibs.slots = SwapBits21and22(item->Slots);
+		ibs.slots = SwapBits21And22(item->Slots);
 		ibs.price = item->Price;
 		ibs.icon = item->Icon;
 		ibs.unknown1 = 1;
@@ -3066,7 +2957,7 @@ namespace SoF
 		isbs.augtype = item->AugType;
 		isbs.augrestrict = item->AugRestrict;
 
-		for (int index = 0; index < invaug::ItemAugSize; ++index) {
+		for (int index = invaug::SOCKET_BEGIN; index <= invaug::SOCKET_END; ++index) {
 			isbs.augslots[index].type = item->AugSlotType[index];
 			isbs.augslots[index].visible = item->AugSlotVisible[index];
 			isbs.augslots[index].unknown = item->AugSlotUnk2[index];
@@ -3238,18 +3129,18 @@ namespace SoF
 
 		ob.write((const char*)&subitem_count, sizeof(uint32));
 
-		for (uint32 index = EQEmu::inventory::containerBegin; index < EQEmu::inventory::ContainerCount; ++index) {
+		for (uint32 index = EQEmu::invbag::SLOT_BEGIN; index <= EQEmu::invbag::SLOT_END; ++index) {
 			EQEmu::ItemInstance* sub = inst->GetItem(index);
 			if (!sub)
 				continue;
 
 			int SubSlotNumber = INVALID_INDEX;
-			if (slot_id_in >= EQEmu::legacy::GENERAL_BEGIN && slot_id_in <= EQEmu::legacy::GENERAL_END)
-				SubSlotNumber = (((slot_id_in + 3) * EQEmu::inventory::ContainerCount) + index + 1);
-			else if (slot_id_in >= EQEmu::legacy::BANK_BEGIN && slot_id_in <= EQEmu::legacy::BANK_END)
-				SubSlotNumber = (((slot_id_in - EQEmu::legacy::BANK_BEGIN) * EQEmu::inventory::ContainerCount) + EQEmu::legacy::BANK_BAGS_BEGIN + index);
-			else if (slot_id_in >= EQEmu::legacy::SHARED_BANK_BEGIN && slot_id_in <= EQEmu::legacy::SHARED_BANK_END)
-				SubSlotNumber = (((slot_id_in - EQEmu::legacy::SHARED_BANK_BEGIN) * EQEmu::inventory::ContainerCount) + EQEmu::legacy::SHARED_BANK_BAGS_BEGIN + index);
+			if (slot_id_in >= EQEmu::invslot::GENERAL_BEGIN && slot_id_in <= EQEmu::invslot::GENERAL_END)
+				SubSlotNumber = (((slot_id_in + 3) * EQEmu::invbag::SLOT_COUNT) + index + 1);
+			else if (slot_id_in >= EQEmu::invslot::BANK_BEGIN && slot_id_in <= EQEmu::invslot::BANK_END)
+				SubSlotNumber = (((slot_id_in - EQEmu::invslot::BANK_BEGIN) * EQEmu::invbag::SLOT_COUNT) + EQEmu::invbag::BANK_BAGS_BEGIN + index);
+			else if (slot_id_in >= EQEmu::invslot::SHARED_BANK_BEGIN && slot_id_in <= EQEmu::invslot::SHARED_BANK_END)
+				SubSlotNumber = (((slot_id_in - EQEmu::invslot::SHARED_BANK_BEGIN) * EQEmu::invbag::SLOT_COUNT) + EQEmu::invbag::SHARED_BANK_BAGS_BEGIN + index);
 			else
 				SubSlotNumber = slot_id_in;
 
@@ -3267,16 +3158,16 @@ namespace SoF
 	{
 		uint32 SoFSlot = 0;
 
-		if (serverSlot >= EQEmu::inventory::slotAmmo && serverSlot <= 53) // Cursor/Ammo/Power Source and Normal Inventory Slots
+		if (serverSlot >= EQEmu::invslot::slotAmmo && serverSlot <= 53) // Cursor/Ammo/Power Source and Normal Inventory Slots
 			SoFSlot = serverSlot + 1;
-		else if (serverSlot >= EQEmu::legacy::GENERAL_BAGS_BEGIN && serverSlot <= EQEmu::legacy::CURSOR_BAG_END)
+		else if (serverSlot >= EQEmu::invbag::GENERAL_BAGS_BEGIN && serverSlot <= EQEmu::invbag::CURSOR_BAG_END)
 			SoFSlot = serverSlot + 11;
-		else if (serverSlot >= EQEmu::legacy::BANK_BAGS_BEGIN && serverSlot <= EQEmu::legacy::BANK_BAGS_END)
+		else if (serverSlot >= EQEmu::invbag::BANK_BAGS_BEGIN && serverSlot <= EQEmu::invbag::BANK_BAGS_END)
 			SoFSlot = serverSlot + 1;
-		else if (serverSlot >= EQEmu::legacy::SHARED_BANK_BAGS_BEGIN && serverSlot <= EQEmu::legacy::SHARED_BANK_BAGS_END)
+		else if (serverSlot >= EQEmu::invbag::SHARED_BANK_BAGS_BEGIN && serverSlot <= EQEmu::invbag::SHARED_BANK_BAGS_END)
 			SoFSlot = serverSlot + 1;
-		else if (serverSlot == EQEmu::inventory::slotPowerSource)
-			SoFSlot = invslot::PossessionsPowerSource;
+		else if (serverSlot == EQEmu::invslot::SLOT_POWER_SOURCE)
+			SoFSlot = invslot::slotPowerSource;
 		else
 			SoFSlot = serverSlot;
 
@@ -3293,16 +3184,16 @@ namespace SoF
 	{
 		uint32 ServerSlot = 0;
 
-		if (sofSlot >= invslot::PossessionsAmmo && sofSlot <= invslot::CorpseEnd) // Cursor/Ammo/Power Source and Normal Inventory Slots
+		if (sofSlot >= invslot::slotAmmo && sofSlot <= invslot::CORPSE_END) // Cursor/Ammo/Power Source and Normal Inventory Slots
 			ServerSlot = sofSlot - 1;
-		else if (sofSlot >= invbag::GeneralBagsBegin && sofSlot <= invbag::CursorBagEnd)
+		else if (sofSlot >= invbag::GENERAL_BAGS_BEGIN && sofSlot <= invbag::CURSOR_BAG_END)
 			ServerSlot = sofSlot - 11;
-		else if (sofSlot >= invbag::BankBagsBegin && sofSlot <= invbag::BankBagsEnd)
+		else if (sofSlot >= invbag::BANK_BAGS_BEGIN && sofSlot <= invbag::BANK_BAGS_END)
 			ServerSlot = sofSlot - 1;
-		else if (sofSlot >= invbag::SharedBankBagsBegin && sofSlot <= invbag::SharedBankBagsEnd)
+		else if (sofSlot >= invbag::SHARED_BANK_BAGS_BEGIN && sofSlot <= invbag::SHARED_BANK_BAGS_END)
 			ServerSlot = sofSlot - 1;
-		else if (sofSlot == invslot::PossessionsPowerSource)
-			ServerSlot = EQEmu::inventory::slotPowerSource;
+		else if (sofSlot == invslot::slotPowerSource)
+			ServerSlot = EQEmu::invslot::SLOT_POWER_SOURCE;
 		else
 			ServerSlot = sofSlot;
 
@@ -3317,7 +3208,7 @@ namespace SoF
 
 	static inline void ServerToSoFSayLink(std::string& sofSayLink, const std::string& serverSayLink)
 	{
-		if ((constants::SayLinkBodySize == EQEmu::constants::SayLinkBodySize) || (serverSayLink.find('\x12') == std::string::npos)) {
+		if ((constants::SAY_LINK_BODY_SIZE == EQEmu::constants::SAY_LINK_BODY_SIZE) || (serverSayLink.find('\x12') == std::string::npos)) {
 			sofSayLink = serverSayLink;
 			return;
 		}
@@ -3326,7 +3217,7 @@ namespace SoF
 
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {
-				if (segments[segment_iter].length() <= EQEmu::constants::SayLinkBodySize) {
+				if (segments[segment_iter].length() <= EQEmu::constants::SAY_LINK_BODY_SIZE) {
 					sofSayLink.append(segments[segment_iter]);
 					// TODO: log size mismatch error
 					continue;
@@ -3357,7 +3248,7 @@ namespace SoF
 
 	static inline void SoFToServerSayLink(std::string& serverSayLink, const std::string& sofSayLink)
 	{
-		if ((EQEmu::constants::SayLinkBodySize == constants::SayLinkBodySize) || (sofSayLink.find('\x12') == std::string::npos)) {
+		if ((EQEmu::constants::SAY_LINK_BODY_SIZE == constants::SAY_LINK_BODY_SIZE) || (sofSayLink.find('\x12') == std::string::npos)) {
 			serverSayLink = sofSayLink;
 			return;
 		}
@@ -3366,7 +3257,7 @@ namespace SoF
 
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {
-				if (segments[segment_iter].length() <= constants::SayLinkBodySize) {
+				if (segments[segment_iter].length() <= constants::SAY_LINK_BODY_SIZE) {
 					serverSayLink.append(segments[segment_iter]);
 					// TODO: log size mismatch error
 					continue;

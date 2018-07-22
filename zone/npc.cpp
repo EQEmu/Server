@@ -135,7 +135,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, const glm::vec4& position, int if
 	respawn2 = in_respawn;
 	swarm_timer.Disable();
 
-	if (size < 0.0f)
+	if (size <= 0.0f)
 		size = GetRaceGenderDefaultHeight(race, gender);
 
 	taunting = false;
@@ -837,8 +837,8 @@ void NPC::UpdateEquipmentLight()
 	m_Light.Type[EQEmu::lightsource::LightEquipment] = 0;
 	m_Light.Level[EQEmu::lightsource::LightEquipment] = 0;
 
-	for (int index = EQEmu::inventory::slotBegin; index < EQEmu::legacy::EQUIPMENT_SIZE; ++index) {
-		if (index == EQEmu::inventory::slotAmmo) { continue; }
+	for (int index = EQEmu::invslot::EQUIPMENT_BEGIN; index <= EQEmu::invslot::EQUIPMENT_END; ++index) {
+		if (index == EQEmu::invslot::slotAmmo) { continue; }
 
 		auto item = database.GetItem(equipment[index]);
 		if (item == nullptr) { continue; }
@@ -983,6 +983,49 @@ bool NPC::SpawnZoneController(){
 	entity_list.AddNPC(npc);
 
 	return true;
+}
+
+NPC * NPC::SpawnGridNodeNPC(std::string name, const glm::vec4 &position, uint32 grid_id, uint32 grid_number, uint32 pause) {
+	auto npc_type = new NPCType;
+	memset(npc_type, 0, sizeof(NPCType));
+
+	sprintf(npc_type->name, "%u_%u", grid_id, grid_number);
+	sprintf(npc_type->lastname, "Number: %u Grid: %u Pause: %u", grid_number, grid_id, pause);
+
+	npc_type->cur_hp           = 4000000;
+	npc_type->max_hp           = 4000000;
+	npc_type->race             = 2254;
+	npc_type->gender           = 2;
+	npc_type->class_           = 9;
+	npc_type->deity            = 1;
+	npc_type->level            = 200;
+	npc_type->npc_id           = 0;
+	npc_type->loottable_id     = 0;
+	npc_type->texture          = 1;
+	npc_type->light            = 1;
+	npc_type->size             = 3;
+	npc_type->runspeed         = 0;
+	npc_type->d_melee_texture1 = 1;
+	npc_type->d_melee_texture2 = 1;
+	npc_type->merchanttype     = 1;
+	npc_type->bodytype         = 1;
+	npc_type->show_name        = true;
+	npc_type->STR              = 150;
+	npc_type->STA              = 150;
+	npc_type->DEX              = 150;
+	npc_type->AGI              = 150;
+	npc_type->INT              = 150;
+	npc_type->WIS              = 150;
+	npc_type->CHA              = 150;
+	npc_type->findable         = true;
+
+	auto node_position = glm::vec4(position.x, position.y, position.z, position.w);
+	auto npc           = new NPC(npc_type, nullptr, node_position, FlyMode1);
+	npc->GiveNPCTypeData(npc_type);
+
+	entity_list.AddNPC(npc, true, true);
+
+	return npc;
 }
 
 NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* client) {
@@ -1646,6 +1689,65 @@ void NPC::PickPocket(Client* thief)
 
 	thief->Message(0, "This target's pockets are empty");
 	thief->SendPickPocketResponse(this, 0, PickPocketFailed);
+}
+
+void NPC::Disarm(Client* client, int chance) {
+	// disarm primary if available, otherwise disarm secondary
+	const EQEmu::ItemData* weapon = NULL;
+	uint8 eslot = 0xFF;
+	if (equipment[EQEmu::invslot::slotPrimary] != 0)
+		eslot = EQEmu::invslot::slotPrimary;
+	else if (equipment[EQEmu::invslot::slotSecondary] != 0)
+		eslot = EQEmu::invslot::slotSecondary;
+	if (eslot != 0xFF) {
+		if (zone->random.Int(0, 1000) <= chance) {
+			weapon = database.GetItem(equipment[eslot]);
+			if (weapon) {
+				if (!weapon->Magic && weapon->NoDrop == 255) {
+					int16 charges = -1;
+					ItemList::iterator cur, end;
+					cur = itemlist.begin();
+					end = itemlist.end();
+					// Get charges for the item in the loot table
+					for (; cur != end; cur++) {
+						ServerLootItem_Struct* citem = *cur;
+						if (citem->item_id == weapon->ID) {
+							charges = citem->charges;
+							break;
+						}
+					}
+					EQEmu::ItemInstance *inst = NULL;
+					inst = database.CreateItem(weapon->ID, charges);
+					// Remove item from loot table
+					RemoveItem(weapon->ID);
+					CalcBonuses();
+					if (inst) {
+						// create a ground item
+						Object* object = new Object(inst, this->GetX(), this->GetY(), this->GetZ(), 0.0f, 300000);
+						entity_list.AddObject(object, true);
+						object->StartDecay();
+						safe_delete(inst);
+					}
+				}
+			}
+			// Update Appearance
+			equipment[eslot] = 0;
+			int matslot = eslot == EQEmu::invslot::slotPrimary ? EQEmu::textures::weaponPrimary : EQEmu::textures::weaponSecondary;
+			if (matslot != -1)
+				SendWearChange(matslot);
+			if ((CastToMob()->GetBodyType() == BT_Humanoid || CastToMob()->GetBodyType() == BT_Summoned) && eslot == EQEmu::invslot::slotPrimary)
+				Say("Ahh! My weapon!");
+			client->Message_StringID(MT_Skills, DISARM_SUCCESS, this->GetCleanName());
+			if (chance != 1000)
+				client->CheckIncreaseSkill(EQEmu::skills::SkillDisarm, nullptr, 4);
+			return;
+		}
+		client->Message_StringID(MT_Skills, DISARM_FAILED);
+		if (chance != 1000)
+			client->CheckIncreaseSkill(EQEmu::skills::SkillDisarm, nullptr, 2);
+		return;
+	}
+	client->Message_StringID(MT_Skills, DISARM_FAILED);
 }
 
 void Mob::NPCSpecialAttacks(const char* parse, int permtag, bool reset, bool remove) {
@@ -2716,4 +2818,3 @@ void NPC::ModifyStatsOnCharm(bool bRemoved)
 	SetAttackTimer();
 	CalcAC();
 }
-

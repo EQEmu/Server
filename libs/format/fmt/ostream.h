@@ -4,25 +4,7 @@
  Copyright (c) 2012 - 2016, Victor Zverovich
  All rights reserved.
 
- Redistribution and use in source and binary forms, with or without
- modification, are permitted provided that the following conditions are met:
-
- 1. Redistributions of source code must retain the above copyright notice, this
-    list of conditions and the following disclaimer.
- 2. Redistributions in binary form must reproduce the above copyright notice,
-    this list of conditions and the following disclaimer in the documentation
-    and/or other materials provided with the distribution.
-
- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
- ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ For the license information refer to format.h.
  */
 
 #ifndef FMT_OSTREAM_H_
@@ -42,28 +24,27 @@ class FormatBuf : public std::basic_streambuf<Char> {
   typedef typename std::basic_streambuf<Char>::traits_type traits_type;
 
   Buffer<Char> &buffer_;
-  Char *start_;
 
  public:
-  FormatBuf(Buffer<Char> &buffer) : buffer_(buffer), start_(&buffer[0]) {
-    this->setp(start_, start_ + buffer_.capacity());
-  }
+  FormatBuf(Buffer<Char> &buffer) : buffer_(buffer) {}
 
-  int_type overflow(int_type ch = traits_type::eof()) {
-    if (!traits_type::eq_int_type(ch, traits_type::eof())) {
-      size_t buf_size = size();
-      buffer_.resize(buf_size);
-      buffer_.reserve(buf_size * 2);
+ protected:
+  // The put-area is actually always empty. This makes the implementation
+  // simpler and has the advantage that the streambuf and the buffer are always
+  // in sync and sputc never writes into uninitialized memory. The obvious
+  // disadvantage is that each call to sputc always results in a (virtual) call
+  // to overflow. There is no disadvantage here for sputn since this always
+  // results in a call to xsputn.
 
-      start_ = &buffer_[0];
-      start_[buf_size] = traits_type::to_char_type(ch);
-      this->setp(start_+ buf_size + 1, start_ + buf_size * 2);
-    }
+  int_type overflow(int_type ch = traits_type::eof()) FMT_OVERRIDE {
+    if (!traits_type::eq_int_type(ch, traits_type::eof()))
+      buffer_.push_back(static_cast<Char>(ch));
     return ch;
   }
 
-  size_t size() const {
-    return to_unsigned(this->pptr() - start_);
+  std::streamsize xsputn(const Char *s, std::streamsize count) FMT_OVERRIDE {
+    buffer_.append(s, s + count);
+    return count;
   }
 };
 
@@ -84,19 +65,22 @@ struct ConvertToIntImpl<T, true> {
     value = sizeof(convert(get<DummyStream>() << get<T>())) == sizeof(No)
   };
 };
+
+// Write the content of w to os.
+FMT_API void write(std::ostream &os, Writer &w);
 }  // namespace internal
 
 // Formats a value.
-template <typename Char, typename ArgFormatter, typename T>
-void format(BasicFormatter<Char, ArgFormatter> &f,
-            const Char *&format_str, const T &value) {
+template <typename Char, typename ArgFormatter_, typename T>
+void format_arg(BasicFormatter<Char, ArgFormatter_> &f,
+                const Char *&format_str, const T &value) {
   internal::MemoryBuffer<Char, internal::INLINE_BUFFER_SIZE> buffer;
 
   internal::FormatBuf<Char> format_buf(buffer);
   std::basic_ostream<Char> output(&format_buf);
   output << value;
 
-  BasicStringRef<Char> str(&buffer[0], format_buf.size());
+  BasicStringRef<Char> str(&buffer[0], buffer.size());
   typedef internal::MakeArg< BasicFormatter<Char> > MakeArg;
   format_str = f.format(format_str, MakeArg(str));
 }
@@ -112,18 +96,6 @@ void format(BasicFormatter<Char, ArgFormatter> &f,
  */
 FMT_API void print(std::ostream &os, CStringRef format_str, ArgList args);
 FMT_VARIADIC(void, print, std::ostream &, CStringRef)
-
-/**
-  \rst
-  Prints formatted data to the stream *os*.
-
-  **Example**::
-
-    fprintf(cerr, "Don't %s!", "panic");
-  \endrst
- */
-FMT_API int fprintf(std::ostream &os, CStringRef format_str, ArgList args);
-FMT_VARIADIC(int, fprintf, std::ostream &, CStringRef)
 }  // namespace fmt
 
 #ifdef FMT_HEADER_ONLY

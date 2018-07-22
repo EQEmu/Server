@@ -647,7 +647,7 @@ void EntityList::AddNPC(NPC *npc, bool SendSpawnPacket, bool dontqueue)
 
 	parse->EventNPC(EVENT_SPAWN, npc, nullptr, "", 0);
 
-	npc->FixZ(1);
+	npc->FixZ();
 
 	uint16 emoteid = npc->GetEmoteID();
 	if (emoteid != 0)
@@ -1546,7 +1546,7 @@ void EntityList::QueueClientsByTarget(Mob *sender, const EQApplicationPacket *ap
 	}
 }
 
-void EntityList::QueueClientsByXTarget(Mob *sender, const EQApplicationPacket *app, bool iSendToSender)
+void EntityList::QueueClientsByXTarget(Mob *sender, const EQApplicationPacket *app, bool iSendToSender, EQEmu::versions::ClientVersionBit client_version_bits)
 {
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
@@ -1554,6 +1554,9 @@ void EntityList::QueueClientsByXTarget(Mob *sender, const EQApplicationPacket *a
 		++it;
 
 		if (!c || ((c == sender) && !iSendToSender))
+			continue;
+
+		if ((c->ClientVersionBit() & client_version_bits) == 0)
 			continue;
 
 		if (!c->IsXTarget(sender))
@@ -2822,26 +2825,6 @@ void EntityList::ListPlayerCorpses(Client *client)
 		++it;
 	}
 	client->Message(0, "%d player corpses listed.", x);
-}
-
-void EntityList::FindPathsToAllNPCs()
-{
-	if (!zone->pathing)
-		return;
-
-	auto it = npc_list.begin();
-	while (it != npc_list.end()) {
-		glm::vec3 Node0 = zone->pathing->GetPathNodeCoordinates(0, false);
-		glm::vec3 Dest(it->second->GetX(), it->second->GetY(), it->second->GetZ());
-		std::deque<int> Route = zone->pathing->FindRoute(Node0, Dest);
-		if (Route.empty())
-			printf("Unable to find a route to %s\n", it->second->GetName());
-		else
-			printf("Found a route to %s\n", it->second->GetName());
-		++it;
-	}
-
-	fflush(stdout);
 }
 
 // returns the number of corpses deleted. A negative number indicates an error code.

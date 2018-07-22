@@ -120,6 +120,7 @@ if [[ "$OS" == "Debian" ]]; then
 	apt-get $apt_options install libsodium-dev
 	apt-get $apt_options install libsodium18
 	apt-get $apt_options install libjson-perl
+	apt-get $apt_options install libssl-dev
 	
 	# Install libsodium
 	wget http://ftp.us.debian.org/debian/pool/main/libs/libsodium/libsodium-dev_1.0.11-1~bpo8+1_amd64.deb -O /home/eqemu/libsodium-dev.deb

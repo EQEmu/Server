@@ -420,7 +420,7 @@ void NPC::SaveGuardSpot(bool iClearGuardSpot) {
 }
 
 void NPC::NextGuardPosition() {
-	if (!CalculateNewPosition2(m_GuardPoint.x, m_GuardPoint.y, m_GuardPoint.z, GetMovespeed())) {
+	if (!CalculateNewPosition(m_GuardPoint.x, m_GuardPoint.y, m_GuardPoint.z, GetMovespeed())) {
 		SetHeading(m_GuardPoint.w);
 		Log(Logs::Detail, Logs::AI, "Unable to move to next guard position. Probably rooted.");
 	}
@@ -615,89 +615,8 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 	return true;
 }
 
-bool Mob::CalculateNewPosition2(float x, float y, float z, int speed, bool checkZ, bool calcHeading) {
-	return MakeNewPositionAndSendUpdate(x, y, z, speed, checkZ, calcHeading);
-}
-
 bool Mob::CalculateNewPosition(float x, float y, float z, int speed, bool checkZ, bool calcHeading) {
-	if (GetID() == 0)
-		return true;
-
-	float nx = m_Position.x;
-	float ny = m_Position.y;
-	float nz = m_Position.z;
-
-	// if NPC is rooted
-	if (speed == 0) {
-		SetHeading(CalculateHeadingToTarget(x, y));
-		if (moved) {
-			SetCurrentSpeed(0);
-			moved = false;
-		}
-		Log(Logs::Detail, Logs::AI, "Rooted while calculating new position to (%.3f, %.3f, %.3f)", x, y, z);
-		return true;
-	}
-
-	float old_test_vector = test_vector;
-	m_TargetV.x = x - nx;
-	m_TargetV.y = y - ny;
-	m_TargetV.z = z - nz;
-
-	if (m_TargetV.x == 0 && m_TargetV.y == 0)
-		return false;
-	SetCurrentSpeed((int8)(speed)); //*NPC_RUNANIM_RATIO);
-									//speed *= NPC_SPEED_MULTIPLIER;
-
-	Log(Logs::Detail, Logs::AI, "Calculating new position to (%.3f, %.3f, %.3f) vector (%.3f, %.3f, %.3f) rate %.3f RAS %d", x, y, z, m_TargetV.x, m_TargetV.y, m_TargetV.z, speed, pRunAnimSpeed);
-
-	// --------------------------------------------------------------------------
-	// 2: get unit vector
-	// --------------------------------------------------------------------------
-	test_vector = sqrtf(x*x + y*y + z*z);
-	tar_vector = speed / sqrtf(m_TargetV.x*m_TargetV.x + m_TargetV.y*m_TargetV.y + m_TargetV.z*m_TargetV.z);
-	m_Position.w = CalculateHeadingToTarget(x, y);
-
-	if (tar_vector >= 1.0) {
-		if (IsNPC()) {
-			entity_list.ProcessMove(CastToNPC(), x, y, z);
-		}
-
-		m_Position.x = x;
-		m_Position.y = y;
-		m_Position.z = z;
-		Log(Logs::Detail, Logs::AI, "Close enough, jumping to waypoint");
-	}
-	else {
-		float new_x = m_Position.x + m_TargetV.x*tar_vector;
-		float new_y = m_Position.y + m_TargetV.y*tar_vector;
-		float new_z = m_Position.z + m_TargetV.z*tar_vector;
-		if (IsNPC()) {
-			entity_list.ProcessMove(CastToNPC(), new_x, new_y, new_z);
-		}
-
-		m_Position.x = new_x;
-		m_Position.y = new_y;
-		m_Position.z = new_z;
-		Log(Logs::Detail, Logs::AI, "Next position (%.3f, %.3f, %.3f)", m_Position.x, m_Position.y, m_Position.z);
-	}
-
-	if (fix_z_timer.Check())
-		this->FixZ();
-
-	//OP_MobUpdate
-	if ((old_test_vector != test_vector) || tar_ndx>20) { //send update
-		tar_ndx = 0;
-		this->SetMoving(true);
-		moved = true;
-		m_Delta = glm::vec4(m_Position.x - nx, m_Position.y - ny, m_Position.z - nz, 0.0f);
-		SendPositionUpdate();
-	}
-	tar_ndx++;
-
-	// now get new heading
-	SetAppearance(eaStanding, false); // make sure they're standing
-	pLastChange = Timer::GetCurrentTime();
-	return true;
+	return MakeNewPositionAndSendUpdate(x, y, z, speed);
 }
 
 void NPC::AssignWaypoints(int32 grid)
@@ -827,61 +746,60 @@ void Mob::SendToFixZ(float new_x, float new_y, float new_z) {
 	}
 }
 
-float Mob::GetFixedZ(glm::vec3 dest, int32 z_find_offset)
-{
+float Mob::GetFixedZ(glm::vec3 dest, int32 z_find_offset) {
 	BenchTimer timer;
 	timer.reset();
 	float new_z = dest.z;
 
-	if (zone->HasMap() && RuleB(Map, FixZWhenMoving) &&
-		(flymode != 1 && flymode != 2))
-	{
-		if (!RuleB(Watermap, CheckForWaterWhenMoving) || !zone->HasWaterMap()
-			|| (zone->HasWaterMap() &&
-				!zone->watermap->InWater(glm::vec3(m_Position))))
-		{
-			/* Any more than 5 in the offset makes NPC's hop/snap to ceiling in small corridors */
-			new_z = this->FindDestGroundZ(dest, z_find_offset);
-			if (new_z != BEST_Z_INVALID)
-			{
-				new_z += this->GetZOffset();
+	if (zone->HasMap() && RuleB(Map, FixZWhenMoving)) {
 
-				// If bad new Z restore old one
-				if (new_z < -2000) {
-					new_z = m_Position.z;
-				}
+		if (flymode == 1 || flymode == 2)
+			return new_z;
+
+		if (this->IsBoat())
+			return new_z;
+
+		if (zone->HasWaterMap() && zone->watermap->InWater(glm::vec3(m_Position)))
+			return new_z;
+
+		/*
+		 * Any more than 5 in the offset makes NPC's hop/snap to ceiling in small corridors
+		 */
+		new_z = this->FindDestGroundZ(dest, z_find_offset);
+		if (new_z != BEST_Z_INVALID) {
+			new_z += this->GetZOffset();
+
+			if (new_z < -2000) {
+				new_z = m_Position.z;
 			}
 		}
 
 		auto duration = timer.elapsed();
 
 		Log(Logs::Moderate, Logs::FixZ,
-			"Mob::GetFixedZ() (%s) returned %4.3f at %4.3f, %4.3f, %4.3f - Took %lf",
-			this->GetCleanName(), new_z, dest.x, dest.y, dest.z, duration);
+		    "Mob::GetFixedZ() (%s) returned %4.3f at %4.3f, %4.3f, %4.3f - Took %lf",
+		    this->GetCleanName(), new_z, dest.x, dest.y, dest.z, duration);
 	}
 
 	return new_z;
 }
 
-void Mob::FixZ(int32 z_find_offset /*= 5*/)
-{
+void Mob::FixZ(int32 z_find_offset /*= 5*/) {
 	glm::vec3 current_loc(m_Position);
-	float new_z = GetFixedZ(current_loc, z_find_offset);
+	float     new_z = GetFixedZ(current_loc, z_find_offset);
 
-	if (!IsClient() && new_z != m_Position.z)
-	{
+	if (!IsClient() && new_z != m_Position.z) {
 		if ((new_z > -2000) && new_z != BEST_Z_INVALID) {
 			if (RuleB(Map, MobZVisualDebug))
 				this->SendAppearanceEffect(78, 0, 0, 0, 0);
 
 			m_Position.z = new_z;
-		}
-		else {
+		} else {
 			if (RuleB(Map, MobZVisualDebug))
 				this->SendAppearanceEffect(103, 0, 0, 0, 0);
 
 			Log(Logs::General, Logs::FixZ, "%s is failing to find Z %f",
-				this->GetCleanName(), std::abs(m_Position.z - new_z));
+			    this->GetCleanName(), std::abs(m_Position.z - new_z));
 		}
 	}
 }
@@ -890,107 +808,109 @@ float Mob::GetZOffset() const {
 	float offset = 3.125f;
 
 	switch (race) {
-		case 436:
+		case RACE_BASILISK_436:
 			offset = 0.577f;
 			break;
-		case 430:
+		case RACE_DRAKE_430:
 			offset = 0.5f;
 			break;
-		case 432:
+		case RACE_DRAKE_432:
 			offset = 1.9f;
 			break;
-		case 435:
+		case RACE_DRAGON_435:
 			offset = 0.93f;
 			break;
-		case 450:
+		case RACE_LAVA_SPIDER_450:
 			offset = 0.938f;
 			break;
-		case 479:
+		case RACE_ALLIGATOR_479:
 			offset = 0.8f;
 			break;
-		case 451:
+		case RACE_LAVA_SPIDER_QUEEN_451:
 			offset = 0.816f;
 			break;
-		case 437:
+		case RACE_DRAGON_437:
 			offset = 0.527f;
 			break;
-		case 439:
+		case RACE_PUMA_439:
 			offset = 1.536f;
 			break;
-		case 415:
+		case RACE_RAT_415:
 			offset = 1.0f;
 			break;
-		case 438:
+		case RACE_DRAGON_438:
 			offset = 0.776f;
 			break;
-		case 452:
+		case RACE_DRAGON_452:
 			offset = 0.776f;
 			break;
-		case 441:
+		case RACE_SPIDER_QUEEN_441:
 			offset = 0.816f;
 			break;
-		case 440:
+		case RACE_SPIDER_440:
 			offset = 0.938f;
 			break;
-		case 468:
+		case RACE_SNAKE_468:
 			offset = 1.0f;
 			break;
-		case 459:
+		case RACE_CORATHUS_459:
 			offset = 1.0f;
 			break;
-		case 462:
+		case RACE_DRACHNID_COCOON_462:
 			offset = 1.5f;
 			break;
-		case 530:
+		case RACE_DRAGON_530:
 			offset = 1.2f;
 			break;
-		case 549:
+		case RACE_GOO_549:
 			offset = 0.5f;
 			break;
-		case 548:
+		case RACE_GOO_548:
 			offset = 0.5f;
 			break;
-		case 547:
+		case RACE_GOO_547:
 			offset = 0.5f;
 			break;
-		case 604:
+		case RACE_DRACOLICH_604:
 			offset = 1.2f;
 			break;
-		case 653:
+		case RACE_TELMIRA_653:
 			offset = 5.9f;
 			break;
-		case 658:
+		case RACE_MORELL_THULE_658:
 			offset = 4.0f;
 			break;
-		case 323:
+		case RACE_ARMOR_OF_MARR_323:
 			offset = 5.0f;
 			break;
-		case 663:
+		case RACE_AMYGDALAN_663:
 			offset = 5.0f;
 			break;
-		case 664:
+		case RACE_SANDMAN_664:
 			offset = 4.0f;
 			break;
-		case 703:
+		case RACE_ALARAN_SENTRY_STONE_703:
 			offset = 9.0f;
 			break;
-		case 688:
+		case RACE_RABBIT_668:
 			offset = 5.0f;
 			break;
-		case 669:
+		case RACE_BLIND_DREAMER_669:
 			offset = 7.0f;
 			break;
-		case 687:
+		case RACE_GORAL_687:
 			offset = 2.0f;
 			break;
-		case 686:
+		case RACE_SELYRAH_686:
 			offset = 2.0f;
 			break;
 		default:
 			offset = 3.125f;
 	}
 
-	return 0.2 * GetSize() * offset;
+	float mob_size = (GetSize() > 0 ? GetSize() : GetDefaultRaceSize());
+
+	return static_cast<float>(0.2 * mob_size * offset);
 }
 
 // This function will try to move the mob along the relative angle a set distance

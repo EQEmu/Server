@@ -42,7 +42,9 @@
 #include "net.h"
 #include "npc.h"
 #include "object.h"
-#include "pathing.h"
+#include "pathfinder_null.h"
+#include "pathfinder_nav_mesh.h"
+#include "pathfinder_waypoint.h"
 #include "petitions.h"
 #include "quest_parser_collection.h"
 #include "spawn2.h"
@@ -148,8 +150,15 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 
 	zone->RequestUCSServerStatus();
 
-	/* Set Logging */
+	/**
+	 * Set Shutdown timer
+	 */
+	uint32 shutdown_timer = static_cast<uint32>(database.getZoneShutDownDelay(zone->GetZoneID(), zone->GetInstanceVersion()));
+	zone->StartShutdownTimer(shutdown_timer);
 
+	/*
+	 * Set Logging
+	 */
 	LogSys.StartFileLogs(StringFormat("%s_version_%u_inst_id_%u_port_%u", zone->GetShortName(), zone->GetInstanceVersion(), zone->GetInstanceID(), ZoneConfig::get()->ZonePort));
 
 	return true;
@@ -898,7 +907,7 @@ bool Zone::Init(bool iStaticZone) {
 	
 	zone->zonemap = Map::LoadMapFile(zone->map_name);
 	zone->watermap = WaterMap::LoadWaterMapfile(zone->map_name);
-	zone->pathing = PathManager::LoadPathFile(zone->map_name);
+	zone->pathing = IPathfinder::Load(zone->map_name);
 
 	Log(Logs::General, Logs::Status, "Loading spawn conditions...");
 	if(!spawn_conditions.LoadSpawnConditions(short_name, instanceid)) {
@@ -1425,11 +1434,18 @@ bool Zone::HasWeather()
 void Zone::StartShutdownTimer(uint32 set_time) {
 	if (set_time > autoshutdown_timer.GetRemainingTime()) {
 		if (set_time == (RuleI(Zone, AutoShutdownDelay))) {
-			set_time = database.getZoneShutDownDelay(GetZoneID(), GetInstanceVersion());
+			set_time = static_cast<uint32>(database.getZoneShutDownDelay(GetZoneID(), GetInstanceVersion()));
 		}
 		autoshutdown_timer.SetTimer(set_time);
 		Log(Logs::General, Logs::Zone_Server, "Zone::StartShutdownTimer set to %u", set_time);
 	}
+
+	Log(Logs::Detail, Logs::Zone_Server,
+	    "Zone::StartShutdownTimer trigger - set_time: %u remaining_time: %u diff: %i",
+	    set_time,
+	    autoshutdown_timer.GetRemainingTime(),
+	    (set_time - autoshutdown_timer.GetRemainingTime())
+	);
 }
 
 bool Zone::Depop(bool StartSpawnTimer) {

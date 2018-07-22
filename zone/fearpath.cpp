@@ -19,7 +19,6 @@
 #include "../common/rulesys.h"
 
 #include "map.h"
-#include "pathing.h"
 #include "zone.h"
 
 #ifdef _WINDOWS
@@ -130,23 +129,12 @@ void Mob::CalculateNewFearpoint()
 {
 	if(RuleB(Pathing, Fear) && zone->pathing)
 	{
-		int Node = zone->pathing->GetRandomPathNode();
+		auto Node = zone->pathing->GetRandomLocation();
+		if (Node.x != 0.0f || Node.y != 0.0f || Node.z != 0.0f) {
 
-		glm::vec3 Loc = zone->pathing->GetPathNodeCoordinates(Node);
+			++Node.z;
+			m_FearWalkTarget = Node;
 
-		++Loc.z;
-
-		glm::vec3 CurrentPosition(GetX(), GetY(), GetZ());
-
-		std::deque<int> Route = zone->pathing->FindRoute(CurrentPosition, Loc);
-
-		if(!Route.empty())
-		{
-            m_FearWalkTarget = glm::vec3(Loc.x, Loc.y, Loc.z);
-			currently_fleeing = true;
-
-			Log(Logs::Detail, Logs::None, "Feared to node %i (%8.3f, %8.3f, %8.3f)", Node, Loc.x, Loc.y, Loc.z);
-			return;
 		}
 
 		Log(Logs::Detail, Logs::None, "No path found to selected node. Falling through to old fear point selection.");
@@ -172,9 +160,7 @@ void Mob::CalculateNewFearpoint()
 		}
 	}
 
-	if (loop <= 100)
-	{
-		m_FearWalkTarget = glm::vec3(ranx, rany, ranz);
-	}
+	if (currently_fleeing)
+        m_FearWalkTarget = glm::vec3(ranx, rany, ranz);
 }
 

@@ -19,6 +19,7 @@
 #define BASEPACKET_H_
 
 #include "types.h"
+#include "serialize_buffer.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -63,6 +64,8 @@ public:
 	void WriteFloat(float value) { *(float *)(pBuffer + _wpos) = value; _wpos += sizeof(float); }
 	void WriteDouble(double value) { *(double *)(pBuffer + _wpos) = value; _wpos += sizeof(double); }
 	void WriteString(const char * str) { uint32 len = static_cast<uint32>(strlen(str)) + 1; memcpy(pBuffer + _wpos, str, len); _wpos += len; }
+	// this is used in task system a lot, it is NOT null-termed
+	void WriteLengthString(uint32 len, const char *str) { *(uint32 *)(pBuffer + _wpos) = len; _wpos += sizeof(uint32); memcpy(pBuffer + _wpos, str, len); _wpos += len; }
 	void WriteData(const void *ptr, size_t n) { memcpy(pBuffer + _wpos, ptr, n); _wpos += n; }
 
 	uint8 ReadUInt8() { uint8 value = *(uint8 *)(pBuffer + _rpos); _rpos += sizeof(uint8); return value; }
@@ -83,6 +86,7 @@ protected:
 	virtual ~BasePacket();
 	BasePacket() { pBuffer=nullptr; size=0; _wpos = 0; _rpos = 0; }
 	BasePacket(const unsigned char *buf, const uint32 len);
+	BasePacket(SerializeBuffer &buf);
 };
 
 extern void DumpPacketHex(const BasePacket* app);

@@ -100,8 +100,6 @@ public:
 	void depopall(int npc_type = 0);
 	void depopzone(bool StartSpawnTimer = true);
 	void repopzone();
-	void ConnectNodeToNode(int node1, int node2, int teleport, int doorid);
-	void AddNode(float x, float y, float z, float best_z, int32 requested_id);
 	void settarget(const char *type, int target_id);
 	void follow(int entity_id, int distance);
 	void sfollow();

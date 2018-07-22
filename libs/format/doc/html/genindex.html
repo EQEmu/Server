@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
     
-    <title>Index &mdash; fmt 3.0.0 documentation</title>
+    <title>Index &mdash; fmt 4.0.0 documentation</title>
     
     <link rel="stylesheet" href="_static/basic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -18,10 +18,11 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '3.0.0',
+        VERSION:     '4.0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX:  ''
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
@@ -34,8 +35,9 @@
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();
+    a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;
+    a.src=g;m.parentNode.insertBefore(a,m)
   })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
   ga('create', 'UA-20116650-4', 'fmtlib.net');
   ga('send', 'pageview');
@@ -49,7 +51,8 @@
       <div class="navbar-content">
         
         <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
+          <button type="button" class="navbar-toggle collapsed"
+                  data-toggle="collapse" data-target=".navbar-collapse">
             <span class="sr-only">Toggle navigation</span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
@@ -62,13 +65,17 @@
         <div class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
             <li class="dropdown">
-              
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
-                 aria-expanded="false">3.0.0 <span class="caret"></span></a>
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown"
+                 role="button" aria-expanded="false">4.0.0
+                <span class="caret"></span></a>
               <ul class="dropdown-menu" role="menu">
-                <li><a href="http://fmtlib.net/2.0.0/">2.0.0</a></li>
-                <li><a href="http://fmtlib.net/1.1.0/">1.1.0</a></li>
-                <li><a href="http://fmtlib.net/1.0.0/">1.0.0</a></li>
+                
+                <li><a href="http://fmtlib.net/3.0.0">3.0.0</a></li>
+                
+                <li><a href="http://fmtlib.net/2.0.0">2.0.0</a></li>
+                
+                <li><a href="http://fmtlib.net/1.1.0">1.1.0</a></li>
+                
               </ul>
             </li>
             
@@ -91,9 +98,11 @@
           </ul>
           
             
-<form class="navbar-form navbar-right" role="search" action="search.html" method="get">
+<form class="navbar-form navbar-right" role="search" action="search.html"
+      method="get">
   <div class="form-group">
-    <input type="text" name="q" class="form-control" placeholder="Search" >
+    <input type="text" name="q" class="form-control"
+           placeholder="Search" >
   </div>
   <input type="hidden" name="check_keywords" value="yes" />
   <input type="hidden" name="area" value="default" />
@@ -141,7 +150,7 @@
   </dt>
 
       
-  <dt><a href="api.html#_CPPv2N3fmt7ArgListixEj">fmt::ArgList::operator[] (C++ function)</a>
+  <dt><a href="api.html#_CPPv2NK3fmt7ArgListixEj">fmt::ArgList::operator[] (C++ function)</a>
   </dt>
 
       
@@ -217,7 +226,7 @@
   </dt>
 
       
-  <dt><a href="api.html#_CPPv2N3fmt17BasicArgFormatter17BasicArgFormatterER14BasicFormatterI4Char4ImplER10FormatSpecPK4Char">fmt::BasicArgFormatter::BasicArgFormatter (C++ function)</a>
+  <dt><a href="api.html#_CPPv2N3fmt17BasicArgFormatter17BasicArgFormatterER14BasicFormatterI4Char4ImplER4SpecPK4Char">fmt::BasicArgFormatter::BasicArgFormatter (C++ function)</a>
   </dt>
 
       
@@ -233,15 +242,23 @@
   </dt>
 
       
+  <dt><a href="api.html#_CPPv2N3fmt20BasicContainerWriterE">fmt::BasicContainerWriter (C++ class)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt20BasicContainerWriter20BasicContainerWriterER9Container">fmt::BasicContainerWriter::BasicContainerWriter (C++ function)</a>
+  </dt>
+
+      
   <dt><a href="api.html#_CPPv2N3fmt15BasicCStringRefE">fmt::BasicCStringRef (C++ class)</a>
   </dt>
 
       
-  <dt><a href="api.html#_CPPv2N3fmt15BasicCStringRef15BasicCStringRefEPK4Char">fmt::BasicCStringRef::BasicCStringRef (C++ function)</a>, <a href="api.html#_CPPv2N3fmt15BasicCStringRef15BasicCStringRefERKNSt12basic_stringI4CharEE">[1]</a>
+  <dt><a href="api.html#_CPPv2N3fmt15BasicCStringRef15BasicCStringRefEPK4Char">fmt::BasicCStringRef::BasicCStringRef (C++ function)</a>, <a href="api.html#_CPPv2N3fmt15BasicCStringRef15BasicCStringRefERKNSt12basic_stringI4CharNSt11char_traitsI4CharEE9AllocatorEE">[1]</a>
   </dt>
 
       
-  <dt><a href="api.html#_CPPv2N3fmt15BasicCStringRef5c_strEv">fmt::BasicCStringRef::c_str (C++ function)</a>
+  <dt><a href="api.html#_CPPv2NK3fmt15BasicCStringRef5c_strEv">fmt::BasicCStringRef::c_str (C++ function)</a>
   </dt>
 
       
@@ -276,6 +293,34 @@
   <dt><a href="api.html#_CPPv2N3fmt17BasicMemoryWriteraSERR17BasicMemoryWriter">fmt::BasicMemoryWriter::operator= (C++ function)</a>
   </dt>
 
+      
+  <dt><a href="api.html#_CPPv2N3fmt23BasicPrintfArgFormatterE">fmt::BasicPrintfArgFormatter (C++ class)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt23BasicPrintfArgFormatter23BasicPrintfArgFormatterER11BasicWriterI4CharER4Spec">fmt::BasicPrintfArgFormatter::BasicPrintfArgFormatter (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt23BasicPrintfArgFormatter10visit_boolEb">fmt::BasicPrintfArgFormatter::visit_bool (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt23BasicPrintfArgFormatter10visit_charEi">fmt::BasicPrintfArgFormatter::visit_char (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt23BasicPrintfArgFormatter13visit_cstringEPKc">fmt::BasicPrintfArgFormatter::visit_cstring (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt23BasicPrintfArgFormatter12visit_customEN8internal3Arg11CustomValueE">fmt::BasicPrintfArgFormatter::visit_custom (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt23BasicPrintfArgFormatter13visit_pointerEPKv">fmt::BasicPrintfArgFormatter::visit_pointer (C++ function)</a>
+  </dt>
+
   </dl></td>
   <td style="width: 33%" valign="top"><dl>
       
@@ -283,19 +328,31 @@
   </dt>
 
       
-  <dt><a href="api.html#_CPPv2N3fmt14BasicStringRef14BasicStringRefEPK4Char">fmt::BasicStringRef::BasicStringRef (C++ function)</a>, <a href="api.html#_CPPv2N3fmt14BasicStringRef14BasicStringRefEPK4CharNSt6size_tE">[1]</a>, <a href="api.html#_CPPv2N3fmt14BasicStringRef14BasicStringRefERKNSt12basic_stringI4CharEE">[2]</a>
+  <dt><a href="api.html#_CPPv2N3fmt14BasicStringRef14BasicStringRefEPK4Char">fmt::BasicStringRef::BasicStringRef (C++ function)</a>, <a href="api.html#_CPPv2N3fmt14BasicStringRef14BasicStringRefEPK4CharNSt6size_tE">[1]</a>, <a href="api.html#_CPPv2N3fmt14BasicStringRef14BasicStringRefERKNSt12basic_stringI4CharNSt11char_traitsI4CharEE9AllocatorEE">[2]</a>
   </dt>
 
       
-  <dt><a href="api.html#_CPPv2N3fmt14BasicStringRef4dataEv">fmt::BasicStringRef::data (C++ function)</a>
+  <dt><a href="api.html#_CPPv2NK3fmt14BasicStringRef4dataEv">fmt::BasicStringRef::data (C++ function)</a>
   </dt>
 
       
-  <dt><a href="api.html#_CPPv2N3fmt14BasicStringRef4sizeEv">fmt::BasicStringRef::size (C++ function)</a>
+  <dt><a href="api.html#_CPPv2NK3fmt14BasicStringRef4sizeEv">fmt::BasicStringRef::size (C++ function)</a>
   </dt>
 
       
-  <dt><a href="api.html#_CPPv2N3fmt14BasicStringRef9to_stringEv">fmt::BasicStringRef::to_string (C++ function)</a>
+  <dt><a href="api.html#_CPPv2NK3fmt14BasicStringRef9to_stringEv">fmt::BasicStringRef::to_string (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt17BasicStringWriterE">fmt::BasicStringWriter (C++ class)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt17BasicStringWriter17BasicStringWriterERK9Allocator">fmt::BasicStringWriter::BasicStringWriter (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt17BasicStringWriter7move_toERNSt12basic_stringI4CharNSt11char_traitsI4CharEE9AllocatorEE">fmt::BasicStringWriter::move_to (C++ function)</a>
   </dt>
 
       
@@ -303,11 +360,11 @@
   </dt>
 
       
-  <dt><a href="api.html#_CPPv2N3fmt11BasicWriter5c_strEv">fmt::BasicWriter::c_str (C++ function)</a>
+  <dt><a href="api.html#_CPPv2NK3fmt11BasicWriter5c_strEv">fmt::BasicWriter::c_str (C++ function)</a>
   </dt>
 
       
-  <dt><a href="api.html#_CPPv2N3fmt11BasicWriter4dataEv">fmt::BasicWriter::data (C++ function)</a>
+  <dt><a href="api.html#_CPPv2NK3fmt11BasicWriter4dataEv">fmt::BasicWriter::data (C++ function)</a>
   </dt>
 
       
@@ -315,11 +372,11 @@
   </dt>
 
       
-  <dt><a href="api.html#_CPPv2N3fmt11BasicWriter4sizeEv">fmt::BasicWriter::size (C++ function)</a>
+  <dt><a href="api.html#_CPPv2NK3fmt11BasicWriter4sizeEv">fmt::BasicWriter::size (C++ function)</a>
   </dt>
 
       
-  <dt><a href="api.html#_CPPv2N3fmt11BasicWriter3strEv">fmt::BasicWriter::str (C++ function)</a>
+  <dt><a href="api.html#_CPPv2NK3fmt11BasicWriter3strEv">fmt::BasicWriter::str (C++ function)</a>
   </dt>
 
       
@@ -343,7 +400,7 @@
   </dt>
 
       
-  <dt><a href="api.html#_CPPv2N3fmt6Buffer8capacityEv">fmt::Buffer::capacity (C++ function)</a>
+  <dt><a href="api.html#_CPPv2NK3fmt6Buffer8capacityEv">fmt::Buffer::capacity (C++ function)</a>
   </dt>
 
       
@@ -359,11 +416,15 @@
   </dt>
 
       
-  <dt><a href="api.html#_CPPv2N3fmt6Buffer4sizeEv">fmt::Buffer::size (C++ function)</a>
+  <dt><a href="api.html#_CPPv2NK3fmt6Buffer4sizeEv">fmt::Buffer::size (C++ function)</a>
   </dt>
 
       
   <dt><a href="api.html#_CPPv2N3fmt6formatE10CStringRef7ArgList">fmt::format (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt19format_system_errorERN3fmt6WriterEiN3fmt9StringRefE">fmt::format_system_error (C++ function)</a>
   </dt>
 
       
@@ -376,14 +437,6 @@
 
       
   <dt><a href="api.html#_CPPv2N3fmt4hexuEi">fmt::hexu (C++ function)</a>
-  </dt>
-
-      
-  <dt><a href="api.html#_CPPv2N3fmt8literalsli2_aEPKcNSt6size_tE">fmt::literals::operator&#34;&#34;_a (C++ function)</a>
-  </dt>
-
-      
-  <dt><a href="api.html#_CPPv2N3fmt8literalsli7_formatEPKcNSt6size_tE">fmt::literals::operator&#34;&#34;_format (C++ function)</a>
   </dt>
 
       
@@ -403,6 +456,26 @@
   </dt>
 
       
+  <dt><a href="api.html#_CPPv2N3fmt18PrintfArgFormatterE">fmt::PrintfArgFormatter (C++ class)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt18PrintfArgFormatter18PrintfArgFormatterER11BasicWriterI4CharER10FormatSpec">fmt::PrintfArgFormatter::PrintfArgFormatter (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt15PrintfFormatterE">fmt::PrintfFormatter (C++ class)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt15PrintfFormatter6formatE15BasicCStringRefI4CharE">fmt::PrintfFormatter::format (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt15PrintfFormatter15PrintfFormatterERK7ArgListR11BasicWriterI4CharE">fmt::PrintfFormatter::PrintfFormatter (C++ function)</a>
+  </dt>
+
+      
   <dt><a href="api.html#_CPPv2N3fmt7sprintfE10CStringRef7ArgList">fmt::sprintf (C++ function)</a>
   </dt>
 
@@ -412,6 +485,10 @@
 
       
   <dt><a href="api.html#_CPPv2N3fmt11SystemError11SystemErrorEi10CStringRef">fmt::SystemError::SystemError (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt9to_stringERK1T">fmt::to_string (C++ function)</a>
   </dt>
 
       
@@ -443,7 +520,7 @@
 
     <div class="footer" role="contentinfo">
         &copy; Copyright 2012-2015, Victor Zverovich.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1+.
     </div>
 
 <script src="_static/bootstrap.min.js"></script>

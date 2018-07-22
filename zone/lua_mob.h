@@ -242,8 +242,6 @@ public:
 	double CalculateHeadingToTarget(double in_x, double in_y);
 	bool CalculateNewPosition(double x, double y, double z, double speed);
 	bool CalculateNewPosition(double x, double y, double z, double speed, bool check_z);
-	bool CalculateNewPosition2(double x, double y, double z, double speed);
-	bool CalculateNewPosition2(double x, double y, double z, double speed, bool check_z);
 	float CalculateDistance(double x, double y, double z);
 	void SendTo(double x, double y, double z);
 	void SendToFixZ(double x, double y, double z);

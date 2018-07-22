@@ -110,10 +110,12 @@ public:
 
 	virtual ~NPC();
 
+	static NPC *SpawnGridNodeNPC(std::string name, const glm::vec4 &position, uint32 grid_id, uint32 grid_number, uint32 pause);
+
 	//abstract virtual function implementations requird by base abstract class
 	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill);
 	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None);
-	virtual bool Attack(Mob* other, int Hand = EQEmu::inventory::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = false,
+	virtual bool Attack(Mob* other, int Hand = EQEmu::invslot::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = false,
 		bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr);
 	virtual bool HasRaid() { return false; }
 	virtual bool HasGroup() { return false; }
@@ -276,6 +278,7 @@ public:
 	void	SetTaunting(bool tog) {taunting = tog;}
 	bool	IsTaunting() const { return taunting; }
 	void	PickPocket(Client* thief);
+	void	Disarm(Client* client, int chance);
 	void	StartSwarmTimer(uint32 duration) { swarm_timer.Start(duration); }
 	void	AddLootDrop(const EQEmu::ItemData*dbitem, ItemList* itemlistconst, int16 charges, uint8 minlevel, uint8 maxlevel, bool equipit, bool wearchange = false, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0);
 	virtual void DoClassAttacks(Mob *target);
@@ -534,7 +537,7 @@ protected:
 
 	uint16	skills[EQEmu::skills::HIGHEST_SKILL + 1];
 
-	uint32	equipment[EQEmu::legacy::EQUIPMENT_SIZE];	//this is an array of item IDs
+	uint32	equipment[EQEmu::invslot::EQUIPMENT_COUNT];	//this is an array of item IDs
 
 	uint32	herosforgemodel;			//this is the Hero Forge Armor Model (i.e 63 or 84 or 203)
 	uint16	d_melee_texture1;			//this is an item Material value
@@ -561,6 +564,8 @@ protected:
 
 	bool raid_target;
 	bool ignore_despawn; //NPCs with this set to 1 will ignore the despawn value in spawngroup
+
+
 
 private:
 	uint32	loottable_id;

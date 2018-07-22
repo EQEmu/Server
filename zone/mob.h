@@ -21,7 +21,7 @@
 #include "common.h"
 #include "entity.h"
 #include "hate_list.h"
-#include "pathing.h"
+#include "pathfinder_interface.h"
 #include "position.h"
 #include "aa_ability.h"
 #include "aa.h"
@@ -184,7 +184,7 @@ public:
 	virtual void RangedAttack(Mob* other) { }
 	virtual void ThrowingAttack(Mob* other) { }
 	// 13 = Primary (default), 14 = secondary
-	virtual bool Attack(Mob* other, int Hand = EQEmu::inventory::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = false,
+	virtual bool Attack(Mob* other, int Hand = EQEmu::invslot::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = false,
 		bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr) = 0;
 	void DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts = nullptr);
 	int MonkSpecialAttack(Mob* other, uint8 skill_used);
@@ -537,7 +537,7 @@ public:
 	inline const float GetTarVZ() const { return m_TargetV.z; }
 	inline const float GetTarVector() const { return tar_vector; }
 	inline const uint8 GetTarNDX() const { return tar_ndx; }
-	inline const int8 GetFlyMode() const { return flymode; }
+	inline const int8 GetFlyMode() const { return static_cast<const int8>(flymode); }
 	bool IsBoat() const;
 
 	//Group
@@ -675,7 +675,7 @@ public:
 	inline AuraMgr &GetAuraMgr() { return aura_mgr; } // mainly used for zone db loading/saving
 
 	//Procs
-	void TriggerDefensiveProcs(Mob *on, uint16 hand = EQEmu::inventory::slotPrimary, bool FromSkillProc = false, int damage = 0);
+	void TriggerDefensiveProcs(Mob *on, uint16 hand = EQEmu::invslot::slotPrimary, bool FromSkillProc = false, int damage = 0);
 	bool AddRangedProc(uint16 spell_id, uint16 iChance = 3, uint16 base_spell_id = SPELL_UNKNOWN);
 	bool RemoveRangedProc(uint16 spell_id, bool bAll = false);
 	bool HasRangedProcs() const;
@@ -979,16 +979,17 @@ public:
 	inline bool IsBlind() { return spellbonuses.IsBlind; }
 
 	inline bool			CheckAggro(Mob* other) {return hate_list.IsEntOnHateList(other);}
-	float				CalculateHeadingToTarget(float in_x, float in_y) {return HeadingAngleToMob(in_x, in_y); }
-	bool				CalculateNewPosition(float x, float y, float z, int speed, bool checkZ = false, bool calcHeading = true);
-	virtual bool		CalculateNewPosition2(float x, float y, float z, int speed, bool checkZ = true, bool calcHeading = true);
+	float				CalculateHeadingToTarget(float in_x, float in_y) { return HeadingAngleToMob(in_x, in_y); }
+	virtual bool		CalculateNewPosition(float x, float y, float z, int speed, bool checkZ = true, bool calcheading = true);
 	float				CalculateDistance(float x, float y, float z);
 	float				GetGroundZ(float new_x, float new_y, float z_offset=0.0);
 	void				SendTo(float new_x, float new_y, float new_z);
 	void				SendToFixZ(float new_x, float new_y, float new_z);
 	float				GetZOffset() const;
+	float               GetDefaultRaceSize() const;
 	void 				FixZ(int32 z_find_offset = 5);
-	float 			GetFixedZ(glm::vec3 position, int32 z_find_offset = 5);
+	float				GetFixedZ(glm::vec3 position, int32 z_find_offset = 5);
+	
 	void				NPCSpecialAttacks(const char* parse, int permtag, bool reset = true, bool remove = false);
 	inline uint32		DontHealMeBefore() const { return pDontHealMeBefore; }
 	inline uint32		DontBuffMeBefore() const { return pDontBuffMeBefore; }
@@ -1285,13 +1286,13 @@ protected:
 	void TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success = false, uint16 hand = 0, bool IsDefensive = false); // hand = SlotCharm?
 	bool PassLimitToSkill(uint16 spell_id, uint16 skill);
 	bool PassLimitClass(uint32 Classes_, uint16 Class_);
-	void TryDefensiveProc(Mob *on, uint16 hand = EQEmu::inventory::slotPrimary);
-	void TryWeaponProc(const EQEmu::ItemInstance* inst, const EQEmu::ItemData* weapon, Mob *on, uint16 hand = EQEmu::inventory::slotPrimary);
-	void TrySpellProc(const EQEmu::ItemInstance* inst, const EQEmu::ItemData* weapon, Mob *on, uint16 hand = EQEmu::inventory::slotPrimary);
-	void TryWeaponProc(const EQEmu::ItemInstance* weapon, Mob *on, uint16 hand = EQEmu::inventory::slotPrimary);
+	void TryDefensiveProc(Mob *on, uint16 hand = EQEmu::invslot::slotPrimary);
+	void TryWeaponProc(const EQEmu::ItemInstance* inst, const EQEmu::ItemData* weapon, Mob *on, uint16 hand = EQEmu::invslot::slotPrimary);
+	void TrySpellProc(const EQEmu::ItemInstance* inst, const EQEmu::ItemData* weapon, Mob *on, uint16 hand = EQEmu::invslot::slotPrimary);
+	void TryWeaponProc(const EQEmu::ItemInstance* weapon, Mob *on, uint16 hand = EQEmu::invslot::slotPrimary);
 	void ExecWeaponProc(const EQEmu::ItemInstance* weapon, uint16 spell_id, Mob *on, int level_override = -1);
-	virtual float GetProcChances(float ProcBonus, uint16 hand = EQEmu::inventory::slotPrimary);
-	virtual float GetDefensiveProcChances(float &ProcBonus, float &ProcChance, uint16 hand = EQEmu::inventory::slotPrimary, Mob *on = nullptr);
+	virtual float GetProcChances(float ProcBonus, uint16 hand = EQEmu::invslot::slotPrimary);
+	virtual float GetDefensiveProcChances(float &ProcBonus, float &ProcChance, uint16 hand = EQEmu::invslot::slotPrimary, Mob *on = nullptr);
 	virtual float GetSkillProcChances(uint16 ReuseTime, uint16 hand = 0); // hand = MainCharm?
 	uint16 GetWeaponSpeedbyHand(uint16 hand);
 #ifdef BOTS
@@ -1303,7 +1304,7 @@ protected:
 	float FindGroundZ(float new_x, float new_y, float z_offset=0.0);
 	float FindDestGroundZ(glm::vec3 dest, float z_offset=0.0);
 	glm::vec3 UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &WaypointChange, bool &NodeReached);
-	void PrintRoute();
+	glm::vec3 HandleStuckPath(const glm::vec3 &To, const glm::vec3 &From);
 
 	virtual float GetSympatheticProcChances(uint16 spell_id, int16 ProcRateMod, int32 ItemProcRate = 0);
 	int16 GetSympatheticSpellProcRate(uint16 spell_id);
@@ -1440,6 +1441,7 @@ protected:
 	std::unique_ptr<Timer> AI_walking_timer;
 	std::unique_ptr<Timer> AI_feign_remember_timer;
 	std::unique_ptr<Timer> AI_check_signal_timer;
+	std::unique_ptr<Timer> AI_scan_door_open_timer;
 	uint32 pLastFightingDelayMoving;
 	HateList hate_list;
 	std::set<uint32> feign_memory_list;
@@ -1452,9 +1454,7 @@ protected:
 	void AddItemFactionBonus(uint32 pFactionID,int32 bonus);
 	int32 GetItemFactionBonus(uint32 pFactionID);
 	void ClearItemFactionBonuses();
-	Timer mHateListCleanup;
-
-	void CalculateFearPosition();
+	Timer hate_list_cleanup_timer;
 
 	bool flee_mode;
 	Timer flee_timer;
@@ -1482,7 +1482,6 @@ protected:
 	int npc_assist_cap;
 	Timer assist_cap_timer; // clear assist cap so more nearby mobs can be called for help
 
-
 	int patrol;
 	glm::vec3 m_FearWalkTarget;
 	bool currently_fleeing;
@@ -1490,16 +1489,11 @@ protected:
 	// Pathing
 	//
 	glm::vec3 PathingDestination;
+	IPathfinder::IPath Route;
+	std::unique_ptr<Timer> PathRecalcTimer;
+	bool DistractedFromGrid;
 	glm::vec3 PathingLastPosition;
 	int PathingLoopCount;
-	int PathingLastNodeVisited;
-	std::deque<int> Route;
-	LOSType PathingLOSState;
-	Timer *PathingLOSCheckTimer;
-	Timer *PathingRouteUpdateTimerShort;
-	Timer *PathingRouteUpdateTimerLong;
-	bool DistractedFromGrid;
-	int PathingTraversedNodes;
 
 	uint32 pDontHealMeBefore;
 	uint32 pDontBuffMeBefore;

@@ -3,6 +3,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 SET(common_sources
 	base_packet.cpp
 	classes.cpp
+	compression.cpp
 	condition.cpp
 	crash.cpp
 	crc16.cpp
@@ -13,7 +14,6 @@ SET(common_sources
 	dbcore.cpp
 	deity.cpp
 	emu_constants.cpp
-	emu_legacy.cpp
 	emu_limits.cpp
 	emu_opcodes.cpp
 	emu_versions.cpp
@@ -60,6 +60,7 @@ SET(common_sources
 	rdtsc.cpp
 	rulesys.cpp
 	say_link.cpp
+	serialize_buffer.cpp
 	serverinfo.cpp
 	shareddb.cpp
 	skills.cpp
@@ -113,6 +114,7 @@ SET(common_headers
 	base_data.h
 	bodytypes.h
 	classes.h
+	compression.h
 	condition.h
 	crash.h
 	crc16.h
@@ -122,7 +124,6 @@ SET(common_headers
 	dbcore.h
 	deity.h
 	emu_constants.h
-	emu_legacy.h
 	emu_limits.h
 	emu_opcodes.h
 	emu_oplist.h
@@ -190,6 +191,7 @@ SET(common_headers
 	ruletypes.h
 	say_link.h
 	seperator.h
+	serialize_buffer.h
 	serverinfo.h
 	servertalk.h
 	shareddb.h

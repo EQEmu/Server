@@ -40,7 +40,7 @@ public:
 	void Disable();
 	void Start(uint32 set_timer_time=0, bool ChangeResetTimer = true);
 	void SetTimer(uint32 set_timer_time=0);
-	uint32 GetRemainingTime();
+	uint32 GetRemainingTime() const;
 	inline const uint32& GetTimerTime()		{ return timer_time; }
 	inline const uint32& GetSetAtTrigger()	{ return set_at_trigger; }
 	void Trigger();

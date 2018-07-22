@@ -181,6 +181,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_DeleteItem] = &Client::Handle_OP_DeleteItem;
 	ConnectedOpcodes[OP_DeleteSpawn] = &Client::Handle_OP_DeleteSpawn;
 	ConnectedOpcodes[OP_DeleteSpell] = &Client::Handle_OP_DeleteSpell;
+	ConnectedOpcodes[OP_Disarm] = &Client::Handle_OP_Disarm;
 	ConnectedOpcodes[OP_DisarmTraps] = &Client::Handle_OP_DisarmTraps;
 	ConnectedOpcodes[OP_DoGroupLeadershipAbility] = &Client::Handle_OP_DoGroupLeadershipAbility;
 	ConnectedOpcodes[OP_DuelResponse] = &Client::Handle_OP_DuelResponse;
@@ -1731,7 +1732,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 			if (iter == m_inv.cursor_cbegin())
 				continue;
 			const EQEmu::ItemInstance *inst = *iter;
-			SendItemPacket(EQEmu::inventory::slotCursor, inst, ItemPacketLimbo);
+			SendItemPacket(EQEmu::invslot::slotCursor, inst, ItemPacketLimbo);
 		}
 	}
 
@@ -2069,7 +2070,7 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 	EQEmu::ItemInstance *inst = database.CreateItem(item, charges);
 	if (!AutoPutLootInInventory(*inst, true, true))
 	{
-		PutLootInInventory(EQEmu::inventory::slotCursor, *inst);
+		PutLootInInventory(EQEmu::invslot::slotCursor, *inst);
 	}
 	Save(1);
 }
@@ -2603,7 +2604,7 @@ void Client::Handle_OP_AltCurrencyPurchase(const EQApplicationPacket *app)
 		EQEmu::ItemInstance *inst = database.CreateItem(item, charges);
 		if (!AutoPutLootInInventory(*inst, true, true))
 		{
-			PutLootInInventory(EQEmu::inventory::slotCursor, *inst);
+			PutLootInInventory(EQEmu::invslot::slotCursor, *inst);
 		}
 
 		Save(1);
@@ -2653,7 +2654,7 @@ void Client::Handle_OP_AltCurrencyReclaim(const EQApplicationPacket *app)
 			SetAlternateCurrencyValue(reclaim->currency_id, 0);
 		}
 		else {
-			SummonItem(item_id, reclaim->count, 0, 0, 0, 0, 0, 0, false, EQEmu::inventory::slotCursor);
+			SummonItem(item_id, reclaim->count, 0, 0, 0, 0, 0, 0, false, EQEmu::invslot::slotCursor);
 			AddAlternateCurrencyValue(reclaim->currency_id, -((int32)reclaim->count));
 		}
 		/* QS: PlayerLogAlternateCurrencyTransactions :: Cursor to Item Storage */
@@ -2866,8 +2867,8 @@ void Client::Handle_OP_ApplyPoison(const EQApplicationPacket *app)
 
 	uint32 ApplyPoisonSuccessResult = 0;
 	ApplyPoison_Struct* ApplyPoisonData = (ApplyPoison_Struct*)app->pBuffer;
-	const EQEmu::ItemInstance* PrimaryWeapon = GetInv().GetItem(EQEmu::inventory::slotPrimary);
-	const EQEmu::ItemInstance* SecondaryWeapon = GetInv().GetItem(EQEmu::inventory::slotSecondary);
+	const EQEmu::ItemInstance* PrimaryWeapon = GetInv().GetItem(EQEmu::invslot::slotPrimary);
+	const EQEmu::ItemInstance* SecondaryWeapon = GetInv().GetItem(EQEmu::invslot::slotSecondary);
 	const EQEmu::ItemInstance* PoisonItemInstance = GetInv()[ApplyPoisonData->inventorySlot];
 	const EQEmu::ItemData* poison=PoisonItemInstance->GetItem();
 	const EQEmu::ItemData* primary=nullptr;
@@ -3001,14 +3002,14 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 	bool deleteItems = false;
 	if (ClientVersion() >= EQEmu::versions::ClientVersion::RoF)
 	{
-		if ((in_augment->container_slot < 0 || in_augment->container_slot >= EQEmu::legacy::SLOT_CURSOR) &&
-			in_augment->container_slot != EQEmu::legacy::SLOT_POWER_SOURCE &&
-			(in_augment->container_slot < EQEmu::legacy::SLOT_PERSONAL_BAGS_BEGIN || in_augment->container_slot > EQEmu::legacy::SLOT_PERSONAL_BAGS_END))
+		if ((in_augment->container_slot < 0 || in_augment->container_slot >= EQEmu::invslot::slotCursor) &&
+			in_augment->container_slot != EQEmu::invslot::SLOT_POWER_SOURCE &&
+			(in_augment->container_slot < EQEmu::invbag::GENERAL_BAGS_BEGIN || in_augment->container_slot > EQEmu::invbag::GENERAL_BAGS_END))
 		{
 			Message(13, "The server does not allow augmentation actions from this slot.");
-			auto cursor_item = m_inv[EQEmu::legacy::SLOT_CURSOR];
+			auto cursor_item = m_inv[EQEmu::invslot::slotCursor];
 			auto augmented_item = m_inv[in_augment->container_slot];
-			SendItemPacket(EQEmu::legacy::SLOT_CURSOR, cursor_item, ItemPacketCharInventory);
+			SendItemPacket(EQEmu::invslot::slotCursor, cursor_item, ItemPacketCharInventory);
 			// this may crash clients on certain slots
 			SendItemPacket(in_augment->container_slot, augmented_item, ItemPacketCharInventory);
 			return;
@@ -3083,7 +3084,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 		{
 		case 0: // Adding an augment
 		case 2: // Swapping augment
-			new_aug = user_inv.GetItem(EQEmu::inventory::slotCursor);
+			new_aug = user_inv.GetItem(EQEmu::invslot::slotCursor);
 
 			if (!new_aug) // Shouldn't get the OP code without the augment on the user's cursor, but maybe it's h4x.
 			{
@@ -3141,7 +3142,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 					if (itemOneToPush)
 					{
 						DeleteItemInInventory(item_slot, 0, true);
-						DeleteItemInInventory(EQEmu::inventory::slotCursor, new_aug->IsStackable() ? 1 : 0, true);
+						DeleteItemInInventory(EQEmu::invslot::slotCursor, new_aug->IsStackable() ? 1 : 0, true);
 
 						if (solvent)
 						{
@@ -3152,7 +3153,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 						if (itemTwoToPush)
 						{
 							// This is a swap. Return the old aug to the player's cursor.
-							if (!PutItemInInventory(EQEmu::inventory::slotCursor, *itemTwoToPush, true))
+							if (!PutItemInInventory(EQEmu::invslot::slotCursor, *itemTwoToPush, true))
 							{
 								Log(Logs::General, Logs::Error, "Problem returning old augment to player's cursor after augmentation swap.");
 								Message(15, "Error: Failed to retrieve old augment after augmentation swap!");
@@ -3237,7 +3238,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 				}
 
 				// Drop the removed augment on the player's cursor
-				if (!PutItemInInventory(EQEmu::inventory::slotCursor, *itemTwoToPush, true))
+				if (!PutItemInInventory(EQEmu::invslot::slotCursor, *itemTwoToPush, true))
 				{
 					Log(Logs::General, Logs::Error, "Problem returning augment to player's cursor after safe removal.");
 					Message(15, "Error: Failed to return augment after removal from item!");
@@ -4031,7 +4032,7 @@ void Client::Handle_OP_CancelTask(const EQApplicationPacket *app)
 	CancelTask_Struct *cts = (CancelTask_Struct*)app->pBuffer;
 
 	if (RuleB(TaskSystem, EnableTaskSystem) && taskstate)
-		taskstate->CancelTask(this, cts->SequenceNumber);
+		taskstate->CancelTask(this, cts->SequenceNumber, static_cast<TaskType>(cts->type));
 }
 
 void Client::Handle_OP_CancelTrade(const EQApplicationPacket *app)
@@ -4175,7 +4176,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 		}
 		else
 		{
-			Message(0, "Error: castspell->inventoryslot >= %i (0x%04x)", EQEmu::inventory::slotCursor, castspell->inventoryslot);
+			Message(0, "Error: castspell->inventoryslot >= %i (0x%04x)", EQEmu::invslot::slotCursor, castspell->inventoryslot);
 			InterruptSpell(castspell->spell_id);
 		}
 	}
@@ -4407,8 +4408,7 @@ void Client::Handle_OP_ClientTimeStamp(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 	if (IsAIControlled())
 		return;
 
@@ -4418,17 +4418,19 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 	/* Invalid size check */
 	if (app->size != sizeof(PlayerPositionUpdateClient_Struct)
 		&& app->size != (sizeof(PlayerPositionUpdateClient_Struct) + 1)
-		) {
-		Log(Logs::General, Logs::Error, "OP size error: OP_ClientUpdate expected:%i got:%i", sizeof(PlayerPositionUpdateClient_Struct), app->size);
+			) {
+		Log(Logs::General, Logs::Error, "OP size error: OP_ClientUpdate expected:%i got:%i",
+			sizeof(PlayerPositionUpdateClient_Struct), app->size);
 		return;
 	}
-	PlayerPositionUpdateClient_Struct* ppu = (PlayerPositionUpdateClient_Struct*)app->pBuffer;
+
+	PlayerPositionUpdateClient_Struct *ppu = (PlayerPositionUpdateClient_Struct *) app->pBuffer;
 
 	/* Boat handling */
 	if (ppu->spawn_id != GetID()) {
 		/* If player is controlling boat */
 		if (ppu->spawn_id == controlling_boat_id) {
-			Mob* boat = entity_list.GetMob(controlling_boat_id);
+			Mob *boat = entity_list.GetMob(controlling_boat_id);
 			if (boat == 0) {
 				controlling_boat_id = 0;
 				return;
@@ -4436,9 +4438,9 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 
 			auto boat_delta = glm::vec4(ppu->delta_x, ppu->delta_y, ppu->delta_z, EQ10toFloat(ppu->delta_heading));
 			boat->SetDelta(boat_delta);
-			
+
 			auto outapp = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
-			PlayerPositionUpdateServer_Struct* ppus = (PlayerPositionUpdateServer_Struct*)outapp->pBuffer;
+			PlayerPositionUpdateServer_Struct *ppus = (PlayerPositionUpdateServer_Struct *) outapp->pBuffer;
 			boat->MakeSpawnUpdate(ppus);
 			entity_list.QueueCloseClients(boat, outapp, true, 300, this, false);
 			safe_delete(outapp);
@@ -4446,16 +4448,15 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 			/* Update the boat's position on the server, without sending an update */
 			boat->GMMove(ppu->x_pos, ppu->y_pos, ppu->z_pos, EQ12toFloat(ppu->heading), false);
 			return;
-		}
-		else return;
+		} else return;
 	}
 
 	float dist = 0;
 	float tmp;
 	tmp = m_Position.x - ppu->x_pos;
-	dist += tmp*tmp;
+	dist += tmp * tmp;
 	tmp = m_Position.y - ppu->y_pos;
-	dist += tmp*tmp;
+	dist += tmp * tmp;
 	dist = sqrt(dist);
 
 	/* Hack checks */
@@ -4463,29 +4464,28 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 		if (m_DistanceSinceLastPositionCheck > 0.0) {
 			uint32 cur_time = Timer::GetCurrentTime();
 			if ((cur_time - m_TimeSinceLastPositionCheck) > 0) {
-				float speed = (m_DistanceSinceLastPositionCheck * 100) / (float)(cur_time - m_TimeSinceLastPositionCheck);
+				float speed =
+						(m_DistanceSinceLastPositionCheck * 100) / (float) (cur_time - m_TimeSinceLastPositionCheck);
 				int runs = GetRunspeed();
 				if (speed > (runs * RuleR(Zone, MQWarpDetectionDistanceFactor))) {
-					if (!GetGMSpeed() && (runs >= GetBaseRunspeed() || (speed > (GetBaseRunspeed() * RuleR(Zone, MQWarpDetectionDistanceFactor))))) {
+					if (!GetGMSpeed() && (runs >= GetBaseRunspeed() ||
+										  (speed > (GetBaseRunspeed() * RuleR(Zone, MQWarpDetectionDistanceFactor))))) {
 						if (IsShadowStepExempted()) {
 							if (m_DistanceSinceLastPositionCheck > 800) {
 								CheatDetected(MQWarpShadowStep, ppu->x_pos, ppu->y_pos, ppu->z_pos);
 							}
-						}
-						else if (IsKnockBackExempted()) {
+						} else if (IsKnockBackExempted()) {
 							if (speed > 30.0f) {
 								CheatDetected(MQWarpKnockBack, ppu->x_pos, ppu->y_pos, ppu->z_pos);
 							}
-						}
-						else if (!IsPortExempted()) {
+						} else if (!IsPortExempted()) {
 							if (!IsMQExemptedArea(zone->GetZoneID(), ppu->x_pos, ppu->y_pos, ppu->z_pos)) {
 								if (speed > (runs * 2 * RuleR(Zone, MQWarpDetectionDistanceFactor))) {
 									m_TimeSinceLastPositionCheck = cur_time;
 									m_DistanceSinceLastPositionCheck = 0.0f;
 									CheatDetected(MQWarp, ppu->x_pos, ppu->y_pos, ppu->z_pos);
 									//Death(this, 10000000, SPELL_UNKNOWN, _1H_BLUNT);
-								}
-								else {
+								} else {
 									CheatDetected(MQWarpLight, ppu->x_pos, ppu->y_pos, ppu->z_pos);
 								}
 							}
@@ -4499,43 +4499,39 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 				m_DistanceSinceLastPositionCheck = 0.0f;
 				m_CheatDetectMoved = false;
 			}
-		}
-		else {
+		} else {
 			m_TimeSinceLastPositionCheck = Timer::GetCurrentTime();
 			m_CheatDetectMoved = false;
 		}
-	}
-	else {
+	} else {
 		m_DistanceSinceLastPositionCheck += dist;
 		m_CheatDetectMoved = true;
 		if (m_TimeSinceLastPositionCheck == 0) {
 			m_TimeSinceLastPositionCheck = Timer::GetCurrentTime();
-		}
-		else {
+		} else {
 			uint32 cur_time = Timer::GetCurrentTime();
 			if ((cur_time - m_TimeSinceLastPositionCheck) > 2500) {
-				float speed = (m_DistanceSinceLastPositionCheck * 100) / (float)(cur_time - m_TimeSinceLastPositionCheck);
+				float speed =
+						(m_DistanceSinceLastPositionCheck * 100) / (float) (cur_time - m_TimeSinceLastPositionCheck);
 				int runs = GetRunspeed();
 				if (speed > (runs * RuleR(Zone, MQWarpDetectionDistanceFactor))) {
-					if (!GetGMSpeed() && (runs >= GetBaseRunspeed() || (speed > (GetBaseRunspeed() * RuleR(Zone, MQWarpDetectionDistanceFactor))))) {
+					if (!GetGMSpeed() && (runs >= GetBaseRunspeed() ||
+										  (speed > (GetBaseRunspeed() * RuleR(Zone, MQWarpDetectionDistanceFactor))))) {
 						if (IsShadowStepExempted()) {
 							if (m_DistanceSinceLastPositionCheck > 800) {
 								CheatDetected(MQWarpShadowStep, ppu->x_pos, ppu->y_pos, ppu->z_pos);
 							}
-						}
-						else if (IsKnockBackExempted()) {
+						} else if (IsKnockBackExempted()) {
 							if (speed > 30.0f) {
 								CheatDetected(MQWarpKnockBack, ppu->x_pos, ppu->y_pos, ppu->z_pos);
 							}
-						}
-						else if (!IsPortExempted()) {
+						} else if (!IsPortExempted()) {
 							if (!IsMQExemptedArea(zone->GetZoneID(), ppu->x_pos, ppu->y_pos, ppu->z_pos)) {
 								if (speed > (runs * 2 * RuleR(Zone, MQWarpDetectionDistanceFactor))) {
 									m_TimeSinceLastPositionCheck = cur_time;
 									m_DistanceSinceLastPositionCheck = 0.0f;
 									CheatDetected(MQWarp, ppu->x_pos, ppu->y_pos, ppu->z_pos);
-								}
-								else {
+								} else {
 									CheatDetected(MQWarpLight, ppu->x_pos, ppu->y_pos, ppu->z_pos);
 								}
 							}
@@ -4603,8 +4599,8 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 			improved_hidden = false;
 			if (!invisible) {
 				auto outapp =
-					new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
-				SpawnAppearance_Struct* sa_out = (SpawnAppearance_Struct*)outapp->pBuffer;
+						new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
+				SpawnAppearance_Struct *sa_out = (SpawnAppearance_Struct *) outapp->pBuffer;
 				sa_out->spawn_id = GetID();
 				sa_out->type = 0x03;
 				sa_out->parameter = 0;
@@ -4619,7 +4615,8 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 	is_client_moving = (ppu->y_pos == m_Position.y && ppu->x_pos == m_Position.x) ? false : true;
 
 	if (is_client_moving) {
-		Log(Logs::Detail, Logs::Normal, "ClientUpdate: Client is moving - scan timer is: %u", client_scan_npc_aggro_timer.GetDuration());
+		Log(Logs::Detail, Logs::Normal, "ClientUpdate: Client is moving - scan timer is: %u",
+			client_scan_npc_aggro_timer.GetDuration());
 		if (client_scan_npc_aggro_timer.GetDuration() > 1000) {
 
 			npc_close_scan_timer.Disable();
@@ -4629,9 +4626,9 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 			client_scan_npc_aggro_timer.Start(500);
 
 		}
-	}
-	else {
-		Log(Logs::Detail, Logs::Normal, "ClientUpdate: Client is NOT moving - scan timer is: %u", client_scan_npc_aggro_timer.GetDuration());
+	} else {
+		Log(Logs::Detail, Logs::Normal, "ClientUpdate: Client is NOT moving - scan timer is: %u",
+			client_scan_npc_aggro_timer.GetDuration());
 		if (client_scan_npc_aggro_timer.GetDuration() < 1000) {
 
 			npc_close_scan_timer.Disable();
@@ -4641,7 +4638,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 			client_scan_npc_aggro_timer.Start(3000);
 		}
 	}
-	
+
 	float new_heading = EQ12toFloat(ppu->heading);
 	int32 new_animation = ppu->animation;
 
@@ -4649,10 +4646,11 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 	m_Position.x = ppu->x_pos;
 	m_Position.y = ppu->y_pos;
 	m_Position.z = ppu->z_pos;
-	
+
 	/* Visual Debugging */
 	if (RuleB(Character, OPClientUpdateVisualDebug)) {
-		Log(Logs::General, Logs::Debug, "ClientUpdate: ppu x: %f y: %f z: %f h: %u", ppu->x_pos, ppu->y_pos, ppu->z_pos, ppu->heading);
+		Log(Logs::General, Logs::Debug, "ClientUpdate: ppu x: %f y: %f z: %f h: %u", ppu->x_pos, ppu->y_pos, ppu->z_pos,
+			ppu->heading);
 		this->SendAppearanceEffect(78, 0, 0, 0, 0);
 		this->SendAppearanceEffect(41, 0, 0, 0, 0);
 	}
@@ -4665,14 +4663,13 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 
 		/* Broadcast update to other clients */
 		auto outapp = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
-		PlayerPositionUpdateServer_Struct* position_update = (PlayerPositionUpdateServer_Struct*)outapp->pBuffer;
+		PlayerPositionUpdateServer_Struct *position_update = (PlayerPositionUpdateServer_Struct *) outapp->pBuffer;
 
 		MakeSpawnUpdate(position_update);
 
 		if (gm_hide_me) {
 			entity_list.QueueClientsStatus(this, outapp, true, Admin(), 250);
-		}
-		else {
+		} else {
 			entity_list.QueueCloseClients(this, outapp, true, RuleI(Range, ClientPositionUpdates), nullptr, true);
 		}
 
@@ -4683,8 +4680,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 
 		if (raid) {
 			raid->QueueClients(this, outapp, true, true, (RuleI(Range, ClientPositionUpdates) * -1));
-		}
-		else if (group) {
+		} else if (group) {
 			group->QueueClients(this, outapp, true, true, (RuleI(Range, ClientPositionUpdates) * -1));
 		}
 
@@ -4692,11 +4688,17 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 	}
 
 	if (zone->watermap) {
-		if (zone->watermap->InLiquid(glm::vec3(m_Position)))
+		if (zone->watermap->InLiquid(glm::vec3(m_Position))) {
 			CheckIncreaseSkill(EQEmu::skills::SkillSwimming, nullptr, -17);
+
+			// Dismount horses when entering water
+			if (GetHorseId() && RuleB(Character, DismountWater)) {
+				SetHorseId(0);
+				BuffFadeByEffect(SE_SummonHorse);
+			}
+		}
 		CheckRegionTypeChanges();
 	}
-
 	return;
 }
 
@@ -5122,7 +5124,7 @@ void Client::Handle_OP_CreateObject(const EQApplicationPacket *app)
 	if (LogSys.log_settings[Logs::Inventory].is_category_enabled)
 		Log(Logs::Detail, Logs::Inventory, "Handle_OP_CreateObject() [psize: %u] %s", app->size, DumpPacketToString(app).c_str());
 
-	DropItem(EQEmu::inventory::slotCursor);
+	DropItem(EQEmu::invslot::slotCursor);
 	return;
 }
 
@@ -5320,6 +5322,97 @@ void Client::Handle_OP_DeleteSpawn(const EQApplicationPacket *app)
 	hate_list.RemoveEntFromHateList(this->CastToMob());
 
 	Disconnect();
+	return;
+}
+
+void Client::Handle_OP_Disarm(const EQApplicationPacket *app) {
+	if (dead || bZoning) return;
+	if (!HasSkill(EQEmu::skills::SkillDisarm))
+		return;
+
+	if (app->size != sizeof(Disarm_Struct)) {
+		Log(Logs::General, Logs::Skills, "Size mismatch for Disarm_Struct packet");
+		return;
+	}
+
+	Disarm_Struct *disarm = (Disarm_Struct *)app->pBuffer;
+
+	if (!p_timers.Expired(&database, pTimerCombatAbility2, false)) {
+		Message(13, "Ability recovery time not yet met.");
+		return;
+	}
+
+	p_timers.Start(pTimerCombatAbility2, 8);
+
+	BreakInvis();
+	Mob* pmob = entity_list.GetMob(disarm->source);
+	Mob* tmob = entity_list.GetMob(disarm->target);
+	if (!pmob || !tmob)
+		return;
+	if (pmob->GetID() != GetID()) {
+		// Client sent a disarm request with an originator ID not matching their own ID.
+		char *hack_str = NULL;
+		MakeAnyLenString(&hack_str, "Player %s (%d) sent OP_Disarm with source ID of: %d", GetCleanName(), GetID(), pmob->GetID());
+		database.SetMQDetectionFlag(this->account_name, this->name, hack_str, zone->GetShortName());
+		safe_delete_array(hack_str);
+		return;
+	}
+	// No disarm on corpses
+	if (tmob->IsCorpse())
+		return;
+	// No target
+	if (!GetTarget())
+		return;
+	// Targets don't match (possible hack, but not flagging)
+	if (GetTarget() != tmob) {
+		return;
+	}
+	// Too far away
+	if (pmob->CalculateDistance(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ()) > 400)
+		return;
+
+	// Can't see mob
+	//if (tmob->BehindMob(pmob))
+	//	return;
+	// How can we disarm someone if we are feigned.
+	if (GetFeigned())
+		return;
+	// We can't disarm someone who is feigned.
+	if (tmob->IsClient() && tmob->CastToClient()->GetFeigned())
+		return;
+	if (GetTarget() == tmob && pmob == this->CastToMob() &&
+		disarm->skill == GetSkill(EQEmu::skills::SkillDisarm) && IsAttackAllowed(tmob)) {
+		int p_level = pmob->GetLevel() ? pmob->GetLevel() : 1;
+		int t_level = tmob->GetLevel() ? tmob->GetLevel() : 1;
+		// We have a disarmable target - sucess or fail, we always aggro the mob
+		if (tmob->IsNPC()) {
+			if (!tmob->CheckAggro(pmob)) {
+				zone->AddAggroMob();
+				tmob->AddToHateList(pmob, p_level);
+			}
+			else {
+				tmob->AddToHateList(pmob, p_level / 3);
+			}
+		}
+		int chance = GetSkill(EQEmu::skills::SkillDisarm); // (1% @ 0 skill) (11% @ 200 skill) - against even con
+		chance /= 2;
+		chance += 10;
+		// Modify chance based on level difference
+		float lvl_mod = p_level / t_level;
+		chance *= lvl_mod;
+		if (chance > 300)
+			chance = 300; // max chance of 30%
+		if (tmob->IsNPC()) {
+			tmob->CastToNPC()->Disarm(this, chance);
+		}
+		else if (tmob->IsClient()) {
+			tmob->CastToClient()->Disarm(this, chance);
+		}
+		return;
+	}
+	// Trying to disarm something we can't disarm
+	Message_StringID(MT_Skills, DISARM_NO_TARGET);
+
 	return;
 }
 
@@ -5761,124 +5854,107 @@ void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 		printf("Error in FindPersonRequest_Struct. Expected size of: %zu, but got: %i\n", sizeof(FindPersonRequest_Struct), app->size);
 	else {
 		FindPersonRequest_Struct* t = (FindPersonRequest_Struct*)app->pBuffer;
-
+	
 		std::vector<FindPerson_Point> points;
 		Mob* target = entity_list.GetMob(t->npc_id);
-
+	
 		if (target == nullptr) {
 			//empty length packet == not found.
 			EQApplicationPacket outapp(OP_FindPersonReply, 0);
 			QueuePacket(&outapp);
 			return;
 		}
-
+	
 		if (!RuleB(Pathing, Find) && RuleB(Bazaar, EnableWarpToTrader) && target->IsClient() && (target->CastToClient()->Trader ||
 			target->CastToClient()->Buyer)) {
 			Message(15, "Moving you to Trader %s", target->GetName());
 			MovePC(zone->GetZoneID(), zone->GetInstanceID(), target->GetX(), target->GetY(), target->GetZ(), 0.0f);
 		}
-
+	
 		if (!RuleB(Pathing, Find) || !zone->pathing)
 		{
 			//fill in the path array...
 			//
-			points.resize(2);
-			points[0].x = GetX();
-			points[0].y = GetY();
-			points[0].z = GetZ();
-			points[1].x = target->GetX();
-			points[1].y = target->GetY();
-			points[1].z = target->GetZ();
+			points.clear();
+			FindPerson_Point a;
+			FindPerson_Point b;
+
+			a.x = GetX();
+			a.y = GetY();
+			a.z = GetZ();
+			b.x = target->GetX();
+			b.y = target->GetY();
+			b.z = target->GetZ();
+
+			points.push_back(a);
+			points.push_back(b);
 		}
 		else
 		{
 			glm::vec3 Start(GetX(), GetY(), GetZ() + (GetSize() < 6.0 ? 6 : GetSize()) * HEAD_POSITION);
 			glm::vec3 End(target->GetX(), target->GetY(), target->GetZ() + (target->GetSize() < 6.0 ? 6 : target->GetSize()) * HEAD_POSITION);
-
-			if (!zone->zonemap->LineIntersectsZone(Start, End, 1.0f, nullptr) && zone->pathing->NoHazards(Start, End))
+	
+			bool partial = false;
+			bool stuck = false;
+			auto pathlist = zone->pathing->FindRoute(Start, End, partial, stuck);
+	
+			if (pathlist.empty() || partial)
 			{
-				points.resize(2);
-				points[0].x = Start.x;
-				points[0].y = Start.y;
-				points[0].z = Start.z;
-
-				points[1].x = End.x;
-				points[1].y = End.y;
-				points[1].z = End.z;
-
+				EQApplicationPacket outapp(OP_FindPersonReply, 0);
+				QueuePacket(&outapp);
+				return;
 			}
-			else
+	
+			// Live appears to send the points in this order:
+			// Final destination.
+			// Current Position.
+			// rest of the points.
+			FindPerson_Point p;
+	
+			int PointNumber = 0;
+	
+			bool LeadsToTeleporter = false;
+	
+			auto v = pathlist.back();
+	
+			p.x = v.pos.x;
+			p.y = v.pos.y;
+			p.z = v.pos.z;
+			points.push_back(p);
+	
+			p.x = GetX();
+			p.y = GetY();
+			p.z = GetZ();
+			points.push_back(p);
+	
+			for (auto Iterator = pathlist.begin(); Iterator != pathlist.end(); ++Iterator)
 			{
-				std::deque<int> pathlist = zone->pathing->FindRoute(Start, End);
-
-				if (pathlist.empty())
+				if ((*Iterator).teleport) // Teleporter
 				{
-					EQApplicationPacket outapp(OP_FindPersonReply, 0);
-					QueuePacket(&outapp);
-					return;
+					LeadsToTeleporter = true;
+					break;
 				}
-
-				//the client seems to have issues with packets larger than this
-				if (pathlist.size() > 36)
-				{
-					EQApplicationPacket outapp(OP_FindPersonReply, 0);
-					QueuePacket(&outapp);
-					return;
-				}
-
-				// Live appears to send the points in this order:
-				// Final destination.
-				// Current Position.
-				// rest of the points.
-				FindPerson_Point p;
-
-				int PointNumber = 0;
-
-				bool LeadsToTeleporter = false;
-
-				glm::vec3 v = zone->pathing->GetPathNodeCoordinates(pathlist.back());
-
+	
+				glm::vec3 v = (*Iterator).pos;
 				p.x = v.x;
 				p.y = v.y;
 				p.z = v.z;
 				points.push_back(p);
-
-				p.x = GetX();
-				p.y = GetY();
-				p.z = GetZ();
+				++PointNumber;
+			}
+	
+			if (!LeadsToTeleporter)
+			{
+				p.x = target->GetX();
+				p.y = target->GetY();
+				p.z = target->GetZ();
+	
 				points.push_back(p);
-
-				for (auto Iterator = pathlist.begin(); Iterator != pathlist.end(); ++Iterator)
-				{
-					if ((*Iterator) == -1) // Teleporter
-					{
-						LeadsToTeleporter = true;
-						break;
-					}
-
-					glm::vec3 v = zone->pathing->GetPathNodeCoordinates((*Iterator), false);
-					p.x = v.x;
-					p.y = v.y;
-					p.z = v.z;
-					points.push_back(p);
-					++PointNumber;
-				}
-
-				if (!LeadsToTeleporter)
-				{
-					p.x = target->GetX();
-					p.y = target->GetY();
-					p.z = target->GetZ();
-
-					points.push_back(p);
-				}
-
 			}
 		}
-
+	
 		SendPathPacket(points);
 	}
-	return;
 }
 
 void Client::Handle_OP_Fishing(const EQApplicationPacket *app)
@@ -7065,7 +7141,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 			return;
 		}
 
-		EQEmu::ItemInstance *CursorItemInst = GetInv().GetItem(EQEmu::inventory::slotCursor);
+		EQEmu::ItemInstance *CursorItemInst = GetInv().GetItem(EQEmu::invslot::slotCursor);
 
 		bool Allowed = true;
 
@@ -7113,7 +7189,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 		{
 			GuildBankDepositAck(false, sentAction);
 
-			DeleteItemInInventory(EQEmu::inventory::slotCursor, 0, false);
+			DeleteItemInInventory(EQEmu::invslot::slotCursor, 0, false);
 		}
 
 		break;
@@ -7134,7 +7210,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 
 	case GuildBankWithdraw:
 	{
-		if (GetInv()[EQEmu::inventory::slotCursor])
+		if (GetInv()[EQEmu::invslot::slotCursor])
 		{
 			Message_StringID(13, GUILD_BANK_EMPTY_HANDS);
 
@@ -7180,7 +7256,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 		{
 			PushItemOnCursor(*inst);
 
-			SendItemPacket(EQEmu::inventory::slotCursor, inst, ItemPacketLimbo);
+			SendItemPacket(EQEmu::invslot::slotCursor, inst, ItemPacketLimbo);
 
 			GuildBanks->DeleteItem(GuildID(), gbwis->Area, gbwis->SlotID, gbwis->Quantity);
 		}
@@ -8163,7 +8239,7 @@ void Client::Handle_OP_InspectAnswer(const EQApplicationPacket *app)
 	const EQEmu::ItemData* item = nullptr;
 
 	int ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
-	for (int16 L = EQEmu::legacy::EQUIPMENT_BEGIN; L <= EQEmu::inventory::slotWaist; L++) {
+	for (int16 L = EQEmu::invslot::EQUIPMENT_BEGIN; L <= EQEmu::invslot::slotWaist; L++) {
 		const EQEmu::ItemInstance* inst = GetInv().GetItem(L);
 		item = inst ? inst->GetItem() : nullptr;
 
@@ -8183,15 +8259,15 @@ void Client::Handle_OP_InspectAnswer(const EQApplicationPacket *app)
 		else { insr->itemicons[L] = 0xFFFFFFFF; }
 	}
 
-	const EQEmu::ItemInstance* inst = GetInv().GetItem(EQEmu::inventory::slotAmmo);
+	const EQEmu::ItemInstance* inst = GetInv().GetItem(EQEmu::invslot::slotAmmo);
 	item = inst ? inst->GetItem() : nullptr;
 
 	if (item) {
 		// another one..I did these, didn't I!!?
-		strcpy(insr->itemnames[SoF::invslot::PossessionsAmmo], item->Name);
-		insr->itemicons[SoF::invslot::PossessionsAmmo] = item->Icon;
+		strcpy(insr->itemnames[SoF::invslot::slotAmmo], item->Name);
+		insr->itemicons[SoF::invslot::slotAmmo] = item->Icon;
 	}
-	else { insr->itemicons[SoF::invslot::PossessionsAmmo] = 0xFFFFFFFF; }
+	else { insr->itemicons[SoF::invslot::slotAmmo] = 0xFFFFFFFF; }
 
 	InspectMessage_Struct* newmessage = (InspectMessage_Struct*)insr->text;
 	InspectMessage_Struct& playermessage = this->GetInspectMessage();
@@ -8264,7 +8340,6 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 		return;
 	}
 
-	DumpPacket(app);
 	ItemViewRequest_Struct *ivrs = (ItemViewRequest_Struct *)app->pBuffer;
 
 	// todo: verify ivrs->link_hash based on a rule, in case we don't care about people being able to sniff data
@@ -8654,7 +8729,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 		EQEmu::ItemInstance* clickaug = nullptr;
 		EQEmu::ItemData* augitem = nullptr;
 
-		for (r = EQEmu::inventory::socketBegin; r < EQEmu::inventory::SocketCount; r++) {
+		for (r = EQEmu::invaug::SOCKET_BEGIN; r <= EQEmu::invaug::SOCKET_END; r++) {
 			const EQEmu::ItemInstance* aug_i = inst->GetAugment(r);
 			if (!aug_i)
 				continue;
@@ -9834,7 +9909,7 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 	MoveItem_Struct* mi = (MoveItem_Struct*)app->pBuffer;
 	if (spellend_timer.Enabled() && casting_spell_id && !IsBardSong(casting_spell_id))
 	{
-		if (mi->from_slot != mi->to_slot && (mi->from_slot <= EQEmu::legacy::GENERAL_END || mi->from_slot > 39) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot))
+		if (mi->from_slot != mi->to_slot && (mi->from_slot <= EQEmu::invslot::GENERAL_END || mi->from_slot > 39) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot))
 		{
 			char *detect = nullptr;
 			const EQEmu::ItemInstance *itm_from = GetInv().GetItem(mi->from_slot);
@@ -9855,8 +9930,8 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 	// Illegal bagslot usage checks. Currently, user only receives a message if this check is triggered.
 	bool mi_hack = false;
 
-	if (mi->from_slot >= EQEmu::legacy::GENERAL_BAGS_BEGIN && mi->from_slot <= EQEmu::legacy::CURSOR_BAG_END) {
-		if (mi->from_slot >= EQEmu::legacy::CURSOR_BAG_BEGIN) { mi_hack = true; }
+	if (mi->from_slot >= EQEmu::invbag::GENERAL_BAGS_BEGIN && mi->from_slot <= EQEmu::invbag::CURSOR_BAG_END) {
+		if (mi->from_slot >= EQEmu::invbag::CURSOR_BAG_BEGIN) { mi_hack = true; }
 		else {
 			int16 from_parent = m_inv.CalcSlotId(mi->from_slot);
 			if (!m_inv[from_parent]) { mi_hack = true; }
@@ -9865,8 +9940,8 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 		}
 	}
 
-	if (mi->to_slot >= EQEmu::legacy::GENERAL_BAGS_BEGIN && mi->to_slot <= EQEmu::legacy::CURSOR_BAG_END) {
-		if (mi->to_slot >= EQEmu::legacy::CURSOR_BAG_BEGIN) { mi_hack = true; }
+	if (mi->to_slot >= EQEmu::invbag::GENERAL_BAGS_BEGIN && mi->to_slot <= EQEmu::invbag::CURSOR_BAG_END) {
+		if (mi->to_slot >= EQEmu::invbag::CURSOR_BAG_BEGIN) { mi_hack = true; }
 		else {
 			int16 to_parent = m_inv.CalcSlotId(mi->to_slot);
 			if (!m_inv[to_parent]) { mi_hack = true; }
@@ -12492,7 +12567,7 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 	Shielding_Struct* shield = (Shielding_Struct*)app->pBuffer;
 	shield_target = entity_list.GetMob(shield->target_id);
 	bool ack = false;
-	EQEmu::ItemInstance* inst = GetInv().GetItem(EQEmu::inventory::slotSecondary);
+	EQEmu::ItemInstance* inst = GetInv().GetItem(EQEmu::invslot::slotSecondary);
 	if (!shield_target)
 		return;
 	if (inst)
@@ -12704,8 +12779,8 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	// shouldn't we be reimbursing if these two fail?
 
 	//make sure we are not completely full...
-	if (freeslotid == EQEmu::inventory::slotCursor) {
-		if (m_inv.GetItem(EQEmu::inventory::slotCursor) != nullptr) {
+	if (freeslotid == EQEmu::invslot::slotCursor) {
+		if (m_inv.GetItem(EQEmu::invslot::slotCursor) != nullptr) {
 			Message(13, "You do not have room for any more items.");
 			safe_delete(outapp);
 			safe_delete(inst);
@@ -13328,13 +13403,13 @@ void Client::Handle_OP_Split(const EQApplicationPacket *app)
 	//Per the note above, Im not exactly sure what to do on error
 	//to notify the client of the error...
 	if (!isgrouped) {
-		Message(13, "You can not split money if your not in a group.");
+		Message(13, "You can not split money if you're not in a group.");
 		return;
 	}
 	Group *cgroup = GetGroup();
 	if (cgroup == nullptr) {
 		//invalid group, not sure if we should say more...
-		Message(13, "You can not split money if your not in a group.");
+		Message(13, "You can not split money if you're not in a group.");
 		return;
 	}
 

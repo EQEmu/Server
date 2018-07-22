@@ -1,0 +1,21 @@
+version: 1.0.{build}
+branches:
+  only:
+  - master
+image: Visual Studio 2017
+configuration: RelWithDebInfo
+clone_folder: c:\projects\eqemu
+init:
+- ps: git config --global core.autocrlf input
+cache: c:\tools\vcpkg\installed\
+before_build:
+- ps: "$wc = New-Object System.Net.WebClient\n$wc.DownloadFile(\"http://strawberryperl.com/download/5.26.2.1/strawberry-perl-5.26.2.1-64bit-portable.zip\", \"c:\\projects\\eqemu\\strawberry-perl-5.26.2.1-64bit-portable.zip\")\ncd c:\\projects\\eqemu\n7z x c:/projects/eqemu/strawberry-perl-5.26.2.1-64bit-portable.zip -oc:/projects/eqemu/strawberry-perl-portable -y\n(Get-Content C:/projects/eqemu/strawberry-perl-portable/perl/lib/CORE/config.h).replace('#define PERL_STATIC_INLINE static __inline__', '#define PERL_STATIC_INLINE static __inline') | Set-Content C:/projects/eqemu/strawberry-perl-portable/perl/lib/CORE/config.h\nvcpkg install boost-geometry:x64-windows boost-dynamic-bitset:x64-windows luajit:x64-windows libsodium:x64-windows libmysql:x64-windows openssl:x64-windows zlib:x64-windows \nmkdir build\ncd build\ncmake -G \"Visual Studio 15 2017 Win64\" -DEQEMU_BUILD_TESTS=ON -DEQEMU_BUILD_LOGIN=ON -EQEMU_ENABLE_BOTS=OFF -DPERL_EXECUTABLE=\"C:/projects/eqemu/strawberry-perl-portable/perl/bin/perl.exe\" -DPERL_INCLUDE_PATH=\"C:/projects/eqemu/strawberry-perl-portable/perl/lib/CORE\" -DPERL_LIBRARY=\"C:/projects/eqemu/strawberry-perl-portable/perl/lib/CORE/libperl526.a\" -DCMAKE_TOOLCHAIN_FILE=\"c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake\" .."
+build:
+  project: C:\projects\eqemu\build\EQEmu.sln
+  parallel: true
+  verbosity: minimal
+after_build:
+- cmd: >-
+    7z a build_x64-no-bots.zip C:\projects\eqemu\build\bin\RelWithDebInfo\*.exe C:\projects\eqemu\build\bin\RelWithDebInfo\*.dll C:\projects\eqemu\build\bin\RelWithDebInfo\*.pdb
+
+    appveyor PushArtifact build_x64-no-bots.zip

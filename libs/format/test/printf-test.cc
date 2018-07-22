@@ -29,6 +29,7 @@
 #include <climits>
 #include <cstring>
 
+#include "fmt/printf.h"
 #include "fmt/format.h"
 #include "gtest-extra.h"
 #include "util.h"
@@ -201,6 +202,8 @@ TEST(PrintfTest, HashFlag) {
 
 TEST(PrintfTest, Width) {
   EXPECT_PRINTF("  abc", "%5s", "abc");
+  EXPECT_PRINTF("  -42", "%5s", "-42");
+  EXPECT_PRINTF("  0.123456", "%10s", 0.123456);
 
   // Width cannot be specified twice.
   EXPECT_THROW_MSG(fmt::sprintf("%5-5d", 42), FormatError,
@@ -295,12 +298,13 @@ void TestLength(const char *length_spec, U value) {
   fmt::LongLong signed_value = 0;
   fmt::ULongLong unsigned_value = 0;
   // Apply integer promotion to the argument.
-  fmt::ULongLong max = std::numeric_limits<U>::max();
-  using fmt::internal::check;
-  if (check(max <= static_cast<unsigned>(std::numeric_limits<int>::max()))) {
+  using std::numeric_limits;
+  fmt::ULongLong max = numeric_limits<U>::max();
+  using fmt::internal::const_check;
+  if (const_check(max <= static_cast<unsigned>(numeric_limits<int>::max()))) {
     signed_value = static_cast<int>(value);
     unsigned_value = static_cast<unsigned>(value);
-  } else if (check(max <= std::numeric_limits<unsigned>::max())) {
+  } else if (const_check(max <= numeric_limits<unsigned>::max())) {
     signed_value = static_cast<unsigned>(value);
     unsigned_value = static_cast<unsigned>(value);
   }
@@ -379,11 +383,13 @@ TEST(PrintfTest, Bool) {
 TEST(PrintfTest, Int) {
   EXPECT_PRINTF("-42", "%d", -42);
   EXPECT_PRINTF("-42", "%i", -42);
+  EXPECT_PRINTF("-42", "%s", -42);
   unsigned u = 0 - 42u;
   EXPECT_PRINTF(fmt::format("{}", u), "%u", -42);
   EXPECT_PRINTF(fmt::format("{:o}", u), "%o", -42);
   EXPECT_PRINTF(fmt::format("{:x}", u), "%x", -42);
   EXPECT_PRINTF(fmt::format("{:X}", u), "%X", -42);
+  EXPECT_PRINTF(fmt::format("{}", u), "%s", u);
 }
 
 TEST(PrintfTest, LongLong) {
@@ -395,7 +401,11 @@ TEST(PrintfTest, LongLong) {
 
 TEST(PrintfTest, Float) {
   EXPECT_PRINTF("392.650000", "%f", 392.65);
+  EXPECT_PRINTF("392.65", "%.2f", 392.65);
+  EXPECT_PRINTF("392.6", "%.1f", 392.65);
+  EXPECT_PRINTF("393", "%.f", 392.65);
   EXPECT_PRINTF("392.650000", "%F", 392.65);
+  EXPECT_PRINTF("392.65", "%s", 392.65);
   char buffer[BUFFER_SIZE];
   safe_sprintf(buffer, "%e", 392.65);
   EXPECT_PRINTF(buffer, "%e", 392.65);
@@ -420,6 +430,7 @@ TEST(PrintfTest, Inf) {
 
 TEST(PrintfTest, Char) {
   EXPECT_PRINTF("x", "%c", 'x');
+  EXPECT_PRINTF("x", "%s", 'x');
   int max = std::numeric_limits<int>::max();
   EXPECT_PRINTF(fmt::format("{}", static_cast<char>(max)), "%c", max);
   //EXPECT_PRINTF("x", "%lc", L'x');
@@ -438,13 +449,17 @@ TEST(PrintfTest, Pointer) {
   int n;
   void *p = &n;
   EXPECT_PRINTF(fmt::format("{}", p), "%p", p);
+  EXPECT_PRINTF(fmt::format("{}", p), "%s", p);
   p = 0;
   EXPECT_PRINTF("(nil)", "%p", p);
   EXPECT_PRINTF("     (nil)", "%10p", p);
+  EXPECT_PRINTF("(nil)", "%s", p);
+  EXPECT_PRINTF("     (nil)", "%10s", p);
   const char *s = "test";
   EXPECT_PRINTF(fmt::format("{:p}", s), "%p", s);
   const char *null_str = 0;
   EXPECT_PRINTF("(nil)", "%p", null_str);
+  EXPECT_PRINTF("(null)", "%s", null_str);
 }
 
 TEST(PrintfTest, Location) {
@@ -476,4 +491,21 @@ TEST(PrintfTest, PrintfError) {
 
 TEST(PrintfTest, WideString) {
   EXPECT_EQ(L"abc", fmt::sprintf(L"%s", L"abc"));
+}
+
+TEST(PrintfTest, PrintfCustom) {
+  EXPECT_EQ("abc", fmt::sprintf("%s", TestString("abc")));
+}
+
+TEST(PrintfTest, OStream) {
+  std::ostringstream os;
+  int ret = fmt::fprintf(os, "Don't %s!", "panic");
+  EXPECT_EQ("Don't panic!", os.str());
+  EXPECT_EQ(12, ret);
+}
+
+TEST(PrintfTest, Writer) {
+  fmt::MemoryWriter writer;
+  printf(writer, "%d", 42);
+  EXPECT_EQ("42", writer.str());
 }

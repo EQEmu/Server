@@ -24,11 +24,12 @@ Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
 
 #include <list>
 #include <vector>
+#include <string>
 
 #define MAXTASKS 10000
 #define MAXTASKSETS 1000
-// The Client has a hard cap of 19 active tasks
-#define MAXACTIVETASKS 19
+// The Client has a hard cap of 19 active quests, 29 in SoD+
+#define MAXACTIVEQUESTS 19
 // The Max Chooser (Task Selector entries) is capped at 40 in the Titanium Client.
 #define MAXCHOOSERENTRIES 40
 // The Client has a hard cap of 20 activities per task.
@@ -53,9 +54,8 @@ namespace EQEmu
 
 struct TaskGoalList_Struct {
 	int ListID;
-	int Size;
 	int Min, Max;
-	int *GoalItemEntries;
+	std::vector<int> GoalItemEntries;
 };
 
 // This is used for handling lists, loading them from the database, searching them.
@@ -75,7 +75,7 @@ public:
 
 private:
 
-	TaskGoalList_Struct *TaskGoalLists;
+	std::vector<TaskGoalList_Struct> TaskGoalLists;
 	int NumberOfLists;
 };
 
@@ -102,29 +102,52 @@ typedef enum { METHODSINGLEID = 0, METHODLIST = 1, METHODQUEST = 2 } TaskMethodT
 struct ActivityInformation {
 	int		StepNumber;
 	int		Type;
-	char	*Text1;
-	char	*Text2;
-	char	*Text3;
+	std::string target_name; // name mob, location -- default empty
+	std::string item_list; // likely defaults to empty
+	std::string skill_list; // IDs ; separated -- default -1
+	std::string spell_list; // IDs ; separated -- default 0
+	std::string desc_override; // overrides auto generated description -- default empty
+	int		skill_id; // older clients, first id from above
+	int		spell_id; // older clients, first id from above
 	int		GoalID;
 	TaskMethodType GoalMethod;
 	int		GoalCount;
 	int		DeliverToNPC;
 	int		ZoneID;
+	std::string zones; // IDs ; searated, ZoneID is the first in this list for older clients -- default empty string
 	bool	Optional;
 };
 
 typedef enum { ActivitiesSequential = 0, ActivitiesStepped = 1 } SequenceType;
 
+enum class TaskType {
+	Task = 0,		// can have at max 1
+	Shared = 1,		// can have at max 1
+	Quest = 2,		// can have at max 19 or 29 depending on client
+	E = 3			// can have at max 19 or 29 depending on client, not present in live anymore
+};
+
+enum class DurationCode {
+	None = 0,
+	Short = 1,
+	Medium = 2,
+	Long = 3
+};
+
 struct TaskInformation {
+	TaskType type;
 	int	Duration;
-	char	*Title;
-	char	*Description;
-	char	*Reward;
+	DurationCode dur_code; // description for time investment for when Duration == 0
+	std::string Title;			// max length 64
+	std::string Description;	// max length 4000, 2048 on Tit
+	std::string Reward;
+	std::string item_link;		// max length 128 older clients, item link gets own string
+	std::string completion_emote; // emote after completing task, yellow. Maybe should make more generic ... but yellow for now!
 	int	RewardID;
 	int	CashReward; // Expressed in copper
 	int	XPReward;
+	int faction_reward; // just a npc_faction_id
 	TaskMethodType RewardMethod;
-	int	StartZone;
 	int	ActivityCount;
 	SequenceType SequenceMode;
 	int	LastStep;
@@ -137,8 +160,8 @@ struct TaskInformation {
 typedef enum { ActivityHidden = 0, ActivityActive = 1, ActivityCompleted = 2 } ActivityState;
 
 typedef enum { ActivityDeliver = 1, ActivityKill = 2, ActivityLoot = 3, ActivitySpeakWith = 4, ActivityExplore = 5,
-			ActivityTradeSkill = 6, ActivityFish = 7, ActivityForage = 8, ActivityUse1 = 9, ActivityUse2 = 10,
-			ActivityTouch = 11, ActivityGiveCash = 100 } ActivityType;
+			ActivityTradeSkill = 6, ActivityFish = 7, ActivityForage = 8, ActivityCastOn = 9, ActivitySkillOn = 10,
+			ActivityTouch = 11, ActivityCollect = 13, ActivityGiveCash = 100 } ActivityType;
 
 
 struct ClientActivityInformation {
@@ -149,6 +172,7 @@ struct ClientActivityInformation {
 };
 
 struct ClientTaskInformation {
+	int slot; // intrusive, but makes things easier :P
 	int TaskID;
 	int CurrentStep;
 	int AcceptedTime;
@@ -170,22 +194,22 @@ public:
 	void ShowClientTasks(Client *c);
 	inline int GetActiveTaskCount() { return ActiveTaskCount; }
 	int GetActiveTaskID(int index);
-	bool IsTaskActivityCompleted(int index, int ActivityID);
-	int GetTaskActivityDoneCount(int index, int ActivityID);
+	bool IsTaskActivityCompleted(TaskType type, int index, int ActivityID);
+	int GetTaskActivityDoneCount(TaskType type, int index, int ActivityID);
 	int GetTaskActivityDoneCountFromTaskID(int TaskID, int ActivityID);
-	int GetTaskStartTime(int index);
+	int GetTaskStartTime(TaskType type, int index);
 	void AcceptNewTask(Client *c, int TaskID, int NPCID, bool enforce_level_requirement = false);
 	void FailTask(Client *c, int TaskID);
 	int TaskTimeLeft(int TaskID);
 	int IsTaskCompleted(int TaskID);
 	bool IsTaskActive(int TaskID);
 	bool IsTaskActivityActive(int TaskID, int ActivityID);
-	ActivityState GetTaskActivityState(int index, int ActivityID);
+	ActivityState GetTaskActivityState(TaskType type, int index, int ActivityID);
 	void UpdateTaskActivity(Client *c, int TaskID, int ActivityID, int Count, bool ignore_quest_update = false);
 	void ResetTaskActivity(Client *c, int TaskID, int ActivityID);
-	void CancelTask(Client *c, int SequenceNumber, bool RemoveFromDB = true);
+	void CancelTask(Client *c, int SequenceNumber, TaskType type, bool RemoveFromDB = true);
 	void CancelAllTasks(Client *c);
-	void RemoveTask(Client *c, int SequenceNumber);
+	void RemoveTask(Client *c, int SequenceNumber, TaskType type);
 	bool UpdateTasksByNPC(Client *c, int ActivityType, int NPCTypeID);
 	void UpdateTasksOnKill(Client *c, int NPCTypeID);
 	void UpdateTasksForItem(Client *c, ActivityType Type, int ItemID, int Count=1);
@@ -194,7 +218,7 @@ public:
 	bool UpdateTasksOnDeliver(Client *c, std::list<EQEmu::ItemInstance*>& Items, int Cash, int NPCTypeID);
 	void UpdateTasksOnTouch(Client *c, int ZoneID);
 	void ProcessTaskProximities(Client *c, float X, float Y, float Z);
-	bool TaskOutOfTime(int Index);
+	bool TaskOutOfTime(TaskType type, int Index);
 	void TaskPeriodicChecks(Client *c);
 	void SendTaskHistory(Client *c, int TaskIndex);
 	void RewardTask(Client *c, TaskInformation *Task);
@@ -206,14 +230,44 @@ public:
 	int ActiveSpeakActivity(int NPCID, int TaskID);
 	int ActiveTasksInSet(int TaskSetID);
 	int CompletedTasksInSet(int TaskSetID);
+	bool HasSlotForTask(TaskInformation *task);
+
+	inline bool HasFreeTaskSlot() { return ActiveTask.TaskID == TASKSLOTEMPTY; }
+
 	friend class TaskManager;
 
 private:
-	bool UnlockActivities(int CharID, int TaskIndex);
+	bool UnlockActivities(int CharID, ClientTaskInformation &task_info);
 	void IncrementDoneCount(Client *c, TaskInformation *Task, int TaskIndex, int ActivityID, int Count = 1, bool ignore_quest_update = false);
+	inline ClientTaskInformation *GetClientTaskInfo(TaskType type, int index)
+	{
+		ClientTaskInformation *info = nullptr;
+		switch (type) {
+		case TaskType::Task:
+			if (index == 0)
+				info = &ActiveTask;
+			break;
+		case TaskType::Shared:
+			break;
+		case TaskType::Quest:
+			if (index < MAXACTIVEQUESTS)
+				info = &ActiveQuests[index];
+			break;
+		default:
+			break;
+		}
+		return info;
+	}
 	int ActiveTaskCount;
-	ClientTaskInformation ActiveTasks[MAXACTIVETASKS];
-	std::vector<int>EnabledTasks;
+	union { // easier to loop over
+		struct {
+			ClientTaskInformation ActiveTask; // only one
+			ClientTaskInformation ActiveQuests[MAXACTIVEQUESTS];
+		};
+		ClientTaskInformation ActiveTasks[MAXACTIVEQUESTS + 1];
+	};
+	// Shared tasks should be limited to 1 as well
+	std::vector<int> EnabledTasks;
 	std::vector<CompletedTaskInformation> CompletedTasks;
 	int LastCompletedTaskLoaded;
 	bool CheckedTouchActivities;
@@ -239,8 +293,9 @@ public:
 	int GetTaskMinLevel(int TaskID);
 	int GetTaskMaxLevel(int TaskID);
 	void TaskSetSelector(Client *c, ClientTaskState *state, Mob *mob, int TaskSetID);
+	void TaskQuestSetSelector(Client *c, ClientTaskState *state, Mob *mob, int count, int *tasks); // task list provided by QuestManager (perl/lua)
 	void SendActiveTasksToClient(Client *c, bool TaskComplete=false);
-	void SendSingleActiveTaskToClient(Client *c, int TaskIndex, bool TaskComplete, bool BringUpTaskJournal=false);
+	void SendSingleActiveTaskToClient(Client *c, ClientTaskInformation &task_info, bool TaskComplete, bool BringUpTaskJournal = false);
 	void SendTaskActivityShort(Client *c, int TaskID, int ActivityID, int ClientTaskIndex);
 	void SendTaskActivityLong(Client *c, int TaskID, int ActivityID, int ClientTaskIndex,
 				bool Optional, bool TaskComplete=false);
@@ -260,7 +315,7 @@ private:
 	TaskProximityManager ProximityManager;
 	TaskInformation* Tasks[MAXTASKS];
 	std::vector<int> TaskSets[MAXTASKSETS];
-	void SendActiveTaskDescription(Client *c, int TaskID, int SequenceNumber, int StartTime, int Duration, bool BringUpTaskJournal=false);
+	void SendActiveTaskDescription(Client *c, int TaskID, ClientTaskInformation &task_info, int StartTime, int Duration, bool BringUpTaskJournal=false);
 
 };
 

@@ -43,8 +43,23 @@
 // Test that the library compiles if None is defined to 0 as done by xlib.h.
 #define None 0
 
+struct LocaleMock {
+  static LocaleMock *instance;
+
+  MOCK_METHOD0(localeconv, lconv *());
+} *LocaleMock::instance;
+
+namespace fmt {
+namespace std {
+using namespace ::std;
+lconv *localeconv() {
+  return LocaleMock::instance ?
+        LocaleMock::instance->localeconv() : ::std::localeconv();
+}
+}
+}
+
 #include "fmt/format.h"
-#include "fmt/time.h"
 
 #include "util.h"
 #include "mock-allocator.h"
@@ -235,7 +250,7 @@ TEST(WriterTest, Allocator) {
   std::size_t size =
       static_cast<std::size_t>(1.5 * fmt::internal::INLINE_BUFFER_SIZE);
   std::vector<char> mem(size);
-  EXPECT_CALL(alloc, allocate(size)).WillOnce(testing::Return(&mem[0]));
+  EXPECT_CALL(alloc, allocate(size, 0)).WillOnce(testing::Return(&mem[0]));
   for (int i = 0; i < fmt::internal::INLINE_BUFFER_SIZE + 1; ++i)
     w << '*';
   EXPECT_CALL(alloc, deallocate(&mem[0], size));
@@ -917,7 +932,7 @@ TEST(FormatterTest, RuntimeWidth) {
       FormatError, "number is too big");
   EXPECT_THROW_MSG(format("{0:{1}}", 0, -1l),
       FormatError, "negative width");
-  if (fmt::internal::check(sizeof(long) > sizeof(int))) {
+  if (fmt::internal::const_check(sizeof(long) > sizeof(int))) {
     long value = INT_MAX;
     EXPECT_THROW_MSG(format("{0:{1}}", 0, (value + 1)),
         FormatError, "number is too big");
@@ -1036,7 +1051,7 @@ TEST(FormatterTest, RuntimePrecision) {
       FormatError, "number is too big");
   EXPECT_THROW_MSG(format("{0:.{1}}", 0, -1l),
       FormatError, "negative precision");
-  if (fmt::internal::check(sizeof(long) > sizeof(int))) {
+  if (fmt::internal::const_check(sizeof(long) > sizeof(int))) {
     long value = INT_MAX;
     EXPECT_THROW_MSG(format("{0:.{1}}", 0, (value + 1)),
         FormatError, "number is too big");
@@ -1209,13 +1224,24 @@ TEST(FormatterTest, FormatOct) {
 }
 
 TEST(FormatterTest, FormatIntLocale) {
-#ifndef _WIN32
-  const char *locale = "en_US.utf-8";
-#else
-  const char *locale = "English_United States";
-#endif
-  std::setlocale(LC_ALL, locale);
-  EXPECT_EQ("1,234,567", format("{:n}", 1234567));
+  ScopedMock<LocaleMock> mock;
+  lconv lc = lconv();
+  char sep[] = "--";
+  lc.thousands_sep = sep;
+  EXPECT_CALL(mock, localeconv()).Times(3).WillRepeatedly(testing::Return(&lc));
+  EXPECT_EQ("123", format("{:n}", 123));
+  EXPECT_EQ("1--234", format("{:n}", 1234));
+  EXPECT_EQ("1--234--567", format("{:n}", 1234567));
+}
+
+struct ConvertibleToLongLong {
+  operator fmt::LongLong() const {
+    return fmt::LongLong(1) << 32;
+  }
+};
+
+TEST(FormatterTest, FormatConvertibleToLongLong) {
+  EXPECT_EQ("100000000", format("{:x}", ConvertibleToLongLong()));
 }
 
 TEST(FormatterTest, FormatFloat) {
@@ -1327,6 +1353,8 @@ TEST(FormatterTest, FormatUCharString) {
   EXPECT_EQ("test", format("{0:s}", str));
   const unsigned char *const_str = str;
   EXPECT_EQ("test", format("{0:s}", const_str));
+  unsigned char *ptr = str;
+  EXPECT_EQ("test", format("{0:s}", ptr));
 }
 
 TEST(FormatterTest, FormatPointer) {
@@ -1350,7 +1378,7 @@ TEST(FormatterTest, FormatCStringRef) {
   EXPECT_EQ("test", format("{0}", CStringRef("test")));
 }
 
-void format(fmt::BasicFormatter<char> &f, const char *, const Date &d) {
+void format_arg(fmt::BasicFormatter<char> &f, const char *, const Date &d) {
   f.writer() << d.year() << '-' << d.month() << '-' << d.day();
 }
 
@@ -1363,7 +1391,7 @@ TEST(FormatterTest, FormatCustom) {
 class Answer {};
 
 template <typename Char>
-void format(fmt::BasicFormatter<Char> &f, const Char *, Answer) {
+void format_arg(fmt::BasicFormatter<Char> &f, const Char *, Answer) {
   f.writer() << "42";
 }
 
@@ -1534,13 +1562,25 @@ TEST(FormatTest, Variadic) {
   EXPECT_EQ(L"abc1", format(L"{}c{}", L"ab", 1));
 }
 
-TEST(FormatTest, Time) {
-  std::tm tm = std::tm();
-  tm.tm_year = 116;
-  tm.tm_mon  = 3;
-  tm.tm_mday = 25;
-  EXPECT_EQ("The date is 2016-04-25.",
-            fmt::format("The date is {:%Y-%m-%d}.", tm));
+TEST(FormatTest, JoinArg) {
+  using fmt::join;
+  int v1[3] = { 1, 2, 3 };
+  std::vector<float> v2;
+  v2.push_back(1.2f);
+  v2.push_back(3.4f);
+
+  EXPECT_EQ("(1, 2, 3)", format("({})", join(v1 + 0, v1 + 3, ", ")));
+  EXPECT_EQ("(1)", format("({})", join(v1 + 0, v1 + 1, ", ")));
+  EXPECT_EQ("()", format("({})", join(v1 + 0, v1 + 0, ", ")));
+  EXPECT_EQ("(001, 002, 003)", format("({:03})", join(v1 + 0, v1 + 3, ", ")));
+  EXPECT_EQ("(+01.20, +03.40)", format("({:+06.2f})", join(v2.begin(), v2.end(), ", ")));
+
+  EXPECT_EQ(L"(1, 2, 3)", format(L"({})", join(v1 + 0, v1 + 3, L", ")));
+
+#if FMT_HAS_GXX_CXX11
+  EXPECT_EQ("(1, 2, 3)", format("({})", join(v1, ", ")));
+  EXPECT_EQ("(+01.20, +03.40)", format("({:+06.2f})", join(v2, ", ")));
+#endif
 }
 
 template <typename T>
@@ -1643,4 +1683,11 @@ FMT_VARIADIC(void, custom_format, const char *)
 
 TEST(FormatTest, CustomArgFormatter) {
   custom_format("{}", 42);
+}
+
+void convert(int);
+
+// Check if there is no collision with convert function in the global namespace.
+TEST(FormatTest, ConvertCollision) {
+  fmt::format("{}", 42);
 }

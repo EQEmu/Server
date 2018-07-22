@@ -433,6 +433,7 @@ void Mob::AI_Init()
 	AI_feign_remember_timer.reset(nullptr);
 	AI_scan_area_timer.reset(nullptr);
 	AI_check_signal_timer.reset(nullptr);
+	AI_scan_door_open_timer.reset(nullptr);
 
 	minLastFightingDelayMoving = RuleI(NPC, LastFightingDelayMovingMin);
 	maxLastFightingDelayMoving = RuleI(NPC, LastFightingDelayMovingMax);
@@ -476,15 +477,21 @@ void Mob::AI_Start(uint32 iMoveDelay) {
 	else
 		pLastFightingDelayMoving = 0;
 
-	pAIControlled = true;
+	pAIControlled  = true;
 	AI_think_timer = std::unique_ptr<Timer>(new Timer(AIthink_duration));
 	AI_think_timer->Trigger();
-	AI_walking_timer = std::unique_ptr<Timer>(new Timer(0));
-	AI_movement_timer = std::unique_ptr<Timer>(new Timer(AImovement_duration));
-	AI_target_check_timer = std::unique_ptr<Timer>(new Timer(AItarget_check_duration));
-	AI_feign_remember_timer = std::unique_ptr<Timer>(new Timer(AIfeignremember_delay));
 
-	if(CastToNPC()->WillAggroNPCs())
+	AI_walking_timer        = std::unique_ptr<Timer>(new Timer(0));
+	AI_movement_timer       = std::unique_ptr<Timer>(new Timer(AImovement_duration));
+	AI_target_check_timer   = std::unique_ptr<Timer>(new Timer(AItarget_check_duration));
+	AI_feign_remember_timer = std::unique_ptr<Timer>(new Timer(AIfeignremember_delay));
+	AI_scan_door_open_timer = std::unique_ptr<Timer>(new Timer(AI_scan_door_open_interval));
+
+	if(!RuleB(Aggro, NPCAggroMaxDistanceEnabled)) {
+		hate_list_cleanup_timer.Disable();
+	}
+
+	if (CastToNPC()->WillAggroNPCs())
 		AI_scan_area_timer = std::unique_ptr<Timer>(new Timer(RandomTimer(RuleI(NPC, NPCToNPCAggroTimerMin), RuleI(NPC, NPCToNPCAggroTimerMax))));
 	
 	AI_check_signal_timer = std::unique_ptr<Timer>(new Timer(AI_check_signal_timer_delay));
@@ -552,6 +559,7 @@ void Mob::AI_Stop() {
 	AI_scan_area_timer.reset(nullptr);
 	AI_feign_remember_timer.reset(nullptr);
 	AI_check_signal_timer.reset(nullptr);
+	AI_scan_door_open_timer.reset(nullptr);
 
 	hate_list.WipeHateList();
 }
@@ -589,10 +597,6 @@ void Client::AI_Stop() {
 
 // only call this on a zone shutdown event
 void Mob::AI_ShutDown() {
-	safe_delete(PathingLOSCheckTimer);
-	safe_delete(PathingRouteUpdateTimerShort);
-	safe_delete(PathingRouteUpdateTimerLong);
-
 	attack_timer.Disable();
 	attack_dw_timer.Disable();
 	ranged_timer.Disable();
@@ -796,7 +800,7 @@ void Client::AI_Process()
 						CalculateNewFearpoint();
 					}
 					if(!RuleB(Pathing, Fear) || !zone->pathing)
-						CalculateNewPosition2(m_FearWalkTarget.x, m_FearWalkTarget.y, m_FearWalkTarget.z, speed, true);
+						CalculateNewPosition(m_FearWalkTarget.x, m_FearWalkTarget.y, m_FearWalkTarget.z, speed, true);
 					else
 					{
 						bool WaypointChanged, NodeReached;
@@ -807,7 +811,7 @@ void Client::AI_Process()
 						if(WaypointChanged)
 							tar_ndx = 20;
 
-						CalculateNewPosition2(Goal.x, Goal.y, Goal.z, speed);
+						CalculateNewPosition(Goal.x, Goal.y, Goal.z, speed);
 					}
 				}
 				return;
@@ -857,7 +861,7 @@ void Client::AI_Process()
 			if (GetTarget() && !IsStunned() && !IsMezzed() && !GetFeigned()) {
 				if (attack_timer.Check()) {
 					// Should charmed clients not be procing?
-					DoAttackRounds(GetTarget(), EQEmu::inventory::slotPrimary);
+					DoAttackRounds(GetTarget(), EQEmu::invslot::slotPrimary);
 				}
 			}
 
@@ -865,7 +869,7 @@ void Client::AI_Process()
 				if (attack_dw_timer.Check()) {
 					if (CheckDualWield()) {
 						// Should charmed clients not be procing?
-						DoAttackRounds(GetTarget(), EQEmu::inventory::slotSecondary);
+						DoAttackRounds(GetTarget(), EQEmu::invslot::slotSecondary);
 					}
 				}
 			}
@@ -879,7 +883,7 @@ void Client::AI_Process()
 					newspeed *= 2;
 					SetCurrentSpeed(newspeed);
 					if(!RuleB(Pathing, Aggro) || !zone->pathing)
-						CalculateNewPosition2(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ(), newspeed);
+						CalculateNewPosition(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ(), newspeed);
 					else
 					{
 						bool WaypointChanged, NodeReached;
@@ -889,7 +893,7 @@ void Client::AI_Process()
 						if(WaypointChanged)
 							tar_ndx = 20;
 
-						CalculateNewPosition2(Goal.x, Goal.y, Goal.z, newspeed);
+						CalculateNewPosition(Goal.x, Goal.y, Goal.z, newspeed);
 					}
 				}
 			}
@@ -938,7 +942,7 @@ void Client::AI_Process()
 					nspeed *= 2;
 					SetCurrentSpeed(nspeed);
 
-					CalculateNewPosition2(owner->GetX(), owner->GetY(), owner->GetZ(), nspeed);
+					CalculateNewPosition(owner->GetX(), owner->GetY(), owner->GetZ(), nspeed);
 				}
 			} else {
 				if (moved) {
@@ -1053,6 +1057,40 @@ void Mob::AI_Process() {
 		engaged = false;
 	}
 
+	if (moving) {
+		if (AI_scan_door_open_timer->Check()) {
+
+			auto &door_list = entity_list.GetDoorsList();
+			for (auto itr : door_list) {
+				Doors *door = itr.second;
+
+				if (door->GetKeyItem())
+					continue;
+
+				if (door->GetLockpick())
+					continue;
+
+				if (door->IsDoorOpen())
+					continue;
+
+				float distance                = DistanceSquared(this->m_Position, door->GetPosition());
+				float distance_scan_door_open = 20;
+
+				if (distance <= (distance_scan_door_open * distance_scan_door_open)) {
+
+					/**
+					 * Make sure we're opening a door within height relevance and not platforms
+					 * above or below
+					 */
+					if (std::abs(this->m_Position.z - door->GetPosition().z) > 10)
+						continue;
+
+					door->ForceOpen(this);
+				}
+			}
+		}
+	}
+
 	// Begin: Additions for Wiz Fear Code
 	//
 	if(RuleB(Combat, EnableFearPathing)){
@@ -1078,7 +1116,7 @@ void Mob::AI_Process() {
 					}
 					if(!RuleB(Pathing, Fear) || !zone->pathing)
 					{
-						CalculateNewPosition2(m_FearWalkTarget.x, m_FearWalkTarget.y, m_FearWalkTarget.z, GetFearSpeed(), true);
+						CalculateNewPosition(m_FearWalkTarget.x, m_FearWalkTarget.y, m_FearWalkTarget.z, GetFearSpeed(), true);
 					}
 					else
 					{
@@ -1090,7 +1128,7 @@ void Mob::AI_Process() {
 						if(WaypointChanged)
 							tar_ndx = 20;
 
-						CalculateNewPosition2(Goal.x, Goal.y, Goal.z, GetFearSpeed());
+						CalculateNewPosition(Goal.x, Goal.y, Goal.z, GetFearSpeed());
 					}
 				}
 				return;
@@ -1129,7 +1167,7 @@ void Mob::AI_Process() {
 
 		// NPCs will forget people after 10 mins of not interacting with them or out of range
 		// both of these maybe zone specific, hardcoded for now
-		if (mHateListCleanup.Check()) {
+		if (hate_list_cleanup_timer.Check()) {
 			hate_list.RemoveStaleEntries(600000, 600.0f);
 			if (hate_list.IsHateListEmpty()) {
 				AI_Event_NoLongerEngaged();
@@ -1237,7 +1275,7 @@ void Mob::AI_Process() {
 				//try main hand first
 				if (attack_timer.Check()) {
 					DoMainHandAttackRounds(target);
-					TriggerDefensiveProcs(target, EQEmu::inventory::slotPrimary, false);
+					TriggerDefensiveProcs(target, EQEmu::invslot::slotPrimary, false);
 
 					bool specialed = false; // NPCs can only do one of these a round
 					if (GetSpecialAbility(SPECATK_FLURRY)) {
@@ -1420,7 +1458,7 @@ void Mob::AI_Process() {
 					if (!IsRooted()) {
 						Log(Logs::Detail, Logs::AI, "Pursuing %s while engaged.", target->GetName());
 						if (!RuleB(Pathing, Aggro) || !zone->pathing)
-							CalculateNewPosition2(target->GetX(), target->GetY(), target->GetZ(), GetRunspeed());
+							CalculateNewPosition(target->GetX(), target->GetY(), target->GetZ(), GetRunspeed());
 						else
 						{
 							bool WaypointChanged, NodeReached;
@@ -1431,7 +1469,7 @@ void Mob::AI_Process() {
 							if (WaypointChanged)
 								tar_ndx = 20;
 
-							CalculateNewPosition2(Goal.x, Goal.y, Goal.z, GetRunspeed());
+							CalculateNewPosition(Goal.x, Goal.y, Goal.z, GetRunspeed());
 						}
 
 					}
@@ -1526,8 +1564,7 @@ void Mob::AI_Process() {
 							}
 							else
 							{
-							CalculateNewPosition2(owner->GetX(), 
-								owner->GetY(), owner->GetZ(), speed);
+							    CalculateNewPosition(owner->GetX(), owner->GetY(), owner->GetZ(), speed);
 							}
 						}
 						else
@@ -1588,7 +1625,7 @@ void Mob::AI_Process() {
 						int speed = GetWalkspeed();
 						if (dist2 >= followdist + 150)
 							speed = GetRunspeed();
-						CalculateNewPosition2(follow->GetX(), follow->GetY(), follow->GetZ(), speed);
+						CalculateNewPosition(follow->GetX(), follow->GetY(), follow->GetZ(), speed);
 					}
 					else
 					{
@@ -1671,10 +1708,13 @@ void NPC::AI_DoMovement() {
 				roambox_distance, roambox_min_x, roambox_max_x, roambox_min_y, 
 				roambox_max_y, roambox_movingto_x, roambox_movingto_y);
 		}
+		
+		Log(Logs::Detail, Logs::AI, "Roam Box: d=%.3f (%.3f->%.3f,%.3f->%.3f): Go To (%.3f,%.3f)",
+			roambox_distance, roambox_min_x, roambox_max_x, roambox_min_y, roambox_max_y, roambox_movingto_x, roambox_movingto_y);
 
-		// Keep calling with updates, using wherever we are in Z.
-		if (!MakeNewPositionAndSendUpdate(roambox_movingto_x, 
-				roambox_movingto_y, m_Position.z, walksp))
+		float new_z = this->FindGroundZ(m_Position.x, m_Position.y, 5) + GetZOffset();
+		
+		if (!CalculateNewPosition(roambox_movingto_x, roambox_movingto_y, new_z, walksp, true))
 		{
 			this->FixZ(); // FixZ on final arrival point.
 			roambox_movingto_x = roambox_max_x + 1; // force update
@@ -1736,7 +1776,7 @@ void NPC::AI_DoMovement() {
 				if (doMove)
 				{	// not at waypoint yet or at 0 pause WP, so keep moving
 					if(!RuleB(Pathing, AggroReturnToGrid) || !zone->pathing || (DistractedFromGrid == 0))
-						CalculateNewPosition2(m_CurrentWayPoint.x, m_CurrentWayPoint.y, m_CurrentWayPoint.z, walksp, true);
+						CalculateNewPosition(m_CurrentWayPoint.x, m_CurrentWayPoint.y, m_CurrentWayPoint.z, walksp, true);
 					else
 					{
 						bool WaypointChanged;
@@ -1748,13 +1788,13 @@ void NPC::AI_DoMovement() {
 						if(NodeReached)
 							entity_list.OpenDoorsNear(CastToNPC());
 
-						CalculateNewPosition2(Goal.x, Goal.y, Goal.z, walksp, true);
+						CalculateNewPosition(Goal.x, Goal.y, Goal.z, walksp, true);
 					}
 
 				}
 			}
 		}		// endif (gridno > 0)
-// handle new quest grid command processing
+		// handle new quest grid command processing
 		else if (gridno < 0)
 		{	// this mob is under quest control
 			if (movetimercompleted==true)
@@ -1773,7 +1813,7 @@ void NPC::AI_DoMovement() {
 	{
 		bool CP2Moved;
 		if(!RuleB(Pathing, Guard) || !zone->pathing)
-			CP2Moved = CalculateNewPosition2(m_GuardPoint.x, m_GuardPoint.y, m_GuardPoint.z, walksp);
+			CP2Moved = CalculateNewPosition(m_GuardPoint.x, m_GuardPoint.y, m_GuardPoint.z, walksp);
 		else
 		{
 			if(!((m_Position.x == m_GuardPoint.x) && (m_Position.y == m_GuardPoint.y) && (m_Position.z == m_GuardPoint.z)))
@@ -1786,7 +1826,7 @@ void NPC::AI_DoMovement() {
 				if(NodeReached)
 					entity_list.OpenDoorsNear(CastToNPC());
 
-				CP2Moved = CalculateNewPosition2(Goal.x, Goal.y, Goal.z, walksp);
+				CP2Moved = CalculateNewPosition(Goal.x, Goal.y, Goal.z, walksp);
 			}
 			else
 				CP2Moved = false;
@@ -1992,14 +2032,17 @@ bool NPC::AI_EngagedCastCheck() {
 
 		// first try innate (spam) spells
 		if(!AICastSpell(GetTarget(), 0, SpellType_Nuke | SpellType_Lifetap | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Slow | SpellType_Debuff | SpellType_Charm | SpellType_Root, true)) {
-			// try casting a heal or gate
-			if (!AICastSpell(this, AISpellVar.engaged_beneficial_self_chance, SpellType_Heal | SpellType_Escape | SpellType_InCombatBuff)) {
-				// try casting a heal on nearby
-				if (!entity_list.AICheckCloseBeneficialSpells(this, AISpellVar.engaged_beneficial_other_chance, MobAISpellRange, SpellType_Heal)) {
-					//nobody to heal, try some detrimental spells.
-					if(!AICastSpell(GetTarget(), AISpellVar.engaged_detrimental_chance, SpellType_Nuke | SpellType_Lifetap | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Slow | SpellType_Debuff | SpellType_Charm | SpellType_Root)) {
-						//no spell to cast, try again soon.
-						AIautocastspell_timer->Start(RandomTimer(AISpellVar.engaged_no_sp_recast_min, AISpellVar.engaged_no_sp_recast_max), false);
+			// try innate (spam) self targeted spells
+			if (!AICastSpell(this, 0, SpellType_InCombatBuff, true)) {
+				// try casting a heal or gate
+				if (!AICastSpell(this, AISpellVar.engaged_beneficial_self_chance, SpellType_Heal | SpellType_Escape | SpellType_InCombatBuff)) {
+					// try casting a heal on nearby
+					if (!entity_list.AICheckCloseBeneficialSpells(this, AISpellVar.engaged_beneficial_other_chance, MobAISpellRange, SpellType_Heal)) {
+						//nobody to heal, try some detrimental spells.
+						if(!AICastSpell(GetTarget(), AISpellVar.engaged_detrimental_chance, SpellType_Nuke | SpellType_Lifetap | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Slow | SpellType_Debuff | SpellType_Charm | SpellType_Root)) {
+							//no spell to cast, try again soon.
+							AIautocastspell_timer->Start(RandomTimer(AISpellVar.engaged_no_sp_recast_min, AISpellVar.engaged_no_sp_recast_max), false);
+						}
 					}
 				}
 			}
@@ -2111,7 +2154,7 @@ bool Mob::Flurry(ExtraAttackOptions *opts)
 		int num_attacks = GetSpecialAbilityParam(SPECATK_FLURRY, 1);
 		num_attacks = num_attacks > 0 ? num_attacks : RuleI(Combat, MaxFlurryHits);
 		for (int i = 0; i < num_attacks; i++)
-			Attack(target, EQEmu::inventory::slotPrimary, false, false, false, opts);
+			Attack(target, EQEmu::invslot::slotPrimary, false, false, false, opts);
 	}
 	return true;
 }

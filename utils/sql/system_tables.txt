@@ -5,7 +5,7 @@ aa_required_level_cost
 aa_ranks
 aa_rank_effects
 aa_rank_prereqs
-activities
+task_activities
 adventure_template
 adventure_template_entry
 adventure_template_entry_flavor
@@ -24,6 +24,7 @@ faction_list_mod
 fear_hints
 fishing
 forage
+global_loot
 goallists
 graveyard
 grid

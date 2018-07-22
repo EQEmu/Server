@@ -1135,17 +1135,6 @@ bool Lua_Mob::CalculateNewPosition(double x, double y, double z, double speed, b
 		check_z);
 }
 
-bool Lua_Mob::CalculateNewPosition2(double x, double y, double z, double speed) {
-	Lua_Safe_Call_Bool();
-	return self->CalculateNewPosition2(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z), static_cast<float>(speed));
-}
-
-bool Lua_Mob::CalculateNewPosition2(double x, double y, double z, double speed, bool check_z) {
-	Lua_Safe_Call_Bool();
-	return self->CalculateNewPosition2(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z), static_cast<float>(speed),
-		check_z);
-}
-
 float Lua_Mob::CalculateDistance(double x, double y, double z) {
 	Lua_Safe_Call_Real();
 	return self->CalculateDistance(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z));
@@ -2374,8 +2363,6 @@ luabind::scope lua_register_mob() {
 		.def("CalculateHeadingToTarget", (double(Lua_Mob::*)(double,double))&Lua_Mob::CalculateHeadingToTarget)
 		.def("CalculateNewPosition", (bool(Lua_Mob::*)(double,double,double,double))&Lua_Mob::CalculateNewPosition)
 		.def("CalculateNewPosition", (bool(Lua_Mob::*)(double,double,double,double,bool))&Lua_Mob::CalculateNewPosition)
-		.def("CalculateNewPosition2", (bool(Lua_Mob::*)(double,double,double,double))&Lua_Mob::CalculateNewPosition2)
-		.def("CalculateNewPosition2", (bool(Lua_Mob::*)(double,double,double,double,bool))&Lua_Mob::CalculateNewPosition2)
 		.def("CalculateDistance", (float(Lua_Mob::*)(double,double,double))&Lua_Mob::CalculateDistance)
 		.def("SendTo", (void(Lua_Mob::*)(double,double,double))&Lua_Mob::SendTo)
 		.def("SendToFixZ", (void(Lua_Mob::*)(double,double,double))&Lua_Mob::SendToFixZ)

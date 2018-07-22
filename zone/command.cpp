@@ -59,7 +59,6 @@
 #include "command.h"
 #include "guild_mgr.h"
 #include "map.h"
-#include "pathing.h"
 #include "qglobals.h"
 #include "queryserv.h"
 #include "quest_parser_collection.h"
@@ -2010,10 +2009,68 @@ void command_setlsinfo(Client *c, const Seperator *sep)
 
 void command_grid(Client *c, const Seperator *sep)
 {
-	if (strcasecmp("max", sep->arg[1]) == 0)
-		c->Message(0, "Highest grid ID in this zone: %d",  database.GetHighestGrid(zone->GetZoneID()));
-	else if (strcasecmp("add", sep->arg[1]) == 0)
-		database.ModifyGrid(c, false,atoi(sep->arg[2]),atoi(sep->arg[3]), atoi(sep->arg[4]),zone->GetZoneID());
+	if (strcasecmp("max", sep->arg[1]) == 0) {
+		c->Message(0, "Highest grid ID in this zone: %d", database.GetHighestGrid(zone->GetZoneID()));
+	}
+	else if (strcasecmp("add", sep->arg[1]) == 0) {
+		database.ModifyGrid(c, false, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), zone->GetZoneID());
+	}
+	else if (strcasecmp("show", sep->arg[1]) == 0) {
+
+		Mob *target = c->GetTarget();
+
+		if (!target || !target->IsNPC()) {
+			c->Message(0, "You need a NPC target!");
+			return;
+		}
+
+		std::string query = StringFormat(
+				"SELECT `x`, `y`, `z`, `heading`, `number`, `pause` "
+				"FROM `grid_entries` "
+				"WHERE `zoneid` = %u and `gridid` = %i "
+				"ORDER BY `number` ",
+				zone->GetZoneID(),
+				target->CastToNPC()->GetGrid()
+		);
+
+		auto results = database.QueryDatabase(query);
+		if (!results.Success()) {
+			c->Message(0, "Error querying database.");
+			c->Message(0, query.c_str());
+		}
+
+		if (results.RowCount() == 0) {
+			c->Message(0, "No grid found");
+			return;
+		}
+
+		/**
+		 * Depop any node npc's already spawned
+		 */
+		auto &mob_list = entity_list.GetMobList();
+		for (auto itr = mob_list.begin(); itr != mob_list.end(); ++itr) {
+			Mob *mob = itr->second;
+			if (mob->IsNPC() && mob->GetRace() == 2254)
+				mob->Depop();
+		}
+
+		/**
+		 * Spawn grid nodes
+		 */
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			auto node_position = glm::vec4(atof(row[0]), atof(row[1]), atof(row[2]), atof(row[3]));
+
+			NPC *npc = NPC::SpawnGridNodeNPC(
+					target->GetCleanName(),
+					node_position,
+					static_cast<uint32>(target->CastToNPC()->GetGrid()),
+					static_cast<uint32>(atoi(row[4])),
+					static_cast<uint32>(atoi(row[5]))
+			);
+			npc->SetFlyMode(1);
+			npc->GMMove(node_position.x, node_position.y, node_position.z, node_position.w);
+		}
+	}
 	else if (strcasecmp("delete", sep->arg[1]) == 0)
 		database.ModifyGrid(c, true,atoi(sep->arg[2]),0,0,zone->GetZoneID());
 	else {
@@ -2535,21 +2592,21 @@ void command_peekinv(Client *c, const Seperator *sep)
 		peekOutOfScope = (peekWorld * 2) // less than
 	};
 
-	static char* scope_prefix[] = { "Equip", "Gen", "Cursor", "Limbo", "Trib", "Bank", "ShBank", "Trade", "World" };
+	static const char* scope_prefix[] = { "equip", "gen", "cursor", "limbo", "trib", "bank", "shbank", "trade", "world" };
 
-	static int16 scope_range[][2] = {
-		{ EQEmu::legacy::EQUIPMENT_BEGIN, EQEmu::legacy::EQUIPMENT_END },
-		{ EQEmu::legacy::GENERAL_BEGIN, EQEmu::legacy::GENERAL_END },
-		{ EQEmu::legacy::SLOT_CURSOR, EQEmu::legacy::SLOT_CURSOR },
-		{ EQEmu::legacy::SLOT_INVALID, EQEmu::legacy::SLOT_INVALID },
-		{ EQEmu::legacy::TRIBUTE_BEGIN, EQEmu::legacy::TRIBUTE_END },
-		{ EQEmu::legacy::BANK_BEGIN, EQEmu::legacy::BANK_END },
-		{ EQEmu::legacy::SHARED_BANK_BEGIN, EQEmu::legacy::SHARED_BANK_END },
-		{ EQEmu::legacy::TRADE_BEGIN, EQEmu::legacy::TRADE_END },
-		{ EQEmu::inventory::slotBegin, (EQEmu::legacy::WORLD_SIZE - 1) }
+	static const int16 scope_range[][2] = {
+		{ EQEmu::invslot::EQUIPMENT_BEGIN, EQEmu::invslot::EQUIPMENT_END },
+		{ EQEmu::invslot::GENERAL_BEGIN, EQEmu::invslot::GENERAL_END },
+		{ EQEmu::invslot::slotCursor, EQEmu::invslot::slotCursor },
+		{ EQEmu::invslot::SLOT_INVALID, EQEmu::invslot::SLOT_INVALID },
+		{ EQEmu::invslot::TRIBUTE_BEGIN, EQEmu::invslot::TRIBUTE_END },
+		{ EQEmu::invslot::BANK_BEGIN, EQEmu::invslot::BANK_END },
+		{ EQEmu::invslot::SHARED_BANK_BEGIN, EQEmu::invslot::SHARED_BANK_END },
+		{ EQEmu::invslot::TRADE_BEGIN, EQEmu::invslot::TRADE_END },
+		{ EQEmu::invslot::SLOT_BEGIN, (EQEmu::invtype::WORLD_SIZE - 1) }
 	};
 
-	static bool scope_bag[] = { false, true, true, true, false, true, true, true, true };
+	static const bool scope_bag[] = { false, true, true, true, false, true, true, true, true };
 
 	if (!c)
 		return;
@@ -2615,7 +2672,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 		}
 
 		for (int16 indexMain = scope_range[scopeIndex][0]; indexMain <= scope_range[scopeIndex][1]; ++indexMain) {
-			if (indexMain == EQEmu::legacy::SLOT_INVALID)
+			if (indexMain == EQEmu::invslot::SLOT_INVALID)
 				continue;
 
 			inst_main = ((scopeBit & peekWorld) ? objectTradeskill->GetItem(indexMain) : targetClient->GetInv().GetItem(indexMain));
@@ -2633,14 +2690,14 @@ void command_peekinv(Client *c, const Seperator *sep)
 				(item_data == nullptr),
 				"%sSlot: %i, Item: %i (%s), Charges: %i",
 				scope_prefix[scopeIndex],
-				((scopeBit & peekWorld) ? (EQEmu::legacy::WORLD_BEGIN + indexMain) : indexMain),
+				((scopeBit & peekWorld) ? (EQEmu::invslot::WORLD_BEGIN + indexMain) : indexMain),
 				((item_data == nullptr) ? 0 : item_data->ID),
 				linker.GenerateLink().c_str(),
 				((inst_main == nullptr) ? 0 : inst_main->GetCharges())
 			);
 
 			if (inst_main && inst_main->IsClassCommon()) {
-				for (uint8 indexAug = EQEmu::inventory::socketBegin; indexAug < EQEmu::inventory::SocketCount; ++indexAug) {
+				for (uint8 indexAug = EQEmu::invaug::SOCKET_BEGIN; indexAug <= EQEmu::invaug::SOCKET_END; ++indexAug) {
 					inst_aug = inst_main->GetItem(indexAug);
 					if (!inst_aug) // extant only
 						continue;
@@ -2653,7 +2710,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 						".%sAugSlot: %i (Slot #%i, Aug idx #%i), Item: %i (%s), Charges: %i",
 						scope_prefix[scopeIndex],
 						INVALID_INDEX,
-						((scopeBit & peekWorld) ? (EQEmu::legacy::WORLD_BEGIN + indexMain) : indexMain),
+						((scopeBit & peekWorld) ? (EQEmu::invslot::WORLD_BEGIN + indexMain) : indexMain),
 						indexAug,
 						((item_data == nullptr) ? 0 : item_data->ID),
 						linker.GenerateLink().c_str(),
@@ -2665,7 +2722,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 			if (!scope_bag[scopeIndex] || !(inst_main && inst_main->IsClassBag()))
 				continue;
 
-			for (uint8 indexSub = EQEmu::inventory::containerBegin; indexSub < EQEmu::inventory::ContainerCount; ++indexSub) {
+			for (uint8 indexSub = EQEmu::invbag::SLOT_BEGIN; indexSub <= EQEmu::invbag::SLOT_END; ++indexSub) {
 				inst_sub = inst_main->GetItem(indexSub);
 				if (!inst_sub) // extant only
 					continue;
@@ -2678,7 +2735,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 					"..%sBagSlot: %i (Slot #%i, Bag idx #%i), Item: %i (%s), Charges: %i",
 					scope_prefix[scopeIndex],
 					((scopeBit & peekWorld) ? INVALID_INDEX : EQEmu::InventoryProfile::CalcSlotId(indexMain, indexSub)),
-					((scopeBit & peekWorld) ? (EQEmu::legacy::WORLD_BEGIN + indexMain) : indexMain),
+					((scopeBit & peekWorld) ? (EQEmu::invslot::WORLD_BEGIN + indexMain) : indexMain),
 					indexSub,
 					((item_data == nullptr) ? 0 : item_data->ID),
 					linker.GenerateLink().c_str(),
@@ -2686,7 +2743,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 				);
 
 				if (inst_sub->IsClassCommon()) {
-					for (uint8 indexAug = EQEmu::inventory::socketBegin; indexAug < EQEmu::inventory::SocketCount; ++indexAug) {
+					for (uint8 indexAug = EQEmu::invaug::SOCKET_BEGIN; indexAug <= EQEmu::invaug::SOCKET_END; ++indexAug) {
 						inst_aug = inst_sub->GetItem(indexAug);
 						if (!inst_aug) // extant only
 							continue;
@@ -2712,7 +2769,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 		}
 
 		if ((scopeBit & peekEquip) && (targetClient->ClientVersion() >= EQEmu::versions::ClientVersion::SoF)) {
-			inst_main = targetClient->GetInv().GetItem(EQEmu::inventory::slotPowerSource);
+			inst_main = targetClient->GetInv().GetItem(EQEmu::invslot::SLOT_POWER_SOURCE);
 			if (inst_main) {
 				itemsFound = true;
 				item_data = inst_main->GetItem();
@@ -2727,14 +2784,14 @@ void command_peekinv(Client *c, const Seperator *sep)
 				(item_data == nullptr),
 				"%sSlot: %i, Item: %i (%s), Charges: %i",
 				scope_prefix[scopeIndex],
-				EQEmu::inventory::slotPowerSource,
+				EQEmu::invslot::SLOT_POWER_SOURCE,
 				((item_data == nullptr) ? 0 : item_data->ID),
 				linker.GenerateLink().c_str(),
 				((inst_main == nullptr) ? 0 : inst_main->GetCharges())
 			);
 
 			if (inst_main && inst_main->IsClassCommon()) {
-				for (uint8 indexAug = EQEmu::inventory::socketBegin; indexAug < EQEmu::inventory::SocketCount; ++indexAug) {
+				for (uint8 indexAug = EQEmu::invaug::SOCKET_BEGIN; indexAug <= EQEmu::invaug::SOCKET_END; ++indexAug) {
 					inst_aug = inst_main->GetItem(indexAug);
 					if (!inst_aug) // extant only
 						continue;
@@ -2747,7 +2804,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 						".%sAugSlot: %i (Slot #%i, Aug idx #%i), Item: %i (%s), Charges: %i",
 						scope_prefix[scopeIndex],
 						INVALID_INDEX,
-						EQEmu::inventory::slotPowerSource,
+						EQEmu::invslot::SLOT_POWER_SOURCE,
 						indexAug,
 						((item_data == nullptr) ? 0 : item_data->ID),
 						linker.GenerateLink().c_str(),
@@ -2785,7 +2842,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 				);
 
 				if (inst_main && inst_main->IsClassCommon()) {
-					for (uint8 indexAug = EQEmu::inventory::socketBegin; indexAug < EQEmu::inventory::SocketCount; ++indexAug) {
+					for (uint8 indexAug = EQEmu::invaug::SOCKET_BEGIN; indexAug <= EQEmu::invaug::SOCKET_END; ++indexAug) {
 						inst_aug = inst_main->GetItem(indexAug);
 						if (!inst_aug) // extant only
 							continue;
@@ -2810,7 +2867,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 				if (!scope_bag[scopeIndex] || !(inst_main && inst_main->IsClassBag()))
 					continue;
 
-				for (uint8 indexSub = EQEmu::inventory::containerBegin; indexSub < EQEmu::inventory::ContainerCount; ++indexSub) {
+				for (uint8 indexSub = EQEmu::invbag::SLOT_BEGIN; indexSub <= EQEmu::invbag::SLOT_END; ++indexSub) {
 					inst_sub = inst_main->GetItem(indexSub);
 					if (!inst_sub)
 						continue;
@@ -2832,7 +2889,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 					);
 
 					if (inst_sub->IsClassCommon()) {
-						for (uint8 indexAug = EQEmu::inventory::socketBegin; indexAug < EQEmu::inventory::SocketCount; ++indexAug) {
+						for (uint8 indexAug = EQEmu::invaug::SOCKET_BEGIN; indexAug <= EQEmu::invaug::SOCKET_END; ++indexAug) {
 							inst_aug = inst_sub->GetItem(indexAug);
 							if (!inst_aug) // extant only
 								continue;
@@ -3267,8 +3324,8 @@ void command_listpetition(Client *c, const Seperator *sep)
 void command_equipitem(Client *c, const Seperator *sep)
 {
 	uint32 slot_id = atoi(sep->arg[1]);
-	if (sep->IsNumber(1) && ((slot_id >= EQEmu::legacy::EQUIPMENT_BEGIN) && (slot_id <= EQEmu::legacy::EQUIPMENT_END) || (slot_id == EQEmu::inventory::slotPowerSource))) {
-		const EQEmu::ItemInstance* from_inst = c->GetInv().GetItem(EQEmu::inventory::slotCursor);
+	if (sep->IsNumber(1) && ((slot_id >= EQEmu::invslot::EQUIPMENT_BEGIN) && (slot_id <= EQEmu::invslot::EQUIPMENT_END) || (slot_id == EQEmu::invslot::SLOT_POWER_SOURCE))) {
+		const EQEmu::ItemInstance* from_inst = c->GetInv().GetItem(EQEmu::invslot::slotCursor);
 		const EQEmu::ItemInstance* to_inst = c->GetInv().GetItem(slot_id); // added (desync issue when forcing stack to stack)
 		bool partialmove = false;
 		int16 movecount;
@@ -3276,7 +3333,7 @@ void command_equipitem(Client *c, const Seperator *sep)
 		if (from_inst && from_inst->IsClassCommon()) {
 			auto outapp = new EQApplicationPacket(OP_MoveItem, sizeof(MoveItem_Struct));
 			MoveItem_Struct* mi	= (MoveItem_Struct*)outapp->pBuffer;
-			mi->from_slot = EQEmu::inventory::slotCursor;
+			mi->from_slot = EQEmu::invslot::slotCursor;
 			mi->to_slot			= slot_id;
 			// mi->number_in_stack	= from_inst->GetCharges(); // replaced with con check for stacking
 
@@ -4517,12 +4574,12 @@ void command_goto(Client *c, const Seperator *sep)
 	else if (!(sep->IsNumber(1) && sep->IsNumber(2) && sep->IsNumber(3)))
 		c->Message(0, "Usage: #goto [x y z]");
 	else
-		c->MovePC(zone->GetZoneID(), zone->GetInstanceID(), atof(sep->arg[1]), atof(sep->arg[2]), atof(sep->arg[3]), 0.0f);
+		c->MovePC(zone->GetZoneID(), zone->GetInstanceID(), atof(sep->arg[1]), atof(sep->arg[2]), atof(sep->arg[3]), c->GetHeading());
 }
 
 void command_iteminfo(Client *c, const Seperator *sep)
 {
-	auto inst = c->GetInv()[EQEmu::inventory::slotCursor];
+	auto inst = c->GetInv()[EQEmu::invslot::slotCursor];
 	if (!inst) {
 		c->Message(13, "Error: You need an item on your cursor for this command");
 		return;
@@ -5682,9 +5739,9 @@ void command_summonitem(Client *c, const Seperator *sep)
 	std::string cmd_msg = sep->msg;
 	size_t link_open = cmd_msg.find('\x12');
 	size_t link_close = cmd_msg.find_last_of('\x12');
-	if (link_open != link_close && (cmd_msg.length() - link_open) > EQEmu::constants::SayLinkBodySize) {
+	if (link_open != link_close && (cmd_msg.length() - link_open) > EQEmu::constants::SAY_LINK_BODY_SIZE) {
 		EQEmu::SayLinkBody_Struct link_body;
-		EQEmu::saylink::DegenerateLinkBody(link_body, cmd_msg.substr(link_open + 1, EQEmu::constants::SayLinkBodySize));
+		EQEmu::saylink::DegenerateLinkBody(link_body, cmd_msg.substr(link_open + 1, EQEmu::constants::SAY_LINK_BODY_SIZE));
 		itemid = link_body.item_id;
 	}
 	else if (!sep->IsNumber(1)) {
@@ -6991,312 +7048,9 @@ void command_qglobal(Client *c, const Seperator *sep) {
 
 void command_path(Client *c, const Seperator *sep)
 {
-	if(sep->arg[1][0] == '\0' || !strcasecmp(sep->arg[1], "help"))
-	{
-		c->Message(0, "Syntax: #path shownodes: Spawns a npc to represent every npc node.");
-		c->Message(0, "#path info node_id: Gives information about node info (requires shownode target).");
-		c->Message(0, "#path dump file_name: Dumps the current zone->pathing to a file of your naming.");
-		c->Message(0, "#path add [requested_id]: Adds a node at your current location will try to take the requested id if possible.");
-		c->Message(0, "#path connect connect_to_id [is_teleport] [door_id]: Connects the currently targeted node to connect_to_id's node and connects that node back (requires shownode target).");
-		c->Message(0, "#path sconnect connect_to_id [is_teleport] [door_id]: Connects the currently targeted node to connect_to_id's node (requires shownode target).");
-		c->Message(0, "#path qconnect [set]: short cut connect, connects the targeted node to the node you set with #path qconnect set (requires shownode target).");
-		c->Message(0, "#path disconnect [all]/disconnect_from_id: Disconnects the currently targeted node to disconnect from disconnect from id's node (requires shownode target), if passed all as the second argument it will disconnect this node from every other node.");
-		c->Message(0, "#path move: Moves your targeted node to your current position");
-		c->Message(0, "#path process file_name: processes the map file and tries to automatically generate a rudimentary path setup and then dumps the current zone->pathing to a file of your naming.");
-		c->Message(0, "#path resort [nodes]: resorts the connections/nodes after you've manually altered them so they'll work.");
-		return;
+	if (zone->pathing) {
+		zone->pathing->DebugCommand(c, sep);
 	}
-	if(!strcasecmp(sep->arg[1], "shownodes"))
-	{
-		if(zone->pathing)
-			zone->pathing->SpawnPathNodes();
-
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "info"))
-	{
-		if(zone->pathing)
-		{
-			zone->pathing->NodeInfo(c);
-		}
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "dump"))
-	{
-		if(zone->pathing)
-		{
-			if(sep->arg[2][0] == '\0')
-				return;
-
-			zone->pathing->DumpPath(sep->arg[2]);
-		}
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "add"))
-	{
-		if(zone->pathing)
-		{
-			float px = c->GetX();
-			float py = c->GetY();
-			float pz = c->GetZ();
-			float best_z;
-
-			if(zone->zonemap)
-			{
-				glm::vec3 loc(px, py, pz);
-				best_z = zone->zonemap->FindBestZ(loc, nullptr);
-			}
-			else
-			{
-				best_z = pz;
-			}
-			int32 res = zone->pathing->AddNode(px, py, pz, best_z, atoi(sep->arg[2]));
-			if(res >= 0)
-			{
-				c->Message(0, "Added Path Node: %i",  res);
-			}
-			else
-			{
-				c->Message(0, "Failed to add Path Node");
-			}
-		}
-		else
-		{
-			zone->pathing = new PathManager();
-			float px = c->GetX();
-			float py = c->GetY();
-			float pz = c->GetZ();
-			float best_z;
-
-			if(zone->zonemap)
-			{
-				glm::vec3 loc(px, py, pz);
-				best_z = zone->zonemap->FindBestZ(loc, nullptr);
-			}
-			else
-			{
-				best_z = pz;
-			}
-			int32 res = zone->pathing->AddNode(px, py, pz, best_z, atoi(sep->arg[2]));
-			if(res >= 0)
-			{
-				c->Message(0, "Added Path Node: %i",  res);
-			}
-			else
-			{
-				c->Message(0, "Failed to add Path Node");
-			}
-		}
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "remove"))
-	{
-		if(zone->pathing)
-		{
-			if(zone->pathing->DeleteNode(c))
-			{
-				c->Message(0, "Removed Node.");
-			}
-			else
-			{
-				c->Message(0, "Unable to Remove Node.");
-			}
-		}
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "connect"))
-	{
-		if(zone->pathing)
-		{
-			zone->pathing->ConnectNodeToNode(c, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]));
-		}
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "sconnect"))
-	{
-		if(zone->pathing)
-		{
-			zone->pathing->ConnectNode(c, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]));
-		}
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "qconnect"))
-	{
-		if(zone->pathing)
-		{
-			if(!strcasecmp(sep->arg[2], "set"))
-			{
-				zone->pathing->QuickConnect(c, true);
-			}
-			else
-			{
-				zone->pathing->QuickConnect(c, false);
-			}
-		}
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "disconnect"))
-	{
-		if(zone->pathing)
-		{
-			if(!strcasecmp(sep->arg[2], "all"))
-			{
-				zone->pathing->DisconnectAll(c);
-			}
-			else
-			{
-				zone->pathing->DisconnectNodeToNode(c, atoi(sep->arg[2]));
-			}
-		}
-		return;
-	}
-
-
-	if(!strcasecmp(sep->arg[1], "move"))
-	{
-		if(zone->pathing)
-		{
-			zone->pathing->MoveNode(c);
-		}
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "process"))
-	{
-		if(zone->pathing)
-		{
-			if(sep->arg[2][0] == '\0')
-				return;
-
-			zone->pathing->ProcessNodesAndSave(sep->arg[2]);
-			c->Message(0, "Path processed...");
-		}
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "resort"))
-	{
-		if(zone->pathing)
-		{
-			if(!strcasecmp(sep->arg[2], "nodes"))
-			{
-				zone->pathing->SortNodes();
-				c->Message(0, "Nodes resorted...");
-			}
-			else
-			{
-				zone->pathing->ResortConnections();
-				c->Message(0, "Connections resorted...");
-			}
-		}
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "hazard"))
-	{
-		if(zone->pathing)
-		{
-			if(c && c->GetTarget())
-			{
-				if (zone->pathing->NoHazardsAccurate(glm::vec3(c->GetX(), c->GetY(), c->GetZ()),
-					glm::vec3(c->GetTarget()->GetX(), c->GetTarget()->GetY(), c->GetTarget()->GetZ())))
-				{
-					c->Message(0, "No hazards.");
-				}
-				else
-				{
-					c->Message(0, "Hazard Detected...");
-				}
-			}
-		}
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "print"))
-	{
-		if(zone->pathing)
-		{
-			zone->pathing->PrintPathing();
-		}
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "showneighbours") || !strcasecmp(sep->arg[1], "showneighbors"))
-	{
-		if(!c->GetTarget())
-		{
-			c->Message(0, "First #path shownodes to spawn the pathnodes, and then target one of them.");
-			return;
-		}
-		if(zone->pathing)
-		{
-			zone->pathing->ShowPathNodeNeighbours(c);
-			return;
-		}
-	}
-	if(!strcasecmp(sep->arg[1], "meshtest"))
-	{
-		if(zone->pathing)
-		{
-			if(!strcasecmp(sep->arg[2], "simple"))
-			{
-				c->Message(0, "You may go linkdead. Results will be in the log file.");
-				zone->pathing->SimpleMeshTest();
-				return;
-			}
-			else
-			{
-				c->Message(0, "You may go linkdead. Results will be in the log file.");
-				zone->pathing->MeshTest();
-				return;
-			}
-		}
-	}
-
-	if(!strcasecmp(sep->arg[1], "allspawns"))
-	{
-		if(zone->pathing)
-		{
-			c->Message(0, "You may go linkdead. Results will be in the log file.");
-			entity_list.FindPathsToAllNPCs();
-			return;
-		}
-	}
-
-	if(!strcasecmp(sep->arg[1], "nearest"))
-	{
-		if(!c->GetTarget() || !c->GetTarget()->IsMob())
-		{
-			c->Message(0, "You must target something.");
-			return;
-		}
-
-		if(zone->pathing)
-		{
-			Mob *m = c->GetTarget();
-
-			glm::vec3 Position(m->GetX(), m->GetY(), m->GetZ());
-
-			int Node = zone->pathing->FindNearestPathNode(Position);
-
-			if(Node == -1)
-				c->Message(0, "Unable to locate a path node within range.");
-			else
-				c->Message(0, "Nearest path node is %i",  Node);
-
-			return;
-		}
-	}
-
-	c->Message(0, "Unknown path command.");
 }
 
 void Client::Undye() {

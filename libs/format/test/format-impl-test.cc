@@ -26,10 +26,12 @@
  */
 
 #define FMT_NOEXCEPT
+#undef FMT_SHARED
 #include "test-assert.h"
 
-// Include format.cc instead of format.h to test implementation-specific stuff.
+// Include *.cc instead of *.h to test implementation-specific stuff.
 #include "fmt/format.cc"
+#include "fmt/printf.cc"
 
 #include <algorithm>
 #include <cstring>
@@ -46,7 +48,7 @@ TEST(FormatTest, ArgConverter) {
   Arg arg = Arg();
   arg.type = Arg::LONG_LONG;
   arg.long_long_value = std::numeric_limits<fmt::LongLong>::max();
-  fmt::ArgConverter<fmt::LongLong>(arg, 'd').visit(arg);
+  fmt::internal::ArgConverter<fmt::LongLong>(arg, 'd').visit(arg);
   EXPECT_EQ(Arg::LONG_LONG, arg.type);
 }
 

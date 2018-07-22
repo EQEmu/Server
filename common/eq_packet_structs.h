@@ -731,7 +731,7 @@ struct BandolierItem_Struct
 struct Bandolier_Struct
 {
 	char Name[32];
-	BandolierItem_Struct Items[EQEmu::legacy::BANDOLIER_ITEM_COUNT];
+	BandolierItem_Struct Items[EQEmu::profile::BANDOLIER_ITEM_COUNT];
 };
 
 //len = 72
@@ -745,7 +745,7 @@ struct PotionBeltItem_Struct
 //len = 288
 struct PotionBelt_Struct
 {
-	PotionBeltItem_Struct Items[EQEmu::legacy::POTION_BELT_ITEM_COUNT];
+	PotionBeltItem_Struct Items[EQEmu::profile::POTION_BELT_SIZE];
 };
 
 struct MovePotionToBelt_Struct
@@ -1049,7 +1049,7 @@ struct PlayerProfile_Struct
 /*7212*/	uint32				tribute_points;
 /*7216*/	uint32				unknown7252;
 /*7220*/	uint32				tribute_active;		//1=active
-/*7224*/	Tribute_Struct		tributes[EQEmu::legacy::TRIBUTE_SIZE];
+/*7224*/	Tribute_Struct		tributes[EQEmu::invtype::TRIBUTE_SIZE];
 /*7264*/	Disciplines_Struct	disciplines;
 /*7664*/	uint32				recastTimers[MAX_RECAST_TYPES];	// Timers (GMT of last use)
 /*7744*/	char				unknown7780[160];
@@ -1076,7 +1076,7 @@ struct PlayerProfile_Struct
 /*12800*/	uint32				expAA;
 /*12804*/	uint32				aapoints;			//avaliable, unspent
 /*12808*/	uint8				unknown12844[36];
-/*12844*/	Bandolier_Struct	bandoliers[EQEmu::legacy::BANDOLIERS_SIZE];
+/*12844*/	Bandolier_Struct	bandoliers[EQEmu::profile::BANDOLIERS_SIZE];
 /*14124*/	uint8				unknown14160[4506];
 /*18630*/	SuspendedMinion_Struct	SuspendedMinion; // No longer in use
 /*19240*/	uint32				timeentitledonaccount;
@@ -1781,6 +1781,15 @@ struct CombatAbility_Struct {
 	uint32 m_target;		//the ID of the target mob
 	uint32 m_atk;
 	uint32 m_skill;
+};
+
+// Disarm Struct incoming from Client [Size: 16]
+struct Disarm_Struct
+{
+	uint32 source;
+	uint32 target;
+	uint32 skill;
+	uint32 unknown;
 };
 
 //Instill Doubt
@@ -3449,8 +3458,8 @@ struct SelectTributeReply_Struct {
 
 struct TributeInfo_Struct {
 	uint32	active;		//0 == inactive, 1 == active
-	uint32	tributes[EQEmu::legacy::TRIBUTE_SIZE];	//-1 == NONE
-	uint32	tiers[EQEmu::legacy::TRIBUTE_SIZE];		//all 00's
+	uint32	tributes[EQEmu::invtype::TRIBUTE_SIZE];	//-1 == NONE
+	uint32	tiers[EQEmu::invtype::TRIBUTE_SIZE];		//all 00's
 	uint32	tribute_master_id;
 };
 
@@ -3782,7 +3791,7 @@ struct AcceptNewTask_Struct {
 //was all 0's from client, server replied with same op, all 0's
 struct CancelTask_Struct {
 	uint32 SequenceNumber;
-	uint32 unknown4; // Only seen 0x00000002
+	uint32 type; // Only seen 0x00000002
 };
 
 #if 0
@@ -3836,28 +3845,28 @@ struct AvailableTaskTrailer_Struct {
 struct TaskDescriptionHeader_Struct {
 	uint32	SequenceNumber; // The order the tasks appear in the journal. 0 for first task, 1 for second, etc.
 	uint32	TaskID;
-	uint32	unknown2;
-	uint32	unknown3;
-	uint8	unknown4;
+	uint8	open_window;
+	uint32	task_type;
+	uint32	reward_type; // if this != 4 says Ebon Crystals else Radiant Crystals
 };
 
 struct TaskDescriptionData1_Struct {
 	uint32	Duration;
-	uint32	unknown2;
+	uint32	dur_code; // if Duration == 0
 	uint32	StartTime;
 };
 
 struct TaskDescriptionData2_Struct {
-	uint32	RewardCount; // ??
-	uint32	unknown1;
-	uint32	unknown2;
-	uint16	unknown3;
-	//uint8	unknown4;
+	uint8 	has_rewards;
+	uint32	coin_reward;
+	uint32	xp_reward;
+	uint32	faction_reward;
 };
 
 struct TaskDescriptionTrailer_Struct {
 	//uint16	unknown1; // 0x0012
 	uint32	Points;
+	uint8	has_reward_selection; // uses newer reward selection window, not in all clients
 };
 
 struct TaskActivityHeader_Struct {
@@ -3897,11 +3906,11 @@ struct TaskActivityShort_Struct {
 
 struct TaskActivityComplete_Struct {
 	uint32	TaskIndex;
-	uint32	unknown2; // 0x00000002
-	uint32	unknown3;
+	uint32	TaskType; // task, shared task, quest
+	uint32	TaskID;		// must match
 	uint32	ActivityID;
-	uint32	unknown4; // 0x00000001
-	uint32	unknown5; // 0x00000001
+	uint32	task_completed; // Broadcasts "Task '%1' Completed" it not 0 and "Task '%1' Failed." if 0
+	uint32	stage_complete; // Broadcasts "Task Stage Completed"
 };
 
 #if 0
@@ -5302,7 +5311,7 @@ struct MercenaryMerchantResponse_Struct {
 struct ServerLootItem_Struct {
 	uint32	item_id;	  // uint32	item_id;
 	int16	equip_slot;	  // int16	equip_slot;
-	uint16	charges;	  // uint8	charges; 
+	uint16	charges;	  // uint8	charges;
 	uint16	lootslot;	  // uint16	lootslot;
 	uint32	aug_1;		  // uint32	aug_1;
 	uint32	aug_2;		  // uint32	aug_2;
@@ -5330,7 +5339,7 @@ struct ClientMarqueeMessage_Struct {
 	uint32 fade_out_time; //The fade out time, in ms
 	uint32 duration; //in ms
 	char msg[1]; //message plus null terminator
-	
+
 };
 
 typedef std::list<ServerLootItem_Struct*> ItemList;

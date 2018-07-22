@@ -1546,9 +1546,9 @@ sub map_files_fetch_bulk{
 	);
 	for my $file (@files) {
 		$destination_file = $file;
-		$destination_file =~s/maps\/EQEmuMaps-master\/maps\///g;
+		$destination_file =~s/maps\/EQEmuMaps-master\///g;
 		print "[Install] Installing :: " . $destination_file . "\n";
-		copy_file($file, "maps/" . $new_file);
+		copy_file($file, "maps/" . $destination_file);
 	}
 	print "[Install] Fetched Latest Maps\n";
 	

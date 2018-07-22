@@ -92,21 +92,12 @@ namespace EQEmu
 		}
 		~InventoryProfile();
 
-		bool SetInventoryVersion(versions::MobVersion inventory_version) {
-			if (!m_mob_version_set) {
-				m_mob_version = versions::ValidateMobVersion(inventory_version);
-				m_lookup = inventory::Lookup(m_mob_version);
-				m_mob_version_set = true;
-				return true;
-			}
-			else {
-				m_lookup = inventory::Lookup(versions::MobVersion::Unknown);
-				return false;
-			}
-		}
+		bool SetInventoryVersion(versions::MobVersion inventory_version);
 		bool SetInventoryVersion(versions::ClientVersion client_version) { return SetInventoryVersion(versions::ConvertClientVersionToMobVersion(client_version)); }
 
 		versions::MobVersion InventoryVersion() { return m_mob_version; }
+
+		const inventory::LookupEntry* GetLookup() const { return m_lookup; }
 
 		static void CleanDirty();
 		static void MarkDirty(ItemInstance *inst);
@@ -163,7 +154,7 @@ namespace EQEmu
 
 		// Locate an available inventory slot
 		int16 FindFreeSlot(bool for_bag, bool try_cursor, uint8 min_size = 0, bool is_arrow = false);
-		int16 FindFreeSlotForTradeItem(const ItemInstance* inst, int16 general_start = legacy::GENERAL_BEGIN, uint8 bag_start = inventory::containerBegin);
+		int16 FindFreeSlotForTradeItem(const ItemInstance* inst, int16 general_start = invslot::GENERAL_BEGIN, uint8 bag_start = invbag::SLOT_BEGIN);
 
 		// Calculate slot_id for an item within a bag
 		static int16 CalcSlotId(int16 slot_id); // Calc parent bag's slot_id

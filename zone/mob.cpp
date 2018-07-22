@@ -116,7 +116,7 @@ Mob::Mob(const char* in_name,
 		fix_z_timer_engaged(100),
 		attack_anim_timer(1000),
 		position_update_melee_push_timer(500),
-		mHateListCleanup(6000)
+		hate_list_cleanup_timer(6000)
 {
 	targeted = 0;
 	tar_ndx = 0;
@@ -432,15 +432,7 @@ Mob::Mob(const char* in_name,
 	m_TargetRing = glm::vec3();
 
 	flymode = FlyMode3;
-	// Pathing
-	PathingLOSState = UnknownLOS;
-	PathingLoopCount = 0;
-	PathingLastNodeVisited = -1;
-	PathingLOSCheckTimer = new Timer(RuleI(Pathing, LOSCheckFrequency));
-	PathingRouteUpdateTimerShort = new Timer(RuleI(Pathing, RouteUpdateFrequencyShort));
-	PathingRouteUpdateTimerLong = new Timer(RuleI(Pathing, RouteUpdateFrequencyLong));
 	DistractedFromGrid = false;
-	PathingTraversedNodes = 0;
 	hate_list.SetHateOwner(this);
 
 	m_AllowBeneficial = false;
@@ -454,6 +446,9 @@ Mob::Mob(const char* in_name,
 	PrimaryAggro = false;
 	AssistAggro = false;
 	npc_assist_cap = 0;
+
+	PathRecalcTimer.reset(new Timer(500));
+	PathingLoopCount = 0;
 }
 
 Mob::~Mob()
@@ -487,9 +482,6 @@ Mob::~Mob()
 		entity_list.DestroyTempPets(this);
 	}
 	entity_list.UnMarkNPC(GetID());
-	safe_delete(PathingLOSCheckTimer);
-	safe_delete(PathingRouteUpdateTimerShort);
-	safe_delete(PathingRouteUpdateTimerLong);
 	UninitializeBuffSlots();
 
 #ifdef BOTS
@@ -1250,6 +1242,13 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 
 		ns->spawn.flymode = 0;
 	}
+
+	if (RuleB(Character, AllowCrossClassTrainers) && ForWho) {
+		if (ns->spawn.class_ >= WARRIORGM && ns->spawn.class_ <= BERSERKERGM) {
+			int trainer_class = WARRIORGM + (ForWho->GetClass() - 1);
+			ns->spawn.class_ = trainer_class;
+		}
+	}
 }
 
 void Mob::CreateDespawnPacket(EQApplicationPacket* app, bool Decay)
@@ -1679,7 +1678,6 @@ void Mob::ShowBuffList(Client* client) {
 }
 
 void Mob::GMMove(float x, float y, float z, float heading, bool SendUpdate) {
-
 	Route.clear();
 
 	if(IsNPC()) {
@@ -2090,7 +2088,7 @@ bool Mob::IsPlayerRace(uint16 in_race) {
 
 
 uint8 Mob::GetDefaultGender(uint16 in_race, uint8 in_gender) {
-	if (Mob::IsPlayerRace(in_race) || in_race == 15 || in_race == 50 || in_race == 57 || in_race == 70 || in_race == 98 || in_race == 118 || in_race == 23) {
+	if (Mob::IsPlayerRace(in_race) || in_race == 15 || in_race == 50 || in_race == 57 || in_race == 70 || in_race == 98 || in_race == 118 || in_race == 562) {
 		if (in_gender >= 2) {
 			// Male default for PC Races
 			return 0;
@@ -2488,8 +2486,8 @@ bool Mob::CanThisClassDualWield(void) const {
 		return(GetSkill(EQEmu::skills::SkillDualWield) > 0);
 	}
 	else if (CastToClient()->HasSkill(EQEmu::skills::SkillDualWield)) {
-		const EQEmu::ItemInstance* pinst = CastToClient()->GetInv().GetItem(EQEmu::inventory::slotPrimary);
-		const EQEmu::ItemInstance* sinst = CastToClient()->GetInv().GetItem(EQEmu::inventory::slotSecondary);
+		const EQEmu::ItemInstance* pinst = CastToClient()->GetInv().GetItem(EQEmu::invslot::slotPrimary);
+		const EQEmu::ItemInstance* sinst = CastToClient()->GetInv().GetItem(EQEmu::invslot::slotSecondary);
 
 		// 2HS, 2HB, or 2HP
 		if(pinst && pinst->IsWeapon()) {
@@ -6053,6 +6051,11 @@ void Mob::CommonBreakInvisible()
 	BreakInvisibleSpells();
 	CancelSneakHide();
 }
+
+float Mob::GetDefaultRaceSize() const {
+	return GetRaceGenderDefaultHeight(race, gender);
+}
+
 
 #ifdef BOTS
 bool Mob::JoinHealRotationTargetPool(std::shared_ptr<HealRotation>* heal_rotation)

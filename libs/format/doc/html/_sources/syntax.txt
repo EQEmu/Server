@@ -49,12 +49,10 @@ mini-language" or interpretation of the *format_spec*.
 Most built-in types support a common formatting mini-language, which is
 described in the next section.
 
-A *format_spec* field can also include nested replacement fields within it.
-These nested replacement fields can contain only an argument index;
-format specifications are not allowed.  Formatting is performed as if the
-replacement fields within the format_spec are substituted before the
-*format_spec* string is interpreted.  This allows the formatting of a value
-to be dynamically specified.
+A *format_spec* field can also include nested replacement fields in certain
+positions within it. These nested replacement fields can contain only an
+argument id; format specifications are not allowed. This allows the
+formatting of a value to be dynamically specified.
 
 See the :ref:`formatexamples` section for some examples.
 
@@ -80,8 +78,8 @@ The general form of a *standard format specifier* is:
    sign: "+" | "-" | " "
    width: `integer` | "{" `arg_id` "}"
    precision: `integer` | "{" `arg_id` "}"
-   type: `int_type` | "c" | "e" | "E" | "f" | "F" | "g" | "G" | "p" | "s"
-   int_type: "b" | "B" | "d" | "o" | "x" | "X"
+   type: `int_type` | "a" | "A" | "c" | "e" | "E" | "f" | "F" | "g" | "G" | "p" | "s"
+   int_type: "b" | "B" | "d" | "n" | "o" | "x" | "X"
 
 The *fill* character can be any character other than '{' or '}'.  The presence
 of a fill character is signaled by the character following it, which must be
@@ -234,7 +232,7 @@ The available presentation types for floating-point values are:
 +=========+==========================================================+
 | ``'a'`` | Hexadecimal floating point format. Prints the number in  |
 |         | base 16 with prefix ``"0x"`` and lower-case letters for  |
-|         | digits above 9. Uses 'p' to indicate the exponent.       |
+|         | digits above 9. Uses ``'p'`` to indicate the exponent.   |
 +---------+----------------------------------------------------------+
 | ``'A'`` | Same as ``'a'`` except it uses upper-case letters for    |
 |         | the prefix, digits above 9 and to indicate the exponent. |
