@@ -2683,7 +2683,7 @@ void Client::LogMerchant(Client* player, Mob* merchant, uint32 quantity, uint32 
 }
 
 void Client::Disarm(Client* disarmer, int chance) {
-	int16 slot = -1;
+	int16 slot = EQEmu::invslot::SLOT_INVALID;
 	const EQEmu::ItemInstance *inst = this->GetInv().GetItem(EQEmu::invslot::slotPrimary);
 	if (inst && inst->IsWeapon()) {
 		slot = EQEmu::invslot::slotPrimary;
@@ -2693,13 +2693,13 @@ void Client::Disarm(Client* disarmer, int chance) {
 		if (inst && inst->IsWeapon())
 			slot = EQEmu::invslot::slotSecondary;
 	}
-	if (slot != -1 && inst->IsClassCommon()) {
+	if (slot != EQEmu::invslot::SLOT_INVALID && inst->IsClassCommon()) {
 		// We have an item that can be disarmed.
 		if (zone->random.Int(0, 1000) <= chance) {
 			// Find a free inventory slot
-			int16 slot_id = -1;
-			slot_id = m_inv.FindFreeSlot(false, true, inst->GetItem()->Size, inst->GetItem()->ItemType);
-			if (slot_id != -1)
+			int16 slot_id = EQEmu::invslot::SLOT_INVALID;
+			slot_id = m_inv.FindFreeSlot(false, true, inst->GetItem()->Size, (inst->GetItem()->ItemType == EQEmu::item::ItemTypeArrow));
+			if (slot_id != EQEmu::invslot::SLOT_INVALID)
 			{
 				EQEmu::ItemInstance *InvItem = m_inv.PopItem(slot);
 				if (InvItem) { // there should be no way it is not there, but check anyway
@@ -2714,8 +2714,8 @@ void Client::Disarm(Client* disarmer, int chance) {
 					FastQueuePacket(&outapp); // this deletes item from the weapon slot on the client
 					if (PutItemInInventory(slot_id, *InvItem, true))
 						database.SaveInventory(this->CharacterID(), NULL, slot);
-					int matslot = slot == EQEmu::invslot::slotPrimary ? EQEmu::textures::weaponPrimary : EQEmu::textures::weaponSecondary;
-					if (matslot != -1)
+					auto matslot = (slot == EQEmu::invslot::slotPrimary ? EQEmu::textures::weaponPrimary : EQEmu::textures::weaponSecondary);
+					if (matslot != EQEmu::textures::materialInvalid)
 						SendWearChange(matslot);
 				}
 				Message_StringID(MT_Skills, DISARMED);
