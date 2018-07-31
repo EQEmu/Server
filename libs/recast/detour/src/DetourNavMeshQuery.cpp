@@ -1096,7 +1096,7 @@ dtStatus dtNavMeshQuery::findPath(dtPolyRef startRef, dtPolyRef endRef,
 			// The API input has been cheked already, skip checking internal data.
 			const dtMeshTile* neighbourTile = 0;
 			const dtPoly* neighbourPoly = 0;
-			if (m_nav->getTileAndPolyByRef(neighbourRef, &neighbourTile, &neighbourPoly) == DT_FAILURE) {
+			if (dtStatusFailed(m_nav->getTileAndPolyByRef(neighbourRef, &neighbourTile, &neighbourPoly))) {
 				continue;
 			}		
 			
