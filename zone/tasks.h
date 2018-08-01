@@ -25,6 +25,7 @@ Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
 #include <list>
 #include <vector>
 #include <string>
+#include <algorithm>
 
 #define MAXTASKS 10000
 #define MAXTASKSETS 1000
@@ -113,9 +114,15 @@ struct ActivityInformation {
 	TaskMethodType GoalMethod;
 	int		GoalCount;
 	int		DeliverToNPC;
-	int		ZoneID;
+	std::vector<int>	ZoneIDs;
 	std::string zones; // IDs ; searated, ZoneID is the first in this list for older clients -- default empty string
 	bool	Optional;
+
+	inline bool CheckZone(int zone_id) {
+		if (ZoneIDs.empty())
+			return true;
+		return std::find(ZoneIDs.begin(), ZoneIDs.end(), zone_id) != ZoneIDs.end();
+	}
 };
 
 typedef enum { ActivitiesSequential = 0, ActivitiesStepped = 1 } SequenceType;
