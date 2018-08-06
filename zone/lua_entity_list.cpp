@@ -340,6 +340,22 @@ Lua_Client_List Lua_EntityList::GetClientList() {
 	return ret;
 }
 
+Lua_Client_List Lua_EntityList::GetShuffledClientList() {
+	Lua_Safe_Call_Class(Lua_Client_List);
+	Lua_Client_List ret;
+	auto &t_list = self->GetClientList();
+
+	auto iter = t_list.begin();
+	while(iter != t_list.end()) {
+		ret.entries.push_back(Lua_Client(iter->second));
+		++iter;
+	}
+
+	zone->random.Shuffle(ret.entries.begin(), ret.entries.end());
+
+	return ret;
+}
+
 Lua_NPC_List Lua_EntityList::GetNPCList() {
 	Lua_Safe_Call_Class(Lua_NPC_List);
 	Lua_NPC_List ret;
@@ -480,6 +496,7 @@ luabind::scope lua_register_entity_list() {
 		.def("GetRandomClient", (Lua_Client(Lua_EntityList::*)(float, float, float, float, Lua_Client))&Lua_EntityList::GetRandomClient)
 		.def("GetMobList", (Lua_Mob_List(Lua_EntityList::*)(void))&Lua_EntityList::GetMobList)
 		.def("GetClientList", (Lua_Client_List(Lua_EntityList::*)(void))&Lua_EntityList::GetClientList)
+		.def("GetShuffledClientList", (Lua_Client_List(Lua_EntityList::*)(void))&Lua_EntityList::GetShuffledClientList)
 		.def("GetNPCList", (Lua_NPC_List(Lua_EntityList::*)(void))&Lua_EntityList::GetNPCList)
 		.def("GetCorpseList", (Lua_Corpse_List(Lua_EntityList::*)(void))&Lua_EntityList::GetCorpseList)
 		.def("GetObjectList", (Lua_Object_List(Lua_EntityList::*)(void))&Lua_EntityList::GetObjectList)
