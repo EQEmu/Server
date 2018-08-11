@@ -1846,7 +1846,7 @@ bool Bot::Process() {
 			SetEndurance(GetEndurance() + CalcEnduranceRegen() + RestRegenEndurance);
 	}
 
-	if (sendhpupdate_timer.Check(false)) {
+	if (send_hp_update_timer.Check(false)) {
 		SendHPUpdate();
 		if(HasPet())
 			GetPet()->SendHPUpdate();
