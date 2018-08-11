@@ -7670,6 +7670,8 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 			bot_owner->Message(m_fail, "gender: %u(F)", FEMALE);
 		else if (RuleI(Bots, AllowedGenders) == 1)
 			bot_owner->Message(m_fail, "gender: %u(M)", MALE);
+		else
+			bot_owner->Message(m_fail, "gender: ERROR - No valid genders exist");
 		return bot_id;
 	}
 
