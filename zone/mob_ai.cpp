@@ -197,7 +197,10 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes, bool bInnates
 					}
 
 					case SpellType_Escape: {
-						if (GetHPRatio() <= 5 )
+						// If min_hp !=0 then the spell list has specified
+						// custom range and we're inside that range if we
+						// made it here.  The hard coded <=5 is for unspecified.
+						if (AIspells[i].min_hp != 0 || GetHPRatio() <= 5)
 						{
 							AIDoSpellCast(i, tar, mana_cost);
 							return true;
