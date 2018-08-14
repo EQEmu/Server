@@ -1202,7 +1202,7 @@ void Client::SendSingleTraderItem(uint32 CharID, int SerialNumber) {
 
 	EQEmu::ItemInstance* inst= database.LoadSingleTraderItem(CharID, SerialNumber);
 	if(inst) {
-		SendItemPacket(30, inst, ItemPacketMerchant); // MainCursor?
+		SendItemPacket(EQEmu::invslot::slotCursor, inst, ItemPacketMerchant); // MainCursor?
 		safe_delete(inst);
 	}
 
@@ -1233,7 +1233,7 @@ void Client::BulkSendTraderInventory(uint32 char_id) {
 				}
 
 				inst->SetPrice(TraderItems->ItemCost[i]);
-				SendItemPacket(30, inst, ItemPacketMerchant); // MainCursor?
+				SendItemPacket(EQEmu::invslot::slotCursor, inst, ItemPacketMerchant); // MainCursor?
 				safe_delete(inst);
 			}
 			else
@@ -2072,7 +2072,7 @@ static void UpdateTraderCustomerItemsAdded(uint32 CustomerID, TraderCharges_Stru
 			Log(Logs::Detail, Logs::Trading, "Sending price update for %s, Serial No. %i with %i charges",
 							item->Name, gis->SerialNumber[i], gis->Charges[i]);
 
-			Customer->SendItemPacket(30, inst, ItemPacketMerchant); // MainCursor?
+			Customer->SendItemPacket(EQEmu::invslot::slotCursor, inst, ItemPacketMerchant); // MainCursor?
 		}
 	}
 
@@ -2156,7 +2156,7 @@ static void UpdateTraderCustomerPriceChanged(uint32 CustomerID, TraderCharges_St
 		Log(Logs::Detail, Logs::Trading, "Sending price update for %s, Serial No. %i with %i charges",
 						item->Name, gis->SerialNumber[i], gis->Charges[i]);
 
-		Customer->SendItemPacket(30, inst, ItemPacketMerchant); // MainCursor??
+		Customer->SendItemPacket(EQEmu::invslot::slotCursor, inst, ItemPacketMerchant); // MainCursor??
 	}
 	safe_delete(inst);
 }

@@ -7194,13 +7194,13 @@ void bot_subcommand_inventory_list(Client *c, const Seperator *sep)
 	linker.SetLinkType(EQEmu::saylink::SayLinkItemInst);
 
 	uint32 inventory_count = 0;
-	for (int i = EQEmu::invslot::EQUIPMENT_BEGIN; i <= (EQEmu::invslot::EQUIPMENT_END + 1); ++i) {
+	for (int i = EQEmu::invslot::EQUIPMENT_BEGIN; i <= EQEmu::invslot::EQUIPMENT_END; ++i) {
 		if ((i == EQEmu::invslot::slotSecondary) && is2Hweapon)
 			continue;
 
-		inst = my_bot->CastToBot()->GetBotItem(i == 22 ? EQEmu::invslot::SLOT_POWER_SOURCE : i);
+		inst = my_bot->CastToBot()->GetBotItem(i);
 		if (!inst || !inst->GetItem()) {
-			c->Message(m_message, "I need something for my %s (slot %i)", GetBotEquipSlotName(i), (i == 22 ? EQEmu::invslot::SLOT_POWER_SOURCE : i));
+			c->Message(m_message, "I need something for my %s (slot %i)", GetBotEquipSlotName(i), i);
 			continue;
 		}
 		
@@ -7210,7 +7210,7 @@ void bot_subcommand_inventory_list(Client *c, const Seperator *sep)
 		}
 
 		linker.SetItemInst(inst);
-		c->Message(m_message, "Using %s in my %s (slot %i)", linker.GenerateLink().c_str(), GetBotEquipSlotName(i), (i == 22 ? EQEmu::invslot::SLOT_POWER_SOURCE : i));
+		c->Message(m_message, "Using %s in my %s (slot %i)", linker.GenerateLink().c_str(), GetBotEquipSlotName(i), i);
 
 		++inventory_count;
 	}
@@ -7249,8 +7249,8 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 	}
 
 	int slotId = atoi(sep->arg[1]);
-	if (!sep->IsNumber(1) || ((slotId > EQEmu::invslot::EQUIPMENT_END || slotId < EQEmu::invslot::EQUIPMENT_BEGIN) && slotId != EQEmu::invslot::SLOT_POWER_SOURCE)) {
-		c->Message(m_fail, "Valid slots are 0-21 or 9999");
+	if (!sep->IsNumber(1) || (slotId > EQEmu::invslot::EQUIPMENT_END || slotId < EQEmu::invslot::EQUIPMENT_BEGIN)) {
+		c->Message(m_fail, "Valid slots are 0-22");
 		return;
 	}
 
@@ -7311,7 +7311,7 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 	case EQEmu::invslot::slotFinger2:
 	case EQEmu::invslot::slotChest:
 	case EQEmu::invslot::slotWaist:
-	case EQEmu::invslot::SLOT_POWER_SOURCE:
+	case EQEmu::invslot::slotPowerSource:
 	case EQEmu::invslot::slotAmmo:
 		c->Message(m_message, "My %s is %s unequipped", GetBotEquipSlotName(slotId), ((itm) ? ("now") : ("already")));
 		break;
@@ -7356,14 +7356,14 @@ void bot_subcommand_inventory_window(Client *c, const Seperator *sep)
 	//EQEmu::SayLinkEngine linker;
 	//linker.SetLinkType(EQEmu::saylink::SayLinkItemInst);
 
-	for (int i = EQEmu::invslot::EQUIPMENT_BEGIN; i <= (EQEmu::invslot::EQUIPMENT_END + 1); ++i) {
+	for (int i = EQEmu::invslot::EQUIPMENT_BEGIN; i <= EQEmu::invslot::EQUIPMENT_END; ++i) {
 		const EQEmu::ItemData* item = nullptr;
-		const EQEmu::ItemInstance* inst = my_bot->CastToBot()->GetBotItem(i == 22 ? EQEmu::invslot::SLOT_POWER_SOURCE : i);
+		const EQEmu::ItemInstance* inst = my_bot->CastToBot()->GetBotItem(i);
 		if (inst)
 			item = inst->GetItem();
 
 		window_text.append("<c \"#FFFFFF\">");
-		window_text.append(GetBotEquipSlotName(i == 22 ? EQEmu::invslot::SLOT_POWER_SOURCE : i));
+		window_text.append(GetBotEquipSlotName(i));
 		window_text.append(": ");
 		if (item) {
 			//window_text.append("</c>");

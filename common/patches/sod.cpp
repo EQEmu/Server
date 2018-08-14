@@ -400,7 +400,7 @@ namespace SoD
 		for (int index = 0; index < item_count; ++index, ++eq) {
 			SerializeItem(ob, (const EQEmu::ItemInstance*)eq->inst, eq->slot_id, 0);
 			if (ob.tellp() == last_pos)
-				Log(Logs::General, Logs::Netcode, "[STRUCTS] Serialization failed on item slot %d during OP_CharInventory.  Item skipped.", eq->slot_id);
+				Log(Logs::General, Logs::Netcode, "SoD::ENCODE(OP_CharInventory) Serialization failed on item slot %d during OP_CharInventory.  Item skipped.", eq->slot_id);
 
 			last_pos = ob.tellp();
 		}
@@ -464,7 +464,12 @@ namespace SoD
 		FINISH_ENCODE();
 	}
 
-	ENCODE(OP_DeleteCharge) { ENCODE_FORWARD(OP_MoveItem); }
+	ENCODE(OP_DeleteCharge)
+	{
+		Log(Logs::Moderate, Logs::Netcode, "SoD::ENCODE(OP_DeleteCharge)");
+
+		ENCODE_FORWARD(OP_MoveItem);
+	}
 
 	ENCODE(OP_DeleteItem)
 	{
@@ -1064,7 +1069,7 @@ namespace SoD
 
 		SerializeItem(ob, (const EQEmu::ItemInstance*)int_struct->inst, int_struct->slot_id, 0);
 		if (ob.tellp() == last_pos) {
-			Log(Logs::General, Logs::Netcode, "[STRUCTS] Serialization failed on item slot %d.", int_struct->slot_id);
+			Log(Logs::General, Logs::Netcode, "SoD::ENCODE(OP_ItemPacket) Serialization failed on item slot %d.", int_struct->slot_id);
 			delete in;
 			return;
 		}
@@ -1124,6 +1129,8 @@ namespace SoD
 	{
 		ENCODE_LENGTH_EXACT(LootingItem_Struct);
 		SETUP_DIRECT_ENCODE(LootingItem_Struct, structs::LootingItem_Struct);
+
+		Log(Logs::Moderate, Logs::Netcode, "SoD::ENCODE(OP_LootItem)");
 
 		OUT(lootee);
 		OUT(looter);
@@ -1285,6 +1292,8 @@ namespace SoD
 	{
 		ENCODE_LENGTH_EXACT(MoveItem_Struct);
 		SETUP_DIRECT_ENCODE(MoveItem_Struct, structs::MoveItem_Struct);
+
+		Log(Logs::Moderate, Logs::Netcode, "SoD::ENCODE(OP_MoveItem)");
 
 		eq->from_slot = ServerToSoDSlot(emu->from_slot);
 		eq->to_slot = ServerToSoDSlot(emu->to_slot);
@@ -1523,7 +1532,7 @@ namespace SoD
 
 		//	OUT(unknown06160[4]);
 
-		// Copy bandoliers where server and client indexes converge
+		// Copy bandoliers where server and client indices converge
 		for (r = 0; r < EQEmu::profile::BANDOLIERS_SIZE && r < profile::BANDOLIERS_SIZE; ++r) {
 			OUT_str(bandoliers[r].Name);
 			for (uint32 k = 0; k < profile::BANDOLIER_ITEM_COUNT; ++k) { // Will need adjusting if 'server != client' is ever true
@@ -1532,7 +1541,7 @@ namespace SoD
 				OUT_str(bandoliers[r].Items[k].Name);
 			}
 		}
-		// Nullify bandoliers where server and client indexes diverge, with a client bias
+		// Nullify bandoliers where server and client indices diverge, with a client bias
 		for (r = EQEmu::profile::BANDOLIERS_SIZE; r < profile::BANDOLIERS_SIZE; ++r) {
 			eq->bandoliers[r].Name[0] = '\0';
 			for (uint32 k = 0; k < profile::BANDOLIER_ITEM_COUNT; ++k) { // Will need adjusting if 'server != client' is ever true
@@ -1544,13 +1553,13 @@ namespace SoD
 
 		//	OUT(unknown07444[5120]);
 
-		// Copy potion belt where server and client indexes converge
+		// Copy potion belt where server and client indices converge
 		for (r = 0; r < EQEmu::profile::POTION_BELT_SIZE && r < profile::POTION_BELT_SIZE; ++r) {
 			OUT(potionbelt.Items[r].ID);
 			OUT(potionbelt.Items[r].Icon);
 			OUT_str(potionbelt.Items[r].Name);
 		}
-		// Nullify potion belt where server and client indexes diverge, with a client bias
+		// Nullify potion belt where server and client indices diverge, with a client bias
 		for (r = EQEmu::profile::POTION_BELT_SIZE; r < profile::POTION_BELT_SIZE; ++r) {
 			eq->potionbelt.Items[r].ID = 0;
 			eq->potionbelt.Items[r].Icon = 0;
@@ -3139,6 +3148,8 @@ namespace SoD
 		DECODE_LENGTH_EXACT(structs::LootingItem_Struct);
 		SETUP_DIRECT_DECODE(LootingItem_Struct, structs::LootingItem_Struct);
 
+		Log(Logs::Moderate, Logs::Netcode, "SoD::DECODE(OP_LootItem)");
+
 		IN(lootee);
 		IN(looter);
 		emu->slot_id = SoDToServerCorpseSlot(eq->slot_id);
@@ -3152,7 +3163,7 @@ namespace SoD
 		DECODE_LENGTH_EXACT(structs::MoveItem_Struct);
 		SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
 
-		Log(Logs::General, Logs::Netcode, "[SoD] Moved item from %u to %u", eq->from_slot, eq->to_slot);
+		Log(Logs::Moderate, Logs::Netcode, "SoD::DECODE(OP_MoveItem)");
 
 		emu->from_slot = SoDToServerSlot(eq->from_slot);
 		emu->to_slot = SoDToServerSlot(eq->to_slot);
@@ -3473,7 +3484,7 @@ namespace SoD
 		ibs.nodrop = item->NoDrop;
 		ibs.attune = item->Attuneable;
 		ibs.size = item->Size;
-		ibs.slots = SwapBits21And22(item->Slots);
+		ibs.slots = item->Slots;
 		ibs.price = item->Price;
 		ibs.icon = item->Icon;
 		ibs.unknown1 = 1;
@@ -3736,79 +3747,193 @@ namespace SoD
 
 		ob.write((const char*)&subitem_count, sizeof(uint32));
 
-		for (uint32 index = EQEmu::invbag::SLOT_BEGIN; index <= EQEmu::invbag::SLOT_END; ++index) {
-			EQEmu::ItemInstance* sub = inst->GetItem(index);
-			if (!sub)
-				continue;
+		// moved outside of loop since it is not modified within that scope
+		int16 SubSlotNumber = EQEmu::invbag::SLOT_INVALID;
 
-			int SubSlotNumber = INVALID_INDEX;
-			if (slot_id_in >= EQEmu::invslot::GENERAL_BEGIN && slot_id_in <= EQEmu::invslot::GENERAL_END)
-				SubSlotNumber = (((slot_id_in + 3) * EQEmu::invbag::SLOT_COUNT) + index + 1);
-			else if (slot_id_in >= EQEmu::invslot::BANK_BEGIN && slot_id_in <= EQEmu::invslot::BANK_END)
-				SubSlotNumber = (((slot_id_in - EQEmu::invslot::BANK_BEGIN) * EQEmu::invbag::SLOT_COUNT) + EQEmu::invbag::BANK_BAGS_BEGIN + index);
-			else if (slot_id_in >= EQEmu::invslot::SHARED_BANK_BEGIN && slot_id_in <= EQEmu::invslot::SHARED_BANK_END)
-				SubSlotNumber = (((slot_id_in - EQEmu::invslot::SHARED_BANK_BEGIN) * EQEmu::invbag::SLOT_COUNT) + EQEmu::invbag::SHARED_BANK_BAGS_BEGIN + index);
-			else
-				SubSlotNumber = slot_id_in;
+		if (slot_id_in <= EQEmu::invslot::slotGeneral8 && slot_id_in >= EQEmu::invslot::GENERAL_BEGIN)
+			SubSlotNumber = EQEmu::invbag::GENERAL_BAGS_BEGIN + ((slot_id_in - EQEmu::invslot::GENERAL_BEGIN) * EQEmu::invbag::SLOT_COUNT);
+		else if (slot_id_in <= EQEmu::invslot::GENERAL_END && slot_id_in >= EQEmu::invslot::slotGeneral9)
+			SubSlotNumber = EQEmu::invbag::SLOT_INVALID;
+		else if (slot_id_in == EQEmu::invslot::slotCursor)
+			SubSlotNumber = EQEmu::invbag::CURSOR_BAG_BEGIN;
+		else if (slot_id_in <= EQEmu::invslot::BANK_END && slot_id_in >= EQEmu::invslot::BANK_BEGIN)
+			SubSlotNumber = EQEmu::invbag::BANK_BAGS_BEGIN + ((slot_id_in - EQEmu::invslot::BANK_BEGIN) * EQEmu::invbag::SLOT_COUNT);
+		else if (slot_id_in <= EQEmu::invslot::SHARED_BANK_END && slot_id_in >= EQEmu::invslot::SHARED_BANK_BEGIN)
+			SubSlotNumber = EQEmu::invbag::SHARED_BANK_BAGS_BEGIN + ((slot_id_in - EQEmu::invslot::SHARED_BANK_BEGIN) * EQEmu::invbag::SLOT_COUNT);
+		else
+			SubSlotNumber = slot_id_in; // not sure if this is the best way to handle this..leaving for now
 
-			ob.write((const char*)&index, sizeof(uint32));
+		if (SubSlotNumber != EQEmu::invbag::SLOT_INVALID) {
+			for (uint32 index = EQEmu::invbag::SLOT_BEGIN; index <= EQEmu::invbag::SLOT_END; ++index) {
+				EQEmu::ItemInstance* sub = inst->GetItem(index);
+				if (!sub)
+					continue;
 
-			SerializeItem(ob, sub, SubSlotNumber, (depth + 1));
-			++subitem_count;
+				ob.write((const char*)&index, sizeof(uint32));
+
+				SerializeItem(ob, sub, SubSlotNumber, (depth + 1));
+				++subitem_count;
+			}
+
+			if (subitem_count)
+				ob.overwrite(count_pos, (const char*)&subitem_count, sizeof(uint32));
 		}
-
-		if (subitem_count)
-			ob.overwrite(count_pos, (const char*)&subitem_count, sizeof(uint32));
 	}
 
 	static inline uint32 ServerToSoDSlot(uint32 serverSlot)
 	{
-		uint32 SoDSlot = 0;
+		uint32 SoDSlot = invslot::SLOT_INVALID;
 
-		if (serverSlot >= EQEmu::invslot::slotAmmo && serverSlot <= 53) // Cursor/Ammo/Power Source and Normal Inventory Slots
-			SoDSlot = serverSlot + 1;
-		else if (serverSlot >= EQEmu::invbag::GENERAL_BAGS_BEGIN && serverSlot <= EQEmu::invbag::CURSOR_BAG_END)
-			SoDSlot = serverSlot + 11;
-		else if (serverSlot >= EQEmu::invbag::BANK_BAGS_BEGIN && serverSlot <= EQEmu::invbag::BANK_BAGS_END)
-			SoDSlot = serverSlot + 1;
-		else if (serverSlot >= EQEmu::invbag::SHARED_BANK_BAGS_BEGIN && serverSlot <= EQEmu::invbag::SHARED_BANK_BAGS_END)
-			SoDSlot = serverSlot + 1;
-		else if (serverSlot == EQEmu::invslot::SLOT_POWER_SOURCE)
-			SoDSlot = invslot::slotPowerSource;
-		else
+		if (serverSlot <= EQEmu::invslot::slotGeneral8) {
 			SoDSlot = serverSlot;
+		}
+
+		else if (serverSlot <= EQEmu::invslot::CORPSE_END && serverSlot >= EQEmu::invslot::slotCursor) {
+			SoDSlot = serverSlot - 2;
+		}
+
+		else if (serverSlot <= EQEmu::invbag::GENERAL_BAGS_8_END && serverSlot >= EQEmu::invbag::GENERAL_BAGS_BEGIN) {
+			SoDSlot = serverSlot + 11;
+		}
+
+		else if (serverSlot <= EQEmu::invbag::CURSOR_BAG_END && serverSlot >= EQEmu::invbag::CURSOR_BAG_BEGIN) {
+			SoDSlot = serverSlot - 9;
+		}
+
+		else if (serverSlot <= EQEmu::invslot::TRIBUTE_END && serverSlot >= EQEmu::invslot::TRIBUTE_BEGIN) {
+			SoDSlot = serverSlot;
+		}
+
+		else if (serverSlot <= EQEmu::invslot::GUILD_TRIBUTE_END && serverSlot >= EQEmu::invslot::GUILD_TRIBUTE_BEGIN) {
+			SoDSlot = serverSlot;
+		}
+
+		else if (serverSlot <= EQEmu::invslot::BANK_END && serverSlot >= EQEmu::invslot::BANK_BEGIN) {
+			SoDSlot = serverSlot;
+		}
+
+		else if (serverSlot <= EQEmu::invbag::BANK_BAGS_END && serverSlot >= EQEmu::invbag::BANK_BAGS_BEGIN) {
+			SoDSlot = serverSlot + 1;
+		}
+
+		else if (serverSlot <= EQEmu::invslot::SHARED_BANK_END && serverSlot >= EQEmu::invslot::SHARED_BANK_BEGIN) {
+			SoDSlot = serverSlot;
+		}
+
+		else if (serverSlot <= EQEmu::invbag::SHARED_BANK_BAGS_END && serverSlot >= EQEmu::invbag::SHARED_BANK_BAGS_BEGIN) {
+			SoDSlot = serverSlot + 1;
+		}
+
+		else if (serverSlot <= EQEmu::invslot::TRADE_END && serverSlot >= EQEmu::invslot::TRADE_BEGIN) {
+			SoDSlot = serverSlot;
+		}
+
+		else if (serverSlot <= EQEmu::invbag::TRADE_BAGS_END && serverSlot >= EQEmu::invbag::TRADE_BAGS_BEGIN) {
+			SoDSlot = serverSlot;
+		}
+
+		else if (serverSlot <= EQEmu::invslot::WORLD_END && serverSlot >= EQEmu::invslot::WORLD_BEGIN) {
+			SoDSlot = serverSlot;
+		}
+
+		Log(Logs::Detail, Logs::Netcode, "Convert Server Slot %i to SoD Slot %i", serverSlot, SoDSlot);
+
 		return SoDSlot;
 	}
 
 	static inline uint32 ServerToSoDCorpseSlot(uint32 serverCorpseSlot)
 	{
-		//uint32 SoDCorpse;
-		return (serverCorpseSlot + 1);
+		uint32 SoDSlot = invslot::SLOT_INVALID;
+
+		if (serverCorpseSlot <= EQEmu::invslot::slotGeneral8 && serverCorpseSlot >= EQEmu::invslot::slotGeneral1) {
+			SoDSlot = serverCorpseSlot;
+		}
+
+		else if (serverCorpseSlot <= EQEmu::invslot::CORPSE_END && serverCorpseSlot >= EQEmu::invslot::slotCursor) {
+			SoDSlot = serverCorpseSlot - 2;
+		}
+
+		Log(Logs::Detail, Logs::Netcode, "Convert Server Corpse Slot %i to SoD Corpse Slot %i", serverCorpseSlot, SoDSlot);
+
+		return SoDSlot;
 	}
 
 	static inline uint32 SoDToServerSlot(uint32 sodSlot)
 	{
-		uint32 ServerSlot = 0;
+		uint32 ServerSlot = EQEmu::invslot::SLOT_INVALID;
 
-		if (sodSlot >= invslot::slotAmmo && sodSlot <= invslot::CORPSE_END) // Cursor/Ammo/Power Source and Normal Inventory Slots
-			ServerSlot = sodSlot - 1;
-		else if (sodSlot >= invbag::GENERAL_BAGS_BEGIN && sodSlot <= invbag::CURSOR_BAG_END)
-			ServerSlot = sodSlot - 11;
-		else if (sodSlot >= invbag::BANK_BAGS_BEGIN && sodSlot <= invbag::BANK_BAGS_END)
-			ServerSlot = sodSlot - 1;
-		else if (sodSlot >= invbag::SHARED_BANK_BAGS_BEGIN && sodSlot <= invbag::SHARED_BANK_BAGS_END)
-			ServerSlot = sodSlot - 1;
-		else if (sodSlot == invslot::slotPowerSource)
-			ServerSlot = EQEmu::invslot::SLOT_POWER_SOURCE;
-		else
+		if (sodSlot <= invslot::slotGeneral8) {
 			ServerSlot = sodSlot;
+		}
+
+		else if (sodSlot <= invslot::CORPSE_END && sodSlot >= invslot::slotCursor) {
+			ServerSlot = sodSlot + 2;
+		}
+
+		else if (sodSlot <= invbag::GENERAL_BAGS_END && sodSlot >= invbag::GENERAL_BAGS_BEGIN) {
+			ServerSlot = sodSlot - 11;
+		}
+
+		else if (sodSlot <= invbag::CURSOR_BAG_END && sodSlot >= invbag::CURSOR_BAG_BEGIN) {
+			ServerSlot = sodSlot + 9;
+		}
+
+		else if (sodSlot <= invslot::TRIBUTE_END && sodSlot >= invslot::TRIBUTE_BEGIN) {
+			ServerSlot = sodSlot;
+		}
+
+		else if (sodSlot <= invslot::GUILD_TRIBUTE_END && sodSlot >= invslot::GUILD_TRIBUTE_BEGIN) {
+			ServerSlot = sodSlot;
+		}
+
+		else if (sodSlot <= invslot::BANK_END && sodSlot >= invslot::BANK_BEGIN) {
+			ServerSlot = sodSlot;
+		}
+
+		else if (sodSlot <= invbag::BANK_BAGS_END && sodSlot >= invbag::BANK_BAGS_BEGIN) {
+			ServerSlot = sodSlot - 1;
+		}
+
+		else if (sodSlot <= invslot::SHARED_BANK_END && sodSlot >= invslot::SHARED_BANK_BEGIN) {
+			ServerSlot = sodSlot;
+		}
+
+		else if (sodSlot <= invbag::SHARED_BANK_BAGS_END && sodSlot >= invbag::SHARED_BANK_BAGS_BEGIN) {
+			ServerSlot = sodSlot - 1;
+		}
+
+		else if (sodSlot <= invslot::TRADE_END && sodSlot >= invslot::TRADE_BEGIN) {
+			ServerSlot = sodSlot;
+		}
+
+		else if (sodSlot <= invbag::TRADE_BAGS_END && sodSlot >= invbag::TRADE_BAGS_BEGIN) {
+			ServerSlot = sodSlot;
+		}
+
+		else if (sodSlot <= invslot::WORLD_END && sodSlot >= invslot::WORLD_BEGIN) {
+			ServerSlot = sodSlot;
+		}
+
+		Log(Logs::Detail, Logs::Netcode, "Convert SoD Slot %i to Server Slot %i", sodSlot, ServerSlot);
+
 		return ServerSlot;
 	}
 
 	static inline uint32 SoDToServerCorpseSlot(uint32 sodCorpseSlot)
 	{
-		//uint32 ServerCorpse;
-		return (sodCorpseSlot - 1);
+		uint32 ServerSlot = EQEmu::invslot::SLOT_INVALID;
+
+		if (sodCorpseSlot <= invslot::slotGeneral8 && sodCorpseSlot >= invslot::slotGeneral1) {
+			ServerSlot = sodCorpseSlot;
+		}
+
+		else if (sodCorpseSlot <= invslot::CORPSE_END && sodCorpseSlot >= invslot::slotCursor) {
+			ServerSlot = sodCorpseSlot + 2;
+		}
+
+		Log(Logs::Detail, Logs::Netcode, "Convert SoD Corpse Slot %i to Server Corpse Slot %i", sodCorpseSlot, ServerSlot);
+
+		return ServerSlot;
 	}
 
 	static inline void ServerToSoDSayLink(std::string& sodSayLink, const std::string& serverSayLink)

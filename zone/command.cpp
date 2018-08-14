@@ -2768,52 +2768,6 @@ void command_peekinv(Client *c, const Seperator *sep)
 			}
 		}
 
-		if ((scopeBit & peekEquip) && (targetClient->ClientVersion() >= EQEmu::versions::ClientVersion::SoF)) {
-			inst_main = targetClient->GetInv().GetItem(EQEmu::invslot::SLOT_POWER_SOURCE);
-			if (inst_main) {
-				itemsFound = true;
-				item_data = inst_main->GetItem();
-			}
-			else {
-				item_data = nullptr;
-			}
-
-			linker.SetItemInst(inst_main);
-
-			c->Message(
-				(item_data == nullptr),
-				"%sSlot: %i, Item: %i (%s), Charges: %i",
-				scope_prefix[scopeIndex],
-				EQEmu::invslot::SLOT_POWER_SOURCE,
-				((item_data == nullptr) ? 0 : item_data->ID),
-				linker.GenerateLink().c_str(),
-				((inst_main == nullptr) ? 0 : inst_main->GetCharges())
-			);
-
-			if (inst_main && inst_main->IsClassCommon()) {
-				for (uint8 indexAug = EQEmu::invaug::SOCKET_BEGIN; indexAug <= EQEmu::invaug::SOCKET_END; ++indexAug) {
-					inst_aug = inst_main->GetItem(indexAug);
-					if (!inst_aug) // extant only
-						continue;
-
-					item_data = inst_aug->GetItem();
-					linker.SetItemInst(inst_aug);
-
-					c->Message(
-						(item_data == nullptr),
-						".%sAugSlot: %i (Slot #%i, Aug idx #%i), Item: %i (%s), Charges: %i",
-						scope_prefix[scopeIndex],
-						INVALID_INDEX,
-						EQEmu::invslot::SLOT_POWER_SOURCE,
-						indexAug,
-						((item_data == nullptr) ? 0 : item_data->ID),
-						linker.GenerateLink().c_str(),
-						((inst_sub == nullptr) ? 0 : inst_sub->GetCharges())
-					);
-				}
-			}
-		}
-
 		if (scopeBit & peekLimbo) {
 			int limboIndex = 0;
 			for (auto it = targetClient->GetInv().cursor_cbegin(); (it != targetClient->GetInv().cursor_cend()); ++it, ++limboIndex) {
@@ -3324,7 +3278,7 @@ void command_listpetition(Client *c, const Seperator *sep)
 void command_equipitem(Client *c, const Seperator *sep)
 {
 	uint32 slot_id = atoi(sep->arg[1]);
-	if (sep->IsNumber(1) && ((slot_id >= EQEmu::invslot::EQUIPMENT_BEGIN) && (slot_id <= EQEmu::invslot::EQUIPMENT_END) || (slot_id == EQEmu::invslot::SLOT_POWER_SOURCE))) {
+	if (sep->IsNumber(1) && (slot_id >= EQEmu::invslot::EQUIPMENT_BEGIN && slot_id <= EQEmu::invslot::EQUIPMENT_END)) {
 		const EQEmu::ItemInstance* from_inst = c->GetInv().GetItem(EQEmu::invslot::slotCursor);
 		const EQEmu::ItemInstance* to_inst = c->GetInv().GetItem(slot_id); // added (desync issue when forcing stack to stack)
 		bool partialmove = false;

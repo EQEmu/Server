@@ -1,5 +1,26 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 08/13/2018 ==
+Uleat: Activation of RoF+ clients' two additional general slots and integration of SoF+ clients' PowerSource slot
+	- Inventory 'Possessions' main slots are now contiguous and implemented to RoF2 standards
+	-- 'slotGeneral9'(31) and 'slotGeneral10'(32) are now active
+	-- Possessions slot enumerations are now defined as between 'slotCharm'(0) and 'slotCursor'(33)
+	-- 'slotPowerSource'(21) is no longer a special case slot(9999)
+	- Special code has been added to exclude 'slotPowerSource,' 'slotGeneral9' and 'slotGeneral10' from server
+		actions in clients that do not support them.
+	- The lua api has been updated to use the new slot enumeration as well as having some slot range definitions added
+	- The perl api now has a look-up function to provide token-to-value translations .. definitions are similar to lua
+	- In both lua and perl, it is HIGHLY recommended that any custom scripts using hard-coded inventory slot values be
+		updated to use the constants/lookup methods as any old values are no longer guaranteed to be accurate
+	- Database will have existing inventory slot values modified to the new standard and table `items` entries will
+		also be updated to the 'correct' equipable slot bitmask
+	- Script (quest) updates are required with this change
+	
+Note: The proper way to reference inventory slots is to use either instrinsic lookups (c/c++ & perl) or to use valid
+	const ref declarations (c/c++ & lua). Any other method is not guaranteed to be accurate and may result in item loss
+	and/or unexpected/undefined behavior.
+	
+
 == 07/10/2018 ==
 Akkadius: Adjusted DataBuckets to use other acceptable time formats
     Example: quest::set_data('key', 'value', '1d');

@@ -1,4 +1,5 @@
 command_settings
+inventory_version
 launcher
 rule_sets
 rule_values

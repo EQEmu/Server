@@ -323,7 +323,7 @@ void NPC::AddLootDrop(const EQEmu::ItemData *item2, ItemList* itemlist, int16 ch
 		// @merth: IDFile size has been increased, this needs to change
 		uint16 emat;
 		if(item2->Material <= 0
-			|| item2->Slots & (1 << EQEmu::invslot::slotPrimary | 1 << EQEmu::invslot::slotSecondary)) {
+			|| (item2->Slots & ((1 << EQEmu::invslot::slotPrimary) | (1 << EQEmu::invslot::slotSecondary)))) {
 			memset(newid, 0, sizeof(newid));
 			for(int i=0;i<7;i++){
 				if (!isalpha(item2->IDFile[i])){

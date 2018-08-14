@@ -815,19 +815,6 @@ void Client::BulkSendInventoryItems()
 		last_pos = ob.tellp();
 	}
 
-	// PowerSource item
-	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF) {
-		const EQEmu::ItemInstance* inst = m_inv[EQEmu::invslot::SLOT_POWER_SOURCE];
-		if (inst) {
-			inst->Serialize(ob, EQEmu::invslot::SLOT_POWER_SOURCE);
-
-			if (ob.tellp() == last_pos)
-				Log(Logs::General, Logs::Inventory, "Serialization failed on item slot %d during BulkSendInventoryItems.  Item skipped.", EQEmu::invslot::SLOT_POWER_SOURCE);
-
-			last_pos = ob.tellp();
-		}
-	}
-
 	// Bank items
 	for (int16 slot_id = EQEmu::invslot::BANK_BEGIN; slot_id <= EQEmu::invslot::BANK_END; slot_id++) {
 		const EQEmu::ItemInstance* inst = m_inv[slot_id];

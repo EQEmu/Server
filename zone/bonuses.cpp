@@ -179,14 +179,6 @@ void Client::CalcItemBonuses(StatBonuses* newbon) {
 			SetTwoHanderEquipped(true);
 	}
 
-	//Power Source Slot
-	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF)
-	{
-		const EQEmu::ItemInstance* inst = m_inv[EQEmu::invslot::SLOT_POWER_SOURCE];
-		if(inst)
-			AddItemBonuses(inst, newbon);
-	}
-
 	//tribute items
 	for (i = EQEmu::invslot::TRIBUTE_BEGIN; i <= EQEmu::invslot::TRIBUTE_END; i++) {
 		const EQEmu::ItemInstance* inst = m_inv[i];
@@ -3261,7 +3253,7 @@ void NPC::CalcItemBonuses(StatBonuses *newbon)
 {
 	if(newbon){
 
-		for (int i = EQEmu::invslot::EQUIPMENT_BEGIN; i <= EQEmu::invslot::EQUIPMENT_END; i++){
+		for (int i = EQEmu::invslot::BONUS_BEGIN; i <= EQEmu::invslot::BONUS_STAT_END; i++){
 			const EQEmu::ItemData *cur = database.GetItem(equipment[i]);
 			if(cur){
 				//basic stats
@@ -3353,13 +3345,6 @@ void Client::CalcItemScale() {
 	if (CalcItemScale(EQEmu::invslot::TRIBUTE_BEGIN, EQEmu::invslot::TRIBUTE_END)) // (< 405)
 		changed = true;
 
-	//Power Source Slot
-	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF)
-	{
-		if (CalcItemScale(EQEmu::invslot::SLOT_POWER_SOURCE, EQEmu::invslot::SLOT_POWER_SOURCE))
-			changed = true;
-	}
-
 	if(changed)
 	{
 		CalcBonuses();
@@ -3447,13 +3432,6 @@ void Client::DoItemEnterZone() {
 	if (DoItemEnterZone(EQEmu::invslot::TRIBUTE_BEGIN, EQEmu::invslot::TRIBUTE_END)) // (< 405)
 		changed = true;
 
-	//Power Source Slot
-	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF)
-	{
-		if (DoItemEnterZone(EQEmu::invslot::SLOT_POWER_SOURCE, EQEmu::invslot::SLOT_POWER_SOURCE))
-			changed = true;
-	}
-
 	if(changed)
 	{
 		CalcBonuses();
@@ -3486,7 +3464,7 @@ bool Client::DoItemEnterZone(uint32 slot_x, uint32 slot_y) {
 			uint16 oldexp = inst->GetExp();
 
 			parse->EventItem(EVENT_ITEM_ENTER_ZONE, this, inst, nullptr, "", 0);
-			if (i <= EQEmu::invslot::slotAmmo || i == EQEmu::invslot::SLOT_POWER_SOURCE) {
+			if (i <= EQEmu::invslot::EQUIPMENT_END) {
 				parse->EventItem(EVENT_EQUIP_ITEM, this, inst, nullptr, "", i);
 			}
 
@@ -3496,7 +3474,7 @@ bool Client::DoItemEnterZone(uint32 slot_x, uint32 slot_y) {
 				update_slot = true;
 			}
 		} else {
-			if (i <= EQEmu::invslot::slotAmmo || i == EQEmu::invslot::SLOT_POWER_SOURCE) {
+			if (i <= EQEmu::invslot::EQUIPMENT_END) {
 				parse->EventItem(EVENT_EQUIP_ITEM, this, inst, nullptr, "", i);
 			}
 

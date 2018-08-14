@@ -335,9 +335,9 @@ namespace Titanium
 		EQEmu::OutBuffer::pos_type last_pos = ob.tellp();
 
 		for (int r = 0; r < itemcount; r++, eq++) {
-			SerializeItem(ob, (const EQEmu::ItemInstance*)eq->inst, eq->slot_id, 0);
+			SerializeItem(ob, (const EQEmu::ItemInstance*)eq->inst, ServerToTitaniumSlot(eq->slot_id), 0);
 			if (ob.tellp() == last_pos)
-				Log(Logs::General, Logs::Netcode, "[STRUCTS] Serialization failed on item slot %d during OP_CharInventory.  Item skipped.", eq->slot_id);
+				Log(Logs::General, Logs::Netcode, "Titanium::ENCODE(OP_CharInventory) Serialization failed on item slot %d during OP_CharInventory.  Item skipped.", eq->slot_id);
 			
 			last_pos = ob.tellp();
 		}
@@ -367,7 +367,12 @@ namespace Titanium
 		FINISH_ENCODE();
 	}
 
-	ENCODE(OP_DeleteCharge) { ENCODE_FORWARD(OP_MoveItem); }
+	ENCODE(OP_DeleteCharge)
+	{
+		Log(Logs::Moderate, Logs::Netcode, "Titanium::ENCODE(OP_DeleteCharge)");
+
+		ENCODE_FORWARD(OP_MoveItem);
+	}
 
 	ENCODE(OP_DeleteItem)
 	{
@@ -772,21 +777,15 @@ namespace Titanium
 		OUT(TargetID);
 		OUT(playerid);
 
-		int r;
-		for (r = 0; r <= 20; r++) {
-			strn0cpy(eq->itemnames[r], emu->itemnames[r], sizeof(eq->itemnames[r]));
+		for (int i = EQEmu::invslot::slotCharm; i <= EQEmu::invslot::slotWaist; ++i) {
+			strn0cpy(eq->itemnames[i], emu->itemnames[i], sizeof(eq->itemnames[i]));
+			OUT(itemicons[i]);
 		}
 
-		// move arrow item down to last element in titanium array
-		strn0cpy(eq->itemnames[21], emu->itemnames[22], sizeof(eq->itemnames[21]));
+		// move ammo down to last element in titanium array
+		strn0cpy(eq->itemnames[invslot::slotAmmo], emu->itemnames[EQEmu::invslot::slotAmmo], sizeof(eq->itemnames[invslot::slotAmmo]));
+		eq->itemicons[invslot::slotAmmo] = emu->itemicons[EQEmu::invslot::slotAmmo];
 
-		int k;
-		for (k = 0; k <= 20; k++) {
-			OUT(itemicons[k]);
-		}
-
-		// move arrow icon down to last element in titanium array
-		eq->itemicons[21] = emu->itemicons[22];
 		strn0cpy(eq->text, emu->text, sizeof(eq->text));
 
 		FINISH_ENCODE();
@@ -821,9 +820,9 @@ namespace Titanium
 
 		ob.write((const char*)__emu_buffer, 4);
 
-		SerializeItem(ob, (const EQEmu::ItemInstance*)int_struct->inst, int_struct->slot_id, 0);
+		SerializeItem(ob, (const EQEmu::ItemInstance*)int_struct->inst, ServerToTitaniumSlot(int_struct->slot_id), 0);
 		if (ob.tellp() == last_pos) {
-			Log(Logs::General, Logs::Netcode, "[STRUCTS] Serialization failed on item slot %d.", int_struct->slot_id);
+			Log(Logs::General, Logs::Netcode, "Titanium::ENCODE(OP_ItemPacket) Serialization failed on item slot %d.", int_struct->slot_id);
 			delete in;
 			return;
 		}
@@ -874,6 +873,8 @@ namespace Titanium
 		ENCODE_LENGTH_EXACT(LootingItem_Struct);
 		SETUP_DIRECT_ENCODE(LootingItem_Struct, structs::LootingItem_Struct);
 
+		Log(Logs::Moderate, Logs::Netcode, "Titanium::ENCODE(OP_LootItem)");
+
 		OUT(lootee);
 		OUT(looter);
 		eq->slot_id = ServerToTitaniumCorpseSlot(emu->slot_id);
@@ -902,6 +903,8 @@ namespace Titanium
 	{
 		ENCODE_LENGTH_EXACT(MoveItem_Struct);
 		SETUP_DIRECT_ENCODE(MoveItem_Struct, structs::MoveItem_Struct);
+
+		Log(Logs::Moderate, Logs::Netcode, "Titanium::ENCODE(OP_MoveItem)");
 
 		eq->from_slot = ServerToTitaniumSlot(emu->from_slot);
 		eq->to_slot = ServerToTitaniumSlot(emu->to_slot);
@@ -1050,7 +1053,7 @@ namespace Titanium
 
 		//	OUT(unknown06160[4]);
 
-		// Copy bandoliers where server and client indexes converge
+		// Copy bandoliers where server and client indices converge
 		for (r = 0; r < EQEmu::profile::BANDOLIERS_SIZE && r < profile::BANDOLIERS_SIZE; ++r) {
 			OUT_str(bandoliers[r].Name);
 			for (uint32 k = 0; k < profile::BANDOLIER_ITEM_COUNT; ++k) { // Will need adjusting if 'server != client' is ever true
@@ -1059,7 +1062,7 @@ namespace Titanium
 				OUT_str(bandoliers[r].Items[k].Name);
 			}
 		}
-		// Nullify bandoliers where server and client indexes diverge, with a client bias
+		// Nullify bandoliers where server and client indices diverge, with a client bias
 		for (r = EQEmu::profile::BANDOLIERS_SIZE; r < profile::BANDOLIERS_SIZE; ++r) {
 			eq->bandoliers[r].Name[0] = '\0';
 			for (uint32 k = 0; k < profile::BANDOLIER_ITEM_COUNT; ++k) { // Will need adjusting if 'server != client' is ever true
@@ -1071,13 +1074,13 @@ namespace Titanium
 
 		//	OUT(unknown07444[5120]);
 
-		// Copy potion belt where server and client indexes converge
+		// Copy potion belt where server and client indices converge
 		for (r = 0; r < EQEmu::profile::POTION_BELT_SIZE && r < profile::POTION_BELT_SIZE; ++r) {
 			OUT(potionbelt.Items[r].ID);
 			OUT(potionbelt.Items[r].Icon);
 			OUT_str(potionbelt.Items[r].Name);
 		}
-		// Nullify potion belt where server and client indexes diverge, with a client bias
+		// Nullify potion belt where server and client indices diverge, with a client bias
 		for (r = EQEmu::profile::POTION_BELT_SIZE; r < profile::POTION_BELT_SIZE; ++r) {
 			eq->potionbelt.Items[r].ID = 0;
 			eq->potionbelt.Items[r].Icon = 0;
@@ -1936,23 +1939,18 @@ namespace Titanium
 		IN(TargetID);
 		IN(playerid);
 
-		int r;
-		for (r = 0; r <= 20; r++) {
-			strn0cpy(emu->itemnames[r], eq->itemnames[r], sizeof(emu->itemnames[r]));
+		for (int i = invslot::slotCharm; i <= invslot::slotWaist; ++i) {
+			strn0cpy(emu->itemnames[i], eq->itemnames[i], sizeof(emu->itemnames[i]));
+			IN(itemicons[i]);
 		}
 
-		// move arrow item up to last element in server array
-		strn0cpy(emu->itemnames[21], "", sizeof(emu->itemnames[21]));
-		strn0cpy(emu->itemnames[22], eq->itemnames[21], sizeof(emu->itemnames[22]));
+		// move ammo up to last element in server array
+		strn0cpy(emu->itemnames[EQEmu::invslot::slotAmmo], eq->itemnames[invslot::slotAmmo], sizeof(emu->itemnames[EQEmu::invslot::slotAmmo]));
+		emu->itemicons[EQEmu::invslot::slotAmmo] = eq->itemicons[invslot::slotAmmo];
 
-		int k;
-		for (k = 0; k <= 20; k++) {
-			IN(itemicons[k]);
-		}
-
-		// move arrow icon up to last element in server array
-		emu->itemicons[21] = 0xFFFFFFFF;
-		emu->itemicons[22] = eq->itemicons[21];
+		// nullify power source element in server array
+		strn0cpy(emu->itemnames[EQEmu::invslot::slotPowerSource], "", sizeof(emu->itemnames[EQEmu::invslot::slotPowerSource]));
+		emu->itemicons[EQEmu::invslot::slotPowerSource] = 0xFFFFFFFF;
 
 		strn0cpy(emu->text, eq->text, sizeof(emu->text));
 
@@ -2020,6 +2018,8 @@ namespace Titanium
 		DECODE_LENGTH_EXACT(structs::LootingItem_Struct);
 		SETUP_DIRECT_DECODE(LootingItem_Struct, structs::LootingItem_Struct);
 
+		Log(Logs::Moderate, Logs::Netcode, "Titanium::DECODE(OP_LootItem)");
+
 		IN(lootee);
 		IN(looter);
 		emu->slot_id = TitaniumToServerCorpseSlot(eq->slot_id);
@@ -2033,7 +2033,7 @@ namespace Titanium
 		DECODE_LENGTH_EXACT(structs::MoveItem_Struct);
 		SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
 
-		Log(Logs::General, Logs::Netcode, "[Titanium] Moved item from %u to %u", eq->from_slot, eq->to_slot);
+		Log(Logs::Moderate, Logs::Netcode, "Titanium::DECODE(OP_MoveItem)");
 
 		emu->from_slot = TitaniumToServerSlot(eq->from_slot);
 		emu->to_slot = TitaniumToServerSlot(eq->to_slot);
@@ -2259,7 +2259,7 @@ namespace Titanium
 		ob << '|' << itoa(item->NoRent);
 		ob << '|' << itoa(item->NoDrop);
 		ob << '|' << itoa(item->Size);
-		ob << '|' << itoa(item->Slots);
+		ob << '|' << itoa(Catch22(SwapBits21And22(item->Slots)));
 		ob << '|' << itoa(item->Price);
 		ob << '|' << itoa(item->Icon);
 		ob << '|' << "0";
@@ -2464,32 +2464,190 @@ namespace Titanium
 
 	static inline int16 ServerToTitaniumSlot(uint32 serverSlot)
 	{
-		//int16 TitaniumSlot;
-		if (serverSlot == INVALID_INDEX)
-			return INVALID_INDEX;
+		int16 TitaniumSlot = invslot::SLOT_INVALID;
 
-		return serverSlot; // deprecated
+		if (serverSlot <= EQEmu::invslot::slotWaist) {
+			TitaniumSlot = serverSlot;
+		}
+
+		else if (serverSlot == EQEmu::invslot::slotAmmo) {
+			TitaniumSlot = serverSlot - 1;
+		}
+
+		else if (serverSlot <= EQEmu::invslot::slotGeneral8 && serverSlot >= EQEmu::invslot::slotGeneral1) {
+			TitaniumSlot = serverSlot - 1;
+		}
+
+		else if (serverSlot <= (EQEmu::invslot::POSSESSIONS_COUNT + EQEmu::invslot::slotWaist) && serverSlot >= EQEmu::invslot::slotCursor) {
+			TitaniumSlot = serverSlot - 3;
+		}
+
+		else if (serverSlot == (EQEmu::invslot::POSSESSIONS_COUNT + EQEmu::invslot::slotAmmo)) {
+			TitaniumSlot = serverSlot - 4;
+		}
+
+		else if (serverSlot <= EQEmu::invbag::GENERAL_BAGS_8_END && serverSlot >= EQEmu::invbag::GENERAL_BAGS_BEGIN) {
+			TitaniumSlot = serverSlot;
+		}
+
+		else if (serverSlot <= EQEmu::invbag::CURSOR_BAG_END && serverSlot >= EQEmu::invbag::CURSOR_BAG_BEGIN) {
+			TitaniumSlot = serverSlot - 20;
+		}
+
+		else if (serverSlot <= EQEmu::invslot::TRIBUTE_END && serverSlot >= EQEmu::invslot::TRIBUTE_BEGIN) {
+			TitaniumSlot = serverSlot;
+		}
+
+		else if (serverSlot <= EQEmu::invslot::GUILD_TRIBUTE_END && serverSlot >= EQEmu::invslot::GUILD_TRIBUTE_BEGIN) {
+			TitaniumSlot = serverSlot;
+		}
+
+		else if (serverSlot <= EQEmu::invslot::BANK_END && serverSlot >= EQEmu::invslot::BANK_BEGIN) {
+			TitaniumSlot = serverSlot;
+		}
+
+		else if (serverSlot <= EQEmu::invbag::BANK_BAGS_16_END && serverSlot >= EQEmu::invbag::BANK_BAGS_BEGIN) {
+			TitaniumSlot = serverSlot;
+		}
+
+		else if (serverSlot <= EQEmu::invslot::SHARED_BANK_END && serverSlot >= EQEmu::invslot::SHARED_BANK_BEGIN) {
+			TitaniumSlot = serverSlot;
+		}
+
+		else if (serverSlot <= EQEmu::invbag::SHARED_BANK_BAGS_END && serverSlot >= EQEmu::invbag::SHARED_BANK_BAGS_BEGIN) {
+			TitaniumSlot = serverSlot;
+		}
+
+		else if (serverSlot <= EQEmu::invslot::TRADE_END && serverSlot >= EQEmu::invslot::TRADE_BEGIN) {
+			TitaniumSlot = serverSlot;
+		}
+
+		else if (serverSlot <= EQEmu::invbag::TRADE_BAGS_END && serverSlot >= EQEmu::invbag::TRADE_BAGS_BEGIN) {
+			TitaniumSlot = serverSlot;
+		}
+
+		else if (serverSlot <= EQEmu::invslot::WORLD_END && serverSlot >= EQEmu::invslot::WORLD_BEGIN) {
+			TitaniumSlot = serverSlot;
+		}
+
+		Log(Logs::Detail, Logs::Netcode, "Convert Server Slot %i to Titanium Slot %i", serverSlot, TitaniumSlot);
+
+		return TitaniumSlot;
 	}
 
 	static inline int16 ServerToTitaniumCorpseSlot(uint32 serverCorpseSlot)
 	{
-		//int16 TitaniumCorpse;
-		return serverCorpseSlot;
+		int16 TitaniumSlot = invslot::SLOT_INVALID;
+
+		if (serverCorpseSlot <= EQEmu::invslot::slotGeneral8 && serverCorpseSlot >= EQEmu::invslot::slotGeneral1) {
+			TitaniumSlot = serverCorpseSlot - 1;
+		}
+
+		else if (serverCorpseSlot <= (EQEmu::invslot::POSSESSIONS_COUNT + EQEmu::invslot::slotWaist) && serverCorpseSlot >= EQEmu::invslot::slotCursor) {
+			TitaniumSlot = serverCorpseSlot - 3;
+		}
+
+		else if (serverCorpseSlot == (EQEmu::invslot::POSSESSIONS_COUNT + EQEmu::invslot::slotAmmo)) {
+			TitaniumSlot = serverCorpseSlot - 4;
+		}
+
+		Log(Logs::Detail, Logs::Netcode, "Convert Server Corpse Slot %i to Titanium Corpse Slot %i", serverCorpseSlot, TitaniumSlot);
+
+		return TitaniumSlot;
 	}
 
 	static inline uint32 TitaniumToServerSlot(int16 titaniumSlot)
 	{
-		//uint32 ServerSlot;
-		if (titaniumSlot == INVALID_INDEX)
-			return INVALID_INDEX;
+		uint32 ServerSlot = EQEmu::invslot::SLOT_INVALID;
 
-		return titaniumSlot; // deprecated
+		if (titaniumSlot <= invslot::slotWaist) {
+			ServerSlot = titaniumSlot;
+		}
+
+		else if (titaniumSlot == invslot::slotAmmo) {
+			ServerSlot = titaniumSlot + 1;
+		}
+
+		else if (titaniumSlot <= invslot::slotGeneral8 && titaniumSlot >= invslot::slotGeneral1) {
+			ServerSlot = titaniumSlot + 1;
+		}
+
+		else if (titaniumSlot <= (invslot::POSSESSIONS_COUNT + invslot::slotWaist) && titaniumSlot >= invslot::slotCursor) {
+			ServerSlot = titaniumSlot + 3;
+		}
+
+		else if (titaniumSlot == (invslot::POSSESSIONS_COUNT + invslot::slotAmmo)) {
+			ServerSlot = titaniumSlot + 4;
+		}
+
+		else if (titaniumSlot <= invbag::GENERAL_BAGS_END && titaniumSlot >= invbag::GENERAL_BAGS_BEGIN) {
+			ServerSlot = titaniumSlot;
+		}
+
+		else if (titaniumSlot <= invbag::CURSOR_BAG_END && titaniumSlot >= invbag::CURSOR_BAG_BEGIN) {
+			ServerSlot = titaniumSlot + 20;
+		}
+
+		else if (titaniumSlot <= invslot::TRIBUTE_END && titaniumSlot >= invslot::TRIBUTE_BEGIN) {
+			ServerSlot = titaniumSlot;
+		}
+
+		else if (titaniumSlot <= invslot::GUILD_TRIBUTE_END && titaniumSlot >= invslot::GUILD_TRIBUTE_BEGIN) {
+			ServerSlot = titaniumSlot;
+		}
+
+		else if (titaniumSlot <= invslot::BANK_END && titaniumSlot >= invslot::BANK_BEGIN) {
+			ServerSlot = titaniumSlot;
+		}
+
+		else if (titaniumSlot <= invbag::BANK_BAGS_END && titaniumSlot >= invbag::BANK_BAGS_BEGIN) {
+			ServerSlot = titaniumSlot;
+		}
+
+		else if (titaniumSlot <= invslot::SHARED_BANK_END && titaniumSlot >= invslot::SHARED_BANK_BEGIN) {
+			ServerSlot = titaniumSlot;
+		}
+
+		else if (titaniumSlot <= invbag::SHARED_BANK_BAGS_END && titaniumSlot >= invbag::SHARED_BANK_BAGS_BEGIN) {
+			ServerSlot = titaniumSlot;
+		}
+
+		else if (titaniumSlot <= invslot::TRADE_END && titaniumSlot >= invslot::TRADE_BEGIN) {
+			ServerSlot = titaniumSlot;
+		}
+
+		else if (titaniumSlot <= invbag::TRADE_BAGS_END && titaniumSlot >= invbag::TRADE_BAGS_BEGIN) {
+			ServerSlot = titaniumSlot;
+		}
+
+		else if (titaniumSlot <= invslot::WORLD_END && titaniumSlot >= invslot::WORLD_BEGIN) {
+			ServerSlot = titaniumSlot;
+		}
+
+		Log(Logs::Detail, Logs::Netcode, "Convert Titanium Slot %i to Server Slot %i", titaniumSlot, ServerSlot);
+
+		return ServerSlot;
 	}
 
 	static inline uint32 TitaniumToServerCorpseSlot(int16 titaniumCorpseSlot)
 	{
-		//uint32 ServerCorpse;
-		return titaniumCorpseSlot;
+		uint32 ServerSlot = EQEmu::invslot::SLOT_INVALID;
+
+		if (titaniumCorpseSlot <= invslot::slotGeneral8 && titaniumCorpseSlot >= invslot::slotGeneral1) {
+			ServerSlot = titaniumCorpseSlot + 1;
+		}
+
+		else if (titaniumCorpseSlot <= (invslot::POSSESSIONS_COUNT + invslot::slotWaist) && titaniumCorpseSlot >= invslot::slotCursor) {
+			ServerSlot = titaniumCorpseSlot + 3;
+		}
+
+		else if (titaniumCorpseSlot == (invslot::POSSESSIONS_COUNT + invslot::slotAmmo)) {
+			ServerSlot = titaniumCorpseSlot + 4;
+		}
+
+		Log(Logs::Detail, Logs::Netcode, "Convert Titanium Corpse Slot %i to Server Corpse Slot %i", titaniumCorpseSlot, ServerSlot);
+
+		return ServerSlot;
 	}
 
 	static inline void ServerToTitaniumSayLink(std::string& titaniumSayLink, const std::string& serverSayLink)

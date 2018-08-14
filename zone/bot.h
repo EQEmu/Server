@@ -80,33 +80,33 @@ static const std::string bot_stance_name[BOT_STANCE_COUNT] = {
 
 static const char* GetBotStanceName(int stance_id) { return bot_stance_name[VALIDBOTSTANCE(stance_id)].c_str(); }
 
-#define VALIDBOTEQUIPSLOT(x) ((x >= EQEmu::invslot::EQUIPMENT_BEGIN && x <= EQEmu::invslot::EQUIPMENT_END) ? (x) : ((x == EQEmu::invslot::SLOT_POWER_SOURCE) ? (22) : (23)))
+#define VALIDBOTEQUIPSLOT(x) ((x >= EQEmu::invslot::EQUIPMENT_BEGIN && x <= EQEmu::invslot::EQUIPMENT_END) ? (x) : (EQEmu::invslot::EQUIPMENT_COUNT))
 
-static std::string bot_equip_slot_name[EQEmu::invslot::EQUIPMENT_COUNT + 2] =
+static const std::string bot_equip_slot_name[EQEmu::invslot::EQUIPMENT_COUNT + 1] =
 {
-	"Charm",			// MainCharm
-	"Left Ear",			// MainEar1
-	"Head",				// MainHead
-	"Face",				// MainFace
-	"Right Ear",		// MainEar2
-	"Neck",				// MainNeck 
-	"Shoulders",		// MainShoulders
-	"Arms",				// MainArms
-	"Back",				// MainBack
-	"Left Wrist",		// MainWrist1
-	"Right Wrist",		// MainWrist2
-	"Range",			// MainRange
-	"Hands",			// MainHands
-	"Primary Hand",		// MainPrimary
-	"Secondary Hand",	// MainSecondary
-	"Left Finger",		// MainFinger1
-	"Right Finger",		// MainFinger2
-	"Chest",			// MainChest
-	"Legs",				// MainLegs
-	"Feet",				// MainFeet
-	"Waist",			// MainWaist
-	"Ammo",				// MainAmmo
-	"Power Source",		// 22 (MainPowerSource = 9999)
+	"Charm",			// slotCharm
+	"Ear 1",			// slotEar1
+	"Head",				// slotHead
+	"Face",				// slotFace
+	"Ear 2",			// slotEar2
+	"Neck",				// slotNeck 
+	"Shoulders",		// slotShoulders
+	"Arms",				// slotArms
+	"Back",				// slotBack
+	"Wrist 1",			// slotWrist1
+	"Wrist 2",			// slotWrist2
+	"Range",			// slotRange
+	"Hands",			// slotHands
+	"Primary",			// slotPrimary
+	"Secondary",		// slotSecondary
+	"Finger 1",			// slotFinger1
+	"Finger 2",			// slotFinger2
+	"Chest",			// slotChest
+	"Legs",				// slotLegs
+	"Feet",				// slotFeet
+	"Waist",			// slotWaist
+	"Power Source",		// slotPowerSource
+	"Ammo",				// slotAmmo
 	"Unknown"
 };
 
