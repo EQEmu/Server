@@ -2255,8 +2255,6 @@ void Mob::AreaRampage(ExtraAttackOptions *opts)
 	m_specialattacks = eSpecialAttacks::AERampage;
 	index_hit = hate_list.AreaRampage(this, GetTarget(), rampage_targets, opts);
 
-	if(index_hit == 0)
-		ProcessAttackRounds(GetTarget(), opts);
 	m_specialattacks = eSpecialAttacks::None;
 }
 
