@@ -30,8 +30,8 @@ public:
 	void CastGroupSpell(Lua_Mob caster, int spell_id, uint32 group_id);
 	int GroupCount(uint32 group_id);
 	int RaidCount();
-	uint32 GetGroup(const char *c);
-	uint32 GetGroup(Lua_Client c);
+	int GetGroup(const char *c);
+	int GetGroup(Lua_Client c);
 	void SplitExp(uint32 exp, Lua_Mob other);
 	uint32 GetTotalRaidDamage(Lua_Mob other);
 	void SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinum);

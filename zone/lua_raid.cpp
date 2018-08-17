@@ -32,12 +32,12 @@ int Lua_Raid::RaidCount() {
 	return self->RaidCount();
 }
 
-uint32 Lua_Raid::GetGroup(const char *c) {
+int Lua_Raid::GetGroup(const char *c) {
 	Lua_Safe_Call_Int();
 	return self->GetGroup(c);
 }
 
-uint32 Lua_Raid::GetGroup(Lua_Client c) {
+int Lua_Raid::GetGroup(Lua_Client c) {
 	Lua_Safe_Call_Int();
 	return self->GetGroup(c);
 }
@@ -142,8 +142,8 @@ luabind::scope lua_register_raid() {
 		.def("CastGroupSpell", (void(Lua_Raid::*)(Lua_Mob,int,uint32))&Lua_Raid::CastGroupSpell)
 		.def("GroupCount", (int(Lua_Raid::*)(uint32))&Lua_Raid::GroupCount)
 		.def("RaidCount", (int(Lua_Raid::*)(void))&Lua_Raid::RaidCount)
-		.def("GetGroup", (uint32(Lua_Raid::*)(const char*))&Lua_Raid::GetGroup)
-		.def("GetGroup", (uint32(Lua_Raid::*)(Lua_Client))&Lua_Raid::GetGroup)
+		.def("GetGroup", (int(Lua_Raid::*)(const char*))&Lua_Raid::GetGroup)
+		.def("GetGroup", (int(Lua_Raid::*)(Lua_Client))&Lua_Raid::GetGroup)
 		.def("SplitExp", (void(Lua_Raid::*)(uint32,Lua_Mob))&Lua_Raid::SplitExp)
 		.def("GetTotalRaidDamage", (uint32(Lua_Raid::*)(Lua_Mob))&Lua_Raid::GetTotalRaidDamage)
 		.def("SplitMoney", (void(Lua_Raid::*)(uint32,uint32,uint32,uint32))&Lua_Raid::SplitMoney)
