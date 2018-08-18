@@ -1106,7 +1106,7 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 
 	Log(Logs::Moderate, Logs::Inventory, "LootItem() LootRequestType %u, Slot %u for %s", loot_request_type, lootitem->slot_id, client->GetName());
 
-	if (loot_request_type == LootRequestType::Forbidden) {
+	if (loot_request_type < LootRequestType::GMAllowed) { // LootRequestType::Forbidden and LootRequestType::GMPeek
 		client->QueuePacket(app);
 		SendEndLootErrorPacket(client);
 		// unlock corpse for others
