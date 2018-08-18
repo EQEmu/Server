@@ -46,21 +46,21 @@ namespace SoF
 	void SerializeItem(EQEmu::OutBuffer& ob, const EQEmu::ItemInstance *inst, int16 slot_id, uint8 depth);
 
 	// server to client inventory location converters
-	static inline uint32 ServerToSoFSlot(uint32 serverSlot);
-	static inline uint32 ServerToSoFCorpseSlot(uint32 serverCorpseSlot);
+	static inline uint32 ServerToSoFSlot(uint32 server_slot);
+	static inline uint32 ServerToSoFCorpseSlot(uint32 server_corpse_slot);
 
 	// client to server inventory location converters
-	static inline uint32 SoFToServerSlot(uint32 sofSlot);
-	static inline uint32 SoFToServerCorpseSlot(uint32 sofCorpseSlot);
+	static inline uint32 SoFToServerSlot(uint32 sof_slot);
+	static inline uint32 SoFToServerCorpseSlot(uint32 sof_corpse_slot);
 
 	// server to client say link converter
-	static inline void ServerToSoFSayLink(std::string& sofSayLink, const std::string& serverSayLink);
+	static inline void ServerToSoFSayLink(std::string &sof_saylink, const std::string &server_saylink);
 
 	// client to server say link converter
-	static inline void SoFToServerSayLink(std::string& serverSayLink, const std::string& sofSayLink);
+	static inline void SoFToServerSayLink(std::string &server_saylink, const std::string &sof_saylink);
 
 	static inline CastingSlot ServerToSoFCastingSlot(EQEmu::CastingSlot slot);
-	static inline EQEmu::CastingSlot SoFToServerCastingSlot(CastingSlot slot, uint32 itemlocation);
+	static inline EQEmu::CastingSlot SoFToServerCastingSlot(CastingSlot slot, uint32 item_location);
 
 	static inline int ServerToSoFBuffSlot(int index);
 	static inline int SoFToServerBuffSlot(int index);
@@ -102,8 +102,6 @@ namespace SoF
 		signature.first_length = sizeof(structs::ClientZoneEntry_Struct);
 		signature.first_eq_opcode = opcodes->EmuToEQ(OP_ZoneEntry);
 		into.RegisterPatch(signature, pname.c_str(), &opcodes, &struct_strategy);
-
-
 
 		Log(Logs::General, Logs::Netcode, "[IDENTIFY] Registered patch %s", name);
 	}
@@ -3173,175 +3171,183 @@ namespace SoF
 		}
 	}
 
-	static inline uint32 ServerToSoFSlot(uint32 serverSlot)
+	static inline uint32 ServerToSoFSlot(uint32 server_slot)
 	{
-		uint32 SoFSlot = invslot::SLOT_INVALID;
+		uint32 sof_slot = invslot::SLOT_INVALID;
 
-		if (serverSlot <= EQEmu::invslot::slotGeneral8) {
-			SoFSlot = serverSlot;
+		if (server_slot <= EQEmu::invslot::slotGeneral8) {
+			sof_slot = server_slot;
 		}
 
-		else if (serverSlot <= EQEmu::invslot::CORPSE_END && serverSlot >= EQEmu::invslot::slotCursor) {
-			SoFSlot = serverSlot - 2;
+		else if (server_slot <= EQEmu::invslot::CORPSE_END && server_slot >= EQEmu::invslot::slotCursor) {
+			sof_slot = server_slot - 2;
 		}
 
-		else if (serverSlot <= EQEmu::invbag::GENERAL_BAGS_8_END && serverSlot >= EQEmu::invbag::GENERAL_BAGS_BEGIN) {
-			SoFSlot = serverSlot + 11;
+		else if (server_slot <= EQEmu::invbag::GENERAL_BAGS_8_END && server_slot >= EQEmu::invbag::GENERAL_BAGS_BEGIN) {
+			sof_slot = server_slot + 11;
 		}
 
-		else if (serverSlot <= EQEmu::invbag::CURSOR_BAG_END && serverSlot >= EQEmu::invbag::CURSOR_BAG_BEGIN) {
-			SoFSlot = serverSlot - 9;
+		else if (server_slot <= EQEmu::invbag::CURSOR_BAG_END && server_slot >= EQEmu::invbag::CURSOR_BAG_BEGIN) {
+			sof_slot = server_slot - 9;
 		}
 
-		else if (serverSlot <= EQEmu::invslot::TRIBUTE_END && serverSlot >= EQEmu::invslot::TRIBUTE_BEGIN) {
-			SoFSlot = serverSlot;
+		else if (server_slot <= EQEmu::invslot::TRIBUTE_END && server_slot >= EQEmu::invslot::TRIBUTE_BEGIN) {
+			sof_slot = server_slot;
 		}
 
-		else if (serverSlot <= EQEmu::invslot::GUILD_TRIBUTE_END && serverSlot >= EQEmu::invslot::GUILD_TRIBUTE_BEGIN) {
-			SoFSlot = serverSlot;
+		else if (server_slot <= EQEmu::invslot::GUILD_TRIBUTE_END && server_slot >= EQEmu::invslot::GUILD_TRIBUTE_BEGIN) {
+			sof_slot = server_slot;
 		}
 
-		else if (serverSlot <= EQEmu::invslot::BANK_END && serverSlot >= EQEmu::invslot::BANK_BEGIN) {
-			SoFSlot = serverSlot;
+		else if (server_slot <= EQEmu::invslot::BANK_END && server_slot >= EQEmu::invslot::BANK_BEGIN) {
+			sof_slot = server_slot;
 		}
 
-		else if (serverSlot <= EQEmu::invbag::BANK_BAGS_END && serverSlot >= EQEmu::invbag::BANK_BAGS_BEGIN) {
-			SoFSlot = serverSlot + 1;
+		else if (server_slot <= EQEmu::invbag::BANK_BAGS_END && server_slot >= EQEmu::invbag::BANK_BAGS_BEGIN) {
+			sof_slot = server_slot + 1;
 		}
 
-		else if (serverSlot <= EQEmu::invslot::SHARED_BANK_END && serverSlot >= EQEmu::invslot::SHARED_BANK_BEGIN) {
-			SoFSlot = serverSlot;
+		else if (server_slot <= EQEmu::invslot::SHARED_BANK_END && server_slot >= EQEmu::invslot::SHARED_BANK_BEGIN) {
+			sof_slot = server_slot;
 		}
 
-		else if (serverSlot <= EQEmu::invbag::SHARED_BANK_BAGS_END && serverSlot >= EQEmu::invbag::SHARED_BANK_BAGS_BEGIN) {
-			SoFSlot = serverSlot + 1;
+		else if (server_slot <= EQEmu::invbag::SHARED_BANK_BAGS_END && server_slot >= EQEmu::invbag::SHARED_BANK_BAGS_BEGIN) {
+			sof_slot = server_slot + 1;
 		}
 
-		else if (serverSlot <= EQEmu::invslot::TRADE_END && serverSlot >= EQEmu::invslot::TRADE_BEGIN) {
-			SoFSlot = serverSlot;
+		else if (server_slot <= EQEmu::invslot::TRADE_END && server_slot >= EQEmu::invslot::TRADE_BEGIN) {
+			sof_slot = server_slot;
 		}
 
-		else if (serverSlot <= EQEmu::invbag::TRADE_BAGS_END && serverSlot >= EQEmu::invbag::TRADE_BAGS_BEGIN) {
-			SoFSlot = serverSlot;
+		else if (server_slot <= EQEmu::invbag::TRADE_BAGS_END && server_slot >= EQEmu::invbag::TRADE_BAGS_BEGIN) {
+			sof_slot = server_slot;
 		}
 
-		else if (serverSlot <= EQEmu::invslot::WORLD_END && serverSlot >= EQEmu::invslot::WORLD_BEGIN) {
-			SoFSlot = serverSlot;
+		else if (server_slot <= EQEmu::invslot::WORLD_END && server_slot >= EQEmu::invslot::WORLD_BEGIN) {
+			sof_slot = server_slot;
 		}
 
-		Log(Logs::Detail, Logs::Netcode, "Convert Server Slot %i to SoF Slot %i", serverSlot, SoFSlot);
+		Log(Logs::Detail, Logs::Netcode, "Convert Server Slot %i to SoF Slot %i", server_slot, sof_slot);
 
-		return SoFSlot;
+		return sof_slot;
 	}
 
-	static inline uint32 ServerToSoFCorpseSlot(uint32 serverCorpseSlot)
+	static inline uint32 ServerToSoFCorpseSlot(uint32 server_corpse_slot)
 	{
 		uint32 SoFSlot = invslot::SLOT_INVALID;
 		
-		if (serverCorpseSlot <= EQEmu::invslot::slotGeneral8 && serverCorpseSlot >= EQEmu::invslot::slotGeneral1) {
-			SoFSlot = serverCorpseSlot;
+		if (server_corpse_slot <= EQEmu::invslot::slotGeneral8 && server_corpse_slot >= EQEmu::invslot::slotGeneral1) {
+			SoFSlot = server_corpse_slot;
 		}
 
-		else if (serverCorpseSlot <= EQEmu::invslot::CORPSE_END && serverCorpseSlot >= EQEmu::invslot::slotCursor) {
-			SoFSlot = serverCorpseSlot - 2;
+		else if (server_corpse_slot <= EQEmu::invslot::CORPSE_END && server_corpse_slot >= EQEmu::invslot::slotCursor) {
+			SoFSlot = server_corpse_slot - 2;
 		}
 
-		Log(Logs::Detail, Logs::Netcode, "Convert Server Corpse Slot %i to SoF Corpse Slot %i", serverCorpseSlot, SoFSlot);
+		Log(Logs::Detail,
+			Logs::Netcode,
+			"Convert Server Corpse Slot %i to SoF Corpse Slot %i",
+			server_corpse_slot,
+			SoFSlot);
 
 		return SoFSlot;
 	}
 
-	static inline uint32 SoFToServerSlot(uint32 sofSlot)
+	static inline uint32 SoFToServerSlot(uint32 sof_slot)
 	{
-		uint32 ServerSlot = EQEmu::invslot::SLOT_INVALID;
+		uint32 server_slot = EQEmu::invslot::SLOT_INVALID;
 
-		if (sofSlot <= invslot::slotGeneral8) {
-			ServerSlot = sofSlot;
+		if (sof_slot <= invslot::slotGeneral8) {
+			server_slot = sof_slot;
 		}
 
-		else if (sofSlot <= invslot::CORPSE_END && sofSlot >= invslot::slotCursor) {
-			ServerSlot = sofSlot + 2;
+		else if (sof_slot <= invslot::CORPSE_END && sof_slot >= invslot::slotCursor) {
+			server_slot = sof_slot + 2;
 		}
 
-		else if (sofSlot <= invbag::GENERAL_BAGS_END && sofSlot >= invbag::GENERAL_BAGS_BEGIN) {
-			ServerSlot = sofSlot - 11;
+		else if (sof_slot <= invbag::GENERAL_BAGS_END && sof_slot >= invbag::GENERAL_BAGS_BEGIN) {
+			server_slot = sof_slot - 11;
 		}
 
-		else if (sofSlot <= invbag::CURSOR_BAG_END && sofSlot >= invbag::CURSOR_BAG_BEGIN) {
-			ServerSlot = sofSlot + 9;
+		else if (sof_slot <= invbag::CURSOR_BAG_END && sof_slot >= invbag::CURSOR_BAG_BEGIN) {
+			server_slot = sof_slot + 9;
 		}
 
-		else if (sofSlot <= invslot::TRIBUTE_END && sofSlot >= invslot::TRIBUTE_BEGIN) {
-			ServerSlot = sofSlot;
+		else if (sof_slot <= invslot::TRIBUTE_END && sof_slot >= invslot::TRIBUTE_BEGIN) {
+			server_slot = sof_slot;
 		}
 
-		else if (sofSlot <= invslot::GUILD_TRIBUTE_END && sofSlot >= invslot::GUILD_TRIBUTE_BEGIN) {
-			ServerSlot = sofSlot;
+		else if (sof_slot <= invslot::GUILD_TRIBUTE_END && sof_slot >= invslot::GUILD_TRIBUTE_BEGIN) {
+			server_slot = sof_slot;
 		}
 
-		else if (sofSlot <= invslot::BANK_END && sofSlot >= invslot::BANK_BEGIN) {
-			ServerSlot = sofSlot;
+		else if (sof_slot <= invslot::BANK_END && sof_slot >= invslot::BANK_BEGIN) {
+			server_slot = sof_slot;
 		}
 
-		else if (sofSlot <= invbag::BANK_BAGS_END && sofSlot >= invbag::BANK_BAGS_BEGIN) {
-			ServerSlot = sofSlot - 1;
+		else if (sof_slot <= invbag::BANK_BAGS_END && sof_slot >= invbag::BANK_BAGS_BEGIN) {
+			server_slot = sof_slot - 1;
 		}
 
-		else if (sofSlot <= invslot::SHARED_BANK_END && sofSlot >= invslot::SHARED_BANK_BEGIN) {
-			ServerSlot = sofSlot;
+		else if (sof_slot <= invslot::SHARED_BANK_END && sof_slot >= invslot::SHARED_BANK_BEGIN) {
+			server_slot = sof_slot;
 		}
 
-		else if (sofSlot <= invbag::SHARED_BANK_BAGS_END && sofSlot >= invbag::SHARED_BANK_BAGS_BEGIN) {
-			ServerSlot = sofSlot - 1;
+		else if (sof_slot <= invbag::SHARED_BANK_BAGS_END && sof_slot >= invbag::SHARED_BANK_BAGS_BEGIN) {
+			server_slot = sof_slot - 1;
 		}
 
-		else if (sofSlot <= invslot::TRADE_END && sofSlot >= invslot::TRADE_BEGIN) {
-			ServerSlot = sofSlot;
+		else if (sof_slot <= invslot::TRADE_END && sof_slot >= invslot::TRADE_BEGIN) {
+			server_slot = sof_slot;
 		}
 
-		else if (sofSlot <= invbag::TRADE_BAGS_END && sofSlot >= invbag::TRADE_BAGS_BEGIN) {
-			ServerSlot = sofSlot;
+		else if (sof_slot <= invbag::TRADE_BAGS_END && sof_slot >= invbag::TRADE_BAGS_BEGIN) {
+			server_slot = sof_slot;
 		}
 
-		else if (sofSlot <= invslot::WORLD_END && sofSlot >= invslot::WORLD_BEGIN) {
-			ServerSlot = sofSlot;
+		else if (sof_slot <= invslot::WORLD_END && sof_slot >= invslot::WORLD_BEGIN) {
+			server_slot = sof_slot;
 		}
 
-		Log(Logs::Detail, Logs::Netcode, "Convert SoF Slot %i to Server Slot %i", sofSlot, ServerSlot);
+		Log(Logs::Detail, Logs::Netcode, "Convert SoF Slot %i to Server Slot %i", sof_slot, server_slot);
 
-		return ServerSlot;
+		return server_slot;
 	}
 
-	static inline uint32 SoFToServerCorpseSlot(uint32 sofCorpseSlot)
+	static inline uint32 SoFToServerCorpseSlot(uint32 sof_corpse_slot)
 	{
-		uint32 ServerSlot = EQEmu::invslot::SLOT_INVALID;
+		uint32 server_slot = EQEmu::invslot::SLOT_INVALID;
 
-		if (sofCorpseSlot <= invslot::slotGeneral8 && sofCorpseSlot >= invslot::slotGeneral1) {
-			ServerSlot = sofCorpseSlot;
+		if (sof_corpse_slot <= invslot::slotGeneral8 && sof_corpse_slot >= invslot::slotGeneral1) {
+			server_slot = sof_corpse_slot;
 		}
 
-		else if (sofCorpseSlot <= invslot::CORPSE_END && sofCorpseSlot >= invslot::slotCursor) {
-			ServerSlot = sofCorpseSlot + 2;
+		else if (sof_corpse_slot <= invslot::CORPSE_END && sof_corpse_slot >= invslot::slotCursor) {
+			server_slot = sof_corpse_slot + 2;
 		}
 
-		Log(Logs::Detail, Logs::Netcode, "Convert SoF Corpse Slot %i to Server Corpse Slot %i", sofCorpseSlot, ServerSlot);
+		Log(Logs::Detail,
+			Logs::Netcode,
+			"Convert SoF Corpse Slot %i to Server Corpse Slot %i",
+			sof_corpse_slot,
+			server_slot);
 
-		return ServerSlot;
+		return server_slot;
 	}
 
-	static inline void ServerToSoFSayLink(std::string& sofSayLink, const std::string& serverSayLink)
+	static inline void ServerToSoFSayLink(std::string &sof_saylink, const std::string &server_saylink)
 	{
-		if ((constants::SAY_LINK_BODY_SIZE == EQEmu::constants::SAY_LINK_BODY_SIZE) || (serverSayLink.find('\x12') == std::string::npos)) {
-			sofSayLink = serverSayLink;
+		if ((constants::SAY_LINK_BODY_SIZE == EQEmu::constants::SAY_LINK_BODY_SIZE) || (server_saylink.find('\x12') == std::string::npos)) {
+			sof_saylink = server_saylink;
 			return;
 		}
 
-		auto segments = SplitString(serverSayLink, '\x12');
+		auto segments = SplitString(server_saylink, '\x12');
 
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {
 				if (segments[segment_iter].length() <= EQEmu::constants::SAY_LINK_BODY_SIZE) {
-					sofSayLink.append(segments[segment_iter]);
+					sof_saylink.append(segments[segment_iter]);
 					// TODO: log size mismatch error
 					continue;
 				}
@@ -3351,37 +3357,37 @@ namespace SoF
 				// SoF:  X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX       X  XXXX  X XXXXX XXXXXXXX (50)
 				// Diff:                                       ^^^^^         ^
 
-				sofSayLink.push_back('\x12');
-				sofSayLink.append(segments[segment_iter].substr(0, 31));
-				sofSayLink.append(segments[segment_iter].substr(36, 5));
+				sof_saylink.push_back('\x12');
+				sof_saylink.append(segments[segment_iter].substr(0, 31));
+				sof_saylink.append(segments[segment_iter].substr(36, 5));
 
 				if (segments[segment_iter][41] == '0')
-					sofSayLink.push_back(segments[segment_iter][42]);
+					sof_saylink.push_back(segments[segment_iter][42]);
 				else
-					sofSayLink.push_back('F');
+					sof_saylink.push_back('F');
 
-				sofSayLink.append(segments[segment_iter].substr(43));
-				sofSayLink.push_back('\x12');
+				sof_saylink.append(segments[segment_iter].substr(43));
+				sof_saylink.push_back('\x12');
 			}
 			else {
-				sofSayLink.append(segments[segment_iter]);
+				sof_saylink.append(segments[segment_iter]);
 			}
 		}
 	}
 
-	static inline void SoFToServerSayLink(std::string& serverSayLink, const std::string& sofSayLink)
+	static inline void SoFToServerSayLink(std::string &server_saylink, const std::string &sof_saylink)
 	{
-		if ((EQEmu::constants::SAY_LINK_BODY_SIZE == constants::SAY_LINK_BODY_SIZE) || (sofSayLink.find('\x12') == std::string::npos)) {
-			serverSayLink = sofSayLink;
+		if ((EQEmu::constants::SAY_LINK_BODY_SIZE == constants::SAY_LINK_BODY_SIZE) || (sof_saylink.find('\x12') == std::string::npos)) {
+			server_saylink = sof_saylink;
 			return;
 		}
 
-		auto segments = SplitString(sofSayLink, '\x12');
+		auto segments = SplitString(sof_saylink, '\x12');
 
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {
 				if (segments[segment_iter].length() <= constants::SAY_LINK_BODY_SIZE) {
-					serverSayLink.append(segments[segment_iter]);
+					server_saylink.append(segments[segment_iter]);
 					// TODO: log size mismatch error
 					continue;
 				}
@@ -3391,98 +3397,95 @@ namespace SoF
 				// RoF2: X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX X  XXXX XX  XXXXX XXXXXXXX (56)
 				// Diff:                                       ^^^^^         ^
 
-				serverSayLink.push_back('\x12');
-				serverSayLink.append(segments[segment_iter].substr(0, 31));
-				serverSayLink.append("00000");
-				serverSayLink.append(segments[segment_iter].substr(31, 5));
-				serverSayLink.push_back('0');
-				serverSayLink.append(segments[segment_iter].substr(36));
-				serverSayLink.push_back('\x12');
+				server_saylink.push_back('\x12');
+				server_saylink.append(segments[segment_iter].substr(0, 31));
+				server_saylink.append("00000");
+				server_saylink.append(segments[segment_iter].substr(31, 5));
+				server_saylink.push_back('0');
+				server_saylink.append(segments[segment_iter].substr(36));
+				server_saylink.push_back('\x12');
 			}
 			else {
-				serverSayLink.append(segments[segment_iter]);
+				server_saylink.append(segments[segment_iter]);
 			}
 		}
 	}
 
-	static inline CastingSlot ServerToSoFCastingSlot(EQEmu::CastingSlot slot)
-	{
+	static inline CastingSlot ServerToSoFCastingSlot(EQEmu::CastingSlot slot) {
 		switch (slot) {
-		case EQEmu::CastingSlot::Gem1:
-			return CastingSlot::Gem1;
-		case EQEmu::CastingSlot::Gem2:
-			return CastingSlot::Gem2;
-		case EQEmu::CastingSlot::Gem3:
-			return CastingSlot::Gem3;
-		case EQEmu::CastingSlot::Gem4:
-			return CastingSlot::Gem4;
-		case EQEmu::CastingSlot::Gem5:
-			return CastingSlot::Gem5;
-		case EQEmu::CastingSlot::Gem6:
-			return CastingSlot::Gem6;
-		case EQEmu::CastingSlot::Gem7:
-			return CastingSlot::Gem7;
-		case EQEmu::CastingSlot::Gem8:
-			return CastingSlot::Gem8;
-		case EQEmu::CastingSlot::Gem9:
-			return CastingSlot::Gem9;
-		case EQEmu::CastingSlot::Item:
-			return CastingSlot::Item;
-		case EQEmu::CastingSlot::PotionBelt:
-			return CastingSlot::PotionBelt;
-		case EQEmu::CastingSlot::Discipline:
-			return CastingSlot::Discipline;
-		case EQEmu::CastingSlot::AltAbility:
-			return CastingSlot::AltAbility;
-		default: // we shouldn't have any issues with other slots ... just return something
-			return CastingSlot::Discipline;
+			case EQEmu::CastingSlot::Gem1:
+				return CastingSlot::Gem1;
+			case EQEmu::CastingSlot::Gem2:
+				return CastingSlot::Gem2;
+			case EQEmu::CastingSlot::Gem3:
+				return CastingSlot::Gem3;
+			case EQEmu::CastingSlot::Gem4:
+				return CastingSlot::Gem4;
+			case EQEmu::CastingSlot::Gem5:
+				return CastingSlot::Gem5;
+			case EQEmu::CastingSlot::Gem6:
+				return CastingSlot::Gem6;
+			case EQEmu::CastingSlot::Gem7:
+				return CastingSlot::Gem7;
+			case EQEmu::CastingSlot::Gem8:
+				return CastingSlot::Gem8;
+			case EQEmu::CastingSlot::Gem9:
+				return CastingSlot::Gem9;
+			case EQEmu::CastingSlot::Item:
+				return CastingSlot::Item;
+			case EQEmu::CastingSlot::PotionBelt:
+				return CastingSlot::PotionBelt;
+			case EQEmu::CastingSlot::Discipline:
+				return CastingSlot::Discipline;
+			case EQEmu::CastingSlot::AltAbility:
+				return CastingSlot::AltAbility;
+			default: // we shouldn't have any issues with other slots ... just return something
+				return CastingSlot::Discipline;
 		}
 	}
 
-	static inline EQEmu::CastingSlot SoFToServerCastingSlot(CastingSlot slot, uint32 itemlocation)
-	{
+	static inline EQEmu::CastingSlot SoFToServerCastingSlot(CastingSlot slot, uint32 item_location) {
 		switch (slot) {
-		case CastingSlot::Gem1:
-			return EQEmu::CastingSlot::Gem1;
-		case CastingSlot::Gem2:
-			return EQEmu::CastingSlot::Gem2;
-		case CastingSlot::Gem3:
-			return EQEmu::CastingSlot::Gem3;
-		case CastingSlot::Gem4:
-			return EQEmu::CastingSlot::Gem4;
-		case CastingSlot::Gem5:
-			return EQEmu::CastingSlot::Gem5;
-		case CastingSlot::Gem6:
-			return EQEmu::CastingSlot::Gem6;
-		case CastingSlot::Gem7:
-			return EQEmu::CastingSlot::Gem7;
-		case CastingSlot::Gem8:
-			return EQEmu::CastingSlot::Gem8;
-		case CastingSlot::Gem9:
-			return EQEmu::CastingSlot::Gem9;
-		case CastingSlot::Ability:
-			return EQEmu::CastingSlot::Ability;
-		// Tit uses 10 for item and discipline casting, but items have a valid location
-		case CastingSlot::Item:
-			if (itemlocation == INVALID_INDEX)
+			case CastingSlot::Gem1:
+				return EQEmu::CastingSlot::Gem1;
+			case CastingSlot::Gem2:
+				return EQEmu::CastingSlot::Gem2;
+			case CastingSlot::Gem3:
+				return EQEmu::CastingSlot::Gem3;
+			case CastingSlot::Gem4:
+				return EQEmu::CastingSlot::Gem4;
+			case CastingSlot::Gem5:
+				return EQEmu::CastingSlot::Gem5;
+			case CastingSlot::Gem6:
+				return EQEmu::CastingSlot::Gem6;
+			case CastingSlot::Gem7:
+				return EQEmu::CastingSlot::Gem7;
+			case CastingSlot::Gem8:
+				return EQEmu::CastingSlot::Gem8;
+			case CastingSlot::Gem9:
+				return EQEmu::CastingSlot::Gem9;
+			case CastingSlot::Ability:
+				return EQEmu::CastingSlot::Ability;
+				// Tit uses 10 for item and discipline casting, but items have a valid location
+			case CastingSlot::Item:
+				if (item_location == INVALID_INDEX)
+					return EQEmu::CastingSlot::Discipline;
+				else
+					return EQEmu::CastingSlot::Item;
+			case CastingSlot::PotionBelt:
+				return EQEmu::CastingSlot::PotionBelt;
+			case CastingSlot::AltAbility:
+				return EQEmu::CastingSlot::AltAbility;
+			default: // we shouldn't have any issues with other slots ... just return something
 				return EQEmu::CastingSlot::Discipline;
-			else
-				return EQEmu::CastingSlot::Item;
-		case CastingSlot::PotionBelt:
-			return EQEmu::CastingSlot::PotionBelt;
-		case CastingSlot::AltAbility:
-			return EQEmu::CastingSlot::AltAbility;
-		default: // we shouldn't have any issues with other slots ... just return something
-			return EQEmu::CastingSlot::Discipline;
 		}
 	}
 
-	static inline int ServerToSoFBuffSlot(int index)
-	{
+	static inline int ServerToSoFBuffSlot(int index) {
 		// we're a disc
 		if (index >= EQEmu::constants::LongBuffs + EQEmu::constants::ShortBuffs)
 			return index - EQEmu::constants::LongBuffs - EQEmu::constants::ShortBuffs +
-			       constants::LongBuffs + constants::ShortBuffs;
+				   constants::LongBuffs + constants::ShortBuffs;
 		// we're a song
 		if (index >= EQEmu::constants::LongBuffs)
 			return index - EQEmu::constants::LongBuffs + constants::LongBuffs;
@@ -3502,4 +3505,4 @@ namespace SoF
 		// we're a normal buff
 		return index; // as long as we guard against bad slots server side, we should be fine
 	}
-} /*SoF*/
+}

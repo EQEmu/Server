@@ -263,134 +263,139 @@ int16 EQEmu::InventoryProfile::PutItem(int16 slot_id, const ItemInstance& inst)
 	return _PutItem(slot_id, inst.Clone());
 }
 
-int16 EQEmu::InventoryProfile::PushCursor(const ItemInstance& inst)
-{
+int16 EQEmu::InventoryProfile::PushCursor(const ItemInstance &inst) {
 	m_cursor.push(inst.Clone());
 	return invslot::slotCursor;
 }
 
-EQEmu::ItemInstance* EQEmu::InventoryProfile::GetCursorItem()
-{
+EQEmu::ItemInstance* EQEmu::InventoryProfile::GetCursorItem() {
 	return m_cursor.peek_front();
 }
 
 // Swap items in inventory
-bool EQEmu::InventoryProfile::SwapItem(int16 slot_a, int16 slot_b, SwapItemFailState& fail_state, uint16 race_id, uint8 class_id, uint16 deity_id, uint8 level)
-{
+bool EQEmu::InventoryProfile::SwapItem(
+	int16 source_slot,
+	int16 destination_slot,
+	SwapItemFailState &fail_state,
+	uint16 race_id,
+	uint8 class_id,
+	uint16 deity_id,
+	uint8 level
+) {
 	fail_state = swapInvalid;
-	
-	if (slot_a <= EQEmu::invslot::POSSESSIONS_END && slot_a >= EQEmu::invslot::POSSESSIONS_BEGIN) {
-		if ((((uint64)1 << slot_a) & m_lookup->PossessionsBitmask) == 0) {
+
+	if (source_slot <= EQEmu::invslot::POSSESSIONS_END && source_slot >= EQEmu::invslot::POSSESSIONS_BEGIN) {
+		if ((((uint64) 1 << source_slot) & m_lookup->PossessionsBitmask) == 0) {
 			fail_state = swapNotAllowed;
 			return false;
 		}
 	}
-	else if (slot_a <= EQEmu::invbag::GENERAL_BAGS_END && slot_a >= EQEmu::invbag::GENERAL_BAGS_BEGIN) {
-		auto temp_slot = EQEmu::invslot::GENERAL_BEGIN + ((slot_a - EQEmu::invbag::GENERAL_BAGS_BEGIN) / EQEmu::invbag::SLOT_COUNT);
+	else if (source_slot <= EQEmu::invbag::GENERAL_BAGS_END && source_slot >= EQEmu::invbag::GENERAL_BAGS_BEGIN) {
+		auto temp_slot = EQEmu::invslot::GENERAL_BEGIN + ((source_slot - EQEmu::invbag::GENERAL_BAGS_BEGIN) / EQEmu::invbag::SLOT_COUNT);
 		if ((((uint64)1 << temp_slot) & m_lookup->PossessionsBitmask) == 0) {
 			fail_state = swapNotAllowed;
 			return false;
 		}
 	}
-	else if (slot_a <= EQEmu::invslot::BANK_END && slot_a >= EQEmu::invslot::BANK_BEGIN) {
-		if ((slot_a - EQEmu::invslot::BANK_BEGIN) >= m_lookup->InventoryTypeSize[EQEmu::invtype::typeBank]) {
+	else if (source_slot <= EQEmu::invslot::BANK_END && source_slot >= EQEmu::invslot::BANK_BEGIN) {
+		if ((source_slot - EQEmu::invslot::BANK_BEGIN) >= m_lookup->InventoryTypeSize[EQEmu::invtype::typeBank]) {
 			fail_state = swapNotAllowed;
 			return false;
 		}
 	}
-	else if (slot_a <= EQEmu::invbag::BANK_BAGS_END && slot_a >= EQEmu::invbag::BANK_BAGS_BEGIN) {
-		auto temp_slot = (slot_a - EQEmu::invbag::BANK_BAGS_BEGIN) / EQEmu::invbag::SLOT_COUNT;
+	else if (source_slot <= EQEmu::invbag::BANK_BAGS_END && source_slot >= EQEmu::invbag::BANK_BAGS_BEGIN) {
+		auto temp_slot = (source_slot - EQEmu::invbag::BANK_BAGS_BEGIN) / EQEmu::invbag::SLOT_COUNT;
 		if (temp_slot >= m_lookup->InventoryTypeSize[EQEmu::invtype::typeBank]) {
 			fail_state = swapNotAllowed;
 			return false;
 		}
 	}
 
-	if (slot_b <= EQEmu::invslot::POSSESSIONS_END && slot_b >= EQEmu::invslot::POSSESSIONS_BEGIN) {
-		if ((((uint64)1 << slot_b) & m_lookup->PossessionsBitmask) == 0) {
+	if (destination_slot <= EQEmu::invslot::POSSESSIONS_END && destination_slot >= EQEmu::invslot::POSSESSIONS_BEGIN) {
+		if ((((uint64)1 << destination_slot) & m_lookup->PossessionsBitmask) == 0) {
 			fail_state = swapNotAllowed;
 			return false;
 		}
 	}
-	else if (slot_b <= EQEmu::invbag::GENERAL_BAGS_END && slot_b >= EQEmu::invbag::GENERAL_BAGS_BEGIN) {
-		auto temp_slot = EQEmu::invslot::GENERAL_BEGIN + ((slot_b - EQEmu::invbag::GENERAL_BAGS_BEGIN) / EQEmu::invbag::SLOT_COUNT);
+	else if (destination_slot <= EQEmu::invbag::GENERAL_BAGS_END && destination_slot >= EQEmu::invbag::GENERAL_BAGS_BEGIN) {
+		auto temp_slot = EQEmu::invslot::GENERAL_BEGIN + ((destination_slot - EQEmu::invbag::GENERAL_BAGS_BEGIN) / EQEmu::invbag::SLOT_COUNT);
 		if ((((uint64)1 << temp_slot) & m_lookup->PossessionsBitmask) == 0) {
 			fail_state = swapNotAllowed;
 			return false;
 		}
 	}
-	else if (slot_b <= EQEmu::invslot::BANK_END && slot_b >= EQEmu::invslot::BANK_BEGIN) {
-		if ((slot_b - EQEmu::invslot::BANK_BEGIN) >= m_lookup->InventoryTypeSize[EQEmu::invtype::typeBank]) {
+	else if (destination_slot <= EQEmu::invslot::BANK_END && destination_slot >= EQEmu::invslot::BANK_BEGIN) {
+		if ((destination_slot - EQEmu::invslot::BANK_BEGIN) >= m_lookup->InventoryTypeSize[EQEmu::invtype::typeBank]) {
 			fail_state = swapNotAllowed;
 			return false;
 		}
 	}
-	else if (slot_b <= EQEmu::invbag::BANK_BAGS_END && slot_b >= EQEmu::invbag::BANK_BAGS_BEGIN) {
-		auto temp_slot = (slot_b - EQEmu::invbag::BANK_BAGS_BEGIN) / EQEmu::invbag::SLOT_COUNT;
+	else if (destination_slot <= EQEmu::invbag::BANK_BAGS_END && destination_slot >= EQEmu::invbag::BANK_BAGS_BEGIN) {
+		auto temp_slot = (destination_slot - EQEmu::invbag::BANK_BAGS_BEGIN) / EQEmu::invbag::SLOT_COUNT;
 		if (temp_slot >= m_lookup->InventoryTypeSize[EQEmu::invtype::typeBank]) {
 			fail_state = swapNotAllowed;
 			return false;
 		}
 	}
 
-	// Temp holding areas for a and b
-	ItemInstance* inst_a = GetItem(slot_a);
-	ItemInstance* inst_b = GetItem(slot_b);
+	// Temp holding areas for source and destination
+	ItemInstance *source_item_instance      = GetItem(source_slot);
+	ItemInstance *destination_item_instance = GetItem(destination_slot);
 
-	if (inst_a) {
-		if (!inst_a->IsSlotAllowed(slot_b)) {
+	if (source_item_instance) {
+		if (!source_item_instance->IsSlotAllowed(destination_slot)) {
 			fail_state = swapNotAllowed;
 			return false;
 		}
-		if ((slot_b >= invslot::EQUIPMENT_BEGIN && slot_b <= invslot::EQUIPMENT_END)) {
-			auto item_a = inst_a->GetItem();
-			if (!item_a) {
+		if ((destination_slot >= invslot::EQUIPMENT_BEGIN && destination_slot <= invslot::EQUIPMENT_END)) {
+			auto source_item = source_item_instance->GetItem();
+			if (!source_item) {
 				fail_state = swapNullData;
 				return false;
 			}
-			if (race_id && class_id && !item_a->IsEquipable(race_id, class_id)) {
+			if (race_id && class_id && !source_item->IsEquipable(race_id, class_id)) {
 				fail_state = swapRaceClass;
 				return false;
 			}
-			if (deity_id && item_a->Deity && !(deity::ConvertDeityTypeToDeityTypeBit((deity::DeityType)deity_id) & item_a->Deity)) {
+			if (deity_id && source_item->Deity && !(deity::ConvertDeityTypeToDeityTypeBit((deity::DeityType)deity_id) & source_item->Deity)) {
 				fail_state = swapDeity;
 				return false;
 			}
-			if (level && item_a->ReqLevel && level < item_a->ReqLevel) {
+			if (level && source_item->ReqLevel && level < source_item->ReqLevel) {
 				fail_state = swapLevel;
 				return false;
 			}
 		}
 	}
 
-	if (inst_b) {
-		if (!inst_b->IsSlotAllowed(slot_a)) {
+	if (destination_item_instance) {
+		if (!destination_item_instance->IsSlotAllowed(source_slot)) {
 			fail_state = swapNotAllowed;
 			return false;
 		}
-		if ((slot_a >= invslot::EQUIPMENT_BEGIN && slot_a <= invslot::EQUIPMENT_END)) {
-			auto item_b = inst_b->GetItem();
-			if (!item_b) {
+		if ((source_slot >= invslot::EQUIPMENT_BEGIN && source_slot <= invslot::EQUIPMENT_END)) {
+			auto destination_item = destination_item_instance->GetItem();
+			if (!destination_item) {
 				fail_state = swapNullData;
 				return false;
 			}
-			if (race_id && class_id && !item_b->IsEquipable(race_id, class_id)) {
+			if (race_id && class_id && !destination_item->IsEquipable(race_id, class_id)) {
 				fail_state = swapRaceClass;
 				return false;
 			}
-			if (deity_id && item_b->Deity && !(deity::ConvertDeityTypeToDeityTypeBit((deity::DeityType)deity_id) & item_b->Deity)) {
+			if (deity_id && destination_item->Deity && !(deity::ConvertDeityTypeToDeityTypeBit((deity::DeityType)deity_id) & destination_item->Deity)) {
 				fail_state = swapDeity;
 				return false;
 			}
-			if (level && item_b->ReqLevel && level < item_b->ReqLevel) {
+			if (level && destination_item->ReqLevel && level < destination_item->ReqLevel) {
 				fail_state = swapLevel;
 				return false;
 			}
 		}
 	}
 
-	_PutItem(slot_a, inst_b); // Assign b->a
-	_PutItem(slot_b, inst_a); // Assign a->b
+	_PutItem(source_slot, destination_item_instance); // Assign destination -> source
+	_PutItem(destination_slot, source_item_instance); // Assign source -> destination
 
 	fail_state = swapPass;
 
@@ -398,10 +403,9 @@ bool EQEmu::InventoryProfile::SwapItem(int16 slot_a, int16 slot_b, SwapItemFailS
 }
 
 // Remove item from inventory (with memory delete)
-bool EQEmu::InventoryProfile::DeleteItem(int16 slot_id, uint8 quantity)
-{
+bool EQEmu::InventoryProfile::DeleteItem(int16 slot_id, uint8 quantity) {
 	// Pop item out of inventory map (or queue)
-	ItemInstance* item_to_delete = PopItem(slot_id);
+	ItemInstance *item_to_delete = PopItem(slot_id);
 
 	// Determine if object should be fully deleted, or
 	// just a quantity of charges of the item can be deleted
@@ -415,7 +419,7 @@ bool EQEmu::InventoryProfile::DeleteItem(int16 slot_id, uint8 quantity)
 			// the item is not stackable, and is not a charged item, or is expendable, delete it
 			if (item_to_delete->IsStackable() ||
 				(!item_to_delete->IsStackable() &&
-				((item_to_delete->GetItem()->MaxCharges == 0) || item_to_delete->IsExpendable()))
+				 ((item_to_delete->GetItem()->MaxCharges == 0) || item_to_delete->IsExpendable()))
 				) {
 				// Item can now be destroyed
 				InventoryProfile::MarkDirty(item_to_delete);
