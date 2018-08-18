@@ -42,19 +42,27 @@ struct wp_distance
 	int index;
 };
 
-void NPC::AI_SetRoambox(float iDist, float iRoamDist, uint32 iDelay, uint32 iMinDelay) {
-	AI_SetRoambox(iDist, GetX() + iRoamDist, GetX() - iRoamDist, GetY() + iRoamDist, GetY() - iRoamDist, iDelay, iMinDelay);
+void NPC::AI_SetRoambox(float max_distance, float roam_distance_variance, uint32 delay, uint32 min_delay) {
+	AI_SetRoambox(
+		max_distance,
+		GetX() + roam_distance_variance,
+		GetX() - roam_distance_variance,
+		GetY() + roam_distance_variance,
+		GetY() - roam_distance_variance,
+		delay,
+		min_delay
+	);
 }
 
-void NPC::AI_SetRoambox(float iDist, float iMaxX, float iMinX, float iMaxY, float iMinY, uint32 iDelay, uint32 iMinDelay) {
-	roambox_distance = iDist;
-	roambox_max_x = iMaxX;
-	roambox_min_x = iMinX;
-	roambox_max_y = iMaxY;
-	roambox_min_y = iMinY;
-	roambox_movingto_x = roambox_max_x + 1; // this will trigger a recalc
-	roambox_delay = iDelay;
-	roambox_min_delay = iMinDelay;
+void NPC::AI_SetRoambox(float distance, float max_x, float min_x, float max_y, float min_y, uint32 delay, uint32 min_delay) {
+	roambox_distance      = distance;
+	roambox_max_x         = max_x;
+	roambox_min_x         = min_x;
+	roambox_max_y         = max_y;
+	roambox_min_y         = min_y;
+	roambox_destination_x = roambox_max_x + 1; // this will trigger a recalc
+	roambox_delay         = delay;
+	roambox_min_delay     = min_delay;
 }
 
 void NPC::DisplayWaypointInfo(Client *c) {
@@ -199,7 +207,7 @@ void NPC::MoveTo(const glm::vec4& position, bool saveguardspot)
 	}
 
 	cur_wp_pause = 0;
-	pLastFightingDelayMoving = 0;
+	time_until_can_move = 0;
 	if (AI_walking_timer->Enabled())
 		AI_walking_timer->Start(100);
 }
@@ -438,22 +446,16 @@ float Mob::CalculateDistance(float x, float y, float z) {
 	return (float)sqrtf(((m_Position.x - x)*(m_Position.x - x)) + ((m_Position.y - y)*(m_Position.y - y)) + ((m_Position.z - z)*(m_Position.z - z)));
 }
 
-bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, bool checkZ, bool calcHeading) {
+bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, bool check_z, bool calculate_heading) {
 	if (GetID() == 0)
 		return true;
 
-	if (speed <= 0)
-	{
+	if (speed <= 0) {
 		SetCurrentSpeed(0);
 		return true;
 	}
 
 	if ((m_Position.x - x == 0) && (m_Position.y - y == 0)) {//spawn is at target coords
-		if (m_Position.z - z != 0) {
-			m_Position.z = z;
-			Log(Logs::Detail, Logs::AI, "Calc Position2 (%.3f, %.3f, %.3f): Jumping pure Z.", x, y, z);
-			return true;
-		}
 		return false;
 	}
 	else if ((std::abs(m_Position.x - x) < 0.1) && (std::abs(m_Position.y - y) < 0.1)) {
@@ -464,16 +466,17 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 		m_Position.x = x;
 		m_Position.y = y;
 		m_Position.z = z;
+
 		return true;
 	}
 
-	bool send_update = false;
 	int compare_steps = 20;
 	if (tar_ndx < compare_steps && m_TargetLocation.x == x && m_TargetLocation.y == y) {
 
-		float new_x = m_Position.x + m_TargetV.x*tar_vector;
-		float new_y = m_Position.y + m_TargetV.y*tar_vector;
-		float new_z = m_Position.z + m_TargetV.z*tar_vector;
+		float new_x = m_Position.x + m_TargetV.x * tar_vector;
+		float new_y = m_Position.y + m_TargetV.y * tar_vector;
+		float new_z = m_Position.z + m_TargetV.z * tar_vector;
+
 		if (IsNPC()) {
 			entity_list.ProcessMove(CastToNPC(), new_x, new_y, new_z);
 		}
@@ -482,21 +485,22 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 		m_Position.y = new_y;
 		m_Position.z = new_z;
 
-		if(checkZ && fix_z_timer.Check() && 
-			(!this->IsEngaged() || flee_mode || currently_fleeing))
+		if (check_z && fix_z_timer.Check() && (!this->IsEngaged() || flee_mode || currently_fleeing)) {
 			this->FixZ();
+		}
 
 		tar_ndx++;
+
 		return true;
 	}
 
-
-	if (tar_ndx>50) {
+	if (tar_ndx > 50) {
 		tar_ndx--;
 	}
 	else {
 		tar_ndx = 0;
 	}
+
 	m_TargetLocation = glm::vec3(x, y, z);
 
 	float nx = this->m_Position.x;
@@ -530,14 +534,12 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 
 	// mob move fix
 
-	if (numsteps<20)
-	{
-		if (numsteps>1)
-		{
+	if (numsteps < 20) {
+		if (numsteps > 1) {
 			tar_vector = 1.0f;
-			m_TargetV.x = m_TargetV.x / (float)numsteps;
-			m_TargetV.y = m_TargetV.y / (float)numsteps;
-			m_TargetV.z = m_TargetV.z / (float)numsteps;
+			m_TargetV.x = m_TargetV.x / (float) numsteps;
+			m_TargetV.y = m_TargetV.y / (float) numsteps;
+			m_TargetV.z = m_TargetV.z / (float) numsteps;
 
 			float new_x = m_Position.x + m_TargetV.x;
 			float new_y = m_Position.y + m_TargetV.y;
@@ -549,12 +551,12 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 			m_Position.x = new_x;
 			m_Position.y = new_y;
 			m_Position.z = new_z;
-			if (calcHeading)
+			if (calculate_heading) {
 				m_Position.w = CalculateHeadingToTarget(x, y);
+			}
 			tar_ndx = 20 - numsteps;
 		}
-		else
-		{
+		else {
 			if (IsNPC()) {
 				entity_list.ProcessMove(CastToNPC(), x, y, z);
 			}
@@ -578,9 +580,10 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 
 		tar_vector *= (dur / 100.0f);
 
-		float new_x = m_Position.x + m_TargetV.x*tar_vector;
-		float new_y = m_Position.y + m_TargetV.y*tar_vector;
-		float new_z = m_Position.z + m_TargetV.z*tar_vector;
+		float new_x = m_Position.x + m_TargetV.x * tar_vector;
+		float new_y = m_Position.y + m_TargetV.y * tar_vector;
+		float new_z = m_Position.z + m_TargetV.z * tar_vector;
+
 		if (IsNPC()) {
 			entity_list.ProcessMove(CastToNPC(), new_x, new_y, new_z);
 		}
@@ -588,11 +591,12 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 		m_Position.x = new_x;
 		m_Position.y = new_y;
 		m_Position.z = new_z;
-		if (calcHeading)
+		if (calculate_heading) {
 			m_Position.w = CalculateHeadingToTarget(x, y);
+		}
 	}
 
-	if (checkZ && fix_z_timer.Check() && !this->IsEngaged())
+	if (check_z && fix_z_timer.Check() && !this->IsEngaged())
 		this->FixZ();
 
 	SetMoving(true);
@@ -600,13 +604,11 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 
 	m_Delta = glm::vec4(m_Position.x - nx, m_Position.y - ny, m_Position.z - nz, 0.0f);
 
-	if (IsClient())
-	{
+	if (IsClient()) {
 		SendPositionUpdate(1);
 		CastToClient()->ResetPositionTimer();
 	}
-	else
-	{
+	else {
 		SendPositionUpdate();
 		SetAppearance(eaStanding, false);
 	}
@@ -615,8 +617,8 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 	return true;
 }
 
-bool Mob::CalculateNewPosition(float x, float y, float z, int speed, bool checkZ, bool calcHeading) {
-	return MakeNewPositionAndSendUpdate(x, y, z, speed);
+bool Mob::CalculateNewPosition(float x, float y, float z, float speed, bool check_z, bool calculate_heading) {
+	return MakeNewPositionAndSendUpdate(x, y, z, speed, check_z);
 }
 
 void NPC::AssignWaypoints(int32 grid)
@@ -746,10 +748,11 @@ void Mob::SendToFixZ(float new_x, float new_y, float new_z) {
 	}
 }
 
-float Mob::GetFixedZ(glm::vec3 dest, int32 z_find_offset) {
+float Mob::GetFixedZ(glm::vec3 destination, int32 z_find_offset) {
 	BenchTimer timer;
 	timer.reset();
-	float new_z = dest.z;
+
+	float new_z = destination.z;
 
 	if (zone->HasMap() && RuleB(Map, FixZWhenMoving)) {
 
@@ -765,7 +768,7 @@ float Mob::GetFixedZ(glm::vec3 dest, int32 z_find_offset) {
 		/*
 		 * Any more than 5 in the offset makes NPC's hop/snap to ceiling in small corridors
 		 */
-		new_z = this->FindDestGroundZ(dest, z_find_offset);
+		new_z = this->FindDestGroundZ(destination, z_find_offset);
 		if (new_z != BEST_Z_INVALID) {
 			new_z += this->GetZOffset();
 
@@ -776,9 +779,15 @@ float Mob::GetFixedZ(glm::vec3 dest, int32 z_find_offset) {
 
 		auto duration = timer.elapsed();
 
-		Log(Logs::Moderate, Logs::FixZ,
-		    "Mob::GetFixedZ() (%s) returned %4.3f at %4.3f, %4.3f, %4.3f - Took %lf",
-		    this->GetCleanName(), new_z, dest.x, dest.y, dest.z, duration);
+		Log(Logs::Moderate,
+			Logs::FixZ,
+			"Mob::GetFixedZ() (%s) returned %4.3f at %4.3f, %4.3f, %4.3f - Took %lf",
+			this->GetCleanName(),
+			new_z,
+			destination.x,
+			destination.y,
+			destination.z,
+			duration);
 	}
 
 	return new_z;
@@ -790,16 +799,19 @@ void Mob::FixZ(int32 z_find_offset /*= 5*/) {
 
 	if (!IsClient() && new_z != m_Position.z) {
 		if ((new_z > -2000) && new_z != BEST_Z_INVALID) {
-			if (RuleB(Map, MobZVisualDebug))
+			if (RuleB(Map, MobZVisualDebug)) {
 				this->SendAppearanceEffect(78, 0, 0, 0, 0);
+			}
 
 			m_Position.z = new_z;
-		} else {
-			if (RuleB(Map, MobZVisualDebug))
+		}
+		else {
+			if (RuleB(Map, MobZVisualDebug)) {
 				this->SendAppearanceEffect(103, 0, 0, 0, 0);
+			}
 
 			Log(Logs::General, Logs::FixZ, "%s is failing to find Z %f",
-			    this->GetCleanName(), std::abs(m_Position.z - new_z));
+				this->GetCleanName(), std::abs(m_Position.z - new_z));
 		}
 	}
 }
