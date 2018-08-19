@@ -1685,17 +1685,44 @@ void NPC::AI_DoMovement() {
 			 * if the roam box was sloppily configured
 			 */
 			if (!this->GetWasSpawnedInWater()) {
-				if (zone->zonemap != nullptr && zone->watermap != nullptr) {
+				if (zone->HasMap() && zone->HasWaterMap()) {
 					auto position = glm::vec3(
 						roambox_destination_x,
 						roambox_destination_y,
-						this->FindGroundZ(roambox_destination_x, roambox_destination_y, 5)
+						(m_Position.z - 15)
 					);
 
 					if (zone->watermap->InLiquid(position)) {
+						Log(Logs::Detail,
+							Logs::NPCRoamBox, "%s | My destination is in water and I don't belong there!",
+							this->GetCleanName());
+
 						return;
 					}
 				}
+			}
+
+			/**
+			 * We check for line of sight because we dont' want NPC's scaling on top of buildings and over ridiculous
+			 * mountains, this also peels back the frequency of pathing as well because we don't want to spam LOS checks
+			 * so if we fail a LOS check to our randomly chosen destination, we roll another timer cycle and wait again
+			 *
+			 * This is also far nicer on CPU since roamboxes are heavy by nature
+			 */
+			if (!CheckLosFN(
+				roambox_destination_x,
+				roambox_destination_y,
+				m_Position.z + GetZOffset(),
+				this->GetSize())) {
+
+				time_until_can_move = Timer::GetCurrentTime() + RandomTimer(roambox_min_delay, roambox_delay);
+
+				Log(Logs::Detail,
+					Logs::NPCRoamBox,
+					"%s | Can't see where I want to go... I'll try something else...",
+					this->GetCleanName());
+
+				return;
 			}
 
 			Log(Logs::Detail,
