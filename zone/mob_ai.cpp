@@ -1666,8 +1666,14 @@ void NPC::AI_DoMovement() {
 			roambox_destination_x = EQEmu::Clamp((GetX() + move_x), roambox_min_x, roambox_max_x);
 			roambox_destination_y = EQEmu::Clamp((GetY() + move_y), roambox_min_y, roambox_max_y);
 
+			/**
+			 * If our roambox was configured with large distances, chances of hitting the min or max end of
+			 * the clamp is high, this causes NPC's to gather on the border of a box, to reduce clustering
+			 * either lower the roambox distance or the code will do a simple random between min - max when it
+			 * hits the min or max of the clamp
+			 */
 			if (roambox_destination_x == roambox_min_x || roambox_destination_x == roambox_max_x) {
-				roambox_destination_x = static_cast<float>(zone->random.Real(roambox_min_x, roambox_max_y));
+				roambox_destination_x = static_cast<float>(zone->random.Real(roambox_min_x, roambox_max_x));
 			}
 
 			if (roambox_destination_y == roambox_min_y || roambox_destination_y == roambox_max_y) {
@@ -1692,8 +1698,6 @@ void NPC::AI_DoMovement() {
 				}
 			}
 
-			this->FixZ();
-
 			Log(Logs::Detail,
 				Logs::NPCRoamBox,
 				"Calculate | NPC: %s distance %.3f | min_x %.3f | max_x %.3f | final_x %.3f | min_y %.3f | max_y %.3f | final_y %.3f",
@@ -1707,9 +1711,11 @@ void NPC::AI_DoMovement() {
 				roambox_destination_y);
 		}
 
-		float new_z = this->FindGroundZ(m_Position.x, m_Position.y, 5) + GetZOffset();
+		if (fix_z_timer.Check()) {
+			this->FixZ();
+		}
 
-		if (!CalculateNewPosition(roambox_destination_x, roambox_destination_y, new_z, move_speed, true)) {
+		if (!CalculateNewPosition(roambox_destination_x, roambox_destination_y, m_Position.z, move_speed, true)) {
 			time_until_can_move = Timer::GetCurrentTime() + RandomTimer(roambox_min_delay, roambox_delay);
 			SetMoving(false);
 			this->FixZ();
