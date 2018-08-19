@@ -39,6 +39,7 @@
 #include "raids.h"
 #include "string_ids.h"
 #include "worldserver.h"
+#include "water_map.h"
 
 #ifdef _WINDOWS
 	#define snprintf	_snprintf
@@ -686,6 +687,15 @@ void EntityList::AddNPC(NPC *npc, bool SendSpawnPacket, bool dontqueue)
 		}
 	}
 
+	/**
+	 * Set whether NPC was spawned in or out of water
+	 */
+	if (zone->HasMap() && zone->HasWaterMap()) {
+		npc->SetSpawnedInWater(false);
+		if (zone->watermap->InLiquid(npc->GetPosition())) {
+			npc->SetSpawnedInWater(true);
+		}
+	}
 }
 
 void EntityList::AddMerc(Merc *merc, bool SendSpawnPacket, bool dontqueue)

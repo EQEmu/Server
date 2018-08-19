@@ -455,7 +455,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 		return true;
 	}
 
-	if ((m_Position.x - x == 0) && (m_Position.y - y == 0)) {//spawn is at target coords
+	if ((m_Position.x - x == 0) && (m_Position.y - y == 0)) { //spawn is at target coords
 		return false;
 	}
 	else if ((std::abs(m_Position.x - x) < 0.1) && (std::abs(m_Position.y - y) < 0.1)) {

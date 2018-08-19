@@ -1663,8 +1663,34 @@ void NPC::AI_DoMovement() {
 			auto move_x = static_cast<float>(zone->random.Real(-roambox_distance, roambox_distance));
 			auto move_y = static_cast<float>(zone->random.Real(-roambox_distance, roambox_distance));
 
-			roambox_destination_x = EQEmu::Clamp((GetX() + move_x), roambox_min_x, roambox_min_y);
+			roambox_destination_x = EQEmu::Clamp((GetX() + move_x), roambox_min_x, roambox_max_x);
 			roambox_destination_y = EQEmu::Clamp((GetY() + move_y), roambox_min_y, roambox_max_y);
+
+			if (roambox_destination_x == roambox_min_x || roambox_destination_x == roambox_max_x) {
+				roambox_destination_x = static_cast<float>(zone->random.Real(roambox_min_x, roambox_max_y));
+			}
+
+			if (roambox_destination_y == roambox_min_y || roambox_destination_y == roambox_max_y) {
+				roambox_destination_y = static_cast<float>(zone->random.Real(roambox_min_y, roambox_max_y));
+			}
+
+			/**
+			 * If mob was not spawned in water, let's not randomly roam them into water
+			 * if the roam box was sloppily configured
+			 */
+			if (!this->GetWasSpawnedInWater()) {
+				if (zone->zonemap != nullptr && zone->watermap != nullptr) {
+					auto position = glm::vec3(
+						roambox_destination_x,
+						roambox_destination_y,
+						this->FindGroundZ(roambox_destination_x, roambox_destination_y, 5)
+					);
+
+					if (zone->watermap->InLiquid(position)) {
+						return;
+					}
+				}
+			}
 
 			this->FixZ();
 
@@ -1681,7 +1707,9 @@ void NPC::AI_DoMovement() {
 				roambox_destination_y);
 		}
 
-		if (!CalculateNewPosition(roambox_destination_x, roambox_destination_y, GetFixedZ(m_Position), move_speed, true)) {
+		float new_z = this->FindGroundZ(m_Position.x, m_Position.y, 5) + GetZOffset();
+
+		if (!CalculateNewPosition(roambox_destination_x, roambox_destination_y, new_z, move_speed, true)) {
 			time_until_can_move = Timer::GetCurrentTime() + RandomTimer(roambox_min_delay, roambox_delay);
 			SetMoving(false);
 			this->FixZ();

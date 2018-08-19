@@ -5455,3 +5455,11 @@ void Mob::DoOffHandAttackRounds(Mob *target, ExtraAttackOptions *opts)
 		}
 	}
 }
+
+bool Mob::GetWasSpawnedInWater() const {
+	return spawned_in_water;
+}
+
+void Mob::SetSpawnedInWater(bool spawned_in_water) {
+	Mob::spawned_in_water = spawned_in_water;
+}
