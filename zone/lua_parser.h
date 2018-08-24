@@ -120,17 +120,8 @@ private:
 	void MapFunctions(lua_State *L);
 	QuestEventID ConvertLuaEvent(QuestEventID evt);
 
-	std::map<std::string, std::string> vars_;
-	std::map<std::string, bool> loaded_;
-	std::vector<LuaMod> mods_;
-	lua_State *L;
-
-	NPCArgumentHandler NPCArgumentDispatch[_LargestEventID];
-	PlayerArgumentHandler PlayerArgumentDispatch[_LargestEventID];
-	ItemArgumentHandler ItemArgumentDispatch[_LargestEventID];
-	SpellArgumentHandler SpellArgumentDispatch[_LargestEventID];
-	EncounterArgumentHandler EncounterArgumentDispatch[_LargestEventID];
-
+	struct Implementation;
+	std::unique_ptr<Implementation> mImpl;
 };
 
 #endif
