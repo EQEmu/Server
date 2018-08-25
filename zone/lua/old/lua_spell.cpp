@@ -3,7 +3,7 @@
 #include "lua.hpp"
 #include <luabind/luabind.hpp>
 
-#include "../common/spdat.h"
+#include "../../common/spdat.h"
 #include "lua_spell.h"
 
 Lua_Spell::Lua_Spell(int id) {

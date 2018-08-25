@@ -1,35 +1,15 @@
-#ifndef _EQE_LUA_PARSER_H
-#define _EQE_LUA_PARSER_H
-#ifdef LUA_EQEMU
-
-#include "quest_parser_collection.h"
-#include "quest_interface.h"
+#pragma once
+#include "../quest_parser_collection.h"
+#include "../quest_interface.h"
 #include <string>
-#include <list>
-#include <map>
-#include <exception>
+#include <sol_forward.hpp>
 
-#include "zone_config.h"
-#include "lua_mod.h"
-
-extern const ZoneConfig *Config;
-
-struct lua_State;
 class Client;
 class NPC;
 
 namespace EQEmu
 {
 	class ItemInstance;
-}
-
-#include "lua_parser_events.h"
-
-struct lua_registered_event;
-namespace luabind {
-	namespace adl {
-		class object;
-	}
 }
 
 class LuaParser : public QuestInterface {
@@ -87,7 +67,7 @@ public:
 		return &inst;
 	}
 
-	bool HasFunction(std::string function, std::string package_name);
+	bool HasFunction(const std::string &function, const std::string &package_name);
 
 	//Mod Extensions
 	void MeleeMitigation(Mob *self, Mob *attacker, DamageHitInfo &hit, ExtraAttackOptions *opts, bool &ignoreDefault);
@@ -102,27 +82,25 @@ public:
 
 private:
 	LuaParser();
-	LuaParser(const LuaParser&);
-	LuaParser& operator=(const LuaParser&);
+	LuaParser(const LuaParser&) = delete;
+	LuaParser& operator=(const LuaParser&) = delete;
 
 	int _EventNPC(std::string package_name, QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-		std::vector<EQEmu::Any> *extra_pointers, luabind::adl::object *l_func = nullptr);
+		std::vector<EQEmu::Any> *extra_pointers, sol::function *l_func = nullptr);
 	int _EventPlayer(std::string package_name, QuestEventID evt, Client *client, std::string data, uint32 extra_data,
-		std::vector<EQEmu::Any> *extra_pointers, luabind::adl::object *l_func = nullptr);
+		std::vector<EQEmu::Any> *extra_pointers, sol::function *l_func = nullptr);
 	int _EventItem(std::string package_name, QuestEventID evt, Client *client, EQEmu::ItemInstance *item, Mob *mob, std::string data,
-		uint32 extra_data, std::vector<EQEmu::Any> *extra_pointers, luabind::adl::object *l_func = nullptr);
+		uint32 extra_data, std::vector<EQEmu::Any> *extra_pointers, sol::function *l_func = nullptr);
 	int _EventSpell(std::string package_name, QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data,
-		std::vector<EQEmu::Any> *extra_pointers, luabind::adl::object *l_func = nullptr);
+		std::vector<EQEmu::Any> *extra_pointers, sol::function *l_func = nullptr);
 	int _EventEncounter(std::string package_name, QuestEventID evt, std::string encounter_name, std::string data, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers);
 
-	void LoadScript(std::string filename, std::string package_name);
-	void MapFunctions(lua_State *L);
+	void LoadScript(const std::string &filename);
+	void LoadScript(const std::string &filename, const std::string &package_name);
+	void MapFunctions();
 	QuestEventID ConvertLuaEvent(QuestEventID evt);
 
 	struct Implementation;
 	std::unique_ptr<Implementation> mImpl;
 };
-
-#endif
-#endif

@@ -40,30 +40,6 @@ SET(zone_sources
 	horse.cpp
 	inventory.cpp
 	loottables.cpp
-	lua_bit.cpp
-	lua_corpse.cpp
-	lua_client.cpp
-	lua_door.cpp
-	lua_encounter.cpp
-	lua_entity.cpp
-	lua_entity_list.cpp
-	lua_general.cpp
-	lua_group.cpp
-	lua_hate_list.cpp
-	lua_inventory.cpp
-	lua_item.cpp
-	lua_iteminst.cpp
-	lua_mob.cpp
-	lua_mod.cpp
-	lua_npc.cpp
-	lua_object.cpp
-	lua_packet.cpp
-	lua_parser.cpp
-	lua_parser_events.cpp
-	lua_raid.cpp
-	lua_spawn.cpp
-	lua_spell.cpp
-	lua_stat_bonuses.cpp
 	embperl.cpp
 	embxs.cpp
 	entity.cpp
@@ -156,7 +132,7 @@ SET(zone_headers
 	command.h
 	common.h
 	corpse.h
-   data_bucket.h
+	data_bucket.h
 	doors.h
 	embparser.h
 	embperl.h
@@ -173,31 +149,6 @@ SET(zone_headers
 	hate_list.h
 	heal_rotation.h
 	horse.h
-	lua_bit.h
-	lua_client.h
-	lua_corpse.h
-	lua_door.h
-	lua_encounter.h
-	lua_entity.h
-	lua_entity_list.h
-	lua_general.h
-	lua_group.h
-	lua_hate_list.h
-	lua_inventory.h
-	lua_item.h
-	lua_iteminst.h
-	lua_mob.h
-	lua_mod.h
-	lua_npc.h
-	lua_object.h
-	lua_packet.h
-	lua_parser.h
-	lua_parser_events.h
-	lua_ptr.h
-	lua_raid.h
-	lua_spawn.h
-	lua_spell.h
-	lua_stat_bonuses.h
 	map.h
 	masterentity.h
 	maxskill.h
@@ -244,6 +195,45 @@ SET(zone_headers
 	zonedb.h
 	zonedump.h
 )
+
+IF(EQEMU_BUILD_LUA)
+
+SET(zone_sources ${zone_sources}
+	lua/lua_client.cpp
+	lua/lua_corpse.cpp
+	lua/lua_door.cpp
+	lua/lua_entity.cpp
+	lua/lua_npc.cpp
+	lua/lua_mob.cpp
+	lua/lua_object.cpp
+	lua/lua_general.cpp
+	lua/lua_parser.cpp
+)
+
+SET(zone_headers ${zone_headers}
+	lua/lua_events.h
+	lua/lua_forward.h
+	lua/lua_parser.h
+	lua/lua_structs.h
+)
+
+SOURCE_GROUP(lua FILES
+	lua/lua_client.cpp
+	lua/lua_corpse.cpp
+	lua/lua_door.cpp
+	lua/lua_entity.cpp
+	lua/lua_events.h
+	lua/lua_forward.h
+	lua/lua_npc.cpp
+	lua/lua_mob.cpp
+	lua/lua_object.cpp
+	lua/lua_general.cpp
+	lua/lua_parser.cpp
+	lua/lua_parser.h
+	lua/lua_structs.h
+)
+
+endif()
 
 IF(EQEMU_DEPOP_INVALIDATES_CACHE)
 	ADD_DEFINITIONS(-DDEPOP_INVALIDATES_NPC_TYPES_CACHE)

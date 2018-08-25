@@ -2,11 +2,11 @@
 #include <luabind/luabind.hpp>
 #include <luabind/object.hpp>
 
-#include "../common/spdat.h"
-#include "masterentity.h"
-#include "questmgr.h"
-#include "zone.h"
-#include "zone_config.h"
+#include "../../common/spdat.h"
+#include "../masterentity.h"
+#include "../questmgr.h"
+#include "../zone.h"
+#include "../zone_config.h"
 
 #include "lua_parser.h"
 #include "lua_mod.h"
