@@ -532,6 +532,11 @@ RULE_INT(NPC, NPCToNPCAggroTimerMin, 500)
 RULE_INT(NPC, NPCToNPCAggroTimerMax, 6000)
 RULE_BOOL(NPC, UseClassAsLastName, true) // Uses class archetype as LastName for npcs with none
 RULE_BOOL(NPC, NewLevelScaling, true) // Better level scaling, use old if new formulas would break your server
+RULE_INT(NPC, NPCGatePercent, 5) // % at which the NPC Will attempt to gate at.
+RULE_BOOL(NPC, NPCGateNearBind, false) // Will NPC attempt to gate when near bind location?
+RULE_INT(NPC, NPCGateDistanceBind, 75) // Distance from bind before NPC will attempt to gate
+RULE_BOOL(NPC, NPCHealOnGate, true) // Will the NPC Heal on Gate.
+RULE_REAL(NPC, NPCHealOnGateAmount, 25) // How much the npc will heal on gate if enabled.
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Aggro)
