@@ -424,7 +424,7 @@ Mob* EntityList::AICheckNPCtoNPCAggro(Mob* sender, float iAggroRange, float iAss
 	return nullptr;
 }
 
-int EntityList::GetHatedCount(Mob *attacker, Mob *exclude)
+int EntityList::GetHatedCount(Mob *attacker, Mob *exclude, bool inc_gray_con)
 {
 	// Return a list of how many non-feared, non-mezzed, non-green mobs, within aggro range, hate *attacker
 	if (!attacker)
@@ -434,20 +434,25 @@ int EntityList::GetHatedCount(Mob *attacker, Mob *exclude)
 
 	for (auto it = npc_list.begin(); it != npc_list.end(); ++it) {
 		NPC *mob = it->second;
-		if (!mob || (mob == exclude))
+		if (!mob || (mob == exclude)) {
 			continue;
+		}
 
-		if (!mob->IsEngaged())
+		if (!mob->IsEngaged()) {
 			continue;
+		}
 
-		if (mob->IsFeared() || mob->IsMezzed())
+		if (mob->IsFeared() || mob->IsMezzed()) {
 			continue;
+		}
 
-		if (attacker->GetLevelCon(mob->GetLevel()) == CON_GRAY)
+		if (!inc_gray_con && attacker->GetLevelCon(mob->GetLevel()) == CON_GRAY) {
 			continue;
+		}
 
-		if (!mob->CheckAggro(attacker))
+		if (!mob->CheckAggro(attacker)) {
 			continue;
+		}
 
 		float AggroRange = mob->GetAggroRange();
 
@@ -455,14 +460,12 @@ int EntityList::GetHatedCount(Mob *attacker, Mob *exclude)
 
 		AggroRange *= AggroRange;
 
-		if (DistanceSquared(mob->GetPosition(), attacker->GetPosition()) > AggroRange)
+		if (DistanceSquared(mob->GetPosition(), attacker->GetPosition()) > AggroRange) {
 			continue;
-
+		}
 		Count++;
 	}
-
 	return Count;
-
 }
 
 void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
