@@ -861,6 +861,7 @@ bool LuaParser::HasFunction(const std::string &subname, const std::string &packa
 }
 
 void LuaParser::MapFunctions() {
+	lua_register_extra_attack_options(mImpl->state.get());
 	lua_register_entity(mImpl->state.get());
 	lua_register_mob(mImpl->state.get());
 	lua_register_npc(mImpl->state.get());

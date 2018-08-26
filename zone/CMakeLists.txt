@@ -203,6 +203,7 @@ SET(zone_sources ${zone_sources}
 	lua/lua_corpse.cpp
 	lua/lua_door.cpp
 	lua/lua_entity.cpp
+	lua/lua_extra_attack_options.cpp
 	lua/lua_npc.cpp
 	lua/lua_mob.cpp
 	lua/lua_object.cpp
@@ -222,6 +223,7 @@ SOURCE_GROUP(lua FILES
 	lua/lua_corpse.cpp
 	lua/lua_door.cpp
 	lua/lua_entity.cpp
+	lua/lua_extra_attack_options.cpp
 	lua/lua_events.h
 	lua/lua_forward.h
 	lua/lua_npc.cpp
