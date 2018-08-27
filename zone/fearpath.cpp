@@ -132,7 +132,7 @@ void Mob::ProcessFlee()
 	Mob *hate_top = GetHateTop();
 
 	// If no special flee_percent check for Gray or Other con rates
-	if(GetLevelCon(hate_top->GetLevel(), GetLevel()) == CON_GRAY && fleeratio == 0 && RuleB(Combat, FleeGray)) {
+	if(hate_top != nullptr && GetLevelCon(hate_top->GetLevel(), GetLevel()) == CON_GRAY && fleeratio == 0 && RuleB(Combat, FleeGray)) {
 		fleeratio = RuleI(Combat, FleeGrayHPRatio);
 	} else if(fleeratio == 0) {
 		fleeratio = RuleI(Combat, FleeHPRatio );
