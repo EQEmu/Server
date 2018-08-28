@@ -3147,7 +3147,7 @@ void EntityList::SignalMobsByNPCID(uint32 snpc, int signal_id)
 	while (it != npc_list.end()) {
 		NPC *pit = it->second;
 		if (pit->GetNPCTypeID() == snpc)
-			pit->SignalNPC(signal_id);
+			pit->Signal(signal_id);
 		++it;
 	}
 }

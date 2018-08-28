@@ -5450,7 +5450,7 @@ void Client::SetPortExemption(bool v)
 	m_PortExemption = v;
 }
 
-void Client::Signal(uint32 data)
+void Client::Signal(int data)
 {
 	char buf[32];
 	snprintf(buf, 31, "%d", data);

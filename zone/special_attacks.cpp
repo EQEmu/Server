@@ -23,7 +23,7 @@
 #include "entity.h"
 #include "mob.h"
 #include "string_ids.h"
-#include "lua_parser.h"
+#include "lua/lua_parser.h"
 
 #include <string.h>
 

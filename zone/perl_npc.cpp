@@ -62,7 +62,7 @@ XS(XS_NPC_SignalNPC) {
 		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->SignalNPC(_signal_id);
+		THIS->Signal(_signal_id);
 	}
 	XSRETURN_EMPTY;
 }

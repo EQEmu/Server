@@ -31,7 +31,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "water_map.h"
 #include "worldserver.h"
 #include "zone.h"
-#include "lua_parser.h"
+#include "lua/lua_parser.h"
 #include "fastmath.h"
 
 #include <assert.h>

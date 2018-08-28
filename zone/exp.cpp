@@ -28,7 +28,7 @@
 
 #include "queryserv.h"
 #include "quest_parser_collection.h"
-#include "lua_parser.h"
+#include "lua/lua_parser.h"
 #include "string_ids.h"
 
 #ifdef BOTS

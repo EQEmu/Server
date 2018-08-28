@@ -253,7 +253,7 @@ public:
 	void	DepopSwarmPets();
 	void	PetOnSpawn(NewSpawn_Struct* ns);
 
-	void	SignalNPC(int _signal_id);
+	virtual void Signal(int signal);
 
 	inline int32	GetNPCFactionID()	const { return npc_faction_id; }
 	inline int32			GetPrimaryFaction()	const { return primary_faction; }

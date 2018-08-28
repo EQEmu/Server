@@ -60,7 +60,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "tasks.h"
 #include "quest_parser_collection.h"
 #include "embparser.h"
-#include "lua_parser.h"
+#include "lua/lua_parser.h"
 #include "questmgr.h"
 
 #include "../common/event/event_loop.h"

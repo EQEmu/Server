@@ -829,7 +829,7 @@ void LuaParser::LoadScript(const std::string &filename, const std::string &packa
 	Script s;
 	s.Env = sol::environment(*mImpl->state, sol::create, mImpl->state->globals());
 	try {
-		auto res = mImpl->state->safe_script_file(filename);
+		auto res = mImpl->state->safe_script_file(filename, s.Env);
 		if (res.valid()) {
 			s.Loaded = true;
 		}
@@ -861,6 +861,7 @@ bool LuaParser::HasFunction(const std::string &subname, const std::string &packa
 }
 
 void LuaParser::MapFunctions() {
+	lua_register_inventory_where(mImpl->state.get());
 	lua_register_extra_attack_options(mImpl->state.get());
 	lua_register_entity(mImpl->state.get());
 	lua_register_mob(mImpl->state.get());

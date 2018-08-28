@@ -1840,7 +1840,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		CZNPCSignal_Struct* CZCN = (CZNPCSignal_Struct*)pack->pBuffer;
 		NPC* n = entity_list.GetNPCByNPCTypeID(CZCN->npctype_id);
 		if (n != 0) {
-			n->SignalNPC(CZCN->data);
+			n->Signal(CZCN->data);
 		}
 		break;
 	}

@@ -5054,7 +5054,7 @@ void Client::Handle_OP_ControlBoat(const EQApplicationPacket *app)
 	FastQueuePacket(&outapp);
 	safe_delete(outapp);
 	// have the boat signal itself, so quests can be triggered by boat use
-	boat->CastToNPC()->SignalNPC(0);
+	boat->Signal(0);
 }
 
 void Client::Handle_OP_CorpseDrag(const EQApplicationPacket *app)

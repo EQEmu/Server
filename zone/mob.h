@@ -633,6 +633,7 @@ public:
 	//Quest
 	void CameraEffect(uint32 duration, uint32 intensity, Client *c = nullptr, bool global = false);
 	inline bool GetQglobal() const { return qglobal; }
+	virtual void Signal(int signal) { };
 
 	//Other Packet
 	void CreateDespawnPacket(EQApplicationPacket* app, bool Decay);
@@ -1020,7 +1021,6 @@ public:
 	bool CheckWillAggro(Mob *mob);
 
 	void InstillDoubt(Mob *who);
-	int16 GetResist(uint8 type) const;
 	Mob* GetShieldTarget() const { return shield_target; }
 	void SetShieldTarget(Mob* mob) { shield_target = mob; }
 	bool HasActiveSong() const { return(bardsong != 0); }

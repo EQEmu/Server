@@ -204,8 +204,12 @@ SET(zone_sources ${zone_sources}
 	lua/lua_door.cpp
 	lua/lua_entity.cpp
 	lua/lua_extra_attack_options.cpp
+	lua/lua_inventory_where.cpp
 	lua/lua_npc.cpp
 	lua/lua_mob.cpp
+	lua/lua_mob_a.cpp
+	lua/lua_mob_b.cpp
+	lua/lua_mob_c.cpp
 	lua/lua_object.cpp
 	lua/lua_general.cpp
 	lua/lua_parser.cpp
@@ -226,8 +230,12 @@ SOURCE_GROUP(lua FILES
 	lua/lua_extra_attack_options.cpp
 	lua/lua_events.h
 	lua/lua_forward.h
+	lua/lua_inventory_where.cpp
 	lua/lua_npc.cpp
 	lua/lua_mob.cpp
+	lua/lua_mob_a.cpp
+	lua/lua_mob_b.cpp
+	lua/lua_mob_c.cpp
 	lua/lua_object.cpp
 	lua/lua_general.cpp
 	lua/lua_parser.cpp

@@ -764,7 +764,7 @@ void Spawn2::SpawnConditionChanged(const SpawnCondition &c, int16 old_value) {
 		int signal_id = c.on_change - SpawnCondition::DoSignalMin;
 		Log(Logs::Detail, Logs::Spawns, "Spawn2 %d: Our condition is now %s. Signaling our mob with %d.", spawn2_id, new_state?"enabled":"disabled", signal_id);
 		if(npcthis != nullptr)
-			npcthis->SignalNPC(signal_id);
+			npcthis->Signal(signal_id);
 	}
 }
 

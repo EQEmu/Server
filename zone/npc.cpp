@@ -2507,9 +2507,9 @@ int32 NPC::CalcMaxMana() {
 	}
 }
 
-void NPC::SignalNPC(int _signal_id)
+void NPC::Signal(int signal)
 {
-	signal_q.push_back(_signal_id);
+	signal_q.push_back(signal);
 }
 
 NPC_Emote_Struct* NPC::GetNPCEmote(uint16 emoteid, uint8 event_) {
