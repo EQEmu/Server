@@ -40,7 +40,12 @@ if($Config{osname}=~/freebsd|linux/i){
 if($Config{osname}=~/Win|MS/i){ 
 	$OS = "Windows"; 
 }
+
 $has_internet_connection = check_internet_connection();
+if(-e "skip_internet_connection_check.txt"){
+	$has_internet_connection = 1;
+}
+
 ($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = localtime();
 
 if(-e "eqemu_server_skip_update.txt"){
