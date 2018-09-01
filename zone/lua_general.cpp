@@ -581,6 +581,32 @@ void lua_task_selector(luabind::adl::object table) {
 	quest_manager.taskselector(count, tasks);
 }
 
+void lua_task_selector(luabind::adl::object table, bool shared) {
+	if(luabind::type(table) != LUA_TTABLE) {
+		return;
+	}
+
+	int tasks[MAXCHOOSERENTRIES] = { 0 };
+	int count = 0;
+
+	for(int i = 1; i <= MAXCHOOSERENTRIES; ++i) {
+		auto cur = table[i];
+		int cur_value = 0;
+		if(luabind::type(cur) != LUA_TNIL) {
+			try {
+				cur_value = luabind::object_cast<int>(cur);
+			} catch(luabind::cast_failed) {
+			}
+		} else {
+			count = i - 1;
+			break;
+		}
+
+		tasks[i - 1] = cur_value;
+	}
+	quest_manager.taskselector(count, tasks, shared);
+}
+
 void lua_task_set_selector(int task_set) {
 	quest_manager.tasksetselector(task_set);
 }
@@ -1630,7 +1656,8 @@ luabind::scope lua_register_general() {
 		luabind::def("summon_all_player_corpses", &lua_summon_all_player_corpses),
 		luabind::def("get_player_buried_corpse_count", &lua_get_player_buried_corpse_count),
 		luabind::def("bury_player_corpse", &lua_bury_player_corpse),
-		luabind::def("task_selector", &lua_task_selector),
+		luabind::def("task_selector", (void(*)(luabind::adl::object))&lua_task_selector),
+		luabind::def("task_selector", (void(*)(luabind::adl::object,bool))&lua_task_selector),
 		luabind::def("task_set_selector", &lua_task_set_selector),
 		luabind::def("enable_task", &lua_enable_task),
 		luabind::def("disable_task", &lua_disable_task),

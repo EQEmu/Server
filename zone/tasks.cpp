@@ -30,16 +30,19 @@ Copyright (C) 2001-2008 EQEMu Development Team (http://eqemulator.net)
 #include "../common/rulesys.h"
 #include "../common/string_util.h"
 #include "../common/say_link.h"
+#include "../common/data_verification.h"
 
 #include "client.h"
 #include "entity.h"
 #include "mob.h"
 #include "string_ids.h"
+#include "worldserver.h"
 
 #include "queryserv.h"
 #include "quest_parser_collection.h"
 
 extern QueryServ* QServ;
+extern WorldServer worldserver;
 
 TaskManager::TaskManager() {
 	for(int i=0; i<MAXTASKS; i++)
@@ -116,15 +119,26 @@ bool TaskManager::LoadTasks(int singleTask)
 		if (!LoadTaskSets())
 			Log(Logs::Detail, Logs::Tasks, "TaskManager::LoadTasks LoadTaskSets failed");
 
-		query = StringFormat("SELECT `id`, `type`, `duration`, `duration_code`, `title`, `description`, "
-				     "`reward`, `rewardid`, `cashreward`, `xpreward`, `rewardmethod`, `faction_reward`,"
-				     "`minlevel`, `maxlevel`, `repeatable`, `completion_emote` FROM `tasks` WHERE `id` < %i",
-				     MAXTASKS);
+		if (!LoadReplayGroups())
+			Log(Logs::Detail, Logs::Tasks, "TaskManager::LoadTasks LoadReplayGroups failed");
+
+		query =
+		    StringFormat("SELECT `id`, `type`, `duration`, `duration_code`, `title`, `description`, `reward`, "
+				 "`rewardid`, `cashreward`, `xpreward`, `rewardmethod`, `faction_reward`, `minlevel`, "
+				 "`maxlevel`, `repeatable`, `completion_emote`, `reward_points`, `reward_type`, "
+				 "`replay_group`, `min_players`, `max_players`, `task_lock_step`, `instance_zone_id`, "
+				 "`zone_version`, `zone_in_zone_id`, `zone_in_x`, `zone_in_y`, `zone_in_object_id`, "
+				 "`dest_x`, `dest_y`, `dest_z`, `dest_h` FROM `tasks` WHERE `id` < %i",
+				 MAXTASKS);
 	} else
-		query = StringFormat("SELECT `id`, `type`, `duration`, `duration_code`, `title`, `description`, "
-				     "`reward`, `rewardid`, `cashreward`, `xpreward`, `rewardmethod`, `faction_reward`,"
-				     "`minlevel`, `maxlevel`, `repeatable`, `completion_emote` FROM `tasks` WHERE `id` = %i",
-				     singleTask);
+		query =
+		    StringFormat("SELECT `id`, `type`, `duration`, `duration_code`, `title`, `description`, `reward`, "
+				 "`rewardid`, `cashreward`, `xpreward`, `rewardmethod`, `faction_reward`, `minlevel`, "
+				 "`maxlevel`, `repeatable`, `completion_emote`, `reward_points`, `reward_type`, "
+				 "`replay_group`, `min_players`, `max_players`, `task_lock_step`, `instance_zone_id`, "
+				 "`zone_version`, `zone_in_zone_id`, `zone_in_x`, `zone_in_y`, `zone_in_object_id`, "
+				 "`dest_x`, `dest_y`, `dest_z`, `dest_h`  FROM `tasks` WHERE `id` = %i",
+				 singleTask);
 
 	const char *ERR_MYSQLERROR = "[TASKS]Error in TaskManager::LoadTasks: %s";
 
@@ -160,6 +174,22 @@ bool TaskManager::LoadTasks(int singleTask)
 		Tasks[taskID]->MaxLevel = atoi(row[13]);
 		Tasks[taskID]->Repeatable = atoi(row[14]);
 		Tasks[taskID]->completion_emote = row[15];
+		Tasks[taskID]->reward_points = atoi(row[16]);
+		Tasks[taskID]->reward_type = static_cast<PointType>(atoi(row[17]));
+		Tasks[taskID]->replay_group = atoi(row[18]);
+		Tasks[taskID]->min_players = atoi(row[19]);
+		Tasks[taskID]->max_players = atoi(row[20]);
+		Tasks[taskID]->task_lock_step = atoi(row[21]);
+		Tasks[taskID]->instance_zone_id = atoi(row[22]);
+		Tasks[taskID]->zone_version = atoi(row[23]);
+		Tasks[taskID]->zone_in_zone_id = atoi(row[24]);
+		Tasks[taskID]->zone_in_x = atof(row[25]);
+		Tasks[taskID]->zone_in_y = atof(row[26]);
+		Tasks[taskID]->zone_in_object_id = atoi(row[27]);
+		Tasks[taskID]->dest_x = atof(row[28]);
+		Tasks[taskID]->dest_y = atof(row[29]);
+		Tasks[taskID]->dest_z = atof(row[30]);
+		Tasks[taskID]->dest_h = atof(row[31]);
 		Tasks[taskID]->ActivityCount = 0;
 		Tasks[taskID]->SequenceMode = ActivitiesSequential;
 		Tasks[taskID]->LastStep = 0;
@@ -277,6 +307,22 @@ bool TaskManager::LoadTasks(int singleTask)
 
 		Tasks[taskID]->ActivityCount++;
 	}
+
+	return true;
+}
+
+bool TaskManager::LoadReplayGroups()
+{
+	replay_groups.clear();
+	std::string query = "SELECT `id`, `name`, `duration` FROM `task_replay_groups` WHERE `id` > 0 ORDER BY `id` ASC";
+
+	auto results = database.QueryDatabase(query);
+
+	if (!results.Success())
+		return false;
+
+	for (auto row = results.begin(); row != results.end(); ++row)
+		replay_groups[atoi(row[0])] = {row[1], atoi(row[2])};
 
 	return true;
 }
@@ -905,7 +951,7 @@ bool ClientTaskState::HasSlotForTask(TaskInformation *task)
 	case TaskType::Task:
 		return ActiveTask.TaskID == TASKSLOTEMPTY;
 	case TaskType::Shared:
-		return false; // todo
+		return ActiveSharedTask == nullptr; // todo
 	case TaskType::Quest:
 		for (int i = 0; i < MAXACTIVEQUESTS; ++i)
 			if (ActiveQuests[i].TaskID == TASKSLOTEMPTY)
@@ -988,7 +1034,7 @@ int TaskManager::GetTaskMaxLevel(int TaskID)
 	return -1;
 }
 
-void TaskManager::TaskSetSelector(Client *c, ClientTaskState *state, Mob *mob, int TaskSetID)
+void TaskManager::TaskSetSelector(Client *c, ClientTaskState *state, Mob *mob, int TaskSetID, bool shared)
 {
 	int TaskList[MAXCHOOSERENTRIES];
 	int TaskListIndex = 0;
@@ -1024,14 +1070,14 @@ void TaskManager::TaskSetSelector(Client *c, ClientTaskState *state, Mob *mob, i
 		// we aren't currently on another, and if it's enabled if not all_enabled
 		if ((all_enabled || state->IsTaskEnabled(task)) && AppropriateLevel(task, PlayerLevel) &&
 		    !state->IsTaskActive(task) && state->HasSlotForTask(Tasks[task]) && // this slot checking is a bit silly, but we allow mixing of task types ...
-		    (IsTaskRepeatable(task) || !state->IsTaskCompleted(task)))
+		    (IsTaskRepeatable(task) || !state->IsTaskCompleted(task)) && (shared == (Tasks[task]->type == TaskType::Shared)))
 			TaskList[TaskListIndex++] = task;
 
 		++Iterator;
 	}
 
 	if (TaskListIndex > 0) {
-		SendTaskSelector(c, mob, TaskListIndex, TaskList);
+		SendTaskSelector(c, mob, TaskListIndex, TaskList, shared);
 	} else {
 		mob->SayTo_StringID(c, CC_Yellow, MAX_ACTIVE_TASKS, c->GetName()); // check color, I think this might be only for (Shared) Tasks, w/e -- think should be yellow
 	}
@@ -1041,7 +1087,7 @@ void TaskManager::TaskSetSelector(Client *c, ClientTaskState *state, Mob *mob, i
 
 // unlike the non-Quest version of this function, it does not check enabled, that is assumed the responsibility of the quest to handle
 // we do however still want it to check the other stuff like level, active, room, etc
-void TaskManager::TaskQuestSetSelector(Client *c, ClientTaskState *state, Mob *mob, int count, int *tasks)
+void TaskManager::TaskQuestSetSelector(Client *c, ClientTaskState *state, Mob *mob, int count, int *tasks, bool shared)
 {
 	int TaskList[MAXCHOOSERENTRIES];
 	int TaskListIndex = 0;
@@ -1058,12 +1104,12 @@ void TaskManager::TaskQuestSetSelector(Client *c, ClientTaskState *state, Mob *m
 		// we aren't currently on another, and if it's enabled if not all_enabled
 		if (AppropriateLevel(task, PlayerLevel) &&
 		    !state->IsTaskActive(task) && state->HasSlotForTask(Tasks[task]) && // this slot checking is a bit silly, but we allow mixing of task types ...
-		    (IsTaskRepeatable(task) || !state->IsTaskCompleted(task)))
+		    (IsTaskRepeatable(task) || !state->IsTaskCompleted(task)) && (shared == (Tasks[task]->type == TaskType::Shared)))
 			TaskList[TaskListIndex++] = task;
 	}
 
 	if (TaskListIndex > 0) {
-		SendTaskSelector(c, mob, TaskListIndex, TaskList);
+		SendTaskSelector(c, mob, TaskListIndex, TaskList, shared);
 	} else {
 		mob->SayTo_StringID(c, CC_Yellow, MAX_ACTIVE_TASKS, c->GetName()); // check color, I think this might be only for (Shared) Tasks, w/e -- think should be yellow
 	}
@@ -1071,11 +1117,11 @@ void TaskManager::TaskQuestSetSelector(Client *c, ClientTaskState *state, Mob *m
 	return;
 }
 
-void TaskManager::SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *TaskList) {
+void TaskManager::SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *TaskList, bool shared) {
 
 	if (c->ClientVersion() >= EQEmu::versions::ClientVersion::RoF)
 	{
-		SendTaskSelectorNew(c, mob, TaskCount, TaskList);
+		SendTaskSelectorNew(c, mob, TaskCount, TaskList, shared);
 		return;
 	}
 	// Titanium OpCode: 0x5e7c
@@ -1108,7 +1154,7 @@ void TaskManager::SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *Task
 
 
 	buf.WriteUInt32(ValidTasks);
-	buf.WriteUInt32(2); // task type, live doesn't let you send more than one type, but we do?
+	buf.WriteUInt32(shared ? static_cast<uint32>(TaskType::Shared) : static_cast<uint32>(TaskType::Quest)); // hack, we need to send only shared tasks when doing shared tasks since they use different reply ops
 	buf.WriteUInt32(mob->GetID());
 
 	for (int i = 0; i < TaskCount; i++) {
@@ -1158,7 +1204,7 @@ void TaskManager::SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *Task
 
 }
 
-void TaskManager::SendTaskSelectorNew(Client *c, Mob *mob, int TaskCount, int *TaskList)
+void TaskManager::SendTaskSelectorNew(Client *c, Mob *mob, int TaskCount, int *TaskList, bool shared)
 {
 	Log(Logs::General, Logs::Tasks, "[UPDATE] TaskSelector for %i Tasks", TaskCount);
 
@@ -1188,9 +1234,7 @@ void TaskManager::SendTaskSelectorNew(Client *c, Mob *mob, int TaskCount, int *T
 	SerializeBuffer buf(50 * ValidTasks);
 
 	buf.WriteUInt32(ValidTasks);	// TaskCount
-	buf.WriteUInt32(2);			// Type, valid values: 0-3. 0 = Task, 1 = Shared Task, 2 = Quest, 3 = ??? -- should fix maybe some day, but we let more than 1 type through :P
-	// so I guess an NPC can only offer one type of quests or we can only open a selection with one type :P (so quest call can tell us I guess)
-	// this is also sent in OP_TaskDescription
+	buf.WriteUInt32(shared ? static_cast<uint32>(TaskType::Shared) : static_cast<uint32>(TaskType::Quest)); // hack, we need to send only shared tasks when doing shared tasks since they use different reply ops
 	buf.WriteUInt32(mob->GetID());	// TaskGiver
 
 	for (int i = 0; i < TaskCount; i++) { // max 40
@@ -1304,7 +1348,8 @@ ClientTaskState::ClientTaskState() {
 
 	ActiveTask.slot = 0;
 	ActiveTask.TaskID = TASKSLOTEMPTY;
-	// TODO: shared task
+
+	ActiveSharedTask = nullptr;
 }
 
 ClientTaskState::~ClientTaskState() {
@@ -3324,6 +3369,164 @@ void ClientTaskState::AcceptNewTask(Client *c, int TaskID, int NPCID, bool enfor
 	parse->EventNPC(EVENT_TASK_ACCEPTED, npc, c, buf.c_str(), 0);
 }
 
+// This function will do a bunch of verification, then set up a pending state which will then send a request
+// to world and send off requests to out of group zones to ask if they can join the task
+// Once the we get all of the replies that pass, we will then assign the task
+void ClientTaskState::PendSharedTask(Client *c, int TaskID, int NPCID, bool enforce_level_requirement)
+{
+	if (!taskmanager || TaskID < 0 || TaskID >= MAXTASKS) {
+		c->Message(13, "Task system not functioning, or TaskID %i out of range.", TaskID);
+		return;
+	}
+
+	auto task = taskmanager->Tasks[TaskID];
+
+	if (task == nullptr) {
+		c->Message(13, "Invalid TaskID %i", TaskID);
+		return;
+	}
+
+	if (task->type != TaskType::Shared) {
+		c->Message(13, "Trying to shared task a non shared task %i", TaskID);
+		return;
+	}
+
+	if (ActiveSharedTask != nullptr) {
+		c->Message_StringID(13, TASK_REJECT_HAVE_ONE);
+		return;
+	}
+
+	if (enforce_level_requirement && !taskmanager->AppropriateLevel(TaskID, c->GetLevel())) {
+		c->Message(13, "You are outside the level range of this task.");
+		return;
+	}
+
+	if (!taskmanager->IsTaskRepeatable(TaskID) && IsTaskCompleted(TaskID))
+		return;
+
+	if (task->replay_group) {
+		auto expires = c->GetTaskLockoutExpire(task->replay_group);
+		if (expires) {
+			auto diff = expires - Timer::GetCurrentTime();
+			std::string days = std::to_string(diff / 86400);
+			diff = diff % 86400;
+			std::string hours = std::to_string(diff / 3600);
+			diff = diff % 3600;
+			std::string minutes = std::to_string(diff / 60);
+			c->Message_StringID(13, TASK_REJECT_LOCKEDOUT, days.c_str(), hours.c_str(), minutes.c_str());
+			return;
+		}
+	}
+
+	// Now we need to verify we meet min_player and max_players for raid/group
+	Group *group = nullptr;
+	Raid *raid = nullptr;
+	int player_count = 1; // 1 is just us!
+	if (c->IsGrouped()) {
+		group = c->GetGroup();
+		player_count = group->GroupCount();
+	} else if (c->IsRaidGrouped()) {
+		raid = c->GetRaid();
+		player_count = raid->RaidCount();
+	}
+
+	// TODO: check task lockouts I guess it's simpler to require everyone to be in zone so we can verify lockouts ...
+
+	if (!EQEmu::ValueWithin(player_count, task->min_players, task->max_players)) {
+		if (player_count < task->min_players)
+			c->Message_StringID(13, TASK_REJECT_MIN_COUNT);
+		else
+			c->Message_StringID(13, TASK_REJECT_MAX_COUNT);
+		return;
+	}
+
+	std::vector<std::string> missing_players; // names of players not in this zone so we can put the checks off to world
+	bool task_failed = false;
+	if (group) {
+		for (int i = 0; i < MAX_GROUP_MEMBERS; ++i) {
+			if (group->members[i] && group->members[i]->IsClient()) {
+				auto *client = group->members[i]->CastToClient();
+				auto *task_state = client->GetTaskState();
+				if (!task_state->HasSlotForTask(task)) {
+					task_failed = true;
+					c->Message_StringID(13, TASK_REJECT_GROUP_HAVE_ONE, c->GetName());
+				} else {
+					if (task->replay_group) {
+						auto expires = client->GetTaskLockoutExpire(task->replay_group);
+						if (expires) {
+							task_failed = true;
+							auto diff = expires - Timer::GetCurrentTime();
+							std::string days = std::to_string(diff / 86400);
+							diff = diff % 86400;
+							std::string hours = std::to_string(diff / 3600);
+							diff = diff % 3600;
+							std::string minutes = std::to_string(diff / 60);
+							c->Message_StringID(13, TASK_REJECT_LOCKEDOUT_OTHER,
+									    client->GetName(), days.c_str(),
+									    hours.c_str(), minutes.c_str());
+							client->Message_StringID(13, TASK_REJECT_LOCKEDOUT_ME,
+										 days.c_str(), hours.c_str(),
+										 minutes.c_str());
+						}
+					}
+				}
+			} else if (group->members[i] == nullptr) { // out of zone
+				missing_players.push_back(group->membername[i]);
+			}
+		}
+	} else if (raid) {
+		for (int i = 0; i < MAX_RAID_MEMBERS; ++i) {
+			if (raid->members[i].member) {
+				auto *client = raid->members[i].member;
+				auto *task_state = client->GetTaskState();
+				if (!task_state->HasSlotForTask(task)) {
+					task_failed = true;
+					c->Message_StringID(13, TASK_REJECT_RAID_HAVE_ONE, c->GetName());
+				} else {
+					if (task->replay_group) {
+						auto expires = client->GetTaskLockoutExpire(task->replay_group);
+						if (expires) {
+							task_failed = true;
+							auto diff = expires - Timer::GetCurrentTime();
+							std::string days = std::to_string(diff / 86400);
+							diff = diff % 86400;
+							std::string hours = std::to_string(diff / 3600);
+							diff = diff % 3600;
+							std::string minutes = std::to_string(diff / 60);
+							c->Message_StringID(13, TASK_REJECT_LOCKEDOUT_OTHER,
+									    client->GetName(), days.c_str(),
+									    hours.c_str(), minutes.c_str());
+							client->Message_StringID(13, TASK_REJECT_LOCKEDOUT_ME,
+										 days.c_str(), hours.c_str(),
+										 minutes.c_str());
+						}
+					}
+				}
+			} else if (raid->members[i].membername[0] != '\0') { // out of zone
+				missing_players.push_back(raid->members[i].membername);
+			}
+		}
+	}
+
+	if (task_failed) // we already yelled at them
+		return;
+
+	// so we've verified all the clients we can and didn't fail, time to pend and yell at world
+	c->SetPendingTask(TaskID, NPCID);
+	c->StartPendingTimer(); // in case something goes wrong and takes ages, we time out
+
+	SerializeBuffer buf(25 + 10 * missing_players.size());
+	buf.WriteInt32(TaskID);			// Task ID
+	buf.WriteString(c->GetName());	// leader name
+	buf.WriteInt32(missing_players.size()); // count
+	for (auto && name : missing_players)
+		buf.WriteString(name);
+
+	auto pack = new ServerPacket(ServerOP_TaskRequest, buf);
+	worldserver.SendPacket(pack);
+	delete pack;
+}
+
 void ClientTaskState::ProcessTaskProximities(Client *c, float X, float Y, float Z) {
 
 	float LastX = c->ProximityX();
@@ -3535,5 +3738,36 @@ int TaskProximityManager::CheckProximities(float X, float Y, float Z) {
 	}
 
 	return 0;
+}
+
+void SharedTaskState::LockTask()
+{
+	SetLocked(true);
+
+	for (auto & m : members)
+		if (m.entity != nullptr)
+			m.entity->Message_StringID(CC_Yellow, SHARED_TASK_LOCK);
+}
+
+void SharedTaskState::MemberZoned(Mob *player)
+{
+	auto it = std::find_if(members.begin(), members.end(),
+			       [&player](const SharedTaskMember &a) { return a.name == player->GetName(); });
+
+	if (it == members.end()) // guess they weren't in this group, w/e
+		return;
+
+	it->entity = nullptr;
+}
+
+void SharedTaskState::MemberEnterZone(Mob *player)
+{
+	auto it = std::find_if(members.begin(), members.end(),
+			       [&player](const SharedTaskMember &a) { return a.name == player->GetName(); });
+
+	if (it == members.end()) // guess they weren't in this group, w/e
+		return;
+
+	it->entity = player;
 }
 

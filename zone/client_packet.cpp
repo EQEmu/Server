@@ -114,6 +114,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_0x0193] = &Client::Handle_0x0193;
 	ConnectedOpcodes[OP_AAAction] = &Client::Handle_OP_AAAction;
 	ConnectedOpcodes[OP_AcceptNewTask] = &Client::Handle_OP_AcceptNewTask;
+	ConnectedOpcodes[OP_AcceptNewSharedTask] = &Client::Handle_OP_AcceptNewSharedTask;
 	ConnectedOpcodes[OP_AdventureInfoRequest] = &Client::Handle_OP_AdventureInfoRequest;
 	ConnectedOpcodes[OP_AdventureLeaderboardRequest] = &Client::Handle_OP_AdventureLeaderboardRequest;
 	ConnectedOpcodes[OP_AdventureMerchantPurchase] = &Client::Handle_OP_AdventureMerchantPurchase;
@@ -1838,6 +1839,20 @@ void Client::Handle_OP_AcceptNewTask(const EQApplicationPacket *app)
 
 	if (ant->task_id > 0 && RuleB(TaskSystem, EnableTaskSystem) && taskstate)
 		taskstate->AcceptNewTask(this, ant->task_id, ant->task_master_id);
+}
+
+void Client::Handle_OP_AcceptNewSharedTask(const EQApplicationPacket *app)
+{
+	if (app->size != sizeof(AcceptNewSharedTask_Struct)) {
+		Log(Logs::General, Logs::None, "Size mismatch in OP_AcceptNewSharedTask expected %i got %i",
+			sizeof(AcceptNewSharedTask_Struct), app->size);
+		DumpPacket(app);
+		return;
+	}
+	auto *ant = (AcceptNewSharedTask_Struct*)app->pBuffer;
+
+	if (ant->task_id > 0 && RuleB(TaskSystem, EnableTaskSystem) && taskstate)
+		taskstate->PendSharedTask(this, ant->task_id, ant->task_master_id);
 }
 
 void Client::Handle_OP_AdventureInfoRequest(const EQApplicationPacket *app)

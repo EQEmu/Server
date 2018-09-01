@@ -25,6 +25,7 @@
 	void Handle_0x01e7(const EQApplicationPacket *app);
 	void Handle_OP_AAAction(const EQApplicationPacket *app);
 	void Handle_OP_AcceptNewTask(const EQApplicationPacket *app);
+	void Handle_OP_AcceptNewSharedTask(const EQApplicationPacket *app);
 	void Handle_OP_AdventureInfoRequest(const EQApplicationPacket *app);
 	void Handle_OP_AdventureLeaderboardRequest(const EQApplicationPacket *app);
 	void Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app);

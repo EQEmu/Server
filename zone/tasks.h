@@ -26,6 +26,8 @@ Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <unordered_map>
+#include <map>
 
 #define MAXTASKS 10000
 #define MAXTASKSETS 1000
@@ -141,6 +143,13 @@ enum class DurationCode {
 	Long = 3
 };
 
+// need to capture more, shared are just Radiant/Ebon though
+enum class PointType {
+	None = 0,
+	Radiant = 4,
+	Ebon = 5,
+};
+
 struct TaskInformation {
 	TaskType type;
 	int	Duration;
@@ -155,12 +164,33 @@ struct TaskInformation {
 	int	XPReward;
 	int faction_reward; // just a npc_faction_id
 	TaskMethodType RewardMethod;
+	int reward_points; // DoN crystals for shared. Generic "points" for non-shared
+	PointType reward_type; // 4 for Radiant Crystals else Ebon crystals when shared task
 	int	ActivityCount;
 	SequenceType SequenceMode;
 	int	LastStep;
 	short	MinLevel;
 	short	MaxLevel;
 	bool	Repeatable;
+	int replay_group; // ID of our replay timer group (0 means none)
+	int min_players; // shared tasks
+	int max_players;
+	int task_lock_step; // task locks after this step is completed
+	uint32 instance_zone_id; // instance shit
+	uint32 zone_version;
+	uint16 zone_in_zone_id;
+	float zone_in_x;
+	float zone_in_y;
+	uint16 zone_in_object_id;
+	float dest_x;
+	float dest_y;
+	float dest_z;
+	float dest_h;
+	/* int graveyard_zone_id;
+	float graveyard_x;
+	float graveyard_y;
+	float graveyard_z;
+	float graveyard_radius; */
 	ActivityInformation Activity[MAXACTIVITIESPERTASK];
 };
 
@@ -193,6 +223,35 @@ struct CompletedTaskInformation {
 	bool ActivityDone[MAXACTIVITIESPERTASK];
 };
 
+struct SharedTaskMember {
+	std::string name;
+	Mob *entity; // needs to be managed
+	bool leader;
+	SharedTaskMember() : entity(nullptr), leader(false) {}
+};
+
+class SharedTaskState {
+public:
+	SharedTaskState() : locked(false) {}
+//	~SharedTaskState();
+
+	inline const bool IsLocked() const { return locked; }
+	inline void SetLocked(bool v) { locked = v; }
+	void LockTask(); // notified clients (if they are etc)
+
+	void MemberZoned(Mob *player); // player left zone, update their pointer
+	void MemberEnterZone(Mob *player); // player entered zone, update their pointer
+
+	ClientTaskInformation *GetActivity() { return &activity; }
+
+	friend class TaskManager;
+
+private:
+	std::vector<SharedTaskMember> members;
+	ClientTaskInformation activity;
+	bool locked;
+};
+
 class ClientTaskState {
 
 public:
@@ -206,6 +265,8 @@ public:
 	int GetTaskActivityDoneCountFromTaskID(int TaskID, int ActivityID);
 	int GetTaskStartTime(TaskType type, int index);
 	void AcceptNewTask(Client *c, int TaskID, int NPCID, bool enforce_level_requirement = false);
+//	void AcceptNewSharedTask(Client *c, int TaskID, int NPCID, bool enforce_level_requirement = false);
+	void PendSharedTask(Client *c, int TaskID, int NPCID, bool enforce_level_requirement = false);
 	void FailTask(Client *c, int TaskID);
 	int TaskTimeLeft(int TaskID);
 	int IsTaskCompleted(int TaskID);
@@ -255,6 +316,8 @@ private:
 				info = &ActiveTask;
 			break;
 		case TaskType::Shared:
+			if (index == 0 && ActiveSharedTask)
+				info = ActiveSharedTask->GetActivity();
 			break;
 		case TaskType::Quest:
 			if (index < MAXACTIVEQUESTS)
@@ -273,6 +336,7 @@ private:
 		};
 		ClientTaskInformation ActiveTasks[MAXACTIVEQUESTS + 1];
 	};
+	SharedTaskState *ActiveSharedTask; // pointer to our shared task managed by TaskManager
 	// Shared tasks should be limited to 1 as well
 	std::vector<int> EnabledTasks;
 	std::vector<CompletedTaskInformation> CompletedTasks;
@@ -280,6 +344,17 @@ private:
 	bool CheckedTouchActivities;
 };
 
+// used for timer lockouts and /tasktimers
+struct TaskTimer {
+	int ID; // ID used in task timer
+	int original_id; // original ID of the task
+	int expires; // UNIX timestamp of when it expires, what happens with DLS? Fuck it.
+};
+
+struct TaskReplayGroups {
+	std::string name;
+	int duration;
+};
 
 class TaskManager {
 
@@ -289,18 +364,19 @@ public:
 	int GetActivityCount(int TaskID);
 	bool LoadSingleTask(int TaskID);
 	bool LoadTasks(int SingleTask=0);
+	bool LoadReplayGroups();
 	void ReloadGoalLists();
 	inline void LoadProximities(int ZoneID) { ProximityManager.LoadProximities(ZoneID); }
 	bool LoadTaskSets();
 	bool LoadClientState(Client *c, ClientTaskState *state);
 	bool SaveClientState(Client *c, ClientTaskState *state);
-	void SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *TaskList);
-	void SendTaskSelectorNew(Client *c, Mob *mob, int TaskCount, int *TaskList);
+	void SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *TaskList, bool shared = false); // dumb hack cuz we do dumb things
+	void SendTaskSelectorNew(Client *c, Mob *mob, int TaskCount, int *TaskList, bool shared = false);
 	bool AppropriateLevel(int TaskID, int PlayerLevel);
 	int GetTaskMinLevel(int TaskID);
 	int GetTaskMaxLevel(int TaskID);
-	void TaskSetSelector(Client *c, ClientTaskState *state, Mob *mob, int TaskSetID);
-	void TaskQuestSetSelector(Client *c, ClientTaskState *state, Mob *mob, int count, int *tasks); // task list provided by QuestManager (perl/lua)
+	void TaskSetSelector(Client *c, ClientTaskState *state, Mob *mob, int TaskSetID, bool shared = false);
+	void TaskQuestSetSelector(Client *c, ClientTaskState *state, Mob *mob, int count, int *tasks, bool shared = false); // task list provided by QuestManager (perl/lua)
 	void SendActiveTasksToClient(Client *c, bool TaskComplete=false);
 	void SendSingleActiveTaskToClient(Client *c, ClientTaskInformation &task_info, bool TaskComplete, bool BringUpTaskJournal = false);
 	void SendTaskActivityShort(Client *c, int TaskID, int ActivityID, int ClientTaskIndex);
@@ -316,6 +392,7 @@ public:
 	bool IsTaskRepeatable(int TaskID);
 	friend class ClientTaskState;
 
+	void LoadSharedTask(int id); // loads the shared task state
 
 private:
 	TaskGoalListManager GoalListManager;
@@ -323,6 +400,8 @@ private:
 	TaskInformation* Tasks[MAXTASKS];
 	std::vector<int> TaskSets[MAXTASKSETS];
 	void SendActiveTaskDescription(Client *c, int TaskID, ClientTaskInformation &task_info, int StartTime, int Duration, bool BringUpTaskJournal=false);
+	std::unordered_map<int, SharedTaskState> SharedTasks;
+	std::map<int, TaskReplayGroups> replay_groups;
 
 };
 

@@ -229,6 +229,14 @@ struct ClientReward
 	uint32 amount;
 };
 
+#define PENDING_TASK_TIMEOUT 60000
+struct PendingSharedTask {
+	int id;
+	int task_master_id;
+	Timer timeout;		// so if we take a very long time to get messages back from world, we time out and fail
+	PendingSharedTask() : id(0), task_master_id(0) {}
+};
+
 class ClientFactory {
 public:
 	Client *MakeClient(std::shared_ptr<EQStreamInterface> ieqs);
@@ -1020,8 +1028,8 @@ public:
 	inline void UpdateTasksOnExplore(int ExploreID) { if(taskstate) taskstate->UpdateTasksOnExplore(this, ExploreID); }
 	inline bool UpdateTasksOnSpeakWith(int NPCTypeID) { if(taskstate) return taskstate->UpdateTasksOnSpeakWith(this, NPCTypeID); else return false; }
 	inline bool UpdateTasksOnDeliver(std::list<EQEmu::ItemInstance*>& Items, int Cash, int NPCTypeID) { if (taskstate) return taskstate->UpdateTasksOnDeliver(this, Items, Cash, NPCTypeID); else return false; }
-	inline void TaskSetSelector(Mob *mob, int TaskSetID) { if(taskmanager) taskmanager->TaskSetSelector(this, taskstate, mob, TaskSetID); }
-	inline void TaskQuestSetSelector(Mob *mob, int count, int *tasks) { if(taskmanager) taskmanager->TaskQuestSetSelector(this, taskstate, mob, count, tasks); }
+	inline void TaskSetSelector(Mob *mob, int TaskSetID, bool shared = false) { if(taskmanager) taskmanager->TaskSetSelector(this, taskstate, mob, TaskSetID, shared); }
+	inline void TaskQuestSetSelector(Mob *mob, int count, int *tasks, bool shared = false) { if(taskmanager) taskmanager->TaskQuestSetSelector(this, taskstate, mob, count, tasks, shared); }
 	inline void EnableTask(int TaskCount, int *TaskList) { if(taskstate) taskstate->EnableTask(CharacterID(), TaskCount, TaskList); }
 	inline void DisableTask(int TaskCount, int *TaskList) { if(taskstate) taskstate->DisableTask(CharacterID(), TaskCount, TaskList); }
 	inline bool IsTaskEnabled(int TaskID) { return (taskstate ? taskstate->IsTaskEnabled(TaskID) : false); }
@@ -1043,6 +1051,13 @@ public:
 	inline int GetTaskActivityDoneCountFromTaskID(int TaskID, int ActivityID) { return (taskstate ? taskstate->GetTaskActivityDoneCountFromTaskID(TaskID, ActivityID) :0); }
 	inline int ActiveTasksInSet(int TaskSet) { return (taskstate ? taskstate->ActiveTasksInSet(TaskSet) :0); }
 	inline int CompletedTasksInSet(int TaskSet) { return (taskstate ? taskstate->CompletedTasksInSet(TaskSet) :0); }
+	inline int GetTaskLockoutExpire(int id) { return 0; } // stub
+
+	inline void SetPendingTask(int id, int task_master_id) { pending_task.id = id; pending_task.task_master_id = task_master_id; }
+	inline bool HasPendingTask() const { return pending_task.id == 0; }
+	inline int GetPendingTaskID() const { return pending_task.id; }
+	inline int GetPendingTaskMasterID() const { return pending_task.task_master_id; }
+	inline void StartPendingTimer() { pending_task.timeout.Start(PENDING_TASK_TIMEOUT); }
 
 	inline const EQEmu::versions::ClientVersion ClientVersion() const { return m_ClientVersion; }
 	inline const uint32 ClientVersionBit() const { return m_ClientVersionBit; }
@@ -1569,6 +1584,7 @@ private:
 	std::set<uint32> zone_flags;
 
 	ClientTaskState *taskstate;
+	PendingSharedTask pending_task;
 	int TotalSecondsPlayed;
 
 	//Anti Spam Stuff

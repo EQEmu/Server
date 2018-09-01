@@ -3788,6 +3788,14 @@ struct AcceptNewTask_Struct {
 	uint32	task_master_id;	//entity ID
 };
 
+struct AcceptNewSharedTask_Struct {
+	uint32 unknown00;
+	uint32 unknown04;
+	uint32 task_master_id;
+	uint32 task_id;
+	float unknown16;
+};
+
 //was all 0's from client, server replied with same op, all 0's
 struct CancelTask_Struct {
 	uint32 SequenceNumber;

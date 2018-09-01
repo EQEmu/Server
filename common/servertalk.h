@@ -4,6 +4,7 @@
 #include "../common/types.h"
 #include "../common/packet_functions.h"
 #include "../common/eq_packet_structs.h"
+#include "../common/serialize_buffer.h"
 #include "../net/packet.h"
 #include <cereal/cereal.hpp>
 #include <cereal/types/string.hpp>
@@ -151,6 +152,12 @@
 #define ServerOP_LSRemoteAddr		0x1009
 #define ServerOP_LSAccountUpdate		0x100A
 
+#define ServerOP_TaskRequest		0x0300
+#define ServerOP_TaskGrant			0x0301
+#define ServerOP_TaskReject			0x0302
+#define ServerOP_TaskAddPlayer		0x0303
+#define ServerOP_TaskRemovePlayer	0x0304
+
 #define ServerOP_EncapPacket		0x2007	// Packet within a packet
 #define ServerOP_WorldListUpdate	0x2008
 #define ServerOP_WorldListRemove	0x2009
@@ -242,6 +249,19 @@ public:
 			pBuffer = new uchar[size];
 			memcpy(pBuffer, p.Data(), size);
 		}
+		_wpos = 0;
+		_rpos = 0;
+	}
+
+	ServerPacket(uint16 in_opcode, SerializeBuffer &buf)
+	{
+		compressed = false;
+		size = buf.m_pos;
+		buf.m_pos = 0;
+		opcode = in_opcode;
+		pBuffer = buf.m_buffer;
+		buf.m_buffer = 0;
+		buf.m_capacity = 0;
 		_wpos = 0;
 		_rpos = 0;
 	}

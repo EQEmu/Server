@@ -187,6 +187,7 @@ public:
 	const unsigned char *buffer() const { return m_buffer; }
 
 	friend class BasePacket;
+	friend class ServerPacket;
 
 private:
 	void Grow(size_t new_size);

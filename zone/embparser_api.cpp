@@ -2048,6 +2048,23 @@ XS(XS__taskselector) {
 
 	XSRETURN_EMPTY;
 }
+
+XS(XS__sharedtaskselector);
+XS(XS__sharedtaskselector) {
+	dXSARGS;
+	if ((items >= 1) && (items <= MAXCHOOSERENTRIES)) {
+		int      tasks[MAXCHOOSERENTRIES];
+		for (int i = 0; i < items; i++) {
+			tasks[i] = (int) SvIV(ST(i));
+		}
+		quest_manager.taskselector(items, tasks, true);
+	} else {
+		Perl_croak(aTHX_ "Usage: quest::sharedtaskselector(int task_id, 2, 3, 4, 5 [up to 40])");
+	}
+
+	XSRETURN_EMPTY;
+}
+
 XS(XS__task_setselector);
 XS(XS__task_setselector) {
 	dXSARGS;
@@ -3770,6 +3787,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "targlobal"), XS__targlobal, file);
 	newXS(strcpy(buf, "taskexploredarea"), XS__taskexploredarea, file);
 	newXS(strcpy(buf, "taskselector"), XS__taskselector, file);
+	newXS(strcpy(buf, "sharedtaskselector"), XS__sharedtaskselector, file);
 	newXS(strcpy(buf, "task_setselector"), XS__task_setselector, file);
 	newXS(strcpy(buf, "tasktimeleft"), XS__tasktimeleft, file);
 	newXS(strcpy(buf, "toggle_spawn_event"), XS__toggle_spawn_event, file);

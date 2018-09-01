@@ -359,6 +359,7 @@
 #define LDON_NO_LOCKPICK			7564	//You must have a lock pick in your inventory to do this.
 #define LDON_WAS_NOT_LOCKED			7565	//%1 was not locked.
 #define LDON_WAS_NOT_TRAPPED		7566	//%1 was not trapped
+#define TASK_REJECT_LOCKEDOUT_ME	8017	//This task can not be assigned to you because you must wait %1d:%2h:%3m before you can do another task of this type.
 #define GAIN_GROUP_LEADERSHIP_POINT	8585	//
 #define GAIN_RAID_LEADERSHIP_POINT	8589	//
 #define MAX_GROUP_LEADERSHIP_POINTS	8584	//
@@ -369,6 +370,15 @@
 #define GAIN_GROUP_LEADERSHIP_EXP	8788	//
 #define GAIN_RAID_LEADERSHIP_EXP	8789	//
 #define BUFF_MINUTES_REMAINING		8799	//%1 (%2 minutes remaining)
+#define TASK_REJECT_MAX_COUNT		8891	//You can not be assigned this shared task because your party exceeds the maximum allowed number of players.
+#define TASK_REJECT_LEADER_REQ		8892	//You can not be assigned this shared task because the leader does not meet the shared task requirements.
+#define TASK_REJECT_MIN_COUNT		8895	//You can not be assigned this shared task because your party does not contain the minimum required number of players.
+#define TASK_REJECT_HAVE_ONE		8935	//You may not request a shared task because you already have one.
+#define TASK_REJECT_RAID_HAVE_ONE	8936	//You may not request a shared task because someone in your raid, %1, already has one.
+#define TASK_REJECT_GROUP_HAVE_ONE	8937	//You may not request a shared task because someone in your group, %1, already has one.
+#define TASK_REJECT_LOCKEDOUT		8946	//You may not request this shared task because you must wait %1d:%2h:%3m before you can do another task of this type.
+#define TASK_REJECT_LOCKEDOUT_OTHER	8947	//You may not request this shared task because %1 must wait %2d:%3h:%4m before they can do another task of this type.
+#define SHARED_TASK_LOCK			8961	//Your shared task is now locked.  You may no longer add or remove players.
 #define NO_MORE_TRAPS				9002	//You have already placed your maximum number of traps.
 #define FEAR_TOO_HIGH				9035	//Your target is too high of a level for your fear spell.
 #define SLOW_MOSTLY_SUCCESSFUL		9029	//Your spell was mostly successful.

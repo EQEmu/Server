@@ -2146,10 +2146,10 @@ bool QuestManager::createBot(const char *name, const char *lastname, uint8 level
 
 #endif //BOTS
 
-void QuestManager::taskselector(int taskcount, int *tasks) {
+void QuestManager::taskselector(int taskcount, int *tasks, bool shared) {
 	QuestManagerCurrentQuestVars();
 	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && owner && taskmanager)
-		initiator->TaskQuestSetSelector(owner, taskcount, tasks);
+		initiator->TaskQuestSetSelector(owner, taskcount, tasks, shared);
 }
 void QuestManager::enabletask(int taskcount, int *tasks) {
 	QuestManagerCurrentQuestVars();
@@ -2174,11 +2174,11 @@ bool QuestManager::istaskenabled(int taskid) {
 	return false;
 }
 
-void QuestManager::tasksetselector(int tasksetid) {
+void QuestManager::tasksetselector(int tasksetid, bool shared) {
 	QuestManagerCurrentQuestVars();
 	Log(Logs::General, Logs::Tasks, "[UPDATE] TaskSetSelector called for task set %i", tasksetid);
 	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && owner && taskmanager)
-		initiator->TaskSetSelector(owner, tasksetid);
+		initiator->TaskSetSelector(owner, tasksetid, shared);
 }
 
 bool QuestManager::istaskactive(int task) {
