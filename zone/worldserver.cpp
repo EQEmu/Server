@@ -1936,6 +1936,44 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
+	case ServerOP_TaskGrant:
+	{
+		int id = pack->ReadUInt32();
+		char name[64] = { 0 };
+		pack->ReadString(name);
+		auto client = entity_list.GetClientByName(name);
+		if (client && client->HasPendingTask()) // if they don't have it, ignore it I guess :P
+			client->AssignSharedTask(client->GetPendingTaskID(), client->GetPendingTaskMasterID(), id);
+		break;
+	}
+	case ServerOP_TaskReject:
+	{
+		int message = pack->ReadUInt32();
+		char name[64] = { 0 };
+		pack->ReadString(name);
+		auto client = entity_list.GetClientByName(name);
+		if (client && client->HasPendingTask()) {
+			client->ResetPendingTask();
+			if (message == 0)
+				client->Message(13, "Shared task assignment has failed.");
+			else if (message > 0)
+				client->Message_StringID(13, message);
+			// negative nothing I guess
+		}
+		break;
+	}
+	case ServerOP_TaskRequest:
+	{
+		int id = pack->ReadUInt32(); // we need the ID when reply to world so we know which shared task we're going to
+		int task_id = pack->ReadUInt32();
+		char name[64] = { 0 };
+		pack->ReadString(name);
+		auto client = entity_list.GetClientByName(name);
+		if (client) {
+			// do check
+		}
+		break;
+	}
 	default: {
 		std::cout << " Unknown ZSopcode:" << (int)pack->opcode;
 		std::cout << " size:" << pack->size << std::endl;

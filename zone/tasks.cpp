@@ -3444,6 +3444,11 @@ void ClientTaskState::PendSharedTask(Client *c, int TaskID, int NPCID, bool enfo
 	bool task_failed = false;
 	if (group) {
 		for (int i = 0; i < MAX_GROUP_MEMBERS; ++i) {
+			if (group->members[i] == c)
+				continue;
+
+			c->PendingTaskAddMember(group->membername[i]);
+
 			if (group->members[i] && group->members[i]->IsClient()) {
 				auto *client = group->members[i]->CastToClient();
 				auto *task_state = client->GetTaskState();
@@ -3476,6 +3481,11 @@ void ClientTaskState::PendSharedTask(Client *c, int TaskID, int NPCID, bool enfo
 		}
 	} else if (raid) {
 		for (int i = 0; i < MAX_RAID_MEMBERS; ++i) {
+			if (raid->members[i].member == c)
+				continue;
+
+			c->PendingTaskAddMember(raid->members[i].membername);
+
 			if (raid->members[i].member) {
 				auto *client = raid->members[i].member;
 				auto *task_state = client->GetTaskState();
@@ -3525,6 +3535,11 @@ void ClientTaskState::PendSharedTask(Client *c, int TaskID, int NPCID, bool enfo
 	auto pack = new ServerPacket(ServerOP_TaskRequest, buf);
 	worldserver.SendPacket(pack);
 	delete pack;
+}
+
+void ClientTaskState::AcceptNewSharedTask(Client *c, int TaskID, int NPCID, int id)
+{
+
 }
 
 void ClientTaskState::ProcessTaskProximities(Client *c, float X, float Y, float Z) {

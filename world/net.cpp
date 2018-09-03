@@ -83,6 +83,7 @@ union semun {
 #include "queryserv.h"
 #include "web_interface.h"
 #include "console.h"
+#include "shared_tasks.h"
 
 #include "../common/net/servertalk_server.h"
 #include "../zone/data_bucket.h"
@@ -103,6 +104,7 @@ bool holdzones = false;
 const WorldConfig *Config;
 EQEmuLogSys LogSys;
 WebInterfaceList web_interface;
+SharedTaskManager shared_tasks;
 
 void CatchSignal(int sig_num);
 void CheckForServerScript(bool force_download = false);

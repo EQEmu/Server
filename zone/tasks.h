@@ -265,7 +265,7 @@ public:
 	int GetTaskActivityDoneCountFromTaskID(int TaskID, int ActivityID);
 	int GetTaskStartTime(TaskType type, int index);
 	void AcceptNewTask(Client *c, int TaskID, int NPCID, bool enforce_level_requirement = false);
-//	void AcceptNewSharedTask(Client *c, int TaskID, int NPCID, bool enforce_level_requirement = false);
+	void AcceptNewSharedTask(Client *c, int TaskID, int NPCID, int id);
 	void PendSharedTask(Client *c, int TaskID, int NPCID, bool enforce_level_requirement = false);
 	void FailTask(Client *c, int TaskID);
 	int TaskTimeLeft(int TaskID);

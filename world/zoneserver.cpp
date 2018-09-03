@@ -35,6 +35,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "adventure_manager.h"
 #include "ucs.h"
 #include "queryserv.h"
+#include "shared_tasks.h"
 
 extern ClientList client_list;
 extern GroupLFPList LFPGroupList;
@@ -45,6 +46,7 @@ extern volatile bool UCSServerAvailable_;
 extern AdventureManager adventure_manager;
 extern UCSConnection UCSLink;
 extern QueryServConnection QSLink;
+extern SharedTaskManager shared_tasks;
 void CatchSignal(int sig_num);
 
 ZoneServer::ZoneServer(std::shared_ptr<EQ::Net::ServertalkServerConnection> connection, EQ::Net::ConsoleServer *console)
@@ -1342,6 +1344,11 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			break;
 
 		cle->ProcessTellQueue();
+		break;
+	}
+	case ServerOP_TaskRequest:
+	{
+		shared_tasks.HandleTaskRequest(pack);
 		break;
 	}
 	default:

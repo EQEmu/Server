@@ -161,8 +161,7 @@ bool Client::Process() {
 
 		if (pending_task.timeout.Check(false)) {
 			Message(13, "Shared task timed out.");
-			pending_task.id = 0;
-			pending_task.task_master_id = 0;
+			ResetPendingTask();
 		}
 
 		if (linkdead_timer.Check()) {
