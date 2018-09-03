@@ -1746,7 +1746,7 @@ void NPC::AI_DoMovement() {
 		glm::vec3 Goal = UpdatePath(
 			roambox_destination_x,
 			roambox_destination_y,
-			GetGroundZ(roambox_destination_x, roambox_destination_y),
+			m_Position.z,
 			move_speed,
 			waypoint_changed,
 			node_reached
