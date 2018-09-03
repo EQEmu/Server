@@ -540,6 +540,7 @@ protected:
 	float roambox_distance;
 	float roambox_destination_x;
 	float roambox_destination_y;
+	float roambox_destination_z;
 	uint32 roambox_delay;
 	uint32 roambox_min_delay;
 

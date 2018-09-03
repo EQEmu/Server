@@ -466,6 +466,7 @@ void NPC::AI_Init()
 	roambox_distance = 0;
 	roambox_destination_x = 0;
 	roambox_destination_y = 0;
+	roambox_destination_z = 0;
 	roambox_min_delay = 2500;
 	roambox_delay = 2500;
 }
@@ -779,44 +780,50 @@ void Client::AI_Process()
 		}
 	}
 
-	if(RuleB(Combat, EnableFearPathing)){
-		if(currently_fleeing) {
+	if (RuleB(Combat, EnableFearPathing)) {
+		if (currently_fleeing) {
 
-			if (fix_z_timer_engaged.Check())
-				this->FixZ();
+			if (fix_z_timer.Check())
+				this->FixZ(5, true);
 
-			if(IsRooted()) {
+			if (IsRooted()) {
 				//make sure everybody knows were not moving, for appearance sake
-				if(IsMoving())
-				{
-					if(GetTarget())
+				if (IsMoving()) {
+					if (GetTarget())
 						SetHeading(CalculateHeadingToTarget(GetTarget()->GetX(), GetTarget()->GetY()));
 					SetCurrentSpeed(0);
 				}
 				//continue on to attack code, ensuring that we execute the engaged code
 				engaged = true;
-			} else {
-				if(AI_movement_timer->Check()) {
+			}
+			else {
+				if (AI_movement_timer->Check()) {
 					int speed = GetFearSpeed();
 					animation = speed;
 					speed *= 2;
 					SetCurrentSpeed(speed);
 					// Check if we have reached the last fear point
 					if ((std::abs(GetX() - m_FearWalkTarget.x) < 0.1) &&
-					    (std::abs(GetY() - m_FearWalkTarget.y) < 0.1)) {
+						(std::abs(GetY() - m_FearWalkTarget.y) < 0.1)) {
 						// Calculate a new point to run to
 						CalculateNewFearpoint();
 					}
-					if(!RuleB(Pathing, Fear) || !zone->pathing)
+
+					if (!RuleB(Pathing, Fear) || !zone->pathing)
 						CalculateNewPosition(m_FearWalkTarget.x, m_FearWalkTarget.y, m_FearWalkTarget.z, speed, true);
-					else
-					{
-						bool WaypointChanged, NodeReached;
+					else {
+						bool waypoint_changed, node_reached;
 
-						glm::vec3 Goal = UpdatePath(m_FearWalkTarget.x, m_FearWalkTarget.y, m_FearWalkTarget.z,
-									speed, WaypointChanged, NodeReached);
+						glm::vec3 Goal = UpdatePath(
+							m_FearWalkTarget.x,
+							m_FearWalkTarget.y,
+							m_FearWalkTarget.z,
+							speed,
+							waypoint_changed,
+							node_reached
+						);
 
-						if(WaypointChanged)
+						if (waypoint_changed)
 							tar_ndx = 20;
 
 						CalculateNewPosition(Goal.x, Goal.y, Goal.z, speed);
@@ -1136,8 +1143,12 @@ void Mob::AI_Process() {
 						bool WaypointChanged, NodeReached;
 
 						glm::vec3 Goal = UpdatePath(
-							m_FearWalkTarget.x, m_FearWalkTarget.y, m_FearWalkTarget.z,
-							GetFearSpeed(), WaypointChanged, NodeReached
+							m_FearWalkTarget.x,
+							m_FearWalkTarget.y,
+							m_FearWalkTarget.z,
+							GetFearSpeed(),
+							WaypointChanged,
+							NodeReached
 						);
 
 						if (WaypointChanged)
@@ -1696,6 +1707,14 @@ void NPC::AI_DoMovement() {
 						(m_Position.z - 15)
 					);
 
+					/**
+					 * If someone brought us into water when we naturally wouldn't path there, return to spawn
+					 */
+					if (zone->watermap->InLiquid(position) && zone->watermap->InLiquid(m_Position)) {
+						roambox_destination_x = m_SpawnPoint.x;
+						roambox_destination_y = m_SpawnPoint.y;
+					}
+
 					if (zone->watermap->InLiquid(position)) {
 						Log(Logs::Detail,
 							Logs::NPCRoamBox, "%s | My destination is in water and I don't belong there!",
@@ -1705,6 +1724,12 @@ void NPC::AI_DoMovement() {
 					}
 				}
 			}
+
+			glm::vec3 destination;
+			destination.x = roambox_destination_x;
+			destination.y = roambox_destination_y;
+			destination.z = m_Position.z;
+			roambox_destination_z = GetFixedZ(destination) + this->GetZOffset();
 
 			Log(Logs::Detail,
 				Logs::NPCRoamBox,
@@ -1719,11 +1744,20 @@ void NPC::AI_DoMovement() {
 				roambox_destination_y);
 		}
 
-		if (fix_z_timer.Check()) {
-			this->FixZ();
-		}
+		bool waypoint_changed, node_reached;
 
-		if (!CalculateNewPosition(roambox_destination_x, roambox_destination_y, m_Position.z, move_speed, true)) {
+		glm::vec3 Goal = UpdatePath(
+			roambox_destination_x,
+			roambox_destination_y,
+			roambox_destination_z,
+			move_speed,
+			waypoint_changed,
+			node_reached
+		);
+
+		CalculateNewPosition(Goal.x, Goal.y, Goal.z, move_speed, true);
+
+		if (m_Position.x == roambox_destination_x && m_Position.y == roambox_destination_y) {
 			time_until_can_move = Timer::GetCurrentTime() + RandomTimer(roambox_min_delay, roambox_delay);
 			SetMoving(false);
 			this->FixZ();

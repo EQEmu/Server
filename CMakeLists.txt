@@ -28,6 +28,9 @@
 #EQEMU_MAP_DIR
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+IF(POLICY CMP0074)
+	cmake_policy(SET CMP0074 NEW)
+ENDIF()
 
 #FindMySQL is located here so lets make it so CMake can find it
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/" ${CMAKE_MODULE_PATH})

@@ -123,6 +123,39 @@ void Database::AddSpeech(const char* from, const char* to, const char* message, 
 
 }
 
+void Database::LogPlayerDropItem(QSPlayerDropItem_Struct* QS) {
+
+	std::string query = StringFormat("INSERT INTO `qs_player_drop_record` SET `time` = NOW(), "
+									 "`char_id` = '%i', `pickup` = '%i', "
+									 "`zone_id` = '%i', `x` = '%i', `y` = '%i', `z` = '%i' ",
+									 QS->char_id, QS->pickup, QS->zone_id, QS->x, QS->y, QS->z);
+
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		Log(Logs::Detail, Logs::QS_Server, "Failed Drop Record Insert: %s", results.ErrorMessage().c_str());
+		Log(Logs::Detail, Logs::QS_Server, "%s", query.c_str());
+	}
+
+	if (QS->_detail_count == 0)
+		return;
+
+	int lastIndex = results.LastInsertedID();
+
+	for (int i = 0; i < QS->_detail_count; i++) {
+		query = StringFormat("INSERT INTO `qs_player_drop_record_entries` SET `event_id` = '%i', "
+							 "`item_id` = '%i', `charges` = '%i', `aug_1` = '%i', `aug_2` = '%i', "
+							 "`aug_3` = '%i', `aug_4` = '%i', `aug_5` = '%i'",
+							 lastIndex, QS->items[i].item_id,
+							 QS->items[i].charges, QS->items[i].aug_1, QS->items[i].aug_2,
+							 QS->items[i].aug_3, QS->items[i].aug_4, QS->items[i].aug_5);
+		results = QueryDatabase(query);
+		if (!results.Success()) {
+			Log(Logs::Detail, Logs::QS_Server, "Failed Drop Record Entry Insert: %s", results.ErrorMessage().c_str());
+			Log(Logs::Detail, Logs::QS_Server, "%s", query.c_str());
+		}
+	}
+}
+
 void Database::LogPlayerTrade(QSPlayerLogTrade_Struct* QS, uint32 detailCount) {
 
 	std::string query = StringFormat("INSERT INTO `qs_player_trade_record` SET `time` = NOW(), "

@@ -702,6 +702,7 @@ RULE_CATEGORY_END()
 RULE_CATEGORY(QueryServ)
 RULE_BOOL(QueryServ, PlayerLogChat, false) // Logs Player Chat
 RULE_BOOL(QueryServ, PlayerLogTrades, false) // Logs Player Trades
+RULE_BOOL(QueryServ, PlayerDropItems, false) // Logs Player dropping items
 RULE_BOOL(QueryServ, PlayerLogHandins, false) // Logs Player Handins
 RULE_BOOL(QueryServ, PlayerLogNPCKills, false) // Logs Player NPC Kills
 RULE_BOOL(QueryServ, PlayerLogDeletes, false) // Logs Player Deletes

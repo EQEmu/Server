@@ -1297,6 +1297,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	case ServerOP_QSPlayerLogDeletes:
 	case ServerOP_QSPlayerLogMoves:
 	case ServerOP_QSPlayerLogMerchantTransactions:
+	case ServerOP_QSPlayerDropItem:
 	{
 		QSLink.SendPacket(pack);
 		break;

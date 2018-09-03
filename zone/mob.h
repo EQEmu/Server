@@ -988,7 +988,7 @@ public:
 	void				SendToFixZ(float new_x, float new_y, float new_z);
 	float				GetZOffset() const;
 	float               GetDefaultRaceSize() const;
-	void 				FixZ(int32 z_find_offset = 5);
+	void 				FixZ(int32 z_find_offset = 5, bool fix_client_z = false);
 	float				GetFixedZ(glm::vec3 destination, int32 z_find_offset = 5);
 	
 	void				NPCSpecialAttacks(const char* parse, int permtag, bool reset = true, bool remove = false);
