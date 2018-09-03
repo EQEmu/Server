@@ -793,26 +793,34 @@ float Mob::GetFixedZ(glm::vec3 destination, int32 z_find_offset) {
 	return new_z;
 }
 
-void Mob::FixZ(int32 z_find_offset /*= 5*/) {
+void Mob::FixZ(int32 z_find_offset /*= 5*/, bool fix_client_z /*= false*/) {
 	glm::vec3 current_loc(m_Position);
-	float     new_z = GetFixedZ(current_loc, z_find_offset);
 
-	if (!IsClient() && new_z != m_Position.z) {
-		if ((new_z > -2000) && new_z != BEST_Z_INVALID) {
-			if (RuleB(Map, MobZVisualDebug)) {
-				this->SendAppearanceEffect(78, 0, 0, 0, 0);
-			}
+	if (IsClient() && !fix_client_z)
+		return;
 
-			m_Position.z = new_z;
+	float new_z = GetFixedZ(current_loc, z_find_offset);
+
+	if (new_z == m_Position.z)
+		return;
+
+	if ((new_z > -2000) && new_z != BEST_Z_INVALID) {
+		if (RuleB(Map, MobZVisualDebug)) {
+			this->SendAppearanceEffect(78, 0, 0, 0, 0);
 		}
-		else {
-			if (RuleB(Map, MobZVisualDebug)) {
-				this->SendAppearanceEffect(103, 0, 0, 0, 0);
-			}
 
-			Log(Logs::General, Logs::FixZ, "%s is failing to find Z %f",
-				this->GetCleanName(), std::abs(m_Position.z - new_z));
+		m_Position.z = new_z;
+	}
+	else {
+		if (RuleB(Map, MobZVisualDebug)) {
+			this->SendAppearanceEffect(103, 0, 0, 0, 0);
 		}
+
+		Log(Logs::General,
+			Logs::FixZ,
+			"%s is failing to find Z %f",
+			this->GetCleanName(),
+			std::abs(m_Position.z - new_z));
 	}
 }
 

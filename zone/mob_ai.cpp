@@ -779,44 +779,50 @@ void Client::AI_Process()
 		}
 	}
 
-	if(RuleB(Combat, EnableFearPathing)){
-		if(currently_fleeing) {
+	if (RuleB(Combat, EnableFearPathing)) {
+		if (currently_fleeing) {
 
-			if (fix_z_timer_engaged.Check())
-				this->FixZ();
+			if (fix_z_timer.Check())
+				this->FixZ(5, true);
 
-			if(IsRooted()) {
+			if (IsRooted()) {
 				//make sure everybody knows were not moving, for appearance sake
-				if(IsMoving())
-				{
-					if(GetTarget())
+				if (IsMoving()) {
+					if (GetTarget())
 						SetHeading(CalculateHeadingToTarget(GetTarget()->GetX(), GetTarget()->GetY()));
 					SetCurrentSpeed(0);
 				}
 				//continue on to attack code, ensuring that we execute the engaged code
 				engaged = true;
-			} else {
-				if(AI_movement_timer->Check()) {
+			}
+			else {
+				if (AI_movement_timer->Check()) {
 					int speed = GetFearSpeed();
 					animation = speed;
 					speed *= 2;
 					SetCurrentSpeed(speed);
 					// Check if we have reached the last fear point
 					if ((std::abs(GetX() - m_FearWalkTarget.x) < 0.1) &&
-					    (std::abs(GetY() - m_FearWalkTarget.y) < 0.1)) {
+						(std::abs(GetY() - m_FearWalkTarget.y) < 0.1)) {
 						// Calculate a new point to run to
 						CalculateNewFearpoint();
 					}
-					if(!RuleB(Pathing, Fear) || !zone->pathing)
+
+					if (!RuleB(Pathing, Fear) || !zone->pathing)
 						CalculateNewPosition(m_FearWalkTarget.x, m_FearWalkTarget.y, m_FearWalkTarget.z, speed, true);
-					else
-					{
-						bool WaypointChanged, NodeReached;
+					else {
+						bool waypoint_changed, node_reached;
 
-						glm::vec3 Goal = UpdatePath(m_FearWalkTarget.x, m_FearWalkTarget.y, m_FearWalkTarget.z,
-									speed, WaypointChanged, NodeReached);
+						glm::vec3 Goal = UpdatePath(
+							m_FearWalkTarget.x,
+							m_FearWalkTarget.y,
+							m_FearWalkTarget.z,
+							speed,
+							waypoint_changed,
+							node_reached
+						);
 
-						if(WaypointChanged)
+						if (waypoint_changed)
 							tar_ndx = 20;
 
 						CalculateNewPosition(Goal.x, Goal.y, Goal.z, speed);
