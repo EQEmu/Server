@@ -599,7 +599,7 @@ void Client::CompleteConnect()
 		if (group)
 			group->SendHPManaEndPacketsTo(this);
 	}
-	
+
 
 	//bulk raid send in here eventually
 
@@ -2873,7 +2873,7 @@ void Client::Handle_OP_ApplyPoison(const EQApplicationPacket *app)
 	const EQEmu::ItemData* poison=PoisonItemInstance->GetItem();
 	const EQEmu::ItemData* primary=nullptr;
 	const EQEmu::ItemData* secondary=nullptr;
-	bool IsPoison = PoisonItemInstance && 
+	bool IsPoison = PoisonItemInstance &&
 					(poison->ItemType == EQEmu::item::ItemTypePoison);
 
 	if (PrimaryWeapon) {
@@ -2893,9 +2893,9 @@ void Client::Handle_OP_ApplyPoison(const EQApplicationPacket *app)
 			// Poison is too high to apply.
 			Message_StringID(clientMessageTradeskill, POISON_TOO_HIGH);
 		}
-		else if ((primary && 
+		else if ((primary &&
 				primary->ItemType == EQEmu::item::ItemType1HPiercing) ||
-			(secondary && 
+			(secondary &&
 			secondary->ItemType == EQEmu::item::ItemType1HPiercing)) {
 
 			double ChanceRoll = zone->random.Real(0, 1);
@@ -2911,7 +2911,7 @@ void Client::Handle_OP_ApplyPoison(const EQApplicationPacket *app)
 
 			if (ChanceRoll < (.9 + GetLevel()/1000)) {
 				ApplyPoisonSuccessResult = 1;
-				AddProcToWeapon(poison->Proc.Effect, false, 
+				AddProcToWeapon(poison->Proc.Effect, false,
 										(GetDEX() / 100) + 103);
 			}
 		}
@@ -2928,18 +2928,18 @@ void Client::Handle_OP_ApplyPoison(const EQApplicationPacket *app)
 	FastQueuePacket(&outapp);
 }
 
-void Client::Handle_OP_Assist(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_Assist(const EQApplicationPacket *app) {
 	if (app->size != sizeof(EntityId_Struct)) {
-		Log(Logs::General, Logs::None, "Size mismatch in OP_Assist expected %i got %i", sizeof(EntityId_Struct), app->size);
+		Log(Logs::General, Logs::None, "Size mismatch in OP_Assist expected %i got %i", sizeof(EntityId_Struct),
+			app->size);
 		return;
 	}
 
-	EntityId_Struct* eid = (EntityId_Struct*)app->pBuffer;
-	Entity* entity = entity_list.GetID(eid->entity_id);
+	EntityId_Struct *eid = (EntityId_Struct *) app->pBuffer;
+	Entity *entity = entity_list.GetID(eid->entity_id);
 
-	EQApplicationPacket* outapp = app->Copy();
-	eid = (EntityId_Struct*)outapp->pBuffer;
+	EQApplicationPacket *outapp = app->Copy();
+	eid = (EntityId_Struct *) outapp->pBuffer;
 	if (RuleB(Combat, AssistNoTargetSelf))
 		eid->entity_id = GetID();
 	if (entity && entity->IsMob()) {
@@ -2947,10 +2947,14 @@ void Client::Handle_OP_Assist(const EQApplicationPacket *app)
 		if (assistee->GetTarget()) {
 			Mob *new_target = assistee->GetTarget();
 			if (new_target && (GetGM() ||
-				Distance(m_Position, assistee->GetPosition()) <= TARGETING_RANGE)) {
+							   Distance(m_Position, assistee->GetPosition()) <= TARGETING_RANGE)) {
 				SetAssistExemption(true);
 				eid->entity_id = new_target->GetID();
+			} else {
+				eid->entity_id = 0;
 			}
+		} else {
+			eid->entity_id = 0;
 		}
 	}
 
@@ -3986,7 +3990,7 @@ void Client::Handle_OP_Bug(const EQApplicationPacket *app)
 		Message(0, "Bug reporting is disabled on this server.");
 		return;
 	}
-	
+
 	if (app->size != sizeof(BugReport_Struct)) {
 		printf("Wrong size of BugReport_Struct got %d expected %zu!\n", app->size, sizeof(BugReport_Struct));
 	}
@@ -4559,7 +4563,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 	rewind_y_diff = ppu->y_pos - m_RewindLocation.y;
 	rewind_y_diff *= rewind_y_diff;
 
-	/* 
+	/*
 		We only need to store updated values if the player has moved.
 		If the player has moved more than units for x or y, then we'll store
 		his pre-PPU x and y for /rewind, in case he gets stuck.
@@ -5854,23 +5858,23 @@ void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 		printf("Error in FindPersonRequest_Struct. Expected size of: %zu, but got: %i\n", sizeof(FindPersonRequest_Struct), app->size);
 	else {
 		FindPersonRequest_Struct* t = (FindPersonRequest_Struct*)app->pBuffer;
-	
+
 		std::vector<FindPerson_Point> points;
 		Mob* target = entity_list.GetMob(t->npc_id);
-	
+
 		if (target == nullptr) {
 			//empty length packet == not found.
 			EQApplicationPacket outapp(OP_FindPersonReply, 0);
 			QueuePacket(&outapp);
 			return;
 		}
-	
+
 		if (!RuleB(Pathing, Find) && RuleB(Bazaar, EnableWarpToTrader) && target->IsClient() && (target->CastToClient()->Trader ||
 			target->CastToClient()->Buyer)) {
 			Message(15, "Moving you to Trader %s", target->GetName());
 			MovePC(zone->GetZoneID(), zone->GetInstanceID(), target->GetX(), target->GetY(), target->GetZ(), 0.0f);
 		}
-	
+
 		if (!RuleB(Pathing, Find) || !zone->pathing)
 		{
 			//fill in the path array...
@@ -5893,40 +5897,40 @@ void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 		{
 			glm::vec3 Start(GetX(), GetY(), GetZ() + (GetSize() < 6.0 ? 6 : GetSize()) * HEAD_POSITION);
 			glm::vec3 End(target->GetX(), target->GetY(), target->GetZ() + (target->GetSize() < 6.0 ? 6 : target->GetSize()) * HEAD_POSITION);
-	
+
 			bool partial = false;
 			bool stuck = false;
 			auto pathlist = zone->pathing->FindRoute(Start, End, partial, stuck);
-	
+
 			if (pathlist.empty() || partial)
 			{
 				EQApplicationPacket outapp(OP_FindPersonReply, 0);
 				QueuePacket(&outapp);
 				return;
 			}
-	
+
 			// Live appears to send the points in this order:
 			// Final destination.
 			// Current Position.
 			// rest of the points.
 			FindPerson_Point p;
-	
+
 			int PointNumber = 0;
-	
+
 			bool LeadsToTeleporter = false;
-	
+
 			auto v = pathlist.back();
-	
+
 			p.x = v.pos.x;
 			p.y = v.pos.y;
 			p.z = v.pos.z;
 			points.push_back(p);
-	
+
 			p.x = GetX();
 			p.y = GetY();
 			p.z = GetZ();
 			points.push_back(p);
-	
+
 			for (auto Iterator = pathlist.begin(); Iterator != pathlist.end(); ++Iterator)
 			{
 				if ((*Iterator).teleport) // Teleporter
@@ -5934,7 +5938,7 @@ void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 					LeadsToTeleporter = true;
 					break;
 				}
-	
+
 				glm::vec3 v = (*Iterator).pos;
 				p.x = v.x;
 				p.y = v.y;
@@ -5942,17 +5946,17 @@ void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 				points.push_back(p);
 				++PointNumber;
 			}
-	
+
 			if (!LeadsToTeleporter)
 			{
 				p.x = target->GetX();
 				p.y = target->GetY();
 				p.z = target->GetZ();
-	
+
 				points.push_back(p);
 			}
 		}
-	
+
 		SendPathPacket(points);
 	}
 }
@@ -11181,14 +11185,14 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 	{
 		case RaidCommandInviteIntoExisting:
 		case RaidCommandInvite: {
-			
+
 			Client *player_to_invite = entity_list.GetClientByName(raid_command_packet->player_name);
 
 			if (!player_to_invite)
 				break;
 
 			Group *player_to_invite_group = player_to_invite->GetGroup();
-			
+
 			if (player_to_invite->HasRaid()) {
 				Message(13, "%s is already in a raid.", player_to_invite->GetName());
 				break;
@@ -11198,7 +11202,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 				Message(13, "You can only invite an ungrouped player or group leader to join your raid.");
 				break;
 			}
-			
+
 			/* Send out invite to the client */
 			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
 			RaidGeneral_Struct *raid_command = (RaidGeneral_Struct*)outapp->pBuffer;
@@ -11210,7 +11214,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 			raid_command->action = 20;
 
 			player_to_invite->QueuePacket(outapp);
-			
+
 			safe_delete(outapp);
 
 			break;
@@ -11306,7 +11310,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 									}
 									if (player_invited_group->IsLeader(player_invited_group->members[x])) {
 										Client *c = nullptr;
-										
+
 										if (player_invited_group->members[x]->IsClient())
 											c = player_invited_group->members[x]->CastToClient();
 										else
@@ -11316,24 +11320,24 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 										raid->SendMakeLeaderPacketTo(raid->leadername, c);
 										raid->AddMember(c, raid_free_group_id, true, true, true);
 										raid->SendBulkRaid(c);
-										
+
 										if (raid->IsLocked()) {
 											raid->SendRaidLockTo(c);
 										}
 									}
 									else {
 										Client *c = nullptr;
-										
+
 										if (player_invited_group->members[x]->IsClient())
 											c = player_invited_group->members[x]->CastToClient();
 										else
 											continue;
-										
+
 										raid->SendRaidCreate(c);
 										raid->SendMakeLeaderPacketTo(raid->leadername, c);
 										raid->AddMember(c, raid_free_group_id);
 										raid->SendBulkRaid(c);
-										
+
 										if (raid->IsLocked()) {
 											raid->SendRaidLockTo(c);
 										}
@@ -11367,12 +11371,12 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 										c = group->members[x]->CastToClient();
 									else
 										continue;
-									
+
 									raid->SendRaidCreate(c);
 									raid->SendMakeLeaderPacketTo(raid->leadername, c);
 									raid->AddMember(c, raid_free_group_id, false, true);
 									raid->SendBulkRaid(c);
-									
+
 									if (raid->IsLocked()) {
 										raid->SendRaidLockTo(c);
 									}
@@ -11380,17 +11384,17 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 								else
 								{
 									Client *c = nullptr;
-									
+
 									if (group->members[x]->IsClient())
 										c = group->members[x]->CastToClient();
 									else
 										continue;
-									
+
 									raid->SendRaidCreate(c);
 									raid->SendMakeLeaderPacketTo(raid->leadername, c);
 									raid->AddMember(c, raid_free_group_id);
 									raid->SendBulkRaid(c);
-									
+
 									if (raid->IsLocked()) {
 										raid->SendRaidLockTo(c);
 									}
@@ -11407,7 +11411,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 						if (player_invited_group) {
 
 							raid = new Raid(player_accepting_invite);
-							
+
 							entity_list.AddRaid(raid);
 							raid->SetRaidDetails();
 							Client *addClientig = nullptr;
@@ -11431,7 +11435,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 										raid->SendMakeLeaderPacketTo(raid->leadername, c);
 										raid->AddMember(c, 0, true, true, true);
 										raid->SendBulkRaid(c);
-										
+
 										if (raid->IsLocked()) {
 											raid->SendRaidLockTo(c);
 										}
@@ -11556,7 +11560,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 							raid->SetGroupLeader(raid_command_packet->leader_name, false);
 
 							/* We were the leader of our old group */
-							if (old_group < 12) { 
+							if (old_group < 12) {
 								/* Assign new group leader if we can */
 								for (int x = 0; x < MAX_RAID_MEMBERS; x++) {
 									if (raid->members[x].GroupNumber == old_group) {
@@ -11585,7 +11589,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 												strn0cpy(raid_command_packet->playername, raid->members[x].membername, 64);
 
 												worldserver.SendPacket(pack);
-												
+
 												safe_delete(pack);
 											}
 											break;
@@ -11631,7 +11635,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 						raid->SetGroupLeader(raid_command_packet->leader_name, false);
 						for (int x = 0; x < MAX_RAID_MEMBERS; x++) {
 							if (raid->members[x].GroupNumber == oldgrp && strlen(raid->members[x].membername) > 0 && strcmp(raid->members[x].membername, raid_command_packet->leader_name) != 0){
-								
+
 								raid->SetGroupLeader(raid->members[x].membername);
 								raid->UpdateGroupAAs(oldgrp);
 
@@ -11654,7 +11658,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 									strn0cpy(raid_command->playername, raid->members[x].membername, 64);
 									raid_command->zoneid = zone->GetZoneID();
 									raid_command->instance_id = zone->GetInstanceID();
-									
+
 									worldserver.SendPacket(pack);
 									safe_delete(pack);
 								}
@@ -11669,14 +11673,14 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 					else {
 						auto pack = new ServerPacket(ServerOP_RaidGroupDisband, sizeof(ServerRaidGeneralAction_Struct));
 						ServerRaidGeneralAction_Struct* raid_command = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
-						
+
 						raid_command->rid = raid->GetID();
 						raid_command->zoneid = zone->GetZoneID();
 						raid_command->instance_id = zone->GetInstanceID();
 						strn0cpy(raid_command->playername, raid_command_packet->leader_name, 64);
 
 						worldserver.SendPacket(pack);
-						
+
 						safe_delete(pack);
 					}
 
