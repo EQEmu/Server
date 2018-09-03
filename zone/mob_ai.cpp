@@ -1702,6 +1702,14 @@ void NPC::AI_DoMovement() {
 						(m_Position.z - 15)
 					);
 
+					/**
+					 * If someone brought us into water when we naturally wouldn't path there, return to spawn
+					 */
+					if (zone->watermap->InLiquid(position) && zone->watermap->InLiquid(m_Position)) {
+						roambox_destination_x = m_SpawnPoint.x;
+						roambox_destination_y = m_SpawnPoint.y;
+					}
+
 					if (zone->watermap->InLiquid(position)) {
 						Log(Logs::Detail,
 							Logs::NPCRoamBox, "%s | My destination is in water and I don't belong there!",
