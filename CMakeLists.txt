@@ -28,7 +28,9 @@
 #EQEMU_MAP_DIR
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
-cmake_policy(SET CMP0074 NEW)
+IF(POLICY CMP0074)
+	cmake_policy(SET CMP0074 NEW)
+ENDIF()
 
 #FindMySQL is located here so lets make it so CMake can find it
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/" ${CMAKE_MODULE_PATH})
@@ -55,8 +57,7 @@ ENDIF(MSVC OR MINGW)
 
 IF(MSVC)
 	IF(CMAKE_CL_64)
-		SET(ZLIB_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/zlib_x64/include")
-		SET(ZLIB_LIBRARY "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/zlib_x64/lib/zlib.lib")
+		SET(ZLIB_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/zlib_x64")
 		SET(MYSQL_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/mysql_x64")
 		SET(LUA_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/luaj_x64")
 		SET(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/openssl_x64")
@@ -69,8 +70,7 @@ IF(MSVC)
 			SET(SODIUM_LIBRARY_HINTS "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/libsodium/x64/Release/v110/dynamic")
 		ENDIF()
 	ELSE(CMAKE_CL_64)
-		SET(ZLIB_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/zlib_x86/include")
-		SET(ZLIB_LIBRARY "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/zlib_x86/lib/zlib.lib")
+		SET(ZLIB_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/zlib_x86")
 		SET(MYSQL_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/mysql_x86")
 		SET(LUA_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/luaj_x86")
 		SET(SODIUM_INCLUDE_HINTS "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/libsodium/include")
