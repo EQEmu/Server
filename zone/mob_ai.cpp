@@ -466,6 +466,7 @@ void NPC::AI_Init()
 	roambox_distance = 0;
 	roambox_destination_x = 0;
 	roambox_destination_y = 0;
+	roambox_destination_z = 0;
 	roambox_min_delay = 2500;
 	roambox_delay = 2500;
 }
@@ -1724,6 +1725,12 @@ void NPC::AI_DoMovement() {
 				}
 			}
 
+			glm::vec3 destination;
+			destination.x = roambox_destination_x;
+			destination.y = roambox_destination_y;
+			destination.z = m_Position.z;
+			roambox_destination_z = GetFixedZ(destination) + this->GetZOffset();
+
 			Log(Logs::Detail,
 				Logs::NPCRoamBox,
 				"Calculate | NPC: %s distance %.3f | min_x %.3f | max_x %.3f | final_x %.3f | min_y %.3f | max_y %.3f | final_y %.3f",
@@ -1737,16 +1744,12 @@ void NPC::AI_DoMovement() {
 				roambox_destination_y);
 		}
 
-		if (fix_z_timer.Check()) {
-			this->FixZ();
-		}
-
 		bool waypoint_changed, node_reached;
 
 		glm::vec3 Goal = UpdatePath(
 			roambox_destination_x,
 			roambox_destination_y,
-			m_Position.z,
+			roambox_destination_z,
 			move_speed,
 			waypoint_changed,
 			node_reached
