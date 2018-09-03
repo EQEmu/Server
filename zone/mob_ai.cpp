@@ -1741,7 +1741,20 @@ void NPC::AI_DoMovement() {
 			this->FixZ();
 		}
 
-		if (!CalculateNewPosition(roambox_destination_x, roambox_destination_y, m_Position.z, move_speed, true)) {
+		bool waypoint_changed, node_reached;
+
+		glm::vec3 Goal = UpdatePath(
+			roambox_destination_x,
+			roambox_destination_y,
+			GetGroundZ(roambox_destination_x, roambox_destination_y),
+			move_speed,
+			waypoint_changed,
+			node_reached
+		);
+
+		CalculateNewPosition(Goal.x, Goal.y, Goal.z, move_speed, true);
+
+		if (m_Position.x == roambox_destination_x && m_Position.y == roambox_destination_y) {
 			time_until_can_move = Timer::GetCurrentTime() + RandomTimer(roambox_min_delay, roambox_delay);
 			SetMoving(false);
 			this->FixZ();
