@@ -45,6 +45,7 @@ public:
 
 	void AddSpeech(const char* from, const char* to, const char* message, uint16 minstatus, uint32 guilddbid, uint8 type);
 	void LogPlayerTrade(QSPlayerLogTrade_Struct* QS, uint32 DetailCount);
+	void LogPlayerDropItem(QSPlayerDropItem_Struct* QS);
 	void LogPlayerHandin(QSPlayerLogHandin_Struct* QS, uint32 DetailCount);
 	void LogPlayerNPCKill(QSPlayerLogNPCKill_Struct* QS, uint32 Members);
 	void LogPlayerDelete(QSPlayerLogDelete_Struct* QS, uint32 Items);

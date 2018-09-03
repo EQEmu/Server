@@ -203,6 +203,7 @@
 #define ServerOP_CZSignalNPC						0x5017
 #define ServerOP_CZSetEntityVariableByNPCTypeID		0x5018
 #define ServerOP_WWMarquee							0x5019
+#define ServerOP_QSPlayerDropItem					0x5020
 
 /* Query Serv Generic Packet Flag/Type Enumeration */
 enum { QSG_LFGuild = 0 }; 
@@ -1138,6 +1139,27 @@ struct QSPlayerLogTrade_Struct {
 	uint16				char2_count;
 	uint16				_detail_count;
 	QSTradeItems_Struct items[0];
+};
+
+struct QSDropItems_Struct {
+	uint32 item_id;
+	uint16 charges;
+	uint32 aug_1;
+	uint32 aug_2;
+	uint32 aug_3;
+	uint32 aug_4;
+	uint32 aug_5;
+};
+
+struct QSPlayerDropItem_Struct {
+	uint32 char_id;
+	bool pickup; // 0 drop, 1 pickup
+	uint32 zone_id;
+	int x;
+	int y;
+	int z;
+	uint16	_detail_count;
+	QSDropItems_Struct items[0];
 };
 
 struct QSHandinItems_Struct {
