@@ -46,18 +46,18 @@ namespace SoD
 	void SerializeItem(EQEmu::OutBuffer& ob, const EQEmu::ItemInstance *inst, int16 slot_id, uint8 depth);
 
 	// server to client inventory location converters
-	static inline uint32 ServerToSoDSlot(uint32 ServerSlot);
-	static inline uint32 ServerToSoDCorpseSlot(uint32 serverCorpseSlot);
+	static inline uint32 ServerToSoDSlot(uint32 server_slot);
+	static inline uint32 ServerToSoDCorpseSlot(uint32 server_corpse_slot);
 
 	// client to server inventory location converters
-	static inline uint32 SoDToServerSlot(uint32 sodSlot);
-	static inline uint32 SoDToServerCorpseSlot(uint32 sodCorpseSlot);
+	static inline uint32 SoDToServerSlot(uint32 sod_slot);
+	static inline uint32 SoDToServerCorpseSlot(uint32 sod_corpse_slot);
 
 	// server to client say link converter
-	static inline void ServerToSoDSayLink(std::string& sodSayLink, const std::string& serverSayLink);
+	static inline void ServerToSoDSayLink(std::string &sod_saylink, const std::string &server_saylink);
 
 	// client to server say link converter
-	static inline void SoDToServerSayLink(std::string& serverSayLink, const std::string& sodSayLink);
+	static inline void SoDToServerSayLink(std::string &server_saylink, const std::string &sod_saylink);
 
 	static inline CastingSlot ServerToSoDCastingSlot(EQEmu::CastingSlot slot);
 	static inline EQEmu::CastingSlot SoDToServerCastingSlot(CastingSlot slot);
@@ -3841,114 +3841,114 @@ namespace SoD
 		return SoDSlot;
 	}
 
-	static inline uint32 ServerToSoDCorpseSlot(uint32 serverCorpseSlot)
+	static inline uint32 ServerToSoDCorpseSlot(uint32 server_corpse_slot)
 	{
 		uint32 SoDSlot = invslot::SLOT_INVALID;
 
-		if (serverCorpseSlot <= EQEmu::invslot::slotGeneral8 && serverCorpseSlot >= EQEmu::invslot::slotGeneral1) {
-			SoDSlot = serverCorpseSlot;
+		if (server_corpse_slot <= EQEmu::invslot::slotGeneral8 && server_corpse_slot >= EQEmu::invslot::slotGeneral1) {
+			SoDSlot = server_corpse_slot;
 		}
 
-		else if (serverCorpseSlot <= EQEmu::invslot::CORPSE_END && serverCorpseSlot >= EQEmu::invslot::slotCursor) {
-			SoDSlot = serverCorpseSlot - 2;
+		else if (server_corpse_slot <= EQEmu::invslot::CORPSE_END && server_corpse_slot >= EQEmu::invslot::slotCursor) {
+			SoDSlot = server_corpse_slot - 2;
 		}
 
-		Log(Logs::Detail, Logs::Netcode, "Convert Server Corpse Slot %i to SoD Corpse Slot %i", serverCorpseSlot, SoDSlot);
+		Log(Logs::Detail, Logs::Netcode, "Convert Server Corpse Slot %i to SoD Corpse Slot %i", server_corpse_slot, SoDSlot);
 
 		return SoDSlot;
 	}
 
-	static inline uint32 SoDToServerSlot(uint32 sodSlot)
+	static inline uint32 SoDToServerSlot(uint32 sod_slot)
 	{
-		uint32 ServerSlot = EQEmu::invslot::SLOT_INVALID;
+		uint32 server_slot = EQEmu::invslot::SLOT_INVALID;
 
-		if (sodSlot <= invslot::slotGeneral8) {
-			ServerSlot = sodSlot;
+		if (sod_slot <= invslot::slotGeneral8) {
+			server_slot = sod_slot;
 		}
 
-		else if (sodSlot <= invslot::CORPSE_END && sodSlot >= invslot::slotCursor) {
-			ServerSlot = sodSlot + 2;
+		else if (sod_slot <= invslot::CORPSE_END && sod_slot >= invslot::slotCursor) {
+			server_slot = sod_slot + 2;
 		}
 
-		else if (sodSlot <= invbag::GENERAL_BAGS_END && sodSlot >= invbag::GENERAL_BAGS_BEGIN) {
-			ServerSlot = sodSlot - 11;
+		else if (sod_slot <= invbag::GENERAL_BAGS_END && sod_slot >= invbag::GENERAL_BAGS_BEGIN) {
+			server_slot = sod_slot - 11;
 		}
 
-		else if (sodSlot <= invbag::CURSOR_BAG_END && sodSlot >= invbag::CURSOR_BAG_BEGIN) {
-			ServerSlot = sodSlot + 9;
+		else if (sod_slot <= invbag::CURSOR_BAG_END && sod_slot >= invbag::CURSOR_BAG_BEGIN) {
+			server_slot = sod_slot + 9;
 		}
 
-		else if (sodSlot <= invslot::TRIBUTE_END && sodSlot >= invslot::TRIBUTE_BEGIN) {
-			ServerSlot = sodSlot;
+		else if (sod_slot <= invslot::TRIBUTE_END && sod_slot >= invslot::TRIBUTE_BEGIN) {
+			server_slot = sod_slot;
 		}
 
-		else if (sodSlot <= invslot::GUILD_TRIBUTE_END && sodSlot >= invslot::GUILD_TRIBUTE_BEGIN) {
-			ServerSlot = sodSlot;
+		else if (sod_slot <= invslot::GUILD_TRIBUTE_END && sod_slot >= invslot::GUILD_TRIBUTE_BEGIN) {
+			server_slot = sod_slot;
 		}
 
-		else if (sodSlot <= invslot::BANK_END && sodSlot >= invslot::BANK_BEGIN) {
-			ServerSlot = sodSlot;
+		else if (sod_slot <= invslot::BANK_END && sod_slot >= invslot::BANK_BEGIN) {
+			server_slot = sod_slot;
 		}
 
-		else if (sodSlot <= invbag::BANK_BAGS_END && sodSlot >= invbag::BANK_BAGS_BEGIN) {
-			ServerSlot = sodSlot - 1;
+		else if (sod_slot <= invbag::BANK_BAGS_END && sod_slot >= invbag::BANK_BAGS_BEGIN) {
+			server_slot = sod_slot - 1;
 		}
 
-		else if (sodSlot <= invslot::SHARED_BANK_END && sodSlot >= invslot::SHARED_BANK_BEGIN) {
-			ServerSlot = sodSlot;
+		else if (sod_slot <= invslot::SHARED_BANK_END && sod_slot >= invslot::SHARED_BANK_BEGIN) {
+			server_slot = sod_slot;
 		}
 
-		else if (sodSlot <= invbag::SHARED_BANK_BAGS_END && sodSlot >= invbag::SHARED_BANK_BAGS_BEGIN) {
-			ServerSlot = sodSlot - 1;
+		else if (sod_slot <= invbag::SHARED_BANK_BAGS_END && sod_slot >= invbag::SHARED_BANK_BAGS_BEGIN) {
+			server_slot = sod_slot - 1;
 		}
 
-		else if (sodSlot <= invslot::TRADE_END && sodSlot >= invslot::TRADE_BEGIN) {
-			ServerSlot = sodSlot;
+		else if (sod_slot <= invslot::TRADE_END && sod_slot >= invslot::TRADE_BEGIN) {
+			server_slot = sod_slot;
 		}
 
-		else if (sodSlot <= invbag::TRADE_BAGS_END && sodSlot >= invbag::TRADE_BAGS_BEGIN) {
-			ServerSlot = sodSlot;
+		else if (sod_slot <= invbag::TRADE_BAGS_END && sod_slot >= invbag::TRADE_BAGS_BEGIN) {
+			server_slot = sod_slot;
 		}
 
-		else if (sodSlot <= invslot::WORLD_END && sodSlot >= invslot::WORLD_BEGIN) {
-			ServerSlot = sodSlot;
+		else if (sod_slot <= invslot::WORLD_END && sod_slot >= invslot::WORLD_BEGIN) {
+			server_slot = sod_slot;
 		}
 
-		Log(Logs::Detail, Logs::Netcode, "Convert SoD Slot %i to Server Slot %i", sodSlot, ServerSlot);
+		Log(Logs::Detail, Logs::Netcode, "Convert SoD Slot %i to Server Slot %i", sod_slot, server_slot);
 
-		return ServerSlot;
+		return server_slot;
 	}
 
-	static inline uint32 SoDToServerCorpseSlot(uint32 sodCorpseSlot)
+	static inline uint32 SoDToServerCorpseSlot(uint32 sod_corpse_slot)
 	{
-		uint32 ServerSlot = EQEmu::invslot::SLOT_INVALID;
+		uint32 server_slot = EQEmu::invslot::SLOT_INVALID;
 
-		if (sodCorpseSlot <= invslot::slotGeneral8 && sodCorpseSlot >= invslot::slotGeneral1) {
-			ServerSlot = sodCorpseSlot;
+		if (sod_corpse_slot <= invslot::slotGeneral8 && sod_corpse_slot >= invslot::slotGeneral1) {
+			server_slot = sod_corpse_slot;
 		}
 
-		else if (sodCorpseSlot <= invslot::CORPSE_END && sodCorpseSlot >= invslot::slotCursor) {
-			ServerSlot = sodCorpseSlot + 2;
+		else if (sod_corpse_slot <= invslot::CORPSE_END && sod_corpse_slot >= invslot::slotCursor) {
+			server_slot = sod_corpse_slot + 2;
 		}
 
-		Log(Logs::Detail, Logs::Netcode, "Convert SoD Corpse Slot %i to Server Corpse Slot %i", sodCorpseSlot, ServerSlot);
+		Log(Logs::Detail, Logs::Netcode, "Convert SoD Corpse Slot %i to Server Corpse Slot %i", sod_corpse_slot, server_slot);
 
-		return ServerSlot;
+		return server_slot;
 	}
 
-	static inline void ServerToSoDSayLink(std::string& sodSayLink, const std::string& serverSayLink)
+	static inline void ServerToSoDSayLink(std::string &sod_saylink, const std::string &server_saylink)
 	{
-		if ((constants::SAY_LINK_BODY_SIZE == EQEmu::constants::SAY_LINK_BODY_SIZE) || (serverSayLink.find('\x12') == std::string::npos)) {
-			sodSayLink = serverSayLink;
+		if ((constants::SAY_LINK_BODY_SIZE == EQEmu::constants::SAY_LINK_BODY_SIZE) || (server_saylink.find('\x12') == std::string::npos)) {
+			sod_saylink = server_saylink;
 			return;
 		}
 
-		auto segments = SplitString(serverSayLink, '\x12');
+		auto segments = SplitString(server_saylink, '\x12');
 
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {
 				if (segments[segment_iter].length() <= EQEmu::constants::SAY_LINK_BODY_SIZE) {
-					sodSayLink.append(segments[segment_iter]);
+					sod_saylink.append(segments[segment_iter]);
 					// TODO: log size mismatch error
 					continue;
 				}
@@ -3958,37 +3958,37 @@ namespace SoD
 				// SoF:  X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX       X  XXXX  X XXXXX XXXXXXXX (50)
 				// Diff:                                       ^^^^^         ^
 
-				sodSayLink.push_back('\x12');
-				sodSayLink.append(segments[segment_iter].substr(0, 31));
-				sodSayLink.append(segments[segment_iter].substr(36, 5));
+				sod_saylink.push_back('\x12');
+				sod_saylink.append(segments[segment_iter].substr(0, 31));
+				sod_saylink.append(segments[segment_iter].substr(36, 5));
 
 				if (segments[segment_iter][41] == '0')
-					sodSayLink.push_back(segments[segment_iter][42]);
+					sod_saylink.push_back(segments[segment_iter][42]);
 				else
-					sodSayLink.push_back('F');
+					sod_saylink.push_back('F');
 
-				sodSayLink.append(segments[segment_iter].substr(43));
-				sodSayLink.push_back('\x12');
+				sod_saylink.append(segments[segment_iter].substr(43));
+				sod_saylink.push_back('\x12');
 			}
 			else {
-				sodSayLink.append(segments[segment_iter]);
+				sod_saylink.append(segments[segment_iter]);
 			}
 		}
 	}
 
-	static inline void SoDToServerSayLink(std::string& serverSayLink, const std::string& sodSayLink)
+	static inline void SoDToServerSayLink(std::string &server_saylink, const std::string &sod_saylink)
 	{
-		if ((EQEmu::constants::SAY_LINK_BODY_SIZE == constants::SAY_LINK_BODY_SIZE) || (sodSayLink.find('\x12') == std::string::npos)) {
-			serverSayLink = sodSayLink;
+		if ((EQEmu::constants::SAY_LINK_BODY_SIZE == constants::SAY_LINK_BODY_SIZE) || (sod_saylink.find('\x12') == std::string::npos)) {
+			server_saylink = sod_saylink;
 			return;
 		}
 
-		auto segments = SplitString(sodSayLink, '\x12');
+		auto segments = SplitString(sod_saylink, '\x12');
 
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {
 				if (segments[segment_iter].length() <= constants::SAY_LINK_BODY_SIZE) {
-					serverSayLink.append(segments[segment_iter]);
+					server_saylink.append(segments[segment_iter]);
 					// TODO: log size mismatch error
 					continue;
 				}
@@ -3998,16 +3998,16 @@ namespace SoD
 				// RoF2: X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX X  XXXX XX  XXXXX XXXXXXXX (56)
 				// Diff:                                       ^^^^^         ^
 
-				serverSayLink.push_back('\x12');
-				serverSayLink.append(segments[segment_iter].substr(0, 31));
-				serverSayLink.append("00000");
-				serverSayLink.append(segments[segment_iter].substr(31, 5));
-				serverSayLink.push_back('0');
-				serverSayLink.append(segments[segment_iter].substr(36));
-				serverSayLink.push_back('\x12');
+				server_saylink.push_back('\x12');
+				server_saylink.append(segments[segment_iter].substr(0, 31));
+				server_saylink.append("00000");
+				server_saylink.append(segments[segment_iter].substr(31, 5));
+				server_saylink.push_back('0');
+				server_saylink.append(segments[segment_iter].substr(36));
+				server_saylink.push_back('\x12');
 			}
 			else {
-				serverSayLink.append(segments[segment_iter]);
+				server_saylink.append(segments[segment_iter]);
 			}
 		}
 	}

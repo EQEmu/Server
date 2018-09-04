@@ -126,7 +126,7 @@ namespace EQEmu
 
 		// Swap items in inventory
 		enum SwapItemFailState : int8 { swapInvalid = -1, swapPass = 0, swapNotAllowed, swapNullData, swapRaceClass, swapDeity, swapLevel };
-		bool SwapItem(int16 slot_a, int16 slot_b, SwapItemFailState& fail_state, uint16 race_id = 0, uint8 class_id = 0, uint16 deity_id = 0, uint8 level = 0);
+		bool SwapItem(int16 source_slot, int16 destination_slot, SwapItemFailState& fail_state, uint16 race_id = 0, uint8 class_id = 0, uint16 deity_id = 0, uint8 level = 0);
 
 		// Remove item from inventory
 		bool DeleteItem(int16 slot_id, uint8 quantity = 0);
