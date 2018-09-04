@@ -315,7 +315,6 @@ public:
 	bool	SaveCharacterBandolier(uint32 character_id, uint8 bandolier_id, uint8 bandolier_slot, uint32 item_id, uint32 icon, const char* bandolier_name);
 	bool	SaveCharacterPotionBelt(uint32 character_id, uint8 potion_id, uint32 item_id, uint32 icon);
 	bool	SaveCharacterLeadershipAA(uint32 character_id, PlayerProfile_Struct* pp);
-	bool	SaveCharacterInventorySnapshot(uint32 character_id);
 
 	/* Character Data Deletes   */
 	bool	DeleteCharacterSpell(uint32 character_id, uint32 spell_id, uint32 slot_id);
@@ -328,7 +327,16 @@ public:
 
 	/* Character Inventory  */
 	bool	NoRentExpired(const char* name);
-
+	bool	SaveCharacterInvSnapshot(uint32 character_id);
+	int		CountCharacterInvSnapshots(uint32 character_id);
+	void	ClearCharacterInvSnapshots(uint32 character_id, bool from_now = false);
+	void	ListCharacterInvSnapshots(uint32 character_id, std::list<std::pair<uint32, int>> &is_list);
+	bool	ValidateCharacterInvSnapshotTimestamp(uint32 character_id, uint32 timestamp);
+	void	ParseCharacterInvSnapshot(uint32 character_id, uint32 timestamp, std::list<std::pair<int16, uint32>> &parse_list);
+	void	DivergeCharacterInvSnapshotFromInventory(uint32 character_id, uint32 timestamp, std::list<std::pair<int16, uint32>> &compare_list);
+	void	DivergeCharacterInventoryFromInvSnapshot(uint32 character_id, uint32 timestamp, std::list<std::pair<int16, uint32>> &compare_list);
+	bool	RestoreCharacterInvSnapshot(uint32 character_id, uint32 timestamp);
+	
 	/* Corpses  */
 	bool		DeleteItemOffCharacterCorpse(uint32 db_id, uint32 equip_slot, uint32 item_id);
 	uint32		GetCharacterCorpseItemCount(uint32 corpse_id);

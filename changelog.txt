@@ -1,5 +1,17 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 09/03/2018 ==
+Uleat: Rework of 'invsnapshot' command and implementation of automatic inventory snapshots.
+	- Inventory snapshots are now taken automatically using the interval rule values - if snapshots are enabled
+	- Command 'invsnapshot' now has more options available to include a restore feature
+	-- A pop-up help menu is available
+	-- argument 'capture' is available to anyone with status high enough to register the command
+	-- Advanced options are only available to players with 150 status or greater
+	-- argument 'list' provides a list of "timestamp : item count" entries
+	-- argument 'parse' displays a "slot : item id : item name" listing of valid snapshots by timestamp
+	-- argument 'compare' shows a 'difference' comparison of "snapshot-to-inventory" changes
+	-- argument 'restore' applies a saved snapshot to the player's inventory (with a pre-clearing call)
+
 == 08/13/2018 ==
 Uleat: Activation of RoF+ clients' two additional general slots and integration of SoF+ clients' PowerSource slot
 	- Inventory 'Possessions' main slots are now contiguous and implemented to RoF2 standards

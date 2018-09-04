@@ -242,6 +242,19 @@ bool Client::Process() {
 			}
 		}
 
+		if (RuleB(Character, ActiveInvSnapshots) && time(nullptr) >= GetNextInvSnapshotTime()) {
+			if (database.SaveCharacterInvSnapshot(CharacterID())) {
+				SetNextInvSnapshot(RuleI(Character, InvSnapshotMinIntervalM));
+				Log(Logs::Moderate, Logs::Inventory, "Successful inventory snapshot taken of %s - setting next interval for %i minute%s.",
+					GetName(), RuleI(Character, InvSnapshotMinIntervalM), (RuleI(Character, InvSnapshotMinIntervalM) == 1 ? "" : "s"));
+			}
+			else {
+				SetNextInvSnapshot(RuleI(Character, InvSnapshotMinRetryM));
+				Log(Logs::Moderate, Logs::Inventory, "Failed to take inventory snapshot of %s - retrying in %i minute%s.",
+					GetName(), RuleI(Character, InvSnapshotMinRetryM), (RuleI(Character, InvSnapshotMinRetryM) == 1 ? "" : "s"));
+			}
+		}
+
 		/* Build a close range list of NPC's  */
 		if (npc_close_scan_timer.Check()) {
 			close_mobs.clear();

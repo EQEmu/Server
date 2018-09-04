@@ -679,7 +679,7 @@ bool Client::Save(uint8 iCommitNow) {
 
 	// perform snapshot before SaveCharacterData() so that m_epp will contain the updated time
 	if (RuleB(Character, ActiveInvSnapshots) && time(nullptr) >= GetNextInvSnapshotTime()) {
-		if (database.SaveCharacterInventorySnapshot(CharacterID())) {
+		if (database.SaveCharacterInvSnapshot(CharacterID())) {
 			SetNextInvSnapshot(RuleI(Character, InvSnapshotMinIntervalM));
 		}
 		else {
