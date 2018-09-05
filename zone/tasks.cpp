@@ -3455,6 +3455,7 @@ void ClientTaskState::PendSharedTask(Client *c, int TaskID, int NPCID, bool enfo
 				if (!task_state->HasSlotForTask(task)) {
 					task_failed = true;
 					c->Message_StringID(13, TASK_REJECT_GROUP_HAVE_ONE, c->GetName());
+					break;
 				} else {
 					if (task->replay_group) {
 						auto expires = client->GetTaskLockoutExpire(task->replay_group);
@@ -3472,6 +3473,7 @@ void ClientTaskState::PendSharedTask(Client *c, int TaskID, int NPCID, bool enfo
 							client->Message_StringID(13, TASK_REJECT_LOCKEDOUT_ME,
 										 days.c_str(), hours.c_str(),
 										 minutes.c_str());
+							break;
 						}
 					}
 				}
@@ -3492,6 +3494,7 @@ void ClientTaskState::PendSharedTask(Client *c, int TaskID, int NPCID, bool enfo
 				if (!task_state->HasSlotForTask(task)) {
 					task_failed = true;
 					c->Message_StringID(13, TASK_REJECT_RAID_HAVE_ONE, c->GetName());
+					break;
 				} else {
 					if (task->replay_group) {
 						auto expires = client->GetTaskLockoutExpire(task->replay_group);
@@ -3509,6 +3512,7 @@ void ClientTaskState::PendSharedTask(Client *c, int TaskID, int NPCID, bool enfo
 							client->Message_StringID(13, TASK_REJECT_LOCKEDOUT_ME,
 										 days.c_str(), hours.c_str(),
 										 minutes.c_str());
+							break;
 						}
 					}
 				}
@@ -3518,8 +3522,10 @@ void ClientTaskState::PendSharedTask(Client *c, int TaskID, int NPCID, bool enfo
 		}
 	}
 
-	if (task_failed) // we already yelled at them
+	if (task_failed) { // we already yelled at them
+		c->ResetPendingTask();
 		return;
+	}
 
 	// so we've verified all the clients we can and didn't fail, time to pend and yell at world
 	c->SetPendingTask(TaskID, NPCID);
@@ -3540,6 +3546,75 @@ void ClientTaskState::PendSharedTask(Client *c, int TaskID, int NPCID, bool enfo
 void ClientTaskState::AcceptNewSharedTask(Client *c, int TaskID, int NPCID, int id)
 {
 
+}
+
+void ClientTaskState::HandleCanJoinSharedTask(Client *c, int TaskID, int id)
+{
+	if (!c)
+		return;
+
+	SerializeBuffer buf(15);
+	buf.WriteInt32(id);
+	buf.WriteString(c->GetName());
+
+	if (!taskmanager || TaskID < 0 || TaskID >= MAXTASKS) {
+		buf.WriteInt32(TASKJOINOOZ_NOTASK);
+		auto pack = new ServerPacket(ServerOP_TaskRequestReply, buf);
+		worldserver.SendPacket(pack);
+		delete pack;
+		return;
+	}
+
+	auto task = taskmanager->Tasks[TaskID];
+
+	if (task == nullptr) {
+		buf.WriteInt32(TASKJOINOOZ_NOTASK);
+		auto pack = new ServerPacket(ServerOP_TaskRequestReply, buf);
+		worldserver.SendPacket(pack);
+		delete pack;
+		return;
+	}
+
+	if (task->type != TaskType::Shared) {
+		buf.WriteInt32(TASKJOINOOZ_NOTASK);
+		auto pack = new ServerPacket(ServerOP_TaskRequestReply, buf);
+		worldserver.SendPacket(pack);
+		delete pack;
+		return;
+	}
+
+	if (ActiveSharedTask != nullptr) {
+		buf.WriteInt32(TASKJOINOOZ_HAVEONE);
+		auto pack = new ServerPacket(ServerOP_TaskRequestReply, buf);
+		worldserver.SendPacket(pack);
+		delete pack;
+		return;
+	}
+
+	if (!taskmanager->AppropriateLevel(TaskID, c->GetLevel())) {
+		buf.WriteInt32(TASKJOINOOZ_LEVEL);
+		auto pack = new ServerPacket(ServerOP_TaskRequestReply, buf);
+		worldserver.SendPacket(pack);
+		delete pack;
+		return;
+	}
+
+	if (task->replay_group) {
+		auto expires = c->GetTaskLockoutExpire(task->replay_group);
+		if (expires) {
+			buf.WriteInt32(TASKJOINOOZ_TIMER);
+			buf.WriteInt32(expires);
+			auto pack = new ServerPacket(ServerOP_TaskRequestReply, buf);
+			worldserver.SendPacket(pack);
+			delete pack;
+			return;
+		}
+	}
+
+	buf.WriteInt32(TASKJOINOOZ_CAN);
+	auto pack = new ServerPacket(ServerOP_TaskRequestReply, buf);
+	worldserver.SendPacket(pack);
+	delete pack;
 }
 
 void ClientTaskState::ProcessTaskProximities(Client *c, float X, float Y, float Z) {

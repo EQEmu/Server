@@ -1970,7 +1970,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		pack->ReadString(name);
 		auto client = entity_list.GetClientByName(name);
 		if (client) {
-			// do check
+			client->HandleCanJoinSharedTask(task_id, id);
 		}
 		break;
 	}

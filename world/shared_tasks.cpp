@@ -83,3 +83,52 @@ void SharedTaskManager::HandleTaskRequest(ServerPacket *pack)
 	}
 }
 
+void SharedTaskManager::HandleTaskRequestReply(ServerPacket *pack)
+{
+	if (!pack)
+		return;
+
+	int id = pack->ReadUInt32();
+
+	char name[64] = { 0 };
+	pack->ReadString(name);
+
+	int status = pack->ReadUInt32();
+
+	auto it = tasks.find(id);
+	if (it == tasks.end()) {
+		// task already errored and no longer existed, we can ignore
+		return;
+	}
+
+	auto &task = it->second;
+
+	if (status != TASKJOINOOZ_CAN) {
+		// TODO: forward to leader
+		return;
+	}
+
+	if (!task.DecrementMissingCount())
+		tasks.erase(it);
+}
+
+bool SharedTask::DecrementMissingCount()
+{
+	--missing_count;
+	if (missing_count == 0) {
+		auto pc = client_list.FindCharacter(leader_name.c_str());
+		if (pc) {
+			SerializeBuffer buf(10);
+			buf.WriteInt32(id);				// task's ID
+			buf.WriteString(leader_name);	// leader's name
+
+			auto pack = new ServerPacket(ServerOP_TaskGrant, buf);
+			zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
+			safe_delete(pack);
+		} else {
+			return false; // error, please clean us up
+		}
+	}
+	return true;
+}
+

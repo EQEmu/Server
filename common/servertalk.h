@@ -157,6 +157,7 @@
 #define ServerOP_TaskReject			0x0302
 #define ServerOP_TaskAddPlayer		0x0303
 #define ServerOP_TaskRemovePlayer	0x0304
+#define ServerOP_TaskRequestReply	0x0305
 
 #define ServerOP_EncapPacket		0x2007	// Packet within a packet
 #define ServerOP_WorldListUpdate	0x2008
@@ -1332,6 +1333,14 @@ struct UCSServerStatus_Struct {
 		uint32 timestamp;
 	};
 };
+
+// shared task related communications
+// error constants
+#define TASKJOINOOZ_CAN				0
+#define TASKJOINOOZ_NOTASK			1
+#define TASKJOINOOZ_HAVEONE			2
+#define TASKJOINOOZ_LEVEL			3
+#define TASKJOINOOZ_TIMER			4
 
 #pragma pack()
 

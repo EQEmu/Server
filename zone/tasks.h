@@ -267,6 +267,7 @@ public:
 	void AcceptNewTask(Client *c, int TaskID, int NPCID, bool enforce_level_requirement = false);
 	void AcceptNewSharedTask(Client *c, int TaskID, int NPCID, int id);
 	void PendSharedTask(Client *c, int TaskID, int NPCID, bool enforce_level_requirement = false);
+	void HandleCanJoinSharedTask(Client *c, int TaskID, int id);
 	void FailTask(Client *c, int TaskID);
 	int TaskTimeLeft(int TaskID);
 	int IsTaskCompleted(int TaskID);
