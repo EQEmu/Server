@@ -379,7 +379,8 @@ struct NewZone_Struct {
 /*0708*/	uint32	FastRegenHP;
 /*0712*/	uint32	FastRegenMana;
 /*0716*/	uint32	FastRegenEndurance;
-/*0720*/
+/*0720*/	uint32	NPCAggroMaxDist;
+/*0724*/
 };
 
 /*

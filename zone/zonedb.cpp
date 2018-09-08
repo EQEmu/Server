@@ -146,7 +146,8 @@ bool ZoneDatabase::GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct 
 		"gravity, "					 // 56
 		"fast_regen_hp, "			 // 57
 		"fast_regen_mana, "			 // 58
-		"fast_regen_endurance "		 // 59
+		"fast_regen_endurance, "	 // 59
+		"npc_max_aggro_dist "		 // 60
 		"FROM zone WHERE zoneidnumber = %i AND version = %i",
 		zoneid, instance_id);
 	auto results = QueryDatabase(query);
@@ -194,6 +195,7 @@ bool ZoneDatabase::GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct 
 	zone_data->FastRegenHP = atoi(row[57]);
 	zone_data->FastRegenMana = atoi(row[58]);
 	zone_data->FastRegenEndurance = atoi(row[59]);
+	zone_data->NPCAggroMaxDist = atoi(row[60]);
 
 	int bindable = 0;
 	bindable = atoi(row[31]);
