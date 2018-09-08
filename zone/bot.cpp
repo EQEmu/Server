@@ -7022,7 +7022,7 @@ void Bot::CalcRestState() {
 	}
 
 	RestRegenHP = 6 * (GetMaxHP() / zone->newzone_data.FastRegenHP);
-	RestRegenMana = 6 * (GetMaxMana() / zone->newzone_data.FastRegenMana));
+	RestRegenMana = 6 * (GetMaxMana() / zone->newzone_data.FastRegenMana);
 	RestRegenEndurance = 6 * (GetMaxEndurance() / zone->newzone_data.FastRegenEndurance);
 }
 
