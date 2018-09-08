@@ -143,10 +143,10 @@ bool ZoneDatabase::GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct 
 		"snow_duration2, "			 // 53
 		"snow_duration3, "			 // 54
 		"snow_duration4, "			 // 55
-		"gravity, " 				 // 56
-		"FastRegenHP, " 			 // 57
-		"FastRegenMana, " 			 // 58
-		"FastRegenEndurance " 		 // 59
+		"gravity, "					 // 56
+		"fast_regen_hp, "			 // 57
+		"fast_regen_mana, "			 // 58
+		"fast_regen_endurance "		 // 59
 		"FROM zone WHERE zoneidnumber = %i AND version = %i",
 		zoneid, instance_id);
 	auto results = QueryDatabase(query);

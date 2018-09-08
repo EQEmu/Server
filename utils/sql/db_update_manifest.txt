@@ -379,7 +379,7 @@
 9123|2018_07_07_data_buckets.sql|SHOW TABLES LIKE 'data_buckets'|empty|
 9124|2018_07_09_tasks.sql|SHOW COLUMNS FROM `tasks` LIKE 'type'|empty|
 9125|2018_07_20_task_emote.sql|SHOW COLUMNS FROM `tasks` LIKE 'completion_emote'|empty|
-9126|2018_09_07_FastRegen.sql|SHOW COLUMNS FROM `zone` LIKE 'FastRegenHP'|empty|
+9126|2018_09_07_FastRegen.sql|SHOW COLUMNS FROM `zone` LIKE 'fast_regen_hp'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
