@@ -588,9 +588,9 @@ struct NewZone_Struct {
 /*0893*/	uint8	unknown893;		// Seen 0 - 00
 /*0894*/	uint8	fall_damage;	// 0 = Fall Damage on, 1 = Fall Damage off
 /*0895*/	uint8	unknown895;		// Seen 0 - 00
-/*0896*/	uint32	unknown896;		// Seen 180
-/*0900*/	uint32	unknown900;		// Seen 180
-/*0904*/	uint32	unknown904;		// Seen 180
+/*0896*/	uint32	FastRegenHP;		// Seen 180
+/*0900*/	uint32	FastRegenMana;		// Seen 180
+/*0904*/	uint32	FastRegenEndurance;		// Seen 180
 /*0908*/	uint32	unknown908;		// Seen 2
 /*0912*/	uint32	unknown912;		// Seen 2
 /*0916*/	float	FogDensity;		// Most zones have this set to 0.33 Blightfire had 0.16

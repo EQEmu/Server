@@ -94,9 +94,6 @@ RULE_INT(Character, SkillUpModifier, 100) //skill ups are at 100%
 RULE_BOOL(Character, SharedBankPlat, false) //off by default to prevent duping for now
 RULE_BOOL(Character, BindAnywhere, false)
 RULE_BOOL(Character, RestRegenEnabled, true) // Enable OOC Regen
-RULE_INT(Character, RestRegenHP, 180) // seconds until full from 0. this is actually zone setable, but most or all zones are 180
-RULE_INT(Character, RestRegenMana, 180) // seconds until full from 0. this is actually zone setable, but most or all zones are 180
-RULE_INT(Character, RestRegenEnd, 180) // seconds until full from 0. this is actually zone setable, but most or all zones are 180
 RULE_INT(Character, RestRegenTimeToActivate, 30) // Time in seconds for rest state regen to kick in.
 RULE_INT(Character, RestRegenRaidTimeToActivate, 300) // Time in seconds for rest state regen to kick in with a raid target.
 RULE_INT(Character, KillsPerGroupLeadershipAA, 250) // Number of dark blues or above per Group Leadership AA
