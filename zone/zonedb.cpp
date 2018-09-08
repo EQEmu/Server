@@ -146,7 +146,7 @@ bool ZoneDatabase::GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct 
 		"gravity, " 				 // 56
 		"FastRegenHP, " 			 // 57
 		"FastRegenMana, " 			 // 58
-		"FastRegenEndurance, " 		 // 59
+		"FastRegenEndurance " 		 // 59
 		"FROM zone WHERE zoneidnumber = %i AND version = %i",
 		zoneid, instance_id);
 	auto results = QueryDatabase(query);
