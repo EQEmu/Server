@@ -1557,26 +1557,46 @@ void Mob::AI_Process() {
 					case SPO_Follow: {
 
 						Mob *owner = GetOwner();
-						if (owner == nullptr)
+						if (owner == nullptr) {
 							break;
+						}
 
-						glm::vec4 ownerPos = owner->GetPosition();
-						float     dist     = DistanceSquared(m_Position, ownerPos);
-						float     distz    = ownerPos.z - m_Position.z;
+						glm::vec4 pet_owner_position = owner->GetPosition();
+						float     distance_to_owner  = DistanceSquared(m_Position, pet_owner_position);
+						float     z_distance         = pet_owner_position.z - m_Position.z;
 
-						if (dist >= 400 || distz > 100) {
-							int speed = GetWalkspeed();
-							if (dist >= 1225) // 35
-								speed = GetRunspeed();
+						if (distance_to_owner >= 400 || z_distance > 100) {
 
-							if (dist >= 202500 || distz > 100) // dist >= 450
-							{
-								m_Position = ownerPos;
+							int pet_speed = GetWalkspeed();
+
+							/**
+							 * Distance: >= 35 (Run if far away)
+							 */
+							if (distance_to_owner >= 1225) {
+								pet_speed = GetRunspeed();
+							}
+
+							/**
+							 * Distance: >= 450 (Snap to owner)
+							 */
+							if (distance_to_owner >= 202500 || z_distance > 100) {
+								m_Position = pet_owner_position;
 								SendPositionUpdate();
 								moved = true;
 							}
 							else {
-								CalculateNewPosition(owner->GetX(), owner->GetY(), owner->GetZ(), speed);
+
+								bool waypoint_changed, node_reached;
+								glm::vec3 Goal = UpdatePath(
+									owner->GetX(),
+									owner->GetY(),
+									owner->GetZ(),
+									pet_speed,
+									waypoint_changed,
+									node_reached
+								);
+
+								CalculateNewPosition(Goal.x, Goal.y, Goal.z, pet_speed, true);
 							}
 						}
 						else {
@@ -1601,24 +1621,43 @@ void Mob::AI_Process() {
 						break;
 					}
 				}
-				if (IsPetRegroup())
+				if (IsPetRegroup()) {
 					return;
+				}
 			}
 				/* Entity has been assigned another entity to follow */
 			else if (GetFollowID()) {
-				Mob *follow = entity_list.GetMob(GetFollowID());
-				if (!follow) { SetFollowID(0); }
+				Mob *follow = entity_list.GetMob(static_cast<uint16>(GetFollowID()));
+				if (!follow) {
+					SetFollowID(0);
+				}
 				else {
-					float dist2      = DistanceSquared(m_Position, follow->GetPosition());
-					int   followdist = GetFollowDistance();
 
-					if (dist2 >= followdist)    // Default follow distance is 100
-					{
+					float distance        = DistanceSquared(m_Position, follow->GetPosition());
+					int   follow_distance = GetFollowDistance();
+
+					/**
+					 * Default follow distance is 100
+					 */
+					if (distance >= follow_distance) {
 						int speed = GetWalkspeed();
-						if (dist2 >= followdist + 150) {
+
+						if (distance >= follow_distance + 150) {
 							speed = GetRunspeed();
 						}
-						CalculateNewPosition(follow->GetX(), follow->GetY(), follow->GetZ(), speed);
+
+						bool waypoint_changed, node_reached;
+
+						glm::vec3 Goal = UpdatePath(
+							follow->GetX(),
+							follow->GetY(),
+							follow->GetZ(),
+							speed,
+							waypoint_changed,
+							node_reached
+						);
+
+						CalculateNewPosition(Goal.x, Goal.y, Goal.z, speed, true);
 					}
 					else {
 						moved = false;
