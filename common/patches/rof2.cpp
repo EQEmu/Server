@@ -1880,6 +1880,9 @@ namespace RoF2
 		OUT(zone_id);
 		OUT(zone_instance);
 		OUT(SuspendBuffs);
+		OUT(FastRegenHP);
+		OUT(FastRegenMana);
+		OUT(FastRegenEndurance);
 
 		eq->FogDensity = emu->fog_density;
 
@@ -1903,9 +1906,6 @@ namespace RoF2
 		eq->bNoFear = 0;
 		eq->fall_damage = 0;	// 0 = Fall Damage on, 1 = Fall Damage off
 		eq->unknown895 = 0;
-		eq->FastRegenHP = 180;
-		eq->FastRegenMana = 180;
-		eq->FastRegenEndurance = 180;
 		eq->CanPlaceCampsite = 2;
 		eq->CanPlaceGuildBanner = 2;
 		eq->FishingRelated = -1;	// Set from PoK Example
