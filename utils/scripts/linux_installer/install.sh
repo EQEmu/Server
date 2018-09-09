@@ -56,7 +56,8 @@ export apt_options="-y -qq" # Set autoconfirm and silent install
 
 if [ ! -f ./install_variables.txt ]; then
 
-read -n1 -r -p "Press any key to continue..." key
+	read -n1 -r -p "Press any key to continue..." key
+	
 	#::: Setting up user environment (eqemu)
 	echo "First, we need to set your passwords..."
 	echo "Make sure that you remember these and keep them somewhere"
