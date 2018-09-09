@@ -2070,7 +2070,7 @@ int ZoneDatabase::CountCharacterInvSnapshots(uint32 character_id) {
 	auto row = results.begin();
 
 	int64 count = atoll(row[0]);
-	if (count > INT_MAX)
+	if (count > 2147483647)
 		return -2;
 	if (count < 0)
 		return -3;
