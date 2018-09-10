@@ -26,7 +26,14 @@ SELECT 'post-transform count..',
 -- update `inventory` slots
 UPDATE `inventory` SET `slotid` = 33 WHERE `slotid` = 30; -- adjust cursor
 UPDATE `inventory` SET `slotid` = (`slotid` + 20) WHERE `slotid` >= 331 AND `slotid` <= 340; -- adjust cursor bags
-UPDATE `inventory` SET `slotid` = (`slotid` + 1) WHERE `slotid` >= 22 AND `slotid` <= 29; -- adjust general slots
+UPDATE `inventory` SET `slotid` = 30 WHERE `slotid` = 29; -- adjust general8 slot
+UPDATE `inventory` SET `slotid` = 29 WHERE `slotid` = 28; -- adjust general7 slot
+UPDATE `inventory` SET `slotid` = 28 WHERE `slotid` = 27; -- adjust general6 slot
+UPDATE `inventory` SET `slotid` = 27 WHERE `slotid` = 26; -- adjust general5 slot
+UPDATE `inventory` SET `slotid` = 26 WHERE `slotid` = 25; -- adjust general4 slot
+UPDATE `inventory` SET `slotid` = 25 WHERE `slotid` = 24; -- adjust general3 slot
+UPDATE `inventory` SET `slotid` = 24 WHERE `slotid` = 23; -- adjust general2 slot
+UPDATE `inventory` SET `slotid` = 23 WHERE `slotid` = 22; -- adjust general1 slot
 -- current general bags remain the same
 UPDATE `inventory` SET `slotid` = 22 WHERE `slotid` = 21; -- adjust ammo slot
 UPDATE `inventory` SET `slotid` = 21 WHERE `slotid` = 9999; -- adjust powersource slot
@@ -35,7 +42,14 @@ UPDATE `inventory` SET `slotid` = 21 WHERE `slotid` = 9999; -- adjust powersourc
 -- update `character_corpse_items` slots
 UPDATE `character_corpse_items` SET `equip_slot` = 33 WHERE `equip_slot` = 30; -- adjust cursor
 UPDATE `character_corpse_items` SET `equip_slot` = (`equip_slot` + 20) WHERE `equip_slot` >= 331 AND `equip_slot` <= 340; -- adjust cursor bags
-UPDATE `character_corpse_items` SET `equip_slot` = (`equip_slot` + 1) WHERE `equip_slot` >= 22 AND `equip_slot` <= 29; -- adjust general slots
+UPDATE `character_corpse_items` SET `equip_slot` = 30 WHERE `equip_slot` = 29; -- adjust general8 slot
+UPDATE `character_corpse_items` SET `equip_slot` = 29 WHERE `equip_slot` = 28; -- adjust general7 slot
+UPDATE `character_corpse_items` SET `equip_slot` = 28 WHERE `equip_slot` = 27; -- adjust general6 slot
+UPDATE `character_corpse_items` SET `equip_slot` = 27 WHERE `equip_slot` = 26; -- adjust general5 slot
+UPDATE `character_corpse_items` SET `equip_slot` = 26 WHERE `equip_slot` = 25; -- adjust general4 slot
+UPDATE `character_corpse_items` SET `equip_slot` = 25 WHERE `equip_slot` = 24; -- adjust general3 slot
+UPDATE `character_corpse_items` SET `equip_slot` = 24 WHERE `equip_slot` = 23; -- adjust general2 slot
+UPDATE `character_corpse_items` SET `equip_slot` = 23 WHERE `equip_slot` = 22; -- adjust general1 slot
 -- current general bags remain the same
 UPDATE `character_corpse_items` SET `equip_slot` = 22 WHERE `equip_slot` = 21; -- adjust ammo slot
 UPDATE `character_corpse_items` SET `equip_slot` = 21 WHERE `equip_slot` = 9999; -- adjust powersource slot
