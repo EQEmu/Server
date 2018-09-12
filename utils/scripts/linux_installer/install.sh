@@ -54,36 +54,39 @@ export apt_options="-y -qq" # Set autoconfirm and silent install
 
 ################################################################
 
-read -n1 -r -p "Press any key to continue..." key
+if [ ! -f ./install_variables.txt ]; then
 
-#::: Setting up user environment (eqemu)
-echo "First, we need to set your passwords..."
-echo "Make sure that you remember these and keep them somewhere"
-echo ""
-echo ""
-groupadd eqemu
-useradd -g eqemu -d $eqemu_server_directory eqemu
-passwd eqemu
+	read -n1 -r -p "Press any key to continue..." key
+	
+	#::: Setting up user environment (eqemu)
+	echo "First, we need to set your passwords..."
+	echo "Make sure that you remember these and keep them somewhere"
+	echo ""
+	echo ""
+	groupadd eqemu
+	useradd -g eqemu -d $eqemu_server_directory eqemu
+	passwd eqemu
 
-#::: Make server directory and go to it
-mkdir $eqemu_server_directory
-cd $eqemu_server_directory
+	#::: Make server directory and go to it
+	mkdir $eqemu_server_directory
+	cd $eqemu_server_directory
 
-#::: Setup MySQL root user PW
-read -p "Enter MySQL root (Database) password: " eqemu_db_root_password
+	#::: Setup MySQL root user PW
+	read -p "Enter MySQL root (Database) password: " eqemu_db_root_password
 
-#::: Write install variables (later use)
-echo "mysql_root:$eqemu_db_root_password" > install_variables.txt
+	#::: Write install variables (later use)
+	echo "mysql_root:$eqemu_db_root_password" > install_variables.txt
 
-#::: Setup MySQL server 
-read -p "Enter Database Name (single word, no special characters, lower case):" eqemu_db_name
-read -p "Enter (Database) MySQL EQEmu Server username: " eqemu_db_username
-read -p "Enter (Database) MySQL EQEmu Server password: " eqemu_db_password
+	#::: Setup MySQL server 
+	read -p "Enter Database Name (single word, no special characters, lower case):" eqemu_db_name
+	read -p "Enter (Database) MySQL EQEmu Server username: " eqemu_db_username
+	read -p "Enter (Database) MySQL EQEmu Server password: " eqemu_db_password
 
-#::: Write install variables (later use)
-echo "mysql_eqemu_db_name:$eqemu_db_name" >> install_variables.txt
-echo "mysql_eqemu_user:$eqemu_db_username" >> install_variables.txt
-echo "mysql_eqemu_password:$eqemu_db_password" >> install_variables.txt
+	#::: Write install variables (later use)
+	echo "mysql_eqemu_db_name:$eqemu_db_name" >> install_variables.txt
+	echo "mysql_eqemu_user:$eqemu_db_username" >> install_variables.txt
+	echo "mysql_eqemu_password:$eqemu_db_password" >> install_variables.txt
+fi
 
 if [[ "$OS" == "Debian" ]]; then
 	# Install pre-req packages
