@@ -66,6 +66,8 @@ class SharedDatabase : public Database
 		*/
 		bool	SetGMSpeed(uint32 account_id, uint8 gmspeed);
 		uint8	GetGMSpeed(uint32 account_id);
+		bool SetNoDelay(uint32 account_id, int16 attackdelay);
+		int16 GetNoDelay(uint32 account_id);
 		bool	SetHideMe(uint32 account_id, uint8 hideme);
 		int32	DeleteStalePlayerCorpses();
 		void	LoadCharacterInspectMessage(uint32 character_id, InspectMessage_Struct* message);

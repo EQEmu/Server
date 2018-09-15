@@ -5182,6 +5182,13 @@ void Client::SetAttackTimer()
 
 	Timer *TimerToUse = nullptr;
 
+	// toggled from #nodelay [on/off] [milliseconds]
+	if (no_delay) {
+		attack_timer.SetAtTrigger(no_delay_time, true);
+		TimerToUse = &attack_timer;
+		return;
+	}
+
 	for (int i = EQEmu::invslot::slotRange; i <= EQEmu::invslot::slotSecondary; i++) {
 		//pick a timer
 		if (i == EQEmu::invslot::slotPrimary)
@@ -5264,6 +5271,13 @@ void NPC::SetAttackTimer()
 	attack_timer.SetAtTrigger(4000, true);
 
 	Timer *TimerToUse = nullptr;
+
+	if (no_delay) {
+		attack_timer.SetAtTrigger(no_delay_time, true);
+		TimerToUse = &attack_timer;
+		return;
+	}
+
 	int hhe = itembonuses.HundredHands + spellbonuses.HundredHands;
 
 	// Technically NPCs should do some logic for weapons, but the effect is minimal

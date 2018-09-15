@@ -967,6 +967,8 @@ public:
 	int GetSnaredAmount();
 	inline const bool IsPseudoRooted() const { return pseudo_rooted; }
 	inline void SetPseudoRoot(bool prState) { pseudo_rooted = prState; }
+	inline void SetNoDelay(bool value, uint32 ms) { no_delay = value; no_delay_time = ms; }
+	inline bool IsNoDelay() { return no_delay; }
 
 	int GetCurWp() { return cur_wp; }
 
@@ -1342,6 +1344,9 @@ protected:
 	int16 slow_mitigation; // Allows for a slow mitigation (100 = 100%, 50% = 50%)
 	Timer tic_timer;
 	Timer mana_timer;
+
+	uint32 no_delay_time{4000};
+	bool no_delay{false};
 
 	//spell casting vars
 	Timer spellend_timer;

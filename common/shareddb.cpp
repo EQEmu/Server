@@ -100,6 +100,33 @@ bool SharedDatabase::SetGMSpeed(uint32 account_id, uint8 gmspeed)
 	return true;
 }
 
+bool SharedDatabase::SetNoDelay(uint32 account_id, int16 attackdelay)
+{
+	std::string query = StringFormat("UPDATE account SET nodelay = %i WHERE id = %i", attackdelay, account_id);
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		return false;
+	}
+
+	return true;
+}
+
+int16 SharedDatabase::GetNoDelay(uint32 account_id)
+{
+	std::string query = StringFormat("SELECT nodelay FROM account WHERE id = '%i'", account_id);
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		return 0;
+	}
+
+	if (results.RowCount() != 1)
+		return 0;
+
+	auto row = results.begin();
+
+	return atoi(row[0]);
+}
+
 uint32 SharedDatabase::GetTotalTimeEntitledOnAccount(uint32 AccountID) {
 	uint32 EntitledTime = 0;
 	std::string query = StringFormat("SELECT `time_played` FROM `character_data` WHERE `account_id` = %u", AccountID);
