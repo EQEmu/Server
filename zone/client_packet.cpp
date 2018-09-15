@@ -1299,7 +1299,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		account_creation = atoul(row[6]);
 		
 		int16 delay   = atoi(row[7]);
-		no_delay      = delay != -1 ? true : false;
+		no_delay      = delay < 0 ? false : true;
 		no_delay_time = delay;
 	}
 
