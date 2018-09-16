@@ -356,15 +356,20 @@ int32 Client::GetActSpellCost(uint16 spell_id, int32 cost)
 		cost -= mana_back;
 	}
 
-	int spec = GetSpecializeSkillValue(spell_id);
-	int PercentManaReduction = 0;
-	if (spec)
-		PercentManaReduction = 1 + spec / 20; // there seems to be some non-obvious rounding here, let's truncate for now.
+	// Formula used from Graffe's testing
+	// https://www.graffe.com/forums/showthread.php?3471-Spell-Casting-Mastery-tests-(no-NOT-fury-mastery)
+	// Info in in-era for 2002
+	float SpecializeSkill = GetSpecializeSkillValue(spell_id);
+	float PercentManaReduction = SpecializeSkill / 20.0f;
+
+	// SCM effects count as an AA-based focus effect, so are rolled into the GetFocusEffect function
 
 	int16 focus_redux = GetFocusEffect(focusManaCost, spell_id);
+
+	// random roll of mana preservation effects handled inside GetFocusEffect function, no need to randomize here
 	PercentManaReduction += focus_redux;
 
-	cost -= cost * PercentManaReduction / 100;
+	cost -= (cost * (PercentManaReduction / 100));
 
 	// Gift of Mana - reduces spell cost to 1 mana
 	if(focus_redux >= 100) {

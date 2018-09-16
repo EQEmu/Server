@@ -3477,8 +3477,7 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 					if (caster->IsClient()) {
 						if (!caster->CastToClient()->GetFeigned())
 							AddToHateList(caster, -effect_value);
-					} else if (!IsClient()) // Allow NPC's to generate hate if casted on other
-								// NPC's.
+					} else if (!IsClient()) // Allow NPC's to generate hate if casted on other NPC's.
 						AddToHateList(caster, -effect_value);
 				}
 
@@ -3583,6 +3582,12 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 		case SE_Charm: {
 			if (!caster || !PassCharismaCheck(caster, buff.spellid)) {
 				BuffFadeByEffect(SE_Charm);
+
+				// Remove from hate list of any NPC's hate list and remove all NPCs this hate list
+				if (IsNPC()) {
+					entity_list.RemoveFromHateLists(this);
+					WipeHateList(true);
+				}
 			}
 
 			break;
