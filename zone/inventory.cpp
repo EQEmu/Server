@@ -610,15 +610,15 @@ void Client::DropItem(int16 slot_id, bool recurse)
 			if (LogSys.log_settings[Logs::Inventory].is_category_enabled) {
 				Log(Logs::General, Logs::Inventory, "DropItem() Hack detected - full item parse:");
 				Log(Logs::General, Logs::Inventory, "depth: 0, Item: '%s' (id: %u), IsDroppable: %s",
-					(invalid_drop->GetItem() ? invalid_drop->GetItem()->Name : "null data"), invalid_drop->GetID(), invalid_drop->IsDroppable(false));
+					(invalid_drop->GetItem() ? invalid_drop->GetItem()->Name : "null data"), invalid_drop->GetID(), (invalid_drop->IsDroppable(false) ? "true" : "false"));
 
 				for (auto iter1 : *invalid_drop->GetContents()) { // depth 1
 					Log(Logs::General, Logs::Inventory, "-depth: 1, Item: '%s' (id: %u), IsDroppable: %s",
-						(iter1.second->GetItem() ? iter1.second->GetItem()->Name : "null data"), iter1.second->GetID(), iter1.second->IsDroppable(false));
+						(iter1.second->GetItem() ? iter1.second->GetItem()->Name : "null data"), iter1.second->GetID(), (iter1.second->IsDroppable(false) ? "true" : "false"));
 
 					for (auto iter2 : *iter1.second->GetContents()) { // depth 2
 						Log(Logs::General, Logs::Inventory, "--depth: 2, Item: '%s' (id: %u), IsDroppable: %s",
-							(iter2.second->GetItem() ? iter2.second->GetItem()->Name : "null data"), iter2.second->GetID(), iter2.second->IsDroppable(false));
+							(iter2.second->GetItem() ? iter2.second->GetItem()->Name : "null data"), iter2.second->GetID(), (iter2.second->IsDroppable(false) ? "true" : "false"));
 					}
 				}
 			}
@@ -636,21 +636,21 @@ void Client::DropItem(int16 slot_id, bool recurse)
 		if (LogSys.log_settings[Logs::Inventory].is_category_enabled) {
 			Log(Logs::General, Logs::Inventory, "DropItem() Processing - full item parse:");
 			Log(Logs::General, Logs::Inventory, "depth: 0, Item: '%s' (id: %u), IsDroppable: %s",
-				(inst->GetItem() ? inst->GetItem()->Name : "null data"), inst->GetID(), inst->IsDroppable(false));
+				(inst->GetItem() ? inst->GetItem()->Name : "null data"), inst->GetID(), (inst->IsDroppable(false) ? "true" : "false"));
 
 			if (!inst->IsDroppable(false))
 				Log(Logs::General, Logs::Error, "Non-droppable item being processed for drop by '%s'", GetCleanName());
 
 			for (auto iter1 : *inst->GetContents()) { // depth 1
 				Log(Logs::General, Logs::Inventory, "-depth: 1, Item: '%s' (id: %u), IsDroppable: %s",
-					(iter1.second->GetItem() ? iter1.second->GetItem()->Name : "null data"), iter1.second->GetID(), iter1.second->IsDroppable(false));
+					(iter1.second->GetItem() ? iter1.second->GetItem()->Name : "null data"), iter1.second->GetID(), (iter1.second->IsDroppable(false) ? "true" : "false"));
 
 				if (!iter1.second->IsDroppable(false))
 					Log(Logs::General, Logs::Error, "Non-droppable item being processed for drop by '%s'", GetCleanName());
 
 				for (auto iter2 : *iter1.second->GetContents()) { // depth 2
 					Log(Logs::General, Logs::Inventory, "--depth: 2, Item: '%s' (id: %u), IsDroppable: %s",
-						(iter2.second->GetItem() ? iter2.second->GetItem()->Name : "null data"), iter2.second->GetID(), iter2.second->IsDroppable(false));
+						(iter2.second->GetItem() ? iter2.second->GetItem()->Name : "null data"), iter2.second->GetID(), (iter2.second->IsDroppable(false) ? "true" : "false"));
 
 					if (!iter2.second->IsDroppable(false))
 						Log(Logs::General, Logs::Error, "Non-droppable item being processed for drop by '%s'", GetCleanName());
@@ -688,8 +688,77 @@ void Client::DropItem(int16 slot_id, bool recurse)
 	object->StartDecay();
 
 	Log(Logs::General, Logs::Inventory, "Item drop handled ut assolet");
+	DropItemQS(inst, false);
 
 	safe_delete(inst);
+}
+
+void Client::DropItemQS(EQEmu::ItemInstance* inst, bool pickup) {
+	if (RuleB(QueryServ, PlayerDropItems)) {
+		QSPlayerDropItem_Struct qs_audit;
+		std::list<void*> event_details;
+		memset(&qs_audit, 0, sizeof(QSPlayerDropItem_Struct));
+
+		qs_audit.char_id = this->character_id;
+		qs_audit.pickup = pickup;
+		qs_audit.zone_id = this->GetZoneID();
+		qs_audit.x = (int) this->GetX();
+		qs_audit.y = (int) this->GetY();
+		qs_audit.z = (int) this->GetZ();
+
+		if (inst) {
+			auto detail = new QSDropItems_Struct;
+			detail->item_id = inst->GetID();
+			detail->charges = inst->IsClassBag() ? 1 : inst->GetCharges();
+			detail->aug_1 = inst->GetAugmentItemID(1);
+			detail->aug_2 = inst->GetAugmentItemID(2);
+			detail->aug_3 = inst->GetAugmentItemID(3);
+			detail->aug_4 = inst->GetAugmentItemID(4);
+			detail->aug_5 = inst->GetAugmentItemID(5);
+			event_details.push_back(detail);
+
+			if (inst->IsClassBag()) {
+				for (uint8 sub_slot = EQEmu::invbag::SLOT_BEGIN; (sub_slot <= EQEmu::invbag::SLOT_END); ++sub_slot) { // this is to catch ALL items
+					const EQEmu::ItemInstance* bag_inst = inst->GetItem(sub_slot);
+					if (bag_inst) {
+						detail = new QSDropItems_Struct;
+						detail->item_id = bag_inst->GetID();
+						detail->charges = (!bag_inst->IsStackable() ? 1 : bag_inst->GetCharges());
+						detail->aug_1 = bag_inst->GetAugmentItemID(1);
+						detail->aug_2 = bag_inst->GetAugmentItemID(2);
+						detail->aug_3 = bag_inst->GetAugmentItemID(3);
+						detail->aug_4 = bag_inst->GetAugmentItemID(4);
+						detail->aug_5 = bag_inst->GetAugmentItemID(5);
+						event_details.push_back(detail);
+					}
+				}
+			}
+		}
+		qs_audit._detail_count = event_details.size();
+
+		auto qs_pack = new ServerPacket(
+				ServerOP_QSPlayerDropItem,
+				sizeof(QSPlayerDropItem_Struct) +
+				(sizeof(QSDropItems_Struct) * qs_audit._detail_count));
+		QSPlayerDropItem_Struct* qs_buf = (QSPlayerDropItem_Struct*) qs_pack->pBuffer;
+
+		memcpy(qs_buf, &qs_audit, sizeof(QSPlayerDropItem_Struct));
+
+		int offset = 0;
+
+		for (auto iter = event_details.begin(); iter != event_details.end(); ++iter, ++offset) {
+			QSDropItems_Struct* detail = reinterpret_cast<QSDropItems_Struct*>(*iter);
+			qs_buf->items[offset] = *detail;
+			safe_delete(detail);
+		}
+
+		event_details.clear();
+
+		if (worldserver.Connected())
+			worldserver.SendPacket(qs_pack);
+
+		safe_delete(qs_pack);
+	}
 }
 
 // Drop inst

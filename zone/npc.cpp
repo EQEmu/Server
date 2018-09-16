@@ -116,7 +116,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, const glm::vec4& position, int if
 	knightattack_timer(1000),
 	assist_timer(AIassistcheck_delay),
 	qglobal_purge_timer(30000),
-	sendhpupdate_timer(2000),
+	send_hp_update_timer(2000),
 	enraged_timer(1000),
 	taunt_timer(TauntReuseTime * 1000),
 	m_SpawnPoint(position),
@@ -242,8 +242,8 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, const glm::vec4& position, int if
 	roambox_max_y = -2;
 	roambox_min_x = -2;
 	roambox_min_y = -2;
-	roambox_movingto_x = -2;
-	roambox_movingto_y = -2;
+	roambox_destination_x = -2;
+	roambox_destination_y = -2;
 	roambox_min_delay = 1000;
 	roambox_delay = 1000;
 	p_depop = false;
@@ -745,11 +745,11 @@ bool NPC::Process()
 		}
 	}
 
-	// we might actually want to reset in this check ... won't until issues arise at least :P
-	if (sendhpupdate_timer.Check(false) && (IsTargeted() || (IsPet() && GetOwner() && GetOwner()->IsClient()))) {
-		if(!IsFullHP || cur_hp<max_hp){
-			SendHPUpdate();
-		}
+	/**
+	 * Send HP updates when engaged
+	 */
+	if (send_hp_update_timer.Check(false) && this->IsEngaged()) {
+		SendHPUpdate();
 	}
 
 	if(HasVirus()) {
@@ -1689,6 +1689,65 @@ void NPC::PickPocket(Client* thief)
 
 	thief->Message(0, "This target's pockets are empty");
 	thief->SendPickPocketResponse(this, 0, PickPocketFailed);
+}
+
+void NPC::Disarm(Client* client, int chance) {
+	// disarm primary if available, otherwise disarm secondary
+	const EQEmu::ItemData* weapon = NULL;
+	uint8 eslot = 0xFF;
+	if (equipment[EQEmu::invslot::slotPrimary] != 0)
+		eslot = EQEmu::invslot::slotPrimary;
+	else if (equipment[EQEmu::invslot::slotSecondary] != 0)
+		eslot = EQEmu::invslot::slotSecondary;
+	if (eslot != 0xFF) {
+		if (zone->random.Int(0, 1000) <= chance) {
+			weapon = database.GetItem(equipment[eslot]);
+			if (weapon) {
+				if (!weapon->Magic && weapon->NoDrop == 255) {
+					int16 charges = -1;
+					ItemList::iterator cur, end;
+					cur = itemlist.begin();
+					end = itemlist.end();
+					// Get charges for the item in the loot table
+					for (; cur != end; cur++) {
+						ServerLootItem_Struct* citem = *cur;
+						if (citem->item_id == weapon->ID) {
+							charges = citem->charges;
+							break;
+						}
+					}
+					EQEmu::ItemInstance *inst = NULL;
+					inst = database.CreateItem(weapon->ID, charges);
+					// Remove item from loot table
+					RemoveItem(weapon->ID);
+					CalcBonuses();
+					if (inst) {
+						// create a ground item
+						Object* object = new Object(inst, this->GetX(), this->GetY(), this->GetZ(), 0.0f, 300000);
+						entity_list.AddObject(object, true);
+						object->StartDecay();
+						safe_delete(inst);
+					}
+				}
+			}
+			// Update Appearance
+			equipment[eslot] = 0;
+			int matslot = eslot == EQEmu::invslot::slotPrimary ? EQEmu::textures::weaponPrimary : EQEmu::textures::weaponSecondary;
+			if (matslot != -1)
+				SendWearChange(matslot);
+			if ((CastToMob()->GetBodyType() == BT_Humanoid || CastToMob()->GetBodyType() == BT_Summoned) && eslot == EQEmu::invslot::slotPrimary)
+				Say("Ahh! My weapon!");
+			client->Message_StringID(MT_Skills, DISARM_SUCCESS, this->GetCleanName());
+			if (chance != 1000)
+				client->CheckIncreaseSkill(EQEmu::skills::SkillDisarm, nullptr, 4);
+			return;
+		}
+		client->Message_StringID(MT_Skills, DISARM_FAILED);
+		if (chance != 1000)
+			client->CheckIncreaseSkill(EQEmu::skills::SkillDisarm, nullptr, 2);
+		return;
+	}
+	client->Message_StringID(MT_Skills, DISARM_FAILED);
 }
 
 void Mob::NPCSpecialAttacks(const char* parse, int permtag, bool reset, bool remove) {
@@ -2654,9 +2713,11 @@ uint32 NPC::GetSpawnKillCount()
 void NPC::DoQuestPause(Mob *other) {
 	if(IsMoving() && !IsOnHatelist(other)) {
 		PauseWandering(RuleI(NPC, SayPauseTimeInSec));
-		FaceTarget(other);
+		if (other && !other->sneaking)
+			FaceTarget(other);
 	} else if(!IsMoving()) {
-		FaceTarget(other);
+		if (other && !other->sneaking && GetAppearance() != eaSitting && GetAppearance() != eaDead)
+			FaceTarget(other);
 	}
 
 }

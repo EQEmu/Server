@@ -143,7 +143,11 @@ bool ZoneDatabase::GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct 
 		"snow_duration2, "			 // 53
 		"snow_duration3, "			 // 54
 		"snow_duration4, "			 // 55
-		"gravity " 				     // 56
+		"gravity, "					 // 56
+		"fast_regen_hp, "			 // 57
+		"fast_regen_mana, "			 // 58
+		"fast_regen_endurance, "	 // 59
+		"npc_max_aggro_dist "		 // 60
 		"FROM zone WHERE zoneidnumber = %i AND version = %i",
 		zoneid, instance_id);
 	auto results = QueryDatabase(query);
@@ -187,6 +191,11 @@ bool ZoneDatabase::GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct 
 	zone_data->gravity = atof(row[56]);
 	Log(Logs::General, Logs::Debug, "Zone Gravity is %f", zone_data->gravity);
 	allow_mercs = true;
+
+	zone_data->FastRegenHP = atoi(row[57]);
+	zone_data->FastRegenMana = atoi(row[58]);
+	zone_data->FastRegenEndurance = atoi(row[59]);
+	zone_data->NPCAggroMaxDist = atoi(row[60]);
 
 	int bindable = 0;
 	bindable = atoi(row[31]);
@@ -3842,12 +3851,16 @@ uint32 ZoneDatabase::CreateGraveyardRecord(uint32 graveyard_zone_id, const glm::
 	return 0;
 }
 uint32 ZoneDatabase::SendCharacterCorpseToGraveyard(uint32 dbid, uint32 zone_id, uint16 instance_id, const glm::vec4& position) {
+
+	double xcorpse = (position.x + zone->random.Real(-20,20));
+	double ycorpse = (position.y + zone->random.Real(-20,20));
+
 	std::string query = StringFormat("UPDATE `character_corpses` "
                                     "SET `zone_id` = %u, `instance_id` = 0, "
                                     "`x` = %1.1f, `y` = %1.1f, `z` = %1.1f, `heading` = %1.1f, "
                                     "`was_at_graveyard` = 1 "
                                     "WHERE `id` = %d",
-                                    zone_id, position.x, position.y, position.z, position.w, dbid);
+                                    zone_id, xcorpse, ycorpse, position.z, position.w, dbid);
 	QueryDatabase(query);
 	return dbid;
 }

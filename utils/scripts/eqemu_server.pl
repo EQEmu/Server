@@ -40,7 +40,12 @@ if($Config{osname}=~/freebsd|linux/i){
 if($Config{osname}=~/Win|MS/i){ 
 	$OS = "Windows"; 
 }
+
 $has_internet_connection = check_internet_connection();
+if(-e "skip_internet_connection_check.txt"){
+	$has_internet_connection = 1;
+}
+
 ($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = localtime();
 
 if(-e "eqemu_server_skip_update.txt"){
@@ -167,19 +172,19 @@ sub show_install_summary_info {
 	if (-e "install_variables.txt") {
 		$file_to_open = "install_variables.txt";
 	}
-	elsif(-e "../install_variables.txt"){
+	elsif (-e "../install_variables.txt") {
 		$file_to_open = "../install_variables.txt";
 	}
-	open (INSTALL_VARS, $file_to_open);
-	while (<INSTALL_VARS>){
+	open(INSTALL_VARS, $file_to_open);
+	while (<INSTALL_VARS>) {
 		chomp;
 		$o = $_;
 		@data = split(":", $o);
 		print " - " . $data[0] . "\t" . $data[1] . "\n";
 	}
-	close (INSTALL_VARS);
-	
-	if($OS eq "Windows"){
+	close(INSTALL_VARS);
+
+	if ($OS eq "Windows") {
 		print "[Install] Windows Utility Scripts:\n";
 		print " - t_start_server.bat			Starts EQEmu server with 30 dynamic zones, UCS & Queryserv, dynamic zones\n";
 		print " - t_start_server_with_loginserver.bat	Starts EQEmu server with 30 zones with loginserver\n";
@@ -187,16 +192,16 @@ sub show_install_summary_info {
 		print " - t_database_backup.bat		Backs up the Database to backups/ folder - do not run during server is online\n";
 		print " - t_server_crash_report.pl 		Will parse any zone crashes for reporting to developers\n";
 	}
-	if($OS eq "Linux"){
+	if ($OS eq "Linux") {
 		print "[Install] Linux Utility Scripts:\n";
 		print " - server_start.sh			Starts EQEmu server (Quiet) with 30 dynamic zones, UCS & Queryserv, dynamic zones\n";
 		print " - server_start_dev.sh			Starts EQEmu server with 10 dynamic zones, UCS & Queryserv, dynamic zones all verbose\n";
 		print " - server_stop.sh			Stops EQEmu Server (No warning)\n";
 		print " - server_status.sh			Prints the status of the EQEmu Server processes\n";
 	}
-	
+
 	print "[Configure] eqemu_config.xml 		Edit to change server settings and name\n";
-	
+
 	analytics_insertion("install_complete", "null");
 }
 
@@ -826,6 +831,7 @@ sub show_menu_prompt {
 		elsif($input eq "setup_bots"){ setup_bots(); $dc = 1; }
 		elsif($input eq "linux_login_server_setup"){ do_linux_login_server_setup(); $dc = 1; }
 		elsif($input eq "quest_heading_convert"){ quest_heading_convert(); $dc = 1; }
+		elsif($input eq "source_peq_db"){ fetch_peq_db_full(); $dc = 1; }
 		elsif($input eq "exit"){
 			exit;
 		}

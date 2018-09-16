@@ -4243,12 +4243,69 @@ void bot_subcommand_bot_clone(Client *c, const Seperator *sep)
 
 void bot_subcommand_bot_create(Client *c, const Seperator *sep)
 {
-	const std::string msg_class = StringFormat("class: %u(WAR), %u(CLR), %u(PAL), %u(RNG), %u(SHD), %u(DRU), %u(MNK), %u(BRD), %u(ROG), %u(SHM), %u(NEC), %u(WIZ), %u(MAG), %u(ENC), %u(BST), %u(BER)",
-		WARRIOR, CLERIC, PALADIN, RANGER, SHADOWKNIGHT, DRUID, MONK, BARD, ROGUE, SHAMAN, NECROMANCER, WIZARD, MAGICIAN, ENCHANTER, BEASTLORD, BERSERKER);
-	const std::string msg_race = StringFormat("race: %u(HUM), %u(BAR), %u(ERU), %u(ELF), %u(HIE), %u(DEF), %u(HEF), %u(DWF), %u(TRL), %u(OGR), %u(HFL), %u(GNM), %u(IKS), %u(VAH), %u(FRG), %u(DRK)",
-		HUMAN, BARBARIAN, ERUDITE, WOOD_ELF, HIGH_ELF, DARK_ELF, HALF_ELF, DWARF, TROLL, OGRE, HALFLING, GNOME, IKSAR, VAHSHIR, FROGLOK, DRAKKIN);
-	const std::string msg_gender = StringFormat("gender: %u(M), %u(F)", MALE, FEMALE);
-	
+	const std::string class_substrs[17] = { "",
+		"%u(WAR)", "%u(CLR)", "%u(PAL)", "%u(RNG)",
+		"%u(SHD)", "%u(DRU)", "%u(MNK)", "%u(BRD)",
+		"%u(ROG)", "%u(SHM)", "%u(NEC)", "%u(WIZ)",
+		"%u(MAG)", "%u(ENC)", "%u(BST)", "%u(BER)"
+	};
+
+	const std::string race_substrs[17] = { "",
+		"%u(HUM)", "%u(BAR)", "%u(ERU)", "%u(ELF)",
+		"%u(HIE)", "%u(DEF)", "%u(HEF)", "%u(DWF)",
+		"%u(TRL)", "%u(OGR)", "%u(HFL)", "%u(GNM)",
+		"%u(IKS)", "%u(VAH)", "%u(FRG)", "%u(DRK)"
+	};
+
+	const uint16 race_values[17] = { 0,
+		HUMAN, BARBARIAN, ERUDITE, WOOD_ELF,
+		HIGH_ELF, DARK_ELF, HALF_ELF, DWARF,
+		TROLL, OGRE, HALFLING, GNOME,
+		IKSAR, VAHSHIR, FROGLOK, DRAKKIN
+	};
+
+	const std::string gender_substrs[2] = {
+		"%u(M)", "%u(F)",
+	};
+
+	std::string msg_class = "class:";
+	std::string msg_race = "race:";
+	std::string msg_gender = "gender:";
+	std::string msg_separator;
+
+	msg_separator = " ";
+	for (int i = 0; i <= 15; ++i) {
+		if (((1 << i) & RuleI(Bots, AllowedClasses)) == 0)
+			continue;
+
+		msg_class.append(const_cast<const std::string&>(msg_separator));
+		msg_class.append(StringFormat(class_substrs[i + 1].c_str(), (i + 1)));
+
+		msg_separator = ", ";
+	}
+
+	msg_separator = " ";
+	for (int i = 0; i <= 15; ++i) {
+		if (((1 << i) & RuleI(Bots, AllowedRaces)) == 0)
+			continue;
+
+		msg_race.append(const_cast<const std::string&>(msg_separator));
+		msg_race.append(StringFormat(race_substrs[i + 1].c_str(), race_values[i + 1]));
+
+		msg_separator = ", ";
+	}
+
+	msg_separator = " ";
+	for (int i = 0; i <= 1; ++i) {
+		if (((1 << i) & RuleI(Bots, AllowedGenders)) == 0)
+			continue;
+
+		msg_gender.append(const_cast<const std::string&>(msg_separator));
+		msg_gender.append(StringFormat(gender_substrs[i].c_str(), i));
+
+		msg_separator = ", ";
+	}
+
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_create", sep->arg[0], "botcreate"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
@@ -7588,14 +7645,33 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 		return bot_id;
 	}
 
+	auto class_bit = GetPlayerClassBit(bot_class);
+	if ((class_bit & RuleI(Bots, AllowedClasses)) == PLAYER_CLASS_UNKNOWN_BIT) {
+		bot_owner->Message(m_fail, "Class '%s' bots are not allowed on this server", GetPlayerClassName(bot_class));
+		return bot_id;
+	}
+
+	auto race_bit = GetPlayerRaceBit(bot_race);
+	if ((race_bit & RuleI(Bots, AllowedRaces)) == PLAYER_RACE_UNKNOWN_BIT) {
+		bot_owner->Message(m_fail, "Race '%s' bots are not allowed on this server", GetPlayerRaceName(bot_class));
+		return bot_id;
+	}
+
 	if (!Bot::IsValidRaceClassCombo(bot_race, bot_class)) {
 		bot_owner->Message(m_fail, "'%s'(%u):'%s'(%u) is an invalid race-class combination",
 			Bot::RaceIdToString(bot_race).c_str(), bot_race, Bot::ClassIdToString(bot_class).c_str(), bot_class);
 		return bot_id;
 	}
 
-	if (bot_gender > FEMALE) {
-		bot_owner->Message(m_fail, "gender: %u(M), %u(F)", MALE, FEMALE);
+	if (bot_gender > FEMALE || (((1 << bot_gender) & RuleI(Bots, AllowedGenders)) == 0)) {
+		if (RuleI(Bots, AllowedGenders) == 3)
+			bot_owner->Message(m_fail, "gender: %u(M), %u(F)", MALE, FEMALE);
+		else if (RuleI(Bots, AllowedGenders) == 2)
+			bot_owner->Message(m_fail, "gender: %u(F)", FEMALE);
+		else if (RuleI(Bots, AllowedGenders) == 1)
+			bot_owner->Message(m_fail, "gender: %u(M)", MALE);
+		else
+			bot_owner->Message(m_fail, "gender: ERROR - No valid genders exist");
 		return bot_id;
 	}
 

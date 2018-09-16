@@ -278,6 +278,7 @@ public:
 	void	SetTaunting(bool tog) {taunting = tog;}
 	bool	IsTaunting() const { return taunting; }
 	void	PickPocket(Client* thief);
+	void	Disarm(Client* client, int chance);
 	void	StartSwarmTimer(uint32 duration) { swarm_timer.Start(duration); }
 	void	AddLootDrop(const EQEmu::ItemData*dbitem, ItemList* itemlistconst, int16 charges, uint8 minlevel, uint8 maxlevel, bool equipit, bool wearchange = false, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0);
 	virtual void DoClassAttacks(Mob *target);
@@ -310,9 +311,17 @@ public:
 	void				SaveGuardSpot(bool iClearGuardSpot = false);
 	inline bool			IsGuarding() const { return(m_GuardPoint.w != 0); }
 	void				SaveGuardSpotCharm();
-	void				RestoreGuardSpotCharm();
-	void				AI_SetRoambox(float iDist, float iRoamDist, uint32 iDelay = 2500, uint32 iMinDelay = 2500);
-	void				AI_SetRoambox(float iDist, float iMaxX, float iMinX, float iMaxY, float iMinY, uint32 iDelay = 2500, uint32 iMinDelay = 2500);
+
+	void RestoreGuardSpotCharm();
+
+	void AI_SetRoambox(
+		float max_distance,
+		float roam_distance_variance,
+		uint32 delay = 2500,
+		uint32 min_delay = 2500
+	);
+
+	void				AI_SetRoambox(float distance, float max_x, float min_x, float max_y, float min_y, uint32 delay = 2500, uint32 min_delay = 2500);
 
 	//mercenary stuff
 	void	LoadMercTypes();
@@ -422,7 +431,7 @@ public:
 	void	SetHeroForgeModel(uint32 model) { herosforgemodel = model; }
 
 	bool IsRaidTarget() const { return raid_target; };
-	void ResetHPUpdateTimer() { sendhpupdate_timer.Start(); }
+	void ResetHPUpdateTimer() { send_hp_update_timer.Start(); }
 
 	bool IgnoreDespawn() { return ignore_despawn; }
 
@@ -455,7 +464,7 @@ protected:
 	Timer	qglobal_purge_timer;
 
 	bool	combat_event;	//true if we are in combat, false otherwise
-	Timer	sendhpupdate_timer;
+	Timer	send_hp_update_timer;
 	Timer	enraged_timer;
 	Timer *reface_timer;
 
@@ -529,8 +538,9 @@ protected:
 	float roambox_min_x;
 	float roambox_min_y;
 	float roambox_distance;
-	float roambox_movingto_x;
-	float roambox_movingto_y;
+	float roambox_destination_x;
+	float roambox_destination_y;
+	float roambox_destination_z;
 	uint32 roambox_delay;
 	uint32 roambox_min_delay;
 

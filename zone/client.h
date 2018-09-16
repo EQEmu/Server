@@ -803,6 +803,7 @@ public:
 
 	void NPCSpawn(NPC *target_npc, const char *identifier, uint32 extra = 0);
 
+	void Disarm(Client* disarmer, int chance);
 	bool BindWound(Mob* bindmob, bool start, bool fail = false);
 	void SetTradeskillObject(Object* object) { m_tradeskill_object = object; }
 	Object* GetTradeskillObject() { return m_tradeskill_object; }
@@ -875,6 +876,7 @@ public:
 	void SetStats(uint8 type,int16 set_val);
 	void IncStats(uint8 type,int16 increase_val);
 	void DropItem(int16 slot_id, bool recurse = true);
+	void DropItemQS(EQEmu::ItemInstance* inst, bool pickup);
 
 	int GetItemLinkHash(const EQEmu::ItemInstance* inst); // move to ItemData..or make use of the pre-calculated database field
 

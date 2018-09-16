@@ -460,9 +460,9 @@ struct NewZone_Struct {
 /*0893*/	uint8	unknown889;	//seen 0 - 00
 /*0894*/	uint8	fall_damage;	// 0 = Fall Damage on, 1 = Fall Damage off
 /*0895*/	uint8	unknown891;	//seen 0 - 00
-/*0892*/	uint32	unknown892;	//seen 180
-/*0896*/	uint32	unknown896;	//seen 180
-/*0900*/	uint32	unknown900;	//seen 180
+/*0892*/	uint32	FastRegenHP;	//seen 180
+/*0896*/	uint32	FastRegenMana;	//seen 180
+/*0900*/	uint32	FastRegenEndurance;	//seen 180
 /*0904*/	uint32	unknown904;	//seen 2
 /*0908*/	uint32	unknown908;	//seen 2
 /*0912*/

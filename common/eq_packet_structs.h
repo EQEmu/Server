@@ -376,7 +376,11 @@ struct NewZone_Struct {
 /*0692*/	uint8	unknown692[8];
 /*0700*/	float	fog_density;
 /*0704*/	uint32	SuspendBuffs;
-/*0704*/
+/*0708*/	uint32	FastRegenHP;
+/*0712*/	uint32	FastRegenMana;
+/*0716*/	uint32	FastRegenEndurance;
+/*0720*/	uint32	NPCAggroMaxDist;
+/*0724*/
 };
 
 /*
@@ -1781,6 +1785,15 @@ struct CombatAbility_Struct {
 	uint32 m_target;		//the ID of the target mob
 	uint32 m_atk;
 	uint32 m_skill;
+};
+
+// Disarm Struct incoming from Client [Size: 16]
+struct Disarm_Struct
+{
+	uint32 source;
+	uint32 target;
+	uint32 skill;
+	uint32 unknown;
 };
 
 //Instill Doubt

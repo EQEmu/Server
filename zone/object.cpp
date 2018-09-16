@@ -528,6 +528,8 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 			if(cursordelete)	// delete the item if it's a duplicate lore. We have to do this because the client expects the item packet
 				sender->DeleteItemInInventory(EQEmu::invslot::slotCursor);
 
+			sender->DropItemQS(m_inst, true);
+
 			if(!m_ground_spawn)
 				safe_delete(m_inst);
 

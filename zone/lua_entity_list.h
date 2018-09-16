@@ -101,6 +101,7 @@ public:
 	Lua_Client GetRandomClient(float x, float y, float z, float dist, Lua_Client exclude);
 	Lua_Mob_List GetMobList();
 	Lua_Client_List GetClientList();
+	Lua_Client_List GetShuffledClientList();
 	Lua_NPC_List GetNPCList();
 	Lua_Corpse_List GetCorpseList();
 	Lua_Object_List GetObjectList();

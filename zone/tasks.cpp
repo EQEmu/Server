@@ -118,12 +118,12 @@ bool TaskManager::LoadTasks(int singleTask)
 
 		query = StringFormat("SELECT `id`, `type`, `duration`, `duration_code`, `title`, `description`, "
 				     "`reward`, `rewardid`, `cashreward`, `xpreward`, `rewardmethod`, `faction_reward`,"
-				     "`minlevel`, `maxlevel`, `repeatable` FROM `tasks` WHERE `id` < %i",
+				     "`minlevel`, `maxlevel`, `repeatable`, `completion_emote` FROM `tasks` WHERE `id` < %i",
 				     MAXTASKS);
 	} else
 		query = StringFormat("SELECT `id`, `type`, `duration`, `duration_code`, `title`, `description`, "
 				     "`reward`, `rewardid`, `cashreward`, `xpreward`, `rewardmethod`, `faction_reward`,"
-				     "`minlevel`, `maxlevel`, `repeatable` FROM `tasks` WHERE `id` = %i",
+				     "`minlevel`, `maxlevel`, `repeatable`, `completion_emote` FROM `tasks` WHERE `id` = %i",
 				     singleTask);
 
 	const char *ERR_MYSQLERROR = "[TASKS]Error in TaskManager::LoadTasks: %s";
@@ -159,6 +159,7 @@ bool TaskManager::LoadTasks(int singleTask)
 		Tasks[taskID]->MinLevel = atoi(row[12]);
 		Tasks[taskID]->MaxLevel = atoi(row[13]);
 		Tasks[taskID]->Repeatable = atoi(row[14]);
+		Tasks[taskID]->completion_emote = row[15];
 		Tasks[taskID]->ActivityCount = 0;
 		Tasks[taskID]->SequenceMode = ActivitiesSequential;
 		Tasks[taskID]->LastStep = 0;
@@ -248,7 +249,9 @@ bool TaskManager::LoadTasks(int singleTask)
 		Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].GoalCount = atoi(row[11]);
 		Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].DeliverToNPC = atoi(row[12]);
 		Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].zones = row[13];
-		Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].ZoneID = atoi(row[13]); // for older clients
+		auto zones = SplitString(Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].zones, ';');
+		for (auto && e : zones)
+			Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].ZoneIDs.push_back(std::stoi(e));
 		Tasks[taskID]->Activity[Tasks[taskID]->ActivityCount].Optional = atoi(row[14]);
 
 		Log(Logs::General, Logs::Tasks,
@@ -1143,7 +1146,7 @@ void TaskManager::SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *Task
 
 			buf.WriteInt32(activity.skill_id);
 			buf.WriteInt32(activity.spell_id);
-			buf.WriteInt32(activity.ZoneID);
+			buf.WriteInt32(activity.ZoneIDs.empty() ? 0 : activity.ZoneIDs.front());
 			buf.WriteString(activity.desc_override);
 		}
 	}
@@ -1533,7 +1536,7 @@ bool ClientTaskState::UpdateTasksByNPC(Client *c, int ActivityType, int NPCTypeI
 			if (Task->Activity[j].Type != ActivityType)
 				continue;
 			// Is there a zone restriction on the activity ?
-			if ((Task->Activity[j].ZoneID > 0) && (Task->Activity[j].ZoneID != (int)zone->GetZoneID())) {
+			if (!Task->Activity[j].CheckZone(zone->GetZoneID())) {
 				Log(Logs::General, Logs::Tasks,
 					"[UPDATE] Char: %s Task: %i, Activity %i, Activity type %i for NPC %i failed zone "
 					"check",
@@ -1593,7 +1596,7 @@ int ClientTaskState::ActiveSpeakTask(int NPCTypeID) {
 			if (Task->Activity[j].Type != ActivitySpeakWith)
 				continue;
 			// Is there a zone restriction on the activity ?
-			if (Task->Activity[j].ZoneID > 0 && Task->Activity[j].ZoneID != (int)zone->GetZoneID())
+			if (!Task->Activity[j].CheckZone(zone->GetZoneID()))
 				continue;
 			// Is the activity to speak with this type of NPC ?
 			if (Task->Activity[j].GoalMethod == METHODQUEST && Task->Activity[j].GoalID == NPCTypeID)
@@ -1631,7 +1634,7 @@ int ClientTaskState::ActiveSpeakActivity(int NPCTypeID, int TaskID) {
 			if (Task->Activity[j].Type != ActivitySpeakWith)
 				continue;
 			// Is there a zone restriction on the activity ?
-			if (Task->Activity[j].ZoneID > 0 && Task->Activity[j].ZoneID != (int)zone->GetZoneID())
+			if (!Task->Activity[j].CheckZone(zone->GetZoneID()))
 				continue;
 			// Is the activity to speak with this type of NPC ?
 			if (Task->Activity[j].GoalMethod == METHODQUEST && Task->Activity[j].GoalID == NPCTypeID)
@@ -1677,7 +1680,7 @@ void ClientTaskState::UpdateTasksForItem(Client *c, ActivityType Type, int ItemI
 			if (Task->Activity[j].Type != (int)Type)
 				continue;
 			// Is there a zone restriction on the activity ?
-			if (Task->Activity[j].ZoneID > 0 && Task->Activity[j].ZoneID != (int)zone->GetZoneID()) {
+			if (!Task->Activity[j].CheckZone(zone->GetZoneID())) {
 				Log(Logs::General, Logs::Tasks, "[UPDATE] Char: %s Activity type %i for Item %i failed zone check",
 							c->GetName(), Type, ItemID);
 				continue;
@@ -1736,7 +1739,7 @@ void ClientTaskState::UpdateTasksOnExplore(Client *c, int ExploreID)
 			// We are only interested in explore activities
 			if (Task->Activity[j].Type != ActivityExplore)
 				continue;
-			if (Task->Activity[j].ZoneID > 0 && Task->Activity[j].ZoneID != (int)zone->GetZoneID()) {
+			if (!Task->Activity[j].CheckZone(zone->GetZoneID())) {
 				Log(Logs::General, Logs::Tasks,
 				    "[UPDATE] Char: %s Explore exploreid %i failed zone check", c->GetName(),
 				    ExploreID);
@@ -1800,11 +1803,11 @@ bool ClientTaskState::UpdateTasksOnDeliver(Client *c, std::list<EQEmu::ItemInsta
 			if (Task->Activity[j].Type != ActivityDeliver && Task->Activity[j].Type != ActivityGiveCash)
 				continue;
 			// Is there a zone restriction on the activity ?
-			if (Task->Activity[j].ZoneID > 0 && Task->Activity[j].ZoneID != (int)zone->GetZoneID()) {
+			if (!Task->Activity[j].CheckZone(zone->GetZoneID())) {
 				Log(Logs::General, Logs::Tasks,
 				    "[UPDATE] Char: %s Deliver activity failed zone check (current zone %i, need zone "
-				    "%i",
-				    c->GetName(), zone->GetZoneID(), Task->Activity[j].ZoneID);
+				    "%s",
+				    c->GetName(), zone->GetZoneID(), Task->Activity[j].zones.c_str());
 				continue;
 			}
 			// Is the activity to deliver to this NPCTypeID ?
@@ -1877,7 +1880,7 @@ void ClientTaskState::UpdateTasksOnTouch(Client *c, int ZoneID)
 				continue;
 			if (Task->Activity[j].GoalMethod != METHODSINGLEID)
 				continue;
-			if (Task->Activity[j].ZoneID != ZoneID) {
+			if (!Task->Activity[j].CheckZone(ZoneID)) {
 				Log(Logs::General, Logs::Tasks, "[UPDATE] Char: %s Touch activity failed zone check",
 				    c->GetName());
 				continue;
@@ -2019,6 +2022,9 @@ void ClientTaskState::RewardTask(Client *c, TaskInformation *Task) {
 			break;
 		}
 	}
+
+	if (!Task->completion_emote.empty())
+		c->SendColoredText(CC_Yellow, Task->completion_emote); // unsure if they use this packet or color, should work
 
 	// just use normal NPC faction ID stuff
 	if (Task->faction_reward)
@@ -2564,7 +2570,7 @@ void ClientTaskState::SendTaskHistory(Client *c, int TaskIndex) {
 			thd2->GoalCount = Task->Activity[i].GoalCount;
 			thd2->unknown04 = 0xffffffff;
 			thd2->unknown08 = 0xffffffff;
-			thd2->ZoneID = Task->Activity[i].ZoneID;
+			thd2->ZoneID = Task->Activity[i].ZoneIDs.empty() ? 0 : Task->Activity[i].ZoneIDs.front();
 			thd2->unknown16 = 0x00000000;
 			Ptr = (char *)thd2 + sizeof(TaskHistoryReplyData2_Struct);
 			VARSTRUCT_ENCODE_STRING(Ptr, Task->Activity[i].desc_override.c_str());
@@ -2768,7 +2774,7 @@ void TaskManager::SendTaskActivityLong(Client *c, int TaskID, int ActivityID, in
 
 	buf.WriteUInt32(Tasks[TaskID]->Activity[ActivityID].skill_id);
 	buf.WriteUInt32(Tasks[TaskID]->Activity[ActivityID].spell_id);
-	buf.WriteUInt32(Tasks[TaskID]->Activity[ActivityID].ZoneID);
+	buf.WriteUInt32(Tasks[TaskID]->Activity[ActivityID].ZoneIDs.empty() ? 0 : Tasks[TaskID]->Activity[ActivityID].ZoneIDs.front());
 	buf.WriteUInt32(0);
 
 	buf.WriteString(Tasks[TaskID]->Activity[ActivityID].desc_override);

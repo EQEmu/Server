@@ -90,6 +90,7 @@ enum LogCategory {
 	FixZ,
 	Food,
 	Traps,
+	NPCRoamBox,
 	MaxCategoryID	/* Don't Remove this*/
 };
 
@@ -144,7 +145,8 @@ static const char* LogCategoryName[LogCategory::MaxCategoryID] = {
 	"HP Update",
 	"FixZ",
 	"Food",
-	"Traps"
+	"Traps",
+	"NPC Roam Box"
 };
 }
 

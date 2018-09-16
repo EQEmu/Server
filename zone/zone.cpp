@@ -904,10 +904,10 @@ bool Zone::Init(bool iStaticZone) {
 			RuleManager::Instance()->LoadRules(&database, r_name.c_str());
 		}
 	}
-	
-	zone->zonemap = Map::LoadMapFile(zone->map_name);
+
+	zone->zonemap  = Map::LoadMapFile(zone->map_name);
 	zone->watermap = WaterMap::LoadWaterMapfile(zone->map_name);
-	zone->pathing = IPathfinder::Load(zone->map_name);
+	zone->pathing  = IPathfinder::Load(zone->map_name);
 
 	Log(Logs::General, Logs::Status, "Loading spawn conditions...");
 	if(!spawn_conditions.LoadSpawnConditions(short_name, instanceid)) {

@@ -256,6 +256,7 @@ public:
 	inline bool SeeInvisibleUndead() const { return see_invis_undead; }
 	inline bool SeeHide() const { return see_hide; }
 	inline bool SeeImprovedHide() const { return see_improved_hide; }
+	inline bool GetSeeInvisible(uint8 see_invis);
 	bool IsInvisible(Mob* other = 0) const;
 	void SetInvisible(uint8 state);
 	EQEmu::skills::SkillType AttackAnimation(int Hand, const EQEmu::ItemInstance* weapon, EQEmu::skills::SkillType skillinuse = EQEmu::skills::Skill1HBlunt);
@@ -980,15 +981,15 @@ public:
 
 	inline bool			CheckAggro(Mob* other) {return hate_list.IsEntOnHateList(other);}
 	float				CalculateHeadingToTarget(float in_x, float in_y) { return HeadingAngleToMob(in_x, in_y); }
-	virtual bool		CalculateNewPosition(float x, float y, float z, int speed, bool checkZ = true, bool calcheading = true);
+	virtual bool		CalculateNewPosition(float x, float y, float z, float speed, bool check_z = true, bool calculate_heading = true);
 	float				CalculateDistance(float x, float y, float z);
 	float				GetGroundZ(float new_x, float new_y, float z_offset=0.0);
 	void				SendTo(float new_x, float new_y, float new_z);
 	void				SendToFixZ(float new_x, float new_y, float new_z);
 	float				GetZOffset() const;
 	float               GetDefaultRaceSize() const;
-	void 				FixZ(int32 z_find_offset = 5);
-	float				GetFixedZ(glm::vec3 position, int32 z_find_offset = 5);
+	void 				FixZ(int32 z_find_offset = 5, bool fix_client_z = false);
+	float				GetFixedZ(glm::vec3 destination, int32 z_find_offset = 5);
 	
 	void				NPCSpecialAttacks(const char* parse, int permtag, bool reset = true, bool remove = false);
 	inline uint32		DontHealMeBefore() const { return pDontHealMeBefore; }
@@ -1164,7 +1165,7 @@ protected:
 	int _GetWalkSpeed() const;
 	int _GetRunSpeed() const;
 	int _GetFearSpeed() const;
-	virtual bool MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, bool checkZ = true, bool calcHeading = true);
+	virtual bool MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, bool check_z = true, bool calculate_heading = true);
 
 	virtual bool AI_EngagedCastCheck() { return(false); }
 	virtual bool AI_PursueCastCheck() { return(false); }
@@ -1413,6 +1414,13 @@ protected:
 	bool pseudo_rooted;
 	bool endur_upkeep;
 	bool degenerating_effects; // true if we have a buff that needs to be recalced every tick
+	bool spawned_in_water;
+public:
+	bool GetWasSpawnedInWater() const;
+
+	void SetSpawnedInWater(bool spawned_in_water);
+
+protected:
 
 	// Bind wound
 	Timer bindwound_timer;
@@ -1442,7 +1450,7 @@ protected:
 	std::unique_ptr<Timer> AI_feign_remember_timer;
 	std::unique_ptr<Timer> AI_check_signal_timer;
 	std::unique_ptr<Timer> AI_scan_door_open_timer;
-	uint32 pLastFightingDelayMoving;
+	uint32 time_until_can_move;
 	HateList hate_list;
 	std::set<uint32> feign_memory_list;
 	// This is to keep track of mobs we cast faction mod spells on

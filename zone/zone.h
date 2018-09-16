@@ -212,10 +212,10 @@ public:
 	void	ReloadWorld(uint32 Option);
 	void	ReloadMerchants();
 
-	Map*	zonemap;
-	WaterMap* watermap;
-	IPathfinder *pathing;
-	NewZone_Struct	newzone_data;
+	Map      *zonemap;
+	WaterMap *watermap;
+	IPathfinder    *pathing;
+	NewZone_Struct newzone_data;
 
 	SpawnConditionManager spawn_conditions;
 
