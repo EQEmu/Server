@@ -281,7 +281,6 @@ void Bot::Sit() {
 	if(IsMoving()) {
 		moved = false;
 		SetCurrentSpeed(0);
-		tar_ndx = 0;
 	}
 
 	SetAppearance(eaSitting);
@@ -2694,9 +2693,6 @@ void Bot::AI_Process() {
 
 						Goal = UpdatePath(Goal.x, Goal.y, Goal.z,
 							GetBotRunspeed(), WaypointChanged, NodeReached);
-
-						if (WaypointChanged)
-							tar_ndx = 20;
 					}
 					
 					CalculateNewPosition(Goal.x, Goal.y, Goal.z, GetBotRunspeed());
@@ -2822,9 +2818,6 @@ void Bot::AI_Process() {
 
 						Goal = UpdatePath(Goal.x, Goal.y, Goal.z,
 							speed, WaypointChanged, NodeReached);
-
-						if (WaypointChanged)
-							tar_ndx = 20;
 					}
 
 					CalculateNewPosition(Goal.x, Goal.y, Goal.z, speed);

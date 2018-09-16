@@ -515,7 +515,6 @@ void Mob::AI_Start(uint32 iMoveDelay) {
 
 	m_Delta = glm::vec4();
 	pRunAnimSpeed = 0;
-	pLastChange = Timer::GetCurrentTime();
 }
 
 void Client::AI_Start(uint32 iMoveDelay) {
@@ -551,7 +550,6 @@ void NPC::AI_Start(uint32 iMoveDelay) {
 	}
 
 	SendTo(GetX(), GetY(), GetZ());
-	SetChanged();
 	SaveGuardSpot();
 }
 
@@ -823,9 +821,6 @@ void Client::AI_Process()
 							node_reached
 						);
 
-						if (waypoint_changed)
-							tar_ndx = 20;
-
 						CalculateNewPosition(Goal.x, Goal.y, Goal.z, speed);
 					}
 				}
@@ -904,9 +899,6 @@ void Client::AI_Process()
 						bool WaypointChanged, NodeReached;
 						glm::vec3 Goal = UpdatePath(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ(),
 							GetRunspeed(), WaypointChanged, NodeReached);
-
-						if(WaypointChanged)
-							tar_ndx = 20;
 
 						CalculateNewPosition(Goal.x, Goal.y, Goal.z, newspeed);
 					}
@@ -1039,7 +1031,6 @@ void Mob::ProcessForcedMovement()
 			Teleport(m_Position + m_Delta);
 			m_Delta = glm::vec4();
 			SendPositionUpdate();
-			pLastChange = Timer::GetCurrentTime();
 			FixZ(); // so we teleport to the ground locally, we want the client to interpolate falling etc
 		} else if (--ForcedMovement) {
 			if (normal.z < -0.15f) // prevent too much wall climbing. ex. OMM's room in anguish
@@ -1150,9 +1141,6 @@ void Mob::AI_Process() {
 							WaypointChanged,
 							NodeReached
 						);
-
-						if (WaypointChanged)
-							tar_ndx = 20;
 
 						CalculateNewPosition(Goal.x, Goal.y, Goal.z, GetFearSpeed());
 					}
@@ -1483,9 +1471,6 @@ void Mob::AI_Process() {
 								target->GetX(), target->GetY(), target->GetZ(),
 								GetRunspeed(), WaypointChanged, NodeReached
 							);
-
-							if (WaypointChanged)
-								tar_ndx = 20;
 
 							CalculateNewPosition(Goal.x, Goal.y, Goal.z, GetRunspeed());
 						}
@@ -1877,8 +1862,6 @@ void NPC::AI_DoMovement() {
 							WaypointChanged,
 							NodeReached
 						);
-						if (WaypointChanged)
-							tar_ndx = 20;
 
 						if (NodeReached)
 							entity_list.OpenDoorsNear(CastToNPC());
@@ -1921,9 +1904,6 @@ void NPC::AI_DoMovement() {
 					WaypointChanged,
 					NodeReached
 				);
-				if (WaypointChanged) {
-					tar_ndx = 20;
-				}
 
 				if (NodeReached) {
 					entity_list.OpenDoorsNear(CastToNPC());

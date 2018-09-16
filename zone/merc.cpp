@@ -1490,9 +1490,6 @@ void Merc::AI_Process() {
 					NodeReached
 				);
 
-				if (WaypointChanged)
-					tar_ndx = 20;
-
 				CalculateNewPosition(Goal.x, Goal.y, Goal.z, GetRunspeed());
 			}
 			else {
@@ -1784,9 +1781,6 @@ void Merc::AI_Process() {
 							glm::vec3 Goal = UpdatePath(follow->GetX(), follow->GetY(), follow->GetZ(),
 								speed, WaypointChanged, NodeReached);
 
-							if (WaypointChanged)
-								tar_ndx = 20;
-
 							CalculateNewPosition(Goal.x, Goal.y, Goal.z, speed);
 						}
 						else {
@@ -1825,7 +1819,6 @@ void Merc::AI_Start(int32 iMoveDelay) {
 	}
 
 	SendTo(GetX(), GetY(), GetZ());
-	SetChanged();
 	SaveGuardSpot();
 }
 
@@ -4397,7 +4390,6 @@ void Merc::Sit() {
 		// SetHeading(CalculateHeadingToTarget(GetTarget()->GetX(), GetTarget()->GetY()));
 		SendPosition();
 		SetMoving(false);
-		tar_ndx = 0;
 	}
 
 	SetAppearance(eaSitting);

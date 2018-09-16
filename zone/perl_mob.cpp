@@ -7275,28 +7275,6 @@ XS(XS_Mob_SetLD) {
 	XSRETURN_EMPTY;
 }
 
-XS(XS_Mob_SetTargetDestSteps); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Mob_SetTargetDestSteps) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetTargetDestSteps(THIS, uint8 target_steps)");
-	{
-		Mob *THIS;
-		uint8 target_steps = (uint8) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "Mob")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Mob *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		THIS->SetTargetDestSteps(target_steps);
-	}
-	XSRETURN_EMPTY;
-}
-
 XS(XS_Mob_SetTargetable); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetTargetable) {
 	dXSARGS;
@@ -8781,7 +8759,6 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "SetBodyType"), XS_Mob_SetBodyType, file, "$$;$");
 	newXSproto(strcpy(buf, "SetDeltas"), XS_Mob_SetDeltas, file, "$$$$$");
 	newXSproto(strcpy(buf, "SetLD"), XS_Mob_SetLD, file, "$$");
-	newXSproto(strcpy(buf, "SetTargetDestSteps"), XS_Mob_SetTargetDestSteps, file, "$$");
 	newXSproto(strcpy(buf, "SetTargetable"), XS_Mob_SetTargetable, file, "$$");
 	newXSproto(strcpy(buf, "MakeTempPet"), XS_Mob_MakeTempPet, file, "$$;$$$$");
 	newXSproto(strcpy(buf, "ModSkillDmgTaken"), XS_Mob_ModSkillDmgTaken, file, "$$$");

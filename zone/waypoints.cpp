@@ -35,6 +35,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include <stdlib.h>
 
 extern FastMath g_Math;
+extern uint64_t frame_time;
 
 struct wp_distance
 {
@@ -332,8 +333,6 @@ void NPC::CalculateNewWaypoint()
 	}
 	}
 
-	tar_ndx = 52;
-
 	// Preserve waypoint setting for quest controlled NPCs
 	if (cur_wp < 0)
 		cur_wp = old_wp;
@@ -455,64 +454,9 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 		return true;
 	}
 
-	if ((m_Position.x - x == 0) && (m_Position.y - y == 0)) { //spawn is at target coords
-		return false;
-	}
-	else if ((std::abs(m_Position.x - x) < 0.1) && (std::abs(m_Position.y - y) < 0.1)) {
-		if (IsNPC()) {
-			entity_list.ProcessMove(CastToNPC(), x, y, z);
-		}
-
-		m_Position.x = x;
-		m_Position.y = y;
-		m_Position.z = z;
-
-		return true;
-	}
-
-	int compare_steps = 20;
-	if (tar_ndx < compare_steps && m_TargetLocation.x == x && m_TargetLocation.y == y) {
-
-		float new_x = m_Position.x + m_TargetV.x * tar_vector;
-		float new_y = m_Position.y + m_TargetV.y * tar_vector;
-		float new_z = m_Position.z + m_TargetV.z * tar_vector;
-
-		if (IsNPC()) {
-			entity_list.ProcessMove(CastToNPC(), new_x, new_y, new_z);
-		}
-
-		m_Position.x = new_x;
-		m_Position.y = new_y;
-		m_Position.z = new_z;
-
-		if (check_z && fix_z_timer.Check() && (!this->IsEngaged() || flee_mode || currently_fleeing)) {
-			this->FixZ();
-		}
-
-		tar_ndx++;
-
-		return true;
-	}
-
-	if (tar_ndx > 50) {
-		tar_ndx--;
-	}
-	else {
-		tar_ndx = 0;
-	}
-
-	m_TargetLocation = glm::vec3(x, y, z);
-
-	float nx = this->m_Position.x;
-	float ny = this->m_Position.y;
-	float nz = this->m_Position.z;
-	//	float nh = this->heading;
-
-	m_TargetV.x = x - nx;
-	m_TargetV.y = y - ny;
-	m_TargetV.z = z - nz;
-	SetCurrentSpeed((int8)speed);
+	SetCurrentSpeed(static_cast<int>(speed));
 	pRunAnimSpeed = speed;
+
 #ifdef BOTS
 	if (IsClient() || IsBot())
 #else
@@ -522,88 +466,48 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 		animation = speed / 2;
 	}
 
-	// --------------------------------------------------------------------------
-	// 2: get unit vector
-	// --------------------------------------------------------------------------
-	float mag = sqrtf(m_TargetV.x*m_TargetV.x + m_TargetV.y*m_TargetV.y + m_TargetV.z*m_TargetV.z);
-	tar_vector = (float)speed / mag;
-
-	// mob move fix
-	int numsteps = (int)(mag * 13.5f / (float)speed + 0.5f);
-
-
-	// mob move fix
-
-	if (numsteps < 20) {
-		if (numsteps > 1) {
-			tar_vector = 1.0f;
-			m_TargetV.x = m_TargetV.x / (float) numsteps;
-			m_TargetV.y = m_TargetV.y / (float) numsteps;
-			m_TargetV.z = m_TargetV.z / (float) numsteps;
-
-			float new_x = m_Position.x + m_TargetV.x;
-			float new_y = m_Position.y + m_TargetV.y;
-			float new_z = m_Position.z + m_TargetV.z;
-			if (IsNPC()) {
-				entity_list.ProcessMove(CastToNPC(), new_x, new_y, new_z);
-			}
-
-			m_Position.x = new_x;
-			m_Position.y = new_y;
-			m_Position.z = new_z;
-			if (calculate_heading) {
-				m_Position.w = CalculateHeadingToTarget(x, y);
-			}
-			tar_ndx = 20 - numsteps;
-		}
-		else {
-			if (IsNPC()) {
-				entity_list.ProcessMove(CastToNPC(), x, y, z);
-			}
-
-			m_Position.x = x;
-			m_Position.y = y;
-			m_Position.z = z;
-		}
+	//Setup Vectors
+	glm::vec3 tar(x, y, z);
+	glm::vec3 pos(m_Position.x, m_Position.y, m_Position.z);
+	double len = glm::distance(pos, tar);
+	if (len == 0) {
+		return true;
 	}
 
+	glm::vec3 dir = tar - pos;
+	glm::vec3 ndir = glm::normalize(dir);
+	if (calculate_heading) {
+		m_Position.w = CalculateHeadingToTarget(x, y);
+	}
+
+	double time_since_last = static_cast<double>(frame_time) / 1000.0;
+	double distance_moved = time_since_last * (speed + 100.0f);
+
+	if (distance_moved > len) {
+		m_Position.x = x;
+		m_Position.y = y;
+		m_Position.z = z;
+	
+		if (IsNPC()) {
+			entity_list.ProcessMove(CastToNPC(), x, y, z);
+		}
+
+		return true;
+	}
 	else {
-		tar_vector /= 13.5f;
-		float dur = Timer::GetCurrentTime() - pLastChange;
-		if (dur < 0.0f) {
-			dur = 0.0f;
-		}
-
-		if (dur > 100.f) {
-			dur = 100.f;
-		}
-
-		tar_vector *= (dur / 100.0f);
-
-		float new_x = m_Position.x + m_TargetV.x * tar_vector;
-		float new_y = m_Position.y + m_TargetV.y * tar_vector;
-		float new_z = m_Position.z + m_TargetV.z * tar_vector;
+		glm::vec3 npos = pos + (ndir * static_cast<float>(distance_moved));
+		m_Position.x = npos.x;
+		m_Position.y = npos.y;
+		m_Position.z = npos.z;
 
 		if (IsNPC()) {
-			entity_list.ProcessMove(CastToNPC(), new_x, new_y, new_z);
-		}
-
-		m_Position.x = new_x;
-		m_Position.y = new_y;
-		m_Position.z = new_z;
-		if (calculate_heading) {
-			m_Position.w = CalculateHeadingToTarget(x, y);
+			entity_list.ProcessMove(CastToNPC(), x, y, z);
 		}
 	}
 
-	if (check_z && fix_z_timer.Check() && !this->IsEngaged())
-		this->FixZ();
-
 	SetMoving(true);
-	moved = true;
-
-	m_Delta = glm::vec4(m_Position.x - nx, m_Position.y - ny, m_Position.z - nz, 0.0f);
-
+	m_Delta = glm::vec4(m_Position.x - pos.x, m_Position.y - pos.y, m_Position.z - pos.z, 0.0f);
+	
 	if (IsClient()) {
 		SendPositionUpdate(1);
 		CastToClient()->ResetPositionTimer();
@@ -613,7 +517,6 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 		SetAppearance(eaStanding, false);
 	}
 
-	pLastChange = Timer::GetCurrentTime();
 	return true;
 }
 
