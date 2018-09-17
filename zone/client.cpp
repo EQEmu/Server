@@ -53,6 +53,7 @@ extern volatile bool RunLoops;
 #include "guild_mgr.h"
 #include "quest_parser_collection.h"
 #include "queryserv.h"
+#include "mob_movement_manager.h"
 
 extern QueryServ* QServ;
 extern EntityList entity_list;
@@ -156,7 +157,6 @@ Client::Client(EQStreamInterface* ieqs)
 	m_AutoAttackTargetLocation(0.0f, 0.0f, 0.0f),
 	last_region_type(RegionTypeUnsupported),
 	m_dirtyautohaters(false),
-	npc_close_scan_timer(6000),
 	hp_self_update_throttle_timer(300),
 	hp_other_update_throttle_timer(500),
 	position_update_timer(10000),
@@ -166,6 +166,7 @@ Client::Client(EQStreamInterface* ieqs)
 	for (int client_filter = 0; client_filter < _FilterCount; client_filter++)
 		ClientFilters[client_filter] = FilterShow;
 
+	mMovementManager->AddClient(this);
 	character_id = 0;
 	conn_state = NoPacketsReceived;
 	client_data_loaded = false;
@@ -339,6 +340,8 @@ Client::Client(EQStreamInterface* ieqs)
 }
 
 Client::~Client() {
+	mMovementManager->RemoveClient(this);
+
 #ifdef BOTS
 	Bot::ProcessBotOwnerRefDelete(this);
 #endif
@@ -6464,7 +6467,7 @@ void Client::LocateCorpse()
 		SetHeading(CalculateHeadingToTarget(ClosestCorpse->GetX(), ClosestCorpse->GetY()));
 		SetTarget(ClosestCorpse);
 		SendTargetCommand(ClosestCorpse->GetID());
-		SendPositionUpdate(2);
+		SendPositionUpdate(true);
 	}
 	else if(!GetTarget())
 		Message_StringID(clientMessageError, SENSE_CORPSE_NONE);

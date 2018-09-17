@@ -23,6 +23,7 @@
 #include "quest_parser_collection.h"
 #include "string_ids.h"
 #include "worldserver.h"
+#include "mob_movement_manager.h"
 
 #include <limits.h>
 #include <math.h>
@@ -116,11 +117,11 @@ Mob::Mob(const char* in_name,
 		position_update_melee_push_timer(500),
 		hate_list_cleanup_timer(6000)
 {
+	mMovementManager = &MobMovementManager::Get();
+	mMovementManager->AddMob(this);
+
 	targeted = 0;
 	currently_fleeing = false;
-
-	last_major_update_position = m_Position;
-	is_distance_roamer = false;
 
 	AI_Init();
 	SetMoving(false);
@@ -448,6 +449,8 @@ Mob::Mob(const char* in_name,
 
 Mob::~Mob()
 {
+	mMovementManager->RemoveMob(this);
+
 	AI_Stop();
 	if (GetPet()) {
 		if (GetPet()->Charmed())
@@ -1450,59 +1453,12 @@ void Mob::StopMoving(float new_heading) {
 
 /* Used for mobs standing still - this does not send a delta */
 void Mob::SendPosition() {
-	//auto app = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
-	//PlayerPositionUpdateServer_Struct* spu = (PlayerPositionUpdateServer_Struct*)app->pBuffer;
-	//MakeSpawnUpdateNoDelta(spu);
-	//
-	//entity_list.QueueCloseClients(this, app, true, 200.0f, nullptr, false);
-	//
-	///* When an NPC has made a large distance change - we should update all clients to prevent "ghosts" */
-	//if (DistanceSquared(last_major_update_position, m_Position) >= (100 * 100)) {
-	//	entity_list.QueueClients(this, app, true, true);
-	//	last_major_update_position = m_Position;
-	//	is_distance_roamer = true;
-	//}
-	//else {
-	//	entity_list.QueueCloseClients(this, app, true, RuleI(Range, MobPositionUpdates), nullptr, false);
-	//}
-	//
-	//safe_delete(app);
-}
-
-void Mob::SendPositionUpdateToClient(Client *client) {
-	//auto app = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
-	//PlayerPositionUpdateServer_Struct* spawn_update = (PlayerPositionUpdateServer_Struct*)app->pBuffer;
-	//
-	//if(this->IsMoving())
-	//	MakeSpawnUpdate(spawn_update);
-	//else
-	//	MakeSpawnUpdateNoDelta(spawn_update);
-	//
-	//client->QueuePacket(app, false);
-	//
-	//safe_delete(app);
+	mMovementManager->SendPosition(this);
 }
 
 /* Position updates for mobs on the move */
-void Mob::SendPositionUpdate(uint8 iSendToSelf) {
-	//auto app = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
-	//PlayerPositionUpdateServer_Struct* spu = (PlayerPositionUpdateServer_Struct*)app->pBuffer;
-	//MakeSpawnUpdate(spu);
-	//
-	//if (iSendToSelf == 2) {
-	//	if (IsClient()) {
-	//		CastToClient()->FastQueuePacket(&app, false);
-	//	}
-	//}
-	//else if (DistanceSquared(last_major_update_position, m_Position) >= (100 * 100)) {
-	//	entity_list.QueueClients(this, app, true, true);
-	//	last_major_update_position = m_Position;
-	//	is_distance_roamer = true;
-	//}
-	//else {
-	//	entity_list.QueueCloseClients(this, app, (iSendToSelf == 0), RuleI(Range, MobPositionUpdates), nullptr, false);
-	//}
-	//safe_delete(app);
+void Mob::SendPositionUpdate(bool iSendToSelf) {
+	mMovementManager->SendPositionUpdate(this, iSendToSelf);
 }
 
 // this is for SendPosition()
@@ -1518,11 +1474,6 @@ void Mob::MakeSpawnUpdateNoDelta(PlayerPositionUpdateServer_Struct *spu) {
 	spu->heading = FloatToEQ12(m_Position.w);
 	spu->animation = 0;
 	spu->delta_heading = FloatToEQ10(0);
-	spu->padding0002 = 0;
-	spu->padding0006 = 7;
-	spu->padding0014 = 0x7f;
-	spu->padding0018 = 0x5df27;
-
 }
 
 // this is for SendPosUpdate()
@@ -1535,10 +1486,6 @@ void Mob::MakeSpawnUpdate(PlayerPositionUpdateServer_Struct* spu) {
 	spu->delta_y = FloatToEQ13(m_Delta.y);
 	spu->delta_z = FloatToEQ13(m_Delta.z);
 	spu->heading = FloatToEQ12(m_Position.w);
-	spu->padding0002 = 0;
-	spu->padding0006 = 7;
-	spu->padding0014 = 0x7f;
-	spu->padding0018 = 0x5df27;
 #ifdef BOTS
 	if (this->IsClient() || this->IsBot())
 #else

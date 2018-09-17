@@ -1189,7 +1189,7 @@ XS(XS_Mob_SendPosUpdate) {
 			iSendToSelf = (uint8) SvUV(ST(1));
 		}
 
-		THIS->SendPositionUpdate(iSendToSelf);
+		THIS->SendPositionUpdate(iSendToSelf != 0 ? true : false);
 	}
 	XSRETURN_EMPTY;
 }

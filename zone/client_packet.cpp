@@ -4622,10 +4622,6 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 		Log(Logs::Detail, Logs::Normal, "ClientUpdate: Client is moving - scan timer is: %u",
 			client_scan_npc_aggro_timer.GetDuration());
 		if (client_scan_npc_aggro_timer.GetDuration() > 1000) {
-
-			npc_close_scan_timer.Disable();
-			npc_close_scan_timer.Start(500);
-
 			client_scan_npc_aggro_timer.Disable();
 			client_scan_npc_aggro_timer.Start(500);
 
@@ -4634,10 +4630,6 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 		Log(Logs::Detail, Logs::Normal, "ClientUpdate: Client is NOT moving - scan timer is: %u",
 			client_scan_npc_aggro_timer.GetDuration());
 		if (client_scan_npc_aggro_timer.GetDuration() < 1000) {
-
-			npc_close_scan_timer.Disable();
-			npc_close_scan_timer.Start(6000);
-
 			client_scan_npc_aggro_timer.Disable();
 			client_scan_npc_aggro_timer.Start(3000);
 		}

@@ -92,6 +92,8 @@ Client::Client(EQStreamInterface* ieqs)
 	connect(1000),
 	eqs(ieqs)
 {
+	//mMovementManager->AddClient(this);
+
 	// Live does not send datarate as of 3/11/2005
 	//eqs->SetDataRate(7);
 	ip = eqs->GetRemoteIP();

@@ -463,7 +463,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 	if (IsClient())
 #endif
 	{
-		animation = speed / 2;
+		animation = speed * 0.55f;
 	}
 
 	//Setup Vectors
@@ -481,7 +481,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 	}
 
 	double time_since_last = static_cast<double>(frame_time) / 1000.0;
-	double distance_moved = time_since_last * (speed + 100.0f);
+	double distance_moved = time_since_last * speed * 2.275f;
 
 	if (distance_moved > len) {
 		m_Position.x = x;
@@ -490,6 +490,10 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 	
 		if (IsNPC()) {
 			entity_list.ProcessMove(CastToNPC(), x, y, z);
+		}
+
+		if (check_z && fix_z_timer.Check() && (!IsEngaged() || flee_mode || currently_fleeing)) {
+			FixZ();
 		}
 
 		return true;
@@ -505,11 +509,15 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 		}
 	}
 
+	if (check_z && fix_z_timer.Check() && !IsEngaged()) {
+		FixZ();
+	}
+
 	SetMoving(true);
 	m_Delta = glm::vec4(m_Position.x - pos.x, m_Position.y - pos.y, m_Position.z - pos.z, 0.0f);
 	
 	if (IsClient()) {
-		SendPositionUpdate(1);
+		SendPositionUpdate();
 		CastToClient()->ResetPositionTimer();
 	}
 	else {
