@@ -3291,6 +3291,9 @@ void command_nodelay(Client *c, const Seperator *sep)
 	int16 delay = atoi(sep->arg[2]);
 	delay = delay > 0 ? delay : -1;
 
+	// state is forced off if delay < 0
+	state = delay < 0 ? false : state;
+
 	// another target
 	if (c->GetTarget()) {
 		if (c->GetTarget()->IsClient()) {
