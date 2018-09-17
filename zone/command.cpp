@@ -157,7 +157,7 @@ int command_init(void)
 		command_add("appearance", "[type] [value] - Send an appearance packet for you or your target", 150, command_appearance) ||
 		command_add("apply_shared_memory", "[shared_memory_name] - Tells every zone and world to apply a specific shared memory segment by name.", 250, command_apply_shared_memory) ||
 		command_add("attack", "[targetname] - Make your NPC target attack targetname", 150, command_attack) ||
-		command_add("nodelay", "[milliseconds] - Toggles no delay for yourself or your target setting it to a constant millisecond refresh time", 150, command_nodelay) ||
+		command_add("nodelay", "[on/off] [milliseconds] - Toggles no delay on or off for yourself or your target setting it to a constant millisecond refresh time", 150, command_nodelay) ||
 		command_add("augmentitem",  "Force augments an item. Must have the augment item window open.",  250, command_augmentitem) ||
 		command_add("ban", "[name] [reason]- Ban by character name", 150, command_ban) ||
 		command_add("beard", "- Change the beard of your target", 80, command_beard) ||
