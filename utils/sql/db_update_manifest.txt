@@ -381,6 +381,7 @@
 9125|2018_07_20_task_emote.sql|SHOW COLUMNS FROM `tasks` LIKE 'completion_emote'|empty|
 9126|2018_09_07_FastRegen.sql|SHOW COLUMNS FROM `zone` LIKE 'fast_regen_hp'|empty|
 9127|2018_09_07_NPCMaxAggroDist.sql|SHOW COLUMNS FROM `zone` LIKE 'npc_max_aggro_dist'|empty|
+9128|2018_09_17_AccountNoDelay.sql|SHOW COLUMNS FROM account WHERE Field = 'nodelay' and Type = 'smallint(5)'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
