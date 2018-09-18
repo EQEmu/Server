@@ -107,16 +107,10 @@ void NPC::DescribeAggro(Client *towho, Mob *mob, bool verbose) {
 	float iAggroRange = GetAggroRange();
 
 	float t1, t2, t3;
-	t1 = mob->GetX() - GetX();
-	t2 = mob->GetY() - GetY();
-	t3 = mob->GetZ() - GetZ();
-	//Cheap ABS()
-	if(t1 < 0)
-		t1 = 0 - t1;
-	if(t2 < 0)
-		t2 = 0 - t2;
-	if(t3 < 0)
-		t3 = 0 - t3;
+	t1 = std::abs(mob->GetX() - GetX());
+	t2 = std::abs(mob->GetY() - GetY());
+	t3 = std::abs(mob->GetZ() - GetZ());
+
 	if(( t1 > iAggroRange)
 		|| ( t2 > iAggroRange)
 		|| ( t3 > iAggroRange) ) {
@@ -271,16 +265,10 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	// Image: I moved this up by itself above faction and distance checks because if one of these return true, theres no reason to go through the other information
 
 	float t1, t2, t3;
-	t1 = mob->GetX() - GetX();
-	t2 = mob->GetY() - GetY();
-	t3 = mob->GetZ() - GetZ();
-	//Cheap ABS()
-	if(t1 < 0)
-		t1 = 0 - t1;
-	if(t2 < 0)
-		t2 = 0 - t2;
-	if(t3 < 0)
-		t3 = 0 - t3;
+	t1 = std::abs(mob->GetX() - GetX());
+	t2 = std::abs(mob->GetY() - GetY());
+	t3 = std::abs(mob->GetZ() - GetZ());
+
 	if(( t1 > iAggroRange)
 		|| ( t2 > iAggroRange)
 		|| ( t3 > iAggroRange)
@@ -526,7 +514,7 @@ void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
 						Log(Logs::General, Logs::None, "AIYellForHelp(\"%s\",\"%s\") %s attacking %s Dist %f Z %f",
 							sender->GetName(), attacker->GetName(), mob->GetName(),
 							attacker->GetName(), DistanceSquared(mob->GetPosition(),
-							sender->GetPosition()), fabs(sender->GetZ()+mob->GetZ()));
+							sender->GetPosition()), std::abs(sender->GetZ()+mob->GetZ()));
 #endif
 						mob->AddToHateList(attacker, 25, 0, false);
 						sender->AddAssistCap();
