@@ -3263,7 +3263,7 @@ void EntityList::AddHealAggro(Mob *target, Mob *caster, uint16 hate)
 	}
 }
 
-void EntityList::OpenDoorsNear(NPC *who)
+void EntityList::OpenDoorsNear(Mob *who)
 {
 
 	for (auto it = door_list.begin();it != door_list.end(); ++it) {
@@ -3276,7 +3276,7 @@ void EntityList::OpenDoorsNear(NPC *who)
 		float curdist = diff.x * diff.x + diff.y * diff.y;
 
 		if (diff.z * diff.z < 10 && curdist <= 100)
-			cdoor->NPCOpen(who);
+			cdoor->Open(who);
 	}
 }
 

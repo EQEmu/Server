@@ -165,7 +165,7 @@ void MobMovementManager::SendPositionUpdate(Mob *who, bool send_to_self)
 
 bool MobMovementManager::HeadingEqual(float a, float b)
 {
-	const float eps = 0.001f;
+	const float eps = 0.0001f;
 	return abs(a - b) < eps;
 }
 

@@ -1478,25 +1478,8 @@ void Merc::AI_Process() {
 			return;
 		}
 		else if (!CheckLosFN(GetTarget())) {
-			if (RuleB(Mercs, MercsUsePathing) && zone->pathing) {
-				bool WaypointChanged, NodeReached;
-
-				glm::vec3 Goal = UpdatePath(
-					GetTarget()->GetX(),
-					GetTarget()->GetY(),
-					GetTarget()->GetZ(),
-					GetRunspeed(),
-					WaypointChanged,
-					NodeReached
-				);
-
-				CalculateNewPosition(Goal.x, Goal.y, Goal.z, GetRunspeed());
-			}
-			else {
-				Mob* follow = entity_list.GetMob(GetFollowID());
-				if (follow)
-					CalculateNewPosition(follow->GetX(), follow->GetY(), follow->GetZ(), GetRunspeed());
-			}
+			auto Goal = GetTarget()->GetPosition();
+			CalculateNewPosition(Goal.x, Goal.y, Goal.z, GetRunspeed());
 
 			return;
 		}
@@ -1775,17 +1758,7 @@ void Merc::AI_Process() {
 					SetRunAnimSpeed(0);
 
 					if (dist > GetFollowDistance()) {
-						if (RuleB(Mercs, MercsUsePathing) && zone->pathing) {
-							bool WaypointChanged, NodeReached;
-
-							glm::vec3 Goal = UpdatePath(follow->GetX(), follow->GetY(), follow->GetZ(),
-								speed, WaypointChanged, NodeReached);
-
-							CalculateNewPosition(Goal.x, Goal.y, Goal.z, speed);
-						}
-						else {
-							CalculateNewPosition(follow->GetX(), follow->GetY(), follow->GetZ(), speed);
-						}
+						CalculateNewPosition(follow->GetX(), follow->GetY(), follow->GetZ(), speed);
 
 						if (rest_timer.Enabled())
 							rest_timer.Disable();

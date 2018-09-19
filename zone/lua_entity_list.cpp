@@ -231,7 +231,7 @@ void Lua_EntityList::ReplaceWithTarget(Lua_Mob target, Lua_Mob new_target) {
 	self->ReplaceWithTarget(target, new_target);
 }
 
-void Lua_EntityList::OpenDoorsNear(Lua_NPC opener) {
+void Lua_EntityList::OpenDoorsNear(Lua_Mob opener) {
 	Lua_Safe_Call_Void();
 	self->OpenDoorsNear(opener);
 }
@@ -479,7 +479,7 @@ luabind::scope lua_register_entity_list() {
 		.def("RemoveFromTargets", (void(Lua_EntityList::*)(Lua_Mob))&Lua_EntityList::RemoveFromTargets)
 		.def("RemoveFromTargets", (void(Lua_EntityList::*)(Lua_Mob, bool))&Lua_EntityList::RemoveFromTargets)
 		.def("ReplaceWithTarget", (void(Lua_EntityList::*)(Lua_Mob, Lua_Mob))&Lua_EntityList::ReplaceWithTarget)
-		.def("OpenDoorsNear", (void(Lua_EntityList::*)(Lua_NPC))&Lua_EntityList::OpenDoorsNear)
+		.def("OpenDoorsNear", (void(Lua_EntityList::*)(Lua_Mob))&Lua_EntityList::OpenDoorsNear)
 		.def("MakeNameUnique", (std::string(Lua_EntityList::*)(const char*))&Lua_EntityList::MakeNameUnique)
 		.def("RemoveNumbers", (std::string(Lua_EntityList::*)(const char*))&Lua_EntityList::RemoveNumbers)
 		.def("SignalMobsByNPCID", (void(Lua_EntityList::*)(uint32, int))&Lua_EntityList::SignalMobsByNPCID)

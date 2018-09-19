@@ -454,6 +454,17 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 		return true;
 	}
 
+	bool WaypointChanged = false;
+	bool NodeReached = false;
+	glm::vec3 Goal = UpdatePath(
+		x, y, z, speed, WaypointChanged, NodeReached
+	);
+
+	if (WaypointChanged || NodeReached) {
+		calculate_heading = true;
+		entity_list.OpenDoorsNear(this);
+	}
+
 	SetCurrentSpeed(static_cast<int>(speed));
 	pRunAnimSpeed = speed;
 
@@ -467,7 +478,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 	}
 
 	//Setup Vectors
-	glm::vec3 tar(x, y, z);
+	glm::vec3 tar(Goal.x, Goal.y, Goal.z);
 	glm::vec3 pos(m_Position.x, m_Position.y, m_Position.z);
 	double len = glm::distance(pos, tar);
 	if (len == 0) {
@@ -476,20 +487,16 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 
 	glm::vec3 dir = tar - pos;
 	glm::vec3 ndir = glm::normalize(dir);
-	if (calculate_heading) {
-		m_Position.w = CalculateHeadingToTarget(x, y);
-	}
-
 	double time_since_last = static_cast<double>(frame_time) / 1000.0;
 	double distance_moved = time_since_last * speed * 2.275f;
 
 	if (distance_moved > len) {
-		m_Position.x = x;
-		m_Position.y = y;
-		m_Position.z = z;
+		m_Position.x = Goal.x;
+		m_Position.y = Goal.y;
+		m_Position.z = Goal.z;
 	
 		if (IsNPC()) {
-			entity_list.ProcessMove(CastToNPC(), x, y, z);
+			entity_list.ProcessMove(CastToNPC(), Goal.x, Goal.y, Goal.z);
 		}
 
 		if (check_z && fix_z_timer.Check() && (!IsEngaged() || flee_mode || currently_fleeing)) {
@@ -505,8 +512,12 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 		m_Position.z = npos.z;
 
 		if (IsNPC()) {
-			entity_list.ProcessMove(CastToNPC(), x, y, z);
+			entity_list.ProcessMove(CastToNPC(), npos.x, npos.y, npos.z);
 		}
+	}
+
+	if (calculate_heading) {
+		m_Position.w = CalculateHeadingToTarget(Goal.x, Goal.y);
 	}
 
 	if (check_z && fix_z_timer.Check() && !IsEngaged()) {

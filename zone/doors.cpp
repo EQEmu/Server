@@ -496,7 +496,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger) {
 	}
 }
 
-void Doors::NPCOpen(NPC* sender, bool alt_mode)
+void Doors::Open(Mob* sender, bool alt_mode)
 {
 	if (sender) {
 		if (GetTriggerType() == 255 || GetTriggerDoorID() > 0 || GetLockpick() != 0 || GetKeyItem() != 0 || open_type == 59 || open_type == 58 || !sender->IsNPC()) { // this object isnt triggered or door is locked - NPCs should not open locked doors!

@@ -2687,14 +2687,7 @@ void Bot::AI_Process() {
 					Log(Logs::Detail, Logs::AI, "Pursuing %s while engaged.", GetTarget()->GetCleanName());
 
 					Goal = GetTarget()->GetPosition();
-					
-					if (RuleB(Bots, UsePathing) && zone->pathing) {
-						bool WaypointChanged, NodeReached;
-
-						Goal = UpdatePath(Goal.x, Goal.y, Goal.z,
-							GetBotRunspeed(), WaypointChanged, NodeReached);
-					}
-					
+										
 					CalculateNewPosition(Goal.x, Goal.y, Goal.z, GetBotRunspeed());
 					return;
 				}
@@ -2812,13 +2805,6 @@ void Bot::AI_Process() {
 						speed = GetBotWalkspeed();
 
 					Goal = follow_mob->GetPosition();
-
-					if (RuleB(Bots, UsePathing) && zone->pathing) {
-						bool WaypointChanged, NodeReached;
-
-						Goal = UpdatePath(Goal.x, Goal.y, Goal.z,
-							speed, WaypointChanged, NodeReached);
-					}
 
 					CalculateNewPosition(Goal.x, Goal.y, Goal.z, speed);
 					return;

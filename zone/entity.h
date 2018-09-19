@@ -370,7 +370,7 @@ public:
 
 	void	AddHealAggro(Mob* target, Mob* caster, uint16 hate);
 	Mob*	FindDefenseNPC(uint32 npcid);
-	void	OpenDoorsNear(NPC* opener);
+	void	OpenDoorsNear(Mob* opener);
 	void	UpdateWho(bool iSendFullUpdate = false);
 	void	SendPositionUpdates(Client* client, uint32 cLastUpdate = 0, float update_range = 0, Entity* always_send = 0, bool iSendEvenIfNotChanged = false);
 	char*	MakeNameUnique(char* name);
