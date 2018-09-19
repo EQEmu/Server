@@ -350,11 +350,11 @@ XS(XS__incstat) {
 	XSRETURN_EMPTY;
 }
 
-XS(XS__inventory);
-XS(XS__inventory) {
+XS(XS__getinventoryslotid);
+XS(XS__getinventoryslotid) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::inventory(string identifier)");
+		Perl_croak(aTHX_ "Usage: quest::getinventoryslotid(string identifier)");
 
 	int16 RETVAL;
 	dXSTARG;
@@ -365,28 +365,28 @@ XS(XS__inventory) {
 
 	if (identifier == "invalid")                   RETVAL = EQEmu::invslot::SLOT_INVALID;
 	else if (identifier == "cursor")               RETVAL = EQEmu::invslot::slotCursor;
-	else if (identifier == "possessions_begin")    RETVAL = EQEmu::invslot::POSSESSIONS_BEGIN;
-	else if (identifier == "possessions_end")      RETVAL = EQEmu::invslot::POSSESSIONS_END;
-	else if (identifier == "bank_begin")           RETVAL = EQEmu::invslot::BANK_BEGIN;
-	else if (identifier == "bank_end")             RETVAL = EQEmu::invslot::BANK_END;
-	else if (identifier == "sharedbank_begin")     RETVAL = EQEmu::invslot::SHARED_BANK_BEGIN;
-	else if (identifier == "sharedbank_end")       RETVAL = EQEmu::invslot::SHARED_BANK_END;
-	else if (identifier == "generalbags_begin")    RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN;
-	else if (identifier == "generalbags_end")      RETVAL = EQEmu::invbag::GENERAL_BAGS_END;
-	else if (identifier == "cursorbag_begin")      RETVAL = EQEmu::invbag::CURSOR_BAG_BEGIN;
-	else if (identifier == "cursorbag_end")        RETVAL = EQEmu::invbag::CURSOR_BAG_END;
-	else if (identifier == "bankbags_begin")       RETVAL = EQEmu::invbag::BANK_BAGS_BEGIN;
-	else if (identifier == "bankbags_end")         RETVAL = EQEmu::invbag::BANK_BAGS_END;
-	else if (identifier == "sharedbankbags_begin") RETVAL = EQEmu::invbag::SHARED_BANK_BAGS_BEGIN;
-	else if (identifier == "sharedbankbags_end")   RETVAL = EQEmu::invbag::SHARED_BANK_BAGS_END;
-	else if (identifier == "bagslot_begin")        RETVAL = EQEmu::invbag::SLOT_BEGIN;
-	else if (identifier == "bagslot_end")          RETVAL = EQEmu::invbag::SLOT_END;
-	else if (identifier == "augsocket_begin")      RETVAL = EQEmu::invaug::SOCKET_BEGIN;
-	else if (identifier == "augsocket_end")        RETVAL = EQEmu::invaug::SOCKET_END;
-	else if (identifier == "equipment_begin")      RETVAL = EQEmu::invslot::EQUIPMENT_BEGIN;
-	else if (identifier == "equipment_end")        RETVAL = EQEmu::invslot::EQUIPMENT_END;
-	else if (identifier == "general_begin")        RETVAL = EQEmu::invslot::GENERAL_BEGIN;
-	else if (identifier == "general_end")          RETVAL = EQEmu::invslot::GENERAL_END;
+	else if (identifier == "possessions.begin")    RETVAL = EQEmu::invslot::POSSESSIONS_BEGIN;
+	else if (identifier == "possessions.end")      RETVAL = EQEmu::invslot::POSSESSIONS_END;
+	else if (identifier == "bank.begin")           RETVAL = EQEmu::invslot::BANK_BEGIN;
+	else if (identifier == "bank.end")             RETVAL = EQEmu::invslot::BANK_END;
+	else if (identifier == "sharedbank.begin")     RETVAL = EQEmu::invslot::SHARED_BANK_BEGIN;
+	else if (identifier == "sharedbank.end")       RETVAL = EQEmu::invslot::SHARED_BANK_END;
+	else if (identifier == "generalbags.begin")    RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN;
+	else if (identifier == "generalbags.end")      RETVAL = EQEmu::invbag::GENERAL_BAGS_END;
+	else if (identifier == "cursorbag.begin")      RETVAL = EQEmu::invbag::CURSOR_BAG_BEGIN;
+	else if (identifier == "cursorbag.end")        RETVAL = EQEmu::invbag::CURSOR_BAG_END;
+	else if (identifier == "bankbags.begin")       RETVAL = EQEmu::invbag::BANK_BAGS_BEGIN;
+	else if (identifier == "bankbags.end")         RETVAL = EQEmu::invbag::BANK_BAGS_END;
+	else if (identifier == "sharedbankbags.begin") RETVAL = EQEmu::invbag::SHARED_BANK_BAGS_BEGIN;
+	else if (identifier == "sharedbankbags.end")   RETVAL = EQEmu::invbag::SHARED_BANK_BAGS_END;
+	else if (identifier == "bagslot.begin")        RETVAL = EQEmu::invbag::SLOT_BEGIN;
+	else if (identifier == "bagslot.end")          RETVAL = EQEmu::invbag::SLOT_END;
+	else if (identifier == "augsocket.begin")      RETVAL = EQEmu::invaug::SOCKET_BEGIN;
+	else if (identifier == "augsocket.end")        RETVAL = EQEmu::invaug::SOCKET_END;
+	else if (identifier == "equipment.begin")      RETVAL = EQEmu::invslot::EQUIPMENT_BEGIN;
+	else if (identifier == "equipment.end")        RETVAL = EQEmu::invslot::EQUIPMENT_END;
+	else if (identifier == "general.begin")        RETVAL = EQEmu::invslot::GENERAL_BEGIN;
+	else if (identifier == "general.end")          RETVAL = EQEmu::invslot::GENERAL_END;
 	else if (identifier == "charm")                RETVAL = EQEmu::invslot::slotCharm;
 	else if (identifier == "ear1")                 RETVAL = EQEmu::invslot::slotEar1;
 	else if (identifier == "head")                 RETVAL = EQEmu::invslot::slotHead;
@@ -3751,6 +3751,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "follow"), XS__follow, file);
 	newXS(strcpy(buf, "forcedoorclose"), XS__forcedoorclose, file);
 	newXS(strcpy(buf, "forcedooropen"), XS__forcedooropen, file);
+	newXS(strcpy(buf, "getinventoryslotid"), XS__getinventoryslotid, file);
 	newXS(strcpy(buf, "getItemName"), XS_qc_getItemName, file);
 	newXS(strcpy(buf, "get_spawn_condition"), XS__get_spawn_condition, file);
 	newXS(strcpy(buf, "getguildnamebyid"), XS__getguildnamebyid, file);
@@ -3762,7 +3763,6 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "gmsay"), XS__gmsay, file);
 	newXS(strcpy(buf, "has_zone_flag"), XS__has_zone_flag, file);
 	newXS(strcpy(buf, "incstat"), XS__incstat, file);
-	newXS(strcpy(buf, "inventory"), XS__inventory, file);
 	newXS(strcpy(buf, "isdisctome"), XS__isdisctome, file);
 	newXS(strcpy(buf, "isdooropen"), XS__isdooropen, file);
 	newXS(strcpy(buf, "istaskactive"), XS__istaskactive, file);
