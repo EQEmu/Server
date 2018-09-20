@@ -204,7 +204,7 @@ int command_init(void)
 		command_add("flag", "[status] [acctname] - Refresh your admin status, or set an account's admin status if arguments provided", 0, command_flag) ||
 		command_add("flagedit", "- Edit zone flags on your target", 100, command_flagedit) ||
 		command_add("flags", "- displays the flags of you or your target", 0, command_flags) ||
-		command_add("flymode", "[0/1/2] - Set your or your player target's flymode to off/on/levitate", 50, command_flymode) ||
+		command_add("flymode", "[0/1/2/3/4/5] - Set your or your player target's flymode to ground/flying/levitate/water/floating/levitate_running", 50, command_flymode) ||
 		command_add("fov", "- Check wether you're behind or in your target's field of view", 80, command_fov) ||
 		command_add("freeze", "- Freeze your target", 80, command_freeze) ||
 		command_add("gassign", "[id] - Assign targetted NPC to predefined wandering grid id", 100, command_gassign) ||
@@ -2067,7 +2067,7 @@ void command_grid(Client *c, const Seperator *sep)
 					static_cast<uint32>(atoi(row[4])),
 					static_cast<uint32>(atoi(row[5]))
 			);
-			npc->SetFlyMode(1);
+			npc->SetFlyMode(GravityBehavior::Flying);
 			npc->GMMove(node_position.x, node_position.y, node_position.z, node_position.w);
 		}
 	}
@@ -2166,20 +2166,37 @@ void command_mana(Client *c, const Seperator *sep)
 
 void command_flymode(Client *c, const Seperator *sep)
 {
-	Client *t=c;
+	Mob *t = c;
 
-	if (strlen(sep->arg[1]) == 1 && !(sep->arg[1][0] == '0' || sep->arg[1][0] == '1' || sep->arg[1][0] == '2'))
-		c->Message(0, "#flymode [0/1/2]");
+	if (strlen(sep->arg[1]) == 1 && !(sep->arg[1][0] == '0' || sep->arg[1][0] == '1' || sep->arg[1][0] == '2' || sep->arg[1][0] == '3' || sep->arg[1][0] == '4' || sep->arg[1][0] == '5'))
+		c->Message(0, "#flymode [0/1/2/3/4/5]");
 	else {
-		if(c->GetTarget() && c->GetTarget()->IsClient())
-			t=c->GetTarget()->CastToClient();
-		t->SendAppearancePacket(AT_Levitate, atoi(sep->arg[1]));
-		if (sep->arg[1][0] == '1')
-			c->Message(0, "Turning %s's Flymode ON",  t->GetName());
-		else if (sep->arg[1][0] == '2')
-			c->Message(0, "Turning %s's Flymode LEV",  t->GetName());
-		else
-			c->Message(0, "Turning %s's Flymode OFF",  t->GetName());
+		if (c->GetTarget()) {
+			t = c->GetTarget();
+		}
+
+		int fm = atoi(sep->arg[1]);
+
+		t->SetFlyMode(static_cast<GravityBehavior>(fm));
+		t->SendAppearancePacket(AT_Levitate, fm);
+		if (sep->arg[1][0] == '0') {
+			c->Message(0, "Setting %s to Grounded", t->GetName());
+		}
+		else if (sep->arg[1][0] == '1') {
+			c->Message(0, "Setting %s to Flying", t->GetName());
+		}
+		else if (sep->arg[1][0] == '2') {
+			c->Message(0, "Setting %s to Levitating", t->GetName());
+		}
+		else if (sep->arg[1][0] == '3') {
+			c->Message(0, "Setting %s to In Water", t->GetName());
+		}
+		else if (sep->arg[1][0] == '4') {
+			c->Message(0, "Setting %s to Floating(Boat)", t->GetName());
+		}
+		else if (sep->arg[1][0] == '5') {
+			c->Message(0, "Setting %s to Levitating While Running", t->GetName());
+		}
 	}
 }
 
@@ -2521,7 +2538,7 @@ void command_npctypespawn(Client *c, const Seperator *sep)
 		const NPCType* tmp = 0;
 		if ((tmp = database.LoadNPCTypesData(atoi(sep->arg[1])))) {
 			//tmp->fixedZ = 1;
-			auto npc = new NPC(tmp, 0, c->GetPosition(), FlyMode3);
+			auto npc = new NPC(tmp, 0, c->GetPosition(), GravityBehavior::Ground);
 			if (npc && sep->IsNumber(2))
 				npc->SetNPCFactionID(atoi(sep->arg[2]));
 

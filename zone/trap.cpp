@@ -166,7 +166,7 @@ void Trap::Trigger(Mob* trigger)
 				{
 					auto randomOffset = glm::vec4(zone->random.Int(-5, 5),zone->random.Int(-5, 5),zone->random.Int(-5, 5), zone->random.Int(0, 249));
 					auto spawnPosition = randomOffset + glm::vec4(m_Position, 0.0f);
-					auto new_npc = new NPC(tmp, nullptr, spawnPosition, FlyMode3);
+					auto new_npc = new NPC(tmp, nullptr, spawnPosition, GravityBehavior::Flying);
 					new_npc->AddLootTable();
 					if (new_npc->DropsGlobalLoot())
 						new_npc->CheckGlobalLootTables();
@@ -191,7 +191,7 @@ void Trap::Trigger(Mob* trigger)
 				{
 					auto randomOffset = glm::vec4(zone->random.Int(-2, 2), zone->random.Int(-2, 2), zone->random.Int(-2, 2), zone->random.Int(0, 249));
 					auto spawnPosition = randomOffset + glm::vec4(m_Position, 0.0f);
-					auto new_npc = new NPC(tmp, nullptr, spawnPosition, FlyMode3);
+					auto new_npc = new NPC(tmp, nullptr, spawnPosition, GravityBehavior::Flying);
 					new_npc->AddLootTable();
 					if (new_npc->DropsGlobalLoot())
 						new_npc->CheckGlobalLootTables();
@@ -469,7 +469,7 @@ void Trap::CreateHiddenTrigger()
 	make_npc->trackable = 0;
 	make_npc->level = level;
 	strcpy(make_npc->special_abilities, "19,1^20,1^24,1^25,1");
-	NPC* npca = new NPC(make_npc, nullptr, glm::vec4(m_Position, 0.0f), FlyMode3);
+	NPC* npca = new NPC(make_npc, nullptr, glm::vec4(m_Position, 0.0f), GravityBehavior::Flying);
 	npca->GiveNPCTypeData(make_npc);
 	entity_list.AddNPC(npca);
 

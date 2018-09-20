@@ -57,7 +57,7 @@ extern Zone* zone;
 extern volatile bool is_zone_loaded;
 extern EntityList entity_list;
 
-NPC::NPC(const NPCType* d, Spawn2* in_respawn, const glm::vec4& position, int iflymode, bool IsCorpse)
+NPC::NPC(const NPCType* d, Spawn2* in_respawn, const glm::vec4& position, GravityBehavior iflymode, bool IsCorpse)
 : Mob(d->name,
 		d->lastname,
 		d->max_hp,
@@ -977,7 +977,7 @@ bool NPC::SpawnZoneController(){
 	point.y = 1000;
 	point.z = 500;
 
-	auto npc = new NPC(npc_type, nullptr, point, FlyMode3);
+	auto npc = new NPC(npc_type, nullptr, point, GravityBehavior::Flying);
 	npc->GiveNPCTypeData(npc_type);
 
 	entity_list.AddNPC(npc);
@@ -1020,7 +1020,7 @@ NPC * NPC::SpawnGridNodeNPC(std::string name, const glm::vec4 &position, uint32 
 	npc_type->findable         = true;
 
 	auto node_position = glm::vec4(position.x, position.y, position.z, position.w);
-	auto npc           = new NPC(npc_type, nullptr, node_position, FlyMode1);
+	auto npc           = new NPC(npc_type, nullptr, node_position, GravityBehavior::Flying);
 	npc->GiveNPCTypeData(npc_type);
 
 	entity_list.AddNPC(npc, true, true);
@@ -1187,7 +1187,7 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* 
 		npc_type->prim_melee_type = 28;
 		npc_type->sec_melee_type = 28;
 
-		auto npc = new NPC(npc_type, nullptr, position, FlyMode3);
+		auto npc = new NPC(npc_type, nullptr, position, GravityBehavior::Ground);
 		npc->GiveNPCTypeData(npc_type);
 
 		entity_list.AddNPC(npc);

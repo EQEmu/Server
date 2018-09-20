@@ -2258,7 +2258,7 @@ void Zone::DoAdventureActions()
 			const NPCType* tmp = database.LoadNPCTypesData(ds->data_id);
 			if(tmp)
 			{
-				NPC* npc = new NPC(tmp, nullptr, glm::vec4(ds->assa_x, ds->assa_y, ds->assa_z, ds->assa_h), FlyMode3);
+				NPC* npc = new NPC(tmp, nullptr, glm::vec4(ds->assa_x, ds->assa_y, ds->assa_z, ds->assa_h), GravityBehavior::Ground);
 				npc->AddLootTable();
 				if (npc->DropsGlobalLoot())
 					npc->CheckGlobalLootTables();

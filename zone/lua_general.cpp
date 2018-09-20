@@ -891,7 +891,7 @@ void lua_flag_instance_by_raid_leader(uint32 zone, uint32 version) {
 }
 
 void lua_fly_mode(int flymode) {
-	quest_manager.FlyMode(flymode);
+	quest_manager.FlyMode(static_cast<GravityBehavior>(flymode));
 }
 
 int lua_faction_value() {
@@ -1499,7 +1499,7 @@ void lua_create_npc(luabind::adl::object table, float x, float y, float z, float
 	LuaCreateNPCParse(no_target_hotkey, bool, false);
 	LuaCreateNPCParse(raid_target, bool, false);
 
-	NPC* npc = new NPC(npc_type, nullptr, glm::vec4(x, y, z, heading), FlyMode3);
+	NPC* npc = new NPC(npc_type, nullptr, glm::vec4(x, y, z, heading), GravityBehavior::Ground);
 	npc->GiveNPCTypeData(npc_type);
 	entity_list.AddNPC(npc);
 }

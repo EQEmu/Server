@@ -16,6 +16,8 @@ public:
 
 	void SendPosition(Mob *who);
 	void SendPositionUpdate(Mob *who, bool send_to_self);
+	void NavigateTo(Mob *who, float x, float y, float z, float speed);
+	void StopNavigation(Mob *who);
 
 	static MobMovementManager &Get() {
 		static MobMovementManager inst;
@@ -32,6 +34,7 @@ private:
 	void SendUpdate(Mob *who, int anim, float heading);
 	void SendUpdateShortDistance(Mob *who, int anim, float heading);
 	void SendUpdateLongDistance(Mob *who, int anim, float heading);
+	void ProcessMovement(Mob *who, float x, float y, float z, float speed);
 
 	struct Implementation;
 	std::unique_ptr<Implementation> _impl;

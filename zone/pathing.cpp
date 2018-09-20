@@ -13,7 +13,7 @@ void AdjustRoute(std::list<IPathfinder::IPathNode> &nodes, int flymode, float of
 	}
 	
 	for (auto &node : nodes) {
-		if (flymode == 0 || !zone->watermap->InLiquid(node.pos)) {
+		if (flymode == GravityBehavior::Ground || !zone->watermap->InLiquid(node.pos)) {
 			auto best_z = zone->zonemap->FindBestZ(node.pos, nullptr);
 			if (best_z != BEST_Z_INVALID) {
 				node.pos.z = best_z + offset;
@@ -114,7 +114,7 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 		}
 
 		bool AtNextNode = false;
-		if (flymode == 1) {
+		if (flymode == GravityBehavior::Flying) {
 			AtNextNode = DistanceSquared(From, (*Route.begin()).pos) < 4.0f;
 		}
 		else {

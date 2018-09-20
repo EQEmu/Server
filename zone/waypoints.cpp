@@ -30,12 +30,12 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "quest_parser_collection.h"
 #include "water_map.h"
 #include "fastmath.h"
+#include "mob_movement_manager.h"
 
 #include <math.h>
 #include <stdlib.h>
 
 extern FastMath g_Math;
-extern uint64_t frame_time;
 
 struct wp_distance
 {
@@ -427,11 +427,8 @@ void NPC::SaveGuardSpot(bool iClearGuardSpot) {
 }
 
 void NPC::NextGuardPosition() {
-	if (!CalculateNewPosition(m_GuardPoint.x, m_GuardPoint.y, m_GuardPoint.z, GetMovespeed())) {
-		SetHeading(m_GuardPoint.w);
-		Log(Logs::Detail, Logs::AI, "Unable to move to next guard position. Probably rooted.");
-	}
-	else if ((m_Position.x == m_GuardPoint.x) && (m_Position.y == m_GuardPoint.y) && (m_Position.z == m_GuardPoint.z))
+	CalculateNewPosition(m_GuardPoint.x, m_GuardPoint.y, m_GuardPoint.z, GetMovespeed());
+	if ((m_Position.x == m_GuardPoint.x) && (m_Position.y == m_GuardPoint.y) && (m_Position.z == m_GuardPoint.z))
 	{
 		if (moved)
 		{
@@ -445,102 +442,8 @@ float Mob::CalculateDistance(float x, float y, float z) {
 	return (float)sqrtf(((m_Position.x - x)*(m_Position.x - x)) + ((m_Position.y - y)*(m_Position.y - y)) + ((m_Position.z - z)*(m_Position.z - z)));
 }
 
-bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, bool check_z, bool calculate_heading) {
-	if (GetID() == 0)
-		return true;
-
-	if (speed <= 0) {
-		SetCurrentSpeed(0);
-		return true;
-	}
-
-	bool WaypointChanged = false;
-	bool NodeReached = false;
-	glm::vec3 Goal = UpdatePath(
-		x, y, z, speed, WaypointChanged, NodeReached
-	);
-
-	if (WaypointChanged || NodeReached) {
-		calculate_heading = true;
-		entity_list.OpenDoorsNear(this);
-	}
-
-	SetCurrentSpeed(static_cast<int>(speed));
-	pRunAnimSpeed = speed;
-
-#ifdef BOTS
-	if (IsClient() || IsBot())
-#else
-	if (IsClient())
-#endif
-	{
-		animation = speed * 0.55f;
-	}
-
-	//Setup Vectors
-	glm::vec3 tar(Goal.x, Goal.y, Goal.z);
-	glm::vec3 pos(m_Position.x, m_Position.y, m_Position.z);
-	double len = glm::distance(pos, tar);
-	if (len == 0) {
-		return true;
-	}
-
-	glm::vec3 dir = tar - pos;
-	glm::vec3 ndir = glm::normalize(dir);
-	double time_since_last = static_cast<double>(frame_time) / 1000.0;
-	double distance_moved = time_since_last * speed * 2.275f;
-
-	if (distance_moved > len) {
-		m_Position.x = Goal.x;
-		m_Position.y = Goal.y;
-		m_Position.z = Goal.z;
-	
-		if (IsNPC()) {
-			entity_list.ProcessMove(CastToNPC(), Goal.x, Goal.y, Goal.z);
-		}
-
-		if (check_z && fix_z_timer.Check() && (!IsEngaged() || flee_mode || currently_fleeing)) {
-			FixZ();
-		}
-
-		return true;
-	}
-	else {
-		glm::vec3 npos = pos + (ndir * static_cast<float>(distance_moved));
-		m_Position.x = npos.x;
-		m_Position.y = npos.y;
-		m_Position.z = npos.z;
-
-		if (IsNPC()) {
-			entity_list.ProcessMove(CastToNPC(), npos.x, npos.y, npos.z);
-		}
-	}
-
-	if (calculate_heading) {
-		m_Position.w = CalculateHeadingToTarget(Goal.x, Goal.y);
-	}
-
-	if (check_z && fix_z_timer.Check() && !IsEngaged()) {
-		FixZ();
-	}
-
-	SetMoving(true);
-	m_Delta = glm::vec4(m_Position.x - pos.x, m_Position.y - pos.y, m_Position.z - pos.z, 0.0f);
-	
-	if (IsClient()) {
-		SendPositionUpdate();
-		CastToClient()->ResetPositionTimer();
-	}
-	else {
-		SendPositionUpdate();
-		SetAppearance(eaStanding, false);
-	}
-
-	return true;
-}
-
-bool Mob::CalculateNewPosition(float x, float y, float z, float speed, bool check_z, bool calculate_heading) {
-	return MakeNewPositionAndSendUpdate(x, y, z, speed, check_z);
+void Mob::CalculateNewPosition(float x, float y, float z, float speed, bool check_z, bool calculate_heading) {
+	mMovementManager->NavigateTo(this, x, y, z, speed);
 }
 
 void NPC::AssignWaypoints(int32 grid)
@@ -620,7 +523,7 @@ void Mob::SendTo(float new_x, float new_y, float new_z) {
 	m_Position.z = new_z;
 	Log(Logs::Detail, Logs::AI, "Sent To (%.3f, %.3f, %.3f)", new_x, new_y, new_z);
 
-	if (flymode == FlyMode1)
+	if (flymode == GravityBehavior::Flying)
 		return;
 
 	//fix up pathing Z, this shouldent be needed IF our waypoints
@@ -678,13 +581,10 @@ float Mob::GetFixedZ(glm::vec3 destination, int32 z_find_offset) {
 
 	if (zone->HasMap() && RuleB(Map, FixZWhenMoving)) {
 
-		if (flymode == 1 || flymode == 2)
+		if (flymode != GravityBehavior::Ground)
 			return new_z;
 
-		if (this->IsBoat())
-			return new_z;
-
-		if (zone->HasWaterMap() && zone->watermap->InWater(glm::vec3(m_Position)))
+		if (zone->HasWaterMap() && zone->watermap->InLiquid(glm::vec3(m_Position)))
 			return new_z;
 
 		/*

@@ -529,7 +529,7 @@ public:
 	inline const float GetHeading() const { return m_Position.w; }
 	inline const float GetSize() const { return size; }
 	inline const float GetBaseSize() const { return base_size; }
-	inline const int8 GetFlyMode() const { return static_cast<const int8>(flymode); }
+	inline const GravityBehavior GetFlyMode() const { return flymode; }
 	bool IsBoat() const;
 
 	//Group
@@ -567,8 +567,8 @@ public:
 	void SetSpawned() { spawned = true; };
 	bool Spawned() { return spawned; };
 	virtual bool ShouldISpawnFor(Client *c) { return true; }
-	void SetFlyMode(uint8 flymode);
-	inline void Teleport(glm::vec3 NewPosition) { m_Position.x = NewPosition.x; m_Position.y = NewPosition.y;
+	void SetFlyMode(GravityBehavior flymode);
+	inline void Teleport(const glm::vec3 &NewPosition) { m_Position.x = NewPosition.x; m_Position.y = NewPosition.y;
 		m_Position.z = NewPosition.z; };
 	void TryMoveAlong(float distance, float angle, bool send = true);
 	void ProcessForcedMovement();
@@ -801,8 +801,9 @@ public:
 	void SetAppearance(EmuAppearance app, bool iIgnoreSelf = true);
 	inline EmuAppearance GetAppearance() const { return _appearance; }
 	inline const int GetAnimation() const { return animation; }
+	inline void SetAnimation(int a) { animation = a; }
 	inline const uint8 GetRunAnimSpeed() const { return pRunAnimSpeed; }
-	inline void SetRunAnimSpeed(int8 in) { if (pRunAnimSpeed != in) { pRunAnimSpeed = in; } }
+	inline void SetRunAnimSpeed(int8 in) { pRunAnimSpeed = in; }
 	bool IsDestructibleObject() { return destructibleobject; }
 	void SetDestructibleObject(bool in) { destructibleobject = in; }
 
@@ -968,13 +969,14 @@ public:
 
 	inline bool			CheckAggro(Mob* other) {return hate_list.IsEntOnHateList(other);}
 	float				CalculateHeadingToTarget(float in_x, float in_y) { return HeadingAngleToMob(in_x, in_y); }
-	virtual bool		CalculateNewPosition(float x, float y, float z, float speed, bool check_z = true, bool calculate_heading = true);
+	virtual void		CalculateNewPosition(float x, float y, float z, float speed, bool check_z = true, bool calculate_heading = true);
 	float				CalculateDistance(float x, float y, float z);
 	float				GetGroundZ(float new_x, float new_y, float z_offset=0.0);
 	void				SendTo(float new_x, float new_y, float new_z);
 	void				SendToFixZ(float new_x, float new_y, float new_z);
 	float				GetZOffset() const;
 	float               GetDefaultRaceSize() const;
+	void				TryFixZ(int32 z_find_offset = 5, bool fix_client_z = false);
 	void 				FixZ(int32 z_find_offset = 5, bool fix_client_z = false);
 	float				GetFixedZ(glm::vec3 destination, int32 z_find_offset = 5);
 	
@@ -1131,6 +1133,9 @@ public:
 	int GetWeaponDamage(Mob *against, const EQEmu::ItemData *weapon_item);
 	int GetWeaponDamage(Mob *against, const EQEmu::ItemInstance *weapon_item, uint32 *hate = nullptr);
 
+	//Pathing
+	glm::vec3 UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &WaypointChange, bool &NodeReached);
+
 	// Bots HealRotation methods
 #ifdef BOTS
 	bool IsHealRotationTarget() { return (m_target_of_heal_rotation.use_count() && m_target_of_heal_rotation.get()); }
@@ -1152,7 +1157,6 @@ protected:
 	int _GetWalkSpeed() const;
 	int _GetRunSpeed() const;
 	int _GetFearSpeed() const;
-	virtual bool MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, bool check_z = true, bool calculate_heading = true);
 
 	virtual bool AI_EngagedCastCheck() { return(false); }
 	virtual bool AI_PursueCastCheck() { return(false); }
@@ -1288,7 +1292,6 @@ protected:
 	void CalculateNewFearpoint();
 	float FindGroundZ(float new_x, float new_y, float z_offset=0.0);
 	float FindDestGroundZ(glm::vec3 dest, float z_offset=0.0);
-	glm::vec3 UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &WaypointChange, bool &NodeReached);
 	glm::vec3 HandleStuckPath(const glm::vec3 &To, const glm::vec3 &From);
 
 	virtual float GetSympatheticProcChances(uint16 spell_id, int16 ProcRateMod, int32 ItemProcRate = 0);
@@ -1509,7 +1512,7 @@ protected:
 
 	// we might want to do this differently, we gotta do max NPC buffs ... which is 97
 	uint32 m_spellHitsLeft[EQEmu::constants::TotalBuffs]; // Used to track which spells will have their numhits incremented when spell finishes casting
-	int flymode;
+	GravityBehavior flymode;
 	bool m_targetable;
 	int QGVarDuration(const char *fmt);
 	void InsertQuestGlobal(int charid, int npcid, int zoneid, const char *name, const char *value, int expdate);

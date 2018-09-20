@@ -557,7 +557,7 @@ void PathfinderWaypoint::ShowNode(const Node &n) {
 
 	npc_type->findable = 1;
 	auto position = glm::vec4(n.v.x, n.v.y, n.v.z, 0.0f);
-	auto npc = new NPC(npc_type, nullptr, position, FlyMode1);
+	auto npc = new NPC(npc_type, nullptr, position, GravityBehavior::Flying);
 	npc->GiveNPCTypeData(npc_type);
 
 	entity_list.AddNPC(npc, true, true);

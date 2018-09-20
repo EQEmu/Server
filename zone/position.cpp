@@ -160,3 +160,9 @@ float GetReciprocalHeading(const float heading)
 
 	return result;
 }
+
+bool IsPositionEqual(float x1, float y1, float z1, float x2, float y2, float z2)
+{
+	static const float eps = 0.0001f;
+	return std::abs(x1 - x2) < eps && std::abs(y1 - y2) < eps && std::abs(z1 - z2) < eps;
+}

@@ -126,7 +126,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 			(npc_dup != nullptr) ? npc_dup : npc_type,	//make sure we give the NPC the correct data pointer
 			0,
 			GetPosition() + glm::vec4(swarmPetLocations[summon_count], 0.0f, 0.0f),
-			FlyMode3);
+			GravityBehavior::Ground);
 
 		if (followme)
 			swarm_pet_npc->SetFollowID(GetID());
@@ -225,7 +225,7 @@ void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_overrid
 				(npc_dup!=nullptr)?npc_dup:npc_type,	//make sure we give the NPC the correct data pointer
 				0,
 				GetPosition() + glm::vec4(swarmPetLocations[summon_count], 0.0f, 0.0f),
-				FlyMode3);
+				GravityBehavior::Ground);
 
 		if (followme)
 			swarm_pet_npc->SetFollowID(GetID());
@@ -413,7 +413,7 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration)
 	make_npc->d_melee_texture1 = 0;
 	make_npc->d_melee_texture2 = 0;
 
-	auto npca = new NPC(make_npc, 0, GetPosition(), FlyMode3);
+	auto npca = new NPC(make_npc, 0, GetPosition(), GravityBehavior::Ground);
 
 	if(!npca->GetSwarmInfo()){
 		auto nSI = new SwarmPet;

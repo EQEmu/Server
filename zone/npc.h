@@ -106,7 +106,7 @@ public:
 	static bool	SpawnZoneController();
 	static int8 GetAILevel(bool iForceReRead = false);
 
-	NPC(const NPCType* data, Spawn2* respawn, const glm::vec4& position, int iflymode, bool IsCorpse = false);
+	NPC(const NPCType* data, Spawn2* respawn, const glm::vec4& position, GravityBehavior iflymode, bool IsCorpse = false);
 
 	virtual ~NPC();
 
@@ -228,9 +228,6 @@ public:
 	glm::vec4 const GetGuardPoint() const { return m_GuardPoint; }
 	EmuAppearance GetGuardPointAnim() const { return guard_anim; }
 	void SaveGuardPointAnim(EmuAppearance anim) { guard_anim = anim; }
-
-	void SetFlyMode(uint8 FlyMode){ flymode=FlyMode; }
-	uint32 GetFlyMode() const { return flymode; }
 
 	uint8 GetPrimSkill()	const { return prim_melee_type; }
 	uint8 GetSecSkill()	const { return sec_melee_type; }

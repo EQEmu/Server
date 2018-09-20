@@ -50,4 +50,6 @@ float DistanceSquaredNoZ(const glm::vec4& point1, const glm::vec4& point2);
 float GetReciprocalHeading(const glm::vec4& point1);
 float GetReciprocalHeading(const float heading);
 
+bool IsPositionEqual(float x1, float y1, float z1, float x2, float y2, float z2);
+
 #endif

@@ -4,19 +4,20 @@
 #include "../common/timer.h"
 
 #include <vector>
+#include <map>
 #include <stdlib.h>
 
-struct MobMovementEntry
+extern uint64_t frame_time;
+
+struct MovementEntry
 {
-	Mob *m;
 	int animation;
 	float heading;
 	bool dirty;
 	double last_sent_time;
 	double last_sent_time_long_distance;
 
-	MobMovementEntry(Mob *m) {
-		this->m = m;
+	MovementEntry(Mob *m) {
 		animation = 0;
 		heading = m->GetHeading();
 		dirty = false;
@@ -25,9 +26,27 @@ struct MobMovementEntry
 	}
 };
 
+struct MoveToEntry
+{
+	float x;
+	float y;
+	float z;
+	float speed;
+	bool active;
+
+	MoveToEntry() {
+		x = 0.0f;
+		y = 0.0f;
+		z = 0.0f;
+		speed = 0.0f;
+		active = false;
+	}
+};
+
 struct MobMovementManager::Implementation
 {
-	std::vector<MobMovementEntry> Entries;
+	std::map<Mob*, MovementEntry> Entries;
+	std::map<Mob*, MoveToEntry> MoveEntries;
 	std::vector<Client*> Clients;
 };
 
@@ -44,9 +63,18 @@ void MobMovementManager::Process()
 {
 	double current_time = static_cast<double>(Timer::GetCurrentTime()) / 1000.0;
 
-	for (auto &ent : _impl->Entries) {
+	for (auto &mov : _impl->MoveEntries) {
+		auto &ent = mov.second;
+
+		if (ent.active) {
+			ProcessMovement(mov.first, ent.x, ent.y, ent.z, ent.speed);
+		}
+	}
+
+	for (auto &iter : _impl->Entries) {
+		auto &ent = iter.second;
 		if (ent.dirty) {
-			SendUpdate(ent.m, ent.animation, ent.heading);
+			SendUpdate(iter.first, ent.animation, ent.heading);
 
 			ent.dirty = false;
 			ent.last_sent_time = current_time;
@@ -56,12 +84,12 @@ void MobMovementManager::Process()
 			double diff_long_range = current_time - ent.last_sent_time_long_distance;
 
 			if (diff_short_range >= 2.0) {
-				SendUpdateShortDistance(ent.m, ent.animation, ent.heading);
+				SendUpdateShortDistance(iter.first, ent.animation, ent.heading);
 				ent.last_sent_time = current_time;
 			}
 
 			if (diff_long_range >= 6.0) {
-				SendUpdateLongDistance(ent.m, ent.animation, ent.heading);
+				SendUpdateLongDistance(iter.first, ent.animation, ent.heading);
 				ent.last_sent_time_long_distance = current_time;
 			}
 		}
@@ -70,20 +98,14 @@ void MobMovementManager::Process()
 
 void MobMovementManager::AddMob(Mob *m)
 {
-	_impl->Entries.push_back(MobMovementEntry(m));
+	_impl->Entries.insert(std::make_pair(m, MovementEntry(m)));
+	_impl->MoveEntries.insert(std::make_pair(m, MoveToEntry()));
 }
 
 void MobMovementManager::RemoveMob(Mob *m)
 {
-	auto iter = _impl->Entries.begin();
-	while (iter != _impl->Entries.end()) {
-		auto &ent = *iter;
-		if (ent.m == m) {
-			_impl->Entries.erase(iter);
-			return;
-		}
-		++iter;
-	}
+	_impl->Entries.erase(m);
+	_impl->MoveEntries.erase(m);
 }
 
 void MobMovementManager::AddClient(Client *c)
@@ -107,60 +129,62 @@ void MobMovementManager::RemoveClient(Client *c)
 
 void MobMovementManager::SendPosition(Mob *who)
 {
-	auto iter = _impl->Entries.begin();
-	while (iter != _impl->Entries.end()) {
-		auto &ent = *iter;
-		
-		if (ent.m == who) {
-			auto anim = 0;
-			auto heading = who->GetHeading();
-			
-			if (ent.animation != anim || !HeadingEqual(ent.heading, heading)) {
-				ent.animation = anim;
-				ent.heading = heading;
-				ent.dirty = true;
-			}
+	auto iter = _impl->Entries.find(who);
+	auto &ent = iter->second;
 
-			return;
-		}
-
-		++iter;
+	auto anim = 0;
+	auto heading = who->GetHeading();
+	
+	if (ent.animation != anim || !HeadingEqual(ent.heading, heading)) {
+		ent.animation = anim;
+		ent.heading = heading;
+		ent.dirty = true;
 	}
 }
 
 void MobMovementManager::SendPositionUpdate(Mob *who, bool send_to_self)
 {
-	auto iter = _impl->Entries.begin();
-	while (iter != _impl->Entries.end()) {
-		auto &ent = *iter;
+	auto iter = _impl->Entries.find(who);
+	auto &ent = iter->second;
 
-		if (ent.m == who) {
-			auto anim = 0;
-			auto heading = who->GetHeading();
-			if (who->IsMoving()) {
-				if (who->IsClient()) {
-					anim = who->GetAnimation();
-				}
-				else {
-					anim = who->GetRunAnimSpeed();
-				}
-			}
-
-			if (send_to_self && who->IsClient()) {
-				SendUpdateTo(who, who->CastToClient(), anim, heading);
-			}
-			
-			if (ent.animation != anim || !HeadingEqual(ent.heading, heading)) {
-				ent.animation = anim;
-				ent.heading = heading;
-				ent.dirty = true;
-			}
-
-			return;
+	auto anim = 0;
+	auto heading = who->GetHeading();
+	if (who->IsMoving()) {
+		if (who->IsClient()) {
+			anim = who->GetAnimation();
 		}
-
-		++iter;
+		else {
+			anim = who->GetRunAnimSpeed();
+		}
 	}
+	
+	if (send_to_self && who->IsClient()) {
+		SendUpdateTo(who, who->CastToClient(), anim, heading);
+	}
+	
+	if (ent.animation != anim || !HeadingEqual(ent.heading, heading)) {
+		ent.animation = anim;
+		ent.heading = heading;
+		ent.dirty = true;
+	}
+}
+
+void MobMovementManager::NavigateTo(Mob *who, float x, float y, float z, float speed)
+{
+	auto iter = _impl->MoveEntries.find(who);
+	auto &ent = iter->second;
+
+	ent.x = x;
+	ent.y = y;
+	ent.z = z;
+	ent.speed = speed;
+	ent.active = true;
+}
+
+void MobMovementManager::StopNavigation(Mob *who) {
+	auto iter = _impl->MoveEntries.find(who);
+	auto &ent = iter->second;
+	ent.active = false;
 }
 
 bool MobMovementManager::HeadingEqual(float a, float b)
@@ -255,5 +279,98 @@ void MobMovementManager::SendUpdateLongDistance(Mob *who, int anim, float headin
 				c->QueuePacket(&outapp);
 			}
 		}
+	}
+}
+
+void MobMovementManager::ProcessMovement(Mob *who, float x, float y, float z, float speed)
+{
+	if (who->GetID() == 0) {
+		return;
+	}
+
+	if (speed <= 0) {
+		who->SetCurrentSpeed(0);
+		return;
+	}
+
+	if (IsPositionEqual(x, y, z, who->GetX(), who->GetY(), who->GetZ())) {
+		StopNavigation(who);
+		return;
+	}
+
+	bool calculate_heading = false;
+	bool WaypointChanged = false;
+	bool NodeReached = false;
+	glm::vec3 Goal = who->UpdatePath(
+		x, y, z, speed, WaypointChanged, NodeReached
+	);
+
+	if (WaypointChanged || NodeReached) {
+		calculate_heading = true;
+		entity_list.OpenDoorsNear(who);
+	}
+
+	who->SetCurrentSpeed(static_cast<int>(speed));
+	who->SetRunAnimSpeed(speed);
+
+#ifdef BOTS
+	if (who->IsClient() || who->IsBot())
+#else
+	if (who->IsClient())
+#endif
+	{
+		who->SetAnimation(speed * 0.55f);
+	}
+
+	auto &p = who->GetPosition();
+
+	//Setup Vectors
+	glm::vec3 tar(Goal.x, Goal.y, Goal.z);
+	glm::vec3 pos(p.x, p.y, p.z);
+	double len = glm::distance(pos, tar);
+	if (len == 0) {
+		return;
+	}
+
+	glm::vec3 dir = tar - pos;
+	glm::vec3 ndir = glm::normalize(dir);
+	double time_since_last = static_cast<double>(frame_time) / 1000.0;
+	double distance_moved = time_since_last * speed * 0.4f * 1.4f;
+
+	if (distance_moved > len) {
+		who->Teleport(Goal);
+
+		if (who->IsNPC()) {
+			entity_list.ProcessMove(who->CastToNPC(), Goal.x, Goal.y, Goal.z);
+		}
+
+		who->TryFixZ();
+
+		return;
+	}
+	else {
+		glm::vec3 npos = pos + (ndir * static_cast<float>(distance_moved));
+		who->Teleport(npos);
+
+		if (who->IsNPC()) {
+			entity_list.ProcessMove(who->CastToNPC(), npos.x, npos.y, npos.z);
+		}
+	}
+
+	if (calculate_heading) {
+		who->SetHeading(who->CalculateHeadingToTarget(Goal.x, Goal.y));
+	}
+
+	who->TryFixZ();
+
+	who->SetMoving(true);
+
+	if (who->IsClient()) {
+		who->SendPositionUpdate();
+		who->CastToClient()->ResetPositionTimer();
+	}
+	else {
+		who->SendPositionUpdate();
+		who->SetAppearance(eaStanding, false);
 	}
 }
