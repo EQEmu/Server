@@ -1,5 +1,54 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 09/18/2018 ==
+Uleat: Notes for manual conversion of quest script inventory slot values
+	- You should use reference/lookup values provided by the lua and perl apis to avoid skirting safety checks
+		and to ensure that the values used are the correct ones for your needs
+	
+	[perl api examples]
+		old:
+			1) my $charmitem = $client->GetItemIDAt(0);
+			2) for($for_x = 22; $for_x < 30; $for_x++) {...}
+			3) for($slot1 = 0; $slot1 <= 30; $slot1++) {...}
+		
+		new:
+			1) my $charmitem = $client->GetItemIDAt(quest::getinventoryslotid("charm"));
+			2) for($for_x = quest::getinventoryslotid("general.begin"); $for_x <= quest::getinventoryslotid("general.end"); $for_x++) {...} ** notice change of conditional
+			3) for($slot1 = quest::getinventoryslotid("possessions.begin"); $slot1 <= quest::getinventoryslotid("possessions.end"); $slot1++) {...}
+	
+	[lua api examples]
+		old:
+			1) if(e.self:GetItemIDAt(30) == 31599) then ...
+			2) for i = 0, 30, 1 do ...
+			
+		new:
+			1) if(e.self:GetItemIDAt(Slot.Cursor) == 31599) then ...
+			2) for i = Slot.PossessionsBegin, Slot.PossessionsEnd, 1 do ...
+	
+	- If you need to manually assign bag slot ranges to individual 'general' slots, use this assignment for now:
+		-- General1  (23) = 251 .. 260
+		-- General2  (24) = 261 .. 270
+		-- General3  (25) = 271 .. 280
+		-- General4  (26) = 281 .. 290
+		-- General5  (27) = 291 .. 300
+		-- General6  (28) = 301 .. 310
+		-- General7  (29) = 311 .. 320
+		-- General8  (30) = 321 .. 330
+		-- General9  (31) = 331 .. 340
+		-- General10 (32) = 341 .. 350
+		-- Cursor    (33) = 351 .. 360
+	
+	- If you need to manually assign ammo or powersource slots, use these values:
+		-- PowerSource = 21
+		-- Ammo = 22
+	
+	- All slot values not addressed above remain the same
+	
+	- Additional information can be found at:
+		-- https://github.com/EQEmu/Server/wiki/Inventory-Slots
+		-- https://github.com/EQEmu/Server/wiki/Perl-API
+		-- https://github.com/EQEmu/Server/wiki/Lua-API
+
 == 09/03/2018 ==
 Uleat: Rework of 'invsnapshot' command and implementation of automatic inventory snapshots.
 	- Inventory snapshots are now taken automatically using the interval rule values - if snapshots are enabled
