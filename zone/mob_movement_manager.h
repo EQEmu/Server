@@ -18,6 +18,7 @@ public:
 	void SendPositionUpdate(Mob *who, bool send_to_self);
 	void NavigateTo(Mob *who, float x, float y, float z, float speed);
 	void StopNavigation(Mob *who);
+	void Dump(Mob *m, Client *to);
 
 	static MobMovementManager &Get() {
 		static MobMovementManager inst;

@@ -185,6 +185,35 @@ void MobMovementManager::StopNavigation(Mob *who) {
 	auto iter = _impl->MoveEntries.find(who);
 	auto &ent = iter->second;
 	ent.active = false;
+
+	SendPosition(who);
+}
+
+void MobMovementManager::Dump(Mob *m, Client *to)
+{
+	{
+		auto iter = _impl->Entries.find(m);
+		auto &ent = iter->second;
+
+		to->Message(0, "Packet: anim=%d, heading=%.2f, dirty=%s, last_sent_time=%.2f, last_sent_time_long_dist=%.2f", 
+			ent.animation, 
+			ent.heading, 
+			ent.dirty ? "true" : "false", 
+			ent.last_sent_time, 
+			ent.last_sent_time_long_distance);
+	}
+
+	{
+		auto iter = _impl->MoveEntries.find(m);
+		auto &ent = iter->second;
+
+		to->Message(0, "Movement: speed=%.2f, x=%.2f, y=%.2f, z=%.2f, active=%s", 
+			ent.speed, 
+			ent.x, 
+			ent.y, 
+			ent.z, 
+			ent.active ? "true" : "false");
+	}
 }
 
 bool MobMovementManager::HeadingEqual(float a, float b)

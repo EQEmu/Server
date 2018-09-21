@@ -7,21 +7,6 @@
 
 extern Zone *zone;
 
-void AdjustRoute(std::list<IPathfinder::IPathNode> &nodes, int flymode, float offset) {
-	if (!zone->HasMap() || !zone->HasWaterMap()) {
-		return;
-	}
-	
-	for (auto &node : nodes) {
-		if (flymode == GravityBehavior::Ground || !zone->watermap->InLiquid(node.pos)) {
-			auto best_z = zone->zonemap->FindBestZ(node.pos, nullptr);
-			if (best_z != BEST_Z_INVALID) {
-				node.pos.z = best_z + offset;
-			}
-		}
-	}
-}
-
 glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &WaypointChanged, bool &NodeReached)
 {
 	glm::vec3 To(ToX, ToY, ToZ);
@@ -42,7 +27,6 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 		bool partial = false;
 		bool stuck = false;
 		Route = zone->pathing->FindRoute(From, To, partial, stuck);
-		AdjustRoute(Route, flymode, GetZOffset());
 
 		PathingDestination = To;
 		WaypointChanged = true;
@@ -66,7 +50,6 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 				bool partial = false;
 				bool stuck = false;
 				Route = zone->pathing->FindRoute(From, To, partial, stuck);
-				AdjustRoute(Route, flymode, GetZOffset());
 
 				PathingDestination = To;
 				WaypointChanged = true;
@@ -86,27 +69,27 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 		}
 
 		if (!IsRooted()) {
-			//bool AtPrevNode = DistanceSquared(From, PathingLastPosition) < 1.0f;
-			//if (AtPrevNode) {
-			//	PathingLoopCount++;
-			//	auto front = (*Route.begin()).pos;
-			//
-			//	if (PathingLoopCount > 5) {
-			//		Teleport(front);
-			//		SendPosition();
-			//		Route.pop_front();
-			//
-			//		WaypointChanged = true;
-			//		NodeReached = true;
-			//		PathingLoopCount = 0;
-			//	}
-			//
-			//	return front;
-			//}
-			//else {
+			bool AtPrevNode = DistanceSquared(From, PathingLastPosition) < 1.0f;
+			if (AtPrevNode) {
+				PathingLoopCount++;
+				auto front = (*Route.begin()).pos;
+			
+				if (PathingLoopCount > 5) {
+					Teleport(front);
+					SendPosition();
+					Route.pop_front();
+			
+					WaypointChanged = true;
+					NodeReached = true;
+					PathingLoopCount = 0;
+				}
+			
+				return front;
+			}
+			else {
 				PathingLastPosition = From;
 				PathingLoopCount = 0;
-			//}
+			}
 		}
 		else {
 			PathingLastPosition = From;
@@ -133,7 +116,6 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 				bool partial = false;
 				bool stuck = false;
 				Route = zone->pathing->FindRoute(From, To, partial, stuck);
-				AdjustRoute(Route, flymode, GetZOffset());
 				PathingDestination = To;
 				WaypointChanged = true;
 

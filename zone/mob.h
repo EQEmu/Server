@@ -969,7 +969,7 @@ public:
 
 	inline bool			CheckAggro(Mob* other) {return hate_list.IsEntOnHateList(other);}
 	float				CalculateHeadingToTarget(float in_x, float in_y) { return HeadingAngleToMob(in_x, in_y); }
-	virtual void		CalculateNewPosition(float x, float y, float z, float speed, bool check_z = true, bool calculate_heading = true);
+	void				CalculateNewPosition(float x, float y, float z, float speed, bool check_z = true, bool calculate_heading = true);
 	float				CalculateDistance(float x, float y, float z);
 	float				GetGroundZ(float new_x, float new_y, float z_offset=0.0);
 	void				SendTo(float new_x, float new_y, float new_z);
@@ -978,7 +978,8 @@ public:
 	float               GetDefaultRaceSize() const;
 	void				TryFixZ(int32 z_find_offset = 5, bool fix_client_z = false);
 	void 				FixZ(int32 z_find_offset = 5, bool fix_client_z = false);
-	float				GetFixedZ(glm::vec3 destination, int32 z_find_offset = 5);
+	float				GetFixedZ(const glm::vec3 &destination, int32 z_find_offset = 5);
+	void				DumpMovement(Client *to);
 	
 	void				NPCSpecialAttacks(const char* parse, int permtag, bool reset = true, bool remove = false);
 	inline uint32		DontHealMeBefore() const { return pDontHealMeBefore; }

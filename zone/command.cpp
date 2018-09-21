@@ -7260,6 +7260,7 @@ void command_pf(Client *c, const Seperator *sep)
 		c->Message(0, "POS: (%.2f, %.2f, %.2f)",  who->GetX(), who->GetY(), who->GetZ());
 		c->Message(0, "WP: %s (%d/%d)",  to_string(who->GetCurrentWayPoint()).c_str(), who->IsNPC()?who->CastToNPC()->GetMaxWp():-1);
 		c->Message(0, "pause=%d RAspeed=%d",  who->GetCWPP(), who->GetRunAnimSpeed());
+		who->DumpMovement(c);
 	} else {
 		c->Message(0, "ERROR: target required");
 	}
