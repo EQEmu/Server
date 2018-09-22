@@ -1124,9 +1124,14 @@ double Lua_Mob::CalculateHeadingToTarget(double in_x, double in_y) {
 	return self->CalculateHeadingToTarget(static_cast<float>(in_x), static_cast<float>(in_y));
 }
 
-void Lua_Mob::CalculateNewPosition(double x, double y, double z, double speed) {
+void Lua_Mob::NavigateTo(double x, double y, double z, double speed) {
 	Lua_Safe_Call_Void();
-	self->CalculateNewPosition(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z), static_cast<float>(speed));
+	self->NavigateTo(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z), static_cast<float>(speed));
+}
+
+void Lua_Mob::StopNavigation() {
+	Lua_Safe_Call_Void();
+	self->StopNavigation();
 }
 
 float Lua_Mob::CalculateDistance(double x, double y, double z) {
@@ -2355,7 +2360,8 @@ luabind::scope lua_register_mob() {
 		.def("FaceTarget", (void(Lua_Mob::*)(Lua_Mob))&Lua_Mob::FaceTarget)
 		.def("SetHeading", (void(Lua_Mob::*)(double))&Lua_Mob::SetHeading)
 		.def("CalculateHeadingToTarget", (double(Lua_Mob::*)(double,double))&Lua_Mob::CalculateHeadingToTarget)
-		.def("CalculateNewPosition", (void(Lua_Mob::*)(double,double,double,double))&Lua_Mob::CalculateNewPosition)
+		.def("NavigateTo", (void(Lua_Mob::*)(double,double,double,double))&Lua_Mob::NavigateTo)
+		.def("StopNavigation", (void(Lua_Mob::*)(void))&Lua_Mob::StopNavigation)
 		.def("CalculateDistance", (float(Lua_Mob::*)(double,double,double))&Lua_Mob::CalculateDistance)
 		.def("SendTo", (void(Lua_Mob::*)(double,double,double))&Lua_Mob::SendTo)
 		.def("SendToFixZ", (void(Lua_Mob::*)(double,double,double))&Lua_Mob::SendToFixZ)

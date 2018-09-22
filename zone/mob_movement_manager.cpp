@@ -124,7 +124,6 @@ void MobMovementManager::RemoveClient(Client *c)
 	
 		++iter;
 	}
-	
 }
 
 void MobMovementManager::SendPosition(Mob *who)
@@ -327,7 +326,6 @@ void MobMovementManager::ProcessMovement(Mob *who, float x, float y, float z, fl
 		return;
 	}
 
-	bool calculate_heading = false;
 	bool WaypointChanged = false;
 	bool NodeReached = false;
 	glm::vec3 Goal = who->UpdatePath(
@@ -335,7 +333,6 @@ void MobMovementManager::ProcessMovement(Mob *who, float x, float y, float z, fl
 	);
 
 	if (WaypointChanged || NodeReached) {
-		calculate_heading = true;
 		entity_list.OpenDoorsNear(who);
 	}
 
@@ -374,7 +371,6 @@ void MobMovementManager::ProcessMovement(Mob *who, float x, float y, float z, fl
 		}
 
 		who->TryFixZ();
-
 		return;
 	}
 	else {
@@ -386,9 +382,8 @@ void MobMovementManager::ProcessMovement(Mob *who, float x, float y, float z, fl
 		}
 	}
 
-	if (calculate_heading) {
-		who->SetHeading(who->CalculateHeadingToTarget(Goal.x, Goal.y));
-	}
+	who->SetHeading(who->CalculateHeadingToTarget(Goal.x, Goal.y));
+	SendPositionUpdate(who, false);
 
 	who->TryFixZ();
 

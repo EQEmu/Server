@@ -427,7 +427,7 @@ void NPC::SaveGuardSpot(bool iClearGuardSpot) {
 }
 
 void NPC::NextGuardPosition() {
-	CalculateNewPosition(m_GuardPoint.x, m_GuardPoint.y, m_GuardPoint.z, GetMovespeed());
+	NavigateTo(m_GuardPoint.x, m_GuardPoint.y, m_GuardPoint.z, GetMovespeed());
 	if ((m_Position.x == m_GuardPoint.x) && (m_Position.y == m_GuardPoint.y) && (m_Position.z == m_GuardPoint.z))
 	{
 		if (moved)
@@ -442,8 +442,12 @@ float Mob::CalculateDistance(float x, float y, float z) {
 	return (float)sqrtf(((m_Position.x - x)*(m_Position.x - x)) + ((m_Position.y - y)*(m_Position.y - y)) + ((m_Position.z - z)*(m_Position.z - z)));
 }
 
-void Mob::CalculateNewPosition(float x, float y, float z, float speed, bool check_z, bool calculate_heading) {
+void Mob::NavigateTo(float x, float y, float z, float speed) {
 	mMovementManager->NavigateTo(this, x, y, z, speed);
+}
+
+void Mob::StopNavigation() {
+	mMovementManager->StopNavigation(this);
 }
 
 void NPC::AssignWaypoints(int32 grid)

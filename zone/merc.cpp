@@ -1479,7 +1479,7 @@ void Merc::AI_Process() {
 		}
 		else if (!CheckLosFN(GetTarget())) {
 			auto Goal = GetTarget()->GetPosition();
-			CalculateNewPosition(Goal.x, Goal.y, Goal.z, GetRunspeed());
+			NavigateTo(Goal.x, Goal.y, Goal.z, GetRunspeed());
 
 			return;
 		}
@@ -1545,7 +1545,7 @@ void Merc::AI_Process() {
 									float newZ = 0;
 									FaceTarget(GetTarget());
 									if (PlotPositionAroundTarget(this, newX, newY, newZ)) {
-										CalculateNewPosition(newX, newY, newZ, GetRunspeed());
+										NavigateTo(newX, newY, newZ, GetRunspeed());
 										return;
 									}
 								}
@@ -1557,7 +1557,7 @@ void Merc::AI_Process() {
 							float newY = 0;
 							float newZ = 0;
 							if (PlotPositionAroundTarget(GetTarget(), newX, newY, newZ)) {
-								CalculateNewPosition(newX, newY, newZ, GetRunspeed());
+								NavigateTo(newX, newY, newZ, GetRunspeed());
 								return;
 							}
 						}
@@ -1568,7 +1568,7 @@ void Merc::AI_Process() {
 						float newY = 0;
 						float newZ = 0;
 						if (PlotPositionAroundTarget(GetTarget(), newX, newY, newZ, false) && GetArchetype() != ARCHETYPE_CASTER) {
-							CalculateNewPosition(newX, newY, newZ, GetRunspeed());
+							NavigateTo(newX, newY, newZ, GetRunspeed());
 							return;
 						}
 					}
@@ -1695,7 +1695,7 @@ void Merc::AI_Process() {
 			{
 				if(!IsRooted()) {
 					Log(Logs::Detail, Logs::AI, "Pursuing %s while engaged.", GetTarget()->GetCleanName());
-					CalculateNewPosition(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ(), GetRunspeed());
+					NavigateTo(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ(), GetRunspeed());
 					return;
 				}
 
@@ -1758,7 +1758,7 @@ void Merc::AI_Process() {
 					SetRunAnimSpeed(0);
 
 					if (dist > GetFollowDistance()) {
-						CalculateNewPosition(follow->GetX(), follow->GetY(), follow->GetZ(), speed);
+						NavigateTo(follow->GetX(), follow->GetY(), follow->GetZ(), speed);
 
 						if (rest_timer.Enabled())
 							rest_timer.Disable();

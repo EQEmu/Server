@@ -602,7 +602,7 @@ public:
 	void SetAssistAggro(bool value) { AssistAggro = value; if (PrimaryAggro) AssistAggro = false; }
 	bool HateSummon();
 	void FaceTarget(Mob* mob_to_face = 0);
-	void SetHeading(float iHeading) { if(m_Position.w != iHeading) { m_Position.w = iHeading; } }
+	void SetHeading(float iHeading) { m_Position.w = iHeading; }
 	void WipeHateList();
 	void AddFeignMemory(Client* attacker);
 	void RemoveFromFeignMemory(Client* attacker);
@@ -969,7 +969,8 @@ public:
 
 	inline bool			CheckAggro(Mob* other) {return hate_list.IsEntOnHateList(other);}
 	float				CalculateHeadingToTarget(float in_x, float in_y) { return HeadingAngleToMob(in_x, in_y); }
-	void				CalculateNewPosition(float x, float y, float z, float speed, bool check_z = true, bool calculate_heading = true);
+	void				NavigateTo(float x, float y, float z, float speed);
+	void				StopNavigation();
 	float				CalculateDistance(float x, float y, float z);
 	float				GetGroundZ(float new_x, float new_y, float z_offset=0.0);
 	void				SendTo(float new_x, float new_y, float new_z);

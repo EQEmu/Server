@@ -5526,12 +5526,12 @@ XS(XS_Mob_CalculateHeadingToTarget) {
 	XSRETURN(1);
 }
 
-XS(XS_Mob_CalculateNewPosition); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Mob_CalculateNewPosition) {
+XS(XS_Mob_NavigateTo); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_NavigateTo) {
 	dXSARGS;
 	if (items < 5 || items > 6)
 		Perl_croak(aTHX_
-		           "Usage: Mob::CalculateNewPosition(THIS, float x, float y, float z, float speed)");
+		           "Usage: Mob::NavigateTo(THIS, float x, float y, float z, float speed)");
 	{
 		Mob *THIS;
 		float x     = (float) SvNV(ST(1));
@@ -5548,7 +5548,31 @@ XS(XS_Mob_CalculateNewPosition) {
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 
-		THIS->CalculateNewPosition(x, y, z, speed);
+		THIS->NavigateTo(x, y, z, speed);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Mob_StopNavigation); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_StopNavigation) {
+	dXSARGS;
+	if (items < 5 || items > 6)
+		Perl_croak(aTHX_
+			"Usage: Mob::StopNavigation(THIS)");
+	{
+		Mob *THIS;
+
+		if (sv_derived_from(ST(0), "Mob")) {
+			IV tmp = SvIV((SV *)SvRV(ST(0)));
+			THIS = INT2PTR(Mob *, tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Mob");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+
+		THIS->StopNavigation();
 	}
 	XSRETURN_EMPTY;
 }
@@ -8687,7 +8711,8 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "WipeHateList"), XS_Mob_WipeHateList, file, "$");
 	newXSproto(strcpy(buf, "CheckAggro"), XS_Mob_CheckAggro, file, "$$");
 	newXSproto(strcpy(buf, "CalculateHeadingToTarget"), XS_Mob_CalculateHeadingToTarget, file, "$$$");
-	newXSproto(strcpy(buf, "CalculateNewPosition"), XS_Mob_CalculateNewPosition, file, "$$$$$");
+	newXSproto(strcpy(buf, "NavigateTo"), XS_Mob_NavigateTo, file, "$$$$$");
+	newXSproto(strcpy(buf, "StopNavigation"), XS_Mob_StopNavigation, file, "$");
 	newXSproto(strcpy(buf, "CalculateDistance"), XS_Mob_CalculateDistance, file, "$$$$");
 	newXSproto(strcpy(buf, "SendTo"), XS_Mob_SendTo, file, "$$$$");
 	newXSproto(strcpy(buf, "SendToFixZ"), XS_Mob_SendToFixZ, file, "$$$$");

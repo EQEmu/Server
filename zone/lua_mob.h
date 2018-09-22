@@ -240,7 +240,8 @@ public:
 	void FaceTarget(Lua_Mob target);
 	void SetHeading(double in);
 	double CalculateHeadingToTarget(double in_x, double in_y);
-	void CalculateNewPosition(double x, double y, double z, double speed);
+	void NavigateTo(double x, double y, double z, double speed);
+	void StopNavigation();
 	float CalculateDistance(double x, double y, double z);
 	void SendTo(double x, double y, double z);
 	void SendToFixZ(double x, double y, double z);
