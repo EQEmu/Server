@@ -376,7 +376,11 @@ struct NewZone_Struct {
 /*0692*/	uint8	unknown692[8];
 /*0700*/	float	fog_density;
 /*0704*/	uint32	SuspendBuffs;
-/*0704*/
+/*0708*/	uint32	FastRegenHP;
+/*0712*/	uint32	FastRegenMana;
+/*0716*/	uint32	FastRegenEndurance;
+/*0720*/	uint32	NPCAggroMaxDist;
+/*0724*/
 };
 
 /*

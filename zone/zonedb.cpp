@@ -143,7 +143,11 @@ bool ZoneDatabase::GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct 
 		"snow_duration2, "			 // 53
 		"snow_duration3, "			 // 54
 		"snow_duration4, "			 // 55
-		"gravity " 				     // 56
+		"gravity, "					 // 56
+		"fast_regen_hp, "			 // 57
+		"fast_regen_mana, "			 // 58
+		"fast_regen_endurance, "	 // 59
+		"npc_max_aggro_dist "		 // 60
 		"FROM zone WHERE zoneidnumber = %i AND version = %i",
 		zoneid, instance_id);
 	auto results = QueryDatabase(query);
@@ -187,6 +191,11 @@ bool ZoneDatabase::GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct 
 	zone_data->gravity = atof(row[56]);
 	Log(Logs::General, Logs::Debug, "Zone Gravity is %f", zone_data->gravity);
 	allow_mercs = true;
+
+	zone_data->FastRegenHP = atoi(row[57]);
+	zone_data->FastRegenMana = atoi(row[58]);
+	zone_data->FastRegenEndurance = atoi(row[59]);
+	zone_data->NPCAggroMaxDist = atoi(row[60]);
 
 	int bindable = 0;
 	bindable = atoi(row[31]);

@@ -2950,7 +2950,11 @@ void Client::Handle_OP_Assist(const EQApplicationPacket *app)
 				Distance(m_Position, assistee->GetPosition()) <= TARGETING_RANGE)) {
 				SetAssistExemption(true);
 				eid->entity_id = new_target->GetID();
+			} else {
+				eid->entity_id = 0;
 			}
+		} else {
+			eid->entity_id = 0;
 		}
 	}
 

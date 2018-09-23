@@ -530,6 +530,28 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 	//uint32 x = 0;
 	int whomlen = 0;
 	if (whom) {
+		// fixes for client converting some queries into a race query instead of zone
+		if (whom->wrace == 221) {
+			whom->wrace = 0xFFFF;
+			strcpy(whom->whom, "scarlet");
+		}
+		if (whom->wrace == 327) {
+			whom->wrace = 0xFFFF;
+			strcpy(whom->whom, "crystal");
+		}
+		if (whom->wrace == 103) {
+			whom->wrace = 0xFFFF;
+			strcpy(whom->whom, "kedge");
+		}
+		if (whom->wrace == 230) {
+			whom->wrace = 0xFFFF;
+			strcpy(whom->whom, "akheva");
+		}
+		if (whom->wrace == 229) {
+			whom->wrace = 0xFFFF;
+			strcpy(whom->whom, "netherbian");
+		}
+
 		whomlen = strlen(whom->whom);
 		if(whom->wrace == 0x001A) // 0x001A is the old Froglok race number and is sent by the client for /who all froglok
 			whom->wrace = FROGLOK; // This is what EQEmu uses for the Froglok Race number.

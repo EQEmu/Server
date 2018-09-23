@@ -94,9 +94,6 @@ RULE_INT(Character, SkillUpModifier, 100) //skill ups are at 100%
 RULE_BOOL(Character, SharedBankPlat, false) //off by default to prevent duping for now
 RULE_BOOL(Character, BindAnywhere, false)
 RULE_BOOL(Character, RestRegenEnabled, true) // Enable OOC Regen
-RULE_INT(Character, RestRegenHP, 180) // seconds until full from 0. this is actually zone setable, but most or all zones are 180
-RULE_INT(Character, RestRegenMana, 180) // seconds until full from 0. this is actually zone setable, but most or all zones are 180
-RULE_INT(Character, RestRegenEnd, 180) // seconds until full from 0. this is actually zone setable, but most or all zones are 180
 RULE_INT(Character, RestRegenTimeToActivate, 30) // Time in seconds for rest state regen to kick in.
 RULE_INT(Character, RestRegenRaidTimeToActivate, 300) // Time in seconds for rest state regen to kick in with a raid target.
 RULE_INT(Character, KillsPerGroupLeadershipAA, 250) // Number of dark blues or above per Group Leadership AA
@@ -419,6 +416,8 @@ RULE_BOOL(Combat, UseIntervalAC, true)
 RULE_INT(Combat, PetAttackMagicLevel, 30)
 RULE_BOOL(Combat, EnableFearPathing, true)
 RULE_REAL(Combat, FleeMultiplier, 2.0) // Determines how quickly a NPC will slow down while fleeing. Decrease multiplier to slow NPC down quicker.
+RULE_BOOL(Combat, FleeGray, true) // If true FleeGrayHPRatio will be used.
+RULE_INT(Combat, FleeGrayHPRatio, 50) //HP % when a Gray NPC begins to flee.
 RULE_INT(Combat, FleeHPRatio, 25) //HP % when a NPC begins to flee.
 RULE_BOOL(Combat, FleeIfNotAlone, false) // If false, mobs won't flee if other mobs are in combat with it.
 RULE_BOOL(Combat, AdjustProcPerMinute, true)
@@ -532,6 +531,11 @@ RULE_INT(NPC, NPCToNPCAggroTimerMin, 500)
 RULE_INT(NPC, NPCToNPCAggroTimerMax, 6000)
 RULE_BOOL(NPC, UseClassAsLastName, true) // Uses class archetype as LastName for npcs with none
 RULE_BOOL(NPC, NewLevelScaling, true) // Better level scaling, use old if new formulas would break your server
+RULE_INT(NPC, NPCGatePercent, 5) // % at which the NPC Will attempt to gate at.
+RULE_BOOL(NPC, NPCGateNearBind, false) // Will NPC attempt to gate when near bind location?
+RULE_INT(NPC, NPCGateDistanceBind, 75) // Distance from bind before NPC will attempt to gate
+RULE_BOOL(NPC, NPCHealOnGate, true) // Will the NPC Heal on Gate.
+RULE_REAL(NPC, NPCHealOnGateAmount, 25) // How much the npc will heal on gate if enabled.
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Aggro)
@@ -695,6 +699,7 @@ RULE_CATEGORY_END()
 RULE_CATEGORY(QueryServ)
 RULE_BOOL(QueryServ, PlayerLogChat, false) // Logs Player Chat
 RULE_BOOL(QueryServ, PlayerLogTrades, false) // Logs Player Trades
+RULE_BOOL(QueryServ, PlayerDropItems, false) // Logs Player dropping items
 RULE_BOOL(QueryServ, PlayerLogHandins, false) // Logs Player Handins
 RULE_BOOL(QueryServ, PlayerLogNPCKills, false) // Logs Player NPC Kills
 RULE_BOOL(QueryServ, PlayerLogDeletes, false) // Logs Player Deletes

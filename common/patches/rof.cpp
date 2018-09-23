@@ -1823,6 +1823,9 @@ namespace RoF
 		OUT(zone_id);
 		OUT(zone_instance);
 		OUT(SuspendBuffs);
+		OUT(FastRegenHP);
+		OUT(FastRegenMana);
+		OUT(FastRegenEndurance);
 
 		eq->FogDensity = emu->fog_density;
 
@@ -1839,9 +1842,6 @@ namespace RoF
 		eq->unknown893 = 0;
 		eq->fall_damage = 0;	// 0 = Fall Damage on, 1 = Fall Damage off
 		eq->unknown895 = 0;
-		eq->unknown896 = 180;
-		eq->unknown900 = 180;
-		eq->unknown904 = 180;
 		eq->unknown908 = 2;
 		eq->unknown912 = 2;
 		eq->unknown932 = -1;	// Set from PoK Example
@@ -2807,7 +2807,7 @@ namespace RoF
 
 		std::vector<int32> skill;
 		std::vector<int32> points;
-		for(auto i = 0; i < emu->total_prereqs; ++i) {
+		for(auto i = 0u; i < emu->total_prereqs; ++i) {
 			skill.push_back(inapp->ReadUInt32());
 			points.push_back(inapp->ReadUInt32());
 		}
@@ -2861,7 +2861,7 @@ namespace RoF
 		outapp->WriteUInt32(emu->total_effects);
 
 		inapp->SetReadPosition(sizeof(AARankInfo_Struct));
-		for(auto i = 0; i < emu->total_effects; ++i) {
+		for(auto i = 0u; i < emu->total_effects; ++i) {
 			outapp->WriteUInt32(inapp->ReadUInt32()); // skill_id
 			outapp->WriteUInt32(inapp->ReadUInt32()); // base1
 			outapp->WriteUInt32(inapp->ReadUInt32()); // base2
@@ -2917,7 +2917,7 @@ namespace RoF
 		unsigned char *eq_ptr = __packet->pBuffer;
 		eq_ptr += sizeof(structs::CharacterSelect_Struct);
 
-		for (int counter = 0; counter < character_count; ++counter) {
+		for (auto counter = 0u; counter < character_count; ++counter) {
 			emu_cse = (CharacterSelectEntry_Struct *)emu_ptr;
 			eq_cse = (structs::CharacterSelectEntry_Struct *)eq_ptr; // base address
 
@@ -3259,7 +3259,7 @@ namespace RoF
 		InBuffer += title_size;
 
 		TaskDescriptionData1_Struct *emu_tdd1 = (TaskDescriptionData1_Struct *)InBuffer;
-		emu_tdd1->StartTime = (time(nullptr) - emu_tdd1->StartTime); // RoF has elapsed time here rather than start time
+		emu_tdd1->StartTime = (static_cast<uint32>(time(nullptr)) - emu_tdd1->StartTime); // RoF has elapsed time here rather than start time
 
 		InBuffer += sizeof(TaskDescriptionData1_Struct);
 		uint32 description_size = strlen(InBuffer) + 1;
@@ -3610,10 +3610,10 @@ namespace RoF
 
 		// calculate size of names, note the packet DOES NOT have null termed c-strings
 		std::vector<uint32> name_lengths;
-		for (int i = 0; i < count; ++i) {
+		for (auto i = 0u; i < count; ++i) {
 			InternalVeteranReward *ivr = (InternalVeteranReward *)__emu_buffer;
 
-			for (int i = 0; i < ivr->claim_count; i++) {
+			for (auto i = 0u; i < ivr->claim_count; i++) {
 				uint32 length = strnlen(ivr->items[i].item_name, 63);
 				if (length)
 					name_lengths.push_back(length);
@@ -3633,7 +3633,7 @@ namespace RoF
 
 		outapp->WriteUInt32(count);
 		auto name_itr = name_lengths.begin();
-		for (int i = 0; i < count; i++) {
+		for (auto i = 0u; i < count; i++) {
 			InternalVeteranReward *ivr = (InternalVeteranReward *)__emu_buffer;
 
 			outapp->WriteUInt32(ivr->claim_id);
@@ -3641,7 +3641,7 @@ namespace RoF
 			outapp->WriteUInt32(ivr->claim_count);
 			outapp->WriteUInt8(1); // enabled
 
-			for (int j = 0; j < ivr->claim_count; j++) {
+			for (auto j = 0u; j < ivr->claim_count; j++) {
 				assert(name_itr != name_lengths.end()); // the way it's written, it should never happen, so just assert
 				outapp->WriteUInt32(*name_itr);
 				outapp->WriteData(ivr->items[j].item_name, *name_itr);
@@ -3869,7 +3869,7 @@ namespace RoF
 			VARSTRUCT_ENCODE_STRING(Buffer, emu->name);
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->spawnId);
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->level);
-			VARSTRUCT_ENCODE_TYPE(float, Buffer, SpawnSize - 0.7);	// Eye Height?
+			VARSTRUCT_ENCODE_TYPE(float, Buffer, SpawnSize - 0.7f);	// Eye Height?
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->NPC);
 
 			structs::Spawn_Struct_Bitfields *Bitfields = (structs::Spawn_Struct_Bitfields*)Buffer;

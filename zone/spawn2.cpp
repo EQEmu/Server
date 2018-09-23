@@ -141,118 +141,181 @@ uint32 Spawn2::despawnTimer(uint32 despawn_timer)
 bool Spawn2::Process() {
 	IsDespawned = false;
 
-	if(!Enabled())
+	if (!Enabled())
 		return true;
 
 	//grab our spawn group
-	SpawnGroup* sg = zone->spawn_group_list.GetSpawnGroup(spawngroup_id_);
+	SpawnGroup *spawn_group = zone->spawn_group_list.GetSpawnGroup(spawngroup_id_);
 
-	if(NPCPointerValid() && (sg->despawn == 0 || condition_id != 0))
+	if (NPCPointerValid() && (spawn_group->despawn == 0 || condition_id != 0)) {
 		return true;
+	}
 
-	if (timer.Check())	{
+	if (timer.Check()) {
 		timer.Disable();
 
 		Log(Logs::Detail, Logs::Spawns, "Spawn2 %d: Timer has triggered", spawn2_id);
 
 		//first check our spawn condition, if this isnt active
 		//then we reset the timer and try again next time.
-		if(condition_id != SC_AlwaysEnabled
+		if (condition_id != SC_AlwaysEnabled
 			&& !zone->spawn_conditions.Check(condition_id, condition_min_value)) {
-			Log(Logs::Detail, Logs::Spawns, "Spawn2 %d: spawning prevented by spawn condition %d", spawn2_id, condition_id);
+			Log(Logs::Detail,
+				Logs::Spawns,
+				"Spawn2 %d: spawning prevented by spawn condition %d",
+				spawn2_id,
+				condition_id);
 			Reset();
-			return(true);
+			return (true);
 		}
 
-		if (sg == nullptr) {
-			database.LoadSpawnGroupsByID(spawngroup_id_,&zone->spawn_group_list);
-			sg = zone->spawn_group_list.GetSpawnGroup(spawngroup_id_);
+		if (spawn_group == nullptr) {
+			database.LoadSpawnGroupsByID(spawngroup_id_, &zone->spawn_group_list);
+			spawn_group = zone->spawn_group_list.GetSpawnGroup(spawngroup_id_);
 		}
 
-		if (sg == nullptr) {
-			Log(Logs::Detail, Logs::Spawns, "Spawn2 %d: Unable to locate spawn group %d. Disabling.", spawn2_id, spawngroup_id_);
+		if (spawn_group == nullptr) {
+			Log(Logs::Detail,
+				Logs::Spawns,
+				"Spawn2 %d: Unable to locate spawn group %d. Disabling.",
+				spawn2_id,
+				spawngroup_id_);
+
 			return false;
 		}
 
 		//have the spawn group pick an NPC for us
-		uint32 npcid = sg->GetNPCType();
+		uint32 npcid = spawn_group->GetNPCType();
 		if (npcid == 0) {
-			Log(Logs::Detail, Logs::Spawns, "Spawn2 %d: Spawn group %d did not yeild an NPC! not spawning.", spawn2_id, spawngroup_id_);
-			Reset();	//try again later (why?)
-			return(true);
+			Log(Logs::Detail,
+				Logs::Spawns,
+				"Spawn2 %d: Spawn group %d did not yeild an NPC! not spawning.",
+				spawn2_id,
+				spawngroup_id_);
+
+			Reset();    //try again later (why?)
+			return (true);
 		}
 
 		//try to find our NPC type.
-		const NPCType* tmp = database.LoadNPCTypesData(npcid);
+		const NPCType *tmp = database.LoadNPCTypesData(npcid);
 		if (tmp == nullptr) {
-			Log(Logs::Detail, Logs::Spawns, "Spawn2 %d: Spawn group %d yeilded an invalid NPC type %d", spawn2_id, spawngroup_id_, npcid);
-			Reset();	//try again later
-			return(true);
+			Log(Logs::Detail,
+				Logs::Spawns,
+				"Spawn2 %d: Spawn group %d yeilded an invalid NPC type %d",
+				spawn2_id,
+				spawngroup_id_,
+				npcid);
+			Reset();    //try again later
+			return (true);
 		}
 
-		if(tmp->unique_spawn_by_name)
-		{
-			if(!entity_list.LimitCheckName(tmp->name))
-			{
-				Log(Logs::Detail, Logs::Spawns, "Spawn2 %d: Spawn group %d yeilded NPC type %d, which is unique and one already exists.", spawn2_id, spawngroup_id_, npcid);
-				timer.Start(5000);	//try again in five seconds.
-				return(true);
+		if (tmp->unique_spawn_by_name) {
+			if (!entity_list.LimitCheckName(tmp->name)) {
+				Log(Logs::Detail,
+					Logs::Spawns,
+					"Spawn2 %d: Spawn group %d yeilded NPC type %d, which is unique and one already exists.",
+					spawn2_id,
+					spawngroup_id_,
+					npcid);
+				timer.Start(5000);    //try again in five seconds.
+				return (true);
 			}
 		}
 
-		if(tmp->spawn_limit > 0) {
-			if(!entity_list.LimitCheckType(npcid, tmp->spawn_limit)) {
-				Log(Logs::Detail, Logs::Spawns, "Spawn2 %d: Spawn group %d yeilded NPC type %d, which is over its spawn limit (%d)", spawn2_id, spawngroup_id_, npcid, tmp->spawn_limit);
-				timer.Start(5000);	//try again in five seconds.
-				return(true);
+		if (tmp->spawn_limit > 0) {
+			if (!entity_list.LimitCheckType(npcid, tmp->spawn_limit)) {
+				Log(Logs::Detail,
+					Logs::Spawns,
+					"Spawn2 %d: Spawn group %d yeilded NPC type %d, which is over its spawn limit (%d)",
+					spawn2_id,
+					spawngroup_id_,
+					npcid,
+					tmp->spawn_limit);
+				timer.Start(5000);    //try again in five seconds.
+				return (true);
 			}
 		}
 
 		bool ignore_despawn = false;
-		if (npcthis)
-		{
+		if (npcthis) {
 			ignore_despawn = npcthis->IgnoreDespawn();
 		}
-		
-		if (ignore_despawn)
-		{
+
+		if (ignore_despawn) {
 			return true;
 		}
-		
-		if (sg->despawn != 0 && condition_id == 0 && !ignore_despawn)
-		{
+
+		if (spawn_group->despawn != 0 && condition_id == 0 && !ignore_despawn) {
 			zone->Despawn(spawn2_id);
 		}
 
-		if (IsDespawned)
-		{
+		if (IsDespawned) {
 			return true;
 		}
 
 		currentnpcid = npcid;
-		NPC* npc = new NPC(tmp, this, glm::vec4(x, y, z, heading), FlyMode3);
+		NPC *npc = new NPC(tmp, this, glm::vec4(x, y, z, heading), FlyMode3);
 
 		npc->mod_prespawn(this);
 
 		npcthis = npc;
 		npc->AddLootTable();
-		if (npc->DropsGlobalLoot())
+		if (npc->DropsGlobalLoot()) {
 			npc->CheckGlobalLootTables();
+		}
 		npc->SetSp2(spawngroup_id_);
 		npc->SaveGuardPointAnim(anim);
-		npc->SetAppearance((EmuAppearance)anim);
+		npc->SetAppearance((EmuAppearance) anim);
 		entity_list.AddNPC(npc);
 		//this limit add must be done after the AddNPC since we need the entity ID.
 		entity_list.LimitAddNPC(npc);
-			if(sg->roamdist && sg->roambox[0] && sg->roambox[1] && sg->roambox[2] && sg->roambox[3] && sg->delay && sg->min_delay)
-		npc->AI_SetRoambox(sg->roamdist,sg->roambox[0],sg->roambox[1],sg->roambox[2],sg->roambox[3],sg->delay,sg->min_delay);
-		if(zone->InstantGrids()) {
-			Log(Logs::Detail, Logs::Spawns, "Spawn2 %d: Group %d spawned %s (%d) at (%.3f, %.3f, %.3f).", spawn2_id, spawngroup_id_, npc->GetName(), npcid, x, y, z);
+
+		/**
+		 * Roambox init
+		 */
+		if (spawn_group->roamdist && spawn_group->roambox[0] && spawn_group->roambox[1] && spawn_group->roambox[2] &&
+			spawn_group->roambox[3] && spawn_group->delay && spawn_group->min_delay) {
+
+			npc->AI_SetRoambox(
+				spawn_group->roamdist,
+				spawn_group->roambox[0],
+				spawn_group->roambox[1],
+				spawn_group->roambox[2],
+				spawn_group->roambox[3],
+				spawn_group->delay,
+				spawn_group->min_delay
+			);
+		}
+
+		if (zone->InstantGrids()) {
+			Log(Logs::Detail,
+				Logs::Spawns,
+				"Spawn2 %d: Group %d spawned %s (%d) at (%.3f, %.3f, %.3f).",
+				spawn2_id,
+				spawngroup_id_,
+				npc->GetName(),
+				npcid,
+				x,
+				y,
+				z);
+
 			LoadGrid();
-		} else {
-			Log(Logs::Detail, Logs::Spawns, "Spawn2 %d: Group %d spawned %s (%d) at (%.3f, %.3f, %.3f). Grid loading delayed.", spawn2_id, spawngroup_id_, tmp->name, npcid, x, y, z);
+		}
+		else {
+			Log(Logs::Detail,
+				Logs::Spawns,
+				"Spawn2 %d: Group %d spawned %s (%d) at (%.3f, %.3f, %.3f). Grid loading delayed.",
+				spawn2_id,
+				spawngroup_id_,
+				tmp->name,
+				npcid,
+				x,
+				y,
+				z);
 		}
 	}
+
 	return true;
 }
 
@@ -266,18 +329,17 @@ void Spawn2::Disable()
 }
 
 void Spawn2::LoadGrid() {
-	if(!npcthis)
+	if (!npcthis)
 		return;
-	if(grid_ < 1)
+	if (grid_ < 1)
 		return;
-	if(!entity_list.IsMobInZone(npcthis))
+	if (!entity_list.IsMobInZone(npcthis))
 		return;
 	//dont set an NPC's grid until its loaded for them.
 	npcthis->SetGrid(grid_);
 	npcthis->AssignWaypoints(grid_);
 	Log(Logs::Detail, Logs::Spawns, "Spawn2 %d: Loading grid %d for %s", spawn2_id, grid_, npcthis->GetName());
 }
-
 
 /*
 	All three of these actions basically say that the mob which was
