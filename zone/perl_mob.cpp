@@ -1166,55 +1166,6 @@ XS(XS_Mob_GMMove) {
 	XSRETURN_EMPTY;
 }
 
-XS(XS_Mob_SendPosUpdate); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Mob_SendPosUpdate) {
-	dXSARGS;
-	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Mob::SendPosUpdate(THIS, [uint8 send_to_self = 0])");
-	{
-		Mob *THIS;
-		uint8 iSendToSelf;
-
-		if (sv_derived_from(ST(0), "Mob")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Mob *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		if (items < 2)
-			iSendToSelf = 0;
-		else {
-			iSendToSelf = (uint8) SvUV(ST(1));
-		}
-
-		THIS->SendPositionUpdate(iSendToSelf != 0 ? true : false);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Mob_SendPosition); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Mob_SendPosition) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::SendPosition(THIS)");
-	{
-		Mob *THIS;
-
-		if (sv_derived_from(ST(0), "Mob")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Mob *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		THIS->SendPosition();
-	}
-	XSRETURN_EMPTY;
-}
-
 XS(XS_Mob_HasProcs); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_HasProcs) {
 	dXSARGS;
@@ -8549,8 +8500,6 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "DoAnim"), XS_Mob_DoAnim, file, "$$;$");
 	newXSproto(strcpy(buf, "ChangeSize"), XS_Mob_ChangeSize, file, "$$;$");
 	newXSproto(strcpy(buf, "GMMove"), XS_Mob_GMMove, file, "$$$$;$");
-	newXSproto(strcpy(buf, "SendPosUpdate"), XS_Mob_SendPosUpdate, file, "$;$");
-	newXSproto(strcpy(buf, "SendPosition"), XS_Mob_SendPosition, file, "$");
 	newXSproto(strcpy(buf, "HasProcs"), XS_Mob_HasProcs, file, "$");
 	newXSproto(strcpy(buf, "IsInvisible"), XS_Mob_IsInvisible, file, "$;$");
 	newXSproto(strcpy(buf, "SetInvisible"), XS_Mob_SetInvisible, file, "$$");

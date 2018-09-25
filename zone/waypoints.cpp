@@ -93,7 +93,7 @@ void NPC::StopWandering()
 {	// stops a mob from wandering, takes him off grid and sends him back to spawn point
 	roamer = false;
 	CastToNPC()->SetGrid(0);
-	SendPosition();
+	StopNavigation();
 	Log(Logs::Detail, Logs::Pathing, "Stop Wandering requested.");
 	return;
 }
@@ -150,7 +150,7 @@ void NPC::PauseWandering(int pausetime)
 		moving = false;
 		DistractedFromGrid = true;
 		Log(Logs::Detail, Logs::Pathing, "Paused Wandering requested. Grid %d. Resuming in %d ms (0=not until told)", GetGrid(), pausetime);
-		SendPosition();
+		StopNavigation();
 		if (pausetime < 1) {	// negative grid number stops him dead in his tracks until ResumeWandering()
 			SetGrid(0 - GetGrid());
 		}
@@ -617,11 +617,6 @@ float Mob::GetFixedZ(const glm::vec3 &destination, int32 z_find_offset) {
 	}
 
 	return new_z;
-}
-
-void Mob::DumpMovement(Client *to)
-{
-	mMovementManager->Dump(this, to);
 }
 
 void Mob::FixZ(int32 z_find_offset /*= 5*/, bool fix_client_z /*= false*/) {

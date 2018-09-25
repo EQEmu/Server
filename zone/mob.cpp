@@ -1453,12 +1453,12 @@ void Mob::StopMoving(float new_heading) {
 
 /* Used for mobs standing still - this does not send a delta */
 void Mob::SendPosition() {
-	mMovementManager->SendPosition(this);
+	//mMovementManager->SendPosition(this);
 }
 
 /* Position updates for mobs on the move */
 void Mob::SendPositionUpdate(bool iSendToSelf) {
-	mMovementManager->SendPositionUpdate(this, iSendToSelf);
+	//mMovementManager->SendPositionUpdate(this, iSendToSelf);
 }
 
 // this is for SendPosition()
@@ -2710,13 +2710,7 @@ void Mob::FaceTarget(Mob* mob_to_face /*= 0*/) {
 	float current_heading = GetHeading();
 	float new_heading = CalculateHeadingToTarget(faced_mob->GetX(), faced_mob->GetY());
 	if(current_heading != new_heading) {
-		SetHeading(new_heading);
-		if (moving) {
-			SendPositionUpdate();
-		}
-		else {
-			SendPosition();
-		}
+		mMovementManager->RotateTo(this, new_heading, 16.0f);
 	}
 
 	if(IsNPC() && !IsEngaged()) {
@@ -3170,20 +3164,6 @@ void Mob::SetNextIncHPEvent( int inchpevent )
 {
 	nextinchpevent = inchpevent;
 }
-//warp for quest function,from sandy
-void Mob::Warp(const glm::vec3& location)
-{
-	if(IsNPC())
-		entity_list.ProcessMove(CastToNPC(), location.x, location.y, location.z);
-
-	m_Position = glm::vec4(location, m_Position.w);
-
-	Mob* target = GetTarget();
-	if (target)
-		FaceTarget( target );
-
-	SendPosition();
-}
 
 int16 Mob::GetResist(uint8 type) const
 {
@@ -3569,6 +3549,14 @@ bool Mob::EntityVariableExists(const char *id)
 void Mob::SetFlyMode(GravityBehavior flymode)
 {
 	this->flymode = flymode;
+}
+
+void Mob::Teleport(const glm::vec3 &pos)
+{
+}
+
+void Mob::Teleport(const glm::vec4 &pos)
+{
 }
 
 bool Mob::IsNimbusEffectActive(uint32 nimbus_effect)
@@ -4592,8 +4580,6 @@ void Mob::DoKnockback(Mob *caster, uint32 pushback, uint32 pushup)
 {
 	if(IsClient())
 	{
-		CastToClient()->SetKnockBackExemption(true);
-
 		auto outapp_push = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 		PlayerPositionUpdateServer_Struct* spu = (PlayerPositionUpdateServer_Struct*)outapp_push->pBuffer;
 

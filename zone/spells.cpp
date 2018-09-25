@@ -305,8 +305,9 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	}
 
 	//To prevent NPC ghosting when spells are cast from scripts
-	if (IsNPC() && IsMoving() && cast_time > 0)
-		SendPosition();
+	if (IsNPC() && IsMoving() && cast_time > 0) {
+		StopNavigation();
+	}
 
 	if(resist_adjust)
 	{
@@ -2665,23 +2666,6 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 
 			action->effect_flag = 4;
 
-			if(spells[spell_id].pushback != 0.0f || spells[spell_id].pushup != 0.0f)
-			{
-				if(IsClient())
-				{
-					if(!IsBuffSpell(spell_id))
-					{
-						CastToClient()->SetKnockBackExemption(true);
-
-					}
-				}
-			}
-
-			if(IsClient() && IsEffectInSpell(spell_id, SE_ShadowStep))
-			{
-				CastToClient()->SetShadowStepExemption(true);
-			}
-
 			if(!IsEffectInSpell(spell_id, SE_BindAffinity))
 			{
 				CastToClient()->QueuePacket(packet);
@@ -3943,23 +3927,12 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 
 	if(spells[spell_id].pushback != 0.0f || spells[spell_id].pushup != 0.0f)
 	{
-		if(spelltar->IsClient())
-		{
-			if(!IsBuffSpell(spell_id))
-			{
-				spelltar->CastToClient()->SetKnockBackExemption(true);
-			}
-		} else if (RuleB(Spells, NPCSpellPush) && !spelltar->IsRooted() && spelltar->ForcedMovement == 0) {
+		if (RuleB(Spells, NPCSpellPush) && !spelltar->IsRooted() && spelltar->ForcedMovement == 0) {
 			spelltar->m_Delta.x += action->force * g_Math.FastSin(action->hit_heading);
 			spelltar->m_Delta.y += action->force * g_Math.FastCos(action->hit_heading);
 			spelltar->m_Delta.z += action->hit_pitch;
 			spelltar->ForcedMovement = 6;
 		}
-	}
-
-	if(spelltar->IsClient() && IsEffectInSpell(spell_id, SE_ShadowStep))
-	{
-		spelltar->CastToClient()->SetShadowStepExemption(true);
 	}
 
 	if(!IsEffectInSpell(spell_id, SE_BindAffinity))
@@ -4940,18 +4913,7 @@ void Mob::Mesmerize()
 	if (casting_spell_id)
 		InterruptSpell();
 
-	SendPosition();
-/* this stuns the client for max time, with no way to break it
-	if (this->IsClient()){
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_Stun, sizeof(Stun_Struct));
-		Stun_Struct* stunon = (Stun_Struct*) outapp->pBuffer;
-		stunon->duration = 0xFFFF;
-		this->CastToClient()->QueuePacket(outapp);
-		safe_delete(outapp);
-	} else {
-		SetRunAnimSpeed(0);
-	}
-*/
+	StopNavigation();
 }
 
 void Client::MakeBuffFadePacket(uint16 spell_id, int slot_id, bool send_message)

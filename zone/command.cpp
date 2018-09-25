@@ -67,6 +67,7 @@
 #include "water_map.h"
 #include "worldserver.h"
 #include "fastmath.h"
+#include "mob_movement_manager.h"
 
 extern QueryServ* QServ;
 extern WorldServer worldserver;
@@ -265,6 +266,7 @@ int command_init(void)
 		command_add("modifynpcstat", "- Modifys a NPC's stats", 150, command_modifynpcstat) ||
 		command_add("motd", "[new motd] - Set message of the day", 150, command_motd) ||
 		command_add("movechar", "[charname] [zonename] - Move charname to zonename", 50, command_movechar) ||
+		command_add("movement", "Various movement commands", 200, command_movement) ||
 		command_add("myskills", "- Show details about your current skill levels", 0, command_myskills) ||
 		command_add("mysqltest", "Akkadius MySQL Bench Test", 250, command_mysqltest) ||
 		command_add("mysql", "Mysql CLI, see 'help' for options.", 250, command_mysql) ||
@@ -1255,6 +1257,63 @@ void command_movechar(Client *c, const Seperator *sep)
 		}
 		else
 			c->Message(0, "Character Does Not Exist");
+	}
+}
+
+void command_movement(Client *c, const Seperator *sep)
+{
+	auto &mgr = MobMovementManager::Get();
+
+	if (sep->arg[1][0] == 0) {
+		c->Message(0, "Usage: #movement stats/clearstats");
+		return;
+	}
+
+	if (strcasecmp(sep->arg[1], "stats") == 0)
+	{
+		//mgr.DumpStats(c);
+	}
+	else if (strcasecmp(sep->arg[1], "clearstats") == 0)
+	{
+		//mgr.ClearStats();
+	}
+	if (strcasecmp(sep->arg[1], "test") == 0)
+	{
+		auto target = c->GetTarget();
+		if (!target) {
+			c->Message(0, "Requires target");
+		}
+
+
+		auto heading = target->CalculateHeadingToTarget(c->GetX(), c->GetY());
+		mgr.RotateTo(target, heading, 16.0f);
+
+		//double a1 = atof(sep->arg[2]);
+		//double a2 = atof(sep->arg[3]);
+		//double a3 = atof(sep->arg[4]);
+		//double a4 = atof(sep->arg[5]);
+		//int a5 = atoi(sep->arg[6]);
+		//
+		////PlayerPositionUpdateServer_Struct
+		//EQApplicationPacket outapp(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
+		//PlayerPositionUpdateServer_Struct *spu = (PlayerPositionUpdateServer_Struct*)outapp.pBuffer;
+		//
+		//memset(spu, 0x00, sizeof(PlayerPositionUpdateServer_Struct));
+		//spu->spawn_id = target->GetID();
+		//spu->x_pos = FloatToEQ19(target->GetX());
+		//spu->y_pos = FloatToEQ19(target->GetY());
+		//spu->z_pos = FloatToEQ19(target->GetZ());
+		//spu->heading = FloatToEQ12(target->GetHeading());
+		//spu->delta_x = FloatToEQ13(a1);
+		//spu->delta_y = FloatToEQ13(a2);
+		//spu->delta_z = FloatToEQ13(a3);
+		//spu->delta_heading = FloatToEQ10(a4);
+		//spu->animation = a5;
+		//
+		//c->QueuePacket(&outapp);
+	}
+	else {
+		c->Message(0, "Usage: #movement stats/clearstats");
 	}
 }
 
@@ -7260,7 +7319,7 @@ void command_pf(Client *c, const Seperator *sep)
 		c->Message(0, "POS: (%.2f, %.2f, %.2f)",  who->GetX(), who->GetY(), who->GetZ());
 		c->Message(0, "WP: %s (%d/%d)",  to_string(who->GetCurrentWayPoint()).c_str(), who->IsNPC()?who->CastToNPC()->GetMaxWp():-1);
 		c->Message(0, "pause=%d RAspeed=%d",  who->GetCWPP(), who->GetRunAnimSpeed());
-		who->DumpMovement(c);
+		//who->DumpMovement(c);
 	} else {
 		c->Message(0, "ERROR: target required");
 	}

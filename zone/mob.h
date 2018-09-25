@@ -542,7 +542,6 @@ public:
 	virtual inline int32 GetPrimaryFaction() const { return 0; }
 
 	//Movement
-	void Warp(const glm::vec3& location);
 	inline bool IsMoving() const { return moving; }
 	virtual void SetMoving(bool move) { moving = move; m_Delta = glm::vec4(); }
 	virtual void GoToBind(uint8 bindnum = 0) { }
@@ -568,14 +567,15 @@ public:
 	bool Spawned() { return spawned; };
 	virtual bool ShouldISpawnFor(Client *c) { return true; }
 	void SetFlyMode(GravityBehavior flymode);
-	inline void Teleport(const glm::vec3 &NewPosition) { m_Position.x = NewPosition.x; m_Position.y = NewPosition.y;
-		m_Position.z = NewPosition.z; };
+	void Teleport(const glm::vec3 &pos);
+	void Teleport(const glm::vec4 &pos);
 	void TryMoveAlong(float distance, float angle, bool send = true);
 	void ProcessForcedMovement();
 	inline void IncDeltaX(float in) { m_Delta.x += in; }
 	inline void IncDeltaY(float in) { m_Delta.y += in; }
 	inline void IncDeltaZ(float in) { m_Delta.z += in; }
 	inline void SetForcedMovement(int in) { ForcedMovement = in; }
+	void SetHeading(float iHeading) { m_Position.w = iHeading; }
 
 	//AI
 	static uint32 GetLevelCon(uint8 mylevel, uint8 iOtherLevel);
@@ -602,7 +602,6 @@ public:
 	void SetAssistAggro(bool value) { AssistAggro = value; if (PrimaryAggro) AssistAggro = false; }
 	bool HateSummon();
 	void FaceTarget(Mob* mob_to_face = 0);
-	void SetHeading(float iHeading) { m_Position.w = iHeading; }
 	void WipeHateList();
 	void AddFeignMemory(Client* attacker);
 	void RemoveFromFeignMemory(Client* attacker);
@@ -980,7 +979,6 @@ public:
 	void				TryFixZ(int32 z_find_offset = 5, bool fix_client_z = false);
 	void 				FixZ(int32 z_find_offset = 5, bool fix_client_z = false);
 	float				GetFixedZ(const glm::vec3 &destination, int32 z_find_offset = 5);
-	void				DumpMovement(Client *to);
 	
 	void				NPCSpecialAttacks(const char* parse, int permtag, bool reset = true, bool remove = false);
 	inline uint32		DontHealMeBefore() const { return pDontHealMeBefore; }
@@ -1251,8 +1249,8 @@ protected:
 	uint8 level;
 	uint8 orig_level;
 	uint32 npctype_id;
-	glm::vec4 m_Position;
 
+	glm::vec4 m_Position;
 	int animation; // this is really what MQ2 calls SpeedRun just packed like (int)(SpeedRun * 40.0f)
 	float base_size;
 	float size;

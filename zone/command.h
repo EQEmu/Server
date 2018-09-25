@@ -168,6 +168,7 @@ void command_merchantopenshop(Client *c, const Seperator *sep);
 void command_modifynpcstat(Client *c, const Seperator *sep);
 void command_motd(Client *c, const Seperator *sep);
 void command_movechar(Client *c, const Seperator *sep);
+void command_movement(Client *c, const Seperator *sep);
 void command_myskills(Client *c, const Seperator *sep);
 void command_mysql(Client *c, const Seperator *sep);
 void command_mysqltest(Client *c, const Seperator *sep);

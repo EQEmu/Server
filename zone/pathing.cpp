@@ -92,7 +92,7 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 				auto front = (*Route.begin()).pos;
 			
 				if (PathingLoopCount > 5) {
-					Teleport(front);
+					Teleport(front); //todo new teleport
 					SendPosition();
 					Route.pop_front();
 			

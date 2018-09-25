@@ -12,7 +12,7 @@
 
 extern Zone *zone;
 
-const int MaxNavmeshNodes = 4092;
+const int MaxNavmeshNodes = 4096;
 
 struct PathfinderNavmesh::Implementation
 {
@@ -43,9 +43,9 @@ IPathfinder::IPath PathfinderNavmesh::FindRoute(const glm::vec3 &start, const gl
 
 	if (!m_impl->query) {
 		m_impl->query = dtAllocNavMeshQuery();
-		m_impl->query->init(m_impl->nav_mesh, MaxNavmeshNodes);
 	}
 
+	m_impl->query->init(m_impl->nav_mesh, MaxNavmeshNodes);
 	glm::vec3 current_location(start.x, start.z, start.y);
 	glm::vec3 dest_location(end.x, end.z, end.y);
 

@@ -2650,56 +2650,6 @@ void EntityList::RemoveDebuffs(Mob *caster)
 	}
 }
 
-// Currently, a new packet is sent per entity.
-// @todo: Come back and use FLAG_COMBINED to pack
-// all updates into one packet.
-void EntityList::SendPositionUpdates(Client *client, uint32 cLastUpdate, float update_range, Entity *always_send, bool iSendEvenIfNotChanged)
-{
-//	update_range = (update_range * update_range);
-//
-//	EQApplicationPacket *outapp = 0;
-//	PlayerPositionUpdateServer_Struct *ppu = 0;
-//	Mob *mob = 0;
-//
-//	auto it = mob_list.begin();
-//	while (it != mob_list.end()) {
-//		
-//		mob = it->second;
-//
-//		if (
-//			mob && !mob->IsCorpse() 
-//			&& (it->second != client)
-//			&& (mob->IsClient() || iSendEvenIfNotChanged || (mob->LastChange() >= cLastUpdate))
-//			&& (it->second->ShouldISpawnFor(client))
-//		) {
-//			if (
-//				update_range == 0 
-//				|| (it->second == always_send) 
-//				|| mob->IsClient() 
-//				|| (DistanceSquared(mob->GetPosition(), client->GetPosition()) <= update_range)
-//			) {
-//				if (mob && mob->IsClient() && mob->GetID() > 0) {
-//					client->QueuePacket(outapp, false, Client::CLIENT_CONNECTED);
-//
-//					if (outapp == 0) {
-//						outapp = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
-//						ppu = (PlayerPositionUpdateServer_Struct*)outapp->pBuffer;
-//					}
-//
-//					mob->MakeSpawnUpdate(ppu);
-//
-//					safe_delete(outapp);
-//					outapp = 0;
-//				}
-//			}
-//		}
-//		
-//		++it;
-//	}
-//
-//	safe_delete(outapp);
-}
-
 char *EntityList::MakeNameUnique(char *name)
 {
 	bool used[300];

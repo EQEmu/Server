@@ -4,6 +4,9 @@
 class Mob;
 class Client;
 
+struct RotateCommand;
+struct PlayerPositionUpdateServer_Struct;
+
 class MobMovementManager
 {
 public:
@@ -14,11 +17,13 @@ public:
 	void AddClient(Client *c);
 	void RemoveClient(Client *c);
 
-	void SendPosition(Mob *who);
-	void SendPositionUpdate(Mob *who, bool send_to_self);
+	void RotateTo(Mob *who, float to, float speed);
+	void Teleport(Mob *who, float x, float y, float z, float heading);
 	void NavigateTo(Mob *who, float x, float y, float z, float speed);
 	void StopNavigation(Mob *who);
-	void Dump(Mob *m, Client *to);
+	//void Dump(Mob *m, Client *to);
+	//void DumpStats(Client *to);
+	//void ClearStats();
 
 	static MobMovementManager &Get() {
 		static MobMovementManager inst;
@@ -30,12 +35,10 @@ private:
 	MobMovementManager(const MobMovementManager&);
 	MobMovementManager& operator=(const MobMovementManager&);
 
-	bool HeadingEqual(float a, float b);
-	void SendUpdateTo(Mob *who, Client *c, int anim, float heading);
-	void SendUpdate(Mob *who, int anim, float heading);
-	void SendUpdateShortDistance(Mob *who, int anim, float heading);
-	void SendUpdateLongDistance(Mob *who, int anim, float heading);
-	void ProcessMovement(Mob *who, float x, float y, float z, float speed);
+	void ProcessRotateCommand(Mob *m, RotateCommand &cmd);
+	void SendCommandToAllClients(Mob *m, float dx, float dy, float dz, float dh, int anim);
+	void FillCommandStruct(PlayerPositionUpdateServer_Struct *spu, Mob *m, float dx, float dy, float dz, float dh, int anim);
+	float FixHeading(float in);
 
 	struct Implementation;
 	std::unique_ptr<Implementation> _impl;
