@@ -124,7 +124,7 @@ namespace EQEmu
 
 	class OutBuffer : public std::stringstream {
 	public:
-		inline size_t size() { return tellp(); }
+		inline size_t size() { return static_cast<size_t>(tellp()); }
 		void overwrite(OutBuffer::pos_type position, const char *_Str, std::streamsize _Count);
 		uchar* detach();
 	};
