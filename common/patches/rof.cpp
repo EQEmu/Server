@@ -5781,8 +5781,9 @@ namespace RoF
 				break;
 			}
 			case invtype::typeWorld: {
+				server_slot = EQEmu::invslot::WORLD_BEGIN; // evidently, [4,-1,-1,-1] is sent when world object is in experimental mode and combine is clicked
 				if (rof_slot.Slot >= invslot::SLOT_BEGIN && rof_slot.Slot < invtype::WORLD_SIZE) {
-					server_slot = EQEmu::invslot::SHARED_BANK_BEGIN + rof_slot.Slot;
+					server_slot += rof_slot.Slot;
 				}
 
 				break;
@@ -5949,8 +5950,9 @@ namespace RoF
 				break;
 			}
 			case invtype::typeWorld: {
+				server_slot = EQEmu::invslot::WORLD_BEGIN; // evidently, [4,-1,-1,-1] is sent when world object is in experimental mode and combine is clicked
 				if (rof_slot.Slot >= invslot::SLOT_BEGIN && rof_slot.Slot < invtype::WORLD_SIZE) {
-					server_slot = EQEmu::invslot::SHARED_BANK_BEGIN + rof_slot.Slot;
+					server_slot += rof_slot.Slot;
 				}
 
 				break;
