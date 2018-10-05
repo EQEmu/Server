@@ -152,7 +152,7 @@ void NPC::DescribeAggro(Client *towho, Mob *mob, bool verbose) {
 
 	if (RuleB(Aggro, UseLevelAggro))
 	{
-		if (GetLevel() < 18 && mob->GetLevelCon(GetLevel()) == CON_GRAY && GetBodyType() != 3)
+		if (GetLevel() < RuleI(Aggro, MinAggroLevel) && mob->GetLevelCon(GetLevel()) == CON_GRAY && GetBodyType() != 3)
 		{
 			towho->Message(0, "...%s is red to me (basically)", mob->GetName(),	dist2, iAggroRange2);
 			return;
@@ -324,7 +324,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	(
 	//old InZone check taken care of above by !mob->CastToClient()->Connected()
 	(
-		( GetLevel() >= 18 )
+		( GetLevel() >= RuleI(Aggro, MinAggroLevel))
 		||(GetBodyType() == 3)
 		||( mob->IsClient() && mob->CastToClient()->IsSitting() )
 		||( mob->GetLevelCon(GetLevel()) != CON_GRAY)
