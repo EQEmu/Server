@@ -3199,6 +3199,10 @@ namespace SoF
 			sof_slot = server_slot;
 		}
 
+		else if (server_slot == EQEmu::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE) {
+			sof_slot = server_slot;
+		}
+
 		else if (server_slot <= EQEmu::invslot::BANK_END && server_slot >= EQEmu::invslot::BANK_BEGIN) {
 			sof_slot = server_slot;
 		}
@@ -3278,6 +3282,10 @@ namespace SoF
 		}
 
 		else if (sof_slot <= invslot::GUILD_TRIBUTE_END && sof_slot >= invslot::GUILD_TRIBUTE_BEGIN) {
+			server_slot = sof_slot;
+		}
+
+		else if (sof_slot == invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE) {
 			server_slot = sof_slot;
 		}
 

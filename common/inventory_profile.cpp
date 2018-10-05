@@ -1418,7 +1418,7 @@ int16 EQEmu::InventoryProfile::_HasItem(std::map<int16, ItemInstance*>& bucket, 
 
 		for (int index = invaug::SOCKET_BEGIN; index <= invaug::SOCKET_END; ++index) {
 			if (inst->GetAugmentItemID(index) == item_id && quantity <= 1)
-				return legacy::SLOT_AUGMENT;
+				return invslot::SLOT_AUGMENT_GENERIC_RETURN;
 		}
 		
 		if (!inst->IsClassBag()) { continue; }
@@ -1435,7 +1435,7 @@ int16 EQEmu::InventoryProfile::_HasItem(std::map<int16, ItemInstance*>& bucket, 
 
 			for (int index = invaug::SOCKET_BEGIN; index <= invaug::SOCKET_END; ++index) {
 				if (bag_inst->GetAugmentItemID(index) == item_id && quantity <= 1)
-					return legacy::SLOT_AUGMENT;
+					return invslot::SLOT_AUGMENT_GENERIC_RETURN;
 			}
 		}
 	}
@@ -1466,7 +1466,7 @@ int16 EQEmu::InventoryProfile::_HasItem(ItemInstQueue& iqueue, uint32 item_id, u
 
 		for (int index = invaug::SOCKET_BEGIN; index <= invaug::SOCKET_END; ++index) {
 			if (inst->GetAugmentItemID(index) == item_id && quantity <= 1)
-				return legacy::SLOT_AUGMENT;
+				return invslot::SLOT_AUGMENT_GENERIC_RETURN;
 		}
 
 		if (!inst->IsClassBag()) { continue; }
@@ -1483,7 +1483,7 @@ int16 EQEmu::InventoryProfile::_HasItem(ItemInstQueue& iqueue, uint32 item_id, u
 
 			for (int index = invaug::SOCKET_BEGIN; index <= invaug::SOCKET_END; ++index) {
 				if (bag_inst->GetAugmentItemID(index) == item_id && quantity <= 1)
-					return legacy::SLOT_AUGMENT;
+					return invslot::SLOT_AUGMENT_GENERIC_RETURN;
 			}
 		}
 
@@ -1593,7 +1593,7 @@ int16 EQEmu::InventoryProfile::_HasItemByLoreGroup(std::map<int16, ItemInstance*
 			if (aug_inst == nullptr) { continue; }
 
 			if (aug_inst->GetItem()->LoreGroup == loregroup)
-				return legacy::SLOT_AUGMENT;
+				return invslot::SLOT_AUGMENT_GENERIC_RETURN;
 		}
 
 		if (!inst->IsClassBag()) { continue; }
@@ -1610,7 +1610,7 @@ int16 EQEmu::InventoryProfile::_HasItemByLoreGroup(std::map<int16, ItemInstance*
 				if (aug_inst == nullptr) { continue; }
 
 				if (aug_inst->GetItem()->LoreGroup == loregroup)
-					return legacy::SLOT_AUGMENT;
+					return invslot::SLOT_AUGMENT_GENERIC_RETURN;
 			}
 		}
 	}
@@ -1633,7 +1633,7 @@ int16 EQEmu::InventoryProfile::_HasItemByLoreGroup(ItemInstQueue& iqueue, uint32
 			if (aug_inst == nullptr) { continue; }
 
 			if (aug_inst->GetItem()->LoreGroup == loregroup)
-				return legacy::SLOT_AUGMENT;
+				return invslot::SLOT_AUGMENT_GENERIC_RETURN;
 		}
 
 		if (!inst->IsClassBag()) { continue; }
@@ -1650,7 +1650,7 @@ int16 EQEmu::InventoryProfile::_HasItemByLoreGroup(ItemInstQueue& iqueue, uint32
 				if (aug_inst == nullptr) { continue; }
 
 				if (aug_inst->GetItem()->LoreGroup == loregroup)
-					return legacy::SLOT_AUGMENT;
+					return invslot::SLOT_AUGMENT_GENERIC_RETURN;
 			}
 		}
 

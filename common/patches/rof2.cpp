@@ -5299,11 +5299,7 @@ namespace RoF2
 		DECODE_LENGTH_EXACT(structs::NewCombine_Struct);
 		SETUP_DIRECT_DECODE(NewCombine_Struct, structs::NewCombine_Struct);
 
-		int16 slot_id = RoF2ToServerSlot(eq->container_slot);
-		if (slot_id == 4000) {
-			slot_id = EQEmu::legacy::SLOT_TRADESKILL;	// 1000
-		}
-		emu->container_slot = slot_id;
+		emu->container_slot = RoF2ToServerSlot(eq->container_slot);
 		emu->guildtribute_slot = RoF2ToServerSlot(eq->guildtribute_slot); // this should only return INVALID_INDEX until implemented
 
 		FINISH_DIRECT_DECODE();
@@ -5887,6 +5883,10 @@ namespace RoF2
 			RoF2Slot.Slot = server_slot - EQEmu::invslot::GUILD_TRIBUTE_BEGIN;
 		}
 
+		else if (server_slot == EQEmu::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE) {
+			RoF2Slot.Type = invtype::typeWorld;
+		}
+
 		else if (server_slot <= EQEmu::invslot::BANK_END && server_slot >= EQEmu::invslot::BANK_BEGIN) {
 			RoF2Slot.Type = invtype::typeBank;
 			RoF2Slot.Slot = server_slot - EQEmu::invslot::BANK_BEGIN;
@@ -6071,9 +6071,12 @@ namespace RoF2
 			break;
 		}
 		case invtype::typeWorld: {
-			server_slot = EQEmu::invslot::WORLD_BEGIN; // evidently, [4,-1,-1,-1] is sent when world object is in experimental mode and combine is clicked
 			if (rof2_slot.Slot >= invslot::SLOT_BEGIN && rof2_slot.Slot < invtype::WORLD_SIZE) {
-				server_slot += rof2_slot.Slot;
+				server_slot = EQEmu::invslot::WORLD_BEGIN + rof2_slot.Slot;
+			}
+
+			else if (rof2_slot.Slot == invslot::SLOT_INVALID) {
+				server_slot = EQEmu::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE;
 			}
 
 			break;
@@ -6222,9 +6225,12 @@ namespace RoF2
 			break;
 		}
 		case invtype::typeWorld: {
-			ServerSlot = EQEmu::invslot::WORLD_BEGIN; // evidently, [4,-1,-1,-1] is sent when world object is in experimental mode and combine is clicked
 			if (rof2_slot.Slot >= invslot::SLOT_BEGIN && rof2_slot.Slot < invtype::WORLD_SIZE) {
-				ServerSlot += rof2_slot.Slot;
+				ServerSlot = EQEmu::invslot::WORLD_BEGIN + rof2_slot.Slot;
+			}
+
+			else if (rof2_slot.Slot == invslot::SLOT_INVALID) {
+				ServerSlot = EQEmu::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE;
 			}
 
 			break;

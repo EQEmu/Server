@@ -2504,6 +2504,9 @@ namespace Titanium
 				 server_slot >= EQEmu::invslot::GUILD_TRIBUTE_BEGIN) {
 			titanium_slot = server_slot;
 		}
+		else if (server_slot == EQEmu::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE) {
+			titanium_slot = server_slot;
+		}
 		else if (server_slot <= EQEmu::invslot::BANK_END && server_slot >= EQEmu::invslot::BANK_BEGIN) {
 			titanium_slot = server_slot;
 		}
@@ -2584,6 +2587,9 @@ namespace Titanium
 			server_slot = titanium_slot + 20;
 		}
 		else if (titanium_slot <= invslot::TRIBUTE_END && titanium_slot >= invslot::TRIBUTE_BEGIN) {
+			server_slot = titanium_slot;
+		}
+		else if (titanium_slot == invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE) {
 			server_slot = titanium_slot;
 		}
 		else if (titanium_slot <= invslot::GUILD_TRIBUTE_END && titanium_slot >= invslot::GUILD_TRIBUTE_BEGIN) {

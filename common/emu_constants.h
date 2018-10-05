@@ -83,6 +83,10 @@ namespace EQEmu
 		using RoF2::invslot::SLOT_INVALID;
 		using RoF2::invslot::SLOT_BEGIN;
 
+		using Titanium::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE;
+
+		const int16 SLOT_AUGMENT_GENERIC_RETURN = 1001; // clients don't appear to use this method... (internal inventory return value)
+
 		using RoF2::invslot::POSSESSIONS_BEGIN;
 		using RoF2::invslot::POSSESSIONS_END;
 		using RoF2::invslot::POSSESSIONS_COUNT;

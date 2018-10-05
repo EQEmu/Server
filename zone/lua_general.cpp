@@ -1908,6 +1908,8 @@ luabind::scope lua_register_slot() {
 			luabind::value("GeneralBagsEnd", static_cast<int>(EQEmu::invbag::GENERAL_BAGS_END)),
 			luabind::value("CursorBagBegin", static_cast<int>(EQEmu::invbag::CURSOR_BAG_BEGIN)),
 			luabind::value("CursorBagEnd", static_cast<int>(EQEmu::invbag::CURSOR_BAG_END)),
+			luabind::value("Tradeskill", static_cast<int>(EQEmu::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE)),
+			luabind::value("Augment", static_cast<int>(EQEmu::invslot::SLOT_AUGMENT_GENERIC_RETURN)), // will be revised out
 			luabind::value("BankBegin", static_cast<int>(EQEmu::invslot::BANK_BEGIN)),
 			luabind::value("BankEnd", static_cast<int>(EQEmu::invslot::BANK_END)),
 			luabind::value("BankBagsBegin", static_cast<int>(EQEmu::invbag::BANK_BAGS_BEGIN)),
@@ -1929,9 +1931,7 @@ luabind::scope lua_register_slot() {
 			luabind::value("Ring2", static_cast<int>(EQEmu::invslot::slotFinger2)), // deprecated
 			luabind::value("PersonalBegin", static_cast<int>(EQEmu::invslot::GENERAL_BEGIN)), // deprecated
 			luabind::value("PersonalEnd", static_cast<int>(EQEmu::invslot::GENERAL_END)), // deprecated
-			luabind::value("CursorEnd", 0xFFFE), // deprecated
-			luabind::value("Tradeskill", static_cast<int>(EQEmu::legacy::SLOT_TRADESKILL)), // deprecated
-			luabind::value("Augment", static_cast<int>(EQEmu::legacy::SLOT_AUGMENT)) // deprecated
+			luabind::value("CursorEnd", 0xFFFE) // deprecated (not in use..and never valid vis-a-vis client behavior)
 		];
 }
 

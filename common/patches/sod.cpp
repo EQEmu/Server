@@ -3809,6 +3809,10 @@ namespace SoD
 			SoDSlot = serverSlot;
 		}
 
+		else if (serverSlot == EQEmu::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE) {
+			SoDSlot = serverSlot;
+		}
+
 		else if (serverSlot <= EQEmu::invslot::BANK_END && serverSlot >= EQEmu::invslot::BANK_BEGIN) {
 			SoDSlot = serverSlot;
 		}
@@ -3884,6 +3888,10 @@ namespace SoD
 		}
 
 		else if (sod_slot <= invslot::GUILD_TRIBUTE_END && sod_slot >= invslot::GUILD_TRIBUTE_BEGIN) {
+			server_slot = sod_slot;
+		}
+
+		else if (sod_slot == invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE) {
 			server_slot = sod_slot;
 		}
 

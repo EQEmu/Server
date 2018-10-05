@@ -4168,6 +4168,10 @@ namespace UF
 			UFSlot = serverSlot;
 		}
 
+		else if (serverSlot == EQEmu::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE) {
+			UFSlot = serverSlot;
+		}
+
 		else if (serverSlot <= EQEmu::invslot::BANK_END && serverSlot >= EQEmu::invslot::BANK_BEGIN) {
 			UFSlot = serverSlot;
 		}
@@ -4243,6 +4247,10 @@ namespace UF
 		}
 
 		else if (ufSlot <= invslot::GUILD_TRIBUTE_END && ufSlot >= invslot::GUILD_TRIBUTE_BEGIN) {
+			ServerSlot = ufSlot;
+		}
+
+		else if (ufSlot == invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE) {
 			ServerSlot = ufSlot;
 		}
 
