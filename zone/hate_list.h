@@ -46,6 +46,8 @@ public:
 	Mob *GetEntWithMostHateOnList(Mob *center, Mob *skip = nullptr);
 	Mob *GetRandomEntOnHateList();
 	Mob *GetEntWithMostHateOnList();
+	Mob *GetEscapingEntOnHateList(); // returns first eligble entity
+	Mob *GetEscapingEntOnHateList(Mob *center, float range = 0.0f, bool first = false);
 
 	bool IsEntOnHateList(Mob *mob);
 	bool IsHateListEmpty();

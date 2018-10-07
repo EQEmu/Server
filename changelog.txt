@@ -1,5 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 10/06/2018 ==
+Uleat: Fixed a few bot issues..
+	- Fix for bot 'stop melee level' not honoring setting level over rule level
+	- Fix for missing bot combat spell casting when within melee range
+	- Fix (in-work) for bots 'forgetting' current target when it flees
+
 == 07/10/2018 ==
 Akkadius: Adjusted DataBuckets to use other acceptable time formats
     Example: quest::set_data('key', 'value', '1d');
