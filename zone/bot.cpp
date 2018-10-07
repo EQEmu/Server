@@ -2265,10 +2265,15 @@ void Bot::AI_Process() {
 		}
 
 		if (find_target) {
-			if (IsRooted())
+			if (IsRooted()) {
 				SetTarget(hate_list.GetClosestEntOnHateList(this));
-			else
-				SetTarget(hate_list.GetEntWithMostHateOnList(this));
+			}
+			else {
+				// This will keep bots on target for now..but, future updates will allow for rooting/stunning
+				SetTarget(hate_list.GetEscapingEntOnHateList(leash_owner, BOT_LEASH_DISTANCE));
+				if (!GetTarget())
+					SetTarget(hate_list.GetEntWithMostHateOnList(this));
+			}
 		}
 		
 		TEST_TARGET();
@@ -2475,6 +2480,8 @@ void Bot::AI_Process() {
 				ChangeBotArcherWeapons(IsBotArcher());
 		}
 
+		// all of this needs review...
+
 		if (IsBotArcher() && atArcheryRange)
 			atCombatRange = true;
 		else if (caster_distance_max && tar_distance <= caster_distance_max)
@@ -2571,6 +2578,10 @@ void Bot::AI_Process() {
 				}
 			}
 
+			if (!IsBotNonSpellFighter() && AI_EngagedCastCheck()) {
+				return;
+			}
+
 			// Up to this point, GetTarget() has been safe to dereference since the initial
 			// TEST_TARGET() call. Due to the chance of the target dying and our pointer
 			// being nullified, we need to test it before dereferencing to avoid crashes
@@ -2580,7 +2591,7 @@ void Bot::AI_Process() {
 				if (GetTarget()->GetHPRatio() <= 99.0f)
 					BotRangedAttack(tar);
 			}
-			else if (!IsBotArcher() && (!(IsBotCaster() && GetLevel() >= RuleI(Bots, CasterStopMeleeLevel)))) {
+			else if (!IsBotArcher() && (IsBotNonSpellFighter() || GetLevel() < GetStopMeleeLevel())) {
 				// we can't fight if we don't have a target, are stun/mezzed or dead..
 				// Stop attacking if the target is enraged
 				TEST_TARGET();

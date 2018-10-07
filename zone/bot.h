@@ -534,6 +534,9 @@ public:
 	bool IsBotCaster() { return IsCasterClass(GetClass()); }
 	bool IsBotINTCaster() { return IsINTCasterClass(GetClass()); }
 	bool IsBotWISCaster() { return IsWISCasterClass(GetClass()); }
+	bool IsBotSpellFighter() { return IsSpellFighterClass(GetClass()); }
+	bool IsBotFighter() { return IsFighterClass(GetClass()); }
+	bool IsBotNonSpellFighter() { return IsNonSpellFighterClass(GetClass()); }
 	bool CanHeal();
 	int GetRawACNoShield(int &shield_ac);
 	

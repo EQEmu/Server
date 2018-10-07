@@ -1,5 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 10/06/2018 ==
+Uleat: Fixed a few bot issues..
+	- Fix for bot 'stop melee level' not honoring setting level over rule level
+	- Fix for missing bot combat spell casting when within melee range
+	- Fix (in-work) for bots 'forgetting' current target when it flees
+
 == 09/18/2018 ==
 Uleat: Notes for manual conversion of quest script inventory slot values
 	- You should use reference/lookup values provided by the lua and perl apis to avoid skirting safety checks
