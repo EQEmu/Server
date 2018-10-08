@@ -1850,6 +1850,13 @@ bool Bot::Process() {
 		SendHPUpdate();
 		if(HasPet())
 			GetPet()->SendHPUpdate();
+
+		// hack fix until percentage changes can be implemented
+		auto g = GetGroup();
+		if (g) {
+			g->SendManaPacketFrom(this);
+			g->SendEndurancePacketFrom(this);
+		}
 	}
 
 	if(GetAppearance() == eaDead && GetHP() > 0)
@@ -3904,6 +3911,8 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 			client->ResetTrade();
 			return;
 		}
+		// non-failing checks above are causing this to trigger (i.e., !ItemClassCommon and !IsEquipable{race, class, min_level})
+		// this process is hindered by not having bots use the inventory trade method (TODO: implement bot inventory use)
 		if (client->CheckLoreConflict(return_instance->GetItem())) {
 			client->Message(CC_Yellow, "You already have lore equipment matching the item '%s' - Trade Canceled!", return_instance->GetItem()->Name);
 			client->ResetTrade();
@@ -4007,8 +4016,17 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 
 		m_inv.PutItem(trade_iterator.toBotSlot, *trade_iterator.tradeItemInstance);
 		this->BotAddEquipItem(trade_iterator.toBotSlot, (trade_iterator.tradeItemInstance ? trade_iterator.tradeItemInstance->GetID() : 0));
+		trade_iterator.tradeItemInstance = nullptr; // actual deletion occurs in client delete below
+
 		client->DeleteItemInInventory(trade_iterator.fromClientSlot, 0, (trade_iterator.fromClientSlot == EQEmu::invslot::slotCursor));
-		trade_iterator.tradeItemInstance = nullptr;
+
+		// database currently has unattuned item saved in inventory..it will be attuned on next bot load
+		// this prevents unattuned item returns in the mean time (TODO: re-work process)
+		if (trade_iterator.toBotSlot >= invslot::EQUIPMENT_BEGIN && trade_iterator.toBotSlot <= invslot::EQUIPMENT_END) {
+			auto attune_item = m_inv.GetItem(trade_iterator.toBotSlot);
+			if (attune_item && attune_item->GetItem()->Attuneable)
+				attune_item->SetAttuned(true);
+		}
 	}
 
 	// trade messages
