@@ -1,5 +1,10 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 10/07/2018 ==
+Uleat: Fixed a few bot issues..
+	- Fix for bot item trades not attuning
+	- Fix for bot mana, endurance not updating properly
+
 == 10/06/2018 ==
 Uleat: Fixed a few bot issues..
 	- Fix for bot 'stop melee level' not honoring setting level over rule level
