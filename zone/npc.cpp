@@ -747,8 +747,10 @@ bool NPC::Process()
 
 	/**
 	 * Send HP updates when engaged
+	 * Pets always - master wants to see the healing
 	 */
-	if (send_hp_update_timer.Check(false) && this->IsEngaged()) {
+	if (send_hp_update_timer.Check(false) && 
+		(this->IsEngaged() || (GetOwner() && GetOwner()->IsClient()))) {
 		SendHPUpdate();
 	}
 
