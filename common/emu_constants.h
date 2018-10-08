@@ -78,28 +78,30 @@ namespace EQEmu
 	} // namespace invtype
 
 	namespace invslot {
-		using namespace Titanium::invslot::enum_;
-
-		const int16 SLOT_POWER_SOURCE = 9999;
+		using namespace RoF2::invslot::enum_;
 
 		using RoF2::invslot::SLOT_INVALID;
 		using RoF2::invslot::SLOT_BEGIN;
 
-		using Titanium::invslot::POSSESSIONS_BEGIN;
-		using Titanium::invslot::POSSESSIONS_END;
-		using SoF::invslot::POSSESSIONS_COUNT;
+		using Titanium::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE;
 
-		using Titanium::invslot::EQUIPMENT_BEGIN;
-		using Titanium::invslot::EQUIPMENT_END;
-		using Titanium::invslot::EQUIPMENT_COUNT;
+		const int16 SLOT_AUGMENT_GENERIC_RETURN = 1001; // clients don't appear to use this method... (internal inventory return value)
 
-		using Titanium::invslot::GENERAL_BEGIN;
-		using Titanium::invslot::GENERAL_END;
-		using Titanium::invslot::GENERAL_COUNT;
+		using RoF2::invslot::POSSESSIONS_BEGIN;
+		using RoF2::invslot::POSSESSIONS_END;
+		using RoF2::invslot::POSSESSIONS_COUNT;
 
-		using Titanium::invslot::BONUS_BEGIN;
-		using Titanium::invslot::BONUS_STAT_END;
-		using Titanium::invslot::BONUS_SKILL_END;
+		using RoF2::invslot::EQUIPMENT_BEGIN;
+		using RoF2::invslot::EQUIPMENT_END;
+		using RoF2::invslot::EQUIPMENT_COUNT;
+
+		using RoF2::invslot::GENERAL_BEGIN;
+		using RoF2::invslot::GENERAL_END;
+		using RoF2::invslot::GENERAL_COUNT;
+
+		using RoF2::invslot::BONUS_BEGIN;
+		using RoF2::invslot::BONUS_STAT_END;
+		using RoF2::invslot::BONUS_SKILL_END;
 
 		using Titanium::invslot::BANK_BEGIN;
 		using SoF::invslot::BANK_END;
@@ -145,7 +147,7 @@ namespace EQEmu
 		const int16 GENERAL_BAGS_8_COUNT = 8 * SLOT_COUNT;
 		const int16 GENERAL_BAGS_8_END = (GENERAL_BAGS_BEGIN + GENERAL_BAGS_8_COUNT) - 1;
 
-		const int16 CURSOR_BAG_BEGIN = 331;
+		const int16 CURSOR_BAG_BEGIN = 351;
 		const int16 CURSOR_BAG_COUNT = SLOT_COUNT;
 		const int16 CURSOR_BAG_END = (CURSOR_BAG_BEGIN + CURSOR_BAG_COUNT) - 1;
 

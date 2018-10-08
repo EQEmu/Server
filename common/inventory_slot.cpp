@@ -110,9 +110,7 @@ bool EQEmu::InventorySlot::IsDeleteSlot() const
 
 bool EQEmu::InventorySlot::IsEquipmentIndex(int16 slot_index)
 {
-	/*if (slot_index < inventory::EquipmentBegin || slot_index > inventory::EquipmentEnd)
-		return false;*/
-	if ((slot_index < invslot::EQUIPMENT_BEGIN || slot_index > invslot::EQUIPMENT_END) && slot_index != invslot::SLOT_POWER_SOURCE)
+	if (slot_index < invslot::EQUIPMENT_BEGIN || slot_index > invslot::EQUIPMENT_END)
 		return false;
 
 	return true;
@@ -120,8 +118,6 @@ bool EQEmu::InventorySlot::IsEquipmentIndex(int16 slot_index)
 
 bool EQEmu::InventorySlot::IsGeneralIndex(int16 slot_index)
 {
-	/*if (slot_index < inventory::GeneralBegin || slot_index > inventory::GeneralEnd)
-		return false;*/
 	if (slot_index < invslot::GENERAL_BEGIN || slot_index > invslot::GENERAL_END)
 		return false;
 
@@ -130,22 +126,18 @@ bool EQEmu::InventorySlot::IsGeneralIndex(int16 slot_index)
 
 bool EQEmu::InventorySlot::IsCursorIndex(int16 slot_index)
 {
-	/*if (slot_index != inventory::slotCursor)
-		return false;*/
-	if (slot_index != invslot::slotCursor)
-		return false;
+	if (slot_index == invslot::slotCursor)
+		return true;
 
-	return true;
+	return false;
 }
 
 bool EQEmu::InventorySlot::IsWeaponIndex(int16 slot_index)
 {
-	/*if ((slot_index != inventory::slotRange) && (slot_index != inventory::slotPrimary) && (slot_index != inventory::slotSecondary))
-		return false;*/
-	if ((slot_index != invslot::slotRange) && (slot_index != invslot::slotPrimary) && (slot_index != invslot::slotSecondary))
-		return false;
-
-	return true;
+	if (slot_index == invslot::slotPrimary || slot_index == invslot::slotSecondary || slot_index == invslot::slotRange)
+		return true;
+	
+	return false;
 }
 
 bool EQEmu::InventorySlot::IsTextureIndex(int16 slot_index)

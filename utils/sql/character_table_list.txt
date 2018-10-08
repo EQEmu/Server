@@ -31,6 +31,7 @@ friends
 guild_members
 instance_list_player
 inventory
+inventory_snapshots
 keyring
 mail
 player_titlesets

@@ -538,6 +538,69 @@ Mob *HateList::GetRandomEntOnHateList()
 	return (*iterator)->entity_on_hatelist;
 }
 
+Mob *HateList::GetEscapingEntOnHateList() {
+	// function is still in design stage
+
+	for (auto iter : list) {
+		if (!iter->entity_on_hatelist)
+			continue;
+
+		if (!iter->entity_on_hatelist->IsFeared())
+			continue;
+
+		if (iter->entity_on_hatelist->IsRooted())
+			continue;
+		if (iter->entity_on_hatelist->IsMezzed())
+			continue;
+		if (iter->entity_on_hatelist->IsStunned())
+			continue;
+
+		return iter->entity_on_hatelist;
+	}
+
+	return nullptr;
+}
+
+Mob *HateList::GetEscapingEntOnHateList(Mob *center, float range, bool first) {
+	// function is still in design stage
+	
+	if (!center)
+		return nullptr;
+
+	Mob *escaping_mob = nullptr;
+	float mob_distance = 0.0f;
+
+	for (auto iter : list) {
+		if (!iter->entity_on_hatelist)
+			continue;
+
+		if (!iter->entity_on_hatelist->IsFeared())
+			continue;
+
+		if (iter->entity_on_hatelist->IsRooted())
+			continue;
+		if (iter->entity_on_hatelist->IsMezzed())
+			continue;
+		if (iter->entity_on_hatelist->IsStunned())
+			continue;
+		
+		float distance_test = DistanceSquared(center->GetPosition(), iter->entity_on_hatelist->GetPosition());
+
+		if (range > 0.0f && distance_test > range)
+			continue;
+		
+		if (first)
+			return iter->entity_on_hatelist;
+		
+		if (distance_test > mob_distance) {
+			escaping_mob = iter->entity_on_hatelist;
+			mob_distance = distance_test;
+		}
+	}
+
+	return escaping_mob;
+}
+
 int32 HateList::GetEntHateAmount(Mob *in_entity, bool damage)
 {
 	struct_HateList *entity;

@@ -1,5 +1,98 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 10/07/2018 ==
+Uleat: Fixed a few bot issues..
+	- Fix for bot item trades not attuning
+	- Fix for bot mana, endurance not updating properly
+
+== 10/06/2018 ==
+Uleat: Fixed a few bot issues..
+	- Fix for bot 'stop melee level' not honoring setting level over rule level
+	- Fix for missing bot combat spell casting when within melee range
+	- Fix (in-work) for bots 'forgetting' current target when it flees
+
+== 09/18/2018 ==
+Uleat: Notes for manual conversion of quest script inventory slot values
+	- You should use reference/lookup values provided by the lua and perl apis to avoid skirting safety checks
+		and to ensure that the values used are the correct ones for your needs
+	
+	[perl api examples]
+		old:
+			1) my $charmitem = $client->GetItemIDAt(0);
+			2) for($for_x = 22; $for_x < 30; $for_x++) {...}
+			3) for($slot1 = 0; $slot1 <= 30; $slot1++) {...}
+		
+		new:
+			1) my $charmitem = $client->GetItemIDAt(quest::getinventoryslotid("charm"));
+			2) for($for_x = quest::getinventoryslotid("general.begin"); $for_x <= quest::getinventoryslotid("general.end"); $for_x++) {...} ** notice change of conditional
+			3) for($slot1 = quest::getinventoryslotid("possessions.begin"); $slot1 <= quest::getinventoryslotid("possessions.end"); $slot1++) {...}
+	
+	[lua api examples]
+		old:
+			1) if(e.self:GetItemIDAt(30) == 31599) then ...
+			2) for i = 0, 30, 1 do ...
+			
+		new:
+			1) if(e.self:GetItemIDAt(Slot.Cursor) == 31599) then ...
+			2) for i = Slot.PossessionsBegin, Slot.PossessionsEnd, 1 do ...
+	
+	- If you need to manually assign bag slot ranges to individual 'general' slots, use this assignment for now:
+		-- General1  (23) = 251 .. 260
+		-- General2  (24) = 261 .. 270
+		-- General3  (25) = 271 .. 280
+		-- General4  (26) = 281 .. 290
+		-- General5  (27) = 291 .. 300
+		-- General6  (28) = 301 .. 310
+		-- General7  (29) = 311 .. 320
+		-- General8  (30) = 321 .. 330
+		-- General9  (31) = 331 .. 340
+		-- General10 (32) = 341 .. 350
+		-- Cursor    (33) = 351 .. 360
+	
+	- If you need to manually assign ammo or powersource slots, use these values:
+		-- PowerSource = 21
+		-- Ammo = 22
+	
+	- All slot values not addressed above remain the same
+	
+	- Additional information can be found at:
+		-- https://github.com/EQEmu/Server/wiki/Inventory-Slots
+		-- https://github.com/EQEmu/Server/wiki/Perl-API
+		-- https://github.com/EQEmu/Server/wiki/Lua-API
+
+== 09/03/2018 ==
+Uleat: Rework of 'invsnapshot' command and implementation of automatic inventory snapshots.
+	- Inventory snapshots are now taken automatically using the interval rule values - if snapshots are enabled
+	- Command 'invsnapshot' now has more options available to include a restore feature
+	-- A pop-up help menu is available
+	-- argument 'capture' is available to anyone with status high enough to register the command
+	-- Advanced options are only available to players with 150 status or greater
+	-- argument 'list' provides a list of "timestamp : item count" entries
+	-- argument 'parse' displays a "slot : item id : item name" listing of valid snapshots by timestamp
+	-- argument 'compare' shows a 'difference' comparison of "snapshot-to-inventory" changes
+	-- argument 'restore' applies a saved snapshot to the player's inventory (with a pre-clearing call)
+
+== 08/13/2018 ==
+Uleat: Activation of RoF+ clients' two additional general slots and integration of SoF+ clients' PowerSource slot
+	- Inventory 'Possessions' main slots are now contiguous and implemented to RoF2 standards
+	-- 'slotGeneral9'(31) and 'slotGeneral10'(32) are now active
+	-- Possessions slot enumerations are now defined as between 'slotCharm'(0) and 'slotCursor'(33)
+	-- 'slotPowerSource'(21) is no longer a special case slot(9999)
+	- Special code has been added to exclude 'slotPowerSource,' 'slotGeneral9' and 'slotGeneral10' from server
+		actions in clients that do not support them.
+	- The lua api has been updated to use the new slot enumeration as well as having some slot range definitions added
+	- The perl api now has a look-up function to provide token-to-value translations .. definitions are similar to lua
+	- In both lua and perl, it is HIGHLY recommended that any custom scripts using hard-coded inventory slot values be
+		updated to use the constants/lookup methods as any old values are no longer guaranteed to be accurate
+	- Database will have existing inventory slot values modified to the new standard and table `items` entries will
+		also be updated to the 'correct' equipable slot bitmask
+	- Script (quest) updates are required with this change
+	
+Note: The proper way to reference inventory slots is to use either instrinsic lookups (c/c++ & perl) or to use valid
+	const ref declarations (c/c++ & lua). Any other method is not guaranteed to be accurate and may result in item loss
+	and/or unexpected/undefined behavior.
+	
+
 == 07/10/2018 ==
 Akkadius: Adjusted DataBuckets to use other acceptable time formats
     Example: quest::set_data('key', 'value', '1d');

@@ -38,10 +38,10 @@ int Lua_Inventory::PushCursor(Lua_ItemInst item) {
 	return self->PushCursor(*inst);
 }
 
-bool Lua_Inventory::SwapItem(int slot_a, int slot_b) {
+bool Lua_Inventory::SwapItem(int source_slot, int destination_slot) {
 	Lua_Safe_Call_Bool();
 	EQEmu::InventoryProfile::SwapItemFailState fail_state = EQEmu::InventoryProfile::swapInvalid;
-	return self->SwapItem(slot_a, slot_b, fail_state);
+	return self->SwapItem(source_slot, destination_slot, fail_state);
 }
 
 bool Lua_Inventory::DeleteItem(int slot_id) {

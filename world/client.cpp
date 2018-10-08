@@ -252,7 +252,7 @@ void Client::SendMembership() {
 	mc->entries[1] = 0xffffffff;	// Max Level Restriction
 	mc->entries[2] = 0xffffffff;	// Max Char Slots per Account (not used by client?)
 	mc->entries[3] = 0xffffffff;	// 1 for Silver
-	mc->entries[4] = 8;				// Main Inventory Size (0xffffffff on Live for Gold, but limiting to 8 until 10 is supported)
+	mc->entries[4] = 0xffffffff;	// Main Inventory Size (0xffffffff on Live for Gold, but limiting to 8 until 10 is supported)
 	mc->entries[5] = 0xffffffff;	// Max Platinum per level
 	mc->entries[6] = 1;				// 0 for Silver
 	mc->entries[7] = 1;				// 0 for Silver
@@ -1442,6 +1442,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	PlayerProfile_Struct pp;
 	ExtendedProfile_Struct ext;
 	EQEmu::InventoryProfile inv;
+	inv.SetInventoryVersion(EQEmu::versions::ConvertClientVersionBitToClientVersion(m_ClientVersionBit));
 	time_t bday = time(nullptr);
 	char startzone[50]={0};
 	uint32 i;

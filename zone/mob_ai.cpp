@@ -1783,6 +1783,7 @@ void NPC::AI_DoMovement() {
 				roambox_destination_y);
 		}
 
+		/**
 		bool waypoint_changed, node_reached;
 
 		glm::vec3 Goal = UpdatePath(
@@ -1793,8 +1794,9 @@ void NPC::AI_DoMovement() {
 			waypoint_changed,
 			node_reached
 		);
+		**/
 
-		CalculateNewPosition(Goal.x, Goal.y, Goal.z, move_speed, true);
+		CalculateNewPosition(roambox_destination_x, roambox_destination_y, roambox_destination_z, move_speed, true);
 
 		if (m_Position.x == roambox_destination_x && m_Position.y == roambox_destination_y) {
 			time_until_can_move = Timer::GetCurrentTime() + RandomTimer(roambox_min_delay, roambox_delay);

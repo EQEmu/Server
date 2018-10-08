@@ -45,21 +45,21 @@ namespace Titanium
 	void SerializeItem(EQEmu::OutBuffer& ob, const EQEmu::ItemInstance *inst, int16 slot_id_in, uint8 depth);
 
 	// server to client inventory location converters
-	static inline int16 ServerToTitaniumSlot(uint32 serverSlot);
-	static inline int16 ServerToTitaniumCorpseSlot(uint32 serverCorpseSlot);
+	static inline int16 ServerToTitaniumSlot(uint32 server_slot);
+	static inline int16 ServerToTitaniumCorpseSlot(uint32 server_corpse_slot);
 
 	// client to server inventory location converters
-	static inline uint32 TitaniumToServerSlot(int16 titaniumSlot);
-	static inline uint32 TitaniumToServerCorpseSlot(int16 titaniumCorpseSlot);
+	static inline uint32 TitaniumToServerSlot(int16 titanium_slot);
+	static inline uint32 TitaniumToServerCorpseSlot(int16 titanium_corpse_slot);
 
 	// server to client say link converter
-	static inline void ServerToTitaniumSayLink(std::string& titaniumSayLink, const std::string& serverSayLink);
+	static inline void ServerToTitaniumSayLink(std::string &titanium_saylink, const std::string &server_saylink);
 
 	// client to server say link converter
-	static inline void TitaniumToServerSayLink(std::string& serverSayLink, const std::string& titaniumSayLink);
+	static inline void TitaniumToServerSayLink(std::string &server_saylink, const std::string &titanium_saylink);
 
 	static inline CastingSlot ServerToTitaniumCastingSlot(EQEmu::CastingSlot slot);
-	static inline EQEmu::CastingSlot TitaniumToServerCastingSlot(CastingSlot slot, uint32 itemlocation);
+	static inline EQEmu::CastingSlot TitaniumToServerCastingSlot(CastingSlot slot, uint32 item_location);
 
 	static inline int ServerToTitaniumBuffSlot(int index);
 	static inline int TitaniumToServerBuffSlot(int index);
@@ -335,9 +335,9 @@ namespace Titanium
 		EQEmu::OutBuffer::pos_type last_pos = ob.tellp();
 
 		for (int r = 0; r < itemcount; r++, eq++) {
-			SerializeItem(ob, (const EQEmu::ItemInstance*)eq->inst, eq->slot_id, 0);
+			SerializeItem(ob, (const EQEmu::ItemInstance*)eq->inst, ServerToTitaniumSlot(eq->slot_id), 0);
 			if (ob.tellp() == last_pos)
-				Log(Logs::General, Logs::Netcode, "[STRUCTS] Serialization failed on item slot %d during OP_CharInventory.  Item skipped.", eq->slot_id);
+				Log(Logs::General, Logs::Netcode, "Titanium::ENCODE(OP_CharInventory) Serialization failed on item slot %d during OP_CharInventory.  Item skipped.", eq->slot_id);
 			
 			last_pos = ob.tellp();
 		}
@@ -367,7 +367,12 @@ namespace Titanium
 		FINISH_ENCODE();
 	}
 
-	ENCODE(OP_DeleteCharge) { ENCODE_FORWARD(OP_MoveItem); }
+	ENCODE(OP_DeleteCharge)
+	{
+		Log(Logs::Moderate, Logs::Netcode, "Titanium::ENCODE(OP_DeleteCharge)");
+
+		ENCODE_FORWARD(OP_MoveItem);
+	}
 
 	ENCODE(OP_DeleteItem)
 	{
@@ -772,21 +777,15 @@ namespace Titanium
 		OUT(TargetID);
 		OUT(playerid);
 
-		int r;
-		for (r = 0; r <= 20; r++) {
-			strn0cpy(eq->itemnames[r], emu->itemnames[r], sizeof(eq->itemnames[r]));
+		for (int i = EQEmu::invslot::slotCharm; i <= EQEmu::invslot::slotWaist; ++i) {
+			strn0cpy(eq->itemnames[i], emu->itemnames[i], sizeof(eq->itemnames[i]));
+			OUT(itemicons[i]);
 		}
 
-		// move arrow item down to last element in titanium array
-		strn0cpy(eq->itemnames[21], emu->itemnames[22], sizeof(eq->itemnames[21]));
+		// move ammo down to last element in titanium array
+		strn0cpy(eq->itemnames[invslot::slotAmmo], emu->itemnames[EQEmu::invslot::slotAmmo], sizeof(eq->itemnames[invslot::slotAmmo]));
+		eq->itemicons[invslot::slotAmmo] = emu->itemicons[EQEmu::invslot::slotAmmo];
 
-		int k;
-		for (k = 0; k <= 20; k++) {
-			OUT(itemicons[k]);
-		}
-
-		// move arrow icon down to last element in titanium array
-		eq->itemicons[21] = emu->itemicons[22];
 		strn0cpy(eq->text, emu->text, sizeof(eq->text));
 
 		FINISH_ENCODE();
@@ -821,9 +820,9 @@ namespace Titanium
 
 		ob.write((const char*)__emu_buffer, 4);
 
-		SerializeItem(ob, (const EQEmu::ItemInstance*)int_struct->inst, int_struct->slot_id, 0);
+		SerializeItem(ob, (const EQEmu::ItemInstance*)int_struct->inst, ServerToTitaniumSlot(int_struct->slot_id), 0);
 		if (ob.tellp() == last_pos) {
-			Log(Logs::General, Logs::Netcode, "[STRUCTS] Serialization failed on item slot %d.", int_struct->slot_id);
+			Log(Logs::General, Logs::Netcode, "Titanium::ENCODE(OP_ItemPacket) Serialization failed on item slot %d.", int_struct->slot_id);
 			delete in;
 			return;
 		}
@@ -874,6 +873,8 @@ namespace Titanium
 		ENCODE_LENGTH_EXACT(LootingItem_Struct);
 		SETUP_DIRECT_ENCODE(LootingItem_Struct, structs::LootingItem_Struct);
 
+		Log(Logs::Moderate, Logs::Netcode, "Titanium::ENCODE(OP_LootItem)");
+
 		OUT(lootee);
 		OUT(looter);
 		eq->slot_id = ServerToTitaniumCorpseSlot(emu->slot_id);
@@ -902,6 +903,8 @@ namespace Titanium
 	{
 		ENCODE_LENGTH_EXACT(MoveItem_Struct);
 		SETUP_DIRECT_ENCODE(MoveItem_Struct, structs::MoveItem_Struct);
+
+		Log(Logs::Moderate, Logs::Netcode, "Titanium::ENCODE(OP_MoveItem)");
 
 		eq->from_slot = ServerToTitaniumSlot(emu->from_slot);
 		eq->to_slot = ServerToTitaniumSlot(emu->to_slot);
@@ -1050,7 +1053,7 @@ namespace Titanium
 
 		//	OUT(unknown06160[4]);
 
-		// Copy bandoliers where server and client indexes converge
+		// Copy bandoliers where server and client indices converge
 		for (r = 0; r < EQEmu::profile::BANDOLIERS_SIZE && r < profile::BANDOLIERS_SIZE; ++r) {
 			OUT_str(bandoliers[r].Name);
 			for (uint32 k = 0; k < profile::BANDOLIER_ITEM_COUNT; ++k) { // Will need adjusting if 'server != client' is ever true
@@ -1059,7 +1062,7 @@ namespace Titanium
 				OUT_str(bandoliers[r].Items[k].Name);
 			}
 		}
-		// Nullify bandoliers where server and client indexes diverge, with a client bias
+		// Nullify bandoliers where server and client indices diverge, with a client bias
 		for (r = EQEmu::profile::BANDOLIERS_SIZE; r < profile::BANDOLIERS_SIZE; ++r) {
 			eq->bandoliers[r].Name[0] = '\0';
 			for (uint32 k = 0; k < profile::BANDOLIER_ITEM_COUNT; ++k) { // Will need adjusting if 'server != client' is ever true
@@ -1071,13 +1074,13 @@ namespace Titanium
 
 		//	OUT(unknown07444[5120]);
 
-		// Copy potion belt where server and client indexes converge
+		// Copy potion belt where server and client indices converge
 		for (r = 0; r < EQEmu::profile::POTION_BELT_SIZE && r < profile::POTION_BELT_SIZE; ++r) {
 			OUT(potionbelt.Items[r].ID);
 			OUT(potionbelt.Items[r].Icon);
 			OUT_str(potionbelt.Items[r].Name);
 		}
-		// Nullify potion belt where server and client indexes diverge, with a client bias
+		// Nullify potion belt where server and client indices diverge, with a client bias
 		for (r = EQEmu::profile::POTION_BELT_SIZE; r < profile::POTION_BELT_SIZE; ++r) {
 			eq->potionbelt.Items[r].ID = 0;
 			eq->potionbelt.Items[r].Icon = 0;
@@ -1936,23 +1939,18 @@ namespace Titanium
 		IN(TargetID);
 		IN(playerid);
 
-		int r;
-		for (r = 0; r <= 20; r++) {
-			strn0cpy(emu->itemnames[r], eq->itemnames[r], sizeof(emu->itemnames[r]));
+		for (int i = invslot::slotCharm; i <= invslot::slotWaist; ++i) {
+			strn0cpy(emu->itemnames[i], eq->itemnames[i], sizeof(emu->itemnames[i]));
+			IN(itemicons[i]);
 		}
 
-		// move arrow item up to last element in server array
-		strn0cpy(emu->itemnames[21], "", sizeof(emu->itemnames[21]));
-		strn0cpy(emu->itemnames[22], eq->itemnames[21], sizeof(emu->itemnames[22]));
+		// move ammo up to last element in server array
+		strn0cpy(emu->itemnames[EQEmu::invslot::slotAmmo], eq->itemnames[invslot::slotAmmo], sizeof(emu->itemnames[EQEmu::invslot::slotAmmo]));
+		emu->itemicons[EQEmu::invslot::slotAmmo] = eq->itemicons[invslot::slotAmmo];
 
-		int k;
-		for (k = 0; k <= 20; k++) {
-			IN(itemicons[k]);
-		}
-
-		// move arrow icon up to last element in server array
-		emu->itemicons[21] = 0xFFFFFFFF;
-		emu->itemicons[22] = eq->itemicons[21];
+		// nullify power source element in server array
+		strn0cpy(emu->itemnames[EQEmu::invslot::slotPowerSource], "", sizeof(emu->itemnames[EQEmu::invslot::slotPowerSource]));
+		emu->itemicons[EQEmu::invslot::slotPowerSource] = 0xFFFFFFFF;
 
 		strn0cpy(emu->text, eq->text, sizeof(emu->text));
 
@@ -2020,6 +2018,8 @@ namespace Titanium
 		DECODE_LENGTH_EXACT(structs::LootingItem_Struct);
 		SETUP_DIRECT_DECODE(LootingItem_Struct, structs::LootingItem_Struct);
 
+		Log(Logs::Moderate, Logs::Netcode, "Titanium::DECODE(OP_LootItem)");
+
 		IN(lootee);
 		IN(looter);
 		emu->slot_id = TitaniumToServerCorpseSlot(eq->slot_id);
@@ -2033,7 +2033,7 @@ namespace Titanium
 		DECODE_LENGTH_EXACT(structs::MoveItem_Struct);
 		SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
 
-		Log(Logs::General, Logs::Netcode, "[Titanium] Moved item from %u to %u", eq->from_slot, eq->to_slot);
+		Log(Logs::Moderate, Logs::Netcode, "Titanium::DECODE(OP_MoveItem)");
 
 		emu->from_slot = TitaniumToServerSlot(eq->from_slot);
 		emu->to_slot = TitaniumToServerSlot(eq->to_slot);
@@ -2225,13 +2225,16 @@ namespace Titanium
 	}
 
 // file scope helper methods
-	void SerializeItem(EQEmu::OutBuffer& ob, const EQEmu::ItemInstance *inst, int16 slot_id_in, uint8 depth)
-	{
-		const char* protection = "\\\\\\\\\\";
-		const EQEmu::ItemData* item = inst->GetUnscaledItem();
+	void SerializeItem(EQEmu::OutBuffer& ob, const EQEmu::ItemInstance *inst, int16 slot_id_in, uint8 depth) {
+		const char *protection      = "\\\\\\\\\\";
+		const EQEmu::ItemData *item = inst->GetUnscaledItem();
 
-		ob << StringFormat("%.*s%s", (depth ? (depth - 1) : 0), protection, (depth ? "\"" : "")); // For leading quotes (and protection) if a subitem;
-		
+		ob << StringFormat(
+			"%.*s%s",
+			(depth ? (depth - 1) : 0),
+			protection,
+			(depth ? "\"" : "")); // For leading quotes (and protection) if a subitem;
+
 		// Instance data
 		ob << itoa((inst->IsStackable() ? inst->GetCharges() : 0)); // stack count
 		ob << '|' << itoa(0); // unknown
@@ -2239,9 +2242,11 @@ namespace Titanium
 		ob << '|' << itoa(inst->GetPrice()); // merchant price
 		ob << '|' << itoa((!inst->GetMerchantSlot() ? 1 : inst->GetMerchantCount())); // inst count/merchant count
 		ob << '|' << itoa((inst->IsScaling() ? (inst->GetExp() / 100) : 0)); // inst experience
-		ob << '|' << itoa((!inst->GetMerchantSlot() ? inst->GetSerialNumber() : inst->GetMerchantSlot())); // merchant serial number
+		ob << '|' << itoa((!inst->GetMerchantSlot() ? inst->GetSerialNumber()
+			: inst->GetMerchantSlot())); // merchant serial number
 		ob << '|' << itoa(inst->GetRecastTimestamp()); // recast timestamp
-		ob << '|' << itoa(((inst->IsStackable() ? ((inst->GetItem()->ItemType == EQEmu::item::ItemTypePotion) ? 1 : 0) : inst->GetCharges()))); // charge count
+		ob << '|' << itoa(((inst->IsStackable() ? ((inst->GetItem()->ItemType == EQEmu::item::ItemTypePotion) ? 1 : 0)
+			: inst->GetCharges()))); // charge count
 		ob << '|' << itoa((inst->IsAttuned() ? 1 : 0)); // inst attuned
 		ob << '|' << itoa(0); // unknown
 		ob << '|';
@@ -2259,7 +2264,7 @@ namespace Titanium
 		ob << '|' << itoa(item->NoRent);
 		ob << '|' << itoa(item->NoDrop);
 		ob << '|' << itoa(item->Size);
-		ob << '|' << itoa(item->Slots);
+		ob << '|' << itoa(Catch22(SwapBits21And22(item->Slots)));
 		ob << '|' << itoa(item->Price);
 		ob << '|' << itoa(item->Icon);
 		ob << '|' << "0";
@@ -2449,62 +2454,208 @@ namespace Titanium
 		for (int index = EQEmu::invbag::SLOT_BEGIN; index <= invbag::SLOT_END; ++index) {
 			ob << '|';
 
-			EQEmu::ItemInstance* sub = inst->GetItem(index);
+			EQEmu::ItemInstance *sub = inst->GetItem(index);
 			if (!sub)
 				continue;
-			
+
 			SerializeItem(ob, sub, 0, (depth + 1));
 		}
 
-		ob << StringFormat("%.*s%s", (depth ? (depth - 1) : 0), protection, (depth ? "\"" : "")); // For trailing quotes (and protection) if a subitem;
+		ob << StringFormat(
+			"%.*s%s",
+			(depth ? (depth - 1) : 0),
+			protection,
+			(depth ? "\"" : "")); // For trailing quotes (and protection) if a subitem;
 
 		if (!depth)
 			ob.write("\0", 1);
 	}
 
-	static inline int16 ServerToTitaniumSlot(uint32 serverSlot)
-	{
-		//int16 TitaniumSlot;
-		if (serverSlot == INVALID_INDEX)
-			return INVALID_INDEX;
+	static inline int16 ServerToTitaniumSlot(uint32 server_slot) {
+		int16 titanium_slot = invslot::SLOT_INVALID;
 
-		return serverSlot; // deprecated
+		if (server_slot <= EQEmu::invslot::slotWaist) {
+			titanium_slot = server_slot;
+		}
+		else if (server_slot == EQEmu::invslot::slotAmmo) {
+			titanium_slot = server_slot - 1;
+		}
+		else if (server_slot <= EQEmu::invslot::slotGeneral8 && server_slot >= EQEmu::invslot::slotGeneral1) {
+			titanium_slot = server_slot - 1;
+		}
+		else if (server_slot <= (EQEmu::invslot::POSSESSIONS_COUNT + EQEmu::invslot::slotWaist) &&
+				 server_slot >= EQEmu::invslot::slotCursor) {
+			titanium_slot = server_slot - 3;
+		}
+		else if (server_slot == (EQEmu::invslot::POSSESSIONS_COUNT + EQEmu::invslot::slotAmmo)) {
+			titanium_slot = server_slot - 4;
+		}
+		else if (server_slot <= EQEmu::invbag::GENERAL_BAGS_8_END &&
+				 server_slot >= EQEmu::invbag::GENERAL_BAGS_BEGIN) {
+			titanium_slot = server_slot;
+		}
+		else if (server_slot <= EQEmu::invbag::CURSOR_BAG_END && server_slot >= EQEmu::invbag::CURSOR_BAG_BEGIN) {
+			titanium_slot = server_slot - 20;
+		}
+		else if (server_slot <= EQEmu::invslot::TRIBUTE_END && server_slot >= EQEmu::invslot::TRIBUTE_BEGIN) {
+			titanium_slot = server_slot;
+		}
+		else if (server_slot <= EQEmu::invslot::GUILD_TRIBUTE_END &&
+				 server_slot >= EQEmu::invslot::GUILD_TRIBUTE_BEGIN) {
+			titanium_slot = server_slot;
+		}
+		else if (server_slot == EQEmu::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE) {
+			titanium_slot = server_slot;
+		}
+		else if (server_slot <= EQEmu::invslot::BANK_END && server_slot >= EQEmu::invslot::BANK_BEGIN) {
+			titanium_slot = server_slot;
+		}
+		else if (server_slot <= EQEmu::invbag::BANK_BAGS_16_END && server_slot >= EQEmu::invbag::BANK_BAGS_BEGIN) {
+			titanium_slot = server_slot;
+		}
+		else if (server_slot <= EQEmu::invslot::SHARED_BANK_END && server_slot >= EQEmu::invslot::SHARED_BANK_BEGIN) {
+			titanium_slot = server_slot;
+		}
+		else if (server_slot <= EQEmu::invbag::SHARED_BANK_BAGS_END &&
+				 server_slot >= EQEmu::invbag::SHARED_BANK_BAGS_BEGIN) {
+			titanium_slot = server_slot;
+		}
+		else if (server_slot <= EQEmu::invslot::TRADE_END && server_slot >= EQEmu::invslot::TRADE_BEGIN) {
+			titanium_slot = server_slot;
+		}
+		else if (server_slot <= EQEmu::invbag::TRADE_BAGS_END && server_slot >= EQEmu::invbag::TRADE_BAGS_BEGIN) {
+			titanium_slot = server_slot;
+		}
+		else if (server_slot <= EQEmu::invslot::WORLD_END && server_slot >= EQEmu::invslot::WORLD_BEGIN) {
+			titanium_slot = server_slot;
+		}
+
+		Log(Logs::Detail, Logs::Netcode, "Convert Server Slot %i to Titanium Slot %i", server_slot, titanium_slot);
+
+		return titanium_slot;
 	}
 
-	static inline int16 ServerToTitaniumCorpseSlot(uint32 serverCorpseSlot)
-	{
-		//int16 TitaniumCorpse;
-		return serverCorpseSlot;
+
+	static inline int16 ServerToTitaniumCorpseSlot(uint32 server_corpse_slot) {
+		int16 titanium_slot = invslot::SLOT_INVALID;
+
+		if (server_corpse_slot <= EQEmu::invslot::slotGeneral8 && server_corpse_slot >= EQEmu::invslot::slotGeneral1) {
+			titanium_slot = server_corpse_slot - 1;
+		}
+
+		else if (server_corpse_slot <= (EQEmu::invslot::POSSESSIONS_COUNT + EQEmu::invslot::slotWaist) &&
+				 server_corpse_slot >= EQEmu::invslot::slotCursor) {
+			titanium_slot = server_corpse_slot - 3;
+		}
+
+		else if (server_corpse_slot == (EQEmu::invslot::POSSESSIONS_COUNT + EQEmu::invslot::slotAmmo)) {
+			titanium_slot = server_corpse_slot - 4;
+		}
+
+		Log(Logs::Detail,
+			Logs::Netcode,
+			"Convert Server Corpse Slot %i to Titanium Corpse Slot %i",
+			server_corpse_slot,
+			titanium_slot);
+
+		return titanium_slot;
 	}
 
-	static inline uint32 TitaniumToServerSlot(int16 titaniumSlot)
-	{
-		//uint32 ServerSlot;
-		if (titaniumSlot == INVALID_INDEX)
-			return INVALID_INDEX;
+	static inline uint32 TitaniumToServerSlot(int16 titanium_slot) {
+		uint32 server_slot = EQEmu::invslot::SLOT_INVALID;
 
-		return titaniumSlot; // deprecated
+		if (titanium_slot <= invslot::slotWaist) {
+			server_slot = titanium_slot;
+		}
+		else if (titanium_slot == invslot::slotAmmo) {
+			server_slot = titanium_slot + 1;
+		}
+		else if (titanium_slot <= invslot::slotGeneral8 && titanium_slot >= invslot::slotGeneral1) {
+			server_slot = titanium_slot + 1;
+		}
+		else if (titanium_slot <= (invslot::POSSESSIONS_COUNT + invslot::slotWaist) &&
+				 titanium_slot >= invslot::slotCursor) {
+			server_slot = titanium_slot + 3;
+		}
+		else if (titanium_slot == (invslot::POSSESSIONS_COUNT + invslot::slotAmmo)) {
+			server_slot = titanium_slot + 4;
+		}
+		else if (titanium_slot <= invbag::GENERAL_BAGS_END && titanium_slot >= invbag::GENERAL_BAGS_BEGIN) {
+			server_slot = titanium_slot;
+		}
+		else if (titanium_slot <= invbag::CURSOR_BAG_END && titanium_slot >= invbag::CURSOR_BAG_BEGIN) {
+			server_slot = titanium_slot + 20;
+		}
+		else if (titanium_slot <= invslot::TRIBUTE_END && titanium_slot >= invslot::TRIBUTE_BEGIN) {
+			server_slot = titanium_slot;
+		}
+		else if (titanium_slot == invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE) {
+			server_slot = titanium_slot;
+		}
+		else if (titanium_slot <= invslot::GUILD_TRIBUTE_END && titanium_slot >= invslot::GUILD_TRIBUTE_BEGIN) {
+			server_slot = titanium_slot;
+		}
+		else if (titanium_slot <= invslot::BANK_END && titanium_slot >= invslot::BANK_BEGIN) {
+			server_slot = titanium_slot;
+		}
+		else if (titanium_slot <= invbag::BANK_BAGS_END && titanium_slot >= invbag::BANK_BAGS_BEGIN) {
+			server_slot = titanium_slot;
+		}
+		else if (titanium_slot <= invslot::SHARED_BANK_END && titanium_slot >= invslot::SHARED_BANK_BEGIN) {
+			server_slot = titanium_slot;
+		}
+		else if (titanium_slot <= invbag::SHARED_BANK_BAGS_END && titanium_slot >= invbag::SHARED_BANK_BAGS_BEGIN) {
+			server_slot = titanium_slot;
+		}
+		else if (titanium_slot <= invslot::TRADE_END && titanium_slot >= invslot::TRADE_BEGIN) {
+			server_slot = titanium_slot;
+		}
+		else if (titanium_slot <= invbag::TRADE_BAGS_END && titanium_slot >= invbag::TRADE_BAGS_BEGIN) {
+			server_slot = titanium_slot;
+		}
+		else if (titanium_slot <= invslot::WORLD_END && titanium_slot >= invslot::WORLD_BEGIN) {
+			server_slot = titanium_slot;
+		}
+
+		Log(Logs::Detail, Logs::Netcode, "Convert Titanium Slot %i to Server Slot %i", titanium_slot, server_slot);
+
+		return server_slot;
 	}
 
-	static inline uint32 TitaniumToServerCorpseSlot(int16 titaniumCorpseSlot)
+	static inline uint32 TitaniumToServerCorpseSlot(int16 titanium_corpse_slot)
 	{
-		//uint32 ServerCorpse;
-		return titaniumCorpseSlot;
+		uint32 server_slot = EQEmu::invslot::SLOT_INVALID;
+
+		if (titanium_corpse_slot <= invslot::slotGeneral8 && titanium_corpse_slot >= invslot::slotGeneral1) {
+			server_slot = titanium_corpse_slot + 1;
+		}
+
+		else if (titanium_corpse_slot <= (invslot::POSSESSIONS_COUNT + invslot::slotWaist) && titanium_corpse_slot >= invslot::slotCursor) {
+			server_slot = titanium_corpse_slot + 3;
+		}
+
+		else if (titanium_corpse_slot == (invslot::POSSESSIONS_COUNT + invslot::slotAmmo)) {
+			server_slot = titanium_corpse_slot + 4;
+		}
+
+		Log(Logs::Detail, Logs::Netcode, "Convert Titanium Corpse Slot %i to Server Corpse Slot %i", titanium_corpse_slot, server_slot);
+
+		return server_slot;
 	}
 
-	static inline void ServerToTitaniumSayLink(std::string& titaniumSayLink, const std::string& serverSayLink)
+	static inline void ServerToTitaniumSayLink(std::string &titanium_saylink, const std::string &server_saylink)
 	{
-		if ((constants::SAY_LINK_BODY_SIZE == EQEmu::constants::SAY_LINK_BODY_SIZE) || (serverSayLink.find('\x12') == std::string::npos)) {
-			titaniumSayLink = serverSayLink;
+		if ((constants::SAY_LINK_BODY_SIZE == EQEmu::constants::SAY_LINK_BODY_SIZE) || (server_saylink.find('\x12') == std::string::npos)) {
+			titanium_saylink = server_saylink;
 			return;
 		}
 
-		auto segments = SplitString(serverSayLink, '\x12');
+		auto segments = SplitString(server_saylink, '\x12');
 
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {
 				if (segments[segment_iter].length() <= EQEmu::constants::SAY_LINK_BODY_SIZE) {
-					titaniumSayLink.append(segments[segment_iter]);
+					titanium_saylink.append(segments[segment_iter]);
 					// TODO: log size mismatch error
 					continue;
 				}
@@ -2514,37 +2665,37 @@ namespace Titanium
 				// 6.2:  X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX       X  XXXX  X       XXXXXXXX (45)
 				// Diff:                                       ^^^^^         ^  ^^^^^
 
-				titaniumSayLink.push_back('\x12');
-				titaniumSayLink.append(segments[segment_iter].substr(0, 31));
-				titaniumSayLink.append(segments[segment_iter].substr(36, 5));
+				titanium_saylink.push_back('\x12');
+				titanium_saylink.append(segments[segment_iter].substr(0, 31));
+				titanium_saylink.append(segments[segment_iter].substr(36, 5));
 
 				if (segments[segment_iter][41] == '0')
-					titaniumSayLink.push_back(segments[segment_iter][42]);
+					titanium_saylink.push_back(segments[segment_iter][42]);
 				else
-					titaniumSayLink.push_back('F');
+					titanium_saylink.push_back('F');
 
-				titaniumSayLink.append(segments[segment_iter].substr(48));
-				titaniumSayLink.push_back('\x12');
+				titanium_saylink.append(segments[segment_iter].substr(48));
+				titanium_saylink.push_back('\x12');
 			}
 			else {
-				titaniumSayLink.append(segments[segment_iter]);
+				titanium_saylink.append(segments[segment_iter]);
 			}
 		}
 	}
 
-	static inline void TitaniumToServerSayLink(std::string& serverSayLink, const std::string& titaniumSayLink)
+	static inline void TitaniumToServerSayLink(std::string &server_saylink, const std::string &titanium_saylink)
 	{
-		if ((EQEmu::constants::SAY_LINK_BODY_SIZE == constants::SAY_LINK_BODY_SIZE) || (titaniumSayLink.find('\x12') == std::string::npos)) {
-			serverSayLink = titaniumSayLink;
+		if ((EQEmu::constants::SAY_LINK_BODY_SIZE == constants::SAY_LINK_BODY_SIZE) || (titanium_saylink.find('\x12') == std::string::npos)) {
+			server_saylink = titanium_saylink;
 			return;
 		}
 
-		auto segments = SplitString(titaniumSayLink, '\x12');
+		auto segments = SplitString(titanium_saylink, '\x12');
 
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {
 				if (segments[segment_iter].length() <= constants::SAY_LINK_BODY_SIZE) {
-					serverSayLink.append(segments[segment_iter]);
+					server_saylink.append(segments[segment_iter]);
 					// TODO: log size mismatch error
 					continue;
 				}
@@ -2554,91 +2705,89 @@ namespace Titanium
 				// RoF2: X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX X  XXXX XX  XXXXX XXXXXXXX (56)
 				// Diff:                                       ^^^^^         ^   ^^^^^
 
-				serverSayLink.push_back('\x12');
-				serverSayLink.append(segments[segment_iter].substr(0, 31));
-				serverSayLink.append("00000");
-				serverSayLink.append(segments[segment_iter].substr(31, 5));
-				serverSayLink.push_back('0');
-				serverSayLink.push_back(segments[segment_iter][36]);
-				serverSayLink.append("00000");
-				serverSayLink.append(segments[segment_iter].substr(37));
-				serverSayLink.push_back('\x12');
+				server_saylink.push_back('\x12');
+				server_saylink.append(segments[segment_iter].substr(0, 31));
+				server_saylink.append("00000");
+				server_saylink.append(segments[segment_iter].substr(31, 5));
+				server_saylink.push_back('0');
+				server_saylink.push_back(segments[segment_iter][36]);
+				server_saylink.append("00000");
+				server_saylink.append(segments[segment_iter].substr(37));
+				server_saylink.push_back('\x12');
 			}
 			else {
-				serverSayLink.append(segments[segment_iter]);
+				server_saylink.append(segments[segment_iter]);
 			}
 		}
 	}
 
-	static inline CastingSlot ServerToTitaniumCastingSlot(EQEmu::CastingSlot slot)
-	{
+	static inline CastingSlot ServerToTitaniumCastingSlot(EQEmu::CastingSlot slot) {
 		switch (slot) {
-		case EQEmu::CastingSlot::Gem1:
-			return CastingSlot::Gem1;
-		case EQEmu::CastingSlot::Gem2:
-			return CastingSlot::Gem2;
-		case EQEmu::CastingSlot::Gem3:
-			return CastingSlot::Gem3;
-		case EQEmu::CastingSlot::Gem4:
-			return CastingSlot::Gem4;
-		case EQEmu::CastingSlot::Gem5:
-			return CastingSlot::Gem5;
-		case EQEmu::CastingSlot::Gem6:
-			return CastingSlot::Gem6;
-		case EQEmu::CastingSlot::Gem7:
-			return CastingSlot::Gem7;
-		case EQEmu::CastingSlot::Gem8:
-			return CastingSlot::Gem8;
-		case EQEmu::CastingSlot::Gem9:
-			return CastingSlot::Gem9;
-		case EQEmu::CastingSlot::Item:
-			return CastingSlot::Item;
-		case EQEmu::CastingSlot::PotionBelt:
-			return CastingSlot::PotionBelt;
-		case EQEmu::CastingSlot::Discipline:
-			return CastingSlot::Discipline;
-		case EQEmu::CastingSlot::AltAbility:
-			return CastingSlot::AltAbility;
-		default: // we shouldn't have any issues with other slots ... just return something
-			return CastingSlot::Discipline;
+			case EQEmu::CastingSlot::Gem1:
+				return CastingSlot::Gem1;
+			case EQEmu::CastingSlot::Gem2:
+				return CastingSlot::Gem2;
+			case EQEmu::CastingSlot::Gem3:
+				return CastingSlot::Gem3;
+			case EQEmu::CastingSlot::Gem4:
+				return CastingSlot::Gem4;
+			case EQEmu::CastingSlot::Gem5:
+				return CastingSlot::Gem5;
+			case EQEmu::CastingSlot::Gem6:
+				return CastingSlot::Gem6;
+			case EQEmu::CastingSlot::Gem7:
+				return CastingSlot::Gem7;
+			case EQEmu::CastingSlot::Gem8:
+				return CastingSlot::Gem8;
+			case EQEmu::CastingSlot::Gem9:
+				return CastingSlot::Gem9;
+			case EQEmu::CastingSlot::Item:
+				return CastingSlot::Item;
+			case EQEmu::CastingSlot::PotionBelt:
+				return CastingSlot::PotionBelt;
+			case EQEmu::CastingSlot::Discipline:
+				return CastingSlot::Discipline;
+			case EQEmu::CastingSlot::AltAbility:
+				return CastingSlot::AltAbility;
+			default: // we shouldn't have any issues with other slots ... just return something
+				return CastingSlot::Discipline;
 		}
 	}
 
-	static inline EQEmu::CastingSlot TitaniumToServerCastingSlot(CastingSlot slot, uint32 itemlocation)
-	{
+	static inline EQEmu::CastingSlot TitaniumToServerCastingSlot(CastingSlot slot, uint32 item_location) {
 		switch (slot) {
-		case CastingSlot::Gem1:
-			return EQEmu::CastingSlot::Gem1;
-		case CastingSlot::Gem2:
-			return EQEmu::CastingSlot::Gem2;
-		case CastingSlot::Gem3:
-			return EQEmu::CastingSlot::Gem3;
-		case CastingSlot::Gem4:
-			return EQEmu::CastingSlot::Gem4;
-		case CastingSlot::Gem5:
-			return EQEmu::CastingSlot::Gem5;
-		case CastingSlot::Gem6:
-			return EQEmu::CastingSlot::Gem6;
-		case CastingSlot::Gem7:
-			return EQEmu::CastingSlot::Gem7;
-		case CastingSlot::Gem8:
-			return EQEmu::CastingSlot::Gem8;
-		case CastingSlot::Gem9:
-			return EQEmu::CastingSlot::Gem9;
-		case CastingSlot::Ability:
-			return EQEmu::CastingSlot::Ability;
-		// Tit uses 10 for item and discipline casting, but items have a valid location
-		case CastingSlot::Item:
-			if (itemlocation == INVALID_INDEX)
+			case CastingSlot::Gem1:
+				return EQEmu::CastingSlot::Gem1;
+			case CastingSlot::Gem2:
+				return EQEmu::CastingSlot::Gem2;
+			case CastingSlot::Gem3:
+				return EQEmu::CastingSlot::Gem3;
+			case CastingSlot::Gem4:
+				return EQEmu::CastingSlot::Gem4;
+			case CastingSlot::Gem5:
+				return EQEmu::CastingSlot::Gem5;
+			case CastingSlot::Gem6:
+				return EQEmu::CastingSlot::Gem6;
+			case CastingSlot::Gem7:
+				return EQEmu::CastingSlot::Gem7;
+			case CastingSlot::Gem8:
+				return EQEmu::CastingSlot::Gem8;
+			case CastingSlot::Gem9:
+				return EQEmu::CastingSlot::Gem9;
+			case CastingSlot::Ability:
+				return EQEmu::CastingSlot::Ability;
+				// Tit uses 10 for item and discipline casting, but items have a valid location
+			case CastingSlot::Item:
+				if (item_location == INVALID_INDEX)
+					return EQEmu::CastingSlot::Discipline;
+				else
+					return EQEmu::CastingSlot::Item;
+			case CastingSlot::PotionBelt:
+				return EQEmu::CastingSlot::PotionBelt;
+			case CastingSlot::AltAbility:
+				return EQEmu::CastingSlot::AltAbility;
+			default: // we shouldn't have any issues with other slots ... just return something
 				return EQEmu::CastingSlot::Discipline;
-			else
-				return EQEmu::CastingSlot::Item;
-		case CastingSlot::PotionBelt:
-			return EQEmu::CastingSlot::PotionBelt;
-		case CastingSlot::AltAbility:
-			return EQEmu::CastingSlot::AltAbility;
-		default: // we shouldn't have any issues with other slots ... just return something
-			return EQEmu::CastingSlot::Discipline;
 		}
 	}
 

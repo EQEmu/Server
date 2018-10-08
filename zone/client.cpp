@@ -679,7 +679,7 @@ bool Client::Save(uint8 iCommitNow) {
 
 	// perform snapshot before SaveCharacterData() so that m_epp will contain the updated time
 	if (RuleB(Character, ActiveInvSnapshots) && time(nullptr) >= GetNextInvSnapshotTime()) {
-		if (database.SaveCharacterInventorySnapshot(CharacterID())) {
+		if (database.SaveCharacterInvSnapshot(CharacterID())) {
 			SetNextInvSnapshot(RuleI(Character, InvSnapshotMinIntervalM));
 		}
 		else {
@@ -1905,7 +1905,7 @@ void Client::CheckManaEndUpdate() {
 			else if (group) {
 				group->SendEndurancePacketFrom(this);
 			}
-
+			
 			auto endurance_packet = new EQApplicationPacket(OP_EnduranceUpdate, sizeof(EnduranceUpdate_Struct));
 			EnduranceUpdate_Struct* endurance_update = (EnduranceUpdate_Struct*)endurance_packet->pBuffer;
 			endurance_update->cur_end = GetEndurance();
@@ -6004,56 +6004,34 @@ void Client::ProcessInspectRequest(Client* requestee, Client* requester) {
 		const EQEmu::ItemData* item = nullptr;
 		const EQEmu::ItemInstance* inst = nullptr;
 		int ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
-		for(int16 L = 0; L <= 20; L++) {
+		for(int16 L = EQEmu::invslot::EQUIPMENT_BEGIN; L <= EQEmu::invslot::EQUIPMENT_END; L++) {
 			inst = requestee->GetInv().GetItem(L);
 
 			if(inst) {
 				item = inst->GetItem();
 				if(item) {
 					strcpy(insr->itemnames[L], item->Name);
-					if (inst && inst->GetOrnamentationAug(ornamentationAugtype))
-					{
-						const EQEmu::ItemData *aug_item = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
+
+					const EQEmu::ItemData *aug_item = nullptr;
+					if (inst->GetOrnamentationAug(ornamentationAugtype))
+						inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
+
+					if (aug_item)
 						insr->itemicons[L] = aug_item->Icon;
-					}
-					else if (inst && inst->GetOrnamentationIcon())
-					{
+					else if (inst->GetOrnamentationIcon())
 						insr->itemicons[L] = inst->GetOrnamentationIcon();
-					}
 					else
-					{
 						insr->itemicons[L] = item->Icon;
-					}
 				}
-				else
+				else {
+					insr->itemnames[L][0] = '\0';
 					insr->itemicons[L] = 0xFFFFFFFF;
+				}
 			}
-		}
-
-		inst = requestee->GetInv().GetItem(EQEmu::invslot::SLOT_POWER_SOURCE);
-
-		if(inst) {
-			item = inst->GetItem();
-			if(item) {
-				// we shouldn't do this..but, that's the way it's coded atm...
-				// (this type of action should be handled exclusively in the client translator)
-				strcpy(insr->itemnames[SoF::invslot::slotPowerSource], item->Name);
-				insr->itemicons[SoF::invslot::slotPowerSource] = item->Icon;
+			else {
+				insr->itemnames[L][0] = '\0';
+				insr->itemicons[L] = 0xFFFFFFFF;
 			}
-			else
-				insr->itemicons[SoF::invslot::slotPowerSource] = 0xFFFFFFFF;
-		}
-
-		inst = requestee->GetInv().GetItem(EQEmu::invslot::slotAmmo);
-
-		if(inst) {
-			item = inst->GetItem();
-			if(item) {
-				strcpy(insr->itemnames[SoF::invslot::slotAmmo], item->Name);
-				insr->itemicons[SoF::invslot::slotAmmo] = item->Icon;
-			}
-			else
-				insr->itemicons[SoF::invslot::slotAmmo] = 0xFFFFFFFF;
 		}
 
 		strcpy(insr->text, requestee->GetInspectMessage().text);
@@ -8406,13 +8384,8 @@ void Client::TickItemCheck()
 
 	if(zone->tick_items.empty()) { return; }
 
-	//Scan equip slots for items
-	for (i = EQEmu::invslot::EQUIPMENT_BEGIN; i <= EQEmu::invslot::EQUIPMENT_END; i++)
-	{
-		TryItemTick(i);
-	}
-	//Scan main inventory + cursor
-	for (i = EQEmu::invslot::GENERAL_BEGIN; i <= EQEmu::invslot::slotCursor; i++)
+	//Scan equip, general, cursor slots for items
+	for (i = EQEmu::invslot::POSSESSIONS_BEGIN; i <= EQEmu::invslot::POSSESSIONS_END; i++)
 	{
 		TryItemTick(i);
 	}
@@ -8464,16 +8437,10 @@ void Client::TryItemTick(int slot)
 void Client::ItemTimerCheck()
 {
 	int i;
-	for (i = EQEmu::invslot::EQUIPMENT_BEGIN; i <= EQEmu::invslot::EQUIPMENT_END; i++)
+	for (i = EQEmu::invslot::POSSESSIONS_BEGIN; i <= EQEmu::invslot::POSSESSIONS_END; i++)
 	{
 		TryItemTimer(i);
 	}
-
-	for (i = EQEmu::invslot::GENERAL_BEGIN; i <= EQEmu::invslot::slotCursor; i++)
-	{
-		TryItemTimer(i);
-	}
-
 	for (i = EQEmu::invbag::GENERAL_BAGS_BEGIN; i <= EQEmu::invbag::CURSOR_BAG_END; i++)
 	{
 		TryItemTimer(i);

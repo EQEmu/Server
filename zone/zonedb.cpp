@@ -1180,7 +1180,7 @@ bool ZoneDatabase::LoadCharacterData(uint32 character_id, PlayerProfile_Struct* 
 		m_epp->aa_effects = atoi(row[r]); r++;									 // "`e_aa_effects`,			"
 		m_epp->perAA = atoi(row[r]); r++;										 // "`e_percent_to_aa`,			"
 		m_epp->expended_aa = atoi(row[r]); r++;									 // "`e_expended_aa_spent`,		"
-		m_epp->last_invsnapshot_time = atoi(row[r]); r++;						 // "`e_last_invsnapshot`		"
+		m_epp->last_invsnapshot_time = atoul(row[r]); r++;						 // "`e_last_invsnapshot`		"
 		m_epp->next_invsnapshot_time = m_epp->last_invsnapshot_time + (RuleI(Character, InvSnapshotMinIntervalM) * 60);
 	}
 	return true;
@@ -1574,56 +1574,6 @@ bool ZoneDatabase::SaveCharacterLeadershipAA(uint32 character_id, PlayerProfile_
 	}
 	auto results = QueryDatabase(query);
 	return true;
-}
-
-bool ZoneDatabase::SaveCharacterInventorySnapshot(uint32 character_id){
-	uint32 time_index = time(nullptr);
-	std::string query = StringFormat(
-		"INSERT INTO inventory_snapshots ("
-		" time_index,"
-		" charid,"
-		" slotid,"
-		" itemid,"
-		" charges,"
-		" color,"
-		" augslot1,"
-		" augslot2,"
-		" augslot3,"
-		" augslot4,"
-		" augslot5,"
-		" augslot6,"
-		" instnodrop,"
-		" custom_data,"
-		" ornamenticon,"
-		" ornamentidfile,"
-		" ornament_hero_model"
-		")"
-		" SELECT"
-		" %u,"
-		" charid,"
-		" slotid,"
-		" itemid,"
-		" charges,"
-		" color,"
-		" augslot1,"
-		" augslot2,"
-		" augslot3,"
-		" augslot4,"
-		" augslot5,"
-		" augslot6,"
-		" instnodrop,"
-		" custom_data,"
-		" ornamenticon,"
-		" ornamentidfile,"
-		" ornament_hero_model"
-		" FROM inventory"
-		" WHERE charid = %u",
-		time_index,
-		character_id
-	);
-	auto results = database.QueryDatabase(query);
-	Log(Logs::General, Logs::None, "ZoneDatabase::SaveCharacterInventorySnapshot %i (%s)", character_id, (results.Success() ? "pass" : "fail"));
-	return results.Success();
 }
 
 bool ZoneDatabase::SaveCharacterData(uint32 character_id, uint32 account_id, PlayerProfile_Struct* pp, ExtendedProfile_Struct* m_epp){
@@ -2050,6 +2000,344 @@ bool ZoneDatabase::NoRentExpired(const char* name){
 	uint32 seconds = atoi(row[0]);
 
 	return (seconds>1800);
+}
+
+bool ZoneDatabase::SaveCharacterInvSnapshot(uint32 character_id) {
+	uint32 time_index = time(nullptr);
+	std::string query = StringFormat(
+		"INSERT "
+		"INTO"
+		" `inventory_snapshots` "
+		"(`time_index`,"
+		" `charid`,"
+		" `slotid`,"
+		" `itemid`,"
+		" `charges`,"
+		" `color`,"
+		" `augslot1`,"
+		" `augslot2`,"
+		" `augslot3`,"
+		" `augslot4`,"
+		" `augslot5`,"
+		" `augslot6`,"
+		" `instnodrop`,"
+		" `custom_data`,"
+		" `ornamenticon`,"
+		" `ornamentidfile`,"
+		" `ornament_hero_model`"
+		") "
+		"SELECT"
+		" %u,"
+		" `charid`,"
+		" `slotid`,"
+		" `itemid`,"
+		" `charges`,"
+		" `color`,"
+		" `augslot1`,"
+		" `augslot2`,"
+		" `augslot3`,"
+		" `augslot4`,"
+		" `augslot5`,"
+		" `augslot6`,"
+		" `instnodrop`,"
+		" `custom_data`,"
+		" `ornamenticon`,"
+		" `ornamentidfile`,"
+		" `ornament_hero_model` "
+		"FROM"
+		" `inventory` "
+		"WHERE"
+		" `charid` = %u",
+		time_index,
+		character_id
+	);
+	auto results = database.QueryDatabase(query);
+	Log(Logs::Moderate, Logs::Inventory, "ZoneDatabase::SaveCharacterInventorySnapshot %i (%s)", character_id, (results.Success() ? "pass" : "fail"));
+	return results.Success();
+}
+
+int ZoneDatabase::CountCharacterInvSnapshots(uint32 character_id) {
+	std::string query = StringFormat(
+		"SELECT"
+		" COUNT(*) "
+		"FROM "
+		"("
+		"SELECT * FROM"
+		" `inventory_snapshots` a "
+		"WHERE"
+		" `charid` = %u "
+		"GROUP BY"
+		" `time_index`"
+		") b",
+		character_id
+	);
+	auto results = QueryDatabase(query);
+
+	if (!results.Success())
+		return -1;
+
+	auto row = results.begin();
+
+	int64 count = atoll(row[0]);
+	if (count > 2147483647)
+		return -2;
+	if (count < 0)
+		return -3;
+
+	return count;
+}
+
+void ZoneDatabase::ClearCharacterInvSnapshots(uint32 character_id, bool from_now) {
+	uint32 del_time = time(nullptr);
+	if (!from_now) { del_time -= RuleI(Character, InvSnapshotHistoryD) * 86400; }
+
+	std::string query = StringFormat(
+		"DELETE "
+		"FROM"
+		" `inventory_snapshots` "
+		"WHERE"
+		" `charid` = %u "
+		"AND"
+		" `time_index` <= %lu",
+		character_id,
+		(unsigned long)del_time
+	);
+	QueryDatabase(query);
+}
+
+void ZoneDatabase::ListCharacterInvSnapshots(uint32 character_id, std::list<std::pair<uint32, int>> &is_list) {
+	std::string query = StringFormat(
+		"SELECT"
+		" `time_index`,"
+		" COUNT(*) "
+		"FROM"
+		" `inventory_snapshots` "
+		"WHERE"
+		" `charid` = %u "
+		"GROUP BY"
+		" `time_index` "
+		"ORDER BY"
+		" `time_index` "
+		"DESC",
+		character_id
+	);
+	auto results = QueryDatabase(query);
+
+	if (!results.Success())
+		return;
+
+	for (auto row : results)
+		is_list.push_back(std::pair<uint32, int>(atoul(row[0]), atoi(row[1])));
+}
+
+bool ZoneDatabase::ValidateCharacterInvSnapshotTimestamp(uint32 character_id, uint32 timestamp) {
+	if (!character_id || !timestamp)
+		return false;
+
+	std::string query = StringFormat(
+		"SELECT"
+		" * "
+		"FROM"
+		" `inventory_snapshots` "
+		"WHERE"
+		" `charid` = %u "
+		"AND"
+		" `time_index` = %u "
+		"LIMIT 1",
+		character_id,
+		timestamp
+	);
+	auto results = QueryDatabase(query);
+
+	if (!results.Success() || results.RowCount() == 0)
+		return false;
+
+	return true;
+}
+
+void ZoneDatabase::ParseCharacterInvSnapshot(uint32 character_id, uint32 timestamp, std::list<std::pair<int16, uint32>> &parse_list) {
+	std::string query = StringFormat(
+		"SELECT"
+		" `slotid`,"
+		" `itemid` "
+		"FROM"
+		" `inventory_snapshots` "
+		"WHERE"
+		" `charid` = %u "
+		"AND"
+		" `time_index` = %u "
+		"ORDER BY"
+		" `slotid`",
+		character_id,
+		timestamp
+	);
+	auto results = QueryDatabase(query);
+
+	if (!results.Success())
+		return;
+
+	for (auto row : results)
+		parse_list.push_back(std::pair<int16, uint32>(atoi(row[0]), atoul(row[1])));
+}
+
+void ZoneDatabase::DivergeCharacterInvSnapshotFromInventory(uint32 character_id, uint32 timestamp, std::list<std::pair<int16, uint32>> &compare_list) {
+	std::string query = StringFormat(
+		"SELECT"
+		" slotid,"
+		" itemid "
+		"FROM"
+		" `inventory_snapshots` "
+		"WHERE"
+		" `time_index` = %u "
+		"AND"
+		" `charid` = %u "
+		"AND"
+		" `slotid` NOT IN "
+		"("
+		"SELECT"
+		" a.`slotid` "
+		"FROM"
+		" `inventory_snapshots` a "
+		"JOIN"
+		" `inventory` b "
+		"USING"
+		" (`slotid`, `itemid`) "
+		"WHERE"
+		" a.`time_index` = %u "
+		"AND"
+		" a.`charid` = %u "
+		"AND"
+		" b.`charid` = %u"
+		")",
+		timestamp,
+		character_id,
+		timestamp,
+		character_id,
+		character_id
+	);
+	auto results = QueryDatabase(query);
+
+	if (!results.Success())
+		return;
+
+	for (auto row : results)
+		compare_list.push_back(std::pair<int16, uint32>(atoi(row[0]), atoul(row[1])));
+}
+
+void ZoneDatabase::DivergeCharacterInventoryFromInvSnapshot(uint32 character_id, uint32 timestamp, std::list<std::pair<int16, uint32>> &compare_list) {
+	std::string query = StringFormat(
+		"SELECT"
+		" `slotid`,"
+		" `itemid` "
+		"FROM"
+		" `inventory` "
+		"WHERE"
+		" `charid` = %u "
+		"AND"
+		" `slotid` NOT IN "
+		"("
+		"SELECT"
+		" a.`slotid` "
+		"FROM"
+		" `inventory` a "
+		"JOIN"
+		" `inventory_snapshots` b "
+		"USING"
+		" (`slotid`, `itemid`) "
+		"WHERE"
+		" b.`time_index` = %u "
+		"AND"
+		" b.`charid` = %u "
+		"AND"
+		" a.`charid` = %u"
+		")",
+		character_id,
+		timestamp,
+		character_id,
+		character_id
+	);
+	auto results = QueryDatabase(query);
+
+	if (!results.Success())
+		return;
+
+	for (auto row : results)
+		compare_list.push_back(std::pair<int16, uint32>(atoi(row[0]), atoul(row[1])));
+}
+
+bool ZoneDatabase::RestoreCharacterInvSnapshot(uint32 character_id, uint32 timestamp) {
+	// we should know what we're doing by the time we call this function..but,
+	// this is to prevent inventory deletions where no timestamp entries exists
+	if (!ValidateCharacterInvSnapshotTimestamp(character_id, timestamp)) {
+		Log(Logs::General, Logs::Error, "ZoneDatabase::RestoreCharacterInvSnapshot() called for id: %u without valid snapshot entries @ %u", character_id, timestamp);
+		return false;
+	}
+
+	std::string query = StringFormat(
+		"DELETE "
+		"FROM"
+		" `inventory` "
+		"WHERE"
+		" `charid` = %u",
+		character_id
+	);
+	auto results = database.QueryDatabase(query);
+	if (!results.Success())
+		return false;
+
+	query = StringFormat(
+		"INSERT "
+		"INTO"
+		" `inventory` "
+		"(`charid`,"
+		" `slotid`,"
+		" `itemid`,"
+		" `charges`,"
+		" `color`,"
+		" `augslot1`,"
+		" `augslot2`,"
+		" `augslot3`,"
+		" `augslot4`,"
+		" `augslot5`,"
+		" `augslot6`,"
+		" `instnodrop`,"
+		" `custom_data`,"
+		" `ornamenticon`,"
+		" `ornamentidfile`,"
+		" `ornament_hero_model`"
+		") "
+		"SELECT"
+		" `charid`,"
+		" `slotid`,"
+		" `itemid`,"
+		" `charges`,"
+		" `color`,"
+		" `augslot1`,"
+		" `augslot2`,"
+		" `augslot3`,"
+		" `augslot4`,"
+		" `augslot5`,"
+		" `augslot6`,"
+		" `instnodrop`,"
+		" `custom_data`,"
+		" `ornamenticon`,"
+		" `ornamentidfile`,"
+		" `ornament_hero_model` "
+		"FROM"
+		" `inventory_snapshots` "
+		"WHERE"
+		" `charid` = %u "
+		"AND"
+		" `time_index` = %u",
+		character_id,
+		timestamp
+	);
+	results = database.QueryDatabase(query);
+
+	Log(Logs::General, Logs::Inventory, "ZoneDatabase::RestoreCharacterInvSnapshot() %s snapshot for %u @ %u",
+		(results.Success() ? "restored" : "failed to restore"), character_id, timestamp);
+
+	return results.Success();
 }
 
 const NPCType* ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load /*= false*/)

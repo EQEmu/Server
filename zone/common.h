@@ -263,6 +263,17 @@ enum class LootResponse : uint8 {
 	LootAll = 6 // SoD+
 };
 
+enum class LootRequestType : uint8 {
+	Forbidden = 0,
+	GMPeek,
+	GMAllowed,
+	Self,
+	AllowedPVE,
+	AllowedPVPAll,
+	AllowedPVPSingle, // can make this 'AllowedPVPVariable' and allow values between 1 and EQEmu::invtype::POSSESSIONS_SIZE
+	AllowedPVPDefined,
+};
+
 //this is our internal representation of the BUFF struct, can put whatever we want in it
 struct Buffs_Struct {
 	uint16	spellid;

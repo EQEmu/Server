@@ -172,7 +172,6 @@ int command_init(void)
 		command_add("castspell", "[spellid] - Cast a spell", 50, command_castspell) ||
 		command_add("chat", "[channel num] [message] - Send a channel message to all zones", 200, command_chat) ||
 		command_add("checklos", "- Check for line of sight to your target", 50, command_checklos) ||
-		command_add("clearinvsnapshots", "[use rule] - Clear inventory snapshot history (true - elapsed entries, false - all entries)", 200, command_clearinvsnapshots) ||
 		command_add("corpse", "- Manipulate corpses, use with no arguments for help", 50, command_corpse) ||
 		command_add("corpsefix", "Attempts to bring corpses from underneath the ground within close proximity of the player", 0, command_corpsefix) ||
 		command_add("crashtest", "- Crash the zoneserver", 255, command_crashtest) ||
@@ -239,7 +238,7 @@ int command_init(void)
 		command_add("instance", "- Modify Instances", 200, command_instance) ||
 		command_add("interrogateinv", "- use [help] argument for available options", 0, command_interrogateinv) ||
 		command_add("interrupt", "[message id] [color] - Interrupt your casting. Arguments are optional.", 50, command_interrupt) ||
-		command_add("invsnapshot", "- Takes an inventory snapshot of your current target", 80, command_invsnapshot) ||
+		command_add("invsnapshot", "- Manipulates inventory snapshots for your current target", 80, command_invsnapshot) ||
 		command_add("invul", "[on/off] - Turn player target's or your invulnerable flag on or off", 80, command_invul) ||
 		command_add("ipban", "[IP address] - Ban IP by character name", 200, command_ipban) ||
 		command_add("iplookup", "[charname] - Look up IP address of charname", 200, command_iplookup) ||
@@ -2768,52 +2767,6 @@ void command_peekinv(Client *c, const Seperator *sep)
 			}
 		}
 
-		if ((scopeBit & peekEquip) && (targetClient->ClientVersion() >= EQEmu::versions::ClientVersion::SoF)) {
-			inst_main = targetClient->GetInv().GetItem(EQEmu::invslot::SLOT_POWER_SOURCE);
-			if (inst_main) {
-				itemsFound = true;
-				item_data = inst_main->GetItem();
-			}
-			else {
-				item_data = nullptr;
-			}
-
-			linker.SetItemInst(inst_main);
-
-			c->Message(
-				(item_data == nullptr),
-				"%sSlot: %i, Item: %i (%s), Charges: %i",
-				scope_prefix[scopeIndex],
-				EQEmu::invslot::SLOT_POWER_SOURCE,
-				((item_data == nullptr) ? 0 : item_data->ID),
-				linker.GenerateLink().c_str(),
-				((inst_main == nullptr) ? 0 : inst_main->GetCharges())
-			);
-
-			if (inst_main && inst_main->IsClassCommon()) {
-				for (uint8 indexAug = EQEmu::invaug::SOCKET_BEGIN; indexAug <= EQEmu::invaug::SOCKET_END; ++indexAug) {
-					inst_aug = inst_main->GetItem(indexAug);
-					if (!inst_aug) // extant only
-						continue;
-
-					item_data = inst_aug->GetItem();
-					linker.SetItemInst(inst_aug);
-
-					c->Message(
-						(item_data == nullptr),
-						".%sAugSlot: %i (Slot #%i, Aug idx #%i), Item: %i (%s), Charges: %i",
-						scope_prefix[scopeIndex],
-						INVALID_INDEX,
-						EQEmu::invslot::SLOT_POWER_SOURCE,
-						indexAug,
-						((item_data == nullptr) ? 0 : item_data->ID),
-						linker.GenerateLink().c_str(),
-						((inst_sub == nullptr) ? 0 : inst_sub->GetCharges())
-					);
-				}
-			}
-		}
-
 		if (scopeBit & peekLimbo) {
 			int limboIndex = 0;
 			for (auto it = targetClient->GetInv().cursor_cbegin(); (it != targetClient->GetInv().cursor_cend()); ++it, ++limboIndex) {
@@ -2990,31 +2943,344 @@ void command_interrogateinv(Client *c, const Seperator *sep)
 
 void command_invsnapshot(Client *c, const Seperator *sep)
 {
-	auto t = c->GetTarget();
-	if (!t || !t->IsClient()) {
-		c->Message(0, "Target must be a client");
+	if (!c)
+		return;
+
+	if (sep->argnum == 0 || strcmp(sep->arg[1], "help") == 0) {
+		std::string window_title = "Inventory Snapshot Argument Help Menu";
+
+		std::string window_text =
+			"<table>"
+				"<tr>"
+					"<td><c \"#FFFFFF\">Usage:</td>"
+					"<td></td>"
+					"<td>#invsnapshot arguments<br>(<c \"#00FF00\">required <c \"#FFFF00\">optional<c \"#FFFFFF\">)</td>"
+				"</tr>"
+				"<tr>"
+					"<td><c \"#FFFF00\">help</td>"
+					"<td></td>"
+					"<td><c \"#AAAAAA\">this menu</td>"
+				"</tr>"
+				"<tr>"
+					"<td><c \"#00FF00\">capture</td>"
+					"<td></td>"
+					"<td><c \"#AAAAAA\">takes snapshot of character inventory</td>"
+				"</tr>";
+		
+		if (c->Admin() >= commandInvSnapshot)
+			window_text.append(
+				"<tr>"
+					"<td><c \"#00FF00\">gcount</td>"
+					"<td></td>"
+					"<td><c \"#AAAAAA\">returns global snapshot count</td>"
+				"</tr>"
+				"<tr>"
+					"<td><c \"#00FF00\">gclear</td>"
+					"<td><c \"#FFFF00\"><br>now</td>"
+					"<td><c \"#AAAAAA\">delete all snapshots - rule<br>delete all snapshots - now</td>"
+				"</tr>"
+				"<tr>"
+					"<td><c \"#00FF00\">count</td>"
+					"<td></td>"
+					"<td><c \"#AAAAAA\">returns character snapshot count</td>"
+				"</tr>"
+				"<tr>"
+					"<td><c \"#00FF00\">clear</td>"
+					"<td><c \"#FFFF00\"><br>now</td>"
+					"<td><c \"#AAAAAA\">delete character snapshots - rule<br>delete character snapshots - now</td>"
+				"</tr>"
+				"<tr>"
+					"<td><c \"#00FF00\">list</td>"
+					"<td><br><c \"#FFFF00\">count</td>"
+					"<td><c \"#AAAAAA\">lists entry ids for current character<br>limits to count</td>"
+				"</tr>"
+				"<tr>"
+					"<td><c \"#00FF00\">parse</td>"
+					"<td><c \"#00FF00\">tstmp</td>"
+					"<td><c \"#AAAAAA\">displays slots and items in snapshot</td>"
+				"</tr>"
+				"<tr>"
+					"<td><c \"#00FF00\">compare</td>"
+					"<td><c \"#00FF00\">tstmp</td>"
+					"<td><c \"#AAAAAA\">compares inventory against snapshot</td>"
+				"</tr>"
+				"<tr>"
+					"<td><c \"#00FF00\">restore</td>"
+					"<td><c \"#00FF00\">tstmp</td>"
+					"<td><c \"#AAAAAA\">restores slots and items in snapshot</td>"
+				"</tr>"
+			);
+
+		window_text.append(
+			"</table>"
+		);
+
+		c->SendPopupToClient(window_title.c_str(), window_text.c_str());
+
 		return;
 	}
 
-	if (database.SaveCharacterInventorySnapshot(((Client*)t)->CharacterID())) {
-		c->SetNextInvSnapshot(RuleI(Character, InvSnapshotMinIntervalM));
-		c->Message(0, "Successful inventory snapshot taken of %s", t->GetName());
-	}
-	else {
-		c->SetNextInvSnapshot(RuleI(Character, InvSnapshotMinRetryM));
-		c->Message(0, "Failed to take inventory snapshot of %s", t->GetName());
-	}
-}
+	if (c->Admin() >= commandInvSnapshot) { // global arguments
 
-void command_clearinvsnapshots(Client *c, const Seperator *sep)
-{
-	if (strcmp(sep->arg[1], "false") == 0) {
-		database.ClearInvSnapshots(false);
-		c->Message(0, "Inventory snapshots cleared using current time");
+		if (strcmp(sep->arg[1], "gcount") == 0) {
+			auto is_count = database.CountInvSnapshots();
+			c->Message(0, "There %s %i inventory snapshot%s.", (is_count == 1 ? "is" : "are"), is_count, (is_count == 1 ? "" : "s"));
+
+			return;
+		}
+
+		if (strcmp(sep->arg[1], "gclear") == 0) {
+			if (strcmp(sep->arg[2], "now") == 0) {
+				database.ClearInvSnapshots(true);
+				c->Message(0, "Inventory snapshots cleared using current time.");
+			}
+			else {
+				database.ClearInvSnapshots();
+				c->Message(0, "Inventory snapshots cleared using RuleI(Character, InvSnapshotHistoryD) (%i day%s).",
+					RuleI(Character, InvSnapshotHistoryD), (RuleI(Character, InvSnapshotHistoryD) == 1 ? "" : "s"));
+			}
+
+			return;
+		}
 	}
-	else {
-		database.ClearInvSnapshots();
-		c->Message(0, "Inventory snapshots cleared using RuleI(Character, InvSnapshotHistoryD) (%i days)", RuleI(Character, InvSnapshotHistoryD));
+
+	if (!c->GetTarget() || !c->GetTarget()->IsClient()) {
+		c->Message(0, "Target must be a client.");
+		return;
+	}
+
+	auto tc = (Client*)c->GetTarget();
+
+	if (strcmp(sep->arg[1], "capture") == 0) {
+		if (database.SaveCharacterInvSnapshot(tc->CharacterID())) {
+			tc->SetNextInvSnapshot(RuleI(Character, InvSnapshotMinIntervalM));
+			c->Message(0, "Successful inventory snapshot taken of %s - setting next interval for %i minute%s.",
+				tc->GetName(), RuleI(Character, InvSnapshotMinIntervalM), (RuleI(Character, InvSnapshotMinIntervalM) == 1 ? "" : "s"));
+		}
+		else {
+			tc->SetNextInvSnapshot(RuleI(Character, InvSnapshotMinRetryM));
+			c->Message(0, "Failed to take inventory snapshot of %s - retrying in %i minute%s.",
+				tc->GetName(), RuleI(Character, InvSnapshotMinRetryM), (RuleI(Character, InvSnapshotMinRetryM) == 1 ? "" : "s"));
+		}
+
+		return;
+	}
+
+	if (c->Admin() >= commandInvSnapshot) {
+		if (strcmp(sep->arg[1], "count") == 0) {
+			auto is_count = database.CountCharacterInvSnapshots(tc->CharacterID());
+			c->Message(0, "%s (id: %u) has %i inventory snapshot%s.", tc->GetName(), tc->CharacterID(), is_count, (is_count == 1 ? "" : "s"));
+
+			return;
+		}
+
+		if (strcmp(sep->arg[1], "clear") == 0) {
+			if (strcmp(sep->arg[2], "now") == 0) {
+				database.ClearCharacterInvSnapshots(tc->CharacterID(), true);
+				c->Message(0, "%s\'s (id: %u) inventory snapshots cleared using current time.", tc->GetName(), tc->CharacterID());
+			}
+			else {
+				database.ClearCharacterInvSnapshots(tc->CharacterID());
+				c->Message(0, "%s\'s (id: %u) inventory snapshots cleared using RuleI(Character, InvSnapshotHistoryD) (%i day%s).",
+					tc->GetName(), tc->CharacterID(), RuleI(Character, InvSnapshotHistoryD), (RuleI(Character, InvSnapshotHistoryD) == 1 ? "" : "s"));
+			}
+
+			return;
+		}
+
+		if (strcmp(sep->arg[1], "list") == 0) {
+			std::list<std::pair<uint32, int>> is_list;
+			database.ListCharacterInvSnapshots(tc->CharacterID(), is_list);
+
+			if (is_list.empty()) {
+				c->Message(0, "No inventory snapshots for %s (id: %u)", tc->GetName(), tc->CharacterID());
+				return;
+			}
+
+			auto list_count = 0;
+			if (sep->IsNumber(2))
+				list_count = atoi(sep->arg[2]);
+			if (list_count < 1 || list_count > is_list.size())
+				list_count = is_list.size();
+
+			std::string window_title = StringFormat("Snapshots for %s", tc->GetName());
+
+			std::string window_text =
+				"<table>"
+					"<tr>"
+						"<td>Timestamp</td>"
+						"<td>Entry Count</td>"
+					"</tr>";
+
+			for (auto iter : is_list) {
+				if (!list_count)
+					break;
+
+				window_text.append(StringFormat(
+					"<tr>"
+						"<td>%u</td>"
+						"<td>%i</td>"
+					"</tr>",
+					iter.first,
+					iter.second
+				));
+
+				--list_count;
+			}
+
+			window_text.append(
+				"</table>"
+			);
+
+			c->SendPopupToClient(window_title.c_str(), window_text.c_str());
+
+			return;
+		}
+
+		if (strcmp(sep->arg[1], "parse") == 0) {
+			if (!sep->IsNumber(2)) {
+				c->Message(0, "A timestamp is required to use this option.");
+				return;
+			}
+
+			uint32 timestamp = atoul(sep->arg[2]);
+
+			if (!database.ValidateCharacterInvSnapshotTimestamp(tc->CharacterID(), timestamp)) {
+				c->Message(0, "No inventory snapshots for %s (id: %u) exist at %u.", tc->GetName(), tc->CharacterID(), timestamp);
+				return;
+			}
+
+			std::list<std::pair<int16, uint32>> parse_list;
+			database.ParseCharacterInvSnapshot(tc->CharacterID(), timestamp, parse_list);
+
+			std::string window_title = StringFormat("Snapshot Parse for %s @ %u", tc->GetName(), timestamp);
+
+			std::string window_text = "Slot: ItemID - Description<br>";
+			
+			for (auto iter : parse_list) {
+				auto item_data = database.GetItem(iter.second);
+				std::string window_line = StringFormat("%i: %u - %s<br>", iter.first, iter.second, (item_data ? item_data->Name : "[error]"));
+
+				if (window_text.length() + window_line.length() < 4095) {
+					window_text.append(window_line);
+				}
+				else {
+					c->Message(0, "Too many snapshot entries to list...");
+					break;
+				}
+			}
+
+			c->SendPopupToClient(window_title.c_str(), window_text.c_str());
+
+			return;
+		}
+
+		if (strcmp(sep->arg[1], "compare") == 0) {
+			if (!sep->IsNumber(2)) {
+				c->Message(0, "A timestamp is required to use this option.");
+				return;
+			}
+
+			uint32 timestamp = atoul(sep->arg[2]);
+			
+			if (!database.ValidateCharacterInvSnapshotTimestamp(tc->CharacterID(), timestamp)) {
+				c->Message(0, "No inventory snapshots for %s (id: %u) exist at %u.", tc->GetName(), tc->CharacterID(), timestamp);
+				return;
+			}
+
+			std::list<std::pair<int16, uint32>> inv_compare_list;
+			database.DivergeCharacterInventoryFromInvSnapshot(tc->CharacterID(), timestamp, inv_compare_list);
+
+			std::list<std::pair<int16, uint32>> iss_compare_list;
+			database.DivergeCharacterInvSnapshotFromInventory(tc->CharacterID(), timestamp, iss_compare_list);
+
+			std::string window_title = StringFormat("Snapshot Comparison for %s @ %u", tc->GetName(), timestamp);
+
+			std::string window_text = "Slot: (action) Snapshot -&gt; Inventory<br>";
+			
+			auto inv_iter = inv_compare_list.begin();
+			auto iss_iter = iss_compare_list.begin();
+
+			while (true) {
+				std::string window_line;
+
+				if (inv_iter == inv_compare_list.end() && iss_iter == iss_compare_list.end()) {
+					break;
+				}
+				else if (inv_iter != inv_compare_list.end() && iss_iter == iss_compare_list.end()) {
+					window_line = StringFormat("%i: (delete) [empty] -&gt; %u<br>", inv_iter->first, inv_iter->second);
+					++inv_iter;
+				}
+				else if (inv_iter == inv_compare_list.end() && iss_iter != iss_compare_list.end()) {
+					window_line = StringFormat("%i: (insert) %u -&gt; [empty]<br>", iss_iter->first, iss_iter->second);
+					++iss_iter;
+				}
+				else {
+					if (inv_iter->first < iss_iter->first) {
+						window_line = StringFormat("%i: (delete) [empty] -&gt; %u<br>", inv_iter->first, inv_iter->second);
+						++inv_iter;
+					}
+					else if (inv_iter->first > iss_iter->first) {
+						window_line = StringFormat("%i: (insert) %u -&gt; [empty]<br>", iss_iter->first, iss_iter->second);
+						++iss_iter;
+					}
+					else {
+						window_line = StringFormat("%i: (replace) %u -&gt; %u<br>", iss_iter->first, iss_iter->second, inv_iter->second);
+						++inv_iter;
+						++iss_iter;
+					}
+				}
+
+				if (window_text.length() + window_line.length() < 4095) {
+					window_text.append(window_line);
+				}
+				else {
+					c->Message(0, "Too many comparison entries to list...");
+					break;
+				}
+			}
+
+			c->SendPopupToClient(window_title.c_str(), window_text.c_str());
+
+			return;
+		}
+
+		if (strcmp(sep->arg[1], "restore") == 0) {
+			if (!sep->IsNumber(2)) {
+				c->Message(0, "A timestamp is required to use this option.");
+				return;
+			}
+
+			uint32 timestamp = atoul(sep->arg[2]);
+
+			if (!database.ValidateCharacterInvSnapshotTimestamp(tc->CharacterID(), timestamp)) {
+				c->Message(0, "No inventory snapshots for %s (id: %u) exist at %u.", tc->GetName(), tc->CharacterID(), timestamp);
+				return;
+			}
+
+			if (database.SaveCharacterInvSnapshot(tc->CharacterID())) {
+				tc->SetNextInvSnapshot(RuleI(Character, InvSnapshotMinIntervalM));
+			}
+			else {
+				c->Message(13, "Failed to take pre-restore inventory snapshot of %s (id: %u).",
+					tc->GetName(), tc->CharacterID());
+				return;
+			}
+
+			if (database.RestoreCharacterInvSnapshot(tc->CharacterID(), timestamp)) {
+				// cannot delete all valid item slots from client..so, we worldkick
+				tc->WorldKick(); // self restores update before the 'kick' is processed
+
+				c->Message(0, "Successfully applied snapshot %u to %s's (id: %u) inventory.",
+					timestamp, tc->GetName(), tc->CharacterID());
+			}
+			else {
+				c->Message(13, "Failed to apply snapshot %u to %s's (id: %u) inventory.",
+					timestamp, tc->GetName(), tc->CharacterID());
+			}
+			
+			return;
+		}
 	}
 }
 
@@ -3324,7 +3590,7 @@ void command_listpetition(Client *c, const Seperator *sep)
 void command_equipitem(Client *c, const Seperator *sep)
 {
 	uint32 slot_id = atoi(sep->arg[1]);
-	if (sep->IsNumber(1) && ((slot_id >= EQEmu::invslot::EQUIPMENT_BEGIN) && (slot_id <= EQEmu::invslot::EQUIPMENT_END) || (slot_id == EQEmu::invslot::SLOT_POWER_SOURCE))) {
+	if (sep->IsNumber(1) && (slot_id >= EQEmu::invslot::EQUIPMENT_BEGIN && slot_id <= EQEmu::invslot::EQUIPMENT_END)) {
 		const EQEmu::ItemInstance* from_inst = c->GetInv().GetItem(EQEmu::invslot::slotCursor);
 		const EQEmu::ItemInstance* to_inst = c->GetInv().GetItem(slot_id); // added (desync issue when forcing stack to stack)
 		bool partialmove = false;
