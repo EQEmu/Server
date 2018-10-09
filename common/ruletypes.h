@@ -389,6 +389,7 @@ RULE_INT(Spells, AI_PursueDetrimentalChance, 90) // Chance while chasing target 
 RULE_INT(Spells, AI_IdleNoSpellMinRecast, 6000) // AI spell recast time(MS) check when no spell is cast while idle. (min time in random)
 RULE_INT(Spells, AI_IdleNoSpellMaxRecast, 60000) // AI spell recast time(MS) check when no spell is cast while chasing target. (max time in random)
 RULE_INT(Spells, AI_IdleBeneficialChance, 100) // Chance while idle to do a beneficial spell on self or others.
+RULE_INT(Spells, AI_HealHPPct, 50) // HP Pct NPCs will start heals at (in and out of combat) if spell's max_hp is not set
 RULE_BOOL(Spells, SHDProcIDOffByOne, true) // pre June 2009 SHD spell procs were off by 1, they stopped doing this in June 2009 (so UF+ spell files need this false)
 RULE_BOOL(Spells, Jun182014HundredHandsRevamp, false) // this should be true for if you import a spell file newer than June 18, 2014
 RULE_BOOL(Spells, SwarmPetTargetLock, false) // Use old method of swarm pets target locking till target dies then despawning.
