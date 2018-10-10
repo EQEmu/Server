@@ -4042,6 +4042,15 @@ bool Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, EQEmu::skills::Sk
 		return false;
 
 	Save();
+
+	Mob *my_owner = GetBotOwner();
+	if (my_owner && my_owner->IsClient() && my_owner->CastToClient()->GetBotOptionDeathMarquee()) {
+		if (killerMob)
+			my_owner->CastToClient()->SendMarqueeMessage(CC_Yellow, 510, 0, 1000, 3000, StringFormat("%s has been slain by %s", GetCleanName(), killerMob->GetCleanName()));
+		else
+			my_owner->CastToClient()->SendMarqueeMessage(CC_Yellow, 510, 0, 1000, 3000, StringFormat("%s has been slain", GetCleanName()));
+	}
+
 	Mob *give_exp = hate_list.GetDamageTopOnHateList(this);
 	Client *give_exp_client = nullptr;
 	if(give_exp && give_exp->IsClient())

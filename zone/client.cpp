@@ -335,6 +335,10 @@ Client::Client(EQStreamInterface* ieqs)
 	temp_pvp = false;
 	is_client_moving = false;
 
+#ifdef BOTS
+	bot_owner_options = DefaultBotOwnerOptions;
+#endif
+
 	AI_Init();
 }
 

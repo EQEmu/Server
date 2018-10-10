@@ -1399,6 +1399,7 @@ int bot_command_init(void)
 		bot_command_add("lull", "Orders a bot to cast a pacification spell", 0, bot_command_lull) ||
 		bot_command_add("mesmerize", "Orders a bot to cast a mesmerization spell", 0, bot_command_mesmerize) ||
 		bot_command_add("movementspeed", "Orders a bot to cast a movement speed enhancement spell", 0, bot_command_movement_speed) ||
+		bot_command_add("owneroption", "Sets options available to bot owners", 0, bot_command_owner_option) ||
 		bot_command_add("pet", "Lists the available bot pet [subcommands]", 0, bot_command_pet) ||
 		bot_command_add("petremove", "Orders a bot to remove its pet", 0, bot_subcommand_pet_remove) ||
 		bot_command_add("petsettype", "Orders a Magician bot to use a specified pet type", 0, bot_subcommand_pet_set_type) ||
@@ -3435,6 +3436,25 @@ void bot_command_movement_speed(Client *c, const Seperator *sep)
 	}
 	
 	helper_no_available_bots(c, my_bot);
+}
+
+void bot_command_owner_option(Client *c, const Seperator *sep)
+{
+	if (helper_is_help_or_usage(sep->arg[1])) {
+		c->Message(m_usage, "usage: %s [deathmarquee]", sep->arg[0]);
+		return;
+	}
+
+	std::string owner_option = sep->arg[1];
+
+	if (!owner_option.compare("deathmarquee")) {
+		c->SetBotOptionDeathMarquee(!c->GetBotOptionDeathMarquee());
+		c->Message(m_action, "Bot death marquee is now %s.", (c->GetBotOptionDeathMarquee() == true ? "enabled" : "disabled"));
+		botdb.SaveOwnerOptionDeathMarquee(c->CharacterID(), c->GetBotOptionDeathMarquee());
+	}
+	else {
+		c->Message(m_fail, "Owner option '%s' is not recognized.", owner_option.c_str());
+	}
 }
 
 void bot_command_pet(Client *c, const Seperator *sep)

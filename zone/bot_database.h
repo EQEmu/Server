@@ -32,6 +32,7 @@
 
 class Bot;
 struct BotsAvailableList;
+class Client;
 
 namespace EQEmu
 {
@@ -145,6 +146,8 @@ public:
 
 	bool SaveStopMeleeLevel(const uint32 owner_id, const uint32 bot_id, const uint8 sml_value);
 
+	bool LoadOwnerOptions(Client *owner);
+	bool SaveOwnerOptionDeathMarquee(const uint32 owner_id, const bool flag);
 
 	/* Bot bot-group functions   */
 	bool QueryBotGroupExistence(const std::string& botgroup_name, bool& extant_flag);

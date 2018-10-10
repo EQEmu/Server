@@ -1,5 +1,12 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 10/09/2018 ==
+Uleat: Added bot owner options
+	- usage: ^owneroption [option] (or aliased as: ^oo [option])
+	- options are saved in the database and therefore, persistent
+	- Implemented option 'deathmarquee'
+	-- toggles client owner flag to show marquee message when a bot dies (default: disabled)
+	
 == 10/07/2018 ==
 Uleat: Fixed a few bot issues..
 	- Fix for bot item trades not attuning

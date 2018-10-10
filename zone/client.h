@@ -1641,6 +1641,25 @@ private:
 
 	void InterrogateInventory_(bool errorcheck, Client* requester, int16 head, int16 index, const EQEmu::ItemInstance* inst, const EQEmu::ItemInstance* parent, bool log, bool silent, bool &error, int depth);
 	bool InterrogateInventory_error(int16 head, int16 index, const EQEmu::ItemInstance* inst, const EQEmu::ItemInstance* parent, int depth);
+
+#ifdef BOTS
+	struct BotOwnerOptions {
+		bool death_marquee;
+	};
+
+	BotOwnerOptions bot_owner_options;
+
+	const BotOwnerOptions DefaultBotOwnerOptions = {
+		false // death_marquee
+	};
+
+public:
+	void SetBotOptionDeathMarquee(bool flag) { bot_owner_options.death_marquee = flag; }
+
+	bool GetBotOptionDeathMarquee() const { return bot_owner_options.death_marquee; }
+
+private:		
+#endif
 };
 
 #endif
