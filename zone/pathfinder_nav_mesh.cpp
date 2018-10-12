@@ -134,7 +134,7 @@ IPathfinder::IPath PathfinderNavmesh::FindRoute(const glm::vec3 &start, const gl
 glm::vec3 PathfinderNavmesh::GetRandomLocation()
 {
 	if (!m_impl->nav_mesh) {
-		return glm::vec3();
+		return glm::vec3(0.f);
 	}
 
 	if (!m_impl->query) {
@@ -155,7 +155,7 @@ glm::vec3 PathfinderNavmesh::GetRandomLocation()
 		return glm::vec3(point[0], point[2], point[1]);
 	}
 
-	return glm::vec3();
+	return glm::vec3(0.f);
 }
 
 void PathfinderNavmesh::DebugCommand(Client *c, const Seperator *sep)

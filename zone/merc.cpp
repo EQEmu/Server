@@ -1479,7 +1479,7 @@ void Merc::AI_Process() {
 		}
 		else if (!CheckLosFN(GetTarget())) {
 			auto Goal = GetTarget()->GetPosition();
-			NavigateTo(Goal.x, Goal.y, Goal.z, GetRunspeed());
+			RunTo(Goal.x, Goal.y, Goal.z);
 
 			return;
 		}
@@ -1545,7 +1545,7 @@ void Merc::AI_Process() {
 									float newZ = 0;
 									FaceTarget(GetTarget());
 									if (PlotPositionAroundTarget(this, newX, newY, newZ)) {
-										NavigateTo(newX, newY, newZ, GetRunspeed());
+										RunTo(newX, newY, newZ);
 										return;
 									}
 								}
@@ -1557,7 +1557,7 @@ void Merc::AI_Process() {
 							float newY = 0;
 							float newZ = 0;
 							if (PlotPositionAroundTarget(GetTarget(), newX, newY, newZ)) {
-								NavigateTo(newX, newY, newZ, GetRunspeed());
+								RunTo(newX, newY, newZ);
 								return;
 							}
 						}
@@ -1568,7 +1568,7 @@ void Merc::AI_Process() {
 						float newY = 0;
 						float newZ = 0;
 						if (PlotPositionAroundTarget(GetTarget(), newX, newY, newZ, false) && GetArchetype() != ARCHETYPE_CASTER) {
-							NavigateTo(newX, newY, newZ, GetRunspeed());
+							RunTo(newX, newY, newZ);
 							return;
 						}
 					}
@@ -1695,7 +1695,7 @@ void Merc::AI_Process() {
 			{
 				if(!IsRooted()) {
 					Log(Logs::Detail, Logs::AI, "Pursuing %s while engaged.", GetTarget()->GetCleanName());
-					NavigateTo(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ(), GetRunspeed());
+					RunTo(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ());
 					return;
 				}
 
@@ -1750,15 +1750,20 @@ void Merc::AI_Process() {
 
 				if (follow) {
 					float dist = DistanceSquared(m_Position, follow->GetPosition());
-					int speed = GetRunspeed();
+					bool running = true;
 
 					if (dist < GetFollowDistance() + 1000)
-						speed = GetWalkspeed();
+						running = false;
 
 					SetRunAnimSpeed(0);
 
 					if (dist > GetFollowDistance()) {
-						NavigateTo(follow->GetX(), follow->GetY(), follow->GetZ(), speed);
+						if (running) {
+							RunTo(follow->GetX(), follow->GetY(), follow->GetZ());
+						}
+						else {
+							WalkTo(follow->GetX(), follow->GetY(), follow->GetZ());
+						}
 
 						if (rest_timer.Enabled())
 							rest_timer.Disable();

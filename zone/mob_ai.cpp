@@ -796,16 +796,12 @@ void Client::AI_Process()
 			}
 			else {
 				if (AI_movement_timer->Check()) {
-					int speed = GetFearSpeed();
-					animation = speed;
-					speed *= 2;
-					SetCurrentSpeed(speed);
 					// Check if we have reached the last fear point
-					if(IsPositionEqual(GetX(), GetY(), GetZ(), m_FearWalkTarget.x, m_FearWalkTarget.y, m_FearWalkTarget.z)) {
+					if(IsPositionEqual(glm::vec3(GetX(), GetY(), GetZ()), m_FearWalkTarget)) {
 						CalculateNewFearpoint();
 					}
 
-					NavigateTo(m_FearWalkTarget.x, m_FearWalkTarget.y, m_FearWalkTarget.z, speed);
+					RunTo(m_FearWalkTarget.x, m_FearWalkTarget.y, m_FearWalkTarget.z);
 				}
 				return;
 			}
@@ -873,11 +869,7 @@ void Client::AI_Process()
 			{
 				if(AI_movement_timer->Check())
 				{
-					int newspeed = GetRunspeed();
-					animation = newspeed;
-					newspeed *= 2;
-					SetCurrentSpeed(newspeed);
-					NavigateTo(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ(), newspeed);
+					RunTo(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ());
 				}
 			}
 			else if(IsMoving())
@@ -920,12 +912,12 @@ void Client::AI_Process()
 				SendPositionUpdate(); // this shouldn't happen a lot (and hard to make it) so lets not rate limit
 			} else if (dist >= 400) { // >=20
 				if (AI_movement_timer->Check()) {
-					int nspeed = (dist >= 1225 ? GetRunspeed() : GetWalkspeed()); // >= 35
-					animation = nspeed;
-					nspeed *= 2;
-					SetCurrentSpeed(nspeed);
-
-					NavigateTo(owner->GetX(), owner->GetY(), owner->GetZ(), nspeed);
+					if (dist >= 1225) {
+						RunTo(owner->GetX(), owner->GetY(), owner->GetZ());
+					}
+					else {
+						WalkTo(owner->GetX(), owner->GetY(), owner->GetZ());
+					}
 				}
 			} else {
 				StopNavigation();
@@ -1089,15 +1081,14 @@ void Mob::AI_Process() {
 			else {
 				if (AI_movement_timer->Check()) {
 					// Check if we have reached the last fear point
-					if (IsPositionEqual(GetX(), GetY(), GetZ(), m_FearWalkTarget.x, m_FearWalkTarget.y, m_FearWalkTarget.z)) {
+					if (IsPositionEqual(glm::vec3(GetX(), GetY(), GetZ()), m_FearWalkTarget)) {
 						// Calculate a new point to run to
 						CalculateNewFearpoint();
 					}
 					NavigateTo(
 						m_FearWalkTarget.x,
 						m_FearWalkTarget.y,
-						m_FearWalkTarget.z,
-						GetFearSpeed()
+						m_FearWalkTarget.z
 					);
 				}
 				return;
@@ -1216,18 +1207,7 @@ void Mob::AI_Process() {
 			StopNavigation();
 
 			if (AI_movement_timer->Check()) {
-				if (CalculateHeadingToTarget(GetTarget()->GetX(), GetTarget()->GetY()) != m_Position.w) {
-					SetHeading(CalculateHeadingToTarget(GetTarget()->GetX(), GetTarget()->GetY()));
-					SendPosition();
-				}
-				SetCurrentSpeed(0);
-			}
-			if (IsMoving()) {
-				if (CalculateHeadingToTarget(GetTarget()->GetX(), GetTarget()->GetY()) != m_Position.w) {
-					SetHeading(CalculateHeadingToTarget(GetTarget()->GetX(), GetTarget()->GetY()));
-					SendPosition();
-				}
-				SetCurrentSpeed(0);
+				FaceTarget();
 			}
 
 			//casting checked above...
@@ -1419,7 +1399,7 @@ void Mob::AI_Process() {
 				else if (AI_movement_timer->Check() && target) {
 					if (!IsRooted()) {
 						Log(Logs::Detail, Logs::AI, "Pursuing %s while engaged.", target->GetName());
-						NavigateTo(target->GetX(), target->GetY(), target->GetZ(), GetRunspeed());
+						RunTo(target->GetX(), target->GetY(), target->GetZ());
 
 					}
 					else if (IsMoving()) {
@@ -1497,13 +1477,13 @@ void Mob::AI_Process() {
 
 						if (distance_to_owner >= 400 || z_distance > 100) {
 
-							int pet_speed = GetWalkspeed();
+							bool running = false;
 
 							/**
 							 * Distance: >= 35 (Run if far away)
 							 */
 							if (distance_to_owner >= 1225) {
-								pet_speed = GetRunspeed();
+								running = true;
 							}
 
 							/**
@@ -1518,7 +1498,12 @@ void Mob::AI_Process() {
 
 								auto &Goal = owner->GetPosition();
 
-								NavigateTo(Goal.x, Goal.y, Goal.z, pet_speed);
+								if (running) {
+									RunTo(Goal.x, Goal.y, Goal.z);
+								}
+								else {
+									WalkTo(Goal.x, Goal.y, Goal.z);
+								}
 							}
 						}
 						else {
@@ -1558,17 +1543,22 @@ void Mob::AI_Process() {
 					 * Default follow distance is 100
 					 */
 					if (distance >= follow_distance) {
-						int speed = GetWalkspeed();
+						bool running = false;
 
 						if (distance >= follow_distance + 150) {
-							speed = GetRunspeed();
+							running = true;
 						}
 
 						bool waypoint_changed, node_reached;
 
 						auto &Goal = follow->GetPosition();
 
-						NavigateTo(Goal.x, Goal.y, Goal.z, speed);
+						if (running) {
+							RunTo(Goal.x, Goal.y, Goal.z);
+						}
+						else {
+							WalkTo(Goal.x, Goal.y, Goal.z);
+						}
 					}
 					else {
 						moved = false;
@@ -1694,7 +1684,7 @@ void NPC::AI_DoMovement() {
 				roambox_destination_y);
 		}
 
-		NavigateTo(roambox_destination_x, roambox_destination_y, roambox_destination_z, move_speed);
+		NavigateTo(roambox_destination_x, roambox_destination_y, roambox_destination_z);
 
 		if (m_Position.x == roambox_destination_x && m_Position.y == roambox_destination_y) {
 			time_until_can_move = Timer::GetCurrentTime() + RandomTimer(roambox_min_delay, roambox_delay);
@@ -1761,8 +1751,7 @@ void NPC::AI_DoMovement() {
 					NavigateTo(
 						m_CurrentWayPoint.x,
 						m_CurrentWayPoint.y,
-						m_CurrentWayPoint.z,
-						move_speed
+						m_CurrentWayPoint.z
 					);
 
 				}
@@ -1782,10 +1771,9 @@ void NPC::AI_DoMovement() {
 
 	}
 	else if (IsGuarding()) {	
-		bool at_gp = IsPositionEqual(GetX(), GetY(), GetZ(), m_GuardPoint.x, m_GuardPoint.y, m_GuardPoint.z);
+		bool at_gp = IsPositionEqual(m_Position, m_GuardPoint);
 
 		if (at_gp) {
-			StopNavigation();
 
 			if (moved) {
 				Log(Logs::Detail,
@@ -1808,7 +1796,7 @@ void NPC::AI_DoMovement() {
 			}
 		}
 		else {
-			NavigateTo(m_GuardPoint.x, m_GuardPoint.y, m_GuardPoint.z, move_speed);
+			NavigateTo(m_GuardPoint.x, m_GuardPoint.y, m_GuardPoint.z);
 		}
 	}
 }

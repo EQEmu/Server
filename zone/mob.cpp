@@ -442,9 +442,6 @@ Mob::Mob(const char* in_name,
 	PrimaryAggro = false;
 	AssistAggro = false;
 	npc_assist_cap = 0;
-
-	PathRecalcTimer.reset(new Timer(500));
-	PathingLoopCount = 0;
 }
 
 Mob::~Mob()
@@ -1622,8 +1619,6 @@ void Mob::ShowBuffList(Client* client) {
 }
 
 void Mob::GMMove(float x, float y, float z, float heading, bool SendUpdate) {
-	Route.clear();
-
 	if(IsNPC()) {
 		entity_list.ProcessMove(CastToNPC(), x, y, z);
 	}
@@ -2710,7 +2705,12 @@ void Mob::FaceTarget(Mob* mob_to_face /*= 0*/) {
 	float current_heading = GetHeading();
 	float new_heading = CalculateHeadingToTarget(faced_mob->GetX(), faced_mob->GetY());
 	if(current_heading != new_heading) {
-		mMovementManager->RotateTo(this, new_heading, 16.0f);
+		if (IsEngaged() || IsRunning()) {
+			mMovementManager->RotateTo(this, new_heading);
+		}
+		else {
+			mMovementManager->RotateTo(this, new_heading, MovementWalking);
+		}
 	}
 
 	if(IsNPC() && !IsEngaged()) {
@@ -3553,10 +3553,12 @@ void Mob::SetFlyMode(GravityBehavior flymode)
 
 void Mob::Teleport(const glm::vec3 &pos)
 {
+	mMovementManager->Teleport(this, pos.x, pos.y, pos.z, m_Position.w);
 }
 
 void Mob::Teleport(const glm::vec4 &pos)
 {
+	mMovementManager->Teleport(this, pos.x, pos.y, pos.z, pos.w);
 }
 
 bool Mob::IsNimbusEffectActive(uint32 nimbus_effect)
@@ -5580,25 +5582,7 @@ float Mob::HeadingAngleToMob(float other_x, float other_y)
 	float this_x = GetX();
 	float this_y = GetY();
 
-	float y_diff = std::abs(this_y - other_y);
-	float x_diff = std::abs(this_x - other_x);
-	if (y_diff < 0.0000009999999974752427)
-		y_diff = 0.0000009999999974752427;
-
-	float angle = atan2(x_diff, y_diff) * 180.0f * 0.3183099014828645f; // angle, nice "pi"
-
-	// return the right thing based on relative quadrant
-	// I'm sure this could be improved for readability, but whatever
-	if (this_y >= other_y) {
-		if (other_x >= this_x)
-			return (90.0f - angle + 90.0f) * 511.5f * 0.0027777778f;
-		if (other_x <= this_x)
-			return (angle + 180.0f) * 511.5f * 0.0027777778f;
-	}
-	if (this_y > other_y || other_x > this_x)
-		return angle * 511.5f * 0.0027777778f;
-	else
-		return (90.0f - angle + 270.0f) * 511.5f * 0.0027777778f;
+	return CalculateHeadingAngleBetweenPositions(this_x, this_y, other_x, other_y);
 }
 
 bool Mob::GetSeeInvisible(uint8 see_invis)

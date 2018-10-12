@@ -523,6 +523,7 @@ public:
 	uint32 GetNPCTypeID() const { return npctype_id; }
 	void SetNPCTypeID(uint32 npctypeid) { npctype_id = npctypeid; }
 	inline const glm::vec4& GetPosition() const { return m_Position; }
+	inline void SetPosition(const float x, const float y, const float z) { m_Position.x = x; m_Position.y = y; m_Position.z = z; }
 	inline const float GetX() const { return m_Position.x; }
 	inline const float GetY() const { return m_Position.y; }
 	inline const float GetZ() const { return m_Position.z; }
@@ -968,7 +969,9 @@ public:
 
 	inline bool			CheckAggro(Mob* other) {return hate_list.IsEntOnHateList(other);}
 	float				CalculateHeadingToTarget(float in_x, float in_y) { return HeadingAngleToMob(in_x, in_y); }
-	void				NavigateTo(float x, float y, float z, float speed);
+	void				WalkTo(float x, float y, float z);
+	void				RunTo(float x, float y, float z);
+	void				NavigateTo(float x, float y, float z);
 	void				StopNavigation();
 	float				CalculateDistance(float x, float y, float z);
 	float				GetGroundZ(float new_x, float new_y, float z_offset=0.0);
@@ -1133,9 +1136,6 @@ public:
 	int GetWeaponDamage(Mob *against, const EQEmu::ItemData *weapon_item);
 	int GetWeaponDamage(Mob *against, const EQEmu::ItemInstance *weapon_item, uint32 *hate = nullptr);
 
-	//Pathing
-	glm::vec3 UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &WaypointChange, bool &NodeReached);
-
 	// Bots HealRotation methods
 #ifdef BOTS
 	bool IsHealRotationTarget() { return (m_target_of_heal_rotation.use_count() && m_target_of_heal_rotation.get()); }
@@ -1292,7 +1292,6 @@ protected:
 	void CalculateNewFearpoint();
 	float FindGroundZ(float new_x, float new_y, float z_offset=0.0);
 	float FindDestGroundZ(glm::vec3 dest, float z_offset=0.0);
-	glm::vec3 HandleStuckPath(const glm::vec3 &To, const glm::vec3 &From);
 
 	virtual float GetSympatheticProcChances(uint16 spell_id, int16 ProcRateMod, int32 ItemProcRate = 0);
 	int16 GetSympatheticSpellProcRate(uint16 spell_id);
@@ -1481,15 +1480,7 @@ protected:
 	glm::vec3 m_FearWalkTarget;
 	bool currently_fleeing;
 
-	// Pathing
-	//
-	glm::vec3 PathingDestination;
-	IPathfinder::IPath Route;
-	std::unique_ptr<Timer> PathRecalcTimer;
 	bool DistractedFromGrid;
-	glm::vec3 PathingLastPosition;
-	int PathingLoopCount;
-
 	uint32 pDontHealMeBefore;
 	uint32 pDontBuffMeBefore;
 	uint32 pDontDotMeBefore;

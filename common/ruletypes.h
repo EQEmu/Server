@@ -567,7 +567,7 @@ RULE_BOOL(TaskSystem, EnableTaskProximity, true)
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Range)
-RULE_INT(Range, Say, 135)
+RULE_INT(Range, Say, 15)
 RULE_INT(Range, Emote, 135)
 RULE_INT(Range, BeginCast, 200)
 RULE_INT(Range, Anims, 135)

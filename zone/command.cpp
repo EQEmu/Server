@@ -1284,9 +1284,11 @@ void command_movement(Client *c, const Seperator *sep)
 			c->Message(0, "Requires target");
 		}
 
+		mgr.NavigateTo(target, c->GetX(), c->GetY(), c->GetZ(), false, MovementRunning);
 
-		auto heading = target->CalculateHeadingToTarget(c->GetX(), c->GetY());
-		mgr.RotateTo(target, heading, 16.0f);
+		//auto heading = target->CalculateHeadingToTarget(c->GetX(), c->GetY());
+		//mgr.SendCommandToClients(target, 0.0f, 0.0f, 0.0f, atof(sep->arg[2]), 0, ClientRangeAny);
+		//mgr.RotateTo(target, heading);
 
 		//double a1 = atof(sep->arg[2]);
 		//double a2 = atof(sep->arg[3]);
