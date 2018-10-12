@@ -25,6 +25,7 @@
 
 #include "bot_database.h"
 #include "bot.h"
+#include "client.h"
 
 
 BotDatabase botdb;
@@ -2177,6 +2178,51 @@ bool BotDatabase::SaveStopMeleeLevel(const uint32 owner_id, const uint32 bot_id,
 		sml_value,
 		owner_id,
 		bot_id
+	);
+	auto results = QueryDatabase(query);
+	if (!results.Success())
+		return false;
+
+	return true;
+}
+
+bool BotDatabase::LoadOwnerOptions(Client *owner)
+{
+	if (!owner || !owner->CharacterID())
+		return false;
+
+	query = StringFormat(
+		"SELECT `death_marquee` FROM `bot_owner_options`"
+		" WHERE `owner_id` = '%u'",
+		owner->CharacterID()
+	);
+	auto results = QueryDatabase(query);
+	if (!results.Success())
+		return false;
+	if (!results.RowCount()) {
+		query = StringFormat("REPLACE INTO `bot_owner_options` (`owner_id`) VALUES ('%u')", owner->CharacterID());
+		results = QueryDatabase(query);
+
+		return false;
+	}
+
+	auto row = results.begin();
+	owner->SetBotOptionDeathMarquee((atoi(row[0]) != 0));
+
+	return true;
+}
+
+bool BotDatabase::SaveOwnerOptionDeathMarquee(const uint32 owner_id, const bool flag)
+{
+	if (!owner_id)
+		return false;
+
+	query = StringFormat(
+		"UPDATE `bot_owner_options`"
+		" SET `death_marquee` = '%u'"
+		" WHERE `owner_id` = '%u'",
+		(flag == true ? 1 : 0),
+		owner_id
 	);
 	auto results = QueryDatabase(query);
 	if (!results.Success())
