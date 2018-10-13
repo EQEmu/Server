@@ -3,6 +3,7 @@
 #include "mob.h"
 #include "zone.h"
 #include "position.h"
+#include "water_map.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/misc_functions.h"
 #include "../common/data_verification.h"
@@ -101,6 +102,8 @@ public:
 		m_last_sent_time = 0.0;
 		m_last_sent_speed = 0;
 		m_started = false;
+		m_total_h_dist = 0.0;
+		m_total_v_dist = 0.0;
 	}
 
 	virtual ~MoveToCommand() {
@@ -127,15 +130,20 @@ public:
 			m_started = true;
 			//rotate to the point
 			m->SetHeading(m->CalculateHeadingToTarget(m_move_to_x, m_move_to_y));
+			m->TryFixZ();
 
 			m_last_sent_speed = current_speed;
 			m_last_sent_time = current_time;
+			m_total_h_dist = DistanceNoZ(m->GetPosition(), glm::vec4(m_move_to_x, m_move_to_z, 0.0f, 0.0f));
+			m_total_v_dist = m_move_to_z - m->GetZ();
 			mgr->SendCommandToClients(m, 0.0, 0.0, 0.0, 0.0, current_speed, ClientRangeCloseMedium);
 			return false;
 		}
 
 		//When speed changes
 		if (current_speed != m_last_sent_speed) {
+			m->TryFixZ();
+
 			m_last_sent_speed = current_speed;
 			m_last_sent_time = current_time;
 			mgr->SendCommandToClients(m, 0.0, 0.0, 0.0, 0.0, current_speed, ClientRangeCloseMedium);
@@ -144,6 +152,8 @@ public:
 
 		//If x seconds have passed without sending an update.
 		if (current_time - m_last_sent_time >= 5.0) {
+			m->TryFixZ();
+
 			m_last_sent_speed = current_speed;
 			m_last_sent_time = current_time;
 			mgr->SendCommandToClients(m, 0.0, 0.0, 0.0, 0.0, current_speed, ClientRangeCloseMedium);
@@ -151,37 +161,44 @@ public:
 		}
 
 		auto &p = m->GetPosition();
-		glm::vec3 tar(m_move_to_x, m_move_to_y, m_move_to_z);
-		glm::vec3 pos(p.x, p.y, p.z);
-
+		glm::vec2 tar(m_move_to_x, m_move_to_y);
+		glm::vec2 pos(p.x, p.y);
 		double len = glm::distance(pos, tar);
 		if (len == 0) {
 			return true;
 		}
 
-		glm::vec3 dir = tar - pos;
-		glm::vec3 ndir = glm::normalize(dir);
+		m->SetMoved(true);
+
+		glm::vec2 dir = tar - pos;
+		glm::vec2 ndir = glm::normalize(dir);
 		double distance_moved = frame_time * current_speed * 0.4f * 1.4f;
 
 		if (distance_moved > len) {
-			m->SetPosition(tar.x, tar.y, tar.z);
+			m->SetPosition(m_move_to_x, m_move_to_y, m_move_to_z);
 		
 			if (m->IsNPC()) {
-				entity_list.ProcessMove(m->CastToNPC(), tar.x, tar.y, tar.z);
+				entity_list.ProcessMove(m->CastToNPC(), m_move_to_x, m_move_to_y, m_move_to_z);
 			}
 		
 			m->TryFixZ();
 			return true;
 		}
 		else {
-			glm::vec3 npos = pos + (ndir * static_cast<float>(distance_moved));
-			m->SetPosition(npos.x, npos.y, npos.z);
+			glm::vec2 npos = pos + (ndir * static_cast<float>(distance_moved));
+			
+			len -= distance_moved;
+			double total_distance_traveled = m_total_h_dist - len;
+			double start_z = m_move_to_z - m_total_v_dist;
+			double z_at_pos = start_z + (m_total_v_dist * (total_distance_traveled / m_total_h_dist));
+
+			m->SetPosition(npos.x, npos.y, z_at_pos);
 		
 			if (m->IsNPC()) {
-				entity_list.ProcessMove(m->CastToNPC(), npos.x, npos.y, npos.z);
+				entity_list.ProcessMove(m->CastToNPC(), npos.x, npos.y, z_at_pos);
 			}
 		}
-
+		
 		return false;
 	}
 
@@ -199,6 +216,8 @@ private:
 
 	double m_last_sent_time;
 	int m_last_sent_speed;
+	double m_total_h_dist;
+	double m_total_v_dist;
 };
 
 class TeleportToCommand : public IMovementCommand
@@ -297,6 +316,21 @@ struct MobMovementEntry
 	std::deque<std::unique_ptr<IMovementCommand>> Commands;
 	NavigateTo NavigateTo;
 };
+
+void AdjustRoute(std::list<IPathfinder::IPathNode> &nodes, int flymode, float offset) {
+	if (!zone->HasMap() || !zone->HasWaterMap()) {
+		return;
+	}
+
+	for (auto &node : nodes) {
+		if (flymode == GravityBehavior::Ground || !zone->watermap->InLiquid(node.pos)) {
+			auto best_z = zone->zonemap->FindBestZ(node.pos, nullptr);
+			if (best_z != BEST_Z_INVALID) {
+				node.pos.z = best_z + offset;
+			}
+		}
+	}
+}
 
 struct MobMovementManager::Implementation
 {
@@ -398,6 +432,10 @@ void MobMovementManager::NavigateTo(Mob *who, float x, float y, float z, bool fo
 		if (false == within) {
 			//Path is no longer valid, calculate a new path
 			UpdatePath(who, x, y, z, mode);
+			nav.navigate_to_x = x;
+			nav.navigate_to_y = y;
+			nav.navigate_to_z = z;
+			nav.last_set_time = current_time;
 		}
 	}
 }
@@ -416,6 +454,7 @@ void MobMovementManager::StopNavigation(Mob *who) {
 		return;
 	}
 
+	who->TryFixZ();
 	SendCommandToClients(who, 0.0, 0.0, 0.0, 0.0, 0, ClientRangeAny);
 	ent.second.Commands.clear();
 }
@@ -538,6 +577,8 @@ void MobMovementManager::UpdatePath(Mob *who, float x, float y, float z, MobMove
 	if (route.empty()) {
 		return;
 	}
+
+	AdjustRoute(route, who->GetFlyMode(), who->GetZOffset());
 
 	auto iter = _impl->Entries.find(who);
 	auto &ent = (*iter);

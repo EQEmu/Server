@@ -7,21 +7,6 @@
 
 extern Zone *zone;
 
-void AdjustRoute(std::list<IPathfinder::IPathNode> &nodes, int flymode, float offset) {
-	if (!zone->HasMap() || !zone->HasWaterMap()) {
-		return;
-	}
-
-	for (auto &node : nodes) {
-		if (flymode == GravityBehavior::Ground || !zone->watermap->InLiquid(node.pos)) {
-			auto best_z = zone->zonemap->FindBestZ(node.pos, nullptr);
-			if (best_z != BEST_Z_INVALID) {
-				node.pos.z = best_z + offset;
-			}
-		}
-	}
-}
-
 void CullPoints(std::vector<FindPerson_Point> &points) {
 	if (!zone->HasMap()) {
 		return;
