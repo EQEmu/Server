@@ -4898,12 +4898,11 @@ void Client::UnStun() {
 
 void NPC::Stun(int duration) {
 	Mob::Stun(duration);
-	SetCurrentSpeed(0);
+	StopNavigation();
 }
 
 void NPC::UnStun() {
 	Mob::UnStun();
-	SetCurrentSpeed(GetRunspeed());
 }
 
 void Mob::Mesmerize()

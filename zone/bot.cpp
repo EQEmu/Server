@@ -280,7 +280,7 @@ void Bot::ChangeBotArcherWeapons(bool isArcher) {
 void Bot::Sit() {
 	if(IsMoving()) {
 		moved = false;
-		SetCurrentSpeed(0);
+		StopNavigation();
 	}
 
 	SetAppearance(eaSitting);
@@ -2999,7 +2999,7 @@ void Bot::PetAIProcess() {
 						botPet->SetHeading(botPet->GetTarget()->GetHeading());
 						if(moved) {
 							moved = false;
-							SetCurrentSpeed(0);
+							StopNavigation();
 							botPet->SendPosition();
 							botPet->SetMoving(false);
 						}
@@ -3027,7 +3027,7 @@ void Bot::PetAIProcess() {
 						botPet->SetHeading(botPet->GetTarget()->GetHeading());
 						if(moved) {
 							moved = false;
-							SetCurrentSpeed(0);
+							StopNavigation();
 							botPet->SendPosition();
 							botPet->SetMoving(false);
 						}

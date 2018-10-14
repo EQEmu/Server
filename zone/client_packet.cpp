@@ -10041,7 +10041,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				mypet->SetPetOrder(SPO_Guard);
 				mypet->CastToNPC()->SaveGuardSpot();
 				if (!mypet->GetTarget()) // want them to not twitch if they're chasing something down
-					mypet->SetCurrentSpeed(0);
+					mypet->StopNavigation();
 				if (mypet->IsPetStop()) {
 					mypet->SetPetStop(false);
 					SetPetCommandState(PET_BUTTON_STOP, 0);
@@ -10343,7 +10343,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				mypet->SetPetStop(false);
 			} else {
 				mypet->SetPetStop(true);
-				mypet->SetCurrentSpeed(0);
+				mypet->StopNavigation();
 				mypet->SetTarget(nullptr);
 				if (mypet->IsPetRegroup()) {
 					mypet->SetPetRegroup(false);
@@ -10359,7 +10359,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
 			mypet->SetPetStop(true);
-			mypet->SetCurrentSpeed(0);
+			mypet->StopNavigation();
 			mypet->SetTarget(nullptr);
 			mypet->SayTo_StringID(this, MT_PetResponse, PET_GETLOST_STRING);
 			if (mypet->IsPetRegroup()) {

@@ -549,7 +549,6 @@ public:
 	virtual void Gate(uint8 bindnum = 0);
 	int GetWalkspeed() const { return(_GetWalkSpeed()); }
 	int GetRunspeed() const { return(_GetRunSpeed()); }
-	void SetCurrentSpeed(int in);
 	int GetBaseRunspeed() const { return base_runspeed; }
 	int GetBaseWalkspeed() const { return base_walkspeed; }
 	int GetBaseFearSpeed() const { return base_fearspeed; }
@@ -972,6 +971,9 @@ public:
 	void				WalkTo(float x, float y, float z);
 	void				RunTo(float x, float y, float z);
 	void				NavigateTo(float x, float y, float z);
+	void				RotateTo(float new_heading);
+	void				RotateToWalking(float new_heading);
+	void				RotateToRunning(float new_heading);
 	void				StopNavigation();
 	float				CalculateDistance(float x, float y, float z);
 	float				GetGroundZ(float new_x, float new_y, float z_offset=0.0);

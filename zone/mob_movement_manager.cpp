@@ -48,6 +48,7 @@ public:
 
 		if (!m_started) {
 			m_started = true;
+			m->SetMoving(true);
 		
 			if (rotate_to_speed > 0.0 && rotate_to_speed <= 25.0) { //send basic rotation
 				mgr->SendCommandToClients(m, 0.0, 0.0, 0.0, m_rotate_to_dir * rotate_to_speed, 0, ClientRangeClose);
@@ -71,7 +72,8 @@ public:
 		
 		if (td >= dist) {
 			m->SetHeading(to);
-			mgr->SendCommandToClients(m, 0.0, 0.0, 0.0, 0.0, 0, ClientRangeAny);
+			m->SetMoving(false);
+			mgr->SendCommandToClients(m, 0.0, 0.0, 0.0, 0.0, 0, ClientRangeCloseMedium);
 			return true;
 		}
 		
@@ -129,6 +131,7 @@ public:
 		if (!m_started) {
 			m_started = true;
 			//rotate to the point
+			m->SetMoving(true);
 			m->SetHeading(m->CalculateHeadingToTarget(m_move_to_x, m_move_to_y));
 			m->TryFixZ();
 
@@ -165,6 +168,7 @@ public:
 		glm::vec2 pos(p.x, p.y);
 		double len = glm::distance(pos, tar);
 		if (len == 0) {
+			m->SetMoving(false);
 			return true;
 		}
 
@@ -172,7 +176,7 @@ public:
 
 		glm::vec2 dir = tar - pos;
 		glm::vec2 ndir = glm::normalize(dir);
-		double distance_moved = frame_time * current_speed * 0.4f * 1.4f;
+		double distance_moved = frame_time * current_speed * 0.4f * 1.45f;
 
 		if (distance_moved > len) {
 			m->SetPosition(m_move_to_x, m_move_to_y, m_move_to_z);
@@ -182,6 +186,7 @@ public:
 			}
 		
 			m->TryFixZ();
+			m->SetMoving(false);
 			return true;
 		}
 		else {
@@ -272,7 +277,7 @@ public:
 			return true;
 		}
 
-		mgr->SendCommandToClients(m, 0.0, 0.0, 0.0, 0.0, 0, ClientRangeAny);
+		mgr->SendCommandToClients(m, 0.0, 0.0, 0.0, 0.0, 0, ClientRangeCloseMedium);
 		return true;
 	}
 
@@ -284,12 +289,14 @@ public:
 struct MovementStats
 {
 	MovementStats() {
+		LastResetTime = static_cast<double>(Timer::GetCurrentTime()) / 1000.0;
 		TotalSent = 0ULL;
 		TotalSentMovement = 0ULL;
 		TotalSentPosition = 0ULL;
 		TotalSentHeading = 0ULL;
 	}
 
+	double LastResetTime;
 	uint64_t TotalSent;
 	uint64_t TotalSentMovement;
 	uint64_t TotalSentPosition;
@@ -302,12 +309,14 @@ struct NavigateTo
 		navigate_to_x = 0.0;
 		navigate_to_y = 0.0;
 		navigate_to_z = 0.0;
+		navigate_to_heading = 0.0;
 		last_set_time = 0.0;
 	}
 
 	double navigate_to_x;
 	double navigate_to_y;
 	double navigate_to_z;
+	double navigate_to_heading;
 	double last_set_time;
 };
 
@@ -417,24 +426,28 @@ void MobMovementManager::Teleport(Mob *who, float x, float y, float z, float hea
 	PushTeleportTo(ent.second, x, y, z, heading);
 }
 
-void MobMovementManager::NavigateTo(Mob *who, float x, float y, float z, bool force, MobMovementMode mode)
+void MobMovementManager::NavigateTo(Mob *who, float x, float y, float z, MobMovementMode mode)
 {
 	auto iter = _impl->Entries.find(who);
 	auto &ent = (*iter);
 	auto &nav = ent.second.NavigateTo;
 
 	double current_time = static_cast<double>(Timer::GetCurrentTime()) / 1000.0;
-	if (force || (current_time - nav.last_set_time) > 0.5) {
+	if ((current_time - nav.last_set_time) > 0.5) {
 		//Can potentially recalc
 	
 		auto within = IsPositionWithinSimpleCylinder(glm::vec3(x, y, z), glm::vec3(nav.navigate_to_x, nav.navigate_to_y, nav.navigate_to_z), 1.5f, 6.0f);
-	
-		if (false == within) {
+		auto heading_match = IsHeadingEqual(0.0, nav.navigate_to_heading);
+
+		if (false == within || false == heading_match) {
+			ent.second.Commands.clear();
+
 			//Path is no longer valid, calculate a new path
 			UpdatePath(who, x, y, z, mode);
 			nav.navigate_to_x = x;
 			nav.navigate_to_y = y;
 			nav.navigate_to_z = z;
+			nav.navigate_to_heading = 0.0;
 			nav.last_set_time = current_time;
 		}
 	}
@@ -455,7 +468,7 @@ void MobMovementManager::StopNavigation(Mob *who) {
 	}
 
 	who->TryFixZ();
-	SendCommandToClients(who, 0.0, 0.0, 0.0, 0.0, 0, ClientRangeAny);
+	SendCommandToClients(who, 0.0, 0.0, 0.0, 0.0, 0, ClientRangeCloseMedium);
 	ent.second.Commands.clear();
 }
 
@@ -492,19 +505,19 @@ void MobMovementManager::SendCommandToClients(Mob *m, float dx, float dy, float 
 
 			bool match = false;
 			if (range & ClientRangeClose) {
-				if (dist < 200.0f) {
+				if (dist < 250.0f) {
 					match = true;
 				}
 			}
 
 			if (!match && range & ClientRangeMedium) {
-				if (dist >= 200.0f && dist < 1000.0f) {
+				if (dist >= 250.0f && dist < 1500.0f) {
 					match = true;
 				}
 			}
 
 			if (!match && range & ClientRangeLong) {
-				if (dist >= 1000.0f) {
+				if (dist >= 1500.0f) {
 					match = true;
 				}
 			}
@@ -540,6 +553,27 @@ float MobMovementManager::FixHeading(float in)
 	}
 
 	return h;
+}
+
+void MobMovementManager::DumpStats(Client *to)
+{
+	auto current_time = static_cast<double>(Timer::GetCurrentTime()) / 1000.0;
+	auto total_time = current_time - _impl->Stats.LastResetTime;
+
+	to->Message(MT_System, "Dumping Movement Stats:");
+	to->Message(MT_System, "Total Sent: %u (%.2f / sec)", _impl->Stats.TotalSent, static_cast<double>(_impl->Stats.TotalSent) / total_time);
+	to->Message(MT_System, "Total Heading: %u (%.2f / sec)", _impl->Stats.TotalSentHeading, static_cast<double>(_impl->Stats.TotalSentHeading) / total_time);
+	to->Message(MT_System, "Total Movement: %u (%.2f / sec)", _impl->Stats.TotalSentMovement, static_cast<double>(_impl->Stats.TotalSentMovement) / total_time);
+	to->Message(MT_System, "Total Position: %u (%.2f / sec)", _impl->Stats.TotalSentPosition, static_cast<double>(_impl->Stats.TotalSentPosition) / total_time);
+}
+
+void MobMovementManager::ClearStats()
+{
+	_impl->Stats.LastResetTime = static_cast<double>(Timer::GetCurrentTime()) / 1000.0;
+	_impl->Stats.TotalSent = 0;
+	_impl->Stats.TotalSentHeading = 0;
+	_impl->Stats.TotalSentMovement = 0;
+	_impl->Stats.TotalSentPosition = 0;
 }
 
 void MobMovementManager::FillCommandStruct(PlayerPositionUpdateServer_Struct *spu, Mob *m, float dx, float dy, float dz, float dh, int anim)

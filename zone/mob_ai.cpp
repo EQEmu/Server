@@ -372,7 +372,7 @@ bool NPC::AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgain
 
 	//stop moving if were casting a spell and were not a bard...
 	if(!IsBardSong(AIspells[i].spellid)) {
-		SetCurrentSpeed(0);
+		StopNavigation();
 	}
 
 	return CastSpell(AIspells[i].spellid, tar->GetID(), EQEmu::CastingSlot::Gem2, AIspells[i].manacost == -2 ? 0 : -1, mana_cost, oDontDoAgainBefore, -1, -1, 0, &(AIspells[i].resist_adjust));
@@ -715,7 +715,7 @@ void Client::AI_SpellCast()
 			{
 				if(!IsBardSong(spell_to_cast))
 				{
-					SetCurrentSpeed(0);
+					StopNavigation();
 				}
 				CastSpell(spell_to_cast, tar->GetID(), slot_to_use);
 				return;
@@ -729,7 +729,7 @@ void Client::AI_SpellCast()
 		{
 			if(!IsBardSong(spell_to_cast))
 			{
-				SetCurrentSpeed(0);
+				StopNavigation();
 			}
 			CastSpell(spell_to_cast, tar->GetID(), slot_to_use);
 			return;
@@ -787,9 +787,8 @@ void Client::AI_Process()
 			if (IsRooted()) {
 				//make sure everybody knows were not moving, for appearance sake
 				if (IsMoving()) {
-					if (GetTarget())
-						SetHeading(CalculateHeadingToTarget(GetTarget()->GetX(), GetTarget()->GetY()));
-					SetCurrentSpeed(0);
+					FaceTarget();
+					StopNavigation();
 				}
 				//continue on to attack code, ensuring that we execute the engaged code
 				engaged = true;
@@ -797,7 +796,7 @@ void Client::AI_Process()
 			else {
 				if (AI_movement_timer->Check()) {
 					// Check if we have reached the last fear point
-					if(IsPositionEqual(glm::vec3(GetX(), GetY(), GetZ()), m_FearWalkTarget)) {
+					if(IsPositionEqualWithinCertainZ(glm::vec3(GetX(), GetY(), GetZ()), m_FearWalkTarget, 5.0f)) {
 						CalculateNewFearpoint();
 					}
 
@@ -844,10 +843,8 @@ void Client::AI_Process()
 			if (AI_movement_timer->Check()) {
 				if (CalculateHeadingToTarget(GetTarget()->GetX(), GetTarget()->GetY()) !=
 				    m_Position.w) {
-					SetHeading(CalculateHeadingToTarget(GetTarget()->GetX(), GetTarget()->GetY()));
-					SendPosition();
+					FaceTarget();
 				}
-				SetCurrentSpeed(0);
 			}
 			if (GetTarget() && !IsStunned() && !IsMezzed() && !GetFeigned()) {
 				if (attack_timer.Check()) {
@@ -874,8 +871,7 @@ void Client::AI_Process()
 			}
 			else if(IsMoving())
 			{
-				SetHeading(CalculateHeadingToTarget(GetTarget()->GetX(), GetTarget()->GetY()));
-				SetCurrentSpeed(0);
+				FaceTarget();
 			}
 		}
 		AI_SpellCast();
@@ -1070,9 +1066,8 @@ void Mob::AI_Process() {
 				!IsPetRegroup()) {
 				//make sure everybody knows were not moving, for appearance sake
 				if (IsMoving()) {
-					if (target)
-						SetHeading(CalculateHeadingToTarget(target->GetX(), target->GetY()));
-					SetCurrentSpeed(0);
+					FaceTarget();
+					StopNavigation();
 					moved = false;
 				}
 				//continue on to attack code, ensuring that we execute the engaged code
@@ -1081,7 +1076,7 @@ void Mob::AI_Process() {
 			else {
 				if (AI_movement_timer->Check()) {
 					// Check if we have reached the last fear point
-					if (IsPositionEqual(glm::vec3(GetX(), GetY(), GetZ()), m_FearWalkTarget)) {
+					if (IsPositionEqualWithinCertainZ(glm::vec3(GetX(), GetY(), GetZ()), m_FearWalkTarget, 5.0f)) {
 						// Calculate a new point to run to
 						CalculateNewFearpoint();
 					}
@@ -1403,8 +1398,7 @@ void Mob::AI_Process() {
 
 					}
 					else if (IsMoving()) {
-						SetHeading(CalculateHeadingToTarget(target->GetX(), target->GetY()));
-						SetCurrentSpeed(0);
+						FaceTarget();
 					}
 				}
 			}
@@ -1490,9 +1484,7 @@ void Mob::AI_Process() {
 							 * Distance: >= 450 (Snap to owner)
 							 */
 							if (distance_to_owner >= 202500 || z_distance > 100) {
-								m_Position = pet_owner_position;
-								SendPositionUpdate();
-								moved = true;
+								Teleport(pet_owner_position);
 							}
 							else {
 
@@ -1562,7 +1554,7 @@ void Mob::AI_Process() {
 					}
 					else {
 						moved = false;
-						SetCurrentSpeed(0);
+						StopNavigation();
 					}
 				}
 			}
@@ -1688,9 +1680,6 @@ void NPC::AI_DoMovement() {
 
 		if (m_Position.x == roambox_destination_x && m_Position.y == roambox_destination_y) {
 			time_until_can_move = Timer::GetCurrentTime() + RandomTimer(roambox_min_delay, roambox_delay);
-			SetMoving(false);
-			this->FixZ();
-			SendPosition();
 		}
 
 		return;
@@ -1721,13 +1710,9 @@ void NPC::AI_DoMovement() {
 
 					SetWaypointPause();
 					SetAppearance(eaStanding, false);
-					SetMoving(false);
 					if (m_CurrentWayPoint.w >= 0.0) {
-						SetHeading(m_CurrentWayPoint.w);
+						RotateTo(m_CurrentWayPoint.w);
 					}
-
-					this->FixZ();
-					SendPosition();
 
 					//kick off event_waypoint arrive
 					char temp[16];
@@ -1771,7 +1756,7 @@ void NPC::AI_DoMovement() {
 
 	}
 	else if (IsGuarding()) {	
-		bool at_gp = IsPositionEqual(m_Position, m_GuardPoint);
+		bool at_gp = IsPositionEqualWithinCertainZ(m_Position, m_GuardPoint, 5.0f);
 
 		if (at_gp) {
 
@@ -1786,12 +1771,11 @@ void NPC::AI_DoMovement() {
 				ClearFeignMemory();
 				moved = false;
 				if (GetTarget() == nullptr || DistanceSquared(m_Position, GetTarget()->GetPosition()) >= 5 * 5) {
-					SetHeading(m_GuardPoint.w);
+					RotateTo(m_GuardPoint.w);
 				}
 				else {
 					FaceTarget(GetTarget());
 				}
-				SetCurrentSpeed(0);
 				SetAppearance(GetGuardPointAnim());
 			}
 		}
@@ -1925,8 +1909,7 @@ void Mob::AI_Event_NoLongerEngaged() {
 	// except if we're a pet, then we might run into some issues with pets backing off when they should immediately be moving
 	if(!IsPet())
 	{
-		SetRunAnimSpeed(0);
-		SendPosition();
+		StopNavigation();
 	}
 	ClearRampage();
 

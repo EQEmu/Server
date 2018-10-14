@@ -1471,7 +1471,7 @@ void Merc::AI_Process() {
 
 				if(moved) {
 					moved = false;
-					SetCurrentSpeed(0);
+					StopNavigation();
 				}
 			}
 
@@ -1513,7 +1513,7 @@ void Merc::AI_Process() {
 				SetRunAnimSpeed(0);
 
 				if(moved) {
-					SetCurrentSpeed(0);
+					StopNavigation();
 				}
 			}
 
@@ -1771,7 +1771,7 @@ void Merc::AI_Process() {
 					else {
 						if (moved) {
 							moved = false;
-							SetCurrentSpeed(0);
+							StopNavigation();
 						}
 					}
 				}

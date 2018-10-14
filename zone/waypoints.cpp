@@ -428,12 +428,11 @@ void NPC::SaveGuardSpot(bool iClearGuardSpot) {
 
 void NPC::NextGuardPosition() {
 	NavigateTo(m_GuardPoint.x, m_GuardPoint.y, m_GuardPoint.z);
-	if ((m_Position.x == m_GuardPoint.x) && (m_Position.y == m_GuardPoint.y) && (m_Position.z == m_GuardPoint.z))
+	if (IsPositionEqualWithinCertainZ(m_Position, m_GuardPoint, 5.0f))
 	{
 		if (moved)
 		{
 			moved = false;
-			SetCurrentSpeed(0);
 		}
 	}
 }
@@ -444,22 +443,42 @@ float Mob::CalculateDistance(float x, float y, float z) {
 
 void Mob::WalkTo(float x, float y, float z)
 {
-	mMovementManager->NavigateTo(this, x, y, z, false, MovementWalking);
+	mMovementManager->NavigateTo(this, x, y, z, MovementWalking);
 }
 
 void Mob::RunTo(float x, float y, float z)
 {
-	mMovementManager->NavigateTo(this, x, y, z, false, MovementRunning);
+	mMovementManager->NavigateTo(this, x, y, z, MovementRunning);
 }
 
 void Mob::NavigateTo(float x, float y, float z)
 {
 	if (IsRunning()) {
-		mMovementManager->NavigateTo(this, x, y, z, false, MovementRunning);
+		RunTo(x, y, z);
 	}
 	else {
-		mMovementManager->NavigateTo(this, x, y, z, false, MovementWalking);
+		WalkTo(x, y, z);
 	}
+}
+
+void Mob::RotateTo(float new_heading)
+{
+	if (IsRunning()) {
+		RotateToRunning(new_heading);
+	}
+	else {
+		RotateToWalking(new_heading);
+	}
+}
+
+void Mob::RotateToWalking(float new_heading)
+{
+	mMovementManager->RotateTo(this, new_heading, MovementWalking);
+}
+
+void Mob::RotateToRunning(float new_heading)
+{
+	mMovementManager->RotateTo(this, new_heading, MovementRunning);
 }
 
 void Mob::StopNavigation() {

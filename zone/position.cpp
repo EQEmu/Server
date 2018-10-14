@@ -163,6 +163,11 @@ float GetReciprocalHeading(const float heading)
 	return result;
 }
 
+bool IsHeadingEqual(const float h1, const float h2)
+{
+	return std::abs(h2 - h1) < 0.01f;
+}
+
 bool IsPositionEqual(const glm::vec2 &p1, const glm::vec2 &p2)
 {
 	return std::abs(p1.x - p2.x) < position_eps && std::abs(p1.y - p2.y) < position_eps;

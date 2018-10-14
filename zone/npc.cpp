@@ -772,9 +772,8 @@ bool NPC::Process()
 			DoGravityEffect();
 	}
 
-	if(reface_timer->Check() && !IsEngaged() && (m_GuardPoint.x == GetX() && m_GuardPoint.y == GetY() && m_GuardPoint.z == GetZ())) {
-		SetHeading(m_GuardPoint.w);
-		SendPosition();
+	if(reface_timer->Check() && !IsEngaged() && IsPositionEqualWithinCertainZ(m_Position, m_GuardPoint, 5.0f)) {
+		RotateTo(m_GuardPoint.w);
 		reface_timer->Disable();
 	}
 

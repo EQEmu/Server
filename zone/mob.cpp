@@ -1434,16 +1434,14 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 }
 
 void Mob::StopMoving() {
-	FixZ();
-	SetCurrentSpeed(0);
+	StopNavigation();
 	if (moved)
 		moved = false;
 }
 
 void Mob::StopMoving(float new_heading) {
-	SetHeading(new_heading);
-	FixZ();
-	SetCurrentSpeed(0);
+	StopNavigation();
+	RotateTo(new_heading);
 	if (moved)
 		moved = false;
 }
@@ -2706,10 +2704,10 @@ void Mob::FaceTarget(Mob* mob_to_face /*= 0*/) {
 	float new_heading = CalculateHeadingToTarget(faced_mob->GetX(), faced_mob->GetY());
 	if(current_heading != new_heading) {
 		if (IsEngaged() || IsRunning()) {
-			mMovementManager->RotateTo(this, new_heading);
+			RotateToRunning(new_heading);
 		}
 		else {
-			mMovementManager->RotateTo(this, new_heading, MovementWalking);
+			RotateToWalking(new_heading);
 		}
 	}
 
@@ -5763,18 +5761,6 @@ void Mob::SendRemovePlayerState(PlayerState old_state)
 	RemovePlayerState(ps->state);
 	entity_list.QueueClients(nullptr, app);
 	safe_delete(app);
-}
-
-void Mob::SetCurrentSpeed(int in){
-	if (current_speed != in)
-	{
-		current_speed = in;
-		if (in == 0) {
-			SetRunAnimSpeed(0);
-			SetMoving(false);
-			SendPosition();
-		}
-	}
 }
 
 int32 Mob::GetMeleeMitigation() {

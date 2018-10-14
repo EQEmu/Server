@@ -39,13 +39,12 @@ public:
 
 	void RotateTo(Mob *who, float to, MobMovementMode mode = MovementRunning);
 	void Teleport(Mob *who, float x, float y, float z, float heading);
-	void NavigateTo(Mob *who, float x, float y, float z, bool force = false, MobMovementMode mode = MovementRunning);
+	void NavigateTo(Mob *who, float x, float y, float z, MobMovementMode mode = MovementRunning);
 	void StopNavigation(Mob *who);
 	void SendCommandToClients(Mob *m, float dx, float dy, float dz, float dh, int anim, ClientRange range);
 	float FixHeading(float in);
-	//void Dump(Mob *m, Client *to);
-	//void DumpStats(Client *to);
-	//void ClearStats();
+	void DumpStats(Client *to);
+	void ClearStats();
 
 	static MobMovementManager &Get() {
 		static MobMovementManager inst;

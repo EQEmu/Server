@@ -1271,48 +1271,11 @@ void command_movement(Client *c, const Seperator *sep)
 
 	if (strcasecmp(sep->arg[1], "stats") == 0)
 	{
-		//mgr.DumpStats(c);
+		mgr.DumpStats(c);
 	}
 	else if (strcasecmp(sep->arg[1], "clearstats") == 0)
 	{
-		//mgr.ClearStats();
-	}
-	if (strcasecmp(sep->arg[1], "test") == 0)
-	{
-		auto target = c->GetTarget();
-		if (!target) {
-			c->Message(0, "Requires target");
-		}
-
-		mgr.NavigateTo(target, c->GetX(), c->GetY(), c->GetZ(), false, MovementRunning);
-
-		//auto heading = target->CalculateHeadingToTarget(c->GetX(), c->GetY());
-		//mgr.SendCommandToClients(target, 0.0f, 0.0f, 0.0f, atof(sep->arg[2]), 0, ClientRangeAny);
-		//mgr.RotateTo(target, heading);
-
-		//double a1 = atof(sep->arg[2]);
-		//double a2 = atof(sep->arg[3]);
-		//double a3 = atof(sep->arg[4]);
-		//double a4 = atof(sep->arg[5]);
-		//int a5 = atoi(sep->arg[6]);
-		//
-		////PlayerPositionUpdateServer_Struct
-		//EQApplicationPacket outapp(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
-		//PlayerPositionUpdateServer_Struct *spu = (PlayerPositionUpdateServer_Struct*)outapp.pBuffer;
-		//
-		//memset(spu, 0x00, sizeof(PlayerPositionUpdateServer_Struct));
-		//spu->spawn_id = target->GetID();
-		//spu->x_pos = FloatToEQ19(target->GetX());
-		//spu->y_pos = FloatToEQ19(target->GetY());
-		//spu->z_pos = FloatToEQ19(target->GetZ());
-		//spu->heading = FloatToEQ12(target->GetHeading());
-		//spu->delta_x = FloatToEQ13(a1);
-		//spu->delta_y = FloatToEQ13(a2);
-		//spu->delta_z = FloatToEQ13(a3);
-		//spu->delta_heading = FloatToEQ10(a4);
-		//spu->animation = a5;
-		//
-		//c->QueuePacket(&outapp);
+		mgr.ClearStats();
 	}
 	else {
 		c->Message(0, "Usage: #movement stats/clearstats");
