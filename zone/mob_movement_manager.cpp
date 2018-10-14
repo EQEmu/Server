@@ -277,7 +277,10 @@ public:
 			return true;
 		}
 
-		mgr->SendCommandToClients(m, 0.0, 0.0, 0.0, 0.0, 0, ClientRangeCloseMedium);
+		if (m->IsMoving()) {
+			m->SetMoving(false);
+			mgr->SendCommandToClients(m, 0.0, 0.0, 0.0, 0.0, 0, ClientRangeCloseMedium);
+		}
 		return true;
 	}
 
@@ -467,8 +470,11 @@ void MobMovementManager::StopNavigation(Mob *who) {
 		return;
 	}
 
-	who->TryFixZ();
-	SendCommandToClients(who, 0.0, 0.0, 0.0, 0.0, 0, ClientRangeCloseMedium);
+	if (who->IsMoving()) {
+		who->TryFixZ();
+		who->SetMoving(false);
+		SendCommandToClients(who, 0.0, 0.0, 0.0, 0.0, 0, ClientRangeCloseMedium);
+	}
 	ent.second.Commands.clear();
 }
 
