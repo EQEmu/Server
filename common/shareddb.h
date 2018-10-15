@@ -89,7 +89,7 @@ class SharedDatabase : public Database
 		int32	GetSharedPlatinum(uint32 account_id);
 		bool	SetSharedPlatinum(uint32 account_id, int32 amount_to_add);
 		bool	GetInventory(uint32 char_id, EQEmu::InventoryProfile* inv);
-		bool	GetInventory(uint32 account_id, char* name, EQEmu::InventoryProfile* inv);
+		bool	GetInventory(uint32 account_id, char* name, EQEmu::InventoryProfile* inv); // deprecated
 		std::map<uint32, uint32> GetItemRecastTimestamps(uint32 char_id);
 		uint32	GetItemRecastTimestamp(uint32 char_id, uint32 recast_type);
 		void	ClearOldRecastTimestamps(uint32 char_id);

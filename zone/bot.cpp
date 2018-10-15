@@ -38,6 +38,8 @@ Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm
 		this->_botOwnerCharacterID = 0;
 	}
 
+	m_inv.SetInventoryVersion(EQEmu::versions::MobVersion::Bot);
+
 	_guildRank = 0;
 	_guildId = 0;
 	_lastTotalPlayTime = 0;
@@ -109,6 +111,8 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 		this->SetBotOwner(entity_list.GetClientByCharID(this->_botOwnerCharacterID));
 
 	auto bot_owner = GetBotOwner();
+
+	m_inv.SetInventoryVersion(EQEmu::versions::MobVersion::Bot);
 
 	_guildRank = 0;
 	_guildId = 0;
@@ -1850,6 +1854,13 @@ bool Bot::Process() {
 		SendHPUpdate();
 		if(HasPet())
 			GetPet()->SendHPUpdate();
+
+		// hack fix until percentage changes can be implemented
+		auto g = GetGroup();
+		if (g) {
+			g->SendManaPacketFrom(this);
+			g->SendEndurancePacketFrom(this);
+		}
 	}
 
 	if(GetAppearance() == eaDead && GetHP() > 0)
@@ -2261,10 +2272,15 @@ void Bot::AI_Process() {
 		}
 
 		if (find_target) {
-			if (IsRooted())
+			if (IsRooted()) {
 				SetTarget(hate_list.GetClosestEntOnHateList(this));
-			else
-				SetTarget(hate_list.GetEntWithMostHateOnList(this));
+			}
+			else {
+				// This will keep bots on target for now..but, future updates will allow for rooting/stunning
+				SetTarget(hate_list.GetEscapingEntOnHateList(leash_owner, BOT_LEASH_DISTANCE));
+				if (!GetTarget())
+					SetTarget(hate_list.GetEntWithMostHateOnList(this));
+			}
 		}
 		
 		TEST_TARGET();
@@ -2471,6 +2487,8 @@ void Bot::AI_Process() {
 				ChangeBotArcherWeapons(IsBotArcher());
 		}
 
+		// all of this needs review...
+
 		if (IsBotArcher() && atArcheryRange)
 			atCombatRange = true;
 		else if (caster_distance_max && tar_distance <= caster_distance_max)
@@ -2567,6 +2585,10 @@ void Bot::AI_Process() {
 				}
 			}
 
+			if (!IsBotNonSpellFighter() && AI_EngagedCastCheck()) {
+				return;
+			}
+
 			// Up to this point, GetTarget() has been safe to dereference since the initial
 			// TEST_TARGET() call. Due to the chance of the target dying and our pointer
 			// being nullified, we need to test it before dereferencing to avoid crashes
@@ -2576,7 +2598,7 @@ void Bot::AI_Process() {
 				if (GetTarget()->GetHPRatio() <= 99.0f)
 					BotRangedAttack(tar);
 			}
-			else if (!IsBotArcher() && (!(IsBotCaster() && GetLevel() >= RuleI(Bots, CasterStopMeleeLevel)))) {
+			else if (!IsBotArcher() && (IsBotNonSpellFighter() || GetLevel() < GetStopMeleeLevel())) {
 				// we can't fight if we don't have a target, are stun/mezzed or dead..
 				// Stop attacking if the target is enraged
 				TEST_TARGET();
@@ -3643,15 +3665,13 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 		ClientReturn(const ItemInstance* item, int16 from, const char* name = "") : returnItemInstance(item), fromBotSlot(from), toClientSlot(invslot::SLOT_INVALID), adjustStackSize(0), failedItemName(name) { }
 	};
 
-	static const int16 proxyPowerSource = 22;
-
-	static const int16 bot_equip_order[(invslot::CORPSE_BEGIN + 1)] = {
+	static const int16 bot_equip_order[invslot::EQUIPMENT_COUNT] = {
 		invslot::slotCharm,			invslot::slotEar1,			invslot::slotHead,			invslot::slotFace,
 		invslot::slotEar2,			invslot::slotNeck,			invslot::slotShoulders,		invslot::slotArms,
 		invslot::slotBack,			invslot::slotWrist1,		invslot::slotWrist2,		invslot::slotRange,
 		invslot::slotHands,			invslot::slotPrimary,		invslot::slotSecondary,		invslot::slotFinger1,
 		invslot::slotFinger2,		invslot::slotChest,			invslot::slotLegs,			invslot::slotFeet,
-		invslot::slotWaist,			invslot::slotAmmo,			proxyPowerSource // invslot::SLOT_POWER_SOURCE
+		invslot::slotWaist,			invslot::slotPowerSource,	invslot::slotAmmo
 	};
 
 	enum { stageStackable = 0, stageEmpty, stageReplaceable };
@@ -3787,9 +3807,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 				//}
 
 				if (stage_loop != stageReplaceable) {
-					if ((index == proxyPowerSource) && m_inv[invslot::SLOT_POWER_SOURCE])
-						continue;
-					else if (m_inv[index])
+					if (m_inv[index])
 						continue;
 				}
 
@@ -3838,18 +3856,10 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 					}
 				}
 
-				if (index == proxyPowerSource) {
-					trade_iterator.toBotSlot = invslot::SLOT_POWER_SOURCE;
+				trade_iterator.toBotSlot = index;
 
-					if (m_inv[invslot::SLOT_POWER_SOURCE])
-						client_return.push_back(ClientReturn(m_inv[invslot::SLOT_POWER_SOURCE], invslot::SLOT_POWER_SOURCE));
-				}
-				else {
-					trade_iterator.toBotSlot = index;
-
-					if (m_inv[index])
-						client_return.push_back(ClientReturn(m_inv[index], index));
-				}
+				if (m_inv[index])
+					client_return.push_back(ClientReturn(m_inv[index], index));
 
 				break;
 			}
@@ -3878,6 +3888,8 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 			client->ResetTrade();
 			return;
 		}
+		// non-failing checks above are causing this to trigger (i.e., !ItemClassCommon and !IsEquipable{race, class, min_level})
+		// this process is hindered by not having bots use the inventory trade method (TODO: implement bot inventory use)
 		if (client->CheckLoreConflict(return_instance->GetItem())) {
 			client->Message(CC_Yellow, "You already have lore equipment matching the item '%s' - Trade Canceled!", return_instance->GetItem()->Name);
 			client->ResetTrade();
@@ -3981,8 +3993,17 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 
 		m_inv.PutItem(trade_iterator.toBotSlot, *trade_iterator.tradeItemInstance);
 		this->BotAddEquipItem(trade_iterator.toBotSlot, (trade_iterator.tradeItemInstance ? trade_iterator.tradeItemInstance->GetID() : 0));
+		trade_iterator.tradeItemInstance = nullptr; // actual deletion occurs in client delete below
+
 		client->DeleteItemInInventory(trade_iterator.fromClientSlot, 0, (trade_iterator.fromClientSlot == EQEmu::invslot::slotCursor));
-		trade_iterator.tradeItemInstance = nullptr;
+
+		// database currently has unattuned item saved in inventory..it will be attuned on next bot load
+		// this prevents unattuned item returns in the mean time (TODO: re-work process)
+		if (trade_iterator.toBotSlot >= invslot::EQUIPMENT_BEGIN && trade_iterator.toBotSlot <= invslot::EQUIPMENT_END) {
+			auto attune_item = m_inv.GetItem(trade_iterator.toBotSlot);
+			if (attune_item && attune_item->GetItem()->Attuneable)
+				attune_item->SetAttuned(true);
+		}
 	}
 
 	// trade messages
@@ -4006,6 +4027,15 @@ bool Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, EQEmu::skills::Sk
 		return false;
 
 	Save();
+
+	Mob *my_owner = GetBotOwner();
+	if (my_owner && my_owner->IsClient() && my_owner->CastToClient()->GetBotOptionDeathMarquee()) {
+		if (killerMob)
+			my_owner->CastToClient()->SendMarqueeMessage(CC_Yellow, 510, 0, 1000, 3000, StringFormat("%s has been slain by %s", GetCleanName(), killerMob->GetCleanName()));
+		else
+			my_owner->CastToClient()->SendMarqueeMessage(CC_Yellow, 510, 0, 1000, 3000, StringFormat("%s has been slain", GetCleanName()));
+	}
+
 	Mob *give_exp = hate_list.GetDamageTopOnHateList(this);
 	Client *give_exp_client = nullptr;
 	if(give_exp && give_exp->IsClient())
@@ -4634,6 +4664,7 @@ int32 Bot::GetBotFocusEffect(BotfocusType bottype, uint16 spell_id) {
 		int32 focus_max = 0;
 		int32 focus_max_real = 0;
 		//item focus
+		// are focus effects the same as bonus? (slotAmmo-excluded)
 		for (int x = EQEmu::invslot::EQUIPMENT_BEGIN; x <= EQEmu::invslot::EQUIPMENT_END; x++) {
 			TempItem = nullptr;
 			EQEmu::ItemInstance* ins = GetBotItem(x);
@@ -7589,10 +7620,7 @@ void Bot::ProcessBotInspectionRequest(Bot* inspectedBot, Client* client) {
 		const EQEmu::ItemData* item = nullptr;
 		const EQEmu::ItemInstance* inst = nullptr;
 
-		// Modded to display power source items (will only show up on SoF+ client inspect windows though.)
-		// I don't think bots are currently coded to use them..but, you'll have to use '#bot inventory list'
-		// to see them on a Titanium client when/if they are activated.
-		for (int16 L = EQEmu::invslot::EQUIPMENT_BEGIN; L <= EQEmu::invslot::slotWaist; L++) {
+		for (int16 L = EQEmu::invslot::EQUIPMENT_BEGIN; L <= EQEmu::invslot::EQUIPMENT_END; L++) {
 			inst = inspectedBot->GetBotItem(L);
 
 			if(inst) {
@@ -7601,33 +7629,15 @@ void Bot::ProcessBotInspectionRequest(Bot* inspectedBot, Client* client) {
 					strcpy(insr->itemnames[L], item->Name);
 					insr->itemicons[L] = item->Icon;
 				}
-				else
+				else {
+					insr->itemnames[L][0] = '\0';
 					insr->itemicons[L] = 0xFFFFFFFF;
+				}
 			}
-		}
-
-		inst = inspectedBot->GetBotItem(EQEmu::invslot::SLOT_POWER_SOURCE);
-
-		if(inst) {
-			item = inst->GetItem();
-			if(item) {
-				strcpy(insr->itemnames[SoF::invslot::slotPowerSource], item->Name);
-				insr->itemicons[SoF::invslot::slotPowerSource] = item->Icon;
+			else {
+				insr->itemnames[L][0] = '\0';
+				insr->itemicons[L] = 0xFFFFFFFF;
 			}
-			else
-				insr->itemicons[SoF::invslot::slotPowerSource] = 0xFFFFFFFF;
-		}
-
-		inst = inspectedBot->GetBotItem(EQEmu::invslot::slotAmmo);
-
-		if(inst) {
-			item = inst->GetItem();
-			if(item) {
-				strcpy(insr->itemnames[SoF::invslot::slotAmmo], item->Name);
-				insr->itemicons[SoF::invslot::slotAmmo] = item->Icon;
-			}
-			else
-				insr->itemicons[SoF::invslot::slotAmmo] = 0xFFFFFFFF;
 		}
 
 		strcpy(insr->text, inspectedBot->GetInspectMessage().text);
@@ -7640,8 +7650,8 @@ void Bot::CalcItemBonuses(StatBonuses* newbon)
 {
 	const EQEmu::ItemData* itemtmp = nullptr;
 
-	for (int i = EQEmu::invslot::EQUIPMENT_BEGIN; i <= (EQEmu::invslot::EQUIPMENT_END + 1); ++i) {
-		const EQEmu::ItemInstance* item = GetBotItem((i == 22 ? 9999 : i));
+	for (int i = EQEmu::invslot::BONUS_BEGIN; i <= EQEmu::invslot::BONUS_STAT_END; ++i) {
+		const EQEmu::ItemInstance* item = GetBotItem(i);
 		if(item) {
 			AddItemBonuses(item, newbon);
 		}

@@ -217,21 +217,15 @@ void Merc::CalcItemBonuses(StatBonuses* newbon) {
 
 	unsigned int i;
 	//should not include 21 (SLOT_AMMO)
-	for (i = 0; i < EQEmu::invslot::slotAmmo; i++) {
-		if(equipment[i] == 0)
+	for (i = EQEmu::invslot::BONUS_BEGIN; i <= EQEmu::invslot::BONUS_STAT_END; i++) {
+		if (i == EQEmu::invslot::slotAmmo)
+			continue;
+		if (equipment[i] == 0)
 			continue;
 		const EQEmu::ItemData * itm = database.GetItem(equipment[i]);
-		if(itm)
+		if (itm)
 			AddItemBonuses(itm, newbon);
 	}
-
-	//Power Source Slot
-	/*if (GetClientVersion() >= EQClientSoF)
-	{
-	const EQEmu::ItemInstance* inst = m_inv[MainPowerSource];
-	if(inst)
-	AddItemBonuses(inst, newbon);
-	}*/
 
 	// Caps
 	if(newbon->HPRegen > CalcHPRegenCap())

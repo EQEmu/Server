@@ -202,6 +202,8 @@ Corpse::Corpse(NPC* in_npc, ItemList* in_itemlist, uint32 in_npctypeid, const NP
 
 	UpdateEquipmentLight();
 	UpdateActiveLight();
+
+	loot_request_type = LootRequestType::Forbidden;
 }
 
 Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
@@ -322,15 +324,11 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 		// to go into the regular slots on the player, out of bags
 		std::list<uint32> removed_list;
 		
+		// ideally, we would start at invslot::slotGeneral1 and progress to invslot::slotCursor..
+		// ..then regress and process invslot::EQUIPMENT_BEGIN through invslot::EQUIPMENT_END...
+		// without additional work to database loading of player corpses, this order is not
+		// currently preserved and a re-work of this processing loop is not warranted.
 		for (i = EQEmu::invslot::POSSESSIONS_BEGIN; i <= EQEmu::invslot::POSSESSIONS_END; ++i) {
-			if (i == EQEmu::invslot::slotAmmo && client->ClientVersion() >= EQEmu::versions::ClientVersion::SoF) {
-				item = client->GetInv().GetItem(EQEmu::invslot::SLOT_POWER_SOURCE);
-				if (item != nullptr) {
-					if (!client->IsBecomeNPC() || (client->IsBecomeNPC() && !item->GetItem()->NoRent))
-						MoveItemToCorpse(client, item, EQEmu::invslot::SLOT_POWER_SOURCE, removed_list);
-				}
-			}
-
 			item = client->GetInv().GetItem(i);
 			if (item == nullptr) { continue; }
 
@@ -340,25 +338,25 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 
 		database.TransactionBegin();
 
-		// I have an untested process that avoids this snarl up when all possessions inventory is removed..but this isn't broke
+		// this should not be modified to include the entire range of invtype::TYPE_POSSESSIONS slots by default..
+		// ..due to the possibility of 'hidden' items from client version bias..or, possibly, soul-bound items (WoW?)
 		if (!removed_list.empty()) {
-			std::stringstream ss("");
-			ss << "DELETE FROM inventory WHERE charid=" << client->CharacterID();
-			ss << " AND (";
 			std::list<uint32>::const_iterator iter = removed_list.begin();
-			bool first = true;
-			while (iter != removed_list.end()) {
-				if (first) {
-					first = false;
-				}
-				else {
-					ss << " OR ";
-				}
-				ss << "slotid=" << (*iter);
+
+			if (iter != removed_list.end()) {
+				std::stringstream ss("");
+				ss << "DELETE FROM `inventory` WHERE `charid` = " << client->CharacterID();
+				ss << " AND `slotid` IN (" << (*iter);
 				++iter;
+
+				while (iter != removed_list.end()) {
+					ss << ", " << (*iter);
+					++iter;
+				}
+				ss << ")";
+
+				database.QueryDatabase(ss.str().c_str());
 			}
-			ss << ")";
-			database.QueryDatabase(ss.str().c_str());
 		}
 
 		auto start = client->GetInv().cursor_cbegin();
@@ -381,6 +379,8 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 
 	UpdateEquipmentLight();
 	UpdateActiveLight();
+
+	loot_request_type = LootRequestType::Forbidden;
 
 	IsRezzed(false);
 	Save();
@@ -524,6 +524,8 @@ EQEmu::TintProfile(),
 
 	UpdateEquipmentLight();
 	UpdateActiveLight();
+
+	loot_request_type = LootRequestType::Forbidden;
 }
 
 Corpse::~Corpse() {
@@ -873,13 +875,16 @@ void Corpse::AllowPlayerLoot(Mob *them, uint8 slot) {
 }
 
 void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* app) {
+	if (!client)
+		return;
+
 	// Added 12/08. Started compressing loot struct on live.
 	if(player_corpse_depop) {
 		SendLootReqErrorPacket(client, LootResponse::SomeoneElse);
 		return;
 	}
 
-	if(IsPlayerCorpse() && corpse_db_id == 0) {
+	if(IsPlayerCorpse() && !corpse_db_id) { // really should try to resave in this case
 		// SendLootReqErrorPacket(client, 0);
 		client->Message(13, "Warning: Corpse's dbid = 0! Corpse will not survive zone shutdown!");
 		std::cout << "Error: PlayerCorpse::MakeLootRequestPackets: dbid = 0!" << std::endl;
@@ -892,165 +897,195 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 		return;
 	}
 
-	if(being_looted_by == 0)
+	if(!being_looted_by || (being_looted_by != 0xFFFFFFFF && !entity_list.GetID(being_looted_by)))
 		being_looted_by = 0xFFFFFFFF;
-
-	if(this->being_looted_by != 0xFFFFFFFF) {
-		// lets double check....
-		Entity* looter = entity_list.GetID(this->being_looted_by);
-		if(looter == nullptr)
-			this->being_looted_by = 0xFFFFFFFF;
-	}
-
-	uint8 Loot_Request_Type = 1;
-	bool loot_coin = false;
-	std::string tmp;
-	if(database.GetVariable("LootCoin", tmp))
-		loot_coin = tmp[0] == 1 && tmp[1] == '\0';
 
 	if (DistanceSquaredNoZ(client->GetPosition(), m_Position) > 625) {
 		SendLootReqErrorPacket(client, LootResponse::TooFar);
-		// not sure if we need to send the packet back in this case? Didn't before!
-		// Will just return for now
 		return;
 	}
-	else if (this->being_looted_by != 0xFFFFFFFF && this->being_looted_by != client->GetID()) {
+	
+	if (being_looted_by != 0xFFFFFFFF && being_looted_by != client->GetID()) {
 		SendLootReqErrorPacket(client, LootResponse::SomeoneElse);
-		Loot_Request_Type = 0;
-	}
-	else if (IsPlayerCorpse() && char_id == client->CharacterID()) {
-		Loot_Request_Type = 2;
-	}
-	else if ((IsNPCCorpse() || become_npc) && CanPlayerLoot(client->CharacterID())) {
-		Loot_Request_Type = 2;
-	}
-	else if (GetPlayerKillItem() == -1 && CanPlayerLoot(client->CharacterID())) { /* PVP loot all items, variable cash */
-		Loot_Request_Type = 3;
-	}
-	else if (GetPlayerKillItem() == 1 && CanPlayerLoot(client->CharacterID())) { /* PVP loot 1 item, variable cash */
-		Loot_Request_Type = 4;
-	}
-	else if (GetPlayerKillItem() > 1 && CanPlayerLoot(client->CharacterID())) { /* PVP loot 1 set item, variable cash */
-		Loot_Request_Type = 5;
+		return;
 	}
 
-	if (Loot_Request_Type == 1) {
-		if (client->Admin() < 100 || !client->GetGM()) {
-			SendLootReqErrorPacket(client, LootResponse::NotAtThisTime);
+	// all loot session disqualifiers should occur before this point as not to interfere with any current looter
+	loot_request_type = LootRequestType::Forbidden;
+
+	// loot_request_type is scoped to class Corpse and reset on a per-loot session basis
+	if (client->GetGM()) {
+		if (client->Admin() >= 100)
+			loot_request_type = LootRequestType::GMAllowed;
+		else
+			loot_request_type = LootRequestType::GMPeek;
+	}
+	else {
+		if (IsPlayerCorpse()) {
+			if (char_id == client->CharacterID()) {
+				loot_request_type = LootRequestType::Self;
+			}
+			else if (CanPlayerLoot(client->CharacterID())) {
+				if (GetPlayerKillItem() == -1)
+					loot_request_type = LootRequestType::AllowedPVPAll;
+				else if (GetPlayerKillItem() == 1)
+					loot_request_type = LootRequestType::AllowedPVPSingle;
+				else if (GetPlayerKillItem() > 1)
+					loot_request_type = LootRequestType::AllowedPVPDefined;
+			}
 		}
+		else if ((IsNPCCorpse() || become_npc) && CanPlayerLoot(client->CharacterID())) {
+			loot_request_type = LootRequestType::AllowedPVE;
+		}
+
 	}
 
-	if(Loot_Request_Type >= 2 || (Loot_Request_Type == 1 && client->Admin() >= 100 && client->GetGM())) {
-		client->CommonBreakInvisible(); // we should be "all good" so lets break invis now instead of earlier before all error checking is done
-		this->being_looted_by = client->GetID();
+	Log(Logs::Moderate, Logs::Inventory, "MakeLootRequestPackets() LootRequestType %u for %s", loot_request_type, client->GetName());
+
+	if (loot_request_type == LootRequestType::Forbidden) {
+		SendLootReqErrorPacket(client, LootResponse::NotAtThisTime);
+		return;
+	}
+
+	being_looted_by = client->GetID();
+	client->CommonBreakInvisible(); // we should be "all good" so lets break invis now instead of earlier before all error checking is done
+
+	// process coin
+	bool loot_coin = false;
+	std::string tmp;
+	if (database.GetVariable("LootCoin", tmp))
+		loot_coin = (tmp[0] == 1 && tmp[1] == '\0');
+
+	if (loot_request_type == LootRequestType::GMPeek || loot_request_type == LootRequestType::GMAllowed) {
+		client->Message(15, "This corpse contains %u platinum, %u gold, %u silver and %u copper.",
+			GetPlatinum(), GetGold(), GetSilver(), GetCopper());
+
 		auto outapp = new EQApplicationPacket(OP_MoneyOnCorpse, sizeof(moneyOnCorpseStruct));
-		moneyOnCorpseStruct* d = (moneyOnCorpseStruct*) outapp->pBuffer;
+		moneyOnCorpseStruct* d = (moneyOnCorpseStruct*)outapp->pBuffer;
 
-		d->response		= static_cast<uint8>(LootResponse::Normal);
-		d->unknown1		= 0x42;
-		d->unknown2		= 0xef;
+		d->response = static_cast<uint8>(LootResponse::Normal);
+		d->unknown1 = 0x42;
+		d->unknown2 = 0xef;
 
-		/* Dont take the coin off if it's a gm peeking at the corpse */
-		if(Loot_Request_Type == 2 || (Loot_Request_Type >= 3 && loot_coin)) {
-			if(!IsPlayerCorpse() && client->IsGrouped() && client->AutoSplitEnabled() && client->GetGroup()) {
-				d->copper		= 0;
-				d->silver		= 0;
-				d->gold			= 0;
-				d->platinum		= 0;
-				Group *cgroup = client->GetGroup();
-				cgroup->SplitMoney(GetCopper(), GetSilver(), GetGold(), GetPlatinum(), client);
-			}
-			else {
-				d->copper		= this->GetCopper();
-				d->silver		= this->GetSilver();
-				d->gold			= this->GetGold();
-				d->platinum		= this->GetPlatinum();
-				client->AddMoneyToPP(GetCopper(), GetSilver(), GetGold(), GetPlatinum(), false);
-			}
+		d->copper = 0;
+		d->silver = 0;
+		d->gold = 0;
+		d->platinum = 0;
 
-			RemoveCash();
-			Save();
-		}
-
-		auto timestamps = database.GetItemRecastTimestamps(client->CharacterID());
 		outapp->priority = 6;
 		client->QueuePacket(outapp);
+
 		safe_delete(outapp);
-		if(Loot_Request_Type == 5) {
-			int pkitem = GetPlayerKillItem();
-			const EQEmu::ItemData* item = database.GetItem(pkitem);
-			EQEmu::ItemInstance* inst = database.CreateItem(item, item->MaxCharges);
-			if(inst) {
-				if (item->RecastDelay)
-					inst->SetRecastTimestamp(timestamps.count(item->RecastType) ? timestamps.at(item->RecastType) : 0);
-				client->SendItemPacket(EQEmu::invslot::CORPSE_BEGIN, inst, ItemPacketLoot);
-				safe_delete(inst);
-			}
-			else { client->Message(13, "Could not find item number %i to send!!", GetPlayerKillItem()); }
+	}
+	else {
+		auto outapp = new EQApplicationPacket(OP_MoneyOnCorpse, sizeof(moneyOnCorpseStruct));
+		moneyOnCorpseStruct* d = (moneyOnCorpseStruct*)outapp->pBuffer;
 
-			client->QueuePacket(app);
-			return;
+		d->response = static_cast<uint8>(LootResponse::Normal);
+		d->unknown1 = 0x42;
+		d->unknown2 = 0xef;
+
+		Group* cgroup = client->GetGroup();
+
+		// this can be reworked into a switch and/or massaged to include specialized pve loot rules based on 'LootRequestType'
+		if (!IsPlayerCorpse() && client->IsGrouped() && client->AutoSplitEnabled() && cgroup) {
+			d->copper = 0;
+			d->silver = 0;
+			d->gold = 0;
+			d->platinum = 0;
+			cgroup->SplitMoney(GetCopper(), GetSilver(), GetGold(), GetPlatinum(), client);
+		}
+		else {
+			d->copper = GetCopper();
+			d->silver = GetSilver();
+			d->gold = GetGold();
+			d->platinum = GetPlatinum();
+			client->AddMoneyToPP(GetCopper(), GetSilver(), GetGold(), GetPlatinum(), false);
 		}
 
-		int i = 0;
-		const EQEmu::ItemData* item = nullptr;
-		ItemList::iterator cur,end;
-		cur = itemlist.begin();
-		end = itemlist.end();
+		RemoveCash();
+		Save();
 
-		int corpselootlimit = EQEmu::inventory::Lookup(EQEmu::versions::ConvertClientVersionToMobVersion(client->ClientVersion()))->InventoryTypeSize[EQEmu::invtype::typeCorpse];
+		outapp->priority = 6;
+		client->QueuePacket(outapp);
 
-		for(; cur != end; ++cur) {
-			ServerLootItem_Struct* item_data = *cur;
-			item_data->lootslot = 0xFFFF;
+		safe_delete(outapp);
+	}
 
-			// Dont display the item if it's in a bag
+	// process items
+	auto timestamps = database.GetItemRecastTimestamps(client->CharacterID());
 
-			// Added cursor queue slots to corpse item visibility list. Nothing else should be making it to corpse.
-			if (!IsPlayerCorpse() || item_data->equip_slot <= EQEmu::invslot::slotCursor || item_data->equip_slot == EQEmu::invslot::SLOT_POWER_SOURCE || Loot_Request_Type >= 3 ||
-				(item_data->equip_slot >= 8000 && item_data->equip_slot <= 8999)) {
-				if(i < corpselootlimit) {
-					item = database.GetItem(item_data->item_id);
-					if(client && item) {
-						EQEmu::ItemInstance* inst = database.CreateItem(item, item_data->charges, item_data->aug_1, item_data->aug_2, item_data->aug_3, item_data->aug_4, item_data->aug_5, item_data->aug_6, item_data->attuned);
-						if(inst) {
-							if (item->RecastDelay)
-								inst->SetRecastTimestamp(timestamps.count(item->RecastType) ? timestamps.at(item->RecastType) : 0);
-							// SlotGeneral1 is the corpse inventory start offset for Ti(EMu) - CORPSE_END = SlotGeneral1 + SlotCursor
-							client->SendItemPacket(i + EQEmu::invslot::CORPSE_BEGIN, inst, ItemPacketLoot);
-							safe_delete(inst);
-						}
+	if (loot_request_type == LootRequestType::AllowedPVPDefined) {
+		auto pkitemid = GetPlayerKillItem();
+		auto pkitem = database.GetItem(pkitemid);
+		auto pkinst = database.CreateItem(pkitem, pkitem->MaxCharges);
 
-						item_data->lootslot = i;
-					}
-				}
+		if (pkinst) {
+			if (pkitem->RecastDelay)
+				pkinst->SetRecastTimestamp(timestamps.count(pkitem->RecastType) ? timestamps.at(pkitem->RecastType) : 0);
 
-				i++;
-			}
+			Log(Logs::Detail, Logs::Inventory, "MakeLootRequestPackets() Slot %u, Item '%s'", EQEmu::invslot::CORPSE_BEGIN, pkitem->Name);
+
+			client->SendItemPacket(EQEmu::invslot::CORPSE_BEGIN, pkinst, ItemPacketLoot);
+			safe_delete(pkinst);
+		}
+		else {
+			Log(Logs::General, Logs::Inventory, "MakeLootRequestPackets() PlayerKillItem %i not found", pkitemid);
+
+			client->Message(CC_Red, "PlayerKillItem (id: %i) could not be found!", pkitemid);
 		}
 
-		if(IsPlayerCorpse() && (char_id == client->CharacterID() || client->GetGM())) {
-			if(i > corpselootlimit) {
-				client->Message(15, "*** This corpse contains more items than can be displayed! ***");
-				client->Message(0, "Remove items and re-loot corpse to access remaining inventory.");
-				client->Message(0, "(%s contains %i additional %s.)", GetName(), (i - corpselootlimit), (i - corpselootlimit) == 1 ? "item" : "items");
-			}
+		client->QueuePacket(app);
+		return;
+	}
 
-			if(IsPlayerCorpse() && i == 0 && itemlist.size() > 0) { // somehow, player corpse contains items, but client doesn't see them...
-				client->Message(13, "This corpse contains items that are inaccessable!");
-				client->Message(15, "Contact a GM for item replacement, if necessary.");
-				client->Message(15, "BUGGED CORPSE [DBID: %i, Name: %s, Item Count: %i]", GetCorpseDBID(), GetName(), itemlist.size());
+	auto loot_slot = EQEmu::invslot::CORPSE_BEGIN;
+	auto corpse_mask = client->GetInv().GetLookup()->CorpseBitmask;
+	
+	for (auto item_data : itemlist) {
+		// every loot session must either set all items' lootslots to 'invslot::SLOT_INVALID'
+		// or to a valid enumerated client-versioned corpse slot (lootslot is not equip_slot)
+		item_data->lootslot = 0xFFFF;
+		
+		// align server and client corpse slot mappings so translators can function properly
+		while (loot_slot <= EQEmu::invslot::CORPSE_END && (((uint64)1 << loot_slot) & corpse_mask) == 0)
+			++loot_slot;
+		
+		if (loot_slot > EQEmu::invslot::CORPSE_END)
+			continue;
 
-				cur = itemlist.begin();
-				end = itemlist.end();
-				for(; cur != end; ++cur) {
-					ServerLootItem_Struct* item_data = *cur;
-					item = database.GetItem(item_data->item_id);
-					Log(Logs::General, Logs::None, "Corpse Looting: %s was not sent to client loot window (corpse_dbid: %i, charname: %s(%s))", item->Name, GetCorpseDBID(), client->GetName(), client->GetGM() ? "GM" : "Owner");
-					client->Message(0, "Inaccessable Corpse Item: %s", item->Name);
-				}
-			}
+		if (IsPlayerCorpse()) {
+			if (loot_request_type == LootRequestType::AllowedPVPSingle && loot_slot != EQEmu::invslot::CORPSE_BEGIN)
+				continue;
+
+			if (item_data->equip_slot < EQEmu::invslot::POSSESSIONS_BEGIN || item_data->equip_slot > EQEmu::invslot::POSSESSIONS_END)
+				continue;
 		}
+		
+		const auto *item = database.GetItem(item_data->item_id);
+		auto inst = database.CreateItem(
+			item,
+			item_data->charges,
+			item_data->aug_1,
+			item_data->aug_2,
+			item_data->aug_3,
+			item_data->aug_4,
+			item_data->aug_5,
+			item_data->aug_6,
+			item_data->attuned
+		);
+		if (!inst)
+			continue;
+
+		if (item->RecastDelay)
+			inst->SetRecastTimestamp(timestamps.count(item->RecastType) ? timestamps.at(item->RecastType) : 0);
+
+		Log(Logs::Moderate, Logs::Inventory, "MakeLootRequestPackets() Slot %i, Item '%s'", loot_slot, item->Name);
+
+		client->SendItemPacket(loot_slot, inst, ItemPacketLoot);
+		safe_delete(inst);
+		
+		item_data->lootslot = loot_slot++;
 	}
 
 	// Disgrace: Client seems to require that we send the packet back...
@@ -1064,7 +1099,21 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 
 void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 {
+	if (!client)
+		return;
+
 	auto lootitem = (LootingItem_Struct *)app->pBuffer;
+
+	Log(Logs::Moderate, Logs::Inventory, "LootItem() LootRequestType %u, Slot %u for %s", loot_request_type, lootitem->slot_id, client->GetName());
+
+	if (loot_request_type < LootRequestType::GMAllowed) { // LootRequestType::Forbidden and LootRequestType::GMPeek
+		client->QueuePacket(app);
+		SendEndLootErrorPacket(client);
+		// unlock corpse for others
+		if (IsBeingLootedBy(client))
+			ResetLooter();
+		return;
+	}
 
 	if (!loot_cooldown_timer.Check()) {
 		client->QueuePacket(app);
@@ -1093,7 +1142,7 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 	}
 
 	if (IsPlayerCorpse() && !CanPlayerLoot(client->CharacterID()) && !become_npc &&
-	    (char_id != client->CharacterID() && client->Admin() < 150)) {
+		(char_id != client->CharacterID() && client->Admin() < 150)) {
 		client->Message(13, "Error: This is a player corpse and you dont own it.");
 		client->QueuePacket(app);
 		SendEndLootErrorPacket(client);
@@ -1108,7 +1157,7 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 	}
 
 	if (IsPlayerCorpse() && (char_id != client->CharacterID()) && CanPlayerLoot(client->CharacterID()) &&
-	    GetPlayerKillItem() == 0) {
+		GetPlayerKillItem() == 0) {
 		client->Message(13, "Error: You cannot loot any more items from this corpse.");
 		client->QueuePacket(app);
 		SendEndLootErrorPacket(client);
@@ -1123,12 +1172,13 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 	memset(bag_item_data, 0, sizeof(bag_item_data));
 	if (GetPlayerKillItem() > 1) {
 		item = database.GetItem(GetPlayerKillItem());
-	} else if (GetPlayerKillItem() == -1 || GetPlayerKillItem() == 1) {
+	}
+	else if (GetPlayerKillItem() == -1 || GetPlayerKillItem() == 1) {
 		item_data =
-		    GetItem(lootitem->slot_id -
-			    EQEmu::invslot::CORPSE_BEGIN); // dont allow them to loot entire bags of items as pvp reward
-	} else {
-		item_data = GetItem(lootitem->slot_id - EQEmu::invslot::CORPSE_BEGIN, bag_item_data);
+			GetItem(lootitem->slot_id); // dont allow them to loot entire bags of items as pvp reward
+	}
+	else {
+		item_data = GetItem(lootitem->slot_id, bag_item_data);
 	}
 
 	if (GetPlayerKillItem() <= 1 && item_data != 0) {
@@ -1138,9 +1188,10 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 	if (item != 0) {
 		if (item_data) {
 			inst = database.CreateItem(item, item_data ? item_data->charges : 0, item_data->aug_1,
-						   item_data->aug_2, item_data->aug_3, item_data->aug_4,
-						   item_data->aug_5, item_data->aug_6, item_data->attuned);
-		} else {
+				item_data->aug_2, item_data->aug_3, item_data->aug_4,
+				item_data->aug_5, item_data->aug_6, item_data->attuned);
+		}
+		else {
 			inst = database.CreateItem(item);
 		}
 	}
@@ -1175,7 +1226,7 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 		char q_corpse_name[64];
 		strcpy(q_corpse_name, corpse_name);
 		snprintf(buf, 87, "%d %d %s", inst->GetItem()->ID, inst->GetCharges(),
-			 EntityList::RemoveNumbers(q_corpse_name));
+			EntityList::RemoveNumbers(q_corpse_name));
 		buf[87] = '\0';
 		std::vector<EQEmu::Any> args;
 		args.push_back(inst);
@@ -1187,6 +1238,8 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 			delete inst;
 			return;
 		}
+
+
 		// do we want this to have a fail option too?
 		parse->EventItem(EVENT_LOOT, client, inst, this, buf, 0);
 
@@ -1211,7 +1264,8 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 		if (lootitem->auto_loot > 0) {
 			if (!client->AutoPutLootInInventory(*inst, true, true, bag_item_data))
 				client->PutLootInInventory(EQEmu::invslot::slotCursor, *inst, bag_item_data);
-		} else {
+		}
+		else {
 			client->PutLootInInventory(EQEmu::invslot::slotCursor, *inst, bag_item_data);
 		}
 
@@ -1222,9 +1276,9 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 		/* Remove it from Corpse */
 		if (item_data) {
 			/* Delete needs to be before RemoveItem because its deletes the pointer for
-			 * item_data/bag_item_data */
+			* item_data/bag_item_data */
 			database.DeleteItemOffCharacterCorpse(this->corpse_db_id, item_data->equip_slot,
-							      item_data->item_id);
+				item_data->item_id);
 			/* Delete Item Instance */
 			RemoveItem(item_data->lootslot);
 		}
@@ -1234,10 +1288,10 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 			for (int i = EQEmu::invbag::SLOT_BEGIN; i <= EQEmu::invbag::SLOT_END; i++) {
 				if (bag_item_data[i]) {
 					/* Delete needs to be before RemoveItem because its deletes the pointer for
-					 * item_data/bag_item_data */
+					* item_data/bag_item_data */
 					database.DeleteItemOffCharacterCorpse(this->corpse_db_id,
-									      bag_item_data[i]->equip_slot,
-									      bag_item_data[i]->item_id);
+						bag_item_data[i]->equip_slot,
+						bag_item_data[i]->item_id);
 					/* Delete Item Instance */
 					RemoveItem(bag_item_data[i]);
 				}
@@ -1261,16 +1315,18 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 			Group *g = client->GetGroup();
 			if (g != nullptr) {
 				g->GroupMessage_StringID(client, MT_LootMessages, OTHER_LOOTED_MESSAGE,
-							 client->GetName(), linker.Link().c_str());
-			} else {
+					client->GetName(), linker.Link().c_str());
+			}
+			else {
 				Raid *r = client->GetRaid();
 				if (r != nullptr) {
 					r->RaidMessage_StringID(client, MT_LootMessages, OTHER_LOOTED_MESSAGE,
-								client->GetName(), linker.Link().c_str());
+						client->GetName(), linker.Link().c_str());
 				}
 			}
 		}
-	} else {
+	}
+	else {
 		SendEndLootErrorPacket(client);
 		safe_delete(inst);
 		return;
@@ -1278,7 +1334,8 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 
 	if (IsPlayerCorpse()) {
 		client->SendItemLink(inst);
-	} else {
+	}
+	else {
 		client->SendItemLink(inst, true);
 	}
 
@@ -1457,7 +1514,7 @@ void Corpse::UpdateEquipmentLight()
 	m_Light.Level[EQEmu::lightsource::LightEquipment] = 0;
 
 	for (auto iter = itemlist.begin(); iter != itemlist.end(); ++iter) {
-		if (((*iter)->equip_slot < EQEmu::invslot::EQUIPMENT_BEGIN || (*iter)->equip_slot > EQEmu::invslot::EQUIPMENT_END) && (*iter)->equip_slot != EQEmu::invslot::SLOT_POWER_SOURCE) { continue; }
+		if ((*iter)->equip_slot < EQEmu::invslot::EQUIPMENT_BEGIN || (*iter)->equip_slot > EQEmu::invslot::EQUIPMENT_END) { continue; }
 		if ((*iter)->equip_slot == EQEmu::invslot::slotAmmo) { continue; }
 		
 		auto item = database.GetItem((*iter)->item_id);

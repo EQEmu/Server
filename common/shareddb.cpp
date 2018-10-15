@@ -547,9 +547,12 @@ bool SharedDatabase::GetSharedBank(uint32 id, EQEmu::InventoryProfile *inv, bool
 	return true;
 }
 
-// Overloaded: Retrieve character inventory based on character id
+// Overloaded: Retrieve character inventory based on character id (zone entry)
 bool SharedDatabase::GetInventory(uint32 char_id, EQEmu::InventoryProfile *inv)
 {
+	if (!char_id || !inv)
+		return false;
+	
 	// Retrieve character inventory
 	std::string query =
 	    StringFormat("SELECT slotid, itemid, charges, color, augslot1, augslot2, augslot3, augslot4, augslot5, "
@@ -566,8 +569,40 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQEmu::InventoryProfile *inv)
 
 	auto timestamps = GetItemRecastTimestamps(char_id);
 
+	auto cv_conflict = false;
+	auto pmask = inv->GetLookup()->PossessionsBitmask;
+	auto bank_size = inv->GetLookup()->InventoryTypeSize[EQEmu::invtype::typeBank];
+
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		int16 slot_id = atoi(row[0]);
+
+		if (slot_id <= EQEmu::invslot::POSSESSIONS_END && slot_id >= EQEmu::invslot::POSSESSIONS_BEGIN) { // Titanium thru UF check
+			if ((((uint64)1 << slot_id) & pmask) == 0) {
+				cv_conflict = true;
+				continue;
+			}
+		}
+		else if (slot_id <= EQEmu::invbag::GENERAL_BAGS_END && slot_id >= EQEmu::invbag::GENERAL_BAGS_BEGIN) { // Titanium thru UF check
+			auto parent_slot = EQEmu::invslot::GENERAL_BEGIN + ((slot_id - EQEmu::invbag::GENERAL_BAGS_BEGIN) / EQEmu::invbag::SLOT_COUNT);
+			if ((((uint64)1 << parent_slot) & pmask) == 0) {
+				cv_conflict = true;
+				continue;
+			}
+		}
+		else if (slot_id <= EQEmu::invslot::BANK_END && slot_id >= EQEmu::invslot::BANK_BEGIN) { // Titanium check
+			if ((slot_id - EQEmu::invslot::BANK_BEGIN) >= bank_size) {
+				cv_conflict = true;
+				continue;
+			}
+		}
+		else if (slot_id <= EQEmu::invbag::BANK_BAGS_END && slot_id >= EQEmu::invbag::BANK_BAGS_BEGIN) { // Titanium check
+			auto parent_index = ((slot_id - EQEmu::invbag::BANK_BAGS_BEGIN) / EQEmu::invbag::SLOT_COUNT);
+			if (parent_index < EQEmu::invslot::SLOT_BEGIN || parent_index >= bank_size) {
+				cv_conflict = true;
+				continue;
+			}
+		}
+
 		uint32 item_id = atoi(row[1]);
 		uint16 charges = atoi(row[2]);
 		uint32 color = atoul(row[3]);
@@ -633,10 +668,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQEmu::InventoryProfile *inv)
 		inst->SetOrnamentationIDFile(ornament_idfile);
 		inst->SetOrnamentHeroModel(item->HerosForgeModel);
 
-		if (instnodrop ||
-			(((slot_id >= EQEmu::invslot::EQUIPMENT_BEGIN && slot_id <= EQEmu::invslot::EQUIPMENT_END) ||
-			slot_id == EQEmu::invslot::SLOT_POWER_SOURCE) &&
-		     inst->GetItem()->Attuneable))
+		if (instnodrop || (inst->GetItem()->Attuneable && slot_id >= EQEmu::invslot::EQUIPMENT_BEGIN && slot_id <= EQEmu::invslot::EQUIPMENT_END))
 			inst->SetAttuned(true);
 
 		if (color > 0)
@@ -684,13 +716,22 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQEmu::InventoryProfile *inv)
 				char_id, item_id, slot_id);
 		}
 	}
+	
+	if (cv_conflict) {
+		char char_name[64] = "";
+		GetCharName(char_id, char_name);
+		Log(Logs::Moderate, Logs::Client_Login,
+			"ClientVersion conflict during inventory load at zone entry for '%s' (charid: %u, inver: %s)",
+			char_name, char_id, EQEmu::versions::MobVersionName(inv->InventoryVersion())
+		);
+	}
 
 	// Retrieve shared inventory
 	return GetSharedBank(char_id, inv, true);
 }
 
-// Overloaded: Retrieve character inventory based on account_id and character name
-bool SharedDatabase::GetInventory(uint32 account_id, char *name, EQEmu::InventoryProfile *inv)
+// Overloaded: Retrieve character inventory based on account_id and character name (char select)
+bool SharedDatabase::GetInventory(uint32 account_id, char *name, EQEmu::InventoryProfile *inv) // deprecated
 {
 	// Retrieve character inventory
 	std::string query =

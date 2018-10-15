@@ -667,77 +667,78 @@ bool NPC::Process()
 		parse->EventNPC(EVENT_TICK, this, nullptr, "", 0);
 		BuffProcess();
 
-		if (currently_fleeing)
+		if (currently_fleeing) {
 			ProcessFlee();
-
-		uint32 sitting_bonus = 0;
-		uint32 petbonus = 0;
-		uint32 bestregen = 0;
-		int32 dbregen = GetNPCHPRegen();
-
-		if (GetAppearance() == eaSitting)
-			sitting_bonus += 3;
-
-		int32 OOCRegen = 0;
-		if (oocregen > 0) { //should pull from Mob class
-			OOCRegen += GetMaxHP() * oocregen / 100;
 		}
 
-		// Fixing NPC regen.NPCs should regen to full during 
-		// a set duration, not based on their HPs.Increase NPC's HPs by 
-		// % of total HPs / tick.
-		//
-		// If oocregen set in db, apply to pets as well.
-		// This allows the obscene #s for pets in the db to be tweaked
-		// while maintaining a decent ooc regen.
+		uint32 npc_sitting_regen_bonus = 0;
+		uint32 pet_regen_bonus         = 0;
+		uint32 npc_regen               = 0;
+		int32  npc_hp_regen            = GetNPCHPRegen();
 
-		bestregen = std::max(dbregen,OOCRegen);
+		if (GetAppearance() == eaSitting) {
+			npc_sitting_regen_bonus += 3;
+		}
+
+		int32 ooc_regen_calc = 0;
+		if (ooc_regen > 0) { //should pull from Mob class
+			ooc_regen_calc += GetMaxHP() * ooc_regen / 100;
+		}
+
+		/**
+		 * Use max value between two values
+		 */
+		npc_regen = std::max(npc_hp_regen, ooc_regen_calc);
 
 		if ((GetHP() < GetMaxHP()) && !IsPet()) {
-			if (!IsEngaged())
-				SetHP(GetHP() + bestregen + sitting_bonus);
-			else
-				SetHP(GetHP() + dbregen);
+			if (!IsEngaged()) {
+				SetHP(GetHP() + npc_regen + npc_sitting_regen_bonus);
+			}
+			else {
+				SetHP(GetHP() + npc_hp_regen);
+			}
 		}
 		else if (GetHP() < GetMaxHP() && GetOwnerID() != 0) {
 			if (!IsEngaged()) {
-				if (oocregen > 0) {
-					petbonus = std::max(OOCRegen,dbregen);
+				if (ooc_regen > 0) {
+					pet_regen_bonus = std::max(ooc_regen_calc, npc_hp_regen);
 				}
 				else {
-					petbonus = dbregen + (GetLevel() / 5);
+					pet_regen_bonus = npc_hp_regen + (GetLevel() / 5);
 				}
 
-				SetHP(GetHP() + sitting_bonus + petbonus);
+				SetHP(GetHP() + npc_sitting_regen_bonus + pet_regen_bonus);
 			}
-			else
-				SetHP(GetHP() + dbregen);
+			else {
+				SetHP(GetHP() + npc_hp_regen);
+			}
+
 		}
-		else
-			SetHP(GetHP() + dbregen + sitting_bonus);
+		else {
+			SetHP(GetHP() + npc_hp_regen + npc_sitting_regen_bonus);
+		}
 
 		if (GetMana() < GetMaxMana()) {
-			SetMana(GetMana() + mana_regen + sitting_bonus);
+			SetMana(GetMana() + mana_regen + npc_sitting_regen_bonus);
 		}
 
+		SendHPUpdate();
 
-		if (zone->adv_data && !p_depop)
-		{
-			ServerZoneAdventureDataReply_Struct* ds = (ServerZoneAdventureDataReply_Struct*)zone->adv_data;
-			if (ds->type == Adventure_Rescue && ds->data_id == GetNPCTypeID())
-			{
+		if (zone->adv_data && !p_depop) {
+			ServerZoneAdventureDataReply_Struct *ds = (ServerZoneAdventureDataReply_Struct *) zone->adv_data;
+			if (ds->type == Adventure_Rescue && ds->data_id == GetNPCTypeID()) {
 				Mob *o = GetOwner();
-				if (o && o->IsClient())
-				{
+				if (o && o->IsClient()) {
 					float x_diff = ds->dest_x - GetX();
 					float y_diff = ds->dest_y - GetY();
 					float z_diff = ds->dest_z - GetZ();
-					float dist = ((x_diff * x_diff) + (y_diff * y_diff) + (z_diff * z_diff));
-					if (dist < RuleR(Adventure, DistanceForRescueComplete))
-					{
+					float dist   = ((x_diff * x_diff) + (y_diff * y_diff) + (z_diff * z_diff));
+					if (dist < RuleR(Adventure, DistanceForRescueComplete)) {
 						zone->DoAdventureCountIncrease();
-						Say("You don't know what this means to me. Thank you so much for finding and saving me from"
-							" this wretched place. I'll find my way from here.");
+						Say(
+							"You don't know what this means to me. Thank you so much for finding and saving me from"
+							" this wretched place. I'll find my way from here."
+						);
 						Depop();
 					}
 				}

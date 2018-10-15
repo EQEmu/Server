@@ -18,6 +18,8 @@
 9017|2017_03_26_bots_spells_id_fix_for_saved_shadowknight_bots.sql|SELECT * FROM `bot_data` WHERE `class` = '5' AND `spells_id` = '3004'|not_empty|
 9018|2018_02_02_Bot_Spells_Min_Max_HP.sql|SHOW COLUMNS FROM `bot_spells_entries` LIKE 'min_hp'|empty|
 9019|2018_04_12_bots_stop_melee_level.sql|SHOW COLUMNS FROM `bot_data` LIKE 'stop_melee_level'|empty|
+9020|2018_08_13_bots_inventory_update.sql|SELECT * FROM `inventory_versions` WHERE `version` = 2 and `bot_step` = 0|not_empty|
+9021|2018_10_09_bots_owner_options.sql|SHOW TABLES LIKE 'bot_owner_options'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

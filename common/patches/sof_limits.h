@@ -150,6 +150,8 @@ namespace SoF
 		const int16 SLOT_INVALID = IINVALID;
 		const int16 SLOT_BEGIN = INULL;
 
+		const int16 SLOT_TRADESKILL_EXPERIMENT_COMBINE = 1000;
+
 		const int16 POSSESSIONS_BEGIN = slotCharm;
 		const int16 POSSESSIONS_END = slotCursor;
 		const int16 POSSESSIONS_COUNT = (POSSESSIONS_END - POSSESSIONS_BEGIN) + 1;

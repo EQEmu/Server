@@ -73,7 +73,7 @@ uint32 SwapBits21And22(uint32 mask);
 uint32 Catch22(uint32 mask);
 
 // macro to catch fp errors (provided by noudness)
-#define FCMP(a,b) (fabs(a-b) < FLT_EPSILON)
+#define FCMP(a,b) (std::abs(a-b) < FLT_EPSILON)
 
 #define _ITOA_BUFLEN	25
 const char *itoa(int num);	//not thread safe

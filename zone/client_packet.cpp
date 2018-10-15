@@ -1496,6 +1496,8 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	}
 
 #ifdef BOTS
+	botdb.LoadOwnerOptions(this);
+	// TODO: mod below function for loading spawned botgroups
 	Bot::LoadAndSpawnAllZonedBots(this);
 #endif
 
@@ -2902,8 +2904,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 	bool deleteItems = false;
 	if (ClientVersion() >= EQEmu::versions::ClientVersion::RoF)
 	{
-		if ((in_augment->container_slot < 0 || in_augment->container_slot >= EQEmu::invslot::slotCursor) &&
-			in_augment->container_slot != EQEmu::invslot::SLOT_POWER_SOURCE &&
+		if ((in_augment->container_slot < EQEmu::invslot::EQUIPMENT_BEGIN || in_augment->container_slot > EQEmu::invslot::GENERAL_END) &&
 			(in_augment->container_slot < EQEmu::invbag::GENERAL_BAGS_BEGIN || in_augment->container_slot > EQEmu::invbag::GENERAL_BAGS_END))
 		{
 			Message(13, "The server does not allow augmentation actions from this slot.");
@@ -8036,7 +8037,7 @@ void Client::Handle_OP_InspectAnswer(const EQApplicationPacket *app)
 	const EQEmu::ItemData* item = nullptr;
 
 	int ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
-	for (int16 L = EQEmu::invslot::EQUIPMENT_BEGIN; L <= EQEmu::invslot::slotWaist; L++) {
+	for (int16 L = EQEmu::invslot::EQUIPMENT_BEGIN; L <= EQEmu::invslot::EQUIPMENT_END; L++) {
 		const EQEmu::ItemInstance* inst = GetInv().GetItem(L);
 		item = inst ? inst->GetItem() : nullptr;
 
@@ -8055,16 +8056,6 @@ void Client::Handle_OP_InspectAnswer(const EQApplicationPacket *app)
 		}
 		else { insr->itemicons[L] = 0xFFFFFFFF; }
 	}
-
-	const EQEmu::ItemInstance* inst = GetInv().GetItem(EQEmu::invslot::slotAmmo);
-	item = inst ? inst->GetItem() : nullptr;
-
-	if (item) {
-		// another one..I did these, didn't I!!?
-		strcpy(insr->itemnames[SoF::invslot::slotAmmo], item->Name);
-		insr->itemicons[SoF::invslot::slotAmmo] = item->Icon;
-	}
-	else { insr->itemicons[SoF::invslot::slotAmmo] = 0xFFFFFFFF; }
 
 	InspectMessage_Struct* newmessage = (InspectMessage_Struct*)insr->text;
 	InspectMessage_Struct& playermessage = this->GetInspectMessage();

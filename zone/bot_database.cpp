@@ -25,6 +25,7 @@
 
 #include "bot_database.h"
 #include "bot.h"
+#include "client.h"
 
 
 BotDatabase botdb;
@@ -1138,7 +1139,7 @@ bool BotDatabase::LoadItems(const uint32 bot_id, EQEmu::InventoryProfile& invent
 	
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		int16 slot_id = atoi(row[0]);
-		if ((slot_id < EQEmu::invslot::EQUIPMENT_BEGIN || slot_id > EQEmu::invslot::EQUIPMENT_END) && slot_id != EQEmu::invslot::SLOT_POWER_SOURCE)
+		if (slot_id < EQEmu::invslot::EQUIPMENT_BEGIN || slot_id > EQEmu::invslot::EQUIPMENT_END)
 			continue;
 
 		uint32 item_id = atoi(row[1]);
@@ -1173,7 +1174,7 @@ bool BotDatabase::LoadItems(const uint32 bot_id, EQEmu::InventoryProfile& invent
 		if (item_inst->GetItem()->Attuneable) {
 			if (atoi(row[4]))
 				item_inst->SetAttuned(true);
-			else if (((slot_id >= EQEmu::invslot::EQUIPMENT_BEGIN) && (slot_id <= EQEmu::invslot::EQUIPMENT_END) || slot_id == EQEmu::invslot::SLOT_POWER_SOURCE))
+			else if (slot_id >= EQEmu::invslot::EQUIPMENT_BEGIN && slot_id <= EQEmu::invslot::EQUIPMENT_END)
 				item_inst->SetAttuned(true);
 		}
 
@@ -1241,7 +1242,7 @@ bool BotDatabase::LoadItemBySlot(Bot* bot_inst)
 
 bool BotDatabase::LoadItemBySlot(const uint32 bot_id, const uint32 slot_id, uint32& item_id)
 {
-	if (!bot_id || (slot_id > EQEmu::invslot::EQUIPMENT_END && slot_id != EQEmu::invslot::SLOT_POWER_SOURCE))
+	if (!bot_id || slot_id > EQEmu::invslot::EQUIPMENT_END)
 		return false;
 	
 	query = StringFormat("SELECT `item_id` FROM `bot_inventories` WHERE `bot_id` = '%i' AND `slot_id` = '%i' LIMIT 1", bot_id, slot_id);
@@ -1259,7 +1260,7 @@ bool BotDatabase::LoadItemBySlot(const uint32 bot_id, const uint32 slot_id, uint
 
 bool BotDatabase::SaveItemBySlot(Bot* bot_inst, const uint32 slot_id, const EQEmu::ItemInstance* item_inst)
 {
-	if (!bot_inst || !bot_inst->GetBotID() || (slot_id > EQEmu::invslot::EQUIPMENT_END && slot_id != EQEmu::invslot::SLOT_POWER_SOURCE))
+	if (!bot_inst || !bot_inst->GetBotID() || slot_id > EQEmu::invslot::EQUIPMENT_END)
 		return false;
 
 	if (!DeleteItemBySlot(bot_inst->GetBotID(), slot_id))
@@ -1343,7 +1344,7 @@ bool BotDatabase::SaveItemBySlot(Bot* bot_inst, const uint32 slot_id, const EQEm
 
 bool BotDatabase::DeleteItemBySlot(const uint32 bot_id, const uint32 slot_id)
 {
-	if (!bot_id || (slot_id > EQEmu::invslot::EQUIPMENT_END && slot_id != EQEmu::invslot::SLOT_POWER_SOURCE))
+	if (!bot_id || slot_id > EQEmu::invslot::EQUIPMENT_END)
 		return false;
 
 	query = StringFormat("DELETE FROM `bot_inventories` WHERE `bot_id` = '%u' AND `slot_id` = '%u'", bot_id, slot_id);
@@ -1382,7 +1383,7 @@ bool BotDatabase::SaveEquipmentColor(const uint32 bot_id, const int16 slot_id, c
 		return false;
 
 	bool all_flag = (slot_id == -2);
-	if ((slot_id < EQEmu::invslot::EQUIPMENT_BEGIN || slot_id > EQEmu::invslot::EQUIPMENT_END) && slot_id != EQEmu::invslot::SLOT_POWER_SOURCE && !all_flag)
+	if ((slot_id < EQEmu::invslot::EQUIPMENT_BEGIN || slot_id > EQEmu::invslot::EQUIPMENT_END) && !all_flag)
 		return false;
 
 	std::string where_clause;
@@ -1659,7 +1660,7 @@ bool BotDatabase::LoadPetItems(const uint32 bot_id, uint32* pet_items)
 		return true;
 
 	int item_index = EQEmu::invslot::EQUIPMENT_BEGIN;
-	for (auto row = results.begin(); row != results.end() && item_index <= EQEmu::invslot::EQUIPMENT_END; ++row) {
+	for (auto row = results.begin(); row != results.end() && (item_index >= EQEmu::invslot::EQUIPMENT_BEGIN && item_index <= EQEmu::invslot::EQUIPMENT_END); ++row) {
 		pet_items[item_index] = atoi(row[0]);
 		++item_index;
 	}
@@ -1683,7 +1684,7 @@ bool BotDatabase::SavePetItems(const uint32 bot_id, const uint32* pet_items, boo
 	if (!saved_pet_index)
 		return true;
 
-	for (int item_index = EQEmu::invslot::SLOT_BEGIN; item_index <= EQEmu::invslot::EQUIPMENT_END; ++item_index) {
+	for (int item_index = EQEmu::invslot::EQUIPMENT_BEGIN; item_index <= EQEmu::invslot::EQUIPMENT_END; ++item_index) {
 		if (!pet_items[item_index])
 			continue;
 
@@ -2177,6 +2178,51 @@ bool BotDatabase::SaveStopMeleeLevel(const uint32 owner_id, const uint32 bot_id,
 		sml_value,
 		owner_id,
 		bot_id
+	);
+	auto results = QueryDatabase(query);
+	if (!results.Success())
+		return false;
+
+	return true;
+}
+
+bool BotDatabase::LoadOwnerOptions(Client *owner)
+{
+	if (!owner || !owner->CharacterID())
+		return false;
+
+	query = StringFormat(
+		"SELECT `death_marquee` FROM `bot_owner_options`"
+		" WHERE `owner_id` = '%u'",
+		owner->CharacterID()
+	);
+	auto results = QueryDatabase(query);
+	if (!results.Success())
+		return false;
+	if (!results.RowCount()) {
+		query = StringFormat("REPLACE INTO `bot_owner_options` (`owner_id`) VALUES ('%u')", owner->CharacterID());
+		results = QueryDatabase(query);
+
+		return false;
+	}
+
+	auto row = results.begin();
+	owner->SetBotOptionDeathMarquee((atoi(row[0]) != 0));
+
+	return true;
+}
+
+bool BotDatabase::SaveOwnerOptionDeathMarquee(const uint32 owner_id, const bool flag)
+{
+	if (!owner_id)
+		return false;
+
+	query = StringFormat(
+		"UPDATE `bot_owner_options`"
+		" SET `death_marquee` = '%u'"
+		" WHERE `owner_id` = '%u'",
+		(flag == true ? 1 : 0),
+		owner_id
 	);
 	auto results = QueryDatabase(query);
 	if (!results.Success())

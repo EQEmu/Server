@@ -52,6 +52,7 @@ guild_members
 hackers
 instance_list_player
 inventory
+inventory_snapshots
 item_tick
 keyring
 launcher_zones

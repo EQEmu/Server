@@ -48,20 +48,22 @@ namespace RoF2
 	void SerializeItem(EQEmu::OutBuffer& ob, const EQEmu::ItemInstance *inst, int16 slot_id, uint8 depth, ItemPacketType packet_type);
 
 	// server to client inventory location converters
-	static inline structs::InventorySlot_Struct ServerToRoF2Slot(uint32 serverSlot, ItemPacketType PacketType = ItemPacketInvalid);
-	static inline structs::TypelessInventorySlot_Struct ServerToRoF2TypelessSlot(uint32 serverSlot);
-	static inline uint32 ServerToRoF2CorpseSlot(uint32 serverCorpseSlot);
-
+	static inline structs::InventorySlot_Struct ServerToRoF2Slot(uint32 server_slot);
+	static inline structs::InventorySlot_Struct ServerToRoF2CorpseSlot(uint32 server_corpse_slot);
+	static inline uint32 ServerToRoF2CorpseMainSlot(uint32 server_corpse_slot);
+	static inline structs::TypelessInventorySlot_Struct ServerToRoF2TypelessSlot(uint32 server_slot, int16 server_type);
+	
 	// client to server inventory location converters
-	static inline uint32 RoF2ToServerSlot(structs::InventorySlot_Struct rof2Slot, ItemPacketType PacketType = ItemPacketInvalid);
-	static inline uint32 RoF2ToServerTypelessSlot(structs::TypelessInventorySlot_Struct rof2Slot);
-	static inline uint32 RoF2ToServerCorpseSlot(uint32 rof2CorpseSlot);
-
+	static inline uint32 RoF2ToServerSlot(structs::InventorySlot_Struct rof2_slot);
+	static inline uint32 RoF2ToServerCorpseSlot(structs::InventorySlot_Struct rof2_corpse_slot);
+	static inline uint32 RoF2ToServerCorpseMainSlot(uint32 rof2_corpse_slot);
+	static inline uint32 RoF2ToServerTypelessSlot(structs::TypelessInventorySlot_Struct rof2_slot, int16 rof2_type);
+	
 	// server to client say link converter
-	static inline void ServerToRoF2SayLink(std::string& rof2SayLink, const std::string& serverSayLink);
+	static inline void ServerToRoF2SayLink(std::string &rof2_saylink, const std::string &server_saylink);
 
 	// client to server say link converter
-	static inline void RoF2ToServerSayLink(std::string& serverSayLink, const std::string& rof2SayLink);
+	static inline void RoF2ToServerSayLink(std::string &server_saylink, const std::string &rof2_saylink);
 
 	static inline CastingSlot ServerToRoF2CastingSlot(EQEmu::CastingSlot slot);
 	static inline EQEmu::CastingSlot RoF2ToServerCastingSlot(CastingSlot slot);
@@ -260,7 +262,7 @@ namespace RoF2
 
 		eq->unknown000 = 1;
 		OUT(npcid);
-		eq->inventory_slot = ServerToRoF2TypelessSlot(emu->slot);
+		eq->inventory_slot = ServerToRoF2TypelessSlot(emu->slot, EQEmu::invtype::typePossessions);
 		OUT(charges);
 		OUT(sell_price);
 
@@ -313,7 +315,7 @@ namespace RoF2
 		SETUP_DIRECT_ENCODE(AltCurrencySellItem_Struct, structs::AltCurrencySellItem_Struct);
 
 		OUT(merchant_entity_id);
-		eq->inventory_slot = ServerToRoF2TypelessSlot(emu->slot_id);
+		eq->inventory_slot = ServerToRoF2TypelessSlot(emu->slot_id, EQEmu::invtype::typePossessions);
 		OUT(charges);
 		OUT(cost);
 
@@ -337,7 +339,7 @@ namespace RoF2
 		ENCODE_LENGTH_EXACT(ApplyPoison_Struct);
 		SETUP_DIRECT_ENCODE(ApplyPoison_Struct, structs::ApplyPoison_Struct);
 
-		eq->inventorySlot = ServerToRoF2TypelessSlot(emu->inventorySlot);
+		eq->inventorySlot = ServerToRoF2TypelessSlot(emu->inventorySlot, EQEmu::invtype::typePossessions);
 		OUT(success);
 
 		FINISH_ENCODE();
@@ -655,7 +657,7 @@ namespace RoF2
 		for (int index = 0; index < item_count; ++index, ++eq) {
 			SerializeItem(ob, (const EQEmu::ItemInstance*)eq->inst, eq->slot_id, 0, ItemPacketCharInventory);
 			if (ob.tellp() == last_pos)
-				Log(Logs::General, Logs::Netcode, "[STRUCTS] Serialization failed on item slot %d during OP_CharInventory.  Item skipped.", eq->slot_id);
+				Log(Logs::General, Logs::Netcode, "RoF2::ENCODE(OP_CharInventory) Serialization failed on item slot %d during OP_CharInventory.  Item skipped.", eq->slot_id);
 
 			last_pos = ob.tellp();
 		}
@@ -735,7 +737,12 @@ namespace RoF2
 		FINISH_ENCODE();
 	}
 
-	ENCODE(OP_DeleteCharge) { ENCODE_FORWARD(OP_MoveItem); }
+	ENCODE(OP_DeleteCharge)
+	{
+		Log(Logs::Moderate, Logs::Netcode, "RoF2::ENCODE(OP_DeleteCharge)");
+
+		ENCODE_FORWARD(OP_MoveItem);
+	}
 
 	ENCODE(OP_DeleteItem)
 	{
@@ -1582,7 +1589,7 @@ namespace RoF2
 
 		SerializeItem(ob, (const EQEmu::ItemInstance*)int_struct->inst, int_struct->slot_id, 0, old_item_pkt->PacketType);
 		if (ob.tellp() == last_pos) {
-			Log(Logs::General, Logs::Netcode, "[STRUCTS] Serialization failed on item slot %d.", int_struct->slot_id);
+			Log(Logs::General, Logs::Netcode, "RoF2::ENCODE(OP_ItemPacket) Serialization failed on item slot %d.", int_struct->slot_id);
 			delete in;
 			return;
 		}
@@ -1655,9 +1662,11 @@ namespace RoF2
 		ENCODE_LENGTH_EXACT(LootingItem_Struct);
 		SETUP_DIRECT_ENCODE(LootingItem_Struct, structs::LootingItem_Struct);
 
+		Log(Logs::Moderate, Logs::Netcode, "RoF2::ENCODE(OP_LootItem)");
+
 		OUT(lootee);
 		OUT(looter);
-		eq->slot_id = ServerToRoF2CorpseSlot(emu->slot_id);
+		eq->slot_id = ServerToRoF2CorpseMainSlot(emu->slot_id);
 		OUT(auto_loot);
 
 		FINISH_ENCODE();
@@ -1824,6 +1833,8 @@ namespace RoF2
 	{
 		ENCODE_LENGTH_EXACT(MoveItem_Struct);
 		SETUP_DIRECT_ENCODE(MoveItem_Struct, structs::MoveItem_Struct);
+
+		Log(Logs::Moderate, Logs::Netcode, "RoF2::ENCODE(OP_MoveItem)");
 
 		eq->from_slot = ServerToRoF2Slot(emu->from_slot);
 		eq->to_slot = ServerToRoF2Slot(emu->to_slot);
@@ -2303,7 +2314,7 @@ namespace RoF2
 
 		outapp->WriteUInt32(profile::BANDOLIERS_SIZE);
 
-		// Copy bandoliers where server and client indexes converge
+		// Copy bandoliers where server and client indices converge
 		for (uint32 r = 0; r < EQEmu::profile::BANDOLIERS_SIZE && r < profile::BANDOLIERS_SIZE; ++r) {
 			outapp->WriteString(emu->bandoliers[r].Name);
 			for (uint32 j = 0; j < profile::BANDOLIER_ITEM_COUNT; ++j) { // Will need adjusting if 'server != client' is ever true
@@ -2318,7 +2329,7 @@ namespace RoF2
  				}
  			}
  		}
-		// Nullify bandoliers where server and client indexes diverge, with a client bias
+		// Nullify bandoliers where server and client indices diverge, with a client bias
 		for (uint32 r = EQEmu::profile::BANDOLIERS_SIZE; r < profile::BANDOLIERS_SIZE; ++r) {
  			outapp->WriteString("");
 			for (uint32 j = 0; j < profile::BANDOLIER_ITEM_COUNT; ++j) { // Will need adjusting if 'server != client' is ever true
@@ -2330,7 +2341,7 @@ namespace RoF2
 
 		outapp->WriteUInt32(profile::POTION_BELT_SIZE);
 
-		// Copy potion belt where server and client indexes converge
+		// Copy potion belt where server and client indices converge
 		for (uint32 r = 0; r < EQEmu::profile::POTION_BELT_SIZE && r < profile::POTION_BELT_SIZE; ++r) {
 			outapp->WriteString(emu->potionbelt.Items[r].Name);
 			outapp->WriteUInt32(emu->potionbelt.Items[r].ID);
@@ -2342,7 +2353,7 @@ namespace RoF2
  				outapp->WriteSInt32(-1);
  			}
  		}
-		// Nullify potion belt where server and client indexes diverge, with a client bias
+		// Nullify potion belt where server and client indices diverge, with a client bias
 		for (uint32 r = EQEmu::profile::POTION_BELT_SIZE; r < profile::POTION_BELT_SIZE; ++r) {
 			outapp->WriteString("");
 			outapp->WriteUInt32(0);
@@ -3110,7 +3121,7 @@ namespace RoF2
 		SETUP_DIRECT_ENCODE(Merchant_Purchase_Struct, structs::Merchant_Purchase_Struct);
 
 		OUT(npcid);
-		eq->inventory_slot = ServerToRoF2TypelessSlot(emu->itemslot);
+		eq->inventory_slot = ServerToRoF2TypelessSlot(emu->itemslot, EQEmu::invtype::typePossessions);
 		//OUT(itemslot);
 		OUT(quantity);
 		OUT(price);
@@ -4299,7 +4310,7 @@ namespace RoF2
 		SETUP_DIRECT_DECODE(Adventure_Sell_Struct, structs::Adventure_Sell_Struct);
 
 		IN(npcid);
-		emu->slot = RoF2ToServerTypelessSlot(eq->inventory_slot);
+		emu->slot = RoF2ToServerTypelessSlot(eq->inventory_slot, invtype::typePossessions);
 		IN(charges);
 		IN(sell_price);
 
@@ -4312,7 +4323,7 @@ namespace RoF2
 		SETUP_DIRECT_DECODE(AltCurrencySellItem_Struct, structs::AltCurrencySellItem_Struct);
 
 		IN(merchant_entity_id);
-		emu->slot_id = RoF2ToServerTypelessSlot(eq->inventory_slot);
+		emu->slot_id = RoF2ToServerTypelessSlot(eq->inventory_slot, invtype::typePossessions);
 		IN(charges);
 		IN(cost);
 
@@ -4325,7 +4336,7 @@ namespace RoF2
 		SETUP_DIRECT_DECODE(AltCurrencySelectItem_Struct, structs::AltCurrencySelectItem_Struct);
 
 		IN(merchant_entity_id);
-		emu->slot_id = RoF2ToServerTypelessSlot(eq->inventory_slot);
+		emu->slot_id = RoF2ToServerTypelessSlot(eq->inventory_slot, invtype::typePossessions);
 
 		FINISH_DIRECT_DECODE();
 	}
@@ -4347,7 +4358,7 @@ namespace RoF2
 		DECODE_LENGTH_EXACT(structs::ApplyPoison_Struct);
 		SETUP_DIRECT_DECODE(ApplyPoison_Struct, structs::ApplyPoison_Struct);
 
-		emu->inventorySlot = RoF2ToServerTypelessSlot(eq->inventorySlot);
+		emu->inventorySlot = RoF2ToServerTypelessSlot(eq->inventorySlot, invtype::typePossessions);
 		IN(success);
 
 		FINISH_DIRECT_DECODE();
@@ -4981,9 +4992,11 @@ namespace RoF2
 		DECODE_LENGTH_EXACT(structs::LootingItem_Struct);
 		SETUP_DIRECT_DECODE(LootingItem_Struct, structs::LootingItem_Struct);
 
+		Log(Logs::Moderate, Logs::Netcode, "RoF2::DECODE(OP_LootItem)");
+
 		IN(lootee);
 		IN(looter);
-		emu->slot_id = RoF2ToServerCorpseSlot(eq->slot_id);
+		emu->slot_id = RoF2ToServerCorpseMainSlot(eq->slot_id);
 		IN(auto_loot);
 
 		FINISH_DIRECT_DECODE();
@@ -4994,10 +5007,13 @@ namespace RoF2
 		DECODE_LENGTH_EXACT(structs::MoveItem_Struct);
 		SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
 
-		Log(Logs::General, Logs::Netcode, "[RoF2] MoveItem SlotType from %i to %i, MainSlot from %i to %i, SubSlot from %i to %i, AugSlot from %i to %i, Unknown01 from %i to %i, Number %u", eq->from_slot.Type, eq->to_slot.Type, eq->from_slot.Slot, eq->to_slot.Slot, eq->from_slot.SubIndex, eq->to_slot.SubIndex, eq->from_slot.AugIndex, eq->to_slot.AugIndex, eq->from_slot.Unknown01, eq->to_slot.Unknown01, eq->number_in_stack);
+		Log(Logs::Moderate, Logs::Netcode, "RoF2::DECODE(OP_MoveItem)");
+		
 		emu->from_slot = RoF2ToServerSlot(eq->from_slot);
 		emu->to_slot = RoF2ToServerSlot(eq->to_slot);
 		IN(number_in_stack);
+		
+		//Log(Logs::General, Logs::Netcode, "[RoF2] MoveItem Slot from %u to %u, Number %u", emu->from_slot, emu->to_slot, emu->number_in_stack);
 
 		FINISH_DIRECT_DECODE();
 	}
@@ -5144,7 +5160,7 @@ namespace RoF2
 		SETUP_DIRECT_DECODE(Merchant_Purchase_Struct, structs::Merchant_Purchase_Struct);
 
 		IN(npcid);
-		emu->itemslot = RoF2ToServerTypelessSlot(eq->inventory_slot);
+		emu->itemslot = RoF2ToServerTypelessSlot(eq->inventory_slot, invtype::typePossessions);
 		//IN(itemslot);
 		IN(quantity);
 		IN(price);
@@ -5283,11 +5299,7 @@ namespace RoF2
 		DECODE_LENGTH_EXACT(structs::NewCombine_Struct);
 		SETUP_DIRECT_DECODE(NewCombine_Struct, structs::NewCombine_Struct);
 
-		int16 slot_id = RoF2ToServerSlot(eq->container_slot);
-		if (slot_id == 4000) {
-			slot_id = EQEmu::legacy::SLOT_TRADESKILL;	// 1000
-		}
-		emu->container_slot = slot_id;
+		emu->container_slot = RoF2ToServerSlot(eq->container_slot);
 		emu->guildtribute_slot = RoF2ToServerSlot(eq->guildtribute_slot); // this should only return INVALID_INDEX until implemented
 
 		FINISH_DIRECT_DECODE();
@@ -5387,8 +5399,16 @@ namespace RoF2
 		hdr.stacksize = (inst->IsStackable() ? ((inst->GetCharges() > 1000) ? 0xFFFFFFFF : inst->GetCharges()) : 1);
 		hdr.unknown004 = 0;
 
-		structs::InventorySlot_Struct slot_id = ServerToRoF2Slot(slot_id_in, packet_type);
-
+		structs::InventorySlot_Struct slot_id;
+		switch (packet_type) {
+		case ItemPacketLoot:
+			slot_id = ServerToRoF2CorpseSlot(slot_id_in);
+			break;
+		default:
+			slot_id = ServerToRoF2Slot(slot_id_in);
+			break;
+		}
+		
 		hdr.slot_type = (inst->GetMerchantSlot() ? invtype::typeMerchant : slot_id.Type);
 		hdr.main_slot = (inst->GetMerchantSlot() ? inst->GetMerchantSlot() : slot_id.Slot);
 		hdr.sub_slot = (inst->GetMerchantSlot() ? 0xffff : slot_id.SubIndex);
@@ -5483,7 +5503,7 @@ namespace RoF2
 		ibs.nodrop = item->NoDrop;
 		ibs.attune = item->Attuneable;
 		ibs.size = item->Size;
-		ibs.slots = SwapBits21And22(item->Slots);
+		ibs.slots = item->Slots;
 		ibs.price = item->Price;
 		ibs.icon = item->Icon;
 		ibs.unknown1 = 1;
@@ -5797,345 +5817,477 @@ namespace RoF2
 
 		ob.write((const char*)&subitem_count, sizeof(uint32));
 
-		for (uint32 index = EQEmu::invbag::SLOT_BEGIN; index <= EQEmu::invbag::SLOT_END; ++index) {
-			EQEmu::ItemInstance* sub = inst->GetItem(index);
-			if (!sub)
-				continue;
+		// moved outside of loop since it is not modified within that scope
+		int16 SubSlotNumber = EQEmu::invbag::SLOT_INVALID;
 
-			int SubSlotNumber = INVALID_INDEX;
-			if (slot_id_in >= EQEmu::invslot::GENERAL_BEGIN && slot_id_in <= EQEmu::invslot::GENERAL_END)
-				SubSlotNumber = (((slot_id_in + 3) * EQEmu::invbag::SLOT_COUNT) + index + 1);
-			else if (slot_id_in >= EQEmu::invslot::BANK_BEGIN && slot_id_in <= EQEmu::invslot::BANK_END)
-				SubSlotNumber = (((slot_id_in - EQEmu::invslot::BANK_BEGIN) * EQEmu::invbag::SLOT_COUNT) + EQEmu::invbag::BANK_BAGS_BEGIN + index);
-			else if (slot_id_in >= EQEmu::invslot::SHARED_BANK_BEGIN && slot_id_in <= EQEmu::invslot::SHARED_BANK_END)
-				SubSlotNumber = (((slot_id_in - EQEmu::invslot::SHARED_BANK_BEGIN) * EQEmu::invbag::SLOT_COUNT) + EQEmu::invbag::SHARED_BANK_BAGS_BEGIN + index);
-			else
-				SubSlotNumber = slot_id_in;
+		if (slot_id_in <= EQEmu::invslot::GENERAL_END && slot_id_in >= EQEmu::invslot::GENERAL_BEGIN)
+			SubSlotNumber = EQEmu::invbag::GENERAL_BAGS_BEGIN + ((slot_id_in - EQEmu::invslot::GENERAL_BEGIN) * EQEmu::invbag::SLOT_COUNT);
+		else if (slot_id_in == EQEmu::invslot::slotCursor)
+			SubSlotNumber = EQEmu::invbag::CURSOR_BAG_BEGIN;
+		else if (slot_id_in <= EQEmu::invslot::BANK_END && slot_id_in >= EQEmu::invslot::BANK_BEGIN)
+			SubSlotNumber = EQEmu::invbag::BANK_BAGS_BEGIN + ((slot_id_in - EQEmu::invslot::BANK_BEGIN) * EQEmu::invbag::SLOT_COUNT);
+		else if (slot_id_in <= EQEmu::invslot::SHARED_BANK_END && slot_id_in >= EQEmu::invslot::SHARED_BANK_BEGIN)
+			SubSlotNumber = EQEmu::invbag::SHARED_BANK_BAGS_BEGIN + ((slot_id_in - EQEmu::invslot::SHARED_BANK_BEGIN) * EQEmu::invbag::SLOT_COUNT);
+		else
+			SubSlotNumber = slot_id_in; // not sure if this is the best way to handle this..leaving for now
 
-			ob.write((const char*)&index, sizeof(uint32));
+		if (SubSlotNumber != EQEmu::invbag::SLOT_INVALID) {
+			for (uint32 index = EQEmu::invbag::SLOT_BEGIN; index <= EQEmu::invbag::SLOT_END; ++index) {
+				EQEmu::ItemInstance* sub = inst->GetItem(index);
+				if (!sub)
+					continue;
 
-			SerializeItem(ob, sub, SubSlotNumber, (depth + 1), packet_type);
-			++subitem_count;
+				ob.write((const char*)&index, sizeof(uint32));
+
+				SerializeItem(ob, sub, SubSlotNumber, (depth + 1), packet_type);
+				++subitem_count;
+			}
+
+			if (subitem_count)
+				ob.overwrite(count_pos, (const char*)&subitem_count, sizeof(uint32));
 		}
-
-		if (subitem_count)
-			ob.overwrite(count_pos, (const char*)&subitem_count, sizeof(uint32));
 	}
 
-	static inline structs::InventorySlot_Struct ServerToRoF2Slot(uint32 serverSlot, ItemPacketType PacketType)
+	static inline structs::InventorySlot_Struct ServerToRoF2Slot(uint32 server_slot)
 	{
 		structs::InventorySlot_Struct RoF2Slot;
-		RoF2Slot.Type = INVALID_INDEX;
-		RoF2Slot.Unknown02 = 0;
-		RoF2Slot.Slot = INVALID_INDEX;
-		RoF2Slot.SubIndex = INVALID_INDEX;
-		RoF2Slot.AugIndex = INVALID_INDEX;
-		RoF2Slot.Unknown01 = 0;
+		RoF2Slot.Type = invtype::TYPE_INVALID;
+		RoF2Slot.Unknown02 = INULL;
+		RoF2Slot.Slot = invslot::SLOT_INVALID;
+		RoF2Slot.SubIndex = invbag::SLOT_INVALID;
+		RoF2Slot.AugIndex = invaug::SOCKET_INVALID;
+		RoF2Slot.Unknown01 = INULL;
 
-		uint32 TempSlot = 0;
+		uint32 TempSlot = EQEmu::invslot::SLOT_INVALID;
 
-		if (serverSlot < 56 || serverSlot == EQEmu::invslot::SLOT_POWER_SOURCE) { // Main Inventory and Cursor
-			if (PacketType == ItemPacketLoot)
-			{
-				RoF2Slot.Type = invtype::typeCorpse;
-				RoF2Slot.Slot = serverSlot - EQEmu::invslot::CORPSE_BEGIN;
-			}
-			else
-			{
-				RoF2Slot.Type = invtype::typePossessions;
-				RoF2Slot.Slot = serverSlot;
-			}
-
-			if (serverSlot == EQEmu::invslot::SLOT_POWER_SOURCE)
-				RoF2Slot.Slot = invslot::slotPowerSource;
-
-			else if (serverSlot >= EQEmu::invslot::slotCursor && PacketType != ItemPacketLoot) // Cursor and Extended Corpse Inventory
-				RoF2Slot.Slot += 3;
-
-			else if (serverSlot >= EQEmu::invslot::slotAmmo) // (> 20)
-				RoF2Slot.Slot += 1;
-		}
-
-		/*else if (ServerSlot < 51) { // Cursor Buffer
-		RoF2Slot.SlotType = maps::MapLimbo;
-		RoF2Slot.MainSlot = ServerSlot - 31;
-		}*/
-
-		else if (serverSlot >= EQEmu::invbag::GENERAL_BAGS_BEGIN && serverSlot <= EQEmu::invbag::CURSOR_BAG_END) { // (> 250 && < 341)
+		if (server_slot < EQEmu::invtype::POSSESSIONS_SIZE) {
 			RoF2Slot.Type = invtype::typePossessions;
-			TempSlot = serverSlot - 1;
-			RoF2Slot.Slot = int(TempSlot / EQEmu::invbag::SLOT_COUNT) - 2;
-			RoF2Slot.SubIndex = TempSlot - ((RoF2Slot.Slot + 2) * EQEmu::invbag::SLOT_COUNT);
-
-			if (RoF2Slot.Slot >= invslot::slotGeneral9) // (> 30)
-				RoF2Slot.Slot = invslot::slotCursor;
+			RoF2Slot.Slot = server_slot;
 		}
 
-		else if (serverSlot >= EQEmu::invslot::TRIBUTE_BEGIN && serverSlot <= EQEmu::invslot::TRIBUTE_END) { // Tribute
+		else if (server_slot <= EQEmu::invbag::CURSOR_BAG_END && server_slot >= EQEmu::invbag::GENERAL_BAGS_BEGIN) {
+			TempSlot = server_slot - EQEmu::invbag::GENERAL_BAGS_BEGIN;
+
+			RoF2Slot.Type = invtype::typePossessions;
+			RoF2Slot.Slot = invslot::GENERAL_BEGIN + (TempSlot / EQEmu::invbag::SLOT_COUNT);
+			RoF2Slot.SubIndex = TempSlot - ((RoF2Slot.Slot - invslot::GENERAL_BEGIN) * EQEmu::invbag::SLOT_COUNT);
+		}
+
+		else if (server_slot <= EQEmu::invslot::TRIBUTE_END && server_slot >= EQEmu::invslot::TRIBUTE_BEGIN) {
 			RoF2Slot.Type = invtype::typeTribute;
-			RoF2Slot.Slot = serverSlot - EQEmu::invslot::TRIBUTE_BEGIN;
+			RoF2Slot.Slot = server_slot - EQEmu::invslot::TRIBUTE_BEGIN;
 		}
 
-		else if (serverSlot >= EQEmu::invslot::BANK_BEGIN && serverSlot <= EQEmu::invbag::BANK_BAGS_END) {
-			RoF2Slot.Type = invtype::typeBank;
-			TempSlot = serverSlot - EQEmu::invslot::BANK_BEGIN;
-			RoF2Slot.Slot = TempSlot;
-
-			if (TempSlot > 30) { // (> 30)
-				RoF2Slot.Slot = int(TempSlot / EQEmu::invbag::SLOT_COUNT) - 3;
-				RoF2Slot.SubIndex = TempSlot - ((RoF2Slot.Slot + 3) * EQEmu::invbag::SLOT_COUNT);
-			}
+		else if (server_slot <= EQEmu::invslot::GUILD_TRIBUTE_END && server_slot >= EQEmu::invslot::GUILD_TRIBUTE_BEGIN) {
+			RoF2Slot.Type = invtype::typeGuildTribute;
+			RoF2Slot.Slot = server_slot - EQEmu::invslot::GUILD_TRIBUTE_BEGIN;
 		}
 
-		else if (serverSlot >= EQEmu::invslot::SHARED_BANK_BEGIN && serverSlot <= EQEmu::invbag::SHARED_BANK_BAGS_END) {
-			RoF2Slot.Type = invtype::typeSharedBank;
-			TempSlot = serverSlot - EQEmu::invslot::SHARED_BANK_BEGIN;
-			RoF2Slot.Slot = TempSlot;
-
-			if (TempSlot > 30) { // (> 30)
-				RoF2Slot.Slot = int(TempSlot / EQEmu::invbag::SLOT_COUNT) - 3;
-				RoF2Slot.SubIndex = TempSlot - ((RoF2Slot.Slot + 3) * EQEmu::invbag::SLOT_COUNT);
-			}
-		}
-
-		else if (serverSlot >= EQEmu::invslot::TRADE_BEGIN && serverSlot <= EQEmu::invbag::TRADE_BAGS_END) {
-			RoF2Slot.Type = invtype::typeTrade;
-			TempSlot = serverSlot - EQEmu::invslot::TRADE_BEGIN;
-			RoF2Slot.Slot = TempSlot;
-
-			if (TempSlot > 30) {
-				RoF2Slot.Slot = int(TempSlot / EQEmu::invbag::SLOT_COUNT) - 3;
-				RoF2Slot.SubIndex = TempSlot - ((RoF2Slot.Slot + 3) * EQEmu::invbag::SLOT_COUNT);
-			}
-
-			/*
-			// OLD CODE:
-			if (TempSlot > 99) {
-			if (TempSlot > 100)
-			RoF2Slot.MainSlot = int((TempSlot - 100) / 10);
-
-			else
-			RoF2Slot.MainSlot = 0;
-
-			RoF2Slot.SubSlot = TempSlot - (100 + RoF2Slot.MainSlot);
-			}
-			*/
-		}
-
-		else if (serverSlot >= EQEmu::invslot::WORLD_BEGIN && serverSlot <= EQEmu::invslot::WORLD_END) {
+		else if (server_slot == EQEmu::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE) {
 			RoF2Slot.Type = invtype::typeWorld;
-			TempSlot = serverSlot - EQEmu::invslot::WORLD_BEGIN;
-			RoF2Slot.Slot = TempSlot;
 		}
 
-		Log(Logs::General, Logs::Netcode, "[ERROR] Convert Server Slot %i to RoF2 Slots: Type %i, Unk2 %i, Main %i, Sub %i, Aug %i, Unk1 %i", serverSlot, RoF2Slot.Type, RoF2Slot.Unknown02, RoF2Slot.Slot, RoF2Slot.SubIndex, RoF2Slot.AugIndex, RoF2Slot.Unknown01);
+		else if (server_slot <= EQEmu::invslot::BANK_END && server_slot >= EQEmu::invslot::BANK_BEGIN) {
+			RoF2Slot.Type = invtype::typeBank;
+			RoF2Slot.Slot = server_slot - EQEmu::invslot::BANK_BEGIN;
+		}
+
+		else if (server_slot <= EQEmu::invbag::BANK_BAGS_END && server_slot >= EQEmu::invbag::BANK_BAGS_BEGIN) {
+			TempSlot = server_slot - EQEmu::invbag::BANK_BAGS_BEGIN;
+
+			RoF2Slot.Type = invtype::typeBank;
+			RoF2Slot.Slot = TempSlot / EQEmu::invbag::SLOT_COUNT;
+			RoF2Slot.SubIndex = TempSlot - (RoF2Slot.Slot * EQEmu::invbag::SLOT_COUNT);
+		}
+
+		else if (server_slot <= EQEmu::invslot::SHARED_BANK_END && server_slot >= EQEmu::invslot::SHARED_BANK_BEGIN) {
+			RoF2Slot.Type = invtype::typeSharedBank;
+			RoF2Slot.Slot = server_slot - EQEmu::invslot::SHARED_BANK_BEGIN;
+		}
+
+		else if (server_slot <= EQEmu::invbag::SHARED_BANK_BAGS_END && server_slot >= EQEmu::invbag::SHARED_BANK_BAGS_BEGIN) {
+			TempSlot = server_slot - EQEmu::invbag::SHARED_BANK_BAGS_BEGIN;
+
+			RoF2Slot.Type = invtype::typeSharedBank;
+			RoF2Slot.Slot = TempSlot / EQEmu::invbag::SLOT_COUNT;
+			RoF2Slot.SubIndex = TempSlot - (RoF2Slot.Slot * EQEmu::invbag::SLOT_COUNT);
+		}
+
+		else if (server_slot <= EQEmu::invslot::TRADE_END && server_slot >= EQEmu::invslot::TRADE_BEGIN) {
+			RoF2Slot.Type = invtype::typeTrade;
+			RoF2Slot.Slot = server_slot - EQEmu::invslot::TRADE_BEGIN;
+		}
+
+		else if (server_slot <= EQEmu::invbag::TRADE_BAGS_END && server_slot >= EQEmu::invbag::TRADE_BAGS_BEGIN) {
+			TempSlot = server_slot - EQEmu::invbag::TRADE_BAGS_BEGIN;
+
+			RoF2Slot.Type = invtype::typeTrade;
+			RoF2Slot.Slot = TempSlot / EQEmu::invbag::SLOT_COUNT;
+			RoF2Slot.SubIndex = TempSlot - (RoF2Slot.Slot * EQEmu::invbag::SLOT_COUNT);
+		}
+
+		else if (server_slot <= EQEmu::invslot::WORLD_END && server_slot >= EQEmu::invslot::WORLD_BEGIN) {
+			RoF2Slot.Type = invtype::typeWorld;
+			RoF2Slot.Slot = server_slot - EQEmu::invslot::WORLD_BEGIN;
+		}
+
+		Log(Logs::Detail, Logs::Netcode, "Convert Server Slot %i to RoF2 Slot [%i, %i, %i, %i] (unk2: %i, unk1: %i)",
+			server_slot, RoF2Slot.Type, RoF2Slot.Slot, RoF2Slot.SubIndex, RoF2Slot.AugIndex, RoF2Slot.Unknown02, RoF2Slot.Unknown01);
 
 		return RoF2Slot;
 	}
 
-	static inline structs::TypelessInventorySlot_Struct ServerToRoF2TypelessSlot(uint32 serverSlot)
+	static inline structs::InventorySlot_Struct ServerToRoF2CorpseSlot(uint32 server_corpse_slot)
+	{
+		structs::InventorySlot_Struct RoF2Slot;
+		RoF2Slot.Type = invtype::TYPE_INVALID;
+		RoF2Slot.Unknown02 = INULL;
+		RoF2Slot.Slot = ServerToRoF2CorpseMainSlot(server_corpse_slot);
+		RoF2Slot.SubIndex = invbag::SLOT_INVALID;
+		RoF2Slot.AugIndex = invaug::SOCKET_INVALID;
+		RoF2Slot.Unknown01 = INULL;
+
+		if (RoF2Slot.Slot != invslot::SLOT_INVALID)
+			RoF2Slot.Type = invtype::typeCorpse;
+
+		Log(Logs::Detail, Logs::Netcode, "Convert Server Corpse Slot %i to RoF2 Corpse Slot [%i, %i, %i, %i] (unk2: %i, unk1: %i)",
+			server_corpse_slot, RoF2Slot.Type, RoF2Slot.Slot, RoF2Slot.SubIndex, RoF2Slot.AugIndex, RoF2Slot.Unknown02, RoF2Slot.Unknown01);
+
+		return RoF2Slot;
+	}
+
+	static inline uint32 ServerToRoF2CorpseMainSlot(uint32 server_corpse_slot)
+	{
+		uint32 RoF2Slot = invslot::SLOT_INVALID;
+
+		if (server_corpse_slot <= EQEmu::invslot::CORPSE_END && server_corpse_slot >= EQEmu::invslot::CORPSE_BEGIN) {
+			RoF2Slot = server_corpse_slot;
+		}
+
+		Log(Logs::Detail, Logs::Netcode, "Convert Server Corpse Slot %i to RoF2 Corpse Main Slot %i", server_corpse_slot, RoF2Slot);
+
+		return RoF2Slot;
+	}
+
+	static inline structs::TypelessInventorySlot_Struct ServerToRoF2TypelessSlot(uint32 server_slot, int16 server_type)
 	{
 		structs::TypelessInventorySlot_Struct RoF2Slot;
-		RoF2Slot.Slot = INVALID_INDEX;
-		RoF2Slot.SubIndex = INVALID_INDEX;
-		RoF2Slot.AugIndex = INVALID_INDEX;
-		RoF2Slot.Unknown01 = 0;
+		RoF2Slot.Slot = invslot::SLOT_INVALID;
+		RoF2Slot.SubIndex = invbag::SLOT_INVALID;
+		RoF2Slot.AugIndex = invaug::SOCKET_INVALID;
+		RoF2Slot.Unknown01 = INULL;
 
-		uint32 TempSlot = 0;
+		uint32 TempSlot = EQEmu::invslot::SLOT_INVALID;
 
-		if (serverSlot < 56 || serverSlot == EQEmu::invslot::SLOT_POWER_SOURCE) { // (< 52)
-			RoF2Slot.Slot = serverSlot;
+		if (server_type == EQEmu::invtype::typePossessions) {
+			if (server_slot < EQEmu::invtype::POSSESSIONS_SIZE) {
+				RoF2Slot.Slot = server_slot;
+			}
 
-			if (serverSlot == EQEmu::invslot::SLOT_POWER_SOURCE)
-				RoF2Slot.Slot = invslot::slotPowerSource;
+			else if (server_slot <= EQEmu::invbag::CURSOR_BAG_END && server_slot >= EQEmu::invbag::GENERAL_BAGS_BEGIN) {
+				TempSlot = server_slot - EQEmu::invbag::GENERAL_BAGS_BEGIN;
 
-			else if (serverSlot >= EQEmu::invslot::slotCursor) // Cursor and Extended Corpse Inventory
-				RoF2Slot.Slot += 3;
-
-			else if (serverSlot >= EQEmu::invslot::slotAmmo) // Ammo and Personl Inventory
-				RoF2Slot.Slot += 1;
-
-			/*else if (ServerSlot >= MainCursor) { // Cursor
-			RoF2Slot.MainSlot = slots::MainCursor;
-
-			if (ServerSlot > 30)
-			RoF2Slot.SubSlot = (ServerSlot + 3) - 33;
-			}*/
+				RoF2Slot.Slot = invslot::GENERAL_BEGIN + (TempSlot / EQEmu::invbag::SLOT_COUNT);
+				RoF2Slot.SubIndex = TempSlot - ((RoF2Slot.Slot - invslot::GENERAL_BEGIN) * EQEmu::invbag::SLOT_COUNT);
+			}
 		}
 
-		else if (serverSlot >= EQEmu::invbag::GENERAL_BAGS_BEGIN && serverSlot <= EQEmu::invbag::CURSOR_BAG_END) {
-			TempSlot = serverSlot - 1;
-			RoF2Slot.Slot = int(TempSlot / EQEmu::invbag::SLOT_COUNT) - 2;
-			RoF2Slot.SubIndex = TempSlot - ((RoF2Slot.Slot + 2) * EQEmu::invbag::SLOT_COUNT);
-		}
-
-		Log(Logs::General, Logs::Netcode, "[ERROR] Convert Server Slot %i to RoF2 Slots: Main %i, Sub %i, Aug %i, Unk1 %i", serverSlot, RoF2Slot.Slot, RoF2Slot.SubIndex, RoF2Slot.AugIndex, RoF2Slot.Unknown01);
+		Log(Logs::Detail, Logs::Netcode, "Convert Server Slot %i to RoF2 Typeless Slot [%i, %i, %i] (implied type: %i, unk1: %i)",
+			server_slot, RoF2Slot.Slot, RoF2Slot.SubIndex, RoF2Slot.AugIndex, server_type, RoF2Slot.Unknown01);
 
 		return RoF2Slot;
 	}
 
-	static inline uint32 ServerToRoF2CorpseSlot(uint32 serverCorpseSlot)
+	static inline uint32 RoF2ToServerSlot(structs::InventorySlot_Struct rof2_slot)
 	{
-		return (serverCorpseSlot - EQEmu::invslot::CORPSE_BEGIN + 1);
+		if (rof2_slot.AugIndex < invaug::SOCKET_INVALID || rof2_slot.AugIndex >= invaug::SOCKET_COUNT) {
+			Log(Logs::Detail, Logs::Netcode, "Convert RoF2 Slot [%i, %i, %i, %i] (unk2: %i, unk1: %i) to Server Slot %i",
+				rof2_slot.Type, rof2_slot.Slot, rof2_slot.SubIndex, rof2_slot.AugIndex, rof2_slot.Unknown02, rof2_slot.Unknown01, EQEmu::invslot::SLOT_INVALID);
+
+			return EQEmu::invslot::SLOT_INVALID;
+		}
+
+		uint32 server_slot = EQEmu::invslot::SLOT_INVALID;
+		uint32 temp_slot = invslot::SLOT_INVALID;
+		
+		switch (rof2_slot.Type) {
+		case invtype::typePossessions: {
+			if (rof2_slot.Slot >= invslot::POSSESSIONS_BEGIN && rof2_slot.Slot <= invslot::POSSESSIONS_END) {
+				if (rof2_slot.SubIndex == invbag::SLOT_INVALID) {
+					server_slot = rof2_slot.Slot;
+				}
+
+				else if (rof2_slot.SubIndex >= invbag::SLOT_BEGIN && rof2_slot.SubIndex <= invbag::SLOT_END) {
+					if (rof2_slot.Slot < invslot::GENERAL_BEGIN)
+						return EQEmu::invslot::SLOT_INVALID;
+
+					temp_slot = (rof2_slot.Slot - invslot::GENERAL_BEGIN) * invbag::SLOT_COUNT;
+					server_slot = EQEmu::invbag::GENERAL_BAGS_BEGIN + temp_slot + rof2_slot.SubIndex;
+				}
+			}
+
+			break;
+		}
+		case invtype::typeBank: {
+			if (rof2_slot.Slot >= invslot::SLOT_BEGIN && rof2_slot.Slot < invtype::BANK_SIZE) {
+				if (rof2_slot.SubIndex == invbag::SLOT_INVALID) {
+					server_slot = EQEmu::invslot::BANK_BEGIN + rof2_slot.Slot;
+				}
+
+				else if (rof2_slot.SubIndex >= invbag::SLOT_BEGIN && rof2_slot.SubIndex <= invbag::SLOT_END) {
+					temp_slot = rof2_slot.Slot * invbag::SLOT_COUNT;
+					server_slot = EQEmu::invbag::BANK_BAGS_BEGIN + temp_slot + rof2_slot.SubIndex;
+				}
+			}
+
+			break;
+		}
+		case invtype::typeSharedBank: {
+			if (rof2_slot.Slot >= invslot::SLOT_BEGIN && rof2_slot.Slot < invtype::SHARED_BANK_SIZE) {
+				if (rof2_slot.SubIndex == invbag::SLOT_INVALID) {
+					server_slot = EQEmu::invslot::SHARED_BANK_BEGIN + rof2_slot.Slot;
+				}
+
+				else if (rof2_slot.SubIndex >= invbag::SLOT_BEGIN && rof2_slot.SubIndex <= invbag::SLOT_END) {
+					temp_slot = rof2_slot.Slot * invbag::SLOT_COUNT;
+					server_slot = EQEmu::invbag::SHARED_BANK_BAGS_BEGIN + temp_slot + rof2_slot.SubIndex;
+				}
+			}
+
+			break;
+		}
+		case invtype::typeTrade: {
+			if (rof2_slot.Slot >= invslot::SLOT_BEGIN && rof2_slot.Slot < invtype::TRADE_SIZE) {
+				if (rof2_slot.SubIndex == invbag::SLOT_INVALID) {
+					server_slot = EQEmu::invslot::TRADE_BEGIN + rof2_slot.Slot;
+				}
+
+				else if (rof2_slot.SubIndex >= invbag::SLOT_BEGIN && rof2_slot.SubIndex <= invbag::SLOT_END) {
+					temp_slot = rof2_slot.Slot * invbag::SLOT_COUNT;
+					server_slot = EQEmu::invbag::TRADE_BAGS_BEGIN + temp_slot + rof2_slot.SubIndex;
+				}
+			}
+
+			break;
+		}
+		case invtype::typeWorld: {
+			if (rof2_slot.Slot >= invslot::SLOT_BEGIN && rof2_slot.Slot < invtype::WORLD_SIZE) {
+				server_slot = EQEmu::invslot::WORLD_BEGIN + rof2_slot.Slot;
+			}
+
+			else if (rof2_slot.Slot == invslot::SLOT_INVALID) {
+				server_slot = EQEmu::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE;
+			}
+
+			break;
+		}
+		case invtype::typeLimbo: {
+			if (rof2_slot.Slot >= invslot::SLOT_BEGIN && rof2_slot.Slot < invtype::LIMBO_SIZE) {
+				server_slot = EQEmu::invslot::slotCursor;
+			}
+
+			break;
+		}
+		case invtype::typeTribute: {
+			if (rof2_slot.Slot >= invslot::SLOT_BEGIN && rof2_slot.Slot < invtype::TRIBUTE_SIZE) {
+				server_slot = EQEmu::invslot::TRIBUTE_BEGIN + rof2_slot.Slot;
+			}
+
+			break;
+		}
+		case invtype::typeGuildTribute: {
+			if (rof2_slot.Slot >= invslot::SLOT_BEGIN && rof2_slot.Slot < invtype::GUILD_TRIBUTE_SIZE) {
+				server_slot = EQEmu::invslot::GUILD_TRIBUTE_BEGIN + rof2_slot.Slot;
+			}
+
+			break;
+		}
+		case invtype::typeCorpse: {
+			if (rof2_slot.Slot >= invslot::CORPSE_BEGIN && rof2_slot.Slot <= invslot::CORPSE_END) {
+				server_slot = rof2_slot.Slot;
+			}
+
+			break;
+		}
+		default: {
+
+			break;
+		}
+		}
+
+		Log(Logs::Detail, Logs::Netcode, "Convert RoF2 Slot [%i, %i, %i, %i] (unk2: %i, unk1: %i) to Server Slot %i",
+			rof2_slot.Type, rof2_slot.Slot, rof2_slot.SubIndex, rof2_slot.AugIndex, rof2_slot.Unknown02, rof2_slot.Unknown01, server_slot);
+
+		return server_slot;
 	}
 
-	static inline uint32 RoF2ToServerSlot(structs::InventorySlot_Struct rof2Slot, ItemPacketType PacketType)
+	static inline uint32 RoF2ToServerCorpseSlot(structs::InventorySlot_Struct rof2_corpse_slot)
 	{
-		uint32 ServerSlot = INVALID_INDEX;
-		uint32 TempSlot = 0;
-
-		if (rof2Slot.Type == invtype::typePossessions && rof2Slot.Slot < 57) { // Worn/Personal Inventory and Cursor (< 51)
-			if (rof2Slot.Slot == invslot::slotPowerSource)
-				TempSlot = EQEmu::invslot::SLOT_POWER_SOURCE;
-
-			else if (rof2Slot.Slot >= invslot::slotCursor) // Cursor and Extended Corpse Inventory
-				TempSlot = rof2Slot.Slot - 3;
-
-			/*else if (RoF2Slot.MainSlot == slots::MainGeneral9 || RoF2Slot.MainSlot == slots::MainGeneral10) { // 9th and 10th RoF2 inventory/corpse slots
-			// Need to figure out what to do when we get these
-
-			// The slot range of 0 - client_max is cross-utilized between player inventory and corpse inventory.
-			// In the case of RoF2, player inventory is addressed as 0 - 33 and corpse inventory is addressed as 23 - 56.
-			// We 'could' assign the two new inventory slots as 9997 and 9998, and then work around their bag
-			// slot assignments, but doing so may disrupt our ability to utilize the corpse looting range properly.
-
-			// For now, it's probably best to leave as-is and let this work itself out in the inventory rework.
-			}*/
-
-			else if (rof2Slot.Slot >= invslot::slotAmmo) // Ammo and Main Inventory
-				TempSlot = rof2Slot.Slot - 1;
-
-			else // Worn Slots
-				TempSlot = rof2Slot.Slot;
-
-			if (rof2Slot.SubIndex >= EQEmu::invbag::SLOT_BEGIN) // Bag Slots
-				TempSlot = ((TempSlot + 3) * EQEmu::invbag::SLOT_COUNT) + rof2Slot.SubIndex + 1;
-
-			ServerSlot = TempSlot;
+		uint32 ServerSlot = EQEmu::invslot::SLOT_INVALID;
+		
+		if (rof2_corpse_slot.Type != invtype::typeCorpse || rof2_corpse_slot.SubIndex != invbag::SLOT_INVALID || rof2_corpse_slot.AugIndex != invaug::SOCKET_INVALID) {
+			ServerSlot = EQEmu::invslot::SLOT_INVALID;
+		}
+		
+		else {
+			ServerSlot = RoF2ToServerCorpseMainSlot(rof2_corpse_slot.Slot);
 		}
 
-		else if (rof2Slot.Type == invtype::typeBank) {
-			TempSlot = EQEmu::invslot::BANK_BEGIN;
-
-			if (rof2Slot.SubIndex >= EQEmu::invbag::SLOT_BEGIN)
-				TempSlot += ((rof2Slot.Slot + 3) * EQEmu::invbag::SLOT_COUNT) + rof2Slot.SubIndex + 1;
-
-			else
-				TempSlot += rof2Slot.Slot;
-
-			ServerSlot = TempSlot;
-		}
-
-		else if (rof2Slot.Type == invtype::typeSharedBank) {
-			TempSlot = EQEmu::invslot::SHARED_BANK_BEGIN;
-
-			if (rof2Slot.SubIndex >= EQEmu::invbag::SLOT_BEGIN)
-				TempSlot += ((rof2Slot.Slot + 3) * EQEmu::invbag::SLOT_COUNT) + rof2Slot.SubIndex + 1;
-
-			else
-				TempSlot += rof2Slot.Slot;
-
-			ServerSlot = TempSlot;
-		}
-
-		else if (rof2Slot.Type == invtype::typeTrade) {
-			TempSlot = EQEmu::invslot::TRADE_BEGIN;
-
-			if (rof2Slot.SubIndex >= EQEmu::invbag::SLOT_BEGIN)
-				TempSlot += ((rof2Slot.Slot + 3) * EQEmu::invbag::SLOT_COUNT) + rof2Slot.SubIndex + 1;
-			// OLD CODE:
-			//TempSlot += 100 + (RoF2Slot.MainSlot * EmuConstants::ITEM_CONTAINER_SIZE) + RoF2Slot.SubSlot;
-
-			else
-				TempSlot += rof2Slot.Slot;
-
-			ServerSlot = TempSlot;
-		}
-
-		else if (rof2Slot.Type == invtype::typeWorld) {
-			TempSlot = EQEmu::invslot::WORLD_BEGIN;
-
-			if (rof2Slot.Slot >= EQEmu::invbag::SLOT_BEGIN)
-				TempSlot += rof2Slot.Slot;
-
-			ServerSlot = TempSlot;
-		}
-
-		/*else if (RoF2Slot.SlotType == maps::MapLimbo) { // Cursor Buffer
-		TempSlot = 31;
-
-		if (RoF2Slot.MainSlot >= 0)
-		TempSlot += RoF2Slot.MainSlot;
-
-		ServerSlot = TempSlot;
-		}*/
-
-		else if (rof2Slot.Type == invtype::typeGuildTribute) {
-			ServerSlot = INVALID_INDEX;
-		}
-
-		else if (rof2Slot.Type == invtype::typeCorpse) {
-			ServerSlot = rof2Slot.Slot + EQEmu::invslot::CORPSE_BEGIN;
-		}
-
-		Log(Logs::General, Logs::Netcode, "[ERROR] Convert RoF2 Slots: Type %i, Unk2 %i, Main %i, Sub %i, Aug %i, Unk1 %i to Server Slot %i", rof2Slot.Type, rof2Slot.Unknown02, rof2Slot.Slot, rof2Slot.SubIndex, rof2Slot.AugIndex, rof2Slot.Unknown01, ServerSlot);
+		Log(Logs::Detail, Logs::Netcode, "Convert RoF2 Slot [%i, %i, %i, %i] (unk2: %i, unk1: %i) to Server Slot %i",
+			rof2_corpse_slot.Type, rof2_corpse_slot.Slot, rof2_corpse_slot.SubIndex, rof2_corpse_slot.AugIndex, rof2_corpse_slot.Unknown02, rof2_corpse_slot.Unknown01, ServerSlot);
 
 		return ServerSlot;
 	}
 
-	static inline uint32 RoF2ToServerTypelessSlot(structs::TypelessInventorySlot_Struct rof2Slot)
+	static inline uint32 RoF2ToServerCorpseMainSlot(uint32 rof2_corpse_slot)
 	{
-		uint32 ServerSlot = INVALID_INDEX;
-		uint32 TempSlot = 0;
+		uint32 ServerSlot = EQEmu::invslot::SLOT_INVALID;
 
-		if (rof2Slot.Slot < 57) { // Worn/Personal Inventory and Cursor (< 33)
-			if (rof2Slot.Slot == invslot::slotPowerSource)
-				TempSlot = EQEmu::invslot::SLOT_POWER_SOURCE;
-
-			else if (rof2Slot.Slot >= invslot::slotCursor) // Cursor and Extended Corpse Inventory
-				TempSlot = rof2Slot.Slot - 3;
-
-			/*else if (RoF2Slot.MainSlot == slots::MainGeneral9 || RoF2Slot.MainSlot == slots::MainGeneral10) { // 9th and 10th RoF2 inventory slots
-			// Need to figure out what to do when we get these
-
-			// Same as above
-			}*/
-
-			else if (rof2Slot.Slot >= invslot::slotAmmo) // Main Inventory and Ammo Slots
-				TempSlot = rof2Slot.Slot - 1;
-
-			else
-				TempSlot = rof2Slot.Slot;
-
-			if (rof2Slot.SubIndex >= EQEmu::invbag::SLOT_BEGIN) // Bag Slots
-				TempSlot = ((TempSlot + 3) * EQEmu::invbag::SLOT_COUNT) + rof2Slot.SubIndex + 1;
-
-			ServerSlot = TempSlot;
+		if (rof2_corpse_slot <= invslot::CORPSE_END && rof2_corpse_slot >= invslot::CORPSE_BEGIN) {
+			ServerSlot = rof2_corpse_slot;
 		}
 
-		Log(Logs::General, Logs::Netcode, "[ERROR] Convert RoF2 Slots: Main %i, Sub %i, Aug %i, Unk1 %i to Server Slot %i", rof2Slot.Slot, rof2Slot.SubIndex, rof2Slot.AugIndex, rof2Slot.Unknown01, ServerSlot);
+		Log(Logs::Detail, Logs::Netcode, "Convert RoF2 Corpse Main Slot %i to Server Corpse Slot %i", rof2_corpse_slot, ServerSlot);
 
 		return ServerSlot;
 	}
 
-	static inline uint32 RoF2ToServerCorpseSlot(uint32 rof2CorpseSlot)
+	static inline uint32 RoF2ToServerTypelessSlot(structs::TypelessInventorySlot_Struct rof2_slot, int16 rof2_type)
 	{
-		return (rof2CorpseSlot + EQEmu::invslot::CORPSE_BEGIN - 1);
+		if (rof2_slot.AugIndex < invaug::SOCKET_INVALID || rof2_slot.AugIndex >= invaug::SOCKET_COUNT) {
+			Log(Logs::Detail, Logs::Netcode, "Convert RoF2 Typeless Slot [%i, %i, %i] (implied type: %i, unk1: %i) to Server Slot %i",
+				rof2_slot.Slot, rof2_slot.SubIndex, rof2_slot.AugIndex, rof2_type, rof2_slot.Unknown01, EQEmu::invslot::SLOT_INVALID);
+
+			return EQEmu::invslot::SLOT_INVALID;
+		}
+
+		uint32 ServerSlot = EQEmu::invslot::SLOT_INVALID;
+		uint32 TempSlot = invslot::SLOT_INVALID;
+
+		switch (rof2_type) {
+		case invtype::typePossessions: {
+			if (rof2_slot.Slot >= invslot::POSSESSIONS_BEGIN && rof2_slot.Slot <= invslot::POSSESSIONS_END) {
+				if (rof2_slot.SubIndex == invbag::SLOT_INVALID) {
+					ServerSlot = rof2_slot.Slot;
+				}
+
+				else if (rof2_slot.SubIndex >= invbag::SLOT_BEGIN && rof2_slot.SubIndex <= invbag::SLOT_END) {
+					if (rof2_slot.Slot < invslot::GENERAL_BEGIN)
+						return EQEmu::invslot::SLOT_INVALID;
+
+					TempSlot = (rof2_slot.Slot - invslot::GENERAL_BEGIN) * invbag::SLOT_COUNT;
+					ServerSlot = EQEmu::invbag::GENERAL_BAGS_BEGIN + TempSlot + rof2_slot.SubIndex;
+				}
+			}
+
+			break;
+		}
+		case invtype::typeBank: {
+			if (rof2_slot.Slot >= invslot::SLOT_BEGIN && rof2_slot.Slot < invtype::BANK_SIZE) {
+				if (rof2_slot.SubIndex == invbag::SLOT_INVALID) {
+					ServerSlot = EQEmu::invslot::BANK_BEGIN + rof2_slot.Slot;
+				}
+
+				else if (rof2_slot.SubIndex >= invbag::SLOT_BEGIN && rof2_slot.SubIndex <= invbag::SLOT_END) {
+					TempSlot = rof2_slot.Slot * invbag::SLOT_COUNT;
+					ServerSlot = EQEmu::invbag::BANK_BAGS_BEGIN + TempSlot + rof2_slot.SubIndex;
+				}
+			}
+
+			break;
+		}
+		case invtype::typeSharedBank: {
+			if (rof2_slot.Slot >= invslot::SLOT_BEGIN && rof2_slot.Slot < invtype::SHARED_BANK_SIZE) {
+				if (rof2_slot.SubIndex == invbag::SLOT_INVALID) {
+					ServerSlot = EQEmu::invslot::SHARED_BANK_BEGIN + rof2_slot.Slot;
+				}
+
+				else if (rof2_slot.SubIndex >= invbag::SLOT_BEGIN && rof2_slot.SubIndex <= invbag::SLOT_END) {
+					TempSlot = rof2_slot.Slot * invbag::SLOT_COUNT;
+					ServerSlot = EQEmu::invbag::SHARED_BANK_BAGS_BEGIN + TempSlot + rof2_slot.SubIndex;
+				}
+			}
+
+			break;
+		}
+		case invtype::typeTrade: {
+			if (rof2_slot.Slot >= invslot::SLOT_BEGIN && rof2_slot.Slot < invtype::TRADE_SIZE) {
+				if (rof2_slot.SubIndex == invbag::SLOT_INVALID) {
+					ServerSlot = EQEmu::invslot::TRADE_BEGIN + rof2_slot.Slot;
+				}
+
+				else if (rof2_slot.SubIndex >= invbag::SLOT_BEGIN && rof2_slot.SubIndex <= invbag::SLOT_END) {
+					TempSlot = rof2_slot.Slot * invbag::SLOT_COUNT;
+					ServerSlot = EQEmu::invbag::TRADE_BAGS_BEGIN + TempSlot + rof2_slot.SubIndex;
+				}
+			}
+
+			break;
+		}
+		case invtype::typeWorld: {
+			if (rof2_slot.Slot >= invslot::SLOT_BEGIN && rof2_slot.Slot < invtype::WORLD_SIZE) {
+				ServerSlot = EQEmu::invslot::WORLD_BEGIN + rof2_slot.Slot;
+			}
+
+			else if (rof2_slot.Slot == invslot::SLOT_INVALID) {
+				ServerSlot = EQEmu::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE;
+			}
+
+			break;
+		}
+		case invtype::typeLimbo: {
+			if (rof2_slot.Slot >= invslot::SLOT_BEGIN && rof2_slot.Slot < invtype::LIMBO_SIZE) {
+				ServerSlot = EQEmu::invslot::slotCursor;
+			}
+
+			break;
+		}
+		case invtype::typeTribute: {
+			if (rof2_slot.Slot >= invslot::SLOT_BEGIN && rof2_slot.Slot < invtype::TRIBUTE_SIZE) {
+				ServerSlot = EQEmu::invslot::TRIBUTE_BEGIN + rof2_slot.Slot;
+			}
+
+			break;
+		}
+		case invtype::typeGuildTribute: {
+			if (rof2_slot.Slot >= invslot::SLOT_BEGIN && rof2_slot.Slot < invtype::GUILD_TRIBUTE_SIZE) {
+				ServerSlot = EQEmu::invslot::GUILD_TRIBUTE_BEGIN + rof2_slot.Slot;
+			}
+
+			break;
+		}
+		case invtype::typeCorpse: {
+			if (rof2_slot.Slot >= invslot::CORPSE_BEGIN && rof2_slot.Slot <= invslot::CORPSE_END) {
+				ServerSlot = rof2_slot.Slot;
+			}
+
+			break;
+		}
+		default: {
+
+			break;
+		}
+		}
+
+		Log(Logs::Detail, Logs::Netcode, "Convert RoF2 Typeless Slot [%i, %i, %i] (implied type: %i, unk1: %i) to Server Slot %i",
+			rof2_slot.Slot, rof2_slot.SubIndex, rof2_slot.AugIndex, rof2_type, rof2_slot.Unknown01, ServerSlot);
+
+		return ServerSlot;
 	}
 
-	static inline void ServerToRoF2SayLink(std::string& rof2SayLink, const std::string& serverSayLink)
+	static inline void ServerToRoF2SayLink(std::string &rof2_saylink, const std::string &server_saylink)
 	{
-		if ((constants::SAY_LINK_BODY_SIZE == EQEmu::constants::SAY_LINK_BODY_SIZE) || (serverSayLink.find('\x12') == std::string::npos)) {
-			rof2SayLink = serverSayLink;
+		if ((constants::SAY_LINK_BODY_SIZE == EQEmu::constants::SAY_LINK_BODY_SIZE) || (server_saylink.find('\x12') == std::string::npos)) {
+			rof2_saylink = server_saylink;
 			return;
 		}
 
-		auto segments = SplitString(serverSayLink, '\x12');
+		auto segments = SplitString(server_saylink, '\x12');
 
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {
 				if (segments[segment_iter].length() <= EQEmu::constants::SAY_LINK_BODY_SIZE) {
-					rof2SayLink.append(segments[segment_iter]);
+					rof2_saylink.append(segments[segment_iter]);
 					// TODO: log size mismatch error
 					continue;
 				}
@@ -6145,29 +6297,29 @@ namespace RoF2
 				// RoF2: X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX X  XXXX XX XXXXX XXXXXXXX (56)
 				// Diff:
 
-				rof2SayLink.push_back('\x12');
-				rof2SayLink.append(segments[segment_iter]);
-				rof2SayLink.push_back('\x12');
+				rof2_saylink.push_back('\x12');
+				rof2_saylink.append(segments[segment_iter]);
+				rof2_saylink.push_back('\x12');
 			}
 			else {
-				rof2SayLink.append(segments[segment_iter]);
+				rof2_saylink.append(segments[segment_iter]);
 			}
 		}
 	}
 
-	static inline void RoF2ToServerSayLink(std::string& serverSayLink, const std::string& rof2SayLink)
+	static inline void RoF2ToServerSayLink(std::string &server_saylink, const std::string &rof2_saylink)
 	{
-		if ((EQEmu::constants::SAY_LINK_BODY_SIZE == constants::SAY_LINK_BODY_SIZE) || (rof2SayLink.find('\x12') == std::string::npos)) {
-			serverSayLink = rof2SayLink;
+		if ((EQEmu::constants::SAY_LINK_BODY_SIZE == constants::SAY_LINK_BODY_SIZE) || (rof2_saylink.find('\x12') == std::string::npos)) {
+			server_saylink = rof2_saylink;
 			return;
 		}
 
-		auto segments = SplitString(rof2SayLink, '\x12');
+		auto segments = SplitString(rof2_saylink, '\x12');
 
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {
 				if (segments[segment_iter].length() <= constants::SAY_LINK_BODY_SIZE) {
-					serverSayLink.append(segments[segment_iter]);
+					server_saylink.append(segments[segment_iter]);
 					// TODO: log size mismatch error
 					continue;
 				}
@@ -6177,12 +6329,12 @@ namespace RoF2
 				// RoF2: X XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX XXXXX X  XXXX XX XXXXX XXXXXXXX (56)
 				// Diff:
 
-				serverSayLink.push_back('\x12');
-				serverSayLink.append(segments[segment_iter]);
-				serverSayLink.push_back('\x12');
+				server_saylink.push_back('\x12');
+				server_saylink.append(segments[segment_iter]);
+				server_saylink.push_back('\x12');
 			}
 			else {
-				serverSayLink.append(segments[segment_iter]);
+				server_saylink.append(segments[segment_iter]);
 			}
 		}
 	}

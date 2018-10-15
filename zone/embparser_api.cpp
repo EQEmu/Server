@@ -33,6 +33,8 @@
 #include "zone.h"
 #include "data_bucket.h"
 
+#include <cctype>
+
 extern Zone      *zone;
 extern QueryServ *QServ;
 
@@ -346,6 +348,83 @@ XS(XS__incstat) {
 	quest_manager.incstat(stat_id, int_value);
 
 	XSRETURN_EMPTY;
+}
+
+XS(XS__getinventoryslotid);
+XS(XS__getinventoryslotid) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getinventoryslotid(string identifier)");
+
+	int16 RETVAL;
+	dXSTARG;
+
+	std::string identifier = (Const_char *)SvPV_nolen(ST(0));
+	for (std::string::size_type i = 0; i < identifier.length(); ++i)
+		identifier[i] = std::tolower(identifier[i]);
+
+	if (identifier == "invalid")                   RETVAL = EQEmu::invslot::SLOT_INVALID;
+	else if (identifier == "cursor")               RETVAL = EQEmu::invslot::slotCursor;
+	else if (identifier == "possessions.begin")    RETVAL = EQEmu::invslot::POSSESSIONS_BEGIN;
+	else if (identifier == "possessions.end")      RETVAL = EQEmu::invslot::POSSESSIONS_END;
+	else if (identifier == "bank.begin")           RETVAL = EQEmu::invslot::BANK_BEGIN;
+	else if (identifier == "bank.end")             RETVAL = EQEmu::invslot::BANK_END;
+	else if (identifier == "sharedbank.begin")     RETVAL = EQEmu::invslot::SHARED_BANK_BEGIN;
+	else if (identifier == "sharedbank.end")       RETVAL = EQEmu::invslot::SHARED_BANK_END;
+	else if (identifier == "generalbags.begin")    RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN;
+	else if (identifier == "generalbags.end")      RETVAL = EQEmu::invbag::GENERAL_BAGS_END;
+	else if (identifier == "cursorbag.begin")      RETVAL = EQEmu::invbag::CURSOR_BAG_BEGIN;
+	else if (identifier == "cursorbag.end")        RETVAL = EQEmu::invbag::CURSOR_BAG_END;
+	else if (identifier == "bankbags.begin")       RETVAL = EQEmu::invbag::BANK_BAGS_BEGIN;
+	else if (identifier == "bankbags.end")         RETVAL = EQEmu::invbag::BANK_BAGS_END;
+	else if (identifier == "sharedbankbags.begin") RETVAL = EQEmu::invbag::SHARED_BANK_BAGS_BEGIN;
+	else if (identifier == "sharedbankbags.end")   RETVAL = EQEmu::invbag::SHARED_BANK_BAGS_END;
+	else if (identifier == "bagslot.begin")        RETVAL = EQEmu::invbag::SLOT_BEGIN;
+	else if (identifier == "bagslot.end")          RETVAL = EQEmu::invbag::SLOT_END;
+	else if (identifier == "augsocket.begin")      RETVAL = EQEmu::invaug::SOCKET_BEGIN;
+	else if (identifier == "augsocket.end")        RETVAL = EQEmu::invaug::SOCKET_END;
+	else if (identifier == "equipment.begin")      RETVAL = EQEmu::invslot::EQUIPMENT_BEGIN;
+	else if (identifier == "equipment.end")        RETVAL = EQEmu::invslot::EQUIPMENT_END;
+	else if (identifier == "general.begin")        RETVAL = EQEmu::invslot::GENERAL_BEGIN;
+	else if (identifier == "general.end")          RETVAL = EQEmu::invslot::GENERAL_END;
+	else if (identifier == "charm")                RETVAL = EQEmu::invslot::slotCharm;
+	else if (identifier == "ear1")                 RETVAL = EQEmu::invslot::slotEar1;
+	else if (identifier == "head")                 RETVAL = EQEmu::invslot::slotHead;
+	else if (identifier == "face")                 RETVAL = EQEmu::invslot::slotFace;
+	else if (identifier == "ear2")                 RETVAL = EQEmu::invslot::slotEar2;
+	else if (identifier == "neck")                 RETVAL = EQEmu::invslot::slotNeck;
+	else if (identifier == "shoulders")            RETVAL = EQEmu::invslot::slotShoulders;
+	else if (identifier == "arms")                 RETVAL = EQEmu::invslot::slotArms;
+	else if (identifier == "back")                 RETVAL = EQEmu::invslot::slotBack;
+	else if (identifier == "wrist1")               RETVAL = EQEmu::invslot::slotWrist1;
+	else if (identifier == "wrist2")               RETVAL = EQEmu::invslot::slotWrist2;
+	else if (identifier == "range")                RETVAL = EQEmu::invslot::slotRange;
+	else if (identifier == "hands")                RETVAL = EQEmu::invslot::slotHands;
+	else if (identifier == "primary")              RETVAL = EQEmu::invslot::slotPrimary;
+	else if (identifier == "secondary")            RETVAL = EQEmu::invslot::slotSecondary;
+	else if (identifier == "finger1")              RETVAL = EQEmu::invslot::slotFinger1;
+	else if (identifier == "finger2")              RETVAL = EQEmu::invslot::slotFinger2;
+	else if (identifier == "chest")                RETVAL = EQEmu::invslot::slotChest;
+	else if (identifier == "legs")                 RETVAL = EQEmu::invslot::slotLegs;
+	else if (identifier == "feet")                 RETVAL = EQEmu::invslot::slotFeet;
+	else if (identifier == "waist")                RETVAL = EQEmu::invslot::slotWaist;
+	else if (identifier == "powersource")          RETVAL = EQEmu::invslot::slotPowerSource;
+	else if (identifier == "ammo")                 RETVAL = EQEmu::invslot::slotAmmo;
+	else if (identifier == "general1")             RETVAL = EQEmu::invslot::slotGeneral1;
+	else if (identifier == "general2")             RETVAL = EQEmu::invslot::slotGeneral2;
+	else if (identifier == "general3")             RETVAL = EQEmu::invslot::slotGeneral3;
+	else if (identifier == "general4")             RETVAL = EQEmu::invslot::slotGeneral4;
+	else if (identifier == "general5")             RETVAL = EQEmu::invslot::slotGeneral5;
+	else if (identifier == "general6")             RETVAL = EQEmu::invslot::slotGeneral6;
+	else if (identifier == "general7")             RETVAL = EQEmu::invslot::slotGeneral7;
+	else if (identifier == "general8")             RETVAL = EQEmu::invslot::slotGeneral8;
+	else if (identifier == "general9")             RETVAL = EQEmu::invslot::slotGeneral9;
+	else if (identifier == "general10")            RETVAL = EQEmu::invslot::slotGeneral10;
+	else                                           RETVAL = EQEmu::invslot::SLOT_INVALID;
+
+	XSprePUSH; PUSHu((IV)RETVAL);
+
+	XSRETURN(1);
 }
 
 XS(XS__castspell);
@@ -3672,6 +3751,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "follow"), XS__follow, file);
 	newXS(strcpy(buf, "forcedoorclose"), XS__forcedoorclose, file);
 	newXS(strcpy(buf, "forcedooropen"), XS__forcedooropen, file);
+	newXS(strcpy(buf, "getinventoryslotid"), XS__getinventoryslotid, file);
 	newXS(strcpy(buf, "getItemName"), XS_qc_getItemName, file);
 	newXS(strcpy(buf, "get_spawn_condition"), XS__get_spawn_condition, file);
 	newXS(strcpy(buf, "getguildnamebyid"), XS__getguildnamebyid, file);

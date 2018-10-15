@@ -2111,10 +2111,27 @@ void Database::LoadLogSettings(EQEmuLogSys::LogSettings* log_settings)
 	}
 }
 
-void Database::ClearInvSnapshots(bool use_rule)
-{
+int Database::CountInvSnapshots() {
+	std::string query = StringFormat("SELECT COUNT(*) FROM (SELECT * FROM `inventory_snapshots` a GROUP BY `charid`, `time_index`) b");
+	auto results = QueryDatabase(query);
+
+	if (!results.Success())
+		return -1;
+
+	auto row = results.begin();
+
+	int64 count = atoll(row[0]);
+	if (count > 2147483647)
+		return -2;
+	if (count < 0)
+		return -3;
+
+	return count;
+}
+
+void Database::ClearInvSnapshots(bool from_now) {
 	uint32 del_time = time(nullptr);
-	if (use_rule) { del_time -= RuleI(Character, InvSnapshotHistoryD) * 86400; }
+	if (!from_now) { del_time -= RuleI(Character, InvSnapshotHistoryD) * 86400; }
 
 	std::string query = StringFormat("DELETE FROM inventory_snapshots WHERE time_index <= %lu", (unsigned long)del_time);
 	QueryDatabase(query);

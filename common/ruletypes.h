@@ -389,6 +389,7 @@ RULE_INT(Spells, AI_PursueDetrimentalChance, 90) // Chance while chasing target 
 RULE_INT(Spells, AI_IdleNoSpellMinRecast, 6000) // AI spell recast time(MS) check when no spell is cast while idle. (min time in random)
 RULE_INT(Spells, AI_IdleNoSpellMaxRecast, 60000) // AI spell recast time(MS) check when no spell is cast while chasing target. (max time in random)
 RULE_INT(Spells, AI_IdleBeneficialChance, 100) // Chance while idle to do a beneficial spell on self or others.
+RULE_INT(Spells, AI_HealHPPct, 50) // HP Pct NPCs will start heals at (in and out of combat) if spell's max_hp is not set
 RULE_BOOL(Spells, SHDProcIDOffByOne, true) // pre June 2009 SHD spell procs were off by 1, they stopped doing this in June 2009 (so UF+ spell files need this false)
 RULE_BOOL(Spells, Jun182014HundredHandsRevamp, false) // this should be true for if you import a spell file newer than June 18, 2014
 RULE_BOOL(Spells, SwarmPetTargetLock, false) // Use old method of swarm pets target locking till target dies then despawning.
@@ -551,7 +552,8 @@ RULE_REAL(Aggro, TunnelVisionAggroMod, 0.75) //people not currently the top hate
 RULE_INT(Aggro, MaxScalingProcAggro, 400) // Set to -1 for no limit. Maxmimum amount of aggro that HP scaling SPA effect in a proc will add.
 RULE_INT(Aggro, IntAggroThreshold, 75) // Int <= this will aggro regardless of level difference.
 RULE_BOOL(Aggro, AllowTickPulling, false) // tick pulling is an exploit in an NPC's call for help fixed sometime in 2006 on live
-RULE_BOOL(Aggro, UseLevelAggro, true) // Level 18+ and Undead will aggro regardless of level difference. (this will disabled Rule:IntAggroThreshold if set to true)
+RULE_INT(Aggro, MinAggroLevel, 18) // For use with UseLevelAggro
+RULE_BOOL(Aggro, UseLevelAggro, true) // MinAggroLevel rule value+ and Undead will aggro regardless of level difference. (this will disabled Rule:IntAggroThreshold if set to true)
 RULE_INT(Aggro, ClientAggroCheckInterval, 6) // Interval in which clients actually check for aggro - in seconds
 RULE_REAL(Aggro, PetAttackRange, 40000.0) // max squared range /pet attack works at default is 200
 RULE_BOOL(Aggro, NPCAggroMaxDistanceEnabled, true) /* If enabled, NPC's will drop aggro beyond 600 units or what is defined at the zone level */
