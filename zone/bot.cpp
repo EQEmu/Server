@@ -29,7 +29,7 @@
 extern volatile bool is_zone_loaded;
 
 // This constructor is used during the bot create command
-Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm::vec4(), 0, false), rest_timer(1) {
+Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm::vec4(), Ground, false), rest_timer(1) {
 	if(botOwner) {
 		this->SetBotOwner(botOwner);
 		this->_botOwnerCharacterID = botOwner->CharacterID();
@@ -101,7 +101,8 @@ Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm
 }
 
 // This constructor is used when the bot is loaded out of the database
-Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double totalPlayTime, uint32 lastZoneId, NPCType npcTypeData) : NPC(&npcTypeData, nullptr, glm::vec4(), 0, false), rest_timer(1)
+Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double totalPlayTime, uint32 lastZoneId, NPCType npcTypeData) 
+	: NPC(&npcTypeData, nullptr, glm::vec4(), Ground, false), rest_timer(1)
 {
 	this->_botOwnerCharacterID = botOwnerCharacterID;
 	if(this->_botOwnerCharacterID > 0)
@@ -2507,7 +2508,7 @@ void Bot::AI_Process() {
 								if (GetArchetype() == ARCHETYPE_CASTER || GetClass() == ROGUE) {
 									if (tar_distance <= melee_distance_max) {
 										if (PlotPositionAroundTarget(this, Goal.x, Goal.y, Goal.z)) {
-											CalculateNewPosition(Goal.x, Goal.y, Goal.z, GetBotWalkspeed(), true, false);
+											WalkTo(Goal.x, Goal.y, Goal.z);
 											return;
 										}
 									}
@@ -2519,7 +2520,7 @@ void Bot::AI_Process() {
 						if (caster_distance_min && tar_distance < caster_distance_min && !tar->IsFeared()) { // Caster back-off adjustment
 							if (PlotPositionAroundTarget(this, Goal.x, Goal.y, Goal.z)) {
 								if (DistanceSquared(Goal, tar->GetPosition()) <= caster_distance_max) {
-									CalculateNewPosition(Goal.x, Goal.y, Goal.z, GetBotWalkspeed(), true, false);
+									WalkTo(Goal.x, Goal.y, Goal.z);
 									return;
 								}
 							}
@@ -2527,7 +2528,7 @@ void Bot::AI_Process() {
 						else if (tar_distance < melee_distance_min) { // Melee back-off adjustment
 							if (PlotPositionAroundTarget(this, Goal.x, Goal.y, Goal.z)) {
 								if (DistanceSquared(Goal, tar->GetPosition()) <= melee_distance_max) {
-									CalculateNewPosition(Goal.x, Goal.y, Goal.z, GetBotWalkspeed(), true, false);
+									WalkTo(Goal.x, Goal.y, Goal.z);
 									return;
 								}
 							}
@@ -2535,7 +2536,7 @@ void Bot::AI_Process() {
 						else if (backstab_weapon && !behind_mob) { // Move the rogue to behind the mob
 							if (PlotPositionAroundTarget(tar, Goal.x, Goal.y, Goal.z)) {
 								if (DistanceSquared(Goal, tar->GetPosition()) <= melee_distance_max) {
-									CalculateNewPosition(Goal.x, Goal.y, Goal.z, GetBotRunspeed(), true, false); // rogues are agile enough to run in melee range
+									RunTo(Goal.x, Goal.y, Goal.z);
 									return;
 								}
 							}
@@ -2546,7 +2547,7 @@ void Bot::AI_Process() {
 								PlotPositionAroundTarget(tar, Goal.x, Goal.y, Goal.z)) // If we're behind the mob, we can attack when it's enraged
 							{
 								if (DistanceSquared(Goal, tar->GetPosition()) <= melee_distance_max) {
-									CalculateNewPosition(Goal.x, Goal.y, Goal.z, GetBotWalkspeed(), true, false);
+									WalkTo(Goal.x, Goal.y, Goal.z);
 									return;
 								}
 							}
@@ -2688,7 +2689,7 @@ void Bot::AI_Process() {
 
 					Goal = GetTarget()->GetPosition();
 										
-					CalculateNewPosition(Goal.x, Goal.y, Goal.z, GetBotRunspeed());
+					RunTo(Goal.x, Goal.y, Goal.z);
 					return;
 				}
 				else {
@@ -2756,10 +2757,10 @@ void Bot::AI_Process() {
 				if (IsMoving())
 					StopMoving();
 
-				Warp(glm::vec3(my_guard));
+				Teleport(my_guard);
 
 				if (HasPet())
-					GetPet()->Warp(glm::vec3(my_guard));
+					GetPet()->Teleport(my_guard);
 
 				return;
 			}
@@ -2769,10 +2770,10 @@ void Bot::AI_Process() {
 			if (IsMoving())
 				StopMoving();
 
-			Warp(glm::vec3(leash_owner->GetPosition()));
+			Teleport(leash_owner->GetPosition());
 			
 			if (HasPet())
-				GetPet()->Warp(glm::vec3(leash_owner->GetPosition()));
+				GetPet()->Teleport(leash_owner->GetPosition());
 
 			return;
 		}
@@ -2800,13 +2801,18 @@ void Bot::AI_Process() {
 					if (rest_timer.Enabled())
 						rest_timer.Disable();
 
-					int speed = GetBotRunspeed();
+					bool running = true;
 					if (fm_dist < GetFollowDistance() + BOT_FOLLOW_DISTANCE_WALK)
-						speed = GetBotWalkspeed();
+						running = false;
 
 					Goal = follow_mob->GetPosition();
 
-					CalculateNewPosition(Goal.x, Goal.y, Goal.z, speed);
+					if (running) {
+						RunTo(Goal.x, Goal.y, Goal.z);
+					}
+					else {
+						WalkTo(Goal.x, Goal.y, Goal.z);
+					}
 					return;
 				}
 			}
@@ -2888,14 +2894,14 @@ void Bot::PetAIProcess() {
 				if(botPet->GetClass() == ROGUE && !petHasAggro && !botPet->BehindMob(botPet->GetTarget(), botPet->GetX(), botPet->GetY())) {
 					// Move the rogue to behind the mob
 					if(botPet->PlotPositionAroundTarget(botPet->GetTarget(), newX, newY, newZ)) {
-						botPet->CalculateNewPosition(newX, newY, newZ, botPet->GetRunspeed());
+						botPet->RunTo(newX, newY, newZ);
 						return;
 					}
 				}
 				else if(GetTarget() == botPet->GetTarget() && !petHasAggro && !botPet->BehindMob(botPet->GetTarget(), botPet->GetX(), botPet->GetY())) {
 					// If the bot owner and the bot are fighting the same mob, then move the pet to the rear arc of the mob
 					if(botPet->PlotPositionAroundTarget(botPet->GetTarget(), newX, newY, newZ)) {
-						botPet->CalculateNewPosition(newX, newY, newZ, botPet->GetRunspeed());
+						botPet->RunTo(newX, newY, newZ);
 						return;
 					}
 				}
@@ -2910,7 +2916,7 @@ void Bot::PetAIProcess() {
 						moveBehindMob = true;
 
 					if(botPet->PlotPositionAroundTarget(botPet->GetTarget(), newX, newY, newZ, moveBehindMob)) {
-						botPet->CalculateNewPosition(newX, newY, newZ, botPet->GetRunspeed());
+						botPet->RunTo(newX, newY, newZ);
 						return;
 					}
 				}
@@ -2993,7 +2999,7 @@ void Bot::PetAIProcess() {
 					botPet->SetRunAnimSpeed(0);
 					if(!botPet->IsRooted()) {
 						Log(Logs::Detail, Logs::AI, "Pursuing %s while engaged.", botPet->GetTarget()->GetCleanName());
-						botPet->CalculateNewPosition(botPet->GetTarget()->GetX(), botPet->GetTarget()->GetY(), botPet->GetTarget()->GetZ(), botPet->GetOwner()->GetRunspeed());
+						botPet->RunTo(botPet->GetTarget()->GetX(), botPet->GetTarget()->GetY(), botPet->GetTarget()->GetZ());
 						return;
 					} else {
 						botPet->SetHeading(botPet->GetTarget()->GetHeading());
@@ -3021,7 +3027,7 @@ void Bot::PetAIProcess() {
 					float dist = DistanceSquared(botPet->GetPosition(), botPet->GetTarget()->GetPosition());
 					botPet->SetRunAnimSpeed(0);
 					if(dist > 184) {
-						botPet->CalculateNewPosition(botPet->GetTarget()->GetX(), botPet->GetTarget()->GetY(), botPet->GetTarget()->GetZ(), botPet->GetTarget()->GetRunspeed());
+						botPet->RunTo(botPet->GetTarget()->GetX(), botPet->GetTarget()->GetY(), botPet->GetTarget()->GetZ());
 						return;
 					} else {
 						botPet->SetHeading(botPet->GetTarget()->GetHeading());
