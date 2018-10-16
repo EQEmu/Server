@@ -1022,7 +1022,7 @@ void command_summon(Client *c, const Seperator *sep)
 	{ // npc target
 		c->Message(0, "Summoning NPC %s to %1.1f, %1.1f, %1.1f",  t->GetName(), c->GetX(), c->GetY(), c->GetZ());
 		t->CastToNPC()->GMMove(c->GetX(), c->GetY(), c->GetZ(), c->GetHeading());
-		t->CastToNPC()->SaveGuardSpot(true);
+		t->CastToNPC()->SaveGuardSpot(glm::vec4(0.0f));
 	}
 	else if (t->IsCorpse())
 	{ // corpse target
@@ -1842,7 +1842,7 @@ void command_ai(Client *c, const Seperator *sep)
 	}
 	else if (strcasecmp(sep->arg[1], "guard") == 0) {
 		if (target && target->IsNPC())
-			target->CastToNPC()->SaveGuardSpot();
+			target->CastToNPC()->SaveGuardSpot(target->GetPosition());
 		else
 			c->Message(0, "Usage: (targeted) #ai guard - sets npc to guard the current location (use #summon to move)");
 	}
@@ -8473,9 +8473,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
         }
 
         c->Message(0, "Updating coordinates successful.");
-        target->CastToNPC()->GMMove(c->GetX(), c->GetY(), c->GetZ(), c->GetHeading());
-        target->CastToNPC()->SaveGuardSpot(true);
-        target->SendPosition();
+        target->GMMove(c->GetX(), c->GetY(), c->GetZ(), c->GetHeading());
 
         return;
     }

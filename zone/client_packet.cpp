@@ -10030,7 +10030,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			if (mypet->IsNPC()) {
 				mypet->SayTo_StringID(this, MT_PetResponse, PET_GUARDINGLIFE);
 				mypet->SetPetOrder(SPO_Guard);
-				mypet->CastToNPC()->SaveGuardSpot();
+				mypet->CastToNPC()->SaveGuardSpot(mypet->GetPosition());
 				if (!mypet->GetTarget()) // want them to not twitch if they're chasing something down
 					mypet->StopNavigation();
 				if (mypet->IsPetStop()) {

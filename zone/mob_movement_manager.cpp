@@ -247,6 +247,11 @@ public:
 		m->SetPosition(m_teleport_to_x, m_teleport_to_y, m_teleport_to_z);
 		m->SetHeading(mgr->FixHeading(m_teleport_to_heading));
 		mgr->SendCommandToClients(m, 0.0, 0.0, 0.0, 0.0, 0, ClientRangeAny);
+
+		if (m->IsNPC()) {
+			entity_list.ProcessMove(m->CastToNPC(), m_teleport_to_x, m_teleport_to_y, m_teleport_to_z);
+		}
+
 		return true;
 	}
 
@@ -326,7 +331,7 @@ struct NavigateTo
 struct MobMovementEntry
 {
 	std::deque<std::unique_ptr<IMovementCommand>> Commands;
-	NavigateTo NavigateTo;
+	NavigateTo NavTo;
 };
 
 void AdjustRoute(std::list<IPathfinder::IPathNode> &nodes, int flymode, float offset) {
@@ -433,7 +438,7 @@ void MobMovementManager::NavigateTo(Mob *who, float x, float y, float z, MobMove
 {
 	auto iter = _impl->Entries.find(who);
 	auto &ent = (*iter);
-	auto &nav = ent.second.NavigateTo;
+	auto &nav = ent.second.NavTo;
 
 	double current_time = static_cast<double>(Timer::GetCurrentTime()) / 1000.0;
 	if ((current_time - nav.last_set_time) > 0.5) {
@@ -502,7 +507,7 @@ void MobMovementManager::SendCommandToClients(Mob *m, float dx, float dy, float 
 				_impl->Stats.TotalSentPosition++;
 			}
 
-			c->QueuePacket(&outapp);
+			c->QueuePacket(&outapp, false);
 		}
 	}
 	else {
@@ -541,7 +546,7 @@ void MobMovementManager::SendCommandToClients(Mob *m, float dx, float dy, float 
 					_impl->Stats.TotalSentPosition++;
 				}
 
-				c->QueuePacket(&outapp);
+				c->QueuePacket(&outapp, false);
 			}
 		}
 	}

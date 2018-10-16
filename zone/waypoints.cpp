@@ -412,18 +412,13 @@ void NPC::SetWaypointPause()
 	}
 }
 
-void NPC::SaveGuardSpot(bool iClearGuardSpot) {
-	if (iClearGuardSpot) {
-		Log(Logs::Detail, Logs::AI, "Clearing guard order.");
-		m_GuardPoint = glm::vec4();
-	}
-	else {
-		m_GuardPoint = m_Position;
+void NPC::SaveGuardSpot(const glm::vec4 &pos)
+{
+	m_GuardPoint = pos;
 
-		if (m_GuardPoint.w == 0)
-			m_GuardPoint.w = 0.0001;		//hack to make IsGuarding simpler
-		Log(Logs::Detail, Logs::AI, "Setting guard position to %s", to_string(static_cast<glm::vec3>(m_GuardPoint)).c_str());
-	}
+	if (m_GuardPoint.w == 0)
+		m_GuardPoint.w = 0.0001;		//hack to make IsGuarding simpler
+	LogF(Logs::Detail, Logs::AI, "Setting guard position to {0}", to_string(static_cast<glm::vec3>(m_GuardPoint)));
 }
 
 void NPC::NextGuardPosition() {
@@ -819,8 +814,6 @@ void Mob::TryMoveAlong(float distance, float angle, bool send)
 
 	new_pos.z = GetFixedZ(new_pos);
 	Teleport(new_pos);
-	if (send)
-		SendPositionUpdate();
 }
 
 int	ZoneDatabase::GetHighestGrid(uint32 zoneid) {

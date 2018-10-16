@@ -1827,7 +1827,6 @@ bool Bot::Process() {
 	if(tic_timer.Check()) {
 		//6 seconds, or whatever the rule is set to has passed, send this position to everyone to avoid ghosting
 		if(!IsMoving() && !IsEngaged()) {
-			SendPosition();
 			if(IsSitting()) {
 				if(!rest_timer.Enabled())
 					rest_timer.Start(RuleI(Character, RestRegenTimeToActivate) * 1000);
@@ -2717,8 +2716,6 @@ void Bot::AI_Process() {
 				else {
 					if (IsMoving())
 						StopMoving();
-					else
-						SendPosition();
 
 					return;
 				}
@@ -2743,8 +2740,6 @@ void Bot::AI_Process() {
 		} // end not in combat range
 
 		if (!IsMoving() && !spellend_timer.Enabled()) { // This may actually need work...
-			SendPosition();
-
 			if (GetBotStance() == BotStancePassive)
 				return;
 			
@@ -3028,8 +3023,7 @@ void Bot::PetAIProcess() {
 						if(moved) {
 							moved = false;
 							StopNavigation();
-							botPet->SendPosition();
-							botPet->SetMoving(false);
+							botPet->StopNavigation();
 						}
 					}
 				}
@@ -3056,8 +3050,7 @@ void Bot::PetAIProcess() {
 						if(moved) {
 							moved = false;
 							StopNavigation();
-							botPet->SendPosition();
-							botPet->SetMoving(false);
+							botPet->StopNavigation();
 						}
 					}
 					break;
@@ -3119,7 +3112,7 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 		entity_list.AddBot(this, true, true);
 		// Load pet
 		LoadPet();
-		this->SendPosition();
+		SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0);
 		// there is something askew with spawn struct appearance fields...
 		// I re-enabled this until I can sort it out
 		uint32 itemID = 0;

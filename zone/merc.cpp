@@ -1271,7 +1271,7 @@ bool Merc::Process()
 		//6 seconds, or whatever the rule is set to has passed, send this position to everyone to avoid ghosting
 		if(!IsMoving() && !IsEngaged())
 		{
-			SendPosition();
+			SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0);
 			if(IsSitting()) {
 				if(!rest_timer.Enabled()) {
 					rest_timer.Start(RuleI(Character, RestRegenTimeToActivate) * 1000);
@@ -1568,10 +1568,10 @@ void Merc::AI_Process() {
 					}
 				}
 
-				if (IsMoving())
-					SendPositionUpdate();
-				else
-					SendPosition();
+				//if (IsMoving())
+				//	SendPositionUpdate();
+				//else
+				//	SendPosition();
 			}
 
 			if(!IsMercCaster() && GetTarget() && !IsStunned() && !IsMezzed() && (GetAppearance() != eaDead))
@@ -1693,10 +1693,10 @@ void Merc::AI_Process() {
 					return;
 				}
 
-				if(IsMoving())
-					SendPositionUpdate();
-				else
-					SendPosition();
+				//if(IsMoving())
+				//	SendPositionUpdate();
+				//else
+				//	SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0);
 			}
 		} // end not in combat range
 
@@ -1791,7 +1791,7 @@ void Merc::AI_Start(int32 iMoveDelay) {
 	}
 
 	SendTo(GetX(), GetY(), GetZ());
-	SaveGuardSpot();
+	SaveGuardSpot(GetPosition());
 }
 
 void Merc::AI_Stop() {
@@ -1990,7 +1990,7 @@ bool Merc::AIDoSpellCast(uint16 spellid, Mob* tar, int32 mana_cost, uint32* oDon
 		|| dist2 <= GetActSpellRange(spellid, spells[spellid].range)*GetActSpellRange(spellid, spells[spellid].range)) && (mana_cost <= GetMana() || GetMana() == GetMaxMana()))
 	{
 		SetRunAnimSpeed(0);
-		SendPosition();
+		SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0);
 		SetMoving(false);
 
 		result = CastSpell(spellid, tar->GetID(), EQEmu::CastingSlot::Gem2, -1, mana_cost, oDontDoAgainBefore, -1, -1, 0, 0);
@@ -4360,7 +4360,7 @@ void Merc::Sit() {
 	if(IsMoving()) {
 		moved = false;
 		// SetHeading(CalculateHeadingToTarget(GetTarget()->GetX(), GetTarget()->GetY()));
-		SendPosition();
+		SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0);
 		SetMoving(false);
 	}
 
@@ -5128,7 +5128,7 @@ bool Merc::Spawn(Client *owner) {
 
 	entity_list.AddMerc(this, true, true);
 
-	SendPosition();
+	SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0);
 
 	Log(Logs::General, Logs::Mercenaries, "Spawn Mercenary %s.", GetName());
 

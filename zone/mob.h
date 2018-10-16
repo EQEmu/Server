@@ -557,10 +557,9 @@ public:
 	void SetRunning(bool val) { m_is_running = val; }
 	virtual void GMMove(float x, float y, float z, float heading = 0.01, bool SendUpdate = true);
 	void SetDelta(const glm::vec4& delta);
-	void SendPositionUpdate(bool iSendToSelf = false);
 	void MakeSpawnUpdateNoDelta(PlayerPositionUpdateServer_Struct* spu);
 	void MakeSpawnUpdate(PlayerPositionUpdateServer_Struct* spu);
-	void SendPosition();
+	void SentPositionPacket(float dx, float dy, float dz, float dh, int anim, bool send_to_self = false);
 	void StopMoving();
 	void StopMoving(float new_heading);
 	void SetSpawned() { spawned = true; };

@@ -664,7 +664,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 				m_Proximity = glm::vec3(m_Position);
 
 				//send out updates to people in zone.
-				SendPosition();
+				SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0);
 			}
 
 			auto outapp =

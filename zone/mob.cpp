@@ -159,7 +159,7 @@ Mob::Mob(const char* in_name,
 	if (runspeed < 0 || runspeed > 20)
 		runspeed = 1.25f;
 	base_runspeed = (int)((float)runspeed * 40.0f);
-	// clients
+	// clients -- todo movement this doesn't take into account gm speed we need to fix that.
 	if (runspeed == 0.7f) {
 		base_runspeed = 28;
 		walkspeed = 0.3f;
@@ -1475,14 +1475,24 @@ void Mob::StopMoving(float new_heading) {
 		moved = false;
 }
 
-/* Used for mobs standing still - this does not send a delta */
-void Mob::SendPosition() {
-	//mMovementManager->SendPosition(this);
-}
+void Mob::SentPositionPacket(float dx, float dy, float dz, float dh, int anim, bool send_to_self)
+{
+	EQApplicationPacket outapp(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
+	PlayerPositionUpdateServer_Struct *spu = (PlayerPositionUpdateServer_Struct*)outapp.pBuffer;
 
-/* Position updates for mobs on the move */
-void Mob::SendPositionUpdate(bool iSendToSelf) {
-	//mMovementManager->SendPositionUpdate(this, iSendToSelf);
+	memset(spu, 0x00, sizeof(PlayerPositionUpdateServer_Struct));
+	spu->spawn_id = GetID();
+	spu->x_pos = FloatToEQ19(GetX());
+	spu->y_pos = FloatToEQ19(GetY());
+	spu->z_pos = FloatToEQ19(GetZ());
+	spu->heading = FloatToEQ12(GetHeading());
+	spu->delta_x = FloatToEQ13(dx);
+	spu->delta_y = FloatToEQ13(dy);
+	spu->delta_z = FloatToEQ13(dz);
+	spu->delta_heading = FloatToEQ10(dh);
+	spu->animation = anim;
+
+	entity_list.QueueClients(this, &outapp, send_to_self == false, false);
 }
 
 // this is for SendPosition()
@@ -1646,19 +1656,11 @@ void Mob::ShowBuffList(Client* client) {
 }
 
 void Mob::GMMove(float x, float y, float z, float heading, bool SendUpdate) {
-	if(IsNPC()) {
-		entity_list.ProcessMove(CastToNPC(), x, y, z);
-	}
+	Teleport(glm::vec4(x, y, z, heading));
 
-	m_Position.x = x;
-	m_Position.y = y;
-	m_Position.z = z;
-	if (m_Position.w != 0.01)
-		this->m_Position.w = heading;
-	if(IsNPC())
-		CastToNPC()->SaveGuardSpot(true);
-	if(SendUpdate)
-		SendPosition();
+	if (IsNPC()) {
+		CastToNPC()->SaveGuardSpot(glm::vec4(x, y, z, heading));
+	}
 }
 
 void Mob::SendIllusionPacket(uint16 in_race, uint8 in_gender, uint8 in_texture, uint8 in_helmtexture, uint8 in_haircolor, uint8 in_beardcolor, uint8 in_eyecolor1, uint8 in_eyecolor2, uint8 in_hairstyle, uint8 in_luclinface, uint8 in_beard, uint8 in_aa_title, uint32 in_drakkin_heritage, uint32 in_drakkin_tattoo, uint32 in_drakkin_details, float in_size) {

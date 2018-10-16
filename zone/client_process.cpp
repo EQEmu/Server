@@ -122,7 +122,7 @@ bool Client::Process() {
 
 		/* I haven't naturally updated my position in 10 seconds, updating manually */
 		if (!is_client_moving && position_update_timer.Check()) {
-			SendPositionUpdate();
+			SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0);
 		}
 
 		if (mana_timer.Check())
