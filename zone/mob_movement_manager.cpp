@@ -682,9 +682,6 @@ void MobMovementManager::UpdatePath(Mob *who, float x, float y, float z, MobMove
 
 			first_node = false;
 		}
-		//yet rotate to node + 1
-		//auto h = CalculateHeadingAngleBetweenPositions(current_node.pos.x, current_node.pos.y, next_node.pos.x, next_node.pos.z);
-		//PushRotateTo(ent.second, who, h, mode);
 
 		//if underwater only mob and node -> node + 1 is moving to land (terminate route, npc will go to the point where it would normally exit the water but no further)
 		if (who->IsUnderwaterOnly()) {
