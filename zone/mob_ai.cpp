@@ -1710,7 +1710,7 @@ void NPC::AI_DoMovement() {
 
 					SetWaypointPause();
 					SetAppearance(eaStanding, false);
-					if (m_CurrentWayPoint.w >= 0.0) {
+					if (cur_wp_pause > 0 && m_CurrentWayPoint.w >= 0.0) {
 						RotateTo(m_CurrentWayPoint.w);
 					}
 
@@ -1756,7 +1756,7 @@ void NPC::AI_DoMovement() {
 
 	}
 	else if (IsGuarding()) {	
-		bool at_gp = IsPositionEqualWithinCertainZ(m_Position, m_GuardPoint, 5.0f);
+		bool at_gp = IsPositionEqualWithinCertainZ(m_Position, m_GuardPoint, 15.0f);
 
 		if (at_gp) {
 

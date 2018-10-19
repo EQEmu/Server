@@ -392,7 +392,6 @@ void NPC::SetWaypointPause()
 
 	if (cur_wp_pause == 0) {
 		AI_walking_timer->Start(100);
-		AI_walking_timer->Trigger();
 	}
 	else
 	{

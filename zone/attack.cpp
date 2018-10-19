@@ -2667,12 +2667,6 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 			}
 		}
 	}
-
-	if (IsNPC() && CastToNPC()->IsUnderwaterOnly() && zone->HasWaterMap()) {
-		if (!zone->watermap->InLiquid(glm::vec3(other->GetPosition()))) {
-			return;
-		}
-	}
 	// first add self
 
 	// The damage on the hate list is used to award XP to the killer. This check is to prevent Killstealing.

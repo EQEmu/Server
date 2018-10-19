@@ -381,7 +381,7 @@ public:
 	/* Only allows players that killed corpse to loot */
 	const bool HasPrivateCorpse() const { return NPCTypedata->private_corpse; }
 
-	const bool IsUnderwaterOnly() const { return NPCTypedata->underwater; }
+	virtual const bool IsUnderwaterOnly() const { return NPCTypedata->underwater; }
 	const char* GetRawNPCTypeName() const { return NPCTypedata->name; }
 
 	void ChangeLastName(const char* in_lastname);

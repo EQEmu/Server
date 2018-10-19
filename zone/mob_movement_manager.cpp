@@ -46,28 +46,29 @@ public:
 
 		auto rotate_to_speed = m_rotate_to_mode == MovementRunning ? 50.0 :  16.0; //todo: get this from mob
 
+		auto from = FixHeading(m->GetHeading());
+		auto to = FixHeading(m_rotate_to);
+		auto diff = to - from;
+
+		while (diff < -256.0) {
+			diff += 512.0;
+		}
+
+		while (diff > 256) {
+			diff -= 512.0;
+		}
+
+		auto dist = std::abs(diff);
+
 		if (!m_started) {
 			m_started = true;
 			m->SetMoving(true);
 		
-			if (rotate_to_speed > 0.0 && rotate_to_speed <= 25.0) { //send basic rotation
+			if (dist > 15.0f && rotate_to_speed > 0.0 && rotate_to_speed <= 25.0) { //send basic rotation
 				mgr->SendCommandToClients(m, 0.0, 0.0, 0.0, m_rotate_to_dir * rotate_to_speed, 0, ClientRangeClose);
 			}
 		}
 		
-		auto from = FixHeading(m->GetHeading());
-		auto to = FixHeading(m_rotate_to);
-		auto diff = to - from;
-		
-		while (diff < -256.0) {
-			diff += 512.0;
-		}
-		
-		while (diff > 256) {
-			diff -= 512.0;
-		}
-		
-		auto dist = std::abs(diff);
 		auto td = rotate_to_speed * 19.0 * frame_time;
 		
 		if (td >= dist) {
@@ -604,51 +605,106 @@ void MobMovementManager::FillCommandStruct(PlayerPositionUpdateServer_Struct *sp
 
 void MobMovementManager::UpdatePath(Mob *who, float x, float y, float z, MobMovementMode mode)
 {
+	//If who is underwater & xyz is underwater & who can see xyz
+		//Create a route directly from who to xyz
+	//else
+		//Create Route
+	if (zone->HasMap() && zone->HasWaterMap()) {
+		if (zone->watermap->InLiquid(who->GetPosition()) && zone->watermap->InLiquid(glm::vec3(x, y, z)) && zone->zonemap->CheckLoS(who->GetPosition(), glm::vec3(x, y, z))) {
+			auto iter = _impl->Entries.find(who);
+			auto &ent = (*iter);
+			
+			PushMoveTo(ent.second, x, y, z, mode);
+			return;
+		}
+	}
+
 	bool partial = false;
 	bool stuck = false;
 	auto route = zone->pathing->FindRoute(glm::vec3(who->GetX(), who->GetY(), who->GetZ()), glm::vec3(x, y, z), partial, stuck);
-
+	
+	//if route empty then return
 	if (route.empty()) {
 		return;
 	}
 
 	auto &first = route.front();
+	auto &last = route.back();
 
-	//if who is already at the first node, then cull it
-	if (IsPositionEqualWithinCertainZ(glm::vec3(who->GetX(), who->GetY(), who->GetZ()), first.pos, 5.0f)) {
-		route.pop_front();
+	if (zone->HasWaterMap()) {
+		//If who is underwater & who is not at the first node
+		//Add node at who
+		if (!IsPositionEqualWithinCertainZ(glm::vec3(who->GetX(), who->GetY(), who->GetZ()), first.pos, 5.0f)
+			&& zone->watermap->InLiquid(who->GetPosition())) 
+		{
+			IPathfinder::IPathNode node(who->GetPosition());
+			route.push_front(node);
+		}
+
+		//If xyz is underwater & xyz is not at the last node
+		//Add node at xyz
+		if (!IsPositionEqualWithinCertainZ(glm::vec3(x, y, z), last.pos, 5.0f)
+			&& zone->watermap->InLiquid(glm::vec3(x, y, z)))
+		{
+			IPathfinder::IPathNode node(glm::vec3(x, y, z));
+			route.push_back(node);
+		}
 	}
 
-	if (route.empty()) {
-		return;
-	}
-
+	//adjust route
 	AdjustRoute(route, who->GetFlyMode(), who->GetZOffset());
 
-	auto iter = _impl->Entries.find(who);
-	auto &ent = (*iter);
-
-	first = route.front();
-	//If mode = walking then rotateto first node (if possible, live does this)
-	if (mode == MovementWalking) {
-		auto h = who->CalculateHeadingToTarget(first.pos.x, first.pos.y);
-		PushRotateTo(ent.second, who, h, mode);
-	}
-
-	//for each node create a moveto/teleport command
+	auto eiter = _impl->Entries.find(who);
+	auto &ent = (*eiter);
+	auto iter = route.begin();
 	glm::vec3 previous_pos(who->GetX(), who->GetY(), who->GetZ());
-	for (auto &node : route) {
-		if (node.teleport) {
-			PushTeleportTo(ent.second, node.pos.x, node.pos.y, node.pos.z, 
-				CalculateHeadingAngleBetweenPositions(previous_pos.x, previous_pos.y, node.pos.x, node.pos.y));
+	bool first_node = true;
+
+	//for each node
+	while (iter != route.end()) {
+		auto &current_node = (*iter);
+
+		iter++;
+
+		if (iter == route.end()) {
+			continue;
+		}
+
+		previous_pos = current_node.pos;
+		auto &next_node = (*iter);
+
+		if (first_node) {
+
+			if (mode == MovementWalking) {
+				auto h = who->CalculateHeadingToTarget(next_node.pos.x, next_node.pos.y);
+				PushRotateTo(ent.second, who, h, mode);
+			}
+
+			first_node = false;
+		}
+		//yet rotate to node + 1
+		//auto h = CalculateHeadingAngleBetweenPositions(current_node.pos.x, current_node.pos.y, next_node.pos.x, next_node.pos.z);
+		//PushRotateTo(ent.second, who, h, mode);
+
+		//if underwater only mob and node -> node + 1 is moving to land (terminate route, npc will go to the point where it would normally exit the water but no further)
+		if (who->IsUnderwaterOnly()) {
+			if (zone->HasWaterMap() && !zone->watermap->InLiquid(next_node.pos)) {
+				PushStopMoving(ent.second);
+				return;
+			}
+		}
+
+		//move to / teleport to node + 1
+		if (next_node.teleport) {
+			PushTeleportTo(ent.second, next_node.pos.x, next_node.pos.y, next_node.pos.z,
+				CalculateHeadingAngleBetweenPositions(current_node.pos.x, current_node.pos.y, next_node.pos.x, next_node.pos.y));
 		}
 		else {
-			PushMoveTo(ent.second, node.pos.x, node.pos.y, node.pos.z, mode);
+			PushMoveTo(ent.second, next_node.pos.x, next_node.pos.y, next_node.pos.z, mode);
 		}
-
-		previous_pos = node.pos;
 	}
 
+	//if stuck then handle stuck
 	if (stuck) {
 		PushTeleportTo(ent.second, x, y, z, 
 			CalculateHeadingAngleBetweenPositions(previous_pos.x, previous_pos.y, x, y));

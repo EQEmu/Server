@@ -1061,6 +1061,7 @@ public:
 	void SetCurrentWP(uint16 waypoint) { cur_wp = waypoint; }
 	virtual FACTION_VALUE GetReverseFactionCon(Mob* iOther) { return FACTION_INDIFFERENT; }
 
+	virtual const bool IsUnderwaterOnly() const { return false; }
 	inline bool IsTrackable() const { return(trackable); }
 	Timer* GetAIThinkTimer() { return AI_think_timer.get(); }
 	Timer* GetAIMovementTimer() { return AI_movement_timer.get(); }
