@@ -623,10 +623,27 @@ void MobMovementManager::UpdatePath(Mob *who, float x, float y, float z, MobMove
 	bool stuck = false;
 	auto route = zone->pathing->FindRoute(glm::vec3(who->GetX(), who->GetY(), who->GetZ()), glm::vec3(x, y, z), partial, stuck);
 	
-	//if route empty then return
-	if (route.empty()) {
-		return;
+	//if route empty or only has two points, and we have los, then just force npc to move to location
+	if (route.size() < 3) {
+		auto iter = _impl->Entries.find(who);
+		auto &ent = (*iter);
+		if (zone->zonemap->CheckLoS(who->GetPosition(), glm::vec3(x, y, z)) && route.size() > 0)
+		{
+
+			auto &first = route.front();
+			auto &last = route.back();
+
+			PushMoveTo(ent.second, x, y, z, mode);
+			return;
+		}
+		else if(route.size() < 2)
+		{
+			PushMoveTo(ent.second, x, y, z, mode);
+			return;
+		}
 	}
+
+
 
 	auto &first = route.front();
 	auto &last = route.back();
@@ -695,19 +712,21 @@ void MobMovementManager::UpdatePath(Mob *who, float x, float y, float z, MobMove
 		}
 
 		//move to / teleport to node + 1
-		if (next_node.teleport) {
+		if (next_node.teleport && next_node.pos.x != 0.0f && next_node.pos.y != 0.0f) {
 			PushTeleportTo(ent.second, next_node.pos.x, next_node.pos.y, next_node.pos.z,
 				CalculateHeadingAngleBetweenPositions(current_node.pos.x, current_node.pos.y, next_node.pos.x, next_node.pos.y));
 		}
 		else {
-			PushMoveTo(ent.second, next_node.pos.x, next_node.pos.y, next_node.pos.z, mode);
+			if (next_node.pos.x != 0.0f && next_node.pos.y != 0.0f)
+			{
+				PushMoveTo(ent.second, next_node.pos.x, next_node.pos.y, next_node.pos.z, mode);
+			}
 		}
 	}
 
 	//if stuck then handle stuck
 	if (stuck) {
-		PushTeleportTo(ent.second, x, y, z, 
-			CalculateHeadingAngleBetweenPositions(previous_pos.x, previous_pos.y, x, y));
+		PushMoveTo(ent.second, x, y, z, mode);
 	}
 	else {
 		PushStopMoving(ent.second);
