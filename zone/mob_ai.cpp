@@ -1663,7 +1663,7 @@ void NPC::AI_DoMovement() {
 			destination.x = roambox_destination_x;
 			destination.y = roambox_destination_y;
 			destination.z = m_Position.z;
-			roambox_destination_z = zone->zonemap->FindClosestZ(glm::vec3(roambox_destination_x, roambox_destination_y, roambox_destination_z), nullptr) +  this->GetZOffset();
+			roambox_destination_z = zone->zonemap->FindClosestZ(destination, nullptr) +  this->GetZOffset();
 
 			Log(Logs::Detail,
 				Logs::NPCRoamBox,
