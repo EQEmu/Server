@@ -131,8 +131,11 @@ IPathfinder::IPath PathfinderNavmesh::FindRoute(const glm::vec3 &start, const gl
 	return Route;
 }
 
-glm::vec3 PathfinderNavmesh::GetRandomLocation()
+glm::vec3 PathfinderNavmesh::GetRandomLocation(const glm::vec3 &start)
 {
+	if (start.x == 0.0f && start.y == 0.0)
+		return glm::vec3(0.f);
+
 	if (!m_impl->nav_mesh) {
 		return glm::vec3(0.f);
 	}
@@ -143,14 +146,33 @@ glm::vec3 PathfinderNavmesh::GetRandomLocation()
 	}
 
 	dtQueryFilter filter;
-	filter.setIncludeFlags(65535U);
+	filter.setIncludeFlags(65535U ^ 2048);
+	filter.setAreaCost(0, 1.0f); //Normal
+	filter.setAreaCost(1, 3.0f); //Water
+	filter.setAreaCost(2, 5.0f); //Lava
+	filter.setAreaCost(4, 1.0f); //PvP
+	filter.setAreaCost(5, 2.0f); //Slime
+	filter.setAreaCost(6, 2.0f); //Ice
+	filter.setAreaCost(7, 4.0f); //V Water (Frigid Water)
+	filter.setAreaCost(8, 1.0f); //General Area
+	filter.setAreaCost(9, 0.1f); //Portal
+	filter.setAreaCost(10, 0.1f); //Prefer
 
 	dtPolyRef randomRef;
 	float point[3];
 
-	if (dtStatusSucceed(m_impl->query->findRandomPoint(&filter, []() {
-		return (float)zone->random.Real(0.0, 1.0);
-	}, &randomRef, point))) 
+	dtPolyRef start_ref;
+	glm::vec3 current_location(start.x, start.z, start.y);
+	glm::vec3 ext(5.0f, 100.0f, 5.0f);
+
+	m_impl->query->findNearestPoly(&current_location[0], &ext[0], &filter, &start_ref, 0);
+
+	if (!start_ref)
+	{
+		return glm::vec3(0.f);
+	}
+
+	if (dtStatusSucceed(m_impl->query->findRandomPointAroundCircle(start_ref, &current_location[0], 100.f, &filter, []() { return (float)zone->random.Real(0.0, 1.0); }, &randomRef, point)))
 	{
 		return glm::vec3(point[0], point[2], point[1]);
 	}

@@ -802,6 +802,7 @@ void Client::AI_Process()
 				if (AI_movement_timer->Check()) {
 					// Check if we have reached the last fear point
 					if(IsPositionEqualWithinCertainZ(glm::vec3(GetX(), GetY(), GetZ()), m_FearWalkTarget, 5.0f)) {
+						StopNavigation();
 						CalculateNewFearpoint();
 					}
 
@@ -1080,11 +1081,12 @@ void Mob::AI_Process() {
 			else {
 				if (AI_movement_timer->Check()) {
 					// Check if we have reached the last fear point
-					if (IsPositionEqualWithinCertainZ(glm::vec3(GetX(), GetY(), GetZ()), m_FearWalkTarget, 5.0f)) {
+					if (DistanceNoZ(glm::vec3(GetX(), GetY(), GetZ()), m_FearWalkTarget) <= 5.0f) {
 						// Calculate a new point to run to
+						StopNavigation();
 						CalculateNewFearpoint();
 					}
-					NavigateTo(
+					RunTo(
 						m_FearWalkTarget.x,
 						m_FearWalkTarget.y,
 						m_FearWalkTarget.z
@@ -1661,7 +1663,7 @@ void NPC::AI_DoMovement() {
 			destination.x = roambox_destination_x;
 			destination.y = roambox_destination_y;
 			destination.z = m_Position.z;
-			roambox_destination_z = GetFixedZ(destination) + this->GetZOffset();
+			roambox_destination_z = zone->zonemap->FindClosestZ(glm::vec3(roambox_destination_x, roambox_destination_y, roambox_destination_z), nullptr) +  this->GetZOffset();
 
 			Log(Logs::Detail,
 				Logs::NPCRoamBox,
