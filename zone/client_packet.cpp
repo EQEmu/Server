@@ -1115,7 +1115,12 @@ void Client::Handle_Connect_OP_ReqNewZone(const EQApplicationPacket *app)
 	memcpy(outapp->pBuffer, &zone->newzone_data, sizeof(NewZone_Struct));
 	strcpy(nz->char_name, m_pp.name);
 
-	FastQueuePacket(&outapp);
+	// This was using FastQueuePacket and the packet was never getting sent...
+	// Not sure if this was timing....  but the NewZone was never logged until
+	// I changed it.
+	outapp->priority = 6;
+	QueuePacket(outapp);
+	safe_delete(outapp);
 
 	return;
 }
@@ -1741,11 +1746,6 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	/* Task Packets */
 	LoadClientTaskState();
 
-	if (ClientVersion() >= EQEmu::versions::ClientVersion::RoF) {
-		outapp = new EQApplicationPacket(OP_ReqNewZone, 0);
-		Handle_Connect_OP_ReqNewZone(outapp);
-		safe_delete(outapp);
-	}
 
 	if (m_ClientVersionBit & EQEmu::versions::bit_UFAndLater) {
 		outapp = new EQApplicationPacket(OP_XTargetResponse, 8);
@@ -1770,6 +1770,10 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	outapp->priority = 6;
 	QueuePacket(outapp);
 	safe_delete(outapp);
+
+	if (ClientVersion() >= EQEmu::versions::ClientVersion::RoF) {
+		Handle_Connect_OP_ReqNewZone(nullptr);
+	}
 
 	SetAttackTimer();
 	conn_state = ZoneInfoSent;
