@@ -40,3 +40,4 @@ logs/
 vcpkg/
 
 .idea/*
+*cbp
