@@ -107,7 +107,7 @@ uint64 DataBucket::DoesBucketExist(std::string bucket_key) {
  */
 bool DataBucket::DeleteData(std::string bucket_key) {
 	std::string query = StringFormat(
-			"DELETE FROM `data_buckets` WHERE `key` = '%s' AND (`expires` > %lld OR `expires` = 0)",
+			"DELETE FROM `data_buckets` WHERE `key` = '%s'",
 			EscapeString(bucket_key).c_str()
 	);
 
