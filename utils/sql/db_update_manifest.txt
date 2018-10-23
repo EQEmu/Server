@@ -381,8 +381,8 @@
 9125|2018_07_20_task_emote.sql|SHOW COLUMNS FROM `tasks` LIKE 'completion_emote'|empty|
 9126|2018_09_07_FastRegen.sql|SHOW COLUMNS FROM `zone` LIKE 'fast_regen_hp'|empty|
 9127|2018_09_07_NPCMaxAggroDist.sql|SHOW COLUMNS FROM `zone` LIKE 'npc_max_aggro_dist'|empty|
-9128|2018_08_13_inventory_version_update.sql|SHOW TABLES LIKE 'inventory_versions'|empty|
-9129|2018_08_13_inventory_update.sql|SELECT * FROM `inventory_versions` WHERE `version` = 2 and `step` = 0|not_empty|
+9128|2018_08_13_inventory_version_update.sql|SHOW TABLES LIKE 'inventory_version'|not_empty|
+9129|2018_08_13_inventory_update.sql|SHOW TABLES LIKE 'inventory_versions'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
