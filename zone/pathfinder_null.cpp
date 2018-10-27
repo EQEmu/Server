@@ -10,7 +10,7 @@ IPathfinder::IPath PathfinderNull::FindRoute(const glm::vec3 &start, const glm::
 	return ret;
 }
 
-glm::vec3 PathfinderNull::GetRandomLocation()
+glm::vec3 PathfinderNull::GetRandomLocation(const glm::vec3 &start)
 {
 	return glm::vec3();
 }
