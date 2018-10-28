@@ -169,7 +169,6 @@ public:
 		glm::vec2 pos(p.x, p.y);
 		double len = glm::distance(pos, tar);
 		if (len == 0) {
-			m->SetMoving(false);
 			return true;
 		}
 
@@ -187,7 +186,6 @@ public:
 			}
 		
 			m->TryFixZ();
-			m->SetMoving(false);
 			return true;
 		}
 		else {
@@ -437,6 +435,10 @@ void MobMovementManager::Teleport(Mob *who, float x, float y, float z, float hea
 
 void MobMovementManager::NavigateTo(Mob *who, float x, float y, float z, MobMovementMode mode)
 {
+	if (IsPositionEqualWithinCertainZ(glm::vec3(x, y, z), glm::vec3(who->GetX(), who->GetY(), who->GetZ()), 6.0f)) {
+		return;
+	}
+
 	auto iter = _impl->Entries.find(who);
 	auto &ent = (*iter);
 	auto &nav = ent.second.NavTo;
@@ -476,12 +478,8 @@ void MobMovementManager::StopNavigation(Mob *who) {
 		return;
 	}
 
-	if (who->IsMoving()) {
-		who->TryFixZ();
-		who->SetMoving(false);
-		SendCommandToClients(who, 0.0, 0.0, 0.0, 0.0, 0, ClientRangeCloseMedium);
-	}
 	ent.second.Commands.clear();
+	PushStopMoving(ent.second);
 }
 
 void MobMovementManager::SendCommandToClients(Mob *m, float dx, float dy, float dz, float dh, int anim, ClientRange range)
@@ -615,6 +613,7 @@ void MobMovementManager::UpdatePath(Mob *who, float x, float y, float z, MobMove
 			auto &ent = (*iter);
 			
 			PushMoveTo(ent.second, x, y, z, mode);
+			PushStopMoving(ent.second);
 			return;
 		}
 	}
@@ -634,16 +633,16 @@ void MobMovementManager::UpdatePath(Mob *who, float x, float y, float z, MobMove
 			auto &last = route.back();
 
 			PushMoveTo(ent.second, x, y, z, mode);
+			PushStopMoving(ent.second);
 			return;
 		}
 		else if(route.size() < 2)
 		{
 			PushMoveTo(ent.second, x, y, z, mode);
+			PushStopMoving(ent.second);
 			return;
 		}
 	}
-
-
 
 	auto &first = route.front();
 	auto &last = route.back();

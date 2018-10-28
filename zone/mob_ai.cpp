@@ -1686,19 +1686,19 @@ void NPC::AI_DoMovement() {
 	}
 	else if (roamer) {
 		if (AI_walking_timer->Check()) {
-			movetimercompleted = true;
+			pause_timer_complete = true;
 			AI_walking_timer->Disable();
 		}
-
+		
 		int32 gridno = CastToNPC()->GetGrid();
-
+		
 		if (gridno > 0 || cur_wp == -2) {
-			if (movetimercompleted == true) { // time to pause at wp is over
+			if (pause_timer_complete == true) { // time to pause at wp is over
 				AI_SetupNextWaypoint();
-			}    // endif (movetimercompleted==true)
+			}    // endif (pause_timer_complete==true)
 			else if (!(AI_walking_timer->Enabled())) {    // currently moving
 				bool doMove = true;
-				if (m_CurrentWayPoint.x == GetX() && m_CurrentWayPoint.y == GetY()) {    // are we there yet? then stop
+				if(IsPositionEqual(glm::vec2(m_CurrentWayPoint.x, m_CurrentWayPoint.y), glm::vec2(GetX(), GetY()))) {
 					Log(Logs::Detail,
 						Logs::AI,
 						"We have reached waypoint %d (%.3f,%.3f,%.3f) on grid %d",
@@ -1707,13 +1707,13 @@ void NPC::AI_DoMovement() {
 						GetY(),
 						GetZ(),
 						GetGrid());
-
+		
 					SetWaypointPause();
 					SetAppearance(eaStanding, false);
-					if (cur_wp_pause > 0 && m_CurrentWayPoint.w >= 0.0) {
+					if (cur_wp_pause > 0) {
 						RotateTo(m_CurrentWayPoint.w);
 					}
-
+		
 					//kick off event_waypoint arrive
 					char temp[16];
 					sprintf(temp, "%d", cur_wp);
@@ -1727,29 +1727,36 @@ void NPC::AI_DoMovement() {
 					if (cur_wp == -2) {
 						AI_SetupNextWaypoint();
 					}
-
+		
 					// wipe feign memory since we reached our first waypoint
 					if (cur_wp == 1)
 						ClearFeignMemory();
+
+					if (cur_wp_pause == 0) {
+						pause_timer_complete = true;
+						AI_SetupNextWaypoint();
+						doMove = true;
+					}
 				}
+
 				if (doMove) {    // not at waypoint yet or at 0 pause WP, so keep moving
 					NavigateTo(
 						m_CurrentWayPoint.x,
 						m_CurrentWayPoint.y,
 						m_CurrentWayPoint.z
 					);
-
+		
 				}
 			}
 		}        // endif (gridno > 0)
 			// handle new quest grid command processing
 		else if (gridno < 0) {    // this mob is under quest control
-			if (movetimercompleted == true) { // time to pause has ended
+			if (pause_timer_complete == true) { // time to pause has ended
 				SetGrid(0 - GetGrid()); // revert to AI control
 				Log(Logs::Detail, Logs::Pathing, "Quest pathing is finished. Resuming on grid %d", GetGrid());
-
+		
 				SetAppearance(eaStanding, false);
-
+		
 				CalculateNewWaypoint();
 			}
 		}
@@ -1813,27 +1820,26 @@ void NPC::AI_SetupNextWaypoint() {
 			found_spawn->SetNPCPointerNull();
 	}
 	else {
-		movetimercompleted = false;
-
+		pause_timer_complete = false;
 		Log(Logs::Detail, Logs::Pathing, "We are departing waypoint %d.", cur_wp);
-
+		
 		//if we were under quest control (with no grid), we are done now..
 		if (cur_wp == -2) {
 			Log(Logs::Detail, Logs::Pathing, "Non-grid quest mob has reached its quest ordered waypoint. Leaving pathing mode.");
 			roamer = false;
 			cur_wp = 0;
 		}
-
+		
 		SetAppearance(eaStanding, false);
-
+		
 		entity_list.OpenDoorsNear(this);
-
+		
 		if (!DistractedFromGrid) {
 			//kick off event_waypoint depart
 			char temp[16];
 			sprintf(temp, "%d", cur_wp);
 			parse->EventNPC(EVENT_WAYPOINT_DEPART, CastToNPC(), nullptr, temp, 0);
-
+		
 			//setup our next waypoint, if we are still on our normal grid
 			//remember that the quest event above could have done anything it wanted with our grid
 			if (GetGrid() > 0) {

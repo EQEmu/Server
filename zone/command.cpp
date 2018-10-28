@@ -1264,7 +1264,7 @@ void command_movement(Client *c, const Seperator *sep)
 	auto &mgr = MobMovementManager::Get();
 
 	if (sep->arg[1][0] == 0) {
-		c->Message(0, "Usage: #movement stats/clearstats");
+		c->Message(0, "Usage: #movement stats/clearstats/walkto/runto/rotateto/stop");
 		return;
 	}
 
@@ -1276,8 +1276,48 @@ void command_movement(Client *c, const Seperator *sep)
 	{
 		mgr.ClearStats();
 	}
+	else if (strcasecmp(sep->arg[1], "walkto") == 0)
+	{
+		auto target = c->GetTarget();
+		if (target == nullptr) {
+			c->Message(0, "No target found.");
+			return;
+		}
+
+		target->WalkTo(c->GetX(), c->GetY(), c->GetZ());
+	}
+	else if (strcasecmp(sep->arg[1], "runto") == 0)
+	{
+		auto target = c->GetTarget();
+		if (target == nullptr) {
+			c->Message(0, "No target found.");
+			return;
+		}
+
+		target->RunTo(c->GetX(), c->GetY(), c->GetZ());
+	}
+	else if (strcasecmp(sep->arg[1], "rotateto") == 0)
+	{
+		auto target = c->GetTarget();
+		if (target == nullptr) {
+			c->Message(0, "No target found.");
+			return;
+		}
+
+		target->RotateToWalking(target->CalculateHeadingToTarget(c->GetX(), c->GetY()));
+	}
+	else if (strcasecmp(sep->arg[1], "stop") == 0)
+	{
+		auto target = c->GetTarget();
+		if (target == nullptr) {
+			c->Message(0, "No target found.");
+			return;
+		}
+
+		target->StopNavigation();
+	}
 	else {
-		c->Message(0, "Usage: #movement stats/clearstats");
+		c->Message(0, "Usage: #movement stats/clearstats/walkto/runto/rotateto/stop");
 	}
 }
 

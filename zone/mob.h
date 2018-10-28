@@ -1430,7 +1430,6 @@ protected:
 	std::unique_ptr<Timer> AI_think_timer;
 	std::unique_ptr<Timer> AI_movement_timer;
 	std::unique_ptr<Timer> AI_target_check_timer;
-	bool movetimercompleted;
 	int8 ForcedMovement; // push
 	bool permarooted;
 	std::unique_ptr<Timer> AI_scan_area_timer;
@@ -1482,6 +1481,7 @@ protected:
 	glm::vec3 m_FearWalkTarget;
 	bool currently_fleeing;
 
+	bool pause_timer_complete;
 	bool DistractedFromGrid;
 	uint32 pDontHealMeBefore;
 	uint32 pDontBuffMeBefore;

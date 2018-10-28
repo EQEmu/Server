@@ -390,12 +390,8 @@ void NPC::SetWaypointPause()
 {
 	//Declare time to wait on current WP
 
-	if (cur_wp_pause == 0) {
-		AI_walking_timer->Start(100);
-	}
-	else
+	if(cur_wp_pause > 0)
 	{
-
 		switch (pausetype)
 		{
 		case 0: //Random Half
