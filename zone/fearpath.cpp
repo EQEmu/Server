@@ -165,11 +165,9 @@ void Mob::CalculateNewFearpoint() {
 			return;
 		}
 
-		Stun(6000);
-
 		Log(Logs::Detail,
 			Logs::Pathing,
-			"No path found to selected node. Falling through to old fear point selection.");
+			"No path found to selected node during CalculateNewFearpoint.");
 	}
 }
 
