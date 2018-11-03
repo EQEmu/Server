@@ -1647,7 +1647,8 @@ void Mob::AI_Process() {
 					if (distance >= follow_distance) {
 						int speed = GetWalkspeed();
 
-						if (distance >= follow_distance + 150) {
+						// maybe we want the NPC to only walk doing follow logic
+						if (GetFollowCanRun() && distance >= follow_distance + 150) {
 							speed = GetRunspeed();
 						}
 

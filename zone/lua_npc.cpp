@@ -333,6 +333,21 @@ void Lua_NPC::AI_SetRoambox(float dist, float max_x, float min_x, float max_y, f
 	self->AI_SetRoambox(dist, max_x, min_x, max_y, min_y, delay, mindelay);
 }
 
+void Lua_NPC::SetFollowID(int id) {
+	Lua_Safe_Call_Void();
+	self->SetFollowID(id);
+}
+
+void Lua_NPC::SetFollowDistance(int dist) {
+	Lua_Safe_Call_Void();
+	self->SetFollowDistance(dist);
+}
+
+void Lua_NPC::SetFollowCanRun(bool v) {
+	Lua_Safe_Call_Void();
+	self->SetFollowCanRun(v);
+}
+
 int Lua_NPC::GetNPCSpellsID() {
 	Lua_Safe_Call_Int();
 	return self->GetNPCSpellsID();
@@ -572,6 +587,9 @@ luabind::scope lua_register_npc() {
 		.def("IsGuarding", (bool(Lua_NPC::*)(void))&Lua_NPC::IsGuarding)
 		.def("AI_SetRoambox", (void(Lua_NPC::*)(float,float,float,float,float))&Lua_NPC::AI_SetRoambox)
 		.def("AI_SetRoambox", (void(Lua_NPC::*)(float,float,float,float,float,uint32,uint32))&Lua_NPC::AI_SetRoambox)
+		.def("SetFollowID", (void(Lua_NPC::*)(int))&Lua_NPC::SetFollowID)
+		.def("SetFollowDistance", (void(Lua_NPC::*)(int))&Lua_NPC::SetFollowDistance)
+		.def("SetFollowCanRun", (void(Lua_NPC::*)(bool))&Lua_NPC::SetFollowCanRun)
 		.def("GetNPCSpellsID", (int(Lua_NPC::*)(void))&Lua_NPC::GetNPCSpellsID)
 		.def("GetSpawnPointID", (int(Lua_NPC::*)(void))&Lua_NPC::GetSpawnPointID)
 		.def("GetSpawnPointX", (float(Lua_NPC::*)(void))&Lua_NPC::GetSpawnPointX)
