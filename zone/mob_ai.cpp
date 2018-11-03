@@ -1635,6 +1635,8 @@ void Mob::AI_Process() {
 				Mob *follow = entity_list.GetMob(static_cast<uint16>(GetFollowID()));
 				if (!follow) {
 					SetFollowID(0);
+					SetFollowDistance(100);
+					SetFollowCanRun(true);
 				}
 				else {
 
