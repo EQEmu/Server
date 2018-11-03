@@ -348,6 +348,21 @@ void Lua_NPC::SetFollowCanRun(bool v) {
 	self->SetFollowCanRun(v);
 }
 
+int Lua_NPC::GetFollowID() {
+	Lua_Safe_Call_Int();
+	return self->GetFollowID();
+}
+
+int Lua_NPC::GetFollowDistance() {
+	Lua_Safe_Call_Int();
+	return self->GetFollowDistance();
+}
+
+bool Lua_NPC::GetFollowCanRun() {
+	Lua_Safe_Call_Bool();
+	return self->GetFollowCanRun();
+}
+
 int Lua_NPC::GetNPCSpellsID() {
 	Lua_Safe_Call_Int();
 	return self->GetNPCSpellsID();
@@ -590,6 +605,10 @@ luabind::scope lua_register_npc() {
 		.def("SetFollowID", (void(Lua_NPC::*)(int))&Lua_NPC::SetFollowID)
 		.def("SetFollowDistance", (void(Lua_NPC::*)(int))&Lua_NPC::SetFollowDistance)
 		.def("SetFollowCanRun", (void(Lua_NPC::*)(bool))&Lua_NPC::SetFollowCanRun)
+		.def("GetFollowID", (int(Lua_NPC::*)(void))&Lua_NPC::GetFollowID)
+		.def("GetFollowDistance", (int(Lua_NPC::*)(void))&Lua_NPC::GetFollowDistance)
+		.def("GetFollowCanRun", (bool(Lua_NPC::*)(void))&Lua_NPC::GetFollowCanRun)
+		.def("GetNPCSpellsID", (int(Lua_NPC::*)(void))&Lua_NPC::GetNPCSpellsID)
 		.def("GetNPCSpellsID", (int(Lua_NPC::*)(void))&Lua_NPC::GetNPCSpellsID)
 		.def("GetSpawnPointID", (int(Lua_NPC::*)(void))&Lua_NPC::GetSpawnPointID)
 		.def("GetSpawnPointX", (float(Lua_NPC::*)(void))&Lua_NPC::GetSpawnPointX)

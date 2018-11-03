@@ -95,6 +95,9 @@ public:
 	void SetFollowID(int id);
 	void SetFollowDistance(int dist);
 	void SetFollowCanRun(bool v);
+	int GetFollowID();
+	int GetFollowDistance();
+	bool GetFollowCanRun();
 	int GetNPCSpellsID();
 	int GetSpawnPointID();
 	float GetSpawnPointX();
