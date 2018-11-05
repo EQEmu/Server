@@ -5469,3 +5469,13 @@ int32 Mob::GetHPRegen() const
 {
 	return hp_regen;
 }
+
+bool Client::GetDisplayMobInfoWindow() const
+{
+	return display_mob_info_window;
+}
+
+void Client::SetDisplayMobInfoWindow(bool display_mob_info_window)
+{
+	Client::display_mob_info_window = display_mob_info_window;
+}

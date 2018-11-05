@@ -249,7 +249,7 @@ int command_init(void)
 		command_add("lastname", "[new lastname] - Set your or your player target's lastname", 50, command_lastname) ||
 		command_add("level", "[level] - Set your or your target's level", 10, command_level) ||
 		command_add("listnpcs", "[name/range] - Search NPCs", 20, command_listnpcs) ||
-		command_add("list", "[npc] [name|all] - Search entities", 20, command_list) ||
+		command_add("list", "[npcs|players|corpses|doors|objects] [search] - Search entities", 20, command_list) ||
 		command_add("listpetition", "- List petitions", 50, command_listpetition) ||
 		command_add("load_shared_memory", "[shared_memory_name] - Reloads shared memory and uses the input as output", 250, command_load_shared_memory) ||
 		command_add("loc", "- Print out your or your target's current location and heading", 0, command_loc) ||

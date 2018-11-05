@@ -246,6 +246,9 @@ public:
 	std::unordered_map<Mob *, float> close_mobs;
 	bool is_client_moving;
 
+	void SetDisplayMobInfoWindow(bool display_mob_info_window);
+	bool GetDisplayMobInfoWindow() const;
+
 	//abstract virtual function implementations required by base abstract class
 	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill);
 	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None);
@@ -1457,6 +1460,8 @@ private:
 	bool AbilityTimer;
 	int Haste; //precalced value
 	uint32 tmSitting; // time stamp started sitting, used for HP regen bonus added on MAY 5, 2004
+
+	bool display_mob_info_window;
 
 	int32 max_end;
 	int32 current_endurance;

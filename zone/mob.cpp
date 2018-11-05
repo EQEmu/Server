@@ -3489,7 +3489,9 @@ void Mob::SetTarget(Mob *mob)
 	else if (IsClient()) {
 		parse->EventPlayer(EVENT_TARGET_CHANGE, CastToClient(), "", 0);
 
-		this->DisplayInfo(mob);
+		if (this->CastToClient()->admin > 200) {
+			this->DisplayInfo(mob);
+		}
 	}
 
 	if (IsPet() && GetOwner() && GetOwner()->IsClient()) {

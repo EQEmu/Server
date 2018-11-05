@@ -10885,33 +10885,46 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 {
 
 	if (app->size != sizeof(PopupResponse_Struct)) {
-		Log(Logs::General, Logs::None, "Size mismatch in OP_PopupResponse expected %i got %i",
-			sizeof(PopupResponse_Struct), app->size);
+		Log(Logs::General,
+			Logs::None,
+			"Size mismatch in OP_PopupResponse expected %i got %i",
+			sizeof(PopupResponse_Struct),
+			app->size);
+
 		DumpPacket(app);
 		return;
 	}
-	PopupResponse_Struct *prs = (PopupResponse_Struct*)app->pBuffer;
 
-	// Handle any EQEmu defined popup Ids first
-	switch (prs->popupid)
-	{
-	case POPUPID_UPDATE_SHOWSTATSWINDOW:
-		if (GetTarget() && GetTarget()->IsClient())
-			GetTarget()->CastToClient()->SendStatsWindow(this, true);
-		else
-			SendStatsWindow(this, true);
-		return;
+	PopupResponse_Struct *popup_response = (PopupResponse_Struct *) app->pBuffer;
 
-	default:
-		break;
+	/**
+	 * Handle any EQEmu defined popup Ids first
+	 */
+	switch (popup_response->popupid) {
+		case POPUPID_UPDATE_SHOWSTATSWINDOW:
+			if (GetTarget() && GetTarget()->IsClient()) {
+				GetTarget()->CastToClient()->SendStatsWindow(this, true);
+			}
+			else {
+				SendStatsWindow(this, true);
+			}
+			return;
+			break;
+
+		case EQEmu::popupresponse::MOB_INFO_DISMISS:
+			this->SetDisplayMobInfoWindow(false);
+			this->Message(15, "GM Mob display window snoozed in this zone...");
+			break;
+		default:
+			break;
 	}
 
 	char buf[16];
-	sprintf(buf, "%d\0", prs->popupid);
+	sprintf(buf, "%d\0", popup_response->popupid);
 
 	parse->EventPlayer(EVENT_POPUP_RESPONSE, this, buf, 0);
 
-	Mob* Target = GetTarget();
+	Mob *Target = GetTarget();
 	if (Target && Target->IsNPC()) {
 		parse->EventNPC(EVENT_POPUP_RESPONSE, Target->CastToNPC(), this, buf, 0);
 	}

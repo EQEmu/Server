@@ -362,6 +362,17 @@ void Mob::DisplayInfo(Mob *mob)
 		std::cout << "Window Length: " << window_text.length() << std::endl;
 		// std::cout << "Window " << window_text << std::endl;
 
-		client->SendPopupToClient("Entity Info", window_text.c_str());
+		if (client->GetDisplayMobInfoWindow()) {
+			client->SendFullPopup(
+				"GM: Entity Info",
+				window_text.c_str(),
+				EQEmu::popupresponse::MOB_INFO_DISMISS,
+				0,
+				100,
+				10,
+				"Snooze",
+				"OK"
+			);
+		}
 	}
 }
