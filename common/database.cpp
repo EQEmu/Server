@@ -2080,7 +2080,6 @@ void Database::LoadLogSettings(EQEmuLogSys::LogSettings* log_settings) {
 	auto results = QueryDatabase(query);
 
 	int log_category_id = 0;
-	LogSys.file_logs_enabled = false;
 
 	int categories_in_database[1000] = {};
 
@@ -2090,9 +2089,9 @@ void Database::LoadLogSettings(EQEmuLogSys::LogSettings* log_settings) {
 			continue;
 		}
 
-		log_settings[log_category_id].log_to_console = atoi(row[2]);
-		log_settings[log_category_id].log_to_file    = atoi(row[3]);
-		log_settings[log_category_id].log_to_gmsay   = atoi(row[4]);
+		log_settings[log_category_id].log_to_console = static_cast<uint8>(atoi(row[2]));
+		log_settings[log_category_id].log_to_file    = static_cast<uint8>(atoi(row[3]));
+		log_settings[log_category_id].log_to_gmsay   = static_cast<uint8>(atoi(row[4]));
 
 		/**
 		 * Determine if any output method is enabled for the category
