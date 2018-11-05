@@ -106,7 +106,7 @@ public:
 	static bool	SpawnZoneController();
 	static int8 GetAILevel(bool iForceReRead = false);
 
-	NPC(const NPCType* data, Spawn2* respawn, const glm::vec4& position, int iflymode, bool IsCorpse = false);
+	NPC(const NPCType* npc_type_data, Spawn2* respawn, const glm::vec4& position, int iflymode, bool IsCorpse = false);
 
 	virtual ~NPC();
 
@@ -142,9 +142,6 @@ public:
 	virtual void	AI_Event_SpellCastFinished(bool iCastSucceeded, uint16 slot);
 
 	void LevelScale();
-	void CalcNPCResists();
-	void CalcNPCRegen();
-	void CalcNPCDamage();
 
 	virtual void SetTarget(Mob* mob);
 	virtual uint16 GetSkill(EQEmu::skills::SkillType skill_num) const { if (skill_num <= EQEmu::skills::HIGHEST_SKILL) { return skills[skill_num]; } return 0; }
@@ -255,12 +252,23 @@ public:
 
 	void	SignalNPC(int _signal_id);
 
-	inline int32	GetNPCFactionID()	const { return npc_faction_id; }
-	inline int32			GetPrimaryFaction()	const { return primary_faction; }
-	int32	GetNPCHate(Mob* in_ent) {return hate_list.GetEntHateAmount(in_ent);}
-	bool	IsOnHatelist(Mob*p) { return hate_list.IsEntOnHateList(p);}
+	inline int32 GetNPCFactionID() const
+	{ return npc_faction_id; }
 
-	void	SetNPCFactionID(int32 in) { npc_faction_id = in; database.GetFactionIdsForNPC(npc_faction_id, &faction_list, &primary_faction); }
+	inline int32 GetPrimaryFaction() const
+	{ return primary_faction; }
+
+	int32 GetNPCHate(Mob *in_ent)
+	{ return hate_list.GetEntHateAmount(in_ent); }
+
+	bool IsOnHatelist(Mob *p)
+	{ return hate_list.IsEntOnHateList(p); }
+
+	void SetNPCFactionID(int32 in)
+	{
+		npc_faction_id = in;
+		database.GetFactionIdsForNPC(npc_faction_id, &faction_list, &primary_faction);
+	}
 
     glm::vec4 m_SpawnPoint;
 
@@ -357,7 +365,7 @@ public:
 	void	SetAvoidanceRating(int32 d) { avoidance_rating = d;}
 	int32 GetRawAC() const { return AC; }
 
-	void	ModifyNPCStat(const char *identifier, const char *newValue);
+	void	ModifyNPCStat(const char *identifier, const char *new_value);
 	virtual void SetLevel(uint8 in_level, bool command = false);
 
 	bool IsLDoNTrapped() const { return (ldon_trapped); }

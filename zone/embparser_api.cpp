@@ -3025,10 +3025,10 @@ XS(XS__saylink) {
 		Perl_croak(aTHX_ "Usage: quest::saylink(string message, [bool silent = false], [link_name = message])");
 	dXSTARG;
 
-	Const_char *RETVAL;
-	char       message[250];
-	char       link_name[250];
-	bool       silent = false;
+	std::string RETVAL;
+	char message[250];
+	char link_name[250];
+	bool silent = false;
 	strcpy(message, (char *) SvPV_nolen(ST(0)));
 	if (items >= 2) {
 		silent = ((int) SvIV(ST(1))) == 0 ? false : true;
@@ -3039,7 +3039,8 @@ XS(XS__saylink) {
 		strcpy(link_name, message);
 
 	RETVAL = quest_manager.saylink(message, silent, link_name);
-	sv_setpv(TARG, RETVAL);
+
+	sv_setpv(TARG, RETVAL.c_str());
 	XSprePUSH;
 	PUSHTARG;
 	XSRETURN(1);

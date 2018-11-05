@@ -382,7 +382,6 @@ public:
 	void	SendPetitionToAdmins();
 	void	AddLootToNPCS(uint32 item_id, uint32 count);
 
-	void	ListNPCs(Client* client, const char* arg1 = 0, const char* arg2 = 0, uint8 searchtype = 0);
 	void	ListNPCCorpses(Client* client);
 	void	ListPlayerCorpses(Client* client);
 	int32	DeleteNPCCorpses();

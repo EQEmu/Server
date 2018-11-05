@@ -82,10 +82,12 @@ SET(zone_sources
 	merc.cpp
 	mob.cpp
 	mob_ai.cpp
+	mob_info.cpp
 	mod_functions.cpp
 	net.cpp
 	npc.cpp
 	npc_ai.cpp
+	npc_scale_manager.cpp
 	object.cpp
 	oriented_bounding_box.cpp
 	pathfinder_interface.cpp
@@ -137,8 +139,7 @@ SET(zone_sources
 	zone.cpp
 	zone_config.cpp
 	zonedb.cpp
-	zoning.cpp
-)
+	zoning.cpp)
 
 SET(zone_headers
 	aa.h
@@ -207,6 +208,7 @@ SET(zone_headers
 	net.h
 	npc.h
 	npc_ai.h
+	npc_scale_manager.h
 	object.h
 	oriented_bounding_box.h
 	pathfinder_interface.h
@@ -242,8 +244,7 @@ SET(zone_headers
 	zone.h
 	zone_config.h
 	zonedb.h
-	zonedump.h
-)
+	zonedump.h)
 
 IF(EQEMU_DEPOP_INVALIDATES_CACHE)
 	ADD_DEFINITIONS(-DDEPOP_INVALIDATES_NPC_TYPES_CACHE)

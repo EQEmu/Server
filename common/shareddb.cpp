@@ -1175,19 +1175,17 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 	}
 }
 
-const EQEmu::ItemData* SharedDatabase::GetItem(uint32 id) {
-	if (id == 0)
-	{
+const EQEmu::ItemData *SharedDatabase::GetItem(uint32 id)
+{
+	if (id == 0) {
 		return nullptr;
 	}
 
-	if(!items_hash || id > items_hash->max_key())
-	{
+	if (!items_hash || id > items_hash->max_key()) {
 		return nullptr;
 	}
 
-	if(items_hash->exists(id))
-	{
+	if (items_hash->exists(id)) {
 		return &(items_hash->at(id));
 	}
 

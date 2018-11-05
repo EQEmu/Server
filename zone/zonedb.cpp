@@ -2637,7 +2637,7 @@ const NPCType* ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		temp_npctype_data->spellscale = atoi(row[86]);
 		temp_npctype_data->healscale = atoi(row[87]);
 		temp_npctype_data->no_target_hotkey = atoi(row[88]) == 1 ? true: false;
-		temp_npctype_data->raid_target = atoi(row[89]) == 0 ? false: true;
+		temp_npctype_data->raid_target = atoi(row[89]) == 0 ? false : true;
 		temp_npctype_data->attack_delay = atoi(row[90]) * 100; // TODO: fix DB
 		temp_npctype_data->light = (atoi(row[91]) & 0x0F);
 

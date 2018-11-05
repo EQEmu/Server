@@ -63,6 +63,33 @@ const std::string vStringFormat(const char* format, va_list args)
 	return output;
 }
 
+const std::string str_tolower(std::string s)
+{
+	std::transform(
+		s.begin(), s.end(), s.begin(),
+		[](unsigned char c) { return std::tolower(c); }
+	);
+	return s;
+}
+
+const std::string str_toupper(std::string s)
+{
+	std::transform(
+		s.begin(), s.end(), s.begin(),
+		[](unsigned char c) { return std::toupper(c); }
+	);
+	return s;
+}
+
+const std::string ucfirst(std::string s)
+{
+	std::string output = s;
+	if (!s.empty())
+		output[0] = static_cast<char>(toupper(s[0]));
+
+	return output;
+}
+
 const std::string StringFormat(const char* format, ...)
 {
 	va_list args;

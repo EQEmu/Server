@@ -5644,9 +5644,8 @@ void NPC::InitializeBuffSlots()
 {
 	int max_slots = GetMaxTotalSlots();
 	buffs = new Buffs_Struct[max_slots];
-	for(int x = 0; x < max_slots; ++x)
-	{
-		buffs[x].spellid = SPELL_UNKNOWN;
+	for (int x = 0; x < max_slots; ++x) {
+		buffs[x].spellid      = SPELL_UNKNOWN;
 		buffs[x].UpdateClient = false;
 	}
 	current_buff_count = 0;

@@ -166,6 +166,10 @@ public:
 
 	bool is_distance_roamer;
 
+	void DisplayInfo(Mob *mob);
+
+public:
+
 	//Somewhat sorted: needs documenting!
 
 	//Attack
@@ -1049,6 +1053,7 @@ public:
  	inline bool Sanctuary() const { return spellbonuses.Sanctuary; }
 
 	bool HasNPCSpecialAtk(const char* parse);
+	bool HasSpecialAbilities();
 	int GetSpecialAbility(int ability);
 	int GetSpecialAbilityParam(int ability, int param);
 	void SetSpecialAbility(int ability, int level);
@@ -1145,6 +1150,8 @@ public:
 	void ResetAssistCap() { npc_assist_cap = 0; }
 	int GetWeaponDamage(Mob *against, const EQEmu::ItemData *weapon_item);
 	int GetWeaponDamage(Mob *against, const EQEmu::ItemInstance *weapon_item, uint32 *hate = nullptr);
+
+	int32 GetHPRegen() const;
 
 	// Bots HealRotation methods
 #ifdef BOTS
@@ -1476,7 +1483,6 @@ protected:
 
 	bool pAIControlled;
 	bool roamer;
-	bool logging_enabled;
 
 	int wandertype;
 	int pausetype;

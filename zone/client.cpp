@@ -254,7 +254,6 @@ Client::Client(EQStreamInterface* ieqs)
 	InitializeMercInfo();
 	SetMerc(0);
 	if (RuleI(World, PVPMinLevel) > 0 && level >= RuleI(World, PVPMinLevel) && m_pp.pvp == 0) SetPVP(true, false);
-	logging_enabled = CLIENT_DEFAULT_LOGGING_ENABLED;
 
 	//for good measure:
 	memset(&m_pp, 0, sizeof(m_pp));
@@ -6670,30 +6669,13 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 	std::string class_Name = itoa(GetClass());
 	std::string class_List[] = { "WAR", "CLR", "PAL", "RNG", "SHD", "DRU", "MNK", "BRD", "ROG", "SHM", "NEC", "WIZ", "MAG", "ENC", "BST", "BER" };
 
-	if(GetClass() < 17 && GetClass() > 0) { class_Name = class_List[GetClass()-1]; }
+	if (GetClass() < 17 && GetClass() > 0) {
+		class_Name = class_List[GetClass() - 1];
+	}
 
 	// Race
-	std::string race_Name = itoa(GetRace());
-	switch(GetRace())
-	{
-		case 1: race_Name = "Human";		break;
-		case 2:	race_Name = "Barbarian";	break;
-		case 3:	race_Name = "Erudite";		break;
-		case 4:	race_Name = "Wood Elf";		break;
-		case 5:	race_Name = "High Elf";		break;
-		case 6:	race_Name = "Dark Elf";		break;
-		case 7:	race_Name = "Half Elf";		break;
-		case 8:	race_Name = "Dwarf";		break;
-		case 9:	race_Name = "Troll";		break;
-		case 10: race_Name = "Ogre";		break;
-		case 11: race_Name = "Halfing";		break;
-		case 12: race_Name = "Gnome";		break;
-		case 128: race_Name = "Iksar";		break;
-		case 130: race_Name = "Vah Shir";	break;
-		case 330: race_Name = "Froglok";	break;
-		case 522: race_Name = "Drakkin";	break;
-		default: break;
-	}
+	std::string race_name = GetRaceIDName(GetRace());
+
 	/*##########################################################
 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 		H/M/E String
@@ -7122,7 +7104,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 
 	std::ostringstream final_string;
 					final_string <<
-	/*	C/L/R	*/	indP << "Class: " << class_Name << indS << "Level: " << static_cast<int>(GetLevel()) << indS << "Race: " << race_Name << "<br>" <<
+	/*	C/L/R	*/	indP << "Class: " << class_Name << indS << "Level: " << static_cast<int>(GetLevel()) << indS << "Race: " << race_name << "<br>" <<
 	/*	Runes	*/	indP << "Rune: " << rune_number << indL << indS << "Spell Rune: " << magic_rune_number << "<br>" <<
 	/*	HP/M/E	*/	HME_row <<
 	/*	DS		*/	indP << "DS: " << (itembonuses.DamageShield + spellbonuses.DamageShield*-1) << " (Spell: " << (spellbonuses.DamageShield*-1) << " + Item: " << itembonuses.DamageShield << " / " << RuleI(Character, ItemDamageShieldCap) << ")<br>" <<
