@@ -152,6 +152,12 @@ void NpcScaleManager::ScaleMob(Mob *mob)
 	if (npc->GetAttackDelay() == 0) {
 		npc->ModifyNPCStat("attack_delay", std::to_string(scale_data.attack_delay).c_str());
 	}
+	if (npc->GetSpellScale() == 0) {
+		npc->ModifyNPCStat("spell_scale", std::to_string(scale_data.spell_scale).c_str());
+	}
+	if (npc->GetHealScale() == 0) {
+		npc->ModifyNPCStat("heal_scale", std::to_string(scale_data.heal_scale).c_str());
+	}
 	if (!npc->HasSpecialAbilities()) {
 		npc->ModifyNPCStat("special_abilities", scale_data.special_abilities.c_str());
 	}
@@ -161,42 +167,13 @@ void NpcScaleManager::ScaleMob(Mob *mob)
 
 void NpcScaleManager::ListStats(Mob *mob)
 {
-	std::string stats[] = {
-		"ac",
-		"max_hp",
-		"accuracy",
-		"slow_mitigation",
-		"atk",
-		"str",
-		"sta",
-		"dex",
-		"agi",
-		"int",
-		"wis",
-		"cha",
-		"mr",
-		"cr",
-		"fr",
-		"pr",
-		"dr",
-		"cr",
-		"pr",
-		"min_hit",
-		"max_hit",
-		"hp_regen",
-		"attack_delay",
-		"special_abilities"
-	};
-
-	int stat_elements = sizeof(stats) / sizeof(stats[0]);
-
-	for (int i = 0; i < stat_elements; i++) {
-		std::string variable = StringFormat("modify_stat_%s", stats[i].c_str());
+	for (const auto &stat : scaling_stats) {
+		std::string variable = StringFormat("modify_stat_%s", stat.c_str());
 		if (mob->EntityVariableExists(variable.c_str())) {
 			Log(Logs::Detail,
 				Logs::NPCScaling,
 				"NpcScaleManager::ListStats: %s - %s ",
-				stats[i].c_str(),
+				stat.c_str(),
 				mob->GetEntityVariable(variable.c_str()));
 		}
 	}
@@ -231,6 +208,8 @@ bool NpcScaleManager::LoadScaleData()
 		"max_dmg,"
 		"hp_regen_rate,"
 		"attack_delay,"
+		"spell_scale,"
+		"heal_scale,"
 		"special_abilities"
 		" FROM `npc_scale_global_base`"
 	);
@@ -263,9 +242,11 @@ bool NpcScaleManager::LoadScaleData()
 		scale_data.max_dmg           = atoi(row[22]);
 		scale_data.hp_regen_rate     = atoi(row[23]);
 		scale_data.attack_delay      = atoi(row[24]);
+		scale_data.spell_scale       = atoi(row[25]);
+		scale_data.heal_scale        = atoi(row[26]);
 
 		if (row[25]) {
-			scale_data.special_abilities = row[25];
+			scale_data.special_abilities = row[27];
 		}
 
 		npc_global_base_scaling_data.insert(

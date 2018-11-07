@@ -52,8 +52,39 @@ public:
 		int max_dmg;
 		int hp_regen_rate;
 		int attack_delay;
+		int spell_scale;
+		int heal_scale;
 
 		std::string special_abilities;
+	};
+
+	std::vector<std::string> scaling_stats = {
+		"ac",
+		"max_hp",
+		"accuracy",
+		"slow_mitigation",
+		"atk",
+		"str",
+		"sta",
+		"dex",
+		"agi",
+		"int",
+		"wis",
+		"cha",
+		"mr",
+		"cr",
+		"fr",
+		"pr",
+		"dr",
+		"cr",
+		"pr",
+		"min_hit",
+		"max_hit",
+		"hp_regen",
+		"attack_delay",
+		"spell_scale",
+		"heal_scale",
+		"special_abilities"
 	};
 
 	void ScaleMob(Mob *mob);
