@@ -911,7 +911,8 @@ bool NPC::DatabaseCastAccepted(int spell_id) {
 	return false;
 }
 
-bool NPC::SpawnZoneController(){
+bool NPC::SpawnZoneController()
+{
 
 	if (!RuleB(Zone, UseZoneController))
 		return false;
@@ -920,23 +921,23 @@ bool NPC::SpawnZoneController(){
 	memset(npc_type, 0, sizeof(NPCType));
 
 	strncpy(npc_type->name, "zone_controller", 60);
-	npc_type->cur_hp = 2000000000;
-	npc_type->max_hp = 2000000000;
-	npc_type->hp_regen = 100000000;
-	npc_type->race = 240;
-	npc_type->size = .1;
-	npc_type->gender = 2;
-	npc_type->class_ = 1;
-	npc_type->deity = 1;
-	npc_type->level = 200;
-	npc_type->npc_id = ZONE_CONTROLLER_NPC_ID;
-	npc_type->loottable_id = 0;
-	npc_type->texture = 3;
-	npc_type->runspeed = 0;
+	npc_type->cur_hp           = 2000000000;
+	npc_type->max_hp           = 2000000000;
+	npc_type->hp_regen         = 100000000;
+	npc_type->race             = 240;
+	npc_type->size             = .1;
+	npc_type->gender           = 2;
+	npc_type->class_           = 1;
+	npc_type->deity            = 1;
+	npc_type->level            = 200;
+	npc_type->npc_id           = ZONE_CONTROLLER_NPC_ID;
+	npc_type->loottable_id     = 0;
+	npc_type->texture          = 3;
+	npc_type->runspeed         = 0;
 	npc_type->d_melee_texture1 = 0;
 	npc_type->d_melee_texture2 = 0;
-	npc_type->merchanttype = 0;
-	npc_type->bodytype = 11;
+	npc_type->merchanttype     = 0;
+	npc_type->bodytype         = 11;
 	npc_type->skip_global_loot = true;
 
 	if (RuleB(Zone, EnableZoneControllerGlobals)) {
@@ -944,9 +945,9 @@ bool NPC::SpawnZoneController(){
 	}
 
 	npc_type->prim_melee_type = 28;
-	npc_type->sec_melee_type = 28;
+	npc_type->sec_melee_type  = 28;
 
-	npc_type->findable = 0;
+	npc_type->findable  = 0;
 	npc_type->trackable = 0;
 
 	strcpy(npc_type->special_abilities, "12,1^13,1^14,1^15,1^16,1^17,1^19,1^22,1^24,1^25,1^28,1^31,1^35,1^39,1^42,1");
@@ -1040,90 +1041,7 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* 
 			sprintf(sep.arg[10], "0");
 		//Calc MaxHP if client neglected to enter it...
 		if (!sep.IsNumber(4)) {
-			//Stolen from Client::GetMaxHP...
-			uint8 multiplier = 0;
-			int tmplevel = atoi(sep.arg[2]);
-			switch(atoi(sep.arg[5]))
-			{
-			case WARRIOR:
-				if (tmplevel < 20)
-					multiplier = 22;
-				else if (tmplevel < 30)
-					multiplier = 23;
-				else if (tmplevel < 40)
-					multiplier = 25;
-				else if (tmplevel < 53)
-					multiplier = 27;
-				else if (tmplevel < 57)
-					multiplier = 28;
-				else
-					multiplier = 30;
-				break;
-
-			case DRUID:
-			case CLERIC:
-			case SHAMAN:
-				multiplier = 15;
-				break;
-
-			case PALADIN:
-			case SHADOWKNIGHT:
-				if (tmplevel < 35)
-					multiplier = 21;
-				else if (tmplevel < 45)
-					multiplier = 22;
-				else if (tmplevel < 51)
-					multiplier = 23;
-				else if (tmplevel < 56)
-					multiplier = 24;
-				else if (tmplevel < 60)
-					multiplier = 25;
-				else
-					multiplier = 26;
-				break;
-
-			case MONK:
-			case BARD:
-			case ROGUE:
-			//case BEASTLORD:
-				if (tmplevel < 51)
-					multiplier = 18;
-				else if (tmplevel < 58)
-					multiplier = 19;
-				else
-					multiplier = 20;
-				break;
-
-			case RANGER:
-				if (tmplevel < 58)
-					multiplier = 20;
-				else
-					multiplier = 21;
-				break;
-
-			case MAGICIAN:
-			case WIZARD:
-			case NECROMANCER:
-			case ENCHANTER:
-				multiplier = 12;
-				break;
-
-			default:
-				if (tmplevel < 35)
-					multiplier = 21;
-				else if (tmplevel < 45)
-					multiplier = 22;
-				else if (tmplevel < 51)
-					multiplier = 23;
-				else if (tmplevel < 56)
-					multiplier = 24;
-				else if (tmplevel < 60)
-					multiplier = 25;
-				else
-					multiplier = 26;
-				break;
-			}
-			sprintf(sep.arg[4],"%i",5+multiplier*atoi(sep.arg[2])+multiplier*atoi(sep.arg[2])*75/300);
+			sep.arg[4] = 0;
 		}
 
 		// Autoselect NPC Gender
@@ -1136,30 +1054,30 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* 
 		memset(npc_type, 0, sizeof(NPCType));
 
 		strncpy(npc_type->name, sep.arg[0], 60);
-		npc_type->cur_hp = atoi(sep.arg[4]);
-		npc_type->max_hp = atoi(sep.arg[4]);
-		npc_type->race = atoi(sep.arg[1]);
-		npc_type->gender = atoi(sep.arg[5]);
-		npc_type->class_ = atoi(sep.arg[6]);
-		npc_type->deity = 1;
-		npc_type->level = atoi(sep.arg[2]);
-		npc_type->npc_id = 0;
-		npc_type->loottable_id = 0;
-		npc_type->texture = atoi(sep.arg[3]);
-		npc_type->light = 0; // spawncommand needs update
-		npc_type->runspeed = 1.25;
+		npc_type->cur_hp           = atoi(sep.arg[4]);
+		npc_type->max_hp           = atoi(sep.arg[4]);
+		npc_type->race             = atoi(sep.arg[1]);
+		npc_type->gender           = atoi(sep.arg[5]);
+		npc_type->class_           = atoi(sep.arg[6]);
+		npc_type->deity            = 1;
+		npc_type->level            = atoi(sep.arg[2]);
+		npc_type->npc_id           = 0;
+		npc_type->loottable_id     = 0;
+		npc_type->texture          = atoi(sep.arg[3]);
+		npc_type->light            = 0; // spawncommand needs update
+		npc_type->runspeed         = 1.25;
 		npc_type->d_melee_texture1 = atoi(sep.arg[7]);
 		npc_type->d_melee_texture2 = atoi(sep.arg[8]);
-		npc_type->merchanttype = atoi(sep.arg[9]);
-		npc_type->bodytype = atoi(sep.arg[10]);
+		npc_type->merchanttype     = atoi(sep.arg[9]);
+		npc_type->bodytype         = atoi(sep.arg[10]);
 
-		npc_type->STR = 150;
-		npc_type->STA = 150;
-		npc_type->DEX = 150;
-		npc_type->AGI = 150;
-		npc_type->INT = 150;
-		npc_type->WIS = 150;
-		npc_type->CHA = 150;
+		npc_type->STR = 0;
+		npc_type->STA = 0;
+		npc_type->DEX = 0;
+		npc_type->AGI = 0;
+		npc_type->INT = 0;
+		npc_type->WIS = 0;
+		npc_type->CHA = 0;
 
 		npc_type->attack_delay = 3000;
 
