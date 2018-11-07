@@ -367,7 +367,7 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	ignore_despawn = npc_type_data->ignore_despawn;
 	m_targetable   = !npc_type_data->untargetable;
 
-	npc_scale_manager->ScaleMob(this);
+	npc_scale_manager->ScaleNPC(this);
 
 	AISpellVar.fail_recast                     = static_cast<uint32>(RuleI(Spells, AI_SpellCastFinishedFailRecast));
 	AISpellVar.engaged_no_sp_recast_min        = static_cast<uint32>(RuleI(Spells, AI_EngagedNoSpellMinRecast));

@@ -87,14 +87,18 @@ public:
 		"special_abilities"
 	};
 
-	void ScaleMob(Mob *mob);
+	void ScaleNPC(NPC * npc);
 	bool LoadScaleData();
 
-	global_npc_scale GetGlobalScaleDataForTypeLevel(int8 mob_type, int mob_level);
+	global_npc_scale GetGlobalScaleDataForTypeLevel(int8 npc_type, int npc_level);
 
 	std::map<std::pair<int, int>, global_npc_scale> npc_global_base_scaling_data;
 
-	void ListStats(Mob * mob);
+	void ListStats(NPC * &npc);
+
+	int8 GetNPCScalingType(NPC * &npc);
+	bool ApplyGlobalBaseScalingToNPCStatically(NPC * &npc);
+	bool ApplyGlobalBaseScalingToNPCDynamically(NPC * &npc);
 
 	uint32 GetClassLevelDamageMod(uint32 level, uint32 npc_class);
 };

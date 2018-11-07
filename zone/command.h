@@ -242,6 +242,7 @@ void command_resetaa_timer(Client *c, const Seperator *sep);
 void command_revoke(Client *c, const Seperator *sep);
 void command_rules(Client *c, const Seperator *sep);
 void command_save(Client *c, const Seperator *sep);
+void command_scale(Client *c, const Seperator *sep);
 void command_scribespell(Client *c, const Seperator *sep);
 void command_scribespells(Client *c, const Seperator *sep);
 void command_sendop(Client *c, const Seperator *sep);

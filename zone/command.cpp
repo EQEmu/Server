@@ -67,6 +67,7 @@
 #include "water_map.h"
 #include "worldserver.h"
 #include "fastmath.h"
+#include "npc_scale_manager.h"
 
 extern QueryServ* QServ;
 extern WorldServer worldserver;
@@ -335,6 +336,7 @@ int command_init(void)
 		command_add("revoke", "[charname] [1/0] - Makes charname unable to talk on OOC", 200, command_revoke) ||
 		command_add("rules", "(subcommand) - Manage server rules", 250, command_rules) ||
 		command_add("save", "- Force your player or player corpse target to be saved to the database", 50, command_save) ||
+		command_add("scale", "- Handles npc scaling", 150, command_scale) ||
 		command_add("scribespell", "[spellid] - Scribe specified spell in your target's spell book.", 180, command_scribespell) ||
 		command_add("scribespells", "[max level] [min level] - Scribe all spells for you or your player target that are usable by them, up to level specified. (may freeze client for a few seconds)", 150, command_scribespells) ||
 		command_add("sendzonespawns", "- Refresh spawn list for all clients in zone", 150, command_sendzonespawns) ||
@@ -1380,7 +1382,7 @@ void command_list(Client *c, const Seperator *sep)
 
 				entity_count++;
 
-				std::string entity_name = entity->GetCleanName();
+				std::string entity_name = entity->GetName();
 
 				/**
 				 * Filter by name
@@ -1421,7 +1423,7 @@ void command_list(Client *c, const Seperator *sep)
 
 				entity_count++;
 
-				std::string entity_name = entity->GetCleanName();
+				std::string entity_name = entity->GetName();
 
 				/**
 				 * Filter by name
@@ -1462,7 +1464,7 @@ void command_list(Client *c, const Seperator *sep)
 
 				entity_count++;
 
-				std::string entity_name = entity->GetCleanName();
+				std::string entity_name = entity->GetName();
 
 				/**
 				 * Filter by name
@@ -11398,6 +11400,133 @@ void command_reloadtraps(Client *c, const Seperator *sep)
 {
 	entity_list.UpdateAllTraps(true, true);
 	c->Message(CC_Default, "Traps reloaded for %s.", zone->GetShortName());
+}
+
+void command_scale(Client *c, const Seperator *sep)
+{
+	if (sep->argnum == 0) {
+		c->Message(15, "# Usage # ");
+		c->Message(15, "#scale [static/dynamic] (With targeted NPC)");
+		c->Message(15, "#scale [npc_name_search] [static/dynamic] (To make zone-wide changes)");
+		c->Message(15, "#scale all [static/dynamic]");
+		return;
+	}
+
+	/**
+	 * Targeted changes
+	 */
+	if (c->GetTarget() && c->GetTarget()->IsNPC() && sep->argnum < 2) {
+		NPC * npc = c->GetTarget()->CastToNPC();
+
+		bool apply_status = false;
+		if (strcasecmp(sep->arg[1], "dynamic") == 0) {
+			c->Message(15, "Applying global base scaling to npc dynamically (All stats set to zeroes)...");
+			apply_status = npc_scale_manager->ApplyGlobalBaseScalingToNPCDynamically(npc);
+		}
+		else if (strcasecmp(sep->arg[1], "static") == 0) {
+			c->Message(15, "Applying global base scaling to npc statically (Copying base stats onto NPC)...");
+			apply_status = npc_scale_manager->ApplyGlobalBaseScalingToNPCStatically(npc);
+		}
+		else {
+			return;
+		}
+
+		if (apply_status) {
+			c->Message(15, "Applied to NPC '%s' successfully!", npc->GetName());
+		}
+		else {
+			c->Message(15, "Failed to load scaling data from the database "
+						   "for this npc / type, see 'NPCScaling' log for more info");
+		}
+	}
+	else if (c->GetTarget() && sep->argnum < 2) {
+		c->Message(15, "Target must be an npc!");
+	}
+
+	/**
+	 * Zonewide
+	 */
+	if (sep->argnum > 1) {
+
+		std::string scale_type;
+		if (strcasecmp(sep->arg[2], "dynamic") == 0) {
+			scale_type = "dynamic";
+		}
+		else if (strcasecmp(sep->arg[2], "static") == 0) {
+			scale_type = "static";
+		}
+
+		if (scale_type.length() <= 0) {
+			c->Message(15, "You must first set if you intend on using static versus dynamic for these changes");
+			c->Message(15, "#scale [npc_name_search] [static/dynamic]");
+			c->Message(15, "#scale all [static/dynamic]");
+			return;
+		}
+
+		std::string search_string = sep->arg[1];
+
+		auto &entity_list_search = entity_list.GetNPCList();
+
+		int found_count = 0;
+		for (auto &itr : entity_list_search) {
+			NPC *entity = itr.second;
+
+			std::string entity_name = entity->GetName();
+
+			/**
+			 * Filter by name
+			 */
+			if (search_string.length() > 0 && entity_name.find(search_string) == std::string::npos && strcasecmp(sep->arg[1], "all") != 0) {
+				continue;
+			}
+
+			std::string status = "(Searching)";
+
+			if (strcasecmp(sep->arg[3], "apply") == 0) {
+				status = "(Applying)";
+
+				if (strcasecmp(sep->arg[2], "dynamic") == 0) {
+					npc_scale_manager->ApplyGlobalBaseScalingToNPCDynamically(entity);
+				}
+				if (strcasecmp(sep->arg[2], "static") == 0) {
+					npc_scale_manager->ApplyGlobalBaseScalingToNPCStatically(entity);
+				}
+			}
+
+			c->Message(
+				15,
+				"| ID %5d | %s | x %.0f | y %0.f | z %.0f | DBID %u %s",
+				entity->GetID(),
+				entity->GetName(),
+				entity->GetX(),
+				entity->GetY(),
+				entity->GetZ(),
+				entity->GetNPCTypeID(),
+				status.c_str()
+			);
+
+			found_count++;
+		}
+
+		if (strcasecmp(sep->arg[3], "apply") == 0) {
+			c->Message(15, "%s scaling applied against (%i) NPC's", sep->arg[2], found_count);
+		}
+		else {
+
+			std::string saylink = StringFormat(
+				"#scale %s %s apply",
+				sep->arg[1],
+				sep->arg[2]
+			);
+
+			c->Message(15, "Found (%i) NPC's that match this search...", found_count);
+			c->Message(
+				15, "To apply these changes, click <%s> or type %s",
+				EQEmu::SayLinkEngine::GenerateQuestSaylink(saylink, false, "Apply").c_str(),
+				saylink.c_str()
+			);
+		}
+	}
 }
 
 // All new code added to command.cpp should be BEFORE this comment line. Do no append code to this file below the BOTS code block.

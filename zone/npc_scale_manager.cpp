@@ -24,34 +24,20 @@
 /**
  * @param mob
  */
-void NpcScaleManager::ScaleMob(Mob *mob)
+void NpcScaleManager::ScaleNPC(NPC * npc)
 {
-	Log(Logs::General, Logs::NPCScaling, "Attempting scale on %s", mob->GetCleanName());
+	Log(Logs::General, Logs::NPCScaling, "Attempting scale on %s", npc->GetCleanName());
 
-	if (mob->IsClient()) {
-		return;
-	}
+	int8 npc_type  = GetNPCScalingType(npc);
+	int  npc_level = npc->GetLevel();
 
-	NPC *npc = mob->CastToNPC();
-
-	int8 mob_type  = 0;
-	int  mob_level = npc->GetLevel();
-
-	if (npc->IsRareSpawn()) {
-		mob_type = 1;
-	}
-
-	if (npc->IsRaidTarget()) {
-		mob_type = 2;
-	}
-
-	global_npc_scale scale_data = GetGlobalScaleDataForTypeLevel(mob_type, mob_level);
+	global_npc_scale scale_data = GetGlobalScaleDataForTypeLevel(npc_type, npc_level);
 
 	if (!scale_data.level) {
 		Log(Logs::General, Logs::NPCScaling, "NPC: %s - scaling data not found for type: %i level: %i",
-			mob->GetCleanName(),
-			mob_type,
-			mob_level
+			npc->GetCleanName(),
+			npc_type,
+			npc_level
 		);
 
 		return;
@@ -165,16 +151,19 @@ void NpcScaleManager::ScaleMob(Mob *mob)
 	ListStats(npc);
 }
 
-void NpcScaleManager::ListStats(Mob *mob)
+/**
+ * @param mob
+ */
+void NpcScaleManager::ListStats(NPC *&npc)
 {
 	for (const auto &stat : scaling_stats) {
 		std::string variable = StringFormat("modify_stat_%s", stat.c_str());
-		if (mob->EntityVariableExists(variable.c_str())) {
+		if (npc->EntityVariableExists(variable.c_str())) {
 			Log(Logs::Detail,
 				Logs::NPCScaling,
 				"NpcScaleManager::ListStats: %s - %s ",
 				stat.c_str(),
-				mob->GetEntityVariable(variable.c_str()));
+				npc->GetEntityVariable(variable.c_str()));
 		}
 	}
 }
@@ -263,13 +252,13 @@ bool NpcScaleManager::LoadScaleData()
 }
 
 /**
- * @param mob_type
- * @param mob_level
+ * @param npc_type
+ * @param npc_level
  * @return NpcScaleManager::global_npc_scale
  */
-NpcScaleManager::global_npc_scale NpcScaleManager::GetGlobalScaleDataForTypeLevel(int8 mob_type, int mob_level)
+NpcScaleManager::global_npc_scale NpcScaleManager::GetGlobalScaleDataForTypeLevel(int8 npc_type, int npc_level)
 {
-	auto iter = npc_global_base_scaling_data.find(std::make_pair(mob_type, mob_level));
+	auto iter = npc_global_base_scaling_data.find(std::make_pair(npc_type, npc_level));
 	if (iter != npc_global_base_scaling_data.end()) {
 		return iter->second;
 	}
@@ -417,4 +406,173 @@ uint32 NpcScaleManager::GetClassLevelDamageMod(uint32 level, uint32 npc_class)
 	}
 
 	return multiplier;
+}
+
+/**
+ * @param npc
+ * @return
+ */
+int8 NpcScaleManager::GetNPCScalingType(NPC *&npc)
+{
+	std::string npc_name = npc->GetName();
+
+	if (npc->IsRareSpawn() || npc_name.find('#') != std::string::npos) {
+		return 1;
+	}
+
+	if (npc->IsRaidTarget()) {
+		return 2;
+	}
+
+	return 0;
+}
+
+/**
+ * Returns false if scaling data not found
+ * @param npc
+ * @return
+ */
+bool NpcScaleManager::ApplyGlobalBaseScalingToNPCStatically(NPC *&npc)
+{
+	int8 npc_type  = GetNPCScalingType(npc);
+	int  npc_level = npc->GetLevel();
+
+	global_npc_scale scale_data = GetGlobalScaleDataForTypeLevel(npc_type, npc_level);
+
+	if (!scale_data.level) {
+		Log(
+			Logs::General,
+			Logs::NPCScaling,
+			"NpcScaleManager::ApplyGlobalBaseScalingToNPCStatically NPC: %s - scaling data not found for type: %i level: %i",
+			npc->GetCleanName(),
+			npc_type,
+			npc_level
+		);
+
+		return false;
+	}
+
+	std::string query = StringFormat(
+		"UPDATE `npc_types` SET "
+		"AC = %i, "
+		"hp = %i, "
+		"Accuracy = %i, "
+		"slow_mitigation = %i, "
+		"ATK = %i, "
+		"STR = %i, "
+		"STA = %i, "
+		"DEX = %i, "
+		"AGI = %i, "
+		"_INT = %i, "
+		"WIS = %i, "
+		"CHA = %i, "
+		"MR = %i, "
+		"CR = %i, "
+		"FR = %i, "
+		"PR = %i, "
+		"DR = %i, "
+		"Corrup = %i, "
+		"PhR = %i, "
+		"mindmg = %i, "
+		"maxdmg = %i, "
+		"hp_regen_rate = %i, "
+		"attack_delay = %i, "
+		"spellscale = %i, "
+		"healscale = %i, "
+		"special_abilities = '%s' "
+		"WHERE `id` = %i",
+		scale_data.ac,
+		scale_data.hp,
+		scale_data.accuracy,
+		scale_data.slow_mitigation,
+		scale_data.attack,
+		scale_data.strength,
+		scale_data.stamina,
+		scale_data.dexterity,
+		scale_data.agility,
+		scale_data.intelligence,
+		scale_data.wisdom,
+		scale_data.charisma,
+		scale_data.magic_resist,
+		scale_data.cold_resist,
+		scale_data.fire_resist,
+		scale_data.poison_resist,
+		scale_data.disease_resist,
+		scale_data.corruption_resist,
+		scale_data.physical_resist,
+		scale_data.min_dmg,
+		scale_data.max_dmg,
+		scale_data.hp_regen_rate,
+		scale_data.attack_delay,
+		scale_data.spell_scale,
+		scale_data.heal_scale,
+		EscapeString(scale_data.special_abilities).c_str(),
+		npc->GetNPCTypeID()
+	);
+
+	auto results = database.QueryDatabase(query);
+
+	return results.Success();
+}
+
+/**
+ * Returns false if scaling data not found
+ * @param npc
+ * @return
+ */
+bool NpcScaleManager::ApplyGlobalBaseScalingToNPCDynamically(NPC *&npc)
+{
+	int8 npc_type  = GetNPCScalingType(npc);
+	int  npc_level = npc->GetLevel();
+
+	global_npc_scale scale_data = GetGlobalScaleDataForTypeLevel(npc_type, npc_level);
+
+	if (!scale_data.level) {
+		Log(
+			Logs::General,
+			Logs::NPCScaling,
+			"NpcScaleManager::ApplyGlobalBaseScalingToNPCDynamically NPC: %s - scaling data not found for type: %i level: %i",
+			npc->GetCleanName(),
+			npc_type,
+			npc_level
+		);
+
+		return false;
+	}
+
+	std::string query = StringFormat(
+		"UPDATE `npc_types` SET "
+		"AC = 0, "
+		"hp = 0, "
+		"Accuracy = 0, "
+		"slow_mitigation = 0, "
+		"ATK = 0, "
+		"STR = 0, "
+		"STA = 0, "
+		"DEX = 0, "
+		"AGI = 0, "
+		"_INT = 0, "
+		"WIS = 0, "
+		"CHA = 0, "
+		"MR = 0, "
+		"CR = 0, "
+		"FR = 0, "
+		"PR = 0, "
+		"DR = 0, "
+		"Corrup = 0, "
+		"PhR = 0, "
+		"mindmg = 0, "
+		"maxdmg = 0, "
+		"hp_regen_rate = 0, "
+		"attack_delay = 0, "
+		"spellscale = 0, "
+		"healscale = 0, "
+		"special_abilities = '' "
+		"WHERE `id` = %i",
+		npc->GetNPCTypeID()
+	);
+
+	auto results = database.QueryDatabase(query);
+
+	return results.Success();
 }

@@ -3247,8 +3247,7 @@ void Mob::QuestJournalledSay(Client *QuestInitiator, const char *str)
 
 const char *Mob::GetCleanName()
 {
-	if(!strlen(clean_name))
-	{
+	if (!strlen(clean_name)) {
 		CleanMobName(GetName(), clean_name);
 	}
 
@@ -3650,11 +3649,10 @@ void Mob::SetEntityVariable(const char *id, const char *m_var)
 	m_EntityVariables[id] = n_m_var;
 }
 
-const char* Mob::GetEntityVariable(const char *id)
+const char *Mob::GetEntityVariable(const char *id)
 {
 	auto iter = m_EntityVariables.find(id);
-	if(iter != m_EntityVariables.end())
-	{
+	if (iter != m_EntityVariables.end()) {
 		return iter->second.c_str();
 	}
 	return nullptr;
