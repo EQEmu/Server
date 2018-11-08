@@ -1367,15 +1367,7 @@ void Mob::AI_Process() {
 				auto targetPosition = glm::vec3(target->GetX(), target->GetY(), target->GetZ());
 				if (!zone->watermap->InLiquid(targetPosition)) {
 					Mob *tar = hate_list.GetEntWithMostHateOnList(this);
-					if (tar == target) {
-						WipeHateList();
-						Heal();
-						BuffFadeAll();
-						AI_walking_timer->Start(100);
-						time_until_can_move = Timer::GetCurrentTime();
-						return;
-					}
-					else if (tar != nullptr) {
+					if (tar != nullptr && tar != target) {
 						SetTarget(tar);
 						return;
 					}

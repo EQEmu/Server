@@ -178,12 +178,12 @@ public:
 		glm::vec2 ndir = glm::normalize(dir);
 		double distance_moved = frame_time * current_speed * 0.4f * 1.45f;
 
-		if (distance_moved > len) {
-			m->SetPosition(m_move_to_x, m_move_to_y, m_move_to_z);
-		
+		if (distance_moved > len) {		
 			if (m->IsNPC()) {
 				entity_list.ProcessMove(m->CastToNPC(), m_move_to_x, m_move_to_y, m_move_to_z);
 			}
+
+			m->SetPosition(m_move_to_x, m_move_to_y, m_move_to_z);
 		
 			m->TryFixZ();
 			return true;
@@ -196,11 +196,11 @@ public:
 			double start_z = m_move_to_z - m_total_v_dist;
 			double z_at_pos = start_z + (m_total_v_dist * (total_distance_traveled / m_total_h_dist));
 
-			m->SetPosition(npos.x, npos.y, z_at_pos);
-		
 			if (m->IsNPC()) {
 				entity_list.ProcessMove(m->CastToNPC(), npos.x, npos.y, z_at_pos);
 			}
+
+			m->SetPosition(npos.x, npos.y, z_at_pos);
 		}
 		
 		return false;
@@ -210,7 +210,7 @@ public:
 		return m_started;
 	}
 
-private:
+protected:
 
 	double m_move_to_x;
 	double m_move_to_y;
@@ -222,6 +222,101 @@ private:
 	int m_last_sent_speed;
 	double m_total_h_dist;
 	double m_total_v_dist;
+};
+
+class SwimToCommand : public MoveToCommand
+{
+public:
+	SwimToCommand(float x, float y, float z, MobMovementMode mode) : MoveToCommand(x, y, z, mode) {
+
+	}
+
+	virtual bool Process(MobMovementManager *mgr, Mob *m)
+	{
+		if (!m->IsAIControlled()) {
+			return true;
+		}
+
+		//Send a movement packet when you start moving		
+		double current_time = static_cast<double>(Timer::GetCurrentTime()) / 1000.0;
+		int current_speed = 0;
+
+		if (m_move_to_mode == MovementRunning) {
+			current_speed = m->GetRunspeed();
+		}
+		else {
+			current_speed = m->GetWalkspeed();
+		}
+
+		if (!m_started) {
+			m_started = true;
+			//rotate to the point
+			m->SetMoving(true);
+			m->SetHeading(m->CalculateHeadingToTarget(m_move_to_x, m_move_to_y));
+
+			m_last_sent_speed = current_speed;
+			m_last_sent_time = current_time;
+			m_total_h_dist = DistanceNoZ(m->GetPosition(), glm::vec4(m_move_to_x, m_move_to_z, 0.0f, 0.0f));
+			m_total_v_dist = m_move_to_z - m->GetZ();
+			mgr->SendCommandToClients(m, 0.0, 0.0, 0.0, 0.0, current_speed, ClientRangeCloseMedium);
+			return false;
+		}
+
+		//When speed changes
+		if (current_speed != m_last_sent_speed) {
+			m_last_sent_speed = current_speed;
+			m_last_sent_time = current_time;
+			mgr->SendCommandToClients(m, 0.0, 0.0, 0.0, 0.0, current_speed, ClientRangeCloseMedium);
+			return false;
+		}
+
+		//If x seconds have passed without sending an update.
+		if (current_time - m_last_sent_time >= 1.5) {
+			m_last_sent_speed = current_speed;
+			m_last_sent_time = current_time;
+			mgr->SendCommandToClients(m, 0.0, 0.0, 0.0, 0.0, current_speed, ClientRangeCloseMedium);
+			return false;
+		}
+
+		auto &p = m->GetPosition();
+		glm::vec2 tar(m_move_to_x, m_move_to_y);
+		glm::vec2 pos(p.x, p.y);
+		double len = glm::distance(pos, tar);
+		if (len == 0) {
+			return true;
+		}
+
+		m->SetMoved(true);
+
+		glm::vec2 dir = tar - pos;
+		glm::vec2 ndir = glm::normalize(dir);
+		double distance_moved = frame_time * current_speed * 0.4f * 1.45f;
+
+		if (distance_moved > len) {
+			if (m->IsNPC()) {
+				entity_list.ProcessMove(m->CastToNPC(), m_move_to_x, m_move_to_y, m_move_to_z);
+			}
+
+			m->SetPosition(m_move_to_x, m_move_to_y, m_move_to_z);
+			return true;
+		}
+		else {
+			glm::vec2 npos = pos + (ndir * static_cast<float>(distance_moved));
+
+			len -= distance_moved;
+			double total_distance_traveled = m_total_h_dist - len;
+			double start_z = m_move_to_z - m_total_v_dist;
+			double z_at_pos = start_z + (m_total_v_dist * (total_distance_traveled / m_total_h_dist));
+
+			if (m->IsNPC()) {
+				entity_list.ProcessMove(m->CastToNPC(), npos.x, npos.y, z_at_pos);
+			}
+
+			m->SetPosition(npos.x, npos.y, z_at_pos);
+		}
+
+		return false;
+	}
 };
 
 class TeleportToCommand : public IMovementCommand
@@ -243,13 +338,13 @@ public:
 			return true;
 		}
 
-		m->SetPosition(m_teleport_to_x, m_teleport_to_y, m_teleport_to_z);
-		m->SetHeading(mgr->FixHeading(m_teleport_to_heading));
-		mgr->SendCommandToClients(m, 0.0, 0.0, 0.0, 0.0, 0, ClientRangeAny);
-
 		if (m->IsNPC()) {
 			entity_list.ProcessMove(m->CastToNPC(), m_teleport_to_x, m_teleport_to_y, m_teleport_to_z);
 		}
+
+		m->SetPosition(m_teleport_to_x, m_teleport_to_y, m_teleport_to_z);
+		m->SetHeading(mgr->FixHeading(m_teleport_to_heading));
+		mgr->SendCommandToClients(m, 0.0, 0.0, 0.0, 0.0, 0, ClientRangeAny);
 
 		return true;
 	}
@@ -603,50 +698,72 @@ void MobMovementManager::FillCommandStruct(PlayerPositionUpdateServer_Struct *sp
 
 void MobMovementManager::UpdatePath(Mob *who, float x, float y, float z, MobMovementMode mode)
 {
-	//If who is underwater & xyz is underwater & who can see xyz
-		//Create a route directly from who to xyz
-	//else
-		//Create Route
-	if (zone->HasMap() && zone->HasWaterMap()) {
-		if (zone->watermap->InLiquid(who->GetPosition()) && zone->watermap->InLiquid(glm::vec3(x, y, z)) && zone->zonemap->CheckLoS(who->GetPosition(), glm::vec3(x, y, z))) {
-			auto iter = _impl->Entries.find(who);
-			auto &ent = (*iter);
-			
-			PushMoveTo(ent.second, x, y, z, mode);
-			PushStopMoving(ent.second);
-			return;
-		}
+	if (!zone->HasMap() || !zone->HasWaterMap()) {
+		auto iter = _impl->Entries.find(who);
+		auto &ent = (*iter);
+
+		PushMoveTo(ent.second, x, y, z, mode);
+		PushStopMoving(ent.second);
+	}
+
+	if (zone->watermap->InLiquid(who->GetPosition())
+		&& zone->watermap->InLiquid(glm::vec3(x, y, z))
+		&& zone->zonemap->CheckLoS(who->GetPosition(), glm::vec3(x, y, z))) {
+		auto iter = _impl->Entries.find(who);
+		auto &ent = (*iter);
+
+		PushSwimTo(ent.second, x, y, z, mode);
+		PushStopMoving(ent.second);
+		return;
 	}
 
 	bool partial = false;
 	bool stuck = false;
-	auto route = zone->pathing->FindRoute(glm::vec3(who->GetX(), who->GetY(), who->GetZ()), glm::vec3(x, y, z), partial, stuck);
-	
+	IPathfinder::IPath route;
+	if (who->IsUnderwaterOnly()) {
+		route = zone->pathing->FindRoute(glm::vec3(who->GetX(), who->GetY(), who->GetZ()), glm::vec3(x, y, z), partial, stuck, PathingWater | PathingLava | PathingVWater | PathingPortal | PathingPrefer);
+	}
+	else {
+		route = zone->pathing->FindRoute(glm::vec3(who->GetX(), who->GetY(), who->GetZ()), glm::vec3(x, y, z), partial, stuck, PathingNotDisabled ^ PathingZoneLine);
+	}
+
 	//if route empty or only has two points, and we have los, then just force npc to move to location
 	if (route.size() < 3) {
 		auto iter = _impl->Entries.find(who);
 		auto &ent = (*iter);
 		if (zone->zonemap->CheckLoS(who->GetPosition(), glm::vec3(x, y, z)) && route.size() > 0)
 		{
-
 			auto &first = route.front();
 			auto &last = route.back();
-
-			PushMoveTo(ent.second, x, y, z, mode);
+	
+			if (zone->watermap->InLiquid(who->GetPosition())) {
+				PushSwimTo(ent.second, x, y, z, mode);
+			}
+			else {
+				PushMoveTo(ent.second, x, y, z, mode);
+			}
+			
 			PushStopMoving(ent.second);
 			return;
 		}
 		else if(route.size() < 2)
 		{
+			if (zone->watermap->InLiquid(who->GetPosition())) {
+				PushSwimTo(ent.second, x, y, z, mode);
+			}
+			else {
+				PushMoveTo(ent.second, x, y, z, mode);
+			}
+
 			PushMoveTo(ent.second, x, y, z, mode);
 			PushStopMoving(ent.second);
 			return;
 		}
 	}
-
+	
 	auto &first = route.front();
 	auto &last = route.back();
-
+	
 	if (zone->HasWaterMap()) {
 		//If who is underwater & who is not at the first node
 		//Add node at who
@@ -656,7 +773,7 @@ void MobMovementManager::UpdatePath(Mob *who, float x, float y, float z, MobMove
 			IPathfinder::IPathNode node(who->GetPosition());
 			route.push_front(node);
 		}
-
+	
 		//If xyz is underwater & xyz is not at the last node
 		//Add node at xyz
 		if (!IsPositionEqualWithinCertainZ(glm::vec3(x, y, z), last.pos, 5.0f)
@@ -666,60 +783,54 @@ void MobMovementManager::UpdatePath(Mob *who, float x, float y, float z, MobMove
 			route.push_back(node);
 		}
 	}
-
+	
 	//adjust route
 	AdjustRoute(route, who->GetFlyMode(), who->GetZOffset());
-
+	
 	auto eiter = _impl->Entries.find(who);
 	auto &ent = (*eiter);
 	auto iter = route.begin();
 	glm::vec3 previous_pos(who->GetX(), who->GetY(), who->GetZ());
 	bool first_node = true;
-
+	
 	//for each node
 	while (iter != route.end()) {
 		auto &current_node = (*iter);
-
+	
 		iter++;
-
+	
 		if (iter == route.end()) {
 			continue;
 		}
-
+	
 		previous_pos = current_node.pos;
 		auto &next_node = (*iter);
-
+	
 		if (first_node) {
-
+	
 			if (mode == MovementWalking) {
 				auto h = who->CalculateHeadingToTarget(next_node.pos.x, next_node.pos.y);
 				PushRotateTo(ent.second, who, h, mode);
 			}
-
+	
 			first_node = false;
 		}
-
-		//if underwater only mob and node -> node + 1 is moving to land (terminate route, npc will go to the point where it would normally exit the water but no further)
-		if (who->IsUnderwaterOnly()) {
-			if (zone->HasWaterMap() && !zone->watermap->InLiquid(next_node.pos)) {
-				PushStopMoving(ent.second);
-				return;
-			}
-		}
-
+	
 		//move to / teleport to node + 1
 		if (next_node.teleport && next_node.pos.x != 0.0f && next_node.pos.y != 0.0f) {
 			PushTeleportTo(ent.second, next_node.pos.x, next_node.pos.y, next_node.pos.z,
 				CalculateHeadingAngleBetweenPositions(current_node.pos.x, current_node.pos.y, next_node.pos.x, next_node.pos.y));
 		}
 		else {
-			if (next_node.pos.x != 0.0f && next_node.pos.y != 0.0f)
-			{
+			if (zone->watermap->InLiquid(previous_pos)) {
+				PushSwimTo(ent.second, next_node.pos.x, next_node.pos.y, next_node.pos.z, mode);
+			}
+			else {
 				PushMoveTo(ent.second, next_node.pos.x, next_node.pos.y, next_node.pos.z, mode);
 			}
 		}
 	}
-
+	
 	//if stuck then handle stuck
 	if (stuck) {
 		PushMoveTo(ent.second, x, y, z, mode);
@@ -737,6 +848,11 @@ void MobMovementManager::PushTeleportTo(MobMovementEntry &ent, float x, float y,
 void MobMovementManager::PushMoveTo(MobMovementEntry &ent, float x, float y, float z, MobMovementMode mode)
 {
 	ent.Commands.push_back(std::unique_ptr<IMovementCommand>(new MoveToCommand(x, y, z, mode)));
+}
+
+void MobMovementManager::PushSwimTo(MobMovementEntry &ent, float x, float y, float z, MobMovementMode mode)
+{
+	ent.Commands.push_back(std::unique_ptr<IMovementCommand>(new SwimToCommand(x, y, z, mode)));
 }
 
 void MobMovementManager::PushRotateTo(MobMovementEntry &ent, Mob *who, float to, MobMovementMode mode)

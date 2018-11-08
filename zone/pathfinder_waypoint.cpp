@@ -114,7 +114,7 @@ PathfinderWaypoint::~PathfinderWaypoint()
 {
 }
 
-IPathfinder::IPath PathfinderWaypoint::FindRoute(const glm::vec3 &start, const glm::vec3 &end, bool &partial, bool &stuck)
+IPathfinder::IPath PathfinderWaypoint::FindRoute(const glm::vec3 &start, const glm::vec3 &end, bool &partial, bool &stuck, int flags)
 {
 	stuck = false;
 	partial = false;

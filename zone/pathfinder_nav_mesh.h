@@ -9,7 +9,7 @@ public:
 	PathfinderNavmesh(const std::string &path);
 	virtual ~PathfinderNavmesh();
 
-	virtual IPath FindRoute(const glm::vec3 &start, const glm::vec3 &end, bool &partial, bool &stuck);
+	virtual IPath FindRoute(const glm::vec3 &start, const glm::vec3 &end, bool &partial, bool &stuck, int flags = PathingNotDisabled);
 	virtual glm::vec3 GetRandomLocation(const glm::vec3 &start);
 	virtual void DebugCommand(Client *c, const Seperator *sep);
 

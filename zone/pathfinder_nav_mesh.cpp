@@ -33,7 +33,7 @@ PathfinderNavmesh::~PathfinderNavmesh()
 	Clear();
 }
 
-IPathfinder::IPath PathfinderNavmesh::FindRoute(const glm::vec3 &start, const glm::vec3 &end, bool &partial, bool &stuck)
+IPathfinder::IPath PathfinderNavmesh::FindRoute(const glm::vec3 &start, const glm::vec3 &end, bool &partial, bool &stuck, int flags)
 {
 	partial = false;
 
@@ -50,7 +50,7 @@ IPathfinder::IPath PathfinderNavmesh::FindRoute(const glm::vec3 &start, const gl
 	glm::vec3 dest_location(end.x, end.z, end.y);
 
 	dtQueryFilter filter;
-	filter.setIncludeFlags(65535U ^ 2048);
+	filter.setIncludeFlags(flags);
 	filter.setAreaCost(0, 1.0f); //Normal
 	filter.setAreaCost(1, 3.0f); //Water
 	filter.setAreaCost(2, 5.0f); //Lava

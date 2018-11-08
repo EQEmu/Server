@@ -1264,7 +1264,7 @@ void command_movement(Client *c, const Seperator *sep)
 	auto &mgr = MobMovementManager::Get();
 
 	if (sep->arg[1][0] == 0) {
-		c->Message(0, "Usage: #movement stats/clearstats/walkto/runto/rotateto/stop");
+		c->Message(0, "Usage: #movement stats/clearstats/walkto/runto/rotateto/stop/packet");
 		return;
 	}
 
@@ -1316,8 +1316,18 @@ void command_movement(Client *c, const Seperator *sep)
 
 		target->StopNavigation();
 	}
+	else if (strcasecmp(sep->arg[1], "packet") == 0)
+	{
+		auto target = c->GetTarget();
+		if (target == nullptr) {
+			c->Message(0, "No target found.");
+			return;
+		}
+
+		mgr.SendCommandToClients(target, atof(sep->arg[2]), atof(sep->arg[3]), atof(sep->arg[4]), atof(sep->arg[5]), atoi(sep->arg[6]), ClientRangeAny);
+	}
 	else {
-		c->Message(0, "Usage: #movement stats/clearstats/walkto/runto/rotateto/stop");
+		c->Message(0, "Usage: #movement stats/clearstats/walkto/runto/rotateto/stop/packet");
 	}
 }
 

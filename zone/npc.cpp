@@ -39,6 +39,7 @@
 #include "spawn2.h"
 #include "zone.h"
 #include "quest_parser_collection.h"
+#include "water_map.h"
 
 #include <cctype>
 #include <stdio.h>
@@ -412,6 +413,20 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, const glm::vec4& position, Gravit
 	AISpellVar.idle_no_sp_recast_min = RuleI(Spells, AI_IdleNoSpellMinRecast);
 	AISpellVar.idle_no_sp_recast_max = RuleI(Spells, AI_IdleNoSpellMaxRecast);
 	AISpellVar.idle_beneficial_chance = RuleI(Spells, AI_IdleBeneficialChance);
+
+	if (zone->watermap) {
+		auto mode = GetFlyMode();
+		if (mode == GravityBehavior::Ground) {
+			if (zone->watermap->InLiquid(m_Position)) {
+				SetFlyMode(GravityBehavior::Water);
+			}
+		}
+		else if (mode == GravityBehavior::Water) {
+			if (!zone->watermap->InLiquid(m_Position)) {
+				SetFlyMode(GravityBehavior::Ground);
+			}
+		}
+	}
 }
 
 NPC::~NPC()
