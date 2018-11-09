@@ -3438,22 +3438,6 @@ void EntityList::ProcessMove(NPC *n, float x, float y, float z) {
 		args.push_back(&evt.area_type);
 		parse->EventNPC(evt.event_id, evt.npc, evt.client, "", 0, &args);
 	}
-
-	if (zone->watermap) {
-		auto mode = n->GetFlyMode();
-		if (mode == GravityBehavior::Ground) {
-			if (zone->watermap->InLiquid(glm::vec3(x, y, z)))
-			{
-				n->SetFlyMode(GravityBehavior::Water);
-			}
-		}
-		else if (mode == GravityBehavior::Water) {
-			if (!zone->watermap->InLiquid(glm::vec3(x, y, z)))
-			{
-				n->SetFlyMode(GravityBehavior::Ground);
-			}
-		}
-	}
 }
 
 void EntityList::AddArea(int id, int type, float min_x, float max_x, float min_y,

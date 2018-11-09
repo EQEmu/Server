@@ -1363,16 +1363,20 @@ void Mob::AI_Process() {
 		else {
 			//we cannot reach our target...
 			//underwater stuff only works with water maps in the zone!
-			if (IsNPC() && CastToNPC()->IsUnderwaterOnly() && zone->HasWaterMap()) {
-				auto targetPosition = glm::vec3(target->GetX(), target->GetY(), target->GetZ());
-				if (!zone->watermap->InLiquid(targetPosition)) {
-					Mob *tar = hate_list.GetEntWithMostHateOnList(this);
-					if (tar != nullptr && tar != target) {
-						SetTarget(tar);
-						return;
-					}
-				}
-			}
+			//if (IsNPC() && CastToNPC()->IsUnderwaterOnly() && zone->HasWaterMap()) {
+			//	auto targetPosition = glm::vec3(target->GetX(), target->GetY(), target->GetZ());
+			//	if (!zone->watermap->InLiquid(targetPosition)) {
+			//		Mob *tar = hate_list.GetEntWithMostHateOnList(this);
+			//		if (tar != nullptr && tar != target) {
+			//			SetTarget(tar);
+			//			RunTo(tar->GetX(), tar->GetY(), tar->GetZ());
+			//			return;
+			//		}
+			//		else {
+			//			RunTo(target->GetX(), target->GetY(), target->GetZ());
+			//		}
+			//	}
+			//}
 
 			// See if we can summon the mob to us
 			if (!HateSummon()) {

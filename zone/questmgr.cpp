@@ -208,7 +208,7 @@ Mob* QuestManager::spawn2(int npc_type, int grid, int unused, const glm::vec4& p
 	const NPCType* tmp = 0;
 	if (tmp = database.LoadNPCTypesData(npc_type))
 	{
-		auto npc = new NPC(tmp, nullptr, position, GravityBehavior::Ground);
+		auto npc = new NPC(tmp, nullptr, position, GravityBehavior::Water);
 		npc->AddLootTable();
 		if (npc->DropsGlobalLoot())
 			npc->CheckGlobalLootTables();
@@ -232,7 +232,7 @@ Mob* QuestManager::unique_spawn(int npc_type, int grid, int unused, const glm::v
 	const NPCType* tmp = 0;
 	if (tmp = database.LoadNPCTypesData(npc_type))
 	{
-		auto npc = new NPC(tmp, nullptr, position, GravityBehavior::Ground);
+		auto npc = new NPC(tmp, nullptr, position, GravityBehavior::Water);
 		npc->AddLootTable();
 		if (npc->DropsGlobalLoot())
 			npc->CheckGlobalLootTables();
@@ -308,7 +308,7 @@ Mob* QuestManager::spawn_from_spawn2(uint32 spawn2_id)
 		found_spawn->SetCurrentNPCID(npcid);
 
         auto position = glm::vec4(found_spawn->GetX(), found_spawn->GetY(), found_spawn->GetZ(), found_spawn->GetHeading());
-		auto npc = new NPC(tmp, found_spawn, position, GravityBehavior::Ground);
+		auto npc = new NPC(tmp, found_spawn, position, GravityBehavior::Water);
 
 		found_spawn->SetNPCPointer(npc);
 		npc->AddLootTable();
@@ -1686,7 +1686,7 @@ void QuestManager::respawn(int npcTypeID, int grid) {
 	const NPCType* npcType = nullptr;
 	if ((npcType = database.LoadNPCTypesData(npcTypeID)))
 	{
-		owner = new NPC(npcType, nullptr, owner->GetPosition(), GravityBehavior::Ground);
+		owner = new NPC(npcType, nullptr, owner->GetPosition(), GravityBehavior::Water);
 		owner->CastToNPC()->AddLootTable();
 		if (owner->CastToNPC()->DropsGlobalLoot())
 			owner->CastToNPC()->CheckGlobalLootTables();

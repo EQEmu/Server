@@ -428,18 +428,20 @@ struct MobMovementEntry
 	NavigateTo NavTo;
 };
 
-void AdjustRoute(std::list<IPathfinder::IPathNode> &nodes, int flymode, float offset) {
+void AdjustRoute(std::list<IPathfinder::IPathNode> &nodes, Mob *who) {
 	if (!zone->HasMap() || !zone->HasWaterMap()) {
 		return;
 	}
 
+	auto offset = who->GetZOffset();
+
 	for (auto &node : nodes) {
-		if (flymode == GravityBehavior::Ground || !zone->watermap->InLiquid(node.pos)) {
+		if(!zone->watermap->InLiquid(node.pos)) {
 			auto best_z = zone->zonemap->FindBestZ(node.pos, nullptr);
 			if (best_z != BEST_Z_INVALID) {
 				node.pos.z = best_z + offset;
 			}
-		}
+		} // todo: floating logic?
 	}
 }
 
@@ -701,99 +703,48 @@ void MobMovementManager::UpdatePath(Mob *who, float x, float y, float z, MobMove
 	if (!zone->HasMap() || !zone->HasWaterMap()) {
 		auto iter = _impl->Entries.find(who);
 		auto &ent = (*iter);
-
+	
 		PushMoveTo(ent.second, x, y, z, mode);
-		PushStopMoving(ent.second);
-	}
-
-	if (zone->watermap->InLiquid(who->GetPosition())
-		&& zone->watermap->InLiquid(glm::vec3(x, y, z))
-		&& zone->zonemap->CheckLoS(who->GetPosition(), glm::vec3(x, y, z))) {
-		auto iter = _impl->Entries.find(who);
-		auto &ent = (*iter);
-
-		PushSwimTo(ent.second, x, y, z, mode);
 		PushStopMoving(ent.second);
 		return;
 	}
 
-	bool partial = false;
-	bool stuck = false;
-	IPathfinder::IPath route;
-	if (who->IsUnderwaterOnly()) {
-		route = zone->pathing->FindRoute(glm::vec3(who->GetX(), who->GetY(), who->GetZ()), glm::vec3(x, y, z), partial, stuck, PathingWater | PathingLava | PathingVWater | PathingPortal | PathingPrefer);
+	if (who->IsBoat()) {
+		UpdatePathBoat(who, x, y, z, mode);
+	} else if (who->IsUnderwaterOnly()) {
+		UpdatePathUnderwater(who, x, y, z, mode);
 	}
 	else {
-		route = zone->pathing->FindRoute(glm::vec3(who->GetX(), who->GetY(), who->GetZ()), glm::vec3(x, y, z), partial, stuck, PathingNotDisabled ^ PathingZoneLine);
+		UpdatePathGround(who, x, y, z, mode);
 	}
+}
 
-	//if route empty or only has two points, and we have los, then just force npc to move to location
-	if (route.size() < 3) {
-		auto iter = _impl->Entries.find(who);
-		auto &ent = (*iter);
-		if (zone->zonemap->CheckLoS(who->GetPosition(), glm::vec3(x, y, z)) && route.size() > 0)
-		{
-			auto &first = route.front();
-			auto &last = route.back();
-	
-			if (zone->watermap->InLiquid(who->GetPosition())) {
-				PushSwimTo(ent.second, x, y, z, mode);
-			}
-			else {
-				PushMoveTo(ent.second, x, y, z, mode);
-			}
-			
-			PushStopMoving(ent.second);
-			return;
-		}
-		else if(route.size() < 2)
-		{
-			if (zone->watermap->InLiquid(who->GetPosition())) {
-				PushSwimTo(ent.second, x, y, z, mode);
-			}
-			else {
-				PushMoveTo(ent.second, x, y, z, mode);
-			}
+void MobMovementManager::UpdatePathGround(Mob * who, float x, float y, float z, MobMovementMode mode)
+{
+	//This is probably pointless since the nav mesh tool currently sets zonelines to disabled anyway
+	auto partial = false;
+	auto stuck = false;
+	auto route = zone->pathing->FindRoute(
+		glm::vec3(who->GetX(), who->GetY(), who->GetZ()),
+		glm::vec3(x, y, z),
+		partial,
+		stuck,
+		PathingNotDisabled ^ PathingZoneLine);
 
-			PushMoveTo(ent.second, x, y, z, mode);
-			PushStopMoving(ent.second);
-			return;
-		}
-	}
-	
-	auto &first = route.front();
-	auto &last = route.back();
-	
-	if (zone->HasWaterMap()) {
-		//If who is underwater & who is not at the first node
-		//Add node at who
-		if (!IsPositionEqualWithinCertainZ(glm::vec3(who->GetX(), who->GetY(), who->GetZ()), first.pos, 5.0f)
-			&& zone->watermap->InLiquid(who->GetPosition())) 
-		{
-			IPathfinder::IPathNode node(who->GetPosition());
-			route.push_front(node);
-		}
-	
-		//If xyz is underwater & xyz is not at the last node
-		//Add node at xyz
-		if (!IsPositionEqualWithinCertainZ(glm::vec3(x, y, z), last.pos, 5.0f)
-			&& zone->watermap->InLiquid(glm::vec3(x, y, z)))
-		{
-			IPathfinder::IPathNode node(glm::vec3(x, y, z));
-			route.push_back(node);
-		}
-	}
-	
-	//adjust route
-	AdjustRoute(route, who->GetFlyMode(), who->GetZOffset());
-	
 	auto eiter = _impl->Entries.find(who);
 	auto &ent = (*eiter);
+
+	if (route.size() == 0) {
+		//handle stuck behavior
+		return;
+	}
+
+	AdjustRoute(route, who);
+
 	auto iter = route.begin();
 	glm::vec3 previous_pos(who->GetX(), who->GetY(), who->GetZ());
 	bool first_node = true;
-	
-	//for each node
+
 	while (iter != route.end()) {
 		auto &current_node = (*iter);
 	
@@ -830,14 +781,86 @@ void MobMovementManager::UpdatePath(Mob *who, float x, float y, float z, MobMove
 			}
 		}
 	}
-	
-	//if stuck then handle stuck
+
 	if (stuck) {
-		PushMoveTo(ent.second, x, y, z, mode);
+		//handle stuck
 	}
-	else {
-		PushStopMoving(ent.second);
+}
+
+void MobMovementManager::UpdatePathUnderwater(Mob * who, float x, float y, float z, MobMovementMode mode)
+{
+	auto partial = false;
+	auto stuck = false;
+	auto route = zone->pathing->FindRoute(
+		glm::vec3(who->GetX(), who->GetY(), who->GetZ()),
+		glm::vec3(x, y, z),
+		partial,
+		stuck,
+		PathingWater | PathingLava | PathingVWater | PathingPortal | PathingPrefer);
+
+	auto eiter = _impl->Entries.find(who);
+	auto &ent = (*eiter);
+
+	if (route.size() == 0) {
+		//handle stuck behavior
+		return;
 	}
+
+	AdjustRoute(route, who);
+
+	auto iter = route.begin();
+	glm::vec3 previous_pos(who->GetX(), who->GetY(), who->GetZ());
+	bool first_node = true;
+
+	while (iter != route.end()) {
+		auto &current_node = (*iter);
+
+		iter++;
+
+		if (iter == route.end()) {
+			continue;
+		}
+
+		previous_pos = current_node.pos;
+		auto &next_node = (*iter);
+
+		if (first_node) {
+
+			if (mode == MovementWalking) {
+				auto h = who->CalculateHeadingToTarget(next_node.pos.x, next_node.pos.y);
+				PushRotateTo(ent.second, who, h, mode);
+			}
+
+			first_node = false;
+		}
+
+		//move to / teleport to node + 1
+		if (next_node.teleport && next_node.pos.x != 0.0f && next_node.pos.y != 0.0f) {
+			PushTeleportTo(ent.second, next_node.pos.x, next_node.pos.y, next_node.pos.z,
+				CalculateHeadingAngleBetweenPositions(current_node.pos.x, current_node.pos.y, next_node.pos.x, next_node.pos.y));
+		}
+		else {
+			if (zone->watermap->InLiquid(previous_pos)) {
+				PushSwimTo(ent.second, next_node.pos.x, next_node.pos.y, next_node.pos.z, mode);
+			}
+			else {
+				PushMoveTo(ent.second, next_node.pos.x, next_node.pos.y, next_node.pos.z, mode);
+			}
+		}
+	}
+
+	if (stuck) {
+		//handle stuck
+	}
+}
+
+void MobMovementManager::UpdatePathBoat(Mob *who, float x, float y, float z, MobMovementMode mode)
+{
+	auto eiter = _impl->Entries.find(who);
+	auto &ent = (*eiter);
+
+	PushSwimTo(ent.second, x, y, z, mode);
+	PushStopMoving(ent.second);
 }
 
 void MobMovementManager::PushTeleportTo(MobMovementEntry &ent, float x, float y, float z, float heading)

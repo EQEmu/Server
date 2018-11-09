@@ -24,6 +24,7 @@
 #include "string_ids.h"
 #include "worldserver.h"
 #include "mob_movement_manager.h"
+#include "water_map.h"
 
 #include <limits.h>
 #include <math.h>
@@ -427,7 +428,7 @@ Mob::Mob(const char* in_name,
 
 	m_TargetRing = glm::vec3();
 
-	flymode = GravityBehavior::Ground;
+	flymode = GravityBehavior::Water;
 	DistractedFromGrid = false;
 	hate_list.SetHateOwner(this);
 
@@ -5995,8 +5996,16 @@ float Mob::GetDefaultRaceSize() const {
 
 void Mob::TryFixZ(int32 z_find_offset, bool fix_client_z)
 {
-	if (fix_z_timer.Check() && flymode == GravityBehavior::Ground) {
-		FixZ();
+	if (fix_z_timer.Check() && flymode != GravityBehavior::Flying) {
+		auto watermap = zone->watermap;
+		if (watermap) {
+			if (!watermap->InLiquid(m_Position)) {
+				FixZ();
+			}
+		}
+		else {
+			FixZ();
+		}
 	}
 }
 

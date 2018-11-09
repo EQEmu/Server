@@ -6281,7 +6281,7 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 				(npc_dup!=nullptr)?npc_dup:npc_type,	//make sure we give the NPC the correct data pointer
 				0,
 				GetPosition() + glm::vec4(swarmPetLocations[summon_count], 0.0f, 0.0f),
-				GravityBehavior::Ground);
+				GravityBehavior::Water);
 
 		if(!swarm_pet_npc->GetSwarmInfo()){
 			auto nSI = new SwarmPet;

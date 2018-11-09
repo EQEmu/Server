@@ -58,6 +58,9 @@ private:
 
 	void FillCommandStruct(PlayerPositionUpdateServer_Struct *spu, Mob *m, float dx, float dy, float dz, float dh, int anim);
 	void UpdatePath(Mob *who, float x, float y, float z, MobMovementMode mode);
+	void UpdatePathGround(Mob *who, float x, float y, float z, MobMovementMode mode);
+	void UpdatePathUnderwater(Mob *who, float x, float y, float z, MobMovementMode mode);
+	void UpdatePathBoat(Mob *who, float x, float y, float z, MobMovementMode mode);
 	void PushTeleportTo(MobMovementEntry &ent, float x, float y, float z, float heading);
 	void PushMoveTo(MobMovementEntry &ent, float x, float y, float z, MobMovementMode mode);
 	void PushSwimTo(MobMovementEntry &ent, float x, float y, float z, MobMovementMode mode);

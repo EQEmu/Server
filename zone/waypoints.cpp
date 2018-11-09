@@ -610,7 +610,7 @@ float Mob::GetFixedZ(const glm::vec3 &destination, int32 z_find_offset) {
 
 	if (zone->HasMap() && RuleB(Map, FixZWhenMoving)) {
 
-		if (flymode != GravityBehavior::Ground)
+		if (flymode == GravityBehavior::Flying)
 			return new_z;
 
 		if (zone->HasWaterMap() && zone->watermap->InLiquid(glm::vec3(m_Position)))

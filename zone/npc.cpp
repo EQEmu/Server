@@ -413,20 +413,6 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, const glm::vec4& position, Gravit
 	AISpellVar.idle_no_sp_recast_min = RuleI(Spells, AI_IdleNoSpellMinRecast);
 	AISpellVar.idle_no_sp_recast_max = RuleI(Spells, AI_IdleNoSpellMaxRecast);
 	AISpellVar.idle_beneficial_chance = RuleI(Spells, AI_IdleBeneficialChance);
-
-	if (zone->watermap) {
-		auto mode = GetFlyMode();
-		if (mode == GravityBehavior::Ground) {
-			if (zone->watermap->InLiquid(m_Position)) {
-				SetFlyMode(GravityBehavior::Water);
-			}
-		}
-		else if (mode == GravityBehavior::Water) {
-			if (!zone->watermap->InLiquid(m_Position)) {
-				SetFlyMode(GravityBehavior::Ground);
-			}
-		}
-	}
 }
 
 NPC::~NPC()
@@ -1202,7 +1188,7 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* 
 		npc_type->prim_melee_type = 28;
 		npc_type->sec_melee_type = 28;
 
-		auto npc = new NPC(npc_type, nullptr, position, GravityBehavior::Ground);
+		auto npc = new NPC(npc_type, nullptr, position, GravityBehavior::Water);
 		npc->GiveNPCTypeData(npc_type);
 
 		entity_list.AddNPC(npc);
