@@ -735,7 +735,7 @@ void MobMovementManager::UpdatePathGround(Mob * who, float x, float y, float z, 
 	auto &ent = (*eiter);
 
 	if (route.size() == 0) {
-		//handle stuck behavior
+		HandleStuckBehavior(who, x, y, z, mode);
 		return;
 	}
 
@@ -782,13 +782,23 @@ void MobMovementManager::UpdatePathGround(Mob * who, float x, float y, float z, 
 		}
 	}
 
+	PushStopMoving(ent.second);
+
 	if (stuck) {
-		//handle stuck
+		HandleStuckBehavior(who, x, y, z, mode);
 	}
 }
 
-void MobMovementManager::UpdatePathUnderwater(Mob * who, float x, float y, float z, MobMovementMode mode)
+void MobMovementManager::UpdatePathUnderwater(Mob *who, float x, float y, float z, MobMovementMode mode)
 {
+	auto eiter = _impl->Entries.find(who);
+	auto &ent = (*eiter);
+	if (zone->watermap->InLiquid(who->GetPosition()) && zone->watermap->InLiquid(glm::vec3(x, y, z)) && zone->zonemap->CheckLoS(who->GetPosition(), glm::vec3(x, y, z))) {
+		PushSwimTo(ent.second, x, y, z, mode);
+		PushStopMoving(ent.second);
+		return;
+	}
+
 	auto partial = false;
 	auto stuck = false;
 	auto route = zone->pathing->FindRoute(
@@ -796,13 +806,10 @@ void MobMovementManager::UpdatePathUnderwater(Mob * who, float x, float y, float
 		glm::vec3(x, y, z),
 		partial,
 		stuck,
-		PathingWater | PathingLava | PathingVWater | PathingPortal | PathingPrefer);
-
-	auto eiter = _impl->Entries.find(who);
-	auto &ent = (*eiter);
+		PathingNotDisabled ^ PathingZoneLine);
 
 	if (route.size() == 0) {
-		//handle stuck behavior
+		HandleStuckBehavior(who, x, y, z, mode);
 		return;
 	}
 
@@ -811,6 +818,30 @@ void MobMovementManager::UpdatePathUnderwater(Mob * who, float x, float y, float
 	auto iter = route.begin();
 	glm::vec3 previous_pos(who->GetX(), who->GetY(), who->GetZ());
 	bool first_node = true;
+
+	while (iter != route.end()) {
+		auto &current_node = (*iter);
+
+		if (!zone->watermap->InLiquid(current_node.pos)) {
+			stuck = true;
+
+			while (iter != route.end()) {
+				iter = route.erase(iter);
+			}
+
+			break;
+		}
+		else {
+			iter++;
+		}
+	}
+
+	if (route.size() == 0) {
+		HandleStuckBehavior(who, x, y, z, mode);
+		return;
+	}
+
+	iter = route.begin();
 
 	while (iter != route.end()) {
 		auto &current_node = (*iter);
@@ -840,17 +871,14 @@ void MobMovementManager::UpdatePathUnderwater(Mob * who, float x, float y, float
 				CalculateHeadingAngleBetweenPositions(current_node.pos.x, current_node.pos.y, next_node.pos.x, next_node.pos.y));
 		}
 		else {
-			if (zone->watermap->InLiquid(previous_pos)) {
-				PushSwimTo(ent.second, next_node.pos.x, next_node.pos.y, next_node.pos.z, mode);
-			}
-			else {
-				PushMoveTo(ent.second, next_node.pos.x, next_node.pos.y, next_node.pos.z, mode);
-			}
+			PushSwimTo(ent.second, next_node.pos.x, next_node.pos.y, next_node.pos.z, mode);
 		}
 	}
 
+	PushStopMoving(ent.second);
+
 	if (stuck) {
-		//handle stuck
+		HandleStuckBehavior(who, x, y, z, mode);
 	}
 }
 
@@ -903,4 +931,8 @@ void MobMovementManager::PushRotateTo(MobMovementEntry &ent, Mob *who, float to,
 void MobMovementManager::PushStopMoving(MobMovementEntry &ent)
 {
 	ent.Commands.push_back(std::unique_ptr<IMovementCommand>(new StopMovingCommand()));
+}
+
+void MobMovementManager::HandleStuckBehavior(Mob * who, float x, float y, float z, MobMovementMode mode)
+{
 }

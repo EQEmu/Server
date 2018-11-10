@@ -66,6 +66,7 @@ private:
 	void PushSwimTo(MobMovementEntry &ent, float x, float y, float z, MobMovementMode mode);
 	void PushRotateTo(MobMovementEntry &ent, Mob *who, float to, MobMovementMode mode);
 	void PushStopMoving(MobMovementEntry &ent);
+	void HandleStuckBehavior(Mob *who, float x, float y, float z, MobMovementMode mode);
 
 	struct Implementation;
 	std::unique_ptr<Implementation> _impl;
