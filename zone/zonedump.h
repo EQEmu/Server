@@ -143,6 +143,7 @@ struct NPCType
 	bool	untargetable;
 	bool	skip_global_loot;
 	bool	rare_spawn;
+	int8	stuck_behavior;
 };
 
 namespace player_lootitem {

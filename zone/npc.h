@@ -434,6 +434,8 @@ public:
 
 	std::unique_ptr<Timer> AIautocastspell_timer;
 
+	virtual int GetStuckBehavior() const { return NPCTypedata_ours ? NPCTypedata_ours->stuck_behavior : NPCTypedata->stuck_behavior; }
+
 protected:
 
 	const NPCType*	NPCTypedata;

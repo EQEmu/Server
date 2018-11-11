@@ -27,6 +27,15 @@ enum MobMovementMode : int
 	MovementRunning = 1
 };
 
+enum MobStuckBehavior : int
+{
+	RunToTarget,
+	WarpToTarget,
+	TakeNoAction,
+	EvadeCombat,
+	MaxStuckBehavior
+};
+
 class MobMovementManager
 {
 public:
@@ -66,6 +75,7 @@ private:
 	void PushSwimTo(MobMovementEntry &ent, float x, float y, float z, MobMovementMode mode);
 	void PushRotateTo(MobMovementEntry &ent, Mob *who, float to, MobMovementMode mode);
 	void PushStopMoving(MobMovementEntry &ent);
+	void PushEvadeCombat(MobMovementEntry &ent);
 	void HandleStuckBehavior(Mob *who, float x, float y, float z, MobMovementMode mode);
 
 	struct Implementation;

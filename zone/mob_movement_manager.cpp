@@ -388,6 +388,38 @@ public:
 	}
 };
 
+class EvadeCombatCommand : public IMovementCommand
+{
+public:
+	EvadeCombatCommand() {
+	}
+
+	virtual ~EvadeCombatCommand() {
+
+	}
+
+	virtual bool Process(MobMovementManager *mgr, Mob *m) {
+		if (!m->IsAIControlled()) {
+			return true;
+		}
+
+		if (m->IsMoving()) {
+			m->SetMoving(false);
+			mgr->SendCommandToClients(m, 0.0, 0.0, 0.0, 0.0, 0, ClientRangeCloseMedium);
+		}
+
+		m->BuffFadeAll();
+		m->WipeHateList();
+		m->Heal();
+
+		return true;
+	}
+
+	virtual bool Started() const {
+		return false;
+	}
+};
+
 struct MovementStats
 {
 	MovementStats() {
@@ -782,10 +814,11 @@ void MobMovementManager::UpdatePathGround(Mob * who, float x, float y, float z, 
 		}
 	}
 
-	PushStopMoving(ent.second);
-
 	if (stuck) {
 		HandleStuckBehavior(who, x, y, z, mode);
+	}
+	else {
+		PushStopMoving(ent.second);
 	}
 }
 
@@ -875,10 +908,11 @@ void MobMovementManager::UpdatePathUnderwater(Mob *who, float x, float y, float 
 		}
 	}
 
-	PushStopMoving(ent.second);
-
 	if (stuck) {
 		HandleStuckBehavior(who, x, y, z, mode);
+	}
+	else {
+		PushStopMoving(ent.second);
 	}
 }
 
@@ -933,6 +967,38 @@ void MobMovementManager::PushStopMoving(MobMovementEntry &ent)
 	ent.Commands.push_back(std::unique_ptr<IMovementCommand>(new StopMovingCommand()));
 }
 
-void MobMovementManager::HandleStuckBehavior(Mob * who, float x, float y, float z, MobMovementMode mode)
+void MobMovementManager::PushEvadeCombat(MobMovementEntry &ent)
 {
+	ent.Commands.push_back(std::unique_ptr<IMovementCommand>(new EvadeCombatCommand()));
+}
+
+void MobMovementManager::HandleStuckBehavior(Mob *who, float x, float y, float z, MobMovementMode mode)
+{
+	auto sb = who->GetStuckBehavior();
+	MobStuckBehavior behavior = RunToTarget;
+
+	if (sb >= 0 && sb < MaxStuckBehavior) {
+		behavior = (MobStuckBehavior)sb;
+	}
+
+	auto eiter = _impl->Entries.find(who);
+	auto &ent = (*eiter);
+
+	switch (sb) {
+	case RunToTarget:
+		PushMoveTo(ent.second, x, y, z, mode);
+		PushStopMoving(ent.second);
+		break;
+	case WarpToTarget:
+		PushTeleportTo(ent.second, x, y, z, 0.0f);
+		PushStopMoving(ent.second);
+		break;
+	case TakeNoAction:
+		PushStopMoving(ent.second);
+		break;
+	case EvadeCombat:
+		//PushEvadeCombat(ent.second);
+		PushStopMoving(ent.second);
+		break;
+	}
 }

@@ -983,7 +983,8 @@ public:
 	void				TryFixZ(int32 z_find_offset = 5, bool fix_client_z = false);
 	void 				FixZ(int32 z_find_offset = 5, bool fix_client_z = false);
 	float				GetFixedZ(const glm::vec3 &destination, int32 z_find_offset = 5);
-	
+	virtual int			GetStuckBehavior() const { return 0; }
+
 	void				NPCSpecialAttacks(const char* parse, int permtag, bool reset = true, bool remove = false);
 	inline uint32		DontHealMeBefore() const { return pDontHealMeBefore; }
 	inline uint32		DontBuffMeBefore() const { return pDontBuffMeBefore; }
