@@ -1,3 +1,66 @@
+DROP TABLE IF EXISTS `inventory_versions`;
+DROP TABLE IF EXISTS `inventory_snapshots`;
+
+
+CREATE TABLE `inventory_versions` (
+	`version` INT(11) UNSIGNED NOT NULL DEFAULT '0',
+	`step` INT(11) UNSIGNED NOT NULL DEFAULT '0',
+	`bot_step` INT(11) UNSIGNED NOT NULL DEFAULT '0'
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=MyISAM;
+
+INSERT INTO `inventory_versions` VALUES (2, 0, 0);
+
+
+CREATE TABLE `inventory_snapshots` (
+	`time_index` INT(11) UNSIGNED NOT NULL DEFAULT '0',
+	`charid` INT(11) UNSIGNED NOT NULL DEFAULT '0',
+	`slotid` MEDIUMINT(7) UNSIGNED NOT NULL DEFAULT '0',
+	`itemid` INT(11) UNSIGNED NULL DEFAULT '0',
+	`charges` SMALLINT(3) UNSIGNED NULL DEFAULT '0',
+	`color` INT(11) UNSIGNED NOT NULL DEFAULT '0',
+	`augslot1` MEDIUMINT(7) UNSIGNED NOT NULL DEFAULT '0',
+	`augslot2` MEDIUMINT(7) UNSIGNED NOT NULL DEFAULT '0',
+	`augslot3` MEDIUMINT(7) UNSIGNED NOT NULL DEFAULT '0',
+	`augslot4` MEDIUMINT(7) UNSIGNED NOT NULL DEFAULT '0',
+	`augslot5` MEDIUMINT(7) UNSIGNED NULL DEFAULT '0',
+	`augslot6` MEDIUMINT(7) NOT NULL DEFAULT '0',
+	`instnodrop` TINYINT(1) UNSIGNED NOT NULL DEFAULT '0',
+	`custom_data` TEXT NULL,
+	`ornamenticon` INT(11) UNSIGNED NOT NULL DEFAULT '0',
+	`ornamentidfile` INT(11) UNSIGNED NOT NULL DEFAULT '0',
+	`ornament_hero_model` INT(11) NOT NULL DEFAULT '0',
+	PRIMARY KEY (`time_index`, `charid`, `slotid`)
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB;
+
+
+CREATE TABLE `inventory_snapshots_v1_bak` (
+	`time_index` INT(11) UNSIGNED NOT NULL DEFAULT '0',
+	`charid` INT(11) UNSIGNED NOT NULL DEFAULT '0',
+	`slotid` MEDIUMINT(7) UNSIGNED NOT NULL DEFAULT '0',
+	`itemid` INT(11) UNSIGNED NULL DEFAULT '0',
+	`charges` SMALLINT(3) UNSIGNED NULL DEFAULT '0',
+	`color` INT(11) UNSIGNED NOT NULL DEFAULT '0',
+	`augslot1` MEDIUMINT(7) UNSIGNED NOT NULL DEFAULT '0',
+	`augslot2` MEDIUMINT(7) UNSIGNED NOT NULL DEFAULT '0',
+	`augslot3` MEDIUMINT(7) UNSIGNED NOT NULL DEFAULT '0',
+	`augslot4` MEDIUMINT(7) UNSIGNED NOT NULL DEFAULT '0',
+	`augslot5` MEDIUMINT(7) UNSIGNED NULL DEFAULT '0',
+	`augslot6` MEDIUMINT(7) NOT NULL DEFAULT '0',
+	`instnodrop` TINYINT(1) UNSIGNED NOT NULL DEFAULT '0',
+	`custom_data` TEXT NULL,
+	`ornamenticon` INT(11) UNSIGNED NOT NULL DEFAULT '0',
+	`ornamentidfile` INT(11) UNSIGNED NOT NULL DEFAULT '0',
+	`ornament_hero_model` INT(11) NOT NULL DEFAULT '0',
+	PRIMARY KEY (`time_index`, `charid`, `slotid`)
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB;
+
+
 -- create inventory v1 backup
 SELECT @pre_timestamp := UNIX_TIMESTAMP(NOW());
 INSERT INTO `inventory_snapshots_v1_bak`

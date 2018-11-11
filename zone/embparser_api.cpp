@@ -3596,6 +3596,21 @@ XS(XS__get_data) {
 	XSRETURN(1);
 }
 
+XS(XS__get_data_expires);
+XS(XS__get_data_expires) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::get_data_expires(string bucket_key)");
+
+	dXSTARG;
+	std::string key = (std::string) SvPV_nolen(ST(0));
+
+	sv_setpv(TARG, DataBucket::GetDataExpires(key).c_str());
+	XSprePUSH;
+	PUSHTARG;
+	XSRETURN(1);
+}
+
 XS(XS__set_data);
 XS(XS__set_data) {
 	dXSARGS;

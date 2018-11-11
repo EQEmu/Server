@@ -1523,6 +1523,8 @@ void Mob::AI_Process() {
 				Mob *follow = entity_list.GetMob(static_cast<uint16>(GetFollowID()));
 				if (!follow) {
 					SetFollowID(0);
+					SetFollowDistance(100);
+					SetFollowCanRun(true);
 				}
 				else {
 
@@ -1534,8 +1536,8 @@ void Mob::AI_Process() {
 					 */
 					if (distance >= follow_distance) {
 						bool running = false;
-
-						if (distance >= follow_distance + 150) {
+						// maybe we want the NPC to only walk doing follow logic
+						if (GetFollowCanRun() && distance >= follow_distance + 150) {
 							running = true;
 						}
 

@@ -822,6 +822,10 @@ std::string lua_get_data(std::string bucket_key) {
 	return DataBucket::GetData(bucket_key);
 }
 
+std::string lua_get_data_expires(std::string bucket_key) {
+	return DataBucket::GetDataExpires(bucket_key);
+}
+
 void lua_set_data(std::string bucket_key, std::string bucket_value) {
 	DataBucket::SetData(bucket_key, bucket_value);
 }

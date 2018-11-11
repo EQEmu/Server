@@ -77,6 +77,31 @@ std::string DataBucket::GetData(std::string bucket_key) {
 }
 
 /**
+ * Retrieves data expires time via bucket_name as key
+ * @param bucket_key
+ * @return
+ */
+std::string DataBucket::GetDataExpires(std::string bucket_key) {
+	std::string query = StringFormat(
+			"SELECT `expires` from `data_buckets` WHERE `key` = '%s' AND (`expires` > %lld OR `expires` = 0)  LIMIT 1",
+			bucket_key.c_str(),
+			(long long) std::time(nullptr)
+	);
+
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		return std::string();
+	}
+
+	if (results.RowCount() != 1)
+		return std::string();
+
+	auto row = results.begin();
+
+	return std::string(row[0]);
+}
+
+/**
  * Checks for bucket existence by bucket_name key
  * @param bucket_key
  * @return
@@ -107,7 +132,7 @@ uint64 DataBucket::DoesBucketExist(std::string bucket_key) {
  */
 bool DataBucket::DeleteData(std::string bucket_key) {
 	std::string query = StringFormat(
-			"DELETE FROM `data_buckets` WHERE `key` = '%s' AND (`expires` > %lld OR `expires` = 0)",
+			"DELETE FROM `data_buckets` WHERE `key` = '%s'",
 			EscapeString(bucket_key).c_str()
 	);
 
