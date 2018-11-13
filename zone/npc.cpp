@@ -383,6 +383,56 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	AISpellVar.idle_beneficial_chance          = static_cast<uint8> (RuleI(Spells, AI_IdleBeneficialChance));
 }
 
+float NPC::GetRoamboxMaxX() const
+{
+	return roambox_max_x;
+}
+
+float NPC::GetRoamboxMaxY() const
+{
+	return roambox_max_y;
+}
+
+float NPC::GetRoamboxMinX() const
+{
+	return roambox_min_x;
+}
+
+float NPC::GetRoamboxMinY() const
+{
+	return roambox_min_y;
+}
+
+float NPC::GetRoamboxDistance() const
+{
+	return roambox_distance;
+}
+
+float NPC::GetRoamboxDestinationX() const
+{
+	return roambox_destination_x;
+}
+
+float NPC::GetRoamboxDestinationY() const
+{
+	return roambox_destination_y;
+}
+
+float NPC::GetRoamboxDestinationZ() const
+{
+	return roambox_destination_z;
+}
+
+uint32 NPC::GetRoamboxDelay() const
+{
+	return roambox_delay;
+}
+
+uint32 NPC::GetRoamboxMinDelay() const
+{
+	return roambox_min_delay;
+}
+
 NPC::~NPC()
 {
 	AI_Stop();
@@ -2747,4 +2797,45 @@ void NPC::ModifyStatsOnCharm(bool bRemoved)
 	// the rest of the stats aren't cached, so lets just do these two instead of full CalcBonuses()
 	SetAttackTimer();
 	CalcAC();
+}
+
+
+uint16 NPC::GetMeleeTexture1() const
+{
+	return d_melee_texture1;
+}
+
+uint16 NPC::GetMeleeTexture2() const
+{
+	return d_melee_texture2;
+}
+
+float NPC::GetProximityMinX()
+{
+	return proximity->min_x;
+}
+
+float NPC::GetProximityMaxX()
+{
+	return proximity->max_x;
+}
+
+float NPC::GetProximityMinY()
+{
+	return proximity->min_y;
+}
+
+float NPC::GetProximityMaxY()
+{
+	return proximity->max_y;
+}
+
+float NPC::GetProximityMinZ()
+{
+	return proximity->min_z;
+}
+
+float NPC::GetProximityMaxZ()
+{
+	return proximity->max_z;
 }

@@ -320,6 +320,9 @@ public:
 	inline bool			IsGuarding() const { return(m_GuardPoint.w != 0); }
 	void				SaveGuardSpotCharm();
 
+	uint16 GetMeleeTexture1() const;
+	uint16 GetMeleeTexture2() const;
+
 	void RestoreGuardSpotCharm();
 
 	void AI_SetRoambox(
@@ -348,6 +351,13 @@ public:
 	inline void GiveNPCTypeData(NPCType *ours) { NPCTypedata_ours = ours; }
 	inline const uint32 GetNPCSpellsID()	const { return npc_spells_id; }
 	inline const uint32 GetNPCSpellsEffectsID()	const { return npc_spells_effects_id; }
+
+	float GetProximityMinX();
+	float GetProximityMaxX();
+	float GetProximityMinY();
+	float GetProximityMaxY();
+	float GetProximityMinZ();
+	float GetProximityMaxZ();
 
 	ItemList	itemlist; //kathgar - why is this public? Doing other things or I would check the code
 
@@ -442,6 +452,17 @@ public:
 	void ResetHPUpdateTimer() { send_hp_update_timer.Start(); }
 
 	bool IgnoreDespawn() { return ignore_despawn; }
+
+	float GetRoamboxMaxX() const;
+	float GetRoamboxMaxY() const;
+	float GetRoamboxMinX() const;
+	float GetRoamboxMinY() const;
+	float GetRoamboxDistance() const;
+	float GetRoamboxDestinationX() const;
+	float GetRoamboxDestinationY() const;
+	float GetRoamboxDestinationZ() const;
+	uint32 GetRoamboxDelay() const;
+	uint32 GetRoamboxMinDelay() const;
 
 	std::unique_ptr<Timer> AIautocastspell_timer;
 
@@ -557,7 +578,8 @@ protected:
 	uint32	equipment[EQEmu::invslot::EQUIPMENT_COUNT];	//this is an array of item IDs
 
 	uint32	herosforgemodel;			//this is the Hero Forge Armor Model (i.e 63 or 84 or 203)
-	uint16	d_melee_texture1;			//this is an item Material value
+	uint16	d_melee_texture1;
+	//this is an item Material value
 	uint16	d_melee_texture2;			//this is an item Material value (offhand)
 	const char*	ammo_idfile;			//this determines projectile graphic "IT###" (see item field 'idfile')
 	uint8	prim_melee_type;			//Sets the Primary Weapon attack message and animation
