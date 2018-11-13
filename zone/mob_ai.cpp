@@ -374,12 +374,6 @@ bool NPC::AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgain
 	Log(Logs::Detail, Logs::AI, "Mob::AIDoSpellCast: spellid = %u, tar = %s, mana = %i, Name: '%s'", AIspells[i].spellid, tar->GetName(), mana_cost, spells[AIspells[i].spellid].name);
 #endif
 	casting_spell_AIindex = i;
-
-	//stop moving if were casting a spell and were not a bard...
-	if(!IsBardSong(AIspells[i].spellid)) {
-		StopNavigation();
-	}
-
 	return CastSpell(AIspells[i].spellid, tar->GetID(), EQEmu::CastingSlot::Gem2, AIspells[i].manacost == -2 ? 0 : -1, mana_cost, oDontDoAgainBefore, -1, -1, 0, &(AIspells[i].resist_adjust));
 }
 
@@ -1082,15 +1076,16 @@ void Mob::AI_Process() {
 				if (AI_movement_timer->Check()) {
 					// Check if we have reached the last fear point
 					if (DistanceNoZ(glm::vec3(GetX(), GetY(), GetZ()), m_FearWalkTarget) <= 5.0f) {
-						// Calculate a new point to run to
-						StopNavigation();
 						CalculateNewFearpoint();
 					}
-					RunTo(
-						m_FearWalkTarget.x,
-						m_FearWalkTarget.y,
-						m_FearWalkTarget.z
-					);
+					else
+					{
+						RunTo(
+							m_FearWalkTarget.x,
+							m_FearWalkTarget.y,
+							m_FearWalkTarget.z
+						);
+					}
 				}
 				return;
 			}
@@ -1387,6 +1382,7 @@ void Mob::AI_Process() {
 				// Now pursue
 				// TODO: Check here for another person on hate list with close hate value
 				if (AI_PursueCastCheck()) {
+						FaceTarget();
 					//we did something, so do not process movement.
 				}
 				else if (AI_movement_timer->Check() && target) {
@@ -1395,7 +1391,7 @@ void Mob::AI_Process() {
 						RunTo(target->GetX(), target->GetY(), target->GetZ());
 
 					}
-					else if (IsMoving()) {
+					else {
 						FaceTarget();
 					}
 				}
@@ -1433,6 +1429,7 @@ void Mob::AI_Process() {
 			}
 		}
 		if (AI_IdleCastCheck()) {
+			StopNavigation();
 			//we processed a spell action, so do nothing else.
 		}
 		else if (zone->CanDoCombat() && CastToNPC()->WillAggroNPCs() && AI_scan_area_timer->Check()) {
@@ -1482,21 +1479,27 @@ void Mob::AI_Process() {
 							 * Distance: >= 450 (Snap to owner)
 							 */
 							if (distance_to_owner >= 202500 || z_distance > 100) {
-								Teleport(pet_owner_position);
+								if (running) {
+									RunTo(pet_owner_position.x, pet_owner_position.y, pet_owner_position.z);
+							}
+							else {
+									WalkTo(pet_owner_position.x, pet_owner_position.y, pet_owner_position.z);
+								}
 							}
 							else {
 
 								auto &Goal = owner->GetPosition();
 
 								if (running) {
-									RunTo(Goal.x, Goal.y, Goal.z);
+									RunTo(pet_owner_position.x, pet_owner_position.y, pet_owner_position.z);
 								}
 								else {
-									WalkTo(Goal.x, Goal.y, Goal.z);
+									WalkTo(pet_owner_position.x, pet_owner_position.y, pet_owner_position.z);
 								}
 							}
 						}
-						else {
+						else
+						{
 							StopNavigation();
 						}
 
@@ -1661,7 +1664,7 @@ void NPC::AI_DoMovement() {
 			destination.x = roambox_destination_x;
 			destination.y = roambox_destination_y;
 			destination.z = m_Position.z;
-			roambox_destination_z = zone->zonemap->FindClosestZ(destination, nullptr) +  this->GetZOffset();
+			roambox_destination_z = zone->zonemap ? zone->zonemap->FindClosestZ(destination, nullptr) + this->GetZOffset() : 0;
 
 			Log(Logs::Detail,
 				Logs::NPCRoamBox,

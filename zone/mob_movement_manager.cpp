@@ -122,7 +122,12 @@ public:
 		double current_time = static_cast<double>(Timer::GetCurrentTime()) / 1000.0;
 		int current_speed = 0;
 
-		if (m_move_to_mode == MovementRunning) {
+		
+		
+		if (m->IsFeared()) {
+			current_speed = m->GetFearSpeed();
+		}
+		else if (m_move_to_mode == MovementRunning) {
 			current_speed = m->GetRunspeed();
 		}
 		else {
@@ -170,6 +175,9 @@ public:
 		double len = glm::distance(pos, tar);
 		if (len == 0) {
 			return true;
+		}
+		if (current_speed == 0.0f) {
+			return false;
 		}
 
 		m->SetMoved(true);
@@ -378,6 +386,7 @@ public:
 
 		if (m->IsMoving()) {
 			m->SetMoving(false);
+			m->FixZ();
 			mgr->SendCommandToClients(m, 0.0, 0.0, 0.0, 0.0, 0, ClientRangeCloseMedium);
 		}
 		return true;
@@ -579,7 +588,7 @@ void MobMovementManager::NavigateTo(Mob *who, float x, float y, float z, MobMove
 		auto within = IsPositionWithinSimpleCylinder(glm::vec3(x, y, z), glm::vec3(nav.navigate_to_x, nav.navigate_to_y, nav.navigate_to_z), 1.5f, 6.0f);
 		auto heading_match = IsHeadingEqual(0.0, nav.navigate_to_heading);
 
-		if (false == within || false == heading_match) {
+		if(false == within || false == heading_match || ent.second.Commands.size() == 0) {
 			ent.second.Commands.clear();
 
 			//Path is no longer valid, calculate a new path

@@ -41,6 +41,7 @@ Child of the Mob class.
 #include "groups.h"
 #include "mob.h"
 #include "raids.h"
+#include "mob_movement_manager.h"
 
 #ifdef BOTS
 #include "bot.h"
@@ -1427,7 +1428,10 @@ bool Corpse::Summon(Client* client, bool spell, bool CheckDistance) {
 				return false;
 			}
 			if (!CheckDistance || (DistanceSquaredNoZ(m_Position, client->GetPosition()) <= dist2)) {
-				GMMove(client->GetX(), client->GetY(), client->GetZ());
+				m_Position.x = client->GetX();
+				m_Position.y = client->GetY();
+				m_Position.z = client->GetZ();
+				mMovementManager->SendCommandToClients(this, 0.0, 0.0, 0.0, 0.0, 0, ClientRangeAny);
 				is_corpse_changed = true;
 			}
 			else {
@@ -1442,7 +1446,10 @@ bool Corpse::Summon(Client* client, bool spell, bool CheckDistance) {
 			for(itr = client->consent_list.begin(); itr != client->consent_list.end(); ++itr) {
 				if(strcmp(this->GetOwnerName(), itr->c_str()) == 0) {
 					if (!CheckDistance || (DistanceSquaredNoZ(m_Position, client->GetPosition()) <= dist2)) {
-						GMMove(client->GetX(), client->GetY(), client->GetZ());
+						m_Position.x = client->GetX();
+						m_Position.y = client->GetY();
+						m_Position.z = client->GetZ();
+						mMovementManager->SendCommandToClients(this, 0.0, 0.0, 0.0, 0.0, 0, ClientRangeAny);
 						is_corpse_changed = true;
 					}
 					else {

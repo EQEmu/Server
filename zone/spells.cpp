@@ -3509,7 +3509,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 		RuleI(Range, SpellMessages), 
 		this, /* Skip this Mob */
 		true, /* Packet ACK */
-		(spelltar->IsClient() ? FilterPCSpells : FilterNPCSpells) /* EQ Filter Type: (8 or 9) */
+		IsBardSong(spell_id) ? FilterBardSongs : ((spelltar->IsClient() ? FilterPCSpells : FilterNPCSpells))); /* EQ Filter Type: (8 or 9) */
 	);
 
 	/* Send the EVENT_CAST_ON event */
