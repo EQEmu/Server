@@ -5470,6 +5470,11 @@ int32 Mob::GetHPRegen() const
 	return hp_regen;
 }
 
+int32 Mob::GetManaRegen() const
+{
+	return mana_regen;
+}
+
 bool Client::GetDisplayMobInfoWindow() const
 {
 	return display_mob_info_window;

@@ -22,12 +22,10 @@
 #include "../common/string_util.h"
 
 /**
- * @param mob
+ * @param npc 
  */
 void NpcScaleManager::ScaleNPC(NPC * npc)
 {
-	Log(Logs::General, Logs::NPCScaling, "Attempting scale on %s", npc->GetCleanName());
-
 	int8 npc_type  = GetNPCScalingType(npc);
 	int  npc_level = npc->GetLevel();
 
@@ -144,27 +142,27 @@ void NpcScaleManager::ScaleNPC(NPC * npc)
 	if (npc->GetHealScale() == 0) {
 		npc->ModifyNPCStat("heal_scale", std::to_string(scale_data.heal_scale).c_str());
 	}
-	if (!npc->HasSpecialAbilities()) {
+	if (!npc->HasSpecialAbilities() && npc->EntityVariableExists("max_hp")) {
 		npc->ModifyNPCStat("special_abilities", scale_data.special_abilities.c_str());
 	}
 
-	ListStats(npc);
-}
+	if (LogSys.log_settings[Logs::NPCScaling].is_category_enabled == 1) {
+		std::string scale_log;
 
-/**
- * @param mob
- */
-void NpcScaleManager::ListStats(NPC *&npc)
-{
-	for (const auto &stat : scaling_stats) {
-		std::string variable = StringFormat("modify_stat_%s", stat.c_str());
-		if (npc->EntityVariableExists(variable.c_str())) {
-			Log(Logs::Detail,
-				Logs::NPCScaling,
-				"NpcScaleManager::ListStats: %s - %s ",
-				stat.c_str(),
-				npc->GetEntityVariable(variable.c_str()));
+		for (const auto &stat : scaling_stats) {
+			std::string variable = StringFormat("modify_stat_%s", stat.c_str());
+			if (npc->EntityVariableExists(variable.c_str())) {
+				scale_log += stat + ": " + npc->GetEntityVariable(variable.c_str()) + " ";
+			}
 		}
+
+		Log(Logs::General,
+			Logs::NPCScaling,
+			"(%s) level: %i type: %i Setting: %s",
+			npc->GetCleanName(),
+			npc_level,
+			npc_type,
+			scale_log.c_str());
 	}
 }
 

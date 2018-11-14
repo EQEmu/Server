@@ -1165,6 +1165,8 @@ public:
 	int GetWeaponDamage(Mob *against, const EQEmu::ItemInstance *weapon_item, uint32 *hate = nullptr);
 
 	int32 GetHPRegen() const;
+	int32 GetManaRegen() const;
+
 
 	// Bots HealRotation methods
 #ifdef BOTS

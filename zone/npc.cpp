@@ -369,6 +369,8 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 
 	npc_scale_manager->ScaleNPC(this);
 
+	SetMana(GetMaxMana());
+
 	AISpellVar.fail_recast                     = static_cast<uint32>(RuleI(Spells, AI_SpellCastFinishedFailRecast));
 	AISpellVar.engaged_no_sp_recast_min        = static_cast<uint32>(RuleI(Spells, AI_EngagedNoSpellMinRecast));
 	AISpellVar.engaged_no_sp_recast_max        = static_cast<uint32>(RuleI(Spells, AI_EngagedNoSpellMaxRecast));
@@ -601,7 +603,7 @@ void NPC::ClearItemList() {
 
 void NPC::QueryLoot(Client* to)
 {
-	to->Message(0, "# Loot %s", GetName());
+	to->Message(0, "| # Loot [%s]", GetName());
 
 	int item_count = 0;
 	for (auto cur  = itemlist.begin(); cur != itemlist.end(); ++cur, ++item_count) {
@@ -620,7 +622,7 @@ void NPC::QueryLoot(Client* to)
 
 		to->Message(
 			0,
-			"-- Item %i: %s ID: %u min_level: %u max_level: %u",
+			"| -- Item %i: %s ID: %u min_level: %u max_level: %u",
 			item_count,
 			linker.GenerateLink().c_str(),
 			(*cur)->item_id,
@@ -629,7 +631,7 @@ void NPC::QueryLoot(Client* to)
 		);
 	}
 
-	to->Message(0, "- %i Platinum %i Gold %i Silver %i Copper", platinum, gold, silver, copper);
+	to->Message(0, "| %i Platinum %i Gold %i Silver %i Copper", platinum, gold, silver, copper);
 }
 
 void NPC::AddCash(uint16 in_copper, uint16 in_silver, uint16 in_gold, uint16 in_platinum) {

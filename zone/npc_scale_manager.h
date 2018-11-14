@@ -94,8 +94,6 @@ public:
 
 	std::map<std::pair<int, int>, global_npc_scale> npc_global_base_scaling_data;
 
-	void ListStats(NPC * &npc);
-
 	int8 GetNPCScalingType(NPC * &npc);
 	bool ApplyGlobalBaseScalingToNPCStatically(NPC * &npc);
 	bool ApplyGlobalBaseScalingToNPCDynamically(NPC * &npc);

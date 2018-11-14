@@ -227,12 +227,18 @@ std::string JoinString(const std::vector<std::string>& ar, const std::string &de
 	return ret;
 }
 
-void find_replace(std::string& string_subject, const std::string& search_string, const std::string& replace_string) {
-	auto index = string_subject.find_first_of(search_string);
-	while (index != std::string::npos) {
-		string_subject.replace(index, index + 1, replace_string);
-		index = string_subject.find_first_of(search_string);
+void find_replace(std::string &string_subject, const std::string &search_string, const std::string &replace_string)
+{
+	if (string_subject.find(search_string) == std::string::npos) {
+		return;
 	}
+
+	size_t start_pos = 0;
+	while((start_pos = string_subject.find(search_string, start_pos)) != std::string::npos) {
+		string_subject.replace(start_pos, search_string.length(), replace_string);
+		start_pos += replace_string.length();
+	}
+
 }
 
 //Const char based
