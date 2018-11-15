@@ -1172,7 +1172,7 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 		return;
 
 	//check cooldown
-	if(!p_timers.Expired(&database, rank->spell_type + pTimerAAStart)) {
+	if(!p_timers.Expired(&database, rank->spell_type + pTimerAAStart, false)) {
 		uint32 aaremain = p_timers.GetRemainingTime(rank->spell_type + pTimerAAStart);
 		uint32 aaremain_hr = aaremain / (60 * 60);
 		uint32 aaremain_min = (aaremain / 60) % 60;
