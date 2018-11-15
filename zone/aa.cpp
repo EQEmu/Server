@@ -1208,6 +1208,17 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 	if (spells[rank->spell].targettype == ST_Pet || spells[rank->spell].targettype == ST_SummonedPet)
 		target_id = GetPetID();
 
+	// extra handling for cast_not_standing spells
+	if (!spells[rank->spell].cast_not_standing) {
+		if (GetAppearance() == eaSitting) // we need to stand!
+			SetAppearance(eaStanding, false);
+
+		if (GetAppearance() != eaStanding) {
+			Message_StringID(MT_SpellFailure, STAND_TO_CAST);
+			return;
+		}
+	}
+
 	// Bards can cast instant cast AAs while they are casting another song
 	if(spells[rank->spell].cast_time == 0 && GetClass() == BARD && IsBardSong(casting_spell_id)) {
 		if(!SpellFinished(rank->spell, entity_list.GetMob(target_id), EQEmu::CastingSlot::AltAbility, spells[rank->spell].mana, -1, spells[rank->spell].ResistDiff, false)) {
