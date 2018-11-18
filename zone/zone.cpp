@@ -1874,7 +1874,7 @@ bool ZoneDatabase::GetDecayTimes(npcDecayTimes_Struct *npcCorpseDecayTimes)
 		npcCorpseDecayTimes[index].minlvl = atoi(sep.arg[1]);
 		npcCorpseDecayTimes[index].maxlvl = atoi(sep.arg[2]);
 
-		npcCorpseDecayTimes[index].seconds = std::min(7200, atoi(row[1]));
+		npcCorpseDecayTimes[index].seconds = std::min(24 * 60 * 60, atoi(row[1]));
 	}
 
 	return true;
