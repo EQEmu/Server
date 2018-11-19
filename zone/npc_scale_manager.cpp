@@ -408,13 +408,13 @@ uint32 NpcScaleManager::GetClassLevelDamageMod(uint32 level, uint32 npc_class)
 
 /**
  * @param npc
- * @return
+ * @return int8
  */
 int8 NpcScaleManager::GetNPCScalingType(NPC *&npc)
 {
 	std::string npc_name = npc->GetName();
 
-	if (npc->IsRareSpawn() || npc_name.find('#') != std::string::npos) {
+	if (npc->IsRareSpawn() || npc_name.find('#') != std::string::npos || isupper(npc_name[0])) {
 		return 1;
 	}
 
@@ -423,6 +423,25 @@ int8 NpcScaleManager::GetNPCScalingType(NPC *&npc)
 	}
 
 	return 0;
+}
+
+/**
+ * @param npc
+ * @return std::string
+ */
+std::string NpcScaleManager::GetNPCScalingTypeName(NPC *&npc)
+{
+	int8 scaling_type = GetNPCScalingType(npc);
+
+	if (scaling_type == 1) {
+		return "Named";
+	}
+
+	if (npc->IsRaidTarget()) {
+		return "Raid";
+	}
+
+	return "Trash";
 }
 
 /**

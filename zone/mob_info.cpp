@@ -22,6 +22,7 @@
 #include "mob.h"
 #include "../common/races.h"
 #include "../common/say_link.h"
+#include "npc_scale_manager.h"
 
 std::string commify(const std::string &number)
 {
@@ -588,9 +589,13 @@ inline void NPCCommandsMenu(Client* client, NPC* npc)
 		menu_commands += "[" + EQEmu::SayLinkEngine::GenerateQuestSaylink(saylink, false, "Emotes") + "] ";
 	}
 
+	if (npc->GetLoottableID() > 0) {
+		menu_commands += "[" + EQEmu::SayLinkEngine::GenerateQuestSaylink("#npcloot show", false, "Loot") + "] ";
+	}
+
 	if (menu_commands.length() > 0) {
-		client->Message(0, "| # Show Commmands");
-		client->Message(0, "| %s", menu_commands.c_str());
+		// client->Message(0, "| # Show Commmands");
+		client->Message(0, "| [Show Commands] %s", menu_commands.c_str());
 	}
 }
 
@@ -676,6 +681,7 @@ void Mob::DisplayInfo(Mob *mob)
 				"DSMit",
 				"avoidance",
 			};
+
 			window_text += WriteDisplayInfoSection(mob, "Mod Defensive", mod_defensive, 1, true);
 
 			std::vector<std::string> mod_offensive = {
@@ -764,13 +770,20 @@ void Mob::DisplayInfo(Mob *mob)
 				window_text += WriteDisplayInfoSection(mob, "Proximity", npc_proximity, 1, true);
 			}
 
-			npc->QueryLoot(client);
+			int8        npc_type        = npc_scale_manager->GetNPCScalingType(npc);
+			std::string npc_type_string = npc_scale_manager->GetNPCScalingTypeName(npc);
+
+			client->Message(
+				0,
+				"| # Target: %s Type: %i (%s)",
+				npc->GetCleanName(),
+				npc_type,
+				npc_type_string.c_str());
 
 			NPCCommandsMenu(client, npc);
 		}
 
 		std::cout << "Window Length: " << window_text.length() << std::endl;
-		// std::cout << "Window " << window_text << std::endl;
 
 		if (client->GetDisplayMobInfoWindow()) {
 			client->SendFullPopup(

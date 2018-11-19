@@ -603,7 +603,7 @@ void NPC::ClearItemList() {
 
 void NPC::QueryLoot(Client* to)
 {
-	to->Message(0, "| # Loot [%s]", GetName());
+	to->Message(0, "| # Current Loot (%s) LootTableID: %i", GetName(), GetLoottableID());
 
 	int item_count = 0;
 	for (auto cur  = itemlist.begin(); cur != itemlist.end(); ++cur, ++item_count) {
