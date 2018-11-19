@@ -123,7 +123,12 @@ public:
 		int current_speed = 0;
 
 		if (m_move_to_mode == MovementRunning) {
-			current_speed = m->GetRunspeed();
+			if (m->IsFeared()) {
+				current_speed = m->GetFearSpeed();
+			}
+			else {
+				current_speed = m->GetRunspeed();
+			}
 		}
 		else {
 			current_speed = m->GetWalkspeed();
@@ -242,7 +247,12 @@ public:
 		int current_speed = 0;
 
 		if (m_move_to_mode == MovementRunning) {
-			current_speed = m->GetRunspeed();
+			if (m->IsFeared()) {
+				current_speed = m->GetFearSpeed();
+			}
+			else {
+				current_speed = m->GetRunspeed();
+			}
 		}
 		else {
 			current_speed = m->GetWalkspeed();

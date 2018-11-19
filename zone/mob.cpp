@@ -1658,7 +1658,15 @@ void Mob::ShowBuffList(Client* client) {
 }
 
 void Mob::GMMove(float x, float y, float z, float heading, bool SendUpdate) {
-	Teleport(glm::vec4(x, y, z, heading));
+	if (IsCorpse()) {
+		m_Position.x = x;
+		m_Position.y = y;
+		m_Position.z = z;
+		mMovementManager->SendCommandToClients(this, 0.0, 0.0, 0.0, 0.0, 0, ClientRangeAny);
+	}
+	else {
+		Teleport(glm::vec4(x, y, z, heading));
+	}
 
 	if (IsNPC()) {
 		CastToNPC()->SaveGuardSpot(glm::vec4(x, y, z, heading));
