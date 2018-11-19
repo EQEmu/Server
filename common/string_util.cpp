@@ -88,7 +88,7 @@ const std::string str_toupper(std::string s)
 {
 	std::transform(
 		s.begin(), s.end(), s.begin(),
-		[](unsigned char c) { return std::toupper(c); }
+		[](unsigned char c) { return ::toupper(c); }
 	);
 	return s;
 }
@@ -97,7 +97,7 @@ const std::string ucfirst(std::string s)
 {
 	std::string output = s;
 	if (!s.empty())
-		output[0] = static_cast<char>(std::toupper(s[0]));
+		output[0] = static_cast<char>(::toupper(s[0]));
 
 	return output;
 }
