@@ -3692,6 +3692,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "GetZoneID"), XS__GetZoneID, file);
 	newXS(strcpy(buf, "GetZoneLongName"), XS__GetZoneLongName, file);
 	newXS(strcpy(buf, "get_data"), XS__get_data, file);
+	newXS(strcpy(buf, "get_data_expires"), XS__get_data_expires, file);
 	newXS(strcpy(buf, "set_data"), XS__set_data, file);
 	newXS(strcpy(buf, "delete_data"), XS__delete_data, file);
 	newXS(strcpy(buf, "IsBeneficialSpell"), XS__IsBeneficialSpell, file);
