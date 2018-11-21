@@ -463,6 +463,16 @@ void Lua_NPC::RemoveAISpell(int spell_id) {
 	self->RemoveSpellFromNPCList(spell_id);
 }
 
+void Lua_NPC::AddMeleeProc(int spell_id, int chance) {
+	Lua_Safe_Call_Void();
+	self->AddProcToWeapon(spell_id, false, chance);
+}
+
+void Lua_NPC::RemoveMeleeProc(int spell_id) {
+	Lua_Safe_Call_Void();
+	self->RemoveProcFromWeapon(spell_id, false);
+}
+
 void Lua_NPC::SetSpellFocusDMG(int focus) {
 	Lua_Safe_Call_Void();
 	self->SetSpellFocusDMG(focus);
@@ -629,6 +639,8 @@ luabind::scope lua_register_npc() {
 		.def("AddAISpell", (void(Lua_NPC::*)(int,int,int,int,int,int))&Lua_NPC::AddAISpell)
 		.def("AddAISpell", (void(Lua_NPC::*)(int,int,int,int,int,int,int,int))&Lua_NPC::AddAISpell)
 		.def("RemoveAISpell", (void(Lua_NPC::*)(int))&Lua_NPC::RemoveAISpell)
+		.def("AddMeleeProc", (void(Lua_NPC::*)(int))&Lua_NPC::AddMeleeProc)
+		.def("RemoveMeleeProc", (void(Lua_NPC::*)(int))&Lua_NPC::RemoveMeleeProc)
 		.def("SetSpellFocusDMG", (void(Lua_NPC::*)(int))&Lua_NPC::SetSpellFocusDMG)
 		.def("SetSpellFocusHeal", (void(Lua_NPC::*)(int))&Lua_NPC::SetSpellFocusHeal)
 		.def("GetSpellFocusDMG", (void(Lua_NPC::*)(int))&Lua_NPC::GetSpellFocusDMG)
