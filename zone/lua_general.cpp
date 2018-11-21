@@ -1680,6 +1680,7 @@ luabind::scope lua_register_general() {
 		luabind::def("say_link", (std::string(*)(const char*,bool))&lua_say_link),
 		luabind::def("say_link", (std::string(*)(const char*))&lua_say_link),
 		luabind::def("get_data", (std::string(*)(std::string))&lua_get_data),
+		luabind::def("get_data_expires", (std::string(*)(std::string))&lua_get_data_expires),
 		luabind::def("set_data", (void(*)(std::string, std::string))&lua_set_data),
 		luabind::def("set_data", (void(*)(std::string, std::string, std::string))&lua_set_data),
 		luabind::def("delete_data", (bool(*)(std::string))&lua_delete_data),
