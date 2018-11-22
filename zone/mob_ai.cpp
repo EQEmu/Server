@@ -782,7 +782,7 @@ void Client::AI_Process()
 		if (currently_fleeing) {
 
 			if (fix_z_timer.Check())
-				this->FixZ(5, true);
+				TryFixZ(5, true);
 
 			if (IsRooted()) {
 				//make sure everybody knows were not moving, for appearance sake
@@ -992,7 +992,7 @@ void Mob::ProcessForcedMovement()
 			Teleport(m_Position + m_Delta);
 			m_Delta = glm::vec4();
 			SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0, true);
-			FixZ(); // so we teleport to the ground locally, we want the client to interpolate falling etc
+			TryFixZ(); // so we teleport to the ground locally, we want the client to interpolate falling etc
 		} else if (--ForcedMovement) {
 			if (normal.z < -0.15f) // prevent too much wall climbing. ex. OMM's room in anguish
 				normal.z = 0.0f;
@@ -1104,7 +1104,7 @@ void Mob::AI_Process() {
 			if (this->GetTarget()) {
 				/* If we are engaged, moving and following client, let's look for best Z more often */
 				float target_distance = DistanceNoZ(this->GetPosition(), this->GetTarget()->GetPosition());
-				FixZ();
+				TryFixZ();
 
 				if (target_distance <= 15 && !this->CheckLosFN(this->GetTarget())) {
 					Mob *target = this->GetTarget();

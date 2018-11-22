@@ -2723,7 +2723,7 @@ void Bot::AI_Process() {
 
 			// Fix Z when following during pull, not when engaged and stationary
 			if (IsMoving() && fix_z_timer_engaged.Check()) {
-				FixZ();
+				TryFixZ();
 				return;
 			}
 

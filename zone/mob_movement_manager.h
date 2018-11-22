@@ -73,7 +73,6 @@ private:
 	void PushTeleportTo(MobMovementEntry &ent, float x, float y, float z, float heading);
 	void PushMoveTo(MobMovementEntry &ent, float x, float y, float z, MobMovementMode mode);
 	void PushSwimTo(MobMovementEntry &ent, float x, float y, float z, MobMovementMode mode);
-	void PushFloatTo(MobMovementEntry &ent, float x, float y, MobMovementMode mode);
 	void PushRotateTo(MobMovementEntry &ent, Mob *who, float to, MobMovementMode mode);
 	void PushStopMoving(MobMovementEntry &ent);
 	void PushEvadeCombat(MobMovementEntry &ent);
