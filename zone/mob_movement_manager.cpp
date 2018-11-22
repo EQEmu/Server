@@ -143,10 +143,9 @@ public:
 
 			m_last_sent_speed = current_speed;
 			m_last_sent_time = current_time;
-			m_total_h_dist = DistanceNoZ(m->GetPosition(), glm::vec4(m_move_to_x, m_move_to_z, 0.0f, 0.0f));
+			m_total_h_dist = DistanceNoZ(m->GetPosition(), glm::vec4(m_move_to_x, m_move_to_y, 0.0f, 0.0f));
 			m_total_v_dist = m_move_to_z - m->GetZ();
 			mgr->SendCommandToClients(m, 0.0, 0.0, 0.0, 0.0, current_speed, ClientRangeCloseMedium);
-			return false;
 		}
 
 		//When speed changes
@@ -156,7 +155,6 @@ public:
 			m_last_sent_speed = current_speed;
 			m_last_sent_time = current_time;
 			mgr->SendCommandToClients(m, 0.0, 0.0, 0.0, 0.0, current_speed, ClientRangeCloseMedium);
-			return false;
 		}
 
 		//If x seconds have passed without sending an update.
@@ -166,7 +164,6 @@ public:
 			m_last_sent_speed = current_speed;
 			m_last_sent_time = current_time;
 			mgr->SendCommandToClients(m, 0.0, 0.0, 0.0, 0.0, current_speed, ClientRangeCloseMedium);
-			return false;
 		}
 
 		auto &p = m->GetPosition();
@@ -266,10 +263,9 @@ public:
 
 			m_last_sent_speed = current_speed;
 			m_last_sent_time = current_time;
-			m_total_h_dist = DistanceNoZ(m->GetPosition(), glm::vec4(m_move_to_x, m_move_to_z, 0.0f, 0.0f));
+			m_total_h_dist = DistanceNoZ(m->GetPosition(), glm::vec4(m_move_to_x, m_move_to_y, 0.0f, 0.0f));
 			m_total_v_dist = m_move_to_z - m->GetZ();
 			mgr->SendCommandToClients(m, 0.0, 0.0, 0.0, 0.0, current_speed, ClientRangeCloseMedium);
-			return false;
 		}
 
 		//When speed changes
@@ -277,7 +273,6 @@ public:
 			m_last_sent_speed = current_speed;
 			m_last_sent_time = current_time;
 			mgr->SendCommandToClients(m, 0.0, 0.0, 0.0, 0.0, current_speed, ClientRangeCloseMedium);
-			return false;
 		}
 
 		//If x seconds have passed without sending an update.
@@ -285,7 +280,6 @@ public:
 			m_last_sent_speed = current_speed;
 			m_last_sent_time = current_time;
 			mgr->SendCommandToClients(m, 0.0, 0.0, 0.0, 0.0, current_speed, ClientRangeCloseMedium);
-			return false;
 		}
 
 		auto &p = m->GetPosition();
@@ -323,6 +317,101 @@ public:
 			}
 
 			m->SetPosition(npos.x, npos.y, z_at_pos);
+		}
+
+		return false;
+	}
+};
+
+//Just a swim to that can't travel in Z
+class FloatToCommand : public MoveToCommand
+{
+public:
+	FloatToCommand(float x, float y, MobMovementMode mode) : MoveToCommand(x, y, 0.0f, mode) {
+
+	}
+
+	virtual bool Process(MobMovementManager *mgr, Mob *m)
+	{
+		if (!m->IsAIControlled()) {
+			return true;
+		}
+
+		//Send a movement packet when you start moving		
+		double current_time = static_cast<double>(Timer::GetCurrentTime()) / 1000.0;
+		int current_speed = 0;
+
+		if (m_move_to_mode == MovementRunning) {
+			if (m->IsFeared()) {
+				current_speed = m->GetFearSpeed();
+			}
+			else {
+				current_speed = m->GetRunspeed();
+			}
+		}
+		else {
+			current_speed = m->GetWalkspeed();
+		}
+
+		if (!m_started) {
+			m_started = true;
+			//rotate to the point
+			m->SetMoving(true);
+			m->SetHeading(m->CalculateHeadingToTarget(m_move_to_x, m_move_to_y));
+
+			m_last_sent_speed = current_speed;
+			m_last_sent_time = current_time;
+			m_total_h_dist = DistanceNoZ(m->GetPosition(), glm::vec4(m_move_to_x, m_move_to_y, 0.0f, 0.0f));
+			mgr->SendCommandToClients(m, 0.0, 0.0, 0.0, 0.0, current_speed, ClientRangeCloseMedium);
+		}
+
+		//When speed changes
+		if (current_speed != m_last_sent_speed) {
+			m_last_sent_speed = current_speed;
+			m_last_sent_time = current_time;
+			mgr->SendCommandToClients(m, 0.0, 0.0, 0.0, 0.0, current_speed, ClientRangeCloseMedium);
+		}
+
+		//If x seconds have passed without sending an update.
+		if (current_time - m_last_sent_time >= 0.8) {
+			m_last_sent_speed = current_speed;
+			m_last_sent_time = current_time;
+			mgr->SendCommandToClients(m, 0.0, 0.0, 0.0, 0.0, current_speed, ClientRangeCloseMedium);
+		}
+
+		auto &p = m->GetPosition();
+		glm::vec2 tar(m_move_to_x, m_move_to_y);
+		glm::vec2 pos(p.x, p.y);
+		double len = glm::distance(pos, tar);
+		if (len == 0) {
+			return true;
+		}
+
+		m->SetMoved(true);
+
+		glm::vec2 dir = tar - pos;
+		glm::vec2 ndir = glm::normalize(dir);
+		double distance_moved = frame_time * current_speed * 0.4f * 1.45f;
+
+		if (distance_moved > len) {
+			if (m->IsNPC()) {
+				entity_list.ProcessMove(m->CastToNPC(), m_move_to_x, m_move_to_y, m_move_to_z);
+			}
+
+			m->SetPosition(m_move_to_x, m_move_to_y, m->GetZ());
+			return true;
+		}
+		else {
+			glm::vec2 npos = pos + (ndir * static_cast<float>(distance_moved));
+
+			len -= distance_moved;
+			double total_distance_traveled = m_total_h_dist - len;
+
+			if (m->IsNPC()) {
+				entity_list.ProcessMove(m->CastToNPC(), npos.x, npos.y, m->GetZ());
+			}
+
+			m->SetPosition(npos.x, npos.y, m->GetZ());
 		}
 
 		return false;
@@ -608,6 +697,7 @@ void MobMovementManager::StopNavigation(Mob *who) {
 	auto &ent = (*iter);
 	
 	if (true == ent.second.Commands.empty()) {
+		PushStopMoving(ent.second);
 		return;
 	}
 
@@ -931,7 +1021,7 @@ void MobMovementManager::UpdatePathBoat(Mob *who, float x, float y, float z, Mob
 	auto eiter = _impl->Entries.find(who);
 	auto &ent = (*eiter);
 
-	PushSwimTo(ent.second, x, y, z, mode);
+	PushFloatTo(ent.second, x, y, mode);
 	PushStopMoving(ent.second);
 }
 
@@ -948,6 +1038,11 @@ void MobMovementManager::PushMoveTo(MobMovementEntry &ent, float x, float y, flo
 void MobMovementManager::PushSwimTo(MobMovementEntry &ent, float x, float y, float z, MobMovementMode mode)
 {
 	ent.Commands.push_back(std::unique_ptr<IMovementCommand>(new SwimToCommand(x, y, z, mode)));
+}
+
+void MobMovementManager::PushFloatTo(MobMovementEntry &ent, float x, float y, MobMovementMode mode)
+{
+	ent.Commands.push_back(std::unique_ptr<IMovementCommand>(new FloatToCommand(x, y, mode)));
 }
 
 void MobMovementManager::PushRotateTo(MobMovementEntry &ent, Mob *who, float to, MobMovementMode mode)
