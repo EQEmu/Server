@@ -44,7 +44,7 @@ public:
 			return true;
 		}
 
-		auto rotate_to_speed = m_rotate_to_mode == MovementRunning ? 50.0 :  16.0; //todo: get this from mob
+		auto rotate_to_speed = m_rotate_to_mode == MovementRunning ? 200.0 :  16.0; //todo: get this from mob
 
 		auto from = FixHeading(m->GetHeading());
 		auto to = FixHeading(m_rotate_to);
@@ -382,6 +382,7 @@ public:
 
 		if (m->IsMoving()) {
 			m->SetMoving(false);
+			m->TryFixZ();
 			mgr->SendCommandToClients(m, 0.0, 0.0, 0.0, 0.0, 0, ClientRangeCloseMedium);
 		}
 		return true;
@@ -606,8 +607,7 @@ void MobMovementManager::StopNavigation(Mob *who) {
 		return;
 	}
 
-	auto &running_cmd = ent.second.Commands.front();
-	if (false == running_cmd->Started()) {
+	if (!who->IsMoving()) {
 		ent.second.Commands.clear();
 		return;
 	}

@@ -835,7 +835,9 @@ void Client::AI_Process()
 		bool is_combat_range = CombatRange(GetTarget());
 
 		if (is_combat_range) {
-			StopNavigation();
+			if (IsMoving()) {
+				StopNavigation();
+			}
 
 			if (charm_class_attacks_timer.Check()) {
 				DoClassAttacks(GetTarget());
@@ -1196,11 +1198,11 @@ void Mob::AI_Process() {
 		bool is_combat_range = CombatRange(target);
 
 		if (is_combat_range) {
-			StopNavigation();
-
-			if (AI_movement_timer->Check()) {
-				FaceTarget();
+			if (IsMoving()) {
+				StopNavigation();
 			}
+
+			FaceTarget();
 
 			//casting checked above...
 			if (target && !IsStunned() && !IsMezzed() && GetAppearance() != eaDead && !IsMeleeDisabled()) {
@@ -1356,22 +1358,6 @@ void Mob::AI_Process() {
 
 		}    //end is within combat rangepet
 		else {
-			//we cannot reach our target...
-			//underwater stuff only works with water maps in the zone!
-			//if (IsNPC() && CastToNPC()->IsUnderwaterOnly() && zone->HasWaterMap()) {
-			//	auto targetPosition = glm::vec3(target->GetX(), target->GetY(), target->GetZ());
-			//	if (!zone->watermap->InLiquid(targetPosition)) {
-			//		Mob *tar = hate_list.GetEntWithMostHateOnList(this);
-			//		if (tar != nullptr && tar != target) {
-			//			SetTarget(tar);
-			//			RunTo(tar->GetX(), tar->GetY(), tar->GetZ());
-			//			return;
-			//		}
-			//		else {
-			//			RunTo(target->GetX(), target->GetY(), target->GetZ());
-			//		}
-			//	}
-			//}
 
 			// See if we can summon the mob to us
 			if (!HateSummon()) {
@@ -1382,7 +1368,10 @@ void Mob::AI_Process() {
 				// Now pursue
 				// TODO: Check here for another person on hate list with close hate value
 				if (AI_PursueCastCheck()) {
-					FaceTarget();
+					if (IsCasting() && GetClass() != BARD) {
+						StopNavigation();
+						FaceTarget();
+					}
 				}
 				else if (AI_movement_timer->Check() && target) {
 					if (!IsRooted()) {
@@ -1428,7 +1417,9 @@ void Mob::AI_Process() {
 			}
 		}
 		if (AI_IdleCastCheck()) {
-			StopNavigation();
+			if (IsCasting() && GetClass() != BARD) {
+				StopNavigation();
+			}
 		}
 		else if (zone->CanDoCombat() && CastToNPC()->WillAggroNPCs() && AI_scan_area_timer->Check()) {
 
@@ -1538,8 +1529,6 @@ void Mob::AI_Process() {
 						if (GetFollowCanRun() && distance >= follow_distance + 150) {
 							running = true;
 						}
-
-						bool waypoint_changed, node_reached;
 
 						auto &Goal = follow->GetPosition();
 
@@ -1902,19 +1891,14 @@ void Mob::AI_Event_Engaged(Mob* attacker, bool iYellForHelp) {
 void Mob::AI_Event_NoLongerEngaged() {
 	if (!IsAIControlled())
 		return;
-	this->AI_walking_timer->Start(RandomTimer(3000,20000));
+	AI_walking_timer->Start(RandomTimer(3000,20000));
 	time_until_can_move = Timer::GetCurrentTime();
 	if (minLastFightingDelayMoving == maxLastFightingDelayMoving)
 		time_until_can_move += minLastFightingDelayMoving;
 	else
 		time_until_can_move += zone->random.Int(minLastFightingDelayMoving, maxLastFightingDelayMoving);
-	// So mobs don't keep running as a ghost until AIwalking_timer fires
-	// if they were moving prior to losing all hate
-	// except if we're a pet, then we might run into some issues with pets backing off when they should immediately be moving
-	if(!IsPet())
-	{
-		StopNavigation();
-	}
+	
+	StopNavigation();
 	ClearRampage();
 
 	if(IsNPC())
