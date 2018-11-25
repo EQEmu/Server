@@ -419,6 +419,7 @@ RULE_BOOL(Combat, EnableFearPathing, true)
 RULE_REAL(Combat, FleeMultiplier, 2.0) // Determines how quickly a NPC will slow down while fleeing. Decrease multiplier to slow NPC down quicker.
 RULE_BOOL(Combat, FleeGray, true) // If true FleeGrayHPRatio will be used.
 RULE_INT(Combat, FleeGrayHPRatio, 50) //HP % when a Gray NPC begins to flee.
+RULE_INT(Combat, FleeGrayMaxLevel, 18) // NPC's above this level won't do gray/green con flee
 RULE_INT(Combat, FleeHPRatio, 25) //HP % when a NPC begins to flee.
 RULE_BOOL(Combat, FleeIfNotAlone, false) // If false, mobs won't flee if other mobs are in combat with it.
 RULE_BOOL(Combat, AdjustProcPerMinute, true)

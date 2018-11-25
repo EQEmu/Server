@@ -1864,26 +1864,22 @@ bool Zone::RemoveSpawnGroup(uint32 in_id) {
 		return false;
 }
 
-
-// Added By Hogie
-bool ZoneDatabase::GetDecayTimes(npcDecayTimes_Struct* npcCorpseDecayTimes) {
-
-	const std::string query = "SELECT varname, value FROM variables WHERE varname LIKE 'decaytime%%' ORDER BY varname";
+bool ZoneDatabase::GetDecayTimes(npcDecayTimes_Struct *npcCorpseDecayTimes)
+{
+	const std::string query =
+	    "SELECT varname, value FROM variables WHERE varname LIKE 'decaytime%%' ORDER BY varname";
 	auto results = QueryDatabase(query);
 	if (!results.Success())
-        return false;
+		return false;
 
 	int index = 0;
-    for (auto row = results.begin(); row != results.end(); ++row, ++index) {
-        Seperator sep(row[0]);
-        npcCorpseDecayTimes[index].minlvl = atoi(sep.arg[1]);
-        npcCorpseDecayTimes[index].maxlvl = atoi(sep.arg[2]);
+	for (auto row = results.begin(); row != results.end(); ++row, ++index) {
+		Seperator sep(row[0]);
+		npcCorpseDecayTimes[index].minlvl = atoi(sep.arg[1]);
+		npcCorpseDecayTimes[index].maxlvl = atoi(sep.arg[2]);
 
-        if (atoi(row[1]) > 7200)
-            npcCorpseDecayTimes[index].seconds = 720;
-        else
-            npcCorpseDecayTimes[index].seconds = atoi(row[1]);
-    }
+		npcCorpseDecayTimes[index].seconds = std::min(24 * 60 * 60, atoi(row[1]));
+	}
 
 	return true;
 }
