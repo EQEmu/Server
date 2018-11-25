@@ -601,7 +601,13 @@ void MobMovementManager::NavigateTo(Mob *who, float x, float y, float z, MobMove
 void MobMovementManager::StopNavigation(Mob *who) {
 	auto iter = _impl->Entries.find(who);
 	auto &ent = (*iter);
-	
+	auto &nav = ent.second.NavTo;
+
+	nav.navigate_to_x = 0.0;
+	nav.navigate_to_y = 0.0;
+	nav.navigate_to_z = 0.0;
+	nav.navigate_to_heading = 0.0;
+
 	if (true == ent.second.Commands.empty()) {
 		PushStopMoving(ent.second);
 		return;
