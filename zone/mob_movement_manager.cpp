@@ -584,7 +584,7 @@ void MobMovementManager::NavigateTo(Mob *who, float x, float y, float z, MobMove
 		auto within = IsPositionWithinSimpleCylinder(glm::vec3(x, y, z), glm::vec3(nav.navigate_to_x, nav.navigate_to_y, nav.navigate_to_z), 1.5f, 6.0f);
 		auto heading_match = IsHeadingEqual(0.0, nav.navigate_to_heading);
 
-		if (false == within || false == heading_match) {
+		if (false == within || false == heading_match || ent.second.Commands.size() == 0) {
 			ent.second.Commands.clear();
 
 			//Path is no longer valid, calculate a new path
