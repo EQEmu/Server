@@ -60,6 +60,7 @@ merc_types
 merc_weaponinfo
 merchantlist
 mercs
+name_filter
 npc_emotes
 npc_faction
 npc_faction_entries
