@@ -639,7 +639,7 @@ luabind::scope lua_register_npc() {
 		.def("AddAISpell", (void(Lua_NPC::*)(int,int,int,int,int,int))&Lua_NPC::AddAISpell)
 		.def("AddAISpell", (void(Lua_NPC::*)(int,int,int,int,int,int,int,int))&Lua_NPC::AddAISpell)
 		.def("RemoveAISpell", (void(Lua_NPC::*)(int))&Lua_NPC::RemoveAISpell)
-		.def("AddMeleeProc", (void(Lua_NPC::*)(int))&Lua_NPC::AddMeleeProc)
+		.def("AddMeleeProc", (void(Lua_NPC::*)(int,int))&Lua_NPC::AddMeleeProc)
 		.def("RemoveMeleeProc", (void(Lua_NPC::*)(int))&Lua_NPC::RemoveMeleeProc)
 		.def("SetSpellFocusDMG", (void(Lua_NPC::*)(int))&Lua_NPC::SetSpellFocusDMG)
 		.def("SetSpellFocusHeal", (void(Lua_NPC::*)(int))&Lua_NPC::SetSpellFocusHeal)
