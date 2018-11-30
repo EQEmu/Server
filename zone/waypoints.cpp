@@ -608,7 +608,7 @@ float Mob::GetFixedZ(const glm::vec3 &destination, int32 z_find_offset) {
 
 	float new_z = destination.z;
 
-	if (zone->HasMap() && RuleB(Map, FixZWhenMoving)) {
+	if (zone->HasMap()) {
 
 		if (flymode == GravityBehavior::Flying)
 			return new_z;
@@ -645,11 +645,19 @@ float Mob::GetFixedZ(const glm::vec3 &destination, int32 z_find_offset) {
 }
 
 void Mob::FixZ(int32 z_find_offset /*= 5*/, bool fix_client_z /*= false*/) {
-	glm::vec3 current_loc(m_Position);
-
-	if (IsClient() && !fix_client_z)
+	if (IsClient() && !fix_client_z) {
 		return;
+	}
+	
+	if (flymode == GravityBehavior::Flying) {
+		return;
+	}
 
+	if (zone->watermap && zone->watermap->InLiquid(m_Position)) {
+		return;
+	}
+
+	glm::vec3 current_loc(m_Position);
 	float new_z = GetFixedZ(current_loc, z_find_offset);
 
 	if (new_z == m_Position.z)

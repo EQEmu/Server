@@ -781,9 +781,6 @@ void Client::AI_Process()
 	if (RuleB(Combat, EnableFearPathing)) {
 		if (currently_fleeing) {
 
-			if (fix_z_timer.Check())
-				TryFixZ(5, true);
-
 			if (IsRooted()) {
 				//make sure everybody knows were not moving, for appearance sake
 				if (IsMoving()) {
@@ -994,7 +991,7 @@ void Mob::ProcessForcedMovement()
 			Teleport(m_Position + m_Delta);
 			m_Delta = glm::vec4();
 			SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0, true);
-			TryFixZ(); // so we teleport to the ground locally, we want the client to interpolate falling etc
+			FixZ(); // so we teleport to the ground locally, we want the client to interpolate falling etc
 		} else if (--ForcedMovement) {
 			if (normal.z < -0.15f) // prevent too much wall climbing. ex. OMM's room in anguish
 				normal.z = 0.0f;
@@ -1100,22 +1097,6 @@ void Mob::AI_Process() {
 	}
 
 	if (engaged) {
-
-		/* Fix Z when following during pull, not when engaged and stationary */
-		if (moving && fix_z_timer_engaged.Check()) {
-			if (this->GetTarget()) {
-				/* If we are engaged, moving and following client, let's look for best Z more often */
-				float target_distance = DistanceNoZ(this->GetPosition(), this->GetTarget()->GetPosition());
-				TryFixZ();
-
-				if (target_distance <= 15 && !this->CheckLosFN(this->GetTarget())) {
-					Mob *target = this->GetTarget();
-
-					Teleport(target->GetPosition());
-				}
-			}
-		}
-
 		if (!(m_PlayerState & static_cast<uint32>(PlayerState::Aggressive)))
 			SendAddPlayerState(PlayerState::Aggressive);
 

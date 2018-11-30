@@ -982,7 +982,6 @@ public:
 	void				SendToFixZ(float new_x, float new_y, float new_z);
 	float				GetZOffset() const;
 	float               GetDefaultRaceSize() const;
-	void				TryFixZ(int32 z_find_offset = 5, bool fix_client_z = false);
 	void 				FixZ(int32 z_find_offset = 5, bool fix_client_z = false);
 	float				GetFixedZ(const glm::vec3 &destination, int32 z_find_offset = 5);
 	virtual int			GetStuckBehavior() const { return 0; }
@@ -1457,8 +1456,6 @@ protected:
 
 	bool flee_mode;
 	Timer flee_timer;
-	Timer fix_z_timer;
-	Timer fix_z_timer_engaged;
 	Timer attack_anim_timer;
 	Timer position_update_melee_push_timer;
 

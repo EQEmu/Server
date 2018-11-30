@@ -2722,10 +2722,6 @@ void Bot::AI_Process() {
 			}
 
 			// Fix Z when following during pull, not when engaged and stationary
-			if (IsMoving() && fix_z_timer_engaged.Check()) {
-				TryFixZ();
-				return;
-			}
 
 			if (GetTarget() && GetTarget()->IsFeared() && !spellend_timer.Enabled() && AI_think_timer->Check()) {
 				if (!IsFacingMob(GetTarget()))

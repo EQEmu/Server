@@ -52,10 +52,6 @@ void Mob::CalcBonuses()
 		We set this here because NPC's can cast spells to change walkspeed/runspeed
 	*/
 	float get_walk_speed = static_cast<float>(0.025f * this->GetWalkspeed());
-	if (get_walk_speed >= 0.9 && this->fix_z_timer.GetDuration() != 100) {
-		this->fix_z_timer.SetTimer(100);
-	}
-
 	rooted = FindType(SE_Root);
 }
 

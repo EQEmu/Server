@@ -112,8 +112,6 @@ Mob::Mob(const char* in_name,
 		tmHidden(-1),
 		mitigation_ac(0),
 		m_specialattacks(eSpecialAttacks::None),
-		fix_z_timer(300),
-		fix_z_timer_engaged(100),
 		attack_anim_timer(1000),
 		position_update_melee_push_timer(500),
 		hate_list_cleanup_timer(6000)
@@ -3426,7 +3424,7 @@ float Mob::FindDestGroundZ(glm::vec3 dest, float z_offset)
 	if (zone->zonemap != nullptr)
 	{
 		dest.z += z_offset;
-		best_z = zone->zonemap->FindBestZ(dest, nullptr);
+		best_z = zone->zonemap->FindClosestZ(dest, nullptr);
 	}
 	return best_z;
 }
@@ -6002,22 +6000,6 @@ void Mob::CommonBreakInvisible()
 float Mob::GetDefaultRaceSize() const {
 	return GetRaceGenderDefaultHeight(race, gender);
 }
-
-void Mob::TryFixZ(int32 z_find_offset, bool fix_client_z)
-{
-	if (fix_z_timer.Check() && flymode != GravityBehavior::Flying) {
-		auto watermap = zone->watermap;
-		if (watermap) {
-			if (!watermap->InLiquid(m_Position)) {
-				FixZ();
-			}
-		}
-		else {
-			FixZ();
-		}
-	}
-}
-
 
 #ifdef BOTS
 bool Mob::JoinHealRotationTargetPool(std::shared_ptr<HealRotation>* heal_rotation)

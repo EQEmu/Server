@@ -98,6 +98,7 @@ class MoveToCommand : public IMovementCommand
 {
 public:
 	MoveToCommand(float x, float y, float z, MobMovementMode mode) {
+		m_distance_moved_since_correction = 0.0;
 		m_move_to_x = x;
 		m_move_to_y = y;
 		m_move_to_z = z;
@@ -139,7 +140,6 @@ public:
 			//rotate to the point
 			m->SetMoving(true);
 			m->SetHeading(m->CalculateHeadingToTarget(m_move_to_x, m_move_to_y));
-			m->TryFixZ();
 
 			m_last_sent_speed = current_speed;
 			m_last_sent_time = current_time;
@@ -150,7 +150,11 @@ public:
 
 		//When speed changes
 		if (current_speed != m_last_sent_speed) {
-			m->TryFixZ();
+			if (RuleB(Map, FixZWhenPathing)) {
+				m->FixZ();
+			}
+
+			m_distance_moved_since_correction = 0.0;
 
 			m_last_sent_speed = current_speed;
 			m_last_sent_time = current_time;
@@ -159,7 +163,11 @@ public:
 
 		//If x seconds have passed without sending an update.
 		if (current_time - m_last_sent_time >= 5.0) {
-			m->TryFixZ();
+			if (RuleB(Map, FixZWhenPathing)) {
+				m->FixZ();
+			}
+
+			m_distance_moved_since_correction = 0.0;
 
 			m_last_sent_speed = current_speed;
 			m_last_sent_time = current_time;
@@ -187,7 +195,9 @@ public:
 
 			m->SetPosition(m_move_to_x, m_move_to_y, m_move_to_z);
 		
-			m->TryFixZ();
+			if (RuleB(Map, FixZWhenPathing)) {
+				m->FixZ();
+			}
 			return true;
 		}
 		else {
@@ -203,6 +213,15 @@ public:
 			}
 
 			m->SetPosition(npos.x, npos.y, z_at_pos);
+
+
+			if (RuleB(Map, FixZWhenPathing)) {
+				m_distance_moved_since_correction += distance_moved;
+				if (m_distance_moved_since_correction > RuleR(Map, DistanceCanTravelBeforeAdjustment)) {
+					m_distance_moved_since_correction = 0.0;
+					m->FixZ();
+				}
+			}
 		}
 		
 		return false;
@@ -213,7 +232,7 @@ public:
 	}
 
 protected:
-
+	double m_distance_moved_since_correction;
 	double m_move_to_x;
 	double m_move_to_y;
 	double m_move_to_z;
@@ -382,7 +401,9 @@ public:
 
 		if (m->IsMoving()) {
 			m->SetMoving(false);
-			m->TryFixZ();
+			if (RuleB(Map, FixZWhenPathing)) {
+				m->FixZ();
+			}
 			mgr->SendCommandToClients(m, 0.0, 0.0, 0.0, 0.0, 0, ClientRangeCloseMedium);
 		}
 		return true;
