@@ -383,6 +383,7 @@
 9127|2018_09_07_NPCMaxAggroDist.sql|SHOW COLUMNS FROM `zone` LIKE 'npc_max_aggro_dist'|empty|
 9128|2018_08_13_inventory_version_update.sql|SHOW TABLES LIKE 'inventory_version'|not_empty|
 9129|2018_08_13_inventory_update.sql|SHOW TABLES LIKE 'inventory_versions'|empty|
+9130|2018_11_25_name_filter_update.sql|SHOW COLUMS FROM `name_filter` LIKE 'id'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
