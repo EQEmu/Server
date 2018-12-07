@@ -93,7 +93,7 @@ public:
 	bool is_zone_time_localized;
 
 	bool	Init(bool iStaticZone);
-	bool	LoadZoneCFG(const char* filename, uint16 instance_id, bool DontLoadDefault = false);
+	bool	LoadZoneCFG(const char* filename, uint16 instance_id);
 	bool	SaveZoneCFG();
 	bool	IsLoaded();
 	bool	IsPVPZone() { return pvpzone; }
