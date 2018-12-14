@@ -976,37 +976,44 @@ void QuestManager::permagender(int gender_id) {
 uint16 QuestManager::scribespells(uint8 max_level, uint8 min_level) {
 	QuestManagerCurrentQuestVars();
 	uint16 book_slot, count;
-	uint16 curspell;
+	uint16 spell_id;
 
-	uint32 Char_ID = initiator->CharacterID();
+	uint32 char_id = initiator->CharacterID();
 	bool SpellGlobalRule = RuleB(Spells, EnableSpellGlobals);
+	bool SpellBucketRule = RuleB(Spells, EnableSpellBuckets);
 	bool SpellGlobalCheckResult = 0;
+	bool SpellBucketCheckResult = 0;
 
 
-	for(curspell = 0, book_slot = initiator->GetNextAvailableSpellBookSlot(), count = 0; curspell < SPDAT_RECORDS && book_slot < MAX_PP_SPELLBOOK; curspell++, book_slot = initiator->GetNextAvailableSpellBookSlot(book_slot))
+	for(spell_id = 0, book_slot = initiator->GetNextAvailableSpellBookSlot(), count = 0; spell_id < SPDAT_RECORDS && book_slot < MAX_PP_SPELLBOOK; spell_id++, book_slot = initiator->GetNextAvailableSpellBookSlot(book_slot))
 	{
 		if
 		(
-			spells[curspell].classes[WARRIOR] != 0 &&       //check if spell exists
-			spells[curspell].classes[initiator->GetPP().class_-1] <= max_level &&   //maximum level
-			spells[curspell].classes[initiator->GetPP().class_-1] >= min_level &&   //minimum level
-			spells[curspell].skill != 52 &&
-			spells[curspell].effectid[EFFECT_COUNT - 1] != 10
+			spells[spell_id].classes[WARRIOR] != 0 &&       //check if spell exists
+			spells[spell_id].classes[initiator->GetPP().class_-1] <= max_level &&   //maximum level
+			spells[spell_id].classes[initiator->GetPP().class_-1] >= min_level &&   //minimum level
+			spells[spell_id].skill != 52 &&
+			spells[spell_id].effectid[EFFECT_COUNT - 1] != 10
 		)
 		{
 			if (book_slot == -1) //no more book slots
 				break;
-			if(!IsDiscipline(curspell) && !initiator->HasSpellScribed(curspell)) { //isn't a discipline & we don't already have it scribed
+			if(!IsDiscipline(spell_id) && !initiator->HasSpellScribed(spell_id)) { //isn't a discipline & we don't already have it scribed
 				if (SpellGlobalRule) {
 					// Bool to see if the character has the required QGlobal to scribe it if one exists in the Spell_Globals table
-					SpellGlobalCheckResult = initiator->SpellGlobalCheck(curspell, Char_ID);
+					SpellGlobalCheckResult = initiator->SpellGlobalCheck(spell_id, char_id);
 					if (SpellGlobalCheckResult) {
-						initiator->ScribeSpell(curspell, book_slot);
+						initiator->ScribeSpell(spell_id, book_slot);
 						count++;
 					}
-				}
-				else {
-					initiator->ScribeSpell(curspell, book_slot);
+				} else if (SpellBucketRule) {
+					SpellBucketCheckResult = initiator->SpellBucketCheck(spell_id, char_id);
+					if (SpellBucketCheckResult) {
+						initiator->ScribeSpell(spell_id, book_slot);
+						count++;
+					}
+				} else {
+					initiator->ScribeSpell(spell_id, book_slot);
 					count++;
 				}
 			}
@@ -1018,46 +1025,59 @@ uint16 QuestManager::scribespells(uint8 max_level, uint8 min_level) {
 uint16 QuestManager::traindiscs(uint8 max_level, uint8 min_level) {
 	QuestManagerCurrentQuestVars();
 	uint16 count;
-	uint16 curspell;
+	uint16 spell_id;
 
-	uint32 Char_ID = initiator->CharacterID();
+	uint32 char_id = initiator->CharacterID();
 	bool SpellGlobalRule = RuleB(Spells, EnableSpellGlobals);
+	bool SpellBucketRule = RuleB(Spells, EnableSpellBuckets);
 	bool SpellGlobalCheckResult = 0;
+	bool SpellBucketCheckResult = 0;
 
-	for(curspell = 0, count = 0; curspell < SPDAT_RECORDS; curspell++)
+	for(spell_id = 0, count = 0; spell_id < SPDAT_RECORDS; spell_id++)
 	{
 		if
 		(
-			spells[curspell].classes[WARRIOR] != 0 &&	//check if spell exists
-			spells[curspell].classes[initiator->GetPP().class_-1] <= max_level &&	//maximum level
-			spells[curspell].classes[initiator->GetPP().class_-1] >= min_level &&	//minimum level
-			spells[curspell].skill != 52 &&
-			( !RuleB(Spells, UseCHAScribeHack) || spells[curspell].effectid[EFFECT_COUNT - 1] != 10 )
+			spells[spell_id].classes[WARRIOR] != 0 &&	//check if spell exists
+			spells[spell_id].classes[initiator->GetPP().class_-1] <= max_level &&	//maximum level
+			spells[spell_id].classes[initiator->GetPP().class_-1] >= min_level &&	//minimum level
+			spells[spell_id].skill != 52 &&
+			( !RuleB(Spells, UseCHAScribeHack) || spells[spell_id].effectid[EFFECT_COUNT - 1] != 10 )
 		)
 		{
-			if(IsDiscipline(curspell)){
+			if(IsDiscipline(spell_id)){
 				//we may want to come up with a function like Client::GetNextAvailableSpellBookSlot() to help speed this up a little
 				for(uint32 r = 0; r < MAX_PP_DISCIPLINES; r++) {
-					if(initiator->GetPP().disciplines.values[r] == curspell) {
+					if(initiator->GetPP().disciplines.values[r] == spell_id) {
 						initiator->Message(13, "You already know this discipline.");
 						break;	//continue the 1st loop
 					}
 					else if(initiator->GetPP().disciplines.values[r] == 0) {
 						if (SpellGlobalRule) {
 							// Bool to see if the character has the required QGlobal to train it if one exists in the Spell_Globals table
-							SpellGlobalCheckResult = initiator->SpellGlobalCheck(curspell, Char_ID);
+							SpellGlobalCheckResult = initiator->SpellGlobalCheck(spell_id, char_id);
 							if (SpellGlobalCheckResult) {
-								initiator->GetPP().disciplines.values[r] = curspell;
-								database.SaveCharacterDisc(Char_ID, r, curspell);
+								initiator->GetPP().disciplines.values[r] = spell_id;
+								database.SaveCharacterDisc(char_id, r, spell_id);
 								initiator->SendDisciplineUpdate();
 								initiator->Message(0, "You have learned a new discipline!");
 								count++;	//success counter
 							}
 							break;	//continue the 1st loop
+						} else if (SpellBucketRule) {
+							// Bool to see if the character has the required bucket to train it if one exists in the spell_buckets table
+							SpellBucketCheckResult = initiator->SpellBucketCheck(spell_id, char_id);
+							if (SpellBucketCheckResult) {
+								initiator->GetPP().disciplines.values[r] = spell_id;
+								database.SaveCharacterDisc(char_id, r, spell_id);
+								initiator->SendDisciplineUpdate();
+								initiator->Message(0, "You have learned a new discipline!");
+								count++;
+							}
+							break;
 						}
 						else {
-							initiator->GetPP().disciplines.values[r] = curspell;
-							database.SaveCharacterDisc(Char_ID, r, curspell);
+							initiator->GetPP().disciplines.values[r] = spell_id;
+							database.SaveCharacterDisc(char_id, r, spell_id);
 							initiator->SendDisciplineUpdate();
 							initiator->Message(0, "You have learned a new discipline!");
 							count++;	//success counter
@@ -2661,6 +2681,10 @@ uint16 QuestManager::GetInstanceID(const char *zone, int16 version)
 	return 0;
 }
 
+uint16 QuestManager::GetInstanceIDByCharID(const char *zone, int16 version, uint32 char_id) {
+	return database.GetInstanceID(zone, char_id, version);
+}
+
 void QuestManager::AssignToInstance(uint16 instance_id)
 {
 	QuestManagerCurrentQuestVars();
@@ -2668,6 +2692,10 @@ void QuestManager::AssignToInstance(uint16 instance_id)
 	{
 		database.AddClientToInstance(instance_id, initiator->CharacterID());
 	}
+}
+
+void QuestManager::AssignToInstanceByCharID(uint16 instance_id, uint32 char_id) {
+	database.AddClientToInstance(instance_id, char_id);
 }
 
 void QuestManager::AssignGroupToInstance(uint16 instance_id)
@@ -2708,6 +2736,10 @@ void QuestManager::RemoveFromInstance(uint16 instance_id)
 		else
 			initiator->Message(MT_Say, "Failed to remove client from instance.");
 	}
+}
+
+void QuestManager::RemoveFromInstanceByCharID(uint16 instance_id, uint32 char_id) {
+	database.RemoveClientFromInstance(instance_id, char_id);
 }
 
 void QuestManager::RemoveAllFromInstance(uint16 instance_id)
