@@ -1419,6 +1419,15 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	drakkin_tattoo = m_pp.drakkin_tattoo;
 	drakkin_details = m_pp.drakkin_details;
 
+	// Max Level for Character:PerCharacterQglobalMaxLevel and Character:PerCharacterBucketMaxLevel
+	int client_max_level = 0;
+	if (RuleB(Character, PerCharacterQglobalMaxLevel)) {
+		client_max_level = GetCharMaxLevelFromQGlobal();
+	} else if (RuleB(Character, PerCharacterBucketMaxLevel)) {
+		client_max_level = GetCharMaxLevelFromBucket();
+	}
+	SetClientMaxLevel(client_max_level);
+	
 	// we know our class now, so we might have to fix our consume timer!
 	if (class_ == MONK)
 		consume_food_timer.SetTimer(CONSUMPTION_MNK_TIMER);
