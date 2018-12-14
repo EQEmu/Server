@@ -59,7 +59,6 @@ launcher_zones
 lfguild
 mail
 merchantlist_temp
-name_filter
 object_contents
 petitions
 player_titlesets
@@ -86,6 +85,7 @@ reports
 respawn_times
 sharedbank
 spell_globals
+spell_buckets
 timers
 trader
 trader_audit

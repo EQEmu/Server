@@ -5154,14 +5154,11 @@ int Client::FindSpellBookSlotBySpellID(uint16 spellid) {
 	return -1;	//default
 }
 
-bool Client::SpellGlobalCheck(uint16 spell_ID, uint32 char_ID) {
-
-	std::string spell_Global_Name;
-	int spell_Global_Value;
-	int global_Value;
-
-	std::string query = StringFormat("SELECT qglobal, value FROM spell_globals "
-                                    "WHERE spellid = %i", spell_ID);
+bool Client::SpellGlobalCheck(uint16 spell_id, uint32 char_id) {
+	std::string spell_global_name;
+	int spell_global_value;
+	int global_value;
+	std::string query = StringFormat("SELECT qglobal, value FROM spell_globals WHERE spellid = %i", spell_id);
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
 		return false; // Query failed, so prevent spell from scribing just in case
@@ -5171,37 +5168,79 @@ bool Client::SpellGlobalCheck(uint16 spell_ID, uint32 char_ID) {
         return true; // Spell ID isn't listed in the spells_global table, so it is not restricted from scribing
 
     auto row = results.begin();
-    spell_Global_Name = row[0];
-	spell_Global_Value = atoi(row[1]);
+    spell_global_name = row[0];
+	spell_global_value = atoi(row[1]);
 
-	if (spell_Global_Name.empty())
+	if (spell_global_name.empty())
         return true; // If the entry in the spell_globals table has nothing set for the qglobal name
 
     query = StringFormat("SELECT value FROM quest_globals "
                         "WHERE charid = %i AND name = '%s'",
-                        char_ID, spell_Global_Name.c_str());
+                        char_id, spell_global_name.c_str());
     results = database.QueryDatabase(query);
     if (!results.Success()) {
-        Log(Logs::General, Logs::Error, "Spell ID %i query of spell_globals with Name: '%s' Value: '%i' failed", spell_ID, spell_Global_Name.c_str(), spell_Global_Value);
+        Log(Logs::General, Logs::Error, "Spell ID %i query of spell_globals with Name: '%s' Value: '%i' failed", spell_id, spell_global_name.c_str(), spell_global_value);
         return false;
     }
 
     if (results.RowCount() != 1) {
-        Log(Logs::General, Logs::Error, "Char ID: %i does not have the Qglobal Name: '%s' for Spell ID %i", char_ID, spell_Global_Name.c_str(), spell_ID);
+        Log(Logs::General, Logs::Error, "Char ID: %i does not have the Qglobal Name: '%s' for Spell ID %i", char_id, spell_global_name.c_str(), spell_id);
+        return false;
+    }
+
+    row = results.begin();
+    global_value = atoi(row[0]);
+    if (global_value == spell_global_value)
+        return true; // If the values match from both tables, allow the spell to be scribed
+    else if (global_value > spell_global_value)
+        return true; // Check if the qglobal value is greater than the require spellglobal value
+
+    // If no matching result found in qglobals, don't scribe this spell
+    Log(Logs::General, Logs::Error, "Char ID: %i Spell_globals Name: '%s' Value: '%i' did not match QGlobal Value: '%i' for Spell ID %i", char_id, spell_global_name.c_str(), spell_global_value, global_value, spell_id);
+    return false;
+}
+
+bool Client::SpellBucketCheck(uint16 spell_id, uint32 char_id) {
+	std::string spell_bucket_name;
+	int spell_bucket_value;
+	int bucket_value;
+	std::string query = StringFormat("SELECT key, value FROM spell_buckets WHERE spellid = %i", spell_id);
+	auto results = database.QueryDatabase(query);
+	if (!results.Success())
+		return false;
+
+	if (results.RowCount() != 1)
+		return true;
+	
+	auto row = results.begin();
+	spell_bucket_name = row[0];
+	spell_bucket_value = atoi(row[1]);
+	if (spell_bucket_name.empty())
+		return true;
+	
+	query = StringFormat("SELECT value FROM data_buckets WHERE key = '%i-%s'", char_id, spell_bucket_name.c_str());
+	results = database.QueryDatabase(query);
+	if (!results.Success()) {
+        Log(Logs::General, Logs::Error, "Spell bucket %s for spell ID %i for char ID %i failed.", spell_bucket_name.c_str(), spell_id, char_id);
+        return false;
+    }
+
+    if (results.RowCount() != 1) {
+        Log(Logs::General, Logs::Error, "Spell bucket %s does not exist for spell ID %i for char ID %i.", spell_bucket_name.c_str(), spell_id, char_id);
         return false;
     }
 
     row = results.begin();
 
-    global_Value = atoi(row[0]);
+    bucket_value = atoi(row[0]);
 
-    if (global_Value == spell_Global_Value)
+    if (bucket_value == spell_bucket_value)
         return true; // If the values match from both tables, allow the spell to be scribed
-    else if (global_Value > spell_Global_Value)
-        return true; // Check if the qglobal value is greater than the require spellglobal value
+    else if (bucket_value > spell_bucket_value)
+        return true; // Check if the data bucket value is greater than the required spell bucket value
 
-    // If no matching result found in qglobals, don't scribe this spell
-    Log(Logs::General, Logs::Error, "Char ID: %i Spell_globals Name: '%s' Value: '%i' did not match QGlobal Value: '%i' for Spell ID %i", char_ID, spell_Global_Name.c_str(), spell_Global_Value, global_Value, spell_ID);
+    // If no matching result found in spell buckets, don't scribe this spell
+    Log(Logs::General, Logs::Error, "Spell bucket %s for spell ID %i for char ID %i did not match value %i.",  spell_bucket_name.c_str(), spell_id, char_id, spell_bucket_value);
     return false;
 }
 

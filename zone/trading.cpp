@@ -1295,7 +1295,7 @@ EQEmu::ItemInstance* Client::FindTraderItemBySerialNumber(int32 SerialNumber){
 GetItems_Struct* Client::GetTraderItems(){
 
 	const EQEmu::ItemInstance* item = nullptr;
-	uint16 SlotID = 0;
+	uint16 SlotID = INVALID_INDEX;
 
 	auto gis = new GetItems_Struct;
 
@@ -1304,9 +1304,14 @@ GetItems_Struct* Client::GetTraderItems(){
 	uint8 ndx = 0;
 
 	for (int i = EQEmu::invslot::GENERAL_BEGIN; i <= EQEmu::invslot::GENERAL_END; i++) {
+		if (ndx >= 80)
+			break;
 		item = this->GetInv().GetItem(i);
 		if(item && item->GetItem()->ID == 17899){ //Traders Satchel
 			for (int x = EQEmu::invbag::SLOT_BEGIN; x <= EQEmu::invbag::SLOT_END; x++) {
+				if (ndx >= 80)
+					break;
+
 				SlotID = EQEmu::InventoryProfile::CalcSlotId(i, x);
 
 				item = this->GetInv().GetItem(SlotID);
