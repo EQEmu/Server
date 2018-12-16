@@ -706,7 +706,9 @@ public:
 	void SendGuildJoin(GuildJoin_Struct* gj);
 	void RefreshGuildInfo();
 
-
+	int GetClientMaxLevel() const { return client_max_level; }
+	void SetClientMaxLevel(int max_level) { client_max_level = max_level; }
+	
 	void CheckManaEndUpdate();
 	void SendManaUpdate();
 	void SendEnduranceUpdate();
@@ -782,8 +784,10 @@ public:
 	void UnscribeSpellAll(bool update_client = true);
 	void UntrainDisc(int slot, bool update_client = true);
 	void UntrainDiscAll(bool update_client = true);
-	bool SpellGlobalCheck(uint16 Spell_ID, uint32 Char_ID);
+	bool SpellGlobalCheck(uint16 spell_id, uint32 char_id);
+	bool SpellBucketCheck(uint16 spell_id, uint32 char_id);
 	uint32 GetCharMaxLevelFromQGlobal();
+	uint32 GetCharMaxLevelFromBucket();
 
 	inline bool IsSitting() const {return (playeraction == 1);}
 	inline bool IsBecomeNPC() const { return npcflag; }
@@ -1663,6 +1667,8 @@ private:
 	void InterrogateInventory_(bool errorcheck, Client* requester, int16 head, int16 index, const EQEmu::ItemInstance* inst, const EQEmu::ItemInstance* parent, bool log, bool silent, bool &error, int depth);
 	bool InterrogateInventory_error(int16 head, int16 index, const EQEmu::ItemInstance* inst, const EQEmu::ItemInstance* parent, int depth);
 
+	int client_max_level;
+	
 #ifdef BOTS
 	struct BotOwnerOptions {
 		bool death_marquee;

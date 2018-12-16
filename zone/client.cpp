@@ -263,6 +263,16 @@ Client::Client(EQStreamInterface* ieqs)
 	PendingSacrifice = false;
 	controlling_boat_id = 0;
 
+	if (!RuleB(Character, PerCharacterQglobalMaxLevel) && !RuleB(Character, PerCharacterBucketMaxLevel)) {
+		SetClientMaxLevel(0);
+	} else if (RuleB(Character, PerCharacterQglobalMaxLevel)) {
+		int client_max_level = GetCharMaxLevelFromQGlobal();
+		SetClientMaxLevel(client_max_level);
+	} else if (RuleB(Character, PerCharacterBucketMaxLevel)) {
+		int client_max_level = GetCharMaxLevelFromBucket();
+		SetClientMaxLevel(client_max_level);
+	}
+
 	KarmaUpdateTimer = new Timer(RuleI(Chat, KarmaUpdateIntervalMS));
 	GlobalChatLimiterTimer = new Timer(RuleI(Chat, IntervalDurationMS));
 	AttemptedMessages = 0;
@@ -1965,7 +1975,6 @@ void Client::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 //	ns->spawn.linkdead	= IsLD() ? 1 : 0;
 //	ns->spawn.pvp		= GetPVP(false) ? 1 : 0;
 	ns->spawn.show_name = true;
-
 
 	strcpy(ns->spawn.title, m_pp.title);
 	strcpy(ns->spawn.suffix, m_pp.suffix);

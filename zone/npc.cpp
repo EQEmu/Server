@@ -2632,7 +2632,16 @@ FACTION_VALUE NPC::CheckNPCFactionAlly(int32 other_faction) {
 				return FACTION_INDIFFERENT;
 		}
 	}
-	return FACTION_INDIFFERENT;
+
+	// I believe that the assumption is, barring no entry in npc_faction_entries
+	// that two npcs on like faction con ally to each other.  This catches cases
+	// where an npc is on a faction but has no hits (hence no entry in 
+	// npc_faction_entries).
+
+	if (GetPrimaryFaction() == other_faction)
+		return FACTION_ALLY;
+	else
+		return FACTION_INDIFFERENT;
 }
 
 bool NPC::IsFactionListAlly(uint32 other_faction) {

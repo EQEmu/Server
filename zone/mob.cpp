@@ -383,8 +383,9 @@ Mob::Mob(const char* in_name,
 	m_CurrentWayPoint = glm::vec4();
 	cur_wp_pause = 0;
 	patrol = 0;
-	follow = 0;
+	follow_id = 0;
 	follow_dist = 100;	// Default Distance for Follow
+	follow_run = true;	// We can run if distance great enough
 	no_target_hotkey = false;
 	flee_mode = false;
 	currently_fleeing = false;

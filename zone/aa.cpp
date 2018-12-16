@@ -1172,7 +1172,7 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 		return;
 
 	//check cooldown
-	if(!p_timers.Expired(&database, rank->spell_type + pTimerAAStart)) {
+	if(!p_timers.Expired(&database, rank->spell_type + pTimerAAStart, false)) {
 		uint32 aaremain = p_timers.GetRemainingTime(rank->spell_type + pTimerAAStart);
 		uint32 aaremain_hr = aaremain / (60 * 60);
 		uint32 aaremain_min = (aaremain / 60) % 60;
@@ -1207,6 +1207,17 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 	// Modern clients don't require pet targeted for AA casts that are ST_Pet
 	if (spells[rank->spell].targettype == ST_Pet || spells[rank->spell].targettype == ST_SummonedPet)
 		target_id = GetPetID();
+
+	// extra handling for cast_not_standing spells
+	if (!spells[rank->spell].cast_not_standing) {
+		if (GetAppearance() == eaSitting) // we need to stand!
+			SetAppearance(eaStanding, false);
+
+		if (GetAppearance() != eaStanding) {
+			Message_StringID(MT_SpellFailure, STAND_TO_CAST);
+			return;
+		}
+	}
 
 	// Bards can cast instant cast AAs while they are casting another song
 	if(spells[rank->spell].cast_time == 0 && GetClass() == BARD && IsBardSong(casting_spell_id)) {

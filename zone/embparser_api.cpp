@@ -2887,6 +2887,20 @@ XS(XS__GetInstanceID) {
 	XSRETURN_UV(id);
 }
 
+XS(XS__GetInstanceIDByCharID);
+XS(XS__GetInstanceIDByCharID) {
+	dXSARGS;
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: quest::GetInstanceIDByCharID(string zone_name, uint16 version, uint32 char_id)");
+
+	char   *zone   = (char *) SvPV_nolen(ST(0));
+	uint16 version = (int) SvUV(ST(1));
+	uint32 char_id = (int) SvUV(ST(2));
+	uint16 id      = quest_manager.GetInstanceIDByCharID(zone, version, char_id);
+
+	XSRETURN_UV(id);
+}
+
 XS(XS__GetCharactersInInstance);
 XS(XS__GetCharactersInInstance) {
 	dXSARGS;
@@ -2938,6 +2952,19 @@ XS(XS__AssignToInstance) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS__AssignToInstanceByCharID);
+XS(XS__AssignToInstanceByCharID) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::AssignToInstanceByCharID(uint16 instance_id, uint32 char_id)");
+
+	uint16 instance_id = (int) SvUV(ST(0));
+	uint32 char_id = (int) SvUV(ST(1));
+	quest_manager.AssignToInstanceByCharID(instance_id, char_id);
+
+	XSRETURN_EMPTY;
+}
+
 XS(XS__AssignGroupToInstance);
 XS(XS__AssignGroupToInstance) {
 	dXSARGS;
@@ -2970,6 +2997,19 @@ XS(XS__RemoveFromInstance) {
 
 	uint16 instance_id = (int) SvUV(ST(0));
 	quest_manager.RemoveFromInstance(instance_id);
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__RemoveFromInstanceByCharID);
+XS(XS__RemoveFromInstanceByCharID) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::RemoveFromInstanceByCharID(uint16 instance_id, uint32 char_id)");
+
+	uint16 instance_id = (int) SvUV(ST(0));
+	uint32 char_id = (int) SvUV(ST(1));
+	quest_manager.RemoveFromInstanceByCharID(instance_id, char_id);
 
 	XSRETURN_EMPTY;
 }
@@ -3692,6 +3732,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "AssignGroupToInstance"), XS__AssignGroupToInstance, file);
 	newXS(strcpy(buf, "AssignRaidToInstance"), XS__AssignRaidToInstance, file);
 	newXS(strcpy(buf, "AssignToInstance"), XS__AssignToInstance, file);
+	newXS(strcpy(buf, "AssignToInstanceByCharID"), XS__AssignToInstanceByCharID, file);
 	newXS(strcpy(buf, "ChooseRandom"), XS__ChooseRandom, file);
 	newXS(strcpy(buf, "CreateInstance"), XS__CreateInstance, file);
 	newXS(strcpy(buf, "DestroyInstance"), XS__DestroyInstance, file);
@@ -3703,12 +3744,14 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "FlyMode"), XS__FlyMode, file);
 	newXS(strcpy(buf, "GetCharactersInInstance"), XS__GetCharactersInInstance, file);
 	newXS(strcpy(buf, "GetInstanceID"), XS__GetInstanceID, file);
+	newXS(strcpy(buf, "GetInstanceIDByCharID"), XS__GetInstanceIDByCharID, file);
 	newXS(strcpy(buf, "GetSpellResistType"), XS__GetSpellResistType, file);
 	newXS(strcpy(buf, "GetSpellTargetType"), XS__GetSpellTargetType, file);
 	newXS(strcpy(buf, "GetTimeSeconds"), XS__GetTimeSeconds, file);
 	newXS(strcpy(buf, "GetZoneID"), XS__GetZoneID, file);
 	newXS(strcpy(buf, "GetZoneLongName"), XS__GetZoneLongName, file);
 	newXS(strcpy(buf, "get_data"), XS__get_data, file);
+	newXS(strcpy(buf, "get_data_expires"), XS__get_data_expires, file);
 	newXS(strcpy(buf, "set_data"), XS__set_data, file);
 	newXS(strcpy(buf, "delete_data"), XS__delete_data, file);
 	newXS(strcpy(buf, "IsBeneficialSpell"), XS__IsBeneficialSpell, file);
@@ -3720,6 +3763,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "MovePCInstance"), XS__MovePCInstance, file);
 	newXS(strcpy(buf, "RemoveAllFromInstance"), XS__RemoveAllFromInstance, file);
 	newXS(strcpy(buf, "RemoveFromInstance"), XS__RemoveFromInstance, file);
+	newXS(strcpy(buf, "RemoveFromInstanceByCharID"), XS__RemoveFromInstanceByCharID, file);
 	newXS(strcpy(buf, "SendMail"), XS__SendMail, file);
 	newXS(strcpy(buf, "SetRunning"), XS__SetRunning, file);
 	newXS(strcpy(buf, "activespeakactivity"), XS__activespeakactivity, file);

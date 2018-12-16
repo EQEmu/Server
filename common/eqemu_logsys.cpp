@@ -113,6 +113,15 @@ void EQEmuLogSys::LoadLogSettingsDefaults()
 	 */
 	log_platform = GetExecutablePlatformInt();
 
+	for (int log_category_id = Logs::AA; log_category_id != Logs::MaxCategoryID; log_category_id++) {
+		log_settings[log_category_id].log_to_console      = 0;
+		log_settings[log_category_id].log_to_file         = 0;
+		log_settings[log_category_id].log_to_gmsay        = 0;
+		log_settings[log_category_id].is_category_enabled = 0;
+	}
+
+	file_logs_enabled = false;
+
 	/**
 	 * Zero out Array
 	 */

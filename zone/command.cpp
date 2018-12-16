@@ -1688,7 +1688,7 @@ void command_zheader(Client *c, const Seperator *sep)
 		c->Message(0, "Invalid Zone Name: %s",  sep->argplus[1]);
 	else {
 
-		if (zone->LoadZoneCFG(sep->argplus[1], true))
+		if (zone->LoadZoneCFG(sep->argplus[1], 0))
 			c->Message(0, "Successfully loaded zone header for %s from database.",  sep->argplus[1]);
 		else
 			c->Message(0, "Failed to load zone header %s from database",  sep->argplus[1]);

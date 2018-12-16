@@ -10,6 +10,7 @@ adventure_template_entry
 adventure_template_entry_flavor
 altadv_vars
 alternate_currency
+auras
 base_data
 blocked_spells
 books
@@ -59,6 +60,7 @@ merc_types
 merc_weaponinfo
 merchantlist
 mercs
+name_filter
 npc_emotes
 npc_faction
 npc_faction_entries

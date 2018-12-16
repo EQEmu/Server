@@ -695,10 +695,12 @@ public:
 	virtual bool IsAttackAllowed(Mob *target, bool isSpellAttack = false);
 	bool IsTargeted() const { return (targeted > 0); }
 	inline void IsTargeted(int in_tar) { targeted += in_tar; if(targeted < 0) targeted = 0;}
-	void SetFollowID(uint32 id) { follow = id; }
+	void SetFollowID(uint32 id) { follow_id = id; }
 	void SetFollowDistance(uint32 dist) { follow_dist = dist; }
-	uint32 GetFollowID() const { return follow; }
+	void SetFollowCanRun(bool v) { follow_run = v; }
+	uint32 GetFollowID() const { return follow_id; }
 	uint32 GetFollowDistance() const { return follow_dist; }
+	bool GetFollowCanRun() const { return follow_run; }
 	inline bool IsRareSpawn() const { return rare_spawn; }
 	inline void SetRareSpawn(bool in) { rare_spawn = in; }
 
@@ -1235,8 +1237,9 @@ protected:
 	uint16 ownerid;
 	PetType typeofpet;
 	int16 petpower;
-	uint32 follow;
+	uint32 follow_id;
 	uint32 follow_dist;
+	bool follow_run;
 	bool no_target_hotkey;
 	bool rare_spawn;
 
