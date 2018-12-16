@@ -47,6 +47,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/spdat.h"
 #include "../common/string_util.h"
 #include "../common/zone_numbers.h"
+#include "data_bucket.h"
 #include "event_codes.h"
 #include "guild_mgr.h"
 #include "merc.h"
@@ -1746,6 +1747,15 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	/* Task Packets */
 	LoadClientTaskState();
 
+	/**
+	 * DevTools Load Settings
+	 */
+	if (Admin() > 200) {
+		std::string dev_tools_window_key = StringFormat("%i-dev-tools-window-disabled", AccountID());
+		if (DataBucket::GetData(dev_tools_window_key) == "true") {
+			dev_tools_window_enabled = false;
+		}
+	}
 
 	if (m_ClientVersionBit & EQEmu::versions::bit_UFAndLater) {
 		outapp = new EQApplicationPacket(OP_XTargetResponse, 8);

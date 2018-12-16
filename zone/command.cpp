@@ -55,7 +55,7 @@
 #include "../say_link.h"
 #include "../common/eqemu_logsys.h"
 
-
+#include "data_bucket.h"
 #include "command.h"
 #include "guild_mgr.h"
 #include "map.h"
@@ -185,6 +185,7 @@ int command_init(void)
 		command_add("delpetition", "[petition number] - Delete a petition", 20, command_delpetition) ||
 		command_add("depop", "- Depop your NPC target", 50, command_depop) ||
 		command_add("depopzone", "- Depop the zone", 100, command_depopzone) ||
+		command_add("devtools", "- Manages devtools", 200, command_devtools) ||
 		command_add("details", "- Change the details of your target (Drakkin Only)", 80, command_details) ||
 		command_add("disablerecipe",  "[recipe_id] - Disables a recipe using the recipe id.",  80, command_disablerecipe) ||
 		command_add("disarmtrap",  "Analog for ldon disarm trap for the newer clients since we still don't have it working.", 80, command_disarmtrap) ||
@@ -4598,6 +4599,49 @@ void command_depopzone(Client *c, const Seperator *sep)
 {
 	zone->Depop();
 	c->Message(0, "Zone depoped.");
+}
+
+void command_devtools(Client *c, const Seperator *sep)
+{
+	std::string menu_commands_search;
+	std::string window_toggle_command;
+
+	/**
+	 * Search entity commands
+	 */
+	menu_commands_search += "[" + EQEmu::SayLinkEngine::GenerateQuestSaylink("#list npcs", false, "NPC") + "] ";
+	menu_commands_search += "[" + EQEmu::SayLinkEngine::GenerateQuestSaylink("#list players", false, "Players") + "] ";
+	menu_commands_search += "[" + EQEmu::SayLinkEngine::GenerateQuestSaylink("#list corpses", false, "Corpses") + "] ";
+	menu_commands_search += "[" + EQEmu::SayLinkEngine::GenerateQuestSaylink("#list doors", false, "Doors") + "] ";
+	menu_commands_search += "[" + EQEmu::SayLinkEngine::GenerateQuestSaylink("#list objects", false, "Objects") + "] ";
+
+	std::string dev_tools_window_key = StringFormat("%i-dev-tools-window-disabled", c->AccountID());
+
+	/**
+	 * Handle window toggle
+	 */
+	if (strcasecmp(sep->arg[1], "disable_window") == 0) {
+		DataBucket::SetData(dev_tools_window_key, "true");
+		c->SetDevToolsWindowEnabled(false);
+	}
+	if (strcasecmp(sep->arg[1], "enable_window") == 0) {
+		DataBucket::DeleteData(dev_tools_window_key);
+		c->SetDevToolsWindowEnabled(true);
+	}
+
+	/**
+	 * Show window status
+	 */
+	window_toggle_command = "Disabled [" + EQEmu::SayLinkEngine::GenerateQuestSaylink("#devtools enable_window", false, "Enable") + "] ";
+	if (c->IsDevToolsWindowEnabled()) {
+		window_toggle_command = "Enabled [" + EQEmu::SayLinkEngine::GenerateQuestSaylink("#devtools disable_window", false, "Disable") + "] ";
+	}
+
+	/**
+	 * Print menu
+	 */
+	c->Message(0, "| [Devtools] Window %s", window_toggle_command.c_str());
+	c->Message(0, "| [Devtools] Search %s", menu_commands_search.c_str());
 }
 
 void command_repop(Client *c, const Seperator *sep)

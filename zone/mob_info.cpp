@@ -630,9 +630,14 @@ void Mob::DisplayInfo(Mob *mob)
 	}
 
 	if (this->IsClient()) {
+
 		std::string window_text = "<c \"#FFFF66\">*Drag window open vertically to see all</c><br>";
 
 		Client *client = this->CastToClient();
+
+		if (!client->IsDevToolsWindowEnabled()) {
+			return;
+		}
 
 		std::vector<std::string> info_attributes = {
 			"name",

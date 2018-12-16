@@ -449,7 +449,7 @@ std::string NpcScaleManager::GetNPCScalingTypeName(NPC *&npc)
 /**
  * Determines based on minimum criteria if NPC is auto scaled for certain things to be scaled like
  * special abilities. We use this so we don't blindly assume we want things to be applied
- * 
+ *
  * @param npc
  * @return
  */

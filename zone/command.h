@@ -84,6 +84,7 @@ void command_deletegraveyard(Client *c, const Seperator *sep);
 void command_delpetition(Client *c, const Seperator *sep);
 void command_depop(Client *c, const Seperator *sep);
 void command_depopzone(Client *c, const Seperator *sep);
+void command_devtools(Client *c, const Seperator *sep);
 void command_details(Client *c, const Seperator *sep);
 void command_disablerecipe(Client *c, const Seperator *sep);
 void command_disarmtrap(Client *c, const Seperator *sep);

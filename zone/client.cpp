@@ -38,6 +38,7 @@ extern volatile bool RunLoops;
 #include "../common/rulesys.h"
 #include "../common/string_util.h"
 #include "../common/data_verification.h"
+#include "data_bucket.h"
 #include "position.h"
 #include "net.h"
 #include "worldserver.h"
@@ -166,7 +167,6 @@ Client::Client(EQStreamInterface* ieqs)
 	for (int client_filter = 0; client_filter < _FilterCount; client_filter++)
 		ClientFilters[client_filter] = FilterShow;
 
-	display_mob_info_window = true;
 	character_id = 0;
 	conn_state = NoPacketsReceived;
 	client_data_loaded = false;
@@ -334,6 +334,12 @@ Client::Client(EQStreamInterface* ieqs)
 
 	temp_pvp = false;
 	is_client_moving = false;
+
+	/**
+	 * GM
+	 */
+	display_mob_info_window  = true;
+	dev_tools_window_enabled = true;
 
 #ifdef BOTS
 	bot_owner_options = DefaultBotOwnerOptions;
@@ -1647,7 +1653,6 @@ void Client::FriendsWho(char *FriendsString) {
 		safe_delete(pack);
 	}
 }
-
 
 void Client::UpdateAdmin(bool iFromDB) {
 	int16 tmp = admin;
@@ -9322,3 +9327,22 @@ void Client::InitInnates()
 	}
 }
 
+bool Client::GetDisplayMobInfoWindow() const
+{
+	return display_mob_info_window;
+}
+
+void Client::SetDisplayMobInfoWindow(bool display_mob_info_window)
+{
+	Client::display_mob_info_window = display_mob_info_window;
+}
+
+bool Client::IsDevToolsWindowEnabled() const
+{
+	return dev_tools_window_enabled;
+}
+
+void Client::SetDevToolsWindowEnabled(bool in_dev_tools_window_enabled)
+{
+	Client::dev_tools_window_enabled = in_dev_tools_window_enabled;
+}
