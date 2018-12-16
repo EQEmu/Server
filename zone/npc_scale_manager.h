@@ -21,7 +21,6 @@
 #ifndef EQEMU_NPC_SCALE_MANAGER_H
 #define EQEMU_NPC_SCALE_MANAGER_H
 
-
 #include "npc.h"
 
 class NpcScaleManager {
@@ -88,6 +87,7 @@ public:
 	};
 
 	void ScaleNPC(NPC * npc);
+	bool IsAutoScaled(NPC * npc);
 	bool LoadScaleData();
 
 	global_npc_scale GetGlobalScaleDataForTypeLevel(int8 npc_type, int npc_level);

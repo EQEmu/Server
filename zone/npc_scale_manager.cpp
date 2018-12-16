@@ -26,8 +26,9 @@
  */
 void NpcScaleManager::ScaleNPC(NPC * npc)
 {
-	int8 npc_type  = GetNPCScalingType(npc);
-	int  npc_level = npc->GetLevel();
+	int8 npc_type       = GetNPCScalingType(npc);
+	int  npc_level      = npc->GetLevel();
+	bool is_auto_scaled = IsAutoScaled(npc);
 
 	global_npc_scale scale_data = GetGlobalScaleDataForTypeLevel(npc_type, npc_level);
 
@@ -93,10 +94,10 @@ void NpcScaleManager::ScaleNPC(NPC * npc)
 	if (npc->GetDR() == 0) {
 		npc->ModifyNPCStat("dr", std::to_string(scale_data.disease_resist).c_str());
 	}
-	if (npc->GetCR() == 0) {
+	if (npc->GetCorrup() == 0) {
 		npc->ModifyNPCStat("cr", std::to_string(scale_data.corruption_resist).c_str());
 	}
-	if (npc->GetPR() == 0) {
+	if (npc->GetPhR() == 0) {
 		npc->ModifyNPCStat("pr", std::to_string(scale_data.physical_resist).c_str());
 	}
 	if (npc->GetMinDMG() == 0) {
@@ -142,7 +143,7 @@ void NpcScaleManager::ScaleNPC(NPC * npc)
 	if (npc->GetHealScale() == 0) {
 		npc->ModifyNPCStat("heal_scale", std::to_string(scale_data.heal_scale).c_str());
 	}
-	if (!npc->HasSpecialAbilities() && npc->EntityVariableExists("max_hp")) {
+	if (!npc->HasSpecialAbilities() && is_auto_scaled) {
 		npc->ModifyNPCStat("special_abilities", scale_data.special_abilities.c_str());
 	}
 
@@ -158,10 +159,11 @@ void NpcScaleManager::ScaleNPC(NPC * npc)
 
 		Log(Logs::General,
 			Logs::NPCScaling,
-			"(%s) level: %i type: %i Setting: %s",
+			"(%s) level: %i type: %i Auto: %s Setting: %s",
 			npc->GetCleanName(),
 			npc_level,
 			npc_type,
+			(is_auto_scaled ? "true" : "false"),
 			scale_log.c_str());
 	}
 }
@@ -442,6 +444,33 @@ std::string NpcScaleManager::GetNPCScalingTypeName(NPC *&npc)
 	}
 
 	return "Trash";
+}
+
+/**
+ * Determines based on minimum criteria if NPC is auto scaled for certain things to be scaled like
+ * special abilities. We use this so we don't blindly assume we want things to be applied
+ * 
+ * @param npc
+ * @return
+ */
+bool NpcScaleManager::IsAutoScaled(NPC *npc)
+{
+	return
+		(npc->GetHP() == 0 &&
+		 npc->GetMaxDMG() == 0 &&
+		 npc->GetMinDMG() == 0 &&
+		 npc->GetSTR() == 0 &&
+		 npc->GetSTA() == 0 &&
+		 npc->GetDEX() == 0 &&
+		 npc->GetAGI() == 0 &&
+		 npc->GetINT() == 0 &&
+		 npc->GetWIS() == 0 &&
+		 npc->GetCHA() == 0 &&
+		 npc->GetMR() == 0 &&
+		 npc->GetFR() == 0 &&
+		 npc->GetCR() == 0 &&
+		 npc->GetPR() == 0 &&
+		 npc->GetDR() == 0);
 }
 
 /**

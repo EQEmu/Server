@@ -619,7 +619,6 @@ inline void NPCCommandsMenu(Client* client, NPC* npc)
 	}
 
 	if (menu_commands.length() > 0) {
-		// client->Message(0, "| # Show Commmands");
 		client->Message(0, "| [Show Commands] %s", menu_commands.c_str());
 	}
 }
