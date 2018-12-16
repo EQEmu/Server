@@ -112,12 +112,7 @@ void EQEmuLogSys::LoadLogSettingsDefaults()
 	 * Get Executable platform currently running this code (Zone/World/etc)
 	 */
 	log_platform = GetExecutablePlatformInt();
-
-	/**
-	 * Zero out Array
-	 */
-	memset(log_settings, 0, sizeof(LogSettings) * Logs::LogCategory::MaxCategoryID);
-
+	
 	for (int log_category_id = Logs::AA; log_category_id != Logs::MaxCategoryID; log_category_id++) {
 		log_settings[log_category_id].log_to_console      = 0;
 		log_settings[log_category_id].log_to_file         = 0;
