@@ -40,88 +40,87 @@ extern EntityList entity_list;
 extern Zone* zone;
 extern WorldServer worldserver;
 
-Mob::Mob(const char* in_name,
-		const char* in_lastname,
-		int32		in_cur_hp,
-		int32		in_max_hp,
-		uint8		in_gender,
-		uint16		in_race,
-		uint8		in_class,
-		bodyType	in_bodytype,
-		uint8		in_deity,
-		uint8		in_level,
-		uint32		in_npctype_id,
-		float		in_size,
-		float		in_runspeed,
-		const glm::vec4& position,
-		uint8		in_light,
-		uint8		in_texture,
-		uint8		in_helmtexture,
-		uint16		in_ac,
-		uint16		in_atk,
-		uint16		in_str,
-		uint16		in_sta,
-		uint16		in_dex,
-		uint16		in_agi,
-		uint16		in_int,
-		uint16		in_wis,
-		uint16		in_cha,
-		uint8		in_haircolor,
-		uint8		in_beardcolor,
-		uint8		in_eyecolor1, // the eyecolors always seem to be the same, maybe left and right eye?
-		uint8		in_eyecolor2,
-		uint8		in_hairstyle,
-		uint8		in_luclinface,
-		uint8		in_beard,
-		uint32		in_drakkin_heritage,
-		uint32		in_drakkin_tattoo,
-		uint32		in_drakkin_details,
-		EQEmu::TintProfile	in_armor_tint,
-		uint8		in_aa_title,
-		uint8		in_see_invis, // see through invis/ivu
-		uint8		in_see_invis_undead,
-		uint8		in_see_hide,
-		uint8		in_see_improved_hide,
-		int32		in_hp_regen,
-		int32		in_mana_regen,
-		uint8		in_qglobal,
-		uint8		in_maxlevel,
-		uint32		in_scalerate,
-		uint8		in_armtexture,
-		uint8		in_bracertexture,
-		uint8		in_handtexture,
-		uint8		in_legtexture,
-		uint8		in_feettexture
-	) :
-		attack_timer(2000),
-		attack_dw_timer(2000),
-		ranged_timer(2000),
-		tic_timer(6000),
-		mana_timer(2000),
-		spellend_timer(0),
-		rewind_timer(30000),
-		bindwound_timer(10000),
-		stunned_timer(0),
-		spun_timer(0),
-		bardsong_timer(6000),
-		gravity_timer(1000),
-		viral_timer(0),
-		m_FearWalkTarget(-999999.0f, -999999.0f, -999999.0f),
-		flee_timer(FLEE_CHECK_TIMER), 
-		m_Position(position),
-		tmHidden(-1),
-		mitigation_ac(0),
-		m_specialattacks(eSpecialAttacks::None),
-		attack_anim_timer(1000),
-		position_update_melee_push_timer(500),
-		hate_list_cleanup_timer(6000)
+Mob::Mob(
+	const char *in_name,
+	const char *in_lastname,
+	int32 in_cur_hp,
+	int32 in_max_hp,
+	uint8 in_gender,
+	uint16 in_race,
+	uint8 in_class,
+	bodyType in_bodytype,
+	uint8 in_deity,
+	uint8 in_level,
+	uint32 in_npctype_id,
+	float in_size,
+	float in_runspeed,
+	const glm::vec4 &position,
+	uint8 in_light,
+	uint8 in_texture,
+	uint8 in_helmtexture,
+	uint16 in_ac,
+	uint16 in_atk,
+	uint16 in_str,
+	uint16 in_sta,
+	uint16 in_dex,
+	uint16 in_agi,
+	uint16 in_int,
+	uint16 in_wis,
+	uint16 in_cha,
+	uint8 in_haircolor,
+	uint8 in_beardcolor,
+	uint8 in_eyecolor1, // the eyecolors always seem to be the same, maybe left and right eye?
+	uint8 in_eyecolor2,
+	uint8 in_hairstyle,
+	uint8 in_luclinface,
+	uint8 in_beard,
+	uint32 in_drakkin_heritage,
+	uint32 in_drakkin_tattoo,
+	uint32 in_drakkin_details,
+	EQEmu::TintProfile in_armor_tint,
+	uint8 in_aa_title,
+	uint8 in_see_invis, // see through invis/ivu
+	uint8 in_see_invis_undead,
+	uint8 in_see_hide,
+	uint8 in_see_improved_hide,
+	int32 in_hp_regen,
+	int32 in_mana_regen,
+	uint8 in_qglobal,
+	uint8 in_maxlevel,
+	uint32 in_scalerate,
+	uint8 in_armtexture,
+	uint8 in_bracertexture,
+	uint8 in_handtexture,
+	uint8 in_legtexture,
+	uint8 in_feettexture
+) :
+	attack_timer(2000),
+	attack_dw_timer(2000),
+	ranged_timer(2000),
+	tic_timer(6000),
+	mana_timer(2000),
+	spellend_timer(0),
+	rewind_timer(30000),
+	bindwound_timer(10000),
+	stunned_timer(0),
+	spun_timer(0),
+	bardsong_timer(6000),
+	gravity_timer(1000),
+	viral_timer(0),
+	m_FearWalkTarget(-999999.0f, -999999.0f, -999999.0f),
+	flee_timer(FLEE_CHECK_TIMER),
+	m_Position(position),
+	tmHidden(-1),
+	mitigation_ac(0),
+	m_specialattacks(eSpecialAttacks::None),
+	attack_anim_timer(1000),
+	position_update_melee_push_timer(500),
+	hate_list_cleanup_timer(6000)
 {
 	mMovementManager = &MobMovementManager::Get();
 	mMovementManager->AddMob(this);
 
 	targeted = 0;
-	currently_fleeing = false;
-
 	currently_fleeing = false;
 
 	AI_Init();
@@ -161,6 +160,7 @@ Mob::Mob(const char* in_name,
 	// neotokyo: sanity check
 	if (runspeed < 0 || runspeed > 20) {
 		runspeed = 1.25f;
+	}
 
 	// clients -- todo movement this doesn't take into account gm speed we need to fix that.
 
@@ -393,7 +393,7 @@ Mob::Mob(const char* in_name,
 	rooted = false;
 	charmed = false;
 	has_virus = false;
-	for (i = 0; i < MAX_SPELL_TRIGGER * 2; i++) {
+	for (int i = 0; i < MAX_SPELL_TRIGGER * 2; i++) {
 		viral_spells[i] = 0;
 	}
 
