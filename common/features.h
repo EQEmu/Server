@@ -272,10 +272,6 @@ enum {
 	commandInvSnapshot = 150		//ability to clear/restore snapshots
 };
 
-//default states for logging flag on NPCs and clients (having NPCs on by default is prolly a bad idea)
-#define CLIENT_DEFAULT_LOGGING_ENABLED true
-#define NPC_DEFAULT_LOGGING_ENABLED false
-
 
 // This is the item ID we use for say links, we use the max that fits in 5 ASCII chars
 #define SAYLINK_ITEM_ID 0xFFFFF

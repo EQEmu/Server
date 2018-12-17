@@ -350,4 +350,5 @@ bool EQ::Net::StaticPacket::Resize(size_t new_size)
 	}
 
 	m_data_length = new_size;
+	return true;
 }

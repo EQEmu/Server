@@ -684,14 +684,12 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 		}
 	}
 
-	if(RuleB(Character, PerCharacterQglobalMaxLevel)){
-		uint32 MaxLevel = GetCharMaxLevelFromQGlobal();
-		if(MaxLevel){
-			if(GetLevel() >= MaxLevel){
-				uint32 expneeded = GetEXPForLevel(MaxLevel);
-				if(set_exp > expneeded) {
-					set_exp = expneeded;
-				}
+	if (GetClientMaxLevel() > 0) {
+		int client_max_level = GetClientMaxLevel();
+		if (GetLevel() >= client_max_level) {
+			uint32 expneeded = GetEXPForLevel(client_max_level);
+			if(set_exp > expneeded) {
+				set_exp = expneeded;
 			}
 		}
 	}
@@ -1130,7 +1128,23 @@ uint32 Client::GetCharMaxLevelFromQGlobal() {
 		++gcount;
 	}
 
-	return false;
+	return 0;
+}
+
+uint32 Client::GetCharMaxLevelFromBucket() {
+	uint32 char_id = this->CharacterID();
+	std::string query = StringFormat("SELECT value FROM data_buckets WHERE key = '%i-CharMaxLevel'", char_id);
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+        Log(Logs::General, Logs::Error, "Data bucket for CharMaxLevel for char ID %i failed.", char_id);
+        return 0;
+    }
+	
+	if (results.RowCount() > 0) {
+		auto row = results.begin();
+		return atoi(row[0]);
+	}
+	return 0;
 }
 
 uint32 Client::GetRequiredAAExperience() {

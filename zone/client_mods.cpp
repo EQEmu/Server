@@ -275,8 +275,9 @@ int32 Client::CalcHPRegen(bool bCombat)
 	if (!skip_innate && m_pp.InnateSkills[InnateRegen] != InnateDisabled) {
 		if (level >= 50) {
 			++base;
-			if (level >= 55)
+			if (level >= 55) {
 				++base;
+			}
 		}
 		base *= 2;
 	}
@@ -331,6 +332,7 @@ int32 Client::CalcMaxHP()
 	if (hp_perc_cap) {
 		int curHP_cap = (max_hp * hp_perc_cap) / 100;
 		if (cur_hp > curHP_cap || (spellbonuses.HPPercCap[1] && cur_hp > spellbonuses.HPPercCap[1])) {
+
 			cur_hp = curHP_cap;
 		}
 	}
@@ -340,136 +342,137 @@ int32 Client::CalcMaxHP()
 uint32 Mob::GetClassLevelFactor()
 {
 	uint32 multiplier = 0;
-	uint8 mlevel = GetLevel();
+	uint8  mlevel     = GetLevel();
 	switch (GetClass()) {
 		case WARRIOR: {
-				if (mlevel < 20) {
-					multiplier = 220;
-				}
-				else if (mlevel < 30) {
-					multiplier = 230;
-				}
-				else if (mlevel < 40) {
-					multiplier = 250;
-				}
-				else if (mlevel < 53) {
-					multiplier = 270;
-				}
-				else if (mlevel < 57) {
-					multiplier = 280;
-				}
-				else if (mlevel < 60) {
-					multiplier = 290;
-				}
-				else if (mlevel < 70) {
-					multiplier = 300;
-				}
-				else {
-					multiplier = 311;
-				}
-				break;
+			if (mlevel < 20) {
+				multiplier = 220;
 			}
+			else if (mlevel < 30) {
+				multiplier = 230;
+			}
+			else if (mlevel < 40) {
+				multiplier = 250;
+			}
+			else if (mlevel < 53) {
+				multiplier = 270;
+			}
+			else if (mlevel < 57) {
+				multiplier = 280;
+			}
+			else if (mlevel < 60) {
+				multiplier = 290;
+			}
+			else if (mlevel < 70) {
+				multiplier = 300;
+			}
+			else {
+				multiplier = 311;
+			}
+			break;
+		}
 		case DRUID:
 		case CLERIC:
 		case SHAMAN: {
-				if (mlevel < 70) {
-					multiplier = 150;
-				}
-				else {
-					multiplier = 157;
-				}
-				break;
+			if (mlevel < 70) {
+				multiplier = 150;
 			}
+			else {
+				multiplier = 157;
+			}
+			break;
+		}
 		case BERSERKER:
 		case PALADIN:
 		case SHADOWKNIGHT: {
-				if (mlevel < 35) {
-					multiplier = 210;
-				}
-				else if (mlevel < 45) {
-					multiplier = 220;
-				}
-				else if (mlevel < 51) {
-					multiplier = 230;
-				}
-				else if (mlevel < 56) {
-					multiplier = 240;
-				}
-				else if (mlevel < 60) {
-					multiplier = 250;
-				}
-				else if (mlevel < 68) {
-					multiplier = 260;
-				}
-				else {
-					multiplier = 270;
-				}
-				break;
+			if (mlevel < 35) {
+				multiplier = 210;
 			}
+			else if (mlevel < 45) {
+				multiplier = 220;
+			}
+			else if (mlevel < 51) {
+				multiplier = 230;
+			}
+			else if (mlevel < 56) {
+				multiplier = 240;
+			}
+			else if (mlevel < 60) {
+				multiplier = 250;
+			}
+			else if (mlevel < 68) {
+				multiplier = 260;
+			}
+			else {
+				multiplier = 270;
+			}
+			break;
+		}
 		case MONK:
 		case BARD:
 		case ROGUE:
 		case BEASTLORD: {
-				if (mlevel < 51) {
-					multiplier = 180;
-				}
-				else if (mlevel < 58) {
-					multiplier = 190;
-				}
-				else if (mlevel < 70) {
-					multiplier = 200;
-				}
-				else {
-					multiplier = 210;
-				}
-				break;
+			if (mlevel < 51) {
+				multiplier = 180;
 			}
+			else if (mlevel < 58) {
+				multiplier = 190;
+			}
+			else if (mlevel < 70) {
+				multiplier = 200;
+			}
+			else {
+				multiplier = 210;
+			}
+			break;
+		}
 		case RANGER: {
-				if (mlevel < 58) {
-					multiplier = 200;
-				}
-				else if (mlevel < 70) {
-					multiplier = 210;
-				}
-				else {
-					multiplier = 220;
-				}
-				break;
+			if (mlevel < 58) {
+				multiplier = 200;
 			}
+			else if (mlevel < 70) {
+				multiplier = 210;
+			}
+			else {
+				multiplier = 220;
+			}
+			break;
+		}
 		case MAGICIAN:
 		case WIZARD:
 		case NECROMANCER:
 		case ENCHANTER: {
-				if (mlevel < 70) {
-					multiplier = 120;
-				}
-				else {
-					multiplier = 127;
-				}
-				break;
+			if (mlevel < 70) {
+				multiplier = 120;
 			}
+			else {
+				multiplier = 127;
+			}
+			break;
+		}
 		default: {
-				if (mlevel < 35) {
-					multiplier = 210;
-				}
-				else if (mlevel < 45) {
-					multiplier = 220;
-				}
-				else if (mlevel < 51) {
-					multiplier = 230;
-				}
-				else if (mlevel < 56) {
-					multiplier = 240;
-				}
-				else if (mlevel < 60) {
-					multiplier = 250;
-				}
-				else {
-					multiplier = 260;
-				}
-				break;
+			if (mlevel < 35) {
+				multiplier = 210;
 			}
+			else if (mlevel < 45) {
+				multiplier = 220;
+			}
+			else if (mlevel < 51) {
+				multiplier = 230;
+			}
+			else if (mlevel < 56) {
+				multiplier = 240;
+			}
+			else if (mlevel < 60) {
+				multiplier = 250;
+			}
+			else {
+				multiplier = 260;
+			}
+			break;
+		}
 	}
+
 	return multiplier;
 }
 
@@ -559,537 +562,6 @@ int32 Client::GetRawItemAC()
 	}
 	return Total;
 }
-
-int32 Client::acmod()
-{
-	int agility = GetAGI();
-	int level = GetLevel();
-	if (agility < 1 || level < 1) {
-		return (0);
-	}
-	if (agility <= 74) {
-		if (agility == 1) {
-			return -24;
-		}
-		else if (agility <= 3) {
-			return -23;
-		}
-		else if (agility == 4) {
-			return -22;
-		}
-		else if (agility <= 6) {
-			return -21;
-		}
-		else if (agility <= 8) {
-			return -20;
-		}
-		else if (agility == 9) {
-			return -19;
-		}
-		else if (agility <= 11) {
-			return -18;
-		}
-		else if (agility == 12) {
-			return -17;
-		}
-		else if (agility <= 14) {
-			return -16;
-		}
-		else if (agility <= 16) {
-			return -15;
-		}
-		else if (agility == 17) {
-			return -14;
-		}
-		else if (agility <= 19) {
-			return -13;
-		}
-		else if (agility == 20) {
-			return -12;
-		}
-		else if (agility <= 22) {
-			return -11;
-		}
-		else if (agility <= 24) {
-			return -10;
-		}
-		else if (agility == 25) {
-			return -9;
-		}
-		else if (agility <= 27) {
-			return -8;
-		}
-		else if (agility == 28) {
-			return -7;
-		}
-		else if (agility <= 30) {
-			return -6;
-		}
-		else if (agility <= 32) {
-			return -5;
-		}
-		else if (agility == 33) {
-			return -4;
-		}
-		else if (agility <= 35) {
-			return -3;
-		}
-		else if (agility == 36) {
-			return -2;
-		}
-		else if (agility <= 38) {
-			return -1;
-		}
-		else if (agility <= 65) {
-			return 0;
-		}
-		else if (agility <= 70) {
-			return 1;
-		}
-		else if (agility <= 74) {
-			return 5;
-		}
-	}
-	else if (agility <= 137) {
-		if (agility == 75) {
-			if (level <= 6) {
-				return 9;
-			}
-			else if (level <= 19) {
-				return 23;
-			}
-			else if (level <= 39) {
-				return 33;
-			}
-			else {
-				return 39;
-			}
-		}
-		else if (agility >= 76 && agility <= 79) {
-			if (level <= 6) {
-				return 10;
-			}
-			else if (level <= 19) {
-				return 23;
-			}
-			else if (level <= 39) {
-				return 33;
-			}
-			else {
-				return 40;
-			}
-		}
-		else if (agility == 80) {
-			if (level <= 6) {
-				return 11;
-			}
-			else if (level <= 19) {
-				return 24;
-			}
-			else if (level <= 39) {
-				return 34;
-			}
-			else {
-				return 41;
-			}
-		}
-		else if (agility >= 81 && agility <= 85) {
-			if (level <= 6) {
-				return 12;
-			}
-			else if (level <= 19) {
-				return 25;
-			}
-			else if (level <= 39) {
-				return 35;
-			}
-			else {
-				return 42;
-			}
-		}
-		else if (agility >= 86 && agility <= 90) {
-			if (level <= 6) {
-				return 12;
-			}
-			else if (level <= 19) {
-				return 26;
-			}
-			else if (level <= 39) {
-				return 36;
-			}
-			else {
-				return 42;
-			}
-		}
-		else if (agility >= 91 && agility <= 95) {
-			if (level <= 6) {
-				return 13;
-			}
-			else if (level <= 19) {
-				return 26;
-			}
-			else if (level <= 39) {
-				return 36;
-			}
-			else {
-				return 43;
-			}
-		}
-		else if (agility >= 96 && agility <= 99) {
-			if (level <= 6) {
-				return 14;
-			}
-			else if (level <= 19) {
-				return 27;
-			}
-			else if (level <= 39) {
-				return 37;
-			}
-			else {
-				return 44;
-			}
-		}
-		else if (agility == 100 && level >= 7) {
-			if (level <= 19) {
-				return 28;
-			}
-			else if (level <= 39) {
-				return 38;
-			}
-			else {
-				return 45;
-			}
-		}
-		else if (level <= 6) {
-			return 15;
-		}
-		//level is >6
-		else if (agility >= 101 && agility <= 105) {
-			if (level <= 19) {
-				return 29;
-			}
-			else if (level <= 39) {
-				return 39;    // not verified
-			}
-			else {
-				return 45;
-			}
-		}
-		else if (agility >= 106 && agility <= 110) {
-			if (level <= 19) {
-				return 29;
-			}
-			else if (level <= 39) {
-				return 39;    // not verified
-			}
-			else {
-				return 46;
-			}
-		}
-		else if (agility >= 111 && agility <= 115) {
-			if (level <= 19) {
-				return 30;
-			}
-			else if (level <= 39) {
-				return 40;    // not verified
-			}
-			else {
-				return 47;
-			}
-		}
-		else if (agility >= 116 && agility <= 119) {
-			if (level <= 19) {
-				return 31;
-			}
-			else if (level <= 39) {
-				return 41;
-			}
-			else {
-				return 47;
-			}
-		}
-		else if (level <= 19) {
-			return 32;
-		}
-		//level is > 19
-		else if (agility == 120) {
-			if (level <= 39) {
-				return 42;
-			}
-			else {
-				return 48;
-			}
-		}
-		else if (agility <= 125) {
-			if (level <= 39) {
-				return 42;
-			}
-			else {
-				return 49;
-			}
-		}
-		else if (agility <= 135) {
-			if (level <= 39) {
-				return 42;
-			}
-			else {
-				return 50;
-			}
-		}
-		else {
-			if (level <= 39) {
-				return 42;
-			}
-			else {
-				return 51;
-			}
-		}
-	}
-	else if (agility <= 300) {
-		if (level <= 6) {
-			if (agility <= 139) {
-				return (21);
-			}
-			else if (agility == 140) {
-				return (22);
-			}
-			else if (agility <= 145) {
-				return (23);
-			}
-			else if (agility <= 150) {
-				return (23);
-			}
-			else if (agility <= 155) {
-				return (24);
-			}
-			else if (agility <= 159) {
-				return (25);
-			}
-			else if (agility == 160) {
-				return (26);
-			}
-			else if (agility <= 165) {
-				return (26);
-			}
-			else if (agility <= 170) {
-				return (27);
-			}
-			else if (agility <= 175) {
-				return (28);
-			}
-			else if (agility <= 179) {
-				return (28);
-			}
-			else if (agility == 180) {
-				return (29);
-			}
-			else if (agility <= 185) {
-				return (30);
-			}
-			else if (agility <= 190) {
-				return (31);
-			}
-			else if (agility <= 195) {
-				return (31);
-			}
-			else if (agility <= 199) {
-				return (32);
-			}
-			else if (agility <= 219) {
-				return (33);
-			}
-			else if (agility <= 239) {
-				return (34);
-			}
-			else {
-				return (35);
-			}
-		}
-		else if (level <= 19) {
-			if (agility <= 139) {
-				return (34);
-			}
-			else if (agility == 140) {
-				return (35);
-			}
-			else if (agility <= 145) {
-				return (36);
-			}
-			else if (agility <= 150) {
-				return (37);
-			}
-			else if (agility <= 155) {
-				return (37);
-			}
-			else if (agility <= 159) {
-				return (38);
-			}
-			else if (agility == 160) {
-				return (39);
-			}
-			else if (agility <= 165) {
-				return (40);
-			}
-			else if (agility <= 170) {
-				return (40);
-			}
-			else if (agility <= 175) {
-				return (41);
-			}
-			else if (agility <= 179) {
-				return (42);
-			}
-			else if (agility == 180) {
-				return (43);
-			}
-			else if (agility <= 185) {
-				return (43);
-			}
-			else if (agility <= 190) {
-				return (44);
-			}
-			else if (agility <= 195) {
-				return (45);
-			}
-			else if (agility <= 199) {
-				return (45);
-			}
-			else if (agility <= 219) {
-				return (46);
-			}
-			else if (agility <= 239) {
-				return (47);
-			}
-			else {
-				return (48);
-			}
-		}
-		else if (level <= 39) {
-			if (agility <= 139) {
-				return (44);
-			}
-			else if (agility == 140) {
-				return (45);
-			}
-			else if (agility <= 145) {
-				return (46);
-			}
-			else if (agility <= 150) {
-				return (47);
-			}
-			else if (agility <= 155) {
-				return (47);
-			}
-			else if (agility <= 159) {
-				return (48);
-			}
-			else if (agility == 160) {
-				return (49);
-			}
-			else if (agility <= 165) {
-				return (50);
-			}
-			else if (agility <= 170) {
-				return (50);
-			}
-			else if (agility <= 175) {
-				return (51);
-			}
-			else if (agility <= 179) {
-				return (52);
-			}
-			else if (agility == 180) {
-				return (53);
-			}
-			else if (agility <= 185) {
-				return (53);
-			}
-			else if (agility <= 190) {
-				return (54);
-			}
-			else if (agility <= 195) {
-				return (55);
-			}
-			else if (agility <= 199) {
-				return (55);
-			}
-			else if (agility <= 219) {
-				return (56);
-			}
-			else if (agility <= 239) {
-				return (57);
-			}
-			else {
-				return (58);
-			}
-		}
-		else {	//lvl >= 40
-			if (agility <= 139) {
-				return (51);
-			}
-			else if (agility == 140) {
-				return (52);
-			}
-			else if (agility <= 145) {
-				return (53);
-			}
-			else if (agility <= 150) {
-				return (53);
-			}
-			else if (agility <= 155) {
-				return (54);
-			}
-			else if (agility <= 159) {
-				return (55);
-			}
-			else if (agility == 160) {
-				return (56);
-			}
-			else if (agility <= 165) {
-				return (56);
-			}
-			else if (agility <= 170) {
-				return (57);
-			}
-			else if (agility <= 175) {
-				return (58);
-			}
-			else if (agility <= 179) {
-				return (58);
-			}
-			else if (agility == 180) {
-				return (59);
-			}
-			else if (agility <= 185) {
-				return (60);
-			}
-			else if (agility <= 190) {
-				return (61);
-			}
-			else if (agility <= 195) {
-				return (61);
-			}
-			else if (agility <= 199) {
-				return (62);
-			}
-			else if (agility <= 219) {
-				return (63);
-			}
-			else if (agility <= 239) {
-				return (64);
-			}
-			else {
-				return (65);
-			}
-		}
-	}
-	else {
-		//seems about 21 agil per extra AC pt over 300...
-		return (65 + ((agility - 300) / 21));
-	}
-	Log(Logs::Detail, Logs::Error, "Error in Client::acmod(): Agility: %i, Level: %i", agility, level);
-	return 0;
-};
 
 int32 Client::CalcMaxMana()
 {

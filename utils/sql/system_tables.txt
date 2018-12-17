@@ -60,9 +60,11 @@ merc_types
 merc_weaponinfo
 merchantlist
 mercs
+name_filter
 npc_emotes
 npc_faction
 npc_faction_entries
+npc_scale_global_base
 npc_spells
 npc_spells_effects
 npc_spells_effects_entries

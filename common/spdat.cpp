@@ -1122,6 +1122,20 @@ bool IsStackableDot(uint16 spell_id)
 	return IsEffectInSpell(spell_id, SE_CurrentHP) || IsEffectInSpell(spell_id, SE_GravityEffect);
 }
 
+bool IsBardOnlyStackEffect(int effect)
+{
+	switch(effect) {
+	case SE_CurrentMana:
+	case SE_ManaRegen_v2:
+	case SE_CurrentHP:
+	case SE_HealOverTime:
+	case SE_BardAEDot:
+		return true;
+	default:
+		return false;
+	}
+}
+
 bool IsCastWhileInvis(uint16 spell_id)
 {
 	if (!IsValidSpell(spell_id))
