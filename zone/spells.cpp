@@ -3021,6 +3021,10 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		if(effect1 != effect2)
 			continue;
 
+		if (IsBardOnlyStackEffect(effect1) && GetSpellLevel(spellid1, BARD) != 255 &&
+		    GetSpellLevel(spellid2, BARD) != 255)
+			continue;
+
 		// big ol' list according to the client, wasn't that nice!
 		if (IsEffectIgnoredInStacking(effect1))
 			continue;

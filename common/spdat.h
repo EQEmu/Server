@@ -968,6 +968,7 @@ uint32 GetPartialMeleeRuneAmount(uint32 spell_id);
 uint32 GetPartialMagicRuneAmount(uint32 spell_id);
 bool NoDetrimentalSpellAggro(uint16 spell_id);
 bool IsStackableDot(uint16 spell_id);
+bool IsBardOnlyStackEffect(int effect);
 bool IsCastWhileInvis(uint16 spell_id);
 bool IsEffectIgnoredInStacking(int spa);
 
