@@ -112,7 +112,7 @@ void EQEmuLogSys::LoadLogSettingsDefaults()
 	 * Get Executable platform currently running this code (Zone/World/etc)
 	 */
 	log_platform = GetExecutablePlatformInt();
-
+	
 	for (int log_category_id = Logs::AA; log_category_id != Logs::MaxCategoryID; log_category_id++) {
 		log_settings[log_category_id].log_to_console      = 0;
 		log_settings[log_category_id].log_to_file         = 0;
@@ -121,11 +121,6 @@ void EQEmuLogSys::LoadLogSettingsDefaults()
 	}
 
 	file_logs_enabled = false;
-
-	/**
-	 * Zero out Array
-	 */
-	memset(log_settings, 0, sizeof(LogSettings) * Logs::LogCategory::MaxCategoryID);
 
 	/**
 	 * Set Defaults
@@ -138,17 +133,20 @@ void EQEmuLogSys::LoadLogSettingsDefaults()
 	log_settings[Logs::MySQLError].log_to_console      = Logs::General;
 	log_settings[Logs::Login_Server].log_to_console    = Logs::General;
 	log_settings[Logs::Headless_Client].log_to_console = Logs::General;
+	log_settings[Logs::NPCScaling].log_to_gmsay        = Logs::General;
 
 	/**
 	 * Set Category enabled status on defaults
 	 */
-	log_settings[Logs::World_Server].is_category_enabled = 1;
-	log_settings[Logs::Zone_Server].is_category_enabled  = 1;
-	log_settings[Logs::QS_Server].is_category_enabled    = 1;
-	log_settings[Logs::UCS_Server].is_category_enabled   = 1;
-	log_settings[Logs::Crash].is_category_enabled        = 1;
-	log_settings[Logs::MySQLError].is_category_enabled   = 1;
-	log_settings[Logs::Login_Server].is_category_enabled = 1;
+	for (int log_category_id = Logs::AA; log_category_id != Logs::MaxCategoryID; log_category_id++) {
+		const bool log_to_console      = log_settings[log_category_id].log_to_console > 0;
+		const bool log_to_file         = log_settings[log_category_id].log_to_file > 0;
+		const bool log_to_gmsay        = log_settings[log_category_id].log_to_gmsay > 0;
+		const bool is_category_enabled = log_to_console || log_to_file || log_to_gmsay;
+		if (is_category_enabled) {
+			log_settings[log_category_id].is_category_enabled = 1;
+		}
+	}
 
 	/**
 	 * Declare process file names for log writing=

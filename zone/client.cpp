@@ -38,6 +38,7 @@ extern volatile bool RunLoops;
 #include "../common/rulesys.h"
 #include "../common/string_util.h"
 #include "../common/data_verification.h"
+#include "data_bucket.h"
 #include "position.h"
 #include "net.h"
 #include "worldserver.h"
@@ -254,7 +255,6 @@ Client::Client(EQStreamInterface* ieqs)
 	InitializeMercInfo();
 	SetMerc(0);
 	if (RuleI(World, PVPMinLevel) > 0 && level >= RuleI(World, PVPMinLevel) && m_pp.pvp == 0) SetPVP(true, false);
-	logging_enabled = CLIENT_DEFAULT_LOGGING_ENABLED;
 
 	//for good measure:
 	memset(&m_pp, 0, sizeof(m_pp));
@@ -344,6 +344,12 @@ Client::Client(EQStreamInterface* ieqs)
 
 	temp_pvp = false;
 	is_client_moving = false;
+
+	/**
+	 * GM
+	 */
+	display_mob_info_window  = true;
+	dev_tools_window_enabled = true;
 
 #ifdef BOTS
 	bot_owner_options = DefaultBotOwnerOptions;
@@ -1657,7 +1663,6 @@ void Client::FriendsWho(char *FriendsString) {
 		safe_delete(pack);
 	}
 }
-
 
 void Client::UpdateAdmin(bool iFromDB) {
 	int16 tmp = admin;
@@ -4041,9 +4046,9 @@ void Client::SetHoTT(uint32 mobid) {
 
 void Client::SendPopupToClient(const char *Title, const char *Text, uint32 PopupID, uint32 Buttons, uint32 Duration)
 {
-
 	auto outapp = new EQApplicationPacket(OP_OnLevelMessage, sizeof(OnLevelMessage_Struct));
-	OnLevelMessage_Struct *olms = (OnLevelMessage_Struct *)outapp->pBuffer;
+
+	OnLevelMessage_Struct *olms = (OnLevelMessage_Struct *) outapp->pBuffer;
 
 	if ((strlen(Title) > (sizeof(olms->Title) - 1)) || (strlen(Text) > (sizeof(olms->Text) - 1))) {
 		safe_delete(outapp);
@@ -4055,12 +4060,14 @@ void Client::SendPopupToClient(const char *Title, const char *Text, uint32 Popup
 
 	olms->Buttons = Buttons;
 
-	if (Duration > 0)
+	if (Duration > 0) {
 		olms->Duration = Duration * 1000;
-	else
+	}
+	else {
 		olms->Duration = 0xffffffff;
+	}
 
-	olms->PopupID = PopupID;
+	olms->PopupID    = PopupID;
 	olms->NegativeID = 0;
 
 	sprintf(olms->ButtonName0, "%s", "Yes");
@@ -4069,16 +4076,29 @@ void Client::SendPopupToClient(const char *Title, const char *Text, uint32 Popup
 	safe_delete(outapp);
 }
 
-void Client::SendFullPopup(const char *Title, const char *Text, uint32 PopupID, uint32 NegativeID, uint32 Buttons, uint32 Duration, const char *ButtonName0, const char *ButtonName1, uint32 SoundControls) {
+void Client::SendFullPopup(
+	const char *Title,
+	const char *Text,
+	uint32 PopupID,
+	uint32 NegativeID,
+	uint32 Buttons,
+	uint32 Duration,
+	const char *ButtonName0,
+	const char *ButtonName1,
+	uint32 SoundControls
+)
+{
 	auto outapp = new EQApplicationPacket(OP_OnLevelMessage, sizeof(OnLevelMessage_Struct));
-	OnLevelMessage_Struct *olms = (OnLevelMessage_Struct *)outapp->pBuffer;
 
-	if((strlen(Text) > (sizeof(olms->Text)-1)) || (strlen(Title) > (sizeof(olms->Title) - 1)) ) {
+	OnLevelMessage_Struct *olms = (OnLevelMessage_Struct *) outapp->pBuffer;
+
+	if ((strlen(Text) > (sizeof(olms->Text) - 1)) || (strlen(Title) > (sizeof(olms->Title) - 1))) {
 		safe_delete(outapp);
 		return;
 	}
 
-	if (ButtonName0 && ButtonName1 && ( (strlen(ButtonName0) > (sizeof(olms->ButtonName0) - 1)) || (strlen(ButtonName1) > (sizeof(olms->ButtonName1) - 1)) ) ) {
+	if (ButtonName0 && ButtonName1 && ((strlen(ButtonName0) > (sizeof(olms->ButtonName0) - 1)) ||
+									   (strlen(ButtonName1) > (sizeof(olms->ButtonName1) - 1)))) {
 		safe_delete(outapp);
 		return;
 	}
@@ -4087,31 +4107,47 @@ void Client::SendFullPopup(const char *Title, const char *Text, uint32 PopupID, 
 	strcpy(olms->Text, Text);
 
 	olms->Buttons = Buttons;
-	
-	if (ButtonName0 == NULL || ButtonName1 == NULL) {
+
+	if (ButtonName0 == nullptr || ButtonName1 == nullptr) {
 		sprintf(olms->ButtonName0, "%s", "Yes");
 		sprintf(olms->ButtonName1, "%s", "No");
-	} else {
+	}
+	else {
 		strcpy(olms->ButtonName0, ButtonName0);
 		strcpy(olms->ButtonName1, ButtonName1);
 	}
 
-	if(Duration > 0)
+	if (Duration > 0) {
 		olms->Duration = Duration * 1000;
-	else
+	}
+	else {
 		olms->Duration = 0xffffffff;
+	}
 
-	olms->PopupID = PopupID;
-	olms->NegativeID = NegativeID;
+	olms->PopupID       = PopupID;
+	olms->NegativeID    = NegativeID;
 	olms->SoundControls = SoundControls;
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
 }
 
-void Client::SendWindow(uint32 PopupID, uint32 NegativeID, uint32 Buttons, const char *ButtonName0, const char *ButtonName1, uint32 Duration, int title_type, Client* target, const char *Title, const char *Text, ...) {
+void Client::SendWindow(
+	uint32 PopupID,
+	uint32 NegativeID,
+	uint32 Buttons,
+	const char *ButtonName0,
+	const char *ButtonName1,
+	uint32 Duration,
+	int title_type,
+	Client *target,
+	const char *Title,
+	const char *Text,
+	...
+)
+{
 	va_list argptr;
-	char buffer[4096];
+	char    buffer[4096];
 
 	va_start(argptr, Text);
 	vsnprintf(buffer, sizeof(buffer), Text, argptr);
@@ -4119,23 +4155,23 @@ void Client::SendWindow(uint32 PopupID, uint32 NegativeID, uint32 Buttons, const
 
 	size_t len = strlen(buffer);
 
-	auto app = new EQApplicationPacket(OP_OnLevelMessage, sizeof(OnLevelMessage_Struct));
-	OnLevelMessage_Struct* olms=(OnLevelMessage_Struct*)app->pBuffer;
+	auto                  app   = new EQApplicationPacket(OP_OnLevelMessage, sizeof(OnLevelMessage_Struct));
+	OnLevelMessage_Struct *olms = (OnLevelMessage_Struct *) app->pBuffer;
 
-	if(strlen(Text) > (sizeof(olms->Text)-1)) {
+	if (strlen(Text) > (sizeof(olms->Text) - 1)) {
 		safe_delete(app);
 		return;
 	}
 
-	if(!target)
+	if (!target) {
 		title_type = 0;
+	}
 
-	switch (title_type)
-	{
+	switch (title_type) {
 		case 1: {
 			char name[64] = "";
 			strcpy(name, target->GetName());
-			if(target->GetLastName()) {
+			if (target->GetLastName()) {
 				char last_name[64] = "";
 				strcpy(last_name, target->GetLastName());
 				strcat(name, " ");
@@ -4145,8 +4181,8 @@ void Client::SendWindow(uint32 PopupID, uint32 NegativeID, uint32 Buttons, const
 			break;
 		}
 		case 2: {
-			if(target->GuildID()) {
-				char *guild_name = (char*)guild_mgr.GetGuildName(target->GuildID());
+			if (target->GuildID()) {
+				char *guild_name = (char *) guild_mgr.GetGuildName(target->GuildID());
 				strcpy(olms->Title, guild_name);
 			}
 			else {
@@ -4160,19 +4196,21 @@ void Client::SendWindow(uint32 PopupID, uint32 NegativeID, uint32 Buttons, const
 		}
 	}
 
-	memcpy(olms->Text, buffer, len+1);
+	memcpy(olms->Text, buffer, len + 1);
 
 	olms->Buttons = Buttons;
 
 	sprintf(olms->ButtonName0, "%s", ButtonName0);
 	sprintf(olms->ButtonName1, "%s", ButtonName1);
 
-	if(Duration > 0)
+	if (Duration > 0) {
 		olms->Duration = Duration * 1000;
-	else
+	}
+	else {
 		olms->Duration = 0xffffffff;
+	}
 
-	olms->PopupID = PopupID;
+	olms->PopupID    = PopupID;
 	olms->NegativeID = NegativeID;
 
 	FastQueuePacket(&app);
@@ -6679,30 +6717,13 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 	std::string class_Name = itoa(GetClass());
 	std::string class_List[] = { "WAR", "CLR", "PAL", "RNG", "SHD", "DRU", "MNK", "BRD", "ROG", "SHM", "NEC", "WIZ", "MAG", "ENC", "BST", "BER" };
 
-	if(GetClass() < 17 && GetClass() > 0) { class_Name = class_List[GetClass()-1]; }
+	if (GetClass() < 17 && GetClass() > 0) {
+		class_Name = class_List[GetClass() - 1];
+	}
 
 	// Race
-	std::string race_Name = itoa(GetRace());
-	switch(GetRace())
-	{
-		case 1: race_Name = "Human";		break;
-		case 2:	race_Name = "Barbarian";	break;
-		case 3:	race_Name = "Erudite";		break;
-		case 4:	race_Name = "Wood Elf";		break;
-		case 5:	race_Name = "High Elf";		break;
-		case 6:	race_Name = "Dark Elf";		break;
-		case 7:	race_Name = "Half Elf";		break;
-		case 8:	race_Name = "Dwarf";		break;
-		case 9:	race_Name = "Troll";		break;
-		case 10: race_Name = "Ogre";		break;
-		case 11: race_Name = "Halfing";		break;
-		case 12: race_Name = "Gnome";		break;
-		case 128: race_Name = "Iksar";		break;
-		case 130: race_Name = "Vah Shir";	break;
-		case 330: race_Name = "Froglok";	break;
-		case 522: race_Name = "Drakkin";	break;
-		default: break;
-	}
+	std::string race_name = GetRaceIDName(GetRace());
+
 	/*##########################################################
 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 		H/M/E String
@@ -7131,7 +7152,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 
 	std::ostringstream final_string;
 					final_string <<
-	/*	C/L/R	*/	indP << "Class: " << class_Name << indS << "Level: " << static_cast<int>(GetLevel()) << indS << "Race: " << race_Name << "<br>" <<
+	/*	C/L/R	*/	indP << "Class: " << class_Name << indS << "Level: " << static_cast<int>(GetLevel()) << indS << "Race: " << race_name << "<br>" <<
 	/*	Runes	*/	indP << "Rune: " << rune_number << indL << indS << "Spell Rune: " << magic_rune_number << "<br>" <<
 	/*	HP/M/E	*/	HME_row <<
 	/*	DS		*/	indP << "DS: " << (itembonuses.DamageShield + spellbonuses.DamageShield*-1) << " (Spell: " << (spellbonuses.DamageShield*-1) << " + Item: " << itembonuses.DamageShield << " / " << RuleI(Character, ItemDamageShieldCap) << ")<br>" <<
@@ -9315,3 +9336,22 @@ void Client::InitInnates()
 	}
 }
 
+bool Client::GetDisplayMobInfoWindow() const
+{
+	return display_mob_info_window;
+}
+
+void Client::SetDisplayMobInfoWindow(bool display_mob_info_window)
+{
+	Client::display_mob_info_window = display_mob_info_window;
+}
+
+bool Client::IsDevToolsWindowEnabled() const
+{
+	return dev_tools_window_enabled;
+}
+
+void Client::SetDevToolsWindowEnabled(bool in_dev_tools_window_enabled)
+{
+	Client::dev_tools_window_enabled = in_dev_tools_window_enabled;
+}

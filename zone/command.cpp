@@ -55,7 +55,7 @@
 #include "../say_link.h"
 #include "../common/eqemu_logsys.h"
 
-
+#include "data_bucket.h"
 #include "command.h"
 #include "guild_mgr.h"
 #include "map.h"
@@ -67,6 +67,7 @@
 #include "water_map.h"
 #include "worldserver.h"
 #include "fastmath.h"
+#include "npc_scale_manager.h"
 
 extern QueryServ* QServ;
 extern WorldServer worldserver;
@@ -184,6 +185,7 @@ int command_init(void)
 		command_add("delpetition", "[petition number] - Delete a petition", 20, command_delpetition) ||
 		command_add("depop", "- Depop your NPC target", 50, command_depop) ||
 		command_add("depopzone", "- Depop the zone", 100, command_depopzone) ||
+		command_add("devtools", "- Manages devtools", 200, command_devtools) ||
 		command_add("details", "- Change the details of your target (Drakkin Only)", 80, command_details) ||
 		command_add("disablerecipe",  "[recipe_id] - Disables a recipe using the recipe id.",  80, command_disablerecipe) ||
 		command_add("disarmtrap",  "Analog for ldon disarm trap for the newer clients since we still don't have it working.", 80, command_disarmtrap) ||
@@ -249,6 +251,7 @@ int command_init(void)
 		command_add("lastname", "[new lastname] - Set your or your player target's lastname", 50, command_lastname) ||
 		command_add("level", "[level] - Set your or your target's level", 10, command_level) ||
 		command_add("listnpcs", "[name/range] - Search NPCs", 20, command_listnpcs) ||
+		command_add("list", "[npcs|players|corpses|doors|objects] [search] - Search entities", 20, command_list) ||
 		command_add("listpetition", "- List petitions", 50, command_listpetition) ||
 		command_add("load_shared_memory", "[shared_memory_name] - Reloads shared memory and uses the input as output", 250, command_load_shared_memory) ||
 		command_add("loc", "- Print out your or your target's current location and heading", 0, command_loc) ||
@@ -334,6 +337,7 @@ int command_init(void)
 		command_add("revoke", "[charname] [1/0] - Makes charname unable to talk on OOC", 200, command_revoke) ||
 		command_add("rules", "(subcommand) - Manage server rules", 250, command_rules) ||
 		command_add("save", "- Force your player or player corpse target to be saved to the database", 50, command_save) ||
+		command_add("scale", "- Handles npc scaling", 150, command_scale) ||
 		command_add("scribespell", "[spellid] - Scribe specified spell in your target's spell book.", 180, command_scribespell) ||
 		command_add("scribespells", "[max level] [min level] - Scribe all spells for you or your player target that are usable by them, up to level specified. (may freeze client for a few seconds)", 150, command_scribespells) ||
 		command_add("sendzonespawns", "- Refresh spawn list for all clients in zone", 150, command_sendzonespawns) ||
@@ -1328,16 +1332,266 @@ void command_delpetition(Client *c, const Seperator *sep)
 
 void command_listnpcs(Client *c, const Seperator *sep)
 {
-	if (strcasecmp(sep->arg[1], "all") == 0)
-		entity_list.ListNPCs(c,sep->arg[1],sep->arg[2],0);
-	else if(sep->IsNumber(1) && sep->IsNumber(2))
-		entity_list.ListNPCs(c,sep->arg[1],sep->arg[2],2);
-	else if(sep->arg[1][0] != 0)
-		entity_list.ListNPCs(c,sep->arg[1],sep->arg[2],1);
+	c->Message(0, "Deprecated, use the #list command (#list npcs <search>)");
+}
+
+void command_list(Client *c, const Seperator *sep)
+{
+	std::string search_type;
+	if (strcasecmp(sep->arg[1], "npcs") == 0) {
+		search_type = "npcs";
+	}
+
+	if (strcasecmp(sep->arg[1], "players") == 0) {
+		search_type = "players";
+	}
+
+	if (strcasecmp(sep->arg[1], "corpses") == 0) {
+		search_type = "corpses";
+	}
+
+	if (strcasecmp(sep->arg[1], "doors") == 0) {
+		search_type = "doors";
+	}
+
+	if (strcasecmp(sep->arg[1], "objects") == 0) {
+		search_type = "objects";
+	}
+
+	if (search_type.length() > 0) {
+
+		int entity_count = 0;
+		int found_count  = 0;
+
+		std::string search_string;
+
+		if (sep->arg[2]) {
+			search_string = sep->arg[2];
+		}
+
+		/**
+		 * NPC
+		 */
+		if (search_type.find("npcs") != std::string::npos) {
+			auto &entity_list_search = entity_list.GetMobList();
+
+			for (auto &itr : entity_list_search) {
+				Mob *entity = itr.second;
+				if (!entity->IsNPC()) {
+					continue;
+				}
+
+				entity_count++;
+
+				std::string entity_name = entity->GetName();
+
+				/**
+				 * Filter by name
+				 */
+				if (search_string.length() > 0 && entity_name.find(search_string) == std::string::npos) {
+					continue;
+				}
+
+				std::string saylink = StringFormat(
+					"#goto %.0f %0.f %.0f",
+					entity->GetX(),
+					entity->GetY(),
+					entity->GetZ());
+
+				c->Message(
+					0,
+					"| %s | ID %5d | %s | x %.0f | y %0.f | z %.0f",
+					EQEmu::SayLinkEngine::GenerateQuestSaylink(saylink, false, "Goto").c_str(),
+					entity->GetID(),
+					entity->GetName(),
+					entity->GetX(),
+					entity->GetY(),
+					entity->GetZ()
+				);
+
+				found_count++;
+			}
+		}
+
+		/**
+		 * Client
+		 */
+		if (search_type.find("players") != std::string::npos) {
+			auto &entity_list_search = entity_list.GetClientList();
+
+			for (auto &itr : entity_list_search) {
+				Client *entity = itr.second;
+
+				entity_count++;
+
+				std::string entity_name = entity->GetName();
+
+				/**
+				 * Filter by name
+				 */
+				if (search_string.length() > 0 && entity_name.find(search_string) == std::string::npos) {
+					continue;
+				}
+
+				std::string saylink = StringFormat(
+					"#goto %.0f %0.f %.0f",
+					entity->GetX(),
+					entity->GetY(),
+					entity->GetZ());
+
+				c->Message(
+					0,
+					"| %s | ID %5d | %s | x %.0f | y %0.f | z %.0f",
+					EQEmu::SayLinkEngine::GenerateQuestSaylink(saylink, false, "Goto").c_str(),
+					entity->GetID(),
+					entity->GetName(),
+					entity->GetX(),
+					entity->GetY(),
+					entity->GetZ()
+				);
+
+				found_count++;
+			}
+		}
+
+		/**
+		 * Corpse
+		 */
+		if (search_type.find("corpses") != std::string::npos) {
+			auto &entity_list_search = entity_list.GetCorpseList();
+
+			for (auto &itr : entity_list_search) {
+				Corpse *entity = itr.second;
+
+				entity_count++;
+
+				std::string entity_name = entity->GetName();
+
+				/**
+				 * Filter by name
+				 */
+				if (search_string.length() > 0 && entity_name.find(search_string) == std::string::npos) {
+					continue;
+				}
+
+				std::string saylink = StringFormat(
+					"#goto %.0f %0.f %.0f",
+					entity->GetX(),
+					entity->GetY(),
+					entity->GetZ());
+
+				c->Message(
+					0,
+					"| %s | ID %5d | %s | x %.0f | y %0.f | z %.0f",
+					EQEmu::SayLinkEngine::GenerateQuestSaylink(saylink, false, "Goto").c_str(),
+					entity->GetID(),
+					entity->GetName(),
+					entity->GetX(),
+					entity->GetY(),
+					entity->GetZ()
+				);
+
+				found_count++;
+			}
+		}
+
+		/**
+		 * Doors
+		 */
+		if (search_type.find("doors") != std::string::npos) {
+			auto &entity_list_search = entity_list.GetDoorsList();
+
+			for (auto &itr : entity_list_search) {
+				Doors * entity = itr.second;
+
+				entity_count++;
+
+				std::string entity_name = entity->GetDoorName();
+
+				/**
+				 * Filter by name
+				 */
+				if (search_string.length() > 0 && entity_name.find(search_string) == std::string::npos) {
+					continue;
+				}
+
+				std::string saylink = StringFormat(
+					"#goto %.0f %0.f %.0f",
+					entity->GetX(),
+					entity->GetY(),
+					entity->GetZ());
+
+				c->Message(
+					0,
+					"| %s | Entity ID %5d | Door ID %i | %s | x %.0f | y %0.f | z %.0f",
+					EQEmu::SayLinkEngine::GenerateQuestSaylink(saylink, false, "Goto").c_str(),
+					entity->GetID(),
+					entity->GetDoorID(),
+					entity->GetDoorName(),
+					entity->GetX(),
+					entity->GetY(),
+					entity->GetZ()
+				);
+
+				found_count++;
+			}
+		}
+
+		/**
+		 * Objects
+		 */
+		if (search_type.find("objects") != std::string::npos) {
+			auto &entity_list_search = entity_list.GetObjectList();
+
+			for (auto &itr : entity_list_search) {
+				Object * entity = itr.second;
+
+				entity_count++;
+
+				std::string entity_name = entity->GetModelName();
+
+				/**
+				 * Filter by name
+				 */
+				if (search_string.length() > 0 && entity_name.find(search_string) == std::string::npos) {
+					continue;
+				}
+
+				std::string saylink = StringFormat(
+					"#goto %.0f %0.f %.0f",
+					entity->GetX(),
+					entity->GetY(),
+					entity->GetZ());
+
+				c->Message(
+					0,
+					"| %s | Entity ID %5d | Object DBID %i | %s | x %.0f | y %0.f | z %.0f",
+					EQEmu::SayLinkEngine::GenerateQuestSaylink(saylink, false, "Goto").c_str(),
+					entity->GetID(),
+					entity->GetDBID(),
+					entity->GetModelName(),
+					entity->GetX(),
+					entity->GetY(),
+					entity->GetZ()
+				);
+
+				found_count++;
+			}
+		}
+
+		if (found_count) {
+			c->Message(
+				0, "Found (%i) of type (%s) in zone (%i) total",
+				found_count,
+				search_type.c_str(),
+				entity_count
+			);
+		}
+	}
 	else {
-		c->Message(0, "Usage of #listnpcs:");
-		c->Message(0, "#listnpcs [#] [#] (Each number would search by ID, ex. #listnpcs 1 30, searches 1-30)");
-		c->Message(0, "#listnpcs [name] (Would search for a npc with [name])");
+		c->Message(0, "Usage of #list");
+		c->Message(0, "- #list [npcs|players|corpses|doors|objects] [search]");
+		c->Message(0, "- Example: #list npc (Blank for all)");
 	}
 }
 
@@ -1460,24 +1714,24 @@ void command_npcstats(Client *c, const Seperator *sep)
 		c->Message(0, "ERROR: Target is not a NPC!");
 	else {
 		auto target_npc = c->GetTarget()->CastToNPC();
-		c->Message(0, "NPC Stats:");
-		c->Message(0, "Name: %s   NpcID: %u", target_npc->GetName(), target_npc->GetNPCTypeID());
-		c->Message(0, "Race: %i  Level: %i  Class: %i  Material: %i", target_npc->GetRace(), target_npc->GetLevel(), target_npc->GetClass(), target_npc->GetTexture());
-		c->Message(0, "Current HP: %i  Max HP: %i", target_npc->GetHP(), target_npc->GetMaxHP());
+		c->Message(0, "# NPC Stats");
+		c->Message(0, "- Name: %s   NpcID: %u", target_npc->GetName(), target_npc->GetNPCTypeID());
+		c->Message(0, "- Race: %i  Level: %i  Class: %i  Material: %i", target_npc->GetRace(), target_npc->GetLevel(), target_npc->GetClass(), target_npc->GetTexture());
+		c->Message(0, "- Current HP: %i  Max HP: %i", target_npc->GetHP(), target_npc->GetMaxHP());
 		//c->Message(0, "Weapon Item Number: %s", target_npc->GetWeapNo());
-		c->Message(0, "Gender: %i  Size: %f  Bodytype: %d", target_npc->GetGender(), target_npc->GetSize(), target_npc->GetBodyType());
-		c->Message(0, "Runspeed: %.3f  Walkspeed: %.3f", static_cast<float>(0.025f * target_npc->GetRunspeed()), static_cast<float>(0.025f * target_npc->GetWalkspeed()));
-		c->Message(0, "Spawn Group: %i  Grid: %i", target_npc->GetSp2(), target_npc->GetGrid());
+		c->Message(0, "- Gender: %i  Size: %f  Bodytype: %d", target_npc->GetGender(), target_npc->GetSize(), target_npc->GetBodyType());
+		c->Message(0, "- Runspeed: %.3f  Walkspeed: %.3f", static_cast<float>(0.025f * target_npc->GetRunspeed()), static_cast<float>(0.025f * target_npc->GetWalkspeed()));
+		c->Message(0, "- Spawn Group: %i  Grid: %i", target_npc->GetSp2(), target_npc->GetGrid());
 		if (target_npc->proximity) {
-			c->Message(0, "Proximity: Enabled");
-			c->Message(0, "Cur_X: %1.3f, Cur_Y: %1.3f, Cur_Z: %1.3f", target_npc->GetX(), target_npc->GetY(), target_npc->GetZ());
-			c->Message(0, "Min_X: %1.3f(%1.3f), Max_X: %1.3f(%1.3f), X_Range: %1.3f", target_npc->proximity->min_x, (target_npc->proximity->min_x - target_npc->GetX()), target_npc->proximity->max_x, (target_npc->proximity->max_x - target_npc->GetX()), (target_npc->proximity->max_x - target_npc->proximity->min_x));
-			c->Message(0, "Min_Y: %1.3f(%1.3f), Max_Y: %1.3f(%1.3f), Y_Range: %1.3f", target_npc->proximity->min_y, (target_npc->proximity->min_y - target_npc->GetY()), target_npc->proximity->max_y, (target_npc->proximity->max_y - target_npc->GetY()), (target_npc->proximity->max_y - target_npc->proximity->min_y));
-			c->Message(0, "Min_Z: %1.3f(%1.3f), Max_Z: %1.3f(%1.3f), Z_Range: %1.3f", target_npc->proximity->min_z, (target_npc->proximity->min_z - target_npc->GetZ()), target_npc->proximity->max_z, (target_npc->proximity->max_z - target_npc->GetZ()), (target_npc->proximity->max_z - target_npc->proximity->min_z));
-			c->Message(0, "Say: %s", (target_npc->proximity->say ? "Enabled" : "Disabled"));
+			c->Message(0, "- Proximity: Enabled");
+			c->Message(0, "-- Cur_X: %1.3f, Cur_Y: %1.3f, Cur_Z: %1.3f", target_npc->GetX(), target_npc->GetY(), target_npc->GetZ());
+			c->Message(0, "-- Min_X: %1.3f(%1.3f), Max_X: %1.3f(%1.3f), X_Range: %1.3f", target_npc->proximity->min_x, (target_npc->proximity->min_x - target_npc->GetX()), target_npc->proximity->max_x, (target_npc->proximity->max_x - target_npc->GetX()), (target_npc->proximity->max_x - target_npc->proximity->min_x));
+			c->Message(0, "-- Min_Y: %1.3f(%1.3f), Max_Y: %1.3f(%1.3f), Y_Range: %1.3f", target_npc->proximity->min_y, (target_npc->proximity->min_y - target_npc->GetY()), target_npc->proximity->max_y, (target_npc->proximity->max_y - target_npc->GetY()), (target_npc->proximity->max_y - target_npc->proximity->min_y));
+			c->Message(0, "-- Min_Z: %1.3f(%1.3f), Max_Z: %1.3f(%1.3f), Z_Range: %1.3f", target_npc->proximity->min_z, (target_npc->proximity->min_z - target_npc->GetZ()), target_npc->proximity->max_z, (target_npc->proximity->max_z - target_npc->GetZ()), (target_npc->proximity->max_z - target_npc->proximity->min_z));
+			c->Message(0, "-- Say: %s", (target_npc->proximity->say ? "Enabled" : "Disabled"));
 		}
 		else {
-			c->Message(0, "Proximity: Disabled");
+			c->Message(0, "-Proximity: Disabled");
 		}
 		c->Message(0, "");
 		c->Message(0, "EmoteID: %i", target_npc->GetEmoteID());
@@ -2024,12 +2278,12 @@ void command_grid(Client *c, const Seperator *sep)
 		}
 
 		std::string query = StringFormat(
-				"SELECT `x`, `y`, `z`, `heading`, `number`, `pause` "
-				"FROM `grid_entries` "
-				"WHERE `zoneid` = %u and `gridid` = %i "
-				"ORDER BY `number` ",
-				zone->GetZoneID(),
-				target->CastToNPC()->GetGrid()
+			"SELECT `x`, `y`, `z`, `heading`, `number`, `pause` "
+			"FROM `grid_entries` "
+			"WHERE `zoneid` = %u and `gridid` = %i "
+			"ORDER BY `number` ",
+			zone->GetZoneID(),
+			target->CastToNPC()->GetGrid()
 		);
 
 		auto results = database.QueryDatabase(query);
@@ -2046,11 +2300,12 @@ void command_grid(Client *c, const Seperator *sep)
 		/**
 		 * Depop any node npc's already spawned
 		 */
-		auto &mob_list = entity_list.GetMobList();
-		for (auto itr = mob_list.begin(); itr != mob_list.end(); ++itr) {
+		auto      &mob_list = entity_list.GetMobList();
+		for (auto itr       = mob_list.begin(); itr != mob_list.end(); ++itr) {
 			Mob *mob = itr->second;
-			if (mob->IsNPC() && mob->GetRace() == 2254)
+			if (mob->IsNPC() && mob->GetRace() == 2254) {
 				mob->Depop();
+			}
 		}
 
 		/**
@@ -2060,21 +2315,22 @@ void command_grid(Client *c, const Seperator *sep)
 			auto node_position = glm::vec4(atof(row[0]), atof(row[1]), atof(row[2]), atof(row[3]));
 
 			NPC *npc = NPC::SpawnGridNodeNPC(
-					target->GetCleanName(),
-					node_position,
-					static_cast<uint32>(target->CastToNPC()->GetGrid()),
-					static_cast<uint32>(atoi(row[4])),
-					static_cast<uint32>(atoi(row[5]))
+				target->GetCleanName(),
+				node_position,
+				static_cast<uint32>(target->CastToNPC()->GetGrid()),
+				static_cast<uint32>(atoi(row[4])),
+				static_cast<uint32>(atoi(row[5]))
 			);
 			npc->SetFlyMode(1);
 			npc->GMMove(node_position.x, node_position.y, node_position.z, node_position.w);
 		}
 	}
-	else if (strcasecmp("delete", sep->arg[1]) == 0)
-		database.ModifyGrid(c, true,atoi(sep->arg[2]),0,0,zone->GetZoneID());
+	else if (strcasecmp("delete", sep->arg[1]) == 0) {
+		database.ModifyGrid(c, true, atoi(sep->arg[2]), 0, 0, zone->GetZoneID());
+	}
 	else {
-		c->Message(0,"Usage: #grid add/delete grid_num wandertype pausetype");
-		c->Message(0,"Usage: #grid max - displays the highest grid ID used in this zone (for add)");
+		c->Message(0, "Usage: #grid add/delete grid_num wandertype pausetype");
+		c->Message(0, "Usage: #grid max - displays the highest grid ID used in this zone (for add)");
 	}
 }
 
@@ -4343,6 +4599,49 @@ void command_depopzone(Client *c, const Seperator *sep)
 {
 	zone->Depop();
 	c->Message(0, "Zone depoped.");
+}
+
+void command_devtools(Client *c, const Seperator *sep)
+{
+	std::string menu_commands_search;
+	std::string window_toggle_command;
+
+	/**
+	 * Search entity commands
+	 */
+	menu_commands_search += "[" + EQEmu::SayLinkEngine::GenerateQuestSaylink("#list npcs", false, "NPC") + "] ";
+	menu_commands_search += "[" + EQEmu::SayLinkEngine::GenerateQuestSaylink("#list players", false, "Players") + "] ";
+	menu_commands_search += "[" + EQEmu::SayLinkEngine::GenerateQuestSaylink("#list corpses", false, "Corpses") + "] ";
+	menu_commands_search += "[" + EQEmu::SayLinkEngine::GenerateQuestSaylink("#list doors", false, "Doors") + "] ";
+	menu_commands_search += "[" + EQEmu::SayLinkEngine::GenerateQuestSaylink("#list objects", false, "Objects") + "] ";
+
+	std::string dev_tools_window_key = StringFormat("%i-dev-tools-window-disabled", c->AccountID());
+
+	/**
+	 * Handle window toggle
+	 */
+	if (strcasecmp(sep->arg[1], "disable_window") == 0) {
+		DataBucket::SetData(dev_tools_window_key, "true");
+		c->SetDevToolsWindowEnabled(false);
+	}
+	if (strcasecmp(sep->arg[1], "enable_window") == 0) {
+		DataBucket::DeleteData(dev_tools_window_key);
+		c->SetDevToolsWindowEnabled(true);
+	}
+
+	/**
+	 * Show window status
+	 */
+	window_toggle_command = "Disabled [" + EQEmu::SayLinkEngine::GenerateQuestSaylink("#devtools enable_window", false, "Enable") + "] ";
+	if (c->IsDevToolsWindowEnabled()) {
+		window_toggle_command = "Enabled [" + EQEmu::SayLinkEngine::GenerateQuestSaylink("#devtools disable_window", false, "Disable") + "] ";
+	}
+
+	/**
+	 * Print menu
+	 */
+	c->Message(0, "| [Devtools] Window %s", window_toggle_command.c_str());
+	c->Message(0, "| [Devtools] Search %s", menu_commands_search.c_str());
 }
 
 void command_repop(Client *c, const Seperator *sep)
@@ -11145,6 +11444,133 @@ void command_reloadtraps(Client *c, const Seperator *sep)
 {
 	entity_list.UpdateAllTraps(true, true);
 	c->Message(CC_Default, "Traps reloaded for %s.", zone->GetShortName());
+}
+
+void command_scale(Client *c, const Seperator *sep)
+{
+	if (sep->argnum == 0) {
+		c->Message(15, "# Usage # ");
+		c->Message(15, "#scale [static/dynamic] (With targeted NPC)");
+		c->Message(15, "#scale [npc_name_search] [static/dynamic] (To make zone-wide changes)");
+		c->Message(15, "#scale all [static/dynamic]");
+		return;
+	}
+
+	/**
+	 * Targeted changes
+	 */
+	if (c->GetTarget() && c->GetTarget()->IsNPC() && sep->argnum < 2) {
+		NPC * npc = c->GetTarget()->CastToNPC();
+
+		bool apply_status = false;
+		if (strcasecmp(sep->arg[1], "dynamic") == 0) {
+			c->Message(15, "Applying global base scaling to npc dynamically (All stats set to zeroes)...");
+			apply_status = npc_scale_manager->ApplyGlobalBaseScalingToNPCDynamically(npc);
+		}
+		else if (strcasecmp(sep->arg[1], "static") == 0) {
+			c->Message(15, "Applying global base scaling to npc statically (Copying base stats onto NPC)...");
+			apply_status = npc_scale_manager->ApplyGlobalBaseScalingToNPCStatically(npc);
+		}
+		else {
+			return;
+		}
+
+		if (apply_status) {
+			c->Message(15, "Applied to NPC '%s' successfully!", npc->GetName());
+		}
+		else {
+			c->Message(15, "Failed to load scaling data from the database "
+						   "for this npc / type, see 'NPCScaling' log for more info");
+		}
+	}
+	else if (c->GetTarget() && sep->argnum < 2) {
+		c->Message(15, "Target must be an npc!");
+	}
+
+	/**
+	 * Zonewide
+	 */
+	if (sep->argnum > 1) {
+
+		std::string scale_type;
+		if (strcasecmp(sep->arg[2], "dynamic") == 0) {
+			scale_type = "dynamic";
+		}
+		else if (strcasecmp(sep->arg[2], "static") == 0) {
+			scale_type = "static";
+		}
+
+		if (scale_type.length() <= 0) {
+			c->Message(15, "You must first set if you intend on using static versus dynamic for these changes");
+			c->Message(15, "#scale [npc_name_search] [static/dynamic]");
+			c->Message(15, "#scale all [static/dynamic]");
+			return;
+		}
+
+		std::string search_string = sep->arg[1];
+
+		auto &entity_list_search = entity_list.GetNPCList();
+
+		int found_count = 0;
+		for (auto &itr : entity_list_search) {
+			NPC *entity = itr.second;
+
+			std::string entity_name = entity->GetName();
+
+			/**
+			 * Filter by name
+			 */
+			if (search_string.length() > 0 && entity_name.find(search_string) == std::string::npos && strcasecmp(sep->arg[1], "all") != 0) {
+				continue;
+			}
+
+			std::string status = "(Searching)";
+
+			if (strcasecmp(sep->arg[3], "apply") == 0) {
+				status = "(Applying)";
+
+				if (strcasecmp(sep->arg[2], "dynamic") == 0) {
+					npc_scale_manager->ApplyGlobalBaseScalingToNPCDynamically(entity);
+				}
+				if (strcasecmp(sep->arg[2], "static") == 0) {
+					npc_scale_manager->ApplyGlobalBaseScalingToNPCStatically(entity);
+				}
+			}
+
+			c->Message(
+				15,
+				"| ID %5d | %s | x %.0f | y %0.f | z %.0f | DBID %u %s",
+				entity->GetID(),
+				entity->GetName(),
+				entity->GetX(),
+				entity->GetY(),
+				entity->GetZ(),
+				entity->GetNPCTypeID(),
+				status.c_str()
+			);
+
+			found_count++;
+		}
+
+		if (strcasecmp(sep->arg[3], "apply") == 0) {
+			c->Message(15, "%s scaling applied against (%i) NPC's", sep->arg[2], found_count);
+		}
+		else {
+
+			std::string saylink = StringFormat(
+				"#scale %s %s apply",
+				sep->arg[1],
+				sep->arg[2]
+			);
+
+			c->Message(15, "Found (%i) NPC's that match this search...", found_count);
+			c->Message(
+				15, "To apply these changes, click <%s> or type %s",
+				EQEmu::SayLinkEngine::GenerateQuestSaylink(saylink, false, "Apply").c_str(),
+				saylink.c_str()
+			);
+		}
+	}
 }
 
 // All new code added to command.cpp should be BEFORE this comment line. Do no append code to this file below the BOTS code block.

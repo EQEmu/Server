@@ -385,6 +385,7 @@
 9129|2018_08_13_inventory_update.sql|SHOW TABLES LIKE 'inventory_versions'|empty|
 9130|2018_11_25_name_filter_update.sql|SHOW COLUMNS FROM `name_filter` LIKE 'id'|empty|
 9131|2018_12_13_spell_buckets.sql|SHOW TABLES LIKE 'spell_buckets'|empty|
+9132|2018_12_16_global_base_scaling.sql|SHOW TABLES LIKE 'npc_scale_global_base'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

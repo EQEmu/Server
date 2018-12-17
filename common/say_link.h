@@ -101,6 +101,8 @@ namespace EQEmu
 		const std::string& LinkBody() { return m_LinkBody; }	// contains string format: '<LinkBody>'
 		const std::string& LinkText() { return m_LinkText; }	// contains string format: '<LinkText>'
 
+		static std::string GenerateQuestSaylink(std::string saylink_text, bool silent, std::string link_name);
+
 		void Reset();
 
 	private:

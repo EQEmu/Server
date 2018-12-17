@@ -248,7 +248,7 @@ public:
 	void FlagInstanceByGroupLeader(uint32 zone, int16 version);
 	void FlagInstanceByRaidLeader(uint32 zone, int16 version);
 	const char* varlink(char* perltext, int item_id);
-	const char* saylink(char* Phrase, bool silent, const char* LinkName);
+	std::string saylink(char *saylink_text, bool silent, const char *link_name);
 	const char* getguildnamebyid(int guild_id);
 	void SetRunning(bool val);
 	bool IsRunning();

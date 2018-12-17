@@ -511,6 +511,7 @@ RULE_BOOL(Combat, UseRevampHandToHand, false) // use h2h revamped dmg/delays I b
 RULE_BOOL(Combat, ClassicMasterWu, false) // classic master wu uses a random special, modern doesn't
 RULE_INT(Combat, LevelToStopDamageCaps, 0) // 1 will effectively disable them, 20 should give basically same results as old incorrect system
 RULE_BOOL(Combat, ClassicNPCBackstab, false) // true disables npc facestab - npcs get normal attack if not behind
+RULE_BOOL(Combat, UseNPCDamageClassLevelMods, true) // Uses GetClassLevelDamageMod calc in npc_scale_manager
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(NPC)

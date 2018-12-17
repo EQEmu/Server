@@ -62,12 +62,12 @@ void Mob::CalcBonuses()
 void NPC::CalcBonuses()
 {
 	memset(&itembonuses, 0, sizeof(StatBonuses));
-	if(RuleB(NPC, UseItemBonusesForNonPets)){
+	if (RuleB(NPC, UseItemBonusesForNonPets)) {
 		memset(&itembonuses, 0, sizeof(StatBonuses));
 		CalcItemBonuses(&itembonuses);
 	}
-	else{
-		if(GetOwner()){
+	else {
+		if (GetOwner()) {
 			memset(&itembonuses, 0, sizeof(StatBonuses));
 			CalcItemBonuses(&itembonuses);
 		}

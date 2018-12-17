@@ -2793,47 +2793,11 @@ void QuestManager::FlagInstanceByRaidLeader(uint32 zone, int16 version)
 	}
 }
 
-const char* QuestManager::saylink(char* Phrase, bool silent, const char* LinkName) {
+std::string QuestManager::saylink(char *saylink_text, bool silent, const char *link_name)
+{
 	QuestManagerCurrentQuestVars();
 
-	int sayid = 0;
-
-	int sz = strlen(Phrase);
-	auto escaped_string = new char[sz * 2];
-	database.DoEscapeString(escaped_string, Phrase, sz);
-
-	// Query for an existing phrase and id in the saylink table
-	std::string query = StringFormat("SELECT `id` FROM `saylink` WHERE `phrase` = '%s'", escaped_string);
-	auto results = database.QueryDatabase(query);
-	if (results.Success()) {
-		if (results.RowCount() >= 1) {
-			for (auto row = results.begin();row != results.end(); ++row)
-				sayid = atoi(row[0]);
-		} else {
-			std::string insert_query = StringFormat("INSERT INTO `saylink` (`phrase`) VALUES ('%s')", escaped_string);
-			results = database.QueryDatabase(insert_query);
-			if (!results.Success()) {
-				Log(Logs::General, Logs::Error, "Error in saylink phrase queries", results.ErrorMessage().c_str());
-			}
-			else {
-				sayid = results.LastInsertedID();
-			}
-		}
-	}
-	safe_delete_array(escaped_string);
-
-	//Create the say link as an item link hash
-	EQEmu::SayLinkEngine linker;
-	linker.SetProxyItemID(SAYLINK_ITEM_ID);
-	if (silent)
-		linker.SetProxyAugment2ID(sayid);
-	else
-		linker.SetProxyAugment1ID(sayid);
-	linker.SetProxyText(LinkName);
-
-	strcpy(Phrase, linker.GenerateLink().c_str());
-
-	return Phrase;
+	return EQEmu::SayLinkEngine::GenerateQuestSaylink(saylink_text, silent, link_name);
 }
 
 const char* QuestManager::getguildnamebyid(int guild_id) {

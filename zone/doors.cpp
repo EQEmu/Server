@@ -820,7 +820,7 @@ void Doors::SetDisableTimer(bool flag) {
 
 void Doors::CreateDatabaseEntry()
 {
-	if(database.GetDoorsDBCountPlusOne(zone->GetShortName(), zone->GetInstanceVersion()) - 1 >= 255) {
+	if (database.GetDoorsDBCountPlusOne(zone->GetShortName(), zone->GetInstanceVersion()) - 1 >= 255) {
 		return;
 	}
 
@@ -828,18 +828,32 @@ void Doors::CreateDatabaseEntry()
 	 * Persist
 	 */
 	database.InsertDoor(
-			GetDoorDBID(),
-			GetDoorID(),
-			GetDoorName(),
-			m_Position,
-			GetOpenType(),
-			static_cast<uint16>(GetGuildID()),
-			GetLockpick(),
-			GetKeyItem(),
-			static_cast<uint8>(GetDoorParam()),
-			static_cast<uint8>(GetInvertState()),
-			GetIncline(),
-			GetSize()
+		GetDoorDBID(),
+		GetDoorID(),
+		GetDoorName(),
+		m_Position,
+		GetOpenType(),
+		static_cast<uint16>(GetGuildID()),
+		GetLockpick(),
+		GetKeyItem(),
+		static_cast<uint8>(GetDoorParam()),
+		static_cast<uint8>(GetInvertState()),
+		GetIncline(),
+		GetSize()
 	);
 }
 
+float Doors::GetX()
+{
+	return m_Position.x;
+}
+
+float Doors::GetY()
+{
+	return m_Position.y;
+}
+
+float Doors::GetZ()
+{
+	return m_Position.z;
+}

@@ -382,15 +382,18 @@ bool RuleManager::ListRulesets(Database *database, std::map<int, std::string> &i
 	return true;
 }
 
-int32 RuleManager::GetIntRule(RuleManager::IntType t) const{
-	return(m_RuleIntValues[t]);
+int32 RuleManager::GetIntRule(RuleManager::IntType t) const
+{
+	return (m_RuleIntValues[t]);
 }
 
-float RuleManager::GetRealRule(RuleManager::RealType t) const{
-	return(m_RuleRealValues[t]);
+float RuleManager::GetRealRule(RuleManager::RealType t) const
+{
+	return (m_RuleRealValues[t]);
 }
 
-bool RuleManager::GetBoolRule(RuleManager::BoolType t) const{
+bool RuleManager::GetBoolRule(RuleManager::BoolType t) const
+{
 	return (m_RuleBoolValues[t] == 1);
 }
 
