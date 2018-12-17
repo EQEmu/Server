@@ -1759,7 +1759,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	/**
 	 * DevTools Load Settings
 	 */
-	if (Admin() > 200) {
+	if (Admin() >= 200) {
 		std::string dev_tools_window_key = StringFormat("%i-dev-tools-window-disabled", AccountID());
 		if (DataBucket::GetData(dev_tools_window_key) == "true") {
 			dev_tools_window_enabled = false;
@@ -10932,7 +10932,7 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 
 		case EQEmu::popupresponse::MOB_INFO_DISMISS:
 			this->SetDisplayMobInfoWindow(false);
-			this->Message(15, "GM Mob display window snoozed in this zone...");
+			this->Message(15, "[DevTools] Window snoozed in this zone...");
 			break;
 		default:
 			break;

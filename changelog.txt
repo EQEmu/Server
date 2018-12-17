@@ -1,5 +1,28 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 12/16/2018 ==
+Akkadius:
+    - Implemented: Global Base Scaling: https://github.com/EQEmu/Server/wiki/NPC-Scaling
+    - Implemented: Beginning of DevTools - more to be added over time (Status >= 200)
+        - Display NPC info on target
+        - Display Client info on target
+        - Display NPC show commands on target
+            - Loot
+            - Grids
+            - Emotes
+    - Implemented: Support for saylinks to be used in GM commands
+    - Deprecated: Commands
+        - #listnpcs
+    - Implemented: Commands
+        - #list [npcs|players|corpses|doors|objects] [search]
+            - Provides clickable saylinks to go to entities
+        - #scale [static/dynamic] (With targeted NPC)
+        - #scale [npc_name_search] [static/dynamic] (To make zone-wide changes)
+        - #scale all [static/dynamic]
+        - #devtools (alias #dev)
+    - Implemented: New Logging categories automatically injected into `logsys_categories` table
+        - Fixed an issue where newly injected categories were turned on by default
+
 == 12/15/2018 ==
 Kinglykrab: Added multiple new instance related quest functions.
 	1. quest::GetInstanceIDByCharID(const char *zone, int16 version, uint32 char_id)
