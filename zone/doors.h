@@ -64,6 +64,10 @@ public:
 	void SetSize(uint16 size);
 	void ToggleState(Mob *sender);
 
+	float GetX();
+	float GetY();
+	float GetZ();
+
 private:
 
 	uint32    database_id;

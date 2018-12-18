@@ -38,149 +38,153 @@ extern EntityList entity_list;
 extern Zone* zone;
 extern WorldServer worldserver;
 
-Mob::Mob(const char* in_name,
-		const char* in_lastname,
-		int32		in_cur_hp,
-		int32		in_max_hp,
-		uint8		in_gender,
-		uint16		in_race,
-		uint8		in_class,
-		bodyType	in_bodytype,
-		uint8		in_deity,
-		uint8		in_level,
-		uint32		in_npctype_id,
-		float		in_size,
-		float		in_runspeed,
-		const glm::vec4& position,
-		uint8		in_light,
-		uint8		in_texture,
-		uint8		in_helmtexture,
-		uint16		in_ac,
-		uint16		in_atk,
-		uint16		in_str,
-		uint16		in_sta,
-		uint16		in_dex,
-		uint16		in_agi,
-		uint16		in_int,
-		uint16		in_wis,
-		uint16		in_cha,
-		uint8		in_haircolor,
-		uint8		in_beardcolor,
-		uint8		in_eyecolor1, // the eyecolors always seem to be the same, maybe left and right eye?
-		uint8		in_eyecolor2,
-		uint8		in_hairstyle,
-		uint8		in_luclinface,
-		uint8		in_beard,
-		uint32		in_drakkin_heritage,
-		uint32		in_drakkin_tattoo,
-		uint32		in_drakkin_details,
-		EQEmu::TintProfile	in_armor_tint,
-		uint8		in_aa_title,
-		uint8		in_see_invis, // see through invis/ivu
-		uint8		in_see_invis_undead,
-		uint8		in_see_hide,
-		uint8		in_see_improved_hide,
-		int32		in_hp_regen,
-		int32		in_mana_regen,
-		uint8		in_qglobal,
-		uint8		in_maxlevel,
-		uint32		in_scalerate,
-		uint8		in_armtexture,
-		uint8		in_bracertexture,
-		uint8		in_handtexture,
-		uint8		in_legtexture,
-		uint8		in_feettexture
-	) :
-		attack_timer(2000),
-		attack_dw_timer(2000),
-		ranged_timer(2000),
-		tic_timer(6000),
-		mana_timer(2000),
-		spellend_timer(0),
-		rewind_timer(30000),
-		bindwound_timer(10000),
-		stunned_timer(0),
-		spun_timer(0),
-		bardsong_timer(6000),
-		gravity_timer(1000),
-		viral_timer(0),
-		m_FearWalkTarget(-999999.0f, -999999.0f, -999999.0f),
-		m_TargetLocation(glm::vec3()),
-		m_TargetV(glm::vec3()),
-		flee_timer(FLEE_CHECK_TIMER), 
-		m_Position(position),
-		tmHidden(-1),
-		mitigation_ac(0),
-		m_specialattacks(eSpecialAttacks::None),
-		fix_z_timer(300),
-		fix_z_timer_engaged(100),
-		attack_anim_timer(1000),
-		position_update_melee_push_timer(500),
-		hate_list_cleanup_timer(6000)
+Mob::Mob(
+	const char *in_name,
+	const char *in_lastname,
+	int32 in_cur_hp,
+	int32 in_max_hp,
+	uint8 in_gender,
+	uint16 in_race,
+	uint8 in_class,
+	bodyType in_bodytype,
+	uint8 in_deity,
+	uint8 in_level,
+	uint32 in_npctype_id,
+	float in_size,
+	float in_runspeed,
+	const glm::vec4 &position,
+	uint8 in_light,
+	uint8 in_texture,
+	uint8 in_helmtexture,
+	uint16 in_ac,
+	uint16 in_atk,
+	uint16 in_str,
+	uint16 in_sta,
+	uint16 in_dex,
+	uint16 in_agi,
+	uint16 in_int,
+	uint16 in_wis,
+	uint16 in_cha,
+	uint8 in_haircolor,
+	uint8 in_beardcolor,
+	uint8 in_eyecolor1, // the eyecolors always seem to be the same, maybe left and right eye?
+	uint8 in_eyecolor2,
+	uint8 in_hairstyle,
+	uint8 in_luclinface,
+	uint8 in_beard,
+	uint32 in_drakkin_heritage,
+	uint32 in_drakkin_tattoo,
+	uint32 in_drakkin_details,
+	EQEmu::TintProfile in_armor_tint,
+	uint8 in_aa_title,
+	uint8 in_see_invis, // see through invis/ivu
+	uint8 in_see_invis_undead,
+	uint8 in_see_hide,
+	uint8 in_see_improved_hide,
+	int32 in_hp_regen,
+	int32 in_mana_regen,
+	uint8 in_qglobal,
+	uint8 in_maxlevel,
+	uint32 in_scalerate,
+	uint8 in_armtexture,
+	uint8 in_bracertexture,
+	uint8 in_handtexture,
+	uint8 in_legtexture,
+	uint8 in_feettexture
+) :
+	attack_timer(2000),
+	attack_dw_timer(2000),
+	ranged_timer(2000),
+	tic_timer(6000),
+	mana_timer(2000),
+	spellend_timer(0),
+	rewind_timer(30000),
+	bindwound_timer(10000),
+	stunned_timer(0),
+	spun_timer(0),
+	bardsong_timer(6000),
+	gravity_timer(1000),
+	viral_timer(0),
+	m_FearWalkTarget(-999999.0f, -999999.0f, -999999.0f),
+	m_TargetLocation(glm::vec3()),
+	m_TargetV(glm::vec3()),
+	flee_timer(FLEE_CHECK_TIMER),
+	m_Position(position),
+	tmHidden(-1),
+	mitigation_ac(0),
+	m_specialattacks(eSpecialAttacks::None),
+	fix_z_timer(300),
+	fix_z_timer_engaged(100),
+	attack_anim_timer(1000),
+	position_update_melee_push_timer(500),
+	hate_list_cleanup_timer(6000)
 {
-	targeted = 0;
-	tar_ndx = 0;
-	tar_vector = 0;
+
+	targeted          = 0;
+	tar_ndx           = 0;
+	tar_vector        = 0;
 	currently_fleeing = false;
 
 	last_major_update_position = m_Position;
-	is_distance_roamer = false;
+	is_distance_roamer         = false;
 
 	AI_Init();
 	SetMoving(false);
-	moved = false;
+	moved            = false;
 	m_RewindLocation = glm::vec3();
 
 	_egnode = nullptr;
-	name[0] = 0;
-	orig_name[0] = 0;
+	name[0]       = 0;
+	orig_name[0]  = 0;
 	clean_name[0] = 0;
-	lastname[0] = 0;
+	lastname[0]   = 0;
 	if (in_name) {
 		strn0cpy(name, in_name, 64);
 		strn0cpy(orig_name, in_name, 64);
 	}
-	if (in_lastname)
+	if (in_lastname) {
 		strn0cpy(lastname, in_lastname, 64);
-	cur_hp = in_cur_hp;
-	max_hp = in_max_hp;
-	base_hp = in_max_hp;
-	gender = in_gender;
-	race = in_race;
-	base_gender = in_gender;
-	base_race = in_race;
-	class_ = in_class;
-	bodytype = in_bodytype;
+	}
+	cur_hp        = in_cur_hp;
+	max_hp        = in_max_hp;
+	base_hp       = in_max_hp;
+	gender        = in_gender;
+	race          = in_race;
+	base_gender   = in_gender;
+	base_race     = in_race;
+	class_        = in_class;
+	bodytype      = in_bodytype;
 	orig_bodytype = in_bodytype;
-	deity = in_deity;
-	level = in_level;
-	orig_level = in_level;
-	npctype_id = in_npctype_id;
-	size = in_size;
-	base_size = size;
-	runspeed = in_runspeed;
+	deity         = in_deity;
+	level         = in_level;
+	orig_level    = in_level;
+	npctype_id    = in_npctype_id;
+	size          = in_size;
+	base_size     = size;
+	runspeed      = in_runspeed;
 	// neotokyo: sanity check
-	if (runspeed < 0 || runspeed > 20)
+	if (runspeed < 0 || runspeed > 20) {
 		runspeed = 1.25f;
-	base_runspeed = (int)((float)runspeed * 40.0f);
+	}
+	base_runspeed = (int) ((float) runspeed * 40.0f);
 	// clients
 	if (runspeed == 0.7f) {
-		base_runspeed = 28;
-		walkspeed = 0.3f;
+		base_runspeed  = 28;
+		walkspeed      = 0.3f;
 		base_walkspeed = 12;
-		fearspeed = 0.625f;
+		fearspeed      = 0.625f;
 		base_fearspeed = 25;
 		// npcs
 	}
 	else {
 		base_walkspeed = base_runspeed * 100 / 265;
-		walkspeed = ((float)base_walkspeed) * 0.025f;
+		walkspeed      = ((float) base_walkspeed) * 0.025f;
 		base_fearspeed = base_runspeed * 100 / 127;
-		fearspeed = ((float)base_fearspeed) * 0.025f;
+		fearspeed      = ((float) base_fearspeed) * 0.025f;
 	}
 
 	last_hp_percent = 0;
-	last_hp = 0;
+	last_hp         = 0;
 
 	current_speed = base_runspeed;
 
@@ -188,226 +192,223 @@ Mob::Mob(const char* in_name,
 
 
 	// sanity check
-	if (runspeed < 0 || runspeed > 20)
+	if (runspeed < 0 || runspeed > 20) {
 		runspeed = 1.25f;
+	}
 
-	m_Light.Type[EQEmu::lightsource::LightInnate] = in_light;
+	m_Light.Type[EQEmu::lightsource::LightInnate]  = in_light;
 	m_Light.Level[EQEmu::lightsource::LightInnate] = EQEmu::lightsource::TypeToLevel(m_Light.Type[EQEmu::lightsource::LightInnate]);
-	m_Light.Type[EQEmu::lightsource::LightActive] = m_Light.Type[EQEmu::lightsource::LightInnate];
+	m_Light.Type[EQEmu::lightsource::LightActive]  = m_Light.Type[EQEmu::lightsource::LightInnate];
 	m_Light.Level[EQEmu::lightsource::LightActive] = m_Light.Level[EQEmu::lightsource::LightInnate];
 
-	texture = in_texture;
-	helmtexture = in_helmtexture;
-	armtexture = in_armtexture;
+	texture       = in_texture;
+	helmtexture   = in_helmtexture;
+	armtexture    = in_armtexture;
 	bracertexture = in_bracertexture;
-	handtexture = in_handtexture;
-	legtexture = in_legtexture;
-	feettexture = in_feettexture;
-	multitexture = (armtexture || bracertexture || handtexture || legtexture || feettexture);
+	handtexture   = in_handtexture;
+	legtexture    = in_legtexture;
+	feettexture   = in_feettexture;
+	multitexture  = (armtexture || bracertexture || handtexture || legtexture || feettexture);
 
-	haircolor = in_haircolor;
-	beardcolor = in_beardcolor;
-	eyecolor1 = in_eyecolor1;
-	eyecolor2 = in_eyecolor2;
-	hairstyle = in_hairstyle;
-	luclinface = in_luclinface;
-	beard = in_beard;
-	drakkin_heritage = in_drakkin_heritage;
-	drakkin_tattoo = in_drakkin_tattoo;
-	drakkin_details = in_drakkin_details;
-	attack_speed = 0;
-	attack_delay = 0;
-	slow_mitigation = 0;
-	findable = false;
-	trackable = true;
-	has_shieldequiped = false;
+	haircolor               = in_haircolor;
+	beardcolor              = in_beardcolor;
+	eyecolor1               = in_eyecolor1;
+	eyecolor2               = in_eyecolor2;
+	hairstyle               = in_hairstyle;
+	luclinface              = in_luclinface;
+	beard                   = in_beard;
+	drakkin_heritage        = in_drakkin_heritage;
+	drakkin_tattoo          = in_drakkin_tattoo;
+	drakkin_details         = in_drakkin_details;
+	attack_speed            = 0;
+	attack_delay            = 0;
+	slow_mitigation         = 0;
+	findable                = false;
+	trackable               = true;
+	has_shieldequiped       = false;
 	has_twohandbluntequiped = false;
-	has_twohanderequipped = false;
-	can_facestab = false;
-	has_numhits = false;
-	has_MGB = false;
-	has_ProjectIllusion = false;
-	SpellPowerDistanceMod = 0;
-	last_los_check = false;
+	has_twohanderequipped   = false;
+	can_facestab            = false;
+	has_numhits             = false;
+	has_MGB                 = false;
+	has_ProjectIllusion     = false;
+	SpellPowerDistanceMod   = 0;
+	last_los_check          = false;
 
-	if (in_aa_title > 0)
+	if (in_aa_title > 0) {
 		aa_title = in_aa_title;
-	else
+	}
+	else {
 		aa_title = 0xFF;
-	AC = in_ac;
-	ATK = in_atk;
-	STR = in_str;
-	STA = in_sta;
-	DEX = in_dex;
-	AGI = in_agi;
-	INT = in_int;
-	WIS = in_wis;
-	CHA = in_cha;
-	MR = CR = FR = DR = PR = Corrup = 0;
+	}
 
-	ExtraHaste = 0;
-	bEnraged = false;
-
-	shield_target = nullptr;
-	current_mana = 0;
-	max_mana = 0;
-	hp_regen = in_hp_regen;
-	mana_regen = in_mana_regen;
-	ooc_regen = RuleI(NPC, OOCRegen); //default Out of Combat Regen
-	maxlevel = in_maxlevel;
-	scalerate = in_scalerate;
-	invisible = false;
-	invisible_undead = false;
+	AC                = in_ac;
+	ATK               = in_atk;
+	STR               = in_str;
+	STA               = in_sta;
+	DEX               = in_dex;
+	AGI               = in_agi;
+	INT               = in_int;
+	WIS               = in_wis;
+	CHA               = in_cha;
+	MR                = CR = FR = DR = PR = Corrup = 0;
+	ExtraHaste        = 0;
+	bEnraged          = false;
+	shield_target     = nullptr;
+	current_mana      = 0;
+	max_mana          = 0;
+	hp_regen          = in_hp_regen;
+	mana_regen        = in_mana_regen;
+	ooc_regen         = RuleI(NPC, OOCRegen); //default Out of Combat Regen
+	maxlevel          = in_maxlevel;
+	scalerate         = in_scalerate;
+	invisible         = 0;
+	invisible_undead  = false;
 	invisible_animals = false;
-	sneaking = false;
-	hidden = false;
-	improved_hidden = false;
-	invulnerable = false;
-	IsFullHP = (cur_hp == max_hp);
-	qglobal = 0;
-	spawned = false;
-	rare_spawn = false;
+	sneaking          = false;
+	hidden            = false;
+	improved_hidden   = false;
+	invulnerable      = false;
+	IsFullHP          = (cur_hp == max_hp);
+	qglobal           = 0;
+	spawned           = false;
+	rare_spawn        = false;
 
 	InitializeBuffSlots();
 
 	// clear the proc arrays
-	int i;
-	int j;
-	for (j = 0; j < MAX_PROCS; j++)
-	{
-		PermaProcs[j].spellID = SPELL_UNKNOWN;
-		PermaProcs[j].chance = 0;
-		PermaProcs[j].base_spellID = SPELL_UNKNOWN;
-		PermaProcs[j].level_override = -1;
-		SpellProcs[j].spellID = SPELL_UNKNOWN;
-		SpellProcs[j].chance = 0;
-		SpellProcs[j].base_spellID = SPELL_UNKNOWN;
-		SpellProcs[j].level_override = -1;
-		DefensiveProcs[j].spellID = SPELL_UNKNOWN;
-		DefensiveProcs[j].chance = 0;
-		DefensiveProcs[j].base_spellID = SPELL_UNKNOWN;
+	for (int j = 0; j < MAX_PROCS; j++) {
+		PermaProcs[j].spellID            = SPELL_UNKNOWN;
+		PermaProcs[j].chance             = 0;
+		PermaProcs[j].base_spellID       = SPELL_UNKNOWN;
+		PermaProcs[j].level_override     = -1;
+		SpellProcs[j].spellID            = SPELL_UNKNOWN;
+		SpellProcs[j].chance             = 0;
+		SpellProcs[j].base_spellID       = SPELL_UNKNOWN;
+		SpellProcs[j].level_override     = -1;
+		DefensiveProcs[j].spellID        = SPELL_UNKNOWN;
+		DefensiveProcs[j].chance         = 0;
+		DefensiveProcs[j].base_spellID   = SPELL_UNKNOWN;
 		DefensiveProcs[j].level_override = -1;
-		RangedProcs[j].spellID = SPELL_UNKNOWN;
-		RangedProcs[j].chance = 0;
-		RangedProcs[j].base_spellID = SPELL_UNKNOWN;
-		RangedProcs[j].level_override = -1;
+		RangedProcs[j].spellID           = SPELL_UNKNOWN;
+		RangedProcs[j].chance            = 0;
+		RangedProcs[j].base_spellID      = SPELL_UNKNOWN;
+		RangedProcs[j].level_override    = -1;
 	}
 
-	for (i = EQEmu::textures::textureBegin; i < EQEmu::textures::materialCount; i++)
-	{
+	for (int i = EQEmu::textures::textureBegin; i < EQEmu::textures::materialCount; i++) {
 		armor_tint.Slot[i].Color = in_armor_tint.Slot[i].Color;
 	}
 
 	std::fill(std::begin(m_spellHitsLeft), std::end(m_spellHitsLeft), 0);
 
-	m_Delta = glm::vec4();
+	m_Delta   = glm::vec4();
 	animation = 0;
 
-	logging_enabled = false;
-	isgrouped = false;
+	isgrouped     = false;
 	israidgrouped = false;
 
 	IsHorse = false;
 
 	entity_id_being_looted = 0;
-	_appearance = eaStanding;
-	pRunAnimSpeed = 0;
+	_appearance            = eaStanding;
+	pRunAnimSpeed          = 0;
 
 	spellend_timer.Disable();
 	bardsong_timer.Disable();
-	bardsong = 0;
-	bardsong_target_id = 0;
-	casting_spell_id = 0;
-	casting_spell_timer = 0;
+	bardsong                     = 0;
+	bardsong_target_id           = 0;
+	casting_spell_id             = 0;
+	casting_spell_timer          = 0;
 	casting_spell_timer_duration = 0;
 	casting_spell_inventory_slot = 0;
-	casting_spell_aa_id = 0;
-	target = 0;
+	casting_spell_aa_id          = 0;
+	target                       = 0;
 
 	ActiveProjectileATK = false;
-	for (int i = 0; i < MAX_SPELL_PROJECTILE; i++)
-	{
-		ProjectileAtk[i].increment = 0;
+	for (int i = 0; i < MAX_SPELL_PROJECTILE; i++) {
+		ProjectileAtk[i].increment     = 0;
 		ProjectileAtk[i].hit_increment = 0;
-		ProjectileAtk[i].target_id = 0;
-		ProjectileAtk[i].wpn_dmg = 0;
-		ProjectileAtk[i].origin_x = 0.0f;
-		ProjectileAtk[i].origin_y = 0.0f;
-		ProjectileAtk[i].origin_z = 0.0f;
-		ProjectileAtk[i].tlast_x = 0.0f;
-		ProjectileAtk[i].tlast_y = 0.0f;
-		ProjectileAtk[i].ranged_id = 0;
-		ProjectileAtk[i].ammo_id = 0;
-		ProjectileAtk[i].ammo_slot = 0;
-		ProjectileAtk[i].skill = 0;
-		ProjectileAtk[i].speed_mod = 0.0f;
+		ProjectileAtk[i].target_id     = 0;
+		ProjectileAtk[i].wpn_dmg       = 0;
+		ProjectileAtk[i].origin_x      = 0.0f;
+		ProjectileAtk[i].origin_y      = 0.0f;
+		ProjectileAtk[i].origin_z      = 0.0f;
+		ProjectileAtk[i].tlast_x       = 0.0f;
+		ProjectileAtk[i].tlast_y       = 0.0f;
+		ProjectileAtk[i].ranged_id     = 0;
+		ProjectileAtk[i].ammo_id       = 0;
+		ProjectileAtk[i].ammo_slot     = 0;
+		ProjectileAtk[i].skill         = 0;
+		ProjectileAtk[i].speed_mod     = 0.0f;
 	}
 
 	memset(&itembonuses, 0, sizeof(StatBonuses));
 	memset(&spellbonuses, 0, sizeof(StatBonuses));
 	memset(&aabonuses, 0, sizeof(StatBonuses));
-	spellbonuses.AggroRange = -1;
+	spellbonuses.AggroRange  = -1;
 	spellbonuses.AssistRange = -1;
 	pLastChange = 0;
 	SetPetID(0);
 	SetOwnerID(0);
-	typeofpet = petNone; // default to not a pet
-	petpower = 0;
-	held = false;
-	gheld = false;
-	nocast = false;
-	focused = false;
-	pet_stop = false;
-	pet_regroup = false;
-	_IsTempPet = false;
-	pet_owner_client = false;
+	typeofpet         = petNone; // default to not a pet
+	petpower          = 0;
+	held              = false;
+	gheld             = false;
+	nocast            = false;
+	focused           = false;
+	pet_stop          = false;
+	pet_regroup       = false;
+	_IsTempPet        = false;
+	pet_owner_client  = false;
 	pet_targetlock_id = 0;
 
 	attacked_count = 0;
-	mezzed = false;
-	stunned = false;
-	silenced = false;
-	amnesiad = false;
-	inWater = false;
+	mezzed         = false;
+	stunned        = false;
+	silenced       = false;
+	amnesiad       = false;
+	inWater        = false;
 	int m;
-	for (m = 0; m < MAX_SHIELDERS; m++)
-	{
-		shielder[m].shielder_id = 0;
+	for (m = 0; m < MAX_SHIELDERS; m++) {
+		shielder[m].shielder_id    = 0;
 		shielder[m].shielder_bonus = 0;
 	}
 
 	destructibleobject = false;
-	wandertype = 0;
-	pausetype = 0;
-	cur_wp = 0;
-	m_CurrentWayPoint = glm::vec4();
-	cur_wp_pause = 0;
-	patrol = 0;
-	follow_id = 0;
-	follow_dist = 100;	// Default Distance for Follow
-	follow_run = true;	// We can run if distance great enough
-	no_target_hotkey = false;
-	flee_mode = false;
-	currently_fleeing = false;
+	wandertype         = 0;
+	pausetype          = 0;
+	cur_wp             = 0;
+	m_CurrentWayPoint  = glm::vec4();
+	cur_wp_pause       = 0;
+	patrol             = 0;
+	follow_id          = 0;
+	follow_dist        = 100;    // Default Distance for Follow
+	follow_run         = true;    // We can run if distance great enough
+	no_target_hotkey   = false;
+	flee_mode          = false;
+	currently_fleeing  = false;
 	flee_timer.Start();
 
 	permarooted = (runspeed > 0) ? false : true;
 
 	movetimercompleted = false;
-	ForcedMovement = 0;
-	roamer = false;
-	rooted = false;
-	charmed = false;
-	has_virus = false;
-	for (i = 0; i < MAX_SPELL_TRIGGER * 2; i++) {
+	ForcedMovement     = 0;
+	roamer             = false;
+	rooted             = false;
+	charmed            = false;
+	has_virus          = false;
+
+	for (int i = 0; i < MAX_SPELL_TRIGGER * 2; i++) {
 		viral_spells[i] = 0;
 	}
-	pStandingPetOrder = SPO_Follow;
-	pseudo_rooted = false;
 
-	see_invis = GetSeeInvisible(in_see_invis);
-	see_invis_undead = GetSeeInvisible(in_see_invis_undead);
-	see_hide = GetSeeInvisible(in_see_hide);
+	pStandingPetOrder = SPO_Follow;
+	pseudo_rooted     = false;
+
+	see_invis         = GetSeeInvisible(in_see_invis);
+	see_invis_undead  = GetSeeInvisible(in_see_invis_undead);
+	see_hide          = GetSeeInvisible(in_see_hide);
 	see_improved_hide = GetSeeInvisible(in_see_improved_hide);
 
 	qglobal = in_qglobal != 0;
@@ -416,12 +417,12 @@ Mob::Mob(const char* in_name,
 	bindwound_timer.Disable();
 	bindwound_target = 0;
 
-	trade = new Trade(this);
+	trade          = new Trade(this);
 	// hp event
-	nexthpevent = -1;
+	nexthpevent    = -1;
 	nextinchpevent = -1;
 
-	hasTempPet = false;
+	hasTempPet    = false;
 	count_TempPet = 0;
 
 	m_is_running = false;
@@ -429,25 +430,31 @@ Mob::Mob(const char* in_name,
 	nimbus_effect1 = 0;
 	nimbus_effect2 = 0;
 	nimbus_effect3 = 0;
-	m_targetable = true;
+	m_targetable   = true;
 
 	m_TargetRing = glm::vec3();
 
-	flymode = FlyMode3;
+	flymode            = FlyMode3;
 	DistractedFromGrid = false;
 	hate_list.SetHateOwner(this);
 
 	m_AllowBeneficial = false;
-	m_DisableMelee = false;
-	for (int i = 0; i < EQEmu::skills::HIGHEST_SKILL + 2; i++) { SkillDmgTaken_Mod[i] = 0; }
-	for (int i = 0; i < HIGHEST_RESIST + 2; i++) { Vulnerability_Mod[i] = 0; }
+	m_DisableMelee    = false;
 
-	emoteid = 0;
-	endur_upkeep = false;
+	for (int i = 0; i < EQEmu::skills::HIGHEST_SKILL + 2; i++) {
+		SkillDmgTaken_Mod[i] = 0;
+	}
+
+	for (int i = 0; i < HIGHEST_RESIST + 2; i++) {
+		Vulnerability_Mod[i] = 0;
+	}
+
+	emoteid              = 0;
+	endur_upkeep         = false;
 	degenerating_effects = false;
-	PrimaryAggro = false;
-	AssistAggro = false;
-	npc_assist_cap = 0;
+	PrimaryAggro         = false;
+	AssistAggro          = false;
+	npc_assist_cap       = 0;
 
 	PathRecalcTimer.reset(new Timer(500));
 	PathingLoopCount = 0;
@@ -830,6 +837,7 @@ int32 Mob::CalcMaxMana() {
 int32 Mob::CalcMaxHP() {
 	max_hp = (base_hp + itembonuses.HP + spellbonuses.HP);
 	max_hp += max_hp * ((aabonuses.MaxHPChange + spellbonuses.MaxHPChange + itembonuses.MaxHPChange) / 10000.0f);
+
 	return max_hp;
 }
 
@@ -3239,8 +3247,7 @@ void Mob::QuestJournalledSay(Client *QuestInitiator, const char *str)
 
 const char *Mob::GetCleanName()
 {
-	if(!strlen(clean_name))
-	{
+	if (!strlen(clean_name)) {
 		CleanMobName(GetName(), clean_name);
 	}
 
@@ -3466,24 +3473,33 @@ int Mob::GetHaste()
 	return 100 + h;
 }
 
-void Mob::SetTarget(Mob* mob) {
-
-	if (target == mob) 
+void Mob::SetTarget(Mob *mob)
+{
+	if (target == mob) {
 		return;
+	}
 
 	target = mob;
 	entity_list.UpdateHoTT(this);
-	
-	if(IsNPC())
+
+	if (IsNPC()) {
 		parse->EventNPC(EVENT_TARGET_CHANGE, CastToNPC(), mob, "", 0);
-	else if (IsClient())
+	}
+	else if (IsClient()) {
 		parse->EventPlayer(EVENT_TARGET_CHANGE, CastToClient(), "", 0);
 
-	if(IsPet() && GetOwner() && GetOwner()->IsClient())
-		GetOwner()->CastToClient()->UpdateXTargetType(MyPetTarget, mob);
+		if (this->CastToClient()->admin > 200) {
+			this->DisplayInfo(mob);
+		}
+	}
 
-	if (this->IsClient() && this->GetTarget() && this->CastToClient()->hp_other_update_throttle_timer.Check())
+	if (IsPet() && GetOwner() && GetOwner()->IsClient()) {
+		GetOwner()->CastToClient()->UpdateXTargetType(MyPetTarget, mob);
+	}
+
+	if (this->IsClient() && this->GetTarget() && this->CastToClient()->hp_other_update_throttle_timer.Check()) {
 		this->GetTarget()->SendHPUpdate(false, true);
+	}
 }
 
 // For when we want a Ground Z at a location we are not at yet
@@ -3633,11 +3649,10 @@ void Mob::SetEntityVariable(const char *id, const char *m_var)
 	m_EntityVariables[id] = n_m_var;
 }
 
-const char* Mob::GetEntityVariable(const char *id)
+const char *Mob::GetEntityVariable(const char *id)
 {
 	auto iter = m_EntityVariables.find(id);
-	if(iter != m_EntityVariables.end())
-	{
+	if (iter != m_EntityVariables.end()) {
 		return iter->second.c_str();
 	}
 	return nullptr;
@@ -5553,12 +5568,24 @@ bool Mob::HasSpellEffect(int effectid)
     return(0);
 }
 
-int Mob::GetSpecialAbility(int ability) {
-	if(ability >= MAX_SPECIAL_ATTACK || ability < 0) {
+int Mob::GetSpecialAbility(int ability)
+{
+	if (ability >= MAX_SPECIAL_ATTACK || ability < 0) {
 		return 0;
 	}
 
 	return SpecialAbilities[ability].level;
+}
+
+bool Mob::HasSpecialAbilities()
+{
+	for (int i = 0; i < MAX_SPECIAL_ATTACK; ++i) {
+		if (GetSpecialAbility(i)) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 int Mob::GetSpecialAbilityParam(int ability, int param) {

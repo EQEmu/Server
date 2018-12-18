@@ -116,17 +116,17 @@ public:
 	inline void AccountTable(std::string t) { account_table = t; }
 
 	/**
-	* Return the value of local_network.
+	* Return the value of world account table.
 	*/
 	inline std::string GetAccountTable() const { return account_table; }
 
 	/**
-	* Sets world account table.
+	* Sets world registration table.
 	*/
 	inline void WorldRegistrationTable(std::string t) { world_registration_table = t; }
 
 	/**
-	* Return the value of world account table.
+	* Return the value of world registration table.
 	*/
 	inline std::string GetWorldRegistrationTable() const { return world_registration_table; }
 
@@ -146,7 +146,7 @@ public:
 	inline void WorldServerTypeTable(std::string t) { world_server_type_table = t; }
 
 	/**
-	* Return the value of world admin account table.
+	* Return the value of world server type table.
 	*/
 	inline std::string GetWorldServerTypeTable() const { return world_server_type_table; }
 

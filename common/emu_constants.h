@@ -77,6 +77,11 @@ namespace EQEmu
 
 	} // namespace invtype
 
+	namespace popupresponse {
+		const int32 SERVER_INTERNAL_USE_BASE = 2000000000;
+		const int32 MOB_INFO_DISMISS         = 2000000001;
+	}
+
 	namespace invslot {
 		using namespace RoF2::invslot::enum_;
 

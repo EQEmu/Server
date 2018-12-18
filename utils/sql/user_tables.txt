@@ -85,6 +85,7 @@ reports
 respawn_times
 sharedbank
 spell_globals
+spell_buckets
 timers
 trader
 trader_audit

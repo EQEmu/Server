@@ -38,6 +38,7 @@
 RULE_CATEGORY(Character)
 RULE_INT(Character, MaxLevel, 65)
 RULE_BOOL(Character, PerCharacterQglobalMaxLevel, false) // This will check for qglobal 'CharMaxLevel' character qglobal (Type 5), if player tries to level beyond that point, it will not go beyond that level
+RULE_BOOL(Character, PerCharacterBucketMaxLevel, false) // This will check for data bucket 'CharMaxLevel', if player tries to level beyond that point, it will not go beyond that level
 RULE_INT(Character, MaxExpLevel, 0) //Sets the Max Level attainable via Experience
 RULE_INT(Character, DeathExpLossLevel, 10)	// Any level greater than this will lose exp on death
 RULE_INT(Character, DeathExpLossMaxLevel, 255)	// Any level greater than this will no longer lose exp on death
@@ -342,7 +343,8 @@ RULE_INT(Spells, TranslocateTimeLimit, 0) // If not zero, time in seconds to acc
 RULE_INT(Spells, SacrificeMinLevel, 46)	//first level Sacrifice will work on
 RULE_INT(Spells, SacrificeMaxLevel, 69)	//last level Sacrifice will work on
 RULE_INT(Spells, SacrificeItemID, 9963)	//Item ID of the item Sacrifice will return (defaults to an EE)
-RULE_BOOL(Spells, EnableSpellGlobals, false)	// If Enabled, spells check the spell_globals table and compare character data from the quest globals before allowing that spell to scribe with scribespells
+RULE_BOOL(Spells, EnableSpellGlobals, false)	// If Enabled, spells check the spell_globals table and compare character data from their quest globals before allowing the spell to scribe with scribespells/traindiscs
+RULE_BOOL(Spells, EnableSpellBuckets, false)    // If Enabled, spells check the spell_buckets table and compare character data from their data buckets before allowing the spell to scribe with scribespells/traindiscs
 RULE_INT(Spells, MaxBuffSlotsNPC, 60)	// default to Tit's limit
 RULE_INT(Spells, MaxSongSlotsNPC, 0)	// NPCs don't have songs ...
 RULE_INT(Spells, MaxDiscSlotsNPC, 0)	// NPCs don't have discs ...
@@ -509,6 +511,7 @@ RULE_BOOL(Combat, UseRevampHandToHand, false) // use h2h revamped dmg/delays I b
 RULE_BOOL(Combat, ClassicMasterWu, false) // classic master wu uses a random special, modern doesn't
 RULE_INT(Combat, LevelToStopDamageCaps, 0) // 1 will effectively disable them, 20 should give basically same results as old incorrect system
 RULE_BOOL(Combat, ClassicNPCBackstab, false) // true disables npc facestab - npcs get normal attack if not behind
+RULE_BOOL(Combat, UseNPCDamageClassLevelMods, true) // Uses GetClassLevelDamageMod calc in npc_scale_manager
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(NPC)

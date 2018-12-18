@@ -179,20 +179,20 @@ protected:
 	void	ResetState();	// Set state back to original
 	void	RandomSpawn(bool send_packet = false);		//spawn this ground spawn at a random place
 
-	Object_Struct	m_data;		// Packet data
-	EQEmu::ItemInstance*		m_inst;		// Item representing object
-	bool			m_inuse;	// Currently in use by a client?
-	uint32			m_id;		// Database key, different than drop_id
-	uint32			m_type;		// Object Type, ie, forge, oven, dropped item, etc (ref: ContainerUseTypes)
-	uint32			m_icon;		// Icon to use for forge, oven, etc
-	float			m_max_x;
-	float			m_max_y;
-	float			m_min_x;
-	float			m_min_y;
-	float			m_z;
-	float			m_heading;
-	bool			m_ground_spawn;
-	char			m_display_name[64];
+	Object_Struct m_data;        // Packet data
+	EQEmu::ItemInstance *m_inst;        // Item representing object
+	bool   m_inuse;    // Currently in use by a client?
+	uint32 m_id;        // Database key, different than drop_id
+	uint32 m_type;        // Object Type, ie, forge, oven, dropped item, etc (ref: ContainerUseTypes)
+	uint32 m_icon;        // Icon to use for forge, oven, etc
+	float  m_max_x;
+	float  m_max_y;
+	float  m_min_x;
+	float  m_min_y;
+	float  m_z;
+	float  m_heading;
+	bool   m_ground_spawn;
+	char   m_display_name[64];
 
 	std::map<std::string, std::string> o_EntityVariables;
 
