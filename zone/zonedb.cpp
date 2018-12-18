@@ -4049,8 +4049,8 @@ bool ZoneDatabase::LoadFactionData()
 		faction_array[index] = new Faction;
 		strn0cpy(faction_array[index]->name, row[1], 50);
 		faction_array[index]->base = atoi(row[2]);
-        faction_array[index]->min = MIN_PERSONAL_FACTION;
-        faction_array[index]->max = MAX_PERSONAL_FACTION;
+		faction_array[index]->min = MIN_PERSONAL_FACTION;
+		faction_array[index]->max = MAX_PERSONAL_FACTION;
 
 		// Load in the mimimum and maximum faction that can be earned for this faction
 		query = StringFormat("SELECT `min` , `max` FROM `faction_base_data` WHERE client_faction_id = %u", index);
@@ -4073,7 +4073,7 @@ bool ZoneDatabase::LoadFactionData()
 			continue;
 
 		for (auto modRow = modResults.begin(); modRow != modResults.end(); ++modRow) {
-				faction_array[index]->mods[modRow[1]] = atoi(modRow[0]);
+			faction_array[index]->mods[modRow[1]] = atoi(modRow[0]);
 		}
     }
 
