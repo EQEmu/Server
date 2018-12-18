@@ -59,31 +59,31 @@ FACTION_VALUE CalculateFaction(FactionMods* fm, int32 tmpCharacter_value)
 	if (fm) {
 		character_value += fm->base + fm->class_mod + fm->race_mod + fm->deity_mod;
 	}
-	if (character_value >= 1101) {
+	if (character_value >= 1100) {
 		return FACTION_ALLY;
 	}
-	if (character_value >= 701 && character_value <= 1100) {
+	if (character_value >= 750 && character_value <= 1099) {
 		return FACTION_WARMLY;
 	}
-	if (character_value >= 401 && character_value <= 700) {
+	if (character_value >= 500 && character_value <= 749) {
 		return FACTION_KINDLY;
 	}
-	if (character_value >= 101 && character_value <= 400) {
+	if (character_value >= 100 && character_value <= 499) {
 		return FACTION_AMIABLE;
 	}
-	if (character_value >= 0 && character_value <= 100) {
+	if (character_value >= 0 && character_value <= 99) {
 		return FACTION_INDIFFERENT;
 	}
 	if (character_value >= -100 && character_value <= -1) {
 		return FACTION_APPREHENSIVE;
 	}
-	if (character_value >= -700 && character_value <= -101) {
+	if (character_value >= -500 && character_value <= -101) {
 		return FACTION_DUBIOUS;
 	}
-	if (character_value >= -999 && character_value <= -701) {
+	if (character_value >= -750 && character_value <= -501) {
 		return FACTION_THREATENLY;
 	}
-	if (character_value <= -1000) {
+	if (character_value <= -751) {
 		return FACTION_SCOWLS;
 	}
 	return FACTION_INDIFFERENT;
