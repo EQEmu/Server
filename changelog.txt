@@ -1,5 +1,43 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 12/16/2018 ==
+Akkadius:
+    - Implemented: Global Base Scaling: https://github.com/EQEmu/Server/wiki/NPC-Scaling
+    - Implemented: Beginning of DevTools - more to be added over time (Status >= 200)
+        - Display NPC info on target
+        - Display Client info on target
+        - Display NPC show commands on target
+            - Loot
+            - Grids
+            - Emotes
+    - Implemented: Support for saylinks to be used in GM commands
+    - Deprecated: Commands
+        - #listnpcs
+    - Implemented: Commands
+        - #list [npcs|players|corpses|doors|objects] [search]
+            - Provides clickable saylinks to go to entities
+        - #scale [static/dynamic] (With targeted NPC)
+        - #scale [npc_name_search] [static/dynamic] (To make zone-wide changes)
+        - #scale all [static/dynamic]
+        - #devtools (alias #dev)
+    - Implemented: New Logging categories automatically injected into `logsys_categories` table
+        - Fixed an issue where newly injected categories were turned on by default
+
+== 12/15/2018 ==
+Kinglykrab: Added multiple new instance related quest functions.
+	1. quest::GetInstanceIDByCharID(const char *zone, int16 version, uint32 char_id)
+		- Allows you to pull the instance ID of a client by character ID.
+	2. quest::AssignToInstanceByCharID(uint16 instance_id, uint32 char_id)
+		- Allows you to assign an instance to a client by character ID.
+	3. quest::RemoveFromInstanceByCharID(uint16 instance_id, uint32 char_id)
+		- Allows you to remove a client from an instance by character ID.
+
+	Added spell buckets, similar to spell globals.
+		- Uses a new spell_buckets table and the Spells:EnableSpellBuckets rule.
+	
+	Added max level by data bucket.
+		- Uses data bucket char_id-CharMaxLevel and Character:PerCharacterBucketMaxLevel rule.
+
 == 10/09/2018 ==
 Uleat: Added bot owner options
 	- usage: ^owneroption [option] (or aliased as: ^oo [option])

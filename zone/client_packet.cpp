@@ -47,6 +47,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/spdat.h"
 #include "../common/string_util.h"
 #include "../common/zone_numbers.h"
+#include "data_bucket.h"
 #include "event_codes.h"
 #include "guild_mgr.h"
 #include "merc.h"
@@ -1419,6 +1420,15 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	drakkin_tattoo = m_pp.drakkin_tattoo;
 	drakkin_details = m_pp.drakkin_details;
 
+	// Max Level for Character:PerCharacterQglobalMaxLevel and Character:PerCharacterBucketMaxLevel
+	int client_max_level = 0;
+	if (RuleB(Character, PerCharacterQglobalMaxLevel)) {
+		client_max_level = GetCharMaxLevelFromQGlobal();
+	} else if (RuleB(Character, PerCharacterBucketMaxLevel)) {
+		client_max_level = GetCharMaxLevelFromBucket();
+	}
+	SetClientMaxLevel(client_max_level);
+	
 	// we know our class now, so we might have to fix our consume timer!
 	if (class_ == MONK)
 		consume_food_timer.SetTimer(CONSUMPTION_MNK_TIMER);
@@ -1746,6 +1756,15 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	/* Task Packets */
 	LoadClientTaskState();
 
+	/**
+	 * DevTools Load Settings
+	 */
+	if (Admin() >= 200) {
+		std::string dev_tools_window_key = StringFormat("%i-dev-tools-window-disabled", AccountID());
+		if (DataBucket::GetData(dev_tools_window_key) == "true") {
+			dev_tools_window_enabled = false;
+		}
+	}
 
 	if (m_ClientVersionBit & EQEmu::versions::bit_UFAndLater) {
 		outapp = new EQApplicationPacket(OP_XTargetResponse, 8);
@@ -10885,33 +10904,46 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 {
 
 	if (app->size != sizeof(PopupResponse_Struct)) {
-		Log(Logs::General, Logs::None, "Size mismatch in OP_PopupResponse expected %i got %i",
-			sizeof(PopupResponse_Struct), app->size);
+		Log(Logs::General,
+			Logs::None,
+			"Size mismatch in OP_PopupResponse expected %i got %i",
+			sizeof(PopupResponse_Struct),
+			app->size);
+
 		DumpPacket(app);
 		return;
 	}
-	PopupResponse_Struct *prs = (PopupResponse_Struct*)app->pBuffer;
 
-	// Handle any EQEmu defined popup Ids first
-	switch (prs->popupid)
-	{
-	case POPUPID_UPDATE_SHOWSTATSWINDOW:
-		if (GetTarget() && GetTarget()->IsClient())
-			GetTarget()->CastToClient()->SendStatsWindow(this, true);
-		else
-			SendStatsWindow(this, true);
-		return;
+	PopupResponse_Struct *popup_response = (PopupResponse_Struct *) app->pBuffer;
 
-	default:
-		break;
+	/**
+	 * Handle any EQEmu defined popup Ids first
+	 */
+	switch (popup_response->popupid) {
+		case POPUPID_UPDATE_SHOWSTATSWINDOW:
+			if (GetTarget() && GetTarget()->IsClient()) {
+				GetTarget()->CastToClient()->SendStatsWindow(this, true);
+			}
+			else {
+				SendStatsWindow(this, true);
+			}
+			return;
+			break;
+
+		case EQEmu::popupresponse::MOB_INFO_DISMISS:
+			this->SetDisplayMobInfoWindow(false);
+			this->Message(15, "[DevTools] Window snoozed in this zone...");
+			break;
+		default:
+			break;
 	}
 
 	char buf[16];
-	sprintf(buf, "%d\0", prs->popupid);
+	sprintf(buf, "%d\0", popup_response->popupid);
 
 	parse->EventPlayer(EVENT_POPUP_RESPONSE, this, buf, 0);
 
-	Mob* Target = GetTarget();
+	Mob *Target = GetTarget();
 	if (Target && Target->IsNPC()) {
 		parse->EventNPC(EVENT_POPUP_RESPONSE, Target->CastToNPC(), this, buf, 0);
 	}

@@ -40,6 +40,8 @@
 #include "string_ids.h"
 #include "worldserver.h"
 #include "water_map.h"
+#include "npc_scale_manager.h"
+#include "../common/say_link.h"
 
 #ifdef _WINDOWS
 	#define snprintf	_snprintf
@@ -2751,58 +2753,6 @@ char *EntityList::RemoveNumbers(char *name)
 	}
 	strn0cpy(name, tmp, sizeof(tmp));
 	return name;
-}
-
-void EntityList::ListNPCs(Client* client, const char *arg1, const char *arg2, uint8 searchtype)
-{
-	if (arg1 == 0)
-		searchtype = 0;
-	else if (arg2 == 0 && searchtype >= 2)
-		searchtype = 0;
-	uint32 x = 0;
-	uint32 z = 0;
-	char sName[36];
-
-	auto it = npc_list.begin();
-	client->Message(0, "NPCs in the zone:");
-	if (searchtype == 0) {
-		while (it != npc_list.end()) {
-			NPC *n = it->second;
-
-			client->Message(0, "  %5d: %s (%.0f, %0.f, %.0f)", n->GetID(), n->GetName(), n->GetX(), n->GetY(), n->GetZ());
-			x++;
-			z++;
-			++it;
-		}
-	} else if (searchtype == 1) {
-		client->Message(0, "Searching by name method. (%s)",arg1);
-		auto tmp = new char[strlen(arg1) + 1];
-		strcpy(tmp, arg1);
-		strupr(tmp);
-		while (it != npc_list.end()) {
-			z++;
-			strcpy(sName, it->second->GetName());
-			strupr(sName);
-			if (strstr(sName, tmp)) {
-				NPC *n = it->second;
-				client->Message(0, "  %5d: %s (%.0f, %.0f, %.0f)", n->GetID(), n->GetName(), n->GetX(), n->GetY(), n->GetZ());
-				x++;
-			}
-			++it;
-		}
-		safe_delete_array(tmp);
-	} else if (searchtype == 2) {
-		client->Message(0, "Searching by number method. (%s %s)",arg1,arg2);
-		while (it != npc_list.end()) {
-			z++;
-			if ((it->second->GetID() >= atoi(arg1)) && (it->second->GetID() <= atoi(arg2)) && (atoi(arg1) <= atoi(arg2))) {
-				client->Message(0, "  %5d: %s", it->second->GetID(), it->second->GetName());
-				x++;
-			}
-			++it;
-		}
-	}
-	client->Message(0, "%d npcs listed. There is a total of %d npcs in this zone.", x, z);
 }
 
 void EntityList::ListNPCCorpses(Client *client)

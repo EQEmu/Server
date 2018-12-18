@@ -789,33 +789,29 @@ int lua_merchant_count_item(uint32 npc_id, uint32 item_id) {
 
 std::string lua_item_link(int item_id) {
 	char text[250] = { 0 };
-	quest_manager.varlink(text, item_id);
 
-	return std::string(text);
+	return quest_manager.varlink(text, item_id);
 }
 
 std::string lua_say_link(const char *phrase, bool silent, const char *link_name) {
 	char text[256] = { 0 };
 	strncpy(text, phrase, 255);
-	quest_manager.saylink(text, silent, link_name);
 
-	return std::string(text);
+	return quest_manager.saylink(text, silent, link_name);
 }
 
 std::string lua_say_link(const char *phrase, bool silent) {
 	char text[256] = { 0 };
 	strncpy(text, phrase, 255);
-	quest_manager.saylink(text, silent, text);
 
-	return std::string(text);
+	return quest_manager.saylink(text, silent, text);
 }
 
 std::string lua_say_link(const char *phrase) {
 	char text[256] = { 0 };
 	strncpy(text, phrase, 255);
-	quest_manager.saylink(text, false, text);
 
-	return std::string(text);
+	return quest_manager.saylink(text, false, text);
 }
 
 std::string lua_get_data(std::string bucket_key) {
@@ -866,8 +862,16 @@ int lua_get_instance_id(const char *zone, uint32 version) {
 	return quest_manager.GetInstanceID(zone, version);
 }
 
+int lua_get_instance_id_by_char_id(const char *zone, uint32 version, uint32 char_id) {
+	return quest_manager.GetInstanceIDByCharID(zone, version, char_id);
+}
+
 void lua_assign_to_instance(uint32 instance_id) {
 	quest_manager.AssignToInstance(instance_id);
+}
+
+void lua_assign_to_instance_by_char_id(uint32 instance_id, uint32 char_id) {
+	quest_manager.AssignToInstanceByCharID(instance_id, char_id);
 }
 
 void lua_assign_group_to_instance(uint32 instance_id) {
@@ -880,6 +884,10 @@ void lua_assign_raid_to_instance(uint32 instance_id) {
 
 void lua_remove_from_instance(uint32 instance_id) {
 	quest_manager.RemoveFromInstance(instance_id);
+}
+
+void lua_remove_from_instance_by_char_id(uint32 instance_id, uint32 char_id) {
+	quest_manager.RemoveFromInstanceByCharID(instance_id, char_id);
 }
 
 void lua_remove_all_from_instance(uint32 instance_id) {
@@ -1430,19 +1438,19 @@ void lua_create_npc(luabind::adl::object table, float x, float y, float z, float
 	LuaCreateNPCParse(AC, uint32, 0);
 	LuaCreateNPCParse(Mana, uint32, 0);
 	LuaCreateNPCParse(ATK, uint32, 0);
-	LuaCreateNPCParse(STR, uint32, 75);
-	LuaCreateNPCParse(STA, uint32, 75);
-	LuaCreateNPCParse(DEX, uint32, 75);
-	LuaCreateNPCParse(AGI, uint32, 75);
-	LuaCreateNPCParse(INT, uint32, 75);
-	LuaCreateNPCParse(WIS, uint32, 75);
-	LuaCreateNPCParse(CHA, uint32, 75);
-	LuaCreateNPCParse(MR, int32, 25);
-	LuaCreateNPCParse(FR, int32, 25);
-	LuaCreateNPCParse(CR, int32, 25);
-	LuaCreateNPCParse(PR, int32, 25);
-	LuaCreateNPCParse(DR, int32, 25);
-	LuaCreateNPCParse(Corrup, int32, 25);
+	LuaCreateNPCParse(STR, uint32, 0);
+	LuaCreateNPCParse(STA, uint32, 0);
+	LuaCreateNPCParse(DEX, uint32, 0);
+	LuaCreateNPCParse(AGI, uint32, 0);
+	LuaCreateNPCParse(INT, uint32, 0);
+	LuaCreateNPCParse(WIS, uint32, 0);
+	LuaCreateNPCParse(CHA, uint32, 0);
+	LuaCreateNPCParse(MR, int32, 0);
+	LuaCreateNPCParse(FR, int32, 0);
+	LuaCreateNPCParse(CR, int32, 0);
+	LuaCreateNPCParse(PR, int32, 0);
+	LuaCreateNPCParse(DR, int32, 0);
+	LuaCreateNPCParse(Corrup, int32, 0);
 	LuaCreateNPCParse(PhR, int32, 0);
 	LuaCreateNPCParse(haircolor, uint8, 0);
 	LuaCreateNPCParse(beardcolor, uint8, 0);
@@ -1689,13 +1697,16 @@ luabind::scope lua_register_general() {
 		luabind::def("destroy_instance", &lua_destroy_instance),
 		luabind::def("update_instance_timer", &lua_update_instance_timer),
 		luabind::def("get_instance_id", &lua_get_instance_id),
+		luabind::def("get_instance_id_by_char_id", &lua_get_instance_id_by_char_id),
 		luabind::def("get_instance_timer", &lua_get_instance_timer),
 		luabind::def("get_instance_timer_by_id", &lua_get_instance_timer_by_id),
 		luabind::def("get_characters_in_instance", &lua_get_characters_in_instance),
 		luabind::def("assign_to_instance", &lua_assign_to_instance),
+		luabind::def("assign_to_instance_by_char_id", &lua_assign_to_instance_by_char_id),
 		luabind::def("assign_group_to_instance", &lua_assign_group_to_instance),
 		luabind::def("assign_raid_to_instance", &lua_assign_raid_to_instance),
 		luabind::def("remove_from_instance", &lua_remove_from_instance),
+		luabind::def("remove_from_instance_by_char_id", &lua_remove_from_instance_by_char_id),
 		luabind::def("remove_all_from_instance", &lua_remove_all_from_instance),
 		luabind::def("flag_instance_by_group_leader", &lua_flag_instance_by_group_leader),
 		luabind::def("flag_instance_by_raid_leader", &lua_flag_instance_by_raid_leader),

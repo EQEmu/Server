@@ -166,6 +166,10 @@ public:
 
 	bool is_distance_roamer;
 
+	void DisplayInfo(Mob *mob);
+
+public:
+
 	//Somewhat sorted: needs documenting!
 
 	//Attack
@@ -482,6 +486,11 @@ public:
 	inline virtual int32 GetINT() const { return INT + itembonuses.INT + spellbonuses.INT; }
 	inline virtual int32 GetWIS() const { return WIS + itembonuses.WIS + spellbonuses.WIS; }
 	inline virtual int32 GetCHA() const { return CHA + itembonuses.CHA + spellbonuses.CHA; }
+	inline virtual int32 GetHeroicMR() const { return 0; }
+	inline virtual int32 GetHeroicFR() const { return 0; }
+	inline virtual int32 GetHeroicDR() const { return 0; }
+	inline virtual int32 GetHeroicPR() const { return 0; }
+	inline virtual int32 GetHeroicCR() const { return 0; }
 	inline virtual int32 GetMR() const { return MR + itembonuses.MR + spellbonuses.MR; }
 	inline virtual int32 GetFR() const { return FR + itembonuses.FR + spellbonuses.FR; }
 	inline virtual int32 GetDR() const { return DR + itembonuses.DR + spellbonuses.DR; }
@@ -495,6 +504,13 @@ public:
 	inline StatBonuses* GetItemBonusesPtr() { return &itembonuses; }
 	inline StatBonuses* GetSpellBonusesPtr() { return &spellbonuses; }
 	inline StatBonuses* GetAABonusesPtr() { return &aabonuses; }
+	inline virtual int32 GetHeroicSTR() const { return 0; }
+	inline virtual int32 GetHeroicSTA() const { return 0; }
+	inline virtual int32 GetHeroicDEX() const { return 0; }
+	inline virtual int32 GetHeroicAGI() const { return 0; }
+	inline virtual int32 GetHeroicINT() const { return 0; }
+	inline virtual int32 GetHeroicWIS() const { return 0; }
+	inline virtual int32 GetHeroicCHA() const { return 0; }
 	inline virtual int32 GetMaxSTR() const { return GetSTR(); }
 	inline virtual int32 GetMaxSTA() const { return GetSTA(); }
 	inline virtual int32 GetMaxDEX() const { return GetDEX(); }
@@ -514,6 +530,7 @@ public:
 	inline int32 GetMaxMana() const { return max_mana; }
 	inline int32 GetMana() const { return current_mana; }
 	virtual int32 GetEndurance() const { return 0; }
+	virtual int32 GetMaxEndurance() const { return 0; }
 	virtual void SetEndurance(int32 newEnd) { return; }
 	int32 GetItemHPBonuses();
 	int32 GetSpellHPBonuses();
@@ -1049,6 +1066,7 @@ public:
  	inline bool Sanctuary() const { return spellbonuses.Sanctuary; }
 
 	bool HasNPCSpecialAtk(const char* parse);
+	bool HasSpecialAbilities();
 	int GetSpecialAbility(int ability);
 	int GetSpecialAbilityParam(int ability, int param);
 	void SetSpecialAbility(int ability, int level);
@@ -1145,6 +1163,10 @@ public:
 	void ResetAssistCap() { npc_assist_cap = 0; }
 	int GetWeaponDamage(Mob *against, const EQEmu::ItemData *weapon_item);
 	int GetWeaponDamage(Mob *against, const EQEmu::ItemInstance *weapon_item, uint32 *hate = nullptr);
+
+	int32 GetHPRegen() const;
+	int32 GetManaRegen() const;
+
 
 	// Bots HealRotation methods
 #ifdef BOTS
@@ -1476,7 +1498,6 @@ protected:
 
 	bool pAIControlled;
 	bool roamer;
-	bool logging_enabled;
 
 	int wandertype;
 	int pausetype;

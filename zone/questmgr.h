@@ -234,10 +234,13 @@ public:
 	uint32 GetInstanceTimerByID(uint16 instance_id = 0);
 	void DestroyInstance(uint16 instance_id);
 	uint16 GetInstanceID(const char *zone, int16 version);
+	uint16 GetInstanceIDByCharID(const char *zone, int16 version, uint32 char_id);
 	void AssignToInstance(uint16 instance_id);
+	void AssignToInstanceByCharID(uint16 instance_id, uint32 char_id);
 	void AssignGroupToInstance(uint16 instance_id);
 	void AssignRaidToInstance(uint16 instance_id);
 	void RemoveFromInstance(uint16 instance_id);
+	void RemoveFromInstanceByCharID(uint16 instance_id, uint32 char_id);
 	//void RemoveGroupFromInstance(uint16 instance_id);	//potentially useful but not implmented at this time.
 	//void RemoveRaidFromInstance(uint16 instance_id);	//potentially useful but not implmented at this time.
 	void RemoveAllFromInstance(uint16 instance_id);
@@ -245,7 +248,7 @@ public:
 	void FlagInstanceByGroupLeader(uint32 zone, int16 version);
 	void FlagInstanceByRaidLeader(uint32 zone, int16 version);
 	const char* varlink(char* perltext, int item_id);
-	const char* saylink(char* Phrase, bool silent, const char* LinkName);
+	std::string saylink(char *saylink_text, bool silent, const char *link_name);
 	const char* getguildnamebyid(int guild_id);
 	void SetRunning(bool val);
 	bool IsRunning();
