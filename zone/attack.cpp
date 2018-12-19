@@ -2695,16 +2695,24 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 
 #ifdef BOTS
 	// if other is a bot, add the bots client to the hate list
-	if (other->IsBot()) {
-		if (other->CastToBot()->GetBotOwner() && other->CastToBot()->GetBotOwner()->CastToClient()->GetFeigned()) {
-			AddFeignMemory(other->CastToBot()->GetBotOwner()->CastToClient());
+	while (other->IsBot()) {
+		auto other_ = other->CastToBot();
+		if (!other_ || !other_->GetBotOwner())
+			break;
+
+		auto owner_ = other_->GetBotOwner()->CastToClient();
+		if (!owner_ || owner_->IsDead() || !owner_->InZone()) // added isdead and inzone checks to avoid issues in AddAutoXTarget(...) below
+			break;
+
+		if (owner_->GetFeigned()) {
+			AddFeignMemory(owner_);
 		}
-		else {
-			if (!hate_list.IsEntOnHateList(other->CastToBot()->GetBotOwner())) {
-				hate_list.AddEntToHateList(other->CastToBot()->GetBotOwner(), 0, 0, false, true);
-				other->CastToBot()->GetBotOwner()->CastToClient()->AddAutoXTarget(this);
-			}
+		else if (!hate_list.IsEntOnHateList(owner_)) {
+			hate_list.AddEntToHateList(owner_, 0, 0, false, true);
+			owner_->AddAutoXTarget(this); // this was being called on dead/out-of-zone clients
 		}
+
+		break;
 	}
 #endif //BOTS
 
@@ -2716,6 +2724,7 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 		else {
 			if (!hate_list.IsEntOnHateList(other->CastToMerc()->GetMercOwner()))
 				hate_list.AddEntToHateList(other->CastToMerc()->GetMercOwner(), 0, 0, false, true);
+			// if mercs are reworked to include adding 'this' to owner's xtarget list, this should reflect bots code above
 		}
 	} //MERC
 
