@@ -266,10 +266,11 @@ IF(EQEMU_BUILD_LUA)
 	ADD_DEFINITIONS(-DLUA_EQEMU)
 ENDIF(EQEMU_BUILD_LUA)
 
-OPTION(EQEMU_USE_MAP_MMFS "Create and use Zone Map MMF files." OFF)
-IF(EQEMU_USE_MAP_MMFS)
-	ADD_DEFINITIONS(-DUSE_MAP_MMFS)
-ENDIF(EQEMU_USE_MAP_MMFS)
+#Disabled until reevaluation performed
+#OPTION(EQEMU_USE_MAP_MMFS "Create and use Zone Map MMF files." OFF)
+#IF(EQEMU_USE_MAP_MMFS)
+#	ADD_DEFINITIONS(-DUSE_MAP_MMFS)
+#ENDIF(EQEMU_USE_MAP_MMFS)
 
 SET(EQEMU_MAP_DIR "./Maps" CACHE STRING "The dir that maps, water maps, and paths are located in.")
 
