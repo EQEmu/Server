@@ -163,7 +163,7 @@ Mob::Mob(
 	}
 
 	// clients -- todo movement this doesn't take into account gm speed we need to fix that.
-
+	base_runspeed = (int)((float)runspeed * 40.0f);
 	if (runspeed == 0.7f) {
 		base_runspeed  = 28;
 		walkspeed      = 0.3f;
