@@ -785,15 +785,21 @@ void MobMovementManager::UpdatePath(Mob *who, float x, float y, float z, MobMove
 
 void MobMovementManager::UpdatePathGround(Mob * who, float x, float y, float z, MobMovementMode mode)
 {
+	PathfinderOptions opts;
+	opts.smooth_path = true;
+	opts.step_size = RuleR(Pathing, NavmeshStepSize);
+	opts.offset = who->GetZOffset();
+	opts.flags = PathingNotDisabled ^ PathingZoneLine;
+
 	//This is probably pointless since the nav mesh tool currently sets zonelines to disabled anyway
 	auto partial = false;
 	auto stuck = false;
-	auto route = zone->pathing->FindRoute(
+	auto route = zone->pathing->FindPath(
 		glm::vec3(who->GetX(), who->GetY(), who->GetZ()),
 		glm::vec3(x, y, z),
 		partial,
 		stuck,
-		PathingNotDisabled ^ PathingZoneLine);
+		opts);
 
 	auto eiter = _impl->Entries.find(who);
 	auto &ent = (*eiter);
@@ -864,14 +870,20 @@ void MobMovementManager::UpdatePathUnderwater(Mob *who, float x, float y, float 
 		return;
 	}
 
+	PathfinderOptions opts;
+	opts.smooth_path = true;
+	opts.step_size = RuleR(Pathing, NavmeshStepSize);
+	opts.offset = who->GetZOffset();
+	opts.flags = PathingNotDisabled ^ PathingZoneLine;
+
 	auto partial = false;
 	auto stuck = false;
-	auto route = zone->pathing->FindRoute(
+	auto route = zone->pathing->FindPath(
 		glm::vec3(who->GetX(), who->GetY(), who->GetZ()),
 		glm::vec3(x, y, z),
 		partial,
 		stuck,
-		PathingNotDisabled ^ PathingZoneLine);
+		opts);
 
 	if (route.size() == 0) {
 		HandleStuckBehavior(who, x, y, z, mode);

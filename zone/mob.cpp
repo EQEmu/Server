@@ -3441,7 +3441,7 @@ float Mob::FindDestGroundZ(glm::vec3 dest, float z_offset)
 	if (zone->zonemap != nullptr)
 	{
 		dest.z += z_offset;
-		best_z = zone->zonemap->FindClosestZ(dest, nullptr);
+		best_z = zone->zonemap->FindBestZ(dest, nullptr);
 	}
 	return best_z;
 }

@@ -314,6 +314,7 @@ RULE_INT(Pathing, CullNodesFromStart, 1)		// Checks LOS from Start point to seco
 RULE_INT(Pathing, CullNodesFromEnd, 1)		// Checks LOS from End point to second to last node for this many nodes and removes last node if there is LOS
 RULE_REAL(Pathing, CandidateNodeRangeXY, 400)		// When searching for path start/end nodes, only nodes within this range will be considered.
 RULE_REAL(Pathing, CandidateNodeRangeZ, 10)		// When searching for path start/end nodes, only nodes within this range will be considered.
+RULE_REAL(Pathing, NavmeshStepSize, 30.0f)
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Watermap)
