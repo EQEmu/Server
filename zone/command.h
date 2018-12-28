@@ -214,6 +214,7 @@ void command_profiledump(Client *c, const Seperator *sep);
 void command_profilereset(Client *c, const Seperator *sep);
 #endif
 
+void command_proximity(Client *c, const Seperator *sep);
 void command_push(Client *c, const Seperator *sep);
 void command_pvp(Client *c, const Seperator *sep);
 void command_qglobal(Client *c, const Seperator *sep);

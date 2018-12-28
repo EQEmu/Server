@@ -51,6 +51,7 @@ typedef struct {
 	float min_z;
 	float max_z;
 	bool say;
+	bool proximity_set;
 } NPCProximity;
 
 struct AISpells_Struct {
@@ -110,6 +111,7 @@ public:
 
 	virtual ~NPC();
 
+	static NPC *SpawnNodeNPC(std::string name, std::string last_name, const glm::vec4 &position);
 	static NPC *SpawnGridNodeNPC(std::string name, const glm::vec4 &position, uint32 grid_id, uint32 grid_number, uint32 pause);
 
 	//abstract virtual function implementations requird by base abstract class
@@ -355,6 +357,7 @@ public:
 	float GetProximityMaxY();
 	float GetProximityMinZ();
 	float GetProximityMaxZ();
+	bool  IsProximitySet();
 
 	ItemList	itemlist; //kathgar - why is this public? Doing other things or I would check the code
 

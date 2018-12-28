@@ -312,6 +312,7 @@ int command_init(void)
 #endif
 
 		command_add("push", "Lets you do spell push", 150, command_push) ||
+		command_add("proximity", "Shows NPC proximity", 150, command_proximity) ||
 		command_add("pvp", "[on/off] - Set your or your player target's PVP status", 100, command_pvp) ||
 		command_add("qglobal", "[on/off/view] - Toggles qglobal functionality on an NPC", 100, command_qglobal) ||
 		command_add("questerrors", "Shows quest errors.", 100, command_questerrors) ||
@@ -4927,6 +4928,49 @@ void command_push(Client *c, const Seperator *sep)
 		t->SetForcedMovement(6);
 	} else if (t->IsClient()) {
 		// TODO: send packet to push
+	}
+}
+
+void command_proximity(Client *c, const Seperator *sep)
+{
+	if (!c->GetTarget() && !c->GetTarget()->IsNPC()) {
+		c->Message(0, "You must target an NPC");
+		return;
+	}
+
+	for (auto &iter : entity_list.GetNPCList()) {
+		auto        npc  = iter.second;
+		std::string name = npc->GetName();
+
+		if (name.find("Proximity") != std::string::npos) {
+			npc->Depop();
+		}
+	}
+
+	NPC *npc = c->GetTarget()->CastToNPC();
+
+	if (npc->IsProximitySet()) {
+		glm::vec4 position;
+		position.w = npc->GetHeading();
+		position.x = npc->GetProximityMinX();
+		position.y = npc->GetProximityMinY();
+		position.z = npc->GetZ();
+
+		position.x = npc->GetProximityMinX();
+		position.y = npc->GetProximityMinY();
+		NPC::SpawnNodeNPC("Proximity", "", position);
+
+		position.x = npc->GetProximityMinX();
+		position.y = npc->GetProximityMaxY();
+		NPC::SpawnNodeNPC("Proximity", "", position);
+
+		position.x = npc->GetProximityMaxX();
+		position.y = npc->GetProximityMinY();
+		NPC::SpawnNodeNPC("Proximity", "", position);
+
+		position.x = npc->GetProximityMaxX();
+		position.y = npc->GetProximityMaxY();
+		NPC::SpawnNodeNPC("Proximity", "", position);
 	}
 }
 
