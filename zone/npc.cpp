@@ -2880,5 +2880,9 @@ float NPC::GetProximityMaxZ()
 
 bool NPC::IsProximitySet()
 {
-	return proximity->proximity_set;
+	if (proximity && proximity->proximity_set) {
+		return proximity->proximity_set;
+	}
+
+	return false;
 }
