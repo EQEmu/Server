@@ -1,5 +1,32 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+
+== 12/30/2018 ==
+
+Akkadius (KLS):
+
+# NPC Movement Overhaul
+
+"Recently, we landed massive changes to pathing logic (Navmesh) with NPC's that took a while to iron out but has been
+    an immensely positive addition to the EQEmu server core. With that, it's made us realize how much some related
+    functionality needed to be addressed and that involves "NPC movement logic". We've been needing to address
+    NPC movement logic for years as it has been fragmented and inconsistent all over the code which has made
+    fixing actual movement related issues a nightmare. There are many other technical things that we can go
+    into about it but the important part is that it is much improved! Special thanks to KLS for putting in a
+    lot of work to make this happen"
+
+    - NPC's should now smoothly path between source and destination, rather than "skipping" all over the place between
+        path points and sending sometimes several position updates, there should only be one update until NPC
+        changes heading or speed
+    - NPC pathing during flee and fear should be far improved
+    - NPC pathing inside of water should be far improved
+    - NPC transitions between water and land should now be seamless
+    - NPC transitions over verticals (hills) should be smoother as well
+    - NPC "Stuck" logic during path finding should be improved
+    - NPC Z coordinate plane correction now occurs during path calculation projection properly (as it should) instead of
+        brute forcing the current Z location along different path projections
+        - Example: https://bit.ly/2Ssn4Yp
+
 == 12/16/2018 ==
 Akkadius:
     - Implemented: Global Base Scaling: https://github.com/EQEmu/Server/wiki/NPC-Scaling
