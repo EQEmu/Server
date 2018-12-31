@@ -352,7 +352,7 @@ public:
 	void SetHideMe(bool hm);
 	inline uint16 GetPort() const { return port; }
 	bool IsDead() const { return(dead); }
-	bool IsUnconscious() const { return ((cur_hp <= 0) ? true : false); }
+	bool IsUnconscious() const { return ((current_hp <= 0) ? true : false); }
 	inline bool IsLFP() { return LFP; }
 	void UpdateLFP();
 
@@ -798,7 +798,7 @@ public:
 #ifdef PACKET_PROFILER
 	void DumpPacketProfile() { if(eqs) eqs->DumpPacketProfile(); }
 #endif
-	uint32 GetEquipment(uint8 material_slot) const; // returns item id
+	uint32 GetEquippedItemFromTextureSlot(uint8 material_slot) const; // returns item id
 	uint32 GetEquipmentColor(uint8 material_slot) const;
 	virtual void UpdateEquipmentLight() { m_Light.Type[EQEmu::lightsource::LightEquipment] = m_inv.FindBrightestLightType(); m_Light.Level[EQEmu::lightsource::LightEquipment] = EQEmu::lightsource::TypeToLevel(m_Light.Type[EQEmu::lightsource::LightEquipment]); }
 

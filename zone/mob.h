@@ -107,58 +107,59 @@ public:
 		AuraMgr() : count(0) { }
 	};
 
-	Mob(const char*	in_name,
-		const char*	in_lastname,
-		int32		in_cur_hp,
-		int32		in_max_hp,
-		uint8		in_gender,
-		uint16		in_race,
-		uint8		in_class,
-		bodyType	in_bodytype,
-		uint8		in_deity,
-		uint8		in_level,
-		uint32		in_npctype_id,
-		float		in_size,
-		float		in_runspeed,
-		const glm::vec4& position,
-		uint8		in_light,
-		uint8		in_texture,
-		uint8		in_helmtexture,
-		uint16		in_ac,
-		uint16		in_atk,
-		uint16		in_str,
-		uint16		in_sta,
-		uint16		in_dex,
-		uint16		in_agi,
-		uint16		in_int,
-		uint16		in_wis,
-		uint16		in_cha,
-		uint8		in_haircolor,
-		uint8		in_beardcolor,
-		uint8		in_eyecolor1, // the eyecolors always seem to be the same, maybe left and right eye?
-		uint8		in_eyecolor2,
-		uint8		in_hairstyle,
-		uint8		in_luclinface,
-		uint8		in_beard,
-		uint32		in_drakkin_heritage,
-		uint32		in_drakkin_tattoo,
-		uint32		in_drakkin_details,
-		EQEmu::TintProfile	in_armor_tint,
-		uint8		in_aa_title,
-		uint8		in_see_invis, // see through invis
-		uint8		in_see_invis_undead, // see through invis vs. undead
-		uint8		in_see_hide,
-		uint8		in_see_improved_hide,
-		int32		in_hp_regen,
-		int32		in_mana_regen,
-		uint8		in_qglobal,
-		uint8		in_maxlevel,
-		uint32		in_scalerate,
-		uint8		in_armtexture,
-		uint8		in_bracertexture,
-		uint8		in_handtexture,
-		uint8		in_legtexture,
-		uint8		in_feettexture
+	Mob(
+		const char *in_name,
+		const char *in_lastname,
+		int32 in_cur_hp,
+		int32 in_max_hp,
+		uint8 in_gender,
+		uint16 in_race,
+		uint8 in_class,
+		bodyType in_bodytype,
+		uint8 in_deity,
+		uint8 in_level,
+		uint32 in_npctype_id,
+		float in_size,
+		float in_runspeed,
+		const glm::vec4 &position,
+		uint8 in_light,
+		uint8 in_texture,
+		uint8 in_helmtexture,
+		uint16 in_ac,
+		uint16 in_atk,
+		uint16 in_str,
+		uint16 in_sta,
+		uint16 in_dex,
+		uint16 in_agi,
+		uint16 in_int,
+		uint16 in_wis,
+		uint16 in_cha,
+		uint8 in_haircolor,
+		uint8 in_beardcolor,
+		uint8 in_eyecolor1, // the eyecolors always seem to be the same, maybe left and right eye?
+		uint8 in_eyecolor2,
+		uint8 in_hairstyle,
+		uint8 in_luclinface,
+		uint8 in_beard,
+		uint32 in_drakkin_heritage,
+		uint32 in_drakkin_tattoo,
+		uint32 in_drakkin_details,
+		EQEmu::TintProfile in_armor_tint,
+		uint8 in_aa_title,
+		uint8 in_see_invis, // see through invis
+		uint8 in_see_invis_undead, // see through invis vs. undead
+		uint8 in_see_hide,
+		uint8 in_see_improved_hide,
+		int32 in_hp_regen,
+		int32 in_mana_regen,
+		uint8 in_qglobal,
+		uint8 in_maxlevel,
+		uint32 in_scalerate,
+		uint8 in_armtexture,
+		uint8 in_bracertexture,
+		uint8 in_handtexture,
+		uint8 in_legtexture,
+		uint8 in_feettexture
 	);
 	virtual ~Mob();
 
@@ -237,30 +238,43 @@ public:
 		return;
 	}
 
-	//Appearance
-	void SendLevelAppearance();
-	void SendStunAppearance();
-	void SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 parm4, uint32 parm5,
-		Client *specific_target=nullptr);
-	void SendTargetable(bool on, Client *specific_target = nullptr);
-	virtual void SendArmorAppearance(Client *one_client = nullptr);
-	virtual void SendWearChange(uint8 material_slot, Client *one_client = nullptr);
-	virtual void SendTextureWC(uint8 slot, uint16 texture, uint32 hero_forge_model = 0, uint32 elite_material = 0,
-		uint32 unknown06 = 0, uint32 unknown18 = 0);
-	virtual void SetSlotTint(uint8 material_slot, uint8 red_tint, uint8 green_tint, uint8 blue_tint);
-	virtual void WearChange(uint8 material_slot, uint16 texture, uint32 color, uint32 hero_forge_model = 0);
-	void DoAnim(const int animnum, int type=0, bool ackreq = true, eqFilterType filter = FilterNone);
-	void ProjectileAnimation(Mob* to, int item_id, bool IsArrow = false, float speed = 0,
-		float angle = 0, float tilt = 0, float arc = 0, const char *IDFile = nullptr, EQEmu::skills::SkillType skillInUse = EQEmu::skills::SkillArchery);
-	void ChangeSize(float in_size, bool bNoRestriction = false);
-	inline uint8 SeeInvisible() const { return see_invis; }
-	inline bool SeeInvisibleUndead() const { return see_invis_undead; }
+	/**
+	 ************************************************
+	 * Appearance
+	 ************************************************
+	 */
+
+	EQEmu::InternalTextureProfile mob_texture_profile = {};
+
+	bool IsInvisible(Mob* other = 0) const;
+
+	EQEmu::skills::SkillType AttackAnimation(int Hand, const EQEmu::ItemInstance* weapon, EQEmu::skills::SkillType skillinuse = EQEmu::skills::Skill1HBlunt);
+
+	inline bool GetSeeInvisible(uint8 see_invis);
 	inline bool SeeHide() const { return see_hide; }
 	inline bool SeeImprovedHide() const { return see_improved_hide; }
-	inline bool GetSeeInvisible(uint8 see_invis);
-	bool IsInvisible(Mob* other = 0) const;
+	inline bool SeeInvisibleUndead() const { return see_invis_undead; }
+	inline uint8 SeeInvisible() const { return see_invis; }
+
+	int32 GetTextureProfileMaterial(uint8 material_slot) const;
+	int32 GetTextureProfileColor(uint8 material_slot) const;
+	int32 GetTextureProfileHeroForgeModel(uint8 material_slot) const;
+
+	virtual void SendArmorAppearance(Client *one_client = nullptr);
+	virtual void SendTextureWC(uint8 slot, uint16 texture, uint32 hero_forge_model = 0, uint32 elite_material = 0, uint32 unknown06 = 0, uint32 unknown18 = 0);
+	virtual void SendWearChange(uint8 material_slot, Client *one_client = nullptr);
+	virtual void SetSlotTint(uint8 material_slot, uint8 red_tint, uint8 green_tint, uint8 blue_tint);
+	virtual void WearChange(uint8 material_slot, uint16 texture, uint32 color, uint32 hero_forge_model = 0);
+
+	void ChangeSize(float in_size, bool bNoRestriction = false);
+	void DoAnim(const int animnum, int type=0, bool ackreq = true, eqFilterType filter = FilterNone);
+	void ProjectileAnimation(Mob* to, int item_id, bool IsArrow = false, float speed = 0, float angle = 0, float tilt = 0, float arc = 0, const char *IDFile = nullptr, EQEmu::skills::SkillType skillInUse = EQEmu::skills::SkillArchery);
+	void SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 parm4, uint32 parm5, Client *specific_target=nullptr);
+	void SendLevelAppearance();
+	void SendStunAppearance();
+	void SendTargetable(bool on, Client *specific_target = nullptr);
 	void SetInvisible(uint8 state);
-	EQEmu::skills::SkillType AttackAnimation(int Hand, const EQEmu::ItemInstance* weapon, EQEmu::skills::SkillType skillinuse = EQEmu::skills::Skill1HBlunt);
+	void SetMobTextureProfile(uint8 material_slot, uint16 texture, uint32 color = 0, uint32 hero_forge_model = 0);
 
 	//Song
 	bool UseBardSpellLogic(uint16 spell_id = 0xffff, int slot = -1);
@@ -410,7 +424,7 @@ public:
 	bool CanFacestab() { return can_facestab; }
 	void SetFacestab(bool val) { can_facestab = val; }
 	virtual uint16 GetSkill(EQEmu::skills::SkillType skill_num) const { return 0; }
-	virtual uint32 GetEquipment(uint8 material_slot) const { return(0); }
+	virtual uint32 GetEquippedItemFromTextureSlot(uint8 material_slot) const { return(0); }
 	virtual int32 GetEquipmentMaterial(uint8 material_slot) const;
 	virtual int32 GetHerosForgeModel(uint8 material_slot) const;
 	virtual uint32 GetEquipmentColor(uint8 material_slot) const;
@@ -420,12 +434,12 @@ public:
 	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill) = 0;
 	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill,
 		bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None) = 0;
-	inline virtual void SetHP(int32 hp) { if (hp >= max_hp) cur_hp = max_hp; else cur_hp = hp;}
+	inline virtual void SetHP(int32 hp) { if (hp >= max_hp) current_hp = max_hp; else current_hp = hp;}
 	bool ChangeHP(Mob* other, int32 amount, uint16 spell_id = 0, int8 buffslot = -1, bool iBuffTic = false);
 	inline void SetOOCRegen(int32 newoocregen) {ooc_regen = newoocregen;}
 	virtual void Heal();
 	virtual void HealDamage(uint32 ammount, Mob* caster = nullptr, uint16 spell_id = SPELL_UNKNOWN);
-	virtual void SetMaxHP() { cur_hp = max_hp; }
+	virtual void SetMaxHP() { current_hp = max_hp; }
 	virtual inline uint16 GetBaseRace() const { return base_race; }
 	virtual inline uint8 GetBaseGender() const { return base_gender; }
 	virtual inline uint16 GetDeity() const { return deity; }
@@ -471,8 +485,8 @@ public:
 	inline Mob* GetTarget() const { return target; }
 	virtual void SetTarget(Mob* mob);
 	inline bool HasTargetReflection() const { return (target && target != this && target->target == this); }
-	virtual inline float GetHPRatio() const { return max_hp == 0 ? 0 : ((float)cur_hp/max_hp*100); }
-	virtual inline int GetIntHPRatio() const { return max_hp == 0 ? 0 : static_cast<int>(cur_hp * 100 / max_hp); }
+	virtual inline float GetHPRatio() const { return max_hp == 0 ? 0 : ((float)current_hp/max_hp*100); }
+	virtual inline int GetIntHPRatio() const { return max_hp == 0 ? 0 : static_cast<int>(current_hp * 100 / max_hp); }
 	inline int32 GetAC() const { return AC; }
 	inline virtual int32 GetATK() const { return ATK + itembonuses.ATK + spellbonuses.ATK; }
 	inline virtual int32 GetATKBonus() const { return itembonuses.ATK + spellbonuses.ATK; }
@@ -521,7 +535,7 @@ public:
 	inline virtual int32 GetMaxCR() const { return 255; }
 	inline virtual int32 GetMaxFR() const { return 255; }
 	inline virtual int32 GetDelayDeath() const { return 0; }
-	inline int32 GetHP() const { return cur_hp; }
+	inline int32 GetHP() const { return current_hp; }
 	inline int32 GetMaxHP() const { return max_hp; }
 	virtual int32 CalcMaxHP();
 	inline int32 GetMaxMana() const { return max_mana; }
@@ -1231,7 +1245,7 @@ protected:
 	int targeted;
 	bool findable;
 	bool trackable;
-	int32 cur_hp;
+	int32 current_hp;
 	int32 max_hp;
 	int32 base_hp;
 	int32 current_mana;

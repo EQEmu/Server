@@ -1274,32 +1274,35 @@ void EntityList::SendZoneSpawns(Client *client)
 
 void EntityList::SendZoneSpawnsBulk(Client *client)
 {
-	NewSpawn_Struct ns;
-	Mob *spawn;
-	uint32 maxspawns = 100;
+	NewSpawn_Struct     ns{};
+	Mob                 *spawn;
 	EQApplicationPacket *app;
 
-	if (maxspawns > mob_list.size())
-		maxspawns = mob_list.size();
-	auto bzsp = new BulkZoneSpawnPacket(client, maxspawns);
+	uint32 max_spawns = 100;
 
-	bool delaypkt = false;
-	const glm::vec4& cpos = client->GetPosition();
-	const float dmax = 600.0 * 600.0;
+	if (max_spawns > mob_list.size()) {
+		max_spawns = static_cast<uint32>(mob_list.size());
+	}
+
+	auto            bulk_zone_spawn_packet = new BulkZoneSpawnPacket(client, max_spawns);
+	const glm::vec4 &client_position       = client->GetPosition();
+	const float     distance_max           = (600.0 * 600.0);
+
 	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
 		spawn = it->second;
 		if (spawn && spawn->GetID() > 0 && spawn->Spawned()) {
-			if (!spawn->ShouldISpawnFor(client))
+			if (!spawn->ShouldISpawnFor(client)) {
 				continue;
+			}
 
-#if 1
-			const glm::vec4& spos = spawn->GetPosition();
+			const glm::vec4 &spawn_position = spawn->GetPosition();
 
-			delaypkt = false;
-			if (DistanceSquared(cpos, spos) > dmax || (spawn->IsClient() && (spawn->GetRace() == MINOR_ILL_OBJ || spawn->GetRace() == TREE)))
-				delaypkt = true;
+			bool is_delayed_packet = (
+				DistanceSquared(client_position, spawn_position) > distance_max ||
+				(spawn->IsClient() && (spawn->GetRace() == MINOR_ILL_OBJ || spawn->GetRace() == TREE))
+			);
 
-			if (delaypkt) {
+			if (is_delayed_packet) {
 				app = new EQApplicationPacket;
 				spawn->CreateSpawnPacket(app);
 				client->QueuePacket(app, true, Client::CLIENT_CONNECTED);
@@ -1308,35 +1311,38 @@ void EntityList::SendZoneSpawnsBulk(Client *client)
 			else {
 				memset(&ns, 0, sizeof(NewSpawn_Struct));
 				spawn->FillSpawnStruct(&ns, client);
-				bzsp->AddSpawn(&ns);
+				bulk_zone_spawn_packet->AddSpawn(&ns);
 			}
 
 			spawn->SendArmorAppearance(client);
-#else
-			/* original code kept for spawn packet research */
-			int32 race = spawn->GetRace();
-			
-			// Illusion races on PCs don't work as a mass spawn
-			// But they will work as an add_spawn AFTER CLIENT_CONNECTED.
-			if (spawn->IsClient() && (race == MINOR_ILL_OBJ || race == TREE)) {
-				app = new EQApplicationPacket;
-				spawn->CreateSpawnPacket(app);
-				client->QueuePacket(app, true, Client::CLIENT_CONNECTED);
-				safe_delete(app);
-			}
-			else {
-				memset(&ns, 0, sizeof(NewSpawn_Struct));
-				spawn->FillSpawnStruct(&ns, client);
-				bzsp->AddSpawn(&ns);
-			}
 
-			// Despite being sent in the OP_ZoneSpawns packet, the client
-			// does not display worn armor correctly so display it.
-			spawn->SendArmorAppearance(client);
-#endif
+			/**
+			 * Original code kept for spawn packet research
+			 *
+			 * int32 race = spawn->GetRace();
+			 *
+			 * Illusion races on PCs don't work as a mass spawn
+			 * But they will work as an add_spawn AFTER CLIENT_CONNECTED.
+			 * if (spawn->IsClient() && (race == MINOR_ILL_OBJ || race == TREE)) {
+			 * 	app = new EQApplicationPacket;
+			 * 	spawn->CreateSpawnPacket(app);
+			 * 	client->QueuePacket(app, true, Client::CLIENT_CONNECTED);
+			 * 	safe_delete(app);
+			 * }
+			 * else {
+			 * 	memset(&ns, 0, sizeof(NewSpawn_Struct));
+			 * 	spawn->FillSpawnStruct(&ns, client);
+			 * 	bzsp->AddSpawn(&ns);
+			 * }
+			 *
+			 * Despite being sent in the OP_ZoneSpawns packet, the client
+			 * does not display worn armor correctly so display it.
+			 * spawn->SendArmorAppearance(client);
+			*/
 		}
 	}
-	safe_delete(bzsp);
+
+	safe_delete(bulk_zone_spawn_packet);
 }
 
 //this is a hack to handle a broken spawn struct
@@ -3967,8 +3973,9 @@ Mob *EntityList::GetTargetForMez(Mob *caster)
 
 void EntityList::SendZoneAppearance(Client *c)
 {
-	if (!c)
+	if (!c) {
 		return;
+	}
 
 	auto it = mob_list.begin();
 	while (it != mob_list.end()) {
@@ -3983,7 +3990,7 @@ void EntityList::SendZoneAppearance(Client *c)
 				cur->SendAppearancePacket(AT_Anim, cur->GetAppearanceValue(cur->GetAppearance()), false, true, c);
 			}
 			if (cur->GetSize() != cur->GetBaseSize()) {
-				cur->SendAppearancePacket(AT_Size, (uint32)cur->GetSize(), false, true, c);
+				cur->SendAppearancePacket(AT_Size, (uint32) cur->GetSize(), false, true, c);
 			}
 		}
 		++it;

@@ -345,25 +345,22 @@ bool Client::Process() {
 		}
 
 		Mob *auto_attack_target = GetTarget();
-		if (auto_attack && auto_attack_target != nullptr && may_use_attacks && attack_timer.Check())
-		{
+		if (auto_attack && auto_attack_target != nullptr && may_use_attacks && attack_timer.Check()) {
 			//check if change
 			//only check on primary attack.. sorry offhand you gotta wait!
-			if (aa_los_them_mob)
-			{
+			if (aa_los_them_mob) {
 				if (auto_attack_target != aa_los_them_mob ||
 					m_AutoAttackPosition.x != GetX() ||
 					m_AutoAttackPosition.y != GetY() ||
 					m_AutoAttackPosition.z != GetZ() ||
 					m_AutoAttackTargetLocation.x != aa_los_them_mob->GetX() ||
 					m_AutoAttackTargetLocation.y != aa_los_them_mob->GetY() ||
-					m_AutoAttackTargetLocation.z != aa_los_them_mob->GetZ())
-				{
-					aa_los_them_mob = auto_attack_target;
-					m_AutoAttackPosition = GetPosition();
+					m_AutoAttackTargetLocation.z != aa_los_them_mob->GetZ()) {
+					aa_los_them_mob            = auto_attack_target;
+					m_AutoAttackPosition       = GetPosition();
 					m_AutoAttackTargetLocation = glm::vec3(aa_los_them_mob->GetPosition());
-					los_status = CheckLosFN(auto_attack_target);
-					los_status_facing = IsFacingMob(aa_los_them_mob);
+					los_status                 = CheckLosFN(auto_attack_target);
+					los_status_facing          = IsFacingMob(aa_los_them_mob);
 				}
 				// If only our heading changes, we can skip the CheckLosFN call
 				// but above we still need to update los_status_facing
@@ -372,25 +369,21 @@ bool Client::Process() {
 					los_status_facing = IsFacingMob(aa_los_them_mob);
 				}
 			}
-			else
-			{
-				aa_los_them_mob = auto_attack_target;
-				m_AutoAttackPosition = GetPosition();
+			else {
+				aa_los_them_mob            = auto_attack_target;
+				m_AutoAttackPosition       = GetPosition();
 				m_AutoAttackTargetLocation = glm::vec3(aa_los_them_mob->GetPosition());
-				los_status = CheckLosFN(auto_attack_target);
-				los_status_facing = IsFacingMob(aa_los_them_mob);
+				los_status                 = CheckLosFN(auto_attack_target);
+				los_status_facing          = IsFacingMob(aa_los_them_mob);
 			}
 
-			if (!CombatRange(auto_attack_target))
-			{
+			if (!CombatRange(auto_attack_target)) {
 				Message_StringID(MT_TooFarAway, TARGET_TOO_FAR);
 			}
-			else if (auto_attack_target == this)
-			{
+			else if (auto_attack_target == this) {
 				Message_StringID(MT_TooFarAway, TRY_ATTACKING_SOMEONE);
 			}
-			else if (!los_status || !los_status_facing)
-			{
+			else if (!los_status || !los_status_facing) {
 				//you can't see your target
 			}
 			else if (auto_attack_target->GetHP() > -10) // -10 so we can watch people bleed in PvP
@@ -400,8 +393,9 @@ bool Client::Process() {
 				TriggerDefensiveProcs(auto_attack_target, EQEmu::invslot::slotPrimary, false);
 
 				DoAttackRounds(auto_attack_target, EQEmu::invslot::slotPrimary);
-				if (CheckAATimer(aaTimerRampage))
+				if (CheckAATimer(aaTimerRampage)) {
 					entity_list.AEAttack(this, 30);
+				}
 			}
 		}
 

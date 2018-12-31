@@ -2965,13 +2965,12 @@ bool Client::BindWound(Mob *bindmob, bool start, bool fail)
 	return true;
 }
 
-void Client::SetMaterial(int16 in_slot, uint32 item_id) {
-	const EQEmu::ItemData* item = database.GetItem(item_id);
-	if (item && item->IsClassCommon())
-	{
+void Client::SetMaterial(int16 in_slot, uint32 item_id)
+{
+	const EQEmu::ItemData *item = database.GetItem(item_id);
+	if (item && item->IsClassCommon()) {
 		uint8 matslot = EQEmu::InventoryProfile::CalcMaterialFromSlot(in_slot);
-		if (matslot != EQEmu::textures::materialInvalid)
-		{
+		if (matslot != EQEmu::textures::materialInvalid) {
 			m_pp.item_material.Slot[matslot].Material = GetEquipmentMaterial(matslot);
 		}
 	}
@@ -8527,11 +8526,11 @@ void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold,
 }
 
 void Client::SendHPUpdateMarquee(){
-	if (!this || !this->IsClient() || !this->cur_hp || !this->max_hp)
+	if (!this || !this->IsClient() || !this->current_hp || !this->max_hp)
 		return;
 
 	/* Health Update Marquee Display: Custom*/
-	uint8 health_percentage = (uint8)(this->cur_hp * 100 / this->max_hp);
+	uint8 health_percentage = (uint8)(this->current_hp * 100 / this->max_hp);
 	if (health_percentage >= 100)
 		return;
 

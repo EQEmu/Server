@@ -1413,7 +1413,7 @@ void lua_create_npc(luabind::adl::object table, float x, float y, float z, float
 	luabind::adl::index_proxy<luabind::adl::object> cur = table["name"];
 	LuaCreateNPCParseString(name, 64, "_");
 	LuaCreateNPCParseString(lastname, 64, "");
-	LuaCreateNPCParse(cur_hp, int32, 30);
+	LuaCreateNPCParse(current_hp, int32, 30);
 	LuaCreateNPCParse(max_hp, int32, 30);
 	LuaCreateNPCParse(size, float, 6.0f);
 	LuaCreateNPCParse(runspeed, float, 1.25f);

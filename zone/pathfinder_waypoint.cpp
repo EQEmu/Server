@@ -529,7 +529,7 @@ void PathfinderWaypoint::ShowNode(const Node &n) {
 
 	sprintf(npc_type->name, "%s", DigitToWord(n.id).c_str());
 	sprintf(npc_type->lastname, "%i", n.id);
-	npc_type->cur_hp = 4000000;
+	npc_type->current_hp = 4000000;
 	npc_type->max_hp = 4000000;
 	npc_type->race = 2254;
 	npc_type->gender = 2;
