@@ -2826,15 +2826,12 @@ void command_test(Client *c, const Seperator *sep)
 {
 	c->Message(15, "Triggering test command");
 
-	// EQEmu::ItemInstance* fake_weapon_secondary = database.CreateItem(static_cast<uint32>(c->GetItemIDAt(EQEmu::invslot::slotSecondary)));
-	// fake_weapon_secondary->SetNewIDFile(c->GetEquipmentMaterial(EQEmu::textures::weaponSecondary));
-	// c->SendItemPacket(EQEmu::invslot::slotSecondary, fake_weapon_secondary, ItemPacketTrade);
-	// safe_delete(fake_weapon_secondary);
-
-	EQEmu::ItemInstance* fake_weapon = database.CreateItem(static_cast<uint32>(c->GetItemIDAt(EQEmu::invslot::slotPrimary)));
-	fake_weapon->SetNewIDFile(c->GetEquipmentMaterial(EQEmu::textures::weaponPrimary));
-	c->SendItemPacket(EQEmu::invslot::slotPrimary, fake_weapon, ItemPacketTrade);
-	safe_delete(fake_weapon);
+	if (sep->arg[1]) {
+		c->SetPrimaryWeaponOrnamentation(atoi(sep->arg[1]));
+	}
+	if (sep->arg[2]) {
+		c->SetSecondaryWeaponOrnamentation(atoi(sep->arg[2]));
+	}
 }
 
 void command_texture(Client *c, const Seperator *sep)

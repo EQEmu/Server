@@ -9021,7 +9021,48 @@ bool Client::IsDevToolsWindowEnabled() const
 	return dev_tools_window_enabled;
 }
 
+/**
+ * @param in_dev_tools_window_enabled
+ */
 void Client::SetDevToolsWindowEnabled(bool in_dev_tools_window_enabled)
 {
 	Client::dev_tools_window_enabled = in_dev_tools_window_enabled;
+}
+
+/**
+ * @param model_id
+ */
+void Client::SetPrimaryWeaponOrnamentation(uint32 model_id)
+{
+	if (GetItemIDAt(EQEmu::invslot::slotPrimary) > 0) {
+		database.QueryDatabase(
+			StringFormat(
+				"UPDATE `inventory` SET `ornamentidfile` = %i WHERE `charid` = %i AND `slotid` = %i",
+				model_id,
+				character_id,
+				EQEmu::invslot::slotPrimary
+			));
+
+		WearChange(EQEmu::textures::weaponPrimary, static_cast<uint16>(model_id), 0);
+		Message(15, "Your primary weapon appearance has been modified, changes will fully take affect next time you zone");
+	}
+}
+
+/**
+ * @param model_id
+ */
+void Client::SetSecondaryWeaponOrnamentation(uint32 model_id)
+{
+	if (GetItemIDAt(EQEmu::invslot::slotSecondary) > 0) {
+		database.QueryDatabase(
+			StringFormat(
+				"UPDATE `inventory` SET `ornamentidfile` = %i WHERE `charid` = %i AND `slotid` = %i",
+				model_id,
+				character_id,
+				EQEmu::invslot::slotSecondary
+			));
+
+		WearChange(EQEmu::textures::weaponSecondary, static_cast<uint16>(model_id), 0);
+		Message(15, "Your secondary weapon appearance has been modified, changes will fully take affect next time you zone");
+	}
 }
