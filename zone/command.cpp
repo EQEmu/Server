@@ -4969,6 +4969,10 @@ void command_proximity(Client *c, const Seperator *sep)
 
 	NPC *npc = c->GetTarget()->CastToNPC();
 
+	std::vector<FindPerson_Point> points;
+
+	FindPerson_Point p{};
+
 	if (npc->IsProximitySet()) {
 		glm::vec4 position;
 		position.w = npc->GetHeading();
@@ -4991,7 +4995,30 @@ void command_proximity(Client *c, const Seperator *sep)
 		position.x = npc->GetProximityMaxX();
 		position.y = npc->GetProximityMaxY();
 		NPC::SpawnNodeNPC("Proximity", "", position);
+
+		p.x = npc->GetProximityMinX();
+		p.y = npc->GetProximityMinY();
+		p.z = npc->GetZ();
+		points.push_back(p);
+
+		p.x = npc->GetProximityMinX();
+		p.y = npc->GetProximityMaxY();
+		points.push_back(p);
+
+		p.x = npc->GetProximityMaxX();
+		p.y = npc->GetProximityMaxY();
+		points.push_back(p);
+
+		p.x = npc->GetProximityMaxX();
+		p.y = npc->GetProximityMinY();
+		points.push_back(p);
+
+		p.x = npc->GetProximityMinX();
+		p.y = npc->GetProximityMinY();
+		points.push_back(p);
 	}
+
+	c->SendPathPacket(points);
 }
 
 void command_pvp(Client *c, const Seperator *sep)
