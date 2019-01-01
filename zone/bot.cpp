@@ -89,7 +89,7 @@ Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm
 	GenerateAppearance();
 	GenerateBaseStats();
 	// Calculate HitPoints Last As It Uses Base Stats
-	cur_hp = GenerateBaseHitPoints();
+	current_hp = GenerateBaseHitPoints();
 	current_mana = GenerateBaseManaPoints();
 	cur_end = CalcBaseEndurance();
 	hp_regen = CalcHPRegen();
@@ -137,7 +137,7 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 	_baseATK = npcTypeData.ATK;
 	_baseRace = npcTypeData.race;
 	_baseGender = npcTypeData.gender;
-	cur_hp = npcTypeData.cur_hp;
+	current_hp = npcTypeData.current_hp;
 	current_mana = npcTypeData.Mana;
 	RestRegenHP = 0;
 	RestRegenMana = 0;
@@ -209,10 +209,10 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 	hp_regen = CalcHPRegen();
 	mana_regen = CalcManaRegen();
 	end_regen = CalcEnduranceRegen();
-	if(cur_hp > max_hp)
-		cur_hp = max_hp;
+	if(current_hp > max_hp)
+		current_hp = max_hp;
 
-	if(cur_hp <= 0) {
+	if(current_hp <= 0) {
 		SetHP(max_hp/5);
 		SetMana(0);
 		BuffFadeAll();
@@ -336,7 +336,7 @@ NPCType Bot::FillNPCTypeStruct(uint32 botSpellsID, std::string botName, std::str
 	BotNPCType.drakkin_heritage = drakkinHeritage;
 	BotNPCType.drakkin_tattoo = drakkinTattoo;
 	BotNPCType.drakkin_details = drakkinDetails;
-	BotNPCType.cur_hp = hp;
+	BotNPCType.current_hp = hp;
 	BotNPCType.Mana = mana;
 	BotNPCType.MR = mr;
 	BotNPCType.CR = cr;
@@ -386,7 +386,7 @@ NPCType Bot::CreateDefaultNPCTypeStructForBot(std::string botName, std::string b
 	Result.maxlevel = botLevel;
 	Result.size = 6.0;
 	Result.npc_id = 0;
-	Result.cur_hp = 0;
+	Result.current_hp = 0;
 	Result.drakkin_details = 0;
 	Result.drakkin_heritage = 0;
 	Result.drakkin_tattoo = 0;
@@ -5147,7 +5147,7 @@ int Bot::GetHandToHandDamage(void) {
 		// everyone uses this in the revamp!
 		int skill = GetSkill(EQEmu::skills::SkillHandtoHand);
 		int epic = 0;
-		if (CastToNPC()->GetEquipment(EQEmu::textures::armorHands) == 10652 && GetLevel() > 46)
+		if (CastToNPC()->GetEquippedItemFromTextureSlot(EQEmu::textures::armorHands) == 10652 && GetLevel() > 46)
 			epic = 280;
 		if (epic > skill)
 			skill = epic;
@@ -5169,7 +5169,7 @@ int Bot::GetHandToHandDamage(void) {
 				9, 9, 9, 9, 9, 10, 10, 10, 10, 10,   // 31-40
 				10, 11, 11, 11, 11, 11, 11, 12, 12}; // 41-49
 	if (GetClass() == MONK) {
-		if (CastToNPC()->GetEquipment(EQEmu::textures::armorHands) == 10652 && GetLevel() > 50)
+		if (CastToNPC()->GetEquippedItemFromTextureSlot(EQEmu::textures::armorHands) == 10652 && GetLevel() > 50)
 			return 9;
 		if (level > 62)
 			return 15;
@@ -7159,14 +7159,14 @@ int32 Bot::CalcMaxHP() {
 	bot_hp += GroupLeadershipAAHealthEnhancement();
 	bot_hp += (bot_hp * ((spellbonuses.MaxHPChange + itembonuses.MaxHPChange) / 10000.0f));
 	max_hp = bot_hp;
-	if (cur_hp > max_hp)
-		cur_hp = max_hp;
+	if (current_hp > max_hp)
+		current_hp = max_hp;
 
 	int hp_perc_cap = spellbonuses.HPPercCap[0];
 	if(hp_perc_cap) {
 		int curHP_cap = ((max_hp * hp_perc_cap) / 100);
-		if (cur_hp > curHP_cap || (spellbonuses.HPPercCap[1] && cur_hp > spellbonuses.HPPercCap[1]))
-			cur_hp = curHP_cap;
+		if (current_hp > curHP_cap || (spellbonuses.HPPercCap[1] && current_hp > spellbonuses.HPPercCap[1]))
+			current_hp = curHP_cap;
 	}
 	return max_hp;
 }

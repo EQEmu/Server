@@ -2887,7 +2887,7 @@ int32 Client::GetEquipmentMaterial(uint8 material_slot)
 {
 	const ItemData *item;
 
-	item = database.GetItem(GetEquipment(material_slot));
+	item = database.GetItem(GetEquippedItemFromTextureSlot(material_slot));
 	if(item != 0)
 	{
 		return item->Material;

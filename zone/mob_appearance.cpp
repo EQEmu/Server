@@ -28,6 +28,10 @@
 #include "quest_parser_collection.h"
 #include "zonedb.h"
 
+#ifdef BOTS
+#include "bot.h"
+#endif
+
 /**
  * Stores internal representation of mob texture by material slot
  *

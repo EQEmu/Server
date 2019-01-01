@@ -624,7 +624,7 @@ XS(XS_Mob_GetEquipment); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetEquipment) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetEquipment(THIS, uint8 material_slot)");
+		Perl_croak(aTHX_ "Usage: Mob::GetEquippedItemFromTextureSlot(THIS, uint8 material_slot)");
 	{
 		Mob *THIS;
 		int32 RETVAL;

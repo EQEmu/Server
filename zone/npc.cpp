@@ -1058,7 +1058,7 @@ NPC * NPC::SpawnNodeNPC(std::string name, std::string last_name, const glm::vec4
 	sprintf(npc_type->name, "%s", name.c_str());
 	sprintf(npc_type->lastname, "%s", last_name.c_str());
 
-	npc_type->current_hp           = 4000000;
+	npc_type->current_hp       = 4000000;
 	npc_type->max_hp           = 4000000;
 	npc_type->race             = 2254;
 	npc_type->gender           = 2;
