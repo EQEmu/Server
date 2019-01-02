@@ -87,28 +87,5 @@ public:
 	~InitWinsock();
 };
 
-template<class T> class AutoDelete {
-public:
-	AutoDelete(T** iVar, T* iSetTo = 0) {
-		init(iVar, iSetTo);
-	}
-	AutoDelete() { pVar = nullptr; }
-	void init(T** iVar, T* iSetTo = 0)
-	{
-		pVar = iVar;
-		if (iSetTo)
-			*pVar = iSetTo;
-	}
-	~AutoDelete() {
-		if(pVar != nullptr)
-			safe_delete(*pVar);
-	}
-	void ReallyClearIt() {
-		pVar = nullptr;
-	}
-private:
-	T** pVar;
-};
-
 #endif
 

@@ -335,15 +335,6 @@ Mob *HateList::GetEntWithMostHateOnList(Mob *center, Mob *skip)
 				continue;
 			}
 
-            auto hateEntryPosition = glm::vec3(cur->entity_on_hatelist->GetX(), cur->entity_on_hatelist->GetY(), cur->entity_on_hatelist->GetZ());
-			if (center->IsNPC() && center->CastToNPC()->IsUnderwaterOnly() && zone->HasWaterMap()) {
-				if (!zone->watermap->InLiquid(hateEntryPosition)) {
-					skipped_count++;
-					++iterator;
-					continue;
-				}
-			}
-
 			if (cur->entity_on_hatelist->Sanctuary()) {
 				if (hate == -1)
 				{
@@ -472,14 +463,6 @@ Mob *HateList::GetEntWithMostHateOnList(Mob *center, Mob *skip)
 			if (cur->entity_on_hatelist == skip) {
 				++iterator;
 				continue;
-			}
-
-			if (center->IsNPC() && center->CastToNPC()->IsUnderwaterOnly() && zone->HasWaterMap()) {
-				if(!zone->watermap->InLiquid(glm::vec3(cur->entity_on_hatelist->GetPosition()))) {
-					skipped_count++;
-					++iterator;
-					continue;
-				}
 			}
 
 			if (cur->entity_on_hatelist != nullptr && ((cur->stored_hate_amount > hate) || cur->is_entity_frenzy))

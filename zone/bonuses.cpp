@@ -52,22 +52,18 @@ void Mob::CalcBonuses()
 		We set this here because NPC's can cast spells to change walkspeed/runspeed
 	*/
 	float get_walk_speed = static_cast<float>(0.025f * this->GetWalkspeed());
-	if (get_walk_speed >= 0.9 && this->fix_z_timer.GetDuration() != 100) {
-		this->fix_z_timer.SetTimer(100);
-	}
-
 	rooted = FindType(SE_Root);
 }
 
 void NPC::CalcBonuses()
 {
 	memset(&itembonuses, 0, sizeof(StatBonuses));
-	if(RuleB(NPC, UseItemBonusesForNonPets)){
+	if (RuleB(NPC, UseItemBonusesForNonPets)) {
 		memset(&itembonuses, 0, sizeof(StatBonuses));
 		CalcItemBonuses(&itembonuses);
 	}
-	else{
-		if(GetOwner()){
+	else {
+		if (GetOwner()) {
 			memset(&itembonuses, 0, sizeof(StatBonuses));
 			CalcItemBonuses(&itembonuses);
 		}

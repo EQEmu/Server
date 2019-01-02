@@ -42,7 +42,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/spdat.h"
 #include "../common/eqemu_logsys.h"
 
-
 #include "zone_config.h"
 #include "masterentity.h"
 #include "worldserver.h"
@@ -62,6 +61,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "embparser.h"
 #include "lua_parser.h"
 #include "questmgr.h"
+#include "npc_scale_manager.h"
 
 #include "../common/event/event_loop.h"
 #include "../common/event/timer.h"
@@ -104,12 +104,13 @@ npcDecayTimes_Struct npcCorpseDecayTimes[100];
 TitleManager title_manager;
 QueryServ *QServ = 0;
 TaskManager *taskmanager = 0;
+NpcScaleManager *npc_scale_manager;
 QuestParserCollection *parse = 0;
 EQEmuLogSys LogSys;
 const SPDat_Spell_Struct* spells;
 int32 SPDAT_RECORDS = -1;
 const ZoneConfig *Config;
-uint64_t frame_time = 0;
+double frame_time = 0.0;
 
 void Shutdown();
 extern void MapOpcodes();
@@ -222,7 +223,6 @@ int main(int argc, char** argv) {
 		worldserver.SetLauncherName("NONE");
 	}
 
-
 	Log(Logs::General, Logs::Zone_Server, "Connecting to MySQL...");
 	if (!database.Connect(
 		Config->DatabaseHost.c_str(),
@@ -254,6 +254,12 @@ int main(int argc, char** argv) {
 	/* Guilds */
 	guild_mgr.SetDatabase(&database);
 	GuildBanks = nullptr;
+
+	/**
+	 * NPC Scale Manager
+	 */
+	npc_scale_manager = new NpcScaleManager;
+	npc_scale_manager->LoadScaleData();
 
 #ifdef _EQDEBUG
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
@@ -447,7 +453,7 @@ int main(int argc, char** argv) {
 
 		//Calculate frame time
 		std::chrono::time_point<std::chrono::system_clock> frame_now = std::chrono::system_clock::now();
-		frame_time = std::chrono::duration_cast<std::chrono::milliseconds>(frame_now - frame_prev).count();
+		frame_time = std::chrono::duration_cast<std::chrono::duration<double>>(frame_now - frame_prev).count();
 		frame_prev = frame_now;
 
 		if (!eqsf_open && Config->ZonePort != 0) {

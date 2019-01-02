@@ -5273,7 +5273,7 @@ void bot_subcommand_bot_summon(Client *c, const Seperator *sep)
 
 		bot_iter->WipeHateList();
 		bot_iter->SetTarget(nullptr);
-		bot_iter->Warp(glm::vec3(c->GetPosition()));
+		bot_iter->Teleport(c->GetPosition());
 		bot_iter->DoAnim(0);
 
 		if (!bot_iter->HasPet())
@@ -5281,7 +5281,7 @@ void bot_subcommand_bot_summon(Client *c, const Seperator *sep)
 
 		bot_iter->GetPet()->WipeHateList();
 		bot_iter->GetPet()->SetTarget(nullptr);
-		bot_iter->GetPet()->Warp(glm::vec3(c->GetPosition()));
+		bot_iter->GetPet()->Teleport(c->GetPosition());
 	}
 
 	if (sbl.size() == 1)

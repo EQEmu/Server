@@ -5443,16 +5443,19 @@ namespace RoF2
 			ob.write((const char*)&evotop, sizeof(RoF2::structs::EvolvingItem));
 		}
 
-		//ORNAMENT IDFILE / ICON
-		int ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
-		uint32 ornaIcon = 0;
-		uint32 heroModel = 0;
+		/**
+		 * Ornamentation
+		 */
+		int    ornamentation_augment_type = RuleI(Character, OrnamentationAugmentType);
+		uint32 ornamentation_icon         = (inst->GetOrnamentationIcon() ? inst->GetOrnamentationIcon() : 0);
+		uint32 hero_model                 = 0;
 
-		if (inst->GetOrnamentationIDFile() && inst->GetOrnamentationIcon()) {
-			ornaIcon = inst->GetOrnamentationIcon();
-			heroModel = inst->GetOrnamentHeroModel(EQEmu::InventoryProfile::CalcMaterialFromSlot(slot_id_in));
+		if (inst->GetOrnamentationIDFile()) {
+			hero_model = inst->GetOrnamentHeroModel(EQEmu::InventoryProfile::CalcMaterialFromSlot(slot_id_in));
 
-			char tmp[30]; memset(tmp, 0x0, 30); sprintf(tmp, "IT%d", inst->GetOrnamentationIDFile());
+			char tmp[30];
+			memset(tmp, 0x0, 30);
+			sprintf(tmp, "IT%d", inst->GetOrnamentationIDFile());
 
 			//Mainhand
 			ob.write(tmp, strlen(tmp));
@@ -5469,9 +5472,9 @@ namespace RoF2
 
 		RoF2::structs::ItemSerializationHeaderFinish hdrf;
 
-		hdrf.ornamentIcon = ornaIcon;
+		hdrf.ornamentIcon = ornamentation_icon;
 		hdrf.unknowna1 = 0xffffffff;
-		hdrf.ornamentHeroModel = heroModel;
+		hdrf.ornamentHeroModel = hero_model;
 		hdrf.unknown063 = 0;
 		hdrf.Copied = 0;
 		hdrf.unknowna4 = 0xffffffff;
@@ -5488,8 +5491,16 @@ namespace RoF2
 			ob.write(item->Lore, strlen(item->Lore));
 		ob.write("\0", 1);
 
-		if (strlen(item->IDFile) > 0)
+		if (inst->GetNewIDFile() > 0) {
+			char new_id_file[30];
+			memset(new_id_file, 0x0, 30);
+			sprintf(new_id_file, "IT%d", inst->GetNewIDFile());
+			ob.write(new_id_file, strlen(new_id_file));
+		}
+		else if (strlen(item->IDFile) > 0) {
 			ob.write(item->IDFile, strlen(item->IDFile));
+		}
+
 		ob.write("\0", 1);
 
 		ob.write("\0", 1);

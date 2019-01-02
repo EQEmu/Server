@@ -208,7 +208,7 @@ Mob* QuestManager::spawn2(int npc_type, int grid, int unused, const glm::vec4& p
 	const NPCType* tmp = 0;
 	if (tmp = database.LoadNPCTypesData(npc_type))
 	{
-		auto npc = new NPC(tmp, nullptr, position, FlyMode3);
+		auto npc = new NPC(tmp, nullptr, position, GravityBehavior::Water);
 		npc->AddLootTable();
 		if (npc->DropsGlobalLoot())
 			npc->CheckGlobalLootTables();
@@ -217,7 +217,7 @@ Mob* QuestManager::spawn2(int npc_type, int grid, int unused, const glm::vec4& p
 		{
 			npc->AssignWaypoints(grid);
 		}
-		npc->SendPositionUpdate();
+
 		return npc;
 	}
 	return nullptr;
@@ -232,7 +232,7 @@ Mob* QuestManager::unique_spawn(int npc_type, int grid, int unused, const glm::v
 	const NPCType* tmp = 0;
 	if (tmp = database.LoadNPCTypesData(npc_type))
 	{
-		auto npc = new NPC(tmp, nullptr, position, FlyMode3);
+		auto npc = new NPC(tmp, nullptr, position, GravityBehavior::Water);
 		npc->AddLootTable();
 		if (npc->DropsGlobalLoot())
 			npc->CheckGlobalLootTables();
@@ -241,7 +241,7 @@ Mob* QuestManager::unique_spawn(int npc_type, int grid, int unused, const glm::v
 		{
 			npc->AssignWaypoints(grid);
 		}
-		npc->SendPositionUpdate();
+
 		return npc;
 	}
 	return nullptr;
@@ -308,22 +308,22 @@ Mob* QuestManager::spawn_from_spawn2(uint32 spawn2_id)
 		found_spawn->SetCurrentNPCID(npcid);
 
         auto position = glm::vec4(found_spawn->GetX(), found_spawn->GetY(), found_spawn->GetZ(), found_spawn->GetHeading());
-	auto npc = new NPC(tmp, found_spawn, position, FlyMode3);
+		auto npc = new NPC(tmp, found_spawn, position, GravityBehavior::Water);
 
-	found_spawn->SetNPCPointer(npc);
-	npc->AddLootTable();
-	if (npc->DropsGlobalLoot())
-		npc->CheckGlobalLootTables();
-	npc->SetSp2(found_spawn->SpawnGroupID());
-	entity_list.AddNPC(npc);
-	entity_list.LimitAddNPC(npc);
+		found_spawn->SetNPCPointer(npc);
+		npc->AddLootTable();
+		if (npc->DropsGlobalLoot())
+			npc->CheckGlobalLootTables();
+		npc->SetSp2(found_spawn->SpawnGroupID());
+		entity_list.AddNPC(npc);
+		entity_list.LimitAddNPC(npc);
 
-	if (sg->roamdist && sg->roambox[0] && sg->roambox[1] && sg->roambox[2] && sg->roambox[3] && sg->delay &&
-	    sg->min_delay)
-		npc->AI_SetRoambox(sg->roamdist, sg->roambox[0], sg->roambox[1], sg->roambox[2], sg->roambox[3],
-				   sg->delay, sg->min_delay);
-	if (zone->InstantGrids()) {
-		found_spawn->LoadGrid();
+		if (sg->roamdist && sg->roambox[0] && sg->roambox[1] && sg->roambox[2] && sg->roambox[3] && sg->delay &&
+			sg->min_delay)
+			npc->AI_SetRoambox(sg->roamdist, sg->roambox[0], sg->roambox[1], sg->roambox[2], sg->roambox[3],
+					   sg->delay, sg->min_delay);
+		if (zone->InstantGrids()) {
+			found_spawn->LoadGrid();
 		}
 
 		return npc;
@@ -1706,32 +1706,33 @@ void QuestManager::respawn(int npcTypeID, int grid) {
 	const NPCType* npcType = nullptr;
 	if ((npcType = database.LoadNPCTypesData(npcTypeID)))
 	{
-		owner = new NPC(npcType, nullptr, owner->GetPosition(), FlyMode3);
+		owner = new NPC(npcType, nullptr, owner->GetPosition(), GravityBehavior::Water);
 		owner->CastToNPC()->AddLootTable();
 		if (owner->CastToNPC()->DropsGlobalLoot())
 			owner->CastToNPC()->CheckGlobalLootTables();
 		entity_list.AddNPC(owner->CastToNPC(),true,true);
 		if(grid > 0)
 			owner->CastToNPC()->AssignWaypoints(grid);
-
-		owner->SendPositionUpdate();
 	}
 }
 
-void QuestManager::set_proximity(float minx, float maxx, float miny, float maxy, float minz, float maxz, bool bSay) {
+void QuestManager::set_proximity(float minx, float maxx, float miny, float maxy, float minz, float maxz, bool bSay)
+{
 	QuestManagerCurrentQuestVars();
-	if (!owner || !owner->IsNPC())
+	if (!owner || !owner->IsNPC()) {
 		return;
+	}
 
 	entity_list.AddProximity(owner->CastToNPC());
 
-	owner->CastToNPC()->proximity->min_x = minx;
-	owner->CastToNPC()->proximity->max_x = maxx;
-	owner->CastToNPC()->proximity->min_y = miny;
-	owner->CastToNPC()->proximity->max_y = maxy;
-	owner->CastToNPC()->proximity->min_z = minz;
-	owner->CastToNPC()->proximity->max_z = maxz;
-	owner->CastToNPC()->proximity->say = bSay;
+	owner->CastToNPC()->proximity->min_x         = minx;
+	owner->CastToNPC()->proximity->max_x         = maxx;
+	owner->CastToNPC()->proximity->min_y         = miny;
+	owner->CastToNPC()->proximity->max_y         = maxy;
+	owner->CastToNPC()->proximity->min_z         = minz;
+	owner->CastToNPC()->proximity->max_z         = maxz;
+	owner->CastToNPC()->proximity->say           = bSay;
+	owner->CastToNPC()->proximity->proximity_set = true;
 }
 
 void QuestManager::clear_proximity() {
@@ -2793,47 +2794,11 @@ void QuestManager::FlagInstanceByRaidLeader(uint32 zone, int16 version)
 	}
 }
 
-const char* QuestManager::saylink(char* Phrase, bool silent, const char* LinkName) {
+std::string QuestManager::saylink(char *saylink_text, bool silent, const char *link_name)
+{
 	QuestManagerCurrentQuestVars();
 
-	int sayid = 0;
-
-	int sz = strlen(Phrase);
-	auto escaped_string = new char[sz * 2];
-	database.DoEscapeString(escaped_string, Phrase, sz);
-
-	// Query for an existing phrase and id in the saylink table
-	std::string query = StringFormat("SELECT `id` FROM `saylink` WHERE `phrase` = '%s'", escaped_string);
-	auto results = database.QueryDatabase(query);
-	if (results.Success()) {
-		if (results.RowCount() >= 1) {
-			for (auto row = results.begin();row != results.end(); ++row)
-				sayid = atoi(row[0]);
-		} else {
-			std::string insert_query = StringFormat("INSERT INTO `saylink` (`phrase`) VALUES ('%s')", escaped_string);
-			results = database.QueryDatabase(insert_query);
-			if (!results.Success()) {
-				Log(Logs::General, Logs::Error, "Error in saylink phrase queries", results.ErrorMessage().c_str());
-			}
-			else {
-				sayid = results.LastInsertedID();
-			}
-		}
-	}
-	safe_delete_array(escaped_string);
-
-	//Create the say link as an item link hash
-	EQEmu::SayLinkEngine linker;
-	linker.SetProxyItemID(SAYLINK_ITEM_ID);
-	if (silent)
-		linker.SetProxyAugment2ID(sayid);
-	else
-		linker.SetProxyAugment1ID(sayid);
-	linker.SetProxyText(LinkName);
-
-	strcpy(Phrase, linker.GenerateLink().c_str());
-
-	return Phrase;
+	return EQEmu::SayLinkEngine::GenerateQuestSaylink(saylink_text, silent, link_name);
 }
 
 const char* QuestManager::getguildnamebyid(int guild_id) {
@@ -2859,22 +2824,18 @@ bool QuestManager::IsRunning()
 	return owner->IsRunning();
 }
 
-void QuestManager::FlyMode(uint8 flymode)
+void QuestManager::FlyMode(GravityBehavior flymode)
 {
 	QuestManagerCurrentQuestVars();
 	if(initiator)
 	{
-		if (flymode >= 0 && flymode < 3) {
-			initiator->SendAppearancePacket(AT_Levitate, flymode);
-			return;
-		}
+		initiator->SendAppearancePacket(AT_Levitate, static_cast<int>(flymode));
+		initiator->SetFlyMode(flymode);
 	}
-	if(owner)
+	else if(owner)
 	{
-		if (flymode >= 0 && flymode < 3) {
-			owner->SendAppearancePacket(AT_Levitate, flymode);
-			return;
-		}
+		owner->SendAppearancePacket(AT_Levitate, static_cast<int>(flymode));
+		owner->SetFlyMode(flymode);
 	}
 }
 

@@ -51,6 +51,7 @@ typedef struct {
 	float min_z;
 	float max_z;
 	bool say;
+	bool proximity_set;
 } NPCProximity;
 
 struct AISpells_Struct {
@@ -106,10 +107,11 @@ public:
 	static bool	SpawnZoneController();
 	static int8 GetAILevel(bool iForceReRead = false);
 
-	NPC(const NPCType* data, Spawn2* respawn, const glm::vec4& position, int iflymode, bool IsCorpse = false);
+	NPC(const NPCType* npc_type_data, Spawn2* respawn, const glm::vec4& position, GravityBehavior iflymode, bool IsCorpse = false);
 
 	virtual ~NPC();
 
+	static NPC *SpawnNodeNPC(std::string name, std::string last_name, const glm::vec4 &position);
 	static NPC *SpawnGridNodeNPC(std::string name, const glm::vec4 &position, uint32 grid_id, uint32 grid_number, uint32 pause);
 
 	//abstract virtual function implementations requird by base abstract class
@@ -142,9 +144,6 @@ public:
 	virtual void	AI_Event_SpellCastFinished(bool iCastSucceeded, uint16 slot);
 
 	void LevelScale();
-	void CalcNPCResists();
-	void CalcNPCRegen();
-	void CalcNPCDamage();
 
 	virtual void SetTarget(Mob* mob);
 	virtual uint16 GetSkill(EQEmu::skills::SkillType skill_num) const { if (skill_num <= EQEmu::skills::HIGHEST_SKILL) { return skills[skill_num]; } return 0; }
@@ -229,9 +228,6 @@ public:
 	EmuAppearance GetGuardPointAnim() const { return guard_anim; }
 	void SaveGuardPointAnim(EmuAppearance anim) { guard_anim = anim; }
 
-	void SetFlyMode(uint8 FlyMode){ flymode=FlyMode; }
-	uint32 GetFlyMode() const { return flymode; }
-
 	uint8 GetPrimSkill()	const { return prim_melee_type; }
 	uint8 GetSecSkill()	const { return sec_melee_type; }
 	uint8 GetRangedSkill() const { return ranged_type; }
@@ -255,12 +251,23 @@ public:
 
 	void	SignalNPC(int _signal_id);
 
-	inline int32	GetNPCFactionID()	const { return npc_faction_id; }
-	inline int32			GetPrimaryFaction()	const { return primary_faction; }
-	int32	GetNPCHate(Mob* in_ent) {return hate_list.GetEntHateAmount(in_ent);}
-	bool	IsOnHatelist(Mob*p) { return hate_list.IsEntOnHateList(p);}
+	inline int32 GetNPCFactionID() const
+	{ return npc_faction_id; }
 
-	void	SetNPCFactionID(int32 in) { npc_faction_id = in; database.GetFactionIdsForNPC(npc_faction_id, &faction_list, &primary_faction); }
+	inline int32 GetPrimaryFaction() const
+	{ return primary_faction; }
+
+	int32 GetNPCHate(Mob *in_ent)
+	{ return hate_list.GetEntHateAmount(in_ent); }
+
+	bool IsOnHatelist(Mob *p)
+	{ return hate_list.IsEntOnHateList(p); }
+
+	void SetNPCFactionID(int32 in)
+	{
+		npc_faction_id = in;
+		database.GetFactionIdsForNPC(npc_faction_id, &faction_list, &primary_faction);
+	}
 
     glm::vec4 m_SpawnPoint;
 
@@ -304,13 +311,16 @@ public:
 	void				MoveTo(const glm::vec4& position, bool saveguardspot);
 	void				GetClosestWaypoint(std::list<wplist> &wp_list, int count, const glm::vec3& location);
 
-	uint32				GetEquipment(uint8 material_slot) const;	// returns item id
+	uint32				GetEquippedItemFromTextureSlot(uint8 material_slot) const;	// returns item id
 	int32				GetEquipmentMaterial(uint8 material_slot) const;
 
 	void				NextGuardPosition();
-	void				SaveGuardSpot(bool iClearGuardSpot = false);
+	void				SaveGuardSpot(const glm::vec4 &pos);
 	inline bool			IsGuarding() const { return(m_GuardPoint.w != 0); }
 	void				SaveGuardSpotCharm();
+
+	uint16 GetMeleeTexture1() const;
+	uint16 GetMeleeTexture2() const;
 
 	void RestoreGuardSpotCharm();
 
@@ -341,6 +351,14 @@ public:
 	inline const uint32 GetNPCSpellsID()	const { return npc_spells_id; }
 	inline const uint32 GetNPCSpellsEffectsID()	const { return npc_spells_effects_id; }
 
+	float GetProximityMinX();
+	float GetProximityMaxX();
+	float GetProximityMinY();
+	float GetProximityMaxY();
+	float GetProximityMinZ();
+	float GetProximityMaxZ();
+	bool  IsProximitySet();
+
 	ItemList	itemlist; //kathgar - why is this public? Doing other things or I would check the code
 
 	NPCProximity* proximity;
@@ -357,7 +375,7 @@ public:
 	void	SetAvoidanceRating(int32 d) { avoidance_rating = d;}
 	int32 GetRawAC() const { return AC; }
 
-	void	ModifyNPCStat(const char *identifier, const char *newValue);
+	void	ModifyNPCStat(const char *identifier, const char *new_value);
 	virtual void SetLevel(uint8 in_level, bool command = false);
 
 	bool IsLDoNTrapped() const { return (ldon_trapped); }
@@ -384,7 +402,7 @@ public:
 	/* Only allows players that killed corpse to loot */
 	const bool HasPrivateCorpse() const { return NPCTypedata->private_corpse; }
 
-	const bool IsUnderwaterOnly() const { return NPCTypedata->underwater; }
+	virtual const bool IsUnderwaterOnly() const { return NPCTypedata->underwater; }
 	const char* GetRawNPCTypeName() const { return NPCTypedata->name; }
 
 	void ChangeLastName(const char* in_lastname);
@@ -435,7 +453,21 @@ public:
 
 	bool IgnoreDespawn() { return ignore_despawn; }
 
+	float GetRoamboxMaxX() const;
+	float GetRoamboxMaxY() const;
+	float GetRoamboxMinX() const;
+	float GetRoamboxMinY() const;
+	float GetRoamboxDistance() const;
+	float GetRoamboxDestinationX() const;
+	float GetRoamboxDestinationY() const;
+	float GetRoamboxDestinationZ() const;
+	uint32 GetRoamboxDelay() const;
+	uint32 GetRoamboxMinDelay() const;
+
 	std::unique_ptr<Timer> AIautocastspell_timer;
+
+	virtual int GetStuckBehavior() const { return NPCTypedata_ours ? NPCTypedata_ours->stuck_behavior : NPCTypedata->stuck_behavior; }
+
 
 protected:
 
@@ -549,7 +581,8 @@ protected:
 	uint32	equipment[EQEmu::invslot::EQUIPMENT_COUNT];	//this is an array of item IDs
 
 	uint32	herosforgemodel;			//this is the Hero Forge Armor Model (i.e 63 or 84 or 203)
-	uint16	d_melee_texture1;			//this is an item Material value
+	uint16	d_melee_texture1;
+	//this is an item Material value
 	uint16	d_melee_texture2;			//this is an item Material value (offhand)
 	const char*	ammo_idfile;			//this determines projectile graphic "IT###" (see item field 'idfile')
 	uint8	prim_melee_type;			//Sets the Primary Weapon attack message and animation

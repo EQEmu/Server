@@ -33,10 +33,13 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "zone.h"
 #include "lua_parser.h"
 #include "fastmath.h"
+#include "mob.h"
+
 
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <boost/concept_check.hpp>
 
 #ifdef BOTS
 #include "bot.h"
@@ -2667,12 +2670,6 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 			}
 		}
 	}
-
-	if (IsNPC() && CastToNPC()->IsUnderwaterOnly() && zone->HasWaterMap()) {
-		if (!zone->watermap->InLiquid(glm::vec3(other->GetPosition()))) {
-			return;
-		}
-	}
 	// first add self
 
 	// The damage on the hate list is used to award XP to the killer. This check is to prevent Killstealing.
@@ -2694,16 +2691,24 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 
 #ifdef BOTS
 	// if other is a bot, add the bots client to the hate list
-	if (other->IsBot()) {
-		if (other->CastToBot()->GetBotOwner() && other->CastToBot()->GetBotOwner()->CastToClient()->GetFeigned()) {
-			AddFeignMemory(other->CastToBot()->GetBotOwner()->CastToClient());
+	while (other->IsBot()) {
+		auto other_ = other->CastToBot();
+		if (!other_ || !other_->GetBotOwner())
+			break;
+
+		auto owner_ = other_->GetBotOwner()->CastToClient();
+		if (!owner_ || owner_->IsDead() || !owner_->InZone()) // added isdead and inzone checks to avoid issues in AddAutoXTarget(...) below
+			break;
+
+		if (owner_->GetFeigned()) {
+			AddFeignMemory(owner_);
 		}
-		else {
-			if (!hate_list.IsEntOnHateList(other->CastToBot()->GetBotOwner())) {
-				hate_list.AddEntToHateList(other->CastToBot()->GetBotOwner(), 0, 0, false, true);
-				other->CastToBot()->GetBotOwner()->CastToClient()->AddAutoXTarget(this);
-			}
+		else if (!hate_list.IsEntOnHateList(owner_)) {
+			hate_list.AddEntToHateList(owner_, 0, 0, false, true);
+			owner_->AddAutoXTarget(this); // this was being called on dead/out-of-zone clients
 		}
+
+		break;
 	}
 #endif //BOTS
 
@@ -2715,6 +2720,7 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 		else {
 			if (!hate_list.IsEntOnHateList(other->CastToMerc()->GetMercOwner()))
 				hate_list.AddEntToHateList(other->CastToMerc()->GetMercOwner(), 0, 0, false, true);
+			// if mercs are reworked to include adding 'this' to owner's xtarget list, this should reflect bots code above
 		}
 	} //MERC
 
@@ -5440,7 +5446,7 @@ void Mob::DoOffHandAttackRounds(Mob *target, ExtraAttackOptions *opts)
 	// For now, SPECATK_QUAD means innate DW when Combat:UseLiveCombatRounds is true
 	if ((GetSpecialAbility(SPECATK_INNATE_DW) ||
 		(RuleB(Combat, UseLiveCombatRounds) && GetSpecialAbility(SPECATK_QUAD))) ||
-		GetEquipment(EQEmu::textures::weaponSecondary) != 0) {
+		GetEquippedItemFromTextureSlot(EQEmu::textures::weaponSecondary) != 0) {
 		if (CheckDualWield()) {
 			Attack(target, EQEmu::invslot::slotSecondary, false, false, false, opts);
 			if (CanThisClassDoubleAttack() && GetLevel() > 35 && CheckDoubleAttack()) {
@@ -5462,4 +5468,14 @@ bool Mob::GetWasSpawnedInWater() const {
 
 void Mob::SetSpawnedInWater(bool spawned_in_water) {
 	Mob::spawned_in_water = spawned_in_water;
+}
+
+int32 Mob::GetHPRegen() const
+{
+	return hp_regen;
+}
+
+int32 Mob::GetManaRegen() const
+{
+	return mana_regen;
 }

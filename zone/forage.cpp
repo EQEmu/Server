@@ -284,7 +284,7 @@ void Client::GoFish()
 						if (tmp != nullptr) {
 							auto positionNPC = GetPosition();
 							positionNPC.x = positionNPC.x + 3;
-							auto npc = new NPC(tmp, nullptr, positionNPC, FlyMode3);
+							auto npc = new NPC(tmp, nullptr, positionNPC, GravityBehavior::Water);
 							npc->AddLootTable();
 							if (npc->DropsGlobalLoot())
 								npc->CheckGlobalLootTables();

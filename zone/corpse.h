@@ -126,7 +126,7 @@ class Corpse : public Mob {
 	void Spawn();
 
 	char		corpse_name[64];
-	uint32		GetEquipment(uint8 material_slot) const;
+	uint32		GetEquippedItemFromTextureSlot(uint8 material_slot) const;
 	uint32		GetEquipmentColor(uint8 material_slot) const;
 	inline int	GetRezExp() { return rez_experience; }
 

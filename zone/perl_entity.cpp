@@ -1355,7 +1355,7 @@ XS(XS_EntityList_OpenDoorsNear) {
 		Perl_croak(aTHX_ "Usage: EntityList::OpenDoorsNear(THIS, NPC* opener)");
 	{
 		EntityList *THIS;
-		NPC        *opener;
+		Mob        *opener;
 
 		if (sv_derived_from(ST(0), "EntityList")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -1365,11 +1365,11 @@ XS(XS_EntityList_OpenDoorsNear) {
 		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		if (sv_derived_from(ST(1), "NPC")) {
+		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
-			opener = INT2PTR(NPC *, tmp);
+			opener = INT2PTR(Mob *, tmp);
 		} else
-			Perl_croak(aTHX_ "opener is not of type NPC");
+			Perl_croak(aTHX_ "opener is not of type Mob");
 		if (opener == nullptr)
 			Perl_croak(aTHX_ "opener is nullptr, avoiding crash.");
 

@@ -496,7 +496,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger) {
 	}
 }
 
-void Doors::NPCOpen(NPC* sender, bool alt_mode)
+void Doors::Open(Mob* sender, bool alt_mode)
 {
 	if (sender) {
 		if (GetTriggerType() == 255 || GetTriggerDoorID() > 0 || GetLockpick() != 0 || GetKeyItem() != 0 || open_type == 59 || open_type == 58 || !sender->IsNPC()) { // this object isnt triggered or door is locked - NPCs should not open locked doors!
@@ -820,7 +820,7 @@ void Doors::SetDisableTimer(bool flag) {
 
 void Doors::CreateDatabaseEntry()
 {
-	if(database.GetDoorsDBCountPlusOne(zone->GetShortName(), zone->GetInstanceVersion()) - 1 >= 255) {
+	if (database.GetDoorsDBCountPlusOne(zone->GetShortName(), zone->GetInstanceVersion()) - 1 >= 255) {
 		return;
 	}
 
@@ -828,18 +828,32 @@ void Doors::CreateDatabaseEntry()
 	 * Persist
 	 */
 	database.InsertDoor(
-			GetDoorDBID(),
-			GetDoorID(),
-			GetDoorName(),
-			m_Position,
-			GetOpenType(),
-			static_cast<uint16>(GetGuildID()),
-			GetLockpick(),
-			GetKeyItem(),
-			static_cast<uint8>(GetDoorParam()),
-			static_cast<uint8>(GetInvertState()),
-			GetIncline(),
-			GetSize()
+		GetDoorDBID(),
+		GetDoorID(),
+		GetDoorName(),
+		m_Position,
+		GetOpenType(),
+		static_cast<uint16>(GetGuildID()),
+		GetLockpick(),
+		GetKeyItem(),
+		static_cast<uint8>(GetDoorParam()),
+		static_cast<uint8>(GetInvertState()),
+		GetIncline(),
+		GetSize()
 	);
 }
 
+float Doors::GetX()
+{
+	return m_Position.x;
+}
+
+float Doors::GetY()
+{
+	return m_Position.y;
+}
+
+float Doors::GetZ()
+{
+	return m_Position.z;
+}

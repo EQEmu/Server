@@ -826,8 +826,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #endif
 				if(IsClient())
 				{
-					CastToClient()->SetSenseExemption(true);
-
 					if (CastToClient()->ClientVersionBit() & EQEmu::versions::bit_SoDAndLater)
 					{
 						bodyType bt = BT_Undead;
@@ -853,7 +851,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 							SetHeading(CalculateHeadingToTarget(ClosestMob->GetX(), ClosestMob->GetY()));
 							SetTarget(ClosestMob);
 							CastToClient()->SendTargetCommand(ClosestMob->GetID());
-							SendPositionUpdate(2);
+							SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0, true);
 						}
 						else
 							Message_StringID(clientMessageError, SENSE_NOTHING);
@@ -4037,63 +4035,6 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 				if (IsNPC())
 					SetLevel(GetOrigLevel());
 				break;
-			}
-
-			case SE_MovementSpeed:
-			{
-				if(IsClient())
-				{
-					Client *my_c = CastToClient();
-					uint32 cur_time = Timer::GetCurrentTime();
-					if((cur_time - my_c->m_TimeSinceLastPositionCheck) > 1000)
-					{
-						float speed = (my_c->m_DistanceSinceLastPositionCheck * 100) / (float)(cur_time - my_c->m_TimeSinceLastPositionCheck);
-						float runs = my_c->GetRunspeed();
-						if(speed > (runs * RuleR(Zone, MQWarpDetectionDistanceFactor)))
-						{
-							if(!my_c->GetGMSpeed() && (runs >= my_c->GetBaseRunspeed() || (speed > (my_c->GetBaseRunspeed() * RuleR(Zone, MQWarpDetectionDistanceFactor)))))
-							{
-								printf("%s %i moving too fast! moved: %.2f in %ims, speed %.2f\n", __FILE__, __LINE__,
-									my_c->m_DistanceSinceLastPositionCheck, (cur_time - my_c->m_TimeSinceLastPositionCheck), speed);
-								if(my_c->IsShadowStepExempted())
-								{
-									if(my_c->m_DistanceSinceLastPositionCheck > 800)
-									{
-										my_c->CheatDetected(MQWarpShadowStep, my_c->GetX(), my_c->GetY(), my_c->GetZ());
-									}
-								}
-								else if(my_c->IsKnockBackExempted())
-								{
-									//still potential to trigger this if you're knocked back off a
-									//HUGE fall that takes > 2.5 seconds
-									if(speed > 30.0f)
-									{
-										my_c->CheatDetected(MQWarpKnockBack, my_c->GetX(), my_c->GetY(), my_c->GetZ());
-									}
-								}
-								else if(!my_c->IsPortExempted())
-								{
-									if(!my_c->IsMQExemptedArea(zone->GetZoneID(), my_c->GetX(), my_c->GetY(), my_c->GetZ()))
-									{
-										if(speed > (runs * 2 * RuleR(Zone, MQWarpDetectionDistanceFactor)))
-										{
-											my_c->m_TimeSinceLastPositionCheck = cur_time;
-											my_c->m_DistanceSinceLastPositionCheck = 0.0f;
-											my_c->CheatDetected(MQWarp, my_c->GetX(), my_c->GetY(), my_c->GetZ());
-											//my_c->Death(my_c, 10000000, SPELL_UNKNOWN, _1H_BLUNT);
-										}
-										else
-										{
-											my_c->CheatDetected(MQWarpLight, my_c->GetX(), my_c->GetY(), my_c->GetZ());
-										}
-									}
-								}
-							}
-						}
-					}
-					my_c->m_TimeSinceLastPositionCheck = cur_time;
-					my_c->m_DistanceSinceLastPositionCheck = 0.0f;
-				}
 			}
 		}
 	}

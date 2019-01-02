@@ -2858,26 +2858,24 @@ void Client::MoveSlotNotAllowed(bool client_update)
 }
 
 // these functions operate with a material slot, which is from 0 to 8
-uint32 Client::GetEquipment(uint8 material_slot) const
+uint32 Client::GetEquippedItemFromTextureSlot(uint8 material_slot) const
 {
-	int16 invslot;
+	int16 inventory_slot;
+
 	const EQEmu::ItemInstance *item;
 
-	if(material_slot > EQEmu::textures::LastTexture)
-	{
+	if (material_slot > EQEmu::textures::LastTexture) {
 		return 0;
 	}
 
-	invslot = EQEmu::InventoryProfile::CalcSlotFromMaterial(material_slot);
-	if (invslot == INVALID_INDEX)
-	{
+	inventory_slot = EQEmu::InventoryProfile::CalcSlotFromMaterial(material_slot);
+	if (inventory_slot == INVALID_INDEX) {
 		return 0;
 	}
 
-	item = m_inv.GetItem(invslot);
+	item = m_inv.GetItem(inventory_slot);
 
-	if(item && item->GetItem())
-	{
+	if (item && item->GetItem()) {
 		return item->GetItem()->ID;
 	}
 
@@ -2889,7 +2887,7 @@ int32 Client::GetEquipmentMaterial(uint8 material_slot)
 {
 	const ItemData *item;
 
-	item = database.GetItem(GetEquipment(material_slot));
+	item = database.GetItem(GetEquippedItemFromTextureSlot(material_slot));
 	if(item != 0)
 	{
 		return item->Material;
@@ -2904,7 +2902,7 @@ uint32 Client::GetEquipmentColor(uint8 material_slot) const
 	if (material_slot > EQEmu::textures::LastTexture)
 		return 0;
 
-	const EQEmu::ItemData *item = database.GetItem(GetEquipment(material_slot));
+	const EQEmu::ItemData *item = database.GetItem(GetEquippedItemFromTextureSlot(material_slot));
 	if(item != nullptr)
 		return ((m_pp.item_tint.Slot[material_slot].UseTint) ? m_pp.item_tint.Slot[material_slot].Color : item->Color);
 

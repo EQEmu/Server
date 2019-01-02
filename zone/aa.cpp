@@ -126,7 +126,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 			(npc_dup != nullptr) ? npc_dup : npc_type,	//make sure we give the NPC the correct data pointer
 			0,
 			GetPosition() + glm::vec4(swarmPetLocations[summon_count], 0.0f, 0.0f),
-			FlyMode3);
+			GravityBehavior::Water);
 
 		if (followme)
 			swarm_pet_npc->SetFollowID(GetID());
@@ -225,7 +225,7 @@ void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_overrid
 				(npc_dup!=nullptr)?npc_dup:npc_type,	//make sure we give the NPC the correct data pointer
 				0,
 				GetPosition() + glm::vec4(swarmPetLocations[summon_count], 0.0f, 0.0f),
-				FlyMode3);
+				GravityBehavior::Water);
 
 		if (followme)
 			swarm_pet_npc->SetFollowID(GetID());
@@ -286,7 +286,7 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration)
 	make_npc->min_dmg = 1;
 
 	//base stats
-	make_npc->cur_hp = (GetLevel() * 55);
+	make_npc->current_hp = (GetLevel() * 55);
 	make_npc->max_hp = (GetLevel() * 55);
 	make_npc->STR = 85 + (GetLevel() * 3);
 	make_npc->STA = 85 + (GetLevel() * 3);
@@ -356,51 +356,51 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration)
 	case PALADIN:
 		//SPECATK_TRIPLE
 		strcpy(make_npc->special_abilities, "6,1");
-		make_npc->cur_hp = make_npc->cur_hp * 150 / 100;
+		make_npc->current_hp = make_npc->current_hp * 150 / 100;
 		make_npc->max_hp = make_npc->max_hp * 150 / 100;
 		make_npc->npc_spells_id = 8;
 		break;
 	case SHADOWKNIGHT:
 		strcpy(make_npc->special_abilities, "6,1");
-		make_npc->cur_hp = make_npc->cur_hp * 150 / 100;
+		make_npc->current_hp = make_npc->current_hp * 150 / 100;
 		make_npc->max_hp = make_npc->max_hp * 150 / 100;
 		make_npc->npc_spells_id = 9;
 		break;
 	case RANGER:
 		strcpy(make_npc->special_abilities, "7,1");
-		make_npc->cur_hp = make_npc->cur_hp * 135 / 100;
+		make_npc->current_hp = make_npc->current_hp * 135 / 100;
 		make_npc->max_hp = make_npc->max_hp * 135 / 100;
 		make_npc->npc_spells_id = 10;
 		break;
 	case BARD:
 		strcpy(make_npc->special_abilities, "6,1");
-		make_npc->cur_hp = make_npc->cur_hp * 110 / 100;
+		make_npc->current_hp = make_npc->current_hp * 110 / 100;
 		make_npc->max_hp = make_npc->max_hp * 110 / 100;
 		make_npc->npc_spells_id = 11;
 		break;
 	case BEASTLORD:
 		strcpy(make_npc->special_abilities, "7,1");
-		make_npc->cur_hp = make_npc->cur_hp * 110 / 100;
+		make_npc->current_hp = make_npc->current_hp * 110 / 100;
 		make_npc->max_hp = make_npc->max_hp * 110 / 100;
 		make_npc->npc_spells_id = 12;
 		break;
 	case ROGUE:
 		strcpy(make_npc->special_abilities, "7,1");
 		make_npc->max_dmg = make_npc->max_dmg * 150 /100;
-		make_npc->cur_hp = make_npc->cur_hp * 110 / 100;
+		make_npc->current_hp = make_npc->current_hp * 110 / 100;
 		make_npc->max_hp = make_npc->max_hp * 110 / 100;
 		break;
 	case MONK:
 		strcpy(make_npc->special_abilities, "7,1");
 		make_npc->max_dmg = make_npc->max_dmg * 150 /100;
-		make_npc->cur_hp = make_npc->cur_hp * 135 / 100;
+		make_npc->current_hp = make_npc->current_hp * 135 / 100;
 		make_npc->max_hp = make_npc->max_hp * 135 / 100;
 		break;
 	case WARRIOR:
 	case BERSERKER:
 		strcpy(make_npc->special_abilities, "7,1");
 		make_npc->max_dmg = make_npc->max_dmg * 150 /100;
-		make_npc->cur_hp = make_npc->cur_hp * 175 / 100;
+		make_npc->current_hp = make_npc->current_hp * 175 / 100;
 		make_npc->max_hp = make_npc->max_hp * 175 / 100;
 		break;
 	default:
@@ -413,7 +413,7 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration)
 	make_npc->d_melee_texture1 = 0;
 	make_npc->d_melee_texture2 = 0;
 
-	auto npca = new NPC(make_npc, 0, GetPosition(), FlyMode3);
+	auto npca = new NPC(make_npc, 0, GetPosition(), GravityBehavior::Water);
 
 	if(!npca->GetSwarmInfo()){
 		auto nSI = new SwarmPet;

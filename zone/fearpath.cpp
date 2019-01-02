@@ -157,10 +157,8 @@ void Mob::ProcessFlee()
 
 void Mob::CalculateNewFearpoint() {
 	if (RuleB(Pathing, Fear) && zone->pathing) {
-		auto Node = zone->pathing->GetRandomLocation();
+		auto Node = zone->pathing->GetRandomLocation(glm::vec3(GetX(), GetY(), GetZ()));
 		if (Node.x != 0.0f || Node.y != 0.0f || Node.z != 0.0f) {
-
-			++Node.z;
 			m_FearWalkTarget  = Node;
 			currently_fleeing = true;
 
@@ -169,29 +167,7 @@ void Mob::CalculateNewFearpoint() {
 
 		Log(Logs::Detail,
 			Logs::Pathing,
-			"No path found to selected node. Falling through to old fear point selection.");
+			"No path found to selected node during CalculateNewFearpoint.");
 	}
-
-	int   loop = 0;
-	float ranx, rany, ranz;
-
-	currently_fleeing = true;
-	while (loop < 100) //Max 100 tries
-	{
-		int ran = 250 - (loop * 2);
-		loop++;
-		ranx    = GetX() + zone->random.Int(0, ran - 1) - zone->random.Int(0, ran - 1);
-		rany    = GetY() + zone->random.Int(0, ran - 1) - zone->random.Int(0, ran - 1);
-		ranz    = FindGroundZ(ranx, rany);
-		if (ranz == BEST_Z_INVALID)
-			continue;
-		float fdist = ranz - GetZ();
-		if (fdist >= -12 && fdist <= 12 && CheckCoordLosNoZLeaps(GetX(), GetY(), GetZ(), ranx, rany, ranz)) {
-			break;
-		}
-	}
-
-	if (currently_fleeing)
-		m_FearWalkTarget = glm::vec3(ranx, rany, ranz);
 }
 

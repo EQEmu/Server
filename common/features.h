@@ -150,7 +150,7 @@ enum {	//reuse times
 
 enum {	//timer settings, all in milliseconds
 	AImovement_duration = 100,
-	AIthink_duration = 150,
+	AIthink_duration = 50,
 	AIscanarea_delay = 6000,
 	AIfeignremember_delay = 500,
 	AItarget_check_duration = 500,
@@ -271,10 +271,6 @@ enum {
 	commandInterrogateInv = 100,	//below this == only log on error state and self-only target dump
 	commandInvSnapshot = 150		//ability to clear/restore snapshots
 };
-
-//default states for logging flag on NPCs and clients (having NPCs on by default is prolly a bad idea)
-#define CLIENT_DEFAULT_LOGGING_ENABLED true
-#define NPC_DEFAULT_LOGGING_ENABLED false
 
 
 // This is the item ID we use for say links, we use the max that fits in 5 ASCII chars

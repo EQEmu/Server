@@ -639,7 +639,7 @@ XS(XS_Mob_GetEquipment) {
 		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetEquipment(material_slot);
+		RETVAL = THIS->GetEquippedItemFromTextureSlot(material_slot);
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
 	}
@@ -1162,55 +1162,6 @@ XS(XS_Mob_GMMove) {
 		}
 
 		THIS->GMMove(x, y, z, heading);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Mob_SendPosUpdate); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Mob_SendPosUpdate) {
-	dXSARGS;
-	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Mob::SendPosUpdate(THIS, [uint8 send_to_self = 0])");
-	{
-		Mob *THIS;
-		uint8 iSendToSelf;
-
-		if (sv_derived_from(ST(0), "Mob")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Mob *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		if (items < 2)
-			iSendToSelf = 0;
-		else {
-			iSendToSelf = (uint8) SvUV(ST(1));
-		}
-
-		THIS->SendPositionUpdate(iSendToSelf);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Mob_SendPosition); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Mob_SendPosition) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::SendPosition(THIS)");
-	{
-		Mob *THIS;
-
-		if (sv_derived_from(ST(0), "Mob")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Mob *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		THIS->SendPosition();
 	}
 	XSRETURN_EMPTY;
 }
@@ -5526,20 +5477,71 @@ XS(XS_Mob_CalculateHeadingToTarget) {
 	XSRETURN(1);
 }
 
-XS(XS_Mob_CalculateNewPosition); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Mob_CalculateNewPosition) {
+XS(XS_Mob_RunTo); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_RunTo) {
 	dXSARGS;
-	if (items < 5 || items > 6)
+	if (items < 4 || items > 5)
 		Perl_croak(aTHX_
-		           "Usage: Mob::CalculateNewPosition(THIS, float x, float y, float z, float speed, [bool check_z = false])");
+			"Usage: Mob::RunTo(THIS, float x, float y, float z)");
 	{
 		Mob *THIS;
-		bool  RETVAL;
+		float x = (float)SvNV(ST(1));
+		float y = (float)SvNV(ST(2));
+		float z = (float)SvNV(ST(3));
+
+		if (sv_derived_from(ST(0), "Mob")) {
+			IV tmp = SvIV((SV *)SvRV(ST(0)));
+			THIS = INT2PTR(Mob *, tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Mob");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+
+		THIS->RunTo(x, y, z);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Mob_WalkTo); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_WalkTo) {
+	dXSARGS;
+	if (items < 4 || items > 5)
+		Perl_croak(aTHX_
+			"Usage: Mob::WalkTo(THIS, float x, float y, float z)");
+	{
+		Mob *THIS;
+		float x = (float)SvNV(ST(1));
+		float y = (float)SvNV(ST(2));
+		float z = (float)SvNV(ST(3));
+
+		if (sv_derived_from(ST(0), "Mob")) {
+			IV tmp = SvIV((SV *)SvRV(ST(0)));
+			THIS = INT2PTR(Mob *, tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Mob");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+
+		THIS->WalkTo(x, y, z);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Mob_NavigateTo); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_NavigateTo) {
+	dXSARGS;
+	if (items < 4 || items > 5)
+		Perl_croak(aTHX_
+		           "Usage: Mob::NavigateTo(THIS, float x, float y, float z)");
+	{
+		Mob *THIS;
 		float x     = (float) SvNV(ST(1));
 		float y     = (float) SvNV(ST(2));
 		float z     = (float) SvNV(ST(3));
-		float speed = (float) SvNV(ST(4));
-		bool  checkZ;
 
 		if (sv_derived_from(ST(0), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -5549,17 +5551,34 @@ XS(XS_Mob_CalculateNewPosition) {
 		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		if (items < 6)
-			checkZ = false;
-		else {
-			checkZ = (bool) SvTRUE(ST(5));
-		}
 
-		RETVAL = THIS->CalculateNewPosition(x, y, z, speed, checkZ);
-		ST(0)       = boolSV(RETVAL);
-		sv_2mortal(ST(0));
+		THIS->NavigateTo(x, y, z);
 	}
-	XSRETURN(1);
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Mob_StopNavigation); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_StopNavigation) {
+	dXSARGS;
+	if (items < 5 || items > 6)
+		Perl_croak(aTHX_
+			"Usage: Mob::StopNavigation(THIS)");
+	{
+		Mob *THIS;
+
+		if (sv_derived_from(ST(0), "Mob")) {
+			IV tmp = SvIV((SV *)SvRV(ST(0)));
+			THIS = INT2PTR(Mob *, tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Mob");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+
+		THIS->StopNavigation();
+	}
+	XSRETURN_EMPTY;
 }
 
 XS(XS_Mob_CalculateDistance); /* prototype to pass -Wmissing-prototypes */
@@ -6652,10 +6671,10 @@ XS(XS_Mob_SetFlyMode); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetFlyMode) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetFlyMode(THIS, uint8 flymode[0|1|2|3])");
+		Perl_croak(aTHX_ "Usage: Mob::SetFlyMode(THIS, uint8 flymode[0|1|2|3|4|5])");
 	{
 		Mob *THIS;
-		uint8 flymode = (uint8) SvIV(ST(1));
+		GravityBehavior flymode = (GravityBehavior) SvIV(ST(1));
 
 		if (sv_derived_from(ST(0), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -7271,28 +7290,6 @@ XS(XS_Mob_SetLD) {
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SendAppearancePacket(AT_Linkdead, value);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Mob_SetTargetDestSteps); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Mob_SetTargetDestSteps) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetTargetDestSteps(THIS, uint8 target_steps)");
-	{
-		Mob *THIS;
-		uint8 target_steps = (uint8) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "Mob")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Mob *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		THIS->SetTargetDestSteps(target_steps);
 	}
 	XSRETURN_EMPTY;
 }
@@ -8556,8 +8553,6 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "DoAnim"), XS_Mob_DoAnim, file, "$$;$");
 	newXSproto(strcpy(buf, "ChangeSize"), XS_Mob_ChangeSize, file, "$$;$");
 	newXSproto(strcpy(buf, "GMMove"), XS_Mob_GMMove, file, "$$$$;$");
-	newXSproto(strcpy(buf, "SendPosUpdate"), XS_Mob_SendPosUpdate, file, "$;$");
-	newXSproto(strcpy(buf, "SendPosition"), XS_Mob_SendPosition, file, "$");
 	newXSproto(strcpy(buf, "HasProcs"), XS_Mob_HasProcs, file, "$");
 	newXSproto(strcpy(buf, "IsInvisible"), XS_Mob_IsInvisible, file, "$;$");
 	newXSproto(strcpy(buf, "SetInvisible"), XS_Mob_SetInvisible, file, "$$");
@@ -8718,7 +8713,10 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "WipeHateList"), XS_Mob_WipeHateList, file, "$");
 	newXSproto(strcpy(buf, "CheckAggro"), XS_Mob_CheckAggro, file, "$$");
 	newXSproto(strcpy(buf, "CalculateHeadingToTarget"), XS_Mob_CalculateHeadingToTarget, file, "$$$");
-	newXSproto(strcpy(buf, "CalculateNewPosition"), XS_Mob_CalculateNewPosition, file, "$$$$$;$");
+	newXSproto(strcpy(buf, "RunTo"), XS_Mob_RunTo, file, "$$$$");
+	newXSproto(strcpy(buf, "WalkTo"), XS_Mob_WalkTo, file, "$$$$");
+	newXSproto(strcpy(buf, "NavigateTo"), XS_Mob_NavigateTo, file, "$$$$");
+	newXSproto(strcpy(buf, "StopNavigation"), XS_Mob_StopNavigation, file, "$");
 	newXSproto(strcpy(buf, "CalculateDistance"), XS_Mob_CalculateDistance, file, "$$$$");
 	newXSproto(strcpy(buf, "SendTo"), XS_Mob_SendTo, file, "$$$$");
 	newXSproto(strcpy(buf, "SendToFixZ"), XS_Mob_SendToFixZ, file, "$$$$");
@@ -8781,7 +8779,6 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "SetBodyType"), XS_Mob_SetBodyType, file, "$$;$");
 	newXSproto(strcpy(buf, "SetDeltas"), XS_Mob_SetDeltas, file, "$$$$$");
 	newXSproto(strcpy(buf, "SetLD"), XS_Mob_SetLD, file, "$$");
-	newXSproto(strcpy(buf, "SetTargetDestSteps"), XS_Mob_SetTargetDestSteps, file, "$$");
 	newXSproto(strcpy(buf, "SetTargetable"), XS_Mob_SetTargetable, file, "$$");
 	newXSproto(strcpy(buf, "MakeTempPet"), XS_Mob_MakeTempPet, file, "$$;$$$$");
 	newXSproto(strcpy(buf, "ModSkillDmgTaken"), XS_Mob_ModSkillDmgTaken, file, "$$$");

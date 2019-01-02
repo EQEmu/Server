@@ -954,7 +954,7 @@ bool Mob::CombatRange(Mob* other)
 	if (_DistNoRoot <= size_mod)
 	{
 		//A hack to kill an exploit till we get something better.
-		if (flymode == 0 && _zDist > 500 && !CheckLastLosState()) {
+		if (flymode != GravityBehavior::Flying && _zDist > 500 && !CheckLastLosState()) {
 			return false;
 		}
 

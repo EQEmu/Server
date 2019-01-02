@@ -2471,7 +2471,8 @@ const NPCType* ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		"npc_types.charm_avoidance_rating, "
 		"npc_types.charm_atk, "
 		"npc_types.skip_global_loot, "
-		"npc_types.rare_spawn "
+		"npc_types.rare_spawn, "
+		"npc_types.stuck_behavior "
 		"FROM npc_types %s",
 		where_condition.c_str()
 	);
@@ -2494,7 +2495,7 @@ const NPCType* ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		temp_npctype_data->race = atoi(row[3]);
 		temp_npctype_data->class_ = atoi(row[4]);
 		temp_npctype_data->max_hp = atoi(row[5]);
-		temp_npctype_data->cur_hp = temp_npctype_data->max_hp;
+		temp_npctype_data->current_hp = temp_npctype_data->max_hp;
 		temp_npctype_data->Mana = atoi(row[6]);
 		temp_npctype_data->gender = atoi(row[7]);
 		temp_npctype_data->texture = atoi(row[8]);
@@ -2637,7 +2638,7 @@ const NPCType* ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		temp_npctype_data->spellscale = atoi(row[86]);
 		temp_npctype_data->healscale = atoi(row[87]);
 		temp_npctype_data->no_target_hotkey = atoi(row[88]) == 1 ? true: false;
-		temp_npctype_data->raid_target = atoi(row[89]) == 0 ? false: true;
+		temp_npctype_data->raid_target = atoi(row[89]) == 0 ? false : true;
 		temp_npctype_data->attack_delay = atoi(row[90]) * 100; // TODO: fix DB
 		temp_npctype_data->light = (atoi(row[91]) & 0x0F);
 
@@ -2660,6 +2661,7 @@ const NPCType* ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 
 		temp_npctype_data->skip_global_loot = atoi(row[107]) != 0;
 		temp_npctype_data->rare_spawn = atoi(row[108]) != 0;
+		temp_npctype_data->stuck_behavior = atoi(row[109]);
 
 		// If NPC with duplicate NPC id already in table,
 		// free item we attempted to add.
@@ -2775,7 +2777,7 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 		tmpNPCType->race = atoi(row[3]);
 		tmpNPCType->class_ = atoi(row[4]);
 		tmpNPCType->max_hp = atoi(row[5]);
-		tmpNPCType->cur_hp = tmpNPCType->max_hp;
+		tmpNPCType->current_hp = tmpNPCType->max_hp;
 		tmpNPCType->Mana = atoi(row[6]);
 		tmpNPCType->gender = atoi(row[7]);
 		tmpNPCType->texture = atoi(row[8]);

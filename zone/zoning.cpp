@@ -95,7 +95,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 				//unable to find a zone point... is there anything else
 				//that can be a valid un-zolicited zone request?
 
-				CheatDetected(MQZone, zc->x, zc->y, zc->z);
+				//Todo cheat detection
 				Message(13, "Invalid unsolicited zone request.");
 				Log(Logs::General, Logs::Error, "Zoning %s: Invalid unsolicited zone request to zone id '%d'.", GetName(), target_zone_id);
 				SendZoneCancel(zc);
@@ -130,7 +130,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 			//then we assume this is invalid.
 			if(!zone_point || zone_point->target_zone_id != target_zone_id) {
 				Log(Logs::General, Logs::Error, "Zoning %s: Invalid unsolicited zone request to zone id '%d'.", GetName(), target_zone_id);
-				CheatDetected(MQGate, zc->x, zc->y, zc->z);
+				//todo cheat detection
 				SendZoneCancel(zc);
 				return;
 			}
@@ -252,7 +252,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		//for now, there are no other cases...
 
 		//could not find a valid reason for them to be zoning, stop it.
-		CheatDetected(MQZoneUnknownDest, 0.0, 0.0, 0.0);
+		//todo cheat detection
 		Log(Logs::General, Logs::Error, "Zoning %s: Invalid unsolicited zone request to zone id '%s'. Not near a zone point.", GetName(), target_zone_name);
 		SendZoneCancel(zc);
 		return;
@@ -296,7 +296,6 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 void Client::SendZoneCancel(ZoneChange_Struct *zc) {
 	//effectively zone them right back to where they were
 	//unless we find a better way to stop the zoning process.
-	SetPortExemption(true);
 	EQApplicationPacket *outapp = nullptr;
 	outapp = new EQApplicationPacket(OP_ZoneChange, sizeof(ZoneChange_Struct));
 	ZoneChange_Struct *zc2 = (ZoneChange_Struct*)outapp->pBuffer;
@@ -315,8 +314,6 @@ void Client::SendZoneCancel(ZoneChange_Struct *zc) {
 void Client::SendZoneError(ZoneChange_Struct *zc, int8 err)
 {
 	Log(Logs::General, Logs::Error, "Zone %i is not available because target wasn't found or character insufficent level", zc->zoneID);
-
-	SetPortExemption(true);
 
 	EQApplicationPacket *outapp = nullptr;
 	outapp = new EQApplicationPacket(OP_ZoneChange, sizeof(ZoneChange_Struct));
@@ -487,8 +484,6 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 
 	pShortZoneName = database.GetZoneName(zoneID);
 	database.GetZoneLongName(pShortZoneName, &pZoneName);
-
-	SetPortExemption(true);
 
 	if(!pZoneName) {
 		Message(13, "Invalid zone number specified");
@@ -669,7 +664,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 				m_Proximity = glm::vec3(m_Position);
 
 				//send out updates to people in zone.
-				SendPosition();
+				SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0);
 			}
 
 			auto outapp =

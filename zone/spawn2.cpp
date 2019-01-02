@@ -255,7 +255,7 @@ bool Spawn2::Process() {
 		}
 
 		currentnpcid = npcid;
-		NPC *npc = new NPC(tmp, this, glm::vec4(x, y, z, heading), FlyMode3);
+		NPC *npc = new NPC(tmp, this, glm::vec4(x, y, z, heading), GravityBehavior::Water);
 
 		npc->mod_prespawn(this);
 
