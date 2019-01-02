@@ -54,6 +54,7 @@
 #include "zone.h"
 #include "zone_config.h"
 #include "mob_movement_manager.h"
+#include "npc_scale_manager.h"
 
 #include <time.h>
 #include <ctime>
@@ -65,8 +66,6 @@
 #define strcasecmp	_stricmp
 #endif
 
-
-
 extern bool staticzone;
 extern NetConnection net;
 extern PetitionList petition_list;
@@ -74,6 +73,7 @@ extern QuestParserCollection* parse;
 extern uint32 numclients;
 extern WorldServer worldserver;
 extern Zone* zone;
+extern NpcScaleManager* npc_scale_manager;
 
 Mutex MZoneShutdown;
 
@@ -1509,17 +1509,21 @@ void Zone::RepopClose(const glm::vec4& client_position, uint32 repop_distance)
 	mod_repop();
 }
 
-void Zone::Repop(uint32 delay) {
+void Zone::Repop(uint32 delay)
+{
 
-	if(!Depop())
+	if (!Depop()) {
 		return;
+	}
 
-	LinkedListIterator<Spawn2*> iterator(spawn2_list);
+	LinkedListIterator<Spawn2 *> iterator(spawn2_list);
 
 	iterator.Reset();
 	while (iterator.MoreElements()) {
 		iterator.RemoveCurrent();
 	}
+
+	npc_scale_manager->LoadScaleData();
 
 	entity_list.ClearTrapPointers();
 
