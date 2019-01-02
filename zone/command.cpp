@@ -249,7 +249,7 @@ int command_init(void)
 		command_add("itemsearch", "[search criteria] - Search for an item", 10, command_itemsearch) ||
 		command_add("kick", "[charname] - Disconnect charname", 150, command_kick) ||
 		command_add("kill", "- Kill your target", 100, command_kill) ||
-		command_add("killallnpcs", "- Kills all npcs, also takes an optional npc name as parameter", 200, command_killallnpcs) ||
+		command_add("killallnpcs", " [npc_name] Kills all npcs by search name, leave blank for all attackable NPC's", 200, command_killallnpcs) ||
 		command_add("lastname", "[new lastname] - Set your or your player target's lastname", 50, command_lastname) ||
 		command_add("level", "[level] - Set your or your target's level", 10, command_level) ||
 		command_add("listnpcs", "[name/range] - Search NPCs", 20, command_listnpcs) ||

@@ -1,6 +1,28 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 
+== 1/1/2019 ==
+Akkadius:
+    - [Logging] Added new logging category "MobAppearance"
+    - [DevTools] Proximity show of NPC now shows a "Path finding" circle around the proximity nodes to more clearly display
+    - [Scaling] Global base scaling data now refreshes from the database on #repop
+    - [Commands] Implemented command #killallnpcs [npc_name] for testing, leave blank for all attackable NPC's
+    - NPC and Player Textures
+        - Textures that have been changed with #wearchange / #wc or any wearchange quest script call will now stick
+            for new clients entering a zone
+        - Weapon models for NPCs changed using wearchange will stick as well during combat and when new clients enter the zone
+        - The above changes allow for customization of a zone and NPC's without needing static data configured on npc_types
+            table data and allows for much more customization options
+        - Implemented Quest API Calls
+            Perl
+                $client->SetPrimaryWeaponOrnamentation(uint32 model_id);
+                $client->SetSecondaryWeaponOrnamentation(uint32 model_id);
+            Lua
+                client:SetPrimaryWeaponOrnamentation(uint32 model_id);
+                client:SetSecondaryWeaponOrnamentation(uint32 model_id);
+            - Both of these API calls persist an ornamentation to the weapon in the inventory table and will load both
+                in character select and cross zone
+
 == 12/30/2018 ==
 
 Akkadius (KLS):
