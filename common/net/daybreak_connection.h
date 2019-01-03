@@ -132,7 +132,6 @@ namespace EQ
 			std::unique_ptr<char[]> m_combined;
 			DaybreakConnectionStats m_stats;
 			Timestamp m_last_session_stats;
-			size_t m_resend_delay;
 			size_t m_rolling_ping;
 			Timestamp m_close_time;
 
@@ -142,6 +141,7 @@ namespace EQ
 				Timestamp last_sent;
 				Timestamp first_sent;
 				size_t times_resent;
+				size_t resend_delay;
 			};
 
 			struct DaybreakStream
@@ -205,10 +205,10 @@ namespace EQ
 			DaybreakConnectionManagerOptions() {
 				max_connection_count = 0;
 				keepalive_delay_ms = 9000;
-				resend_delay_ms = 150;
-				resend_delay_factor = 1.5;
+				resend_delay_ms = 30;
+				resend_delay_factor = 1.25;
 				resend_delay_min = 150;
-				resend_delay_max = 1000;
+				resend_delay_max = 3000;
 				connect_delay_ms = 500;
 				stale_connection_ms = 90000;
 				connect_stale_ms = 5000;

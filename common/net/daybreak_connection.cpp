@@ -278,7 +278,6 @@ EQ::Net::DaybreakConnection::DaybreakConnection(DaybreakConnectionManager *owner
 	m_hold_time = Clock::now();
 	m_buffered_packets_length = 0;
 	m_rolling_ping = 500;
-	m_resend_delay = (m_rolling_ping * m_owner->m_options.resend_delay_factor) + m_owner->m_options.resend_delay_ms;
 	m_combined.reset(new char[512]);
 	m_combined[0] = 0;
 	m_combined[1] = OP_Combined;
@@ -301,7 +300,6 @@ EQ::Net::DaybreakConnection::DaybreakConnection(DaybreakConnectionManager *owner
 	m_hold_time = Clock::now();
 	m_buffered_packets_length = 0;
 	m_rolling_ping = 500;
-	m_resend_delay = (m_rolling_ping * m_owner->m_options.resend_delay_factor) + m_owner->m_options.resend_delay_ms;
 	m_combined.reset(new char[512]);
 	m_combined[0] = 0;
 	m_combined[1] = OP_Combined;
@@ -356,9 +354,6 @@ void EQ::Net::DaybreakConnection::ResetStats()
 void EQ::Net::DaybreakConnection::Process()
 {
 	try {
-		m_resend_delay = (size_t)(m_rolling_ping * m_owner->m_options.resend_delay_factor) + m_owner->m_options.resend_delay_ms;
-		m_resend_delay = EQEmu::Clamp(m_resend_delay, m_owner->m_options.resend_delay_min, m_owner->m_options.resend_delay_max);
-
 		auto now = Clock::now();
 		auto time_since_hold = (size_t)std::chrono::duration_cast<std::chrono::milliseconds>(now - m_hold_time).count();
 		if (time_since_hold >= m_owner->m_options.hold_length_ms) {
@@ -1020,17 +1015,17 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 	if (m_status == DbProtocolStatus::StatusDisconnected) {
 		return;
 	}
-
+	
 	auto now = Clock::now();
 	auto s = &m_streams[stream];
 	for (auto &entry : s->sent_packets) {
 		auto time_since_last_send = std::chrono::duration_cast<std::chrono::milliseconds>(now - entry.second.last_sent);
 		if (entry.second.times_resent == 0) {
-			if ((size_t)time_since_last_send.count() > m_resend_delay) {
+			if ((size_t)time_since_last_send.count() > entry.second.resend_delay) {
 				InternalBufferedSend(entry.second.packet);
 				entry.second.last_sent = now;
 				entry.second.times_resent++;
-				m_rolling_ping += 100;
+				entry.second.resend_delay = EQEmu::Clamp(entry.second.resend_delay * 2, m_owner->m_options.resend_delay_min, m_owner->m_options.resend_delay_max);
 			}
 		}
 		else {
@@ -1039,12 +1034,12 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 				Close();
 				return;
 			}
-
-			if ((size_t)time_since_last_send.count() > m_resend_delay) {
+	
+			if ((size_t)time_since_last_send.count() > entry.second.resend_delay) {
 				InternalBufferedSend(entry.second.packet);
 				entry.second.last_sent = now;
 				entry.second.times_resent++;
-				m_rolling_ping += 100;
+				entry.second.resend_delay = EQEmu::Clamp(entry.second.resend_delay * 2, m_owner->m_options.resend_delay_min, m_owner->m_options.resend_delay_max);
 			}
 		}
 	}
@@ -1183,16 +1178,16 @@ void EQ::Net::DaybreakConnection::SendKeepAlive()
 void EQ::Net::DaybreakConnection::InternalSend(Packet &p)
 {
 	m_last_send = Clock::now();
-
+	
 	auto send_func = [](uv_udp_send_t* req, int status) {
 		delete[](char*)req->data;
 		delete req;
 	};
-
+	
 	if (PacketCanBeEncoded(p)) {
 		DynamicPacket out;
 		out.PutPacket(0, p);
-
+	
 		for (int i = 0; i < 2; ++i) {
 			switch (m_encode_passes[i]) {
 				case EncodeCompression:
@@ -1211,20 +1206,20 @@ void EQ::Net::DaybreakConnection::InternalSend(Packet &p)
 					break;
 			}
 		}
-
+	
 		AppendCRC(out);
-
+	
 		uv_udp_send_t *send_req = new uv_udp_send_t;
 		memset(send_req, 0, sizeof(*send_req));
 		sockaddr_in send_addr;
 		uv_ip4_addr(m_endpoint.c_str(), m_port, &send_addr);
 		uv_buf_t send_buffers[1];
-
+	
 		char *data = new char[out.Length()];
 		memcpy(data, out.Data(), out.Length());
 		send_buffers[0] = uv_buf_init(data, out.Length());
 		send_req->data = send_buffers[0].base;
-
+	
 		m_stats.sent_bytes += out.Length();
 		m_stats.sent_packets++;
 		if (m_owner->m_options.simulated_out_packet_loss && m_owner->m_options.simulated_out_packet_loss >= m_owner->m_rand.Int(0, 100)) {
@@ -1232,30 +1227,30 @@ void EQ::Net::DaybreakConnection::InternalSend(Packet &p)
 			delete send_req;
 			return;
 		}
-
+	
 		uv_udp_send(send_req, &m_owner->m_socket, send_buffers, 1, (sockaddr*)&send_addr, send_func);
 		return;
 	}
-
+	
 	uv_udp_send_t *send_req = new uv_udp_send_t;
 	sockaddr_in send_addr;
 	uv_ip4_addr(m_endpoint.c_str(), m_port, &send_addr);
 	uv_buf_t send_buffers[1];
-
+	
 	char *data = new char[p.Length()];
 	memcpy(data, p.Data(), p.Length());
 	send_buffers[0] = uv_buf_init(data, p.Length());
 	send_req->data = send_buffers[0].base;
-
+	
 	m_stats.sent_bytes += p.Length();
 	m_stats.sent_packets++;
-
+	
 	if (m_owner->m_options.simulated_out_packet_loss && m_owner->m_options.simulated_out_packet_loss >= m_owner->m_rand.Int(0, 100)) {
 		delete[](char*)send_req->data;
 		delete send_req;
 		return;
 	}
-
+	
 	uv_udp_send(send_req, &m_owner->m_socket, send_buffers, 1, (sockaddr*)&send_addr, send_func);
 }
 
@@ -1294,6 +1289,10 @@ void EQ::Net::DaybreakConnection::InternalQueuePacket(Packet &p, int stream_id, 
 		sent.last_sent = Clock::now();
 		sent.first_sent = Clock::now();
 		sent.times_resent = 0;
+		sent.resend_delay = EQEmu::Clamp(
+			static_cast<size_t>((m_rolling_ping * m_owner->m_options.resend_delay_factor) + m_owner->m_options.resend_delay_ms), 
+			m_owner->m_options.resend_delay_min, 
+			m_owner->m_options.resend_delay_max);
 		stream->sent_packets.insert(std::make_pair(stream->sequence_out, sent));
 		stream->sequence_out++;
 
@@ -1322,6 +1321,10 @@ void EQ::Net::DaybreakConnection::InternalQueuePacket(Packet &p, int stream_id, 
 			sent.last_sent = Clock::now();
 			sent.first_sent = Clock::now();
 			sent.times_resent = 0;
+			sent.resend_delay = EQEmu::Clamp(
+				static_cast<size_t>((m_rolling_ping * m_owner->m_options.resend_delay_factor) + m_owner->m_options.resend_delay_ms),
+				m_owner->m_options.resend_delay_min,
+				m_owner->m_options.resend_delay_max);
 			stream->sent_packets.insert(std::make_pair(stream->sequence_out, sent));
 			stream->sequence_out++;
 
@@ -1342,6 +1345,10 @@ void EQ::Net::DaybreakConnection::InternalQueuePacket(Packet &p, int stream_id, 
 		sent.last_sent = Clock::now();
 		sent.first_sent = Clock::now();
 		sent.times_resent = 0;
+		sent.resend_delay = EQEmu::Clamp(
+			static_cast<size_t>((m_rolling_ping * m_owner->m_options.resend_delay_factor) + m_owner->m_options.resend_delay_ms),
+			m_owner->m_options.resend_delay_min,
+			m_owner->m_options.resend_delay_max);
 		stream->sent_packets.insert(std::make_pair(stream->sequence_out, sent));
 		stream->sequence_out++;
 
