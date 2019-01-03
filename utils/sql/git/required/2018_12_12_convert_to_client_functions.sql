@@ -46,7 +46,7 @@ delete from faction_list where id < 5000;
 /* Make an entry for each faction */
 /* No base on client factions */
 
-insert into faction_list (select id, name, 0 from client_faction_names);
+insert into faction_list (id, name, base)  (select id, name, 0 from client_faction_names);
 
 /* Create mods based on the client_faction_associations */
 /* No code changes required */
@@ -110,6 +110,8 @@ delete from faction_values
 
 /* Custom faction mappings dont have to worry about range collision */
 
+select "Updating faction_values for custom factions";
+
 update faction_values set faction_id = (select new_faction from custom_faction_mappings where old_faction = faction_id) 
 where faction_id in (select old_faction from custom_faction_mappings);
 
@@ -118,10 +120,14 @@ Common factions have range collision issues, move them out of the way while
 we process them.
 */
 
+select "Offsetting core faction_values so that we can map them without conflict";
+
 update faction_values set faction_id = faction_id + 20000 
 where faction_id in (select serverid from client_server_faction_map);
 
 /* Put them in their correct places now based on client mapping */
+
+select "Updating core faction_values to use new faction ids....";
 
 update faction_values set faction_id = (select clientid from client_server_faction_map 
 where faction_id > 20000 && serverid = (faction_id-20000)) 
