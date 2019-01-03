@@ -753,7 +753,7 @@ void Client::CompleteConnect()
 	entity_list.SendUntargetable(this);
 
 	int x;
-	for (x = 0; x < 8; x++) {
+	for (x = EQEmu::textures::textureBegin; x <= EQEmu::textures::LastTexture; x++) {
 		SendWearChange(x);
 	}
 	// added due to wear change above
@@ -762,7 +762,7 @@ void Client::CompleteConnect()
 
 	Mob *pet = GetPet();
 	if (pet != nullptr) {
-		for (x = 0; x < 8; x++) {
+		for (x = EQEmu::textures::textureBegin; x <= EQEmu::textures::LastTexture; x++) {
 			pet->SendWearChange(x);
 		}
 		// added due to wear change above

@@ -5491,16 +5491,8 @@ namespace RoF2
 			ob.write(item->Lore, strlen(item->Lore));
 		ob.write("\0", 1);
 
-		if (inst->GetNewIDFile() > 0) {
-			char new_id_file[30];
-			memset(new_id_file, 0x0, 30);
-			sprintf(new_id_file, "IT%d", inst->GetNewIDFile());
-			ob.write(new_id_file, strlen(new_id_file));
-		}
-		else if (strlen(item->IDFile) > 0) {
+		if (strlen(item->IDFile) > 0)
 			ob.write(item->IDFile, strlen(item->IDFile));
-		}
-
 		ob.write("\0", 1);
 
 		ob.write("\0", 1);

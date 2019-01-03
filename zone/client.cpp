@@ -9034,7 +9034,8 @@ void Client::SetDevToolsWindowEnabled(bool in_dev_tools_window_enabled)
  */
 void Client::SetPrimaryWeaponOrnamentation(uint32 model_id)
 {
-	if (GetItemIDAt(EQEmu::invslot::slotPrimary) > 0) {
+	auto primary_item = m_inv.GetItem(EQEmu::invslot::slotPrimary);
+	if (primary_item) {
 		database.QueryDatabase(
 			StringFormat(
 				"UPDATE `inventory` SET `ornamentidfile` = %i WHERE `charid` = %i AND `slotid` = %i",
@@ -9043,8 +9044,11 @@ void Client::SetPrimaryWeaponOrnamentation(uint32 model_id)
 				EQEmu::invslot::slotPrimary
 			));
 
+		primary_item->SetOrnamentationIDFile(model_id);
+		SendItemPacket(EQEmu::invslot::slotPrimary, primary_item, ItemPacketTrade);
 		WearChange(EQEmu::textures::weaponPrimary, static_cast<uint16>(model_id), 0);
-		Message(15, "Your primary weapon appearance has been modified, changes will fully take affect next time you zone");
+
+		Message(15, "Your primary weapon appearance has been modified");
 	}
 }
 
@@ -9053,7 +9057,8 @@ void Client::SetPrimaryWeaponOrnamentation(uint32 model_id)
  */
 void Client::SetSecondaryWeaponOrnamentation(uint32 model_id)
 {
-	if (GetItemIDAt(EQEmu::invslot::slotSecondary) > 0) {
+	auto secondary_item = m_inv.GetItem(EQEmu::invslot::slotSecondary);
+	if (secondary_item) {
 		database.QueryDatabase(
 			StringFormat(
 				"UPDATE `inventory` SET `ornamentidfile` = %i WHERE `charid` = %i AND `slotid` = %i",
@@ -9062,7 +9067,10 @@ void Client::SetSecondaryWeaponOrnamentation(uint32 model_id)
 				EQEmu::invslot::slotSecondary
 			));
 
+		secondary_item->SetOrnamentationIDFile(model_id);
+		SendItemPacket(EQEmu::invslot::slotSecondary, secondary_item, ItemPacketTrade);
 		WearChange(EQEmu::textures::weaponSecondary, static_cast<uint16>(model_id), 0);
-		Message(15, "Your secondary weapon appearance has been modified, changes will fully take affect next time you zone");
+		
+		Message(15, "Your secondary weapon appearance has been modified");
 	}
 }
