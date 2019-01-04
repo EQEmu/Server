@@ -14,6 +14,7 @@ with client faction_ids.
 /* Create the temp table and start mappings at 5000 */
 CREATE TABLE custom_faction_mappings (old_faction int, new_faction int, primary key (old_faction)) engine=INNODB;
 
+select "Moving custom factions to safe range, well above known client values" ``;
 select @startcustom:=5000;
 
 /* Insert the custom/obsolete factions into the temp mapping table */
@@ -101,37 +102,29 @@ delete from npc_faction_entries where faction_id > 20000;
 /* 
 Update the faction_values now.
 
-We're deleting any faction_values for obsolete factions.  These are factions
-that were used, then switched away from in the past by servers, but the entries
-were still there.
 */
 delete from faction_values
  where faction_id not in (select old_faction from custom_faction_mappings) and faction_id not in (select serverid from client_server_faction_map);
 
 /* Custom faction mappings dont have to worry about range collision */
 
-select "Updating faction_values for custom factions";
+select "Updating faction_values for custom factions" ``;
 
 update faction_values set faction_id = (select new_faction from custom_faction_mappings where old_faction = faction_id) 
 where faction_id in (select old_faction from custom_faction_mappings);
 
 /* 
-Common factions have range collision issues, move them out of the way while
-we process them.
+There are so many of these, Im going to update in place to save time.
+To do this we must remove the unique keys, as these will be violated until
+the update is complete
 */
 
-select "Offsetting core faction_values so that we can map them without conflict";
+select "Updating core faction_values to use new faction ids...." ``;
 
-update faction_values set faction_id = faction_id + 20000 
-where faction_id in (select serverid from client_server_faction_map);
+alter table faction_values drop primary key;
 
-/* Put them in their correct places now based on client mapping */
+update faction_values v
+join client_server_faction_map m on v.faction_id = m.serverid
+set faction_id = m.clientid;
 
-select "Updating core faction_values to use new faction ids....";
-
-update faction_values set faction_id = (select clientid from client_server_faction_map 
-where faction_id > 20000 && serverid = (faction_id-20000)) 
-where faction_id > 20000 && (faction_id-20000) in (select serverid from client_server_faction_map);
-
-/* Delete any stragglers */
-delete from faction_values where faction_id > 20000;
+ALTER TABLE `faction_values` ADD PRIMARY KEY `lookup` (`char_id`,`faction_id`);

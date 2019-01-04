@@ -128,7 +128,8 @@ DROP TABLE IF EXISTS `client_server_faction_map`;
 CREATE TABLE `client_server_faction_map` (
   `clientid` int(11) NOT NULL,
   `serverid` int(11) NOT NULL,
-  PRIMARY KEY (`clientid`,`serverid`)
+  PRIMARY KEY (`clientid`,`serverid`),
+  INDEX serverid (`serverid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
