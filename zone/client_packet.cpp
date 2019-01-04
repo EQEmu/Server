@@ -753,7 +753,7 @@ void Client::CompleteConnect()
 	entity_list.SendUntargetable(this);
 
 	int x;
-	for (x = 0; x < 8; x++) {
+	for (x = EQEmu::textures::textureBegin; x <= EQEmu::textures::LastTexture; x++) {
 		SendWearChange(x);
 	}
 	// added due to wear change above
@@ -762,7 +762,7 @@ void Client::CompleteConnect()
 
 	Mob *pet = GetPet();
 	if (pet != nullptr) {
-		for (x = 0; x < 8; x++) {
+		for (x = EQEmu::textures::textureBegin; x <= EQEmu::textures::LastTexture; x++) {
 			pet->SendWearChange(x);
 		}
 		// added due to wear change above
@@ -3237,42 +3237,40 @@ void Client::Handle_OP_AutoAttack(const EQApplicationPacket *app)
 		return;
 	}
 
-	if (app->pBuffer[0] == 0)
-	{
+	if (app->pBuffer[0] == 0) {
 		auto_attack = false;
-		if (IsAIControlled())
+		if (IsAIControlled()) {
 			return;
+		}
 		attack_timer.Disable();
 		ranged_timer.Disable();
 		attack_dw_timer.Disable();
 
-		m_AutoAttackPosition = glm::vec4();
+		m_AutoAttackPosition       = glm::vec4();
 		m_AutoAttackTargetLocation = glm::vec3();
-		aa_los_them_mob = nullptr;
+		aa_los_them_mob            = nullptr;
 	}
-	else if (app->pBuffer[0] == 1)
-	{
+	else if (app->pBuffer[0] == 1) {
 		auto_attack = true;
-		auto_fire = false;
-		if (IsAIControlled())
+		auto_fire   = false;
+		if (IsAIControlled()) {
 			return;
+		}
 		SetAttackTimer();
 
-		if (GetTarget())
-		{
-			aa_los_them_mob = GetTarget();
-			m_AutoAttackPosition = GetPosition();
+		if (GetTarget()) {
+			aa_los_them_mob            = GetTarget();
+			m_AutoAttackPosition       = GetPosition();
 			m_AutoAttackTargetLocation = glm::vec3(aa_los_them_mob->GetPosition());
-			los_status = CheckLosFN(aa_los_them_mob);
-			los_status_facing = IsFacingMob(aa_los_them_mob);
+			los_status                 = CheckLosFN(aa_los_them_mob);
+			los_status_facing          = IsFacingMob(aa_los_them_mob);
 		}
-		else
-		{
-			m_AutoAttackPosition = GetPosition();
+		else {
+			m_AutoAttackPosition       = GetPosition();
 			m_AutoAttackTargetLocation = glm::vec3();
-			aa_los_them_mob = nullptr;
-			los_status = false;
-			los_status_facing = false;
+			aa_los_them_mob            = nullptr;
+			los_status                 = false;
+			los_status_facing          = false;
 		}
 	}
 }
@@ -14452,7 +14450,6 @@ void Client::Handle_OP_WearChange(const EQApplicationPacket *app)
 
 	// we could maybe ignore this and just send our own from moveitem
 	entity_list.QueueClients(this, app, true);
-	return;
 }
 
 void Client::Handle_OP_WhoAllRequest(const EQApplicationPacket *app)

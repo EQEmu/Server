@@ -203,6 +203,8 @@ namespace EQEmu
 		void SetOrnamentIcon(uint32 ornament_icon)					{ m_ornamenticon = ornament_icon; }
 		uint32 GetOrnamentationIDFile() const						{ return m_ornamentidfile; }
 		void SetOrnamentationIDFile(uint32 ornament_idfile)			{ m_ornamentidfile = ornament_idfile; }
+		uint32 GetNewIDFile() const						            { return m_new_id_file; }
+		void SetNewIDFile(uint32 new_id_file)			            { m_new_id_file = new_id_file; }
 		uint32 GetOrnamentHeroModel(int32 material_slot = -1) const;
 		void SetOrnamentHeroModel(uint32 ornament_hero_model)		{ m_ornament_hero_model = ornament_hero_model; }
 		uint32 GetRecastTimestamp() const							{ return m_recast_timestamp; }
@@ -306,6 +308,7 @@ namespace EQEmu
 		bool				m_scaling;
 		uint32				m_ornamenticon;
 		uint32				m_ornamentidfile;
+		uint32				m_new_id_file;
 		uint32				m_ornament_hero_model;
 		uint32				m_recast_timestamp;
 

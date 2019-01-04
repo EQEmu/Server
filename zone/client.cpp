@@ -2965,13 +2965,12 @@ bool Client::BindWound(Mob *bindmob, bool start, bool fail)
 	return true;
 }
 
-void Client::SetMaterial(int16 in_slot, uint32 item_id) {
-	const EQEmu::ItemData* item = database.GetItem(item_id);
-	if (item && item->IsClassCommon())
-	{
+void Client::SetMaterial(int16 in_slot, uint32 item_id)
+{
+	const EQEmu::ItemData *item = database.GetItem(item_id);
+	if (item && item->IsClassCommon()) {
 		uint8 matslot = EQEmu::InventoryProfile::CalcMaterialFromSlot(in_slot);
-		if (matslot != EQEmu::textures::materialInvalid)
-		{
+		if (matslot != EQEmu::textures::materialInvalid) {
 			m_pp.item_material.Slot[matslot].Material = GetEquipmentMaterial(matslot);
 		}
 	}
@@ -8527,11 +8526,11 @@ void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold,
 }
 
 void Client::SendHPUpdateMarquee(){
-	if (!this || !this->IsClient() || !this->cur_hp || !this->max_hp)
+	if (!this || !this->IsClient() || !this->current_hp || !this->max_hp)
 		return;
 
 	/* Health Update Marquee Display: Custom*/
-	uint8 health_percentage = (uint8)(this->cur_hp * 100 / this->max_hp);
+	uint8 health_percentage = (uint8)(this->current_hp * 100 / this->max_hp);
 	if (health_percentage >= 100)
 		return;
 
@@ -9022,7 +9021,56 @@ bool Client::IsDevToolsWindowEnabled() const
 	return dev_tools_window_enabled;
 }
 
+/**
+ * @param in_dev_tools_window_enabled
+ */
 void Client::SetDevToolsWindowEnabled(bool in_dev_tools_window_enabled)
 {
 	Client::dev_tools_window_enabled = in_dev_tools_window_enabled;
+}
+
+/**
+ * @param model_id
+ */
+void Client::SetPrimaryWeaponOrnamentation(uint32 model_id)
+{
+	auto primary_item = m_inv.GetItem(EQEmu::invslot::slotPrimary);
+	if (primary_item) {
+		database.QueryDatabase(
+			StringFormat(
+				"UPDATE `inventory` SET `ornamentidfile` = %i WHERE `charid` = %i AND `slotid` = %i",
+				model_id,
+				character_id,
+				EQEmu::invslot::slotPrimary
+			));
+
+		primary_item->SetOrnamentationIDFile(model_id);
+		SendItemPacket(EQEmu::invslot::slotPrimary, primary_item, ItemPacketTrade);
+		WearChange(EQEmu::textures::weaponPrimary, static_cast<uint16>(model_id), 0);
+
+		Message(15, "Your primary weapon appearance has been modified");
+	}
+}
+
+/**
+ * @param model_id
+ */
+void Client::SetSecondaryWeaponOrnamentation(uint32 model_id)
+{
+	auto secondary_item = m_inv.GetItem(EQEmu::invslot::slotSecondary);
+	if (secondary_item) {
+		database.QueryDatabase(
+			StringFormat(
+				"UPDATE `inventory` SET `ornamentidfile` = %i WHERE `charid` = %i AND `slotid` = %i",
+				model_id,
+				character_id,
+				EQEmu::invslot::slotSecondary
+			));
+
+		secondary_item->SetOrnamentationIDFile(model_id);
+		SendItemPacket(EQEmu::invslot::slotSecondary, secondary_item, ItemPacketTrade);
+		WearChange(EQEmu::textures::weaponSecondary, static_cast<uint16>(model_id), 0);
+		
+		Message(15, "Your secondary weapon appearance has been modified");
+	}
 }

@@ -973,7 +973,7 @@ bool NPC::SpawnZoneController()
 	memset(npc_type, 0, sizeof(NPCType));
 
 	strncpy(npc_type->name, "zone_controller", 60);
-	npc_type->cur_hp           = 2000000000;
+	npc_type->current_hp           = 2000000000;
 	npc_type->max_hp           = 2000000000;
 	npc_type->hp_regen         = 100000000;
 	npc_type->race             = 240;
@@ -1024,7 +1024,7 @@ NPC * NPC::SpawnGridNodeNPC(std::string name, const glm::vec4 &position, uint32 
 	sprintf(npc_type->name, "%u_%u", grid_id, grid_number);
 	sprintf(npc_type->lastname, "Number: %u Grid: %u Pause: %u", grid_number, grid_id, pause);
 
-	npc_type->cur_hp           = 4000000;
+	npc_type->current_hp           = 4000000;
 	npc_type->max_hp           = 4000000;
 	npc_type->race             = 2254;
 	npc_type->gender           = 2;
@@ -1058,7 +1058,7 @@ NPC * NPC::SpawnNodeNPC(std::string name, std::string last_name, const glm::vec4
 	sprintf(npc_type->name, "%s", name.c_str());
 	sprintf(npc_type->lastname, "%s", last_name.c_str());
 
-	npc_type->cur_hp           = 4000000;
+	npc_type->current_hp       = 4000000;
 	npc_type->max_hp           = 4000000;
 	npc_type->race             = 2254;
 	npc_type->gender           = 2;
@@ -1095,33 +1095,45 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* 
 	else {
 		Seperator sep(spawncommand);
 		//Lets see if someone didn't fill out the whole #spawn function properly
-		if (!sep.IsNumber(1))
-			sprintf(sep.arg[1],"1");
-		if (!sep.IsNumber(2))
-			sprintf(sep.arg[2],"1");
-		if (!sep.IsNumber(3))
-			sprintf(sep.arg[3],"0");
-		if (atoi(sep.arg[4]) > 2100000000 || atoi(sep.arg[4]) <= 0)
-			sprintf(sep.arg[4]," ");
-		if (!strcmp(sep.arg[5],"-"))
-			sprintf(sep.arg[5]," ");
-		if (!sep.IsNumber(5))
-			sprintf(sep.arg[5]," ");
-		if (!sep.IsNumber(6))
-			sprintf(sep.arg[6],"1");
-		if (!sep.IsNumber(8))
-			sprintf(sep.arg[8],"0");
-		if (!sep.IsNumber(9))
+		if (!sep.IsNumber(1)) {
+			sprintf(sep.arg[1], "1");
+		}
+		if (!sep.IsNumber(2)) {
+			sprintf(sep.arg[2], "1");
+		}
+		if (!sep.IsNumber(3)) {
+			sprintf(sep.arg[3], "0");
+		}
+		if (atoi(sep.arg[4]) > 2100000000 || atoi(sep.arg[4]) <= 0) {
+			sprintf(sep.arg[4], " ");
+		}
+		if (!strcmp(sep.arg[5], "-")) {
+			sprintf(sep.arg[5], " ");
+		}
+		if (!sep.IsNumber(5)) {
+			sprintf(sep.arg[5], " ");
+		}
+		if (!sep.IsNumber(6)) {
+			sprintf(sep.arg[6], "1");
+		}
+		if (!sep.IsNumber(8)) {
+			sprintf(sep.arg[8], "0");
+		}
+		if (!sep.IsNumber(9)) {
 			sprintf(sep.arg[9], "0");
-		if (!sep.IsNumber(7))
-			sprintf(sep.arg[7],"0");
-		if (!strcmp(sep.arg[4],"-"))
-			sprintf(sep.arg[4]," ");
-		if (!sep.IsNumber(10))	// bodytype
+		}
+		if (!sep.IsNumber(7)) {
+			sprintf(sep.arg[7], "0");
+		}
+		if (!strcmp(sep.arg[4], "-")) {
+			sprintf(sep.arg[4], " ");
+		}
+		if (!sep.IsNumber(10)) {    // bodytype
 			sprintf(sep.arg[10], "0");
+		}
 		//Calc MaxHP if client neglected to enter it...
-		if (!sep.IsNumber(4)) {
-			sep.arg[4] = 0;
+		if (sep.arg[4] && !sep.IsNumber(4)) {
+			sprintf(sep.arg[4], "0");
 		}
 
 		// Autoselect NPC Gender
@@ -1134,7 +1146,7 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* 
 		memset(npc_type, 0, sizeof(NPCType));
 
 		strncpy(npc_type->name, sep.arg[0], 60);
-		npc_type->cur_hp           = atoi(sep.arg[4]);
+		npc_type->current_hp       = atoi(sep.arg[4]);
 		npc_type->max_hp           = atoi(sep.arg[4]);
 		npc_type->race             = atoi(sep.arg[1]);
 		npc_type->gender           = atoi(sep.arg[5]);
@@ -1487,38 +1499,49 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 
 int32 NPC::GetEquipmentMaterial(uint8 material_slot) const
 {
-	if (material_slot >= EQEmu::textures::materialCount)
+	int32 texture_profile_material = GetTextureProfileMaterial(material_slot);
+
+	Log(Logs::Detail, Logs::MobAppearance, "NPC::GetEquipmentMaterial [%s] material_slot: %u",
+		this->clean_name,
+		material_slot
+	);
+
+	if (texture_profile_material > 0) {
+		return texture_profile_material;
+	}
+
+	if (material_slot >= EQEmu::textures::materialCount) {
 		return 0;
+	}
 
 	int16 invslot = EQEmu::InventoryProfile::CalcSlotFromMaterial(material_slot);
-	if (invslot == INVALID_INDEX)
+	if (invslot == INVALID_INDEX) {
 		return 0;
+	}
 
-	if (equipment[invslot] == 0)
-	{
-		switch(material_slot)
-		{
-		case EQEmu::textures::armorHead:
-			return helmtexture;
-		case EQEmu::textures::armorChest:
-			return texture;
-		case EQEmu::textures::armorArms:
-			return armtexture;
-		case EQEmu::textures::armorWrist:
-			return bracertexture;
-		case EQEmu::textures::armorHands:
-			return handtexture;
-		case EQEmu::textures::armorLegs:
-			return legtexture;
-		case EQEmu::textures::armorFeet:
-			return feettexture;
-		case EQEmu::textures::weaponPrimary:
-			return d_melee_texture1;
-		case EQEmu::textures::weaponSecondary:
-			return d_melee_texture2;
-		default:
-			//they have nothing in the slot, and its not a special slot... they get nothing.
-			return(0);
+	if (equipment[invslot] == 0) {
+		switch (material_slot) {
+			case EQEmu::textures::armorHead:
+				return helmtexture;
+			case EQEmu::textures::armorChest:
+				return texture;
+			case EQEmu::textures::armorArms:
+				return armtexture;
+			case EQEmu::textures::armorWrist:
+				return bracertexture;
+			case EQEmu::textures::armorHands:
+				return handtexture;
+			case EQEmu::textures::armorLegs:
+				return legtexture;
+			case EQEmu::textures::armorFeet:
+				return feettexture;
+			case EQEmu::textures::weaponPrimary:
+				return d_melee_texture1;
+			case EQEmu::textures::weaponSecondary:
+				return d_melee_texture2;
+			default:
+				//they have nothing in the slot, and its not a special slot... they get nothing.
+				return (0);
 		}
 	}
 
@@ -2164,8 +2187,8 @@ void NPC::ModifyNPCStat(const char *identifier, const char *new_value)
 		base_hp = atoi(val.c_str());
 
 		CalcMaxHP();
-		if (cur_hp > max_hp) {
-			cur_hp = max_hp;
+		if (current_hp > max_hp) {
+			current_hp = max_hp;
 		}
 
 		return;
@@ -2346,14 +2369,14 @@ void NPC::LevelScale() {
 				base_hp += (random_level - level) * 100;
 			}
 
-			cur_hp = max_hp;
+			current_hp = max_hp;
 			max_dmg += (random_level - level) * 2;
 		} else {
 			uint8 scale_adjust = 1;
 
 			base_hp += (int)(base_hp * scaling);
 			max_hp += (int)(max_hp * scaling);
-			cur_hp = max_hp;
+			current_hp = max_hp;
 
 			if (max_dmg) {
 				max_dmg += (int)(max_dmg * scaling / scale_adjust);
@@ -2394,7 +2417,7 @@ void NPC::LevelScale() {
 		ATK += (int)(ATK * scaling);
 		base_hp += (int)(base_hp * scaling);
 		max_hp += (int)(max_hp * scaling);
-		cur_hp = max_hp;
+		current_hp = max_hp;
 		STR += (int)(STR * scaling / scale_adjust);
 		STA += (int)(STA * scaling / scale_adjust);
 		AGI += (int)(AGI * scaling / scale_adjust);

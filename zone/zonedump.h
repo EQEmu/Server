@@ -36,7 +36,7 @@ struct NPCType
 {
 	char	name[64];
 	char	lastname[70]; 
-	int32	cur_hp;
+	int32	current_hp;
 	int32	max_hp; 
 	float	size;
 	float	runspeed;

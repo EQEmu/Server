@@ -93,6 +93,7 @@ namespace Logs {
 		Traps,
 		NPCRoamBox,
 		NPCScaling,
+		MobAppearance,
 		MaxCategoryID /* Don't Remove this */
 	};
 
@@ -151,7 +152,8 @@ namespace Logs {
 		"Food",
 		"Traps",
 		"NPC Roam Box",
-		"NPC Scaling"
+		"NPC Scaling",
+		"Mob Appearance"
 	};
 }
 

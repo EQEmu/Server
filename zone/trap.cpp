@@ -456,7 +456,7 @@ void Trap::CreateHiddenTrigger()
 	auto make_npc = new NPCType;
 	memcpy(make_npc, base_type, sizeof(NPCType));
 	make_npc->max_hp = 100000;
-	make_npc->cur_hp = 100000;
+	make_npc->current_hp = 100000;
 	strcpy(make_npc->name, "a_trap");
 	make_npc->runspeed = 0.0f;
 	make_npc->bodytype = BT_Special;

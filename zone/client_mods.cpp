@@ -325,15 +325,15 @@ int32 Client::CalcMaxHP()
 	max_hp += spellbonuses.HP + aabonuses.HP;
 	max_hp += GroupLeadershipAAHealthEnhancement();
 	max_hp += max_hp * ((spellbonuses.MaxHPChange + itembonuses.MaxHPChange) / 10000.0f);
-	if (cur_hp > max_hp) {
-		cur_hp = max_hp;
+	if (current_hp > max_hp) {
+		current_hp = max_hp;
 	}
 	int hp_perc_cap = spellbonuses.HPPercCap[0];
 	if (hp_perc_cap) {
 		int curHP_cap = (max_hp * hp_perc_cap) / 100;
-		if (cur_hp > curHP_cap || (spellbonuses.HPPercCap[1] && cur_hp > spellbonuses.HPPercCap[1])) {
+		if (current_hp > curHP_cap || (spellbonuses.HPPercCap[1] && current_hp > spellbonuses.HPPercCap[1])) {
 
-			cur_hp = curHP_cap;
+			current_hp = curHP_cap;
 		}
 	}
 	return max_hp;

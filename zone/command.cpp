@@ -249,6 +249,7 @@ int command_init(void)
 		command_add("itemsearch", "[search criteria] - Search for an item", 10, command_itemsearch) ||
 		command_add("kick", "[charname] - Disconnect charname", 150, command_kick) ||
 		command_add("kill", "- Kill your target", 100, command_kill) ||
+		command_add("killallnpcs", " [npc_name] Kills all npcs by search name, leave blank for all attackable NPC's", 200, command_killallnpcs) ||
 		command_add("lastname", "[new lastname] - Set your or your player target's lastname", 50, command_lastname) ||
 		command_add("level", "[level] - Set your or your target's level", 10, command_level) ||
 		command_add("listnpcs", "[name/range] - Search NPCs", 20, command_listnpcs) ||
@@ -388,6 +389,7 @@ int command_init(void)
 		command_add("tattoo", "- Change the tattoo of your target (Drakkin Only)", 80, command_tattoo) ||
 		command_add("tempname", "[newname] - Temporarily renames your target. Leave name blank to restore the original name.", 100, command_tempname) ||
 		command_add("petname", "[newname] - Temporarily renames your pet. Leave name blank to restore the original name.", 100, command_petname) ||
+		command_add("test", "Test command", 200, command_test) ||
 		command_add("texture", "[texture] [helmtexture] - Change your or your target's appearance, use 255 to show equipment", 10, command_texture) ||
 		command_add("time", "[HH] [MM] - Set EQ time", 90, command_time) ||
 		command_add("timers", "- Display persistent timers for target", 200, command_timers) ||
@@ -748,21 +750,21 @@ void command_serversidename(Client *c, const Seperator *sep)
 
 void command_wc(Client *c, const Seperator *sep)
 {
-	if(sep->argnum < 2)
-	{
-		c->Message(0, "Usage: #wc [wear slot] [material] [ [hero_forge_model] [elite_material] [unknown06] [unknown18] ]");
+	if (sep->argnum < 2) {
+		c->Message(
+			0,
+			"Usage: #wc [wear slot] [material] [ [hero_forge_model] [elite_material] [unknown06] [unknown18] ]"
+		);
 	}
-	else if(c->GetTarget() == nullptr) {
+	else if (c->GetTarget() == nullptr) {
 		c->Message(13, "You must have a target to do a wear change.");
 	}
-	else
-	{
+	else {
 		uint32 hero_forge_model = 0;
-		uint32 wearslot = atoi(sep->arg[1]);
+		uint32 wearslot         = atoi(sep->arg[1]);
 
 		// Hero Forge
-		if (sep->argnum > 2)
-		{
+		if (sep->argnum > 2) {
 			hero_forge_model = atoi(sep->arg[3]);
 
 			if (hero_forge_model != 0 && hero_forge_model < 1000) {
@@ -778,45 +780,43 @@ void command_wc(Client *c, const Seperator *sep)
 		else
 			Color = c->GetTarget()->GetArmorTint(atoi(sep->arg[1]));
 		*/
-		c->GetTarget()->SendTextureWC(wearslot, atoi(sep->arg[2]), hero_forge_model, atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]));
+		c->GetTarget()->SendTextureWC(
+			wearslot,
+			atoi(sep->arg[2]),
+			hero_forge_model,
+			atoi(sep->arg[4]),
+			atoi(sep->arg[5]),
+			atoi(sep->arg[6]));
 	}
 }
 
 void command_heromodel(Client *c, const Seperator *sep)
 {
-	if (sep->argnum < 1)
-	{
+	if (sep->argnum < 1) {
 		c->Message(0, "Usage: #heromodel [hero forge model] [ [slot] ] (example: #heromodel 63)");
 	}
-	else if (c->GetTarget() == nullptr)
-	{
+	else if (c->GetTarget() == nullptr) {
 		c->Message(13, "You must have a target to do a wear change for Hero's Forge Models.");
 	}
-	else
-	{
+	else {
 		uint32 hero_forge_model = atoi(sep->arg[1]);
 
-		if (sep->argnum > 1)
-		{
-			uint8 wearslot = (uint8)atoi(sep->arg[2]);
+		if (sep->argnum > 1) {
+			uint8 wearslot = (uint8) atoi(sep->arg[2]);
 			c->GetTarget()->SendTextureWC(wearslot, 0, hero_forge_model, 0, 0, 0);
 		}
-		else
-		{
-			if (hero_forge_model > 0)
-			{
+		else {
+			if (hero_forge_model > 0) {
 				// Conversion to simplify the command arguments
 				// Hero's Forge model is actually model * 1000 + texture * 100 + wearslot
 				// Hero's Forge Model slot 7 is actually for Robes, but it still needs to use wearslot 1 in the packet
 				hero_forge_model *= 100;
 
-				for (uint8 wearslot = 0; wearslot < 7; wearslot++)
-				{
+				for (uint8 wearslot = 0; wearslot < 7; wearslot++) {
 					c->GetTarget()->SendTextureWC(wearslot, 0, (hero_forge_model + wearslot), 0, 0, 0);
 				}
 			}
-			else
-			{
+			else {
 				c->Message(13, "Hero's Forge Model must be greater than 0.");
 			}
 		}
@@ -827,12 +827,14 @@ void command_setanim(Client *c, const Seperator *sep)
 {
 	if (c->GetTarget() && sep->IsNumber(1)) {
 		int num = atoi(sep->arg[1]);
-		if(num < 0 || num >= _eaMaxAppearance) {
-		c->Message(0, "Invalid animation number, between 0 and %d",  _eaMaxAppearance-1);
+		if (num < 0 || num >= _eaMaxAppearance) {
+			c->Message(0, "Invalid animation number, between 0 and %d", _eaMaxAppearance - 1);
 		}
 		c->GetTarget()->SetAppearance(EmuAppearance(num));
-	} else
+	}
+	else {
 		c->Message(0, "Usage: #setanim [animnum]");
+	}
 }
 
 void command_serverinfo(Client *c, const Seperator *sep)
@@ -2728,18 +2730,21 @@ void command_setskillall(Client *c, const Seperator *sep)
 
 void command_race(Client *c, const Seperator *sep)
 {
-	Mob *t=c->CastToMob();
+	Mob *target = c->CastToMob();
 
 	if (sep->IsNumber(1)) {
 		auto race = atoi(sep->arg[1]);
 		if ((race >= 0 && race <= 732) || (race >= 2253 && race <= 2259)) {
-			if ((c->GetTarget()) && c->Admin() >= commandRaceOthers)
-				t = c->GetTarget();
-			t->SendIllusionPacket(race);
-		} else {
+			if ((c->GetTarget()) && c->Admin() >= commandRaceOthers) {
+				target = c->GetTarget();
+			}
+			target->SendIllusionPacket(race);
+		}
+		else {
 			c->Message(0, "Usage: #race [0-732, 2253-2259] (0 for back to normal)");
 		}
-	} else {
+	}
+	else {
 		c->Message(0, "Usage: #race [0-732, 2253-2259] (0 for back to normal)");
 	}
 }
@@ -2814,6 +2819,18 @@ void command_spawn(Client *c, const Seperator *sep)
 		c->Message(0, "Format: #spawn name race level material hp gender class priweapon secweapon merchantid bodytype - spawns a npc those parameters.");
 		c->Message(0, "Name Format: NPCFirstname_NPCLastname - All numbers in a name are stripped and \"_\" characters become a space.");
 		c->Message(0, "Note: Using \"-\" for gender will autoselect the gender for the race. Using \"-\" for HP will use the calculated maximum HP.");
+	}
+}
+
+void command_test(Client *c, const Seperator *sep)
+{
+	c->Message(15, "Triggering test command");
+
+	if (sep->arg[1]) {
+		c->SetPrimaryWeaponOrnamentation(atoi(sep->arg[1]));
+	}
+	if (sep->arg[2]) {
+		c->SetSecondaryWeaponOrnamentation(atoi(sep->arg[2]));
 	}
 }
 
@@ -4949,6 +4966,10 @@ void command_proximity(Client *c, const Seperator *sep)
 
 	NPC *npc = c->GetTarget()->CastToNPC();
 
+	std::vector<FindPerson_Point> points;
+
+	FindPerson_Point p{};
+
 	if (npc->IsProximitySet()) {
 		glm::vec4 position;
 		position.w = npc->GetHeading();
@@ -4971,7 +4992,30 @@ void command_proximity(Client *c, const Seperator *sep)
 		position.x = npc->GetProximityMaxX();
 		position.y = npc->GetProximityMaxY();
 		NPC::SpawnNodeNPC("Proximity", "", position);
+
+		p.x = npc->GetProximityMinX();
+		p.y = npc->GetProximityMinY();
+		p.z = npc->GetZ();
+		points.push_back(p);
+
+		p.x = npc->GetProximityMinX();
+		p.y = npc->GetProximityMaxY();
+		points.push_back(p);
+
+		p.x = npc->GetProximityMaxX();
+		p.y = npc->GetProximityMaxY();
+		points.push_back(p);
+
+		p.x = npc->GetProximityMaxX();
+		p.y = npc->GetProximityMinY();
+		points.push_back(p);
+
+		p.x = npc->GetProximityMinX();
+		p.y = npc->GetProximityMinY();
+		points.push_back(p);
 	}
+
+	c->SendPathPacket(points);
 }
 
 void command_pvp(Client *c, const Seperator *sep)
@@ -5109,6 +5153,41 @@ void command_kill(Client *c, const Seperator *sep)
 	else
 		if (!c->GetTarget()->IsClient() || c->GetTarget()->CastToClient()->Admin() <= c->Admin())
 			c->GetTarget()->Kill();
+}
+
+void command_killallnpcs(Client *c, const Seperator *sep)
+{
+	std::string search_string;
+	if (sep->arg[1]) {
+		search_string = sep->arg[1];
+	}
+
+	int count = 0;
+	for (auto &itr : entity_list.GetMobList()) {
+		Mob *entity = itr.second;
+		if (!entity->IsNPC()) {
+			continue;
+		}
+
+		std::string entity_name = entity->GetName();
+
+		/**
+		 * Filter by name
+		 */
+		if (search_string.length() > 0 && entity_name.find(search_string) == std::string::npos) {
+			continue;
+		}
+
+		if (entity->IsInvisible() || !entity->IsAttackAllowed(c)) {
+			continue;
+		}
+
+		entity->Damage(c, 1000000000, 0, EQEmu::skills::SkillDragonPunch);
+
+		count++;
+	}
+
+	c->Message(15, "Killed (%i) npc(s)", count);
 }
 
 void command_haste(Client *c, const Seperator *sep)
