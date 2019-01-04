@@ -208,7 +208,8 @@ namespace EQ
 				resend_delay_ms = 30;
 				resend_delay_factor = 1.25;
 				resend_delay_min = 150;
-				resend_delay_max = 3000;
+				resend_delay_max = 5000;
+				resends_per_connection_cycle = 10;
 				connect_delay_ms = 500;
 				stale_connection_ms = 90000;
 				connect_stale_ms = 5000;
@@ -233,6 +234,7 @@ namespace EQ
 			size_t resend_delay_ms;
 			size_t resend_delay_min;
 			size_t resend_delay_max;
+			int resends_per_connection_cycle;
 			size_t connect_delay_ms;
 			size_t connect_stale_ms;
 			size_t stale_connection_ms;

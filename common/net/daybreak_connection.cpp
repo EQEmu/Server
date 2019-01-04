@@ -1016,6 +1016,7 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 		return;
 	}
 	
+	auto resends = 0;
 	auto now = Clock::now();
 	auto s = &m_streams[stream];
 	for (auto &entry : s->sent_packets) {
@@ -1026,6 +1027,7 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 				entry.second.last_sent = now;
 				entry.second.times_resent++;
 				entry.second.resend_delay = EQEmu::Clamp(entry.second.resend_delay * 2, m_owner->m_options.resend_delay_min, m_owner->m_options.resend_delay_max);
+				resends++;
 			}
 		}
 		else {
@@ -1040,7 +1042,12 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 				entry.second.last_sent = now;
 				entry.second.times_resent++;
 				entry.second.resend_delay = EQEmu::Clamp(entry.second.resend_delay * 2, m_owner->m_options.resend_delay_min, m_owner->m_options.resend_delay_max);
+				resends++;
 			}
+		}
+
+		if (resends >= m_owner->m_options.resends_per_connection_cycle) {
+			return;
 		}
 	}
 }
