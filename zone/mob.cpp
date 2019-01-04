@@ -1665,7 +1665,7 @@ void Mob::ShowBuffList(Client* client) {
 }
 
 void Mob::GMMove(float x, float y, float z, float heading, bool SendUpdate) {
-	if (IsCorpse()) {
+	if (IsCorpse() || (IsClient() && !IsAIControlled())) {
 		m_Position.x = x;
 		m_Position.y = y;
 		m_Position.z = z;
