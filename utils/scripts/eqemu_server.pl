@@ -1257,8 +1257,8 @@ sub copy_file {
 
 sub fetch_latest_windows_appveyor {
 	print "[Update] Fetching Latest Windows Binaries (unstable) from Appveyor... \n";
-	get_remote_file("https://ci.appveyor.com/api/projects/KimLS/server/artifacts/build_x86_pdb.zip", "updates_staged/master_windows_build_pdb.zip", 1);
-	get_remote_file("https://ci.appveyor.com/api/projects/KimLS/server/artifacts/build_x86.zip", "updates_staged/master_windows_build.zip", 1);
+	get_remote_file("https://ci.appveyor.com/api/projects/KimLS/server/artifacts/eqemu-x86-no-bots.zip", "updates_staged/master_windows_build_pdb.zip", 1);
+
 	print "[Update] Fetched Latest Windows Binaries (unstable) from Appveyor... \n";
 	print "[Update] Extracting... --- \n";
 	unzip('updates_staged/master_windows_build.zip', 'updates_staged/binaries/');
