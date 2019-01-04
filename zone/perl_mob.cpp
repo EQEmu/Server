@@ -639,7 +639,7 @@ XS(XS_Mob_GetEquipment) {
 		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetEquipment(material_slot);
+		RETVAL = THIS->GetEquippedItemFromTextureSlot(material_slot);
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
 	}

@@ -311,7 +311,7 @@ public:
 	void				MoveTo(const glm::vec4& position, bool saveguardspot);
 	void				GetClosestWaypoint(std::list<wplist> &wp_list, int count, const glm::vec3& location);
 
-	uint32				GetEquipment(uint8 material_slot) const;	// returns item id
+	uint32				GetEquippedItemFromTextureSlot(uint8 material_slot) const;	// returns item id
 	int32				GetEquipmentMaterial(uint8 material_slot) const;
 
 	void				NextGuardPosition();
@@ -467,6 +467,7 @@ public:
 	std::unique_ptr<Timer> AIautocastspell_timer;
 
 	virtual int GetStuckBehavior() const { return NPCTypedata_ours ? NPCTypedata_ours->stuck_behavior : NPCTypedata->stuck_behavior; }
+
 
 protected:
 

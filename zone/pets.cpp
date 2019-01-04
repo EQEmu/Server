@@ -240,7 +240,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 		if(scale_power > 0)
 		{
 			npc_type->max_hp *= (1 + scale_power);
-			npc_type->cur_hp = npc_type->max_hp;
+			npc_type->current_hp = npc_type->max_hp;
 			npc_type->AC *= (1 + scale_power);
 			npc_type->level += 1 + ((int)act_power / 25) > npc_type->level + RuleR(Pets, PetPowerLevelCap) ? RuleR(Pets, PetPowerLevelCap) : 1 + ((int)act_power / 25); // gains an additional level for every 25 pet power
 			npc_type->min_dmg = (npc_type->min_dmg * (1 + (scale_power / 2)));
@@ -255,7 +255,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 
 	if (MaxHP){
 		npc_type->max_hp += (npc_type->max_hp*MaxHP)/100;
-		npc_type->cur_hp = npc_type->max_hp;
+		npc_type->current_hp = npc_type->max_hp;
 	}
 
 	//TODO: think about regen (engaged vs. not engaged)

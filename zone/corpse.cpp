@@ -1479,7 +1479,7 @@ void Corpse::Spawn() {
 	safe_delete(app);
 }
 
-uint32 Corpse::GetEquipment(uint8 material_slot) const {
+uint32 Corpse::GetEquippedItemFromTextureSlot(uint8 material_slot) const {
 	int16 invslot;
 
 	if (material_slot > EQEmu::textures::LastTexture) {
@@ -1500,7 +1500,7 @@ uint32 Corpse::GetEquipmentColor(uint8 material_slot) const {
 		return 0;
 	}
 
-	item = database.GetItem(GetEquipment(material_slot));
+	item = database.GetItem(GetEquippedItemFromTextureSlot(material_slot));
 	if(item != 0) {
 		return (item_tint.Slot[material_slot].UseTint ? item_tint.Slot[material_slot].Color : item->Color);
 	}

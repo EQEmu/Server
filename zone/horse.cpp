@@ -90,7 +90,7 @@ const NPCType *Horse::BuildHorseType(uint16 spell_id) {
     strcpy(npc_type->name, "Unclaimed_Mount"); // this should never get used
 
     strcpy(npc_type->special_abilities, "19,1^20,1^24,1");
-    npc_type->cur_hp = 1;
+    npc_type->current_hp = 1;
     npc_type->max_hp = 1;
     npc_type->race = atoi(row[0]);
     npc_type->gender = atoi(row[1]); // Drogmor's are female horses. Yuck.
