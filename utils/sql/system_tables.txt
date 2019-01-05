@@ -20,6 +20,7 @@ class_skill
 damageshieldtypes
 data_buckets
 doors
+eqtime
 faction_list
 faction_list_mod
 fear_hints
