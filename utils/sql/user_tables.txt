@@ -24,6 +24,7 @@ character_data
 character_disciplines
 character_enabledtasks
 character_inspect_messages
+character_item_recast
 character_languages
 character_leadership_abilities
 character_material
