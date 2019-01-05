@@ -387,6 +387,7 @@
 9131|2018_12_13_spell_buckets.sql|SHOW TABLES LIKE 'spell_buckets'|empty|
 9132|2018_12_16_global_base_scaling.sql|SHOW TABLES LIKE 'npc_scale_global_base'|empty|
 9133|2018_11_25_StuckBehavior.sql|SHOW COLUMNS FROM `npc_types` LIKE 'stuck_behavior'|empty|
+9134|2019_01_04_update_global_base_scaling.sql|SELECT * FROM db_version WHERE version >= 9134|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
