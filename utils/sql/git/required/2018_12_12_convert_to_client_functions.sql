@@ -20,18 +20,19 @@ select @startcustom:=5000;
 /* Insert the custom/obsolete factions into the temp mapping table */
 insert into custom_faction_mappings (select id, @startcustom := @startcustom +1 from faction_list where id not in (select serverid from client_server_faction_map) and id < 5000);
 
-CREATE TABLE IF NOT EXISTS faction_list_mod_oldfac AS SELECT * from faction_list_mod;
+CREATE TABLE IF NOT EXISTS faction_list_mod_prefix AS SELECT * from faction_list_mod;
 
 /* Now we update all the tables for these custom factions */
 
 update faction_list_mod set faction_id = (select new_faction from custom_faction_mappings where old_faction = faction_id) where faction_id < 5000 and faction_id in (select old_faction from custom_faction_mappings);
 
-CREATE TABLE IF NOT EXISTS faction_list_oldfac AS SELECT * from faction_list;
+CREATE TABLE IF NOT EXISTS faction_list_prefix AS SELECT * from faction_list;
 
 /* The faction_list table was forcing faction name to be a key.  Client does
    not.  Also, auto increment doesnt make sense anymore */
 ALTER TABLE faction_list  CHANGE COLUMN `id` `id` INT(11) NOT NULL;
 ALTER TABLE faction_list  DROP INDEX `name`;
+
 
 update faction_list set id =
 (select new_faction from custom_faction_mappings where old_faction = id) where id < 5000 and id in (select old_faction from custom_faction_mappings);
@@ -72,7 +73,7 @@ where other_faction_id between 201 and 216);
 
 /* And now we need to fix all the other faction tables to point to the new factions. */
 
-CREATE TABLE IF NOT EXISTS npc_faction_oldfac AS SELECT * from npc_faction;
+CREATE TABLE IF NOT EXISTS npc_faction_prefix AS SELECT * from npc_faction;
 
 update npc_faction set primaryfaction = (select new_faction from custom_faction_mappings where old_faction = primaryfaction) 
 where primaryfaction in (select old_faction from custom_faction_mappings);
@@ -83,7 +84,7 @@ where primaryfaction in (select serverid from client_server_faction_map);
 update npc_faction_entries set faction_id = (select new_faction from custom_faction_mappings where old_faction = faction_id) 
 where faction_id in (select old_faction from custom_faction_mappings);
 
-CREATE TABLE IF NOT EXISTS npc_faction_entries_oldfac AS SELECT * from npc_faction_entries;
+CREATE TABLE IF NOT EXISTS npc_faction_entries_prefix AS SELECT * from npc_faction_entries;
 
 /* Move existing factions out of wat - the following replace would create key */
 /* duplicates along the way, but none when complete. */
@@ -101,8 +102,10 @@ delete from npc_faction_entries where faction_id > 20000;
 
 /* 
 Update the faction_values now.
-
 */
+
+CREATE TABLE IF NOT EXISTS faction_values_prefix AS SELECT * from faction_values;
+
 delete from faction_values
  where faction_id not in (select old_faction from custom_faction_mappings) and faction_id not in (select serverid from client_server_faction_map);
 
@@ -128,3 +131,21 @@ join client_server_faction_map m on v.faction_id = m.serverid
 set faction_id = m.clientid;
 
 ALTER TABLE `faction_values` ADD PRIMARY KEY `lookup` (`char_id`,`faction_id`);
+
+/*
+Delete temporary tables
+*/
+
+DROP TABLE IF EXISTS `custom_faction_mappings`;
+
+/*
+ * The following to be deleted in a future update, once everyone is
+ * happy with the conversion
+
+DROP TABLE IF EXISTS faction_list_mod_prefix;
+DROP TABLE IF EXISTS faction_list_prefix;
+DROP TABLE IF EXISTS npc_faction_prefix;
+DROP TABLE IF EXISTS npc_faction_entries_prefix;
+DROP TABLE IF NOT EXISTS faction_values_prefix;
+
+ */
