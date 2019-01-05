@@ -19,6 +19,8 @@ char_create_point_allocations
 class_skill
 damageshieldtypes
 data_buckets
+db_str
+db_version
 doors
 eqtime
 faction_list
@@ -74,6 +76,7 @@ npc_types
 npc_types_metadata
 npc_types_tint
 object
+perl_event_export_settings
 pets
 pets_equipmentset
 pets_equipmentset_entries
