@@ -14,6 +14,7 @@ auras
 base_data
 blocked_spells
 books
+bug_reports
 char_create_combinations
 char_create_point_allocations
 class_skill
@@ -36,6 +37,7 @@ ground_spawns
 horses
 instance_list
 items
+ip_exemptions
 ldon_trap_entries
 ldon_trap_templates
 level_exp_mods
