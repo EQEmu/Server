@@ -28,11 +28,15 @@ update faction_list_mod set faction_id = (select new_faction from custom_faction
 
 CREATE TABLE IF NOT EXISTS faction_list_prefix AS SELECT * from faction_list;
 
-/* The faction_list table was forcing faction name to be a key.  Client does
-   not.  Also, auto increment doesnt make sense anymore */
-ALTER TABLE faction_list  CHANGE COLUMN `id` `id` INT(11) NOT NULL;
-ALTER TABLE faction_list  DROP INDEX `name`;
+DROP TABLE faction_list;
 
+CREATE TABLE `faction_list` (
+  `id` int(11) NOT NULL,
+  `name` varchar(50) NOT NULL DEFAULT '',
+  `base` smallint(6) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id` (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=486 DEFAULT CHARSET=utf8 as select id, name, base from faction_list_prefix;
 
 update faction_list set id =
 (select new_faction from custom_faction_mappings where old_faction = id) where id < 5000 and id in (select old_faction from custom_faction_mappings);
