@@ -20,7 +20,6 @@ class_skill
 damageshieldtypes
 data_buckets
 db_str
-db_version
 doors
 eqtime
 faction_list
