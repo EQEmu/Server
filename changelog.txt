@@ -1,6 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 
+== 1/4/2019 ==
+Akkadius: [Scaling] Global base scaling data has been updated in new database binary revision
+
 == 1/1/2019 ==
 Akkadius:
     - [Logging] Added new logging category "MobAppearance"
