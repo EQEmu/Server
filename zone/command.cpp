@@ -5015,7 +5015,9 @@ void command_proximity(Client *c, const Seperator *sep)
 		points.push_back(p);
 	}
 
-	c->SendPathPacket(points);
+	if (c->ClientVersion() >= EQEmu::versions::ClientVersion::RoF) {
+		c->SendPathPacket(points);
+	}
 }
 
 void command_pvp(Client *c, const Seperator *sep)
