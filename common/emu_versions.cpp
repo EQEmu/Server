@@ -106,27 +106,6 @@ EQEmu::versions::ClientVersion EQEmu::versions::ConvertClientVersionBitToClientV
 	}
 }
 
-uint32 EQEmu::versions::ConvertClientVersionToExpansion(ClientVersion client_version)
-{
-	switch (client_version) {
-	case ClientVersion::Unknown:
-	case ClientVersion::Client62:
-	case ClientVersion::Titanium:
-		return 0x000007FFU;
-	case ClientVersion::SoF:
-		return 0x00007FFFU;
-	case ClientVersion::SoD:
-		return 0x0000FFFFU;
-	case ClientVersion::UF:
-		return 0x0001FFFFU;
-	case ClientVersion::RoF:
-	case ClientVersion::RoF2:
-		return 0x000FFFFFU;
-	default:
-		return 0;
-	}
-}
-
 bool EQEmu::versions::IsValidMobVersion(MobVersion mob_version)
 {
 	if (mob_version <= MobVersion::Unknown || mob_version > LastMobVersion)
@@ -366,5 +345,93 @@ EQEmu::versions::MobVersion EQEmu::versions::ConvertClientVersionToOfflinePCMobV
 		return MobVersion::OfflineRoF2;
 	default:
 		return MobVersion::Unknown;
+	}
+}
+
+const char* EQEmu::expansions::ExpansionName(uint32 expansion_bit)
+{
+	switch (expansion_bit) {
+	case expansions::bitEverQuest:
+		return "EverQuest";
+	case expansions::bitRoK:
+		return "The Ruins of Kunark";
+	case expansions::bitSoV:
+		return "The Scars of Velious";
+	case expansions::bitSoL:
+		return "The Shadows of Luclin";
+	case expansions::bitPoP:
+		return "The Planes of Power";
+	case expansions::bitLoY:
+		return "The Legacy of Ykesha";
+	case expansions::bitLDoN:
+		return "Lost Dungeons of Norrath";
+	case expansions::bitGoD:
+		return "Gates of Discord";
+	case expansions::bitOoW:
+		return "Omens of War";
+	case expansions::bitDoN:
+		return "Dragons of Norrath";
+	case expansions::bitDoD:
+		return "Depths of Darkhollow";
+	case expansions::bitPoR:
+		return "Prophecy of Ro";
+	case expansions::bitTSS:
+		return "The Serpent's Spine";
+	case expansions::bitTBS:
+		return "The Buried Sea";
+	case expansions::bitSoF:
+		return "Secrets of Faydwer";
+	case expansions::bitSoD:
+		return "Seeds of Destruction";
+	case expansions::bitUF:
+		return "Underfoot";
+	case expansions::bitHoT:
+		return "House of Thule";
+	case expansions::bitVoA:
+		return "Veil of Alaris";
+	case expansions::bitRoF:
+		return "Rain of Fear";
+	case expansions::bitCotF:
+		return "Call of the Forsaken";
+	default:
+		return "Invalid Expansion";
+	}
+}
+
+uint32 EQEmu::expansions::ConvertClientVersionToExpansionBit(versions::ClientVersion client_version)
+{
+	switch (client_version) {
+	case versions::ClientVersion::Titanium:
+		return expansions::bitPoR;
+	case versions::ClientVersion::SoF:
+		return expansions::bitSoF;
+	case versions::ClientVersion::SoD:
+		return expansions::bitSoD;
+	case versions::ClientVersion::UF:
+		return expansions::bitUF;
+	case versions::ClientVersion::RoF:
+	case versions::ClientVersion::RoF2:
+		return expansions::bitRoF;
+	default:
+		return expansions::bitEverQuest;
+	}
+}
+
+uint32 EQEmu::expansions::ConvertClientVersionToExpansionMask(versions::ClientVersion client_version)
+{
+	switch (client_version) {
+	case versions::ClientVersion::Titanium:
+		return expansions::maskPoR;
+	case versions::ClientVersion::SoF:
+		return expansions::maskSoF;
+	case versions::ClientVersion::SoD:
+		return expansions::maskSoD;
+	case versions::ClientVersion::UF:
+		return expansions::maskUF;
+	case versions::ClientVersion::RoF:
+	case versions::ClientVersion::RoF2:
+		return expansions::maskRoF;
+	default:
+		return expansions::maskEverQuest;
 	}
 }

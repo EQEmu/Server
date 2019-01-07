@@ -276,6 +276,9 @@ namespace Titanium
 	namespace constants {
 		inline EQEmu::versions::ClientVersion GetConstantsRef() { return EQEmu::versions::ClientVersion::Titanium; }
 
+		const uint32 EXPANSION_BIT = EQEmu::expansions::bitPoR;
+		const uint32 EXPANSIONS_MASK = EQEmu::expansions::maskPoR;
+
 		const size_t CHARACTER_CREATION_LIMIT = 8; // Hard-coded in client - DO NOT ALTER
 
 		const size_t SAY_LINK_BODY_SIZE = 45;

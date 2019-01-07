@@ -35,7 +35,10 @@ namespace EQEmu
 {
 	namespace constants {
 		struct LookupEntry {
+			uint32 ExpansionBit;
+			uint32 ExpansionsMask;
 			int16 CharacterCreationLimit;
+			size_t SayLinkBodySize;
 			int LongBuffs;
 			int ShortBuffs;
 			int DiscBuffs;
@@ -45,7 +48,10 @@ namespace EQEmu
 			int MercBuffs;
 
 			LookupEntry(
+				uint32 ExpansionBit,
+				uint32 ExpansionsMask,
 				int16 CharacterCreationLimit,
+				size_t SayLinkBodySize,
 				int LongBuffs,
 				int ShortBuffs,
 				int DiscBuffs,
@@ -54,7 +60,10 @@ namespace EQEmu
 				int PetBuffs,
 				int MercBuffs
 			) :
+				ExpansionBit(ExpansionBit),
+				ExpansionsMask(ExpansionsMask),
 				CharacterCreationLimit(CharacterCreationLimit),
+				SayLinkBodySize(SayLinkBodySize),
 				LongBuffs(LongBuffs),
 				ShortBuffs(ShortBuffs),
 				DiscBuffs(DiscBuffs),

@@ -32,6 +32,9 @@ static const EQEmu::constants::LookupEntry constants_lookup_entries[EQEmu::versi
 		ClientUnknown::INULL,
 		ClientUnknown::INULL,
 		ClientUnknown::INULL,
+		ClientUnknown::INULL,
+		ClientUnknown::INULL,
+		ClientUnknown::INULL,
 		ClientUnknown::INULL
 	),
 	/*[ClientVersion::Client62] =*/
@@ -43,11 +46,17 @@ static const EQEmu::constants::LookupEntry constants_lookup_entries[EQEmu::versi
 		Client62::INULL,
 		Client62::INULL,
 		Client62::INULL,
+		Client62::INULL,
+		Client62::INULL,
+		Client62::INULL,
 		Client62::INULL
 	),
 	/*[ClientVersion::Titanium] =*/
 	EQEmu::constants::LookupEntry(
+		Titanium::constants::EXPANSION_BIT,
+		Titanium::constants::EXPANSIONS_MASK,
 		Titanium::constants::CHARACTER_CREATION_LIMIT,
+		Titanium::constants::SAY_LINK_BODY_SIZE,
 		Titanium::constants::LongBuffs,
 		Titanium::constants::ShortBuffs,
 		Titanium::constants::DiscBuffs,
@@ -58,7 +67,10 @@ static const EQEmu::constants::LookupEntry constants_lookup_entries[EQEmu::versi
 	),
 	/*[ClientVersion::SoF] =*/
 	EQEmu::constants::LookupEntry(
+		SoF::constants::EXPANSION_BIT,
+		SoF::constants::EXPANSIONS_MASK,
 		SoF::constants::CHARACTER_CREATION_LIMIT,
+		SoF::constants::SAY_LINK_BODY_SIZE,
 		SoF::constants::LongBuffs,
 		SoF::constants::ShortBuffs,
 		SoF::constants::DiscBuffs,
@@ -69,7 +81,10 @@ static const EQEmu::constants::LookupEntry constants_lookup_entries[EQEmu::versi
 	),
 	/*[ClientVersion::SoD] =*/
 	EQEmu::constants::LookupEntry(
+		SoD::constants::EXPANSION_BIT,
+		SoD::constants::EXPANSIONS_MASK,
 		SoD::constants::CHARACTER_CREATION_LIMIT,
+		SoD::constants::SAY_LINK_BODY_SIZE,
 		SoD::constants::LongBuffs,
 		SoD::constants::ShortBuffs,
 		SoD::constants::DiscBuffs,
@@ -80,7 +95,10 @@ static const EQEmu::constants::LookupEntry constants_lookup_entries[EQEmu::versi
 	),
 	/*[ClientVersion::UF] =*/
 	EQEmu::constants::LookupEntry(
+		UF::constants::EXPANSION_BIT,
+		UF::constants::EXPANSIONS_MASK,
 		UF::constants::CHARACTER_CREATION_LIMIT,
+		UF::constants::SAY_LINK_BODY_SIZE,
 		UF::constants::LongBuffs,
 		UF::constants::ShortBuffs,
 		UF::constants::DiscBuffs,
@@ -91,7 +109,10 @@ static const EQEmu::constants::LookupEntry constants_lookup_entries[EQEmu::versi
 	),
 	/*[ClientVersion::RoF] =*/
 	EQEmu::constants::LookupEntry(
+		RoF::constants::EXPANSION_BIT,
+		RoF::constants::EXPANSIONS_MASK,
 		RoF::constants::CHARACTER_CREATION_LIMIT,
+		RoF::constants::SAY_LINK_BODY_SIZE,
 		RoF::constants::LongBuffs,
 		RoF::constants::ShortBuffs,
 		RoF::constants::DiscBuffs,
@@ -102,7 +123,10 @@ static const EQEmu::constants::LookupEntry constants_lookup_entries[EQEmu::versi
 	),
 	/*[ClientVersion::RoF2] =*/
 	EQEmu::constants::LookupEntry(
+		RoF2::constants::EXPANSION_BIT,
+		RoF2::constants::EXPANSIONS_MASK,
 		RoF2::constants::CHARACTER_CREATION_LIMIT,
+		RoF2::constants::SAY_LINK_BODY_SIZE,
 		RoF2::constants::LongBuffs,
 		RoF2::constants::ShortBuffs,
 		RoF2::constants::DiscBuffs,

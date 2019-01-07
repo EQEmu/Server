@@ -1398,7 +1398,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if (m_pp.ldon_points_available < 0 || m_pp.ldon_points_available > 2000000000) { m_pp.ldon_points_available = 0; }
 
 	if (RuleB(World, UseClientBasedExpansionSettings)) {
-		m_pp.expansions = EQEmu::versions::ConvertClientVersionToExpansion(ClientVersion());
+		m_pp.expansions = EQEmu::expansions::ConvertClientVersionToExpansionMask(ClientVersion());
 	}
 	else {
 		m_pp.expansions = RuleI(World, ExpansionSettings);
