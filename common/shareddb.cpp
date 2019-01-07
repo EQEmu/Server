@@ -571,7 +571,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQEmu::InventoryProfile *inv)
 
 	auto cv_conflict = false;
 	auto pmask = inv->GetLookup()->PossessionsBitmask;
-	auto bank_size = inv->GetLookup()->InventoryTypeSize[EQEmu::invtype::typeBank];
+	auto bank_size = inv->GetLookup()->InventoryTypeSize.Bank;
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		int16 slot_id = atoi(row[0]);
