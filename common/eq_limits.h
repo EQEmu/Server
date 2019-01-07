@@ -43,6 +43,26 @@ namespace EQEmu
 			int NPCBuffs;
 			int PetBuffs;
 			int MercBuffs;
+
+			LookupEntry(
+				int16 CharacterCreationLimit,
+				int LongBuffs,
+				int ShortBuffs,
+				int DiscBuffs,
+				int TotalBuffs,
+				int NPCBuffs,
+				int PetBuffs,
+				int MercBuffs
+			) :
+				CharacterCreationLimit(CharacterCreationLimit),
+				LongBuffs(LongBuffs),
+				ShortBuffs(ShortBuffs),
+				DiscBuffs(DiscBuffs),
+				TotalBuffs(TotalBuffs),
+				NPCBuffs(NPCBuffs),
+				PetBuffs(PetBuffs),
+				MercBuffs(MercBuffs)
+			{ }
 		};
 
 		const LookupEntry* Lookup(versions::ClientVersion client_version);
@@ -135,6 +155,12 @@ namespace EQEmu
 	namespace behavior {
 		struct LookupEntry {
 			bool CoinHasWeight;
+
+			LookupEntry(
+				bool CoinHasWeight
+			) :
+				CoinHasWeight(CoinHasWeight)
+			{ }
 		};
 
 		const LookupEntry* Lookup(versions::MobVersion mob_version);

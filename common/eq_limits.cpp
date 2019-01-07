@@ -24,7 +24,7 @@
 static const EQEmu::constants::LookupEntry constants_lookup_entries[EQEmu::versions::ClientVersionCount] =
 {
 	/*[ClientVersion::Unknown] =*/
-	EQEmu::constants::LookupEntry() = {
+	EQEmu::constants::LookupEntry(
 		ClientUnknown::INULL,
 		ClientUnknown::INULL,
 		ClientUnknown::INULL,
@@ -33,9 +33,9 @@ static const EQEmu::constants::LookupEntry constants_lookup_entries[EQEmu::versi
 		ClientUnknown::INULL,
 		ClientUnknown::INULL,
 		ClientUnknown::INULL
-	},
+	),
 	/*[ClientVersion::Client62] =*/
-	EQEmu::constants::LookupEntry() = {
+	EQEmu::constants::LookupEntry(
 		Client62::INULL,
 		Client62::INULL,
 		Client62::INULL,
@@ -44,9 +44,9 @@ static const EQEmu::constants::LookupEntry constants_lookup_entries[EQEmu::versi
 		Client62::INULL,
 		Client62::INULL,
 		Client62::INULL
-	},
+	),
 	/*[ClientVersion::Titanium] =*/
-	EQEmu::constants::LookupEntry() = {
+	EQEmu::constants::LookupEntry(
 		Titanium::constants::CHARACTER_CREATION_LIMIT,
 		Titanium::constants::LongBuffs,
 		Titanium::constants::ShortBuffs,
@@ -55,9 +55,9 @@ static const EQEmu::constants::LookupEntry constants_lookup_entries[EQEmu::versi
 		Titanium::constants::NPCBuffs,
 		Titanium::constants::PetBuffs,
 		Titanium::constants::MercBuffs
-	},
+	),
 	/*[ClientVersion::SoF] =*/
-	EQEmu::constants::LookupEntry() = {
+	EQEmu::constants::LookupEntry(
 		SoF::constants::CHARACTER_CREATION_LIMIT,
 		SoF::constants::LongBuffs,
 		SoF::constants::ShortBuffs,
@@ -66,9 +66,9 @@ static const EQEmu::constants::LookupEntry constants_lookup_entries[EQEmu::versi
 		SoF::constants::NPCBuffs,
 		SoF::constants::PetBuffs,
 		SoF::constants::MercBuffs
-	},
+	),
 	/*[ClientVersion::SoD] =*/
-	EQEmu::constants::LookupEntry() = {
+	EQEmu::constants::LookupEntry(
 		SoD::constants::CHARACTER_CREATION_LIMIT,
 		SoD::constants::LongBuffs,
 		SoD::constants::ShortBuffs,
@@ -77,9 +77,9 @@ static const EQEmu::constants::LookupEntry constants_lookup_entries[EQEmu::versi
 		SoD::constants::NPCBuffs,
 		SoD::constants::PetBuffs,
 		SoD::constants::MercBuffs
-	},
+	),
 	/*[ClientVersion::UF] =*/
-	EQEmu::constants::LookupEntry() = {
+	EQEmu::constants::LookupEntry(
 		UF::constants::CHARACTER_CREATION_LIMIT,
 		UF::constants::LongBuffs,
 		UF::constants::ShortBuffs,
@@ -88,9 +88,9 @@ static const EQEmu::constants::LookupEntry constants_lookup_entries[EQEmu::versi
 		UF::constants::NPCBuffs,
 		UF::constants::PetBuffs,
 		UF::constants::MercBuffs
-	},
+	),
 	/*[ClientVersion::RoF] =*/
-	EQEmu::constants::LookupEntry() = {
+	EQEmu::constants::LookupEntry(
 		RoF::constants::CHARACTER_CREATION_LIMIT,
 		RoF::constants::LongBuffs,
 		RoF::constants::ShortBuffs,
@@ -99,9 +99,9 @@ static const EQEmu::constants::LookupEntry constants_lookup_entries[EQEmu::versi
 		RoF::constants::NPCBuffs,
 		RoF::constants::PetBuffs,
 		RoF::constants::MercBuffs
-	},
+	),
 	/*[ClientVersion::RoF2] =*/
-	EQEmu::constants::LookupEntry() = {
+	EQEmu::constants::LookupEntry(
 		RoF2::constants::CHARACTER_CREATION_LIMIT,
 		RoF2::constants::LongBuffs,
 		RoF2::constants::ShortBuffs,
@@ -110,7 +110,7 @@ static const EQEmu::constants::LookupEntry constants_lookup_entries[EQEmu::versi
 		RoF2::constants::NPCBuffs,
 		RoF2::constants::PetBuffs,
 		RoF2::constants::MercBuffs
-	}
+	)
 };
 
 const EQEmu::constants::LookupEntry* EQEmu::constants::Lookup(versions::ClientVersion client_version)
@@ -658,93 +658,93 @@ const EQEmu::inventory::LookupEntry* EQEmu::inventory::Lookup(versions::MobVersi
 static const EQEmu::behavior::LookupEntry behavior_lookup_entries[EQEmu::versions::MobVersionCount] =
 {
 	/*[MobVersion::Unknown] =*/
-	EQEmu::behavior::LookupEntry() = {
+	EQEmu::behavior::LookupEntry(
 		true
-	},
+	),
 	/*[MobVersion::Client62] =*/
-	EQEmu::behavior::LookupEntry() = {
+	EQEmu::behavior::LookupEntry(
 		true
-	},
+	),
 	/*[MobVersion::Titanium] =*/
-	EQEmu::behavior::LookupEntry() = {
+	EQEmu::behavior::LookupEntry(
 		Titanium::behavior::CoinHasWeight
-	},
+	),
 	/*[MobVersion::SoF] =*/
-	EQEmu::behavior::LookupEntry() = {
+	EQEmu::behavior::LookupEntry(
 		SoF::behavior::CoinHasWeight
-	},
+	),
 	/*[MobVersion::SoD] =*/
-	EQEmu::behavior::LookupEntry() = {
+	EQEmu::behavior::LookupEntry(
 		SoD::behavior::CoinHasWeight
-	},
+	),
 	/*[MobVersion::UF] =*/
-	EQEmu::behavior::LookupEntry() = {
+	EQEmu::behavior::LookupEntry(
 		UF::behavior::CoinHasWeight
-	},
+	),
 	/*[MobVersion::RoF] =*/
-	EQEmu::behavior::LookupEntry() = {
+	EQEmu::behavior::LookupEntry(
 		RoF::behavior::CoinHasWeight
-	},
+	),
 	/*[MobVersion::RoF2] =*/
-	EQEmu::behavior::LookupEntry() = {
+	EQEmu::behavior::LookupEntry(
 		RoF2::behavior::CoinHasWeight
-	},
+	),
 	/*[MobVersion::NPC] =*/
-	EQEmu::behavior::LookupEntry() = {
+	EQEmu::behavior::LookupEntry(
 		EQEmu::behavior::CoinHasWeight
-	},
+	),
 	/*[MobVersion::NPCMerchant] =*/
-	EQEmu::behavior::LookupEntry() = {
+	EQEmu::behavior::LookupEntry(
 		EQEmu::behavior::CoinHasWeight
-	},
+	),
 	/*[MobVersion::Merc] =*/
-	EQEmu::behavior::LookupEntry() = {
+	EQEmu::behavior::LookupEntry(
 		EQEmu::behavior::CoinHasWeight
-	},
+	),
 	/*[MobVersion::Bot] =*/
-	EQEmu::behavior::LookupEntry() = {
+	EQEmu::behavior::LookupEntry(
 		EQEmu::behavior::CoinHasWeight
-	},
+	),
 	/*[MobVersion::ClientPet] =*/
-	EQEmu::behavior::LookupEntry() = {
+	EQEmu::behavior::LookupEntry(
 		EQEmu::behavior::CoinHasWeight
-	},
+	),
 	/*[MobVersion::NPCPet] =*/
-	EQEmu::behavior::LookupEntry() = {
+	EQEmu::behavior::LookupEntry(
 		EQEmu::behavior::CoinHasWeight
-	},
+	),
 	/*[MobVersion::MercPet] =*/
-	EQEmu::behavior::LookupEntry() = {
+	EQEmu::behavior::LookupEntry(
 		EQEmu::behavior::CoinHasWeight
-	},
+	),
 	/*[MobVersion::BotPet] =*/
-	EQEmu::behavior::LookupEntry() = {
+	EQEmu::behavior::LookupEntry(
 		EQEmu::behavior::CoinHasWeight
-	},
+	),
 	/*[MobVersion::OfflineTitanium] =*/
-	EQEmu::behavior::LookupEntry() = {
+	EQEmu::behavior::LookupEntry(
 		Titanium::behavior::CoinHasWeight
-	},
+	),
 	/*[MobVersion::OfflineSoF] =*/
-	EQEmu::behavior::LookupEntry() = {
+	EQEmu::behavior::LookupEntry(
 		SoF::behavior::CoinHasWeight
-	},
+	),
 	/*[MobVersion::OfflineSoD] =*/
-	EQEmu::behavior::LookupEntry() = {
+	EQEmu::behavior::LookupEntry(
 		SoD::behavior::CoinHasWeight
-	},
+	),
 	/*[MobVersion::OfflineUF] =*/
-	EQEmu::behavior::LookupEntry() = {
+	EQEmu::behavior::LookupEntry(
 		UF::behavior::CoinHasWeight
-	},
+	),
 	/*[MobVersion::OfflineRoF] =*/
-	EQEmu::behavior::LookupEntry() = {
+	EQEmu::behavior::LookupEntry(
 		RoF::behavior::CoinHasWeight
-	},
+	),
 	/*[MobVersion::OfflineRoF2] =*/
-	EQEmu::behavior::LookupEntry() = {
+	EQEmu::behavior::LookupEntry(
 		RoF2::behavior::CoinHasWeight
-	}
+	)
 };
 
 const EQEmu::behavior::LookupEntry* EQEmu::behavior::Lookup(versions::MobVersion mob_version)
