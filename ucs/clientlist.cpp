@@ -473,7 +473,6 @@ Clientlist::Clientlist(int ChatPort) {
 	chat_opts.daybreak_options.resend_delay_factor = RuleR(Network, ResendDelayFactor);
 	chat_opts.daybreak_options.resend_delay_min = RuleI(Network, ResendDelayMinMS);
 	chat_opts.daybreak_options.resend_delay_max = RuleI(Network, ResendDelayMaxMS);
-	chat_opts.daybreak_options.resends_per_connection_cycle = RuleI(Network, ResendsPerCycle);
 
 	chatsf = new EQ::Net::EQStreamManager(chat_opts);
 

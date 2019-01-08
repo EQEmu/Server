@@ -95,7 +95,7 @@ namespace EQ
 
 		class DaybreakConnectionManager;
 		class DaybreakConnection;
-		class DaybreakConnection
+		class DaybreakConnection : public std::enable_shared_from_this<DaybreakConnection>
 		{
 		public:
 			DaybreakConnection(DaybreakConnectionManager *owner, const DaybreakConnect &connect, const std::string &endpoint, int port);
@@ -109,10 +109,16 @@ namespace EQ
 			void QueuePacket(Packet &p);
 			void QueuePacket(Packet &p, int stream);
 			void QueuePacket(Packet &p, int stream, bool reliable);
+
 			const DaybreakConnectionStats& GetStats() const { return m_stats; }
+			DaybreakConnectionStats &GetStats() { return m_stats; }
 			void ResetStats();
 			size_t GetRollingPing() const { return m_rolling_ping; }
-			DbProtocolStatus GetStatus() { return m_status; }
+			DbProtocolStatus GetStatus() const { return m_status; }
+
+			const DaybreakEncodeType* GetEncodePasses() const { return m_encode_passes; }
+			const DaybreakConnectionManager* GetManager() const { return m_owner; }
+			DaybreakConnectionManager* GetManager() { return m_owner; }
 		private:
 			DaybreakConnectionManager *m_owner;
 			std::string m_endpoint;
@@ -209,7 +215,6 @@ namespace EQ
 				resend_delay_factor = 1.25;
 				resend_delay_min = 150;
 				resend_delay_max = 5000;
-				resends_per_connection_cycle = 10;
 				connect_delay_ms = 500;
 				stale_connection_ms = 90000;
 				connect_stale_ms = 5000;
@@ -234,7 +239,6 @@ namespace EQ
 			size_t resend_delay_ms;
 			size_t resend_delay_min;
 			size_t resend_delay_max;
-			int resends_per_connection_cycle;
 			size_t connect_delay_ms;
 			size_t connect_stale_ms;
 			size_t stale_connection_ms;

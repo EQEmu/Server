@@ -499,7 +499,6 @@ int main(int argc, char** argv) {
 	opts.daybreak_options.resend_delay_factor = RuleR(Network, ResendDelayFactor);
 	opts.daybreak_options.resend_delay_min = RuleI(Network, ResendDelayMinMS);
 	opts.daybreak_options.resend_delay_max = RuleI(Network, ResendDelayMaxMS);
-	opts.daybreak_options.resends_per_connection_cycle = RuleI(Network, ResendsPerCycle);
 
 	EQ::Net::EQStreamManager eqsm(opts);
 
