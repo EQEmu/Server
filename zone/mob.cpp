@@ -1381,7 +1381,7 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 	/**
 	 * Update those who have us targeted
 	 */
-	entity_list.QueueClientsByTarget(this, &hp_packet, false, 0, false, true, EQEmu::versions::bit_AllClients);
+	entity_list.QueueClientsByTarget(this, &hp_packet, false, 0, false, true, EQEmu::versions::maskAllClients);
 
 	/**
 	 * Update those who have us on x-target
@@ -1663,7 +1663,7 @@ void Mob::ShowBuffList(Client* client) {
 }
 
 void Mob::GMMove(float x, float y, float z, float heading, bool SendUpdate) {
-	if (IsCorpse()) {
+	if (IsCorpse() || (IsClient() && !IsAIControlled())) {
 		m_Position.x = x;
 		m_Position.y = y;
 		m_Position.z = z;

@@ -1125,10 +1125,10 @@ bool IsStackableDot(uint16 spell_id)
 bool IsBardOnlyStackEffect(int effect)
 {
 	switch(effect) {
-	case SE_CurrentMana:
+	/*case SE_CurrentMana:
 	case SE_ManaRegen_v2:
 	case SE_CurrentHP:
-	case SE_HealOverTime:
+	case SE_HealOverTime:*/
 	case SE_BardAEDot:
 		return true;
 	default:

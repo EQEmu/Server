@@ -2700,7 +2700,7 @@ void TaskManager::SendTaskActivityShort(Client *c, int TaskID, int ActivityID, i
 
 	TaskActivityShort_Struct* tass;
 
-	if (c->ClientVersionBit() & EQEmu::versions::bit_RoFAndLater)
+	if (c->ClientVersionBit() & EQEmu::versions::maskRoFAndLater)
 	{
 		auto outapp = new EQApplicationPacket(OP_TaskActivity, 25);
 		outapp->WriteUInt32(ClientTaskIndex);

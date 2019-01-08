@@ -14,12 +14,15 @@ auras
 base_data
 blocked_spells
 books
+bug_reports
 char_create_combinations
 char_create_point_allocations
 class_skill
 damageshieldtypes
 data_buckets
+db_str
 doors
+eqtime
 faction_list
 faction_list_mod
 fear_hints
@@ -34,6 +37,7 @@ ground_spawns
 horses
 instance_list
 items
+ip_exemptions
 ldon_trap_entries
 ldon_trap_templates
 level_exp_mods
@@ -73,6 +77,7 @@ npc_types
 npc_types_metadata
 npc_types_tint
 object
+perl_event_export_settings
 pets
 pets_equipmentset
 pets_equipmentset_entries

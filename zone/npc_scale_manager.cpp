@@ -100,7 +100,7 @@ void NpcScaleManager::ScaleNPC(NPC * npc)
 	if (npc->GetPhR() == 0) {
 		npc->ModifyNPCStat("pr", std::to_string(scale_data.physical_resist).c_str());
 	}
-	if (npc->GetMinDMG() == 0) {
+	if (npc->GetMinDMG() == 0 && npc->GetMaxDMG() == 0) {
 		int min_dmg = scale_data.min_dmg;
 		if (RuleB(Combat, UseNPCDamageClassLevelMods)) {
 			int32 class_level_damage_mod = GetClassLevelDamageMod(npc->GetLevel(), npc->GetClass());

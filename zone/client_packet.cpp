@@ -753,7 +753,7 @@ void Client::CompleteConnect()
 	entity_list.SendUntargetable(this);
 
 	int x;
-	for (x = 0; x < 8; x++) {
+	for (x = EQEmu::textures::textureBegin; x <= EQEmu::textures::LastTexture; x++) {
 		SendWearChange(x);
 	}
 	// added due to wear change above
@@ -762,7 +762,7 @@ void Client::CompleteConnect()
 
 	Mob *pet = GetPet();
 	if (pet != nullptr) {
-		for (x = 0; x < 8; x++) {
+		for (x = EQEmu::textures::textureBegin; x <= EQEmu::textures::LastTexture; x++) {
 			pet->SendWearChange(x);
 		}
 		// added due to wear change above
@@ -868,14 +868,14 @@ void Client::CompleteConnect()
 	worldserver.SendPacket(pack);
 	delete pack;
 
-	if (IsClient() && CastToClient()->ClientVersionBit() & EQEmu::versions::bit_UFAndLater) {
+	if (IsClient() && CastToClient()->ClientVersionBit() & EQEmu::versions::maskUFAndLater) {
 		EQApplicationPacket *outapp = MakeBuffsPacket(false);
 		CastToClient()->FastQueuePacket(&outapp);
 	}
 
 	// TODO: load these states
 	// We at least will set them to the correct state for now
-	if (m_ClientVersionBit & EQEmu::versions::bit_UFAndLater && GetPet()) {
+	if (m_ClientVersionBit & EQEmu::versions::maskUFAndLater && GetPet()) {
 		SetPetCommandState(PET_BUTTON_SIT, 0);
 		SetPetCommandState(PET_BUTTON_STOP, 0);
 		SetPetCommandState(PET_BUTTON_REGROUP, 0);
@@ -1398,7 +1398,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if (m_pp.ldon_points_available < 0 || m_pp.ldon_points_available > 2000000000) { m_pp.ldon_points_available = 0; }
 
 	if (RuleB(World, UseClientBasedExpansionSettings)) {
-		m_pp.expansions = EQEmu::versions::ConvertClientVersionToExpansion(ClientVersion());
+		m_pp.expansions = EQEmu::expansions::ConvertClientVersionToExpansionMask(ClientVersion());
 	}
 	else {
 		m_pp.expansions = RuleI(World, ExpansionSettings);
@@ -1663,7 +1663,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		}
 	}
 
-	if (m_ClientVersionBit & EQEmu::versions::bit_UFAndLater) {
+	if (m_ClientVersionBit & EQEmu::versions::maskUFAndLater) {
 		outapp = new EQApplicationPacket(OP_XTargetResponse, 8);
 		outapp->WriteUInt32(GetMaxXTargets());
 		outapp->WriteUInt32(0);
@@ -10168,16 +10168,16 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		if (aabonuses.PetCommands[PetCommand] && mypet->IsNPC()) {
 			if (mypet->IsHeld())
 			{
-				if (m_ClientVersionBit & EQEmu::versions::bit_SoDAndLater)
+				if (m_ClientVersionBit & EQEmu::versions::maskSoDAndLater)
 					Message_StringID(MT_PetResponse, PET_HOLD_SET_OFF);
 				mypet->SetHeld(false);
 			}
 			else
 			{
-				if (m_ClientVersionBit & EQEmu::versions::bit_SoDAndLater)
+				if (m_ClientVersionBit & EQEmu::versions::maskSoDAndLater)
 					Message_StringID(MT_PetResponse, PET_HOLD_SET_ON);
 
-				if (m_ClientVersionBit & EQEmu::versions::bit_UFAndLater)
+				if (m_ClientVersionBit & EQEmu::versions::maskUFAndLater)
 					mypet->SayTo_StringID(this, MT_PetResponse, PET_NOW_HOLDING);
 				else
 					mypet->SayTo_StringID(this, MT_PetResponse, PET_ON_HOLD);
@@ -10191,10 +10191,10 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 	}
 	case PET_HOLD_ON: {
 		if (aabonuses.PetCommands[PetCommand] && mypet->IsNPC() && !mypet->IsHeld()) {
-			if (m_ClientVersionBit & EQEmu::versions::bit_SoDAndLater)
+			if (m_ClientVersionBit & EQEmu::versions::maskSoDAndLater)
 				Message_StringID(MT_PetResponse, PET_HOLD_SET_ON);
 
-			if (m_ClientVersionBit & EQEmu::versions::bit_UFAndLater)
+			if (m_ClientVersionBit & EQEmu::versions::maskUFAndLater)
 				mypet->SayTo_StringID(this, MT_PetResponse, PET_NOW_HOLDING);
 			else
 				mypet->SayTo_StringID(this, MT_PetResponse, PET_ON_HOLD);
@@ -10206,7 +10206,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 	}
 	case PET_HOLD_OFF: {
 		if (aabonuses.PetCommands[PetCommand] && mypet->IsNPC() && mypet->IsHeld()) {
-			if (m_ClientVersionBit & EQEmu::versions::bit_SoDAndLater)
+			if (m_ClientVersionBit & EQEmu::versions::maskSoDAndLater)
 				Message_StringID(MT_PetResponse, PET_HOLD_SET_OFF);
 			mypet->SetHeld(false);
 		}
@@ -10216,13 +10216,13 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		if (aabonuses.PetCommands[PetCommand] && mypet->IsNPC()) {
 			if (mypet->IsGHeld())
 			{
-				if (m_ClientVersionBit & EQEmu::versions::bit_UFAndLater)
+				if (m_ClientVersionBit & EQEmu::versions::maskUFAndLater)
 					Message_StringID(MT_PetResponse, PET_OFF_GHOLD);
 				mypet->SetGHeld(false);
 			}
 			else
 			{
-				if (m_ClientVersionBit & EQEmu::versions::bit_UFAndLater) {
+				if (m_ClientVersionBit & EQEmu::versions::maskUFAndLater) {
 					Message_StringID(MT_PetResponse, PET_ON_GHOLD);
 					mypet->SayTo_StringID(this, MT_PetResponse, PET_GHOLD_ON_MSG);
 				} else {
@@ -10237,7 +10237,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 	}
 	case PET_GHOLD_ON: {
 		if (aabonuses.PetCommands[PetCommand] && mypet->IsNPC()) {
-			if (m_ClientVersionBit & EQEmu::versions::bit_UFAndLater) {
+			if (m_ClientVersionBit & EQEmu::versions::maskUFAndLater) {
 				Message_StringID(MT_PetResponse, PET_ON_GHOLD);
 				mypet->SayTo_StringID(this, MT_PetResponse, PET_GHOLD_ON_MSG);
 			} else {
@@ -10251,7 +10251,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 	}
 	case PET_GHOLD_OFF: {
 		if (aabonuses.PetCommands[PetCommand] && mypet->IsNPC() && mypet->IsGHeld()) {
-			if (m_ClientVersionBit & EQEmu::versions::bit_UFAndLater)
+			if (m_ClientVersionBit & EQEmu::versions::maskUFAndLater)
 				Message_StringID(MT_PetResponse, PET_OFF_GHOLD);
 			mypet->SetGHeld(false);
 		}
@@ -10263,13 +10263,13 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				break;
 			if (mypet->IsNoCast()) {
 				Message_StringID(MT_PetResponse, PET_CASTING);
-				if (m_ClientVersionBit & EQEmu::versions::bit_SoDAndLater)
+				if (m_ClientVersionBit & EQEmu::versions::maskSoDAndLater)
 					Message_StringID(MT_PetResponse, PET_SPELLHOLD_SET_OFF);
 				mypet->SetNoCast(false);
 			}
 			else {
 				Message_StringID(MT_PetResponse, PET_NOT_CASTING);
-				if (m_ClientVersionBit & EQEmu::versions::bit_SoDAndLater)
+				if (m_ClientVersionBit & EQEmu::versions::maskSoDAndLater)
 					Message_StringID(MT_PetResponse, PET_SPELLHOLD_SET_ON);
 				mypet->SetNoCast(true);
 			}
@@ -10282,7 +10282,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				break;
 			if (!mypet->IsNoCast()) {
 				Message_StringID(MT_PetResponse, PET_NOT_CASTING);
-				if (m_ClientVersionBit & EQEmu::versions::bit_SoDAndLater)
+				if (m_ClientVersionBit & EQEmu::versions::maskSoDAndLater)
 					Message_StringID(MT_PetResponse, PET_SPELLHOLD_SET_ON);
 				mypet->SetNoCast(true);
 			}
@@ -10295,7 +10295,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				break;
 			if (mypet->IsNoCast()) {
 				Message_StringID(MT_PetResponse, PET_CASTING);
-				if (m_ClientVersionBit & EQEmu::versions::bit_SoDAndLater)
+				if (m_ClientVersionBit & EQEmu::versions::maskSoDAndLater)
 					Message_StringID(MT_PetResponse, PET_SPELLHOLD_SET_OFF);
 				mypet->SetNoCast(false);
 			}
@@ -10308,13 +10308,13 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				break;
 			if (mypet->IsFocused()) {
 				Message_StringID(MT_PetResponse, PET_NOT_FOCUSING);
-				if (m_ClientVersionBit & EQEmu::versions::bit_SoDAndLater)
+				if (m_ClientVersionBit & EQEmu::versions::maskSoDAndLater)
 					Message_StringID(MT_PetResponse, PET_FOCUS_SET_OFF);
 				mypet->SetFocused(false);
 			}
 			else {
 				Message_StringID(MT_PetResponse, PET_NOW_FOCUSING);
-				if (m_ClientVersionBit & EQEmu::versions::bit_SoDAndLater)
+				if (m_ClientVersionBit & EQEmu::versions::maskSoDAndLater)
 					Message_StringID(MT_PetResponse, PET_FOCUS_SET_ON);
 				mypet->SetFocused(true);
 			}
@@ -10327,7 +10327,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				break;
 			if (!mypet->IsFocused()) {
 				Message_StringID(MT_PetResponse, PET_NOW_FOCUSING);
-				if (m_ClientVersionBit & EQEmu::versions::bit_SoDAndLater)
+				if (m_ClientVersionBit & EQEmu::versions::maskSoDAndLater)
 					Message_StringID(MT_PetResponse, PET_FOCUS_SET_ON);
 				mypet->SetFocused(true);
 			}
@@ -10340,7 +10340,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				break;
 			if (mypet->IsFocused()) {
 				Message_StringID(MT_PetResponse, PET_NOT_FOCUSING);
-				if (m_ClientVersionBit & EQEmu::versions::bit_SoDAndLater)
+				if (m_ClientVersionBit & EQEmu::versions::maskSoDAndLater)
 					Message_StringID(MT_PetResponse, PET_FOCUS_SET_OFF);
 				mypet->SetFocused(false);
 			}

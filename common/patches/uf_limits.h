@@ -278,6 +278,9 @@ namespace UF
 	namespace constants {
 		inline EQEmu::versions::ClientVersion GetConstantsRef() { return EQEmu::versions::ClientVersion::UF; }
 
+		const uint32 EXPANSION_BIT = EQEmu::expansions::bitUF;
+		const uint32 EXPANSIONS_MASK = EQEmu::expansions::maskUF;
+
 		const size_t CHARACTER_CREATION_LIMIT = 12;
 
 		const size_t SAY_LINK_BODY_SIZE = 50;

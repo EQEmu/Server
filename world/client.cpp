@@ -172,7 +172,7 @@ void Client::SendExpansionInfo() {
 	auto outapp = new EQApplicationPacket(OP_ExpansionInfo, sizeof(ExpansionInfo_Struct));
 	ExpansionInfo_Struct *eis = (ExpansionInfo_Struct*)outapp->pBuffer;
 	if(RuleB(World, UseClientBasedExpansionSettings)) {
-		eis->Expansions = EQEmu::versions::ConvertClientVersionToExpansion(eqs->ClientVersion());
+		eis->Expansions = EQEmu::expansions::ConvertClientVersionToExpansionMask(eqs->ClientVersion());
 	} else {
 		eis->Expansions = (RuleI(World, ExpansionSettings));
 	}
@@ -186,7 +186,7 @@ void Client::SendCharInfo() {
 		cle->SetOnline(CLE_Status_CharSelect);
 	}
 
-	if (m_ClientVersionBit & EQEmu::versions::bit_RoFAndLater) {
+	if (m_ClientVersionBit & EQEmu::versions::maskRoFAndLater) {
 		SendMaxCharCreate();
 		SendMembership();
 		SendMembershipSettings();
@@ -717,7 +717,7 @@ bool Client::HandleCharacterCreatePacket(const EQApplicationPacket *app) {
 	}
 	else
 	{
-		if (m_ClientVersionBit & EQEmu::versions::bit_TitaniumAndEarlier)
+		if (m_ClientVersionBit & EQEmu::versions::maskTitaniumAndEarlier)
 			StartInTutorial = true;
 		SendCharInfo();
 	}
@@ -989,7 +989,7 @@ bool Client::HandleDeleteCharacterPacket(const EQApplicationPacket *app) {
 
 bool Client::HandleZoneChangePacket(const EQApplicationPacket *app) {
 	// HoT sends this to world while zoning and wants it echoed back.
-	if (m_ClientVersionBit & EQEmu::versions::bit_RoFAndLater)
+	if (m_ClientVersionBit & EQEmu::versions::maskRoFAndLater)
 	{
 		QueuePacket(app);
 	}
@@ -1465,7 +1465,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	Log(Logs::Detail, Logs::World_Server, "Beard: %d  Beardcolor: %d", cc->beard, cc->beardcolor);
 
 	/* Validate the char creation struct */
-	if (m_ClientVersionBit & EQEmu::versions::bit_SoFAndLater) {
+	if (m_ClientVersionBit & EQEmu::versions::maskSoFAndLater) {
 		if (!CheckCharCreateInfoSoF(cc)) {
 			Log(Logs::Detail, Logs::World_Server,"CheckCharCreateInfo did not validate the request (bad race/class/stats)");
 			return false;
@@ -1536,7 +1536,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	pp.pvp = database.GetServerType() == 1 ? 1 : 0;
 
 	/* If it is an SoF Client and the SoF Start Zone rule is set, send new chars there */
-	if (m_ClientVersionBit & EQEmu::versions::bit_SoFAndLater) {
+	if (m_ClientVersionBit & EQEmu::versions::maskSoFAndLater) {
 		Log(Logs::Detail, Logs::World_Server,"Found 'SoFStartZoneID' rule setting: %i", RuleI(World, SoFStartZoneID));
 		if (RuleI(World, SoFStartZoneID) > 0) {
 			pp.zone_id = RuleI(World, SoFStartZoneID);
@@ -1552,7 +1552,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 		}
 	} 	
 	/* use normal starting zone logic to either get defaults, or if startzone was set, load that from the db table.*/
-	bool ValidStartZone = database.GetStartZone(&pp, cc, m_ClientVersionBit & EQEmu::versions::bit_TitaniumAndEarlier);
+	bool ValidStartZone = database.GetStartZone(&pp, cc, m_ClientVersionBit & EQEmu::versions::maskTitaniumAndEarlier);
 
 	if (!ValidStartZone){
 		return false;
