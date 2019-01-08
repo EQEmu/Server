@@ -507,7 +507,7 @@ void NPC::SetTarget(Mob* mob) {
 
 	if (owner) {
 		auto client = owner->CastToClient();
-		if (client->ClientVersionBit() & EQEmu::versions::bit_UFAndLater) {
+		if (client->ClientVersionBit() & EQEmu::versions::maskUFAndLater) {
 			auto app = new EQApplicationPacket(OP_PetHoTT, sizeof(ClientTarget_Struct));
 			auto ct = (ClientTarget_Struct *)app->pBuffer;
 			ct->new_target = mob ? mob->GetID() : 0;

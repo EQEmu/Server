@@ -39,26 +39,27 @@ namespace EQEmu
 			RoF2		// Build: 'May 10 2013 23:30:08'
 		};
 
-		enum ClientVersionBit : uint32 {
-			bit_Unknown = 0,
-			bit_Client62 = 0x00000001, // unsupported (placeholder for scripts)
-			bit_Titanium = 0x00000002,
-			bit_SoF = 0x00000004,
-			bit_SoD = 0x00000008,
-			bit_UF = 0x00000010,
-			bit_RoF = 0x00000020,
-			bit_RoF2 = 0x00000040,
-			bit_TitaniumAndEarlier = 0x00000003,
-			bit_SoFAndEarlier = 0x00000007,
-			bit_SoDAndEarlier = 0x0000000F,
-			bit_UFAndEarlier = 0x0000001F,
-			bit_RoFAndEarlier = 0x0000003F,
-			bit_SoFAndLater = 0xFFFFFFFC,
-			bit_SoDAndLater = 0xFFFFFFF8,
-			bit_UFAndLater = 0xFFFFFFF0,
-			bit_RoFAndLater = 0xFFFFFFE0,
-			bit_RoF2AndLater = 0xFFFFFFC0,
-			bit_AllClients = 0xFFFFFFFF
+		enum ClientVersionBitmask : uint32 {
+			bitUnknown = 0x00000000,
+			bitClient62 = 0x00000001, // unsupported (placeholder for scripts)
+			bitTitanium = 0x00000002,
+			bitSoF = 0x00000004,
+			bitSoD = 0x00000008,
+			bitUF = 0x00000010,
+			bitRoF = 0x00000020,
+			bitRoF2 = 0x00000040,
+			maskUnknown = 0x00000000,
+			maskTitaniumAndEarlier = 0x00000003,
+			maskSoFAndEarlier = 0x00000007,
+			maskSoDAndEarlier = 0x0000000F,
+			maskUFAndEarlier = 0x0000001F,
+			maskRoFAndEarlier = 0x0000003F,
+			maskSoFAndLater = 0xFFFFFFFC,
+			maskSoDAndLater = 0xFFFFFFF8,
+			maskUFAndLater = 0xFFFFFFF0,
+			maskRoFAndLater = 0xFFFFFFE0,
+			maskRoF2AndLater = 0xFFFFFFC0,
+			maskAllClients = 0xFFFFFFFF
 		};
 
 		const ClientVersion LastClientVersion = ClientVersion::RoF2;

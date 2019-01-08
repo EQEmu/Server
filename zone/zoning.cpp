@@ -588,7 +588,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			// If we are SoF and later and are respawning from hover, we want the real zone ID, else zero to use the old hack.
 			//
 			if(zone->GetZoneID() == zoneID) {
-				if ((ClientVersionBit() & EQEmu::versions::bit_SoFAndLater) && (!RuleB(Character, RespawnFromHover) || !IsHoveringForRespawn()))
+				if ((ClientVersionBit() & EQEmu::versions::maskSoFAndLater) && (!RuleB(Character, RespawnFromHover) || !IsHoveringForRespawn()))
 					gmg->bind_zone_id = 0;
 				else
 					gmg->bind_zone_id = zoneID;

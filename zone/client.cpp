@@ -1899,9 +1899,9 @@ void Client::CheckManaEndUpdate() {
 			mana_update->cur_mana = GetMana();
 			mana_update->max_mana = GetMaxMana();
 			mana_update->spawn_id = GetID();
-			if ((ClientVersionBit() & EQEmu::versions::ClientVersionBit::bit_SoDAndLater) != 0)
+			if ((ClientVersionBit() & EQEmu::versions::ClientVersionBitmask::maskSoDAndLater) != 0)
 				QueuePacket(mana_packet); // do we need this with the OP_ManaChange packet above?
-			entity_list.QueueClientsByXTarget(this, mana_packet, false, EQEmu::versions::ClientVersionBit::bit_SoDAndLater);
+			entity_list.QueueClientsByXTarget(this, mana_packet, false, EQEmu::versions::ClientVersionBitmask::maskSoDAndLater);
 			safe_delete(mana_packet);
 
 			last_reported_mana_percent = this->GetManaPercent();
@@ -1924,9 +1924,9 @@ void Client::CheckManaEndUpdate() {
 			endurance_update->cur_end = GetEndurance();
 			endurance_update->max_end = GetMaxEndurance();
 			endurance_update->spawn_id = GetID();
-			if ((ClientVersionBit() & EQEmu::versions::ClientVersionBit::bit_SoDAndLater) != 0)
+			if ((ClientVersionBit() & EQEmu::versions::ClientVersionBitmask::maskSoDAndLater) != 0)
 				QueuePacket(endurance_packet); // do we need this with the OP_ManaChange packet above?
-			entity_list.QueueClientsByXTarget(this, endurance_packet, false, EQEmu::versions::ClientVersionBit::bit_SoDAndLater);
+			entity_list.QueueClientsByXTarget(this, endurance_packet, false, EQEmu::versions::ClientVersionBitmask::maskSoDAndLater);
 			safe_delete(endurance_packet);
 
 			last_reported_endurance_percent = this->GetEndurancePercent();
@@ -3054,7 +3054,7 @@ void Client::ServerFilter(SetServerFilter_Struct* filter){
 	Filter0(FilterMissedMe);
 	Filter1(FilterDamageShields);
 
-	if (ClientVersionBit() & EQEmu::versions::bit_SoDAndLater) {
+	if (ClientVersionBit() & EQEmu::versions::maskSoDAndLater) {
 		if (filter->filters[FilterDOT] == 0)
 			ClientFilters[FilterDOT] = FilterShow;
 		else if (filter->filters[FilterDOT] == 1)
@@ -3075,7 +3075,7 @@ void Client::ServerFilter(SetServerFilter_Struct* filter){
 	Filter1(FilterFocusEffects);
 	Filter1(FilterPetSpells);
 
-	if (ClientVersionBit() & EQEmu::versions::bit_SoDAndLater) {
+	if (ClientVersionBit() & EQEmu::versions::maskSoDAndLater) {
 		if (filter->filters[FilterHealOverTime] == 0)
 			ClientFilters[FilterHealOverTime] = FilterShow;
 		// This is called 'Show Mine Only' in the clients, but functions the same as show
@@ -5622,7 +5622,7 @@ void Client::SuspendMinion()
 			memset(&m_suspendedminion, 0, sizeof(struct PetInfo));
 			// TODO: These pet command states need to be synced ...
 			// Will just fix them for now
-			if (m_ClientVersionBit & EQEmu::versions::bit_UFAndLater) {
+			if (m_ClientVersionBit & EQEmu::versions::maskUFAndLater) {
 				SetPetCommandState(PET_BUTTON_SIT, 0);
 				SetPetCommandState(PET_BUTTON_STOP, 0);
 				SetPetCommandState(PET_BUTTON_REGROUP, 0);
@@ -7631,7 +7631,7 @@ void Client::SendClearMercInfo()
 
 void Client::DuplicateLoreMessage(uint32 ItemID)
 {
-	if (!(m_ClientVersionBit & EQEmu::versions::bit_RoFAndLater))
+	if (!(m_ClientVersionBit & EQEmu::versions::maskRoFAndLater))
 	{
 		Message_StringID(0, PICK_LORE);
 		return;

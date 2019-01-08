@@ -63,32 +63,26 @@ const char* EQEmu::versions::ClientVersionName(ClientVersion client_version)
 uint32 EQEmu::versions::ConvertClientVersionToClientVersionBit(ClientVersion client_version)
 {
 	switch (client_version) {
-	case ClientVersion::Unknown:
-	case ClientVersion::Client62:
-		return bit_Unknown;
 	case ClientVersion::Titanium:
-		return bit_Titanium;
+		return bitTitanium;
 	case ClientVersion::SoF:
-		return bit_SoF;
+		return bitSoF;
 	case ClientVersion::SoD:
-		return bit_SoD;
+		return bitSoD;
 	case ClientVersion::UF:
-		return bit_UF;
+		return bitUF;
 	case ClientVersion::RoF:
-		return bit_RoF;
+		return bitRoF;
 	case ClientVersion::RoF2:
-		return bit_RoF2;
+		return bitRoF2;
 	default:
-		return bit_Unknown;
+		return bitUnknown;
 	}
 }
 
 EQEmu::versions::ClientVersion EQEmu::versions::ConvertClientVersionBitToClientVersion(uint32 client_version_bit)
 {
 	switch (client_version_bit) {
-	case (uint32)static_cast<unsigned int>(ClientVersion::Unknown) :
-	case ((uint32)1 << (static_cast<unsigned int>(ClientVersion::Client62) - 1)) :
-		return ClientVersion::Unknown;
 	case ((uint32)1 << (static_cast<unsigned int>(ClientVersion::Titanium) - 1)) :
 		return ClientVersion::Titanium;
 	case ((uint32)1 << (static_cast<unsigned int>(ClientVersion::SoF) - 1)) :

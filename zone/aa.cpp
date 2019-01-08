@@ -488,7 +488,7 @@ void Client::ResetAA() {
 
 	database.DeleteCharacterLeadershipAAs(CharacterID());
 	// undefined for these clients
-	if (ClientVersionBit() & EQEmu::versions::bit_TitaniumAndEarlier)
+	if (ClientVersionBit() & EQEmu::versions::maskTitaniumAndEarlier)
 		Kick();
 }
 
@@ -1455,7 +1455,7 @@ bool Mob::CanUseAlternateAdvancementRank(AA::Rank *rank) {
 	//the one titanium hack i will allow
 	//just to make sure we dont crash the client with newer aas
 	//we'll exclude any expendable ones
-	if(IsClient() && CastToClient()->ClientVersionBit() & EQEmu::versions::bit_TitaniumAndEarlier) {
+	if(IsClient() && CastToClient()->ClientVersionBit() & EQEmu::versions::maskTitaniumAndEarlier) {
 		if(ability->charges > 0) {
 			return false;
 		}
