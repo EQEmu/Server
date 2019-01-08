@@ -1133,7 +1133,7 @@ uint32 Client::GetCharMaxLevelFromQGlobal() {
 
 uint32 Client::GetCharMaxLevelFromBucket() {
 	uint32 char_id = this->CharacterID();
-	std::string query = StringFormat("SELECT value FROM data_buckets WHERE key = '%i-CharMaxLevel'", char_id);
+	std::string query = StringFormat("SELECT value FROM data_buckets WHERE `key` = '%i-CharMaxLevel'", char_id);
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
         Log(Logs::General, Logs::Error, "Data bucket for CharMaxLevel for char ID %i failed.", char_id);
