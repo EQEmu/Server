@@ -250,6 +250,7 @@ namespace RoF
 	namespace constants {
 		inline EQEmu::versions::ClientVersion GetConstantsRef() { return EQEmu::versions::ClientVersion::RoF; }
 
+		const EQEmu::expansions::Expansion EXPANSION = EQEmu::expansions::Expansion::RoF;
 		const uint32 EXPANSION_BIT = EQEmu::expansions::bitRoF;
 		const uint32 EXPANSIONS_MASK = EQEmu::expansions::maskRoF;
 

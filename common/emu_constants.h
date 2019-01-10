@@ -188,6 +188,7 @@ namespace EQEmu
 	namespace constants {
 		const EQEmu::versions::ClientVersion CHARACTER_CREATION_CLIENT = EQEmu::versions::ClientVersion::Titanium;
 
+		using RoF2::constants::EXPANSION;
 		using RoF2::constants::EXPANSION_BIT;
 		using RoF2::constants::EXPANSIONS_MASK;
 

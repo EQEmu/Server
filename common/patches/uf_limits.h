@@ -278,6 +278,7 @@ namespace UF
 	namespace constants {
 		inline EQEmu::versions::ClientVersion GetConstantsRef() { return EQEmu::versions::ClientVersion::UF; }
 
+		const EQEmu::expansions::Expansion EXPANSION = EQEmu::expansions::Expansion::UF;
 		const uint32 EXPANSION_BIT = EQEmu::expansions::bitUF;
 		const uint32 EXPANSIONS_MASK = EQEmu::expansions::maskUF;
 

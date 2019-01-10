@@ -277,6 +277,7 @@ namespace SoD
 	namespace constants {
 		inline EQEmu::versions::ClientVersion GetConstantsRef() { return EQEmu::versions::ClientVersion::SoD; }
 
+		const EQEmu::expansions::Expansion EXPANSION = EQEmu::expansions::Expansion::SoD;
 		const uint32 EXPANSION_BIT = EQEmu::expansions::bitSoD;
 		const uint32 EXPANSIONS_MASK = EQEmu::expansions::maskSoD;
 

@@ -25,6 +25,7 @@ static const EQEmu::constants::LookupEntry constants_lookup_entries[EQEmu::versi
 {
 	/*[ClientVersion::Unknown] =*/
 	EQEmu::constants::LookupEntry(
+		EQEmu::expansions::Expansion::EverQuest,
 		ClientUnknown::INULL,
 		ClientUnknown::INULL,
 		ClientUnknown::INULL,
@@ -39,6 +40,7 @@ static const EQEmu::constants::LookupEntry constants_lookup_entries[EQEmu::versi
 	),
 	/*[ClientVersion::Client62] =*/
 	EQEmu::constants::LookupEntry(
+		EQEmu::expansions::Expansion::EverQuest,
 		Client62::INULL,
 		Client62::INULL,
 		Client62::INULL,
@@ -53,6 +55,7 @@ static const EQEmu::constants::LookupEntry constants_lookup_entries[EQEmu::versi
 	),
 	/*[ClientVersion::Titanium] =*/
 	EQEmu::constants::LookupEntry(
+		Titanium::constants::EXPANSION,
 		Titanium::constants::EXPANSION_BIT,
 		Titanium::constants::EXPANSIONS_MASK,
 		Titanium::constants::CHARACTER_CREATION_LIMIT,
@@ -67,6 +70,7 @@ static const EQEmu::constants::LookupEntry constants_lookup_entries[EQEmu::versi
 	),
 	/*[ClientVersion::SoF] =*/
 	EQEmu::constants::LookupEntry(
+		SoF::constants::EXPANSION,
 		SoF::constants::EXPANSION_BIT,
 		SoF::constants::EXPANSIONS_MASK,
 		SoF::constants::CHARACTER_CREATION_LIMIT,
@@ -81,6 +85,7 @@ static const EQEmu::constants::LookupEntry constants_lookup_entries[EQEmu::versi
 	),
 	/*[ClientVersion::SoD] =*/
 	EQEmu::constants::LookupEntry(
+		SoD::constants::EXPANSION,
 		SoD::constants::EXPANSION_BIT,
 		SoD::constants::EXPANSIONS_MASK,
 		SoD::constants::CHARACTER_CREATION_LIMIT,
@@ -95,6 +100,7 @@ static const EQEmu::constants::LookupEntry constants_lookup_entries[EQEmu::versi
 	),
 	/*[ClientVersion::UF] =*/
 	EQEmu::constants::LookupEntry(
+		UF::constants::EXPANSION,
 		UF::constants::EXPANSION_BIT,
 		UF::constants::EXPANSIONS_MASK,
 		UF::constants::CHARACTER_CREATION_LIMIT,
@@ -109,6 +115,7 @@ static const EQEmu::constants::LookupEntry constants_lookup_entries[EQEmu::versi
 	),
 	/*[ClientVersion::RoF] =*/
 	EQEmu::constants::LookupEntry(
+		RoF::constants::EXPANSION,
 		RoF::constants::EXPANSION_BIT,
 		RoF::constants::EXPANSIONS_MASK,
 		RoF::constants::CHARACTER_CREATION_LIMIT,
@@ -123,6 +130,7 @@ static const EQEmu::constants::LookupEntry constants_lookup_entries[EQEmu::versi
 	),
 	/*[ClientVersion::RoF2] =*/
 	EQEmu::constants::LookupEntry(
+		RoF2::constants::EXPANSION,
 		RoF2::constants::EXPANSION_BIT,
 		RoF2::constants::EXPANSIONS_MASK,
 		RoF2::constants::CHARACTER_CREATION_LIMIT,

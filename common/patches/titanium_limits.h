@@ -276,6 +276,7 @@ namespace Titanium
 	namespace constants {
 		inline EQEmu::versions::ClientVersion GetConstantsRef() { return EQEmu::versions::ClientVersion::Titanium; }
 
+		const EQEmu::expansions::Expansion EXPANSION = EQEmu::expansions::Expansion::PoR;
 		const uint32 EXPANSION_BIT = EQEmu::expansions::bitPoR;
 		const uint32 EXPANSIONS_MASK = EQEmu::expansions::maskPoR;
 

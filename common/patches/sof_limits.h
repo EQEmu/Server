@@ -277,6 +277,7 @@ namespace SoF
 	namespace constants {
 		inline EQEmu::versions::ClientVersion GetConstantsRef() { return EQEmu::versions::ClientVersion::SoF; }
 
+		const EQEmu::expansions::Expansion EXPANSION = EQEmu::expansions::Expansion::SoF;
 		const uint32 EXPANSION_BIT = EQEmu::expansions::bitSoF;
 		const uint32 EXPANSIONS_MASK = EQEmu::expansions::maskSoF;
 
