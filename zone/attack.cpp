@@ -5038,7 +5038,7 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 			hit.damage_done = headshot;
 		}
 		else if (GetClass() == RANGER && GetLevel() > 50) { // no double dmg on headshot
-			if (defender->IsNPC() && !defender->IsMoving() && !defender->IsRooted()) {
+			if ((defender->IsNPC() && !defender->IsMoving() && !defender->IsRooted()) || !RuleB(Combat, ArcheryBonusRequiresStationary)) {
 				hit.damage_done *= 2;
 				Message_StringID(MT_CritMelee, BOW_DOUBLE_DAMAGE);
 			}
