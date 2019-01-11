@@ -1,6 +1,14 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 
+== 1/11/2019 ==
+Uleat: Modified rules system to ignore all runtime modifications of 'World:ExpansionSettings' and 'World:UseClientBasedExpansionSettings' fields.
+	- These fields are no longer allowed to be changed during server runtime through the command system
+	- Major syncronization issues between server and clients result when these fields are altered in-game
+	- It is not recommended to update these fields via sql queries while the server is in operation
+	- Failure to observe these warnings will result in abhorant behavior and loss of items
+	- Modify these fields during server operation at your own risk!
+
 == 1/4/2019 ==
 Akkadius: [Scaling] Global base scaling data has been updated in new database binary revision
 

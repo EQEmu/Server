@@ -8345,7 +8345,7 @@ void command_rules(Client *c, const Seperator *sep) {
 			c->Message(0, "(%d) %s",  cur->first, cur->second.c_str());
 		}
 	} else if(!strcasecmp(sep->arg[1], "reload")) {
-		RuleManager::Instance()->LoadRules(&database, RuleManager::Instance()->GetActiveRuleset());
+		RuleManager::Instance()->LoadRules(&database, RuleManager::Instance()->GetActiveRuleset(), true);
 		c->Message(0, "The active ruleset (%s (%d)) has been reloaded",  RuleManager::Instance()->GetActiveRuleset(),
 			RuleManager::Instance()->GetActiveRulesetID());
 	} else if(!strcasecmp(sep->arg[1], "switch")) {
@@ -8361,7 +8361,7 @@ void command_rules(Client *c, const Seperator *sep) {
 		}
 
 		//TODO: we likely want to reload this ruleset everywhere...
-		RuleManager::Instance()->LoadRules(&database, sep->arg[2]);
+		RuleManager::Instance()->LoadRules(&database, sep->arg[2], true);
 
 		c->Message(0, "The selected ruleset has been changed to (%s (%d)) and reloaded locally",  sep->arg[2], rsid);
 	} else if(!strcasecmp(sep->arg[1], "load")) {
@@ -8371,7 +8371,7 @@ void command_rules(Client *c, const Seperator *sep) {
 			c->Message(13, "Unknown rule set '%s'",  sep->arg[2]);
 			return;
 		}
-		RuleManager::Instance()->LoadRules(&database, sep->arg[2]);
+		RuleManager::Instance()->LoadRules(&database, sep->arg[2], true);
 		c->Message(0, "Loaded ruleset '%s' (%d) locally",  sep->arg[2], rsid);
 	} else if(!strcasecmp(sep->arg[1], "store")) {
 		if(sep->argnum == 1) {
@@ -8395,9 +8395,9 @@ void command_rules(Client *c, const Seperator *sep) {
 			return;
 		}
 	} else if(!strcasecmp(sep->arg[1], "reset")) {
-		RuleManager::Instance()->ResetRules();
+		RuleManager::Instance()->ResetRules(true);
 		c->Message(0, "The running ruleset has been set to defaults");
-
+	
 	} else if(!strcasecmp(sep->arg[1], "get")) {
 		if(sep->argnum != 2) {
 			c->Message(13, "Invalid argument count, see help.");
@@ -8414,7 +8414,7 @@ void command_rules(Client *c, const Seperator *sep) {
 			c->Message(13, "Invalid argument count, see help.");
 			return;
 		}
-		if(!RuleManager::Instance()->SetRule(sep->arg[2], sep->arg[3])) {
+		if(!RuleManager::Instance()->SetRule(sep->arg[2], sep->arg[3], nullptr, false, true)) {
 			c->Message(13, "Failed to modify rule");
 		} else {
 			c->Message(0, "Rule modified locally.");
@@ -8424,7 +8424,7 @@ void command_rules(Client *c, const Seperator *sep) {
 			c->Message(13, "Invalid argument count, see help.");
 			return;
 		}
-		if(!RuleManager::Instance()->SetRule(sep->arg[2], sep->arg[3], &database, true)) {
+		if(!RuleManager::Instance()->SetRule(sep->arg[2], sep->arg[3], &database, true, true)) {
 			c->Message(13, "Failed to modify rule");
 		} else {
 			c->Message(0, "Rule modified locally and in the database.");

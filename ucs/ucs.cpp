@@ -102,13 +102,14 @@ int main() {
 
 	char tmp[64];
 
+	// ucs has no 'reload rules' handler
 	if (database.GetVariable("RuleSet", tmp, sizeof(tmp)-1)) {
 		Log(Logs::General, Logs::UCS_Server, "Loading rule set '%s'", tmp);
-		if(!RuleManager::Instance()->LoadRules(&database, tmp)) {
+		if(!RuleManager::Instance()->LoadRules(&database, tmp, false)) {
 			Log(Logs::General, Logs::UCS_Server, "Failed to load ruleset '%s', falling back to defaults.", tmp);
 		}
 	} else {
-		if(!RuleManager::Instance()->LoadRules(&database, "default")) {
+		if(!RuleManager::Instance()->LoadRules(&database, "default", false)) {
 			Log(Logs::General, Logs::UCS_Server, "No rule set configured, using default rules");
 		} else {
 			Log(Logs::General, Logs::UCS_Server, "Loaded default rule set 'default'", tmp);
