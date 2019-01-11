@@ -488,7 +488,7 @@ bool ZoneDatabase::PopulateZoneSpawnListClose(uint32 zoneid, LinkedList<Spawn2*>
 		"animation "
 		"FROM "
 		"spawn2 "
-		"WHERE zone = '%s' AND version = %u",
+		"WHERE zone = '%s' AND  (version = %u OR version = -1) ",
 		zone_name,
 		version
 		);
@@ -592,7 +592,7 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 		"animation "
 		"FROM "
 		"spawn2 "
-		"WHERE zone = '%s' AND version = %u",
+		"WHERE zone = '%s' AND  (version = %u OR version = -1)",
 		zone_name,
 		version
 	);
