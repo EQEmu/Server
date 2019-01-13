@@ -183,8 +183,12 @@ namespace RoF2
 		const int16 CORPSE_BEGIN = invslot::slotGeneral1;
 		const int16 CORPSE_END = invslot::slotGeneral1 + invslot::slotCursor;
 
-		const uint64 POSSESSIONS_BITMASK = 0x00000003FFFFFFFF; // based on 34-slot count (RoF+)
-		const uint64 CORPSE_BITMASK = 0x01FFFFFFFF800000; // based on 34-slot count (RoF+)
+		const uint64 EQUIPMENT_BITMASK = 0x00000000007FFFFF;
+		const uint64 GENERAL_BITMASK = 0x00000001FF800000;
+		const uint64 CURSOR_BITMASK = 0x0000000200000000;
+		const uint64 POSSESSIONS_BITMASK = (EQUIPMENT_BITMASK | GENERAL_BITMASK | CURSOR_BITMASK); // based on 34-slot count (RoF+)
+		const uint64 CORPSE_BITMASK = (GENERAL_BITMASK | CURSOR_BITMASK | (EQUIPMENT_BITMASK << 34)); // based on 34-slot count (RoF+)
+
 
 		const char* GetInvPossessionsSlotName(int16 inv_slot);
 		const char* GetInvSlotName(int16 inv_type, int16 inv_slot);

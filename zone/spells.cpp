@@ -5619,12 +5619,12 @@ int Client::GetCurrentBuffSlots() const
 		numbuffs++;
 	if (GetLevel() > 74)
 		numbuffs++;
-	return EQEmu::ClampUpper(numbuffs, EQEmu::constants::Lookup(m_ClientVersion)->LongBuffs);
+	return EQEmu::ClampUpper(numbuffs, EQEmu::constants::StaticLookup(m_ClientVersion)->LongBuffs);
 }
 
 int Client::GetCurrentSongSlots() const
 {
-	return EQEmu::constants::Lookup(m_ClientVersion)->ShortBuffs; // AAs dont affect this
+	return EQEmu::constants::StaticLookup(m_ClientVersion)->ShortBuffs; // AAs dont affect this
 }
 
 void Client::InitializeBuffSlots()

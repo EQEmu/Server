@@ -116,6 +116,9 @@ int main() {
 		}
 	}
 
+	EQEmu::InitializeDynamicLookups();
+	Log(Logs::General, Logs::UCS_Server, "Initialized dynamic dictionary entries");
+
 	database.ExpireMail();
 
 	if(Config->ChatPort != Config->MailPort)

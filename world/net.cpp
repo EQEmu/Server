@@ -348,6 +348,9 @@ int main(int argc, char** argv) {
 				Log(Logs::General, Logs::World_Server, "Loaded default rule set 'default'", tmp.c_str());
 			}
 		}
+
+		EQEmu::InitializeDynamicLookups();
+		Log(Logs::General, Logs::World_Server, "Initialized dynamic dictionary entries");
 	}
 
 	if (RuleB(World, ClearTempMerchantlist)) {

@@ -3646,7 +3646,7 @@ void ZoneDatabase::LoadBuffs(Client *client)
 	}
 
 	// We load up to the most our client supports
-	max_slots = EQEmu::constants::Lookup(client->ClientVersion())->LongBuffs;
+	max_slots = EQEmu::constants::StaticLookup(client->ClientVersion())->LongBuffs;
 	for (int index = 0; index < max_slots; ++index) {
 		if (!IsValidSpell(buffs[index].spellid))
 			continue;

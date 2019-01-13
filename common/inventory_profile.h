@@ -88,7 +88,7 @@ namespace EQEmu
 		InventoryProfile() {
 			m_mob_version = versions::MobVersion::Unknown;
 			m_mob_version_set = false;
-			m_lookup = inventory::Lookup(versions::MobVersion::Unknown);
+			m_lookup = inventory::StaticLookup(versions::MobVersion::Unknown);
 		}
 		~InventoryProfile();
 

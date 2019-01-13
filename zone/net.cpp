@@ -374,6 +374,9 @@ int main(int argc, char** argv) {
 				Log(Logs::General, Logs::Zone_Server, "Loaded default rule set 'default'", tmp.c_str());
 			}
 		}
+
+		EQEmu::InitializeDynamicLookups();
+		Log(Logs::General, Logs::Zone_Server, "Initialized dynamic dictionary entries");
 	}
 
 #ifdef BOTS

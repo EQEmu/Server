@@ -122,12 +122,12 @@ EQEmu::InventoryProfile::~InventoryProfile()
 bool EQEmu::InventoryProfile::SetInventoryVersion(versions::MobVersion inventory_version) {
 	if (!m_mob_version_set) {
 		m_mob_version = versions::ValidateMobVersion(inventory_version);
-		m_lookup = inventory::Lookup(m_mob_version);
+		m_lookup = inventory::StaticLookup(m_mob_version);
 		m_mob_version_set = true;
 		return true;
 	}
 	else {
-		m_lookup = inventory::Lookup(versions::MobVersion::Unknown);
+		m_lookup = inventory::StaticLookup(versions::MobVersion::Unknown);
 		Log(Logs::General, Logs::Error, "InventoryVersion set request after initial set (old: %u, new: %u)",
 			static_cast<uint32>(m_mob_version), static_cast<uint32>(inventory_version));
 		return false;
@@ -1092,7 +1092,7 @@ bool EQEmu::InventoryProfile::SupportsClickCasting(int16 slot_id)
 		return true;
 	}
 	else if (slot_id >= invbag::GENERAL_BAGS_BEGIN && slot_id <= invbag::GENERAL_BAGS_END) {
-		if (inventory::Lookup(m_mob_version)->AllowClickCastFromBag)
+		if (inventory::StaticLookup(m_mob_version)->AllowClickCastFromBag)
 			return true;
 	}
 

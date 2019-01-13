@@ -190,8 +190,12 @@ namespace Titanium
 		const int16 CORPSE_BEGIN = invslot::slotGeneral1;
 		const int16 CORPSE_END = invslot::slotGeneral1 + invslot::slotCursor;
 
-		const uint64 POSSESSIONS_BITMASK = 0x000000027FDFFFFF; // based on 34-slot count (RoF+)
-		const uint64 CORPSE_BITMASK = 0x017FFFFE7F800000; // based on 34-slot count (RoF+)
+		const uint64 EQUIPMENT_BITMASK = 0x00000000005FFFFF;
+		const uint64 GENERAL_BITMASK = 0x000000007F800000;
+		const uint64 CURSOR_BITMASK = 0x0000000200000000;
+		const uint64 POSSESSIONS_BITMASK = (EQUIPMENT_BITMASK | GENERAL_BITMASK | CURSOR_BITMASK); // based on 34-slot count (RoF+)
+		const uint64 CORPSE_BITMASK = (GENERAL_BITMASK | CURSOR_BITMASK | (EQUIPMENT_BITMASK << 34)); // based on 34-slot count (RoF+)
+		
 
 		const char* GetInvPossessionsSlotName(int16 inv_slot);
 		const char* GetInvCorpseSlotName(int16 inv_slot);
@@ -276,9 +280,9 @@ namespace Titanium
 	namespace constants {
 		inline EQEmu::versions::ClientVersion GetConstantsRef() { return EQEmu::versions::ClientVersion::Titanium; }
 
-		const EQEmu::expansions::Expansion EXPANSION = EQEmu::expansions::Expansion::PoR;
-		const uint32 EXPANSION_BIT = EQEmu::expansions::bitPoR;
-		const uint32 EXPANSIONS_MASK = EQEmu::expansions::maskPoR;
+		const EQEmu::expansions::Expansion EXPANSION = EQEmu::expansions::Expansion::DoD; // Someone had this as PoR in another section...
+		const uint32 EXPANSION_BIT = EQEmu::expansions::bitDoD;
+		const uint32 EXPANSIONS_MASK = EQEmu::expansions::maskDoD;
 
 		const size_t CHARACTER_CREATION_LIMIT = 8; // Hard-coded in client - DO NOT ALTER
 

@@ -33,6 +33,8 @@
 
 namespace EQEmu
 {
+	void InitializeDynamicLookups();
+
 	namespace constants {
 		struct LookupEntry {
 			EQEmu::expansions::Expansion Expansion;
@@ -48,6 +50,7 @@ namespace EQEmu
 			int PetBuffs;
 			int MercBuffs;
 
+			LookupEntry(const LookupEntry *lookup_entry) { }
 			LookupEntry(
 				EQEmu::expansions::Expansion Expansion,
 				uint32 ExpansionBit,
@@ -77,7 +80,10 @@ namespace EQEmu
 			{ }
 		};
 
-		const LookupEntry* Lookup(versions::ClientVersion client_version);
+		void InitializeDynamicLookups();
+
+		const LookupEntry* DynamicLookup(versions::ClientVersion client_version);
+		const LookupEntry* StaticLookup(versions::ClientVersion client_version);
 
 	} /*constants*/
 	
@@ -127,6 +133,9 @@ namespace EQEmu
 				int16 InventoryTypeSizeArray[25]; // should reflect EQEmu::invtype::TYPE_COUNT referenced in emu_constants.h
 			};
 
+			uint64 EquipmentBitmask;
+			uint64 GeneralBitmask;
+			uint64 CursorBitmask;
 			uint64 PossessionsBitmask;
 			uint64 CorpseBitmask;
 			int16 BagSlotCount;
@@ -137,8 +146,12 @@ namespace EQEmu
 			bool ConcatenateInvTypeLimbo;
 			bool AllowOverLevelEquipment;
 
+			LookupEntry(const LookupEntry *lookup_entry) { }
 			LookupEntry(
 				InventoryTypeSize_Struct InventoryTypeSize,
+				uint64 EquipmentBitmask,
+				uint64 GeneralBitmask,
+				uint64 CursorBitmask,
 				uint64 PossessionsBitmask,
 				uint64 CorpseBitmask,
 				int16 BagSlotCount,
@@ -149,6 +162,9 @@ namespace EQEmu
 				bool AllowOverLevelEquipment
 			) :
 				InventoryTypeSize(InventoryTypeSize),
+				EquipmentBitmask(EquipmentBitmask),
+				GeneralBitmask(GeneralBitmask),
+				CursorBitmask(CursorBitmask),
 				PossessionsBitmask(PossessionsBitmask),
 				CorpseBitmask(CorpseBitmask),
 				BagSlotCount(BagSlotCount),
@@ -160,7 +176,10 @@ namespace EQEmu
 			{ }
 		};
 
-		const LookupEntry* Lookup(versions::MobVersion mob_version);
+		void InitializeDynamicLookups();
+
+		const LookupEntry* DynamicLookup(versions::MobVersion mob_version);
+		const LookupEntry* StaticLookup(versions::MobVersion mob_version);
 
 	} /*inventory*/
 	
@@ -168,6 +187,7 @@ namespace EQEmu
 		struct LookupEntry {
 			bool CoinHasWeight;
 
+			LookupEntry(const LookupEntry *lookup_entry) { }
 			LookupEntry(
 				bool CoinHasWeight
 			) :
@@ -175,7 +195,10 @@ namespace EQEmu
 			{ }
 		};
 
-		const LookupEntry* Lookup(versions::MobVersion mob_version);
+		void InitializeDynamicLookups();
+
+		const LookupEntry* DynamicLookup(versions::MobVersion mob_version);
+		const LookupEntry* StaticLookup(versions::MobVersion mob_version);
 
 	} /*behavior*/
 
