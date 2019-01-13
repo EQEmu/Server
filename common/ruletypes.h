@@ -209,7 +209,7 @@ RULE_CATEGORY_END()
 
 RULE_CATEGORY(World)
 RULE_INT(World, ZoneAutobootTimeoutMS, 60000)
-RULE_INT(World, ClientKeepaliveTimeoutMS, 65000)
+RULE_INT(World, ClientKeepaliveTimeoutMS, 10000)
 RULE_BOOL(World, UseBannedIPsTable, false) // Toggle whether or not to check incoming client connections against the Banned_IPs table. Set this value to false to disable this feature.
 RULE_BOOL(World, EnableTutorialButton, true)
 RULE_BOOL(World, EnableReturnHomeButton, true)

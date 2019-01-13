@@ -520,7 +520,7 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 	if (!cle)
 		return true;
 
-	cle->SetIP(GetIP());
+
 	return true;
 }
 
@@ -1072,9 +1072,9 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 		}
 		case OP_WorldLogout:
 		{
-			// I don't see this getting executed on logout
 			eqs->Close();
-			cle->SetOnline(CLE_Status_Offline); //allows this player to log in again without an ip restriction.
+			client_list.DisconnectCLE(cle);
+			//cle->SetOnline(CLE_Status_Offline); //allows this player to log in again without an ip restriction.
 			return false;
 		}
 		case OP_ZoneChange:

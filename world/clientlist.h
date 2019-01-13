@@ -50,6 +50,7 @@ public:
 
 	void	ClientUpdate(ZoneServer* zoneserver, ServerClientList_Struct* scl);
 	void	CLERemoveZSRef(ZoneServer* iZS);
+	void	DisconnectCLE(ClientListEntry* entry);
 	ClientListEntry* CheckAuth(uint32 iLSID, const char* iKey);
 	ClientListEntry* CheckAuth(const char* iName, const char* iPassword);
 	ClientListEntry* CheckAuth(uint32 id, const char* iKey, uint32 ip);
@@ -58,9 +59,11 @@ public:
 	ClientListEntry* FindCLEByCharacterID(uint32 iCharID);
 	ClientListEntry* GetCLE(uint32 iID);
 	void	GetCLEIP(uint32 iIP);
+	bool	CheckCLEIP(uint32 iIP);
 	uint32	GetCLEIPCount(uint32 iLSAccountID);
 	void	DisconnectByIP(uint32 iIP);
 	void	EnforceSessionLimit(uint32 iLSAccountID);
+	bool	CheckSessionLimit(uint32 iLSAccountID);
 	void	CLCheckStale();
 	void	CLEKeepAlive(uint32 numupdates, uint32* wid);
 	void	CLEAdd(uint32 iLSID, const char* iLoginName, const char* iLoginKey, int16 iWorldAdmin = 0, uint32 ip = 0, uint8 local=0);

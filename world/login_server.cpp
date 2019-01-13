@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include <stdlib.h>
 #include "../common/version.h"
 #include "../common/servertalk.h"
+#include "../common/misc.h"
 #include "../common/misc_functions.h"
 #include "login_server.h"
 #include "login_server_list.h"
@@ -71,7 +72,25 @@ void LoginServer::ProcessUsertoWorldReq(uint16_t opcode, EQ::Net::Packet &p) {
 	UsertoWorldResponse_Struct* utwrs = (UsertoWorldResponse_Struct*)outpack->pBuffer;
 	utwrs->lsaccountid = utwr->lsaccountid;
 	utwrs->ToID = utwr->FromID;
-
+	int32 x = Config->MaxClients;
+	if ((int32)numplayers >= x && x != -1 && x != 255 && status < 80)
+		utwrs->response = -3;
+	else if (status == -3)
+		utwrs->response = -1;
+	else if (status == -4)
+		utwrs->response = -2;
+	else if (!client_list.CheckSessionLimit(utwr->lsaccountid))
+	{
+		Log(Logs::General, Logs::World_Server, "Account Info: Session Restricted for %i : %i ", utwr->lsaccountid, utwr->IPAddr);
+		utwrs->response = -4;
+	}
+	else if (!client_list.CheckCLEIP(inet_addr(utwr->IPAddr)))
+	{
+		Log(Logs::General, Logs::World_Server, "Account Info: IP Restricted for %i : %i ", utwr->lsaccountid, utwr->IPAddr);
+		utwrs->response = -5;
+	}
+	else
+	{
 	if (Config->Locked == true)
 	{
 		if ((status == 0 || status < 100) && (status != -2 || status != -1))
@@ -82,15 +101,7 @@ void LoginServer::ProcessUsertoWorldReq(uint16_t opcode, EQ::Net::Packet &p) {
 	else {
 		utwrs->response = 1;
 	}
-
-	int32 x = Config->MaxClients;
-	if ((int32)numplayers >= x && x != -1 && x != 255 && status < 80)
-		utwrs->response = -3;
-
-	if (status == -1)
-		utwrs->response = -1;
-	if (status == -2)
-		utwrs->response = -2;
+	}
 
 	utwrs->worldid = utwr->worldid;
 	SendPacket(outpack);
@@ -104,13 +115,23 @@ void LoginServer::ProcessLSClientAuth(uint16_t opcode, EQ::Net::Packet &p) {
 	try {
 		auto slsca = p.GetSerialize<ClientAuth_Struct>(0);
 
-		if (RuleI(World, AccountSessionLimit) >= 0) {
-			// Enforce the limit on the number of characters on the same account that can be
-			// online at the same time.
-			client_list.EnforceSessionLimit(slsca.lsaccount_id);
+		bool okSession = client_list.CheckSessionLimit(slsca.ip);
+
+		bool okIP = client_list.CheckCLEIP(slsca.ip);
+
+		if (okSession && okIP)
+		{
+			client_list.CLEAdd(slsca.lsaccount_id, slsca.name, slsca.key, slsca.worldadmin, slsca.ip, slsca.local);
+			
+			
+			
+			Log(Logs::Detail, Logs::World_Server, "Account Info: Session okay for %s : %s - okSession TRUE okIP TRUE ", slsca.name, long2ip(slsca.ip).c_str());
+		}
+		else
+		{
+			Log(Logs::General, Logs::World_Server, "Account Info: Session NOT okay for %s : %s - okSession %s okIP %s ", slsca.name, long2ip(slsca.ip).c_str(), okSession ? "TRUE" : "FALSE", okIP ? "TRUE" : "FALSE");
 		}
 
-		client_list.CLEAdd(slsca.lsaccount_id, slsca.name, slsca.key, slsca.worldadmin, slsca.ip, slsca.local);
 	}
 	catch (std::exception &ex) {
 		LogF(Logs::General, Logs::Error, "Error parsing LSClientAuth packet from world.\n{0}", ex.what());
