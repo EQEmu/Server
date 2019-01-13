@@ -816,7 +816,7 @@ void EQEmu::inventory::InitializeDynamicLookups() {
 			continue;
 
 		// direct manipulation of lookup indices is safe so long as (int)ClientVersion::<client> == (int)MobVersion::<client>
-		inventory_dynamic_lookup_entries[iter] = std::make_unique<LookupEntry>(new LookupEntry(inventory_static_lookup_entries[iter]));
+		inventory_dynamic_lookup_entries[iter] = std::unique_ptr<LookupEntry>(new LookupEntry(inventory_static_lookup_entries[iter]));
 
 		// clamp affected fields to the lowest standard
 		inventory_dynamic_lookup_entries[iter]->InventoryTypeSize.Bank = Titanium::invtype::BANK_SIZE; // bank size
