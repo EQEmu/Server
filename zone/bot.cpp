@@ -39,6 +39,7 @@ Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm
 	}
 
 	m_inv.SetInventoryVersion(EQEmu::versions::MobVersion::Bot);
+	m_inv.SetGMInventory(false); // bot expansions are not currently implemented (defaults to static)
 
 	_guildRank = 0;
 	_guildId = 0;
@@ -113,6 +114,7 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 	auto bot_owner = GetBotOwner();
 
 	m_inv.SetInventoryVersion(EQEmu::versions::MobVersion::Bot);
+	m_inv.SetGMInventory(false); // bot expansions are not currently implemented (defaults to static)
 
 	_guildRank = 0;
 	_guildId = 0;

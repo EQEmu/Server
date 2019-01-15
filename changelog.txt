@@ -1,6 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 
+== 1/15/2019 ==
+Uleat: Activated per-expansion support for active inventory slot addressing
+	- Server honors expansions that alter bank size and power source, general9 and general10 slots
+	- Server honors gm flag behaviors for the active inventory slots of each client
+
 == 1/11/2019 ==
 Uleat: Modified rules system to ignore all runtime modifications of 'World:ExpansionSettings' and 'World:UseClientBasedExpansionSettings' fields.
 	- These fields are no longer allowed to be changed during server runtime through the command system

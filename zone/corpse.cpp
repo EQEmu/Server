@@ -1374,7 +1374,7 @@ void Corpse::QueryLoot(Client* to) {
 	cur = itemlist.begin();
 	end = itemlist.end();
 
-	int corpselootlimit = EQEmu::inventory::StaticLookup(EQEmu::versions::ConvertClientVersionToMobVersion(to->ClientVersion()))->InventoryTypeSize.Corpse;
+	int corpselootlimit = to->GetInv().GetLookup()->InventoryTypeSize.Corpse;
 
 	for(; cur != end; ++cur) {
 		ServerLootItem_Struct* sitem = *cur;

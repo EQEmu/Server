@@ -1144,8 +1144,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	SetClientVersion(Connection()->ClientVersion());
 	m_ClientVersionBit = EQEmu::versions::ConvertClientVersionToClientVersionBit(Connection()->ClientVersion());
 
-	bool siv = m_inv.SetInventoryVersion(m_ClientVersion);
-	Log(Logs::General, Logs::None, "%s inventory version to %s(%i)", (siv ? "Succeeded in setting" : "Failed to set"), ClientVersionName(m_ClientVersion), m_ClientVersion);
+	m_inv.SetInventoryVersion(m_ClientVersion);
 
 	/* Antighost code
 	tmp var is so the search doesnt find this object
@@ -1185,7 +1184,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	uint32 cid = CharacterID();
 	character_id = cid; /* Global character_id reference */
 
-						/* Flush and reload factions */
+	/* Flush and reload factions */
 	database.RemoveTempFactions(this);
 	database.LoadCharacterFactionValues(cid, factionvalues);
 
@@ -1222,6 +1221,9 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		m_pp.platinum_shared = database.GetSharedPlatinum(this->AccountID());
 
 	database.ClearOldRecastTimestamps(cid); /* Clear out our old recast timestamps to keep the DB clean */
+	// set to full support in case they're a gm with items in disabled expansion slots..but, have their gm flag off...
+	// item loss will occur when they use the 'empty' slots, if this is not done
+	m_inv.SetGMInventory(true); 
 	loaditems = database.GetInventory(cid, &m_inv); /* Load Character Inventory */
 	database.LoadCharacterBandolier(cid, &m_pp); /* Load Character Bandolier */
 	database.LoadCharacterBindPoint(cid, &m_pp); /* Load Character Bind */
@@ -1238,7 +1240,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	database.LoadCharacterLeadershipAA(cid, &m_pp); /* Load Character Leadership AA's */
 	database.LoadCharacterTribute(cid, &m_pp); /* Load CharacterTribute */
 
-											   /* Load AdventureStats */
+	/* Load AdventureStats */
 	AdventureStats_Struct as;
 	if (database.GetAdventureStats(cid, &as))
 	{
@@ -1397,6 +1399,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if (m_pp.ldon_points_tak < 0 || m_pp.ldon_points_tak > 2000000000) { m_pp.ldon_points_tak = 0; }
 	if (m_pp.ldon_points_available < 0 || m_pp.ldon_points_available > 2000000000) { m_pp.ldon_points_available = 0; }
 
+	// need to rework .. not until full scope of change is accounted for, though
 	if (RuleB(World, UseClientBasedExpansionSettings)) {
 		m_pp.expansions = EQEmu::expansions::ConvertClientVersionToExpansionMask(ClientVersion());
 	}
@@ -1516,6 +1519,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	Bot::LoadAndSpawnAllZonedBots(this);
 #endif
 
+	m_inv.SetGMInventory((bool)m_pp.gm); // set to current gm state for calc
 	CalcBonuses();
 	if (RuleB(Zone, EnableLoggedOffReplenishments) &&
 		time(nullptr) - m_pp.lastlogin >= RuleI(Zone, MinOfflineTimeToReplenishments)) {
@@ -1639,6 +1643,9 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	this is not quite where live sends inventory, they do it after tribute
 	*/
 	if (loaditems) { /* Dont load if a length error occurs */
+		if (admin >= minStatusToBeGM)
+			m_inv.SetGMInventory(true); // set to true to allow expansion-restricted packets through
+
 		BulkSendInventoryItems();
 		/* Send stuff on the cursor which isnt sent in bulk */
 		for (auto iter = m_inv.cursor_cbegin(); iter != m_inv.cursor_cend(); ++iter) {
@@ -1648,6 +1655,9 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 			const EQEmu::ItemInstance *inst = *iter;
 			SendItemPacket(EQEmu::invslot::slotCursor, inst, ItemPacketLimbo);
 		}
+
+		// this is kinda hackish atm..this process needs to be realigned to allow a contiguous flow
+		m_inv.SetGMInventory((bool)m_pp.gm); // reset back to current gm state
 	}
 
 	/* Task Packets */

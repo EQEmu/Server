@@ -171,10 +171,13 @@ void Client::SendEnterWorld(std::string name)
 void Client::SendExpansionInfo() {
 	auto outapp = new EQApplicationPacket(OP_ExpansionInfo, sizeof(ExpansionInfo_Struct));
 	ExpansionInfo_Struct *eis = (ExpansionInfo_Struct*)outapp->pBuffer;
-	if(RuleB(World, UseClientBasedExpansionSettings)) {
+	
+	// need to rework .. not until full scope of change is accounted for, though
+	if (RuleB(World, UseClientBasedExpansionSettings)) {
 		eis->Expansions = EQEmu::expansions::ConvertClientVersionToExpansionMask(eqs->ClientVersion());
-	} else {
-		eis->Expansions = (RuleI(World, ExpansionSettings));
+	}
+	else {
+		eis->Expansions = RuleI(World, ExpansionSettings);
 	}
 
 	QueuePacket(outapp);
@@ -1442,7 +1445,10 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	PlayerProfile_Struct pp;
 	ExtendedProfile_Struct ext;
 	EQEmu::InventoryProfile inv;
+
 	inv.SetInventoryVersion(EQEmu::versions::ConvertClientVersionBitToClientVersion(m_ClientVersionBit));
+	inv.SetGMInventory(false); // character cannot have gm flag at this point
+
 	time_t bday = time(nullptr);
 	char startzone[50]={0};
 	uint32 i;

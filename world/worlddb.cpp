@@ -97,7 +97,10 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 		CharacterSelectEntry_Struct *cse = (CharacterSelectEntry_Struct *)buff_ptr;
 		PlayerProfile_Struct pp;
 		EQEmu::InventoryProfile inv;
+
 		inv.SetInventoryVersion(client_version);
+		inv.SetGMInventory(true); // charsel can not interact with items..but, no harm in setting to full expansion support
+
 		uint32 character_id = (uint32)atoi(row[0]);
 		uint8 has_home = 0;
 		uint8 has_bind = 0;

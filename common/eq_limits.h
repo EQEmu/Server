@@ -82,6 +82,7 @@ namespace EQEmu
 
 		void InitializeDynamicLookups();
 
+		const LookupEntry* DynamicGMLookup(versions::ClientVersion client_version);
 		const LookupEntry* DynamicLookup(versions::ClientVersion client_version);
 		const LookupEntry* StaticLookup(versions::ClientVersion client_version);
 
@@ -178,6 +179,7 @@ namespace EQEmu
 
 		void InitializeDynamicLookups();
 
+		const LookupEntry* DynamicGMLookup(versions::MobVersion mob_version);
 		const LookupEntry* DynamicLookup(versions::MobVersion mob_version);
 		const LookupEntry* StaticLookup(versions::MobVersion mob_version);
 
@@ -197,6 +199,7 @@ namespace EQEmu
 
 		void InitializeDynamicLookups();
 
+		const LookupEntry* DynamicGMLookup(versions::MobVersion mob_version);
 		const LookupEntry* DynamicLookup(versions::MobVersion mob_version);
 		const LookupEntry* StaticLookup(versions::MobVersion mob_version);
 

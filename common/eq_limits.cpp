@@ -36,6 +36,7 @@ void EQEmu::InitializeDynamicLookups() {
 	global_dictionary_init = true;
 }
 
+static std::unique_ptr<EQEmu::constants::LookupEntry> constants_dynamic_gm_lookup_entries[EQEmu::versions::ClientVersionCount];
 static std::unique_ptr<EQEmu::constants::LookupEntry> constants_dynamic_lookup_entries[EQEmu::versions::ClientVersionCount];
 static const EQEmu::constants::LookupEntry constants_static_lookup_entries[EQEmu::versions::ClientVersionCount] =
 {
@@ -173,6 +174,15 @@ void EQEmu::constants::InitializeDynamicLookups() {
 	// use static references for now
 }
 
+const EQEmu::constants::LookupEntry* EQEmu::constants::DynamicGMLookup(versions::ClientVersion client_version)
+{
+	client_version = versions::ValidateClientVersion(client_version);
+	if (constants_dynamic_gm_lookup_entries[static_cast<int>(client_version)])
+		return constants_dynamic_gm_lookup_entries[static_cast<int>(client_version)].get();
+
+	return &constants_static_lookup_entries[static_cast<int>(client_version)];
+}
+
 const EQEmu::constants::LookupEntry* EQEmu::constants::DynamicLookup(versions::ClientVersion client_version)
 {
 	client_version = versions::ValidateClientVersion(client_version);
@@ -187,6 +197,7 @@ const EQEmu::constants::LookupEntry* EQEmu::constants::StaticLookup(versions::Cl
 	return &constants_static_lookup_entries[static_cast<int>(versions::ValidateClientVersion(client_version))];
 }
 
+static std::unique_ptr<EQEmu::inventory::LookupEntry> inventory_dynamic_gm_lookup_entries[EQEmu::versions::MobVersionCount];
 static std::unique_ptr<EQEmu::inventory::LookupEntry> inventory_dynamic_lookup_entries[EQEmu::versions::MobVersionCount];
 static const EQEmu::inventory::LookupEntry inventory_static_lookup_entries[EQEmu::versions::MobVersionCount] =
 {
@@ -797,25 +808,123 @@ void EQEmu::inventory::InitializeDynamicLookups() {
 		return;
 
 	// Notes:
-	// Currently, there are only 3 known expansions that affect inventory-related settings in the clients..
-	//   - Expansion::PoR "Prophecy of Ro" - toggles between 24 (set) and 16 (clear) bank slots
-	//   - Expansion::TBS "The Buried Sea" - toggles slotPowerSource enabled (set) and disabled (clear) 
-	//   - Expansion::HoT "House of Thule" - toggles slotGeneral9/slotGeneral10 enabled (set) and disabled (clear)
-	// Obviously, the client must support the expansion to allow any (set) condition
+	// - Currently, there are only 3 known expansions that affect inventory-related settings in the clients..
+	//   -- Expansion::PoR "Prophecy of Ro" - toggles between 24 (set) and 16 (clear) bank slots
+	//   -- Expansion::TBS "The Buried Sea" - toggles slotPowerSource activated (set) and deactivated (clear) 
+	//   -- Expansion::HoT "House of Thule" - toggles slotGeneral9/slotGeneral10 activated (set) and deactivated (clear)
+	// - Corspe size does not appear to reflect loss of active possessions slots
+	// - Inspect size does not appear to reflect loss of active equipment slots
+	// - Bank size is not overridden by GM flag when expansion bit is (clear)
+	// - Power Source slot is enabled, but not activated, by GM flag when expansion bit is (clear)
+	// - General9 and General10 slots are activated by GM flag when expansion bit is (clear)
+	// - Obviously, the client must support the expansion to allow any (set) or override condition
 
-	const uint32 current_expansions = RuleI(World, ExpansionSettings);
-	const uint32 dynamic_check_mask = (EQEmu::expansions::bitPoR | EQEmu::expansions::bitTBS | EQEmu::expansions::bitHoT); // the only known expansions that affect inventory
+	const uint32 dynamic_check_mask = 
+		(
+			EQEmu::expansions::bitPoR |
+			EQEmu::expansions::bitTBS |
+			EQEmu::expansions::bitHoT
+		);
 
 	// if all of the above expansion bits are present, then static references will suffice
-	if ((current_expansions & dynamic_check_mask) == dynamic_check_mask)
+	if ((dynamic_check_mask & RuleI(World, ExpansionSettings)) == dynamic_check_mask)
 		return;
 
-	for (uint32 iter = static_cast<uint32>(EQEmu::versions::ClientVersion::Unknown); iter <= static_cast<uint32>(EQEmu::versions::LastClientVersion); ++iter) {
-		// no need to dynamic this condition since it is the lowest compatibility standard at this time
-		if (iter <= static_cast<uint32>(EQEmu::versions::ClientVersion::Titanium))
+	// Dynamic GM Lookups (demotive methodology) (client-linked mob versions only)
+	for (uint32 iter = static_cast<uint32>(EQEmu::versions::MobVersion::Unknown); iter <= static_cast<uint32>(EQEmu::versions::LastPCMobVersion); ++iter) {
+		// no need to dynamic this condition since it is the lowest compatibility standard
+		if ((dynamic_check_mask & ~constants_static_lookup_entries[iter].ExpansionsMask) == dynamic_check_mask)
 			continue;
 
+		// only client versions whose supported expansions are affected need to be considered
+		if ((constants_static_lookup_entries[iter].ExpansionsMask & RuleI(World, ExpansionSettings)) == constants_static_lookup_entries[iter].ExpansionsMask)
+			continue;
+
+		// special case gm exclusions based on known behaviors
+		switch (iter) {
+		case static_cast<uint32>(versions::MobVersion::RoF2) :
+		case static_cast<uint32>(versions::MobVersion::RoF) :
+			// if bank size is not altered on these clients, then static will suffice
+			// (we already know these clients support this expansion...)
+			if (RuleI(World, ExpansionSettings) & expansions::bitPoR)
+				continue;
+			break;
+		default:
+			break;
+		}
+
 		// direct manipulation of lookup indices is safe so long as (int)ClientVersion::<client> == (int)MobVersion::<client>
+		inventory_dynamic_gm_lookup_entries[iter] = std::unique_ptr<LookupEntry>(new LookupEntry(inventory_static_lookup_entries[iter]));
+
+		inventory_dynamic_gm_lookup_entries[iter]->PossessionsBitmask = 0; // we'll fix later
+		inventory_dynamic_gm_lookup_entries[iter]->CorpseBitmask = 0; // we'll fix later
+
+		if (~RuleI(World, ExpansionSettings) & EQEmu::expansions::bitPoR) {
+			// update bank size
+			if (constants_static_lookup_entries[iter].ExpansionsMask & EQEmu::expansions::bitPoR)
+				inventory_dynamic_gm_lookup_entries[iter]->InventoryTypeSize.Bank = Titanium::invtype::BANK_SIZE;
+		}
+
+		if (~RuleI(World, ExpansionSettings) & EQEmu::expansions::bitTBS) {
+			// update power source
+			switch (iter) {
+			case versions::bitUF:
+			case versions::bitSoD:
+			case versions::bitSoF:
+				// gm flag does not override expansion-based behavior
+				// (we already know that only these clients support this behavior)
+				inventory_dynamic_gm_lookup_entries[iter]->EquipmentBitmask = Titanium::invslot::EQUIPMENT_BITMASK;
+				break;
+			default:
+				break;
+			}
+		}
+
+		if (~RuleI(World, ExpansionSettings) & EQEmu::expansions::bitHoT) {
+			// update general size
+			switch (iter) {
+			case versions::bitUF:
+			case versions::bitSoD:
+			case versions::bitSoF:
+				// gm flag does not override expansion-based behavior
+				// (we already know that only these clients support this behavior)
+				inventory_dynamic_gm_lookup_entries[iter]->GeneralBitmask = Titanium::invslot::GENERAL_BITMASK;
+				break;
+			default:
+				break;
+			}
+		}
+
+		// fixup possessions bitmask
+		inventory_dynamic_gm_lookup_entries[iter]->PossessionsBitmask =
+			(
+				inventory_dynamic_gm_lookup_entries[iter]->EquipmentBitmask |
+				inventory_dynamic_gm_lookup_entries[iter]->GeneralBitmask |
+				inventory_dynamic_gm_lookup_entries[iter]->CursorBitmask
+				);
+
+		// fixup corpse bitmask
+		inventory_dynamic_gm_lookup_entries[iter]->CorpseBitmask =
+			(
+				inventory_dynamic_gm_lookup_entries[iter]->GeneralBitmask |
+				inventory_dynamic_gm_lookup_entries[iter]->CursorBitmask |
+				(inventory_dynamic_gm_lookup_entries[iter]->EquipmentBitmask << 34)
+				);
+
+		// expansion-related fields are now updated and all other fields reflect the static entry values
+	}
+
+	// Dynamic Lookups (promotive methodology) (all mob versions allowed)
+	for (uint32 iter = static_cast<uint32>(EQEmu::versions::MobVersion::Unknown); iter <= static_cast<uint32>(EQEmu::versions::LastPCMobVersion); ++iter) {
+		// no need to dynamic this condition since it is the lowest compatibility standard
+		if ((dynamic_check_mask & ~constants_static_lookup_entries[iter].ExpansionsMask) == dynamic_check_mask)
+			continue;
+
+		// only client versions whose supported expansions are affected need to be considered
+		if ((constants_static_lookup_entries[iter].ExpansionsMask & RuleI(World, ExpansionSettings)) == constants_static_lookup_entries[iter].ExpansionsMask)
+			continue;
+
+		// direct manipulation of lookup indices is safe so long as (int)ClientVersion::<mob> == (int)MobVersion::<mob>
 		inventory_dynamic_lookup_entries[iter] = std::unique_ptr<LookupEntry>(new LookupEntry(inventory_static_lookup_entries[iter]));
 
 		// clamp affected fields to the lowest standard
@@ -825,19 +934,19 @@ void EQEmu::inventory::InitializeDynamicLookups() {
 		inventory_dynamic_lookup_entries[iter]->PossessionsBitmask = 0; // we'll fix later
 		inventory_dynamic_lookup_entries[iter]->CorpseBitmask = 0; // we'll fix later
 
-		if (current_expansions & EQEmu::expansions::bitPoR) {
+		if (RuleI(World, ExpansionSettings) & EQEmu::expansions::bitPoR) {
 			// update bank size
 			if (constants_static_lookup_entries[iter].ExpansionsMask & EQEmu::expansions::bitPoR)
 				inventory_dynamic_lookup_entries[iter]->InventoryTypeSize.Bank = SoF::invtype::BANK_SIZE;
 		}
 
-		if (current_expansions & EQEmu::expansions::bitTBS) {
+		if (RuleI(World, ExpansionSettings) & EQEmu::expansions::bitTBS) {
 			// update power source
 			if (constants_static_lookup_entries[iter].ExpansionsMask & EQEmu::expansions::bitTBS)
 				inventory_dynamic_lookup_entries[iter]->EquipmentBitmask = SoF::invslot::EQUIPMENT_BITMASK;
 		}
 
-		if (current_expansions & EQEmu::expansions::bitHoT) {
+		if (RuleI(World, ExpansionSettings) & EQEmu::expansions::bitHoT) {
 			// update general size
 			if (constants_static_lookup_entries[iter].ExpansionsMask & EQEmu::expansions::bitHoT)
 				inventory_dynamic_lookup_entries[iter]->GeneralBitmask = RoF::invslot::GENERAL_BITMASK;
@@ -862,7 +971,16 @@ void EQEmu::inventory::InitializeDynamicLookups() {
 		// expansion-related fields are now updated and all other fields reflect the static entry values
 	}
 
-	// only client versions that require a change from their static definitions have been given a dynamic lookup entry
+	// only client versions that require a change from their static definitions have been given a dynamic (gm) lookup entry
+}
+
+const EQEmu::inventory::LookupEntry* EQEmu::inventory::DynamicGMLookup(versions::MobVersion mob_version)
+{
+	mob_version = versions::ValidateMobVersion(mob_version);
+	if (inventory_dynamic_gm_lookup_entries[static_cast<int>(mob_version)])
+		return inventory_dynamic_gm_lookup_entries[static_cast<int>(mob_version)].get();
+
+	return &inventory_static_lookup_entries[static_cast<int>(mob_version)];
 }
 
 const EQEmu::inventory::LookupEntry* EQEmu::inventory::DynamicLookup(versions::MobVersion mob_version)
@@ -879,6 +997,7 @@ const EQEmu::inventory::LookupEntry* EQEmu::inventory::StaticLookup(versions::Mo
 	return &inventory_static_lookup_entries[static_cast<int>(versions::ValidateMobVersion(mob_version))];
 }
 
+static std::unique_ptr<EQEmu::behavior::LookupEntry> behavior_dynamic_gm_lookup_entries[EQEmu::versions::MobVersionCount];
 static std::unique_ptr<EQEmu::behavior::LookupEntry> behavior_dynamic_lookup_entries[EQEmu::versions::MobVersionCount];
 static const EQEmu::behavior::LookupEntry behavior_static_lookup_entries[EQEmu::versions::MobVersionCount] =
 {
@@ -982,6 +1101,15 @@ void EQEmu::behavior::InitializeDynamicLookups() {
 		return;
 
 	// use static references for now
+}
+
+const EQEmu::behavior::LookupEntry* EQEmu::behavior::DynamicGMLookup(versions::MobVersion mob_version)
+{
+	mob_version = versions::ValidateMobVersion(mob_version);
+	if (behavior_dynamic_gm_lookup_entries[static_cast<int>(mob_version)])
+		return behavior_dynamic_gm_lookup_entries[static_cast<int>(mob_version)].get();
+
+	return &behavior_static_lookup_entries[static_cast<int>(mob_version)];
 }
 
 const EQEmu::behavior::LookupEntry* EQEmu::behavior::DynamicLookup(versions::MobVersion mob_version)
