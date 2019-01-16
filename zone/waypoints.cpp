@@ -537,9 +537,6 @@ void NPC::AssignWaypoints(int32 grid)
 
 	if (wandertype == 1 || wandertype == 2 || wandertype == 5)
 		CalculateNewWaypoint();
-
-	if (wandertype == 1 || wandertype == 2 || wandertype == 5)
-		CalculateNewWaypoint();
 }
 
 void Mob::SendTo(float new_x, float new_y, float new_z) {
