@@ -815,7 +815,7 @@ void EQEmu::inventory::InitializeDynamicLookups() {
 	// - Corspe size does not appear to reflect loss of active possessions slots
 	// - Inspect size does not appear to reflect loss of active equipment slots
 	// - Bank size is not overridden by GM flag when expansion bit is (clear)
-	// - Power Source slot is enabled, but not activated, by GM flag when expansion bit is (clear)
+	// - Power Source slot is enabled, but not activated, by GM flag when expansion bit is (clear) (RoF+ only)
 	// - General9 and General10 slots are activated by GM flag when expansion bit is (clear)
 	// - Obviously, the client must support the expansion to allow any (set) or override condition
 
