@@ -93,7 +93,7 @@ namespace EQEmu
 			// note: 'PossessionsBitmask' needs to be attuned to the client version with the highest number
 			// of possessions slots and 'InventoryTypeSize[typePossessions]' should reflect the same count
 			// with translators adjusting for valid slot indices. Server-side validations will be performed
-			// against 'PossessionsBitmask' (note: the same applies to Corpse type size and bitmask)
+			// against 'PossessionsBitmask' (note: the same applies to CorpseBitmask..size is not dependent)
 
 			struct InventoryTypeSize_Struct { // should reflect count and naming conventions referenced in emu_constants.h
 				int16 Possessions,	Bank,				SharedBank;
@@ -204,6 +204,32 @@ namespace EQEmu
 		const LookupEntry* StaticLookup(versions::MobVersion mob_version);
 
 	} /*behavior*/
+
+	namespace spells {
+		struct LookupEntry {
+			int SpellIdMax;
+			int SpellbookSize;
+			int SpellGemCount;
+			
+			LookupEntry(const LookupEntry *lookup_entry) { }
+			LookupEntry(
+				int SpellIdMax,
+				int SpellbookSize,
+				int SpellGemCount
+			) :
+				SpellIdMax(SpellIdMax),
+				SpellbookSize(SpellbookSize),
+				SpellGemCount(SpellGemCount)
+			{ }
+		};
+		
+		void InitializeDynamicLookups();
+		
+		const LookupEntry* DynamicGMLookup(versions::ClientVersion client_version);
+		const LookupEntry* DynamicLookup(versions::ClientVersion client_version);
+		const LookupEntry* StaticLookup(versions::ClientVersion client_version);
+
+	} /*spells*/
 
 } /*EQEmu*/
 

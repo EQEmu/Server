@@ -852,10 +852,6 @@ struct SuspendedMinion_Struct
 ** OpCode: 0x006a
  */
 static const uint32 MAX_PP_LANGUAGE = 28;
-static const uint32 MAX_PP_SPELLBOOK = 480;	// Set for all functions
-static const uint32 MAX_PP_MEMSPELL = static_cast<uint32>(EQEmu::CastingSlot::MaxGems); // Set to latest client so functions can work right -- 12
-static const uint32 MAX_PP_REF_SPELLBOOK = 480;	// Set for Player Profile size retain
-static const uint32 MAX_PP_REF_MEMSPELL = 9; // Set for Player Profile size retain
 
 static const uint32 MAX_PP_SKILL		= PACKET_SKILL_ARRAY_SIZE;	// 100 - actual skills buffer size
 static const uint32 MAX_PP_INNATE_SKILL	= 25;
@@ -935,7 +931,7 @@ struct PlayerProfile_Struct
 /*0245*/	uint8				guildbanker;
 /*0246*/	uint8				unknown0246[6];		//
 /*0252*/	uint32				intoxication;
-/*0256*/	uint32				spellSlotRefresh[MAX_PP_MEMSPELL];	//in ms
+/*0256*/	uint32				spellSlotRefresh[EQEmu::spells::SPELL_GEM_COUNT];	//in ms
 /*0292*/	uint32				abilitySlotRefresh;
 /*0296*/	uint8				haircolor;			// Player hair color
 /*0297*/	uint8				beardcolor;			// Player beard color
@@ -974,9 +970,9 @@ struct PlayerProfile_Struct
 /*2505*/	uint8				unknown2541[47];	// ?
 /*2552*/	uint8				languages[MAX_PP_LANGUAGE];
 /*2580*/	uint8				unknown2616[4];
-/*2584*/	uint32				spell_book[MAX_PP_REF_SPELLBOOK];
+/*2584*/	uint32				spell_book[EQEmu::spells::SPELLBOOK_SIZE];
 /*4504*/	uint8				unknown4540[128];	// Was [428] all 0xff
-/*4632*/	uint32				mem_spells[MAX_PP_MEMSPELL];
+/*4632*/	uint32				mem_spells[EQEmu::spells::SPELL_GEM_COUNT];
 /*4668*/	uint8				unknown4704[32];	//
 /*4700*/	float				y;					// Player y position
 /*4704*/	float				x;					// Player x position
@@ -4373,7 +4369,7 @@ struct AnnoyingZoneUnknown_Struct {
 };
 
 struct LoadSpellSet_Struct {
-	uint32 spell[MAX_PP_MEMSPELL];	// 0xFFFFFFFF if no action, slot number if to unmem starting at 0
+	uint32 spell[EQEmu::spells::SPELL_GEM_COUNT];	// 0xFFFFFFFF if no action, slot number if to unmem starting at 0
 	uint32 unknown;					//there seems to be an extra field in this packet...
 };
 

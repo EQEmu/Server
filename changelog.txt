@@ -1,6 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 
+== 1/20/2019 ==
+Uleat: Added 'spells' entry to EQDictionary
+
 == 1/15/2019 ==
 Uleat: Activated per-expansion support for active inventory slot addressing
 	- Server honors expansions that alter bank size and power source, general9 and general10 slots

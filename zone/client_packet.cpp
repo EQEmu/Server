@@ -530,7 +530,7 @@ void Client::CompleteConnect()
 		SendAppearancePacket(AT_GuildID, GuildID(), false);
 		SendAppearancePacket(AT_GuildRank, rank, false);
 	}
-	for (uint32 spellInt = 0; spellInt < MAX_PP_REF_SPELLBOOK; spellInt++) {
+	for (uint32 spellInt = 0; spellInt < EQEmu::spells::SPELLBOOK_SIZE; spellInt++) {
 		if (m_pp.spell_book[spellInt] < 3 || m_pp.spell_book[spellInt] > 50000)
 			m_pp.spell_book[spellInt] = 0xFFFFFFFF;
 	}
@@ -1412,7 +1412,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	}
 
 	if (SPDAT_RECORDS > 0) {
-		for (uint32 z = 0; z<MAX_PP_MEMSPELL; z++) {
+		for (uint32 z = 0; z < EQEmu::spells::SPELL_GEM_COUNT; z++) {
 			if (m_pp.mem_spells[z] >= (uint32)SPDAT_RECORDS)
 				UnmemSpell(z, false);
 		}
@@ -1544,7 +1544,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	}
 
 	/* Load Spell Slot Refresh from Currently Memoried Spells */
-	for (unsigned int i = 0; i < MAX_PP_MEMSPELL; ++i)
+	for (unsigned int i = 0; i < EQEmu::spells::SPELL_GEM_COUNT; ++i)
 		if (IsValidSpell(m_pp.mem_spells[i]))
 			m_pp.spellSlotRefresh[i] = p_timers.GetRemainingTime(pTimerSpellStart + m_pp.mem_spells[i]) * 1000;
 
@@ -4006,7 +4006,7 @@ void Client::Handle_OP_CancelTrade(const EQApplicationPacket *app)
 
 void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 {
-	using EQEmu::CastingSlot;
+	using EQEmu::spells::CastingSlot;
 	if (app->size != sizeof(CastSpell_Struct)) {
 		std::cout << "Wrong size: OP_CastSpell, size=" << app->size << ", expected " << sizeof(CastSpell_Struct) << std::endl;
 		return;
@@ -4027,14 +4027,14 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 	/* Memorized Spell */
 	if (m_pp.mem_spells[castspell->slot] && m_pp.mem_spells[castspell->slot] == castspell->spell_id) {
 		uint16 spell_to_cast = 0;
-		if (castspell->slot < MAX_PP_MEMSPELL) {
+		if (castspell->slot < EQEmu::spells::SPELL_GEM_COUNT) {
 			spell_to_cast = m_pp.mem_spells[castspell->slot];
 			if (spell_to_cast != castspell->spell_id) {
 				InterruptSpell(castspell->spell_id); //CHEATER!!!
 				return;
 			}
 		}
-		else if (castspell->slot >= MAX_PP_MEMSPELL) {
+		else if (castspell->slot >= EQEmu::spells::SPELL_GEM_COUNT) {
 			InterruptSpell();
 			return;
 		}
@@ -5253,7 +5253,7 @@ void Client::Handle_OP_DeleteSpell(const EQApplicationPacket *app)
 	EQApplicationPacket* outapp = app->Copy();
 	DeleteSpell_Struct* dss = (DeleteSpell_Struct*)outapp->pBuffer;
 
-	if (dss->spell_slot < 0 || dss->spell_slot > int(MAX_PP_SPELLBOOK))
+	if (dss->spell_slot < 0 || dss->spell_slot > int(EQEmu::spells::SPELLBOOK_SIZE))
 		return;
 
 	if (m_pp.spell_book[dss->spell_slot] != SPELLBOOK_UNKNOWN) {
@@ -8451,7 +8451,7 @@ void Client::Handle_OP_ItemPreview(const EQApplicationPacket *app)
 
 void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 {
-	using EQEmu::CastingSlot;
+	using EQEmu::spells::CastingSlot;
 	if (app->size != sizeof(ItemVerifyRequest_Struct))
 	{
 		Log(Logs::General, Logs::Error, "OP size error: OP_ItemVerifyRequest expected:%i got:%i", sizeof(ItemVerifyRequest_Struct), app->size);
@@ -9177,7 +9177,7 @@ void Client::Handle_OP_LoadSpellSet(const EQApplicationPacket *app)
 	}
 	int i;
 	LoadSpellSet_Struct* ss = (LoadSpellSet_Struct*)app->pBuffer;
-	for (i = 0; i<MAX_PP_MEMSPELL; i++) {
+	for (i = 0; i < EQEmu::spells::SPELL_GEM_COUNT; i++) {
 		if (ss->spell[i] != 0xFFFFFFFF)
 			UnmemSpell(i, true);
 	}
@@ -13327,7 +13327,7 @@ void Client::Handle_OP_SwapSpell(const EQApplicationPacket *app)
 	const SwapSpell_Struct* swapspell = (const SwapSpell_Struct*)app->pBuffer;
 	int swapspelltemp;
 
-	if (swapspell->from_slot < 0 || swapspell->from_slot > MAX_PP_SPELLBOOK || swapspell->to_slot < 0 || swapspell->to_slot > MAX_PP_SPELLBOOK)
+	if (swapspell->from_slot < 0 || swapspell->from_slot > EQEmu::spells::SPELLBOOK_SIZE || swapspell->to_slot < 0 || swapspell->to_slot > EQEmu::spells::SPELLBOOK_SIZE)
 		return;
 
 	swapspelltemp = m_pp.spell_book[swapspell->from_slot];

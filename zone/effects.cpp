@@ -643,9 +643,9 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 		}
 
 		if (reduced_recast > 0)
-			CastSpell(spell_id, target, EQEmu::CastingSlot::Discipline, -1, -1, 0, -1, (uint32)DiscTimer, reduced_recast);
+			CastSpell(spell_id, target, EQEmu::spells::CastingSlot::Discipline, -1, -1, 0, -1, (uint32)DiscTimer, reduced_recast);
 		else{
-			CastSpell(spell_id, target, EQEmu::CastingSlot::Discipline);
+			CastSpell(spell_id, target, EQEmu::spells::CastingSlot::Discipline);
 			return true;
 		}
 
@@ -653,7 +653,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 	}
 	else
 	{
-		CastSpell(spell_id, target, EQEmu::CastingSlot::Discipline);
+		CastSpell(spell_id, target, EQEmu::spells::CastingSlot::Discipline);
 	}
 	return(true);
 }

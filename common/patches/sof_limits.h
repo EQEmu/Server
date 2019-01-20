@@ -313,6 +313,33 @@ namespace SoF
 
 	} /*skills*/
 
+	namespace spells {
+		inline EQEmu::versions::ClientVersion GetSkillsRef() { return EQEmu::versions::ClientVersion::SoF; }
+		
+		enum class CastingSlot : uint32 {
+			Gem1 = 0,
+			Gem2 = 1,
+			Gem3 = 2,
+			Gem4 = 3,
+			Gem5 = 4,
+			Gem6 = 5,
+			Gem7 = 6,
+			Gem8 = 7,
+			Gem9 = 8,
+			MaxGems = 9,
+			Ability = 9,
+			Item = 10,
+			Discipline = 10,
+			PotionBelt = 11,
+			AltAbility = 0xFF
+		};
+
+		const int SPELL_ID_MAX = 15999;
+		const int SPELLBOOK_SIZE = 480;
+		const int SPELL_GEM_COUNT = static_cast<uint32>(CastingSlot::MaxGems);
+		
+	} /*spells*/
+
 }; /*SoF*/
 
 #endif /*COMMON_SOF_LIMITS_H*/

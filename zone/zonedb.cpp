@@ -1204,12 +1204,12 @@ bool ZoneDatabase::LoadCharacterMemmedSpells(uint32 character_id, PlayerProfile_
 	auto results = database.QueryDatabase(query);
 	int i = 0;
 	/* Initialize Spells */
-	for (i = 0; i < MAX_PP_MEMSPELL; i++){
+	for (i = 0; i < EQEmu::spells::SPELL_GEM_COUNT; i++){
 		pp->mem_spells[i] = 0xFFFFFFFF;
 	}
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		i = atoi(row[0]);
-		if (i < MAX_PP_MEMSPELL && atoi(row[1]) <= SPDAT_RECORDS){
+		if (i < EQEmu::spells::SPELL_GEM_COUNT && atoi(row[1]) <= SPDAT_RECORDS){
 			pp->mem_spells[i] = atoi(row[1]);
 		}
 	}
@@ -1227,12 +1227,12 @@ bool ZoneDatabase::LoadCharacterSpellBook(uint32 character_id, PlayerProfile_Str
 	auto results = database.QueryDatabase(query);
 	int i = 0;
 	/* Initialize Spells */
-	for (i = 0; i < MAX_PP_SPELLBOOK; i++){
+	for (i = 0; i < EQEmu::spells::SPELLBOOK_SIZE; i++){
 		pp->spell_book[i] = 0xFFFFFFFF;
 	}
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		i = atoi(row[0]);
-		if (i < MAX_PP_SPELLBOOK && atoi(row[1]) <= SPDAT_RECORDS){
+		if (i < EQEmu::spells::SPELLBOOK_SIZE && atoi(row[1]) <= SPDAT_RECORDS){
 			pp->spell_book[i] = atoi(row[1]);
 		}
 	}

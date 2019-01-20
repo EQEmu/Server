@@ -1993,7 +1993,7 @@ bool Merc::AIDoSpellCast(uint16 spellid, Mob* tar, int32 mana_cost, uint32* oDon
 		SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0);
 		SetMoving(false);
 
-		result = CastSpell(spellid, tar->GetID(), EQEmu::CastingSlot::Gem2, -1, mana_cost, oDontDoAgainBefore, -1, -1, 0, 0);
+		result = CastSpell(spellid, tar->GetID(), EQEmu::spells::CastingSlot::Gem2, -1, mana_cost, oDontDoAgainBefore, -1, -1, 0, 0);
 
 		if(IsCasting() && IsSitting())
 			Stand();
@@ -4045,7 +4045,7 @@ bool Merc::UseDiscipline(int32 spell_id, int32 target) {
 	if(IsCasting())
 		InterruptSpell();
 
-	CastSpell(spell_id, target, EQEmu::CastingSlot::Discipline);
+	CastSpell(spell_id, target, EQEmu::spells::CastingSlot::Discipline);
 
 	return(true);
 }

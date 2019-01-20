@@ -107,7 +107,7 @@ extern volatile bool is_zone_loaded;
 extern WorldServer worldserver;
 extern FastMath g_Math;
 
-using EQEmu::CastingSlot;
+using EQEmu::spells::CastingSlot;
 
 // this is run constantly for every mob
 void Mob::SpellProcess()
@@ -4968,7 +4968,7 @@ void Client::MakeBuffFadePacket(uint16 spell_id, int slot_id, bool send_message)
 
 void Client::MemSpell(uint16 spell_id, int slot, bool update_client)
 {
-	if(slot >= MAX_PP_MEMSPELL || slot < 0)
+	if(slot >= EQEmu::spells::SPELL_GEM_COUNT || slot < 0)
 		return;
 
 	if(update_client)
@@ -4990,7 +4990,7 @@ void Client::MemSpell(uint16 spell_id, int slot, bool update_client)
 
 void Client::UnmemSpell(int slot, bool update_client)
 {
-	if(slot > MAX_PP_MEMSPELL || slot < 0)
+	if(slot > EQEmu::spells::SPELL_GEM_COUNT || slot < 0)
 		return;
 
 	Log(Logs::Detail, Logs::Spells, "Spell %d forgotten from slot %d", m_pp.mem_spells[slot], slot);
@@ -5006,7 +5006,7 @@ void Client::UnmemSpell(int slot, bool update_client)
 
 void Client::UnmemSpellBySpellID(int32 spell_id)
 {
-	for(int i = 0; i < MAX_PP_MEMSPELL; i++) {
+	for(int i = 0; i < EQEmu::spells::SPELL_GEM_COUNT; i++) {
 		if(m_pp.mem_spells[i] == spell_id) {
 			UnmemSpell(i, true);
 			break;
@@ -5018,14 +5018,14 @@ void Client::UnmemSpellAll(bool update_client)
 {
 	int i;
 
-	for(i = 0; i < MAX_PP_MEMSPELL; i++)
+	for(i = 0; i < EQEmu::spells::SPELL_GEM_COUNT; i++)
 		if(m_pp.mem_spells[i] != 0xFFFFFFFF)
 			UnmemSpell(i, update_client);
 }
 
 void Client::ScribeSpell(uint16 spell_id, int slot, bool update_client)
 {
-	if(slot >= MAX_PP_SPELLBOOK || slot < 0)
+	if(slot >= EQEmu::spells::SPELLBOOK_SIZE || slot < 0)
 		return;
 
 	if(update_client)
@@ -5046,7 +5046,7 @@ void Client::ScribeSpell(uint16 spell_id, int slot, bool update_client)
 
 void Client::UnscribeSpell(int slot, bool update_client)
 {
-	if(slot >= MAX_PP_SPELLBOOK || slot < 0)
+	if(slot >= EQEmu::spells::SPELLBOOK_SIZE || slot < 0)
 		return;
 
 	Log(Logs::Detail, Logs::Spells, "Spell %d erased from spell book slot %d", m_pp.spell_book[slot], slot);
@@ -5068,7 +5068,7 @@ void Client::UnscribeSpellAll(bool update_client)
 {
 	int i;
 
-	for(i = 0; i < MAX_PP_SPELLBOOK; i++)
+	for(i = 0; i < EQEmu::spells::SPELLBOOK_SIZE; i++)
 	{
 		if(m_pp.spell_book[i] != 0xFFFFFFFF)
 			UnscribeSpell(i, update_client);
@@ -5102,7 +5102,7 @@ void Client::UntrainDiscAll(bool update_client)
 }
 
 int Client::GetNextAvailableSpellBookSlot(int starting_slot) {
-	for (int i = starting_slot; i < MAX_PP_SPELLBOOK; i++) {	//using starting_slot should help speed this up when we're iterating through a bunch of spells
+	for (int i = starting_slot; i < EQEmu::spells::SPELLBOOK_SIZE; i++) {	//using starting_slot should help speed this up when we're iterating through a bunch of spells
 		if (!IsValidSpell(GetSpellByBookSlot(i)))
 			return i;
 	}
@@ -5111,7 +5111,7 @@ int Client::GetNextAvailableSpellBookSlot(int starting_slot) {
 }
 
 int Client::FindSpellBookSlotBySpellID(uint16 spellid) {
-	for(int i = 0; i < MAX_PP_SPELLBOOK; i++) {
+	for(int i = 0; i < EQEmu::spells::SPELLBOOK_SIZE; i++) {
 		if(m_pp.spell_book[i] == spellid)
 			return i;
 	}
@@ -5410,7 +5410,7 @@ bool Mob::UseBardSpellLogic(uint16 spell_id, int slot)
 		spell_id != SPELL_UNKNOWN &&
 		slot != -1 &&
 		GetClass() == BARD &&
-		slot <= MAX_PP_MEMSPELL &&
+		slot <= EQEmu::spells::SPELL_GEM_COUNT &&
 		IsBardSong(spell_id)
 	);
 }

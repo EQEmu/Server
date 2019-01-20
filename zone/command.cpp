@@ -2609,14 +2609,14 @@ void command_castspell(Client *c, const Seperator *sep)
 		else
 			if (c->GetTarget() == 0)
 				if(c->Admin() >= commandInstacast)
-					c->SpellFinished(spellid, 0, EQEmu::CastingSlot::Item, 0, -1, spells[spellid].ResistDiff);
+					c->SpellFinished(spellid, 0, EQEmu::spells::CastingSlot::Item, 0, -1, spells[spellid].ResistDiff);
 				else
-					c->CastSpell(spellid, 0, EQEmu::CastingSlot::Item, 0);
+					c->CastSpell(spellid, 0, EQEmu::spells::CastingSlot::Item, 0);
 			else
 				if(c->Admin() >= commandInstacast)
-					c->SpellFinished(spellid, c->GetTarget(), EQEmu::CastingSlot::Item, 0, -1, spells[spellid].ResistDiff);
+					c->SpellFinished(spellid, c->GetTarget(), EQEmu::spells::CastingSlot::Item, 0, -1, spells[spellid].ResistDiff);
 				else
-					c->CastSpell(spellid, c->GetTarget()->GetID(), EQEmu::CastingSlot::Item, 0);
+					c->CastSpell(spellid, c->GetTarget()->GetID(), EQEmu::spells::CastingSlot::Item, 0);
 	}
 }
 
@@ -4620,7 +4620,7 @@ void command_memspell(Client *c, const Seperator *sep)
 	{
 		slot = atoi(sep->arg[1]) - 1;
 		spell_id = atoi(sep->arg[2]);
-		if (slot > MAX_PP_MEMSPELL || spell_id >= SPDAT_RECORDS)
+		if (slot > EQEmu::spells::SPELL_GEM_COUNT || spell_id >= SPDAT_RECORDS)
 		{
 			c->Message(0, "Error: #MemSpell: Arguement out of range");
 		}
@@ -6301,7 +6301,7 @@ void command_scribespells(Client *c, const Seperator *sep)
 		c->Message(0, "Scribing spells for %s.",  t->GetName());
 	Log(Logs::General, Logs::Normal, "Scribe spells request for %s from %s, levels: %u -> %u",  t->GetName(), c->GetName(), min_level, max_level);
 
-	for(curspell = 0, book_slot = t->GetNextAvailableSpellBookSlot(), count = 0; curspell < SPDAT_RECORDS && book_slot < MAX_PP_SPELLBOOK; curspell++, book_slot = t->GetNextAvailableSpellBookSlot(book_slot))
+	for(curspell = 0, book_slot = t->GetNextAvailableSpellBookSlot(), count = 0; curspell < SPDAT_RECORDS && book_slot < EQEmu::spells::SPELLBOOK_SIZE; curspell++, book_slot = t->GetNextAvailableSpellBookSlot(book_slot))
 	{
 		if
 		(

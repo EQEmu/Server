@@ -6263,7 +6263,7 @@ void Bot::DoBuffTic(const Buffs_Struct &buff, int slot, Mob* caster) {
 	Mob::DoBuffTic(buff, slot, caster);
 }
 
-bool Bot::CastSpell(uint16 spell_id, uint16 target_id, EQEmu::CastingSlot slot, int32 cast_time, int32 mana_cost,
+bool Bot::CastSpell(uint16 spell_id, uint16 target_id, EQEmu::spells::CastingSlot slot, int32 cast_time, int32 mana_cost,
 					uint32* oSpellWillFinish, uint32 item_slot, int16 *resist_adjust, uint32 aa_id) {
 	bool Result = false;
 	if(zone && !zone->IsSpellBlocked(spell_id, glm::vec3(GetPosition()))) {
@@ -6303,7 +6303,7 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, EQEmu::CastingSlot slot, 
 			return false;
 		}
 
-		if(slot < EQEmu::CastingSlot::MaxGems && !CheckFizzle(spell_id)) {
+		if(slot < EQEmu::spells::CastingSlot::MaxGems && !CheckFizzle(spell_id)) {
 			int fizzle_msg = IsBardSong(spell_id) ? MISS_NOTE : SPELL_FIZZLE;
 			InterruptSpell(fizzle_msg, 0x121, spell_id);
 
@@ -6317,7 +6317,7 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, EQEmu::CastingSlot slot, 
 			Log(Logs::Detail, Logs::Spells, "Casting a new spell/song while singing a song. Killing old song %d.", bardsong);
 			bardsong = 0;
 			bardsong_target_id = 0;
-			bardsong_slot = EQEmu::CastingSlot::Gem1;
+			bardsong_slot = EQEmu::spells::CastingSlot::Gem1;
 			bardsong_timer.Disable();
 		}
 
@@ -6447,7 +6447,7 @@ bool Bot::IsImmuneToSpell(uint16 spell_id, Mob *caster) {
 	return Result;
 }
 
-bool Bot::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_center, CastAction_type &CastAction, EQEmu::CastingSlot slot) {
+bool Bot::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_center, CastAction_type &CastAction, EQEmu::spells::CastingSlot slot) {
 	bool Result = false;
 	SpellTargetType targetType = spells[spell_id].targettype;
 	if(targetType == ST_GroupClientAndPet) {
@@ -6460,7 +6460,7 @@ bool Bot::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 	return Result;
 }
 
-bool Bot::DoCastSpell(uint16 spell_id, uint16 target_id, EQEmu::CastingSlot slot, int32 cast_time, int32 mana_cost, uint32* oSpellWillFinish, uint32 item_slot, uint32 aa_id) {
+bool Bot::DoCastSpell(uint16 spell_id, uint16 target_id, EQEmu::spells::CastingSlot slot, int32 cast_time, int32 mana_cost, uint32* oSpellWillFinish, uint32 item_slot, uint32 aa_id) {
 	bool Result = false;
 	if(GetClass() == BARD)
 		cast_time = 0;
@@ -6564,7 +6564,7 @@ void Bot::GenerateSpecialAttacks() {
 		SetSpecialAbility(SPECATK_TRIPLE, 1);
 }
 
-bool Bot::DoFinishedSpellAETarget(uint16 spell_id, Mob* spellTarget, EQEmu::CastingSlot slot, bool& stopLogic) {
+bool Bot::DoFinishedSpellAETarget(uint16 spell_id, Mob* spellTarget, EQEmu::spells::CastingSlot slot, bool& stopLogic) {
 	if(GetClass() == BARD) {
 		if(!ApplyNextBardPulse(bardsong, this, bardsong_slot))
 			InterruptSpell(SONG_ENDS_ABRUPTLY, 0x121, bardsong);
@@ -6574,7 +6574,7 @@ bool Bot::DoFinishedSpellAETarget(uint16 spell_id, Mob* spellTarget, EQEmu::Cast
 	return true;
 }
 
-bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQEmu::CastingSlot slot, bool& stopLogic) {
+bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQEmu::spells::CastingSlot slot, bool& stopLogic) {
 	if(spellTarget) {
 		if(IsGrouped() && (spellTarget->IsBot() || spellTarget->IsClient()) && RuleB(Bots, GroupBuffing)) {
 			bool noGroupSpell = false;
@@ -6586,7 +6586,7 @@ bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQEmu::
 				bool spelltypeequal = ((spelltype == 2) || (spelltype == 16) || (spelltype == 32));
 				bool spelltypetargetequal = ((spelltype == 8) && (spells[thespell].targettype == ST_Self));
 				bool spelltypeclassequal = ((spelltype == 1024) && (GetClass() == SHAMAN));
-				bool slotequal = (slot == EQEmu::CastingSlot::Item);
+				bool slotequal = (slot == EQEmu::spells::CastingSlot::Item);
 				if(spellequal || slotequal) {
 					if((spelltypeequal || spelltypetargetequal) || spelltypeclassequal || slotequal) {
 						if(((spells[thespell].effectid[0] == 0) && (spells[thespell].base[0] < 0)) &&
@@ -6625,7 +6625,7 @@ bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQEmu::
 	return true;
 }
 
-bool Bot::DoFinishedSpellGroupTarget(uint16 spell_id, Mob* spellTarget, EQEmu::CastingSlot slot, bool& stopLogic) {
+bool Bot::DoFinishedSpellGroupTarget(uint16 spell_id, Mob* spellTarget, EQEmu::spells::CastingSlot slot, bool& stopLogic) {
 	bool isMainGroupMGB = false;
 	if(isMainGroupMGB && (GetClass() != BARD)) {
 		BotGroupSay(this, "MGB %s", spells[spell_id].name);
@@ -8708,7 +8708,7 @@ bool Bot::UseDiscipline(uint32 spell_id, uint32 target) {
 	if(IsCasting())
 		InterruptSpell();
 
-	CastSpell(spell_id, target, EQEmu::CastingSlot::Discipline);
+	CastSpell(spell_id, target, EQEmu::spells::CastingSlot::Discipline);
 	return true;
 }
 

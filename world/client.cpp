@@ -1529,10 +1529,10 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 //	strcpy(pp.servername, WorldConfig::get()->ShortName.c_str());
 
 
-	for (i = 0; i < MAX_PP_REF_SPELLBOOK; i++)
+	for (i = 0; i < EQEmu::spells::SPELLBOOK_SIZE; i++)
 		pp.spell_book[i] = 0xFFFFFFFF;
 
-	for(i = 0; i < MAX_PP_MEMSPELL; i++)
+	for(i = 0; i < EQEmu::spells::SPELL_GEM_COUNT; i++)
 		pp.mem_spells[i] = 0xFFFFFFFF;
 
 	for(i = 0; i < BUFF_COUNT; i++)

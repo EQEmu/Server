@@ -313,6 +313,32 @@ namespace SoD
 
 	} /*skills*/
 
+	namespace spells {
+		inline EQEmu::versions::ClientVersion GetSkillsRef() { return EQEmu::versions::ClientVersion::SoD; }
+		
+		enum class CastingSlot : uint32 {
+			Gem1 = 0,
+			Gem2 = 1,
+			Gem3 = 2,
+			Gem4 = 3,
+			Gem5 = 4,
+			Gem6 = 5,
+			Gem7 = 6,
+			Gem8 = 7,
+			Gem9 = 8,
+			Gem10 = 9,
+			MaxGems = 10,
+			Item = 10,
+			Discipline = 11,
+			AltAbility = 0xFF
+		};
+
+		const int SPELL_ID_MAX = 23000;
+		const int SPELLBOOK_SIZE = 480;
+		const int SPELL_GEM_COUNT = static_cast<uint32>(CastingSlot::MaxGems);
+		
+	} /*spells*/
+
 }; /*SoD*/
 
 #endif /*COMMON_SOD_LIMITS_H*/

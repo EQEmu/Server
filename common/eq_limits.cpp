@@ -32,6 +32,7 @@ void EQEmu::InitializeDynamicLookups() {
 	constants::InitializeDynamicLookups();
 	inventory::InitializeDynamicLookups();
 	behavior::InitializeDynamicLookups();
+	spells::InitializeDynamicLookups();
 
 	global_dictionary_init = true;
 }
@@ -1124,4 +1125,93 @@ const EQEmu::behavior::LookupEntry* EQEmu::behavior::DynamicLookup(versions::Mob
 const EQEmu::behavior::LookupEntry* EQEmu::behavior::StaticLookup(versions::MobVersion mob_version)
 {
 	return &behavior_static_lookup_entries[static_cast<int>(versions::ValidateMobVersion(mob_version))];
+}
+
+static std::unique_ptr<EQEmu::spells::LookupEntry> spells_dynamic_gm_lookup_entries[EQEmu::versions::ClientVersionCount];
+static std::unique_ptr<EQEmu::spells::LookupEntry> spells_dynamic_lookup_entries[EQEmu::versions::ClientVersionCount];
+static const EQEmu::spells::LookupEntry spells_static_lookup_entries[EQEmu::versions::ClientVersionCount] =
+{
+	/*[ClientVersion::Unknown] =*/
+	EQEmu::spells::LookupEntry(
+		ClientUnknown::INULL,
+		ClientUnknown::INULL,
+		ClientUnknown::INULL
+	),
+	/*[ClientVersion::Client62] =*/
+	EQEmu::spells::LookupEntry(
+		Client62::INULL,
+		Client62::INULL,
+		Client62::INULL
+	),
+	/*[ClientVersion::Titanium] =*/
+	EQEmu::spells::LookupEntry(
+		Titanium::spells::SPELL_ID_MAX,
+		Titanium::spells::SPELLBOOK_SIZE,
+		Titanium::spells::SPELL_GEM_COUNT
+	),
+	/*[ClientVersion::SoF] =*/
+	EQEmu::spells::LookupEntry(
+		SoF::spells::SPELL_ID_MAX,
+		SoF::spells::SPELLBOOK_SIZE,
+		SoF::spells::SPELL_GEM_COUNT
+	),
+	/*[ClientVersion::SoD] =*/
+	EQEmu::spells::LookupEntry(
+		SoD::spells::SPELL_ID_MAX,
+		SoD::spells::SPELLBOOK_SIZE,
+		SoD::spells::SPELL_GEM_COUNT
+	),
+	/*[ClientVersion::UF] =*/
+	EQEmu::spells::LookupEntry(
+		UF::spells::SPELL_ID_MAX,
+		SoD::spells::SPELLBOOK_SIZE,
+		UF::spells::SPELL_GEM_COUNT
+	),
+	/*[ClientVersion::RoF] =*/
+	EQEmu::spells::LookupEntry(
+		RoF::spells::SPELL_ID_MAX,
+		SoD::spells::SPELLBOOK_SIZE,
+		UF::spells::SPELL_GEM_COUNT // client translators are setup to allow the max value a client supports..however, the top 4 indices are not valid in this case
+	),
+	/*[ClientVersion::RoF2] =*/
+	EQEmu::spells::LookupEntry(
+		RoF2::spells::SPELL_ID_MAX,
+		SoD::spells::SPELLBOOK_SIZE,
+		UF::spells::SPELL_GEM_COUNT // client translators are setup to allow the max value a client supports..however, the top 4 indices are not valid in this case
+	)
+};
+
+static bool spells_dictionary_init = false;
+void EQEmu::spells::InitializeDynamicLookups() {
+	if (spells_dictionary_init == true)
+		return;
+	spells_dictionary_init = true;
+	
+	if (RuleB(World, UseClientBasedExpansionSettings))
+		return;
+	
+	// use static references for now
+}
+
+const EQEmu::spells::LookupEntry* EQEmu::spells::DynamicGMLookup(versions::ClientVersion client_version)
+{
+	client_version = versions::ValidateClientVersion(client_version);
+	if (spells_dynamic_gm_lookup_entries[static_cast<int>(client_version)])
+		return spells_dynamic_gm_lookup_entries[static_cast<int>(client_version)].get();
+	
+	return &spells_static_lookup_entries[static_cast<int>(client_version)];
+}
+
+const EQEmu::spells::LookupEntry* EQEmu::spells::DynamicLookup(versions::ClientVersion client_version)
+{
+	client_version = versions::ValidateClientVersion(client_version);
+	if (spells_dynamic_lookup_entries[static_cast<int>(client_version)])
+		return spells_dynamic_lookup_entries[static_cast<int>(client_version)].get();
+	
+	return &spells_static_lookup_entries[static_cast<int>(client_version)];
+}
+
+const EQEmu::spells::LookupEntry* EQEmu::spells::StaticLookup(versions::ClientVersion client_version)
+{
+	return &spells_static_lookup_entries[static_cast<int>(versions::ValidateClientVersion(client_version))];
 }
