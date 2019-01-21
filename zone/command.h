@@ -325,6 +325,7 @@ void command_viewnpctype(Client *c, const Seperator *sep);
 void command_viewpetition(Client *c, const Seperator *sep);
 void command_wc(Client *c, const Seperator *sep);
 void command_weather(Client *c, const Seperator *sep);
+void command_who(Client *c, const Seperator *sep);
 void command_worldshutdown(Client *c, const Seperator *sep);
 void command_wp(Client *c, const Seperator *sep);
 void command_wpadd(Client *c, const Seperator *sep);

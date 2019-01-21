@@ -3,8 +3,21 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 
 == 1/20/2019 ==
 Uleat: Added 'spells' entry to EQDictionary
-Akkadius: Implement and extended #goto via #goto <player_name> - this will work cross zone, cross instance, in zone etc.
-    It works on top of the original #goto (target) and #goto x y z
+Akkadius:
+    - [Command] Extended #goto via #goto <player_name> -
+        - This will work cross zone, cross instance, in zone etc.
+        - It works on top of the original #goto (target) and #goto x y z
+    - [Command] Implemented server side #who Example: https://bit.ly/2TZ2hvI
+        - Searches can be filtered by
+            - Account Name
+            - Base Class Name
+            - Guild Name
+            - IP
+            - Player Name
+            - Race Name
+            - Zone Short Name
+        - Features a clickable (Goto) saylink that will bring you directly to a player regardless of
+            whether or not they are in an instance
 
 == 1/15/2019 ==
 Uleat: Activated per-expansion support for active inventory slot addressing

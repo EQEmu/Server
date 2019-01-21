@@ -809,6 +809,16 @@ void Client::CompleteConnect()
 			std::string event_desc = StringFormat("Connect :: Logged into zoneid:%i instid:%i", this->GetZoneID(), this->GetInstanceID());
 			QServ->PlayerLogEvent(Player_Log_Connect_State, this->CharacterID(), event_desc);
 		}
+
+		/**
+		 * Update last login since this doesn't get updated until a late save later so we can update online status
+		 */
+		database.QueryDatabase(
+			StringFormat(
+				"UPDATE `character_data` SET `last_login` = UNIX_TIMESTAMP() WHERE id = %u",
+				this->CharacterID()
+			)
+		);
 	}
 
 	if (zone) {
