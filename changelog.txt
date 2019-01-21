@@ -18,7 +18,9 @@ Akkadius:
             - Zone Short Name
         - Features a clickable (Goto) saylink that will bring you directly to a player regardless of
             whether or not they are in an instance
-
+    - [Command] Implemented: #gmzone [zone_short_name] [zone_version=0] [identifier=gmzone]
+        - Zones to a private GM instance
+            - Example: https://i.imgur.com/qswdrzO.gif
 == 1/15/2019 ==
 Uleat: Activated per-expansion support for active inventory slot addressing
 	- Server honors expansions that alter bank size and power source, general9 and general10 slots

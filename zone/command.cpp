@@ -219,6 +219,7 @@ int command_init(void)
 		command_add("globalview", "Lists all qglobals in cache if you were to do a quest with this target.", 80, command_globalview) ||
 		command_add("gm", "- Turn player target's or your GM flag on or off", 80, command_gm) ||
 		command_add("gmspeed", "[on/off] - Turn GM speed hack on/off for you or your player target", 100, command_gmspeed) ||
+		command_add("gmzone", "[zone_short_name] [zone_version=0] [identifier=gmzone] - Zones to a private GM instance", 100, command_gmzone) ||
 		command_add("goto", "[x] [y] [z] - Teleport to the provided coordinates or to your target", 10, command_goto) ||
 		command_add("grid", "[add/delete] [grid_num] [wandertype] [pausetype] - Create/delete a wandering grid", 170, command_grid) ||
 		command_add("guild", "- Guild manipulation commands. Use argument help for more info.", 10, command_guild) ||
@@ -4429,18 +4430,94 @@ void command_fixmob(Client *c, const Seperator *sep)
 
 void command_gmspeed(Client *c, const Seperator *sep)
 {
-	bool state=atobool(sep->arg[1]);
-	Client *t=c;
+	bool   state = atobool(sep->arg[1]);
+	Client *t    = c;
 
-	if(c->GetTarget() && c->GetTarget()->IsClient())
-		t=c->GetTarget()->CastToClient();
-
-	if(sep->arg[1][0] != 0) {
-		database.SetGMSpeed(t->AccountID(), state?1:0);
-		c->Message(0, "Turning GMSpeed %s for %s (zone to take effect)",  state?"On":"Off", t->GetName());
+	if (c->GetTarget() && c->GetTarget()->IsClient()) {
+		t = c->GetTarget()->CastToClient();
 	}
-	else
+
+	if (sep->arg[1][0] != 0) {
+		database.SetGMSpeed(t->AccountID(), state ? 1 : 0);
+		c->Message(0, "Turning GMSpeed %s for %s (zone to take effect)", state ? "On" : "Off", t->GetName());
+	}
+	else {
 		c->Message(0, "Usage: #gmspeed [on/off]");
+	}
+}
+
+void command_gmzone(Client *c, const Seperator *sep)
+{
+	if (!sep->arg[1]) {
+		c->Message(0, "Usage");
+		c->Message(0, "-------");
+		c->Message(0, "#gmzone [zone_short_name] [zone_version=0]");
+		return;
+	}
+
+	std::string zone_short_name_string = sep->arg[1];
+	const char  *zone_short_name       = sep->arg[1];
+	auto        zone_version           = static_cast<uint32>(sep->arg[2] ? atoi(sep->arg[2]) : 0);
+	std::string identifier             = "gmzone";
+	uint32      zone_id                = database.GetZoneID(zone_short_name);
+	uint32      duration               = 100000000;
+	uint16      instance_id            = 0;
+
+	if (zone_id == 0) {
+		c->Message(13, "Invalid zone specified");
+		return;
+	}
+
+	if (sep->arg[3] && sep->arg[3][0]) {
+		identifier = sep->arg[3];
+	}
+
+	std::string bucket_key             = StringFormat("%s-%s-instance", zone_short_name, identifier.c_str());
+	std::string existing_zone_instance = DataBucket::GetData(bucket_key);
+
+	if (existing_zone_instance.length() > 0) {
+		instance_id = std::stoi(existing_zone_instance);
+
+		c->Message(15, "Found already created instance (%s) (%u)", zone_short_name, instance_id);
+	}
+
+	if (instance_id == 0) {
+		if (!database.GetUnusedInstanceID(instance_id)) {
+			c->Message(13, "Server was unable to find a free instance id.");
+			return;
+		}
+
+		if (!database.CreateInstance(instance_id, zone_id, zone_version, duration)) {
+			c->Message(13, "Server was unable to create a new instance.");
+			return;
+		}
+
+		c->Message(15, "New private GM instance %s was created with id %lu.", zone_short_name, (unsigned long) instance_id);
+		DataBucket::SetData(bucket_key, std::to_string(instance_id));
+	}
+
+	if (instance_id > 0) {
+		float target_x   = -1, target_y = -1, target_z = -1;
+		int16 min_status = 0;
+		uint8 min_level  = 0;
+
+		if (!database.GetSafePoints(
+			zone_short_name,
+			zone_version,
+			&target_x,
+			&target_y,
+			&target_z,
+			&min_status,
+			&min_level
+		)) {
+			c->Message(13, "Failed to find safe coordinates for specified zone");
+		}
+
+		c->Message(15, "Zoning to private GM instance (%s) (%u)", zone_short_name, instance_id);
+
+		c->AssignToInstance(instance_id);
+		c->MovePC(zone_id, instance_id, target_x, target_y, target_z, 0, 1);
+	}
 }
 
 void command_title(Client *c, const Seperator *sep)
