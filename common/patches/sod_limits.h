@@ -289,14 +289,6 @@ namespace SoD
 
 		const size_t SAY_LINK_BODY_SIZE = 50;
 
-		const int LongBuffs = 25;
-		const int ShortBuffs = 15;
-		const int DiscBuffs = 1;
-		const int TotalBuffs = LongBuffs + ShortBuffs + DiscBuffs;
-		const int NPCBuffs = 85;
-		const int PetBuffs = NPCBuffs;
-		const int MercBuffs = LongBuffs;
-
 	} /*constants*/
 
 	namespace behavior {
@@ -337,6 +329,14 @@ namespace SoD
 		const int SPELLBOOK_SIZE = 480;
 		const int SPELL_GEM_COUNT = static_cast<uint32>(CastingSlot::MaxGems);
 		
+		const int LONG_BUFFS = 25;
+		const int SHORT_BUFFS = 15;
+		const int DISC_BUFFS = 1;
+		const int TOTAL_BUFFS = LONG_BUFFS + SHORT_BUFFS + DISC_BUFFS;
+		const int NPC_BUFFS = 85;
+		const int PET_BUFFS = NPC_BUFFS;
+		const int MERC_BUFFS = LONG_BUFFS;
+
 	} /*spells*/
 
 }; /*SoD*/

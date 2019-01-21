@@ -42,41 +42,20 @@ namespace EQEmu
 			uint32 ExpansionsMask;
 			int16 CharacterCreationLimit;
 			size_t SayLinkBodySize;
-			int LongBuffs;
-			int ShortBuffs;
-			int DiscBuffs;
-			int TotalBuffs;
-			int NPCBuffs;
-			int PetBuffs;
-			int MercBuffs;
-
+			
 			LookupEntry(const LookupEntry *lookup_entry) { }
 			LookupEntry(
 				EQEmu::expansions::Expansion Expansion,
 				uint32 ExpansionBit,
 				uint32 ExpansionsMask,
 				int16 CharacterCreationLimit,
-				size_t SayLinkBodySize,
-				int LongBuffs,
-				int ShortBuffs,
-				int DiscBuffs,
-				int TotalBuffs,
-				int NPCBuffs,
-				int PetBuffs,
-				int MercBuffs
+				size_t SayLinkBodySize
 			) :
 				Expansion(Expansion),
 				ExpansionBit(ExpansionBit),
 				ExpansionsMask(ExpansionsMask),
 				CharacterCreationLimit(CharacterCreationLimit),
-				SayLinkBodySize(SayLinkBodySize),
-				LongBuffs(LongBuffs),
-				ShortBuffs(ShortBuffs),
-				DiscBuffs(DiscBuffs),
-				TotalBuffs(TotalBuffs),
-				NPCBuffs(NPCBuffs),
-				PetBuffs(PetBuffs),
-				MercBuffs(MercBuffs)
+				SayLinkBodySize(SayLinkBodySize)
 			{ }
 		};
 
@@ -210,16 +189,38 @@ namespace EQEmu
 			int SpellIdMax;
 			int SpellbookSize;
 			int SpellGemCount;
+
+			int LongBuffs;
+			int ShortBuffs;
+			int DiscBuffs;
+			int TotalBuffs;
+			int NPCBuffs;
+			int PetBuffs;
+			int MercBuffs;
 			
 			LookupEntry(const LookupEntry *lookup_entry) { }
 			LookupEntry(
 				int SpellIdMax,
 				int SpellbookSize,
-				int SpellGemCount
+				int SpellGemCount,
+				int LongBuffs,
+				int ShortBuffs,
+				int DiscBuffs,
+				int TotalBuffs,
+				int NPCBuffs,
+				int PetBuffs,
+				int MercBuffs
 			) :
 				SpellIdMax(SpellIdMax),
 				SpellbookSize(SpellbookSize),
-				SpellGemCount(SpellGemCount)
+				SpellGemCount(SpellGemCount),
+				LongBuffs(LongBuffs),
+				ShortBuffs(ShortBuffs),
+				DiscBuffs(DiscBuffs),
+				TotalBuffs(TotalBuffs),
+				NPCBuffs(NPCBuffs),
+				PetBuffs(PetBuffs),
+				MercBuffs(MercBuffs)
 			{ }
 		};
 		

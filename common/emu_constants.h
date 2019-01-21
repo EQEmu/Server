@@ -203,14 +203,6 @@ namespace EQEmu
 		const size_t SAY_LINK_CLOSER_SIZE = 1;
 		const size_t SAY_LINK_MAXIMUM_SIZE = (SAY_LINK_OPENER_SIZE + SAY_LINK_BODY_SIZE + SAY_LINK_TEXT_SIZE + SAY_LINK_CLOSER_SIZE);
 
-		const int LongBuffs = RoF2::constants::LongBuffs;
-		const int ShortBuffs = RoF2::constants::ShortBuffs;
-		const int DiscBuffs = RoF2::constants::DiscBuffs;
-		const int TotalBuffs = RoF2::constants::TotalBuffs;
-		const int NPCBuffs = RoF2::constants::NPCBuffs;
-		const int PetBuffs = RoF2::constants::PetBuffs;
-		const int MercBuffs = RoF2::constants::MercBuffs;
-
 	} /*constants*/
 
 	namespace profile {
@@ -253,6 +245,14 @@ namespace EQEmu
 		using RoF2::spells::SPELL_ID_MAX;
 		using SoD::spells::SPELLBOOK_SIZE;
 		using UF::spells::SPELL_GEM_COUNT; // RoF+ clients define more than UF client..but, they are not valid beyond UF
+
+		using RoF2::spells::LONG_BUFFS;
+		using RoF2::spells::SHORT_BUFFS;
+		using RoF2::spells::DISC_BUFFS;
+		using RoF2::spells::TOTAL_BUFFS;
+		using RoF2::spells::NPC_BUFFS;
+		using RoF2::spells::PET_BUFFS;
+		using RoF2::spells::MERC_BUFFS;
 
 	} // namespace spells
 

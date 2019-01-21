@@ -557,10 +557,10 @@ public:
 	virtual int GetCurrentBuffSlots() const;
 	virtual int GetCurrentSongSlots() const;
 	virtual int GetCurrentDiscSlots() const { return 1; }
-	virtual int GetMaxBuffSlots() const { return EQEmu::constants::LongBuffs; }
-	virtual int GetMaxSongSlots() const { return EQEmu::constants::ShortBuffs; }
-	virtual int GetMaxDiscSlots() const { return EQEmu::constants::DiscBuffs; }
-	virtual int GetMaxTotalSlots() const { return EQEmu::constants::TotalBuffs; }
+	virtual int GetMaxBuffSlots() const { return EQEmu::spells::LONG_BUFFS; }
+	virtual int GetMaxSongSlots() const { return EQEmu::spells::SHORT_BUFFS; }
+	virtual int GetMaxDiscSlots() const { return EQEmu::spells::DISC_BUFFS; }
+	virtual int GetMaxTotalSlots() const { return EQEmu::spells::TOTAL_BUFFS; }
 	virtual uint32 GetFirstBuffSlot(bool disc, bool song);
 	virtual uint32 GetLastBuffSlot(bool disc, bool song);
 	virtual void InitializeBuffSlots();

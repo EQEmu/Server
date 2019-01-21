@@ -271,14 +271,6 @@ namespace RoF2
 
 		const size_t SAY_LINK_BODY_SIZE = 56;
 
-		const int LongBuffs = 42;
-		const int ShortBuffs = 20;
-		const int DiscBuffs = 1;
-		const int TotalBuffs = LongBuffs + ShortBuffs + DiscBuffs;
-		const int NPCBuffs = 97;
-		const int PetBuffs = NPCBuffs;
-		const int MercBuffs = LongBuffs;
-
 	} /*constants*/
 
 	namespace behavior {
@@ -321,6 +313,14 @@ namespace RoF2
 		const int SPELLBOOK_SIZE = 720;
 		const int SPELL_GEM_COUNT = static_cast<uint32>(CastingSlot::MaxGems);
 		
+		const int LONG_BUFFS = 42;
+		const int SHORT_BUFFS = 20;
+		const int DISC_BUFFS = 1;
+		const int TOTAL_BUFFS = LONG_BUFFS + SHORT_BUFFS + DISC_BUFFS;
+		const int NPC_BUFFS = 97;
+		const int PET_BUFFS = NPC_BUFFS;
+		const int MERC_BUFFS = LONG_BUFFS;
+
 	} /*spells*/
 
 }; /*RoF2*/

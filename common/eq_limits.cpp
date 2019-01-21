@@ -47,25 +47,11 @@ static const EQEmu::constants::LookupEntry constants_static_lookup_entries[EQEmu
 		ClientUnknown::INULL,
 		ClientUnknown::INULL,
 		ClientUnknown::INULL,
-		ClientUnknown::INULL,
-		ClientUnknown::INULL,
-		ClientUnknown::INULL,
-		ClientUnknown::INULL,
-		ClientUnknown::INULL,
-		ClientUnknown::INULL,
-		ClientUnknown::INULL,
 		ClientUnknown::INULL
 	),
 	/*[ClientVersion::Client62] =*/
 	EQEmu::constants::LookupEntry(
 		EQEmu::expansions::Expansion::EverQuest,
-		Client62::INULL,
-		Client62::INULL,
-		Client62::INULL,
-		Client62::INULL,
-		Client62::INULL,
-		Client62::INULL,
-		Client62::INULL,
 		Client62::INULL,
 		Client62::INULL,
 		Client62::INULL,
@@ -77,14 +63,7 @@ static const EQEmu::constants::LookupEntry constants_static_lookup_entries[EQEmu
 		Titanium::constants::EXPANSION_BIT,
 		Titanium::constants::EXPANSIONS_MASK,
 		Titanium::constants::CHARACTER_CREATION_LIMIT,
-		Titanium::constants::SAY_LINK_BODY_SIZE,
-		Titanium::constants::LongBuffs,
-		Titanium::constants::ShortBuffs,
-		Titanium::constants::DiscBuffs,
-		Titanium::constants::TotalBuffs,
-		Titanium::constants::NPCBuffs,
-		Titanium::constants::PetBuffs,
-		Titanium::constants::MercBuffs
+		Titanium::constants::SAY_LINK_BODY_SIZE
 	),
 	/*[ClientVersion::SoF] =*/
 	EQEmu::constants::LookupEntry(
@@ -92,14 +71,7 @@ static const EQEmu::constants::LookupEntry constants_static_lookup_entries[EQEmu
 		SoF::constants::EXPANSION_BIT,
 		SoF::constants::EXPANSIONS_MASK,
 		SoF::constants::CHARACTER_CREATION_LIMIT,
-		SoF::constants::SAY_LINK_BODY_SIZE,
-		SoF::constants::LongBuffs,
-		SoF::constants::ShortBuffs,
-		SoF::constants::DiscBuffs,
-		SoF::constants::TotalBuffs,
-		SoF::constants::NPCBuffs,
-		SoF::constants::PetBuffs,
-		SoF::constants::MercBuffs
+		SoF::constants::SAY_LINK_BODY_SIZE
 	),
 	/*[ClientVersion::SoD] =*/
 	EQEmu::constants::LookupEntry(
@@ -107,14 +79,7 @@ static const EQEmu::constants::LookupEntry constants_static_lookup_entries[EQEmu
 		SoD::constants::EXPANSION_BIT,
 		SoD::constants::EXPANSIONS_MASK,
 		SoD::constants::CHARACTER_CREATION_LIMIT,
-		SoD::constants::SAY_LINK_BODY_SIZE,
-		SoD::constants::LongBuffs,
-		SoD::constants::ShortBuffs,
-		SoD::constants::DiscBuffs,
-		SoD::constants::TotalBuffs,
-		SoD::constants::NPCBuffs,
-		SoD::constants::PetBuffs,
-		SoD::constants::MercBuffs
+		SoD::constants::SAY_LINK_BODY_SIZE
 	),
 	/*[ClientVersion::UF] =*/
 	EQEmu::constants::LookupEntry(
@@ -122,14 +87,7 @@ static const EQEmu::constants::LookupEntry constants_static_lookup_entries[EQEmu
 		UF::constants::EXPANSION_BIT,
 		UF::constants::EXPANSIONS_MASK,
 		UF::constants::CHARACTER_CREATION_LIMIT,
-		UF::constants::SAY_LINK_BODY_SIZE,
-		UF::constants::LongBuffs,
-		UF::constants::ShortBuffs,
-		UF::constants::DiscBuffs,
-		UF::constants::TotalBuffs,
-		UF::constants::NPCBuffs,
-		UF::constants::PetBuffs,
-		UF::constants::MercBuffs
+		UF::constants::SAY_LINK_BODY_SIZE
 	),
 	/*[ClientVersion::RoF] =*/
 	EQEmu::constants::LookupEntry(
@@ -137,14 +95,7 @@ static const EQEmu::constants::LookupEntry constants_static_lookup_entries[EQEmu
 		RoF::constants::EXPANSION_BIT,
 		RoF::constants::EXPANSIONS_MASK,
 		RoF::constants::CHARACTER_CREATION_LIMIT,
-		RoF::constants::SAY_LINK_BODY_SIZE,
-		RoF::constants::LongBuffs,
-		RoF::constants::ShortBuffs,
-		RoF::constants::DiscBuffs,
-		RoF::constants::TotalBuffs,
-		RoF::constants::NPCBuffs,
-		RoF::constants::PetBuffs,
-		RoF::constants::MercBuffs
+		RoF::constants::SAY_LINK_BODY_SIZE
 	),
 	/*[ClientVersion::RoF2] =*/
 	EQEmu::constants::LookupEntry(
@@ -152,14 +103,7 @@ static const EQEmu::constants::LookupEntry constants_static_lookup_entries[EQEmu
 		RoF2::constants::EXPANSION_BIT,
 		RoF2::constants::EXPANSIONS_MASK,
 		RoF2::constants::CHARACTER_CREATION_LIMIT,
-		RoF2::constants::SAY_LINK_BODY_SIZE,
-		RoF2::constants::LongBuffs,
-		RoF2::constants::ShortBuffs,
-		RoF2::constants::DiscBuffs,
-		RoF2::constants::TotalBuffs,
-		RoF2::constants::NPCBuffs,
-		RoF2::constants::PetBuffs,
-		RoF2::constants::MercBuffs
+		RoF2::constants::SAY_LINK_BODY_SIZE
 	)
 };
 
@@ -1135,10 +1079,24 @@ static const EQEmu::spells::LookupEntry spells_static_lookup_entries[EQEmu::vers
 	EQEmu::spells::LookupEntry(
 		ClientUnknown::INULL,
 		ClientUnknown::INULL,
+		ClientUnknown::INULL,
+		ClientUnknown::INULL,
+		ClientUnknown::INULL,
+		ClientUnknown::INULL,
+		ClientUnknown::INULL,
+		ClientUnknown::INULL,
+		ClientUnknown::INULL,
 		ClientUnknown::INULL
 	),
 	/*[ClientVersion::Client62] =*/
 	EQEmu::spells::LookupEntry(
+		Client62::INULL,
+		Client62::INULL,
+		Client62::INULL,
+		Client62::INULL,
+		Client62::INULL,
+		Client62::INULL,
+		Client62::INULL,
 		Client62::INULL,
 		Client62::INULL,
 		Client62::INULL
@@ -1147,37 +1105,79 @@ static const EQEmu::spells::LookupEntry spells_static_lookup_entries[EQEmu::vers
 	EQEmu::spells::LookupEntry(
 		Titanium::spells::SPELL_ID_MAX,
 		Titanium::spells::SPELLBOOK_SIZE,
-		Titanium::spells::SPELL_GEM_COUNT
+		Titanium::spells::SPELL_GEM_COUNT,
+		Titanium::spells::LONG_BUFFS,
+		Titanium::spells::SHORT_BUFFS,
+		Titanium::spells::DISC_BUFFS,
+		Titanium::spells::TOTAL_BUFFS,
+		Titanium::spells::NPC_BUFFS,
+		Titanium::spells::PET_BUFFS,
+		Titanium::spells::MERC_BUFFS
 	),
 	/*[ClientVersion::SoF] =*/
 	EQEmu::spells::LookupEntry(
 		SoF::spells::SPELL_ID_MAX,
 		SoF::spells::SPELLBOOK_SIZE,
-		SoF::spells::SPELL_GEM_COUNT
+		SoF::spells::SPELL_GEM_COUNT,
+		SoF::spells::LONG_BUFFS,
+		SoF::spells::SHORT_BUFFS,
+		SoF::spells::DISC_BUFFS,
+		SoF::spells::TOTAL_BUFFS,
+		SoF::spells::NPC_BUFFS,
+		SoF::spells::PET_BUFFS,
+		SoF::spells::MERC_BUFFS
 	),
 	/*[ClientVersion::SoD] =*/
 	EQEmu::spells::LookupEntry(
 		SoD::spells::SPELL_ID_MAX,
 		SoD::spells::SPELLBOOK_SIZE,
-		SoD::spells::SPELL_GEM_COUNT
+		SoD::spells::SPELL_GEM_COUNT,
+		SoD::spells::LONG_BUFFS,
+		SoD::spells::SHORT_BUFFS,
+		SoD::spells::DISC_BUFFS,
+		SoD::spells::TOTAL_BUFFS,
+		SoD::spells::NPC_BUFFS,
+		SoD::spells::PET_BUFFS,
+		SoD::spells::MERC_BUFFS
 	),
 	/*[ClientVersion::UF] =*/
 	EQEmu::spells::LookupEntry(
 		UF::spells::SPELL_ID_MAX,
 		SoD::spells::SPELLBOOK_SIZE,
-		UF::spells::SPELL_GEM_COUNT
+		UF::spells::SPELL_GEM_COUNT,
+		UF::spells::LONG_BUFFS,
+		UF::spells::SHORT_BUFFS,
+		UF::spells::DISC_BUFFS,
+		UF::spells::TOTAL_BUFFS,
+		UF::spells::NPC_BUFFS,
+		UF::spells::PET_BUFFS,
+		UF::spells::MERC_BUFFS
 	),
 	/*[ClientVersion::RoF] =*/
 	EQEmu::spells::LookupEntry(
 		RoF::spells::SPELL_ID_MAX,
 		SoD::spells::SPELLBOOK_SIZE,
-		UF::spells::SPELL_GEM_COUNT // client translators are setup to allow the max value a client supports..however, the top 4 indices are not valid in this case
+		UF::spells::SPELL_GEM_COUNT, // client translators are setup to allow the max value a client supports..however, the top 4 indices are not valid in this case
+		RoF::spells::LONG_BUFFS,
+		RoF::spells::SHORT_BUFFS,
+		RoF::spells::DISC_BUFFS,
+		RoF::spells::TOTAL_BUFFS,
+		RoF::spells::NPC_BUFFS,
+		RoF::spells::PET_BUFFS,
+		RoF::spells::MERC_BUFFS
 	),
 	/*[ClientVersion::RoF2] =*/
 	EQEmu::spells::LookupEntry(
 		RoF2::spells::SPELL_ID_MAX,
 		SoD::spells::SPELLBOOK_SIZE,
-		UF::spells::SPELL_GEM_COUNT // client translators are setup to allow the max value a client supports..however, the top 4 indices are not valid in this case
+		UF::spells::SPELL_GEM_COUNT, // client translators are setup to allow the max value a client supports..however, the top 4 indices are not valid in this case
+		RoF2::spells::LONG_BUFFS,
+		RoF2::spells::SHORT_BUFFS,
+		RoF2::spells::DISC_BUFFS,
+		RoF2::spells::TOTAL_BUFFS,
+		RoF2::spells::NPC_BUFFS,
+		RoF2::spells::PET_BUFFS,
+		RoF2::spells::MERC_BUFFS
 	)
 };
 
