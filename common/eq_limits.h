@@ -61,8 +61,9 @@ namespace EQEmu
 
 		void InitializeDynamicLookups();
 
+		const LookupEntry* DynamicLookup(versions::ClientVersion client_version, bool gm_flag);
+		const LookupEntry* DynamicNonGMLookup(versions::ClientVersion client_version);
 		const LookupEntry* DynamicGMLookup(versions::ClientVersion client_version);
-		const LookupEntry* DynamicLookup(versions::ClientVersion client_version);
 		const LookupEntry* StaticLookup(versions::ClientVersion client_version);
 
 	} /*constants*/
@@ -158,8 +159,9 @@ namespace EQEmu
 
 		void InitializeDynamicLookups();
 
+		const LookupEntry* DynamicLookup(versions::MobVersion mob_version, bool gm_flag);
+		const LookupEntry* DynamicNonGMLookup(versions::MobVersion mob_version);
 		const LookupEntry* DynamicGMLookup(versions::MobVersion mob_version);
-		const LookupEntry* DynamicLookup(versions::MobVersion mob_version);
 		const LookupEntry* StaticLookup(versions::MobVersion mob_version);
 
 	} /*inventory*/
@@ -178,8 +180,9 @@ namespace EQEmu
 
 		void InitializeDynamicLookups();
 
+		const LookupEntry* DynamicLookup(versions::MobVersion mob_version, bool gm_flag);
+		const LookupEntry* DynamicNonGMLookup(versions::MobVersion mob_version);
 		const LookupEntry* DynamicGMLookup(versions::MobVersion mob_version);
-		const LookupEntry* DynamicLookup(versions::MobVersion mob_version);
 		const LookupEntry* StaticLookup(versions::MobVersion mob_version);
 
 	} /*behavior*/
@@ -226,8 +229,9 @@ namespace EQEmu
 		
 		void InitializeDynamicLookups();
 		
+		const LookupEntry* DynamicLookup(versions::ClientVersion client_version, bool gm_flag);
+		const LookupEntry* DynamicNonGMLookup(versions::ClientVersion client_version);
 		const LookupEntry* DynamicGMLookup(versions::ClientVersion client_version);
-		const LookupEntry* DynamicLookup(versions::ClientVersion client_version);
 		const LookupEntry* StaticLookup(versions::ClientVersion client_version);
 
 	} /*spells*/

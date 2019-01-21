@@ -127,10 +127,7 @@ void EQEmu::InventoryProfile::SetInventoryVersion(versions::MobVersion inventory
 void EQEmu::InventoryProfile::SetGMInventory(bool gmi_flag) {
 	m_gm_inventory = gmi_flag;
 
-	if (m_gm_inventory)
-		m_lookup = inventory::DynamicGMLookup(m_mob_version);
-	else
-		m_lookup = inventory::DynamicLookup(m_mob_version);
+	m_lookup = inventory::DynamicLookup(m_mob_version, gmi_flag);
 }
 
 void EQEmu::InventoryProfile::CleanDirty() {
