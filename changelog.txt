@@ -3,6 +3,8 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 
 == 1/20/2019 ==
 Uleat: Added 'spells' entry to EQDictionary
+Akkadius: Implement and extended #goto via #goto <player_name> - this will work cross zone, cross instance, in zone etc.
+    It works on top of the original #goto (target) and #goto x y z
 
 == 1/15/2019 ==
 Uleat: Activated per-expansion support for active inventory slot addressing

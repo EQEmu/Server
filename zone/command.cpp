@@ -5349,13 +5349,65 @@ void command_loc(Client *c, const Seperator *sep)
 
 void command_goto(Client *c, const Seperator *sep)
 {
-	// goto function
-	if (sep->arg[1][0] == '\0' && c->GetTarget())
-		c->MovePC(zone->GetZoneID(), zone->GetInstanceID(), c->GetTarget()->GetX(), c->GetTarget()->GetY(), c->GetTarget()->GetZ(), c->GetTarget()->GetHeading());
-	else if (!(sep->IsNumber(1) && sep->IsNumber(2) && sep->IsNumber(3)))
+	/**
+	 * Goto via target and no args
+	 */
+	if (sep->arg[1][0] == '\0' && c->GetTarget()) {
+		c->MovePC(
+			zone->GetZoneID(),
+			zone->GetInstanceID(),
+			c->GetTarget()->GetX(),
+			c->GetTarget()->GetY(),
+			c->GetTarget()->GetZ(),
+			c->GetTarget()->GetHeading());
+	}
+
+	/**
+	 * Goto via player name
+	 */
+	else if (!sep->IsNumber(1) && sep->arg[1]) {
+
+		/**
+		 * Find them in zone first
+		 */
+		const char  *player_name       = sep->arg[1];
+		std::string player_name_string = sep->arg[1];
+		Client      *client            = entity_list.GetClientByName(player_name);
+		if (client) {
+			c->MovePC(
+				zone->GetZoneID(),
+				zone->GetInstanceID(),
+				client->GetX(),
+				client->GetY(),
+				client->GetZ(),
+				client->GetHeading());
+
+			c->Message(15, "Goto player '%s' same zone", player_name_string.c_str());
+		}
+		else if (c->GotoPlayer(player_name_string)) {
+			c->Message(15, "Goto player '%s' different zone", player_name_string.c_str());
+		}
+		else {
+			c->Message(15, "Player '%s' not found", player_name_string.c_str());
+		}
+	}
+
+	/**
+	 * Goto via x y z
+	 */
+	else if (sep->IsNumber(1) && sep->IsNumber(2) && sep->IsNumber(3)) {
+		c->MovePC(
+			zone->GetZoneID(),
+			zone->GetInstanceID(),
+			atof(sep->arg[1]),
+			atof(sep->arg[2]),
+			atof(sep->arg[3]),
+			c->GetHeading());
+	}
+	else {
 		c->Message(0, "Usage: #goto [x y z]");
-	else
-		c->MovePC(zone->GetZoneID(), zone->GetInstanceID(), atof(sep->arg[1]), atof(sep->arg[2]), atof(sep->arg[3]), c->GetHeading());
+		c->Message(0, "Usage: #goto [player_name]");
+	}
 }
 
 void command_iteminfo(Client *c, const Seperator *sep)
