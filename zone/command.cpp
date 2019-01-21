@@ -5260,7 +5260,15 @@ void command_killallnpcs(Client *c, const Seperator *sep)
 			continue;
 		}
 
-		if (entity->IsInvisible() || !entity->IsAttackAllowed(c)) {
+		bool is_not_attackable =
+				 (
+					 entity->IsInvisible() ||
+					 !entity->IsAttackAllowed(c) ||
+					 entity->GetRace() == 127 ||
+					 entity->GetRace() == 240
+				 );
+
+		if (is_not_attackable) {
 			continue;
 		}
 
