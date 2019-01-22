@@ -920,7 +920,7 @@ sub show_menu_prompt {
             $errored_command = 1;
         }
         elsif ($input ne "") {
-            print "Invalid command '" . $input . "'\n";
+            # print "Invalid command '" . $input . "'\n";
             $errored_command = 1;
         }
         else {
