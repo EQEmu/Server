@@ -538,6 +538,7 @@ protected:
 	int default_accuracy_rating;
 	int default_avoidance_rating;
 	int default_atk;
+	char default_special_abilities[512];
 
 	// when charmed, switch to these
 	int charm_ac;
