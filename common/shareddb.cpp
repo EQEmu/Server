@@ -417,8 +417,8 @@ bool SharedDatabase::SetStartingItems(PlayerProfile_Struct* pp, EQEmu::Inventory
     std::string query = StringFormat("SELECT itemid, item_charges, slot FROM starting_items "
                                     "WHERE (race = %i or race = 0) AND (class = %i or class = 0) AND "
                                     "(deityid = %i or deityid = 0) AND (zoneid = %i or zoneid = 0) AND "
-                                    "gm <= %i ORDER BY id",
-                                    si_race, si_class, si_deity, si_current_zone, admin_level);
+                                    "gm <= %i AND %i & expansions = expansions ORDER BY id",
+                                    si_race, si_class, si_deity, si_current_zone, admin_level, RuleI(World, ExpansionSettings));
     auto results = QueryDatabase(query);
     if (!results.Success())
         return false;
@@ -1937,7 +1937,7 @@ void SharedDatabase::GetLootTableInfo(uint32 &loot_table_count, uint32 &max_loot
 	loot_table_count = 0;
 	max_loot_table = 0;
 	loot_table_entries = 0;
-	const std::string query = "SELECT COUNT(*), MAX(id), (SELECT COUNT(*) FROM loottable_entries) FROM loottable";
+	const std::string query = StringFormat("SELECT COUNT(*), MAX(id), (SELECT COUNT(*) FROM loottable_entries) FROM loottable WHERE %d & expansions = expansions", RuleI(World, ExpansionSettings));
     auto results = QueryDatabase(query);
     if (!results.Success()) {
         return;
@@ -1958,7 +1958,7 @@ void SharedDatabase::GetLootDropInfo(uint32 &loot_drop_count, uint32 &max_loot_d
 	max_loot_drop = 0;
 	loot_drop_entries = 0;
 
-	const std::string query = "SELECT COUNT(*), MAX(id), (SELECT COUNT(*) FROM lootdrop_entries) FROM lootdrop";
+	const std::string query = StringFormat("SELECT COUNT(*), MAX(id), (SELECT COUNT(*) FROM lootdrop_entries) FROM lootdrop WHERE %d & expansions = expansions", RuleI(World, ExpansionSettings));
     auto results = QueryDatabase(query);
     if (!results.Success()) {
         return;
@@ -1980,10 +1980,10 @@ void SharedDatabase::LoadLootTables(void *data, uint32 size) {
 	uint8 loot_table[sizeof(LootTable_Struct) + (sizeof(LootTableEntries_Struct) * 128)];
 	LootTable_Struct *lt = reinterpret_cast<LootTable_Struct*>(loot_table);
 
-	const std::string query = "SELECT loottable.id, loottable.mincash, loottable.maxcash, loottable.avgcoin, "
+	const std::string query = StringFormat("SELECT loottable.id, loottable.mincash, loottable.maxcash, loottable.avgcoin, "
                             "loottable_entries.lootdrop_id, loottable_entries.multiplier, loottable_entries.droplimit, "
                             "loottable_entries.mindrop, loottable_entries.probability FROM loottable LEFT JOIN loottable_entries "
-                            "ON loottable.id = loottable_entries.loottable_id ORDER BY id";
+                            "ON loottable.id = loottable_entries.loottable_id WHERE %d & loottable.expansions = loottable.expansions ORDER BY id", RuleI(World, ExpansionSettings));
     auto results = QueryDatabase(query);
     if (!results.Success()) {
         return;
@@ -2033,10 +2033,10 @@ void SharedDatabase::LoadLootDrops(void *data, uint32 size) {
 	uint8 loot_drop[sizeof(LootDrop_Struct) + (sizeof(LootDropEntries_Struct) * 1260)];
 	LootDrop_Struct *ld = reinterpret_cast<LootDrop_Struct*>(loot_drop);
 
-	const std::string query = "SELECT lootdrop.id, lootdrop_entries.item_id, lootdrop_entries.item_charges, "
+	const std::string query = StringFormat("SELECT lootdrop.id, lootdrop_entries.item_id, lootdrop_entries.item_charges, "
                             "lootdrop_entries.equip_item, lootdrop_entries.chance, lootdrop_entries.minlevel, "
                             "lootdrop_entries.maxlevel, lootdrop_entries.multiplier FROM lootdrop JOIN lootdrop_entries "
-                            "ON lootdrop.id = lootdrop_entries.lootdrop_id ORDER BY lootdrop_id";
+                            "ON lootdrop.id = lootdrop_entries.lootdrop_id WHERE %d & expansions = expansions ORDER BY lootdrop_id", RuleI(World, ExpansionSettings));
     auto results = QueryDatabase(query);
     if (!results.Success()) {
 		return;

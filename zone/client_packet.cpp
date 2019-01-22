@@ -11763,13 +11763,13 @@ void Client::Handle_OP_RecipesFavorite(const EQApplicationPacket *app)
 		"LEFT JOIN (SELECT recipe_id, madecount "
 		"FROM char_recipe_list "
 		"WHERE char_id = %u) AS crl ON tr.id=crl.recipe_id "
-		"WHERE tr.enabled <> 0 AND tr.id IN (%s) "
+		"WHERE tr.enabled <> 0 AND %i & tr.expansions = tr.expansions AND tr.id IN (%s) "
 		"AND tr.must_learn & 0x20 <> 0x20 AND "
 		"((tr.must_learn & 0x3 <> 0 AND crl.madecount IS NOT NULL) "
 		"OR (tr.must_learn & 0x3 = 0)) "
 		"GROUP BY tr.id "
 		"HAVING sum(if(tre.item_id %s AND tre.iscontainer > 0,1,0)) > 0 AND SUM(tre.componentcount) <= %u "
-		"LIMIT 100 ", CharacterID(), favoriteIDs.c_str(), containers.c_str(), combineObjectSlots);
+		"LIMIT 100 ", CharacterID(), RuleI(World, ExpansionSettings), favoriteIDs.c_str(), containers.c_str(), combineObjectSlots);
 
 	TradeskillSearchResults(query, tsf->object_type, tsf->some_id);
 	return;
@@ -11828,15 +11828,15 @@ void Client::Handle_OP_RecipesSearch(const EQApplicationPacket *app)
 		"LEFT JOIN tradeskill_recipe_entries AS tre ON tr.id = tre.recipe_id "
 		"LEFT JOIN (SELECT recipe_id, madecount "
 		"FROM char_recipe_list WHERE char_id = %u) AS crl ON tr.id=crl.recipe_id "
-		"WHERE %s tr.trivial >= %u AND tr.trivial <= %u AND tr.enabled <> 0 "
-		"AND tr.must_learn & 0x20 <> 0x20 "
+		"WHERE %s tr.trivial >= %u AND tr.trivial <= %u AND tr.enabled <> 0"
+		"AND %i & tr.expansions = tr.expansions AND tr.must_learn & 0x20 <> 0x20 "
 		"AND ((tr.must_learn & 0x3 <> 0 "
 		"AND crl.madecount IS NOT NULL) "
 		"OR (tr.must_learn & 0x3 = 0)) "
 		"GROUP BY tr.id "
 		"HAVING sum(if(tre.item_id %s AND tre.iscontainer > 0,1,0)) > 0 AND SUM(tre.componentcount) <= %u "
 		"LIMIT 200 ",
-		CharacterID(), searchClause.c_str(),
+		CharacterID(), RuleI(World, ExpansionSettings), searchClause.c_str(),
 		rss->mintrivial, rss->maxtrivial, containers, combineObjectSlots);
 	TradeskillSearchResults(query, rss->object_type, rss->some_id);
 	return;
@@ -12306,8 +12306,8 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 	uint32 startCity = (uint32)strtol((const char*)app->pBuffer, nullptr, 10);
 
 	std::string query = StringFormat("SELECT zone_id, bind_id, x, y, z FROM start_zones "
-		"WHERE player_class=%i AND player_deity=%i AND player_race=%i",
-		m_pp.class_, m_pp.deity, m_pp.race);
+		"WHERE player_class=%i AND player_deity=%i AND player_race=%i AND %i & expansions = expansions",
+		m_pp.class_, m_pp.deity, m_pp.race, RuleI(World, ExpansionSettings));
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
 		Log(Logs::General, Logs::Error, "No valid start zones found for /setstartcity");
@@ -12337,8 +12337,8 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 	}
 
 	query = StringFormat("SELECT zone_id, bind_id FROM start_zones "
-		"WHERE player_class=%i AND player_deity=%i AND player_race=%i",
-		m_pp.class_, m_pp.deity, m_pp.race);
+		"WHERE player_class=%i AND player_deity=%i AND player_race=%i AND %i & expansions = expansions",
+		m_pp.class_, m_pp.deity, m_pp.race, RuleI(World, ExpansionSettings));
 	results = database.QueryDatabase(query);
 	if (!results.Success())
 		return;

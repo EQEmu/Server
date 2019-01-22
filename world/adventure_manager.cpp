@@ -637,13 +637,17 @@ bool AdventureManager::LoadAdventureTemplates()
 		"assa_y, assa_z, assa_h, text, duration, zone_in_time, win_points, lose_points, "
 		"theme, zone_in_zone_id, zone_in_x, zone_in_y, zone_in_object_id, dest_x, dest_y, "
 		"dest_z, dest_h, graveyard_zone_id, graveyard_x, graveyard_y, graveyard_z, "
-		"graveyard_radius FROM adventure_template";
+		"graveyard_radius, expansions FROM adventure_template";
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
 		return false;
     }
 
     for (auto row = results.begin(); row != results.end(); ++row) {
+		int32 expansions = atoi(row[32]);
+		if (RuleI(World, ExpansionSettings) & expansions != expansions) {
+			continue;
+		}
 	    auto aTemplate = new AdventureTemplate;
 		aTemplate->id = atoi(row[0]);
 		strcpy(aTemplate->zone, row[1]);
@@ -678,7 +682,7 @@ bool AdventureManager::LoadAdventureTemplates()
 		aTemplate->graveyard_z = atof(row[30]);
 		aTemplate->graveyard_radius = atof(row[31]);
 		adventure_templates[aTemplate->id] = aTemplate;
-    }
+    }	
 
     return true;
 }

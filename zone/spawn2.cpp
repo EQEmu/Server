@@ -642,7 +642,7 @@ Spawn2* ZoneDatabase::LoadSpawn2(LinkedList<Spawn2*> &spawn2_list, uint32 spawn2
 	std::string query = StringFormat("SELECT id, spawngroupID, x, y, z, heading, "
                                     "respawntime, variance, pathgrid, _condition, "
                                     "cond_value, enabled, animation FROM spawn2 "
-                                    "WHERE id = %i", spawn2id);
+                                    "WHERE id = %i AND %d & expansions = expansions", spawn2id, RuleI(World, ExpansionSettings));
     auto results = QueryDatabase(query);
     if (!results.Success()) {
         return nullptr;

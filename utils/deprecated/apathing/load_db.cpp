@@ -148,7 +148,7 @@ bool load_doors_from_db(MYSQL *m, const char *zone, list<PathNode*> &db_spawns) 
 	
 	sprintf(query, 
 		"SELECT pos_x,pos_y,pos_z FROM doors "
-		"WHERE  zone='%s'", zone);
+		"WHERE  zone='%s' AND %d & expansions = expansions", zone, RuleI(World, ExpansionSettings));
 	if(mysql_query(m, query) != 0) {
 		printf("Unable to query: %s\n", mysql_error(m));
 		return(false);

@@ -1283,9 +1283,9 @@ bool ZoneDatabase::GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id
                                     "LEFT JOIN (SELECT recipe_id, madecount "
                                     "FROM char_recipe_list WHERE char_id = %u) AS crl "
                                     "ON tr.id = crl.recipe_id "
-                                    "WHERE tr.id = %lu AND tre.item_id %s AND tr.enabled "
+                                    "WHERE tr.id = %lu AND tre.item_id %s AND tr.enabled AND %i & tr.expansions = tr.expansions "
                                     "GROUP BY tr.id",
-                                    char_id, (unsigned long)recipe_id, containers.c_str());
+                                    char_id, (unsigned long)recipe_id, containers.c_str(), RuleI(World, ExpansionSettings));
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		Log(Logs::General, Logs::Error, "Error in GetTradeRecipe, query: %s", query.c_str());

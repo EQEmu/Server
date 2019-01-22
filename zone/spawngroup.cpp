@@ -146,7 +146,7 @@ bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnG
 					 "spawngroup.max_y, spawngroup.min_y, spawngroup.delay, "
 					 "spawngroup.despawn, spawngroup.despawn_timer, spawngroup.mindelay "
 					 "FROM spawn2, spawngroup WHERE spawn2.spawngroupID = spawngroup.ID "
-					 "AND spawn2.version = %u and zone = '%s'",
+					 "AND spawn2.version = %u and zone = '%s' AND %d & spawn2.expansions = spawn2.expansions",
 					 version, zone_name);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {

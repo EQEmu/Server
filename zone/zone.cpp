@@ -171,8 +171,8 @@ bool Zone::LoadZoneObjects()
 	std::string query =
 	    StringFormat("SELECT id, zoneid, xpos, ypos, zpos, heading, itemid, charges, objectname, type, icon, "
 			 "unknown08, unknown10, unknown20, unknown24, unknown76, size, tilt_x, tilt_y, display_name "
-			 "FROM object WHERE zoneid = %i AND (version = %u OR version = -1)",
-			 zoneid, instanceversion);
+			 "FROM object WHERE zoneid = %i AND (version = %u OR version = -1) AND %d & expansions = expansions",
+			 zoneid, instanceversion, RuleI(World, ExpansionSettings));
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
 		Log(Logs::General, Logs::Error, "Error Loading Objects from DB: %s",
@@ -465,7 +465,7 @@ void Zone::LoadNewMerchantData(uint32 merchantid) {
 
 	std::list<MerchantList> merlist;
 	std::string query = StringFormat("SELECT item, slot, faction_required, level_required, alt_currency_cost, "
-                                     "classes_required, probability FROM merchantlist WHERE merchantid=%d ORDER BY slot", merchantid);
+                                     "classes_required, probability FROM merchantlist WHERE merchantid=%d AND %d & expansions = expansions ORDER BY slot", merchantid, RuleI(World, ExpansionSettings));
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
         return;
@@ -1706,9 +1706,9 @@ bool ZoneDatabase::LoadStaticZonePoints(LinkedList<ZonePoint*>* zone_point_list,
 	std::string query = StringFormat("SELECT x, y, z, target_x, target_y, "
 					 "target_z, target_zone_id, heading, target_heading, "
 					 "number, target_instance, client_version_mask "
-					 "FROM zone_points WHERE zone='%s' AND (version=%i OR version=-1) "
+					 "FROM zone_points WHERE zone='%s' AND (version=%i OR version=-1) AND %d & expansions = expansions "
 					 "ORDER BY number",
-					 zonename, version);
+					 zonename, version, RuleI(World, ExpansionSettings));
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		return false;
@@ -2344,7 +2344,7 @@ uint32 Zone::GetSpawnKillCount(uint32 in_spawnid) {
 
 void Zone::UpdateHotzone()
 {
-    std::string query = StringFormat("SELECT hotzone FROM zone WHERE short_name = '%s'", GetShortName());
+    std::string query = StringFormat("SELECT hotzone FROM zone WHERE short_name = '%s' AND %d & expansions = expansions", GetShortName(), RuleI(World, ExpansionSettings));
     auto results = database.QueryDatabase(query);
     if (!results.Success())
         return;

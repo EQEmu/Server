@@ -464,7 +464,7 @@ void NPC::CheckGlobalLootTables()
 void ZoneDatabase::LoadGlobalLoot()
 {
 	auto query = StringFormat("SELECT id, loottable_id, description, min_level, max_level, rare, raid, race, "
-				  "class, bodytype, zone FROM global_loot WHERE enabled = 1");
+				  "class, bodytype, zone FROM global_loot WHERE enabled = 1 AND %d & expansions = expansions", RuleI(World, ExpansionSettings));
 
 	auto results = QueryDatabase(query);
 	if (!results.Success() || results.RowCount() == 0)

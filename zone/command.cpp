@@ -3712,13 +3712,13 @@ void command_findzone(Client *c, const Seperator *sep)
 	    database.DoEscapeString(escName, sep->arg[1], strlen(sep->arg[1]));
 
 	    query = StringFormat("SELECT zoneidnumber, short_name, long_name FROM zone "
-				 "WHERE long_name RLIKE '%s' AND version = 0",
-				 escName);
+				 "WHERE long_name RLIKE '%s' AND version = 0 AND %i & expansions = expansions",
+				 escName, RuleI(World, ExpansionSettings));
 	    safe_delete_array(escName);
     }
     else // Otherwise, look for just that zoneidnumber.
 		query = StringFormat("SELECT zoneidnumber, short_name, long_name FROM zone "
-                            "WHERE zoneidnumber = %i AND version = 0",  id);
+                            "WHERE zoneidnumber = %i AND version = 0 AND %i & expansions = expansions",  id, RuleI(World, ExpansionSettings));
 
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
@@ -9512,17 +9512,18 @@ void command_object(Client *c, const Seperator *sep)
 			    "AND (xpos BETWEEN %.1f AND %.1f) "
 			    "AND (ypos BETWEEN %.1f AND %.1f) "
 			    "AND (zpos BETWEEN %.1f AND %.1f) "
+				"AND %d & expansions = expansions"
 			    "ORDER BY id",
 			    zone->GetZoneID(), zone->GetInstanceVersion(),
 			    c->GetX() - radius, // Yes, we're actually using a bounding box instead of a radius.
 			    c->GetX() + radius, // Much less processing power used this way.
-			    c->GetY() - radius, c->GetY() + radius, c->GetZ() - radius, c->GetZ() + radius);
+			    c->GetY() - radius, c->GetY() + radius, c->GetZ() - radius, c->GetZ() + radius, RuleI(World, ExpansionSettings));
 		else
 			query = StringFormat("SELECT id, xpos, ypos, zpos, heading, itemid, "
 					     "objectname, type, icon, unknown08, unknown10, unknown20 "
-					     "FROM object WHERE zoneid = %u AND version = %u "
+					     "FROM object WHERE zoneid = %u AND version = %u AND %d & expansions = expansions"
 					     "ORDER BY id",
-					     zone->GetZoneID(), zone->GetInstanceVersion());
+					     zone->GetZoneID(), zone->GetInstanceVersion(), RuleI(World, ExpansionSettings));
 
 		auto results = database.QueryDatabase(query);
 		if (!results.Success()) {
@@ -10376,9 +10377,9 @@ void command_object(Client *c, const Seperator *sep)
 			std::string query =
 			    StringFormat("INSERT INTO object "
 					 "(zoneid, version, xpos, ypos, zpos, heading, itemid, "
-					 "objectname, type, icon, unknown08, unknown10, unknown20) "
+					 "objectname, type, icon, unknown08, unknown10, unknown20, expansions) "
 					 "SELECT zoneid, %u, xpos, ypos, zpos, heading, itemid, "
-					 "objectname, type, icon, unknown08, unknown10, unknown20 "
+					 "objectname, type, icon, unknown08, unknown10, unknown20, expansions "
 					 "FROM object WHERE zoneid = %u) AND version = %u",
 					 od.zone_instance, zone->GetZoneID(), zone->GetInstanceVersion());
 			auto results = database.QueryDatabase(query);
@@ -10396,9 +10397,9 @@ void command_object(Client *c, const Seperator *sep)
 
 		std::string query = StringFormat("INSERT INTO object "
 						 "(zoneid, version, xpos, ypos, zpos, heading, itemid, "
-						 "objectname, type, icon, unknown08, unknown10, unknown20) "
+						 "objectname, type, icon, unknown08, unknown10, unknown20, expansions) "
 						 "SELECT zoneid, %u, xpos, ypos, zpos, heading, itemid, "
-						 "objectname, type, icon, unknown08, unknown10, unknown20 "
+						 "objectname, type, icon, unknown08, unknown10, unknown20, expansions "
 						 "FROM object WHERE id = %u AND zoneid = %u AND version = %u",
 						 od.zone_instance, id, zone->GetZoneID(), zone->GetInstanceVersion());
 		auto results = database.QueryDatabase(query);

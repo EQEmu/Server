@@ -169,8 +169,9 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	float safe_x, safe_y, safe_z;
 	int16 minstatus = 0;
 	uint8 minlevel = 0;
+	uint32 expansions = 0;
 	char flag_needed[128];
-	if(!database.GetSafePoints(target_zone_name, database.GetInstanceVersion(target_instance_id), &safe_x, &safe_y, &safe_z, &minstatus, &minlevel, flag_needed)) {
+	if(!database.GetSafePoints(target_zone_name, database.GetInstanceVersion(target_instance_id), &safe_x, &safe_y, &safe_z, &minstatus, &minlevel, &expansions, flag_needed)) {
 		//invalid zone...
 		Message(13, "Invalid target zone while getting safe points.");
 		Log(Logs::General, Logs::Error, "Zoning %s: Unable to get safe coordinates for zone '%s'.", GetName(), target_zone_name);
@@ -838,8 +839,9 @@ void Client::SendZoneFlagInfo(Client *to) const {
 		float safe_x, safe_y, safe_z;
 		int16 minstatus = 0;
 		uint8 minlevel = 0;
+		uint32 expansions = 0;
 		char flag_name[128];
-		if(!database.GetSafePoints(short_name, 0, &safe_x, &safe_y, &safe_z, &minstatus, &minlevel, flag_name)) {
+		if(!database.GetSafePoints(short_name, 0, &safe_x, &safe_y, &safe_z, &minstatus, &minlevel, &expansions, flag_name)) {
 			strcpy(flag_name, "(ERROR GETTING NAME)");
 		}
 
@@ -860,8 +862,9 @@ bool Client::CanBeInZone() {
 	float safe_x, safe_y, safe_z;
 	int16 minstatus = 0;
 	uint8 minlevel = 0;
+	uint32 expansions = 0;
 	char flag_needed[128];
-	if(!database.GetSafePoints(zone->GetShortName(), zone->GetInstanceVersion(), &safe_x, &safe_y, &safe_z, &minstatus, &minlevel, flag_needed)) {
+ 	if(!database.GetSafePoints(zone->GetShortName(), zone->GetInstanceVersion(), &safe_x, &safe_y, &safe_z, &minstatus, &minlevel, &expansions, flag_needed)) {
 		//this should not happen...
 		Log(Logs::Detail, Logs::None, "[CLIENT] Unable to query zone info for ourself '%s'", zone->GetShortName());
 		return(false);
@@ -873,6 +876,10 @@ bool Client::CanBeInZone() {
 	}
 	if(Admin() < minstatus) {
 		Log(Logs::Detail, Logs::None, "[CLIENT] Character does not meet min status requirement (%d < %d)!", Admin(), minstatus);
+		return(false);
+	}
+	if(Admin() < 150 && RuleI(World, ExpansionSettings) & expansions != expansions) {
+		Log(Logs::Detail, Logs::None, "[CLIENT] Character does not have expansion", Admin(), expansions);
 		return(false);
 	}
 

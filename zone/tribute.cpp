@@ -387,7 +387,7 @@ bool ZoneDatabase::LoadTributes() {
 
 	tribute_list.clear();
 
-	const std::string query = "SELECT id, name, descr, unknown, isguild FROM tributes";
+	const std::string query = StringFormat("SELECT id, name, descr, unknown, isguild FROM tributes WHERE %i & expansions = expansions", RuleI(World, ExpansionSettings));
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		return false;

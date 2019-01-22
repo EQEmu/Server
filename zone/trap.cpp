@@ -401,7 +401,7 @@ bool ZoneDatabase::LoadTraps(const char* zonename, int16 version) {
 
 	std::string query = StringFormat("SELECT id, x, y, z, effect, effectvalue, effectvalue2, skill, "
 		"maxzdiff, radius, chance, message, respawn_time, respawn_var, level, "
-		"`group`, triggered_number, despawn_when_triggered, undetectable  FROM traps WHERE zone='%s' AND version=%u", zonename, version);
+		"`group`, triggered_number, despawn_when_triggered, undetectable  FROM traps WHERE zone='%s' AND version=%u AND %i & expansions = expansions", zonename, version, RuleI(World, ExpansionSettings));
 
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
@@ -485,14 +485,14 @@ bool ZoneDatabase::SetTrapData(Trap* trap, bool repopnow) {
 	{
 		query = StringFormat("SELECT id, x, y, z, effect, effectvalue, effectvalue2, skill, "
 			"maxzdiff, radius, chance, message, respawn_time, respawn_var, level, "
-			"triggered_number, despawn_when_triggered, undetectable FROM traps WHERE zone='%s' AND `group`=%d AND id != %d ORDER BY RAND() LIMIT 1", zone->GetShortName(), trap->group, dbid);
+			"triggered_number, despawn_when_triggered, undetectable FROM traps WHERE zone='%s' AND `group`=%d AND id != %d AND %i & expansions = expansions ORDER BY RAND() LIMIT 1", zone->GetShortName(), trap->group, dbid, RuleI(World, ExpansionSettings));
 	}
 	else
 	{
 		// We could just use the existing data here, but querying the DB is not expensive, and allows content developers to change traps without rebooting.
 		query = StringFormat("SELECT id, x, y, z, effect, effectvalue, effectvalue2, skill, "
 			"maxzdiff, radius, chance, message, respawn_time, respawn_var, level, "
-			"triggered_number, despawn_when_triggered, undetectable FROM traps WHERE zone='%s' AND id = %d", zone->GetShortName(), dbid);
+			"triggered_number, despawn_when_triggered, undetectable FROM traps WHERE zone='%s' AND id = %d AND %i & expansions = expansions", zone->GetShortName(), dbid, RuleI(World, ExpansionSettings));
 	}
 
 	auto results = QueryDatabase(query);
