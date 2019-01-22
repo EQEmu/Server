@@ -877,6 +877,7 @@ sub show_menu_prompt {
         }
         elsif ($input eq "check_db_updates") {
             main_db_management();
+            main_db_management();
             $dc = 1;
         }
         elsif ($input eq "check_bot_db_updates") {
