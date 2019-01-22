@@ -814,6 +814,16 @@ std::string lua_say_link(const char *phrase) {
 	return quest_manager.saylink(text, false, text);
 }
 
+void lua_set_rule(std::string rule_name, std::string rule_value) {
+	RuleManager::Instance()->SetRule(rule_name.c_str(), rule_value.c_str());
+}
+
+std::string lua_get_rule(std::string rule_name) {
+	std::string rule_value;
+	RuleManager::Instance()->GetRule(rule_name.c_str(), rule_value);
+	return rule_value;
+}
+
 std::string lua_get_data(std::string bucket_key) {
 	return DataBucket::GetData(bucket_key);
 }
@@ -1687,6 +1697,8 @@ luabind::scope lua_register_general() {
 		luabind::def("say_link", (std::string(*)(const char*,bool,const char*))&lua_say_link),
 		luabind::def("say_link", (std::string(*)(const char*,bool))&lua_say_link),
 		luabind::def("say_link", (std::string(*)(const char*))&lua_say_link),
+		luabind::def("set_rule", (void(*)(std::string, std::string))&lua_set_rule),
+		luabind::def("get_rule", (std::string(*)(std::string))&lua_get_rule),
 		luabind::def("get_data", (std::string(*)(std::string))&lua_get_data),
 		luabind::def("get_data_expires", (std::string(*)(std::string))&lua_get_data_expires),
 		luabind::def("set_data", (void(*)(std::string, std::string))&lua_set_data),
