@@ -2246,7 +2246,7 @@ sub run_database_check {
     }
 
     #::: Iterate through Manifest backwards from binary version down to local version...
-    for ($i = $revision_check; $i <= $binary_database_version; $i++) {
+    for ($i = $revision_check; $i < $binary_database_version; $i++) {
         if (!defined($m_d{$i}[0])) {
             next;
         }
