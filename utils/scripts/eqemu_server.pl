@@ -19,13 +19,13 @@ use Time::HiRes qw(usleep);
 
 #::: Variables
 $install_repository_request_url = "https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/";
-$eqemu_repository_request_url = "https://raw.githubusercontent.com/EQEmu/Server/master/";
+$eqemu_repository_request_url   = "https://raw.githubusercontent.com/EQEmu/Server/master/";
 
 #::: Globals
-$time_stamp = strftime('%m-%d-%Y', gmtime());
+$time_stamp   = strftime('%m-%d-%Y', gmtime());
 $db_run_stage = 0; #::: Sets database run stage check
 if ($Config{osname} =~ /freebsd|linux/i) {
-    $OS = "Linux";
+    $OS        = "Linux";
     $os_flavor = "";
     if (-e "/etc/debian_version") {
         $os_flavor = "debian";
@@ -134,7 +134,7 @@ sub analytics_insertion {
             $extended_os = trim($extended_os);
         }
         if ($OS eq "Windows") {
-            my $output = `ver`;
+            my $output     = `ver`;
             my @os_version = split("\n", $output);
             foreach my $val (@os_version) {
                 if ($val =~ /Windows/i) {
@@ -179,7 +179,7 @@ sub show_install_summary_info {
     open(INSTALL_VARS, $file_to_open);
     while (<INSTALL_VARS>) {
         chomp;
-        $o = $_;
+        $o    = $_;
         @data = split(":", $o);
         print " - " . $data[0] . "\t" . $data[1] . "\n";
     }
@@ -227,8 +227,8 @@ sub new_server {
 
     while (1) {
 
-        $database_name = $installation_variables{"mysql_eqemu_db_name"};
-        $database_user = $installation_variables{"mysql_eqemu_user"};
+        $database_name     = $installation_variables{"mysql_eqemu_db_name"};
+        $database_user     = $installation_variables{"mysql_eqemu_user"};
         $database_password = $installation_variables{"mysql_eqemu_password"};
 
         if ($database_name ne "") {
@@ -248,13 +248,13 @@ sub new_server {
             $database_password = trim($input);
 
             $check_connection = `mysql -u $database_user -p$database_password -N -B -e "SHOW PROCESSLIST" > mysqlcheck.txt`;
-            $mysql_pass = 0;
+            $mysql_pass       = 0;
             open(MYSQL_CHECK, "mysqlcheck.txt");
             while (<MYSQL_CHECK>) {
                 chomp;
-                $o = $_;
-                if ($o =~ /Error/i) {$mysql_pass = 0;}
-                if ($o =~ /SHOW PROCESSLIST/i) {$mysql_pass = 1;}
+                $o                                           = $_;
+                if ($o =~ /Error/i) { $mysql_pass            = 0; }
+                if ($o =~ /SHOW PROCESSLIST/i) { $mysql_pass = 1; }
             }
             close(MYSQL_CHECK);
             unlink("mysqlcheck.txt");
@@ -368,23 +368,23 @@ sub build_linux_source {
 
     $build_options = $_[0];
 
-    $cmake_options = "";
+    $cmake_options          = "";
     $source_folder_post_fix = "";
 
     if ($build_options =~ /bots/i) {
-        $cmake_options .= " -DEQEMU_ENABLE_BOTS=ON";
+        $cmake_options          .= " -DEQEMU_ENABLE_BOTS=ON";
         $source_folder_post_fix = "_bots";
     }
 
     $current_directory = `pwd`;
-    @directories = split('/', $current_directory);
+    @directories       = split('/', $current_directory);
     foreach my $val (@directories) {
         if (trim($val) ne "") {
             $last_directory = trim($val);
         }
     }
     my $eqemu_server_directory = "/home/eqemu";
-    my $source_dir = $eqemu_server_directory . '/' . $last_directory . '_source' . $source_folder_post_fix;
+    my $source_dir             = $eqemu_server_directory . '/' . $last_directory . '_source' . $source_folder_post_fix;
 
     $current_directory = trim($current_directory);
 
@@ -467,9 +467,9 @@ sub do_installer_routines {
     print `"$path" --host $host --user $user --password="$pass" -N -B -e "CREATE DATABASE $db_name"`;
 
     #::: Get Binary DB version
-    if ($OS eq "Windows") {@db_version = split(': ', `world db_version`);}
-    if ($OS eq "Linux") {@db_version = split(': ', `./world db_version`);}
-    $binary_database_version = trim($db_version[1]);
+    if ($OS eq "Windows") { @db_version = split(': ', `world db_version`); }
+    if ($OS eq "Linux") { @db_version   = split(': ', `./world db_version`); }
+    $binary_database_version            = trim($db_version[1]);
 
     #::: Local DB Version
     check_db_version_table();
@@ -508,7 +508,7 @@ sub check_for_world_bootup_database_update {
     }
 
     $binary_database_version = trim($db_version[1]);
-    $local_database_version = trim(get_mysql_result("SELECT version FROM db_version LIMIT 1"));
+    $local_database_version  = trim(get_mysql_result("SELECT version FROM db_version LIMIT 1"));
 
     #::: Bots
     $bots_binary_version = trim($db_version[2]);
@@ -556,7 +556,7 @@ sub check_for_world_bootup_database_update {
 
         #::: Make sure that we didn't pass any arugments to the script
         else {
-            if (!$db) {print "[eqemu_server.pl] No database connection found... Running without\n";}
+            if (!$db) { print "[eqemu_server.pl] No database connection found... Running without\n"; }
             show_menu_prompt();
         }
     }
@@ -616,7 +616,7 @@ sub do_self_update_check_routine {
     if (-e "updates_staged/eqemu_server.pl") {
 
         my $remote_script_size = -s "updates_staged/eqemu_server.pl";
-        my $local_script_size = -s "eqemu_server.pl";
+        my $local_script_size  = -s "eqemu_server.pl";
 
         if ($remote_script_size != $local_script_size) {
             print "[Update] Script has been updated, updating...\n";
@@ -624,7 +624,7 @@ sub do_self_update_check_routine {
             my @files;
             my $start_dir = "updates_staged/";
             find(
-                sub {push @files, $File::Find::name unless -d;},
+                sub { push @files, $File::Find::name unless -d; },
                 $start_dir
             );
             for my $file (@files) {
@@ -666,8 +666,8 @@ sub get_installation_variables {
     }
     while (<INSTALL_VARS>) {
         chomp;
-        $o = $_;
-        @data = split(":", $o);
+        $o                                      = $_;
+        @data                                   = split(":", $o);
         $installation_variables{trim($data[0])} = trim($data[1]);
     }
     close(INSTALL_VARS);
@@ -691,9 +691,9 @@ sub do_install_config_json {
 
     $config = $json->decode($content);
 
-    $long_name = "Akkas " . $OS . " PEQ Installer (" . generate_random_password(5) . ')';
+    $long_name                               = "Akkas " . $OS . " PEQ Installer (" . generate_random_password(5) . ')';
     $config->{"server"}{"world"}{"longname"} = $long_name;
-    $config->{"server"}{"world"}{"key"} = generate_random_password(30);
+    $config->{"server"}{"world"}{"key"}      = generate_random_password(30);
 
     if ($installation_variables{"mysql_eqemu_db_name"}) {
         $db_name = $installation_variables{"mysql_eqemu_db_name"};
@@ -704,11 +704,11 @@ sub do_install_config_json {
 
     $config->{"server"}{"database"}{"username"} = $installation_variables{"mysql_eqemu_user"};
     $config->{"server"}{"database"}{"password"} = $installation_variables{"mysql_eqemu_password"};
-    $config->{"server"}{"database"}{"db"} = $db_name;
+    $config->{"server"}{"database"}{"db"}       = $db_name;
 
     $config->{"server"}{"qsdatabase"}{"username"} = $installation_variables{"mysql_eqemu_user"};
     $config->{"server"}{"qsdatabase"}{"password"} = $installation_variables{"mysql_eqemu_password"};
-    $config->{"server"}{"qsdatabase"}{"db"} = $db_name;
+    $config->{"server"}{"qsdatabase"}{"db"}       = $db_name;
 
     $json->canonical(1);
     $json->indent_length(5);
@@ -933,7 +933,7 @@ sub show_menu_prompt {
         }
         elsif ($dc == 1) {
             analytics_insertion("menu", trim($input));
-            $dc = 0;
+            $dc    = 0;
             $input = "";
         }
         else {
@@ -943,7 +943,7 @@ sub show_menu_prompt {
         #::: If we're processing a CLI command, kill the loop
         if ($ARGV[0] ne "") {
             analytics_insertion("cli", trim($input));
-            $input = "";
+            $input   = "";
             $ARGV[0] = "";
             exit;
         }
@@ -1007,7 +1007,7 @@ sub check_for_database_dump_script {
     if (-e "updates_staged/database_dumper.pl") {
 
         my $remote_script_size = -s "updates_staged/database_dumper.pl";
-        my $local_script_size = -s "database_dumper.pl";
+        my $local_script_size  = -s "database_dumper.pl";
 
         if ($remote_script_size != $local_script_size) {
             print "[Update] Script has been updated, updating...\n";
@@ -1015,7 +1015,7 @@ sub check_for_database_dump_script {
             my @files;
             my $start_dir = "updates_staged/";
             find(
-                sub {push @files, $File::Find::name unless -d;},
+                sub { push @files, $File::Find::name unless -d; },
                 $start_dir
             );
             for my $file (@files) {
@@ -1059,7 +1059,7 @@ sub database_dump_player_tables {
     $i = 0;
     while (<FILE>) {
         chomp;
-        $o = $_;
+        $o      = $_;
         $tables .= $o . ",";
     }
     $tables = substr($tables, 0, -1);
@@ -1098,8 +1098,8 @@ sub check_db_version_table {
 #::: Returns Tab Delimited MySQL Result from Command Line
 sub get_mysql_result {
     my $run_query = $_[0];
-    if (!$db) {return;}
-    if ($OS eq "Windows") {return `"$path" --host $host --user $user --password="$pass" $db -N -B -e "$run_query"`;}
+    if (!$db) { return; }
+    if ($OS eq "Windows") { return `"$path" --host $host --user $user --password="$pass" $db -N -B -e "$run_query"`; }
     if ($OS eq "Linux") {
         $run_query =~ s/`//g;
         return `$path --user="$user" --host $host --password="$pass" $db -N -B -e "$run_query"`;
@@ -1108,19 +1108,27 @@ sub get_mysql_result {
 
 sub get_mysql_result_from_file {
     my $update_file = $_[0];
-    if (!$db) {return;}
-    if ($OS eq "Windows") {return `"$path" --host $host --user $user --password="$pass" --force $db < $update_file`;}
-    if ($OS eq "Linux") {return `"$path" --host $host --user $user --password="$pass" --force $db < $update_file`;}
+    if (!$db) {
+        return;
+    }
+
+    if ($OS eq "Windows") {
+        return `"$path" --host $host --user $user --password="$pass" --force $db < $update_file`;
+    }
+
+    if ($OS eq "Linux") {
+        return `"$path" --host $host --user $user --password="$pass" --force $db < $update_file`;
+    }
 }
 
 #::: Gets Remote File based on request_url (1st Arg), and saves to destination file (2nd Arg)
 #::: Example: get_remote_file($eqemu_repository_request_url . "utils/sql/db_update_manifest.txt", "db_update/db_update_manifest.txt");
 sub get_remote_file {
-    my $request_url = $_[0];
+    my $request_url      = $_[0];
     my $destination_file = $_[1];
-    my $content_type = $_[2];
-    my $no_retry = $_[3];
-    my $silent_download = $_[4];
+    my $content_type     = $_[2];
+    my $no_retry         = $_[3];
+    my $silent_download  = $_[4];
 
     if (!$has_internet_connection) {
         print "[Download] Cannot download without internet connection...\n";
@@ -1131,8 +1139,8 @@ sub get_remote_file {
 
     if ($destination_file =~ /\//i) {
         my @directory_path = split('/', $destination_file);
-        $build_path = "";
-        $directory_index = 0;
+        $build_path        = "";
+        $directory_index   = 0;
         while ($directory_path[$directory_index] && $directory_path[$directory_index + 1]) {
             $build_path .= $directory_path[$directory_index] . "/";
             # print "checking '" . $build_path . "'\n";
@@ -1190,8 +1198,8 @@ sub read_eqemu_config_xml {
             print "Long Name: '" . $long_name . "'\n" if $debug;
         }
         if ($in_database_tag == 1) {
-            @left = split(">", $o);
-            @right = split("<", $left[1]);
+            @left     = split(">", $o);
+            @right    = split("<", $left[1]);
             $tag_data = trim($right[0]);
 
             if ($o =~ /<username>/i && $in_database_tag) {
@@ -1228,7 +1236,7 @@ sub read_eqemu_config_json {
 
     $config = $json->decode($content);
 
-    $db = $config->{"server"}{"database"}{"db"};
+    $db   = $config->{"server"}{"database"}{"db"};
     $host = $config->{"server"}{"database"}{"host"};
     $user = $config->{"server"}{"database"}{"username"};
     $pass = $config->{"server"}{"database"}{"password"};
@@ -1266,7 +1274,7 @@ sub opcodes_fetch {
     while ($opcodes{$loop}[0]) {
         #::: Split the request_url by the patches folder to get the file name from request_url
         @real_file = split("patches/", $opcodes{$loop}[1]);
-        $find = 0;
+        $find      = 0;
         while ($real_file[$find]) {
             $file_name = $real_file[$find];
             $find++;
@@ -1286,15 +1294,15 @@ sub remove_duplicate_rule_values {
 
     #::: Store Default values...
     $mysql_result = get_mysql_result("SELECT * FROM `rule_values` WHERE `ruleset_id` = " . $ruleset_id);
-    my @lines = split("\n", $mysql_result);
+    my @lines     = split("\n", $mysql_result);
     foreach my $val (@lines) {
-        my @values = split("\t", $val);
+        my @values                      = split("\t", $val);
         $rule_set_values{$values[1]}[0] = $values[2];
     }
 
     #::: Compare default values against other rulesets to check for duplicates...
     $mysql_result = get_mysql_result("SELECT * FROM `rule_values` WHERE `ruleset_id` != " . $ruleset_id);
-    my @lines = split("\n", $mysql_result);
+    my @lines     = split("\n", $mysql_result);
     foreach my $val (@lines) {
         my @values = split("\t", $val);
         if ($values[2] == $rule_set_values{$values[1]}[0]) {
@@ -1308,12 +1316,12 @@ sub remove_duplicate_rule_values {
 }
 
 sub copy_file {
-    $l_source_file = $_[0];
+    $l_source_file      = $_[0];
     $l_destination_file = $_[1];
     if ($l_destination_file =~ /\//i) {
         my @directory_path = split('/', $l_destination_file);
-        $build_path = "";
-        $directory_index = 0;
+        $build_path        = "";
+        $directory_index   = 0;
         while ($directory_path[$directory_index]) {
             $build_path .= $directory_path[$directory_index] . "/";
             #::: If path does not exist, create the directory...
@@ -1341,7 +1349,7 @@ sub fetch_latest_windows_appveyor {
     my @files;
     my $start_dir = "updates_staged/binaries";
     find(
-        sub {push @files, $File::Find::name unless -d;},
+        sub { push @files, $File::Find::name unless -d; },
         $start_dir
     );
     for my $file (@files) {
@@ -1364,7 +1372,7 @@ sub fetch_latest_windows_binaries {
     my @files;
     my $start_dir = "updates_staged/binaries";
     find(
-        sub {push @files, $File::Find::name unless -d;},
+        sub { push @files, $File::Find::name unless -d; },
         $start_dir
     );
     for my $file (@files) {
@@ -1387,7 +1395,7 @@ sub fetch_latest_windows_binaries_bots {
     my @files;
     my $start_dir = "updates_staged/binaries";
     find(
-        sub {push @files, $File::Find::name unless -d;},
+        sub { push @files, $File::Find::name unless -d; },
         $start_dir
     );
     for my $file (@files) {
@@ -1409,7 +1417,7 @@ sub do_windows_login_server_setup {
     my @files;
     my $start_dir = "updates_staged/login_server";
     find(
-        sub {push @files, $File::Find::name unless -d;},
+        sub { push @files, $File::Find::name unless -d; },
         $start_dir
     );
     for my $file (@files) {
@@ -1465,8 +1473,8 @@ sub do_linux_login_server_setup {
     system("chmod 755 *.sh");
 
     get_installation_variables();
-    my $db_name = $installation_variables{"mysql_eqemu_db_name"};
-    my $db_user = $installation_variables{"mysql_eqemu_user"};
+    my $db_name     = $installation_variables{"mysql_eqemu_db_name"};
+    my $db_user     = $installation_variables{"mysql_eqemu_user"};
     my $db_password = $installation_variables{"mysql_eqemu_password"};
 
     #::: Open new config file
@@ -1478,9 +1486,9 @@ sub do_linux_login_server_setup {
         chomp;
         $o = $_;
         #::: Find replace variables
-        if ($o =~ /db/i) {$o = "db = " . $db_name;}
-        if ($o =~ /user/i) {$o = "user = " . $db_user;}
-        if ($o =~ /password/i) {$o = "password = " . $db_password;}
+        if ($o =~ /db/i) { $o       = "db = " . $db_name; }
+        if ($o =~ /user/i) { $o     = "user = " . $db_user; }
+        if ($o =~ /password/i) { $o = "password = " . $db_password; }
 
         print NEW_CONFIG $o . "\n";
     }
@@ -1498,10 +1506,10 @@ sub do_linux_login_server_setup {
 sub add_login_server_firewall_rules {
     #::: Check Loginserver Firewall install for Windows
     if ($OS eq "Windows") {
-        $output = `netsh advfirewall firewall show rule name=all`;
-        @output_buffer = split("\n", $output);
+        $output                         = `netsh advfirewall firewall show rule name=all`;
+        @output_buffer                  = split("\n", $output);
         $has_loginserver_rules_titanium = 0;
-        $has_loginserver_rules_sod = 0;
+        $has_loginserver_rules_sod      = 0;
         foreach my $val (@output_buffer) {
             if ($val =~ /Rule Name/i) {
                 $val =~ s/Rule Name://g;
@@ -1552,10 +1560,10 @@ sub add_login_server_firewall_rules {
 }
 
 sub check_windows_firewall_rules {
-    $output = `netsh advfirewall firewall show rule name=all`;
-    @output_buffer = split("\n", $output);
+    $output          = `netsh advfirewall firewall show rule name=all`;
+    @output_buffer   = split("\n", $output);
     $has_world_rules = 0;
-    $has_zone_rules = 0;
+    $has_zone_rules  = 0;
     foreach my $val (@output_buffer) {
         if ($val =~ /Rule Name/i) {
             $val =~ s/Rule Name://g;
@@ -1598,7 +1606,7 @@ sub fetch_peq_db_full {
     unzip('updates_staged/peq_beta.zip', 'updates_staged/peq_db/');
     my $start_dir = "updates_staged/peq_db";
     find(
-        sub {push @files, $File::Find::name unless -d;},
+        sub { push @files, $File::Find::name unless -d; },
         $start_dir
     );
     for my $file (@files) {
@@ -1622,7 +1630,7 @@ sub map_files_fetch_bulk {
     my @files;
     my $start_dir = "maps/EQEmuMaps-master/";
     find(
-        sub {push @files, $File::Find::name unless -d;},
+        sub { push @files, $File::Find::name unless -d; },
         $start_dir
     );
     for my $file (@files) {
@@ -1647,7 +1655,7 @@ sub map_files_fetch {
     $i = 0;
     while (<FILE>) {
         chomp;
-        $o = $_;
+        $o                 = $_;
         @manifest_map_data = split(',', $o);
         if ($manifest_map_data[0] ne "") {
             $maps_manifest[$i] = [ $manifest_map_data[0], $manifest_map_data[1] ];
@@ -1656,9 +1664,9 @@ sub map_files_fetch {
     }
 
     #::: Download
-    $fc = 0;
-    for ($m = 0; $m <= $i; $m++) {
-        my $file_existing = $maps_manifest[$m][0];
+    $fc                        = 0;
+    for ($m                    = 0; $m <= $i; $m++) {
+        my $file_existing      = $maps_manifest[$m][0];
         my $file_existing_size = (stat $file_existing)[7];
         if ($file_existing_size != $maps_manifest[$m][1]) {
             print "[Install] Updating: '" . $maps_manifest[$m][0] . "'\n";
@@ -1688,12 +1696,12 @@ sub quest_files_fetch {
     my @files;
     my $start_dir = "updates_staged/projecteqquests-master/";
     find(
-        sub {push @files, $File::Find::name unless -d;},
+        sub { push @files, $File::Find::name unless -d; },
         $start_dir
     );
     for my $file (@files) {
         if ($file =~ /\.pl|\.lua|\.ext/i) {
-            $staged_file = $file;
+            $staged_file      = $file;
             $destination_file = $file;
             $destination_file =~ s/updates_staged\/projecteqquests-master\//quests\//g;
 
@@ -1748,12 +1756,12 @@ sub lua_modules_fetch {
     my @files;
     my $start_dir = "updates_staged/projecteqquests-master/lua_modules/";
     find(
-        sub {push @files, $File::Find::name unless -d;},
+        sub { push @files, $File::Find::name unless -d; },
         $start_dir
     );
     for my $file (@files) {
         if ($file =~ /\.pl|\.lua|\.ext/i) {
-            $staged_file = $file;
+            $staged_file      = $file;
             $destination_file = $file;
             $destination_file =~ s/updates_staged\/projecteqquests-master\/lua_modules\//lua_modules\//g;
 
@@ -1807,12 +1815,12 @@ sub plugins_fetch {
     my @files;
     my $start_dir = "updates_staged/projecteqquests-master/plugins/";
     find(
-        sub {push @files, $File::Find::name unless -d;},
+        sub { push @files, $File::Find::name unless -d; },
         $start_dir
     );
     for my $file (@files) {
         if ($file =~ /\.pl|\.lua|\.ext/i) {
-            $staged_file = $file;
+            $staged_file      = $file;
             $destination_file = $file;
             $destination_file =~ s/updates_staged\/projecteqquests-master\///g;
 
@@ -1864,7 +1872,7 @@ sub do_file_diff {
 
 sub unzip {
     $archive_to_unzip = $_[0];
-    $dest_folder = $_[1];
+    $dest_folder      = $_[1];
 
     if ($OS eq "Windows") {
         eval "use Archive::Zip qw( :ERROR_CODES :CONSTANTS )";
@@ -1881,8 +1889,8 @@ sub unzip {
 }
 
 sub are_file_sizes_different {
-    $file_1 = $_[0];
-    $file_2 = $_[1];
+    $file_1    = $_[0];
+    $file_2    = $_[1];
     my $file_1 = (stat $file_1)[7];
     my $file_2 = (stat $file_2)[7];
     # print $file_1 . " :: " . $file_2 . "\n";
@@ -2216,7 +2224,7 @@ sub run_database_check {
                 next;
             }
 
-            @manifest = split('\|', $o);
+            @manifest          = split('\|', $o);
             $m_d{$manifest[0]} = [ @manifest ];
         }
         #::: Setting Manifest stage...
@@ -2242,10 +2250,10 @@ sub run_database_check {
             next;
         }
 
-        $file_name = trim($m_d{$i}[1]);
+        $file_name   = trim($m_d{$i}[1]);
         $query_check = trim($m_d{$i}[2]);
-        $match_type = trim($m_d{$i}[3]);
-        $match_text = trim($m_d{$i}[4]);
+        $match_type  = trim($m_d{$i}[3]);
+        $match_text  = trim($m_d{$i}[4]);
 
         #::: Match type update
         if ($match_type eq "contains") {
@@ -2316,7 +2324,7 @@ sub run_database_check {
 }
 
 sub fetch_missing_db_update {
-    $db_update = $_[0];
+    $db_update   = $_[0];
     $update_file = $_[1];
     if ($db_update >= 9000) {
         if ($bots_db_management == 1) {
@@ -2332,7 +2340,7 @@ sub fetch_missing_db_update {
 }
 
 sub print_match_debug {
-    if (!$debug) {return;}
+    if (!$debug) { return; }
     print "	Match Type: '" . $match_type . "'\n";
     print "	Match Text: '" . $match_text . "'\n";
     print "	Query Check: '" . $query_check . "'\n";
@@ -2340,7 +2348,7 @@ sub print_match_debug {
 }
 
 sub print_break {
-    if (!$debug) {return;}
+    if (!$debug) { return; }
     print "\n==============================================\n";
 }
 
@@ -2378,13 +2386,13 @@ sub quest_heading_convert {
     my @files;
     my $start_dir = "quests/.";
     find(
-        sub {push @files, $File::Find::name unless -d;},
+        sub { push @files, $File::Find::name unless -d; },
         $start_dir
     );
     for my $file (@files) {
 
         #::: Skip non script files
-        if ($file !~ /lua|pl/i) {next;}
+        if ($file !~ /lua|pl/i) { next; }
 
         if ($file =~ /lua|pl/i) {
             $print_buffer = "";
@@ -2400,7 +2408,7 @@ sub quest_heading_convert {
                 #::: Loop through matches
                 foreach my $key (sort (keys %matches)) {
                     $argument_position = $matches{$key}[1];
-                    $match = $matches{$key}[0];
+                    $match             = $matches{$key}[0];
 
                     if ($line =~ /$match/i) {
                         $line_temp = $line;
@@ -2416,9 +2424,9 @@ sub quest_heading_convert {
                         # use Data::Dumper;
                         # print Dumper(\@line_data);
 
-                        $heading_value = $line_data[$argument_position];
-                        $heading_value_clean = trim($heading_value);
-                        $heading_value_raw = $line_data[$argument_position];
+                        $heading_value        = $line_data[$argument_position];
+                        $heading_value_clean  = trim($heading_value);
+                        $heading_value_raw    = $line_data[$argument_position];
                         $heading_value_before = $line_data[$argument_position - 1];
 
                         if (looks_like_number($heading_value) && $heading_value != 0 && ($heading_value * 2) <= 512) {
@@ -2426,7 +2434,7 @@ sub quest_heading_convert {
 
                             $heading_value =~ s/$heading_value_clean/$heading_value_new/g;
 
-                            $heading_value_search = quotemeta($heading_value_before . "," . $heading_value_raw);
+                            $heading_value_search  = quotemeta($heading_value_before . "," . $heading_value_raw);
                             $heading_value_replace = $heading_value_before . "," . $heading_value;
 
                             print $file . "\n";
