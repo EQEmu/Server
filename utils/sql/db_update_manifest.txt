@@ -388,7 +388,7 @@
 9132|2018_12_16_global_base_scaling.sql|SHOW TABLES LIKE 'npc_scale_global_base'|empty|
 9133|2018_11_25_StuckBehavior.sql|SHOW COLUMNS FROM `npc_types` LIKE 'stuck_behavior'|empty|
 9134|2019_01_04_update_global_base_scaling.sql|SELECT * FROM db_version WHERE version >= 9134|empty|
-9135|2019_01_10_multi_version_spawns.sql|SELECT * FROM db_version WHERE version >= 9135|empty|
+9135|2019_01_10_multi_version_spawns.sql|SHOW COLUMNS FROM `spawn2` LIKE 'version'|contains|unsigned|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
