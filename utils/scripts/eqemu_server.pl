@@ -2246,7 +2246,7 @@ sub run_database_check {
     }
 
     #::: Iterate through Manifest backwards from binary version down to local version...
-    for ($i = $revision_check; $i < $binary_database_version; $i++) {
+    for ($i = $revision_check; $i <= $binary_database_version; $i++) {
         if (!defined($m_d{$i}[0])) {
             next;
         }
@@ -2264,14 +2264,14 @@ sub run_database_check {
                 push(@total_updates, $i);
             }
             else {
-                print "[Database] has update: " . $i . " - '" . $file_name . "' \n";
+                print "[Database] has update (" . $i . ") '" . $file_name . "' \n";
             }
             print_match_debug();
             print_break();
         }
         if ($match_type eq "missing") {
             if (get_mysql_result($query_check) =~ /$match_text/i) {
-                print "[Database] has update: " . $i . " - '" . $file_name . "' \n";
+                print "[Database] has update (" . $i . ") '" . $file_name . "' \n";
                 next;
             }
             else {
@@ -2289,7 +2289,7 @@ sub run_database_check {
                 push(@total_updates, $i);
             }
             else {
-                print "[Database] has update: " . $i . " - '" . $file_name . "' \n";
+                print "[Database] has update (" . $i . ") '" . $file_name . "' \n";
             }
             print_match_debug();
             print_break();
@@ -2301,7 +2301,7 @@ sub run_database_check {
                 push(@total_updates, $i);
             }
             else {
-                print "[Database] has update: " . $i . " - '" . $file_name . "' \n";
+                print "[Database] has update (" . $i . ") '" . $file_name . "' \n";
             }
             print_match_debug();
             print_break();
