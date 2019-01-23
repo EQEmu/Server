@@ -639,10 +639,11 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 
 Spawn2* ZoneDatabase::LoadSpawn2(LinkedList<Spawn2*> &spawn2_list, uint32 spawn2id, uint32 timeleft) {
 
+	auto latest_expansion = EQEmu::expansions::ConvertExpansionBitToExpansion(RuleI(World, ExpansionSettings));
 	std::string query = StringFormat("SELECT id, spawngroupID, x, y, z, heading, "
                                     "respawntime, variance, pathgrid, _condition, "
                                     "cond_value, enabled, animation FROM spawn2 "
-                                    "WHERE id = %i AND %d & expansions = expansions", spawn2id, RuleI(World, ExpansionSettings));
+                                    "WHERE id = %i AND min_expansion <= %i AND max_expansion >= %i", spawn2id, latest_expansion, latest_expansion);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
         return nullptr;

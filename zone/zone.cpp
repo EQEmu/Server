@@ -164,15 +164,16 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 
 	return true;
 }
-
+ 
 //this really loads the objects into entity_list
 bool Zone::LoadZoneObjects()
 {
+	auto latest_expansion = EQEmu::expansions::ConvertExpansionBitToExpansion(RuleI(World, ExpansionSettings));
 	std::string query =
 	    StringFormat("SELECT id, zoneid, xpos, ypos, zpos, heading, itemid, charges, objectname, type, icon, "
 			 "unknown08, unknown10, unknown20, unknown24, unknown76, size, tilt_x, tilt_y, display_name "
-			 "FROM object WHERE zoneid = %i AND (version = %u OR version = -1) AND %d & expansions = expansions",
-			 zoneid, instanceversion, RuleI(World, ExpansionSettings));
+			 "FROM object WHERE zoneid = %i AND (version = %u OR version = -1) AND min_expansion <= %i AND max_expansion >= %i",
+			 zoneid, instanceversion, latest_expansion, latest_expansion);
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
 		Log(Logs::General, Logs::Error, "Error Loading Objects from DB: %s",
@@ -464,8 +465,9 @@ void Zone::LoadTempMerchantData() {
 void Zone::LoadNewMerchantData(uint32 merchantid) {
 
 	std::list<MerchantList> merlist;
+	auto latest_expansion = EQEmu::expansions::ConvertExpansionBitToExpansion(RuleI(World, ExpansionSettings));
 	std::string query = StringFormat("SELECT item, slot, faction_required, level_required, alt_currency_cost, "
-                                     "classes_required, probability FROM merchantlist WHERE merchantid=%d AND %d & expansions = expansions ORDER BY slot", merchantid, RuleI(World, ExpansionSettings));
+                                     "classes_required, probability FROM merchantlist WHERE merchantid=%d AND min_expansion <= %i AND max_expansion >= %i ORDER BY slot", merchantid, latest_expansion, latest_expansion);
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
         return;
@@ -1703,12 +1705,13 @@ bool ZoneDatabase::LoadStaticZonePoints(LinkedList<ZonePoint*>* zone_point_list,
 {
 	zone_point_list->Clear();
 	zone->numzonepoints = 0;
+	auto latest_expansion = EQEmu::expansions::ConvertExpansionBitToExpansion(RuleI(World, ExpansionSettings));
 	std::string query = StringFormat("SELECT x, y, z, target_x, target_y, "
 					 "target_z, target_zone_id, heading, target_heading, "
 					 "number, target_instance, client_version_mask "
-					 "FROM zone_points WHERE zone='%s' AND (version=%i OR version=-1) AND %d & expansions = expansions "
+					 "FROM zone_points WHERE zone='%s' AND (version=%i OR version=-1) AND min_expansion <= %i AND max_expansion >= %i "
 					 "ORDER BY number",
-					 zonename, version, RuleI(World, ExpansionSettings));
+					 zonename, version, latest_expansion, latest_expansion);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		return false;
@@ -2344,7 +2347,7 @@ uint32 Zone::GetSpawnKillCount(uint32 in_spawnid) {
 
 void Zone::UpdateHotzone()
 {
-    std::string query = StringFormat("SELECT hotzone FROM zone WHERE short_name = '%s' AND %d & expansions = expansions", GetShortName(), RuleI(World, ExpansionSettings));
+    std::string query = StringFormat("SELECT hotzone FROM zone WHERE short_name = '%s'", GetShortName());
     auto results = database.QueryDatabase(query);
     if (!results.Success())
         return;

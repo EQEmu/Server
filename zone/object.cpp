@@ -694,13 +694,13 @@ void ZoneDatabase::UpdateObject(uint32 id, uint32 type, uint32 icon, const Objec
 }
 
 Ground_Spawns* ZoneDatabase::LoadGroundSpawns(uint32 zone_id, int16 version, Ground_Spawns* gs) {
-
+	auto latest_expansion = EQEmu::expansions::ConvertExpansionBitToExpansion(RuleI(World, ExpansionSettings));
 	std::string query = StringFormat("SELECT max_x, max_y, max_z, "
                                     "min_x, min_y, heading, name, "
                                     "item, max_allowed, respawn_timer "
                                     "FROM ground_spawns "
-                                    "WHERE zoneid = %i AND (version = %u OR version = -1) AND %d & expansions = expansions"
-                                    "LIMIT 50", zone_id, version, RuleI(World, ExpansionSettings));
+                                    "WHERE zoneid = %i AND (version = %u OR version = -1) AND min_expansion <= %i AND max_expansion >= %i"
+                                    "LIMIT 50", zone_id, version, latest_expansion, latest_expansion);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
 		return gs;

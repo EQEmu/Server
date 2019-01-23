@@ -54,9 +54,10 @@ uint32 ZoneDatabase::GetZoneForage(uint32 ZoneID, uint8 skill) {
 	}
 
 	uint32 chancepool = 0;
+	auto latest_expansion = EQEmu::expansions::ConvertExpansionBitToExpansion(RuleI(World, ExpansionSettings));
     std::string query = StringFormat("SELECT itemid, chance FROM "
-                                    "forage WHERE zoneid = '%i' AND level <= '%i' AND %d & expansions = expansions "
-                                    "LIMIT %i", ZoneID, skill, RuleI(World, ExpansionSettings), FORAGE_ITEM_LIMIT);
+                                    "forage WHERE zoneid = '%i' AND level <= '%i' AND min_expansion <= %i AND max_expansion >= %i "
+                                    "LIMIT %i", ZoneID, skill, latest_expansion, latest_expansion, FORAGE_ITEM_LIMIT);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		return 0;
@@ -109,9 +110,10 @@ uint32 ZoneDatabase::GetZoneFishing(uint32 ZoneID, uint8 skill, uint32 &npc_id, 
 		chance[c]=0;
 	}
 
+	auto latest_expansion = EQEmu::expansions::ConvertExpansionBitToExpansion(RuleI(World, ExpansionSettings));
     std::string query = StringFormat("SELECT itemid, chance, npc_id, npc_chance "
-                                    "FROM fishing WHERE (zoneid = '%i' || zoneid = 0) AND skill_level <= '%i' AND %d & expansions = expansions",
-                                    ZoneID, skill, RuleI(World, ExpansionSettings));
+                                    "FROM fishing WHERE (zoneid = '%i' || zoneid = 0) AND skill_level <= '%i' AND min_expansion <= %i AND max_expansion >= %i",
+                                    ZoneID, skill, latest_expansion, latest_expansion);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
 		return 0;

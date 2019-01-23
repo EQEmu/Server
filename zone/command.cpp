@@ -9472,6 +9472,7 @@ void command_object(Client *c, const Seperator *sep)
 	uint32 newid = 0;
 	uint16 radius;
 	EQApplicationPacket *app;
+	auto latest_expansion = EQEmu::expansions::ConvertExpansionBitToExpansion(RuleI(World, ExpansionSettings));
 
 	bool bNewObject = false;
 
@@ -9503,8 +9504,10 @@ void command_object(Client *c, const Seperator *sep)
 		else
 			c->Message(0, "Objects within %u units of your current location:", radius);
 
+		auto latest_expansion = EQEmu::expansions::ConvertExpansionBitToExpansion(RuleI(World, ExpansionSettings));
 		std::string query;
 		if (radius)
+
 			query = StringFormat(
 			    "SELECT id, xpos, ypos, zpos, heading, itemid, "
 			    "objectname, type, icon, unknown08, unknown10, unknown20 "
@@ -9512,18 +9515,18 @@ void command_object(Client *c, const Seperator *sep)
 			    "AND (xpos BETWEEN %.1f AND %.1f) "
 			    "AND (ypos BETWEEN %.1f AND %.1f) "
 			    "AND (zpos BETWEEN %.1f AND %.1f) "
-				"AND %d & expansions = expansions"
+				"AND min_expansion <= %i AND max_expansion >= %i "
 			    "ORDER BY id",
 			    zone->GetZoneID(), zone->GetInstanceVersion(),
 			    c->GetX() - radius, // Yes, we're actually using a bounding box instead of a radius.
 			    c->GetX() + radius, // Much less processing power used this way.
-			    c->GetY() - radius, c->GetY() + radius, c->GetZ() - radius, c->GetZ() + radius, RuleI(World, ExpansionSettings));
+			    c->GetY() - radius, c->GetY() + radius, c->GetZ() - radius, c->GetZ() + radius, latest_expansion, latest_expansion);
 		else
 			query = StringFormat("SELECT id, xpos, ypos, zpos, heading, itemid, "
 					     "objectname, type, icon, unknown08, unknown10, unknown20 "
-					     "FROM object WHERE zoneid = %u AND version = %u AND %d & expansions = expansions"
+					     "FROM object WHERE zoneid = %u AND version = %u AND min_expansion <= %i AND max_expansion >= %i"
 					     "ORDER BY id",
-					     zone->GetZoneID(), zone->GetInstanceVersion(), RuleI(World, ExpansionSettings));
+					     zone->GetZoneID(), zone->GetInstanceVersion(), latest_expansion, latest_expansion);
 
 		auto results = database.QueryDatabase(query);
 		if (!results.Success()) {

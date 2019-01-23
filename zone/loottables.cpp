@@ -463,8 +463,9 @@ void NPC::CheckGlobalLootTables()
 
 void ZoneDatabase::LoadGlobalLoot()
 {
+	auto latest_expansion = EQEmu::expansions::ConvertExpansionBitToExpansion(RuleI(World, ExpansionSettings));
 	auto query = StringFormat("SELECT id, loottable_id, description, min_level, max_level, rare, raid, race, "
-				  "class, bodytype, zone FROM global_loot WHERE enabled = 1 AND %d & expansions = expansions", RuleI(World, ExpansionSettings));
+				  "class, bodytype, zone FROM global_loot WHERE enabled = 1 AND min_expansion <= %i AND max_expansion >= %i", latest_expansion, latest_expansion);
 
 	auto results = QueryDatabase(query);
 	if (!results.Success() || results.RowCount() == 0)

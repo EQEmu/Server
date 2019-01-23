@@ -934,9 +934,9 @@ uint32 Database::GetMiniLoginAccount(char* ip)
 }
 
 // Get zone starting points from DB
-bool Database::GetSafePoints(const char* short_name, uint32 version, float* safe_x, float* safe_y, float* safe_z, int16* minstatus, uint8* minlevel, uint32* expansions, char *flag_needed) {
+bool Database::GetSafePoints(const char* short_name, uint32 version, float* safe_x, float* safe_y, float* safe_z, int16* minstatus, uint8* minlevel, uint32* minexpansion, uint32* maxexpansion, char *flag_needed) {
 	
-	std::string query = StringFormat("SELECT safe_x, safe_y, safe_z, min_status, min_level, flag_needed, expansions FROM zone "
+	std::string query = StringFormat("SELECT safe_x, safe_y, safe_z, min_status, min_level, flag_needed, min_expansion, max_expansion FROM zone "
 		" WHERE short_name='%s' AND (version=%i OR version=0) ORDER BY version DESC", short_name, version);
 	auto results = QueryDatabase(query);
 
@@ -960,15 +960,17 @@ bool Database::GetSafePoints(const char* short_name, uint32 version, float* safe
 		*minlevel = atoi(row[4]);
 	if (flag_needed != nullptr)
 		strcpy(flag_needed, row[5]);
-	if (expansions != nullptr)
-		*expansions = atoi(row[6]);
+	if (minexpansion != nullptr)
+		*minexpansion = atoi(row[6]);
+	if (maxexpansion != nullptr)
+		*maxexpansion = atoi(row[7]);
 
 	return true;
 }
 
 bool Database::GetZoneLongName(const char* short_name, char** long_name, char* file_name, float* safe_x, float* safe_y, float* safe_z, uint32* graveyard_id, uint32* maxclients) {
 	
-	std::string query = StringFormat("SELECT long_name, file_name, safe_x, safe_y, safe_z, graveyard_id, maxclients FROM zone WHERE short_name='%s' AND version=0 AND %i & expansions = expansions", short_name, RuleI(World, ExpansionSettings));
+	std::string query = StringFormat("SELECT long_name, file_name, safe_x, safe_y, safe_z, graveyard_id, maxclients FROM zone WHERE short_name='%s' AND version=0", short_name);
 	auto results = QueryDatabase(query);
 
 	if (!results.Success()) {
@@ -1093,7 +1095,7 @@ const char* Database::GetZoneName(uint32 zoneID, bool ErrorUnknown) {
 
 uint8 Database::GetPEQZone(uint32 zoneID, uint32 version){
 	
-	std::string query = StringFormat("SELECT peqzone from zone where zoneidnumber='%i' AND (version=%i OR version=0) AND %i & expansions = expansions ORDER BY version DESC", zoneID, version, RuleI(World, ExpansionSettings));
+	std::string query = StringFormat("SELECT peqzone from zone where zoneidnumber='%i' AND (version=%i OR version=0) ORDER BY version DESC", zoneID, version);
 	auto results = QueryDatabase(query);
 
 	if (!results.Success()) {
