@@ -59,8 +59,8 @@ namespace SoF
 	// client to server say link converter
 	static inline void SoFToServerSayLink(std::string &server_saylink, const std::string &sof_saylink);
 
-	static inline CastingSlot ServerToSoFCastingSlot(EQEmu::CastingSlot slot);
-	static inline EQEmu::CastingSlot SoFToServerCastingSlot(CastingSlot slot, uint32 item_location);
+	static inline spells::CastingSlot ServerToSoFCastingSlot(EQEmu::spells::CastingSlot slot);
+	static inline EQEmu::spells::CastingSlot SoFToServerCastingSlot(spells::CastingSlot slot, uint32 item_location);
 
 	static inline int ServerToSoFBuffSlot(int index);
 	static inline int SoFToServerBuffSlot(int index);
@@ -956,7 +956,7 @@ namespace SoF
 
 		// Since HT/LoH are translated up, we need to translate down only for memSpellSpellbar case
 		if (emu->scribing == 3)
-			eq->slot = static_cast<uint32>(ServerToSoFCastingSlot(static_cast<EQEmu::CastingSlot>(emu->slot)));
+			eq->slot = static_cast<uint32>(ServerToSoFCastingSlot(static_cast<EQEmu::spells::CastingSlot>(emu->slot)));
 		else
 			OUT(slot);
 		OUT(spell_id);
@@ -1116,7 +1116,7 @@ namespace SoF
 		}
 		OUT(deity);
 		OUT(intoxication);
-		OUT_array(spellSlotRefresh, structs::MAX_PP_MEMSPELL);
+		OUT_array(spellSlotRefresh, spells::SPELL_GEM_COUNT);
 		OUT(abilitySlotRefresh);
 		OUT(points); // Relocation Test
 		//	OUT(unknown0166[4]);
@@ -1156,9 +1156,9 @@ namespace SoF
 		OUT(WIS);
 		OUT(face);
 		//	OUT(unknown02264[47]);
-		OUT_array(spell_book, structs::MAX_PP_SPELLBOOK);
+		OUT_array(spell_book, spells::SPELLBOOK_SIZE);
 		//	OUT(unknown4184[128]);
-		OUT_array(mem_spells, structs::MAX_PP_MEMSPELL);
+		OUT_array(mem_spells, spells::SPELL_GEM_COUNT);
 		//	OUT(unknown04396[32]);
 		OUT(platinum);
 		OUT(gold);
@@ -2298,7 +2298,7 @@ namespace SoF
 		DECODE_LENGTH_EXACT(structs::CastSpell_Struct);
 		SETUP_DIRECT_DECODE(CastSpell_Struct, structs::CastSpell_Struct);
 
-		emu->slot = static_cast<uint32>(SoFToServerCastingSlot(static_cast<CastingSlot>(eq->slot), eq->inventoryslot));
+		emu->slot = static_cast<uint32>(SoFToServerCastingSlot(static_cast<spells::CastingSlot>(eq->slot), eq->inventoryslot));
 		IN(spell_id);
 		emu->inventoryslot = SoFToServerSlot(eq->inventoryslot);
 		IN(target_id);
@@ -2540,9 +2540,9 @@ namespace SoF
 		DECODE_LENGTH_EXACT(structs::LoadSpellSet_Struct);
 		SETUP_DIRECT_DECODE(LoadSpellSet_Struct, structs::LoadSpellSet_Struct);
 
-		for (int i = 0; i < structs::MAX_PP_MEMSPELL; ++i)
+		for (int i = 0; i < spells::SPELL_GEM_COUNT; ++i)
 			IN(spell[i]);
-		for (int i = structs::MAX_PP_MEMSPELL; i < MAX_PP_MEMSPELL; ++i)
+		for (int i = spells::SPELL_GEM_COUNT; i < EQEmu::spells::SPELL_GEM_COUNT; ++i)
 			emu->spell[i] = 0xFFFFFFFF;
 
 		IN(unknown);
@@ -3419,84 +3419,84 @@ namespace SoF
 		}
 	}
 
-	static inline CastingSlot ServerToSoFCastingSlot(EQEmu::CastingSlot slot) {
+	static inline spells::CastingSlot ServerToSoFCastingSlot(EQEmu::spells::CastingSlot slot) {
 		switch (slot) {
-			case EQEmu::CastingSlot::Gem1:
-				return CastingSlot::Gem1;
-			case EQEmu::CastingSlot::Gem2:
-				return CastingSlot::Gem2;
-			case EQEmu::CastingSlot::Gem3:
-				return CastingSlot::Gem3;
-			case EQEmu::CastingSlot::Gem4:
-				return CastingSlot::Gem4;
-			case EQEmu::CastingSlot::Gem5:
-				return CastingSlot::Gem5;
-			case EQEmu::CastingSlot::Gem6:
-				return CastingSlot::Gem6;
-			case EQEmu::CastingSlot::Gem7:
-				return CastingSlot::Gem7;
-			case EQEmu::CastingSlot::Gem8:
-				return CastingSlot::Gem8;
-			case EQEmu::CastingSlot::Gem9:
-				return CastingSlot::Gem9;
-			case EQEmu::CastingSlot::Item:
-				return CastingSlot::Item;
-			case EQEmu::CastingSlot::PotionBelt:
-				return CastingSlot::PotionBelt;
-			case EQEmu::CastingSlot::Discipline:
-				return CastingSlot::Discipline;
-			case EQEmu::CastingSlot::AltAbility:
-				return CastingSlot::AltAbility;
+			case EQEmu::spells::CastingSlot::Gem1:
+				return spells::CastingSlot::Gem1;
+			case EQEmu::spells::CastingSlot::Gem2:
+				return spells::CastingSlot::Gem2;
+			case EQEmu::spells::CastingSlot::Gem3:
+				return spells::CastingSlot::Gem3;
+			case EQEmu::spells::CastingSlot::Gem4:
+				return spells::CastingSlot::Gem4;
+			case EQEmu::spells::CastingSlot::Gem5:
+				return spells::CastingSlot::Gem5;
+			case EQEmu::spells::CastingSlot::Gem6:
+				return spells::CastingSlot::Gem6;
+			case EQEmu::spells::CastingSlot::Gem7:
+				return spells::CastingSlot::Gem7;
+			case EQEmu::spells::CastingSlot::Gem8:
+				return spells::CastingSlot::Gem8;
+			case EQEmu::spells::CastingSlot::Gem9:
+				return spells::CastingSlot::Gem9;
+			case EQEmu::spells::CastingSlot::Item:
+				return spells::CastingSlot::Item;
+			case EQEmu::spells::CastingSlot::PotionBelt:
+				return spells::CastingSlot::PotionBelt;
+			case EQEmu::spells::CastingSlot::Discipline:
+				return spells::CastingSlot::Discipline;
+			case EQEmu::spells::CastingSlot::AltAbility:
+				return spells::CastingSlot::AltAbility;
 			default: // we shouldn't have any issues with other slots ... just return something
-				return CastingSlot::Discipline;
+				return spells::CastingSlot::Discipline;
 		}
 	}
 
-	static inline EQEmu::CastingSlot SoFToServerCastingSlot(CastingSlot slot, uint32 item_location) {
+	static inline EQEmu::spells::CastingSlot SoFToServerCastingSlot(spells::CastingSlot slot, uint32 item_location) {
 		switch (slot) {
-			case CastingSlot::Gem1:
-				return EQEmu::CastingSlot::Gem1;
-			case CastingSlot::Gem2:
-				return EQEmu::CastingSlot::Gem2;
-			case CastingSlot::Gem3:
-				return EQEmu::CastingSlot::Gem3;
-			case CastingSlot::Gem4:
-				return EQEmu::CastingSlot::Gem4;
-			case CastingSlot::Gem5:
-				return EQEmu::CastingSlot::Gem5;
-			case CastingSlot::Gem6:
-				return EQEmu::CastingSlot::Gem6;
-			case CastingSlot::Gem7:
-				return EQEmu::CastingSlot::Gem7;
-			case CastingSlot::Gem8:
-				return EQEmu::CastingSlot::Gem8;
-			case CastingSlot::Gem9:
-				return EQEmu::CastingSlot::Gem9;
-			case CastingSlot::Ability:
-				return EQEmu::CastingSlot::Ability;
+			case spells::CastingSlot::Gem1:
+				return EQEmu::spells::CastingSlot::Gem1;
+			case spells::CastingSlot::Gem2:
+				return EQEmu::spells::CastingSlot::Gem2;
+			case spells::CastingSlot::Gem3:
+				return EQEmu::spells::CastingSlot::Gem3;
+			case spells::CastingSlot::Gem4:
+				return EQEmu::spells::CastingSlot::Gem4;
+			case spells::CastingSlot::Gem5:
+				return EQEmu::spells::CastingSlot::Gem5;
+			case spells::CastingSlot::Gem6:
+				return EQEmu::spells::CastingSlot::Gem6;
+			case spells::CastingSlot::Gem7:
+				return EQEmu::spells::CastingSlot::Gem7;
+			case spells::CastingSlot::Gem8:
+				return EQEmu::spells::CastingSlot::Gem8;
+			case spells::CastingSlot::Gem9:
+				return EQEmu::spells::CastingSlot::Gem9;
+			case spells::CastingSlot::Ability:
+				return EQEmu::spells::CastingSlot::Ability;
 				// Tit uses 10 for item and discipline casting, but items have a valid location
-			case CastingSlot::Item:
+			case spells::CastingSlot::Item:
 				if (item_location == INVALID_INDEX)
-					return EQEmu::CastingSlot::Discipline;
+					return EQEmu::spells::CastingSlot::Discipline;
 				else
-					return EQEmu::CastingSlot::Item;
-			case CastingSlot::PotionBelt:
-				return EQEmu::CastingSlot::PotionBelt;
-			case CastingSlot::AltAbility:
-				return EQEmu::CastingSlot::AltAbility;
+					return EQEmu::spells::CastingSlot::Item;
+			case spells::CastingSlot::PotionBelt:
+				return EQEmu::spells::CastingSlot::PotionBelt;
+			case spells::CastingSlot::AltAbility:
+				return EQEmu::spells::CastingSlot::AltAbility;
 			default: // we shouldn't have any issues with other slots ... just return something
-				return EQEmu::CastingSlot::Discipline;
+				return EQEmu::spells::CastingSlot::Discipline;
 		}
 	}
 
 	static inline int ServerToSoFBuffSlot(int index) {
 		// we're a disc
-		if (index >= EQEmu::constants::LongBuffs + EQEmu::constants::ShortBuffs)
-			return index - EQEmu::constants::LongBuffs - EQEmu::constants::ShortBuffs +
-				   constants::LongBuffs + constants::ShortBuffs;
+		if (index >= EQEmu::spells::LONG_BUFFS + EQEmu::spells::SHORT_BUFFS)
+			return index - EQEmu::spells::LONG_BUFFS - EQEmu::spells::SHORT_BUFFS +
+				   spells::LONG_BUFFS + spells::SHORT_BUFFS;
 		// we're a song
-		if (index >= EQEmu::constants::LongBuffs)
-			return index - EQEmu::constants::LongBuffs + constants::LongBuffs;
+		if (index >= EQEmu::spells::LONG_BUFFS)
+			return index - EQEmu::spells::LONG_BUFFS + spells::LONG_BUFFS;
 		// we're a normal buff
 		return index; // as long as we guard against bad slots server side, we should be fine
 	}
@@ -3504,12 +3504,12 @@ namespace SoF
 	static inline int SoFToServerBuffSlot(int index)
 	{
 		// we're a disc
-		if (index >= constants::LongBuffs + constants::ShortBuffs)
-			return index - constants::LongBuffs - constants::ShortBuffs + EQEmu::constants::LongBuffs +
-			       EQEmu::constants::ShortBuffs;
+		if (index >= spells::LONG_BUFFS + spells::SHORT_BUFFS)
+			return index - spells::LONG_BUFFS - spells::SHORT_BUFFS + EQEmu::spells::LONG_BUFFS +
+			       EQEmu::spells::SHORT_BUFFS;
 		// we're a song
-		if (index >= constants::LongBuffs)
-			return index - constants::LongBuffs + EQEmu::constants::LongBuffs;
+		if (index >= spells::LONG_BUFFS)
+			return index - spells::LONG_BUFFS + EQEmu::spells::LONG_BUFFS;
 		// we're a normal buff
 		return index; // as long as we guard against bad slots server side, we should be fine
 	}

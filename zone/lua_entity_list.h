@@ -84,7 +84,7 @@ public:
 	void RemoveFromTargets(Lua_Mob mob);
 	void RemoveFromTargets(Lua_Mob mob, bool RemoveFromXTargets);
 	void ReplaceWithTarget(Lua_Mob target, Lua_Mob new_target);
-	void OpenDoorsNear(Lua_NPC opener);
+	void OpenDoorsNear(Lua_Mob opener);
 	std::string MakeNameUnique(const char *name);
 	std::string RemoveNumbers(const char *name);
 	void SignalMobsByNPCID(uint32 npc_id, int signal);

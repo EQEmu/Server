@@ -29,7 +29,7 @@
 extern volatile bool is_zone_loaded;
 
 // This constructor is used during the bot create command
-Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm::vec4(), 0, false), rest_timer(1) {
+Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm::vec4(), Ground, false), rest_timer(1) {
 	if(botOwner) {
 		this->SetBotOwner(botOwner);
 		this->_botOwnerCharacterID = botOwner->CharacterID();
@@ -39,6 +39,7 @@ Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm
 	}
 
 	m_inv.SetInventoryVersion(EQEmu::versions::MobVersion::Bot);
+	m_inv.SetGMInventory(false); // bot expansions are not currently implemented (defaults to static)
 
 	_guildRank = 0;
 	_guildId = 0;
@@ -89,7 +90,7 @@ Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm
 	GenerateAppearance();
 	GenerateBaseStats();
 	// Calculate HitPoints Last As It Uses Base Stats
-	cur_hp = GenerateBaseHitPoints();
+	current_hp = GenerateBaseHitPoints();
 	current_mana = GenerateBaseManaPoints();
 	cur_end = CalcBaseEndurance();
 	hp_regen = CalcHPRegen();
@@ -103,7 +104,8 @@ Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm
 }
 
 // This constructor is used when the bot is loaded out of the database
-Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double totalPlayTime, uint32 lastZoneId, NPCType npcTypeData) : NPC(&npcTypeData, nullptr, glm::vec4(), 0, false), rest_timer(1)
+Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double totalPlayTime, uint32 lastZoneId, NPCType npcTypeData) 
+	: NPC(&npcTypeData, nullptr, glm::vec4(), Ground, false), rest_timer(1)
 {
 	this->_botOwnerCharacterID = botOwnerCharacterID;
 	if(this->_botOwnerCharacterID > 0)
@@ -112,6 +114,7 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 	auto bot_owner = GetBotOwner();
 
 	m_inv.SetInventoryVersion(EQEmu::versions::MobVersion::Bot);
+	m_inv.SetGMInventory(false); // bot expansions are not currently implemented (defaults to static)
 
 	_guildRank = 0;
 	_guildId = 0;
@@ -136,7 +139,7 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 	_baseATK = npcTypeData.ATK;
 	_baseRace = npcTypeData.race;
 	_baseGender = npcTypeData.gender;
-	cur_hp = npcTypeData.cur_hp;
+	current_hp = npcTypeData.current_hp;
 	current_mana = npcTypeData.Mana;
 	RestRegenHP = 0;
 	RestRegenMana = 0;
@@ -208,10 +211,10 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 	hp_regen = CalcHPRegen();
 	mana_regen = CalcManaRegen();
 	end_regen = CalcEnduranceRegen();
-	if(cur_hp > max_hp)
-		cur_hp = max_hp;
+	if(current_hp > max_hp)
+		current_hp = max_hp;
 
-	if(cur_hp <= 0) {
+	if(current_hp <= 0) {
 		SetHP(max_hp/5);
 		SetMana(0);
 		BuffFadeAll();
@@ -284,8 +287,7 @@ void Bot::ChangeBotArcherWeapons(bool isArcher) {
 void Bot::Sit() {
 	if(IsMoving()) {
 		moved = false;
-		SetCurrentSpeed(0);
-		tar_ndx = 0;
+		StopNavigation();
 	}
 
 	SetAppearance(eaSitting);
@@ -336,7 +338,7 @@ NPCType Bot::FillNPCTypeStruct(uint32 botSpellsID, std::string botName, std::str
 	BotNPCType.drakkin_heritage = drakkinHeritage;
 	BotNPCType.drakkin_tattoo = drakkinTattoo;
 	BotNPCType.drakkin_details = drakkinDetails;
-	BotNPCType.cur_hp = hp;
+	BotNPCType.current_hp = hp;
 	BotNPCType.Mana = mana;
 	BotNPCType.MR = mr;
 	BotNPCType.CR = cr;
@@ -386,7 +388,7 @@ NPCType Bot::CreateDefaultNPCTypeStructForBot(std::string botName, std::string b
 	Result.maxlevel = botLevel;
 	Result.size = 6.0;
 	Result.npc_id = 0;
-	Result.cur_hp = 0;
+	Result.current_hp = 0;
 	Result.drakkin_details = 0;
 	Result.drakkin_heritage = 0;
 	Result.drakkin_tattoo = 0;
@@ -1827,7 +1829,6 @@ bool Bot::Process() {
 	if(tic_timer.Check()) {
 		//6 seconds, or whatever the rule is set to has passed, send this position to everyone to avoid ghosting
 		if(!IsMoving() && !IsEngaged()) {
-			SendPosition();
 			if(IsSitting()) {
 				if(!rest_timer.Enabled())
 					rest_timer.Start(RuleI(Character, RestRegenTimeToActivate) * 1000);
@@ -2526,7 +2527,7 @@ void Bot::AI_Process() {
 								if (GetArchetype() == ARCHETYPE_CASTER || GetClass() == ROGUE) {
 									if (tar_distance <= melee_distance_max) {
 										if (PlotPositionAroundTarget(this, Goal.x, Goal.y, Goal.z)) {
-											CalculateNewPosition(Goal.x, Goal.y, Goal.z, GetBotWalkspeed(), true, false);
+											WalkTo(Goal.x, Goal.y, Goal.z);
 											return;
 										}
 									}
@@ -2538,7 +2539,7 @@ void Bot::AI_Process() {
 						if (caster_distance_min && tar_distance < caster_distance_min && !tar->IsFeared()) { // Caster back-off adjustment
 							if (PlotPositionAroundTarget(this, Goal.x, Goal.y, Goal.z)) {
 								if (DistanceSquared(Goal, tar->GetPosition()) <= caster_distance_max) {
-									CalculateNewPosition(Goal.x, Goal.y, Goal.z, GetBotWalkspeed(), true, false);
+									WalkTo(Goal.x, Goal.y, Goal.z);
 									return;
 								}
 							}
@@ -2546,7 +2547,7 @@ void Bot::AI_Process() {
 						else if (tar_distance < melee_distance_min) { // Melee back-off adjustment
 							if (PlotPositionAroundTarget(this, Goal.x, Goal.y, Goal.z)) {
 								if (DistanceSquared(Goal, tar->GetPosition()) <= melee_distance_max) {
-									CalculateNewPosition(Goal.x, Goal.y, Goal.z, GetBotWalkspeed(), true, false);
+									WalkTo(Goal.x, Goal.y, Goal.z);
 									return;
 								}
 							}
@@ -2554,7 +2555,7 @@ void Bot::AI_Process() {
 						else if (backstab_weapon && !behind_mob) { // Move the rogue to behind the mob
 							if (PlotPositionAroundTarget(tar, Goal.x, Goal.y, Goal.z)) {
 								if (DistanceSquared(Goal, tar->GetPosition()) <= melee_distance_max) {
-									CalculateNewPosition(Goal.x, Goal.y, Goal.z, GetBotRunspeed(), true, false); // rogues are agile enough to run in melee range
+									RunTo(Goal.x, Goal.y, Goal.z);
 									return;
 								}
 							}
@@ -2565,7 +2566,7 @@ void Bot::AI_Process() {
 								PlotPositionAroundTarget(tar, Goal.x, Goal.y, Goal.z)) // If we're behind the mob, we can attack when it's enraged
 							{
 								if (DistanceSquared(Goal, tar->GetPosition()) <= melee_distance_max) {
-									CalculateNewPosition(Goal.x, Goal.y, Goal.z, GetBotWalkspeed(), true, false);
+									WalkTo(Goal.x, Goal.y, Goal.z);
 									return;
 								}
 							}
@@ -2710,35 +2711,19 @@ void Bot::AI_Process() {
 					Log(Logs::Detail, Logs::AI, "Pursuing %s while engaged.", GetTarget()->GetCleanName());
 
 					Goal = GetTarget()->GetPosition();
-					
-					if (RuleB(Bots, UsePathing) && zone->pathing) {
-						bool WaypointChanged, NodeReached;
-
-						Goal = UpdatePath(Goal.x, Goal.y, Goal.z,
-							GetBotRunspeed(), WaypointChanged, NodeReached);
-
-						if (WaypointChanged)
-							tar_ndx = 20;
-					}
-					
-					CalculateNewPosition(Goal.x, Goal.y, Goal.z, GetBotRunspeed());
+										
+					RunTo(Goal.x, Goal.y, Goal.z);
 					return;
 				}
 				else {
 					if (IsMoving())
 						StopMoving();
-					else
-						SendPosition();
 
 					return;
 				}
 			}
 
 			// Fix Z when following during pull, not when engaged and stationary
-			if (IsMoving() && fix_z_timer_engaged.Check()) {
-				FixZ();
-				return;
-			}
 
 			if (GetTarget() && GetTarget()->IsFeared() && !spellend_timer.Enabled() && AI_think_timer->Check()) {
 				if (!IsFacingMob(GetTarget()))
@@ -2753,8 +2738,6 @@ void Bot::AI_Process() {
 		} // end not in combat range
 
 		if (!IsMoving() && !spellend_timer.Enabled()) { // This may actually need work...
-			SendPosition();
-
 			if (GetBotStance() == BotStancePassive)
 				return;
 			
@@ -2789,10 +2772,10 @@ void Bot::AI_Process() {
 				if (IsMoving())
 					StopMoving();
 
-				Warp(glm::vec3(my_guard));
+				Teleport(my_guard);
 
 				if (HasPet())
-					GetPet()->Warp(glm::vec3(my_guard));
+					GetPet()->Teleport(my_guard);
 
 				return;
 			}
@@ -2802,10 +2785,10 @@ void Bot::AI_Process() {
 			if (IsMoving())
 				StopMoving();
 
-			Warp(glm::vec3(leash_owner->GetPosition()));
+			Teleport(leash_owner->GetPosition());
 			
 			if (HasPet())
-				GetPet()->Warp(glm::vec3(leash_owner->GetPosition()));
+				GetPet()->Teleport(leash_owner->GetPosition());
 
 			return;
 		}
@@ -2833,23 +2816,18 @@ void Bot::AI_Process() {
 					if (rest_timer.Enabled())
 						rest_timer.Disable();
 
-					int speed = GetBotRunspeed();
+					bool running = true;
 					if (fm_dist < GetFollowDistance() + BOT_FOLLOW_DISTANCE_WALK)
-						speed = GetBotWalkspeed();
+						running = false;
 
 					Goal = follow_mob->GetPosition();
 
-					if (RuleB(Bots, UsePathing) && zone->pathing) {
-						bool WaypointChanged, NodeReached;
-
-						Goal = UpdatePath(Goal.x, Goal.y, Goal.z,
-							speed, WaypointChanged, NodeReached);
-
-						if (WaypointChanged)
-							tar_ndx = 20;
+					if (running) {
+						RunTo(Goal.x, Goal.y, Goal.z);
 					}
-
-					CalculateNewPosition(Goal.x, Goal.y, Goal.z, speed);
+					else {
+						WalkTo(Goal.x, Goal.y, Goal.z);
+					}
 					return;
 				}
 			}
@@ -2931,14 +2909,14 @@ void Bot::PetAIProcess() {
 				if(botPet->GetClass() == ROGUE && !petHasAggro && !botPet->BehindMob(botPet->GetTarget(), botPet->GetX(), botPet->GetY())) {
 					// Move the rogue to behind the mob
 					if(botPet->PlotPositionAroundTarget(botPet->GetTarget(), newX, newY, newZ)) {
-						botPet->CalculateNewPosition(newX, newY, newZ, botPet->GetRunspeed());
+						botPet->RunTo(newX, newY, newZ);
 						return;
 					}
 				}
 				else if(GetTarget() == botPet->GetTarget() && !petHasAggro && !botPet->BehindMob(botPet->GetTarget(), botPet->GetX(), botPet->GetY())) {
 					// If the bot owner and the bot are fighting the same mob, then move the pet to the rear arc of the mob
 					if(botPet->PlotPositionAroundTarget(botPet->GetTarget(), newX, newY, newZ)) {
-						botPet->CalculateNewPosition(newX, newY, newZ, botPet->GetRunspeed());
+						botPet->RunTo(newX, newY, newZ);
 						return;
 					}
 				}
@@ -2953,7 +2931,7 @@ void Bot::PetAIProcess() {
 						moveBehindMob = true;
 
 					if(botPet->PlotPositionAroundTarget(botPet->GetTarget(), newX, newY, newZ, moveBehindMob)) {
-						botPet->CalculateNewPosition(newX, newY, newZ, botPet->GetRunspeed());
+						botPet->RunTo(newX, newY, newZ);
 						return;
 					}
 				}
@@ -3036,15 +3014,14 @@ void Bot::PetAIProcess() {
 					botPet->SetRunAnimSpeed(0);
 					if(!botPet->IsRooted()) {
 						Log(Logs::Detail, Logs::AI, "Pursuing %s while engaged.", botPet->GetTarget()->GetCleanName());
-						botPet->CalculateNewPosition(botPet->GetTarget()->GetX(), botPet->GetTarget()->GetY(), botPet->GetTarget()->GetZ(), botPet->GetOwner()->GetRunspeed());
+						botPet->RunTo(botPet->GetTarget()->GetX(), botPet->GetTarget()->GetY(), botPet->GetTarget()->GetZ());
 						return;
 					} else {
 						botPet->SetHeading(botPet->GetTarget()->GetHeading());
 						if(moved) {
 							moved = false;
-							SetCurrentSpeed(0);
-							botPet->SendPosition();
-							botPet->SetMoving(false);
+							StopNavigation();
+							botPet->StopNavigation();
 						}
 					}
 				}
@@ -3064,15 +3041,14 @@ void Bot::PetAIProcess() {
 					float dist = DistanceSquared(botPet->GetPosition(), botPet->GetTarget()->GetPosition());
 					botPet->SetRunAnimSpeed(0);
 					if(dist > 184) {
-						botPet->CalculateNewPosition(botPet->GetTarget()->GetX(), botPet->GetTarget()->GetY(), botPet->GetTarget()->GetZ(), botPet->GetTarget()->GetRunspeed());
+						botPet->RunTo(botPet->GetTarget()->GetX(), botPet->GetTarget()->GetY(), botPet->GetTarget()->GetZ());
 						return;
 					} else {
 						botPet->SetHeading(botPet->GetTarget()->GetHeading());
 						if(moved) {
 							moved = false;
-							SetCurrentSpeed(0);
-							botPet->SendPosition();
-							botPet->SetMoving(false);
+							StopNavigation();
+							botPet->StopNavigation();
 						}
 					}
 					break;
@@ -3134,7 +3110,7 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 		entity_list.AddBot(this, true, true);
 		// Load pet
 		LoadPet();
-		this->SendPosition();
+		SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0);
 		// there is something askew with spawn struct appearance fields...
 		// I re-enabled this until I can sort it out
 		uint32 itemID = 0;
@@ -5173,7 +5149,7 @@ int Bot::GetHandToHandDamage(void) {
 		// everyone uses this in the revamp!
 		int skill = GetSkill(EQEmu::skills::SkillHandtoHand);
 		int epic = 0;
-		if (CastToNPC()->GetEquipment(EQEmu::textures::armorHands) == 10652 && GetLevel() > 46)
+		if (CastToNPC()->GetEquippedItemFromTextureSlot(EQEmu::textures::armorHands) == 10652 && GetLevel() > 46)
 			epic = 280;
 		if (epic > skill)
 			skill = epic;
@@ -5195,7 +5171,7 @@ int Bot::GetHandToHandDamage(void) {
 				9, 9, 9, 9, 9, 10, 10, 10, 10, 10,   // 31-40
 				10, 11, 11, 11, 11, 11, 11, 12, 12}; // 41-49
 	if (GetClass() == MONK) {
-		if (CastToNPC()->GetEquipment(EQEmu::textures::armorHands) == 10652 && GetLevel() > 50)
+		if (CastToNPC()->GetEquippedItemFromTextureSlot(EQEmu::textures::armorHands) == 10652 && GetLevel() > 50)
 			return 9;
 		if (level > 62)
 			return 15;
@@ -6287,7 +6263,7 @@ void Bot::DoBuffTic(const Buffs_Struct &buff, int slot, Mob* caster) {
 	Mob::DoBuffTic(buff, slot, caster);
 }
 
-bool Bot::CastSpell(uint16 spell_id, uint16 target_id, EQEmu::CastingSlot slot, int32 cast_time, int32 mana_cost,
+bool Bot::CastSpell(uint16 spell_id, uint16 target_id, EQEmu::spells::CastingSlot slot, int32 cast_time, int32 mana_cost,
 					uint32* oSpellWillFinish, uint32 item_slot, int16 *resist_adjust, uint32 aa_id) {
 	bool Result = false;
 	if(zone && !zone->IsSpellBlocked(spell_id, glm::vec3(GetPosition()))) {
@@ -6327,7 +6303,7 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, EQEmu::CastingSlot slot, 
 			return false;
 		}
 
-		if(slot < EQEmu::CastingSlot::MaxGems && !CheckFizzle(spell_id)) {
+		if(slot < EQEmu::spells::CastingSlot::MaxGems && !CheckFizzle(spell_id)) {
 			int fizzle_msg = IsBardSong(spell_id) ? MISS_NOTE : SPELL_FIZZLE;
 			InterruptSpell(fizzle_msg, 0x121, spell_id);
 
@@ -6341,7 +6317,7 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, EQEmu::CastingSlot slot, 
 			Log(Logs::Detail, Logs::Spells, "Casting a new spell/song while singing a song. Killing old song %d.", bardsong);
 			bardsong = 0;
 			bardsong_target_id = 0;
-			bardsong_slot = EQEmu::CastingSlot::Gem1;
+			bardsong_slot = EQEmu::spells::CastingSlot::Gem1;
 			bardsong_timer.Disable();
 		}
 
@@ -6471,7 +6447,7 @@ bool Bot::IsImmuneToSpell(uint16 spell_id, Mob *caster) {
 	return Result;
 }
 
-bool Bot::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_center, CastAction_type &CastAction, EQEmu::CastingSlot slot) {
+bool Bot::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_center, CastAction_type &CastAction, EQEmu::spells::CastingSlot slot) {
 	bool Result = false;
 	SpellTargetType targetType = spells[spell_id].targettype;
 	if(targetType == ST_GroupClientAndPet) {
@@ -6484,7 +6460,7 @@ bool Bot::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 	return Result;
 }
 
-bool Bot::DoCastSpell(uint16 spell_id, uint16 target_id, EQEmu::CastingSlot slot, int32 cast_time, int32 mana_cost, uint32* oSpellWillFinish, uint32 item_slot, uint32 aa_id) {
+bool Bot::DoCastSpell(uint16 spell_id, uint16 target_id, EQEmu::spells::CastingSlot slot, int32 cast_time, int32 mana_cost, uint32* oSpellWillFinish, uint32 item_slot, uint32 aa_id) {
 	bool Result = false;
 	if(GetClass() == BARD)
 		cast_time = 0;
@@ -6588,7 +6564,7 @@ void Bot::GenerateSpecialAttacks() {
 		SetSpecialAbility(SPECATK_TRIPLE, 1);
 }
 
-bool Bot::DoFinishedSpellAETarget(uint16 spell_id, Mob* spellTarget, EQEmu::CastingSlot slot, bool& stopLogic) {
+bool Bot::DoFinishedSpellAETarget(uint16 spell_id, Mob* spellTarget, EQEmu::spells::CastingSlot slot, bool& stopLogic) {
 	if(GetClass() == BARD) {
 		if(!ApplyNextBardPulse(bardsong, this, bardsong_slot))
 			InterruptSpell(SONG_ENDS_ABRUPTLY, 0x121, bardsong);
@@ -6598,7 +6574,7 @@ bool Bot::DoFinishedSpellAETarget(uint16 spell_id, Mob* spellTarget, EQEmu::Cast
 	return true;
 }
 
-bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQEmu::CastingSlot slot, bool& stopLogic) {
+bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQEmu::spells::CastingSlot slot, bool& stopLogic) {
 	if(spellTarget) {
 		if(IsGrouped() && (spellTarget->IsBot() || spellTarget->IsClient()) && RuleB(Bots, GroupBuffing)) {
 			bool noGroupSpell = false;
@@ -6610,7 +6586,7 @@ bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQEmu::
 				bool spelltypeequal = ((spelltype == 2) || (spelltype == 16) || (spelltype == 32));
 				bool spelltypetargetequal = ((spelltype == 8) && (spells[thespell].targettype == ST_Self));
 				bool spelltypeclassequal = ((spelltype == 1024) && (GetClass() == SHAMAN));
-				bool slotequal = (slot == EQEmu::CastingSlot::Item);
+				bool slotequal = (slot == EQEmu::spells::CastingSlot::Item);
 				if(spellequal || slotequal) {
 					if((spelltypeequal || spelltypetargetequal) || spelltypeclassequal || slotequal) {
 						if(((spells[thespell].effectid[0] == 0) && (spells[thespell].base[0] < 0)) &&
@@ -6649,7 +6625,7 @@ bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQEmu::
 	return true;
 }
 
-bool Bot::DoFinishedSpellGroupTarget(uint16 spell_id, Mob* spellTarget, EQEmu::CastingSlot slot, bool& stopLogic) {
+bool Bot::DoFinishedSpellGroupTarget(uint16 spell_id, Mob* spellTarget, EQEmu::spells::CastingSlot slot, bool& stopLogic) {
 	bool isMainGroupMGB = false;
 	if(isMainGroupMGB && (GetClass() != BARD)) {
 		BotGroupSay(this, "MGB %s", spells[spell_id].name);
@@ -7185,14 +7161,14 @@ int32 Bot::CalcMaxHP() {
 	bot_hp += GroupLeadershipAAHealthEnhancement();
 	bot_hp += (bot_hp * ((spellbonuses.MaxHPChange + itembonuses.MaxHPChange) / 10000.0f));
 	max_hp = bot_hp;
-	if (cur_hp > max_hp)
-		cur_hp = max_hp;
+	if (current_hp > max_hp)
+		current_hp = max_hp;
 
 	int hp_perc_cap = spellbonuses.HPPercCap[0];
 	if(hp_perc_cap) {
 		int curHP_cap = ((max_hp * hp_perc_cap) / 100);
-		if (cur_hp > curHP_cap || (spellbonuses.HPPercCap[1] && cur_hp > spellbonuses.HPPercCap[1]))
-			cur_hp = curHP_cap;
+		if (current_hp > curHP_cap || (spellbonuses.HPPercCap[1] && current_hp > spellbonuses.HPPercCap[1]))
+			current_hp = curHP_cap;
 	}
 	return max_hp;
 }
@@ -8732,7 +8708,7 @@ bool Bot::UseDiscipline(uint32 spell_id, uint32 target) {
 	if(IsCasting())
 		InterruptSpell();
 
-	CastSpell(spell_id, target, EQEmu::CastingSlot::Discipline);
+	CastSpell(spell_id, target, EQEmu::spells::CastingSlot::Discipline);
 	return true;
 }
 

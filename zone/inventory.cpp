@@ -113,7 +113,7 @@ uint32 Client::NukeItem(uint32 itemnum, uint8 where_to_check) {
 					x++;
 				}
 
-				DeleteItemInInventory(i, 0, ((i - EQEmu::invslot::BANK_BEGIN) >= GetInv().GetLookup()->InventoryTypeSize[EQEmu::invtype::typeBank]));
+				DeleteItemInInventory(i, 0, ((i - EQEmu::invslot::BANK_BEGIN) >= GetInv().GetLookup()->InventoryTypeSize.Bank));
 			}
 		}
 
@@ -126,7 +126,7 @@ uint32 Client::NukeItem(uint32 itemnum, uint8 where_to_check) {
 					x++;
 				}
 
-				DeleteItemInInventory(i, 0, (((i - EQEmu::invbag::BANK_BAGS_BEGIN) / EQEmu::invbag::SLOT_COUNT) >= GetInv().GetLookup()->InventoryTypeSize[EQEmu::invtype::typeBank]));
+				DeleteItemInInventory(i, 0, (((i - EQEmu::invbag::BANK_BAGS_BEGIN) / EQEmu::invbag::SLOT_COUNT) >= GetInv().GetLookup()->InventoryTypeSize.Bank));
 			}
 		}
 	}
@@ -781,12 +781,12 @@ int32 Client::GetItemIDAt(int16 slot_id) {
 			return INVALID_ID;
 	}
 	else if (slot_id <= EQEmu::invslot::BANK_END && slot_id >= EQEmu::invslot::BANK_BEGIN) {
-		if ((slot_id - EQEmu::invslot::BANK_BEGIN) >= GetInv().GetLookup()->InventoryTypeSize[EQEmu::invtype::typeBank])
+		if ((slot_id - EQEmu::invslot::BANK_BEGIN) >= GetInv().GetLookup()->InventoryTypeSize.Bank)
 			return INVALID_ID;
 	}
 	else if (slot_id <= EQEmu::invbag::BANK_BAGS_END && slot_id >= EQEmu::invbag::BANK_BAGS_BEGIN) {
 		auto temp_slot = (slot_id - EQEmu::invbag::BANK_BAGS_BEGIN) / EQEmu::invbag::SLOT_COUNT;
-		if (temp_slot >= GetInv().GetLookup()->InventoryTypeSize[EQEmu::invtype::typeBank])
+		if (temp_slot >= GetInv().GetLookup()->InventoryTypeSize.Bank)
 			return INVALID_ID;
 	}
 
@@ -811,12 +811,12 @@ int32 Client::GetAugmentIDAt(int16 slot_id, uint8 augslot) {
 			return INVALID_ID;
 	}
 	else if (slot_id <= EQEmu::invslot::BANK_END && slot_id >= EQEmu::invslot::BANK_BEGIN) {
-		if ((slot_id - EQEmu::invslot::BANK_BEGIN) >= GetInv().GetLookup()->InventoryTypeSize[EQEmu::invtype::typeBank])
+		if ((slot_id - EQEmu::invslot::BANK_BEGIN) >= GetInv().GetLookup()->InventoryTypeSize.Bank)
 			return INVALID_ID;
 	}
 	else if (slot_id <= EQEmu::invbag::BANK_BAGS_END && slot_id >= EQEmu::invbag::BANK_BAGS_BEGIN) {
 		auto temp_slot = (slot_id - EQEmu::invbag::BANK_BAGS_BEGIN) / EQEmu::invbag::SLOT_COUNT;
-		if (temp_slot >= GetInv().GetLookup()->InventoryTypeSize[EQEmu::invtype::typeBank])
+		if (temp_slot >= GetInv().GetLookup()->InventoryTypeSize.Bank)
 			return INVALID_ID;
 	}
 
@@ -1474,11 +1474,11 @@ bool Client::IsValidSlot(uint32 slot) {
 		return ((((uint64)1 << temp_slot) & GetInv().GetLookup()->PossessionsBitmask) != 0);
 	}
 	else if (slot <= EQEmu::invslot::BANK_END && slot >= EQEmu::invslot::BANK_BEGIN) {
-		return ((slot - EQEmu::invslot::BANK_BEGIN) < GetInv().GetLookup()->InventoryTypeSize[EQEmu::invtype::typeBank]);
+		return ((slot - EQEmu::invslot::BANK_BEGIN) < GetInv().GetLookup()->InventoryTypeSize.Bank);
 	}
 	else if (slot <= EQEmu::invbag::BANK_BAGS_END && slot >= EQEmu::invbag::BANK_BAGS_BEGIN) {
 		auto temp_slot = (slot - EQEmu::invbag::BANK_BAGS_BEGIN) / EQEmu::invbag::SLOT_COUNT;
-		return (temp_slot < GetInv().GetLookup()->InventoryTypeSize[EQEmu::invtype::typeBank]);
+		return (temp_slot < GetInv().GetLookup()->InventoryTypeSize.Bank);
 	}
 	else if (
 		(slot == (uint32)INVALID_INDEX) ||
@@ -2500,7 +2500,7 @@ void Client::DisenchantSummonedBags(bool client_update)
 	}
 
 	for (auto slot_id = EQEmu::invslot::BANK_BEGIN; slot_id <= EQEmu::invslot::BANK_END; ++slot_id) {
-		if ((slot_id - EQEmu::invslot::BANK_BEGIN) >= GetInv().GetLookup()->InventoryTypeSize[EQEmu::invtype::typeBank])
+		if ((slot_id - EQEmu::invslot::BANK_BEGIN) >= GetInv().GetLookup()->InventoryTypeSize.Bank)
 			continue;
 
 		auto inst = m_inv[slot_id];
@@ -2627,7 +2627,7 @@ void Client::RemoveNoRent(bool client_update)
 	}
 
 	for (auto slot_id = EQEmu::invslot::BANK_BEGIN; slot_id <= EQEmu::invslot::BANK_END; ++slot_id) {
-		if ((slot_id - EQEmu::invslot::BANK_BEGIN) >= GetInv().GetLookup()->InventoryTypeSize[EQEmu::invtype::typeBank])
+		if ((slot_id - EQEmu::invslot::BANK_BEGIN) >= GetInv().GetLookup()->InventoryTypeSize.Bank)
 			continue;
 
 		auto inst = m_inv[slot_id];
@@ -2639,7 +2639,7 @@ void Client::RemoveNoRent(bool client_update)
 
 	for (auto slot_id = EQEmu::invbag::BANK_BAGS_BEGIN; slot_id <= EQEmu::invbag::BANK_BAGS_END; ++slot_id) {
 		auto temp_slot = (slot_id - EQEmu::invbag::BANK_BAGS_BEGIN) / EQEmu::invbag::SLOT_COUNT;
-		if (temp_slot >= GetInv().GetLookup()->InventoryTypeSize[EQEmu::invtype::typeBank])
+		if (temp_slot >= GetInv().GetLookup()->InventoryTypeSize.Bank)
 			continue;
 
 		auto inst = m_inv[slot_id];
@@ -2745,7 +2745,7 @@ void Client::RemoveDuplicateLore(bool client_update)
 	}
 
 	for (auto slot_id = EQEmu::invslot::BANK_BEGIN; slot_id <= EQEmu::invslot::BANK_END; ++slot_id) {
-		if ((slot_id - EQEmu::invslot::BANK_BEGIN) >= GetInv().GetLookup()->InventoryTypeSize[EQEmu::invtype::typeBank])
+		if ((slot_id - EQEmu::invslot::BANK_BEGIN) >= GetInv().GetLookup()->InventoryTypeSize.Bank)
 			continue;
 
 		auto inst = m_inv.PopItem(slot_id);
@@ -2762,7 +2762,7 @@ void Client::RemoveDuplicateLore(bool client_update)
 
 	for (auto slot_id = EQEmu::invbag::BANK_BAGS_BEGIN; slot_id <= EQEmu::invbag::BANK_BAGS_END; ++slot_id) {
 		auto temp_slot = (slot_id - EQEmu::invbag::BANK_BAGS_BEGIN) / EQEmu::invbag::SLOT_COUNT;
-		if (temp_slot >= GetInv().GetLookup()->InventoryTypeSize[EQEmu::invtype::typeBank])
+		if (temp_slot >= GetInv().GetLookup()->InventoryTypeSize.Bank)
 			continue;
 
 		auto inst = m_inv.PopItem(slot_id);
@@ -2858,26 +2858,24 @@ void Client::MoveSlotNotAllowed(bool client_update)
 }
 
 // these functions operate with a material slot, which is from 0 to 8
-uint32 Client::GetEquipment(uint8 material_slot) const
+uint32 Client::GetEquippedItemFromTextureSlot(uint8 material_slot) const
 {
-	int16 invslot;
+	int16 inventory_slot;
+
 	const EQEmu::ItemInstance *item;
 
-	if(material_slot > EQEmu::textures::LastTexture)
-	{
+	if (material_slot > EQEmu::textures::LastTexture) {
 		return 0;
 	}
 
-	invslot = EQEmu::InventoryProfile::CalcSlotFromMaterial(material_slot);
-	if (invslot == INVALID_INDEX)
-	{
+	inventory_slot = EQEmu::InventoryProfile::CalcSlotFromMaterial(material_slot);
+	if (inventory_slot == INVALID_INDEX) {
 		return 0;
 	}
 
-	item = m_inv.GetItem(invslot);
+	item = m_inv.GetItem(inventory_slot);
 
-	if(item && item->GetItem())
-	{
+	if (item && item->GetItem()) {
 		return item->GetItem()->ID;
 	}
 
@@ -2889,7 +2887,7 @@ int32 Client::GetEquipmentMaterial(uint8 material_slot)
 {
 	const ItemData *item;
 
-	item = database.GetItem(GetEquipment(material_slot));
+	item = database.GetItem(GetEquippedItemFromTextureSlot(material_slot));
 	if(item != 0)
 	{
 		return item->Material;
@@ -2904,7 +2902,7 @@ uint32 Client::GetEquipmentColor(uint8 material_slot) const
 	if (material_slot > EQEmu::textures::LastTexture)
 		return 0;
 
-	const EQEmu::ItemData *item = database.GetItem(GetEquipment(material_slot));
+	const EQEmu::ItemData *item = database.GetItem(GetEquippedItemFromTextureSlot(material_slot));
 	if(item != nullptr)
 		return ((m_pp.item_tint.Slot[material_slot].UseTint) ? m_pp.item_tint.Slot[material_slot].Color : item->Color);
 
@@ -2927,12 +2925,12 @@ void Client::SendItemPacket(int16 slot_id, const EQEmu::ItemInstance* inst, Item
 			return;
 	}
 	else if (slot_id <= EQEmu::invslot::BANK_END && slot_id >= EQEmu::invslot::BANK_BEGIN) {
-		if ((slot_id - EQEmu::invslot::BANK_BEGIN) >= GetInv().GetLookup()->InventoryTypeSize[EQEmu::invtype::typeBank])
+		if ((slot_id - EQEmu::invslot::BANK_BEGIN) >= GetInv().GetLookup()->InventoryTypeSize.Bank)
 			return;
 	}
 	else if (slot_id <= EQEmu::invbag::BANK_BAGS_END && slot_id >= EQEmu::invbag::BANK_BAGS_BEGIN) {
 		auto temp_slot = (slot_id - EQEmu::invbag::BANK_BAGS_BEGIN) / EQEmu::invbag::SLOT_COUNT;
-		if (temp_slot >= GetInv().GetLookup()->InventoryTypeSize[EQEmu::invtype::typeBank])
+		if (temp_slot >= GetInv().GetLookup()->InventoryTypeSize.Bank)
 			return;
 	}
 

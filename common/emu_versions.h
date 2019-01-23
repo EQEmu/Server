@@ -39,26 +39,27 @@ namespace EQEmu
 			RoF2		// Build: 'May 10 2013 23:30:08'
 		};
 
-		enum ClientVersionBit : uint32 {
-			bit_Unknown = 0,
-			bit_Client62 = 0x00000001, // unsupported (placeholder for scripts)
-			bit_Titanium = 0x00000002,
-			bit_SoF = 0x00000004,
-			bit_SoD = 0x00000008,
-			bit_UF = 0x00000010,
-			bit_RoF = 0x00000020,
-			bit_RoF2 = 0x00000040,
-			bit_TitaniumAndEarlier = 0x00000003,
-			bit_SoFAndEarlier = 0x00000007,
-			bit_SoDAndEarlier = 0x0000000F,
-			bit_UFAndEarlier = 0x0000001F,
-			bit_RoFAndEarlier = 0x0000003F,
-			bit_SoFAndLater = 0xFFFFFFFC,
-			bit_SoDAndLater = 0xFFFFFFF8,
-			bit_UFAndLater = 0xFFFFFFF0,
-			bit_RoFAndLater = 0xFFFFFFE0,
-			bit_RoF2AndLater = 0xFFFFFFC0,
-			bit_AllClients = 0xFFFFFFFF
+		enum ClientVersionBitmask : uint32 {
+			bitUnknown = 0x00000000,
+			bitClient62 = 0x00000001, // unsupported (placeholder for scripts)
+			bitTitanium = 0x00000002,
+			bitSoF = 0x00000004,
+			bitSoD = 0x00000008,
+			bitUF = 0x00000010,
+			bitRoF = 0x00000020,
+			bitRoF2 = 0x00000040,
+			maskUnknown = 0x00000000,
+			maskTitaniumAndEarlier = 0x00000003,
+			maskSoFAndEarlier = 0x00000007,
+			maskSoDAndEarlier = 0x0000000F,
+			maskUFAndEarlier = 0x0000001F,
+			maskRoFAndEarlier = 0x0000003F,
+			maskSoFAndLater = 0xFFFFFFFC,
+			maskSoDAndLater = 0xFFFFFFF8,
+			maskUFAndLater = 0xFFFFFFF0,
+			maskRoFAndLater = 0xFFFFFFE0,
+			maskRoF2AndLater = 0xFFFFFFC0,
+			maskAllClients = 0xFFFFFFFF
 		};
 
 		const ClientVersion LastClientVersion = ClientVersion::RoF2;
@@ -69,9 +70,7 @@ namespace EQEmu
 		const char* ClientVersionName(ClientVersion client_version);
 		uint32 ConvertClientVersionToClientVersionBit(ClientVersion client_version);
 		ClientVersion ConvertClientVersionBitToClientVersion(uint32 client_version_bit);
-		uint32 ConvertClientVersionToExpansion(ClientVersion client_version);
-
-
+		
 		enum class MobVersion : uint32 {
 			Unknown = 0,
 			Client62,
@@ -136,6 +135,87 @@ namespace EQEmu
 		};
 
 	} /*versions*/
+
+	namespace expansions {
+		enum class Expansion : uint32 {
+			EverQuest = 0,
+			RoK,
+			SoV,
+			SoL,
+			PoP,
+			LoY,
+			LDoN,
+			GoD,
+			OoW,
+			DoN,
+			DoD,
+			PoR,
+			TSS,
+			TBS,
+			SoF,
+			SoD,
+			UF,
+			HoT,
+			VoA,
+			RoF,
+			CotF
+		};
+
+		enum ExpansionBitmask : uint32 {
+			bitEverQuest = 0x00000000,
+			bitRoK = 0x00000001,
+			bitSoV = 0x00000002,
+			bitSoL = 0x00000004,
+			bitPoP = 0x00000008,
+			bitLoY = 0x00000010,
+			bitLDoN = 0x00000020,
+			bitGoD = 0x00000040,
+			bitOoW = 0x00000080,
+			bitDoN = 0x00000100,
+			bitDoD = 0x00000200,
+			bitPoR = 0x00000400,
+			bitTSS = 0x00000800,
+			bitTBS = 0x00001000,
+			bitSoF = 0x00002000,
+			bitSoD = 0x00004000,
+			bitUF = 0x00008000,
+			bitHoT = 0x00010000,
+			bitVoA = 0x00020000,
+			bitRoF = 0x00040000,
+			bitCotF = 0x00080000,
+			maskEverQuest = 0x00000000,
+			maskRoK = 0x00000001,
+			maskSoV = 0x00000003,
+			maskSoL = 0x00000007,
+			maskPoP = 0x0000000F,
+			maskLoY = 0x0000001F,
+			maskLDoN = 0x0000003F,
+			maskGoD = 0x0000007F,
+			maskOoW = 0x000000FF,
+			maskDoN = 0x000001FF,
+			maskDoD = 0x000003FF,
+			maskPoR = 0x000007FF,
+			maskTSS = 0x00000FFF,
+			maskTBS = 0x00001FFF,
+			maskSoF = 0x00003FFF,
+			maskSoD = 0x00007FFF,
+			maskUF = 0x0000FFFF,
+			maskHoT = 0x0001FFFF,
+			maskVoA = 0x0003FFFF,
+			maskRoF = 0x0007FFFF,
+			maskCotF = 0x000FFFFF
+		};
+
+		const char* ExpansionName(Expansion expansion);
+		const char* ExpansionName(uint32 expansion_bit);
+		uint32 ConvertExpansionToExpansionBit(Expansion expansion);
+		Expansion ConvertExpansionBitToExpansion(uint32 expansion_bit);
+		uint32 ConvertExpansionToExpansionMask(Expansion expansion);
+		Expansion ConvertClientVersionToExpansion(versions::ClientVersion client_version);
+		uint32 ConvertClientVersionToExpansionBit(versions::ClientVersion client_version);
+		uint32 ConvertClientVersionToExpansionMask(versions::ClientVersion client_version);
+
+	} /*expansions*/
 
 } /*EQEmu*/
 

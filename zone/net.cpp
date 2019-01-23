@@ -110,7 +110,7 @@ EQEmuLogSys LogSys;
 const SPDat_Spell_Struct* spells;
 int32 SPDAT_RECORDS = -1;
 const ZoneConfig *Config;
-uint64_t frame_time = 0;
+double frame_time = 0.0;
 
 void Shutdown();
 extern void MapOpcodes();
@@ -362,18 +362,21 @@ int main(int argc, char** argv) {
 		std::string tmp;
 		if (database.GetVariable("RuleSet", tmp)) {
 			Log(Logs::General, Logs::Zone_Server, "Loading rule set '%s'", tmp.c_str());
-			if (!RuleManager::Instance()->LoadRules(&database, tmp.c_str())) {
+			if (!RuleManager::Instance()->LoadRules(&database, tmp.c_str(), false)) {
 				Log(Logs::General, Logs::Error, "Failed to load ruleset '%s', falling back to defaults.", tmp.c_str());
 			}
 		}
 		else {
-			if (!RuleManager::Instance()->LoadRules(&database, "default")) {
+			if (!RuleManager::Instance()->LoadRules(&database, "default", false)) {
 				Log(Logs::General, Logs::Zone_Server, "No rule set configured, using default rules");
 			}
 			else {
 				Log(Logs::General, Logs::Zone_Server, "Loaded default rule set 'default'", tmp.c_str());
 			}
 		}
+
+		EQEmu::InitializeDynamicLookups();
+		Log(Logs::General, Logs::Zone_Server, "Initialized dynamic dictionary entries");
 	}
 
 #ifdef BOTS
@@ -453,7 +456,7 @@ int main(int argc, char** argv) {
 
 		//Calculate frame time
 		std::chrono::time_point<std::chrono::system_clock> frame_now = std::chrono::system_clock::now();
-		frame_time = std::chrono::duration_cast<std::chrono::milliseconds>(frame_now - frame_prev).count();
+		frame_time = std::chrono::duration_cast<std::chrono::duration<double>>(frame_now - frame_prev).count();
 		frame_prev = frame_now;
 
 		if (!eqsf_open && Config->ZonePort != 0) {

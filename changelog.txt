@@ -1,5 +1,93 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+
+== 1/20/2019 ==
+Uleat: Added 'spells' entry to EQDictionary
+Akkadius:
+    - [Command] Extended #goto via #goto <player_name> -
+        - This will work cross zone, cross instance, in zone etc.
+        - It works on top of the original #goto (target) and #goto x y z
+    - [Command] Implemented server side #who Example: https://bit.ly/2TZ2hvI
+        - Searches can be filtered by
+            - Account Name
+            - Base Class Name
+            - Guild Name
+            - IP
+            - Player Name
+            - Race Name
+            - Zone Short Name
+        - Features a clickable (Goto) saylink that will bring you directly to a player regardless of
+            whether or not they are in an instance
+    - [Command] Implemented: #gmzone [zone_short_name] [zone_version=0] [identifier=gmzone]
+        - Zones to a private GM instance
+            - Example: https://i.imgur.com/qswdrzO.gif
+    - [NPC] Fix issue where NPC's clip into the world and the client interprets them at 0,0,0
+        - This issue would show itself when NPC's would bunch up by a zone-in
+
+== 1/15/2019 ==
+Uleat: Activated per-expansion support for active inventory slot addressing
+	- Server honors expansions that alter bank size and power source, general9 and general10 slots
+	- Server honors gm flag behaviors for the active inventory slots of each client
+
+== 1/11/2019 ==
+Uleat: Modified rules system to ignore all runtime modifications of 'World:ExpansionSettings' and 'World:UseClientBasedExpansionSettings' fields.
+	- These fields are no longer allowed to be changed during server runtime through the command system
+	- Major syncronization issues between server and clients result when these fields are altered in-game
+	- It is not recommended to update these fields via sql queries while the server is in operation
+	- Failure to observe these warnings will result in abhorant behavior and loss of items
+	- Modify these fields during server operation at your own risk!
+
+== 1/4/2019 ==
+Akkadius: [Scaling] Global base scaling data has been updated in new database binary revision
+
+== 1/1/2019 ==
+Akkadius:
+    - [Logging] Added new logging category "MobAppearance"
+    - [DevTools] Proximity show of NPC now shows a "Path finding" circle around the proximity nodes to more clearly display
+    - [Scaling] Global base scaling data now refreshes from the database on #repop
+    - [Commands] Implemented command #killallnpcs [npc_name] for testing, leave blank for all attackable NPC's
+    - NPC and Player Textures
+        - Textures that have been changed with #wearchange / #wc or any wearchange quest script call will now stick
+            for new clients entering a zone
+        - Weapon models for NPCs changed using wearchange will stick as well during combat and when new clients enter the zone
+        - The above changes allow for customization of a zone and NPC's without needing static data configured on npc_types
+            table data and allows for much more customization options
+        - Implemented Quest API Calls
+            Perl
+                $client->SetPrimaryWeaponOrnamentation(uint32 model_id);
+                $client->SetSecondaryWeaponOrnamentation(uint32 model_id);
+            Lua
+                client:SetPrimaryWeaponOrnamentation(uint32 model_id);
+                client:SetSecondaryWeaponOrnamentation(uint32 model_id);
+            - Both of these API calls persist an ornamentation to the weapon in the inventory table and will load both
+                in character select and cross zone
+
+== 12/30/2018 ==
+
+Akkadius (KLS):
+
+# NPC Movement Overhaul
+
+"Recently, we landed massive changes to pathing logic (Navmesh) with NPC's that took a while to iron out but has been
+    an immensely positive addition to the EQEmu server core. With that, it's made us realize how much some related
+    functionality needed to be addressed and that involves "NPC movement logic". We've been needing to address
+    NPC movement logic for years as it has been fragmented and inconsistent all over the code which has made
+    fixing actual movement related issues a nightmare. There are many other technical things that we can go
+    into about it but the important part is that it is much improved! Special thanks to KLS for putting in a
+    lot of work to make this happen"
+
+    - NPC's should now smoothly path between source and destination, rather than "skipping" all over the place between
+        path points and sending sometimes several position updates, there should only be one update until NPC
+        changes heading or speed
+    - NPC pathing during flee and fear should be far improved
+    - NPC pathing inside of water should be far improved
+    - NPC transitions between water and land should now be seamless
+    - NPC transitions over verticals (hills) should be smoother as well
+    - NPC "Stuck" logic during path finding should be improved
+    - NPC Z coordinate plane correction now occurs during path calculation projection properly (as it should) instead of
+        brute forcing the current Z location along different path projections
+        - Example: https://bit.ly/2Ssn4Yp
+
 == 12/16/2018 ==
 Akkadius:
     - Implemented: Global Base Scaling: https://github.com/EQEmu/Server/wiki/NPC-Scaling

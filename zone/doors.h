@@ -49,7 +49,7 @@ public:
 	void ForceClose(Mob *sender, bool alt_mode = false);
 	void ForceOpen(Mob *sender, bool alt_mode = false);
 	void HandleClick(Client *sender, uint8 trigger);
-	void NPCOpen(NPC *sender, bool alt_mode = false);
+	void Open(Mob *sender, bool alt_mode = false);
 	void SetDisableTimer(bool flag);
 	void SetDoorName(const char *name);
 	void SetEntityID(uint32 entity) { entity_id = entity; }

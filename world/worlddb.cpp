@@ -36,7 +36,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 {
 	/* Set Character Creation Limit */
 	EQEmu::versions::ClientVersion client_version = EQEmu::versions::ConvertClientVersionBitToClientVersion(clientVersionBit);
-	size_t character_limit = EQEmu::constants::Lookup(client_version)->CharacterCreationLimit;
+	size_t character_limit = EQEmu::constants::StaticLookup(client_version)->CharacterCreationLimit;
 	
 	// Validate against absolute server max
 	if (character_limit > EQEmu::constants::CHARACTER_CREATION_LIMIT)
@@ -97,7 +97,10 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 		CharacterSelectEntry_Struct *cse = (CharacterSelectEntry_Struct *)buff_ptr;
 		PlayerProfile_Struct pp;
 		EQEmu::InventoryProfile inv;
+
 		inv.SetInventoryVersion(client_version);
+		inv.SetGMInventory(true); // charsel can not interact with items..but, no harm in setting to full expansion support
+
 		uint32 character_id = (uint32)atoi(row[0]);
 		uint8 has_home = 0;
 		uint8 has_bind = 0;

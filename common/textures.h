@@ -65,6 +65,12 @@ namespace EQEmu
 			uint32 Unknown2; // same as material?
 		};
 
+		struct InternalTexture_Struct {
+			uint32 HerosForgeModel;
+			uint32 Material;
+			uint32 Color;
+		};
+
 		struct TextureMaterial_Struct {
 			uint32 Material;
 		};
@@ -97,6 +103,23 @@ namespace EQEmu
 				textures::Texture_Struct Secondary;
 			};
 			textures::Texture_Struct Slot[textures::materialCount];
+		};
+	};
+
+	struct InternalTextureProfile {
+		union {
+			struct {
+				textures::InternalTexture_Struct Head;
+				textures::InternalTexture_Struct Chest;
+				textures::InternalTexture_Struct Arms;
+				textures::InternalTexture_Struct Wrist;
+				textures::InternalTexture_Struct Hands;
+				textures::InternalTexture_Struct Legs;
+				textures::InternalTexture_Struct Feet;
+				textures::InternalTexture_Struct Primary;
+				textures::InternalTexture_Struct Secondary;
+			};
+			textures::InternalTexture_Struct Slot[textures::materialCount];
 		};
 	};
 

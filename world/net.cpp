@@ -336,18 +336,21 @@ int main(int argc, char** argv) {
 		std::string tmp;
 		if (database.GetVariable("RuleSet", tmp)) {
 			Log(Logs::General, Logs::World_Server, "Loading rule set '%s'", tmp.c_str());
-			if (!RuleManager::Instance()->LoadRules(&database, tmp.c_str())) {
+			if (!RuleManager::Instance()->LoadRules(&database, tmp.c_str(), false)) {
 				Log(Logs::General, Logs::World_Server, "Failed to load ruleset '%s', falling back to defaults.", tmp.c_str());
 			}
 		}
 		else {
-			if (!RuleManager::Instance()->LoadRules(&database, "default")) {
+			if (!RuleManager::Instance()->LoadRules(&database, "default", false)) {
 				Log(Logs::General, Logs::World_Server, "No rule set configured, using default rules");
 			}
 			else {
 				Log(Logs::General, Logs::World_Server, "Loaded default rule set 'default'", tmp.c_str());
 			}
 		}
+
+		EQEmu::InitializeDynamicLookups();
+		Log(Logs::General, Logs::World_Server, "Initialized dynamic dictionary entries");
 	}
 
 	if (RuleB(World, ClearTempMerchantlist)) {

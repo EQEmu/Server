@@ -33,6 +33,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "zone.h"
 #include "lua_parser.h"
 #include "fastmath.h"
+#include "mob.h"
+
 
 #include <assert.h>
 #include <stdio.h>
@@ -1524,7 +1526,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 		IsValidSpell(aabonuses.SkillAttackProc[2])) {
 		float chance = aabonuses.SkillAttackProc[0] / 1000.0f;
 		if (zone->random.Roll(chance))
-			SpellFinished(aabonuses.SkillAttackProc[2], other, EQEmu::CastingSlot::Item, 0, -1,
+			SpellFinished(aabonuses.SkillAttackProc[2], other, EQEmu::spells::CastingSlot::Item, 0, -1,
 				spells[aabonuses.SkillAttackProc[2]].ResistDiff);
 	}
 	other->Damage(this, my_hit.damage_done, SPELL_UNKNOWN, my_hit.skill, true, -1, false, m_specialattacks);
@@ -1792,7 +1794,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQEmu::skills::Sk
 		//this generates a lot of 'updates' to the client that the client does not need
 		BuffFadeNonPersistDeath();
 		if (RuleB(Character, UnmemSpellsOnDeath)) {
-			if ((ClientVersionBit() & EQEmu::versions::bit_SoFAndLater) && RuleB(Character, RespawnFromHover))
+			if ((ClientVersionBit() & EQEmu::versions::maskSoFAndLater) && RuleB(Character, RespawnFromHover))
 				UnmemSpellAll(true);
 			else
 				UnmemSpellAll(false);
@@ -1855,7 +1857,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQEmu::skills::Sk
 	from these and overwrite what we set in pp anyway
 	*/
 
-	if (LeftCorpse && (ClientVersionBit() & EQEmu::versions::bit_SoFAndLater) && RuleB(Character, RespawnFromHover))
+	if (LeftCorpse && (ClientVersionBit() & EQEmu::versions::maskSoFAndLater) && RuleB(Character, RespawnFromHover))
 	{
 		ClearDraggedCorpses();
 		RespawnFromHoverTimer.Start(RuleI(Character, RespawnFromHoverTimer) * 1000);
@@ -2128,7 +2130,7 @@ void NPC::Damage(Mob* other, int32 damage, uint16 spell_id, EQEmu::skills::Skill
 			if (IsLDoNTrapped())
 			{
 				Message_StringID(13, LDON_ACCIDENT_SETOFF2);
-				SpellFinished(GetLDoNTrapSpellID(), other, EQEmu::CastingSlot::Item, 0, -1, spells[GetLDoNTrapSpellID()].ResistDiff, false);
+				SpellFinished(GetLDoNTrapSpellID(), other, EQEmu::spells::CastingSlot::Item, 0, -1, spells[GetLDoNTrapSpellID()].ResistDiff, false);
 				SetLDoNTrapSpellID(0);
 				SetLDoNTrapped(false);
 				SetLDoNTrapDetected(false);
@@ -2668,12 +2670,6 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 			}
 		}
 	}
-
-	if (IsNPC() && CastToNPC()->IsUnderwaterOnly() && zone->HasWaterMap()) {
-		if (!zone->watermap->InLiquid(glm::vec3(other->GetPosition()))) {
-			return;
-		}
-	}
 	// first add self
 
 	// The damage on the hate list is used to award XP to the killer. This check is to prevent Killstealing.
@@ -2695,16 +2691,24 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 
 #ifdef BOTS
 	// if other is a bot, add the bots client to the hate list
-	if (other->IsBot()) {
-		if (other->CastToBot()->GetBotOwner() && other->CastToBot()->GetBotOwner()->CastToClient()->GetFeigned()) {
-			AddFeignMemory(other->CastToBot()->GetBotOwner()->CastToClient());
+	while (other->IsBot()) {
+		auto other_ = other->CastToBot();
+		if (!other_ || !other_->GetBotOwner())
+			break;
+
+		auto owner_ = other_->GetBotOwner()->CastToClient();
+		if (!owner_ || owner_->IsDead() || !owner_->InZone()) // added isdead and inzone checks to avoid issues in AddAutoXTarget(...) below
+			break;
+
+		if (owner_->GetFeigned()) {
+			AddFeignMemory(owner_);
 		}
-		else {
-			if (!hate_list.IsEntOnHateList(other->CastToBot()->GetBotOwner())) {
-				hate_list.AddEntToHateList(other->CastToBot()->GetBotOwner(), 0, 0, false, true);
-				other->CastToBot()->GetBotOwner()->CastToClient()->AddAutoXTarget(this);
-			}
+		else if (!hate_list.IsEntOnHateList(owner_)) {
+			hate_list.AddEntToHateList(owner_, 0, 0, false, true);
+			owner_->AddAutoXTarget(this); // this was being called on dead/out-of-zone clients
 		}
+
+		break;
 	}
 #endif //BOTS
 
@@ -2716,6 +2720,7 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 		else {
 			if (!hate_list.IsEntOnHateList(other->CastToMerc()->GetMercOwner()))
 				hate_list.AddEntToHateList(other->CastToMerc()->GetMercOwner(), 0, 0, false, true);
+			// if mercs are reworked to include adding 'this' to owner's xtarget list, this should reflect bots code above
 		}
 	} //MERC
 
@@ -3786,7 +3791,7 @@ void Mob::HealDamage(uint32 amount, Mob *caster, uint16 spell_id)
 			if (IsBuffSpell(spell_id)) { // hots
 										 // message to caster
 				if (caster->IsClient() && caster == this) {
-					if (caster->CastToClient()->ClientVersionBit() & EQEmu::versions::bit_SoFAndLater)
+					if (caster->CastToClient()->ClientVersionBit() & EQEmu::versions::maskSoFAndLater)
 						FilteredMessage_StringID(caster, MT_NonMelee, FilterHealOverTime,
 							HOT_HEAL_SELF, itoa(acthealed), spells[spell_id].name);
 					else
@@ -3794,7 +3799,7 @@ void Mob::HealDamage(uint32 amount, Mob *caster, uint16 spell_id)
 							YOU_HEALED, GetCleanName(), itoa(acthealed));
 				}
 				else if (caster->IsClient() && caster != this) {
-					if (caster->CastToClient()->ClientVersionBit() & EQEmu::versions::bit_SoFAndLater)
+					if (caster->CastToClient()->ClientVersionBit() & EQEmu::versions::maskSoFAndLater)
 						caster->FilteredMessage_StringID(caster, MT_NonMelee, FilterHealOverTime,
 							HOT_HEAL_OTHER, GetCleanName(), itoa(acthealed),
 							spells[spell_id].name);
@@ -3804,7 +3809,7 @@ void Mob::HealDamage(uint32 amount, Mob *caster, uint16 spell_id)
 				}
 				// message to target
 				if (IsClient() && caster != this) {
-					if (CastToClient()->ClientVersionBit() & EQEmu::versions::bit_SoFAndLater)
+					if (CastToClient()->ClientVersionBit() & EQEmu::versions::maskSoFAndLater)
 						FilteredMessage_StringID(this, MT_NonMelee, FilterHealOverTime,
 							HOT_HEALED_OTHER, caster->GetCleanName(),
 							itoa(acthealed), spells[spell_id].name);
@@ -5033,7 +5038,7 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 			hit.damage_done = headshot;
 		}
 		else if (GetClass() == RANGER && GetLevel() > 50) { // no double dmg on headshot
-			if (defender->IsNPC() && !defender->IsMoving() && !defender->IsRooted()) {
+			if ((defender->IsNPC() && !defender->IsMoving() && !defender->IsRooted()) || !RuleB(Combat, ArcheryBonusRequiresStationary)) {
 				hit.damage_done *= 2;
 				Message_StringID(MT_CritMelee, BOW_DOUBLE_DAMAGE);
 			}
@@ -5441,7 +5446,7 @@ void Mob::DoOffHandAttackRounds(Mob *target, ExtraAttackOptions *opts)
 	// For now, SPECATK_QUAD means innate DW when Combat:UseLiveCombatRounds is true
 	if ((GetSpecialAbility(SPECATK_INNATE_DW) ||
 		(RuleB(Combat, UseLiveCombatRounds) && GetSpecialAbility(SPECATK_QUAD))) ||
-		GetEquipment(EQEmu::textures::weaponSecondary) != 0) {
+		GetEquippedItemFromTextureSlot(EQEmu::textures::weaponSecondary) != 0) {
 		if (CheckDualWield()) {
 			Attack(target, EQEmu::invslot::slotSecondary, false, false, false, opts);
 			if (CanThisClassDoubleAttack() && GetLevel() > 35 && CheckDoubleAttack()) {

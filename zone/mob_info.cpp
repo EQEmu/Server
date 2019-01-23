@@ -618,6 +618,10 @@ inline void NPCCommandsMenu(Client* client, NPC* npc)
 		menu_commands += "[" + EQEmu::SayLinkEngine::GenerateQuestSaylink("#npcloot show", false, "Loot") + "] ";
 	}
 
+	if (npc->IsProximitySet()) {
+		menu_commands += "[" + EQEmu::SayLinkEngine::GenerateQuestSaylink("#proximity show", false, "Proximity") + "] ";
+	}
+
 	if (menu_commands.length() > 0) {
 		std::string dev_menu = "[" + EQEmu::SayLinkEngine::GenerateQuestSaylink("#devtools", false, "DevTools") + "] ";;
 		client->Message(0, "| %s [Show Commands] %s", dev_menu.c_str(), menu_commands.c_str());
@@ -813,7 +817,7 @@ void Mob::DisplayInfo(Mob *mob)
 			NPCCommandsMenu(client, npc);
 		}
 
-		std::cout << "Window Length: " << window_text.length() << std::endl;
+		// std::cout << "Window Length: " << window_text.length() << std::endl;
 
 		if (client->GetDisplayMobInfoWindow()) {
 			client->SendFullPopup(

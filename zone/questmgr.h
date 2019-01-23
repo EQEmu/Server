@@ -252,7 +252,7 @@ public:
 	const char* getguildnamebyid(int guild_id);
 	void SetRunning(bool val);
 	bool IsRunning();
-	void FlyMode(uint8 flymode);
+	void FlyMode(GravityBehavior flymode);
 	uint8 FactionValue();
 	void wearchange(uint8 slot, uint16 texture, uint32 hero_forge_model = 0, uint32 elite_material = 0);
 	void voicetell(const char *str, int macronum, int racenum, int gendernum);

@@ -1204,12 +1204,12 @@ bool ZoneDatabase::LoadCharacterMemmedSpells(uint32 character_id, PlayerProfile_
 	auto results = database.QueryDatabase(query);
 	int i = 0;
 	/* Initialize Spells */
-	for (i = 0; i < MAX_PP_MEMSPELL; i++){
+	for (i = 0; i < EQEmu::spells::SPELL_GEM_COUNT; i++){
 		pp->mem_spells[i] = 0xFFFFFFFF;
 	}
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		i = atoi(row[0]);
-		if (i < MAX_PP_MEMSPELL && atoi(row[1]) <= SPDAT_RECORDS){
+		if (i < EQEmu::spells::SPELL_GEM_COUNT && atoi(row[1]) <= SPDAT_RECORDS){
 			pp->mem_spells[i] = atoi(row[1]);
 		}
 	}
@@ -1227,12 +1227,12 @@ bool ZoneDatabase::LoadCharacterSpellBook(uint32 character_id, PlayerProfile_Str
 	auto results = database.QueryDatabase(query);
 	int i = 0;
 	/* Initialize Spells */
-	for (i = 0; i < MAX_PP_SPELLBOOK; i++){
+	for (i = 0; i < EQEmu::spells::SPELLBOOK_SIZE; i++){
 		pp->spell_book[i] = 0xFFFFFFFF;
 	}
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		i = atoi(row[0]);
-		if (i < MAX_PP_SPELLBOOK && atoi(row[1]) <= SPDAT_RECORDS){
+		if (i < EQEmu::spells::SPELLBOOK_SIZE && atoi(row[1]) <= SPDAT_RECORDS){
 			pp->spell_book[i] = atoi(row[1]);
 		}
 	}
@@ -1535,7 +1535,7 @@ bool ZoneDatabase::SaveCharacterTribute(uint32 character_id, PlayerProfile_Struc
 	QueryDatabase(query);
 	/* Save Tributes only if we have values... */
 	for (int i = 0; i < EQEmu::invtype::TRIBUTE_SIZE; i++){
-		if (pp->tributes[i].tribute > 0 && pp->tributes[i].tribute != TRIBUTE_NONE){
+		if (pp->tributes[i].tribute >= 0 && pp->tributes[i].tribute != TRIBUTE_NONE){
 			std::string query = StringFormat("REPLACE INTO `character_tribute` (id, tier, tribute) VALUES (%u, %u, %u)", character_id, pp->tributes[i].tier, pp->tributes[i].tribute);
 			QueryDatabase(query);
 			Log(Logs::General, Logs::None, "ZoneDatabase::SaveCharacterTribute for character ID: %i, tier:%u tribute:%u done", character_id, pp->tributes[i].tier, pp->tributes[i].tribute);
@@ -2471,7 +2471,8 @@ const NPCType* ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		"npc_types.charm_avoidance_rating, "
 		"npc_types.charm_atk, "
 		"npc_types.skip_global_loot, "
-		"npc_types.rare_spawn "
+		"npc_types.rare_spawn, "
+		"npc_types.stuck_behavior "
 		"FROM npc_types %s",
 		where_condition.c_str()
 	);
@@ -2494,7 +2495,7 @@ const NPCType* ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		temp_npctype_data->race = atoi(row[3]);
 		temp_npctype_data->class_ = atoi(row[4]);
 		temp_npctype_data->max_hp = atoi(row[5]);
-		temp_npctype_data->cur_hp = temp_npctype_data->max_hp;
+		temp_npctype_data->current_hp = temp_npctype_data->max_hp;
 		temp_npctype_data->Mana = atoi(row[6]);
 		temp_npctype_data->gender = atoi(row[7]);
 		temp_npctype_data->texture = atoi(row[8]);
@@ -2660,6 +2661,7 @@ const NPCType* ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 
 		temp_npctype_data->skip_global_loot = atoi(row[107]) != 0;
 		temp_npctype_data->rare_spawn = atoi(row[108]) != 0;
+		temp_npctype_data->stuck_behavior = atoi(row[109]);
 
 		// If NPC with duplicate NPC id already in table,
 		// free item we attempted to add.
@@ -2775,7 +2777,7 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 		tmpNPCType->race = atoi(row[3]);
 		tmpNPCType->class_ = atoi(row[4]);
 		tmpNPCType->max_hp = atoi(row[5]);
-		tmpNPCType->cur_hp = tmpNPCType->max_hp;
+		tmpNPCType->current_hp = tmpNPCType->max_hp;
 		tmpNPCType->Mana = atoi(row[6]);
 		tmpNPCType->gender = atoi(row[7]);
 		tmpNPCType->texture = atoi(row[8]);
@@ -3644,7 +3646,7 @@ void ZoneDatabase::LoadBuffs(Client *client)
 	}
 
 	// We load up to the most our client supports
-	max_slots = EQEmu::constants::Lookup(client->ClientVersion())->LongBuffs;
+	max_slots = EQEmu::spells::StaticLookup(client->ClientVersion())->LongBuffs;
 	for (int index = 0; index < max_slots; ++index) {
 		if (!IsValidSpell(buffs[index].spellid))
 			continue;

@@ -39,6 +39,7 @@
 #include "spawn2.h"
 #include "zone.h"
 #include "quest_parser_collection.h"
+#include "water_map.h"
 #include "npc_scale_manager.h"
 
 #include <cctype>
@@ -58,7 +59,7 @@ extern Zone* zone;
 extern volatile bool is_zone_loaded;
 extern EntityList entity_list;
 
-NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &position, int iflymode, bool IsCorpse)
+NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &position, GravityBehavior iflymode, bool IsCorpse)
 	: Mob(
 	npc_type_data->name,
 	npc_type_data->lastname,
@@ -506,7 +507,7 @@ void NPC::SetTarget(Mob* mob) {
 
 	if (owner) {
 		auto client = owner->CastToClient();
-		if (client->ClientVersionBit() & EQEmu::versions::bit_UFAndLater) {
+		if (client->ClientVersionBit() & EQEmu::versions::maskUFAndLater) {
 			auto app = new EQApplicationPacket(OP_PetHoTT, sizeof(ClientTarget_Struct));
 			auto ct = (ClientTarget_Struct *)app->pBuffer;
 			ct->new_target = mob ? mob->GetID() : 0;
@@ -803,9 +804,8 @@ bool NPC::Process()
 			DoGravityEffect();
 	}
 
-	if(reface_timer->Check() && !IsEngaged() && (m_GuardPoint.x == GetX() && m_GuardPoint.y == GetY() && m_GuardPoint.z == GetZ())) {
-		SetHeading(m_GuardPoint.w);
-		SendPosition();
+	if(reface_timer->Check() && !IsEngaged() && IsPositionEqualWithinCertainZ(m_Position, m_GuardPoint, 5.0f)) {
+		RotateTo(m_GuardPoint.w);
 		reface_timer->Disable();
 	}
 
@@ -973,7 +973,7 @@ bool NPC::SpawnZoneController()
 	memset(npc_type, 0, sizeof(NPCType));
 
 	strncpy(npc_type->name, "zone_controller", 60);
-	npc_type->cur_hp           = 2000000000;
+	npc_type->current_hp           = 2000000000;
 	npc_type->max_hp           = 2000000000;
 	npc_type->hp_regen         = 100000000;
 	npc_type->race             = 240;
@@ -1009,7 +1009,7 @@ bool NPC::SpawnZoneController()
 	point.y = 1000;
 	point.z = 500;
 
-	auto npc = new NPC(npc_type, nullptr, point, FlyMode3);
+	auto npc = new NPC(npc_type, nullptr, point, GravityBehavior::Flying);
 	npc->GiveNPCTypeData(npc_type);
 
 	entity_list.AddNPC(npc);
@@ -1024,7 +1024,7 @@ NPC * NPC::SpawnGridNodeNPC(std::string name, const glm::vec4 &position, uint32 
 	sprintf(npc_type->name, "%u_%u", grid_id, grid_number);
 	sprintf(npc_type->lastname, "Number: %u Grid: %u Pause: %u", grid_number, grid_id, pause);
 
-	npc_type->cur_hp           = 4000000;
+	npc_type->current_hp           = 4000000;
 	npc_type->max_hp           = 4000000;
 	npc_type->race             = 2254;
 	npc_type->gender           = 2;
@@ -1037,22 +1037,50 @@ NPC * NPC::SpawnGridNodeNPC(std::string name, const glm::vec4 &position, uint32 
 	npc_type->light            = 1;
 	npc_type->size             = 1;
 	npc_type->runspeed         = 0;
+	npc_type->merchanttype     = 1;
+	npc_type->bodytype         = 1;
+	npc_type->show_name        = true;
+	npc_type->findable         = true;
+
+	auto node_position = glm::vec4(position.x, position.y, position.z, position.w);
+	auto npc           = new NPC(npc_type, nullptr, node_position, GravityBehavior::Flying);
+	npc->GiveNPCTypeData(npc_type);
+
+	entity_list.AddNPC(npc, true, true);
+
+	return npc;
+}
+
+NPC * NPC::SpawnNodeNPC(std::string name, std::string last_name, const glm::vec4 &position) {
+	auto npc_type = new NPCType;
+	memset(npc_type, 0, sizeof(NPCType));
+
+	sprintf(npc_type->name, "%s", name.c_str());
+	sprintf(npc_type->lastname, "%s", last_name.c_str());
+
+	npc_type->current_hp       = 4000000;
+	npc_type->max_hp           = 4000000;
+	npc_type->race             = 2254;
+	npc_type->gender           = 2;
+	npc_type->class_           = 9;
+	npc_type->deity            = 1;
+	npc_type->level            = 200;
+	npc_type->npc_id           = 0;
+	npc_type->loottable_id     = 0;
+	npc_type->texture          = 1;
+	npc_type->light            = 1;
+	npc_type->size             = 3;
 	npc_type->d_melee_texture1 = 1;
 	npc_type->d_melee_texture2 = 1;
 	npc_type->merchanttype     = 1;
 	npc_type->bodytype         = 1;
 	npc_type->show_name        = true;
-	npc_type->STR              = 150;
-	npc_type->STA              = 150;
-	npc_type->DEX              = 150;
-	npc_type->AGI              = 150;
-	npc_type->INT              = 150;
-	npc_type->WIS              = 150;
-	npc_type->CHA              = 150;
 	npc_type->findable         = true;
+	npc_type->runspeed         = 1.25;
 
 	auto node_position = glm::vec4(position.x, position.y, position.z, position.w);
-	auto npc           = new NPC(npc_type, nullptr, node_position, FlyMode1);
+	auto npc           = new NPC(npc_type, nullptr, node_position, GravityBehavior::Flying);
+
 	npc->GiveNPCTypeData(npc_type);
 
 	entity_list.AddNPC(npc, true, true);
@@ -1067,33 +1095,45 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* 
 	else {
 		Seperator sep(spawncommand);
 		//Lets see if someone didn't fill out the whole #spawn function properly
-		if (!sep.IsNumber(1))
-			sprintf(sep.arg[1],"1");
-		if (!sep.IsNumber(2))
-			sprintf(sep.arg[2],"1");
-		if (!sep.IsNumber(3))
-			sprintf(sep.arg[3],"0");
-		if (atoi(sep.arg[4]) > 2100000000 || atoi(sep.arg[4]) <= 0)
-			sprintf(sep.arg[4]," ");
-		if (!strcmp(sep.arg[5],"-"))
-			sprintf(sep.arg[5]," ");
-		if (!sep.IsNumber(5))
-			sprintf(sep.arg[5]," ");
-		if (!sep.IsNumber(6))
-			sprintf(sep.arg[6],"1");
-		if (!sep.IsNumber(8))
-			sprintf(sep.arg[8],"0");
-		if (!sep.IsNumber(9))
+		if (!sep.IsNumber(1)) {
+			sprintf(sep.arg[1], "1");
+		}
+		if (!sep.IsNumber(2)) {
+			sprintf(sep.arg[2], "1");
+		}
+		if (!sep.IsNumber(3)) {
+			sprintf(sep.arg[3], "0");
+		}
+		if (atoi(sep.arg[4]) > 2100000000 || atoi(sep.arg[4]) <= 0) {
+			sprintf(sep.arg[4], " ");
+		}
+		if (!strcmp(sep.arg[5], "-")) {
+			sprintf(sep.arg[5], " ");
+		}
+		if (!sep.IsNumber(5)) {
+			sprintf(sep.arg[5], " ");
+		}
+		if (!sep.IsNumber(6)) {
+			sprintf(sep.arg[6], "1");
+		}
+		if (!sep.IsNumber(8)) {
+			sprintf(sep.arg[8], "0");
+		}
+		if (!sep.IsNumber(9)) {
 			sprintf(sep.arg[9], "0");
-		if (!sep.IsNumber(7))
-			sprintf(sep.arg[7],"0");
-		if (!strcmp(sep.arg[4],"-"))
-			sprintf(sep.arg[4]," ");
-		if (!sep.IsNumber(10))	// bodytype
+		}
+		if (!sep.IsNumber(7)) {
+			sprintf(sep.arg[7], "0");
+		}
+		if (!strcmp(sep.arg[4], "-")) {
+			sprintf(sep.arg[4], " ");
+		}
+		if (!sep.IsNumber(10)) {    // bodytype
 			sprintf(sep.arg[10], "0");
+		}
 		//Calc MaxHP if client neglected to enter it...
-		if (!sep.IsNumber(4)) {
-			sep.arg[4] = 0;
+		if (sep.arg[4] && !sep.IsNumber(4)) {
+			sprintf(sep.arg[4], "0");
 		}
 
 		// Autoselect NPC Gender
@@ -1106,7 +1146,7 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* 
 		memset(npc_type, 0, sizeof(NPCType));
 
 		strncpy(npc_type->name, sep.arg[0], 60);
-		npc_type->cur_hp           = atoi(sep.arg[4]);
+		npc_type->current_hp       = atoi(sep.arg[4]);
 		npc_type->max_hp           = atoi(sep.arg[4]);
 		npc_type->race             = atoi(sep.arg[1]);
 		npc_type->gender           = atoi(sep.arg[5]);
@@ -1136,7 +1176,7 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* 
 		npc_type->prim_melee_type = 28;
 		npc_type->sec_melee_type = 28;
 
-		auto npc = new NPC(npc_type, nullptr, position, FlyMode3);
+		auto npc = new NPC(npc_type, nullptr, position, GravityBehavior::Water);
 		npc->GiveNPCTypeData(npc_type);
 
 		entity_list.AddNPC(npc);
@@ -1348,7 +1388,7 @@ uint32 ZoneDatabase::DeleteSpawnRemoveFromNPCTypeTable(const char *zone, uint32 
 	uint32 spawngroupID = 0;
 
 	std::string query = StringFormat("SELECT id, spawngroupID FROM spawn2 WHERE zone = '%s' "
-					 "AND version = %u AND spawngroupID = %i",
+					 "AND (version = %u OR version = -1) AND spawngroupID = %i",
 					 zone, zone_version, spawn->GetSp2());
 	auto results = QueryDatabase(query);
 	if (!results.Success())
@@ -1459,38 +1499,49 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 
 int32 NPC::GetEquipmentMaterial(uint8 material_slot) const
 {
-	if (material_slot >= EQEmu::textures::materialCount)
+	int32 texture_profile_material = GetTextureProfileMaterial(material_slot);
+
+	Log(Logs::Detail, Logs::MobAppearance, "NPC::GetEquipmentMaterial [%s] material_slot: %u",
+		this->clean_name,
+		material_slot
+	);
+
+	if (texture_profile_material > 0) {
+		return texture_profile_material;
+	}
+
+	if (material_slot >= EQEmu::textures::materialCount) {
 		return 0;
+	}
 
 	int16 invslot = EQEmu::InventoryProfile::CalcSlotFromMaterial(material_slot);
-	if (invslot == INVALID_INDEX)
+	if (invslot == INVALID_INDEX) {
 		return 0;
+	}
 
-	if (equipment[invslot] == 0)
-	{
-		switch(material_slot)
-		{
-		case EQEmu::textures::armorHead:
-			return helmtexture;
-		case EQEmu::textures::armorChest:
-			return texture;
-		case EQEmu::textures::armorArms:
-			return armtexture;
-		case EQEmu::textures::armorWrist:
-			return bracertexture;
-		case EQEmu::textures::armorHands:
-			return handtexture;
-		case EQEmu::textures::armorLegs:
-			return legtexture;
-		case EQEmu::textures::armorFeet:
-			return feettexture;
-		case EQEmu::textures::weaponPrimary:
-			return d_melee_texture1;
-		case EQEmu::textures::weaponSecondary:
-			return d_melee_texture2;
-		default:
-			//they have nothing in the slot, and its not a special slot... they get nothing.
-			return(0);
+	if (equipment[invslot] == 0) {
+		switch (material_slot) {
+			case EQEmu::textures::armorHead:
+				return helmtexture;
+			case EQEmu::textures::armorChest:
+				return texture;
+			case EQEmu::textures::armorArms:
+				return armtexture;
+			case EQEmu::textures::armorWrist:
+				return bracertexture;
+			case EQEmu::textures::armorHands:
+				return handtexture;
+			case EQEmu::textures::armorLegs:
+				return legtexture;
+			case EQEmu::textures::armorFeet:
+				return feettexture;
+			case EQEmu::textures::weaponPrimary:
+				return d_melee_texture1;
+			case EQEmu::textures::weaponSecondary:
+				return d_melee_texture2;
+			default:
+				//they have nothing in the slot, and its not a special slot... they get nothing.
+				return (0);
 		}
 	}
 
@@ -2136,8 +2187,8 @@ void NPC::ModifyNPCStat(const char *identifier, const char *new_value)
 		base_hp = atoi(val.c_str());
 
 		CalcMaxHP();
-		if (cur_hp > max_hp) {
-			cur_hp = max_hp;
+		if (current_hp > max_hp) {
+			current_hp = max_hp;
 		}
 
 		return;
@@ -2318,14 +2369,14 @@ void NPC::LevelScale() {
 				base_hp += (random_level - level) * 100;
 			}
 
-			cur_hp = max_hp;
+			current_hp = max_hp;
 			max_dmg += (random_level - level) * 2;
 		} else {
 			uint8 scale_adjust = 1;
 
 			base_hp += (int)(base_hp * scaling);
 			max_hp += (int)(max_hp * scaling);
-			cur_hp = max_hp;
+			current_hp = max_hp;
 
 			if (max_dmg) {
 				max_dmg += (int)(max_dmg * scaling / scale_adjust);
@@ -2366,7 +2417,7 @@ void NPC::LevelScale() {
 		ATK += (int)(ATK * scaling);
 		base_hp += (int)(base_hp * scaling);
 		max_hp += (int)(max_hp * scaling);
-		cur_hp = max_hp;
+		current_hp = max_hp;
 		STR += (int)(STR * scaling / scale_adjust);
 		STA += (int)(STA * scaling / scale_adjust);
 		AGI += (int)(AGI * scaling / scale_adjust);
@@ -2848,4 +2899,13 @@ float NPC::GetProximityMinZ()
 float NPC::GetProximityMaxZ()
 {
 	return proximity->max_z;
+}
+
+bool NPC::IsProximitySet()
+{
+	if (proximity && proximity->proximity_set) {
+		return proximity->proximity_set;
+	}
+
+	return false;
 }

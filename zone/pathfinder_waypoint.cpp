@@ -114,7 +114,7 @@ PathfinderWaypoint::~PathfinderWaypoint()
 {
 }
 
-IPathfinder::IPath PathfinderWaypoint::FindRoute(const glm::vec3 &start, const glm::vec3 &end, bool &partial, bool &stuck)
+IPathfinder::IPath PathfinderWaypoint::FindRoute(const glm::vec3 &start, const glm::vec3 &end, bool &partial, bool &stuck, int flags)
 {
 	stuck = false;
 	partial = false;
@@ -184,7 +184,7 @@ IPathfinder::IPath PathfinderWaypoint::FindRoute(const glm::vec3 &start, const g
 	return IPath();
 }
 
-glm::vec3 PathfinderWaypoint::GetRandomLocation()
+glm::vec3 PathfinderWaypoint::GetRandomLocation(const glm::vec3 &start)
 {
 	if (m_impl->Nodes.size() > 0) {
 		auto idx = zone->random.Int(0, (int)m_impl->Nodes.size() - 1);
@@ -529,7 +529,7 @@ void PathfinderWaypoint::ShowNode(const Node &n) {
 
 	sprintf(npc_type->name, "%s", DigitToWord(n.id).c_str());
 	sprintf(npc_type->lastname, "%i", n.id);
-	npc_type->cur_hp = 4000000;
+	npc_type->current_hp = 4000000;
 	npc_type->max_hp = 4000000;
 	npc_type->race = 2254;
 	npc_type->gender = 2;
@@ -557,7 +557,7 @@ void PathfinderWaypoint::ShowNode(const Node &n) {
 
 	npc_type->findable = 1;
 	auto position = glm::vec4(n.v.x, n.v.y, n.v.z, 0.0f);
-	auto npc = new NPC(npc_type, nullptr, position, FlyMode1);
+	auto npc = new NPC(npc_type, nullptr, position, GravityBehavior::Flying);
 	npc->GiveNPCTypeData(npc_type);
 
 	entity_list.AddNPC(npc, true, true);

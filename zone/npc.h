@@ -51,6 +51,7 @@ typedef struct {
 	float min_z;
 	float max_z;
 	bool say;
+	bool proximity_set;
 } NPCProximity;
 
 struct AISpells_Struct {
@@ -106,10 +107,11 @@ public:
 	static bool	SpawnZoneController();
 	static int8 GetAILevel(bool iForceReRead = false);
 
-	NPC(const NPCType* npc_type_data, Spawn2* respawn, const glm::vec4& position, int iflymode, bool IsCorpse = false);
+	NPC(const NPCType* npc_type_data, Spawn2* respawn, const glm::vec4& position, GravityBehavior iflymode, bool IsCorpse = false);
 
 	virtual ~NPC();
 
+	static NPC *SpawnNodeNPC(std::string name, std::string last_name, const glm::vec4 &position);
 	static NPC *SpawnGridNodeNPC(std::string name, const glm::vec4 &position, uint32 grid_id, uint32 grid_number, uint32 pause);
 
 	//abstract virtual function implementations requird by base abstract class
@@ -226,9 +228,6 @@ public:
 	EmuAppearance GetGuardPointAnim() const { return guard_anim; }
 	void SaveGuardPointAnim(EmuAppearance anim) { guard_anim = anim; }
 
-	void SetFlyMode(uint8 FlyMode){ flymode=FlyMode; }
-	uint32 GetFlyMode() const { return flymode; }
-
 	uint8 GetPrimSkill()	const { return prim_melee_type; }
 	uint8 GetSecSkill()	const { return sec_melee_type; }
 	uint8 GetRangedSkill() const { return ranged_type; }
@@ -312,11 +311,11 @@ public:
 	void				MoveTo(const glm::vec4& position, bool saveguardspot);
 	void				GetClosestWaypoint(std::list<wplist> &wp_list, int count, const glm::vec3& location);
 
-	uint32				GetEquipment(uint8 material_slot) const;	// returns item id
+	uint32				GetEquippedItemFromTextureSlot(uint8 material_slot) const;	// returns item id
 	int32				GetEquipmentMaterial(uint8 material_slot) const;
 
 	void				NextGuardPosition();
-	void				SaveGuardSpot(bool iClearGuardSpot = false);
+	void				SaveGuardSpot(const glm::vec4 &pos);
 	inline bool			IsGuarding() const { return(m_GuardPoint.w != 0); }
 	void				SaveGuardSpotCharm();
 
@@ -358,6 +357,7 @@ public:
 	float GetProximityMaxY();
 	float GetProximityMinZ();
 	float GetProximityMaxZ();
+	bool  IsProximitySet();
 
 	ItemList	itemlist; //kathgar - why is this public? Doing other things or I would check the code
 
@@ -402,7 +402,7 @@ public:
 	/* Only allows players that killed corpse to loot */
 	const bool HasPrivateCorpse() const { return NPCTypedata->private_corpse; }
 
-	const bool IsUnderwaterOnly() const { return NPCTypedata->underwater; }
+	virtual const bool IsUnderwaterOnly() const { return NPCTypedata->underwater; }
 	const char* GetRawNPCTypeName() const { return NPCTypedata->name; }
 
 	void ChangeLastName(const char* in_lastname);
@@ -465,6 +465,9 @@ public:
 	uint32 GetRoamboxMinDelay() const;
 
 	std::unique_ptr<Timer> AIautocastspell_timer;
+
+	virtual int GetStuckBehavior() const { return NPCTypedata_ours ? NPCTypedata_ours->stuck_behavior : NPCTypedata->stuck_behavior; }
+
 
 protected:
 

@@ -5273,7 +5273,7 @@ void bot_subcommand_bot_summon(Client *c, const Seperator *sep)
 
 		bot_iter->WipeHateList();
 		bot_iter->SetTarget(nullptr);
-		bot_iter->Warp(glm::vec3(c->GetPosition()));
+		bot_iter->Teleport(c->GetPosition());
 		bot_iter->DoAnim(0);
 
 		if (!bot_iter->HasPet())
@@ -5281,7 +5281,7 @@ void bot_subcommand_bot_summon(Client *c, const Seperator *sep)
 
 		bot_iter->GetPet()->WipeHateList();
 		bot_iter->GetPet()->SetTarget(nullptr);
-		bot_iter->GetPet()->Warp(glm::vec3(c->GetPosition()));
+		bot_iter->GetPet()->Teleport(c->GetPosition());
 	}
 
 	if (sbl.size() == 1)
@@ -7774,7 +7774,7 @@ bool helper_cast_standard_spell(Bot* casting_bot, Mob* target_mob, int spell_id,
 	if (annouce_cast)
 		Bot::BotGroupSay(casting_bot, "Attempting to cast '%s' on %s", spells[spell_id].name, target_mob->GetCleanName());
 
-	return casting_bot->CastSpell(spell_id, target_mob->GetID(), EQEmu::CastingSlot::Gem2, -1, -1, dont_root_before);
+	return casting_bot->CastSpell(spell_id, target_mob->GetID(), EQEmu::spells::CastingSlot::Gem2, -1, -1, dont_root_before);
 }
 
 bool helper_command_alias_fail(Client *bot_owner, const char* command_handler, const char *alias, const char *command)

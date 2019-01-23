@@ -1486,6 +1486,16 @@ void Lua_Client::DisableAreaRegens()
 	self->DisableAreaRegens();
 }
 
+void Lua_Client::SetPrimaryWeaponOrnamentation(uint32 model_id) {
+	Lua_Safe_Call_Void();
+	self->SetPrimaryWeaponOrnamentation(model_id);
+}
+
+void Lua_Client::SetSecondaryWeaponOrnamentation(uint32 model_id) {
+	Lua_Safe_Call_Void();
+	self->SetSecondaryWeaponOrnamentation(model_id);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 		.def(luabind::constructor<>())
@@ -1548,6 +1558,8 @@ luabind::scope lua_register_client() {
 		.def("GetBindHeading", (float(Lua_Client::*)(int))&Lua_Client::GetBindHeading)
 		.def("GetBindZoneID", (uint32(Lua_Client::*)(void))&Lua_Client::GetBindZoneID)
 		.def("GetBindZoneID", (uint32(Lua_Client::*)(int))&Lua_Client::GetBindZoneID)
+		.def("SetPrimaryWeaponOrnamentation", (void(Lua_Client::*)(uint32))&Lua_Client::SetPrimaryWeaponOrnamentation)
+		.def("SetSecondaryWeaponOrnamentation", (void(Lua_Client::*)(uint32))&Lua_Client::SetSecondaryWeaponOrnamentation)
 		.def("MovePC", (void(Lua_Client::*)(int,float,float,float,float))&Lua_Client::MovePC)
 		.def("MovePCInstance", (void(Lua_Client::*)(int,int,float,float,float,float))&Lua_Client::MovePCInstance)
 		.def("ChangeLastName", (void(Lua_Client::*)(const char *in))&Lua_Client::ChangeLastName)
