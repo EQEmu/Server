@@ -637,15 +637,18 @@ bool AdventureManager::LoadAdventureTemplates()
 		"assa_y, assa_z, assa_h, text, duration, zone_in_time, win_points, lose_points, "
 		"theme, zone_in_zone_id, zone_in_x, zone_in_y, zone_in_object_id, dest_x, dest_y, "
 		"dest_z, dest_h, graveyard_zone_id, graveyard_x, graveyard_y, graveyard_z, "
-		"graveyard_radius, expansions FROM adventure_template";
+		"graveyard_radius, min_expansion, max_expansion FROM adventure_template";
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
 		return false;
     }
 
+	auto latest_expansion = EQEmu::expansions::ConvertExpansionMaskToLatestExpansion(RuleI(World, ExpansionSettings));
     for (auto row = results.begin(); row != results.end(); ++row) {
-		int32 expansions = atoi(row[32]);
-		if (RuleI(World, ExpansionSettings) & expansions != expansions) {
+		uint32 min_expansion = atoi(row[32]);
+		uint32 max_expansion = atoi(row[33]);
+
+		if (latest_expansion < min_expansion || latest_expansion > max_expansion) {
 			continue;
 		}
 	    auto aTemplate = new AdventureTemplate;

@@ -387,7 +387,8 @@ bool ZoneDatabase::LoadTributes() {
 
 	tribute_list.clear();
 
-	const std::string query = StringFormat("SELECT id, name, descr, unknown, isguild FROM tributes WHERE %i & expansions = expansions", RuleI(World, ExpansionSettings));
+	auto latest_expansion = EQEmu::expansions::ConvertExpansionMaskToLatestExpansion(RuleI(World, ExpansionSettings));
+	const std::string query = StringFormat("SELECT id, name, descr, unknown, isguild FROM tributes WHERE min_expansion <= %i AND max_expansion >= %i", latest_expansion, latest_expansion);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		return false;

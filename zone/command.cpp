@@ -9472,7 +9472,7 @@ void command_object(Client *c, const Seperator *sep)
 	uint32 newid = 0;
 	uint16 radius;
 	EQApplicationPacket *app;
-	auto latest_expansion = EQEmu::expansions::ConvertExpansionBitToExpansion(RuleI(World, ExpansionSettings));
+	auto latest_expansion = EQEmu::expansions::ConvertExpansionMaskToLatestExpansion(RuleI(World, ExpansionSettings));
 
 	bool bNewObject = false;
 
@@ -9504,7 +9504,7 @@ void command_object(Client *c, const Seperator *sep)
 		else
 			c->Message(0, "Objects within %u units of your current location:", radius);
 
-		auto latest_expansion = EQEmu::expansions::ConvertExpansionBitToExpansion(RuleI(World, ExpansionSettings));
+		auto latest_expansion = EQEmu::expansions::ConvertExpansionMaskToLatestExpansion(RuleI(World, ExpansionSettings));
 		std::string query;
 		if (radius)
 

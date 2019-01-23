@@ -168,7 +168,7 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 //this really loads the objects into entity_list
 bool Zone::LoadZoneObjects()
 {
-	auto latest_expansion = EQEmu::expansions::ConvertExpansionBitToExpansion(RuleI(World, ExpansionSettings));
+	auto latest_expansion = EQEmu::expansions::ConvertExpansionMaskToLatestExpansion(RuleI(World, ExpansionSettings));
 	std::string query =
 	    StringFormat("SELECT id, zoneid, xpos, ypos, zpos, heading, itemid, charges, objectname, type, icon, "
 			 "unknown08, unknown10, unknown20, unknown24, unknown76, size, tilt_x, tilt_y, display_name "
@@ -465,7 +465,7 @@ void Zone::LoadTempMerchantData() {
 void Zone::LoadNewMerchantData(uint32 merchantid) {
 
 	std::list<MerchantList> merlist;
-	auto latest_expansion = EQEmu::expansions::ConvertExpansionBitToExpansion(RuleI(World, ExpansionSettings));
+	auto latest_expansion = EQEmu::expansions::ConvertExpansionMaskToLatestExpansion(RuleI(World, ExpansionSettings));
 	std::string query = StringFormat("SELECT item, slot, faction_required, level_required, alt_currency_cost, "
                                      "classes_required, probability FROM merchantlist WHERE merchantid=%d AND min_expansion <= %i AND max_expansion >= %i ORDER BY slot", merchantid, latest_expansion, latest_expansion);
     auto results = database.QueryDatabase(query);
@@ -1705,7 +1705,7 @@ bool ZoneDatabase::LoadStaticZonePoints(LinkedList<ZonePoint*>* zone_point_list,
 {
 	zone_point_list->Clear();
 	zone->numzonepoints = 0;
-	auto latest_expansion = EQEmu::expansions::ConvertExpansionBitToExpansion(RuleI(World, ExpansionSettings));
+	auto latest_expansion = EQEmu::expansions::ConvertExpansionMaskToLatestExpansion(RuleI(World, ExpansionSettings));
 	std::string query = StringFormat("SELECT x, y, z, target_x, target_y, "
 					 "target_z, target_zone_id, heading, target_heading, "
 					 "number, target_instance, client_version_mask "

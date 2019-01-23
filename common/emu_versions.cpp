@@ -597,3 +597,28 @@ uint32 EQEmu::expansions::ConvertClientVersionToExpansionMask(versions::ClientVe
 		return expansions::maskEverQuest;
 	}
 }
+
+uint32 EQEmu::expansions::ConvertExpansionMaskToLatestExpansion(uint32 expansion_mask)
+{
+	if (expansion_mask & bitRoK == bitRoK) return static_cast<uint32>(Expansion::RoK);
+	if (expansion_mask & bitSoV == bitSoV) return static_cast<uint32>(Expansion::SoV);
+	if (expansion_mask & bitSoL == bitSoL) return static_cast<uint32>(Expansion::SoL);
+	if (expansion_mask & bitPoP == bitPoP) return static_cast<uint32>(Expansion::PoP);
+	if (expansion_mask & bitLoY == bitLoY) return static_cast<uint32>(Expansion::LoY);
+	if (expansion_mask & bitLDoN == bitLDoN) return static_cast<uint32>(Expansion::LDoN);
+	if (expansion_mask & bitGoD == bitGoD) return static_cast<uint32>(Expansion::GoD);
+	if (expansion_mask & bitOoW == bitOoW) return static_cast<uint32>(Expansion::OoW);
+	if (expansion_mask & bitDoN == bitDoN) return static_cast<uint32>(Expansion::DoN);
+	if (expansion_mask & bitDoD == bitDoD) return static_cast<uint32>(Expansion::DoD);
+	if (expansion_mask & bitPoR == bitPoR) return static_cast<uint32>(Expansion::PoR);
+	if (expansion_mask & bitTSS == bitTSS) return static_cast<uint32>(Expansion::TSS);
+	if (expansion_mask & bitTBS == bitTBS) return static_cast<uint32>(Expansion::TBS);
+	if (expansion_mask & bitSoF == bitSoF) return static_cast<uint32>(Expansion::SoF);
+	if (expansion_mask & bitSoD == bitSoD) return static_cast<uint32>(Expansion::SoD);
+	if (expansion_mask & bitUF == bitUF) return static_cast<uint32>(Expansion::UF);
+	if (expansion_mask & bitHoT == bitHoT) return static_cast<uint32>(Expansion::HoT);
+	if (expansion_mask & bitVoA == bitVoA) return static_cast<uint32>(Expansion::VoA);
+	if (expansion_mask & bitRoF == bitRoF) return static_cast<uint32>(Expansion::RoF);
+	if (expansion_mask & bitCotF == bitCotF) return static_cast<uint32>(Expansion::CotF);
+	return static_cast<uint32>(Expansion::EverQuest);
+}

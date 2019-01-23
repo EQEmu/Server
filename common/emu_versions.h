@@ -214,7 +214,7 @@ namespace EQEmu
 		Expansion ConvertClientVersionToExpansion(versions::ClientVersion client_version);
 		uint32 ConvertClientVersionToExpansionBit(versions::ClientVersion client_version);
 		uint32 ConvertClientVersionToExpansionMask(versions::ClientVersion client_version);
-
+		uint32 ConvertExpansionMaskToLatestExpansion(uint32 expansion_mask);
 	} /*expansions*/
 
 } /*EQEmu*/

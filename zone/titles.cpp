@@ -35,10 +35,10 @@ TitleManager::TitleManager() {
 bool TitleManager::LoadTitles()
 {
 	Titles.clear();
-
+	auto latest_expansion = EQEmu::expansions::ConvertExpansionMaskToLatestExpansion(RuleI(World, ExpansionSettings));
 	std::string query = StringFormat("SELECT `id`, `skill_id`, `min_skill_value`, `max_skill_value`, "
                         "`min_aa_points`, `max_aa_points`, `class`, `gender`, `char_id`, "
-                        "`status`, `item_id`, `prefix`, `suffix`, `title_set` FROM titles WHERE %i & expansions = expansions", RuleI(World, ExpansionSettings));
+                        "`status`, `item_id`, `prefix`, `suffix`, `title_set` FROM titles WHERE `min_expansion` <= %i AND `max_expansion` >= %i", latest_expansion, latest_expansion);
     auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
 		return false;

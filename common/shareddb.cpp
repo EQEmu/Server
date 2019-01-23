@@ -413,7 +413,7 @@ bool SharedDatabase::SetSharedPlatinum(uint32 account_id, int32 amount_to_add) {
 bool SharedDatabase::SetStartingItems(PlayerProfile_Struct* pp, EQEmu::InventoryProfile* inv, uint32 si_race, uint32 si_class, uint32 si_deity, uint32 si_current_zone, char* si_name, int admin_level) {
 
 	const EQEmu::ItemData* myitem;
-	auto latest_expansion = EQEmu::expansions::ConvertExpansionBitToExpansion(RuleI(World, ExpansionSettings));
+	auto latest_expansion = EQEmu::expansions::ConvertExpansionMaskToLatestExpansion(RuleI(World, ExpansionSettings));
     std::string query = StringFormat("SELECT itemid, item_charges, slot FROM starting_items "
                                     "WHERE (race = %i or race = 0) AND (class = %i or class = 0) AND "
                                     "(deityid = %i or deityid = 0) AND (zoneid = %i or zoneid = 0) AND "
@@ -1936,7 +1936,7 @@ void SharedDatabase::GetLootTableInfo(uint32 &loot_table_count, uint32 &max_loot
 	loot_table_count = 0;
 	max_loot_table = 0;
 	loot_table_entries = 0;
-	auto latest_expansion = EQEmu::expansions::ConvertExpansionBitToExpansion(RuleI(World, ExpansionSettings));
+	auto latest_expansion = EQEmu::expansions::ConvertExpansionMaskToLatestExpansion(RuleI(World, ExpansionSettings));
 	const std::string query = StringFormat("SELECT COUNT(*), MAX(id), (SELECT COUNT(*) FROM loottable_entries) FROM loottable WHERE min_expansion <= %i AND max_expansion >= %i", latest_expansion, latest_expansion);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
@@ -1957,7 +1957,7 @@ void SharedDatabase::GetLootDropInfo(uint32 &loot_drop_count, uint32 &max_loot_d
 	loot_drop_count = 0;
 	max_loot_drop = 0;
 	loot_drop_entries = 0;
-	auto latest_expansion = EQEmu::expansions::ConvertExpansionBitToExpansion(RuleI(World, ExpansionSettings));
+	auto latest_expansion = EQEmu::expansions::ConvertExpansionMaskToLatestExpansion(RuleI(World, ExpansionSettings));
 
 	const std::string query = StringFormat("SELECT COUNT(*), MAX(id), (SELECT COUNT(*) FROM lootdrop_entries) FROM lootdrop WHERE min_expansion <= %i AND max_expansion >= %i", latest_expansion, latest_expansion);
     auto results = QueryDatabase(query);
@@ -1981,10 +1981,11 @@ void SharedDatabase::LoadLootTables(void *data, uint32 size) {
 	uint8 loot_table[sizeof(LootTable_Struct) + (sizeof(LootTableEntries_Struct) * 128)];
 	LootTable_Struct *lt = reinterpret_cast<LootTable_Struct*>(loot_table);
 
+	auto latest_expansion = EQEmu::expansions::ConvertExpansionMaskToLatestExpansion(RuleI(World, ExpansionSettings));
 	const std::string query = StringFormat("SELECT loottable.id, loottable.mincash, loottable.maxcash, loottable.avgcoin, "
                             "loottable_entries.lootdrop_id, loottable_entries.multiplier, loottable_entries.droplimit, "
                             "loottable_entries.mindrop, loottable_entries.probability FROM loottable LEFT JOIN loottable_entries "
-                            "ON loottable.id = loottable_entries.loottable_id WHERE %d & loottable.expansions = loottable.expansions ORDER BY id", RuleI(World, ExpansionSettings));
+                            "ON loottable.id = loottable_entries.loottable_id WHERE min_expansion <= %i AND max_expansion >= %i ORDER BY id", latest_expansion, latest_expansion);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
         return;
@@ -2034,7 +2035,7 @@ void SharedDatabase::LoadLootDrops(void *data, uint32 size) {
 	uint8 loot_drop[sizeof(LootDrop_Struct) + (sizeof(LootDropEntries_Struct) * 1260)];
 	LootDrop_Struct *ld = reinterpret_cast<LootDrop_Struct*>(loot_drop);
 
-	auto latest_expansion = EQEmu::expansions::ConvertExpansionBitToExpansion(RuleI(World, ExpansionSettings));
+	auto latest_expansion = EQEmu::expansions::ConvertExpansionMaskToLatestExpansion(RuleI(World, ExpansionSettings));
 	const std::string query = StringFormat("SELECT lootdrop.id, lootdrop_entries.item_id, lootdrop_entries.item_charges, "
                             "lootdrop_entries.equip_item, lootdrop_entries.chance, lootdrop_entries.minlevel, "
                             "lootdrop_entries.maxlevel, lootdrop_entries.multiplier FROM lootdrop JOIN lootdrop_entries "

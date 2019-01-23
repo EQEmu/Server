@@ -146,7 +146,7 @@ bool load_spawns_from_db(MYSQL *m, const char *zone, list<PathNode*> &db_spawns)
 bool load_doors_from_db(MYSQL *m, const char *zone, list<PathNode*> &db_spawns) {
 	char query[512];
 	
-	auto latest_expansion = EQEmu::expansions::ConvertExpansionBitToExpansion(RuleI(World, ExpansionSettings));
+	auto latest_expansion = EQEmu::expansions::ConvertExpansionMaskToLatestExpansion(RuleI(World, ExpansionSettings));
 	sprintf(query, 
 		"SELECT pos_x,pos_y,pos_z FROM doors "
 		"WHERE  zone='%s' AND min_expansion <= %i AND max_expansion >= %i", zone, latest_expansion, latest_expansion);

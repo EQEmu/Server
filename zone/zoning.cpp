@@ -269,7 +269,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 
 	//not sure when we would use ZONE_ERROR_NOTREADY
 
-	auto latest_expansion = EQEmu::expansions::ConvertExpansionBitToExpansion(RuleI(World, ExpansionSettings));
+	auto latest_expansion = EQEmu::expansions::ConvertExpansionMaskToLatestExpansion(RuleI(World, ExpansionSettings));
 
 	//enforce min status and level
 	if (!ignorerestrictions && (Admin() < minstatus || GetLevel() < minlevel || (uint32)latest_expansion <= minexpansion || (uint32)latest_expansion >= maxexpansion))
@@ -883,7 +883,7 @@ bool Client::CanBeInZone() {
 		Log(Logs::Detail, Logs::None, "[CLIENT] Character does not meet min status requirement (%d < %d)!", Admin(), minstatus);
 		return(false);
 	}
-	auto latest_expansion = EQEmu::expansions::ConvertExpansionBitToExpansion(RuleI(World, ExpansionSettings));
+	auto latest_expansion = EQEmu::expansions::ConvertExpansionMaskToLatestExpansion(RuleI(World, ExpansionSettings));
 	if(Admin() < 150 && (uint32)latest_expansion < minexpansion && (uint32)latest_expansion > maxexpansion) {
 		Log(Logs::Detail, Logs::None, "[CLIENT] Character does not have expansion");
 		return(false);
