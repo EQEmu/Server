@@ -1593,7 +1593,8 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		m_pp.RestTimer = 0;
 
 	/* This checksum should disappear once dynamic structs are in... each struct strategy will do it */ // looks to be in place now
-	CRC32::SetEQChecksum((unsigned char*)&m_pp, sizeof(PlayerProfile_Struct) - sizeof(m_pp.m_player_profile_version) - 4);
+	//CRC32::SetEQChecksum((unsigned char*)&m_pp, sizeof(PlayerProfile_Struct) - sizeof(m_pp.m_player_profile_version) - 4);
+	// m_pp.checksum = 0; // All server out-bound player profile packets are now translated - no need to waste cycles calculating this...
 
 	outapp = new EQApplicationPacket(OP_PlayerProfile, sizeof(PlayerProfile_Struct));
 

@@ -909,7 +909,7 @@ sed -e 's/_t//g' -e 's/MAX_AA/MAX_PP_AA_ARRAY/g' \
 
 struct PlayerProfile_Struct
 {
-/*0000*/	uint32				checksum;			// Checksum from CRC32::SetEQChecksum
+// /*0000*/	uint32				checksum;			// Checksum from CRC32::SetEQChecksum
 /*0004*/	char				name[64];			// Name of player sizes not right
 /*0068*/	char				last_name[32];		// Last name of player sizes not right
 /*0100*/	uint32				gender;				// Player Gender - 0 Male, 1 Female
@@ -1099,10 +1099,10 @@ struct PlayerProfile_Struct
 	void SetPlayerProfileVersion(EQEmu::versions::MobVersion mob_version) { m_player_profile_version = EQEmu::versions::ValidateMobVersion(mob_version); }
 	void SetPlayerProfileVersion(EQEmu::versions::ClientVersion client_version) { SetPlayerProfileVersion(EQEmu::versions::ConvertClientVersionToMobVersion(client_version)); }
 
-// private:
+private:
 	// No need for gm flag since pp already has one
 	// No need for lookup pointer since this struct is not tied to any one system
-	EQEmu::versions::MobVersion m_player_profile_version; // kept public for now so checksum can calc sizeof (client_packet.cpp:1586)
+	EQEmu::versions::MobVersion m_player_profile_version;
 };
 
 

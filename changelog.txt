@@ -11,6 +11,7 @@ Uleat: Extended server spellbook entries to RoF2 standard and added per-client r
 	- Each client is still restricted to its spellbook capacity (400, 480, 480, 720, 720, 720 - respectively)
 	- Each client is restricted to its max supported spell id (9999, 15999, 23000, 28000, 45000, 45000 - respectively)
 	- Please report any abnormal behavior so it may be addressed
+Uleat: Removed server-side checksum of player profile..wasted calculation since it's performed again in all translators
 
 == 1/20/2019 ==
 Uleat: Added 'spells' entry to EQDictionary
