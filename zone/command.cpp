@@ -3705,20 +3705,22 @@ void command_findzone(Client *c, const Seperator *sep)
         return;
     }
 
+	auto latest_expansion = EQEmu::expansions::ConvertExpansionBitToExpansion(RuleI(World, ExpansionSettings));
     std::string query;
     int id = atoi((const char *)sep->arg[1]);
     if (id == 0) { // If id evaluates to 0, then search as if user entered a string.
 	    auto escName = new char[strlen(sep->arg[1]) * 2 + 1];
 	    database.DoEscapeString(escName, sep->arg[1], strlen(sep->arg[1]));
 
+		
 	    query = StringFormat("SELECT zoneidnumber, short_name, long_name FROM zone "
-				 "WHERE long_name RLIKE '%s' AND version = 0 AND %i & expansions = expansions",
-				 escName, RuleI(World, ExpansionSettings));
+				 "WHERE long_name RLIKE '%s' AND version = 0 AND min_expansion <= %i AND max_expansion >= %i",
+				 escName, latest_expansion, latest_expansion);
 	    safe_delete_array(escName);
     }
     else // Otherwise, look for just that zoneidnumber.
 		query = StringFormat("SELECT zoneidnumber, short_name, long_name FROM zone "
-                            "WHERE zoneidnumber = %i AND version = 0 AND %i & expansions = expansions",  id, RuleI(World, ExpansionSettings));
+                            "WHERE zoneidnumber = %i AND version = 0 AND min_expansion <= %i AND max_expansion >= %i",  id, latest_expansion, latest_expansion);
 
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {

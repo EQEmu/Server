@@ -12305,9 +12305,10 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 	uint32 zoneid = 0;
 	uint32 startCity = (uint32)strtol((const char*)app->pBuffer, nullptr, 10);
 
+	auto latest_expansion = EQEmu::expansions::ConvertExpansionBitToExpansion(RuleI(World, ExpansionSettings));
 	std::string query = StringFormat("SELECT zone_id, bind_id, x, y, z FROM start_zones "
-		"WHERE player_class=%i AND player_deity=%i AND player_race=%i AND %i & expansions = expansions",
-		m_pp.class_, m_pp.deity, m_pp.race, RuleI(World, ExpansionSettings));
+		"WHERE player_class=%i AND player_deity=%i AND player_race=%i AND auto latest_expansion = EQEmu::expansions::ConvertExpansionBitToExpansion(RuleI(World, ExpansionSettings));",
+		m_pp.class_, m_pp.deity, m_pp.race, latest_expansion, latest_expansion);
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
 		Log(Logs::General, Logs::Error, "No valid start zones found for /setstartcity");
@@ -12337,8 +12338,8 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 	}
 
 	query = StringFormat("SELECT zone_id, bind_id FROM start_zones "
-		"WHERE player_class=%i AND player_deity=%i AND player_race=%i AND %i & expansions = expansions",
-		m_pp.class_, m_pp.deity, m_pp.race, RuleI(World, ExpansionSettings));
+		"WHERE player_class=%i AND player_deity=%i AND player_race=%i AND min_expansion <= %i AND max_expansion >= %i",
+		m_pp.class_, m_pp.deity, m_pp.race, latest_expansion, latest_expansion);
 	results = database.QueryDatabase(query);
 	if (!results.Success())
 		return;

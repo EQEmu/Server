@@ -399,9 +399,10 @@ void EntityList::ClearTrapPointers()
 
 bool ZoneDatabase::LoadTraps(const char* zonename, int16 version) {
 
+	auto latest_expansion = EQEmu::expansions::ConvertExpansionBitToExpansion(RuleI(World, ExpansionSettings));
 	std::string query = StringFormat("SELECT id, x, y, z, effect, effectvalue, effectvalue2, skill, "
 		"maxzdiff, radius, chance, message, respawn_time, respawn_var, level, "
-		"`group`, triggered_number, despawn_when_triggered, undetectable  FROM traps WHERE zone='%s' AND version=%u AND %i & expansions = expansions", zonename, version, RuleI(World, ExpansionSettings));
+		"`group`, triggered_number, despawn_when_triggered, undetectable  FROM traps WHERE zone='%s' AND version=%u AND min_expansion <= %i AND max_expansion >= %i", zonename, version, latest_expansion, latest_expansion);
 
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
@@ -481,18 +482,19 @@ bool ZoneDatabase::SetTrapData(Trap* trap, bool repopnow) {
 	uint32 dbid = trap->db_id;
 	std::string query;
 
+	auto latest_expansion = EQEmu::expansions::ConvertExpansionBitToExpansion(RuleI(World, ExpansionSettings));
 	if (trap->group > 0)
 	{
 		query = StringFormat("SELECT id, x, y, z, effect, effectvalue, effectvalue2, skill, "
 			"maxzdiff, radius, chance, message, respawn_time, respawn_var, level, "
-			"triggered_number, despawn_when_triggered, undetectable FROM traps WHERE zone='%s' AND `group`=%d AND id != %d AND %i & expansions = expansions ORDER BY RAND() LIMIT 1", zone->GetShortName(), trap->group, dbid, RuleI(World, ExpansionSettings));
+			"triggered_number, despawn_when_triggered, undetectable FROM traps WHERE zone='%s' AND `group`=%d AND id != %d AND min_expansion <= %i AND max_expansion >= %i ORDER BY RAND() LIMIT 1", zone->GetShortName(), trap->group, dbid, latest_expansion, latest_expansion);
 	}
 	else
 	{
 		// We could just use the existing data here, but querying the DB is not expensive, and allows content developers to change traps without rebooting.
 		query = StringFormat("SELECT id, x, y, z, effect, effectvalue, effectvalue2, skill, "
 			"maxzdiff, radius, chance, message, respawn_time, respawn_var, level, "
-			"triggered_number, despawn_when_triggered, undetectable FROM traps WHERE zone='%s' AND id = %d AND %i & expansions = expansions", zone->GetShortName(), dbid, RuleI(World, ExpansionSettings));
+			"triggered_number, despawn_when_triggered, undetectable FROM traps WHERE zone='%s' AND id = %d AND min_expansion <= %i AND max_expansion >= %i", zone->GetShortName(), dbid, latest_expansion, latest_expansion);
 	}
 
 	auto results = QueryDatabase(query);
