@@ -754,8 +754,7 @@ struct BindStruct {
 ** OpCode: 0x006a
  */
 static const uint32 MAX_PP_LANGUAGE		= 28;
-static const uint32 MAX_PP_SPELLBOOK	= 400;
-static const uint32 MAX_PP_MEMSPELL		= 9;
+
 static const uint32 MAX_PP_SKILL		= PACKET_SKILL_ARRAY_SIZE;	// 100 - actual skills buffer size
 static const uint32 MAX_PP_INNATE_SKILL	= 25;
 static const uint32 MAX_PP_AA_ARRAY		= 240;
@@ -824,7 +823,7 @@ struct PlayerProfile_Struct
 /*00024*/ BindStruct binds[5];          // Bind points (primary is first)
 /*00124*/ uint32  deity;              // deity
 /*00128*/ uint32  intoxication;       // Alcohol level (in ticks till sober?)
-/*00132*/ uint32  spellSlotRefresh[MAX_PP_MEMSPELL]; // Refresh time (millis)
+/*00132*/ uint32  spellSlotRefresh[spells::SPELL_GEM_COUNT]; // Refresh time (millis)
 /*00168*/ uint32  abilitySlotRefresh;
 /*00172*/ uint8   haircolor;          // Player hair color
 /*00173*/ uint8   beardcolor;         // Player beard color
@@ -849,9 +848,9 @@ struct PlayerProfile_Struct
 /*02260*/ uint32  WIS;                // Wisdom
 /*02264*/ uint8   face;               // Player face
 /*02265*/ uint8 unknown02264[47];
-/*02312*/ uint32   spell_book[MAX_PP_SPELLBOOK];    // List of the Spells in spellbook
+/*02312*/ uint32   spell_book[spells::SPELLBOOK_SIZE];    // List of the Spells in spellbook
 /*03912*/ uint8   unknown4184[448];   // all 0xff after last spell
-/*04360*/ uint32   mem_spells[MAX_PP_MEMSPELL]; // List of spells memorized
+/*04360*/ uint32   mem_spells[spells::SPELL_GEM_COUNT]; // List of spells memorized
 /*04396*/ uint8 unknown04396[32];
 /*04428*/ uint32  platinum;           // Platinum Pieces on player
 /*04432*/ uint32  gold;               // Gold Pieces on player
@@ -3271,7 +3270,7 @@ struct AnnoyingZoneUnknown_Struct {
 };
 
 struct LoadSpellSet_Struct {
-	uint32 spell[MAX_PP_MEMSPELL];
+	uint32 spell[spells::SPELL_GEM_COUNT];
 	uint32 unknown;
 };
 

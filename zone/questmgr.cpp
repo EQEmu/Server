@@ -371,14 +371,14 @@ void QuestManager::castspell(int spell_id, int target_id) {
 	if (owner) {
 		Mob *tgt = entity_list.GetMob(target_id);
 		if(tgt != nullptr)
-			owner->SpellFinished(spell_id, tgt, EQEmu::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
+			owner->SpellFinished(spell_id, tgt, EQEmu::spells::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
 	}
 }
 
 void QuestManager::selfcast(int spell_id) {
 	QuestManagerCurrentQuestVars();
 	if (initiator)
-		initiator->SpellFinished(spell_id, initiator, EQEmu::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
+		initiator->SpellFinished(spell_id, initiator, EQEmu::spells::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
 }
 
 void QuestManager::addloot(int item_id, int charges, bool equipitem, int aug1, int aug2, int aug3, int aug4, int aug5, int aug6) {
@@ -985,7 +985,7 @@ uint16 QuestManager::scribespells(uint8 max_level, uint8 min_level) {
 	bool SpellBucketCheckResult = 0;
 
 
-	for(spell_id = 0, book_slot = initiator->GetNextAvailableSpellBookSlot(), count = 0; spell_id < SPDAT_RECORDS && book_slot < MAX_PP_SPELLBOOK; spell_id++, book_slot = initiator->GetNextAvailableSpellBookSlot(book_slot))
+	for(spell_id = 0, book_slot = initiator->GetNextAvailableSpellBookSlot(), count = 0; spell_id < SPDAT_RECORDS && book_slot < EQEmu::spells::SPELLBOOK_SIZE; spell_id++, book_slot = initiator->GetNextAvailableSpellBookSlot(book_slot))
 	{
 		if
 		(

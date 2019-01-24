@@ -70,7 +70,10 @@ namespace EntityLimits
 		} // namespace invtype
 
 		namespace invslot {
-			const uint64 POSSESSIONS_BITMASK = 0x00000000007FFFFF; // based on 34-slot count (RoF+)
+			const uint64 EQUIPMENT_BITMASK = 0x00000000007FFFFF;
+			const uint64 GENERAL_BITMASK = 0x0000000000000000;
+			const uint64 CURSOR_BITMASK = 0x0000000000000000;
+			const uint64 POSSESSIONS_BITMASK = (EQUIPMENT_BITMASK | GENERAL_BITMASK | CURSOR_BITMASK); // based on 34-slot count (RoF+)
 
 		} // namespace invslot
 

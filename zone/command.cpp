@@ -219,6 +219,7 @@ int command_init(void)
 		command_add("globalview", "Lists all qglobals in cache if you were to do a quest with this target.", 80, command_globalview) ||
 		command_add("gm", "- Turn player target's or your GM flag on or off", 80, command_gm) ||
 		command_add("gmspeed", "[on/off] - Turn GM speed hack on/off for you or your player target", 100, command_gmspeed) ||
+		command_add("gmzone", "[zone_short_name] [zone_version=0] [identifier=gmzone] - Zones to a private GM instance", 100, command_gmzone) ||
 		command_add("goto", "[x] [y] [z] - Teleport to the provided coordinates or to your target", 10, command_goto) ||
 		command_add("grid", "[add/delete] [grid_num] [wandertype] [pausetype] - Create/delete a wandering grid", 170, command_grid) ||
 		command_add("guild", "- Guild manipulation commands. Use argument help for more info.", 10, command_guild) ||
@@ -413,6 +414,7 @@ int command_init(void)
 		command_add("viewpetition", "[petition number] - View a petition", 20, command_viewpetition) ||
 		command_add("wc", "[wear slot] [material] - Sends an OP_WearChange for your target", 200, command_wc) ||
 		command_add("weather", "[0/1/2/3] (Off/Rain/Snow/Manual) - Change the weather", 80, command_weather) ||
+		command_add("who", "[search]", 20, command_who) ||
 		command_add("worldshutdown", "- Shut down world and all zones", 200, command_worldshutdown) ||
 		command_add("wp", "[add/delete] [grid_num] [pause] [wp_num] [-h] - Add/delete a waypoint to/from a wandering grid", 170, command_wp) ||
 		command_add("wpadd", "[pause] [-h] - Add your current location as a waypoint to your NPC target's AI path", 170, command_wpadd) ||
@@ -2262,10 +2264,12 @@ void command_sendzonespawns(Client *c, const Seperator *sep)
 
 void command_zsave(Client *c, const Seperator *sep)
 {
-	if(zone->SaveZoneCFG())
+	if (zone->SaveZoneCFG()) {
 		c->Message(13, "Zone header saved successfully.");
-		else
+	}
+	else {
 		c->Message(13, "ERROR: Zone header data was NOT saved.");
+	}
 }
 
 void command_dbspawn2(Client *c, const Seperator *sep)
@@ -2609,14 +2613,14 @@ void command_castspell(Client *c, const Seperator *sep)
 		else
 			if (c->GetTarget() == 0)
 				if(c->Admin() >= commandInstacast)
-					c->SpellFinished(spellid, 0, EQEmu::CastingSlot::Item, 0, -1, spells[spellid].ResistDiff);
+					c->SpellFinished(spellid, 0, EQEmu::spells::CastingSlot::Item, 0, -1, spells[spellid].ResistDiff);
 				else
-					c->CastSpell(spellid, 0, EQEmu::CastingSlot::Item, 0);
+					c->CastSpell(spellid, 0, EQEmu::spells::CastingSlot::Item, 0);
 			else
 				if(c->Admin() >= commandInstacast)
-					c->SpellFinished(spellid, c->GetTarget(), EQEmu::CastingSlot::Item, 0, -1, spells[spellid].ResistDiff);
+					c->SpellFinished(spellid, c->GetTarget(), EQEmu::spells::CastingSlot::Item, 0, -1, spells[spellid].ResistDiff);
 				else
-					c->CastSpell(spellid, c->GetTarget()->GetID(), EQEmu::CastingSlot::Item, 0);
+					c->CastSpell(spellid, c->GetTarget()->GetID(), EQEmu::spells::CastingSlot::Item, 0);
 	}
 }
 
@@ -4426,18 +4430,94 @@ void command_fixmob(Client *c, const Seperator *sep)
 
 void command_gmspeed(Client *c, const Seperator *sep)
 {
-	bool state=atobool(sep->arg[1]);
-	Client *t=c;
+	bool   state = atobool(sep->arg[1]);
+	Client *t    = c;
 
-	if(c->GetTarget() && c->GetTarget()->IsClient())
-		t=c->GetTarget()->CastToClient();
-
-	if(sep->arg[1][0] != 0) {
-		database.SetGMSpeed(t->AccountID(), state?1:0);
-		c->Message(0, "Turning GMSpeed %s for %s (zone to take effect)",  state?"On":"Off", t->GetName());
+	if (c->GetTarget() && c->GetTarget()->IsClient()) {
+		t = c->GetTarget()->CastToClient();
 	}
-	else
+
+	if (sep->arg[1][0] != 0) {
+		database.SetGMSpeed(t->AccountID(), state ? 1 : 0);
+		c->Message(0, "Turning GMSpeed %s for %s (zone to take effect)", state ? "On" : "Off", t->GetName());
+	}
+	else {
 		c->Message(0, "Usage: #gmspeed [on/off]");
+	}
+}
+
+void command_gmzone(Client *c, const Seperator *sep)
+{
+	if (!sep->arg[1]) {
+		c->Message(0, "Usage");
+		c->Message(0, "-------");
+		c->Message(0, "#gmzone [zone_short_name] [zone_version=0]");
+		return;
+	}
+
+	std::string zone_short_name_string = sep->arg[1];
+	const char  *zone_short_name       = sep->arg[1];
+	auto        zone_version           = static_cast<uint32>(sep->arg[2] ? atoi(sep->arg[2]) : 0);
+	std::string identifier             = "gmzone";
+	uint32      zone_id                = database.GetZoneID(zone_short_name);
+	uint32      duration               = 100000000;
+	uint16      instance_id            = 0;
+
+	if (zone_id == 0) {
+		c->Message(13, "Invalid zone specified");
+		return;
+	}
+
+	if (sep->arg[3] && sep->arg[3][0]) {
+		identifier = sep->arg[3];
+	}
+
+	std::string bucket_key             = StringFormat("%s-%s-instance", zone_short_name, identifier.c_str());
+	std::string existing_zone_instance = DataBucket::GetData(bucket_key);
+
+	if (existing_zone_instance.length() > 0) {
+		instance_id = std::stoi(existing_zone_instance);
+
+		c->Message(15, "Found already created instance (%s) (%u)", zone_short_name, instance_id);
+	}
+
+	if (instance_id == 0) {
+		if (!database.GetUnusedInstanceID(instance_id)) {
+			c->Message(13, "Server was unable to find a free instance id.");
+			return;
+		}
+
+		if (!database.CreateInstance(instance_id, zone_id, zone_version, duration)) {
+			c->Message(13, "Server was unable to create a new instance.");
+			return;
+		}
+
+		c->Message(15, "New private GM instance %s was created with id %lu.", zone_short_name, (unsigned long) instance_id);
+		DataBucket::SetData(bucket_key, std::to_string(instance_id));
+	}
+
+	if (instance_id > 0) {
+		float target_x   = -1, target_y = -1, target_z = -1;
+		int16 min_status = 0;
+		uint8 min_level  = 0;
+
+		if (!database.GetSafePoints(
+			zone_short_name,
+			zone_version,
+			&target_x,
+			&target_y,
+			&target_z,
+			&min_status,
+			&min_level
+		)) {
+			c->Message(13, "Failed to find safe coordinates for specified zone");
+		}
+
+		c->Message(15, "Zoning to private GM instance (%s) (%u)", zone_short_name, instance_id);
+
+		c->AssignToInstance(instance_id);
+		c->MovePC(zone_id, instance_id, target_x, target_y, target_z, 0, 1);
+	}
 }
 
 void command_title(Client *c, const Seperator *sep)
@@ -4620,7 +4700,7 @@ void command_memspell(Client *c, const Seperator *sep)
 	{
 		slot = atoi(sep->arg[1]) - 1;
 		spell_id = atoi(sep->arg[2]);
-		if (slot > MAX_PP_MEMSPELL || spell_id >= SPDAT_RECORDS)
+		if (slot > EQEmu::spells::SPELL_GEM_COUNT || spell_id >= SPDAT_RECORDS)
 		{
 			c->Message(0, "Error: #MemSpell: Arguement out of range");
 		}
@@ -5015,7 +5095,9 @@ void command_proximity(Client *c, const Seperator *sep)
 		points.push_back(p);
 	}
 
-	c->SendPathPacket(points);
+	if (c->ClientVersion() >= EQEmu::versions::ClientVersion::RoF) {
+		c->SendPathPacket(points);
+	}
 }
 
 void command_pvp(Client *c, const Seperator *sep)
@@ -5178,7 +5260,15 @@ void command_killallnpcs(Client *c, const Seperator *sep)
 			continue;
 		}
 
-		if (entity->IsInvisible() || !entity->IsAttackAllowed(c)) {
+		bool is_not_attackable =
+				 (
+					 entity->IsInvisible() ||
+					 !entity->IsAttackAllowed(c) ||
+					 entity->GetRace() == 127 ||
+					 entity->GetRace() == 240
+				 );
+
+		if (is_not_attackable) {
 			continue;
 		}
 
@@ -5347,13 +5437,65 @@ void command_loc(Client *c, const Seperator *sep)
 
 void command_goto(Client *c, const Seperator *sep)
 {
-	// goto function
-	if (sep->arg[1][0] == '\0' && c->GetTarget())
-		c->MovePC(zone->GetZoneID(), zone->GetInstanceID(), c->GetTarget()->GetX(), c->GetTarget()->GetY(), c->GetTarget()->GetZ(), c->GetTarget()->GetHeading());
-	else if (!(sep->IsNumber(1) && sep->IsNumber(2) && sep->IsNumber(3)))
+	/**
+	 * Goto via target and no args
+	 */
+	if (sep->arg[1][0] == '\0' && c->GetTarget()) {
+		c->MovePC(
+			zone->GetZoneID(),
+			zone->GetInstanceID(),
+			c->GetTarget()->GetX(),
+			c->GetTarget()->GetY(),
+			c->GetTarget()->GetZ(),
+			c->GetTarget()->GetHeading());
+	}
+
+	/**
+	 * Goto via player name
+	 */
+	else if (!sep->IsNumber(1) && sep->arg[1]) {
+
+		/**
+		 * Find them in zone first
+		 */
+		const char  *player_name       = sep->arg[1];
+		std::string player_name_string = sep->arg[1];
+		Client      *client            = entity_list.GetClientByName(player_name);
+		if (client) {
+			c->MovePC(
+				zone->GetZoneID(),
+				zone->GetInstanceID(),
+				client->GetX(),
+				client->GetY(),
+				client->GetZ(),
+				client->GetHeading());
+
+			c->Message(15, "Goto player '%s' same zone", player_name_string.c_str());
+		}
+		else if (c->GotoPlayer(player_name_string)) {
+			c->Message(15, "Goto player '%s' different zone", player_name_string.c_str());
+		}
+		else {
+			c->Message(15, "Player '%s' not found", player_name_string.c_str());
+		}
+	}
+
+	/**
+	 * Goto via x y z
+	 */
+	else if (sep->IsNumber(1) && sep->IsNumber(2) && sep->IsNumber(3)) {
+		c->MovePC(
+			zone->GetZoneID(),
+			zone->GetInstanceID(),
+			atof(sep->arg[1]),
+			atof(sep->arg[2]),
+			atof(sep->arg[3]),
+			c->GetHeading());
+	}
+	else {
 		c->Message(0, "Usage: #goto [x y z]");
-	else
-		c->MovePC(zone->GetZoneID(), zone->GetInstanceID(), atof(sep->arg[1]), atof(sep->arg[2]), atof(sep->arg[3]), c->GetHeading());
+		c->Message(0, "Usage: #goto [player_name]");
+	}
 }
 
 void command_iteminfo(Client *c, const Seperator *sep)
@@ -6299,7 +6441,7 @@ void command_scribespells(Client *c, const Seperator *sep)
 		c->Message(0, "Scribing spells for %s.",  t->GetName());
 	Log(Logs::General, Logs::Normal, "Scribe spells request for %s from %s, levels: %u -> %u",  t->GetName(), c->GetName(), min_level, max_level);
 
-	for(curspell = 0, book_slot = t->GetNextAvailableSpellBookSlot(), count = 0; curspell < SPDAT_RECORDS && book_slot < MAX_PP_SPELLBOOK; curspell++, book_slot = t->GetNextAvailableSpellBookSlot(book_slot))
+	for(curspell = 0, book_slot = t->GetNextAvailableSpellBookSlot(), count = 0; curspell < SPDAT_RECORDS && book_slot < EQEmu::spells::SPELLBOOK_SIZE; curspell++, book_slot = t->GetNextAvailableSpellBookSlot(book_slot))
 	{
 		if
 		(
@@ -8343,7 +8485,7 @@ void command_rules(Client *c, const Seperator *sep) {
 			c->Message(0, "(%d) %s",  cur->first, cur->second.c_str());
 		}
 	} else if(!strcasecmp(sep->arg[1], "reload")) {
-		RuleManager::Instance()->LoadRules(&database, RuleManager::Instance()->GetActiveRuleset());
+		RuleManager::Instance()->LoadRules(&database, RuleManager::Instance()->GetActiveRuleset(), true);
 		c->Message(0, "The active ruleset (%s (%d)) has been reloaded",  RuleManager::Instance()->GetActiveRuleset(),
 			RuleManager::Instance()->GetActiveRulesetID());
 	} else if(!strcasecmp(sep->arg[1], "switch")) {
@@ -8359,7 +8501,7 @@ void command_rules(Client *c, const Seperator *sep) {
 		}
 
 		//TODO: we likely want to reload this ruleset everywhere...
-		RuleManager::Instance()->LoadRules(&database, sep->arg[2]);
+		RuleManager::Instance()->LoadRules(&database, sep->arg[2], true);
 
 		c->Message(0, "The selected ruleset has been changed to (%s (%d)) and reloaded locally",  sep->arg[2], rsid);
 	} else if(!strcasecmp(sep->arg[1], "load")) {
@@ -8369,7 +8511,7 @@ void command_rules(Client *c, const Seperator *sep) {
 			c->Message(13, "Unknown rule set '%s'",  sep->arg[2]);
 			return;
 		}
-		RuleManager::Instance()->LoadRules(&database, sep->arg[2]);
+		RuleManager::Instance()->LoadRules(&database, sep->arg[2], true);
 		c->Message(0, "Loaded ruleset '%s' (%d) locally",  sep->arg[2], rsid);
 	} else if(!strcasecmp(sep->arg[1], "store")) {
 		if(sep->argnum == 1) {
@@ -8393,9 +8535,9 @@ void command_rules(Client *c, const Seperator *sep) {
 			return;
 		}
 	} else if(!strcasecmp(sep->arg[1], "reset")) {
-		RuleManager::Instance()->ResetRules();
+		RuleManager::Instance()->ResetRules(true);
 		c->Message(0, "The running ruleset has been set to defaults");
-
+	
 	} else if(!strcasecmp(sep->arg[1], "get")) {
 		if(sep->argnum != 2) {
 			c->Message(13, "Invalid argument count, see help.");
@@ -8412,7 +8554,7 @@ void command_rules(Client *c, const Seperator *sep) {
 			c->Message(13, "Invalid argument count, see help.");
 			return;
 		}
-		if(!RuleManager::Instance()->SetRule(sep->arg[2], sep->arg[3])) {
+		if(!RuleManager::Instance()->SetRule(sep->arg[2], sep->arg[3], nullptr, false, true)) {
 			c->Message(13, "Failed to modify rule");
 		} else {
 			c->Message(0, "Rule modified locally.");
@@ -8422,7 +8564,7 @@ void command_rules(Client *c, const Seperator *sep) {
 			c->Message(13, "Invalid argument count, see help.");
 			return;
 		}
-		if(!RuleManager::Instance()->SetRule(sep->arg[2], sep->arg[3], &database, true)) {
+		if(!RuleManager::Instance()->SetRule(sep->arg[2], sep->arg[3], &database, true, true)) {
 			c->Message(13, "Failed to modify rule");
 		} else {
 			c->Message(0, "Rule modified locally and in the database.");
@@ -11781,6 +11923,126 @@ void command_scale(Client *c, const Seperator *sep)
 			);
 		}
 	}
+}
+
+void command_who(Client *c, const Seperator *sep)
+{
+	std::string query =
+		"SELECT\n"
+		"    character_data.account_id,\n"
+		"    character_data.name,\n"
+		"    character_data.zone_id,\n"
+		"    COALESCE((select zone.short_name from zone where zoneidnumber = character_data.zone_id LIMIT 1), \"Not Found\") as zone_name,\n"
+		"    character_data.zone_instance,\n"
+		"    COALESCE((select guilds.name from guilds where id = ((select guild_id from guild_members where char_id = character_data.id))), \"\") as guild_name,\n"
+		"    character_data.level,\n"
+		"    character_data.race,\n"
+		"    character_data.class,\n"
+		"    COALESCE((select account.status from account where account.id = character_data.account_id LIMIT 1), 0) as account_status,\n"
+		"    COALESCE((select account.name from account where account.id = character_data.account_id LIMIT 1), \"\") as account_name,\n"
+		"    COALESCE((select account_ip.ip from account_ip where account_ip.accid = character_data.account_id ORDER BY account_ip.lastused DESC LIMIT 1), \"\") as account_ip\n"
+		"FROM\n"
+		"    character_data\n"
+		"WHERE\n"
+		"    last_login > (UNIX_TIMESTAMP() - 600)\n"
+  		"ORDER BY character_data.name;";
+
+	auto results = database.QueryDatabase(query);
+	if (!results.Success())
+		return;
+
+	if (results.RowCount() == 0) {
+		c->Message(15, "No results found");
+		return;
+	}
+
+	std::string search_string;
+
+	if (sep->arg[1]) {
+		search_string = str_tolower(sep->arg[1]);
+	}
+
+	int found_count = 0;
+
+	c->Message(5, "Players in EverQuest");
+	c->Message(5, "--------------------");
+
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		auto        account_id      = static_cast<uint32>(atoi(row[0]));
+		std::string player_name     = row[1];
+		auto        zone_id         = static_cast<uint32>(atoi(row[2]));
+		std::string zone_short_name = row[3];
+		auto        zone_instance   = static_cast<uint32>(atoi(row[4]));
+		std::string guild_name      = row[5];
+		auto        player_level    = static_cast<uint32>(atoi(row[6]));
+		auto        player_race     = static_cast<uint32>(atoi(row[7]));
+		auto        player_class    = static_cast<uint32>(atoi(row[8]));
+		auto        account_status  = static_cast<uint32>(atoi(row[9]));
+		std::string account_name    = row[10];
+		std::string account_ip      = row[11];
+
+		std::string base_class_name     = GetClassIDName(static_cast<uint8>(player_class), 1);
+		std::string displayed_race_name = GetRaceIDName(static_cast<uint16>(player_race));
+
+		if (search_string.length() > 0) {
+			bool found_search_term =
+					 (
+						 str_tolower(player_name).find(search_string) != std::string::npos ||
+						 str_tolower(zone_short_name).find(search_string) != std::string::npos ||
+						 str_tolower(displayed_race_name).find(search_string) != std::string::npos ||
+						 str_tolower(base_class_name).find(search_string) != std::string::npos ||
+						 str_tolower(guild_name).find(search_string) != std::string::npos ||
+						 str_tolower(account_name).find(search_string) != std::string::npos ||
+						 str_tolower(account_ip).find(search_string) != std::string::npos
+					 );
+
+			if (!found_search_term) {
+				continue;
+			}
+		}
+
+		std::string displayed_guild_name;
+		if (guild_name.length() > 0) {
+			displayed_guild_name = EQEmu::SayLinkEngine::GenerateQuestSaylink(
+				StringFormat(
+					"#who \"%s\"",
+					guild_name.c_str()),
+				false,
+				StringFormat("<%s>", guild_name.c_str())
+			);
+		}
+
+		std::string goto_saylink = EQEmu::SayLinkEngine::GenerateQuestSaylink(
+			StringFormat("#goto %s", player_name.c_str()), false, "Goto"
+		);
+
+		std::string display_class_name = GetClassIDName(static_cast<uint8>(player_class), static_cast<uint8>(player_level));
+
+		c->Message(
+			5, "%s[%u %s] %s (%s) %s ZONE: %s (%u) (%s) (%s) (%s)",
+			(account_status > 0 ? "* GM * " : ""),
+			player_level,
+			EQEmu::SayLinkEngine::GenerateQuestSaylink(StringFormat("#who %s", base_class_name.c_str()), false, display_class_name).c_str(),
+			player_name.c_str(),
+			EQEmu::SayLinkEngine::GenerateQuestSaylink(StringFormat("#who %s", displayed_race_name.c_str()), false, displayed_race_name).c_str(),
+			displayed_guild_name.c_str(),
+			EQEmu::SayLinkEngine::GenerateQuestSaylink(StringFormat("#who %s", zone_short_name.c_str()), false, zone_short_name).c_str(),
+			zone_instance,
+			goto_saylink.c_str(),
+			EQEmu::SayLinkEngine::GenerateQuestSaylink(StringFormat("#who %s", account_name.c_str()), false, account_name).c_str(),
+			EQEmu::SayLinkEngine::GenerateQuestSaylink(StringFormat("#who %s", account_ip.c_str()), false, account_ip).c_str()
+		);
+
+		found_count++;
+	}
+
+	std::string message = (
+		found_count > 0 ?
+			StringFormat("There is %i player(s) in EverQuest", found_count).c_str() :
+			"There are no players in EverQuest that match those who filters."
+	);
+
+	c->Message(5, message.c_str());
 }
 
 // All new code added to command.cpp should be BEFORE this comment line. Do no append code to this file below the BOTS code block.

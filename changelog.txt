@@ -1,6 +1,45 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 
+== 1/20/2019 ==
+Uleat: Added 'spells' entry to EQDictionary
+Akkadius:
+    - [Command] Extended #goto via #goto <player_name> -
+        - This will work cross zone, cross instance, in zone etc.
+        - It works on top of the original #goto (target) and #goto x y z
+    - [Command] Implemented server side #who Example: https://bit.ly/2TZ2hvI
+        - Searches can be filtered by
+            - Account Name
+            - Base Class Name
+            - Guild Name
+            - IP
+            - Player Name
+            - Race Name
+            - Zone Short Name
+        - Features a clickable (Goto) saylink that will bring you directly to a player regardless of
+            whether or not they are in an instance
+    - [Command] Implemented: #gmzone [zone_short_name] [zone_version=0] [identifier=gmzone]
+        - Zones to a private GM instance
+            - Example: https://i.imgur.com/qswdrzO.gif
+    - [NPC] Fix issue where NPC's clip into the world and the client interprets them at 0,0,0
+        - This issue would show itself when NPC's would bunch up by a zone-in
+
+== 1/15/2019 ==
+Uleat: Activated per-expansion support for active inventory slot addressing
+	- Server honors expansions that alter bank size and power source, general9 and general10 slots
+	- Server honors gm flag behaviors for the active inventory slots of each client
+
+== 1/11/2019 ==
+Uleat: Modified rules system to ignore all runtime modifications of 'World:ExpansionSettings' and 'World:UseClientBasedExpansionSettings' fields.
+	- These fields are no longer allowed to be changed during server runtime through the command system
+	- Major syncronization issues between server and clients result when these fields are altered in-game
+	- It is not recommended to update these fields via sql queries while the server is in operation
+	- Failure to observe these warnings will result in abhorant behavior and loss of items
+	- Modify these fields during server operation at your own risk!
+
+== 1/4/2019 ==
+Akkadius: [Scaling] Global base scaling data has been updated in new database binary revision
+
 == 1/1/2019 ==
 Akkadius:
     - [Logging] Added new logging category "MobAppearance"

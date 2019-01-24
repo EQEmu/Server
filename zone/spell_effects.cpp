@@ -149,7 +149,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 		if (spells[spell_id].EndurUpkeep > 0)
 			SetEndurUpkeep(true);
 
-		if (IsClient() && CastToClient()->ClientVersionBit() & EQEmu::versions::bit_UFAndLater)
+		if (IsClient() && CastToClient()->ClientVersionBit() & EQEmu::versions::maskUFAndLater)
 		{
 			EQApplicationPacket *outapp = MakeBuffsPacket(false);
 			CastToClient()->FastQueuePacket(&outapp);
@@ -826,7 +826,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #endif
 				if(IsClient())
 				{
-					if (CastToClient()->ClientVersionBit() & EQEmu::versions::bit_SoDAndLater)
+					if (CastToClient()->ClientVersionBit() & EQEmu::versions::maskSoDAndLater)
 					{
 						bodyType bt = BT_Undead;
 
@@ -1244,7 +1244,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					// Will fix buttons for now
 					if (IsClient()) {
 						auto c = CastToClient();
-						if (c->ClientVersionBit() & EQEmu::versions::bit_UFAndLater) {
+						if (c->ClientVersionBit() & EQEmu::versions::maskUFAndLater) {
 							c->SetPetCommandState(PET_BUTTON_SIT, 0);
 							c->SetPetCommandState(PET_BUTTON_STOP, 0);
 							c->SetPetCommandState(PET_BUTTON_REGROUP, 0);
@@ -1663,7 +1663,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #endif
 				// This is handled by the client prior to SoD.
 				//
-				if (IsClient() && (CastToClient()->ClientVersionBit() & EQEmu::versions::bit_SoDAndLater))
+				if (IsClient() && (CastToClient()->ClientVersionBit() & EQEmu::versions::maskSoDAndLater))
 					CastToClient()->LocateCorpse();
 
 				break;
@@ -2470,7 +2470,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_FcTimerRefresh:
 			{
 				if(IsClient()) {
-					for(unsigned int i =0 ; i < MAX_PP_MEMSPELL; ++i) {
+					for (unsigned int i = 0; i < EQEmu::spells::SPELL_GEM_COUNT; ++i) {
 						if(IsValidSpell(CastToClient()->m_pp.mem_spells[i])) {
 							if (CalcFocusEffect(focusFcTimerRefresh, spell_id, CastToClient()->m_pp.mem_spells[i])){
 								CastToClient()->m_pp.spellSlotRefresh[i] = 1;
@@ -2739,7 +2739,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 				if (caster && IsValidSpell(spells[spell_id].base2[i])){
 					if(zone->random.Roll(spells[spell_id].base[i]))
-						caster->SpellFinished(spells[spell_id].base2[i], this, EQEmu::CastingSlot::Item, 0, -1, spells[spells[spell_id].base2[i]].ResistDiff);
+						caster->SpellFinished(spells[spell_id].base2[i], this, EQEmu::spells::CastingSlot::Item, 0, -1, spells[spells[spell_id].base2[i]].ResistDiff);
 				}
 				break;
 			}
@@ -3402,7 +3402,7 @@ void Mob::BuffProcess()
 						Log(Logs::Detail, Logs::Spells, "Buff %d in slot %d has %d tics remaining.", buffs[buffs_i].spellid, buffs_i, buffs[buffs_i].ticsremaining);
 					}
 				}
-				else if (IsClient() && !(CastToClient()->ClientVersionBit() & EQEmu::versions::bit_SoFAndLater))
+				else if (IsClient() && !(CastToClient()->ClientVersionBit() & EQEmu::versions::maskSoFAndLater))
 				{
 					buffs[buffs_i].UpdateClient = true;
 				}
@@ -3662,14 +3662,14 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 		case SE_CastOnFadeEffectNPC:
 		case SE_CastOnFadeEffectAlways: {
 			if (buff.ticsremaining == 0) {
-				SpellFinished(spells[buff.spellid].base[i], this, EQEmu::CastingSlot::Item, 0, -1, spells[spells[buff.spellid].base[i]].ResistDiff);
+				SpellFinished(spells[buff.spellid].base[i], this, EQEmu::spells::CastingSlot::Item, 0, -1, spells[spells[buff.spellid].base[i]].ResistDiff);
 			}
 			break;
 		}
 		case SE_LocateCorpse: {
 			// This is handled by the client prior to SoD.
 
-			if (IsClient() && (CastToClient()->ClientVersionBit() & EQEmu::versions::bit_SoDAndLater))
+			if (IsClient() && (CastToClient()->ClientVersionBit() & EQEmu::versions::maskSoDAndLater))
 				CastToClient()->LocateCorpse();
 		}
 
@@ -4085,7 +4085,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 	{
 		EQApplicationPacket *outapp = MakeBuffsPacket();
 
-		entity_list.QueueClientsByTarget(this, outapp, false, nullptr, true, false, EQEmu::versions::bit_SoDAndLater);
+		entity_list.QueueClientsByTarget(this, outapp, false, nullptr, true, false, EQEmu::versions::maskSoDAndLater);
 		if(IsClient() && GetTarget() == this) {
 			CastToClient()->QueuePacket(outapp);
 		}
@@ -4095,11 +4095,11 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 
 	if (IsNPC()) {
 		EQApplicationPacket *outapp = MakeBuffsPacket();
-		entity_list.QueueClientsByTarget(this, outapp, false, nullptr, true, false, EQEmu::versions::bit_SoDAndLater, true);
+		entity_list.QueueClientsByTarget(this, outapp, false, nullptr, true, false, EQEmu::versions::maskSoDAndLater, true);
 		safe_delete(outapp);
 	}
 
-	if (IsClient() && CastToClient()->ClientVersionBit() & EQEmu::versions::bit_UFAndLater)
+	if (IsClient() && CastToClient()->ClientVersionBit() & EQEmu::versions::maskUFAndLater)
 	{
 		EQApplicationPacket *outapp = MakeBuffsPacket(false);
 		CastToClient()->FastQueuePacket(&outapp);
@@ -5100,7 +5100,7 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 
 	if (Caston_spell_id) {
 		if (IsValidSpell(Caston_spell_id) && (Caston_spell_id != spell_id))
-			SpellFinished(Caston_spell_id, this, EQEmu::CastingSlot::Item, 0, -1, spells[Caston_spell_id].ResistDiff);
+			SpellFinished(Caston_spell_id, this, EQEmu::spells::CastingSlot::Item, 0, -1, spells[Caston_spell_id].ResistDiff);
 	}
 
 	return (value * lvlModifier / 100);
@@ -6663,10 +6663,10 @@ void Mob::TryTriggerThreshHold(int32 damage, int effect_id,  Mob* attacker){
 						if (IsValidSpell(spell_id)) {
 
 							if (IsBeneficialSpell(spell_id))
-								SpellFinished(spell_id, this, EQEmu::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
+								SpellFinished(spell_id, this, EQEmu::spells::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
 
 							else if(attacker)
-								SpellFinished(spell_id, attacker, EQEmu::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
+								SpellFinished(spell_id, attacker, EQEmu::spells::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
 						}
 					}
 				}

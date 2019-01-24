@@ -63,32 +63,26 @@ const char* EQEmu::versions::ClientVersionName(ClientVersion client_version)
 uint32 EQEmu::versions::ConvertClientVersionToClientVersionBit(ClientVersion client_version)
 {
 	switch (client_version) {
-	case ClientVersion::Unknown:
-	case ClientVersion::Client62:
-		return bit_Unknown;
 	case ClientVersion::Titanium:
-		return bit_Titanium;
+		return bitTitanium;
 	case ClientVersion::SoF:
-		return bit_SoF;
+		return bitSoF;
 	case ClientVersion::SoD:
-		return bit_SoD;
+		return bitSoD;
 	case ClientVersion::UF:
-		return bit_UF;
+		return bitUF;
 	case ClientVersion::RoF:
-		return bit_RoF;
+		return bitRoF;
 	case ClientVersion::RoF2:
-		return bit_RoF2;
+		return bitRoF2;
 	default:
-		return bit_Unknown;
+		return bitUnknown;
 	}
 }
 
 EQEmu::versions::ClientVersion EQEmu::versions::ConvertClientVersionBitToClientVersion(uint32 client_version_bit)
 {
 	switch (client_version_bit) {
-	case (uint32)static_cast<unsigned int>(ClientVersion::Unknown) :
-	case ((uint32)1 << (static_cast<unsigned int>(ClientVersion::Client62) - 1)) :
-		return ClientVersion::Unknown;
 	case ((uint32)1 << (static_cast<unsigned int>(ClientVersion::Titanium) - 1)) :
 		return ClientVersion::Titanium;
 	case ((uint32)1 << (static_cast<unsigned int>(ClientVersion::SoF) - 1)) :
@@ -103,27 +97,6 @@ EQEmu::versions::ClientVersion EQEmu::versions::ConvertClientVersionBitToClientV
 		return ClientVersion::RoF2;
 	default:
 		return ClientVersion::Unknown;
-	}
-}
-
-uint32 EQEmu::versions::ConvertClientVersionToExpansion(ClientVersion client_version)
-{
-	switch (client_version) {
-	case ClientVersion::Unknown:
-	case ClientVersion::Client62:
-	case ClientVersion::Titanium:
-		return 0x000007FFU;
-	case ClientVersion::SoF:
-		return 0x00007FFFU;
-	case ClientVersion::SoD:
-		return 0x0000FFFFU;
-	case ClientVersion::UF:
-		return 0x0001FFFFU;
-	case ClientVersion::RoF:
-	case ClientVersion::RoF2:
-		return 0x000FFFFFU;
-	default:
-		return 0;
 	}
 }
 
@@ -366,5 +339,261 @@ EQEmu::versions::MobVersion EQEmu::versions::ConvertClientVersionToOfflinePCMobV
 		return MobVersion::OfflineRoF2;
 	default:
 		return MobVersion::Unknown;
+	}
+}
+
+const char* EQEmu::expansions::ExpansionName(Expansion expansion)
+{
+	switch (expansion) {
+	case Expansion::EverQuest:
+		return "EverQuest";
+	case Expansion::RoK:
+		return "The Ruins of Kunark";
+	case Expansion::SoV:
+		return "The Scars of Velious";
+	case Expansion::SoL:
+		return "The Shadows of Luclin";
+	case Expansion::PoP:
+		return "The Planes of Power";
+	case Expansion::LoY:
+		return "The Legacy of Ykesha";
+	case Expansion::LDoN:
+		return "Lost Dungeons of Norrath";
+	case Expansion::GoD:
+		return "Gates of Discord";
+	case Expansion::OoW:
+		return "Omens of War";
+	case Expansion::DoN:
+		return "Dragons of Norrath";
+	case Expansion::DoD:
+		return "Depths of Darkhollow";
+	case Expansion::PoR:
+		return "Prophecy of Ro";
+	case Expansion::TSS:
+		return "The Serpent's Spine";
+	case Expansion::TBS:
+		return "The Buried Sea";
+	case Expansion::SoF:
+		return "Secrets of Faydwer";
+	case Expansion::SoD:
+		return "Seeds of Destruction";
+	case Expansion::UF:
+		return "Underfoot";
+	case Expansion::HoT:
+		return "House of Thule";
+	case Expansion::VoA:
+		return "Veil of Alaris";
+	case Expansion::RoF:
+		return "Rain of Fear";
+	case Expansion::CotF:
+		return "Call of the Forsaken";
+	default:
+		return "Invalid Expansion";
+	}
+}
+
+const char* EQEmu::expansions::ExpansionName(uint32 expansion_bit)
+{
+	return ExpansionName(ConvertExpansionBitToExpansion(expansion_bit));
+}
+
+uint32 EQEmu::expansions::ConvertExpansionToExpansionBit(Expansion expansion)
+{
+	switch (expansion) {
+	case Expansion::RoK:
+		return bitRoK;
+	case Expansion::SoV:
+		return bitSoV;
+	case Expansion::SoL:
+		return bitSoL;
+	case Expansion::PoP:
+		return bitPoP;
+	case Expansion::LoY:
+		return bitLoY;
+	case Expansion::LDoN:
+		return bitLDoN;
+	case Expansion::GoD:
+		return bitGoD;
+	case Expansion::OoW:
+		return bitOoW;
+	case Expansion::DoN:
+		return bitDoN;
+	case Expansion::DoD:
+		return bitDoD;
+	case Expansion::PoR:
+		return bitPoR;
+	case Expansion::TSS:
+		return bitTSS;
+	case Expansion::TBS:
+		return bitTBS;
+	case Expansion::SoF:
+		return bitSoF;
+	case Expansion::SoD:
+		return bitSoD;
+	case Expansion::UF:
+		return bitUF;
+	case Expansion::HoT:
+		return bitHoT;
+	case Expansion::VoA:
+		return bitVoA;
+	case Expansion::RoF:
+		return bitRoF;
+	case Expansion::CotF:
+		return bitCotF;
+	default:
+		return bitEverQuest;
+	}
+}
+
+EQEmu::expansions::Expansion EQEmu::expansions::ConvertExpansionBitToExpansion(uint32 expansion_bit)
+{
+	switch (expansion_bit) {
+	case bitRoK:
+		return Expansion::RoK;
+	case bitSoV:
+		return Expansion::SoV;
+	case bitSoL:
+		return Expansion::SoL;
+	case bitPoP:
+		return Expansion::PoP;
+	case bitLoY:
+		return Expansion::LoY;
+	case bitLDoN:
+		return Expansion::LDoN;
+	case bitGoD:
+		return Expansion::GoD;
+	case bitOoW:
+		return Expansion::OoW;
+	case bitDoN:
+		return Expansion::DoN;
+	case bitDoD:
+		return Expansion::DoD;
+	case bitPoR:
+		return Expansion::PoR;
+	case bitTSS:
+		return Expansion::TSS;
+	case bitTBS:
+		return Expansion::TBS;
+	case bitSoF:
+		return Expansion::SoF;
+	case bitSoD:
+		return Expansion::SoD;
+	case bitUF:
+		return Expansion::UF;
+	case bitHoT:
+		return Expansion::HoT;
+	case bitVoA:
+		return Expansion::VoA;
+	case bitRoF:
+		return Expansion::RoF;
+	case bitCotF:
+		return Expansion::CotF;
+	default:
+		return Expansion::EverQuest;
+	}
+}
+
+uint32 EQEmu::expansions::ConvertExpansionToExpansionMask(Expansion expansion)
+{
+	switch (expansion) {
+	case Expansion::RoK:
+		return maskRoK;
+	case Expansion::SoV:
+		return maskSoV;
+	case Expansion::SoL:
+		return maskSoL;
+	case Expansion::PoP:
+		return maskPoP;
+	case Expansion::LoY:
+		return maskLoY;
+	case Expansion::LDoN:
+		return maskLDoN;
+	case Expansion::GoD:
+		return maskGoD;
+	case Expansion::OoW:
+		return maskOoW;
+	case Expansion::DoN:
+		return maskDoN;
+	case Expansion::DoD:
+		return maskDoD;
+	case Expansion::PoR:
+		return maskPoR;
+	case Expansion::TSS:
+		return maskTSS;
+	case Expansion::TBS:
+		return maskTBS;
+	case Expansion::SoF:
+		return maskSoF;
+	case Expansion::SoD:
+		return maskSoD;
+	case Expansion::UF:
+		return maskUF;
+	case Expansion::HoT:
+		return maskHoT;
+	case Expansion::VoA:
+		return maskVoA;
+	case Expansion::RoF:
+		return maskRoF;
+	case Expansion::CotF:
+		return maskCotF;
+	default:
+		return maskEverQuest;
+	}
+}
+
+EQEmu::expansions::Expansion EQEmu::expansions::ConvertClientVersionToExpansion(versions::ClientVersion client_version)
+{
+	switch (client_version) {
+	case versions::ClientVersion::Titanium:
+		return expansions::Expansion::PoR;
+	case versions::ClientVersion::SoF:
+		return expansions::Expansion::SoF;
+	case versions::ClientVersion::SoD:
+		return expansions::Expansion::SoD;
+	case versions::ClientVersion::UF:
+		return expansions::Expansion::UF;
+	case versions::ClientVersion::RoF:
+	case versions::ClientVersion::RoF2:
+		return expansions::Expansion::RoF;
+	default:
+		return expansions::Expansion::EverQuest;
+	}
+}
+
+uint32 EQEmu::expansions::ConvertClientVersionToExpansionBit(versions::ClientVersion client_version)
+{
+	switch (client_version) {
+	case versions::ClientVersion::Titanium:
+		return expansions::bitPoR;
+	case versions::ClientVersion::SoF:
+		return expansions::bitSoF;
+	case versions::ClientVersion::SoD:
+		return expansions::bitSoD;
+	case versions::ClientVersion::UF:
+		return expansions::bitUF;
+	case versions::ClientVersion::RoF:
+	case versions::ClientVersion::RoF2:
+		return expansions::bitRoF;
+	default:
+		return expansions::bitEverQuest;
+	}
+}
+
+uint32 EQEmu::expansions::ConvertClientVersionToExpansionMask(versions::ClientVersion client_version)
+{
+	switch (client_version) {
+	case versions::ClientVersion::Titanium:
+		return expansions::maskPoR;
+	case versions::ClientVersion::SoF:
+		return expansions::maskSoF;
+	case versions::ClientVersion::SoD:
+		return expansions::maskSoD;
+	case versions::ClientVersion::UF:
+		return expansions::maskUF;
+	case versions::ClientVersion::RoF:
+	case versions::ClientVersion::RoF2:
+		return expansions::maskRoF;
+	default:
+		return expansions::maskEverQuest;
 	}
 }

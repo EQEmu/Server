@@ -838,7 +838,7 @@ uint32 Client::CalcCurrentWeight()
 	    This is the ONLY instance I have seen where the client is hard coded to particular Item IDs to set a certain property for an item. It is very odd.
 	*/
 	// SoD+ client has no weight for coin
-	if (EQEmu::behavior::Lookup(EQEmu::versions::ConvertClientVersionToMobVersion(ClientVersion()))->CoinHasWeight) {
+	if (EQEmu::behavior::StaticLookup(EQEmu::versions::ConvertClientVersionToMobVersion(ClientVersion()))->CoinHasWeight) {
 		Total += (m_pp.platinum + m_pp.gold + m_pp.silver + m_pp.copper) / 4;
 	}
 	float Packrat = (float)spellbonuses.Packrat + (float)aabonuses.Packrat + (float)itembonuses.Packrat;

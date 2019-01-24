@@ -650,8 +650,6 @@ void EntityList::AddNPC(NPC *npc, bool SendSpawnPacket, bool dontqueue)
 
 	parse->EventNPC(EVENT_SPAWN, npc, nullptr, "", 0);
 
-	npc->FixZ();
-
 	uint16 emoteid = npc->GetEmoteID();
 	if (emoteid != 0)
 		npc->DoNPCEmote(ONSPAWN, emoteid);
@@ -1564,7 +1562,7 @@ void EntityList::QueueClientsByTarget(Mob *sender, const EQApplicationPacket *ap
 	}
 }
 
-void EntityList::QueueClientsByXTarget(Mob *sender, const EQApplicationPacket *app, bool iSendToSender, EQEmu::versions::ClientVersionBit client_version_bits)
+void EntityList::QueueClientsByXTarget(Mob *sender, const EQApplicationPacket *app, bool iSendToSender, EQEmu::versions::ClientVersionBitmask client_version_bits)
 {
 	auto it = client_list.begin();
 	while (it != client_list.end()) {

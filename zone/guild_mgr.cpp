@@ -691,7 +691,7 @@ void GuildBankManager::SendGuildBank(Client *c)
 	auto &guild_bank = *Iterator;
 
 	// RoF+ uses a bulk list packet -- This is also how the Action 0 of older clients basically works
-	if (c->ClientVersionBit() & EQEmu::versions::bit_RoFAndLater) {
+	if (c->ClientVersionBit() & EQEmu::versions::maskRoFAndLater) {
 		auto outapp = new EQApplicationPacket(OP_GuildBankItemList, sizeof(GuildBankItemListEntry_Struct) * 240);
 		for (int i = 0; i < GUILD_BANK_DEPOSIT_AREA_SIZE; ++i) {
 			const EQEmu::ItemData *Item = database.GetItem(guild_bank->Items.DepositArea[i].ItemID);

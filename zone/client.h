@@ -255,6 +255,8 @@ public:
 	void SetPrimaryWeaponOrnamentation(uint32 model_id);
 	void SetSecondaryWeaponOrnamentation(uint32 model_id);
 
+	bool GotoPlayer(std::string player_name);
+
 	//abstract virtual function implementations required by base abstract class
 	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill);
 	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None);
@@ -557,10 +559,10 @@ public:
 	virtual int GetCurrentBuffSlots() const;
 	virtual int GetCurrentSongSlots() const;
 	virtual int GetCurrentDiscSlots() const { return 1; }
-	virtual int GetMaxBuffSlots() const { return EQEmu::constants::LongBuffs; }
-	virtual int GetMaxSongSlots() const { return EQEmu::constants::ShortBuffs; }
-	virtual int GetMaxDiscSlots() const { return EQEmu::constants::DiscBuffs; }
-	virtual int GetMaxTotalSlots() const { return EQEmu::constants::TotalBuffs; }
+	virtual int GetMaxBuffSlots() const { return EQEmu::spells::LONG_BUFFS; }
+	virtual int GetMaxSongSlots() const { return EQEmu::spells::SHORT_BUFFS; }
+	virtual int GetMaxDiscSlots() const { return EQEmu::spells::DISC_BUFFS; }
+	virtual int GetMaxTotalSlots() const { return EQEmu::spells::TOTAL_BUFFS; }
 	virtual uint32 GetFirstBuffSlot(bool disc, bool song);
 	virtual uint32 GetLastBuffSlot(bool disc, bool song);
 	virtual void InitializeBuffSlots();
@@ -1160,7 +1162,7 @@ public:
 	void HandleLFGuildResponse(ServerPacket *pack);
 	void SendLFGuildStatus();
 	void SendGuildLFGuildStatus();
-	inline bool XTargettingAvailable() const { return ((m_ClientVersionBit & EQEmu::versions::bit_UFAndLater) && RuleB(Character, EnableXTargetting)); }
+	inline bool XTargettingAvailable() const { return ((m_ClientVersionBit & EQEmu::versions::maskUFAndLater) && RuleB(Character, EnableXTargetting)); }
 	inline uint8 GetMaxXTargets() const { return MaxXTargets; }
 	void SetMaxXTargets(uint8 NewMax);
 	bool IsXTarget(const Mob *m) const;
@@ -1184,7 +1186,7 @@ public:
 	bool GroupFollow(Client* inviter);
 	inline bool  GetRunMode() const { return runmode; }
 
-	inline bool AggroMeterAvailable() const { return ((m_ClientVersionBit & EQEmu::versions::bit_RoF2AndLater)) && RuleB(Character, EnableAggroMeter); } // RoF untested
+	inline bool AggroMeterAvailable() const { return ((m_ClientVersionBit & EQEmu::versions::maskRoF2AndLater)) && RuleB(Character, EnableAggroMeter); } // RoF untested
 	inline void SetAggroMeterLock(int in) { m_aggrometer.set_lock_id(in); }
 
 	void ProcessAggroMeter(); // builds packet and sends

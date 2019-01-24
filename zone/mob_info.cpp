@@ -817,7 +817,7 @@ void Mob::DisplayInfo(Mob *mob)
 			NPCCommandsMenu(client, npc);
 		}
 
-		std::cout << "Window Length: " << window_text.length() << std::endl;
+		// std::cout << "Window Length: " << window_text.length() << std::endl;
 
 		if (client->GetDisplayMobInfoWindow()) {
 			client->SendFullPopup(

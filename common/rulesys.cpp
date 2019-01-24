@@ -61,7 +61,7 @@ RuleManager::RuleManager()
 :	m_activeRuleset(0),
 	m_activeName("default")
 {
-	ResetRules();
+	ResetRules(false);
 }
 
 RuleManager::CategoryType RuleManager::FindCategory(const char *catname) {
@@ -126,7 +126,7 @@ bool RuleManager::GetRule(const char *rule_name, std::string &return_value) {
 	return true;
 }
 
-bool RuleManager::SetRule(const char *rule_name, const char *rule_value, Database *database, bool db_save) {
+bool RuleManager::SetRule(const char *rule_name, const char *rule_value, Database *database, bool db_save, bool reload) {
 	if(rule_name == nullptr || rule_value == nullptr)
 		return(false);
 
@@ -134,6 +134,13 @@ bool RuleManager::SetRule(const char *rule_name, const char *rule_value, Databas
 	uint16 index;
 	if(!_FindRule(rule_name, type, index))
 		return(false);
+
+	if (reload) {
+		if (strcasecmp(rule_name, "World:ExpansionSettings") == 0)
+			return(false);
+		if (strcasecmp(rule_name, "World:UseClientBasedExpansionSettings") == 0)
+			return(false);
+	}
 
 	switch(type) {
 		case IntRule:
@@ -160,7 +167,16 @@ bool RuleManager::SetRule(const char *rule_name, const char *rule_value, Databas
 	return(true);
 }
 
-void RuleManager::ResetRules() {
+void RuleManager::ResetRules(bool reload) {
+	std::string expansion1;
+	std::string expansion2;
+
+	// these rules must not change during server runtime
+	if (reload) {
+		GetRule("World:ExpansionSettings", expansion1);
+		GetRule("World:UseClientBasedExpansionSettings", expansion2);
+	}
+
 	Log(Logs::Detail, Logs::Rules, "Resetting running rules to default values");
 	#define RULE_INT(cat, rule, default_value) \
 		m_RuleIntValues[ Int__##rule ] = default_value;
@@ -169,6 +185,12 @@ void RuleManager::ResetRules() {
 	#define RULE_BOOL(cat, rule, default_value) \
 		m_RuleBoolValues[ Bool__##rule ] = default_value;
 	#include "ruletypes.h"
+
+	// restore these rules to their pre-reset values
+	if (reload) {
+		SetRule("World:ExpansionSettings", expansion1.c_str(), nullptr, false, false);
+		SetRule("World:UseClientBasedExpansionSettings", expansion2.c_str(), nullptr, false, false);
+	}
 }
 
 bool RuleManager::_FindRule(const char *rule_name, RuleType &type_into, uint16 &index_into) {
@@ -235,7 +257,7 @@ void RuleManager::SaveRules(Database *database, const char *ruleset_name) {
 	}
 }
 
-bool RuleManager::LoadRules(Database *database, const char *ruleset_name) {
+bool RuleManager::LoadRules(Database *database, const char *ruleset_name, bool reload) {
 
 	int ruleset_id = this->GetRulesetID(database, ruleset_name);
 	if (ruleset_id < 0) {
@@ -269,7 +291,7 @@ bool RuleManager::LoadRules(Database *database, const char *ruleset_name) {
 			return false;
 
 		for (auto row = results.begin(); row != results.end(); ++row)
-			if (!SetRule(row[0], row[1], nullptr, false))
+			if (!SetRule(row[0], row[1], nullptr, false, reload))
 				Log(Logs::Detail, Logs::Rules, "Unable to interpret rule record for %s", row[0]);
 	}
 
@@ -279,7 +301,7 @@ bool RuleManager::LoadRules(Database *database, const char *ruleset_name) {
 		return false;
 
 	for (auto row = results.begin(); row != results.end(); ++row)
-		if (!SetRule(row[0], row[1], nullptr, false))
+		if (!SetRule(row[0], row[1], nullptr, false, reload))
 			Log(Logs::Detail, Logs::Rules, "Unable to interpret rule record for %s", row[0]);
 
 	return true;
@@ -288,6 +310,11 @@ bool RuleManager::LoadRules(Database *database, const char *ruleset_name) {
 void RuleManager::_SaveRule(Database *database, RuleType type, uint16 index) {
 	char value_string[100];
 
+	if (type == IntRule && strcasecmp(_GetRuleName(type, index), "World:ExpansionSettings") == 0)
+		return;
+	if (type == BoolRule && strcasecmp(_GetRuleName(type, index), "World:UseClientBasedExpansionSettings") == 0)
+		return;
+	
 	switch (type) {
 		case IntRule:
 			sprintf(value_string, "%d", m_RuleIntValues[index]);

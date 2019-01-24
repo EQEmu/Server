@@ -65,8 +65,8 @@ namespace RoF
 	// client to server say link converter
 	static inline void RoFToServerSayLink(std::string& serverSayLink, const std::string& rofSayLink);
 
-	static inline CastingSlot ServerToRoFCastingSlot(EQEmu::CastingSlot slot);
-	static inline EQEmu::CastingSlot RoFToServerCastingSlot(CastingSlot slot);
+	static inline spells::CastingSlot ServerToRoFCastingSlot(EQEmu::spells::CastingSlot slot);
+	static inline EQEmu::spells::CastingSlot RoFToServerCastingSlot(spells::CastingSlot slot);
 
 	static inline int ServerToRoFBuffSlot(int index);
 	static inline int RoFToServerBuffSlot(int index);
@@ -502,7 +502,7 @@ namespace RoF
 		ENCODE_LENGTH_EXACT(CastSpell_Struct);
 		SETUP_DIRECT_ENCODE(CastSpell_Struct, structs::CastSpell_Struct);
 
-		eq->slot = static_cast<uint32>(ServerToRoFCastingSlot(static_cast<EQEmu::CastingSlot>(emu->slot)));
+		eq->slot = static_cast<uint32>(ServerToRoFCastingSlot(static_cast<EQEmu::spells::CastingSlot>(emu->slot)));
 
 		OUT(spell_id);
 		eq->inventory_slot = ServerToRoFSlot(emu->inventoryslot);
@@ -2124,33 +2124,33 @@ namespace RoF
 			outapp->WriteUInt32(0);
 		}
 
-		outapp->WriteUInt32(structs::MAX_PP_SPELLBOOK);		// Spellbook slots
+		outapp->WriteUInt32(spells::SPELLBOOK_SIZE);		// Spellbook slots
 
-		for (uint32 r = 0; r < MAX_PP_SPELLBOOK; r++)
+		for (uint32 r = 0; r < EQEmu::spells::SPELLBOOK_SIZE; r++)
 		{
 			outapp->WriteUInt32(emu->spell_book[r]);
 		}
 		// zeroes for the rest of the spellbook slots
-		for (uint32 r = 0; r < structs::MAX_PP_SPELLBOOK - MAX_PP_SPELLBOOK; r++)
+		for (uint32 r = 0; r < spells::SPELLBOOK_SIZE - EQEmu::spells::SPELLBOOK_SIZE; r++)
 		{
 			outapp->WriteUInt32(0xFFFFFFFFU);
 		}
 
-		outapp->WriteUInt32(structs::MAX_PP_MEMSPELL);		// Memorised spell slots
+		outapp->WriteUInt32(spells::SPELL_GEM_COUNT);		// Memorised spell slots
 
-		for (uint32 r = 0; r < MAX_PP_MEMSPELL; r++) // first 12
+		for (uint32 r = 0; r < EQEmu::spells::SPELL_GEM_COUNT; r++) // first 12
 		{
 			outapp->WriteUInt32(emu->mem_spells[r]);
 		}
 		// zeroes for the rest of the slots -- the other 4 which don't work at all!
-		for (uint32 r = 0; r < structs::MAX_PP_MEMSPELL - MAX_PP_MEMSPELL; r++)
+		for (uint32 r = 0; r < spells::SPELL_GEM_COUNT - EQEmu::spells::SPELL_GEM_COUNT; r++)
 		{
 			outapp->WriteUInt32(0xFFFFFFFFU);
 		}
 
 		outapp->WriteUInt32(13);			// gem refresh count
 
-		for (uint32 r = 0; r < MAX_PP_MEMSPELL; r++)
+		for (uint32 r = 0; r < EQEmu::spells::SPELL_GEM_COUNT; r++)
 		{
 			outapp->WriteUInt32(emu->spellSlotRefresh[r]);			// spell gem refresh
 		}
@@ -2334,7 +2334,8 @@ namespace RoF
 		outapp->WriteUInt32(emu->lastlogin);
 		outapp->WriteUInt32(emu->timePlayedMin);
 		outapp->WriteUInt32(emu->timeentitledonaccount);
-		outapp->WriteUInt32(0x0007ffff);		// Expansion bitmask
+		outapp->WriteUInt32(emu->expansions);
+		//outapp->WriteUInt32(0x0007ffff);		// Expansion bitmask
 
 		outapp->WriteUInt32(structs::MAX_PP_LANGUAGE);
 
@@ -4220,7 +4221,7 @@ namespace RoF
 		DECODE_LENGTH_EXACT(structs::CastSpell_Struct);
 		SETUP_DIRECT_DECODE(CastSpell_Struct, structs::CastSpell_Struct);
 
-		emu->slot = static_cast<uint32>(RoFToServerCastingSlot(static_cast<CastingSlot>(eq->slot)));
+		emu->slot = static_cast<uint32>(RoFToServerCastingSlot(static_cast<spells::CastingSlot>(eq->slot)));
 
 		IN(spell_id);
 		emu->inventoryslot = RoFToServerSlot(eq->inventory_slot);
@@ -4737,7 +4738,7 @@ namespace RoF
 		DECODE_LENGTH_EXACT(structs::LoadSpellSet_Struct);
 		SETUP_DIRECT_DECODE(LoadSpellSet_Struct, structs::LoadSpellSet_Struct);
 
-		for (unsigned int i = 0; i < MAX_PP_MEMSPELL; ++i)
+		for (unsigned int i = 0; i < EQEmu::spells::SPELL_GEM_COUNT; ++i)
 		{
 			if (eq->spell[i] == 0)
 				emu->spell[i] = 0xFFFFFFFF;
@@ -6086,80 +6087,80 @@ namespace RoF
 		}
 	}
 
-	static inline CastingSlot ServerToRoFCastingSlot(EQEmu::CastingSlot slot)
+	static inline spells::CastingSlot ServerToRoFCastingSlot(EQEmu::spells::CastingSlot slot)
 	{
 		switch (slot) {
-		case EQEmu::CastingSlot::Gem1:
-			return CastingSlot::Gem1;
-		case EQEmu::CastingSlot::Gem2:
-			return CastingSlot::Gem2;
-		case EQEmu::CastingSlot::Gem3:
-			return CastingSlot::Gem3;
-		case EQEmu::CastingSlot::Gem4:
-			return CastingSlot::Gem4;
-		case EQEmu::CastingSlot::Gem5:
-			return CastingSlot::Gem5;
-		case EQEmu::CastingSlot::Gem6:
-			return CastingSlot::Gem6;
-		case EQEmu::CastingSlot::Gem7:
-			return CastingSlot::Gem7;
-		case EQEmu::CastingSlot::Gem8:
-			return CastingSlot::Gem8;
-		case EQEmu::CastingSlot::Gem9:
-			return CastingSlot::Gem9;
-		case EQEmu::CastingSlot::Gem10:
-			return CastingSlot::Gem10;
-		case EQEmu::CastingSlot::Gem11:
-			return CastingSlot::Gem11;
-		case EQEmu::CastingSlot::Gem12:
-			return CastingSlot::Gem12;
-		case EQEmu::CastingSlot::Item:
-		case EQEmu::CastingSlot::PotionBelt:
-			return CastingSlot::Item;
-		case EQEmu::CastingSlot::Discipline:
-			return CastingSlot::Discipline;
-		case EQEmu::CastingSlot::AltAbility:
-			return CastingSlot::AltAbility;
+		case EQEmu::spells::CastingSlot::Gem1:
+			return spells::CastingSlot::Gem1;
+		case EQEmu::spells::CastingSlot::Gem2:
+			return spells::CastingSlot::Gem2;
+		case EQEmu::spells::CastingSlot::Gem3:
+			return spells::CastingSlot::Gem3;
+		case EQEmu::spells::CastingSlot::Gem4:
+			return spells::CastingSlot::Gem4;
+		case EQEmu::spells::CastingSlot::Gem5:
+			return spells::CastingSlot::Gem5;
+		case EQEmu::spells::CastingSlot::Gem6:
+			return spells::CastingSlot::Gem6;
+		case EQEmu::spells::CastingSlot::Gem7:
+			return spells::CastingSlot::Gem7;
+		case EQEmu::spells::CastingSlot::Gem8:
+			return spells::CastingSlot::Gem8;
+		case EQEmu::spells::CastingSlot::Gem9:
+			return spells::CastingSlot::Gem9;
+		case EQEmu::spells::CastingSlot::Gem10:
+			return spells::CastingSlot::Gem10;
+		case EQEmu::spells::CastingSlot::Gem11:
+			return spells::CastingSlot::Gem11;
+		case EQEmu::spells::CastingSlot::Gem12:
+			return spells::CastingSlot::Gem12;
+		case EQEmu::spells::CastingSlot::Item:
+		case EQEmu::spells::CastingSlot::PotionBelt:
+			return spells::CastingSlot::Item;
+		case EQEmu::spells::CastingSlot::Discipline:
+			return spells::CastingSlot::Discipline;
+		case EQEmu::spells::CastingSlot::AltAbility:
+			return spells::CastingSlot::AltAbility;
 		default: // we shouldn't have any issues with other slots ... just return something
-			return CastingSlot::Discipline;
+			return spells::CastingSlot::Discipline;
 		}
 	}
 
-	static inline EQEmu::CastingSlot RoFToServerCastingSlot(CastingSlot slot)
+	static inline EQEmu::spells::CastingSlot RoFToServerCastingSlot(spells::CastingSlot slot)
 	{
 		switch (slot) {
-		case CastingSlot::Gem1:
-			return EQEmu::CastingSlot::Gem1;
-		case CastingSlot::Gem2:
-			return EQEmu::CastingSlot::Gem2;
-		case CastingSlot::Gem3:
-			return EQEmu::CastingSlot::Gem3;
-		case CastingSlot::Gem4:
-			return EQEmu::CastingSlot::Gem4;
-		case CastingSlot::Gem5:
-			return EQEmu::CastingSlot::Gem5;
-		case CastingSlot::Gem6:
-			return EQEmu::CastingSlot::Gem6;
-		case CastingSlot::Gem7:
-			return EQEmu::CastingSlot::Gem7;
-		case CastingSlot::Gem8:
-			return EQEmu::CastingSlot::Gem8;
-		case CastingSlot::Gem9:
-			return EQEmu::CastingSlot::Gem9;
-		case CastingSlot::Gem10:
-			return EQEmu::CastingSlot::Gem10;
-		case CastingSlot::Gem11:
-			return EQEmu::CastingSlot::Gem11;
-		case CastingSlot::Gem12:
-			return EQEmu::CastingSlot::Gem12;
-		case CastingSlot::Discipline:
-			return EQEmu::CastingSlot::Discipline;
-		case CastingSlot::Item:
-			return EQEmu::CastingSlot::Item;
-		case CastingSlot::AltAbility:
-			return EQEmu::CastingSlot::AltAbility;
+		case spells::CastingSlot::Gem1:
+			return EQEmu::spells::CastingSlot::Gem1;
+		case spells::CastingSlot::Gem2:
+			return EQEmu::spells::CastingSlot::Gem2;
+		case spells::CastingSlot::Gem3:
+			return EQEmu::spells::CastingSlot::Gem3;
+		case spells::CastingSlot::Gem4:
+			return EQEmu::spells::CastingSlot::Gem4;
+		case spells::CastingSlot::Gem5:
+			return EQEmu::spells::CastingSlot::Gem5;
+		case spells::CastingSlot::Gem6:
+			return EQEmu::spells::CastingSlot::Gem6;
+		case spells::CastingSlot::Gem7:
+			return EQEmu::spells::CastingSlot::Gem7;
+		case spells::CastingSlot::Gem8:
+			return EQEmu::spells::CastingSlot::Gem8;
+		case spells::CastingSlot::Gem9:
+			return EQEmu::spells::CastingSlot::Gem9;
+		case spells::CastingSlot::Gem10:
+			return EQEmu::spells::CastingSlot::Gem10;
+		case spells::CastingSlot::Gem11:
+			return EQEmu::spells::CastingSlot::Gem11;
+		case spells::CastingSlot::Gem12:
+			return EQEmu::spells::CastingSlot::Gem12;
+		case spells::CastingSlot::Discipline:
+			return EQEmu::spells::CastingSlot::Discipline;
+		case spells::CastingSlot::Item:
+			return EQEmu::spells::CastingSlot::Item;
+		case spells::CastingSlot::AltAbility:
+			return EQEmu::spells::CastingSlot::AltAbility;
 		default: // we shouldn't have any issues with other slots ... just return something
-			return EQEmu::CastingSlot::Discipline;
+			return EQEmu::spells::CastingSlot::Discipline;
 		}
 	}
 
@@ -6168,12 +6169,12 @@ namespace RoF
 	static inline int ServerToRoFBuffSlot(int index)
 	{
 		// we're a disc
-		if (index >= EQEmu::constants::LongBuffs + EQEmu::constants::ShortBuffs)
-			return index - EQEmu::constants::LongBuffs - EQEmu::constants::ShortBuffs +
-			       constants::LongBuffs + constants::ShortBuffs;
+		if (index >= EQEmu::spells::LONG_BUFFS + EQEmu::spells::SHORT_BUFFS)
+			return index - EQEmu::spells::LONG_BUFFS - EQEmu::spells::SHORT_BUFFS +
+			       spells::LONG_BUFFS + spells::SHORT_BUFFS;
 		// we're a song
-		if (index >= EQEmu::constants::LongBuffs)
-			return index - EQEmu::constants::LongBuffs + constants::LongBuffs;
+		if (index >= EQEmu::spells::LONG_BUFFS)
+			return index - EQEmu::spells::LONG_BUFFS + spells::LONG_BUFFS;
 		// we're a normal buff
 		return index; // as long as we guard against bad slots server side, we should be fine
 	}
@@ -6181,12 +6182,12 @@ namespace RoF
 	static inline int RoFToServerBuffSlot(int index)
 	{
 		// we're a disc
-		if (index >= constants::LongBuffs + constants::ShortBuffs)
-			return index - constants::LongBuffs - constants::ShortBuffs + EQEmu::constants::LongBuffs +
-			       EQEmu::constants::ShortBuffs;
+		if (index >= spells::LONG_BUFFS + spells::SHORT_BUFFS)
+			return index - spells::LONG_BUFFS - spells::SHORT_BUFFS + EQEmu::spells::LONG_BUFFS +
+			       EQEmu::spells::SHORT_BUFFS;
 		// we're a song
-		if (index >= constants::LongBuffs)
-			return index - constants::LongBuffs + EQEmu::constants::LongBuffs;
+		if (index >= spells::LONG_BUFFS)
+			return index - spells::LONG_BUFFS + EQEmu::spells::LONG_BUFFS;
 		// we're a normal buff
 		return index; // as long as we guard against bad slots server side, we should be fine
 	}

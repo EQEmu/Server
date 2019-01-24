@@ -488,7 +488,7 @@ void Client::ResetAA() {
 
 	database.DeleteCharacterLeadershipAAs(CharacterID());
 	// undefined for these clients
-	if (ClientVersionBit() & EQEmu::versions::bit_TitaniumAndEarlier)
+	if (ClientVersionBit() & EQEmu::versions::maskTitaniumAndEarlier)
 		Kick();
 }
 
@@ -1221,12 +1221,12 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 
 	// Bards can cast instant cast AAs while they are casting another song
 	if(spells[rank->spell].cast_time == 0 && GetClass() == BARD && IsBardSong(casting_spell_id)) {
-		if(!SpellFinished(rank->spell, entity_list.GetMob(target_id), EQEmu::CastingSlot::AltAbility, spells[rank->spell].mana, -1, spells[rank->spell].ResistDiff, false)) {
+		if(!SpellFinished(rank->spell, entity_list.GetMob(target_id), EQEmu::spells::CastingSlot::AltAbility, spells[rank->spell].mana, -1, spells[rank->spell].ResistDiff, false)) {
 			return;
 		}
 		ExpendAlternateAdvancementCharge(ability->id);
 	} else {
-		if(!CastSpell(rank->spell, target_id, EQEmu::CastingSlot::AltAbility, -1, -1, 0, -1, rank->spell_type + pTimerAAStart, cooldown, nullptr, rank->id)) {
+		if(!CastSpell(rank->spell, target_id, EQEmu::spells::CastingSlot::AltAbility, -1, -1, 0, -1, rank->spell_type + pTimerAAStart, cooldown, nullptr, rank->id)) {
 			return;
 		}
 	}
@@ -1455,7 +1455,7 @@ bool Mob::CanUseAlternateAdvancementRank(AA::Rank *rank) {
 	//the one titanium hack i will allow
 	//just to make sure we dont crash the client with newer aas
 	//we'll exclude any expendable ones
-	if(IsClient() && CastToClient()->ClientVersionBit() & EQEmu::versions::bit_TitaniumAndEarlier) {
+	if(IsClient() && CastToClient()->ClientVersionBit() & EQEmu::versions::maskTitaniumAndEarlier) {
 		if(ability->charges > 0) {
 			return false;
 		}

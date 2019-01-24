@@ -171,10 +171,13 @@ void Client::SendEnterWorld(std::string name)
 void Client::SendExpansionInfo() {
 	auto outapp = new EQApplicationPacket(OP_ExpansionInfo, sizeof(ExpansionInfo_Struct));
 	ExpansionInfo_Struct *eis = (ExpansionInfo_Struct*)outapp->pBuffer;
-	if(RuleB(World, UseClientBasedExpansionSettings)) {
-		eis->Expansions = EQEmu::versions::ConvertClientVersionToExpansion(eqs->ClientVersion());
-	} else {
-		eis->Expansions = (RuleI(World, ExpansionSettings));
+	
+	// need to rework .. not until full scope of change is accounted for, though
+	if (RuleB(World, UseClientBasedExpansionSettings)) {
+		eis->Expansions = EQEmu::expansions::ConvertClientVersionToExpansionMask(eqs->ClientVersion());
+	}
+	else {
+		eis->Expansions = RuleI(World, ExpansionSettings);
 	}
 
 	QueuePacket(outapp);
@@ -186,7 +189,7 @@ void Client::SendCharInfo() {
 		cle->SetOnline(CLE_Status_CharSelect);
 	}
 
-	if (m_ClientVersionBit & EQEmu::versions::bit_RoFAndLater) {
+	if (m_ClientVersionBit & EQEmu::versions::maskRoFAndLater) {
 		SendMaxCharCreate();
 		SendMembership();
 		SendMembershipSettings();
@@ -211,7 +214,7 @@ void Client::SendMaxCharCreate() {
 	auto outapp = new EQApplicationPacket(OP_SendMaxCharacters, sizeof(MaxCharacters_Struct));
 	MaxCharacters_Struct* mc = (MaxCharacters_Struct*)outapp->pBuffer;
 
-	mc->max_chars = EQEmu::constants::Lookup(m_ClientVersion)->CharacterCreationLimit;
+	mc->max_chars = EQEmu::constants::StaticLookup(m_ClientVersion)->CharacterCreationLimit;
 	if (mc->max_chars > EQEmu::constants::CHARACTER_CREATION_LIMIT)
 		mc->max_chars = EQEmu::constants::CHARACTER_CREATION_LIMIT;
 
@@ -717,7 +720,7 @@ bool Client::HandleCharacterCreatePacket(const EQApplicationPacket *app) {
 	}
 	else
 	{
-		if (m_ClientVersionBit & EQEmu::versions::bit_TitaniumAndEarlier)
+		if (m_ClientVersionBit & EQEmu::versions::maskTitaniumAndEarlier)
 			StartInTutorial = true;
 		SendCharInfo();
 	}
@@ -765,7 +768,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 	// This can probably be moved outside and have another method return requested info (don't forget to remove the #include "../common/shareddb.h" above)
 	// (This is a literal translation of the original process..I don't see why it can't be changed to a single-target query over account iteration)
 	if (!is_player_zoning) {
-		size_t character_limit = EQEmu::constants::Lookup(eqs->ClientVersion())->CharacterCreationLimit;
+		size_t character_limit = EQEmu::constants::StaticLookup(eqs->ClientVersion())->CharacterCreationLimit;
 		if (character_limit > EQEmu::constants::CHARACTER_CREATION_LIMIT) { character_limit = EQEmu::constants::CHARACTER_CREATION_LIMIT; }
 		if (eqs->ClientVersion() == EQEmu::versions::ClientVersion::Titanium) { character_limit = Titanium::constants::CHARACTER_CREATION_LIMIT; }
 
@@ -989,7 +992,7 @@ bool Client::HandleDeleteCharacterPacket(const EQApplicationPacket *app) {
 
 bool Client::HandleZoneChangePacket(const EQApplicationPacket *app) {
 	// HoT sends this to world while zoning and wants it echoed back.
-	if (m_ClientVersionBit & EQEmu::versions::bit_RoFAndLater)
+	if (m_ClientVersionBit & EQEmu::versions::maskRoFAndLater)
 	{
 		QueuePacket(app);
 	}
@@ -1442,7 +1445,10 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	PlayerProfile_Struct pp;
 	ExtendedProfile_Struct ext;
 	EQEmu::InventoryProfile inv;
+
 	inv.SetInventoryVersion(EQEmu::versions::ConvertClientVersionBitToClientVersion(m_ClientVersionBit));
+	inv.SetGMInventory(false); // character cannot have gm flag at this point
+
 	time_t bday = time(nullptr);
 	char startzone[50]={0};
 	uint32 i;
@@ -1465,7 +1471,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	Log(Logs::Detail, Logs::World_Server, "Beard: %d  Beardcolor: %d", cc->beard, cc->beardcolor);
 
 	/* Validate the char creation struct */
-	if (m_ClientVersionBit & EQEmu::versions::bit_SoFAndLater) {
+	if (m_ClientVersionBit & EQEmu::versions::maskSoFAndLater) {
 		if (!CheckCharCreateInfoSoF(cc)) {
 			Log(Logs::Detail, Logs::World_Server,"CheckCharCreateInfo did not validate the request (bad race/class/stats)");
 			return false;
@@ -1523,10 +1529,10 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 //	strcpy(pp.servername, WorldConfig::get()->ShortName.c_str());
 
 
-	for (i = 0; i < MAX_PP_REF_SPELLBOOK; i++)
+	for (i = 0; i < EQEmu::spells::SPELLBOOK_SIZE; i++)
 		pp.spell_book[i] = 0xFFFFFFFF;
 
-	for(i = 0; i < MAX_PP_MEMSPELL; i++)
+	for(i = 0; i < EQEmu::spells::SPELL_GEM_COUNT; i++)
 		pp.mem_spells[i] = 0xFFFFFFFF;
 
 	for(i = 0; i < BUFF_COUNT; i++)
@@ -1536,7 +1542,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	pp.pvp = database.GetServerType() == 1 ? 1 : 0;
 
 	/* If it is an SoF Client and the SoF Start Zone rule is set, send new chars there */
-	if (m_ClientVersionBit & EQEmu::versions::bit_SoFAndLater) {
+	if (m_ClientVersionBit & EQEmu::versions::maskSoFAndLater) {
 		Log(Logs::Detail, Logs::World_Server,"Found 'SoFStartZoneID' rule setting: %i", RuleI(World, SoFStartZoneID));
 		if (RuleI(World, SoFStartZoneID) > 0) {
 			pp.zone_id = RuleI(World, SoFStartZoneID);
@@ -1552,7 +1558,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 		}
 	} 	
 	/* use normal starting zone logic to either get defaults, or if startzone was set, load that from the db table.*/
-	bool ValidStartZone = database.GetStartZone(&pp, cc, m_ClientVersionBit & EQEmu::versions::bit_TitaniumAndEarlier);
+	bool ValidStartZone = database.GetStartZone(&pp, cc, m_ClientVersionBit & EQEmu::versions::maskTitaniumAndEarlier);
 
 	if (!ValidStartZone){
 		return false;

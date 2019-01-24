@@ -1899,9 +1899,9 @@ void Client::CheckManaEndUpdate() {
 			mana_update->cur_mana = GetMana();
 			mana_update->max_mana = GetMaxMana();
 			mana_update->spawn_id = GetID();
-			if ((ClientVersionBit() & EQEmu::versions::ClientVersionBit::bit_SoDAndLater) != 0)
+			if ((ClientVersionBit() & EQEmu::versions::ClientVersionBitmask::maskSoDAndLater) != 0)
 				QueuePacket(mana_packet); // do we need this with the OP_ManaChange packet above?
-			entity_list.QueueClientsByXTarget(this, mana_packet, false, EQEmu::versions::ClientVersionBit::bit_SoDAndLater);
+			entity_list.QueueClientsByXTarget(this, mana_packet, false, EQEmu::versions::ClientVersionBitmask::maskSoDAndLater);
 			safe_delete(mana_packet);
 
 			last_reported_mana_percent = this->GetManaPercent();
@@ -1924,9 +1924,9 @@ void Client::CheckManaEndUpdate() {
 			endurance_update->cur_end = GetEndurance();
 			endurance_update->max_end = GetMaxEndurance();
 			endurance_update->spawn_id = GetID();
-			if ((ClientVersionBit() & EQEmu::versions::ClientVersionBit::bit_SoDAndLater) != 0)
+			if ((ClientVersionBit() & EQEmu::versions::ClientVersionBitmask::maskSoDAndLater) != 0)
 				QueuePacket(endurance_packet); // do we need this with the OP_ManaChange packet above?
-			entity_list.QueueClientsByXTarget(this, endurance_packet, false, EQEmu::versions::ClientVersionBit::bit_SoDAndLater);
+			entity_list.QueueClientsByXTarget(this, endurance_packet, false, EQEmu::versions::ClientVersionBitmask::maskSoDAndLater);
 			safe_delete(endurance_packet);
 
 			last_reported_endurance_percent = this->GetEndurancePercent();
@@ -2077,6 +2077,7 @@ bool Client::ChangeFirstName(const char* in_firstname, const char* gmname)
 
 void Client::SetGM(bool toggle) {
 	m_pp.gm = toggle ? 1 : 0;
+	m_inv.SetGMInventory((bool)m_pp.gm);
 	Message(13, "You are %s a GM.", m_pp.gm ? "now" : "no longer");
 	SendAppearancePacket(AT_GM, m_pp.gm);
 	Save();
@@ -3054,7 +3055,7 @@ void Client::ServerFilter(SetServerFilter_Struct* filter){
 	Filter0(FilterMissedMe);
 	Filter1(FilterDamageShields);
 
-	if (ClientVersionBit() & EQEmu::versions::bit_SoDAndLater) {
+	if (ClientVersionBit() & EQEmu::versions::maskSoDAndLater) {
 		if (filter->filters[FilterDOT] == 0)
 			ClientFilters[FilterDOT] = FilterShow;
 		else if (filter->filters[FilterDOT] == 1)
@@ -3075,7 +3076,7 @@ void Client::ServerFilter(SetServerFilter_Struct* filter){
 	Filter1(FilterFocusEffects);
 	Filter1(FilterPetSpells);
 
-	if (ClientVersionBit() & EQEmu::versions::bit_SoDAndLater) {
+	if (ClientVersionBit() & EQEmu::versions::maskSoDAndLater) {
 		if (filter->filters[FilterHealOverTime] == 0)
 			ClientFilters[FilterHealOverTime] = FilterShow;
 		// This is called 'Show Mine Only' in the clients, but functions the same as show
@@ -4949,7 +4950,7 @@ void Client::HandleLDoNOpen(NPC *target)
 			if(target->GetLDoNTrapSpellID() != 0)
 			{
 				Message_StringID(13, LDON_ACCIDENT_SETOFF2);
-				target->SpellFinished(target->GetLDoNTrapSpellID(), this, EQEmu::CastingSlot::Item, 0, -1, spells[target->GetLDoNTrapSpellID()].ResistDiff);
+				target->SpellFinished(target->GetLDoNTrapSpellID(), this, EQEmu::spells::CastingSlot::Item, 0, -1, spells[target->GetLDoNTrapSpellID()].ResistDiff);
 				target->SetLDoNTrapSpellID(0);
 				target->SetLDoNTrapped(false);
 				target->SetLDoNTrapDetected(false);
@@ -5071,7 +5072,7 @@ void Client::HandleLDoNDisarm(NPC *target, uint16 skill, uint8 type)
 				break;
 			case -1:
 				Message_StringID(13, LDON_ACCIDENT_SETOFF2);
-				target->SpellFinished(target->GetLDoNTrapSpellID(), this, EQEmu::CastingSlot::Item, 0, -1, spells[target->GetLDoNTrapSpellID()].ResistDiff);
+				target->SpellFinished(target->GetLDoNTrapSpellID(), this, EQEmu::spells::CastingSlot::Item, 0, -1, spells[target->GetLDoNTrapSpellID()].ResistDiff);
 				target->SetLDoNTrapSpellID(0);
 				target->SetLDoNTrapped(false);
 				target->SetLDoNTrapDetected(false);
@@ -5090,7 +5091,7 @@ void Client::HandleLDoNPickLock(NPC *target, uint16 skill, uint8 type)
 			if(target->IsLDoNTrapped())
 			{
 				Message_StringID(13, LDON_ACCIDENT_SETOFF2);
-				target->SpellFinished(target->GetLDoNTrapSpellID(), this, EQEmu::CastingSlot::Item, 0, -1, spells[target->GetLDoNTrapSpellID()].ResistDiff);
+				target->SpellFinished(target->GetLDoNTrapSpellID(), this, EQEmu::spells::CastingSlot::Item, 0, -1, spells[target->GetLDoNTrapSpellID()].ResistDiff);
 				target->SetLDoNTrapSpellID(0);
 				target->SetLDoNTrapped(false);
 				target->SetLDoNTrapDetected(false);
@@ -5622,7 +5623,7 @@ void Client::SuspendMinion()
 			memset(&m_suspendedminion, 0, sizeof(struct PetInfo));
 			// TODO: These pet command states need to be synced ...
 			// Will just fix them for now
-			if (m_ClientVersionBit & EQEmu::versions::bit_UFAndLater) {
+			if (m_ClientVersionBit & EQEmu::versions::maskUFAndLater) {
 				SetPetCommandState(PET_BUTTON_SIT, 0);
 				SetPetCommandState(PET_BUTTON_STOP, 0);
 				SetPetCommandState(PET_BUTTON_REGROUP, 0);
@@ -7631,7 +7632,7 @@ void Client::SendClearMercInfo()
 
 void Client::DuplicateLoreMessage(uint32 ItemID)
 {
-	if (!(m_ClientVersionBit & EQEmu::versions::bit_RoFAndLater))
+	if (!(m_ClientVersionBit & EQEmu::versions::maskRoFAndLater))
 	{
 		Message_StringID(0, PICK_LORE);
 		return;
@@ -9073,4 +9074,56 @@ void Client::SetSecondaryWeaponOrnamentation(uint32 model_id)
 		
 		Message(15, "Your secondary weapon appearance has been modified");
 	}
+}
+
+/**
+ * Used in #goto <player_name>
+ *
+ * @param player_name
+ */
+bool Client::GotoPlayer(std::string player_name)
+{
+	std::string query = StringFormat(
+		"SELECT"
+		"    character_data.zone_id,"
+		"    character_data.zone_instance,"
+		"    character_data.x,"
+		"    character_data.y,"
+		"    character_data.z,"
+		"    character_data.heading "
+		"FROM"
+		"    character_data "
+		"WHERE"
+		"    TRUE"
+		"    AND character_data.name = '%s'"
+		"    AND character_data.last_login > (UNIX_TIMESTAMP() - 600) LIMIT 1", player_name.c_str());
+
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		return false;
+	}
+
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		auto zone_id     = static_cast<uint32>(atoi(row[0]));
+		auto instance_id = static_cast<uint16>(atoi(row[1]));
+		auto x           = static_cast<float>(atof(row[2]));
+		auto y           = static_cast<float>(atof(row[3]));
+		auto z           = static_cast<float>(atof(row[4]));
+		auto heading     = static_cast<float>(atof(row[5]));
+
+		if (instance_id > 0 && !database.CheckInstanceExists(instance_id)) {
+			this->Message(15, "Instance no longer exists...");
+			return false;
+		}
+
+		if (instance_id > 0) {
+			database.AddClientToInstance(instance_id, this->CharacterID());
+		}
+
+		this->MovePC(zone_id, instance_id, x, y, z, heading);
+
+		return true;
+	}
+
+	return false;
 }

@@ -904,7 +904,7 @@ bool Zone::Init(bool iStaticZone) {
 		std::string r_name = RuleManager::Instance()->GetRulesetName(&database, default_ruleset);
 		if(r_name.size() > 0)
 		{
-			RuleManager::Instance()->LoadRules(&database, r_name.c_str());
+			RuleManager::Instance()->LoadRules(&database, r_name.c_str(), false);
 		}
 	}
 

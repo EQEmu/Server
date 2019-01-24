@@ -530,7 +530,7 @@ void Client::CompleteConnect()
 		SendAppearancePacket(AT_GuildID, GuildID(), false);
 		SendAppearancePacket(AT_GuildRank, rank, false);
 	}
-	for (uint32 spellInt = 0; spellInt < MAX_PP_REF_SPELLBOOK; spellInt++) {
+	for (uint32 spellInt = 0; spellInt < EQEmu::spells::SPELLBOOK_SIZE; spellInt++) {
 		if (m_pp.spell_book[spellInt] < 3 || m_pp.spell_book[spellInt] > 50000)
 			m_pp.spell_book[spellInt] = 0xFFFFFFFF;
 	}
@@ -809,6 +809,16 @@ void Client::CompleteConnect()
 			std::string event_desc = StringFormat("Connect :: Logged into zoneid:%i instid:%i", this->GetZoneID(), this->GetInstanceID());
 			QServ->PlayerLogEvent(Player_Log_Connect_State, this->CharacterID(), event_desc);
 		}
+
+		/**
+		 * Update last login since this doesn't get updated until a late save later so we can update online status
+		 */
+		database.QueryDatabase(
+			StringFormat(
+				"UPDATE `character_data` SET `last_login` = UNIX_TIMESTAMP() WHERE id = %u",
+				this->CharacterID()
+			)
+		);
 	}
 
 	if (zone) {
@@ -868,14 +878,14 @@ void Client::CompleteConnect()
 	worldserver.SendPacket(pack);
 	delete pack;
 
-	if (IsClient() && CastToClient()->ClientVersionBit() & EQEmu::versions::bit_UFAndLater) {
+	if (IsClient() && CastToClient()->ClientVersionBit() & EQEmu::versions::maskUFAndLater) {
 		EQApplicationPacket *outapp = MakeBuffsPacket(false);
 		CastToClient()->FastQueuePacket(&outapp);
 	}
 
 	// TODO: load these states
 	// We at least will set them to the correct state for now
-	if (m_ClientVersionBit & EQEmu::versions::bit_UFAndLater && GetPet()) {
+	if (m_ClientVersionBit & EQEmu::versions::maskUFAndLater && GetPet()) {
 		SetPetCommandState(PET_BUTTON_SIT, 0);
 		SetPetCommandState(PET_BUTTON_STOP, 0);
 		SetPetCommandState(PET_BUTTON_REGROUP, 0);
@@ -1144,8 +1154,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	SetClientVersion(Connection()->ClientVersion());
 	m_ClientVersionBit = EQEmu::versions::ConvertClientVersionToClientVersionBit(Connection()->ClientVersion());
 
-	bool siv = m_inv.SetInventoryVersion(m_ClientVersion);
-	Log(Logs::General, Logs::None, "%s inventory version to %s(%i)", (siv ? "Succeeded in setting" : "Failed to set"), ClientVersionName(m_ClientVersion), m_ClientVersion);
+	m_inv.SetInventoryVersion(m_ClientVersion);
 
 	/* Antighost code
 	tmp var is so the search doesnt find this object
@@ -1185,7 +1194,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	uint32 cid = CharacterID();
 	character_id = cid; /* Global character_id reference */
 
-						/* Flush and reload factions */
+	/* Flush and reload factions */
 	database.RemoveTempFactions(this);
 	database.LoadCharacterFactionValues(cid, factionvalues);
 
@@ -1222,6 +1231,9 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		m_pp.platinum_shared = database.GetSharedPlatinum(this->AccountID());
 
 	database.ClearOldRecastTimestamps(cid); /* Clear out our old recast timestamps to keep the DB clean */
+	// set to full support in case they're a gm with items in disabled expansion slots..but, have their gm flag off...
+	// item loss will occur when they use the 'empty' slots, if this is not done
+	m_inv.SetGMInventory(true); 
 	loaditems = database.GetInventory(cid, &m_inv); /* Load Character Inventory */
 	database.LoadCharacterBandolier(cid, &m_pp); /* Load Character Bandolier */
 	database.LoadCharacterBindPoint(cid, &m_pp); /* Load Character Bind */
@@ -1238,7 +1250,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	database.LoadCharacterLeadershipAA(cid, &m_pp); /* Load Character Leadership AA's */
 	database.LoadCharacterTribute(cid, &m_pp); /* Load CharacterTribute */
 
-											   /* Load AdventureStats */
+	/* Load AdventureStats */
 	AdventureStats_Struct as;
 	if (database.GetAdventureStats(cid, &as))
 	{
@@ -1397,8 +1409,9 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if (m_pp.ldon_points_tak < 0 || m_pp.ldon_points_tak > 2000000000) { m_pp.ldon_points_tak = 0; }
 	if (m_pp.ldon_points_available < 0 || m_pp.ldon_points_available > 2000000000) { m_pp.ldon_points_available = 0; }
 
+	// need to rework .. not until full scope of change is accounted for, though
 	if (RuleB(World, UseClientBasedExpansionSettings)) {
-		m_pp.expansions = EQEmu::versions::ConvertClientVersionToExpansion(ClientVersion());
+		m_pp.expansions = EQEmu::expansions::ConvertClientVersionToExpansionMask(ClientVersion());
 	}
 	else {
 		m_pp.expansions = RuleI(World, ExpansionSettings);
@@ -1409,7 +1422,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	}
 
 	if (SPDAT_RECORDS > 0) {
-		for (uint32 z = 0; z<MAX_PP_MEMSPELL; z++) {
+		for (uint32 z = 0; z < EQEmu::spells::SPELL_GEM_COUNT; z++) {
 			if (m_pp.mem_spells[z] >= (uint32)SPDAT_RECORDS)
 				UnmemSpell(z, false);
 		}
@@ -1516,6 +1529,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	Bot::LoadAndSpawnAllZonedBots(this);
 #endif
 
+	m_inv.SetGMInventory((bool)m_pp.gm); // set to current gm state for calc
 	CalcBonuses();
 	if (RuleB(Zone, EnableLoggedOffReplenishments) &&
 		time(nullptr) - m_pp.lastlogin >= RuleI(Zone, MinOfflineTimeToReplenishments)) {
@@ -1540,7 +1554,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	}
 
 	/* Load Spell Slot Refresh from Currently Memoried Spells */
-	for (unsigned int i = 0; i < MAX_PP_MEMSPELL; ++i)
+	for (unsigned int i = 0; i < EQEmu::spells::SPELL_GEM_COUNT; ++i)
 		if (IsValidSpell(m_pp.mem_spells[i]))
 			m_pp.spellSlotRefresh[i] = p_timers.GetRemainingTime(pTimerSpellStart + m_pp.mem_spells[i]) * 1000;
 
@@ -1639,6 +1653,9 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	this is not quite where live sends inventory, they do it after tribute
 	*/
 	if (loaditems) { /* Dont load if a length error occurs */
+		if (admin >= minStatusToBeGM)
+			m_inv.SetGMInventory(true); // set to true to allow expansion-restricted packets through
+
 		BulkSendInventoryItems();
 		/* Send stuff on the cursor which isnt sent in bulk */
 		for (auto iter = m_inv.cursor_cbegin(); iter != m_inv.cursor_cend(); ++iter) {
@@ -1648,6 +1665,9 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 			const EQEmu::ItemInstance *inst = *iter;
 			SendItemPacket(EQEmu::invslot::slotCursor, inst, ItemPacketLimbo);
 		}
+
+		// this is kinda hackish atm..this process needs to be realigned to allow a contiguous flow
+		m_inv.SetGMInventory((bool)m_pp.gm); // reset back to current gm state
 	}
 
 	/* Task Packets */
@@ -1663,7 +1683,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		}
 	}
 
-	if (m_ClientVersionBit & EQEmu::versions::bit_UFAndLater) {
+	if (m_ClientVersionBit & EQEmu::versions::maskUFAndLater) {
 		outapp = new EQApplicationPacket(OP_XTargetResponse, 8);
 		outapp->WriteUInt32(GetMaxXTargets());
 		outapp->WriteUInt32(0);
@@ -3996,7 +4016,7 @@ void Client::Handle_OP_CancelTrade(const EQApplicationPacket *app)
 
 void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 {
-	using EQEmu::CastingSlot;
+	using EQEmu::spells::CastingSlot;
 	if (app->size != sizeof(CastSpell_Struct)) {
 		std::cout << "Wrong size: OP_CastSpell, size=" << app->size << ", expected " << sizeof(CastSpell_Struct) << std::endl;
 		return;
@@ -4017,14 +4037,14 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 	/* Memorized Spell */
 	if (m_pp.mem_spells[castspell->slot] && m_pp.mem_spells[castspell->slot] == castspell->spell_id) {
 		uint16 spell_to_cast = 0;
-		if (castspell->slot < MAX_PP_MEMSPELL) {
+		if (castspell->slot < EQEmu::spells::SPELL_GEM_COUNT) {
 			spell_to_cast = m_pp.mem_spells[castspell->slot];
 			if (spell_to_cast != castspell->spell_id) {
 				InterruptSpell(castspell->spell_id); //CHEATER!!!
 				return;
 			}
 		}
-		else if (castspell->slot >= MAX_PP_MEMSPELL) {
+		else if (castspell->slot >= EQEmu::spells::SPELL_GEM_COUNT) {
 			InterruptSpell();
 			return;
 		}
@@ -5243,7 +5263,7 @@ void Client::Handle_OP_DeleteSpell(const EQApplicationPacket *app)
 	EQApplicationPacket* outapp = app->Copy();
 	DeleteSpell_Struct* dss = (DeleteSpell_Struct*)outapp->pBuffer;
 
-	if (dss->spell_slot < 0 || dss->spell_slot > int(MAX_PP_SPELLBOOK))
+	if (dss->spell_slot < 0 || dss->spell_slot > int(EQEmu::spells::SPELLBOOK_SIZE))
 		return;
 
 	if (m_pp.spell_book[dss->spell_slot] != SPELLBOOK_UNKNOWN) {
@@ -8441,7 +8461,7 @@ void Client::Handle_OP_ItemPreview(const EQApplicationPacket *app)
 
 void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 {
-	using EQEmu::CastingSlot;
+	using EQEmu::spells::CastingSlot;
 	if (app->size != sizeof(ItemVerifyRequest_Struct))
 	{
 		Log(Logs::General, Logs::Error, "OP size error: OP_ItemVerifyRequest expected:%i got:%i", sizeof(ItemVerifyRequest_Struct), app->size);
@@ -9167,7 +9187,7 @@ void Client::Handle_OP_LoadSpellSet(const EQApplicationPacket *app)
 	}
 	int i;
 	LoadSpellSet_Struct* ss = (LoadSpellSet_Struct*)app->pBuffer;
-	for (i = 0; i<MAX_PP_MEMSPELL; i++) {
+	for (i = 0; i < EQEmu::spells::SPELL_GEM_COUNT; i++) {
 		if (ss->spell[i] != 0xFFFFFFFF)
 			UnmemSpell(i, true);
 	}
@@ -10168,16 +10188,16 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		if (aabonuses.PetCommands[PetCommand] && mypet->IsNPC()) {
 			if (mypet->IsHeld())
 			{
-				if (m_ClientVersionBit & EQEmu::versions::bit_SoDAndLater)
+				if (m_ClientVersionBit & EQEmu::versions::maskSoDAndLater)
 					Message_StringID(MT_PetResponse, PET_HOLD_SET_OFF);
 				mypet->SetHeld(false);
 			}
 			else
 			{
-				if (m_ClientVersionBit & EQEmu::versions::bit_SoDAndLater)
+				if (m_ClientVersionBit & EQEmu::versions::maskSoDAndLater)
 					Message_StringID(MT_PetResponse, PET_HOLD_SET_ON);
 
-				if (m_ClientVersionBit & EQEmu::versions::bit_UFAndLater)
+				if (m_ClientVersionBit & EQEmu::versions::maskUFAndLater)
 					mypet->SayTo_StringID(this, MT_PetResponse, PET_NOW_HOLDING);
 				else
 					mypet->SayTo_StringID(this, MT_PetResponse, PET_ON_HOLD);
@@ -10191,10 +10211,10 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 	}
 	case PET_HOLD_ON: {
 		if (aabonuses.PetCommands[PetCommand] && mypet->IsNPC() && !mypet->IsHeld()) {
-			if (m_ClientVersionBit & EQEmu::versions::bit_SoDAndLater)
+			if (m_ClientVersionBit & EQEmu::versions::maskSoDAndLater)
 				Message_StringID(MT_PetResponse, PET_HOLD_SET_ON);
 
-			if (m_ClientVersionBit & EQEmu::versions::bit_UFAndLater)
+			if (m_ClientVersionBit & EQEmu::versions::maskUFAndLater)
 				mypet->SayTo_StringID(this, MT_PetResponse, PET_NOW_HOLDING);
 			else
 				mypet->SayTo_StringID(this, MT_PetResponse, PET_ON_HOLD);
@@ -10206,7 +10226,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 	}
 	case PET_HOLD_OFF: {
 		if (aabonuses.PetCommands[PetCommand] && mypet->IsNPC() && mypet->IsHeld()) {
-			if (m_ClientVersionBit & EQEmu::versions::bit_SoDAndLater)
+			if (m_ClientVersionBit & EQEmu::versions::maskSoDAndLater)
 				Message_StringID(MT_PetResponse, PET_HOLD_SET_OFF);
 			mypet->SetHeld(false);
 		}
@@ -10216,13 +10236,13 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		if (aabonuses.PetCommands[PetCommand] && mypet->IsNPC()) {
 			if (mypet->IsGHeld())
 			{
-				if (m_ClientVersionBit & EQEmu::versions::bit_UFAndLater)
+				if (m_ClientVersionBit & EQEmu::versions::maskUFAndLater)
 					Message_StringID(MT_PetResponse, PET_OFF_GHOLD);
 				mypet->SetGHeld(false);
 			}
 			else
 			{
-				if (m_ClientVersionBit & EQEmu::versions::bit_UFAndLater) {
+				if (m_ClientVersionBit & EQEmu::versions::maskUFAndLater) {
 					Message_StringID(MT_PetResponse, PET_ON_GHOLD);
 					mypet->SayTo_StringID(this, MT_PetResponse, PET_GHOLD_ON_MSG);
 				} else {
@@ -10237,7 +10257,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 	}
 	case PET_GHOLD_ON: {
 		if (aabonuses.PetCommands[PetCommand] && mypet->IsNPC()) {
-			if (m_ClientVersionBit & EQEmu::versions::bit_UFAndLater) {
+			if (m_ClientVersionBit & EQEmu::versions::maskUFAndLater) {
 				Message_StringID(MT_PetResponse, PET_ON_GHOLD);
 				mypet->SayTo_StringID(this, MT_PetResponse, PET_GHOLD_ON_MSG);
 			} else {
@@ -10251,7 +10271,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 	}
 	case PET_GHOLD_OFF: {
 		if (aabonuses.PetCommands[PetCommand] && mypet->IsNPC() && mypet->IsGHeld()) {
-			if (m_ClientVersionBit & EQEmu::versions::bit_UFAndLater)
+			if (m_ClientVersionBit & EQEmu::versions::maskUFAndLater)
 				Message_StringID(MT_PetResponse, PET_OFF_GHOLD);
 			mypet->SetGHeld(false);
 		}
@@ -10263,13 +10283,13 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				break;
 			if (mypet->IsNoCast()) {
 				Message_StringID(MT_PetResponse, PET_CASTING);
-				if (m_ClientVersionBit & EQEmu::versions::bit_SoDAndLater)
+				if (m_ClientVersionBit & EQEmu::versions::maskSoDAndLater)
 					Message_StringID(MT_PetResponse, PET_SPELLHOLD_SET_OFF);
 				mypet->SetNoCast(false);
 			}
 			else {
 				Message_StringID(MT_PetResponse, PET_NOT_CASTING);
-				if (m_ClientVersionBit & EQEmu::versions::bit_SoDAndLater)
+				if (m_ClientVersionBit & EQEmu::versions::maskSoDAndLater)
 					Message_StringID(MT_PetResponse, PET_SPELLHOLD_SET_ON);
 				mypet->SetNoCast(true);
 			}
@@ -10282,7 +10302,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				break;
 			if (!mypet->IsNoCast()) {
 				Message_StringID(MT_PetResponse, PET_NOT_CASTING);
-				if (m_ClientVersionBit & EQEmu::versions::bit_SoDAndLater)
+				if (m_ClientVersionBit & EQEmu::versions::maskSoDAndLater)
 					Message_StringID(MT_PetResponse, PET_SPELLHOLD_SET_ON);
 				mypet->SetNoCast(true);
 			}
@@ -10295,7 +10315,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				break;
 			if (mypet->IsNoCast()) {
 				Message_StringID(MT_PetResponse, PET_CASTING);
-				if (m_ClientVersionBit & EQEmu::versions::bit_SoDAndLater)
+				if (m_ClientVersionBit & EQEmu::versions::maskSoDAndLater)
 					Message_StringID(MT_PetResponse, PET_SPELLHOLD_SET_OFF);
 				mypet->SetNoCast(false);
 			}
@@ -10308,13 +10328,13 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				break;
 			if (mypet->IsFocused()) {
 				Message_StringID(MT_PetResponse, PET_NOT_FOCUSING);
-				if (m_ClientVersionBit & EQEmu::versions::bit_SoDAndLater)
+				if (m_ClientVersionBit & EQEmu::versions::maskSoDAndLater)
 					Message_StringID(MT_PetResponse, PET_FOCUS_SET_OFF);
 				mypet->SetFocused(false);
 			}
 			else {
 				Message_StringID(MT_PetResponse, PET_NOW_FOCUSING);
-				if (m_ClientVersionBit & EQEmu::versions::bit_SoDAndLater)
+				if (m_ClientVersionBit & EQEmu::versions::maskSoDAndLater)
 					Message_StringID(MT_PetResponse, PET_FOCUS_SET_ON);
 				mypet->SetFocused(true);
 			}
@@ -10327,7 +10347,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				break;
 			if (!mypet->IsFocused()) {
 				Message_StringID(MT_PetResponse, PET_NOW_FOCUSING);
-				if (m_ClientVersionBit & EQEmu::versions::bit_SoDAndLater)
+				if (m_ClientVersionBit & EQEmu::versions::maskSoDAndLater)
 					Message_StringID(MT_PetResponse, PET_FOCUS_SET_ON);
 				mypet->SetFocused(true);
 			}
@@ -10340,7 +10360,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				break;
 			if (mypet->IsFocused()) {
 				Message_StringID(MT_PetResponse, PET_NOT_FOCUSING);
-				if (m_ClientVersionBit & EQEmu::versions::bit_SoDAndLater)
+				if (m_ClientVersionBit & EQEmu::versions::maskSoDAndLater)
 					Message_StringID(MT_PetResponse, PET_FOCUS_SET_OFF);
 				mypet->SetFocused(false);
 			}
@@ -13317,7 +13337,7 @@ void Client::Handle_OP_SwapSpell(const EQApplicationPacket *app)
 	const SwapSpell_Struct* swapspell = (const SwapSpell_Struct*)app->pBuffer;
 	int swapspelltemp;
 
-	if (swapspell->from_slot < 0 || swapspell->from_slot > MAX_PP_SPELLBOOK || swapspell->to_slot < 0 || swapspell->to_slot > MAX_PP_SPELLBOOK)
+	if (swapspell->from_slot < 0 || swapspell->from_slot > EQEmu::spells::SPELLBOOK_SIZE || swapspell->to_slot < 0 || swapspell->to_slot > EQEmu::spells::SPELLBOOK_SIZE)
 		return;
 
 	swapspelltemp = m_pp.spell_book[swapspell->from_slot];

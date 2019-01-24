@@ -812,7 +812,7 @@ void Client::BulkSendInventoryItems()
 void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 	const EQEmu::ItemData* handyitem = nullptr;
 	uint32 numItemSlots = 80; //The max number of items passed in the transaction.
-	if (m_ClientVersionBit & EQEmu::versions::bit_RoFAndLater) { // RoF+ can send 200 items
+	if (m_ClientVersionBit & EQEmu::versions::maskRoFAndLater) { // RoF+ can send 200 items
 		numItemSlots = 200;
 	}
 	const EQEmu::ItemData *item = nullptr;
@@ -1132,7 +1132,7 @@ void Client::CancelSneakHide()
 		// The later clients send back a OP_Hide (this has a size but data is 0)
 		// as well as OP_SpawnAppearance with AT_Invis and one with AT_Sneak
 		// So we don't have to handle any of those flags
-		if (ClientVersionBit() & EQEmu::versions::bit_SoFAndEarlier)
+		if (ClientVersionBit() & EQEmu::versions::maskSoFAndEarlier)
 			sneaking = false;
 	}
 }
@@ -2129,7 +2129,7 @@ void Client::ClearHover()
 	entity_list.QueueClients(this, outapp, false);
 	safe_delete(outapp);
 
-	if (IsClient() && CastToClient()->ClientVersionBit() & EQEmu::versions::bit_UFAndLater)
+	if (IsClient() && CastToClient()->ClientVersionBit() & EQEmu::versions::maskUFAndLater)
 	{
 		EQApplicationPacket *outapp = MakeBuffsPacket(false);
 		CastToClient()->FastQueuePacket(&outapp);
