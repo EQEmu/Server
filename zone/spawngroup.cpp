@@ -141,13 +141,14 @@ bool SpawnGroupList::RemoveSpawnGroup(uint32 in_id) {
 
 bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnGroupList *spawn_group_list)
 {
+	auto latest_expansion = EQEmu::expansions::ConvertExpansionMaskToLatestExpansion(RuleI(World, ExpansionSettings));
 	std::string query = StringFormat("SELECT DISTINCT(spawngroupID), spawngroup.name, spawngroup.spawn_limit, "
 					 "spawngroup.dist, spawngroup.max_x, spawngroup.min_x, "
 					 "spawngroup.max_y, spawngroup.min_y, spawngroup.delay, "
 					 "spawngroup.despawn, spawngroup.despawn_timer, spawngroup.mindelay "
 					 "FROM spawn2, spawngroup WHERE spawn2.spawngroupID = spawngroup.ID "
-					 "AND spawn2.version = %u and zone = '%s' AND %d & spawn2.expansions = spawn2.expansions",
-					 version, zone_name);
+					 "AND spawn2.version = %u and zone = '%s' AND spawn2.min_expansion <= %i AND spawn2.max_expansion >= %i",
+					 version, zone_name, latest_expansion, latest_expansion);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		return false;
