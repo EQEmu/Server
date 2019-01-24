@@ -1,6 +1,17 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 
+== 1/24/2019 ==
+Uleat: Extended server spellbook entries to RoF2 standard and added per-client restriction of spell id max
+	- Bumped server spellbook entry capacity to 720 spells
+	- Server keeps all 'learned' spells as found
+	  -- Access is limited by the clients' limitations of spellbook capacities and max spell ids
+	  -- This is done to avoid losing spells by switching from newer clients to older ones
+	  -- Existing behavior is kept in place for illegal access conditions
+	- Each client is still restricted to its spellbook capacity (400, 480, 480, 720, 720, 720 - respectively)
+	- Each client is restricted to its max supported spell id (9999, 15999, 23000, 28000, 45000, 45000 - respectively)
+	- Please report any abnormal behavior so it may be addressed
+
 == 1/20/2019 ==
 Uleat: Added 'spells' entry to EQDictionary
 Akkadius:

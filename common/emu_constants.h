@@ -243,7 +243,7 @@ namespace EQEmu
 		};
 
 		using RoF2::spells::SPELL_ID_MAX;
-		using SoD::spells::SPELLBOOK_SIZE;
+		using RoF2::spells::SPELLBOOK_SIZE;
 		using UF::spells::SPELL_GEM_COUNT; // RoF+ clients define more than UF client..but, they are not valid beyond UF
 
 		using RoF2::spells::LONG_BUFFS;

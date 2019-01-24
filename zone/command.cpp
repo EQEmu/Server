@@ -6441,7 +6441,15 @@ void command_scribespells(Client *c, const Seperator *sep)
 		c->Message(0, "Scribing spells for %s.",  t->GetName());
 	Log(Logs::General, Logs::Normal, "Scribe spells request for %s from %s, levels: %u -> %u",  t->GetName(), c->GetName(), min_level, max_level);
 
-	for(curspell = 0, book_slot = t->GetNextAvailableSpellBookSlot(), count = 0; curspell < SPDAT_RECORDS && book_slot < EQEmu::spells::SPELLBOOK_SIZE; curspell++, book_slot = t->GetNextAvailableSpellBookSlot(book_slot))
+	for (
+		curspell = 0,
+		book_slot = t->GetNextAvailableSpellBookSlot(),
+		count = 0; // ;
+		curspell < SPDAT_RECORDS &&
+		book_slot < EQEmu::spells::SPELLBOOK_SIZE; // ;
+		curspell++,
+		book_slot = t->GetNextAvailableSpellBookSlot(book_slot)
+	)
 	{
 		if
 		(

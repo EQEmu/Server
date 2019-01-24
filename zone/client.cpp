@@ -2640,6 +2640,11 @@ bool Client::CheckAccess(int16 iDBLevel, int16 iDefaultLevel) {
 }
 
 void Client::MemorizeSpell(uint32 slot,uint32 spellid,uint32 scribing){
+	if (slot < 0 || slot >= EQEmu::spells::DynamicLookup(ClientVersion(), GetGM())->SpellbookSize)
+		return;
+	if (spellid < 3 || spellid > EQEmu::spells::DynamicLookup(ClientVersion(), GetGM())->SpellIdMax)
+		return;
+
 	auto outapp = new EQApplicationPacket(OP_MemorizeSpell, sizeof(MemorizeSpell_Struct));
 	MemorizeSpell_Struct* mss=(MemorizeSpell_Struct*)outapp->pBuffer;
 	mss->scribing=scribing;

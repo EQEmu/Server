@@ -1091,6 +1091,18 @@ struct PlayerProfile_Struct
 /*19559*/	uint8				unknown19595[5];	// ***Placeholder (6/29/2005)
 /*19564*/	uint32				RestTimer;
 /*19568*/
+
+	// All player profile packets are translated and this overhead is ignored in out-bound packets
+	PlayerProfile_Struct() : m_player_profile_version(EQEmu::versions::MobVersion::Unknown) { }
+
+	EQEmu::versions::MobVersion PlayerProfileVersion() { return m_player_profile_version; }
+	void SetPlayerProfileVersion(EQEmu::versions::MobVersion mob_version) { m_player_profile_version = EQEmu::versions::ValidateMobVersion(mob_version); }
+	void SetPlayerProfileVersion(EQEmu::versions::ClientVersion client_version) { SetPlayerProfileVersion(EQEmu::versions::ConvertClientVersionToMobVersion(client_version)); }
+
+// private:
+	// No need for gm flag since pp already has one
+	// No need for lookup pointer since this struct is not tied to any one system
+	EQEmu::versions::MobVersion m_player_profile_version; // kept public for now so checksum can calc sizeof (client_packet.cpp:1586)
 };
 
 
