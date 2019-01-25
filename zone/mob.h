@@ -700,6 +700,7 @@ public:
 	bool HasSkillProcSuccess() const;
 	bool AddProcToWeapon(uint16 spell_id, bool bPerma = false, uint16 iChance = 3, uint16 base_spell_id = SPELL_UNKNOWN, int level_override = -1);
 	bool RemoveProcFromWeapon(uint16 spell_id, bool bAll = false);
+	bool RemovePermaProcFromWeapon(uint16 spell_id);
 	bool HasProcs() const;
 	bool IsCombatProc(uint16 spell_id);
 
