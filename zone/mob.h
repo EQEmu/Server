@@ -576,8 +576,8 @@ public:
 	virtual void SetMoving(bool move) { moving = move; m_Delta = glm::vec4(); }
 	virtual void GoToBind(uint8 bindnum = 0) { }
 	virtual void Gate(uint8 bindnum = 0);
-	int GetWalkspeed() const { return(_GetWalkSpeed()); }
-	int GetRunspeed() const { return(_GetRunSpeed()); }
+	virtual int GetWalkspeed() const { return(_GetWalkSpeed()); }
+	virtual int GetRunspeed() const { return(_GetRunSpeed()); }
 	int GetBaseRunspeed() const { return base_runspeed; }
 	int GetBaseWalkspeed() const { return base_walkspeed; }
 	int GetBaseFearSpeed() const { return base_fearspeed; }
