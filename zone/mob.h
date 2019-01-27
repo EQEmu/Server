@@ -589,8 +589,8 @@ public:
 	void MakeSpawnUpdateNoDelta(PlayerPositionUpdateServer_Struct* spu);
 	void MakeSpawnUpdate(PlayerPositionUpdateServer_Struct* spu);
 	void SentPositionPacket(float dx, float dy, float dz, float dh, int anim, bool send_to_self = false);
-	void StopMoving();
-	void StopMoving(float new_heading);
+	virtual void StopMoving();
+	virtual void StopMoving(float new_heading);
 	void SetSpawned() { spawned = true; };
 	bool Spawned() { return spawned; };
 	virtual bool ShouldISpawnFor(Client *c) { return true; }

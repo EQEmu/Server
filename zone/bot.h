@@ -341,6 +341,8 @@ public:
 	virtual int GetRunspeed() const { return (int)((float)_GetRunSpeed() * 1.785714f); }
 	virtual void WalkTo(float x, float y, float z);
 	virtual void RunTo(float x, float y, float z);
+	virtual void StopMoving();
+	virtual void StopMoving(float new_heading);
 	bool UseDiscipline(uint32 spell_id, uint32 target);
 	uint8 GetNumberNeedingHealedInGroup(uint8 hpr, bool includePets);
 	bool GetNeedsCured(Mob *tar);
@@ -731,6 +733,7 @@ private:
 	unsigned int RestRegenMana;
 	unsigned int RestRegenEndurance;
 	Timer rest_timer;
+	Timer ping_timer;
 	int32	base_end;
 	int32	cur_end;
 	int32	max_end;
