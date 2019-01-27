@@ -7707,16 +7707,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 		return bot_id;
 	}
 
-	auto DefaultNPCTypeStruct = Bot::CreateDefaultNPCTypeStructForBot(
-		bot_name.c_str(),
-		"",
-		bot_owner->GetLevel(),
-		bot_race,
-		bot_class,
-		bot_gender
-	);
-
-	auto my_bot = new Bot(DefaultNPCTypeStruct, bot_owner);
+	auto my_bot = new Bot(Bot::CreateDefaultNPCTypeStructForBot(bot_name.c_str(), "", bot_owner->GetLevel(), bot_race, bot_class, bot_gender), bot_owner);
 
 	if (!my_bot->Save()) {
 		bot_owner->Message(m_unknown, "Failed to create '%s' due to unknown cause", my_bot->GetCleanName());

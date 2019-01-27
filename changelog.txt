@@ -1,6 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 
+== 1/26/2019 ==
+Uleat: Fix for class Bot not honoring NPCType data reference
+	- Fixes bots not moving on spawn/grouping issue
+	- Report any issues with non movement-related behavior
+
 == 1/24/2019 ==
 Uleat: Extended server spellbook entries to RoF2 standard and added per-client restriction of spell id max
 	- Bumped server spellbook entry capacity to 720 spells

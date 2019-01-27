@@ -2142,8 +2142,7 @@ bool QuestManager::createBot(const char *name, const char *lastname, uint8 level
 			return false;
 		}
 
-		NPCType DefaultNPCTypeStruct = Bot::CreateDefaultNPCTypeStructForBot(name, lastname, level, race, botclass, gender);
-		Bot* NewBot = new Bot(DefaultNPCTypeStruct, initiator);
+		Bot* NewBot = new Bot(Bot::CreateDefaultNPCTypeStructForBot(name, lastname, level, race, botclass, gender), initiator);
 
 		if(NewBot)
 		{
