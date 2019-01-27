@@ -998,8 +998,8 @@ public:
 
 	inline bool			CheckAggro(Mob* other) {return hate_list.IsEntOnHateList(other);}
 	float				CalculateHeadingToTarget(float in_x, float in_y) { return HeadingAngleToMob(in_x, in_y); }
-	void				WalkTo(float x, float y, float z);
-	void				RunTo(float x, float y, float z);
+	virtual void		WalkTo(float x, float y, float z);
+	virtual void		RunTo(float x, float y, float z);
 	void				NavigateTo(float x, float y, float z);
 	void				RotateTo(float new_heading);
 	void				RotateToWalking(float new_heading);

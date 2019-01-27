@@ -339,6 +339,8 @@ public:
 	bool IsStanding();
 	virtual int GetWalkspeed() const { return (int)((float)_GetWalkSpeed() * 1.785714f); } // 1.25 / 0.7 = 1.7857142857142857142857142857143
 	virtual int GetRunspeed() const { return (int)((float)_GetRunSpeed() * 1.785714f); }
+	virtual void WalkTo(float x, float y, float z);
+	virtual void RunTo(float x, float y, float z);
 	bool UseDiscipline(uint32 spell_id, uint32 target);
 	uint8 GetNumberNeedingHealedInGroup(uint8 hpr, bool includePets);
 	bool GetNeedsCured(Mob *tar);
