@@ -7707,16 +7707,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 		return bot_id;
 	}
 
-	auto DefaultNPCTypeStruct = Bot::CreateDefaultNPCTypeStructForBot(
-		bot_name.c_str(),
-		"",
-		bot_owner->GetLevel(),
-		bot_race,
-		bot_class,
-		bot_gender
-	);
-
-	auto my_bot = new Bot(DefaultNPCTypeStruct, bot_owner);
+	auto my_bot = new Bot(Bot::CreateDefaultNPCTypeStructForBot(bot_name.c_str(), "", bot_owner->GetLevel(), bot_race, bot_class, bot_gender), bot_owner);
 
 	if (!my_bot->Save()) {
 		bot_owner->Message(m_unknown, "Failed to create '%s' due to unknown cause", my_bot->GetCleanName());
@@ -7774,7 +7765,7 @@ bool helper_cast_standard_spell(Bot* casting_bot, Mob* target_mob, int spell_id,
 	if (annouce_cast)
 		Bot::BotGroupSay(casting_bot, "Attempting to cast '%s' on %s", spells[spell_id].name, target_mob->GetCleanName());
 
-	return casting_bot->CastSpell(spell_id, target_mob->GetID(), EQEmu::CastingSlot::Gem2, -1, -1, dont_root_before);
+	return casting_bot->CastSpell(spell_id, target_mob->GetID(), EQEmu::spells::CastingSlot::Gem2, -1, -1, dont_root_before);
 }
 
 bool helper_command_alias_fail(Client *bot_owner, const char* command_handler, const char *alias, const char *command)

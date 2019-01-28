@@ -720,9 +720,12 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQEmu::InventoryProfile *inv)
 	if (cv_conflict) {
 		char char_name[64] = "";
 		GetCharName(char_id, char_name);
-		Log(Logs::Moderate, Logs::Client_Login,
-			"ClientVersion conflict during inventory load at zone entry for '%s' (charid: %u, inver: %s)",
-			char_name, char_id, EQEmu::versions::MobVersionName(inv->InventoryVersion())
+		Log(Logs::General, Logs::Error,
+			"ClientVersion/Expansion conflict during inventory load at zone entry for '%s' (charid: %u, inver: %s, gmi: %s)",
+			char_name,
+			char_id,
+			EQEmu::versions::MobVersionName(inv->InventoryVersion()),
+			(inv->GMInventory() ? "true" : "false")
 		);
 	}
 

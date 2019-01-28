@@ -137,6 +137,30 @@ namespace EQEmu
 	} /*versions*/
 
 	namespace expansions {
+		enum class Expansion : uint32 {
+			EverQuest = 0,
+			RoK,
+			SoV,
+			SoL,
+			PoP,
+			LoY,
+			LDoN,
+			GoD,
+			OoW,
+			DoN,
+			DoD,
+			PoR,
+			TSS,
+			TBS,
+			SoF,
+			SoD,
+			UF,
+			HoT,
+			VoA,
+			RoF,
+			CotF
+		};
+
 		enum ExpansionBitmask : uint32 {
 			bitEverQuest = 0x00000000,
 			bitRoK = 0x00000001,
@@ -182,7 +206,12 @@ namespace EQEmu
 			maskCotF = 0x000FFFFF
 		};
 
+		const char* ExpansionName(Expansion expansion);
 		const char* ExpansionName(uint32 expansion_bit);
+		uint32 ConvertExpansionToExpansionBit(Expansion expansion);
+		Expansion ConvertExpansionBitToExpansion(uint32 expansion_bit);
+		uint32 ConvertExpansionToExpansionMask(Expansion expansion);
+		Expansion ConvertClientVersionToExpansion(versions::ClientVersion client_version);
 		uint32 ConvertClientVersionToExpansionBit(versions::ClientVersion client_version);
 		uint32 ConvertClientVersionToExpansionMask(versions::ClientVersion client_version);
 

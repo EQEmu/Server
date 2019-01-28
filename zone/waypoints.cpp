@@ -537,9 +537,6 @@ void NPC::AssignWaypoints(int32 grid)
 
 	if (wandertype == 1 || wandertype == 2 || wandertype == 5)
 		CalculateNewWaypoint();
-
-	if (wandertype == 1 || wandertype == 2 || wandertype == 5)
-		CalculateNewWaypoint();
 }
 
 void Mob::SendTo(float new_x, float new_y, float new_z) {
@@ -1066,3 +1063,32 @@ void NPC::RestoreGuardSpotCharm()
 {
 	m_GuardPoint = m_GuardPointSaved;
 }
+
+/******************
+* Bot-specific overloads to make them play nice with the new movement system
+*/
+#ifdef BOTS
+#include "bot.h"
+
+void Bot::WalkTo(float x, float y, float z)
+{
+	if (IsSitting())
+		Stand();
+
+	if (ping_timer.Enabled())
+		ping_timer.Disable();
+
+	Mob::WalkTo(x, y, z);
+}
+
+void Bot::RunTo(float x, float y, float z)
+{
+	if (IsSitting())
+		Stand();
+
+	if (ping_timer.Enabled())
+		ping_timer.Disable();
+
+	Mob::RunTo(x, y, z);
+}
+#endif

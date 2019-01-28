@@ -357,8 +357,8 @@ bool BotDatabase::LoadBot(const uint32 bot_id, Bot*& loaded_bot)
 
 	// TODO: Consider removing resists and basic attributes from the load query above since we're using defaultNPCType values instead
 	auto row = results.begin();
-	NPCType defaultNPCTypeStruct = Bot::CreateDefaultNPCTypeStructForBot(std::string(row[2]), std::string(row[3]), atoi(row[10]), atoi(row[8]), atoi(row[9]), atoi(row[7]));
-	NPCType tempNPCStruct = Bot::FillNPCTypeStruct(
+	auto defaultNPCTypeStruct = Bot::CreateDefaultNPCTypeStructForBot(std::string(row[2]), std::string(row[3]), atoi(row[10]), atoi(row[8]), atoi(row[9]), atoi(row[7]));
+	auto tempNPCStruct = Bot::FillNPCTypeStruct(
 		atoi(row[1]),
 		std::string(row[2]),
 		std::string(row[3]),
@@ -379,21 +379,21 @@ bool BotDatabase::LoadBot(const uint32 bot_id, Bot*& loaded_bot)
 		atoi(row[25]),
 		atoi(row[28]),
 		atoi(row[29]),
-		defaultNPCTypeStruct.MR,
-		defaultNPCTypeStruct.CR,
-		defaultNPCTypeStruct.DR,
-		defaultNPCTypeStruct.FR,
-		defaultNPCTypeStruct.PR,
-		defaultNPCTypeStruct.Corrup,
-		defaultNPCTypeStruct.AC,
-		defaultNPCTypeStruct.STR,
-		defaultNPCTypeStruct.STA,
-		defaultNPCTypeStruct.DEX,
-		defaultNPCTypeStruct.AGI,
-		defaultNPCTypeStruct.INT,
-		defaultNPCTypeStruct.WIS,
-		defaultNPCTypeStruct.CHA,
-		defaultNPCTypeStruct.ATK
+		defaultNPCTypeStruct->MR,
+		defaultNPCTypeStruct->CR,
+		defaultNPCTypeStruct->DR,
+		defaultNPCTypeStruct->FR,
+		defaultNPCTypeStruct->PR,
+		defaultNPCTypeStruct->Corrup,
+		defaultNPCTypeStruct->AC,
+		defaultNPCTypeStruct->STR,
+		defaultNPCTypeStruct->STA,
+		defaultNPCTypeStruct->DEX,
+		defaultNPCTypeStruct->AGI,
+		defaultNPCTypeStruct->INT,
+		defaultNPCTypeStruct->WIS,
+		defaultNPCTypeStruct->CHA,
+		defaultNPCTypeStruct->ATK
 	);
 
 	loaded_bot = new Bot(bot_id, atoi(row[0]), atoi(row[1]), atof(row[14]), atoi(row[6]), tempNPCStruct);

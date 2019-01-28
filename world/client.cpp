@@ -171,10 +171,13 @@ void Client::SendEnterWorld(std::string name)
 void Client::SendExpansionInfo() {
 	auto outapp = new EQApplicationPacket(OP_ExpansionInfo, sizeof(ExpansionInfo_Struct));
 	ExpansionInfo_Struct *eis = (ExpansionInfo_Struct*)outapp->pBuffer;
-	if(RuleB(World, UseClientBasedExpansionSettings)) {
+	
+	// need to rework .. not until full scope of change is accounted for, though
+	if (RuleB(World, UseClientBasedExpansionSettings)) {
 		eis->Expansions = EQEmu::expansions::ConvertClientVersionToExpansionMask(eqs->ClientVersion());
-	} else {
-		eis->Expansions = (RuleI(World, ExpansionSettings));
+	}
+	else {
+		eis->Expansions = RuleI(World, ExpansionSettings);
 	}
 
 	QueuePacket(outapp);
@@ -211,7 +214,7 @@ void Client::SendMaxCharCreate() {
 	auto outapp = new EQApplicationPacket(OP_SendMaxCharacters, sizeof(MaxCharacters_Struct));
 	MaxCharacters_Struct* mc = (MaxCharacters_Struct*)outapp->pBuffer;
 
-	mc->max_chars = EQEmu::constants::Lookup(m_ClientVersion)->CharacterCreationLimit;
+	mc->max_chars = EQEmu::constants::StaticLookup(m_ClientVersion)->CharacterCreationLimit;
 	if (mc->max_chars > EQEmu::constants::CHARACTER_CREATION_LIMIT)
 		mc->max_chars = EQEmu::constants::CHARACTER_CREATION_LIMIT;
 
@@ -765,7 +768,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 	// This can probably be moved outside and have another method return requested info (don't forget to remove the #include "../common/shareddb.h" above)
 	// (This is a literal translation of the original process..I don't see why it can't be changed to a single-target query over account iteration)
 	if (!is_player_zoning) {
-		size_t character_limit = EQEmu::constants::Lookup(eqs->ClientVersion())->CharacterCreationLimit;
+		size_t character_limit = EQEmu::constants::StaticLookup(eqs->ClientVersion())->CharacterCreationLimit;
 		if (character_limit > EQEmu::constants::CHARACTER_CREATION_LIMIT) { character_limit = EQEmu::constants::CHARACTER_CREATION_LIMIT; }
 		if (eqs->ClientVersion() == EQEmu::versions::ClientVersion::Titanium) { character_limit = Titanium::constants::CHARACTER_CREATION_LIMIT; }
 
@@ -1442,7 +1445,11 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	PlayerProfile_Struct pp;
 	ExtendedProfile_Struct ext;
 	EQEmu::InventoryProfile inv;
+
+	pp.SetPlayerProfileVersion(EQEmu::versions::ConvertClientVersionToMobVersion(EQEmu::versions::ConvertClientVersionBitToClientVersion(m_ClientVersionBit)));
 	inv.SetInventoryVersion(EQEmu::versions::ConvertClientVersionBitToClientVersion(m_ClientVersionBit));
+	inv.SetGMInventory(false); // character cannot have gm flag at this point
+
 	time_t bday = time(nullptr);
 	char startzone[50]={0};
 	uint32 i;
@@ -1522,12 +1529,9 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 
 //	strcpy(pp.servername, WorldConfig::get()->ShortName.c_str());
 
-
-	for (i = 0; i < MAX_PP_REF_SPELLBOOK; i++)
-		pp.spell_book[i] = 0xFFFFFFFF;
-
-	for(i = 0; i < MAX_PP_MEMSPELL; i++)
-		pp.mem_spells[i] = 0xFFFFFFFF;
+	memset(pp.spell_book, 0xFF, (sizeof(uint32) * EQEmu::spells::SPELLBOOK_SIZE));
+	
+	memset(pp.mem_spells, 0xFF, (sizeof(uint32) * EQEmu::spells::SPELL_GEM_COUNT));
 
 	for(i = 0; i < BUFF_COUNT; i++)
 		pp.buffs[i].spellid = 0xFFFF;

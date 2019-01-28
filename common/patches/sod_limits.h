@@ -191,8 +191,12 @@ namespace SoD
 		const int16 CORPSE_BEGIN = invslot::slotGeneral1;
 		const int16 CORPSE_END = invslot::slotGeneral1 + invslot::slotCursor;
 
-		const uint64 POSSESSIONS_BITMASK = 0x000000027FFFFFFF; // based on 34-slot count (RoF+)
-		const uint64 CORPSE_BITMASK = 0x01FFFFFE7F800000; // based on 34-slot count (RoF+)
+		const uint64 EQUIPMENT_BITMASK = 0x00000000007FFFFF;
+		const uint64 GENERAL_BITMASK = 0x000000007F800000;
+		const uint64 CURSOR_BITMASK = 0x0000000200000000;
+		const uint64 POSSESSIONS_BITMASK = (EQUIPMENT_BITMASK | GENERAL_BITMASK | CURSOR_BITMASK); // based on 34-slot count (RoF+)
+		const uint64 CORPSE_BITMASK = (GENERAL_BITMASK | CURSOR_BITMASK | (EQUIPMENT_BITMASK << 34)); // based on 34-slot count (RoF+)
+
 
 		const char* GetInvPossessionsSlotName(int16 inv_slot);
 		const char* GetInvCorpseSlotName(int16 inv_slot);
@@ -277,20 +281,13 @@ namespace SoD
 	namespace constants {
 		inline EQEmu::versions::ClientVersion GetConstantsRef() { return EQEmu::versions::ClientVersion::SoD; }
 
+		const EQEmu::expansions::Expansion EXPANSION = EQEmu::expansions::Expansion::SoD;
 		const uint32 EXPANSION_BIT = EQEmu::expansions::bitSoD;
 		const uint32 EXPANSIONS_MASK = EQEmu::expansions::maskSoD;
 
 		const size_t CHARACTER_CREATION_LIMIT = 12;
 
 		const size_t SAY_LINK_BODY_SIZE = 50;
-
-		const int LongBuffs = 25;
-		const int ShortBuffs = 15;
-		const int DiscBuffs = 1;
-		const int TotalBuffs = LongBuffs + ShortBuffs + DiscBuffs;
-		const int NPCBuffs = 85;
-		const int PetBuffs = NPCBuffs;
-		const int MercBuffs = LongBuffs;
 
 	} /*constants*/
 
@@ -307,6 +304,40 @@ namespace SoD
 		const size_t LastUsableSkill = EQEmu::skills::SkillTripleAttack;
 
 	} /*skills*/
+
+	namespace spells {
+		inline EQEmu::versions::ClientVersion GetSkillsRef() { return EQEmu::versions::ClientVersion::SoD; }
+		
+		enum class CastingSlot : uint32 {
+			Gem1 = 0,
+			Gem2 = 1,
+			Gem3 = 2,
+			Gem4 = 3,
+			Gem5 = 4,
+			Gem6 = 5,
+			Gem7 = 6,
+			Gem8 = 7,
+			Gem9 = 8,
+			Gem10 = 9,
+			MaxGems = 10,
+			Item = 10,
+			Discipline = 11,
+			AltAbility = 0xFF
+		};
+
+		const int SPELL_ID_MAX = 23000;
+		const int SPELLBOOK_SIZE = 480;
+		const int SPELL_GEM_COUNT = static_cast<uint32>(CastingSlot::MaxGems);
+		
+		const int LONG_BUFFS = 25;
+		const int SHORT_BUFFS = 15;
+		const int DISC_BUFFS = 1;
+		const int TOTAL_BUFFS = LONG_BUFFS + SHORT_BUFFS + DISC_BUFFS;
+		const int NPC_BUFFS = 85;
+		const int PET_BUFFS = NPC_BUFFS;
+		const int MERC_BUFFS = LONG_BUFFS;
+
+	} /*spells*/
 
 }; /*SoD*/
 

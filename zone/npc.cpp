@@ -1388,7 +1388,7 @@ uint32 ZoneDatabase::DeleteSpawnRemoveFromNPCTypeTable(const char *zone, uint32 
 	uint32 spawngroupID = 0;
 
 	std::string query = StringFormat("SELECT id, spawngroupID FROM spawn2 WHERE zone = '%s' "
-					 "AND version = %u AND spawngroupID = %i",
+					 "AND (version = %u OR version = -1) AND spawngroupID = %i",
 					 zone, zone_version, spawn->GetSp2());
 	auto results = QueryDatabase(query);
 	if (!results.Success())
