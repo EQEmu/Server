@@ -30,6 +30,8 @@ extern volatile bool is_zone_loaded;
 
 // This constructor is used during the bot create command
 Bot::Bot(NPCType *npcTypeData, Client* botOwner) : NPC(npcTypeData, nullptr, glm::vec4(), Ground, false), rest_timer(1), ping_timer(1) {
+	GiveNPCTypeData(npcTypeData);
+	
 	if(botOwner) {
 		this->SetBotOwner(botOwner);
 		this->_botOwnerCharacterID = botOwner->CharacterID();
@@ -108,6 +110,8 @@ Bot::Bot(NPCType *npcTypeData, Client* botOwner) : NPC(npcTypeData, nullptr, glm
 Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double totalPlayTime, uint32 lastZoneId, NPCType *npcTypeData) 
 	: NPC(npcTypeData, nullptr, glm::vec4(), Ground, false), rest_timer(1), ping_timer(1)
 {
+	GiveNPCTypeData(npcTypeData);
+	
 	this->_botOwnerCharacterID = botOwnerCharacterID;
 	if(this->_botOwnerCharacterID > 0)
 		this->SetBotOwner(entity_list.GetClientByCharID(this->_botOwnerCharacterID));
