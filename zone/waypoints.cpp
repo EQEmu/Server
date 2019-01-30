@@ -1075,9 +1075,6 @@ void Bot::WalkTo(float x, float y, float z)
 	if (IsSitting())
 		Stand();
 
-	if (ping_timer.Enabled())
-		ping_timer.Disable();
-
 	Mob::WalkTo(x, y, z);
 }
 
@@ -1085,9 +1082,6 @@ void Bot::RunTo(float x, float y, float z)
 {
 	if (IsSitting())
 		Stand();
-
-	if (ping_timer.Enabled())
-		ping_timer.Disable();
 
 	Mob::RunTo(x, y, z);
 }

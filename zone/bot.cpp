@@ -2013,12 +2013,20 @@ bool Bot::Process() {
 	if(GetAppearance() == eaDead && GetHP() > 0)
 		SetAppearance(eaStanding);
 
+	if (IsMoving()) {
+		ping_timer.Disable();
+	}
+	else {
+		if (!ping_timer.Enabled())
+			ping_timer.Start(BOT_KEEP_ALIVE_INTERVAL);
+
+		if (ping_timer.Check())
+			SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0);
+	}
+
 	if (IsStunned() || IsMezzed())
 		return true;
 
-	if (!IsMoving() && ping_timer.Check())
-		SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0);
-	
 	// Bot AI
 	AI_Process();
 	return true;
@@ -9080,20 +9088,6 @@ std::string Bot::CreateSayLink(Client* c, const char* message, const char* name)
 
 	auto saylink = linker.GenerateLink();
 	return saylink;
-}
-
-void Bot::StopMoving() {
-	if (!ping_timer.Enabled())
-		ping_timer.Start(8000);
-
-	Mob::StopMoving();
-}
-
-void Bot::StopMoving(float new_heading) {
-	if (!ping_timer.Enabled())
-		ping_timer.Start(8000);
-
-	Mob::StopMoving(new_heading);
 }
 
 #endif
