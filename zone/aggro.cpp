@@ -320,36 +320,35 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	int heroicCHA_mod = mob->itembonuses.HeroicCHA/25; // 800 Heroic CHA cap
 	if(heroicCHA_mod > THREATENLY_ARRGO_CHANCE)
 		heroicCHA_mod = THREATENLY_ARRGO_CHANCE;
-	if (RuleB(Aggro, UseLevelAggro) &&
-	(
-	//old InZone check taken care of above by !mob->CastToClient()->Connected()
-	(
-		( GetLevel() >= RuleI(Aggro, MinAggroLevel))
-		||(GetBodyType() == 3)
-		||( mob->IsClient() && mob->CastToClient()->IsSitting() )
-		||( mob->GetLevelCon(GetLevel()) != CON_GRAY)
-
-	)
-	&&
-	(
+	if (RuleB(Aggro, UseLevelAggro))
+	{
+		//old InZone check taken care of above by !mob->CastToClient()->Connected()
+		if 
 		(
-			fv == FACTION_SCOWLS
-			||
-			(mob->GetPrimaryFaction() != GetPrimaryFaction() && mob->GetPrimaryFaction() == -4 && GetOwner() == nullptr)
-			||
+			(   
+				( GetLevel() >= RuleI(Aggro, MinAggroLevel))
+				||(GetBodyType() == 3)
+				||( mob->IsClient() && mob->CastToClient()->IsSitting() )
+				||( mob->GetLevelCon(GetLevel()) != CON_GRAY)
+			)
+			&&
 			(
-				fv == FACTION_THREATENLY
-				&& zone->random.Roll(THREATENLY_ARRGO_CHANCE - heroicCHA_mod)
+				fv == FACTION_SCOWLS
+				||
+				(mob->GetPrimaryFaction() != GetPrimaryFaction() && mob->GetPrimaryFaction() == -4 && GetOwner() == nullptr)
+				||
+				(
+					fv == FACTION_THREATENLY
+					&& zone->random.Roll(THREATENLY_ARRGO_CHANCE - heroicCHA_mod)
+				)
 			)
 		)
-	)
-	)
-	)
-	{
-		//FatherNiwtit: make sure we can see them. last since it is very expensive
-		if(CheckLosFN(mob)) {
-			Log(Logs::Detail, Logs::Aggro, "Check aggro for %s target %s.", GetName(), mob->GetName());
-			return( mod_will_aggro(mob, this) );
+		{
+			//FatherNiwtit: make sure we can see them. last since it is very expensive
+			if(CheckLosFN(mob)) {
+				Log(Logs::Detail, Logs::Aggro, "Check aggro for %s target %s.", GetName(), mob->GetName());
+				return( mod_will_aggro(mob, this) );
+			}
 		}
 	}
 	else
