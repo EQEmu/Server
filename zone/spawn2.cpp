@@ -575,6 +575,7 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 	}
 
 	const char *zone_name = database.GetZoneName(zoneid);
+	auto latest_expansion = EQEmu::expansions::ConvertExpansionMaskToLatestExpansion(RuleI(World, ExpansionSettings));
 	std::string query = StringFormat(
 		"SELECT "
 		"id, "
@@ -592,11 +593,15 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 		"animation "
 		"FROM "
 		"spawn2 "
-		"WHERE zone = '%s' AND  (version = %u OR version = -1)",
+		"WHERE zone = '%s' AND  (version = %u OR version = -1) AND min_expansion <= %i AND max_expansion >= %i",
 		zone_name,
-		version
+		version,
+		latest_expansion,
+		latest_expansion
 	);
 	results = QueryDatabase(query);
+	Log(Logs::General, Logs::Status, "%s", query.c_str());
+
 
 	if (!results.Success()) {
 		return false;
