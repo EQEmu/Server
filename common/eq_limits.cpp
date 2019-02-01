@@ -1167,7 +1167,7 @@ static const EQEmu::spells::LookupEntry spells_static_lookup_entries[EQEmu::vers
 	/*[ClientVersion::UF] =*/
 	EQEmu::spells::LookupEntry(
 		UF::spells::SPELL_ID_MAX,
-		SoD::spells::SPELLBOOK_SIZE,
+		UF::spells::SPELLBOOK_SIZE,
 		UF::spells::SPELL_GEM_COUNT,
 		UF::spells::LONG_BUFFS,
 		UF::spells::SHORT_BUFFS,
@@ -1180,7 +1180,7 @@ static const EQEmu::spells::LookupEntry spells_static_lookup_entries[EQEmu::vers
 	/*[ClientVersion::RoF] =*/
 	EQEmu::spells::LookupEntry(
 		RoF::spells::SPELL_ID_MAX,
-		SoD::spells::SPELLBOOK_SIZE,
+		RoF::spells::SPELLBOOK_SIZE,
 		UF::spells::SPELL_GEM_COUNT, // client translators are setup to allow the max value a client supports..however, the top 4 indices are not valid in this case
 		RoF::spells::LONG_BUFFS,
 		RoF::spells::SHORT_BUFFS,
@@ -1193,7 +1193,7 @@ static const EQEmu::spells::LookupEntry spells_static_lookup_entries[EQEmu::vers
 	/*[ClientVersion::RoF2] =*/
 	EQEmu::spells::LookupEntry(
 		RoF2::spells::SPELL_ID_MAX,
-		SoD::spells::SPELLBOOK_SIZE,
+		RoF2::spells::SPELLBOOK_SIZE,
 		UF::spells::SPELL_GEM_COUNT, // client translators are setup to allow the max value a client supports..however, the top 4 indices are not valid in this case
 		RoF2::spells::LONG_BUFFS,
 		RoF2::spells::SHORT_BUFFS,
