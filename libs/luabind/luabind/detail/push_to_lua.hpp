@@ -26,6 +26,7 @@
 
 #include <luabind/config.hpp>
 #include <luabind/detail/policy.hpp>
+#include <luabind/detail/type_traits.hpp>
 
 namespace luabind {
 

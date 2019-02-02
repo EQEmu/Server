@@ -72,7 +72,7 @@ namespace luabind {
 				detail::stack_pop pop(m_interpreter, 1);
 
 				lua_pushvalue(m_interpreter, m_key_index);
-				detail::push(m_interpreter, value);
+				detail::push_to_lua(m_interpreter, value);
 				lua_settable(m_interpreter, -3);
 				return *this;
 			}

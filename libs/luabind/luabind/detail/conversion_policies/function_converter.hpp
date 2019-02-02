@@ -39,15 +39,13 @@ namespace luabind {
 
 		template< typename T >
 		struct is_function< std::function< T > > : public std::true_type {};
-
-		template< typename R, typename... Args, typename WrappedType >
-		struct deduce_signature <std::function< R(Args...) >, WrappedType >
-		{
-			using type = meta::type_list< R, Args... >;
-		};
-
 	}
 
+	template< typename R, typename... Args, typename WrappedType >
+	struct deduce_signature <std::function< R(Args...) >, WrappedType >
+	{
+		using type = meta::type_list< R, Args... >;
+	};
 
 	template <typename F>
 	struct default_converter<F, typename std::enable_if<detail::is_function<remove_const_reference_t<F>>::value>::type>
