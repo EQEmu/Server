@@ -1,4 +1,4 @@
-// Copyright (c) 2005 Daniel Wallin and Arvid Norberg
+// Copyright (c) 2003 Daniel Wallin and Arvid Norberg
 
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -20,25 +20,54 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
 // OR OTHER DEALINGS IN THE SOFTWARE.
 
-#ifndef MOST_DERIVED_051018_HPP
-# define MOST_DERIVED_051018_HPP
 
-# include <boost/mpl/if.hpp>
-# include <boost/type_traits/is_base_and_derived.hpp>
+#ifndef LUABIND_CONVERT_TO_LUA_HPP_INCLUDED
+#define LUABIND_CONVERT_TO_LUA_HPP_INCLUDED
 
-namespace luabind { namespace detail {
+#include <luabind/config.hpp>
+#include <luabind/detail/policy.hpp>
 
-template<class Class, class WrappedClass>
-struct most_derived
-{
-    typedef typename boost::mpl::if_<
-        boost::is_base_and_derived<Class, WrappedClass>
-      , WrappedClass
-      , Class
-    >::type type;
-};
+namespace luabind {
 
-}} // namespace luabind::detail
+	namespace detail {
 
-#endif // MOST_DERIVED_051018_HPP
+		template< typename T >
+		struct unwrapped {
+			static const bool is_wrapped_ref = false;
+			using type = T;
+
+			static const T& get(const T& t) {
+				return t;
+			}
+		};
+
+		template< typename T >
+		struct unwrapped< std::reference_wrapper< T > >
+		{
+			static const bool is_wrapped_ref = true;
+			using type = T&;
+
+			static T& get(const std::reference_wrapper<T>& refwrap)
+			{
+				return refwrap.get();
+			}
+		};
+
+		template<typename T>
+		using unwrapped_t = typename unwrapped< T >::type;
+
+		template<unsigned int PolicyIndex = 1, typename Policies = no_policies, typename T>
+		void push_to_lua(lua_State* L, T&& v)
+		{
+			using value_type = unwrapped_t<remove_const_reference_t<T>>;
+
+			specialized_converter_policy_n<PolicyIndex, Policies, value_type, cpp_to_lua>()
+				.to_lua(L, unwrapped<T>::get(v));
+		}
+
+	}
+
+}
+
+#endif
 

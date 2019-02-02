@@ -1,5 +1,17 @@
-// Copyright (c) 2004 Daniel Wallin and Arvid Norberg
+/** @file
+	@brief Header
 
+	@date 2012
+
+	@author
+	Ryan Pavlik
+	<rpavlik@iastate.edu> and <abiryan@ryand.net>
+	http://academic.cleardefinition.com/
+	Iowa State University Virtual Reality Applications Center
+	Human-Computer Interaction Graduate Program
+*/
+
+//          Copyright Iowa State University 2012.
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
 // to deal in the Software without restriction, including without limitation
@@ -20,37 +32,23 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
 // OR OTHER DEALINGS IN THE SOFTWARE.
 
-#ifndef LUA_502_HPP
-#define LUA_502_HPP
+#ifndef INCLUDED_set_package_preload_hpp_GUID_563c882e_86f7_4ea7_8603_4594ea41737e
+#define INCLUDED_set_package_preload_hpp_GUID_563c882e_86f7_4ea7_8603_4594ea41737e
 
-#if LUA_VERSION_NUM >= 502
+// Internal Includes
+#include <luabind/config.hpp>
+#include <luabind/lua_state_fwd.hpp>
 
-inline LUA_API int lua_equal(lua_State *L, int idx1, int idx2)
-{
-  return lua_compare(L, idx1, idx2, LUA_OPEQ);
+// Library/third-party includes
+// - none
+
+// Standard includes
+// - none
+
+
+namespace luabind {
+
+	LUABIND_API void set_package_preload(lua_State * L, const char * modulename, int(*loader) (lua_State *));
 }
+#endif // INCLUDED_set_package_preload_hpp_GUID_563c882e_86f7_4ea7_8603_4594ea41737e
 
-inline LUA_API int lua_lessthan(lua_State *L, int idx1, int idx2)
-{
-  return lua_compare(L, idx1, idx2, LUA_OPLT);
-}
-
-#undef lua_strlen
-#define lua_strlen lua_rawlen
-
-#undef lua_getfenv
-#define lua_getfenv lua_getuservalue
-
-#undef lua_setfenv
-#define lua_setfenv lua_setuservalue
-
-#undef lua_open
-#define lua_open luaL_newstate
-
-#else  // LUA_VERSION_NUM >= 502
-
-#define lua_pushglobaltable(L) lua_pushvalue(L, LUA_GLOBALSINDEX)
-
-#endif  // LUA_VERSION_NUM >= 502
-
-#endif

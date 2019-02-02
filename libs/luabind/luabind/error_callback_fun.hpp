@@ -20,42 +20,27 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
 // OR OTHER DEALINGS IN THE SOFTWARE.
 
-#if !BOOST_PP_IS_ITERATING
+#ifndef INCLUDED_error_callback_fun_hpp_GUID_1150976a_4348_495f_99ce_9d7edd00a0b8
+#define INCLUDED_error_callback_fun_hpp_GUID_1150976a_4348_495f_99ce_9d7edd00a0b8
 
-# include <luabind/detail/signature_match.hpp>
+// Internal Includes
+#include <luabind/config.hpp>
+#include <luabind/lua_state_fwd.hpp>
 
-#ifndef LUABIND_CALC_ARITY_HPP_INCLUDED
-#define LUABIND_CALC_ARITY_HPP_INCLUDED
+// Library/third-party includes
+// - none
 
-#define LUABIND_FIND_CONV(z,n,text) typedef typename find_conversion_policy<n + 1, Policies>::type p##n;
-#define LUABIND_CALC_ARITY(z,n,text) + BOOST_PP_CAT(p,n)::has_arg
+// Standard includes
+// - none
 
-namespace luabind { namespace detail
+namespace luabind
 {
-	template<int N> struct calc_arity;
+	class type_id;
 
-	#define BOOST_PP_ITERATION_PARAMS_1 (4, (0, LUABIND_MAX_ARITY, <luabind/detail/calc_arity.hpp>, 1))
-	#include BOOST_PP_ITERATE()
-}}
+	using error_callback_fun       = void(*)(lua_State*);
+	using cast_failed_callback_fun = void(*)(lua_State*, type_id const&);
+	using pcall_callback_fun       = void(*)(lua_State*);
+}
 
-#undef LUABIND_CALC_ARITY
-#undef LUABIND_FIND_CONV
-
-
-#endif // LUABIND_CALC_ARITY_HPP_INCLUDED
-
-#else // BOOST_PP_ITERATE
-
-	template<>
-	struct calc_arity<BOOST_PP_ITERATION()>
-	{
-		template<BOOST_PP_ENUM_PARAMS(LUABIND_MAX_ARITY, class A), class Policies>
-		static int apply(constructor<BOOST_PP_ENUM_PARAMS(LUABIND_MAX_ARITY, A)>, Policies*)
-		{
-			BOOST_PP_REPEAT(BOOST_PP_ITERATION(), LUABIND_FIND_CONV, _)
-			return 0 BOOST_PP_REPEAT(BOOST_PP_ITERATION(), LUABIND_CALC_ARITY, _);
-		}
-	};
-
-#endif
+#endif // INCLUDED_error_callback_fun_hpp_GUID_1150976a_4348_495f_99ce_9d7edd00a0b8
 
