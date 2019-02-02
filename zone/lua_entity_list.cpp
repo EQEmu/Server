@@ -508,37 +508,37 @@ luabind::scope lua_register_entity_list() {
 
 luabind::scope lua_register_mob_list() {
 	return luabind::class_<Lua_Mob_List>("MobList")
-			.def_readwrite("entries", &Lua_Mob_List::entries, luabind::return_stl_iterator);
+			.def_readwrite("entries", &Lua_Mob_List::entries, luabind::return_stl_iterator());
 }
 
 luabind::scope lua_register_client_list() {
 	return luabind::class_<Lua_Client_List>("ClientList")
-			.def_readwrite("entries", &Lua_Client_List::entries, luabind::return_stl_iterator);
+			.def_readwrite("entries", &Lua_Client_List::entries, luabind::return_stl_iterator());
 }
 
 luabind::scope lua_register_npc_list() {
 	return luabind::class_<Lua_NPC_List>("NPCList")
-			.def_readwrite("entries", &Lua_NPC_List::entries, luabind::return_stl_iterator);
+			.def_readwrite("entries", &Lua_NPC_List::entries, luabind::return_stl_iterator());
 }
 
 luabind::scope lua_register_corpse_list() {
 	return luabind::class_<Lua_Corpse_List>("CorpseList")
-			.def_readwrite("entries", &Lua_Corpse_List::entries, luabind::return_stl_iterator);
+			.def_readwrite("entries", &Lua_Corpse_List::entries, luabind::return_stl_iterator());
 }
 
 luabind::scope lua_register_object_list() {
 	return luabind::class_<Lua_Object_List>("ObjectList")
-			.def_readwrite("entries", &Lua_Object_List::entries, luabind::return_stl_iterator);
+			.def_readwrite("entries", &Lua_Object_List::entries, luabind::return_stl_iterator());
 }
 
 luabind::scope lua_register_door_list() {
 	return luabind::class_<Lua_Doors_List>("DoorList")
-			.def_readwrite("entries", &Lua_Doors_List::entries, luabind::return_stl_iterator);
+			.def_readwrite("entries", &Lua_Doors_List::entries, luabind::return_stl_iterator());
 }
 
 luabind::scope lua_register_spawn_list() {
 	return luabind::class_<Lua_Spawn_List>("SpawnList")
-			.def_readwrite("entries", &Lua_Spawn_List::entries, luabind::return_stl_iterator);
+			.def_readwrite("entries", &Lua_Spawn_List::entries, luabind::return_stl_iterator());
 }
 
 #endif
