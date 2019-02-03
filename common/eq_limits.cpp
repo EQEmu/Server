@@ -43,17 +43,17 @@ static const EQEmu::constants::LookupEntry constants_static_lookup_entries[EQEmu
 {
 	/*[ClientVersion::Unknown] =*/
 	EQEmu::constants::LookupEntry(
-		EQEmu::expansions::Expansion::EverQuest,
-		ClientUnknown::INULL,
-		ClientUnknown::INULL,
+		ClientUnknown::constants::EXPANSION,
+		ClientUnknown::constants::EXPANSION_BIT,
+		ClientUnknown::constants::EXPANSIONS_MASK,
 		ClientUnknown::INULL,
 		ClientUnknown::INULL
 	),
 	/*[ClientVersion::Client62] =*/
 	EQEmu::constants::LookupEntry(
-		EQEmu::expansions::Expansion::EverQuest,
-		Client62::INULL,
-		Client62::INULL,
+		Client62::constants::EXPANSION,
+		Client62::constants::EXPANSION_BIT,
+		Client62::constants::EXPANSIONS_MASK,
 		Client62::INULL,
 		Client62::INULL
 	),
