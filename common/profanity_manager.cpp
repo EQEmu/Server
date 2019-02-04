@@ -21,6 +21,7 @@
 #include "dbcore.h"
 
 #include <ctype.h>
+#include <cstring>
 #include <algorithm>
 
 
