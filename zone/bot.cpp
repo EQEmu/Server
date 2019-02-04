@@ -2248,10 +2248,9 @@ void Bot::AI_Process() {
 
 	Client* bot_owner = (GetBotOwner() && GetBotOwner()->IsClient() ? GetBotOwner()->CastToClient() : nullptr);
 	Group* bot_group = GetGroup();
-	Mob* follow_mob = entity_list.GetMob(GetFollowID());
-
+	
 	// Primary reasons for not processing AI
-	if (!bot_owner || !bot_group || !follow_mob || !IsAIControlled())
+	if (!bot_owner || !bot_group || !IsAIControlled())
 		return;
 
 	if (bot_owner->IsDead()) {
@@ -2261,10 +2260,17 @@ void Bot::AI_Process() {
 		return;
 	}
 
-	// We also need a leash owner (subset of primary AI criteria)
+	// We also need a leash owner and follow mob (subset of primary AI criteria)
 	Client* leash_owner = (bot_group->GetLeader() && bot_group->GetLeader()->IsClient() ? bot_group->GetLeader()->CastToClient() : bot_owner);
 	if (!leash_owner)
 		return;
+
+	Mob* follow_mob = entity_list.GetMob(GetFollowID());
+
+	if (!follow_mob) {
+		follow_mob = leash_owner;
+		SetFollowID(leash_owner->GetID());
+	}
 
 	// Berserk updates should occur if primary AI criteria are met
 	if (GetClass() == WARRIOR || GetClass() == BERSERKER) {
