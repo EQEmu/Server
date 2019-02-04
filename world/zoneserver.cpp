@@ -981,6 +981,10 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		safe_delete(pack);
 		break;
 	}
+	case ServerOP_RefreshCensorship: {
+		zoneserver_list.SendPacket(pack);
+		break;
+	}
 	case ServerOP_SetWorldTime: {
 		Log(Logs::Detail, Logs::World_Server, "Received SetWorldTime");
 		eqTimeOfDay* newtime = (eqTimeOfDay*)pack->pBuffer;

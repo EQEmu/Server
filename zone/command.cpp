@@ -54,6 +54,7 @@
 #include "../common/string_util.h"
 #include "../say_link.h"
 #include "../common/eqemu_logsys.h"
+#include "../common/profanity_manager.h"
 
 #include "data_bucket.h"
 #include "command.h"
@@ -307,6 +308,7 @@ int command_init(void)
 		command_add("petitioninfo", "[petition number] - Get info about a petition", 20, command_petitioninfo) ||
 		command_add("pf", "- Display additional mob coordinate and wandering data", 0, command_pf) ||
 		command_add("picklock",  "Analog for ldon pick lock for the newer clients since we still don't have it working.",  0, command_picklock) ||
+		command_add("profanity", "Manage censored language.", 150, command_profanity) ||
 
 #ifdef EQPROFILE
 		command_add("profiledump", "- Dump profiling info to logs", 250, command_profiledump) ||
@@ -11041,6 +11043,68 @@ void command_picklock(Client *c, const Seperator *sep)
 		else
 			c->Message(13, "You do not have the pick locks skill.");
 	}
+}
+
+void command_profanity(Client *c, const Seperator *sep)
+{
+	std::string arg1(sep->arg[1]);
+	
+	while (true) {
+		if (arg1.compare("list") == 0) {
+			// do nothing
+		}
+		else if (arg1.compare("clear") == 0) {
+			EQEmu::ProfanityManager::DeleteProfanityList(&database);
+			auto pack = new ServerPacket(ServerOP_RefreshCensorship);
+			worldserver.SendPacket(pack);
+			safe_delete(pack);
+		}
+		else if (arg1.compare("add") == 0) {
+			if (!EQEmu::ProfanityManager::AddProfanity(&database, sep->arg[2]))
+				c->Message(CC_Red, "Could not add '%s' to the profanity list.", sep->arg[2]);
+			auto pack = new ServerPacket(ServerOP_RefreshCensorship);
+			worldserver.SendPacket(pack);
+			safe_delete(pack);
+		}
+		else if (arg1.compare("del") == 0) {
+			if (!EQEmu::ProfanityManager::RemoveProfanity(&database, sep->arg[2]))
+				c->Message(CC_Red, "Could not delete '%s' from the profanity list.", sep->arg[2]);
+			auto pack = new ServerPacket(ServerOP_RefreshCensorship);
+			worldserver.SendPacket(pack);
+			safe_delete(pack);
+		}
+		else if (arg1.compare("reload") == 0) {
+			if (!EQEmu::ProfanityManager::UpdateProfanityList(&database))
+				c->Message(CC_Red, "Could not reload the profanity list.");
+			auto pack = new ServerPacket(ServerOP_RefreshCensorship);
+			worldserver.SendPacket(pack);
+			safe_delete(pack);
+		}
+		else {
+			break;
+		}
+
+		std::string popup;
+		const auto &list = EQEmu::ProfanityManager::GetProfanityList();
+		for (const auto &iter : list) {
+			popup.append(iter);
+			popup.append("<br>");
+		}
+		if (list.empty())
+			popup.append("** Censorship Inactive **<br>");
+		else
+			popup.append("** End of List **<br>");
+
+		c->SendPopupToClient("Profanity List", popup.c_str());
+		
+		return;
+	}
+	
+	c->Message(0, "Usage: #profanity [list] - shows profanity list");
+	c->Message(0, "Usage: #profanity [clear] - deletes all entries");
+	c->Message(0, "Usage: #profanity [add] [<word>] - adds entry");
+	c->Message(0, "Usage: #profanity [del] [<word>] - deletes entry");
+	c->Message(0, "Usage: #profanity [reload] - reloads profanity list");
 }
 
 void command_mysql(Client *c, const Seperator *sep)
