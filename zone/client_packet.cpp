@@ -2812,24 +2812,19 @@ void Client::Handle_OP_ApplyPoison(const EQApplicationPacket *app)
 		return;
 	}
 
-	uint32 ApplyPoisonSuccessResult = 0;
 	ApplyPoison_Struct* ApplyPoisonData = (ApplyPoison_Struct*)app->pBuffer;
+
+	uint32 ApplyPoisonSuccessResult = 0;
+
 	const EQEmu::ItemInstance* PrimaryWeapon = GetInv().GetItem(EQEmu::invslot::slotPrimary);
 	const EQEmu::ItemInstance* SecondaryWeapon = GetInv().GetItem(EQEmu::invslot::slotSecondary);
-	const EQEmu::ItemInstance* PoisonItemInstance = GetInv()[ApplyPoisonData->inventorySlot];
-	const EQEmu::ItemData* poison=PoisonItemInstance->GetItem();
-	const EQEmu::ItemData* primary=nullptr;
-	const EQEmu::ItemData* secondary=nullptr;
-	bool IsPoison = PoisonItemInstance && 
-					(poison->ItemType == EQEmu::item::ItemTypePoison);
+	const EQEmu::ItemInstance* PoisonItemInstance = GetInv().GetItem(ApplyPoisonData->inventorySlot);
 
-	if (PrimaryWeapon) {
-		primary=PrimaryWeapon->GetItem();
-	}
+	const EQEmu::ItemData* primary = (PrimaryWeapon ? PrimaryWeapon->GetItem() : nullptr);
+	const EQEmu::ItemData* secondary = (SecondaryWeapon ? SecondaryWeapon->GetItem() : nullptr);
+	const EQEmu::ItemData* poison = (PoisonItemInstance ? PoisonItemInstance->GetItem() : nullptr);
 
-	if (SecondaryWeapon) {
-		secondary=SecondaryWeapon->GetItem();
-	}
+	bool IsPoison = (poison && poison->ItemType == EQEmu::item::ItemTypePoison);
 
 	if (IsPoison && GetClass() == ROGUE) {
 
