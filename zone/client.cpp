@@ -896,10 +896,6 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		language = 0; // No need for language when drunk
 	}
 
-	// Censor the message
-	if (EQEmu::ProfanityManager::IsCensorshipActive() && (chan_num != 8))
-		EQEmu::ProfanityManager::RedactMessage(message);
-
 	switch(chan_num)
 	{
 	case 0: { /* Guild Chat */
@@ -936,6 +932,9 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		if (GetPet() && GetTarget() == GetPet() && GetPet()->FindType(SE_VoiceGraft))
 			sender = GetPet();
 
+		if (EQEmu::ProfanityManager::IsCensorshipActive())
+			EQEmu::ProfanityManager::RedactMessage(message);
+
 		entity_list.ChannelMessage(sender, chan_num, language, lang_skill, message);
 		break;
 	}
@@ -965,16 +964,22 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 				}
 			}
 
+			if (EQEmu::ProfanityManager::IsCensorshipActive())
+				EQEmu::ProfanityManager::RedactMessage(message);
+
 			if (!worldserver.SendChannelMessage(this, 0, 4, 0, language, message))
-			Message(0, "Error: World server disconnected");
+				Message(0, "Error: World server disconnected");
 		}
 		else if(!RuleB(Chat, ServerWideAuction)) {
 			Mob *sender = this;
 
 			if (GetPet() && GetTarget() == GetPet() && GetPet()->FindType(SE_VoiceGraft))
-			sender = GetPet();
+				sender = GetPet();
 
-		entity_list.ChannelMessage(sender, chan_num, language, message);
+			if (EQEmu::ProfanityManager::IsCensorshipActive())
+				EQEmu::ProfanityManager::RedactMessage(message);
+
+			entity_list.ChannelMessage(sender, chan_num, language, message);
 		}
 		break;
 	}
@@ -1009,6 +1014,9 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 				}
 			}
 
+			if (EQEmu::ProfanityManager::IsCensorshipActive())
+				EQEmu::ProfanityManager::RedactMessage(message);
+
 			if (!worldserver.SendChannelMessage(this, 0, 5, 0, language, message))
 			{
 				Message(0, "Error: World server disconnected");
@@ -1021,12 +1029,16 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 			if (GetPet() && GetTarget() == GetPet() && GetPet()->FindType(SE_VoiceGraft))
 				sender = GetPet();
 
+			if (EQEmu::ProfanityManager::IsCensorshipActive())
+				EQEmu::ProfanityManager::RedactMessage(message);
+
 			entity_list.ChannelMessage(sender, chan_num, language, message);
 		}
 		break;
 	}
 	case 6: /* Broadcast */
 	case 11: { /* GM Say */
+		// gms/admins should have enough tact to not abuse their own servers...
 		if (!(admin >= 80))
 			Message(0, "Error: Only GMs can use this channel");
 		else if (!worldserver.SendChannelMessage(this, targetname, chan_num, 0, language, message))
@@ -1159,6 +1171,11 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 	}
 	case 20:
 	{
+		// need to activate ucs filter for non-private channels - do not redact here
+
+		//if (EQEmu::ProfanityManager::IsCensorshipActive())
+		//	EQEmu::ProfanityManager::RedactMessage(message);
+		
 		// UCS Relay for Underfoot and later.
 		if(!worldserver.SendChannelMessage(this, 0, chan_num, 0, language, message))
 			Message(0, "Error: World server disconnected");
@@ -1172,6 +1189,9 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		size_t msg_len = strlen(message);
 		if (msg_len > 512)
 			message[512] = '\0';
+
+		if (EQEmu::ProfanityManager::IsCensorshipActive())
+			EQEmu::ProfanityManager::RedactMessage(message);
 
 		auto outapp = new EQApplicationPacket(OP_Emote, 4 + msg_len + strlen(GetName()) + 2);
 		Emote_Struct* es = (Emote_Struct*)outapp->pBuffer;
