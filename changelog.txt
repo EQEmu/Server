@@ -1,6 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 
+== 2/7/2019 ==
+Uleat: Put merc and bot classes on the same stance standard (mercs)
+	- Both classes will now use the same stance standard
+	- Pushed stance types up to EQEmu::constants
+
 == 2/4/2019 ==
 Uleat: Added command 'profanity' (aliased 'prof')
 	- This is a server-based tool for redacting any language that an admin deems as profanity (socially unacceptable within their community)

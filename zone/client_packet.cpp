@@ -9394,7 +9394,7 @@ void Client::Handle_OP_MercenaryCommand(const EQApplicationPacket *app)
 				//check to see if selected option is a valid stance slot (option is the slot the stance is in, not the actual stance)
 				if (option >= 0 && option < numStances)
 				{
-					merc->SetStance(mercTemplate->Stances[option]);
+					merc->SetStance((EQEmu::constants::StanceType)mercTemplate->Stances[option]);
 					GetMercInfo().Stance = mercTemplate->Stances[option];
 
 					Log(Logs::General, Logs::Mercenaries, "Set Stance: %u for %s (%s)", merc->GetStance(), merc->GetName(), GetName());

@@ -4249,7 +4249,7 @@ void bot_subcommand_bot_clone(Client *c, const Seperator *sep)
 		return;
 	}
 
-	int clone_stance = BotStancePassive;
+	int clone_stance = EQEmu::constants::stancePassive;
 	if (!botdb.LoadStance(my_bot->GetBotID(), clone_stance))
 		c->Message(m_fail, "%s for bot '%s'", BotDatabase::fail::LoadStance(), my_bot->GetCleanName());
 	if (!botdb.SaveStance(clone_id, clone_stance))
@@ -5160,29 +5160,34 @@ void bot_subcommand_bot_stance(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_stance", sep->arg[0], "botstance"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(m_usage, "usage: %s [current | value: 0-6] ([actionable: target | byname] ([actionable_name]))", sep->arg[0]);
+		c->Message(m_usage, "usage: %s [current | value: 1-9] ([actionable: target | byname] ([actionable_name]))", sep->arg[0]);
 		c->Message(m_note, "value: %u(%s), %u(%s), %u(%s), %u(%s), %u(%s), %u(%s), %u(%s)",
-			BotStancePassive, GetBotStanceName(BotStancePassive),
-			BotStanceBalanced, GetBotStanceName(BotStanceBalanced),
-			BotStanceEfficient, GetBotStanceName(BotStanceEfficient),
-			BotStanceReactive, GetBotStanceName(BotStanceReactive),
-			BotStanceAggressive, GetBotStanceName(BotStanceAggressive),
-			BotStanceBurn, GetBotStanceName(BotStanceBurn),
-			BotStanceBurnAE, GetBotStanceName(BotStanceBurnAE)
+			EQEmu::constants::stancePassive, EQEmu::constants::GetStanceName(EQEmu::constants::stancePassive),
+			EQEmu::constants::stanceBalanced, EQEmu::constants::GetStanceName(EQEmu::constants::stanceBalanced),
+			EQEmu::constants::stanceEfficient, EQEmu::constants::GetStanceName(EQEmu::constants::stanceEfficient),
+			EQEmu::constants::stanceReactive, EQEmu::constants::GetStanceName(EQEmu::constants::stanceReactive),
+			EQEmu::constants::stanceAggressive, EQEmu::constants::GetStanceName(EQEmu::constants::stanceAggressive),
+			EQEmu::constants::stanceAssist, EQEmu::constants::GetStanceName(EQEmu::constants::stanceAssist),
+			EQEmu::constants::stanceBurn, EQEmu::constants::GetStanceName(EQEmu::constants::stanceBurn),
+			EQEmu::constants::stanceEfficient2, EQEmu::constants::GetStanceName(EQEmu::constants::stanceEfficient2),
+			EQEmu::constants::stanceBurnAE, EQEmu::constants::GetStanceName(EQEmu::constants::stanceBurnAE)
 		);
 		return;
 	}
 	int ab_mask = (ActionableBots::ABM_Target | ActionableBots::ABM_ByName);
 
 	bool current_flag = false;
-	auto bst = BotStanceUnknown;
+	auto bst = EQEmu::constants::stanceUnknown;
 	
 	if (!strcasecmp(sep->arg[1], "current"))
 		current_flag = true;
-	else if (sep->IsNumber(1))
-		bst = VALIDBOTSTANCE(atoi(sep->arg[1]));
+	else if (sep->IsNumber(1)) {
+		bst = (EQEmu::constants::StanceType)atoi(sep->arg[1]);
+		if (bst < EQEmu::constants::stanceUnknown || bst > EQEmu::constants::stanceBurnAE)
+			bst = EQEmu::constants::stanceUnknown;
+	}
 
-	if (!current_flag && bst == BotStanceUnknown) {
+	if (!current_flag && bst == EQEmu::constants::stanceUnknown) {
 		c->Message(m_fail, "A [current] argument or valid numeric [value] is required to use this command");
 		return;
 	}
@@ -5200,7 +5205,12 @@ void bot_subcommand_bot_stance(Client *c, const Seperator *sep)
 			bot_iter->Save();
 		}
 
-		Bot::BotGroupSay(bot_iter, "My current stance is '%s' (%u)", GetBotStanceName(bot_iter->GetBotStance()), bot_iter->GetBotStance());
+		Bot::BotGroupSay(
+			bot_iter,
+			"My current stance is '%s' (%i)",
+			EQEmu::constants::GetStanceName(bot_iter->GetBotStance()),
+			bot_iter->GetBotStance()
+		);
 	}
 }
 
