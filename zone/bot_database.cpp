@@ -122,7 +122,7 @@ bool BotDatabase::LoadBotSpellCastingChances()
 			continue;
 		--class_index;
 		uint8 stance_index = atoi(row[2]);
-		if (stance_index >= EQEmu::constants::STANCE_TYPE_MAX)
+		if (stance_index >= EQEmu::constants::STANCE_TYPE_COUNT)
 			continue;
 
 		for (uint8 conditional_index = nHSND; conditional_index < cntHSND; ++conditional_index) {
@@ -2853,7 +2853,7 @@ uint8 BotDatabase::GetSpellCastingChance(uint8 spell_type_index, uint8 class_ind
 		return 0;
 	if (class_index >= PLAYER_CLASS_COUNT)
 		return 0;
-	if (stance_index >= EQEmu::constants::STANCE_TYPE_MAX)
+	if (stance_index >= EQEmu::constants::STANCE_TYPE_COUNT)
 		return 0;
 	if (conditional_index >= cntHSND)
 		return 0;

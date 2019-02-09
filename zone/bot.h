@@ -771,7 +771,7 @@ private:
 	bool DeletePet();
 
 	public:
-	static uint8 spell_casting_chances[MaxSpellTypes][PLAYER_CLASS_COUNT][EQEmu::constants::STANCE_TYPE_MAX][cntHSND];
+	static uint8 spell_casting_chances[MaxSpellTypes][PLAYER_CLASS_COUNT][EQEmu::constants::STANCE_TYPE_COUNT][cntHSND];
 };
 
 #endif // BOTS

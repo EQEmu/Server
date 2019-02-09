@@ -219,7 +219,9 @@ namespace EQEmu
 		const char *GetStanceName(StanceType stance_type);
 		int ConvertStanceTypeToIndex(StanceType stance_type);
 
-		const size_t STANCE_TYPE_MAX = stanceBurnAE;
+		const int STANCE_TYPE_FIRST = stancePassive;
+		const int STANCE_TYPE_LAST = stanceBurnAE;
+		const int STANCE_TYPE_COUNT = stanceBurnAE;
 
 	} /*constants*/
 

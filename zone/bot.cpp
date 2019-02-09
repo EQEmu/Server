@@ -8213,7 +8213,7 @@ bool Bot::CheckLoreConflict(const EQEmu::ItemData* item) {
 }
 
 bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, float iRange, uint32 iSpellTypes) {
-	if((iSpellTypes&SpellTypes_Detrimental) != 0) {
+	if((iSpellTypes & SPELL_TYPES_DETRIMENTAL) != 0) {
 		Log(Logs::General, Logs::Error, "Error: detrimental spells requested from AICheckCloseBeneficialSpells!!");
 		return false;
 	}
@@ -9096,6 +9096,6 @@ std::string Bot::CreateSayLink(Client* c, const char* message, const char* name)
 	return saylink;
 }
 
-uint8 Bot::spell_casting_chances[MaxSpellTypes][PLAYER_CLASS_COUNT][EQEmu::constants::STANCE_TYPE_MAX][cntHSND] = { 0 };
+uint8 Bot::spell_casting_chances[MaxSpellTypes][PLAYER_CLASS_COUNT][EQEmu::constants::STANCE_TYPE_COUNT][cntHSND] = { 0 };
 
 #endif
