@@ -2570,79 +2570,79 @@ bool Bot::CheckDisciplineRecastTimers(Bot *caster, int timer_index) {
 
 uint8 Bot::GetChanceToCastBySpellType(uint32 spellType)
 {
-	uint8 spell_type_index = MaxSpellTypes;
+	uint8 spell_type_index = SPELL_TYPE_COUNT;
 	switch (spellType) {
 	case SpellType_Nuke:
-		spell_type_index = SpellType_NukeIndex;
+		spell_type_index = spellTypeIndexNuke;
 		break;
 	case SpellType_Heal:
-		spell_type_index = SpellType_HealIndex;
+		spell_type_index = spellTypeIndexHeal;
 		break;
 	case SpellType_Root:
-		spell_type_index = SpellType_RootIndex;
+		spell_type_index = spellTypeIndexRoot;
 		break;
 	case SpellType_Buff:
-		spell_type_index = SpellType_BuffIndex;
+		spell_type_index = spellTypeIndexBuff;
 		break;
 	case SpellType_Escape:
-		spell_type_index = SpellType_EscapeIndex;
+		spell_type_index = spellTypeIndexEscape;
 		break;
 	case SpellType_Pet:
-		spell_type_index = SpellType_PetIndex;
+		spell_type_index = spellTypeIndexPet;
 		break;
 	case SpellType_Lifetap:
-		spell_type_index = SpellType_LifetapIndex;
+		spell_type_index = spellTypeIndexLifetap;
 		break;
 	case SpellType_Snare:
-		spell_type_index = SpellType_SnareIndex;
+		spell_type_index = spellTypeIndexSnare;
 		break;
 	case SpellType_DOT:
-		spell_type_index = SpellType_DOTIndex;
+		spell_type_index = spellTypeIndexDot;
 		break;
 	case SpellType_Dispel:
-		spell_type_index = SpellType_DispelIndex;
+		spell_type_index = spellTypeIndexDispel;
 		break;
 	case SpellType_InCombatBuff:
-		spell_type_index = SpellType_InCombatBuffIndex;
+		spell_type_index = spellTypeIndexInCombatBuff;
 		break;
 	case SpellType_Mez:
-		spell_type_index = SpellType_MezIndex;
+		spell_type_index = spellTypeIndexMez;
 		break;
 	case SpellType_Charm:
-		spell_type_index = SpellType_CharmIndex;
+		spell_type_index = spellTypeIndexCharm;
 		break;
 	case SpellType_Slow:
-		spell_type_index = SpellType_SlowIndex;
+		spell_type_index = spellTypeIndexSlow;
 		break;
 	case SpellType_Debuff:
-		spell_type_index = SpellType_DebuffIndex;
+		spell_type_index = spellTypeIndexDebuff;
 		break;
 	case SpellType_Cure:
-		spell_type_index = SpellType_CureIndex;
+		spell_type_index = spellTypeIndexCure;
 		break;
 	case SpellType_Resurrect:
-		spell_type_index = SpellType_ResurrectIndex;
+		spell_type_index = spellTypeIndexResurrect;
 		break;
 	case SpellType_HateRedux:
-		spell_type_index = SpellType_HateReduxIndex;
+		spell_type_index = spellTypeIndexHateRedux;
 		break;
 	case SpellType_InCombatBuffSong:
-		spell_type_index = SpellType_InCombatBuffSongIndex;
+		spell_type_index = spellTypeIndexInCombatBuffSong;
 		break;
 	case SpellType_OutOfCombatBuffSong:
-		spell_type_index = SpellType_OutOfCombatBuffSongIndex;
+		spell_type_index = spellTypeIndexOutOfCombatBuffSong;
 		break;
 	case SpellType_PreCombatBuff:
-		spell_type_index = SpellType_PreCombatBuffIndex;
+		spell_type_index = spellTypeIndexPreCombatBuff;
 		break;
 	case SpellType_PreCombatBuffSong:
-		spell_type_index = SpellType_PreCombatBuffSongIndex;
+		spell_type_index = spellTypeIndexPreCombatBuffSong;
 		break;
 	default:
-		spell_type_index = MaxSpellTypes;
+		spell_type_index = SPELL_TYPE_COUNT;
 		break;
 	}
-	if (spell_type_index >= MaxSpellTypes)
+	if (spell_type_index >= SPELL_TYPE_COUNT)
 		return 0;
 
 	uint8 class_index = GetClass();

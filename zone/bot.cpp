@@ -9096,6 +9096,6 @@ std::string Bot::CreateSayLink(Client* c, const char* message, const char* name)
 	return saylink;
 }
 
-uint8 Bot::spell_casting_chances[MaxSpellTypes][PLAYER_CLASS_COUNT][EQEmu::constants::STANCE_TYPE_COUNT][cntHSND] = { 0 };
+uint8 Bot::spell_casting_chances[SPELL_TYPE_COUNT][PLAYER_CLASS_COUNT][EQEmu::constants::STANCE_TYPE_COUNT][cntHSND] = { 0 };
 
 #endif

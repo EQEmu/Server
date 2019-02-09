@@ -7230,7 +7230,7 @@ void bot_subcommand_inventory_list(Client *c, const Seperator *sep)
 
 		inst = my_bot->CastToBot()->GetBotItem(i);
 		if (!inst || !inst->GetItem()) {
-			c->Message(m_message, "I need something for my %s (slot %i)", GetBotEquipSlotName(i), i);
+			c->Message(m_message, "I need something for my %s (slot %i)", EQEmu::invslot::GetInvPossessionsSlotName(i), i);
 			continue;
 		}
 		
@@ -7240,7 +7240,7 @@ void bot_subcommand_inventory_list(Client *c, const Seperator *sep)
 		}
 
 		linker.SetItemInst(inst);
-		c->Message(m_message, "Using %s in my %s (slot %i)", linker.GenerateLink().c_str(), GetBotEquipSlotName(i), i);
+		c->Message(m_message, "Using %s in my %s (slot %i)", linker.GenerateLink().c_str(), EQEmu::invslot::GetInvPossessionsSlotName(i), i);
 
 		++inventory_count;
 	}
@@ -7343,14 +7343,14 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 	case EQEmu::invslot::slotWaist:
 	case EQEmu::invslot::slotPowerSource:
 	case EQEmu::invslot::slotAmmo:
-		c->Message(m_message, "My %s is %s unequipped", GetBotEquipSlotName(slotId), ((itm) ? ("now") : ("already")));
+		c->Message(m_message, "My %s is %s unequipped", EQEmu::invslot::GetInvPossessionsSlotName(slotId), ((itm) ? ("now") : ("already")));
 		break;
 	case EQEmu::invslot::slotShoulders:
 	case EQEmu::invslot::slotArms:
 	case EQEmu::invslot::slotHands:
 	case EQEmu::invslot::slotLegs:
 	case EQEmu::invslot::slotFeet:
-		c->Message(m_message, "My %s are %s unequipped", GetBotEquipSlotName(slotId), ((itm) ? ("now") : ("already")));
+		c->Message(m_message, "My %s are %s unequipped", EQEmu::invslot::GetInvPossessionsSlotName(slotId), ((itm) ? ("now") : ("already")));
 		break;
 	default:
 		c->Message(m_fail, "I'm soo confused...");
@@ -7393,7 +7393,7 @@ void bot_subcommand_inventory_window(Client *c, const Seperator *sep)
 			item = inst->GetItem();
 
 		window_text.append("<c \"#FFFFFF\">");
-		window_text.append(GetBotEquipSlotName(i));
+		window_text.append(EQEmu::invslot::GetInvPossessionsSlotName(i));
 		window_text.append(": ");
 		if (item) {
 			//window_text.append("</c>");

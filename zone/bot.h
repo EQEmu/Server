@@ -54,63 +54,7 @@ const int MaxDisciplineTimer = 10;
 const int DisciplineReuseStart = MaxSpellTimer + 1;
 const int MaxTimer = MaxSpellTimer + MaxDisciplineTimer;
 
-#define VALIDBOTEQUIPSLOT(x) ((x >= EQEmu::invslot::EQUIPMENT_BEGIN && x <= EQEmu::invslot::EQUIPMENT_END) ? (x) : (EQEmu::invslot::EQUIPMENT_COUNT))
 
-static const std::string bot_equip_slot_name[EQEmu::invslot::EQUIPMENT_COUNT + 1] =
-{
-	"Charm",			// slotCharm
-	"Ear 1",			// slotEar1
-	"Head",				// slotHead
-	"Face",				// slotFace
-	"Ear 2",			// slotEar2
-	"Neck",				// slotNeck 
-	"Shoulders",		// slotShoulders
-	"Arms",				// slotArms
-	"Back",				// slotBack
-	"Wrist 1",			// slotWrist1
-	"Wrist 2",			// slotWrist2
-	"Range",			// slotRange
-	"Hands",			// slotHands
-	"Primary",			// slotPrimary
-	"Secondary",		// slotSecondary
-	"Finger 1",			// slotFinger1
-	"Finger 2",			// slotFinger2
-	"Chest",			// slotChest
-	"Legs",				// slotLegs
-	"Feet",				// slotFeet
-	"Waist",			// slotWaist
-	"Power Source",		// slotPowerSource
-	"Ammo",				// slotAmmo
-	"Unknown"
-};
-
-static const char* GetBotEquipSlotName(int slot_id) { return bot_equip_slot_name[VALIDBOTEQUIPSLOT(slot_id)].c_str(); }
-
-enum SpellTypeIndex {
-	SpellType_NukeIndex,
-	SpellType_HealIndex,
-	SpellType_RootIndex,
-	SpellType_BuffIndex,
-	SpellType_EscapeIndex,
-	SpellType_PetIndex,
-	SpellType_LifetapIndex,
-	SpellType_SnareIndex,
-	SpellType_DOTIndex,
-	SpellType_DispelIndex,
-	SpellType_InCombatBuffIndex,
-	SpellType_MezIndex,
-	SpellType_CharmIndex,
-	SpellType_SlowIndex,
-	SpellType_DebuffIndex,
-	SpellType_CureIndex,
-	SpellType_ResurrectIndex,
-	SpellType_HateReduxIndex,
-	SpellType_InCombatBuffSongIndex,
-	SpellType_OutOfCombatBuffSongIndex,
-	SpellType_PreCombatBuffIndex,
-	SpellType_PreCombatBuffSongIndex,
-	MaxSpellTypes
-};
 
 // nHSND	negative Healer/Slower/Nuker/Doter
 // pH		positive Healer
@@ -200,28 +144,34 @@ public:
 		BotRoleRaidHealer
 	};
 
-	enum EqExpansions { // expansions are off..EQ should be '0'
-		ExpansionNone,
-		ExpansionEQ,
-		ExpansionRoK,
-		ExpansionSoV,
-		ExpansionSoL,
-		ExpansionPoP,
-		ExpansionLoY,
-		ExpansionLDoN,
-		ExpansionGoD,
-		ExpansionOoW,
-		ExpansionDoN,
-		ExpansionDoDH,
-		ExpansionPoR,
-		ExpansionTSS,
-		ExpansionSoF,
-		ExpansionSoD,
-		ExpansionUF,
-		ExpansionHoT,
-		ExpansionVoA,
-		ExpansionRoF
+	enum SpellTypeIndex : uint32 {
+		spellTypeIndexNuke,
+		spellTypeIndexHeal,
+		spellTypeIndexRoot,
+		spellTypeIndexBuff,
+		spellTypeIndexEscape,
+		spellTypeIndexPet,
+		spellTypeIndexLifetap,
+		spellTypeIndexSnare,
+		spellTypeIndexDot,
+		spellTypeIndexDispel,
+		spellTypeIndexInCombatBuff,
+		spellTypeIndexMez,
+		spellTypeIndexCharm,
+		spellTypeIndexSlow,
+		spellTypeIndexDebuff,
+		spellTypeIndexCure,
+		spellTypeIndexResurrect,
+		spellTypeIndexHateRedux,
+		spellTypeIndexInCombatBuffSong,
+		spellTypeIndexOutOfCombatBuffSong,
+		spellTypeIndexPreCombatBuff,
+		spellTypeIndexPreCombatBuffSong
 	};
+
+	static const uint32 SPELL_TYPE_FIRST = spellTypeIndexNuke;
+	static const uint32 SPELL_TYPE_LAST = spellTypeIndexPreCombatBuffSong;
+	static const uint32 SPELL_TYPE_COUNT = SPELL_TYPE_LAST + 1;
 
 	// Class Constructors
 	Bot(NPCType *npcTypeData, Client* botOwner);
@@ -771,7 +721,7 @@ private:
 	bool DeletePet();
 
 	public:
-	static uint8 spell_casting_chances[MaxSpellTypes][PLAYER_CLASS_COUNT][EQEmu::constants::STANCE_TYPE_COUNT][cntHSND];
+	static uint8 spell_casting_chances[SPELL_TYPE_COUNT][PLAYER_CLASS_COUNT][EQEmu::constants::STANCE_TYPE_COUNT][cntHSND];
 };
 
 #endif // BOTS
