@@ -54,6 +54,26 @@ delete from faction_list where id < 5000;
 
 insert into faction_list (id, name, base)  (select id, name, 0 from client_faction_names);
 
+/* Now restore any base for factions for which the client has no mods (social factions) */
+
+DROP TABLE IF EXISTS oldbases;
+
+CREATE TABLE `oldbases` (
+  `id` int(11) DEFAULT 0,
+  `name` varchar(50) NOT NULL DEFAULT '',
+  `base` smallint(6) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 as 
+(select m.clientid as id, p.name, p.base from faction_list_prefix p 
+join  client_server_faction_map m on m.serverid = p.id where p.base <> 0 
+&& m.clientid in (select id from faction_list where id not in (SELECT faction_id from client_faction_associations group by faction_id)));
+
+update faction_list f
+INNER JOIN oldbases o  on o.id = f.id
+set f.base = o.base;
+
+DROP TABLE IF EXISTS oldbases;
+
 /* Create mods based on the client_faction_associations */
 /* No code changes required */
 
