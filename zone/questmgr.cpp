@@ -1020,24 +1020,30 @@ uint16 QuestManager::scribespells(uint8 max_level, uint8 min_level) {
 			if (spells[spell_id].effectid[EFFECT_COUNT - 1] == 10)
 				break;
 
-			if (!IsDiscipline(spell_id) && !initiator->HasSpellScribed(spell_id)) { //isn't a discipline & we don't already have it scribed
+			uint16 spell_id_ = (uint16)spell_id;
+			if ((spell_id_ != spell_id) || (spell_id != spell_id_)) {
+				initiator->Message(13, "FATAL ERROR: Type conversion data loss with spell_id (%u != %i)", spell_id, spell_id_);
+				return count;
+			}
+
+			if (!IsDiscipline(spell_id_) && !initiator->HasSpellScribed(spell_id)) { //isn't a discipline & we don't already have it scribed
 				if (SpellGlobalRule) {
 					// Bool to see if the character has the required QGlobal to scribe it if one exists in the Spell_Globals table
-					SpellGlobalCheckResult = initiator->SpellGlobalCheck(spell_id, char_id);
+					SpellGlobalCheckResult = initiator->SpellGlobalCheck(spell_id_, char_id);
 					if (SpellGlobalCheckResult) {
-						initiator->ScribeSpell(spell_id, book_slot);
+						initiator->ScribeSpell(spell_id_, book_slot);
 						count++;
 					}
 				}
 				else if (SpellBucketRule) {
-					SpellBucketCheckResult = initiator->SpellBucketCheck(spell_id, char_id);
+					SpellBucketCheckResult = initiator->SpellBucketCheck(spell_id_, char_id);
 					if (SpellBucketCheckResult) {
-						initiator->ScribeSpell(spell_id, book_slot);
+						initiator->ScribeSpell(spell_id_, book_slot);
 						count++;
 					}
 				}
 				else {
-					initiator->ScribeSpell(spell_id, book_slot);
+					initiator->ScribeSpell(spell_id_, book_slot);
 					count++;
 				}
 			}
