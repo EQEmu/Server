@@ -6407,26 +6407,25 @@ void command_beardcolor(Client *c, const Seperator *sep)
 
 void command_scribespells(Client *c, const Seperator *sep)
 {
-	uint8 max_level, min_level;
-	uint16 book_slot, curspell, count;
-	Client *t=c;
+	// rewrote this command to test for possible type conversion issues
+	// most of the redundant checks can be removed if proven successful
 
-	if(c->GetTarget() && c->GetTarget()->IsClient() && c->GetGM())
-		t=c->GetTarget()->CastToClient();
+	Client *t = c;
+	if (c->GetTarget() && c->GetTarget()->IsClient() && c->GetGM())
+		t = c->GetTarget()->CastToClient();
 
-	if(!sep->arg[1][0])
-	{
+	if(sep->argnum < 1 || !sep->IsNumber(1)) {
 		c->Message(0, "FORMAT: #scribespells <max level> <min level>");
 		return;
 	}
 
-	max_level = (uint8)atoi(sep->arg[1]);
-	if (!c->GetGM() && max_level > RuleI(Character, MaxLevel))
-		max_level = RuleI(Character, MaxLevel);	//default to Character:MaxLevel if we're not a GM & it's higher than the max level
-	min_level = sep->arg[2][0] ? (uint8)atoi(sep->arg[2]) : 1;	//default to 1 if there isn't a 2nd argument
-	if (!c->GetGM() && min_level > RuleI(Character, MaxLevel))
-		min_level = RuleI(Character, MaxLevel);	//default to Character:MaxLevel if we're not a GM & it's higher than the max level
+	uint8 max_level = (uint8)atol(sep->arg[1]);
+	if (!c->GetGM() && max_level > (uint8)RuleI(Character, MaxLevel))
+		max_level = (uint8)RuleI(Character, MaxLevel);	//default to Character:MaxLevel if we're not a GM & it's higher than the max level
 
+	uint8 min_level = (sep->IsNumber(2) ? (uint8)atol(sep->arg[2]) : 1);	//default to 1 if there isn't a 2nd argument
+	if (!c->GetGM() && min_level > (uint8)RuleI(Character, MaxLevel))
+		min_level = (uint8)RuleI(Character, MaxLevel);	//default to Character:MaxLevel if we're not a GM & it's higher than the max level
 
 	if(max_level < 1 || min_level < 1)
 	{
@@ -6434,7 +6433,7 @@ void command_scribespells(Client *c, const Seperator *sep)
 		return;
 	}
 	if (min_level > max_level) {
-		c->Message(0, "Error: Min Level must be less than or equal to Max Level.");
+		c->Message(0, "ERROR: Min Level must be less than or equal to Max Level.");
 		return;
 	}
 
@@ -6443,42 +6442,71 @@ void command_scribespells(Client *c, const Seperator *sep)
 		c->Message(0, "Scribing spells for %s.",  t->GetName());
 	Log(Logs::General, Logs::Normal, "Scribe spells request for %s from %s, levels: %u -> %u",  t->GetName(), c->GetName(), min_level, max_level);
 
-	for (
-		curspell = 0,
-		book_slot = t->GetNextAvailableSpellBookSlot(),
-		count = 0; // ;
-		curspell < SPDAT_RECORDS &&
-		book_slot < EQEmu::spells::SPELLBOOK_SIZE; // ;
-		curspell++,
-		book_slot = t->GetNextAvailableSpellBookSlot(book_slot)
-	)
-	{
-		if
-		(
-			spells[curspell].classes[WARRIOR] != 0 && // check if spell exists
-			spells[curspell].classes[t->GetPP().class_-1] <= max_level &&	//maximum level
-			spells[curspell].classes[t->GetPP().class_-1] >= min_level &&	//minimum level
-			spells[curspell].skill != 52
-		)
-		{
-			if (book_slot == -1) {	//no more book slots
-				t->Message(13, "Unable to scribe spell %s (%u) to spellbook: no more spell book slots available.",  spells[curspell].name, curspell);
-				if (t != c)
-					c->Message(13, "Error scribing spells: %s ran out of spell book slots on spell %s (%u)",  t->GetName(), spells[curspell].name, curspell);
-				break;
-			}
-			if(!IsDiscipline(curspell) && !t->HasSpellScribed(curspell)) {	//isn't a discipline & we don't already have it scribed
-				t->ScribeSpell(curspell, book_slot);
-				count++;
-			}
+	int book_slot = t->GetNextAvailableSpellBookSlot();
+	int spell_id = 0;
+	int count = 0;
+
+	for ( ; spell_id < SPDAT_RECORDS && book_slot < EQEmu::spells::SPELLBOOK_SIZE; ++spell_id) {
+		if (book_slot == -1) {
+			t->Message(
+				13,
+				"Unable to scribe spell %s (%i) to spellbook: no more spell book slots available.",
+				((spell_id >= 0 && spell_id < SPDAT_RECORDS) ? spells[spell_id].name : "Out-of-range"),
+				spell_id
+			);
+			if (t != c)
+				c->Message(
+					13,
+					"Error scribing spells: %s ran out of spell book slots on spell %s (%i)",
+					t->GetName(),
+					((spell_id >= 0 && spell_id < SPDAT_RECORDS) ? spells[spell_id].name : "Out-of-range"),
+					spell_id
+				);
+
+			break;
 		}
+		if (spell_id < 0 || spell_id >= SPDAT_RECORDS) {
+			c->Message(13, "FATAL ERROR: Spell id out-of-range (id: %i, min: 0, max: %i)", spell_id, SPDAT_RECORDS);
+			return;
+		}
+		if (book_slot < 0 || book_slot >= EQEmu::spells::SPELLBOOK_SIZE) {
+			c->Message(13, "FATAL ERROR: Book slot out-of-range (slot: %i, min: 0, max: %i)", book_slot, EQEmu::spells::SPELLBOOK_SIZE);
+			return;
+		}
+		
+		while (true) {
+			if (spells[spell_id].classes[WARRIOR] == 0) // check if spell exists
+				break;
+			if (spells[spell_id].classes[t->GetPP().class_ - 1] > max_level) // maximum level
+				break;
+			if (spells[spell_id].classes[t->GetPP().class_ - 1] < min_level) // minimum level
+				break;
+			if (spells[spell_id].skill == 52)
+				break;
+
+			uint16 spell_id_ = (uint16)spell_id;
+			if ((spell_id_ != spell_id) || (spell_id != spell_id_)) {
+				c->Message(13, "FATAL ERROR: Type conversion data loss with spell_id (%u != %i)", spell_id, spell_id_);
+				return;
+			}
+
+			if (!IsDiscipline(spell_id_) && !t->HasSpellScribed(spell_id)) { // isn't a discipline & we don't already have it scribed
+				t->ScribeSpell(spell_id_, book_slot);
+				++count;
+			}
+
+			break;
+		}
+
+		book_slot = t->GetNextAvailableSpellBookSlot(book_slot);
 	}
 
 	if (count > 0) {
-		t->Message(0, "Successfully scribed %u spells.",  count);
+		t->Message(0, "Successfully scribed %i spells.",  count);
 		if (t != c)
-			c->Message(0, "Successfully scribed %u spells for %s.",  count, t->GetName());
-	} else {
+			c->Message(0, "Successfully scribed %i spells for %s.",  count, t->GetName());
+	}
+	else {
 		t->Message(0, "No spells scribed.");
 		if (t != c)
 			c->Message(0, "No spells scribed for %s.",  t->GetName());

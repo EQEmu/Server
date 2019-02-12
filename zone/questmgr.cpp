@@ -974,38 +974,53 @@ void QuestManager::permagender(int gender_id) {
 }
 
 uint16 QuestManager::scribespells(uint8 max_level, uint8 min_level) {
+	// rewrote this handler to test for possible type conversion issues
+	// most of the redundant checks can be removed if proven successful
+
 	QuestManagerCurrentQuestVars();
-	uint16 book_slot, count;
-	uint16 spell_id;
+	int book_slot = initiator->GetNextAvailableSpellBookSlot();
+	int spell_id = 0;
+	int count = 0;
 
 	uint32 char_id = initiator->CharacterID();
 	bool SpellGlobalRule = RuleB(Spells, EnableSpellGlobals);
 	bool SpellBucketRule = RuleB(Spells, EnableSpellBuckets);
-	bool SpellGlobalCheckResult = 0;
-	bool SpellBucketCheckResult = 0;
+	bool SpellGlobalCheckResult = false;
+	bool SpellBucketCheckResult = false;
 
-	for (
-		spell_id = 0,
-		book_slot = initiator->GetNextAvailableSpellBookSlot(),
-		count = 0; // ;
-		spell_id < SPDAT_RECORDS &&
-		book_slot < EQEmu::spells::SPELLBOOK_SIZE; // ;
-		spell_id++,
-		book_slot = initiator->GetNextAvailableSpellBookSlot(book_slot)
-	)
-	{
-		if
-		(
-			spells[spell_id].classes[WARRIOR] != 0 &&       //check if spell exists
-			spells[spell_id].classes[initiator->GetPP().class_-1] <= max_level &&   //maximum level
-			spells[spell_id].classes[initiator->GetPP().class_-1] >= min_level &&   //minimum level
-			spells[spell_id].skill != 52 &&
-			spells[spell_id].effectid[EFFECT_COUNT - 1] != 10
-		)
-		{
-			if (book_slot == -1) //no more book slots
+	for ( ; spell_id < SPDAT_RECORDS && book_slot < EQEmu::spells::SPELLBOOK_SIZE; ++spell_id) {
+		if (book_slot == -1) {
+			initiator->Message(
+				13,
+				"Unable to scribe spell %s (%i) to spellbook: no more spell book slots available.",
+				((spell_id >= 0 && spell_id < SPDAT_RECORDS) ? spells[spell_id].name : "Out-of-range"),
+				spell_id
+			);
+			
+			break;
+		}
+		if (spell_id < 0 || spell_id >= SPDAT_RECORDS) {
+			initiator->Message(13, "FATAL ERROR: Spell id out-of-range (id: %i, min: 0, max: %i)", spell_id, SPDAT_RECORDS);
+			return count;
+		}
+		if (book_slot < 0 || book_slot >= EQEmu::spells::SPELLBOOK_SIZE) {
+			initiator->Message(13, "FATAL ERROR: Book slot out-of-range (slot: %i, min: 0, max: %i)", book_slot, EQEmu::spells::SPELLBOOK_SIZE);
+			return count;
+		}
+
+		while (true) {
+			if (spells[spell_id].classes[WARRIOR] == 0) // check if spell exists
 				break;
-			if(!IsDiscipline(spell_id) && !initiator->HasSpellScribed(spell_id)) { //isn't a discipline & we don't already have it scribed
+			if (spells[spell_id].classes[initiator->GetPP().class_ - 1] > max_level) // maximum level
+				break;
+			if (spells[spell_id].classes[initiator->GetPP().class_ - 1] < min_level) // minimum level
+				break;
+			if (spells[spell_id].skill == 52)
+				break;
+			if (spells[spell_id].effectid[EFFECT_COUNT - 1] == 10)
+				break;
+
+			if (!IsDiscipline(spell_id) && !initiator->HasSpellScribed(spell_id)) { //isn't a discipline & we don't already have it scribed
 				if (SpellGlobalRule) {
 					// Bool to see if the character has the required QGlobal to scribe it if one exists in the Spell_Globals table
 					SpellGlobalCheckResult = initiator->SpellGlobalCheck(spell_id, char_id);
@@ -1013,19 +1028,26 @@ uint16 QuestManager::scribespells(uint8 max_level, uint8 min_level) {
 						initiator->ScribeSpell(spell_id, book_slot);
 						count++;
 					}
-				} else if (SpellBucketRule) {
+				}
+				else if (SpellBucketRule) {
 					SpellBucketCheckResult = initiator->SpellBucketCheck(spell_id, char_id);
 					if (SpellBucketCheckResult) {
 						initiator->ScribeSpell(spell_id, book_slot);
 						count++;
 					}
-				} else {
+				}
+				else {
 					initiator->ScribeSpell(spell_id, book_slot);
 					count++;
 				}
 			}
+
+			break;
 		}
+
+		book_slot = initiator->GetNextAvailableSpellBookSlot(book_slot);
 	}
+
 	return count; //how many spells were scribed successfully
 }
 
