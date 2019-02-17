@@ -4249,7 +4249,7 @@ void bot_subcommand_bot_clone(Client *c, const Seperator *sep)
 		return;
 	}
 
-	int clone_stance = BotStancePassive;
+	int clone_stance = EQEmu::constants::stancePassive;
 	if (!botdb.LoadStance(my_bot->GetBotID(), clone_stance))
 		c->Message(m_fail, "%s for bot '%s'", BotDatabase::fail::LoadStance(), my_bot->GetCleanName());
 	if (!botdb.SaveStance(clone_id, clone_stance))
@@ -5160,29 +5160,34 @@ void bot_subcommand_bot_stance(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_stance", sep->arg[0], "botstance"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(m_usage, "usage: %s [current | value: 0-6] ([actionable: target | byname] ([actionable_name]))", sep->arg[0]);
+		c->Message(m_usage, "usage: %s [current | value: 1-9] ([actionable: target | byname] ([actionable_name]))", sep->arg[0]);
 		c->Message(m_note, "value: %u(%s), %u(%s), %u(%s), %u(%s), %u(%s), %u(%s), %u(%s)",
-			BotStancePassive, GetBotStanceName(BotStancePassive),
-			BotStanceBalanced, GetBotStanceName(BotStanceBalanced),
-			BotStanceEfficient, GetBotStanceName(BotStanceEfficient),
-			BotStanceReactive, GetBotStanceName(BotStanceReactive),
-			BotStanceAggressive, GetBotStanceName(BotStanceAggressive),
-			BotStanceBurn, GetBotStanceName(BotStanceBurn),
-			BotStanceBurnAE, GetBotStanceName(BotStanceBurnAE)
+			EQEmu::constants::stancePassive, EQEmu::constants::GetStanceName(EQEmu::constants::stancePassive),
+			EQEmu::constants::stanceBalanced, EQEmu::constants::GetStanceName(EQEmu::constants::stanceBalanced),
+			EQEmu::constants::stanceEfficient, EQEmu::constants::GetStanceName(EQEmu::constants::stanceEfficient),
+			EQEmu::constants::stanceReactive, EQEmu::constants::GetStanceName(EQEmu::constants::stanceReactive),
+			EQEmu::constants::stanceAggressive, EQEmu::constants::GetStanceName(EQEmu::constants::stanceAggressive),
+			EQEmu::constants::stanceAssist, EQEmu::constants::GetStanceName(EQEmu::constants::stanceAssist),
+			EQEmu::constants::stanceBurn, EQEmu::constants::GetStanceName(EQEmu::constants::stanceBurn),
+			EQEmu::constants::stanceEfficient2, EQEmu::constants::GetStanceName(EQEmu::constants::stanceEfficient2),
+			EQEmu::constants::stanceBurnAE, EQEmu::constants::GetStanceName(EQEmu::constants::stanceBurnAE)
 		);
 		return;
 	}
 	int ab_mask = (ActionableBots::ABM_Target | ActionableBots::ABM_ByName);
 
 	bool current_flag = false;
-	auto bst = BotStanceUnknown;
+	auto bst = EQEmu::constants::stanceUnknown;
 	
 	if (!strcasecmp(sep->arg[1], "current"))
 		current_flag = true;
-	else if (sep->IsNumber(1))
-		bst = VALIDBOTSTANCE(atoi(sep->arg[1]));
+	else if (sep->IsNumber(1)) {
+		bst = (EQEmu::constants::StanceType)atoi(sep->arg[1]);
+		if (bst < EQEmu::constants::stanceUnknown || bst > EQEmu::constants::stanceBurnAE)
+			bst = EQEmu::constants::stanceUnknown;
+	}
 
-	if (!current_flag && bst == BotStanceUnknown) {
+	if (!current_flag && bst == EQEmu::constants::stanceUnknown) {
 		c->Message(m_fail, "A [current] argument or valid numeric [value] is required to use this command");
 		return;
 	}
@@ -5200,7 +5205,12 @@ void bot_subcommand_bot_stance(Client *c, const Seperator *sep)
 			bot_iter->Save();
 		}
 
-		Bot::BotGroupSay(bot_iter, "My current stance is '%s' (%u)", GetBotStanceName(bot_iter->GetBotStance()), bot_iter->GetBotStance());
+		Bot::BotGroupSay(
+			bot_iter,
+			"My current stance is '%s' (%i)",
+			EQEmu::constants::GetStanceName(bot_iter->GetBotStance()),
+			bot_iter->GetBotStance()
+		);
 	}
 }
 
@@ -7220,7 +7230,7 @@ void bot_subcommand_inventory_list(Client *c, const Seperator *sep)
 
 		inst = my_bot->CastToBot()->GetBotItem(i);
 		if (!inst || !inst->GetItem()) {
-			c->Message(m_message, "I need something for my %s (slot %i)", GetBotEquipSlotName(i), i);
+			c->Message(m_message, "I need something for my %s (slot %i)", EQEmu::invslot::GetInvPossessionsSlotName(i), i);
 			continue;
 		}
 		
@@ -7230,7 +7240,7 @@ void bot_subcommand_inventory_list(Client *c, const Seperator *sep)
 		}
 
 		linker.SetItemInst(inst);
-		c->Message(m_message, "Using %s in my %s (slot %i)", linker.GenerateLink().c_str(), GetBotEquipSlotName(i), i);
+		c->Message(m_message, "Using %s in my %s (slot %i)", linker.GenerateLink().c_str(), EQEmu::invslot::GetInvPossessionsSlotName(i), i);
 
 		++inventory_count;
 	}
@@ -7333,14 +7343,14 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 	case EQEmu::invslot::slotWaist:
 	case EQEmu::invslot::slotPowerSource:
 	case EQEmu::invslot::slotAmmo:
-		c->Message(m_message, "My %s is %s unequipped", GetBotEquipSlotName(slotId), ((itm) ? ("now") : ("already")));
+		c->Message(m_message, "My %s is %s unequipped", EQEmu::invslot::GetInvPossessionsSlotName(slotId), ((itm) ? ("now") : ("already")));
 		break;
 	case EQEmu::invslot::slotShoulders:
 	case EQEmu::invslot::slotArms:
 	case EQEmu::invslot::slotHands:
 	case EQEmu::invslot::slotLegs:
 	case EQEmu::invslot::slotFeet:
-		c->Message(m_message, "My %s are %s unequipped", GetBotEquipSlotName(slotId), ((itm) ? ("now") : ("already")));
+		c->Message(m_message, "My %s are %s unequipped", EQEmu::invslot::GetInvPossessionsSlotName(slotId), ((itm) ? ("now") : ("already")));
 		break;
 	default:
 		c->Message(m_fail, "I'm soo confused...");
@@ -7383,7 +7393,7 @@ void bot_subcommand_inventory_window(Client *c, const Seperator *sep)
 			item = inst->GetItem();
 
 		window_text.append("<c \"#FFFFFF\">");
-		window_text.append(GetBotEquipSlotName(i));
+		window_text.append(EQEmu::invslot::GetInvPossessionsSlotName(i));
 		window_text.append(": ");
 		if (item) {
 			//window_text.append("</c>");
@@ -7707,16 +7717,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 		return bot_id;
 	}
 
-	auto DefaultNPCTypeStruct = Bot::CreateDefaultNPCTypeStructForBot(
-		bot_name.c_str(),
-		"",
-		bot_owner->GetLevel(),
-		bot_race,
-		bot_class,
-		bot_gender
-	);
-
-	auto my_bot = new Bot(DefaultNPCTypeStruct, bot_owner);
+	auto my_bot = new Bot(Bot::CreateDefaultNPCTypeStructForBot(bot_name.c_str(), "", bot_owner->GetLevel(), bot_race, bot_class, bot_gender), bot_owner);
 
 	if (!my_bot->Save()) {
 		bot_owner->Message(m_unknown, "Failed to create '%s' due to unknown cause", my_bot->GetCleanName());

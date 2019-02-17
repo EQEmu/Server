@@ -379,7 +379,7 @@ bool NPC::AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgain
 }
 
 bool EntityList::AICheckCloseBeneficialSpells(NPC* caster, uint8 iChance, float iRange, uint32 iSpellTypes) {
-	if((iSpellTypes & SpellTypes_Detrimental) != 0) {
+	if((iSpellTypes & SPELL_TYPES_DETRIMENTAL) != 0) {
 		//according to live, you can buff and heal through walls...
 		//now with PCs, this only applies if you can TARGET the target, but
 		// according to Rogean, Live NPCs will just cast through walls/floors, no problem..
@@ -2813,7 +2813,7 @@ DBnpcspells_Struct *ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID)
 			entry.max_hp = atoi(row[8]);
 
 			// some spell types don't make much since to be priority 0, so fix that
-			if (!(entry.type & SpellTypes_Innate) && entry.priority == 0)
+			if (!(entry.type & SPELL_TYPES_INNATE) && entry.priority == 0)
 				entry.priority = 1;
 
 			if (row[9])

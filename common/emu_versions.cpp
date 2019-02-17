@@ -18,6 +18,7 @@
 */
 
 #include "emu_versions.h"
+#include "emu_constants.h"
 
 
 bool EQEmu::versions::IsValidClientVersion(ClientVersion client_version)
@@ -493,7 +494,7 @@ EQEmu::expansions::Expansion EQEmu::expansions::ConvertExpansionBitToExpansion(u
 	}
 }
 
-uint32 EQEmu::expansions::ConvertExpansionToExpansionMask(Expansion expansion)
+uint32 EQEmu::expansions::ConvertExpansionToExpansionsMask(Expansion expansion)
 {
 	switch (expansion) {
 	case Expansion::RoK:
@@ -543,57 +544,15 @@ uint32 EQEmu::expansions::ConvertExpansionToExpansionMask(Expansion expansion)
 
 EQEmu::expansions::Expansion EQEmu::expansions::ConvertClientVersionToExpansion(versions::ClientVersion client_version)
 {
-	switch (client_version) {
-	case versions::ClientVersion::Titanium:
-		return expansions::Expansion::PoR;
-	case versions::ClientVersion::SoF:
-		return expansions::Expansion::SoF;
-	case versions::ClientVersion::SoD:
-		return expansions::Expansion::SoD;
-	case versions::ClientVersion::UF:
-		return expansions::Expansion::UF;
-	case versions::ClientVersion::RoF:
-	case versions::ClientVersion::RoF2:
-		return expansions::Expansion::RoF;
-	default:
-		return expansions::Expansion::EverQuest;
-	}
+	return EQEmu::constants::StaticLookup(client_version)->Expansion;
 }
 
 uint32 EQEmu::expansions::ConvertClientVersionToExpansionBit(versions::ClientVersion client_version)
 {
-	switch (client_version) {
-	case versions::ClientVersion::Titanium:
-		return expansions::bitPoR;
-	case versions::ClientVersion::SoF:
-		return expansions::bitSoF;
-	case versions::ClientVersion::SoD:
-		return expansions::bitSoD;
-	case versions::ClientVersion::UF:
-		return expansions::bitUF;
-	case versions::ClientVersion::RoF:
-	case versions::ClientVersion::RoF2:
-		return expansions::bitRoF;
-	default:
-		return expansions::bitEverQuest;
-	}
+	return EQEmu::constants::StaticLookup(client_version)->ExpansionBit;
 }
 
-uint32 EQEmu::expansions::ConvertClientVersionToExpansionMask(versions::ClientVersion client_version)
+uint32 EQEmu::expansions::ConvertClientVersionToExpansionsMask(versions::ClientVersion client_version)
 {
-	switch (client_version) {
-	case versions::ClientVersion::Titanium:
-		return expansions::maskPoR;
-	case versions::ClientVersion::SoF:
-		return expansions::maskSoF;
-	case versions::ClientVersion::SoD:
-		return expansions::maskSoD;
-	case versions::ClientVersion::UF:
-		return expansions::maskUF;
-	case versions::ClientVersion::RoF:
-	case versions::ClientVersion::RoF2:
-		return expansions::maskRoF;
-	default:
-		return expansions::maskEverQuest;
-	}
+	return EQEmu::constants::StaticLookup(client_version)->ExpansionsMask;
 }

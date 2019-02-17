@@ -1225,17 +1225,28 @@ bool ZoneDatabase::LoadCharacterSpellBook(uint32 character_id, PlayerProfile_Str
 		"`character_spells`		"
 		"WHERE `id` = %u ORDER BY `slot_id`", character_id);
 	auto results = database.QueryDatabase(query);
-	int i = 0;
+	
 	/* Initialize Spells */
-	for (i = 0; i < EQEmu::spells::SPELLBOOK_SIZE; i++){
-		pp->spell_book[i] = 0xFFFFFFFF;
-	}
+	
+	memset(pp->spell_book, 0xFF, (sizeof(uint32) * EQEmu::spells::SPELLBOOK_SIZE));
+
+	// We have the ability to block loaded spells by max id on a per-client basis..
+	// but, we do not have to ability to keep players from using older clients after
+	// they have scribed spells on a newer one that exceeds the older one's limit.
+	// Load them all so that server actions are valid..but, nix them in translators.
+
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		i = atoi(row[0]);
-		if (i < EQEmu::spells::SPELLBOOK_SIZE && atoi(row[1]) <= SPDAT_RECORDS){
-			pp->spell_book[i] = atoi(row[1]);
-		}
+		int idx = atoi(row[0]);
+		int id = atoi(row[1]);
+
+		if (idx < 0 || idx >= EQEmu::spells::SPELLBOOK_SIZE)
+			continue;
+		if (id < 3 || id > SPDAT_RECORDS) // 3 ("Summon Corpse") is the first scribable spell in spells_us.txt
+			continue;
+		
+		pp->spell_book[idx] = id;
 	}
+
 	return true;
 }
 

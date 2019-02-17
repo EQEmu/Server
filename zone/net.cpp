@@ -32,6 +32,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/eq_stream_ident.h"
 #include "../common/patches/patches.h"
 #include "../common/rulesys.h"
+#include "../common/profanity_manager.h"
 #include "../common/misc_functions.h"
 #include "../common/string_util.h"
 #include "../common/platform.h"
@@ -349,6 +350,10 @@ int main(int argc, char** argv) {
 
 	Log(Logs::General, Logs::Zone_Server, "Loading corpse timers");
 	database.GetDecayTimes(npcCorpseDecayTimes);
+
+	Log(Logs::General, Logs::Zone_Server, "Loading profanity list");
+	if (!EQEmu::ProfanityManager::LoadProfanityList(&database))
+		Log(Logs::General, Logs::Error, "Loading profanity list FAILED!");
 
 	Log(Logs::General, Logs::Zone_Server, "Loading commands");
 	int retval = command_init();

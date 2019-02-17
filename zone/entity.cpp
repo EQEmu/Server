@@ -4178,7 +4178,7 @@ void EntityList::ZoneWho(Client *c, Who_All_Struct *Who)
 				WAPP2->RankMSGID = 12315;
 			else if (ClientEntry->IsBuyer())
 				WAPP2->RankMSGID = 6056;
-			else if (ClientEntry->Admin() >= 10)
+			else if (ClientEntry->Admin() >= 10 && ClientEntry->GetGM())
 				WAPP2->RankMSGID = 12312;
 			else
 				WAPP2->RankMSGID = 0xFFFFFFFF;

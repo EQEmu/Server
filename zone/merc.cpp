@@ -66,7 +66,7 @@ Merc::Merc(const NPCType* d, float x, float y, float z, float heading)
 	memset(equipment, 0, sizeof(equipment));
 
 	SetMercID(0);
-	SetStance(MercStanceBalanced);
+	SetStance(EQEmu::constants::stanceBalanced);
 	rest_timer.Disable();
 
 	if (GetClass() == ROGUE)
@@ -1908,7 +1908,7 @@ bool Merc::AI_IdleCastCheck() {
 
 bool EntityList::Merc_AICheckCloseBeneficialSpells(Merc* caster, uint8 iChance, float iRange, uint32 iSpellTypes) {
 
-	if((iSpellTypes&SpellTypes_Detrimental) != 0) {
+	if((iSpellTypes & SPELL_TYPES_DETRIMENTAL) != 0) {
 		//according to live, you can buff and heal through walls...
 		//now with PCs, this only applies if you can TARGET the target, but
 		// according to Rogean, Live NPCs will just cast through walls/floors, no problem..
@@ -3669,13 +3669,13 @@ MercSpell Merc::GetBestMercSpellForAENuke(Merc* caster, Mob* tar) {
 
 		switch(caster->GetStance())
 		{
-		case MercStanceBurnAE:
+		case EQEmu::constants::stanceBurnAE:
 			initialCastChance = 50;
 			break;
-		case MercStanceBalanced:
+		case EQEmu::constants::stanceBalanced:
 			initialCastChance = 25;
 			break;
-		case MercStanceBurn:
+		case EQEmu::constants::stanceBurn:
 			initialCastChance = 0;
 			break;
 		}
@@ -3717,11 +3717,11 @@ MercSpell Merc::GetBestMercSpellForTargetedAENuke(Merc* caster, Mob* tar) {
 
 	switch(caster->GetStance())
 	{
-	case MercStanceBurnAE:
+	case EQEmu::constants::stanceBurnAE:
 		numTargetsCheck = 1;
 		break;
-	case MercStanceBalanced:
-	case MercStanceBurn:
+	case EQEmu::constants::stanceBalanced:
+	case EQEmu::constants::stanceBurn:
 		numTargetsCheck = 2;
 		break;
 	}
@@ -3769,11 +3769,11 @@ MercSpell Merc::GetBestMercSpellForPBAENuke(Merc* caster, Mob* tar) {
 
 	switch(caster->GetStance())
 	{
-	case MercStanceBurnAE:
+	case EQEmu::constants::stanceBurnAE:
 		numTargetsCheck = 2;
 		break;
-	case MercStanceBalanced:
-	case MercStanceBurn:
+	case EQEmu::constants::stanceBalanced:
+	case EQEmu::constants::stanceBurn:
 		numTargetsCheck = 3;
 		break;
 	}
@@ -3820,11 +3820,11 @@ MercSpell Merc::GetBestMercSpellForAERainNuke(Merc* caster, Mob* tar) {
 
 	switch(caster->GetStance())
 	{
-	case MercStanceBurnAE:
+	case EQEmu::constants::stanceBurnAE:
 		numTargetsCheck = 1;
 		break;
-	case MercStanceBalanced:
-	case MercStanceBurn:
+	case EQEmu::constants::stanceBalanced:
+	case EQEmu::constants::stanceBurn:
 		numTargetsCheck = 2;
 		break;
 	}
@@ -5649,7 +5649,7 @@ void Client::SpawnMerc(Merc* merc, bool setMaxStats) {
 	merc->SetSuspended(false);
 	SetMerc(merc);
 	merc->Unsuspend(setMaxStats);
-	merc->SetStance(GetMercInfo().Stance);
+	merc->SetStance((EQEmu::constants::StanceType)GetMercInfo().Stance);
 
 	Log(Logs::General, Logs::Mercenaries, "SpawnMerc Success for %s.", GetName());
 
