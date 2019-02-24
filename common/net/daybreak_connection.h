@@ -95,7 +95,7 @@ namespace EQ
 
 		class DaybreakConnectionManager;
 		class DaybreakConnection;
-		class DaybreakConnection : public std::enable_shared_from_this<DaybreakConnection>
+		class DaybreakConnection
 		{
 		public:
 			DaybreakConnection(DaybreakConnectionManager *owner, const DaybreakConnect &connect, const std::string &endpoint, int port);
@@ -267,6 +267,8 @@ namespace EQ
 			void OnNewConnection(std::function<void(std::shared_ptr<DaybreakConnection>)> func) { m_on_new_connection = func; }
 			void OnConnectionStateChange(std::function<void(std::shared_ptr<DaybreakConnection>, DbProtocolStatus, DbProtocolStatus)> func) { m_on_connection_state_change = func; }
 			void OnPacketRecv(std::function<void(std::shared_ptr<DaybreakConnection>, const Packet &)> func) { m_on_packet_recv = func; }
+
+			DaybreakConnectionManagerOptions& GetOptions() { return m_options; }
 		private:
 			void Attach(uv_loop_t *loop);
 			void Detach();

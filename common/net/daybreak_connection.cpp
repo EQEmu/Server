@@ -1182,95 +1182,80 @@ void EQ::Net::DaybreakConnection::SendKeepAlive()
 void EQ::Net::DaybreakConnection::InternalSend(Packet &p)
 {
 	m_last_send = Clock::now();
+
 	auto send_func = [](uv_udp_send_t* req, int status) {
 		delete[](char*)req->data;
 		delete req;
 	};
 
 	if (PacketCanBeEncoded(p)) {
-		DynamicPacket *out = new DynamicPacket();
-		out->PutPacket(0, p);
+		DynamicPacket out;
+		out.PutPacket(0, p);
 
-		auto sp = shared_from_this();
-		EQ::Task([sp, out](EQ::Task::ResolveFn resolve, EQ::Task::RejectFn reject) {
-			
-			auto encode_passes = sp->GetEncodePasses();
-			for (int i = 0; i < 2; ++i) {
-				switch (encode_passes[i]) {
-					case EncodeCompression:
-						if(out->GetInt8(0) == 0) 
-							sp->Compress(*out, DaybreakHeader::size(), out->Length() - DaybreakHeader::size());
-						else
-							sp->Compress(*out, 1, out->Length() - 1);
-						break;
-					case EncodeXOR:
-						if (out->GetInt8(0) == 0)
-							sp->Encode(*out, DaybreakHeader::size(), out->Length() - DaybreakHeader::size());
-						else
-							sp->Encode(*out, 1, out->Length() - 1);
-						break;
-					default:
-						break;
-				}
+		for (int i = 0; i < 2; ++i) {
+			switch (m_encode_passes[i]) {
+			case EncodeCompression:
+				if (out.GetInt8(0) == 0)
+					Compress(out, DaybreakHeader::size(), out.Length() - DaybreakHeader::size());
+				else
+					Compress(out, 1, out.Length() - 1);
+				break;
+			case EncodeXOR:
+				if (out.GetInt8(0) == 0)
+					Encode(out, DaybreakHeader::size(), out.Length() - DaybreakHeader::size());
+				else
+					Encode(out, 1, out.Length() - 1);
+				break;
+			default:
+				break;
 			}
-			
-			sp->AppendCRC(*out);
-			resolve(out);
-		})
-		.Then([sp, out, send_func](const EQEmu::Any &result) {
-			uv_udp_send_t *send_req = new uv_udp_send_t;
-			memset(send_req, 0, sizeof(*send_req));
-			sockaddr_in send_addr;
-			uv_ip4_addr(sp->RemoteEndpoint().c_str(), sp->RemotePort(), &send_addr);
-			uv_buf_t send_buffers[1];
-			
-			char *data = new char[out->Length()];
-			memcpy(data, out->Data(), out->Length());
-			send_buffers[0] = uv_buf_init(data, out->Length());
-			send_req->data = send_buffers[0].base;
-			
-			auto &stats = sp->GetStats();
+		}
 
-			stats.sent_bytes += out->Length();
-			stats.sent_packets++;
+		AppendCRC(out);
 
-			auto owner = sp->GetManager();
-
-			if (owner->m_options.simulated_out_packet_loss && owner->m_options.simulated_out_packet_loss >= owner->m_rand.Int(0, 100)) {
-				delete[](char*)send_req->data;
-				delete send_req;
-				return;
-			}
-			
-			uv_udp_send(send_req, &owner->m_socket, send_buffers, 1, (sockaddr*)&send_addr, send_func);
-		})
-		.Finally([out]() {
-			delete out;
-		})
-		.Run();
-	}
-	else {
 		uv_udp_send_t *send_req = new uv_udp_send_t;
+		memset(send_req, 0, sizeof(*send_req));
 		sockaddr_in send_addr;
 		uv_ip4_addr(m_endpoint.c_str(), m_port, &send_addr);
 		uv_buf_t send_buffers[1];
-		
-		char *data = new char[p.Length()];
-		memcpy(data, p.Data(), p.Length());
-		send_buffers[0] = uv_buf_init(data, p.Length());
+
+		char *data = new char[out.Length()];
+		memcpy(data, out.Data(), out.Length());
+		send_buffers[0] = uv_buf_init(data, out.Length());
 		send_req->data = send_buffers[0].base;
-		
-		m_stats.sent_bytes += p.Length();
+
+		m_stats.sent_bytes += out.Length();
 		m_stats.sent_packets++;
-		
 		if (m_owner->m_options.simulated_out_packet_loss && m_owner->m_options.simulated_out_packet_loss >= m_owner->m_rand.Int(0, 100)) {
 			delete[](char*)send_req->data;
 			delete send_req;
 			return;
 		}
-		
+
 		uv_udp_send(send_req, &m_owner->m_socket, send_buffers, 1, (sockaddr*)&send_addr, send_func);
+		return;
 	}
+
+	uv_udp_send_t *send_req = new uv_udp_send_t;
+	sockaddr_in send_addr;
+	uv_ip4_addr(m_endpoint.c_str(), m_port, &send_addr);
+	uv_buf_t send_buffers[1];
+
+	char *data = new char[p.Length()];
+	memcpy(data, p.Data(), p.Length());
+	send_buffers[0] = uv_buf_init(data, p.Length());
+	send_req->data = send_buffers[0].base;
+
+	m_stats.sent_bytes += p.Length();
+	m_stats.sent_packets++;
+
+	if (m_owner->m_options.simulated_out_packet_loss && m_owner->m_options.simulated_out_packet_loss >= m_owner->m_rand.Int(0, 100)) {
+		delete[](char*)send_req->data;
+		delete send_req;
+		return;
+	}
+
+	uv_udp_send(send_req, &m_owner->m_socket, send_buffers, 1, (sockaddr*)&send_addr, send_func);
 }
 
 void EQ::Net::DaybreakConnection::InternalQueuePacket(Packet &p, int stream_id, bool reliable)
