@@ -37,6 +37,8 @@ public:
 	virtual const uint32 GetBytesSentPerSecond() const;
 	virtual const uint32 GetBytesRecvPerSecond() const;
 
+	virtual std::shared_ptr<EQ::Net::DaybreakConnection> GetRawConnection();
+
 protected:
 	std::shared_ptr<EQStreamInterface> const m_stream;	//we own this stream object.
 	const StructStrategy *const	m_structs;	//we do not own this object.

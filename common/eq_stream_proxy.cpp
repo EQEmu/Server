@@ -110,6 +110,10 @@ void EQStreamProxy::RemoveData() {
 	m_stream->RemoveData();
 }
 
+std::shared_ptr<EQ::Net::DaybreakConnection> EQStreamProxy::GetRawConnection() {
+	return m_stream->GetRawConnection();
+}
+
 bool EQStreamProxy::CheckState(EQStreamState state) {
 	if(m_stream)
 		return(m_stream->CheckState(state));
