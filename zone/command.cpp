@@ -54,6 +54,7 @@
 #include "../common/string_util.h"
 #include "../say_link.h"
 #include "../common/eqemu_logsys.h"
+#include "../common/profanity_manager.h"
 
 #include "data_bucket.h"
 #include "command.h"
@@ -307,6 +308,7 @@ int command_init(void)
 		command_add("petitioninfo", "[petition number] - Get info about a petition", 20, command_petitioninfo) ||
 		command_add("pf", "- Display additional mob coordinate and wandering data", 0, command_pf) ||
 		command_add("picklock",  "Analog for ldon pick lock for the newer clients since we still don't have it working.",  0, command_picklock) ||
+		command_add("profanity", "Manage censored language.", 150, command_profanity) ||
 
 #ifdef EQPROFILE
 		command_add("profiledump", "- Dump profiling info to logs", 250, command_profiledump) ||
@@ -6405,34 +6407,29 @@ void command_beardcolor(Client *c, const Seperator *sep)
 
 void command_scribespells(Client *c, const Seperator *sep)
 {
-	uint8 max_level, min_level;
-	uint16 book_slot, curspell, count;
-	Client *t=c;
+	Client *t = c;
+	if (c->GetTarget() && c->GetTarget()->IsClient() && c->GetGM())
+		t = c->GetTarget()->CastToClient();
 
-	if(c->GetTarget() && c->GetTarget()->IsClient() && c->GetGM())
-		t=c->GetTarget()->CastToClient();
-
-	if(!sep->arg[1][0])
-	{
+	if(sep->argnum < 1 || !sep->IsNumber(1)) {
 		c->Message(0, "FORMAT: #scribespells <max level> <min level>");
 		return;
 	}
 
-	max_level = (uint8)atoi(sep->arg[1]);
-	if (!c->GetGM() && max_level > RuleI(Character, MaxLevel))
-		max_level = RuleI(Character, MaxLevel);	//default to Character:MaxLevel if we're not a GM & it's higher than the max level
-	min_level = sep->arg[2][0] ? (uint8)atoi(sep->arg[2]) : 1;	//default to 1 if there isn't a 2nd argument
-	if (!c->GetGM() && min_level > RuleI(Character, MaxLevel))
-		min_level = RuleI(Character, MaxLevel);	//default to Character:MaxLevel if we're not a GM & it's higher than the max level
+	uint8 max_level = (uint8)atol(sep->arg[1]);
+	if (!c->GetGM() && max_level > (uint8)RuleI(Character, MaxLevel))
+		max_level = (uint8)RuleI(Character, MaxLevel); // default to Character:MaxLevel if we're not a GM & it's higher than the max level
 
+	uint8 min_level = (sep->IsNumber(2) ? (uint8)atol(sep->arg[2]) : 1); // default to 1 if there isn't a 2nd argument
+	if (!c->GetGM() && min_level > (uint8)RuleI(Character, MaxLevel))
+		min_level = (uint8)RuleI(Character, MaxLevel); // default to Character:MaxLevel if we're not a GM & it's higher than the max level
 
-	if(max_level < 1 || min_level < 1)
-	{
+	if(max_level < 1 || min_level < 1) {
 		c->Message(0, "ERROR: Level must be greater than 1.");
 		return;
 	}
 	if (min_level > max_level) {
-		c->Message(0, "Error: Min Level must be less than or equal to Max Level.");
+		c->Message(0, "ERROR: Min Level must be less than or equal to Max Level.");
 		return;
 	}
 
@@ -6441,42 +6438,71 @@ void command_scribespells(Client *c, const Seperator *sep)
 		c->Message(0, "Scribing spells for %s.",  t->GetName());
 	Log(Logs::General, Logs::Normal, "Scribe spells request for %s from %s, levels: %u -> %u",  t->GetName(), c->GetName(), min_level, max_level);
 
-	for (
-		curspell = 0,
-		book_slot = t->GetNextAvailableSpellBookSlot(),
-		count = 0; // ;
-		curspell < SPDAT_RECORDS &&
-		book_slot < EQEmu::spells::SPELLBOOK_SIZE; // ;
-		curspell++,
-		book_slot = t->GetNextAvailableSpellBookSlot(book_slot)
-	)
-	{
-		if
-		(
-			spells[curspell].classes[WARRIOR] != 0 && // check if spell exists
-			spells[curspell].classes[t->GetPP().class_-1] <= max_level &&	//maximum level
-			spells[curspell].classes[t->GetPP().class_-1] >= min_level &&	//minimum level
-			spells[curspell].skill != 52
-		)
-		{
-			if (book_slot == -1) {	//no more book slots
-				t->Message(13, "Unable to scribe spell %s (%u) to spellbook: no more spell book slots available.",  spells[curspell].name, curspell);
-				if (t != c)
-					c->Message(13, "Error scribing spells: %s ran out of spell book slots on spell %s (%u)",  t->GetName(), spells[curspell].name, curspell);
-				break;
-			}
-			if(!IsDiscipline(curspell) && !t->HasSpellScribed(curspell)) {	//isn't a discipline & we don't already have it scribed
-				t->ScribeSpell(curspell, book_slot);
-				count++;
-			}
+	int book_slot = t->GetNextAvailableSpellBookSlot();
+	int spell_id = 0;
+	int count = 0;
+
+	for ( ; spell_id < SPDAT_RECORDS && book_slot < EQEmu::spells::SPELLBOOK_SIZE; ++spell_id) {
+		if (book_slot == -1) {
+			t->Message(
+				13,
+				"Unable to scribe spell %s (%i) to spellbook: no more spell book slots available.",
+				((spell_id >= 0 && spell_id < SPDAT_RECORDS) ? spells[spell_id].name : "Out-of-range"),
+				spell_id
+			);
+			if (t != c)
+				c->Message(
+					13,
+					"Error scribing spells: %s ran out of spell book slots on spell %s (%i)",
+					t->GetName(),
+					((spell_id >= 0 && spell_id < SPDAT_RECORDS) ? spells[spell_id].name : "Out-of-range"),
+					spell_id
+				);
+
+			break;
 		}
+		if (spell_id < 0 || spell_id >= SPDAT_RECORDS) {
+			c->Message(13, "FATAL ERROR: Spell id out-of-range (id: %i, min: 0, max: %i)", spell_id, SPDAT_RECORDS);
+			return;
+		}
+		if (book_slot < 0 || book_slot >= EQEmu::spells::SPELLBOOK_SIZE) {
+			c->Message(13, "FATAL ERROR: Book slot out-of-range (slot: %i, min: 0, max: %i)", book_slot, EQEmu::spells::SPELLBOOK_SIZE);
+			return;
+		}
+		
+		while (true) {
+			if (spells[spell_id].classes[WARRIOR] == 0) // check if spell exists
+				break;
+			if (spells[spell_id].classes[t->GetPP().class_ - 1] > max_level) // maximum level
+				break;
+			if (spells[spell_id].classes[t->GetPP().class_ - 1] < min_level) // minimum level
+				break;
+			if (spells[spell_id].skill == 52)
+				break;
+
+			uint16 spell_id_ = (uint16)spell_id;
+			if ((spell_id_ != spell_id) || (spell_id != spell_id_)) {
+				c->Message(13, "FATAL ERROR: Type conversion data loss with spell_id (%i != %u)", spell_id, spell_id_);
+				return;
+			}
+
+			if (!IsDiscipline(spell_id_) && !t->HasSpellScribed(spell_id)) { // isn't a discipline & we don't already have it scribed
+				t->ScribeSpell(spell_id_, book_slot);
+				++count;
+			}
+
+			break;
+		}
+
+		book_slot = t->GetNextAvailableSpellBookSlot(book_slot);
 	}
 
 	if (count > 0) {
-		t->Message(0, "Successfully scribed %u spells.",  count);
+		t->Message(0, "Successfully scribed %i spells.",  count);
 		if (t != c)
-			c->Message(0, "Successfully scribed %u spells for %s.",  count, t->GetName());
-	} else {
+			c->Message(0, "Successfully scribed %i spells for %s.",  count, t->GetName());
+	}
+	else {
 		t->Message(0, "No spells scribed.");
 		if (t != c)
 			c->Message(0, "No spells scribed for %s.",  t->GetName());
@@ -8732,28 +8758,24 @@ void command_reloadtitles(Client *c, const Seperator *sep)
 
 void command_traindisc(Client *c, const Seperator *sep)
 {
-	uint8 max_level, min_level;
-	uint16 curspell, count;
-	Client *t=c;
+	Client *t = c;
+	if (c->GetTarget() && c->GetTarget()->IsClient() && c->GetGM())
+		t = c->GetTarget()->CastToClient();
 
-	if(c->GetTarget() && c->GetTarget()->IsClient() && c->GetGM())
-		t=c->GetTarget()->CastToClient();
-
-	if(!sep->arg[1][0])
-	{
+	if (sep->argnum < 1 || !sep->IsNumber(1)) {
 		c->Message(0, "FORMAT: #traindisc <max level> <min level>");
 		return;
 	}
 
-	max_level = (uint8)atoi(sep->arg[1]);
-	if (!c->GetGM() && max_level > RuleI(Character, MaxLevel))
-		max_level = RuleI(Character, MaxLevel);	//default to Character:MaxLevel if we're not a GM & it's higher than the max level
-	min_level = sep->arg[2][0] ? (uint8)atoi(sep->arg[2]) : 1;	//default to 1 if there isn't a 2nd argument
-	if (!c->GetGM() && min_level > RuleI(Character, MaxLevel))
-		min_level = RuleI(Character, MaxLevel);	//default to Character:MaxLevel if we're not a GM & it's higher than the max level
+	uint8 max_level = (uint8)atol(sep->arg[1]);
+	if (!c->GetGM() && max_level >(uint8)RuleI(Character, MaxLevel))
+		max_level = (uint8)RuleI(Character, MaxLevel); // default to Character:MaxLevel if we're not a GM & it's higher than the max level
 
-	if(max_level < 1 || min_level < 1)
-	{
+	uint8 min_level = (sep->IsNumber(2) ? (uint8)atol(sep->arg[2]) : 1); // default to 1 if there isn't a 2nd argument
+	if (!c->GetGM() && min_level > (uint8)RuleI(Character, MaxLevel))
+		min_level = (uint8)RuleI(Character, MaxLevel); // default to Character:MaxLevel if we're not a GM & it's higher than the max level
+
+	if(max_level < 1 || min_level < 1) {
 		c->Message(0, "ERROR: Level must be greater than 1.");
 		return;
 	}
@@ -8767,34 +8789,57 @@ void command_traindisc(Client *c, const Seperator *sep)
 		c->Message(0, "Training disciplines for %s.",  t->GetName());
 	Log(Logs::General, Logs::Normal, "Train disciplines request for %s from %s, levels: %u -> %u",  t->GetName(), c->GetName(), min_level, max_level);
 
-	for(curspell = 0, count = 0; curspell < SPDAT_RECORDS; curspell++)
-	{
-		if
-		(
-			spells[curspell].classes[WARRIOR] != 0 && // check if spell exists
-			spells[curspell].classes[t->GetPP().class_-1] <= max_level &&	//maximum level
-			spells[curspell].classes[t->GetPP().class_-1] >= min_level &&	//minimum level
-			spells[curspell].skill != 52
-		)
-		{
-			if(IsDiscipline(curspell)){
-				//we may want to come up with a function like Client::GetNextAvailableSpellBookSlot() to help speed this up a little
-				for(int r = 0; r < MAX_PP_DISCIPLINES; r++) {
-					if(t->GetPP().disciplines.values[r] == curspell) {
-						t->Message(13, "You already know this discipline.");
-						break;	//continue the 1st loop
-					} else if(t->GetPP().disciplines.values[r] == 0) {
-						t->GetPP().disciplines.values[r] = curspell;
-						database.SaveCharacterDisc(t->CharacterID(), r, curspell);
-						t->SendDisciplineUpdate();
-						t->Message(0, "You have learned a new discipline!");
-						count++;	//success counter
-						break;	//continue the 1st loop
-					}	//if we get to this point, there's already a discipline in this slot, so we continue onto the next slot
-				}
+	int spell_id = 0;
+	int count = 0;
+
+	bool change = false;
+
+	for( ; spell_id < SPDAT_RECORDS; ++spell_id) {
+		if (spell_id < 0 || spell_id >= SPDAT_RECORDS) {
+			c->Message(13, "FATAL ERROR: Spell id out-of-range (id: %i, min: 0, max: %i)", spell_id, SPDAT_RECORDS);
+			return;
+		}
+
+		while (true) {
+			if (spells[spell_id].classes[WARRIOR] == 0) // check if spell exists
+				break;
+			if (spells[spell_id].classes[t->GetPP().class_ - 1] > max_level) // maximum level
+				break;
+			if (spells[spell_id].classes[t->GetPP().class_ - 1] < min_level) // minimum level
+				break;
+			if (spells[spell_id].skill == 52)
+				break;
+			
+			uint16 spell_id_ = (uint16)spell_id;
+			if ((spell_id_ != spell_id) || (spell_id != spell_id_)) {
+				c->Message(13, "FATAL ERROR: Type conversion data loss with spell_id (%i != %u)", spell_id, spell_id_);
+				return;
 			}
+
+			if (!IsDiscipline(spell_id_))
+				break;
+
+			for (uint32 r = 0; r < MAX_PP_DISCIPLINES; ++r) {
+				if (t->GetPP().disciplines.values[r] == spell_id_) {
+					t->Message(13, "You already know this discipline.");
+					break; // continue the 1st loop
+				}
+				else if (t->GetPP().disciplines.values[r] == 0) {
+					t->GetPP().disciplines.values[r] = spell_id_;
+					database.SaveCharacterDisc(t->CharacterID(), r, spell_id_);
+					change = true;
+					t->Message(0, "You have learned a new discipline!");
+					++count; // success counter
+					break; // continue the 1st loop
+				} // if we get to this point, there's already a discipline in this slot, so we continue onto the next slot
+			}
+
+			break;
 		}
 	}
+
+	if (change)
+		t->SendDisciplineUpdate();
 
 	if (count > 0) {
 		t->Message(0, "Successfully trained %u disciplines.",  count);
@@ -11041,6 +11086,68 @@ void command_picklock(Client *c, const Seperator *sep)
 		else
 			c->Message(13, "You do not have the pick locks skill.");
 	}
+}
+
+void command_profanity(Client *c, const Seperator *sep)
+{
+	std::string arg1(sep->arg[1]);
+	
+	while (true) {
+		if (arg1.compare("list") == 0) {
+			// do nothing
+		}
+		else if (arg1.compare("clear") == 0) {
+			EQEmu::ProfanityManager::DeleteProfanityList(&database);
+			auto pack = new ServerPacket(ServerOP_RefreshCensorship);
+			worldserver.SendPacket(pack);
+			safe_delete(pack);
+		}
+		else if (arg1.compare("add") == 0) {
+			if (!EQEmu::ProfanityManager::AddProfanity(&database, sep->arg[2]))
+				c->Message(CC_Red, "Could not add '%s' to the profanity list.", sep->arg[2]);
+			auto pack = new ServerPacket(ServerOP_RefreshCensorship);
+			worldserver.SendPacket(pack);
+			safe_delete(pack);
+		}
+		else if (arg1.compare("del") == 0) {
+			if (!EQEmu::ProfanityManager::RemoveProfanity(&database, sep->arg[2]))
+				c->Message(CC_Red, "Could not delete '%s' from the profanity list.", sep->arg[2]);
+			auto pack = new ServerPacket(ServerOP_RefreshCensorship);
+			worldserver.SendPacket(pack);
+			safe_delete(pack);
+		}
+		else if (arg1.compare("reload") == 0) {
+			if (!EQEmu::ProfanityManager::UpdateProfanityList(&database))
+				c->Message(CC_Red, "Could not reload the profanity list.");
+			auto pack = new ServerPacket(ServerOP_RefreshCensorship);
+			worldserver.SendPacket(pack);
+			safe_delete(pack);
+		}
+		else {
+			break;
+		}
+
+		std::string popup;
+		const auto &list = EQEmu::ProfanityManager::GetProfanityList();
+		for (const auto &iter : list) {
+			popup.append(iter);
+			popup.append("<br>");
+		}
+		if (list.empty())
+			popup.append("** Censorship Inactive **<br>");
+		else
+			popup.append("** End of List **<br>");
+
+		c->SendPopupToClient("Profanity List", popup.c_str());
+		
+		return;
+	}
+	
+	c->Message(0, "Usage: #profanity [list] - shows profanity list");
+	c->Message(0, "Usage: #profanity [clear] - deletes all entries");
+	c->Message(0, "Usage: #profanity [add] [<word>] - adds entry");
+	c->Message(0, "Usage: #profanity [del] [<word>] - deletes entry");
+	c->Message(0, "Usage: #profanity [reload] - reloads profanity list");
 }
 
 void command_mysql(Client *c, const Seperator *sep)

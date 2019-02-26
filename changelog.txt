@@ -1,6 +1,35 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 
+== 2/7/2019 ==
+Uleat: Put merc and bot classes on the same stance standard (mercs)
+	- Both classes will now use the same stance standard
+	- Pushed stance types up to EQEmu::constants
+
+== 2/4/2019 ==
+Uleat: Added command 'profanity' (aliased 'prof')
+	- This is a server-based tool for redacting any language that an admin deems as profanity (socially unacceptable within their community)
+	- Five options are available under this command..
+	 -- 'list' - shows the current list of banned words
+	 -- 'clear' - clears the current list of banned words
+	 -- 'add <word>' - adds <word> to the banned word list
+	 -- 'del <word>' - deletes <word> from the banned word list
+	 -- 'reload' - forces a reload of the banned word list
+	- All actions are immediate and a world broadcast refreshes other active zones
+	- The system is in stand-by when the list is empty..just add a word to the list to begin censorship
+	- Redaction only occurs on genuine occurences of any banned word
+	 -- Banned words are replaced with a series of '*' characters
+	 -- Compounded words are ignored to avoid issues with allowed words containing a banned sub-string
+	 -- If 'test' is banned, 'testing' will not be banned .. it must be added separately
+	- Extreme care should be exercised when adding words to the banned list..
+	 -- Quest failures and limited social interactions may alienate players if they become inhibiting
+	 -- System commands are allowed to be processed before redaction occurs in the 'say' channel
+	- A longer list requires more clock cycles to process - so, try to keep them to the most offensible occurrences
+Uleat: Fix for bots ceasing combat when their 'follow me' mob dies
+	- Bots will revert to their client leash owner (bot owner or client group leader) when their FollowID() mob is no longer valid
+	- Combat will no longer be interrupted in these cases
+	- Does not apply to bot owner death...
+
 == 1/26/2019 ==
 Uleat: Fix for class Bot not honoring NPCType data reference
 	- Fixes bots not moving on spawn/grouping issue

@@ -163,7 +163,7 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 	if (!stance_flag && bot_owner)
 		bot_owner->Message(13, "Could not locate stance for '%s'", GetCleanName());
 
-	SetTaunting((GetClass() == WARRIOR || GetClass() == PALADIN || GetClass() == SHADOWKNIGHT) && (GetBotStance() == BotStanceAggressive));
+	SetTaunting((GetClass() == WARRIOR || GetClass() == PALADIN || GetClass() == SHADOWKNIGHT) && (GetBotStance() == EQEmu::constants::stanceAggressive));
 	SetPauseAI(false);
 
 	rest_timer.Disable();
@@ -2013,12 +2013,20 @@ bool Bot::Process() {
 	if(GetAppearance() == eaDead && GetHP() > 0)
 		SetAppearance(eaStanding);
 
+	if (IsMoving()) {
+		ping_timer.Disable();
+	}
+	else {
+		if (!ping_timer.Enabled())
+			ping_timer.Start(BOT_KEEP_ALIVE_INTERVAL);
+
+		if (ping_timer.Check())
+			SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0);
+	}
+
 	if (IsStunned() || IsMezzed())
 		return true;
 
-	if (!IsMoving() && ping_timer.Check())
-		SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0);
-	
 	// Bot AI
 	AI_Process();
 	return true;
@@ -2240,10 +2248,9 @@ void Bot::AI_Process() {
 
 	Client* bot_owner = (GetBotOwner() && GetBotOwner()->IsClient() ? GetBotOwner()->CastToClient() : nullptr);
 	Group* bot_group = GetGroup();
-	Mob* follow_mob = entity_list.GetMob(GetFollowID());
-
+	
 	// Primary reasons for not processing AI
-	if (!bot_owner || !bot_group || !follow_mob || !IsAIControlled())
+	if (!bot_owner || !bot_group || !IsAIControlled())
 		return;
 
 	if (bot_owner->IsDead()) {
@@ -2253,10 +2260,17 @@ void Bot::AI_Process() {
 		return;
 	}
 
-	// We also need a leash owner (subset of primary AI criteria)
+	// We also need a leash owner and follow mob (subset of primary AI criteria)
 	Client* leash_owner = (bot_group->GetLeader() && bot_group->GetLeader()->IsClient() ? bot_group->GetLeader()->CastToClient() : bot_owner);
 	if (!leash_owner)
 		return;
+
+	Mob* follow_mob = entity_list.GetMob(GetFollowID());
+
+	if (!follow_mob) {
+		follow_mob = leash_owner;
+		SetFollowID(leash_owner->GetID());
+	}
 
 	// Berserk updates should occur if primary AI criteria are met
 	if (GetClass() == WARRIOR || GetClass() == BERSERKER) {
@@ -2752,7 +2766,7 @@ void Bot::AI_Process() {
 				// we can't fight if we don't have a target, are stun/mezzed or dead..
 				// Stop attacking if the target is enraged
 				TEST_TARGET();
-				if (GetBotStance() == BotStancePassive || (tar->IsEnraged() && !BehindMob(tar, GetX(), GetY())))
+				if (GetBotStance() == EQEmu::constants::stancePassive || (tar->IsEnraged() && !BehindMob(tar, GetX(), GetY())))
 					return;
 
 				// First, special attack per class (kick, backstab etc..)
@@ -2879,7 +2893,7 @@ void Bot::AI_Process() {
 					FaceTarget(GetTarget());
 
 				// This is a mob that is fleeing either because it has been feared or is low on hitpoints
-				if (GetBotStance() != BotStancePassive) {
+				if (GetBotStance() != EQEmu::constants::stancePassive) {
 					AI_PursueCastCheck(); // This appears to always return true..can't trust for success/fail
 					return;
 				}
@@ -2887,7 +2901,7 @@ void Bot::AI_Process() {
 		} // end not in combat range
 
 		if (!IsMoving() && !spellend_timer.Enabled()) { // This may actually need work...
-			if (GetBotStance() == BotStancePassive)
+			if (GetBotStance() == EQEmu::constants::stancePassive)
 				return;
 			
 			if (GetTarget() && AI_EngagedCastCheck()) 
@@ -2945,7 +2959,7 @@ void Bot::AI_Process() {
 		// Ok to idle
 		if (fm_dist <= GetFollowDistance()) {
 			if (!IsMoving() && AI_think_timer->Check() && !spellend_timer.Enabled()) {
-				if (GetBotStance() != BotStancePassive) {
+				if (GetBotStance() != EQEmu::constants::stancePassive) {
 					if (!AI_IdleCastCheck() && !IsCasting() && GetClass() != BARD)
 						BotMeditate(true);
 				}
@@ -2990,7 +3004,7 @@ void Bot::AI_Process() {
 		
 		// Basically, bard bots get a chance to cast idle spells while moving
 		if (IsMoving()) {
-			if (GetBotStance() != BotStancePassive) {
+			if (GetBotStance() != EQEmu::constants::stancePassive) {
 				if (GetClass() == BARD && !spellend_timer.Enabled() && AI_think_timer->Check()) {
 					AI_IdleCastCheck();
 					return;
@@ -8199,7 +8213,7 @@ bool Bot::CheckLoreConflict(const EQEmu::ItemData* item) {
 }
 
 bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, float iRange, uint32 iSpellTypes) {
-	if((iSpellTypes&SpellTypes_Detrimental) != 0) {
+	if((iSpellTypes & SPELL_TYPES_DETRIMENTAL) != 0) {
 		Log(Logs::General, Logs::Error, "Error: detrimental spells requested from AICheckCloseBeneficialSpells!!");
 		return false;
 	}
@@ -8254,19 +8268,19 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 				Group *g = caster->GetGroup();
 				float hpRatioToHeal = 25.0f;
 				switch(caster->GetBotStance()) {
-					case BotStanceReactive:
-					case BotStanceBalanced:
-						hpRatioToHeal = 50.0f;
-						break;
-					case BotStanceBurn:
-					case BotStanceBurnAE:
-						hpRatioToHeal = 20.0f;
-						break;
-					case BotStanceAggressive:
-					case BotStanceEfficient:
-					default:
-						hpRatioToHeal = 25.0f;
-						break;
+				case EQEmu::constants::stanceReactive:
+				case EQEmu::constants::stanceBalanced:
+					hpRatioToHeal = 50.0f;
+					break;
+				case EQEmu::constants::stanceBurn:
+				case EQEmu::constants::stanceBurnAE:
+					hpRatioToHeal = 20.0f;
+					break;
+				case EQEmu::constants::stanceAggressive:
+				case EQEmu::constants::stanceEfficient:
+				default:
+					hpRatioToHeal = 25.0f;
+					break;
 				}
 
 				if(g) {
@@ -8805,11 +8819,11 @@ bool Bot::HasOrMayGetAggro() {
 }
 
 void Bot::SetDefaultBotStance() {
-	BotStanceType defaultStance = BotStanceBalanced;
+	EQEmu::constants::StanceType defaultStance = EQEmu::constants::stanceBalanced;
 	if (GetClass() == WARRIOR)
-		defaultStance = BotStanceAggressive;
+		defaultStance = EQEmu::constants::stanceAggressive;
 
-	_baseBotStance = BotStancePassive;
+	_baseBotStance = EQEmu::constants::stancePassive;
 	_botStance = defaultStance;
 }
 
@@ -9082,18 +9096,6 @@ std::string Bot::CreateSayLink(Client* c, const char* message, const char* name)
 	return saylink;
 }
 
-void Bot::StopMoving() {
-	if (!ping_timer.Enabled())
-		ping_timer.Start(8000);
-
-	Mob::StopMoving();
-}
-
-void Bot::StopMoving(float new_heading) {
-	if (!ping_timer.Enabled())
-		ping_timer.Start(8000);
-
-	Mob::StopMoving(new_heading);
-}
+uint8 Bot::spell_casting_chances[SPELL_TYPE_COUNT][PLAYER_CLASS_COUNT][EQEmu::constants::STANCE_TYPE_COUNT][cntHSND] = { 0 };
 
 #endif

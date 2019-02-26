@@ -172,12 +172,11 @@ void Client::SendExpansionInfo() {
 	auto outapp = new EQApplicationPacket(OP_ExpansionInfo, sizeof(ExpansionInfo_Struct));
 	ExpansionInfo_Struct *eis = (ExpansionInfo_Struct*)outapp->pBuffer;
 	
-	// need to rework .. not until full scope of change is accounted for, though
 	if (RuleB(World, UseClientBasedExpansionSettings)) {
-		eis->Expansions = EQEmu::expansions::ConvertClientVersionToExpansionMask(eqs->ClientVersion());
+		eis->Expansions = EQEmu::expansions::ConvertClientVersionToExpansionsMask(eqs->ClientVersion());
 	}
 	else {
-		eis->Expansions = RuleI(World, ExpansionSettings);
+		eis->Expansions = (RuleI(World, ExpansionSettings) & EQEmu::expansions::ConvertClientVersionToExpansionsMask(eqs->ClientVersion()));
 	}
 
 	QueuePacket(outapp);
