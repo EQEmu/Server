@@ -2214,6 +2214,10 @@ sub run_database_check {
             if ($bots_db_management == 1 && $val == 9000) {
                 modify_db_for_bots();
             }
+
+			if ($val == 9137) {
+				fix_quest_factions();
+			}
         }
         $db_run_stage = 2;
     }
@@ -2564,12 +2568,12 @@ sub quest_faction_convert {
     						$new_faction = get_mysql_result("select clientid from client_server_faction_map where serverid = $faction_value_clean");
 							chomp $new_faction;
 							if ($new_faction == 0) {
-    							$new_faction = get_mysql_result("select new_faction from custom_faction_mappings where old_faction = $faction_value_clean");
+								$new_faction = get_mysql_result("select new_faction from custom_faction_mappings where old_faction = $faction_value_clean");
 								chomp $new_faction;
 							}
 							if ($new_faction > 0) {
 								print "BEFORE: " . $line . "\n";
-                            	$line =~ s/$faction_value_clean/$new_faction/g;
+								$line =~ s/$faction_value_clean/$new_faction/g;
 								print "AFTER: " . $line . "\n";
 								$changes_made = 1;	
 							}
@@ -2599,4 +2603,26 @@ sub quest_faction_convert {
 	print get_mysql_result("INSERT INTO `variables` (varname, value, information, ts) VALUES ('new_faction_conversion', 'true', 'Script ran against quests folder to convert new faction values', NOW())");
 
 	print "Total matches: " . $total_matches . "\n";
+}
+
+sub fix_quest_factions {
+	# Backup the quests
+	mkdir('backups');
+	my @files;
+	my $start_dir = "quests/";
+	find(
+		sub { push @files, $File::Find::name unless -d; },
+		$start_dir
+	);
+	for my $file (@files) {
+		$destination_file = $file;
+		my $date = strftime "%m-%d-%Y", localtime;
+        $destination_file =~ s/quests/quests-$date/;
+		print "Backing up :: " . $destination_file . "\n";
+#		unlink($destination_file);
+		copy_file($file, 'backups/' . $destination_file);
+	}
+
+	# Fix the factions
+	quest_faction_convert();	
 }
