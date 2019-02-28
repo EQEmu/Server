@@ -156,16 +156,12 @@ set faction_id = m.clientid;
 
 ALTER TABLE `faction_values` ADD PRIMARY KEY `lookup` (`char_id`,`faction_id`);
 
-/*
-Delete temporary tables
-*/
-
-DROP TABLE IF EXISTS `custom_faction_mappings`;
 
 /*
  * The following to be deleted in a future update, once everyone is
  * happy with the conversion
 
+DROP TABLE IF EXISTS custom_faction_mappings;
 DROP TABLE IF EXISTS faction_list_mod_prefix;
 DROP TABLE IF EXISTS faction_list_prefix;
 DROP TABLE IF EXISTS npc_faction_prefix;
