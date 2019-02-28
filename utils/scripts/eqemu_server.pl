@@ -2215,7 +2215,7 @@ sub run_database_check {
                 modify_db_for_bots();
             }
 
-			if ($val == 9137) {
+			if ($val == 9138) {
 				fix_quest_factions();
 			}
         }
