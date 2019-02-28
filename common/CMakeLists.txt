@@ -55,6 +55,7 @@ SET(common_sources
 	perl_eqdb.cpp
 	perl_eqdb_res.cpp
 	proc_launcher.cpp
+	profanity_manager.cpp
 	ptimer.cpp
 	races.cpp
 	rdtsc.cpp
@@ -181,6 +182,7 @@ SET(common_headers
 	packet_functions.h
 	platform.h
 	proc_launcher.h
+	profanity_manager.h
 	profiler.h
 	ptimer.h
 	queue.h

@@ -172,12 +172,11 @@ void Client::SendExpansionInfo() {
 	auto outapp = new EQApplicationPacket(OP_ExpansionInfo, sizeof(ExpansionInfo_Struct));
 	ExpansionInfo_Struct *eis = (ExpansionInfo_Struct*)outapp->pBuffer;
 	
-	// need to rework .. not until full scope of change is accounted for, though
 	if (RuleB(World, UseClientBasedExpansionSettings)) {
-		eis->Expansions = EQEmu::expansions::ConvertClientVersionToExpansionMask(eqs->ClientVersion());
+		eis->Expansions = EQEmu::expansions::ConvertClientVersionToExpansionsMask(eqs->ClientVersion());
 	}
 	else {
-		eis->Expansions = RuleI(World, ExpansionSettings);
+		eis->Expansions = (RuleI(World, ExpansionSettings) & EQEmu::expansions::ConvertClientVersionToExpansionsMask(eqs->ClientVersion()));
 	}
 
 	QueuePacket(outapp);
@@ -1446,6 +1445,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	ExtendedProfile_Struct ext;
 	EQEmu::InventoryProfile inv;
 
+	pp.SetPlayerProfileVersion(EQEmu::versions::ConvertClientVersionToMobVersion(EQEmu::versions::ConvertClientVersionBitToClientVersion(m_ClientVersionBit)));
 	inv.SetInventoryVersion(EQEmu::versions::ConvertClientVersionBitToClientVersion(m_ClientVersionBit));
 	inv.SetGMInventory(false); // character cannot have gm flag at this point
 
@@ -1528,12 +1528,9 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 
 //	strcpy(pp.servername, WorldConfig::get()->ShortName.c_str());
 
-
-	for (i = 0; i < EQEmu::spells::SPELLBOOK_SIZE; i++)
-		pp.spell_book[i] = 0xFFFFFFFF;
-
-	for(i = 0; i < EQEmu::spells::SPELL_GEM_COUNT; i++)
-		pp.mem_spells[i] = 0xFFFFFFFF;
+	memset(pp.spell_book, 0xFF, (sizeof(uint32) * EQEmu::spells::SPELLBOOK_SIZE));
+	
+	memset(pp.mem_spells, 0xFF, (sizeof(uint32) * EQEmu::spells::SPELL_GEM_COUNT));
 
 	for(i = 0; i < BUFF_COUNT; i++)
 		pp.buffs[i].spellid = 0xFFFF;

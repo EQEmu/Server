@@ -20,6 +20,7 @@
 9019|2018_04_12_bots_stop_melee_level.sql|SHOW COLUMNS FROM `bot_data` LIKE 'stop_melee_level'|empty|
 9020|2018_08_13_bots_inventory_update.sql|SELECT * FROM `inventory_versions` WHERE `version` = 2 and `bot_step` = 0|not_empty|
 9021|2018_10_09_bots_owner_options.sql|SHOW TABLES LIKE 'bot_owner_options'|empty|
+9022|2019_02_07_bots_stance_type_update.sql|SELECT * FROM `bot_spell_casting_chances` WHERE `spell_type_index` = '255' AND `class_id` = '255' AND `stance_index` = '0'|not_empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

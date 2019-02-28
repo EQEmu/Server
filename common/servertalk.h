@@ -159,6 +159,7 @@
 #define ServerOP_SetWorldTime		0x200B
 #define ServerOP_GetWorldTime		0x200C
 #define ServerOP_SyncWorldTime		0x200E
+#define ServerOP_RefreshCensorship	0x200F
 
 #define ServerOP_LSZoneInfo			0x3001
 #define ServerOP_LSZoneStart		0x3002

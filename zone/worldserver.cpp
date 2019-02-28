@@ -36,6 +36,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/misc_functions.h"
 #include "../common/rulesys.h"
 #include "../common/servertalk.h"
+#include "../common/profanity_manager.h"
 
 #include "client.h"
 #include "corpse.h"
@@ -791,6 +792,11 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		if (zone && zone->is_zone_time_localized) {
 			Log(Logs::General, Logs::Zone_Server, "Received request to sync time from world, but our time is localized currently");
 		}
+		break;
+	}
+	case ServerOP_RefreshCensorship: {
+		if (!EQEmu::ProfanityManager::LoadProfanityList(&database))
+			Log(Logs::General, Logs::Error, "Received request to refresh the profanity list..but, the action failed");
 		break;
 	}
 	case ServerOP_ChangeWID: {

@@ -1,6 +1,52 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 
+== 2/7/2019 ==
+Uleat: Put merc and bot classes on the same stance standard (mercs)
+	- Both classes will now use the same stance standard
+	- Pushed stance types up to EQEmu::constants
+
+== 2/4/2019 ==
+Uleat: Added command 'profanity' (aliased 'prof')
+	- This is a server-based tool for redacting any language that an admin deems as profanity (socially unacceptable within their community)
+	- Five options are available under this command..
+	 -- 'list' - shows the current list of banned words
+	 -- 'clear' - clears the current list of banned words
+	 -- 'add <word>' - adds <word> to the banned word list
+	 -- 'del <word>' - deletes <word> from the banned word list
+	 -- 'reload' - forces a reload of the banned word list
+	- All actions are immediate and a world broadcast refreshes other active zones
+	- The system is in stand-by when the list is empty..just add a word to the list to begin censorship
+	- Redaction only occurs on genuine occurences of any banned word
+	 -- Banned words are replaced with a series of '*' characters
+	 -- Compounded words are ignored to avoid issues with allowed words containing a banned sub-string
+	 -- If 'test' is banned, 'testing' will not be banned .. it must be added separately
+	- Extreme care should be exercised when adding words to the banned list..
+	 -- Quest failures and limited social interactions may alienate players if they become inhibiting
+	 -- System commands are allowed to be processed before redaction occurs in the 'say' channel
+	- A longer list requires more clock cycles to process - so, try to keep them to the most offensible occurrences
+Uleat: Fix for bots ceasing combat when their 'follow me' mob dies
+	- Bots will revert to their client leash owner (bot owner or client group leader) when their FollowID() mob is no longer valid
+	- Combat will no longer be interrupted in these cases
+	- Does not apply to bot owner death...
+
+== 1/26/2019 ==
+Uleat: Fix for class Bot not honoring NPCType data reference
+	- Fixes bots not moving on spawn/grouping issue
+	- Report any issues with non movement-related behavior
+
+== 1/24/2019 ==
+Uleat: Extended server spellbook entries to RoF2 standard and added per-client restriction of spell id max
+	- Bumped server spellbook entry capacity to 720 spells
+	- Server keeps all 'learned' spells as found
+	  -- Access is limited by the clients' limitations of spellbook capacities and max spell ids
+	  -- This is done to avoid losing spells by switching from newer clients to older ones
+	  -- Existing behavior is kept in place for illegal access conditions
+	- Each client is still restricted to its spellbook capacity (400, 480, 480, 720, 720, 720 - respectively)
+	- Each client is restricted to its max supported spell id (9999, 15999, 23000, 28000, 45000, 45000 - respectively)
+	- Please report any abnormal behavior so it may be addressed
+Uleat: Removed server-side checksum of player profile..wasted calculation since it's performed again in all translators
+
 == 1/20/2019 ==
 Uleat: Added 'spells' entry to EQDictionary
 Akkadius:

@@ -1724,8 +1724,26 @@ namespace UF
 		OUT(WIS);
 		OUT(face);
 		//	OUT(unknown02264[47]);
-		memset(eq->spell_book, 0xFF, sizeof(uint32)* spells::SPELLBOOK_SIZE);
-		OUT_array(spell_book, 480U);
+		
+		if (spells::SPELLBOOK_SIZE <= EQEmu::spells::SPELLBOOK_SIZE) {
+			for (uint32 r = 0; r < spells::SPELLBOOK_SIZE; r++) {
+				if (emu->spell_book[r] <= spells::SPELL_ID_MAX)
+					eq->spell_book[r] = emu->spell_book[r];
+				else
+					eq->spell_book[r] = 0xFFFFFFFFU;
+			}
+		}
+		else {
+			for (uint32 r = 0; r < EQEmu::spells::SPELLBOOK_SIZE; r++) {
+				if (emu->spell_book[r] <= spells::SPELL_ID_MAX)
+					eq->spell_book[r] = emu->spell_book[r];
+				else
+					eq->spell_book[r] = 0xFFFFFFFFU;
+			}
+			// invalidate the rest of the spellbook slots
+			memset(&eq->spell_book[EQEmu::spells::SPELLBOOK_SIZE], 0xFF, (sizeof(uint32) * (spells::SPELLBOOK_SIZE - EQEmu::spells::SPELLBOOK_SIZE)));
+		}
+
 		//	OUT(unknown4184[128]);
 		OUT_array(mem_spells, spells::SPELL_GEM_COUNT);
 		//	OUT(unknown04396[32]);

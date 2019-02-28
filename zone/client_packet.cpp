@@ -530,10 +530,14 @@ void Client::CompleteConnect()
 		SendAppearancePacket(AT_GuildID, GuildID(), false);
 		SendAppearancePacket(AT_GuildRank, rank, false);
 	}
-	for (uint32 spellInt = 0; spellInt < EQEmu::spells::SPELLBOOK_SIZE; spellInt++) {
-		if (m_pp.spell_book[spellInt] < 3 || m_pp.spell_book[spellInt] > 50000)
+
+	// moved to dbload and translators since we iterate there also .. keep m_pp values whatever they are when they get here
+	/*const auto sbs = EQEmu::spells::DynamicLookup(ClientVersion(), GetGM())->SpellbookSize;
+	for (uint32 spellInt = 0; spellInt < sbs; ++spellInt) {
+		if (m_pp.spell_book[spellInt] < 3 || m_pp.spell_book[spellInt] > EQEmu::spells::SPELL_ID_MAX)
 			m_pp.spell_book[spellInt] = 0xFFFFFFFF;
-	}
+	}*/
+
 	//SendAATable();
 
 	if (GetHideMe()) Message(13, "[GM] You are currently hidden to all clients");
@@ -1154,6 +1158,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	SetClientVersion(Connection()->ClientVersion());
 	m_ClientVersionBit = EQEmu::versions::ConvertClientVersionToClientVersionBit(Connection()->ClientVersion());
 
+	m_pp.SetPlayerProfileVersion(m_ClientVersion);
 	m_inv.SetInventoryVersion(m_ClientVersion);
 
 	/* Antighost code
@@ -1409,12 +1414,11 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if (m_pp.ldon_points_tak < 0 || m_pp.ldon_points_tak > 2000000000) { m_pp.ldon_points_tak = 0; }
 	if (m_pp.ldon_points_available < 0 || m_pp.ldon_points_available > 2000000000) { m_pp.ldon_points_available = 0; }
 
-	// need to rework .. not until full scope of change is accounted for, though
 	if (RuleB(World, UseClientBasedExpansionSettings)) {
-		m_pp.expansions = EQEmu::expansions::ConvertClientVersionToExpansionMask(ClientVersion());
+		m_pp.expansions = EQEmu::expansions::ConvertClientVersionToExpansionsMask(ClientVersion());
 	}
 	else {
-		m_pp.expansions = RuleI(World, ExpansionSettings);
+		m_pp.expansions = (RuleI(World, ExpansionSettings) & EQEmu::expansions::ConvertClientVersionToExpansionsMask(ClientVersion()));
 	}
 
 	if (!database.LoadAlternateAdvancement(this)) {
@@ -1587,8 +1591,9 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if ((m_pp.RestTimer > RuleI(Character, RestRegenTimeToActivate)) && (m_pp.RestTimer > RuleI(Character, RestRegenRaidTimeToActivate)))
 		m_pp.RestTimer = 0;
 
-	/* This checksum should disappear once dynamic structs are in... each struct strategy will do it */
-	CRC32::SetEQChecksum((unsigned char*)&m_pp, sizeof(PlayerProfile_Struct) - 4);
+	/* This checksum should disappear once dynamic structs are in... each struct strategy will do it */ // looks to be in place now
+	//CRC32::SetEQChecksum((unsigned char*)&m_pp, sizeof(PlayerProfile_Struct) - sizeof(m_pp.m_player_profile_version) - 4);
+	// m_pp.checksum = 0; // All server out-bound player profile packets are now translated - no need to waste cycles calculating this...
 
 	outapp = new EQApplicationPacket(OP_PlayerProfile, sizeof(PlayerProfile_Struct));
 
@@ -2807,24 +2812,19 @@ void Client::Handle_OP_ApplyPoison(const EQApplicationPacket *app)
 		return;
 	}
 
-	uint32 ApplyPoisonSuccessResult = 0;
 	ApplyPoison_Struct* ApplyPoisonData = (ApplyPoison_Struct*)app->pBuffer;
+
+	uint32 ApplyPoisonSuccessResult = 0;
+
 	const EQEmu::ItemInstance* PrimaryWeapon = GetInv().GetItem(EQEmu::invslot::slotPrimary);
 	const EQEmu::ItemInstance* SecondaryWeapon = GetInv().GetItem(EQEmu::invslot::slotSecondary);
-	const EQEmu::ItemInstance* PoisonItemInstance = GetInv()[ApplyPoisonData->inventorySlot];
-	const EQEmu::ItemData* poison=PoisonItemInstance->GetItem();
-	const EQEmu::ItemData* primary=nullptr;
-	const EQEmu::ItemData* secondary=nullptr;
-	bool IsPoison = PoisonItemInstance && 
-					(poison->ItemType == EQEmu::item::ItemTypePoison);
+	const EQEmu::ItemInstance* PoisonItemInstance = GetInv().GetItem(ApplyPoisonData->inventorySlot);
 
-	if (PrimaryWeapon) {
-		primary=PrimaryWeapon->GetItem();
-	}
+	const EQEmu::ItemData* primary = (PrimaryWeapon ? PrimaryWeapon->GetItem() : nullptr);
+	const EQEmu::ItemData* secondary = (SecondaryWeapon ? SecondaryWeapon->GetItem() : nullptr);
+	const EQEmu::ItemData* poison = (PoisonItemInstance ? PoisonItemInstance->GetItem() : nullptr);
 
-	if (SecondaryWeapon) {
-		secondary=SecondaryWeapon->GetItem();
-	}
+	bool IsPoison = (poison && poison->ItemType == EQEmu::item::ItemTypePoison);
 
 	if (IsPoison && GetClass() == ROGUE) {
 
@@ -5263,7 +5263,7 @@ void Client::Handle_OP_DeleteSpell(const EQApplicationPacket *app)
 	EQApplicationPacket* outapp = app->Copy();
 	DeleteSpell_Struct* dss = (DeleteSpell_Struct*)outapp->pBuffer;
 
-	if (dss->spell_slot < 0 || dss->spell_slot > int(EQEmu::spells::SPELLBOOK_SIZE))
+	if (dss->spell_slot < 0 || dss->spell_slot >= EQEmu::spells::DynamicLookup(ClientVersion(), GetGM())->SpellbookSize)
 		return;
 
 	if (m_pp.spell_book[dss->spell_slot] != SPELLBOOK_UNKNOWN) {
@@ -9394,7 +9394,7 @@ void Client::Handle_OP_MercenaryCommand(const EQApplicationPacket *app)
 				//check to see if selected option is a valid stance slot (option is the slot the stance is in, not the actual stance)
 				if (option >= 0 && option < numStances)
 				{
-					merc->SetStance(mercTemplate->Stances[option]);
+					merc->SetStance((EQEmu::constants::StanceType)mercTemplate->Stances[option]);
 					GetMercInfo().Stance = mercTemplate->Stances[option];
 
 					Log(Logs::General, Logs::Mercenaries, "Set Stance: %u for %s (%s)", merc->GetStance(), merc->GetName(), GetName());
@@ -13337,7 +13337,10 @@ void Client::Handle_OP_SwapSpell(const EQApplicationPacket *app)
 	const SwapSpell_Struct* swapspell = (const SwapSpell_Struct*)app->pBuffer;
 	int swapspelltemp;
 
-	if (swapspell->from_slot < 0 || swapspell->from_slot > EQEmu::spells::SPELLBOOK_SIZE || swapspell->to_slot < 0 || swapspell->to_slot > EQEmu::spells::SPELLBOOK_SIZE)
+	const auto sbs = EQEmu::spells::DynamicLookup(ClientVersion(), GetGM())->SpellbookSize;
+	if (swapspell->from_slot < 0 || swapspell->from_slot >= sbs)
+		return;
+	if (swapspell->to_slot < 0 || swapspell->to_slot >= sbs)
 		return;
 
 	swapspelltemp = m_pp.spell_book[swapspell->from_slot];

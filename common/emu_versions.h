@@ -210,10 +210,10 @@ namespace EQEmu
 		const char* ExpansionName(uint32 expansion_bit);
 		uint32 ConvertExpansionToExpansionBit(Expansion expansion);
 		Expansion ConvertExpansionBitToExpansion(uint32 expansion_bit);
-		uint32 ConvertExpansionToExpansionMask(Expansion expansion);
+		uint32 ConvertExpansionToExpansionsMask(Expansion expansion);
 		Expansion ConvertClientVersionToExpansion(versions::ClientVersion client_version);
 		uint32 ConvertClientVersionToExpansionBit(versions::ClientVersion client_version);
-		uint32 ConvertClientVersionToExpansionMask(versions::ClientVersion client_version);
+		uint32 ConvertClientVersionToExpansionsMask(versions::ClientVersion client_version);
 
 	} /*expansions*/
 
