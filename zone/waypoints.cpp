@@ -1063,3 +1063,26 @@ void NPC::RestoreGuardSpotCharm()
 {
 	m_GuardPoint = m_GuardPointSaved;
 }
+
+/******************
+* Bot-specific overloads to make them play nice with the new movement system
+*/
+#ifdef BOTS
+#include "bot.h"
+
+void Bot::WalkTo(float x, float y, float z)
+{
+	if (IsSitting())
+		Stand();
+
+	Mob::WalkTo(x, y, z);
+}
+
+void Bot::RunTo(float x, float y, float z)
+{
+	if (IsSitting())
+		Stand();
+
+	Mob::RunTo(x, y, z);
+}
+#endif

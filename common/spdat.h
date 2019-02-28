@@ -68,16 +68,16 @@ enum SpellTypes : uint32
 	SpellType_InCombatBuffSong = (1 << 18), // bard in-combat group/ae buffs
 	SpellType_OutOfCombatBuffSong = (1 << 19), // bard out-of-combat group/ae buffs
 	SpellType_PreCombatBuff = (1 << 20),
-	SpellType_PreCombatBuffSong = (1 << 21),
-
-	SpellTypes_Detrimental = (SpellType_Nuke | SpellType_Root | SpellType_Lifetap | SpellType_Snare | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Charm | SpellType_Debuff | SpellType_Slow),
-	SpellTypes_Beneficial = (SpellType_Heal | SpellType_Buff | SpellType_Escape | SpellType_Pet | SpellType_InCombatBuff | SpellType_Cure | SpellType_HateRedux | SpellType_InCombatBuffSong | SpellType_OutOfCombatBuffSong | SpellType_PreCombatBuff | SpellType_PreCombatBuffSong),
-
-	SpellTypes_Innate = (SpellType_Nuke | SpellType_Lifetap | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Slow | SpellType_Debuff | SpellType_Charm | SpellType_Root),
-
-	SpellType_Any = 0xFFFFFFFF
+	SpellType_PreCombatBuffSong = (1 << 21)
 };
 
+const uint32 SPELL_TYPE_MIN = (SpellType_Nuke << 1) - 1;
+const uint32 SPELL_TYPE_MAX = (SpellType_PreCombatBuffSong << 1) - 1;
+const uint32 SPELL_TYPE_ANY = 0xFFFFFFFF;
+
+const uint32 SPELL_TYPES_DETRIMENTAL = (SpellType_Nuke | SpellType_Root | SpellType_Lifetap | SpellType_Snare | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Charm | SpellType_Debuff | SpellType_Slow);
+const uint32 SPELL_TYPES_BENEFICIAL = (SpellType_Heal | SpellType_Buff | SpellType_Escape | SpellType_Pet | SpellType_InCombatBuff | SpellType_Cure | SpellType_HateRedux | SpellType_InCombatBuffSong | SpellType_OutOfCombatBuffSong | SpellType_PreCombatBuff | SpellType_PreCombatBuffSong);
+const uint32 SPELL_TYPES_INNATE = (SpellType_Nuke | SpellType_Lifetap | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Slow | SpellType_Debuff | SpellType_Charm | SpellType_Root);
 
 // These should not be used to determine spell category..
 // They are a graphical affects (effects?) index only

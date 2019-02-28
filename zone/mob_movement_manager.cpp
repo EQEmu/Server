@@ -759,7 +759,7 @@ void MobMovementManager::FillCommandStruct(PlayerPositionUpdateServer_Struct *sp
 	spu->delta_y = FloatToEQ13(dy);
 	spu->delta_z = FloatToEQ13(dz);
 	spu->delta_heading = FloatToEQ10(dh);
-	spu->animation = anim;
+	spu->animation = (m->IsBot() ? (int)((float)anim / 1.785714f) : anim);
 }
 
 void MobMovementManager::UpdatePath(Mob *who, float x, float y, float z, MobMovementMode mode)

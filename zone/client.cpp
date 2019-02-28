@@ -38,6 +38,7 @@ extern volatile bool RunLoops;
 #include "../common/rulesys.h"
 #include "../common/string_util.h"
 #include "../common/data_verification.h"
+#include "../common/profanity_manager.h"
 #include "data_bucket.h"
 #include "position.h"
 #include "net.h"
@@ -895,6 +896,10 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		language = 0; // No need for language when drunk
 	}
 
+	// Censor the message
+	if (EQEmu::ProfanityManager::IsCensorshipActive() && (chan_num != 8))
+		EQEmu::ProfanityManager::RedactMessage(message);
+
 	switch(chan_num)
 	{
 	case 0: { /* Guild Chat */
@@ -1091,6 +1096,9 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 			}
 			break;
 		}
+
+		if (EQEmu::ProfanityManager::IsCensorshipActive())
+			EQEmu::ProfanityManager::RedactMessage(message);
 
 #ifdef BOTS
 		if (message[0] == BOT_COMMAND_CHAR) {
@@ -2640,6 +2648,11 @@ bool Client::CheckAccess(int16 iDBLevel, int16 iDefaultLevel) {
 }
 
 void Client::MemorizeSpell(uint32 slot,uint32 spellid,uint32 scribing){
+	if (slot < 0 || slot >= EQEmu::spells::DynamicLookup(ClientVersion(), GetGM())->SpellbookSize)
+		return;
+	if ((spellid < 3 || spellid > EQEmu::spells::DynamicLookup(ClientVersion(), GetGM())->SpellIdMax) && spellid != 0xFFFFFFFF)
+		return;
+
 	auto outapp = new EQApplicationPacket(OP_MemorizeSpell, sizeof(MemorizeSpell_Struct));
 	MemorizeSpell_Struct* mss=(MemorizeSpell_Struct*)outapp->pBuffer;
 	mss->scribing=scribing;

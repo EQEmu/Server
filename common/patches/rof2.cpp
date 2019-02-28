@@ -2202,14 +2202,25 @@ namespace RoF2
 
 		outapp->WriteUInt32(spells::SPELLBOOK_SIZE);		// Spellbook slots
 
-		for (uint32 r = 0; r < EQEmu::spells::SPELLBOOK_SIZE; r++)
-		{
-			outapp->WriteUInt32(emu->spell_book[r]);
+		if (spells::SPELLBOOK_SIZE <= EQEmu::spells::SPELLBOOK_SIZE) {
+			for (uint32 r = 0; r < spells::SPELLBOOK_SIZE; r++) {
+				if (emu->spell_book[r] <= spells::SPELL_ID_MAX)
+					outapp->WriteUInt32(emu->spell_book[r]);
+				else
+					outapp->WriteUInt32(0xFFFFFFFFU);
+			}
 		}
-		// zeroes for the rest of the spellbook slots
-		for (uint32 r = 0; r < spells::SPELLBOOK_SIZE - EQEmu::spells::SPELLBOOK_SIZE; r++)
-		{
-			outapp->WriteUInt32(0xFFFFFFFFU);
+		else {
+			for (uint32 r = 0; r < EQEmu::spells::SPELLBOOK_SIZE; r++) {
+				if (emu->spell_book[r] <= spells::SPELL_ID_MAX)
+					outapp->WriteUInt32(emu->spell_book[r]);
+				else
+					outapp->WriteUInt32(0xFFFFFFFFU);
+			}
+			// invalidate the rest of the spellbook slots
+			for (uint32 r = EQEmu::spells::SPELLBOOK_SIZE; r < spells::SPELLBOOK_SIZE; r++) {
+				outapp->WriteUInt32(0xFFFFFFFFU);
+			}
 		}
 
 		outapp->WriteUInt32(spells::SPELL_GEM_COUNT);		// Memorised spell slots

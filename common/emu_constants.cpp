@@ -118,3 +118,37 @@ EQEmu::bug::CategoryID EQEmu::bug::CategoryNameToCategoryID(const char* category
 	
 	return catOther;
 }
+
+const char *EQEmu::constants::GetStanceName(StanceType stance_type) {
+	switch (stance_type) {
+	case stanceUnknown:
+		return "Unknown";
+	case stancePassive:
+		return "Passive";
+	case stanceBalanced:
+		return "Balanced";
+	case stanceEfficient:
+		return "Efficient";
+	case stanceReactive:
+		return "Reactive";
+	case stanceAggressive:
+		return "Aggressive";
+	case stanceAssist:
+		return "Assist";
+	case stanceBurn:
+		return "Burn";
+	case stanceEfficient2:
+		return "Efficient2";
+	case stanceBurnAE:
+		return "BurnAE";
+	default:
+		return "Invalid";
+	}
+}
+
+int EQEmu::constants::ConvertStanceTypeToIndex(StanceType stance_type) {
+	if (stance_type >= EQEmu::constants::stancePassive && stance_type <= EQEmu::constants::stanceBurnAE)
+		return (stance_type - EQEmu::constants::stancePassive);
+
+	return 0;
+}

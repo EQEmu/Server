@@ -243,12 +243,26 @@ namespace ClientUnknown
 	const int16 IINVALID = -1;
 	const int16 INULL = 0;
 
+	namespace constants {
+		const EQEmu::expansions::Expansion EXPANSION = EQEmu::expansions::Expansion::EverQuest;
+		const uint32 EXPANSION_BIT = EQEmu::expansions::bitEverQuest;
+		const uint32 EXPANSIONS_MASK = EQEmu::expansions::maskEverQuest;
+
+	} // namespace constants
+
 } /*ClientUnknown*/
 
 namespace Client62
 {
 	const int16 IINVALID = -1;
 	const int16 INULL = 0;
+
+	namespace constants {
+		const EQEmu::expansions::Expansion EXPANSION = EQEmu::expansions::Expansion::EverQuest;
+		const uint32 EXPANSION_BIT = EQEmu::expansions::bitEverQuest;
+		const uint32 EXPANSIONS_MASK = EQEmu::expansions::maskEverQuest;
+
+	} // namespace constants
 
 } /*Client62*/
 
