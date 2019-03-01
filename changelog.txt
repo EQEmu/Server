@@ -1,6 +1,96 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 
+== 3/1/2019 ==
+Noudess: Major faction conversion to use client data.
+
+	Pull request #802 New min/max personal faction per faction. Use of actual 
+	client mods for race/class/deity.
+
+	This PR involves major changes to your database and your quests.
+
+	The clients recently exposed raw data included 
+
+	- the min/max personal faction for each faction
+	- the actual faction id the client uses for each faction
+	- the actual mods that come into play when a PC cons an opponent that 
+	  determine your overall con to that faction.
+
+
+	The approach I took resulted in minimal change to the code base.  I did 
+	alter the code to enforce the new validated min/max from the client.  This 
+	min/max applies to personally earned faction.  So if a faction has a min 
+	of 0 and a max of 2000, that means your personally earned value can never 
+	go below 0 or over 2000.  The actual con, will, however often do so because 
+	of class/race/deity modifications.  I also changed the con ranges, per 
+	Mackal's data that was proven to be accurate:
+
+	Ally = 1100+ 
+	Warmly = 750 to 1099 
+	Kindly = 500 to 749 
+	Amiable = 100 to 499 
+	Indifferent = 0 to 99 
+	Apprehensive = -1 to -100 
+	Dubious = -101 to -500 
+	Threateningly = -501 to -750 
+	Ready to Attack = -751 
+
+	The above means that dubious is a much smaller range now.  For that reason 
+	the scripts modify any custom faction base values to put them in the same 
+	range, hopefully as the creators of the custom factions intended.
+
+	Also to be noted as characters that have a faction between -501 and -700 
+	wont be dubious anymore, they will be threateningly.  This is expected with 
+	the new ranges, but might take players by suprise as the old ranges we used 
+	were more liberal but were incorrect.
+
+	The database is changed extensively, but really only content.  We're 
+	translating faction_list to use the clients ids.  As such every place a 
+	faction_is is used, namely (see below) are being converted.
+
+	- faction_list
+	- faction_list_mod
+	- npc_faction (primary_faction field only)
+	- npc_faction_entries (faction_id field only)
+	- faction_values
+
+	Quests will also automatically be adjusted.  This MUST be done after the 
+	PR sql and before starting the server.  This is automated by 
+	eqemu_server.pl (or starting world)
+
+	Be assured, custom factions that you may have created, or obsolete or 
+	duplicate factions in our original faction_list, that you may have used, 
+	will be preserved.  Anything that does not map directly is being moved to 
+	the 5000 range in faction_list and any references are corrected to point 
+	there.
+
+	A great example of this is Ebon Mask and Hall of the Ebon Mask.  Many peqdb 
+	style servers have both of these.  Some have used one, some the other.  We 
+	map Ebon Mask to the clients Ebon mask and the Hall of the Ebon Mask gets 
+	moved to the 5000 range, and all its references are preserved.  However, 
+	if you would like to make proper use of client mobs to Ebon mask, or other 
+	factions that have duplicitous entries, I recommend you manually move to 
+	using the correct one.  In that way all of the new raw data mapped in from 
+	the client into faction_list_mod will get used instead of what your db had 
+	before these values were known.
+
+	In my experience converting 4 different server's data, there are only 
+	about 20 factions moved into the 5000 range.
+
+	This PR has only 1 new, permanent table faction_base_data, which is taken 
+	right from the client.  The base field is left in case you want to mod your 
+	server, but we are very sure that the client doesn't use a base.  It uses 
+	global mods to race or class for this as you'll see in the 
+	new faction_list_mod.
+
+	The PR makes many backup tables, and two mapping tables that are used during
+	the conversion process to fix quests.  This table was hand created by 
+	analysis.  This table serves no purpose after conversion except an audit 
+	trail if we see any issues.
+
+	I will release a new PR that will clean up all these backups and temporary 
+	tables in about a month.
+
 == 2/7/2019 ==
 Uleat: Put merc and bot classes on the same stance standard (mercs)
 	- Both classes will now use the same stance standard
