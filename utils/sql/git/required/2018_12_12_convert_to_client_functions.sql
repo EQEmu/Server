@@ -72,6 +72,9 @@ update faction_list f
 INNER JOIN oldbases o  on o.id = f.id
 set f.base = o.base;
 
+/* Adjust for the big change in the dubious range */
+update faction_list set base = base + 200 where base between -900 and -501;
+
 DROP TABLE IF EXISTS oldbases;
 
 /* Create mods based on the client_faction_associations */
