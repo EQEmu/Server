@@ -2215,7 +2215,7 @@ sub run_database_check {
                 modify_db_for_bots();
             }
 
-			if ($val == 9138) {
+            if ($val == 9138) {
 				fix_quest_factions();
 			}
         }
@@ -2617,7 +2617,7 @@ sub fix_quest_factions {
 	for my $file (@files) {
 		$destination_file = $file;
 		my $date = strftime "%m-%d-%Y", localtime;
-        $destination_file =~ s/quests/quests-$date/;
+		$destination_file =~ s/quests/quests-$date/;
 		print "Backing up :: " . $destination_file . "\n";
 #		unlink($destination_file);
 		copy_file($file, 'backups/' . $destination_file);
