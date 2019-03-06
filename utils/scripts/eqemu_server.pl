@@ -2565,7 +2565,7 @@ sub quest_faction_convert {
 						$faction_value_clean  = trim($faction_value);
 
 						if (looks_like_number($faction_value_clean)) {
-    						$new_faction = get_mysql_result("select clientid from client_server_faction_map where serverid = $faction_value_clean");
+							$new_faction = get_mysql_result("select clientid from client_server_faction_map where serverid = $faction_value_clean");
 							chomp $new_faction;
 							if ($new_faction == 0) {
 								$new_faction = get_mysql_result("select new_faction from custom_faction_mappings where old_faction = $faction_value_clean");
