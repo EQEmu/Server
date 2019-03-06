@@ -2216,7 +2216,7 @@ sub run_database_check {
             }
 
             if ($val == 9138) {
-				fix_quest_factions();
+                fix_quest_factions();
 			}
         }
         $db_run_stage = 2;
