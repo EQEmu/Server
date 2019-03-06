@@ -390,6 +390,8 @@
 9134|2019_01_04_update_global_base_scaling.sql|SELECT * FROM db_version WHERE version >= 9134|empty|
 9135|2019_01_10_multi_version_spawns.sql|SHOW COLUMNS FROM `spawn2` LIKE 'version'|contains|unsigned|
 9136|2019_02_04_profanity_command.sql|SHOW TABLES LIKE 'profanity_list'|empty|
+9137|2018_12_12_client_faction_tables.sql|SHOW TABLES LIKE 'faction_base_data'|empty|
+9138|2018_12_12_convert_to_client_functions.sql|SELECT `id` FROM `faction_list` WHERE `id` > 4999|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
