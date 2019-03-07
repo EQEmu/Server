@@ -168,6 +168,6 @@ DROP TABLE IF EXISTS faction_list_mod_prefix;
 DROP TABLE IF EXISTS faction_list_prefix;
 DROP TABLE IF EXISTS npc_faction_prefix;
 DROP TABLE IF EXISTS npc_faction_entries_prefix;
-DROP TABLE IF NOT EXISTS faction_values_prefix;
+DROP TABLE IF EXISTS faction_values_prefix;
 
  */
