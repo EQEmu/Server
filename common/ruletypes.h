@@ -704,6 +704,14 @@ RULE_CATEGORY(Console)
 RULE_INT(Console, SessionTimeOut, 600000)	// Amount of time in ms for the console session to time out
 RULE_CATEGORY_END()
 
+RULE_CATEGORY(Network)
+RULE_INT(Network, ResendDelayBaseMS, 100)
+RULE_REAL(Network, ResendDelayFactor, 1.5)
+RULE_INT(Network, ResendDelayMinMS, 100)
+RULE_INT(Network, ResendDelayMaxMS, 5000)
+RULE_INT(Network, ResendsPerCycle, 1000)
+RULE_CATEGORY_END()
+
 RULE_CATEGORY(QueryServ)
 RULE_BOOL(QueryServ, PlayerLogChat, false) // Logs Player Chat
 RULE_BOOL(QueryServ, PlayerLogTrades, false) // Logs Player Trades

@@ -179,6 +179,7 @@ void command_mysqltest(Client *c, const Seperator *sep);
 void command_mystats(Client *c, const Seperator *sep);
 void command_name(Client *c, const Seperator *sep);
 void command_netstats(Client *c, const Seperator *sep);
+void command_network(Client *c, const Seperator *sep);
 void command_npccast(Client *c, const Seperator *sep);
 void command_npcedit(Client *c, const Seperator *sep);
 void command_npcemote(Client *c, const Seperator *sep);

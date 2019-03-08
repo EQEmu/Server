@@ -109,10 +109,16 @@ namespace EQ
 			void QueuePacket(Packet &p);
 			void QueuePacket(Packet &p, int stream);
 			void QueuePacket(Packet &p, int stream, bool reliable);
+
 			const DaybreakConnectionStats& GetStats() const { return m_stats; }
+			DaybreakConnectionStats &GetStats() { return m_stats; }
 			void ResetStats();
 			size_t GetRollingPing() const { return m_rolling_ping; }
-			DbProtocolStatus GetStatus() { return m_status; }
+			DbProtocolStatus GetStatus() const { return m_status; }
+
+			const DaybreakEncodeType* GetEncodePasses() const { return m_encode_passes; }
+			const DaybreakConnectionManager* GetManager() const { return m_owner; }
+			DaybreakConnectionManager* GetManager() { return m_owner; }
 		private:
 			DaybreakConnectionManager *m_owner;
 			std::string m_endpoint;
@@ -132,7 +138,6 @@ namespace EQ
 			std::unique_ptr<char[]> m_combined;
 			DaybreakConnectionStats m_stats;
 			Timestamp m_last_session_stats;
-			size_t m_resend_delay;
 			size_t m_rolling_ping;
 			Timestamp m_close_time;
 
@@ -142,6 +147,7 @@ namespace EQ
 				Timestamp last_sent;
 				Timestamp first_sent;
 				size_t times_resent;
+				size_t resend_delay;
 			};
 
 			struct DaybreakStream
@@ -205,10 +211,10 @@ namespace EQ
 			DaybreakConnectionManagerOptions() {
 				max_connection_count = 0;
 				keepalive_delay_ms = 9000;
-				resend_delay_ms = 150;
-				resend_delay_factor = 1.5;
+				resend_delay_ms = 30;
+				resend_delay_factor = 1.25;
 				resend_delay_min = 150;
-				resend_delay_max = 1000;
+				resend_delay_max = 5000;
 				connect_delay_ms = 500;
 				stale_connection_ms = 90000;
 				connect_stale_ms = 5000;
@@ -261,6 +267,8 @@ namespace EQ
 			void OnNewConnection(std::function<void(std::shared_ptr<DaybreakConnection>)> func) { m_on_new_connection = func; }
 			void OnConnectionStateChange(std::function<void(std::shared_ptr<DaybreakConnection>, DbProtocolStatus, DbProtocolStatus)> func) { m_on_connection_state_change = func; }
 			void OnPacketRecv(std::function<void(std::shared_ptr<DaybreakConnection>, const Packet &)> func) { m_on_packet_recv = func; }
+
+			DaybreakConnectionManagerOptions& GetOptions() { return m_options; }
 		private:
 			void Attach(uv_loop_t *loop);
 			void Detach();

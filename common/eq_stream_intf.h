@@ -6,6 +6,7 @@
 #include <string>
 #include "emu_versions.h"
 #include "eq_packet.h"
+#include "net/daybreak_connection.h"
 
 typedef enum {
 	ESTABLISHED,
@@ -56,6 +57,8 @@ public:
 	virtual const uint32 GetBytesSentPerSecond() const { return 0; }
 	virtual const uint32 GetBytesRecvPerSecond() const { return 0; }
 	virtual const EQEmu::versions::ClientVersion ClientVersion() const { return EQEmu::versions::ClientVersion::Unknown; }
+
+	virtual std::shared_ptr<EQ::Net::DaybreakConnection> GetRawConnection() = 0;
 };
 
 #endif /*EQSTREAMINTF_H_*/

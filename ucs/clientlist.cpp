@@ -469,6 +469,11 @@ Clientlist::Clientlist(int ChatPort) {
 	EQ::Net::EQStreamManagerOptions chat_opts(ChatPort, false, false);
 	chat_opts.opcode_size = 1;
 	chat_opts.daybreak_options.stale_connection_ms = 300000;
+	chat_opts.daybreak_options.resend_delay_ms = RuleI(Network, ResendDelayBaseMS);
+	chat_opts.daybreak_options.resend_delay_factor = RuleR(Network, ResendDelayFactor);
+	chat_opts.daybreak_options.resend_delay_min = RuleI(Network, ResendDelayMinMS);
+	chat_opts.daybreak_options.resend_delay_max = RuleI(Network, ResendDelayMaxMS);
+
 	chatsf = new EQ::Net::EQStreamManager(chat_opts);
 
 	ChatOpMgr = new RegularOpcodeManager;

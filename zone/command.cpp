@@ -52,7 +52,7 @@
 #include "../common/rulesys.h"
 #include "../common/serverinfo.h"
 #include "../common/string_util.h"
-#include "../say_link.h"
+#include "../common/say_link.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/profanity_manager.h"
 
@@ -278,6 +278,7 @@ int command_init(void)
 		command_add("mystats", "- Show details about you or your pet", 50, command_mystats) ||
 		command_add("name", "[newname] - Rename your player target", 150, command_name) ||
 		command_add("netstats", "- Gets the network stats for a stream.", 200, command_netstats) ||
+		command_add("network", "- Admin commands for the udp network interface.", 250, command_network) ||
 		command_add("npccast", "[targetname/entityid] [spellid] - Causes NPC target to cast spellid on targetname/entityid", 80, command_npccast) ||
 		command_add("npcedit", "[column] [value] - Mega NPC editing command", 100, command_npcedit) ||
 		command_add("npcemote", "[message] - Make your NPC target emote a message.", 150, command_npcemote) ||
@@ -12158,6 +12159,169 @@ void command_who(Client *c, const Seperator *sep)
 	);
 
 	c->Message(5, message.c_str());
+}
+
+void command_network(Client *c, const Seperator *sep)
+{
+	if (!strcasecmp(sep->arg[1], "getopt"))
+	{
+		auto eqsi = c->Connection();
+		auto dbc = eqsi->GetRawConnection();
+		auto manager = dbc->GetManager();
+		auto &opts = manager->GetOptions();
+
+		if (!strcasecmp(sep->arg[2], "all"))
+		{
+			c->Message(0, "max_packet_size: %llu", opts.max_packet_size);
+			c->Message(0, "max_connection_count: %llu", opts.max_connection_count);
+			c->Message(0, "keepalive_delay_ms: %llu", opts.keepalive_delay_ms);
+			c->Message(0, "resend_delay_factor: %.2f", opts.resend_delay_factor);
+			c->Message(0, "resend_delay_ms: %llu", opts.resend_delay_ms);
+			c->Message(0, "resend_delay_min: %llu", opts.resend_delay_min);
+			c->Message(0, "resend_delay_max: %llu", opts.resend_delay_max);
+			c->Message(0, "connect_delay_ms: %llu", opts.connect_delay_ms);
+			c->Message(0, "connect_stale_ms: %llu", opts.connect_stale_ms);
+			c->Message(0, "stale_connection_ms: %llu", opts.stale_connection_ms);
+			c->Message(0, "crc_length: %llu", opts.crc_length);
+			c->Message(0, "hold_size: %llu", opts.hold_size);
+			c->Message(0, "hold_length_ms: %llu", opts.hold_length_ms);
+			c->Message(0, "simulated_in_packet_loss: %llu", opts.simulated_in_packet_loss);
+			c->Message(0, "simulated_out_packet_loss: %llu", opts.simulated_out_packet_loss);
+			c->Message(0, "tic_rate_hertz: %.2f", opts.tic_rate_hertz);
+			c->Message(0, "resend_timeout: %llu", opts.resend_timeout);
+			c->Message(0, "connection_close_time: %llu", opts.connection_close_time);
+			c->Message(0, "encode_passes[0]: %llu", opts.encode_passes[0]);
+			c->Message(0, "encode_passes[1]: %llu", opts.encode_passes[1]);
+			c->Message(0, "port: %llu", opts.port);
+		}
+		else {
+			c->Message(0, "Unknown get option: %s", sep->arg[2]);
+			c->Message(0, "Available options:");
+			//Todo the rest of these when im less lazy.
+			//c->Message(0, "max_packet_size");
+			//c->Message(0, "max_connection_count");
+			//c->Message(0, "keepalive_delay_ms");
+			//c->Message(0, "resend_delay_factor");
+			//c->Message(0, "resend_delay_ms");
+			//c->Message(0, "resend_delay_min");
+			//c->Message(0, "resend_delay_max");
+			//c->Message(0, "connect_delay_ms");
+			//c->Message(0, "connect_stale_ms");
+			//c->Message(0, "stale_connection_ms");
+			//c->Message(0, "crc_length");
+			//c->Message(0, "hold_size");
+			//c->Message(0, "hold_length_ms");
+			//c->Message(0, "simulated_in_packet_loss");
+			//c->Message(0, "simulated_out_packet_loss");
+			//c->Message(0, "tic_rate_hertz");
+			//c->Message(0, "resend_timeout");
+			//c->Message(0, "connection_close_time");
+			//c->Message(0, "encode_passes[0]");
+			//c->Message(0, "encode_passes[1]");
+			//c->Message(0, "port");
+			c->Message(0, "all");
+		}
+	}
+	else if (!strcasecmp(sep->arg[1], "setopt"))
+	{
+		auto eqsi = c->Connection();
+		auto dbc = eqsi->GetRawConnection();
+		auto manager = dbc->GetManager();
+		auto &opts = manager->GetOptions();
+
+		if (!strcasecmp(sep->arg[3], ""))
+		{
+			c->Message(0, "Missing value for set");
+			return;
+		}
+
+		std::string value = sep->arg[3];
+		if (!strcasecmp(sep->arg[2], "max_connection_count"))
+		{
+			opts.max_connection_count = std::stoull(value);
+		} 
+		else if (!strcasecmp(sep->arg[2], "keepalive_delay_ms"))
+		{
+			opts.keepalive_delay_ms = std::stoull(value);
+		}
+		else if (!strcasecmp(sep->arg[2], "resend_delay_factor"))
+		{
+			opts.resend_delay_factor = std::stod(value);
+		}
+		else if (!strcasecmp(sep->arg[2], "resend_delay_ms"))
+		{
+			opts.resend_delay_ms = std::stoull(value);
+		}
+		else if (!strcasecmp(sep->arg[2], "resend_delay_min"))
+		{
+			opts.resend_delay_min = std::stoull(value);
+		}
+		else if (!strcasecmp(sep->arg[2], "resend_delay_max"))
+		{
+			opts.resend_delay_max = std::stoull(value);
+		}
+		else if (!strcasecmp(sep->arg[2], "connect_delay_ms"))
+		{
+			opts.connect_delay_ms = std::stoull(value);
+		}
+		else if (!strcasecmp(sep->arg[2], "connect_stale_ms"))
+		{
+			opts.connect_stale_ms = std::stoull(value);
+		}
+		else if (!strcasecmp(sep->arg[2], "stale_connection_ms"))
+		{
+			opts.stale_connection_ms = std::stoull(value);
+		}
+		else if (!strcasecmp(sep->arg[2], "hold_size"))
+		{
+			opts.hold_size = std::stoull(value);
+		}
+		else if (!strcasecmp(sep->arg[2], "hold_length_ms"))
+		{
+			opts.hold_length_ms = std::stoull(value);
+		}
+		else if (!strcasecmp(sep->arg[2], "simulated_in_packet_loss"))
+		{
+			opts.simulated_in_packet_loss = std::stoull(value);
+		}
+		else if (!strcasecmp(sep->arg[2], "simulated_out_packet_loss"))
+		{
+			opts.simulated_out_packet_loss = std::stoull(value);
+		}
+		else if (!strcasecmp(sep->arg[2], "resend_timeout"))
+		{
+			opts.resend_timeout = std::stoull(value);
+		}
+		else if (!strcasecmp(sep->arg[2], "connection_close_time"))
+		{
+			opts.connection_close_time = std::stoull(value);
+		}
+		else {
+			c->Message(0, "Unknown set option: %s", sep->arg[2]);
+			c->Message(0, "Available options:");
+			c->Message(0, "max_connection_count");
+			c->Message(0, "keepalive_delay_ms");
+			c->Message(0, "resend_delay_factor");
+			c->Message(0, "resend_delay_ms");
+			c->Message(0, "resend_delay_min");
+			c->Message(0, "resend_delay_max");
+			c->Message(0, "connect_delay_ms");
+			c->Message(0, "connect_stale_ms");
+			c->Message(0, "stale_connection_ms");
+			c->Message(0, "hold_size");
+			c->Message(0, "hold_length_ms");
+			c->Message(0, "simulated_in_packet_loss");
+			c->Message(0, "simulated_out_packet_loss");
+			c->Message(0, "resend_timeout");
+			c->Message(0, "connection_close_time");
+		}
+	}
+	else {
+		c->Message(0, "Unknown command: %s", sep->arg[1]);
+		c->Message(0, "Network commands avail:");
+		c->Message(0, "getopt optname - Retrieve the current option value set.");
+		c->Message(0, "setopt optname - Set the current option allowed.");
+	}
 }
 
 // All new code added to command.cpp should be BEFORE this comment line. Do no append code to this file below the BOTS code block.
