@@ -284,7 +284,7 @@ public:
 	void LoadBuffs(Client *c);
 	void SaveAuras(Client *c);
 	void LoadAuras(Client *c);
-	std::string SavePetInfoQuery(Client * client);
+	void SavePetInfoQuery(Client * client, std::string& query);
 	void LoadPetInfo(Client *c);
 	void SavePetInfo(Client *c);
 	void RemoveTempFactions(Client *c);
@@ -315,16 +315,16 @@ public:
 
 	bool SaveCharacterAA(uint32 character_id, uint32 aa_id, uint32 current_level, uint32 charges);
 	bool SaveCharacterBandolier(uint32 character_id, uint8 bandolier_id, uint8 bandolier_slot, uint32 item_id, uint32 icon, const char* bandolier_name);
-	std::string SaveCharacterBindPointQuery(uint32 character_id, const BindStruct & bind, uint32 bind_num);
+	void SaveCharacterBindPointQuery(uint32 character_id, const BindStruct & bind, uint32 bind_num, std::string& query);
 	bool SaveCharacterBindPoint(uint32 character_id, const BindStruct &bind, uint32 bind_num);
 	bool SaveCharacterCurrency(uint32 character_id, PlayerProfile_Struct* pp);
 	bool SaveCharacterData(uint32 character_id, uint32 account_id, PlayerProfile_Struct* pp, ExtendedProfile_Struct* m_epp);
-	std::string SaveCharacterCurrencyQuery(uint32 character_id, PlayerProfile_Struct * pp);
+	void SaveCharacterCurrencyQuery(uint32 character_id, PlayerProfile_Struct * pp,std::string& query);
 	bool SaveCharacterDisc(uint32 character_id, uint32 slot_id, uint32 disc_id);
-	std::string SaveCharacterTributeQuery(uint32 character_id, PlayerProfile_Struct * pp);
+	void SaveCharacterTributeQuery(uint32 character_id, PlayerProfile_Struct * pp, std::string& query);
 	bool SaveCharacterLanguage(uint32 character_id, uint32 lang_id, uint32 value);
 	bool SaveCharacterLeadershipAA(uint32 character_id, PlayerProfile_Struct* pp);
-	std::string SaveCharacterDataQuery(uint32 character_id, uint32 account_id, PlayerProfile_Struct * pp, ExtendedProfile_Struct * m_epp);
+	void SaveCharacterDataQuery(uint32 character_id, uint32 account_id, PlayerProfile_Struct * pp, ExtendedProfile_Struct * m_epp, std::string& query);
 	bool SaveCharacterMaterialColor(uint32 character_id, uint32 slot_id, uint32 color);
 	bool SaveCharacterMemorizedSpell(uint32 character_id, uint32 spell_id, uint32 slot_id);
 	bool SaveCharacterPotionBelt(uint32 character_id, uint8 potion_id, uint32 item_id, uint32 icon);
@@ -524,11 +524,7 @@ public:
 	void LoadAltCurrencyValues(uint32 char_id, std::map<uint32, uint32> &currency);
 	void UpdateAltCurrencyValue(uint32 char_id, uint32 currency_id, uint32 value);
 
-	std::string SaveBuffsDeleteQuery(Client * client);
-
-	std::string SaveBuffsInsertQuery(Client * client);
-
-	std::string SaveBuffsQuery(Client * client);
+	void SaveBuffsQuery(Client * client, std::string& query);
 
 	/* Saylinks   */
 	uint32 LoadSaylinkID(const char* saylink_text, bool auto_insert = true);

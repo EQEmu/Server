@@ -280,14 +280,14 @@ bool TaskManager::LoadTasks(int singleTask)
 
 	return true;
 }
-std::string TaskManager::SaveClientStateQuery(Client *c, ClientTaskState *state)
+void TaskManager::SaveClientStateQuery(Client *c, ClientTaskState *state, std::string& query)
 {
 	// I am saving the slot in the ActiveTasks table, because unless a Task is cancelled/completed, the client
 	// doesn't seem to like tasks moving slots between zoning and you can end up with 'bogus' activities if the task
 	// previously in that slot had more activities than the one now occupying it. Hopefully retaining the slot
 	// number for the duration of a session will overcome this.
 	if (!c || !state)
-		return false;
+		return;
 
 	const char *ERR_MYSQLERROR = "[TASKS]Error in TaskManager::SaveClientState %s";
 
@@ -295,7 +295,7 @@ std::string TaskManager::SaveClientStateQuery(Client *c, ClientTaskState *state)
 
 	Log(Logs::Detail, Logs::Tasks, "TaskManager::SaveClientState for character ID %d", characterID);
 
-	std::string query = "";
+	
 	if (state->ActiveTaskCount > 0 || state->ActiveTask.TaskID != TASKSLOTEMPTY) { // TODO: tasks
 		for (int task = 0; task < MAXACTIVEQUESTS + 1; task++) {
 			int taskID = state->ActiveTasks[task].TaskID;
@@ -371,7 +371,7 @@ std::string TaskManager::SaveClientStateQuery(Client *c, ClientTaskState *state)
 	if (!RuleB(TaskSystem, RecordCompletedTasks) ||
 		(state->CompletedTasks.size() <= (unsigned int)state->LastCompletedTaskLoaded)) {
 		state->LastCompletedTaskLoaded = state->CompletedTasks.size();
-		return query;
+		return;
 	}
 
 	const char *completedTaskQuery = "REPLACE INTO completed_tasks (charid, completedtime, taskid, activityid) "
@@ -408,7 +408,6 @@ std::string TaskManager::SaveClientStateQuery(Client *c, ClientTaskState *state)
 		}
 	}
 
-	return query;
 }
 //if you make modifications to SaveClientSate, be sure to update SaveClientStateQuery as well.Overall this method is a tangle of logic
 //so was hard to seperate the queries from the actual code base. 

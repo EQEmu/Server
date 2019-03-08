@@ -150,11 +150,11 @@ bool PersistentTimer::Load(Database *db) {
     return true;
 }
 
-std::string PersistentTimer::StoreQuery(Database *db) {
+void PersistentTimer::StoreQuery(Database *db, std::string& query) {
 	if (Expired(db, false))	//dont need to store expired timers.
-		return "";
+		return;
 
-	std::string query = StringFormat("REPLACE INTO timers "
+	query += StringFormat("REPLACE INTO timers "
 		" (char_id, type, start, duration, enable) "
 		" VALUES (%lu, %u, %lu, %lu, %d);",
 		(unsigned long)_char_id, _type, (unsigned long)start_time,
@@ -164,14 +164,14 @@ std::string PersistentTimer::StoreQuery(Database *db) {
 #ifdef DEBUG_PTIMERS
 	printf("Storing timer: char %lu of type %u: '%s'\n", (unsigned long)_char_id, _type, query.c_str());
 #endif
-	return query;
-
+	
 }
 bool PersistentTimer::Store(Database *db) {
 	if(Expired(db, false))	//dont need to store expired timers.
 		return true;
 
-	std::string query = StoreQuery(db);
+	std::string query = "";
+	StoreQuery(db,query);
 
 #ifdef DEBUG_PTIMERS
 	printf("Storing timer: char %lu of type %u: '%s'\n", (unsigned long)_char_id, _type, query.c_str());
@@ -331,11 +331,11 @@ bool PTimerList::Load(Database *db) {
 	return true;
 }
 
-std::string PTimerList::StoreListQuery(Database *db) {
+void PTimerList::StoreListQuery(Database *db, std::string& query) {
 #ifdef DEBUG_PTIMERS
 	printf("Storing all timers for char %lu\n", (unsigned long)_char_id);
 #endif
-	std::string query = "";
+	
 	std::map<pTimerType, PersistentTimer *>::iterator s;
 	s = _list.begin();
 	bool res = true;
@@ -345,11 +345,11 @@ std::string PTimerList::StoreListQuery(Database *db) {
 			printf("Storing timer %u for char %lu\n", s->first, (unsigned long)_char_id);
 #endif
 	
-			query += s->second->StoreQuery(db);
+			s->second->StoreQuery(db,query);
 		}
 		++s;
 	}
-	return query;
+	
 }
 
 bool PTimerList::Store(Database *db) {
