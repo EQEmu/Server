@@ -57,11 +57,104 @@ void DBcore::ping() {
 	mysql_ping(&mysql);
 	MDatabase.unlock();
 }
+bool DBcore::QueryDatabaseMulti(std::string query, bool retryOnFailureOnce)
+{
+	return QueryDatabaseMulti(query.c_str(), query.length(), retryOnFailureOnce);
+}
 
 MySQLRequestResult DBcore::QueryDatabase(std::string query, bool retryOnFailureOnce)
 {
 	return QueryDatabase(query.c_str(), query.length(), retryOnFailureOnce);
 }
+
+bool DBcore::QueryDatabaseMulti(const char* query, uint32 querylen, bool retryOnFailureOnce)
+{
+	LockMutex lock(&MDatabase);
+
+	// Reconnect if we are not connected before hand.
+	if (pStatus != Connected)
+		Open();
+	 
+	int status = mysql_real_query(&mysql, query, querylen);
+	// request query. != 0 indicates some kind of error.
+	if (status != 0)
+	{
+		unsigned int errorNumber = mysql_errno(&mysql);
+
+		if (errorNumber == CR_SERVER_GONE_ERROR)
+			pStatus = Error;
+
+		// error appears to be a disconnect error, may need to try again.
+		if (errorNumber == CR_SERVER_LOST || errorNumber == CR_SERVER_GONE_ERROR)
+		{
+
+			if (retryOnFailureOnce)
+			{
+				std::cout << "Database Error: Lost connection, attempting to recover...." << std::endl;
+				bool result = QueryDatabaseMulti(query, querylen, false);
+
+				if (result)
+				{
+					std::cout << "Reconnection to database successful." << std::endl;
+					return true;
+				}
+
+			}
+
+			pStatus = Error;
+
+			auto errorBuffer = new char[MYSQL_ERRMSG_SIZE];
+
+			snprintf(errorBuffer, MYSQL_ERRMSG_SIZE, "#%i: %s", mysql_errno(&mysql), mysql_error(&mysql));
+
+			return false;
+		}
+
+		auto errorBuffer = new char[MYSQL_ERRMSG_SIZE];
+		snprintf(errorBuffer, MYSQL_ERRMSG_SIZE, "#%i: %s", mysql_errno(&mysql), mysql_error(&mysql));
+
+		/* Implement Logging at the Root */
+		if (mysql_errno(&mysql) > 0 && strlen(query) > 0) {
+			if (LogSys.log_settings[Logs::MySQLError].is_category_enabled == 1)
+				Log(Logs::General, Logs::MySQLError, "%i: %s \n %s", mysql_errno(&mysql), mysql_error(&mysql), query);
+		}
+
+		return false;
+
+	}
+	
+	// successful query. get results, and process/free them
+	//https://dev.mysql.com/doc/refman/5.6/en/c-api-multiple-queries.html
+	MYSQL_RES* res;
+	do {
+		/* did current statement return data? */
+		res = mysql_store_result(&mysql);
+		if (res)
+		{
+			/* yes; process rows and free the result set */
+			mysql_free_result(res);
+		}
+		else          /* no result set or error */
+		{
+			if (mysql_field_count(&mysql) == 0)
+			{
+				//printf("%lld rows affected\n",
+				//	mysql_affected_rows(&mysql));
+			}
+			else  /* some error occurred */
+			{
+				//"Could not retrieve result set"
+				break;
+			}
+		}
+		/* more results? -1 = no, >0 = error, 0 = yes (keep looping) */
+		status = mysql_next_result(&mysql);
+	
+	} while (status == 0);
+
+	return true;
+}
+
 
 MySQLRequestResult DBcore::QueryDatabase(const char* query, uint32 querylen, bool retryOnFailureOnce)
 {
@@ -70,10 +163,12 @@ MySQLRequestResult DBcore::QueryDatabase(const char* query, uint32 querylen, boo
 	// Reconnect if we are not connected before hand.
 	if (pStatus != Connected)
 		Open();
+	
 
 	// request query. != 0 indicates some kind of error.
 	if (mysql_real_query(&mysql, query, querylen) != 0)
 	{
+
 		unsigned int errorNumber = mysql_errno(&mysql);
 
 		if (errorNumber == CR_SERVER_GONE_ERROR)
@@ -117,6 +212,7 @@ MySQLRequestResult DBcore::QueryDatabase(const char* query, uint32 querylen, boo
 		return MySQLRequestResult(nullptr, 0, 0, 0, 0, mysql_errno(&mysql),errorBuffer);
 
 	}
+	
 
 	// successful query. get results.
 	MYSQL_RES* res = mysql_store_result(&mysql);
@@ -193,9 +289,16 @@ bool DBcore::Open(uint32* errnum, char* errbuf) {
 	*/
 	uint32 flags = CLIENT_FOUND_ROWS;
 	if (pCompress)
+	{
 		flags |= CLIENT_COMPRESS;
+	}
 	if (pSSL)
+	{
 		flags |= CLIENT_SSL;
+
+	}
+	flags |= CLIENT_MULTI_STATEMENTS;
+
 	if (mysql_real_connect(&mysql, pHost, pUser, pPassword, pDatabase, pPort, 0, flags)) {
 		pStatus = Connected;
 		return true;

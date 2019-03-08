@@ -20,6 +20,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <ctime>
 
 // for windows compile
 #ifndef _WINDOWS
@@ -606,10 +607,118 @@ void Client::RemoveExpendedAA(int aa_id)
 	database.QueryDatabase(StringFormat("DELETE from `character_alternate_abilities` WHERE `id` = %d and `aa_id` = %d", character_id, aa_id));
 }
 
+//bool Client::Save(uint8 iCommitNow) {
+//	if (!ClientDataLoaded())
+//		return false;
+//	clock_t t = std::clock(); /* Function timer start */
+//	/* Wrote current basics to PP for saves */
+//	m_pp.x = m_Position.x;
+//	m_pp.y = m_Position.y;
+//	m_pp.z = m_Position.z;
+//	m_pp.guildrank = guildrank;
+//	m_pp.heading = m_Position.w;
+//
+//	/* Mana and HP */
+//	if (GetHP() <= 0) {
+//		m_pp.cur_hp = GetMaxHP();
+//	}
+//	else {
+//		m_pp.cur_hp = GetHP();
+//	}
+//
+//	m_pp.mana = current_mana;
+//	m_pp.endurance = current_endurance;
+//
+//	/* Save Character Currency */
+//	database.SaveCharacterCurrency(CharacterID(), &m_pp);
+//
+//	/* Save Current Bind Points */
+//	for (int i = 0; i < 5; i++)
+//		if (m_pp.binds[i].zoneId)
+//			database.SaveCharacterBindPoint(CharacterID(), m_pp.binds[i], i);
+//
+//	/* Save Character Buffs */
+//	database.SaveBuffs(this);
+//
+//	/* Total Time Played */
+//	TotalSecondsPlayed += (time(nullptr) - m_pp.lastlogin);
+//	m_pp.timePlayedMin = (TotalSecondsPlayed / 60);
+//	m_pp.RestTimer = GetRestTimer();
+//
+//	/* Save Mercs */
+//	if (GetMercInfo().MercTimerRemaining > RuleI(Mercs, UpkeepIntervalMS)) {
+//		GetMercInfo().MercTimerRemaining = RuleI(Mercs, UpkeepIntervalMS);
+//	}
+//
+//	if (GetMercTimer()->Enabled()) {
+//		GetMercInfo().MercTimerRemaining = GetMercTimer()->GetRemainingTime();
+//	}
+//
+//	if (dead || (!GetMerc() && !GetMercInfo().IsSuspended)) {
+//		memset(&m_mercinfo, 0, sizeof(struct MercInfo));
+//	}
+//
+//	m_pp.lastlogin = time(nullptr);
+//
+//	if (GetPet() && GetPet()->CastToNPC()->GetPetSpellID() && !dead) {
+//		NPC *pet = GetPet()->CastToNPC();
+//		m_petinfo.SpellID = pet->CastToNPC()->GetPetSpellID();
+//		m_petinfo.HP = pet->GetHP();
+//		m_petinfo.Mana = pet->GetMana();
+//		pet->GetPetState(m_petinfo.Buffs, m_petinfo.Items, m_petinfo.Name);
+//		m_petinfo.petpower = pet->GetPetPower();
+//		m_petinfo.size = pet->GetSize();
+//	}
+//	else {
+//		memset(&m_petinfo, 0, sizeof(struct PetInfo));
+//	}
+//	database.SavePetInfo(this);
+//
+//	if (tribute_timer.Enabled()) {
+//		m_pp.tribute_time_remaining = tribute_timer.GetRemainingTime();
+//	}
+//	else {
+//		m_pp.tribute_time_remaining = 0xFFFFFFFF; m_pp.tribute_active = 0;
+//	}
+//
+//	if (m_pp.hunger_level < 0)
+//		m_pp.hunger_level = 0;
+//
+//	if (m_pp.thirst_level < 0)
+//		m_pp.thirst_level = 0;
+//
+//	p_timers.Store(&database);
+//
+//	database.SaveCharacterTribute(this->CharacterID(), &m_pp);
+//	SaveTaskState(); /* Save Character Task */
+//
+//	Log(Logs::General, Logs::Food, "Client::Save - hunger_level: %i thirst_level: %i", m_pp.hunger_level, m_pp.thirst_level);
+//
+//	// perform snapshot before SaveCharacterData() so that m_epp will contain the updated time
+//	if (RuleB(Character, ActiveInvSnapshots) && time(nullptr) >= GetNextInvSnapshotTime()) {
+//		if (database.SaveCharacterInvSnapshot(CharacterID())) {
+//			SetNextInvSnapshot(RuleI(Character, InvSnapshotMinIntervalM));
+//		}
+//		else {
+//			SetNextInvSnapshot(RuleI(Character, InvSnapshotMinRetryM));
+//		}
+//	}
+//
+//	database.SaveCharacterData(this->CharacterID(), this->AccountID(), &m_pp, &m_epp); /* Save Character Data */
+//	float totalTime = ((float)(std::clock() - t));
+//	Log(Logs::General, Logs::Zone_Server, "ZoneDatabase::SaveCharacterData_OldWay %i, done... Took %f seconds", character_id, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
+//	return true;
+//}
+
 bool Client::Save(uint8 iCommitNow) {
 	if(!ClientDataLoaded())
 		return false;
 
+	clock_t t = std::clock(); /* Function timer start */
+	std::string combinedQueries;
+	combinedQueries.reserve(1024 * 10);//10k should be enough
+	
+	combinedQueries += "START TRANSACTION;";
 	/* Wrote current basics to PP for saves */
 	m_pp.x = m_Position.x;
 	m_pp.y = m_Position.y;
@@ -629,16 +738,19 @@ bool Client::Save(uint8 iCommitNow) {
 	m_pp.endurance = current_endurance;
 
 	/* Save Character Currency */
-	database.SaveCharacterCurrency(CharacterID(), &m_pp);
+	combinedQueries+=database.SaveCharacterCurrencyQuery(CharacterID(), &m_pp);
 
 	/* Save Current Bind Points */
 	for (int i = 0; i < 5; i++)
+	{
 		if (m_pp.binds[i].zoneId)
-			database.SaveCharacterBindPoint(CharacterID(), m_pp.binds[i], i);
-
+		{
+			combinedQueries += database.SaveCharacterBindPointQuery(CharacterID(), m_pp.binds[i], i);
+		}
+	}
 	/* Save Character Buffs */
-	database.SaveBuffs(this);
-
+	combinedQueries+=database.SaveBuffsQuery(this);
+	
 	/* Total Time Played */
 	TotalSecondsPlayed += (time(nullptr) - m_pp.lastlogin);
 	m_pp.timePlayedMin = (TotalSecondsPlayed / 60);
@@ -670,7 +782,7 @@ bool Client::Save(uint8 iCommitNow) {
 	} else {
 		memset(&m_petinfo, 0, sizeof(struct PetInfo));
 	}
-	database.SavePetInfo(this);
+	combinedQueries+=database.SavePetInfoQuery(this);
 
 	if(tribute_timer.Enabled()) {
 		m_pp.tribute_time_remaining = tribute_timer.GetRemainingTime();
@@ -685,14 +797,20 @@ bool Client::Save(uint8 iCommitNow) {
 	if (m_pp.thirst_level < 0)
 		m_pp.thirst_level = 0;
 
-	p_timers.Store(&database);
+	combinedQueries+=p_timers.StoreListQuery(&database);
 
-	database.SaveCharacterTribute(this->CharacterID(), &m_pp);
-	SaveTaskState(); /* Save Character Task */
-
+	combinedQueries+=database.SaveCharacterTributeQuery(this->CharacterID(), &m_pp);
+	
+	if (taskmanager)
+	{ 
+		/* Save Character Task */
+		combinedQueries+=taskmanager->SaveClientStateQuery(this, taskstate);
+	}
+	
 	Log(Logs::General, Logs::Food, "Client::Save - hunger_level: %i thirst_level: %i", m_pp.hunger_level, m_pp.thirst_level);
 
 	// perform snapshot before SaveCharacterData() so that m_epp will contain the updated time
+	//not part of combined as it checks for record existance logic
 	if (RuleB(Character, ActiveInvSnapshots) && time(nullptr) >= GetNextInvSnapshotTime()) {
 		if (database.SaveCharacterInvSnapshot(CharacterID())) {
 			SetNextInvSnapshot(RuleI(Character, InvSnapshotMinIntervalM));
@@ -702,9 +820,14 @@ bool Client::Save(uint8 iCommitNow) {
 		}
 	}
 
-	database.SaveCharacterData(this->CharacterID(), this->AccountID(), &m_pp, &m_epp); /* Save Character Data */
+	combinedQueries+=database.SaveCharacterDataQuery(this->CharacterID(), this->AccountID(), &m_pp, &m_epp); /* Save Character Data */
+	combinedQueries+="COMMIT;";
 
-	return true;
+	bool savedCharacter = database.QueryDatabaseMulti(combinedQueries, false);
+	float totalTime = ((float)(std::clock() - t));
+	Log(Logs::General, Logs::Zone_Server, "ZoneDatabase::SaveCharacterData_NewWay %i, done... Took %f seconds", character_id, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
+
+	return savedCharacter;
 }
 
 void Client::SaveBackup() {

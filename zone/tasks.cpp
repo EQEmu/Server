@@ -280,7 +280,138 @@ bool TaskManager::LoadTasks(int singleTask)
 
 	return true;
 }
+std::string TaskManager::SaveClientStateQuery(Client *c, ClientTaskState *state)
+{
+	// I am saving the slot in the ActiveTasks table, because unless a Task is cancelled/completed, the client
+	// doesn't seem to like tasks moving slots between zoning and you can end up with 'bogus' activities if the task
+	// previously in that slot had more activities than the one now occupying it. Hopefully retaining the slot
+	// number for the duration of a session will overcome this.
+	if (!c || !state)
+		return false;
 
+	const char *ERR_MYSQLERROR = "[TASKS]Error in TaskManager::SaveClientState %s";
+
+	int characterID = c->CharacterID();
+
+	Log(Logs::Detail, Logs::Tasks, "TaskManager::SaveClientState for character ID %d", characterID);
+
+	std::string query = "";
+	if (state->ActiveTaskCount > 0 || state->ActiveTask.TaskID != TASKSLOTEMPTY) { // TODO: tasks
+		for (int task = 0; task < MAXACTIVEQUESTS + 1; task++) {
+			int taskID = state->ActiveTasks[task].TaskID;
+			if (taskID == TASKSLOTEMPTY)
+				continue;
+
+			int slot = state->ActiveTasks[task].slot;
+
+			if (state->ActiveTasks[task].Updated) {
+
+				Log(Logs::General, Logs::Tasks,
+					"[CLIENTSAVE] TaskManager::SaveClientState for character ID %d, Updating TaskIndex "
+					"%i TaskID %i",
+					characterID, slot, taskID);
+
+				query += StringFormat(
+					"REPLACE INTO character_tasks (charid, taskid, slot, type, acceptedtime) "
+					"VALUES (%i, %i, %i, %i, %i);",
+					characterID, taskID, slot, static_cast<int>(Tasks[taskID]->type),
+					state->ActiveTasks[task].AcceptedTime);
+				auto results = database.QueryDatabase(query);
+				if (!results.Success()) {
+					Log(Logs::General, Logs::Error, ERR_MYSQLERROR, results.ErrorMessage().c_str());
+				}
+				else {
+					state->ActiveTasks[task].Updated = false;
+				}
+			}
+
+			std::string tquery =
+				"REPLACE INTO character_activities (charid, taskid, activityid, donecount, completed) "
+				"VALUES ";
+
+			int updatedActivityCount = 0;
+			for (int activityIndex = 0; activityIndex < Tasks[taskID]->ActivityCount; ++activityIndex) {
+
+				if (!state->ActiveTasks[task].Activity[activityIndex].Updated)
+					continue;
+
+				Log(Logs::General, Logs::Tasks,
+					"[CLIENTSAVE] TaskManager::SaveClientSate for character ID %d, Updating Activity "
+					"%i, %i",
+					characterID, slot, activityIndex);
+
+				if (updatedActivityCount == 0)
+					tquery +=
+					StringFormat("(%i, %i, %i, %i, %i)", characterID, taskID, activityIndex,
+						state->ActiveTasks[task].Activity[activityIndex].DoneCount,
+						state->ActiveTasks[task].Activity[activityIndex].State ==
+						ActivityCompleted);
+				else
+					tquery +=
+					StringFormat(", (%i, %i, %i, %i, %i)", characterID, taskID, activityIndex,
+						state->ActiveTasks[task].Activity[activityIndex].DoneCount,
+						state->ActiveTasks[task].Activity[activityIndex].State ==
+						ActivityCompleted);
+
+				updatedActivityCount++;
+			}
+
+			if (updatedActivityCount == 0)
+				continue;
+
+			query += tquery;
+			query += ";";
+
+			state->ActiveTasks[task].Updated = false;
+			for (int activityIndex = 0; activityIndex < Tasks[taskID]->ActivityCount; ++activityIndex)
+				state->ActiveTasks[task].Activity[activityIndex].Updated = false;
+		}
+	}
+
+	if (!RuleB(TaskSystem, RecordCompletedTasks) ||
+		(state->CompletedTasks.size() <= (unsigned int)state->LastCompletedTaskLoaded)) {
+		state->LastCompletedTaskLoaded = state->CompletedTasks.size();
+		return query;
+	}
+
+	const char *completedTaskQuery = "REPLACE INTO completed_tasks (charid, completedtime, taskid, activityid) "
+		"VALUES (%i, %i, %i, %i);";
+
+	for (unsigned int i = state->LastCompletedTaskLoaded; i < state->CompletedTasks.size(); i++) {
+
+		Log(Logs::General, Logs::Tasks,
+			"[CLIENTSAVE] TaskManager::SaveClientState Saving Completed Task at slot %i", i);
+		int taskID = state->CompletedTasks[i].TaskID;
+
+		if ((taskID <= 0) || (taskID >= MAXTASKS) || (Tasks[taskID] == nullptr))
+			continue;
+
+		// First we save a record with an ActivityID of -1.
+		// This indicates this task was completed at the given time. We infer that all
+		// none optional activities were completed.
+		//
+		query +=StringFormat(completedTaskQuery, characterID, state->CompletedTasks[i].CompletedTime, taskID, -1);
+	
+		// If the Rule to record non-optional task completion is not enabled, don't save it
+		if (!RuleB(TaskSystem, RecordCompletedOptionalActivities))
+			continue;
+
+		// Insert one record for each completed optional task.
+
+		for (int j = 0; j < Tasks[taskID]->ActivityCount; j++) {
+			if (!Tasks[taskID]->Activity[j].Optional || !state->CompletedTasks[i].ActivityDone[j])
+				continue;
+
+			query += StringFormat(completedTaskQuery, characterID, state->CompletedTasks[i].CompletedTime,
+				taskID, j);
+			
+		}
+	}
+
+	return query;
+}
+//if you make modifications to SaveClientSate, be sure to update SaveClientStateQuery as well.Overall this method is a tangle of logic
+//so was hard to seperate the queries from the actual code base. 
 bool TaskManager::SaveClientState(Client *c, ClientTaskState *state)
 {
 	// I am saving the slot in the ActiveTasks table, because unless a Task is cancelled/completed, the client

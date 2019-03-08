@@ -22,11 +22,13 @@ public:
 	eStatus	GetStatus() { return pStatus; }
 	MySQLRequestResult	QueryDatabase(const char* query, uint32 querylen, bool retryOnFailureOnce = true);
 	MySQLRequestResult	QueryDatabase(std::string query, bool retryOnFailureOnce = true);
+	bool QueryDatabaseMulti(const char * query, uint32 querylen, bool retryOnFailureOnce);
 	void TransactionBegin();
 	void TransactionCommit();
 	void TransactionRollback();
 	uint32	DoEscapeString(char* tobuf, const char* frombuf, uint32 fromlen);
 	void	ping();
+	bool QueryDatabaseMulti(std::string query, bool retryOnFailureOnce);
 	MYSQL*	getMySQL(){ return &mysql; }
 
 protected:

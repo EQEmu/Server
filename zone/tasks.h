@@ -289,6 +289,7 @@ public:
 	int GetActivityCount(int TaskID);
 	bool LoadSingleTask(int TaskID);
 	bool LoadTasks(int SingleTask=0);
+	std::string SaveClientStateQuery(Client * c, ClientTaskState * state);
 	void ReloadGoalLists();
 	inline void LoadProximities(int ZoneID) { ProximityManager.LoadProximities(ZoneID); }
 	bool LoadTaskSets();

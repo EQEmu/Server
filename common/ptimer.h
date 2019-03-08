@@ -88,6 +88,7 @@ public:
 	inline bool Enabled() { return enabled; }
 
 	bool Load(Database *db);
+	std::string StoreQuery(Database * db);
 	bool Store(Database *db);
 	bool Clear(Database *db);
 
@@ -110,6 +111,7 @@ public:
 	~PTimerList();
 
 	bool Load(Database *db);
+	std::string StoreListQuery(Database * db);
 	bool Store(Database *db);
 	bool Clear(Database *db);
 
