@@ -1505,62 +1505,60 @@ void ClientList::GetClientList(Json::Value &response)
 
 		Json::Value row;
 
-		row["online"]                 = cle->Online();
-		row["id"]                     = cle->GetID();
-		row["ip"]                     = cle->GetIP();
-		row["loginserver_id"]         = cle->LSID();
-		row["loginserver_account_id"] = cle->LSAccountID();
-		row["loginserver_name"]       = cle->LSName();
-		row["world_admin"]            = cle->WorldAdmin();
 		row["account_id"]             = cle->AccountID();
 		row["account_name"]           = cle->AccountName();
 		row["admin"]                  = cle->Admin();
+		row["id"]                     = cle->GetID();
+		row["ip"]                     = cle->GetIP();
+		row["loginserver_account_id"] = cle->LSAccountID();
+		row["loginserver_id"]         = cle->LSID();
+		row["loginserver_name"]       = cle->LSName();
+		row["online"]                 = cle->Online();
+		row["world_admin"]            = cle->WorldAdmin();
 
 		auto server = cle->Server();
 		if (server) {
 			row["server"]["client_address"]       = server->GetCAddress();
 			row["server"]["client_local_address"] = server->GetCLocalAddress();
-			row["server"]["compile_time"]         = server->GetCompileTime();
 			row["server"]["client_port"]          = server->GetCPort();
+			row["server"]["compile_time"]         = server->GetCompileTime();
 			row["server"]["id"]                   = server->GetID();
 			row["server"]["instance_id"]          = server->GetInstanceID();
 			row["server"]["ip"]                   = server->GetIP();
-			row["server"]["launched_name"]        = server->GetLaunchedName();
+			row["server"]["is_booting"]           = server->IsBootingUp();
 			row["server"]["launch_name"]          = server->GetLaunchName();
+			row["server"]["launched_name"]        = server->GetLaunchedName();
+			row["server"]["number_players"]       = server->NumPlayers();
 			row["server"]["port"]                 = server->GetPort();
 			row["server"]["previous_zone_id"]     = server->GetPrevZoneID();
+			row["server"]["static_zone"]          = server->IsStaticZone();
 			row["server"]["uui"]                  = server->GetUUID();
 			row["server"]["zone_id"]              = server->GetZoneID();
 			row["server"]["zone_long_name"]       = server->GetZoneLongName();
 			row["server"]["zone_name"]            = server->GetZoneName();
 			row["server"]["zone_os_pid"]          = server->GetZoneOSProcessID();
-			row["server"]["number_players"]       = server->NumPlayers();
-			row["server"]["is_booting"]           = server->IsBootingUp();
-			row["server"]["static_zone"]          = server->IsStaticZone();
 		}
 		else {
 			row["server"] = Json::Value();
 		}
-
-		row["character_id"] = cle->CharID();
-		row["name"]         = cle->name();
-		row["zone"]         = cle->zone();
-		row["instance"]     = cle->instance();
-		row["level"]        = cle->level();
-		row["class"]        = cle->class_();
-		row["race"]         = cle->race();
-		row["anon"]         = cle->Anon();
-
-		row["tells_off"]        = cle->TellsOff();
-		row["guild_id"]         = cle->GuildID();
-		row["lfg"]              = cle->LFG();
-		row["gm"]               = cle->GetGM();
-		row["is_local_client"]  = cle->IsLocalClient();
-		row["lfg_from_level"]   = cle->GetLFGFromLevel();
-		row["lfg_to_level"]     = cle->GetLFGToLevel();
-		row["lfg_match_filter"] = cle->GetLFGMatchFilter();
-		row["lfg_comments"]     = cle->GetLFGComments();
+		row["anon"]             = cle->Anon();
+		row["character_id"]     = cle->CharID();
+		row["class"]            = cle->class_();
 		row["client_version"]   = cle->GetClientVersion();
+		row["gm"]               = cle->GetGM();
+		row["guild_id"]         = cle->GuildID();
+		row["instance"]         = cle->instance();
+		row["is_local_client"]  = cle->IsLocalClient();
+		row["level"]            = cle->level();
+		row["lfg"]              = cle->LFG();
+		row["lfg_comments"]     = cle->GetLFGComments();
+		row["lfg_from_level"]   = cle->GetLFGFromLevel();
+		row["lfg_match_filter"] = cle->GetLFGMatchFilter();
+		row["lfg_to_level"]     = cle->GetLFGToLevel();
+		row["name"]             = cle->name();
+		row["race"]             = cle->race();
+		row["tells_off"]        = cle->TellsOff();
+		row["zone"]             = cle->zone();
 
 		response.append(row);
 
