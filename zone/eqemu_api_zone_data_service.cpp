@@ -18,12 +18,13 @@
  *
  */
 
-#include "eqemu_api_zone_data_service.h"
+#include "client.h"
 #include "doors.h"
+#include "entity.h"
+#include "eqemu_api_zone_data_service.h"
 #include "npc.h"
 #include "object.h"
 #include "zone.h"
-#include "entity.h"
 #include <iostream>
 
 extern Zone *zone;
@@ -380,6 +381,199 @@ void callGetMobListDetail(Json::Value &response)
 	}
 }
 
+void callGetClientListDetail(Json::Value &response)
+{
+	auto &list = entity_list.GetClientList();
+
+	for (auto &iter : list) {
+		auto client = iter.second;
+
+		Json::Value row;
+
+		/**
+		 * Main
+		 */
+		row["id"]         = client->GetID();
+		row["clean_name"] = client->GetCleanName();
+		row["x"]          = client->GetX();
+		row["y"]          = client->GetY();
+		row["z"]          = client->GetZ();
+		row["heading"]    = client->GetHeading();
+
+		/**
+		 * Rest
+		 */
+		row["aa_percent"]                              = client->GetAAPercent();
+		row["aa_points"]                               = client->GetAAPoints();
+		row["aaxp"]                                    = client->GetAAXP();
+		row["account_age"]                             = client->GetAccountAge();
+		row["account_creation"]                        = client->GetAccountCreation();
+		row["account_id"]                              = client->AccountID();
+		row["account_name"]                            = client->AccountName();
+		row["act_agi"]                                 = client->GetActAGI();
+		row["act_cha"]                                 = client->GetActCHA();
+		row["act_dex"]                                 = client->GetActDEX();
+		row["act_int"]                                 = client->GetActINT();
+		row["act_sta"]                                 = client->GetActSTA();
+		row["act_str"]                                 = client->GetActSTR();
+		row["act_wis"]                                 = client->GetActWIS();
+		row["active_task_count"]                       = client->GetActiveTaskCount();
+		row["admin"]                                   = client->Admin();
+		row["aggro_count"]                             = client->GetAggroCount();
+		row["aggro_meter_available"]                   = client->AggroMeterAvailable();
+		row["all_money"]                               = client->GetAllMoney();
+		row["anon"]                                    = client->GetAnon();
+		row["atk_rating"]                              = client->GetATKRating();
+		row["auto_attack_enabled"]                     = client->AutoAttackEnabled();
+		row["auto_fire_enabled"]                       = client->AutoFireEnabled();
+		row["auto_split_enabled"]                      = client->AutoSplitEnabled();
+		row["base_agi"]                                = client->GetBaseAGI();
+		row["base_beard"]                              = client->GetBaseBeard();
+		row["base_beard_color"]                        = client->GetBaseBeardColor();
+		row["base_cha"]                                = client->GetBaseCHA();
+		row["base_class"]                              = client->GetBaseClass();
+		row["base_corrup"]                             = client->GetBaseCorrup();
+		row["base_details"]                            = client->GetBaseDetails();
+		row["base_dex"]                                = client->GetBaseDEX();
+		row["base_eye_color"]                          = client->GetBaseEyeColor();
+		row["base_face"]                               = client->GetBaseFace();
+		row["base_gender"]                             = client->GetBaseGender();
+		row["base_hair_color"]                         = client->GetBaseHairColor();
+		row["base_hair_style"]                         = client->GetBaseHairStyle();
+		row["base_heritage"]                           = client->GetBaseHeritage();
+		row["base_hp"]                                 = client->GetBaseHP();
+		row["base_int"]                                = client->GetBaseINT();
+		row["base_ph_r"]                               = client->GetBasePhR();
+		row["base_race"]                               = client->GetBaseRace();
+		row["base_sta"]                                = client->GetBaseSTA();
+		row["base_str"]                                = client->GetBaseSTR();
+		row["base_tattoo"]                             = client->GetBaseTattoo();
+		row["base_wis"]                                = client->GetBaseWIS();
+		row["become_npc_level"]                        = client->GetBecomeNPCLevel();
+		row["boat_id"]                                 = client->GetBoatID();
+		row["buyer_welcome_message"]                   = client->GetBuyerWelcomeMessage();
+		row["calc_atk"]                                = client->CalcATK();
+		row["calc_base_mana"]                          = client->CalcBaseMana();
+		row["calc_current_weight"]                     = client->CalcCurrentWeight();
+		row["calc_endurance_regen_cap"]                = client->CalcEnduranceRegenCap();
+		row["calc_hp_regen_cap"]                       = client->CalcHPRegenCap();
+		row["calc_mana_regen_cap"]                     = client->CalcManaRegenCap();
+		row["calc_max_mana"]                           = client->CalcMaxMana();
+		row["can_fast_regen"]                          = client->CanFastRegen();
+		row["can_fish"]                                = client->CanFish();
+		row["can_med_on_horse"]                        = client->CanMedOnHorse();
+		row["carried_money"]                           = client->GetCarriedMoney();
+		row["char_max_level_from_bucket"]              = client->GetCharMaxLevelFromBucket();
+		row["char_max_level_from_q_global"]            = client->GetCharMaxLevelFromQGlobal();
+		row["character_id"]                            = client->CharacterID();
+		row["check_can_unsuspend_merc"]                = client->CheckCanUnsuspendMerc();
+		row["check_double_attack"]                     = client->CheckDoubleAttack();
+		row["check_double_ranged_attack"]              = client->CheckDoubleRangedAttack();
+		row["check_dual_wield"]                        = client->CheckDualWield();
+		row["check_trade_non_droppable"]               = client->CheckTradeNonDroppable();
+		row["check_triple_attack"]                     = client->CheckTripleAttack();
+		row["client_max_level"]                        = client->GetClientMaxLevel();
+		row["client_version_bit"]                      = client->ClientVersionBit();
+		row["connected"]                               = client->Connected();
+		row["copper"]                                  = client->GetCopper();
+		row["corpse_count"]                            = client->GetCorpseCount();
+		row["duel_tar"]                                = client->GetDuelTarget();
+		row["ebon_crystals"]                           = client->GetEbonCrystals();
+		row["endurance"]                               = client->GetEndurance();
+		row["endurance_percent"]                       = client->GetEndurancePercent();
+		row["exp"]                                     = client->GetEXP();
+		row["face"]                                    = client->GetFace();
+		row["feigned"]                                 = client->GetFeigned();
+		row["gm"]                                      = client->GetGM();
+		row["gm_speed"]                                = client->GetGMSpeed();
+		row["gold"]                                    = client->GetGold();
+		row["group_exp"]                               = client->GetGroupEXP();
+		row["group_leadership_aa_health_enhancement"]  = client->GroupLeadershipAAHealthEnhancement();
+		row["group_leadership_aa_health_regeneration"] = client->GroupLeadershipAAHealthRegeneration();
+		row["group_leadership_aa_mana_enhancement"]    = client->GroupLeadershipAAManaEnhancement();
+		row["group_leadership_aa_offense_enhancement"] = client->GroupLeadershipAAOffenseEnhancement();
+		row["group_points"]                            = client->GetGroupPoints();
+		row["guild_id"]                                = client->GuildID();
+		row["guild_rank"]                              = client->GuildRank();
+		row["has_adventure_data"]                      = client->HasAdventureData();
+		row["hide_me"]                                 = client->GetHideMe();
+		row["horse_id"]                                = client->GetHorseId();
+		row["hunger"]                                  = client->GetHunger();
+		row["hungry"]                                  = client->Hungry();
+		row["in_zone"]                                 = client->InZone();
+		row["instance_id"]                             = client->GetInstanceID();
+		row["interrogate_inv_state"]                   = client->GetInterrogateInvState();
+		row["ip"]                                      = client->GetIP();
+		row["is_become_npc"]                           = client->IsBecomeNPC();
+		row["is_buyer"]                                = client->IsBuyer();
+		row["is_dead"]                                 = client->IsDead();
+		row["is_dragging_corpse"]                      = client->IsDraggingCorpse();
+		row["is_dueling"]                              = client->IsDueling();
+		row["is_guild_banker"]                         = client->IsGuildBanker();
+		row["is_hovering_for_respawn"]                 = client->IsHoveringForRespawn();
+		row["is_in_a_guild"]                           = client->IsInAGuild();
+		row["is_ld"]                                   = client->IsLD();
+		row["is_leadership_exp_on"]                    = client->IsLeadershipEXPOn();
+		row["is_lfp"]                                  = client->IsLFP();
+		row["is_medding"]                              = client->IsMedding();
+		row["is_on_adventure"]                         = client->IsOnAdventure();
+		row["is_rezz_pending"]                         = client->IsRezzPending();
+		row["is_sitting"]                              = client->IsSitting();
+		row["is_starved"]                              = client->IsStarved();
+		row["is_tracking"]                             = client->IsTracking();
+		row["is_trader"]                               = client->IsTrader();
+		row["is_unconscious"]                          = client->IsUnconscious();
+		row["ldon_losses"]                             = client->GetLDoNLosses();
+		row["ldon_wins"]                               = client->GetLDoNWins();
+		row["last_inv_snapshot_time"]                  = client->GetLastInvSnapshotTime();
+		row["last_name"]                               = client->GetLastName();
+		row["level2"]                                  = client->GetLevel2();
+		row["level_regen"]                             = client->LevelRegen();
+		row["ls_account_id"]                           = client->LSAccountID();
+		row["max_endurance"]                           = client->GetMaxEndurance();
+		row["max_x_tars"]                              = client->GetMaxXTargets();
+		row["merc_id"]                                 = client->GetMercID();
+		row["merc_only_or_no_group"]                   = client->MercOnlyOrNoGroup();
+		row["merc_slot"]                               = client->GetMercSlot();
+		row["next_inv_snapshot_time"]                  = client->GetNextInvSnapshotTime();
+		row["num_mercs"]                               = client->GetNumMercs();
+		row["pending_adventure_create"]                = client->GetPendingAdventureCreate();
+		row["pending_adventure_door_click"]            = client->GetPendingAdventureDoorClick();
+		row["pending_adventure_leave"]                 = client->GetPendingAdventureLeave();
+		row["pending_adventure_request"]               = client->GetPendingAdventureRequest();
+		row["pending_guild_invitation"]                = client->GetPendingGuildInvitation();
+		row["platinum"]                                = client->GetPlatinum();
+		row["port"]                                    = client->GetPort();
+		row["primary_skill_value"]                     = client->GetPrimarySkillValue();
+		row["proximity_x"]                             = client->ProximityX();
+		row["proximity_y"]                             = client->ProximityY();
+		row["proximity_z"]                             = client->ProximityZ();
+		row["pvp_points"]                              = client->GetPVPPoints();
+		row["radiant_crystals"]                        = client->GetRadiantCrystals();
+		row["raid_exp"]                                = client->GetRaidEXP();
+		row["raid_points"]                             = client->GetRaidPoints();
+		row["raw_item_ac"]                             = client->GetRawItemAC();
+		row["required_aa_experience"]                  = client->GetRequiredAAExperience();
+		row["revoked"]                                 = client->GetRevoked();
+		row["run_mode"]                                = client->GetRunMode();
+		row["save_currency"]                           = client->SaveCurrency();
+		row["save_task_state"]                         = client->SaveTaskState();
+		row["silver"]                                  = client->GetSilver();
+		row["skill_points"]                            = client->GetSkillPoints();
+		row["spent_aa"]                                = client->GetSpentAA();
+		row["tgb"]                                     = client->TGB();
+		row["thirst"]                                  = client->GetThirst();
+		row["thirsty"]                                 = client->Thirsty();
+		row["total_atk"]                               = client->GetTotalATK();
+		row["total_seconds_played"]                    = client->GetTotalSecondsPlayed();
+		row["weight"]                                  = client->GetWeight();
+		row["wid"]                                     = client->GetWID();
+		row["x_tarting_available"]                     = client->XTargettingAvailable();
+
+		response.append(row);
+	}
+}
+
 void callGetZoneAttributes(Json::Value &response)
 {
 	Json::Value row;
@@ -427,6 +621,9 @@ void EQEmuApiZoneDataService::get(Json::Value &response, const std::vector<std::
 
 	if (method == "get_npc_list_detail") {
 		callGetNpcListDetail(response);
+	}
+	if (method == "get_client_list_detail") {
+		callGetClientListDetail(response);
 	}
 	if (method == "get_mob_list_detail") {
 		callGetMobListDetail(response);
