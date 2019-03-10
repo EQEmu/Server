@@ -84,11 +84,13 @@ namespace EQ
 				sync_remote_sent_packets = 0;
 				min_ping = 0xFFFFFFFFFFFFFFFFUL;
 				max_ping = 0;
+				avg_ping = 0;
 				created = Clock::now();
 				dropped_datarate_packets = 0;
 				resent_packets = 0;
 				resent_fragments = 0;
 				resent_full = 0;
+				datarate_remaining = 0.0;
 			}
 
 			uint64_t recv_bytes;
@@ -101,12 +103,14 @@ namespace EQ
 			uint64_t sync_remote_sent_packets;
 			uint64_t min_ping;
 			uint64_t max_ping;
+			uint64_t avg_ping;
 			uint64_t last_ping;
 			Timestamp created;
 			uint64_t dropped_datarate_packets; //packets dropped due to datarate limit, couldn't think of a great name
 			uint64_t resent_packets;
 			uint64_t resent_fragments;
 			uint64_t resent_full;
+			double datarate_remaining;
 		};
 
 		class DaybreakConnectionManager;
@@ -247,7 +251,7 @@ namespace EQ
 				tic_rate_hertz = 60.0;
 				resend_timeout = 90000;
 				connection_close_time = 2000;
-				outgoing_data_rate = 8.0;
+				outgoing_data_rate = 0.0;
 			}
 
 			size_t max_packet_size;

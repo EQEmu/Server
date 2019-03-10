@@ -372,7 +372,11 @@ void EQ::Net::DaybreakConnection::QueuePacket(Packet &p, int stream, bool reliab
 
 EQ::Net::DaybreakConnectionStats EQ::Net::DaybreakConnection::GetStats()
 {
-	return m_stats;
+	EQ::Net::DaybreakConnectionStats ret = m_stats;
+	ret.datarate_remaining = m_outgoing_budget;
+	ret.avg_ping = m_rolling_ping;
+
+	return ret;
 }
 
 void EQ::Net::DaybreakConnection::ResetStats()
@@ -785,14 +789,14 @@ void EQ::Net::DaybreakConnection::ProcessDecodedPacket(const Packet &p)
 				InternalSend(out);
 				break;
 			}
-			case OP_SessionStatResponse:
+			case OP_SessionStatResponse: {
 				auto response = p.GetSerialize<DaybreakSessionStatResponse>(0);
 				m_stats.sync_remote_sent_packets = EQ::Net::NetworkToHost(response.server_sent);
 				m_stats.sync_remote_recv_packets = EQ::Net::NetworkToHost(response.server_recv);
 				m_stats.sync_sent_packets = m_stats.sent_packets;
 				m_stats.sync_recv_packets = m_stats.recv_packets;
-
 				break;
+			}
 			default:
 				LogF(Logs::Detail, Logs::Netcode, "Unhandled opcode {0:#x}", p.GetInt8(1));
 				break;
@@ -1253,11 +1257,14 @@ void EQ::Net::DaybreakConnection::SendKeepAlive()
 
 void EQ::Net::DaybreakConnection::InternalSend(Packet &p)
 {
-	if (m_owner->m_options.outgoing_data_rate >= 0.0) {
+	if (m_owner->m_options.outgoing_data_rate > 0.0) {
 		auto new_budget = m_outgoing_budget - (p.Length() / 1024.0);
 		if (new_budget <= 0.0) {
 			m_stats.dropped_datarate_packets++;
 			return;
+		}
+		else {
+			m_outgoing_budget = new_budget;
 		}
 	}
 

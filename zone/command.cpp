@@ -9488,6 +9488,7 @@ void command_netstats(Client *c, const Seperator *sep)
 		}
 
 		auto connection = c->Connection();
+		auto &opts = connection->GetRawConnection()->GetManager()->GetOptions();
 		auto stats = connection->GetRawConnection()->GetStats();
 		auto now = EQ::Net::Clock::now();
 		auto sec_since_stats_reset = std::chrono::duration_cast<std::chrono::duration<double>>(now - stats.created).count();
@@ -9499,6 +9500,7 @@ void command_netstats(Client *c, const Seperator *sep)
 		c->Message(0, "Min Ping: %u", stats.min_ping);
 		c->Message(0, "Max Ping: %u", stats.max_ping);
 		c->Message(0, "Last Ping: %u", stats.last_ping);
+		c->Message(0, "Averge Ping: %u", stats.avg_ping);
 		c->Message(0, "--------------------------------------------------------------------");
 		c->Message(0, "(Realtime) Recv Packets: %u (%.2f/sec)", stats.recv_packets, stats.recv_packets / sec_since_stats_reset);
 		c->Message(0, "(Realtime) Sent Packets: %u (%.2f/sec)", stats.sent_packets, stats.sent_packets / sec_since_stats_reset);
@@ -9513,6 +9515,11 @@ void command_netstats(Client *c, const Seperator *sep)
 		c->Message(0, "Resent Fragments: %u (%.2f/sec)", stats.resent_fragments, stats.resent_fragments / sec_since_stats_reset);
 		c->Message(0, "Resent Non-Fragments: %u (%.2f/sec)", stats.resent_full, stats.resent_full / sec_since_stats_reset);
 		c->Message(0, "Dropped Datarate Packets: %u (%.2f/sec)", stats.dropped_datarate_packets, stats.dropped_datarate_packets / sec_since_stats_reset);
+
+		if (opts.outgoing_data_rate > 0.0) {
+			c->Message(0, "Outgoing Link Saturation %.2f%% (%.2fkb/sec)", 100.0 * (1.0 - ((opts.outgoing_data_rate - stats.datarate_remaining) / opts.outgoing_data_rate)), opts.outgoing_data_rate);
+		}
+
 		c->Message(0, "--------------------------------------------------------------------");
 	}
 }
