@@ -77,7 +77,7 @@ private:
 	std::unique_ptr<EQ::Timer> m_tick;
 	std::unique_ptr<EQ::Timer> m_keepalive;
 
-	std::list<std::unique_ptr<ZoneServer>> list;
+	std::list<std::unique_ptr<ZoneServer>> zone_server_list;
 };
 
 #endif /*ZONELIST_H_*/
