@@ -43,6 +43,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/spdat.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/eqemu_logsys_fmt.h"
+#include "../common/net/console_server.h"
 
 #include "zone_config.h"
 #include "masterentity.h"
@@ -120,6 +121,7 @@ double frame_time = 0.0;
 
 void Shutdown();
 extern void MapOpcodes();
+void RegisterConsoleFunctions(std::unique_ptr<EQ::Net::ConsoleServer> &console);
 
 int main(int argc, char** argv) {
 	RegisterExecutablePlatform(ExePlatformZone);
