@@ -19,12 +19,13 @@
  */
 
 #include "client.h"
-#include "doors.h"
 #include "entity.h"
+#include "corpse.h"
 #include "eqemu_api_zone_data_service.h"
 #include "npc.h"
 #include "object.h"
 #include "zone.h"
+#include "doors.h"
 #include <iostream>
 
 extern Zone *zone;
@@ -118,10 +119,10 @@ void callGetNpcListDetail(Json::Value &response)
 
 void callGetDoorListDetail(Json::Value &response)
 {
-	auto &list = entity_list.GetDoorsList();
+	auto &door_list = entity_list.GetDoorsList();
 
-	for (auto &iter : list) {
-		auto door = iter.second;
+	for (auto itr : door_list) {
+		Doors *door = itr.second;
 
 		Json::Value row;
 
@@ -152,6 +153,40 @@ void callGetDoorListDetail(Json::Value &response)
 		response.append(row);
 	}
 }
+
+void callGetCorpseListDetail(Json::Value &response)
+{
+	auto &corpse_list = entity_list.GetCorpseList();
+
+	for (auto itr : corpse_list) {
+		auto corpse = itr.second;
+
+		Json::Value row;
+
+		row["char_id"]                   = corpse->GetCharID();
+		row["copper"]                    = corpse->GetCopper();
+		row["corpse_dbid"]               = corpse->GetCorpseDBID();
+		row["count_items"]               = corpse->CountItems();
+		row["decay_time"]                = corpse->GetDecayTime();
+		row["gold"]                      = corpse->GetGold();
+		row["is_become_npc_corpse"]      = corpse->IsBecomeNPCCorpse();
+		row["is_being_looted"]           = corpse->IsBeingLooted();
+		row["is_corpse"]                 = corpse->IsCorpse();
+		row["is_locked"]                 = corpse->IsLocked();
+		row["is_npc_corpse"]             = corpse->IsNPCCorpse();
+		row["is_player_corpse"]          = corpse->IsPlayerCorpse();
+		row["is_rezzed"]                 = corpse->IsRezzed();
+		row["owner_name"]                = corpse->GetOwnerName();
+		row["platinum"]                  = corpse->GetPlatinum();
+		row["player_kill_item"]          = corpse->GetPlayerKillItem();
+		row["rez_exp"]                   = corpse->GetRezExp();
+		row["rez_time"]                  = corpse->GetRezTime();
+		row["silver"]                    = corpse->GetSilver();
+
+		response.append(row);
+	}
+}
+
 void callGetObjectListDetail(Json::Value &response)
 {
 	auto &list = entity_list.GetObjectList();
@@ -630,6 +665,9 @@ void EQEmuApiZoneDataService::get(Json::Value &response, const std::vector<std::
 	}
 	if (method == "get_door_list_detail") {
 		callGetDoorListDetail(response);
+	}
+	if (method == "get_corpse_list_detail") {
+		callGetCorpseListDetail(response);
 	}
 	if (method == "get_object_list_detail") {
 		callGetObjectListDetail(response);
