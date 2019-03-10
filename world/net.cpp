@@ -502,6 +502,7 @@ int main(int argc, char** argv) {
 	opts.daybreak_options.resend_delay_factor = RuleR(Network, ResendDelayFactor);
 	opts.daybreak_options.resend_delay_min = RuleI(Network, ResendDelayMinMS);
 	opts.daybreak_options.resend_delay_max = RuleI(Network, ResendDelayMaxMS);
+	opts.daybreak_options.outgoing_data_rate = RuleR(Network, ClientDataRate);
 
 	EQ::Net::EQStreamManager eqsm(opts);
 
@@ -520,7 +521,7 @@ int main(int argc, char** argv) {
 
 	eqsm.OnNewConnection([&stream_identifier](std::shared_ptr<EQ::Net::EQStream> stream) {
 		stream_identifier.AddStream(stream);
-		LogF(Logs::Detail, Logs::World_Server, "New connection from IP {0}:{1}", stream->RemoteEndpoint(), ntohs(stream->GetRemotePort()));
+		LogF(Logs::Detail, Logs::World_Server, "New connection from IP {0}:{1}", stream->GetRawConnection()->RemoteEndpoint(), ntohs(stream->GetRemotePort()));
 	});
 
 	while (RunLoops) {

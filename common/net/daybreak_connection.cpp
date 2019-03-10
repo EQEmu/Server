@@ -41,6 +41,7 @@ void EQ::Net::DaybreakConnectionManager::Attach(uv_loop_t *loop)
 
 		uv_timer_start(&m_timer, [](uv_timer_t *handle) {
 			DaybreakConnectionManager *c = (DaybreakConnectionManager*)handle->data;
+			c->UpdateDataBudget();
 			c->Process();
 			c->ProcessResend();
 		}, update_rate, update_rate);
@@ -157,6 +158,25 @@ void EQ::Net::DaybreakConnectionManager::Process()
 			default:
 				break;
 		}
+
+		iter++;
+	}
+}
+
+void EQ::Net::DaybreakConnectionManager::UpdateDataBudget()
+{
+	auto outgoing_data_rate = m_options.outgoing_data_rate;
+	if (outgoing_data_rate <= 0.0) {
+		return;
+	}
+
+	auto update_rate = (uint64_t)(1000.0 / m_options.tic_rate_hertz);
+	auto budget_add = update_rate * outgoing_data_rate / 1000.0;
+
+	auto iter = m_connections.begin();
+	while (iter != m_connections.end()) {
+		auto &connection = iter->second;
+		connection->UpdateDataBudget(budget_add);
 
 		iter++;
 	}
@@ -283,6 +303,7 @@ EQ::Net::DaybreakConnection::DaybreakConnection(DaybreakConnectionManager *owner
 	m_combined[0] = 0;
 	m_combined[1] = OP_Combined;
 	m_last_session_stats = Clock::now();
+	m_outgoing_budget = owner->m_options.outgoing_data_rate;
 }
 
 //new connection made as client
@@ -305,6 +326,7 @@ EQ::Net::DaybreakConnection::DaybreakConnection(DaybreakConnectionManager *owner
 	m_combined[0] = 0;
 	m_combined[1] = OP_Combined;
 	m_last_session_stats = Clock::now();
+	m_outgoing_budget = owner->m_options.outgoing_data_rate;
 }
 
 EQ::Net::DaybreakConnection::~DaybreakConnection()
@@ -345,6 +367,11 @@ void EQ::Net::DaybreakConnection::QueuePacket(Packet &p, int stream, bool reliab
 	}
 
 	InternalQueuePacket(p, stream, reliable);
+}
+
+EQ::Net::DaybreakConnectionStats EQ::Net::DaybreakConnection::GetStats()
+{
+	return m_stats;
 }
 
 void EQ::Net::DaybreakConnection::ResetStats()
@@ -738,6 +765,10 @@ void EQ::Net::DaybreakConnection::ProcessDecodedPacket(const Packet &p)
 			case OP_SessionStatRequest:
 			{
 				auto request = p.GetSerialize<DaybreakSessionStatRequest>(0);
+				m_stats.sync_remote_sent_packets = EQ::Net::NetworkToHost(request.packets_sent);
+				m_stats.sync_remote_recv_packets = EQ::Net::NetworkToHost(request.packets_recv);
+				m_stats.sync_sent_packets = m_stats.sent_packets;
+				m_stats.sync_recv_packets = m_stats.recv_packets;
 
 				DaybreakSessionStatResponse response;
 				response.zero = 0;
@@ -754,6 +785,12 @@ void EQ::Net::DaybreakConnection::ProcessDecodedPacket(const Packet &p)
 				break;
 			}
 			case OP_SessionStatResponse:
+				auto response = p.GetSerialize<DaybreakSessionStatResponse>(0);
+				m_stats.sync_remote_sent_packets = EQ::Net::NetworkToHost(response.server_sent);
+				m_stats.sync_remote_recv_packets = EQ::Net::NetworkToHost(response.server_recv);
+				m_stats.sync_sent_packets = m_stats.sent_packets;
+				m_stats.sync_recv_packets = m_stats.recv_packets;
+
 				break;
 			default:
 				LogF(Logs::Detail, Logs::Netcode, "Unhandled opcode {0:#x}", p.GetInt8(1));
@@ -1024,7 +1061,21 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 		auto time_since_last_send = std::chrono::duration_cast<std::chrono::milliseconds>(now - entry.second.last_sent);
 		if (entry.second.times_resent == 0) {
 			if ((size_t)time_since_last_send.count() > entry.second.resend_delay) {
-				InternalBufferedSend(entry.second.packet);
+				auto &p = entry.second.packet;
+				if (p.Length() >= DaybreakHeader::size()) {
+					if (p.GetInt8(0) == 0 && p.GetInt8(1) >= OP_Fragment && p.GetInt8(1) <= OP_Fragment4) {
+						m_stats.resent_fragments++;
+					}
+					else {
+						m_stats.resent_full++;
+					}
+				}
+				else {
+					m_stats.resent_full++;
+				}
+				m_stats.resent_packets++;
+
+				InternalBufferedSend(p);
 				entry.second.last_sent = now;
 				entry.second.times_resent++;
 				entry.second.resend_delay = EQEmu::Clamp(entry.second.resend_delay * 2, m_owner->m_options.resend_delay_min, m_owner->m_options.resend_delay_max);
@@ -1039,7 +1090,21 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 			}
 	
 			if ((size_t)time_since_last_send.count() > entry.second.resend_delay) {
-				InternalBufferedSend(entry.second.packet);
+				auto &p = entry.second.packet;
+				if (p.Length() >= DaybreakHeader::size()) {
+					if (p.GetInt8(0) == 0 && p.GetInt8(1) >= OP_Fragment && p.GetInt8(1) <= OP_Fragment4) {
+						m_stats.resent_fragments++;
+					}
+					else {
+						m_stats.resent_full++;
+					}
+				}
+				else {
+					m_stats.resent_full++;
+				}
+				m_stats.resent_packets++;
+
+				InternalBufferedSend(p);
 				entry.second.last_sent = now;
 				entry.second.times_resent++;
 				entry.second.resend_delay = EQEmu::Clamp(entry.second.resend_delay * 2, m_owner->m_options.resend_delay_min, m_owner->m_options.resend_delay_max);
@@ -1089,6 +1154,12 @@ void EQ::Net::DaybreakConnection::OutOfOrderAck(int stream, uint16_t seq)
 
 		s->sent_packets.erase(iter);
 	}
+}
+
+void EQ::Net::DaybreakConnection::UpdateDataBudget(double budget_add)
+{
+	auto outgoing_data_rate = m_owner->m_options.outgoing_data_rate;
+	m_outgoing_budget = EQEmu::ClampUpper(m_outgoing_budget + budget_add, outgoing_data_rate);
 }
 
 void EQ::Net::DaybreakConnection::SendAck(int stream_id, uint16_t seq)
@@ -1181,6 +1252,14 @@ void EQ::Net::DaybreakConnection::SendKeepAlive()
 
 void EQ::Net::DaybreakConnection::InternalSend(Packet &p)
 {
+	if (m_owner->m_options.outgoing_data_rate >= 0.0) {
+		auto new_budget = m_outgoing_budget - (p.Length() / 1024.0);
+		if (new_budget <= 0.0) {
+			m_stats.dropped_datarate_packets++;
+			return;
+		}
+	}
+
 	m_last_send = Clock::now();
 
 	auto send_func = [](uv_udp_send_t* req, int status) {

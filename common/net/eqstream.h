@@ -84,14 +84,9 @@ namespace EQ
 				m_opcode_manager = opm;
 			}
 
-			virtual std::shared_ptr<EQ::Net::DaybreakConnection> GetRawConnection() {
+			virtual std::shared_ptr<EQ::Net::DaybreakConnection> GetRawConnection() const {
 				return m_connection;
 			}
-
-			const std::string& RemoteEndpoint() const { return m_connection->RemoteEndpoint(); }
-			const DaybreakConnectionStats& GetStats() const { return m_connection->GetStats(); }
-			void ResetStats() { m_connection->ResetStats(); }
-			size_t GetRollingPing() const { return m_connection->GetRollingPing(); }
 		private:
 			EQStreamManager *m_owner;
 			std::shared_ptr<DaybreakConnection> m_connection;

@@ -78,19 +78,35 @@ namespace EQ
 				sent_bytes = 0;
 				recv_packets = 0;
 				sent_packets = 0;
+				sync_recv_packets = 0;
+				sync_sent_packets = 0;
+				sync_remote_recv_packets = 0;
+				sync_remote_sent_packets = 0;
 				min_ping = 0xFFFFFFFFFFFFFFFFUL;
 				max_ping = 0;
 				created = Clock::now();
+				dropped_datarate_packets = 0;
+				resent_packets = 0;
+				resent_fragments = 0;
+				resent_full = 0;
 			}
 
 			uint64_t recv_bytes;
 			uint64_t sent_bytes;
 			uint64_t recv_packets;
 			uint64_t sent_packets;
+			uint64_t sync_recv_packets;
+			uint64_t sync_sent_packets;
+			uint64_t sync_remote_recv_packets;
+			uint64_t sync_remote_sent_packets;
 			uint64_t min_ping;
 			uint64_t max_ping;
 			uint64_t last_ping;
 			Timestamp created;
+			uint64_t dropped_datarate_packets; //packets dropped due to datarate limit, couldn't think of a great name
+			uint64_t resent_packets;
+			uint64_t resent_fragments;
+			uint64_t resent_full;
 		};
 
 		class DaybreakConnectionManager;
@@ -110,8 +126,7 @@ namespace EQ
 			void QueuePacket(Packet &p, int stream);
 			void QueuePacket(Packet &p, int stream, bool reliable);
 
-			const DaybreakConnectionStats& GetStats() const { return m_stats; }
-			DaybreakConnectionStats &GetStats() { return m_stats; }
+			DaybreakConnectionStats GetStats();
 			void ResetStats();
 			size_t GetRollingPing() const { return m_rolling_ping; }
 			DbProtocolStatus GetStatus() const { return m_status; }
@@ -140,6 +155,7 @@ namespace EQ
 			Timestamp m_last_session_stats;
 			size_t m_rolling_ping;
 			Timestamp m_close_time;
+			double m_outgoing_budget;
 
 			struct DaybreakSentPacket
 			{
@@ -191,6 +207,7 @@ namespace EQ
 			void ProcessResend(int stream);
 			void Ack(int stream, uint16_t seq);
 			void OutOfOrderAck(int stream, uint16_t seq);
+			void UpdateDataBudget(double budget_add);
 
 			void SendConnect();
 			void SendKeepAlive();
@@ -230,6 +247,7 @@ namespace EQ
 				tic_rate_hertz = 60.0;
 				resend_timeout = 90000;
 				connection_close_time = 2000;
+				outgoing_data_rate = 8.0;
 			}
 
 			size_t max_packet_size;
@@ -252,6 +270,7 @@ namespace EQ
 			size_t connection_close_time;
 			DaybreakEncodeType encode_passes[2];
 			int port;
+			double outgoing_data_rate;
 		};
 
 		class DaybreakConnectionManager
@@ -263,6 +282,7 @@ namespace EQ
 
 			void Connect(const std::string &addr, int port);
 			void Process();
+			void UpdateDataBudget();
 			void ProcessResend();
 			void OnNewConnection(std::function<void(std::shared_ptr<DaybreakConnection>)> func) { m_on_new_connection = func; }
 			void OnConnectionStateChange(std::function<void(std::shared_ptr<DaybreakConnection>, DbProtocolStatus, DbProtocolStatus)> func) { m_on_connection_state_change = func; }

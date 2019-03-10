@@ -31,13 +31,7 @@ public:
 	virtual const EQEmu::versions::ClientVersion ClientVersion() const;
 	virtual EQStreamState GetState();
 	virtual void SetOpcodeManager(OpcodeManager **opm);
-
-	virtual const uint32 GetBytesSent() const;
-	virtual const uint32 GetBytesRecieved() const;
-	virtual const uint32 GetBytesSentPerSecond() const;
-	virtual const uint32 GetBytesRecvPerSecond() const;
-
-	virtual std::shared_ptr<EQ::Net::DaybreakConnection> GetRawConnection();
+	virtual std::shared_ptr<EQ::Net::DaybreakConnection> GetRawConnection() const;
 
 protected:
 	std::shared_ptr<EQStreamInterface> const m_stream;	//we own this stream object.

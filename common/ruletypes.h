@@ -709,7 +709,7 @@ RULE_INT(Network, ResendDelayBaseMS, 100)
 RULE_REAL(Network, ResendDelayFactor, 1.5)
 RULE_INT(Network, ResendDelayMinMS, 100)
 RULE_INT(Network, ResendDelayMaxMS, 5000)
-RULE_INT(Network, ResendsPerCycle, 1000)
+RULE_REAL(Network, ClientDataRate, 50.0) // 50KB / Sec
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(QueryServ)

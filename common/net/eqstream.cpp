@@ -130,11 +130,11 @@ void EQ::Net::EQStream::Close() {
 
 std::string EQ::Net::EQStream::GetRemoteAddr() const
 {
-	return RemoteEndpoint();
+	return GetRawConnection()->RemoteEndpoint();
 }
 
 uint32 EQ::Net::EQStream::GetRemoteIP() const {
-	return inet_addr(RemoteEndpoint().c_str());
+	return inet_addr(GetRawConnection()->RemoteEndpoint().c_str());
 }
 
 bool EQ::Net::EQStream::CheckState(EQStreamState state) {
@@ -177,23 +177,23 @@ EQStreamInterface::MatchState EQ::Net::EQStream::CheckSignature(const Signature 
 		if (opcode == sig->first_eq_opcode) {
 			if (length == sig->first_length) {
 				LogF(Logs::General, Logs::Netcode, "[IDENT_TRACE] {0}:{1}: First opcode matched {2:#x} and length matched {3}",
-					RemoteEndpoint(), m_connection->RemotePort(), sig->first_eq_opcode, length);
+					GetRawConnection()->RemoteEndpoint(), m_connection->RemotePort(), sig->first_eq_opcode, length);
 				return MatchSuccessful;
 			}
 			else if (length == 0) {
 				LogF(Logs::General, Logs::Netcode, "[IDENT_TRACE] {0}:{1}: First opcode matched {2:#x} and length is ignored.",
-					RemoteEndpoint(), m_connection->RemotePort(), sig->first_eq_opcode);
+					GetRawConnection()->RemoteEndpoint(), m_connection->RemotePort(), sig->first_eq_opcode);
 				return MatchSuccessful;
 			}
 			else {
 				LogF(Logs::General, Logs::Netcode, "[IDENT_TRACE] {0}:{1}: First opcode matched {2:#x} but length {3} did not match expected {4}",
-					RemoteEndpoint(), m_connection->RemotePort(), sig->first_eq_opcode, length, sig->first_length);
+					GetRawConnection()->RemoteEndpoint(), m_connection->RemotePort(), sig->first_eq_opcode, length, sig->first_length);
 				return MatchFailed;
 			}
 		}
 		else {
 			LogF(Logs::General, Logs::Netcode, "[IDENT_TRACE] {0}:{1}: First opcode {1:#x} did not match expected {2:#x}",
-				RemoteEndpoint(), m_connection->RemotePort(), opcode, sig->first_eq_opcode);
+				GetRawConnection()->RemoteEndpoint(), m_connection->RemotePort(), opcode, sig->first_eq_opcode);
 			return MatchFailed;
 		}
 	}

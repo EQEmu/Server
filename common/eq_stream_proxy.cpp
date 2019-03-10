@@ -82,26 +82,6 @@ uint16 EQStreamProxy::GetRemotePort() const {
 	return(m_stream->GetRemotePort());
 }
 
-const uint32 EQStreamProxy::GetBytesSent() const
-{
-	return(m_stream->GetBytesSent());
-}
-
-const uint32 EQStreamProxy::GetBytesRecieved() const
-{
-	return(m_stream->GetBytesRecieved());
-}
-
-const uint32 EQStreamProxy::GetBytesSentPerSecond() const
-{
-	return(m_stream->GetBytesSentPerSecond());
-}
-
-const uint32 EQStreamProxy::GetBytesRecvPerSecond() const
-{
-	return(m_stream->GetBytesRecvPerSecond());
-}
-
 void EQStreamProxy::ReleaseFromUse() {
 	m_stream->ReleaseFromUse();
 }
@@ -110,7 +90,7 @@ void EQStreamProxy::RemoveData() {
 	m_stream->RemoveData();
 }
 
-std::shared_ptr<EQ::Net::DaybreakConnection> EQStreamProxy::GetRawConnection() {
+std::shared_ptr<EQ::Net::DaybreakConnection> EQStreamProxy::GetRawConnection() const {
 	return m_stream->GetRawConnection();
 }
 

@@ -482,7 +482,7 @@ Clientlist::Clientlist(int ChatPort) {
 		exit(1);
 
 	chatsf->OnNewConnection([this](std::shared_ptr<EQ::Net::EQStream> stream) {
-		LogF(Logs::General, Logs::Login_Server, "New Client UDP connection from {0}:{1}", stream->RemoteEndpoint(), stream->GetRemotePort());
+		LogF(Logs::General, Logs::Login_Server, "New Client UDP connection from {0}:{1}", stream->GetRawConnection()->RemoteEndpoint(), stream->GetRemotePort());
 		stream->SetOpcodeManager(&ChatOpMgr);
 
 		auto c = new Client(stream);

@@ -55,6 +55,7 @@
 #include "../common/say_link.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/profanity_manager.h"
+#include "../common/net/eqstream.h"
 
 #include "data_bucket.h"
 #include "command.h"
@@ -9481,23 +9482,38 @@ void command_netstats(Client *c, const Seperator *sep)
 {
 	if(c)
 	{
-		if(c->GetTarget() && c->GetTarget()->IsClient())
-		{
-			c->Message(0, "Sent:");
-			c->Message(0, "Total: %u, per second: %u",  c->GetTarget()->CastToClient()->Connection()->GetBytesSent(),
-				c->GetTarget()->CastToClient()->Connection()->GetBytesSentPerSecond());
-			c->Message(0, "Recieved:");
-			c->Message(0, "Total: %u, per second: %u",  c->GetTarget()->CastToClient()->Connection()->GetBytesRecieved(),
-				c->GetTarget()->CastToClient()->Connection()->GetBytesRecvPerSecond());
+		auto client = c;
+		if (c->GetTarget() && c->GetTarget()->IsClient()) {
+			client = c->GetTarget()->CastToClient();
+		}
 
-		}
-		else
-		{
-			c->Message(0, "Sent:");
-			c->Message(0, "Total: %u, per second: %u",  c->Connection()->GetBytesSent(), c->Connection()->GetBytesSentPerSecond());
-			c->Message(0, "Recieved:");
-			c->Message(0, "Total: %u, per second: %u",  c->Connection()->GetBytesRecieved(), c->Connection()->GetBytesRecvPerSecond());
-		}
+		auto connection = c->Connection();
+		auto stats = connection->GetRawConnection()->GetStats();
+		auto now = EQ::Net::Clock::now();
+		auto sec_since_stats_reset = std::chrono::duration_cast<std::chrono::duration<double>>(now - stats.created).count();
+
+		c->Message(0, "Netstats:");
+		c->Message(0, "--------------------------------------------------------------------");
+		c->Message(0, "Sent Bytes: %u (%.2f/sec)", stats.sent_bytes, stats.sent_bytes / sec_since_stats_reset);
+		c->Message(0, "Recv Bytes: %u (%.2f/sec)", stats.recv_bytes, stats.recv_bytes / sec_since_stats_reset);
+		c->Message(0, "Min Ping: %u", stats.min_ping);
+		c->Message(0, "Max Ping: %u", stats.max_ping);
+		c->Message(0, "Last Ping: %u", stats.last_ping);
+		c->Message(0, "--------------------------------------------------------------------");
+		c->Message(0, "(Realtime) Recv Packets: %u (%.2f/sec)", stats.recv_packets, stats.recv_packets / sec_since_stats_reset);
+		c->Message(0, "(Realtime) Sent Packets: %u (%.2f/sec)", stats.sent_packets, stats.sent_packets / sec_since_stats_reset);
+		c->Message(0, "(Sync) Recv Packets: %u", stats.sync_recv_packets);
+		c->Message(0, "(Sync) Sent Packets: %u", stats.sync_sent_packets);
+		c->Message(0, "(Sync) Remote Recv Packets: %u", stats.sync_remote_recv_packets);
+		c->Message(0, "(Sync) Remote Sent Packets: %u", stats.sync_remote_sent_packets);
+		c->Message(0, "Packet Loss In: %.2f%%", 100.0 * (1.0 - static_cast<double>(stats.sync_recv_packets) / static_cast<double>(stats.sync_remote_sent_packets)));
+		c->Message(0, "Packet Loss Out: %.2f%%", 100.0 * (1.0 - static_cast<double>(stats.sync_remote_recv_packets) / static_cast<double>(stats.sync_sent_packets)));
+		c->Message(0, "--------------------------------------------------------------------");
+		c->Message(0, "Resent Packets: %u (%.2f/sec)", stats.resent_packets, stats.resent_packets / sec_since_stats_reset);
+		c->Message(0, "Resent Fragments: %u (%.2f/sec)", stats.resent_fragments, stats.resent_fragments / sec_since_stats_reset);
+		c->Message(0, "Resent Non-Fragments: %u (%.2f/sec)", stats.resent_full, stats.resent_full / sec_since_stats_reset);
+		c->Message(0, "Dropped Datarate Packets: %u (%.2f/sec)", stats.dropped_datarate_packets, stats.dropped_datarate_packets / sec_since_stats_reset);
+		c->Message(0, "--------------------------------------------------------------------");
 	}
 }
 

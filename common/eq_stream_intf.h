@@ -51,14 +51,8 @@ public:
 	virtual MatchState CheckSignature(const Signature *sig) { return MatchFailed; }
 	virtual EQStreamState GetState() = 0;
 	virtual void SetOpcodeManager(OpcodeManager **opm) = 0;
-
-	virtual const uint32 GetBytesSent() const { return 0; }
-	virtual const uint32 GetBytesRecieved() const { return 0; }
-	virtual const uint32 GetBytesSentPerSecond() const { return 0; }
-	virtual const uint32 GetBytesRecvPerSecond() const { return 0; }
 	virtual const EQEmu::versions::ClientVersion ClientVersion() const { return EQEmu::versions::ClientVersion::Unknown; }
-
-	virtual std::shared_ptr<EQ::Net::DaybreakConnection> GetRawConnection() = 0;
+	virtual std::shared_ptr<EQ::Net::DaybreakConnection> GetRawConnection() const = 0;
 };
 
 #endif /*EQSTREAMINTF_H_*/

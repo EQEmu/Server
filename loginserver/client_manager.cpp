@@ -37,7 +37,7 @@ ClientManager::ClientManager()
 	}
 
 	titanium_stream->OnNewConnection([this](std::shared_ptr<EQ::Net::EQStream> stream) {
-		LogF(Logs::General, Logs::Login_Server, "New Titanium client connection from {0}:{1}", stream->RemoteEndpoint(), stream->GetRemotePort());
+		LogF(Logs::General, Logs::Login_Server, "New Titanium client connection from {0}:{1}", stream->GetRawConnection()->RemoteEndpoint(), stream->GetRemotePort());
 		stream->SetOpcodeManager(&titanium_ops);
 		Client *c = new Client(stream, cv_titanium);
 		clients.push_back(c);
@@ -55,7 +55,7 @@ ClientManager::ClientManager()
 	}
 
 	sod_stream->OnNewConnection([this](std::shared_ptr<EQ::Net::EQStream> stream) {
-		LogF(Logs::General, Logs::Login_Server, "New SoD client connection from {0}:{1}", stream->RemoteEndpoint(), stream->GetRemotePort());
+		LogF(Logs::General, Logs::Login_Server, "New SoD client connection from {0}:{1}", stream->GetRawConnection()->RemoteEndpoint(), stream->GetRemotePort());
 		stream->SetOpcodeManager(&sod_ops);
 		Client *c = new Client(stream, cv_sod);
 		clients.push_back(c);
