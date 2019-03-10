@@ -250,7 +250,7 @@ SET(zone_headers
 	zone.h
 	zone_config.h
 	zonedb.h
-	zonedump.h eqemu_api_zone_data_service.cpp eqemu_api_zone_data_service.h)
+	zonedump.h)
 
 IF(EQEMU_DEPOP_INVALIDATES_CACHE)
 	ADD_DEFINITIONS(-DDEPOP_INVALIDATES_NPC_TYPES_CACHE)
