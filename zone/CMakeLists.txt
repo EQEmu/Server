@@ -17,6 +17,7 @@ SET(zone_sources
 	client_mods.cpp
 	client_packet.cpp
 	client_process.cpp
+	console.cpp
 	command.cpp
 	corpse.cpp
 	data_bucket.cpp
@@ -28,6 +29,7 @@ SET(zone_sources
 	embxs.cpp
 	encounter.cpp
 	entity.cpp
+	eqemu_api_zone_data_service.cpp
 	exp.cpp
 	fastmath.cpp
 	fearpath.cpp
@@ -140,7 +142,8 @@ SET(zone_sources
 	zone.cpp
 	zone_config.cpp
 	zonedb.cpp
-	zoning.cpp)
+	zoning.cpp
+)
 
 SET(zone_headers
 	aa.h
@@ -157,14 +160,16 @@ SET(zone_headers
 	client_packet.h
 	command.h
 	common.h
+	console.h
 	corpse.h
-   data_bucket.h
+	data_bucket.h
 	doors.h
 	embparser.h
 	embperl.h
 	embxs.h
 	encounter.h
 	entity.h
+	eqemu_api_zone_data_service.h
 	errmsg.h
 	event_codes.h
 	fastmath.h
@@ -245,7 +250,7 @@ SET(zone_headers
 	zone.h
 	zone_config.h
 	zonedb.h
-	zonedump.h)
+	zonedump.h eqemu_api_zone_data_service.cpp eqemu_api_zone_data_service.h)
 
 IF(EQEMU_DEPOP_INVALIDATES_CACHE)
 	ADD_DEFINITIONS(-DDEPOP_INVALIDATES_NPC_TYPES_CACHE)
