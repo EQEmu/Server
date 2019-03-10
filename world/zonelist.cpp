@@ -754,3 +754,8 @@ void ZSList::OnKeepAlive(EQ::Timer *t)
 		zone->SendKeepAlive();
 	}
 }
+
+const std::list<std::unique_ptr<ZoneServer>> &ZSList::getZoneServerList() const
+{
+	return list;
+}
