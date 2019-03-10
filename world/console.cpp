@@ -9,6 +9,7 @@
 #include "zoneserver.h"
 #include "../common/string_util.h"
 #include "../common/md5.h"
+#include <fmt/format.h>
 
 extern ClientList client_list;
 extern ZSList zoneserver_list;

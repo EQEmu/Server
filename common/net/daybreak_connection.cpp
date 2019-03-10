@@ -2,6 +2,7 @@
 #include "../event/event_loop.h"
 #include "../event/task.h"
 #include "../eqemu_logsys.h"
+#include "../eqemu_logsys_fmt.h"
 #include "../data_verification.h"
 #include "crc32.h"
 #include <zlib.h>

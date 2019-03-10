@@ -19,8 +19,8 @@
 #define LAUNCHERLINK_H_
 
 #include "../common/timer.h"
-#include "../net/servertalk_server_connection.h"
-#include "../event/timer.h"
+#include "../common/net/servertalk_server_connection.h"
+#include "../common/event/timer.h"
 #include <memory>
 #include <string>
 #include <vector>

@@ -22,6 +22,7 @@ extern LoginServer server;
 extern bool run_server;
 
 #include "../common/eqemu_logsys.h"
+#include "../common/eqemu_logsys_fmt.h"
 
 ClientManager::ClientManager()
 {
