@@ -18,11 +18,14 @@
  *
  */
 
+#include "clientlist.h"
+#include "cliententry.h"
 #include "eqemu_api_world_data_service.h"
 #include "zoneserver.h"
 #include "zonelist.h"
 
-extern ZSList zoneserver_list;
+extern ZSList     zoneserver_list;
+extern ClientList client_list;
 
 void callGetZoneList(Json::Value &response)
 {
@@ -53,6 +56,10 @@ void callGetZoneList(Json::Value &response)
 	}
 }
 
+void callGetClientList(Json::Value &response)
+{
+	client_list.GetClientList(response);
+}
 
 void EQEmuApiWorldDataService::get(Json::Value &response, const std::vector<std::string> &args)
 {
@@ -60,5 +67,8 @@ void EQEmuApiWorldDataService::get(Json::Value &response, const std::vector<std:
 
 	if (method == "get_zone_list") {
 		callGetZoneList(response);
+	}
+	if (method == "get_client_list") {
+		callGetClientList(response);
 	}
 }
