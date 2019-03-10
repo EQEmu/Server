@@ -19,6 +19,7 @@
  */
 
 #include "eqemu_api_zone_data_service.h"
+#include "doors.h"
 #include "npc.h"
 #include "zone.h"
 #include "entity.h"
@@ -108,6 +109,43 @@ void callGetNpcListDetail(Json::Value &response)
 		row["swarm_target"]    = npc->GetSwarmTarget();
 		row["waypoint_max"]    = npc->GetWaypointMax();
 		row["will_aggro_npcs"] = npc->WillAggroNPCs();
+
+		response.append(row);
+	}
+}
+
+void callGetDoorListDetail(Json::Value &response)
+{
+	auto &list = entity_list.GetDoorsList();
+
+	for (auto &iter : list) {
+		auto door = iter.second;
+
+		Json::Value row;
+
+		row["door_name"]           = door->GetDoorName();
+		row["client_version_mask"] = door->GetClientVersionMask();
+		row["disable_timer"]       = door->GetDisableTimer();
+		row["door_db_id"]          = door->GetDoorDBID();
+		row["door_id"]             = door->GetDoorID();
+		row["door_param"]          = door->GetDoorParam();
+		row["entity_id"]           = door->GetEntityID();
+		row["guild_id"]            = door->GetGuildID();
+		row["incline"]             = door->GetIncline();
+		row["invert_state"]        = door->GetInvertState();
+		row["is_door"]             = door->IsDoor();
+		row["is_door_open"]        = door->IsDoorOpen();
+		row["is_ldon_door"]        = door->IsLDoNDoor();
+		row["key_item"]            = door->GetKeyItem();
+		row["lockpick"]            = door->GetLockpick();
+		row["no_keyring"]          = door->GetNoKeyring();
+		row["open_type"]           = door->GetOpenType();
+		row["size"]                = door->GetSize();
+		row["trigger_door_id"]     = door->GetTriggerDoorID();
+		row["trigger_type"]        = door->GetTriggerType();
+		row["x"]                   = door->GetX();
+		row["y"]                   = door->GetY();
+		row["z"]                   = door->GetZ();
 
 		response.append(row);
 	}
@@ -363,6 +401,9 @@ void EQEmuApiZoneDataService::get(Json::Value &response, const std::vector<std::
 	}
 	if (method == "get_mob_list_detail") {
 		callGetMobListDetail(response);
+	}
+	if (method == "get_door_list_detail") {
+		callGetDoorListDetail(response);
 	}
 	if (method == "get_zone_attributes") {
 		callGetZoneAttributes(response);
