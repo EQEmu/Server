@@ -21,6 +21,7 @@
 #include "eqemu_api_zone_data_service.h"
 #include "doors.h"
 #include "npc.h"
+#include "object.h"
 #include "zone.h"
 #include "entity.h"
 #include <iostream>
@@ -146,6 +147,34 @@ void callGetDoorListDetail(Json::Value &response)
 		row["x"]                   = door->GetX();
 		row["y"]                   = door->GetY();
 		row["z"]                   = door->GetZ();
+
+		response.append(row);
+	}
+}
+void callGetObjectListDetail(Json::Value &response)
+{
+	auto &list = entity_list.GetObjectList();
+
+	for (auto &iter : list) {
+		auto object = iter.second;
+
+		Json::Value row;
+
+		row["display_name"]    = object->GetDisplayName();
+		row["dbid"]            = object->GetDBID();
+		row["heading_data"]    = object->GetHeadingData();
+		row["icon"]            = object->GetIcon();
+		row["is_ground_spawn"] = object->IsGroundSpawn();
+		row["item_id"]         = object->GetItemID();
+		row["model_name"]      = object->GetModelName();
+		row["size"]            = object->GetSize();
+		row["solid_type"]      = object->GetSolidType();
+		row["tilt_x"]          = object->GetTiltX();
+		row["tilt_y"]          = object->GetTiltY();
+		row["type"]            = object->GetType();
+		row["x"]               = object->GetX();
+		row["y"]               = object->GetY();
+		row["z"]               = object->GetZ();
 
 		response.append(row);
 	}
@@ -404,6 +433,9 @@ void EQEmuApiZoneDataService::get(Json::Value &response, const std::vector<std::
 	}
 	if (method == "get_door_list_detail") {
 		callGetDoorListDetail(response);
+	}
+	if (method == "get_object_list_detail") {
+		callGetObjectListDetail(response);
 	}
 	if (method == "get_zone_attributes") {
 		callGetZoneAttributes(response);
