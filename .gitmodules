@@ -13,9 +13,6 @@
 [submodule "submodules/cereal"]
 	path = submodules/cereal
 	url = https://github.com/USCiLab/cereal.git
-[submodule "submodules/jsoncpp"]
-	path = submodules/jsoncpp
-	url = https://github.com/open-source-parsers/jsoncpp.git
 [submodule "submodules/recastnavigation"]
 	path = submodules/recastnavigation
 	url = https://github.com/recastnavigation/recastnavigation.git
