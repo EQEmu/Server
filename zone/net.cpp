@@ -68,6 +68,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/event/event_loop.h"
 #include "../common/event/timer.h"
 #include "../common/net/eqstream.h"
+#include "../common/net/servertalk_server.h"
 
 #include <iostream>
 #include <string>
@@ -91,6 +92,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #else
 #include <pthread.h>
 #include "../common/unix.h"
+#include "../common/net/console_server.h"
+#include "console.h"
+
 #endif
 
 volatile bool RunLoops = true;
@@ -447,24 +451,50 @@ int main(int argc, char** argv) {
 	Log(Logs::Detail, Logs::None, "Main thread running with thread id %d", pthread_self());
 #endif
 
+	bool worldwasconnected    = worldserver.Connected();
+	bool eqsf_open            = false;
+	bool telnet_server_opened = false;
+
 	Timer quest_timers(100);
 	UpdateWindowTitle();
-	bool worldwasconnected = worldserver.Connected();
 	std::shared_ptr<EQStreamInterface> eqss;
 	EQStreamInterface *eqsi;
-	bool eqsf_open = false;
 	std::unique_ptr<EQ::Net::EQStreamManager> eqsm;
 	std::chrono::time_point<std::chrono::system_clock> frame_prev = std::chrono::system_clock::now();
+	std::unique_ptr<EQ::Net::ConsoleServer> console;
 
 	auto loop_fn = [&](EQ::Timer* t) {
 		//Advance the timer to our current point in time
 		Timer::SetCurrentTime();
 
-		//Calculate frame time
+		/**
+		 * Calculate frame time
+		 */
 		std::chrono::time_point<std::chrono::system_clock> frame_now = std::chrono::system_clock::now();
 		frame_time = std::chrono::duration_cast<std::chrono::duration<double>>(frame_now - frame_prev).count();
 		frame_prev = frame_now;
 
+		/**
+		 * Telnet server
+		 */
+		if (!telnet_server_opened && Config->ZonePort != 0) {
+			if (Config->TelnetEnabled) {
+				Log(
+					Logs::General,
+					Logs::Zone_Server,
+					"Telnet Console (TCP) listener started (%s:%u).",
+					Config->TelnetIP.c_str(),
+					Config->ZonePort
+				);
+				console.reset(new EQ::Net::ConsoleServer(Config->TelnetIP, Config->ZonePort));
+				RegisterConsoleFunctions(console);
+				telnet_server_opened = true;
+			}
+		}
+
+		/**
+		 * EQStreamManager
+		 */
 		if (!eqsf_open && Config->ZonePort != 0) {
 			Log(Logs::General, Logs::Zone_Server, "Starting EQ Network server on port %d", Config->ZonePort);
 
