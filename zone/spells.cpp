@@ -100,6 +100,7 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include "bot.h"
 #endif
 
+#include "mob_movement_manager.h"
 
 
 extern Zone* zone;
@@ -4818,7 +4819,22 @@ void Mob::Spin() {
 		safe_delete(outapp);
 	}
 	else {
-		GMMove(GetX(), GetY(), GetZ(), GetHeading()+5);
+		float x,y,z,h;
+
+		x=GetX();
+		y=GetY();
+		z=GetZ();
+		h=GetHeading()+5;
+
+		if (IsCorpse() || (IsClient() && !IsAIControlled())) {
+			m_Position.x = x;
+			m_Position.y = y;
+			m_Position.z = z;
+			mMovementManager->SendCommandToClients(this, 0.0, 0.0, 0.0, 0.0, 0, ClientRangeAny);
+		}
+		else {
+			Teleport(glm::vec4(x, y, z, h));
+		}
 	}
 }
 
