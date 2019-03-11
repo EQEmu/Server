@@ -67,6 +67,9 @@ void EQ::Net::EQStream::QueuePacket(const EQApplicationPacket *p, bool ack_req) 
 			opcode = p->GetOpcodeBypass();
 		}
 		else {
+			if (m_owner->m_options.track_opcode_stats) {
+				m_packet_sent_count[p->GetOpcode()]++; //Wont bother with bypass tracking of these since those are rare for testing anyway
+			}
 			opcode = (*m_opcode_manager)->EmuToEQ(p->GetOpcode());
 		}
 
@@ -116,6 +119,10 @@ EQApplicationPacket *EQ::Net::EQStream::PopPacket() {
 		}
 
 		EmuOpcode emu_op = (*m_opcode_manager)->EQToEmu(opcode);
+		if (m_owner->m_options.track_opcode_stats) {
+			m_packet_recv_count[emu_op]++;
+		}
+
 		EQApplicationPacket *ret = new EQApplicationPacket(emu_op, (unsigned char*)p->Data() + m_owner->m_options.opcode_size, p->Length() - m_owner->m_options.opcode_size);
 		ret->SetProtocolOpcode(opcode);
 		m_packet_queue.pop_front();
@@ -214,4 +221,25 @@ EQStreamState EQ::Net::EQStream::GetState() {
 	default:
 		return CLOSED;
 	}
+}
+
+EQ::Net::EQStream::Stats EQ::Net::EQStream::GetStats() const
+{
+	Stats ret;
+	ret.DaybreakStats = m_connection->GetStats();
+
+	for (int i = 0; i < _maxEmuOpcode; ++i) {
+		ret.RecvCount[i] = 0;
+		ret.SentCount[i] = 0;
+	}
+
+	for (auto &s : m_packet_sent_count) {
+		ret.SentCount[s.first] = s.second;
+	}
+
+	for (auto &r : m_packet_recv_count) {
+		ret.RecvCount[r.first] = r.second;
+	}
+
+	return ret;
 }

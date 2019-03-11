@@ -6,6 +6,7 @@
 #include "daybreak_connection.h"
 #include <vector>
 #include <deque>
+#include <unordered_map>
 
 namespace EQ
 {
@@ -19,6 +20,7 @@ namespace EQ
 
 			EQStreamManagerOptions(int port, bool encoded, bool compressed) {
 				opcode_size = 2;
+				track_opcode_stats = false;
 
 				//World seems to support both compression and xor zone supports one or the others.
 				//Enforce one or the other in the convienence construct
@@ -35,6 +37,7 @@ namespace EQ
 			}
 
 			int opcode_size;
+			bool track_opcode_stats;
 			DaybreakConnectionManagerOptions daybreak_options;
 		};
 
@@ -87,11 +90,15 @@ namespace EQ
 			virtual std::shared_ptr<EQ::Net::DaybreakConnection> GetRawConnection() const {
 				return m_connection;
 			}
+
+			virtual Stats GetStats() const;
 		private:
 			EQStreamManager *m_owner;
 			std::shared_ptr<DaybreakConnection> m_connection;
 			OpcodeManager **m_opcode_manager;
 			std::deque<std::unique_ptr<EQ::Net::Packet>> m_packet_queue;
+			std::unordered_map<EmuOpcode, int> m_packet_recv_count;
+			std::unordered_map<EmuOpcode, int> m_packet_sent_count;
 			friend class EQStreamManager;
 		};
 	}

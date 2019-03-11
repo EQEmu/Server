@@ -30,11 +30,19 @@ public:
 		uint16 first_eq_opcode;
 		uint32 first_length;			//0=dont check length
 	};
+
 	typedef enum {
 		MatchNotReady,
 		MatchSuccessful,
 		MatchFailed
 	} MatchState;
+
+	struct Stats
+	{
+		EQ::Net::DaybreakConnectionStats DaybreakStats;
+		int RecvCount[_maxEmuOpcode];
+		int SentCount[_maxEmuOpcode];
+	};
 
 	virtual void QueuePacket(const EQApplicationPacket *p, bool ack_req=true) = 0;
 	virtual void FastQueuePacket(EQApplicationPacket **p, bool ack_req=true) = 0;
@@ -53,6 +61,7 @@ public:
 	virtual void SetOpcodeManager(OpcodeManager **opm) = 0;
 	virtual const EQEmu::versions::ClientVersion ClientVersion() const { return EQEmu::versions::ClientVersion::Unknown; }
 	virtual std::shared_ptr<EQ::Net::DaybreakConnection> GetRawConnection() const = 0;
+	virtual Stats GetStats() const = 0;
 };
 
 #endif /*EQSTREAMINTF_H_*/

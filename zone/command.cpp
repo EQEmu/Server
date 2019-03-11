@@ -9489,7 +9489,8 @@ void command_netstats(Client *c, const Seperator *sep)
 
 		auto connection = c->Connection();
 		auto &opts = connection->GetRawConnection()->GetManager()->GetOptions();
-		auto stats = connection->GetRawConnection()->GetStats();
+		auto eqs_stats = connection->GetStats();
+		auto &stats = eqs_stats.DaybreakStats;
 		auto now = EQ::Net::Clock::now();
 		auto sec_since_stats_reset = std::chrono::duration_cast<std::chrono::duration<double>>(now - stats.created).count();
 
@@ -9518,6 +9519,24 @@ void command_netstats(Client *c, const Seperator *sep)
 
 		if (opts.outgoing_data_rate > 0.0) {
 			c->Message(0, "Outgoing Link Saturation %.2f%% (%.2fkb/sec)", 100.0 * (1.0 - ((opts.outgoing_data_rate - stats.datarate_remaining) / opts.outgoing_data_rate)), opts.outgoing_data_rate);
+		}
+
+		c->Message(0, "--------------------------------------------------------------------");
+		c->Message(0, "Sent Packet Types");
+		for (auto i = 0; i < _maxEmuOpcode; ++i) {
+			auto cnt = eqs_stats.SentCount[i];
+			if (cnt > 0) {
+				c->Message(0, "%s: %u", OpcodeNames[i], cnt);
+			}
+		}
+
+		c->Message(0, "--------------------------------------------------------------------");
+		c->Message(0, "Recv Packet Types");
+		for (auto i = 0; i < _maxEmuOpcode; ++i) {
+			auto cnt = eqs_stats.RecvCount[i];
+			if (cnt > 0) {
+				c->Message(0, "%s: %u", OpcodeNames[i], cnt);
+			}
 		}
 
 		c->Message(0, "--------------------------------------------------------------------");

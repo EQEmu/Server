@@ -94,6 +94,11 @@ std::shared_ptr<EQ::Net::DaybreakConnection> EQStreamProxy::GetRawConnection() c
 	return m_stream->GetRawConnection();
 }
 
+EQStreamInterface::Stats EQStreamProxy::GetStats() const
+{
+	return m_stream->GetStats();
+}
+
 bool EQStreamProxy::CheckState(EQStreamState state) {
 	if(m_stream)
 		return(m_stream->CheckState(state));
