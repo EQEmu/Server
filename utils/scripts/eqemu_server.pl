@@ -637,7 +637,7 @@ sub do_self_update_check_routine {
                     if ($OS eq "Linux") {
                         system("chmod 755 eqemu_server.pl");
                     }
-                    system("perl eqemu_server.pl start_from_world");
+                    exec("perl eqemu_server.pl ran_from_world");
                 }
             }
             print "[Install] Done\n";
