@@ -3259,7 +3259,7 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 		else
 			this->GetBotOwner()->CastToClient()->Message(13, "%s save failed!", this->GetCleanName());
 
-		// Spawn the bot at the bow owner's loc
+		// Spawn the bot at the bot owner's loc
 		this->m_Position.x = botCharacterOwner->GetX();
 		this->m_Position.y = botCharacterOwner->GetY();
 		this->m_Position.z = botCharacterOwner->GetZ();
@@ -3364,6 +3364,8 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		ns->spawn.helm = helmtexture; //(GetShowHelm() ? helmtexture : 0); //0xFF;
 		ns->spawn.equip_chest2 = texture; //0xFF;
 		ns->spawn.show_name = true;
+		strcpy(ns->spawn.title, GetTitle().c_str());
+		strcpy(ns->spawn.suffix, GetSuffix().c_str());
 		const EQEmu::ItemData* item = nullptr;
 		const EQEmu::ItemInstance* inst = nullptr;
 		uint32 spawnedbotid = 0;

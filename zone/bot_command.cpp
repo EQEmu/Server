@@ -1352,6 +1352,8 @@ int bot_command_init(void)
 		bot_command_add("botstopmeleelevel", "Sets the level a caster or spell-casting fighter bot will stop melee combat", 0, bot_subcommand_bot_stop_melee_level) ||
 		bot_command_add("botsummon", "Summons bot(s) to your location", 0, bot_subcommand_bot_summon) ||
 		bot_command_add("bottattoo", "Changes the Drakkin tattoo of a bot", 0, bot_subcommand_bot_tattoo) ||
+		bot_command_add("bottitle", "For changing the bot title", 0, bot_subcommand_bot_title) ||
+		bot_command_add("botsuffix", "For changing the bot suffix", 0, bot_subcommand_bot_suffix) ||
 		bot_command_add("bottogglearcher", "Toggles a archer bot between melee and ranged weapon use", 0, bot_subcommand_bot_toggle_archer) ||
 		bot_command_add("bottogglehelm", "Toggles the helm visibility of a bot between shown and hidden", 0, bot_subcommand_bot_toggle_helm) ||
 		bot_command_add("botupdate", "Updates a bot to reflect any level changes that you have experienced", 0, bot_subcommand_bot_update) ||
@@ -5538,6 +5540,68 @@ void bot_subcommand_bot_update(Client *c, const Seperator *sep)
 	}
 
 	c->Message(m_action, "Updated %i of your %i spawned bots", bot_count, sbl.size());
+}
+
+void bot_subcommand_bot_title(Client *c, const Seperator *sep)
+{
+	if (sep->arg[1][0] == '\0' || sep->IsNumber(1)) {
+		c->Message(m_fail, "You must specify a [title] to use this command");
+		return;
+	}
+	auto my_bot = ActionableBots::AsTarget_ByBot(c);
+	if (!my_bot) {
+		c->Message(m_fail, "You must <target> a bot that you own to use this command");
+		return;
+	}
+
+	if (strlen(sep->arg[1]) > 31) {
+		c->Message(13, "Title must be 31 characters or less.");
+		return;
+	}
+
+	std::string bot_title = sep->arg[1];
+
+	my_bot->setTitle(bot_title);
+	if (!botdb.SaveBot(my_bot)) {
+		c->Message(m_fail, BotDatabase::fail::SaveBot());
+		return;
+	}
+	else {
+		my_bot->CastToClient()->SetAATitle(bot_title.c_str());
+		c->Message(m_action, "Bot Saved.");
+	}
+}
+
+void bot_subcommand_bot_suffix(Client *c, const Seperator *sep)
+{
+	if (sep->arg[1][0] == '\0' || sep->IsNumber(1)) {
+		c->Message(m_fail, "You must specify a [suffix] to use this command (use underscores for any spaces)");
+		return;
+	}
+	auto my_bot = ActionableBots::AsTarget_ByBot(c);
+	if (!my_bot) {
+		c->Message(m_fail, "You must <target> a bot that you own to use this command");
+		return;
+	}
+
+	if (strlen(sep->arg[1]) > 31) {
+		c->Message(13, "Suffix must be 31 characters or less.");
+		return;
+	}
+
+	std::string bot_suffix = sep->arg[1];
+	std::replace(bot_suffix.begin(), bot_suffix.end(), '_', ' ');
+	bot_suffix = bot_suffix.substr(0, 31);
+	my_bot->setSuffix(bot_suffix);
+
+	if (!botdb.SaveBot(my_bot)) {
+		c->Message(m_fail, BotDatabase::fail::SaveBot());
+		return;
+	}
+	else {
+		my_bot->CastToClient()->SetTitleSuffix(bot_suffix.c_str());
+		c->Message(m_action, "Bot Saved.");
+	}
 }
 
 void bot_subcommand_bot_woad(Client *c, const Seperator *sep)

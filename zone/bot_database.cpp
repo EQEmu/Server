@@ -395,7 +395,8 @@ bool BotDatabase::LoadBot(const uint32 bot_id, Bot*& loaded_bot)
 	loaded_bot = new Bot(bot_id, atoi(row[0]), atoi(row[1]), atof(row[14]), atoi(row[6]), tempNPCStruct);
 	if (loaded_bot) {
 		loaded_bot->SetShowHelm((atoi(row[43]) > 0 ? true : false));
-
+		loaded_bot->setTitle(row[4]);
+		loaded_bot->setSuffix(row[5]);
 		uint32 bfd = atoi(row[44]);
 		if (bfd < 1)
 			bfd = 1;
@@ -604,7 +605,9 @@ bool BotDatabase::SaveBot(Bot* bot_inst)
 		" `corruption` = '%i',"
 		" `show_helm` = '%i',"
 		" `follow_distance` = '%i',"
-		" `stop_melee_level` = '%u'"
+		" `stop_melee_level` = '%u',"
+		" `title` = '%s',"
+		" `suffix` = '%s'"
 		" WHERE `bot_id` = '%u'",
 		bot_inst->GetBotOwnerCharacterID(),
 		bot_inst->GetBotSpellID(),
@@ -647,6 +650,8 @@ bool BotDatabase::SaveBot(Bot* bot_inst)
 		((bot_inst->GetShowHelm()) ? (1) : (0)),
 		bot_inst->GetFollowDistance(),
 		bot_inst->GetStopMeleeLevel(),
+		bot_inst->GetTitle().c_str(),
+		bot_inst->GetSuffix().c_str(),
 		bot_inst->GetBotID()
 	);
 	auto results = QueryDatabase(query);
