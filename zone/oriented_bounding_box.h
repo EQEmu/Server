@@ -8,10 +8,10 @@ class OrientedBoundingBox
 {
 public:
 	OrientedBoundingBox() { }
-	OrientedBoundingBox(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale, glm::vec3 extents);
+	OrientedBoundingBox(const glm::vec3 &pos, const glm::vec3 &rot, const glm::vec3 &scale, const glm::vec3 &extents);
 	~OrientedBoundingBox() { }
 
-	bool ContainsPoint(glm::vec3 p) const;
+	bool ContainsPoint(const glm::vec3 &p) const;
 	
 	glm::mat4& GetTransformation() { return transformation; }
 	glm::mat4& GetInvertedTransformation() { return inverted_transformation; }

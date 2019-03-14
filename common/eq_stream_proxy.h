@@ -31,8 +31,9 @@ public:
 	virtual const EQEmu::versions::ClientVersion ClientVersion() const;
 	virtual EQStreamState GetState();
 	virtual void SetOpcodeManager(OpcodeManager **opm);
-	virtual std::shared_ptr<EQ::Net::DaybreakConnection> GetRawConnection() const;
 	virtual Stats GetStats() const;
+	virtual void ResetStats();
+	virtual EQStreamManagerInterface* GetManager() const;
 
 protected:
 	std::shared_ptr<EQStreamInterface> const m_stream;	//we own this stream object.

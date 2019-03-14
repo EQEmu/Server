@@ -467,7 +467,7 @@ static void ProcessCommandIgnore(Client *c, std::string Ignoree) {
 
 }
 Clientlist::Clientlist(int ChatPort) {
-	EQ::Net::EQStreamManagerOptions chat_opts(ChatPort, false, false);
+	EQStreamManagerInterfaceOptions chat_opts(ChatPort, false, false);
 	chat_opts.opcode_size = 1;
 	chat_opts.daybreak_options.stale_connection_ms = 300000;
 	chat_opts.daybreak_options.resend_delay_ms = RuleI(Network, ResendDelayBaseMS);
@@ -483,7 +483,7 @@ Clientlist::Clientlist(int ChatPort) {
 		exit(1);
 
 	chatsf->OnNewConnection([this](std::shared_ptr<EQ::Net::EQStream> stream) {
-		LogF(Logs::General, Logs::Login_Server, "New Client UDP connection from {0}:{1}", stream->GetRawConnection()->RemoteEndpoint(), stream->GetRemotePort());
+		LogF(Logs::General, Logs::Login_Server, "New Client UDP connection from {0}:{1}", stream->GetRemoteIP(), stream->GetRemotePort());
 		stream->SetOpcodeManager(&ChatOpMgr);
 
 		auto c = new Client(stream);

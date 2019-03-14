@@ -498,7 +498,7 @@ int main(int argc, char** argv) {
 		web_interface.RemoveConnection(connection);
 	});
 
-	EQ::Net::EQStreamManagerOptions opts(9000, false, false);
+	EQStreamManagerInterfaceOptions opts(9000, false, false);
 	opts.daybreak_options.resend_delay_ms = RuleI(Network, ResendDelayBaseMS);
 	opts.daybreak_options.resend_delay_factor = RuleR(Network, ResendDelayFactor);
 	opts.daybreak_options.resend_delay_min = RuleI(Network, ResendDelayMinMS);
@@ -522,7 +522,7 @@ int main(int argc, char** argv) {
 
 	eqsm.OnNewConnection([&stream_identifier](std::shared_ptr<EQ::Net::EQStream> stream) {
 		stream_identifier.AddStream(stream);
-		LogF(Logs::Detail, Logs::World_Server, "New connection from IP {0}:{1}", stream->GetRawConnection()->RemoteEndpoint(), ntohs(stream->GetRemotePort()));
+		LogF(Logs::Detail, Logs::World_Server, "New connection from IP {0}:{1}", stream->GetRemoteIP(), ntohs(stream->GetRemotePort()));
 	});
 
 	while (RunLoops) {

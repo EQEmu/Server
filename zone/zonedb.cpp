@@ -80,7 +80,21 @@ bool ZoneDatabase::SaveZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct
 	return true;
 }
 
-bool ZoneDatabase::GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct *zone_data, bool &can_bind, bool &can_combat, bool &can_levitate, bool &can_castoutdoor, bool &is_city, bool &is_hotzone, bool &allow_mercs, uint8 &zone_type, int &ruleset, char **map_filename) {
+bool ZoneDatabase::GetZoneCFG(
+	uint32 zoneid, 
+	uint16 instance_id, 
+	NewZone_Struct *zone_data, 
+	bool &can_bind, 
+	bool &can_combat, 
+	bool &can_levitate, 
+	bool &can_castoutdoor, 
+	bool &is_city, 
+	bool &is_hotzone, 
+	bool &allow_mercs, 
+	double &max_movement_update_range,
+	uint8 &zone_type, 
+	int &ruleset, 
+	char **map_filename) {
 
 	*map_filename = new char[100];
 	zone_data->zone_id = zoneid;
@@ -147,7 +161,8 @@ bool ZoneDatabase::GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct 
 		"fast_regen_hp, "			 // 57
 		"fast_regen_mana, "			 // 58
 		"fast_regen_endurance, "	 // 59
-		"npc_max_aggro_dist "		 // 60
+		"npc_max_aggro_dist, "		 // 60
+		"max_movement_update_range " // 61
 		"FROM zone WHERE zoneidnumber = %i AND version = %i",
 		zoneid, instance_id);
 	auto results = QueryDatabase(query);
@@ -206,7 +221,7 @@ bool ZoneDatabase::GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct 
 	can_levitate = atoi(row[33]) == 0 ? false : true;
 	can_castoutdoor = atoi(row[34]) == 0 ? false : true;
 	is_hotzone = atoi(row[35]) == 0 ? false : true;
-
+	max_movement_update_range = atof(row[61]);
 
 	ruleset = atoi(row[36]);
 	zone_data->SuspendBuffs = atoi(row[37]);

@@ -244,7 +244,7 @@ namespace EQ
 				encode_passes[0] = DaybreakEncodeType::EncodeNone;
 				encode_passes[1] = DaybreakEncodeType::EncodeNone;
 				port = 0;
-				hold_size = 448;
+				hold_size = 512;
 				hold_length_ms = 50;
 				simulated_in_packet_loss = 0;
 				simulated_out_packet_loss = 0;

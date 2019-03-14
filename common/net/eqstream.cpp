@@ -2,10 +2,8 @@
 #include "../eqemu_logsys.h"
 #include "../eqemu_logsys_fmt.h"
 
-EQ::Net::EQStreamManager::EQStreamManager(EQStreamManagerOptions &options) : m_daybreak(options.daybreak_options)
+EQ::Net::EQStreamManager::EQStreamManager(const EQStreamManagerInterfaceOptions &options) : EQStreamManagerInterface(options), m_daybreak(options.daybreak_options)
 {
-	m_options = options;
-
 	m_daybreak.OnNewConnection(std::bind(&EQStreamManager::DaybreakNewConnection, this, std::placeholders::_1));
 	m_daybreak.OnConnectionStateChange(std::bind(&EQStreamManager::DaybreakConnectionStateChange, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	m_daybreak.OnPacketRecv(std::bind(&EQStreamManager::DaybreakPacketRecv, this, std::placeholders::_1, std::placeholders::_2));
@@ -49,7 +47,7 @@ void EQ::Net::EQStreamManager::DaybreakPacketRecv(std::shared_ptr<DaybreakConnec
 	}
 }
 
-EQ::Net::EQStream::EQStream(EQStreamManager *owner, std::shared_ptr<DaybreakConnection> connection)
+EQ::Net::EQStream::EQStream(EQStreamManagerInterface *owner, std::shared_ptr<DaybreakConnection> connection)
 {
 	m_owner = owner;
 	m_connection = connection;
@@ -67,14 +65,14 @@ void EQ::Net::EQStream::QueuePacket(const EQApplicationPacket *p, bool ack_req) 
 			opcode = p->GetOpcodeBypass();
 		}
 		else {
-			if (m_owner->m_options.track_opcode_stats) {
+			if (m_owner->GetOptions().track_opcode_stats) {
 				m_packet_sent_count[p->GetOpcode()]++; //Wont bother with bypass tracking of these since those are rare for testing anyway
 			}
 			opcode = (*m_opcode_manager)->EmuToEQ(p->GetOpcode());
 		}
 
 		EQ::Net::DynamicPacket out;
-		switch (m_owner->m_options.opcode_size) {
+		switch (m_owner->GetOptions().opcode_size) {
 		case 1:
 			out.PutUInt8(0, opcode);
 			out.PutData(1, p->pBuffer, p->size);
@@ -109,7 +107,7 @@ EQApplicationPacket *EQ::Net::EQStream::PopPacket() {
 		auto &p = m_packet_queue.front();
 
 		uint16 opcode = 0;
-		switch (m_owner->m_options.opcode_size) {
+		switch (m_owner->GetOptions().opcode_size) {
 		case 1:
 			opcode = p->GetUInt8(0);
 			break;
@@ -119,11 +117,11 @@ EQApplicationPacket *EQ::Net::EQStream::PopPacket() {
 		}
 
 		EmuOpcode emu_op = (*m_opcode_manager)->EQToEmu(opcode);
-		if (m_owner->m_options.track_opcode_stats) {
+		if (m_owner->GetOptions().track_opcode_stats) {
 			m_packet_recv_count[emu_op]++;
 		}
 
-		EQApplicationPacket *ret = new EQApplicationPacket(emu_op, (unsigned char*)p->Data() + m_owner->m_options.opcode_size, p->Length() - m_owner->m_options.opcode_size);
+		EQApplicationPacket *ret = new EQApplicationPacket(emu_op, (unsigned char*)p->Data() + m_owner->GetOptions().opcode_size, p->Length() - m_owner->GetOptions().opcode_size);
 		ret->SetProtocolOpcode(opcode);
 		m_packet_queue.pop_front();
 		return ret;
@@ -138,11 +136,11 @@ void EQ::Net::EQStream::Close() {
 
 std::string EQ::Net::EQStream::GetRemoteAddr() const
 {
-	return GetRawConnection()->RemoteEndpoint();
+	return m_connection->RemoteEndpoint();
 }
 
 uint32 EQ::Net::EQStream::GetRemoteIP() const {
-	return inet_addr(GetRawConnection()->RemoteEndpoint().c_str());
+	return inet_addr(m_connection->RemoteEndpoint().c_str());
 }
 
 bool EQ::Net::EQStream::CheckState(EQStreamState state) {
@@ -153,8 +151,8 @@ EQStreamInterface::MatchState EQ::Net::EQStream::CheckSignature(const Signature 
 	if (!m_packet_queue.empty()) {
 		auto p = m_packet_queue.front().get();
 		uint16 opcode = 0;
-		size_t length = p->Length() - m_owner->m_options.opcode_size;
-		switch (m_owner->m_options.opcode_size) {
+		size_t length = p->Length() - m_owner->GetOptions().opcode_size;
+		switch (m_owner->GetOptions().opcode_size) {
 		case 1:
 			opcode = p->GetUInt8(0);
 			break;
@@ -167,8 +165,8 @@ EQStreamInterface::MatchState EQ::Net::EQStream::CheckSignature(const Signature 
 			if (m_packet_queue.size() > 1) {
 				p = m_packet_queue[1].get();
 				opcode = 0;
-				length = p->Length() - m_owner->m_options.opcode_size;
-				switch (m_owner->m_options.opcode_size) {
+				length = p->Length() - m_owner->GetOptions().opcode_size;
+				switch (m_owner->GetOptions().opcode_size) {
 				case 1:
 					opcode = p->GetUInt8(0);
 					break;
@@ -185,23 +183,23 @@ EQStreamInterface::MatchState EQ::Net::EQStream::CheckSignature(const Signature 
 		if (opcode == sig->first_eq_opcode) {
 			if (length == sig->first_length) {
 				LogF(Logs::General, Logs::Netcode, "[IDENT_TRACE] {0}:{1}: First opcode matched {2:#x} and length matched {3}",
-					GetRawConnection()->RemoteEndpoint(), m_connection->RemotePort(), sig->first_eq_opcode, length);
+					m_connection->RemoteEndpoint(), m_connection->RemotePort(), sig->first_eq_opcode, length);
 				return MatchSuccessful;
 			}
 			else if (length == 0) {
 				LogF(Logs::General, Logs::Netcode, "[IDENT_TRACE] {0}:{1}: First opcode matched {2:#x} and length is ignored.",
-					GetRawConnection()->RemoteEndpoint(), m_connection->RemotePort(), sig->first_eq_opcode);
+					m_connection->RemoteEndpoint(), m_connection->RemotePort(), sig->first_eq_opcode);
 				return MatchSuccessful;
 			}
 			else {
 				LogF(Logs::General, Logs::Netcode, "[IDENT_TRACE] {0}:{1}: First opcode matched {2:#x} but length {3} did not match expected {4}",
-					GetRawConnection()->RemoteEndpoint(), m_connection->RemotePort(), sig->first_eq_opcode, length, sig->first_length);
+					m_connection->RemoteEndpoint(), m_connection->RemotePort(), sig->first_eq_opcode, length, sig->first_length);
 				return MatchFailed;
 			}
 		}
 		else {
 			LogF(Logs::General, Logs::Netcode, "[IDENT_TRACE] {0}:{1}: First opcode {1:#x} did not match expected {2:#x}",
-				GetRawConnection()->RemoteEndpoint(), m_connection->RemotePort(), opcode, sig->first_eq_opcode);
+				m_connection->RemoteEndpoint(), m_connection->RemotePort(), opcode, sig->first_eq_opcode);
 			return MatchFailed;
 		}
 	}
@@ -242,4 +240,14 @@ EQ::Net::EQStream::Stats EQ::Net::EQStream::GetStats() const
 	}
 
 	return ret;
+}
+
+void EQ::Net::EQStream::ResetStats()
+{
+	m_connection->ResetStats();
+}
+
+EQStreamManagerInterface *EQ::Net::EQStream::GetManager() const
+{
+	return m_owner;
 }

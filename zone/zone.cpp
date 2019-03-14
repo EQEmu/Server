@@ -1070,14 +1070,14 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_id)
 	map_name = nullptr;
 
 	if(!database.GetZoneCFG(database.GetZoneID(filename), instance_id, &newzone_data, can_bind,
-		can_combat, can_levitate, can_castoutdoor, is_city, is_hotzone, allow_mercs, zone_type, default_ruleset, &map_name))
+		can_combat, can_levitate, can_castoutdoor, is_city, is_hotzone, allow_mercs, max_movement_update_range, zone_type, default_ruleset, &map_name))
 	{
 		// If loading a non-zero instance failed, try loading the default
 		if (instance_id != 0)
 		{
 			safe_delete_array(map_name);
 			if(!database.GetZoneCFG(database.GetZoneID(filename), 0, &newzone_data, can_bind, can_combat, can_levitate, 
-				can_castoutdoor, is_city, is_hotzone, allow_mercs, zone_type, default_ruleset, &map_name))
+				can_castoutdoor, is_city, is_hotzone, allow_mercs, max_movement_update_range, zone_type, default_ruleset, &map_name))
 				{
 				Log(Logs::General, Logs::Error, "Error loading the Zone Config.");
 				return false;

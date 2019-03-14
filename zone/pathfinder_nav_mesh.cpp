@@ -12,7 +12,7 @@
 
 extern Zone *zone;
 
-const int MaxNavmeshNodes = 4096;
+const int MaxNavmeshNodes = 1024;
 
 struct PathfinderNavmesh::Implementation
 {

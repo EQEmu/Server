@@ -313,6 +313,8 @@ public:
 		}
 	}
 
+	double GetMaxMovementUpdateRange() const { return max_movement_update_range; }
+
 	/**
 	 * Modding hooks
 	 */
@@ -332,6 +334,7 @@ private:
 	bool      m_ucss_available;
 	bool      staticzone;
 	bool      zone_has_current_time;
+	double    max_movement_update_range;
 	char      *long_name;
 	char      *map_name;
 	char      *short_name;

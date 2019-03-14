@@ -90,13 +90,19 @@ void EQStreamProxy::RemoveData() {
 	m_stream->RemoveData();
 }
 
-std::shared_ptr<EQ::Net::DaybreakConnection> EQStreamProxy::GetRawConnection() const {
-	return m_stream->GetRawConnection();
-}
-
 EQStreamInterface::Stats EQStreamProxy::GetStats() const
 {
 	return m_stream->GetStats();
+}
+
+void EQStreamProxy::ResetStats()
+{
+	m_stream->ResetStats();
+}
+
+EQStreamManagerInterface *EQStreamProxy::GetManager() const
+{
+	return m_stream->GetManager();
 }
 
 bool EQStreamProxy::CheckState(EQStreamState state) {

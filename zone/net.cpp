@@ -500,18 +500,19 @@ int main(int argc, char** argv) {
 		if (!eqsf_open && Config->ZonePort != 0) {
 			Log(Logs::General, Logs::Zone_Server, "Starting EQ Network server on port %d", Config->ZonePort);
 
-			EQ::Net::EQStreamManagerOptions opts(Config->ZonePort, false, true);
+			EQStreamManagerInterfaceOptions opts(Config->ZonePort, false, true);
 			opts.daybreak_options.resend_delay_ms = RuleI(Network, ResendDelayBaseMS);
 			opts.daybreak_options.resend_delay_factor = RuleR(Network, ResendDelayFactor);
 			opts.daybreak_options.resend_delay_min = RuleI(Network, ResendDelayMinMS);
 			opts.daybreak_options.resend_delay_max = RuleI(Network, ResendDelayMaxMS);
 			opts.daybreak_options.outgoing_data_rate = RuleR(Network, ClientDataRate);
+			opts.track_opcode_stats = RuleB(Network, TrackOpcodeStats);
 			eqsm.reset(new EQ::Net::EQStreamManager(opts));
 			eqsf_open = true;
 
 			eqsm->OnNewConnection([&stream_identifier](std::shared_ptr<EQ::Net::EQStream> stream) {
 				stream_identifier.AddStream(stream);
-				LogF(Logs::Detail, Logs::World_Server, "New connection from IP {0}:{1}", stream->GetRawConnection()->RemoteEndpoint(), ntohs(stream->GetRemotePort()));
+				LogF(Logs::Detail, Logs::World_Server, "New connection from IP {0}:{1}", stream->GetRemoteIP(), ntohs(stream->GetRemotePort()));
 			});
 		}
 
