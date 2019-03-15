@@ -38,6 +38,8 @@
 #include <limits>
 #include <math.h>
 
+#define ROAMBOX_MOVE_IN_PROGESS	(666)
+
 extern EntityList entity_list;
 extern FastMath g_Math;
 
@@ -1572,9 +1574,21 @@ void NPC::AI_DoMovement() {
 	/**
 	 * Roambox logic sets precedence
 	 */
+
 	if (roambox_distance > 0) {
 
-		if (!IsMoving()) {
+		// Check if we're already moving to a WP
+		// If so, if we're not moving we have arrived and need to set delay
+
+		if (GetCWP() == ROAMBOX_MOVE_IN_PROGESS && !IsMoving()) {
+			// We have arrived
+			time_until_can_move = Timer::GetCurrentTime() + RandomTimer(roambox_min_delay, roambox_delay);
+			SetCurrentWP(0);
+			return;
+		}
+
+		// Set a new destination
+		if (!IsMoving() && time_until_can_move < Timer::GetCurrentTime()) {
 			auto move_x = static_cast<float>(zone->random.Real(-roambox_distance, roambox_distance));
 			auto move_y = static_cast<float>(zone->random.Real(-roambox_distance, roambox_distance));
 
@@ -1642,12 +1656,10 @@ void NPC::AI_DoMovement() {
 				roambox_min_y,
 				roambox_max_y,
 				roambox_destination_y);
-		}
+			Log(Logs::Detail, Logs::NPCRoamBox, "Dest Z is (%f)", roambox_destination_z);
 
-		NavigateTo(roambox_destination_x, roambox_destination_y, roambox_destination_z);
-
-		if (m_Position.x == roambox_destination_x && m_Position.y == roambox_destination_y) {
-			time_until_can_move = Timer::GetCurrentTime() + RandomTimer(roambox_min_delay, roambox_delay);
+			SetCurrentWP(ROAMBOX_MOVE_IN_PROGESS);
+			NavigateTo(roambox_destination_x, roambox_destination_y, roambox_destination_z);
 		}
 
 		return;
