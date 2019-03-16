@@ -1,11 +1,10 @@
 #include "daybreak_connection.h"
 #include "../event/event_loop.h"
 #include "../event/task.h"
-#include "../eqemu_logsys.h"
-#include "../eqemu_logsys_fmt.h"
 #include "../data_verification.h"
 #include "crc32.h"
 #include <zlib.h>
+#include <fmt/format.h>
 #include <sstream>
 
 EQ::Net::DaybreakConnectionManager::DaybreakConnectionManager()
@@ -211,7 +210,9 @@ void EQ::Net::DaybreakConnectionManager::ProcessPacket(const std::string &endpoi
 	}
 
 	if (size < DaybreakHeader::size()) {
-		LogF(Logs::Detail, Logs::Netcode, "Packet of size {0} which is less than {1}", size, DaybreakHeader::size());
+		if (m_on_error_message) {
+			m_on_error_message(fmt::format("Packet of size {0} which is less than {1}", size, DaybreakHeader::size()));
+		}
 		return;
 	}
 
@@ -241,7 +242,9 @@ void EQ::Net::DaybreakConnectionManager::ProcessPacket(const std::string &endpoi
 		}
 	}
 	catch (std::exception &ex) {
-		LogF(Logs::Detail, Logs::Netcode, "Error processing packet: {0}", ex.what());
+		if (m_on_error_message) {
+			m_on_error_message(fmt::format("Error processing packet: {0}", ex.what()));
+		}
 	}
 }
 
@@ -396,7 +399,9 @@ void EQ::Net::DaybreakConnection::Process()
 		ProcessQueue();
 	}
 	catch (std::exception ex) {
-		LogF(Logs::Detail, Logs::Netcode, "Error processing connection: {0}", ex.what());
+		if (m_owner->m_on_error_message) {
+			m_owner->m_on_error_message(fmt::format("Error processing connection: {0}", ex.what()));
+		}
 	}
 }
 
@@ -417,7 +422,9 @@ void EQ::Net::DaybreakConnection::ProcessPacket(Packet &p)
 
 	if (PacketCanBeEncoded(p)) {
 		if (!ValidateCRC(p)) {
-			LogF(Logs::Detail, Logs::Netcode, "Tossed packet that failed CRC of type {0:#x}", p.Length() >= 2 ? p.GetInt8(1) : 0);
+			if (m_owner->m_on_error_message) {
+				m_owner->m_on_error_message(fmt::format("Tossed packet that failed CRC of type {0:#x}", p.Length() >= 2 ? p.GetInt8(1) : 0));
+			}
 			return;
 		}
 
@@ -798,7 +805,9 @@ void EQ::Net::DaybreakConnection::ProcessDecodedPacket(const Packet &p)
 				break;
 			}
 			default:
-				LogF(Logs::Detail, Logs::Netcode, "Unhandled opcode {0:#x}", p.GetInt8(1));
+				if (m_owner->m_on_error_message) {
+					m_owner->m_on_error_message(fmt::format("Unhandled opcode {0:#x}", p.GetInt8(1)));
+				}
 				break;
 		}
 	}
