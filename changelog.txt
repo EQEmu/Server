@@ -1,11 +1,6 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
-== 3/12/2019 ==
-KentaiVZ: Added two new bot commands to make use of the already present database fields.
-				
-	- ^bottitle - Gives targeted bot a custom title ( I.E Pathfinder )
-	- ^botsuffix - Gives targeted bot a custom suffix ( I.E of The Grand Creation )
-	
+
 == 3/1/2019 ==
 Noudess: Major faction conversion to use client data.
 

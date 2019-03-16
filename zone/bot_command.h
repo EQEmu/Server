@@ -593,8 +593,6 @@ void bot_command_water_breathing(Client *c, const Seperator *sep);
 
 // bot subcommands
 void bot_subcommand_bot_appearance(Client *c, const Seperator *sep);
-void bot_subcommand_bot_title(Client *c, const Seperator *sep);
-void bot_subcommand_bot_suffix(Client *c, const Seperator *sep);
 void bot_subcommand_bot_beard_color(Client *c, const Seperator *sep);
 void bot_subcommand_bot_beard_style(Client *c, const Seperator *sep);
 void bot_subcommand_bot_camp(Client *c, const Seperator *sep);

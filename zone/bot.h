@@ -272,11 +272,6 @@ public:
 	bool HasOrMayGetAggro();
 	void SetDefaultBotStance();
 
-	void  setTitle(std::string bot_title) { title = bot_title; }
-	void  setSuffix(std::string bot_suffix) { suffix = bot_suffix; }
-	std::string GetTitle() { return title; }
-	std::string GetSuffix() { return suffix; }
-
 	inline virtual int32	GetMaxStat();
 	inline virtual int32	GetMaxResist();
 	inline virtual int32	GetMaxSTR();
@@ -656,8 +651,6 @@ private:
 	uint32 _guildId;
 	uint8 _guildRank;
 	std::string _guildName;
-	std::string title;
-	std::string suffix;
 	uint32 _lastZoneId;
 	bool _rangerAutoWeaponSelect;
 	BotRoleType _botRole;
