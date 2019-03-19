@@ -163,25 +163,25 @@ void callGetCorpseListDetail(Json::Value &response)
 
 		Json::Value row;
 
-		row["char_id"]                   = corpse->GetCharID();
-		row["copper"]                    = corpse->GetCopper();
-		row["corpse_dbid"]               = corpse->GetCorpseDBID();
-		row["count_items"]               = corpse->CountItems();
-		row["decay_time"]                = corpse->GetDecayTime();
-		row["gold"]                      = corpse->GetGold();
-		row["is_become_npc_corpse"]      = corpse->IsBecomeNPCCorpse();
-		row["is_being_looted"]           = corpse->IsBeingLooted();
-		row["is_corpse"]                 = corpse->IsCorpse();
-		row["is_locked"]                 = corpse->IsLocked();
-		row["is_npc_corpse"]             = corpse->IsNPCCorpse();
-		row["is_player_corpse"]          = corpse->IsPlayerCorpse();
-		row["is_rezzed"]                 = corpse->IsRezzed();
-		row["owner_name"]                = corpse->GetOwnerName();
-		row["platinum"]                  = corpse->GetPlatinum();
-		row["player_kill_item"]          = corpse->GetPlayerKillItem();
-		row["rez_exp"]                   = corpse->GetRezExp();
-		row["rez_time"]                  = corpse->GetRezTime();
-		row["silver"]                    = corpse->GetSilver();
+		row["char_id"]              = corpse->GetCharID();
+		row["copper"]               = corpse->GetCopper();
+		row["corpse_dbid"]          = corpse->GetCorpseDBID();
+		row["count_items"]          = corpse->CountItems();
+		row["decay_time"]           = corpse->GetDecayTime();
+		row["gold"]                 = corpse->GetGold();
+		row["is_become_npc_corpse"] = corpse->IsBecomeNPCCorpse();
+		row["is_being_looted"]      = corpse->IsBeingLooted();
+		row["is_corpse"]            = corpse->IsCorpse();
+		row["is_locked"]            = corpse->IsLocked();
+		row["is_npc_corpse"]        = corpse->IsNPCCorpse();
+		row["is_player_corpse"]     = corpse->IsPlayerCorpse();
+		row["is_rezzed"]            = corpse->IsRezzed();
+		row["owner_name"]           = corpse->GetOwnerName();
+		row["platinum"]             = corpse->GetPlatinum();
+		row["player_kill_item"]     = corpse->GetPlayerKillItem();
+		row["rez_exp"]              = corpse->GetRezExp();
+		row["rez_time"]             = corpse->GetRezTime();
+		row["silver"]               = corpse->GetSilver();
 
 		response.append(row);
 	}
@@ -650,6 +650,75 @@ void callGetZoneAttributes(Json::Value &response)
 	response.append(row);
 }
 
+void callGetPacketStatistics(Json::Value &response)
+{
+	auto &list = entity_list.GetClientList();
+
+	for (auto &iter : list) {
+		auto client                = iter.second;
+		auto connection            = client->Connection();
+		auto &opts                 = connection->GetManager()->GetOptions();
+		auto eqs_stats             = connection->GetStats();
+		auto &stats                = eqs_stats.DaybreakStats;
+		auto now                   = EQ::Net::Clock::now();
+		auto sec_since_stats_reset = std::chrono::duration_cast<std::chrono::duration<double>>(
+			now - stats.created
+		).count();
+
+		Json::Value row;
+
+		row["client_id"]                = client->GetID();
+		row["client_name"]              = client->GetCleanName();
+		row["seconds_since_reset"]      = sec_since_stats_reset;
+		row["sent_bytes"]               = stats.sent_bytes;
+		row["receive_bytes"]            = stats.recv_bytes;
+		row["min_ping"]                 = stats.min_ping;
+		row["max_ping"]                 = stats.max_ping;
+		row["last_ping"]                = stats.last_ping;
+		row["average_ping"]             = stats.avg_ping;
+		row["realtime_receive_packets"] = stats.recv_packets;
+		row["realtime_sent_packets"]    = stats.sent_packets;
+		row["sync_recv_packets"]        = stats.sync_recv_packets;
+		row["sync_sent_packets"]        = stats.sync_sent_packets;
+		row["sync_remote_recv_packets"] = stats.sync_remote_recv_packets;
+		row["sync_remote_sent_packets"] = stats.sync_remote_sent_packets;
+		row["packet_loss_in"]           = (100.0 * (1.0 - static_cast<double>(stats.sync_recv_packets) /
+														  static_cast<double>(stats.sync_remote_sent_packets)));
+		row["packet_loss_out"]          = (100.0 * (1.0 - static_cast<double>(stats.sync_remote_recv_packets) /
+														  static_cast<double>(stats.sync_sent_packets)));
+		row["resent_packets"]           = stats.resent_packets;
+		row["resent_fragments"]         = stats.resent_fragments;
+		row["resent_non_fragments"]     = stats.resent_full;
+		row["dropped_datarate_packets"] = stats.dropped_datarate_packets;
+
+		if (opts.track_opcode_stats) {
+
+			Json::Value sent_packet_types;
+
+			for (auto i = 0; i < _maxEmuOpcode; ++i) {
+				auto count = eqs_stats.SentCount[i];
+				if (count > 0) {
+					sent_packet_types[OpcodeNames[i]] = count;
+				}
+			}
+
+			Json::Value receive_packet_types;
+
+			for (auto i = 0; i < _maxEmuOpcode; ++i) {
+				auto count = eqs_stats.RecvCount[i];
+				if (count > 0) {
+					receive_packet_types[OpcodeNames[i]] = count;
+				}
+			}
+
+			row["sent_packet_types"]    = sent_packet_types;
+			row["receive_packet_types"] = receive_packet_types;
+		}
+
+		response.append(row);
+	}
+}
+
 void EQEmuApiZoneDataService::get(Json::Value &response, const std::vector<std::string> &args)
 {
 	std::string method = args[0];
@@ -659,6 +728,16 @@ void EQEmuApiZoneDataService::get(Json::Value &response, const std::vector<std::
 		return;
 	}
 
+	/**
+	 * Packet statistics
+	 */
+	if (method == "get_packet_statistics") {
+		callGetPacketStatistics(response);
+	}
+
+	/**
+	 * List detail
+	 */
 	if (method == "get_npc_list_detail") {
 		callGetNpcListDetail(response);
 	}
@@ -677,6 +756,10 @@ void EQEmuApiZoneDataService::get(Json::Value &response, const std::vector<std::
 	if (method == "get_object_list_detail") {
 		callGetObjectListDetail(response);
 	}
+
+	/**
+	 * Zone attributes
+	 */
 	if (method == "get_zone_attributes") {
 		callGetZoneAttributes(response);
 	}

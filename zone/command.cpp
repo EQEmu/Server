@@ -9508,7 +9508,7 @@ void command_netstats(Client *c, const Seperator *sep)
 		c->Message(0, "Min Ping: %u", stats.min_ping);
 		c->Message(0, "Max Ping: %u", stats.max_ping);
 		c->Message(0, "Last Ping: %u", stats.last_ping);
-		c->Message(0, "Averge Ping: %u", stats.avg_ping);
+		c->Message(0, "Average Ping: %u", stats.avg_ping);
 		c->Message(0, "--------------------------------------------------------------------");
 		c->Message(0, "(Realtime) Recv Packets: %u (%.2f/sec)", stats.recv_packets, stats.recv_packets / sec_since_stats_reset);
 		c->Message(0, "(Realtime) Sent Packets: %u (%.2f/sec)", stats.sent_packets, stats.sent_packets / sec_since_stats_reset);
