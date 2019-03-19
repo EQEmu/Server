@@ -654,6 +654,11 @@ void EQEmuApiZoneDataService::get(Json::Value &response, const std::vector<std::
 {
 	std::string method = args[0];
 
+	if (!zone->IsLoaded()) {
+		response["error"] = "Zone must be loaded to invoke calls";
+		return;
+	}
+
 	if (method == "get_npc_list_detail") {
 		callGetNpcListDetail(response);
 	}
