@@ -719,6 +719,16 @@ void callGetPacketStatistics(Json::Value &response)
 	}
 }
 
+
+void callGetOpcodeList(Json::Value &response)
+{
+	for (auto i = 0; i < _maxEmuOpcode; ++i) {
+		Json::Value row = OpcodeNames[i];
+		
+		response.append(row);
+	}
+}
+
 void EQEmuApiZoneDataService::get(Json::Value &response, const std::vector<std::string> &args)
 {
 	std::string method = args[0];
@@ -733,6 +743,9 @@ void EQEmuApiZoneDataService::get(Json::Value &response, const std::vector<std::
 	 */
 	if (method == "get_packet_statistics") {
 		callGetPacketStatistics(response);
+	}
+	if (method == "get_opcode_list") {
+		callGetOpcodeList(response);
 	}
 
 	/**
