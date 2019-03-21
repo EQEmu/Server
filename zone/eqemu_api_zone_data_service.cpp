@@ -724,7 +724,7 @@ void callGetOpcodeList(Json::Value &response)
 {
 	for (auto i = 0; i < _maxEmuOpcode; ++i) {
 		Json::Value row = OpcodeNames[i];
-		
+
 		response.append(row);
 	}
 }
@@ -733,7 +733,7 @@ void EQEmuApiZoneDataService::get(Json::Value &response, const std::vector<std::
 {
 	std::string method = args[0];
 
-	if (!zone->IsLoaded()) {
+	if (zone->GetZoneID() > 0) {
 		response["error"] = "Zone must be loaded to invoke calls";
 		return;
 	}
