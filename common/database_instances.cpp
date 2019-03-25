@@ -38,16 +38,23 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include <sys/time.h>
 #endif
 
+/**
+ * @param instance_id
+ * @param char_id
+ * @return
+ */
 bool Database::AddClientToInstance(uint16 instance_id, uint32 char_id)
 {
 	std::string query = StringFormat(
 		"REPLACE INTO `instance_list_player` (id, charid) "
 		"VALUES "
 		"(%lu, %lu)",
-		(unsigned long)instance_id,
-		(unsigned long)char_id
-		);
+		(unsigned long) instance_id,
+		(unsigned long) char_id
+	);
+
 	auto results = QueryDatabase(query);
+
 	return results.Success();
 }
 

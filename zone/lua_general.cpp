@@ -815,33 +815,39 @@ int lua_merchant_count_item(uint32 npc_id, uint32 item_id) {
 
 std::string lua_item_link(int item_id) {
 	char text[250] = { 0 };
-	quest_manager.varlink(text, item_id);
 
-	return std::string(text);
+	return quest_manager.varlink(text, item_id);
 }
 
 std::string lua_say_link(const char *phrase, bool silent, const char *link_name) {
 	char text[256] = { 0 };
 	strncpy(text, phrase, 255);
-	quest_manager.saylink(text, silent, link_name);
 
-	return std::string(text);
+	return quest_manager.saylink(text, silent, link_name);
 }
 
 std::string lua_say_link(const char *phrase, bool silent) {
 	char text[256] = { 0 };
 	strncpy(text, phrase, 255);
-	quest_manager.saylink(text, silent, text);
 
-	return std::string(text);
+	return quest_manager.saylink(text, silent, text);
 }
 
 std::string lua_say_link(const char *phrase) {
 	char text[256] = { 0 };
 	strncpy(text, phrase, 255);
-	quest_manager.saylink(text, false, text);
 
-	return std::string(text);
+	return quest_manager.saylink(text, false, text);
+}
+
+void lua_set_rule(std::string rule_name, std::string rule_value) {
+	RuleManager::Instance()->SetRule(rule_name.c_str(), rule_value.c_str());
+}
+
+std::string lua_get_rule(std::string rule_name) {
+	std::string rule_value;
+	RuleManager::Instance()->GetRule(rule_name.c_str(), rule_value);
+	return rule_value;
 }
 
 std::string lua_get_data(std::string bucket_key) {
@@ -933,7 +939,7 @@ void lua_flag_instance_by_raid_leader(uint32 zone, uint32 version) {
 }
 
 void lua_fly_mode(int flymode) {
-	quest_manager.FlyMode(flymode);
+	quest_manager.FlyMode(static_cast<GravityBehavior>(flymode));
 }
 
 int lua_faction_value() {
@@ -1443,7 +1449,7 @@ void lua_create_npc(luabind::adl::object table, float x, float y, float z, float
 	luabind::adl::index_proxy<luabind::adl::object> cur = table["name"];
 	LuaCreateNPCParseString(name, 64, "_");
 	LuaCreateNPCParseString(lastname, 64, "");
-	LuaCreateNPCParse(cur_hp, int32, 30);
+	LuaCreateNPCParse(current_hp, int32, 30);
 	LuaCreateNPCParse(max_hp, int32, 30);
 	LuaCreateNPCParse(size, float, 6.0f);
 	LuaCreateNPCParse(runspeed, float, 1.25f);
@@ -1468,19 +1474,19 @@ void lua_create_npc(luabind::adl::object table, float x, float y, float z, float
 	LuaCreateNPCParse(AC, uint32, 0);
 	LuaCreateNPCParse(Mana, uint32, 0);
 	LuaCreateNPCParse(ATK, uint32, 0);
-	LuaCreateNPCParse(STR, uint32, 75);
-	LuaCreateNPCParse(STA, uint32, 75);
-	LuaCreateNPCParse(DEX, uint32, 75);
-	LuaCreateNPCParse(AGI, uint32, 75);
-	LuaCreateNPCParse(INT, uint32, 75);
-	LuaCreateNPCParse(WIS, uint32, 75);
-	LuaCreateNPCParse(CHA, uint32, 75);
-	LuaCreateNPCParse(MR, int32, 25);
-	LuaCreateNPCParse(FR, int32, 25);
-	LuaCreateNPCParse(CR, int32, 25);
-	LuaCreateNPCParse(PR, int32, 25);
-	LuaCreateNPCParse(DR, int32, 25);
-	LuaCreateNPCParse(Corrup, int32, 25);
+	LuaCreateNPCParse(STR, uint32, 0);
+	LuaCreateNPCParse(STA, uint32, 0);
+	LuaCreateNPCParse(DEX, uint32, 0);
+	LuaCreateNPCParse(AGI, uint32, 0);
+	LuaCreateNPCParse(INT, uint32, 0);
+	LuaCreateNPCParse(WIS, uint32, 0);
+	LuaCreateNPCParse(CHA, uint32, 0);
+	LuaCreateNPCParse(MR, int32, 0);
+	LuaCreateNPCParse(FR, int32, 0);
+	LuaCreateNPCParse(CR, int32, 0);
+	LuaCreateNPCParse(PR, int32, 0);
+	LuaCreateNPCParse(DR, int32, 0);
+	LuaCreateNPCParse(Corrup, int32, 0);
 	LuaCreateNPCParse(PhR, int32, 0);
 	LuaCreateNPCParse(haircolor, uint8, 0);
 	LuaCreateNPCParse(beardcolor, uint8, 0);
@@ -1541,7 +1547,7 @@ void lua_create_npc(luabind::adl::object table, float x, float y, float z, float
 	LuaCreateNPCParse(no_target_hotkey, bool, false);
 	LuaCreateNPCParse(raid_target, bool, false);
 
-	NPC* npc = new NPC(npc_type, nullptr, glm::vec4(x, y, z, heading), FlyMode3);
+	NPC* npc = new NPC(npc_type, nullptr, glm::vec4(x, y, z, heading), GravityBehavior::Water);
 	npc->GiveNPCTypeData(npc_type);
 	entity_list.AddNPC(npc);
 }
@@ -1718,6 +1724,8 @@ luabind::scope lua_register_general() {
 		luabind::def("say_link", (std::string(*)(const char*,bool,const char*))&lua_say_link),
 		luabind::def("say_link", (std::string(*)(const char*,bool))&lua_say_link),
 		luabind::def("say_link", (std::string(*)(const char*))&lua_say_link),
+		luabind::def("set_rule", (void(*)(std::string, std::string))&lua_set_rule),
+		luabind::def("get_rule", (std::string(*)(std::string))&lua_get_rule),
 		luabind::def("get_data", (std::string(*)(std::string))&lua_get_data),
 		luabind::def("get_data_expires", (std::string(*)(std::string))&lua_get_data_expires),
 		luabind::def("set_data", (void(*)(std::string, std::string))&lua_set_data),

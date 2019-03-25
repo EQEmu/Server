@@ -49,7 +49,7 @@ public:
 	void ForceClose(Mob *sender, bool alt_mode = false);
 	void ForceOpen(Mob *sender, bool alt_mode = false);
 	void HandleClick(Client *sender, uint8 trigger);
-	void NPCOpen(NPC *sender, bool alt_mode = false);
+	void Open(Mob *sender, bool alt_mode = false);
 	void SetDisableTimer(bool flag);
 	void SetDoorName(const char *name);
 	void SetEntityID(uint32 entity) { entity_id = entity; }
@@ -63,6 +63,10 @@ public:
 	void SetPosition(const glm::vec4 &position);
 	void SetSize(uint16 size);
 	void ToggleState(Mob *sender);
+
+	float GetX();
+	float GetY();
+	float GetZ();
 
 private:
 

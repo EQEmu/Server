@@ -100,6 +100,7 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include "bot.h"
 #endif
 
+#include "mob_movement_manager.h"
 
 
 extern Zone* zone;
@@ -107,7 +108,7 @@ extern volatile bool is_zone_loaded;
 extern WorldServer worldserver;
 extern FastMath g_Math;
 
-using EQEmu::CastingSlot;
+using EQEmu::spells::CastingSlot;
 
 // this is run constantly for every mob
 void Mob::SpellProcess()
@@ -305,8 +306,9 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	}
 
 	//To prevent NPC ghosting when spells are cast from scripts
-	if (IsNPC() && IsMoving() && cast_time > 0)
-		SendPosition();
+	if (IsNPC() && IsMoving() && cast_time > 0) {
+		StopNavigation();
+	}
 
 	if(resist_adjust)
 	{
@@ -2665,23 +2667,6 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 
 			action->effect_flag = 4;
 
-			if(spells[spell_id].pushback != 0.0f || spells[spell_id].pushup != 0.0f)
-			{
-				if(IsClient())
-				{
-					if(!IsBuffSpell(spell_id))
-					{
-						CastToClient()->SetKnockBackExemption(true);
-
-					}
-				}
-			}
-
-			if(IsClient() && IsEffectInSpell(spell_id, SE_ShadowStep))
-			{
-				CastToClient()->SetShadowStepExemption(true);
-			}
-
 			if(!IsEffectInSpell(spell_id, SE_BindAffinity))
 			{
 				CastToClient()->QueuePacket(packet);
@@ -3021,6 +3006,10 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		if(effect1 != effect2)
 			continue;
 
+		if (IsBardOnlyStackEffect(effect1) && GetSpellLevel(spellid1, BARD) != 255 &&
+		    GetSpellLevel(spellid2, BARD) != 255)
+			continue;
+
 		// big ol' list according to the client, wasn't that nice!
 		if (IsEffectIgnoredInStacking(effect1))
 			continue;
@@ -3329,7 +3318,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 	{
 		EQApplicationPacket *outapp = MakeBuffsPacket();
 
-		entity_list.QueueClientsByTarget(this, outapp, false, nullptr, true, false, EQEmu::versions::bit_SoDAndLater);
+		entity_list.QueueClientsByTarget(this, outapp, false, nullptr, true, false, EQEmu::versions::maskSoDAndLater);
 
 		if(IsClient() && GetTarget() == this)
 			CastToClient()->QueuePacket(outapp);
@@ -3339,7 +3328,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 
 	if (IsNPC()) {
 		EQApplicationPacket *outapp = MakeBuffsPacket();
-		entity_list.QueueClientsByTarget(this, outapp, false, nullptr, true, false, EQEmu::versions::bit_SoDAndLater, true);
+		entity_list.QueueClientsByTarget(this, outapp, false, nullptr, true, false, EQEmu::versions::maskSoDAndLater, true);
 		safe_delete(outapp);
 	}
 
@@ -3943,23 +3932,12 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 
 	if(spells[spell_id].pushback != 0.0f || spells[spell_id].pushup != 0.0f)
 	{
-		if(spelltar->IsClient())
-		{
-			if(!IsBuffSpell(spell_id))
-			{
-				spelltar->CastToClient()->SetKnockBackExemption(true);
-			}
-		} else if (RuleB(Spells, NPCSpellPush) && !spelltar->IsRooted() && spelltar->ForcedMovement == 0) {
+		if (RuleB(Spells, NPCSpellPush) && !spelltar->IsRooted() && spelltar->ForcedMovement == 0) {
 			spelltar->m_Delta.x += action->force * g_Math.FastSin(action->hit_heading);
 			spelltar->m_Delta.y += action->force * g_Math.FastCos(action->hit_heading);
 			spelltar->m_Delta.z += action->hit_pitch;
 			spelltar->ForcedMovement = 6;
 		}
-	}
-
-	if(spelltar->IsClient() && IsEffectInSpell(spell_id, SE_ShadowStep))
-	{
-		spelltar->CastToClient()->SetShadowStepExemption(true);
 	}
 
 	if(!IsEffectInSpell(spell_id, SE_BindAffinity))
@@ -4841,7 +4819,22 @@ void Mob::Spin() {
 		safe_delete(outapp);
 	}
 	else {
-		GMMove(GetX(), GetY(), GetZ(), GetHeading()+5);
+		float x,y,z,h;
+
+		x=GetX();
+		y=GetY();
+		z=GetZ();
+		h=GetHeading()+5;
+
+		if (IsCorpse() || (IsClient() && !IsAIControlled())) {
+			m_Position.x = x;
+			m_Position.y = y;
+			m_Position.z = z;
+			mMovementManager->SendCommandToClients(this, 0.0, 0.0, 0.0, 0.0, 0, ClientRangeAny);
+		}
+		else {
+			Teleport(glm::vec4(x, y, z, h));
+		}
 	}
 }
 
@@ -4925,12 +4918,11 @@ void Client::UnStun() {
 
 void NPC::Stun(int duration) {
 	Mob::Stun(duration);
-	SetCurrentSpeed(0);
+	StopNavigation();
 }
 
 void NPC::UnStun() {
 	Mob::UnStun();
-	SetCurrentSpeed(GetRunspeed());
 }
 
 void Mob::Mesmerize()
@@ -4940,18 +4932,7 @@ void Mob::Mesmerize()
 	if (casting_spell_id)
 		InterruptSpell();
 
-	SendPosition();
-/* this stuns the client for max time, with no way to break it
-	if (this->IsClient()){
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_Stun, sizeof(Stun_Struct));
-		Stun_Struct* stunon = (Stun_Struct*) outapp->pBuffer;
-		stunon->duration = 0xFFFF;
-		this->CastToClient()->QueuePacket(outapp);
-		safe_delete(outapp);
-	} else {
-		SetRunAnimSpeed(0);
-	}
-*/
+	StopNavigation();
 }
 
 void Client::MakeBuffFadePacket(uint16 spell_id, int slot_id, bool send_message)
@@ -5003,7 +4984,7 @@ void Client::MakeBuffFadePacket(uint16 spell_id, int slot_id, bool send_message)
 
 void Client::MemSpell(uint16 spell_id, int slot, bool update_client)
 {
-	if(slot >= MAX_PP_MEMSPELL || slot < 0)
+	if(slot >= EQEmu::spells::SPELL_GEM_COUNT || slot < 0)
 		return;
 
 	if(update_client)
@@ -5025,7 +5006,7 @@ void Client::MemSpell(uint16 spell_id, int slot, bool update_client)
 
 void Client::UnmemSpell(int slot, bool update_client)
 {
-	if(slot > MAX_PP_MEMSPELL || slot < 0)
+	if(slot > EQEmu::spells::SPELL_GEM_COUNT || slot < 0)
 		return;
 
 	Log(Logs::Detail, Logs::Spells, "Spell %d forgotten from slot %d", m_pp.mem_spells[slot], slot);
@@ -5041,7 +5022,7 @@ void Client::UnmemSpell(int slot, bool update_client)
 
 void Client::UnmemSpellBySpellID(int32 spell_id)
 {
-	for(int i = 0; i < MAX_PP_MEMSPELL; i++) {
+	for(int i = 0; i < EQEmu::spells::SPELL_GEM_COUNT; i++) {
 		if(m_pp.mem_spells[i] == spell_id) {
 			UnmemSpell(i, true);
 			break;
@@ -5053,14 +5034,14 @@ void Client::UnmemSpellAll(bool update_client)
 {
 	int i;
 
-	for(i = 0; i < MAX_PP_MEMSPELL; i++)
+	for(i = 0; i < EQEmu::spells::SPELL_GEM_COUNT; i++)
 		if(m_pp.mem_spells[i] != 0xFFFFFFFF)
 			UnmemSpell(i, update_client);
 }
 
 void Client::ScribeSpell(uint16 spell_id, int slot, bool update_client)
 {
-	if(slot >= MAX_PP_SPELLBOOK || slot < 0)
+	if(slot >= EQEmu::spells::SPELLBOOK_SIZE || slot < 0)
 		return;
 
 	if(update_client)
@@ -5081,14 +5062,14 @@ void Client::ScribeSpell(uint16 spell_id, int slot, bool update_client)
 
 void Client::UnscribeSpell(int slot, bool update_client)
 {
-	if(slot >= MAX_PP_SPELLBOOK || slot < 0)
+	if(slot >= EQEmu::spells::SPELLBOOK_SIZE || slot < 0)
 		return;
 
 	Log(Logs::Detail, Logs::Spells, "Spell %d erased from spell book slot %d", m_pp.spell_book[slot], slot);
 	m_pp.spell_book[slot] = 0xFFFFFFFF;
 
 	database.DeleteCharacterSpell(this->CharacterID(), m_pp.spell_book[slot], slot);
-	if(update_client)
+	if(update_client && slot < EQEmu::spells::DynamicLookup(ClientVersion(), GetGM())->SpellbookSize)
 	{
 		auto outapp = new EQApplicationPacket(OP_DeleteSpell, sizeof(DeleteSpell_Struct));
 		DeleteSpell_Struct* del = (DeleteSpell_Struct*)outapp->pBuffer;
@@ -5101,9 +5082,7 @@ void Client::UnscribeSpell(int slot, bool update_client)
 
 void Client::UnscribeSpellAll(bool update_client)
 {
-	int i;
-
-	for(i = 0; i < MAX_PP_SPELLBOOK; i++)
+	for(int i = 0; i < EQEmu::spells::SPELLBOOK_SIZE; i++)
 	{
 		if(m_pp.spell_book[i] != 0xFFFFFFFF)
 			UnscribeSpell(i, update_client);
@@ -5137,7 +5116,7 @@ void Client::UntrainDiscAll(bool update_client)
 }
 
 int Client::GetNextAvailableSpellBookSlot(int starting_slot) {
-	for (int i = starting_slot; i < MAX_PP_SPELLBOOK; i++) {	//using starting_slot should help speed this up when we're iterating through a bunch of spells
+	for (int i = starting_slot; i < EQEmu::spells::SPELLBOOK_SIZE; i++) {	//using starting_slot should help speed this up when we're iterating through a bunch of spells
 		if (!IsValidSpell(GetSpellByBookSlot(i)))
 			return i;
 	}
@@ -5146,7 +5125,7 @@ int Client::GetNextAvailableSpellBookSlot(int starting_slot) {
 }
 
 int Client::FindSpellBookSlotBySpellID(uint16 spellid) {
-	for(int i = 0; i < MAX_PP_SPELLBOOK; i++) {
+	for(int i = 0; i < EQEmu::spells::SPELLBOOK_SIZE; i++) {
 		if(m_pp.spell_book[i] == spellid)
 			return i;
 	}
@@ -5204,7 +5183,7 @@ bool Client::SpellBucketCheck(uint16 spell_id, uint32 char_id) {
 	std::string spell_bucket_name;
 	int spell_bucket_value;
 	int bucket_value;
-	std::string query = StringFormat("SELECT key, value FROM spell_buckets WHERE spellid = %i", spell_id);
+	std::string query = StringFormat("SELECT `key`, value FROM spell_buckets WHERE spellid = %i", spell_id);
 	auto results = database.QueryDatabase(query);
 	if (!results.Success())
 		return false;
@@ -5218,7 +5197,7 @@ bool Client::SpellBucketCheck(uint16 spell_id, uint32 char_id) {
 	if (spell_bucket_name.empty())
 		return true;
 	
-	query = StringFormat("SELECT value FROM data_buckets WHERE key = '%i-%s'", char_id, spell_bucket_name.c_str());
+	query = StringFormat("SELECT value FROM data_buckets WHERE `key` = '%i-%s'", char_id, spell_bucket_name.c_str());
 	results = database.QueryDatabase(query);
 	if (!results.Success()) {
         Log(Logs::General, Logs::Error, "Spell bucket %s for spell ID %i for char ID %i failed.", spell_bucket_name.c_str(), spell_id, char_id);
@@ -5445,7 +5424,7 @@ bool Mob::UseBardSpellLogic(uint16 spell_id, int slot)
 		spell_id != SPELL_UNKNOWN &&
 		slot != -1 &&
 		GetClass() == BARD &&
-		slot <= MAX_PP_MEMSPELL &&
+		slot <= EQEmu::spells::SPELL_GEM_COUNT &&
 		IsBardSong(spell_id)
 	);
 }
@@ -5566,7 +5545,7 @@ void Mob::SendBuffsToClient(Client *c)
 	if(!c)
 		return;
 
-	if (c->ClientVersionBit() & EQEmu::versions::bit_SoDAndLater)
+	if (c->ClientVersionBit() & EQEmu::versions::maskSoDAndLater)
 	{
 		EQApplicationPacket *outapp = MakeBuffsPacket();
 		c->FastQueuePacket(&outapp);
@@ -5654,12 +5633,12 @@ int Client::GetCurrentBuffSlots() const
 		numbuffs++;
 	if (GetLevel() > 74)
 		numbuffs++;
-	return EQEmu::ClampUpper(numbuffs, EQEmu::constants::Lookup(m_ClientVersion)->LongBuffs);
+	return EQEmu::ClampUpper(numbuffs, EQEmu::spells::StaticLookup(m_ClientVersion)->LongBuffs);
 }
 
 int Client::GetCurrentSongSlots() const
 {
-	return EQEmu::constants::Lookup(m_ClientVersion)->ShortBuffs; // AAs dont affect this
+	return EQEmu::spells::StaticLookup(m_ClientVersion)->ShortBuffs; // AAs dont affect this
 }
 
 void Client::InitializeBuffSlots()
@@ -5683,9 +5662,8 @@ void NPC::InitializeBuffSlots()
 {
 	int max_slots = GetMaxTotalSlots();
 	buffs = new Buffs_Struct[max_slots];
-	for(int x = 0; x < max_slots; ++x)
-	{
-		buffs[x].spellid = SPELL_UNKNOWN;
+	for (int x = 0; x < max_slots; ++x) {
+		buffs[x].spellid      = SPELL_UNKNOWN;
 		buffs[x].UpdateClient = false;
 	}
 	current_buff_count = 0;

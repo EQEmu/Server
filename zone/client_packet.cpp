@@ -47,6 +47,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/spdat.h"
 #include "../common/string_util.h"
 #include "../common/zone_numbers.h"
+#include "data_bucket.h"
 #include "event_codes.h"
 #include "guild_mgr.h"
 #include "merc.h"
@@ -506,7 +507,6 @@ void Client::CompleteConnect()
 	client_state = CLIENT_CONNECTED;
 	SendAllPackets();
 	hpupdate_timer.Start();
-	position_timer.Start();
 	autosave_timer.Start();
 	SetDuelTarget(0);
 	SetDueling(false);
@@ -531,10 +531,14 @@ void Client::CompleteConnect()
 		SendAppearancePacket(AT_GuildID, GuildID(), false);
 		SendAppearancePacket(AT_GuildRank, rank, false);
 	}
-	for (uint32 spellInt = 0; spellInt < MAX_PP_REF_SPELLBOOK; spellInt++) {
-		if (m_pp.spell_book[spellInt] < 3 || m_pp.spell_book[spellInt] > 50000)
+
+	// moved to dbload and translators since we iterate there also .. keep m_pp values whatever they are when they get here
+	/*const auto sbs = EQEmu::spells::DynamicLookup(ClientVersion(), GetGM())->SpellbookSize;
+	for (uint32 spellInt = 0; spellInt < sbs; ++spellInt) {
+		if (m_pp.spell_book[spellInt] < 3 || m_pp.spell_book[spellInt] > EQEmu::spells::SPELL_ID_MAX)
 			m_pp.spell_book[spellInt] = 0xFFFFFFFF;
-	}
+	}*/
+
 	//SendAATable();
 
 	if (GetHideMe()) Message(13, "[GM] You are currently hidden to all clients");
@@ -754,7 +758,7 @@ void Client::CompleteConnect()
 	entity_list.SendUntargetable(this);
 
 	int x;
-	for (x = 0; x < 8; x++) {
+	for (x = EQEmu::textures::textureBegin; x <= EQEmu::textures::LastTexture; x++) {
 		SendWearChange(x);
 	}
 	// added due to wear change above
@@ -763,7 +767,7 @@ void Client::CompleteConnect()
 
 	Mob *pet = GetPet();
 	if (pet != nullptr) {
-		for (x = 0; x < 8; x++) {
+		for (x = EQEmu::textures::textureBegin; x <= EQEmu::textures::LastTexture; x++) {
 			pet->SendWearChange(x);
 		}
 		// added due to wear change above
@@ -810,6 +814,16 @@ void Client::CompleteConnect()
 			std::string event_desc = StringFormat("Connect :: Logged into zoneid:%i instid:%i", this->GetZoneID(), this->GetInstanceID());
 			QServ->PlayerLogEvent(Player_Log_Connect_State, this->CharacterID(), event_desc);
 		}
+
+		/**
+		 * Update last login since this doesn't get updated until a late save later so we can update online status
+		 */
+		database.QueryDatabase(
+			StringFormat(
+				"UPDATE `character_data` SET `last_login` = UNIX_TIMESTAMP() WHERE id = %u",
+				this->CharacterID()
+			)
+		);
 	}
 
 	if (zone) {
@@ -869,14 +883,14 @@ void Client::CompleteConnect()
 	worldserver.SendPacket(pack);
 	delete pack;
 
-	if (IsClient() && CastToClient()->ClientVersionBit() & EQEmu::versions::bit_UFAndLater) {
+	if (IsClient() && CastToClient()->ClientVersionBit() & EQEmu::versions::maskUFAndLater) {
 		EQApplicationPacket *outapp = MakeBuffsPacket(false);
 		CastToClient()->FastQueuePacket(&outapp);
 	}
 
 	// TODO: load these states
 	// We at least will set them to the correct state for now
-	if (m_ClientVersionBit & EQEmu::versions::bit_UFAndLater && GetPet()) {
+	if (m_ClientVersionBit & EQEmu::versions::maskUFAndLater && GetPet()) {
 		SetPetCommandState(PET_BUTTON_SIT, 0);
 		SetPetCommandState(PET_BUTTON_STOP, 0);
 		SetPetCommandState(PET_BUTTON_REGROUP, 0);
@@ -894,108 +908,6 @@ void Client::CompleteConnect()
 	entity_list.RefreshClientXTargets(this);
 
 	worldserver.RequestTellQueue(GetName());
-}
-
-void Client::CheatDetected(CheatTypes CheatType, float x, float y, float z)
-{
-	//ToDo: Break warp down for special zones. Some zones have special teleportation pads or bad .map files which can trigger the detector without a legit zone request.
-
-	switch (CheatType)
-	{
-	case MQWarp: //Some zones may still have issues. Database updates will eliminate most if not all problems.
-		if (RuleB(Zone, EnableMQWarpDetector)
-			&& ((this->Admin() < RuleI(Zone, MQWarpExemptStatus)
-				|| (RuleI(Zone, MQWarpExemptStatus)) == -1)))
-		{
-			Message(13, "Large warp detected.");
-			char hString[250];
-			sprintf(hString, "/MQWarp with location %.2f, %.2f, %.2f", GetX(), GetY(), GetZ());
-			database.SetMQDetectionFlag(this->account_name, this->name, hString, zone->GetShortName());
-		}
-		break;
-	case MQWarpShadowStep:
-		if (RuleB(Zone, EnableMQWarpDetector)
-			&& ((this->Admin() < RuleI(Zone, MQWarpExemptStatus)
-				|| (RuleI(Zone, MQWarpExemptStatus)) == -1)))
-		{
-			char *hString = nullptr;
-			MakeAnyLenString(&hString, "/MQWarp(SS) with location %.2f, %.2f, %.2f, the target was shadow step exempt but we still found this suspicious.", GetX(), GetY(), GetZ());
-			database.SetMQDetectionFlag(this->account_name, this->name, hString, zone->GetShortName());
-			safe_delete_array(hString);
-		}
-		break;
-	case MQWarpKnockBack:
-		if (RuleB(Zone, EnableMQWarpDetector)
-			&& ((this->Admin() < RuleI(Zone, MQWarpExemptStatus)
-				|| (RuleI(Zone, MQWarpExemptStatus)) == -1)))
-		{
-			char *hString = nullptr;
-			MakeAnyLenString(&hString, "/MQWarp(KB) with location %.2f, %.2f, %.2f, the target was Knock Back exempt but we still found this suspicious.", GetX(), GetY(), GetZ());
-			database.SetMQDetectionFlag(this->account_name, this->name, hString, zone->GetShortName());
-			safe_delete_array(hString);
-		}
-		break;
-
-	case MQWarpLight:
-		if (RuleB(Zone, EnableMQWarpDetector)
-			&& ((this->Admin() < RuleI(Zone, MQWarpExemptStatus)
-				|| (RuleI(Zone, MQWarpExemptStatus)) == -1)))
-		{
-			if (RuleB(Zone, MarkMQWarpLT))
-			{
-				char *hString = nullptr;
-				MakeAnyLenString(&hString, "/MQWarp(LT) with location %.2f, %.2f, %.2f, running fast but not fast enough to get killed, possibly: small warp, speed hack, excessive lag, marked as suspicious.", GetX(), GetY(), GetZ());
-				database.SetMQDetectionFlag(this->account_name, this->name, hString, zone->GetShortName());
-				safe_delete_array(hString);
-			}
-		}
-		break;
-
-	case MQZone:
-		if (RuleB(Zone, EnableMQZoneDetector) && ((this->Admin() < RuleI(Zone, MQZoneExemptStatus) || (RuleI(Zone, MQZoneExemptStatus)) == -1)))
-		{
-			char hString[250];
-			sprintf(hString, "/MQZone used at %.2f, %.2f, %.2f to %.2f %.2f %.2f", GetX(), GetY(), GetZ(), x, y, z);
-			database.SetMQDetectionFlag(this->account_name, this->name, hString, zone->GetShortName());
-		}
-		break;
-	case MQZoneUnknownDest:
-		if (RuleB(Zone, EnableMQZoneDetector) && ((this->Admin() < RuleI(Zone, MQZoneExemptStatus) || (RuleI(Zone, MQZoneExemptStatus)) == -1)))
-		{
-			char hString[250];
-			sprintf(hString, "/MQZone used at %.2f, %.2f, %.2f", GetX(), GetY(), GetZ());
-			database.SetMQDetectionFlag(this->account_name, this->name, hString, zone->GetShortName());
-		}
-		break;
-	case MQGate:
-		if (RuleB(Zone, EnableMQGateDetector) && ((this->Admin() < RuleI(Zone, MQGateExemptStatus) || (RuleI(Zone, MQGateExemptStatus)) == -1))) {
-			Message(13, "Illegal gate request.");
-			char hString[250];
-			sprintf(hString, "/MQGate used at %.2f, %.2f, %.2f", GetX(), GetY(), GetZ());
-			database.SetMQDetectionFlag(this->account_name, this->name, hString, zone->GetShortName());
-			if (zone)
-			{
-				this->SetZone(this->GetZoneID(), zone->GetInstanceID()); //Prevent the player from zoning, place him back in the zone where he tried to originally /gate.
-			}
-			else
-			{
-				this->SetZone(this->GetZoneID(), 0); //Prevent the player from zoning, place him back in the zone where he tried to originally /gate.
-
-			}
-		}
-		break;
-	case MQGhost: //Not currently implemented, but the framework is in place - just needs detection scenarios identified
-		if (RuleB(Zone, EnableMQGhostDetector) && ((this->Admin() < RuleI(Zone, MQGhostExemptStatus) || (RuleI(Zone, MQGhostExemptStatus)) == -1))) {
-			database.SetMQDetectionFlag(this->account_name, this->name, "/MQGhost", zone->GetShortName());
-		}
-		break;
-	default:
-		char *hString = nullptr;
-		MakeAnyLenString(&hString, "Unhandled HackerDetection flag with location %.2f, %.2f, %.2f.", GetX(), GetY(), GetZ());
-		database.SetMQDetectionFlag(this->account_name, this->name, hString, zone->GetShortName());
-		safe_delete_array(hString);
-		break;
-	}
 }
 
 // connecting opcode handlers
@@ -1247,8 +1159,8 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	SetClientVersion(Connection()->ClientVersion());
 	m_ClientVersionBit = EQEmu::versions::ConvertClientVersionToClientVersionBit(Connection()->ClientVersion());
 
-	bool siv = m_inv.SetInventoryVersion(m_ClientVersion);
-	Log(Logs::General, Logs::None, "%s inventory version to %s(%i)", (siv ? "Succeeded in setting" : "Failed to set"), ClientVersionName(m_ClientVersion), m_ClientVersion);
+	m_pp.SetPlayerProfileVersion(m_ClientVersion);
+	m_inv.SetInventoryVersion(m_ClientVersion);
 
 	/* Antighost code
 	tmp var is so the search doesnt find this object
@@ -1288,7 +1200,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	uint32 cid = CharacterID();
 	character_id = cid; /* Global character_id reference */
 
-						/* Flush and reload factions */
+	/* Flush and reload factions */
 	database.RemoveTempFactions(this);
 	database.LoadCharacterFactionValues(cid, factionvalues);
 
@@ -1325,6 +1237,9 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		m_pp.platinum_shared = database.GetSharedPlatinum(this->AccountID());
 
 	database.ClearOldRecastTimestamps(cid); /* Clear out our old recast timestamps to keep the DB clean */
+	// set to full support in case they're a gm with items in disabled expansion slots..but, have their gm flag off...
+	// item loss will occur when they use the 'empty' slots, if this is not done
+	m_inv.SetGMInventory(true); 
 	loaditems = database.GetInventory(cid, &m_inv); /* Load Character Inventory */
 	database.LoadCharacterBandolier(cid, &m_pp); /* Load Character Bandolier */
 	database.LoadCharacterBindPoint(cid, &m_pp); /* Load Character Bind */
@@ -1341,7 +1256,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	database.LoadCharacterLeadershipAA(cid, &m_pp); /* Load Character Leadership AA's */
 	database.LoadCharacterTribute(cid, &m_pp); /* Load CharacterTribute */
 
-											   /* Load AdventureStats */
+	/* Load AdventureStats */
 	AdventureStats_Struct as;
 	if (database.GetAdventureStats(cid, &as))
 	{
@@ -1501,10 +1416,10 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if (m_pp.ldon_points_available < 0 || m_pp.ldon_points_available > 2000000000) { m_pp.ldon_points_available = 0; }
 
 	if (RuleB(World, UseClientBasedExpansionSettings)) {
-		m_pp.expansions = EQEmu::versions::ConvertClientVersionToExpansion(ClientVersion());
+		m_pp.expansions = EQEmu::expansions::ConvertClientVersionToExpansionsMask(ClientVersion());
 	}
 	else {
-		m_pp.expansions = RuleI(World, ExpansionSettings);
+		m_pp.expansions = (RuleI(World, ExpansionSettings) & EQEmu::expansions::ConvertClientVersionToExpansionsMask(ClientVersion()));
 	}
 
 	if (!database.LoadAlternateAdvancement(this)) {
@@ -1512,7 +1427,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	}
 
 	if (SPDAT_RECORDS > 0) {
-		for (uint32 z = 0; z<MAX_PP_MEMSPELL; z++) {
+		for (uint32 z = 0; z < EQEmu::spells::SPELL_GEM_COUNT; z++) {
 			if (m_pp.mem_spells[z] >= (uint32)SPDAT_RECORDS)
 				UnmemSpell(z, false);
 		}
@@ -1619,6 +1534,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	Bot::LoadAndSpawnAllZonedBots(this);
 #endif
 
+	m_inv.SetGMInventory((bool)m_pp.gm); // set to current gm state for calc
 	CalcBonuses();
 	if (RuleB(Zone, EnableLoggedOffReplenishments) &&
 		time(nullptr) - m_pp.lastlogin >= RuleI(Zone, MinOfflineTimeToReplenishments)) {
@@ -1643,7 +1559,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	}
 
 	/* Load Spell Slot Refresh from Currently Memoried Spells */
-	for (unsigned int i = 0; i < MAX_PP_MEMSPELL; ++i)
+	for (unsigned int i = 0; i < EQEmu::spells::SPELL_GEM_COUNT; ++i)
 		if (IsValidSpell(m_pp.mem_spells[i]))
 			m_pp.spellSlotRefresh[i] = p_timers.GetRemainingTime(pTimerSpellStart + m_pp.mem_spells[i]) * 1000;
 
@@ -1676,8 +1592,9 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if ((m_pp.RestTimer > RuleI(Character, RestRegenTimeToActivate)) && (m_pp.RestTimer > RuleI(Character, RestRegenRaidTimeToActivate)))
 		m_pp.RestTimer = 0;
 
-	/* This checksum should disappear once dynamic structs are in... each struct strategy will do it */
-	CRC32::SetEQChecksum((unsigned char*)&m_pp, sizeof(PlayerProfile_Struct) - 4);
+	/* This checksum should disappear once dynamic structs are in... each struct strategy will do it */ // looks to be in place now
+	//CRC32::SetEQChecksum((unsigned char*)&m_pp, sizeof(PlayerProfile_Struct) - sizeof(m_pp.m_player_profile_version) - 4);
+	// m_pp.checksum = 0; // All server out-bound player profile packets are now translated - no need to waste cycles calculating this...
 
 	outapp = new EQApplicationPacket(OP_PlayerProfile, sizeof(PlayerProfile_Struct));
 
@@ -1742,6 +1659,9 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	this is not quite where live sends inventory, they do it after tribute
 	*/
 	if (loaditems) { /* Dont load if a length error occurs */
+		if (admin >= minStatusToBeGM)
+			m_inv.SetGMInventory(true); // set to true to allow expansion-restricted packets through
+
 		BulkSendInventoryItems();
 		/* Send stuff on the cursor which isnt sent in bulk */
 		for (auto iter = m_inv.cursor_cbegin(); iter != m_inv.cursor_cend(); ++iter) {
@@ -1751,13 +1671,25 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 			const EQEmu::ItemInstance *inst = *iter;
 			SendItemPacket(EQEmu::invslot::slotCursor, inst, ItemPacketLimbo);
 		}
+
+		// this is kinda hackish atm..this process needs to be realigned to allow a contiguous flow
+		m_inv.SetGMInventory((bool)m_pp.gm); // reset back to current gm state
 	}
 
 	/* Task Packets */
 	LoadClientTaskState();
 
+	/**
+	 * DevTools Load Settings
+	 */
+	if (Admin() >= 200) {
+		std::string dev_tools_window_key = StringFormat("%i-dev-tools-window-disabled", AccountID());
+		if (DataBucket::GetData(dev_tools_window_key) == "true") {
+			dev_tools_window_enabled = false;
+		}
+	}
 
-	if (m_ClientVersionBit & EQEmu::versions::bit_UFAndLater) {
+	if (m_ClientVersionBit & EQEmu::versions::maskUFAndLater) {
 		outapp = new EQApplicationPacket(OP_XTargetResponse, 8);
 		outapp->WriteUInt32(GetMaxXTargets());
 		outapp->WriteUInt32(0);
@@ -2895,24 +2827,19 @@ void Client::Handle_OP_ApplyPoison(const EQApplicationPacket *app)
 		return;
 	}
 
-	uint32 ApplyPoisonSuccessResult = 0;
 	ApplyPoison_Struct* ApplyPoisonData = (ApplyPoison_Struct*)app->pBuffer;
+
+	uint32 ApplyPoisonSuccessResult = 0;
+
 	const EQEmu::ItemInstance* PrimaryWeapon = GetInv().GetItem(EQEmu::invslot::slotPrimary);
 	const EQEmu::ItemInstance* SecondaryWeapon = GetInv().GetItem(EQEmu::invslot::slotSecondary);
-	const EQEmu::ItemInstance* PoisonItemInstance = GetInv()[ApplyPoisonData->inventorySlot];
-	const EQEmu::ItemData* poison=PoisonItemInstance->GetItem();
-	const EQEmu::ItemData* primary=nullptr;
-	const EQEmu::ItemData* secondary=nullptr;
-	bool IsPoison = PoisonItemInstance && 
-					(poison->ItemType == EQEmu::item::ItemTypePoison);
+	const EQEmu::ItemInstance* PoisonItemInstance = GetInv().GetItem(ApplyPoisonData->inventorySlot);
 
-	if (PrimaryWeapon) {
-		primary=PrimaryWeapon->GetItem();
-	}
+	const EQEmu::ItemData* primary = (PrimaryWeapon ? PrimaryWeapon->GetItem() : nullptr);
+	const EQEmu::ItemData* secondary = (SecondaryWeapon ? SecondaryWeapon->GetItem() : nullptr);
+	const EQEmu::ItemData* poison = (PoisonItemInstance ? PoisonItemInstance->GetItem() : nullptr);
 
-	if (SecondaryWeapon) {
-		secondary=SecondaryWeapon->GetItem();
-	}
+	bool IsPoison = (poison && poison->ItemType == EQEmu::item::ItemTypePoison);
 
 	if (IsPoison && GetClass() == ROGUE) {
 
@@ -2978,7 +2905,6 @@ void Client::Handle_OP_Assist(const EQApplicationPacket *app)
 			Mob *new_target = assistee->GetTarget();
 			if (new_target && (GetGM() ||
 				Distance(m_Position, assistee->GetPosition()) <= TARGETING_RANGE)) {
-				SetAssistExemption(true);
 				eid->entity_id = new_target->GetID();
 			} else {
 				eid->entity_id = 0;
@@ -3346,42 +3272,40 @@ void Client::Handle_OP_AutoAttack(const EQApplicationPacket *app)
 		return;
 	}
 
-	if (app->pBuffer[0] == 0)
-	{
+	if (app->pBuffer[0] == 0) {
 		auto_attack = false;
-		if (IsAIControlled())
+		if (IsAIControlled()) {
 			return;
+		}
 		attack_timer.Disable();
 		ranged_timer.Disable();
 		attack_dw_timer.Disable();
 
-		m_AutoAttackPosition = glm::vec4();
+		m_AutoAttackPosition       = glm::vec4();
 		m_AutoAttackTargetLocation = glm::vec3();
-		aa_los_them_mob = nullptr;
+		aa_los_them_mob            = nullptr;
 	}
-	else if (app->pBuffer[0] == 1)
-	{
+	else if (app->pBuffer[0] == 1) {
 		auto_attack = true;
-		auto_fire = false;
-		if (IsAIControlled())
+		auto_fire   = false;
+		if (IsAIControlled()) {
 			return;
+		}
 		SetAttackTimer();
 
-		if (GetTarget())
-		{
-			aa_los_them_mob = GetTarget();
-			m_AutoAttackPosition = GetPosition();
+		if (GetTarget()) {
+			aa_los_them_mob            = GetTarget();
+			m_AutoAttackPosition       = GetPosition();
 			m_AutoAttackTargetLocation = glm::vec3(aa_los_them_mob->GetPosition());
-			los_status = CheckLosFN(aa_los_them_mob);
-			los_status_facing = IsFacingMob(aa_los_them_mob);
+			los_status                 = CheckLosFN(aa_los_them_mob);
+			los_status_facing          = IsFacingMob(aa_los_them_mob);
 		}
-		else
-		{
-			m_AutoAttackPosition = GetPosition();
+		else {
+			m_AutoAttackPosition       = GetPosition();
 			m_AutoAttackTargetLocation = glm::vec3();
-			aa_los_them_mob = nullptr;
-			los_status = false;
-			los_status_facing = false;
+			aa_los_them_mob            = nullptr;
+			los_status                 = false;
+			los_status_facing          = false;
 		}
 	}
 }
@@ -3949,6 +3873,8 @@ void Client::Handle_OP_BoardBoat(const EQApplicationPacket *app)
 		return;
 	controlling_boat_id = boat->GetID();	// set the client's BoatID to show that it's on this boat
 
+	Message(0, "Board boat: %s", boatname);
+
 	return;
 }
 
@@ -4105,7 +4031,7 @@ void Client::Handle_OP_CancelTrade(const EQApplicationPacket *app)
 
 void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 {
-	using EQEmu::CastingSlot;
+	using EQEmu::spells::CastingSlot;
 	if (app->size != sizeof(CastSpell_Struct)) {
 		std::cout << "Wrong size: OP_CastSpell, size=" << app->size << ", expected " << sizeof(CastSpell_Struct) << std::endl;
 		return;
@@ -4126,14 +4052,14 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 	/* Memorized Spell */
 	if (m_pp.mem_spells[castspell->slot] && m_pp.mem_spells[castspell->slot] == castspell->spell_id) {
 		uint16 spell_to_cast = 0;
-		if (castspell->slot < MAX_PP_MEMSPELL) {
+		if (castspell->slot < EQEmu::spells::SPELL_GEM_COUNT) {
 			spell_to_cast = m_pp.mem_spells[castspell->slot];
 			if (spell_to_cast != castspell->spell_id) {
 				InterruptSpell(castspell->spell_id); //CHEATER!!!
 				return;
 			}
 		}
-		else if (castspell->slot >= MAX_PP_MEMSPELL) {
+		else if (castspell->slot >= EQEmu::spells::SPELL_GEM_COUNT) {
 			InterruptSpell();
 			return;
 		}
@@ -4456,9 +4382,9 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 			sizeof(PlayerPositionUpdateClient_Struct), app->size);
 		return;
 	}
-
+	
 	PlayerPositionUpdateClient_Struct *ppu = (PlayerPositionUpdateClient_Struct *) app->pBuffer;
-
+	
 	/* Boat handling */
 	if (ppu->spawn_id != GetID()) {
 		/* If player is controlling boat */
@@ -4468,163 +4394,67 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 				controlling_boat_id = 0;
 				return;
 			}
-
+	
 			auto boat_delta = glm::vec4(ppu->delta_x, ppu->delta_y, ppu->delta_z, EQ10toFloat(ppu->delta_heading));
 			boat->SetDelta(boat_delta);
-
+	
 			auto outapp = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 			PlayerPositionUpdateServer_Struct *ppus = (PlayerPositionUpdateServer_Struct *) outapp->pBuffer;
 			boat->MakeSpawnUpdate(ppus);
 			entity_list.QueueCloseClients(boat, outapp, true, 300, this, false);
 			safe_delete(outapp);
-
+	
 			/* Update the boat's position on the server, without sending an update */
 			boat->GMMove(ppu->x_pos, ppu->y_pos, ppu->z_pos, EQ12toFloat(ppu->heading), false);
 			return;
 		} else return;
 	}
-
-	float dist = 0;
-	float tmp;
-	tmp = m_Position.x - ppu->x_pos;
-	dist += tmp * tmp;
-	tmp = m_Position.y - ppu->y_pos;
-	dist += tmp * tmp;
-	dist = sqrt(dist);
-
-	/* Hack checks */
-	if (dist == 0) {
-		if (m_DistanceSinceLastPositionCheck > 0.0) {
-			uint32 cur_time = Timer::GetCurrentTime();
-			if ((cur_time - m_TimeSinceLastPositionCheck) > 0) {
-				float speed =
-						(m_DistanceSinceLastPositionCheck * 100) / (float) (cur_time - m_TimeSinceLastPositionCheck);
-				int runs = GetRunspeed();
-				if (speed > (runs * RuleR(Zone, MQWarpDetectionDistanceFactor))) {
-					if (!GetGMSpeed() && (runs >= GetBaseRunspeed() ||
-										  (speed > (GetBaseRunspeed() * RuleR(Zone, MQWarpDetectionDistanceFactor))))) {
-						if (IsShadowStepExempted()) {
-							if (m_DistanceSinceLastPositionCheck > 800) {
-								CheatDetected(MQWarpShadowStep, ppu->x_pos, ppu->y_pos, ppu->z_pos);
-							}
-						} else if (IsKnockBackExempted()) {
-							if (speed > 30.0f) {
-								CheatDetected(MQWarpKnockBack, ppu->x_pos, ppu->y_pos, ppu->z_pos);
-							}
-						} else if (!IsPortExempted()) {
-							if (!IsMQExemptedArea(zone->GetZoneID(), ppu->x_pos, ppu->y_pos, ppu->z_pos)) {
-								if (speed > (runs * 2 * RuleR(Zone, MQWarpDetectionDistanceFactor))) {
-									m_TimeSinceLastPositionCheck = cur_time;
-									m_DistanceSinceLastPositionCheck = 0.0f;
-									CheatDetected(MQWarp, ppu->x_pos, ppu->y_pos, ppu->z_pos);
-									//Death(this, 10000000, SPELL_UNKNOWN, _1H_BLUNT);
-								} else {
-									CheatDetected(MQWarpLight, ppu->x_pos, ppu->y_pos, ppu->z_pos);
-								}
-							}
-						}
-					}
-				}
-				SetShadowStepExemption(false);
-				SetKnockBackExemption(false);
-				SetPortExemption(false);
-				m_TimeSinceLastPositionCheck = cur_time;
-				m_DistanceSinceLastPositionCheck = 0.0f;
-				m_CheatDetectMoved = false;
-			}
-		} else {
-			m_TimeSinceLastPositionCheck = Timer::GetCurrentTime();
-			m_CheatDetectMoved = false;
-		}
-	} else {
-		m_DistanceSinceLastPositionCheck += dist;
-		m_CheatDetectMoved = true;
-		if (m_TimeSinceLastPositionCheck == 0) {
-			m_TimeSinceLastPositionCheck = Timer::GetCurrentTime();
-		} else {
-			uint32 cur_time = Timer::GetCurrentTime();
-			if ((cur_time - m_TimeSinceLastPositionCheck) > 2500) {
-				float speed =
-						(m_DistanceSinceLastPositionCheck * 100) / (float) (cur_time - m_TimeSinceLastPositionCheck);
-				int runs = GetRunspeed();
-				if (speed > (runs * RuleR(Zone, MQWarpDetectionDistanceFactor))) {
-					if (!GetGMSpeed() && (runs >= GetBaseRunspeed() ||
-										  (speed > (GetBaseRunspeed() * RuleR(Zone, MQWarpDetectionDistanceFactor))))) {
-						if (IsShadowStepExempted()) {
-							if (m_DistanceSinceLastPositionCheck > 800) {
-								CheatDetected(MQWarpShadowStep, ppu->x_pos, ppu->y_pos, ppu->z_pos);
-							}
-						} else if (IsKnockBackExempted()) {
-							if (speed > 30.0f) {
-								CheatDetected(MQWarpKnockBack, ppu->x_pos, ppu->y_pos, ppu->z_pos);
-							}
-						} else if (!IsPortExempted()) {
-							if (!IsMQExemptedArea(zone->GetZoneID(), ppu->x_pos, ppu->y_pos, ppu->z_pos)) {
-								if (speed > (runs * 2 * RuleR(Zone, MQWarpDetectionDistanceFactor))) {
-									m_TimeSinceLastPositionCheck = cur_time;
-									m_DistanceSinceLastPositionCheck = 0.0f;
-									CheatDetected(MQWarp, ppu->x_pos, ppu->y_pos, ppu->z_pos);
-								} else {
-									CheatDetected(MQWarpLight, ppu->x_pos, ppu->y_pos, ppu->z_pos);
-								}
-							}
-						}
-					}
-				}
-				SetShadowStepExemption(false);
-				SetKnockBackExemption(false);
-				SetPortExemption(false);
-				m_TimeSinceLastPositionCheck = cur_time;
-				m_DistanceSinceLastPositionCheck = 0.0f;
-			}
-		}
-
-		if (IsDraggingCorpse())
-			DragCorpses();
-	}
+	
+	if (IsDraggingCorpse())
+		DragCorpses();
 
 	/* Check to see if PPU should trigger an update to the rewind position. */
 	float rewind_x_diff = 0;
 	float rewind_y_diff = 0;
-
+	
 	rewind_x_diff = ppu->x_pos - m_RewindLocation.x;
 	rewind_x_diff *= rewind_x_diff;
 	rewind_y_diff = ppu->y_pos - m_RewindLocation.y;
 	rewind_y_diff *= rewind_y_diff;
-
+	
 	/* 
 		We only need to store updated values if the player has moved.
 		If the player has moved more than units for x or y, then we'll store
 		his pre-PPU x and y for /rewind, in case he gets stuck.
 	*/
-
+	
 	if ((rewind_x_diff > 750) || (rewind_y_diff > 750))
 		m_RewindLocation = glm::vec3(m_Position);
-
+	
 	/*
 		If the PPU was a large jump, such as a cross zone gate or Call of Hero,
 			just update rewind coordinates to the new ppu coordinates. This will prevent exploitation.
 	*/
-
+	
 	if ((rewind_x_diff > 5000) || (rewind_y_diff > 5000))
 		m_RewindLocation = glm::vec3(ppu->x_pos, ppu->y_pos, ppu->z_pos);
-
+	
 	if (proximity_timer.Check()) {
 		entity_list.ProcessMove(this, glm::vec3(ppu->x_pos, ppu->y_pos, ppu->z_pos));
 		if (RuleB(TaskSystem, EnableTaskSystem) && RuleB(TaskSystem, EnableTaskProximity))
 			ProcessTaskProximities(ppu->x_pos, ppu->y_pos, ppu->z_pos);
-
+	
 		m_Proximity = glm::vec3(ppu->x_pos, ppu->y_pos, ppu->z_pos);
 	}
-
+	
 	/* Update internal state */
 	m_Delta = glm::vec4(ppu->delta_x, ppu->delta_y, ppu->delta_z, EQ10toFloat(ppu->delta_heading));
-
+	
 	if (IsTracking() && ((m_Position.x != ppu->x_pos) || (m_Position.y != ppu->y_pos))) {
 		if (zone->random.Real(0, 100) < 70)//should be good
 			CheckIncreaseSkill(EQEmu::skills::SkillTracking, nullptr, -20);
 	}
-
+	
 	/* Break Hide if moving without sneaking and set rewind timer if moved */
 	if (ppu->y_pos != m_Position.y || ppu->x_pos != m_Position.x) {
 		if ((hidden || improved_hidden) && !sneaking) {
@@ -4643,43 +4473,35 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 		}
 		rewind_timer.Start(30000, true);
 	}
-
+	
 	/* Handle client aggro scanning timers NPCs */
 	is_client_moving = (ppu->y_pos == m_Position.y && ppu->x_pos == m_Position.x) ? false : true;
-
+	
 	if (is_client_moving) {
 		Log(Logs::Detail, Logs::Normal, "ClientUpdate: Client is moving - scan timer is: %u",
 			client_scan_npc_aggro_timer.GetDuration());
 		if (client_scan_npc_aggro_timer.GetDuration() > 1000) {
-
-			npc_close_scan_timer.Disable();
-			npc_close_scan_timer.Start(500);
-
 			client_scan_npc_aggro_timer.Disable();
 			client_scan_npc_aggro_timer.Start(500);
-
+	
 		}
 	} else {
 		Log(Logs::Detail, Logs::Normal, "ClientUpdate: Client is NOT moving - scan timer is: %u",
 			client_scan_npc_aggro_timer.GetDuration());
 		if (client_scan_npc_aggro_timer.GetDuration() < 1000) {
-
-			npc_close_scan_timer.Disable();
-			npc_close_scan_timer.Start(6000);
-
 			client_scan_npc_aggro_timer.Disable();
 			client_scan_npc_aggro_timer.Start(3000);
 		}
 	}
-
+	
 	float new_heading = EQ12toFloat(ppu->heading);
 	int32 new_animation = ppu->animation;
-
+	
 	/* Update internal server position from what the client has sent */
 	m_Position.x = ppu->x_pos;
 	m_Position.y = ppu->y_pos;
 	m_Position.z = ppu->z_pos;
-
+	
 	/* Visual Debugging */
 	if (RuleB(Character, OPClientUpdateVisualDebug)) {
 		Log(Logs::General, Logs::Debug, "ClientUpdate: ppu x: %f y: %f z: %f h: %u", ppu->x_pos, ppu->y_pos, ppu->z_pos,
@@ -4687,43 +4509,43 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 		this->SendAppearanceEffect(78, 0, 0, 0, 0);
 		this->SendAppearanceEffect(41, 0, 0, 0, 0);
 	}
-
+	
 	/* Only feed real time updates when client is moving */
 	if (is_client_moving || new_heading != m_Position.w || new_animation != animation) {
-
+	
 		animation = ppu->animation;
 		m_Position.w = EQ12toFloat(ppu->heading);
-
+	
 		/* Broadcast update to other clients */
 		auto outapp = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 		PlayerPositionUpdateServer_Struct *position_update = (PlayerPositionUpdateServer_Struct *) outapp->pBuffer;
-
+	
 		MakeSpawnUpdate(position_update);
-
+	
 		if (gm_hide_me) {
 			entity_list.QueueClientsStatus(this, outapp, true, Admin(), 250);
 		} else {
 			entity_list.QueueCloseClients(this, outapp, true, RuleI(Range, ClientPositionUpdates), nullptr, true);
 		}
-
-
+	
+	
 		/* Always send position updates to group - send when beyond normal ClientPositionUpdate range */
 		Group *group = this->GetGroup();
 		Raid *raid = this->GetRaid();
-
+	
 		if (raid) {
 			raid->QueueClients(this, outapp, true, true, (RuleI(Range, ClientPositionUpdates) * -1));
 		} else if (group) {
 			group->QueueClients(this, outapp, true, true, (RuleI(Range, ClientPositionUpdates) * -1));
 		}
-
+	
 		safe_delete(outapp);
 	}
-
+	
 	if (zone->watermap) {
 		if (zone->watermap->InLiquid(glm::vec3(m_Position))) {
 			CheckIncreaseSkill(EQEmu::skills::SkillSwimming, nullptr, -17);
-
+	
 			// Dismount horses when entering water
 			if (GetHorseId() && RuleB(Character, DismountWater)) {
 				SetHorseId(0);
@@ -4732,7 +4554,6 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 		}
 		CheckRegionTypeChanges();
 	}
-	return;
 }
 
 void Client::Handle_OP_CombatAbility(const EQApplicationPacket *app)
@@ -4817,7 +4638,7 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 	con->playerid = GetID();
 	con->targetid = conin->targetid;
 	if (tmob->IsNPC())
-		con->faction = GetFactionLevel(character_id, tmob->GetNPCTypeID(), race, class_, deity, (tmob->IsNPC()) ? tmob->CastToNPC()->GetPrimaryFaction() : 0, tmob); // Dec. 20, 2001; TODO: Send the players proper deity
+		con->faction = GetFactionLevel(character_id, tmob->GetNPCTypeID(), GetFactionRace(), class_, deity, (tmob->IsNPC()) ? tmob->CastToNPC()->GetPrimaryFaction() : 0, tmob); // Dec. 20, 2001; TODO: Send the players proper deity
 	else
 		con->faction = 1;
 	con->level = GetLevelCon(tmob->GetLevel());
@@ -5457,7 +5278,7 @@ void Client::Handle_OP_DeleteSpell(const EQApplicationPacket *app)
 	EQApplicationPacket* outapp = app->Copy();
 	DeleteSpell_Struct* dss = (DeleteSpell_Struct*)outapp->pBuffer;
 
-	if (dss->spell_slot < 0 || dss->spell_slot > int(MAX_PP_SPELLBOOK))
+	if (dss->spell_slot < 0 || dss->spell_slot >= EQEmu::spells::DynamicLookup(ClientVersion(), GetGM())->SpellbookSize)
 		return;
 
 	if (m_pp.spell_book[dss->spell_slot] != SPELLBOOK_UNKNOWN) {
@@ -8655,7 +8476,7 @@ void Client::Handle_OP_ItemPreview(const EQApplicationPacket *app)
 
 void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 {
-	using EQEmu::CastingSlot;
+	using EQEmu::spells::CastingSlot;
 	if (app->size != sizeof(ItemVerifyRequest_Struct))
 	{
 		Log(Logs::General, Logs::Error, "OP size error: OP_ItemVerifyRequest expected:%i got:%i", sizeof(ItemVerifyRequest_Struct), app->size);
@@ -9381,7 +9202,7 @@ void Client::Handle_OP_LoadSpellSet(const EQApplicationPacket *app)
 	}
 	int i;
 	LoadSpellSet_Struct* ss = (LoadSpellSet_Struct*)app->pBuffer;
-	for (i = 0; i<MAX_PP_MEMSPELL; i++) {
+	for (i = 0; i < EQEmu::spells::SPELL_GEM_COUNT; i++) {
 		if (ss->spell[i] != 0xFFFFFFFF)
 			UnmemSpell(i, true);
 	}
@@ -9588,7 +9409,7 @@ void Client::Handle_OP_MercenaryCommand(const EQApplicationPacket *app)
 				//check to see if selected option is a valid stance slot (option is the slot the stance is in, not the actual stance)
 				if (option >= 0 && option < numStances)
 				{
-					merc->SetStance(mercTemplate->Stances[option]);
+					merc->SetStance((EQEmu::constants::StanceType)mercTemplate->Stances[option]);
 					GetMercInfo().Stance = mercTemplate->Stances[option];
 
 					Log(Logs::General, Logs::Mercenaries, "Set Stance: %u for %s (%s)", merc->GetStance(), merc->GetName(), GetName());
@@ -10265,9 +10086,9 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			if (mypet->IsNPC()) {
 				mypet->SayTo_StringID(this, MT_PetResponse, PET_GUARDINGLIFE);
 				mypet->SetPetOrder(SPO_Guard);
-				mypet->CastToNPC()->SaveGuardSpot();
+				mypet->CastToNPC()->SaveGuardSpot(mypet->GetPosition());
 				if (!mypet->GetTarget()) // want them to not twitch if they're chasing something down
-					mypet->SetCurrentSpeed(0);
+					mypet->StopNavigation();
 				if (mypet->IsPetStop()) {
 					mypet->SetPetStop(false);
 					SetPetCommandState(PET_BUTTON_STOP, 0);
@@ -10382,16 +10203,16 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		if (aabonuses.PetCommands[PetCommand] && mypet->IsNPC()) {
 			if (mypet->IsHeld())
 			{
-				if (m_ClientVersionBit & EQEmu::versions::bit_SoDAndLater)
+				if (m_ClientVersionBit & EQEmu::versions::maskSoDAndLater)
 					Message_StringID(MT_PetResponse, PET_HOLD_SET_OFF);
 				mypet->SetHeld(false);
 			}
 			else
 			{
-				if (m_ClientVersionBit & EQEmu::versions::bit_SoDAndLater)
+				if (m_ClientVersionBit & EQEmu::versions::maskSoDAndLater)
 					Message_StringID(MT_PetResponse, PET_HOLD_SET_ON);
 
-				if (m_ClientVersionBit & EQEmu::versions::bit_UFAndLater)
+				if (m_ClientVersionBit & EQEmu::versions::maskUFAndLater)
 					mypet->SayTo_StringID(this, MT_PetResponse, PET_NOW_HOLDING);
 				else
 					mypet->SayTo_StringID(this, MT_PetResponse, PET_ON_HOLD);
@@ -10405,10 +10226,10 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 	}
 	case PET_HOLD_ON: {
 		if (aabonuses.PetCommands[PetCommand] && mypet->IsNPC() && !mypet->IsHeld()) {
-			if (m_ClientVersionBit & EQEmu::versions::bit_SoDAndLater)
+			if (m_ClientVersionBit & EQEmu::versions::maskSoDAndLater)
 				Message_StringID(MT_PetResponse, PET_HOLD_SET_ON);
 
-			if (m_ClientVersionBit & EQEmu::versions::bit_UFAndLater)
+			if (m_ClientVersionBit & EQEmu::versions::maskUFAndLater)
 				mypet->SayTo_StringID(this, MT_PetResponse, PET_NOW_HOLDING);
 			else
 				mypet->SayTo_StringID(this, MT_PetResponse, PET_ON_HOLD);
@@ -10420,7 +10241,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 	}
 	case PET_HOLD_OFF: {
 		if (aabonuses.PetCommands[PetCommand] && mypet->IsNPC() && mypet->IsHeld()) {
-			if (m_ClientVersionBit & EQEmu::versions::bit_SoDAndLater)
+			if (m_ClientVersionBit & EQEmu::versions::maskSoDAndLater)
 				Message_StringID(MT_PetResponse, PET_HOLD_SET_OFF);
 			mypet->SetHeld(false);
 		}
@@ -10430,13 +10251,13 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		if (aabonuses.PetCommands[PetCommand] && mypet->IsNPC()) {
 			if (mypet->IsGHeld())
 			{
-				if (m_ClientVersionBit & EQEmu::versions::bit_UFAndLater)
+				if (m_ClientVersionBit & EQEmu::versions::maskUFAndLater)
 					Message_StringID(MT_PetResponse, PET_OFF_GHOLD);
 				mypet->SetGHeld(false);
 			}
 			else
 			{
-				if (m_ClientVersionBit & EQEmu::versions::bit_UFAndLater) {
+				if (m_ClientVersionBit & EQEmu::versions::maskUFAndLater) {
 					Message_StringID(MT_PetResponse, PET_ON_GHOLD);
 					mypet->SayTo_StringID(this, MT_PetResponse, PET_GHOLD_ON_MSG);
 				} else {
@@ -10451,7 +10272,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 	}
 	case PET_GHOLD_ON: {
 		if (aabonuses.PetCommands[PetCommand] && mypet->IsNPC()) {
-			if (m_ClientVersionBit & EQEmu::versions::bit_UFAndLater) {
+			if (m_ClientVersionBit & EQEmu::versions::maskUFAndLater) {
 				Message_StringID(MT_PetResponse, PET_ON_GHOLD);
 				mypet->SayTo_StringID(this, MT_PetResponse, PET_GHOLD_ON_MSG);
 			} else {
@@ -10465,7 +10286,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 	}
 	case PET_GHOLD_OFF: {
 		if (aabonuses.PetCommands[PetCommand] && mypet->IsNPC() && mypet->IsGHeld()) {
-			if (m_ClientVersionBit & EQEmu::versions::bit_UFAndLater)
+			if (m_ClientVersionBit & EQEmu::versions::maskUFAndLater)
 				Message_StringID(MT_PetResponse, PET_OFF_GHOLD);
 			mypet->SetGHeld(false);
 		}
@@ -10477,13 +10298,13 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				break;
 			if (mypet->IsNoCast()) {
 				Message_StringID(MT_PetResponse, PET_CASTING);
-				if (m_ClientVersionBit & EQEmu::versions::bit_SoDAndLater)
+				if (m_ClientVersionBit & EQEmu::versions::maskSoDAndLater)
 					Message_StringID(MT_PetResponse, PET_SPELLHOLD_SET_OFF);
 				mypet->SetNoCast(false);
 			}
 			else {
 				Message_StringID(MT_PetResponse, PET_NOT_CASTING);
-				if (m_ClientVersionBit & EQEmu::versions::bit_SoDAndLater)
+				if (m_ClientVersionBit & EQEmu::versions::maskSoDAndLater)
 					Message_StringID(MT_PetResponse, PET_SPELLHOLD_SET_ON);
 				mypet->SetNoCast(true);
 			}
@@ -10496,7 +10317,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				break;
 			if (!mypet->IsNoCast()) {
 				Message_StringID(MT_PetResponse, PET_NOT_CASTING);
-				if (m_ClientVersionBit & EQEmu::versions::bit_SoDAndLater)
+				if (m_ClientVersionBit & EQEmu::versions::maskSoDAndLater)
 					Message_StringID(MT_PetResponse, PET_SPELLHOLD_SET_ON);
 				mypet->SetNoCast(true);
 			}
@@ -10509,7 +10330,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				break;
 			if (mypet->IsNoCast()) {
 				Message_StringID(MT_PetResponse, PET_CASTING);
-				if (m_ClientVersionBit & EQEmu::versions::bit_SoDAndLater)
+				if (m_ClientVersionBit & EQEmu::versions::maskSoDAndLater)
 					Message_StringID(MT_PetResponse, PET_SPELLHOLD_SET_OFF);
 				mypet->SetNoCast(false);
 			}
@@ -10522,13 +10343,13 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				break;
 			if (mypet->IsFocused()) {
 				Message_StringID(MT_PetResponse, PET_NOT_FOCUSING);
-				if (m_ClientVersionBit & EQEmu::versions::bit_SoDAndLater)
+				if (m_ClientVersionBit & EQEmu::versions::maskSoDAndLater)
 					Message_StringID(MT_PetResponse, PET_FOCUS_SET_OFF);
 				mypet->SetFocused(false);
 			}
 			else {
 				Message_StringID(MT_PetResponse, PET_NOW_FOCUSING);
-				if (m_ClientVersionBit & EQEmu::versions::bit_SoDAndLater)
+				if (m_ClientVersionBit & EQEmu::versions::maskSoDAndLater)
 					Message_StringID(MT_PetResponse, PET_FOCUS_SET_ON);
 				mypet->SetFocused(true);
 			}
@@ -10541,7 +10362,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				break;
 			if (!mypet->IsFocused()) {
 				Message_StringID(MT_PetResponse, PET_NOW_FOCUSING);
-				if (m_ClientVersionBit & EQEmu::versions::bit_SoDAndLater)
+				if (m_ClientVersionBit & EQEmu::versions::maskSoDAndLater)
 					Message_StringID(MT_PetResponse, PET_FOCUS_SET_ON);
 				mypet->SetFocused(true);
 			}
@@ -10554,7 +10375,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				break;
 			if (mypet->IsFocused()) {
 				Message_StringID(MT_PetResponse, PET_NOT_FOCUSING);
-				if (m_ClientVersionBit & EQEmu::versions::bit_SoDAndLater)
+				if (m_ClientVersionBit & EQEmu::versions::maskSoDAndLater)
 					Message_StringID(MT_PetResponse, PET_FOCUS_SET_OFF);
 				mypet->SetFocused(false);
 			}
@@ -10569,7 +10390,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				mypet->SetPetStop(false);
 			} else {
 				mypet->SetPetStop(true);
-				mypet->SetCurrentSpeed(0);
+				mypet->StopNavigation();
 				mypet->SetTarget(nullptr);
 				if (mypet->IsPetRegroup()) {
 					mypet->SetPetRegroup(false);
@@ -10585,7 +10406,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
 			mypet->SetPetStop(true);
-			mypet->SetCurrentSpeed(0);
+			mypet->StopNavigation();
 			mypet->SetTarget(nullptr);
 			mypet->SayTo_StringID(this, MT_PetResponse, PET_GETLOST_STRING);
 			if (mypet->IsPetRegroup()) {
@@ -10909,33 +10730,46 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 {
 
 	if (app->size != sizeof(PopupResponse_Struct)) {
-		Log(Logs::General, Logs::None, "Size mismatch in OP_PopupResponse expected %i got %i",
-			sizeof(PopupResponse_Struct), app->size);
+		Log(Logs::General,
+			Logs::None,
+			"Size mismatch in OP_PopupResponse expected %i got %i",
+			sizeof(PopupResponse_Struct),
+			app->size);
+
 		DumpPacket(app);
 		return;
 	}
-	PopupResponse_Struct *prs = (PopupResponse_Struct*)app->pBuffer;
 
-	// Handle any EQEmu defined popup Ids first
-	switch (prs->popupid)
-	{
-	case POPUPID_UPDATE_SHOWSTATSWINDOW:
-		if (GetTarget() && GetTarget()->IsClient())
-			GetTarget()->CastToClient()->SendStatsWindow(this, true);
-		else
-			SendStatsWindow(this, true);
-		return;
+	PopupResponse_Struct *popup_response = (PopupResponse_Struct *) app->pBuffer;
 
-	default:
-		break;
+	/**
+	 * Handle any EQEmu defined popup Ids first
+	 */
+	switch (popup_response->popupid) {
+		case POPUPID_UPDATE_SHOWSTATSWINDOW:
+			if (GetTarget() && GetTarget()->IsClient()) {
+				GetTarget()->CastToClient()->SendStatsWindow(this, true);
+			}
+			else {
+				SendStatsWindow(this, true);
+			}
+			return;
+			break;
+
+		case EQEmu::popupresponse::MOB_INFO_DISMISS:
+			this->SetDisplayMobInfoWindow(false);
+			this->Message(15, "[DevTools] Window snoozed in this zone...");
+			break;
+		default:
+			break;
 	}
 
 	char buf[16];
-	sprintf(buf, "%d\0", prs->popupid);
+	sprintf(buf, "%d\0", popup_response->popupid);
 
 	parse->EventPlayer(EVENT_POPUP_RESPONSE, this, buf, 0);
 
-	Mob* Target = GetTarget();
+	Mob *Target = GetTarget();
 	if (Target && Target->IsNPC()) {
 		parse->EventNPC(EVENT_POPUP_RESPONSE, Target->CastToNPC(), this, buf, 0);
 	}
@@ -13518,7 +13352,10 @@ void Client::Handle_OP_SwapSpell(const EQApplicationPacket *app)
 	const SwapSpell_Struct* swapspell = (const SwapSpell_Struct*)app->pBuffer;
 	int swapspelltemp;
 
-	if (swapspell->from_slot < 0 || swapspell->from_slot > MAX_PP_SPELLBOOK || swapspell->to_slot < 0 || swapspell->to_slot > MAX_PP_SPELLBOOK)
+	const auto sbs = EQEmu::spells::DynamicLookup(ClientVersion(), GetGM())->SpellbookSize;
+	if (swapspell->from_slot < 0 || swapspell->from_slot >= sbs)
+		return;
+	if (swapspell->to_slot < 0 || swapspell->to_slot >= sbs)
 		return;
 
 	swapspelltemp = m_pp.spell_book[swapspell->from_slot];
@@ -13693,12 +13530,6 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 				GetTarget()->IsTargeted(1);
 				return;
 			}
-			else if (IsAssistExempted())
-			{
-				GetTarget()->IsTargeted(1);
-				SetAssistExemption(false);
-				return;
-			}
 			else if (GetTarget()->IsClient())
 			{
 				//make sure this client is in our raid/group
@@ -13714,17 +13545,6 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 				database.SetMQDetectionFlag(AccountName(), GetName(), hacker_str, zone->GetShortName());
 				safe_delete_array(hacker_str);
 				SetTarget((Mob*)nullptr);
-				return;
-			}
-			else if (IsPortExempted())
-			{
-				GetTarget()->IsTargeted(1);
-				return;
-			}
-			else if (IsSenseExempted())
-			{
-				GetTarget()->IsTargeted(1);
-				SetSenseExemption(false);
 				return;
 			}
 			else if (IsXTarget(GetTarget()))
@@ -14668,7 +14488,6 @@ void Client::Handle_OP_WearChange(const EQApplicationPacket *app)
 
 	// we could maybe ignore this and just send our own from moveitem
 	entity_list.QueueClients(this, app, true);
-	return;
 }
 
 void Client::Handle_OP_WhoAllRequest(const EQApplicationPacket *app)

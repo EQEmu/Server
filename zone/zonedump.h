@@ -36,7 +36,7 @@ struct NPCType
 {
 	char	name[64];
 	char	lastname[70]; 
-	int32	cur_hp;
+	int32	current_hp;
 	int32	max_hp; 
 	float	size;
 	float	runspeed;
@@ -143,6 +143,7 @@ struct NPCType
 	bool	untargetable;
 	bool	skip_global_loot;
 	bool	rare_spawn;
+	int8	stuck_behavior;
 };
 
 namespace player_lootitem {

@@ -84,6 +84,7 @@ EQEmu::ItemInstance::ItemInstance(const ItemData* item, int16 charges) {
 	m_ornamentidfile = 0;
 	m_ornament_hero_model = 0;
 	m_recast_timestamp = 0;
+	m_new_id_file = 0;
 }
 
 EQEmu::ItemInstance::ItemInstance(SharedDatabase *db, uint32 item_id, int16 charges) {
@@ -117,6 +118,7 @@ EQEmu::ItemInstance::ItemInstance(SharedDatabase *db, uint32 item_id, int16 char
 	m_ornamentidfile = 0;
 	m_ornament_hero_model = 0;
 	m_recast_timestamp = 0;
+	m_new_id_file = 0;
 }
 
 EQEmu::ItemInstance::ItemInstance(ItemInstTypes use_type) {
@@ -138,6 +140,7 @@ EQEmu::ItemInstance::ItemInstance(ItemInstTypes use_type) {
 	m_ornamentidfile = 0;
 	m_ornament_hero_model = 0;
 	m_recast_timestamp = 0;
+	m_new_id_file = 0;
 }
 
 // Make a copy of an EQEmu::ItemInstance object
@@ -195,6 +198,7 @@ EQEmu::ItemInstance::ItemInstance(const ItemInstance& copy)
 	m_ornamentidfile = copy.m_ornamentidfile;
 	m_ornament_hero_model = copy.m_ornament_hero_model;
 	m_recast_timestamp = copy.m_recast_timestamp;
+	m_new_id_file = copy.m_new_id_file;
 }
 
 // Clean up container contents

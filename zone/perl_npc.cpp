@@ -1341,11 +1341,14 @@ XS(XS_NPC_NextGuardPosition) {
 XS(XS_NPC_SaveGuardSpot); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_SaveGuardSpot) {
 	dXSARGS;
-	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: NPC::SaveGuardSpot(THIS, [bool clear_guard_spot = false])");
+	if (items != 5)
+		Perl_croak(aTHX_ "Usage: NPC::SaveGuardSpot(THIS, x, y, z, heading)");
 	{
 		NPC  *THIS;
-		bool iClearGuardSpot;
+		float x = (float)SvNV(ST(1));
+		float y = (float)SvNV(ST(2));
+		float z = (float)SvNV(ST(3));
+		float heading = (float)SvNV(ST(4));
 
 		if (sv_derived_from(ST(0), "NPC")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -1355,13 +1358,7 @@ XS(XS_NPC_SaveGuardSpot) {
 		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		if (items < 2)
-			iClearGuardSpot = false;
-		else {
-			iClearGuardSpot = (bool) SvTRUE(ST(1));
-		}
-
-		THIS->SaveGuardSpot(iClearGuardSpot);
+		THIS->SaveGuardSpot(glm::vec4(x, y, z, heading));
 	}
 	XSRETURN_EMPTY;
 }
@@ -2449,7 +2446,7 @@ XS(boot_NPC) {
 	newXSproto(strcpy(buf, "PauseWandering"), XS_NPC_PauseWandering, file, "$$");
 	newXSproto(strcpy(buf, "MoveTo"), XS_NPC_MoveTo, file, "$$$$");
 	newXSproto(strcpy(buf, "NextGuardPosition"), XS_NPC_NextGuardPosition, file, "$");
-	newXSproto(strcpy(buf, "SaveGuardSpot"), XS_NPC_SaveGuardSpot, file, "$;$");
+	newXSproto(strcpy(buf, "SaveGuardSpot"), XS_NPC_SaveGuardSpot, file, "$$$$$");
 	newXSproto(strcpy(buf, "IsGuarding"), XS_NPC_IsGuarding, file, "$");
 	newXSproto(strcpy(buf, "AI_SetRoambox"), XS_NPC_AI_SetRoambox, file, "$$$$$$;$$");
 	newXSproto(strcpy(buf, "GetNPCSpellsID"), XS_NPC_GetNPCSpellsID, file, "$");

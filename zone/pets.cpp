@@ -240,7 +240,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 		if(scale_power > 0)
 		{
 			npc_type->max_hp *= (1 + scale_power);
-			npc_type->cur_hp = npc_type->max_hp;
+			npc_type->current_hp = npc_type->max_hp;
 			npc_type->AC *= (1 + scale_power);
 			npc_type->level += 1 + ((int)act_power / 25) > npc_type->level + RuleR(Pets, PetPowerLevelCap) ? RuleR(Pets, PetPowerLevelCap) : 1 + ((int)act_power / 25); // gains an additional level for every 25 pet power
 			npc_type->min_dmg = (npc_type->min_dmg * (1 + (scale_power / 2)));
@@ -255,7 +255,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 
 	if (MaxHP){
 		npc_type->max_hp += (npc_type->max_hp*MaxHP)/100;
-		npc_type->cur_hp = npc_type->max_hp;
+		npc_type->current_hp = npc_type->max_hp;
 	}
 
 	//TODO: think about regen (engaged vs. not engaged)
@@ -425,7 +425,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 into walls or objects (+10), this sometimes creates the "ghost" effect. I changed to +2 (as close as I
 could get while it still looked good). I also noticed this can happen if an NPC is spawned on the same spot of another or in a related bad spot.*/
 Pet::Pet(NPCType *type_data, Mob *owner, PetType type, uint16 spell_id, int16 power)
-: NPC(type_data, 0, owner->GetPosition() + glm::vec4(2.0f, 2.0f, 0.0f, 0.0f), FlyMode3)
+: NPC(type_data, 0, owner->GetPosition() + glm::vec4(2.0f, 2.0f, 0.0f, 0.0f), GravityBehavior::Water)
 {
 	GiveNPCTypeData(type_data);
 	typeofpet = type;

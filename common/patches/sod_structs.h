@@ -815,8 +815,7 @@ struct BindStruct {
 ** OpCode: 0x006a
  */
 static const uint32 MAX_PP_LANGUAGE		= 25; //
-static const uint32 MAX_PP_SPELLBOOK	= 480; // Confirmed 60 pages on Live now
-static const uint32 MAX_PP_MEMSPELL		= 10; //was 9 now 10 on Live
+
 static const uint32 MAX_PP_SKILL		= PACKET_SKILL_ARRAY_SIZE;	// 100 - actual skills buffer size
 static const uint32 MAX_PP_INNATE_SKILL	= 25;
 static const uint32 MAX_PP_AA_ARRAY		= 300; //was 299
@@ -885,7 +884,7 @@ struct PlayerProfile_Struct
 /*00060*/ BindStruct binds[5];			// Bind points (primary is first)
 /*00160*/ uint32  deity;				// deity
 /*00164*/ uint32  intoxication;			// Alcohol level (in ticks till sober?)
-/*00168*/ uint32  spellSlotRefresh[MAX_PP_MEMSPELL]; // Refresh time (millis) - 4 Octets Each
+/*00168*/ uint32  spellSlotRefresh[spells::SPELL_GEM_COUNT]; // Refresh time (millis) - 4 Octets Each
 /*00208*/ uint32  abilitySlotRefresh;
 /*00212*/ uint8   haircolor;			// Player hair color
 /*00213*/ uint8   beardcolor;			// Player beard color
@@ -911,9 +910,9 @@ struct PlayerProfile_Struct
 /*04172*/ uint8   unknown04172[28];		//
 /*04200*/ uint8   face;					// Player face
 /*04201*/ uint8   unknown02264[147];		// was [175]
-/*04348*/ uint32   spell_book[MAX_PP_SPELLBOOK];	// List of the Spells in spellbook 480 = 60 pages [1920]
+/*04348*/ uint32   spell_book[spells::SPELLBOOK_SIZE];	// List of the Spells in spellbook 480 = 60 pages [1920]
 /*06268*/ uint8   unknown4184[128];		// was [164] Seen -1
-/*06396*/ uint32   mem_spells[MAX_PP_MEMSPELL]; // List of spells memorized
+/*06396*/ uint32   mem_spells[spells::SPELL_GEM_COUNT]; // List of spells memorized
 /*06436*/ uint8 unknown04396[28];		//#### uint8 unknown04396[32]; in Titanium ####[28]
 /*06464*/ uint32  platinum;				// Platinum Pieces on player
 /*06468*/ uint32  gold;					// Gold Pieces on player
@@ -3846,7 +3845,7 @@ struct AnnoyingZoneUnknown_Struct {
 };
 
 struct LoadSpellSet_Struct {
-      uint32  spell[MAX_PP_MEMSPELL];      // 0xFFFFFFFF if no action, slot number if to unmem starting at 0
+      uint32  spell[spells::SPELL_GEM_COUNT];      // 0xFFFFFFFF if no action, slot number if to unmem starting at 0
       uint32 unknown;	//there seems to be an extra field in this packet...
 };
 

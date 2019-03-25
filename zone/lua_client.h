@@ -309,6 +309,10 @@ public:
 	void DisableAreaEndRegen();
 	void EnableAreaRegens(int value);
 	void DisableAreaRegens();
+
+
+	void SetPrimaryWeaponOrnamentation(uint32 model_id);
+	void SetSecondaryWeaponOrnamentation(uint32 model_id);
 };
 
 #endif

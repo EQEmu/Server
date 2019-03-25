@@ -770,28 +770,28 @@ bool Lua_Mob::CastSpell(int spell_id, int target_id) {
 
 bool Lua_Mob::CastSpell(int spell_id, int target_id, int slot) {
 	Lua_Safe_Call_Bool();
-	return self->CastSpell(spell_id, target_id, static_cast<EQEmu::CastingSlot>(slot));
+	return self->CastSpell(spell_id, target_id, static_cast<EQEmu::spells::CastingSlot>(slot));
 }
 
 bool Lua_Mob::CastSpell(int spell_id, int target_id, int slot, int cast_time) {
 	Lua_Safe_Call_Bool();
-	return self->CastSpell(spell_id, target_id, static_cast<EQEmu::CastingSlot>(slot), cast_time);
+	return self->CastSpell(spell_id, target_id, static_cast<EQEmu::spells::CastingSlot>(slot), cast_time);
 }
 
 bool Lua_Mob::CastSpell(int spell_id, int target_id, int slot, int cast_time, int mana_cost) {
 	Lua_Safe_Call_Bool();
-	return self->CastSpell(spell_id, target_id, static_cast<EQEmu::CastingSlot>(slot), cast_time, mana_cost);
+	return self->CastSpell(spell_id, target_id, static_cast<EQEmu::spells::CastingSlot>(slot), cast_time, mana_cost);
 }
 
 bool Lua_Mob::CastSpell(int spell_id, int target_id, int slot, int cast_time, int mana_cost, int item_slot) {
 	Lua_Safe_Call_Bool();
-	return self->CastSpell(spell_id, target_id, static_cast<EQEmu::CastingSlot>(slot), cast_time, mana_cost, nullptr, static_cast<uint32>(item_slot));
+	return self->CastSpell(spell_id, target_id, static_cast<EQEmu::spells::CastingSlot>(slot), cast_time, mana_cost, nullptr, static_cast<uint32>(item_slot));
 }
 
 bool Lua_Mob::CastSpell(int spell_id, int target_id, int slot, int cast_time, int mana_cost, int item_slot, int timer,
 	int timer_duration) {
 	Lua_Safe_Call_Bool();
-	return self->CastSpell(spell_id, target_id, static_cast<EQEmu::CastingSlot>(slot), cast_time, mana_cost, nullptr, static_cast<uint32>(item_slot),
+	return self->CastSpell(spell_id, target_id, static_cast<EQEmu::spells::CastingSlot>(slot), cast_time, mana_cost, nullptr, static_cast<uint32>(item_slot),
 		static_cast<uint32>(timer), static_cast<uint32>(timer_duration));
 }
 
@@ -800,7 +800,7 @@ bool Lua_Mob::CastSpell(int spell_id, int target_id, int slot, int cast_time, in
 	Lua_Safe_Call_Bool();
 	int16 res = resist_adjust;
 
-	return self->CastSpell(spell_id, target_id, static_cast<EQEmu::CastingSlot>(slot), cast_time, mana_cost, nullptr, static_cast<uint32>(item_slot),
+	return self->CastSpell(spell_id, target_id, static_cast<EQEmu::spells::CastingSlot>(slot), cast_time, mana_cost, nullptr, static_cast<uint32>(item_slot),
 		static_cast<uint32>(timer), static_cast<uint32>(timer_duration), &res);
 }
 
@@ -811,27 +811,27 @@ bool Lua_Mob::SpellFinished(int spell_id, Lua_Mob target) {
 
 bool Lua_Mob::SpellFinished(int spell_id, Lua_Mob target, int slot) {
 	Lua_Safe_Call_Bool();
-	return self->SpellFinished(spell_id, target, static_cast<EQEmu::CastingSlot>(slot));
+	return self->SpellFinished(spell_id, target, static_cast<EQEmu::spells::CastingSlot>(slot));
 }
 
 bool Lua_Mob::SpellFinished(int spell_id, Lua_Mob target, int slot, int mana_used) {
 	Lua_Safe_Call_Bool();
-	return self->SpellFinished(spell_id, target, static_cast<EQEmu::CastingSlot>(slot), mana_used);
+	return self->SpellFinished(spell_id, target, static_cast<EQEmu::spells::CastingSlot>(slot), mana_used);
 }
 
 bool Lua_Mob::SpellFinished(int spell_id, Lua_Mob target, int slot, int mana_used, uint32 inventory_slot) {
 	Lua_Safe_Call_Bool();
-	return self->SpellFinished(spell_id, target, static_cast<EQEmu::CastingSlot>(slot), mana_used, inventory_slot);
+	return self->SpellFinished(spell_id, target, static_cast<EQEmu::spells::CastingSlot>(slot), mana_used, inventory_slot);
 }
 
 bool Lua_Mob::SpellFinished(int spell_id, Lua_Mob target, int slot, int mana_used, uint32 inventory_slot, int resist_adjust) {
 	Lua_Safe_Call_Bool();
-	return self->SpellFinished(spell_id, target, static_cast<EQEmu::CastingSlot>(slot), mana_used, inventory_slot, resist_adjust);
+	return self->SpellFinished(spell_id, target, static_cast<EQEmu::spells::CastingSlot>(slot), mana_used, inventory_slot, resist_adjust);
 }
 
 bool Lua_Mob::SpellFinished(int spell_id, Lua_Mob target, int slot, int mana_used, uint32 inventory_slot, int resist_adjust, bool proc) {
 	Lua_Safe_Call_Bool();
-	return self->SpellFinished(spell_id, target, static_cast<EQEmu::CastingSlot>(slot), mana_used, inventory_slot, resist_adjust, proc);
+	return self->SpellFinished(spell_id, target, static_cast<EQEmu::spells::CastingSlot>(slot), mana_used, inventory_slot, resist_adjust, proc);
 }
 
 void Lua_Mob::SendBeginCast(int spell_id, int cast_time) {
@@ -1124,15 +1124,24 @@ double Lua_Mob::CalculateHeadingToTarget(double in_x, double in_y) {
 	return self->CalculateHeadingToTarget(static_cast<float>(in_x), static_cast<float>(in_y));
 }
 
-bool Lua_Mob::CalculateNewPosition(double x, double y, double z, double speed) {
-	Lua_Safe_Call_Bool();
-	return self->CalculateNewPosition(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z), static_cast<float>(speed));
+void Lua_Mob::RunTo(double x, double y, double z) {
+	Lua_Safe_Call_Void();
+	self->RunTo(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z));
 }
 
-bool Lua_Mob::CalculateNewPosition(double x, double y, double z, double speed, bool check_z) {
-	Lua_Safe_Call_Bool();
-	return self->CalculateNewPosition(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z), static_cast<float>(speed),
-		check_z);
+void Lua_Mob::WalkTo(double x, double y, double z) {
+	Lua_Safe_Call_Void();
+	self->WalkTo(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z));
+}
+
+void Lua_Mob::NavigateTo(double x, double y, double z) {
+	Lua_Safe_Call_Void();
+	self->NavigateTo(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z));
+}
+
+void Lua_Mob::StopNavigation() {
+	Lua_Safe_Call_Void();
+	self->StopNavigation();
 }
 
 float Lua_Mob::CalculateDistance(double x, double y, double z) {
@@ -1430,7 +1439,7 @@ void Lua_Mob::SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uin
 
 void Lua_Mob::SetFlyMode(int in) {
 	Lua_Safe_Call_Void();
-	self->SetFlyMode(in);
+	self->SetFlyMode(static_cast<GravityBehavior>(in));
 }
 
 void Lua_Mob::SetTexture(int in) {
@@ -2361,8 +2370,10 @@ luabind::scope lua_register_mob() {
 		.def("FaceTarget", (void(Lua_Mob::*)(Lua_Mob))&Lua_Mob::FaceTarget)
 		.def("SetHeading", (void(Lua_Mob::*)(double))&Lua_Mob::SetHeading)
 		.def("CalculateHeadingToTarget", (double(Lua_Mob::*)(double,double))&Lua_Mob::CalculateHeadingToTarget)
-		.def("CalculateNewPosition", (bool(Lua_Mob::*)(double,double,double,double))&Lua_Mob::CalculateNewPosition)
-		.def("CalculateNewPosition", (bool(Lua_Mob::*)(double,double,double,double,bool))&Lua_Mob::CalculateNewPosition)
+		.def("RunTo", (void(Lua_Mob::*)(double, double, double))&Lua_Mob::RunTo)
+		.def("WalkTo", (void(Lua_Mob::*)(double, double, double))&Lua_Mob::WalkTo)
+		.def("NavigateTo", (void(Lua_Mob::*)(double,double,double))&Lua_Mob::NavigateTo)
+		.def("StopNavigation", (void(Lua_Mob::*)(void))&Lua_Mob::StopNavigation)
 		.def("CalculateDistance", (float(Lua_Mob::*)(double,double,double))&Lua_Mob::CalculateDistance)
 		.def("SendTo", (void(Lua_Mob::*)(double,double,double))&Lua_Mob::SendTo)
 		.def("SendToFixZ", (void(Lua_Mob::*)(double,double,double))&Lua_Mob::SendToFixZ)

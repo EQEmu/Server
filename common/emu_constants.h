@@ -77,6 +77,11 @@ namespace EQEmu
 
 	} // namespace invtype
 
+	namespace popupresponse {
+		const int32 SERVER_INTERNAL_USE_BASE = 2000000000;
+		const int32 MOB_INFO_DISMISS         = 2000000001;
+	}
+
 	namespace invslot {
 		using namespace RoF2::invslot::enum_;
 
@@ -126,6 +131,9 @@ namespace EQEmu
 		const int16 CORPSE_BEGIN = invslot::slotGeneral1;
 		const int16 CORPSE_END = CORPSE_BEGIN + invslot::slotCursor;
 
+		using RoF2::invslot::EQUIPMENT_BITMASK;
+		using RoF2::invslot::GENERAL_BITMASK;
+		using RoF2::invslot::CURSOR_BITMASK;
 		using RoF2::invslot::POSSESSIONS_BITMASK;
 		using RoF2::invslot::CORPSE_BITMASK;
 
@@ -183,6 +191,10 @@ namespace EQEmu
 	namespace constants {
 		const EQEmu::versions::ClientVersion CHARACTER_CREATION_CLIENT = EQEmu::versions::ClientVersion::Titanium;
 
+		using RoF2::constants::EXPANSION;
+		using RoF2::constants::EXPANSION_BIT;
+		using RoF2::constants::EXPANSIONS_MASK;
+
 		using RoF2::constants::CHARACTER_CREATION_LIMIT;
 		
 		const size_t SAY_LINK_OPENER_SIZE = 1;
@@ -191,13 +203,25 @@ namespace EQEmu
 		const size_t SAY_LINK_CLOSER_SIZE = 1;
 		const size_t SAY_LINK_MAXIMUM_SIZE = (SAY_LINK_OPENER_SIZE + SAY_LINK_BODY_SIZE + SAY_LINK_TEXT_SIZE + SAY_LINK_CLOSER_SIZE);
 
-		const int LongBuffs = RoF2::constants::LongBuffs;
-		const int ShortBuffs = RoF2::constants::ShortBuffs;
-		const int DiscBuffs = RoF2::constants::DiscBuffs;
-		const int TotalBuffs = RoF2::constants::TotalBuffs;
-		const int NPCBuffs = RoF2::constants::NPCBuffs;
-		const int PetBuffs = RoF2::constants::PetBuffs;
-		const int MercBuffs = RoF2::constants::MercBuffs;
+		enum StanceType : int {
+			stanceUnknown = 0,
+			stancePassive,
+			stanceBalanced,
+			stanceEfficient,
+			stanceReactive,
+			stanceAggressive,
+			stanceAssist,
+			stanceBurn,
+			stanceEfficient2,
+			stanceBurnAE
+		};
+
+		const char *GetStanceName(StanceType stance_type);
+		int ConvertStanceTypeToIndex(StanceType stance_type);
+
+		const int STANCE_TYPE_FIRST = stancePassive;
+		const int STANCE_TYPE_LAST = stanceBurnAE;
+		const int STANCE_TYPE_COUNT = stanceBurnAE;
 
 	} /*constants*/
 
@@ -215,6 +239,42 @@ namespace EQEmu
 		using RoF2::behavior::CoinHasWeight;
 
 	} // namespace behavior
+
+	namespace spells {
+		enum class CastingSlot : uint32 { // hybrid declaration
+			Gem1 = 0,
+			Gem2 = 1,
+			Gem3 = 2,
+			Gem4 = 3,
+			Gem5 = 4,
+			Gem6 = 5,
+			Gem7 = 6,
+			Gem8 = 7,
+			Gem9 = 8,
+			Gem10 = 9,
+			Gem11 = 10,
+			Gem12 = 11,
+			MaxGems = 12,
+			Ability = 20, // HT/LoH for Tit
+			PotionBelt = 21, // Tit uses a different slot for PB
+			Item = 22,
+			Discipline = 23,
+			AltAbility = 0xFF
+		};
+
+		using RoF2::spells::SPELL_ID_MAX;
+		using RoF2::spells::SPELLBOOK_SIZE;
+		using UF::spells::SPELL_GEM_COUNT; // RoF+ clients define more than UF client..but, they are not valid beyond UF
+
+		using RoF2::spells::LONG_BUFFS;
+		using RoF2::spells::SHORT_BUFFS;
+		using RoF2::spells::DISC_BUFFS;
+		using RoF2::spells::TOTAL_BUFFS;
+		using RoF2::spells::NPC_BUFFS;
+		using RoF2::spells::PET_BUFFS;
+		using RoF2::spells::MERC_BUFFS;
+
+	} // namespace spells
 
 	namespace bug {
 		enum CategoryID : uint32 {
@@ -247,25 +307,10 @@ namespace EQEmu
 
 	} // namespace bug
 
-	enum class CastingSlot : uint32 {
-		Gem1       = 0,
-		Gem2       = 1,
-		Gem3       = 2,
-		Gem4       = 3,
-		Gem5       = 4,
-		Gem6       = 5,
-		Gem7       = 6,
-		Gem8       = 7,
-		Gem9       = 8,
-		Gem10      = 9,
-		Gem11      = 10,
-		Gem12      = 11,
-		MaxGems    = 12,
-		Ability    = 20, // HT/LoH for Tit
-		PotionBelt = 21, // Tit uses a different slot for PB
-		Item       = 22,
-		Discipline = 23,
-		AltAbility = 0xFF
+	enum WaypointStatus : int {
+		RoamBoxPauseInProgress = -3,
+		QuestControlNoGrid = -2,
+		QuestControlGrid = -1
 	};
 
 } /*EQEmu*/

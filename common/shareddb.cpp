@@ -571,7 +571,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQEmu::InventoryProfile *inv)
 
 	auto cv_conflict = false;
 	auto pmask = inv->GetLookup()->PossessionsBitmask;
-	auto bank_size = inv->GetLookup()->InventoryTypeSize[EQEmu::invtype::typeBank];
+	auto bank_size = inv->GetLookup()->InventoryTypeSize.Bank;
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		int16 slot_id = atoi(row[0]);
@@ -720,9 +720,12 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQEmu::InventoryProfile *inv)
 	if (cv_conflict) {
 		char char_name[64] = "";
 		GetCharName(char_id, char_name);
-		Log(Logs::Moderate, Logs::Client_Login,
-			"ClientVersion conflict during inventory load at zone entry for '%s' (charid: %u, inver: %s)",
-			char_name, char_id, EQEmu::versions::MobVersionName(inv->InventoryVersion())
+		Log(Logs::General, Logs::Error,
+			"ClientVersion/Expansion conflict during inventory load at zone entry for '%s' (charid: %u, inver: %s, gmi: %s)",
+			char_name,
+			char_id,
+			EQEmu::versions::MobVersionName(inv->InventoryVersion()),
+			(inv->GMInventory() ? "true" : "false")
 		);
 	}
 
@@ -1175,19 +1178,17 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 	}
 }
 
-const EQEmu::ItemData* SharedDatabase::GetItem(uint32 id) {
-	if (id == 0)
-	{
+const EQEmu::ItemData *SharedDatabase::GetItem(uint32 id)
+{
+	if (id == 0) {
 		return nullptr;
 	}
 
-	if(!items_hash || id > items_hash->max_key())
-	{
+	if (!items_hash || id > items_hash->max_key()) {
 		return nullptr;
 	}
 
-	if(items_hash->exists(id))
-	{
+	if (items_hash->exists(id)) {
 		return &(items_hash->at(id));
 	}
 

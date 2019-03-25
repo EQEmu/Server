@@ -171,30 +171,27 @@ void Database::LoginIP(uint32 AccountID, const char* LoginIP) {
 	QueryDatabase(query); 
 }
 
-int16 Database::CheckStatus(uint32 account_id) {
-	std::string query = StringFormat("SELECT `status`, UNIX_TIMESTAMP(`suspendeduntil`) as `suspendeduntil`, UNIX_TIMESTAMP() as `current`"
-							" FROM `account` WHERE `id` = %i", account_id);
+int16 Database::CheckStatus(uint32 account_id)
+{
+	std::string query = StringFormat(
+	    "SELECT `status`, TIMESTAMPDIFF(SECOND, NOW(), `suspendeduntil`) FROM `account` WHERE `id` = %i",
+	    account_id);
 
-	auto results = QueryDatabase(query); 
-	if (!results.Success()) {
+	auto results = QueryDatabase(query);
+	if (!results.Success())
 		return 0;
-	}
 
 	if (results.RowCount() != 1)
 		return 0;
-	
-	auto row = results.begin(); 
-	int16 status = atoi(row[0]); 
-	int32 suspendeduntil = 0;
 
-	// MariaDB initalizes with NULL if unix_timestamp() is out of range
-	if (row[1] != nullptr) {
-		suspendeduntil = atoi(row[1]);
-	}
+	auto row = results.begin();
+	int16 status = atoi(row[0]);
+	int32 date_diff = 0;
 
-	int32 current = atoi(row[2]);
+	if (row[1] != nullptr)
+		date_diff = atoi(row[1]);
 
-	if(suspendeduntil > current)
+	if (date_diff > 0)
 		return -1;
 
 	return status;
@@ -1408,25 +1405,39 @@ uint8 Database::GetSkillCap(uint8 skillid, uint8 in_race, uint8 in_class, uint16
 	return base_cap;
 }
 
-uint32 Database::GetCharacterInfo(const char* iName, uint32* oAccID, uint32* oZoneID, uint32* oInstanceID, float* oX, float* oY, float* oZ) { 
-	std::string query = StringFormat("SELECT `id`, `account_id`, `zone_id`, `zone_instance`, `x`, `y`, `z` FROM `character_data` WHERE `name` = '%s'", iName);
+uint32 Database::GetCharacterInfo(
+	const char *iName,
+	uint32 *oAccID,
+	uint32 *oZoneID,
+	uint32 *oInstanceID,
+	float *oX,
+	float *oY,
+	float *oZ
+)
+{
+	std::string query = StringFormat(
+		"SELECT `id`, `account_id`, `zone_id`, `zone_instance`, `x`, `y`, `z` FROM `character_data` WHERE `name` = '%s'",
+		EscapeString(iName).c_str()
+	);
+
 	auto results = QueryDatabase(query);
 
 	if (!results.Success()) {
 		return 0;
 	}
 
-	if (results.RowCount() != 1)
+	if (results.RowCount() != 1) {
 		return 0;
+	}
 
-	auto row = results.begin();
+	auto   row    = results.begin();
 	uint32 charid = atoi(row[0]);
-	if (oAccID){ *oAccID = atoi(row[1]); }
-	if (oZoneID){ *oZoneID = atoi(row[2]); }
-	if (oInstanceID){ *oInstanceID = atoi(row[3]); }
-	if (oX){ *oX = atof(row[4]); }
-	if (oY){ *oY = atof(row[5]); }
-	if (oZ){ *oZ = atof(row[6]); }
+	if (oAccID) { *oAccID = atoi(row[1]); }
+	if (oZoneID) { *oZoneID = atoi(row[2]); }
+	if (oInstanceID) { *oInstanceID = atoi(row[3]); }
+	if (oX) { *oX = atof(row[4]); }
+	if (oY) { *oY = atof(row[5]); }
+	if (oZ) { *oZ = atof(row[6]); }
 
 	return charid;
 }

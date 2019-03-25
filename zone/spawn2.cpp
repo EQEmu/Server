@@ -255,7 +255,7 @@ bool Spawn2::Process() {
 		}
 
 		currentnpcid = npcid;
-		NPC *npc = new NPC(tmp, this, glm::vec4(x, y, z, heading), FlyMode3);
+		NPC *npc = new NPC(tmp, this, glm::vec4(x, y, z, heading), GravityBehavior::Water);
 
 		npc->mod_prespawn(this);
 
@@ -488,7 +488,7 @@ bool ZoneDatabase::PopulateZoneSpawnListClose(uint32 zoneid, LinkedList<Spawn2*>
 		"animation "
 		"FROM "
 		"spawn2 "
-		"WHERE zone = '%s' AND version = %u",
+		"WHERE zone = '%s' AND  (version = %u OR version = -1) ",
 		zone_name,
 		version
 		);
@@ -592,7 +592,7 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 		"animation "
 		"FROM "
 		"spawn2 "
-		"WHERE zone = '%s' AND version = %u",
+		"WHERE zone = '%s' AND  (version = %u OR version = -1)",
 		zone_name,
 		version
 	);

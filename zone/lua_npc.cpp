@@ -308,14 +308,9 @@ void Lua_NPC::NextGuardPosition() {
 	self->NextGuardPosition();
 }
 
-void Lua_NPC::SaveGuardSpot() {
+void Lua_NPC::SaveGuardSpot(float x, float y, float z, float heading) {
 	Lua_Safe_Call_Void();
-	self->SaveGuardSpot();
-}
-
-void Lua_NPC::SaveGuardSpot(bool clear) {
-	Lua_Safe_Call_Void();
-	self->SaveGuardSpot(clear);
+	self->SaveGuardSpot(glm::vec4(x, y, z, heading));
 }
 
 bool Lua_NPC::IsGuarding() {
@@ -597,8 +592,7 @@ luabind::scope lua_register_npc() {
 		.def("PauseWandering", (void(Lua_NPC::*)(int))&Lua_NPC::PauseWandering)
 		.def("MoveTo", (void(Lua_NPC::*)(float,float,float,float,bool))&Lua_NPC::MoveTo)
 		.def("NextGuardPosition", (void(Lua_NPC::*)(void))&Lua_NPC::NextGuardPosition)
-		.def("SaveGuardSpot", (void(Lua_NPC::*)(void))&Lua_NPC::SaveGuardSpot)
-		.def("SaveGuardSpot", (void(Lua_NPC::*)(bool))&Lua_NPC::SaveGuardSpot)
+		.def("SaveGuardSpot", (void(Lua_NPC::*)(float,float,float,float))&Lua_NPC::SaveGuardSpot)
 		.def("IsGuarding", (bool(Lua_NPC::*)(void))&Lua_NPC::IsGuarding)
 		.def("AI_SetRoambox", (void(Lua_NPC::*)(float,float,float,float,float))&Lua_NPC::AI_SetRoambox)
 		.def("AI_SetRoambox", (void(Lua_NPC::*)(float,float,float,float,float,uint32,uint32))&Lua_NPC::AI_SetRoambox)

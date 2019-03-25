@@ -27,7 +27,7 @@
 
 #include <string.h>
 
-extern uint64_t frame_time;
+extern double frame_time;
 
 int Mob::GetBaseSkillDamage(EQEmu::skills::SkillType skill, Mob *target)
 {
@@ -197,7 +197,7 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQEmu::skills::SkillType skill, int32 
 	    IsValidSpell(aabonuses.SkillAttackProc[2])) {
 		float chance = aabonuses.SkillAttackProc[0] / 1000.0f;
 		if (zone->random.Roll(chance))
-			SpellFinished(aabonuses.SkillAttackProc[2], who, EQEmu::CastingSlot::Item, 0, -1,
+			SpellFinished(aabonuses.SkillAttackProc[2], who, EQEmu::spells::CastingSlot::Item, 0, -1,
 				      spells[aabonuses.SkillAttackProc[2]].ResistDiff);
 	}
 
@@ -1033,7 +1033,7 @@ void Mob::ProjectileAttack()
 			ProjectileAtk[i].skill = 0;
 			ProjectileAtk[i].speed_mod = 0.0f;
 		} else {
-			ProjectileAtk[i].increment += frame_time;
+			ProjectileAtk[i].increment += 1000 * frame_time;
 		}
 	}
 
@@ -2156,7 +2156,7 @@ void Mob::DoMeleeSkillAttackDmg(Mob *other, uint16 weapon_damage, EQEmu::skills:
 	    IsValidSpell(aabonuses.SkillAttackProc[2])) {
 		float chance = aabonuses.SkillAttackProc[0] / 1000.0f;
 		if (zone->random.Roll(chance))
-			SpellFinished(aabonuses.SkillAttackProc[2], other, EQEmu::CastingSlot::Item, 0, -1,
+			SpellFinished(aabonuses.SkillAttackProc[2], other, EQEmu::spells::CastingSlot::Item, 0, -1,
 				      spells[aabonuses.SkillAttackProc[2]].ResistDiff);
 	}
 

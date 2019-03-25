@@ -5,6 +5,8 @@
 #include <cmath>
 #include "../common/string_util.h"
 
+static const float position_eps = 0.0001f;
+
 std::string to_string(const glm::vec4 &position) {
 	return StringFormat("(%.3f, %.3f, %.3f, %.3f)", position.x,position.y,position.z,position.w);
 }
@@ -159,4 +161,95 @@ float GetReciprocalHeading(const float heading)
 	result = (result / 6.283184f) * 512.0f;
 
 	return result;
+}
+
+bool IsHeadingEqual(const float h1, const float h2)
+{
+	return std::abs(h2 - h1) < 0.01f;
+}
+
+bool IsPositionEqual(const glm::vec2 &p1, const glm::vec2 &p2)
+{
+	return std::abs(p1.x - p2.x) < position_eps && std::abs(p1.y - p2.y) < position_eps;
+}
+
+bool IsPositionEqual(const glm::vec3 &p1, const glm::vec3 &p2)
+{
+	return std::abs(p1.x - p2.x) < position_eps && std::abs(p1.y - p2.y) < position_eps && std::abs(p1.z - p2.z) < position_eps;
+}
+
+bool IsPositionEqual(const glm::vec4 &p1, const glm::vec4 &p2)
+{
+	return std::abs(p1.x - p2.x) < position_eps && std::abs(p1.y - p2.y) < position_eps && std::abs(p1.z - p2.z) < position_eps;
+}
+
+bool IsPositionEqualWithinCertainZ(const glm::vec3 &p1, const glm::vec3 &p2, float z_eps) {
+	return std::abs(p1.x - p2.x) < position_eps && std::abs(p1.y - p2.y) < position_eps && std::abs(p1.z - p2.z) < z_eps;
+}
+
+bool IsPositionEqualWithinCertainZ(const glm::vec4 &p1, const glm::vec4 &p2, float z_eps) {
+	return std::abs(p1.x - p2.x) < position_eps && std::abs(p1.y - p2.y) < position_eps && std::abs(p1.z - p2.z) < z_eps;
+}
+
+bool IsPositionWithinSimpleCylinder(const glm::vec3 &p1, const glm::vec3 &cylinder_center, float cylinder_radius, float cylinder_height)
+{
+	//If we're outside the height of cylinder then we're not in it (duh)
+	auto d = std::abs(p1.z - cylinder_center.z);
+	if (d > cylinder_height / 2.0) {
+		return false;
+	}
+
+	glm::vec2 p1d(p1.x, p1.y);
+	glm::vec2 ccd(cylinder_center.x, cylinder_center.y);
+
+	//If we're outside the radius of the cylinder then we're not in it (also duh)
+	d = Distance(p1d, ccd);
+	if (d > cylinder_radius) {
+		return false;
+	}
+
+	return true;
+}
+
+bool IsPositionWithinSimpleCylinder(const glm::vec4 &p1, const glm::vec4 &cylinder_center, float cylinder_radius, float cylinder_height)
+{
+	//If we're outside the height of cylinder then we're not in it (duh)
+	auto d = std::abs(p1.z - cylinder_center.z);
+	if (d > cylinder_height / 2.0) {
+		return false;
+	}
+
+	glm::vec2 p1d(p1.x, p1.y);
+	glm::vec2 ccd(cylinder_center.x, cylinder_center.y);
+
+	//If we're outside the radius of the cylinder then we're not in it (also duh)
+	d = Distance(p1d, ccd);
+	if (d > cylinder_radius) {
+		return false;
+	}
+
+	return true;
+}
+
+float CalculateHeadingAngleBetweenPositions(float x1, float y1, float x2, float y2)
+{
+	float y_diff = std::abs(y1 - y2);
+	float x_diff = std::abs(x1 - x2);
+	if (y_diff < 0.0000009999999974752427)
+		y_diff = 0.0000009999999974752427;
+
+	float angle = atan2(x_diff, y_diff) * 180.0f * 0.3183099014828645f; // angle, nice "pi"
+
+	// return the right thing based on relative quadrant
+	// I'm sure this could be improved for readability, but whatever
+	if (y1 >= y2) {
+		if (x2 >= x1)
+			return (90.0f - angle + 90.0f) * 511.5f * 0.0027777778f;
+		if (x2 <= x1)
+			return (angle + 180.0f) * 511.5f * 0.0027777778f;
+	}
+	if (y1 > y2 || x2 > x1)
+		return angle * 511.5f * 0.0027777778f;
+	else
+		return (90.0f - angle + 270.0f) * 511.5f * 0.0027777778f;
 }

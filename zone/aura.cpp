@@ -6,8 +6,8 @@
 #include "raids.h"
 
 Aura::Aura(NPCType *type_data, Mob *owner, AuraRecord &record)
-    : NPC(type_data, 0, owner->GetPosition(), FlyMode3), spell_id(record.spell_id), distance(record.distance),
-      remove_timer(record.duration), movement_timer(100), process_timer(100), aura_id(-1)
+    : NPC(type_data, 0, owner->GetPosition(), GravityBehavior::Flying), spell_id(record.spell_id), distance(record.distance),
+      remove_timer(record.duration), movement_timer(100), process_timer(1000), aura_id(-1)
 {
 	GiveNPCTypeData(type_data); // we will delete this later on
 	m_owner = owner->GetID();

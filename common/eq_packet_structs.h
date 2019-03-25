@@ -852,10 +852,6 @@ struct SuspendedMinion_Struct
 ** OpCode: 0x006a
  */
 static const uint32 MAX_PP_LANGUAGE = 28;
-static const uint32 MAX_PP_SPELLBOOK = 480;	// Set for all functions
-static const uint32 MAX_PP_MEMSPELL = static_cast<uint32>(EQEmu::CastingSlot::MaxGems); // Set to latest client so functions can work right -- 12
-static const uint32 MAX_PP_REF_SPELLBOOK = 480;	// Set for Player Profile size retain
-static const uint32 MAX_PP_REF_MEMSPELL = 9; // Set for Player Profile size retain
 
 static const uint32 MAX_PP_SKILL		= PACKET_SKILL_ARRAY_SIZE;	// 100 - actual skills buffer size
 static const uint32 MAX_PP_INNATE_SKILL	= 25;
@@ -913,7 +909,7 @@ sed -e 's/_t//g' -e 's/MAX_AA/MAX_PP_AA_ARRAY/g' \
 
 struct PlayerProfile_Struct
 {
-/*0000*/	uint32				checksum;			// Checksum from CRC32::SetEQChecksum
+// /*0000*/	uint32				checksum;			// Checksum from CRC32::SetEQChecksum
 /*0004*/	char				name[64];			// Name of player sizes not right
 /*0068*/	char				last_name[32];		// Last name of player sizes not right
 /*0100*/	uint32				gender;				// Player Gender - 0 Male, 1 Female
@@ -935,7 +931,7 @@ struct PlayerProfile_Struct
 /*0245*/	uint8				guildbanker;
 /*0246*/	uint8				unknown0246[6];		//
 /*0252*/	uint32				intoxication;
-/*0256*/	uint32				spellSlotRefresh[MAX_PP_MEMSPELL];	//in ms
+/*0256*/	uint32				spellSlotRefresh[EQEmu::spells::SPELL_GEM_COUNT];	//in ms
 /*0292*/	uint32				abilitySlotRefresh;
 /*0296*/	uint8				haircolor;			// Player hair color
 /*0297*/	uint8				beardcolor;			// Player beard color
@@ -974,9 +970,9 @@ struct PlayerProfile_Struct
 /*2505*/	uint8				unknown2541[47];	// ?
 /*2552*/	uint8				languages[MAX_PP_LANGUAGE];
 /*2580*/	uint8				unknown2616[4];
-/*2584*/	uint32				spell_book[MAX_PP_REF_SPELLBOOK];
+/*2584*/	uint32				spell_book[EQEmu::spells::SPELLBOOK_SIZE];
 /*4504*/	uint8				unknown4540[128];	// Was [428] all 0xff
-/*4632*/	uint32				mem_spells[MAX_PP_MEMSPELL];
+/*4632*/	uint32				mem_spells[EQEmu::spells::SPELL_GEM_COUNT];
 /*4668*/	uint8				unknown4704[32];	//
 /*4700*/	float				y;					// Player y position
 /*4704*/	float				x;					// Player x position
@@ -1095,6 +1091,18 @@ struct PlayerProfile_Struct
 /*19559*/	uint8				unknown19595[5];	// ***Placeholder (6/29/2005)
 /*19564*/	uint32				RestTimer;
 /*19568*/
+
+	// All player profile packets are translated and this overhead is ignored in out-bound packets
+	PlayerProfile_Struct() : m_player_profile_version(EQEmu::versions::MobVersion::Unknown) { }
+
+	EQEmu::versions::MobVersion PlayerProfileVersion() { return m_player_profile_version; }
+	void SetPlayerProfileVersion(EQEmu::versions::MobVersion mob_version) { m_player_profile_version = EQEmu::versions::ValidateMobVersion(mob_version); }
+	void SetPlayerProfileVersion(EQEmu::versions::ClientVersion client_version) { SetPlayerProfileVersion(EQEmu::versions::ConvertClientVersionToMobVersion(client_version)); }
+
+private:
+	// No need for gm flag since pp already has one
+	// No need for lookup pointer since this struct is not tied to any one system
+	EQEmu::versions::MobVersion m_player_profile_version;
 };
 
 
@@ -1184,15 +1192,15 @@ struct SpecialMesg_Struct
 ** When somebody changes what they're wearing or give a pet a weapon (model changes)
 ** Length: 19 Bytes
 */
-struct WearChange_Struct{
-/*000*/ uint16 spawn_id;
-/*002*/ uint32 material;
-/*006*/ uint32 unknown06;
-/*010*/ uint32 elite_material;	// 1 for Drakkin Elite Material
-/*014*/ uint32 hero_forge_model; // New to VoA
-/*018*/ uint32 unknown18; // New to RoF
+struct WearChange_Struct {
+/*000*/ uint16                       spawn_id;
+/*002*/ uint32                       material;
+/*006*/ uint32                       unknown06;
+/*010*/ uint32                       elite_material;    // 1 for Drakkin Elite Material
+/*014*/ uint32                       hero_forge_model; // New to VoA
+/*018*/ uint32                       unknown18; // New to RoF
 /*022*/ EQEmu::textures::Tint_Struct color;
-/*026*/ uint8 wear_slot_id;
+/*026*/ uint8                        wear_slot_id;
 /*027*/
 };
 
@@ -4381,7 +4389,7 @@ struct AnnoyingZoneUnknown_Struct {
 };
 
 struct LoadSpellSet_Struct {
-	uint32 spell[MAX_PP_MEMSPELL];	// 0xFFFFFFFF if no action, slot number if to unmem starting at 0
+	uint32 spell[EQEmu::spells::SPELL_GEM_COUNT];	// 0xFFFFFFFF if no action, slot number if to unmem starting at 0
 	uint32 unknown;					//there seems to be an extra field in this packet...
 };
 

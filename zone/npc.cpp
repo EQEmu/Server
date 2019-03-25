@@ -39,6 +39,8 @@
 #include "spawn2.h"
 #include "zone.h"
 #include "quest_parser_collection.h"
+#include "water_map.h"
+#include "npc_scale_manager.h"
 
 #include <cctype>
 #include <stdio.h>
@@ -57,250 +59,237 @@ extern Zone* zone;
 extern volatile bool is_zone_loaded;
 extern EntityList entity_list;
 
-NPC::NPC(const NPCType* d, Spawn2* in_respawn, const glm::vec4& position, int iflymode, bool IsCorpse)
-: Mob(d->name,
-		d->lastname,
-		d->max_hp,
-		d->max_hp,
-		d->gender,
-		d->race,
-		d->class_,
-		(bodyType)d->bodytype,
-		d->deity,
-		d->level,
-		d->npc_id,
-		d->size,
-		d->runspeed,
-		position,
-		d->light, // innate_light
-		d->texture,
-		d->helmtexture,
-		d->AC,
-		d->ATK,
-		d->STR,
-		d->STA,
-		d->DEX,
-		d->AGI,
-		d->INT,
-		d->WIS,
-		d->CHA,
-		d->haircolor,
-		d->beardcolor,
-		d->eyecolor1,
-		d->eyecolor2,
-		d->hairstyle,
-		d->luclinface,
-		d->beard,
-		d->drakkin_heritage,
-		d->drakkin_tattoo,
-		d->drakkin_details,
-		d->armor_tint,
-		0,
-		d->see_invis,			// pass see_invis/see_ivu flags to mob constructor
-		d->see_invis_undead,
-		d->see_hide,
-		d->see_improved_hide,
-		d->hp_regen,
-		d->mana_regen,
-		d->qglobal,
-		d->maxlevel,
-		d->scalerate,
-		d->armtexture,
-		d->bracertexture,
-		d->handtexture,
-		d->legtexture,
-		d->feettexture),
-	attacked_timer(CombatEventTimer_expire),
-	swarm_timer(100),
-	classattack_timer(1000),
-	knightattack_timer(1000),
-	assist_timer(AIassistcheck_delay),
-	qglobal_purge_timer(30000),
-	send_hp_update_timer(2000),
-	enraged_timer(1000),
-	taunt_timer(TauntReuseTime * 1000),
-	m_SpawnPoint(position),
-	m_GuardPoint(-1,-1,-1,0),
-	m_GuardPointSaved(0,0,0,0)
+NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &position, GravityBehavior iflymode, bool IsCorpse)
+	: Mob(
+	npc_type_data->name,
+	npc_type_data->lastname,
+	npc_type_data->max_hp,
+	npc_type_data->max_hp,
+	npc_type_data->gender,
+	npc_type_data->race,
+	npc_type_data->class_,
+	(bodyType) npc_type_data->bodytype,
+	npc_type_data->deity,
+	npc_type_data->level,
+	npc_type_data->npc_id,
+	npc_type_data->size,
+	npc_type_data->runspeed,
+	position,
+	npc_type_data->light, // innate_light
+	npc_type_data->texture,
+	npc_type_data->helmtexture,
+	npc_type_data->AC,
+	npc_type_data->ATK,
+	npc_type_data->STR,
+	npc_type_data->STA,
+	npc_type_data->DEX,
+	npc_type_data->AGI,
+	npc_type_data->INT,
+	npc_type_data->WIS,
+	npc_type_data->CHA,
+	npc_type_data->haircolor,
+	npc_type_data->beardcolor,
+	npc_type_data->eyecolor1,
+	npc_type_data->eyecolor2,
+	npc_type_data->hairstyle,
+	npc_type_data->luclinface,
+	npc_type_data->beard,
+	npc_type_data->drakkin_heritage,
+	npc_type_data->drakkin_tattoo,
+	npc_type_data->drakkin_details,
+	npc_type_data->armor_tint,
+	0,
+	npc_type_data->see_invis,            // pass see_invis/see_ivu flags to mob constructor
+	npc_type_data->see_invis_undead,
+	npc_type_data->see_hide,
+	npc_type_data->see_improved_hide,
+	npc_type_data->hp_regen,
+	npc_type_data->mana_regen,
+	npc_type_data->qglobal,
+	npc_type_data->maxlevel,
+	npc_type_data->scalerate,
+	npc_type_data->armtexture,
+	npc_type_data->bracertexture,
+	npc_type_data->handtexture,
+	npc_type_data->legtexture,
+	npc_type_data->feettexture
+),
+	  attacked_timer(CombatEventTimer_expire),
+	  swarm_timer(100),
+	  classattack_timer(1000),
+	  knightattack_timer(1000),
+	  assist_timer(AIassistcheck_delay),
+	  qglobal_purge_timer(30000),
+	  send_hp_update_timer(2000),
+	  enraged_timer(1000),
+	  taunt_timer(TauntReuseTime * 1000),
+	  m_SpawnPoint(position),
+	  m_GuardPoint(-1, -1, -1, 0),
+	  m_GuardPointSaved(0, 0, 0, 0)
 {
 	//What is the point of this, since the names get mangled..
-	Mob* mob = entity_list.GetMob(name);
-	if(mob != 0)
+	Mob *mob = entity_list.GetMob(name);
+	if (mob != nullptr) {
 		entity_list.RemoveEntity(mob->GetID());
+	}
 
-	int moblevel=GetLevel();
+	int moblevel = GetLevel();
 
-	NPCTypedata = d;
+	NPCTypedata      = npc_type_data;
 	NPCTypedata_ours = nullptr;
-	respawn2 = in_respawn;
+	respawn2         = in_respawn;
+
 	swarm_timer.Disable();
 
-	if (size <= 0.0f)
+	if (size <= 0.0f) {
 		size = GetRaceGenderDefaultHeight(race, gender);
+	}
 
-	taunting = false;
-	proximity = nullptr;
-	copper = 0;
-	silver = 0;
-	gold = 0;
-	platinum = 0;
-	max_dmg = d->max_dmg;
-	min_dmg = d->min_dmg;
-	attack_count = d->attack_count;
-	grid = 0;
-	wp_m = 0;
-	max_wp=0;
-	save_wp = 0;
-	spawn_group = 0;
+	taunting     = false;
+	proximity    = nullptr;
+	copper       = 0;
+	silver       = 0;
+	gold         = 0;
+	platinum     = 0;
+	max_dmg      = npc_type_data->max_dmg;
+	min_dmg      = npc_type_data->min_dmg;
+	attack_count = npc_type_data->attack_count;
+	grid         = 0;
+	wp_m         = 0;
+	max_wp       = 0;
+	save_wp      = 0;
+	spawn_group  = 0;
 	swarmInfoPtr = nullptr;
-	spellscale = d->spellscale;
-	healscale = d->healscale;
-
-	logging_enabled = NPC_DEFAULT_LOGGING_ENABLED;
-
-	pAggroRange = d->aggroradius;
-	pAssistRange = d->assistradius;
-	findable = d->findable;
-	trackable = d->trackable;
-
-	MR = d->MR;
-	CR = d->CR;
-	DR = d->DR;
-	FR = d->FR;
-	PR = d->PR;
-	Corrup = d->Corrup;
-	PhR = d->PhR;
-
-	STR = d->STR;
-	STA = d->STA;
-	AGI = d->AGI;
-	DEX = d->DEX;
-	INT = d->INT;
-	WIS = d->WIS;
-	CHA = d->CHA;
-	npc_mana = d->Mana;
+	spellscale   = npc_type_data->spellscale;
+	healscale    = npc_type_data->healscale;
+	pAggroRange  = npc_type_data->aggroradius;
+	pAssistRange = npc_type_data->assistradius;
+	findable     = npc_type_data->findable;
+	trackable    = npc_type_data->trackable;
+	MR           = npc_type_data->MR;
+	CR           = npc_type_data->CR;
+	DR           = npc_type_data->DR;
+	FR           = npc_type_data->FR;
+	PR           = npc_type_data->PR;
+	Corrup       = npc_type_data->Corrup;
+	PhR          = npc_type_data->PhR;
+	STR          = npc_type_data->STR;
+	STA          = npc_type_data->STA;
+	AGI          = npc_type_data->AGI;
+	DEX          = npc_type_data->DEX;
+	INT          = npc_type_data->INT;
+	WIS          = npc_type_data->WIS;
+	CHA          = npc_type_data->CHA;
+	npc_mana     = npc_type_data->Mana;
 
 	//quick fix of ordering if they screwed it up in the DB
-	if(max_dmg < min_dmg) {
+	if (max_dmg < min_dmg) {
 		int tmp = min_dmg;
 		min_dmg = max_dmg;
 		max_dmg = tmp;
 	}
 
 	// Max Level and Stat Scaling if maxlevel is set
-	if(maxlevel > level)
-	{
+	if (maxlevel > level) {
 		LevelScale();
 	}
 
-	// Set Resists if they are 0 in the DB
-	CalcNPCResists();
-
-	// Set Mana and HP Regen Rates if they are 0 in the DB
-	CalcNPCRegen();
-
-	// Set Min and Max Damage if they are 0 in the DB
-	if(max_dmg == 0){
-		CalcNPCDamage();
-	}
-
-	base_damage = round((max_dmg - min_dmg) / 1.9);
-	min_damage = min_dmg - round(base_damage / 10.0);
-
-	accuracy_rating = d->accuracy_rating;
-	avoidance_rating = d->avoidance_rating;
-	ATK = d->ATK;
+	base_damage      = round((max_dmg - min_dmg) / 1.9);
+	min_damage       = min_dmg - round(base_damage / 10.0);
+	accuracy_rating  = npc_type_data->accuracy_rating;
+	avoidance_rating = npc_type_data->avoidance_rating;
+	ATK              = npc_type_data->ATK;
 
 	// used for when switch back to charm
-	default_ac = d->AC;
-	default_min_dmg = min_dmg;
-	default_max_dmg = max_dmg;
-	default_attack_delay = d->attack_delay;
-	default_accuracy_rating = d->accuracy_rating;
-	default_avoidance_rating = d->avoidance_rating;
-	default_atk = d->ATK;
+	default_ac               = npc_type_data->AC;
+	default_min_dmg          = min_dmg;
+	default_max_dmg          = max_dmg;
+	default_attack_delay     = npc_type_data->attack_delay;
+	default_accuracy_rating  = npc_type_data->accuracy_rating;
+	default_avoidance_rating = npc_type_data->avoidance_rating;
+	default_atk              = npc_type_data->ATK;
 
 	// used for when getting charmed, if 0, doesn't swap
-	charm_ac = d->charm_ac;
-	charm_min_dmg = d->charm_min_dmg;
-	charm_max_dmg = d->charm_max_dmg;
-	charm_attack_delay = d->charm_attack_delay;
-	charm_accuracy_rating = d->charm_accuracy_rating;
-	charm_avoidance_rating = d->charm_avoidance_rating;
-	charm_atk = d->charm_atk;
+	charm_ac               = npc_type_data->charm_ac;
+	charm_min_dmg          = npc_type_data->charm_min_dmg;
+	charm_max_dmg          = npc_type_data->charm_max_dmg;
+	charm_attack_delay     = npc_type_data->charm_attack_delay;
+	charm_accuracy_rating  = npc_type_data->charm_accuracy_rating;
+	charm_avoidance_rating = npc_type_data->charm_avoidance_rating;
+	charm_atk              = npc_type_data->charm_atk;
 
 	CalcMaxMana();
 	SetMana(GetMaxMana());
 
-	MerchantType = d->merchanttype;
-	merchant_open = GetClass() == MERCHANT;
-	adventure_template_id = d->adventure_template;
-	flymode = iflymode;
-	guard_anim = eaStanding;
-	roambox_distance = 0;
-	roambox_max_x = -2;
-	roambox_max_y = -2;
-	roambox_min_x = -2;
-	roambox_min_y = -2;
+	MerchantType          = npc_type_data->merchanttype;
+	merchant_open         = GetClass() == MERCHANT;
+	adventure_template_id = npc_type_data->adventure_template;
+	flymode               = iflymode;
+	guard_anim            = eaStanding;
+	roambox_distance      = 0;
+	roambox_max_x         = -2;
+	roambox_max_y         = -2;
+	roambox_min_x         = -2;
+	roambox_min_y         = -2;
 	roambox_destination_x = -2;
 	roambox_destination_y = -2;
-	roambox_min_delay = 1000;
-	roambox_delay = 1000;
-	p_depop = false;
-	loottable_id = d->loottable_id;
-	skip_global_loot = d->skip_global_loot;
-	rare_spawn = d->rare_spawn;
+	roambox_min_delay     = 1000;
+	roambox_delay         = 1000;
+	p_depop               = false;
+	loottable_id          = npc_type_data->loottable_id;
+	skip_global_loot      = npc_type_data->skip_global_loot;
+	rare_spawn            = npc_type_data->rare_spawn;
+	no_target_hotkey      = npc_type_data->no_target_hotkey;
+	primary_faction       = 0;
 
-	no_target_hotkey = d->no_target_hotkey;
+	SetNPCFactionID(npc_type_data->npc_faction_id);
 
-	primary_faction = 0;
-	SetNPCFactionID(d->npc_faction_id);
-
-	npc_spells_id = 0;
-	HasAISpell = false;
-	HasAISpellEffects = false;
+	npc_spells_id        = 0;
+	HasAISpell           = false;
+	HasAISpellEffects    = false;
 	innate_proc_spell_id = 0;
 
-	if(GetClass() == MERCERNARY_MASTER && RuleB(Mercs, AllowMercs))
-	{
+	if (GetClass() == MERCERNARY_MASTER && RuleB(Mercs, AllowMercs)) {
 		LoadMercTypes();
 		LoadMercs();
 	}
 
-	SpellFocusDMG = 0;
+	SpellFocusDMG  = 0;
 	SpellFocusHeal = 0;
 
 	pet_spell_id = 0;
 
-	delaytimer = false;
-	combat_event = false;
-	attack_speed = d->attack_speed;
-	attack_delay = d->attack_delay;
-	slow_mitigation = d->slow_mitigation;
+	delaytimer      = false;
+	combat_event    = false;
+	attack_speed    = npc_type_data->attack_speed;
+	attack_delay    = npc_type_data->attack_delay;
+	slow_mitigation = npc_type_data->slow_mitigation;
 
 	EntityList::RemoveNumbers(name);
 	entity_list.MakeNameUnique(name);
 
-	npc_aggro = d->npc_aggro;
+	npc_aggro = npc_type_data->npc_aggro;
 
 	AI_Init();
 	AI_Start();
 
-	d_melee_texture1 = d->d_melee_texture1;
-	d_melee_texture2 = d->d_melee_texture2;
-	herosforgemodel = d->herosforgemodel;
+	d_melee_texture1 = npc_type_data->d_melee_texture1;
+	d_melee_texture2 = npc_type_data->d_melee_texture2;
+	herosforgemodel  = npc_type_data->herosforgemodel;
 
-	ammo_idfile = d->ammo_idfile;
+	ammo_idfile = npc_type_data->ammo_idfile;
 	memset(equipment, 0, sizeof(equipment));
-	prim_melee_type = d->prim_melee_type;
-	sec_melee_type = d->sec_melee_type;
-	ranged_type = d->ranged_type;
+	prim_melee_type = npc_type_data->prim_melee_type;
+	sec_melee_type  = npc_type_data->sec_melee_type;
+	ranged_type     = npc_type_data->ranged_type;
 
 	// If Melee Textures are not set, set attack type to Hand to Hand as default
-	if(!d_melee_texture1)
+	if (!d_melee_texture1) {
 		prim_melee_type = 28;
-	if(!d_melee_texture2)
+	}
+	if (!d_melee_texture2) {
 		sec_melee_type = 28;
+	}
 
 	//give NPCs skill values...
 	int r;
@@ -312,106 +301,139 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, const glm::vec4& position, int if
 	// the theory of needing to be able to set skills for each mob separately
 	if (moblevel > 50) {
 		skills[EQEmu::skills::SkillDoubleAttack] = 250;
-		skills[EQEmu::skills::SkillDualWield] = 250;
-	} else if (moblevel > 3) {
+		skills[EQEmu::skills::SkillDualWield]    = 250;
+	}
+	else if (moblevel > 3) {
 		skills[EQEmu::skills::SkillDoubleAttack] = moblevel * 5;
-		skills[EQEmu::skills::SkillDualWield] = skills[EQEmu::skills::SkillDoubleAttack];
-	} else {
+		skills[EQEmu::skills::SkillDualWield]    = skills[EQEmu::skills::SkillDoubleAttack];
+	}
+	else {
 		skills[EQEmu::skills::SkillDoubleAttack] = moblevel * 5;
 	}
 
-	if(d->trap_template > 0)
-	{
-		std::map<uint32,std::list<LDoNTrapTemplate*> >::iterator trap_ent_iter;
-		std::list<LDoNTrapTemplate*> trap_list;
+	ldon_trapped       = false;
+	ldon_trap_type     = 0;
+	ldon_spell_id      = 0;
+	ldon_locked        = false;
+	ldon_locked_skill  = 0;
+	ldon_trap_detected = false;
 
-		trap_ent_iter = zone->ldon_trap_entry_list.find(d->trap_template);
-		if(trap_ent_iter != zone->ldon_trap_entry_list.end())
-		{
+	if (npc_type_data->trap_template > 0) {
+		std::map<uint32, std::list<LDoNTrapTemplate *> >::iterator trap_ent_iter;
+		std::list<LDoNTrapTemplate *>                              trap_list;
+
+		trap_ent_iter = zone->ldon_trap_entry_list.find(npc_type_data->trap_template);
+		if (trap_ent_iter != zone->ldon_trap_entry_list.end()) {
 			trap_list = trap_ent_iter->second;
-			if(trap_list.size() > 0)
-			{
+			if (trap_list.size() > 0) {
 				auto trap_list_iter = trap_list.begin();
 				std::advance(trap_list_iter, zone->random.Int(0, trap_list.size() - 1));
-				LDoNTrapTemplate* tt = (*trap_list_iter);
-				if(tt)
-				{
-					if((uint8)tt->spell_id > 0)
-					{
-						ldon_trapped = true;
-						ldon_spell_id = tt->spell_id;
+				LDoNTrapTemplate *trap_template = (*trap_list_iter);
+				if (trap_template) {
+					if ((uint8) trap_template->spell_id > 0) {
+						ldon_trapped  = true;
+						ldon_spell_id = trap_template->spell_id;
 					}
-					else
-					{
-						ldon_trapped = false;
+					else {
+						ldon_trapped  = false;
 						ldon_spell_id = 0;
 					}
 
-					ldon_trap_type = (uint8)tt->type;
-					if(tt->locked > 0)
-					{
-						ldon_locked = true;
-						ldon_locked_skill = tt->skill;
+					ldon_trap_type     = (uint8) trap_template->type;
+					if (trap_template->locked > 0) {
+						ldon_locked       = true;
+						ldon_locked_skill = trap_template->skill;
 					}
-					else
-					{
-						ldon_locked = false;
+					else {
+						ldon_locked       = false;
 						ldon_locked_skill = 0;
 					}
+
 					ldon_trap_detected = 0;
 				}
 			}
-			else
-			{
-				ldon_trapped = false;
-				ldon_trap_type = 0;
-				ldon_spell_id = 0;
-				ldon_locked = false;
-				ldon_locked_skill = 0;
-				ldon_trap_detected = 0;
-			}
-		}
-		else
-		{
-			ldon_trapped = false;
-			ldon_trap_type = 0;
-			ldon_spell_id = 0;
-			ldon_locked = false;
-			ldon_locked_skill = 0;
-			ldon_trap_detected = 0;
 		}
 	}
-	else
-	{
-		ldon_trapped = false;
-		ldon_trap_type = 0;
-		ldon_spell_id = 0;
-		ldon_locked = false;
-		ldon_locked_skill = 0;
-		ldon_trap_detected = 0;
-	}
+
 	reface_timer = new Timer(15000);
 	reface_timer->Disable();
+
 	qGlobals = nullptr;
-	SetEmoteID(d->emoteid);
+
+	SetEmoteID(static_cast<uint16>(npc_type_data->emoteid));
 	InitializeBuffSlots();
 	CalcBonuses();
-	raid_target = d->raid_target;
-	ignore_despawn = d->ignore_despawn;
-	m_targetable = !d->untargetable;
 
-	AISpellVar.fail_recast = RuleI(Spells, AI_SpellCastFinishedFailRecast);
-	AISpellVar.engaged_no_sp_recast_min = RuleI(Spells, AI_EngagedNoSpellMinRecast);
-	AISpellVar.engaged_no_sp_recast_max = RuleI(Spells, AI_EngagedNoSpellMaxRecast);
-	AISpellVar.engaged_beneficial_self_chance = RuleI(Spells, AI_EngagedBeneficialSelfChance);
-	AISpellVar.engaged_beneficial_other_chance = RuleI(Spells, AI_EngagedBeneficialOtherChance);
-	AISpellVar.engaged_detrimental_chance = RuleI(Spells, AI_EngagedDetrimentalChance);
-	AISpellVar.pursue_no_sp_recast_min = RuleI(Spells, AI_PursueNoSpellMinRecast);
-	AISpellVar.pursue_no_sp_recast_max = RuleI(Spells, AI_PursueNoSpellMaxRecast);
-	AISpellVar.pursue_detrimental_chance = RuleI(Spells, AI_PursueDetrimentalChance);
-	AISpellVar.idle_no_sp_recast_min = RuleI(Spells, AI_IdleNoSpellMinRecast);
-	AISpellVar.idle_no_sp_recast_max = RuleI(Spells, AI_IdleNoSpellMaxRecast);
-	AISpellVar.idle_beneficial_chance = RuleI(Spells, AI_IdleBeneficialChance);
+	raid_target    = npc_type_data->raid_target;
+	ignore_despawn = npc_type_data->ignore_despawn;
+	m_targetable   = !npc_type_data->untargetable;
+
+	npc_scale_manager->ScaleNPC(this);
+
+	SetMana(GetMaxMana());
+
+	AISpellVar.fail_recast                     = static_cast<uint32>(RuleI(Spells, AI_SpellCastFinishedFailRecast));
+	AISpellVar.engaged_no_sp_recast_min        = static_cast<uint32>(RuleI(Spells, AI_EngagedNoSpellMinRecast));
+	AISpellVar.engaged_no_sp_recast_max        = static_cast<uint32>(RuleI(Spells, AI_EngagedNoSpellMaxRecast));
+	AISpellVar.engaged_beneficial_self_chance  = static_cast<uint8> (RuleI(Spells, AI_EngagedBeneficialSelfChance));
+	AISpellVar.engaged_beneficial_other_chance = static_cast<uint8> (RuleI(Spells, AI_EngagedBeneficialOtherChance));
+	AISpellVar.engaged_detrimental_chance      = static_cast<uint8> (RuleI(Spells, AI_EngagedDetrimentalChance));
+	AISpellVar.pursue_no_sp_recast_min         = static_cast<uint32>(RuleI(Spells, AI_PursueNoSpellMinRecast));
+	AISpellVar.pursue_no_sp_recast_max         = static_cast<uint32>(RuleI(Spells, AI_PursueNoSpellMaxRecast));
+	AISpellVar.pursue_detrimental_chance       = static_cast<uint8> (RuleI(Spells, AI_PursueDetrimentalChance));
+	AISpellVar.idle_no_sp_recast_min           = static_cast<uint32>(RuleI(Spells, AI_IdleNoSpellMinRecast));
+	AISpellVar.idle_no_sp_recast_max           = static_cast<uint32>(RuleI(Spells, AI_IdleNoSpellMaxRecast));
+	AISpellVar.idle_beneficial_chance          = static_cast<uint8> (RuleI(Spells, AI_IdleBeneficialChance));
+}
+
+float NPC::GetRoamboxMaxX() const
+{
+	return roambox_max_x;
+}
+
+float NPC::GetRoamboxMaxY() const
+{
+	return roambox_max_y;
+}
+
+float NPC::GetRoamboxMinX() const
+{
+	return roambox_min_x;
+}
+
+float NPC::GetRoamboxMinY() const
+{
+	return roambox_min_y;
+}
+
+float NPC::GetRoamboxDistance() const
+{
+	return roambox_distance;
+}
+
+float NPC::GetRoamboxDestinationX() const
+{
+	return roambox_destination_x;
+}
+
+float NPC::GetRoamboxDestinationY() const
+{
+	return roambox_destination_y;
+}
+
+float NPC::GetRoamboxDestinationZ() const
+{
+	return roambox_destination_z;
+}
+
+uint32 NPC::GetRoamboxDelay() const
+{
+	return roambox_delay;
+}
+
+uint32 NPC::GetRoamboxMinDelay() const
+{
+	return roambox_min_delay;
 }
 
 NPC::~NPC()
@@ -485,7 +507,7 @@ void NPC::SetTarget(Mob* mob) {
 
 	if (owner) {
 		auto client = owner->CastToClient();
-		if (client->ClientVersionBit() & EQEmu::versions::bit_UFAndLater) {
+		if (client->ClientVersionBit() & EQEmu::versions::maskUFAndLater) {
 			auto app = new EQApplicationPacket(OP_PetHoTT, sizeof(ClientTarget_Struct));
 			auto ct = (ClientTarget_Struct *)app->pBuffer;
 			ct->new_target = mob ? mob->GetID() : 0;
@@ -582,10 +604,10 @@ void NPC::ClearItemList() {
 
 void NPC::QueryLoot(Client* to)
 {
-	to->Message(0, "Coin: %ip %ig %is %ic", platinum, gold, silver, copper);
+	to->Message(0, "| # Current Loot (%s) LootTableID: %i", GetName(), GetLoottableID());
 
-	int x = 0;
-	for (auto cur = itemlist.begin(); cur != itemlist.end(); ++cur, ++x) {
+	int item_count = 0;
+	for (auto cur  = itemlist.begin(); cur != itemlist.end(); ++cur, ++item_count) {
 		if (!(*cur)) {
 			Log(Logs::General, Logs::Error, "NPC::QueryLoot() - ItemList error, null item");
 			continue;
@@ -599,10 +621,18 @@ void NPC::QueryLoot(Client* to)
 		linker.SetLinkType(EQEmu::saylink::SayLinkLootItem);
 		linker.SetLootData(*cur);
 
-		to->Message(0, "%s, ID: %u, Level: (min: %u, max: %u)", linker.GenerateLink().c_str(), (*cur)->item_id, (*cur)->min_level, (*cur)->max_level);
+		to->Message(
+			0,
+			"| -- Item %i: %s ID: %u min_level: %u max_level: %u",
+			item_count,
+			linker.GenerateLink().c_str(),
+			(*cur)->item_id,
+			(*cur)->min_level,
+			(*cur)->max_level
+		);
 	}
 
-	to->Message(0, "%i items on %s.", x, GetName());
+	to->Message(0, "| %i Platinum %i Gold %i Silver %i Copper", platinum, gold, silver, copper);
 }
 
 void NPC::AddCash(uint16 in_copper, uint16 in_silver, uint16 in_gold, uint16 in_platinum) {
@@ -627,10 +657,11 @@ void NPC::AddCash(uint16 in_copper, uint16 in_silver, uint16 in_gold, uint16 in_
 		platinum = 0;
 }
 
-void NPC::AddCash() {
-	copper = zone->random.Int(1, 100);
-	silver = zone->random.Int(1, 50);
-	gold = zone->random.Int(1, 10);
+void NPC::AddCash()
+{
+	copper   = zone->random.Int(1, 100);
+	silver   = zone->random.Int(1, 50);
+	gold     = zone->random.Int(1, 10);
 	platinum = zone->random.Int(1, 5);
 }
 
@@ -773,9 +804,8 @@ bool NPC::Process()
 			DoGravityEffect();
 	}
 
-	if(reface_timer->Check() && !IsEngaged() && (m_GuardPoint.x == GetX() && m_GuardPoint.y == GetY() && m_GuardPoint.z == GetZ())) {
-		SetHeading(m_GuardPoint.w);
-		SendPosition();
+	if(reface_timer->Check() && !IsEngaged() && IsPositionEqualWithinCertainZ(m_Position, m_GuardPoint, 5.0f)) {
+		RotateTo(m_GuardPoint.w);
 		reface_timer->Disable();
 	}
 
@@ -933,7 +963,8 @@ bool NPC::DatabaseCastAccepted(int spell_id) {
 	return false;
 }
 
-bool NPC::SpawnZoneController(){
+bool NPC::SpawnZoneController()
+{
 
 	if (!RuleB(Zone, UseZoneController))
 		return false;
@@ -942,23 +973,23 @@ bool NPC::SpawnZoneController(){
 	memset(npc_type, 0, sizeof(NPCType));
 
 	strncpy(npc_type->name, "zone_controller", 60);
-	npc_type->cur_hp = 2000000000;
-	npc_type->max_hp = 2000000000;
-	npc_type->hp_regen = 100000000;
-	npc_type->race = 240;
-	npc_type->size = .1;
-	npc_type->gender = 2;
-	npc_type->class_ = 1;
-	npc_type->deity = 1;
-	npc_type->level = 200;
-	npc_type->npc_id = ZONE_CONTROLLER_NPC_ID;
-	npc_type->loottable_id = 0;
-	npc_type->texture = 3;
-	npc_type->runspeed = 0;
+	npc_type->current_hp           = 2000000000;
+	npc_type->max_hp           = 2000000000;
+	npc_type->hp_regen         = 100000000;
+	npc_type->race             = 240;
+	npc_type->size             = .1;
+	npc_type->gender           = 2;
+	npc_type->class_           = 1;
+	npc_type->deity            = 1;
+	npc_type->level            = 200;
+	npc_type->npc_id           = ZONE_CONTROLLER_NPC_ID;
+	npc_type->loottable_id     = 0;
+	npc_type->texture          = 3;
+	npc_type->runspeed         = 0;
 	npc_type->d_melee_texture1 = 0;
 	npc_type->d_melee_texture2 = 0;
-	npc_type->merchanttype = 0;
-	npc_type->bodytype = 11;
+	npc_type->merchanttype     = 0;
+	npc_type->bodytype         = 11;
 	npc_type->skip_global_loot = true;
 
 	if (RuleB(Zone, EnableZoneControllerGlobals)) {
@@ -966,9 +997,9 @@ bool NPC::SpawnZoneController(){
 	}
 
 	npc_type->prim_melee_type = 28;
-	npc_type->sec_melee_type = 28;
+	npc_type->sec_melee_type  = 28;
 
-	npc_type->findable = 0;
+	npc_type->findable  = 0;
 	npc_type->trackable = 0;
 
 	strcpy(npc_type->special_abilities, "12,1^13,1^14,1^15,1^16,1^17,1^19,1^22,1^24,1^25,1^28,1^31,1^35,1^39,1^42,1");
@@ -978,7 +1009,7 @@ bool NPC::SpawnZoneController(){
 	point.y = 1000;
 	point.z = 500;
 
-	auto npc = new NPC(npc_type, nullptr, point, FlyMode3);
+	auto npc = new NPC(npc_type, nullptr, point, GravityBehavior::Flying);
 	npc->GiveNPCTypeData(npc_type);
 
 	entity_list.AddNPC(npc);
@@ -993,7 +1024,41 @@ NPC * NPC::SpawnGridNodeNPC(std::string name, const glm::vec4 &position, uint32 
 	sprintf(npc_type->name, "%u_%u", grid_id, grid_number);
 	sprintf(npc_type->lastname, "Number: %u Grid: %u Pause: %u", grid_number, grid_id, pause);
 
-	npc_type->cur_hp           = 4000000;
+	npc_type->current_hp           = 4000000;
+	npc_type->max_hp           = 4000000;
+	npc_type->race             = 2254;
+	npc_type->gender           = 2;
+	npc_type->class_           = 9;
+	npc_type->deity            = 1;
+	npc_type->level            = 200;
+	npc_type->npc_id           = 0;
+	npc_type->loottable_id     = 0;
+	npc_type->texture          = 1;
+	npc_type->light            = 1;
+	npc_type->size             = 1;
+	npc_type->runspeed         = 0;
+	npc_type->merchanttype     = 1;
+	npc_type->bodytype         = 1;
+	npc_type->show_name        = true;
+	npc_type->findable         = true;
+
+	auto node_position = glm::vec4(position.x, position.y, position.z, position.w);
+	auto npc           = new NPC(npc_type, nullptr, node_position, GravityBehavior::Flying);
+	npc->GiveNPCTypeData(npc_type);
+
+	entity_list.AddNPC(npc, true, true);
+
+	return npc;
+}
+
+NPC * NPC::SpawnNodeNPC(std::string name, std::string last_name, const glm::vec4 &position) {
+	auto npc_type = new NPCType;
+	memset(npc_type, 0, sizeof(NPCType));
+
+	sprintf(npc_type->name, "%s", name.c_str());
+	sprintf(npc_type->lastname, "%s", last_name.c_str());
+
+	npc_type->current_hp       = 4000000;
 	npc_type->max_hp           = 4000000;
 	npc_type->race             = 2254;
 	npc_type->gender           = 2;
@@ -1005,23 +1070,17 @@ NPC * NPC::SpawnGridNodeNPC(std::string name, const glm::vec4 &position, uint32 
 	npc_type->texture          = 1;
 	npc_type->light            = 1;
 	npc_type->size             = 3;
-	npc_type->runspeed         = 0;
 	npc_type->d_melee_texture1 = 1;
 	npc_type->d_melee_texture2 = 1;
 	npc_type->merchanttype     = 1;
 	npc_type->bodytype         = 1;
 	npc_type->show_name        = true;
-	npc_type->STR              = 150;
-	npc_type->STA              = 150;
-	npc_type->DEX              = 150;
-	npc_type->AGI              = 150;
-	npc_type->INT              = 150;
-	npc_type->WIS              = 150;
-	npc_type->CHA              = 150;
 	npc_type->findable         = true;
+	npc_type->runspeed         = 1.25;
 
 	auto node_position = glm::vec4(position.x, position.y, position.z, position.w);
-	auto npc           = new NPC(npc_type, nullptr, node_position, FlyMode1);
+	auto npc           = new NPC(npc_type, nullptr, node_position, GravityBehavior::Flying);
+
 	npc->GiveNPCTypeData(npc_type);
 
 	entity_list.AddNPC(npc, true, true);
@@ -1036,116 +1095,45 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* 
 	else {
 		Seperator sep(spawncommand);
 		//Lets see if someone didn't fill out the whole #spawn function properly
-		if (!sep.IsNumber(1))
-			sprintf(sep.arg[1],"1");
-		if (!sep.IsNumber(2))
-			sprintf(sep.arg[2],"1");
-		if (!sep.IsNumber(3))
-			sprintf(sep.arg[3],"0");
-		if (atoi(sep.arg[4]) > 2100000000 || atoi(sep.arg[4]) <= 0)
-			sprintf(sep.arg[4]," ");
-		if (!strcmp(sep.arg[5],"-"))
-			sprintf(sep.arg[5]," ");
-		if (!sep.IsNumber(5))
-			sprintf(sep.arg[5]," ");
-		if (!sep.IsNumber(6))
-			sprintf(sep.arg[6],"1");
-		if (!sep.IsNumber(8))
-			sprintf(sep.arg[8],"0");
-		if (!sep.IsNumber(9))
+		if (!sep.IsNumber(1)) {
+			sprintf(sep.arg[1], "1");
+		}
+		if (!sep.IsNumber(2)) {
+			sprintf(sep.arg[2], "1");
+		}
+		if (!sep.IsNumber(3)) {
+			sprintf(sep.arg[3], "0");
+		}
+		if (atoi(sep.arg[4]) > 2100000000 || atoi(sep.arg[4]) <= 0) {
+			sprintf(sep.arg[4], " ");
+		}
+		if (!strcmp(sep.arg[5], "-")) {
+			sprintf(sep.arg[5], " ");
+		}
+		if (!sep.IsNumber(5)) {
+			sprintf(sep.arg[5], " ");
+		}
+		if (!sep.IsNumber(6)) {
+			sprintf(sep.arg[6], "1");
+		}
+		if (!sep.IsNumber(8)) {
+			sprintf(sep.arg[8], "0");
+		}
+		if (!sep.IsNumber(9)) {
 			sprintf(sep.arg[9], "0");
-		if (!sep.IsNumber(7))
-			sprintf(sep.arg[7],"0");
-		if (!strcmp(sep.arg[4],"-"))
-			sprintf(sep.arg[4]," ");
-		if (!sep.IsNumber(10))	// bodytype
+		}
+		if (!sep.IsNumber(7)) {
+			sprintf(sep.arg[7], "0");
+		}
+		if (!strcmp(sep.arg[4], "-")) {
+			sprintf(sep.arg[4], " ");
+		}
+		if (!sep.IsNumber(10)) {    // bodytype
 			sprintf(sep.arg[10], "0");
+		}
 		//Calc MaxHP if client neglected to enter it...
-		if (!sep.IsNumber(4)) {
-			//Stolen from Client::GetMaxHP...
-			uint8 multiplier = 0;
-			int tmplevel = atoi(sep.arg[2]);
-			switch(atoi(sep.arg[5]))
-			{
-			case WARRIOR:
-				if (tmplevel < 20)
-					multiplier = 22;
-				else if (tmplevel < 30)
-					multiplier = 23;
-				else if (tmplevel < 40)
-					multiplier = 25;
-				else if (tmplevel < 53)
-					multiplier = 27;
-				else if (tmplevel < 57)
-					multiplier = 28;
-				else
-					multiplier = 30;
-				break;
-
-			case DRUID:
-			case CLERIC:
-			case SHAMAN:
-				multiplier = 15;
-				break;
-
-			case PALADIN:
-			case SHADOWKNIGHT:
-				if (tmplevel < 35)
-					multiplier = 21;
-				else if (tmplevel < 45)
-					multiplier = 22;
-				else if (tmplevel < 51)
-					multiplier = 23;
-				else if (tmplevel < 56)
-					multiplier = 24;
-				else if (tmplevel < 60)
-					multiplier = 25;
-				else
-					multiplier = 26;
-				break;
-
-			case MONK:
-			case BARD:
-			case ROGUE:
-			//case BEASTLORD:
-				if (tmplevel < 51)
-					multiplier = 18;
-				else if (tmplevel < 58)
-					multiplier = 19;
-				else
-					multiplier = 20;
-				break;
-
-			case RANGER:
-				if (tmplevel < 58)
-					multiplier = 20;
-				else
-					multiplier = 21;
-				break;
-
-			case MAGICIAN:
-			case WIZARD:
-			case NECROMANCER:
-			case ENCHANTER:
-				multiplier = 12;
-				break;
-
-			default:
-				if (tmplevel < 35)
-					multiplier = 21;
-				else if (tmplevel < 45)
-					multiplier = 22;
-				else if (tmplevel < 51)
-					multiplier = 23;
-				else if (tmplevel < 56)
-					multiplier = 24;
-				else if (tmplevel < 60)
-					multiplier = 25;
-				else
-					multiplier = 26;
-				break;
-			}
-			sprintf(sep.arg[4],"%i",5+multiplier*atoi(sep.arg[2])+multiplier*atoi(sep.arg[2])*75/300);
+		if (sep.arg[4] && !sep.IsNumber(4)) {
+			sprintf(sep.arg[4], "0");
 		}
 
 		// Autoselect NPC Gender
@@ -1158,37 +1146,37 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* 
 		memset(npc_type, 0, sizeof(NPCType));
 
 		strncpy(npc_type->name, sep.arg[0], 60);
-		npc_type->cur_hp = atoi(sep.arg[4]);
-		npc_type->max_hp = atoi(sep.arg[4]);
-		npc_type->race = atoi(sep.arg[1]);
-		npc_type->gender = atoi(sep.arg[5]);
-		npc_type->class_ = atoi(sep.arg[6]);
-		npc_type->deity = 1;
-		npc_type->level = atoi(sep.arg[2]);
-		npc_type->npc_id = 0;
-		npc_type->loottable_id = 0;
-		npc_type->texture = atoi(sep.arg[3]);
-		npc_type->light = 0; // spawncommand needs update
-		npc_type->runspeed = 1.25;
+		npc_type->current_hp       = atoi(sep.arg[4]);
+		npc_type->max_hp           = atoi(sep.arg[4]);
+		npc_type->race             = atoi(sep.arg[1]);
+		npc_type->gender           = atoi(sep.arg[5]);
+		npc_type->class_           = atoi(sep.arg[6]);
+		npc_type->deity            = 1;
+		npc_type->level            = atoi(sep.arg[2]);
+		npc_type->npc_id           = 0;
+		npc_type->loottable_id     = 0;
+		npc_type->texture          = atoi(sep.arg[3]);
+		npc_type->light            = 0; // spawncommand needs update
+		npc_type->runspeed         = 1.25;
 		npc_type->d_melee_texture1 = atoi(sep.arg[7]);
 		npc_type->d_melee_texture2 = atoi(sep.arg[8]);
-		npc_type->merchanttype = atoi(sep.arg[9]);
-		npc_type->bodytype = atoi(sep.arg[10]);
+		npc_type->merchanttype     = atoi(sep.arg[9]);
+		npc_type->bodytype         = atoi(sep.arg[10]);
 
-		npc_type->STR = 150;
-		npc_type->STA = 150;
-		npc_type->DEX = 150;
-		npc_type->AGI = 150;
-		npc_type->INT = 150;
-		npc_type->WIS = 150;
-		npc_type->CHA = 150;
+		npc_type->STR = 0;
+		npc_type->STA = 0;
+		npc_type->DEX = 0;
+		npc_type->AGI = 0;
+		npc_type->INT = 0;
+		npc_type->WIS = 0;
+		npc_type->CHA = 0;
 
 		npc_type->attack_delay = 3000;
 
 		npc_type->prim_melee_type = 28;
 		npc_type->sec_melee_type = 28;
 
-		auto npc = new NPC(npc_type, nullptr, position, FlyMode3);
+		auto npc = new NPC(npc_type, nullptr, position, GravityBehavior::Water);
 		npc->GiveNPCTypeData(npc_type);
 
 		entity_list.AddNPC(npc);
@@ -1400,7 +1388,7 @@ uint32 ZoneDatabase::DeleteSpawnRemoveFromNPCTypeTable(const char *zone, uint32 
 	uint32 spawngroupID = 0;
 
 	std::string query = StringFormat("SELECT id, spawngroupID FROM spawn2 WHERE zone = '%s' "
-					 "AND version = %u AND spawngroupID = %i",
+					 "AND (version = %u OR version = -1) AND spawngroupID = %i",
 					 zone, zone_version, spawn->GetSp2());
 	auto results = QueryDatabase(query);
 	if (!results.Success())
@@ -1511,38 +1499,49 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 
 int32 NPC::GetEquipmentMaterial(uint8 material_slot) const
 {
-	if (material_slot >= EQEmu::textures::materialCount)
+	int32 texture_profile_material = GetTextureProfileMaterial(material_slot);
+
+	Log(Logs::Detail, Logs::MobAppearance, "NPC::GetEquipmentMaterial [%s] material_slot: %u",
+		this->clean_name,
+		material_slot
+	);
+
+	if (texture_profile_material > 0) {
+		return texture_profile_material;
+	}
+
+	if (material_slot >= EQEmu::textures::materialCount) {
 		return 0;
+	}
 
 	int16 invslot = EQEmu::InventoryProfile::CalcSlotFromMaterial(material_slot);
-	if (invslot == INVALID_INDEX)
+	if (invslot == INVALID_INDEX) {
 		return 0;
+	}
 
-	if (equipment[invslot] == 0)
-	{
-		switch(material_slot)
-		{
-		case EQEmu::textures::armorHead:
-			return helmtexture;
-		case EQEmu::textures::armorChest:
-			return texture;
-		case EQEmu::textures::armorArms:
-			return armtexture;
-		case EQEmu::textures::armorWrist:
-			return bracertexture;
-		case EQEmu::textures::armorHands:
-			return handtexture;
-		case EQEmu::textures::armorLegs:
-			return legtexture;
-		case EQEmu::textures::armorFeet:
-			return feettexture;
-		case EQEmu::textures::weaponPrimary:
-			return d_melee_texture1;
-		case EQEmu::textures::weaponSecondary:
-			return d_melee_texture2;
-		default:
-			//they have nothing in the slot, and its not a special slot... they get nothing.
-			return(0);
+	if (equipment[invslot] == 0) {
+		switch (material_slot) {
+			case EQEmu::textures::armorHead:
+				return helmtexture;
+			case EQEmu::textures::armorChest:
+				return texture;
+			case EQEmu::textures::armorArms:
+				return armtexture;
+			case EQEmu::textures::armorWrist:
+				return bracertexture;
+			case EQEmu::textures::armorHands:
+				return handtexture;
+			case EQEmu::textures::armorLegs:
+				return legtexture;
+			case EQEmu::textures::armorFeet:
+				return feettexture;
+			case EQEmu::textures::weaponPrimary:
+				return d_melee_texture1;
+			case EQEmu::textures::weaponSecondary:
+				return d_melee_texture2;
+			default:
+				//they have nothing in the slot, and its not a special slot... they get nothing.
+				return (0);
 		}
 	}
 
@@ -2138,77 +2137,218 @@ void NPC::SetLevel(uint8 in_level, bool command)
 	SendAppearancePacket(AT_WhoLevel, in_level);
 }
 
-void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
+void NPC::ModifyNPCStat(const char *identifier, const char *new_value)
 {
-	std::string id = identifier;
-	std::string val = newValue;
-	for(int i = 0; i < id.length(); ++i) {
-		id[i] = std::tolower(id[i]);
-	}
+	std::string id  = str_tolower(identifier);
+	std::string val = new_value;
 
-	if(id == "ac") { AC = atoi(val.c_str()); CalcAC(); return; }
-	else if(id == "str") { STR = atoi(val.c_str()); return; }
-	else if(id == "sta") { STA = atoi(val.c_str()); return; }
-	else if(id == "agi") { AGI = atoi(val.c_str()); CalcAC(); return; }
-	else if(id == "dex") { DEX = atoi(val.c_str()); return; }
-	else if(id == "wis") { WIS = atoi(val.c_str()); CalcMaxMana(); return; }
-	else if(id == "int" || id == "_int") { INT = atoi(val.c_str()); CalcMaxMana(); return; }
-	else if(id == "cha") { CHA = atoi(val.c_str()); return; }
-	else if(id == "max_hp") { base_hp = atoi(val.c_str()); CalcMaxHP(); if (cur_hp > max_hp) { cur_hp = max_hp; } return; }
-	else if(id == "max_mana") { npc_mana = atoi(val.c_str()); CalcMaxMana(); if (current_mana > max_mana){ current_mana = max_mana; } return; }
-	else if(id == "mr") { MR = atoi(val.c_str()); return; }
-	else if(id == "fr") { FR = atoi(val.c_str()); return; }
-	else if(id == "cr") { CR = atoi(val.c_str()); return; }
-	else if(id == "pr") { PR = atoi(val.c_str()); return; }
-	else if(id == "dr") { DR = atoi(val.c_str()); return; }
-	else if(id == "phr") { PhR = atoi(val.c_str()); return; }
-	else if(id == "runspeed") {
-		runspeed = (float)atof(val.c_str());
-		base_runspeed = (int)((float)runspeed * 40.0f);
+	std::string variable_key = StringFormat("modify_stat_%s", id.c_str());
+	SetEntityVariable(variable_key.c_str(), new_value);
+
+	Log(Logs::Detail, Logs::NPCScaling, "NPC::ModifyNPCStat key: %s val: %s ", variable_key.c_str(), new_value);
+
+	if (id == "ac") {
+		AC = atoi(val.c_str());
+		CalcAC();
+		return;
+	}
+	else if (id == "str") {
+		STR = atoi(val.c_str());
+		return;
+	}
+	else if (id == "sta") {
+		STA = atoi(val.c_str());
+		return;
+	}
+	else if (id == "agi") {
+		AGI = atoi(val.c_str());
+		CalcAC();
+		return;
+	}
+	else if (id == "dex") {
+		DEX = atoi(val.c_str());
+		return;
+	}
+	else if (id == "wis") {
+		WIS = atoi(val.c_str());
+		CalcMaxMana();
+		return;
+	}
+	else if (id == "int" || id == "_int") {
+		INT = atoi(val.c_str());
+		CalcMaxMana();
+		return;
+	}
+	else if (id == "cha") {
+		CHA = atoi(val.c_str());
+		return;
+	}
+	else if (id == "max_hp") {
+		base_hp = atoi(val.c_str());
+
+		CalcMaxHP();
+		if (current_hp > max_hp) {
+			current_hp = max_hp;
+		}
+
+		return;
+	}
+	else if (id == "max_mana") {
+		npc_mana = atoi(val.c_str());
+		CalcMaxMana();
+		if (current_mana > max_mana) {
+			current_mana = max_mana;
+		}
+		return;
+	}
+	else if (id == "mr") {
+		MR = atoi(val.c_str());
+		return;
+	}
+	else if (id == "fr") {
+		FR = atoi(val.c_str());
+		return;
+	}
+	else if (id == "cr") {
+		CR = atoi(val.c_str());
+		return;
+	}
+	else if (id == "pr") {
+		PR = atoi(val.c_str());
+		return;
+	}
+	else if (id == "dr") {
+		DR = atoi(val.c_str());
+		return;
+	}
+	else if (id == "phr") {
+		PhR = atoi(val.c_str());
+		return;
+	}
+	else if (id == "runspeed") {
+		runspeed       = (float) atof(val.c_str());
+		base_runspeed  = (int) ((float) runspeed * 40.0f);
 		base_walkspeed = base_runspeed * 100 / 265;
-		walkspeed = ((float)base_walkspeed) * 0.025f;
+		walkspeed      = ((float) base_walkspeed) * 0.025f;
 		base_fearspeed = base_runspeed * 100 / 127;
-		fearspeed = ((float)base_fearspeed) * 0.025f;
-		CalcBonuses(); return;
-	}
-	else if(id == "special_attacks") { NPCSpecialAttacks(val.c_str(), 0, 1); return; }
-	else if(id == "special_abilities") { ProcessSpecialAbilities(val.c_str()); return; }
-	else if(id == "attack_speed") { attack_speed = (float)atof(val.c_str()); CalcBonuses(); return; }
-	else if(id == "attack_delay") { /* TODO: fix DB */attack_delay = atoi(val.c_str()) * 100; CalcBonuses(); return; }
-	else if(id == "atk") { ATK = atoi(val.c_str()); return; }
-	else if(id == "accuracy") { accuracy_rating = atoi(val.c_str()); return; }
-	else if(id == "avoidance") { avoidance_rating = atoi(val.c_str()); return; }
-	else if(id == "trackable") { trackable = atoi(val.c_str()); return; }
-	else if(id == "min_hit") {
-		min_dmg = atoi(val.c_str());
-		// TODO: fix DB
-		base_damage = round((max_dmg - min_dmg) / 1.9);
-		min_damage = min_dmg - round(base_damage / 10.0);
+		fearspeed      = ((float) base_fearspeed) * 0.025f;
+		CalcBonuses();
 		return;
 	}
-	else if(id == "max_hit") {
-		max_dmg = atoi(val.c_str());
-		// TODO: fix DB
-		base_damage = round((max_dmg - min_dmg) / 1.9);
-		min_damage = min_dmg - round(base_damage / 10.0);
+	else if (id == "special_attacks") {
+		NPCSpecialAttacks(val.c_str(), 0, 1);
 		return;
 	}
-	else if(id == "attack_count") { attack_count = atoi(val.c_str()); return; }
-	else if(id == "see_invis") { see_invis = atoi(val.c_str()); return; }
-	else if(id == "see_invis_undead") { see_invis_undead = atoi(val.c_str()); return; }
-	else if(id == "see_hide") { see_hide = atoi(val.c_str()); return; }
-	else if(id == "see_improved_hide") { see_improved_hide = atoi(val.c_str()); return; }
-	else if(id == "hp_regen") { hp_regen = atoi(val.c_str()); return; }
-	else if(id == "mana_regen") { mana_regen = atoi(val.c_str()); return; }
-	else if(id == "level") { SetLevel(atoi(val.c_str())); return; }
-	else if(id == "aggro") { pAggroRange = atof(val.c_str()); return; }
-	else if(id == "assist") { pAssistRange = atof(val.c_str()); return; }
-	else if(id == "slow_mitigation") { slow_mitigation = atoi(val.c_str()); return; }
-	else if(id == "loottable_id") { loottable_id = atof(val.c_str()); return; }
-	else if(id == "healscale") { healscale = atof(val.c_str()); return; }
-	else if(id == "spellscale") { spellscale = atof(val.c_str()); return; }
-	else if(id == "npc_spells_id") { AI_AddNPCSpells(atoi(val.c_str())); return; }
-	else if(id == "npc_spells_effects_id") { AI_AddNPCSpellsEffects(atoi(val.c_str())); CalcBonuses(); return; }
+	else if (id == "special_abilities") {
+		ProcessSpecialAbilities(val.c_str());
+		return;
+	}
+	else if (id == "attack_speed") {
+		attack_speed = (float) atof(val.c_str());
+		CalcBonuses();
+		return;
+	}
+	else if (id == "attack_delay") {
+		/* TODO: fix DB */
+		attack_delay = atoi(val.c_str()) * 100;
+		CalcBonuses();
+		return;
+	}
+	else if (id == "atk") {
+		ATK = atoi(val.c_str());
+		return;
+	}
+	else if (id == "accuracy") {
+		accuracy_rating = atoi(val.c_str());
+		return;
+	}
+	else if (id == "avoidance") {
+		avoidance_rating = atoi(val.c_str());
+		return;
+	}
+	else if (id == "trackable") {
+		trackable = atoi(val.c_str());
+		return;
+	}
+	else if (id == "min_hit") {
+		min_dmg     = atoi(val.c_str());
+		// TODO: fix DB
+		base_damage = round((max_dmg - min_dmg) / 1.9);
+		min_damage  = min_dmg - round(base_damage / 10.0);
+		return;
+	}
+	else if (id == "max_hit") {
+		max_dmg     = atoi(val.c_str());
+		// TODO: fix DB
+		base_damage = round((max_dmg - min_dmg) / 1.9);
+		min_damage  = min_dmg - round(base_damage / 10.0);
+		return;
+	}
+	else if (id == "attack_count") {
+		attack_count = atoi(val.c_str());
+		return;
+	}
+	else if (id == "see_invis") {
+		see_invis = atoi(val.c_str());
+		return;
+	}
+	else if (id == "see_invis_undead") {
+		see_invis_undead = atoi(val.c_str());
+		return;
+	}
+	else if (id == "see_hide") {
+		see_hide = atoi(val.c_str());
+		return;
+	}
+	else if (id == "see_improved_hide") {
+		see_improved_hide = atoi(val.c_str());
+		return;
+	}
+	else if (id == "hp_regen") {
+		hp_regen = atoi(val.c_str());
+		return;
+	}
+	else if (id == "mana_regen") {
+		mana_regen = atoi(val.c_str());
+		return;
+	}
+	else if (id == "level") {
+		SetLevel(atoi(val.c_str()));
+		return;
+	}
+	else if (id == "aggro") {
+		pAggroRange = atof(val.c_str());
+		return;
+	}
+	else if (id == "assist") {
+		pAssistRange = atof(val.c_str());
+		return;
+	}
+	else if (id == "slow_mitigation") {
+		slow_mitigation = atoi(val.c_str());
+		return;
+	}
+	else if (id == "loottable_id") {
+		loottable_id = atof(val.c_str());
+		return;
+	}
+	else if (id == "healscale") {
+		healscale = atof(val.c_str());
+		return;
+	}
+	else if (id == "spellscale") {
+		spellscale = atof(val.c_str());
+		return;
+	}
+	else if (id == "npc_spells_id") {
+		AI_AddNPCSpells(atoi(val.c_str()));
+		return;
+	}
+	else if (id == "npc_spells_effects_id") {
+		AI_AddNPCSpellsEffects(atoi(val.c_str()));
+		CalcBonuses();
+		return;
+	}
 }
 
 void NPC::LevelScale() {
@@ -2229,14 +2369,14 @@ void NPC::LevelScale() {
 				base_hp += (random_level - level) * 100;
 			}
 
-			cur_hp = max_hp;
+			current_hp = max_hp;
 			max_dmg += (random_level - level) * 2;
 		} else {
 			uint8 scale_adjust = 1;
 
 			base_hp += (int)(base_hp * scaling);
 			max_hp += (int)(max_hp * scaling);
-			cur_hp = max_hp;
+			current_hp = max_hp;
 
 			if (max_dmg) {
 				max_dmg += (int)(max_dmg * scaling / scale_adjust);
@@ -2277,7 +2417,7 @@ void NPC::LevelScale() {
 		ATK += (int)(ATK * scaling);
 		base_hp += (int)(base_hp * scaling);
 		max_hp += (int)(max_hp * scaling);
-		cur_hp = max_hp;
+		current_hp = max_hp;
 		STR += (int)(STR * scaling / scale_adjust);
 		STA += (int)(STA * scaling / scale_adjust);
 		AGI += (int)(AGI * scaling / scale_adjust);
@@ -2308,120 +2448,9 @@ void NPC::LevelScale() {
 	return;
 }
 
-void NPC::CalcNPCResists() {
-
-	if (!MR)
-		MR = (GetLevel() * 11)/10;
-	if (!CR)
-		CR = (GetLevel() * 11)/10;
-	if (!DR)
-		DR = (GetLevel() * 11)/10;
-	if (!FR)
-		FR = (GetLevel() * 11)/10;
-	if (!PR)
-		PR = (GetLevel() * 11)/10;
-	if (!Corrup)
-		Corrup = 15;
-	if (!PhR)
-		PhR = 10;
-	return;
-}
-
-void NPC::CalcNPCRegen() {
-
-	// Fix for lazy db-updaters (regen values left at 0)
-	if (GetCasterClass() != 'N' && mana_regen == 0)
-		mana_regen = (GetLevel() / 10) + 4;
-	else if(mana_regen < 0)
-		mana_regen = 0;
-	else
-		mana_regen = mana_regen;
-
-	// Gives low end monsters no regen if set to 0 in database. Should make low end monsters killable
-	// Might want to lower this to /5 rather than 10.
-	if(hp_regen == 0)
-	{
-		if(GetLevel() <= 6)
-			hp_regen = 1;
-		else if(GetLevel() > 6 && GetLevel() <= 10)
-			hp_regen = 2;
-		else if(GetLevel() > 10 && GetLevel() <= 15)
-			hp_regen = 3;
-		else if(GetLevel() > 15 && GetLevel() <= 20)
-			hp_regen = 5;
-		else if(GetLevel() > 20 && GetLevel() <= 30)
-			hp_regen = 7;
-		else if(GetLevel() > 30 && GetLevel() <= 35)
-			hp_regen = 9;
-		else if(GetLevel() > 35 && GetLevel() <= 40)
-			hp_regen = 12;
-		else if(GetLevel() > 40 && GetLevel() <= 45)
-			hp_regen = 18;
-		else if(GetLevel() > 45 && GetLevel() <= 50)
-			hp_regen = 21;
-		else
-			hp_regen = 30;
-	} else if(hp_regen < 0) {
-		hp_regen = 0;
-	} else
-		hp_regen = hp_regen;
-
-	return;
-}
-
-void NPC::CalcNPCDamage() {
-
-	int AC_adjust=12;
-
-	if (GetLevel() >= 66) {
-		if (min_dmg==0)
-			min_dmg = 220;
-		if (max_dmg==0)
-			max_dmg = ((((99000)*(GetLevel()-64))/400)*AC_adjust/10);
-	}
-	else if (GetLevel() >= 60 && GetLevel() <= 65){
-		if(min_dmg==0)
-			min_dmg = (GetLevel()+(GetLevel()/3));
-		if(max_dmg==0)
-			max_dmg = (GetLevel()*3)*AC_adjust/10;
-	}
-	else if (GetLevel() >= 51 && GetLevel() <= 59){
-		if(min_dmg==0)
-			min_dmg = (GetLevel()+(GetLevel()/3));
-		if(max_dmg==0)
-			max_dmg = (GetLevel()*3)*AC_adjust/10;
-	}
-	else if (GetLevel() >= 40 && GetLevel() <= 50) {
-		if (min_dmg==0)
-			min_dmg = GetLevel();
-		if(max_dmg==0)
-			max_dmg = (GetLevel()*3)*AC_adjust/10;
-	}
-	else if (GetLevel() >= 28 && GetLevel() <= 39) {
-		if (min_dmg==0)
-			min_dmg = GetLevel() / 2;
-		if (max_dmg==0)
-			max_dmg = ((GetLevel()*2)+2)*AC_adjust/10;
-	}
-	else if (GetLevel() <= 27) {
-		if (min_dmg==0)
-			min_dmg=1;
-		if (max_dmg==0)
-			max_dmg = (GetLevel()*2)*AC_adjust/10;
-	}
-
-	int32 clfact = GetClassLevelFactor();
-	min_dmg = (min_dmg * clfact) / 220;
-	max_dmg = (max_dmg * clfact) / 220;
-
-	return;
-}
-
-
 uint32 NPC::GetSpawnPointID() const
 {
-	if(respawn2)
-	{
+	if (respawn2) {
 		return respawn2->GetID();
 	}
 	return 0;
@@ -2438,7 +2467,6 @@ void NPC::NPCSlotTexture(uint8 slot, uint16 texture)
 	else if (slot < 6) {
 		// Reserved for texturing individual armor slots
 	}
-	return;
 }
 
 uint32 NPC::GetSwarmOwner()
@@ -2468,14 +2496,15 @@ void NPC::SetSwarmTarget(int target_id)
 	return;
 }
 
-int32 NPC::CalcMaxMana() {
-	if(npc_mana == 0) {
+int32 NPC::CalcMaxMana()
+{
+	if (npc_mana == 0) {
 		switch (GetCasterClass()) {
 			case 'I':
-				max_mana = (((GetINT()/2)+1) * GetLevel()) + spellbonuses.Mana + itembonuses.Mana;
+				max_mana = (((GetINT() / 2) + 1) * GetLevel()) + spellbonuses.Mana + itembonuses.Mana;
 				break;
 			case 'W':
-				max_mana = (((GetWIS()/2)+1) * GetLevel()) + spellbonuses.Mana + itembonuses.Mana;
+				max_mana = (((GetWIS() / 2) + 1) * GetLevel()) + spellbonuses.Mana + itembonuses.Mana;
 				break;
 			case 'N':
 			default:
@@ -2487,7 +2516,8 @@ int32 NPC::CalcMaxMana() {
 		}
 
 		return max_mana;
-	} else {
+	}
+	else {
 		switch (GetCasterClass()) {
 			case 'I':
 				max_mana = npc_mana + spellbonuses.Mana + itembonuses.Mana;
@@ -2829,4 +2859,53 @@ void NPC::ModifyStatsOnCharm(bool bRemoved)
 	// the rest of the stats aren't cached, so lets just do these two instead of full CalcBonuses()
 	SetAttackTimer();
 	CalcAC();
+}
+
+uint16 NPC::GetMeleeTexture1() const
+{
+	return d_melee_texture1;
+}
+
+uint16 NPC::GetMeleeTexture2() const
+{
+	return d_melee_texture2;
+}
+
+float NPC::GetProximityMinX()
+{
+	return proximity->min_x;
+}
+
+float NPC::GetProximityMaxX()
+{
+	return proximity->max_x;
+}
+
+float NPC::GetProximityMinY()
+{
+	return proximity->min_y;
+}
+
+float NPC::GetProximityMaxY()
+{
+	return proximity->max_y;
+}
+
+float NPC::GetProximityMinZ()
+{
+	return proximity->min_z;
+}
+
+float NPC::GetProximityMaxZ()
+{
+	return proximity->max_z;
+}
+
+bool NPC::IsProximitySet()
+{
+	if (proximity && proximity->proximity_set) {
+		return proximity->proximity_set;
+	}
+
+	return false;
 }

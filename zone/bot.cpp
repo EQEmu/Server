@@ -29,7 +29,9 @@
 extern volatile bool is_zone_loaded;
 
 // This constructor is used during the bot create command
-Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm::vec4(), 0, false), rest_timer(1) {
+Bot::Bot(NPCType *npcTypeData, Client* botOwner) : NPC(npcTypeData, nullptr, glm::vec4(), Ground, false), rest_timer(1), ping_timer(1) {
+	GiveNPCTypeData(npcTypeData);
+	
 	if(botOwner) {
 		this->SetBotOwner(botOwner);
 		this->_botOwnerCharacterID = botOwner->CharacterID();
@@ -39,29 +41,30 @@ Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm
 	}
 
 	m_inv.SetInventoryVersion(EQEmu::versions::MobVersion::Bot);
+	m_inv.SetGMInventory(false); // bot expansions are not currently implemented (defaults to static)
 
 	_guildRank = 0;
 	_guildId = 0;
 	_lastTotalPlayTime = 0;
 	_startTotalPlayTime = time(&_startTotalPlayTime);
 	_lastZoneId = 0;
-	_baseMR = npcTypeData.MR;
-	_baseCR = npcTypeData.CR;
-	_baseDR = npcTypeData.DR;
-	_baseFR = npcTypeData.FR;
-	_basePR = npcTypeData.PR;
-	_baseCorrup = npcTypeData.Corrup;
-	_baseAC = npcTypeData.AC;
-	_baseSTR = npcTypeData.STR;
-	_baseSTA = npcTypeData.STA;
-	_baseDEX = npcTypeData.DEX;
-	_baseAGI = npcTypeData.AGI;
-	_baseINT = npcTypeData.INT;
-	_baseWIS = npcTypeData.WIS;
-	_baseCHA = npcTypeData.CHA;
-	_baseATK = npcTypeData.ATK;
-	_baseRace = npcTypeData.race;
-	_baseGender = npcTypeData.gender;
+	_baseMR = npcTypeData->MR;
+	_baseCR = npcTypeData->CR;
+	_baseDR = npcTypeData->DR;
+	_baseFR = npcTypeData->FR;
+	_basePR = npcTypeData->PR;
+	_baseCorrup = npcTypeData->Corrup;
+	_baseAC = npcTypeData->AC;
+	_baseSTR = npcTypeData->STR;
+	_baseSTA = npcTypeData->STA;
+	_baseDEX = npcTypeData->DEX;
+	_baseAGI = npcTypeData->AGI;
+	_baseINT = npcTypeData->INT;
+	_baseWIS = npcTypeData->WIS;
+	_baseCHA = npcTypeData->CHA;
+	_baseATK = npcTypeData->ATK;
+	_baseRace = npcTypeData->race;
+	_baseGender = npcTypeData->gender;
 	RestRegenHP = 0;
 	RestRegenMana = 0;
 	RestRegenEndurance = 0;
@@ -79,6 +82,7 @@ Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm
 	SetShowHelm(true);
 	SetPauseAI(false);
 	rest_timer.Disable();
+	ping_timer.Disable();
 	SetFollowDistance(BOT_FOLLOW_DISTANCE_DEFAULT);
 	if (IsCasterClass(GetClass()))
 		SetStopMeleeLevel((uint8)RuleI(Bots, CasterStopMeleeLevel));
@@ -89,7 +93,7 @@ Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm
 	GenerateAppearance();
 	GenerateBaseStats();
 	// Calculate HitPoints Last As It Uses Base Stats
-	cur_hp = GenerateBaseHitPoints();
+	current_hp = GenerateBaseHitPoints();
 	current_mana = GenerateBaseManaPoints();
 	cur_end = CalcBaseEndurance();
 	hp_regen = CalcHPRegen();
@@ -103,8 +107,11 @@ Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm
 }
 
 // This constructor is used when the bot is loaded out of the database
-Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double totalPlayTime, uint32 lastZoneId, NPCType npcTypeData) : NPC(&npcTypeData, nullptr, glm::vec4(), 0, false), rest_timer(1)
+Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double totalPlayTime, uint32 lastZoneId, NPCType *npcTypeData) 
+	: NPC(npcTypeData, nullptr, glm::vec4(), Ground, false), rest_timer(1), ping_timer(1)
 {
+	GiveNPCTypeData(npcTypeData);
+	
 	this->_botOwnerCharacterID = botOwnerCharacterID;
 	if(this->_botOwnerCharacterID > 0)
 		this->SetBotOwner(entity_list.GetClientByCharID(this->_botOwnerCharacterID));
@@ -112,6 +119,7 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 	auto bot_owner = GetBotOwner();
 
 	m_inv.SetInventoryVersion(EQEmu::versions::MobVersion::Bot);
+	m_inv.SetGMInventory(false); // bot expansions are not currently implemented (defaults to static)
 
 	_guildRank = 0;
 	_guildId = 0;
@@ -119,25 +127,25 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 	_startTotalPlayTime = time(&_startTotalPlayTime);
 	_lastZoneId = lastZoneId;
 	berserk = false;
-	_baseMR = npcTypeData.MR;
-	_baseCR = npcTypeData.CR;
-	_baseDR = npcTypeData.DR;
-	_baseFR = npcTypeData.FR;
-	_basePR = npcTypeData.PR;
-	_baseCorrup = npcTypeData.Corrup;
-	_baseAC = npcTypeData.AC;
-	_baseSTR = npcTypeData.STR;
-	_baseSTA = npcTypeData.STA;
-	_baseDEX = npcTypeData.DEX;
-	_baseAGI = npcTypeData.AGI;
-	_baseINT = npcTypeData.INT;
-	_baseWIS = npcTypeData.WIS;
-	_baseCHA = npcTypeData.CHA;
-	_baseATK = npcTypeData.ATK;
-	_baseRace = npcTypeData.race;
-	_baseGender = npcTypeData.gender;
-	cur_hp = npcTypeData.cur_hp;
-	current_mana = npcTypeData.Mana;
+	_baseMR = npcTypeData->MR;
+	_baseCR = npcTypeData->CR;
+	_baseDR = npcTypeData->DR;
+	_baseFR = npcTypeData->FR;
+	_basePR = npcTypeData->PR;
+	_baseCorrup = npcTypeData->Corrup;
+	_baseAC = npcTypeData->AC;
+	_baseSTR = npcTypeData->STR;
+	_baseSTA = npcTypeData->STA;
+	_baseDEX = npcTypeData->DEX;
+	_baseAGI = npcTypeData->AGI;
+	_baseINT = npcTypeData->INT;
+	_baseWIS = npcTypeData->WIS;
+	_baseCHA = npcTypeData->CHA;
+	_baseATK = npcTypeData->ATK;
+	_baseRace = npcTypeData->race;
+	_baseGender = npcTypeData->gender;
+	current_hp = npcTypeData->current_hp;
+	current_mana = npcTypeData->Mana;
 	RestRegenHP = 0;
 	RestRegenMana = 0;
 	RestRegenEndurance = 0;
@@ -155,10 +163,11 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 	if (!stance_flag && bot_owner)
 		bot_owner->Message(13, "Could not locate stance for '%s'", GetCleanName());
 
-	SetTaunting((GetClass() == WARRIOR || GetClass() == PALADIN || GetClass() == SHADOWKNIGHT) && (GetBotStance() == BotStanceAggressive));
+	SetTaunting((GetClass() == WARRIOR || GetClass() == PALADIN || GetClass() == SHADOWKNIGHT) && (GetBotStance() == EQEmu::constants::stanceAggressive));
 	SetPauseAI(false);
 
 	rest_timer.Disable();
+	ping_timer.Disable();
 	SetFollowDistance(BOT_FOLLOW_DISTANCE_DEFAULT);
 	if (IsCasterClass(GetClass()))
 		SetStopMeleeLevel((uint8)RuleI(Bots, CasterStopMeleeLevel));
@@ -208,10 +217,10 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 	hp_regen = CalcHPRegen();
 	mana_regen = CalcManaRegen();
 	end_regen = CalcEnduranceRegen();
-	if(cur_hp > max_hp)
-		cur_hp = max_hp;
+	if(current_hp > max_hp)
+		current_hp = max_hp;
 
-	if(cur_hp <= 0) {
+	if(current_hp <= 0) {
 		SetHP(max_hp/5);
 		SetMana(0);
 		BuffFadeAll();
@@ -284,8 +293,7 @@ void Bot::ChangeBotArcherWeapons(bool isArcher) {
 void Bot::Sit() {
 	if(IsMoving()) {
 		moved = false;
-		SetCurrentSpeed(0);
-		tar_ndx = 0;
+		StopNavigation();
 	}
 
 	SetAppearance(eaSitting);
@@ -311,112 +319,252 @@ bool Bot::IsStanding() {
 	return result;
 }
 
-NPCType Bot::FillNPCTypeStruct(uint32 botSpellsID, std::string botName, std::string botLastName, uint8 botLevel, uint16 botRace, uint8 botClass, uint8 gender, float size, uint32 face, uint32 hairStyle, uint32 hairColor, uint32 eyeColor, uint32 eyeColor2, uint32 beardColor, uint32 beard, uint32 drakkinHeritage, uint32 drakkinTattoo, uint32 drakkinDetails, int32 hp, int32 mana, int32 mr, int32 cr, int32 dr, int32 fr, int32 pr, int32 corrup, int32 ac, uint32 str, uint32 sta, uint32 dex, uint32 agi, uint32 _int, uint32 wis, uint32 cha, uint32 attack) {
-	NPCType BotNPCType;
-	int CopyLength = 0;
-	CopyLength = botName.copy(BotNPCType.name, 63);
-	BotNPCType.name[CopyLength] = '\0';
-	CopyLength = 0;
-	CopyLength = botLastName.copy(BotNPCType.lastname, 69);
-	BotNPCType.lastname[CopyLength] = '\0';
-	CopyLength = 0;
-	BotNPCType.npc_spells_id = botSpellsID;
-	BotNPCType.level = botLevel;
-	BotNPCType.race = botRace;
-	BotNPCType.class_ = botClass;
-	BotNPCType.gender = gender;
-	BotNPCType.size = size;
-	BotNPCType.luclinface = face;
-	BotNPCType.hairstyle = hairStyle;
-	BotNPCType.haircolor = hairColor;
-	BotNPCType.eyecolor1 = eyeColor;
-	BotNPCType.eyecolor2 = eyeColor2;
-	BotNPCType.beardcolor = beardColor;
-	BotNPCType.beard = beard;
-	BotNPCType.drakkin_heritage = drakkinHeritage;
-	BotNPCType.drakkin_tattoo = drakkinTattoo;
-	BotNPCType.drakkin_details = drakkinDetails;
-	BotNPCType.cur_hp = hp;
-	BotNPCType.Mana = mana;
-	BotNPCType.MR = mr;
-	BotNPCType.CR = cr;
-	BotNPCType.DR = dr;
-	BotNPCType.FR = fr;
-	BotNPCType.PR = pr;
-	BotNPCType.Corrup = corrup;
-	BotNPCType.AC = ac;
-	BotNPCType.STR = str;
-	BotNPCType.STA = sta;
-	BotNPCType.DEX = dex;
-	BotNPCType.AGI = agi;
-	BotNPCType.INT = _int;
-	BotNPCType.WIS = wis;
-	BotNPCType.CHA = cha;
-	BotNPCType.ATK = attack;
-	BotNPCType.npc_id = 0;
-	BotNPCType.texture = 0;
-	BotNPCType.d_melee_texture1 = 0;
-	BotNPCType.d_melee_texture2 = 0;
-	BotNPCType.qglobal = false;
-	BotNPCType.attack_speed = 0;
-	BotNPCType.runspeed = 0.7f;
-	BotNPCType.bodytype = 1;
-	BotNPCType.findable = 0;
-	BotNPCType.hp_regen = 1;
-	BotNPCType.mana_regen = 1;
-	BotNPCType.maxlevel = botLevel;
-	BotNPCType.light = 0; // due to the way that bots are coded..this is sent post-spawn
-	return BotNPCType;
+NPCType *Bot::FillNPCTypeStruct(uint32 botSpellsID, std::string botName, std::string botLastName, uint8 botLevel, uint16 botRace, uint8 botClass, uint8 gender, float size, uint32 face, uint32 hairStyle, uint32 hairColor, uint32 eyeColor, uint32 eyeColor2, uint32 beardColor, uint32 beard, uint32 drakkinHeritage, uint32 drakkinTattoo, uint32 drakkinDetails, int32 hp, int32 mana, int32 mr, int32 cr, int32 dr, int32 fr, int32 pr, int32 corrup, int32 ac, uint32 str, uint32 sta, uint32 dex, uint32 agi, uint32 _int, uint32 wis, uint32 cha, uint32 attack) {
+	auto bot_npc_type = new NPCType{ 0 };
+	int copy_length = 0;
+
+	copy_length = botName.copy(bot_npc_type->name, 63);
+	bot_npc_type->name[copy_length] = '\0';
+	copy_length = 0;
+
+	copy_length = botLastName.copy(bot_npc_type->lastname, 69);
+	bot_npc_type->lastname[copy_length] = '\0';
+	copy_length = 0;
+
+	bot_npc_type->current_hp = hp;
+	bot_npc_type->max_hp = hp;
+	bot_npc_type->size = size;
+	bot_npc_type->runspeed = 0.7f;
+	bot_npc_type->gender = gender;
+	bot_npc_type->race = botRace;
+	bot_npc_type->class_ = botClass;
+	bot_npc_type->bodytype = 1;
+	bot_npc_type->deity = EQEmu::deity::DeityAgnostic;
+	bot_npc_type->level = botLevel;
+	//bot_npc_type->npc_id = 0;
+	//bot_npc_type->texture = 0;
+	//bot_npc_type->helmtexture = 0;
+	//bot_npc_type->herosforgemodel = 0;
+	//bot_npc_type->loottable_id = 0;
+	bot_npc_type->npc_spells_id = botSpellsID;
+	//bot_npc_type->npc_spells_effects_id = 0;
+	//bot_npc_type->npc_faction_id = 0;
+	//bot_npc_type->merchanttype = 0;
+	//bot_npc_type->alt_currency_type = 0;
+	//bot_npc_type->adventure_template = 0;
+	//bot_npc_type->trap_template = 0;
+	//bot_npc_type->light = 0;
+	bot_npc_type->AC = ac;
+	bot_npc_type->Mana = mana;
+	bot_npc_type->ATK = attack;
+	bot_npc_type->STR = str;
+	bot_npc_type->STA = sta;
+	bot_npc_type->DEX = dex;
+	bot_npc_type->AGI = agi;
+	bot_npc_type->INT = _int;
+	bot_npc_type->WIS = wis;
+	bot_npc_type->CHA = cha;
+	bot_npc_type->MR = mr;
+	bot_npc_type->FR = fr;
+	bot_npc_type->CR = cr;
+	bot_npc_type->PR = pr;
+	bot_npc_type->DR = dr;
+	bot_npc_type->Corrup = corrup;
+	//bot_npc_type->PhR = 0;
+	bot_npc_type->haircolor = hairColor;
+	bot_npc_type->beardcolor = beardColor;
+	bot_npc_type->eyecolor1 = eyeColor;
+	bot_npc_type->eyecolor2 = eyeColor2;
+	bot_npc_type->hairstyle = hairStyle;
+	bot_npc_type->luclinface = face;
+	bot_npc_type->beard = beard;
+	bot_npc_type->drakkin_heritage = drakkinHeritage;
+	bot_npc_type->drakkin_tattoo = drakkinTattoo;
+	bot_npc_type->drakkin_details = drakkinDetails;
+	//bot_npc_type->armor_tint = { 0 };
+	//bot_npc_type->min_dmg = 0;
+	//bot_npc_type->max_dmg = 0;
+	//bot_npc_type->charm_ac = 0;
+	//bot_npc_type->charm_min_dmg = 0;
+	//bot_npc_type->charm_max_dmg = 0;
+	//bot_npc_type->charm_attack_delay = 0;
+	//bot_npc_type->charm_accuracy_rating = 0;
+	//bot_npc_type->charm_avoidance_rating = 0;
+	//bot_npc_type->charm_atk = 0;
+	//bot_npc_type->attack_count = 0;
+	//*bot_npc_type->special_abilities = { 0 };
+	//bot_npc_type->d_melee_texture1 = 0;
+	//bot_npc_type->d_melee_texture2 = 0;
+	//*bot_npc_type->ammo_idfile = { 0 };
+	//bot_npc_type->prim_melee_type = 0;
+	//bot_npc_type->sec_melee_type = 0;
+	//bot_npc_type->ranged_type = 0;
+	bot_npc_type->hp_regen = 1;
+	bot_npc_type->mana_regen = 1;
+	//bot_npc_type->aggroradius = 0;
+	//bot_npc_type->assistradius = 0;
+	//bot_npc_type->see_invis = 0;
+	//bot_npc_type->see_invis_undead = false;
+	//bot_npc_type->see_hide = false;
+	//bot_npc_type->see_improved_hide = false;
+	//bot_npc_type->qglobal = false;
+	//bot_npc_type->npc_aggro = false;
+	//bot_npc_type->spawn_limit = 0;
+	//bot_npc_type->mount_color = 0;
+	//bot_npc_type->attack_speed = 0.0f;
+	//bot_npc_type->attack_delay = 0;
+	//bot_npc_type->accuracy_rating = 0;
+	//bot_npc_type->avoidance_rating = 0;
+	//bot_npc_type->findable = false;
+	bot_npc_type->trackable = true;
+	//bot_npc_type->slow_mitigation = 0;
+	bot_npc_type->maxlevel = botLevel;
+	//bot_npc_type->scalerate = 0;
+	//bot_npc_type->private_corpse = false;
+	//bot_npc_type->unique_spawn_by_name = false;
+	//bot_npc_type->underwater = false;
+	//bot_npc_type->emoteid = 0;
+	//bot_npc_type->spellscale = 0.0f;
+	//bot_npc_type->healscale = 0.0f;
+	//bot_npc_type->no_target_hotkey = false;
+	//bot_npc_type->raid_target = false;
+	//bot_npc_type->armtexture = 0;
+	//bot_npc_type->bracertexture = 0;
+	//bot_npc_type->handtexture = 0;
+	//bot_npc_type->legtexture = 0;
+	//bot_npc_type->feettexture = 0;
+	//bot_npc_type->ignore_despawn = false;
+	bot_npc_type->show_name = true;
+	//bot_npc_type->untargetable = false;
+	bot_npc_type->skip_global_loot = true;
+	//bot_npc_type->rare_spawn = false;
+	bot_npc_type->stuck_behavior = Ground;
+
+	return bot_npc_type;
 }
 
-NPCType Bot::CreateDefaultNPCTypeStructForBot(std::string botName, std::string botLastName, uint8 botLevel, uint16 botRace, uint8 botClass, uint8 gender) {
-	NPCType Result;
-	int CopyLength = 0;
-	CopyLength = botName.copy(Result.name, 63);
-	Result.name[CopyLength] = '\0';
-	CopyLength = 0;
-	CopyLength = botLastName.copy(Result.lastname, 69);
-	Result.lastname[CopyLength] = '\0';
-	CopyLength = 0;
-	Result.level = botLevel;
-	Result.race = botRace;
-	Result.class_ = botClass;
-	Result.gender = gender;
-	// default values
-	Result.maxlevel = botLevel;
-	Result.size = 6.0;
-	Result.npc_id = 0;
-	Result.cur_hp = 0;
-	Result.drakkin_details = 0;
-	Result.drakkin_heritage = 0;
-	Result.drakkin_tattoo = 0;
-	Result.runspeed = 0.7f;
-	Result.bodytype = 1;
-	Result.findable = 0;
-	Result.hp_regen = 1;
-	Result.mana_regen = 1;
-	Result.texture = 0;
-	Result.d_melee_texture1 = 0;
-	Result.d_melee_texture2 = 0;
-	Result.qglobal = false;
-	Result.npc_spells_id = 0;
-	Result.attack_speed = 0;
-	Result.STR = 75;
-	Result.STA = 75;
-	Result.DEX = 75;
-	Result.AGI = 75;
-	Result.WIS = 75;
-	Result.INT = 75;
-	Result.CHA = 75;
-	Result.ATK = 75;
-	Result.MR = 25;
-	Result.FR = 25;
-	Result.DR = 15;
-	Result.PR = 15;
-	Result.CR = 25;
-	Result.Corrup = 15;
-	Result.AC = 12;
-	return Result;
+NPCType *Bot::CreateDefaultNPCTypeStructForBot(std::string botName, std::string botLastName, uint8 botLevel, uint16 botRace, uint8 botClass, uint8 gender) {
+	auto bot_npc_type = new NPCType{ 0 };
+	int copy_length = 0;
+
+	copy_length = botName.copy(bot_npc_type->name, 63);
+	bot_npc_type->name[copy_length] = '\0';
+	copy_length = 0;
+
+	copy_length = botLastName.copy(bot_npc_type->lastname, 69);
+	bot_npc_type->lastname[copy_length] = '\0';
+	copy_length = 0;
+
+	//bot_npc_type->current_hp = 0;
+	//bot_npc_type->max_hp = 0;
+	bot_npc_type->size = 6.0f;
+	bot_npc_type->runspeed = 0.7f;
+	bot_npc_type->gender = gender;
+	bot_npc_type->race = botRace;
+	bot_npc_type->class_ = botClass;
+	bot_npc_type->bodytype = 1;
+	bot_npc_type->deity = EQEmu::deity::DeityAgnostic;
+	bot_npc_type->level = botLevel;
+	//bot_npc_type->npc_id = 0;
+	//bot_npc_type->texture = 0;
+	//bot_npc_type->helmtexture = 0;
+	//bot_npc_type->herosforgemodel = 0;
+	//bot_npc_type->loottable_id = 0;
+	//bot_npc_type->npc_spells_id = 0;
+	//bot_npc_type->npc_spells_effects_id = 0;
+	//bot_npc_type->npc_faction_id = 0;
+	//bot_npc_type->merchanttype = 0;
+	//bot_npc_type->alt_currency_type = 0;
+	//bot_npc_type->adventure_template = 0;
+	//bot_npc_type->trap_template = 0;
+	//bot_npc_type->light = 0;
+	bot_npc_type->AC = 12;
+	//bot_npc_type->Mana = 0;
+	bot_npc_type->ATK = 75;
+	bot_npc_type->STR = 75;
+	bot_npc_type->STA = 75;
+	bot_npc_type->DEX = 75;
+	bot_npc_type->AGI = 75;
+	bot_npc_type->INT = 75;
+	bot_npc_type->WIS = 75;
+	bot_npc_type->CHA = 75;
+	bot_npc_type->MR = 25;
+	bot_npc_type->FR = 25;
+	bot_npc_type->CR = 25;
+	bot_npc_type->PR = 15;
+	bot_npc_type->DR = 15;
+	bot_npc_type->Corrup = 15;
+	//bot_npc_type->PhR = 0;
+	//bot_npc_type->haircolor = 0;
+	//bot_npc_type->beardcolor = 0;
+	//bot_npc_type->eyecolor1 = 0;
+	//bot_npc_type->eyecolor2 = 0;
+	//bot_npc_type->hairstyle = 0;
+	//bot_npc_type->luclinface = 0;
+	//bot_npc_type->beard = 0;
+	//bot_npc_type->drakkin_heritage = 0;
+	//bot_npc_type->drakkin_tattoo = 0;
+	//bot_npc_type->drakkin_details = 0;
+	//bot_npc_type->armor_tint = { 0 };
+	//bot_npc_type->min_dmg = 0;
+	//bot_npc_type->max_dmg = 0;
+	//bot_npc_type->charm_ac = 0;
+	//bot_npc_type->charm_min_dmg = 0;
+	//bot_npc_type->charm_max_dmg = 0;
+	//bot_npc_type->charm_attack_delay = 0;
+	//bot_npc_type->charm_accuracy_rating = 0;
+	//bot_npc_type->charm_avoidance_rating = 0;
+	//bot_npc_type->charm_atk = 0;
+	//bot_npc_type->attack_count = 0;
+	//*bot_npc_type->special_abilities = { 0 };
+	//bot_npc_type->d_melee_texture1 = 0;
+	//bot_npc_type->d_melee_texture2 = 0;
+	//*bot_npc_type->ammo_idfile = { 0 };
+	//bot_npc_type->prim_melee_type = 0;
+	//bot_npc_type->sec_melee_type = 0;
+	//bot_npc_type->ranged_type = 0;
+	bot_npc_type->hp_regen = 1;
+	bot_npc_type->mana_regen = 1;
+	//bot_npc_type->aggroradius = 0;
+	//bot_npc_type->assistradius = 0;
+	//bot_npc_type->see_invis = 0;
+	//bot_npc_type->see_invis_undead = false;
+	//bot_npc_type->see_hide = false;
+	//bot_npc_type->see_improved_hide = false;
+	//bot_npc_type->qglobal = false;
+	//bot_npc_type->npc_aggro = false;
+	//bot_npc_type->spawn_limit = 0;
+	//bot_npc_type->mount_color = 0;
+	//bot_npc_type->attack_speed = 0.0f;
+	//bot_npc_type->attack_delay = 0;
+	//bot_npc_type->accuracy_rating = 0;
+	//bot_npc_type->avoidance_rating = 0;
+	//bot_npc_type->findable = false;
+	bot_npc_type->trackable = true;
+	//bot_npc_type->slow_mitigation = 0;
+	bot_npc_type->maxlevel = botLevel;
+	//bot_npc_type->scalerate = 0;
+	//bot_npc_type->private_corpse = false;
+	//bot_npc_type->unique_spawn_by_name = false;
+	//bot_npc_type->underwater = false;
+	//bot_npc_type->emoteid = 0;
+	//bot_npc_type->spellscale = 0.0f;
+	//bot_npc_type->healscale = 0.0f;
+	//bot_npc_type->no_target_hotkey = false;
+	//bot_npc_type->raid_target = false;
+	//bot_npc_type->armtexture = 0;
+	//bot_npc_type->bracertexture = 0;
+	//bot_npc_type->handtexture = 0;
+	//bot_npc_type->legtexture = 0;
+	//bot_npc_type->feettexture = 0;
+	//bot_npc_type->ignore_despawn = false;
+	bot_npc_type->show_name = true;
+	//bot_npc_type->untargetable = false;
+	bot_npc_type->skip_global_loot = true;
+	//bot_npc_type->rare_spawn = false;
+	bot_npc_type->stuck_behavior = Ground;
+
+	return bot_npc_type;
 }
 
 void Bot::GenerateBaseStats()
@@ -1827,7 +1975,6 @@ bool Bot::Process() {
 	if(tic_timer.Check()) {
 		//6 seconds, or whatever the rule is set to has passed, send this position to everyone to avoid ghosting
 		if(!IsMoving() && !IsEngaged()) {
-			SendPosition();
 			if(IsSitting()) {
 				if(!rest_timer.Enabled())
 					rest_timer.Start(RuleI(Character, RestRegenTimeToActivate) * 1000);
@@ -1865,6 +2012,17 @@ bool Bot::Process() {
 
 	if(GetAppearance() == eaDead && GetHP() > 0)
 		SetAppearance(eaStanding);
+
+	if (IsMoving()) {
+		ping_timer.Disable();
+	}
+	else {
+		if (!ping_timer.Enabled())
+			ping_timer.Start(BOT_KEEP_ALIVE_INTERVAL);
+
+		if (ping_timer.Check())
+			SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0);
+	}
 
 	if (IsStunned() || IsMezzed())
 		return true;
@@ -2090,10 +2248,9 @@ void Bot::AI_Process() {
 
 	Client* bot_owner = (GetBotOwner() && GetBotOwner()->IsClient() ? GetBotOwner()->CastToClient() : nullptr);
 	Group* bot_group = GetGroup();
-	Mob* follow_mob = entity_list.GetMob(GetFollowID());
-
+	
 	// Primary reasons for not processing AI
-	if (!bot_owner || !bot_group || !follow_mob || !IsAIControlled())
+	if (!bot_owner || !bot_group || !IsAIControlled())
 		return;
 
 	if (bot_owner->IsDead()) {
@@ -2103,10 +2260,17 @@ void Bot::AI_Process() {
 		return;
 	}
 
-	// We also need a leash owner (subset of primary AI criteria)
+	// We also need a leash owner and follow mob (subset of primary AI criteria)
 	Client* leash_owner = (bot_group->GetLeader() && bot_group->GetLeader()->IsClient() ? bot_group->GetLeader()->CastToClient() : bot_owner);
 	if (!leash_owner)
 		return;
+
+	Mob* follow_mob = entity_list.GetMob(GetFollowID());
+
+	if (!follow_mob) {
+		follow_mob = leash_owner;
+		SetFollowID(leash_owner->GetID());
+	}
 
 	// Berserk updates should occur if primary AI criteria are met
 	if (GetClass() == WARRIOR || GetClass() == BERSERKER) {
@@ -2526,7 +2690,7 @@ void Bot::AI_Process() {
 								if (GetArchetype() == ARCHETYPE_CASTER || GetClass() == ROGUE) {
 									if (tar_distance <= melee_distance_max) {
 										if (PlotPositionAroundTarget(this, Goal.x, Goal.y, Goal.z)) {
-											CalculateNewPosition(Goal.x, Goal.y, Goal.z, GetBotWalkspeed(), true, false);
+											WalkTo(Goal.x, Goal.y, Goal.z);
 											return;
 										}
 									}
@@ -2538,7 +2702,7 @@ void Bot::AI_Process() {
 						if (caster_distance_min && tar_distance < caster_distance_min && !tar->IsFeared()) { // Caster back-off adjustment
 							if (PlotPositionAroundTarget(this, Goal.x, Goal.y, Goal.z)) {
 								if (DistanceSquared(Goal, tar->GetPosition()) <= caster_distance_max) {
-									CalculateNewPosition(Goal.x, Goal.y, Goal.z, GetBotWalkspeed(), true, false);
+									WalkTo(Goal.x, Goal.y, Goal.z);
 									return;
 								}
 							}
@@ -2546,7 +2710,7 @@ void Bot::AI_Process() {
 						else if (tar_distance < melee_distance_min) { // Melee back-off adjustment
 							if (PlotPositionAroundTarget(this, Goal.x, Goal.y, Goal.z)) {
 								if (DistanceSquared(Goal, tar->GetPosition()) <= melee_distance_max) {
-									CalculateNewPosition(Goal.x, Goal.y, Goal.z, GetBotWalkspeed(), true, false);
+									WalkTo(Goal.x, Goal.y, Goal.z);
 									return;
 								}
 							}
@@ -2554,7 +2718,7 @@ void Bot::AI_Process() {
 						else if (backstab_weapon && !behind_mob) { // Move the rogue to behind the mob
 							if (PlotPositionAroundTarget(tar, Goal.x, Goal.y, Goal.z)) {
 								if (DistanceSquared(Goal, tar->GetPosition()) <= melee_distance_max) {
-									CalculateNewPosition(Goal.x, Goal.y, Goal.z, GetBotRunspeed(), true, false); // rogues are agile enough to run in melee range
+									RunTo(Goal.x, Goal.y, Goal.z);
 									return;
 								}
 							}
@@ -2565,7 +2729,7 @@ void Bot::AI_Process() {
 								PlotPositionAroundTarget(tar, Goal.x, Goal.y, Goal.z)) // If we're behind the mob, we can attack when it's enraged
 							{
 								if (DistanceSquared(Goal, tar->GetPosition()) <= melee_distance_max) {
-									CalculateNewPosition(Goal.x, Goal.y, Goal.z, GetBotWalkspeed(), true, false);
+									WalkTo(Goal.x, Goal.y, Goal.z);
 									return;
 								}
 							}
@@ -2602,7 +2766,7 @@ void Bot::AI_Process() {
 				// we can't fight if we don't have a target, are stun/mezzed or dead..
 				// Stop attacking if the target is enraged
 				TEST_TARGET();
-				if (GetBotStance() == BotStancePassive || (tar->IsEnraged() && !BehindMob(tar, GetX(), GetY())))
+				if (GetBotStance() == EQEmu::constants::stancePassive || (tar->IsEnraged() && !BehindMob(tar, GetX(), GetY())))
 					return;
 
 				// First, special attack per class (kick, backstab etc..)
@@ -2710,42 +2874,26 @@ void Bot::AI_Process() {
 					Log(Logs::Detail, Logs::AI, "Pursuing %s while engaged.", GetTarget()->GetCleanName());
 
 					Goal = GetTarget()->GetPosition();
-					
-					if (RuleB(Bots, UsePathing) && zone->pathing) {
-						bool WaypointChanged, NodeReached;
-
-						Goal = UpdatePath(Goal.x, Goal.y, Goal.z,
-							GetBotRunspeed(), WaypointChanged, NodeReached);
-
-						if (WaypointChanged)
-							tar_ndx = 20;
-					}
-					
-					CalculateNewPosition(Goal.x, Goal.y, Goal.z, GetBotRunspeed());
+										
+					RunTo(Goal.x, Goal.y, Goal.z);
 					return;
 				}
 				else {
 					if (IsMoving())
 						StopMoving();
-					else
-						SendPosition();
 
 					return;
 				}
 			}
 
 			// Fix Z when following during pull, not when engaged and stationary
-			if (IsMoving() && fix_z_timer_engaged.Check()) {
-				FixZ();
-				return;
-			}
 
 			if (GetTarget() && GetTarget()->IsFeared() && !spellend_timer.Enabled() && AI_think_timer->Check()) {
 				if (!IsFacingMob(GetTarget()))
 					FaceTarget(GetTarget());
 
 				// This is a mob that is fleeing either because it has been feared or is low on hitpoints
-				if (GetBotStance() != BotStancePassive) {
+				if (GetBotStance() != EQEmu::constants::stancePassive) {
 					AI_PursueCastCheck(); // This appears to always return true..can't trust for success/fail
 					return;
 				}
@@ -2753,9 +2901,7 @@ void Bot::AI_Process() {
 		} // end not in combat range
 
 		if (!IsMoving() && !spellend_timer.Enabled()) { // This may actually need work...
-			SendPosition();
-
-			if (GetBotStance() == BotStancePassive)
+			if (GetBotStance() == EQEmu::constants::stancePassive)
 				return;
 			
 			if (GetTarget() && AI_EngagedCastCheck()) 
@@ -2789,10 +2935,10 @@ void Bot::AI_Process() {
 				if (IsMoving())
 					StopMoving();
 
-				Warp(glm::vec3(my_guard));
+				Teleport(my_guard);
 
 				if (HasPet())
-					GetPet()->Warp(glm::vec3(my_guard));
+					GetPet()->Teleport(my_guard);
 
 				return;
 			}
@@ -2802,10 +2948,10 @@ void Bot::AI_Process() {
 			if (IsMoving())
 				StopMoving();
 
-			Warp(glm::vec3(leash_owner->GetPosition()));
+			Teleport(leash_owner->GetPosition());
 			
 			if (HasPet())
-				GetPet()->Warp(glm::vec3(leash_owner->GetPosition()));
+				GetPet()->Teleport(leash_owner->GetPosition());
 
 			return;
 		}
@@ -2813,7 +2959,7 @@ void Bot::AI_Process() {
 		// Ok to idle
 		if (fm_dist <= GetFollowDistance()) {
 			if (!IsMoving() && AI_think_timer->Check() && !spellend_timer.Enabled()) {
-				if (GetBotStance() != BotStancePassive) {
+				if (GetBotStance() != EQEmu::constants::stancePassive) {
 					if (!AI_IdleCastCheck() && !IsCasting() && GetClass() != BARD)
 						BotMeditate(true);
 				}
@@ -2833,23 +2979,18 @@ void Bot::AI_Process() {
 					if (rest_timer.Enabled())
 						rest_timer.Disable();
 
-					int speed = GetBotRunspeed();
+					bool running = true;
 					if (fm_dist < GetFollowDistance() + BOT_FOLLOW_DISTANCE_WALK)
-						speed = GetBotWalkspeed();
+						running = false;
 
 					Goal = follow_mob->GetPosition();
 
-					if (RuleB(Bots, UsePathing) && zone->pathing) {
-						bool WaypointChanged, NodeReached;
-
-						Goal = UpdatePath(Goal.x, Goal.y, Goal.z,
-							speed, WaypointChanged, NodeReached);
-
-						if (WaypointChanged)
-							tar_ndx = 20;
+					if (running) {
+						RunTo(Goal.x, Goal.y, Goal.z);
 					}
-
-					CalculateNewPosition(Goal.x, Goal.y, Goal.z, speed);
+					else {
+						WalkTo(Goal.x, Goal.y, Goal.z);
+					}
 					return;
 				}
 			}
@@ -2863,7 +3004,7 @@ void Bot::AI_Process() {
 		
 		// Basically, bard bots get a chance to cast idle spells while moving
 		if (IsMoving()) {
-			if (GetBotStance() != BotStancePassive) {
+			if (GetBotStance() != EQEmu::constants::stancePassive) {
 				if (GetClass() == BARD && !spellend_timer.Enabled() && AI_think_timer->Check()) {
 					AI_IdleCastCheck();
 					return;
@@ -2931,14 +3072,14 @@ void Bot::PetAIProcess() {
 				if(botPet->GetClass() == ROGUE && !petHasAggro && !botPet->BehindMob(botPet->GetTarget(), botPet->GetX(), botPet->GetY())) {
 					// Move the rogue to behind the mob
 					if(botPet->PlotPositionAroundTarget(botPet->GetTarget(), newX, newY, newZ)) {
-						botPet->CalculateNewPosition(newX, newY, newZ, botPet->GetRunspeed());
+						botPet->RunTo(newX, newY, newZ);
 						return;
 					}
 				}
 				else if(GetTarget() == botPet->GetTarget() && !petHasAggro && !botPet->BehindMob(botPet->GetTarget(), botPet->GetX(), botPet->GetY())) {
 					// If the bot owner and the bot are fighting the same mob, then move the pet to the rear arc of the mob
 					if(botPet->PlotPositionAroundTarget(botPet->GetTarget(), newX, newY, newZ)) {
-						botPet->CalculateNewPosition(newX, newY, newZ, botPet->GetRunspeed());
+						botPet->RunTo(newX, newY, newZ);
 						return;
 					}
 				}
@@ -2953,7 +3094,7 @@ void Bot::PetAIProcess() {
 						moveBehindMob = true;
 
 					if(botPet->PlotPositionAroundTarget(botPet->GetTarget(), newX, newY, newZ, moveBehindMob)) {
-						botPet->CalculateNewPosition(newX, newY, newZ, botPet->GetRunspeed());
+						botPet->RunTo(newX, newY, newZ);
 						return;
 					}
 				}
@@ -3036,15 +3177,14 @@ void Bot::PetAIProcess() {
 					botPet->SetRunAnimSpeed(0);
 					if(!botPet->IsRooted()) {
 						Log(Logs::Detail, Logs::AI, "Pursuing %s while engaged.", botPet->GetTarget()->GetCleanName());
-						botPet->CalculateNewPosition(botPet->GetTarget()->GetX(), botPet->GetTarget()->GetY(), botPet->GetTarget()->GetZ(), botPet->GetOwner()->GetRunspeed());
+						botPet->RunTo(botPet->GetTarget()->GetX(), botPet->GetTarget()->GetY(), botPet->GetTarget()->GetZ());
 						return;
 					} else {
 						botPet->SetHeading(botPet->GetTarget()->GetHeading());
 						if(moved) {
 							moved = false;
-							SetCurrentSpeed(0);
-							botPet->SendPosition();
-							botPet->SetMoving(false);
+							StopNavigation();
+							botPet->StopNavigation();
 						}
 					}
 				}
@@ -3064,15 +3204,14 @@ void Bot::PetAIProcess() {
 					float dist = DistanceSquared(botPet->GetPosition(), botPet->GetTarget()->GetPosition());
 					botPet->SetRunAnimSpeed(0);
 					if(dist > 184) {
-						botPet->CalculateNewPosition(botPet->GetTarget()->GetX(), botPet->GetTarget()->GetY(), botPet->GetTarget()->GetZ(), botPet->GetTarget()->GetRunspeed());
+						botPet->RunTo(botPet->GetTarget()->GetX(), botPet->GetTarget()->GetY(), botPet->GetTarget()->GetZ());
 						return;
 					} else {
 						botPet->SetHeading(botPet->GetTarget()->GetHeading());
 						if(moved) {
 							moved = false;
-							SetCurrentSpeed(0);
-							botPet->SendPosition();
-							botPet->SetMoving(false);
+							StopNavigation();
+							botPet->StopNavigation();
 						}
 					}
 					break;
@@ -3134,7 +3273,8 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 		entity_list.AddBot(this, true, true);
 		// Load pet
 		LoadPet();
-		this->SendPosition();
+		SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0);
+		ping_timer.Start(8000);
 		// there is something askew with spawn struct appearance fields...
 		// I re-enabled this until I can sort it out
 		uint32 itemID = 0;
@@ -5173,7 +5313,7 @@ int Bot::GetHandToHandDamage(void) {
 		// everyone uses this in the revamp!
 		int skill = GetSkill(EQEmu::skills::SkillHandtoHand);
 		int epic = 0;
-		if (CastToNPC()->GetEquipment(EQEmu::textures::armorHands) == 10652 && GetLevel() > 46)
+		if (CastToNPC()->GetEquippedItemFromTextureSlot(EQEmu::textures::armorHands) == 10652 && GetLevel() > 46)
 			epic = 280;
 		if (epic > skill)
 			skill = epic;
@@ -5195,7 +5335,7 @@ int Bot::GetHandToHandDamage(void) {
 				9, 9, 9, 9, 9, 10, 10, 10, 10, 10,   // 31-40
 				10, 11, 11, 11, 11, 11, 11, 12, 12}; // 41-49
 	if (GetClass() == MONK) {
-		if (CastToNPC()->GetEquipment(EQEmu::textures::armorHands) == 10652 && GetLevel() > 50)
+		if (CastToNPC()->GetEquippedItemFromTextureSlot(EQEmu::textures::armorHands) == 10652 && GetLevel() > 50)
 			return 9;
 		if (level > 62)
 			return 15;
@@ -6287,7 +6427,7 @@ void Bot::DoBuffTic(const Buffs_Struct &buff, int slot, Mob* caster) {
 	Mob::DoBuffTic(buff, slot, caster);
 }
 
-bool Bot::CastSpell(uint16 spell_id, uint16 target_id, EQEmu::CastingSlot slot, int32 cast_time, int32 mana_cost,
+bool Bot::CastSpell(uint16 spell_id, uint16 target_id, EQEmu::spells::CastingSlot slot, int32 cast_time, int32 mana_cost,
 					uint32* oSpellWillFinish, uint32 item_slot, int16 *resist_adjust, uint32 aa_id) {
 	bool Result = false;
 	if(zone && !zone->IsSpellBlocked(spell_id, glm::vec3(GetPosition()))) {
@@ -6327,7 +6467,7 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, EQEmu::CastingSlot slot, 
 			return false;
 		}
 
-		if(slot < EQEmu::CastingSlot::MaxGems && !CheckFizzle(spell_id)) {
+		if(slot < EQEmu::spells::CastingSlot::MaxGems && !CheckFizzle(spell_id)) {
 			int fizzle_msg = IsBardSong(spell_id) ? MISS_NOTE : SPELL_FIZZLE;
 			InterruptSpell(fizzle_msg, 0x121, spell_id);
 
@@ -6341,7 +6481,7 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, EQEmu::CastingSlot slot, 
 			Log(Logs::Detail, Logs::Spells, "Casting a new spell/song while singing a song. Killing old song %d.", bardsong);
 			bardsong = 0;
 			bardsong_target_id = 0;
-			bardsong_slot = EQEmu::CastingSlot::Gem1;
+			bardsong_slot = EQEmu::spells::CastingSlot::Gem1;
 			bardsong_timer.Disable();
 		}
 
@@ -6471,7 +6611,7 @@ bool Bot::IsImmuneToSpell(uint16 spell_id, Mob *caster) {
 	return Result;
 }
 
-bool Bot::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_center, CastAction_type &CastAction, EQEmu::CastingSlot slot) {
+bool Bot::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_center, CastAction_type &CastAction, EQEmu::spells::CastingSlot slot) {
 	bool Result = false;
 	SpellTargetType targetType = spells[spell_id].targettype;
 	if(targetType == ST_GroupClientAndPet) {
@@ -6484,7 +6624,7 @@ bool Bot::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 	return Result;
 }
 
-bool Bot::DoCastSpell(uint16 spell_id, uint16 target_id, EQEmu::CastingSlot slot, int32 cast_time, int32 mana_cost, uint32* oSpellWillFinish, uint32 item_slot, uint32 aa_id) {
+bool Bot::DoCastSpell(uint16 spell_id, uint16 target_id, EQEmu::spells::CastingSlot slot, int32 cast_time, int32 mana_cost, uint32* oSpellWillFinish, uint32 item_slot, uint32 aa_id) {
 	bool Result = false;
 	if(GetClass() == BARD)
 		cast_time = 0;
@@ -6588,7 +6728,7 @@ void Bot::GenerateSpecialAttacks() {
 		SetSpecialAbility(SPECATK_TRIPLE, 1);
 }
 
-bool Bot::DoFinishedSpellAETarget(uint16 spell_id, Mob* spellTarget, EQEmu::CastingSlot slot, bool& stopLogic) {
+bool Bot::DoFinishedSpellAETarget(uint16 spell_id, Mob* spellTarget, EQEmu::spells::CastingSlot slot, bool& stopLogic) {
 	if(GetClass() == BARD) {
 		if(!ApplyNextBardPulse(bardsong, this, bardsong_slot))
 			InterruptSpell(SONG_ENDS_ABRUPTLY, 0x121, bardsong);
@@ -6598,7 +6738,7 @@ bool Bot::DoFinishedSpellAETarget(uint16 spell_id, Mob* spellTarget, EQEmu::Cast
 	return true;
 }
 
-bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQEmu::CastingSlot slot, bool& stopLogic) {
+bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQEmu::spells::CastingSlot slot, bool& stopLogic) {
 	if(spellTarget) {
 		if(IsGrouped() && (spellTarget->IsBot() || spellTarget->IsClient()) && RuleB(Bots, GroupBuffing)) {
 			bool noGroupSpell = false;
@@ -6610,7 +6750,7 @@ bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQEmu::
 				bool spelltypeequal = ((spelltype == 2) || (spelltype == 16) || (spelltype == 32));
 				bool spelltypetargetequal = ((spelltype == 8) && (spells[thespell].targettype == ST_Self));
 				bool spelltypeclassequal = ((spelltype == 1024) && (GetClass() == SHAMAN));
-				bool slotequal = (slot == EQEmu::CastingSlot::Item);
+				bool slotequal = (slot == EQEmu::spells::CastingSlot::Item);
 				if(spellequal || slotequal) {
 					if((spelltypeequal || spelltypetargetequal) || spelltypeclassequal || slotequal) {
 						if(((spells[thespell].effectid[0] == 0) && (spells[thespell].base[0] < 0)) &&
@@ -6649,7 +6789,7 @@ bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQEmu::
 	return true;
 }
 
-bool Bot::DoFinishedSpellGroupTarget(uint16 spell_id, Mob* spellTarget, EQEmu::CastingSlot slot, bool& stopLogic) {
+bool Bot::DoFinishedSpellGroupTarget(uint16 spell_id, Mob* spellTarget, EQEmu::spells::CastingSlot slot, bool& stopLogic) {
 	bool isMainGroupMGB = false;
 	if(isMainGroupMGB && (GetClass() != BARD)) {
 		BotGroupSay(this, "MGB %s", spells[spell_id].name);
@@ -7185,14 +7325,14 @@ int32 Bot::CalcMaxHP() {
 	bot_hp += GroupLeadershipAAHealthEnhancement();
 	bot_hp += (bot_hp * ((spellbonuses.MaxHPChange + itembonuses.MaxHPChange) / 10000.0f));
 	max_hp = bot_hp;
-	if (cur_hp > max_hp)
-		cur_hp = max_hp;
+	if (current_hp > max_hp)
+		current_hp = max_hp;
 
 	int hp_perc_cap = spellbonuses.HPPercCap[0];
 	if(hp_perc_cap) {
 		int curHP_cap = ((max_hp * hp_perc_cap) / 100);
-		if (cur_hp > curHP_cap || (spellbonuses.HPPercCap[1] && cur_hp > spellbonuses.HPPercCap[1]))
-			cur_hp = curHP_cap;
+		if (current_hp > curHP_cap || (spellbonuses.HPPercCap[1] && current_hp > spellbonuses.HPPercCap[1]))
+			current_hp = curHP_cap;
 	}
 	return max_hp;
 }
@@ -8073,7 +8213,7 @@ bool Bot::CheckLoreConflict(const EQEmu::ItemData* item) {
 }
 
 bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, float iRange, uint32 iSpellTypes) {
-	if((iSpellTypes&SpellTypes_Detrimental) != 0) {
+	if((iSpellTypes & SPELL_TYPES_DETRIMENTAL) != 0) {
 		Log(Logs::General, Logs::Error, "Error: detrimental spells requested from AICheckCloseBeneficialSpells!!");
 		return false;
 	}
@@ -8128,19 +8268,19 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 				Group *g = caster->GetGroup();
 				float hpRatioToHeal = 25.0f;
 				switch(caster->GetBotStance()) {
-					case BotStanceReactive:
-					case BotStanceBalanced:
-						hpRatioToHeal = 50.0f;
-						break;
-					case BotStanceBurn:
-					case BotStanceBurnAE:
-						hpRatioToHeal = 20.0f;
-						break;
-					case BotStanceAggressive:
-					case BotStanceEfficient:
-					default:
-						hpRatioToHeal = 25.0f;
-						break;
+				case EQEmu::constants::stanceReactive:
+				case EQEmu::constants::stanceBalanced:
+					hpRatioToHeal = 50.0f;
+					break;
+				case EQEmu::constants::stanceBurn:
+				case EQEmu::constants::stanceBurnAE:
+					hpRatioToHeal = 20.0f;
+					break;
+				case EQEmu::constants::stanceAggressive:
+				case EQEmu::constants::stanceEfficient:
+				default:
+					hpRatioToHeal = 25.0f;
+					break;
 				}
 
 				if(g) {
@@ -8679,11 +8819,11 @@ bool Bot::HasOrMayGetAggro() {
 }
 
 void Bot::SetDefaultBotStance() {
-	BotStanceType defaultStance = BotStanceBalanced;
+	EQEmu::constants::StanceType defaultStance = EQEmu::constants::stanceBalanced;
 	if (GetClass() == WARRIOR)
-		defaultStance = BotStanceAggressive;
+		defaultStance = EQEmu::constants::stanceAggressive;
 
-	_baseBotStance = BotStancePassive;
+	_baseBotStance = EQEmu::constants::stancePassive;
 	_botStance = defaultStance;
 }
 
@@ -8732,7 +8872,7 @@ bool Bot::UseDiscipline(uint32 spell_id, uint32 target) {
 	if(IsCasting())
 		InterruptSpell();
 
-	CastSpell(spell_id, target, EQEmu::CastingSlot::Discipline);
+	CastSpell(spell_id, target, EQEmu::spells::CastingSlot::Discipline);
 	return true;
 }
 
@@ -8955,5 +9095,7 @@ std::string Bot::CreateSayLink(Client* c, const char* message, const char* name)
 	auto saylink = linker.GenerateLink();
 	return saylink;
 }
+
+uint8 Bot::spell_casting_chances[SPELL_TYPE_COUNT][PLAYER_CLASS_COUNT][EQEmu::constants::STANCE_TYPE_COUNT][cntHSND] = { 0 };
 
 #endif
