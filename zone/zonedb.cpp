@@ -2483,7 +2483,8 @@ const NPCType* ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		"npc_types.charm_atk, "
 		"npc_types.skip_global_loot, "
 		"npc_types.rare_spawn, "
-		"npc_types.stuck_behavior "
+		"npc_types.stuck_behavior, "
+		"npc_types.model "
 		"FROM npc_types %s",
 		where_condition.c_str()
 	);
@@ -2673,6 +2674,7 @@ const NPCType* ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		temp_npctype_data->skip_global_loot = atoi(row[107]) != 0;
 		temp_npctype_data->rare_spawn = atoi(row[108]) != 0;
 		temp_npctype_data->stuck_behavior = atoi(row[109]);
+		temp_npctype_data->use_model = atoi(row[110]);
 
 		// If NPC with duplicate NPC id already in table,
 		// free item we attempted to add.
