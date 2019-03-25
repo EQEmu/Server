@@ -1572,9 +1572,22 @@ void NPC::AI_DoMovement() {
 	/**
 	 * Roambox logic sets precedence
 	 */
+	using EQEmu::waypoints::WaypointStatus;
+
 	if (roambox_distance > 0) {
 
-		if (!IsMoving()) {
+		// Check if we're already moving to a WP
+		// If so, if we're not moving we have arrived and need to set delay
+
+		if (GetCWP() == WaypointStatus::wpsRoamBoxPauseInProgress && !IsMoving()) {
+			// We have arrived
+			time_until_can_move = Timer::GetCurrentTime() + RandomTimer(roambox_min_delay, roambox_delay);
+			SetCurrentWP(0);
+			return;
+		}
+
+		// Set a new destination
+		if (!IsMoving() && time_until_can_move < Timer::GetCurrentTime()) {
 			auto move_x = static_cast<float>(zone->random.Real(-roambox_distance, roambox_distance));
 			auto move_y = static_cast<float>(zone->random.Real(-roambox_distance, roambox_distance));
 
@@ -1642,12 +1655,10 @@ void NPC::AI_DoMovement() {
 				roambox_min_y,
 				roambox_max_y,
 				roambox_destination_y);
-		}
+			Log(Logs::Detail, Logs::NPCRoamBox, "Dest Z is (%f)", roambox_destination_z);
 
-		NavigateTo(roambox_destination_x, roambox_destination_y, roambox_destination_z);
-
-		if (m_Position.x == roambox_destination_x && m_Position.y == roambox_destination_y) {
-			time_until_can_move = Timer::GetCurrentTime() + RandomTimer(roambox_min_delay, roambox_delay);
+			SetCurrentWP(WaypointStatus::wpsRoamBoxPauseInProgress);
+			NavigateTo(roambox_destination_x, roambox_destination_y, roambox_destination_z);
 		}
 
 		return;
@@ -1660,7 +1671,7 @@ void NPC::AI_DoMovement() {
 		
 		int32 gridno = CastToNPC()->GetGrid();
 		
-		if (gridno > 0 || cur_wp == -2) {
+		if (gridno > 0 || cur_wp == WaypointStatus::wpsQuestControlNoGrid) {
 			if (pause_timer_complete == true) { // time to pause at wp is over
 				AI_SetupNextWaypoint();
 			}    // endif (pause_timer_complete==true)
@@ -1692,7 +1703,7 @@ void NPC::AI_DoMovement() {
 					// as that is where roamer is unset and we don't want
 					// the next trip through to move again based on grid stuff.
 					doMove = false;
-					if (cur_wp == -2) {
+					if (cur_wp == WaypointStatus::wpsQuestControlNoGrid) {
 						AI_SetupNextWaypoint();
 					}
 		
@@ -1791,8 +1802,10 @@ void NPC::AI_SetupNextWaypoint() {
 		pause_timer_complete = false;
 		Log(Logs::Detail, Logs::Pathing, "We are departing waypoint %d.", cur_wp);
 		
+		using EQEmu::waypoints::WaypointStatus;
+
 		//if we were under quest control (with no grid), we are done now..
-		if (cur_wp == -2) {
+		if (cur_wp == WaypointStatus::wpsQuestControlNoGrid) {
 			Log(Logs::Detail, Logs::Pathing, "Non-grid quest mob has reached its quest ordered waypoint. Leaving pathing mode.");
 			roamer = false;
 			cur_wp = 0;
