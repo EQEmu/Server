@@ -307,6 +307,14 @@ namespace EQEmu
 
 	} // namespace bug
 
+	namespace waypoints {
+		enum WaypointStatus : int {
+			wpsRoamBoxPauseInProgress = -3,
+			wpsQuestControlNoGrid = -2,
+			wpsQuestControlGrid = -1
+		};
+	} // waypoint_status behavior
+
 } /*EQEmu*/
 
 #endif /*COMMON_EMU_CONSTANTS_H*/
