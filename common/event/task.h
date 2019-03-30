@@ -24,7 +24,13 @@ namespace EQ {
 			std::exception error;
 		};
 
+		Task(EQ::EventLoop *loop, TaskFn fn) {
+			m_loop = loop;
+			m_fn = fn;
+		}
+
 		Task(TaskFn fn) {
+			m_loop = &EQ::EventLoop::GetDefault();
 			m_fn = fn;
 		}
 
@@ -60,7 +66,7 @@ namespace EQ {
 
 			m_work->data = baton;
 
-			uv_queue_work(EventLoop::Get().Handle(), m_work, [](uv_work_t* req) {
+			uv_queue_work(m_loop->Handle(), m_work, [](uv_work_t* req) {
 				TaskBaton *baton = (TaskBaton*)req->data;
 
 				baton->fn([baton](const EQEmu::Any& result) {
@@ -92,6 +98,7 @@ namespace EQ {
 		}
 
 	private:
+		EQ::EventLoop *m_loop;
 		TaskFn m_fn;
 		ResolveFn m_then;
 		RejectFn m_catch;

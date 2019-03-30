@@ -8,7 +8,7 @@ namespace EQ
 {
 	namespace Net
 	{
-		static void DNSLookup(const std::string &addr, int port, bool ipv6, std::function<void(const std::string&)> cb) {
+		static void DNSLookup(EQ::EventLoop *eloop, const std::string &addr, int port, bool ipv6, std::function<void(const std::string&)> cb) {
 			struct DNSBaton
 			{
 				std::function<void(const std::string&)> cb;
@@ -21,7 +21,7 @@ namespace EQ
 			hints.ai_socktype = SOCK_STREAM;
 			hints.ai_protocol = IPPROTO_TCP;
 
-			auto loop = EQ::EventLoop::Get().Handle();
+			auto loop = eloop->Handle();
 			uv_getaddrinfo_t *resolver = new uv_getaddrinfo_t();
 			memset(resolver, 0, sizeof(uv_getaddrinfo_t));
 			auto port_str = std::to_string(port);
@@ -56,6 +56,10 @@ namespace EQ
 
 				cb(addr);
 			}, addr.c_str(), port_str.c_str(), &hints);
+		}
+
+		static void DNSLookup(const std::string &addr, int port, bool ipv6, std::function<void(const std::string&)> cb) {
+			DNSLookup(&EQ::EventLoop::GetDefault(), addr, port, ipv6, cb);
 		}
 	}
 }

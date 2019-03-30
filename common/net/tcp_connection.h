@@ -7,6 +7,7 @@
 
 namespace EQ
 {
+	class EventLoop;
 	namespace Net
 	{
 		class TCPConnection
@@ -15,6 +16,7 @@ namespace EQ
 			TCPConnection(uv_tcp_t *socket);
 			~TCPConnection();
 
+			static void Connect(EQ::EventLoop *loop, const std::string &addr, int port, bool ipv6, std::function<void(std::shared_ptr<TCPConnection>)> cb);
 			static void Connect(const std::string &addr, int port, bool ipv6, std::function<void(std::shared_ptr<TCPConnection>)> cb);
 			
 			void Start();

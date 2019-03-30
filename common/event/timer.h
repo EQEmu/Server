@@ -6,14 +6,31 @@ namespace EQ {
 	class Timer
 	{
 	public:
-		Timer(std::function<void(Timer *)> cb)
+		Timer(EQ::EventLoop *loop, std::function<void(Timer *)> cb)
 		{
+			m_loop = loop;
 			m_timer = nullptr;
 			m_cb = cb;
 		}
 
+		Timer(std::function<void(Timer *)> cb)
+		{
+			m_loop = &EQ::EventLoop::GetDefault();
+			m_timer = nullptr;
+			m_cb = cb;
+		}
+
+		Timer(EQ::EventLoop *loop, uint64_t duration_ms, bool repeats, std::function<void(Timer *)> cb)
+		{
+			m_loop = loop;
+			m_timer = nullptr;
+			m_cb = cb;
+			Start(duration_ms, repeats);
+		}
+
 		Timer(uint64_t duration_ms, bool repeats, std::function<void(Timer *)> cb)
 		{
+			m_loop = &EQ::EventLoop::GetDefault();
 			m_timer = nullptr;
 			m_cb = cb;
 			Start(duration_ms, repeats);
@@ -25,7 +42,7 @@ namespace EQ {
 		}
 
 		void Start(uint64_t duration_ms, bool repeats) {
-			auto loop = EventLoop::Get().Handle();
+			auto loop = m_loop->Handle();
 			if (!m_timer) {
 				m_timer = new uv_timer_t;
 				memset(m_timer, 0, sizeof(uv_timer_t));
@@ -61,6 +78,7 @@ namespace EQ {
 			m_cb(this);
 		}
 	
+		EQ::EventLoop *m_loop;
 		uv_timer_t *m_timer;
 		std::function<void(Timer*)> m_cb;
 	};

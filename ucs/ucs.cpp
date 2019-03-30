@@ -153,7 +153,7 @@ int main() {
 		if(ChannelListProcessTimer.Check())
 			ChannelList->Process();
 
-		EQ::EventLoop::Get().Process();
+		EQ::EventLoop::GetDefault().Process();
 
 		Sleep(5);
 	}

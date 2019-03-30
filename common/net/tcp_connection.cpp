@@ -15,7 +15,7 @@ EQ::Net::TCPConnection::~TCPConnection() {
 	Disconnect();
 }
 
-void EQ::Net::TCPConnection::Connect(const std::string &addr, int port, bool ipv6, std::function<void(std::shared_ptr<TCPConnection>)> cb)
+void EQ::Net::TCPConnection::Connect(EQ::EventLoop *loop, const std::string & addr, int port, bool ipv6, std::function<void(std::shared_ptr<TCPConnection>)> cb)
 {
 	struct EQTCPConnectBaton
 	{
@@ -23,10 +23,9 @@ void EQ::Net::TCPConnection::Connect(const std::string &addr, int port, bool ipv
 		std::function<void(std::shared_ptr<EQ::Net::TCPConnection>)> cb;
 	};
 
-	auto loop = EQ::EventLoop::Get().Handle();
 	uv_tcp_t *socket = new uv_tcp_t;
 	memset(socket, 0, sizeof(uv_tcp_t));
-	uv_tcp_init(loop, socket);
+	uv_tcp_init(loop->Handle(), socket);
 
 	sockaddr_storage iaddr;
 	if (ipv6) {
@@ -62,6 +61,11 @@ void EQ::Net::TCPConnection::Connect(const std::string &addr, int port, bool ipv
 			cb(connection);
 		}
 	});
+}
+
+void EQ::Net::TCPConnection::Connect(const std::string &addr, int port, bool ipv6, std::function<void(std::shared_ptr<TCPConnection>)> cb)
+{
+	Connect(&EventLoop::GetDefault(), addr, port, ipv6, cb);
 }
 
 void EQ::Net::TCPConnection::Start() {

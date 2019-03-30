@@ -136,7 +136,7 @@ int main(int argc, char *argv[]) {
 			zones.erase(rem);
 		}
 
-		EQ::EventLoop::Get().Process();
+		EQ::EventLoop::GetDefault().Process();
 		Sleep(5);
 	}
 

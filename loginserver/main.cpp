@@ -179,7 +179,7 @@ int main()
 	while (run_server) {
 		Timer::SetCurrentTime();
 		server.client_manager->Process();
-		EQ::EventLoop::Get().Process();
+		EQ::EventLoop::GetDefault().Process();
 		Sleep(5);
 	}
 

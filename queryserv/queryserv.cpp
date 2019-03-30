@@ -99,7 +99,7 @@ int main() {
 		if(LFGuildExpireTimer.Check())
 			lfguildmanager.ExpireEntries();
 
-		EQ::EventLoop::Get().Process();
+		EQ::EventLoop::GetDefault().Process();
 		Sleep(5);
 	}
 	LogSys.CloseFileLogs();

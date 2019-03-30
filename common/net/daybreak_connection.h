@@ -13,6 +13,7 @@
 
 namespace EQ
 {
+	class EventLoop;
 	namespace Net
 	{
 		enum DaybreakProtocolOpcode
@@ -252,6 +253,7 @@ namespace EQ
 				resend_timeout = 90000;
 				connection_close_time = 2000;
 				outgoing_data_rate = 0.0;
+				loop = nullptr;
 			}
 
 			size_t max_packet_size;
@@ -275,6 +277,7 @@ namespace EQ
 			DaybreakEncodeType encode_passes[2];
 			int port;
 			double outgoing_data_rate;
+			EQ::EventLoop *loop;
 		};
 
 		class DaybreakConnectionManager

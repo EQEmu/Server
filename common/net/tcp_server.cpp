@@ -7,6 +7,13 @@ void on_close_tcp_server_handle(uv_handle_t* handle) {
 
 EQ::Net::TCPServer::TCPServer()
 {
+	m_loop = &EventLoop::GetDefault();
+	m_socket = nullptr;
+}
+
+EQ::Net::TCPServer::TCPServer(EQ::EventLoop *loop)
+{
+	m_loop = loop;
 	m_socket = nullptr;
 }
 
@@ -32,7 +39,7 @@ void EQ::Net::TCPServer::Listen(const std::string &addr, int port, bool ipv6, st
 
 	m_on_new_connection = cb;
 
-	auto loop = EQ::EventLoop::Get().Handle();
+	auto loop = m_loop->Handle();
 	m_socket = new uv_tcp_t;
 	memset(m_socket, 0, sizeof(uv_tcp_t));
 	uv_tcp_init(loop, m_socket);
@@ -53,7 +60,7 @@ void EQ::Net::TCPServer::Listen(const std::string &addr, int port, bool ipv6, st
 			return;
 		}
 
-		auto loop = EQ::EventLoop::Get().Handle();
+		auto loop = server->loop;
 		uv_tcp_t *client = new uv_tcp_t;
 		memset(client, 0, sizeof(uv_tcp_t));
 		uv_tcp_init(loop, client);

@@ -7,14 +7,19 @@ namespace EQ
 {
 	class EventLoop
 	{
-	public:
-		static EventLoop &Get() {
-			static thread_local EventLoop inst;
-			return inst;
+	public:		
+		EventLoop() {
+			memset(&m_loop, 0, sizeof(uv_loop_t));
+			uv_loop_init(&m_loop);
 		}
 
 		~EventLoop() {
 			uv_loop_close(&m_loop);
+		}
+		
+		static EventLoop &GetDefault() {
+			static EventLoop inst;
+			return inst;
 		}
 
 		void Process() {
@@ -23,12 +28,7 @@ namespace EQ
 
 		uv_loop_t* Handle() { return &m_loop; }
 
-	private:
-		EventLoop() {
-			memset(&m_loop, 0, sizeof(uv_loop_t));
-			uv_loop_init(&m_loop);
-		}
-		
+	private:		
 		EventLoop(const EventLoop&);
 		EventLoop& operator=(const EventLoop&);
 	
