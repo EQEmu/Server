@@ -16,3 +16,6 @@
 [submodule "submodules/recastnavigation"]
 	path = submodules/recastnavigation
 	url = https://github.com/recastnavigation/recastnavigation.git
+[submodule "submodules/concurrentqueue"]
+	path = submodules/concurrentqueue
+	url = https://github.com/cameron314/concurrentqueue.git
