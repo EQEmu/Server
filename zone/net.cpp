@@ -510,7 +510,7 @@ int main(int argc, char** argv) {
 			eqsm.reset(new EQ::Net::EQStreamManager(opts));
 			eqsf_open = true;
 
-			eqsm->OnNewConnection([&stream_identifier](std::shared_ptr<EQ::Net::EQStream> stream) {
+			eqsm->OnNewConnection([&stream_identifier](std::shared_ptr<EQStreamInterface> stream) {
 				stream_identifier.AddStream(stream);
 				LogF(Logs::Detail, Logs::World_Server, "New connection from IP {0}:{1}", stream->GetRemoteIP(), ntohs(stream->GetRemotePort()));
 			});

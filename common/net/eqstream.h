@@ -19,12 +19,12 @@ namespace EQ
 			EQStreamManager(const EQStreamManagerInterfaceOptions &options);
 			~EQStreamManager();
 
-			void OnNewConnection(std::function<void(std::shared_ptr<EQStream>)> func) { m_on_new_connection = func; }
-			void OnConnectionStateChange(std::function<void(std::shared_ptr<EQStream>, DbProtocolStatus, DbProtocolStatus)> func) { m_on_connection_state_change = func; }
+			virtual void OnNewConnection(std::function<void(std::shared_ptr<EQStreamInterface>)> func) { m_on_new_connection = func; }
+			virtual void OnConnectionStateChange(std::function<void(std::shared_ptr<EQStreamInterface>, EQ::Net::DbProtocolStatus, EQ::Net::DbProtocolStatus)> func) { m_on_connection_state_change = func; }
 		private:
 			DaybreakConnectionManager m_daybreak;
-			std::function<void(std::shared_ptr<EQStream>)> m_on_new_connection;
-			std::function<void(std::shared_ptr<EQStream>, DbProtocolStatus, DbProtocolStatus)> m_on_connection_state_change;
+			std::function<void(std::shared_ptr<EQStreamInterface>)> m_on_new_connection;
+			std::function<void(std::shared_ptr<EQStreamInterface>, DbProtocolStatus, DbProtocolStatus)> m_on_connection_state_change;
 			std::map<std::shared_ptr<DaybreakConnection>, std::shared_ptr<EQStream>> m_streams;
 
 			void DaybreakNewConnection(std::shared_ptr<DaybreakConnection> connection);

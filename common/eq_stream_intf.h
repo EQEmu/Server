@@ -7,6 +7,7 @@
 #include "emu_versions.h"
 #include "eq_packet.h"
 #include "net/daybreak_connection.h"
+#include "event/event_loop.h"
 
 typedef enum {
 	ESTABLISHED,
@@ -23,6 +24,7 @@ struct EQStreamManagerInterfaceOptions
 {
 	EQStreamManagerInterfaceOptions() {
 		opcode_size = 2;
+		loop = &EQ::EventLoop::GetDefault();
 	}
 
 	EQStreamManagerInterfaceOptions(int port, bool encoded, bool compressed) {
@@ -41,13 +43,16 @@ struct EQStreamManagerInterfaceOptions
 		}
 
 		daybreak_options.port = port;
+		loop = &EQ::EventLoop::GetDefault();
 	}
 
 	int opcode_size;
 	bool track_opcode_stats;
 	EQ::Net::DaybreakConnectionManagerOptions daybreak_options;
+	EQ::EventLoop *loop;
 };
 
+class EQStreamInterface;
 class EQStreamManagerInterface
 {
 public:
@@ -56,6 +61,9 @@ public:
 
 	const EQStreamManagerInterfaceOptions& GetOptions() const { return m_options; }
 	EQStreamManagerInterfaceOptions& MutateOptions() { return m_options; }
+
+	virtual void OnNewConnection(std::function<void(std::shared_ptr<EQStreamInterface>)> func) = 0;
+	virtual void OnConnectionStateChange(std::function<void(std::shared_ptr<EQStreamInterface>, EQ::Net::DbProtocolStatus, EQ::Net::DbProtocolStatus)> func) = 0;
 protected:
 	EQStreamManagerInterfaceOptions m_options;
 };

@@ -10,6 +10,7 @@
 EQ::Net::DaybreakConnectionManager::DaybreakConnectionManager()
 {
 	m_attached = nullptr;
+	m_next_id = 1;
 	memset(&m_timer, 0, sizeof(uv_timer_t));
 	memset(&m_socket, 0, sizeof(uv_udp_t));
 
@@ -20,6 +21,7 @@ EQ::Net::DaybreakConnectionManager::DaybreakConnectionManager(const DaybreakConn
 {
 	m_attached = nullptr;
 	m_options = opts;
+	m_next_id = 1;
 	memset(&m_timer, 0, sizeof(uv_timer_t));
 	memset(&m_socket, 0, sizeof(uv_udp_t));
 
@@ -94,7 +96,7 @@ void EQ::Net::DaybreakConnectionManager::Connect(const std::string &addr, int po
 {
 	//todo dns resolution
 
-	auto connection = std::shared_ptr<DaybreakConnection>(new DaybreakConnection(this, addr, port));
+	auto connection = std::shared_ptr<DaybreakConnection>(new DaybreakConnection(this, GetNextId(), addr, port));
 	connection->m_self = connection;
 
 	if (m_on_new_connection) {
@@ -232,7 +234,7 @@ void EQ::Net::DaybreakConnectionManager::ProcessPacket(const std::string &endpoi
 				StaticPacket p((void*)data, size);
 				auto request = p.GetSerialize<DaybreakConnect>(0);
 
-				connection = std::shared_ptr<DaybreakConnection>(new DaybreakConnection(this, request, endpoint, port));
+				connection = std::shared_ptr<DaybreakConnection>(new DaybreakConnection(this, GetNextId(), request, endpoint, port));
 				connection->m_self = connection;
 
 				if (m_on_new_connection) {
@@ -290,10 +292,18 @@ void EQ::Net::DaybreakConnectionManager::SendDisconnect(const std::string &addr,
 	});
 }
 
+uint64_t EQ::Net::DaybreakConnectionManager::GetNextId()
+{
+	auto id = m_next_id;
+	m_next_id++;
+	return id;
+}
+
 //new connection made as server
-EQ::Net::DaybreakConnection::DaybreakConnection(DaybreakConnectionManager *owner, const DaybreakConnect &connect, const std::string &endpoint, int port)
+EQ::Net::DaybreakConnection::DaybreakConnection(DaybreakConnectionManager *owner, uint64_t id, const DaybreakConnect &connect, const std::string &endpoint, int port)
 {
 	m_owner = owner;
+	m_id = id;
 	m_last_send = Clock::now();
 	m_last_recv = Clock::now();
 	m_status = StatusConnected;
@@ -316,9 +326,10 @@ EQ::Net::DaybreakConnection::DaybreakConnection(DaybreakConnectionManager *owner
 }
 
 //new connection made as client
-EQ::Net::DaybreakConnection::DaybreakConnection(DaybreakConnectionManager *owner, const std::string &endpoint, int port)
+EQ::Net::DaybreakConnection::DaybreakConnection(DaybreakConnectionManager *owner, uint64_t id, const std::string &endpoint, int port)
 {
 	m_owner = owner;
+	m_id = id;
 	m_last_send = Clock::now();
 	m_last_recv = Clock::now();
 	m_status = StatusConnecting;

@@ -33,7 +33,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/version.h"
 #include "../common/eqtime.h"
 #include "../common/event/event_loop.h"
-#include "../common/net/eqstream.h"
+#include "../common/net/eqstream_concurrent.h"
 #include "../common/opcodemgr.h"
 #include "../common/guilds.h"
 #include "../common/eq_stream_ident.h"
@@ -505,7 +505,7 @@ int main(int argc, char** argv) {
 	opts.daybreak_options.resend_delay_max = RuleI(Network, ResendDelayMaxMS);
 	opts.daybreak_options.outgoing_data_rate = RuleR(Network, ClientDataRate);
 
-	EQ::Net::EQStreamManager eqsm(opts);
+	EQ::Net::ConcurrentEQStreamManager eqsm(opts);
 
 	//register all the patches we have avaliable with the stream identifier.
 	EQStreamIdentifier stream_identifier;
@@ -520,7 +520,7 @@ int main(int argc, char** argv) {
 	std::shared_ptr<EQStreamInterface> eqs;
 	EQStreamInterface *eqsi;
 
-	eqsm.OnNewConnection([&stream_identifier](std::shared_ptr<EQ::Net::EQStream> stream) {
+	eqsm.OnNewConnection([&stream_identifier](std::shared_ptr<EQStreamInterface> stream) {
 		stream_identifier.AddStream(stream);
 		LogF(Logs::Detail, Logs::World_Server, "New connection from IP {0}:{1}", stream->GetRemoteIP(), ntohs(stream->GetRemotePort()));
 	});

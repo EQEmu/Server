@@ -482,7 +482,7 @@ Clientlist::Clientlist(int ChatPort) {
 	if (!ChatOpMgr->LoadOpcodes("mail_opcodes.conf"))
 		exit(1);
 
-	chatsf->OnNewConnection([this](std::shared_ptr<EQ::Net::EQStream> stream) {
+	chatsf->OnNewConnection([this](std::shared_ptr<EQStreamInterface> stream) {
 		LogF(Logs::General, Logs::Login_Server, "New Client UDP connection from {0}:{1}", stream->GetRemoteIP(), stream->GetRemotePort());
 		stream->SetOpcodeManager(&ChatOpMgr);
 

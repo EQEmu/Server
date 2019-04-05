@@ -1,10 +1,12 @@
 #pragma once
 
 #include "../eq_stream_intf.h"
+#include "eqstream_concurrent_message.h"
 #include <memory>
 
 namespace EQ
 {
+	class Timer;
 	namespace Net
 	{
 		class ConcurrentEQStream;
@@ -14,22 +16,30 @@ namespace EQ
 			ConcurrentEQStreamManager(const EQStreamManagerInterfaceOptions &options);
 			~ConcurrentEQStreamManager();
 
-			void OnNewConnection(std::function<void(std::shared_ptr<ConcurrentEQStream>)> func);
-			void OnConnectionStateChange(std::function<void(std::shared_ptr<ConcurrentEQStream>, DbProtocolStatus, DbProtocolStatus)> func);
+			virtual void OnNewConnection(std::function<void(std::shared_ptr<EQStreamInterface>)> func);
+			virtual void OnConnectionStateChange(std::function<void(std::shared_ptr<EQStreamInterface>, EQ::Net::DbProtocolStatus, EQ::Net::DbProtocolStatus)> func);
+
+			void _PushToBackgroundQueue(ceqs_msg_t* msg);
+			void _PushToForegroundQueue(ceqs_msg_t* msg);
 		private:
 			struct Impl;
 			std::unique_ptr<Impl> _impl;
+			void _BackgroundThread();
+			void _BackgroundTimer(EQ::Timer *t);
+			void _BackgroundUpdateStatsTimer(EQ::Timer *t);
+			void _ProcessBackgroundMessage(const ceqs_msg_t &msg);
+			void _ForegroundTimer(EQ::Timer *t);
+			void _ProcessForegroundMessage(const ceqs_msg_t &msg);
 
 			void DaybreakNewConnection(std::shared_ptr<DaybreakConnection> connection);
 			void DaybreakConnectionStateChange(std::shared_ptr<DaybreakConnection> connection, DbProtocolStatus from, DbProtocolStatus to);
 			void DaybreakPacketRecv(std::shared_ptr<DaybreakConnection> connection, const Packet &p);
-			friend class EQStream;
 		};
 
 		class ConcurrentEQStream : public EQStreamInterface
 		{
 		public:
-			ConcurrentEQStream(EQStreamManagerInterface *parent, uint64_t id);
+			ConcurrentEQStream(ConcurrentEQStreamManager *parent, uint64_t id, const std::string &remote_endpoint, int remote_port, DbProtocolStatus state);
 			~ConcurrentEQStream();
 
 			virtual void QueuePacket(const EQApplicationPacket *p, bool ack_req = true);
@@ -50,11 +60,15 @@ namespace EQ
 			virtual Stats GetStats() const;
 			virtual void ResetStats();
 			virtual EQStreamManagerInterface* GetManager() const;
+
+			void _SetState(DbProtocolStatus state);
+			void _RecvPacket(std::unique_ptr<EQ::Net::Packet> p);
+			void _UpdateStats(const DaybreakConnectionStats &stats);
+			void _Invalidate();
 		private:
 			struct Impl;
 
 			std::unique_ptr<Impl> _impl;
-			friend class ConcurrentEQStreamManager;
 		};
 	}
 }

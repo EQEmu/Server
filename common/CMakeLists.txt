@@ -224,6 +224,7 @@ SET(common_headers
 	net/endian.h
 	net/eqstream.h
 	net/eqstream_concurrent.h
+	net/eqstream_concurrent_message.h
 	net/packet.h
 	net/servertalk_client_connection.h
 	net/servertalk_legacy_client_connection.h
@@ -298,6 +299,7 @@ SOURCE_GROUP(Net FILES
 	net/eqstream.h
 	net/eqstream_concurrent.cpp
 	net/eqstream_concurrent.h
+	net/eqstream_concurrent_message.h
 	net/packet.cpp
 	net/packet.h
 	net/servertalk_client_connection.cpp

@@ -119,8 +119,8 @@ namespace EQ
 		class DaybreakConnection
 		{
 		public:
-			DaybreakConnection(DaybreakConnectionManager *owner, const DaybreakConnect &connect, const std::string &endpoint, int port);
-			DaybreakConnection(DaybreakConnectionManager *owner, const std::string &endpoint, int port);
+			DaybreakConnection(DaybreakConnectionManager *owner, uint64_t id, const DaybreakConnect &connect, const std::string &endpoint, int port);
+			DaybreakConnection(DaybreakConnectionManager *owner, uint64_t id, const std::string &endpoint, int port);
 			~DaybreakConnection();
 
 			const std::string& RemoteEndpoint() const { return m_endpoint; }
@@ -139,6 +139,7 @@ namespace EQ
 			const DaybreakEncodeType* GetEncodePasses() const { return m_encode_passes; }
 			const DaybreakConnectionManager* GetManager() const { return m_owner; }
 			DaybreakConnectionManager* GetManager() { return m_owner; }
+			uint64_t GetId() const { return m_id; }
 		private:
 			DaybreakConnectionManager *m_owner;
 			std::string m_endpoint;
@@ -161,6 +162,7 @@ namespace EQ
 			size_t m_rolling_ping;
 			Timestamp m_close_time;
 			double m_outgoing_budget;
+			uint64_t m_id;
 
 			struct DaybreakSentPacket
 			{
@@ -306,6 +308,7 @@ namespace EQ
 			uv_udp_t m_socket;
 			uv_loop_t *m_attached;
 			DaybreakConnectionManagerOptions m_options;
+			uint64_t m_next_id;
 			std::function<void(std::shared_ptr<DaybreakConnection>)> m_on_new_connection;
 			std::function<void(std::shared_ptr<DaybreakConnection>, DbProtocolStatus, DbProtocolStatus)> m_on_connection_state_change;
 			std::function<void(std::shared_ptr<DaybreakConnection>, const Packet&)> m_on_packet_recv;
@@ -315,6 +318,7 @@ namespace EQ
 			void ProcessPacket(const std::string &endpoint, int port, const char *data, size_t size);
 			std::shared_ptr<DaybreakConnection> FindConnectionByEndpoint(std::string addr, int port);
 			void SendDisconnect(const std::string &addr, int port);
+			uint64_t GetNextId();
 
 			friend class DaybreakConnection;
 		};
