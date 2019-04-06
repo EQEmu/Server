@@ -18,6 +18,7 @@ namespace EQ
 
 			virtual void OnNewConnection(std::function<void(std::shared_ptr<EQStreamInterface>)> func);
 			virtual void OnConnectionStateChange(std::function<void(std::shared_ptr<EQStreamInterface>, EQ::Net::DbProtocolStatus, EQ::Net::DbProtocolStatus)> func);
+			virtual void SetPriority(EQStreamPriority priority);
 
 			void _PushToBackgroundQueue(ceqs_msg_t* msg);
 			void _PushToForegroundQueue(ceqs_msg_t* msg);

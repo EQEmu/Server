@@ -18,7 +18,8 @@ namespace EQ
 			QueuePacket,
 			TerminateBackground,
 			CloseConnection,
-			ResetStats
+			ResetStats,
+			SetPriority
 		};
 
 		typedef struct  
@@ -85,5 +86,10 @@ namespace EQ
 			ceqs_msg_type type;
 		} ceqs_terminate_msg_t;
 
+		typedef struct
+		{
+			ceqs_msg_type type;
+			EQStreamPriority priority;
+		} ceqs_set_priority_msg_t;
 	}
 }

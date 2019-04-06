@@ -50,6 +50,12 @@ struct EQStreamManagerInterfaceOptions
 	EQ::EventLoop *loop;
 };
 
+enum EQStreamPriority : int32_t {
+	High,
+	Normal,
+	Low
+};
+
 class EQStreamInterface;
 class EQStreamManagerInterface
 {
@@ -62,6 +68,7 @@ public:
 
 	virtual void OnNewConnection(std::function<void(std::shared_ptr<EQStreamInterface>)> func) = 0;
 	virtual void OnConnectionStateChange(std::function<void(std::shared_ptr<EQStreamInterface>, EQ::Net::DbProtocolStatus, EQ::Net::DbProtocolStatus)> func) = 0;
+	virtual void SetPriority(EQStreamPriority priority) = 0;
 protected:
 	EQStreamManagerInterfaceOptions m_options;
 };
