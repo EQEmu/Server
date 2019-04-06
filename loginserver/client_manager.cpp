@@ -28,7 +28,7 @@ ClientManager::ClientManager()
 {
 	int titanium_port = atoi(server.config->GetVariable("Titanium", "port").c_str());
 	EQStreamManagerInterfaceOptions titanium_opts(titanium_port, false, false);
-	titanium_stream = new EQ::Net::EQStreamManager(titanium_opts);
+	titanium_stream = new EQ::Net::ConcurrentEQStreamManager(titanium_opts);
 	titanium_ops = new RegularOpcodeManager;
 	if (!titanium_ops->LoadOpcodes(server.config->GetVariable("Titanium", "opcodes").c_str()))
 	{
@@ -38,7 +38,7 @@ ClientManager::ClientManager()
 	}
 
 	titanium_stream->OnNewConnection([this](std::shared_ptr<EQStreamInterface> stream) {
-		LogF(Logs::General, Logs::Login_Server, "New Titanium client connection from {0}:{1}", stream->GetRemoteIP(), stream->GetRemotePort());
+		LogF(Logs::General, Logs::Login_Server, "New Titanium client connection from {0}:{1}", stream->GetRemoteAddr(), stream->GetRemotePort());
 		stream->SetOpcodeManager(&titanium_ops);
 		Client *c = new Client(stream, cv_titanium);
 		clients.push_back(c);
@@ -46,7 +46,7 @@ ClientManager::ClientManager()
 
 	int sod_port = atoi(server.config->GetVariable("SoD", "port").c_str());
 	EQStreamManagerInterfaceOptions sod_opts(sod_port, false, false);
-	sod_stream = new EQ::Net::EQStreamManager(sod_opts);
+	sod_stream = new EQ::Net::ConcurrentEQStreamManager(sod_opts);
 	sod_ops = new RegularOpcodeManager;
 	if (!sod_ops->LoadOpcodes(server.config->GetVariable("SoD", "opcodes").c_str()))
 	{
@@ -56,7 +56,7 @@ ClientManager::ClientManager()
 	}
 
 	sod_stream->OnNewConnection([this](std::shared_ptr<EQStreamInterface> stream) {
-		LogF(Logs::General, Logs::Login_Server, "New SoD client connection from {0}:{1}", stream->GetRemoteIP(), stream->GetRemotePort());
+		LogF(Logs::General, Logs::Login_Server, "New SoD client connection from {0}:{1}", stream->GetRemoteAddr(), stream->GetRemotePort());
 		stream->SetOpcodeManager(&sod_ops);
 		Client *c = new Client(stream, cv_sod);
 		clients.push_back(c);

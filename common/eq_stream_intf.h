@@ -29,7 +29,6 @@ struct EQStreamManagerInterfaceOptions
 
 	EQStreamManagerInterfaceOptions(int port, bool encoded, bool compressed) {
 		opcode_size = 2;
-		track_opcode_stats = false;
 
 		//World seems to support both compression and xor zone supports one or the others.
 		//Enforce one or the other in the convienence construct
@@ -47,7 +46,6 @@ struct EQStreamManagerInterfaceOptions
 	}
 
 	int opcode_size;
-	bool track_opcode_stats;
 	EQ::Net::DaybreakConnectionManagerOptions daybreak_options;
 	EQ::EventLoop *loop;
 };

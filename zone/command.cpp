@@ -9528,26 +9528,23 @@ void command_netstats(Client *c, const Seperator *sep)
 			c->Message(0, "Outgoing Link Saturation %.2f%% (%.2fkb/sec)", 100.0 * (1.0 - ((opts.daybreak_options.outgoing_data_rate - stats.datarate_remaining) / opts.daybreak_options.outgoing_data_rate)), opts.daybreak_options.outgoing_data_rate);
 		}
 		
-		if (opts.track_opcode_stats) {
-			c->Message(0, "--------------------------------------------------------------------");
-			c->Message(0, "Sent Packet Types");
-			for (auto i = 0; i < _maxEmuOpcode; ++i) {
-				auto cnt = eqs_stats.SentCount[i];
-				if (cnt > 0) {
-					c->Message(0, "%s: %u (%.2f / sec)", OpcodeNames[i], cnt, cnt / sec_since_stats_reset);
-				}
-			}
-
-			c->Message(0, "--------------------------------------------------------------------");
-			c->Message(0, "Recv Packet Types");
-			for (auto i = 0; i < _maxEmuOpcode; ++i) {
-				auto cnt = eqs_stats.RecvCount[i];
-				if (cnt > 0) {
-					c->Message(0, "%s: %u (%.2f / sec)", OpcodeNames[i], cnt, cnt / sec_since_stats_reset);
-				}
+		c->Message(0, "--------------------------------------------------------------------");
+		c->Message(0, "Sent Packet Types");
+		for (auto i = 0; i < _maxEmuOpcode; ++i) {
+			auto cnt = eqs_stats.SentCount[i];
+			if (cnt > 0) {
+				c->Message(0, "%s: %u (%.2f / sec)", OpcodeNames[i], cnt, cnt / sec_since_stats_reset);
 			}
 		}
-		
+
+		c->Message(0, "--------------------------------------------------------------------");
+		c->Message(0, "Recv Packet Types");
+		for (auto i = 0; i < _maxEmuOpcode; ++i) {
+			auto cnt = eqs_stats.RecvCount[i];
+			if (cnt > 0) {
+				c->Message(0, "%s: %u (%.2f / sec)", OpcodeNames[i], cnt, cnt / sec_since_stats_reset);
+			}
+		}
 		c->Message(0, "--------------------------------------------------------------------");
 	}
 }

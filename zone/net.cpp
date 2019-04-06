@@ -44,6 +44,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/eqemu_logsys.h"
 #include "../common/eqemu_logsys_fmt.h"
 #include "../common/net/console_server.h"
+#include "../common/net/eqstream_concurrent.h"
 
 #include "zone_config.h"
 #include "masterentity.h"
@@ -461,7 +462,7 @@ int main(int argc, char** argv) {
 	UpdateWindowTitle();
 	std::shared_ptr<EQStreamInterface> eqss;
 	EQStreamInterface *eqsi;
-	std::unique_ptr<EQ::Net::EQStreamManager> eqsm;
+	std::unique_ptr<EQ::Net::ConcurrentEQStreamManager> eqsm;
 	std::chrono::time_point<std::chrono::system_clock> frame_prev = std::chrono::system_clock::now();
 	std::unique_ptr<EQ::Net::ConsoleServer> console;
 
@@ -506,8 +507,7 @@ int main(int argc, char** argv) {
 			opts.daybreak_options.resend_delay_min = RuleI(Network, ResendDelayMinMS);
 			opts.daybreak_options.resend_delay_max = RuleI(Network, ResendDelayMaxMS);
 			opts.daybreak_options.outgoing_data_rate = RuleR(Network, ClientDataRate);
-			opts.track_opcode_stats = RuleB(Network, TrackOpcodeStats);
-			eqsm.reset(new EQ::Net::EQStreamManager(opts));
+			eqsm.reset(new EQ::Net::ConcurrentEQStreamManager(opts));
 			eqsf_open = true;
 
 			eqsm->OnNewConnection([&stream_identifier](std::shared_ptr<EQStreamInterface> stream) {

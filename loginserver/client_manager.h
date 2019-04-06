@@ -20,7 +20,7 @@
 
 #include "../common/global_define.h"
 #include "../common/opcodemgr.h"
-#include "../common/net/eqstream.h"
+#include "../common/net/eqstream_concurrent.h"
 #include "client.h"
 #include <list>
 
@@ -63,9 +63,9 @@ private:
 
 	std::list<Client*> clients;
 	OpcodeManager *titanium_ops;
-	EQ::Net::EQStreamManager *titanium_stream;
+	EQ::Net::ConcurrentEQStreamManager *titanium_stream;
 	OpcodeManager *sod_ops;
-	EQ::Net::EQStreamManager *sod_stream;
+	EQ::Net::ConcurrentEQStreamManager *sod_stream;
 };
 
 #endif
