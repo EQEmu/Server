@@ -9522,6 +9522,7 @@ void command_netstats(Client *c, const Seperator *sep)
 		c->Message(0, "Resent Packets: %u (%.2f/sec)", stats.resent_packets, stats.resent_packets / sec_since_stats_reset);
 		c->Message(0, "Resent Fragments: %u (%.2f/sec)", stats.resent_fragments, stats.resent_fragments / sec_since_stats_reset);
 		c->Message(0, "Resent Non-Fragments: %u (%.2f/sec)", stats.resent_full, stats.resent_full / sec_since_stats_reset);
+		c->Message(0, "Resent Times: %ums (min) %ums (max) %ums (avg)", stats.resent_time_min, stats.resent_time_max, stats.resent_time_average);
 		c->Message(0, "Dropped Datarate Packets: %u (%.2f/sec)", stats.dropped_datarate_packets, stats.dropped_datarate_packets / sec_since_stats_reset);
 		
 		if (opts.daybreak_options.outgoing_data_rate > 0.0) {

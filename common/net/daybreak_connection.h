@@ -91,6 +91,9 @@ namespace EQ
 				resent_packets = 0;
 				resent_fragments = 0;
 				resent_full = 0;
+				resent_time_min = 0;
+				resent_time_max = 0;
+				resent_time_average = 0;
 				datarate_remaining = 0.0;
 			}
 
@@ -111,6 +114,9 @@ namespace EQ
 			uint64_t resent_packets;
 			uint64_t resent_fragments;
 			uint64_t resent_full;
+			uint64_t resent_time_min;
+			uint64_t resent_time_max;
+			uint64_t resent_time_average;
 			double datarate_remaining;
 		};
 

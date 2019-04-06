@@ -1105,6 +1105,10 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 				}
 				m_stats.resent_packets++;
 
+				m_stats.resent_time_min = std::min(m_stats.resent_time_min, (uint64_t)time_since_last_send.count());
+				m_stats.resent_time_max = std::max(m_stats.resent_time_max, (uint64_t)time_since_last_send.count());
+				m_stats.resent_time_average = (m_stats.resent_time_average / 2) + (time_since_last_send.count() / 2);
+
 				InternalBufferedSend(p);
 				entry.second.last_sent = now;
 				entry.second.times_resent++;
@@ -1133,6 +1137,10 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 					m_stats.resent_full++;
 				}
 				m_stats.resent_packets++;
+
+				m_stats.resent_time_min = std::min(m_stats.resent_time_min, (uint64_t)time_since_last_send.count());
+				m_stats.resent_time_max = std::max(m_stats.resent_time_max, (uint64_t)time_since_last_send.count());
+				m_stats.resent_time_average = (m_stats.resent_time_average / 2) + (time_since_last_send.count() / 2);
 
 				InternalBufferedSend(p);
 				entry.second.last_sent = now;

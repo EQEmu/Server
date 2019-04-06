@@ -689,6 +689,9 @@ void callGetPacketStatistics(Json::Value &response)
 		row["resent_packets"]           = stats.resent_packets;
 		row["resent_fragments"]         = stats.resent_fragments;
 		row["resent_non_fragments"]     = stats.resent_full;
+		row["resent_time_min"]          = stats.resent_time_min;
+		row["resent_time_max"]          = stats.resent_time_max;
+		row["resent_time_average"]      = stats.resent_time_average;
 		row["dropped_datarate_packets"] = stats.dropped_datarate_packets;
 
 		Json::Value sent_packet_types;
