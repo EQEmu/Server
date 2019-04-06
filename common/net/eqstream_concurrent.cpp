@@ -85,7 +85,7 @@ void EQ::Net::ConcurrentEQStreamManager::_BackgroundThread() {
 
 	while (true == _impl->background_running) {
 		loop.Process();
-		std::this_thread::sleep_for(std::chrono::microseconds(1));
+		Sleep(1);
 	}
 
 	_impl->background_loop_timer.release();
