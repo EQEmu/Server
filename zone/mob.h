@@ -1091,7 +1091,7 @@ public:
 	inline glm::vec4 GetCurrentWayPoint() const { return m_CurrentWayPoint; }
 	inline float GetCWPP() const { return(static_cast<float>(cur_wp_pause)); }
 	inline int GetCWP() const { return(cur_wp); }
-	void SetCurrentWP(uint16 waypoint) { cur_wp = waypoint; }
+	void SetCurrentWP(int waypoint) { cur_wp = waypoint; }
 	virtual FACTION_VALUE GetReverseFactionCon(Mob* iOther) { return FACTION_INDIFFERENT; }
 
 	virtual const bool IsUnderwaterOnly() const { return false; }
