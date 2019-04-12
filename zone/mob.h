@@ -159,7 +159,8 @@ public:
 		uint8 in_bracertexture,
 		uint8 in_handtexture,
 		uint8 in_legtexture,
-		uint8 in_feettexture
+		uint8 in_feettexture,
+		uint16 in_usemodel
 	);
 	virtual ~Mob();
 
@@ -1280,6 +1281,7 @@ protected:
 
 	uint8 gender;
 	uint16 race;
+	uint16 use_model;
 	uint8 base_gender;
 	uint16 base_race;
 	uint8 class_;
