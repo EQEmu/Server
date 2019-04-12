@@ -18,6 +18,7 @@
 
 #include "faction.h"
 #include "races.h"
+#include "rulesys.h"
 
 const char *FactionValueToString(FACTION_VALUE fv)
 {
@@ -59,34 +60,31 @@ FACTION_VALUE CalculateFaction(FactionMods* fm, int32 tmpCharacter_value)
 	if (fm) {
 		character_value += fm->base + fm->class_mod + fm->race_mod + fm->deity_mod;
 	}
-	if (character_value >= 1100) {
+	if (character_value >= RuleI(Faction, AllyFactionMinimum)) {
 		return FACTION_ALLY;
 	}
-	if (character_value >= 750 && character_value <= 1099) {
+	if (character_value >= RuleI(Faction, WarmlyFactionMinimum)) {
 		return FACTION_WARMLY;
 	}
-	if (character_value >= 500 && character_value <= 749) {
+	if (character_value >= RuleI(Faction, KindlyFactionMinimum)) {
 		return FACTION_KINDLY;
 	}
-	if (character_value >= 100 && character_value <= 499) {
+	if (character_value >= RuleI(Faction, AmiablyFactionMinimum)) {
 		return FACTION_AMIABLE;
 	}
-	if (character_value >= 0 && character_value <= 99) {
+	if (character_value >= RuleI(Faction, IndifferentlyFactionMinimum)) {
 		return FACTION_INDIFFERENT;
 	}
-	if (character_value >= -100 && character_value <= -1) {
+	if (character_value >= RuleI(Faction, ApprehensivelyFactionMinimum)) {
 		return FACTION_APPREHENSIVE;
 	}
-	if (character_value >= -500 && character_value <= -101) {
+	if (character_value >= RuleI(Faction, DubiouslyFactionMinimum)) {
 		return FACTION_DUBIOUS;
 	}
-	if (character_value >= -750 && character_value <= -501) {
+	if (character_value >= RuleI(Faction, ThreateninglyFactionMinimum)) {
 		return FACTION_THREATENLY;
 	}
-	if (character_value <= -751) {
-		return FACTION_SCOWLS;
-	}
-	return FACTION_INDIFFERENT;
+	return FACTION_SCOWLS;
 }
 
 // this function should check if some races have more than one race define
