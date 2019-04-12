@@ -1553,7 +1553,7 @@ void Mob::ShowStats(Client* client)
 		}
 	}
 	else {
-		client->Message(0, "  Level: %i  AC: %i  Class: %i  Size: %1.1f  Haste: %i", GetLevel(), GetAC(), GetClass(), GetSize(), GetHaste());
+		client->Message(0, "  Level: %i  AC: %i  Class: %i  Size: %1.1f  Haste: %i", GetLevel(), ACSum(), GetClass(), GetSize(), GetHaste());
 		client->Message(0, "  HP: %i  Max HP: %i",GetHP(), GetMaxHP());
 		client->Message(0, "  Mana: %i  Max Mana: %i", GetMana(), GetMaxMana());
 		client->Message(0, "  Total ATK: %i  Worn/Spell ATK (Cap %i): %i", GetATK(), RuleI(Character, ItemATKCap), GetATKBonus());
@@ -2121,6 +2121,16 @@ bool Mob::IsPlayerRace(uint16 in_race) {
 	return false;
 }
 
+uint16 Mob::GetFactionRace() {
+	uint16 current_race = GetRace();	
+	if (IsPlayerRace(current_race) || current_race == TREE || 
+		current_race == MINOR_ILL_OBJ) {
+		return current_race;
+	}
+	else {
+		return (GetBaseRace());
+	}
+}
 
 uint8 Mob::GetDefaultGender(uint16 in_race, uint8 in_gender) {
 	if (Mob::IsPlayerRace(in_race) || in_race == 15 || in_race == 50 || in_race == 57 || in_race == 70 || in_race == 98 || in_race == 118 || in_race == 562) {

@@ -30,18 +30,6 @@ namespace EQEmu
 
 const int MercAISpellRange = 100; // TODO: Write a method that calcs what the merc's spell range is based on spell, equipment, AA, whatever and replace this
 
-enum MercStanceType {
-	MercStancePassive = 1,
-	MercStanceBalanced,
-	MercStanceEfficient,
-	MercStanceReactive,
-	MercStanceAggressive,
-	MercStanceAssist,
-	MercStanceBurn,
-	MercStanceEfficient2,
-	MercStanceBurnAE
-};
-
 struct MercSpell {
 	uint16 spellid; // <= 0 = no spell
 	uint32 type; // 0 = never, must be one (and only one) of the defined values
@@ -175,7 +163,7 @@ public:
 	uint8 GetTierID() { return _TierID; }
 	uint32 GetCostFormula() { return _CostFormula; }
 	uint32 GetMercNameType() { return _NameType; }
-	uint32 GetStance() { return _currentStance; }
+	EQEmu::constants::StanceType GetStance() { return _currentStance; }
 	int GetHatedCount() { return _hatedCount; }
 
 	inline const uint8 GetClientVersion() const { return _OwnerClientVersion; }
@@ -265,7 +253,7 @@ public:
 	void SetMercNameType( uint8 nametype ) { _NameType = nametype; }
 	void SetClientVersion(uint8 clientVersion) { _OwnerClientVersion = clientVersion; }
 	void SetSuspended(bool suspended) { _suspended = suspended; }
-	void SetStance( uint32 stance ) { _currentStance = stance; }
+	void SetStance( EQEmu::constants::StanceType stance ) { _currentStance = stance; }
 	void SetHatedCount( int count ) { _hatedCount = count; }
 
 	void Sit();
@@ -385,7 +373,7 @@ private:
 	uint8 _CostFormula;
 	uint8 _NameType;
 	uint8 _OwnerClientVersion;
-	uint32 _currentStance;
+	EQEmu::constants::StanceType _currentStance;
 
 	EQEmu::InventoryProfile m_inv;
 	int32 max_end;

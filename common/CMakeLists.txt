@@ -73,7 +73,6 @@ SET(common_sources
 	unix.cpp
 	xml_parser.cpp
 	platform.cpp
-	event/event_loop.cpp
 	json/jsoncpp.cpp
 	net/console_server.cpp
 	net/console_server_connection.cpp
@@ -209,8 +208,8 @@ SET(common_headers
 	version.h
 	xml_parser.h
 	zone_numbers.h
-	event/background_task.h
 	event/event_loop.h
+	event/task.h
 	event/timer.h
 	json/json.h
 	json/json-forwards.h
@@ -267,10 +266,9 @@ SET(common_headers
 )
 
 SOURCE_GROUP(Event FILES
-	event/background_task.h
-	event/event_loop.cpp
 	event/event_loop.h
 	event/timer.h
+	event/task.h
 )
 
 SOURCE_GROUP(Json FILES

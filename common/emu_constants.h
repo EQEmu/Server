@@ -203,6 +203,26 @@ namespace EQEmu
 		const size_t SAY_LINK_CLOSER_SIZE = 1;
 		const size_t SAY_LINK_MAXIMUM_SIZE = (SAY_LINK_OPENER_SIZE + SAY_LINK_BODY_SIZE + SAY_LINK_TEXT_SIZE + SAY_LINK_CLOSER_SIZE);
 
+		enum StanceType : int {
+			stanceUnknown = 0,
+			stancePassive,
+			stanceBalanced,
+			stanceEfficient,
+			stanceReactive,
+			stanceAggressive,
+			stanceAssist,
+			stanceBurn,
+			stanceEfficient2,
+			stanceBurnAE
+		};
+
+		const char *GetStanceName(StanceType stance_type);
+		int ConvertStanceTypeToIndex(StanceType stance_type);
+
+		const int STANCE_TYPE_FIRST = stancePassive;
+		const int STANCE_TYPE_LAST = stanceBurnAE;
+		const int STANCE_TYPE_COUNT = stanceBurnAE;
+
 	} /*constants*/
 
 	namespace profile {
@@ -286,6 +306,12 @@ namespace EQEmu
 		CategoryID CategoryNameToCategoryID(const char* category_name);
 
 	} // namespace bug
+
+	enum WaypointStatus : int {
+		RoamBoxPauseInProgress = -3,
+		QuestControlNoGrid = -2,
+		QuestControlGrid = -1
+	};
 
 } /*EQEmu*/
 

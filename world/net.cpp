@@ -498,6 +498,11 @@ int main(int argc, char** argv) {
 	});
 
 	EQ::Net::EQStreamManagerOptions opts(9000, false, false);
+	opts.daybreak_options.resend_delay_ms = RuleI(Network, ResendDelayBaseMS);
+	opts.daybreak_options.resend_delay_factor = RuleR(Network, ResendDelayFactor);
+	opts.daybreak_options.resend_delay_min = RuleI(Network, ResendDelayMinMS);
+	opts.daybreak_options.resend_delay_max = RuleI(Network, ResendDelayMaxMS);
+
 	EQ::Net::EQStreamManager eqsm(opts);
 
 	//register all the patches we have avaliable with the stream identifier.

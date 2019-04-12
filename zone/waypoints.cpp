@@ -108,7 +108,7 @@ void NPC::ResumeWandering()
 		{	// we were paused by a quest
 			AI_walking_timer->Disable();
 			SetGrid(0 - GetGrid());
-			if (cur_wp == -1)
+			if (cur_wp == EQEmu::WaypointStatus::QuestControlGrid)
 			{	// got here by a MoveTo()
 				cur_wp = save_wp;
 				UpdateWaypoint(cur_wp);	// have him head to last destination from here
@@ -164,28 +164,32 @@ void NPC::PauseWandering(int pausetime)
 	return;
 }
 
-void NPC::MoveTo(const glm::vec4& position, bool saveguardspot)
-{	// makes mob walk to specified location
-	if (IsNPC() && GetGrid() != 0)
-	{	// he is on a grid
-		if (GetGrid() < 0)
-		{	// currently stopped by a quest command
-			SetGrid(0 - GetGrid());	// get him moving again
-			Log(Logs::Detail, Logs::AI, "MoveTo during quest wandering. Canceling quest wandering and going back to grid %d when MoveTo is done.", GetGrid());
+void NPC::MoveTo(const glm::vec4 &position, bool saveguardspot)
+{    // makes mob walk to specified location
+	if (IsNPC() && GetGrid() != 0) {    // he is on a grid
+		if (GetGrid() < 0) {    // currently stopped by a quest command
+			SetGrid(0 - GetGrid());    // get him moving again
+			Log(Logs::Detail,
+				Logs::AI,
+				"MoveTo during quest wandering. Canceling quest wandering and going back to grid %d when MoveTo is done.",
+				GetGrid());
 		}
-		AI_walking_timer->Disable();	// disable timer in case he is paused at a wp
-		if (cur_wp >= 0)
-		{	// we've not already done a MoveTo()
-			save_wp = cur_wp;	// save the current waypoint
-			cur_wp = -1;		// flag this move as quest controlled
+		AI_walking_timer->Disable();    // disable timer in case he is paused at a wp
+		if (cur_wp >= 0) {    // we've not already done a MoveTo()
+			save_wp = cur_wp;    // save the current waypoint
+			cur_wp  = EQEmu::WaypointStatus::QuestControlGrid;
 		}
-		Log(Logs::Detail, Logs::AI, "MoveTo %s, pausing regular grid wandering. Grid %d, save_wp %d", to_string(static_cast<glm::vec3>(position)).c_str(), -GetGrid(), save_wp);
+		Log(Logs::Detail,
+			Logs::AI,
+			"MoveTo %s, pausing regular grid wandering. Grid %d, save_wp %d",
+			to_string(static_cast<glm::vec3>(position)).c_str(),
+			-GetGrid(),
+			save_wp);
 	}
-	else
-	{	// not on a grid
-		roamer = true;
+	else {    // not on a grid
+		roamer  = true;
 		save_wp = 0;
-		cur_wp = -2;		// flag as quest controlled w/no grid
+		cur_wp  = EQEmu::WaypointStatus::QuestControlNoGrid;
 		Log(Logs::Detail, Logs::AI, "MoveTo %s without a grid.", to_string(static_cast<glm::vec3>(position)).c_str());
 	}
 
@@ -194,23 +198,27 @@ void NPC::MoveTo(const glm::vec4& position, bool saveguardspot)
 	m_CurrentWayPoint = position;
 	m_CurrentWayPoint.z = GetFixedZ(dest);
 
-	if (saveguardspot)
-	{
+	if (saveguardspot) {
 		m_GuardPoint = m_CurrentWayPoint;
 
-		if (m_GuardPoint.w == 0)
-			m_GuardPoint.w = 0.0001;		//hack to make IsGuarding simpler
+		if (m_GuardPoint.w == 0) {
+			m_GuardPoint.w = 0.0001;
+		}        //hack to make IsGuarding simpler
 
 		if (m_GuardPoint.w == -1)
 			m_GuardPoint.w = this->CalculateHeadingToTarget(position.x, position.y);
 
-		Log(Logs::Detail, Logs::AI, "Setting guard position to %s", to_string(static_cast<glm::vec3>(m_GuardPoint)).c_str());
+		Log(Logs::Detail,
+			Logs::AI,
+			"Setting guard position to %s",
+			to_string(static_cast<glm::vec3>(m_GuardPoint)).c_str());
 	}
 
-	cur_wp_pause = 0;
+	cur_wp_pause        = 0;
 	time_until_can_move = 0;
-	if (AI_walking_timer->Enabled())
+	if (AI_walking_timer->Enabled()) {
 		AI_walking_timer->Start(100);
+	}
 }
 
 void NPC::UpdateWaypoint(int wp_index)

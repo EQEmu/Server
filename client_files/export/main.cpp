@@ -60,6 +60,29 @@ int main(int argc, char **argv) {
 	database.LoadLogSettings(LogSys.log_settings);
 	LogSys.StartFileLogs();
 
+	std::string arg_1;
+
+	if (argv[1]) {
+		arg_1 = argv[1];
+	}
+
+	if (arg_1 == "spells") {
+		ExportSpells(&database);
+		return 0;
+	}
+	if (arg_1 == "skills") {
+		ExportSkillCaps(&database);
+		return 0;
+	}
+	if (arg_1 == "basedata") {
+		ExportBaseData(&database);
+		return 0;
+	}
+	if (arg_1 == "dbstring") {
+		ExportDBStrings(&database);
+		return 0;
+	}
+
 	ExportSpells(&database);
 	ExportSkillCaps(&database);
 	ExportBaseData(&database);

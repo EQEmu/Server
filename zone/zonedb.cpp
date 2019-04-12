@@ -3914,6 +3914,8 @@ bool ZoneDatabase::GetFactionData(FactionMods* fm, uint32 class_mod, uint32 race
 	}
 
 	fm->base = faction_array[faction_id]->base;
+	fm->min = faction_array[faction_id]->min; // The lowest your personal earned faction can go - before race/class/diety adjustments.
+	fm->max = faction_array[faction_id]->max; // The highest your personal earned faction can go - before race/class/diety adjustments.
 
 	if(class_mod > 0) {
 		char str[32];
@@ -4060,14 +4062,32 @@ bool ZoneDatabase::LoadFactionData()
 		faction_array[index] = new Faction;
 		strn0cpy(faction_array[index]->name, row[1], 50);
 		faction_array[index]->base = atoi(row[2]);
+		faction_array[index]->min = MIN_PERSONAL_FACTION;
+		faction_array[index]->max = MAX_PERSONAL_FACTION;
 
-        query = StringFormat("SELECT `mod`, `mod_name` FROM `faction_list_mod` WHERE faction_id = %u", index);
-        auto modResults = QueryDatabase(query);
-        if (!modResults.Success())
-            continue;
+		// Load in the mimimum and maximum faction that can be earned for this faction
+		query = StringFormat("SELECT `min` , `max` FROM `faction_base_data` WHERE client_faction_id = %u", index);
+		auto baseResults = QueryDatabase(query);
+		if (!baseResults.Success() || baseResults.RowCount() == 0) {
+			Log(Logs::General, Logs::General, "Faction %d has no base data", (int)index);
+		}
+		else {
+			for (auto modRow = baseResults.begin(); modRow != baseResults.end(); ++modRow) {
+				faction_array[index]->min = atoi(modRow[0]);
+				faction_array[index]->max = atoi(modRow[1]);
+				Log(Logs::General, Logs::None, "Min(%d), Max(%d) for faction (%u)",faction_array[index]->min, faction_array[index]->max, index);
+			}
+		}
 
-		for (auto modRow = modResults.begin(); modRow != modResults.end(); ++modRow)
-            faction_array[index]->mods[modRow[1]] = atoi(modRow[0]);
+		// Load in modifiers to the faction based on characters race, class and diety.
+		query = StringFormat("SELECT `mod`, `mod_name` FROM `faction_list_mod` WHERE faction_id = %u", index);
+		auto modResults = QueryDatabase(query);
+		if (!modResults.Success())
+			continue;
+
+		for (auto modRow = modResults.begin(); modRow != modResults.end(); ++modRow) {
+			faction_array[index]->mods[modRow[1]] = atoi(modRow[0]);
+		}
     }
 
 	return true;
