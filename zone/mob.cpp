@@ -74,7 +74,7 @@ Mob::Mob(
 	uint8 in_hairstyle,
 	uint8 in_luclinface,
 	uint8 in_beard,
-	uint32 in__heritage,
+	uint32 in_drakkin_heritage,
 	uint32 in_drakkin_tattoo,
 	uint32 in_drakkin_details,
 	EQEmu::TintProfile in_armor_tint,
