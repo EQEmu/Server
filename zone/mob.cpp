@@ -74,7 +74,7 @@ Mob::Mob(
 	uint8 in_hairstyle,
 	uint8 in_luclinface,
 	uint8 in_beard,
-	uint32 in_drakkin_heritage,
+	uint32 in__heritage,
 	uint32 in_drakkin_tattoo,
 	uint32 in_drakkin_details,
 	EQEmu::TintProfile in_armor_tint,
@@ -1737,11 +1737,11 @@ void Mob::SendIllusionPacket(
 	new_luclinface = (in_luclinface == 0xFF) ? GetLuclinFace() : in_luclinface;
 	new_beard = (in_beard == 0xFF) ? GetBeard() : in_beard;
 	new_drakkin_heritage = 
-		(in_drakkin_heritage == 0xFF) ? GetDrakkinHeritage() : in_drakkin_heritage;
+		(in_drakkin_heritage == 0xFFFFFFFF) ? GetDrakkinHeritage() : in_drakkin_heritage;
 	new_drakkin_tattoo = 
-		(in_drakkin_tattoo == 0xFF) ? GetDrakkinTattoo() : in_drakkin_tattoo;
+		(in_drakkin_tattoo == 0xFFFFFFFF) ? GetDrakkinTattoo() : in_drakkin_tattoo;
 	new_drakkin_details = 
-		(in_drakkin_details == 0xFF) ? GetDrakkinDetails() : in_drakkin_details;
+		(in_drakkin_details == 0xFFFFFFFF) ? GetDrakkinDetails() : in_drakkin_details;
 	new_aa_title = in_aa_title;
 	size = (in_size <= 0.0f) ? GetSize() : in_size;
 
@@ -1759,12 +1759,9 @@ void Mob::SendIllusionPacket(
 		new_luclinface = luclinface		= CastToClient()->GetBaseFace();
 		new_beard = beard				= CastToClient()->GetBaseBeard();
 		new_aa_title = aa_title			= 0xFF;
-		new_drakkin_heritage 			= drakkin_heritage	
-										= CastToClient()->GetBaseHeritage();
-		new_drakkin_tattoo = 			drakkin_tattoo	
-										= CastToClient()->GetBaseTattoo();
-		new_drakkin_details 			= drakkin_details	
-										= CastToClient()->GetBaseDetails();
+		new_drakkin_heritage = drakkin_heritage	= CastToClient()->GetBaseHeritage();
+		new_drakkin_tattoo = drakkin_tattoo	= CastToClient()->GetBaseTattoo();
+		new_drakkin_details = drakkin_details	= CastToClient()->GetBaseDetails();
 		switch (race) {
 			case OGRE:
 				size = 9;
