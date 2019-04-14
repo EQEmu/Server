@@ -2604,8 +2604,11 @@ uint16 Client::GetMaxSkillAfterSpecializationRules(EQEmu::skills::SkillType skil
 
 		}
 	}
-	
+
 	Result += spellbonuses.RaiseSkillCap[skillid] + itembonuses.RaiseSkillCap[skillid] + aabonuses.RaiseSkillCap[skillid];
+
+	if (skillid == EQEmu::skills::SkillType::SkillForage)
+		Result += aabonuses.GrantForage;
 
 	return Result;
 }
