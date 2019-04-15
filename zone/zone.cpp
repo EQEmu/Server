@@ -1952,46 +1952,37 @@ bool Zone::IsSpellBlocked(uint32 spell_id, const glm::vec3& location)
 			}
 		}
 
+        // If all spells are blocked and this is an exception, it is not blocked
+        if (block_all && exception)
+        {
+	        return false;
+	    }
+
 		for (int x = 0; x < totalBS; x++)
 		{
-			// If spellid is 0, block all spells in the zone
-			if (block_all)
+	        // Spellid of 0 matches all spells
+			if (0 != blocked_spells[x].spellid && spell_id != blocked_spells[x].spellid)
 			{
-				// If the same zone has entries other than spellid 0, they act as exceptions and are allowed
-				if (exception)
-				{
-					return false;
-				}
-				else
+				continue;
+			}
+
+			switch (blocked_spells[x].type)
+			{
+				case 1:
 				{
 					return true;
+					break;
 				}
-			}
-			else
-			{
-				if (spell_id != blocked_spells[x].spellid)
+				case 2:
+				{
+					if (IsWithinAxisAlignedBox(location, blocked_spells[x].m_Location - blocked_spells[x].m_Difference, blocked_spells[x].m_Location + blocked_spells[x].m_Difference))
+						return true;
+					break;
+				}
+				default:
 				{
 					continue;
-				}
-
-				switch (blocked_spells[x].type)
-				{
-					case 1:
-					{
-						return true;
-						break;
-					}
-					case 2:
-					{
-						if (IsWithinAxisAlignedBox(location, blocked_spells[x].m_Location - blocked_spells[x].m_Difference, blocked_spells[x].m_Location + blocked_spells[x].m_Difference))
-							return true;
-						break;
-					}
-					default:
-					{
-						continue;
-						break;
-					}
+					break;
 				}
 			}
 		}
