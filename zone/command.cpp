@@ -2784,7 +2784,7 @@ void command_level(Client *c, const Seperator *sep)
 	if ((level <= 0) || ((level > RuleI(Character, MaxLevel)) && (c->Admin() < commandLevelAboveCap))) {
 		c->Message(0, "Error: #Level: Invalid Level");
 	}
-	else if (c->Admin() < 100) {
+	else if (c->Admin() < RuleI(GM, MinStatusToLevelTarget)) {
 		c->SetLevel(level, true);
 #ifdef BOTS
 		if(RuleB(Bots, BotLevelsWithOwner))
