@@ -691,29 +691,26 @@ void callGetPacketStatistics(Json::Value &response)
 		row["resent_non_fragments"]     = stats.resent_full;
 		row["dropped_datarate_packets"] = stats.dropped_datarate_packets;
 
-		if (opts.track_opcode_stats) {
+		Json::Value sent_packet_types;
 
-			Json::Value sent_packet_types;
-
-			for (auto i = 0; i < _maxEmuOpcode; ++i) {
-				auto count = eqs_stats.SentCount[i];
-				if (count > 0) {
-					sent_packet_types[OpcodeNames[i]] = count;
-				}
+		for (auto i = 0; i < _maxEmuOpcode; ++i) {
+			auto count = eqs_stats.SentCount[i];
+			if (count > 0) {
+				sent_packet_types[OpcodeNames[i]] = count;
 			}
-
-			Json::Value receive_packet_types;
-
-			for (auto i = 0; i < _maxEmuOpcode; ++i) {
-				auto count = eqs_stats.RecvCount[i];
-				if (count > 0) {
-					receive_packet_types[OpcodeNames[i]] = count;
-				}
-			}
-
-			row["sent_packet_types"]    = sent_packet_types;
-			row["receive_packet_types"] = receive_packet_types;
 		}
+
+		Json::Value receive_packet_types;
+
+		for (auto i = 0; i < _maxEmuOpcode; ++i) {
+			auto count = eqs_stats.RecvCount[i];
+			if (count > 0) {
+				receive_packet_types[OpcodeNames[i]] = count;
+			}
+		}
+
+		row["sent_packet_types"]    = sent_packet_types;
+		row["receive_packet_types"] = receive_packet_types;
 
 		response.append(row);
 	}

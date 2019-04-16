@@ -19,6 +19,7 @@ namespace EQ
 			EQStreamManager(const EQStreamManagerInterfaceOptions &options);
 			~EQStreamManager();
 
+			virtual void SetOptions(const EQStreamManagerInterfaceOptions& options);
 			void OnNewConnection(std::function<void(std::shared_ptr<EQStream>)> func) { m_on_new_connection = func; }
 			void OnConnectionStateChange(std::function<void(std::shared_ptr<EQStream>, DbProtocolStatus, DbProtocolStatus)> func) { m_on_connection_state_change = func; }
 		private:

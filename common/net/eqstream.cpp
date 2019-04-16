@@ -13,6 +13,13 @@ EQ::Net::EQStreamManager::~EQStreamManager()
 {
 }
 
+void EQ::Net::EQStreamManager::SetOptions(const EQStreamManagerInterfaceOptions &options)
+{
+	m_options = options;
+	auto &opts = m_daybreak.GetOptions();
+	opts = options.daybreak_options;
+}
+
 void EQ::Net::EQStreamManager::DaybreakNewConnection(std::shared_ptr<DaybreakConnection> connection)
 {
 	std::shared_ptr<EQStream> stream(new EQStream(this, connection));
@@ -65,9 +72,7 @@ void EQ::Net::EQStream::QueuePacket(const EQApplicationPacket *p, bool ack_req) 
 			opcode = p->GetOpcodeBypass();
 		}
 		else {
-			if (m_owner->GetOptions().track_opcode_stats) {
-				m_packet_sent_count[p->GetOpcode()]++; //Wont bother with bypass tracking of these since those are rare for testing anyway
-			}
+			m_packet_sent_count[p->GetOpcode()]++; //Wont bother with bypass tracking of these since those are rare for testing anyway
 			opcode = (*m_opcode_manager)->EmuToEQ(p->GetOpcode());
 		}
 
@@ -117,9 +122,7 @@ EQApplicationPacket *EQ::Net::EQStream::PopPacket() {
 		}
 
 		EmuOpcode emu_op = (*m_opcode_manager)->EQToEmu(opcode);
-		if (m_owner->GetOptions().track_opcode_stats) {
-			m_packet_recv_count[emu_op]++;
-		}
+		m_packet_recv_count[emu_op]++;
 
 		EQApplicationPacket *ret = new EQApplicationPacket(emu_op, (unsigned char*)p->Data() + m_owner->GetOptions().opcode_size, p->Length() - m_owner->GetOptions().opcode_size);
 		ret->SetProtocolOpcode(opcode);

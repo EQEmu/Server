@@ -27,7 +27,6 @@ struct EQStreamManagerInterfaceOptions
 
 	EQStreamManagerInterfaceOptions(int port, bool encoded, bool compressed) {
 		opcode_size = 2;
-		track_opcode_stats = false;
 
 		//World seems to support both compression and xor zone supports one or the others.
 		//Enforce one or the other in the convienence construct
@@ -54,8 +53,9 @@ public:
 	EQStreamManagerInterface(const EQStreamManagerInterfaceOptions &options) { m_options = options; }
 	virtual ~EQStreamManagerInterface() { };
 
+	EQStreamManagerInterfaceOptions GetOptions() { return m_options; }
 	const EQStreamManagerInterfaceOptions& GetOptions() const { return m_options; }
-	EQStreamManagerInterfaceOptions& MutateOptions() { return m_options; }
+	virtual void SetOptions(const EQStreamManagerInterfaceOptions& options) = 0;
 protected:
 	EQStreamManagerInterfaceOptions m_options;
 };

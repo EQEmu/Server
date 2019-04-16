@@ -15,15 +15,33 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#ifndef SERVERINFO_H
-#define SERVERINFO_H
+#pragma once
 
-#ifdef _WINDOWS
-	extern char Ver_name[36];
-	extern DWORD Ver_build, Ver_min, Ver_maj, Ver_pid;
-	int GetOS();
-#else
-	char* GetOS(char* os_string);
-#endif
+#include <string>
+#include <vector>
 
-#endif
+typedef struct eq_cpu_info_s {
+	std::string model;
+	double speed;
+	uint64_t time_user;
+	uint64_t time_nice;
+	uint64_t time_sys;
+	uint64_t time_idle;
+	uint64_t time_irq;
+} eq_cpu_info_t;
+
+typedef struct eq_utsname_s {
+	std::string sysname;
+	std::string release;
+	std::string version;
+	std::string machine;
+} eq_utsname_t;
+
+namespace EQ
+{
+	size_t GetRSS();
+	double GetUptime();
+	size_t GetPID();
+	std::vector<eq_cpu_info_t> GetCPUs();
+	eq_utsname_t GetOS();
+}

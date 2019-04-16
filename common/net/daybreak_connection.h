@@ -91,6 +91,24 @@ namespace EQ
 				resent_fragments = 0;
 				resent_full = 0;
 				datarate_remaining = 0.0;
+				bytes_after_decode = 0;
+				bytes_before_encode = 0;
+			}
+
+			void Reset() {
+				recv_bytes = 0;
+				sent_bytes = 0;
+				min_ping = 0xFFFFFFFFFFFFFFFFUL;
+				max_ping = 0;
+				avg_ping = 0;
+				created = Clock::now();
+				dropped_datarate_packets = 0;
+				resent_packets = 0;
+				resent_fragments = 0;
+				resent_full = 0;
+				datarate_remaining = 0.0;
+				bytes_after_decode = 0;
+				bytes_before_encode = 0;
 			}
 
 			uint64_t recv_bytes;
@@ -111,6 +129,8 @@ namespace EQ
 			uint64_t resent_fragments;
 			uint64_t resent_full;
 			double datarate_remaining;
+			uint64_t bytes_after_decode;
+			uint64_t bytes_before_encode;
 		};
 
 		class DaybreakConnectionManager;

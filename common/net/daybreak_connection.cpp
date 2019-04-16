@@ -368,6 +368,7 @@ void EQ::Net::DaybreakConnection::QueuePacket(Packet &p, int stream, bool reliab
 		packet.PutUInt8(0, 0);
 		packet.PutPacket(1, p);
 		InternalQueuePacket(packet, stream, reliable);
+		return;
 	}
 
 	InternalQueuePacket(p, stream, reliable);
@@ -384,7 +385,7 @@ EQ::Net::DaybreakConnectionStats EQ::Net::DaybreakConnection::GetStats()
 
 void EQ::Net::DaybreakConnection::ResetStats()
 {
-	m_stats = DaybreakConnectionStats();
+	m_stats.Reset();
 }
 
 void EQ::Net::DaybreakConnection::Process()
@@ -417,6 +418,7 @@ void EQ::Net::DaybreakConnection::ProcessPacket(Packet &p)
 
 	auto opcode = p.GetInt8(1);
 	if (p.GetInt8(0) == 0 && (opcode == OP_KeepAlive || opcode == OP_OutboundPing)) {
+		m_stats.bytes_after_decode += p.Length();
 		return;
 	}
 
@@ -425,6 +427,8 @@ void EQ::Net::DaybreakConnection::ProcessPacket(Packet &p)
 			if (m_owner->m_on_error_message) {
 				m_owner->m_on_error_message(fmt::format("Tossed packet that failed CRC of type {0:#x}", p.Length() >= 2 ? p.GetInt8(1) : 0));
 			}
+
+			m_stats.bytes_after_decode += p.Length();
 			return;
 		}
 
@@ -453,6 +457,7 @@ void EQ::Net::DaybreakConnection::ProcessPacket(Packet &p)
 				}
 			}
 
+			m_stats.bytes_after_decode += temp.Length();
 			ProcessDecodedPacket(StaticPacket(temp.Data(), temp.Length()));
 		}
 		else {
@@ -471,10 +476,12 @@ void EQ::Net::DaybreakConnection::ProcessPacket(Packet &p)
 				}
 			}
 
+			m_stats.bytes_after_decode += temp.Length();
 			ProcessDecodedPacket(StaticPacket(temp.Data(), temp.Length()));
 		}
 	}
 	else {
+		m_stats.bytes_after_decode += p.Length();
 		ProcessDecodedPacket(p);
 	}
 }
@@ -1285,6 +1292,9 @@ void EQ::Net::DaybreakConnection::InternalSend(Packet &p)
 	};
 
 	if (PacketCanBeEncoded(p)) {
+
+		m_stats.bytes_before_encode += p.Length();
+
 		DynamicPacket out;
 		out.PutPacket(0, p);
 
@@ -1331,6 +1341,8 @@ void EQ::Net::DaybreakConnection::InternalSend(Packet &p)
 		uv_udp_send(send_req, &m_owner->m_socket, send_buffers, 1, (sockaddr*)&send_addr, send_func);
 		return;
 	}
+
+	m_stats.bytes_before_encode += p.Length();
 
 	uv_udp_send_t *send_req = new uv_udp_send_t;
 	sockaddr_in send_addr;
