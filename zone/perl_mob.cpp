@@ -1135,28 +1135,28 @@ XS(XS_Mob_ChangeSize) {
 	XSRETURN_EMPTY;
 }
 
-+XS(XS_Mob_RandomizeFeatures); /* prototype to pass -Wmissing-prototypes */
-+XS(XS_Mob_RandomizeFeatures) {
-+       dXSARGS;
-+       if (items < 2 || items > 3)
-+               Perl_croak(aTHX_ "Usage: Mob::RandomizeFeatures(THIS, bool send_illusion, set_variables)");
-+       {
-+               Mob *THIS;
-+               bool send_illusion = (bool) SvNV(ST(1));
-+               bool set_variables = (bool) SvNV(ST(2));
-+
-+               if (sv_derived_from(ST(0), "Mob")) {
-+                       IV tmp = SvIV((SV *) SvRV(ST(0)));
-+                       THIS = INT2PTR(Mob *, tmp);
-+               } else
-+                       Perl_croak(aTHX_ "THIS is not of type Mob");
-+               if (THIS == nullptr)
-+                       Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-+
-+               THIS->RandomizeFeatures(send_illusion, set_variables);
-+       }
-+       XSRETURN_EMPTY;
-+}
+XS(XS_Mob_RandomizeFeatures); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_RandomizeFeatures) {
+       dXSARGS;
+       if (items < 2 || items > 3)
+               Perl_croak(aTHX_ "Usage: Mob::RandomizeFeatures(THIS, bool send_illusion, set_variables)");
+       {
+               Mob *THIS;
+               bool send_illusion = (bool) SvNV(ST(1));
+               bool set_variables = (bool) SvNV(ST(2));
+
+               if (sv_derived_from(ST(0), "Mob")) {
+                       IV tmp = SvIV((SV *) SvRV(ST(0)));
+                       THIS = INT2PTR(Mob *, tmp);
+               } else
+                       Perl_croak(aTHX_ "THIS is not of type Mob");
+               if (THIS == nullptr)
+                       Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+               THIS->RandomizeFeatures(send_illusion, set_variables);
+       }
+       XSRETURN_EMPTY;
+}
 
 XS(XS_Mob_GMMove); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GMMove) {
