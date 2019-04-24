@@ -71,6 +71,7 @@ public:
 	void DoAnim(int anim_num, int type, bool ackreq, int filter);
 	void ChangeSize(double in_size);
 	void ChangeSize(double in_size, bool no_restriction);
+	void RandomizeFeatures(bool send_illusion, bool save_variables);
 	void GMMove(double x, double y, double z);
 	void GMMove(double x, double y, double z, double heading);
 	void GMMove(double x, double y, double z, double heading, bool send_update);
