@@ -144,6 +144,7 @@ struct NPCType
 	bool	skip_global_loot;
 	bool	rare_spawn;
 	int8	stuck_behavior;
+	uint16	use_model;
 };
 
 namespace player_lootitem {
