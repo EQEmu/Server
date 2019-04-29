@@ -5612,6 +5612,12 @@ void Client::SuspendMinion()
 	{
 		if(m_suspendedminion.SpellID > 0)
 		{
+			if (m_suspendedminion.SpellID >= SPDAT_RECORDS) {
+				Message(13, "Invalid suspended minion spell id (%u).", m_suspendedminion.SpellID);
+				memset(&m_suspendedminion, 0, sizeof(PetInfo));
+				return;
+			}
+
 			MakePoweredPet(m_suspendedminion.SpellID, spells[m_suspendedminion.SpellID].teleport_zone,
 				m_suspendedminion.petpower, m_suspendedminion.Name, m_suspendedminion.size);
 
