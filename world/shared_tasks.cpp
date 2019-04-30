@@ -112,6 +112,32 @@ void SharedTaskManager::HandleTaskRequestReply(ServerPacket *pack)
 		tasks.erase(it);
 }
 
+/*
+ * This is called once during boot of world
+ * We need to load next_id, clean up expired tasks (?), and populate the map
+ */
+bool SharedTaskManager::LoadSharedTaskState()
+{
+	// clean up expired tasks ... We may not want to do this if world crashes and has to be restarted
+	// May need to wait to do it to cleanly inform existing zones to clean up expired tasks
+
+	// Load existing tasks. We may not want to actually do this here and wait for a client to log in
+	// But the crash case may actually dictate we should :P
+
+	// set next_id to highest used ID + 1
+	return true;
+}
+
+int SharedTaskManger::GetNextID()
+{
+	next_id++;
+	// let's not be extra clever here ...
+	while (tasks.count(next_id) != 0)
+		next_id++;
+
+	return next_id;
+}
+
 bool SharedTask::DecrementMissingCount()
 {
 	--missing_count;

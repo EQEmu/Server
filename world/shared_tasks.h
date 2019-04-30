@@ -34,15 +34,17 @@ private:
 
 class SharedTaskManager {
 public:
-	SharedTaskManager() {}
+	SharedTaskManager() : next_id(0) {}
 	~SharedTaskManager() {}
+
+	bool LoadSharedTaskState();
 
 	// IPC packet processing
 	void HandleTaskRequest(ServerPacket *pack);
 	void HandleTaskRequestReply(ServerPacket *pack);
 
 private:
-	inline int GetNextID() { return ++next_id; }
+	int GetNextID();
 	int next_id;
 	std::unordered_map<int, SharedTask> tasks;
 };
