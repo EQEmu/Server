@@ -128,7 +128,7 @@ bool SharedTaskManager::LoadSharedTaskState()
 	return true;
 }
 
-int SharedTaskManger::GetNextID()
+int SharedTaskManager::GetNextID()
 {
 	next_id++;
 	// let's not be extra clever here ...
