@@ -942,7 +942,7 @@ uint32_t Deflate(const uint8_t* in, uint32_t in_len, uint8_t* out, uint32_t out_
 	zstream.avail_in = in_len;
 	zstream.opaque = Z_NULL;
 
-	deflateInit(&zstream, Z_FINISH);
+	deflateInit(&zstream, Z_BEST_SPEED);
 	zstream.next_out = out;
 	zstream.avail_out = out_len;
 
