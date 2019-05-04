@@ -416,14 +416,14 @@ int8 NpcScaleManager::GetNPCScalingType(NPC *&npc)
 {
 	std::string npc_name = npc->GetName();
 
-	if (npc->IsRareSpawn() || npc_name.find('#') != std::string::npos || isupper(npc_name[0])) {
-		return 1;
-	}
-
 	if (npc->IsRaidTarget()) {
 		return 2;
 	}
 
+	if (npc->IsRareSpawn() || npc_name.find('#') != std::string::npos || isupper(npc_name[0])) {
+		return 1;
+	}
+	
 	return 0;
 }
 

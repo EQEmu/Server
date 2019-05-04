@@ -590,7 +590,7 @@ typedef enum {
 #define SE_CorruptionCounter			369	// implemented
 #define SE_ResistCorruption				370	// implemented
 #define SE_AttackSpeed4					371 // implemented - stackable slow effect 'Inhibit Melee'
-#define SE_ForageSkill					372	// *not implemented[AA] Will increase the skill cap for those that have the Forage skill and grant the skill and raise the cap to those that do not.
+#define SE_ForageSkill					372	// implemented[AA] Will increase the skill cap for those that have the Forage skill and grant the skill and raise the cap to those that do not.
 #define SE_CastOnFadeEffectAlways		373 // implemented - Triggers if fades after natural duration OR from rune/numhits fades.
 #define SE_ApplyEffect					374 // implemented
 #define SE_DotCritDmgIncrease			375	// implemented - Increase damage of DoT critical amount
