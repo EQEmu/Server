@@ -1472,14 +1472,23 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			newbon->trap_slots += base1;
 			break;
 
+		case SE_ForageSkill:
+			newbon->GrantForage += base1;
+			// we need to grant a skill point here
+			// I'd rather not do this here, but whatever, probably fine
+			if (IsClient()) {
+				auto client = CastToClient();
+				if (client->GetRawSkill(EQEmu::skills::SkillType::SkillForage) == 0)
+					client->SetSkill(EQEmu::skills::SkillType::SkillForage, 1);
+			}
+			break;
+
 		// to do
 		case SE_PetDiscipline:
 			break;
 		case SE_PotionBeltSlots:
 			break;
 		case SE_BandolierSlots:
-			break;
-		case SE_ForageSkill:
 			break;
 		case SE_SecondaryForte:
 			break;

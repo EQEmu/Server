@@ -558,6 +558,7 @@ struct StatBonuses {
 	int16	FeignedCastOnChance;				// Percent Value
 	bool	PetCommands[PET_MAXCOMMANDS];		// SPA 267
 	int	FeignedMinionChance;				// SPA 281 base1 = chance, just like normal FD
+	int	GrantForage; // affects max skill of forage as well as granting non-forage classes forage
 	int aura_slots;
 	int trap_slots;
 	bool hunger; // Song of Sustenance -- min caps to 3500
