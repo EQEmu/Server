@@ -189,7 +189,7 @@ bool Spawn2::Process() {
 		if (npcid == 0) {
 			Log(Logs::Detail,
 				Logs::Spawns,
-				"Spawn2 %d: Spawn group %d did not yeild an NPC! not spawning.",
+				"Spawn2 %d: Spawn group %d did not yield an NPC! not spawning.",
 				spawn2_id,
 				spawngroup_id_);
 
@@ -717,7 +717,9 @@ void Spawn2::SpawnConditionChanged(const SpawnCondition &c, int16 old_value) {
 
 	bool old_state = (old_value >= condition_min_value);
 	bool new_state = (c.value >= condition_min_value);
-	if(old_state == new_state) {
+
+	if(c.on_change != SpawnCondition::DoUpdateSpawnGroup && 
+		old_state == new_state) {
 		Log(Logs::Detail, Logs::Spawns, "Spawn2 %d: Our threshold for this condition was not crossed. Doing nothing.", spawn2_id);
 		return;	//no change
 	}
@@ -755,6 +757,14 @@ void Spawn2::SpawnConditionChanged(const SpawnCondition &c, int16 old_value) {
 		} else {
 			Log(Logs::Detail, Logs::Spawns,"Spawn2 %d: Our condition is now %s. Not checking respawn timer.", spawn2_id, new_state?"enabled":"disabled");
 		}
+		break;
+	case SpawnCondition::DoUpdateSpawnGroup:
+		// Change spawngroup so that next valid spawn comes from update group
+		// based on condition
+
+		// Update in memory spawngroup for this spawn2 if in enabled state
+		spawngroup_id_ = zone->spawn_conditions.GetSpawn2Group(spawn2_id,c.value);
+		Log(Logs::Detail, Logs::Spawns,"Switched to SG(%d) for spawn(%d) value(%d)", spawngroup_id_, spawn2_id,c.value);
 		break;
 	default:
 		if(c.on_change < SpawnCondition::DoSignalMin) {
@@ -852,6 +862,10 @@ void SpawnConditionManager::Process() {
 			}
 		}
 	}
+}
+
+uint16 SpawnConditionManager::GetSpawn2Group(uint16 s2id, uint16 s2condvalue) {
+	return spawn2_groups[std::make_pair(s2id,s2condvalue)];
 }
 
 void SpawnConditionManager::ExecEvent(SpawnEvent &event, bool send_update) {
@@ -976,11 +990,37 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
 {
 	//clear out old stuff..
 	spawn_conditions.clear();
+	spawn2_groups.clear();
 
-	std::string query = StringFormat("SELECT id, onchange, value "
+	// Load in the spawn2_groups table
+
+	std::string query=StringFormat("SELECT g.spawn2_id, g.cond_value, g.spawngroupID "
+		"FROM spawn2_groups g, spawn2 s "
+		"WHERE s.zone = '%s' and s.id = g.spawn2_id", zone_name);
+
+    auto results = database.QueryDatabase(query);
+    if (!results.Success()) {
+		return false;
+    }
+
+    for (auto row = results.begin(); row != results.end(); ++row) {
+        //load spawn conditions
+        uint16 s2id;
+		int16 s2condvalue;
+
+        s2id = atoi(row[0]);
+        s2condvalue = atoi(row[1]);
+
+		spawn2_groups[std::make_pair(s2id,s2condvalue)] = atoi(row[2]);
+
+        Log(Logs::Detail, Logs::Spawns, "Loaded spawn2 group %d for spawn2 %d with condition %d", atoi(row[2]), s2id, s2condvalue);
+    }
+
+
+	query = StringFormat("SELECT id, onchange, value "
                                     "FROM spawn_conditions "
                                     "WHERE zone = '%s'", zone_name);
-    auto results = database.QueryDatabase(query);
+    results = database.QueryDatabase(query);
     if (!results.Success()) {
 		return false;
     }

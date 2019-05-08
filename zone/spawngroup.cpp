@@ -141,13 +141,14 @@ bool SpawnGroupList::RemoveSpawnGroup(uint32 in_id) {
 
 bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnGroupList *spawn_group_list)
 {
-	std::string query = StringFormat("SELECT DISTINCT(spawngroupID), spawngroup.name, spawngroup.spawn_limit, "
-					 "spawngroup.dist, spawngroup.max_x, spawngroup.min_x, "
-					 "spawngroup.max_y, spawngroup.min_y, spawngroup.delay, "
-					 "spawngroup.despawn, spawngroup.despawn_timer, spawngroup.mindelay "
-					 "FROM spawn2, spawngroup WHERE spawn2.spawngroupID = spawngroup.ID "
-					 "AND spawn2.version = %u and zone = '%s'",
-					 version, zone_name);
+	std::string query = StringFormat("SELECT DISTINCT(s.id), s.name, "
+					"s.spawn_limit, s.dist, s.max_x, s.min_x, s.max_y, s.min_y, "
+					"s.delay, s.despawn, s.despawn_timer, s.mindelay "
+					"FROM spawn2 s2, spawngroup s, spawn2_groups s2g "
+					"WHERE version = %u and zone = '%s' "
+					"AND (s2.spawngroupID = s.id OR "
+					"(s2g.spawn2_id = s2.id and s2g.spawngroupID = s.id))",
+					version, zone_name);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		return false;
@@ -160,13 +161,16 @@ bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnG
 		spawn_group_list->AddSpawnGroup(newSpawnGroup);
 	}
 
-	query = StringFormat("SELECT DISTINCT spawnentry.spawngroupID, npcid, chance, "
-			     "npc_types.spawn_limit AS sl "
-			     "FROM spawnentry, spawn2, npc_types "
-			     "WHERE spawnentry.npcID=npc_types.id "
-			     "AND spawnentry.spawngroupID = spawn2.spawngroupID "
-			     "AND zone = '%s'",
+	query = StringFormat("SELECT DISTINCT se.spawngroupID, n.id, se.chance, "
+			     "n.spawn_limit AS sl "
+			     "FROM spawnentry se, spawn2 s, npc_types n, spawn2_groups s2g "
+			     "WHERE se.npcID=n.id "
+			     "AND zone = '%s' "
+			     "AND (se.spawngroupID = s.spawngroupID OR "
+				 "(s2g.spawn2_id = s.id and s2g.spawngroupID = se.spawngroupID))",
 			     zone_name);
+
+
 	results = QueryDatabase(query);
 	if (!results.Success()) {
 		Log(Logs::General, Logs::Error, "Error2 in PopulateZoneLists query '%'", query.c_str());

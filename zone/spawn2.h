@@ -101,6 +101,7 @@ public:
 		DoDepop = 1,
 		DoRepop = 2,
 		DoRepopIfReady = 3,
+		DoUpdateSpawnGroup = 4,
 		//... 4...9 reserved for future use
 		DoSignalMin = 10	//any number above this value is used as
 							//a base for the signal ID sent. e.g.
@@ -151,9 +152,12 @@ public:
 	void ToggleEvent(uint32 event_id, bool enabled, bool strict, bool reset_base);
 	bool Check(uint16 condition, int16 min_value);
 	void ReloadEvent(uint32 event_id);
+	uint16 GetSpawn2Group(uint16 spawn2_id, uint16 condvalue);
 
 protected:
 	std::map<uint16, SpawnCondition> spawn_conditions;
+	std::map<std::pair<uint16,uint16>, uint16> spawn2_groups;
+
 	std::vector<SpawnEvent> spawn_events;
 
 	void ExecEvent(SpawnEvent &e, bool send_update);
