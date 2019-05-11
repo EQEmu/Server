@@ -657,7 +657,7 @@ void callGetPacketStatistics(Json::Value &response)
 	for (auto &iter : list) {
 		auto client                = iter.second;
 		auto connection            = client->Connection();
-		auto &opts                 = connection->GetManager()->GetOptions();
+		auto opts                 = connection->GetManager()->GetOptions();
 		auto eqs_stats             = connection->GetStats();
 		auto &stats                = eqs_stats.DaybreakStats;
 		auto now                   = EQ::Net::Clock::now();

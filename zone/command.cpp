@@ -9509,7 +9509,7 @@ void command_netstats(Client *c, const Seperator *sep)
 		}
 		
 		auto connection = c->Connection();
-		auto &opts = connection->GetManager()->GetOptions();
+		auto opts = connection->GetManager()->GetOptions();
 		auto eqs_stats = connection->GetStats();
 		auto &stats = eqs_stats.DaybreakStats;
 		auto now = EQ::Net::Clock::now();
@@ -12236,7 +12236,7 @@ void command_network(Client *c, const Seperator *sep)
 	{
 		auto eqsi = c->Connection();
 		auto manager = eqsi->GetManager();
-		auto &opts = manager->GetOptions();
+		auto opts = manager->GetOptions();
 	
 		if (!strcasecmp(sep->arg[2], "all"))
 		{
@@ -12294,7 +12294,7 @@ void command_network(Client *c, const Seperator *sep)
 	{
 		auto eqsi = c->Connection();
 		auto manager = eqsi->GetManager();
-		auto &opts = manager->GetOptions();
+		auto opts = manager->GetOptions();
 	
 		if (!strcasecmp(sep->arg[3], ""))
 		{
