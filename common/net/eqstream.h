@@ -66,8 +66,8 @@ namespace EQ
 			std::shared_ptr<DaybreakConnection> m_connection;
 			OpcodeManager **m_opcode_manager;
 			std::deque<std::unique_ptr<EQ::Net::Packet>> m_packet_queue;
-			std::unordered_map<EmuOpcode, int> m_packet_recv_count;
-			std::unordered_map<EmuOpcode, int> m_packet_sent_count;
+			std::unordered_map<int, int> m_packet_recv_count;
+			std::unordered_map<int, int> m_packet_sent_count;
 			friend class EQStreamManager;
 		};
 	}
