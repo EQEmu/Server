@@ -307,6 +307,12 @@ namespace EQEmu
 
 	} // namespace bug
 
+	enum WaypointStatus : int {
+		RoamBoxPauseInProgress = -3,
+		QuestControlNoGrid = -2,
+		QuestControlGrid = -1
+	};
+
 } /*EQEmu*/
 
 #endif /*COMMON_EMU_CONSTANTS_H*/

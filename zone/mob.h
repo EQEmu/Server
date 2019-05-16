@@ -159,7 +159,8 @@ public:
 		uint8 in_bracertexture,
 		uint8 in_handtexture,
 		uint8 in_legtexture,
-		uint8 in_feettexture
+		uint8 in_feettexture,
+		uint16 in_usemodel
 	);
 	virtual ~Mob();
 
@@ -1091,7 +1092,7 @@ public:
 	inline glm::vec4 GetCurrentWayPoint() const { return m_CurrentWayPoint; }
 	inline float GetCWPP() const { return(static_cast<float>(cur_wp_pause)); }
 	inline int GetCWP() const { return(cur_wp); }
-	void SetCurrentWP(uint16 waypoint) { cur_wp = waypoint; }
+	void SetCurrentWP(int waypoint) { cur_wp = waypoint; }
 	virtual FACTION_VALUE GetReverseFactionCon(Mob* iOther) { return FACTION_INDIFFERENT; }
 
 	virtual const bool IsUnderwaterOnly() const { return false; }
@@ -1280,6 +1281,7 @@ protected:
 
 	uint8 gender;
 	uint16 race;
+	uint16 use_model;
 	uint8 base_gender;
 	uint16 base_race;
 	uint8 class_;

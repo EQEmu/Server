@@ -119,6 +119,7 @@ Client::Client(EQStreamInterface* ieqs)
 	0,
 	0,
 	0,
+	0,
 	0
 	),
 	hpupdate_timer(2000),
@@ -2603,8 +2604,11 @@ uint16 Client::GetMaxSkillAfterSpecializationRules(EQEmu::skills::SkillType skil
 
 		}
 	}
-	
+
 	Result += spellbonuses.RaiseSkillCap[skillid] + itembonuses.RaiseSkillCap[skillid] + aabonuses.RaiseSkillCap[skillid];
+
+	if (skillid == EQEmu::skills::SkillType::SkillForage)
+		Result += aabonuses.GrantForage;
 
 	return Result;
 }
@@ -5608,6 +5612,12 @@ void Client::SuspendMinion()
 	{
 		if(m_suspendedminion.SpellID > 0)
 		{
+			if (m_suspendedminion.SpellID >= SPDAT_RECORDS) {
+				Message(13, "Invalid suspended minion spell id (%u).", m_suspendedminion.SpellID);
+				memset(&m_suspendedminion, 0, sizeof(PetInfo));
+				return;
+			}
+
 			MakePoweredPet(m_suspendedminion.SpellID, spells[m_suspendedminion.SpellID].teleport_zone,
 				m_suspendedminion.petpower, m_suspendedminion.Name, m_suspendedminion.size);
 
@@ -7809,9 +7819,9 @@ void Client::SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, ui
 		//
 		// Adjust these values for cases where starting faction is below
 		// min or above max by not allowing any earn in those directions.
-		this_faction_min = MIN_PERSONAL_FACTION - fm.base;
+		this_faction_min = fm.min - fm.base;
 		this_faction_min = std::min(0, this_faction_min);
-		this_faction_max = MAX_PERSONAL_FACTION - fm.base;
+		this_faction_max = fm.max - fm.base;
 		this_faction_max = std::max(0, this_faction_max);
 
 		// Get the characters current value with that faction
@@ -7852,9 +7862,9 @@ void Client::SetFactionLevel2(uint32 char_id, int32 faction_id, uint8 char_class
 		// min or above max by not allowing any earn/loss in those directions.
 		// At least one faction starts out way below min, so we don't want
 		// to allow loses in those cases, just massive gains.
-		this_faction_min = MIN_PERSONAL_FACTION - fm.base;
+		this_faction_min = fm.min - fm.base;
 		this_faction_min = std::min(0, this_faction_min);
-		this_faction_max = MAX_PERSONAL_FACTION - fm.base;
+		this_faction_max = fm.max - fm.base;
 		this_faction_max = std::max(0, this_faction_max);
 
 		//Get the faction modifiers

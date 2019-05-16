@@ -392,6 +392,7 @@
 9136|2019_02_04_profanity_command.sql|SHOW TABLES LIKE 'profanity_list'|empty|
 9137|2018_12_12_client_faction_tables.sql|SHOW TABLES LIKE 'faction_base_data'|empty|
 9138|2018_12_12_convert_to_client_functions.sql|SELECT `id` FROM `faction_list` WHERE `id` > 4999|empty|
+9139|2019_03_25_optional_npc_model.sql|SHOW COLUMNS FROM `npc_types` LIKE 'model'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
