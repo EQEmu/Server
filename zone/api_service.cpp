@@ -18,10 +18,14 @@
  *
  */
 
+#include <memory>
+#include "../common/net/websocket_server.h"
+#include "../common/eqemu_logsys.h"
+#include "zonedb.h"
 #include "client.h"
 #include "entity.h"
 #include "corpse.h"
-#include "eqemu_api_zone_data_service.h"
+#include "api_service.h"
 #include "npc.h"
 #include "object.h"
 #include "zone.h"
@@ -30,8 +34,117 @@
 
 extern Zone *zone;
 
-void callGetNpcListDetail(Json::Value &response)
-{
+EQ::Net::WebsocketLoginStatus CheckLogin(EQ::Net::WebsocketServerConnection *connection, const std::string &username, const std::string &password) {
+	EQ::Net::WebsocketLoginStatus ret;
+	ret.logged_in = false;
+
+	ret.account_id = database.CheckLogin(username.c_str(), password.c_str());
+
+	if (ret.account_id == 0) {
+		return ret;
+	}
+
+	char account_name[64];
+	database.GetAccountName(static_cast<uint32>(ret.account_id), account_name);
+	ret.account_name = account_name;
+	ret.logged_in = true;
+	ret.status = database.CheckStatus(ret.account_id);
+	return ret;
+}
+
+Json::Value ApiGetPacketStatistics(EQ::Net::WebsocketServerConnection *connection, Json::Value params) {
+	if (zone->GetZoneID() == 0) {
+		throw EQ::Net::WebsocketException("Zone must be loaded to invoke this call");
+	}
+
+	Json::Value response;
+	auto &list = entity_list.GetClientList();
+
+	for (auto &iter : list) {
+		auto client                = iter.second;
+		auto connection            = client->Connection();
+		auto opts                 = connection->GetManager()->GetOptions();
+		auto eqs_stats             = connection->GetStats();
+		auto &stats                = eqs_stats.DaybreakStats;
+		auto now                   = EQ::Net::Clock::now();
+		auto sec_since_stats_reset = std::chrono::duration_cast<std::chrono::duration<double>>(
+			now - stats.created
+		).count();
+		
+		Json::Value row;
+		
+		row["client_id"]                = client->GetID();
+		row["client_name"]              = client->GetCleanName();
+		row["seconds_since_reset"]      = sec_since_stats_reset;
+		row["sent_bytes"]               = stats.sent_bytes;
+		row["receive_bytes"]            = stats.recv_bytes;
+		row["min_ping"]                 = stats.min_ping;
+		row["max_ping"]                 = stats.max_ping;
+		row["last_ping"]                = stats.last_ping;
+		row["average_ping"]             = stats.avg_ping;
+		row["realtime_receive_packets"] = stats.recv_packets;
+		row["realtime_sent_packets"]    = stats.sent_packets;
+		row["sync_recv_packets"]        = stats.sync_recv_packets;
+		row["sync_sent_packets"]        = stats.sync_sent_packets;
+		row["sync_remote_recv_packets"] = stats.sync_remote_recv_packets;
+		row["sync_remote_sent_packets"] = stats.sync_remote_sent_packets;
+		row["packet_loss_in"]           = (100.0 * (1.0 - static_cast<double>(stats.sync_recv_packets) /
+														  static_cast<double>(stats.sync_remote_sent_packets)));
+		row["packet_loss_out"]          = (100.0 * (1.0 - static_cast<double>(stats.sync_remote_recv_packets) /
+														  static_cast<double>(stats.sync_sent_packets)));
+		row["resent_packets"]           = stats.resent_packets;
+		row["resent_fragments"]         = stats.resent_fragments;
+		row["resent_non_fragments"]     = stats.resent_full;
+		row["dropped_datarate_packets"] = stats.dropped_datarate_packets;
+		
+		Json::Value sent_packet_types;
+		
+		for (auto i = 0; i < _maxEmuOpcode; ++i) {
+			auto count = eqs_stats.SentCount[i];
+			if (count > 0) {
+				sent_packet_types[OpcodeNames[i]] = count;
+			}
+		}
+		
+		Json::Value receive_packet_types;
+		
+		for (auto i = 0; i < _maxEmuOpcode; ++i) {
+			auto count = eqs_stats.RecvCount[i];
+			if (count > 0) {
+				receive_packet_types[OpcodeNames[i]] = count;
+			}
+		}
+		
+		row["sent_packet_types"]    = sent_packet_types;
+		row["receive_packet_types"] = receive_packet_types;
+
+		response.append(row);
+	}
+
+	return response;
+}
+
+Json::Value ApiGetOpcodeList(EQ::Net::WebsocketServerConnection *connection, Json::Value params) {
+	if (zone->GetZoneID() == 0) {
+		throw EQ::Net::WebsocketException("Zone must be loaded to invoke this call");
+	}
+	
+	Json::Value response;
+	for (auto i = 0; i < _maxEmuOpcode; ++i) {
+		Json::Value row = OpcodeNames[i];
+
+		response.append(row);
+	}
+
+	return response;
+}
+
+Json::Value ApiGetNpcListDetail(EQ::Net::WebsocketServerConnection *connection, Json::Value params) {
+	if (zone->GetZoneID() == 0) {
+		throw EQ::Net::WebsocketException("Zone must be loaded to invoke this call");
+	}
+
+	Json::Value response;
 	auto &list = entity_list.GetNPCList();
 
 	for (auto &iter : list) {
@@ -115,10 +228,16 @@ void callGetNpcListDetail(Json::Value &response)
 
 		response.append(row);
 	}
+
+	return response;
 }
 
-void callGetDoorListDetail(Json::Value &response)
-{
+Json::Value ApiGetDoorListDetail(EQ::Net::WebsocketServerConnection *connection, Json::Value params) {
+	if (zone->GetZoneID() == 0) {
+		throw EQ::Net::WebsocketException("Zone must be loaded to invoke this call");
+	}
+
+	Json::Value response;
 	auto &door_list = entity_list.GetDoorsList();
 
 	for (auto itr : door_list) {
@@ -152,10 +271,16 @@ void callGetDoorListDetail(Json::Value &response)
 
 		response.append(row);
 	}
+
+	return response;
 }
 
-void callGetCorpseListDetail(Json::Value &response)
-{
+Json::Value ApiGetCorpseListDetail(EQ::Net::WebsocketServerConnection *connection, Json::Value params) {
+	if (zone->GetZoneID() == 0) {
+		throw EQ::Net::WebsocketException("Zone must be loaded to invoke this call");
+	}
+
+	Json::Value response;
 	auto &corpse_list = entity_list.GetCorpseList();
 
 	for (auto itr : corpse_list) {
@@ -185,10 +310,16 @@ void callGetCorpseListDetail(Json::Value &response)
 
 		response.append(row);
 	}
+
+	return response;
 }
 
-void callGetObjectListDetail(Json::Value &response)
-{
+Json::Value ApiGetObjectListDetail(EQ::Net::WebsocketServerConnection *connection, Json::Value params) {
+	if (zone->GetZoneID() == 0) {
+		throw EQ::Net::WebsocketException("Zone must be loaded to invoke this call");
+	}
+
+	Json::Value response;
 	auto &list = entity_list.GetObjectList();
 
 	for (auto &iter : list) {
@@ -214,10 +345,16 @@ void callGetObjectListDetail(Json::Value &response)
 
 		response.append(row);
 	}
+
+	return response;
 }
 
-void callGetMobListDetail(Json::Value &response)
-{
+Json::Value ApiGetMobListDetail(EQ::Net::WebsocketServerConnection *connection, Json::Value params) {
+	if (zone->GetZoneID() == 0) {
+		throw EQ::Net::WebsocketException("Zone must be loaded to invoke this call");
+	}
+
+	Json::Value response;
 	auto &list = entity_list.GetMobList();
 
 	for (auto &iter : list) {
@@ -414,10 +551,16 @@ void callGetMobListDetail(Json::Value &response)
 
 		response.append(row);
 	}
+
+	return response;
 }
 
-void callGetClientListDetail(Json::Value &response)
-{
+Json::Value ApiGetClientListDetail(EQ::Net::WebsocketServerConnection *connection, Json::Value params) {
+	if (zone->GetZoneID() == 0) {
+		throw EQ::Net::WebsocketException("Zone must be loaded to invoke this call");
+	}
+
+	Json::Value response;
 	auto &list = entity_list.GetClientList();
 
 	for (auto &iter : list) {
@@ -607,10 +750,16 @@ void callGetClientListDetail(Json::Value &response)
 
 		response.append(row);
 	}
+
+	return response;
 }
 
-void callGetZoneAttributes(Json::Value &response)
-{
+Json::Value ApiGetZoneAttributes(EQ::Net::WebsocketServerConnection *connection, Json::Value params) {
+	if (zone->GetZoneID() == 0) {
+		throw EQ::Net::WebsocketException("Zone must be loaded to invoke this call");
+	}
+
+	Json::Value response;
 	Json::Value row;
 
 	row["aggro_limit_reached"]     = zone->AggroLimitReached();
@@ -648,129 +797,31 @@ void callGetZoneAttributes(Json::Value &response)
 	row["zone_type"]               = zone->GetZoneType();
 
 	response.append(row);
+	return response;
 }
 
-void callGetPacketStatistics(Json::Value &response)
+void RegisterApiLogEvent(std::unique_ptr<EQ::Net::WebsocketServer> &server)
 {
-	auto &list = entity_list.GetClientList();
-
-	for (auto &iter : list) {
-		auto client                = iter.second;
-		auto connection            = client->Connection();
-		auto opts                 = connection->GetManager()->GetOptions();
-		auto eqs_stats             = connection->GetStats();
-		auto &stats                = eqs_stats.DaybreakStats;
-		auto now                   = EQ::Net::Clock::now();
-		auto sec_since_stats_reset = std::chrono::duration_cast<std::chrono::duration<double>>(
-			now - stats.created
-		).count();
-
-		Json::Value row;
-
-		row["client_id"]                = client->GetID();
-		row["client_name"]              = client->GetCleanName();
-		row["seconds_since_reset"]      = sec_since_stats_reset;
-		row["sent_bytes"]               = stats.sent_bytes;
-		row["receive_bytes"]            = stats.recv_bytes;
-		row["min_ping"]                 = stats.min_ping;
-		row["max_ping"]                 = stats.max_ping;
-		row["last_ping"]                = stats.last_ping;
-		row["average_ping"]             = stats.avg_ping;
-		row["realtime_receive_packets"] = stats.recv_packets;
-		row["realtime_sent_packets"]    = stats.sent_packets;
-		row["sync_recv_packets"]        = stats.sync_recv_packets;
-		row["sync_sent_packets"]        = stats.sync_sent_packets;
-		row["sync_remote_recv_packets"] = stats.sync_remote_recv_packets;
-		row["sync_remote_sent_packets"] = stats.sync_remote_sent_packets;
-		row["packet_loss_in"]           = (100.0 * (1.0 - static_cast<double>(stats.sync_recv_packets) /
-														  static_cast<double>(stats.sync_remote_sent_packets)));
-		row["packet_loss_out"]          = (100.0 * (1.0 - static_cast<double>(stats.sync_remote_recv_packets) /
-														  static_cast<double>(stats.sync_sent_packets)));
-		row["resent_packets"]           = stats.resent_packets;
-		row["resent_fragments"]         = stats.resent_fragments;
-		row["resent_non_fragments"]     = stats.resent_full;
-		row["dropped_datarate_packets"] = stats.dropped_datarate_packets;
-
-		Json::Value sent_packet_types;
-
-		for (auto i = 0; i < _maxEmuOpcode; ++i) {
-			auto count = eqs_stats.SentCount[i];
-			if (count > 0) {
-				sent_packet_types[OpcodeNames[i]] = count;
-			}
-		}
-
-		Json::Value receive_packet_types;
-
-		for (auto i = 0; i < _maxEmuOpcode; ++i) {
-			auto count = eqs_stats.RecvCount[i];
-			if (count > 0) {
-				receive_packet_types[OpcodeNames[i]] = count;
-			}
-		}
-
-		row["sent_packet_types"]    = sent_packet_types;
-		row["receive_packet_types"] = receive_packet_types;
-
-		response.append(row);
-	}
+	LogSys.SetConsoleHandler([&](uint16 debug_level, uint16 log_category, const std::string &msg) {
+		Json::Value data;
+		data["debug_level"] = debug_level;
+		data["log_category"] = log_category;
+		data["msg"] = msg;
+		server->DispatchEvent("log", data, 50);
+	});
 }
 
+void RegisterApiService(std::unique_ptr<EQ::Net::WebsocketServer> &server) {
+	server->SetLoginHandler(CheckLogin);
+	server->SetMethodHandler("get_packet_statistics", &ApiGetPacketStatistics, 50);
+	server->SetMethodHandler("get_opcode_list", &ApiGetOpcodeList, 50);
+	server->SetMethodHandler("get_npc_list_detail", &ApiGetNpcListDetail, 50);
+	server->SetMethodHandler("get_door_list_detail", &ApiGetDoorListDetail, 50);
+	server->SetMethodHandler("get_corpse_list_detail", &ApiGetCorpseListDetail, 50);
+	server->SetMethodHandler("get_object_list_detail", &ApiGetObjectListDetail, 50);
+	server->SetMethodHandler("get_mob_list_detail", &ApiGetMobListDetail, 50);
+	server->SetMethodHandler("get_client_list_detail", &ApiGetClientListDetail, 50);
+	server->SetMethodHandler("get_zone_attributes", &ApiGetZoneAttributes, 50);
 
-void callGetOpcodeList(Json::Value &response)
-{
-	for (auto i = 0; i < _maxEmuOpcode; ++i) {
-		Json::Value row = OpcodeNames[i];
-
-		response.append(row);
-	}
-}
-
-void EQEmuApiZoneDataService::get(Json::Value &response, const std::vector<std::string> &args)
-{
-	std::string method = args[0];
-
-	if (zone->GetZoneID() == 0) {
-		response["error"] = "Zone must be loaded to invoke calls";
-		return;
-	}
-
-	/**
-	 * Packet statistics
-	 */
-	if (method == "get_packet_statistics") {
-		callGetPacketStatistics(response);
-	}
-	if (method == "get_opcode_list") {
-		callGetOpcodeList(response);
-	}
-
-	/**
-	 * List detail
-	 */
-	if (method == "get_npc_list_detail") {
-		callGetNpcListDetail(response);
-	}
-	if (method == "get_client_list_detail") {
-		callGetClientListDetail(response);
-	}
-	if (method == "get_mob_list_detail") {
-		callGetMobListDetail(response);
-	}
-	if (method == "get_door_list_detail") {
-		callGetDoorListDetail(response);
-	}
-	if (method == "get_corpse_list_detail") {
-		callGetCorpseListDetail(response);
-	}
-	if (method == "get_object_list_detail") {
-		callGetObjectListDetail(response);
-	}
-
-	/**
-	 * Zone attributes
-	 */
-	if (method == "get_zone_attributes") {
-		callGetZoneAttributes(response);
-	}
+	RegisterApiLogEvent(server);
 }

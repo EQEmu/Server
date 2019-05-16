@@ -5,8 +5,9 @@ SET(zone_sources
 	aa_ability.cpp
 	aggro.cpp
 	aggromanager.cpp
-	aura.cpp
+	api_service.cpp
 	attack.cpp
+	aura.cpp
 	beacon.cpp
 	bonuses.cpp
 	bot.cpp
@@ -17,7 +18,6 @@ SET(zone_sources
 	client_mods.cpp
 	client_packet.cpp
 	client_process.cpp
-	console.cpp
 	command.cpp
 	corpse.cpp
 	data_bucket.cpp
@@ -29,7 +29,6 @@ SET(zone_sources
 	embxs.cpp
 	encounter.cpp
 	entity.cpp
-	eqemu_api_zone_data_service.cpp
 	exp.cpp
 	fastmath.cpp
 	fearpath.cpp
@@ -149,6 +148,7 @@ SET(zone_headers
 	aa.h
 	aa_ability.h
 	aggromanager.h
+	api_service.h
 	aura.h
 	basic_functions.h
 	beacon.h
@@ -160,7 +160,6 @@ SET(zone_headers
 	client_packet.h
 	command.h
 	common.h
-	console.h
 	corpse.h
 	data_bucket.h
 	doors.h
@@ -169,7 +168,6 @@ SET(zone_headers
 	embxs.h
 	encounter.h
 	entity.h
-	eqemu_api_zone_data_service.h
 	errmsg.h
 	event_codes.h
 	fastmath.h

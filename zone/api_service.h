@@ -1,6 +1,6 @@
 /**
  * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2018 EQEmulator Development Team (https://github.com/EQEmu/Server)
+ * Copyright (C) 2001-2019 EQEmulator Development Team (https://github.com/EQEmu/Server)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 
 #pragma once
 
-#include "../common/net/console_server.h"
+#include <memory>
+#include "../common/net/websocket_server.h"
 
-void RegisterConsoleFunctions(std::unique_ptr<EQ::Net::ConsoleServer> &console);
+void RegisterApiService(std::unique_ptr<EQ::Net::WebsocketServer> &server);

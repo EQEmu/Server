@@ -43,8 +43,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/spdat.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/eqemu_logsys_fmt.h"
-#include "../common/net/console_server.h"
 
+#include "api_service.h"
 #include "zone_config.h"
 #include "masterentity.h"
 #include "worldserver.h"
@@ -93,9 +93,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #else
 #include <pthread.h>
 #include "../common/unix.h"
-#include "../common/net/console_server.h"
-#include "console.h"
-
 #endif
 
 volatile bool RunLoops = true;
@@ -121,7 +118,6 @@ double frame_time = 0.0;
 
 void Shutdown();
 extern void MapOpcodes();
-void RegisterConsoleFunctions(std::unique_ptr<EQ::Net::ConsoleServer> &console);
 
 int main(int argc, char** argv) {
 	RegisterExecutablePlatform(ExePlatformZone);
@@ -255,7 +251,7 @@ int main(int argc, char** argv) {
 #endif
 
 	/* Register Log System and Settings */
-	LogSys.OnLogHookCallBackZone(&Zone::GMSayHookCallBackProcess);
+	LogSys.SetGMSayHandler(&Zone::GMSayHookCallBackProcess);
 	database.LoadLogSettings(LogSys.log_settings);
 	LogSys.StartFileLogs();
 
@@ -463,7 +459,7 @@ int main(int argc, char** argv) {
 	EQStreamInterface *eqsi;
 	std::unique_ptr<EQ::Net::EQStreamManager> eqsm;
 	std::chrono::time_point<std::chrono::system_clock> frame_prev = std::chrono::system_clock::now();
-	std::unique_ptr<EQ::Net::ConsoleServer> console;
+	std::unique_ptr<EQ::Net::WebsocketServer> ws_server;
 
 	auto loop_fn = [&](EQ::Timer* t) {
 		//Advance the timer to our current point in time
@@ -488,8 +484,8 @@ int main(int argc, char** argv) {
 					Config->TelnetIP.c_str(),
 					Config->ZonePort
 				);
-				console.reset(new EQ::Net::ConsoleServer(Config->TelnetIP, Config->ZonePort));
-				RegisterConsoleFunctions(console);
+				ws_server.reset(new EQ::Net::WebsocketServer(Config->TelnetIP, Config->ZonePort));
+				RegisterApiService(ws_server);
 				telnet_server_opened = true;
 			}
 		}

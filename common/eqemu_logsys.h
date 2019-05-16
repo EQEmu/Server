@@ -240,7 +240,8 @@ public:
 	 */
 	uint16 GetGMSayColorFromCategory(uint16 log_category);
 
-	void OnLogHookCallBackZone(std::function<void(uint16 log_type, const std::string&)> f) { on_log_gmsay_hook = f; }
+	void SetGMSayHandler(std::function<void(uint16 log_type, const std::string&)> f) { on_log_gmsay_hook = f; }
+	void SetConsoleHandler(std::function<void(uint16 debug_level, uint16 log_type, const std::string&)> f) { on_log_console_hook = f; }
 
 private:
 
@@ -248,6 +249,7 @@ private:
 	 * Callback pointer to zone process for hooking logs to zone using GMSay
 	 */
 	std::function<void(uint16 log_category, const std::string&)> on_log_gmsay_hook;
+	std::function<void(uint16 debug_level, uint16 log_category, const std::string&)> on_log_console_hook;
 
 	/**
 	 * Formats log messages like '[Category] This is a log message'
