@@ -10,9 +10,6 @@
 [submodule "submodules/cereal"]
 	path = submodules/cereal
 	url = https://github.com/USCiLab/cereal.git
-[submodule "submodules/recastnavigation"]
-	path = submodules/recastnavigation
-	url = https://github.com/recastnavigation/recastnavigation.git
 [submodule "submodules/websocketpp"]
 	path = submodules/websocketpp
 	url = https://github.com/zaphoyd/websocketpp.git
