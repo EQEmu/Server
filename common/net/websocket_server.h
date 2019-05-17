@@ -11,6 +11,13 @@ namespace EQ
 {
 	namespace Net
 	{
+		enum WebsocketSubscriptionEvent : int
+		{
+			SubscriptionEventNone,
+			SubscriptionEventLog,
+			SubscriptionEventMax
+		};
+
 		struct WebsocketLoginStatus
 		{
 			bool logged_in;
@@ -45,7 +52,7 @@ namespace EQ
 			
 			void SetMethodHandler(const std::string& method, MethodHandler handler, int required_status);
 			void SetLoginHandler(LoginHandler handler);
-			void DispatchEvent(const std::string& evt, Json::Value data = Json::Value(), int required_status = 0);
+			void DispatchEvent(WebsocketSubscriptionEvent evt, Json::Value data = Json::Value(), int required_status = 0);
 		private:
 			void ReleaseConnection(WebsocketServerConnection *connection);
 			Json::Value HandleRequest(WebsocketServerConnection *connection, const std::string& method, const Json::Value &params);
@@ -53,6 +60,10 @@ namespace EQ
 			Json::Value Login(WebsocketServerConnection *connection, const Json::Value &params);
 			Json::Value Subscribe(WebsocketServerConnection *connection, const Json::Value &params);
 			Json::Value Unsubscribe(WebsocketServerConnection *connection, const Json::Value &params);
+			void DoSubscribe(WebsocketServerConnection *connection, WebsocketSubscriptionEvent sub);
+			void DoUnsubscribe(WebsocketServerConnection *connection, WebsocketSubscriptionEvent sub);
+			bool IsSubscribed(WebsocketServerConnection *connection, WebsocketSubscriptionEvent sub);
+			void UnsubscribeAll(WebsocketServerConnection *connection);
 
 			struct Impl;
 			std::unique_ptr<Impl> _impl;

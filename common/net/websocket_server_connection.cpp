@@ -3,7 +3,6 @@
 #include "../timer.h"
 #include "../util/uuid.h"
 #include <sstream>
-#include <unordered_set>
 #include <fmt/format.h>
 
 struct EQ::Net::WebsocketServerConnection::Impl {
@@ -15,7 +14,6 @@ struct EQ::Net::WebsocketServerConnection::Impl {
 	std::string account_name;
 	uint32 account_id;
 	int status;
-	std::unordered_set<std::string> subscribed;
 };
 
 EQ::Net::WebsocketServerConnection::WebsocketServerConnection(WebsocketServer *parent, 
@@ -152,38 +150,4 @@ void EQ::Net::WebsocketServerConnection::SetAuthorized(bool v, const std::string
 	_impl->account_name = account_name;
 	_impl->account_id = account_id;
 	_impl->status = status;
-}
-
-void EQ::Net::WebsocketServerConnection::Subscribe(const std::string &evt)
-{
-	if (evt == "") {
-		return;
-	}
-
-	auto iter = _impl->subscribed.find(evt);
-	if (iter == _impl->subscribed.end()) {
-		_impl->subscribed.insert(evt);
-	}
-}
-
-void EQ::Net::WebsocketServerConnection::Unsubscribe(const std::string &evt)
-{
-	if (evt == "") {
-		return;
-	}
-
-	auto iter = _impl->subscribed.find(evt);
-	if (iter != _impl->subscribed.end()) {
-		_impl->subscribed.erase(iter);
-	}
-}
-
-bool EQ::Net::WebsocketServerConnection::IsSubscribed(const std::string &evt) const
-{
-	auto iter = _impl->subscribed.find(evt);
-	if (iter != _impl->subscribed.end()) {
-		return true;
-	}
-
-	return false;
 }

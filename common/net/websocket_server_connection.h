@@ -36,9 +36,6 @@ namespace EQ
 			void OnMessage(websocketpp::connection_hdl hdl, websocket_message_ptr msg);
 			void SendResponse(const Json::Value &response, double time_elapsed);
 			void SetAuthorized(bool v, const std::string account_name, uint32 account_id, int status);
-			void Subscribe(const std::string &evt);
-			void Unsubscribe(const std::string &evt);
-			bool IsSubscribed(const std::string &evt) const;
 
 			struct Impl;
 			std::unique_ptr<Impl> _impl;

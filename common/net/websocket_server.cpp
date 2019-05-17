@@ -3,7 +3,8 @@
 #include "../event/timer.h"
 #include <fmt/format.h>
 #include <map>
-#include <list>
+#include <unordered_set>
+#include <array>
 
 struct MethodHandlerEntry
 {
@@ -24,6 +25,7 @@ struct EQ::Net::WebsocketServer::Impl
 	std::map<std::string, MethodHandlerEntry> methods;
 	websocket_server websocket_server;
 	LoginHandler login_handler;
+	std::array<std::unordered_set<WebsocketServerConnection*>, SubscriptionEventMax> subscriptions;
 };
 
 EQ::Net::WebsocketServer::WebsocketServer(const std::string &addr, int port)
@@ -88,7 +90,7 @@ EQ::Net::WebsocketServer::~WebsocketServer()
 
 void EQ::Net::WebsocketServer::ReleaseConnection(WebsocketServerConnection *connection)
 {
-	//Clear any subscriptions here
+	UnsubscribeAll(connection);
 
 	_impl->connections.erase(connection->GetWebsocketConnection());
 }
@@ -132,12 +134,12 @@ void EQ::Net::WebsocketServer::SetLoginHandler(LoginHandler handler)
 	_impl->login_handler = handler;
 }
 
-void EQ::Net::WebsocketServer::DispatchEvent(const std::string &evt, Json::Value data, int required_status)
+void EQ::Net::WebsocketServer::DispatchEvent(WebsocketSubscriptionEvent evt, Json::Value data, int required_status)
 {
 	try {
 		Json::Value event_obj;
 		event_obj["type"] = "event";
-		event_obj["event"] = evt;
+		event_obj["event"] = (int)evt;
 		event_obj["data"] = data;
 
 		std::stringstream payload;
@@ -146,9 +148,7 @@ void EQ::Net::WebsocketServer::DispatchEvent(const std::string &evt, Json::Value
 		for (auto &iter : _impl->connections) {
 			auto &c = iter.second;
 
-			//Might be better to get rid of subscriptions and just send everything and 
-			//let the client sort out what they want idk
-			if (c->GetStatus() >= required_status && c->IsSubscribed(evt)) {
+			if (c->GetStatus() >= required_status && IsSubscribed(c.get(), evt)) {
 				c->GetWebsocketConnection()->send(payload.str());
 			}
 		}
@@ -190,13 +190,20 @@ Json::Value EQ::Net::WebsocketServer::Subscribe(WebsocketServerConnection *conne
 	Json::Value ret;
 
 	try {
-		auto evt = params[0].asString();
-		connection->Subscribe(evt);
+		auto evt = params[0].asInt();
+		if (evt < 0 || evt >= SubscriptionEventMax) {
+			throw WebsocketException("Not a valid subscription");
+		}
+
+		DoSubscribe(connection, (WebsocketSubscriptionEvent)evt);
 		ret["status"] = "Ok";
 		return ret;
 	}
+	catch (WebsocketException &ex) {
+		throw ex;
+	}
 	catch (std::exception) {
-		throw WebsocketException("Unable to process subscribe request");
+		throw WebsocketException("Unable to process unsubscribe request");
 	}
 }
 
@@ -205,12 +212,44 @@ Json::Value EQ::Net::WebsocketServer::Unsubscribe(WebsocketServerConnection *con
 	Json::Value ret;
 
 	try {
-		auto evt = params[0].asString();
-		connection->Unsubscribe(evt);
+		auto evt = params[0].asInt();
+		if (evt < 0 || evt >= SubscriptionEventMax) {
+			throw WebsocketException("Not a valid subscription");
+		}
+
+		DoUnsubscribe(connection, (WebsocketSubscriptionEvent)evt);
 		ret["status"] = "Ok";
 		return ret;
 	}
+	catch (WebsocketException &ex) {
+		throw ex;
+	}
 	catch (std::exception) {
 		throw WebsocketException("Unable to process unsubscribe request");
+	}
+}
+
+void EQ::Net::WebsocketServer::DoSubscribe(WebsocketServerConnection *connection, WebsocketSubscriptionEvent sub) {
+	auto &s = _impl->subscriptions[sub];
+
+	auto iter = s.find(connection);
+	if (iter == s.end()) {
+		s.insert(connection);
+	}
+}
+
+void EQ::Net::WebsocketServer::DoUnsubscribe(WebsocketServerConnection *connection, WebsocketSubscriptionEvent sub) {
+	auto &s = _impl->subscriptions[sub];
+	s.erase(connection);
+}
+
+bool EQ::Net::WebsocketServer::IsSubscribed(WebsocketServerConnection *connection, WebsocketSubscriptionEvent sub) {
+	auto &s = _impl->subscriptions[sub];
+	return s.count(connection) == 1;
+}
+
+void EQ::Net::WebsocketServer::UnsubscribeAll(WebsocketServerConnection *connection) {
+	for (auto i = 0; i < SubscriptionEventMax; ++i) {
+		DoUnsubscribe(connection, (WebsocketSubscriptionEvent)i);
 	}
 }

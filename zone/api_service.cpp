@@ -807,7 +807,7 @@ void RegisterApiLogEvent(std::unique_ptr<EQ::Net::WebsocketServer> &server)
 		data["debug_level"] = debug_level;
 		data["log_category"] = log_category;
 		data["msg"] = msg;
-		server->DispatchEvent("log", data, 50);
+		server->DispatchEvent(EQ::Net::SubscriptionEventLog, data, 50);
 	});
 }
 
