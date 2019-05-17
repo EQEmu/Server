@@ -13,3 +13,6 @@
 [submodule "submodules/websocketpp"]
 	path = submodules/websocketpp
 	url = https://github.com/zaphoyd/websocketpp.git
+[submodule "submodules/recastnavigation"]
+	path = submodules/recastnavigation
+	url = https://github.com/EQEmu/recastnavigation.git
