@@ -23,7 +23,7 @@ struct EQ::Net::WebsocketServer::Impl
 	std::unique_ptr<EQ::Timer> ping_timer;
 	std::map<std::shared_ptr<websocket_connection>, std::unique_ptr<WebsocketServerConnection>> connections;
 	std::map<std::string, MethodHandlerEntry> methods;
-	websocket_server websocket_server;
+	websocket_server ws_server;
 	LoginHandler login_handler;
 	std::array<std::unordered_set<WebsocketServerConnection*>, SubscriptionEventMax> subscriptions;
 };
@@ -33,14 +33,14 @@ EQ::Net::WebsocketServer::WebsocketServer(const std::string &addr, int port)
 	_impl.reset(new Impl());
 	_impl->server.reset(new EQ::Net::TCPServer());
 	_impl->server->Listen(addr, port, false, [this](std::shared_ptr<EQ::Net::TCPConnection> connection) {
-		auto wsc = _impl->websocket_server.get_connection();
+		auto wsc = _impl->ws_server.get_connection();
 		WebsocketServerConnection *c = new WebsocketServerConnection(this, connection, wsc);
 		_impl->connections.insert(std::make_pair(wsc, std::unique_ptr<WebsocketServerConnection>(c)));
 	});
 
-	_impl->websocket_server.set_write_handler(
+	_impl->ws_server.set_write_handler(
 		[this](websocketpp::connection_hdl hdl, char const *data, size_t size) -> websocketpp::lib::error_code {
-		auto c = _impl->websocket_server.get_con_from_hdl(hdl);
+		auto c = _impl->ws_server.get_con_from_hdl(hdl);
 		auto iter = _impl->connections.find(c);
 		if (iter != _impl->connections.end()) {
 			iter->second->GetTCPConnection()->Write(data, size);
@@ -81,7 +81,7 @@ EQ::Net::WebsocketServer::WebsocketServer(const std::string &addr, int port)
 		return ret;
 	};
 
-	_impl->websocket_server.clear_access_channels(websocketpp::log::alevel::all);
+	_impl->ws_server.clear_access_channels(websocketpp::log::alevel::all);
 }
 
 EQ::Net::WebsocketServer::~WebsocketServer()
