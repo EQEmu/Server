@@ -447,7 +447,7 @@ void Mob::AI_Init()
 	maxLastFightingDelayMoving = RuleI(NPC, LastFightingDelayMovingMax);
 
 	pDontHealMeBefore = 0;
-	pDontBuffMeBefore = 0;
+	pDontBuffMeBefore = Timer::GetCurrentTime() + 400;
 	pDontDotMeBefore = 0;
 	pDontRootMeBefore = 0;
 	pDontSnareMeBefore = 0;
@@ -1636,11 +1636,12 @@ void NPC::AI_DoMovement() {
 				}
 			}
 
-			glm::vec3 destination;
-			destination.x = roambox_destination_x;
-			destination.y = roambox_destination_y;
-			destination.z = m_Position.z;
-			roambox_destination_z = zone->zonemap ? zone->zonemap->FindClosestZ(destination, nullptr) + this->GetZOffset() : 0;
+			roambox_destination_z = 0;
+			/*
+			if (zone->zonemap) {
+				roambox_destination_z = FindGroundZ(roambox_destination_x, roambox_destination_y, this->GetZOffset());
+			}
+				*/
 
 			Log(Logs::Detail,
 				Logs::NPCRoamBox,
@@ -1799,7 +1800,6 @@ void NPC::AI_SetupNextWaypoint() {
 	else {
 		pause_timer_complete = false;
 		Log(Logs::Detail, Logs::Pathing, "We are departing waypoint %d.", cur_wp);
-
 		//if we were under quest control (with no grid), we are done now..
 		if (cur_wp == EQEmu::WaypointStatus::QuestControlNoGrid) {
 			Log(Logs::Detail, Logs::Pathing, "Non-grid quest mob has reached its quest ordered waypoint. Leaving pathing mode.");
