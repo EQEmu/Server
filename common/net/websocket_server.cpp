@@ -8,6 +8,10 @@
 
 struct MethodHandlerEntry
 {
+	MethodHandlerEntry() {
+		status = 0;
+	}
+
 	MethodHandlerEntry(EQ::Net::WebsocketServer::MethodHandler h, int s) {
 		handler = h;
 		status = s;
@@ -126,7 +130,7 @@ void EQ::Net::WebsocketServer::SetMethodHandler(const std::string &method, Metho
 		return;
 	}
 
-	_impl->methods.insert_or_assign(method, MethodHandlerEntry(handler, required_status));
+	_impl->methods[method] = MethodHandlerEntry(handler, required_status);
 }
 
 void EQ::Net::WebsocketServer::SetLoginHandler(LoginHandler handler)
