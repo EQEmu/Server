@@ -151,6 +151,7 @@ SET(common_headers
 	fixed_memory_hash_set.h
 	fixed_memory_variable_hash_set.h
 	global_define.h
+	global_tasks.h
 	guild_base.h
 	guilds.h
 	inventory_profile.h

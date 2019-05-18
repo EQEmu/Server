@@ -1954,6 +1954,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	}
 	case ServerOP_TaskReject:
 	{
+		// this will be reworked to not use the pend shit, we will depend on hoping successive requests just get thrown out
 		int message = pack->ReadUInt32();
 		char name[64] = { 0 };
 		pack->ReadString(name);
@@ -1965,18 +1966,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			else if (message > 0)
 				client->Message_StringID(13, message);
 			// negative nothing I guess
-		}
-		break;
-	}
-	case ServerOP_TaskRequest:
-	{
-		int id = pack->ReadUInt32(); // we need the ID when reply to world so we know which shared task we're going to
-		int task_id = pack->ReadUInt32();
-		char name[64] = { 0 };
-		pack->ReadString(name);
-		auto client = entity_list.GetClientByName(name);
-		if (client) {
-			client->HandleCanJoinSharedTask(task_id, id);
 		}
 		break;
 	}

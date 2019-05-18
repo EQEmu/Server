@@ -6,6 +6,7 @@
 //#include "../common/eq_packet_structs.h"
 #include "../common/servertalk.h"
 #include "../common/rulesys.h"
+#include "../common/global_tasks.h"
 #include <vector>
 
 
@@ -18,6 +19,7 @@
 
 class ZoneServer;
 struct ServerClientList_Struct;
+class SharedTask;
 
 class ClientListEntry {
 public:
@@ -88,6 +90,12 @@ public:
 	inline void PushToTellQueue(ServerChannelMessage_Struct *scm) { tell_queue.push_back(scm); }
 	void ProcessTellQueue();
 
+	// shared task stuff
+	int GetTaskLockoutExpire(int id) const;
+	int GetTaskLockoutTimeLeft(int id) const;
+	inline int GetCurrentSharedTaskID() const { return shared_task_id; }
+	inline void SetCurrentSharedTaskID(int in) { shared_task_id = in; }
+
 private:
 	void	ClearVars(bool iAll = false);
 
@@ -128,6 +136,13 @@ private:
 	uint8	pLFGToLevel;
 	bool	pLFGMatchFilter;
 	char	pLFGComments[64];
+
+	// shared task stuff
+	// stub for now
+	int shared_task_id; // ID in the TaskManager
+	SharedTask *m_shared_task; // just for quick reference so we can tell it to clean up our pointer
+
+	std::vector<TaskTimer> m_task_replay_timers;
 
 	// Tell Queue -- really a vector :D
 	std::vector<ServerChannelMessage_Struct *> tell_queue;

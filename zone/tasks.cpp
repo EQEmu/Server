@@ -3405,14 +3405,13 @@ void ClientTaskState::PendSharedTask(Client *c, int TaskID, int NPCID, bool enfo
 		return;
 
 	if (task->replay_group) {
-		auto expires = c->GetTaskLockoutExpire(task->replay_group);
-		if (expires) {
-			auto diff = expires - Timer::GetCurrentTime();
-			std::string days = std::to_string(diff / 86400);
-			diff = diff % 86400;
-			std::string hours = std::to_string(diff / 3600);
-			diff = diff % 3600;
-			std::string minutes = std::to_string(diff / 60);
+		auto expires = c->GetTaskLockoutTimeLeft(task->replay_group);
+		if (expires > 0) {
+			std::string days = std::to_string(expires / 86400);
+			expires = expires % 86400;
+			std::string hours = std::to_string(expires / 3600);
+			expires = expires % 3600;
+			std::string minutes = std::to_string(expires / 60);
 			c->Message_StringID(13, TASK_REJECT_LOCKEDOUT, days.c_str(), hours.c_str(), minutes.c_str());
 			return;
 		}
@@ -3440,6 +3439,37 @@ void ClientTaskState::PendSharedTask(Client *c, int TaskID, int NPCID, bool enfo
 		return;
 	}
 
+	// okay, we verified a few things on the requestor, now we need to fire off to world to do the rest
+	SerializeBuffer buf(25 + 10 * player_count);
+	buf.WriteInt32(TaskID);			// Task ID
+	buf.WriteString(c->GetName());	// leader name
+	buf.WriteInt32(player_count - 1); // count, not leader
+	if (group) {
+		for (int i = 0; i < MAX_GROUP_MEMBERS; ++i) {
+			if (group->members[i] == c) // skipping requestor
+				continue;
+
+			// TODO: mercs/bots
+			if (group->members[i] != nullptr && group->members[i]->IsClient())
+				buf.WriteString(group->membername[i]);
+		}
+	} else if (raid) {
+		for (int i = 0; i < MAX_RAID_MEMBERS; ++i) {
+			if (raid->members[i].member == c) // skipping requestor
+				continue;
+			// TODO: bots if they ever can live in a raid
+			if (raid->members[i].membername[0] != '\0')
+				buf.WriteString(raid->members[i].membername);
+		}
+	}
+
+	auto pack = new ServerPacket(ServerOP_TaskRequest, buf);
+	worldserver.SendPacket(pack);
+	delete pack;
+
+	return;
+
+	/*
 	std::vector<std::string> missing_players; // names of players not in this zone so we can put the checks off to world
 	bool task_failed = false;
 	if (group) {
@@ -3458,15 +3488,14 @@ void ClientTaskState::PendSharedTask(Client *c, int TaskID, int NPCID, bool enfo
 					break;
 				} else {
 					if (task->replay_group) {
-						auto expires = client->GetTaskLockoutExpire(task->replay_group);
-						if (expires) {
+						auto expires = client->GetTaskLockoutTimeLeft(task->replay_group);
+						if (expires > 0) {
 							task_failed = true;
-							auto diff = expires - Timer::GetCurrentTime();
-							std::string days = std::to_string(diff / 86400);
-							diff = diff % 86400;
-							std::string hours = std::to_string(diff / 3600);
-							diff = diff % 3600;
-							std::string minutes = std::to_string(diff / 60);
+							std::string days = std::to_string(expires / 86400);
+							expires = expires % 86400;
+							std::string hours = std::to_string(expires / 3600);
+							expires = expires % 3600;
+							std::string minutes = std::to_string(expires / 60);
 							c->Message_StringID(13, TASK_REJECT_LOCKEDOUT_OTHER,
 									    client->GetName(), days.c_str(),
 									    hours.c_str(), minutes.c_str());
@@ -3497,15 +3526,14 @@ void ClientTaskState::PendSharedTask(Client *c, int TaskID, int NPCID, bool enfo
 					break;
 				} else {
 					if (task->replay_group) {
-						auto expires = client->GetTaskLockoutExpire(task->replay_group);
-						if (expires) {
+						auto expires = client->GetTaskLockoutTimeLeft(task->replay_group);
+						if (expires > 0) {
 							task_failed = true;
-							auto diff = expires - Timer::GetCurrentTime();
-							std::string days = std::to_string(diff / 86400);
-							diff = diff % 86400;
-							std::string hours = std::to_string(diff / 3600);
-							diff = diff % 3600;
-							std::string minutes = std::to_string(diff / 60);
+							std::string days = std::to_string(expires / 86400);
+							expires = expires % 86400;
+							std::string hours = std::to_string(expires / 3600);
+							expires = expires % 3600;
+							std::string minutes = std::to_string(expires / 60);
 							c->Message_StringID(13, TASK_REJECT_LOCKEDOUT_OTHER,
 									    client->GetName(), days.c_str(),
 									    hours.c_str(), minutes.c_str());
@@ -3530,91 +3558,13 @@ void ClientTaskState::PendSharedTask(Client *c, int TaskID, int NPCID, bool enfo
 	// so we've verified all the clients we can and didn't fail, time to pend and yell at world
 	c->SetPendingTask(TaskID, NPCID);
 	c->StartPendingTimer(); // in case something goes wrong and takes ages, we time out
+	*/
 
-	SerializeBuffer buf(25 + 10 * missing_players.size());
-	buf.WriteInt32(TaskID);			// Task ID
-	buf.WriteString(c->GetName());	// leader name
-	buf.WriteInt32(missing_players.size()); // count
-	for (auto && name : missing_players)
-		buf.WriteString(name);
-
-	auto pack = new ServerPacket(ServerOP_TaskRequest, buf);
-	worldserver.SendPacket(pack);
-	delete pack;
 }
 
 void ClientTaskState::AcceptNewSharedTask(Client *c, int TaskID, int NPCID, int id)
 {
 
-}
-
-void ClientTaskState::HandleCanJoinSharedTask(Client *c, int TaskID, int id)
-{
-	if (!c)
-		return;
-
-	SerializeBuffer buf(15);
-	buf.WriteInt32(id);
-	buf.WriteString(c->GetName());
-
-	if (!taskmanager || TaskID < 0 || TaskID >= MAXTASKS) {
-		buf.WriteInt32(TASKJOINOOZ_NOTASK);
-		auto pack = new ServerPacket(ServerOP_TaskRequestReply, buf);
-		worldserver.SendPacket(pack);
-		delete pack;
-		return;
-	}
-
-	auto task = taskmanager->Tasks[TaskID];
-
-	if (task == nullptr) {
-		buf.WriteInt32(TASKJOINOOZ_NOTASK);
-		auto pack = new ServerPacket(ServerOP_TaskRequestReply, buf);
-		worldserver.SendPacket(pack);
-		delete pack;
-		return;
-	}
-
-	if (task->type != TaskType::Shared) {
-		buf.WriteInt32(TASKJOINOOZ_NOTASK);
-		auto pack = new ServerPacket(ServerOP_TaskRequestReply, buf);
-		worldserver.SendPacket(pack);
-		delete pack;
-		return;
-	}
-
-	if (ActiveSharedTask != nullptr) {
-		buf.WriteInt32(TASKJOINOOZ_HAVEONE);
-		auto pack = new ServerPacket(ServerOP_TaskRequestReply, buf);
-		worldserver.SendPacket(pack);
-		delete pack;
-		return;
-	}
-
-	if (!taskmanager->AppropriateLevel(TaskID, c->GetLevel())) {
-		buf.WriteInt32(TASKJOINOOZ_LEVEL);
-		auto pack = new ServerPacket(ServerOP_TaskRequestReply, buf);
-		worldserver.SendPacket(pack);
-		delete pack;
-		return;
-	}
-
-	if (task->replay_group) {
-		auto expires = c->GetTaskLockoutExpire(task->replay_group);
-		if (expires) {
-			buf.WriteInt32(TASKJOINOOZ_TIMER);
-			buf.WriteInt32(expires);
-			auto pack = new ServerPacket(ServerOP_TaskRequestReply, buf);
-			worldserver.SendPacket(pack);
-			delete pack;
-			return;
-		}
-	}
-
-	buf.WriteInt32(TASKJOINOOZ_CAN);
-	auto pack = new ServerPacket(ServerOP_TaskRequestReply, buf);
-	worldserver.SendPacket(pack);
-	delete pack;
 }
 
 void ClientTaskState::ProcessTaskProximities(Client *c, float X, float Y, float Z) {

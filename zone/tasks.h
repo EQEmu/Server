@@ -21,6 +21,7 @@ Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
 #define TASKS_H
 
 #include "../common/types.h"
+#include "../common/global_tasks.h"
 
 #include <list>
 #include <vector>
@@ -28,24 +29,6 @@ Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
 #include <algorithm>
 #include <unordered_map>
 #include <map>
-
-#define MAXTASKS 10000
-#define MAXTASKSETS 1000
-// The Client has a hard cap of 19 active quests, 29 in SoD+
-#define MAXACTIVEQUESTS 19
-// The Max Chooser (Task Selector entries) is capped at 40 in the Titanium Client.
-#define MAXCHOOSERENTRIES 40
-// The Client has a hard cap of 20 activities per task.
-#define MAXACTIVITIESPERTASK 20
-// This is used to determine if a client's active task slot is empty.
-#define TASKSLOTEMPTY 0
-
-// Command Codes for worldserver ServerOP_ReloadTasks
-//
-#define RELOADTASKS		0
-#define RELOADTASKGOALLISTS	1
-#define RELOADTASKPROXIMITIES	2
-#define RELOADTASKSETS		3
 
 class Client;
 class Mob;
@@ -99,106 +82,6 @@ public:
 private:
 	std::vector<TaskProximity> TaskProximities;
 };
-
-typedef enum { METHODSINGLEID = 0, METHODLIST = 1, METHODQUEST = 2 } TaskMethodType;
-
-struct ActivityInformation {
-	int		StepNumber;
-	int		Type;
-	std::string target_name; // name mob, location -- default empty
-	std::string item_list; // likely defaults to empty
-	std::string skill_list; // IDs ; separated -- default -1
-	std::string spell_list; // IDs ; separated -- default 0
-	std::string desc_override; // overrides auto generated description -- default empty
-	int		skill_id; // older clients, first id from above
-	int		spell_id; // older clients, first id from above
-	int		GoalID;
-	TaskMethodType GoalMethod;
-	int		GoalCount;
-	int		DeliverToNPC;
-	std::vector<int>	ZoneIDs;
-	std::string zones; // IDs ; searated, ZoneID is the first in this list for older clients -- default empty string
-	bool	Optional;
-
-	inline bool CheckZone(int zone_id) {
-		if (ZoneIDs.empty())
-			return true;
-		return std::find(ZoneIDs.begin(), ZoneIDs.end(), zone_id) != ZoneIDs.end();
-	}
-};
-
-typedef enum { ActivitiesSequential = 0, ActivitiesStepped = 1 } SequenceType;
-
-enum class TaskType {
-	Task = 0,		// can have at max 1
-	Shared = 1,		// can have at max 1
-	Quest = 2,		// can have at max 19 or 29 depending on client
-	E = 3			// can have at max 19 or 29 depending on client, not present in live anymore
-};
-
-enum class DurationCode {
-	None = 0,
-	Short = 1,
-	Medium = 2,
-	Long = 3
-};
-
-// need to capture more, shared are just Radiant/Ebon though
-enum class PointType {
-	None = 0,
-	Radiant = 4,
-	Ebon = 5,
-};
-
-struct TaskInformation {
-	TaskType type;
-	int	Duration;
-	DurationCode dur_code; // description for time investment for when Duration == 0
-	std::string Title;			// max length 64
-	std::string Description;	// max length 4000, 2048 on Tit
-	std::string Reward;
-	std::string item_link;		// max length 128 older clients, item link gets own string
-	std::string completion_emote; // emote after completing task, yellow. Maybe should make more generic ... but yellow for now!
-	int	RewardID;
-	int	CashReward; // Expressed in copper
-	int	XPReward;
-	int faction_reward; // just a npc_faction_id
-	TaskMethodType RewardMethod;
-	int reward_points; // DoN crystals for shared. Generic "points" for non-shared
-	PointType reward_type; // 4 for Radiant Crystals else Ebon crystals when shared task
-	int	ActivityCount;
-	SequenceType SequenceMode;
-	int	LastStep;
-	short	MinLevel;
-	short	MaxLevel;
-	bool	Repeatable;
-	int replay_group; // ID of our replay timer group (0 means none)
-	int min_players; // shared tasks
-	int max_players;
-	int task_lock_step; // task locks after this step is completed
-	uint32 instance_zone_id; // instance shit
-	uint32 zone_version;
-	uint16 zone_in_zone_id;
-	float zone_in_x;
-	float zone_in_y;
-	uint16 zone_in_object_id;
-	float dest_x;
-	float dest_y;
-	float dest_z;
-	float dest_h;
-	/* int graveyard_zone_id;
-	float graveyard_x;
-	float graveyard_y;
-	float graveyard_z;
-	float graveyard_radius; */
-	ActivityInformation Activity[MAXACTIVITIESPERTASK];
-};
-
-typedef enum { ActivityHidden = 0, ActivityActive = 1, ActivityCompleted = 2 } ActivityState;
-
-typedef enum { ActivityDeliver = 1, ActivityKill = 2, ActivityLoot = 3, ActivitySpeakWith = 4, ActivityExplore = 5,
-			ActivityTradeSkill = 6, ActivityFish = 7, ActivityForage = 8, ActivityCastOn = 9, ActivitySkillOn = 10,
-			ActivityTouch = 11, ActivityCollect = 13, ActivityGiveCash = 100 } ActivityType;
 
 
 struct ClientActivityInformation {
@@ -267,7 +150,6 @@ public:
 	void AcceptNewTask(Client *c, int TaskID, int NPCID, bool enforce_level_requirement = false);
 	void AcceptNewSharedTask(Client *c, int TaskID, int NPCID, int id);
 	void PendSharedTask(Client *c, int TaskID, int NPCID, bool enforce_level_requirement = false);
-	void HandleCanJoinSharedTask(Client *c, int TaskID, int id);
 	void FailTask(Client *c, int TaskID);
 	int TaskTimeLeft(int TaskID);
 	int IsTaskCompleted(int TaskID);
@@ -343,13 +225,6 @@ private:
 	std::vector<CompletedTaskInformation> CompletedTasks;
 	int LastCompletedTaskLoaded;
 	bool CheckedTouchActivities;
-};
-
-// used for timer lockouts and /tasktimers
-struct TaskTimer {
-	int ID; // ID used in task timer
-	int original_id; // original ID of the task
-	int expires; // UNIX timestamp of when it expires, what happens with DLS? Fuck it.
 };
 
 struct TaskReplayGroups {

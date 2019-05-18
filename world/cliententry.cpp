@@ -25,6 +25,9 @@
 #include "world_config.h"
 #include "../common/guilds.h"
 #include "../common/string_util.h"
+#include "shared_tasks.h"
+
+#include <algorithm>
 
 extern uint32 numplayers;
 extern LoginServerList loginserverlist;
@@ -50,6 +53,8 @@ ClientListEntry::ClientListEntry(uint32 in_id, uint32 iLSID, const char* iLoginN
 	pLFGToLevel = 0;
 	pLFGMatchFilter = false;
 	memset(pLFGComments, 0, 64);
+	shared_task_id = 0;
+	m_shared_task = nullptr;
 }
 
 ClientListEntry::ClientListEntry(uint32 in_id, uint32 iAccID, const char* iAccName, MD5& iMD5Pass, int16 iAdmin)
@@ -71,6 +76,8 @@ ClientListEntry::ClientListEntry(uint32 in_id, uint32 iAccID, const char* iAccNa
 	pLFGToLevel = 0;
 	pLFGMatchFilter = false;
 	memset(pLFGComments, 0, 64);
+	shared_task_id = 0;
+	m_shared_task = nullptr;
 }
 
 ClientListEntry::ClientListEntry(uint32 in_id, ZoneServer* iZS, ServerClientList_Struct* scl, int8 iOnline)
@@ -93,6 +100,8 @@ ClientListEntry::ClientListEntry(uint32 in_id, ZoneServer* iZS, ServerClientList
 	pLFGToLevel = 0;
 	pLFGMatchFilter = false;
 	memset(pLFGComments, 0, 64);
+	shared_task_id = 0;
+	m_shared_task = nullptr;
 
 	if (iOnline >= CLE_Status_Zoning)
 		Update(iZS, scl, iOnline);
@@ -105,6 +114,8 @@ ClientListEntry::~ClientListEntry() {
 		Camp(); // updates zoneserver's numplayers
 		client_list.RemoveCLEReferances(this);
 	}
+	if (m_shared_task != nullptr)
+		m_shared_task->MemberLeftGame(this);
 	for (auto &elem : tell_queue)
 		safe_delete_array(elem);
 	tell_queue.clear();
@@ -248,6 +259,10 @@ void ClientListEntry::ClearVars(bool iAll) {
 	pLFG = 0;
 	gm = 0;
 	pClientVersion = 0;
+	shared_task_id = 0;
+	if (m_shared_task != nullptr)
+		m_shared_task->MemberLeftGame(this);
+	m_shared_task = nullptr;
 	for (auto &elem : tell_queue)
 		safe_delete_array(elem);
 	tell_queue.clear();
@@ -329,5 +344,36 @@ void ClientListEntry::ProcessTellQueue()
 		it = tell_queue.erase(it);
 	}
 	return;
+}
+
+/*
+ * returns expire timestamp
+ */
+
+int ClientListEntry::GetTaskLockoutExpire(int id) const
+{
+	auto it = std::find_if(m_task_replay_timers.begin(), m_task_replay_timers.end(),
+			       [id](const TaskTimer &a) { return a.ID == id; });
+
+	if (it != m_task_replay_timers.end())
+		return it->expires;
+
+	return 0;
+}
+
+/*
+ * returns seconds until expires
+ * returns <= 0 if expired
+ */
+
+int ClientListEntry::GetTaskLockoutTimeLeft(int id) const
+{
+	auto it = std::find_if(m_task_replay_timers.begin(), m_task_replay_timers.end(),
+			       [id](const TaskTimer &a) { return a.ID == id; });
+
+	if (it != m_task_replay_timers.end())
+		return it->expires - Timer::GetCurrentTime();
+
+	return 0;
 }
 

@@ -157,7 +157,6 @@
 #define ServerOP_TaskReject			0x0302
 #define ServerOP_TaskAddPlayer		0x0303
 #define ServerOP_TaskRemovePlayer	0x0304
-#define ServerOP_TaskRequestReply	0x0305
 
 #define ServerOP_EncapPacket		0x2007	// Packet within a packet
 #define ServerOP_WorldListUpdate	0x2008
