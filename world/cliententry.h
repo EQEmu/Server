@@ -95,6 +95,7 @@ public:
 	int GetTaskLockoutTimeLeft(int id) const;
 	inline int GetCurrentSharedTaskID() const { return shared_task_id; }
 	inline void SetCurrentSharedTaskID(int in) { shared_task_id = in; }
+	inline bool HasFreeSharedTaskSlot() const { return shared_task_id == 0; }
 
 private:
 	void	ClearVars(bool iAll = false);

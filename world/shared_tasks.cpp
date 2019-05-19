@@ -29,6 +29,7 @@ void SharedTaskManager::HandleTaskRequest(ServerPacket *pack)
 	if (it == task_information.end()) { // not loaded! bad id or not shared task
 		auto pc = client_list.FindCharacter(leader_name.c_str());
 		if (pc) {
+			// failure TODO: appropriate message
 			auto pack = new ServerPacket(ServerOP_TaskReject, leader_name.size() + 1 + 4);
 			pack->WriteUInt32(0); // string ID or just generic fail message
 			pack->WriteString(leader_name.c_str());
@@ -43,6 +44,7 @@ void SharedTaskManager::HandleTaskRequest(ServerPacket *pack)
 	if (!ret.second) {
 		auto pc = client_list.FindCharacter(leader_name.c_str());
 		if (pc) {
+			// failure TODO: appropriate message
 			auto pack = new ServerPacket(ServerOP_TaskReject, leader_name.size() + 1 + 4);
 			pack->WriteUInt32(0); // string ID or just generic fail message
 			pack->WriteString(leader_name.c_str());
@@ -52,14 +54,14 @@ void SharedTaskManager::HandleTaskRequest(ServerPacket *pack)
 		return;
 	}
 
-	auto cle = client_list.FindCharacter(leader_name.c_str());
-	if (cle == nullptr) {// something went wrong
+	auto cle_leader = client_list.FindCharacter(leader_name.c_str());
+	if (cle_leader == nullptr) {// something went wrong
 		tasks.erase(ret.first);
 		return;
 	}
 
 	auto &task = ret.first->second;
-	task.AddMember(leader_name, cle, true);
+	task.AddMember(leader_name, cle_leader, true);
 
 	if (players.empty()) {
 		// send instant success to leader
@@ -68,25 +70,58 @@ void SharedTaskManager::HandleTaskRequest(ServerPacket *pack)
 		buf.WriteString(leader_name);	// leader's name
 
 		auto pack = new ServerPacket(ServerOP_TaskGrant, buf);
-		zoneserver_list.SendPacket(cle->zone(), cle->instance(), pack);
+		zoneserver_list.SendPacket(cle_leader->zone(), cle_leader->instance(), pack);
 		safe_delete(pack);
+		tasks.erase(ret.first);
 		return;
 	}
 
 	for (auto &&name : players) {
 		// look up CLEs by name, tell them we need to know if they can be added
-		cle = client_list.FindCharacter(name.c_str());
+		auto cle = client_list.FindCharacter(name.c_str());
 		if (cle) {
 			// make sure we don't have a shared task already
+			if (!cle->HasFreeSharedTaskSlot()) {
+				// failure TODO: appropriate message
+				auto pack = new ServerPacket(ServerOP_TaskReject, leader_name.size() + 1 + 4);
+				pack->WriteUInt32(0); // string ID or just generic fail message
+				pack->WriteString(leader_name.c_str());
+				zoneserver_list.SendPacket(cle_leader->zone(), cle_leader->instance(), pack);
+				safe_delete(pack);
+				tasks.erase(ret.first);
+				return;
+			}
 
 			// make sure our level is right
+			if (!AppropriateLevel(task_id, cle->level())) {
+				// failure TODO: appropriate message
+				auto pack = new ServerPacket(ServerOP_TaskReject, leader_name.size() + 1 + 4);
+				pack->WriteUInt32(0); // string ID or just generic fail message
+				pack->WriteString(leader_name.c_str());
+				zoneserver_list.SendPacket(cle_leader->zone(), cle_leader->instance(), pack);
+				safe_delete(pack);
+				tasks.erase(ret.first);
+				return;
+			}
 
 			// check our lock out timer
+			int expires = cle->GetTaskLockoutExpire(task_id);
+			if ((expires - Timer::GetCurrentTime()) >= 0) {
+				// failure TODO: appropriate message, we need to send the timestamp here
+				auto pack = new ServerPacket(ServerOP_TaskReject, leader_name.size() + 1 + 4);
+				pack->WriteUInt32(0); // string ID or just generic fail message
+				pack->WriteString(leader_name.c_str());
+				zoneserver_list.SendPacket(cle_leader->zone(), cle_leader->instance(), pack);
+				safe_delete(pack);
+				tasks.erase(ret.first);
+				return;
+			}
 
 			// we're good, add to task
 			task.AddMember(name, cle);
 		}
 	}
+	// TODO: what do now!
 }
 
 /*
@@ -113,6 +148,27 @@ int SharedTaskManager::GetNextID()
 		next_id++;
 
 	return next_id;
+}
+
+/*
+ * returns true if the level fits in the task's defined range
+ */
+bool SharedTaskManager::AppropriateLevel(int id, int level) const
+{
+	auto it = task_information.find(id);
+	// doesn't exist
+	if (it == task_information.end())
+		return false;
+
+	auto &task = it->second;
+
+	if (task.MinLevel && level < task.MinLevel)
+		return false;
+
+	if (task.MaxLevel && level > task.MaxLevel)
+		return false;
+
+	return true;
 }
 
 /*

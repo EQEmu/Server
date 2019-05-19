@@ -47,6 +47,8 @@ public:
 	bool LoadSharedTaskState();
 	bool LoadSharedTasks();
 
+	bool AppropriateLevel(int id, int level) const;
+
 	// IPC packet processing
 	void HandleTaskRequest(ServerPacket *pack);
 
