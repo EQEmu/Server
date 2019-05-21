@@ -13,6 +13,7 @@ struct SharedTaskMember {
 	std::string name;
 	ClientListEntry *cle;
 	bool leader;
+	// TODO: monster mission stuff
 	SharedTaskMember() : leader(false), cle(nullptr) {}
 	SharedTaskMember(std::string name, ClientListEntry *cle, bool leader) : name(name), cle(cle), leader(leader) {}
 };
@@ -31,6 +32,9 @@ public:
 	}
 	void MemberLeftGame(ClientListEntry *cle);
 	const std::string &GetLeaderName() const { return leader_name; }
+
+	void SerializeMembers(SerializeBuffer &buf, bool include_leader = true) const;
+	void SetCLESharedTasks();
 
 private:
 	int id; // id we have in our map
@@ -51,6 +55,8 @@ public:
 
 	// IPC packet processing
 	void HandleTaskRequest(ServerPacket *pack);
+
+	void Process();
 
 private:
 	int GetNextID();

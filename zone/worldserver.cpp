@@ -1945,22 +1945,33 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	case ServerOP_TaskGrant:
 	{
 		int id = pack->ReadUInt32();
+		int task_id = pack->ReadUInt32();
+		int taskmaster_id = pack->ReadUInt32();
 		char name[64] = { 0 };
 		pack->ReadString(name);
 		auto client = entity_list.GetClientByName(name);
-		if (client && client->HasPendingTask()) // if they don't have it, ignore it I guess :P
-			client->AssignSharedTask(client->GetPendingTaskID(), client->GetPendingTaskMasterID(), id);
+		if (client) { // guess we just do nothing if they're not here
+			std::vector<std::string> members;
+			int count = pack->ReadUInt32();
+			for (int i = 0; i < count; ++i) {
+				pack->ReadString(name);
+				members.push_back(name);
+			}
+			client->AssignSharedTask(task_id, taskmaster_id, id, members);
+		} else {
+			// TODO: something failed, tell world to clean up
+		}
 		break;
 	}
 	case ServerOP_TaskReject:
 	{
 		// this will be reworked to not use the pend shit, we will depend on hoping successive requests just get thrown out
 		int message = pack->ReadUInt32();
+		int taskmaster_id = pack->ReadUInt32();
 		char name[64] = { 0 };
 		pack->ReadString(name);
 		auto client = entity_list.GetClientByName(name);
-		if (client && client->HasPendingTask()) {
-			client->ResetPendingTask();
+		if (client) {
 			if (message == 0)
 				client->Message(13, "Shared task assignment has failed.");
 			else if (message > 0)

@@ -159,11 +159,6 @@ bool Client::Process() {
 		if (TaskPeriodic_Timer.Check() && taskstate)
 			taskstate->TaskPeriodicChecks(this);
 
-		if (pending_task.timeout.Check(false)) {
-			Message(13, "Shared task timed out.");
-			ResetPendingTask();
-		}
-
 		if (linkdead_timer.Check()) {
 			LeaveGroup();
 			Save();

@@ -229,15 +229,6 @@ struct ClientReward
 	uint32 amount;
 };
 
-#define PENDING_TASK_TIMEOUT 60000
-struct PendingSharedTask {
-	int id;
-	int task_master_id;
-	Timer timeout;		// so if we take a very long time to get messages back from world, we time out and fail
-	std::vector<std::string> members; // members ahh I guess if verification takes a long time raid could change?
-	PendingSharedTask() : id(0), task_master_id(0) {}
-};
-
 class ClientFactory {
 public:
 	Client *MakeClient(std::shared_ptr<EQStreamInterface> ieqs);
@@ -1035,7 +1026,7 @@ public:
 	inline bool IsTaskEnabled(int TaskID) { return (taskstate ? taskstate->IsTaskEnabled(TaskID) : false); }
 	inline void ProcessTaskProximities(float X, float Y, float Z) { if(taskstate) taskstate->ProcessTaskProximities(this, X, Y, Z); }
 	inline void AssignTask(int TaskID, int NPCID, bool enforce_level_requirement = false) { if (taskstate) taskstate->AcceptNewTask(this, TaskID, NPCID, enforce_level_requirement); }
-	inline void AssignSharedTask(int TaskID, int NPCID, int id) { if (taskstate) taskstate->AcceptNewSharedTask(this, TaskID, NPCID, id); }
+	inline void AssignSharedTask(int TaskID, int NPCID, int id, std::vector<std::string> &members) { if (taskstate) taskstate->AcceptNewSharedTask(this, TaskID, NPCID, id, members); }
 	inline int ActiveSpeakTask(int NPCID) { if(taskstate) return taskstate->ActiveSpeakTask(NPCID); else return 0; }
 	inline int ActiveSpeakActivity(int NPCID, int TaskID) { if(taskstate) return taskstate->ActiveSpeakActivity(NPCID, TaskID); else return 0; }
 	inline void FailTask(int TaskID) { if(taskstate) taskstate->FailTask(this, TaskID); }
@@ -1054,14 +1045,6 @@ public:
 	inline int CompletedTasksInSet(int TaskSet) { return (taskstate ? taskstate->CompletedTasksInSet(TaskSet) :0); }
 	inline int GetTaskLockoutExpire(int id) { return 0; } // stub
 	inline int GetTaskLockoutTimeLeft(int id) { return 0; } // stub
-
-	inline void SetPendingTask(int id, int task_master_id) { pending_task.id = id; pending_task.task_master_id = task_master_id; }
-	inline bool HasPendingTask() const { return pending_task.id != 0; }
-	inline int GetPendingTaskID() const { return pending_task.id; }
-	inline int GetPendingTaskMasterID() const { return pending_task.task_master_id; }
-	inline void StartPendingTimer() { pending_task.timeout.Start(PENDING_TASK_TIMEOUT); }
-	inline void ResetPendingTask() { pending_task.id = 0; pending_task.task_master_id = 0; pending_task.timeout.Disable(); pending_task.members.clear(); }
-	inline void PendingTaskAddMember(const char *name) { pending_task.members.push_back(name); }
 
 	inline const EQEmu::versions::ClientVersion ClientVersion() const { return m_ClientVersion; }
 	inline const uint32 ClientVersionBit() const { return m_ClientVersionBit; }
@@ -1586,7 +1569,6 @@ private:
 	std::set<uint32> zone_flags;
 
 	ClientTaskState *taskstate;
-	PendingSharedTask pending_task;
 	int TotalSecondsPlayed;
 
 	//Anti Spam Stuff

@@ -96,6 +96,8 @@ public:
 	inline int GetCurrentSharedTaskID() const { return shared_task_id; }
 	inline void SetCurrentSharedTaskID(int in) { shared_task_id = in; }
 	inline bool HasFreeSharedTaskSlot() const { return shared_task_id == 0; }
+	inline void SetSharedTask(SharedTask *in) { m_shared_task = in; }
+	inline SharedTask *GetSharedTask() const { return m_shared_task; }
 
 private:
 	void	ClearVars(bool iAll = false);

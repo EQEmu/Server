@@ -3429,8 +3429,6 @@ void ClientTaskState::PendSharedTask(Client *c, int TaskID, int NPCID, bool enfo
 		player_count = raid->RaidCount();
 	}
 
-	// TODO: check task lockouts I guess it's simpler to require everyone to be in zone so we can verify lockouts ...
-
 	if (!EQEmu::ValueWithin(player_count, task->min_players, task->max_players)) {
 		if (player_count < task->min_players)
 			c->Message_StringID(13, TASK_REJECT_MIN_COUNT);
@@ -3442,6 +3440,7 @@ void ClientTaskState::PendSharedTask(Client *c, int TaskID, int NPCID, bool enfo
 	// okay, we verified a few things on the requestor, now we need to fire off to world to do the rest
 	SerializeBuffer buf(25 + 10 * player_count);
 	buf.WriteInt32(TaskID);			// Task ID
+	buf.WriteInt32(NPCID);			// NPC we're requesting from
 	buf.WriteString(c->GetName());	// leader name
 	buf.WriteInt32(player_count - 1); // count, not leader
 	if (group) {
@@ -3562,7 +3561,7 @@ void ClientTaskState::PendSharedTask(Client *c, int TaskID, int NPCID, bool enfo
 
 }
 
-void ClientTaskState::AcceptNewSharedTask(Client *c, int TaskID, int NPCID, int id)
+void ClientTaskState::AcceptNewSharedTask(Client *c, int TaskID, int NPCID, int id, std::vector<std::string> &members)
 {
 
 }

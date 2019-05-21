@@ -13,8 +13,19 @@ void SharedTaskManager::HandleTaskRequest(ServerPacket *pack)
 	if (!pack)
 		return;
 
+	/*
+	 * Things done in zone:
+	 * Verified we were requesting a shared task
+	 * Verified leader has a slot available
+	 * Verified leader met level reqs
+	 * Verified repeatable or not completed (not doing that here?)
+	 * Verified leader doesn't have a lock out
+	 * Verified the group/raid met min/max player counts
+	 */
+
 	char tmp_str[64] = { 0 };
 	int task_id = pack->ReadUInt32();
+	int npc_id = pack->ReadUInt32();
 	pack->ReadString(tmp_str);
 	std::string leader_name = tmp_str;
 	int player_count = pack->ReadUInt32();
@@ -30,8 +41,9 @@ void SharedTaskManager::HandleTaskRequest(ServerPacket *pack)
 		auto pc = client_list.FindCharacter(leader_name.c_str());
 		if (pc) {
 			// failure TODO: appropriate message
-			auto pack = new ServerPacket(ServerOP_TaskReject, leader_name.size() + 1 + 4);
+			auto pack = new ServerPacket(ServerOP_TaskReject, leader_name.size() + 1 + 8);
 			pack->WriteUInt32(0); // string ID or just generic fail message
+			pack->WriteUInt32(npc_id);
 			pack->WriteString(leader_name.c_str());
 			zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
 			safe_delete(pack);
@@ -45,8 +57,9 @@ void SharedTaskManager::HandleTaskRequest(ServerPacket *pack)
 		auto pc = client_list.FindCharacter(leader_name.c_str());
 		if (pc) {
 			// failure TODO: appropriate message
-			auto pack = new ServerPacket(ServerOP_TaskReject, leader_name.size() + 1 + 4);
+			auto pack = new ServerPacket(ServerOP_TaskReject, leader_name.size() + 1 + 8);
 			pack->WriteUInt32(0); // string ID or just generic fail message
+			pack->WriteUInt32(npc_id);
 			pack->WriteString(leader_name.c_str());
 			zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
 			safe_delete(pack);
@@ -66,13 +79,17 @@ void SharedTaskManager::HandleTaskRequest(ServerPacket *pack)
 	if (players.empty()) {
 		// send instant success to leader
 		SerializeBuffer buf(10);
-		buf.WriteInt32(id);				// task's ID
+		buf.WriteInt32(id);				// shared task's ID
+		buf.WriteInt32(task_id);		// ID of the task's data
+		buf.WriteInt32(npc_id);			// NPC we're requesting from
 		buf.WriteString(leader_name);	// leader's name
+		buf.WriteInt32(0); // member list minus leader
 
 		auto pack = new ServerPacket(ServerOP_TaskGrant, buf);
 		zoneserver_list.SendPacket(cle_leader->zone(), cle_leader->instance(), pack);
 		safe_delete(pack);
-		tasks.erase(ret.first);
+
+		task.SetCLESharedTasks();
 		return;
 	}
 
@@ -83,8 +100,9 @@ void SharedTaskManager::HandleTaskRequest(ServerPacket *pack)
 			// make sure we don't have a shared task already
 			if (!cle->HasFreeSharedTaskSlot()) {
 				// failure TODO: appropriate message
-				auto pack = new ServerPacket(ServerOP_TaskReject, leader_name.size() + 1 + 4);
+				auto pack = new ServerPacket(ServerOP_TaskReject, leader_name.size() + 1 + 8);
 				pack->WriteUInt32(0); // string ID or just generic fail message
+				pack->WriteUInt32(npc_id);
 				pack->WriteString(leader_name.c_str());
 				zoneserver_list.SendPacket(cle_leader->zone(), cle_leader->instance(), pack);
 				safe_delete(pack);
@@ -95,8 +113,9 @@ void SharedTaskManager::HandleTaskRequest(ServerPacket *pack)
 			// make sure our level is right
 			if (!AppropriateLevel(task_id, cle->level())) {
 				// failure TODO: appropriate message
-				auto pack = new ServerPacket(ServerOP_TaskReject, leader_name.size() + 1 + 4);
+				auto pack = new ServerPacket(ServerOP_TaskReject, leader_name.size() + 1 + 8);
 				pack->WriteUInt32(0); // string ID or just generic fail message
+				pack->WriteUInt32(npc_id);
 				pack->WriteString(leader_name.c_str());
 				zoneserver_list.SendPacket(cle_leader->zone(), cle_leader->instance(), pack);
 				safe_delete(pack);
@@ -108,8 +127,9 @@ void SharedTaskManager::HandleTaskRequest(ServerPacket *pack)
 			int expires = cle->GetTaskLockoutExpire(task_id);
 			if ((expires - Timer::GetCurrentTime()) >= 0) {
 				// failure TODO: appropriate message, we need to send the timestamp here
-				auto pack = new ServerPacket(ServerOP_TaskReject, leader_name.size() + 1 + 4);
+				auto pack = new ServerPacket(ServerOP_TaskReject, leader_name.size() + 1 + 8);
 				pack->WriteUInt32(0); // string ID or just generic fail message
+				pack->WriteUInt32(npc_id);
 				pack->WriteString(leader_name.c_str());
 				zoneserver_list.SendPacket(cle_leader->zone(), cle_leader->instance(), pack);
 				safe_delete(pack);
@@ -121,7 +141,21 @@ void SharedTaskManager::HandleTaskRequest(ServerPacket *pack)
 			task.AddMember(name, cle);
 		}
 	}
-	// TODO: what do now!
+
+	// fire off to zone we're done!
+	SerializeBuffer buf(10 + 10 * players.size());
+	buf.WriteInt32(id);				// shared task's ID
+	buf.WriteInt32(task_id);		// ID of the task's data
+	buf.WriteInt32(npc_id);			// NPC we're requesting from
+	buf.WriteString(leader_name);	// leader's name
+	task.SerializeMembers(buf, false);	// everyone but leader
+
+	auto reply = new ServerPacket(ServerOP_TaskGrant, buf);
+	zoneserver_list.SendPacket(cle_leader->zone(), cle_leader->instance(), reply);
+	safe_delete(reply);
+
+	task.SetCLESharedTasks();
+	return;
 }
 
 /*
@@ -172,6 +206,13 @@ bool SharedTaskManager::AppropriateLevel(int id, int level) const
 }
 
 /*
+ * This will check if any tasks have expired
+ */
+void SharedTaskManager::Process()
+{
+}
+
+/*
  * When a player leaves world they will tell us to clean up their pointer
  * This is NOT leaving the shared task, just crashed or something
  */
@@ -185,5 +226,37 @@ void SharedTask::MemberLeftGame(ClientListEntry *cle)
 		return;
 
 	it->cle = nullptr;
+}
+
+/*
+ * Serializes Members into the SerializeBuffer
+ * Starts with count then followed by names null-termed
+ * In the future this will include monster mission shit
+ */
+void SharedTask::SerializeMembers(SerializeBuffer &buf, bool include_leader) const
+{
+	buf.WriteInt32(include_leader ? members.size() : members.size() - 1);
+
+	for (auto && m : members) {
+		if (!include_leader && m.leader)
+			continue;
+
+		buf.WriteString(m.name);
+		// TODO: live also has monster mission class choice in here
+	}
+}
+
+/*
+ * This sets the CLE's quick look up shared task stuff
+ */
+void SharedTask::SetCLESharedTasks()
+{
+	for (auto &&m : members) {
+		if (m.cle == nullptr) // shouldn't happen ....
+			continue;
+
+		m.cle->SetSharedTask(this);
+		m.cle->SetCurrentSharedTaskID(id);
+	}
 }
 
