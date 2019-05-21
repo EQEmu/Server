@@ -49,7 +49,7 @@ public:
 	~SharedTaskManager() {}
 
 	bool LoadSharedTaskState();
-	bool LoadSharedTasks();
+	bool LoadSharedTasks(int single_task = 0);
 
 	bool AppropriateLevel(int id, int level) const;
 

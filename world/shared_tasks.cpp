@@ -1,6 +1,8 @@
-#include "shared_tasks.h"
-#include "clientlist.h"
+#include "../common/string_util.h"
 #include "cliententry.h"
+#include "clientlist.h"
+#include "shared_tasks.h"
+#include "worlddb.h"
 #include "zonelist.h"
 
 #include <algorithm>
@@ -156,6 +158,154 @@ void SharedTaskManager::HandleTaskRequest(ServerPacket *pack)
 
 	task.SetCLESharedTasks();
 	return;
+}
+
+bool SharedTaskManager::LoadSharedTasks(int single_task)
+{
+	std::string query;
+
+	if (single_task == 0) {
+		query =
+		    StringFormat("SELECT `id`, `type`, `duration`, `duration_code`, `title`, `description`, `reward`, "
+				 "`rewardid`, `cashreward`, `xpreward`, `rewardmethod`, `faction_reward`, `minlevel`, "
+				 "`maxlevel`, `repeatable`, `completion_emote`, `reward_points`, `reward_type`, "
+				 "`replay_group`, `min_players`, `max_players`, `task_lock_step`, `instance_zone_id`, "
+				 "`zone_version`, `zone_in_zone_id`, `zone_in_x`, `zone_in_y`, `zone_in_object_id`, "
+				 "`dest_x`, `dest_y`, `dest_z`, `dest_h` FROM `tasks` WHERE `type` = %i",
+				 static_cast<int>(TaskType::Shared));
+	} else {
+		query =
+		    StringFormat("SELECT `id`, `type`, `duration`, `duration_code`, `title`, `description`, `reward`, "
+				 "`rewardid`, `cashreward`, `xpreward`, `rewardmethod`, `faction_reward`, `minlevel`, "
+				 "`maxlevel`, `repeatable`, `completion_emote`, `reward_points`, `reward_type`, "
+				 "`replay_group`, `min_players`, `max_players`, `task_lock_step`, `instance_zone_id`, "
+				 "`zone_version`, `zone_in_zone_id`, `zone_in_x`, `zone_in_y`, `zone_in_object_id`, "
+				 "`dest_x`, `dest_y`, `dest_z`, `dest_h` FROM `tasks` WHERE `id` = %i AND `type` = %i",
+				 single_task, static_cast<int>(TaskType::Shared));
+	}
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		return false;
+	}
+
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		int task_id = atoi(row[0]);
+
+		auto &task = task_information[task_id];
+		task.type = static_cast<TaskType>(atoi(row[1]));
+		task.Duration = atoi(row[2]);
+		task.dur_code = static_cast<DurationCode>(atoi(row[3]));
+		task.Title = row[4];
+		task.Description = row[5];
+		task.Reward = row[6];
+		task.RewardID = atoi(row[7]);
+		task.CashReward = atoi(row[8]);
+		task.XPReward = atoi(row[9]);
+		task.RewardMethod = (TaskMethodType)atoi(row[10]);
+		task.faction_reward = atoi(row[11]);
+		task.MinLevel = atoi(row[12]);
+		task.MaxLevel = atoi(row[13]);
+		task.Repeatable = atoi(row[14]);
+		task.completion_emote = row[15];
+		task.reward_points = atoi(row[16]);
+		task.reward_type = static_cast<PointType>(atoi(row[17]));
+		task.replay_group = atoi(row[18]);
+		task.min_players = atoi(row[19]);
+		task.max_players = atoi(row[20]);
+		task.task_lock_step = atoi(row[21]);
+		task.instance_zone_id = atoi(row[22]);
+		task.zone_version = atoi(row[23]);
+		task.zone_in_zone_id = atoi(row[24]);
+		task.zone_in_x = atof(row[25]);
+		task.zone_in_y = atof(row[26]);
+		task.zone_in_object_id = atoi(row[27]);
+		task.dest_x = atof(row[28]);
+		task.dest_y = atof(row[29]);
+		task.dest_z = atof(row[30]);
+		task.dest_h = atof(row[31]);
+		task.ActivityCount = 0;
+		task.SequenceMode = ActivitiesSequential;
+		task.LastStep = 0;
+	}
+
+	// hmm need to limit to shared tasks only ...
+	if (single_task == 0)
+		query = StringFormat(
+		    "SELECT `taskid`, `step`, `activityid`, `activitytype`, `target_name`, `item_list`, `skill_list`, "
+		    "`spell_list`, `description_override`, `goalid`, `goalmethod`, `goalcount`, `delivertonpc`, "
+		    "`zones`, `optional` FROM `task_activities` WHERE `activityid` < %i AND `taskid` IN (SELECT `id` "
+		    "FROM `tasks` WHERE `type` = %i) ORDER BY taskid, activityid ASC",
+		    MAXACTIVITIESPERTASK, static_cast<int>(TaskType::Shared));
+	else
+		query = StringFormat(
+		    "SELECT `taskid`, `step`, `activityid`, `activitytype`, `target_name`, `item_list`, `skill_list`, "
+		    "`spell_list`, `description_override`, `goalid`, `goalmethod`, `goalcount`, `delivertonpc`, "
+		    "`zones`, `optional` FROM `task_activities` WHERE `taskid` = %i AND `activityid` < %i AND `taskid` "
+		    "IN (SELECT `id` FROM `tasks` WHERE `type` = %i) ORDER BY taskid, activityid ASC",
+		    single_task, MAXACTIVITIESPERTASK, static_cast<int>(TaskType::Shared));
+	results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		return false;
+	}
+
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		int task_id = atoi(row[0]);
+		int step = atoi(row[1]);
+
+		int activity_id = atoi(row[2]);
+
+		if (activity_id < 0 || activity_id >= MAXACTIVITIESPERTASK) {
+			// This shouldn't happen, as the SELECT is bounded by MAXTASKS
+			continue;
+		}
+
+		if (task_information.count(task_id) == 0) {
+			continue;
+		}
+
+		auto &task = task_information[task_id];
+
+		task.Activity[task.ActivityCount].StepNumber = step;
+
+		if (step != 0)
+			task.SequenceMode = ActivitiesStepped;
+
+		if (step > task.LastStep)
+			task.LastStep = step;
+
+		// Task Activities MUST be numbered sequentially from 0. If not, log an error
+		// and set the task to nullptr. Subsequent activities for this task will raise
+		// ERR_NOTASK errors.
+		// Change to (activityID != (task.ActivityCount + 1)) to index from 1
+		if (activity_id != task.ActivityCount) {
+			task_information.erase(task_id);
+			continue;
+		}
+
+		task.Activity[task.ActivityCount].Type = atoi(row[3]);
+
+		task.Activity[task.ActivityCount].target_name = row[4];
+		task.Activity[task.ActivityCount].item_list = row[5];
+		task.Activity[task.ActivityCount].skill_list = row[6];
+		task.Activity[task.ActivityCount].skill_id = atoi(row[6]); // for older clients
+		task.Activity[task.ActivityCount].spell_list = row[7];
+		task.Activity[task.ActivityCount].spell_id = atoi(row[7]); // for older clients
+		task.Activity[task.ActivityCount].desc_override = row[8];
+
+		task.Activity[task.ActivityCount].GoalID = atoi(row[9]);
+		task.Activity[task.ActivityCount].GoalMethod = (TaskMethodType)atoi(row[10]);
+		task.Activity[task.ActivityCount].GoalCount = atoi(row[11]);
+		task.Activity[task.ActivityCount].DeliverToNPC = atoi(row[12]);
+		task.Activity[task.ActivityCount].zones = row[13];
+		auto zones = SplitString(task.Activity[task.ActivityCount].zones, ';');
+		for (auto && e : zones)
+			task.Activity[task.ActivityCount].ZoneIDs.push_back(std::stoi(e));
+		task.Activity[task.ActivityCount].Optional = atoi(row[14]);
+
+		task.ActivityCount++;
+	}
+
+	return true;
 }
 
 /*
