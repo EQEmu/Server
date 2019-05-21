@@ -160,6 +160,13 @@ void SharedTaskManager::HandleTaskRequest(ServerPacket *pack)
 	return;
 }
 
+/*
+ * Loads in the tasks and task_activity tables
+ * We limit to shared to save some memory
+ * This can be called while reloading tasks (because deving etc)
+ * This data is loaded into the task_information map
+ */
+
 bool SharedTaskManager::LoadSharedTasks(int single_task)
 {
 	std::string query;
@@ -320,9 +327,14 @@ bool SharedTaskManager::LoadSharedTaskState()
 	// Load existing tasks. We may not want to actually do this here and wait for a client to log in
 	// But the crash case may actually dictate we should :P
 
-	// set next_id to highest used ID + 1
+	// set next_id to highest used ID
 	return true;
 }
+
+/*
+ * Return the next unused ID
+ * Hopefully this does not grow too large.
+ */
 
 int SharedTaskManager::GetNextID()
 {
