@@ -321,13 +321,47 @@ bool SharedTaskManager::LoadSharedTasks(int single_task)
  */
 bool SharedTaskManager::LoadSharedTaskState()
 {
-	// clean up expired tasks ... We may not want to do this if world crashes and has to be restarted
-	// May need to wait to do it to cleanly inform existing zones to clean up expired tasks
+	// one may think we should clean up expired tasks, but we don't just in case world is booting back up after a crash
+	// we will clean them up in the normal process loop so zones get told to clean up
+	std::string query = "SELECT `id`, `taskid`, `acceptedtime`, `locked` FROM `shared_task_state`";
+	auto results = database.QueryDatabase(query);
+
+	if (results.Success() && results.RowCount() > 0) {
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			int id = atoi(row[0]);
+
+			auto &task = tasks[id];
+			task.SetID(id);
+			task.SetTaskID(atoi(row[1]));
+			task.SetAcceptedTime(atoi(row[2]));
+			task.SetLocked(atoi(row[3]) != 0);
+		}
+	}
+
+	query = "SELECT `shared_id`, `charid`, `name`, `leader` FROM `shared_task_members` ORDER BY shared_id ASC";
+	results = database.QueryDatabase(query);
+	if (results.Success() && results.RowCount() > 0) {
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			int task_id = atoi(row[0]);
+			// hmm not sure best way to do this, fine for now
+			if (tasks.count(task_id) == 1)
+				tasks[task_id].AddMember(row[2], nullptr, atoi(row[3]) != 0);
+		}
+	}
 
 	// Load existing tasks. We may not want to actually do this here and wait for a client to log in
 	// But the crash case may actually dictate we should :P
 
 	// set next_id to highest used ID
+	query = "SELECT MAX(id) FROM shared_task_state";
+	results = database.QueryDatabase(query);
+	if (results.Success() && results.RowCount() == 1) {
+		auto row = results.begin();
+		next_id = atoi(row[0]);
+	} else {
+		next_id = 0; // oh well
+	}
+
 	return true;
 }
 
@@ -335,7 +369,6 @@ bool SharedTaskManager::LoadSharedTaskState()
  * Return the next unused ID
  * Hopefully this does not grow too large.
  */
-
 int SharedTaskManager::GetNextID()
 {
 	next_id++;

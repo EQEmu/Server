@@ -14,14 +14,14 @@ struct SharedTaskMember {
 	ClientListEntry *cle;
 	bool leader;
 	// TODO: monster mission stuff
-	SharedTaskMember() : leader(false), cle(nullptr) {}
+	SharedTaskMember() : cle(nullptr), leader(false) {}
 	SharedTaskMember(std::string name, ClientListEntry *cle, bool leader) : name(name), cle(cle), leader(leader) {}
 };
 
 class SharedTask {
 public:
-	SharedTask() : id(0), task_id(0), locked(false) {}
-	SharedTask(int id, int task_id) : id(id), task_id(task_id), locked(false) {}
+	SharedTask() : id(0), task_id(0), accepted_time(0), locked(false) {}
+	SharedTask(int id, int task_id) : id(id), task_id(task_id), accepted_time(0), locked(false) {}
 	~SharedTask() {}
 
 	void AddMember(std::string name, ClientListEntry *cle = nullptr, bool leader = false)
@@ -37,12 +37,19 @@ public:
 	void SetCLESharedTasks();
 
 private:
+	inline void SetID(int in) { id = in; }
+	inline void SetTaskID(int in) { task_id = in; }
+	inline void SetAcceptedTime(int in) { accepted_time = in; }
+	inline void SetLocked(bool in) { locked = in; }
 	int id; // id we have in our map
 	int task_id; // ID of the task we're on
+	int accepted_time; // timestamp of when accepted, initially set by zone
 	bool locked;
 	std::string leader_name;
 	std::vector<SharedTaskMember> members;
 	ClientTaskInformation task_state; // book keeping
+
+	friend class SharedTaskManager;
 };
 
 class SharedTaskManager {
