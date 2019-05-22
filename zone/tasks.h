@@ -84,22 +84,6 @@ private:
 };
 
 
-struct ClientActivityInformation {
-	int ActivityID;
-	int DoneCount;
-	ActivityState State;
-	bool Updated; // Flag so we know if we need to update the database
-};
-
-struct ClientTaskInformation {
-	int slot; // intrusive, but makes things easier :P
-	int TaskID;
-	int CurrentStep;
-	int AcceptedTime;
-	bool Updated;
-	ClientActivityInformation Activity[MAXACTIVITIESPERTASK];
-};
-
 struct CompletedTaskInformation {
 	int TaskID;
 	int CompletedTime;

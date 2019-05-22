@@ -151,5 +151,20 @@ typedef enum { ActivityDeliver = 1, ActivityKill = 2, ActivityLoot = 3, Activity
 			ActivityTradeSkill = 6, ActivityFish = 7, ActivityForage = 8, ActivityCastOn = 9, ActivitySkillOn = 10,
 			ActivityTouch = 11, ActivityCollect = 13, ActivityGiveCash = 100 } ActivityType;
 
+struct ClientActivityInformation {
+	int ActivityID;
+	int DoneCount;
+	ActivityState State;
+	bool Updated; // Flag so we know if we need to update the database
+};
+
+struct ClientTaskInformation {
+	int slot; // intrusive, but makes things easier :P
+	int TaskID;
+	int CurrentStep;
+	int AcceptedTime;
+	bool Updated;
+	ClientActivityInformation Activity[MAXACTIVITIESPERTASK];
+};
 
 #endif /* !GLOBAL_TASKS_H */

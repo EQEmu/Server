@@ -20,8 +20,8 @@ struct SharedTaskMember {
 
 class SharedTask {
 public:
-	SharedTask() : id(0), task_id(0) {}
-	SharedTask(int id, int task_id) : id(id), task_id(task_id) {}
+	SharedTask() : id(0), task_id(0), locked(false) {}
+	SharedTask(int id, int task_id) : id(id), task_id(task_id), locked(false) {}
 	~SharedTask() {}
 
 	void AddMember(std::string name, ClientListEntry *cle = nullptr, bool leader = false)
@@ -39,8 +39,10 @@ public:
 private:
 	int id; // id we have in our map
 	int task_id; // ID of the task we're on
+	bool locked;
 	std::string leader_name;
 	std::vector<SharedTaskMember> members;
+	ClientTaskInformation task_state; // book keeping
 };
 
 class SharedTaskManager {
