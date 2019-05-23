@@ -377,3 +377,41 @@ int ClientListEntry::GetTaskLockoutTimeLeft(int id) const
 	return 0;
 }
 
+/*
+ * Cleans up expired lockouts from the DB
+ */
+bool ClientListEntry::CleanExpiredTaskLockouts() const
+{
+	std::string query =
+	    StringFormat("DELETE FROM `character_task_lockouts` WHERE `charid` = %i AND `timestamp` > %i", pcharid,
+			 Timer::GetCurrentTime());
+	auto results = database.QueryDatabase(query);
+	return results.Success();
+}
+
+/*
+ * Loads task lockouts
+ */
+bool ClientListEntry::LoadTaskLockouts()
+{
+	CleanExpiredTaskLockouts();
+	std::string query = StringFormat(
+	    "SELECT `replay_group`, `original_id`, `timestamp` FROM `character_task_lockouts` WHERE `charid` = %i",
+	    pcharid);
+	auto results = database.QueryDatabase(query);
+	if (!results.Success())
+		return false;
+
+	if (results.RowCount() > 0) {
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			TaskTimer t;
+			t.ID = atoi(row[0]);
+			t.original_id = atoi(row[1]);
+			t.expires = atoi(row[2]);
+			m_task_replay_timers.push_back(t);
+		}
+	}
+
+	return true;
+}
+

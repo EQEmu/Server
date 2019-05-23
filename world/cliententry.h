@@ -91,6 +91,8 @@ public:
 	void ProcessTellQueue();
 
 	// shared task stuff
+	bool CleanExpiredTaskLockouts() const;
+	bool LoadTaskLockouts();
 	int GetTaskLockoutExpire(int id) const;
 	int GetTaskLockoutTimeLeft(int id) const;
 	inline int GetCurrentSharedTaskID() const { return shared_task_id; }

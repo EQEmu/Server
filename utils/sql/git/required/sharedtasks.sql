@@ -23,6 +23,7 @@ CREATE TABLE `task_replay_groups` (
 CREATE TABLE `character_task_lockouts` (
 	`charid` INT NOT NULL,
 	`replay_group` INT NOT NULL,
+	`original_id` INT NOT NULL,
 	`timestamp` INT NOT NULL,
 	PRIMARY KEY(`charid`, `replay_group`)
 );

@@ -1221,6 +1221,7 @@ void Client::EnterWorld(bool TryBootup) {
 	}
 
 	cle->SetChar(charid, char_name);
+	cle->LoadTaskLockouts();
 	database.UpdateLiveChar(char_name, GetAccountID());
 
 	Log(Logs::General, Logs::World_Server, 
