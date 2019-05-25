@@ -34,7 +34,9 @@
 
 extern Zone *zone;
 
-EQ::Net::WebsocketLoginStatus CheckLogin(EQ::Net::WebsocketServerConnection *connection, const std::string &username, const std::string &password) {
+EQ::Net::WebsocketLoginStatus
+CheckLogin(EQ::Net::WebsocketServerConnection *connection, const std::string &username, const std::string &password)
+{
 	EQ::Net::WebsocketLoginStatus ret;
 	ret.logged_in = false;
 
@@ -47,32 +49,33 @@ EQ::Net::WebsocketLoginStatus CheckLogin(EQ::Net::WebsocketServerConnection *con
 	char account_name[64];
 	database.GetAccountName(static_cast<uint32>(ret.account_id), account_name);
 	ret.account_name = account_name;
-	ret.logged_in = true;
-	ret.status = database.CheckStatus(ret.account_id);
+	ret.logged_in    = true;
+	ret.status       = database.CheckStatus(ret.account_id);
 	return ret;
 }
 
-Json::Value ApiGetPacketStatistics(EQ::Net::WebsocketServerConnection *connection, Json::Value params) {
+Json::Value ApiGetPacketStatistics(EQ::Net::WebsocketServerConnection *connection, Json::Value params)
+{
 	if (zone->GetZoneID() == 0) {
 		throw EQ::Net::WebsocketException("Zone must be loaded to invoke this call");
 	}
 
 	Json::Value response;
-	auto &list = entity_list.GetClientList();
+	auto        &list = entity_list.GetClientList();
 
 	for (auto &iter : list) {
 		auto client                = iter.second;
 		auto connection            = client->Connection();
-		auto opts                 = connection->GetManager()->GetOptions();
+		auto opts                  = connection->GetManager()->GetOptions();
 		auto eqs_stats             = connection->GetStats();
 		auto &stats                = eqs_stats.DaybreakStats;
 		auto now                   = EQ::Net::Clock::now();
 		auto sec_since_stats_reset = std::chrono::duration_cast<std::chrono::duration<double>>(
 			now - stats.created
 		).count();
-		
+
 		Json::Value row;
-		
+
 		row["client_id"]                = client->GetID();
 		row["client_name"]              = client->GetCleanName();
 		row["seconds_since_reset"]      = sec_since_stats_reset;
@@ -96,25 +99,25 @@ Json::Value ApiGetPacketStatistics(EQ::Net::WebsocketServerConnection *connectio
 		row["resent_fragments"]         = stats.resent_fragments;
 		row["resent_non_fragments"]     = stats.resent_full;
 		row["dropped_datarate_packets"] = stats.dropped_datarate_packets;
-		
+
 		Json::Value sent_packet_types;
-		
+
 		for (auto i = 0; i < _maxEmuOpcode; ++i) {
 			auto count = eqs_stats.SentCount[i];
 			if (count > 0) {
 				sent_packet_types[OpcodeNames[i]] = count;
 			}
 		}
-		
+
 		Json::Value receive_packet_types;
-		
+
 		for (auto i = 0; i < _maxEmuOpcode; ++i) {
 			auto count = eqs_stats.RecvCount[i];
 			if (count > 0) {
 				receive_packet_types[OpcodeNames[i]] = count;
 			}
 		}
-		
+
 		row["sent_packet_types"]    = sent_packet_types;
 		row["receive_packet_types"] = receive_packet_types;
 
@@ -124,13 +127,14 @@ Json::Value ApiGetPacketStatistics(EQ::Net::WebsocketServerConnection *connectio
 	return response;
 }
 
-Json::Value ApiGetOpcodeList(EQ::Net::WebsocketServerConnection *connection, Json::Value params) {
+Json::Value ApiGetOpcodeList(EQ::Net::WebsocketServerConnection *connection, Json::Value params)
+{
 	if (zone->GetZoneID() == 0) {
 		throw EQ::Net::WebsocketException("Zone must be loaded to invoke this call");
 	}
-	
+
 	Json::Value response;
-	for (auto i = 0; i < _maxEmuOpcode; ++i) {
+	for (auto   i = 0; i < _maxEmuOpcode; ++i) {
 		Json::Value row = OpcodeNames[i];
 
 		response.append(row);
@@ -139,13 +143,14 @@ Json::Value ApiGetOpcodeList(EQ::Net::WebsocketServerConnection *connection, Jso
 	return response;
 }
 
-Json::Value ApiGetNpcListDetail(EQ::Net::WebsocketServerConnection *connection, Json::Value params) {
+Json::Value ApiGetNpcListDetail(EQ::Net::WebsocketServerConnection *connection, Json::Value params)
+{
 	if (zone->GetZoneID() == 0) {
 		throw EQ::Net::WebsocketException("Zone must be loaded to invoke this call");
 	}
 
 	Json::Value response;
-	auto &list = entity_list.GetNPCList();
+	auto        &list = entity_list.GetNPCList();
 
 	for (auto &iter : list) {
 		auto        npc = iter.second;
@@ -232,13 +237,14 @@ Json::Value ApiGetNpcListDetail(EQ::Net::WebsocketServerConnection *connection, 
 	return response;
 }
 
-Json::Value ApiGetDoorListDetail(EQ::Net::WebsocketServerConnection *connection, Json::Value params) {
+Json::Value ApiGetDoorListDetail(EQ::Net::WebsocketServerConnection *connection, Json::Value params)
+{
 	if (zone->GetZoneID() == 0) {
 		throw EQ::Net::WebsocketException("Zone must be loaded to invoke this call");
 	}
 
 	Json::Value response;
-	auto &door_list = entity_list.GetDoorsList();
+	auto        &door_list = entity_list.GetDoorsList();
 
 	for (auto itr : door_list) {
 		Doors *door = itr.second;
@@ -275,13 +281,14 @@ Json::Value ApiGetDoorListDetail(EQ::Net::WebsocketServerConnection *connection,
 	return response;
 }
 
-Json::Value ApiGetCorpseListDetail(EQ::Net::WebsocketServerConnection *connection, Json::Value params) {
+Json::Value ApiGetCorpseListDetail(EQ::Net::WebsocketServerConnection *connection, Json::Value params)
+{
 	if (zone->GetZoneID() == 0) {
 		throw EQ::Net::WebsocketException("Zone must be loaded to invoke this call");
 	}
 
 	Json::Value response;
-	auto &corpse_list = entity_list.GetCorpseList();
+	auto        &corpse_list = entity_list.GetCorpseList();
 
 	for (auto itr : corpse_list) {
 		auto corpse = itr.second;
@@ -314,13 +321,14 @@ Json::Value ApiGetCorpseListDetail(EQ::Net::WebsocketServerConnection *connectio
 	return response;
 }
 
-Json::Value ApiGetObjectListDetail(EQ::Net::WebsocketServerConnection *connection, Json::Value params) {
+Json::Value ApiGetObjectListDetail(EQ::Net::WebsocketServerConnection *connection, Json::Value params)
+{
 	if (zone->GetZoneID() == 0) {
 		throw EQ::Net::WebsocketException("Zone must be loaded to invoke this call");
 	}
 
 	Json::Value response;
-	auto &list = entity_list.GetObjectList();
+	auto        &list = entity_list.GetObjectList();
 
 	for (auto &iter : list) {
 		auto object = iter.second;
@@ -349,13 +357,14 @@ Json::Value ApiGetObjectListDetail(EQ::Net::WebsocketServerConnection *connectio
 	return response;
 }
 
-Json::Value ApiGetMobListDetail(EQ::Net::WebsocketServerConnection *connection, Json::Value params) {
+Json::Value ApiGetMobListDetail(EQ::Net::WebsocketServerConnection *connection, Json::Value params)
+{
 	if (zone->GetZoneID() == 0) {
 		throw EQ::Net::WebsocketException("Zone must be loaded to invoke this call");
 	}
 
 	Json::Value response;
-	auto &list = entity_list.GetMobList();
+	auto        &list = entity_list.GetMobList();
 
 	for (auto &iter : list) {
 		auto mob = iter.second;
@@ -555,13 +564,14 @@ Json::Value ApiGetMobListDetail(EQ::Net::WebsocketServerConnection *connection, 
 	return response;
 }
 
-Json::Value ApiGetClientListDetail(EQ::Net::WebsocketServerConnection *connection, Json::Value params) {
+Json::Value ApiGetClientListDetail(EQ::Net::WebsocketServerConnection *connection, Json::Value params)
+{
 	if (zone->GetZoneID() == 0) {
 		throw EQ::Net::WebsocketException("Zone must be loaded to invoke this call");
 	}
 
 	Json::Value response;
-	auto &list = entity_list.GetClientList();
+	auto        &list = entity_list.GetClientList();
 
 	for (auto &iter : list) {
 		auto client = iter.second;
@@ -754,7 +764,8 @@ Json::Value ApiGetClientListDetail(EQ::Net::WebsocketServerConnection *connectio
 	return response;
 }
 
-Json::Value ApiGetZoneAttributes(EQ::Net::WebsocketServerConnection *connection, Json::Value params) {
+Json::Value ApiGetZoneAttributes(EQ::Net::WebsocketServerConnection *connection, Json::Value params)
+{
 	if (zone->GetZoneID() == 0) {
 		throw EQ::Net::WebsocketException("Zone must be loaded to invoke this call");
 	}
@@ -800,18 +811,79 @@ Json::Value ApiGetZoneAttributes(EQ::Net::WebsocketServerConnection *connection,
 	return response;
 }
 
-void RegisterApiLogEvent(std::unique_ptr<EQ::Net::WebsocketServer> &server)
+Json::Value ApiGetLogsysCategories(EQ::Net::WebsocketServerConnection *connection, Json::Value params)
 {
-	LogSys.SetConsoleHandler([&](uint16 debug_level, uint16 log_category, const std::string &msg) {
-		Json::Value data;
-		data["debug_level"] = debug_level;
-		data["log_category"] = log_category;
-		data["msg"] = msg;
-		server->DispatchEvent(EQ::Net::SubscriptionEventLog, data, 50);
-	});
+	if (zone->GetZoneID() == 0) {
+		throw EQ::Net::WebsocketException("Zone must be loaded to invoke this call");
+	}
+
+	Json::Value response;
+
+	for (int i = 1; i < Logs::LogCategory::MaxCategoryID; i++) {
+		Json::Value row;
+
+		row["log_category_id"]          = i;
+		row["log_category_description"] = Logs::LogCategoryName[i];
+		row["log_to_console"]           = LogSys.log_settings[i].log_to_console;
+		row["log_to_file"]              = LogSys.log_settings[i].log_to_file;
+		row["log_to_gmsay"]             = LogSys.log_settings[i].log_to_gmsay;
+
+		response.append(row);
+	}
+
+	return response;
 }
 
-void RegisterApiService(std::unique_ptr<EQ::Net::WebsocketServer> &server) {
+Json::Value ApiSetLoggingLevel(EQ::Net::WebsocketServerConnection *connection, Json::Value params)
+{
+	if (zone->GetZoneID() == 0) {
+		throw EQ::Net::WebsocketException("Zone must be loaded to invoke this call");
+	}
+
+	Json::Value response;
+
+	auto logging_category = params[0].asInt();
+	auto logging_level    = params[1].asInt();
+
+	response["status"] = "Category doesn't exist";
+
+	Log(Logs::General, Logs::Status, "Logging category is %i and level is %i",
+		logging_category,
+		logging_level
+	);
+
+	if (logging_category < Logs::LogCategory::MaxCategoryID &&
+		logging_category > Logs::LogCategory::None
+		) {
+		LogSys.log_settings[logging_category].log_to_console = logging_level;
+		response["status"] = "Category log level updated";
+	}
+
+	if (logging_level > 0) {
+		LogSys.log_settings[logging_category].is_category_enabled = 1;
+	}
+	else {
+		LogSys.log_settings[logging_category].is_category_enabled = 0;
+	}
+
+	return response;
+}
+
+void RegisterApiLogEvent(std::unique_ptr<EQ::Net::WebsocketServer> &server)
+{
+	LogSys.SetConsoleHandler(
+		[&](uint16 debug_level, uint16 log_category, const std::string &msg) {
+			Json::Value data;
+			data["debug_level"]  = debug_level;
+			data["log_category"] = log_category;
+			data["msg"]          = msg;
+			server->DispatchEvent(EQ::Net::SubscriptionEventLog, data, 50);
+		}
+	);
+}
+
+void RegisterApiService(std::unique_ptr<EQ::Net::WebsocketServer> &server)
+{
 	server->SetLoginHandler(CheckLogin);
 	server->SetMethodHandler("get_packet_statistics", &ApiGetPacketStatistics, 50);
 	server->SetMethodHandler("get_opcode_list", &ApiGetOpcodeList, 50);
@@ -821,7 +893,8 @@ void RegisterApiService(std::unique_ptr<EQ::Net::WebsocketServer> &server) {
 	server->SetMethodHandler("get_object_list_detail", &ApiGetObjectListDetail, 50);
 	server->SetMethodHandler("get_mob_list_detail", &ApiGetMobListDetail, 50);
 	server->SetMethodHandler("get_client_list_detail", &ApiGetClientListDetail, 50);
-	server->SetMethodHandler("get_zone_attributes", &ApiGetZoneAttributes, 50);
+	server->SetMethodHandler("get_logsys_categories", &ApiGetLogsysCategories, 50);
+	server->SetMethodHandler("set_logging_level", &ApiSetLoggingLevel, 50);
 
 	RegisterApiLogEvent(server);
 }
