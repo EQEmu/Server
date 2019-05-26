@@ -23,6 +23,7 @@ data_buckets
 db_str
 doors
 eqtime
+faction_base_data
 faction_list
 faction_list_mod
 fear_hints
