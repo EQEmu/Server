@@ -893,6 +893,7 @@ void RegisterApiService(std::unique_ptr<EQ::Net::WebsocketServer> &server)
 	server->SetMethodHandler("get_object_list_detail", &ApiGetObjectListDetail, 50);
 	server->SetMethodHandler("get_mob_list_detail", &ApiGetMobListDetail, 50);
 	server->SetMethodHandler("get_client_list_detail", &ApiGetClientListDetail, 50);
+	server->SetMethodHandler("get_zone_attributes", &ApiGetZoneAttributes, 50);
 	server->SetMethodHandler("get_logsys_categories", &ApiGetLogsysCategories, 50);
 	server->SetMethodHandler("set_logging_level", &ApiSetLoggingLevel, 50);
 
