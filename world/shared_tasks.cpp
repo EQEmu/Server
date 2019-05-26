@@ -18,7 +18,7 @@ void SharedTaskManager::HandleTaskRequest(ServerPacket *pack)
 	/*
 	 * Things done in zone:
 	 * Verified we were requesting a shared task
-	 * Verified leader has a slot available
+	 * Verified leader has a slot available (guess we should double check this one)
 	 * Verified leader met level reqs
 	 * Verified repeatable or not completed (not doing that here?)
 	 * Verified leader doesn't have a lock out
@@ -71,6 +71,11 @@ void SharedTaskManager::HandleTaskRequest(ServerPacket *pack)
 
 	auto cle_leader = client_list.FindCharacter(leader_name.c_str());
 	if (cle_leader == nullptr) {// something went wrong
+		tasks.erase(ret.first);
+		return;
+	}
+
+	if (!cle_leader->HasFreeSharedTaskSlot()) { // they have a task already ...
 		tasks.erase(ret.first);
 		return;
 	}
@@ -144,6 +149,8 @@ void SharedTaskManager::HandleTaskRequest(ServerPacket *pack)
 		}
 	}
 
+	// this will also prevent any of these clients from requesting or being added to another, lets do it now before we tell zone
+	task.SetCLESharedTasks();
 	// fire off to zone we're done!
 	SerializeBuffer buf(10 + 10 * players.size());
 	buf.WriteInt32(id);				// shared task's ID
@@ -156,7 +163,6 @@ void SharedTaskManager::HandleTaskRequest(ServerPacket *pack)
 	zoneserver_list.SendPacket(cle_leader->zone(), cle_leader->instance(), reply);
 	safe_delete(reply);
 
-	task.SetCLESharedTasks();
 	return;
 }
 
