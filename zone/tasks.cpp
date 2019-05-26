@@ -2451,6 +2451,15 @@ bool TaskManager::IsTaskRepeatable(int TaskID) {
 	return Task->Repeatable;
 }
 
+SharedTaskState *TaskManager::CreateSharedTask(int id, int task_id)
+{
+	auto ret = SharedTasks.insert({id, {id, task_id}});
+	if (!ret.second) // hmm was already created
+		return nullptr;
+
+	return &(ret.first->second);
+}
+
 bool ClientTaskState::TaskOutOfTime(TaskType type, int Index)
 {
 	// Returns true if the Task in the specified slot has a time limit that has been exceeded.
@@ -3267,10 +3276,8 @@ void ClientTaskState::AcceptNewTask(Client *c, int TaskID, int NPCID, bool enfor
 		if (ActiveTask.TaskID != TASKSLOTEMPTY)
 			max_tasks = true;
 		break;
-	case TaskType::Shared: // TODO: shared tasks
-		// if (something)
-			max_tasks = true;
-		break;
+	case TaskType::Shared: // shared tasks shouldn't call this function. should we log?
+		return;
 	case TaskType::Quest:
 		if (ActiveTaskCount == MAXACTIVEQUESTS)
 			max_tasks = true;
@@ -3312,9 +3319,8 @@ void ClientTaskState::AcceptNewTask(Client *c, int TaskID, int NPCID, bool enfor
 	case TaskType::Task:
 		active_slot = &ActiveTask;
 		break;
-	case TaskType::Shared: // TODO: shared
-		active_slot = nullptr;
-		break;
+	case TaskType::Shared: // shared aren't done here, should have returned already :P
+		return;
 	case TaskType::Quest:
 		for (int i = 0; i < MAXACTIVEQUESTS; i++) {
 			Log(Logs::General, Logs::Tasks,
@@ -3467,103 +3473,66 @@ void ClientTaskState::PendSharedTask(Client *c, int TaskID, int NPCID, bool enfo
 	delete pack;
 
 	return;
-
-	/*
-	std::vector<std::string> missing_players; // names of players not in this zone so we can put the checks off to world
-	bool task_failed = false;
-	if (group) {
-		for (int i = 0; i < MAX_GROUP_MEMBERS; ++i) {
-			if (group->members[i] == c)
-				continue;
-
-			c->PendingTaskAddMember(group->membername[i]);
-
-			if (group->members[i] && group->members[i]->IsClient()) {
-				auto *client = group->members[i]->CastToClient();
-				auto *task_state = client->GetTaskState();
-				if (!task_state->HasSlotForTask(task)) {
-					task_failed = true;
-					c->Message_StringID(13, TASK_REJECT_GROUP_HAVE_ONE, c->GetName());
-					break;
-				} else {
-					if (task->replay_group) {
-						auto expires = client->GetTaskLockoutTimeLeft(task->replay_group);
-						if (expires > 0) {
-							task_failed = true;
-							std::string days = std::to_string(expires / 86400);
-							expires = expires % 86400;
-							std::string hours = std::to_string(expires / 3600);
-							expires = expires % 3600;
-							std::string minutes = std::to_string(expires / 60);
-							c->Message_StringID(13, TASK_REJECT_LOCKEDOUT_OTHER,
-									    client->GetName(), days.c_str(),
-									    hours.c_str(), minutes.c_str());
-							client->Message_StringID(13, TASK_REJECT_LOCKEDOUT_ME,
-										 days.c_str(), hours.c_str(),
-										 minutes.c_str());
-							break;
-						}
-					}
-				}
-			} else if (group->members[i] == nullptr) { // out of zone
-				missing_players.push_back(group->membername[i]);
-			}
-		}
-	} else if (raid) {
-		for (int i = 0; i < MAX_RAID_MEMBERS; ++i) {
-			if (raid->members[i].member == c)
-				continue;
-
-			c->PendingTaskAddMember(raid->members[i].membername);
-
-			if (raid->members[i].member) {
-				auto *client = raid->members[i].member;
-				auto *task_state = client->GetTaskState();
-				if (!task_state->HasSlotForTask(task)) {
-					task_failed = true;
-					c->Message_StringID(13, TASK_REJECT_RAID_HAVE_ONE, c->GetName());
-					break;
-				} else {
-					if (task->replay_group) {
-						auto expires = client->GetTaskLockoutTimeLeft(task->replay_group);
-						if (expires > 0) {
-							task_failed = true;
-							std::string days = std::to_string(expires / 86400);
-							expires = expires % 86400;
-							std::string hours = std::to_string(expires / 3600);
-							expires = expires % 3600;
-							std::string minutes = std::to_string(expires / 60);
-							c->Message_StringID(13, TASK_REJECT_LOCKEDOUT_OTHER,
-									    client->GetName(), days.c_str(),
-									    hours.c_str(), minutes.c_str());
-							client->Message_StringID(13, TASK_REJECT_LOCKEDOUT_ME,
-										 days.c_str(), hours.c_str(),
-										 minutes.c_str());
-							break;
-						}
-					}
-				}
-			} else if (raid->members[i].membername[0] != '\0') { // out of zone
-				missing_players.push_back(raid->members[i].membername);
-			}
-		}
-	}
-
-	if (task_failed) { // we already yelled at them
-		c->ResetPendingTask();
-		return;
-	}
-
-	// so we've verified all the clients we can and didn't fail, time to pend and yell at world
-	c->SetPendingTask(TaskID, NPCID);
-	c->StartPendingTimer(); // in case something goes wrong and takes ages, we time out
-	*/
-
 }
 
 void ClientTaskState::AcceptNewSharedTask(Client *c, int TaskID, int NPCID, int id, std::vector<std::string> &members)
 {
+	// all of this data should have been verified already
+	// first we need to create the new SharedTaskState
+	auto task_state = taskmanager->CreateSharedTask(id, TaskID);
+	if (!task_state) {
+		// TODO: something failed, tell world
+		return;
+	}
 
+	// we need to init the activity now
+	auto task_activity = task_state->GetActivity();
+
+	task_activity->TaskID = TaskID;
+	task_activity->AcceptedTime = time(nullptr);
+	task_activity->Updated = true;
+	task_activity->CurrentStep = -1;
+
+	for (int i = 0; i < taskmanager->Tasks[TaskID]->ActivityCount; i++) {
+		task_activity->Activity[i].ActivityID = i;
+		task_activity->Activity[i].DoneCount = 0;
+		task_activity->Activity[i].State = ActivityHidden;
+		task_activity->Activity[i].Updated = true;
+	}
+
+	// TODO: figure out packet order
+	// unsure if we unlock now packet wise, just copying normal tasks for now
+	UnlockActivities(c->CharacterID(), *task_activity);
+
+	taskmanager->SendSingleActiveTaskToClient(c, *task_activity, false, true);
+	c->Message(0, "You have been assigned the task '%s'.", taskmanager->Tasks[TaskID]->Title.c_str());
+
+	// send member list of just leader
+	task_state->AddMember(c->GetName(), c, true);
+	task_state->SendMembersList(c);
+
+	// send compass shit
+
+	// add everyone else and send that
+	// we could try to find these members so they could know about it ... but ahh not sure :P
+	for (auto &m : members)
+		task_state->AddMember(m);
+
+	task_state->SendMembersList(c);
+
+	std::string buf = std::to_string(TaskID);
+	NPC *npc = entity_list.GetID(NPCID)->CastToNPC();
+	if(!npc) {
+		c->Message(clientMessageYellow, "Task Giver ID is %i", NPCID);
+		c->Message(clientMessageError, "Unable to find NPC to send EVENT_TASKACCEPTED to. Report this bug.");
+		// TODO: ahh do we wanna do this? clean up world at least
+		return;
+	}
+
+	// TODO: save state
+	parse->EventNPC(EVENT_TASK_ACCEPTED, npc, c, buf.c_str(), 0);
+	// TODO: We need to tell world we are successful so we can tell all the other clients
+	// there are a few issues we need to solve with this
 }
 
 void ClientTaskState::ProcessTaskProximities(Client *c, float X, float Y, float Z) {
@@ -3808,5 +3777,27 @@ void SharedTaskState::MemberEnterZone(Mob *player)
 		return;
 
 	it->entity = player;
+}
+
+void SharedTaskState::SendMembersList(Client *to) const
+{
+	if (!to)
+		return;
+
+	SerializeBuffer buf(sizeof(TaskMemberList_Struct) + 15 * members.size());
+	buf.WriteInt32(0); // unknown ids
+	buf.WriteInt32(0);
+	buf.WriteInt32(members.size());
+
+	for (auto &&m : members) {
+		buf.WriteString(m.name);
+		buf.WriteInt32(0); // monster mission shit
+		buf.WriteInt8(m.leader);
+	}
+
+	auto outapp = new EQApplicationPacket(OP_SharedTaskMemberList, buf);
+
+	to->QueuePacket(outapp);
+	safe_delete(outapp);
 }
 

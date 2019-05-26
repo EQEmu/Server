@@ -433,6 +433,7 @@ void SharedTask::MemberLeftGame(ClientListEntry *cle)
  * Serializes Members into the SerializeBuffer
  * Starts with count then followed by names null-termed
  * In the future this will include monster mission shit
+ * This should probably send the SharedMember struct or something more like it, fine for now
  */
 void SharedTask::SerializeMembers(SerializeBuffer &buf, bool include_leader) const
 {

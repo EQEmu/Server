@@ -3698,6 +3698,7 @@ struct TaskMemberList_Struct {
 /*12*/ char	list_pointer[0];
 /*	list is of the form:
 	char member_name[1]	//null terminated string
+	uint32	monster_mission; // class chosen
 	uint8	task_leader	//boolean flag
 */
 };

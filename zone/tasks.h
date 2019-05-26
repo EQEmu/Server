@@ -95,11 +95,13 @@ struct SharedTaskMember {
 	Mob *entity; // needs to be managed
 	bool leader;
 	SharedTaskMember() : entity(nullptr), leader(false) {}
+	SharedTaskMember(std::string name, Mob *entity, bool leader) : name(name), entity(entity), leader(leader) {}
 };
 
 class SharedTaskState {
 public:
 	SharedTaskState() : locked(false) {}
+	SharedTaskState(int id, int task_id) : id(id), task_id(task_id), locked(false) { }
 //	~SharedTaskState();
 
 	inline const bool IsLocked() const { return locked; }
@@ -109,12 +111,24 @@ public:
 	void MemberZoned(Mob *player); // player left zone, update their pointer
 	void MemberEnterZone(Mob *player); // player entered zone, update their pointer
 
+	void AddMember(std::string name, Mob *entity = nullptr, bool leader = false)
+	{
+		members.push_back({name, entity, leader});
+		if (leader)
+			leader_name = name;
+	}
+
+	void SendMembersList(Client *to) const;
+
 	ClientTaskInformation *GetActivity() { return &activity; }
 
 	friend class TaskManager;
 
 private:
+	int id;
+	int task_id;
 	std::vector<SharedTaskMember> members;
+	std::string leader_name;
 	ClientTaskInformation activity;
 	bool locked;
 };
@@ -253,6 +267,7 @@ public:
 	friend class ClientTaskState;
 
 	void LoadSharedTask(int id); // loads the shared task state
+	SharedTaskState *CreateSharedTask(int id, int task_id);
 
 private:
 	TaskGoalListManager GoalListManager;
