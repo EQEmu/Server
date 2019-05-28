@@ -26,10 +26,11 @@
 class SpawnEntry
 {
 public:
-	SpawnEntry(uint32 in_NPCType, int in_chance, uint8 in_npc_spawn_limit );
+	SpawnEntry(uint32 in_NPCType, int in_chance, uint16 in_filter, uint8 in_npc_spawn_limit );
 	~SpawnEntry() { }
 	uint32 NPCType;
 	int chance;
+	uint16 condition_value_filter;
 
 	//this is a cached value from npc_types, for speed
 	uint8 npc_spawn_limit; //max # of this entry which can be spawned in this zone
@@ -40,7 +41,7 @@ class SpawnGroup
 public:
 	SpawnGroup(uint32 in_id, char* name, int in_group_spawn_limit, float dist, float maxx, float minx, float maxy, float miny, int delay_in, int despawn_in, uint32 despawn_timer_in, int min_delay_in );
 	~SpawnGroup();
-	uint32 GetNPCType();
+	uint32 GetNPCType(uint16 condition_value_filter=1);
 	void AddSpawnEntry( SpawnEntry* newEntry );
 	uint32 id;
 	float roamdist;

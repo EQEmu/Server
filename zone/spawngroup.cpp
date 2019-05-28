@@ -28,9 +28,10 @@
 extern EntityList entity_list;
 extern Zone* zone;
 
-SpawnEntry::SpawnEntry( uint32 in_NPCType, int in_chance, uint8 in_npc_spawn_limit ) {
+SpawnEntry::SpawnEntry( uint32 in_NPCType, int in_chance, uint16 in_filter, uint8 in_npc_spawn_limit ) {
 	NPCType = in_NPCType;
 	chance = in_chance;
+	condition_value_filter = in_filter;
 	npc_spawn_limit = in_npc_spawn_limit;
 }
 
@@ -49,7 +50,7 @@ SpawnGroup::SpawnGroup( uint32 in_id, char* name, int in_group_spawn_limit, floa
 	despawn_timer=despawn_timer_in;
 }
 
-uint32 SpawnGroup::GetNPCType() {
+uint32 SpawnGroup::GetNPCType(uint16 in_filter) {
 #if EQDEBUG >= 10
 	Log(Logs::General, Logs::None, "SpawnGroup[%08x]::GetNPCType()", (uint32) this);
 #endif
@@ -69,9 +70,13 @@ uint32 SpawnGroup::GetNPCType() {
 		if(!entity_list.LimitCheckType(se->NPCType, se->npc_spawn_limit))
 			continue;
 
+		if (se->condition_value_filter != in_filter)
+			continue;
+
 		totalchance += se->chance;
 		possible.push_back(se);
 	}
+
 	if(totalchance == 0)
 		return 0;
 
@@ -160,8 +165,8 @@ bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnG
 		spawn_group_list->AddSpawnGroup(newSpawnGroup);
 	}
 
-	query = StringFormat("SELECT DISTINCT spawnentry.spawngroupID, npcid, chance, "
-			     "npc_types.spawn_limit AS sl "
+	query = StringFormat("SELECT DISTINCT spawnentry.spawngroupID, npcid, "
+				 "chance, condition_value_filter, npc_types.spawn_limit AS sl "
 			     "FROM spawnentry, spawn2, npc_types "
 			     "WHERE spawnentry.npcID=npc_types.id "
 			     "AND spawnentry.spawngroupID = spawn2.spawngroupID "
@@ -174,7 +179,7 @@ bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnG
 	}
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		auto newSpawnEntry = new SpawnEntry(atoi(row[1]), atoi(row[2]), row[3] ? atoi(row[3]) : 0);
+		auto newSpawnEntry = new SpawnEntry(atoi(row[1]), atoi(row[2]), atoi(row[3]), row[4] ? atoi(row[4]) : 0);
 		SpawnGroup *sg = spawn_group_list->GetSpawnGroup(atoi(row[0]));
 
 		if (!sg) {
@@ -209,11 +214,11 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawngroupid, SpawnGroupList *spawn_g
 		spawn_group_list->AddSpawnGroup(newSpawnGroup);
 	}
 
-	query = StringFormat("SELECT DISTINCT(spawnentry.spawngroupID), spawnentry.npcid, "
-			     "spawnentry.chance, spawngroup.spawn_limit FROM spawnentry, spawngroup "
-			     "WHERE spawnentry.spawngroupID = '%i' AND spawngroup.spawn_limit = '0' "
-			     "ORDER BY chance",
-			     spawngroupid);
+	query = StringFormat("SELECT DISTINCT(spawnentry.spawngroupID), "
+		"spawnentry.npcid, spawnentry.chance, "
+		"spawnentry.condition_value_filter, spawngroup.spawn_limit "
+		"FROM spawnentry, spawngroup WHERE spawnentry.spawngroupID = '%i' "
+		"AND spawngroup.spawn_limit = '0' ORDER BY chance", spawngroupid);
 	results = QueryDatabase(query);
 	if (!results.Success()) {
 		Log(Logs::General, Logs::Error, "Error3 in PopulateZoneLists query '%s'", query.c_str());
@@ -221,7 +226,7 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawngroupid, SpawnGroupList *spawn_g
 	}
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		auto newSpawnEntry = new SpawnEntry(atoi(row[1]), atoi(row[2]), row[3] ? atoi(row[3]) : 0);
+		auto newSpawnEntry = new SpawnEntry(atoi(row[1]), atoi(row[2]), atoi(row[3]), row[4] ? atoi(row[4]) : 0);
 		SpawnGroup *sg = spawn_group_list->GetSpawnGroup(atoi(row[0]));
 		if (!sg) {
 			safe_delete(newSpawnEntry);
