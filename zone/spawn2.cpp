@@ -184,8 +184,14 @@ bool Spawn2::Process() {
 			return false;
 		}
 
+		uint16 condition_value=1;
+
+		if (condition_id > 0) {
+			condition_value = zone->spawn_conditions.GetCondition(zone->GetShortName(), zone->GetInstanceID(), condition_id);
+		}
+
 		//have the spawn group pick an NPC for us
-		uint32 npcid = spawn_group->GetNPCType();
+		uint32 npcid = spawn_group->GetNPCType(condition_value);
 		if (npcid == 0) {
 			Log(Logs::Detail,
 				Logs::Spawns,
