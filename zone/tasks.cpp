@@ -3529,9 +3529,16 @@ void ClientTaskState::AcceptNewSharedTask(Client *c, int TaskID, int NPCID, int 
 		return;
 	}
 
-	// TODO: save state
+	// TODO: save state -- for the client
 	parse->EventNPC(EVENT_TASK_ACCEPTED, npc, c, buf.c_str(), 0);
-	// TODO: We need to tell world we are successful so we can tell all the other clients
+
+	auto pack = new ServerPacket(ServerOP_TaskZoneCreated, sizeof(uint32)); // just the ID saying to continue
+	pack->WriteUInt32(id);
+	worldserver.SendPacket(pack);
+	delete pack;
+
+	return;
+
 	// there are a few issues we need to solve with this
 }
 

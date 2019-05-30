@@ -152,11 +152,13 @@
 #define ServerOP_LSRemoteAddr		0x1009
 #define ServerOP_LSAccountUpdate		0x100A
 
-#define ServerOP_TaskRequest		0x0300
-#define ServerOP_TaskGrant			0x0301
-#define ServerOP_TaskReject			0x0302
-#define ServerOP_TaskAddPlayer		0x0303
-#define ServerOP_TaskRemovePlayer	0x0304
+#define ServerOP_TaskRequest		0x0300 // zone -> world. Player trying to get task
+#define ServerOP_TaskGrant			0x0301 // world -> zone. World verified everything is good
+#define ServerOP_TaskReject			0x0302 // world -> zone. Something failed ABORT
+#define ServerOP_TaskAddPlayer		0x0303 // bidirectional. /taskaddplayer request zone -> world. success world -> zone
+#define ServerOP_TaskRemovePlayer	0x0304 // .. /taskremoveplayer ..
+#define ServerOP_TaskZoneCreated	0x0305 // zone -> world. Something didn't go wrong creating the new task! Now World needs to tell other players to join world -> zone response to tell someone to join
+#define ServerOP_TaskZoneFailed		0x0306 // zone -> world. Something went wrong above ABORT
 
 #define ServerOP_EncapPacket		0x2007	// Packet within a packet
 #define ServerOP_WorldListUpdate	0x2008
@@ -1335,6 +1337,10 @@ struct UCSServerStatus_Struct {
 };
 
 // shared task related communications
+struct ServerSharedTaskMember_Struct { // used for various things we just need the ID and a name (add, remove, etc)
+	uint32 id;
+	char name[64];
+};
 // error constants
 #define TASKJOINOOZ_CAN				0
 #define TASKJOINOOZ_NOTASK			1

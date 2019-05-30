@@ -6,6 +6,7 @@
 #include "zonelist.h"
 
 #include <algorithm>
+#include <unordered_set>
 
 extern ClientList client_list;
 extern ZSList zoneserver_list;
@@ -163,7 +164,68 @@ void SharedTaskManager::HandleTaskRequest(ServerPacket *pack)
 	zoneserver_list.SendPacket(cle_leader->zone(), cle_leader->instance(), reply);
 	safe_delete(reply);
 
+	task.Save();
+
 	return;
+}
+
+/*
+ * Just sends the ID of the task that was successfully created zone side
+ * We now need to tell all the other clients to join the task
+ * We could probably try to find all the clients already in the zone and not
+ * worry about them here, but it's simpler this way
+ */
+void SharedTaskManager::HandleTaskZoneCreated(ServerPacket *pack)
+{
+	if (!pack)
+		return;
+
+	int id = pack->ReadUInt32();
+
+	auto task = GetSharedTask(id);
+
+	if (!task) // hmm guess we should tell zone something is broken TODO
+		return;
+
+	auto leader = task->GetLeader();
+
+	if (!leader) // hmmm
+		return;
+
+	// if a zone server isn't in here, we need to send a serialized task state to them -- might not do this way :P
+	std::unordered_set<ZoneServer *> zones;
+	zones.insert(leader->cle->Server());
+
+	// we reuse this, easier this way
+	auto outpack = new ServerPacket(ServerOP_TaskZoneCreated, sizeof(ServerSharedTaskMember_Struct));
+	auto stm = (ServerSharedTaskMember_Struct *)outpack->pBuffer;
+	stm->id = id;
+
+	ServerPacket *taskpack = nullptr; // if we have, we will create this
+
+	for (auto &&m : task->members) {
+		if (m.leader) // leader done!
+			continue;
+
+		if (!m.cle) // hmmm
+			continue;
+
+		if (!m.cle->Server()) // hmm
+			continue;
+
+		auto ret = zones.insert(m.cle->Server());
+		if (ret.second) { // new zone! send serialized task
+			if (!taskpack) { // we need to create the serialized packet
+			}
+			zoneserver_list.SendPacket(m.cle->zone(), m.cle->instance(), taskpack);
+		}
+
+		strn0cpy(stm->name, m.name.c_str(), 64);
+		zoneserver_list.SendPacket(m.cle->zone(), m.cle->instance(), outpack);
+	}
+
+	safe_delete(outpack);
+	safe_delete(taskpack);
 }
 
 /*
@@ -460,5 +522,9 @@ void SharedTask::SetCLESharedTasks()
 		m.cle->SetSharedTask(this);
 		m.cle->SetCurrentSharedTaskID(id);
 	}
+}
+
+void SharedTask::Save() const
+{
 }
 

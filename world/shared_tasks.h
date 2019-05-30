@@ -31,10 +31,19 @@ public:
 			leader_name = name;
 	}
 	void MemberLeftGame(ClientListEntry *cle);
-	const std::string &GetLeaderName() const { return leader_name; }
+	inline const std::string &GetLeaderName() const { return leader_name; }
+	inline SharedTaskMember *GetLeader() {
+		auto it = std::find_if(members.begin(), members.end(), [](const SharedTaskMember &m) { return m.leader; });
+		if (it != members.end())
+			return &(*it);
+		else
+			return nullptr;
+	}
 
 	void SerializeMembers(SerializeBuffer &buf, bool include_leader = true) const;
 	void SetCLESharedTasks();
+
+	void Save() const; // save to database
 
 private:
 	inline void SetID(int in) { id = in; }
@@ -62,8 +71,17 @@ public:
 
 	bool AppropriateLevel(int id, int level) const;
 
+	inline SharedTask *GetSharedTask(int id) {
+		auto it = tasks.find(id);
+		if (it != tasks.end())
+			return &it->second;
+		else
+			return nullptr;
+	}
+
 	// IPC packet processing
 	void HandleTaskRequest(ServerPacket *pack);
+	void HandleTaskZoneCreated(ServerPacket *pack);
 
 	void Process();
 
