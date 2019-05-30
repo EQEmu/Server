@@ -10,6 +10,7 @@
 
 extern ClientList client_list;
 extern ZSList zoneserver_list;
+extern SharedTaskManager shared_tasks;
 
 void SharedTaskManager::HandleTaskRequest(ServerPacket *pack)
 {
@@ -152,6 +153,7 @@ void SharedTaskManager::HandleTaskRequest(ServerPacket *pack)
 
 	// this will also prevent any of these clients from requesting or being added to another, lets do it now before we tell zone
 	task.SetCLESharedTasks();
+	task.InitActivities();
 	// fire off to zone we're done!
 	SerializeBuffer buf(10 + 10 * players.size());
 	buf.WriteInt32(id);				// shared task's ID
@@ -526,5 +528,23 @@ void SharedTask::SetCLESharedTasks()
 
 void SharedTask::Save() const
 {
+}
+
+/*
+ * sets up activity stuff
+ */
+void SharedTask::InitActivities()
+{
+	task_state.TaskID = task_id;
+	task_state.AcceptedTime = time(nullptr);
+	task_state.Updated = true;
+	task_state.CurrentStep = -1;
+
+	for (int i = 0; i < shared_tasks.GetTaskActivityCount(task_id); i++) {
+		task_state.Activity[i].ActivityID = i;
+		task_state.Activity[i].DoneCount = 0;
+		task_state.Activity[i].State = ActivityHidden;
+		task_state.Activity[i].Updated = true;
+	}
 }
 

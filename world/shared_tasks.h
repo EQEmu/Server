@@ -42,6 +42,7 @@ public:
 
 	void SerializeMembers(SerializeBuffer &buf, bool include_leader = true) const;
 	void SetCLESharedTasks();
+	void InitActivities();
 
 	void Save() const; // save to database
 
@@ -77,6 +78,14 @@ public:
 			return &it->second;
 		else
 			return nullptr;
+	}
+
+	inline int GetTaskActivityCount(int task_id) const {
+		auto it = task_information.find(task_id);
+		if (it != task_information.end())
+			return it->second.ActivityCount;
+		else
+			return 0; // hmm
 	}
 
 	// IPC packet processing
