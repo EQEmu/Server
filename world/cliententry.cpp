@@ -260,8 +260,6 @@ void ClientListEntry::ClearVars(bool iAll) {
 	gm = 0;
 	pClientVersion = 0;
 	shared_task_id = 0;
-	if (m_shared_task != nullptr)
-		m_shared_task->MemberLeftGame(this);
 	m_shared_task = nullptr;
 	for (auto &elem : tell_queue)
 		safe_delete_array(elem);
@@ -275,6 +273,9 @@ void ClientListEntry::Camp(ZoneServer* iZS) {
 		pzoneserver->RemovePlayer();
 		LSUpdate(pzoneserver);
 	}
+
+	if (m_shared_task != nullptr)
+		m_shared_task->MemberLeftGame(this);
 
 	ClearVars();
 
