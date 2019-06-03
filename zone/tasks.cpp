@@ -3475,7 +3475,8 @@ void ClientTaskState::PendSharedTask(Client *c, int TaskID, int NPCID, bool enfo
 	return;
 }
 
-void ClientTaskState::AcceptNewSharedTask(Client *c, int TaskID, int NPCID, int id, std::vector<std::string> &members)
+void ClientTaskState::AcceptNewSharedTask(Client *c, int TaskID, int NPCID, int id, int accepted_time,
+					  std::vector<std::string> &members)
 {
 	// all of this data should have been verified already
 	// first we need to create the new SharedTaskState
@@ -3489,7 +3490,7 @@ void ClientTaskState::AcceptNewSharedTask(Client *c, int TaskID, int NPCID, int 
 	auto task_activity = task_state->GetActivity();
 
 	task_activity->TaskID = TaskID;
-	task_activity->AcceptedTime = time(nullptr);
+	task_activity->AcceptedTime = accepted_time;
 	task_activity->Updated = true;
 	task_activity->CurrentStep = -1;
 

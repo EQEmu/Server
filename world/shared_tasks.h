@@ -20,8 +20,8 @@ struct SharedTaskMember {
 
 class SharedTask {
 public:
-	SharedTask() : id(0), task_id(0), accepted_time(0), locked(false) {}
-	SharedTask(int id, int task_id) : id(id), task_id(task_id), accepted_time(0), locked(false) {}
+	SharedTask() : id(0), task_id(0), locked(false) {}
+	SharedTask(int id, int task_id) : id(id), task_id(task_id), locked(false) {}
 	~SharedTask() {}
 
 	void AddMember(std::string name, ClientListEntry *cle = nullptr, bool leader = false)
@@ -43,17 +43,19 @@ public:
 	void SerializeMembers(SerializeBuffer &buf, bool include_leader = true) const;
 	void SetCLESharedTasks();
 	void InitActivities();
+	bool UnlockActivities();
 
 	void Save() const; // save to database
 
 private:
 	inline void SetID(int in) { id = in; }
 	inline void SetTaskID(int in) { task_id = in; }
-	inline void SetAcceptedTime(int in) { accepted_time = in; }
+	inline void SetAcceptedTime(int in) { task_state.AcceptedTime = in; }
 	inline void SetLocked(bool in) { locked = in; }
+
+	inline int GetAcceptedTime() const { return task_state.AcceptedTime; }
 	int id; // id we have in our map
 	int task_id; // ID of the task we're on
-	int accepted_time; // timestamp of when accepted, initially set by zone
 	bool locked;
 	std::string leader_name;
 	std::vector<SharedTaskMember> members;

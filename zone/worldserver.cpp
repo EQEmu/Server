@@ -1947,6 +1947,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		int id = pack->ReadUInt32();
 		int task_id = pack->ReadUInt32();
 		int taskmaster_id = pack->ReadUInt32();
+		int accepted_time = pack->ReadUInt32();
 		char name[64] = { 0 };
 		pack->ReadString(name);
 		auto client = entity_list.GetClientByName(name);
@@ -1957,7 +1958,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				pack->ReadString(name);
 				members.push_back(name);
 			}
-			client->AssignSharedTask(task_id, taskmaster_id, id, members);
+			client->AssignSharedTask(task_id, taskmaster_id, id, accepted_time, members);
 		} else {
 			// TODO: something failed, tell world to clean up
 		}
