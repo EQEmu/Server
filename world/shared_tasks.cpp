@@ -6,7 +6,6 @@
 #include "zonelist.h"
 
 #include <algorithm>
-#include <unordered_set>
 
 extern ClientList client_list;
 extern ZSList zoneserver_list;
@@ -190,21 +189,10 @@ void SharedTaskManager::HandleTaskZoneCreated(ServerPacket *pack)
 	if (!task) // hmm guess we should tell zone something is broken TODO
 		return;
 
-	auto leader = task->GetLeader();
-
-	if (!leader) // hmmm
-		return;
-
-	// if a zone server isn't in here, we need to send a serialized task state to them -- might not do this way :P
-	std::unordered_set<ZoneServer *> zones;
-	zones.insert(leader->cle->Server());
-
 	// we reuse this, easier this way
 	auto outpack = new ServerPacket(ServerOP_TaskZoneCreated, sizeof(ServerSharedTaskMember_Struct));
 	auto stm = (ServerSharedTaskMember_Struct *)outpack->pBuffer;
 	stm->id = id;
-
-	ServerPacket *taskpack = nullptr; // if we have, we will create this
 
 	for (auto &&m : task->members) {
 		if (m.leader) // leader done!
@@ -216,19 +204,11 @@ void SharedTaskManager::HandleTaskZoneCreated(ServerPacket *pack)
 		if (!m.cle->Server()) // hmm
 			continue;
 
-		auto ret = zones.insert(m.cle->Server());
-		if (ret.second) { // new zone! send serialized task
-			if (!taskpack) { // we need to create the serialized packet
-			}
-			zoneserver_list.SendPacket(m.cle->zone(), m.cle->instance(), taskpack);
-		}
-
 		strn0cpy(stm->name, m.name.c_str(), 64);
 		zoneserver_list.SendPacket(m.cle->zone(), m.cle->instance(), outpack);
 	}
 
 	safe_delete(outpack);
-	safe_delete(taskpack);
 }
 
 /*
