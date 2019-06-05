@@ -953,8 +953,7 @@ struct PlayerProfile_Struct
 /*2384*/	char				title[32];			// length might be wrong
 /*2416*/	char				suffix[32];			// length might be wrong
 /*2448*/	uint32				guildid2;			//
-/*2452*/	uint32				exp;				// Current Experience
-/*2456*/	uint32				unknown2492;
+/*2452*/	int64				exp;				// Current Experience
 /*2460*/	uint32				points;				// Unspent Practice points
 /*2464*/	uint32				mana;				// current mana
 /*2468*/	uint32				cur_hp;				// current hp
