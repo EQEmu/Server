@@ -57,6 +57,7 @@ public:
 	uint32 GetKeyItem();
 	void SetNoKeyring(int type);
 	int GetNoKeyring();
+	bool IsDoorOpen();
 	void CreateDatabaseEntry();
 	void ForceOpen(Lua_Mob sender);
 	void ForceOpen(Lua_Mob sender, bool alt_mode);
