@@ -445,7 +445,7 @@ void Client::CalculateExp(uint32 in_add_exp, uint32 &add_exp, uint32 &add_aaxp, 
 			totalmod += RuleR(Zone, HotZoneBonus);
 		}
 
-		add_exp = uint32(float(add_exp) * totalmod * zemmod);
+		if (float(add_exp) >= 0.0f) add_exp = uint32(float(add_exp) * totalmod * zemmod);
 
 		//if XP scaling is based on the con of a monster, do that now.
 		if (RuleB(Character, UseXPConScaling))
@@ -758,7 +758,7 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 		char val1[20]={0};
 		char val2[20]={0};
 		char val3[20]={0};
-		Message_StringID(MT_Experience, GM_GAINXP, ConvertArray(set_aaxp,val1),ConvertArray(set_exp,val2),ConvertArray(GetEXPForLevel(GetLevel()+1),val3));	//[GM] You have gained %1 AXP and %2 EXP (%3).
+		Message_StringID(MT_Experience, GM_GAINXP, ConvertArrayU(set_aaxp,val1), ConvertArrayU(set_exp,val2), ConvertArrayU(GetEXPForLevel(GetLevel()+1),val3));	//[GM] You have gained %1 AXP and %2 EXP (%3).
 	}
 }
 

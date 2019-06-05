@@ -1116,7 +1116,7 @@ bool ZoneDatabase::LoadCharacterData(uint32 character_id, PlayerProfile_Struct* 
 		pp->ability_time_hours = atoi(row[r]); r++;								 // "ability_time_hours,        "
 		strcpy(pp->title, row[r]); r++;											 // "title,                     "
 		strcpy(pp->suffix, row[r]); r++;										 // "suffix,                    "
-		pp->exp = atoi(row[r]); r++;											 // "exp,                       "
+		pp->exp = atoll(row[r]); r++;											 // "exp,                       "
 		pp->points = atoi(row[r]); r++;											 // "points,                    "
 		pp->mana = atoi(row[r]); r++;											 // "mana,                      "
 		pp->cur_hp = atoi(row[r]); r++;											 // "cur_hp,                    "

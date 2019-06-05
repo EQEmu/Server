@@ -477,6 +477,12 @@ const char *ConvertArray(int input, char *returnchar)
 	return returnchar;
 }
 
+const char* ConvertArrayU(uint32 input, char* returnchar)
+{
+	sprintf(returnchar, "%u", input);
+	return returnchar;
+}
+
 const char *ConvertArrayF(float input, char *returnchar)
 {
 	sprintf(returnchar, "%0.2f", input);
