@@ -396,6 +396,9 @@ int main(int argc, char** argv) {
 	adventure_manager.Load();
 	adventure_manager.LoadLeaderboardInfo();
 
+	shared_tasks.LoadSharedTasks();
+	shared_tasks.LoadSharedTaskState();
+
 	Log(Logs::General, Logs::World_Server, "Purging expired instances");
 	database.PurgeExpiredInstances();
 
