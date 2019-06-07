@@ -408,7 +408,7 @@ bool SharedTaskManager::LoadSharedTaskState()
 	results = database.QueryDatabase(query);
 	if (results.Success() && results.RowCount() == 1) {
 		auto row = results.begin();
-		next_id = atoi(row[0]);
+		next_id = row[0] ? atoi(row[0]) : 0;
 	} else {
 		next_id = 0; // oh well
 	}
