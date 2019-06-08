@@ -180,7 +180,7 @@ public:
 	bool HasSlotForTask(TaskInformation *task);
 	// shared task related functions
 	void AcceptNewSharedTask(Client *c, int TaskID, int NPCID, int id, int accepted_time, std::vector<std::string> &members);
-	void PendSharedTask(Client *c, int TaskID, int NPCID, bool enforce_level_requirement = false);
+	void RequestSharedTask(Client *c, int TaskID, int NPCID, bool enforce_level_requirement = false);
 
 	inline bool HasFreeTaskSlot() { return ActiveTask.TaskID == TASKSLOTEMPTY; }
 
