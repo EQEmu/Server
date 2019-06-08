@@ -666,6 +666,7 @@ public:
 	void Sacrifice(Client* caster);
 	void GoToDeath();
 	inline const int32 GetInstanceID() const { return zone->GetInstanceID(); }
+    inline const int32 GetInstanceVersion() const { return zone->GetInstanceVersion(); }
 	void SetZoning(bool in) { bZoning = in; }
 
 	FACTION_VALUE GetReverseFactionCon(Mob* iOther);

@@ -5574,7 +5574,7 @@ XS(XS_Client_GetInstanceVersion) {
 		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = zone->GetInstanceVersion();
+		RETVAL = THIS->GetInstanceVersion();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
 	}
