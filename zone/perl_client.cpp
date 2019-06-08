@@ -5556,6 +5556,31 @@ XS(XS_Client_GetInstanceID) {
 	XSRETURN(1);
 }
 
+XS(XS_Client_GetInstanceVersion); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_GetInstanceVersion) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Client::GetInstanceVersion(THIS)");
+	{
+		Client *THIS;
+		int8 RETVAL;
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Client *, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = zone->GetInstanceVersion();
+		XSprePUSH;
+		PUSHu((UV) RETVAL);
+	}
+	XSRETURN(1);
+}
+
 XS(XS_Client_HasSpellScribed); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_HasSpellScribed) {
 	dXSARGS;
@@ -6336,6 +6361,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GetHorseId"), XS_Client_GetHorseId, file, "$");
 	newXSproto(strcpy(buf, "GetHunger"), XS_Client_GetHunger, file, "$$");
 	newXSproto(strcpy(buf, "GetInstanceID"), XS_Client_GetInstanceID, file, "$$");
+	newXSproto(strcpy(buf, "GetInstanceVersion"), XS_Client_GetInstanceVersion, file, "$$");
 	newXSproto(strcpy(buf, "GetInstrumentMod"), XS_Client_GetInstrumentMod, file, "$$");
 	newXSproto(strcpy(buf, "GetIP"), XS_Client_GetIP, file, "$");
 	newXSproto(strcpy(buf, "GetItemAt"), XS_Client_GetItemAt, file, "$$");
