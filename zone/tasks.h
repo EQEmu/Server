@@ -146,8 +146,6 @@ public:
 	int GetTaskActivityDoneCountFromTaskID(int TaskID, int ActivityID);
 	int GetTaskStartTime(TaskType type, int index);
 	void AcceptNewTask(Client *c, int TaskID, int NPCID, bool enforce_level_requirement = false);
-	void AcceptNewSharedTask(Client *c, int TaskID, int NPCID, int id, int accepted_time, std::vector<std::string> &members);
-	void PendSharedTask(Client *c, int TaskID, int NPCID, bool enforce_level_requirement = false);
 	void FailTask(Client *c, int TaskID);
 	int TaskTimeLeft(int TaskID);
 	int IsTaskCompleted(int TaskID);
@@ -180,6 +178,9 @@ public:
 	int ActiveTasksInSet(int TaskSetID);
 	int CompletedTasksInSet(int TaskSetID);
 	bool HasSlotForTask(TaskInformation *task);
+	// shared task related functions
+	void AcceptNewSharedTask(Client *c, int TaskID, int NPCID, int id, int accepted_time, std::vector<std::string> &members);
+	void PendSharedTask(Client *c, int TaskID, int NPCID, bool enforce_level_requirement = false);
 
 	inline bool HasFreeTaskSlot() { return ActiveTask.TaskID == TASKSLOTEMPTY; }
 
