@@ -404,11 +404,11 @@ bool SharedTaskManager::LoadSharedTaskState()
 	// But the crash case may actually dictate we should :P
 
 	// set next_id to highest used ID
-	query = "SELECT MAX(id) FROM shared_task_state";
+	query = "SELECT IFNULL(MAX(id), 0) FROM shared_task_state";
 	results = database.QueryDatabase(query);
 	if (results.Success() && results.RowCount() == 1) {
 		auto row = results.begin();
-		next_id = row[0] ? atoi(row[0]) : 0;
+		next_id = atoi(row[0]);
 	} else {
 		next_id = 0; // oh well
 	}
