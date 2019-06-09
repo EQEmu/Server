@@ -3556,6 +3556,8 @@ void ClientTaskState::AcceptNewSharedTask(Client *c, int TaskID, int NPCID, int 
 	worldserver.SendPacket(pack);
 	delete pack;
 
+	ActiveSharedTask = task_state;
+
 	return;
 
 	// there are a few issues we need to solve with this
@@ -3589,6 +3591,8 @@ void ClientTaskState::AddToSharedTask(Client *c, int TaskID)
 	// So normally getting a task we would send EVENT_TASK_ACCEPTED here, but
 	// this isn't an accept step. I guess we should add another event in case
 	// they need the same thing TODO
+
+	ActiveSharedTask = task;
 
 	return;
 }
