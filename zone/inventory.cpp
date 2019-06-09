@@ -972,8 +972,8 @@ void Client::DeleteItemInInventory(int16 slot_id, int8 quantity, bool client_upd
 			safe_delete(outapp);
 		}
 		else {
-			outapp = new EQApplicationPacket(OP_MoveItem, sizeof(MoveItem_Struct));
-			MoveItem_Struct* delitem	= (MoveItem_Struct*)outapp->pBuffer;
+			outapp = new EQApplicationPacket(OP_DeleteItem, sizeof(DeleteItem_Struct));
+			DeleteItem_Struct* delitem	= (DeleteItem_Struct*)outapp->pBuffer;
 			delitem->from_slot			= slot_id;
 			delitem->to_slot			= 0xFFFFFFFF;
 			delitem->number_in_stack	= 0xFFFFFFFF;
