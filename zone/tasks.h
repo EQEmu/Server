@@ -185,6 +185,8 @@ public:
 
 	inline bool HasFreeTaskSlot() { return ActiveTask.TaskID == TASKSLOTEMPTY; }
 
+	inline SharedTaskState *GetSharedTask() { return ActiveSharedTask ; }
+
 	friend class TaskManager;
 
 private:
