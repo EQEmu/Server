@@ -1199,6 +1199,8 @@ void TaskManager::SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *Task
 
 	auto outapp = new EQApplicationPacket(OP_OpenNewTasksWindow, buf);
 
+	DumpPacket(outapp, true);
+
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
 
@@ -1283,6 +1285,8 @@ void TaskManager::SendTaskSelectorNew(Client *c, Mob *mob, int TaskCount, int *T
 	}
 
 	auto outapp = new EQApplicationPacket(OP_OpenNewTasksWindow, buf);
+
+	DumpPacket(outapp, true);
 
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
@@ -2550,7 +2554,7 @@ void Client::SendTaskComplete(int TaskIndex) {
 	tcs->unknown04 = 0x00000002;
 
 	Log.LogDebugType(Logs::Detail, Logs::Tasks, "SendTasksComplete");
-	DumpPacket(outapp); fflush(stdout);
+	DumpPacket(outapp, true); fflush(stdout);
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
@@ -2631,6 +2635,7 @@ void ClientTaskState::SendTaskHistory(Client *c, int TaskIndex) {
 		}
 	}
 
+	DumpPacket(outapp, true);
 
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
@@ -2656,6 +2661,7 @@ void Client::SendTaskActivityComplete(int TaskID, int ActivityID, int TaskIndex,
 	tac->task_completed = 0x00000001;
 	tac->stage_complete = TaskIncomplete;
 
+	DumpPacket(outapp, true);
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
@@ -2684,6 +2690,8 @@ void Client::SendTaskFailed(int TaskID, int TaskIndex, TaskType type)
 	tac->stage_complete = 0; // 0 for task complete or failed.
 
 	Log(Logs::General, Logs::Tasks, "[UPDATE] TaskFailed");
+
+	DumpPacket(outapp, true);
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
@@ -2740,6 +2748,7 @@ void TaskManager::SendCompletedTasksToClient(Client *c, ClientTaskState *State) 
 		buf = buf + 4;
 	}
 
+	DumpPacket(outapp, true);
 
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
@@ -2764,6 +2773,8 @@ void TaskManager::SendTaskActivityShort(Client *c, int TaskID, int ActivityID, i
 		outapp->WriteUInt32(0);
 		outapp->WriteUInt32(0xffffffff);
 		outapp->WriteUInt8(0);
+
+		DumpPacket(outapp, true);
 		c->FastQueuePacket(&outapp);
 
 		return;
@@ -2781,7 +2792,7 @@ void TaskManager::SendTaskActivityShort(Client *c, int TaskID, int ActivityID, i
 	tass->ActivityType = 0xffffffff;
 	tass->unknown4 = 0x00000000;
 
-
+	DumpPacket(outapp, true);
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
 }
@@ -2843,6 +2854,8 @@ void TaskManager::SendTaskActivityLong(Client *c, int TaskID, int ActivityID, in
 
 	auto outapp = new EQApplicationPacket(OP_TaskActivity, buf);
 
+	DumpPacket(outapp, true);
+
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
 
@@ -2902,6 +2915,8 @@ void TaskManager::SendTaskActivityNew(Client *c, int TaskID, int ActivityID, int
 	buf.WriteString(Tasks[TaskID]->Activity[ActivityID].zones);
 
 	auto outapp = new EQApplicationPacket(OP_TaskActivity, buf);
+
+	DumpPacket(outapp, true);
 
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
@@ -3070,6 +3085,8 @@ void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, ClientTaskInf
 	tdt->Points = 0x00000000; // Points Count TODO: this does have a visible affect on the client ...
 	tdt->has_reward_selection = 0; // TODO: new rewards window
 
+	DumpPacket(outapp, true);
+
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
 }
@@ -3193,6 +3210,8 @@ void ClientTaskState::CancelTask(Client *c, int SequenceNumber, TaskType type, b
 	cts->type = static_cast<uint32>(type);
 
 	Log(Logs::General, Logs::Tasks, "[UPDATE] CancelTask");
+
+	DumpPacket(outapp, true);
 
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
@@ -3804,6 +3823,8 @@ void SharedTaskState::SendMembersList(Client *to) const
 	}
 
 	auto outapp = new EQApplicationPacket(OP_SharedTaskMemberList, buf);
+
+	DumpPacket(outapp, true);
 
 	to->QueuePacket(outapp);
 	safe_delete(outapp);

@@ -36,12 +36,16 @@ namespace EQ
 		class ServertalkServer
 		{
 		public:
+			typedef std::function<void(std::shared_ptr<ServertalkServerConnection>)> IdentityCallback;
+
 			ServertalkServer();
 			~ServertalkServer();
 
 			void Listen(const ServertalkServerOptions& opts);
-			void OnConnectionIdentified(const std::string &type, std::function<void(std::shared_ptr<ServertalkServerConnection>)> cb);
-			void OnConnectionRemoved(const std::string &type, std::function<void(std::shared_ptr<ServertalkServerConnection>)> cb);
+			void OnConnectionIdentified(const std::string &type, IdentityCallback cb);
+			void OnConnectionRemoved(const std::string &type, IdentityCallback cb);
+			void OnConnectionIdentified(IdentityCallback cb);
+			void OnConnectionRemoved(IdentityCallback cb);
 
 		private:
 			void ConnectionDisconnected(ServertalkServerConnection *conn);
@@ -52,8 +56,10 @@ namespace EQ
 			std::vector<std::shared_ptr<ServertalkServerConnection>> m_unident_connections;
 			std::map<std::string, std::vector<std::shared_ptr<ServertalkServerConnection>>> m_ident_connections;
 
-			std::map<std::string, std::function<void(std::shared_ptr<ServertalkServerConnection>)>> m_on_ident;
-			std::map<std::string, std::function<void(std::shared_ptr<ServertalkServerConnection>)>> m_on_disc;
+			std::map<std::string, IdentityCallback> m_on_ident;
+			std::map<std::string, IdentityCallback> m_on_disc;
+			IdentityCallback m_on_any_ident;
+			IdentityCallback m_on_any_disc;
 			bool m_encrypted;
 			bool m_allow_downgrade;
 			std::string m_credentials;

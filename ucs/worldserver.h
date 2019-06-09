@@ -18,20 +18,14 @@
 #ifndef WORLDSERVER_H
 #define WORLDSERVER_H
 
-#include "../net/servertalk_client_connection.h"
-#include "../common/eq_packet_structs.h"
-#include <memory>
+#include "../world_connection.h"
 
-class WorldServer
+class WorldServer : public EQ::WorldConnection
 {
 public:
 	WorldServer();
 	~WorldServer();
-	void ProcessMessage(uint16 opcode, EQ::Net::Packet &);
-
-private:
-
-	std::unique_ptr<EQ::Net::ServertalkClient> m_connection;
+	void ProcessMessage(uint16 opcode, const EQ::Net::Packet &p);
 };
 #endif
 

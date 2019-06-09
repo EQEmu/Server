@@ -47,16 +47,16 @@ void Client50ToServerSayLink(std::string& serverSayLink, const std::string& clie
 void Client55ToServerSayLink(std::string& serverSayLink, const std::string& clientSayLink);
 
 WorldServer::WorldServer()
+	: WorldConnection::WorldConnection("UCS")
 {
-	m_connection.reset(new EQ::Net::ServertalkClient(Config->WorldIP, Config->WorldTCPPort, false, "UCS", Config->SharedKey));
-	m_connection->OnMessage(std::bind(&WorldServer::ProcessMessage, this, std::placeholders::_1, std::placeholders::_2));
+	SetOnMessageHandler(std::bind(&WorldServer::ProcessMessage, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 WorldServer::~WorldServer()
 {
 }
 
-void WorldServer::ProcessMessage(uint16 opcode, EQ::Net::Packet &p)
+void WorldServer::ProcessMessage(uint16 opcode, const EQ::Net::Packet &p)
 {
 	ServerPacket tpack(opcode, p);
 	ServerPacket *pack = &tpack;

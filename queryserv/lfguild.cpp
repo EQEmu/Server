@@ -7,7 +7,7 @@
 #include "../common/packet_dump.h"
 #include "../common/rulesys.h"
 
-extern WorldServer *worldserver;
+extern std::unique_ptr<WorldServer> worldserver;
 extern Database database;
 
 PlayerLookingForGuild::PlayerLookingForGuild(char *Name, char *Comments, uint32 Level, uint32 Class, uint32 AACount, uint32 Timezone, uint32 TimePosted)

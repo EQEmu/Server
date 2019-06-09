@@ -202,6 +202,7 @@
 #define ServerOP_CZSetEntityVariableByClientName 0x4012
 #define ServerOP_UCSServerStatusRequest		0x4013
 #define ServerOP_UCSServerStatusReply		0x4014
+#define ServerOP_Speech						0x4513
 /* Query Server OP Codes */
 #define ServerOP_QSPlayerLogTrades					0x5010
 #define ServerOP_QSPlayerLogHandins					0x5011
@@ -215,12 +216,13 @@
 #define ServerOP_WWMarquee							0x5019
 #define ServerOP_QSPlayerDropItem					0x5020
 
+/* Routing System OP Code(s) */
+#define ServerOP_RouteTo							0x6000
+
 /* Query Serv Generic Packet Flag/Type Enumeration */
 enum { QSG_LFGuild = 0 }; 
 enum {	QSG_LFGuild_PlayerMatches = 0, QSG_LFGuild_UpdatePlayerInfo, QSG_LFGuild_RequestPlayerInfo, QSG_LFGuild_UpdateGuildInfo, QSG_LFGuild_GuildMatches,
 	QSG_LFGuild_RequestGuildInfo };
-
-#define ServerOP_Speech			0x4513
 
 /************ PACKET RELATED STRUCT ************/
 class ServerPacket
@@ -1347,6 +1349,19 @@ struct ServerSharedTaskMember_Struct { // used for various things we just need t
 #define TASKJOINOOZ_HAVEONE			2
 #define TASKJOINOOZ_LEVEL			3
 #define TASKJOINOOZ_TIMER			4
+
+struct RouteToHeader
+{
+	char filter[64];
+	char type[128];
+
+	template <class Archive>
+	void serialize(Archive & archive)
+	{
+		archive(filter,
+			type);
+	}
+};
 
 #pragma pack()
 

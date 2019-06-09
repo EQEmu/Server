@@ -19,14 +19,24 @@ void EQ::Net::ServertalkServer::Listen(const ServertalkServerOptions& opts)
 	});
 }
 
-void EQ::Net::ServertalkServer::OnConnectionIdentified(const std::string &type, std::function<void(std::shared_ptr<ServertalkServerConnection>)> cb)
+void EQ::Net::ServertalkServer::OnConnectionIdentified(const std::string &type, IdentityCallback cb)
 {
 	m_on_ident.insert(std::make_pair(type, cb));
 }
 
-void EQ::Net::ServertalkServer::OnConnectionRemoved(const std::string &type, std::function<void(std::shared_ptr<ServertalkServerConnection>)> cb)
+void EQ::Net::ServertalkServer::OnConnectionRemoved(const std::string &type, IdentityCallback cb)
 {
 	m_on_disc.insert(std::make_pair(type, cb));
+}
+
+void EQ::Net::ServertalkServer::OnConnectionIdentified(IdentityCallback cb)
+{
+	m_on_any_ident = cb;
+}
+
+void EQ::Net::ServertalkServer::OnConnectionRemoved(IdentityCallback cb)
+{
+	m_on_any_disc = cb;
 }
 
 void EQ::Net::ServertalkServer::ConnectionDisconnected(ServertalkServerConnection *conn)
@@ -51,6 +61,11 @@ void EQ::Net::ServertalkServer::ConnectionDisconnected(ServertalkServerConnectio
 					if (on_disc != m_on_disc.end()) {
 						on_disc->second(*iter);
 					}
+
+					if (m_on_any_disc) {
+						m_on_any_disc(*iter);
+					}
+
 					type->second.erase(iter);
 					return;
 				}
@@ -68,6 +83,10 @@ void EQ::Net::ServertalkServer::ConnectionIdentified(ServertalkServerConnection 
 			auto on_ident = m_on_ident.find(conn->GetIdentifier());
 			if (on_ident != m_on_ident.end()) {
 				on_ident->second(*iter);
+			}
+
+			if (m_on_any_ident) {
+				m_on_any_ident(*iter);
 			}
 
 			if (m_ident_connections.count(conn->GetIdentifier()) > 0) {

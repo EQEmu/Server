@@ -18,20 +18,13 @@
 #ifndef WORLDSERVER_H
 #define WORLDSERVER_H
 
-#include "../common/eq_packet_structs.h"
-#include "../common/net/servertalk_client_connection.h"
+#include "../common/world_connection.h"
 
-class WorldServer
+class WorldServer : public EQ::WorldConnection
 {
 	public:
 		WorldServer();
-		~WorldServer();
-
-		void Connect();
-		bool SendPacket(ServerPacket* pack);
-		std::string GetIP() const;
-		uint16 GetPort() const;
-		bool Connected() const;
+		virtual ~WorldServer();
 
 		void HandleMessage(uint16 opcode, const EQ::Net::Packet &p);
 	private:

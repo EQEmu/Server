@@ -26,6 +26,8 @@ namespace EQ
 			bool Connected() const { return m_connecting != true; }
 
 			std::shared_ptr<EQ::Net::TCPConnection> Handle() { return m_connection; }
+
+			std::string GetIdentifier() const { return m_identifier; }
 		private:
 			void Connect();
 			void ProcessData(EQ::Net::TCPConnection *c, const unsigned char *data, size_t length);

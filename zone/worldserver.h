@@ -18,8 +18,8 @@
 #ifndef WORLDSERVER_H
 #define WORLDSERVER_H
 
-#include "../common/eq_packet_structs.h"
-#include "../common/net/servertalk_client_connection.h"
+#include "../common/world_connection.h"
+#include <memory>
 
 class ServerPacket;
 class EQApplicationPacket;
@@ -31,10 +31,10 @@ public:
 	~WorldServer();
 
 	void Connect();
-	bool SendPacket(ServerPacket* pack);
+	bool Connected() const;
+	void SendPacket(ServerPacket* pack);
 	std::string GetIP() const;
 	uint16 GetPort() const;
-	bool Connected() const;
 
 	void HandleMessage(uint16 opcode, const EQ::Net::Packet &p);
 
@@ -72,7 +72,7 @@ private:
 	uint32 cur_groupid;
 	uint32 last_groupid;
 
-	std::unique_ptr<EQ::Net::ServertalkClient> m_connection;
+	std::unique_ptr<EQ::WorldConnection> m_connection;
 };
 #endif
 

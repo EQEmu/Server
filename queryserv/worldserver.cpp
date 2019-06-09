@@ -43,38 +43,13 @@ extern Database database;
 extern LFGuildManager lfguildmanager;
 
 WorldServer::WorldServer()
+	: WorldConnection::WorldConnection("QueryServ")
 {
+	SetOnMessageHandler(std::bind(&WorldServer::HandleMessage, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 WorldServer::~WorldServer()
 {
-}
-
-void WorldServer::Connect()
-{
-	m_connection.reset(new EQ::Net::ServertalkClient(Config->WorldIP, Config->WorldTCPPort, false, "QueryServ", Config->SharedKey));
-	m_connection->OnMessage(std::bind(&WorldServer::HandleMessage, this, std::placeholders::_1, std::placeholders::_2));
-}
-
-bool WorldServer::SendPacket(ServerPacket *pack)
-{
-	m_connection->SendPacket(pack);
-	return true;
-}
-
-std::string WorldServer::GetIP() const
-{
-	return m_connection->Handle()->RemoteIP();
-}
-
-uint16 WorldServer::GetPort() const
-{
-	return m_connection->Handle()->RemotePort();
-}
-
-bool WorldServer::Connected() const
-{
-	return m_connection->Connected();
 }
 
 void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)

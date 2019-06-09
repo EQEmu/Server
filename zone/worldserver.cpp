@@ -79,33 +79,43 @@ WorldServer::~WorldServer() {
 
 void WorldServer::Connect()
 {
-	m_connection.reset(new EQ::Net::ServertalkClient(Config->WorldIP, Config->WorldTCPPort, false, "Zone", Config->SharedKey));
-	m_connection->OnConnect([this](EQ::Net::ServertalkClient *client) {
-		OnConnected();
-	});
-
-	m_connection->OnMessage(std::bind(&WorldServer::HandleMessage, this, std::placeholders::_1, std::placeholders::_2));
-}
-
-bool WorldServer::SendPacket(ServerPacket *pack)
-{
-	m_connection->SendPacket(pack);
-	return true;
-}
-
-std::string WorldServer::GetIP() const
-{
-	return m_connection->Handle()->RemoteIP();
-}
-
-uint16 WorldServer::GetPort() const
-{
-	return m_connection->Handle()->RemotePort();
+	m_connection.reset(new EQ::WorldConnection("Zone"));
+	m_connection->SetOnConnectedHandler(std::bind(&WorldServer::OnConnected, this));
+	m_connection->SetOnMessageHandler(std::bind(&WorldServer::HandleMessage, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 bool WorldServer::Connected() const
 {
-	return m_connection->Connected();
+	if (m_connection) {
+		return m_connection->Connected();
+	}
+
+	return false;
+}
+
+void WorldServer::SendPacket(ServerPacket *pack)
+{
+	if (m_connection) {
+		m_connection->SendPacket(pack);
+	}
+}
+
+std::string WorldServer::GetIP() const
+{
+	if (m_connection) {
+		return m_connection->GetIP();
+	}
+
+	return std::string();
+}
+
+uint16 WorldServer::GetPort() const
+{
+	if (m_connection) {
+		return m_connection->GetPort();
+	}
+
+	return 0;
 }
 
 void WorldServer::SetZoneData(uint32 iZoneID, uint32 iInstanceID) {
@@ -2026,9 +2036,9 @@ bool WorldServer::SendChannelMessage(Client* from, const char* to, uint8 chan_nu
 	scm->queued = 0;
 	strcpy(scm->message, buffer);
 
-	bool ret = SendPacket(pack);
+	SendPacket(pack);
 	safe_delete(pack);
-	return ret;
+	return true;
 }
 
 bool WorldServer::SendEmoteMessage(const char* to, uint32 to_guilddbid, uint32 type, const char* message, ...) {
@@ -2064,9 +2074,9 @@ bool WorldServer::SendEmoteMessage(const char* to, uint32 to_guilddbid, int16 to
 	sem->minstatus = to_minstatus;
 	strcpy(sem->message, buffer);
 
-	bool ret = SendPacket(pack);
+	SendPacket(pack);
 	safe_delete(pack);
-	return ret;
+	return true;
 }
 
 bool WorldServer::SendVoiceMacro(Client* From, uint32 Type, char* Target, uint32 MacroNumber, uint32 GroupOrRaidID) {
@@ -2101,15 +2111,19 @@ bool WorldServer::SendVoiceMacro(Client* From, uint32 Type, char* Target, uint32
 
 	svm->MacroNumber = MacroNumber;
 
-	bool Ret = SendPacket(pack);
+	SendPacket(pack);
 
 	safe_delete(pack);
 
-	return Ret;
+	return true;
 }
 
 bool WorldServer::RezzPlayer(EQApplicationPacket* rpack, uint32 rezzexp, uint32 dbid, uint16 opcode)
 {
+	if (!Connected()) {
+		return false;
+	}
+
 	Log(Logs::Detail, Logs::Spells, "WorldServer::RezzPlayer rezzexp is %i (0 is normal for RezzComplete", rezzexp);
 	auto pack = new ServerPacket(ServerOP_RezzPlayer, sizeof(RezzPlayer_Struct));
 	RezzPlayer_Struct* sem = (RezzPlayer_Struct*)pack->pBuffer;
@@ -2117,14 +2131,9 @@ bool WorldServer::RezzPlayer(EQApplicationPacket* rpack, uint32 rezzexp, uint32 
 	sem->rez = *(Resurrect_Struct*)rpack->pBuffer;
 	sem->exp = rezzexp;
 	sem->dbid = dbid;
-	bool ret = SendPacket(pack);
-	if (ret)
-		Log(Logs::Detail, Logs::Spells, "Sending player rezz packet to world spellid:%i", sem->rez.spellid);
-	else
-		Log(Logs::Detail, Logs::Spells, "NOT Sending player rezz packet to world");
-
+	SendPacket(pack);
 	safe_delete(pack);
-	return ret;
+	return true;
 }
 
 void WorldServer::SendReloadTasks(int Command, int TaskID) {

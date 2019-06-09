@@ -502,6 +502,16 @@ int main(int argc, char** argv) {
 		web_interface.RemoveConnection(connection);
 	});
 
+	server_connection->OnConnectionIdentified([](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
+		LogF(Logs::General, Logs::World_Server, "New connection from {0} with identifier {1}",
+			connection->GetUUID(), connection->GetIdentifier());
+	});
+
+	server_connection->OnConnectionRemoved([](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
+		LogF(Logs::General, Logs::World_Server, "Removed connection from {0} with identifier {1}",
+			connection->GetUUID(), connection->GetIdentifier());
+	});
+
 	EQ::Net::EQStreamManagerOptions opts(9000, false, false);
 	opts.daybreak_options.resend_delay_ms = RuleI(Network, ResendDelayBaseMS);
 	opts.daybreak_options.resend_delay_factor = RuleR(Network, ResendDelayFactor);

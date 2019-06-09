@@ -40,7 +40,7 @@ ChatChannelList *ChannelList;
 Clientlist *g_Clientlist;
 EQEmuLogSys LogSys;
 Database database;
-WorldServer *worldserver = nullptr;
+std::unique_ptr<WorldServer> worldserver;
 
 const ucsconfig *Config;
 
@@ -142,7 +142,7 @@ int main() {
 		return 1;
 	}
 
-	worldserver = new WorldServer;
+	worldserver.reset(new WorldServer());
 
 	while(RunLoops) {
 

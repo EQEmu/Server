@@ -25,16 +25,14 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "zone_launch.h"
 
 WorldServer::WorldServer(std::map<std::string, ZoneLaunch *> &zones, const char *name, const EQEmuConfig *config)
-	: m_name(name),
+	: 
+	WorldConnection::WorldConnection("Launcher"),
+	m_name(name),
 	m_config(config),
 	m_zones(zones)
 {
-	m_connection.reset(new EQ::Net::ServertalkClient(config->WorldIP, config->WorldTCPPort, false, "Launcher", config->SharedKey));
-	m_connection->OnConnect([this](EQ::Net::ServertalkClient *client) {
-		OnConnected();
-	});
-
-	m_connection->OnMessage(std::bind(&WorldServer::HandleMessage, this, std::placeholders::_1, std::placeholders::_2));
+	SetOnConnectedHandler(std::bind(&WorldServer::OnConnected, this));
+	SetOnMessageHandler(std::bind(&WorldServer::HandleMessage, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 WorldServer::~WorldServer() {
@@ -57,7 +55,7 @@ void WorldServer::OnConnected() {
 	}
 }
 
-void WorldServer::HandleMessage(uint16 opcode, EQ::Net::Packet &p) {
+void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	ServerPacket tpack(opcode, p);
 	ServerPacket *pack = &tpack;
 
@@ -125,8 +123,6 @@ void WorldServer::HandleMessage(uint16 opcode, EQ::Net::Packet &p) {
 	}
 	}
 }
-
-
 
 void WorldServer::SendStatus(const char *short_name, uint32 start_count, bool running) {
 	auto pack = new ServerPacket(ServerOP_LauncherZoneStatus, sizeof(LauncherZoneStatus));

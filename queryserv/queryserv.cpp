@@ -39,7 +39,7 @@ Database database;
 LFGuildManager lfguildmanager;
 std::string WorldShortName;
 const queryservconfig *Config;
-WorldServer *worldserver = 0;
+std::unique_ptr<WorldServer> worldserver;
 EQEmuLogSys LogSys;
 
 void CatchSignal(int sig_num) { 
@@ -88,8 +88,7 @@ int main() {
 	}
 
 	/* Initial Connection to Worldserver */
-	worldserver = new WorldServer;
-	worldserver->Connect(); 
+	worldserver.reset(new WorldServer());
 
 	/* Load Looking For Guild Manager */
 	lfguildmanager.LoadDatabase();

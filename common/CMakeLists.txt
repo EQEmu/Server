@@ -54,6 +54,7 @@ SET(common_sources
 	packet_functions.cpp
 	perl_eqdb.cpp
 	perl_eqdb_res.cpp
+	platform.cpp
 	proc_launcher.cpp
 	profanity_manager.cpp
 	ptimer.cpp
@@ -71,8 +72,8 @@ SET(common_sources
 	textures.cpp
 	timer.cpp
 	unix.cpp
+	world_connection.cpp
 	xml_parser.cpp
-	platform.cpp
 	json/jsoncpp.cpp
 	net/console_server.cpp
 	net/console_server_connection.cpp
@@ -207,6 +208,7 @@ SET(common_headers
 	unix.h
 	useperl.h
 	version.h
+	world_connection.h
 	xml_parser.h
 	zone_numbers.h
 	event/event_loop.h
