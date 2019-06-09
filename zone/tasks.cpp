@@ -3822,7 +3822,7 @@ void SharedTaskState::LockTask()
 void SharedTaskState::MemberZoned(Mob *player)
 {
 	auto it = std::find_if(members.begin(), members.end(),
-			       [&player](const SharedTaskMember &a) { return a.name == player->GetName(); });
+			       [&player](const SharedTaskMember &a) { return a.entity == player; });
 
 	if (it == members.end()) // guess they weren't in this group, w/e
 		return;
