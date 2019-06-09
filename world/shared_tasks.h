@@ -6,6 +6,7 @@
 
 #include "../common/servertalk.h"
 #include "../common/global_tasks.h"
+#include "cliententry.h"
 
 class ClientListEntry;
 
@@ -29,6 +30,9 @@ public:
 		members.push_back({name, cle, leader});
 		if (leader)
 			leader_name = name;
+		auto it = std::find(char_ids.begin(), char_ids.end(), cle->CharID());
+		if (it == char_ids.end())
+			char_ids.push_back(cle->CharID());
 	}
 	void MemberLeftGame(ClientListEntry *cle);
 	inline const std::string &GetLeaderName() const { return leader_name; }
@@ -59,6 +63,7 @@ private:
 	bool locked;
 	std::string leader_name;
 	std::vector<SharedTaskMember> members;
+	std::vector<int> char_ids; // every char id of someone to be locked out, different in case they leave/removed
 	ClientTaskInformation task_state; // book keeping
 
 	friend class SharedTaskManager;
