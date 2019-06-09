@@ -1046,6 +1046,7 @@ public:
 	inline int CompletedTasksInSet(int TaskSet) { return (taskstate ? taskstate->CompletedTasksInSet(TaskSet) :0); }
 	inline int GetTaskLockoutExpire(int id) { return 0; } // stub
 	inline int GetTaskLockoutTimeLeft(int id) { return 0; } // stub
+	inline SharedTaskState *GetSharedTask() { return taskstate ? taskstate->GetSharedTask() : nullptr; }
 
 	inline const EQEmu::versions::ClientVersion ClientVersion() const { return m_ClientVersion; }
 	inline const uint32 ClientVersionBit() const { return m_ClientVersionBit; }
