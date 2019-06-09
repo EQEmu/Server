@@ -373,7 +373,7 @@ int ClientListEntry::GetTaskLockoutTimeLeft(int id) const
 			       [id](const TaskTimer &a) { return a.ID == id; });
 
 	if (it != m_task_replay_timers.end())
-		return it->expires - Timer::GetCurrentTime();
+		return it->expires - time(nullptr);
 
 	return 0;
 }

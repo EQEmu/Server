@@ -133,7 +133,7 @@ void SharedTaskManager::HandleTaskRequest(ServerPacket *pack)
 
 			// check our lock out timer
 			int expires = cle->GetTaskLockoutExpire(task_id);
-			if ((expires - Timer::GetCurrentTime()) >= 0) {
+			if ((expires - time(nullptr)) >= 0) {
 				// failure TODO: appropriate message, we need to send the timestamp here
 				auto pack = new ServerPacket(ServerOP_TaskReject, leader_name.size() + 1 + 8);
 				pack->WriteUInt32(0); // string ID or just generic fail message
