@@ -3074,6 +3074,21 @@ void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, ClientTaskInf
 	safe_delete(outapp);
 }
 
+// TODO: stub
+SharedTaskState *TaskManager::LoadSharedTask(int id)
+{
+	return nullptr;
+}
+
+SharedTaskState *TaskManager::GetSharedTask(int id)
+{
+	auto it = SharedTasks.find(id);
+	if (it == SharedTasks.end())
+		return nullptr;
+
+	return &(it->second);
+}
+
 bool ClientTaskState::IsTaskActivityCompleted(TaskType type, int index, int ActivityID)
 {
 	switch (type) {
@@ -3544,6 +3559,38 @@ void ClientTaskState::AcceptNewSharedTask(Client *c, int TaskID, int NPCID, int 
 	return;
 
 	// there are a few issues we need to solve with this
+}
+
+/*
+ * This function is called when world sends ServerOP_TaskZoneCreated to trigger
+ * members to join. If the task doesn't already exist, we need to load it from
+ * the DB.
+ *
+ * This is also called in LoadClientTaskState() when they notice they have a
+ * shared task they need to join. (Called from first OP_ZoneEntry)
+ */
+void ClientTaskState::AddToSharedTask(Client *c, int TaskID)
+{
+	auto task = taskmanager->GetSharedTask(TaskID);
+	if (!task)
+		task = taskmanager->LoadSharedTask(TaskID);
+
+	if (!task) {// FUCK
+		return;
+	}
+
+	task->MemberEnterZone(c);
+
+	// send packets
+	auto task_activity = task->GetActivity();
+	taskmanager->SendSingleActiveTaskToClient(c, *task_activity, false, true);
+	task->SendMembersList(c);
+
+	// So normally getting a task we would send EVENT_TASK_ACCEPTED here, but
+	// this isn't an accept step. I guess we should add another event in case
+	// they need the same thing TODO
+
+	return;
 }
 
 void ClientTaskState::ProcessTaskProximities(Client *c, float X, float Y, float Z) {

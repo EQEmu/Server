@@ -1981,6 +1981,17 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
+	case ServerOP_TaskZoneCreated:
+	{
+		int task_id = pack->ReadUInt32();
+		char name[64] = { 0 };
+		pack->ReadString(name);
+
+		auto client = entity_list.GetClientByName(name);
+		if (client)
+			client->AddToSharedTask(task_id);
+		break;
+	}
 	default: {
 		std::cout << " Unknown ZSopcode:" << (int)pack->opcode;
 		std::cout << " size:" << pack->size << std::endl;
