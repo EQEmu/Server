@@ -439,6 +439,7 @@ NPCType *Bot::FillNPCTypeStruct(uint32 botSpellsID, std::string botName, std::st
 	bot_npc_type->skip_global_loot = true;
 	//bot_npc_type->rare_spawn = false;
 	bot_npc_type->stuck_behavior = Ground;
+	bot_npc_type->skip_auto_scale = true;
 
 	return bot_npc_type;
 }

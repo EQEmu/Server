@@ -26,6 +26,9 @@
  */
 void NpcScaleManager::ScaleNPC(NPC * npc)
 {
+	if (npc->IsSkipAutoScale())
+		return;
+
 	int8 npc_type       = GetNPCScalingType(npc);
 	int  npc_level      = npc->GetLevel();
 	bool is_auto_scaled = IsAutoScaled(npc);
