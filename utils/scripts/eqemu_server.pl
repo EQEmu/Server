@@ -644,6 +644,14 @@ sub do_self_update_check_routine {
         }
         else {
             print "[Update] No script update necessary...\n";
+
+            if (-e "db_update") {
+                unlink("db_update");
+            }
+
+            if (-e "updates_staged") {
+                unlink("updates_staged");
+            }
         }
 
         unlink("updates_staged/eqemu_server.pl");
