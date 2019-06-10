@@ -82,7 +82,7 @@ void SharedTaskManager::HandleTaskRequest(ServerPacket *pack)
 	}
 
 	auto &task = ret.first->second;
-	task.AddMember(leader_name, cle_leader, true);
+	task.AddMember(leader_name, cle_leader, cle_leader->CharID(), true);
 
 	if (players.empty()) {
 		// send instant success to leader
@@ -146,7 +146,7 @@ void SharedTaskManager::HandleTaskRequest(ServerPacket *pack)
 			}
 
 			// we're good, add to task
-			task.AddMember(name, cle);
+			task.AddMember(name, cle, cle->CharID());
 		}
 	}
 
@@ -396,7 +396,7 @@ bool SharedTaskManager::LoadSharedTaskState()
 			int task_id = atoi(row[0]);
 			// hmm not sure best way to do this, fine for now
 			if (tasks.count(task_id) == 1)
-				tasks[task_id].AddMember(row[2], nullptr, atoi(row[3]) != 0);
+				tasks[task_id].AddMember(row[2], nullptr, atoi(row[1]), atoi(row[3]) != 0);
 		}
 	}
 
