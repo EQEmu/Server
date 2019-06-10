@@ -118,10 +118,10 @@ uint16 WorldServer::GetPort() const
 	return 0;
 }
 
-void WorldServer::RouteMessage(const std::string &filter, int type, const EQ::Net::Packet &p)
+void WorldServer::RouteMessage(const std::string &filter, const std::string &id, const EQ::Net::Packet &p)
 {
 	if (m_connection) {
-		m_connection->RouteMessage(filter, type, p);
+		m_connection->RouteMessage(filter, id, p);
 	}
 }
 
@@ -196,14 +196,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	ServerPacket *pack = &tpack;
 
 	switch (opcode) {
-	case 0: {
-		break;
-	}
-	case ServerOP_KeepAlive: {
-		// ignore this
-		break;
-	}
-							 // World is tellins us what port to use.
+	// World is tellins us what port to use.
 	case ServerOP_SetConnectInfo: {
 		if (pack->size != sizeof(ServerConnectInfo))
 			break;

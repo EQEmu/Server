@@ -60,14 +60,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	ServerPacket *pack = &tpack;
 
 	switch (opcode) {
-	case 0: {
-		break;
-	}
-	case ServerOP_EmoteMessage:
-	case ServerOP_KeepAlive: {
-		// ignore this
-		break;
-	}
 	case ServerOP_LauncherZoneRequest: {
 		if (pack->size != sizeof(LauncherZoneRequest)) {
 			Log(Logs::Detail, Logs::Launcher, "Invalid size of LauncherZoneRequest: %d", pack->size);

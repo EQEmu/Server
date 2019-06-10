@@ -32,10 +32,10 @@ namespace EQ
 		virtual void OnStart() = 0;
 		virtual void OnStop() = 0;
 		virtual void OnHeartbeat(double time_since_last) = 0;
-		virtual void OnRoutedMessage(const std::string& identifier, int type, const EQ::Net::Packet& p) = 0;
+		virtual void OnRoutedMessage(const std::string& filter, const std::string& identifier, const std::string& id, const EQ::Net::Packet& payload) = 0;
 		
-		void RouteMessage(const std::string &filter, int type, const EQ::Net::Packet& p);
-
+		void RouteMessage(const std::string &filter, const std::string &id, const EQ::Net::Packet& p);
+		void Stop();
 	private:
 		struct Impl;
 		std::unique_ptr<Impl> _impl;

@@ -10,6 +10,7 @@
 
 namespace EQ {
 	namespace Net {
+		class StaticPacket;
 		class Packet
 		{
 		public:
@@ -77,6 +78,7 @@ namespace EQ {
 			double GetDouble(size_t offset) const;
 			std::string GetString(size_t offset, size_t length) const;
 			std::string GetCString(size_t offset) const;
+			StaticPacket GetPacket(size_t offset, size_t length) const;
 
 			std::string ToString() const;
 			std::string ToString(size_t line_length) const;

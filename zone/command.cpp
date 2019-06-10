@@ -2832,8 +2832,9 @@ void command_spawn(Client *c, const Seperator *sep)
 void command_test(Client *c, const Seperator *sep)
 {
 	EQ::Net::DynamicPacket p;
-	p.PutCString(0, "TestPacket");
-	worldserver.RouteMessage("Tasks", 1234, p);
+	p.PutInt32(0, 1234);
+	p.PutCString(p.Length(), "TestPacket");
+	worldserver.RouteMessage("Tasks", "", p);
 
 	//c->Message(15, "Triggering test command");
 	//

@@ -15,5 +15,5 @@ public:
 private:
 	std::list<std::shared_ptr<EQ::Net::ServertalkServerConnection>> m_connections;
 
-	void OnRouterMessage(uint16 opcode, const EQ::Net::Packet &p);
+	void OnRouterMessage(std::shared_ptr<EQ::Net::ServertalkServerConnection> connection, uint16 opcode, const EQ::Net::Packet &p);
 };

@@ -188,12 +188,6 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	ServerPacket *pack = &tpack;
 
 	switch (opcode) {
-	case 0:
-		break;
-	case ServerOP_KeepAlive: {
-		// ignore this
-		break;
-	}
 	case ServerOP_ZAAuth: {
 		break;
 	}
@@ -1415,13 +1409,6 @@ void ZoneServer::SendGroupIDs() {
 	zoneserver_list.NextGroupIDs(sgi->start, sgi->end);
 	SendPacket(pack);
 	delete pack;
-}
-
-
-void ZoneServer::SendKeepAlive()
-{
-	ServerPacket pack(ServerOP_KeepAlive, 0);
-	SendPacket(&pack);
 }
 
 void ZoneServer::ChangeWID(uint32 iCharID, uint32 iWID) {

@@ -30,11 +30,18 @@ EQ::Service::~Service()
 
 void EQ::Service::Run()
 {
+	_impl->running = true;
+
 	OnStart();
 
+	//If start canceled our run then just quit, dont bother initializing everything else
+	if (!_impl->running) {
+		return;
+	}
+
 	_impl->world_connection.reset(new EQ::WorldConnection(_impl->identifier));
-	_impl->world_connection->SetOnRoutedMessageHandler([this](const std::string& filter, const std::string& identifier, int type, const EQ::Net::Packet& p) {
-		OnRoutedMessage(identifier, type, p);
+	_impl->world_connection->SetOnRoutedMessageHandler([this](const std::string& filter, const std::string& identifier, const std::string& id, const EQ::Net::Packet& payload) {
+		OnRoutedMessage(filter, identifier, id, payload);
 	});
 	_impl->last_time = std::chrono::steady_clock::now();
 
@@ -43,8 +50,6 @@ void EQ::Service::Run()
 		auto time_since = std::chrono::duration_cast<std::chrono::duration<double>>(now - _impl->last_time);
 		OnHeartbeat(time_since.count());
 	}));
-
-	_impl->running = true;
 
 	auto &loop = EQ::EventLoop::Get();
 	auto sleep_duration = _impl->sleep_duration_ms;
@@ -59,7 +64,11 @@ void EQ::Service::Run()
 	OnStop();
 }
 
-void EQ::Service::RouteMessage(const std::string &filter, int type, const EQ::Net::Packet &p)
+void EQ::Service::RouteMessage(const std::string &filter, const std::string &id, const EQ::Net::Packet &p)
 {
-	_impl->world_connection->RouteMessage(filter, type, p);
+	_impl->world_connection->RouteMessage(filter, id, p);
+}
+
+void EQ::Service::Stop() {
+	_impl->running = false;
 }

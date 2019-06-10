@@ -1,10 +1,12 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 SET(service_sources
+	tasks_database.cpp
 	tasks_service.cpp
 )
 
 SET(service_headers
+	tasks_database.h
 	tasks_service.h
 )
 

@@ -15,209 +15,201 @@
 #define LoginServer_AuthStale				60000
 #define AUTHCHANGE_TIMEOUT					900	// in seconds
 
-#define ServerOP_KeepAlive			0x0001	// packet to test if port is still open
-#define ServerOP_ChannelMessage		0x0002	// broadcast/guildsay
-#define ServerOP_SetZone			0x0003	// client -> server zoneinfo
-#define ServerOP_ShutdownAll		0x0004	// exit(0);
-#define ServerOP_ZoneShutdown		0x0005	// unload all data, goto sleep mode
-#define ServerOP_ZoneBootup			0x0006	// come out of sleep mode and load zone specified
-#define ServerOP_ZoneStatus			0x0007	// Shows status of all zones
-#define ServerOP_SetConnectInfo		0x0008	// Tells server address and port #
-#define ServerOP_EmoteMessage		0x0009	// Worldfarts
-#define ServerOP_ClientList			0x000A	// Update worldserver's client list, for #whos
-#define ServerOP_Who				0x000B	// #who
-#define ServerOP_ZonePlayer			0x000C	// #zone, or #summon
-#define ServerOP_KickPlayer			0x000D	// #kick
-
-#define ServerOP_RefreshGuild		0x000E	// Notice to all zoneservers to refresh their guild cache for ID# in packet (ServerGuildRefresh_Struct)
-#define ServerOP_VoiceMacro		0x000F
-//#define ServerOP_GuildInvite		0x0010
-#define ServerOP_DeleteGuild		0x0011	// ServerGuildID_Struct
-#define ServerOP_GuildRankUpdate	0x0012
-#define ServerOP_GuildCharRefresh	0x0013
-#define ServerOP_GuildMemberUpdate	0x0014
-#define ServerOP_RequestOnlineGuildMembers	0x0015
-#define ServerOP_OnlineGuildMembersResponse	0x0016
-#define ServerOP_LFGuildUpdate		0x0017
-
-#define ServerOP_FlagUpdate			0x0018	// GM Flag updated for character, refresh the memory cache
-#define ServerOP_GMGoto				0x0019
-#define ServerOP_MultiLineMsg		0x001A
-#define ServerOP_Lock				0x001B	// For #lock/#unlock inside server
-#define ServerOP_Motd				0x001C	// For changing MoTD inside server.
-#define ServerOP_Uptime				0x001D
-#define ServerOP_Petition			0x001E
-#define	ServerOP_KillPlayer			0x001F
-#define ServerOP_UpdateGM			0x0020
-#define ServerOP_RezzPlayer			0x0021
-#define ServerOP_ZoneReboot			0x0022
-#define ServerOP_ZoneToZoneRequest	0x0023
-#define ServerOP_AcceptWorldEntrance 0x0024
-#define ServerOP_ZAAuth				0x0025
-#define ServerOP_ZAAuthFailed		0x0026
-#define ServerOP_ZoneIncClient		0x0027	// Incoming client
-#define ServerOP_ClientListKA		0x0028
-#define ServerOP_ChangeWID			0x0029
-#define ServerOP_IPLookup			0x002A
-#define ServerOP_LockZone			0x002B
-#define ServerOP_ItemStatus			0x002C
-#define ServerOP_OOCMute			0x002D
-#define ServerOP_Revoke				0x002E
-#define	ServerOP_WebInterfaceCall   0x002F
-#define ServerOP_GroupIDReq			0x0030
-#define ServerOP_GroupIDReply		0x0031
-#define ServerOP_GroupLeave			0x0032	// for disbanding out of zone folks
-#define ServerOP_RezzPlayerAccept	0x0033
-#define ServerOP_SpawnCondition		0x0034
-#define ServerOP_SpawnEvent			0x0035
-#define ServerOP_SetLaunchName		0x0036
-#define ServerOP_RezzPlayerReject	0x0037
-#define ServerOP_SpawnPlayerCorpse	0x0038
-#define ServerOP_Consent			0x0039
-#define ServerOP_Consent_Response	0x003a
-#define ServerOP_ForceGroupUpdate	0x003b
-#define ServerOP_OOZGroupMessage	0x003c
-#define ServerOP_DisbandGroup		0x003d //for disbanding a whole group cross zone
-#define ServerOP_GroupJoin			0x003e //for joining ooz folks
-#define ServerOP_UpdateSpawn		0x003f
-#define ServerOP_SpawnStatusChange	0x0040
-#define ServerOP_ReloadTasks		0x0060
-#define ServerOP_DepopAllPlayersCorpses	0x0061
-#define ServerOP_ReloadTitles		0x0062
-#define ServerOP_QGlobalUpdate		0x0063
-#define ServerOP_QGlobalDelete		0x0064
-#define ServerOP_DepopPlayerCorpse	0x0065
-#define ServerOP_RequestTellQueue	0x0066 // client asks for it's tell queues
-#define ServerOP_ChangeSharedMem	0x0067
-#define	ServerOP_WebInterfaceEvent  0x0068
-#define ServerOP_WebInterfaceSubscribe 0x0069
-#define ServerOP_WebInterfaceUnsubscribe 0x0070
-
-#define ServerOP_RaidAdd			0x0100 //in use
-#define ServerOP_RaidRemove			0x0101 //in use
-#define	ServerOP_RaidDisband		0x0102 //in use
-#define ServerOP_RaidLockFlag		0x0103 //in use
-#define ServerOP_RaidGroupLeader	0x0104 //in use
-#define ServerOP_RaidLeader			0x0105 //in use
-#define	ServerOP_RaidGroupSay		0x0106 //in use
-#define	ServerOP_RaidSay			0x0107 //in use
-#define	ServerOP_DetailsChange		0x0108 //in use
-
-#define ServerOP_UpdateGroup		0x010A //in use
-#define ServerOP_RaidGroupDisband	0x010B //in use
-#define ServerOP_RaidChangeGroup	0x010C //in use
-#define ServerOP_RaidGroupAdd		0x010D
-#define ServerOP_RaidGroupRemove	0x010E
-#define ServerOP_GroupInvite		0x010F
-#define ServerOP_GroupFollow		0x0110
-#define ServerOP_GroupFollowAck		0x0111
-#define ServerOP_GroupCancelInvite	0x0112
-#define ServerOP_RaidMOTD			0x0113
-
-#define ServerOP_InstanceUpdateTime			0x014F
-#define ServerOP_AdventureRequest			0x0150
-#define ServerOP_AdventureRequestAccept		0x0151
-#define ServerOP_AdventureRequestDeny		0x0152
-#define ServerOP_AdventureRequestCreate		0x0153
-#define ServerOP_AdventureData				0x0154
-#define ServerOP_AdventureDataClear			0x0155
-#define ServerOP_AdventureCreateDeny		0x0156
-#define ServerOP_AdventureDataRequest		0x0157
-#define ServerOP_AdventureClickDoor			0x0158
-#define ServerOP_AdventureClickDoorReply	0x0159
-#define ServerOP_AdventureClickDoorError	0x015a
-#define ServerOP_AdventureLeave				0x015b
-#define ServerOP_AdventureLeaveReply		0x015c
-#define ServerOP_AdventureLeaveDeny			0x015d
-#define ServerOP_AdventureCountUpdate		0x015e
-#define ServerOP_AdventureZoneData			0x015f
-#define ServerOP_AdventureAssaCountUpdate	0x0160
-#define ServerOP_AdventureFinish			0x0161
-#define ServerOP_AdventureLeaderboard		0x0162
-
-#define ServerOP_WhoAll				0x0210
-#define ServerOP_FriendsWho			0x0211
-#define ServerOP_LFGMatches			0x0212
-#define ServerOP_LFPUpdate			0x0213
-#define ServerOP_LFPMatches			0x0214
-#define ServerOP_ClientVersionSummary 0x0215
-#define ServerOP_LSInfo				0x1000
-#define ServerOP_LSStatus			0x1001
+//Defines for backwards compat with old LS
+#define	ServerOP_UsertoWorldReq		0xAB00
+#define	ServerOP_UsertoWorldResp	0xAB01
 #define ServerOP_LSClientAuth		0x1002
 #define ServerOP_LSFatalError		0x1003
 #define ServerOP_SystemwideMessage	0x1005
-#define ServerOP_ListWorlds			0x1006
-#define ServerOP_PeerConnect		0x1007
-#define ServerOP_NewLSInfo			0x1008
 #define ServerOP_LSRemoteAddr		0x1009
-#define ServerOP_LSAccountUpdate		0x100A
+#define ServerOP_LSAccountUpdate	0x100A
+#define ServerOP_NewLSInfo			0x1008
+#define ServerOP_LSInfo				0x1000
+#define ServerOP_LSStatus			0x1001
 
-#define ServerOP_TaskRequest		0x0300 // zone -> world. Player trying to get task
-#define ServerOP_TaskGrant			0x0301 // world -> zone. World verified everything is good
-#define ServerOP_TaskReject			0x0302 // world -> zone. Something failed ABORT
-#define ServerOP_TaskAddPlayer		0x0303 // bidirectional. /taskaddplayer request zone -> world. success world -> zone
-#define ServerOP_TaskRemovePlayer	0x0304 // .. /taskremoveplayer ..
-#define ServerOP_TaskZoneCreated	0x0305 // zone -> world. Something didn't go wrong creating the new task! Now World needs to tell other players to join world -> zone response to tell someone to join
-#define ServerOP_TaskZoneFailed		0x0306 // zone -> world. Something went wrong above ABORT
+enum ServerOpcode : int
+{
+	ServerOP_ChannelMessage,
+	ServerOP_SetZone,
+	ServerOP_ShutdownAll,
+	ServerOP_ZoneShutdown,
+	ServerOP_ZoneBootup,
+	ServerOP_ZoneStatus,
+	ServerOP_SetConnectInfo,
+	ServerOP_EmoteMessage,
+	ServerOP_ClientList,
+	ServerOP_Who,
+	ServerOP_ZonePlayer,
+	ServerOP_KickPlayer,
+	ServerOP_RefreshGuild,
+	ServerOP_VoiceMacro,
+	//ServerOP_GuildInvite,
+	ServerOP_DeleteGuild,
+	ServerOP_GuildRankUpdate,
+	ServerOP_GuildCharRefresh,
+	ServerOP_GuildMemberUpdate,
+	ServerOP_RequestOnlineGuildMembers,
+	ServerOP_OnlineGuildMembersResponse,
+	ServerOP_LFGuildUpdate,
+	ServerOP_FlagUpdate,
+	ServerOP_GMGoto,
+	ServerOP_MultiLineMsg,
+	ServerOP_Lock,
+	ServerOP_Motd,
+	ServerOP_Uptime,
+	ServerOP_Petition,
+	ServerOP_KillPlayer,
+	ServerOP_UpdateGM,
+	ServerOP_RezzPlayer,
+	ServerOP_ZoneReboot,
+	ServerOP_ZoneToZoneRequest,
+	ServerOP_AcceptWorldEntrance,
+	ServerOP_ZAAuth,
+	ServerOP_ZAAuthFailed,
+	ServerOP_ZoneIncClient,
+	ServerOP_ClientListKA,
+	ServerOP_ChangeWID,
+	ServerOP_IPLookup,
+	ServerOP_LockZone,
+	ServerOP_ItemStatus,
+	ServerOP_OOCMute,
+	ServerOP_Revoke,
+	ServerOP_WebInterfaceCall,
+	ServerOP_GroupIDReq,
+	ServerOP_GroupIDReply,
+	ServerOP_GroupLeave,
+	ServerOP_RezzPlayerAccept,
+	ServerOP_SpawnCondition,
+	ServerOP_SpawnEvent,
+	ServerOP_SetLaunchName,
+	ServerOP_RezzPlayerReject,
+	ServerOP_SpawnPlayerCorpse,
+	ServerOP_Consent,
+	ServerOP_Consent_Response,
+	ServerOP_ForceGroupUpdate,
+	ServerOP_OOZGroupMessage,
+	ServerOP_DisbandGroup,
+	ServerOP_GroupJoin,
+	ServerOP_UpdateSpawn,
+	ServerOP_SpawnStatusChange,
+	ServerOP_ReloadTasks,
+	ServerOP_DepopAllPlayersCorpses,
+	ServerOP_ReloadTitles,
+	ServerOP_QGlobalUpdate,
+	ServerOP_QGlobalDelete,
+	ServerOP_DepopPlayerCorpse,
+	ServerOP_RequestTellQueue,
+	ServerOP_ChangeSharedMem,
+	ServerOP_WebInterfaceEvent,
+	ServerOP_WebInterfaceSubscribe,
+	ServerOP_WebInterfaceUnsubscribe,
+	ServerOP_RaidAdd,
+	ServerOP_RaidRemove,
+	ServerOP_RaidDisband,
+	ServerOP_RaidLockFlag,
+	ServerOP_RaidGroupLeader,
+	ServerOP_RaidLeader,
+	ServerOP_RaidGroupSay,
+	ServerOP_RaidSay,
+	ServerOP_DetailsChange,
+	ServerOP_UpdateGroup,
+	ServerOP_RaidGroupDisband,
+	ServerOP_RaidChangeGroup,
+	ServerOP_RaidGroupAdd,
+	ServerOP_RaidGroupRemove,
+	ServerOP_GroupInvite,
+	ServerOP_GroupFollow,
+	ServerOP_GroupFollowAck,
+	ServerOP_GroupCancelInvite,
+	ServerOP_RaidMOTD,
+	ServerOP_InstanceUpdateTime,
+	ServerOP_AdventureRequest,
+	ServerOP_AdventureRequestAccept,
+	ServerOP_AdventureRequestDeny,
+	ServerOP_AdventureRequestCreate,
+	ServerOP_AdventureData,
+	ServerOP_AdventureDataClear,
+	ServerOP_AdventureCreateDeny,
+	ServerOP_AdventureDataRequest,
+	ServerOP_AdventureClickDoor,
+	ServerOP_AdventureClickDoorReply,
+	ServerOP_AdventureClickDoorError,
+	ServerOP_AdventureLeave,
+	ServerOP_AdventureLeaveReply,
+	ServerOP_AdventureLeaveDeny,
+	ServerOP_AdventureCountUpdate,
+	ServerOP_AdventureZoneData,
+	ServerOP_AdventureAssaCountUpdate,
+	ServerOP_AdventureFinish,
+	ServerOP_AdventureLeaderboard,
+	ServerOP_WhoAll,
+	ServerOP_FriendsWho,
+	ServerOP_LFGMatches,
+	ServerOP_LFPUpdate,
+	ServerOP_LFPMatches,
+	ServerOP_ClientVersionSummary,
+	ServerOP_ListWorlds,
+	ServerOP_PeerConnect,
+	ServerOP_TaskRequest,
+	ServerOP_TaskGrant,
+	ServerOP_TaskReject,
+	ServerOP_TaskAddPlayer,
+	ServerOP_TaskRemovePlayer,
+	ServerOP_TaskZoneCreated,
+	ServerOP_TaskZoneFailed,
+	ServerOP_EncapPacket,
+	ServerOP_WorldListUpdate,
+	ServerOP_WorldListRemove,
+	ServerOP_TriggerWorldListRefresh,
+	ServerOP_WhoAllReply,
+	ServerOP_SetWorldTime,
+	ServerOP_GetWorldTime,
+	ServerOP_SyncWorldTime,
+	ServerOP_RefreshCensorship,
+	ServerOP_LSZoneInfo,
+	ServerOP_LSZoneStart,
+	ServerOP_LSZoneBoot,
+	ServerOP_LSZoneShutdown,
+	ServerOP_LSZoneSleep,
+	ServerOP_LSPlayerLeftWorld,
+	ServerOP_LSPlayerJoinWorld,
+	ServerOP_LSPlayerZoneChange,
+	ServerOP_LauncherConnectInfo,
+	ServerOP_LauncherZoneRequest,
+	ServerOP_LauncherZoneStatus,
+	ServerOP_DoZoneCommand,
+	ServerOP_UCSMessage,
+	ServerOP_UCSMailMessage,
+	ServerOP_ReloadRules,
+	ServerOP_ReloadRulesWorld,
+	ServerOP_CameraShake,
+	ServerOP_QueryServGeneric,
+	ServerOP_CZSignalClient,
+	ServerOP_CZSignalClientByName,
+	ServerOP_CZMessagePlayer,
+	ServerOP_ReloadWorld,
+	ServerOP_ReloadLogs,
+	ServerOP_ReloadPerlExportSettings,
+	ServerOP_CZSetEntityVariableByClientName,
+	ServerOP_UCSServerStatusRequest,
+	ServerOP_UCSServerStatusReply,
+	ServerOP_Speech,
+	ServerOP_QSPlayerLogTrades,
+	ServerOP_QSPlayerLogHandins,
+	ServerOP_QSPlayerLogNPCKills,
+	ServerOP_QSPlayerLogDeletes,
+	ServerOP_QSPlayerLogMoves,
+	ServerOP_QSPlayerLogMerchantTransactions,
+	ServerOP_QSSendQuery,
+	ServerOP_CZSignalNPC,
+	ServerOP_CZSetEntityVariableByNPCTypeID,
+	ServerOP_WWMarquee,
+	ServerOP_QSPlayerDropItem,
+	ServerOP_RouteTo
+};
 
-#define ServerOP_EncapPacket		0x2007	// Packet within a packet
-#define ServerOP_WorldListUpdate	0x2008
-#define ServerOP_WorldListRemove	0x2009
-#define ServerOP_TriggerWorldListRefresh	0x200A
-#define ServerOP_WhoAllReply		0x2010
-#define ServerOP_SetWorldTime		0x200B
-#define ServerOP_GetWorldTime		0x200C
-#define ServerOP_SyncWorldTime		0x200E
-#define ServerOP_RefreshCensorship	0x200F
 
-#define ServerOP_LSZoneInfo			0x3001
-#define ServerOP_LSZoneStart		0x3002
-#define ServerOP_LSZoneBoot			0x3003
-#define ServerOP_LSZoneShutdown		0x3004
-#define ServerOP_LSZoneSleep		0x3005
-#define ServerOP_LSPlayerLeftWorld	0x3006
-#define ServerOP_LSPlayerJoinWorld	0x3007
-#define ServerOP_LSPlayerZoneChange	0x3008
 
-#define	ServerOP_UsertoWorldReq		0xAB00
-#define	ServerOP_UsertoWorldResp	0xAB01
-
-#define ServerOP_LauncherConnectInfo	0x3000
-#define ServerOP_LauncherZoneRequest	0x3001
-#define ServerOP_LauncherZoneStatus		0x3002
-#define ServerOP_DoZoneCommand		0x3003
-
-#define ServerOP_UCSMessage		0x4000
-#define ServerOP_UCSMailMessage 0x4001
-#define ServerOP_ReloadRules	0x4002
-#define ServerOP_ReloadRulesWorld	0x4003
-#define ServerOP_CameraShake	0x4004
-#define ServerOP_QueryServGeneric	0x4005
-#define ServerOP_CZSignalClient 0x4006
-#define ServerOP_CZSignalClientByName 0x4007
-#define ServerOP_CZMessagePlayer 0x4008
-#define ServerOP_ReloadWorld 0x4009
-#define ServerOP_ReloadLogs 0x4010
-#define ServerOP_ReloadPerlExportSettings	0x4011
-#define ServerOP_CZSetEntityVariableByClientName 0x4012
-#define ServerOP_UCSServerStatusRequest		0x4013
-#define ServerOP_UCSServerStatusReply		0x4014
-#define ServerOP_Speech						0x4513
-/* Query Server OP Codes */
-#define ServerOP_QSPlayerLogTrades					0x5010
-#define ServerOP_QSPlayerLogHandins					0x5011
-#define ServerOP_QSPlayerLogNPCKills				0x5012
-#define ServerOP_QSPlayerLogDeletes					0x5013
-#define ServerOP_QSPlayerLogMoves					0x5014
-#define ServerOP_QSPlayerLogMerchantTransactions	0x5015
-#define ServerOP_QSSendQuery						0x5016
-#define ServerOP_CZSignalNPC						0x5017
-#define ServerOP_CZSetEntityVariableByNPCTypeID		0x5018
-#define ServerOP_WWMarquee							0x5019
-#define ServerOP_QSPlayerDropItem					0x5020
-
-/* Routing System OP Code(s) */
-#define ServerOP_RouteTo							0x6000
 
 /* Query Serv Generic Packet Flag/Type Enumeration */
 enum { QSG_LFGuild = 0 }; 
@@ -1351,5 +1343,19 @@ struct ServerSharedTaskMember_Struct { // used for various things we just need t
 #define TASKJOINOOZ_TIMER			4
 
 #pragma pack()
+
+struct RouteToMessage
+{
+	std::string filter;
+	std::string identifier;
+	std::string id;
+	size_t payload_size;
+
+	template <class Archive>
+	void serialize(Archive &ar)
+	{
+		ar(filter, identifier, id, payload_size);
+	}
+};
 
 #endif

@@ -55,12 +55,6 @@ WorldServer::~WorldServer()
 void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 {
 	switch (opcode) {
-	case 0: {
-		break;
-	}
-	case ServerOP_KeepAlive: {
-		break;
-	}
 	case ServerOP_Speech: {
 		Server_Speech_Struct *SSS = (Server_Speech_Struct*)p.Data();
 		std::string tmp1 = SSS->from;

@@ -72,12 +72,6 @@ void LauncherLink::ProcessMessage(uint16 opcode, EQ::Net::Packet &p)
 	ServerPacket *pack = &tpack;
 
 	switch (opcode) {
-	case 0:
-		break;
-	case ServerOP_KeepAlive: {
-		// ignore this
-		break;
-	}
 	case ServerOP_ZAAuth: {
 		Log(Logs::Detail, Logs::World_Server, "Got authentication from %s when they are already authenticated.", m_name.c_str());
 		break;

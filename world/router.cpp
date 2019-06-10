@@ -11,7 +11,7 @@ Router::~Router()
 void Router::AddConnection(std::shared_ptr<EQ::Net::ServertalkServerConnection> connection)
 {
 	m_connections.push_back(connection);
-	connection->OnMessage(ServerOP_RouteTo, std::bind(&Router::OnRouterMessage, this, std::placeholders::_1, std::placeholders::_2));
+	connection->OnMessage(ServerOP_RouteTo, std::bind(&Router::OnRouterMessage, this, connection, std::placeholders::_1, std::placeholders::_2));
 }
 
 void Router::RemoveConnection(std::shared_ptr<EQ::Net::ServertalkServerConnection> connection)
@@ -27,19 +27,54 @@ void Router::RemoveConnection(std::shared_ptr<EQ::Net::ServertalkServerConnectio
 	}
 }
 
-void Router::OnRouterMessage(uint16 opcode, const EQ::Net::Packet &p)
+void Router::OnRouterMessage(std::shared_ptr<EQ::Net::ServertalkServerConnection> connection, uint16 opcode, const EQ::Net::Packet &p)
 {
-	auto idx = 0;
-	auto filter_length = p.GetInt32(idx); idx += sizeof(int32_t);
-	auto filter = p.GetString(idx, filter_length); idx += filter_length;
+	auto msg = p.GetSerialize<RouteToMessage>(0);
+	auto payload_offset = p.Length() - msg.payload_size;
+	auto payload = p.GetPacket(payload_offset, msg.payload_size);
 
-	printf("Recv router msg of size %i\n", p.Length());
+	auto out_msg = msg;
+	out_msg.identifier = connection->GetIdentifier();
+	out_msg.id = connection->GetUUID();
 
-	for (auto &connection : m_connections) {
-		auto identifier = connection->GetIdentifier();
-		auto pos = identifier.find(filter);
-		if (pos == 0) {
-			connection->Send(opcode, p);
+	EQ::Net::DynamicPacket out;
+	out.PutSerialize(0, out_msg);
+	out.PutPacket(out.Length(), payload);
+
+	if (!msg.id.empty() && !msg.filter.empty()) {
+		for (auto &connection : m_connections) {
+			auto id = connection->GetUUID();
+			if (id == msg.id) {
+				connection->Send(ServerOP_RouteTo, out);
+			}
+			else {
+				auto identifier = connection->GetIdentifier();
+				auto pos = identifier.find(msg.filter);
+				if (pos == 0) {
+					connection->Send(ServerOP_RouteTo, out);
+				}
+			}
+		}
+	}
+	else if (!msg.id.empty()) {
+		for (auto &connection : m_connections) {
+			auto id = connection->GetUUID();
+			if (id == msg.id) {
+				connection->Send(ServerOP_RouteTo, out);
+			}
+		}
+	} else if (!msg.filter.empty()) {
+		for (auto &connection : m_connections) {
+			auto identifier = connection->GetIdentifier();
+			auto pos = identifier.find(msg.filter);
+			if (pos == 0) {
+				connection->Send(ServerOP_RouteTo, out);
+			}
+		}
+	}
+	else {
+		for (auto &connection : m_connections) {
+			connection->Send(ServerOP_RouteTo, out);
 		}
 	}
 }

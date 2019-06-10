@@ -276,6 +276,11 @@ std::string EQ::Net::Packet::GetCString(size_t offset) const
 	return std::string(str);
 }
 
+EQ::Net::StaticPacket EQ::Net::Packet::GetPacket(size_t offset, size_t length) const
+{
+	return EQ::Net::StaticPacket((char*)Data() + offset, length);
+}
+
 char ToSafePrint(unsigned char in) {
 	if (std::isprint(in)) {
 		return in;

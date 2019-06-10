@@ -36,7 +36,7 @@ bool EQ::WorldConnection::Connected() const {
 	return m_connection->Connected();
 }
 
-void EQ::WorldConnection::RouteMessage(const std::string &filter, int type, const EQ::Net::Packet &p)
+void EQ::WorldConnection::RouteMessage(const std::string &filter, const std::string &id, const EQ::Net::Packet& payload)
 {
 	if (!m_connection->Connected()) {
 		return;
@@ -44,14 +44,15 @@ void EQ::WorldConnection::RouteMessage(const std::string &filter, int type, cons
 
 	auto identifier = m_connection->GetIdentifier();
 
+	RouteToMessage msg;
+	msg.filter = filter;
+	msg.identifier = identifier;
+	msg.id = id;
+	msg.payload_size = payload.Length();
+
 	EQ::Net::DynamicPacket out;
-	out.PutUInt32(out.Length(), static_cast<uint32_t>(filter.length()));
-	out.PutString(out.Length(), filter);
-	out.PutUInt32(out.Length(), static_cast<uint32_t>(identifier.length()));
-	out.PutString(out.Length(), identifier);
-	out.PutInt32(out.Length(), type);
-	out.PutInt32(out.Length(), static_cast<uint32_t>(p.Length()));
-	out.PutPacket(out.Length(), p);
+	out.PutSerialize(0, msg);
+	out.PutPacket(out.Length(), payload);
 
 	m_connection->Send(ServerOP_RouteTo, out);
 }
@@ -66,17 +67,10 @@ void EQ::WorldConnection::_HandleMessage(uint16 opcode, const EQ::Net::Packet &p
 void EQ::WorldConnection::_HandleRoutedMessage(uint16 opcode, const EQ::Net::Packet &p)
 {
 	if (m_on_routed_message) {
-		auto idx = 0;
-		auto filter_length = p.GetInt32(idx); idx += sizeof(int32_t);
-		auto filter = p.GetString(idx, filter_length); idx += filter_length;
-		auto identifier_length = p.GetInt32(idx); idx += sizeof(int32_t);
-		auto identifier = p.GetString(idx, identifier_length); idx += identifier_length;
-		auto type = p.GetInt32(idx); idx += sizeof(int32_t);
-		auto packet_length = p.GetInt32(idx); idx += sizeof(int32_t);
-		auto packet = EQ::Net::StaticPacket(
-			(void*)((const uint8_t*)p.Data() + idx),
-			static_cast<size_t>(packet_length));
-	
-		m_on_routed_message(filter, identifier, type, packet);
+		auto msg = p.GetSerialize<RouteToMessage>(0);
+		auto payload_offset = p.Length() - msg.payload_size;
+		auto payload = p.GetPacket(payload_offset, msg.payload_size);
+
+		m_on_routed_message(msg.filter, msg.identifier, msg.id, payload);
 	}
 }

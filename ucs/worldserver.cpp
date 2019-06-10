@@ -65,13 +65,6 @@ void WorldServer::ProcessMessage(uint16 opcode, const EQ::Net::Packet &p)
 
 	switch (opcode)
 	{
-	case 0: {
-		break;
-	}
-	case ServerOP_KeepAlive:
-	{
-		break;
-	}
 	case ServerOP_UCSMessage:
 	{
 		char *Buffer = (char *)pack->pBuffer;
