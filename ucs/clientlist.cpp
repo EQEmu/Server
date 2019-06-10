@@ -465,6 +465,7 @@ static void ProcessCommandIgnore(Client *c, std::string Ignoree) {
 	safe_delete(outapp);
 
 }
+
 Clientlist::Clientlist(int ChatPort) {
 	EQ::Net::EQStreamManagerOptions chat_opts(ChatPort, false, false);
 	chat_opts.opcode_size = 1;
@@ -478,7 +479,7 @@ Clientlist::Clientlist(int ChatPort) {
 
 	ChatOpMgr = new RegularOpcodeManager;
 
-	if (!ChatOpMgr->LoadOpcodes("mail_opcodes.conf"))
+	if (!ChatOpMgr->LoadOpcodes(Config->MailOpCodesFile))
 		exit(1);
 
 	chatsf->OnNewConnection([this](std::shared_ptr<EQ::Net::EQStream> stream) {
