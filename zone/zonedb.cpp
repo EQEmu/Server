@@ -2877,6 +2877,7 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 		tmpNPCType->scalerate = atoi(row[43]);
 		tmpNPCType->spellscale = atoi(row[44]);
 		tmpNPCType->healscale = atoi(row[45]);
+		tmpNPCType->skip_global_loot = true;
 
 		// If Merc with duplicate NPC id already in table,
 		// free item we attempted to add.
