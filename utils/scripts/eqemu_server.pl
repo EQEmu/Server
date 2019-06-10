@@ -72,6 +72,14 @@ if (-e "eqemu_update.pl") {
     unlink("eqemu_update.pl");
 }
 
+if (-e "db_update") {
+    unlink("db_update");
+}
+
+if (-e "updates_staged") {
+    unlink("updates_staged");
+}
+
 print "[Info] For EQEmu Server management utilities - run eqemu_server.pl\n" if $ARGV[0] eq "ran_from_world";
 
 check_db_version_table();
