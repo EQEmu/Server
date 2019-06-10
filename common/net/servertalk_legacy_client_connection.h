@@ -15,7 +15,7 @@ namespace EQ
 			ServertalkLegacyClient(const std::string &addr, int port, bool ipv6);
 			~ServertalkLegacyClient();
 
-			void Send(uint16_t opcode, EQ::Net::Packet &p);
+			void Send(uint16_t opcode, const EQ::Net::Packet &p);
 			void SendPacket(ServerPacket *p);
 			void OnConnect(std::function<void(ServertalkLegacyClient*)> cb) { m_on_connect_cb = cb; }
 			void OnMessage(uint16_t opcode, std::function<void(uint16_t, EQ::Net::Packet&)> cb);

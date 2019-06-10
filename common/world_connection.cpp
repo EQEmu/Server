@@ -36,19 +36,24 @@ bool EQ::WorldConnection::Connected() const {
 	return m_connection->Connected();
 }
 
-void EQ::WorldConnection::RouteMessage(const std::string &filter, const EQ::Net::Packet &p)
+void EQ::WorldConnection::RouteMessage(const std::string &filter, int type, const EQ::Net::Packet &p)
 {
 	if (!m_connection->Connected()) {
 		return;
 	}
 
-	RouteToHeader header;
-	strn0cpy(header.filter, filter.data(), 64);
-	strn0cpy(header.type, m_connection->GetIdentifier().data(), 128);
+	auto identifier = m_connection->GetIdentifier();
 
 	EQ::Net::DynamicPacket out;
-	out.PutSerialize(0, header);
+	out.PutUInt32(out.Length(), static_cast<uint32_t>(filter.length()));
+	out.PutString(out.Length(), filter);
+	out.PutUInt32(out.Length(), static_cast<uint32_t>(identifier.length()));
+	out.PutString(out.Length(), identifier);
+	out.PutInt32(out.Length(), type);
+	out.PutInt32(out.Length(), static_cast<uint32_t>(p.Length()));
 	out.PutPacket(out.Length(), p);
+
+	m_connection->Send(ServerOP_RouteTo, out);
 }
 
 void EQ::WorldConnection::_HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
@@ -61,9 +66,17 @@ void EQ::WorldConnection::_HandleMessage(uint16 opcode, const EQ::Net::Packet &p
 void EQ::WorldConnection::_HandleRoutedMessage(uint16 opcode, const EQ::Net::Packet &p)
 {
 	if (m_on_routed_message) {
-		auto header = p.GetSerialize<RouteToHeader>(0);
-		auto np = EQ::Net::StaticPacket((int8_t*)p.Data() + sizeof(RouteToHeader), p.Length() - sizeof(RouteToHeader));
-
-		m_on_routed_message(header.filter, header.type, np);
+		auto idx = 0;
+		auto filter_length = p.GetInt32(idx); idx += sizeof(int32_t);
+		auto filter = p.GetString(idx, filter_length); idx += filter_length;
+		auto identifier_length = p.GetInt32(idx); idx += sizeof(int32_t);
+		auto identifier = p.GetString(idx, identifier_length); idx += identifier_length;
+		auto type = p.GetInt32(idx); idx += sizeof(int32_t);
+		auto packet_length = p.GetInt32(idx); idx += sizeof(int32_t);
+		auto packet = EQ::Net::StaticPacket(
+			(void*)((const uint8_t*)p.Data() + idx),
+			static_cast<size_t>(packet_length));
+	
+		m_on_routed_message(filter, identifier, type, packet);
 	}
 }

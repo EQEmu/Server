@@ -19,22 +19,32 @@ EQ::Net::ServertalkServerConnection::~ServertalkServerConnection()
 {
 }
 
-void EQ::Net::ServertalkServerConnection::Send(uint16_t opcode, EQ::Net::Packet & p)
+void EQ::Net::ServertalkServerConnection::Send(uint16_t opcode, const EQ::Net::Packet & p)
 {
 	EQ::Net::DynamicPacket out;
 #ifdef ENABLE_SECURITY
 	if (m_encrypted) {
 		if (p.Length() == 0) {
+			DynamicPacket p;
 			p.PutUInt8(0, 0);
+
+			out.PutUInt32(0, p.Length() + crypto_secretbox_MACBYTES);
+			out.PutUInt16(4, opcode);
+
+			std::unique_ptr<unsigned char[]> cipher(new unsigned char[p.Length() + crypto_secretbox_MACBYTES]);
+			crypto_box_easy_afternm(&cipher[0], (unsigned char*)p.Data(), p.Length(), m_nonce_ours, m_shared_key);
+			(*(uint64_t*)&m_nonce_ours[0])++;
+			out.PutData(6, &cipher[0], p.Length() + crypto_secretbox_MACBYTES);
 		}
+		else {
+			out.PutUInt32(0, p.Length() + crypto_secretbox_MACBYTES);
+			out.PutUInt16(4, opcode);
 
-		out.PutUInt32(0, p.Length() + crypto_secretbox_MACBYTES);
-		out.PutUInt16(4, opcode);
-
-		std::unique_ptr<unsigned char[]> cipher(new unsigned char[p.Length() + crypto_secretbox_MACBYTES]);
-		crypto_box_easy_afternm(&cipher[0], (unsigned char*)p.Data(), p.Length(), m_nonce_ours, m_shared_key);
-		(*(uint64_t*)&m_nonce_ours[0])++;
-		out.PutData(6, &cipher[0], p.Length() + crypto_secretbox_MACBYTES);
+			std::unique_ptr<unsigned char[]> cipher(new unsigned char[p.Length() + crypto_secretbox_MACBYTES]);
+			crypto_box_easy_afternm(&cipher[0], (unsigned char*)p.Data(), p.Length(), m_nonce_ours, m_shared_key);
+			(*(uint64_t*)&m_nonce_ours[0])++;
+			out.PutData(6, &cipher[0], p.Length() + crypto_secretbox_MACBYTES);
+		}
 	}
 	else {
 		out.PutUInt32(0, p.Length());

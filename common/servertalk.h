@@ -1350,19 +1350,6 @@ struct ServerSharedTaskMember_Struct { // used for various things we just need t
 #define TASKJOINOOZ_LEVEL			3
 #define TASKJOINOOZ_TIMER			4
 
-struct RouteToHeader
-{
-	char filter[64];
-	char type[128];
-
-	template <class Archive>
-	void serialize(Archive & archive)
-	{
-		archive(filter,
-			type);
-	}
-};
-
 #pragma pack()
 
 #endif

@@ -11,7 +11,7 @@ namespace EQ
 	public:
 		typedef std::function<void()> OnConnectedHandler;
 		typedef std::function<void(uint16, const EQ::Net::Packet&)> OnMessageHandler;
-		typedef std::function<void(const std::string&, const std::string&, EQ::Net::Packet&)> OnRoutedMessageHandler;
+		typedef std::function<void(const std::string&, const std::string&, int, const EQ::Net::Packet&)> OnRoutedMessageHandler;
 
 		WorldConnection(const std::string &type);
 		virtual ~WorldConnection();
@@ -33,7 +33,7 @@ namespace EQ
 			m_on_routed_message = handler;
 		}
 
-		void RouteMessage(const std::string &filter, const EQ::Net::Packet& p);
+		void RouteMessage(const std::string &filter, int type, const EQ::Net::Packet& p);
 		
 	protected:
 		OnConnectedHandler m_on_connected;

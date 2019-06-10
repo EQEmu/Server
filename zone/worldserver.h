@@ -35,6 +35,7 @@ public:
 	void SendPacket(ServerPacket* pack);
 	std::string GetIP() const;
 	uint16 GetPort() const;
+	void RouteMessage(const std::string &filter, int type, const EQ::Net::Packet& p);
 
 	void HandleMessage(uint16 opcode, const EQ::Net::Packet &p);
 

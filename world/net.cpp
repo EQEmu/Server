@@ -84,6 +84,7 @@ union semun {
 #include "web_interface.h"
 #include "console.h"
 #include "shared_tasks.h"
+#include "router.h"
 
 #include "../common/net/servertalk_server.h"
 #include "../zone/data_bucket.h"
@@ -419,6 +420,7 @@ int main(int argc, char** argv) {
 	std::unique_ptr<EQ::Net::ServertalkServer> server_connection;
 	server_connection.reset(new EQ::Net::ServertalkServer());
 
+	Router router;
 	EQ::Net::ServertalkServerOptions server_opts;
 	server_opts.port = Config->WorldTCPPort;
 	server_opts.ipv6 = false;
@@ -502,14 +504,18 @@ int main(int argc, char** argv) {
 		web_interface.RemoveConnection(connection);
 	});
 
-	server_connection->OnConnectionIdentified([](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
+	server_connection->OnConnectionIdentified([&router](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
 		LogF(Logs::General, Logs::World_Server, "New connection from {0} with identifier {1}",
 			connection->GetUUID(), connection->GetIdentifier());
+
+		router.AddConnection(connection);
 	});
 
-	server_connection->OnConnectionRemoved([](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
+	server_connection->OnConnectionRemoved([&router](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
 		LogF(Logs::General, Logs::World_Server, "Removed connection from {0} with identifier {1}",
 			connection->GetUUID(), connection->GetIdentifier());
+
+		router.RemoveConnection(connection);
 	});
 
 	EQ::Net::EQStreamManagerOptions opts(9000, false, false);

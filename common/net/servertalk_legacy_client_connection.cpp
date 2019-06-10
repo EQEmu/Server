@@ -17,7 +17,7 @@ EQ::Net::ServertalkLegacyClient::~ServertalkLegacyClient()
 {
 }
 
-void EQ::Net::ServertalkLegacyClient::Send(uint16_t opcode, EQ::Net::Packet &p)
+void EQ::Net::ServertalkLegacyClient::Send(uint16_t opcode, const EQ::Net::Packet &p)
 {
 	if (!m_connection)
 		return;

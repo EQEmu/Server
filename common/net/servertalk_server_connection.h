@@ -19,7 +19,7 @@ namespace EQ
 			ServertalkServerConnection(std::shared_ptr<EQ::Net::TCPConnection> c, ServertalkServer *parent, bool encrypted, bool allow_downgrade);
 			~ServertalkServerConnection();
 
-			void Send(uint16_t opcode, EQ::Net::Packet &p);
+			void Send(uint16_t opcode, const EQ::Net::Packet &p);
 			void SendPacket(ServerPacket *p);
 			void OnMessage(uint16_t opcode, std::function<void(uint16_t, EQ::Net::Packet&)> cb);
 			void OnMessage(std::function<void(uint16_t, EQ::Net::Packet&)> cb);

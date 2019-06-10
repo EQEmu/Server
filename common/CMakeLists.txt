@@ -64,6 +64,7 @@ SET(common_sources
 	say_link.cpp
 	serialize_buffer.cpp
 	serverinfo.cpp
+	service.cpp
 	shareddb.cpp
 	skills.cpp
 	spdat.cpp
@@ -197,6 +198,7 @@ SET(common_headers
 	serialize_buffer.h
 	serverinfo.h
 	servertalk.h
+	service.h
 	shareddb.h
 	skills.h
 	spdat.h

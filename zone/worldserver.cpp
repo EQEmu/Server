@@ -118,6 +118,13 @@ uint16 WorldServer::GetPort() const
 	return 0;
 }
 
+void WorldServer::RouteMessage(const std::string &filter, int type, const EQ::Net::Packet &p)
+{
+	if (m_connection) {
+		m_connection->RouteMessage(filter, type, p);
+	}
+}
+
 void WorldServer::SetZoneData(uint32 iZoneID, uint32 iInstanceID) {
 	auto pack = new ServerPacket(ServerOP_SetZone, sizeof(SetZone_Struct));
 	SetZone_Struct* szs = (SetZone_Struct*)pack->pBuffer;

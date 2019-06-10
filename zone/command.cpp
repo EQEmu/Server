@@ -2831,14 +2831,18 @@ void command_spawn(Client *c, const Seperator *sep)
 
 void command_test(Client *c, const Seperator *sep)
 {
-	c->Message(15, "Triggering test command");
+	EQ::Net::DynamicPacket p;
+	p.PutCString(0, "TestPacket");
+	worldserver.RouteMessage("Tasks", 1234, p);
 
-	if (sep->arg[1]) {
-		c->SetPrimaryWeaponOrnamentation(atoi(sep->arg[1]));
-	}
-	if (sep->arg[2]) {
-		c->SetSecondaryWeaponOrnamentation(atoi(sep->arg[2]));
-	}
+	//c->Message(15, "Triggering test command");
+	//
+	//if (sep->arg[1]) {
+	//	c->SetPrimaryWeaponOrnamentation(atoi(sep->arg[1]));
+	//}
+	//if (sep->arg[2]) {
+	//	c->SetSecondaryWeaponOrnamentation(atoi(sep->arg[2]));
+	//}
 }
 
 void command_texture(Client *c, const Seperator *sep)
