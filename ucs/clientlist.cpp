@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/eqemu_logsys.h"
 #include "../common/misc_functions.h"
 
+#include "ucsconfig.h"
 #include "clientlist.h"
 #include "database.h"
 #include "chatchannel.h"
@@ -479,7 +480,10 @@ Clientlist::Clientlist(int ChatPort) {
 
 	ChatOpMgr = new RegularOpcodeManager;
 
-	if (!ChatOpMgr->LoadOpcodes(Config->MailOpCodesFile))
+	const ucsconfig *Config = ucsconfig::get();
+
+	Log(Logs::General, Logs::UCS_Server, "Loading '%s'", Config->MailOpCodesFile.c_str());
+	if (!ChatOpMgr->LoadOpcodes(Config->MailOpCodesFile.c_str()))
 		exit(1);
 
 	chatsf->OnNewConnection([this](std::shared_ptr<EQ::Net::EQStream> stream) {
