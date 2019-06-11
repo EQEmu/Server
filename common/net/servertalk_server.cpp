@@ -1,4 +1,5 @@
 #include "servertalk_server.h"
+#include <regex>
 
 EQ::Net::ServertalkServer::ServertalkServer()
 {
@@ -80,9 +81,12 @@ void EQ::Net::ServertalkServer::ConnectionIdentified(ServertalkServerConnection 
 	auto iter = m_unident_connections.begin();
 	while (iter != m_unident_connections.end()) {
 		if (conn == iter->get()) {
-			auto on_ident = m_on_ident.find(conn->GetIdentifier());
-			if (on_ident != m_on_ident.end()) {
-				on_ident->second(*iter);
+			for (auto &ident : m_on_ident) {
+				std::regex ident_regex(ident.first);
+
+				if (std::regex_match(conn->GetIdentifier(), ident_regex)) {
+					ident.second(*iter);
+				}
 			}
 
 			if (m_on_any_ident) {

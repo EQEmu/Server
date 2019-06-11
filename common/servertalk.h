@@ -1,5 +1,4 @@
-#ifndef EQ_SOPCODES_H
-#define EQ_SOPCODES_H
+#pragma once
 
 #include "../common/types.h"
 #include "../common/packet_functions.h"
@@ -9,23 +8,20 @@
 #include <cereal/cereal.hpp>
 #include <cereal/types/string.hpp>
 
-#define SERVER_TIMEOUT	45000	// how often keepalive gets sent
-#define INTERSERVER_TIMER					10000
-#define LoginServer_StatusUpdateInterval	15000
-#define LoginServer_AuthStale				60000
-#define AUTHCHANGE_TIMEOUT					900	// in seconds
+constexpr auto INTERSERVER_TIMER = 10000;
+constexpr auto LoginServer_StatusUpdateInterval = 15000;
 
-//Defines for backwards compat with old LS
-#define	ServerOP_UsertoWorldReq		0xAB00
-#define	ServerOP_UsertoWorldResp	0xAB01
-#define ServerOP_LSClientAuth		0x1002
-#define ServerOP_LSFatalError		0x1003
-#define ServerOP_SystemwideMessage	0x1005
-#define ServerOP_LSRemoteAddr		0x1009
-#define ServerOP_LSAccountUpdate	0x100A
-#define ServerOP_NewLSInfo			0x1008
-#define ServerOP_LSInfo				0x1000
-#define ServerOP_LSStatus			0x1001
+//Certain ops needed for backwards compat with old LS can't enum without being really annoying.
+constexpr auto ServerOP_UsertoWorldReq		= 0xAB00;
+constexpr auto ServerOP_UsertoWorldResp		= 0xAB01;
+constexpr auto ServerOP_LSClientAuth		= 0x1002;
+constexpr auto ServerOP_LSFatalError		= 0x1003;
+constexpr auto ServerOP_SystemwideMessage	= 0x1005;
+constexpr auto ServerOP_LSRemoteAddr		= 0x1009;
+constexpr auto ServerOP_LSAccountUpdate		= 0x100A;
+constexpr auto ServerOP_NewLSInfo			= 0x1008;
+constexpr auto ServerOP_LSInfo				= 0x1000;
+constexpr auto ServerOP_LSStatus			= 0x1001;
 
 enum ServerOpcode : int
 {
@@ -205,7 +201,10 @@ enum ServerOpcode : int
 	ServerOP_CZSetEntityVariableByNPCTypeID,
 	ServerOP_WWMarquee,
 	ServerOP_QSPlayerDropItem,
-	ServerOP_RouteTo
+	ServerOP_RouteTo,
+
+	/*Tasks*/
+	ServerOP_GetClientTaskState
 };
 
 
@@ -1344,6 +1343,10 @@ struct ServerSharedTaskMember_Struct { // used for various things we just need t
 
 #pragma pack()
 
+/*
+ * Routing
+ */
+
 struct RouteToMessage
 {
 	std::string filter;
@@ -1358,4 +1361,22 @@ struct RouteToMessage
 	}
 };
 
-#endif
+/*
+ * Tasks
+ */
+
+enum TaskMessageTypes
+{
+	TaskGetClientTaskState = 1
+};
+
+struct GetClientTaskStateRequest
+{
+	uint32 client_id;
+
+	template <class Archive>
+	void serialize(Archive &ar)
+	{
+		ar(client_id);
+	}
+};

@@ -471,29 +471,22 @@ bool TaskManager::SaveClientState(Client *c, ClientTaskState *state)
 }
 
 void Client::LoadClientTaskState() {
+	GetClientTaskStateRequest req;
+	req.client_id = CharacterID();
 
-	if(RuleB(TaskSystem, EnableTaskSystem) && taskmanager) {
-		if(taskstate)
-			safe_delete(taskstate);
+	EQ::Net::DynamicPacket p;
+	p.PutInt32(0, TaskGetClientTaskState);
+	p.PutSerialize(4, req);
 
-		taskstate = new ClientTaskState;
-		if(!taskmanager->LoadClientState(this, taskstate)) {
-			safe_delete(taskstate);
-		}
-		else {
-			taskmanager->SendActiveTasksToClient(this);
-			taskmanager->SendCompletedTasksToClient(this, taskstate);
-		}
-	}
-
+	worldserver.RouteMessage("Tasks", "", p);
 }
 
 void Client::RemoveClientTaskState() {
 
-	if(taskstate) {
-		taskstate->CancelAllTasks(this);
-		safe_delete(taskstate);
-	}
+	//if(taskstate) {
+	//	taskstate->CancelAllTasks(this);
+	//	safe_delete(taskstate);
+	//}
 }
 
 bool TaskManager::LoadClientState(Client *c, ClientTaskState *state)

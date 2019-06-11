@@ -36,6 +36,8 @@ void EQ::TasksService::OnStart() {
 
 	m_db->LoadLogSettings(LogSys.log_settings);
 	LogSys.StartFileLogs();
+
+	//Load task info here
 }
 
 void EQ::TasksService::OnStop() {
@@ -48,7 +50,19 @@ void EQ::TasksService::OnHeartbeat(double time_since_last) {
 
 void EQ::TasksService::OnRoutedMessage(const std::string& filter, const std::string& identifier, const std::string& id, const EQ::Net::Packet& payload)
 {
-	LogF(Logs::General, Logs::Status, "Routed message from filter {0}, identifier {1}, id {2} with a payload of size {3}", filter, identifier, id, payload.Length());
+	auto msg_type = payload.GetInt32(0);
+
+	switch (msg_type) {
+	case TaskGetClientTaskState:
+	{
+		Log(Logs::General, Logs::Status, "Task state request");
+		auto req = payload.GetSerialize<GetClientTaskStateRequest>(4);
+		//Get the task state request
+		break;
+	}
+	default:
+		break;
+	}
 }
 
 EQRegisterService(EQ::TasksService);

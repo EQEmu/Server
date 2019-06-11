@@ -1,4 +1,5 @@
 #include "router.h"
+#include <regex>
 
 Router::Router()
 {
@@ -42,32 +43,35 @@ void Router::OnRouterMessage(std::shared_ptr<EQ::Net::ServertalkServerConnection
 	out.PutPacket(out.Length(), payload);
 
 	if (!msg.id.empty() && !msg.filter.empty()) {
+		auto id_regex = std::regex(msg.id);
+		auto filter_regex = std::regex(msg.filter);
+
 		for (auto &connection : m_connections) {
 			auto id = connection->GetUUID();
-			if (id == msg.id) {
+			auto identifier = connection->GetIdentifier();
+			if (std::regex_match(id, id_regex)) {
 				connection->Send(ServerOP_RouteTo, out);
 			}
-			else {
-				auto identifier = connection->GetIdentifier();
-				auto pos = identifier.find(msg.filter);
-				if (pos == 0) {
-					connection->Send(ServerOP_RouteTo, out);
-				}
+			else if (std::regex_match(identifier, filter_regex)) {
+				connection->Send(ServerOP_RouteTo, out);
 			}
 		}
 	}
 	else if (!msg.id.empty()) {
+		auto id_regex = std::regex(msg.id);
+
 		for (auto &connection : m_connections) {
 			auto id = connection->GetUUID();
-			if (id == msg.id) {
+			if (std::regex_match(id, id_regex)) {
 				connection->Send(ServerOP_RouteTo, out);
 			}
 		}
 	} else if (!msg.filter.empty()) {
+		auto filter_regex = std::regex(msg.filter);
+
 		for (auto &connection : m_connections) {
 			auto identifier = connection->GetIdentifier();
-			auto pos = identifier.find(msg.filter);
-			if (pos == 0) {
+			if (std::regex_match(identifier, filter_regex)) {
 				connection->Send(ServerOP_RouteTo, out);
 			}
 		}
