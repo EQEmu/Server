@@ -45,7 +45,7 @@ void NpcScaleManager::ScaleNPC(NPC * npc)
 		return;
 	}
 
-	if (npc->GetAC() == 0) {
+	if (npc->GetAC() == 0 && is_auto_scaled) {
 		npc->ModifyNPCStat("ac", std::to_string(scale_data.ac).c_str());
 	}
 	if (npc->GetMaxHP() == 0) {
@@ -97,10 +97,10 @@ void NpcScaleManager::ScaleNPC(NPC * npc)
 	if (npc->GetDR() == 0) {
 		npc->ModifyNPCStat("dr", std::to_string(scale_data.disease_resist).c_str());
 	}
-	if (npc->GetCorrup() == 0) {
+	if (npc->GetCorrup() == 0 && is_auto_scaled) {
 		npc->ModifyNPCStat("cor", std::to_string(scale_data.corruption_resist).c_str());
 	}
-	if (npc->GetPhR() == 0) {
+	if (npc->GetPhR() == 0 && is_auto_scaled) {
 		npc->ModifyNPCStat("phr", std::to_string(scale_data.physical_resist).c_str());
 	}
 	if (npc->GetMinDMG() == 0 && npc->GetMaxDMG() == 0) {
