@@ -98,10 +98,10 @@ void NpcScaleManager::ScaleNPC(NPC * npc)
 		npc->ModifyNPCStat("dr", std::to_string(scale_data.disease_resist).c_str());
 	}
 	if (npc->GetCorrup() == 0) {
-		npc->ModifyNPCStat("cr", std::to_string(scale_data.corruption_resist).c_str());
+		npc->ModifyNPCStat("cor", std::to_string(scale_data.corruption_resist).c_str());
 	}
 	if (npc->GetPhR() == 0) {
-		npc->ModifyNPCStat("pr", std::to_string(scale_data.physical_resist).c_str());
+		npc->ModifyNPCStat("phr", std::to_string(scale_data.physical_resist).c_str());
 	}
 	if (npc->GetMinDMG() == 0 && npc->GetMaxDMG() == 0) {
 		int min_dmg = scale_data.min_dmg;

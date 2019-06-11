@@ -2215,6 +2215,14 @@ void NPC::ModifyNPCStat(const char *identifier, const char *new_value)
 		CR = atoi(val.c_str());
 		return;
 	}
+	else if (id == "cor") {
+		Corrup = atoi(val.c_str());
+		return;
+	}
+	else if (id == "phr") {
+		PhR = atoi(val.c_str());
+		return;
+	}
 	else if (id == "pr") {
 		PR = atoi(val.c_str());
 		return;
