@@ -3084,6 +3084,21 @@ void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, ClientTaskInf
 	safe_delete(outapp);
 }
 
+// TODO: stub
+SharedTaskState *TaskManager::LoadSharedTask(int id)
+{
+	return nullptr;
+}
+
+SharedTaskState *TaskManager::GetSharedTask(int id)
+{
+	auto it = SharedTasks.find(id);
+	if (it == SharedTasks.end())
+		return nullptr;
+
+	return &(it->second);
+}
+
 bool ClientTaskState::IsTaskActivityCompleted(TaskType type, int index, int ActivityID)
 {
 	switch (type) {
@@ -3387,10 +3402,13 @@ void ClientTaskState::AcceptNewTask(Client *c, int TaskID, int NPCID, bool enfor
 	parse->EventNPC(EVENT_TASK_ACCEPTED, npc, c, buf.c_str(), 0);
 }
 
-// This function will do a bunch of verification, then set up a pending state which will then send a request
-// to world and send off requests to out of group zones to ask if they can join the task
-// Once the we get all of the replies that pass, we will then assign the task
-void ClientTaskState::PendSharedTask(Client *c, int TaskID, int NPCID, bool enforce_level_requirement)
+/*
+ * This function is a proxy for OP_AccetNewSharedTask since it has to fire to
+ * world. We do a handful of checks on the leader, then build a packet with a
+ * list of all the members in our group/raid if applicable. The verification for
+ * the other members is done in world.
+ */
+void ClientTaskState::RequestSharedTask(Client *c, int TaskID, int NPCID, bool enforce_level_requirement)
 {
 	if (!taskmanager || TaskID < 0 || TaskID >= MAXTASKS) {
 		c->Message(13, "Task system not functioning, or TaskID %i out of range.", TaskID);
@@ -3550,9 +3568,45 @@ void ClientTaskState::AcceptNewSharedTask(Client *c, int TaskID, int NPCID, int 
 	worldserver.SendPacket(pack);
 	delete pack;
 
+	ActiveSharedTask = task_state;
+
 	return;
 
 	// there are a few issues we need to solve with this
+}
+
+/*
+ * This function is called when world sends ServerOP_TaskZoneCreated to trigger
+ * members to join. If the task doesn't already exist, we need to load it from
+ * the DB.
+ *
+ * This is also called in LoadClientTaskState() when they notice they have a
+ * shared task they need to join. (Called from first OP_ZoneEntry)
+ */
+void ClientTaskState::AddToSharedTask(Client *c, int TaskID)
+{
+	auto task = taskmanager->GetSharedTask(TaskID);
+	if (!task)
+		task = taskmanager->LoadSharedTask(TaskID);
+
+	if (!task) {// FUCK
+		return;
+	}
+
+	task->MemberEnterZone(c);
+
+	// send packets
+	auto task_activity = task->GetActivity();
+	taskmanager->SendSingleActiveTaskToClient(c, *task_activity, false, true);
+	task->SendMembersList(c);
+
+	// So normally getting a task we would send EVENT_TASK_ACCEPTED here, but
+	// this isn't an accept step. I guess we should add another event in case
+	// they need the same thing TODO
+
+	ActiveSharedTask = task;
+
+	return;
 }
 
 void ClientTaskState::ProcessTaskProximities(Client *c, float X, float Y, float Z) {
@@ -3780,7 +3834,7 @@ void SharedTaskState::LockTask()
 void SharedTaskState::MemberZoned(Mob *player)
 {
 	auto it = std::find_if(members.begin(), members.end(),
-			       [&player](const SharedTaskMember &a) { return a.name == player->GetName(); });
+			       [&player](const SharedTaskMember &a) { return a.entity == player; });
 
 	if (it == members.end()) // guess they weren't in this group, w/e
 		return;

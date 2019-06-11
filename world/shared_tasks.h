@@ -6,16 +6,21 @@
 
 #include "../common/servertalk.h"
 #include "../common/global_tasks.h"
+#include "cliententry.h"
 
 class ClientListEntry;
 
 struct SharedTaskMember {
 	std::string name;
 	ClientListEntry *cle;
+	int char_id;
 	bool leader;
 	// TODO: monster mission stuff
-	SharedTaskMember() : cle(nullptr), leader(false) {}
-	SharedTaskMember(std::string name, ClientListEntry *cle, bool leader) : name(name), cle(cle), leader(leader) {}
+	SharedTaskMember() : cle(nullptr), char_id(0), leader(false) {}
+	SharedTaskMember(std::string name, ClientListEntry *cle, int char_id, bool leader)
+	    : name(name), cle(cle), char_id(char_id), leader(leader)
+	{
+	}
 };
 
 class SharedTask {
@@ -24,11 +29,16 @@ public:
 	SharedTask(int id, int task_id) : id(id), task_id(task_id), locked(false) {}
 	~SharedTask() {}
 
-	void AddMember(std::string name, ClientListEntry *cle = nullptr, bool leader = false)
+	void AddMember(std::string name, ClientListEntry *cle = nullptr, int char_id = 0, bool leader = false)
 	{
-		members.push_back({name, cle, leader});
+		members.push_back({name, cle, char_id, leader});
 		if (leader)
 			leader_name = name;
+		if (char_id == 0)
+			return;
+		auto it = std::find(char_ids.begin(), char_ids.end(), char_id);
+		if (it == char_ids.end())
+			char_ids.push_back(char_id);
 	}
 	void MemberLeftGame(ClientListEntry *cle);
 	inline const std::string &GetLeaderName() const { return leader_name; }
@@ -59,6 +69,7 @@ private:
 	bool locked;
 	std::string leader_name;
 	std::vector<SharedTaskMember> members;
+	std::vector<int> char_ids; // every char id of someone to be locked out, different in case they leave/removed
 	ClientTaskInformation task_state; // book keeping
 
 	friend class SharedTaskManager;

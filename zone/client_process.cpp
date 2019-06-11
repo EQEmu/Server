@@ -149,6 +149,9 @@ bool Client::Process() {
 			{
 				myraid->MemberZoned(this);
 			}
+			auto shared_task = GetSharedTask();
+			if (shared_task)
+				shared_task->MemberZoned(this);
 			return(false);
 		}
 
@@ -171,6 +174,9 @@ bool Client::Process() {
 			if (myraid) {
 				myraid->MemberZoned(this);
 			}
+			auto shared_task = GetSharedTask();
+			if (shared_task)
+				shared_task->MemberZoned(this);
 			return false; //delete client
 		}
 
@@ -653,6 +659,9 @@ bool Client::Process() {
 					myraid->MemberZoned(this);
 				}
 			}
+			auto shared_task = GetSharedTask();
+			if (shared_task)
+				shared_task->MemberZoned(this);
 			OnDisconnect(false);
 			return false;
 		}
@@ -693,6 +702,10 @@ void Client::OnDisconnect(bool hard_disconnect) {
 
 		if (MyRaid)
 			MyRaid->MemberZoned(this);
+
+		auto shared_task = GetSharedTask();
+		if (shared_task)
+			shared_task->MemberZoned(this);
 
 		parse->EventPlayer(EVENT_DISCONNECT, this, "", 0);
 
@@ -2100,6 +2113,10 @@ void Client::HandleRespawnFromHover(uint32 Option)
 		Raid* r = entity_list.GetRaidByClient(this);
 		if(r)
 			r->MemberZoned(this);
+
+		auto shared_task = GetSharedTask();
+		if (shared_task)
+			shared_task->MemberZoned(this);
 
 		m_pp.zone_id = chosen->zone_id;
 		m_pp.zoneInstance = chosen->instance_id;

@@ -82,7 +82,7 @@ void SharedTaskManager::HandleTaskRequest(ServerPacket *pack)
 	}
 
 	auto &task = ret.first->second;
-	task.AddMember(leader_name, cle_leader, true);
+	task.AddMember(leader_name, cle_leader, cle_leader->CharID(), true);
 
 	if (players.empty()) {
 		// send instant success to leader
@@ -133,7 +133,7 @@ void SharedTaskManager::HandleTaskRequest(ServerPacket *pack)
 
 			// check our lock out timer
 			int expires = cle->GetTaskLockoutExpire(task_id);
-			if ((expires - Timer::GetCurrentTime()) >= 0) {
+			if ((expires - time(nullptr)) >= 0) {
 				// failure TODO: appropriate message, we need to send the timestamp here
 				auto pack = new ServerPacket(ServerOP_TaskReject, leader_name.size() + 1 + 8);
 				pack->WriteUInt32(0); // string ID or just generic fail message
@@ -146,7 +146,7 @@ void SharedTaskManager::HandleTaskRequest(ServerPacket *pack)
 			}
 
 			// we're good, add to task
-			task.AddMember(name, cle);
+			task.AddMember(name, cle, cle->CharID());
 		}
 	}
 
@@ -374,7 +374,7 @@ bool SharedTaskManager::LoadSharedTaskState()
 {
 	// one may think we should clean up expired tasks, but we don't just in case world is booting back up after a crash
 	// we will clean them up in the normal process loop so zones get told to clean up
-	std::string query = "SELECT `id`, `taskid`, `acceptedtime`, `locked` FROM `shared_task_state`";
+	std::string query = "SELECT `id`, `task_id`, `accepted_time`, `is_locked` FROM `shared_task_state`";
 	auto results = database.QueryDatabase(query);
 
 	if (results.Success() && results.RowCount() > 0) {
@@ -389,14 +389,14 @@ bool SharedTaskManager::LoadSharedTaskState()
 		}
 	}
 
-	query = "SELECT `shared_id`, `charid`, `name`, `leader` FROM `shared_task_members` ORDER BY shared_id ASC";
+	query = "SELECT `shared_task_id`, `character_id`, `character_name`, `is_leader` FROM `shared_task_members` ORDER BY shared_task_id ASC";
 	results = database.QueryDatabase(query);
 	if (results.Success() && results.RowCount() > 0) {
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			int task_id = atoi(row[0]);
 			// hmm not sure best way to do this, fine for now
 			if (tasks.count(task_id) == 1)
-				tasks[task_id].AddMember(row[2], nullptr, atoi(row[3]) != 0);
+				tasks[task_id].AddMember(row[2], nullptr, atoi(row[1]), atoi(row[3]) != 0);
 		}
 	}
 
@@ -404,7 +404,7 @@ bool SharedTaskManager::LoadSharedTaskState()
 	// But the crash case may actually dictate we should :P
 
 	// set next_id to highest used ID
-	query = "SELECT MAX(id) FROM shared_task_state";
+	query = "SELECT IFNULL(MAX(id), 0) FROM shared_task_state";
 	results = database.QueryDatabase(query);
 	if (results.Success() && results.RowCount() == 1) {
 		auto row = results.begin();

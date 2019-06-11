@@ -373,7 +373,7 @@ int ClientListEntry::GetTaskLockoutTimeLeft(int id) const
 			       [id](const TaskTimer &a) { return a.ID == id; });
 
 	if (it != m_task_replay_timers.end())
-		return it->expires - Timer::GetCurrentTime();
+		return it->expires - time(nullptr);
 
 	return 0;
 }
@@ -384,7 +384,7 @@ int ClientListEntry::GetTaskLockoutTimeLeft(int id) const
 bool ClientListEntry::CleanExpiredTaskLockouts() const
 {
 	std::string query =
-	    StringFormat("DELETE FROM `character_task_lockouts` WHERE `charid` = %i AND `timestamp` > %i", pcharid,
+	    StringFormat("DELETE FROM `character_task_lockouts` WHERE `character_id` = %i AND `timestamp` > %i", pcharid,
 			 Timer::GetCurrentTime());
 	auto results = database.QueryDatabase(query);
 	return results.Success();
@@ -397,7 +397,7 @@ bool ClientListEntry::LoadTaskLockouts()
 {
 	CleanExpiredTaskLockouts();
 	std::string query = StringFormat(
-	    "SELECT `replay_group`, `original_id`, `timestamp` FROM `character_task_lockouts` WHERE `charid` = %i",
+	    "SELECT `replay_group`, `original_id`, `timestamp` FROM `character_task_lockouts` WHERE `character_id` = %i",
 	    pcharid);
 	auto results = database.QueryDatabase(query);
 	if (!results.Success())

@@ -3396,6 +3396,11 @@ void Client::LinkDead()
 	if(raid){
 		raid->MemberZoned(this);
 	}
+
+	auto shared_task = GetSharedTask();
+	if (shared_task)
+		shared_task->MemberZoned(this);
+
 //	save_timer.Start(2500);
 	linkdead_timer.Start(RuleI(Zone,ClientLinkdeadMS));
 	SendAppearancePacket(AT_Linkdead, 1);

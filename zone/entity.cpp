@@ -537,6 +537,9 @@ void EntityList::MobProcess()
 					Log(Logs::General, Logs::Error, "About to delete a client still in a raid.");
 					r->MemberZoned(mob->CastToClient());
 				}
+				auto shared_task = mob->CastToClient()->GetSharedTask();
+				if (shared_task)
+					shared_task->MemberZoned(mob);
 				entity_list.RemoveClient(id);
 			}
 

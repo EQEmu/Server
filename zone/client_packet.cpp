@@ -1799,7 +1799,7 @@ void Client::Handle_OP_AcceptNewSharedTask(const EQApplicationPacket *app)
 	auto *ant = (AcceptNewSharedTask_Struct*)app->pBuffer;
 
 	if (ant->task_id > 0 && RuleB(TaskSystem, EnableTaskSystem) && taskstate)
-		taskstate->PendSharedTask(this, ant->task_id, ant->task_master_id);
+		taskstate->RequestSharedTask(this, ant->task_id, ant->task_master_id);
 }
 
 void Client::Handle_OP_AdventureInfoRequest(const EQApplicationPacket *app)

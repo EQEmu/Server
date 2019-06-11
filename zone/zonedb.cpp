@@ -2675,6 +2675,7 @@ const NPCType* ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		temp_npctype_data->rare_spawn = atoi(row[108]) != 0;
 		temp_npctype_data->stuck_behavior = atoi(row[109]);
 		temp_npctype_data->use_model = atoi(row[110]);
+		temp_npctype_data->skip_auto_scale = false; // hardcoded here for now
 
 		// If NPC with duplicate NPC id already in table,
 		// free item we attempted to add.
@@ -2877,6 +2878,8 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 		tmpNPCType->scalerate = atoi(row[43]);
 		tmpNPCType->spellscale = atoi(row[44]);
 		tmpNPCType->healscale = atoi(row[45]);
+		tmpNPCType->skip_global_loot = true;
+		tmpNPCType->skip_auto_scale = true;
 
 		// If Merc with duplicate NPC id already in table,
 		// free item we attempted to add.

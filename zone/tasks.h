@@ -146,8 +146,6 @@ public:
 	int GetTaskActivityDoneCountFromTaskID(int TaskID, int ActivityID);
 	int GetTaskStartTime(TaskType type, int index);
 	void AcceptNewTask(Client *c, int TaskID, int NPCID, bool enforce_level_requirement = false);
-	void AcceptNewSharedTask(Client *c, int TaskID, int NPCID, int id, int accepted_time, std::vector<std::string> &members);
-	void PendSharedTask(Client *c, int TaskID, int NPCID, bool enforce_level_requirement = false);
 	void FailTask(Client *c, int TaskID);
 	int TaskTimeLeft(int TaskID);
 	int IsTaskCompleted(int TaskID);
@@ -180,8 +178,14 @@ public:
 	int ActiveTasksInSet(int TaskSetID);
 	int CompletedTasksInSet(int TaskSetID);
 	bool HasSlotForTask(TaskInformation *task);
+	// shared task related functions
+	void AcceptNewSharedTask(Client *c, int TaskID, int NPCID, int id, int accepted_time, std::vector<std::string> &members);
+	void AddToSharedTask(Client *c, int TaskID);
+	void RequestSharedTask(Client *c, int TaskID, int NPCID, bool enforce_level_requirement = false);
 
 	inline bool HasFreeTaskSlot() { return ActiveTask.TaskID == TASKSLOTEMPTY; }
+
+	inline SharedTaskState *GetSharedTask() { return ActiveSharedTask ; }
 
 	friend class TaskManager;
 
@@ -266,8 +270,9 @@ public:
 	bool IsTaskRepeatable(int TaskID);
 	friend class ClientTaskState;
 
-	void LoadSharedTask(int id); // loads the shared task state
+	SharedTaskState *LoadSharedTask(int id); // loads the shared task state
 	SharedTaskState *CreateSharedTask(int id, int task_id);
+	SharedTaskState *GetSharedTask(int id);
 
 private:
 	TaskGoalListManager GoalListManager;

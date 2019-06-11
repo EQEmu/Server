@@ -1877,6 +1877,10 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQEmu::skills::Sk
 		if (r)
 			r->MemberZoned(this);
 
+		auto shared_task = GetSharedTask();
+		if (shared_task)
+			shared_task->MemberZoned(this);
+
 		dead_timer.Start(5000, true);
 		m_pp.zone_id = m_pp.binds[0].zoneId;
 		m_pp.zoneInstance = m_pp.binds[0].instance_id;
