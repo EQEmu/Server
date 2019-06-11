@@ -21,30 +21,30 @@ CREATE TABLE `task_replay_groups` (
 	PRIMARY KEY(`id`)
 );
 CREATE TABLE `character_task_lockouts` (
-	`charid` INT NOT NULL,
+	`character_id` INT NOT NULL,
 	`replay_group` INT NOT NULL,
 	`original_id` INT NOT NULL,
 	`timestamp` INT NOT NULL,
-	PRIMARY KEY(`charid`, `replay_group`)
+	PRIMARY KEY(`character_id`, `replay_group`)
 );
 CREATE TABLE `shared_task_state` (
 	`id` INT NOT NULL,
-	`taskid` INT NOT NULL,
-	`acceptedtime` INT NOT NULL,
-	`locked` TINYINT NOT NULL DEFAULT '0',
+	`task_id` INT NOT NULL,
+	`accepted_time` INT NOT NULL,
+	`is_locked` TINYINT NOT NULL DEFAULT '0',
 	PRIMARY KEY(`id`)
 );
 CREATE TABLE `shared_task_activities` (
-	`shared_id` INT NOT NULL,
+	`shared_task_id` INT NOT NULL,
 	`activity_id` INT NOT NULL,
 	`done_count` INT NOT NULL,
 	`completed` TINYINT,
-	PRIMARY KEY(`shared_id`, `activity_id`)
+	PRIMARY KEY(`shared_task_id`, `activity_id`)
 );
 CREATE TABLE `shared_task_members` (
-	`shared_id` INT NOT NULL,
-	`charid` INT NOT NULL,
-	`name` VARCHAR(64) NOT NULL,
-	`leader` TINYINT,
-	PRIMARY KEY(`charid`)
+	`shared_task_id` INT NOT NULL,
+	`character_id` INT NOT NULL,
+	`character_name` VARCHAR(64) NOT NULL,
+	`is_leader` TINYINT DEFAULT 0,
+	PRIMARY KEY(shared_task_id, character_id)
 );

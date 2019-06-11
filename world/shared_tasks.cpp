@@ -374,7 +374,7 @@ bool SharedTaskManager::LoadSharedTaskState()
 {
 	// one may think we should clean up expired tasks, but we don't just in case world is booting back up after a crash
 	// we will clean them up in the normal process loop so zones get told to clean up
-	std::string query = "SELECT `id`, `taskid`, `acceptedtime`, `locked` FROM `shared_task_state`";
+	std::string query = "SELECT `id`, `task_id`, `accepted_time`, `is_locked` FROM `shared_task_state`";
 	auto results = database.QueryDatabase(query);
 
 	if (results.Success() && results.RowCount() > 0) {
@@ -389,7 +389,7 @@ bool SharedTaskManager::LoadSharedTaskState()
 		}
 	}
 
-	query = "SELECT `shared_id`, `charid`, `name`, `leader` FROM `shared_task_members` ORDER BY shared_id ASC";
+	query = "SELECT `shared_task_id`, `character_id`, `character_name`, `is_leader` FROM `shared_task_members` ORDER BY shared_task_id ASC";
 	results = database.QueryDatabase(query);
 	if (results.Success() && results.RowCount() > 0) {
 		for (auto row = results.begin(); row != results.end(); ++row) {
