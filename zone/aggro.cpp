@@ -251,9 +251,10 @@ bool Mob::CheckWillAggro(Mob *mob) {
 			return false;
 	}
 
-	Mob *ownr = mob->GetOwner();
-	if(ownr && ownr->IsClient() && !ownr->CastToClient()->ClientFinishedLoading())
+	Mob *pet_owner = mob->GetOwner();
+	if (pet_owner && pet_owner->IsClient()) {
 		return false;
+	}
 
 	float iAggroRange = GetAggroRange();
 
