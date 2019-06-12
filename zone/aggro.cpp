@@ -251,6 +251,13 @@ bool Mob::CheckWillAggro(Mob *mob) {
 			return false;
 	}
 
+	/**
+	 * Pets shouldn't scan for aggro
+	 */
+	if (this->GetOwner()) {
+		return false;
+	}
+
 	Mob *pet_owner = mob->GetOwner();
 	if (pet_owner && pet_owner->IsClient()) {
 		return false;
