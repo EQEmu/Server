@@ -82,6 +82,8 @@ public:
 	bool IsInvisible(Lua_Mob other);
     void SetInvisible(int state);
 	bool FindBuff(int spell_id);
+	uint16 FindBuffBySlot(int slot);
+	uint32 BuffCount();
     bool FindType(int type);
 	bool FindType(int type, bool offensive);
 	bool FindType(int type, bool offensive, int threshold);
