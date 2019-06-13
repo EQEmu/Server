@@ -89,6 +89,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 			if(zone_point) {
 				//we found a zone point, which is a reasonable distance away
 				//assume that is the one were going with.
+				cheat_timer.Start(3500, false);
 				target_zone_id = zone_point->target_zone_id;
 				target_instance_id = zone_point->target_zone_instance;
 			} else {
@@ -227,7 +228,6 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		//Handle zone point case:
 		if(zone_point != nullptr) {
 			//they are zoning using a valid zone point, figure out coords
-
 			//999999 is a placeholder for 'same as where they were from'
 			if(zone_point->target_x == 999999)
 				dest_x = GetX();
@@ -446,27 +446,34 @@ void Client::ProcessMovePC(uint32 zoneID, uint32 instance_id, float x, float y, 
 
 	switch(zm) {
 		case GateToBindPoint:
+			cheat_timer.Start(3500, false);
 			ZonePC(zoneID, instance_id, x, y, z, heading, ignorerestrictions, zm);
 			break;
 		case EvacToSafeCoords:
 		case ZoneToSafeCoords:
+			cheat_timer.Start(3500, false);
 			ZonePC(zoneID, instance_id, x, y, z, heading, ignorerestrictions, zm);
 			break;
 		case GMSummon:
+			cheat_timer.Start(3500, false);
 			Message(15, "You have been summoned by a GM!");
 			ZonePC(zoneID, instance_id, x, y, z, heading, ignorerestrictions, zm);
 			break;
 		case ZoneToBindPoint:
+			cheat_timer.Start(3500, false);
 			ZonePC(zoneID, instance_id, x, y, z, heading, ignorerestrictions, zm);
 			break;
 		case ZoneSolicited:
+			cheat_timer.Start(3500, false);
 			ZonePC(zoneID, instance_id, x, y, z, heading, ignorerestrictions, zm);
 			break;
 		case SummonPC:
+			cheat_timer.Start(3500, false);
 			Message(15, "You have been summoned!");
 			ZonePC(zoneID, instance_id, x, y, z, heading, ignorerestrictions, zm);
 			break;
 		case Rewind:
+			cheat_timer.Start(3500, false);
 			Message(15, "Rewinding to previous location.");
 			ZonePC(zoneID, instance_id, x, y, z, heading, ignorerestrictions, zm);
 			break;

@@ -1665,6 +1665,7 @@ void Mob::ShowBuffList(Client* client) {
 }
 
 void Mob::GMMove(float x, float y, float z, float heading, bool SendUpdate) {
+	cheat_timer.Start(3500, false);
 	m_Position.x = x;
 	m_Position.y = y;
 	m_Position.z = z;

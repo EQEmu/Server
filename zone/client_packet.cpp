@@ -4369,7 +4369,15 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 	}
 	
 	PlayerPositionUpdateClient_Struct *ppu = (PlayerPositionUpdateClient_Struct *) app->pBuffer;
-	
+	ZonePoint *Closest_ZP = zone->GetClosestZonePointWithoutZone(m_Position.x, m_Position.y, m_Position.z, this, 50);
+	if (!Closest_ZP && !cheat_timer.Enabled() && !IsMQExemptedArea(zone->GetZoneID(), m_Position.x, m_Position.y, m_Position.z)) {
+		float distance = Distance(glm::vec3(m_Position), glm::vec3(ppu->x_pos, ppu->y_pos, ppu->z_pos));
+		if (distance >= 140.0f) {
+			CheatDetected(CheatTypes::MQWarp, ppu->x_pos, ppu->y_pos, ppu->z_pos);
+		}
+	} else {
+		cheat_timer.Disable();
+	}
 	/* Boat handling */
 	if (ppu->spawn_id != GetID()) {
 		/* If player is controlling boat */
@@ -14764,4 +14772,178 @@ void Client::Handle_OP_ResetAA(const EQApplicationPacket *app)
 		ResetAA();
 	}
 	return;
+}
+
+void Client::CheatDetected(CheatTypes CheatType, float x, float y, float z)
+{
+	switch (CheatType)
+	{
+	case MQWarp:
+		if (RuleB(Zone, EnableMQWarpDetector) && ((this->Admin() < RuleI(Zone, MQWarpExemptStatus) || (RuleI(Zone, MQWarpExemptStatus)) == -1)))
+		{
+			Message(13, "Large warp detected.");
+			char hString[250];
+			sprintf(hString, "/MQWarp with location %.2f, %.2f, %.2f", GetX(), GetY(), GetZ());
+			database.SetMQDetectionFlag(this->account_name, this->name, hString, zone->GetShortName());
+		}
+		break;
+	default:
+		char* hString = nullptr;
+		MakeAnyLenString(&hString, "Unhandled HackerDetection flag with location %.2f, %.2f, %.2f.", GetX(), GetY(), GetZ());
+		database.SetMQDetectionFlag(this->account_name, this->name, hString, zone->GetShortName());
+		safe_delete_array(hString);
+		break;
+	}
+}
+
+bool Client::IsMQExemptedArea(uint32 zoneID, float x, float y, float z)
+{
+	float max_dist = 90000;
+	switch (zoneID)
+	{
+	case 2:
+	{
+		float delta = (x - (-713.6));
+		delta *= delta;
+		float distance = delta;
+		delta = (y - (-160.2));
+		delta *= delta;
+		distance += delta;
+		delta = (z - (-12.8));
+		delta *= delta;
+		distance += delta;
+
+		if (distance < max_dist)
+			return true;
+
+		delta = (x - (-153.8));
+		delta *= delta;
+		distance = delta;
+		delta = (y - (-30.3));
+		delta *= delta;
+		distance += delta;
+		delta = (z - (8.2));
+		delta *= delta;
+		distance += delta;
+
+		if (distance < max_dist)
+			return true;
+
+		break;
+	}
+	case 9:
+	{
+		float delta = (x - (-682.5));
+		delta *= delta;
+		float distance = delta;
+		delta = (y - (147.0));
+		delta *= delta;
+		distance += delta;
+		delta = (z - (-9.9));
+		delta *= delta;
+		distance += delta;
+
+		if (distance < max_dist)
+			return true;
+
+		delta = (x - (-655.4));
+		delta *= delta;
+		distance = delta;
+		delta = (y - (10.5));
+		delta *= delta;
+		distance += delta;
+		delta = (z - (-51.8));
+		delta *= delta;
+		distance += delta;
+
+		if (distance < max_dist)
+			return true;
+
+		break;
+	}
+	case 62:
+	case 75:
+	case 114:
+	case 209:
+	{
+		//The portals are so common in paineel/felwitheb that checking
+		//distances wouldn't be worth it cause unless you're porting to the
+		//start field you're going to be triggering this and that's a level of
+		//accuracy I'm willing to sacrifice
+		return true;
+		break;
+	}
+
+	case 24:
+	{
+		float delta = (x - (-183.0));
+		delta *= delta;
+		float distance = delta;
+		delta = (y - (-773.3));
+		delta *= delta;
+		distance += delta;
+		delta = (z - (54.1));
+		delta *= delta;
+		distance += delta;
+
+		if (distance < max_dist)
+			return true;
+
+		delta = (x - (-8.8));
+		delta *= delta;
+		distance = delta;
+		delta = (y - (-394.1));
+		delta *= delta;
+		distance += delta;
+		delta = (z - (41.1));
+		delta *= delta;
+		distance += delta;
+
+		if (distance < max_dist)
+			return true;
+
+		delta = (x - (-310.3));
+		delta *= delta;
+		distance = delta;
+		delta = (y - (-1411.6));
+		delta *= delta;
+		distance += delta;
+		delta = (z - (-42.8));
+		delta *= delta;
+		distance += delta;
+
+		if (distance < max_dist)
+			return true;
+
+		delta = (x - (-183.1));
+		delta *= delta;
+		distance = delta;
+		delta = (y - (-1409.8));
+		delta *= delta;
+		distance += delta;
+		delta = (z - (37.1));
+		delta *= delta;
+		distance += delta;
+
+		if (distance < max_dist)
+			return true;
+
+		break;
+	}
+
+	case 110:
+	case 34:
+	case 96:
+	case 93:
+	case 68:
+	case 84:
+	{
+		if (GetBoatID() != 0)
+			return true;
+		break;
+	}
+	default:
+		break;
+	}
+	return false;
 }

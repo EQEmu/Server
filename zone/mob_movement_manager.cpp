@@ -584,7 +584,6 @@ void MobMovementManager::Teleport(Mob *who, float x, float y, float z, float hea
 	auto &ent = (*iter);
 	
 	ent.second.Commands.clear();
-
 	PushTeleportTo(ent.second, x, y, z, heading);
 }
 

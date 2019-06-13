@@ -68,6 +68,7 @@ enum class eSpecialAttacks : int {
 
 class Mob : public Entity {
 public:
+	Timer cheat_timer;
 	enum CLIENT_CONN_STATUS { CLIENT_CONNECTING, CLIENT_CONNECTED, CLIENT_LINKDEAD,
 						CLIENT_KICKED, DISCONNECTED, CLIENT_ERROR, CLIENT_CONNECTINGALL };
 	enum eStandingPetOrder { SPO_Follow, SPO_Sit, SPO_Guard };

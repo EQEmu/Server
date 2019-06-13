@@ -1655,6 +1655,8 @@ public:
 
 private:		
 #endif
+	void CheatDetected(CheatTypes CheatType, float x, float y, float z);
+	bool IsMQExemptedArea(uint32 zoneID, float x, float y, float z);
 };
 
 #endif
