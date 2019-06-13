@@ -1297,6 +1297,57 @@ XS(XS_Mob_FindBuff) {
 	XSRETURN(1);
 }
 
+XS(XS_Mob_FindBuffBySlot); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_FindBuffBySlot) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Mob::FindBuffBySlot(THIS, int slot)");
+	{
+		Mob *THIS;
+		uint16 RETVAL;
+		dXSTARG;
+		int slot = SvIV(ST(1));
+
+		if (sv_derived_from(ST(0), "Mob")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Mob *, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type Mob");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->FindBuffBySlot(slot);
+		XSprePUSH;
+		PUSHu((UV) RETVAL);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Mob_BuffCount); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_BuffCount) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Mob::BuffCount(THIS)");
+	{
+		Mob *THIS;
+		uint32  RETVAL;
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "Mob")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Mob *, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type Mob");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->BuffCount();
+		XSprePUSH;
+		PUSHu((UV) RETVAL);		
+	}
+	XSRETURN(1);
+}
+
 XS(XS_Mob_FindType); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_FindType) {
 	dXSARGS;
@@ -8581,6 +8632,8 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "IsInvisible"), XS_Mob_IsInvisible, file, "$;$");
 	newXSproto(strcpy(buf, "SetInvisible"), XS_Mob_SetInvisible, file, "$$");
 	newXSproto(strcpy(buf, "FindBuff"), XS_Mob_FindBuff, file, "$$");
+	newXSproto(strcpy(buf, "FindBuffBySlot"), XS_Mob_FindBuffBySlot, file, "$$");
+	newXSproto(strcpy(buf, "BuffCount"), XS_Mob_BuffCount, file, "$");
 	newXSproto(strcpy(buf, "FindType"), XS_Mob_FindType, file, "$$;$$");
 	newXSproto(strcpy(buf, "GetBuffSlotFromType"), XS_Mob_GetBuffSlotFromType, file, "$$");
 	newXSproto(strcpy(buf, "MakePet"), XS_Mob_MakePet, file, "$$$;$");
