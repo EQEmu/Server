@@ -1341,42 +1341,15 @@ struct ServerSharedTaskMember_Struct { // used for various things we just need t
 #define TASKJOINOOZ_LEVEL			3
 #define TASKJOINOOZ_TIMER			4
 
-#pragma pack()
-
 /*
  * Routing
  */
 
 struct RouteToMessage
 {
-	std::string filter;
-	std::string identifier;
-	std::string id;
-	size_t payload_size;
-
-	template <class Archive>
-	void serialize(Archive &ar)
-	{
-		ar(filter, identifier, id, payload_size);
-	}
+	char filter[32];
+	char identifier[32];
+	char id[32];
 };
 
-/*
- * Tasks
- */
-
-enum TaskMessageTypes
-{
-	TaskGetClientTaskState = 1
-};
-
-struct GetClientTaskStateRequest
-{
-	uint32 client_id;
-
-	template <class Archive>
-	void serialize(Archive &ar)
-	{
-		ar(client_id);
-	}
-};
+#pragma pack()

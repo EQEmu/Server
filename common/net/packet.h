@@ -8,6 +8,14 @@
 #include <cereal/cereal.hpp>
 #include <cereal/archives/binary.hpp>
 
+namespace google
+{
+	namespace protobuf
+	{
+		class Message;
+	}
+}
+
 namespace EQ {
 	namespace Net {
 		class StaticPacket;
@@ -65,6 +73,7 @@ namespace EQ {
 			void PutCString(size_t offset, const char *str);
 			void PutPacket(size_t offset, const Packet &p);
 			void PutData(size_t offset, void *data, size_t length);
+			void PutProtobuf(size_t offset, const google::protobuf::Message *msg);
 
 			int8_t GetInt8(size_t offset) const;
 			int16_t GetInt16(size_t offset) const;
@@ -79,6 +88,7 @@ namespace EQ {
 			std::string GetString(size_t offset, size_t length) const;
 			std::string GetCString(size_t offset) const;
 			StaticPacket GetPacket(size_t offset, size_t length) const;
+			google::protobuf::Message* GetProtobuf(size_t offset);
 
 			std::string ToString() const;
 			std::string ToString(size_t line_length) const;

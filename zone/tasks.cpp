@@ -471,14 +471,14 @@ bool TaskManager::SaveClientState(Client *c, ClientTaskState *state)
 }
 
 void Client::LoadClientTaskState() {
-	GetClientTaskStateRequest req;
-	req.client_id = CharacterID();
-
-	EQ::Net::DynamicPacket p;
-	p.PutInt32(0, TaskGetClientTaskState);
-	p.PutSerialize(4, req);
-
-	worldserver.RouteMessage("Tasks", "", p);
+	//GetClientTaskStateRequest req;
+	//req.client_id = CharacterID();
+	//
+	//EQ::Net::DynamicPacket p;
+	//p.PutInt32(0, TaskGetClientTaskState);
+	//p.PutSerialize(4, req);
+	//
+	//worldserver.RouteMessage("Tasks", "", p);
 }
 
 void Client::RemoveClientTaskState() {

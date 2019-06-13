@@ -1,0 +1,18 @@
+syntax = "proto3";
+import "google/protobuf/any.proto";
+
+package EQ.Proto;
+
+message TaskMessage {
+	int32 message = 1;
+	google.protobuf.Any details = 2;
+}
+
+message ClientTaskStateRequest {
+	int32 client_id = 1;
+}
+
+message ClientTaskStateResponse {
+	int32 client_id = 1;
+}
+

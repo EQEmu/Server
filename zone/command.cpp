@@ -39,6 +39,8 @@
 #include <ctime>
 #include <thread>
 
+#include <task.pb.h>
+
 #ifdef _WINDOWS
 #define strcasecmp _stricmp
 #endif
@@ -2831,9 +2833,12 @@ void command_spawn(Client *c, const Seperator *sep)
 
 void command_test(Client *c, const Seperator *sep)
 {
+	EQ::Proto::ClientTaskStateRequest req;
+	req.set_client_id(123);
+
 	EQ::Net::DynamicPacket p;
-	p.PutInt32(0, 1234);
-	p.PutCString(p.Length(), "TestPacket");
+	p.PutProtobuf(0, &req);
+
 	worldserver.RouteMessage("Tasks", "", p);
 
 	//c->Message(15, "Triggering test command");

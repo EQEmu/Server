@@ -1,5 +1,5 @@
 #include "router.h"
-#include <regex>
+#include "../common/string_util.h"
 
 Router::Router()
 {
@@ -30,55 +30,44 @@ void Router::RemoveConnection(std::shared_ptr<EQ::Net::ServertalkServerConnectio
 
 void Router::OnRouterMessage(std::shared_ptr<EQ::Net::ServertalkServerConnection> connection, uint16 opcode, const EQ::Net::Packet &p)
 {
-	auto msg = p.GetSerialize<RouteToMessage>(0);
-	auto payload_offset = p.Length() - msg.payload_size;
-	auto payload = p.GetPacket(payload_offset, msg.payload_size);
+	auto msg = (RouteToMessage*)p.Data();
+	char to_id[32];
+	strn0cpy(to_id, msg->id, 32);
 
-	auto out_msg = msg;
-	out_msg.identifier = connection->GetIdentifier();
-	out_msg.id = connection->GetUUID();
+	strn0cpy(msg->id, connection->GetUUID().c_str(), 32);
 
-	EQ::Net::DynamicPacket out;
-	out.PutSerialize(0, out_msg);
-	out.PutPacket(out.Length(), payload);
 
-	if (!msg.id.empty() && !msg.filter.empty()) {
-		auto id_regex = std::regex(msg.id);
-		auto filter_regex = std::regex(msg.filter);
-
+	if (to_id[0] != '\0' && msg->filter[0] != '\0') {
 		for (auto &connection : m_connections) {
 			auto id = connection->GetUUID();
 			auto identifier = connection->GetIdentifier();
-			if (std::regex_match(id, id_regex)) {
-				connection->Send(ServerOP_RouteTo, out);
+			if (strcmp(to_id, id.c_str()) == 0) {
+				connection->Send(ServerOP_RouteTo, p);
 			}
-			else if (std::regex_match(identifier, filter_regex)) {
-				connection->Send(ServerOP_RouteTo, out);
+			else if (strcmp(msg->filter, identifier.c_str()) == 0) {
+				connection->Send(ServerOP_RouteTo, p);
 			}
 		}
 	}
-	else if (!msg.id.empty()) {
-		auto id_regex = std::regex(msg.id);
-
-		for (auto &connection : m_connections) {
-			auto id = connection->GetUUID();
-			if (std::regex_match(id, id_regex)) {
-				connection->Send(ServerOP_RouteTo, out);
-			}
-		}
-	} else if (!msg.filter.empty()) {
-		auto filter_regex = std::regex(msg.filter);
-
+	else if (msg->filter[0] != '\0') {
 		for (auto &connection : m_connections) {
 			auto identifier = connection->GetIdentifier();
-			if (std::regex_match(identifier, filter_regex)) {
-				connection->Send(ServerOP_RouteTo, out);
+			if (strcmp(msg->filter, identifier.c_str()) == 0) {
+				connection->Send(ServerOP_RouteTo, p);
+			}
+		}
+	}
+	else if (to_id[0] != '\0') {
+		for (auto &connection : m_connections) {
+			auto id = connection->GetUUID();
+			if (strcmp(to_id, id.c_str()) == 0) {
+				connection->Send(ServerOP_RouteTo, p);
 			}
 		}
 	}
 	else {
 		for (auto &connection : m_connections) {
-			connection->Send(ServerOP_RouteTo, out);
+			connection->Send(ServerOP_RouteTo, p);
 		}
 	}
 }

@@ -383,7 +383,12 @@ SOURCE_GROUP(Util FILES
 
 INCLUDE_DIRECTORIES(Patches SocketLib StackWalker TinyXML)
 
-ADD_LIBRARY(common ${common_sources} ${common_headers})
+protobuf_generate_cpp(PROTO_TASK_SRCS PROTO_TASK_HDRS "${CMAKE_CURRENT_SOURCE_DIR}/proto/task.proto")
+
+ADD_LIBRARY(common 
+	${common_sources} ${common_headers} 
+	${PROTO_TASK_SRCS} ${PROTO_TASK_HDRS}
+)
 
 IF(UNIX)
 	SET_SOURCE_FILES_PROPERTIES("SocketLib/Mime.cpp" PROPERTY COMPILE_FLAGS -Wno-unused-result)

@@ -2,6 +2,7 @@
 #include "endian.h"
 #include <fmt/format.h>
 #include <cctype>
+#include <google/protobuf/message.h>
 
 void EQ::Net::Packet::PutInt8(size_t offset, int8_t value)
 {
@@ -165,6 +166,23 @@ void EQ::Net::Packet::PutData(size_t offset, void *data, size_t length)
 	}
 
 	memcpy(((char*)Data() + offset), data, length);
+}
+
+void EQ::Net::Packet::PutProtobuf(size_t offset, const google::protobuf::Message *msg)
+{
+	auto length = msg->ByteSizeLong();
+
+	if (length == 0) {
+		return;
+	}
+
+	if (Length() < offset + length) {
+		if (!Resize(offset + length)) {
+			throw std::out_of_range("Packet::PutProtobuf(), could not resize packet and would of written past the end.");
+		}
+	}
+
+	msg->SerializeToArray((void*)((char*)Data() + offset), (int)length);
 }
 
 int8_t EQ::Net::Packet::GetInt8(size_t offset) const

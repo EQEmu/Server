@@ -49,6 +49,7 @@ void EQ::Service::Run()
 		auto now = std::chrono::steady_clock::now();
 		auto time_since = std::chrono::duration_cast<std::chrono::duration<double>>(now - _impl->last_time);
 		OnHeartbeat(time_since.count());
+		_impl->last_time = now;
 	}));
 
 	auto &loop = EQ::EventLoop::Get();

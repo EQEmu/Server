@@ -45,15 +45,15 @@ void EQ::WorldConnection::RouteMessage(const std::string &filter, const std::str
 	auto identifier = m_connection->GetIdentifier();
 
 	RouteToMessage msg;
-	msg.filter = filter;
-	msg.identifier = identifier;
-	msg.id = id;
-	msg.payload_size = payload.Length();
+	strn0cpy(msg.filter, filter.c_str(), 32);
+	strn0cpy(msg.identifier, identifier.c_str(), 32);
+	strn0cpy(msg.id, id.c_str(), 32);
 
 	EQ::Net::DynamicPacket out;
-	out.PutSerialize(0, msg);
-	out.PutPacket(out.Length(), payload);
-
+	out.Reserve(sizeof(RouteToMessage) + payload.Length());
+	out.PutData(0, &msg, sizeof(RouteToMessage));
+	out.PutPacket(sizeof(RouteToMessage), payload);
+	
 	m_connection->Send(ServerOP_RouteTo, out);
 }
 
@@ -67,10 +67,9 @@ void EQ::WorldConnection::_HandleMessage(uint16 opcode, const EQ::Net::Packet &p
 void EQ::WorldConnection::_HandleRoutedMessage(uint16 opcode, const EQ::Net::Packet &p)
 {
 	if (m_on_routed_message) {
-		auto msg = p.GetSerialize<RouteToMessage>(0);
-		auto payload_offset = p.Length() - msg.payload_size;
-		auto payload = p.GetPacket(payload_offset, msg.payload_size);
+		auto msg = (RouteToMessage*)p.Data();
+		auto payload = p.GetPacket(sizeof(RouteToMessage), p.Length() - sizeof(RouteToMessage));
 
-		m_on_routed_message(msg.filter, msg.identifier, msg.id, payload);
+		m_on_routed_message(msg->filter, msg->identifier, msg->id, payload);
 	}
 }

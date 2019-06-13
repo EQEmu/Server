@@ -5,10 +5,6 @@
 #include <vector>
 #include <map>
 
-#ifdef ENABLE_SECURITY
-#include <sodium.h>
-#endif
-
 namespace EQ
 {
 	namespace Net
@@ -22,13 +18,8 @@ namespace EQ
 			std::string credentials;
 
 			ServertalkServerOptions() {
-#ifdef ENABLE_SECURITY
-				encrypted = true;
-				allow_downgrade = true;
-#else
 				encrypted = false;
 				allow_downgrade = true;
-#endif
 				ipv6 = false;
 			}
 		};

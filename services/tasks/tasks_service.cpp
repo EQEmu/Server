@@ -50,19 +50,21 @@ void EQ::TasksService::OnHeartbeat(double time_since_last) {
 
 void EQ::TasksService::OnRoutedMessage(const std::string& filter, const std::string& identifier, const std::string& id, const EQ::Net::Packet& payload)
 {
-	auto msg_type = payload.GetInt32(0);
+	LogF(Logs::General, Logs::Status, "On routed message with payload size {0}", payload.Length());
 
-	switch (msg_type) {
-	case TaskGetClientTaskState:
-	{
-		Log(Logs::General, Logs::Status, "Task state request");
-		auto req = payload.GetSerialize<GetClientTaskStateRequest>(4);
-		//Get the task state request
-		break;
-	}
-	default:
-		break;
-	}
+	//auto msg_type = payload.GetInt32(0);
+	//
+	//switch (msg_type) {
+	//case TaskGetClientTaskState:
+	//{
+	//	Log(Logs::General, Logs::Status, "Task state request");
+	//	auto req = payload.GetSerialize<GetClientTaskStateRequest>(4);
+	//	//Get the task state request
+	//	break;
+	//}
+	//default:
+	//	break;
+	//}
 }
 
 EQRegisterService(EQ::TasksService);
