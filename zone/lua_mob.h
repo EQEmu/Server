@@ -404,6 +404,7 @@ public:
 	bool IsAmnesiad();
 	int32 GetMeleeMitigation();
 	int GetWeaponDamageBonus(Lua_Item weapon, bool offhand);
+	int GetItemStat(uint32 itemid, const char* identifier);
 	Lua_StatBonuses GetItemBonuses();
 	Lua_StatBonuses GetSpellBonuses();
 	Lua_StatBonuses GetAABonuses();
