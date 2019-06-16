@@ -5056,6 +5056,23 @@ void Client::UnmemSpellAll(bool update_client)
 			UnmemSpell(i, update_client);
 }
 
+uint16 Client::FindMemmedSpellBySlot(int slot) {
+	if (m_pp.mem_spells[slot] != 0xFFFFFFFF)
+		return m_pp.mem_spells[slot];
+	
+	return 0;
+}
+
+int Client::MemmedCount() {
+	int memmed_count = 0;
+	for (int i = 0; i < EQEmu::spells::SPELL_GEM_COUNT; i++)
+		if (m_pp.mem_spells[i] != 0xFFFFFFFF)
+			memmed_count++;
+		
+	return memmed_count;
+}
+
+
 void Client::ScribeSpell(uint16 spell_id, int slot, bool update_client)
 {
 	if(slot >= EQEmu::spells::SPELLBOOK_SIZE || slot < 0)
