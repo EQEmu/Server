@@ -2101,6 +2101,11 @@ int Lua_Mob::GetWeaponDamageBonus(Lua_Item weapon, bool offhand) {
 	return self->GetWeaponDamageBonus(weapon, offhand);
 }
 
+int Lua_Mob::GetItemStat(uint32 itemid, const char* identifier) {
+	Lua_Safe_Call_Int();
+	return self->GetItemStat(itemid, identifier);
+}
+
 Lua_StatBonuses Lua_Mob::GetItemBonuses()
 {
 	Lua_Safe_Call_Class(Lua_StatBonuses);
@@ -2260,6 +2265,7 @@ luabind::scope lua_register_mob() {
 		.def("IsWarriorClass", &Lua_Mob::IsWarriorClass)
 		.def("GetHP", &Lua_Mob::GetHP)
 		.def("GetMaxHP", &Lua_Mob::GetMaxHP)
+		.def("GetItemStat", (int(Lua_Mob::*)(uint32,const char*))&Lua_Mob::GetItemStat)
 		.def("GetItemHPBonuses", &Lua_Mob::GetItemHPBonuses)
 		.def("GetSpellHPBonuses", &Lua_Mob::GetSpellHPBonuses)
 		.def("GetWalkspeed", &Lua_Mob::GetWalkspeed)
