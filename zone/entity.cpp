@@ -286,6 +286,17 @@ Bot *Entity::CastToBot()
 #endif
 	return static_cast<Bot *>(this);
 }
+
+const Bot *Entity::CastToBot() const
+{
+#ifdef _EQDEBUG
+	if (!IsBot()) {
+		std::cout << "CastToBot error" << std::endl;
+		return 0;
+	}
+#endif
+	return static_cast<const Bot *>(this);
+}
 #endif
 
 EntityList::EntityList()

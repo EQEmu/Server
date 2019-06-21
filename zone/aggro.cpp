@@ -735,6 +735,7 @@ type', in which case, the answer is yes.
 		}
 
 #ifdef BOTS
+		// this is HIGHLY inefficient
 		bool HasRuleDefined = false;
 		bool IsBotAttackAllowed = false;
 		IsBotAttackAllowed = Bot::IsBotAttackAllowed(mob1, mob2, HasRuleDefined);
