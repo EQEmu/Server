@@ -544,6 +544,7 @@ int main(int argc, char** argv) {
 		if (InterserverTimer.Check()) {
 			InterserverTimer.Start();
 			database.ping();
+			botdb.ping();
 			entity_list.UpdateWho();
 		}
 	};
