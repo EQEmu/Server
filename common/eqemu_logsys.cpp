@@ -33,7 +33,7 @@
 
 std::ofstream process_log;
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 #include <direct.h>
 #include <conio.h>
 #include <iostream>
@@ -331,7 +331,7 @@ uint16 EQEmuLogSys::GetGMSayColorFromCategory(uint16 log_category)
  */
 void EQEmuLogSys::ProcessConsoleMessage(uint16 debug_level, uint16 log_category, const std::string &message)
 {
-#ifdef _WINDOWS
+#ifdef _WIN32
 	HANDLE  console_handle;
 	console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
 	CONSOLE_FONT_INFOEX info = { 0 };
@@ -413,7 +413,7 @@ void EQEmuLogSys::SetCurrentTimeStamp(char *time_stamp)
  */
 void EQEmuLogSys::MakeDirectory(const std::string &directory_name)
 {
-#ifdef _WINDOWS
+#ifdef _WIN32
 	struct _stat st;
 	if (_stat(directory_name.c_str(), &st) == 0) // exists
 		return;

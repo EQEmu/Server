@@ -9,7 +9,7 @@
  * 2013-01-26          - Modified by KimLS(KLS) for EQEmu's purposes
  *
  **********************************************************************/
-#ifdef _WINDOWS
+#ifdef _WIN32
 // #pragma once is supported starting with _MCS_VER 1000, 
 // so we need not to check the version (because we only support _MSC_VER >= 1100)!
 #pragma once

@@ -1,4 +1,4 @@
-#ifdef _WINDOWS
+#ifdef _WIN32
 	// VS6 doesn't like the length of STL generated names: disabling
 	#pragma warning(disable:4786)
 #endif
@@ -10,7 +10,7 @@
 #include <iostream>
 #include <zlib.h>
 
-#ifndef WIN32
+#ifndef _WIN32
 #include <sys/time.h>
 #endif
 
@@ -24,7 +24,7 @@
 
 std::map<int,std::string> DBFieldNames;
 
-#ifndef WIN32
+#ifndef _WIN32
 #if defined(FREEBSD) || defined(__CYGWIN__)
 int print_stacktrace()
 {
@@ -526,7 +526,7 @@ std::string generate_key(int length)
 {
 std::string key;
 //TODO: write this for win32...
-#ifndef WIN32
+#ifndef _WIN32
 int i;
 timeval now;
 	static const char *chars="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";

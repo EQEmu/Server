@@ -21,7 +21,7 @@
 #include "map.h"
 #include "zone.h"
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 #define snprintf	_snprintf
 #endif
 

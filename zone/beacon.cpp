@@ -25,7 +25,7 @@ target to center around.
 
 class Zone;
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	#if (!defined(_MSC_VER) || (defined(_MSC_VER) && _MSC_VER < 1900))
 		#define snprintf	_snprintf
 		#define vsnprintf	_vsnprintf

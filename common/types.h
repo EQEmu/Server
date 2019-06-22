@@ -29,7 +29,7 @@ typedef int16_t int16;
 typedef int32_t int32;
 typedef int64_t int64;
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	#pragma warning( disable : 4200 )
 #endif
 
@@ -42,7 +42,7 @@ typedef unsigned short		ushort;
 typedef unsigned char		uchar;
 typedef const char Const_char;	//for perl XS
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	#if (!defined(_MSC_VER) || (defined(_MSC_VER) && _MSC_VER < 1900))
 		#define snprintf	_snprintf
 	#endif
@@ -61,7 +61,7 @@ typedef const char Const_char;	//for perl XS
 #define H32(i)	((uint32) (i >> 32))
 #define L16(i)	((uint16) i)
 
-#ifndef WIN32
+#ifndef _WIN32
 // More WIN32 compatability
 	typedef unsigned long DWORD;
 	typedef unsigned char BYTE;
@@ -79,14 +79,14 @@ typedef const char Const_char;	//for perl XS
 #endif
 
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 #define DLLFUNC extern "C" __declspec(dllexport)
 #else
 #define DLLFUNC extern "C"
 #endif
 
 // htonll and ntohll already defined on windows
-#ifndef WIN32
+#ifndef _WIN32
 #	if defined(__linux__)
 #		include <endian.h>
 #	elif defined(__FreeBSD__) || defined(__NetBSD__)

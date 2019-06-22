@@ -18,7 +18,7 @@
 
 
 // Disgrace: for windows compile
-#ifndef WIN32
+#ifndef _WIN32
 	#include <sys/time.h>
 #else
 	#include <sys/timeb.h>
@@ -64,7 +64,7 @@ Timer::Timer(uint32 start, uint32 timer, bool iUseAcurateTiming = false) {
 }
 
 /* Reimplemented for MSVC - Bounce */
-#ifdef _WINDOWS
+#ifdef _WIN32
 int gettimeofday (timeval *tp, ...)
 {
 	timeb tb;

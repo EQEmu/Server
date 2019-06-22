@@ -18,13 +18,13 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include "../common/global_define.h"
 #include "../common/eqemu_logsys.h"
 #include <string.h>
-#ifdef _WINDOWS
+#ifdef _WIN32
 #include <process.h>
 #else
 #include <pthread.h>
 #endif
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	#define snprintf	_snprintf
 	#define strncasecmp	_strnicmp
 	#define strcasecmp	_stricmp

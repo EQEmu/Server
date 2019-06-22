@@ -18,7 +18,7 @@
 #ifndef SERVERINFO_H
 #define SERVERINFO_H
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	extern char Ver_name[36];
 	extern DWORD Ver_build, Ver_min, Ver_maj, Ver_pid;
 	int GetOS();

@@ -36,7 +36,7 @@
 
 EQEmuLogSys LogSys;
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 #include <direct.h>
 #else
 #include <unistd.h>
@@ -45,7 +45,7 @@ EQEmuLogSys LogSys;
 
 inline bool MakeDirectory(const std::string &directory_name)
 {
-#ifdef _WINDOWS
+#ifdef _WIN32
 	struct _stat st;
 	if (_stat(directory_name.c_str(), &st) == 0) {
 		return false;

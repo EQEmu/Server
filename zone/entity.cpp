@@ -22,7 +22,7 @@
 #include <string.h>
 #include <iostream>
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 #include <process.h>
 #else
 #include <pthread.h>
@@ -43,7 +43,7 @@
 #include "npc_scale_manager.h"
 #include "../common/say_link.h"
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	#define snprintf	_snprintf
 	#define strncasecmp	_strnicmp
 	#define strcasecmp	_stricmp
@@ -532,7 +532,7 @@ void EntityList::MobProcess()
 				entity_list.RemoveNPC(id);
 			}
 			else {
-#ifdef _WINDOWS
+#ifdef _WIN32
 				struct in_addr in;
 				in.s_addr = mob->CastToClient()->GetIP();
 				Log(Logs::General, Logs::Zone_Server, "Dropping client: Process=false, ip=%s port=%u", inet_ntoa(in), mob->CastToClient()->GetPort());
@@ -2688,7 +2688,7 @@ char *EntityList::MakeNameUnique(char *name)
 	}
 	for (int i=0; i < 300; i++) {
 		if (!used[i]) {
-			#ifdef _WINDOWS
+			#ifdef _WIN32
 			snprintf(name, 64, "%s%03d", name, i);
 			#else
 			//glibc clears destination of snprintf

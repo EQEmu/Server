@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include <zlib.h>
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	#include <winsock2.h>
 	#include <windows.h>
 	#define snprintf	_snprintf

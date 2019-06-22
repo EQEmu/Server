@@ -1,7 +1,7 @@
 #ifndef MYSQL_REQUEST_RESULT_H
 #define MYSQL_REQUEST_RESULT_H
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	#include <winsock2.h>
 	#include <windows.h>
 #endif

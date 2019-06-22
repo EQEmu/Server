@@ -22,19 +22,19 @@
 #include <string.h>
 #include <time.h>
 
-#ifndef WIN32
+#ifndef _WIN32
 #include <netinet/in.h>
 #include <sys/socket.h>
 #endif
 #include <iostream>
 #include <iomanip>
-#ifdef _WINDOWS
+#ifdef _WIN32
 	#include <io.h>
 #endif
 #include "../common/timer.h"
 #include "../common/seperator.h"
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	#include <windows.h>
 
 	#define snprintf	_snprintf
@@ -73,7 +73,7 @@ void CoutTimestamp(bool ms) {
 
 
 int32 filesize(FILE* fp) {
-#ifdef _WINDOWS
+#ifdef _WIN32
 	return _filelength(_fileno(fp));
 #else
 	struct stat file_stat;
@@ -88,7 +88,7 @@ int32 filesize(FILE* fp) {
 }
 
 uint32 ResolveIP(const char* hostname, char* errbuf) {
-#ifdef _WINDOWS
+#ifdef _WIN32
 	static InitWinsock ws;
 #endif
 	if (errbuf)
@@ -99,14 +99,14 @@ uint32 ResolveIP(const char* hostname, char* errbuf) {
 		return 0;
 	}
 	struct sockaddr_in	server_sin;
-#ifdef _WINDOWS
+#ifdef _WIN32
 	PHOSTENT phostent = nullptr;
 #else
 	struct hostent *phostent = nullptr;
 #endif
 	server_sin.sin_family = AF_INET;
 	if ((phostent = gethostbyname(hostname)) == nullptr) {
-#ifdef _WINDOWS
+#ifdef _WIN32
 		if (errbuf)
 			snprintf(errbuf, ERRBUF_SIZE, "Unable to get the host name. Error: %i", WSAGetLastError());
 #else
@@ -115,7 +115,7 @@ uint32 ResolveIP(const char* hostname, char* errbuf) {
 #endif
 		return 0;
 	}
-#ifdef _WINDOWS
+#ifdef _WIN32
 	memcpy ((char FAR *)&(server_sin.sin_addr), phostent->h_addr, phostent->h_length);
 #else
 	memcpy ((char*)&(server_sin.sin_addr), phostent->h_addr, phostent->h_length);
@@ -136,7 +136,7 @@ bool ParseAddress(const char* iAddress, uint32* oIP, uint16* oPort, char* errbuf
 	return false;
 }
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 InitWinsock::InitWinsock() {
 	WORD version = MAKEWORD (1,1);
 	WSADATA wsadata;
@@ -157,7 +157,7 @@ const char * itoa(int num) {
 		return temp;
 }
 
-#ifndef WIN32
+#ifndef _WIN32
 const char * itoa(int num, char* a,int b) {
 		static char temp[_ITOA_BUFLEN];
 		memset(temp,0,_ITOA_BUFLEN);

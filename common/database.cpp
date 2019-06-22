@@ -30,7 +30,7 @@
 #include <string.h>
 
 // Disgrace: for windows compile
-#ifdef _WINDOWS
+#ifdef _WIN32
 #include <windows.h>
 #define snprintf	_snprintf
 #define strncasecmp	_strnicmp

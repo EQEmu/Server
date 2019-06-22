@@ -1,4 +1,4 @@
-#ifdef _WINDOWS
+#ifdef _WIN32
 #include <winsock2.h>
 #endif
 
@@ -13,7 +13,7 @@
 #include <mysqld_error.h>
 #include <string.h>
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	#define snprintf	_snprintf
 	#define strncasecmp	_strnicmp
 	#define strcasecmp	_stricmp

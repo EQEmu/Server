@@ -17,7 +17,7 @@
 */
 
 #include "ipc_mutex.h"
-#ifdef _WINDOWS
+#ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #undef WIN32_LEAN_AND_MEAN
@@ -33,7 +33,7 @@
 
 namespace EQEmu {
 	struct IPCMutex::Implementation {
-#ifdef _WINDOWS
+#ifdef _WIN32
 		HANDLE mut_;
 #else
 		int fd_;
@@ -42,7 +42,7 @@ namespace EQEmu {
 
 	IPCMutex::IPCMutex(std::string name) : locked_(false) {
 		imp_ = new Implementation;
-#ifdef _WINDOWS
+#ifdef _WIN32
 		auto Config = EQEmuConfig::get();
 		std::string final_name = Config->SharedMemDir + "EQEmuMutex_";
 		final_name += name;
@@ -82,7 +82,7 @@ namespace EQEmu {
 	}
 
 	IPCMutex::~IPCMutex() {
-#ifdef _WINDOWS
+#ifdef _WIN32
 		if(locked_) {
 			ReleaseMutex(imp_->mut_);
 		}
@@ -103,7 +103,7 @@ namespace EQEmu {
 			return false;
 		}
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 		DWORD wait_result = WaitForSingleObject(imp_->mut_, INFINITE);
 		if(wait_result != WAIT_OBJECT_0) {
 			return false;
@@ -121,7 +121,7 @@ namespace EQEmu {
 		if(!locked_) {
 			return false;
 		}
-#ifdef _WINDOWS
+#ifdef _WIN32
 		if(!ReleaseMutex(imp_->mut_)) {
 			return false;
 		}

@@ -77,7 +77,7 @@ uint32 Catch22(uint32 mask);
 
 #define _ITOA_BUFLEN	25
 const char *itoa(int num);	//not thread safe
-#ifndef _WINDOWS
+#ifndef _WIN32
 const char *itoa(int num, char* a,int b);
 #endif
 

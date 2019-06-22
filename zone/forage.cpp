@@ -33,7 +33,7 @@
 
 #include <iostream>
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 #define snprintf	_snprintf
 #endif
 

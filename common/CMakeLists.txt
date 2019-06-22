@@ -1,5 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
-
+CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
 SET(common_sources
 	base_packet.cpp
 	classes.cpp

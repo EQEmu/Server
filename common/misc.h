@@ -24,7 +24,7 @@ void decode(char *in, char *out);
 void encode_chunk(char *in, int len, char *out);
 void decode_chunk(char *in, char *out);
 
-#ifndef WIN32
+#ifndef _WIN32
 int print_stacktrace();
 #endif
 

@@ -25,7 +25,7 @@
 
 #endif
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 bool IsTryLockSupported();
 bool TrylockSupported = IsTryLockSupported();
 
@@ -69,7 +69,7 @@ Mutex::Mutex() {
 #if DEBUG_MUTEX_CLASS >= 7
 	std::cout << "Constructing Mutex" << std::endl;
 #endif
-#ifdef _WINDOWS
+#ifdef _WIN32
     InitializeCriticalSection(&CSMutex);
 #else
     pthread_mutexattr_t attr;
@@ -85,7 +85,7 @@ Mutex::Mutex() {
 }
 
 Mutex::~Mutex() {
-#ifdef _WINDOWS
+#ifdef _WIN32
 	DeleteCriticalSection(&CSMutex);
 #else
 #endif
@@ -95,14 +95,14 @@ void Mutex::lock() {
 #if DEBUG_MUTEX_CLASS >= 5
 	if (!trylock()) {
 		std::cout << "Locking Mutex: Having to wait" << std::endl;
-		#ifdef _WINDOWS
+		#ifdef _WIN32
 			EnterCriticalSection(&CSMutex);
 		#else
 			pthread_mutex_lock(&CSMutex);
 		#endif
 	}
 #else
-	#ifdef _WINDOWS
+	#ifdef _WIN32
 		EnterCriticalSection(&CSMutex);
 	#else
 		pthread_mutex_lock(&CSMutex);
@@ -111,7 +111,7 @@ void Mutex::lock() {
 }
 
 bool Mutex::trylock() {
-#ifdef _WINDOWS
+#ifdef _WIN32
 	#if(_WIN32_WINNT >= 0x0400)
 		if (TrylockSupported)
 			return TryEnterCriticalSection(&CSMutex);
@@ -129,7 +129,7 @@ bool Mutex::trylock() {
 }
 
 void Mutex::unlock() {
-#ifdef _WINDOWS
+#ifdef _WIN32
 	LeaveCriticalSection(&CSMutex);
 #else
 	pthread_mutex_unlock(&CSMutex);

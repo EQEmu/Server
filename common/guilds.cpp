@@ -23,6 +23,6 @@
 #include "eq_packet_structs.h"
 
 
-#ifndef WIN32
+#ifndef _WIN32
 #include <netinet/in.h>	//for htonl
 #endif

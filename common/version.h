@@ -40,7 +40,7 @@
 #endif
 #define COMPILE_DATE	__DATE__
 #define COMPILE_TIME	__TIME__
-#ifndef WIN32
+#ifndef _WIN32
 	#define LAST_MODIFIED	__TIME__
 #else
 	#define LAST_MODIFIED	__TIMESTAMP__

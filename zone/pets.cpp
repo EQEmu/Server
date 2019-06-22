@@ -34,7 +34,7 @@
 #include "bot.h"
 #endif
 
-#ifndef WIN32
+#ifndef _WIN32
 #include <stdlib.h>
 #include "../common/unix.h"
 #endif

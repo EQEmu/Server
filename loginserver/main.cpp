@@ -167,7 +167,7 @@ int main()
 		return 1;
 	}
 
-#ifdef WIN32
+#ifdef _WIN32
 #ifdef UNICODE
 	SetConsoleTitle(L"EQEmu Login Server");
 #else

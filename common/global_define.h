@@ -17,7 +17,7 @@
 */
 
 // WHY IS THIS UP HERE
-#if defined(_DEBUG) && defined(WIN32)
+#if defined(_DEBUG) && defined(_WIN32)
 	#ifndef _CRTDBG_MAP_ALLOC
 		#include <stdlib.h>
 		#include <crtdbg.h>
@@ -27,7 +27,7 @@
 #ifndef EQDEBUG_H
 #define EQDEBUG_H
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	#include <winsock2.h>
 	#include <windows.h>
 #endif

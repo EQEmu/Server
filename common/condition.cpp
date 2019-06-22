@@ -18,7 +18,7 @@
 
 #include "condition.h"
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 
 	Condition::Condition()
 	{

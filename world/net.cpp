@@ -41,7 +41,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/crash.h"
 #include "client.h"
 #include "worlddb.h"
-#ifdef _WINDOWS
+#ifdef _WIN32
 #include <process.h>
 #define snprintf	_snprintf
 #define strncasecmp	_strnicmp
@@ -108,7 +108,7 @@ void CatchSignal(int sig_num);
 void CheckForServerScript(bool force_download = false);
 
 inline void UpdateWindowTitle(std::string new_title) {
-#ifdef _WINDOWS
+#ifdef _WIN32
 	SetConsoleTitle(new_title.c_str());
 #endif
 }
@@ -160,7 +160,7 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
-#ifndef WIN32
+#ifndef _WIN32
 	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR) {
 		Log(Logs::General, Logs::World_Server, "Could not set signal handler");
 		return 1;
@@ -604,7 +604,7 @@ void CatchSignal(int sig_num) {
 }
 
 void UpdateWindowTitle(char* iNewTitle) {
-#ifdef _WINDOWS
+#ifdef _WIN32
 	char tmp[500];
 	if (iNewTitle) {
 		snprintf(tmp, sizeof(tmp), "World: %s", iNewTitle);

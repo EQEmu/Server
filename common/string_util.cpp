@@ -17,7 +17,7 @@
 #include "string_util.h"
 #include <algorithm>
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	#include <windows.h>
 
 	#define snprintf	_snprintf

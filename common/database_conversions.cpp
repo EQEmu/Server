@@ -28,7 +28,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include <iostream>
 
 // Disgrace: for windows compile
-#ifdef _WINDOWS
+#ifdef _WIN32
 #include <windows.h>
 #define snprintf	_snprintf
 #define strncasecmp	_strnicmp

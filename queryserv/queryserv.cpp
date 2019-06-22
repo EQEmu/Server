@@ -106,7 +106,7 @@ int main() {
 }
 
 void UpdateWindowTitle(char* iNewTitle) {
-#ifdef _WINDOWS
+#ifdef _WIN32
 	char tmp[500];
 	if (iNewTitle) {
 		snprintf(tmp, sizeof(tmp), "QueryServ: %s", iNewTitle);

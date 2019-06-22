@@ -2,7 +2,7 @@
 #include "eqemu_logsys.h"
 #include "crash.h"
 
-#if defined(_WINDOWS) && defined(CRASH_LOGGING)
+#if defined(_WIN32) && defined(CRASH_LOGGING)
 #include "StackWalker.h"
 
 class EQEmuStackWalker : public StackWalker

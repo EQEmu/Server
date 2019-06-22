@@ -22,7 +22,7 @@
 #include <stdio.h>
 
 // for windows compile
-#ifndef _WINDOWS
+#ifndef _WIN32
 	#include <stdarg.h>
 	#include <sys/socket.h>
 	#include <netinet/in.h>

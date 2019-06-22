@@ -5,12 +5,12 @@
 #include <EXTERN.h>
 #define WIN32IO_IS_STDIO
 
-#ifndef WIN32
+#ifndef _WIN32
 extern "C" {	//the perl headers dont do this for us...
 #endif
 #include <perl.h>
 #include <XSUB.h>
-#ifndef WIN32
+#ifndef _WIN32
 };
 #endif
 

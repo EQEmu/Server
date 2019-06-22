@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 #define	snprintf	_snprintf
 #define	vsnprintf	_vsnprintf
 #else
@@ -60,7 +60,7 @@
 #include <ctime>
 #include <iostream>
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 #define snprintf	_snprintf
 #define strncasecmp	_strnicmp
 #define strcasecmp	_stricmp

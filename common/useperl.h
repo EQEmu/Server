@@ -10,16 +10,16 @@
 // this doesn't do shit for C++ but libc++ and GCC 6.1+ use it to define some macros
 #include <ciso646>
 
-#ifndef WIN32
+#ifndef _WIN32
 extern "C" {	//the perl headers dont do this for us...
 #endif
 #include <perl.h>
 #include <XSUB.h>
-#ifndef WIN32
+#ifndef _WIN32
 };
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
 #ifndef snprintf
 #define snprintf _snprintf
 #endif

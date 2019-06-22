@@ -23,7 +23,7 @@
 #include "packet_dump.h"
 #include "packet_functions.h"
 
-#ifndef WIN32
+#ifndef _WIN32
 	#include <netinet/in.h>
 #endif
 

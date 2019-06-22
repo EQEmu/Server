@@ -41,7 +41,7 @@
 #include <ctime>
 #include <thread>
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 #define strcasecmp _stricmp
 #endif
 

@@ -39,7 +39,7 @@
 #include <ctime>
 #include <thread>
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 #define strcasecmp _stricmp
 #endif
 
@@ -844,7 +844,7 @@ void command_setanim(Client *c, const Seperator *sep)
 
 void command_serverinfo(Client *c, const Seperator *sep)
 {
-#ifdef _WINDOWS
+#ifdef _WIN32
 	char intbuffer [sizeof(unsigned long)];
 	c->Message(0, "Operating system information.");
 	c->Message(0, "	%s",  Ver_name);
@@ -11815,7 +11815,7 @@ void command_hotfix(Client *c, const Seperator *sep) {
 
 	c->Message(0, "Creating and applying hotfix");
 	std::thread t1([c,hotfix_name]() {
-#ifdef WIN32
+#ifdef _WIN32
 		if(hotfix_name.length() > 0) {
 			system(StringFormat("shared_memory -hotfix=%s", hotfix_name.c_str()).c_str());
 		} else {
@@ -11856,7 +11856,7 @@ void command_load_shared_memory(Client *c, const Seperator *sep) {
 	hotfix_name = sep->arg[1];
 	c->Message(0, "Loading shared memory segment %s", hotfix_name.c_str());
 	std::thread t1([c,hotfix_name]() {
-#ifdef WIN32
+#ifdef _WIN32
 		if(hotfix_name.length() > 0) {
 			system(StringFormat("shared_memory -hotfix=%s", hotfix_name.c_str()).c_str());
 		} else {

@@ -77,7 +77,7 @@
 #include "classes.h"
 #include "spdat.h"
 
-#ifndef WIN32
+#ifndef _WIN32
 #include <stdlib.h>
 #include "unix.h"
 #endif

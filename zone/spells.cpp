@@ -87,7 +87,7 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include <math.h>
 #include <algorithm>
 
-#ifndef WIN32
+#ifndef _WIN32
 	#include <stdlib.h>
 	#include "../common/unix.h"
 #endif

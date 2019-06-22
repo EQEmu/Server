@@ -121,11 +121,8 @@ private:
 
 	int	m_activeRuleset;
 	std::string m_activeName;
-#ifdef WIN64
-	uint32	m_RuleIntValues [_IntRuleCount ];
-#else
-	int m_RuleIntValues [_IntRuleCount ];
-#endif
+
+	int32 m_RuleIntValues [_IntRuleCount ];
 	float	m_RuleRealValues[_RealRuleCount];
 	uint32	m_RuleBoolValues[_BoolRuleCount];
 

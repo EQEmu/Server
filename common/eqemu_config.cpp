@@ -152,7 +152,7 @@ void EQEmuConfig::parse_config()
 	TerminateWait    = atoi(_root["server"]["launcher"]["timers"].get("reterminate", "10000").asString().c_str());
 	InitialBootWait  = atoi(_root["server"]["launcher"]["timers"].get("initial", "20000").asString().c_str());
 	ZoneBootInterval = atoi(_root["server"]["launcher"]["timers"].get("interval", "2000").asString().c_str());
-#ifdef WIN32
+#ifdef _WIN32
 	ZoneExe = _root["server"]["launcher"].get("exe", "zone.exe").asString();
 #else
 	ZoneExe = _root["server"]["launcher"].get("exe", "./zone").asString();

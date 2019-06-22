@@ -23,7 +23,7 @@
 #include "database.h"
 #include "string_util.h"
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	#include <winsock2.h>
 	#include <windows.h>
 	int gettimeofday (timeval *tp, ...);

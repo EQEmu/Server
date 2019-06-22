@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <list>
 
-#ifndef WIN32
+#ifndef _WIN32
 #include <netinet/in.h>	//for htonl
 #endif
 

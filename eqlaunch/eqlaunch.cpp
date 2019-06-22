@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
 		Log(Logs::Detail, Logs::Launcher, "Could not set signal handler");
 		return 1;
 	}
-	#ifndef WIN32
+	#ifndef _WIN32
 	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR)	{
 		Log(Logs::Detail, Logs::Launcher, "Could not set signal handler");
 		return 1;

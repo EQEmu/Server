@@ -84,7 +84,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #define new new(_NORMAL_BLOCK, __FILE__, __LINE__)
 #endif
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 #include <conio.h>
 #include <process.h>
 #else
@@ -279,7 +279,7 @@ int main(int argc, char** argv) {
 		Log(Logs::General, Logs::Error, "Could not set signal handler");
 		return 1;
 	}
-#ifndef WIN32
+#ifndef _WIN32
 	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR) {
 		Log(Logs::General, Logs::Error, "Could not set signal handler");
 		return 1;
@@ -442,7 +442,7 @@ int main(int argc, char** argv) {
 	EQStreamIdentifier stream_identifier;
 	RegisterAllPatches(stream_identifier);
 
-#ifndef WIN32
+#ifndef _WIN32
 	Log(Logs::Detail, Logs::None, "Main thread running with thread id %d", pthread_self());
 #endif
 
@@ -602,7 +602,7 @@ int main(int argc, char** argv) {
 }
 
 void CatchSignal(int sig_num) {
-#ifdef _WINDOWS
+#ifdef _WIN32
 	Log(Logs::General, Logs::Zone_Server, "Recieved signal: %i", sig_num);
 #endif
 	RunLoops = false;
@@ -672,7 +672,7 @@ NetConnection::~NetConnection() {
 
 /* Update Window Title with relevant information */
 void UpdateWindowTitle(char* iNewTitle) {
-#ifdef _WINDOWS
+#ifdef _WIN32
 	char tmp[500];
 	if (iNewTitle) {
 		snprintf(tmp, sizeof(tmp), "%i: %s", ZoneConfig::get()->ZonePort, iNewTitle);

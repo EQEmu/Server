@@ -1,7 +1,7 @@
 #ifndef MYSQL_REQUEST_ROW_H
 #define MYSQL_REQUEST_ROW_H
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	#include <winsock2.h>
 	#include <windows.h>
 #endif

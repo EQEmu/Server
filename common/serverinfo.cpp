@@ -21,7 +21,7 @@
 // Implement preliminary support for *nix variants
 // misanthropicfiend
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 #include <windows.h>
 
 char Ver_name[100];

@@ -17,7 +17,7 @@
 */
 
 #include "memory_mapped_file.h"
-#ifdef _WINDOWS
+#ifdef _WIN32
 #include <windows.h>
 #else
 #include <sys/types.h>
@@ -36,7 +36,7 @@
 namespace EQEmu {
 
 	struct MemoryMappedFile::Implementation {
-#ifdef _WINDOWS
+#ifdef _WIN32
 		HANDLE mapped_object_;
 #else
 		int fd_;
@@ -47,7 +47,7 @@ namespace EQEmu {
 		: filename_(filename), size_(size) {
 		imp_ = new Implementation;
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 		DWORD total_size = size + sizeof(shared_memory_struct);
 		HANDLE file = CreateFile(filename.c_str(),
 			GENERIC_READ | GENERIC_WRITE,
@@ -116,7 +116,7 @@ namespace EQEmu {
 		size_ = size;
 		fclose(f);
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 		DWORD total_size = size + sizeof(shared_memory_struct);
 		HANDLE file = CreateFile(filename.c_str(),
 			GENERIC_READ | GENERIC_WRITE,
@@ -172,7 +172,7 @@ namespace EQEmu {
 	}
 
 	MemoryMappedFile::~MemoryMappedFile() {
-#ifdef _WINDOWS
+#ifdef _WIN32
 		if(imp_->mapped_object_) {
 			CloseHandle(imp_->mapped_object_);
 		}

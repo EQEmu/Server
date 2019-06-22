@@ -22,7 +22,7 @@
 #include <chrono>
 
 // Disgrace: for windows compile
-#ifdef _WINDOWS
+#ifdef _WIN32
 	#include "global_define.h"
 	int gettimeofday (timeval *tp, ...);
 #endif

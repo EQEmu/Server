@@ -59,7 +59,7 @@ namespace EQEmu
 #include "zone.h"
 #include "zonedb.h"
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	// since windows defines these within windef.h (which windows.h include)
 	// we are required to undefine these to use min and max from <algorithm>
 	#undef min

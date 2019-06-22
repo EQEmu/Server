@@ -60,7 +60,7 @@
 //#define IPBASED_AUTH_HACK
 
 // Disgrace: for windows compile
-#ifdef _WINDOWS
+#ifdef _WIN32
 	#include <winsock2.h>
 	#include <windows.h>
 #else

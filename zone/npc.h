@@ -29,7 +29,7 @@
 #include <list>
 
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	#define M_PI	3.141592
 #endif
 

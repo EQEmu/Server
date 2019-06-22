@@ -109,7 +109,7 @@ int GetArgs(char * string)
 	char *buffer = com_list;
 	memset(temp,0x0,255);
 	//memset(buffer,0x0,512);
-	//#ifdef WIN32
+	//#ifdef _WIN32
 	//strcpy(buffer,com_list);
 	//#else
 	//strncpy(buffer,com_list,sizeof(buffer)-1);

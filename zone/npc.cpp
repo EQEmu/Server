@@ -46,7 +46,7 @@
 #include <stdio.h>
 #include <string>
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 #define snprintf	_snprintf
 #define strncasecmp	_strnicmp
 #define strcasecmp	_stricmp

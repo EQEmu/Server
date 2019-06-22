@@ -17,7 +17,7 @@
 */
 #ifndef MYMUTEX_H
 #define MYMUTEX_H
-#ifdef _WINDOWS
+#ifdef _WIN32
 	#include <winsock2.h>
 	#include <windows.h>
 #else
@@ -36,7 +36,7 @@ public:
 	bool trylock();
 protected:
 private:
-#if defined WIN32 || defined WIN64
+#if defined _WIN32
 	CRITICAL_SECTION CSMutex;
 #else
 	pthread_mutex_t CSMutex;

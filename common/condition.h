@@ -20,7 +20,7 @@
 
 #include "global_define.h"
 #include "mutex.h"
-#ifndef WIN32
+#ifndef _WIN32
 #include <pthread.h>
 #endif
 
@@ -30,7 +30,7 @@
 
 class Condition {
 	private:
-#ifdef WIN32
+#ifdef _WIN32
 		enum {
 			SignalEvent = 0,
 			BroadcastEvent,

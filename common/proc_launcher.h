@@ -33,7 +33,7 @@ public:
 	static ProcLauncher *get() { return(&s_launcher); }
 	static void ProcessInThisThread();
 
-#ifdef WIN32
+#ifdef _WIN32
 	typedef DWORD ProcRef;
 	static const ProcRef ProcError;
 #else
@@ -55,7 +55,7 @@ public:
 		std::string logFile;	//empty = do not redirect output.
 	protected:
 		//None of these fields get copied around
-#ifdef WIN32
+#ifdef _WIN32
 		PROCESS_INFORMATION proc_info;
 #endif
 	};
@@ -83,7 +83,7 @@ protected:
 
 private:
 	static ProcLauncher s_launcher;
-#ifndef WIN32
+#ifndef _WIN32
 	uint32 m_signalCount;
 	static void HandleSigChild(int signum);
 #endif

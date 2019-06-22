@@ -22,7 +22,7 @@
 #include "global_define.h"
 #include "types.h"
 #include "proc_launcher.h"
-#ifdef _WINDOWS
+#ifdef _WIN32
 	#include <windows.h>
 #else
 	#include <sys/types.h>
@@ -39,7 +39,7 @@
 
 ProcLauncher ProcLauncher::s_launcher;
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 const ProcLauncher::ProcRef ProcLauncher::ProcError = 0xFFFFFFFF;
 #else
 const ProcLauncher::ProcRef ProcLauncher::ProcError = -1;
@@ -47,7 +47,7 @@ const ProcLauncher::ProcRef ProcLauncher::ProcError = -1;
 
 ProcLauncher::ProcLauncher()
 {
-#ifndef WIN32
+#ifndef _WIN32
 	if(signal(SIGCHLD, ProcLauncher::HandleSigChild) == SIG_ERR)
 		fprintf(stderr, "Unable to register child signal handler. Thats bad.");
 	m_signalCount = 0;
@@ -55,7 +55,7 @@ ProcLauncher::ProcLauncher()
 }
 
 void ProcLauncher::Process() {
-#ifdef _WINDOWS
+#ifdef _WIN32
 	std::map<ProcRef, Spec *>::iterator cur, end, tmp;
 	cur = m_running.begin();
 	end = m_running.end();
@@ -112,7 +112,7 @@ void ProcLauncher::ProcessTerminated(std::map<ProcRef, Spec *>::iterator &it) {
 	if(it->second->handler != nullptr)
 		it->second->handler->OnTerminate(it->first, it->second);
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	CloseHandle(it->second->proc_info.hProcess);
 #else	//!WIN32
 #endif	//!WIN32
@@ -125,7 +125,7 @@ ProcLauncher::ProcRef ProcLauncher::Launch(Spec *&to_launch) {
 	Spec *it = to_launch;
 	to_launch = nullptr;
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	STARTUPINFO siStartInfo;
 	BOOL bFuncRetn = FALSE;
 
@@ -283,7 +283,7 @@ bool ProcLauncher::Terminate(const ProcRef &proc, bool graceful) {
 	//we do not remove it from the list until we have been notified
 	//that they have been terminated.
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	if(!TerminateProcess(res->second->proc_info.hProcess, 0)) {
 		return(false);
 	}
@@ -325,7 +325,7 @@ void ProcLauncher::TerminateAll(bool final) {
 }
 
 
-#ifndef WIN32
+#ifndef _WIN32
 void ProcLauncher::HandleSigChild(int signum) {
 	if(signum == SIGCHLD) {
 		ProcLauncher::get()->m_signalCount++;
