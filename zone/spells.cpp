@@ -455,7 +455,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 			{
 				mana_cost = 0;
 			} else {
-				Log(Logs::Detail, Logs::Spells, "Spell Error not enough mana spell=%d mymana=%d cost=%d\n", GetName(), spell_id, my_curmana, mana_cost);
+				Log(Logs::Detail, Logs::Spells, "Spell Error not enough mana spell=%d mymana=%d cost=%d\n", spell_id, my_curmana, mana_cost);
 				if(IsClient()) {
 					//clients produce messages... npcs should not for this case
 					Message_StringID(13, INSUFFICIENT_MANA);
