@@ -2436,7 +2436,7 @@ bool NPC::AI_AddNPCSpells(uint32 iDBSpellsID) {
 	}
 	DBnpcspells_Struct* parentlist = database.GetNPCSpells(spell_list->parent_list);
 #if MobAI_DEBUG_Spells >= 10
-	std::string debug_msg = StringFormat("Loading NPCSpells onto %s: dbspellsid=%u", this->GetName(), iDBSpellsID);
+	std::string debug_msg = StringFormat("Loading NPCSpells onto %s: dbspellsid=%u, level=%u", this->GetName(), iDBSpellsID, this->GetLevel());
 	if (spell_list) {
 		debug_msg.append(StringFormat(" (found, %u), parentlist=%u", spell_list->entries.size(), spell_list->parent_list));
 		if (spell_list->parent_list) {
@@ -2450,6 +2450,22 @@ bool NPC::AI_AddNPCSpells(uint32 iDBSpellsID) {
 		debug_msg.append(" (not found)");
 	}
 	Log(Logs::Detail, Logs::AI, "%s", debug_msg.c_str());
+
+#ifdef MobAI_DEBUG_Spells >= 25
+	if (parentlist) {
+		for (const auto &iter : parentlist->entries) {
+			Log(Logs::Detail, Logs::AI, "(%i) %s", iter.spellid, spells[iter.spellid].name);
+		}
+	}
+	Log(Logs::Detail, Logs::AI, "fin (parent list)");
+	if (spell_list) {
+		for (const auto &iter : spell_list->entries) {
+			Log(Logs::Detail, Logs::AI, "(%i) %s", iter.spellid, spells[iter.spellid].name);
+		}
+	}
+	Log(Logs::Detail, Logs::AI, "fin (spell list)");
+#endif
+
 #endif
 	uint16 attack_proc_spell = -1;
 	int8 proc_chance = 3;

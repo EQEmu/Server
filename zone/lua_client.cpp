@@ -550,6 +550,16 @@ void Lua_Client::UnmemSpellAll(bool update_client) {
 	self->UnmemSpellAll(update_client);
 }
 
+uint16 Lua_Client::FindMemmedSpellBySlot(int slot) {
+	Lua_Safe_Call_Int();
+	return self->FindMemmedSpellBySlot(slot);
+}
+
+int Lua_Client::MemmedCount() {
+	Lua_Safe_Call_Int();
+	return self->MemmedCount();
+}
+
 void Lua_Client::ScribeSpell(int spell_id, int slot) {
 	Lua_Safe_Call_Void();
 	self->ScribeSpell(spell_id, slot);
@@ -1618,6 +1628,8 @@ luabind::scope lua_register_client() {
 		.def("UnmemSpellBySpellID", (void(Lua_Client::*)(int32))&Lua_Client::UnmemSpellBySpellID)
 		.def("UnmemSpellAll", (void(Lua_Client::*)(void))&Lua_Client::UnmemSpellAll)
 		.def("UnmemSpellAll", (void(Lua_Client::*)(bool))&Lua_Client::UnmemSpellAll)
+		.def("FindMemmedSpellBySlot", (uint16(Lua_Client::*)(int))&Lua_Client::FindMemmedSpellBySlot)
+		.def("MemmedCount", (int(Lua_Client::*)(void))&Lua_Client::MemmedCount)
 		.def("ScribeSpell", (void(Lua_Client::*)(int,int))&Lua_Client::ScribeSpell)
 		.def("ScribeSpell", (void(Lua_Client::*)(int,int,bool))&Lua_Client::ScribeSpell)
 		.def("UnscribeSpell", (void(Lua_Client::*)(int))&Lua_Client::UnscribeSpell)

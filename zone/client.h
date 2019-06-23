@@ -781,6 +781,8 @@ public:
 	void UnmemSpell(int slot, bool update_client = true);
 	void UnmemSpellBySpellID(int32 spell_id);
 	void UnmemSpellAll(bool update_client = true);
+	uint16 FindMemmedSpellBySlot(int slot);
+	int MemmedCount();
 	void ScribeSpell(uint16 spell_id, int slot, bool update_client = true);
 	void UnscribeSpell(int slot, bool update_client = true);
 	void UnscribeSpellAll(bool update_client = true);
@@ -1640,18 +1642,22 @@ private:
 #ifdef BOTS
 	struct BotOwnerOptions {
 		bool death_marquee;
+		bool stats_update;
 	};
 
 	BotOwnerOptions bot_owner_options;
 
 	const BotOwnerOptions DefaultBotOwnerOptions = {
-		false // death_marquee
+		false,	// death_marquee
+		false	// stats_update
 	};
 
 public:
 	void SetBotOptionDeathMarquee(bool flag) { bot_owner_options.death_marquee = flag; }
+	void SetBotOptionStatsUpdate(bool flag) { bot_owner_options.stats_update = flag; }
 
 	bool GetBotOptionDeathMarquee() const { return bot_owner_options.death_marquee; }
+	bool GetBotOptionStatsUpdate() const { return bot_owner_options.stats_update; }
 
 private:		
 #endif

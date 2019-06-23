@@ -239,6 +239,7 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	p_depop               = false;
 	loottable_id          = npc_type_data->loottable_id;
 	skip_global_loot      = npc_type_data->skip_global_loot;
+	skip_auto_scale       = npc_type_data->skip_auto_scale;
 	rare_spawn            = npc_type_data->rare_spawn;
 	no_target_hotkey      = npc_type_data->no_target_hotkey;
 	primary_faction       = 0;
@@ -2212,6 +2213,14 @@ void NPC::ModifyNPCStat(const char *identifier, const char *new_value)
 	}
 	else if (id == "cr") {
 		CR = atoi(val.c_str());
+		return;
+	}
+	else if (id == "cor") {
+		Corrup = atoi(val.c_str());
+		return;
+	}
+	else if (id == "phr") {
+		PhR = atoi(val.c_str());
 		return;
 	}
 	else if (id == "pr") {

@@ -143,6 +143,7 @@ struct NPCType
 	bool	untargetable;
 	bool	skip_global_loot;
 	bool	rare_spawn;
+	bool	skip_auto_scale; // just so it doesn't mess up bots or mercs, probably should add to DB too just in case
 	int8	stuck_behavior;
 	uint16	use_model;
 };
