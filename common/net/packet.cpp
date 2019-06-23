@@ -1,6 +1,7 @@
 #include "packet.h"
 #include <fmt/format.h>
 #include <cctype>
+#include <fmt/format.h>
 
 bool EQ::Net::StaticPacket::Resize(size_t new_size)
 {

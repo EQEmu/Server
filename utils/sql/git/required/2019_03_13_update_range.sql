@@ -1,0 +1,1 @@
+ALTER TABLE `zone` ADD COLUMN `max_movement_update_range` INT(11) UNSIGNED NOT NULL DEFAULT '600' AFTER `npc_max_aggro_dist`;

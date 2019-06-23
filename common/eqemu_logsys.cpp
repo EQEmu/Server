@@ -95,6 +95,7 @@ enum GameChatColor {
 EQEmuLogSys::EQEmuLogSys()
 {
 	on_log_gmsay_hook      = [](uint16 log_type, const std::string &) {};
+	on_log_console_hook    = [](uint16 debug_level, uint16 log_type, const std::string &) {};
 	bool file_logs_enabled = false;
 	int  log_platform      = 0;
 }
@@ -346,6 +347,8 @@ void EQEmuLogSys::ProcessConsoleMessage(uint16 debug_level, uint16 log_category,
 #else
 	std::cout << EQEmuLogSys::GetLinuxConsoleColorFromCategory(log_category) << message << LC_RESET << std::endl;
 #endif
+
+	on_log_console_hook(debug_level, log_category, message);
 }
 
 /**

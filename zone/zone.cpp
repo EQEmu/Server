@@ -1070,14 +1070,14 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_id)
 	map_name = nullptr;
 
 	if(!database.GetZoneCFG(database.GetZoneID(filename), instance_id, &newzone_data, can_bind,
-		can_combat, can_levitate, can_castoutdoor, is_city, is_hotzone, allow_mercs, zone_type, default_ruleset, &map_name))
+		can_combat, can_levitate, can_castoutdoor, is_city, is_hotzone, allow_mercs, max_movement_update_range, zone_type, default_ruleset, &map_name))
 	{
 		// If loading a non-zero instance failed, try loading the default
 		if (instance_id != 0)
 		{
 			safe_delete_array(map_name);
 			if(!database.GetZoneCFG(database.GetZoneID(filename), 0, &newzone_data, can_bind, can_combat, can_levitate, 
-				can_castoutdoor, is_city, is_hotzone, allow_mercs, zone_type, default_ruleset, &map_name))
+				can_castoutdoor, is_city, is_hotzone, allow_mercs, max_movement_update_range, zone_type, default_ruleset, &map_name))
 				{
 				Log(Logs::General, Logs::Error, "Error loading the Zone Config.");
 				return false;
@@ -1832,33 +1832,6 @@ void Zone::ShowSpawnStatusByID(Mob* client, uint32 spawnid)
 		client->Message(0, "%i of %i spawns listed.", iSpawnIDCount, x);
 	else
 		client->Message(0, "No matching spawn id was found in this zone.");
-}
-
-
-bool Zone::RemoveSpawnEntry(uint32 spawnid)
-{
-	LinkedListIterator<Spawn2*> iterator(spawn2_list);
-
-
-	iterator.Reset();
-	while(iterator.MoreElements())
-	{
-		if(iterator.GetData()->GetID() == spawnid)
-		{
-			iterator.RemoveCurrent();
-			return true;
-		}
-		else
-		iterator.Advance();
-	}
-return false;
-}
-
-bool Zone::RemoveSpawnGroup(uint32 in_id) {
-	if(spawn_group_list.RemoveSpawnGroup(in_id))
-		return true;
-	else
-		return false;
 }
 
 bool ZoneDatabase::GetDecayTimes(npcDecayTimes_Struct *npcCorpseDecayTimes)

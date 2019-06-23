@@ -4,7 +4,7 @@
 #include "../common/types.h"
 #include "../common/packet_functions.h"
 #include "../common/eq_packet_structs.h"
-#include "../net/packet.h"
+#include "../common/net/packet.h"
 #include <cereal/cereal.hpp>
 #include <cereal/types/string.hpp>
 

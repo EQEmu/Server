@@ -671,24 +671,27 @@ void MobMovementManager::SendCommandToClients(Mob *m, float dx, float dy, float 
 		}
 	}
 	else {
+		float short_range = RuleR(Pathing, ShortMovementUpdateRange);
+		float long_range = zone->GetMaxMovementUpdateRange();
+
 		for (auto &c : _impl->Clients) {
 			float dist = c->CalculateDistance(m->GetX(), m->GetY(), m->GetZ());
 
 			bool match = false;
 			if (range & ClientRangeClose) {
-				if (dist < 250.0f) {
+				if (dist < short_range) {
 					match = true;
 				}
 			}
 
 			if (!match && range & ClientRangeMedium) {
-				if (dist >= 250.0f && dist < 1500.0f) {
+				if (dist >= short_range && dist < long_range) {
 					match = true;
 				}
 			}
 
 			if (!match && range & ClientRangeLong) {
-				if (dist >= 1500.0f) {
+				if (dist >= long_range) {
 					match = true;
 				}
 			}
