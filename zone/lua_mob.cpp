@@ -2161,7 +2161,7 @@ bool Lua_Mob::IsBerserk() {
 	return self->IsBerserk();
 }
 
-bool Lua_Mob::TryFinishingBlow(Lua_Mob defender, int &damage) {
+bool Lua_Mob::TryFinishingBlow(Lua_Mob defender, int damage) {
 	Lua_Safe_Call_Bool();
 	return self->TryFinishingBlow(defender, damage);
 }
