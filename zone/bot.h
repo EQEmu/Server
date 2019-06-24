@@ -29,7 +29,6 @@
 #include "groups.h"
 #include "corpse.h"
 #include "zonedb.h"
-#include "bot_database.h"
 #include "string_ids.h"
 #include "../common/misc_functions.h"
 #include "../common/global_define.h"
