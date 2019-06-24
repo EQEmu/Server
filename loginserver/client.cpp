@@ -181,6 +181,9 @@ void Client::Handle_SessionReady(const char* data, unsigned int size)
 void Client::Handle_Login(const char* data, unsigned int size)
 {
 	auto mode = server.options.GetEncryptionMode();
+	if (mode < 13) {
+		Log(Logs::General, Logs::Error, "Password hash mode is set to an insecure hash method, you should consider using a more secure hash such as argon2(13) or scrypt(14) instead.");
+	}
 
 	if (status != cs_waiting_for_login) {
 		Log(Logs::General, Logs::Error, "Login received after already having logged in.");
@@ -386,20 +389,22 @@ void Client::SendPlayResponse(EQApplicationPacket *outapp)
 
 void Client::GenerateKey()
 {
-	key.clear();
-	int count = 0;
-	while (count < 10)
-	{
-		static const char key_selection[] =
-		{
-			'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
-			'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
-			'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
-			'Y', 'Z', '0', '1', '2', '3', '4', '5',
-			'6', '7', '8', '9'
-		};
+	//key.clear();
+	//int count = 0;
+	//while (count < 10)
+	//{
+	//	static const char key_selection[] =
+	//	{
+	//		'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+	//		'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+	//		'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+	//		'Y', 'Z', '0', '1', '2', '3', '4', '5',
+	//		'6', '7', '8', '9'
+	//	};
+	//
+	//	key.append((const char*)&key_selection[random.Int(0, 35)], 1);
+	//	count++;
+	//}
 
-		key.append((const char*)&key_selection[random.Int(0, 35)], 1);
-		count++;
-	}
+	key = "HOPDN6KHZG";
 }
