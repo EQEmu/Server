@@ -53,97 +53,11 @@ IF(UNIX)
 	ENDIF(CMAKE_SYSTEM_NAME MATCHES "Darwin")
 ENDIF(UNIX)
 
-#debug level, 5 is default. Most people wont ever change this but it's there if you want to
-SET(EQEMU_DEBUG_LEVEL 5 CACHE STRING "EQEmu debug level:
-	0 - Quiet mode Errors to file Status and Normal ignored
-	1 - Status and Normal to console, Errors to logfile
-	2 - Status, Normal, and Error to console and logfile
-	3 - Light debug release errors and status
-	4 - Moderate debug release errors and status
-	5 - Maximum debug release errors and status
-	10 - More errors than you ever wanted to see"
-)
-
-SET(EQEMU_LOG_LEVEL_STATUS 2 CACHE STRING "EQEmu logging level for [Status]:
-	0 - Disabled
-	1 - Ouput to File Enabled
-	2 - Output to stdout Enabled
-	3 - Output to File and stdout Enabled
-	8 - Output to stderr Enabled
-	9 - Output to File and stderr Enabled
-	11 - Output to File, stdout and stderr Enabled"
-)
-
-SET(EQEMU_LOG_LEVEL_NORMAL 3 CACHE STRING "EQEmu logging level for [Normal]:
-	0 - Disabled
-	1 - Ouput to File Enabled
-	2 - Output to stdout Enabled
-	3 - Output to File and stdout Enabled
-	8 - Output to stderr Enabled
-	9 - Output to File and stderr Enabled
-	11 - Output to File, stdout and stderr Enabled"
-)
-
-SET(EQEMU_LOG_LEVEL_ERROR 2 CACHE STRING "EQEmu logging level for [Error]:
-	0 - Disabled
-	1 - Ouput to File Enabled
-	2 - Output to stdout Enabled
-	3 - Output to File and stdout Enabled
-	8 - Output to stderr Enabled
-	9 - Output to File and stderr Enabled
-	11 - Output to File, stdout and stderr Enabled"
-)
-
-SET(EQEMU_LOG_LEVEL_DEBUG 3 CACHE STRING "EQEmu logging level for [Debug]:
-	0 - Disabled
-	1 - Ouput to File Enabled
-	2 - Output to stdout Enabled
-	3 - Output to File and stdout Enabled
-	8 - Output to stderr Enabled
-	9 - Output to File and stderr Enabled
-	11 - Output to File, stdout and stderr Enabled"
-)
-
-SET(EQEMU_LOG_LEVEL_QUEST 2 CACHE STRING "EQEmu logging level for [Quest]:
-	0 - Disabled
-	1 - Ouput to File Enabled
-	2 - Output to stdout Enabled
-	3 - Output to File and stdout Enabled
-	8 - Output to stderr Enabled
-	9 - Output to File and stderr Enabled
-	11 - Output to File, stdout and stderr Enabled"
-)
-
-SET(EQEMU_LOG_LEVEL_COMMANDS 1 CACHE STRING "EQEmu logging level for [Commands]:
-	0 - Disabled
-	1 - Ouput to File Enabled
-	2 - Output to stdout Enabled
-	3 - Output to File and stdout Enabled
-	8 - Output to stderr Enabled
-	9 - Output to File and stderr Enabled
-	11 - Output to File, stdout and stderr Enabled"
-)
-
-SET(EQEMU_LOG_LEVEL_CRASH 3 CACHE STRING "EQEmu logging level for [Crash]:
-	0 - Disabled
-	1 - Ouput to File Enabled
-	2 - Output to stdout Enabled
-	3 - Output to File and stdout Enabled
-	8 - Output to stderr Enabled
-	9 - Output to File and stderr Enabled
-	11 - Output to File, stdout and stderr Enabled"
-)
-
-MARK_AS_ADVANCED(EQEMU_LOG_LEVEL_STATUS EQEMU_LOG_LEVEL_NORMAL EQEMU_LOG_LEVEL_ERROR EQEMU_LOG_LEVEL_DEBUG EQEMU_LOG_LEVEL_QUEST EQEMU_LOG_LEVEL_COMMANDS EQEMU_LOG_LEVEL_CRASH)
-
 #NPC Types Cache Behavior
 OPTION(EQEMU_DEPOP_INVALIDATES_CACHE "#repop invalidates the npc_types cache (will cause a larger database hit on #repop but is more convienent)." ON)
 
 #Bots are a compile time option so on/off
 OPTION(EQEMU_ENABLE_BOTS "Enable Bots" OFF)
-
-#Disable entire _mlog system (excludes trade/command logs)
-OPTION(EQEMU_DISABLE_LOGSYS "Disable Logging INI System" ON)
 
 #Enable GM Command log system
 OPTION(EQEMU_COMMANDS_LOGGING "Enable GM Command logs" ON)
@@ -151,10 +65,6 @@ OPTION(EQEMU_COMMANDS_LOGGING "Enable GM Command logs" ON)
 IF(EQEMU_COMMANDS_LOGGING)
 	ADD_DEFINITIONS(-DCOMMANDS_LOGGING)
 ENDIF(EQEMU_COMMANDS_LOGGING)
-
-IF(EQEMU_DISABLE_LOGSYS)
-	ADD_DEFINITIONS(-DDISABLE_LOGSYS)
-ENDIF(EQEMU_DISABLE_LOGSYS)
 
 IF(EQEMU_ENABLE_BOTS)
 	ADD_DEFINITIONS(-DBOTS)
@@ -166,19 +76,6 @@ OPTION(EQEMU_BUILD_HC "Build the headless client." OFF)
 OPTION(EQEMU_BUILD_TESTS "Build utility tests." OFF)
 OPTION(EQEMU_BUILD_CLIENT_FILES "Build Client Import/Export Data Programs." ON)
 
-SET(EQEMU_MAP_DIR "./Maps" CACHE STRING "The dir that maps, water maps, and paths are located in.")
-
-ADD_DEFINITIONS(-DEQDEBUG=${EQEMU_DEBUG_LEVEL})
-ADD_DEFINITIONS(-DINVERSEXY)
-ADD_DEFINITIONS(-DFIELD_ITEMS)
-ADD_DEFINITIONS(-DMAP_DIR="${EQEMU_MAP_DIR}")
-ADD_DEFINITIONS(-DLOG_LEVEL_STATUS=${EQEMU_LOG_LEVEL_STATUS})
-ADD_DEFINITIONS(-DLOG_LEVEL_NORMAL=${EQEMU_LOG_LEVEL_NORMAL})
-ADD_DEFINITIONS(-DLOG_LEVEL_ERROR=${EQEMU_LOG_LEVEL_ERROR})
-ADD_DEFINITIONS(-DLOG_LEVEL_DEBUG=${EQEMU_LOG_LEVEL_DEBUG})
-ADD_DEFINITIONS(-DLOG_LEVEL_QUEST=${EQEMU_LOG_LEVEL_QUEST})
-ADD_DEFINITIONS(-DLOG_LEVEL_COMMANDS=${EQEMU_LOG_LEVEL_COMMANDS})
-ADD_DEFINITIONS(-DLOG_LEVEL_CRASH=${EQEMU_LOG_LEVEL_CRASH})
 ADD_DEFINITIONS(-DGLM_FORCE_RADIANS)
 ADD_DEFINITIONS(-DGLM_FORCE_CTOR_INIT)
 ADD_DEFINITIONS(-DGLM_ENABLE_EXPERIMENTAL)
@@ -269,15 +166,6 @@ IF(Lua51_FOUND)
 	ENDIF(EQEMU_BUILD_LUA)
 ENDIF()
 
-IF(SODIUM_FOUND)
-	OPTION(EQEMU_ENABLE_SECURITY "Use LibSodium for stronger security" ON)
-	IF(EQEMU_ENABLE_SECURITY)
-		INCLUDE_DIRECTORIES(SYSTEM "${SODIUM_INCLUDE_DIRS}")
-		SET(SERVER_LIBS ${SERVER_LIBS} ${SODIUM_LIBRARIES})
-		ADD_DEFINITIONS(-DENABLE_SECURITY)
-	ENDIF()
-ENDIF()
-
 IF(OpenSSL_FOUND OR MBEDTLS_FOUND)
 	OPTION(EQEMU_BUILD_LOGIN "Build the login server." ON)
 	
@@ -307,6 +195,15 @@ IF(OpenSSL_FOUND OR MBEDTLS_FOUND)
 		INCLUDE_DIRECTORIES(SYSTEM "${MBEDTLS_INCLUDE_DIR}")
 		SET(SERVER_LIBS ${SERVER_LIBS} ${MBEDTLS_LIBRARY} ${MBEDX509_LIBRARY} ${MBEDCRYPTO_LIBRARY})
 		ADD_DEFINITIONS(-DEQEMU_USE_MBEDTLS)
+	ENDIF()
+ENDIF()
+
+IF(SODIUM_FOUND AND EQEMU_BUILD_LOGIN)
+	OPTION(EQEMU_ENABLE_SECURITY "Use libsodium for stronger password hashing" ON)
+	IF(EQEMU_ENABLE_SECURITY)
+		INCLUDE_DIRECTORIES(SYSTEM "${SODIUM_INCLUDE_DIRS}")
+		SET(SERVER_LIBS ${SERVER_LIBS} ${SODIUM_LIBRARIES})
+		ADD_DEFINITIONS(-DENABLE_SECURITY)
 	ENDIF()
 ENDIF()
 
