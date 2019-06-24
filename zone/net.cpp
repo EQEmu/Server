@@ -451,7 +451,7 @@ int main(int argc, char** argv) {
 
 	bool worldwasconnected    = worldserver.Connected();
 	bool eqsf_open            = false;
-	bool telnet_server_opened = false;
+	bool websocker_server_opened = false;
 
 	Timer quest_timers(100);
 	UpdateWindowTitle();
@@ -475,19 +475,17 @@ int main(int argc, char** argv) {
 		/**
 		 * Telnet server
 		 */
-		if (!telnet_server_opened && Config->ZonePort != 0) {
-			if (Config->TelnetEnabled) {
-				Log(
-					Logs::General,
-					Logs::Zone_Server,
-					"Telnet Console (TCP) listener started (%s:%u).",
-					Config->TelnetIP.c_str(),
-					Config->ZonePort
-				);
-				ws_server.reset(new EQ::Net::WebsocketServer(Config->TelnetIP, Config->ZonePort));
-				RegisterApiService(ws_server);
-				telnet_server_opened = true;
-			}
+		if (!websocker_server_opened && Config->ZonePort != 0) {
+			Log(
+				Logs::General,
+				Logs::Zone_Server,
+				"Websocket Server listener started (%s:%u).",
+				Config->TelnetIP.c_str(),
+				Config->ZonePort
+			);
+			ws_server.reset(new EQ::Net::WebsocketServer(Config->TelnetIP, Config->ZonePort));
+			RegisterApiService(ws_server);
+			websocker_server_opened = true;
 		}
 
 		/**
