@@ -586,7 +586,7 @@ int main(int argc, char** argv) {
 
 	while (RunLoops) {
 		bool previous_loaded = is_zone_loaded && numclients > 0;
-		EQ::EventLoop::Get().Process();
+		EQ::EventLoop::GetDefault().Process();
 
 		bool current_loaded = is_zone_loaded && numclients > 0;
 		if (previous_loaded && !current_loaded) {

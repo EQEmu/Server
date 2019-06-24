@@ -587,7 +587,7 @@ int main(int argc, char** argv) {
 			UpdateWindowTitle(window_title);
 		}
 
-		EQ::EventLoop::Get().Process();
+		EQ::EventLoop::GetDefault().Process();
 		Sleep(5);
 	}
 	Log(Logs::General, Logs::World_Server, "World main loop completed.");

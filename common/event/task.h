@@ -24,8 +24,12 @@ namespace EQ {
 			std::exception error;
 		};
 
-		Task(TaskFn fn) {
-			m_fn = fn;
+		Task(EventLoop &loop, TaskFn fn) : _loop(loop) {
+			_fn = fn;
+		}
+
+		Task(TaskFn fn) : _loop(EventLoop::GetDefault()) {
+			_fn = fn;
 		}
 
 		~Task() {
@@ -33,34 +37,34 @@ namespace EQ {
 		}
 
 		Task& Then(ResolveFn fn) {
-			m_then = fn;
+			_then = fn;
 			return *this;
 		}
 
 		Task& Catch(RejectFn fn) {
-			m_catch = fn;
+			_catch = fn;
 			return *this;
 		}
 
 		Task& Finally(FinallyFn fn) {
-			m_finally = fn;
+			_fin = fn;
 			return *this;
 		}
 
 		void Run() {
-			uv_work_t *m_work = new uv_work_t;
-			memset(m_work, 0, sizeof(uv_work_t));
+			uv_work_t *work = new uv_work_t;
+			memset(work, 0, sizeof(uv_work_t));
 			TaskBaton *baton = new TaskBaton();
-			baton->fn = m_fn;
-			baton->on_then = m_then;
-			baton->on_catch = m_catch;
-			baton->on_finally = m_finally;
+			baton->fn = _fn;
+			baton->on_then = _then;
+			baton->on_catch = _catch;
+			baton->on_finally = _fin;
 			baton->has_result = false;
 			baton->has_error = false;
 
-			m_work->data = baton;
+			work->data = baton;
 
-			uv_queue_work(EventLoop::Get().Handle(), m_work, [](uv_work_t* req) {
+			uv_queue_work(_loop.Handle(), work, [](uv_work_t* req) {
 				TaskBaton *baton = (TaskBaton*)req->data;
 
 				baton->fn([baton](const EQEmu::Any& result) {
@@ -92,9 +96,10 @@ namespace EQ {
 		}
 
 	private:
-		TaskFn m_fn;
-		ResolveFn m_then;
-		RejectFn m_catch;
-		FinallyFn m_finally;
+		TaskFn _fn;
+		ResolveFn _then;
+		RejectFn _catch;
+		FinallyFn _fin;
+		EventLoop &_loop;
 	};
 }

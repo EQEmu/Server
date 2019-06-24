@@ -8,13 +8,21 @@ namespace EQ
 	class EventLoop
 	{
 	public:
-		static EventLoop &Get() {
-			static thread_local EventLoop inst;
-			return inst;
+		EventLoop() {
+			memset(&m_loop, 0, sizeof(uv_loop_t));
+			uv_loop_init(&m_loop);
 		}
 
 		~EventLoop() {
 			uv_loop_close(&m_loop);
+		}
+
+		EventLoop(const EventLoop&) = delete;
+		EventLoop& operator=(const EventLoop&) = delete;
+		
+		static EventLoop &GetDefault() {
+			static thread_local EventLoop inst;
+			return inst;
 		}
 
 		void Process() {
@@ -23,15 +31,7 @@ namespace EQ
 
 		uv_loop_t* Handle() { return &m_loop; }
 
-	private:
-		EventLoop() {
-			memset(&m_loop, 0, sizeof(uv_loop_t));
-			uv_loop_init(&m_loop);
-		}
-		
-		EventLoop(const EventLoop&);
-		EventLoop& operator=(const EventLoop&);
-	
+	private:	
 		uv_loop_t m_loop;
 	};
 }

@@ -23,7 +23,7 @@ void EQ::Net::TCPConnection::Connect(const std::string &addr, int port, bool ipv
 		std::function<void(std::shared_ptr<EQ::Net::TCPConnection>)> cb;
 	};
 
-	auto loop = EQ::EventLoop::Get().Handle();
+	auto loop = EQ::EventLoop::GetDefault().Handle();
 	uv_tcp_t *socket = new uv_tcp_t;
 	memset(socket, 0, sizeof(uv_tcp_t));
 	uv_tcp_init(loop, socket);

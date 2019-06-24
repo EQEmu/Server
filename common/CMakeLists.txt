@@ -211,6 +211,7 @@ SET(common_headers
 	xml_parser.h
 	zone_numbers.h
 	event/event_loop.h
+	event/idle.h
 	event/task.h
 	event/timer.h
 	json/json.h
@@ -271,6 +272,7 @@ SET(common_headers
 
 SOURCE_GROUP(Event FILES
 	event/event_loop.h
+	event/idle.h
 	event/timer.h
 	event/task.h
 )

@@ -21,7 +21,7 @@ namespace EQ
 			hints.ai_socktype = SOCK_STREAM;
 			hints.ai_protocol = IPPROTO_TCP;
 
-			auto loop = EQ::EventLoop::Get().Handle();
+			auto loop = EQ::EventLoop::GetDefault().Handle();
 			uv_getaddrinfo_t *resolver = new uv_getaddrinfo_t();
 			memset(resolver, 0, sizeof(uv_getaddrinfo_t));
 			auto port_str = std::to_string(port);

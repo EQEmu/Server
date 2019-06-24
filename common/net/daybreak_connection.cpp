@@ -13,7 +13,7 @@ EQ::Net::DaybreakConnectionManager::DaybreakConnectionManager()
 	memset(&m_timer, 0, sizeof(uv_timer_t));
 	memset(&m_socket, 0, sizeof(uv_udp_t));
 
-	Attach(EQ::EventLoop::Get().Handle());
+	Attach(EQ::EventLoop::GetDefault().Handle());
 }
 
 EQ::Net::DaybreakConnectionManager::DaybreakConnectionManager(const DaybreakConnectionManagerOptions &opts)
@@ -23,7 +23,7 @@ EQ::Net::DaybreakConnectionManager::DaybreakConnectionManager(const DaybreakConn
 	memset(&m_timer, 0, sizeof(uv_timer_t));
 	memset(&m_socket, 0, sizeof(uv_udp_t));
 
-	Attach(EQ::EventLoop::Get().Handle());
+	Attach(EQ::EventLoop::GetDefault().Handle());
 }
 
 EQ::Net::DaybreakConnectionManager::~DaybreakConnectionManager()

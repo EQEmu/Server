@@ -6,16 +6,29 @@ namespace EQ {
 	class Timer
 	{
 	public:
-		Timer(std::function<void(Timer *)> cb)
+		Timer(EventLoop &loop, std::function<void(Timer *)> cb) : _loop(loop)
 		{
-			m_timer = nullptr;
-			m_cb = cb;
+			_timer = nullptr;
+			_cb = cb;
 		}
 
-		Timer(uint64_t duration_ms, bool repeats, std::function<void(Timer *)> cb)
+		Timer(EventLoop &loop, uint64_t duration_ms, bool repeats, std::function<void(Timer *)> cb) : _loop(loop)
 		{
-			m_timer = nullptr;
-			m_cb = cb;
+			_timer = nullptr;
+			_cb = cb;
+			Start(duration_ms, repeats);
+		}
+
+		Timer(std::function<void(Timer *)> cb) : _loop(EventLoop::GetDefault())
+		{
+			_timer = nullptr;
+			_cb = cb;
+		}
+
+		Timer(uint64_t duration_ms, bool repeats, std::function<void(Timer *)> cb) : _loop(EventLoop::GetDefault())
+		{
+			_timer = nullptr;
+			_cb = cb;
 			Start(duration_ms, repeats);
 		}
 	
@@ -25,21 +38,21 @@ namespace EQ {
 		}
 
 		void Start(uint64_t duration_ms, bool repeats) {
-			auto loop = EventLoop::Get().Handle();
-			if (!m_timer) {
-				m_timer = new uv_timer_t;
-				memset(m_timer, 0, sizeof(uv_timer_t));
-				uv_timer_init(loop, m_timer);
-				m_timer->data = this;
+			auto loop = EventLoop::GetDefault().Handle();
+			if (!_timer) {
+				_timer = new uv_timer_t;
+				memset(_timer, 0, sizeof(uv_timer_t));
+				uv_timer_init(loop, _timer);
+				_timer->data = this;
 
 				if (repeats) {
-					uv_timer_start(m_timer, [](uv_timer_t *handle) {
+					uv_timer_start(_timer, [](uv_timer_t *handle) {
 						Timer *t = (Timer*)handle->data;
 						t->Execute();
 					}, duration_ms, duration_ms);
 				}
 				else {
-					uv_timer_start(m_timer, [](uv_timer_t *handle) {
+					uv_timer_start(_timer, [](uv_timer_t *handle) {
 						Timer *t = (Timer*)handle->data;
 						t->Stop();
 						t->Execute();
@@ -49,19 +62,20 @@ namespace EQ {
 		}
 
 		void Stop() {
-			if (m_timer) {
-				uv_close((uv_handle_t*)m_timer, [](uv_handle_t* handle) {
+			if (_timer) {
+				uv_close((uv_handle_t*)_timer, [](uv_handle_t* handle) {
 					delete handle;
 				});
-				m_timer = nullptr;
+				_timer = nullptr;
 			}
 		}
 	private:
 		void Execute() {
-			m_cb(this);
+			_cb(this);
 		}
 	
-		uv_timer_t *m_timer;
-		std::function<void(Timer*)> m_cb;
+		EventLoop &_loop;
+		uv_timer_t *_timer;
+		std::function<void(Timer*)> _cb;
 	};
 }
