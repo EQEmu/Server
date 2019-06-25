@@ -1,5 +1,10 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 6/24/2019 ==
+Uleat: Reworked BotDatabase into a functional add-on for ZoneDatabase
+	- Eliminated the database connection associated with class BotDatabase
+	- All behaviors remain the same with the exception of the calling object
+	 -- To invoke a BotDatabase function, use database.botdb.<f> rather than botdb.<f>
 
 == 3/1/2019 ==
 Noudess: Major faction conversion to use client data.

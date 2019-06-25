@@ -1528,7 +1528,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	}
 
 #ifdef BOTS
-	botdb.LoadOwnerOptions(this);
+	database.botdb.LoadOwnerOptions(this);
 	// TODO: mod below function for loading spawned botgroups
 	Bot::LoadAndSpawnAllZonedBots(this);
 #endif

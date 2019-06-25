@@ -2181,7 +2181,7 @@ bool QuestManager::createBot(const char *name, const char *lastname, uint8 level
 
 		std::string test_name = name;
 		bool available_flag = false;
-		if(!botdb.QueryNameAvailablity(test_name, available_flag)) {
+		if(!database.botdb.QueryNameAvailablity(test_name, available_flag)) {
 			initiator->Message(0, "%s for '%s'", BotDatabase::fail::QueryNameAvailablity(), (char*)name);
 			return false;
 		}
