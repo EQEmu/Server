@@ -11772,15 +11772,25 @@ void command_logs(Client *c, const Seperator *sep){
 			safe_delete(pack);
 		}
 		/* #logs list_settings */
-		if (strcasecmp(sep->arg[1], "list_settings") == 0 || (strcasecmp(sep->arg[1], "set") == 0 && strcasecmp(sep->arg[3], "") == 0)){
+		if (strcasecmp(sep->arg[1], "list_settings") == 0 ||
+			(strcasecmp(sep->arg[1], "set") == 0 && strcasecmp(sep->arg[3], "") == 0)) {
 			c->Message(0, "[Category ID | console | file | gmsay | Category Description]");
 			int redisplay_columns = 0;
-			for (int i = 0; i < Logs::LogCategory::MaxCategoryID; i++){
-				if (redisplay_columns == 10){
+			for (int i            = 0; i < Logs::LogCategory::MaxCategoryID; i++) {
+				if (redisplay_columns == 10) {
 					c->Message(0, "[Category ID | console | file | gmsay | Category Description]");
 					redisplay_columns = 0;
 				}
-				c->Message(0, StringFormat("--- %i | %u | %u | %u | %s",  i, LogSys.log_settings[i].log_to_console, LogSys.log_settings[i].log_to_file, LogSys.log_settings[i].log_to_gmsay, Logs::LogCategoryName[i]).c_str());
+				c->Message(
+					0,
+					StringFormat(
+						"--- %i | %u | %u | %u | %s",
+						i,
+						LogSys.log_settings[i].log_to_console,
+						LogSys.log_settings[i].log_to_file,
+						LogSys.log_settings[i].log_to_gmsay,
+						Logs::LogCategoryName[i]
+					).c_str());
 				redisplay_columns++;
 			}
 		}

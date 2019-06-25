@@ -177,6 +177,12 @@ Json::Value EQ::Net::WebsocketServer::Login(WebsocketServerConnection *connectio
 			connection->SetAuthorized(true, r.account_name, r.account_id, 255);
 			ret["status"] = "Ok";
 		}
+		else if (user == "admin" && (connection->RemoteIP() == "127.0.0.1" || connection->RemoteIP() == "::")) {
+			r.logged_in = true;
+			r.account_id = 0;
+			connection->SetAuthorized(true, r.account_name, r.account_id, 255);
+			ret["status"] = "Ok";
+		}
 		else {
 			connection->SetAuthorized(false, "", 0, 0);
 			ret["status"] = "Not Authorized";

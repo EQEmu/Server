@@ -1642,18 +1642,22 @@ private:
 #ifdef BOTS
 	struct BotOwnerOptions {
 		bool death_marquee;
+		bool stats_update;
 	};
 
 	BotOwnerOptions bot_owner_options;
 
 	const BotOwnerOptions DefaultBotOwnerOptions = {
-		false // death_marquee
+		false,	// death_marquee
+		false	// stats_update
 	};
 
 public:
 	void SetBotOptionDeathMarquee(bool flag) { bot_owner_options.death_marquee = flag; }
+	void SetBotOptionStatsUpdate(bool flag) { bot_owner_options.stats_update = flag; }
 
 	bool GetBotOptionDeathMarquee() const { return bot_owner_options.death_marquee; }
+	bool GetBotOptionStatsUpdate() const { return bot_owner_options.stats_update; }
 
 private:		
 #endif

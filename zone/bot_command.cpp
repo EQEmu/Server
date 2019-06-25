@@ -3441,16 +3441,34 @@ void bot_command_movement_speed(Client *c, const Seperator *sep)
 void bot_command_owner_option(Client *c, const Seperator *sep)
 {
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(m_usage, "usage: %s [deathmarquee]", sep->arg[0]);
+		c->Message(m_usage, "usage: %s [deathmarquee | statsupdate] (argument: enable | disable | null (toggles))", sep->arg[0]);
 		return;
 	}
 
 	std::string owner_option = sep->arg[1];
+	std::string flag = sep->arg[2];
 
 	if (!owner_option.compare("deathmarquee")) {
-		c->SetBotOptionDeathMarquee(!c->GetBotOptionDeathMarquee());
-		c->Message(m_action, "Bot death marquee is now %s.", (c->GetBotOptionDeathMarquee() == true ? "enabled" : "disabled"));
+		if (!flag.compare("enable"))
+			c->SetBotOptionDeathMarquee(true);
+		else if (!flag.compare("disable"))
+			c->SetBotOptionDeathMarquee(false);
+		else
+			c->SetBotOptionDeathMarquee(!c->GetBotOptionDeathMarquee());
+		
 		botdb.SaveOwnerOptionDeathMarquee(c->CharacterID(), c->GetBotOptionDeathMarquee());
+		c->Message(m_action, "Bot 'death marquee' is now %s.", (c->GetBotOptionDeathMarquee() == true ? "enabled" : "disabled"));
+	}
+	else if (!owner_option.compare("statsupdate")) {
+		if (!flag.compare("enable"))
+			c->SetBotOptionStatsUpdate(true);
+		else if (!flag.compare("disable"))
+			c->SetBotOptionStatsUpdate(false);
+		else
+			c->SetBotOptionStatsUpdate(!c->GetBotOptionStatsUpdate());
+
+		botdb.SaveOwnerOptionStatsUpdate(c->CharacterID(), c->GetBotOptionStatsUpdate());
+		c->Message(m_action, "Bot 'stats update' is now %s.", (c->GetBotOptionStatsUpdate() == true ? "enabled" : "disabled"));
 	}
 	else {
 		c->Message(m_fail, "Owner option '%s' is not recognized.", owner_option.c_str());
@@ -5532,7 +5550,7 @@ void bot_subcommand_bot_update(Client *c, const Seperator *sep)
 			continue;
 
 		bot_iter->SetPetChooser(false);
-		bot_iter->CalcBotStats((sbl.size() == 1));
+		bot_iter->CalcBotStats(c->GetBotOptionStatsUpdate());
 		bot_iter->SendAppearancePacket(AT_WhoLevel, bot_iter->GetLevel(), true, true);
 		++bot_count;
 	}
@@ -7321,7 +7339,7 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 		}
 
 		my_bot->BotRemoveEquipItem(slotId);
-		my_bot->CalcBotStats();
+		my_bot->CalcBotStats(c->GetBotOptionStatsUpdate());
 	}
 
 	switch (slotId) {

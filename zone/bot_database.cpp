@@ -2188,7 +2188,7 @@ bool BotDatabase::LoadOwnerOptions(Client *owner)
 		return false;
 
 	query = StringFormat(
-		"SELECT `death_marquee` FROM `bot_owner_options`"
+		"SELECT `death_marquee`, `stats_update` FROM `bot_owner_options`"
 		" WHERE `owner_id` = '%u'",
 		owner->CharacterID()
 	);
@@ -2204,6 +2204,7 @@ bool BotDatabase::LoadOwnerOptions(Client *owner)
 
 	auto row = results.begin();
 	owner->SetBotOptionDeathMarquee((atoi(row[0]) != 0));
+	owner->SetBotOptionStatsUpdate((atoi(row[1]) != 0));
 
 	return true;
 }
@@ -2216,6 +2217,25 @@ bool BotDatabase::SaveOwnerOptionDeathMarquee(const uint32 owner_id, const bool 
 	query = StringFormat(
 		"UPDATE `bot_owner_options`"
 		" SET `death_marquee` = '%u'"
+		" WHERE `owner_id` = '%u'",
+		(flag == true ? 1 : 0),
+		owner_id
+	);
+	auto results = QueryDatabase(query);
+	if (!results.Success())
+		return false;
+
+	return true;
+}
+
+bool BotDatabase::SaveOwnerOptionStatsUpdate(const uint32 owner_id, const bool flag)
+{
+	if (!owner_id)
+		return false;
+
+	query = StringFormat(
+		"UPDATE `bot_owner_options`"
+		" SET `stats_update` = '%u'"
 		" WHERE `owner_id` = '%u'",
 		(flag == true ? 1 : 0),
 		owner_id
