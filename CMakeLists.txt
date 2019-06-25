@@ -132,7 +132,7 @@ ENDIF()
 
 MESSAGE(STATUS "**************************************************")
 
-SET(SERVER_LIBS common debug ${MySQL_LIBRARY_DEBUG} optimized ${MySQL_LIBRARY_RELEASE} ${ZLIB_LIBRARY} ${Boost_LIBRARIES} uv_a fmt RecastNavigation::Detour)
+SET(SERVER_LIBS common debug ${MySQL_LIBRARY_DEBUG} optimized ${MySQL_LIBRARY_RELEASE} ${Boost_LIBRARIES} uv_a fmt RecastNavigation::Detour)
 
 IF(WIN32)
 	SET(SERVER_LIBS ${SERVER_LIBS} "ws2_32" "psapi" "iphlpapi" "userenv")
