@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/eqemu_logsys.h"
 #include "../common/misc_functions.h"
 
+#include "ucsconfig.h"
 #include "clientlist.h"
 #include "database.h"
 #include "chatchannel.h"
@@ -465,15 +466,24 @@ static void ProcessCommandIgnore(Client *c, std::string Ignoree) {
 	safe_delete(outapp);
 
 }
+
 Clientlist::Clientlist(int ChatPort) {
 	EQ::Net::EQStreamManagerOptions chat_opts(ChatPort, false, false);
 	chat_opts.opcode_size = 1;
 	chat_opts.daybreak_options.stale_connection_ms = 300000;
+	chat_opts.daybreak_options.resend_delay_ms = RuleI(Network, ResendDelayBaseMS);
+	chat_opts.daybreak_options.resend_delay_factor = RuleR(Network, ResendDelayFactor);
+	chat_opts.daybreak_options.resend_delay_min = RuleI(Network, ResendDelayMinMS);
+	chat_opts.daybreak_options.resend_delay_max = RuleI(Network, ResendDelayMaxMS);
+
 	chatsf = new EQ::Net::EQStreamManager(chat_opts);
 
 	ChatOpMgr = new RegularOpcodeManager;
 
-	if (!ChatOpMgr->LoadOpcodes("mail_opcodes.conf"))
+	const ucsconfig *Config = ucsconfig::get();
+
+	Log(Logs::General, Logs::UCS_Server, "Loading '%s'", Config->MailOpCodesFile.c_str());
+	if (!ChatOpMgr->LoadOpcodes(Config->MailOpCodesFile.c_str()))
 		exit(1);
 
 	chatsf->OnNewConnection([this](std::shared_ptr<EQ::Net::EQStream> stream) {
@@ -513,6 +523,7 @@ Client::Client(std::shared_ptr<EQStreamInterface> eqs) {
 	GlobalChatLimiterTimer = new Timer(RuleI(Chat, IntervalDurationMS));
 
 	TypeOfConnection = ConnectionTypeUnknown;
+	ClientVersion_ = EQEmu::versions::ClientVersion::Unknown;
 
 	UnderfootOrLater = false;
 }
@@ -681,6 +692,7 @@ void Clientlist::Process()
 			it = ClientChatConnections.erase(it);
 			continue;
 		}
+
 		++it;
 	}
 }
@@ -2134,34 +2146,62 @@ void Client::SetConnectionType(char c) {
 
 	switch (c)
 	{
-	case 'S':
-	{
-		TypeOfConnection = ConnectionTypeCombined;
-		Log(Logs::Detail, Logs::UCS_Server, "Connection type is Combined (SoF/SoD)");
-		break;
-	}
-	case 'U':
-	{
-		TypeOfConnection = ConnectionTypeCombined;
-		UnderfootOrLater = true;
-		Log(Logs::Detail, Logs::UCS_Server, "Connection type is Combined (Underfoot+)");
-		break;
-	}
-	case 'M':
-	{
-		TypeOfConnection = ConnectionTypeMail;
-		Log(Logs::Detail, Logs::UCS_Server, "Connection type is Mail (6.2 or Titanium client)");
-		break;
-	}
-	case 'C':
+	case EQEmu::versions::ucsTitaniumChat:
 	{
 		TypeOfConnection = ConnectionTypeChat;
-		Log(Logs::Detail, Logs::UCS_Server, "Connection type is Chat (6.2 or Titanium client)");
+		ClientVersion_ = EQEmu::versions::ClientVersion::Titanium;
+		Log(Logs::Detail, Logs::UCS_Server, "Connection type is Chat (Titanium)");
+		break;
+	}
+	case EQEmu::versions::ucsTitaniumMail:
+	{
+		TypeOfConnection = ConnectionTypeMail;
+		ClientVersion_ = EQEmu::versions::ClientVersion::Titanium;
+		Log(Logs::Detail, Logs::UCS_Server, "Connection type is Mail (Titanium)");
+		break;
+	}
+	case EQEmu::versions::ucsSoFCombined:
+	{
+		TypeOfConnection = ConnectionTypeCombined;
+		ClientVersion_ = EQEmu::versions::ClientVersion::SoF;
+		Log(Logs::Detail, Logs::UCS_Server, "Connection type is Combined (SoF)");
+		break;
+	}
+	case EQEmu::versions::ucsSoDCombined:
+	{
+		TypeOfConnection = ConnectionTypeCombined;
+		ClientVersion_ = EQEmu::versions::ClientVersion::SoD;
+		Log(Logs::Detail, Logs::UCS_Server, "Connection type is Combined (SoD)");
+		break;
+	}
+	case EQEmu::versions::ucsUFCombined:
+	{
+		TypeOfConnection = ConnectionTypeCombined;
+		ClientVersion_ = EQEmu::versions::ClientVersion::UF;
+		UnderfootOrLater = true;
+		Log(Logs::Detail, Logs::UCS_Server, "Connection type is Combined (Underfoot)");
+		break;
+	}
+	case EQEmu::versions::ucsRoFCombined:
+	{
+		TypeOfConnection = ConnectionTypeCombined;
+		ClientVersion_ = EQEmu::versions::ClientVersion::RoF;
+		UnderfootOrLater = true;
+		Log(Logs::Detail, Logs::UCS_Server, "Connection type is Combined (RoF)");
+		break;
+	}
+	case EQEmu::versions::ucsRoF2Combined:
+	{
+		TypeOfConnection = ConnectionTypeCombined;
+		ClientVersion_ = EQEmu::versions::ClientVersion::RoF2;
+		UnderfootOrLater = true;
+		Log(Logs::Detail, Logs::UCS_Server, "Connection type is Combined (RoF2)");
 		break;
 	}
 	default:
 	{
 		TypeOfConnection = ConnectionTypeUnknown;
+		ClientVersion_ = EQEmu::versions::ClientVersion::Unknown;
 		Log(Logs::Detail, Logs::UCS_Server, "Connection type is unknown.");
 	}
 	}

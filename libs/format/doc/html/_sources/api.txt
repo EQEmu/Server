@@ -11,8 +11,8 @@ namespace is usually omitted in examples.
 Format API
 ==========
 
-The following functions use :ref:`format string syntax <syntax>` similar
-to the one used by Python's `str.format
+The following functions defined in ``fmt/format.h`` use :ref:`format string
+syntax <syntax>` similar to the one used by Python's `str.format
 <http://docs.python.org/3/library/stdtypes.html#str.format>`_ function.
 They take *format_str* and *args* as arguments.
 
@@ -21,6 +21,11 @@ fields surrounded by braces ``{}``. The fields are replaced with formatted
 arguments in the resulting string.
 
 *args* is an argument list representing arbitrary arguments.
+
+The `performance of the format API
+<https://github.com/fmtlib/fmt/blob/master/README.rst#speed-tests>`_ is close
+to that of glibc's ``printf`` and better than the performance of IOStreams.
+For even better speed use the `write API`_.
 
 .. _format:
 
@@ -40,8 +45,9 @@ arguments in the resulting string.
 Date and time formatting
 ------------------------
 
-The library supports `strftime <http://en.cppreference.com/w/cpp/chrono/c/strftime>`_-like
-date and time formatting::
+The library supports `strftime
+<http://en.cppreference.com/w/cpp/chrono/c/strftime>`_-like date and time
+formatting::
 
   #include "fmt/time.h"
 
@@ -51,6 +57,36 @@ date and time formatting::
 
 The format string syntax is described in the documentation of
 `strftime <http://en.cppreference.com/w/cpp/chrono/c/strftime>`_.
+
+Formatting user-defined types
+-----------------------------
+
+A custom ``format_arg`` function may be implemented and used to format any
+user-defined type. That is how date and time formatting described in the
+previous section is implemented in :file:`fmt/time.h`. The following example
+shows how to implement custom formatting for a user-defined structure.
+
+::
+
+  struct MyStruct { double a, b; };
+
+  void format_arg(fmt::BasicFormatter<char> &f,
+    const char *&format_str, const MyStruct &s) {
+    f.writer().write("[MyStruct: a={:.1f}, b={:.2f}]", s.a, s.b);
+  }
+
+  MyStruct m = { 1, 2 };
+  std::string s = fmt::format("m={}", n);
+  // s == "m=[MyStruct: a=1.0, b=2.00]"
+
+Note in the example above the ``format_arg`` function ignores the contents of
+``format_str`` so the type will always be formatted as specified. See
+``format_arg`` in :file:`fmt/time.h` for an advanced example of how to use
+the ``format_str`` argument to customize the formatted output.
+
+This section shows how to define a custom format function for a user-defined
+type. The next section describes how to get ``fmt`` to use a conventional stream
+output ``operator<<`` when one is defined for a user-defined type.
 
 ``std::ostream`` support
 ------------------------
@@ -63,7 +99,7 @@ formatting of user-defined types that have overloaded ``operator<<``::
   class Date {
     int year_, month_, day_;
   public:
-    Date(int year, int month, int day) : year_(year), month_(month), day_(day) {}
+    Date(int year, int month, int day): year_(year), month_(month), day_(day) {}
 
     friend std::ostream &operator<<(std::ostream &os, const Date &d) {
       return os << d.year_ << '-' << d.month_ << '-' << d.day_;
@@ -75,8 +111,6 @@ formatting of user-defined types that have overloaded ``operator<<``::
 
 .. doxygenfunction:: print(std::ostream&, CStringRef, ArgList)
 
-.. doxygenfunction:: fprintf(std::ostream&, CStringRef, ArgList)
-
 Argument formatters
 -------------------
 
@@ -86,7 +120,7 @@ custom argument formatter class::
   // A custom argument formatter that formats negative integers as unsigned
   // with the ``x`` format specifier.
   class CustomArgFormatter :
-    public fmt::BasicArgFormatter<CustomArgFormatter, char>  {
+    public fmt::BasicArgFormatter<CustomArgFormatter, char> {
     public:
     CustomArgFormatter(fmt::BasicFormatter<char, CustomArgFormatter> &f,
                        fmt::FormatSpec &s, const char *fmt)
@@ -120,21 +154,42 @@ custom argument formatter class::
 .. doxygenclass:: fmt::ArgFormatter
    :members:
 
-Printf formatting functions
----------------------------
+Printf formatting
+-----------------
 
+The header ``fmt/printf.h`` provides ``printf``-like formatting functionality.
 The following functions use `printf format string syntax
 <http://pubs.opengroup.org/onlinepubs/009695399/functions/fprintf.html>`_ with
-a POSIX extension for positional arguments.
+the POSIX extension for positional arguments. Unlike their standard
+counterparts, the ``fmt`` functions are type-safe and throw an exception if an
+argument type doesn't match its format specification.
 
 .. doxygenfunction:: printf(CStringRef, ArgList)
 
 .. doxygenfunction:: fprintf(std::FILE *, CStringRef, ArgList)
 
+.. doxygenfunction:: fprintf(std::ostream&, CStringRef, ArgList)
+
 .. doxygenfunction:: sprintf(CStringRef, ArgList)
+
+.. doxygenclass:: fmt::PrintfFormatter
+   :members:
+
+.. doxygenclass:: fmt::BasicPrintfArgFormatter
+   :members:
+
+.. doxygenclass:: fmt::PrintfArgFormatter
+   :members:
 
 Write API
 =========
+
+The write API provides classes for writing formatted data into character
+streams. It is usually faster than the `format API`_ but, as IOStreams,
+may result in larger compiled code size. The main writer class is
+`~fmt::BasicMemoryWriter` which stores its output in a memory buffer and
+provides direct access to it. It is possible to create custom writers that
+store output elsewhere by subclassing `~fmt::BasicWriter`.
 
 .. doxygenclass:: fmt::BasicWriter
    :members:
@@ -143,6 +198,12 @@ Write API
    :members:
 
 .. doxygenclass:: fmt::BasicArrayWriter
+   :members:
+
+.. doxygenclass:: fmt::BasicStringWriter
+   :members:
+
+.. doxygenclass:: fmt::BasicContainerWriter
    :members:
 
 .. doxygenfunction:: bin(int)
@@ -169,6 +230,8 @@ Utilities
 .. doxygenclass:: fmt::ArgList
    :members:
 
+.. doxygenfunction:: fmt::to_string(const T&)
+
 .. doxygenclass:: fmt::BasicStringRef
    :members:
 
@@ -184,6 +247,8 @@ System errors
 
 .. doxygenclass:: fmt::SystemError
    :members:
+
+.. doxygenfunction:: fmt::format_system_error
 
 .. doxygenclass:: fmt::WindowsError
    :members:
@@ -202,7 +267,8 @@ A custom allocator class can be specified as a template argument to
 It is also possible to write a formatting function that uses a custom
 allocator::
 
-    typedef std::basic_string<char, std::char_traits<char>, CustomAllocator> CustomString;
+    typedef std::basic_string<char, std::char_traits<char>, CustomAllocator>
+            CustomString;
 
     CustomString format(CustomAllocator alloc, fmt::CStringRef format_str,
                         fmt::ArgList args) {

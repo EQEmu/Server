@@ -28,6 +28,8 @@
 #include "pets.h"
 #include "zonedb.h"
 
+#include <string>
+
 #ifdef BOTS
 #include "bot.h"
 #endif
@@ -38,82 +40,42 @@
 #endif
 
 
-const char *GetRandPetName()
+// need to pass in a char array of 64 chars
+void GetRandPetName(char *name)
 {
-	static const char *petnames[] = { "Gabaner","Gabann","Gabantik","Gabarab","Gabarer","Gabarn","Gabartik",
-		"Gabekab","Gabeker","Gabekn","Gaber","Gabn","Gabobab","Gabobn","Gabtik",
-		"Ganer","Gann","Gantik","Garab","Garaner","Garann","Garantik","Gararn",
-		"Garekn","Garer","Garn","Gartik","Gasaner","Gasann","Gasantik","Gasarer",
-		"Gasartik","Gasekn","Gaser","Gebann","Gebantik","Gebarer","Gebarn","Gebartik",
-		"Gebeker","Gebekn","Gebn","Gekab","Geker","Gekn","Genaner","Genann","Genantik",
-		"Genarer","Genarn","Gener","Genn","Genobtik","Gibaner","Gibann","Gibantik",
-		"Gibarn","Gibartik","Gibekn","Giber","Gibn","Gibobtik","Gibtik","Gobaber",
-		"Gobaner","Gobann","Gobarn","Gobartik","Gober","Gobn","Gobober","Gobobn",
-		"Gobobtik","Gobtik","Gonaner","Gonann","Gonantik","Gonarab","Gonarer",
-		"Gonarn","Gonartik","Gonekab","Gonekn","Goner","Gonobtik","Gontik","Gotik",
-		"Jabaner","Jabann","Jabantik","Jabarab","Jabarer","Jabarn","Jabartik",
-		"Jabekab","Jabeker","Jabekn","Jaber","Jabn","Jabobtik","Jabtik","Janab",
-		"Janer","Jann","Jantik","Jarab","Jaranab","Jaraner","Jararer","Jararn",
-		"Jarartik","Jareker","Jarekn","Jarer","Jarn","Jarobn","Jarobtik","Jartik",
-		"Jasab","Jasaner","Jasantik","Jasarer","Jasartik","Jasekab","Jaseker",
-		"Jasekn","Jaser","Jasn","Jasobab","Jasober","Jastik","Jebanab","Jebann",
-		"Jebantik","Jebarab","Jebarar","Jebarer","Jebarn","Jebartik","Jebeker",
-		"Jebekn","Jeber","Jebobn","Jebtik","Jekab","Jeker","Jekn","Jenann",
-		"Jenantik","Jenarer","Jeneker","Jenekn","Jentik","Jibaner","Jibann",
-		"Jibantik","Jibarer","Jibarn","Jibartik","Jibeker","Jibn","Jibobn",
-		"Jibtik","Jobab","Jobaner","Jobann","Jobantik","Jobarn","Jobartik",
-		"Jobekab","Jobeker","Jober","Jobn","Jobtik","Jonanab","Jonaner",
-		"Jonann","Jonantik","Jonarer","Jonarn","Jonartik","Jonekab","Joneker",
-		"Jonekn","Joner","Jonn","Jonnarn","Jonober","Jonobn","Jonobtik","Jontik",
-		"Kabanab","Kabaner","Kabann","Kabantik","Kabarer","Kabarn","Kabartik",
-		"Kabeker","Kabekn","Kaber","Kabn","Kabober","Kabobn","Kabobtik","Kabtik",
-		"Kanab","Kaner","Kann","Kantik","Karab","Karanab","Karaner","Karann",
-		"Karantik","Kararer","Karartik","Kareker","Karer","Karn","Karobab","Karobn",
-		"Kartik","Kasaner","Kasann","Kasarer","Kasartik","Kaseker","Kasekn","Kaser",
-		"Kasn","Kasober","Kastik","Kebann","Kebantik","Kebarab","Kebartik","Kebeker",
-		"Kebekn","Kebn","Kebobab","Kebtik","Kekab","Keker","Kekn","Kenab","Kenaner",
-		"Kenantik","Kenarer","Kenarn","Keneker","Kener","Kenn","Kenobn","Kenobtik",
-		"Kentik","Kibab","Kibaner","Kibantik","Kibarn","Kibartik","Kibekab","Kibeker",
-		"Kibekn","Kibn","Kibobn","Kibobtik","Kobab","Kobanab","Kobaner","Kobann",
-		"Kobantik","Kobarer","Kobarn","Kobartik","Kobeker","Kobekn","Kober","Kobn",
-		"Kobober","Kobobn","Kobtik","Konanab","Konaner","Konann","Konantik","Konarab",
-		"Konarer","Konarn","Konekab","Koneker","Konekn","Koner","Konn","Konobn",
-		"Konobtik","Kontik","Labanab","Labaner","Labann","Labarab","Labarer",
-		"Labarn","Labartik","Labeker","Labekn","Laner","Lann","Larab","Larantik",
-		"Lararer","Lararn","Larartik","Lareker","Larer","Larn","Lartik","Lasaner",
-		"Lasann","Lasarer","Laseker","Laser","Lasik","Lasn","Lastik","Lebaner",
-		"Lebarer","Lebartik","Lebekn","Lebtik","Lekab","Lekn","Lenanab","Lenaner",
-		"Lenann","Lenartik","Lenekab","Leneker","Lenekn","Lentik","Libab","Libaner",
-		"Libann","Libantik","Libarer","Libarn","Libartik","Libeker","Libekn","Lobann",
-		"Lobarab","Lobarn","Lobartik","Lobekn","Lobn","Lobober","Lobobn","Lobtik",
-		"Lonaner","Lonann","Lonantik","Lonarab","Lonarer","Lonarn","Lonartik","Lonekn",
-		"Loner","Lonobtik","Lontik","Vabanab","Vabaner","Vabann","Vabantik","Vabarer",
-		"Vabarn","Vabartik","Vabeker","Vabekn","Vabtik","Vanikk","Vann","Varartik","Varn",
-		"Vartik","Vasann","Vasantik","Vasarab","Vasarer","Vaseker","Vebaner","Vebantik",
-		"Vebarab","Vebeker","Vebekn","Vebobn","Vekab","Veker","Venaner","Venantik","Venar",
-		"Venarn","Vener","Ventik","Vibann","Vibantik","Viber","Vibobtik","Vobann",
-		"Vobarer","Vobartik","Vobekn","Vober","Vobn","Vobtik","Vonaner","Vonann",
-		"Vonantik","Vonarab","Vonarn","Vonartik","Voneker","Vonn","Xabanab","Xabaner",
-		"Xabarer","Xabarn","Xabartik","Xabekab","Xabeker","Xabekn","Xaber","Xabober",
-		"Xaner","Xann","Xarab","Xaranab","Xarann","Xarantik","Xararer","Xarartik","Xarer",
-		"Xarn","Xartik","Xasaner","Xasann","Xasarab","Xasarn","Xasekab","Xaseker",
-		"Xebarer","Xebarn","Xebeker","Xeber","Xebober","Xebtik","Xekab","Xeker",
-		"Xekn","Xenann","Xenantik","Xenarer","Xenartik","Xenekn","Xener","Xenober",
-		"Xentik","Xibantik","Xibarer","Xibekab","Xibeker","Xibobab","Xibober","Xibobn",
-		"Xobaner","Xobann","Xobarab","Xobarn","Xobekab","Xobeker","Xobekn","Xober",
-		"Xobn","Xobobn","Xobtik","Xonaner","Xonann","Xonantik","Xonarer","Xonartik",
-		"Xonekab","Xoneker","Xonekn","Xoner","Xonober","Xtik","Zabaner","Zabantik",
-		"Zabarab","Zabekab","Zabekn","Zaber","Zabn","Zabobab","Zabober","Zabtik",
-		"Zaner","Zantik","Zarann","Zarantik","Zararn","Zarartik","Zareker","Zarekn",
-		"Zarer","Zarn","Zarober","Zartik","Zasaner","Zasarer","Zaseker","Zasekn","Zasn",
-		"Zebantik","Zebarer","Zebarn","Zebartik","Zebobab","Zekab","Zekn","Zenann",
-		"Zenantik","Zenarer","Zenarn","Zenekab","Zeneker","Zenobtik","Zibanab","Zibaner",
-		"Zibann","Zibarer","Zibartik","Zibekn","Zibn","Zibobn","Zobaner","Zobann",
-		"Zobarn","Zober","Zobn","Zonanab","Zonaner","Zonann","Zonantik","Zonarer",
-		"Zonartik","Zonobn","Zonobtik","Zontik","Ztik" };
-	int r = zone->random.Int(0, (sizeof(petnames)/sizeof(const char *))-1);
-	printf("Pet being created: %s\n",petnames[r]); // DO NOT COMMENT THIS OUT!
-	return petnames[r];
+	std::string temp;
+	temp.reserve(64);
+	// note these orders are used to make the exclusions cheap :P
+	static const char *part1[] = {"G", "J", "K", "L", "V", "X", "Z"};
+	static const char *part2[] = {nullptr, "ab", "ar", "as", "eb", "en", "ib", "ob", "on"};
+	static const char *part3[] = {nullptr, "an", "ar", "ek", "ob"};
+	static const char *part4[] = {"er", "ab", "n", "tik"};
+
+	const char *first = part1[zone->random.Int(0, (sizeof(part1) / sizeof(const char *)) - 1)];
+	const char *second = part2[zone->random.Int(0, (sizeof(part2) / sizeof(const char *)) - 1)];
+	const char *third = part3[zone->random.Int(0, (sizeof(part3) / sizeof(const char *)) - 1)];
+	const char *fourth = part4[zone->random.Int(0, (sizeof(part4) / sizeof(const char *)) - 1)];
+
+	// if both of these are empty, we would get an illegally short name
+	if (second == nullptr && third == nullptr)
+		fourth = part4[(sizeof(part4) / sizeof(const char *)) - 1];
+
+	// "ektik" isn't allowed either I guess?
+	if (third == part3[3] && fourth == part4[3])
+		fourth = part4[zone->random.Int(0, (sizeof(part4) / sizeof(const char *)) - 2)];
+
+	// "Laser" isn't allowed either I guess?
+	if (first == part1[3] && second == part2[3] && third == nullptr && fourth == part4[0])
+		fourth = part4[zone->random.Int(1, (sizeof(part4) / sizeof(const char *)) - 2)];
+
+	temp += first;
+	if (second != nullptr)
+		temp += second;
+	if (third != nullptr)
+		temp += third;
+	temp += fourth;
+
+	strn0cpy(name, temp.c_str(), 64);
 }
 
 //not used anymore
@@ -278,7 +240,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 		if(scale_power > 0)
 		{
 			npc_type->max_hp *= (1 + scale_power);
-			npc_type->cur_hp = npc_type->max_hp;
+			npc_type->current_hp = npc_type->max_hp;
 			npc_type->AC *= (1 + scale_power);
 			npc_type->level += 1 + ((int)act_power / 25) > npc_type->level + RuleR(Pets, PetPowerLevelCap) ? RuleR(Pets, PetPowerLevelCap) : 1 + ((int)act_power / 25); // gains an additional level for every 25 pet power
 			npc_type->min_dmg = (npc_type->min_dmg * (1 + (scale_power / 2)));
@@ -293,7 +255,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 
 	if (MaxHP){
 		npc_type->max_hp += (npc_type->max_hp*MaxHP)/100;
-		npc_type->cur_hp = npc_type->max_hp;
+		npc_type->current_hp = npc_type->max_hp;
 	}
 
 	//TODO: think about regen (engaged vs. not engaged)
@@ -325,7 +287,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	} else if (record.petnaming == 4) {
 		// Keep the DB name
 	} else if (record.petnaming == 3 && IsClient()) {
-		strcpy(npc_type->name, GetRandPetName());
+		GetRandPetName(npc_type->name);
 	} else if (record.petnaming == 5 && IsClient()) {
 		strcpy(npc_type->name, this->GetName());
 		npc_type->name[24] = '\0';
@@ -423,12 +385,12 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	// the base items for the pet. These are always loaded
 	// so that a rank 1 suspend minion does not kill things
 	// like the special back items some focused pets may receive.
-	uint32 petinv[EQEmu::legacy::EQUIPMENT_SIZE];
+	uint32 petinv[EQEmu::invslot::EQUIPMENT_COUNT];
 	memset(petinv, 0, sizeof(petinv));
 	const EQEmu::ItemData *item = nullptr;
 
 	if (database.GetBasePetItems(record.equipmentset, petinv)) {
-		for (int i = 0; i < EQEmu::legacy::EQUIPMENT_SIZE; i++)
+		for (int i = EQEmu::invslot::EQUIPMENT_BEGIN; i <= EQEmu::invslot::EQUIPMENT_END; i++)
 			if (petinv[i]) {
 				item = database.GetItem(petinv[i]);
 				npc->AddLootDrop(item, &npc->itemlist, 0, 1, 127, true, true);
@@ -463,7 +425,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 into walls or objects (+10), this sometimes creates the "ghost" effect. I changed to +2 (as close as I
 could get while it still looked good). I also noticed this can happen if an NPC is spawned on the same spot of another or in a related bad spot.*/
 Pet::Pet(NPCType *type_data, Mob *owner, PetType type, uint16 spell_id, int16 power)
-: NPC(type_data, 0, owner->GetPosition() + glm::vec4(2.0f, 2.0f, 0.0f, 0.0f), FlyMode3)
+: NPC(type_data, 0, owner->GetPosition() + glm::vec4(2.0f, 2.0f, 0.0f, 0.0f), GravityBehavior::Water)
 {
 	GiveNPCTypeData(type_data);
 	typeofpet = type;
@@ -562,10 +524,10 @@ void NPC::GetPetState(SpellBuff_Struct *pet_buffs, uint32 *items, char *name) {
 	strn0cpy(name, GetName(), 64);
 
 	//save their items, we only care about what they are actually wearing
-	memcpy(items, equipment, sizeof(uint32) * EQEmu::legacy::EQUIPMENT_SIZE);
+	memcpy(items, equipment, sizeof(uint32) * EQEmu::invslot::EQUIPMENT_COUNT);
 
 	//save their buffs.
-	for (int i=0; i < GetPetMaxTotalSlots(); i++) {
+	for (int i=EQEmu::invslot::EQUIPMENT_BEGIN; i < GetPetMaxTotalSlots(); i++) {
 		if (buffs[i].spellid != SPELL_UNKNOWN) {
 			pet_buffs[i].spellid = buffs[i].spellid;
 			pet_buffs[i].effect_type = i+1;
@@ -650,7 +612,7 @@ void NPC::SetPetState(SpellBuff_Struct *pet_buffs, uint32 *items) {
 	}
 
 	//restore their equipment...
-	for (i = 0; i < EQEmu::legacy::EQUIPMENT_SIZE; i++) {
+	for (i = EQEmu::invslot::EQUIPMENT_BEGIN; i <= EQEmu::invslot::EQUIPMENT_END; i++) {
 		if(items[i] == 0)
 			continue;
 
@@ -717,7 +679,7 @@ bool ZoneDatabase::GetBasePetItems(int32 equipmentset, uint32 *items) {
 			{
 				slot = atoi(row[0]);
 
-				if (slot >= EQEmu::legacy::EQUIPMENT_SIZE)
+				if (slot > EQEmu::invslot::EQUIPMENT_END)
 					continue;
 
 				if (items[slot] == 0)

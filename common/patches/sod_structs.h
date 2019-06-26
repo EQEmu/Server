@@ -292,7 +292,7 @@ struct Spawn_Struct
 /*0000*/ //uint8     nullterm1; // hack to null terminate name
 /*0064*/ uint32 spawnId;
 /*0068*/ uint8  level;
-/*0069*/ float    unknown1;
+/*0069*/ float  bounding_radius; // used in melee, overrides calc
 /*0073*/ uint8  NPC;           // 0=player,1=npc,2=pc corpse,3=npc corpse
 	 Spawn_Struct_Bitfields	Bitfields;
 /*0000*/ uint8  otherData; // & 4 - has title, & 8 - has suffix, & 1 - it's a chest or untargetable
@@ -456,9 +456,9 @@ struct NewZone_Struct {
 /*0893*/	uint8	unknown893;	//seen 0 - 00
 /*0894*/	uint8	fall_damage;	// 0 = Fall Damage on, 1 = Fall Damage off
 /*0895*/	uint8	unknown895;	//seen 0 - 00
-/*0896*/	uint32	unknown896;	//seen 180
-/*0900*/	uint32	unknown900;	//seen 180
-/*0904*/	uint32	unknown904;	//seen 180
+/*0896*/	uint32	FastRegenHP;	//seen 180
+/*0900*/	uint32	FastRegenMana;	//seen 180
+/*0904*/	uint32	FastRegenEndurance;	//seen 180
 /*0908*/	uint32	unknown908;	//seen 2
 /*0912*/	uint32	unknown912;	//seen 2
 /*0916*/	float   FogDensity;	//Of about 10 or so zones tested, all but one have this set to 0.33 Blightfire had 0.16
@@ -716,7 +716,7 @@ struct BandolierItem_Struct
 struct Bandolier_Struct
 {
 	char Name[32];
-	BandolierItem_Struct Items[profile::BandolierItemCount];
+	BandolierItem_Struct Items[profile::BANDOLIER_ITEM_COUNT];
 };
 
 //len = 72
@@ -730,7 +730,7 @@ struct PotionBeltItem_Struct
 //len = 288
 struct PotionBelt_Struct
 {
-	PotionBeltItem_Struct Items[profile::PotionBeltSize];
+	PotionBeltItem_Struct Items[profile::POTION_BELT_SIZE];
 };
 
 static const uint32 MAX_GROUP_LEADERSHIP_AA_ARRAY = 16;
@@ -815,8 +815,7 @@ struct BindStruct {
 ** OpCode: 0x006a
  */
 static const uint32 MAX_PP_LANGUAGE		= 25; //
-static const uint32 MAX_PP_SPELLBOOK	= 480; // Confirmed 60 pages on Live now
-static const uint32 MAX_PP_MEMSPELL		= 10; //was 9 now 10 on Live
+
 static const uint32 MAX_PP_SKILL		= PACKET_SKILL_ARRAY_SIZE;	// 100 - actual skills buffer size
 static const uint32 MAX_PP_INNATE_SKILL	= 25;
 static const uint32 MAX_PP_AA_ARRAY		= 300; //was 299
@@ -885,7 +884,7 @@ struct PlayerProfile_Struct
 /*00060*/ BindStruct binds[5];			// Bind points (primary is first)
 /*00160*/ uint32  deity;				// deity
 /*00164*/ uint32  intoxication;			// Alcohol level (in ticks till sober?)
-/*00168*/ uint32  spellSlotRefresh[MAX_PP_MEMSPELL]; // Refresh time (millis) - 4 Octets Each
+/*00168*/ uint32  spellSlotRefresh[spells::SPELL_GEM_COUNT]; // Refresh time (millis) - 4 Octets Each
 /*00208*/ uint32  abilitySlotRefresh;
 /*00212*/ uint8   haircolor;			// Player hair color
 /*00213*/ uint8   beardcolor;			// Player beard color
@@ -911,9 +910,9 @@ struct PlayerProfile_Struct
 /*04172*/ uint8   unknown04172[28];		//
 /*04200*/ uint8   face;					// Player face
 /*04201*/ uint8   unknown02264[147];		// was [175]
-/*04348*/ uint32   spell_book[MAX_PP_SPELLBOOK];	// List of the Spells in spellbook 480 = 60 pages [1920]
+/*04348*/ uint32   spell_book[spells::SPELLBOOK_SIZE];	// List of the Spells in spellbook 480 = 60 pages [1920]
 /*06268*/ uint8   unknown4184[128];		// was [164] Seen -1
-/*06396*/ uint32   mem_spells[MAX_PP_MEMSPELL]; // List of spells memorized
+/*06396*/ uint32   mem_spells[spells::SPELL_GEM_COUNT]; // List of spells memorized
 /*06436*/ uint8 unknown04396[28];		//#### uint8 unknown04396[32]; in Titanium ####[28]
 /*06464*/ uint32  platinum;				// Platinum Pieces on player
 /*06468*/ uint32  gold;					// Gold Pieces on player
@@ -924,7 +923,7 @@ struct PlayerProfile_Struct
 /*06488*/ uint32  silver_cursor;		// Silver Pieces on cursor
 /*06492*/ uint32  copper_cursor;		// Copper Pieces on cursor
 /*06496*/ uint32  skills[MAX_PP_SKILL];	// [400] List of skills	// 100 dword buffer
-/*06896*/ uint32  InnateSkills[MAX_PP_SKILL];
+/*06896*/ uint32  InnateSkills[MAX_PP_INNATE_SKILL];
 /*06996*/ uint8   unknown04760[36];
 /*07032*/ uint32  toxicity;				// Potion Toxicity (15=too toxic, each potion adds 3)
 /*07036*/ uint32  thirst_level;			// Drink (ticks till next drink)
@@ -937,7 +936,7 @@ struct PlayerProfile_Struct
 /*08288*/ uint32  aapoints_spent;		// Number of spent AA points
 /*08292*/ uint32  aapoints;				// Unspent AA points
 /*08296*/ uint8 unknown06160[4];
-/*08300*/ Bandolier_Struct bandoliers[profile::BandoliersSize]; // [6400] bandolier contents
+/*08300*/ Bandolier_Struct bandoliers[profile::BANDOLIERS_SIZE]; // [6400] bandolier contents
 /*14700*/ PotionBelt_Struct  potionbelt;	// [360] potion belt 72 extra octets by adding 1 more belt slot
 /*15060*/ uint8 unknown12852[8];
 /*15068*/ uint32 available_slots;
@@ -1215,20 +1214,18 @@ struct Action_Struct
 {
  /* 00 */	uint16 target;	// id of target
  /* 02 */	uint16 source;	// id of caster
- /* 04 */	uint16 level; // level of caster
- /* 06 */	uint16 instrument_mod;	// seems to be fixed to 0x0A
- /* 08 */	uint32 unknown08;
- /* 12 */	uint16 unknown16;
-// some kind of sequence that's the same in both actions
-// as well as the combat damage, to tie em together?
- /* 14 */	float sequence;		// was uint32
- /* 18 */	uint32 unknown18;
- /* 22 */	uint8 type;		// 231 (0xE7) for spells
- /* 23 */	uint32 unknown23;
+ /* 04 */	uint16 level; // level of caster for spells, OSX dump says attack rating, guess spells use it for level
+ /* 06 */	uint32 instrument_mod;	// OSX dump says base damage, spells use it for bard song (different from newer clients)
+ /* 10 */	float force;
+ /* 14 */	float hit_heading;
+ /* 18 */	float hit_pitch;
+ /* 22 */	uint8 type;		// 231 (0xE7) for spells, skill
+ /* 23 */	uint16 unknown23; // OSX says min_damage
+ /* 25 */	uint16 unknown25; // OSX says tohit
  /* 27 */	uint16 spell;	// spell id being cast
- /* 29 */	uint8 level2;	// level of caster again? Or maybe the castee
+ /* 29 */	uint8 spell_level;	// level of caster again? Or maybe the castee
 // this field seems to be some sort of success flag, if it's 4
- /* 30 */	uint8 buff_unknown;	// if this is 4, a buff icon is made
+ /* 30 */	uint8 effect_flag;	// if this is 4, a buff icon is made
  /* 31 */
 };
 
@@ -1237,26 +1234,23 @@ struct Action_Struct
 // has to do with buff blocking??
 struct ActionAlt_Struct // ActionAlt_Struct - Size: 56 bytes
 {
-/*0000*/ uint16 target;                 // Target ID
-/*0002*/ uint16 source;                 // SourceID
-/*0004*/ uint16 level;					// level of caster
-/*0006*/ uint16 instrument_mod;				// seems to be fixed to 0x0A
-/*0008*/ uint32 unknown08;
-/*0012*/ uint16 unknown16;
-/*0014*/ uint32 sequence;
-/*0018*/ uint32 unknown18;
-/*0022*/ uint8  type;                   // Casts, Falls, Bashes, etc...
-/*0023*/ uint32  damage;                 // Amount of Damage
-/*0027*/ uint16  spell;                  // SpellID
-/*0029*/ uint8 unknown29;
-/*0030*/ uint8 buff_unknown;				// if this is 4, a buff icon is made
-/*0031*/ uint32 unknown0031;			// seen 00 00 00 00
-/*0035*/ uint8 unknown0035;				// seen 00
-/*0036*/ uint32 unknown0036;			// seen ff ff ff ff
-/*0040*/ uint32 unknown0040;			// seen ff ff ff ff
-/*0044*/ uint32 unknown0044;			// seen ff ff ff ff
-/*0048*/ uint32 unknown0048;			// seen 00 00 00 00
-/*0052*/ uint32 unknown0052;			// seen 00 00 00 00
+/*0000*/ uint16 target;	// id of target
+/*0002*/ uint16 source;	// id of caster
+/*0004*/ uint16 level; // level of caster for spells, OSX dump says attack rating, guess spells use it for level
+/*0006*/ uint32 instrument_mod;	// OSX dump says base damage, spells use it for bard song (different from newer clients)
+/*0010*/ float force;
+/*0014*/ float hit_heading;
+/*0018*/ float hit_pitch;
+/*0022*/ uint8 type;		// 231 (0xE7) for spells, skill
+/*0023*/ uint16 unknown23; // OSX says min_damage
+/*0025*/ uint16 unknown25; // OSX says tohit
+/*0027*/ uint16 spell;	// spell id being cast
+/*0029*/ uint8 spell_level;	// level of caster again? Or maybe the castee
+// this field seems to be some sort of success flag, if it's 4
+/*0030*/ uint8 effect_flag;	// if this is 4, a buff icon is made
+/*0031*/ uint8 spell_slot;
+/*0032*/ uint32 slot[5];
+/*0052*/ uint32 item_cast_type;	// ItemSpellTypes enum from MQ2
 /*0056*/
 };
 
@@ -1271,9 +1265,9 @@ struct CombatDamage_Struct
 /* 05 */	uint16	spellid;
 /* 07 */	int32	damage;
 /* 11 */	float	force;		// cd cc cc 3d
-/* 15 */	float	meleepush_xy;		// see above notes in Action_Struct
-/* 19 */	float	meleepush_z;
-/* 23 */	uint8	unknown23;	// was [9]
+/* 15 */	float	hit_heading;		// see above notes in Action_Struct
+/* 19 */	float	hit_pitch;
+/* 23 */	uint8	secondary;	// 0 for primary hand, 1 for secondary
 /* 24 */	uint32	special; // 2 = Rampage, 1 = Wild Rampage
 /* 28 */
 };
@@ -3008,24 +3002,6 @@ struct GuildMakeLeader{
 	char	target[64];
 };
 
-struct BugStruct{
-/*0000*/    uint32  type1; //seems to be just a different way of seeing type; seems to be ordered completely differently
-/*0004*/	char	chartype[64];
-/*0068*/	char	name[96];
-/*0164*/	char	ui[128];
-/*0292*/	float	x;
-/*0296*/	float	y;
-/*0300*/	float	z;
-/*0304*/	float	heading;
-/*0308*/	uint32	unknown304;
-/*0312*/	char	unknown308[160];
-/*0472*/	char	target_name[64];
-/*0536*/	uint32	type;
-/*0540*/	char	unknown536[2052];
-/*2588*/	char	bug[2048];
-/*4636*/	char	unknown4632[6];
-/*4642*/	char	system_info[4094];
-};
 struct Make_Pet_Struct { //Simple struct for getting pet info
 	uint8 level;
 	uint8 class_;
@@ -3052,20 +3028,21 @@ struct Ground_Spawn{
 struct Ground_Spawns {
 	struct Ground_Spawn spawn[50]; //Assigned max number to allow
 };
-struct PetitionBug_Struct{
-	uint32	petition_number;
-	uint32	unknown4;
-	char	accountname[64];
-	uint32	zoneid;
-	char	name[64];
-	uint32	level;
-	uint32	class_;
-	uint32	race;
-	uint32	unknown152[3];
-	uint32	time;
-	uint32	unknown168;
-	char	text[1028];
-};
+
+//struct PetitionBug_Struct{
+//	uint32	petition_number;
+//	uint32	unknown4;
+//	char	accountname[64];
+//	uint32	zoneid;
+//	char	name[64];
+//	uint32	level;
+//	uint32	class_;
+//	uint32	race;
+//	uint32	unknown152[3];
+//	uint32	time;
+//	uint32	unknown168;
+//	char	text[1028];
+//};
 
 struct ApproveZone_Struct {
 	char	name[64];
@@ -3868,7 +3845,7 @@ struct AnnoyingZoneUnknown_Struct {
 };
 
 struct LoadSpellSet_Struct {
-      uint32  spell[MAX_PP_MEMSPELL];      // 0xFFFFFFFF if no action, slot number if to unmem starting at 0
+      uint32  spell[spells::SPELL_GEM_COUNT];      // 0xFFFFFFFF if no action, slot number if to unmem starting at 0
       uint32 unknown;	//there seems to be an extra field in this packet...
 };
 
@@ -4402,6 +4379,22 @@ struct MercenaryAssign_Struct {
 /*0004*/	uint32	MercUnk01;		//
 /*0008*/	uint32	MercUnk02;		//
 /*0012*/
+};
+
+struct SayLinkBodyFrame_Struct {
+/*000*/	char ActionID[1];
+/*001*/	char ItemID[5];
+/*006*/	char Augment1[5];
+/*011*/	char Augment2[5];
+/*016*/	char Augment3[5];
+/*021*/	char Augment4[5];
+/*026*/	char Augment5[5];
+/*031*/	char IsEvolving[1];
+/*032*/	char EvolveGroup[4];
+/*036*/	char EvolveLevel[1];
+/*037*/	char OrnamentIcon[5];
+/*042*/	char Hash[8];
+/*050*/
 };
 
 	}; /*structs*/

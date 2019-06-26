@@ -30,18 +30,6 @@ namespace EQEmu
 
 const int MercAISpellRange = 100; // TODO: Write a method that calcs what the merc's spell range is based on spell, equipment, AA, whatever and replace this
 
-enum MercStanceType {
-	MercStancePassive = 1,
-	MercStanceBalanced,
-	MercStanceEfficient,
-	MercStanceReactive,
-	MercStanceAggressive,
-	MercStanceAssist,
-	MercStanceBurn,
-	MercStanceEfficient2,
-	MercStanceBurnAE
-};
-
 struct MercSpell {
 	uint16 spellid; // <= 0 = no spell
 	uint32 type; // 0 = never, must be one (and only one) of the defined values
@@ -66,7 +54,7 @@ public:
 	//abstract virtual function implementations requird by base abstract class
 	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill);
 	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None);
-	virtual bool Attack(Mob* other, int Hand = EQEmu::inventory::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = false,
+	virtual bool Attack(Mob* other, int Hand = EQEmu::invslot::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = false,
 	bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr);
 	virtual bool HasRaid() { return false; }
 	virtual bool HasGroup() { return (GetGroup() ? true : false); }
@@ -175,7 +163,7 @@ public:
 	uint8 GetTierID() { return _TierID; }
 	uint32 GetCostFormula() { return _CostFormula; }
 	uint32 GetMercNameType() { return _NameType; }
-	uint32 GetStance() { return _currentStance; }
+	EQEmu::constants::StanceType GetStance() { return _currentStance; }
 	int GetHatedCount() { return _hatedCount; }
 
 	inline const uint8 GetClientVersion() const { return _OwnerClientVersion; }
@@ -265,7 +253,7 @@ public:
 	void SetMercNameType( uint8 nametype ) { _NameType = nametype; }
 	void SetClientVersion(uint8 clientVersion) { _OwnerClientVersion = clientVersion; }
 	void SetSuspended(bool suspended) { _suspended = suspended; }
-	void SetStance( uint32 stance ) { _currentStance = stance; }
+	void SetStance( EQEmu::constants::StanceType stance ) { _currentStance = stance; }
 	void SetHatedCount( int count ) { _hatedCount = count; }
 
 	void Sit();
@@ -293,7 +281,7 @@ protected:
 	Timer evade_timer; // can be moved to pTimers at some point
 
 	uint16 skills[EQEmu::skills::HIGHEST_SKILL + 1];
-	uint32 equipment[EQEmu::legacy::EQUIPMENT_SIZE]; //this is an array of item IDs
+	uint32 equipment[EQEmu::invslot::EQUIPMENT_COUNT]; //this is an array of item IDs
 	uint16 d_melee_texture1; //this is an item Material value
 	uint16 d_melee_texture2; //this is an item Material value (offhand)
 	uint8 prim_melee_type; //Sets the Primary Weapon attack message and animation
@@ -385,7 +373,7 @@ private:
 	uint8 _CostFormula;
 	uint8 _NameType;
 	uint8 _OwnerClientVersion;
-	uint32 _currentStance;
+	EQEmu::constants::StanceType _currentStance;
 
 	EQEmu::InventoryProfile m_inv;
 	int32 max_end;

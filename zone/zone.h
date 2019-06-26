@@ -28,6 +28,8 @@
 #include "spawn2.h"
 #include "spawngroup.h"
 #include "aa_ability.h"
+#include "pathfinder_interface.h"
+#include "global_loot_manager.h"
 
 struct ZonePoint
 {
@@ -73,11 +75,11 @@ struct item_tick_struct {
 class Client;
 class Map;
 class Mob;
-class PathManager;
 class WaterMap;
 extern EntityList entity_list;
 struct NPCType;
 struct ServerZoneIncomingClient_Struct;
+class MobMovementManager;
 
 class Zone
 {
@@ -92,7 +94,7 @@ public:
 	bool is_zone_time_localized;
 
 	bool	Init(bool iStaticZone);
-	bool	LoadZoneCFG(const char* filename, uint16 instance_id, bool DontLoadDefault = false);
+	bool	LoadZoneCFG(const char* filename, uint16 instance_id);
 	bool	SaveZoneCFG();
 	bool	IsLoaded();
 	bool	IsPVPZone() { return pvpzone; }
@@ -209,11 +211,12 @@ public:
 	void	LoadAlternateCurrencies();
 	void	LoadNPCEmotes(LinkedList<NPC_Emote_Struct*>* NPCEmoteList);
 	void	ReloadWorld(uint32 Option);
+	void	ReloadMerchants();
 
-	Map*	zonemap;
-	WaterMap* watermap;
-	PathManager *pathing;
-	NewZone_Struct	newzone_data;
+	Map      *zonemap;
+	WaterMap *watermap;
+	IPathfinder    *pathing;
+	NewZone_Struct newzone_data;
 
 	SpawnConditionManager spawn_conditions;
 
@@ -222,7 +225,7 @@ public:
 	void	SetDate(uint16 year, uint8 month, uint8 day, uint8 hour, uint8 minute);
 	void SetTime(uint8 hour, uint8 minute, bool update_world = true);
 
-	void	weatherSend();
+	void	weatherSend(Client* client = nullptr);
 	bool	CanBind() const { return(can_bind); }
 	bool	IsCity() const { return(is_city); }
 	bool	CanDoCombat() const { return(can_combat); }
@@ -267,6 +270,15 @@ public:
 	uint32  GetSpawnKillCount(uint32 in_spawnid);
 	void    UpdateHotzone();
 	std::unordered_map<int, item_tick_struct> tick_items;
+
+	inline std::vector<int> GetGlobalLootTables(NPC *mob) const { return m_global_loot.GetGlobalLootTables(mob); }
+	inline void AddGlobalLootEntry(GlobalLootEntry &in) { return m_global_loot.AddEntry(in); }
+	inline void ShowZoneGlobalLoot(Client *to) { m_global_loot.ShowZoneGlobalLoot(to); }
+	inline void ShowNPCGlobalLoot(Client *to, NPC *who) { m_global_loot.ShowNPCGlobalLoot(to, who); }
+
+	void RequestUCSServerStatus();
+	void SetUCSServerAvailable(bool ucss_available, uint32 update_timestamp);
+	bool IsUCSServerAvailable() { return m_ucss_available; }
 
 	// random object that provides random values for the zone
 	EQEmu::Random random;
@@ -346,6 +358,13 @@ private:
 	QGlobalCache *qGlobals;
 
 	Timer	hotzone_timer;
+
+	GlobalLootManager m_global_loot;
+
+	bool m_ucss_available;
+	uint32 m_last_ucss_update;
+
+	MobMovementManager *mMovementManager;
 };
 
 #endif

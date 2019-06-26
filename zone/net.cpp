@@ -32,6 +32,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/eq_stream_ident.h"
 #include "../common/patches/patches.h"
 #include "../common/rulesys.h"
+#include "../common/profanity_manager.h"
 #include "../common/misc_functions.h"
 #include "../common/string_util.h"
 #include "../common/platform.h"
@@ -42,7 +43,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/spdat.h"
 #include "../common/eqemu_logsys.h"
 
-
 #include "zone_config.h"
 #include "masterentity.h"
 #include "worldserver.h"
@@ -52,7 +52,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "command.h"
 #ifdef BOTS
 #include "bot_command.h"
-#include "bot_database.h"
 #endif
 #include "zone_config.h"
 #include "titles.h"
@@ -62,6 +61,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "embparser.h"
 #include "lua_parser.h"
 #include "questmgr.h"
+#include "npc_scale_manager.h"
 
 #include "../common/event/event_loop.h"
 #include "../common/event/timer.h"
@@ -104,12 +104,13 @@ npcDecayTimes_Struct npcCorpseDecayTimes[100];
 TitleManager title_manager;
 QueryServ *QServ = 0;
 TaskManager *taskmanager = 0;
+NpcScaleManager *npc_scale_manager;
 QuestParserCollection *parse = 0;
 EQEmuLogSys LogSys;
 const SPDat_Spell_Struct* spells;
 int32 SPDAT_RECORDS = -1;
 const ZoneConfig *Config;
-uint64_t frame_time = 0;
+double frame_time = 0.0;
 
 void Shutdown();
 extern void MapOpcodes();
@@ -222,7 +223,6 @@ int main(int argc, char** argv) {
 		worldserver.SetLauncherName("NONE");
 	}
 
-
 	Log(Logs::General, Logs::Zone_Server, "Connecting to MySQL...");
 	if (!database.Connect(
 		Config->DatabaseHost.c_str(),
@@ -234,18 +234,6 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
-#ifdef BOTS
-	if (!botdb.Connect(
-		Config->DatabaseHost.c_str(),
-		Config->DatabaseUsername.c_str(),
-		Config->DatabasePassword.c_str(),
-		Config->DatabaseDB.c_str(),
-		Config->DatabasePort)) {
-		Log(Logs::General, Logs::Error, "Cannot continue without a bots database connection.");
-		return 1;
-	}
-#endif
-
 	/* Register Log System and Settings */
 	LogSys.OnLogHookCallBackZone(&Zone::GMSayHookCallBackProcess);
 	database.LoadLogSettings(LogSys.log_settings);
@@ -254,6 +242,12 @@ int main(int argc, char** argv) {
 	/* Guilds */
 	guild_mgr.SetDatabase(&database);
 	GuildBanks = nullptr;
+
+	/**
+	 * NPC Scale Manager
+	 */
+	npc_scale_manager = new NpcScaleManager;
+	npc_scale_manager->LoadScaleData();
 
 #ifdef _EQDEBUG
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
@@ -344,6 +338,10 @@ int main(int argc, char** argv) {
 	Log(Logs::General, Logs::Zone_Server, "Loading corpse timers");
 	database.GetDecayTimes(npcCorpseDecayTimes);
 
+	Log(Logs::General, Logs::Zone_Server, "Loading profanity list");
+	if (!EQEmu::ProfanityManager::LoadProfanityList(&database))
+		Log(Logs::General, Logs::Error, "Loading profanity list FAILED!");
+
 	Log(Logs::General, Logs::Zone_Server, "Loading commands");
 	int retval = command_init();
 	if (retval<0)
@@ -356,18 +354,21 @@ int main(int argc, char** argv) {
 		std::string tmp;
 		if (database.GetVariable("RuleSet", tmp)) {
 			Log(Logs::General, Logs::Zone_Server, "Loading rule set '%s'", tmp.c_str());
-			if (!RuleManager::Instance()->LoadRules(&database, tmp.c_str())) {
+			if (!RuleManager::Instance()->LoadRules(&database, tmp.c_str(), false)) {
 				Log(Logs::General, Logs::Error, "Failed to load ruleset '%s', falling back to defaults.", tmp.c_str());
 			}
 		}
 		else {
-			if (!RuleManager::Instance()->LoadRules(&database, "default")) {
+			if (!RuleManager::Instance()->LoadRules(&database, "default", false)) {
 				Log(Logs::General, Logs::Zone_Server, "No rule set configured, using default rules");
 			}
 			else {
 				Log(Logs::General, Logs::Zone_Server, "Loaded default rule set 'default'", tmp.c_str());
 			}
 		}
+
+		EQEmu::InitializeDynamicLookups();
+		Log(Logs::General, Logs::Zone_Server, "Initialized dynamic dictionary entries");
 	}
 
 #ifdef BOTS
@@ -379,7 +380,7 @@ int main(int argc, char** argv) {
 		Log(Logs::General, Logs::Zone_Server, "%d bot commands loaded", botretval);
 
 	Log(Logs::General, Logs::Zone_Server, "Loading bot spell casting chances");
-	if (!botdb.LoadBotSpellCastingChances())
+	if (!database.botdb.LoadBotSpellCastingChances())
 		Log(Logs::General, Logs::Error, "Bot spell casting chances loading FAILED");
 #endif
 
@@ -447,13 +448,17 @@ int main(int argc, char** argv) {
 
 		//Calculate frame time
 		std::chrono::time_point<std::chrono::system_clock> frame_now = std::chrono::system_clock::now();
-		frame_time = std::chrono::duration_cast<std::chrono::milliseconds>(frame_now - frame_prev).count();
+		frame_time = std::chrono::duration_cast<std::chrono::duration<double>>(frame_now - frame_prev).count();
 		frame_prev = frame_now;
 
 		if (!eqsf_open && Config->ZonePort != 0) {
 			Log(Logs::General, Logs::Zone_Server, "Starting EQ Network server on port %d", Config->ZonePort);
 
 			EQ::Net::EQStreamManagerOptions opts(Config->ZonePort, false, true);
+			opts.daybreak_options.resend_delay_ms = RuleI(Network, ResendDelayBaseMS);
+			opts.daybreak_options.resend_delay_factor = RuleR(Network, ResendDelayFactor);
+			opts.daybreak_options.resend_delay_min = RuleI(Network, ResendDelayMinMS);
+			opts.daybreak_options.resend_delay_max = RuleI(Network, ResendDelayMaxMS);
 			eqsm.reset(new EQ::Net::EQStreamManager(opts));
 			eqsf_open = true;
 
@@ -541,11 +546,6 @@ int main(int argc, char** argv) {
 		if (previous_loaded && !current_loaded) {
 			process_timer.Stop();
 			process_timer.Start(1000, true);
-
-			if (zone && zone->GetZoneID() && zone->GetInstanceVersion()) {
-				uint32 shutdown_timer = database.getZoneShutDownDelay(zone->GetZoneID(), zone->GetInstanceVersion());
-				zone->StartShutdownTimer(shutdown_timer);
-			}
 		}
 		else if (!previous_loaded && current_loaded) {
 			process_timer.Stop();

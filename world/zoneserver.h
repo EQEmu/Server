@@ -39,6 +39,7 @@ public:
 	void        SendPacket(ServerPacket* pack) { tcpc->SendPacket(pack); }
 	void		SendEmoteMessage(const char* to, uint32 to_guilddbid, int16 to_minstatus, uint32 type, const char* message, ...);
 	void		SendEmoteMessageRaw(const char* to, uint32 to_guilddbid, int16 to_minstatus, uint32 type, const char* message);
+	void		SendKeepAlive();
 	bool		SetZone(uint32 iZoneID, uint32 iInstanceID = 0, bool iStaticZone = false);
 	void		TriggerBootup(uint32 iZoneID = 0, uint32 iInstanceID = 0, const char* iAdminName = 0, bool iMakeStatic = false);
 	void		Disconnect() { auto handle = tcpc->Handle(); if (handle) { handle->Disconnect(); } }

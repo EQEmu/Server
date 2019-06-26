@@ -336,6 +336,20 @@ void LoginServer::SendStatus() {
 	delete pack;
 }
 
+void LoginServer::SendPacket(ServerPacket *pack)
+{
+	if (IsLegacy) {
+		if (legacy_client) {
+			legacy_client->SendPacket(pack);
+		}
+	}
+	else {
+		if (client) {
+			client->SendPacket(pack);
+		}
+	}
+}
+
 void LoginServer::SendAccountUpdate(ServerPacket* pack) {
 	ServerLSAccountUpdate_Struct* s = (ServerLSAccountUpdate_Struct *)pack->pBuffer;
 	if (CanUpdate()) {
@@ -344,4 +358,20 @@ void LoginServer::SendAccountUpdate(ServerPacket* pack) {
 		strn0cpy(s->worldpassword, LoginPassword.c_str(), 30);
 		SendPacket(pack);
 	}
+}
+
+bool LoginServer::Connected()
+{
+	if (IsLegacy) {
+		if (legacy_client) {
+			return legacy_client->Connected();
+		}
+	}
+	else {
+		if (client) {
+			return client->Connected();
+		}
+	}
+
+	return false;
 }

@@ -172,30 +172,27 @@ void Database::LoginIP(uint32 AccountID, const char* LoginIP) {
 	QueryDatabase(query); 
 }
 
-int16 Database::CheckStatus(uint32 account_id) {
-	std::string query = StringFormat("SELECT `status`, UNIX_TIMESTAMP(`suspendeduntil`) as `suspendeduntil`, UNIX_TIMESTAMP() as `current`"
-							" FROM `account` WHERE `id` = %i", account_id);
+int16 Database::CheckStatus(uint32 account_id)
+{
+	std::string query = StringFormat(
+	    "SELECT `status`, TIMESTAMPDIFF(SECOND, NOW(), `suspendeduntil`) FROM `account` WHERE `id` = %i",
+	    account_id);
 
-	auto results = QueryDatabase(query); 
-	if (!results.Success()) {
+	auto results = QueryDatabase(query);
+	if (!results.Success())
 		return 0;
-	}
 
 	if (results.RowCount() != 1)
 		return 0;
-	
-	auto row = results.begin(); 
-	int16 status = atoi(row[0]); 
-	int32 suspendeduntil = 0;
 
-	// MariaDB initalizes with NULL if unix_timestamp() is out of range
-	if (row[1] != nullptr) {
-		suspendeduntil = atoi(row[1]);
-	}
+	auto row = results.begin();
+	int16 status = atoi(row[0]);
+	int32 date_diff = 0;
 
-	int32 current = atoi(row[2]);
+	if (row[1] != nullptr)
+		date_diff = atoi(row[1]);
 
-	if(suspendeduntil > current)
+	if (date_diff > 0)
 		return -1;
 
 	return status;
@@ -709,7 +706,7 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, EQEmu
 
 	/* Insert starting inventory... */
 	std::string invquery;
-	for (int16 i = EQEmu::legacy::EQUIPMENT_BEGIN; i <= EQEmu::legacy::BANK_BAGS_END;) {
+	for (int16 i = EQEmu::invslot::EQUIPMENT_BEGIN; i <= EQEmu::invbag::BANK_BAGS_END;) {
 		const EQEmu::ItemInstance* newinv = inv->GetItem(i);
 		if (newinv) {
 			invquery = StringFormat("INSERT INTO `inventory` (charid, slotid, itemid, charges, color) VALUES (%u, %i, %u, %i, %u)",
@@ -718,16 +715,16 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, EQEmu
 			auto results = QueryDatabase(invquery); 
 		}
 
-		if (i == EQEmu::inventory::slotCursor) {
-			i = EQEmu::legacy::GENERAL_BAGS_BEGIN; 
+		if (i == EQEmu::invslot::slotCursor) {
+			i = EQEmu::invbag::GENERAL_BAGS_BEGIN; 
 			continue;
 		}
-		else if (i == EQEmu::legacy::CURSOR_BAG_END) { 
-			i = EQEmu::legacy::BANK_BEGIN; 
+		else if (i == EQEmu::invbag::CURSOR_BAG_END) { 
+			i = EQEmu::invslot::BANK_BEGIN; 
 			continue; 
 		}
-		else if (i == EQEmu::legacy::BANK_END) { 
-			i = EQEmu::legacy::BANK_BAGS_BEGIN; 
+		else if (i == EQEmu::invslot::BANK_END) { 
+			i = EQEmu::invbag::BANK_BAGS_BEGIN; 
 			continue; 
 		} 
 		i++;
@@ -1399,25 +1396,39 @@ uint8 Database::GetSkillCap(uint8 skillid, uint8 in_race, uint8 in_class, uint16
 	return base_cap;
 }
 
-uint32 Database::GetCharacterInfo(const char* iName, uint32* oAccID, uint32* oZoneID, uint32* oInstanceID, float* oX, float* oY, float* oZ) { 
-	std::string query = StringFormat("SELECT `id`, `account_id`, `zone_id`, `zone_instance`, `x`, `y`, `z` FROM `character_data` WHERE `name` = '%s'", iName);
+uint32 Database::GetCharacterInfo(
+	const char *iName,
+	uint32 *oAccID,
+	uint32 *oZoneID,
+	uint32 *oInstanceID,
+	float *oX,
+	float *oY,
+	float *oZ
+)
+{
+	std::string query = StringFormat(
+		"SELECT `id`, `account_id`, `zone_id`, `zone_instance`, `x`, `y`, `z` FROM `character_data` WHERE `name` = '%s'",
+		EscapeString(iName).c_str()
+	);
+
 	auto results = QueryDatabase(query);
 
 	if (!results.Success()) {
 		return 0;
 	}
 
-	if (results.RowCount() != 1)
+	if (results.RowCount() != 1) {
 		return 0;
+	}
 
-	auto row = results.begin();
+	auto   row    = results.begin();
 	uint32 charid = atoi(row[0]);
-	if (oAccID){ *oAccID = atoi(row[1]); }
-	if (oZoneID){ *oZoneID = atoi(row[2]); }
-	if (oInstanceID){ *oInstanceID = atoi(row[3]); }
-	if (oX){ *oX = atof(row[4]); }
-	if (oY){ *oY = atof(row[5]); }
-	if (oZ){ *oZ = atof(row[6]); }
+	if (oAccID) { *oAccID = atoi(row[1]); }
+	if (oZoneID) { *oZoneID = atoi(row[2]); }
+	if (oInstanceID) { *oInstanceID = atoi(row[3]); }
+	if (oX) { *oX = atof(row[4]); }
+	if (oY) { *oY = atof(row[5]); }
+	if (oZ) { *oZ = atof(row[6]); }
 
 	return charid;
 }
@@ -1743,6 +1754,15 @@ void Database::ClearRaidDetails(uint32 rid) {
 		std::cout << "Unable to clear raid details: " << results.ErrorMessage() << std::endl;
 }
 
+void Database::PurgeAllDeletedDataBuckets() {
+	std::string query = StringFormat(
+			"DELETE FROM `data_buckets` WHERE (`expires` < %lld AND `expires` > 0)",
+			(long long) std::time(nullptr)
+	);
+
+	QueryDatabase(query);
+}
+
 // returns 0 on error or no raid for that character, or
 // the raid id that the character is a member of.
 uint32 Database::GetRaidID(const char* name)
@@ -2045,58 +2065,114 @@ uint32 Database::GetGuildIDByCharID(uint32 character_id)
 	return atoi(row[0]);
 }
 
-void Database::LoadLogSettings(EQEmuLogSys::LogSettings* log_settings)
-{
+void Database::LoadLogSettings(EQEmuLogSys::LogSettings* log_settings) {
 	// log_settings previously initialized to '0' by EQEmuLogSys::LoadLogSettingsDefaults()
-	
-	std::string query = 
-		"SELECT "
-		"log_category_id, "
-		"log_category_description, "
-		"log_to_console, "
-		"log_to_file, "
-		"log_to_gmsay "
-		"FROM "
-		"logsys_categories "
-		"ORDER BY log_category_id";
+
+	std::string query =
+					"SELECT "
+					"log_category_id, "
+					"log_category_description, "
+					"log_to_console, "
+					"log_to_file, "
+					"log_to_gmsay "
+					"FROM "
+					"logsys_categories "
+					"ORDER BY log_category_id";
+
 	auto results = QueryDatabase(query);
 
-	int log_category = 0;
-	LogSys.file_logs_enabled = false;
+	int log_category_id = 0;
+
+	int categories_in_database[1000] = {};
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		log_category = atoi(row[0]);
-		if (log_category <= Logs::None || log_category >= Logs::MaxCategoryID)
+		log_category_id = atoi(row[0]);
+		if (log_category_id <= Logs::None || log_category_id >= Logs::MaxCategoryID) {
 			continue;
+		}
 
-		log_settings[log_category].log_to_console = atoi(row[2]);
-		log_settings[log_category].log_to_file = atoi(row[3]);
-		log_settings[log_category].log_to_gmsay = atoi(row[4]);
+		log_settings[log_category_id].log_to_console = static_cast<uint8>(atoi(row[2]));
+		log_settings[log_category_id].log_to_file    = static_cast<uint8>(atoi(row[3]));
+		log_settings[log_category_id].log_to_gmsay   = static_cast<uint8>(atoi(row[4]));
 
-		/* Determine if any output method is enabled for the category 
-			and set it to 1 so it can used to check if category is enabled */
-		const bool log_to_console = log_settings[log_category].log_to_console > 0;
-		const bool log_to_file = log_settings[log_category].log_to_file > 0;
-		const bool log_to_gmsay = log_settings[log_category].log_to_gmsay > 0;
+		/**
+		 * Determine if any output method is enabled for the category
+		 * and set it to 1 so it can used to check if category is enabled
+		 */
+		const bool log_to_console      = log_settings[log_category_id].log_to_console > 0;
+		const bool log_to_file         = log_settings[log_category_id].log_to_file > 0;
+		const bool log_to_gmsay        = log_settings[log_category_id].log_to_gmsay > 0;
 		const bool is_category_enabled = log_to_console || log_to_file || log_to_gmsay;
 
-		if (is_category_enabled)
-			log_settings[log_category].is_category_enabled = 1;
+		if (is_category_enabled) {
+			log_settings[log_category_id].is_category_enabled = 1;
+		}
 
-		/* 
-			This determines whether or not the process needs to actually file log anything.
-			If we go through this whole loop and nothing is set to any debug level, there is no point to create a file or keep anything open
-		*/
-		if (log_settings[log_category].log_to_file > 0){
+		/**
+		 * This determines whether or not the process needs to actually file log anything.
+		 * If we go through this whole loop and nothing is set to any debug level, there is no point to create a file or keep anything open
+		 */
+		if (log_settings[log_category_id].log_to_file > 0) {
 			LogSys.file_logs_enabled = true;
+		}
+
+		categories_in_database[log_category_id] = 1;
+	}
+
+	/**
+	 * Auto inject categories that don't exist in the database...
+	 */
+	for (int log_index = Logs::AA; log_index != Logs::MaxCategoryID; log_index++) {
+		if (!categories_in_database[log_index]) {
+
+			Log(Logs::General,
+				Logs::Status,
+				"New Log Category '%s' doesn't exist... Automatically adding to `logsys_categories` table...",
+				Logs::LogCategoryName[log_index]
+			);
+
+			std::string inject_query = StringFormat(
+				"INSERT INTO logsys_categories "
+				"(log_category_id, "
+				"log_category_description, "
+				"log_to_console, "
+				"log_to_file, "
+				"log_to_gmsay) "
+				"VALUES "
+				"(%i, '%s', %i, %i, %i)",
+				log_index,
+				EscapeString(Logs::LogCategoryName[log_index]).c_str(),
+				log_settings[log_category_id].log_to_console,
+				log_settings[log_category_id].log_to_file,
+				log_settings[log_category_id].log_to_gmsay
+			);
+
+			QueryDatabase(inject_query);
 		}
 	}
 }
 
-void Database::ClearInvSnapshots(bool use_rule)
-{
+int Database::CountInvSnapshots() {
+	std::string query = StringFormat("SELECT COUNT(*) FROM (SELECT * FROM `inventory_snapshots` a GROUP BY `charid`, `time_index`) b");
+	auto results = QueryDatabase(query);
+
+	if (!results.Success())
+		return -1;
+
+	auto row = results.begin();
+
+	int64 count = atoll(row[0]);
+	if (count > 2147483647)
+		return -2;
+	if (count < 0)
+		return -3;
+
+	return count;
+}
+
+void Database::ClearInvSnapshots(bool from_now) {
 	uint32 del_time = time(nullptr);
-	if (use_rule) { del_time -= RuleI(Character, InvSnapshotHistoryD) * 86400; }
+	if (!from_now) { del_time -= RuleI(Character, InvSnapshotHistoryD) * 86400; }
 
 	std::string query = StringFormat("DELETE FROM inventory_snapshots WHERE time_index <= %lu", (unsigned long)del_time);
 	QueryDatabase(query);

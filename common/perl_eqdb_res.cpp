@@ -28,9 +28,9 @@
 typedef const char Const_char;
 
 #ifdef EMBPERL
-#include "../common/global_define.h"
-#include "../common/useperl.h"
+#include "global_define.h"
 #include "eqdb_res.h"
+#include "useperl.h"
 
 
 XS(XS_EQDBRes_num_rows); /* prototype to pass -Wmissing-prototypes */

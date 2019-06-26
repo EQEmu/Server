@@ -26,6 +26,7 @@
 #include "mob.h"
 #include "npc.h"
 #include "zonedb.h"
+#include "global_loot_manager.h"
 
 #include <iostream>
 #include <stdlib.h>
@@ -37,10 +38,14 @@
 // Queries the loottable: adds item & coin to the npc
 void ZoneDatabase::AddLootTableToNPC(NPC* npc,uint32 loottable_id, ItemList* itemlist, uint32* copper, uint32* silver, uint32* gold, uint32* plat) {
 	const LootTable_Struct* lts = nullptr;
-	*copper = 0;
-	*silver = 0;
-	*gold = 0;
-	*plat = 0;
+	// global loot passes nullptr for these
+	bool bGlobal = copper == nullptr && silver == nullptr && gold == nullptr && plat == nullptr;
+	if (!bGlobal) {
+		*copper = 0;
+		*silver = 0;
+		*gold = 0;
+		*plat = 0;
+	}
 
 	lts = database.GetLootTable(loottable_id);
 	if (!lts)
@@ -55,17 +60,19 @@ void ZoneDatabase::AddLootTableToNPC(NPC* npc,uint32 loottable_id, ItemList* ite
 	}
 
 	uint32 cash = 0;
-	if(max_cash > 0 && lts->avgcoin > 0 && EQEmu::ValueWithin(lts->avgcoin, min_cash, max_cash)) {
-		float upper_chance = (float)(lts->avgcoin - min_cash) / (float)(max_cash - min_cash);
-		float avg_cash_roll = (float)zone->random.Real(0.0, 1.0);
+	if (!bGlobal) {
+		if(max_cash > 0 && lts->avgcoin > 0 && EQEmu::ValueWithin(lts->avgcoin, min_cash, max_cash)) {
+			float upper_chance = (float)(lts->avgcoin - min_cash) / (float)(max_cash - min_cash);
+			float avg_cash_roll = (float)zone->random.Real(0.0, 1.0);
 
-		if(avg_cash_roll < upper_chance) {
-			cash = zone->random.Int(lts->avgcoin, max_cash);
+			if(avg_cash_roll < upper_chance) {
+				cash = zone->random.Int(lts->avgcoin, max_cash);
+			} else {
+				cash = zone->random.Int(min_cash, lts->avgcoin);
+			}
 		} else {
-			cash = zone->random.Int(min_cash, lts->avgcoin);
+			cash = zone->random.Int(min_cash, max_cash);
 		}
-	} else {
-		cash = zone->random.Int(min_cash, max_cash);
 	}
 
 	if(cash != 0) {
@@ -80,6 +87,7 @@ void ZoneDatabase::AddLootTableToNPC(NPC* npc,uint32 loottable_id, ItemList* ite
 
 		*copper = cash;
 	}
+
 	uint32 global_loot_multiplier = RuleI(Zone, GlobalLootMultiplier);
 
 	// Do items
@@ -255,7 +263,7 @@ void NPC::AddLootDrop(const EQEmu::ItemData *item2, ItemList* itemlist, int16 ch
 	item->attuned = 0;
 	item->min_level = minlevel;
 	item->max_level = maxlevel;
-	item->equip_slot = EQEmu::inventory::slotInvalid;
+	item->equip_slot = EQEmu::invslot::SLOT_INVALID;
 
 	if (equipit) {
 		uint8 eslot = 0xFF;
@@ -274,7 +282,7 @@ void NPC::AddLootDrop(const EQEmu::ItemData *item2, ItemList* itemlist, int16 ch
 		// it is an improvement.
 
 		if (!item2->NoPet) {
-			for (int i = 0; !found && i < EQEmu::legacy::EQUIPMENT_SIZE; i++) {
+			for (int i = EQEmu::invslot::EQUIPMENT_BEGIN; !found && i <= EQEmu::invslot::EQUIPMENT_END; i++) {
 				uint32 slots = (1 << i);
 				if (item2->Slots & slots) {
 					if(equipment[i])
@@ -315,7 +323,7 @@ void NPC::AddLootDrop(const EQEmu::ItemData *item2, ItemList* itemlist, int16 ch
 		// @merth: IDFile size has been increased, this needs to change
 		uint16 emat;
 		if(item2->Material <= 0
-			|| item2->Slots & (1 << EQEmu::inventory::slotPrimary | 1 << EQEmu::inventory::slotSecondary)) {
+			|| (item2->Slots & ((1 << EQEmu::invslot::slotPrimary) | (1 << EQEmu::invslot::slotSecondary)))) {
 			memset(newid, 0, sizeof(newid));
 			for(int i=0;i<7;i++){
 				if (!isalpha(item2->IDFile[i])){
@@ -329,7 +337,7 @@ void NPC::AddLootDrop(const EQEmu::ItemData *item2, ItemList* itemlist, int16 ch
 			emat = item2->Material;
 		}
 
-		if (foundslot == EQEmu::inventory::slotPrimary) {
+		if (foundslot == EQEmu::invslot::slotPrimary) {
 			if (item2->Proc.Effect != 0)
 				CastToMob()->AddProcToWeapon(item2->Proc.Effect, true);
 
@@ -342,7 +350,7 @@ void NPC::AddLootDrop(const EQEmu::ItemData *item2, ItemList* itemlist, int16 ch
 			if (item2->IsType2HWeapon())
 				SetTwoHanderEquipped(true);
 		}
-		else if (foundslot == EQEmu::inventory::slotSecondary
+		else if (foundslot == EQEmu::invslot::slotSecondary
 			&& (GetOwner() != nullptr || (CanThisClassDualWield() && zone->random.Roll(NPC_DW_CHANCE)) || (item2->Damage==0)) &&
 			(item2->IsType1HWeapon() || item2->ItemType == EQEmu::item::ItemTypeShield))
 		{
@@ -353,25 +361,25 @@ void NPC::AddLootDrop(const EQEmu::ItemData *item2, ItemList* itemlist, int16 ch
 			if (item2->Damage > 0)
 				SendAddPlayerState(PlayerState::SecondaryWeaponEquipped);
 		}
-		else if (foundslot == EQEmu::inventory::slotHead) {
+		else if (foundslot == EQEmu::invslot::slotHead) {
 			eslot = EQEmu::textures::armorHead;
 		}
-		else if (foundslot == EQEmu::inventory::slotChest) {
+		else if (foundslot == EQEmu::invslot::slotChest) {
 			eslot = EQEmu::textures::armorChest;
 		}
-		else if (foundslot == EQEmu::inventory::slotArms) {
+		else if (foundslot == EQEmu::invslot::slotArms) {
 			eslot = EQEmu::textures::armorArms;
 		}
-		else if (foundslot == EQEmu::inventory::slotWrist1 || foundslot == EQEmu::inventory::slotWrist2) {
+		else if (foundslot == EQEmu::invslot::slotWrist1 || foundslot == EQEmu::invslot::slotWrist2) {
 			eslot = EQEmu::textures::armorWrist;
 		}
-		else if (foundslot == EQEmu::inventory::slotHands) {
+		else if (foundslot == EQEmu::invslot::slotHands) {
 			eslot = EQEmu::textures::armorHands;
 		}
-		else if (foundslot == EQEmu::inventory::slotLegs) {
+		else if (foundslot == EQEmu::invslot::slotLegs) {
 			eslot = EQEmu::textures::armorLegs;
 		}
-		else if (foundslot == EQEmu::inventory::slotFeet) {
+		else if (foundslot == EQEmu::invslot::slotFeet) {
 			eslot = EQEmu::textures::armorFeet;
 		}
 
@@ -444,3 +452,76 @@ void NPC::AddLootTable(uint32 ldid) {
 	  database.AddLootTableToNPC(this,ldid, &itemlist, &copper, &silver, &gold, &platinum);
 	}
 }
+
+void NPC::CheckGlobalLootTables()
+{
+	auto tables = zone->GetGlobalLootTables(this);
+
+	for (auto &id : tables)
+		database.AddLootTableToNPC(this, id, &itemlist, nullptr, nullptr, nullptr, nullptr);
+}
+
+void ZoneDatabase::LoadGlobalLoot()
+{
+	auto query = StringFormat("SELECT id, loottable_id, description, min_level, max_level, rare, raid, race, "
+				  "class, bodytype, zone FROM global_loot WHERE enabled = 1");
+
+	auto results = QueryDatabase(query);
+	if (!results.Success() || results.RowCount() == 0)
+		return;
+
+	// we might need this, lets not keep doing it in a loop
+	auto zoneid = std::to_string(zone->GetZoneID());
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		// checking zone limits
+		if (row[10]) {
+			auto zones = SplitString(row[10], '|');
+
+			auto it = std::find(zones.begin(), zones.end(), zoneid);
+			if (it == zones.end())  // not in here, skip
+				continue;
+		}
+
+		GlobalLootEntry e(atoi(row[0]), atoi(row[1]), row[2] ? row[2] : "");
+
+		auto min_level = atoi(row[3]);
+		if (min_level)
+			e.AddRule(GlobalLoot::RuleTypes::LevelMin, min_level);
+
+		auto max_level = atoi(row[4]);
+		if (max_level)
+			e.AddRule(GlobalLoot::RuleTypes::LevelMax, max_level);
+
+		// null is not used
+		if (row[5])
+			e.AddRule(GlobalLoot::RuleTypes::Rare, atoi(row[5]));
+
+		// null is not used
+		if (row[6])
+			e.AddRule(GlobalLoot::RuleTypes::Raid, atoi(row[6]));
+
+		if (row[7]) {
+			auto races = SplitString(row[7], '|');
+
+			for (auto &r : races)
+				e.AddRule(GlobalLoot::RuleTypes::Race, std::stoi(r));
+		}
+
+		if (row[8]) {
+			auto classes = SplitString(row[8], '|');
+
+			for (auto &c : classes)
+				e.AddRule(GlobalLoot::RuleTypes::Class, std::stoi(c));
+		}
+
+		if (row[9]) {
+			auto bodytypes = SplitString(row[9], '|');
+
+			for (auto &b : bodytypes)
+				e.AddRule(GlobalLoot::RuleTypes::Class, std::stoi(b));
+		}
+
+		zone->AddGlobalLootEntry(e);
+	}
+}
+

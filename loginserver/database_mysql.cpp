@@ -36,7 +36,7 @@ DatabaseMySQL::DatabaseMySQL(std::string user, std::string pass, std::string hos
 	database = mysql_init(nullptr);
 	if (database)
 	{
-		my_bool r = 1;
+		char r = 1;
 		mysql_options(database, MYSQL_OPT_RECONNECT, &r);
 		if (!mysql_real_connect(database, host.c_str(), user.c_str(), pass.c_str(), name.c_str(), atoi(port.c_str()), nullptr, 0))
 		{

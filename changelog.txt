@@ -1,5 +1,486 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 6/24/2019 ==
+Uleat: Reworked BotDatabase into a functional add-on for ZoneDatabase
+	- Eliminated the database connection associated with class BotDatabase
+	- All behaviors remain the same with the exception of the calling object
+	 -- To invoke a BotDatabase function, use database.botdb.<f> rather than botdb.<f>
+
+== 3/1/2019 ==
+Noudess: Major faction conversion to use client data.
+
+	Pull request #802 New min/max personal faction per faction. Use of actual 
+	client mods for race/class/deity.
+
+	This PR involves major changes to your database and your quests.
+
+	The clients recently exposed raw data included 
+
+	- the min/max personal faction for each faction
+	- the actual faction id the client uses for each faction
+	- the actual mods that come into play when a PC cons an opponent that 
+	  determine your overall con to that faction.
+
+
+	The approach I took resulted in minimal change to the code base.  I did 
+	alter the code to enforce the new validated min/max from the client.  This 
+	min/max applies to personally earned faction.  So if a faction has a min 
+	of 0 and a max of 2000, that means your personally earned value can never 
+	go below 0 or over 2000.  The actual con, will, however often do so because 
+	of class/race/deity modifications.  I also changed the con ranges, per 
+	Mackal's data that was proven to be accurate:
+
+	Ally = 1100+ 
+	Warmly = 750 to 1099 
+	Kindly = 500 to 749 
+	Amiable = 100 to 499 
+	Indifferent = 0 to 99 
+	Apprehensive = -1 to -100 
+	Dubious = -101 to -500 
+	Threateningly = -501 to -750 
+	Ready to Attack = -751 
+
+	The above means that dubious is a much smaller range now.  For that reason 
+	the scripts modify any custom faction base values to put them in the same 
+	range, hopefully as the creators of the custom factions intended.
+
+	Also to be noted as characters that have a faction between -501 and -700 
+	wont be dubious anymore, they will be threateningly.  This is expected with 
+	the new ranges, but might take players by suprise as the old ranges we used 
+	were more liberal but were incorrect.
+
+	The database is changed extensively, but really only content.  We're 
+	translating faction_list to use the clients ids.  As such every place a 
+	faction_is is used, namely (see below) are being converted.
+
+	- faction_list
+	- faction_list_mod
+	- npc_faction (primary_faction field only)
+	- npc_faction_entries (faction_id field only)
+	- faction_values
+
+	Quests will also automatically be adjusted.  This MUST be done after the 
+	PR sql and before starting the server.  This is automated by 
+	eqemu_server.pl (or starting world)
+
+	Be assured, custom factions that you may have created, or obsolete or 
+	duplicate factions in our original faction_list, that you may have used, 
+	will be preserved.  Anything that does not map directly is being moved to 
+	the 5000 range in faction_list and any references are corrected to point 
+	there.
+
+	A great example of this is Ebon Mask and Hall of the Ebon Mask.  Many peqdb 
+	style servers have both of these.  Some have used one, some the other.  We 
+	map Ebon Mask to the clients Ebon mask and the Hall of the Ebon Mask gets 
+	moved to the 5000 range, and all its references are preserved.  However, 
+	if you would like to make proper use of client mobs to Ebon mask, or other 
+	factions that have duplicitous entries, I recommend you manually move to 
+	using the correct one.  In that way all of the new raw data mapped in from 
+	the client into faction_list_mod will get used instead of what your db had 
+	before these values were known.
+
+	In my experience converting 4 different server's data, there are only 
+	about 20 factions moved into the 5000 range.
+
+	This PR has only 1 new, permanent table faction_base_data, which is taken 
+	right from the client.  The base field is left in case you want to mod your 
+	server, but we are very sure that the client doesn't use a base.  It uses 
+	global mods to race or class for this as you'll see in the 
+	new faction_list_mod.
+
+	The PR makes many backup tables, and two mapping tables that are used during
+	the conversion process to fix quests.  This table was hand created by 
+	analysis.  This table serves no purpose after conversion except an audit 
+	trail if we see any issues.
+
+	I will release a new PR that will clean up all these backups and temporary 
+	tables in about a month.
+
+== 2/7/2019 ==
+Uleat: Put merc and bot classes on the same stance standard (mercs)
+	- Both classes will now use the same stance standard
+	- Pushed stance types up to EQEmu::constants
+
+== 2/4/2019 ==
+Uleat: Added command 'profanity' (aliased 'prof')
+	- This is a server-based tool for redacting any language that an admin deems as profanity (socially unacceptable within their community)
+	- Five options are available under this command..
+	 -- 'list' - shows the current list of banned words
+	 -- 'clear' - clears the current list of banned words
+	 -- 'add <word>' - adds <word> to the banned word list
+	 -- 'del <word>' - deletes <word> from the banned word list
+	 -- 'reload' - forces a reload of the banned word list
+	- All actions are immediate and a world broadcast refreshes other active zones
+	- The system is in stand-by when the list is empty..just add a word to the list to begin censorship
+	- Redaction only occurs on genuine occurences of any banned word
+	 -- Banned words are replaced with a series of '*' characters
+	 -- Compounded words are ignored to avoid issues with allowed words containing a banned sub-string
+	 -- If 'test' is banned, 'testing' will not be banned .. it must be added separately
+	- Extreme care should be exercised when adding words to the banned list..
+	 -- Quest failures and limited social interactions may alienate players if they become inhibiting
+	 -- System commands are allowed to be processed before redaction occurs in the 'say' channel
+	- A longer list requires more clock cycles to process - so, try to keep them to the most offensible occurrences
+Uleat: Fix for bots ceasing combat when their 'follow me' mob dies
+	- Bots will revert to their client leash owner (bot owner or client group leader) when their FollowID() mob is no longer valid
+	- Combat will no longer be interrupted in these cases
+	- Does not apply to bot owner death...
+
+== 1/26/2019 ==
+Uleat: Fix for class Bot not honoring NPCType data reference
+	- Fixes bots not moving on spawn/grouping issue
+	- Report any issues with non movement-related behavior
+
+== 1/24/2019 ==
+Uleat: Extended server spellbook entries to RoF2 standard and added per-client restriction of spell id max
+	- Bumped server spellbook entry capacity to 720 spells
+	- Server keeps all 'learned' spells as found
+	  -- Access is limited by the clients' limitations of spellbook capacities and max spell ids
+	  -- This is done to avoid losing spells by switching from newer clients to older ones
+	  -- Existing behavior is kept in place for illegal access conditions
+	- Each client is still restricted to its spellbook capacity (400, 480, 480, 720, 720, 720 - respectively)
+	- Each client is restricted to its max supported spell id (9999, 15999, 23000, 28000, 45000, 45000 - respectively)
+	- Please report any abnormal behavior so it may be addressed
+Uleat: Removed server-side checksum of player profile..wasted calculation since it's performed again in all translators
+
+== 1/20/2019 ==
+Uleat: Added 'spells' entry to EQDictionary
+Akkadius:
+    - [Command] Extended #goto via #goto <player_name> -
+        - This will work cross zone, cross instance, in zone etc.
+        - It works on top of the original #goto (target) and #goto x y z
+    - [Command] Implemented server side #who Example: https://bit.ly/2TZ2hvI
+        - Searches can be filtered by
+            - Account Name
+            - Base Class Name
+            - Guild Name
+            - IP
+            - Player Name
+            - Race Name
+            - Zone Short Name
+        - Features a clickable (Goto) saylink that will bring you directly to a player regardless of
+            whether or not they are in an instance
+    - [Command] Implemented: #gmzone [zone_short_name] [zone_version=0] [identifier=gmzone]
+        - Zones to a private GM instance
+            - Example: https://i.imgur.com/qswdrzO.gif
+    - [NPC] Fix issue where NPC's clip into the world and the client interprets them at 0,0,0
+        - This issue would show itself when NPC's would bunch up by a zone-in
+
+== 1/15/2019 ==
+Uleat: Activated per-expansion support for active inventory slot addressing
+	- Server honors expansions that alter bank size and power source, general9 and general10 slots
+	- Server honors gm flag behaviors for the active inventory slots of each client
+
+== 1/11/2019 ==
+Uleat: Modified rules system to ignore all runtime modifications of 'World:ExpansionSettings' and 'World:UseClientBasedExpansionSettings' fields.
+	- These fields are no longer allowed to be changed during server runtime through the command system
+	- Major syncronization issues between server and clients result when these fields are altered in-game
+	- It is not recommended to update these fields via sql queries while the server is in operation
+	- Failure to observe these warnings will result in abhorant behavior and loss of items
+	- Modify these fields during server operation at your own risk!
+
+== 1/4/2019 ==
+Akkadius: [Scaling] Global base scaling data has been updated in new database binary revision
+
+== 1/1/2019 ==
+Akkadius:
+    - [Logging] Added new logging category "MobAppearance"
+    - [DevTools] Proximity show of NPC now shows a "Path finding" circle around the proximity nodes to more clearly display
+    - [Scaling] Global base scaling data now refreshes from the database on #repop
+    - [Commands] Implemented command #killallnpcs [npc_name] for testing, leave blank for all attackable NPC's
+    - NPC and Player Textures
+        - Textures that have been changed with #wearchange / #wc or any wearchange quest script call will now stick
+            for new clients entering a zone
+        - Weapon models for NPCs changed using wearchange will stick as well during combat and when new clients enter the zone
+        - The above changes allow for customization of a zone and NPC's without needing static data configured on npc_types
+            table data and allows for much more customization options
+        - Implemented Quest API Calls
+            Perl
+                $client->SetPrimaryWeaponOrnamentation(uint32 model_id);
+                $client->SetSecondaryWeaponOrnamentation(uint32 model_id);
+            Lua
+                client:SetPrimaryWeaponOrnamentation(uint32 model_id);
+                client:SetSecondaryWeaponOrnamentation(uint32 model_id);
+            - Both of these API calls persist an ornamentation to the weapon in the inventory table and will load both
+                in character select and cross zone
+
+== 12/30/2018 ==
+
+Akkadius (KLS):
+
+# NPC Movement Overhaul
+
+"Recently, we landed massive changes to pathing logic (Navmesh) with NPC's that took a while to iron out but has been
+    an immensely positive addition to the EQEmu server core. With that, it's made us realize how much some related
+    functionality needed to be addressed and that involves "NPC movement logic". We've been needing to address
+    NPC movement logic for years as it has been fragmented and inconsistent all over the code which has made
+    fixing actual movement related issues a nightmare. There are many other technical things that we can go
+    into about it but the important part is that it is much improved! Special thanks to KLS for putting in a
+    lot of work to make this happen"
+
+    - NPC's should now smoothly path between source and destination, rather than "skipping" all over the place between
+        path points and sending sometimes several position updates, there should only be one update until NPC
+        changes heading or speed
+    - NPC pathing during flee and fear should be far improved
+    - NPC pathing inside of water should be far improved
+    - NPC transitions between water and land should now be seamless
+    - NPC transitions over verticals (hills) should be smoother as well
+    - NPC "Stuck" logic during path finding should be improved
+    - NPC Z coordinate plane correction now occurs during path calculation projection properly (as it should) instead of
+        brute forcing the current Z location along different path projections
+        - Example: https://bit.ly/2Ssn4Yp
+
+== 12/16/2018 ==
+Akkadius:
+    - Implemented: Global Base Scaling: https://github.com/EQEmu/Server/wiki/NPC-Scaling
+    - Implemented: Beginning of DevTools - more to be added over time (Status >= 200)
+        - Display NPC info on target
+        - Display Client info on target
+        - Display NPC show commands on target
+            - Loot
+            - Grids
+            - Emotes
+    - Implemented: Support for saylinks to be used in GM commands
+    - Deprecated: Commands
+        - #listnpcs
+    - Implemented: Commands
+        - #list [npcs|players|corpses|doors|objects] [search]
+            - Provides clickable saylinks to go to entities
+        - #scale [static/dynamic] (With targeted NPC)
+        - #scale [npc_name_search] [static/dynamic] (To make zone-wide changes)
+        - #scale all [static/dynamic]
+        - #devtools (alias #dev)
+    - Implemented: New Logging categories automatically injected into `logsys_categories` table
+        - Fixed an issue where newly injected categories were turned on by default
+
+== 12/15/2018 ==
+Kinglykrab: Added multiple new instance related quest functions.
+	1. quest::GetInstanceIDByCharID(const char *zone, int16 version, uint32 char_id)
+		- Allows you to pull the instance ID of a client by character ID.
+	2. quest::AssignToInstanceByCharID(uint16 instance_id, uint32 char_id)
+		- Allows you to assign an instance to a client by character ID.
+	3. quest::RemoveFromInstanceByCharID(uint16 instance_id, uint32 char_id)
+		- Allows you to remove a client from an instance by character ID.
+
+	Added spell buckets, similar to spell globals.
+		- Uses a new spell_buckets table and the Spells:EnableSpellBuckets rule.
+	
+	Added max level by data bucket.
+		- Uses data bucket char_id-CharMaxLevel and Character:PerCharacterBucketMaxLevel rule.
+
+== 10/09/2018 ==
+Uleat: Added bot owner options
+	- usage: ^owneroption [option] (or aliased as: ^oo [option])
+	- options are saved in the database and therefore, persistent
+	- Implemented option 'deathmarquee'
+	-- toggles client owner flag to show marquee message when a bot dies (default: disabled)
+	
+== 10/07/2018 ==
+Uleat: Fixed a few bot issues..
+	- Fix for bot item trades not attuning
+	- Fix for bot mana, endurance not updating properly
+
+== 10/06/2018 ==
+Uleat: Fixed a few bot issues..
+	- Fix for bot 'stop melee level' not honoring setting level over rule level
+	- Fix for missing bot combat spell casting when within melee range
+	- Fix (in-work) for bots 'forgetting' current target when it flees
+
+== 09/18/2018 ==
+Uleat: Notes for manual conversion of quest script inventory slot values
+	- You should use reference/lookup values provided by the lua and perl apis to avoid skirting safety checks
+		and to ensure that the values used are the correct ones for your needs
+	
+	[perl api examples]
+		old:
+			1) my $charmitem = $client->GetItemIDAt(0);
+			2) for($for_x = 22; $for_x < 30; $for_x++) {...}
+			3) for($slot1 = 0; $slot1 <= 30; $slot1++) {...}
+		
+		new:
+			1) my $charmitem = $client->GetItemIDAt(quest::getinventoryslotid("charm"));
+			2) for($for_x = quest::getinventoryslotid("general.begin"); $for_x <= quest::getinventoryslotid("general.end"); $for_x++) {...} ** notice change of conditional
+			3) for($slot1 = quest::getinventoryslotid("possessions.begin"); $slot1 <= quest::getinventoryslotid("possessions.end"); $slot1++) {...}
+	
+	[lua api examples]
+		old:
+			1) if(e.self:GetItemIDAt(30) == 31599) then ...
+			2) for i = 0, 30, 1 do ...
+			
+		new:
+			1) if(e.self:GetItemIDAt(Slot.Cursor) == 31599) then ...
+			2) for i = Slot.PossessionsBegin, Slot.PossessionsEnd, 1 do ...
+	
+	- If you need to manually assign bag slot ranges to individual 'general' slots, use this assignment for now:
+		-- General1  (23) = 251 .. 260
+		-- General2  (24) = 261 .. 270
+		-- General3  (25) = 271 .. 280
+		-- General4  (26) = 281 .. 290
+		-- General5  (27) = 291 .. 300
+		-- General6  (28) = 301 .. 310
+		-- General7  (29) = 311 .. 320
+		-- General8  (30) = 321 .. 330
+		-- General9  (31) = 331 .. 340
+		-- General10 (32) = 341 .. 350
+		-- Cursor    (33) = 351 .. 360
+	
+	- If you need to manually assign ammo or powersource slots, use these values:
+		-- PowerSource = 21
+		-- Ammo = 22
+	
+	- All slot values not addressed above remain the same
+	
+	- Additional information can be found at:
+		-- https://github.com/EQEmu/Server/wiki/Inventory-Slots
+		-- https://github.com/EQEmu/Server/wiki/Perl-API
+		-- https://github.com/EQEmu/Server/wiki/Lua-API
+
+== 09/03/2018 ==
+Uleat: Rework of 'invsnapshot' command and implementation of automatic inventory snapshots.
+	- Inventory snapshots are now taken automatically using the interval rule values - if snapshots are enabled
+	- Command 'invsnapshot' now has more options available to include a restore feature
+	-- A pop-up help menu is available
+	-- argument 'capture' is available to anyone with status high enough to register the command
+	-- Advanced options are only available to players with 150 status or greater
+	-- argument 'list' provides a list of "timestamp : item count" entries
+	-- argument 'parse' displays a "slot : item id : item name" listing of valid snapshots by timestamp
+	-- argument 'compare' shows a 'difference' comparison of "snapshot-to-inventory" changes
+	-- argument 'restore' applies a saved snapshot to the player's inventory (with a pre-clearing call)
+
+== 08/13/2018 ==
+Uleat: Activation of RoF+ clients' two additional general slots and integration of SoF+ clients' PowerSource slot
+	- Inventory 'Possessions' main slots are now contiguous and implemented to RoF2 standards
+	-- 'slotGeneral9'(31) and 'slotGeneral10'(32) are now active
+	-- Possessions slot enumerations are now defined as between 'slotCharm'(0) and 'slotCursor'(33)
+	-- 'slotPowerSource'(21) is no longer a special case slot(9999)
+	- Special code has been added to exclude 'slotPowerSource,' 'slotGeneral9' and 'slotGeneral10' from server
+		actions in clients that do not support them.
+	- The lua api has been updated to use the new slot enumeration as well as having some slot range definitions added
+	- The perl api now has a look-up function to provide token-to-value translations .. definitions are similar to lua
+	- In both lua and perl, it is HIGHLY recommended that any custom scripts using hard-coded inventory slot values be
+		updated to use the constants/lookup methods as any old values are no longer guaranteed to be accurate
+	- Database will have existing inventory slot values modified to the new standard and table `items` entries will
+		also be updated to the 'correct' equipable slot bitmask
+	- Script (quest) updates are required with this change
+	
+Note: The proper way to reference inventory slots is to use either instrinsic lookups (c/c++ & perl) or to use valid
+	const ref declarations (c/c++ & lua). Any other method is not guaranteed to be accurate and may result in item loss
+	and/or unexpected/undefined behavior.
+	
+
+== 07/10/2018 ==
+Akkadius: Adjusted DataBuckets to use other acceptable time formats
+    Example: quest::set_data('key', 'value', '1d');
+        - Acceptable inputs:
+            - 15s = 15 seconds
+            - s15 = 15 seconds
+            - 60m = 60 minutes
+            - 7d  = 7 days
+            - 1y  = 1 year
+            - 600 = 600 seconds
+
+== 07/09/2018 ==
+mackal: Rework of Task System, Shared Tasks still unsupported
+	- The tables now have better named columns, which hopefully won't need to be explained
+	- Text1 is now target_name, Text2 is now item_list, Text3 is now description_override
+	- Tasks can now reward faction hits, this is just normal NPC Faction ID entries because I was lazy
+	- The "Task" type tasks are now supported, a player can only be doing one of these at a time
+	- Activity IDs for use spell on and use skill on have been identified but not implemented
+	- Identified "duration code" for unlimited duration tasks (None = 0, Short = 1, Medium = 2, Long = 3)
+	- Activities can now have multiple zones separated by ';'
+	- tasks.startzone removed since it actually just uses first activity
+	- skill_list and spell_list are both IDs that can be separated by ';' (still unimplemented though)
+
+== 07/07/2018 ==
+Akkadius: Implemented a much better replacement for qglobals called 'DataBuckets'
+    - A much more detailed example can be found at: https://github.com/EQEmu/Server/wiki/Data-Buckets
+
+== 07/05/2018 ==
+Uleat: Reintegration of inventory-based EQDictionary references
+	- Standardized 'CONSTANT_DECLARATION' and 'enumerationValue' tokens for most of the affected references
+	- Added 'BEGIN' and 'END' constants to many inventory-based ranges to help eliminate '< SIZE'-type comparisons
+	- Eliminated multiple, duplicated reference points of the same value context (bye, bye namespace legacy!)
+	- Most server values are now linked to the implementation client directly through a 'using ##' directive
+
+== 05/28/2018 ==
+Akkadius: Fixed an issue where size 0 NPC's hop in and out of the ground at idle
+Akkadius: NPC's now open doors within proximity given the door doesn't have locked requirements
+Akkadius: #reloadallrules will now display zones that have had their rules reloaded to GM's
+Akkadius: Zones should now respect "shutdowndelay" in the zones table at all times
+Akkadius: Fixed an issue where boats would snap to the bed of the body of water
+Akkadius: Added rule Aggro:NPCAggroMaxDistanceEnabled - defaults to true
+Akkadius: Changed map directory load structure
+    - maps/base/*.map
+    - maps/nav/*.nav
+    - maps/water/*.wtr
+    - maps/path/*.path
+
+KLS: Implemented navigation mesh
+    - All up to date maps and navs can be found https://github.com/Akkadius/EQEmuMaps
+    - To update maps either check out the maps found in the above repository or use the maintenance command:
+        perl eqemu_server.pl maps
+
+== 03/28/2018 ==
+Kayen: SE_CastOnFadeEffect, SE_CastOnFadeEffectNPC, SE_CastOnFadeEffectAlway triggered spell will now hit
+the correct targets.
+
+== 03/07/2018 ==
+Uleat: Added command '#ucs' to force a reconnect to UCS server.
+	- Works in place of client auto-reconnect packet in zones where feature is unsupported
+	- Currently, you will need to manually re-join channels
+
+== 03/04/2018 ==
+Uleat: Updated UCS versioning
+	- SoF and higher clients have a new opcode identified (update your *.conf files)
+	- Rework of previous ucs connectivity code
+	- Unrelated: Zone::weatherSend() now takes an optional parameter for singular updates (as in client entering zone)
+	-- prior to this, every client already in-zone received a weather update packet whenever a new client zoned in
+
+== 02/18/2018 ==
+Uleat: Bug reporting fix and overhaul.
+	- Fixed bug reporting for SoD+ clients
+	- Added ability to disable bug reporting (set rule 'Bugs:ReportingSystemActive' to 'false')
+	- Implemented a more detailed reporting system (set rule 'Bugs:UseOldReportingMethod' to 'false')
+	-- New system is not currently compatible with script-based monitoring
+	- Soft-removal of defunct 'Petition Bug' system
+
+== 02/14/2018 ==
+mackal: Fix Heading -- Quests broken
+
+Please report any other issues with heading, most things were tested and worked
+
+You can use eqemu_server.pl to run a conversion to fix your headings in quests.
+Some may need manual review.
+
+== 02/10/2018 ==
+mackal: Add Global Loot system
+
+This will allow us to implement global loot similarly to how it works on live
+This system reuses our current loottable tables which the global_loot table references.
+The limits for the rules to govern if a table should be rolled are min level, max level, rare,
+raid, race, class, bodytype, and zone
+
+race, class, bodytype, and zone are a pipe | separated list of IDs.
+
+== 01/31/2018 ==
+Uleat: Re-work of Bot::AI_Process(). Overall behavior is much improved.
+	- Removed a 'ton' of unneeded packet updates
+	- Added a 'leash' to the distance a bot can travel
+	- Added a 'main assist' feature to target control (set using group roles)
+	- Added combat 'jitter' movement to complement the existing rogue movement
+	- Attack can now be aborted if target contains no leash owner nor bot hate and leash owner turns off auto-attack
+	- Please report any issues with the bot AI code
+	
+Added a work-around for heal rotations crashing the server - under certain conditions.
+
+== 01/28/2018 ==
+Mackal: Spell AI tweaks
+
+AI spells are treated as "innate" spells (devs use this term, and I think this is what they mean by it)
+These spells are spammed by the NPC, lots of encounters on live work like this and this will greatly reduce
+the need to do quest scripting on these types of encounters.
+
+You can safely run update npc_spells_entries set priority = priority + 1 where priority >= 0; if you want to disable this new behavior
+
 == 10/08/2017 ==
 Mackal: Rework regens
 

@@ -26,7 +26,9 @@
 */
 
 #include "../common/features.h"
+
 #ifdef EMBPERL_XS_CLASSES
+
 #include "../common/global_define.h"
 #include "embperl.h"
 
@@ -41,22 +43,20 @@
 #endif
 
 XS(XS_Object_IsGroundSpawn); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_IsGroundSpawn)
-{
+XS(XS_Object_IsGroundSpawn) {
 	dXSARGS;
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Object::IsGroundSpawn(THIS)");
 	{
-		Object *		THIS;
-		bool		RETVAL;
+		Object *THIS;
+		bool   RETVAL;
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->IsGroundSpawn();
@@ -67,23 +67,20 @@ XS(XS_Object_IsGroundSpawn)
 }
 
 
-
 XS(XS_Object_Close); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_Close)
-{
+XS(XS_Object_Close) {
 	dXSARGS;
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Object::Close(THIS)");
 	{
-		Object *		THIS;
+		Object *THIS;
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->Close();
@@ -93,28 +90,26 @@ XS(XS_Object_Close)
 
 
 XS(XS_Object_Delete); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_Delete)
-{
+XS(XS_Object_Delete) {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Object::Delete(THIS, reset_state=false)");
+		Perl_croak(aTHX_ "Usage: Object::Delete(THIS, [bool reset_state = false])");
 	{
-		Object *		THIS;
-		bool		reset_state;
+		Object *THIS;
+		bool   reset_state;
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items < 2)
 			reset_state = false;
 		else {
-			reset_state = (bool)SvTRUE(ST(1));
+			reset_state = (bool) SvTRUE(ST(1));
 		}
 
 		THIS->Delete(reset_state);
@@ -122,21 +117,19 @@ XS(XS_Object_Delete)
 	XSRETURN_EMPTY;
 }
 XS(XS_Object_StartDecay); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_StartDecay)
-{
+XS(XS_Object_StartDecay) {
 	dXSARGS;
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Object::StartDecay(THIS)");
 	{
-		Object *		THIS;
+		Object *THIS;
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->StartDecay();
@@ -146,22 +139,20 @@ XS(XS_Object_StartDecay)
 
 
 XS(XS_Object_DeleteItem); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_DeleteItem)
-{
+XS(XS_Object_DeleteItem) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Object::DeleteItem(THIS, index)");
+		Perl_croak(aTHX_ "Usage: Object::DeleteItem(THIS, uint8 index)");
 	{
-		Object *		THIS;
-		uint8		index = (uint8)SvUV(ST(1));
+		Object *THIS;
+		uint8  index = (uint8) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->DeleteItem(index);
@@ -170,22 +161,20 @@ XS(XS_Object_DeleteItem)
 }
 
 XS(XS_Object_IsObject); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_IsObject)
-{
+XS(XS_Object_IsObject) {
 	dXSARGS;
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Object::IsObject(THIS)");
 	{
-		Object *		THIS;
-		bool		RETVAL;
+		Object *THIS;
+		bool   RETVAL;
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->IsObject();
@@ -197,22 +186,20 @@ XS(XS_Object_IsObject)
 
 
 XS(XS_Object_Save); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_Save)
-{
+XS(XS_Object_Save) {
 	dXSARGS;
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Object::Save(THIS)");
 	{
-		Object *		THIS;
-		bool		RETVAL;
+		Object *THIS;
+		bool   RETVAL;
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->Save();
@@ -224,22 +211,20 @@ XS(XS_Object_Save)
 
 
 XS(XS_Object_SetID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_SetID)
-{
+XS(XS_Object_SetID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Object::SetID(THIS, set_id)");
+		Perl_croak(aTHX_ "Usage: Object::SetID(THIS, uint16 id)");
 	{
-		Object *		THIS;
-		uint16		set_id = (uint16)SvUV(ST(1));
+		Object *THIS;
+		uint16 set_id = (uint16) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetID(set_id);
@@ -249,21 +234,19 @@ XS(XS_Object_SetID)
 
 
 XS(XS_Object_ClearUser); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_ClearUser)
-{
+XS(XS_Object_ClearUser) {
 	dXSARGS;
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Object::ClearUser(THIS)");
 	{
-		Object *		THIS;
+		Object *THIS;
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->ClearUser();
@@ -273,232 +256,222 @@ XS(XS_Object_ClearUser)
 
 
 XS(XS_Object_GetDBID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_GetDBID)
-{
+XS(XS_Object_GetDBID) {
 	dXSARGS;
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Object::GetDBID(THIS)");
 	{
-		Object *		THIS;
-		uint32		RETVAL;
+		Object *THIS;
+		uint32 RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetDBID();
-		XSprePUSH; PUSHu((UV)RETVAL);
+		XSprePUSH;
+		PUSHu((UV) RETVAL);
 	}
 	XSRETURN(1);
 }
 
 XS(XS_Object_GetID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_GetID)
-{
+XS(XS_Object_GetID) {
 	dXSARGS;
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Object::GetID(THIS)");
 	{
-		Object *		THIS;
-		uint16		RETVAL;
+		Object *THIS;
+		uint16 RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetID();
-		XSprePUSH; PUSHu((UV)RETVAL);
+		XSprePUSH;
+		PUSHu((UV) RETVAL);
 	}
 	XSRETURN(1);
 }
 
 XS(XS_Object_GetX); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_GetX)
-{
+XS(XS_Object_GetX) {
 	dXSARGS;
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Object::GetX(THIS)");
 	{
-		Object *		THIS;
-		float		RETVAL;
+		Object *THIS;
+		float  RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetX();
-		XSprePUSH; PUSHn((double)RETVAL);
+		XSprePUSH;
+		PUSHn((double) RETVAL);
 	}
 	XSRETURN(1);
 }
 
 XS(XS_Object_GetY); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_GetY)
-{
+XS(XS_Object_GetY) {
 	dXSARGS;
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Object::GetY(THIS)");
 	{
-		Object *		THIS;
-		float		RETVAL;
+		Object *THIS;
+		float  RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetY();
-		XSprePUSH; PUSHn((double)RETVAL);
+		XSprePUSH;
+		PUSHn((double) RETVAL);
 	}
 	XSRETURN(1);
 }
 
 XS(XS_Object_GetZ); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_GetZ)
-{
+XS(XS_Object_GetZ) {
 	dXSARGS;
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Object::GetZ(THIS)");
 	{
-		Object *		THIS;
-		float		RETVAL;
+		Object *THIS;
+		float  RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetZ();
-		XSprePUSH; PUSHn((double)RETVAL);
+		XSprePUSH;
+		PUSHn((double) RETVAL);
 	}
 	XSRETURN(1);
 }
 
 XS(XS_Object_GetHeading); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_GetHeading)
-{
+XS(XS_Object_GetHeading) {
 	dXSARGS;
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Object::GetHeading(THIS)");
 	{
-		Object *		THIS;
-		float		RETVAL;
+		Object *THIS;
+		float  RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetHeadingData();
-		XSprePUSH; PUSHn((double)RETVAL);
+		XSprePUSH;
+		PUSHn((double) RETVAL);
 	}
 	XSRETURN(1);
 }
 
 XS(XS_Object_VarSave); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_VarSave)
-{
+XS(XS_Object_VarSave) {
 	dXSARGS;
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Object::VarSave(THIS)");
 	{
-		Object *		THIS;
-		uint32		RETVAL;
+		Object *THIS;
+		uint32 RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->VarSave();
-		XSprePUSH; PUSHu((UV)RETVAL);
+		XSprePUSH;
+		PUSHu((UV) RETVAL);
 	}
 	XSRETURN(1);
 }
 
 
 XS(XS_Object_GetType); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_GetType)
-{
+XS(XS_Object_GetType) {
 	dXSARGS;
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Object::GetType(THIS)");
 	{
-		Object *		THIS;
-		uint32		RETVAL;
+		Object *THIS;
+		uint32 RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetType();
-		XSprePUSH; PUSHu((UV)RETVAL);
+		XSprePUSH;
+		PUSHu((UV) RETVAL);
 	}
 	XSRETURN(1);
 }
 
 
 XS(XS_Object_SetType); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_SetType)
-{
+XS(XS_Object_SetType) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Object::SetType(THIS, type)");
+		Perl_croak(aTHX_ "Usage: Object::SetType(THIS, uint32 type)");
 	{
-		Object *		THIS;
-		uint32		type = (uint32)SvUV(ST(1));
+		Object *THIS;
+		uint32 type = (uint32) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetType(type);
@@ -508,49 +481,46 @@ XS(XS_Object_SetType)
 
 
 XS(XS_Object_GetIcon); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_GetIcon)
-{
+XS(XS_Object_GetIcon) {
 	dXSARGS;
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Object::GetIcon(THIS)");
 	{
-		Object *		THIS;
-		uint32		RETVAL;
+		Object *THIS;
+		uint32 RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetIcon();
-		XSprePUSH; PUSHu((UV)RETVAL);
+		XSprePUSH;
+		PUSHu((UV) RETVAL);
 	}
 	XSRETURN(1);
 }
 
 
 XS(XS_Object_SetIcon); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_SetIcon)
-{
+XS(XS_Object_SetIcon) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Object::SetIcon(THIS, icon)");
+		Perl_croak(aTHX_ "Usage: Object::SetIcon(THIS, uint32 icon)");
 	{
-		Object *		THIS;
-		uint32		icon = (uint32)SvUV(ST(1));
+		Object *THIS;
+		uint32 icon = (uint32) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetIcon(icon);
@@ -560,49 +530,46 @@ XS(XS_Object_SetIcon)
 
 
 XS(XS_Object_GetItemID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_GetItemID)
-{
+XS(XS_Object_GetItemID) {
 	dXSARGS;
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Object::GetItemID(THIS)");
 	{
-		Object *		THIS;
-		uint32		RETVAL;
+		Object *THIS;
+		uint32 RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetItemID();
-		XSprePUSH; PUSHu((UV)RETVAL);
+		XSprePUSH;
+		PUSHu((UV) RETVAL);
 	}
 	XSRETURN(1);
 }
 
 
 XS(XS_Object_SetItemID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_SetItemID)
-{
+XS(XS_Object_SetItemID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Object::SetItemID(THIS, itemid)");
+		Perl_croak(aTHX_ "Usage: Object::SetItemID(THIS, uint32 item_id)");
 	{
-		Object *		THIS;
-		uint32		itemid = (uint32)SvUV(ST(1));
+		Object *THIS;
+		uint32 itemid = (uint32) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetItemID(itemid);
@@ -611,24 +578,22 @@ XS(XS_Object_SetItemID)
 }
 
 XS(XS_Object_SetLocation); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_SetLocation)
-{
+XS(XS_Object_SetLocation) {
 	dXSARGS;
 	if (items != 4)
-		Perl_croak(aTHX_ "Usage: Object::SetLocation(THIS, x, y, z)");
+		Perl_croak(aTHX_ "Usage: Object::SetLocation(THIS, float x, float y, float z)");
 	{
-		Object *		THIS;
-		float		x = (float)SvNV(ST(1));
-		float		y = (float)SvNV(ST(2));
-		float		z = (float)SvNV(ST(3));
+		Object *THIS;
+		float  x = (float) SvNV(ST(1));
+		float  y = (float) SvNV(ST(2));
+		float  z = (float) SvNV(ST(3));
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetLocation(x, y, z);
@@ -637,22 +602,20 @@ XS(XS_Object_SetLocation)
 }
 
 XS(XS_Object_SetX); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_SetX)
-{
+XS(XS_Object_SetX) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Object::SetX(THIS, XPos)");
+		Perl_croak(aTHX_ "Usage: Object::SetX(THIS, float x)");
 	{
-		Object *		THIS;
-		float		pos = (float)SvNV(ST(1));
+		Object *THIS;
+		float  pos = (float) SvNV(ST(1));
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetX(pos);
@@ -661,22 +624,20 @@ XS(XS_Object_SetX)
 }
 
 XS(XS_Object_SetY); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_SetY)
-{
+XS(XS_Object_SetY) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Object::SetY(THIS, YPos)");
+		Perl_croak(aTHX_ "Usage: Object::SetY(THIS, float y)");
 	{
-		Object *		THIS;
-		float		pos = (float)SvNV(ST(1));
+		Object *THIS;
+		float  pos = (float) SvNV(ST(1));
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetY(pos);
@@ -685,22 +646,20 @@ XS(XS_Object_SetY)
 }
 
 XS(XS_Object_SetZ); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_SetZ)
-{
+XS(XS_Object_SetZ) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Object::SetZ(THIS, ZPos)");
+		Perl_croak(aTHX_ "Usage: Object::SetZ(THIS, float z)");
 	{
-		Object *		THIS;
-		float		pos = (float)SvNV(ST(1));
+		Object *THIS;
+		float  pos = (float) SvNV(ST(1));
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetZ(pos);
@@ -709,22 +668,20 @@ XS(XS_Object_SetZ)
 }
 
 XS(XS_Object_SetHeading); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_SetHeading)
-{
+XS(XS_Object_SetHeading) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Object::SetHeading(THIS, heading)");
+		Perl_croak(aTHX_ "Usage: Object::SetHeading(THIS, float heading)");
 	{
-		Object *		THIS;
-		float		heading = (float)SvNV(ST(1));
+		Object *THIS;
+		float  heading = (float) SvNV(ST(1));
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetHeading(heading);
@@ -733,73 +690,69 @@ XS(XS_Object_SetHeading)
 }
 
 XS(XS_Object_SetModelName); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_SetModelName)
-{
+XS(XS_Object_SetModelName) {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Object::SetModelName(THIS, name)");
+		Perl_croak(aTHX_ "Usage: Object::SetModelName(THIS, string name)");
 	{
-		Object *		THIS;
-		char *		name = nullptr;
+		Object *THIS;
+		char   *name = nullptr;
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		if (items > 1)	{	name = (char *)SvPV_nolen(ST(1));	}
+		if (items > 1) { name = (char *) SvPV_nolen(ST(1)); }
 
 		THIS->SetModelName(name);
 	}
 	XSRETURN_EMPTY;
 }
 XS(XS_Object_GetModelName); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_GetModelName)
-{
+XS(XS_Object_GetModelName) {
 	dXSARGS;
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Object::GetModelName(THIS)");
 	{
-		Object *		THIS;
-		Const_char *		RETVAL;
+		Object     *THIS;
+		Const_char *RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetModelName();
-		sv_setpv(TARG, RETVAL); XSprePUSH; PUSHTARG;
+		sv_setpv(TARG, RETVAL);
+		XSprePUSH;
+		PUSHTARG;
 	}
 	XSRETURN(1);
 }
 
 XS(XS_Object_Repop); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_Repop)
-{
+XS(XS_Object_Repop) {
 	dXSARGS;
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Object::Repop(THIS)");
 	{
-		Object *		THIS;
+		Object *THIS;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 		THIS->Repop();
 	}
@@ -807,22 +760,20 @@ XS(XS_Object_Repop)
 }
 
 XS(XS_Object_Depop); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_Depop)
-{
+XS(XS_Object_Depop) {
 	dXSARGS;
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Object::Depop(THIS)");
 	{
-		Object *		THIS;
+		Object *THIS;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 		THIS->Depop();
 	}
@@ -831,77 +782,73 @@ XS(XS_Object_Depop)
 
 
 XS(XS_Object_GetEntityVariable); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_GetEntityVariable)
-{
+XS(XS_Object_GetEntityVariable) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Object::GetEntityVariable(THIS, id)");
+		Perl_croak(aTHX_ "Usage: Object::GetEntityVariable(THIS, string key)");
 	{
-		Object *		THIS;
+		Object     *THIS;
 		Const_char *id = SvPV_nolen(ST(1));
-		Const_char *		RETVAL;
+		Const_char *RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetEntityVariable(id);
-		sv_setpv(TARG, RETVAL); XSprePUSH; PUSHTARG;
+		sv_setpv(TARG, RETVAL);
+		XSprePUSH;
+		PUSHTARG;
 	}
 	XSRETURN(1);
 }
 
 XS(XS_Object_EntityVariableExists); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_EntityVariableExists)
-{
+XS(XS_Object_EntityVariableExists) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Object::EntityVariableExists(THIS, id)");
+		Perl_croak(aTHX_ "Usage: Object::EntityVariableExists(THIS, string key)");
 	{
-		Object *		THIS;
+		Object     *THIS;
 		Const_char *id = SvPV_nolen(ST(1));
-		bool		RETVAL;
+		bool       RETVAL;
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->EntityVariableExists(id);
-		ST(0) = boolSV(RETVAL);
+		ST(0)          = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
 	XSRETURN(1);
 }
 
 XS(XS_Object_SetEntityVariable); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_SetEntityVariable)
-{
+XS(XS_Object_SetEntityVariable) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Object::SetEntityVariable(THIS, id, var)");
+		Perl_croak(aTHX_ "Usage: Object::SetEntityVariable(THIS, string key, string var)");
 	{
-		Object *		THIS;
-		Const_char *id = SvPV_nolen(ST(1));
-		const char *	var = (const char *)SvPV_nolen(ST(2));
+		Object     *THIS;
+		Const_char *id  = SvPV_nolen(ST(1));
+		const char *var = (const char *) SvPV_nolen(ST(2));
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetEntityVariable(id, var);
@@ -910,49 +857,46 @@ XS(XS_Object_SetEntityVariable)
 }
 
 XS(XS_Object_GetSolidType); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_GetSolidType)
-{
+XS(XS_Object_GetSolidType) {
 	dXSARGS;
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Object::GetSolidType(THIS)");
 	{
-		Object *		THIS;
-		uint16		RETVAL;
+		Object *THIS;
+		uint16 RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetSolidType();
-		XSprePUSH; PUSHu((UV)RETVAL);
+		XSprePUSH;
+		PUSHu((UV) RETVAL);
 	}
 	XSRETURN(1);
 }
 
 
 XS(XS_Object_SetSolidType); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_SetSolidType)
-{
+XS(XS_Object_SetSolidType) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Object::SetSolidType(THIS, type)");
+		Perl_croak(aTHX_ "Usage: Object::SetSolidType(THIS, uint16 type)");
 	{
-		Object *		THIS;
-		uint16		type = (uint16)SvUV(ST(1));
+		Object *THIS;
+		uint16 type = (uint16) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetSolidType(type);
@@ -961,49 +905,46 @@ XS(XS_Object_SetSolidType)
 }
 
 XS(XS_Object_GetSize); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_GetSize)
-{
+XS(XS_Object_GetSize) {
 	dXSARGS;
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Object::GetSize(THIS)");
 	{
-		Object *		THIS;
-		float		RETVAL;
+		Object *THIS;
+		float  RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetSize();
-		XSprePUSH; PUSHn((double)RETVAL);
+		XSprePUSH;
+		PUSHn((double) RETVAL);
 	}
 	XSRETURN(1);
 }
 
 
 XS(XS_Object_SetSize); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_SetSize)
-{
+XS(XS_Object_SetSize) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Object::SetSize(THIS, type)");
+		Perl_croak(aTHX_ "Usage: Object::SetSize(THIS, float size)");
 	{
-		Object *		THIS;
-		float		size = (float)SvNV(ST(1));
+		Object *THIS;
+		float  size = (float) SvNV(ST(1));
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetSize(size);
@@ -1012,22 +953,20 @@ XS(XS_Object_SetSize)
 }
 
 XS(XS_Object_SetTiltX); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_SetTiltX)
-{
+XS(XS_Object_SetTiltX) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Object::SetTiltX(THIS, pos)");
+		Perl_croak(aTHX_ "Usage: Object::SetTiltX(THIS, float tilt_x)");
 	{
-		Object *		THIS;
-		float		pos = (float)SvNV(ST(1));
+		Object *THIS;
+		float  pos = (float) SvNV(ST(1));
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetTiltX(pos);
@@ -1036,22 +975,20 @@ XS(XS_Object_SetTiltX)
 }
 
 XS(XS_Object_SetTiltY); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_SetTiltY)
-{
+XS(XS_Object_SetTiltY) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Object::SetTiltY(THIS, pos)");
+		Perl_croak(aTHX_ "Usage: Object::SetTiltY(THIS, float tilt_y)");
 	{
-		Object *		THIS;
-		float		pos = (float)SvNV(ST(1));
+		Object *THIS;
+		float  pos = (float) SvNV(ST(1));
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetTiltY(pos);
@@ -1060,53 +997,51 @@ XS(XS_Object_SetTiltY)
 }
 
 XS(XS_Object_GetTiltX); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_GetTiltX)
-{
+XS(XS_Object_GetTiltX) {
 	dXSARGS;
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Object::GetSize(THIS)");
 	{
-		Object *		THIS;
-		float		RETVAL;
+		Object *THIS;
+		float  RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetTiltX();
-		XSprePUSH; PUSHn((double)RETVAL);
+		XSprePUSH;
+		PUSHn((double) RETVAL);
 	}
 	XSRETURN(1);
 }
 
 XS(XS_Object_GetTiltY); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Object_GetTiltY)
-{
+XS(XS_Object_GetTiltY) {
 	dXSARGS;
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Object::GetSize(THIS)");
 	{
-		Object *		THIS;
-		float		RETVAL;
+		Object *THIS;
+		float  RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Object")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Object *,tmp);
-		}
-		else
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Object *, tmp);
+		} else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetTiltY();
-		XSprePUSH; PUSHn((double)RETVAL);
+		XSprePUSH;
+		PUSHn((double) RETVAL);
 	}
 	XSRETURN(1);
 }
@@ -1115,61 +1050,60 @@ XS(XS_Object_GetTiltY)
 extern "C"
 #endif
 XS(boot_Object); /* prototype to pass -Wmissing-prototypes */
-XS(boot_Object)
-{
+XS(boot_Object) {
 	dXSARGS;
 	char file[256];
 	strncpy(file, __FILE__, 256);
 	file[255] = 0;
 
-	if(items != 1)
+	if (items != 1)
 		fprintf(stderr, "boot_quest does not take any arguments.");
 	char buf[128];
 
 	//add the strcpy stuff to get rid of const warnings....
 
-	XS_VERSION_BOOTCHECK ;
-		newXSproto(strcpy(buf, "Depop"),XS_Object_Depop, file, "$");
-		newXSproto(strcpy(buf, "Repop"),XS_Object_Repop, file, "$");
-		newXSproto(strcpy(buf, "SetModelName"),XS_Object_SetModelName, file, "$$");
-		newXSproto(strcpy(buf, "GetModelName"),XS_Object_GetModelName, file, "$");
-		newXSproto(strcpy(buf, "GetX"),XS_Object_GetX, file, "$");
-		newXSproto(strcpy(buf, "GetY"),XS_Object_GetY, file, "$");
-		newXSproto(strcpy(buf, "GetZ"),XS_Object_GetZ, file, "$");
-		newXSproto(strcpy(buf, "GetHeading"),XS_Object_GetHeading, file, "$");
-		newXSproto(strcpy(buf, "SetX"),XS_Object_SetX, file, "$$");
-		newXSproto(strcpy(buf, "SetY"),XS_Object_SetY, file, "$$");
-		newXSproto(strcpy(buf, "SetZ"),XS_Object_SetZ, file, "$$");
-		newXSproto(strcpy(buf, "SetHeading"),XS_Object_SetHeading, file, "$$");
-		newXSproto(strcpy(buf, "SetLocation"),XS_Object_SetLocation, file, "$$$$");
-		newXSproto(strcpy(buf, "SetItemID"),XS_Object_SetItemID, file, "$$");
-		newXSproto(strcpy(buf, "GetItemID"),XS_Object_GetItemID, file, "$");
-		newXSproto(strcpy(buf, "SetIcon"),XS_Object_SetIcon, file, "$$");
-		newXSproto(strcpy(buf, "GetIcon"),XS_Object_GetIcon, file, "$");
-		newXSproto(strcpy(buf, "SetType"),XS_Object_SetType, file, "$$");
-		newXSproto(strcpy(buf, "GetType"),XS_Object_GetType, file, "$");
-		newXSproto(strcpy(buf, "GetDBID"),XS_Object_GetDBID, file, "$");
-		newXSproto(strcpy(buf, "ClearUser"),XS_Object_ClearUser, file, "$");
-		newXSproto(strcpy(buf, "SetID"),XS_Object_SetID, file, "$$");
-		newXSproto(strcpy(buf, "GetID"),XS_Object_GetID, file, "$");
-		newXSproto(strcpy(buf, "Save"),XS_Object_Save, file, "$");
-		newXSproto(strcpy(buf, "VarSave"),XS_Object_VarSave, file, "$");
-		newXSproto(strcpy(buf, "DeleteItem"),XS_Object_DeleteItem, file, "$$");
-		newXSproto(strcpy(buf, "StartDecay"),XS_Object_StartDecay, file, "$$");
-		newXSproto(strcpy(buf, "Delete"),XS_Object_Delete, file, "$$");
-		newXSproto(strcpy(buf, "IsGroundSpawn"),XS_Object_IsGroundSpawn, file, "$");
-		newXSproto(strcpy(buf, "Close"),XS_Object_Close, file, "$");
-		newXSproto(strcpy(buf, "GetEntityVariable"), XS_Object_GetEntityVariable, file, "$$");
-		newXSproto(strcpy(buf, "SetEntityVariable"), XS_Object_SetEntityVariable, file, "$$$");
-		newXSproto(strcpy(buf, "EntityVariableExists"), XS_Object_EntityVariableExists, file, "$$");
-		newXSproto(strcpy(buf, "SetSolidType"),XS_Object_SetSolidType, file, "$$");
-		newXSproto(strcpy(buf, "GetSolidType"),XS_Object_GetSolidType, file, "$");
-		newXSproto(strcpy(buf, "SetSize"),XS_Object_SetSize, file, "$$");
-		newXSproto(strcpy(buf, "GetSize"),XS_Object_GetSize, file, "$");
-		newXSproto(strcpy(buf, "SetTiltX"),XS_Object_SetTiltX, file, "$$");
-		newXSproto(strcpy(buf, "SetTiltY"),XS_Object_SetTiltY, file, "$");
-		newXSproto(strcpy(buf, "GetTiltX"),XS_Object_GetTiltX, file, "$$");
-		newXSproto(strcpy(buf, "GetTiltY"),XS_Object_GetTiltY, file, "$");
+	XS_VERSION_BOOTCHECK;
+	newXSproto(strcpy(buf, "Depop"), XS_Object_Depop, file, "$");
+	newXSproto(strcpy(buf, "Repop"), XS_Object_Repop, file, "$");
+	newXSproto(strcpy(buf, "SetModelName"), XS_Object_SetModelName, file, "$$");
+	newXSproto(strcpy(buf, "GetModelName"), XS_Object_GetModelName, file, "$");
+	newXSproto(strcpy(buf, "GetX"), XS_Object_GetX, file, "$");
+	newXSproto(strcpy(buf, "GetY"), XS_Object_GetY, file, "$");
+	newXSproto(strcpy(buf, "GetZ"), XS_Object_GetZ, file, "$");
+	newXSproto(strcpy(buf, "GetHeading"), XS_Object_GetHeading, file, "$");
+	newXSproto(strcpy(buf, "SetX"), XS_Object_SetX, file, "$$");
+	newXSproto(strcpy(buf, "SetY"), XS_Object_SetY, file, "$$");
+	newXSproto(strcpy(buf, "SetZ"), XS_Object_SetZ, file, "$$");
+	newXSproto(strcpy(buf, "SetHeading"), XS_Object_SetHeading, file, "$$");
+	newXSproto(strcpy(buf, "SetLocation"), XS_Object_SetLocation, file, "$$$$");
+	newXSproto(strcpy(buf, "SetItemID"), XS_Object_SetItemID, file, "$$");
+	newXSproto(strcpy(buf, "GetItemID"), XS_Object_GetItemID, file, "$");
+	newXSproto(strcpy(buf, "SetIcon"), XS_Object_SetIcon, file, "$$");
+	newXSproto(strcpy(buf, "GetIcon"), XS_Object_GetIcon, file, "$");
+	newXSproto(strcpy(buf, "SetType"), XS_Object_SetType, file, "$$");
+	newXSproto(strcpy(buf, "GetType"), XS_Object_GetType, file, "$");
+	newXSproto(strcpy(buf, "GetDBID"), XS_Object_GetDBID, file, "$");
+	newXSproto(strcpy(buf, "ClearUser"), XS_Object_ClearUser, file, "$");
+	newXSproto(strcpy(buf, "SetID"), XS_Object_SetID, file, "$$");
+	newXSproto(strcpy(buf, "GetID"), XS_Object_GetID, file, "$");
+	newXSproto(strcpy(buf, "Save"), XS_Object_Save, file, "$");
+	newXSproto(strcpy(buf, "VarSave"), XS_Object_VarSave, file, "$");
+	newXSproto(strcpy(buf, "DeleteItem"), XS_Object_DeleteItem, file, "$$");
+	newXSproto(strcpy(buf, "StartDecay"), XS_Object_StartDecay, file, "$$");
+	newXSproto(strcpy(buf, "Delete"), XS_Object_Delete, file, "$$");
+	newXSproto(strcpy(buf, "IsGroundSpawn"), XS_Object_IsGroundSpawn, file, "$");
+	newXSproto(strcpy(buf, "Close"), XS_Object_Close, file, "$");
+	newXSproto(strcpy(buf, "GetEntityVariable"), XS_Object_GetEntityVariable, file, "$$");
+	newXSproto(strcpy(buf, "SetEntityVariable"), XS_Object_SetEntityVariable, file, "$$$");
+	newXSproto(strcpy(buf, "EntityVariableExists"), XS_Object_EntityVariableExists, file, "$$");
+	newXSproto(strcpy(buf, "SetSolidType"), XS_Object_SetSolidType, file, "$$");
+	newXSproto(strcpy(buf, "GetSolidType"), XS_Object_GetSolidType, file, "$");
+	newXSproto(strcpy(buf, "SetSize"), XS_Object_SetSize, file, "$$");
+	newXSproto(strcpy(buf, "GetSize"), XS_Object_GetSize, file, "$");
+	newXSproto(strcpy(buf, "SetTiltX"), XS_Object_SetTiltX, file, "$$");
+	newXSproto(strcpy(buf, "SetTiltY"), XS_Object_SetTiltY, file, "$");
+	newXSproto(strcpy(buf, "GetTiltX"), XS_Object_GetTiltX, file, "$$");
+	newXSproto(strcpy(buf, "GetTiltY"), XS_Object_GetTiltY, file, "$");
 	XSRETURN_YES;
 }
 #endif //EMBPERL_XS_CLASSES

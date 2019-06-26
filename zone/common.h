@@ -194,7 +194,8 @@ enum {
 	CASTING_RESIST_DIFF = 43,
 	COUNTER_AVOID_DAMAGE = 44,
 	PROX_AGGRO = 45,
-	MAX_SPECIAL_ATTACK = 46
+	IMMUNE_RANGED_ATTACKS = 46,
+	MAX_SPECIAL_ATTACK = 47
 };
 
 typedef enum {	//fear states
@@ -204,8 +205,6 @@ typedef enum {	//fear states
 	fearStateGrid,			//I am allready on a fear grid
 	fearStateStuck			//I cannot move somehow...
 } FearState;
-
-enum { FlyMode0 = 0, FlyMode1 = 1, Flymode2 = 2, FlyMode3 = 3 };
 
 // This is actually FlyMode, from MQ2
 enum GravityBehavior {
@@ -260,6 +259,17 @@ enum class LootResponse : uint8 {
 	Hostiles = 4,
 	TooFar = 5,
 	LootAll = 6 // SoD+
+};
+
+enum class LootRequestType : uint8 {
+	Forbidden = 0,
+	GMPeek,
+	GMAllowed,
+	Self,
+	AllowedPVE,
+	AllowedPVPAll,
+	AllowedPVPSingle, // can make this 'AllowedPVPVariable' and allow values between 1 and EQEmu::invtype::POSSESSIONS_SIZE
+	AllowedPVPDefined,
 };
 
 //this is our internal representation of the BUFF struct, can put whatever we want in it
@@ -548,6 +558,7 @@ struct StatBonuses {
 	int16	FeignedCastOnChance;				// Percent Value
 	bool	PetCommands[PET_MAXCOMMANDS];		// SPA 267
 	int	FeignedMinionChance;				// SPA 281 base1 = chance, just like normal FD
+	int	GrantForage; // affects max skill of forage as well as granting non-forage classes forage
 	int aura_slots;
 	int trap_slots;
 	bool hunger; // Song of Sustenance -- min caps to 3500

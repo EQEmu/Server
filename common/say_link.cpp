@@ -26,34 +26,35 @@
 #include "../zone/zonedb.h"
 
 
-bool EQEmu::saylink::DegenerateLinkBody(SayLinkBody_Struct& say_link_body_struct, const std::string& say_link_body)
+bool EQEmu::saylink::DegenerateLinkBody(SayLinkBody_Struct &say_link_body_struct, const std::string &say_link_body)
 {
 	memset(&say_link_body_struct, 0, sizeof(say_link_body_struct));
-	if (say_link_body.length() != EQEmu::legacy::TEXT_LINK_BODY_LENGTH)
+	if (say_link_body.length() != EQEmu::constants::SAY_LINK_BODY_SIZE) {
 		return false;
+	}
 
-	say_link_body_struct.unknown_1 = (uint8)strtol(say_link_body.substr(0, 1).c_str(), nullptr, 16);
-	say_link_body_struct.item_id = (uint32)strtol(say_link_body.substr(1, 5).c_str(), nullptr, 16);
-	say_link_body_struct.augment_1 = (uint32)strtol(say_link_body.substr(6, 5).c_str(), nullptr, 16);
-	say_link_body_struct.augment_2 = (uint32)strtol(say_link_body.substr(11, 5).c_str(), nullptr, 16);
-	say_link_body_struct.augment_3 = (uint32)strtol(say_link_body.substr(16, 5).c_str(), nullptr, 16);
-	say_link_body_struct.augment_4 = (uint32)strtol(say_link_body.substr(21, 5).c_str(), nullptr, 16);
-	say_link_body_struct.augment_5 = (uint32)strtol(say_link_body.substr(26, 5).c_str(), nullptr, 16);
-	say_link_body_struct.augment_6 = (uint32)strtol(say_link_body.substr(31, 5).c_str(), nullptr, 16);
-	say_link_body_struct.is_evolving = (uint8)strtol(say_link_body.substr(36, 1).c_str(), nullptr, 16);
-	say_link_body_struct.evolve_group = (uint32)strtol(say_link_body.substr(37, 4).c_str(), nullptr, 16);
-	say_link_body_struct.evolve_level = (uint8)strtol(say_link_body.substr(41, 2).c_str(), nullptr, 16);
-	say_link_body_struct.ornament_icon = (uint32)strtol(say_link_body.substr(43, 5).c_str(), nullptr, 16);
-	say_link_body_struct.hash = (int)strtol(say_link_body.substr(48, 8).c_str(), nullptr, 16);
+	say_link_body_struct.action_id     = (uint8) strtol(say_link_body.substr(0, 1).c_str(), nullptr, 16);
+	say_link_body_struct.item_id       = (uint32) strtol(say_link_body.substr(1, 5).c_str(), nullptr, 16);
+	say_link_body_struct.augment_1     = (uint32) strtol(say_link_body.substr(6, 5).c_str(), nullptr, 16);
+	say_link_body_struct.augment_2     = (uint32) strtol(say_link_body.substr(11, 5).c_str(), nullptr, 16);
+	say_link_body_struct.augment_3     = (uint32) strtol(say_link_body.substr(16, 5).c_str(), nullptr, 16);
+	say_link_body_struct.augment_4     = (uint32) strtol(say_link_body.substr(21, 5).c_str(), nullptr, 16);
+	say_link_body_struct.augment_5     = (uint32) strtol(say_link_body.substr(26, 5).c_str(), nullptr, 16);
+	say_link_body_struct.augment_6     = (uint32) strtol(say_link_body.substr(31, 5).c_str(), nullptr, 16);
+	say_link_body_struct.is_evolving   = (uint8) strtol(say_link_body.substr(36, 1).c_str(), nullptr, 16);
+	say_link_body_struct.evolve_group  = (uint32) strtol(say_link_body.substr(37, 4).c_str(), nullptr, 16);
+	say_link_body_struct.evolve_level  = (uint8) strtol(say_link_body.substr(41, 2).c_str(), nullptr, 16);
+	say_link_body_struct.ornament_icon = (uint32) strtol(say_link_body.substr(43, 5).c_str(), nullptr, 16);
+	say_link_body_struct.hash          = (uint32) strtol(say_link_body.substr(48, 8).c_str(), nullptr, 16);
 
 	return true;
 }
 
-bool EQEmu::saylink::GenerateLinkBody(std::string& say_link_body, const SayLinkBody_Struct& say_link_body_struct)
+bool EQEmu::saylink::GenerateLinkBody(std::string &say_link_body, const SayLinkBody_Struct &say_link_body_struct)
 {
 	say_link_body = StringFormat(
 		"%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%02X" "%05X" "%08X",
-		(0x0F & say_link_body_struct.unknown_1),
+		(0x0F & say_link_body_struct.action_id),
 		(0x000FFFFF & say_link_body_struct.item_id),
 		(0x000FFFFF & say_link_body_struct.augment_1),
 		(0x000FFFFF & say_link_body_struct.augment_2),
@@ -68,8 +69,9 @@ bool EQEmu::saylink::GenerateLinkBody(std::string& say_link_body, const SayLinkB
 		(0xFFFFFFFF & say_link_body_struct.hash)
 	);
 
-	if (say_link_body.length() != EQEmu::legacy::TEXT_LINK_BODY_LENGTH)
+	if (say_link_body.length() != EQEmu::constants::SAY_LINK_BODY_SIZE) {
 		return false;
+	}
 
 	return true;
 }
@@ -79,7 +81,7 @@ EQEmu::SayLinkEngine::SayLinkEngine()
 	Reset();
 }
 
-std::string EQEmu::SayLinkEngine::GenerateLink()
+const std::string &EQEmu::SayLinkEngine::GenerateLink()
 {
 	m_Link.clear();
 	m_LinkBody.clear();
@@ -88,18 +90,26 @@ std::string EQEmu::SayLinkEngine::GenerateLink()
 	generate_body();
 	generate_text();
 
-	if ((m_LinkBody.length() == EQEmu::legacy::TEXT_LINK_BODY_LENGTH) && (m_LinkText.length() > 0)) {
+	if ((m_LinkBody.length() == EQEmu::constants::SAY_LINK_BODY_SIZE) && (m_LinkText.length() > 0)) {
 		m_Link.push_back(0x12);
 		m_Link.append(m_LinkBody);
 		m_Link.append(m_LinkText);
 		m_Link.push_back(0x12);
 	}
 
-	if ((m_Link.length() == 0) || (m_Link.length() > 250)) {
+	if ((m_Link.length() == 0) || (m_Link.length() > (EQEmu::constants::SAY_LINK_MAXIMUM_SIZE))) {
 		m_Error = true;
-		m_Link = "<LINKER ERROR>";
-		Log(Logs::General, Logs::Error, "TextLink::GenerateLink() failed to generate a useable text link (LinkType: %i, Lengths: {link: %u, body: %u, text: %u})",
-			m_LinkType, m_Link.length(), m_LinkBody.length(), m_LinkText.length());
+		m_Link  = "<LINKER ERROR>";
+		Log(Logs::General, Logs::Error, "SayLinkEngine::GenerateLink() failed to generate a useable say link");
+		Log(Logs::General, Logs::Error, ">> LinkType: %i, Lengths: {link: %u(%u), body: %u(%u), text: %u(%u)}",
+			m_LinkType,
+			m_Link.length(),
+			EQEmu::constants::SAY_LINK_MAXIMUM_SIZE,
+			m_LinkBody.length(),
+			EQEmu::constants::SAY_LINK_BODY_SIZE,
+			m_LinkText.length(),
+			EQEmu::constants::SAY_LINK_TEXT_SIZE
+		);
 		Log(Logs::General, Logs::Error, ">> LinkBody: %s", m_LinkBody.c_str());
 		Log(Logs::General, Logs::Error, ">> LinkText: %s", m_LinkText.c_str());
 	}
@@ -113,20 +123,10 @@ void EQEmu::SayLinkEngine::Reset()
 	m_ItemData = nullptr;
 	m_LootData = nullptr;
 	m_ItemInst = nullptr;
-	m_Proxy_unknown_1 = 0;
-	m_ProxyItemID = 0;
-	m_ProxyAugment1ID = 0;
-	m_ProxyAugment2ID = 0;
-	m_ProxyAugment3ID = 0;
-	m_ProxyAugment4ID = 0;
-	m_ProxyAugment5ID = 0;
-	m_ProxyAugment6ID = 0;
-	m_ProxyIsEvolving = 0;
-	m_ProxyEvolveGroup = 0;
-	m_ProxyEvolveLevel = 0;
-	m_ProxyOrnamentIcon = 0;
-	m_ProxyHash = 0;
-	m_ProxyText = nullptr;
+
+	memset(&m_LinkBodyStruct, 0, sizeof(SayLinkBody_Struct));
+	memset(&m_LinkProxyStruct, 0, sizeof(SayLinkProxy_Struct));
+
 	m_TaskUse = false;
 	m_Link.clear();
 	m_LinkBody.clear();
@@ -147,87 +147,101 @@ void EQEmu::SayLinkEngine::generate_body()
 
 	memset(&m_LinkBodyStruct, 0, sizeof(SayLinkBody_Struct));
 
-	const EQEmu::ItemData* item_data = nullptr;
+	const EQEmu::ItemData *item_data = nullptr;
 
 	switch (m_LinkType) {
-	case saylink::SayLinkBlank:
-		break;
-	case saylink::SayLinkItemData:
-		if (m_ItemData == nullptr) { break; }
-		m_LinkBodyStruct.item_id = m_ItemData->ID;
-		m_LinkBodyStruct.evolve_group = m_ItemData->LoreGroup; // this probably won't work for all items
-		//m_LinkBodyStruct.evolve_level = m_ItemData->EvolvingLevel;
-		// TODO: add hash call
-		break;
-	case saylink::SayLinkLootItem:
-		if (m_LootData == nullptr) { break; }
-		item_data = database.GetItem(m_LootData->item_id);
-		if (item_data == nullptr) { break; }
-		m_LinkBodyStruct.item_id = item_data->ID;
-		m_LinkBodyStruct.augment_1 = m_LootData->aug_1;
-		m_LinkBodyStruct.augment_2 = m_LootData->aug_2;
-		m_LinkBodyStruct.augment_3 = m_LootData->aug_3;
-		m_LinkBodyStruct.augment_4 = m_LootData->aug_4;
-		m_LinkBodyStruct.augment_5 = m_LootData->aug_5;
-		m_LinkBodyStruct.augment_6 = m_LootData->aug_6;
-		m_LinkBodyStruct.evolve_group = item_data->LoreGroup; // see note above
-		//m_LinkBodyStruct.evolve_level = item_data->EvolvingLevel;
-		// TODO: add hash call
-		break;
-	case saylink::SayLinkItemInst:
-		if (m_ItemInst == nullptr) { break; }
-		if (m_ItemInst->GetItem() == nullptr) { break; }
-		m_LinkBodyStruct.item_id = m_ItemInst->GetItem()->ID;
-		m_LinkBodyStruct.augment_1 = m_ItemInst->GetAugmentItemID(0);
-		m_LinkBodyStruct.augment_2 = m_ItemInst->GetAugmentItemID(1);
-		m_LinkBodyStruct.augment_3 = m_ItemInst->GetAugmentItemID(2);
-		m_LinkBodyStruct.augment_4 = m_ItemInst->GetAugmentItemID(3);
-		m_LinkBodyStruct.augment_5 = m_ItemInst->GetAugmentItemID(4);
-		m_LinkBodyStruct.augment_6 = m_ItemInst->GetAugmentItemID(5);
-		m_LinkBodyStruct.is_evolving = (m_ItemInst->IsEvolving() ? 1 : 0);
-		m_LinkBodyStruct.evolve_group = m_ItemInst->GetItem()->LoreGroup; // see note above
-		m_LinkBodyStruct.evolve_level = m_ItemInst->GetEvolveLvl();
-		m_LinkBodyStruct.ornament_icon = m_ItemInst->GetOrnamentationIcon();
-		// TODO: add hash call
-		break;
-	default:
-		break;
+		case saylink::SayLinkBlank:
+			break;
+		case saylink::SayLinkItemData:
+			if (m_ItemData == nullptr) { break; }
+			m_LinkBodyStruct.item_id      = m_ItemData->ID;
+			m_LinkBodyStruct.evolve_group = m_ItemData->LoreGroup; // this probably won't work for all items
+			//m_LinkBodyStruct.evolve_level = m_ItemData->EvolvingLevel;
+			// TODO: add hash call
+			break;
+		case saylink::SayLinkLootItem:
+			if (m_LootData == nullptr) { break; }
+			item_data = database.GetItem(m_LootData->item_id);
+			if (item_data == nullptr) { break; }
+			m_LinkBodyStruct.item_id      = item_data->ID;
+			m_LinkBodyStruct.augment_1    = m_LootData->aug_1;
+			m_LinkBodyStruct.augment_2    = m_LootData->aug_2;
+			m_LinkBodyStruct.augment_3    = m_LootData->aug_3;
+			m_LinkBodyStruct.augment_4    = m_LootData->aug_4;
+			m_LinkBodyStruct.augment_5    = m_LootData->aug_5;
+			m_LinkBodyStruct.augment_6    = m_LootData->aug_6;
+			m_LinkBodyStruct.evolve_group = item_data->LoreGroup; // see note above
+			//m_LinkBodyStruct.evolve_level = item_data->EvolvingLevel;
+			// TODO: add hash call
+			break;
+		case saylink::SayLinkItemInst:
+			if (m_ItemInst == nullptr) { break; }
+			if (m_ItemInst->GetItem() == nullptr) { break; }
+			m_LinkBodyStruct.item_id       = m_ItemInst->GetItem()->ID;
+			m_LinkBodyStruct.augment_1     = m_ItemInst->GetAugmentItemID(0);
+			m_LinkBodyStruct.augment_2     = m_ItemInst->GetAugmentItemID(1);
+			m_LinkBodyStruct.augment_3     = m_ItemInst->GetAugmentItemID(2);
+			m_LinkBodyStruct.augment_4     = m_ItemInst->GetAugmentItemID(3);
+			m_LinkBodyStruct.augment_5     = m_ItemInst->GetAugmentItemID(4);
+			m_LinkBodyStruct.augment_6     = m_ItemInst->GetAugmentItemID(5);
+			m_LinkBodyStruct.is_evolving   = (m_ItemInst->IsEvolving() ? 1 : 0);
+			m_LinkBodyStruct.evolve_group  = m_ItemInst->GetItem()->LoreGroup; // see note above
+			m_LinkBodyStruct.evolve_level  = m_ItemInst->GetEvolveLvl();
+			m_LinkBodyStruct.ornament_icon = m_ItemInst->GetOrnamentationIcon();
+			// TODO: add hash call
+			break;
+		default:
+			break;
 	}
 
-	if (m_Proxy_unknown_1)
-		m_LinkBodyStruct.unknown_1 = m_Proxy_unknown_1;
-	if (m_ProxyItemID)
-		m_LinkBodyStruct.item_id = m_ProxyItemID;
-	if (m_ProxyAugment1ID)
-		m_LinkBodyStruct.augment_1 = m_ProxyAugment1ID;
-	if (m_ProxyAugment2ID)
-		m_LinkBodyStruct.augment_2 = m_ProxyAugment2ID;
-	if (m_ProxyAugment3ID)
-		m_LinkBodyStruct.augment_3 = m_ProxyAugment3ID;
-	if (m_ProxyAugment4ID)
-		m_LinkBodyStruct.augment_4 = m_ProxyAugment4ID;
-	if (m_ProxyAugment5ID)
-		m_LinkBodyStruct.augment_5 = m_ProxyAugment5ID;
-	if (m_ProxyAugment6ID)
-		m_LinkBodyStruct.augment_6 = m_ProxyAugment6ID;
-	if (m_ProxyIsEvolving)
-		m_LinkBodyStruct.is_evolving = m_ProxyIsEvolving;
-	if (m_ProxyEvolveGroup)
-		m_LinkBodyStruct.evolve_group = m_ProxyEvolveGroup;
-	if (m_ProxyEvolveLevel)
-		m_LinkBodyStruct.evolve_level = m_ProxyEvolveLevel;
-	if (m_ProxyOrnamentIcon)
-		m_LinkBodyStruct.ornament_icon = m_ProxyOrnamentIcon;
-	if (m_ProxyHash)
-		m_LinkBodyStruct.hash = m_ProxyHash;
+	if (m_LinkProxyStruct.action_id) {
+		m_LinkBodyStruct.action_id = m_LinkProxyStruct.action_id;
+	}
+	if (m_LinkProxyStruct.item_id) {
+		m_LinkBodyStruct.item_id = m_LinkProxyStruct.item_id;
+	}
+	if (m_LinkProxyStruct.augment_1) {
+		m_LinkBodyStruct.augment_1 = m_LinkProxyStruct.augment_1;
+	}
+	if (m_LinkProxyStruct.augment_2) {
+		m_LinkBodyStruct.augment_2 = m_LinkProxyStruct.augment_2;
+	}
+	if (m_LinkProxyStruct.augment_3) {
+		m_LinkBodyStruct.augment_3 = m_LinkProxyStruct.augment_3;
+	}
+	if (m_LinkProxyStruct.augment_4) {
+		m_LinkBodyStruct.augment_4 = m_LinkProxyStruct.augment_4;
+	}
+	if (m_LinkProxyStruct.augment_5) {
+		m_LinkBodyStruct.augment_5 = m_LinkProxyStruct.augment_5;
+	}
+	if (m_LinkProxyStruct.augment_6) {
+		m_LinkBodyStruct.augment_6 = m_LinkProxyStruct.augment_6;
+	}
+	if (m_LinkProxyStruct.is_evolving) {
+		m_LinkBodyStruct.is_evolving = m_LinkProxyStruct.is_evolving;
+	}
+	if (m_LinkProxyStruct.evolve_group) {
+		m_LinkBodyStruct.evolve_group = m_LinkProxyStruct.evolve_group;
+	}
+	if (m_LinkProxyStruct.evolve_level) {
+		m_LinkBodyStruct.evolve_level = m_LinkProxyStruct.evolve_level;
+	}
+	if (m_LinkProxyStruct.ornament_icon) {
+		m_LinkBodyStruct.ornament_icon = m_LinkProxyStruct.ornament_icon;
+	}
+	if (m_LinkProxyStruct.hash) {
+		m_LinkBodyStruct.hash = m_LinkProxyStruct.hash;
+	}
 
 
-	if (m_TaskUse)
+	if (m_TaskUse) {
 		m_LinkBodyStruct.hash = 0x14505DC2;
+	}
 
 	m_LinkBody = StringFormat(
 		"%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%02X" "%05X" "%08X",
-		(0x0F & m_LinkBodyStruct.unknown_1),
+		(0x0F & m_LinkBodyStruct.action_id),
 		(0x000FFFFF & m_LinkBodyStruct.item_id),
 		(0x000FFFFF & m_LinkBodyStruct.augment_1),
 		(0x000FFFFF & m_LinkBodyStruct.augment_2),
@@ -245,34 +259,84 @@ void EQEmu::SayLinkEngine::generate_body()
 
 void EQEmu::SayLinkEngine::generate_text()
 {
-	if (m_ProxyText != nullptr) {
-		m_LinkText = m_ProxyText;
+	if (m_LinkProxyStruct.text != nullptr) {
+		m_LinkText = m_LinkProxyStruct.text;
 		return;
 	}
 
-	const EQEmu::ItemData* item_data = nullptr;
+	const EQEmu::ItemData *item_data = nullptr;
 
 	switch (m_LinkType) {
-	case saylink::SayLinkBlank:
-		break;
-	case saylink::SayLinkItemData:
-		if (m_ItemData == nullptr) { break; }
-		m_LinkText = m_ItemData->Name;
-		return;
-	case saylink::SayLinkLootItem:
-		if (m_LootData == nullptr) { break; }
-		item_data = database.GetItem(m_LootData->item_id);
-		if (item_data == nullptr) { break; }
-		m_LinkText = item_data->Name;
-		return;
-	case saylink::SayLinkItemInst:
-		if (m_ItemInst == nullptr) { break; }
-		if (m_ItemInst->GetItem() == nullptr) { break; }
-		m_LinkText = m_ItemInst->GetItem()->Name;
-		return;
-	default:
-		break;
+		case saylink::SayLinkBlank:
+			break;
+		case saylink::SayLinkItemData:
+			if (m_ItemData == nullptr) { break; }
+			m_LinkText = m_ItemData->Name;
+			return;
+		case saylink::SayLinkLootItem:
+			if (m_LootData == nullptr) { break; }
+			item_data = database.GetItem(m_LootData->item_id);
+			if (item_data == nullptr) { break; }
+			m_LinkText = item_data->Name;
+			return;
+		case saylink::SayLinkItemInst:
+			if (m_ItemInst == nullptr) { break; }
+			if (m_ItemInst->GetItem() == nullptr) { break; }
+			m_LinkText = m_ItemInst->GetItem()->Name;
+			return;
+		default:
+			break;
 	}
 
 	m_LinkText = "null";
+}
+
+std::string EQEmu::SayLinkEngine::GenerateQuestSaylink(std::string saylink_text, bool silent, std::string link_name)
+{
+	uint32 saylink_id = 0;
+
+	/**
+	 * Query for an existing phrase and id in the saylink table
+	 */
+	std::string query = StringFormat(
+		"SELECT `id` FROM `saylink` WHERE `phrase` = '%s' LIMIT 1",
+		EscapeString(saylink_text).c_str());
+
+	auto results = database.QueryDatabase(query);
+
+	if (results.Success()) {
+		if (results.RowCount() >= 1) {
+			for (auto row = results.begin(); row != results.end(); ++row)
+				saylink_id = static_cast<uint32>(atoi(row[0]));
+		}
+		else {
+			std::string insert_query = StringFormat(
+				"INSERT INTO `saylink` (`phrase`) VALUES ('%s')",
+				EscapeString(saylink_text).c_str());
+
+			results = database.QueryDatabase(insert_query);
+			if (!results.Success()) {
+				Log(Logs::General, Logs::Error, "Error in saylink phrase queries %s", results.ErrorMessage().c_str());
+			}
+			else {
+				saylink_id = results.LastInsertedID();
+			}
+		}
+	}
+
+	/**
+	 * Generate the actual link
+	 */
+	EQEmu::SayLinkEngine linker;
+	linker.SetProxyItemID(SAYLINK_ITEM_ID);
+	if (silent) {
+		linker.SetProxyAugment2ID(saylink_id);
+	}
+	else {
+		linker.SetProxyAugment1ID(saylink_id);
+	}
+
+	linker.SetProxyText(link_name.c_str());
+
+	return linker.GenerateLink();
 }

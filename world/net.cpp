@@ -85,6 +85,7 @@ union semun {
 #include "console.h"
 
 #include "../common/net/servertalk_server.h"
+#include "../zone/data_bucket.h"
 
 ClientList client_list;
 GroupLFPList LFPGroupList;
@@ -314,6 +315,9 @@ int main(int argc, char** argv) {
 		}
 	}
 
+	Log(Logs::General, Logs::World_Server, "Purging expired data buckets...");
+	database.PurgeAllDeletedDataBuckets();
+
 	Log(Logs::General, Logs::World_Server, "Loading zones..");
 	database.LoadZoneNames();
 	Log(Logs::General, Logs::World_Server, "Clearing groups..");
@@ -337,18 +341,21 @@ int main(int argc, char** argv) {
 		std::string tmp;
 		if (database.GetVariable("RuleSet", tmp)) {
 			Log(Logs::General, Logs::World_Server, "Loading rule set '%s'", tmp.c_str());
-			if (!RuleManager::Instance()->LoadRules(&database, tmp.c_str())) {
+			if (!RuleManager::Instance()->LoadRules(&database, tmp.c_str(), false)) {
 				Log(Logs::General, Logs::World_Server, "Failed to load ruleset '%s', falling back to defaults.", tmp.c_str());
 			}
 		}
 		else {
-			if (!RuleManager::Instance()->LoadRules(&database, "default")) {
+			if (!RuleManager::Instance()->LoadRules(&database, "default", false)) {
 				Log(Logs::General, Logs::World_Server, "No rule set configured, using default rules");
 			}
 			else {
 				Log(Logs::General, Logs::World_Server, "Loaded default rule set 'default'", tmp.c_str());
 			}
 		}
+
+		EQEmu::InitializeDynamicLookups();
+		Log(Logs::General, Logs::World_Server, "Initialized dynamic dictionary entries");
 	}
 
 	if (RuleB(World, ClearTempMerchantlist)) {
@@ -394,6 +401,7 @@ int main(int argc, char** argv) {
 
 	Log(Logs::General, Logs::World_Server, "Purging expired instances");
 	database.PurgeExpiredInstances();
+
 	Timer PurgeInstanceTimer(450000);
 	PurgeInstanceTimer.Start(450000);
 
@@ -467,6 +475,8 @@ int main(int argc, char** argv) {
 			connection->Handle()->RemoteIP(), connection->Handle()->RemotePort(), connection->GetUUID());
 
 		UCSLink.SetConnection(connection);
+
+		zoneserver_list.UpdateUCSServerAvailable();
 	});
 
 	server_connection->OnConnectionRemoved("UCS", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
@@ -474,6 +484,8 @@ int main(int argc, char** argv) {
 			connection->GetUUID());
 
 		UCSLink.SetConnection(nullptr);
+
+		zoneserver_list.UpdateUCSServerAvailable(false);
 	});
 
 	server_connection->OnConnectionIdentified("WebInterface", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
@@ -491,6 +503,11 @@ int main(int argc, char** argv) {
 	});
 
 	EQ::Net::EQStreamManagerOptions opts(9000, false, false);
+	opts.daybreak_options.resend_delay_ms = RuleI(Network, ResendDelayBaseMS);
+	opts.daybreak_options.resend_delay_factor = RuleR(Network, ResendDelayFactor);
+	opts.daybreak_options.resend_delay_min = RuleI(Network, ResendDelayMinMS);
+	opts.daybreak_options.resend_delay_max = RuleI(Network, ResendDelayMaxMS);
+
 	EQ::Net::EQStreamManager eqsm(opts);
 
 	//register all the patches we have avaliable with the stream identifier.
@@ -546,9 +563,9 @@ int main(int argc, char** argv) {
 
 		client_list.Process();
 
-		if (PurgeInstanceTimer.Check())
-		{
+		if (PurgeInstanceTimer.Check()) {
 			database.PurgeExpiredInstances();
+			database.PurgeAllDeletedDataBuckets();
 		}
 
 		if (EQTimeTimer.Check()) {

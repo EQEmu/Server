@@ -220,6 +220,8 @@ public:
 	void	GetRaidLeadershipInfo(uint32 rid, char* maintank = nullptr, char* assist = nullptr, char* puller = nullptr, char *marknpc = nullptr, RaidLeadershipAA_Struct* RLAA = nullptr);
 	void	SetRaidGroupLeaderInfo(uint32 gid, uint32 rid);
 
+	void    PurgeAllDeletedDataBuckets();
+
 	/* Database Conversions 'database_conversions.cpp' */
 
 	bool	CheckDatabaseConversions();
@@ -261,7 +263,8 @@ public:
 	void	SetLFP(uint32 CharID, bool LFP);
 	void	SetLoginFlags(uint32 CharID, bool LFP, bool LFG, uint8 firstlogon);
 
-	void	ClearInvSnapshots(bool use_rule = true);
+	int		CountInvSnapshots();
+	void	ClearInvSnapshots(bool from_now = false);
 
 	/* EQEmuLogSys */
 	void	LoadLogSettings(EQEmuLogSys::LogSettings* log_settings);

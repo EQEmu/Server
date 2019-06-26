@@ -122,7 +122,7 @@ bool Client::Process() {
 
 		/* I haven't naturally updated my position in 10 seconds, updating manually */
 		if (!is_client_moving && position_update_timer.Check()) {
-			SendPositionUpdate();
+			SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0);
 		}
 
 		if (mana_timer.Check())
@@ -188,10 +188,6 @@ bool Client::Process() {
 		if (IsStunned() && stunned_timer.Check())
 			Mob::UnStun();
 
-		if (!m_CheatDetectMoved) {
-			m_TimeSinceLastPositionCheck = Timer::GetCurrentTime();
-		}
-
 		if (bardsong_timer.Check() && bardsong != 0) {
 			//NOTE: this is kinda a heavy-handed check to make sure the mob still exists before
 			//doing the next pulse on them...
@@ -242,23 +238,29 @@ bool Client::Process() {
 			}
 		}
 
+		if (RuleB(Character, ActiveInvSnapshots) && time(nullptr) >= GetNextInvSnapshotTime()) {
+			if (database.SaveCharacterInvSnapshot(CharacterID())) {
+				SetNextInvSnapshot(RuleI(Character, InvSnapshotMinIntervalM));
+				Log(Logs::Moderate, Logs::Inventory, "Successful inventory snapshot taken of %s - setting next interval for %i minute%s.",
+					GetName(), RuleI(Character, InvSnapshotMinIntervalM), (RuleI(Character, InvSnapshotMinIntervalM) == 1 ? "" : "s"));
+			}
+			else {
+				SetNextInvSnapshot(RuleI(Character, InvSnapshotMinRetryM));
+				Log(Logs::Moderate, Logs::Inventory, "Failed to take inventory snapshot of %s - retrying in %i minute%s.",
+					GetName(), RuleI(Character, InvSnapshotMinRetryM), (RuleI(Character, InvSnapshotMinRetryM) == 1 ? "" : "s"));
+			}
+		}
+
 		/* Build a close range list of NPC's  */
 		if (npc_close_scan_timer.Check()) {
 			close_mobs.clear();
-
-			/* Force spawn updates when traveled far */
+			//Force spawn updates when traveled far 
 			bool force_spawn_updates = false;
 			float client_update_range = (RuleI(Range, ClientForceSpawnUpdateRange) *  RuleI(Range, ClientForceSpawnUpdateRange));
-			if (DistanceSquared(last_major_update_position, m_Position) >= client_update_range) {
-				last_major_update_position = m_Position;
-				force_spawn_updates = true;
-			}
-
 			float scan_range = (RuleI(Range, ClientNPCScan) * RuleI(Range, ClientNPCScan));
 			auto &mob_list = entity_list.GetMobList();
 			for (auto itr = mob_list.begin(); itr != mob_list.end(); ++itr) {
 				Mob* mob = itr->second;
-
 				float distance = DistanceSquared(m_Position, mob->GetPosition());
 				if (mob->IsNPC()) {
 					if (distance <= scan_range) {
@@ -268,21 +270,9 @@ bool Client::Process() {
 						close_mobs.insert(std::pair<Mob *, float>(mob, distance));
 					}
 				}
-
-				if (force_spawn_updates && mob != this) {
-
-					if (mob->is_distance_roamer) {
-						mob->SendPositionUpdateToClient(this);
-						continue;
-					}
-
-					if (distance <= client_update_range)
-						mob->SendPositionUpdateToClient(this);
-				}
-
 			}
 		}
-
+		
 		bool may_use_attacks = false;
 		/*
 			Things which prevent us from attacking:
@@ -310,7 +300,7 @@ bool Client::Process() {
 		}
 
 		if (AutoFireEnabled()) {
-			EQEmu::ItemInstance *ranged = GetInv().GetItem(EQEmu::inventory::slotRange);
+			EQEmu::ItemInstance *ranged = GetInv().GetItem(EQEmu::invslot::slotRange);
 			if (ranged)
 			{
 				if (ranged->GetItem() && ranged->GetItem()->ItemType == EQEmu::item::ItemTypeBow) {
@@ -355,25 +345,22 @@ bool Client::Process() {
 		}
 
 		Mob *auto_attack_target = GetTarget();
-		if (auto_attack && auto_attack_target != nullptr && may_use_attacks && attack_timer.Check())
-		{
+		if (auto_attack && auto_attack_target != nullptr && may_use_attacks && attack_timer.Check()) {
 			//check if change
 			//only check on primary attack.. sorry offhand you gotta wait!
-			if (aa_los_them_mob)
-			{
+			if (aa_los_them_mob) {
 				if (auto_attack_target != aa_los_them_mob ||
 					m_AutoAttackPosition.x != GetX() ||
 					m_AutoAttackPosition.y != GetY() ||
 					m_AutoAttackPosition.z != GetZ() ||
 					m_AutoAttackTargetLocation.x != aa_los_them_mob->GetX() ||
 					m_AutoAttackTargetLocation.y != aa_los_them_mob->GetY() ||
-					m_AutoAttackTargetLocation.z != aa_los_them_mob->GetZ())
-				{
-					aa_los_them_mob = auto_attack_target;
-					m_AutoAttackPosition = GetPosition();
+					m_AutoAttackTargetLocation.z != aa_los_them_mob->GetZ()) {
+					aa_los_them_mob            = auto_attack_target;
+					m_AutoAttackPosition       = GetPosition();
 					m_AutoAttackTargetLocation = glm::vec3(aa_los_them_mob->GetPosition());
-					los_status = CheckLosFN(auto_attack_target);
-					los_status_facing = IsFacingMob(aa_los_them_mob);
+					los_status                 = CheckLosFN(auto_attack_target);
+					los_status_facing          = IsFacingMob(aa_los_them_mob);
 				}
 				// If only our heading changes, we can skip the CheckLosFN call
 				// but above we still need to update los_status_facing
@@ -382,36 +369,33 @@ bool Client::Process() {
 					los_status_facing = IsFacingMob(aa_los_them_mob);
 				}
 			}
-			else
-			{
-				aa_los_them_mob = auto_attack_target;
-				m_AutoAttackPosition = GetPosition();
+			else {
+				aa_los_them_mob            = auto_attack_target;
+				m_AutoAttackPosition       = GetPosition();
 				m_AutoAttackTargetLocation = glm::vec3(aa_los_them_mob->GetPosition());
-				los_status = CheckLosFN(auto_attack_target);
-				los_status_facing = IsFacingMob(aa_los_them_mob);
+				los_status                 = CheckLosFN(auto_attack_target);
+				los_status_facing          = IsFacingMob(aa_los_them_mob);
 			}
 
-			if (!CombatRange(auto_attack_target))
-			{
+			if (!CombatRange(auto_attack_target)) {
 				Message_StringID(MT_TooFarAway, TARGET_TOO_FAR);
 			}
-			else if (auto_attack_target == this)
-			{
+			else if (auto_attack_target == this) {
 				Message_StringID(MT_TooFarAway, TRY_ATTACKING_SOMEONE);
 			}
-			else if (!los_status || !los_status_facing)
-			{
+			else if (!los_status || !los_status_facing) {
 				//you can't see your target
 			}
 			else if (auto_attack_target->GetHP() > -10) // -10 so we can watch people bleed in PvP
 			{
-				EQEmu::ItemInstance *wpn = GetInv().GetItem(EQEmu::inventory::slotPrimary);
-				TryWeaponProc(wpn, auto_attack_target, EQEmu::inventory::slotPrimary);
-				TriggerDefensiveProcs(auto_attack_target, EQEmu::inventory::slotPrimary, false);
+				EQEmu::ItemInstance *wpn = GetInv().GetItem(EQEmu::invslot::slotPrimary);
+				TryWeaponProc(wpn, auto_attack_target, EQEmu::invslot::slotPrimary);
+				TriggerDefensiveProcs(auto_attack_target, EQEmu::invslot::slotPrimary, false);
 
-				DoAttackRounds(auto_attack_target, EQEmu::inventory::slotPrimary);
-				if (CheckAATimer(aaTimerRampage))
+				DoAttackRounds(auto_attack_target, EQEmu::invslot::slotPrimary);
+				if (CheckAATimer(aaTimerRampage)) {
 					entity_list.AEAttack(this, 30);
+				}
 			}
 		}
 
@@ -445,36 +429,11 @@ bool Client::Process() {
 			else if (auto_attack_target->GetHP() > -10) {
 				CheckIncreaseSkill(EQEmu::skills::SkillDualWield, auto_attack_target, -10);
 				if (CheckDualWield()) {
-					EQEmu::ItemInstance *wpn = GetInv().GetItem(EQEmu::inventory::slotSecondary);
-					TryWeaponProc(wpn, auto_attack_target, EQEmu::inventory::slotSecondary);
+					EQEmu::ItemInstance *wpn = GetInv().GetItem(EQEmu::invslot::slotSecondary);
+					TryWeaponProc(wpn, auto_attack_target, EQEmu::invslot::slotSecondary);
 
-					DoAttackRounds(auto_attack_target, EQEmu::inventory::slotSecondary);
+					DoAttackRounds(auto_attack_target, EQEmu::invslot::slotSecondary);
 				}
-			}
-		}
-
-		if (position_timer.Check()) {
-			if (IsAIControlled())
-			{
-				if (!IsMoving())
-				{
-					animation = 0;
-					m_Delta = glm::vec4(0.0f, 0.0f, 0.0f, m_Delta.w);
-					SendPositionUpdate(2);
-				}
-			}
-
-			// Send a position packet every 8 seconds - if not done, other clients
-			// see this char disappear after 10-12 seconds of inactivity
-			if (position_timer_counter >= 36) { // Approx. 4 ticks per second
-				entity_list.SendPositionUpdates(this, pLastUpdateWZ, RuleI(Range, MobPositionUpdates), GetTarget(), true);
-				pLastUpdate = Timer::GetCurrentTime();
-				pLastUpdateWZ = pLastUpdate;
-				position_timer_counter = 0;
-			}
-			else {
-				pLastUpdate = Timer::GetCurrentTime();
-				position_timer_counter++;
 			}
 		}
 
@@ -622,9 +581,8 @@ bool Client::Process() {
 	EQApplicationPacket *app = nullptr;
 	if (!eqs->CheckState(CLOSING))
 	{
-		while (ret && (app = (EQApplicationPacket *)eqs->PopPacket())) {
-			if (app)
-				ret = HandlePacket(app);
+		while (app = eqs->PopPacket()) {
+			HandlePacket(app);
 			safe_delete(app);
 		}
 	}
@@ -777,7 +735,7 @@ void Client::BulkSendInventoryItems()
 {
 	// LINKDEAD TRADE ITEMS
 	// Move trade slot items back into normal inventory..need them there now for the proceeding validity checks
-	for (int16 slot_id = EQEmu::legacy::TRADE_BEGIN; slot_id <= EQEmu::legacy::TRADE_END; slot_id++) {
+	for (int16 slot_id = EQEmu::invslot::TRADE_BEGIN; slot_id <= EQEmu::invslot::TRADE_END; slot_id++) {
 		EQEmu::ItemInstance* inst = m_inv.PopItem(slot_id);
 		if(inst) {
 			bool is_arrow = (inst->GetItem()->ItemType == EQEmu::item::ItemTypeArrow) ? true : false;
@@ -803,7 +761,7 @@ void Client::BulkSendInventoryItems()
 	EQEmu::OutBuffer::pos_type last_pos = ob.tellp();
 
 	// Possessions items
-	for (int16 slot_id = EQEmu::inventory::slotBegin; slot_id < EQEmu::legacy::TYPE_POSSESSIONS_SIZE; slot_id++) {
+	for (int16 slot_id = EQEmu::invslot::POSSESSIONS_BEGIN; slot_id <= EQEmu::invslot::POSSESSIONS_END; slot_id++) {
 		const EQEmu::ItemInstance* inst = m_inv[slot_id];
 		if (!inst)
 			continue;
@@ -816,21 +774,8 @@ void Client::BulkSendInventoryItems()
 		last_pos = ob.tellp();
 	}
 
-	// PowerSource item
-	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF) {
-		const EQEmu::ItemInstance* inst = m_inv[EQEmu::inventory::slotPowerSource];
-		if (inst) {
-			inst->Serialize(ob, EQEmu::inventory::slotPowerSource);
-
-			if (ob.tellp() == last_pos)
-				Log(Logs::General, Logs::Inventory, "Serialization failed on item slot %d during BulkSendInventoryItems.  Item skipped.", EQEmu::inventory::slotPowerSource);
-
-			last_pos = ob.tellp();
-		}
-	}
-
 	// Bank items
-	for (int16 slot_id = EQEmu::legacy::BANK_BEGIN; slot_id <= EQEmu::legacy::BANK_END; slot_id++) {
+	for (int16 slot_id = EQEmu::invslot::BANK_BEGIN; slot_id <= EQEmu::invslot::BANK_END; slot_id++) {
 		const EQEmu::ItemInstance* inst = m_inv[slot_id];
 		if (!inst)
 			continue;
@@ -844,7 +789,7 @@ void Client::BulkSendInventoryItems()
 	}
 
 	// SharedBank items
-	for (int16 slot_id = EQEmu::legacy::SHARED_BANK_BEGIN; slot_id <= EQEmu::legacy::SHARED_BANK_END; slot_id++) {
+	for (int16 slot_id = EQEmu::invslot::SHARED_BANK_BEGIN; slot_id <= EQEmu::invslot::SHARED_BANK_END; slot_id++) {
 		const EQEmu::ItemInstance* inst = m_inv[slot_id];
 		if (!inst)
 			continue;
@@ -867,7 +812,7 @@ void Client::BulkSendInventoryItems()
 void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 	const EQEmu::ItemData* handyitem = nullptr;
 	uint32 numItemSlots = 80; //The max number of items passed in the transaction.
-	if (m_ClientVersionBit & EQEmu::versions::bit_RoFAndLater) { // RoF+ can send 200 items
+	if (m_ClientVersionBit & EQEmu::versions::maskRoFAndLater) { // RoF+ can send 200 items
 		numItemSlots = 200;
 	}
 	const EQEmu::ItemData *item = nullptr;
@@ -887,7 +832,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 	uint8 handychance = 0;
 	for (itr = merlist.begin(); itr != merlist.end() && i <= numItemSlots; ++itr) {
 		MerchantList ml = *itr;
-		if (merch->CastToNPC()->GetMerchantProbability() > ml.probability)
+		if (ml.probability != 100 && zone->random.Int(1, 100) > ml.probability)
 			continue;
 
 		if (GetLevel() < ml.level_required)
@@ -1134,7 +1079,7 @@ void Client::OPMemorizeSpell(const EQApplicationPacket* app)
 	switch(memspell->scribing)
 	{
 		case memSpellScribing:	{	// scribing spell to book
-			const EQEmu::ItemInstance* inst = m_inv[EQEmu::inventory::slotCursor];
+			const EQEmu::ItemInstance* inst = m_inv[EQEmu::invslot::slotCursor];
 
 			if (inst && inst->IsClassCommon())
 			{
@@ -1148,7 +1093,7 @@ void Client::OPMemorizeSpell(const EQApplicationPacket* app)
 				if(item && item->Scroll.Effect == (int32)(memspell->spell_id))
 				{
 					ScribeSpell(memspell->spell_id, memspell->slot);
-					DeleteItemInInventory(EQEmu::inventory::slotCursor, 1, true);
+					DeleteItemInInventory(EQEmu::invslot::slotCursor, 1, true);
 				}
 				else
 					Message(0,"Scribing spell: inst exists but item does not or spell ids do not match.");
@@ -1187,7 +1132,7 @@ void Client::CancelSneakHide()
 		// The later clients send back a OP_Hide (this has a size but data is 0)
 		// as well as OP_SpawnAppearance with AT_Invis and one with AT_Sneak
 		// So we don't have to handle any of those flags
-		if (ClientVersionBit() & EQEmu::versions::bit_SoFAndEarlier)
+		if (ClientVersionBit() & EQEmu::versions::maskSoFAndEarlier)
 			sneaking = false;
 	}
 }
@@ -1541,9 +1486,11 @@ void Client::OPGMTraining(const EQApplicationPacket *app)
 		return;
 
 	//you can only use your own trainer, client enforces this, but why trust it
-	int trains_class = pTrainer->GetClass() - (WARRIORGM - WARRIOR);
-	if(GetClass() != trains_class)
-		return;
+	if (!RuleB(Character, AllowCrossClassTrainers)) {
+		int trains_class = pTrainer->GetClass() - (WARRIORGM - WARRIOR);
+		if (GetClass() != trains_class)
+			return;
+	}
 
 	//you have to be somewhat close to a trainer to be properly using them
 	if(DistanceSquared(m_Position,pTrainer->GetPosition()) > USE_NPC_RANGE2)
@@ -1594,9 +1541,11 @@ void Client::OPGMEndTraining(const EQApplicationPacket *app)
 		return;
 
 	//you can only use your own trainer, client enforces this, but why trust it
-	int trains_class = pTrainer->GetClass() - (WARRIORGM - WARRIOR);
-	if(GetClass() != trains_class)
-		return;
+	if (!RuleB(Character, AllowCrossClassTrainers)) {
+		int trains_class = pTrainer->GetClass() - (WARRIORGM - WARRIOR);
+		if (GetClass() != trains_class)
+			return;
+	}
 
 	//you have to be somewhat close to a trainer to be properly using them
 	if(DistanceSquared(m_Position, pTrainer->GetPosition()) > USE_NPC_RANGE2)
@@ -1623,9 +1572,11 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 		return;
 
 	//you can only use your own trainer, client enforces this, but why trust it
-	int trains_class = pTrainer->GetClass() - (WARRIORGM - WARRIOR);
-	if(GetClass() != trains_class)
-		return;
+	if (!RuleB(Character, AllowCrossClassTrainers)) {
+		int trains_class = pTrainer->GetClass() - (WARRIORGM - WARRIOR);
+		if (GetClass() != trains_class)
+			return;
+	}
 
 	//you have to be somewhat close to a trainer to be properly using them
 	if(DistanceSquared(m_Position, pTrainer->GetPosition()) > USE_NPC_RANGE2)
@@ -1928,12 +1879,11 @@ void Client::DoEnduranceUpkeep() {
 		SetEndurUpkeep(false);
 }
 
-void Client::CalcRestState() {
-
+void Client::CalcRestState()
+{
 	// This method calculates rest state HP and mana regeneration.
 	// The client must have been out of combat for RuleI(Character, RestRegenTimeToActivate) seconds,
 	// must be sitting down, and must not have any detrimental spells affecting them.
-	//
 	if(!RuleB(Character, RestRegenEnabled))
 		return;
 
@@ -1945,6 +1895,9 @@ void Client::CalcRestState() {
 	if(!rest_timer.Check(false))
 		return;
 
+	// so we don't have aggro, our timer has expired, we do not want this to cause issues
+	m_pp.RestTimer = 0;
+
 	uint32 buff_count = GetMaxTotalSlots();
 	for (unsigned int j = 0; j < buff_count; j++) {
 		if(buffs[j].spellid != SPELL_UNKNOWN) {
@@ -1955,62 +1908,44 @@ void Client::CalcRestState() {
 	}
 
 	ooc_regen = true;
-
 }
 
 void Client::DoTracking()
 {
-	if(TrackingID == 0)
+	if (TrackingID == 0)
 		return;
 
 	Mob *m = entity_list.GetMob(TrackingID);
 
-	if(!m || m->IsCorpse())
-	{
+	if (!m || m->IsCorpse()) {
 		Message_StringID(MT_Skills, TRACK_LOST_TARGET);
-
 		TrackingID = 0;
-
 		return;
 	}
 
 	float RelativeHeading = GetHeading() - CalculateHeadingToTarget(m->GetX(), m->GetY());
 
-	if(RelativeHeading < 0)
-		RelativeHeading += 256;
+	if (RelativeHeading < 0)
+		RelativeHeading += 512;
 
-	if((RelativeHeading <= 16) || (RelativeHeading >= 240))
-	{
+	if (RelativeHeading > 480)
 		Message_StringID(MT_Skills, TRACK_STRAIGHT_AHEAD, m->GetCleanName());
-	}
-	else if((RelativeHeading > 16) && (RelativeHeading <= 48))
-	{
-		Message_StringID(MT_Skills, TRACK_AHEAD_AND_TO, m->GetCleanName(), "right");
-	}
-	else if((RelativeHeading > 48) && (RelativeHeading <= 80))
-	{
-		Message_StringID(MT_Skills, TRACK_TO_THE, m->GetCleanName(), "right");
-	}
-	else if((RelativeHeading > 80) && (RelativeHeading <= 112))
-	{
-		Message_StringID(MT_Skills, TRACK_BEHIND_AND_TO, m->GetCleanName(), "right");
-	}
-	else if((RelativeHeading > 112) && (RelativeHeading <= 144))
-	{
-		Message_StringID(MT_Skills, TRACK_BEHIND_YOU, m->GetCleanName());
-	}
-	else if((RelativeHeading > 144) && (RelativeHeading <= 176))
-	{
-		Message_StringID(MT_Skills, TRACK_BEHIND_AND_TO, m->GetCleanName(), "left");
-	}
-	else if((RelativeHeading > 176) && (RelativeHeading <= 208))
-	{
-		Message_StringID(MT_Skills, TRACK_TO_THE, m->GetCleanName(), "left");
-	}
-	else if((RelativeHeading > 208) && (RelativeHeading < 240))
-	{
+	else if (RelativeHeading > 416)
 		Message_StringID(MT_Skills, TRACK_AHEAD_AND_TO, m->GetCleanName(), "left");
-	}
+	else if (RelativeHeading > 352)
+		Message_StringID(MT_Skills, TRACK_TO_THE, m->GetCleanName(), "left");
+	else if (RelativeHeading > 288)
+		Message_StringID(MT_Skills, TRACK_BEHIND_AND_TO, m->GetCleanName(), "left");
+	else if (RelativeHeading > 224)
+		Message_StringID(MT_Skills, TRACK_BEHIND_YOU, m->GetCleanName());
+	else if (RelativeHeading > 160)
+		Message_StringID(MT_Skills, TRACK_BEHIND_AND_TO, m->GetCleanName(), "right");
+	else if (RelativeHeading > 96)
+		Message_StringID(MT_Skills, TRACK_TO_THE, m->GetCleanName(), "right");
+	else if (RelativeHeading > 32)
+		Message_StringID(MT_Skills, TRACK_AHEAD_AND_TO, m->GetCleanName(), "right");
+	else if (RelativeHeading >= 0)
+		Message_StringID(MT_Skills, TRACK_STRAIGHT_AHEAD, m->GetCleanName());
 }
 
 void Client::HandleRespawnFromHover(uint32 Option)
@@ -2194,7 +2129,7 @@ void Client::ClearHover()
 	entity_list.QueueClients(this, outapp, false);
 	safe_delete(outapp);
 
-	if (IsClient() && CastToClient()->ClientVersionBit() & EQEmu::versions::bit_UFAndLater)
+	if (IsClient() && CastToClient()->ClientVersionBit() & EQEmu::versions::maskUFAndLater)
 	{
 		EQApplicationPacket *outapp = MakeBuffsPacket(false);
 		CastToClient()->FastQueuePacket(&outapp);

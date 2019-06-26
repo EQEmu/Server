@@ -51,6 +51,7 @@ protected:
 	EmuOpcode emu_opcode;
 
 	EQPacket(EmuOpcode opcode, const unsigned char *buf, const uint32 len);
+	EQPacket(EmuOpcode opcode, SerializeBuffer &buf) : BasePacket(buf), emu_opcode(opcode) { };
 //	EQPacket(const EQPacket &p) { }
 	EQPacket() { emu_opcode=OP_Unknown; pBuffer=nullptr; size=0; }
 
@@ -103,6 +104,8 @@ public:
 	EQApplicationPacket(const EmuOpcode op, const uint32 len) : EQPacket(op, nullptr, len), opcode_bypass(0)
 		{ app_opcode_size = GetExecutablePlatform() == ExePlatformUCS ? 1 : 2; }
 	EQApplicationPacket(const EmuOpcode op, const unsigned char *buf, const uint32 len) : EQPacket(op, buf, len), opcode_bypass(0)
+		{ app_opcode_size = GetExecutablePlatform() == ExePlatformUCS ? 1 : 2; }
+	EQApplicationPacket(const EmuOpcode op, SerializeBuffer &buf) : EQPacket(op, buf), opcode_bypass(0)
 		{ app_opcode_size = GetExecutablePlatform() == ExePlatformUCS ? 1 : 2; }
 	bool combine(const EQApplicationPacket *rhs);
 	uint32 serialize (uint16 opcode, unsigned char *dest) const;

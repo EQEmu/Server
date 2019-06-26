@@ -370,7 +370,29 @@
 9114|2017_07_22_aura.sql|SHOW TABLES LIKE 'auras'|empty|
 9115|2017_10_28_traps.sql|SHOW COLUMNS FROM `traps` LIKE 'triggered_number'|empty|
 9116|2017_12_16_GroundSpawn_Respawn_Timer.sql|SHOW COLUMNS FROM `ground_spawns` WHERE Field = 'respawn_timer' AND Type = 'int(11) unsigned'|empty|
-9117|2017_12_25_AccountTable.sql|SHOW COLUMNS FROM `ground_spawns` WHERE Field = 'ls_id' AND Type = 'varchar(64)'|empty|
+9117|2018_02_01_NPC_Spells_Min_Max_HP.sql|SHOW COLUMNS FROM `npc_spells_entries` LIKE 'min_hp'|empty|
+9118|2018_02_04_Charm_Stats.sql|SHOW COLUMNS FROM `npc_types` LIKE 'charm_ac'|empty|
+9119|2018_02_10_GlobalLoot.sql|SHOW TABLES LIKE 'global_loot'|empty|
+9120|2018_02_13_Heading.sql|SELECT value FROM variables WHERE varname = 'fixed_heading'|empty|
+9121|2018_02_18_bug_reports.sql|SHOW TABLES LIKE 'bug_reports'|empty|
+9122|2018_03_07_ucs_command.sql|SELECT * FROM `command_settings` WHERE `command` LIKE 'ucs'|empty|
+9123|2018_07_07_data_buckets.sql|SHOW TABLES LIKE 'data_buckets'|empty|
+9124|2018_07_09_tasks.sql|SHOW COLUMNS FROM `tasks` LIKE 'type'|empty|
+9125|2018_07_20_task_emote.sql|SHOW COLUMNS FROM `tasks` LIKE 'completion_emote'|empty|
+9126|2018_09_07_FastRegen.sql|SHOW COLUMNS FROM `zone` LIKE 'fast_regen_hp'|empty|
+9127|2018_09_07_NPCMaxAggroDist.sql|SHOW COLUMNS FROM `zone` LIKE 'npc_max_aggro_dist'|empty|
+9128|2018_08_13_inventory_version_update.sql|SHOW TABLES LIKE 'inventory_version'|not_empty|
+9129|2018_08_13_inventory_update.sql|SHOW TABLES LIKE 'inventory_versions'|empty|
+9130|2018_11_25_name_filter_update.sql|SHOW COLUMNS FROM `name_filter` LIKE 'id'|empty|
+9131|2018_12_13_spell_buckets.sql|SHOW TABLES LIKE 'spell_buckets'|empty|
+9132|2018_12_16_global_base_scaling.sql|SHOW TABLES LIKE 'npc_scale_global_base'|empty|
+9133|2018_11_25_StuckBehavior.sql|SHOW COLUMNS FROM `npc_types` LIKE 'stuck_behavior'|empty|
+9134|2019_01_04_update_global_base_scaling.sql|SELECT * FROM db_version WHERE version >= 9134|empty|
+9135|2019_01_10_multi_version_spawns.sql|SHOW COLUMNS FROM `spawn2` LIKE 'version'|contains|unsigned|
+9136|2019_02_04_profanity_command.sql|SHOW TABLES LIKE 'profanity_list'|empty|
+9137|2018_12_12_client_faction_tables.sql|SHOW TABLES LIKE 'faction_base_data'|empty|
+9138|2018_12_12_convert_to_client_functions.sql|SELECT `id` FROM `faction_list` WHERE `id` > 4999|empty|
+9139|2019_03_25_optional_npc_model.sql|SHOW COLUMNS FROM `npc_types` LIKE 'model'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

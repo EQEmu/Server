@@ -308,14 +308,9 @@ void Lua_NPC::NextGuardPosition() {
 	self->NextGuardPosition();
 }
 
-void Lua_NPC::SaveGuardSpot() {
+void Lua_NPC::SaveGuardSpot(float x, float y, float z, float heading) {
 	Lua_Safe_Call_Void();
-	self->SaveGuardSpot();
-}
-
-void Lua_NPC::SaveGuardSpot(bool clear) {
-	Lua_Safe_Call_Void();
-	self->SaveGuardSpot(clear);
+	self->SaveGuardSpot(glm::vec4(x, y, z, heading));
 }
 
 bool Lua_NPC::IsGuarding() {
@@ -331,6 +326,36 @@ void Lua_NPC::AI_SetRoambox(float dist, float max_x, float min_x, float max_y, f
 void Lua_NPC::AI_SetRoambox(float dist, float max_x, float min_x, float max_y, float min_y, uint32 delay, uint32 mindelay) {
 	Lua_Safe_Call_Void();
 	self->AI_SetRoambox(dist, max_x, min_x, max_y, min_y, delay, mindelay);
+}
+
+void Lua_NPC::SetFollowID(int id) {
+	Lua_Safe_Call_Void();
+	self->SetFollowID(id);
+}
+
+void Lua_NPC::SetFollowDistance(int dist) {
+	Lua_Safe_Call_Void();
+	self->SetFollowDistance(dist);
+}
+
+void Lua_NPC::SetFollowCanRun(bool v) {
+	Lua_Safe_Call_Void();
+	self->SetFollowCanRun(v);
+}
+
+int Lua_NPC::GetFollowID() {
+	Lua_Safe_Call_Int();
+	return self->GetFollowID();
+}
+
+int Lua_NPC::GetFollowDistance() {
+	Lua_Safe_Call_Int();
+	return self->GetFollowDistance();
+}
+
+bool Lua_NPC::GetFollowCanRun() {
+	Lua_Safe_Call_Bool();
+	return self->GetFollowCanRun();
 }
 
 int Lua_NPC::GetNPCSpellsID() {
@@ -420,7 +445,12 @@ void Lua_NPC::ModifyNPCStat(const char *stat, const char *value) {
 
 void Lua_NPC::AddAISpell(int priority, int spell_id, int type, int mana_cost, int recast_delay, int resist_adjust) {
 	Lua_Safe_Call_Void();
-	self->AddSpellToNPCList(priority, spell_id, type, mana_cost, recast_delay, resist_adjust);
+	self->AddSpellToNPCList(priority, spell_id, type, mana_cost, recast_delay, resist_adjust, 0, 0);
+}
+
+void Lua_NPC::AddAISpell(int priority, int spell_id, int type, int mana_cost, int recast_delay, int resist_adjust, int min_hp, int max_hp) {
+	Lua_Safe_Call_Void();
+	self->AddSpellToNPCList(priority, spell_id, type, mana_cost, recast_delay, resist_adjust, min_hp, max_hp);
 }
 
 void Lua_NPC::RemoveAISpell(int spell_id) {
@@ -486,16 +516,6 @@ void Lua_NPC::MerchantOpenShop() {
 void Lua_NPC::MerchantCloseShop() {
 	Lua_Safe_Call_Void();
 	self->MerchantCloseShop();
-}
-
-void Lua_NPC::SetMerchantProbability(uint8 amt) {
-	Lua_Safe_Call_Void();
-	self->SetMerchantProbability(amt);
-}
-
-uint8 Lua_NPC::GetMerchantProbability() {
-	Lua_Safe_Call_Int();
-	return self->GetMerchantProbability();
 }
 
 int Lua_NPC::GetRawAC() {
@@ -572,11 +592,17 @@ luabind::scope lua_register_npc() {
 		.def("PauseWandering", (void(Lua_NPC::*)(int))&Lua_NPC::PauseWandering)
 		.def("MoveTo", (void(Lua_NPC::*)(float,float,float,float,bool))&Lua_NPC::MoveTo)
 		.def("NextGuardPosition", (void(Lua_NPC::*)(void))&Lua_NPC::NextGuardPosition)
-		.def("SaveGuardSpot", (void(Lua_NPC::*)(void))&Lua_NPC::SaveGuardSpot)
-		.def("SaveGuardSpot", (void(Lua_NPC::*)(bool))&Lua_NPC::SaveGuardSpot)
+		.def("SaveGuardSpot", (void(Lua_NPC::*)(float,float,float,float))&Lua_NPC::SaveGuardSpot)
 		.def("IsGuarding", (bool(Lua_NPC::*)(void))&Lua_NPC::IsGuarding)
 		.def("AI_SetRoambox", (void(Lua_NPC::*)(float,float,float,float,float))&Lua_NPC::AI_SetRoambox)
 		.def("AI_SetRoambox", (void(Lua_NPC::*)(float,float,float,float,float,uint32,uint32))&Lua_NPC::AI_SetRoambox)
+		.def("SetFollowID", (void(Lua_NPC::*)(int))&Lua_NPC::SetFollowID)
+		.def("SetFollowDistance", (void(Lua_NPC::*)(int))&Lua_NPC::SetFollowDistance)
+		.def("SetFollowCanRun", (void(Lua_NPC::*)(bool))&Lua_NPC::SetFollowCanRun)
+		.def("GetFollowID", (int(Lua_NPC::*)(void))&Lua_NPC::GetFollowID)
+		.def("GetFollowDistance", (int(Lua_NPC::*)(void))&Lua_NPC::GetFollowDistance)
+		.def("GetFollowCanRun", (bool(Lua_NPC::*)(void))&Lua_NPC::GetFollowCanRun)
+		.def("GetNPCSpellsID", (int(Lua_NPC::*)(void))&Lua_NPC::GetNPCSpellsID)
 		.def("GetNPCSpellsID", (int(Lua_NPC::*)(void))&Lua_NPC::GetNPCSpellsID)
 		.def("GetSpawnPointID", (int(Lua_NPC::*)(void))&Lua_NPC::GetSpawnPointID)
 		.def("GetSpawnPointX", (float(Lua_NPC::*)(void))&Lua_NPC::GetSpawnPointX)
@@ -595,6 +621,7 @@ luabind::scope lua_register_npc() {
 		.def("SetSwarmTarget", (void(Lua_NPC::*)(int))&Lua_NPC::SetSwarmTarget)
 		.def("ModifyNPCStat", (void(Lua_NPC::*)(const char*,const char*))&Lua_NPC::ModifyNPCStat)
 		.def("AddAISpell", (void(Lua_NPC::*)(int,int,int,int,int,int))&Lua_NPC::AddAISpell)
+		.def("AddAISpell", (void(Lua_NPC::*)(int,int,int,int,int,int,int,int))&Lua_NPC::AddAISpell)
 		.def("RemoveAISpell", (void(Lua_NPC::*)(int))&Lua_NPC::RemoveAISpell)
 		.def("SetSpellFocusDMG", (void(Lua_NPC::*)(int))&Lua_NPC::SetSpellFocusDMG)
 		.def("SetSpellFocusHeal", (void(Lua_NPC::*)(int))&Lua_NPC::SetSpellFocusHeal)
@@ -608,8 +635,6 @@ luabind::scope lua_register_npc() {
 		.def("GetScore", (int(Lua_NPC::*)(void))&Lua_NPC::GetScore)
 		.def("MerchantOpenShop", (void(Lua_NPC::*)(void))&Lua_NPC::MerchantOpenShop)
 		.def("MerchantCloseShop", (void(Lua_NPC::*)(void))&Lua_NPC::MerchantCloseShop)
-		.def("SetMerchantProbability", (void(Lua_NPC::*)(void))&Lua_NPC::SetMerchantProbability)
-		.def("GetMerchantProbability", (uint8(Lua_NPC::*)(void))&Lua_NPC::GetMerchantProbability)
 		.def("GetRawAC", (int(Lua_NPC::*)(void))&Lua_NPC::GetRawAC)
 		.def("GetAvoidanceRating", &Lua_NPC::GetAvoidanceRating);
 }

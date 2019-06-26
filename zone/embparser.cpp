@@ -1046,7 +1046,7 @@ void PerlembParser::ExportMobVariables(bool isPlayerQuest, bool isGlobalPlayerQu
 		if (mob && npcmob && mob->IsClient()) {
 			Client* client = mob->CastToClient();
 
-			fac = client->GetFactionLevel(client->CharacterID(), npcmob->GetID(), client->GetRace(),
+			fac = client->GetFactionLevel(client->CharacterID(), npcmob->GetID(), client->GetFactionRace(),
 				client->GetClass(), client->GetDeity(), npcmob->GetPrimaryFaction(), npcmob);
 		}
 	}
@@ -1128,9 +1128,9 @@ void PerlembParser::ExportItemVariables(std::string &package_name, Mob *mob) {
 		std::string hashname = package_name + std::string("::oncursor");
 		perl->eval(std::string("%").append(hashname).append(" = ();").c_str());
 		char *hi_decl = nullptr;
-		int itemid = mob->CastToClient()->GetItemIDAt(30);
+		int itemid = mob->CastToClient()->GetItemIDAt(EQEmu::invslot::slotCursor);
 		if(!HASITEM_ISNULLITEM(itemid)) {
-			MakeAnyLenString(&hi_decl, "push (@{$%s{%d}},%d);",hashname.c_str(), itemid, 30);
+			MakeAnyLenString(&hi_decl, "push (@{$%s{%d}},%d);",hashname.c_str(), itemid, EQEmu::invslot::slotCursor);
 			perl->eval(hi_decl);
 			safe_delete_array(hi_decl);
 		}

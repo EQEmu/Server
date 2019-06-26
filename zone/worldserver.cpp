@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include <stdio.h>
 #include <iomanip>
 #include <stdarg.h>
+#include <limits.h>
 
 #ifdef _WINDOWS
 #include <process.h>
@@ -35,6 +36,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/misc_functions.h"
 #include "../common/rulesys.h"
 #include "../common/servertalk.h"
+#include "../common/profanity_manager.h"
 
 #include "client.h"
 #include "corpse.h"
@@ -790,6 +792,11 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		if (zone && zone->is_zone_time_localized) {
 			Log(Logs::General, Logs::Zone_Server, "Received request to sync time from world, but our time is localized currently");
 		}
+		break;
+	}
+	case ServerOP_RefreshCensorship: {
+		if (!EQEmu::ProfanityManager::LoadProfanityList(&database))
+			Log(Logs::General, Logs::Error, "Received request to refresh the profanity list..but, the action failed");
 		break;
 	}
 	case ServerOP_ChangeWID: {
@@ -1764,9 +1771,14 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-	case ServerOP_ReloadRules:
-	{
-		RuleManager::Instance()->LoadRules(&database, RuleManager::Instance()->GetActiveRuleset());
+	case ServerOP_ReloadRules: {
+		worldserver.SendEmoteMessage(
+				0, 0, 0, 15,
+				"Rules reloaded for Zone: '%s' Instance ID: %u",
+				zone->GetLongName(),
+				zone->GetInstanceID()
+		);
+		RuleManager::Instance()->LoadRules(&database, RuleManager::Instance()->GetActiveRuleset(), true);
 		break;
 	}
 	case ServerOP_ReloadLogs: {
@@ -1811,6 +1823,13 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			break;
 		}
 
+		break;
+	}
+	case ServerOP_UCSServerStatusReply:
+	{
+		auto ucsss = (UCSServerStatus_Struct*)pack->pBuffer;
+		if (zone)
+			zone->SetUCSServerAvailable((ucsss->available != 0), ucsss->timestamp);
 		break;
 	}
 	case ServerOP_CZSetEntityVariableByNPCTypeID:

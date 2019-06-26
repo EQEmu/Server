@@ -81,6 +81,7 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include "quest_parser_collection.h"
 #include "string_ids.h"
 #include "worldserver.h"
+#include "fastmath.h"
 
 #include <assert.h>
 #include <math.h>
@@ -99,13 +100,15 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include "bot.h"
 #endif
 
+#include "mob_movement_manager.h"
 
 
 extern Zone* zone;
 extern volatile bool is_zone_loaded;
 extern WorldServer worldserver;
+extern FastMath g_Math;
 
-using EQEmu::CastingSlot;
+using EQEmu::spells::CastingSlot;
 
 // this is run constantly for every mob
 void Mob::SpellProcess()
@@ -279,7 +282,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 				return(false);
 			}
 		}
-		if (itm && (itm->GetItem()->Click.Type == EQEmu::item::ItemEffectEquipClick) && !(item_slot <= EQEmu::inventory::slotAmmo || item_slot == EQEmu::inventory::slotPowerSource)){
+		if (itm && (itm->GetItem()->Click.Type == EQEmu::item::ItemEffectEquipClick) && item_slot > EQEmu::invslot::EQUIPMENT_END){
 			if (CastToClient()->ClientVersion() < EQEmu::versions::ClientVersion::SoF) {
 				// They are attempting to cast a must equip clicky without having it equipped
 				Log(Logs::General, Logs::Error, "HACKER: %s (account: %s) attempted to click an equip-only effect on item %s (id: %d) without equiping it!", CastToClient()->GetCleanName(), CastToClient()->AccountName(), itm->GetItem()->Name, itm->GetItem()->ID);
@@ -303,8 +306,9 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	}
 
 	//To prevent NPC ghosting when spells are cast from scripts
-	if (IsNPC() && IsMoving() && cast_time > 0)
-		SendPosition();
+	if (IsNPC() && IsMoving() && cast_time > 0) {
+		StopNavigation();
+	}
 
 	if(resist_adjust)
 	{
@@ -451,7 +455,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 			{
 				mana_cost = 0;
 			} else {
-				Log(Logs::Detail, Logs::Spells, "Spell Error not enough mana spell=%d mymana=%d cost=%d\n", GetName(), spell_id, my_curmana, mana_cost);
+				Log(Logs::Detail, Logs::Spells, "Spell Error not enough mana spell=%d mymana=%d cost=%d\n", spell_id, my_curmana, mana_cost);
 				if(IsClient()) {
 					//clients produce messages... npcs should not for this case
 					Message_StringID(13, INSUFFICIENT_MANA);
@@ -1208,7 +1212,10 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 
 				// handle the components for traditional casters
 				else {
-					if(c->GetInv().HasItem(component, component_count, invWhereWorn|invWherePersonal) == -1) // item not found
+					if (!RuleB(Character, PetsUseReagents) && IsEffectInSpell(spell_id, SE_SummonPet)) {
+						//bypass reagent cost
+					} 
+					else if(c->GetInv().HasItem(component, component_count, invWhereWorn|invWherePersonal) == -1) // item not found
 					{
 						if (!missingreags)
 						{
@@ -1237,6 +1244,9 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 					InterruptSpell();
 					return;
 				}
+			}
+			else if (!RuleB(Character, PetsUseReagents) && IsEffectInSpell(spell_id, SE_SummonPet)) {
+				//bypass reagent cost
 			}
 			else if (!bard_song_mode)
 			{
@@ -1286,7 +1296,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 			if (inst == nullptr)
 				break;
 
-			for (int r = EQEmu::inventory::socketBegin; r < EQEmu::inventory::SocketCount; r++) {
+			for (int r = EQEmu::invaug::SOCKET_BEGIN; r <= EQEmu::invaug::SOCKET_END; r++) {
 				const EQEmu::ItemInstance* aug_i = inst->GetAugment(r);
 
 				if (!aug_i)
@@ -2646,67 +2656,16 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 			action->source = caster->GetID();
 			action->target = GetID();
 			action->spell = spell_id;
-			action->sequence = (uint32) (GetHeading() * 2);	// just some random number
+			action->force = spells[spell_id].pushback;
+			action->hit_heading = GetHeading();
+			action->hit_pitch = spells[spell_id].pushup;
 			action->instrument_mod = caster->GetInstrumentMod(spell_id);
-			action->buff_unknown = 0;
-			action->level = buffs[buffs_i].casterlevel;
+			action->effect_flag = 0;
+			action->spell_level = action->level = buffs[buffs_i].casterlevel;
 			action->type = DamageTypeSpell;
 			entity_list.QueueCloseClients(this, packet, false, RuleI(Range, SongMessages), 0, true, IsClient() ? FilterPCSpells : FilterNPCSpells);
 
-			action->buff_unknown = 4;
-
-			if(IsEffectInSpell(spell_id, SE_TossUp))
-			{
-				action->buff_unknown = 0;
-			}
-			else if(spells[spell_id].pushback > 0 || spells[spell_id].pushup > 0)
-			{
-				if(IsClient())
-				{
-					if(!IsBuffSpell(spell_id))
-					{
-						CastToClient()->SetKnockBackExemption(true);
-
-						action->buff_unknown = 0;
-						auto outapp_push = new EQApplicationPacket(
-						    OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
-						PlayerPositionUpdateServer_Struct* spu = (PlayerPositionUpdateServer_Struct*)outapp_push->pBuffer;
-
-						double look_heading = caster->CalculateHeadingToTarget(GetX(), GetY());
-						look_heading /= 256;
-						look_heading *= 360;
-						if(look_heading > 360)
-							look_heading -= 360;
-
-						//x and y are crossed mkay
-						double new_x = spells[spell_id].pushback * sin(double(look_heading * 3.141592 / 180.0));
-						double new_y = spells[spell_id].pushback * cos(double(look_heading * 3.141592 / 180.0));
-
-						spu->spawn_id	= GetID();
-						spu->x_pos		= FloatToEQ19(GetX());
-						spu->y_pos		= FloatToEQ19(GetY());
-						spu->z_pos		= FloatToEQ19(GetZ());
-						spu->delta_x	= NewFloatToEQ13(new_x);
-						spu->delta_y	= NewFloatToEQ13(new_y);
-						spu->delta_z	= NewFloatToEQ13(spells[spell_id].pushup);
-						spu->heading	= FloatToEQ19(GetHeading());
-						spu->padding0002	=0;
-						spu->padding0006	=7;
-						spu->padding0014	=0x7f;
-						spu->padding0018	=0x5df27;
-						spu->animation = 0;
-						spu->delta_heading = NewFloatToEQ13(0);
-						outapp_push->priority = 6;
-						entity_list.QueueClients(this, outapp_push, true);
-						CastToClient()->FastQueuePacket(&outapp_push);
-					}
-				}
-			}
-
-			if(IsClient() && IsEffectInSpell(spell_id, SE_ShadowStep))
-			{
-				CastToClient()->SetShadowStepExemption(true);
-			}
+			action->effect_flag = 4;
 
 			if(!IsEffectInSpell(spell_id, SE_BindAffinity))
 			{
@@ -2719,7 +2678,9 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 			cd->source = action->source;
 			cd->type = DamageTypeSpell;
 			cd->spellid = action->spell;
-			cd->meleepush_xy = action->sequence;
+			cd->force = action->force;
+			cd->hit_heading = action->hit_heading;
+			cd->hit_pitch = action->hit_pitch;
 			cd->damage = 0;
 			if(!IsEffectInSpell(spell_id, SE_BindAffinity))
 			{
@@ -3045,6 +3006,10 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		if(effect1 != effect2)
 			continue;
 
+		if (IsBardOnlyStackEffect(effect1) && GetSpellLevel(spellid1, BARD) != 255 &&
+		    GetSpellLevel(spellid2, BARD) != 255)
+			continue;
+
 		// big ol' list according to the client, wasn't that nice!
 		if (IsEffectIgnoredInStacking(effect1))
 			continue;
@@ -3353,7 +3318,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 	{
 		EQApplicationPacket *outapp = MakeBuffsPacket();
 
-		entity_list.QueueClientsByTarget(this, outapp, false, nullptr, true, false, EQEmu::versions::bit_SoDAndLater);
+		entity_list.QueueClientsByTarget(this, outapp, false, nullptr, true, false, EQEmu::versions::maskSoDAndLater);
 
 		if(IsClient() && GetTarget() == this)
 			CastToClient()->QueuePacket(outapp);
@@ -3363,7 +3328,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 
 	if (IsNPC()) {
 		EQApplicationPacket *outapp = MakeBuffsPacket();
-		entity_list.QueueClientsByTarget(this, outapp, false, nullptr, true, false, EQEmu::versions::bit_SoDAndLater, true);
+		entity_list.QueueClientsByTarget(this, outapp, false, nullptr, true, false, EQEmu::versions::maskSoDAndLater, true);
 		safe_delete(outapp);
 	}
 
@@ -3527,12 +3492,14 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 		action->target = spelltar->GetID();
 	}
 
-	action->level = caster_level;	// caster level, for animation only
+	action->spell_level = action->level = caster_level;	// caster level, for animation only
 	action->type = 231;	// 231 means a spell
 	action->spell = spell_id;
-	action->sequence = (uint32) (GetHeading() * 2);	// just some random number
+	action->force = spells[spell_id].pushback;
+	action->hit_heading = GetHeading();
+	action->hit_pitch = spells[spell_id].pushup;
 	action->instrument_mod = GetInstrumentMod(spell_id);
-	action->buff_unknown = 0;
+	action->effect_flag = 0;
 
 	if(spelltar != this && spelltar->IsClient())	// send to target
 		spelltar->CastToClient()->QueuePacket(action_packet);
@@ -3917,6 +3884,8 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 			spelltar->SetHateAmountOnEnt(this, std::max(newhate, 1));
 		}
 	} else if (IsBeneficialSpell(spell_id) && !IsSummonPCSpell(spell_id)) {
+		if (this != spelltar && spelltar->IsClient() && IsClient())
+			CastToClient()->UpdateRestTimer(spelltar->CastToClient()->GetRestTimer());
 		entity_list.AddHealAggro(
 		    spelltar, this,
 		    CheckHealAggroAmount(spell_id, spelltar, (spelltar->GetMaxHP() - spelltar->GetHP())));
@@ -3959,59 +3928,16 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 	// NOTE: this is what causes the buff icon to appear on the client, if
 	// this is a buff - but it sortof relies on the first packet.
 	// the complete sequence is 2 actions and 1 damage message
-	action->buff_unknown = 0x04;	// this is a success flag
+	action->effect_flag = 0x04;	// this is a success flag
 
-	if(IsEffectInSpell(spell_id, SE_TossUp))
+	if(spells[spell_id].pushback != 0.0f || spells[spell_id].pushup != 0.0f)
 	{
-		action->buff_unknown = 0;
-	}
-	else if(spells[spell_id].pushback > 0 || spells[spell_id].pushup > 0)
-	{
-		if(spelltar->IsClient())
-		{
-			if(!IsBuffSpell(spell_id))
-			{
-				spelltar->CastToClient()->SetKnockBackExemption(true);
-
-				action->buff_unknown = 0;
-				auto outapp_push =
-				    new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
-				PlayerPositionUpdateServer_Struct* spu = (PlayerPositionUpdateServer_Struct*)outapp_push->pBuffer;
-
-				double look_heading = CalculateHeadingToTarget(spelltar->GetX(), spelltar->GetY());
-				look_heading /= 256;
-				look_heading *= 360;
-				if(look_heading > 360)
-					look_heading -= 360;
-
-				//x and y are crossed mkay
-				double new_x = spells[spell_id].pushback * sin(double(look_heading * 3.141592 / 180.0));
-				double new_y = spells[spell_id].pushback * cos(double(look_heading * 3.141592 / 180.0));
-
-				spu->spawn_id	= spelltar->GetID();
-				spu->x_pos		= FloatToEQ19(spelltar->GetX());
-				spu->y_pos		= FloatToEQ19(spelltar->GetY());
-				spu->z_pos		= FloatToEQ19(spelltar->GetZ());
-				spu->delta_x	= NewFloatToEQ13(new_x);
-				spu->delta_y	= NewFloatToEQ13(new_y);
-				spu->delta_z	= NewFloatToEQ13(spells[spell_id].pushup);
-				spu->heading	= FloatToEQ19(spelltar->GetHeading());
-				spu->padding0002	=0;
-				spu->padding0006	=7;
-				spu->padding0014	=0x7f;
-				spu->padding0018	=0x5df27;
-				spu->animation = 0;
-				spu->delta_heading = NewFloatToEQ13(0);
-				outapp_push->priority = 6;
-				entity_list.QueueClients(this, outapp_push, true);
-				spelltar->CastToClient()->FastQueuePacket(&outapp_push);
-			}
+		if (RuleB(Spells, NPCSpellPush) && !spelltar->IsRooted() && spelltar->ForcedMovement == 0) {
+			spelltar->m_Delta.x += action->force * g_Math.FastSin(action->hit_heading);
+			spelltar->m_Delta.y += action->force * g_Math.FastCos(action->hit_heading);
+			spelltar->m_Delta.z += action->hit_pitch;
+			spelltar->ForcedMovement = 6;
 		}
-	}
-
-	if(spelltar->IsClient() && IsEffectInSpell(spell_id, SE_ShadowStep))
-	{
-		spelltar->CastToClient()->SetShadowStepExemption(true);
 	}
 
 	if(!IsEffectInSpell(spell_id, SE_BindAffinity))
@@ -4033,7 +3959,9 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 	cd->source = action->source;
 	cd->type = action->type;
 	cd->spellid = action->spell;
-	cd->meleepush_xy = action->sequence;
+	cd->force = action->force;
+	cd->hit_heading = action->hit_heading;
+	cd->hit_pitch = action->hit_pitch;
 	cd->damage = 0;
 	if(!IsEffectInSpell(spell_id, SE_BindAffinity)){
 		entity_list.QueueCloseClients(
@@ -4102,6 +4030,23 @@ bool Mob::FindBuff(uint16 spellid)
 			return true;
 
 	return false;
+}
+
+uint16 Mob::FindBuffBySlot(int slot) {
+	if (buffs[slot].spellid != SPELL_UNKNOWN)
+		return buffs[slot].spellid;
+	
+	return 0;
+}
+
+uint32 Mob::BuffCount() {
+	uint32 active_buff_count = 0;
+	int buff_count = GetMaxTotalSlots();
+	for (int i = 0; i < buff_count; i++) 
+		if (buffs[i].spellid != SPELL_UNKNOWN)
+			active_buff_count++;
+	
+	return active_buff_count;
 }
 
 // removes all buffs
@@ -4278,7 +4223,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 	{
 		if(GetSpecialAbility(UNMEZABLE)) {
 			Log(Logs::Detail, Logs::Spells, "We are immune to Mez spells.");
-			caster->Message_StringID(MT_Shout, CANNOT_MEZ);
+			caster->Message_StringID(MT_SpellFailure, CANNOT_MEZ);
 			int32 aggro = caster->CheckAggroAmount(spell_id, this);
 			if(aggro > 0) {
 				AddToHateList(caster, aggro);
@@ -4296,7 +4241,8 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 			(!caster->IsNPC() || (caster->IsNPC() && !RuleB(Spells, NPCIgnoreBaseImmunity))))
 		{
 			Log(Logs::Detail, Logs::Spells, "Our level (%d) is higher than the limit of this Mez spell (%d)", GetLevel(), spells[spell_id].max[effect_index]);
-			caster->Message_StringID(MT_Shout, CANNOT_MEZ_WITH_SPELL);
+			caster->Message_StringID(MT_SpellFailure, CANNOT_MEZ_WITH_SPELL);
+			AddToHateList(caster, 1,0,true,false,false,spell_id);
 			return true;
 		}
 	}
@@ -4305,7 +4251,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 	if(GetSpecialAbility(UNSLOWABLE) && IsEffectInSpell(spell_id, SE_AttackSpeed))
 	{
 		Log(Logs::Detail, Logs::Spells, "We are immune to Slow spells.");
-		caster->Message_StringID(MT_Shout, IMMUNE_ATKSPEED);
+		caster->Message_StringID(CC_Red, IMMUNE_ATKSPEED);
 		int32 aggro = caster->CheckAggroAmount(spell_id, this);
 		if(aggro > 0) {
 			AddToHateList(caster, aggro);
@@ -4321,7 +4267,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 		effect_index = GetSpellEffectIndex(spell_id, SE_Fear);
 		if(GetSpecialAbility(UNFEARABLE)) {
 			Log(Logs::Detail, Logs::Spells, "We are immune to Fear spells.");
-			caster->Message_StringID(MT_Shout, IMMUNE_FEAR);
+			caster->Message_StringID(CC_Red, IMMUNE_FEAR);	// need to verify message type, not in MQ2Cast for easy look up
 			int32 aggro = caster->CheckAggroAmount(spell_id, this);
 			if(aggro > 0) {
 				AddToHateList(caster, aggro);
@@ -4332,7 +4278,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 		} else if(IsClient() && caster->IsClient() && (caster->CastToClient()->GetGM() == false))
 		{
 			Log(Logs::Detail, Logs::Spells, "Clients cannot fear eachother!");
-			caster->Message_StringID(MT_Shout, IMMUNE_FEAR);
+			caster->Message_StringID(CC_Red, IMMUNE_FEAR);	// need to verify message type, not in MQ2Cast for easy look up
 			return true;
 		}
 		else if(GetLevel() > spells[spell_id].max[effect_index] && spells[spell_id].max[effect_index] != 0)
@@ -4351,7 +4297,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 		{
 			Message(13, "Your are immune to fear.");
 			Log(Logs::Detail, Logs::Spells, "Clients has WarCry effect, immune to fear!");
-			caster->Message_StringID(MT_Shout, IMMUNE_FEAR);
+			caster->Message_StringID(CC_Red, IMMUNE_FEAR);	// need to verify message type, not in MQ2Cast for easy look up
 			return true;
 		}
 	}
@@ -4361,7 +4307,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 		if(GetSpecialAbility(UNCHARMABLE))
 		{
 			Log(Logs::Detail, Logs::Spells, "We are immune to Charm spells.");
-			caster->Message_StringID(MT_Shout, CANNOT_CHARM);
+			caster->Message_StringID(CC_Red, CANNOT_CHARM);	// need to verify message type, not in MQ2Cast for easy look up
 			int32 aggro = caster->CheckAggroAmount(spell_id, this);
 			if(aggro > 0) {
 				AddToHateList(caster, aggro);
@@ -4374,7 +4320,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 		if(this == caster)
 		{
 			Log(Logs::Detail, Logs::Spells, "You are immune to your own charms.");
-			caster->Message(MT_Shout, "You cannot charm yourself.");
+			caster->Message(CC_Red, "You cannot charm yourself.");	// need to look up message?
 			return true;
 		}
 
@@ -4387,7 +4333,8 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 			if(GetLevel() > spells[spell_id].max[effect_index] && spells[spell_id].max[effect_index] != 0)
 			{
 				Log(Logs::Detail, Logs::Spells, "Our level (%d) is higher than the limit of this Charm spell (%d)", GetLevel(), spells[spell_id].max[effect_index]);
-				caster->Message_StringID(MT_Shout, CANNOT_CHARM_YET);
+				caster->Message_StringID(CC_Red, CANNOT_CHARM_YET);	// need to verify message type, not in MQ2Cast for easy look up<Paste>
+				AddToHateList(caster, 1,0,true,false,false,spell_id);
 				return true;
 			}
 		}
@@ -4401,7 +4348,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 	{
 		if(GetSpecialAbility(UNSNAREABLE)) {
 			Log(Logs::Detail, Logs::Spells, "We are immune to Snare spells.");
-			caster->Message_StringID(MT_Shout, IMMUNE_MOVEMENT);
+			caster->Message_StringID(CC_Red, IMMUNE_MOVEMENT);
 			int32 aggro = caster->CheckAggroAmount(spell_id, this);
 			if(aggro > 0) {
 				AddToHateList(caster, aggro);
@@ -4417,7 +4364,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 		if(this == caster)
 		{
 			Log(Logs::Detail, Logs::Spells, "You cannot lifetap yourself.");
-			caster->Message_StringID(MT_Shout, CANT_DRAIN_SELF);
+			caster->Message_StringID(MT_SpellFailure, CANT_DRAIN_SELF);
 			return true;
 		}
 	}
@@ -4427,7 +4374,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 		if(this == caster)
 		{
 			Log(Logs::Detail, Logs::Spells, "You cannot sacrifice yourself.");
-			caster->Message_StringID(MT_Shout, CANNOT_SAC_SELF);
+			caster->Message_StringID(MT_SpellFailure, CANNOT_SAC_SELF);
 			return true;
 		}
 	}
@@ -4889,7 +4836,22 @@ void Mob::Spin() {
 		safe_delete(outapp);
 	}
 	else {
-		GMMove(GetX(), GetY(), GetZ(), GetHeading()+5);
+		float x,y,z,h;
+
+		x=GetX();
+		y=GetY();
+		z=GetZ();
+		h=GetHeading()+5;
+
+		if (IsCorpse() || (IsClient() && !IsAIControlled())) {
+			m_Position.x = x;
+			m_Position.y = y;
+			m_Position.z = z;
+			mMovementManager->SendCommandToClients(this, 0.0, 0.0, 0.0, 0.0, 0, ClientRangeAny);
+		}
+		else {
+			Teleport(glm::vec4(x, y, z, h));
+		}
 	}
 }
 
@@ -4973,12 +4935,11 @@ void Client::UnStun() {
 
 void NPC::Stun(int duration) {
 	Mob::Stun(duration);
-	SetCurrentSpeed(0);
+	StopNavigation();
 }
 
 void NPC::UnStun() {
 	Mob::UnStun();
-	SetCurrentSpeed(GetRunspeed());
 }
 
 void Mob::Mesmerize()
@@ -4988,18 +4949,7 @@ void Mob::Mesmerize()
 	if (casting_spell_id)
 		InterruptSpell();
 
-	SendPosition();
-/* this stuns the client for max time, with no way to break it
-	if (this->IsClient()){
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_Stun, sizeof(Stun_Struct));
-		Stun_Struct* stunon = (Stun_Struct*) outapp->pBuffer;
-		stunon->duration = 0xFFFF;
-		this->CastToClient()->QueuePacket(outapp);
-		safe_delete(outapp);
-	} else {
-		SetRunAnimSpeed(0);
-	}
-*/
+	StopNavigation();
 }
 
 void Client::MakeBuffFadePacket(uint16 spell_id, int slot_id, bool send_message)
@@ -5051,7 +5001,7 @@ void Client::MakeBuffFadePacket(uint16 spell_id, int slot_id, bool send_message)
 
 void Client::MemSpell(uint16 spell_id, int slot, bool update_client)
 {
-	if(slot >= MAX_PP_MEMSPELL || slot < 0)
+	if(slot >= EQEmu::spells::SPELL_GEM_COUNT || slot < 0)
 		return;
 
 	if(update_client)
@@ -5073,7 +5023,7 @@ void Client::MemSpell(uint16 spell_id, int slot, bool update_client)
 
 void Client::UnmemSpell(int slot, bool update_client)
 {
-	if(slot > MAX_PP_MEMSPELL || slot < 0)
+	if(slot > EQEmu::spells::SPELL_GEM_COUNT || slot < 0)
 		return;
 
 	Log(Logs::Detail, Logs::Spells, "Spell %d forgotten from slot %d", m_pp.mem_spells[slot], slot);
@@ -5089,7 +5039,7 @@ void Client::UnmemSpell(int slot, bool update_client)
 
 void Client::UnmemSpellBySpellID(int32 spell_id)
 {
-	for(int i = 0; i < MAX_PP_MEMSPELL; i++) {
+	for(int i = 0; i < EQEmu::spells::SPELL_GEM_COUNT; i++) {
 		if(m_pp.mem_spells[i] == spell_id) {
 			UnmemSpell(i, true);
 			break;
@@ -5101,14 +5051,31 @@ void Client::UnmemSpellAll(bool update_client)
 {
 	int i;
 
-	for(i = 0; i < MAX_PP_MEMSPELL; i++)
+	for(i = 0; i < EQEmu::spells::SPELL_GEM_COUNT; i++)
 		if(m_pp.mem_spells[i] != 0xFFFFFFFF)
 			UnmemSpell(i, update_client);
 }
 
+uint16 Client::FindMemmedSpellBySlot(int slot) {
+	if (m_pp.mem_spells[slot] != 0xFFFFFFFF)
+		return m_pp.mem_spells[slot];
+	
+	return 0;
+}
+
+int Client::MemmedCount() {
+	int memmed_count = 0;
+	for (int i = 0; i < EQEmu::spells::SPELL_GEM_COUNT; i++)
+		if (m_pp.mem_spells[i] != 0xFFFFFFFF)
+			memmed_count++;
+		
+	return memmed_count;
+}
+
+
 void Client::ScribeSpell(uint16 spell_id, int slot, bool update_client)
 {
-	if(slot >= MAX_PP_SPELLBOOK || slot < 0)
+	if(slot >= EQEmu::spells::SPELLBOOK_SIZE || slot < 0)
 		return;
 
 	if(update_client)
@@ -5129,14 +5096,14 @@ void Client::ScribeSpell(uint16 spell_id, int slot, bool update_client)
 
 void Client::UnscribeSpell(int slot, bool update_client)
 {
-	if(slot >= MAX_PP_SPELLBOOK || slot < 0)
+	if(slot >= EQEmu::spells::SPELLBOOK_SIZE || slot < 0)
 		return;
 
 	Log(Logs::Detail, Logs::Spells, "Spell %d erased from spell book slot %d", m_pp.spell_book[slot], slot);
 	m_pp.spell_book[slot] = 0xFFFFFFFF;
 
 	database.DeleteCharacterSpell(this->CharacterID(), m_pp.spell_book[slot], slot);
-	if(update_client)
+	if(update_client && slot < EQEmu::spells::DynamicLookup(ClientVersion(), GetGM())->SpellbookSize)
 	{
 		auto outapp = new EQApplicationPacket(OP_DeleteSpell, sizeof(DeleteSpell_Struct));
 		DeleteSpell_Struct* del = (DeleteSpell_Struct*)outapp->pBuffer;
@@ -5149,9 +5116,7 @@ void Client::UnscribeSpell(int slot, bool update_client)
 
 void Client::UnscribeSpellAll(bool update_client)
 {
-	int i;
-
-	for(i = 0; i < MAX_PP_SPELLBOOK; i++)
+	for(int i = 0; i < EQEmu::spells::SPELLBOOK_SIZE; i++)
 	{
 		if(m_pp.spell_book[i] != 0xFFFFFFFF)
 			UnscribeSpell(i, update_client);
@@ -5185,7 +5150,7 @@ void Client::UntrainDiscAll(bool update_client)
 }
 
 int Client::GetNextAvailableSpellBookSlot(int starting_slot) {
-	for (int i = starting_slot; i < MAX_PP_SPELLBOOK; i++) {	//using starting_slot should help speed this up when we're iterating through a bunch of spells
+	for (int i = starting_slot; i < EQEmu::spells::SPELLBOOK_SIZE; i++) {	//using starting_slot should help speed this up when we're iterating through a bunch of spells
 		if (!IsValidSpell(GetSpellByBookSlot(i)))
 			return i;
 	}
@@ -5194,7 +5159,7 @@ int Client::GetNextAvailableSpellBookSlot(int starting_slot) {
 }
 
 int Client::FindSpellBookSlotBySpellID(uint16 spellid) {
-	for(int i = 0; i < MAX_PP_SPELLBOOK; i++) {
+	for(int i = 0; i < EQEmu::spells::SPELLBOOK_SIZE; i++) {
 		if(m_pp.spell_book[i] == spellid)
 			return i;
 	}
@@ -5202,14 +5167,11 @@ int Client::FindSpellBookSlotBySpellID(uint16 spellid) {
 	return -1;	//default
 }
 
-bool Client::SpellGlobalCheck(uint16 spell_ID, uint32 char_ID) {
-
-	std::string spell_Global_Name;
-	int spell_Global_Value;
-	int global_Value;
-
-	std::string query = StringFormat("SELECT qglobal, value FROM spell_globals "
-                                    "WHERE spellid = %i", spell_ID);
+bool Client::SpellGlobalCheck(uint16 spell_id, uint32 char_id) {
+	std::string spell_global_name;
+	int spell_global_value;
+	int global_value;
+	std::string query = StringFormat("SELECT qglobal, value FROM spell_globals WHERE spellid = %i", spell_id);
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
 		return false; // Query failed, so prevent spell from scribing just in case
@@ -5219,37 +5181,79 @@ bool Client::SpellGlobalCheck(uint16 spell_ID, uint32 char_ID) {
         return true; // Spell ID isn't listed in the spells_global table, so it is not restricted from scribing
 
     auto row = results.begin();
-    spell_Global_Name = row[0];
-	spell_Global_Value = atoi(row[1]);
+    spell_global_name = row[0];
+	spell_global_value = atoi(row[1]);
 
-	if (spell_Global_Name.empty())
+	if (spell_global_name.empty())
         return true; // If the entry in the spell_globals table has nothing set for the qglobal name
 
     query = StringFormat("SELECT value FROM quest_globals "
                         "WHERE charid = %i AND name = '%s'",
-                        char_ID, spell_Global_Name.c_str());
+                        char_id, spell_global_name.c_str());
     results = database.QueryDatabase(query);
     if (!results.Success()) {
-        Log(Logs::General, Logs::Error, "Spell ID %i query of spell_globals with Name: '%s' Value: '%i' failed", spell_ID, spell_Global_Name.c_str(), spell_Global_Value);
+        Log(Logs::General, Logs::Error, "Spell ID %i query of spell_globals with Name: '%s' Value: '%i' failed", spell_id, spell_global_name.c_str(), spell_global_value);
         return false;
     }
 
     if (results.RowCount() != 1) {
-        Log(Logs::General, Logs::Error, "Char ID: %i does not have the Qglobal Name: '%s' for Spell ID %i", char_ID, spell_Global_Name.c_str(), spell_ID);
+        Log(Logs::General, Logs::Error, "Char ID: %i does not have the Qglobal Name: '%s' for Spell ID %i", char_id, spell_global_name.c_str(), spell_id);
+        return false;
+    }
+
+    row = results.begin();
+    global_value = atoi(row[0]);
+    if (global_value == spell_global_value)
+        return true; // If the values match from both tables, allow the spell to be scribed
+    else if (global_value > spell_global_value)
+        return true; // Check if the qglobal value is greater than the require spellglobal value
+
+    // If no matching result found in qglobals, don't scribe this spell
+    Log(Logs::General, Logs::Error, "Char ID: %i Spell_globals Name: '%s' Value: '%i' did not match QGlobal Value: '%i' for Spell ID %i", char_id, spell_global_name.c_str(), spell_global_value, global_value, spell_id);
+    return false;
+}
+
+bool Client::SpellBucketCheck(uint16 spell_id, uint32 char_id) {
+	std::string spell_bucket_name;
+	int spell_bucket_value;
+	int bucket_value;
+	std::string query = StringFormat("SELECT `key`, value FROM spell_buckets WHERE spellid = %i", spell_id);
+	auto results = database.QueryDatabase(query);
+	if (!results.Success())
+		return false;
+
+	if (results.RowCount() != 1)
+		return true;
+	
+	auto row = results.begin();
+	spell_bucket_name = row[0];
+	spell_bucket_value = atoi(row[1]);
+	if (spell_bucket_name.empty())
+		return true;
+	
+	query = StringFormat("SELECT value FROM data_buckets WHERE `key` = '%i-%s'", char_id, spell_bucket_name.c_str());
+	results = database.QueryDatabase(query);
+	if (!results.Success()) {
+        Log(Logs::General, Logs::Error, "Spell bucket %s for spell ID %i for char ID %i failed.", spell_bucket_name.c_str(), spell_id, char_id);
+        return false;
+    }
+
+    if (results.RowCount() != 1) {
+        Log(Logs::General, Logs::Error, "Spell bucket %s does not exist for spell ID %i for char ID %i.", spell_bucket_name.c_str(), spell_id, char_id);
         return false;
     }
 
     row = results.begin();
 
-    global_Value = atoi(row[0]);
+    bucket_value = atoi(row[0]);
 
-    if (global_Value == spell_Global_Value)
+    if (bucket_value == spell_bucket_value)
         return true; // If the values match from both tables, allow the spell to be scribed
-    else if (global_Value > spell_Global_Value)
-        return true; // Check if the qglobal value is greater than the require spellglobal value
+    else if (bucket_value > spell_bucket_value)
+        return true; // Check if the data bucket value is greater than the required spell bucket value
 
-    // If no matching result found in qglobals, don't scribe this spell
-    Log(Logs::General, Logs::Error, "Char ID: %i Spell_globals Name: '%s' Value: '%i' did not match QGlobal Value: '%i' for Spell ID %i", char_ID, spell_Global_Name.c_str(), spell_Global_Value, global_Value, spell_ID);
+    // If no matching result found in spell buckets, don't scribe this spell
+    Log(Logs::General, Logs::Error, "Spell bucket %s for spell ID %i for char ID %i did not match value %i.",  spell_bucket_name.c_str(), spell_id, char_id, spell_bucket_value);
     return false;
 }
 
@@ -5454,7 +5458,7 @@ bool Mob::UseBardSpellLogic(uint16 spell_id, int slot)
 		spell_id != SPELL_UNKNOWN &&
 		slot != -1 &&
 		GetClass() == BARD &&
-		slot <= MAX_PP_MEMSPELL &&
+		slot <= EQEmu::spells::SPELL_GEM_COUNT &&
 		IsBardSong(spell_id)
 	);
 }
@@ -5575,7 +5579,7 @@ void Mob::SendBuffsToClient(Client *c)
 	if(!c)
 		return;
 
-	if (c->ClientVersionBit() & EQEmu::versions::bit_SoDAndLater)
+	if (c->ClientVersionBit() & EQEmu::versions::maskSoDAndLater)
 	{
 		EQApplicationPacket *outapp = MakeBuffsPacket();
 		c->FastQueuePacket(&outapp);
@@ -5663,12 +5667,12 @@ int Client::GetCurrentBuffSlots() const
 		numbuffs++;
 	if (GetLevel() > 74)
 		numbuffs++;
-	return EQEmu::ClampUpper(numbuffs, EQEmu::constants::Lookup(m_ClientVersion)->LongBuffs);
+	return EQEmu::ClampUpper(numbuffs, EQEmu::spells::StaticLookup(m_ClientVersion)->LongBuffs);
 }
 
 int Client::GetCurrentSongSlots() const
 {
-	return EQEmu::constants::Lookup(m_ClientVersion)->ShortBuffs; // AAs dont affect this
+	return EQEmu::spells::StaticLookup(m_ClientVersion)->ShortBuffs; // AAs dont affect this
 }
 
 void Client::InitializeBuffSlots()
@@ -5692,9 +5696,8 @@ void NPC::InitializeBuffSlots()
 {
 	int max_slots = GetMaxTotalSlots();
 	buffs = new Buffs_Struct[max_slots];
-	for(int x = 0; x < max_slots; ++x)
-	{
-		buffs[x].spellid = SPELL_UNKNOWN;
+	for (int x = 0; x < max_slots; ++x) {
+		buffs[x].spellid      = SPELL_UNKNOWN;
 		buffs[x].UpdateClient = false;
 	}
 	current_buff_count = 0;
@@ -5716,7 +5719,7 @@ void Client::SendSpellAnim(uint16 targetid, uint16 spell_id)
 	a->source = this->GetID();
 	a->type = 231;
 	a->spell = spell_id;
-	a->sequence = 231;
+	a->hit_heading = GetHeading();
 
 	app.priority = 1;
 	entity_list.QueueCloseClients(this, &app, false, RuleI(Range, SpellParticles));
@@ -5727,8 +5730,8 @@ void Mob::CalcDestFromHeading(float heading, float distance, float MaxZDiff, flo
 	if (!distance) { return; }
 	if (!MaxZDiff) { MaxZDiff = 5; }
 
-	float ReverseHeading = 256 - heading;
-	float ConvertAngle = ReverseHeading * 1.40625f;
+	float ReverseHeading = 512 - heading;
+	float ConvertAngle = ReverseHeading * 360.0f / 512.0f;
 	if (ConvertAngle <= 270)
 		ConvertAngle = ConvertAngle + 90;
 	else
@@ -5736,8 +5739,8 @@ void Mob::CalcDestFromHeading(float heading, float distance, float MaxZDiff, flo
 
 	float Radian = ConvertAngle * (3.1415927f / 180.0f);
 
-	float CircleX = distance * cos(Radian);
-	float CircleY = distance * sin(Radian);
+	float CircleX = distance * std::cos(Radian);
+	float CircleY = distance * std::sin(Radian);
 	dX = CircleX + StartX;
 	dY = CircleY + StartY;
 	dZ = FindGroundZ(dX, dY, MaxZDiff);
@@ -5802,7 +5805,8 @@ void Mob::BeamDirectional(uint16 spell_id, int16 resist_adjust)
 				maxtarget_count++;
 			}
 
-			if (maxtarget_count >= spells[spell_id].aemaxtargets)
+			// not sure if we need this check, but probably do, need to check if it should be default limited or not
+			if (spells[spell_id].aemaxtargets && maxtarget_count >= spells[spell_id].aemaxtargets)
 				return;
 		}
 		++iter;
@@ -5817,8 +5821,10 @@ void Mob::ConeDirectional(uint16 spell_id, int16 resist_adjust)
 	if (IsBeneficialSpell(spell_id) && IsClient())
 		beneficial_targets = true;
 
-	float angle_start = spells[spell_id].directional_start + (GetHeading() * 360.0f / 256.0f);
-	float angle_end = spells[spell_id].directional_end + (GetHeading() * 360.0f / 256.0f);
+	float heading = GetHeading() * 360.0f / 512.0f; // convert to degrees
+
+	float angle_start = spells[spell_id].directional_start + heading;
+	float angle_end = spells[spell_id].directional_end + heading;
 
 	while (angle_start > 360.0f)
 		angle_start -= 360.0f;
@@ -5839,7 +5845,7 @@ void Mob::ConeDirectional(uint16 spell_id, int16 resist_adjust)
 		}
 
 		float heading_to_target =
-		    (CalculateHeadingToTarget((*iter)->GetX(), (*iter)->GetY()) * 360.0f / 256.0f);
+		    (CalculateHeadingToTarget((*iter)->GetX(), (*iter)->GetY()) * 360.0f / 512.0f);
 
 		while (heading_to_target < 0.0f)
 			heading_to_target += 360.0f;
@@ -5883,7 +5889,8 @@ void Mob::ConeDirectional(uint16 spell_id, int16 resist_adjust)
 			}
 		}
 
-		if (maxtarget_count >= spells[spell_id].aemaxtargets)
+		// my SHM breath could hit all 5 dummies I could summon in arena
+		if (spells[spell_id].aemaxtargets && maxtarget_count >= spells[spell_id].aemaxtargets)
 			return;
 
 		++iter;

@@ -22,16 +22,15 @@
 
 #ifdef BOTS
 
-#include "../common/dbcore.h"
-#include "../common/eq_packet_structs.h"
-
 #include <list>
 #include <map>
 #include <vector>
 
 
 class Bot;
+class Client;
 struct BotsAvailableList;
+struct InspectMessage_Struct;
 
 namespace EQEmu
 {
@@ -40,15 +39,9 @@ namespace EQEmu
 }
 
 
-class BotDatabase : public DBcore
+class BotDatabase
 {
 public:
-	BotDatabase();
-	BotDatabase(const char* host, const char* user, const char* passwd, const char* database, uint32 port);
-	virtual ~BotDatabase();
-
-	bool Connect(const char* host, const char* user, const char* passwd, const char* database, uint32 port);
-
 	bool LoadBotCommandSettings(std::map<std::string, std::pair<uint8, std::vector<std::string>>> &bot_command_settings);
 	bool LoadBotSpellCastingChances();
 
@@ -143,6 +136,11 @@ public:
 	bool CreateCloneBot(const uint32 owner_id, const uint32 bot_id, const std::string& clone_name, uint32& clone_id);
 	bool CreateCloneBotInventory(const uint32 owner_id, const uint32 bot_id, const uint32 clone_id);
 
+	bool SaveStopMeleeLevel(const uint32 owner_id, const uint32 bot_id, const uint8 sml_value);
+
+	bool LoadOwnerOptions(Client *owner);
+	bool SaveOwnerOptionDeathMarquee(const uint32 owner_id, const bool flag);
+	bool SaveOwnerOptionStatsUpdate(const uint32 owner_id, const bool flag);
 
 	/* Bot bot-group functions   */
 	bool QueryBotGroupExistence(const std::string& botgroup_name, bool& extant_flag);
@@ -253,6 +251,7 @@ public:
 		static const char* SaveAllFollowDistances();
 		static const char* CreateCloneBot();
 		static const char* CreateCloneBotInventory();
+		static const char* SaveStopMeleeLevel();
 
 		/* fail::Bot bot-group functions   */
 		static const char* QueryBotGroupExistence();
@@ -289,8 +288,6 @@ public:
 	private:
 		std::string query;
 };
-
-extern BotDatabase botdb;
 
 #endif
 

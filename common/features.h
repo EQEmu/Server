@@ -150,10 +150,11 @@ enum {	//reuse times
 
 enum {	//timer settings, all in milliseconds
 	AImovement_duration = 100,
-	AIthink_duration = 150,
+	AIthink_duration = 50,
 	AIscanarea_delay = 6000,
 	AIfeignremember_delay = 500,
 	AItarget_check_duration = 500,
+	AI_scan_door_open_interval = 1000,
 	// AIClientScanarea_delay = 750,	//used in REVERSE_AGGRO
 	AIassistcheck_delay = 3000,		//now often a fighting NPC will yell for help
 	AI_check_signal_timer_delay = 500, // How often EVENT_SIGNAL checks are processed
@@ -219,6 +220,9 @@ enum {	//some random constants
 //the square of the maximum range at whihc you could possibly use NPC services (shop, tribute, etc)
 #define USE_NPC_RANGE2 200*200		//arbitrary right now
 
+// Squared range for rampage 75.0 * 75.0 for now
+#define NPC_RAMPAGE_RANGE2 5625.0f
+
 //the formula for experience for killing a mob.
 //level is the only valid variable to use
 #define EXP_FORMULA level*level*75*35/10
@@ -264,12 +268,9 @@ enum {
 	commandBanPlayers = 100,		//can set bans on players
 	commandChangeDatarate = 201,	//edit client's data rate
 	commandZoneToCoords = 0,		//can #zone with coords
-	commandInterrogateInv = 100		//below this == only log on error state and self-only target dump
+	commandInterrogateInv = 100,	//below this == only log on error state and self-only target dump
+	commandInvSnapshot = 150		//ability to clear/restore snapshots
 };
-
-//default states for logging flag on NPCs and clients (having NPCs on by default is prolly a bad idea)
-#define CLIENT_DEFAULT_LOGGING_ENABLED true
-#define NPC_DEFAULT_LOGGING_ENABLED false
 
 
 // This is the item ID we use for say links, we use the max that fits in 5 ASCII chars

@@ -42,7 +42,9 @@
 #include "net.h"
 #include "npc.h"
 #include "object.h"
-#include "pathing.h"
+#include "pathfinder_null.h"
+#include "pathfinder_nav_mesh.h"
+#include "pathfinder_waypoint.h"
 #include "petitions.h"
 #include "quest_parser_collection.h"
 #include "spawn2.h"
@@ -51,6 +53,8 @@
 #include "worldserver.h"
 #include "zone.h"
 #include "zone_config.h"
+#include "mob_movement_manager.h"
+#include "npc_scale_manager.h"
 
 #include <time.h>
 #include <ctime>
@@ -62,8 +66,6 @@
 #define strcasecmp	_stricmp
 #endif
 
-
-
 extern bool staticzone;
 extern NetConnection net;
 extern PetitionList petition_list;
@@ -71,6 +73,7 @@ extern QuestParserCollection* parse;
 extern uint32 numclients;
 extern WorldServer worldserver;
 extern Zone* zone;
+extern NpcScaleManager* npc_scale_manager;
 
 Mutex MZoneShutdown;
 
@@ -146,8 +149,17 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	UpdateWindowTitle();
 	zone->GetTimeSync();
 
-	/* Set Logging */
+	zone->RequestUCSServerStatus();
 
+	/**
+	 * Set Shutdown timer
+	 */
+	uint32 shutdown_timer = static_cast<uint32>(database.getZoneShutDownDelay(zone->GetZoneID(), zone->GetInstanceVersion()));
+	zone->StartShutdownTimer(shutdown_timer);
+
+	/*
+	 * Set Logging
+	 */
 	LogSys.StartFileLogs(StringFormat("%s_version_%u_inst_id_%u_port_%u", zone->GetShortName(), zone->GetInstanceVersion(), zone->GetInstanceID(), ZoneConfig::get()->ZonePort));
 
 	return true;
@@ -847,6 +859,11 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 		GuildBanks = new GuildBankManager;
 	else
 		GuildBanks = nullptr;
+
+	m_ucss_available = false;
+	m_last_ucss_update = 0;
+
+	mMovementManager = &MobMovementManager::Get();
 }
 
 Zone::~Zone() {
@@ -879,7 +896,7 @@ bool Zone::Init(bool iStaticZone) {
 	SetStaticZone(iStaticZone);
 	
 	//load the zone config file.
-	if (!LoadZoneCFG(zone->GetShortName(), zone->GetInstanceVersion(), true)) // try loading the zone name...
+	if (!LoadZoneCFG(zone->GetShortName(), zone->GetInstanceVersion())) // try loading the zone name...
 		LoadZoneCFG(zone->GetFileName(), zone->GetInstanceVersion()); // if that fails, try the file name, then load defaults
 
 	if(RuleManager::Instance()->GetActiveRulesetID() != default_ruleset)
@@ -887,13 +904,13 @@ bool Zone::Init(bool iStaticZone) {
 		std::string r_name = RuleManager::Instance()->GetRulesetName(&database, default_ruleset);
 		if(r_name.size() > 0)
 		{
-			RuleManager::Instance()->LoadRules(&database, r_name.c_str());
+			RuleManager::Instance()->LoadRules(&database, r_name.c_str(), false);
 		}
 	}
-	
-	zone->zonemap = Map::LoadMapFile(zone->map_name);
+
+	zone->zonemap  = Map::LoadMapFile(zone->map_name);
 	zone->watermap = WaterMap::LoadWaterMapfile(zone->map_name);
-	zone->pathing = PathManager::LoadPathFile(zone->map_name);
+	zone->pathing  = IPathfinder::Load(zone->map_name);
 
 	Log(Logs::General, Logs::Status, "Loading spawn conditions...");
 	if(!spawn_conditions.LoadSpawnConditions(short_name, instanceid)) {
@@ -968,6 +985,8 @@ bool Zone::Init(bool iStaticZone) {
 
 	LoadAlternateAdvancement();
 
+	database.LoadGlobalLoot();
+
 	//Load merchant data
 	zone->GetMerchantDataForZoneLoad();
 
@@ -1038,39 +1057,31 @@ void Zone::ReloadStaticData() {
 	zone->LoadNPCEmotes(&NPCEmoteList);
 
 	//load the zone config file.
-	if (!LoadZoneCFG(zone->GetShortName(), zone->GetInstanceVersion(), true)) // try loading the zone name...
+	if (!LoadZoneCFG(zone->GetShortName(), zone->GetInstanceVersion())) // try loading the zone name...
 		LoadZoneCFG(zone->GetFileName(), zone->GetInstanceVersion()); // if that fails, try the file name, then load defaults
 
 	Log(Logs::General, Logs::Status, "Zone Static Data Reloaded.");
 }
 
-bool Zone::LoadZoneCFG(const char* filename, uint16 instance_id, bool DontLoadDefault)
+bool Zone::LoadZoneCFG(const char* filename, uint16 instance_id)
 {
+
 	memset(&newzone_data, 0, sizeof(NewZone_Struct));
-	if(instance_id == 0)
+	map_name = nullptr;
+
+	if(!database.GetZoneCFG(database.GetZoneID(filename), instance_id, &newzone_data, can_bind,
+		can_combat, can_levitate, can_castoutdoor, is_city, is_hotzone, allow_mercs, zone_type, default_ruleset, &map_name))
 	{
-		map_name = nullptr;
-		if(!database.GetZoneCFG(database.GetZoneID(filename), 0, &newzone_data, can_bind,
-			can_combat, can_levitate, can_castoutdoor, is_city, is_hotzone, allow_mercs, zone_type, default_ruleset, &map_name))
-		{
-			Log(Logs::General, Logs::Error, "Error loading the Zone Config.");
-			return false;
-		}
-	}
-	else
-	{
-		//Fall back to base zone if we don't find the instance version.
-		map_name = nullptr;
-		if(!database.GetZoneCFG(database.GetZoneID(filename), instance_id, &newzone_data, can_bind,
-			can_combat, can_levitate, can_castoutdoor, is_city, is_hotzone, allow_mercs, zone_type, default_ruleset, &map_name))
+		// If loading a non-zero instance failed, try loading the default
+		if (instance_id != 0)
 		{
 			safe_delete_array(map_name);
-			if(!database.GetZoneCFG(database.GetZoneID(filename), 0, &newzone_data, can_bind,
-			can_combat, can_levitate, can_castoutdoor, is_city, is_hotzone, allow_mercs, zone_type, default_ruleset, &map_name))
-			{
+			if(!database.GetZoneCFG(database.GetZoneID(filename), 0, &newzone_data, can_bind, can_combat, can_levitate, 
+				can_castoutdoor, is_city, is_hotzone, allow_mercs, zone_type, default_ruleset, &map_name))
+				{
 				Log(Logs::General, Logs::Error, "Error loading the Zone Config.");
 				return false;
-			}
+				}
 		}
 	}
 
@@ -1258,7 +1269,8 @@ bool Zone::Process() {
 		}
 	}
 
-	if(Weather_Timer->Check()){
+	if(Weather_Timer->Check())
+	{
 		Weather_Timer->Disable();
 		this->ChangeWeather();
 	}
@@ -1286,6 +1298,8 @@ bool Zone::Process() {
 	}
 
 	if(hotzone_timer.Check()) { UpdateHotzone(); }
+
+	mMovementManager->Process();
 
 	return true;
 }
@@ -1418,11 +1432,18 @@ bool Zone::HasWeather()
 void Zone::StartShutdownTimer(uint32 set_time) {
 	if (set_time > autoshutdown_timer.GetRemainingTime()) {
 		if (set_time == (RuleI(Zone, AutoShutdownDelay))) {
-			set_time = database.getZoneShutDownDelay(GetZoneID(), GetInstanceVersion());
+			set_time = static_cast<uint32>(database.getZoneShutDownDelay(GetZoneID(), GetInstanceVersion()));
 		}
 		autoshutdown_timer.SetTimer(set_time);
 		Log(Logs::General, Logs::Zone_Server, "Zone::StartShutdownTimer set to %u", set_time);
 	}
+
+	Log(Logs::Detail, Logs::Zone_Server,
+	    "Zone::StartShutdownTimer trigger - set_time: %u remaining_time: %u diff: %i",
+	    set_time,
+	    autoshutdown_timer.GetRemainingTime(),
+	    (set_time - autoshutdown_timer.GetRemainingTime())
+	);
 }
 
 bool Zone::Depop(bool StartSpawnTimer) {
@@ -1436,6 +1457,9 @@ bool Zone::Depop(bool StartSpawnTimer) {
 		delete itr->second;
 		npctable.erase(itr);
 	}
+
+	// clear spell cache
+	database.ClearNPCSpells();
 
 	return true;
 }
@@ -1485,17 +1509,21 @@ void Zone::RepopClose(const glm::vec4& client_position, uint32 repop_distance)
 	mod_repop();
 }
 
-void Zone::Repop(uint32 delay) {
+void Zone::Repop(uint32 delay)
+{
 
-	if(!Depop())
+	if (!Depop()) {
 		return;
+	}
 
-	LinkedListIterator<Spawn2*> iterator(spawn2_list);
+	LinkedListIterator<Spawn2 *> iterator(spawn2_list);
 
 	iterator.Reset();
 	while (iterator.MoreElements()) {
 		iterator.RemoveCurrent();
 	}
+
+	npc_scale_manager->LoadScaleData();
 
 	entity_list.ClearTrapPointers();
 
@@ -1613,8 +1641,7 @@ ZonePoint* Zone::GetClosestZonePoint(const glm::vec3& location, uint32 to, Clien
 	// this shouldn't open up any exploits since those situations are detected later on
 	if ((zone->HasWaterMap() && !zone->watermap->InZoneLine(glm::vec3(client->GetPosition()))) || (!zone->HasWaterMap() && closest_dist > 400.0f && closest_dist < max_distance2))
 	{
-		if(client)
-			client->CheatDetected(MQZoneUnknownDest, location.x, location.y, location.z); // Someone is trying to use /zone
+		//TODO cheat detection
 		Log(Logs::General, Logs::Status, "WARNING: Closest zone point for zone id %d is %f, you might need to update your zone_points table if you dont arrive at the right spot.", to, closest_dist);
 		Log(Logs::General, Logs::Status, "<Real Zone Points>. %s", to_string(location).c_str());
 	}
@@ -1834,38 +1861,37 @@ bool Zone::RemoveSpawnGroup(uint32 in_id) {
 		return false;
 }
 
-
-// Added By Hogie
-bool ZoneDatabase::GetDecayTimes(npcDecayTimes_Struct* npcCorpseDecayTimes) {
-
-	const std::string query = "SELECT varname, value FROM variables WHERE varname LIKE 'decaytime%%' ORDER BY varname";
+bool ZoneDatabase::GetDecayTimes(npcDecayTimes_Struct *npcCorpseDecayTimes)
+{
+	const std::string query =
+	    "SELECT varname, value FROM variables WHERE varname LIKE 'decaytime%%' ORDER BY varname";
 	auto results = QueryDatabase(query);
 	if (!results.Success())
-        return false;
+		return false;
 
 	int index = 0;
-    for (auto row = results.begin(); row != results.end(); ++row, ++index) {
-        Seperator sep(row[0]);
-        npcCorpseDecayTimes[index].minlvl = atoi(sep.arg[1]);
-        npcCorpseDecayTimes[index].maxlvl = atoi(sep.arg[2]);
+	for (auto row = results.begin(); row != results.end(); ++row, ++index) {
+		Seperator sep(row[0]);
+		npcCorpseDecayTimes[index].minlvl = atoi(sep.arg[1]);
+		npcCorpseDecayTimes[index].maxlvl = atoi(sep.arg[2]);
 
-        if (atoi(row[1]) > 7200)
-            npcCorpseDecayTimes[index].seconds = 720;
-        else
-            npcCorpseDecayTimes[index].seconds = atoi(row[1]);
-    }
+		npcCorpseDecayTimes[index].seconds = std::min(24 * 60 * 60, atoi(row[1]));
+	}
 
 	return true;
 }
 
-void Zone::weatherSend()
+void Zone::weatherSend(Client* client)
 {
 	auto outapp = new EQApplicationPacket(OP_Weather, 8);
 	if(zone_weather>0)
 		outapp->pBuffer[0] = zone_weather-1;
 	if(zone_weather>0)
 		outapp->pBuffer[4] = zone->weather_intensity;
-	entity_list.QueueClients(0, outapp);
+	if (client)
+		client->QueuePacket(outapp);
+	else
+		entity_list.QueueClients(0, outapp);
 	safe_delete(outapp);
 }
 
@@ -2224,8 +2250,10 @@ void Zone::DoAdventureActions()
 			const NPCType* tmp = database.LoadNPCTypesData(ds->data_id);
 			if(tmp)
 			{
-				NPC* npc = new NPC(tmp, nullptr, glm::vec4(ds->assa_x, ds->assa_y, ds->assa_z, ds->assa_h), FlyMode3);
+				NPC* npc = new NPC(tmp, nullptr, glm::vec4(ds->assa_x, ds->assa_y, ds->assa_z, ds->assa_h), GravityBehavior::Water);
 				npc->AddLootTable();
+				if (npc->DropsGlobalLoot())
+					npc->CheckGlobalLootTables();
 				entity_list.AddNPC(npc);
 				npc->Shout("Rarrrgh!");
 				did_adventure_actions = true;
@@ -2329,3 +2357,22 @@ void Zone::UpdateHotzone()
     is_hotzone = atoi(row[0]) == 0 ? false: true;
 }
 
+void Zone::RequestUCSServerStatus() {
+	auto outapp = new ServerPacket(ServerOP_UCSServerStatusRequest, sizeof(UCSServerStatus_Struct));
+	auto ucsss = (UCSServerStatus_Struct*)outapp->pBuffer;
+	ucsss->available = 0;
+	ucsss->port = Config->ZonePort;
+	ucsss->unused = 0;
+	worldserver.SendPacket(outapp);
+	safe_delete(outapp);
+}
+
+void Zone::SetUCSServerAvailable(bool ucss_available, uint32 update_timestamp) {
+	if (m_last_ucss_update == update_timestamp && m_ucss_available != ucss_available) {
+		m_ucss_available = false;
+		RequestUCSServerStatus();
+		return;
+	}
+	if (m_last_ucss_update < update_timestamp)
+		m_ucss_available = ucss_available;
+}

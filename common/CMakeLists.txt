@@ -3,6 +3,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 SET(common_sources
 	base_packet.cpp
 	classes.cpp
+	compression.cpp
 	condition.cpp
 	crash.cpp
 	crc16.cpp
@@ -13,7 +14,6 @@ SET(common_sources
 	dbcore.cpp
 	deity.cpp
 	emu_constants.cpp
-	emu_legacy.cpp
 	emu_limits.cpp
 	emu_opcodes.cpp
 	emu_versions.cpp
@@ -55,11 +55,13 @@ SET(common_sources
 	perl_eqdb.cpp
 	perl_eqdb_res.cpp
 	proc_launcher.cpp
+	profanity_manager.cpp
 	ptimer.cpp
 	races.cpp
 	rdtsc.cpp
 	rulesys.cpp
 	say_link.cpp
+	serialize_buffer.cpp
 	serverinfo.cpp
 	shareddb.cpp
 	skills.cpp
@@ -71,7 +73,6 @@ SET(common_sources
 	unix.cpp
 	xml_parser.cpp
 	platform.cpp
-	event/event_loop.cpp
 	json/jsoncpp.cpp
 	net/console_server.cpp
 	net/console_server_connection.cpp
@@ -113,6 +114,7 @@ SET(common_headers
 	base_data.h
 	bodytypes.h
 	classes.h
+	compression.h
 	condition.h
 	crash.h
 	crc16.h
@@ -122,7 +124,6 @@ SET(common_headers
 	dbcore.h
 	deity.h
 	emu_constants.h
-	emu_legacy.h
 	emu_limits.h
 	emu_opcodes.h
 	emu_oplist.h
@@ -180,6 +181,7 @@ SET(common_headers
 	packet_functions.h
 	platform.h
 	proc_launcher.h
+	profanity_manager.h
 	profiler.h
 	ptimer.h
 	queue.h
@@ -190,6 +192,7 @@ SET(common_headers
 	ruletypes.h
 	say_link.h
 	seperator.h
+	serialize_buffer.h
 	serverinfo.h
 	servertalk.h
 	shareddb.h
@@ -205,8 +208,8 @@ SET(common_headers
 	version.h
 	xml_parser.h
 	zone_numbers.h
-	event/background_task.h
 	event/event_loop.h
+	event/task.h
 	event/timer.h
 	json/json.h
 	json/json-forwards.h
@@ -263,10 +266,9 @@ SET(common_headers
 )
 
 SOURCE_GROUP(Event FILES
-	event/background_task.h
-	event/event_loop.cpp
 	event/event_loop.h
 	event/timer.h
+	event/task.h
 )
 
 SOURCE_GROUP(Json FILES

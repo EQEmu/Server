@@ -38,6 +38,7 @@
 RULE_CATEGORY(Character)
 RULE_INT(Character, MaxLevel, 65)
 RULE_BOOL(Character, PerCharacterQglobalMaxLevel, false) // This will check for qglobal 'CharMaxLevel' character qglobal (Type 5), if player tries to level beyond that point, it will not go beyond that level
+RULE_BOOL(Character, PerCharacterBucketMaxLevel, false) // This will check for data bucket 'CharMaxLevel', if player tries to level beyond that point, it will not go beyond that level
 RULE_INT(Character, MaxExpLevel, 0) //Sets the Max Level attainable via Experience
 RULE_INT(Character, DeathExpLossLevel, 10)	// Any level greater than this will lose exp on death
 RULE_INT(Character, DeathExpLossMaxLevel, 255)	// Any level greater than this will no longer lose exp on death
@@ -94,9 +95,6 @@ RULE_INT(Character, SkillUpModifier, 100) //skill ups are at 100%
 RULE_BOOL(Character, SharedBankPlat, false) //off by default to prevent duping for now
 RULE_BOOL(Character, BindAnywhere, false)
 RULE_BOOL(Character, RestRegenEnabled, true) // Enable OOC Regen
-RULE_INT(Character, RestRegenHP, 180) // seconds until full from 0. this is actually zone setable, but most or all zones are 180
-RULE_INT(Character, RestRegenMana, 180) // seconds until full from 0. this is actually zone setable, but most or all zones are 180
-RULE_INT(Character, RestRegenEnd, 180) // seconds until full from 0. this is actually zone setable, but most or all zones are 180
 RULE_INT(Character, RestRegenTimeToActivate, 30) // Time in seconds for rest state regen to kick in.
 RULE_INT(Character, RestRegenRaidTimeToActivate, 300) // Time in seconds for rest state regen to kick in with a raid target.
 RULE_INT(Character, KillsPerGroupLeadershipAA, 250) // Number of dark blues or above per Group Leadership AA
@@ -156,6 +154,9 @@ RULE_BOOL(Character, UseOldBindWound, false) // Uses the original bind wound beh
 RULE_BOOL(Character, GrantHoTTOnCreate, false) // Grant Health of Target's Target leadership AA on character creation
 RULE_BOOL(Character, UseOldConSystem, false) // Grant Health of Target's Target leadership AA on character creation
 RULE_BOOL(Character, OPClientUpdateVisualDebug, false) // Shows a pulse and forward directional particle each time the client sends its position to server
+RULE_BOOL(Character, AllowCrossClassTrainers, false)
+RULE_BOOL(Character, PetsUseReagents, true) //Pets use reagent on spells
+RULE_BOOL(Character, DismountWater, true) // Dismount horses when entering water
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)
@@ -233,6 +234,7 @@ RULE_INT(World, TitaniumStartZoneID, -1) //Sets the Starting Zone for Titanium C
 RULE_INT(World, ExpansionSettings, 16383) // Sets the expansion settings for the server, This is sent on login to world and affects client expansion settings. Defaults to all expansions enabled up to TSS.
 RULE_BOOL(World, UseClientBasedExpansionSettings, true) // if true it will overrule World, ExpansionSettings and set someone's expansion based on the client they're using
 RULE_INT(World, PVPSettings, 0) // Sets the PVP settings for the server, 1 = Rallos Zek RuleSet, 2 = Tallon/Vallon Zek Ruleset, 4 = Sullon Zek Ruleset, 6 = Discord Ruleset, anything above 6 is the Discord Ruleset without the no-drop restrictions removed. TODO: Edit IsAttackAllowed in Zone to accomodate for these rules.
+RULE_INT(World, PVPMinLevel, 0) // minimum level to pvp
 RULE_BOOL (World, IsGMPetitionWindowEnabled, false)
 RULE_INT (World, FVNoDropFlag, 0) // Sets the Firiona Vie settings on the client. If set to 2, the flag will be set for GMs only, allowing trading of no-drop items.
 RULE_BOOL (World, IPLimitDisconnectAll, false)
@@ -275,17 +277,11 @@ RULE_INT(Zone, GlobalLootMultiplier, 1) // Sets Global Loot drop multiplier for 
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Map)
-//enable these to help prevent mob hopping when they are pathing
-RULE_BOOL(Map, FixPathingZWhenLoading, true)		//increases zone boot times a bit to reduce hopping.
-RULE_BOOL(Map, FixPathingZAtWaypoints, false)	//alternative to `WhenLoading`, accomplishes the same thing but does it at each waypoint instead of once at boot time.
-RULE_BOOL(Map, FixPathingZWhenMoving, false)		//very CPU intensive, but helps hopping with widely spaced waypoints.
 RULE_BOOL(Map, FixPathingZOnSendTo, false)		//try to repair Z coords in the SendTo routine as well.
-RULE_BOOL(Map, FixZWhenMoving, true)		// Automatically fix NPC Z coordinates when moving/pathing/engaged (Far less CPU intensive than its predecessor)
+RULE_BOOL(Map, FixZWhenPathing, true)		// Automatically fix NPC Z coordinates when moving/pathing/engaged (Far less CPU intensive than its predecessor)
+RULE_REAL(Map, DistanceCanTravelBeforeAdjustment, 10.0) // distance a mob can path before FixZ is called, depends on FixZWhenPathing
 RULE_BOOL(Map, MobZVisualDebug, false)		// Displays spell effects determining whether or not NPC is hitting Best Z calcs (blue for hit, red for miss)
-RULE_REAL(Map, FixPathingZMaxDeltaMoving, 20)	//at runtime while pathing: max change in Z to allow the BestZ code to apply.
-RULE_REAL(Map, FixPathingZMaxDeltaWaypoint, 20)	//at runtime at each waypoint: max change in Z to allow the BestZ code to apply.
 RULE_REAL(Map, FixPathingZMaxDeltaSendTo, 20)	//at runtime in SendTo: max change in Z to allow the BestZ code to apply.
-RULE_REAL(Map, FixPathingZMaxDeltaLoading, 45)	//while loading each waypoint: max change in Z to allow the BestZ code to apply.
 RULE_INT(Map, FindBestZHeightAdjust, 1)		// Adds this to the current Z before seeking the best Z position
 RULE_CATEGORY_END()
 
@@ -318,6 +314,7 @@ RULE_INT(Pathing, CullNodesFromStart, 1)		// Checks LOS from Start point to seco
 RULE_INT(Pathing, CullNodesFromEnd, 1)		// Checks LOS from End point to second to last node for this many nodes and removes last node if there is LOS
 RULE_REAL(Pathing, CandidateNodeRangeXY, 400)		// When searching for path start/end nodes, only nodes within this range will be considered.
 RULE_REAL(Pathing, CandidateNodeRangeZ, 10)		// When searching for path start/end nodes, only nodes within this range will be considered.
+RULE_REAL(Pathing, NavmeshStepSize, 30.0f)
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Watermap)
@@ -348,7 +345,8 @@ RULE_INT(Spells, TranslocateTimeLimit, 0) // If not zero, time in seconds to acc
 RULE_INT(Spells, SacrificeMinLevel, 46)	//first level Sacrifice will work on
 RULE_INT(Spells, SacrificeMaxLevel, 69)	//last level Sacrifice will work on
 RULE_INT(Spells, SacrificeItemID, 9963)	//Item ID of the item Sacrifice will return (defaults to an EE)
-RULE_BOOL(Spells, EnableSpellGlobals, false)	// If Enabled, spells check the spell_globals table and compare character data from the quest globals before allowing that spell to scribe with scribespells
+RULE_BOOL(Spells, EnableSpellGlobals, false)	// If Enabled, spells check the spell_globals table and compare character data from their quest globals before allowing the spell to scribe with scribespells/traindiscs
+RULE_BOOL(Spells, EnableSpellBuckets, false)    // If Enabled, spells check the spell_buckets table and compare character data from their data buckets before allowing the spell to scribe with scribespells/traindiscs
 RULE_INT(Spells, MaxBuffSlotsNPC, 60)	// default to Tit's limit
 RULE_INT(Spells, MaxSongSlotsNPC, 0)	// NPCs don't have songs ...
 RULE_INT(Spells, MaxDiscSlotsNPC, 0)	// NPCs don't have discs ...
@@ -395,6 +393,7 @@ RULE_INT(Spells, AI_PursueDetrimentalChance, 90) // Chance while chasing target 
 RULE_INT(Spells, AI_IdleNoSpellMinRecast, 6000) // AI spell recast time(MS) check when no spell is cast while idle. (min time in random)
 RULE_INT(Spells, AI_IdleNoSpellMaxRecast, 60000) // AI spell recast time(MS) check when no spell is cast while chasing target. (max time in random)
 RULE_INT(Spells, AI_IdleBeneficialChance, 100) // Chance while idle to do a beneficial spell on self or others.
+RULE_INT(Spells, AI_HealHPPct, 50) // HP Pct NPCs will start heals at (in and out of combat) if spell's max_hp is not set
 RULE_BOOL(Spells, SHDProcIDOffByOne, true) // pre June 2009 SHD spell procs were off by 1, they stopped doing this in June 2009 (so UF+ spell files need this false)
 RULE_BOOL(Spells, Jun182014HundredHandsRevamp, false) // this should be true for if you import a spell file newer than June 18, 2014
 RULE_BOOL(Spells, SwarmPetTargetLock, false) // Use old method of swarm pets target locking till target dies then despawning.
@@ -407,6 +406,7 @@ RULE_BOOL(Spells, IgnoreSpellDmgLvlRestriction, false) // ignore the 5 level spr
 RULE_BOOL(Spells, AllowItemTGB, false) // TGB doesn't work with items on live, custom servers want it though
 RULE_BOOL(Spells, NPCInnateProcOverride, true) //  NPC innate procs override the target type to single target.
 RULE_BOOL(Spells, OldRainTargets, false) // use old incorrectly implemented max targets for rains
+RULE_BOOL(Spells, NPCSpellPush, false) // enable spell push on NPCs
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)
@@ -421,6 +421,9 @@ RULE_BOOL(Combat, UseIntervalAC, true)
 RULE_INT(Combat, PetAttackMagicLevel, 30)
 RULE_BOOL(Combat, EnableFearPathing, true)
 RULE_REAL(Combat, FleeMultiplier, 2.0) // Determines how quickly a NPC will slow down while fleeing. Decrease multiplier to slow NPC down quicker.
+RULE_BOOL(Combat, FleeGray, true) // If true FleeGrayHPRatio will be used.
+RULE_INT(Combat, FleeGrayHPRatio, 50) //HP % when a Gray NPC begins to flee.
+RULE_INT(Combat, FleeGrayMaxLevel, 18) // NPC's above this level won't do gray/green con flee
 RULE_INT(Combat, FleeHPRatio, 25) //HP % when a NPC begins to flee.
 RULE_BOOL(Combat, FleeIfNotAlone, false) // If false, mobs won't flee if other mobs are in combat with it.
 RULE_BOOL(Combat, AdjustProcPerMinute, true)
@@ -510,6 +513,7 @@ RULE_BOOL(Combat, UseRevampHandToHand, false) // use h2h revamped dmg/delays I b
 RULE_BOOL(Combat, ClassicMasterWu, false) // classic master wu uses a random special, modern doesn't
 RULE_INT(Combat, LevelToStopDamageCaps, 0) // 1 will effectively disable them, 20 should give basically same results as old incorrect system
 RULE_BOOL(Combat, ClassicNPCBackstab, false) // true disables npc facestab - npcs get normal attack if not behind
+RULE_BOOL(Combat, UseNPCDamageClassLevelMods, true) // Uses GetClassLevelDamageMod calc in npc_scale_manager
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(NPC)
@@ -517,7 +521,8 @@ RULE_INT(NPC, MinorNPCCorpseDecayTimeMS, 450000) //level<55
 RULE_INT(NPC, MajorNPCCorpseDecayTimeMS, 1500000) //level>=55
 RULE_INT(NPC, CorpseUnlockTimer, 150000)
 RULE_INT(NPC, EmptyNPCCorpseDecayTimeMS, 0)
-RULE_BOOL (NPC, UseItemBonusesForNonPets, true)
+RULE_BOOL(NPC, UseItemBonusesForNonPets, true)
+RULE_BOOL(NPC, UseBaneDamage, false)
 RULE_INT(NPC, SayPauseTimeInSec, 5)
 RULE_INT(NPC, OOCRegen, 0)
 RULE_BOOL(NPC, BuffFriends, false)
@@ -533,6 +538,11 @@ RULE_INT(NPC, NPCToNPCAggroTimerMin, 500)
 RULE_INT(NPC, NPCToNPCAggroTimerMax, 6000)
 RULE_BOOL(NPC, UseClassAsLastName, true) // Uses class archetype as LastName for npcs with none
 RULE_BOOL(NPC, NewLevelScaling, true) // Better level scaling, use old if new formulas would break your server
+RULE_INT(NPC, NPCGatePercent, 5) // % at which the NPC Will attempt to gate at.
+RULE_BOOL(NPC, NPCGateNearBind, false) // Will NPC attempt to gate when near bind location?
+RULE_INT(NPC, NPCGateDistanceBind, 75) // Distance from bind before NPC will attempt to gate
+RULE_BOOL(NPC, NPCHealOnGate, true) // Will the NPC Heal on Gate.
+RULE_REAL(NPC, NPCHealOnGateAmount, 25) // How much the npc will heal on gate if enabled.
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Aggro)
@@ -548,8 +558,11 @@ RULE_REAL(Aggro, TunnelVisionAggroMod, 0.75) //people not currently the top hate
 RULE_INT(Aggro, MaxScalingProcAggro, 400) // Set to -1 for no limit. Maxmimum amount of aggro that HP scaling SPA effect in a proc will add.
 RULE_INT(Aggro, IntAggroThreshold, 75) // Int <= this will aggro regardless of level difference.
 RULE_BOOL(Aggro, AllowTickPulling, false) // tick pulling is an exploit in an NPC's call for help fixed sometime in 2006 on live
-RULE_BOOL(Aggro, UseLevelAggro, true) // Level 18+ and Undead will aggro regardless of level difference. (this will disabled Rule:IntAggroThreshold if set to true)
+RULE_INT(Aggro, MinAggroLevel, 18) // For use with UseLevelAggro
+RULE_BOOL(Aggro, UseLevelAggro, true) // MinAggroLevel rule value+ and Undead will aggro regardless of level difference. (this will disabled Rule:IntAggroThreshold if set to true)
 RULE_INT(Aggro, ClientAggroCheckInterval, 6) // Interval in which clients actually check for aggro - in seconds
+RULE_REAL(Aggro, PetAttackRange, 40000.0) // max squared range /pet attack works at default is 200
+RULE_BOOL(Aggro, NPCAggroMaxDistanceEnabled, true) /* If enabled, NPC's will drop aggro beyond 600 units or what is defined at the zone level */
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(TaskSystem)
@@ -562,7 +575,7 @@ RULE_BOOL(TaskSystem, EnableTaskProximity, true)
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Range)
-RULE_INT(Range, Say, 135)
+RULE_INT(Range, Say, 15)
 RULE_INT(Range, Emote, 135)
 RULE_INT(Range, BeginCast, 200)
 RULE_INT(Range, Anims, 135)
@@ -601,6 +614,9 @@ RULE_BOOL(Bots, BotLevelsWithOwner, false) // Auto-updates spawned bots as owner
 RULE_BOOL(Bots, BotCharacterLevelEnabled, false) // Enables required level to spawn bots
 RULE_INT(Bots, BotCharacterLevel, 0) // 0 as default (if level > this value you can spawn bots if BotCharacterLevelEnabled is true)
 RULE_INT(Bots, CasterStopMeleeLevel, 13) // Level at which caster bots stop melee attacks
+RULE_INT(Bots, AllowedClasses, 0xFFFFFFFF) // Bitmask of allowed bot classes
+RULE_INT(Bots, AllowedRaces, 0xFFFFFFFF) // Bitmask of allowed bot races
+RULE_INT(Bots, AllowedGenders, 0x3) // Bitmask of allowed bot genders
 RULE_CATEGORY_END()
 #endif
 
@@ -688,9 +704,18 @@ RULE_CATEGORY(Console)
 RULE_INT(Console, SessionTimeOut, 600000)	// Amount of time in ms for the console session to time out
 RULE_CATEGORY_END()
 
+RULE_CATEGORY(Network)
+RULE_INT(Network, ResendDelayBaseMS, 100)
+RULE_REAL(Network, ResendDelayFactor, 1.5)
+RULE_INT(Network, ResendDelayMinMS, 100)
+RULE_INT(Network, ResendDelayMaxMS, 5000)
+RULE_INT(Network, ResendsPerCycle, 1000)
+RULE_CATEGORY_END()
+
 RULE_CATEGORY(QueryServ)
 RULE_BOOL(QueryServ, PlayerLogChat, false) // Logs Player Chat
 RULE_BOOL(QueryServ, PlayerLogTrades, false) // Logs Player Trades
+RULE_BOOL(QueryServ, PlayerDropItems, false) // Logs Player dropping items
 RULE_BOOL(QueryServ, PlayerLogHandins, false) // Logs Player Handins
 RULE_BOOL(QueryServ, PlayerLogNPCKills, false) // Logs Player NPC Kills
 RULE_BOOL(QueryServ, PlayerLogDeletes, false) // Logs Player Deletes
@@ -725,6 +750,23 @@ RULE_CATEGORY_END()
 RULE_CATEGORY(Client)
 RULE_BOOL(Client, UseLiveFactionMessage, false) // Allows players to see faction adjustments like Live
 RULE_BOOL(Client, UseLiveBlockedMessage, false) // Allows players to see faction adjustments like Live
+RULE_CATEGORY_END()
+
+RULE_CATEGORY(Bugs)
+RULE_BOOL(Bugs, ReportingSystemActive, true) // Activates bug reporting
+RULE_BOOL(Bugs, UseOldReportingMethod, true) // Forces the use of the old bug reporting system
+RULE_BOOL(Bugs, DumpTargetEntity, false) // Dumps the target entity, if one is provided
+RULE_CATEGORY_END()
+
+RULE_CATEGORY(Faction)
+RULE_INT(Faction, AllyFactionMinimum, 1100)
+RULE_INT(Faction, WarmlyFactionMinimum, 750)
+RULE_INT(Faction, KindlyFactionMinimum, 500)
+RULE_INT(Faction, AmiablyFactionMinimum, 100)
+RULE_INT(Faction, IndifferentlyFactionMinimum, 0)
+RULE_INT(Faction, ApprehensivelyFactionMinimum, -100)
+RULE_INT(Faction, DubiouslyFactionMinimum, -500)
+RULE_INT(Faction, ThreateninglyFactionMinimum, -750)
 RULE_CATEGORY_END()
 
 #undef RULE_CATEGORY

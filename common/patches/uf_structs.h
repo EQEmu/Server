@@ -292,7 +292,7 @@ struct Spawn_Struct
 /*0000*/ //uint8     nullterm1; // hack to null terminate name
 /*0064*/ uint32 spawnId;
 /*0068*/ uint8  level;
-/*0069*/ float    unknown1;
+/*0069*/ float  bounding_radius; // used in melee, overrides calc
 /*0073*/ uint8  NPC;           // 0=player,1=npc,2=pc corpse,3=npc corpse
 	 Spawn_Struct_Bitfields	Bitfields;
 /*0000*/ uint8  otherData; // & 4 - has title, & 8 - has suffix, & 1 - it's a chest or untargetable
@@ -456,9 +456,9 @@ struct NewZone_Struct {
 /*0893*/	uint8	unknown893;	//seen 0 - 00
 /*0894*/	uint8	fall_damage;	// 0 = Fall Damage on, 1 = Fall Damage off
 /*0895*/	uint8	unknown895;	//seen 0 - 00
-/*0896*/	uint32	unknown896;	//seen 180
-/*0900*/	uint32	unknown900;	//seen 180
-/*0904*/	uint32	unknown904;	//seen 180
+/*0896*/	uint32	FastRegenHP;	//seen 180
+/*0900*/	uint32	FastRegenMana;	//seen 180
+/*0904*/	uint32	FastRegenEndurance;	//seen 180
 /*0908*/	uint32	unknown908;	//seen 2
 /*0912*/	uint32	unknown912;	//seen 2
 /*0916*/	float	FogDensity;	//Of about 10 or so zones tested, all but one have this set to 0.33 Blightfire had 0.16
@@ -746,7 +746,7 @@ struct BandolierItem_Struct
 struct Bandolier_Struct
 {
 	char Name[32];
-	BandolierItem_Struct Items[profile::BandolierItemCount];
+	BandolierItem_Struct Items[profile::BANDOLIER_ITEM_COUNT];
 };
 
 //len = 72
@@ -760,7 +760,7 @@ struct PotionBeltItem_Struct
 //len = 288
 struct PotionBelt_Struct
 {
-	PotionBeltItem_Struct Items[profile::PotionBeltSize];
+	PotionBeltItem_Struct Items[profile::POTION_BELT_SIZE];
 };
 
 static const uint32 MAX_GROUP_LEADERSHIP_AA_ARRAY = 16;
@@ -845,8 +845,7 @@ struct BindStruct {
 ** OpCode: 0x006a
  */
 static const uint32 MAX_PP_LANGUAGE		= 25; //
-static const uint32 MAX_PP_SPELLBOOK	= 720; // Confirmed 60 pages on Underfoot now
-static const uint32 MAX_PP_MEMSPELL		= 12; //was 9 now 10 on Underfoot
+
 static const uint32 MAX_PP_SKILL		= PACKET_SKILL_ARRAY_SIZE;	// 100 - actual skills buffer size
 static const uint32 MAX_PP_INNATE_SKILL	= 25;
 static const uint32 MAX_PP_AA_ARRAY		= 300; //was 299
@@ -916,7 +915,7 @@ struct PlayerProfile_Struct
 /*00060*/ BindStruct binds[5];			// Bind points (primary is first)
 /*00160*/ uint32  deity;				// deity
 /*00164*/ uint32  intoxication;			// Alcohol level (in ticks till sober?)
-/*00168*/ uint32  spellSlotRefresh[MAX_PP_MEMSPELL]; // Refresh time (millis) - 4 Octets Each
+/*00168*/ uint32  spellSlotRefresh[spells::SPELL_GEM_COUNT]; // Refresh time (millis) - 4 Octets Each
 /*00208*/ uint8   unknown00208[6];		// Seen 00 00 00 00 00 00 00 00 00 00 00 00 02 01
 /*00222*/ uint32  abilitySlotRefresh;
 /*00226*/ uint8   haircolor;			// Player hair color
@@ -943,8 +942,8 @@ struct PlayerProfile_Struct
 /*04188*/ uint8   unknown04188[28];		//
 /*04216*/ uint8   face;					// Player face - Actually uint32?
 /*04217*/ uint8   unknown04217[147];		// was [175]
-/*04364*/ uint32   spell_book[MAX_PP_SPELLBOOK];	// List of the Spells in spellbook 720 = 90 pages [2880] was [1920]
-/*07244*/ uint32   mem_spells[MAX_PP_MEMSPELL]; // List of spells memorized
+/*04364*/ uint32   spell_book[spells::SPELLBOOK_SIZE];	// List of the Spells in spellbook 720 = 90 pages [2880] was [1920]
+/*07244*/ uint32   mem_spells[spells::SPELL_GEM_COUNT]; // List of spells memorized
 /*07284*/ uint8   unknown07284[20];		//#### uint8 unknown04396[32]; in Titanium ####[28]
 /*07312*/ uint32  platinum;				// Platinum Pieces on player
 /*07316*/ uint32  gold;					// Gold Pieces on player
@@ -969,7 +968,7 @@ struct PlayerProfile_Struct
 /*11236*/ uint32  aapoints_spent;		// Number of spent AA points
 /*11240*/ uint32  aapoints;				// Unspent AA points
 /*11244*/ uint8 unknown11244[4];
-/*11248*/ Bandolier_Struct bandoliers[profile::BandoliersSize]; // [6400] bandolier contents
+/*11248*/ Bandolier_Struct bandoliers[profile::BANDOLIERS_SIZE]; // [6400] bandolier contents
 /*17648*/ PotionBelt_Struct  potionbelt;	// [360] potion belt 72 extra octets by adding 1 more belt slot
 /*18008*/ uint8 unknown18008[8];
 /*18016*/ uint32 available_slots;
@@ -1252,19 +1251,19 @@ struct Action_Struct
 {
 /*00*/	uint16 target;			// id of target
 /*02*/	uint16 source;			// id of caster
-/*04*/	uint16 level;			// level of caster - Seen 0
-/*06*/  uint32 unknown06;
-/*10*/	uint16 instrument_focus;
-/*12*/	uint16 unknown12;		// seems to always be set to something and it doesn't change between casts except in special cases like changing instrument mods
-/*14*/  uint32 unknown14;       // seen 0
-/*18*/  float knockback_angle;  //seems to go from 0-512 then it rolls over again
-/*22*/  uint32 unknown22;
-/*26*/  uint8 type;
-/*27*/  uint32 damage;
-/*31*/  uint16 unknown31;
+/*04*/	uint16 level;			// level of caster for spells, OSX dump says attack rating, guess spells use it for level
+/*06*/  uint32 unknown06;		// OSX dump says base_damage, was used for bard mod too, this is 0'd :(
+/*10*/	float instrument_mod;
+/*14*/  float force;
+/*18*/  float hit_heading;
+/*22*/  float hit_pitch;
+/*26*/  uint8 type;				// 231 (0xE7) for spells, skill
+/*27*/  uint32 damage;			// OSX says min_damage
+/*31*/  uint16 unknown31;		// OSX says tohit
 /*33*/	uint16 spell;			// spell id being cast
-/*35*/	uint8 level2;			// level of caster again? Or maybe the castee
+/*35*/	uint8 spell_level;		// level of caster again? Or maybe the castee
 /*36*/	uint8 effect_flag;		// if this is 4, the effect is valid: or if two are sent at the same time?
+/*37*/
 };
 
 
@@ -1276,27 +1275,22 @@ struct ActionAlt_Struct
 {
 /*00*/	uint16 target;			// id of target
 /*02*/	uint16 source;			// id of caster
-/*04*/	uint16 level;			// level of caster - Seen 0
-/*06*/  uint32 unknown06;
+/*04*/	uint16 level;			// level of caster for spells, OSX dump says attack rating, guess spells use it for level
+/*06*/  uint32 unknown06;		// OSX dump says base_damage, was used for bard mod too, this is 0'd :(
 /*10*/	float instrument_mod;
-/*14*/  uint32 unknown14;       // seen 0
-/*18*/  float knockback_angle;  //seems to go from 0-512 then it rolls over again
-/*22*/  uint32 unknown22;
-/*26*/  uint8 type;
-/*27*/  uint32 damage;
-/*31*/  uint16 unknown31;
+/*14*/  float force;
+/*18*/  float hit_heading;
+/*22*/  float hit_pitch;
+/*26*/  uint8 type;				// 231 (0xE7) for spells, skill
+/*27*/  uint32 damage;			// OSX says min_damage
+/*31*/  uint16 unknown31;		// OSX says tohit
 /*33*/	uint16 spell;			// spell id being cast
-/*35*/	uint8 level2;			// level of caster again? Or maybe the castee
+/*35*/	uint8 spell_level;		// level of caster again? Or maybe the castee
 /*36*/	uint8 effect_flag;		// if this is 4, the effect is valid: or if two are sent at the same time?
-/*37*/	uint32 unknown37;		// New field to Underfoot - Seen 14
-/*41*/	uint8 unknown41;			// New field to Underfoot - Seen 0
-/*42*/	uint8 unknown42;			// New field to Underfoot - Seen 0
-/*43*/	uint8 unknown43;			// New field to Underfoot - Seen 0
-/*44*/	uint32 unknown44;		// New field to Underfoot - Seen 23
-/*48*/	uint32 unknown48;		// New field to Underfoot - Seen -1
-/*52*/	uint32 unknown52;		// New field to Underfoot - Seen -1
-/*56*/	uint32 unknown56;		// New field to Underfoot - Seen 0
-/*60*/	uint32 unknown60;		// New field to Underfoot - Seen 0
+/*37*/	uint8 spell_gem;
+/*38*/	uint8 padding38[2];
+/*40*/	uint32 slot[5];
+/*60*/	uint32 item_cast_type;	// ItemSpellTypes enum from MQ2
 /*64*/
 };
 
@@ -1311,9 +1305,9 @@ struct CombatDamage_Struct
 /* 05 */	uint16	spellid;
 /* 07 */	int32	damage;
 /* 11 */	float	force;		// cd cc cc 3d
-/* 15 */	float	meleepush_xy;		// see above notes in Action_Struct
-/* 19 */	float	meleepush_z;
-/* 23 */	uint8	unknown23;	// was [9]
+/* 15 */	float	hit_heading;		// see above notes in Action_Struct
+/* 19 */	float	hit_pitch;
+/* 23 */	uint8	secondary;	// 0 for primary hand, 1 for secondary
 /* 24 */	uint32	special; // 2 = Rampage, 1 = Wild Rampage
 /* 28 */
 };
@@ -3060,23 +3054,6 @@ struct GuildMakeLeader{
 	char	target[64];
 };
 
-
-
-struct BugStruct{
-/*0000*/	char	chartype[64];
-/*0064*/	char	name[96];
-/*0160*/	char	ui[128];
-/*0288*/	float	x;
-/*0292*/	float	y;
-/*0296*/	float	z;
-/*0300*/	float	heading;
-/*0304*/	uint32	unknown304;
-/*0308*/	uint32	type;
-/*0312*/	char	unknown312[2144];
-/*2456*/	char	bug[1024];
-/*3480*/	char	placeholder[2];
-/*3482*/	char	system_info[4098];
-};
 struct Make_Pet_Struct { //Simple struct for getting pet info
 	uint8 level;
 	uint8 class_;
@@ -3103,20 +3080,21 @@ struct Ground_Spawn{
 struct Ground_Spawns {
 	struct Ground_Spawn spawn[50]; //Assigned max number to allow
 };
-struct PetitionBug_Struct{
-	uint32	petition_number;
-	uint32	unknown4;
-	char	accountname[64];
-	uint32	zoneid;
-	char	name[64];
-	uint32	level;
-	uint32	class_;
-	uint32	race;
-	uint32	unknown152[3];
-	uint32	time;
-	uint32	unknown168;
-	char	text[1028];
-};
+
+//struct PetitionBug_Struct{
+//	uint32	petition_number;
+//	uint32	unknown4;
+//	char	accountname[64];
+//	uint32	zoneid;
+//	char	name[64];
+//	uint32	level;
+//	uint32	class_;
+//	uint32	race;
+//	uint32	unknown152[3];
+//	uint32	time;
+//	uint32	unknown168;
+//	char	text[1028];
+//};
 
 struct ApproveZone_Struct {
 	char	name[64];
@@ -3928,7 +3906,7 @@ struct AnnoyingZoneUnknown_Struct {
 };
 
 struct LoadSpellSet_Struct {
-      uint8  spell[MAX_PP_MEMSPELL];      // 0 if no action
+      uint8  spell[spells::SPELL_GEM_COUNT];      // 0 if no action
       uint32 unknown;	// there seems to be an extra field in this packet...
 };
 
@@ -4505,6 +4483,22 @@ struct MercenaryAssign_Struct {
 /*0004*/	uint32	MercUnk01;		//
 /*0008*/	uint32	MercUnk02;		//
 /*0012*/
+};
+
+struct SayLinkBodyFrame_Struct {
+/*000*/	char ActionID[1];
+/*001*/	char ItemID[5];
+/*006*/	char Augment1[5];
+/*011*/	char Augment2[5];
+/*016*/	char Augment3[5];
+/*021*/	char Augment4[5];
+/*026*/	char Augment5[5];
+/*031*/	char IsEvolving[1];
+/*032*/	char EvolveGroup[4];
+/*036*/	char EvolveLevel[1];
+/*037*/	char OrnamentIcon[5];
+/*042*/	char Hash[8];
+/*050*/
 };
 
 	}; /*structs*/

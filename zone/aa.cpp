@@ -126,7 +126,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 			(npc_dup != nullptr) ? npc_dup : npc_type,	//make sure we give the NPC the correct data pointer
 			0,
 			GetPosition() + glm::vec4(swarmPetLocations[summon_count], 0.0f, 0.0f),
-			FlyMode3);
+			GravityBehavior::Water);
 
 		if (followme)
 			swarm_pet_npc->SetFollowID(GetID());
@@ -225,7 +225,7 @@ void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_overrid
 				(npc_dup!=nullptr)?npc_dup:npc_type,	//make sure we give the NPC the correct data pointer
 				0,
 				GetPosition() + glm::vec4(swarmPetLocations[summon_count], 0.0f, 0.0f),
-				FlyMode3);
+				GravityBehavior::Water);
 
 		if (followme)
 			swarm_pet_npc->SetFollowID(GetID());
@@ -286,7 +286,7 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration)
 	make_npc->min_dmg = 1;
 
 	//base stats
-	make_npc->cur_hp = (GetLevel() * 55);
+	make_npc->current_hp = (GetLevel() * 55);
 	make_npc->max_hp = (GetLevel() * 55);
 	make_npc->STR = 85 + (GetLevel() * 3);
 	make_npc->STA = 85 + (GetLevel() * 3);
@@ -356,51 +356,51 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration)
 	case PALADIN:
 		//SPECATK_TRIPLE
 		strcpy(make_npc->special_abilities, "6,1");
-		make_npc->cur_hp = make_npc->cur_hp * 150 / 100;
+		make_npc->current_hp = make_npc->current_hp * 150 / 100;
 		make_npc->max_hp = make_npc->max_hp * 150 / 100;
 		make_npc->npc_spells_id = 8;
 		break;
 	case SHADOWKNIGHT:
 		strcpy(make_npc->special_abilities, "6,1");
-		make_npc->cur_hp = make_npc->cur_hp * 150 / 100;
+		make_npc->current_hp = make_npc->current_hp * 150 / 100;
 		make_npc->max_hp = make_npc->max_hp * 150 / 100;
 		make_npc->npc_spells_id = 9;
 		break;
 	case RANGER:
 		strcpy(make_npc->special_abilities, "7,1");
-		make_npc->cur_hp = make_npc->cur_hp * 135 / 100;
+		make_npc->current_hp = make_npc->current_hp * 135 / 100;
 		make_npc->max_hp = make_npc->max_hp * 135 / 100;
 		make_npc->npc_spells_id = 10;
 		break;
 	case BARD:
 		strcpy(make_npc->special_abilities, "6,1");
-		make_npc->cur_hp = make_npc->cur_hp * 110 / 100;
+		make_npc->current_hp = make_npc->current_hp * 110 / 100;
 		make_npc->max_hp = make_npc->max_hp * 110 / 100;
 		make_npc->npc_spells_id = 11;
 		break;
 	case BEASTLORD:
 		strcpy(make_npc->special_abilities, "7,1");
-		make_npc->cur_hp = make_npc->cur_hp * 110 / 100;
+		make_npc->current_hp = make_npc->current_hp * 110 / 100;
 		make_npc->max_hp = make_npc->max_hp * 110 / 100;
 		make_npc->npc_spells_id = 12;
 		break;
 	case ROGUE:
 		strcpy(make_npc->special_abilities, "7,1");
 		make_npc->max_dmg = make_npc->max_dmg * 150 /100;
-		make_npc->cur_hp = make_npc->cur_hp * 110 / 100;
+		make_npc->current_hp = make_npc->current_hp * 110 / 100;
 		make_npc->max_hp = make_npc->max_hp * 110 / 100;
 		break;
 	case MONK:
 		strcpy(make_npc->special_abilities, "7,1");
 		make_npc->max_dmg = make_npc->max_dmg * 150 /100;
-		make_npc->cur_hp = make_npc->cur_hp * 135 / 100;
+		make_npc->current_hp = make_npc->current_hp * 135 / 100;
 		make_npc->max_hp = make_npc->max_hp * 135 / 100;
 		break;
 	case WARRIOR:
 	case BERSERKER:
 		strcpy(make_npc->special_abilities, "7,1");
 		make_npc->max_dmg = make_npc->max_dmg * 150 /100;
-		make_npc->cur_hp = make_npc->cur_hp * 175 / 100;
+		make_npc->current_hp = make_npc->current_hp * 175 / 100;
 		make_npc->max_hp = make_npc->max_hp * 175 / 100;
 		break;
 	default:
@@ -413,7 +413,7 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration)
 	make_npc->d_melee_texture1 = 0;
 	make_npc->d_melee_texture2 = 0;
 
-	auto npca = new NPC(make_npc, 0, GetPosition(), FlyMode3);
+	auto npca = new NPC(make_npc, 0, GetPosition(), GravityBehavior::Water);
 
 	if(!npca->GetSwarmInfo()){
 		auto nSI = new SwarmPet;
@@ -424,6 +424,7 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration)
 		npca->GetSwarmInfo()->duration->Start(duration*1000);
 	}
 
+	npca->StartSwarmTimer(duration * 1000);
 	npca->GetSwarmInfo()->owner_id = GetID();
 
 	//give the pet somebody to "love"
@@ -434,7 +435,7 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration)
 
 	//gear stuff, need to make sure there's
 	//no situation where this stuff can be duped
-	for (int x = EQEmu::legacy::EQUIPMENT_BEGIN; x <= EQEmu::legacy::EQUIPMENT_END; x++) // (< 21) added MainAmmo
+	for (int x = EQEmu::invslot::EQUIPMENT_BEGIN; x <= EQEmu::invslot::EQUIPMENT_END; x++)
 	{
 		uint32 sitem = 0;
 		sitem = CorpseToUse->GetWornItem(x);
@@ -487,7 +488,7 @@ void Client::ResetAA() {
 
 	database.DeleteCharacterLeadershipAAs(CharacterID());
 	// undefined for these clients
-	if (ClientVersionBit() & EQEmu::versions::bit_TitaniumAndEarlier)
+	if (ClientVersionBit() & EQEmu::versions::maskTitaniumAndEarlier)
 		Kick();
 }
 
@@ -1171,7 +1172,7 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 		return;
 
 	//check cooldown
-	if(!p_timers.Expired(&database, rank->spell_type + pTimerAAStart)) {
+	if(!p_timers.Expired(&database, rank->spell_type + pTimerAAStart, false)) {
 		uint32 aaremain = p_timers.GetRemainingTime(rank->spell_type + pTimerAAStart);
 		uint32 aaremain_hr = aaremain / (60 * 60);
 		uint32 aaremain_min = (aaremain / 60) % 60;
@@ -1207,14 +1208,25 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 	if (spells[rank->spell].targettype == ST_Pet || spells[rank->spell].targettype == ST_SummonedPet)
 		target_id = GetPetID();
 
+	// extra handling for cast_not_standing spells
+	if (!spells[rank->spell].cast_not_standing) {
+		if (GetAppearance() == eaSitting) // we need to stand!
+			SetAppearance(eaStanding, false);
+
+		if (GetAppearance() != eaStanding) {
+			Message_StringID(MT_SpellFailure, STAND_TO_CAST);
+			return;
+		}
+	}
+
 	// Bards can cast instant cast AAs while they are casting another song
 	if(spells[rank->spell].cast_time == 0 && GetClass() == BARD && IsBardSong(casting_spell_id)) {
-		if(!SpellFinished(rank->spell, entity_list.GetMob(target_id), EQEmu::CastingSlot::AltAbility, spells[rank->spell].mana, -1, spells[rank->spell].ResistDiff, false)) {
+		if(!SpellFinished(rank->spell, entity_list.GetMob(target_id), EQEmu::spells::CastingSlot::AltAbility, spells[rank->spell].mana, -1, spells[rank->spell].ResistDiff, false)) {
 			return;
 		}
 		ExpendAlternateAdvancementCharge(ability->id);
 	} else {
-		if(!CastSpell(rank->spell, target_id, EQEmu::CastingSlot::AltAbility, -1, -1, 0, -1, rank->spell_type + pTimerAAStart, cooldown, nullptr, rank->id)) {
+		if(!CastSpell(rank->spell, target_id, EQEmu::spells::CastingSlot::AltAbility, -1, -1, 0, -1, rank->spell_type + pTimerAAStart, cooldown, nullptr, rank->id)) {
 			return;
 		}
 	}
@@ -1443,7 +1455,7 @@ bool Mob::CanUseAlternateAdvancementRank(AA::Rank *rank) {
 	//the one titanium hack i will allow
 	//just to make sure we dont crash the client with newer aas
 	//we'll exclude any expendable ones
-	if(IsClient() && CastToClient()->ClientVersionBit() & EQEmu::versions::bit_TitaniumAndEarlier) {
+	if(IsClient() && CastToClient()->ClientVersionBit() & EQEmu::versions::maskTitaniumAndEarlier) {
 		if(ability->charges > 0) {
 			return false;
 		}

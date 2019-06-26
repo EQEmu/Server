@@ -244,8 +244,7 @@ bool IsBeneficialSpell(uint16 spell_id)
 			} else {
 				// If the resisttype is not magic and spell is Bind Sight or Cast Sight
 				// It's not beneficial
-				if (sai == SAI_Dispell_Sight && spells[spell_id].skill == 18 &&
-						!IsEffectInSpell(spell_id, SE_VoiceGraft))
+				if ((sai == SAI_Calm && IsEffectInSpell(spell_id, SE_Harmony)) || (sai == SAI_Calm_Song && IsEffectInSpell(spell_id, SE_BindSight)) || (sai == SAI_Dispell_Sight && spells[spell_id].skill == 18 && !IsEffectInSpell(spell_id, SE_VoiceGraft)))
 					return false;
 			}
 		}
@@ -1121,6 +1120,20 @@ bool IsStackableDot(uint16 spell_id)
 	if (spell.dot_stacking_exempt || spell.goodEffect || !spell.buffdurationformula)
 		return false;
 	return IsEffectInSpell(spell_id, SE_CurrentHP) || IsEffectInSpell(spell_id, SE_GravityEffect);
+}
+
+bool IsBardOnlyStackEffect(int effect)
+{
+	switch(effect) {
+	/*case SE_CurrentMana:
+	case SE_ManaRegen_v2:
+	case SE_CurrentHP:
+	case SE_HealOverTime:*/
+	case SE_BardAEDot:
+		return true;
+	default:
+		return false;
+	}
 }
 
 bool IsCastWhileInvis(uint16 spell_id)

@@ -94,6 +94,7 @@
 	void Handle_OP_DeleteItem(const EQApplicationPacket *app);
 	void Handle_OP_DeleteSpawn(const EQApplicationPacket *app);
 	void Handle_OP_DeleteSpell(const EQApplicationPacket *app);
+	void Handle_OP_Disarm(const EQApplicationPacket *app);
 	void Handle_OP_DisarmTraps(const EQApplicationPacket *app);
 	void Handle_OP_DoGroupLeadershipAbility(const EQApplicationPacket *app);
 	void Handle_OP_DuelResponse(const EQApplicationPacket *app);
@@ -228,6 +229,7 @@
 	void Handle_OP_PurchaseLeadershipAA(const EQApplicationPacket *app);
 	void Handle_OP_PVPLeaderBoardDetailsRequest(const EQApplicationPacket *app);
 	void Handle_OP_PVPLeaderBoardRequest(const EQApplicationPacket *app);
+	void Handle_OP_QueryUCSServerStatus(const EQApplicationPacket *app);
 	void Handle_OP_RaidCommand(const EQApplicationPacket *app);
 	void Handle_OP_RandomReq(const EQApplicationPacket *app);
 	void Handle_OP_ReadBook(const EQApplicationPacket *app);

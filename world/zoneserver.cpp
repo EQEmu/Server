@@ -41,6 +41,7 @@ extern GroupLFPList LFPGroupList;
 extern ZSList zoneserver_list;
 extern LoginServerList loginserverlist;
 extern volatile bool RunLoops;
+extern volatile bool UCSServerAvailable_;
 extern AdventureManager adventure_manager;
 extern UCSConnection UCSLink;
 extern QueryServConnection QSLink;
@@ -813,12 +814,12 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	}
 	case ServerOP_ReloadRules: {
 		zoneserver_list.SendPacket(pack);
-		RuleManager::Instance()->LoadRules(&database, "default");
+		RuleManager::Instance()->LoadRules(&database, "default", true);
 		break;
 	}
 	case ServerOP_ReloadRulesWorld:
 	{
-		RuleManager::Instance()->LoadRules(&database, "default");
+		RuleManager::Instance()->LoadRules(&database, "default", true);
 		break;
 	}
 	case ServerOP_ReloadPerlExportSettings:
@@ -978,6 +979,10 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		tod->start_realtime = zoneserver_list.worldclock.getStartRealTime();
 		SendPacket(pack);
 		safe_delete(pack);
+		break;
+	}
+	case ServerOP_RefreshCensorship: {
+		zoneserver_list.SendPacket(pack);
 		break;
 	}
 	case ServerOP_SetWorldTime: {
@@ -1267,6 +1272,24 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		UCSLink.SendPacket(pack);
 		break;
 	}
+
+	case ServerOP_UCSServerStatusRequest:
+	{
+		auto ucsss = (UCSServerStatus_Struct*)pack->pBuffer;
+		auto zs = zoneserver_list.FindByPort(ucsss->port);
+		if (!zs)
+			break;
+
+		auto outapp = new ServerPacket(ServerOP_UCSServerStatusReply, sizeof(UCSServerStatus_Struct));
+		ucsss = (UCSServerStatus_Struct*)outapp->pBuffer;
+		ucsss->available = (UCSServerAvailable_ ? 1 : 0);
+		ucsss->timestamp = Timer::GetCurrentTime();
+		zs->SendPacket(outapp);
+		safe_delete(outapp);
+
+		break;
+	}
+
 	case ServerOP_QSSendQuery:
 	case ServerOP_QueryServGeneric:
 	case ServerOP_Speech:
@@ -1276,6 +1299,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	case ServerOP_QSPlayerLogDeletes:
 	case ServerOP_QSPlayerLogMoves:
 	case ServerOP_QSPlayerLogMerchantTransactions:
+	case ServerOP_QSPlayerDropItem:
 	{
 		QSLink.SendPacket(pack);
 		break;
@@ -1379,6 +1403,13 @@ void ZoneServer::SendGroupIDs() {
 	zoneserver_list.NextGroupIDs(sgi->start, sgi->end);
 	SendPacket(pack);
 	delete pack;
+}
+
+
+void ZoneServer::SendKeepAlive()
+{
+	ServerPacket pack(ServerOP_KeepAlive, 0);
+	SendPacket(&pack);
 }
 
 void ZoneServer::ChangeWID(uint32 iCharID, uint32 iWID) {

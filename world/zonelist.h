@@ -54,7 +54,8 @@ public:
 	Timer*	reminder;
 	void	NextGroupIDs(uint32 &start, uint32 &end);
 	void	SendLSZones();
-	uint16 GetAvailableZonePort();
+	uint16	GetAvailableZonePort();
+	void	UpdateUCSServerAvailable(bool ucss_available = true);
 
 	int GetZoneCount();
 	void GetZoneIDList(std::vector<uint32> &zones);
@@ -62,6 +63,7 @@ public:
 
 private:
 	void OnTick(EQ::Timer *t);
+	void OnKeepAlive(EQ::Timer *t);
 	uint32 NextID;
 	std::list<std::unique_ptr<ZoneServer>> list;
 	uint16	pLockedZones[MaxLockedZones];
@@ -69,6 +71,7 @@ private:
 	uint16 LastAllocatedPort;
 
 	std::unique_ptr<EQ::Timer> m_tick;
+	std::unique_ptr<EQ::Timer> m_keepalive;
 };
 
 #endif /*ZONELIST_H_*/

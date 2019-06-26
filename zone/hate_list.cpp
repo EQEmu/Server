@@ -107,6 +107,7 @@ void HateList::SetHateAmountOnEnt(Mob* other, uint32 in_hate, uint32 in_damage)
 			entity->hatelist_damage = in_damage;
 		if (in_hate > 0)
 			entity->stored_hate_amount = in_hate;
+		entity->last_modified = Timer::GetCurrentTime();
 	}
 }
 
@@ -192,6 +193,7 @@ void HateList::AddEntToHateList(Mob *in_entity, int32 in_hate, int32 in_damage, 
 		entity->hatelist_damage += (in_damage >= 0) ? in_damage : 0;
 		entity->stored_hate_amount += in_hate;
 		entity->is_entity_frenzy = in_is_entity_frenzied;
+		entity->last_modified = Timer::GetCurrentTime();
 	}
 	else if (iAddIfNotExist) {
 		entity = new struct_HateList;
@@ -199,13 +201,13 @@ void HateList::AddEntToHateList(Mob *in_entity, int32 in_hate, int32 in_damage, 
 		entity->hatelist_damage = (in_damage >= 0) ? in_damage : 0;
 		entity->stored_hate_amount = in_hate;
 		entity->is_entity_frenzy = in_is_entity_frenzied;
+		entity->oor_count = 0;
+		entity->last_modified = Timer::GetCurrentTime();
 		list.push_back(entity);
 		parse->EventNPC(EVENT_HATE_LIST, hate_owner->CastToNPC(), in_entity, "1", 0);
 
 		if (in_entity->IsClient()) {
-			if (hate_owner->CastToNPC()->IsRaidTarget())
-				in_entity->CastToClient()->SetEngagedRaidTarget(true);
-			in_entity->CastToClient()->IncrementAggroCount();
+			in_entity->CastToClient()->IncrementAggroCount(hate_owner->CastToNPC()->IsRaidTarget());
 		}
 	}
 }
@@ -331,15 +333,6 @@ Mob *HateList::GetEntWithMostHateOnList(Mob *center, Mob *skip)
 			if (cur->entity_on_hatelist == skip) {
 				++iterator;
 				continue;
-			}
-
-            auto hateEntryPosition = glm::vec3(cur->entity_on_hatelist->GetX(), cur->entity_on_hatelist->GetY(), cur->entity_on_hatelist->GetZ());
-			if (center->IsNPC() && center->CastToNPC()->IsUnderwaterOnly() && zone->HasWaterMap()) {
-				if (!zone->watermap->InLiquid(hateEntryPosition)) {
-					skipped_count++;
-					++iterator;
-					continue;
-				}
 			}
 
 			if (cur->entity_on_hatelist->Sanctuary()) {
@@ -472,14 +465,6 @@ Mob *HateList::GetEntWithMostHateOnList(Mob *center, Mob *skip)
 				continue;
 			}
 
-			if (center->IsNPC() && center->CastToNPC()->IsUnderwaterOnly() && zone->HasWaterMap()) {
-				if(!zone->watermap->InLiquid(glm::vec3(cur->entity_on_hatelist->GetPosition()))) {
-					skipped_count++;
-					++iterator;
-					continue;
-				}
-			}
-
 			if (cur->entity_on_hatelist != nullptr && ((cur->stored_hate_amount > hate) || cur->is_entity_frenzy))
 			{
 				top_hate = cur->entity_on_hatelist;
@@ -536,6 +521,69 @@ Mob *HateList::GetRandomEntOnHateList()
 	return (*iterator)->entity_on_hatelist;
 }
 
+Mob *HateList::GetEscapingEntOnHateList() {
+	// function is still in design stage
+
+	for (auto iter : list) {
+		if (!iter->entity_on_hatelist)
+			continue;
+
+		if (!iter->entity_on_hatelist->IsFeared())
+			continue;
+
+		if (iter->entity_on_hatelist->IsRooted())
+			continue;
+		if (iter->entity_on_hatelist->IsMezzed())
+			continue;
+		if (iter->entity_on_hatelist->IsStunned())
+			continue;
+
+		return iter->entity_on_hatelist;
+	}
+
+	return nullptr;
+}
+
+Mob *HateList::GetEscapingEntOnHateList(Mob *center, float range, bool first) {
+	// function is still in design stage
+	
+	if (!center)
+		return nullptr;
+
+	Mob *escaping_mob = nullptr;
+	float mob_distance = 0.0f;
+
+	for (auto iter : list) {
+		if (!iter->entity_on_hatelist)
+			continue;
+
+		if (!iter->entity_on_hatelist->IsFeared())
+			continue;
+
+		if (iter->entity_on_hatelist->IsRooted())
+			continue;
+		if (iter->entity_on_hatelist->IsMezzed())
+			continue;
+		if (iter->entity_on_hatelist->IsStunned())
+			continue;
+		
+		float distance_test = DistanceSquared(center->GetPosition(), iter->entity_on_hatelist->GetPosition());
+
+		if (range > 0.0f && distance_test > range)
+			continue;
+		
+		if (first)
+			return iter->entity_on_hatelist;
+		
+		if (distance_test > mob_distance) {
+			escaping_mob = iter->entity_on_hatelist;
+			mob_distance = distance_test;
+		}
+	}
+
+	return escaping_mob;
+}
+
 int32 HateList::GetEntHateAmount(Mob *in_entity, bool damage)
 {
 	struct_HateList *entity;
@@ -573,12 +621,19 @@ int HateList::AreaRampage(Mob *caster, Mob *target, int count, ExtraAttackOption
 	if (!target || !caster)
 		return 0;
 
+	// tank will be hit ONLY if they are the only target on the hate list
+	// if there is anyone else on the hate list, the tank will not be hit, even if those others aren't hit either
+	if (list.size() == 1) {
+		caster->ProcessAttackRounds(target, opts);
+		return 1;
+	}
+
 	int hit_count = 0;
 	// This should prevent crashes if something dies (or mainly more than 1 thing goes away)
 	// This is a temp solution until the hate lists can be rewritten to not have that issue
 	std::vector<uint16> id_list;
 	for (auto &h : list) {
-		if (h->entity_on_hatelist && h->entity_on_hatelist != caster &&
+		if (h->entity_on_hatelist && h->entity_on_hatelist != caster && h->entity_on_hatelist != target &&
 		    caster->CombatRange(h->entity_on_hatelist))
 			id_list.push_back(h->entity_on_hatelist->GetID());
 		if (count != -1 && id_list.size() > count)
@@ -646,3 +701,45 @@ void HateList::SpellCast(Mob *caster, uint32 spell_id, float range, Mob* ae_cent
 		iter++;
 	}
 }
+
+void HateList::RemoveStaleEntries(int time_ms, float dist)
+{
+	auto it = list.begin();
+
+	auto cur_time = Timer::GetCurrentTime();
+
+	auto dist2 = dist * dist;
+
+	while (it != list.end()) {
+		auto m = (*it)->entity_on_hatelist;
+		if (m) {
+			bool remove = false;
+
+			if (cur_time - (*it)->last_modified > time_ms)
+				remove = true;
+
+			if (!remove && DistanceSquaredNoZ(hate_owner->GetPosition(), m->GetPosition()) > dist2) {
+				(*it)->oor_count++;
+				if ((*it)->oor_count == 2)
+					remove = true;
+			} else if ((*it)->oor_count != 0) {
+				(*it)->oor_count = 0;
+			}
+
+			if (remove) {
+				parse->EventNPC(EVENT_HATE_LIST, hate_owner->CastToNPC(), m, "0", 0);
+
+				if (m->IsClient()) {
+					m->CastToClient()->DecrementAggroCount();
+					m->CastToClient()->RemoveXTarget(hate_owner, true);
+				}
+
+				delete (*it);
+				it = list.erase(it);
+				continue;
+			}
+		}
+		++it;
+	}
+}
+

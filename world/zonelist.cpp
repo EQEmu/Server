@@ -32,6 +32,7 @@ extern uint32 numzones;
 extern bool holdzones;
 extern EQEmu::Random emu_random;
 extern WebInterfaceList web_interface;
+volatile bool UCSServerAvailable_ = false;
 void CatchSignal(int sig_num);
 
 ZSList::ZSList()
@@ -42,6 +43,7 @@ ZSList::ZSList()
 	memset(pLockedZones, 0, sizeof(pLockedZones));
 
 	m_tick.reset(new EQ::Timer(5000, true, std::bind(&ZSList::OnTick, this, std::placeholders::_1)));
+	m_keepalive.reset(new EQ::Timer(2500, true, std::bind(&ZSList::OnKeepAlive, this, std::placeholders::_1)));
 }
 
 ZSList::~ZSList() {
@@ -669,6 +671,16 @@ void ZSList::GetZoneIDList(std::vector<uint32> &zones) {
 	}
 }
 
+void ZSList::UpdateUCSServerAvailable(bool ucss_available) {
+	UCSServerAvailable_ = ucss_available;
+	auto outapp = new ServerPacket(ServerOP_UCSServerStatusReply, sizeof(UCSServerStatus_Struct));
+	auto ucsss = (UCSServerStatus_Struct*)outapp->pBuffer;
+	ucsss->available = (ucss_available ? 1 : 0);
+	ucsss->timestamp = Timer::GetCurrentTime();
+	SendPacket(outapp);
+	safe_delete(outapp);
+}
+
 void ZSList::WorldShutDown(uint32 time, uint32 interval)
 {
 	if (time > 0) {
@@ -734,4 +746,11 @@ void ZSList::OnTick(EQ::Timer *t)
 	}
 
 	web_interface.SendEvent(out);
+}
+
+void ZSList::OnKeepAlive(EQ::Timer *t)
+{
+	for (auto &zone : list) {
+		zone->SendKeepAlive();
+	}
 }

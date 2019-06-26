@@ -53,7 +53,7 @@ class Corpse : public Mob {
 	/* Corpse: General */
 	virtual bool	Death(Mob* killerMob, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill) { return true; }
 	virtual void	Damage(Mob* from, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None) { return; }
-	virtual bool	Attack(Mob* other, int Hand = EQEmu::inventory::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = true, bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr) { return false; }
+	virtual bool	Attack(Mob* other, int Hand = EQEmu::invslot::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = true, bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr) { return false; }
 	virtual bool	HasRaid()			{ return false; }
 	virtual bool	HasGroup()			{ return false; }
 	virtual Raid*	GetRaid()			{ return 0; }
@@ -116,7 +116,7 @@ class Corpse : public Mob {
 	inline void	Lock()				{ is_locked = true; }
 	inline void	UnLock()			{ is_locked = false; }
 	inline bool	IsLocked()			{ return is_locked; }
-	inline void	ResetLooter()		{ being_looted_by = 0xFFFFFFFF; }
+	inline void	ResetLooter()		{ being_looted_by = 0xFFFFFFFF; loot_request_type = LootRequestType::Forbidden; }
 	inline bool	IsBeingLooted()		{ return (being_looted_by != 0xFFFFFFFF); }
 	inline bool	IsBeingLootedBy(Client *c) { return being_looted_by == c->GetID(); }
 
@@ -126,7 +126,7 @@ class Corpse : public Mob {
 	void Spawn();
 
 	char		corpse_name[64];
-	uint32		GetEquipment(uint8 material_slot) const;
+	uint32		GetEquippedItemFromTextureSlot(uint8 material_slot) const;
 	uint32		GetEquipmentColor(uint8 material_slot) const;
 	inline int	GetRezExp() { return rez_experience; }
 
@@ -161,6 +161,7 @@ private:
 	Timer		loot_cooldown_timer; /* Delay between loot actions on the corpse entity */
 	EQEmu::TintProfile item_tint;
 
+	LootRequestType	loot_request_type;
 };
 
 #endif
