@@ -1372,3 +1372,12 @@ uint32 LuaParser::GetExperienceForKill(Client *self, Mob *against, bool &ignoreD
 	}
 	return retval;
 }
+
+void LuaParser::AddLevelBasedExp(Client *self, uint8 exp_percentage, uint8 max_level, bool &ignoreDefault)
+{
+	uint32 retval = 0;
+	for (auto &mod : mods_) {
+		mod.AddLevelBasedExp(self, exp_percentage, max_level, ignoreDefault);
+	}
+	return;
+}

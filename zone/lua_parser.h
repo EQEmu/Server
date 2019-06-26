@@ -99,6 +99,7 @@ public:
 	uint32 GetRequiredAAExperience(Client *self, bool &ignoreDefault);
 	uint32 GetEXPForLevel(Client *self, uint16 level, bool &ignoreDefault);
 	uint32 GetExperienceForKill(Client *self, Mob *against, bool &ignoreDefault);
+	void AddLevelBasedExp(Client *self, uint8 exp_percentage, uint8 max_level,bool &ignoreDefault);
 
 private:
 	LuaParser();

@@ -942,6 +942,15 @@ uint32 Client::GetEXPForLevel(uint16 check_level)
 
 void Client::AddLevelBasedExp(uint8 exp_percentage, uint8 max_level) 
 { 
+	#ifdef LUA_EQEMU
+		bool ignoreDefault = false;
+		LuaParser::Instance()->AddLevelBasedExp(this, exp_percentage, max_level, ignoreDefault);
+
+		if (ignoreDefault) {
+			return;
+		}
+	#endif
+
 	uint32	award;
 	uint32	xp_for_level;
 
