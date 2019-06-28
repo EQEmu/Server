@@ -152,7 +152,8 @@ Corpse::Corpse(NPC* in_npc, ItemList* in_itemlist, uint32 in_npctypeid, const NP
 	in_npc->GetDeity(),in_npc->GetLevel(),in_npc->GetNPCTypeID(),in_npc->GetSize(),0,
 	in_npc->GetPosition(), in_npc->GetInnateLightType(), in_npc->GetTexture(),in_npc->GetHelmTexture(),
 	0,0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,0,0,EQEmu::TintProfile(),0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0),
+	0,0,0,0,0,0,0,0,0,0,EQEmu::TintProfile(),0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+	(*in_npctypedata)->use_model),
 	corpse_decay_timer(in_decaytime),
 	corpse_rez_timer(0),
 	corpse_delay_timer(RuleI(NPC, CorpseUnlockTimer)),
@@ -258,6 +259,7 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 	0,								  // uint8		in_bracertexture,
 	0,								  // uint8		in_handtexture,
 	0,								  // uint8		in_legtexture,
+	0,
 	0								  // uint8		in_feettexture,
 	),
 	corpse_decay_timer(RuleI(Character, CorpseDecayTimeMS)),
@@ -471,6 +473,7 @@ in_helmtexture,
 0,
 EQEmu::TintProfile(),
 0xff,
+0,
 0,
 0,
 0,
@@ -1374,7 +1377,7 @@ void Corpse::QueryLoot(Client* to) {
 	cur = itemlist.begin();
 	end = itemlist.end();
 
-	int corpselootlimit = EQEmu::inventory::StaticLookup(EQEmu::versions::ConvertClientVersionToMobVersion(to->ClientVersion()))->InventoryTypeSize.Corpse;
+	int corpselootlimit = to->GetInv().GetLookup()->InventoryTypeSize.Corpse;
 
 	for(; cur != end; ++cur) {
 		ServerLootItem_Struct* sitem = *cur;

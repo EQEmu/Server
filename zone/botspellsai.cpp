@@ -192,25 +192,24 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 					else {
 						float hpRatioToCast = 0.0f;
 
-						switch(this->GetBotStance())
-						{
-							case BotStanceEfficient:
-							case BotStanceAggressive:
-								hpRatioToCast = isPrimaryHealer?90.0f:50.0f;
-								break;
-							case BotStanceBalanced:
-								hpRatioToCast = isPrimaryHealer?95.0f:75.0f;
-								break;
-							case BotStanceReactive:
-								hpRatioToCast = isPrimaryHealer?100.0f:90.0f;
-								break;
-							case BotStanceBurn:
-							case BotStanceBurnAE:
-								hpRatioToCast = isPrimaryHealer?75.0f:25.0f;
-								break;
-							default:
-								hpRatioToCast = isPrimaryHealer?100.0f:0.0f;
-								break;
+						switch(this->GetBotStance()) {
+						case EQEmu::constants::stanceEfficient:
+						case EQEmu::constants::stanceAggressive:
+							hpRatioToCast = isPrimaryHealer?90.0f:50.0f;
+							break;
+						case EQEmu::constants::stanceBalanced:
+							hpRatioToCast = isPrimaryHealer?95.0f:75.0f;
+							break;
+						case EQEmu::constants::stanceReactive:
+							hpRatioToCast = isPrimaryHealer?100.0f:90.0f;
+							break;
+						case EQEmu::constants::stanceBurn:
+						case EQEmu::constants::stanceBurnAE:
+							hpRatioToCast = isPrimaryHealer?75.0f:25.0f;
+							break;
+						default:
+							hpRatioToCast = isPrimaryHealer?100.0f:0.0f;
+							break;
 						}
 
 						//If we're at specified mana % or below, don't heal as hybrid
@@ -381,23 +380,22 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 					{
 						float manaRatioToCast = 75.0f;
 
-						switch(this->GetBotStance())
-						{
-							case BotStanceEfficient:
-								manaRatioToCast = 90.0f;
-								break;
-							case BotStanceBalanced:
-							case BotStanceAggressive:
-								manaRatioToCast = 75.0f;
-								break;
-							case BotStanceReactive:
-							case BotStanceBurn:
-							case BotStanceBurnAE:
-								manaRatioToCast = 50.0f;
-								break;
-							default:
-								manaRatioToCast = 75.0f;
-								break;
+						switch(this->GetBotStance()) {
+						case EQEmu::constants::stanceEfficient:
+							manaRatioToCast = 90.0f;
+							break;
+						case EQEmu::constants::stanceBalanced:
+						case EQEmu::constants::stanceAggressive:
+							manaRatioToCast = 75.0f;
+							break;
+						case EQEmu::constants::stanceReactive:
+						case EQEmu::constants::stanceBurn:
+						case EQEmu::constants::stanceBurnAE:
+							manaRatioToCast = 50.0f;
+							break;
+						default:
+							manaRatioToCast = 75.0f;
+							break;
 						}
 
 						//If we're at specified mana % or below, don't rune as enchanter
@@ -461,25 +459,24 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 				{
 					float manaRatioToCast = 75.0f;
 
-					switch(this->GetBotStance())
-					{
-						case BotStanceEfficient:
-							manaRatioToCast = 90.0f;
-							break;
-						case BotStanceBalanced:
-							manaRatioToCast = 75.0f;
-							break;
-						case BotStanceReactive:
-						case BotStanceAggressive:
-							manaRatioToCast = 50.0f;
-							break;
-						case BotStanceBurn:
-						case BotStanceBurnAE:
-							manaRatioToCast = 25.0f;
-							break;
-						default:
-							manaRatioToCast = 50.0f;
-							break;
+					switch(this->GetBotStance()) {
+					case EQEmu::constants::stanceEfficient:
+						manaRatioToCast = 90.0f;
+						break;
+					case EQEmu::constants::stanceBalanced:
+						manaRatioToCast = 75.0f;
+						break;
+					case EQEmu::constants::stanceReactive:
+					case EQEmu::constants::stanceAggressive:
+						manaRatioToCast = 50.0f;
+						break;
+					case EQEmu::constants::stanceBurn:
+					case EQEmu::constants::stanceBurnAE:
+						manaRatioToCast = 25.0f;
+						break;
+					default:
+						manaRatioToCast = 50.0f;
+						break;
 					}
 
 					//If we're at specified mana % or below, don't nuke as cleric or enchanter
@@ -1310,7 +1307,7 @@ bool Bot::AI_EngagedCastCheck() {
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 
 		uint8 botClass = GetClass();
-		BotStanceType botStance = GetBotStance();
+		EQEmu::constants::StanceType botStance = GetBotStance();
 		bool mayGetAggro = HasOrMayGetAggro();
 
 		Log(Logs::Detail, Logs::AI, "Engaged autocast check triggered (BOTS). Trying to cast healing spells then maybe offensive spells.");
@@ -2573,79 +2570,79 @@ bool Bot::CheckDisciplineRecastTimers(Bot *caster, int timer_index) {
 
 uint8 Bot::GetChanceToCastBySpellType(uint32 spellType)
 {
-	uint8 spell_type_index = MaxSpellTypes;
+	uint8 spell_type_index = SPELL_TYPE_COUNT;
 	switch (spellType) {
 	case SpellType_Nuke:
-		spell_type_index = SpellType_NukeIndex;
+		spell_type_index = spellTypeIndexNuke;
 		break;
 	case SpellType_Heal:
-		spell_type_index = SpellType_HealIndex;
+		spell_type_index = spellTypeIndexHeal;
 		break;
 	case SpellType_Root:
-		spell_type_index = SpellType_RootIndex;
+		spell_type_index = spellTypeIndexRoot;
 		break;
 	case SpellType_Buff:
-		spell_type_index = SpellType_BuffIndex;
+		spell_type_index = spellTypeIndexBuff;
 		break;
 	case SpellType_Escape:
-		spell_type_index = SpellType_EscapeIndex;
+		spell_type_index = spellTypeIndexEscape;
 		break;
 	case SpellType_Pet:
-		spell_type_index = SpellType_PetIndex;
+		spell_type_index = spellTypeIndexPet;
 		break;
 	case SpellType_Lifetap:
-		spell_type_index = SpellType_LifetapIndex;
+		spell_type_index = spellTypeIndexLifetap;
 		break;
 	case SpellType_Snare:
-		spell_type_index = SpellType_SnareIndex;
+		spell_type_index = spellTypeIndexSnare;
 		break;
 	case SpellType_DOT:
-		spell_type_index = SpellType_DOTIndex;
+		spell_type_index = spellTypeIndexDot;
 		break;
 	case SpellType_Dispel:
-		spell_type_index = SpellType_DispelIndex;
+		spell_type_index = spellTypeIndexDispel;
 		break;
 	case SpellType_InCombatBuff:
-		spell_type_index = SpellType_InCombatBuffIndex;
+		spell_type_index = spellTypeIndexInCombatBuff;
 		break;
 	case SpellType_Mez:
-		spell_type_index = SpellType_MezIndex;
+		spell_type_index = spellTypeIndexMez;
 		break;
 	case SpellType_Charm:
-		spell_type_index = SpellType_CharmIndex;
+		spell_type_index = spellTypeIndexCharm;
 		break;
 	case SpellType_Slow:
-		spell_type_index = SpellType_SlowIndex;
+		spell_type_index = spellTypeIndexSlow;
 		break;
 	case SpellType_Debuff:
-		spell_type_index = SpellType_DebuffIndex;
+		spell_type_index = spellTypeIndexDebuff;
 		break;
 	case SpellType_Cure:
-		spell_type_index = SpellType_CureIndex;
+		spell_type_index = spellTypeIndexCure;
 		break;
 	case SpellType_Resurrect:
-		spell_type_index = SpellType_ResurrectIndex;
+		spell_type_index = spellTypeIndexResurrect;
 		break;
 	case SpellType_HateRedux:
-		spell_type_index = SpellType_HateReduxIndex;
+		spell_type_index = spellTypeIndexHateRedux;
 		break;
 	case SpellType_InCombatBuffSong:
-		spell_type_index = SpellType_InCombatBuffSongIndex;
+		spell_type_index = spellTypeIndexInCombatBuffSong;
 		break;
 	case SpellType_OutOfCombatBuffSong:
-		spell_type_index = SpellType_OutOfCombatBuffSongIndex;
+		spell_type_index = spellTypeIndexOutOfCombatBuffSong;
 		break;
 	case SpellType_PreCombatBuff:
-		spell_type_index = SpellType_PreCombatBuffIndex;
+		spell_type_index = spellTypeIndexPreCombatBuff;
 		break;
 	case SpellType_PreCombatBuffSong:
-		spell_type_index = SpellType_PreCombatBuffSongIndex;
+		spell_type_index = spellTypeIndexPreCombatBuffSong;
 		break;
 	default:
-		spell_type_index = MaxSpellTypes;
+		spell_type_index = SPELL_TYPE_COUNT;
 		break;
 	}
-	if (spell_type_index >= MaxSpellTypes)
+	if (spell_type_index >= SPELL_TYPE_COUNT)
 		return 0;
 
 	uint8 class_index = GetClass();
@@ -2653,11 +2650,13 @@ uint8 Bot::GetChanceToCastBySpellType(uint32 spellType)
 		return 0;
 	--class_index;
 
-	uint8 stance_index = (uint8)GetBotStance();
-	if (stance_index >= MaxStances)
+	EQEmu::constants::StanceType stance_type = GetBotStance();
+	if (stance_type < EQEmu::constants::stancePassive || stance_type > EQEmu::constants::stanceBurnAE)
 		return 0;
 
+	uint8 stance_index = EQEmu::constants::ConvertStanceTypeToIndex(stance_type);
 	uint8 type_index = nHSND;
+
 	if (HasGroup()) {
 		if (IsGroupHealer()/* || IsRaidHealer()*/)
 			type_index |= pH;
@@ -2669,7 +2668,7 @@ uint8 Bot::GetChanceToCastBySpellType(uint32 spellType)
 			type_index |= pD;
 	}
 
-	return botdb.GetSpellCastingChance(spell_type_index, class_index, stance_index, type_index);
+	return database.botdb.GetSpellCastingChance(spell_type_index, class_index, stance_index, type_index);
 }
 
 #endif

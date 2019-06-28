@@ -171,10 +171,12 @@ void Client::SendEnterWorld(std::string name)
 void Client::SendExpansionInfo() {
 	auto outapp = new EQApplicationPacket(OP_ExpansionInfo, sizeof(ExpansionInfo_Struct));
 	ExpansionInfo_Struct *eis = (ExpansionInfo_Struct*)outapp->pBuffer;
-	if(RuleB(World, UseClientBasedExpansionSettings)) {
-		eis->Expansions = EQEmu::expansions::ConvertClientVersionToExpansionMask(eqs->ClientVersion());
-	} else {
-		eis->Expansions = (RuleI(World, ExpansionSettings));
+	
+	if (RuleB(World, UseClientBasedExpansionSettings)) {
+		eis->Expansions = EQEmu::expansions::ConvertClientVersionToExpansionsMask(eqs->ClientVersion());
+	}
+	else {
+		eis->Expansions = (RuleI(World, ExpansionSettings) & EQEmu::expansions::ConvertClientVersionToExpansionsMask(eqs->ClientVersion()));
 	}
 
 	QueuePacket(outapp);
@@ -1442,7 +1444,11 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	PlayerProfile_Struct pp;
 	ExtendedProfile_Struct ext;
 	EQEmu::InventoryProfile inv;
+
+	pp.SetPlayerProfileVersion(EQEmu::versions::ConvertClientVersionToMobVersion(EQEmu::versions::ConvertClientVersionBitToClientVersion(m_ClientVersionBit)));
 	inv.SetInventoryVersion(EQEmu::versions::ConvertClientVersionBitToClientVersion(m_ClientVersionBit));
+	inv.SetGMInventory(false); // character cannot have gm flag at this point
+
 	time_t bday = time(nullptr);
 	char startzone[50]={0};
 	uint32 i;
@@ -1522,12 +1528,9 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 
 //	strcpy(pp.servername, WorldConfig::get()->ShortName.c_str());
 
-
-	for (i = 0; i < MAX_PP_REF_SPELLBOOK; i++)
-		pp.spell_book[i] = 0xFFFFFFFF;
-
-	for(i = 0; i < MAX_PP_MEMSPELL; i++)
-		pp.mem_spells[i] = 0xFFFFFFFF;
+	memset(pp.spell_book, 0xFF, (sizeof(uint32) * EQEmu::spells::SPELLBOOK_SIZE));
+	
+	memset(pp.mem_spells, 0xFF, (sizeof(uint32) * EQEmu::spells::SPELL_GEM_COUNT));
 
 	for(i = 0; i < BUFF_COUNT; i++)
 		pp.buffs[i].spellid = 0xFFFF;

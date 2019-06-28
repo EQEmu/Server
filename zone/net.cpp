@@ -32,6 +32,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/eq_stream_ident.h"
 #include "../common/patches/patches.h"
 #include "../common/rulesys.h"
+#include "../common/profanity_manager.h"
 #include "../common/misc_functions.h"
 #include "../common/string_util.h"
 #include "../common/platform.h"
@@ -51,7 +52,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "command.h"
 #ifdef BOTS
 #include "bot_command.h"
-#include "bot_database.h"
 #endif
 #include "zone_config.h"
 #include "titles.h"
@@ -234,18 +234,6 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
-#ifdef BOTS
-	if (!botdb.Connect(
-		Config->DatabaseHost.c_str(),
-		Config->DatabaseUsername.c_str(),
-		Config->DatabasePassword.c_str(),
-		Config->DatabaseDB.c_str(),
-		Config->DatabasePort)) {
-		Log(Logs::General, Logs::Error, "Cannot continue without a bots database connection.");
-		return 1;
-	}
-#endif
-
 	/* Register Log System and Settings */
 	LogSys.OnLogHookCallBackZone(&Zone::GMSayHookCallBackProcess);
 	database.LoadLogSettings(LogSys.log_settings);
@@ -350,6 +338,10 @@ int main(int argc, char** argv) {
 	Log(Logs::General, Logs::Zone_Server, "Loading corpse timers");
 	database.GetDecayTimes(npcCorpseDecayTimes);
 
+	Log(Logs::General, Logs::Zone_Server, "Loading profanity list");
+	if (!EQEmu::ProfanityManager::LoadProfanityList(&database))
+		Log(Logs::General, Logs::Error, "Loading profanity list FAILED!");
+
 	Log(Logs::General, Logs::Zone_Server, "Loading commands");
 	int retval = command_init();
 	if (retval<0)
@@ -388,7 +380,7 @@ int main(int argc, char** argv) {
 		Log(Logs::General, Logs::Zone_Server, "%d bot commands loaded", botretval);
 
 	Log(Logs::General, Logs::Zone_Server, "Loading bot spell casting chances");
-	if (!botdb.LoadBotSpellCastingChances())
+	if (!database.botdb.LoadBotSpellCastingChances())
 		Log(Logs::General, Logs::Error, "Bot spell casting chances loading FAILED");
 #endif
 
@@ -463,6 +455,10 @@ int main(int argc, char** argv) {
 			Log(Logs::General, Logs::Zone_Server, "Starting EQ Network server on port %d", Config->ZonePort);
 
 			EQ::Net::EQStreamManagerOptions opts(Config->ZonePort, false, true);
+			opts.daybreak_options.resend_delay_ms = RuleI(Network, ResendDelayBaseMS);
+			opts.daybreak_options.resend_delay_factor = RuleR(Network, ResendDelayFactor);
+			opts.daybreak_options.resend_delay_min = RuleI(Network, ResendDelayMinMS);
+			opts.daybreak_options.resend_delay_max = RuleI(Network, ResendDelayMaxMS);
 			eqsm.reset(new EQ::Net::EQStreamManager(opts));
 			eqsf_open = true;
 

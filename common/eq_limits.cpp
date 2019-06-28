@@ -32,40 +32,28 @@ void EQEmu::InitializeDynamicLookups() {
 	constants::InitializeDynamicLookups();
 	inventory::InitializeDynamicLookups();
 	behavior::InitializeDynamicLookups();
+	spells::InitializeDynamicLookups();
 
 	global_dictionary_init = true;
 }
 
-static std::unique_ptr<EQEmu::constants::LookupEntry> constants_dynamic_lookup_entries[EQEmu::versions::ClientVersionCount];
+static std::unique_ptr<EQEmu::constants::LookupEntry> constants_dynamic_nongm_lookup_entries[EQEmu::versions::ClientVersionCount];
+static std::unique_ptr<EQEmu::constants::LookupEntry> constants_dynamic_gm_lookup_entries[EQEmu::versions::ClientVersionCount];
 static const EQEmu::constants::LookupEntry constants_static_lookup_entries[EQEmu::versions::ClientVersionCount] =
 {
 	/*[ClientVersion::Unknown] =*/
 	EQEmu::constants::LookupEntry(
-		EQEmu::expansions::Expansion::EverQuest,
-		ClientUnknown::INULL,
-		ClientUnknown::INULL,
-		ClientUnknown::INULL,
-		ClientUnknown::INULL,
-		ClientUnknown::INULL,
-		ClientUnknown::INULL,
-		ClientUnknown::INULL,
-		ClientUnknown::INULL,
-		ClientUnknown::INULL,
+		ClientUnknown::constants::EXPANSION,
+		ClientUnknown::constants::EXPANSION_BIT,
+		ClientUnknown::constants::EXPANSIONS_MASK,
 		ClientUnknown::INULL,
 		ClientUnknown::INULL
 	),
 	/*[ClientVersion::Client62] =*/
 	EQEmu::constants::LookupEntry(
-		EQEmu::expansions::Expansion::EverQuest,
-		Client62::INULL,
-		Client62::INULL,
-		Client62::INULL,
-		Client62::INULL,
-		Client62::INULL,
-		Client62::INULL,
-		Client62::INULL,
-		Client62::INULL,
-		Client62::INULL,
+		Client62::constants::EXPANSION,
+		Client62::constants::EXPANSION_BIT,
+		Client62::constants::EXPANSIONS_MASK,
 		Client62::INULL,
 		Client62::INULL
 	),
@@ -75,14 +63,7 @@ static const EQEmu::constants::LookupEntry constants_static_lookup_entries[EQEmu
 		Titanium::constants::EXPANSION_BIT,
 		Titanium::constants::EXPANSIONS_MASK,
 		Titanium::constants::CHARACTER_CREATION_LIMIT,
-		Titanium::constants::SAY_LINK_BODY_SIZE,
-		Titanium::constants::LongBuffs,
-		Titanium::constants::ShortBuffs,
-		Titanium::constants::DiscBuffs,
-		Titanium::constants::TotalBuffs,
-		Titanium::constants::NPCBuffs,
-		Titanium::constants::PetBuffs,
-		Titanium::constants::MercBuffs
+		Titanium::constants::SAY_LINK_BODY_SIZE
 	),
 	/*[ClientVersion::SoF] =*/
 	EQEmu::constants::LookupEntry(
@@ -90,14 +71,7 @@ static const EQEmu::constants::LookupEntry constants_static_lookup_entries[EQEmu
 		SoF::constants::EXPANSION_BIT,
 		SoF::constants::EXPANSIONS_MASK,
 		SoF::constants::CHARACTER_CREATION_LIMIT,
-		SoF::constants::SAY_LINK_BODY_SIZE,
-		SoF::constants::LongBuffs,
-		SoF::constants::ShortBuffs,
-		SoF::constants::DiscBuffs,
-		SoF::constants::TotalBuffs,
-		SoF::constants::NPCBuffs,
-		SoF::constants::PetBuffs,
-		SoF::constants::MercBuffs
+		SoF::constants::SAY_LINK_BODY_SIZE
 	),
 	/*[ClientVersion::SoD] =*/
 	EQEmu::constants::LookupEntry(
@@ -105,14 +79,7 @@ static const EQEmu::constants::LookupEntry constants_static_lookup_entries[EQEmu
 		SoD::constants::EXPANSION_BIT,
 		SoD::constants::EXPANSIONS_MASK,
 		SoD::constants::CHARACTER_CREATION_LIMIT,
-		SoD::constants::SAY_LINK_BODY_SIZE,
-		SoD::constants::LongBuffs,
-		SoD::constants::ShortBuffs,
-		SoD::constants::DiscBuffs,
-		SoD::constants::TotalBuffs,
-		SoD::constants::NPCBuffs,
-		SoD::constants::PetBuffs,
-		SoD::constants::MercBuffs
+		SoD::constants::SAY_LINK_BODY_SIZE
 	),
 	/*[ClientVersion::UF] =*/
 	EQEmu::constants::LookupEntry(
@@ -120,14 +87,7 @@ static const EQEmu::constants::LookupEntry constants_static_lookup_entries[EQEmu
 		UF::constants::EXPANSION_BIT,
 		UF::constants::EXPANSIONS_MASK,
 		UF::constants::CHARACTER_CREATION_LIMIT,
-		UF::constants::SAY_LINK_BODY_SIZE,
-		UF::constants::LongBuffs,
-		UF::constants::ShortBuffs,
-		UF::constants::DiscBuffs,
-		UF::constants::TotalBuffs,
-		UF::constants::NPCBuffs,
-		UF::constants::PetBuffs,
-		UF::constants::MercBuffs
+		UF::constants::SAY_LINK_BODY_SIZE
 	),
 	/*[ClientVersion::RoF] =*/
 	EQEmu::constants::LookupEntry(
@@ -135,14 +95,7 @@ static const EQEmu::constants::LookupEntry constants_static_lookup_entries[EQEmu
 		RoF::constants::EXPANSION_BIT,
 		RoF::constants::EXPANSIONS_MASK,
 		RoF::constants::CHARACTER_CREATION_LIMIT,
-		RoF::constants::SAY_LINK_BODY_SIZE,
-		RoF::constants::LongBuffs,
-		RoF::constants::ShortBuffs,
-		RoF::constants::DiscBuffs,
-		RoF::constants::TotalBuffs,
-		RoF::constants::NPCBuffs,
-		RoF::constants::PetBuffs,
-		RoF::constants::MercBuffs
+		RoF::constants::SAY_LINK_BODY_SIZE
 	),
 	/*[ClientVersion::RoF2] =*/
 	EQEmu::constants::LookupEntry(
@@ -150,14 +103,7 @@ static const EQEmu::constants::LookupEntry constants_static_lookup_entries[EQEmu
 		RoF2::constants::EXPANSION_BIT,
 		RoF2::constants::EXPANSIONS_MASK,
 		RoF2::constants::CHARACTER_CREATION_LIMIT,
-		RoF2::constants::SAY_LINK_BODY_SIZE,
-		RoF2::constants::LongBuffs,
-		RoF2::constants::ShortBuffs,
-		RoF2::constants::DiscBuffs,
-		RoF2::constants::TotalBuffs,
-		RoF2::constants::NPCBuffs,
-		RoF2::constants::PetBuffs,
-		RoF2::constants::MercBuffs
+		RoF2::constants::SAY_LINK_BODY_SIZE
 	)
 };
 
@@ -173,11 +119,28 @@ void EQEmu::constants::InitializeDynamicLookups() {
 	// use static references for now
 }
 
-const EQEmu::constants::LookupEntry* EQEmu::constants::DynamicLookup(versions::ClientVersion client_version)
+const EQEmu::constants::LookupEntry* EQEmu::constants::DynamicLookup(versions::ClientVersion client_version, bool gm_flag)
+{
+	if (gm_flag)
+		return DynamicGMLookup(client_version);
+	else
+		return DynamicNonGMLookup(client_version);
+}
+
+const EQEmu::constants::LookupEntry* EQEmu::constants::DynamicNonGMLookup(versions::ClientVersion client_version)
 {
 	client_version = versions::ValidateClientVersion(client_version);
-	if (constants_dynamic_lookup_entries[static_cast<int>(client_version)])
-		return constants_dynamic_lookup_entries[static_cast<int>(client_version)].get();
+	if (constants_dynamic_nongm_lookup_entries[static_cast<int>(client_version)])
+		return constants_dynamic_nongm_lookup_entries[static_cast<int>(client_version)].get();
+
+	return &constants_static_lookup_entries[static_cast<int>(client_version)];
+}
+
+const EQEmu::constants::LookupEntry* EQEmu::constants::DynamicGMLookup(versions::ClientVersion client_version)
+{
+	client_version = versions::ValidateClientVersion(client_version);
+	if (constants_dynamic_gm_lookup_entries[static_cast<int>(client_version)])
+		return constants_dynamic_gm_lookup_entries[static_cast<int>(client_version)].get();
 
 	return &constants_static_lookup_entries[static_cast<int>(client_version)];
 }
@@ -187,7 +150,8 @@ const EQEmu::constants::LookupEntry* EQEmu::constants::StaticLookup(versions::Cl
 	return &constants_static_lookup_entries[static_cast<int>(versions::ValidateClientVersion(client_version))];
 }
 
-static std::unique_ptr<EQEmu::inventory::LookupEntry> inventory_dynamic_lookup_entries[EQEmu::versions::MobVersionCount];
+static std::unique_ptr<EQEmu::inventory::LookupEntry> inventory_dynamic_nongm_lookup_entries[EQEmu::versions::MobVersionCount];
+static std::unique_ptr<EQEmu::inventory::LookupEntry> inventory_dynamic_gm_lookup_entries[EQEmu::versions::MobVersionCount];
 static const EQEmu::inventory::LookupEntry inventory_static_lookup_entries[EQEmu::versions::MobVersionCount] =
 {
 	/*[MobVersion::Unknown] =*/
@@ -797,79 +761,194 @@ void EQEmu::inventory::InitializeDynamicLookups() {
 		return;
 
 	// Notes:
-	// Currently, there are only 3 known expansions that affect inventory-related settings in the clients..
-	//   - Expansion::PoR "Prophecy of Ro" - toggles between 24 (set) and 16 (clear) bank slots
-	//   - Expansion::TBS "The Buried Sea" - toggles slotPowerSource enabled (set) and disabled (clear) 
-	//   - Expansion::HoT "House of Thule" - toggles slotGeneral9/slotGeneral10 enabled (set) and disabled (clear)
-	// Obviously, the client must support the expansion to allow any (set) condition
+	// - Currently, there are only 3 known expansions that affect inventory-related settings in the clients..
+	//   -- Expansion::PoR "Prophecy of Ro" - toggles between 24 (set) and 16 (clear) bank slots
+	//   -- Expansion::TBS "The Buried Sea" - toggles slotPowerSource activated (set) and deactivated (clear) 
+	//   -- Expansion::HoT "House of Thule" - toggles slotGeneral9/slotGeneral10 activated (set) and deactivated (clear)
+	// - Corspe size does not appear to reflect loss of active possessions slots
+	// - Inspect size does not appear to reflect loss of active equipment slots
+	// - Bank size is not overridden by GM flag when expansion bit is (clear)
+	// - Power Source slot is enabled, but not activated, by GM flag when expansion bit is (clear) (RoF+ only)
+	// - General9 and General10 slots are activated by GM flag when expansion bit is (clear)
+	// - Obviously, the client must support the expansion to allow any (set) or override condition
 
-	const uint32 current_expansions = RuleI(World, ExpansionSettings);
-	const uint32 dynamic_check_mask = (EQEmu::expansions::bitPoR | EQEmu::expansions::bitTBS | EQEmu::expansions::bitHoT); // the only known expansions that affect inventory
+	const uint32 dynamic_check_mask = 
+		(
+			EQEmu::expansions::bitPoR |
+			EQEmu::expansions::bitTBS |
+			EQEmu::expansions::bitHoT
+		);
 
 	// if all of the above expansion bits are present, then static references will suffice
-	if ((current_expansions & dynamic_check_mask) == dynamic_check_mask)
+	if ((dynamic_check_mask & RuleI(World, ExpansionSettings)) == dynamic_check_mask)
 		return;
 
-	for (uint32 iter = static_cast<uint32>(EQEmu::versions::ClientVersion::Unknown); iter <= static_cast<uint32>(EQEmu::versions::LastClientVersion); ++iter) {
-		// no need to dynamic this condition since it is the lowest compatibility standard at this time
-		if (iter <= static_cast<uint32>(EQEmu::versions::ClientVersion::Titanium))
+	// Dynamic Lookups (promotive methodology) (all mob versions allowed)
+	for (uint32 iter = static_cast<uint32>(EQEmu::versions::MobVersion::Unknown); iter <= static_cast<uint32>(EQEmu::versions::LastPCMobVersion); ++iter) {
+		// no need to dynamic this condition since it is the lowest compatibility standard
+		if ((dynamic_check_mask & ~constants_static_lookup_entries[iter].ExpansionsMask) == dynamic_check_mask)
 			continue;
 
-		// direct manipulation of lookup indices is safe so long as (int)ClientVersion::<client> == (int)MobVersion::<client>
-		inventory_dynamic_lookup_entries[iter] = std::unique_ptr<LookupEntry>(new LookupEntry(inventory_static_lookup_entries[iter]));
+		// only client versions whose supported expansions are affected need to be considered
+		if ((constants_static_lookup_entries[iter].ExpansionsMask & RuleI(World, ExpansionSettings)) == constants_static_lookup_entries[iter].ExpansionsMask)
+			continue;
+
+		// direct manipulation of lookup indices is safe so long as (int)ClientVersion::<mob> == (int)MobVersion::<mob>
+		inventory_dynamic_nongm_lookup_entries[iter] = std::unique_ptr<LookupEntry>(new LookupEntry(inventory_static_lookup_entries[iter]));
 
 		// clamp affected fields to the lowest standard
-		inventory_dynamic_lookup_entries[iter]->InventoryTypeSize.Bank = Titanium::invtype::BANK_SIZE; // bank size
-		inventory_dynamic_lookup_entries[iter]->EquipmentBitmask = Titanium::invslot::EQUIPMENT_BITMASK; // power source
-		inventory_dynamic_lookup_entries[iter]->GeneralBitmask = Titanium::invslot::GENERAL_BITMASK; // general size
-		inventory_dynamic_lookup_entries[iter]->PossessionsBitmask = 0; // we'll fix later
-		inventory_dynamic_lookup_entries[iter]->CorpseBitmask = 0; // we'll fix later
+		inventory_dynamic_nongm_lookup_entries[iter]->InventoryTypeSize.Bank = Titanium::invtype::BANK_SIZE; // bank size
+		inventory_dynamic_nongm_lookup_entries[iter]->EquipmentBitmask = Titanium::invslot::EQUIPMENT_BITMASK; // power source
+		inventory_dynamic_nongm_lookup_entries[iter]->GeneralBitmask = Titanium::invslot::GENERAL_BITMASK; // general size
+		inventory_dynamic_nongm_lookup_entries[iter]->PossessionsBitmask = 0; // we'll fix later
+		inventory_dynamic_nongm_lookup_entries[iter]->CorpseBitmask = 0; // we'll fix later
 
-		if (current_expansions & EQEmu::expansions::bitPoR) {
+		if (RuleI(World, ExpansionSettings) & EQEmu::expansions::bitPoR) {
 			// update bank size
 			if (constants_static_lookup_entries[iter].ExpansionsMask & EQEmu::expansions::bitPoR)
-				inventory_dynamic_lookup_entries[iter]->InventoryTypeSize.Bank = SoF::invtype::BANK_SIZE;
+				inventory_dynamic_nongm_lookup_entries[iter]->InventoryTypeSize.Bank = SoF::invtype::BANK_SIZE;
 		}
 
-		if (current_expansions & EQEmu::expansions::bitTBS) {
+		if (RuleI(World, ExpansionSettings) & EQEmu::expansions::bitTBS) {
 			// update power source
 			if (constants_static_lookup_entries[iter].ExpansionsMask & EQEmu::expansions::bitTBS)
-				inventory_dynamic_lookup_entries[iter]->EquipmentBitmask = SoF::invslot::EQUIPMENT_BITMASK;
+				inventory_dynamic_nongm_lookup_entries[iter]->EquipmentBitmask = SoF::invslot::EQUIPMENT_BITMASK;
 		}
 
-		if (current_expansions & EQEmu::expansions::bitHoT) {
+		if (RuleI(World, ExpansionSettings) & EQEmu::expansions::bitHoT) {
 			// update general size
 			if (constants_static_lookup_entries[iter].ExpansionsMask & EQEmu::expansions::bitHoT)
-				inventory_dynamic_lookup_entries[iter]->GeneralBitmask = RoF::invslot::GENERAL_BITMASK;
+				inventory_dynamic_nongm_lookup_entries[iter]->GeneralBitmask = RoF::invslot::GENERAL_BITMASK;
 		}
 
 		// fixup possessions bitmask
-		inventory_dynamic_lookup_entries[iter]->PossessionsBitmask =
+		inventory_dynamic_nongm_lookup_entries[iter]->PossessionsBitmask =
 			(
-				inventory_dynamic_lookup_entries[iter]->EquipmentBitmask |
-				inventory_dynamic_lookup_entries[iter]->GeneralBitmask |
-				inventory_dynamic_lookup_entries[iter]->CursorBitmask
+				inventory_dynamic_nongm_lookup_entries[iter]->EquipmentBitmask |
+				inventory_dynamic_nongm_lookup_entries[iter]->GeneralBitmask |
+				inventory_dynamic_nongm_lookup_entries[iter]->CursorBitmask
 			);
 
 		// fixup corpse bitmask
-		inventory_dynamic_lookup_entries[iter]->CorpseBitmask =
+		inventory_dynamic_nongm_lookup_entries[iter]->CorpseBitmask =
 			(
-				inventory_dynamic_lookup_entries[iter]->GeneralBitmask |
-				inventory_dynamic_lookup_entries[iter]->CursorBitmask |
-				(inventory_dynamic_lookup_entries[iter]->EquipmentBitmask << 34)
+				inventory_dynamic_nongm_lookup_entries[iter]->GeneralBitmask |
+				inventory_dynamic_nongm_lookup_entries[iter]->CursorBitmask |
+				(inventory_dynamic_nongm_lookup_entries[iter]->EquipmentBitmask << 34)
 			);
 
 		// expansion-related fields are now updated and all other fields reflect the static entry values
 	}
 
-	// only client versions that require a change from their static definitions have been given a dynamic lookup entry
+	// Dynamic GM Lookups (demotive methodology) (client-linked mob versions only)
+	for (uint32 iter = static_cast<uint32>(EQEmu::versions::MobVersion::Unknown); iter <= static_cast<uint32>(EQEmu::versions::LastPCMobVersion); ++iter) {
+		// no need to dynamic this condition since it is the lowest compatibility standard
+		if ((dynamic_check_mask & ~constants_static_lookup_entries[iter].ExpansionsMask) == dynamic_check_mask)
+			continue;
+
+		// only client versions whose supported expansions are affected need to be considered
+		if ((constants_static_lookup_entries[iter].ExpansionsMask & RuleI(World, ExpansionSettings)) == constants_static_lookup_entries[iter].ExpansionsMask)
+			continue;
+
+		// special case gm exclusions based on known behaviors
+		switch (iter) {
+		case static_cast<uint32>(versions::MobVersion::RoF2) :
+		case static_cast<uint32>(versions::MobVersion::RoF) :
+			// if bank size is not altered on these clients, then static will suffice
+			// (we already know these clients support this expansion...)
+			if (RuleI(World, ExpansionSettings) & expansions::bitPoR)
+				continue;
+			break;
+		default:
+			break;
+		}
+
+		// direct manipulation of lookup indices is safe so long as (int)ClientVersion::<client> == (int)MobVersion::<client>
+		inventory_dynamic_gm_lookup_entries[iter] = std::unique_ptr<LookupEntry>(new LookupEntry(inventory_static_lookup_entries[iter]));
+
+		inventory_dynamic_gm_lookup_entries[iter]->PossessionsBitmask = 0; // we'll fix later
+		inventory_dynamic_gm_lookup_entries[iter]->CorpseBitmask = 0; // we'll fix later
+
+		if (~RuleI(World, ExpansionSettings) & EQEmu::expansions::bitPoR) {
+			// update bank size
+			if (constants_static_lookup_entries[iter].ExpansionsMask & EQEmu::expansions::bitPoR)
+				inventory_dynamic_gm_lookup_entries[iter]->InventoryTypeSize.Bank = Titanium::invtype::BANK_SIZE;
+		}
+
+		if (~RuleI(World, ExpansionSettings) & EQEmu::expansions::bitTBS) {
+			// update power source
+			switch (iter) {
+			case versions::bitUF:
+			case versions::bitSoD:
+			case versions::bitSoF:
+				// gm flag does not override expansion-based behavior
+				// (we already know that only these clients support this behavior)
+				inventory_dynamic_gm_lookup_entries[iter]->EquipmentBitmask = Titanium::invslot::EQUIPMENT_BITMASK;
+				break;
+			default:
+				break;
+			}
+		}
+
+		if (~RuleI(World, ExpansionSettings) & EQEmu::expansions::bitHoT) {
+			// update general size
+			switch (iter) {
+			case versions::bitUF:
+			case versions::bitSoD:
+			case versions::bitSoF:
+				// gm flag does not override expansion-based behavior
+				// (we already know that only these clients support this behavior)
+				inventory_dynamic_gm_lookup_entries[iter]->GeneralBitmask = Titanium::invslot::GENERAL_BITMASK;
+				break;
+			default:
+				break;
+			}
+		}
+
+		// fixup possessions bitmask
+		inventory_dynamic_gm_lookup_entries[iter]->PossessionsBitmask =
+			(
+				inventory_dynamic_gm_lookup_entries[iter]->EquipmentBitmask |
+				inventory_dynamic_gm_lookup_entries[iter]->GeneralBitmask |
+				inventory_dynamic_gm_lookup_entries[iter]->CursorBitmask
+			);
+
+		// fixup corpse bitmask
+		inventory_dynamic_gm_lookup_entries[iter]->CorpseBitmask =
+			(
+				inventory_dynamic_gm_lookup_entries[iter]->GeneralBitmask |
+				inventory_dynamic_gm_lookup_entries[iter]->CursorBitmask |
+				(inventory_dynamic_gm_lookup_entries[iter]->EquipmentBitmask << 34)
+			);
+
+		// expansion-related fields are now updated and all other fields reflect the static entry values
+	}
+
+	// only client versions that require a change from their static definitions have been given a dynamic (gm) lookup entry
 }
 
-const EQEmu::inventory::LookupEntry* EQEmu::inventory::DynamicLookup(versions::MobVersion mob_version)
+const EQEmu::inventory::LookupEntry* EQEmu::inventory::DynamicLookup(versions::MobVersion mob_version, bool gm_flag)
+{
+	if (gm_flag)
+		return DynamicGMLookup(mob_version);
+	else
+		return DynamicNonGMLookup(mob_version);
+}
+
+const EQEmu::inventory::LookupEntry* EQEmu::inventory::DynamicNonGMLookup(versions::MobVersion mob_version)
 {
 	mob_version = versions::ValidateMobVersion(mob_version);
-	if (inventory_dynamic_lookup_entries[static_cast<int>(mob_version)])
-		return inventory_dynamic_lookup_entries[static_cast<int>(mob_version)].get();
+	if (inventory_dynamic_nongm_lookup_entries[static_cast<int>(mob_version)])
+		return inventory_dynamic_nongm_lookup_entries[static_cast<int>(mob_version)].get();
+
+	return &inventory_static_lookup_entries[static_cast<int>(mob_version)];
+}
+
+const EQEmu::inventory::LookupEntry* EQEmu::inventory::DynamicGMLookup(versions::MobVersion mob_version)
+{
+	mob_version = versions::ValidateMobVersion(mob_version);
+	if (inventory_dynamic_gm_lookup_entries[static_cast<int>(mob_version)])
+		return inventory_dynamic_gm_lookup_entries[static_cast<int>(mob_version)].get();
 
 	return &inventory_static_lookup_entries[static_cast<int>(mob_version)];
 }
@@ -879,7 +958,8 @@ const EQEmu::inventory::LookupEntry* EQEmu::inventory::StaticLookup(versions::Mo
 	return &inventory_static_lookup_entries[static_cast<int>(versions::ValidateMobVersion(mob_version))];
 }
 
-static std::unique_ptr<EQEmu::behavior::LookupEntry> behavior_dynamic_lookup_entries[EQEmu::versions::MobVersionCount];
+static std::unique_ptr<EQEmu::behavior::LookupEntry> behavior_dynamic_nongm_lookup_entries[EQEmu::versions::MobVersionCount];
+static std::unique_ptr<EQEmu::behavior::LookupEntry> behavior_dynamic_gm_lookup_entries[EQEmu::versions::MobVersionCount];
 static const EQEmu::behavior::LookupEntry behavior_static_lookup_entries[EQEmu::versions::MobVersionCount] =
 {
 	/*[MobVersion::Unknown] =*/
@@ -984,11 +1064,28 @@ void EQEmu::behavior::InitializeDynamicLookups() {
 	// use static references for now
 }
 
-const EQEmu::behavior::LookupEntry* EQEmu::behavior::DynamicLookup(versions::MobVersion mob_version)
+const EQEmu::behavior::LookupEntry* EQEmu::behavior::DynamicLookup(versions::MobVersion mob_version, bool gm_flag)
+{
+	if (gm_flag)
+		return DynamicGMLookup(mob_version);
+	else
+		return DynamicNonGMLookup(mob_version);
+}
+
+const EQEmu::behavior::LookupEntry* EQEmu::behavior::DynamicNonGMLookup(versions::MobVersion mob_version)
 {
 	mob_version = versions::ValidateMobVersion(mob_version);
-	if (behavior_dynamic_lookup_entries[static_cast<int>(mob_version)])
-		return behavior_dynamic_lookup_entries[static_cast<int>(mob_version)].get();
+	if (behavior_dynamic_nongm_lookup_entries[static_cast<int>(mob_version)])
+		return behavior_dynamic_nongm_lookup_entries[static_cast<int>(mob_version)].get();
+
+	return &behavior_static_lookup_entries[static_cast<int>(mob_version)];
+}
+
+const EQEmu::behavior::LookupEntry* EQEmu::behavior::DynamicGMLookup(versions::MobVersion mob_version)
+{
+	mob_version = versions::ValidateMobVersion(mob_version);
+	if (behavior_dynamic_gm_lookup_entries[static_cast<int>(mob_version)])
+		return behavior_dynamic_gm_lookup_entries[static_cast<int>(mob_version)].get();
 
 	return &behavior_static_lookup_entries[static_cast<int>(mob_version)];
 }
@@ -996,4 +1093,157 @@ const EQEmu::behavior::LookupEntry* EQEmu::behavior::DynamicLookup(versions::Mob
 const EQEmu::behavior::LookupEntry* EQEmu::behavior::StaticLookup(versions::MobVersion mob_version)
 {
 	return &behavior_static_lookup_entries[static_cast<int>(versions::ValidateMobVersion(mob_version))];
+}
+
+static std::unique_ptr<EQEmu::spells::LookupEntry> spells_dynamic_nongm_lookup_entries[EQEmu::versions::ClientVersionCount];
+static std::unique_ptr<EQEmu::spells::LookupEntry> spells_dynamic_gm_lookup_entries[EQEmu::versions::ClientVersionCount];
+static const EQEmu::spells::LookupEntry spells_static_lookup_entries[EQEmu::versions::ClientVersionCount] =
+{
+	/*[ClientVersion::Unknown] =*/
+	EQEmu::spells::LookupEntry(
+		ClientUnknown::INULL,
+		ClientUnknown::INULL,
+		ClientUnknown::INULL,
+		ClientUnknown::INULL,
+		ClientUnknown::INULL,
+		ClientUnknown::INULL,
+		ClientUnknown::INULL,
+		ClientUnknown::INULL,
+		ClientUnknown::INULL,
+		ClientUnknown::INULL
+	),
+	/*[ClientVersion::Client62] =*/
+	EQEmu::spells::LookupEntry(
+		Client62::INULL,
+		Client62::INULL,
+		Client62::INULL,
+		Client62::INULL,
+		Client62::INULL,
+		Client62::INULL,
+		Client62::INULL,
+		Client62::INULL,
+		Client62::INULL,
+		Client62::INULL
+	),
+	/*[ClientVersion::Titanium] =*/
+	EQEmu::spells::LookupEntry(
+		Titanium::spells::SPELL_ID_MAX,
+		Titanium::spells::SPELLBOOK_SIZE,
+		Titanium::spells::SPELL_GEM_COUNT,
+		Titanium::spells::LONG_BUFFS,
+		Titanium::spells::SHORT_BUFFS,
+		Titanium::spells::DISC_BUFFS,
+		Titanium::spells::TOTAL_BUFFS,
+		Titanium::spells::NPC_BUFFS,
+		Titanium::spells::PET_BUFFS,
+		Titanium::spells::MERC_BUFFS
+	),
+	/*[ClientVersion::SoF] =*/
+	EQEmu::spells::LookupEntry(
+		SoF::spells::SPELL_ID_MAX,
+		SoF::spells::SPELLBOOK_SIZE,
+		SoF::spells::SPELL_GEM_COUNT,
+		SoF::spells::LONG_BUFFS,
+		SoF::spells::SHORT_BUFFS,
+		SoF::spells::DISC_BUFFS,
+		SoF::spells::TOTAL_BUFFS,
+		SoF::spells::NPC_BUFFS,
+		SoF::spells::PET_BUFFS,
+		SoF::spells::MERC_BUFFS
+	),
+	/*[ClientVersion::SoD] =*/
+	EQEmu::spells::LookupEntry(
+		SoD::spells::SPELL_ID_MAX,
+		SoD::spells::SPELLBOOK_SIZE,
+		SoD::spells::SPELL_GEM_COUNT,
+		SoD::spells::LONG_BUFFS,
+		SoD::spells::SHORT_BUFFS,
+		SoD::spells::DISC_BUFFS,
+		SoD::spells::TOTAL_BUFFS,
+		SoD::spells::NPC_BUFFS,
+		SoD::spells::PET_BUFFS,
+		SoD::spells::MERC_BUFFS
+	),
+	/*[ClientVersion::UF] =*/
+	EQEmu::spells::LookupEntry(
+		UF::spells::SPELL_ID_MAX,
+		UF::spells::SPELLBOOK_SIZE,
+		UF::spells::SPELL_GEM_COUNT,
+		UF::spells::LONG_BUFFS,
+		UF::spells::SHORT_BUFFS,
+		UF::spells::DISC_BUFFS,
+		UF::spells::TOTAL_BUFFS,
+		UF::spells::NPC_BUFFS,
+		UF::spells::PET_BUFFS,
+		UF::spells::MERC_BUFFS
+	),
+	/*[ClientVersion::RoF] =*/
+	EQEmu::spells::LookupEntry(
+		RoF::spells::SPELL_ID_MAX,
+		RoF::spells::SPELLBOOK_SIZE,
+		UF::spells::SPELL_GEM_COUNT, // client translators are setup to allow the max value a client supports..however, the top 4 indices are not valid in this case
+		RoF::spells::LONG_BUFFS,
+		RoF::spells::SHORT_BUFFS,
+		RoF::spells::DISC_BUFFS,
+		RoF::spells::TOTAL_BUFFS,
+		RoF::spells::NPC_BUFFS,
+		RoF::spells::PET_BUFFS,
+		RoF::spells::MERC_BUFFS
+	),
+	/*[ClientVersion::RoF2] =*/
+	EQEmu::spells::LookupEntry(
+		RoF2::spells::SPELL_ID_MAX,
+		RoF2::spells::SPELLBOOK_SIZE,
+		UF::spells::SPELL_GEM_COUNT, // client translators are setup to allow the max value a client supports..however, the top 4 indices are not valid in this case
+		RoF2::spells::LONG_BUFFS,
+		RoF2::spells::SHORT_BUFFS,
+		RoF2::spells::DISC_BUFFS,
+		RoF2::spells::TOTAL_BUFFS,
+		RoF2::spells::NPC_BUFFS,
+		RoF2::spells::PET_BUFFS,
+		RoF2::spells::MERC_BUFFS
+	)
+};
+
+static bool spells_dictionary_init = false;
+void EQEmu::spells::InitializeDynamicLookups() {
+	if (spells_dictionary_init == true)
+		return;
+	spells_dictionary_init = true;
+	
+	if (RuleB(World, UseClientBasedExpansionSettings))
+		return;
+	
+	// use static references for now
+}
+
+const EQEmu::spells::LookupEntry* EQEmu::spells::DynamicLookup(versions::ClientVersion client_version, bool gm_flag)
+{
+	if (gm_flag)
+		return DynamicGMLookup(client_version);
+	else
+		return DynamicNonGMLookup(client_version);
+}
+
+const EQEmu::spells::LookupEntry* EQEmu::spells::DynamicNonGMLookup(versions::ClientVersion client_version)
+{
+	client_version = versions::ValidateClientVersion(client_version);
+	if (spells_dynamic_nongm_lookup_entries[static_cast<int>(client_version)])
+		return spells_dynamic_nongm_lookup_entries[static_cast<int>(client_version)].get();
+
+	return &spells_static_lookup_entries[static_cast<int>(client_version)];
+}
+
+const EQEmu::spells::LookupEntry* EQEmu::spells::DynamicGMLookup(versions::ClientVersion client_version)
+{
+	client_version = versions::ValidateClientVersion(client_version);
+	if (spells_dynamic_gm_lookup_entries[static_cast<int>(client_version)])
+		return spells_dynamic_gm_lookup_entries[static_cast<int>(client_version)].get();
+	
+	return &spells_static_lookup_entries[static_cast<int>(client_version)];
+}
+
+const EQEmu::spells::LookupEntry* EQEmu::spells::StaticLookup(versions::ClientVersion client_version)
+{
+	return &spells_static_lookup_entries[static_cast<int>(versions::ValidateClientVersion(client_version))];
 }

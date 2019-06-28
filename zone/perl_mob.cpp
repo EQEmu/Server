@@ -1135,6 +1135,29 @@ XS(XS_Mob_ChangeSize) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Mob_RandomizeFeatures); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_RandomizeFeatures) {
+       dXSARGS;
+       if (items < 2 || items > 3)
+               Perl_croak(aTHX_ "Usage: Mob::RandomizeFeatures(THIS, bool send_illusion, set_variables)");
+       {
+               Mob *THIS;
+               bool send_illusion = (bool) SvNV(ST(1));
+               bool set_variables = (bool) SvNV(ST(2));
+
+               if (sv_derived_from(ST(0), "Mob")) {
+                       IV tmp = SvIV((SV *) SvRV(ST(0)));
+                       THIS = INT2PTR(Mob *, tmp);
+               } else
+                       Perl_croak(aTHX_ "THIS is not of type Mob");
+               if (THIS == nullptr)
+                       Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+               THIS->RandomizeFeatures(send_illusion, set_variables);
+       }
+       XSRETURN_EMPTY;
+}
+
 XS(XS_Mob_GMMove); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GMMove) {
 	dXSARGS;
@@ -1270,6 +1293,57 @@ XS(XS_Mob_FindBuff) {
 		RETVAL = THIS->FindBuff(spellid);
 		ST(0)          = boolSV(RETVAL);
 		sv_2mortal(ST(0));
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Mob_FindBuffBySlot); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_FindBuffBySlot) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Mob::FindBuffBySlot(THIS, int slot)");
+	{
+		Mob *THIS;
+		uint16 RETVAL;
+		dXSTARG;
+		int slot = SvIV(ST(1));
+
+		if (sv_derived_from(ST(0), "Mob")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Mob *, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type Mob");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->FindBuffBySlot(slot);
+		XSprePUSH;
+		PUSHu((UV) RETVAL);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Mob_BuffCount); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_BuffCount) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Mob::BuffCount(THIS)");
+	{
+		Mob *THIS;
+		uint32  RETVAL;
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "Mob")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Mob *, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type Mob");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->BuffCount();
+		XSprePUSH;
+		PUSHu((UV) RETVAL);		
 	}
 	XSRETURN(1);
 }
@@ -3737,7 +3811,7 @@ XS(XS_Mob_CastSpell) {
 		Mob *THIS;
 		uint16             spell_id  = (uint16) SvUV(ST(1));
 		uint16             target_id = (uint16) SvUV(ST(2));
-		EQEmu::CastingSlot slot;
+		EQEmu::spells::CastingSlot slot;
 		int32              casttime;
 		int32              mana_cost;
 		int16              resist_adjust;
@@ -3751,9 +3825,9 @@ XS(XS_Mob_CastSpell) {
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items < 4)
-			slot = EQEmu::CastingSlot::Item;
+			slot = EQEmu::spells::CastingSlot::Item;
 		else {
-			slot = static_cast<EQEmu::CastingSlot>(SvUV(ST(3)));
+			slot = static_cast<EQEmu::spells::CastingSlot>(SvUV(ST(3)));
 		}
 
 		if (items < 5)
@@ -3827,7 +3901,7 @@ XS(XS_Mob_SpellFinished) {
 			resist_diff = spells[spell_id].ResistDiff;
 		}
 
-		THIS->SpellFinished(spell_id, spell_target, EQEmu::CastingSlot::Item, mana_cost, -1, resist_diff);
+		THIS->SpellFinished(spell_id, spell_target, EQEmu::spells::CastingSlot::Item, mana_cost, -1, resist_diff);
 	}
 	XSRETURN_EMPTY;
 }
@@ -6760,7 +6834,7 @@ XS(XS_Mob_SendIllusion) {
 	dXSARGS;
 	if (items < 2 || items > 14)
 		Perl_croak(aTHX_
-		           "Usage: Mob::SendIllusion(THIS, uint16 race, [uint8 gender = 0xFF], [uint8 texture = 0xFF], [unit8 helmtexture = 0xFF], [unit8 face = 0xFF], [unit8 hairstyle = 0xFF], [uint8 hair_color = 0xFF], [uint8 beard = 0xFF], [uint8 beard_color = 0xFF], [uint32 drakkin_heritage = 0xFFFFFFFF], [uint32 drakkin_tattoo = 0xFFFFFFFF], [uint32 drakkin_details = 0xFFFFFFFF], [float size = -1])");
+		           "Usage: Mob::SendIllusion(THIS, uint16 race, [uint8 gender = 0xFF], [uint8 texture  face = 0xFF], [uint8 hairstyle = 0xFF], [uint8 hair_color = 0xFF], [uint8 beard = 0xFF], [uint8 beard_color =FF], [uint32 drakkin_tattoo = 0xFFFFFFFF], [uint32 drakkin_details = 0xFFFFFFFF], [float size = -1])");
 	{
 		Mob *THIS;
 		uint16 race             = (uint16) SvIV(ST(1));
@@ -8552,11 +8626,14 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "SetHP"), XS_Mob_SetHP, file, "$$");
 	newXSproto(strcpy(buf, "DoAnim"), XS_Mob_DoAnim, file, "$$;$");
 	newXSproto(strcpy(buf, "ChangeSize"), XS_Mob_ChangeSize, file, "$$;$");
+	newXSproto(strcpy(buf, "RandomizeFeatures"), XS_Mob_RandomizeFeatures, file, "$$;$");
 	newXSproto(strcpy(buf, "GMMove"), XS_Mob_GMMove, file, "$$$$;$");
 	newXSproto(strcpy(buf, "HasProcs"), XS_Mob_HasProcs, file, "$");
 	newXSproto(strcpy(buf, "IsInvisible"), XS_Mob_IsInvisible, file, "$;$");
 	newXSproto(strcpy(buf, "SetInvisible"), XS_Mob_SetInvisible, file, "$$");
 	newXSproto(strcpy(buf, "FindBuff"), XS_Mob_FindBuff, file, "$$");
+	newXSproto(strcpy(buf, "FindBuffBySlot"), XS_Mob_FindBuffBySlot, file, "$$");
+	newXSproto(strcpy(buf, "BuffCount"), XS_Mob_BuffCount, file, "$");
 	newXSproto(strcpy(buf, "FindType"), XS_Mob_FindType, file, "$$;$$");
 	newXSproto(strcpy(buf, "GetBuffSlotFromType"), XS_Mob_GetBuffSlotFromType, file, "$$");
 	newXSproto(strcpy(buf, "MakePet"), XS_Mob_MakePet, file, "$$$;$");

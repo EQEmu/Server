@@ -3622,6 +3622,36 @@ XS(XS__UpdateZoneHeader) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS__set_rule);
+XS(XS__set_rule) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::set_rule(string rule_name, string rule_value)");
+	
+	std::string rule_name = (std::string) SvPV_nolen(ST(0));
+	std::string rule_value = (std::string) SvPV_nolen(ST(1));
+	RuleManager::Instance()->SetRule(rule_name.c_str(), rule_value.c_str());
+	
+	XSRETURN_EMPTY;
+}
+
+XS(XS__get_rule);
+XS(XS__get_rule) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::get_rule(string rule_name)");
+
+	dXSTARG;
+	std::string rule_name = (std::string) SvPV_nolen(ST(0));
+	std::string rule_value;
+	RuleManager::Instance()->GetRule(rule_name.c_str(), rule_value);
+
+	sv_setpv(TARG, rule_value.c_str());
+	XSprePUSH;
+	PUSHTARG;
+	XSRETURN(1);
+}
+
 XS(XS__get_data);
 XS(XS__get_data) {
 	dXSARGS;
@@ -3734,6 +3764,8 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "GetTimeSeconds"), XS__GetTimeSeconds, file);
 	newXS(strcpy(buf, "GetZoneID"), XS__GetZoneID, file);
 	newXS(strcpy(buf, "GetZoneLongName"), XS__GetZoneLongName, file);
+	newXS(strcpy(buf, "set_rule"), XS__set_rule, file);
+	newXS(strcpy(buf, "get_rule"), XS__get_rule, file);
 	newXS(strcpy(buf, "get_data"), XS__get_data, file);
 	newXS(strcpy(buf, "get_data_expires"), XS__get_data_expires, file);
 	newXS(strcpy(buf, "set_data"), XS__set_data, file);

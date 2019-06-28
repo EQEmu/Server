@@ -163,7 +163,7 @@ IPathfinder::IPath PathfinderNavmesh::FindPath(const glm::vec3 &start, const glm
 	static const int max_polys = 256;
 	dtPolyRef start_ref;
 	dtPolyRef end_ref;
-	glm::vec3 ext(5.0f, 100.0f, 5.0f);
+	glm::vec3 ext(10.0f, 200.0f, 10.0f);
 
 	m_impl->query->findNearestPoly(&current_location[0], &ext[0], &filter, &start_ref, 0);
 	m_impl->query->findNearestPoly(&dest_location[0], &ext[0], &filter, &end_ref, 0);

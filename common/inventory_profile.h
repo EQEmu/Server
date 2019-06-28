@@ -87,15 +87,18 @@ namespace EQEmu
 
 		InventoryProfile() {
 			m_mob_version = versions::MobVersion::Unknown;
-			m_mob_version_set = false;
+			m_gm_inventory = false;
 			m_lookup = inventory::StaticLookup(versions::MobVersion::Unknown);
 		}
 		~InventoryProfile();
 
-		bool SetInventoryVersion(versions::MobVersion inventory_version);
-		bool SetInventoryVersion(versions::ClientVersion client_version) { return SetInventoryVersion(versions::ConvertClientVersionToMobVersion(client_version)); }
+		void SetInventoryVersion(versions::MobVersion inventory_version);
+		void SetInventoryVersion(versions::ClientVersion client_version) { SetInventoryVersion(versions::ConvertClientVersionToMobVersion(client_version)); }
 
-		versions::MobVersion InventoryVersion() { return m_mob_version; }
+		void SetGMInventory(bool gmi_flag);
+		bool GMInventory() const { return m_gm_inventory; }
+
+		versions::MobVersion InventoryVersion() const { return m_mob_version; }
 
 		const inventory::LookupEntry* GetLookup() const { return m_lookup; }
 
@@ -222,7 +225,7 @@ namespace EQEmu
 	private:
 		// Active mob version
 		versions::MobVersion m_mob_version;
-		bool m_mob_version_set;
+		bool m_gm_inventory;
 		const inventory::LookupEntry* m_lookup;
 	};
 }

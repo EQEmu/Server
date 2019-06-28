@@ -704,6 +704,14 @@ RULE_CATEGORY(Console)
 RULE_INT(Console, SessionTimeOut, 600000)	// Amount of time in ms for the console session to time out
 RULE_CATEGORY_END()
 
+RULE_CATEGORY(Network)
+RULE_INT(Network, ResendDelayBaseMS, 100)
+RULE_REAL(Network, ResendDelayFactor, 1.5)
+RULE_INT(Network, ResendDelayMinMS, 100)
+RULE_INT(Network, ResendDelayMaxMS, 5000)
+RULE_INT(Network, ResendsPerCycle, 1000)
+RULE_CATEGORY_END()
+
 RULE_CATEGORY(QueryServ)
 RULE_BOOL(QueryServ, PlayerLogChat, false) // Logs Player Chat
 RULE_BOOL(QueryServ, PlayerLogTrades, false) // Logs Player Trades
@@ -748,6 +756,17 @@ RULE_CATEGORY(Bugs)
 RULE_BOOL(Bugs, ReportingSystemActive, true) // Activates bug reporting
 RULE_BOOL(Bugs, UseOldReportingMethod, true) // Forces the use of the old bug reporting system
 RULE_BOOL(Bugs, DumpTargetEntity, false) // Dumps the target entity, if one is provided
+RULE_CATEGORY_END()
+
+RULE_CATEGORY(Faction)
+RULE_INT(Faction, AllyFactionMinimum, 1100)
+RULE_INT(Faction, WarmlyFactionMinimum, 750)
+RULE_INT(Faction, KindlyFactionMinimum, 500)
+RULE_INT(Faction, AmiablyFactionMinimum, 100)
+RULE_INT(Faction, IndifferentlyFactionMinimum, 0)
+RULE_INT(Faction, ApprehensivelyFactionMinimum, -100)
+RULE_INT(Faction, DubiouslyFactionMinimum, -500)
+RULE_INT(Faction, ThreateninglyFactionMinimum, -750)
 RULE_CATEGORY_END()
 
 #undef RULE_CATEGORY

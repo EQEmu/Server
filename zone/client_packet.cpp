@@ -530,10 +530,14 @@ void Client::CompleteConnect()
 		SendAppearancePacket(AT_GuildID, GuildID(), false);
 		SendAppearancePacket(AT_GuildRank, rank, false);
 	}
-	for (uint32 spellInt = 0; spellInt < MAX_PP_REF_SPELLBOOK; spellInt++) {
-		if (m_pp.spell_book[spellInt] < 3 || m_pp.spell_book[spellInt] > 50000)
+
+	// moved to dbload and translators since we iterate there also .. keep m_pp values whatever they are when they get here
+	/*const auto sbs = EQEmu::spells::DynamicLookup(ClientVersion(), GetGM())->SpellbookSize;
+	for (uint32 spellInt = 0; spellInt < sbs; ++spellInt) {
+		if (m_pp.spell_book[spellInt] < 3 || m_pp.spell_book[spellInt] > EQEmu::spells::SPELL_ID_MAX)
 			m_pp.spell_book[spellInt] = 0xFFFFFFFF;
-	}
+	}*/
+
 	//SendAATable();
 
 	if (GetHideMe()) Message(13, "[GM] You are currently hidden to all clients");
@@ -809,6 +813,16 @@ void Client::CompleteConnect()
 			std::string event_desc = StringFormat("Connect :: Logged into zoneid:%i instid:%i", this->GetZoneID(), this->GetInstanceID());
 			QServ->PlayerLogEvent(Player_Log_Connect_State, this->CharacterID(), event_desc);
 		}
+
+		/**
+		 * Update last login since this doesn't get updated until a late save later so we can update online status
+		 */
+		database.QueryDatabase(
+			StringFormat(
+				"UPDATE `character_data` SET `last_login` = UNIX_TIMESTAMP() WHERE id = %u",
+				this->CharacterID()
+			)
+		);
 	}
 
 	if (zone) {
@@ -1144,8 +1158,8 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	SetClientVersion(Connection()->ClientVersion());
 	m_ClientVersionBit = EQEmu::versions::ConvertClientVersionToClientVersionBit(Connection()->ClientVersion());
 
-	bool siv = m_inv.SetInventoryVersion(m_ClientVersion);
-	Log(Logs::General, Logs::None, "%s inventory version to %s(%i)", (siv ? "Succeeded in setting" : "Failed to set"), ClientVersionName(m_ClientVersion), m_ClientVersion);
+	m_pp.SetPlayerProfileVersion(m_ClientVersion);
+	m_inv.SetInventoryVersion(m_ClientVersion);
 
 	/* Antighost code
 	tmp var is so the search doesnt find this object
@@ -1185,7 +1199,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	uint32 cid = CharacterID();
 	character_id = cid; /* Global character_id reference */
 
-						/* Flush and reload factions */
+	/* Flush and reload factions */
 	database.RemoveTempFactions(this);
 	database.LoadCharacterFactionValues(cid, factionvalues);
 
@@ -1222,6 +1236,9 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		m_pp.platinum_shared = database.GetSharedPlatinum(this->AccountID());
 
 	database.ClearOldRecastTimestamps(cid); /* Clear out our old recast timestamps to keep the DB clean */
+	// set to full support in case they're a gm with items in disabled expansion slots..but, have their gm flag off...
+	// item loss will occur when they use the 'empty' slots, if this is not done
+	m_inv.SetGMInventory(true); 
 	loaditems = database.GetInventory(cid, &m_inv); /* Load Character Inventory */
 	database.LoadCharacterBandolier(cid, &m_pp); /* Load Character Bandolier */
 	database.LoadCharacterBindPoint(cid, &m_pp); /* Load Character Bind */
@@ -1238,7 +1255,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	database.LoadCharacterLeadershipAA(cid, &m_pp); /* Load Character Leadership AA's */
 	database.LoadCharacterTribute(cid, &m_pp); /* Load CharacterTribute */
 
-											   /* Load AdventureStats */
+	/* Load AdventureStats */
 	AdventureStats_Struct as;
 	if (database.GetAdventureStats(cid, &as))
 	{
@@ -1398,10 +1415,10 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if (m_pp.ldon_points_available < 0 || m_pp.ldon_points_available > 2000000000) { m_pp.ldon_points_available = 0; }
 
 	if (RuleB(World, UseClientBasedExpansionSettings)) {
-		m_pp.expansions = EQEmu::expansions::ConvertClientVersionToExpansionMask(ClientVersion());
+		m_pp.expansions = EQEmu::expansions::ConvertClientVersionToExpansionsMask(ClientVersion());
 	}
 	else {
-		m_pp.expansions = RuleI(World, ExpansionSettings);
+		m_pp.expansions = (RuleI(World, ExpansionSettings) & EQEmu::expansions::ConvertClientVersionToExpansionsMask(ClientVersion()));
 	}
 
 	if (!database.LoadAlternateAdvancement(this)) {
@@ -1409,7 +1426,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	}
 
 	if (SPDAT_RECORDS > 0) {
-		for (uint32 z = 0; z<MAX_PP_MEMSPELL; z++) {
+		for (uint32 z = 0; z < EQEmu::spells::SPELL_GEM_COUNT; z++) {
 			if (m_pp.mem_spells[z] >= (uint32)SPDAT_RECORDS)
 				UnmemSpell(z, false);
 		}
@@ -1511,11 +1528,12 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	}
 
 #ifdef BOTS
-	botdb.LoadOwnerOptions(this);
+	database.botdb.LoadOwnerOptions(this);
 	// TODO: mod below function for loading spawned botgroups
 	Bot::LoadAndSpawnAllZonedBots(this);
 #endif
 
+	m_inv.SetGMInventory((bool)m_pp.gm); // set to current gm state for calc
 	CalcBonuses();
 	if (RuleB(Zone, EnableLoggedOffReplenishments) &&
 		time(nullptr) - m_pp.lastlogin >= RuleI(Zone, MinOfflineTimeToReplenishments)) {
@@ -1540,7 +1558,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	}
 
 	/* Load Spell Slot Refresh from Currently Memoried Spells */
-	for (unsigned int i = 0; i < MAX_PP_MEMSPELL; ++i)
+	for (unsigned int i = 0; i < EQEmu::spells::SPELL_GEM_COUNT; ++i)
 		if (IsValidSpell(m_pp.mem_spells[i]))
 			m_pp.spellSlotRefresh[i] = p_timers.GetRemainingTime(pTimerSpellStart + m_pp.mem_spells[i]) * 1000;
 
@@ -1573,8 +1591,9 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if ((m_pp.RestTimer > RuleI(Character, RestRegenTimeToActivate)) && (m_pp.RestTimer > RuleI(Character, RestRegenRaidTimeToActivate)))
 		m_pp.RestTimer = 0;
 
-	/* This checksum should disappear once dynamic structs are in... each struct strategy will do it */
-	CRC32::SetEQChecksum((unsigned char*)&m_pp, sizeof(PlayerProfile_Struct) - 4);
+	/* This checksum should disappear once dynamic structs are in... each struct strategy will do it */ // looks to be in place now
+	//CRC32::SetEQChecksum((unsigned char*)&m_pp, sizeof(PlayerProfile_Struct) - sizeof(m_pp.m_player_profile_version) - 4);
+	// m_pp.checksum = 0; // All server out-bound player profile packets are now translated - no need to waste cycles calculating this...
 
 	outapp = new EQApplicationPacket(OP_PlayerProfile, sizeof(PlayerProfile_Struct));
 
@@ -1639,6 +1658,9 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	this is not quite where live sends inventory, they do it after tribute
 	*/
 	if (loaditems) { /* Dont load if a length error occurs */
+		if (admin >= minStatusToBeGM)
+			m_inv.SetGMInventory(true); // set to true to allow expansion-restricted packets through
+
 		BulkSendInventoryItems();
 		/* Send stuff on the cursor which isnt sent in bulk */
 		for (auto iter = m_inv.cursor_cbegin(); iter != m_inv.cursor_cend(); ++iter) {
@@ -1648,6 +1670,9 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 			const EQEmu::ItemInstance *inst = *iter;
 			SendItemPacket(EQEmu::invslot::slotCursor, inst, ItemPacketLimbo);
 		}
+
+		// this is kinda hackish atm..this process needs to be realigned to allow a contiguous flow
+		m_inv.SetGMInventory((bool)m_pp.gm); // reset back to current gm state
 	}
 
 	/* Task Packets */
@@ -2787,24 +2812,19 @@ void Client::Handle_OP_ApplyPoison(const EQApplicationPacket *app)
 		return;
 	}
 
-	uint32 ApplyPoisonSuccessResult = 0;
 	ApplyPoison_Struct* ApplyPoisonData = (ApplyPoison_Struct*)app->pBuffer;
+
+	uint32 ApplyPoisonSuccessResult = 0;
+
 	const EQEmu::ItemInstance* PrimaryWeapon = GetInv().GetItem(EQEmu::invslot::slotPrimary);
 	const EQEmu::ItemInstance* SecondaryWeapon = GetInv().GetItem(EQEmu::invslot::slotSecondary);
-	const EQEmu::ItemInstance* PoisonItemInstance = GetInv()[ApplyPoisonData->inventorySlot];
-	const EQEmu::ItemData* poison=PoisonItemInstance->GetItem();
-	const EQEmu::ItemData* primary=nullptr;
-	const EQEmu::ItemData* secondary=nullptr;
-	bool IsPoison = PoisonItemInstance && 
-					(poison->ItemType == EQEmu::item::ItemTypePoison);
+	const EQEmu::ItemInstance* PoisonItemInstance = GetInv().GetItem(ApplyPoisonData->inventorySlot);
 
-	if (PrimaryWeapon) {
-		primary=PrimaryWeapon->GetItem();
-	}
+	const EQEmu::ItemData* primary = (PrimaryWeapon ? PrimaryWeapon->GetItem() : nullptr);
+	const EQEmu::ItemData* secondary = (SecondaryWeapon ? SecondaryWeapon->GetItem() : nullptr);
+	const EQEmu::ItemData* poison = (PoisonItemInstance ? PoisonItemInstance->GetItem() : nullptr);
 
-	if (SecondaryWeapon) {
-		secondary=SecondaryWeapon->GetItem();
-	}
+	bool IsPoison = (poison && poison->ItemType == EQEmu::item::ItemTypePoison);
 
 	if (IsPoison && GetClass() == ROGUE) {
 
@@ -3996,7 +4016,7 @@ void Client::Handle_OP_CancelTrade(const EQApplicationPacket *app)
 
 void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 {
-	using EQEmu::CastingSlot;
+	using EQEmu::spells::CastingSlot;
 	if (app->size != sizeof(CastSpell_Struct)) {
 		std::cout << "Wrong size: OP_CastSpell, size=" << app->size << ", expected " << sizeof(CastSpell_Struct) << std::endl;
 		return;
@@ -4017,14 +4037,14 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 	/* Memorized Spell */
 	if (m_pp.mem_spells[castspell->slot] && m_pp.mem_spells[castspell->slot] == castspell->spell_id) {
 		uint16 spell_to_cast = 0;
-		if (castspell->slot < MAX_PP_MEMSPELL) {
+		if (castspell->slot < EQEmu::spells::SPELL_GEM_COUNT) {
 			spell_to_cast = m_pp.mem_spells[castspell->slot];
 			if (spell_to_cast != castspell->spell_id) {
 				InterruptSpell(castspell->spell_id); //CHEATER!!!
 				return;
 			}
 		}
-		else if (castspell->slot >= MAX_PP_MEMSPELL) {
+		else if (castspell->slot >= EQEmu::spells::SPELL_GEM_COUNT) {
 			InterruptSpell();
 			return;
 		}
@@ -4603,7 +4623,7 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 	con->playerid = GetID();
 	con->targetid = conin->targetid;
 	if (tmob->IsNPC())
-		con->faction = GetFactionLevel(character_id, tmob->GetNPCTypeID(), race, class_, deity, (tmob->IsNPC()) ? tmob->CastToNPC()->GetPrimaryFaction() : 0, tmob); // Dec. 20, 2001; TODO: Send the players proper deity
+		con->faction = GetFactionLevel(character_id, tmob->GetNPCTypeID(), GetFactionRace(), class_, deity, (tmob->IsNPC()) ? tmob->CastToNPC()->GetPrimaryFaction() : 0, tmob); // Dec. 20, 2001; TODO: Send the players proper deity
 	else
 		con->faction = 1;
 	con->level = GetLevelCon(tmob->GetLevel());
@@ -5243,7 +5263,7 @@ void Client::Handle_OP_DeleteSpell(const EQApplicationPacket *app)
 	EQApplicationPacket* outapp = app->Copy();
 	DeleteSpell_Struct* dss = (DeleteSpell_Struct*)outapp->pBuffer;
 
-	if (dss->spell_slot < 0 || dss->spell_slot > int(MAX_PP_SPELLBOOK))
+	if (dss->spell_slot < 0 || dss->spell_slot >= EQEmu::spells::DynamicLookup(ClientVersion(), GetGM())->SpellbookSize)
 		return;
 
 	if (m_pp.spell_book[dss->spell_slot] != SPELLBOOK_UNKNOWN) {
@@ -8441,7 +8461,7 @@ void Client::Handle_OP_ItemPreview(const EQApplicationPacket *app)
 
 void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 {
-	using EQEmu::CastingSlot;
+	using EQEmu::spells::CastingSlot;
 	if (app->size != sizeof(ItemVerifyRequest_Struct))
 	{
 		Log(Logs::General, Logs::Error, "OP size error: OP_ItemVerifyRequest expected:%i got:%i", sizeof(ItemVerifyRequest_Struct), app->size);
@@ -9167,7 +9187,7 @@ void Client::Handle_OP_LoadSpellSet(const EQApplicationPacket *app)
 	}
 	int i;
 	LoadSpellSet_Struct* ss = (LoadSpellSet_Struct*)app->pBuffer;
-	for (i = 0; i<MAX_PP_MEMSPELL; i++) {
+	for (i = 0; i < EQEmu::spells::SPELL_GEM_COUNT; i++) {
 		if (ss->spell[i] != 0xFFFFFFFF)
 			UnmemSpell(i, true);
 	}
@@ -9374,7 +9394,7 @@ void Client::Handle_OP_MercenaryCommand(const EQApplicationPacket *app)
 				//check to see if selected option is a valid stance slot (option is the slot the stance is in, not the actual stance)
 				if (option >= 0 && option < numStances)
 				{
-					merc->SetStance(mercTemplate->Stances[option]);
+					merc->SetStance((EQEmu::constants::StanceType)mercTemplate->Stances[option]);
 					GetMercInfo().Stance = mercTemplate->Stances[option];
 
 					Log(Logs::General, Logs::Mercenaries, "Set Stance: %u for %s (%s)", merc->GetStance(), merc->GetName(), GetName());
@@ -13317,7 +13337,10 @@ void Client::Handle_OP_SwapSpell(const EQApplicationPacket *app)
 	const SwapSpell_Struct* swapspell = (const SwapSpell_Struct*)app->pBuffer;
 	int swapspelltemp;
 
-	if (swapspell->from_slot < 0 || swapspell->from_slot > MAX_PP_SPELLBOOK || swapspell->to_slot < 0 || swapspell->to_slot > MAX_PP_SPELLBOOK)
+	const auto sbs = EQEmu::spells::DynamicLookup(ClientVersion(), GetGM())->SpellbookSize;
+	if (swapspell->from_slot < 0 || swapspell->from_slot >= sbs)
+		return;
+	if (swapspell->to_slot < 0 || swapspell->to_slot >= sbs)
 		return;
 
 	swapspelltemp = m_pp.spell_book[swapspell->from_slot];

@@ -189,11 +189,11 @@ inline std::string GetMobAttributeByString(Mob *mob, const std::string &attribut
 	}
 
 	if (attribute == "cor") {
-		return std::to_string(mob->GetCorrup());
+		return commify(std::to_string(mob->GetCorrup())) + scaling_modified;
 	}
 
 	if (attribute == "phy") {
-		return std::to_string(mob->GetPhR());
+		return commify(std::to_string(mob->GetPhR())) + scaling_modified;
 	}
 
 	if (attribute == "name") {
@@ -817,7 +817,7 @@ void Mob::DisplayInfo(Mob *mob)
 			NPCCommandsMenu(client, npc);
 		}
 
-		std::cout << "Window Length: " << window_text.length() << std::endl;
+		// std::cout << "Window Length: " << window_text.length() << std::endl;
 
 		if (client->GetDisplayMobInfoWindow()) {
 			client->SendFullPopup(

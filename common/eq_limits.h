@@ -42,47 +42,28 @@ namespace EQEmu
 			uint32 ExpansionsMask;
 			int16 CharacterCreationLimit;
 			size_t SayLinkBodySize;
-			int LongBuffs;
-			int ShortBuffs;
-			int DiscBuffs;
-			int TotalBuffs;
-			int NPCBuffs;
-			int PetBuffs;
-			int MercBuffs;
-
+			
 			LookupEntry(const LookupEntry *lookup_entry) { }
 			LookupEntry(
 				EQEmu::expansions::Expansion Expansion,
 				uint32 ExpansionBit,
 				uint32 ExpansionsMask,
 				int16 CharacterCreationLimit,
-				size_t SayLinkBodySize,
-				int LongBuffs,
-				int ShortBuffs,
-				int DiscBuffs,
-				int TotalBuffs,
-				int NPCBuffs,
-				int PetBuffs,
-				int MercBuffs
+				size_t SayLinkBodySize
 			) :
 				Expansion(Expansion),
 				ExpansionBit(ExpansionBit),
 				ExpansionsMask(ExpansionsMask),
 				CharacterCreationLimit(CharacterCreationLimit),
-				SayLinkBodySize(SayLinkBodySize),
-				LongBuffs(LongBuffs),
-				ShortBuffs(ShortBuffs),
-				DiscBuffs(DiscBuffs),
-				TotalBuffs(TotalBuffs),
-				NPCBuffs(NPCBuffs),
-				PetBuffs(PetBuffs),
-				MercBuffs(MercBuffs)
+				SayLinkBodySize(SayLinkBodySize)
 			{ }
 		};
 
 		void InitializeDynamicLookups();
 
-		const LookupEntry* DynamicLookup(versions::ClientVersion client_version);
+		const LookupEntry* DynamicLookup(versions::ClientVersion client_version, bool gm_flag);
+		const LookupEntry* DynamicNonGMLookup(versions::ClientVersion client_version);
+		const LookupEntry* DynamicGMLookup(versions::ClientVersion client_version);
 		const LookupEntry* StaticLookup(versions::ClientVersion client_version);
 
 	} /*constants*/
@@ -92,7 +73,7 @@ namespace EQEmu
 			// note: 'PossessionsBitmask' needs to be attuned to the client version with the highest number
 			// of possessions slots and 'InventoryTypeSize[typePossessions]' should reflect the same count
 			// with translators adjusting for valid slot indices. Server-side validations will be performed
-			// against 'PossessionsBitmask' (note: the same applies to Corpse type size and bitmask)
+			// against 'PossessionsBitmask' (note: the same applies to CorpseBitmask..size is not dependent)
 
 			struct InventoryTypeSize_Struct { // should reflect count and naming conventions referenced in emu_constants.h
 				int16 Possessions,	Bank,				SharedBank;
@@ -178,7 +159,9 @@ namespace EQEmu
 
 		void InitializeDynamicLookups();
 
-		const LookupEntry* DynamicLookup(versions::MobVersion mob_version);
+		const LookupEntry* DynamicLookup(versions::MobVersion mob_version, bool gm_flag);
+		const LookupEntry* DynamicNonGMLookup(versions::MobVersion mob_version);
+		const LookupEntry* DynamicGMLookup(versions::MobVersion mob_version);
 		const LookupEntry* StaticLookup(versions::MobVersion mob_version);
 
 	} /*inventory*/
@@ -197,10 +180,61 @@ namespace EQEmu
 
 		void InitializeDynamicLookups();
 
-		const LookupEntry* DynamicLookup(versions::MobVersion mob_version);
+		const LookupEntry* DynamicLookup(versions::MobVersion mob_version, bool gm_flag);
+		const LookupEntry* DynamicNonGMLookup(versions::MobVersion mob_version);
+		const LookupEntry* DynamicGMLookup(versions::MobVersion mob_version);
 		const LookupEntry* StaticLookup(versions::MobVersion mob_version);
 
 	} /*behavior*/
+
+	namespace spells {
+		struct LookupEntry {
+			int SpellIdMax;
+			int SpellbookSize;
+			int SpellGemCount;
+
+			int LongBuffs;
+			int ShortBuffs;
+			int DiscBuffs;
+			int TotalBuffs;
+			int NPCBuffs;
+			int PetBuffs;
+			int MercBuffs;
+			
+			LookupEntry(const LookupEntry *lookup_entry) { }
+			LookupEntry(
+				int SpellIdMax,
+				int SpellbookSize,
+				int SpellGemCount,
+				int LongBuffs,
+				int ShortBuffs,
+				int DiscBuffs,
+				int TotalBuffs,
+				int NPCBuffs,
+				int PetBuffs,
+				int MercBuffs
+			) :
+				SpellIdMax(SpellIdMax),
+				SpellbookSize(SpellbookSize),
+				SpellGemCount(SpellGemCount),
+				LongBuffs(LongBuffs),
+				ShortBuffs(ShortBuffs),
+				DiscBuffs(DiscBuffs),
+				TotalBuffs(TotalBuffs),
+				NPCBuffs(NPCBuffs),
+				PetBuffs(PetBuffs),
+				MercBuffs(MercBuffs)
+			{ }
+		};
+		
+		void InitializeDynamicLookups();
+		
+		const LookupEntry* DynamicLookup(versions::ClientVersion client_version, bool gm_flag);
+		const LookupEntry* DynamicNonGMLookup(versions::ClientVersion client_version);
+		const LookupEntry* DynamicGMLookup(versions::ClientVersion client_version);
+		const LookupEntry* StaticLookup(versions::ClientVersion client_version);
+
+	} /*spells*/
 
 } /*EQEmu*/
 
@@ -209,12 +243,26 @@ namespace ClientUnknown
 	const int16 IINVALID = -1;
 	const int16 INULL = 0;
 
+	namespace constants {
+		const EQEmu::expansions::Expansion EXPANSION = EQEmu::expansions::Expansion::EverQuest;
+		const uint32 EXPANSION_BIT = EQEmu::expansions::bitEverQuest;
+		const uint32 EXPANSIONS_MASK = EQEmu::expansions::maskEverQuest;
+
+	} // namespace constants
+
 } /*ClientUnknown*/
 
 namespace Client62
 {
 	const int16 IINVALID = -1;
 	const int16 INULL = 0;
+
+	namespace constants {
+		const EQEmu::expansions::Expansion EXPANSION = EQEmu::expansions::Expansion::EverQuest;
+		const uint32 EXPANSION_BIT = EQEmu::expansions::bitEverQuest;
+		const uint32 EXPANSIONS_MASK = EQEmu::expansions::maskEverQuest;
+
+	} // namespace constants
 
 } /*Client62*/
 

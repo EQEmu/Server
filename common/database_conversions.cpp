@@ -217,7 +217,7 @@ namespace Convert {
 		/*0245*/	uint8							guildbanker;
 		/*0246*/	uint8							unknown0246[6];		//
 		/*0252*/	uint32							intoxication;
-		/*0256*/	uint32							spellSlotRefresh[MAX_PP_REF_MEMSPELL];	//in ms
+		/*0256*/	uint32							spellSlotRefresh[9];	//in ms
 		/*0292*/	uint32							abilitySlotRefresh;
 		/*0296*/	uint8							haircolor;			// Player hair color
 		/*0297*/	uint8							beardcolor;			// Player beard color
@@ -256,9 +256,9 @@ namespace Convert {
 		/*2505*/	uint8							unknown2541[47];	// ?
 		/*2552*/	uint8							languages[MAX_PP_LANGUAGE];
 		/*2580*/	uint8							unknown2616[4];
-		/*2584*/	uint32							spell_book[MAX_PP_REF_SPELLBOOK];
+		/*2584*/	uint32							spell_book[480];
 		/*4504*/	uint8							unknown4540[128];	// Was [428] all 0xff
-		/*4632*/	uint32							mem_spells[MAX_PP_REF_MEMSPELL];
+		/*4632*/	uint32							mem_spells[9];
 		/*4668*/	uint8							unknown4704[32];	//
 		/*4700*/	float							y;					// Player y position
 		/*4704*/	float							x;					// Player x position
@@ -1360,7 +1360,7 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				if (rquery != ""){ results = QueryDatabase(rquery); }
 				/* Run Spell Convert */
 				first_entry = 0; rquery = "";
-				for (i = 0; i < MAX_PP_REF_SPELLBOOK; i++){
+				for (i = 0; i < 480; i++){
 					if (pp->spell_book[i] > 0 && pp->spell_book[i] != 4294967295 && pp->spell_book[i] < 40000 && pp->spell_book[i] != 1){
 						if (first_entry != 1){
 							rquery = StringFormat("REPLACE INTO `character_spells` (id, slot_id, spell_id) VALUES (%u, %u, %u)", character_id, i, pp->spell_book[i]);
@@ -1372,7 +1372,7 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				if (rquery != ""){ results = QueryDatabase(rquery); }
 				/* Run Max Memmed Spell Convert */
 				first_entry = 0; rquery = "";
-				for (i = 0; i < MAX_PP_REF_MEMSPELL; i++){
+				for (i = 0; i < 9; i++){
 					if (pp->mem_spells[i] > 0 && pp->mem_spells[i] != 65535 && pp->mem_spells[i] != 4294967295){
 						if (first_entry != 1){
 							rquery = StringFormat("REPLACE INTO `character_memmed_spells` (id, slot_id, spell_id) VALUES (%u, %u, %u)", character_id, i, pp->mem_spells[i]);

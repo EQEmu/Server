@@ -289,14 +289,6 @@ namespace SoF
 
 		const size_t SAY_LINK_BODY_SIZE = 50;
 
-		const int LongBuffs = 25;
-		const int ShortBuffs = 15;
-		const int DiscBuffs = 1;
-		const int TotalBuffs = LongBuffs + ShortBuffs + DiscBuffs;
-		const int NPCBuffs = 60;
-		const int PetBuffs = 30;
-		const int MercBuffs = 0;
-
 	} /*constants*/
 
 	namespace behavior {
@@ -312,6 +304,41 @@ namespace SoF
 		const size_t LastUsableSkill = EQEmu::skills::SkillTripleAttack;
 
 	} /*skills*/
+
+	namespace spells {
+		inline EQEmu::versions::ClientVersion GetSkillsRef() { return EQEmu::versions::ClientVersion::SoF; }
+		
+		enum class CastingSlot : uint32 {
+			Gem1 = 0,
+			Gem2 = 1,
+			Gem3 = 2,
+			Gem4 = 3,
+			Gem5 = 4,
+			Gem6 = 5,
+			Gem7 = 6,
+			Gem8 = 7,
+			Gem9 = 8,
+			MaxGems = 9,
+			Ability = 9,
+			Item = 10,
+			Discipline = 10,
+			PotionBelt = 11,
+			AltAbility = 0xFF
+		};
+
+		const int SPELL_ID_MAX = 15999;
+		const int SPELLBOOK_SIZE = 480;
+		const int SPELL_GEM_COUNT = static_cast<uint32>(CastingSlot::MaxGems);
+		
+		const int LONG_BUFFS = 25;
+		const int SHORT_BUFFS = 15;
+		const int DISC_BUFFS = 1;
+		const int TOTAL_BUFFS = LONG_BUFFS + SHORT_BUFFS + DISC_BUFFS;
+		const int NPC_BUFFS = 60;
+		const int PET_BUFFS = 30;
+		const int MERC_BUFFS = 0;
+
+	} /*spells*/
 
 }; /*SoF*/
 

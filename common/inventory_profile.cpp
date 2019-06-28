@@ -119,19 +119,15 @@ EQEmu::InventoryProfile::~InventoryProfile()
 	m_trade.clear();
 }
 
-bool EQEmu::InventoryProfile::SetInventoryVersion(versions::MobVersion inventory_version) {
-	if (!m_mob_version_set) {
-		m_mob_version = versions::ValidateMobVersion(inventory_version);
-		m_lookup = inventory::StaticLookup(m_mob_version);
-		m_mob_version_set = true;
-		return true;
-	}
-	else {
-		m_lookup = inventory::StaticLookup(versions::MobVersion::Unknown);
-		Log(Logs::General, Logs::Error, "InventoryVersion set request after initial set (old: %u, new: %u)",
-			static_cast<uint32>(m_mob_version), static_cast<uint32>(inventory_version));
-		return false;
-	}
+void EQEmu::InventoryProfile::SetInventoryVersion(versions::MobVersion inventory_version) {
+	m_mob_version = versions::ValidateMobVersion(inventory_version);
+	SetGMInventory(m_gm_inventory);
+}
+
+void EQEmu::InventoryProfile::SetGMInventory(bool gmi_flag) {
+	m_gm_inventory = gmi_flag;
+
+	m_lookup = inventory::DynamicLookup(m_mob_version, gmi_flag);
 }
 
 void EQEmu::InventoryProfile::CleanDirty() {

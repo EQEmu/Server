@@ -92,7 +92,8 @@ Mob::Mob(
 	uint8 in_bracertexture,
 	uint8 in_handtexture,
 	uint8 in_legtexture,
-	uint8 in_feettexture
+	uint8 in_feettexture,
+	uint16 in_usemodel
 ) :
 	attack_timer(2000),
 	attack_dw_timer(2000),
@@ -147,6 +148,7 @@ Mob::Mob(
 	race          = in_race;
 	base_gender   = in_gender;
 	base_race     = in_race;
+	use_model	  = in_usemodel;
 	class_        = in_class;
 	bodytype      = in_bodytype;
 	orig_bodytype = in_bodytype;
@@ -1112,7 +1114,7 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	ns->spawn.spawnId	= GetID();
 	ns->spawn.curHp	= static_cast<uint8>(GetHPRatio());
 	ns->spawn.max_hp	= 100;		//this field needs a better name
-	ns->spawn.race		= race;
+	ns->spawn.race		= (use_model) ? use_model : race;
 	ns->spawn.runspeed	= runspeed;
 	ns->spawn.walkspeed	= walkspeed;
 	ns->spawn.class_	= class_;
@@ -1553,7 +1555,7 @@ void Mob::ShowStats(Client* client)
 		}
 	}
 	else {
-		client->Message(0, "  Level: %i  AC: %i  Class: %i  Size: %1.1f  Haste: %i", GetLevel(), GetAC(), GetClass(), GetSize(), GetHaste());
+		client->Message(0, "  Level: %i  AC: %i  Class: %i  Size: %1.1f  Haste: %i", GetLevel(), ACSum(), GetClass(), GetSize(), GetHaste());
 		client->Message(0, "  HP: %i  Max HP: %i",GetHP(), GetMaxHP());
 		client->Message(0, "  Mana: %i  Max Mana: %i", GetMana(), GetMaxMana());
 		client->Message(0, "  Total ATK: %i  Worn/Spell ATK (Cap %i): %i", GetATK(), RuleI(Character, ItemATKCap), GetATKBonus());
@@ -1692,151 +1694,74 @@ void Mob::SendIllusionPacket(
 	float in_size
 )
 {
+	uint8 new_texture = in_texture;
+	uint8 new_helmtexture = in_helmtexture;
+	uint8 new_haircolor;
+	uint8 new_beardcolor;
+	uint8 new_eyecolor1;
+	uint8 new_eyecolor2;
+	uint8 new_hairstyle;
+	uint8 new_luclinface;
+	uint8 new_beard;
+	uint8 new_aa_title;
+	uint32 new_drakkin_heritage;
+	uint32 new_drakkin_tattoo;
+	uint32 new_drakkin_details;
 
-	uint16 BaseRace = GetBaseRace();
+	race = (in_race) ? in_race : GetBaseRace();
 
-	if (in_race == 0) {
-		race = BaseRace;
-		if (in_gender == 0xFF) {
-			gender = GetBaseGender();
+	if (in_gender != 0xFF)
+		{
+		gender = in_gender;
 		}
-		else {
-			gender = in_gender;
+	else
+		{
+		gender = (in_race) ? GetDefaultGender(race, gender) : GetBaseGender();
 		}
-	}
-	else {
-		race = in_race;
-		if (in_gender == 0xFF) {
-			gender = GetDefaultGender(race, gender);
+
+	if (in_texture == 0xFF && !IsPlayerRace(in_race))
+		{
+		new_texture = GetTexture();
 		}
-		else {
-			gender = in_gender;
+
+	if (in_helmtexture == 0xFF && !IsPlayerRace(in_race))
+		{
+		new_helmtexture = GetHelmTexture();
 		}
-	}
 
-	if (in_texture == 0xFF) {
-		if (IsPlayerRace(in_race)) {
-			texture = 0xFF;
-		}
-		else {
-			texture = GetTexture();
-		}
-	}
-	else {
-		texture = in_texture;
-	}
-
-	if (in_helmtexture == 0xFF) {
-		if (IsPlayerRace(in_race)) {
-			helmtexture = 0xFF;
-		}
-		else if (in_texture != 0xFF) {
-			helmtexture = in_texture;
-		}
-		else {
-			helmtexture = GetHelmTexture();
-		}
-	}
-	else {
-		helmtexture = in_helmtexture;
-	}
-
-	if (in_haircolor == 0xFF) {
-		haircolor = GetHairColor();
-	}
-	else {
-		haircolor = in_haircolor;
-	}
-
-	if (in_beardcolor == 0xFF) {
-		beardcolor = GetBeardColor();
-	}
-	else {
-		beardcolor = in_beardcolor;
-	}
-
-	if (in_eyecolor1 == 0xFF) {
-		eyecolor1 = GetEyeColor1();
-	}
-	else {
-		eyecolor1 = in_eyecolor1;
-	}
-
-	if (in_eyecolor2 == 0xFF) {
-		eyecolor2 = GetEyeColor2();
-	}
-	else {
-		eyecolor2 = in_eyecolor2;
-	}
-
-	if (in_hairstyle == 0xFF) {
-		hairstyle = GetHairStyle();
-	}
-	else {
-		hairstyle = in_hairstyle;
-	}
-
-	if (in_luclinface == 0xFF) {
-		luclinface = GetLuclinFace();
-	}
-	else {
-		luclinface = in_luclinface;
-	}
-
-	if (in_beard == 0xFF) {
-		beard = GetBeard();
-	}
-	else {
-		beard = in_beard;
-	}
-
-	aa_title = in_aa_title;
-
-	if (in_drakkin_heritage == 0xFFFFFFFF) {
-		drakkin_heritage = GetDrakkinHeritage();
-	}
-	else {
-		drakkin_heritage = in_drakkin_heritage;
-	}
-
-	if (in_drakkin_tattoo == 0xFFFFFFFF) {
-		drakkin_tattoo = GetDrakkinTattoo();
-	}
-	else {
-		drakkin_tattoo = in_drakkin_tattoo;
-	}
-
-	if (in_drakkin_details == 0xFFFFFFFF) {
-		drakkin_details = GetDrakkinDetails();
-	}
-	else {
-		drakkin_details = in_drakkin_details;
-	}
-
-	if (in_size <= 0.0f) {
-		size = GetSize();
-	}
-	else {
-		size = in_size;
-	}
+	new_haircolor = (in_haircolor == 0xFF) ? GetHairColor() : in_haircolor;
+	new_beardcolor = (in_beardcolor == 0xFF) ? GetBeardColor() : in_beardcolor;
+	new_eyecolor1 = (in_eyecolor1 == 0xFF) ? GetEyeColor1() : in_eyecolor1;
+	new_eyecolor2 = (in_eyecolor2 == 0xFF) ? GetEyeColor2() : in_eyecolor2;
+	new_hairstyle = (in_hairstyle == 0xFF) ? GetHairStyle() : in_hairstyle;
+	new_luclinface = (in_luclinface == 0xFF) ? GetLuclinFace() : in_luclinface;
+	new_beard = (in_beard == 0xFF) ? GetBeard() : in_beard;
+	new_drakkin_heritage = 
+		(in_drakkin_heritage == 0xFFFFFFFF) ? GetDrakkinHeritage() : in_drakkin_heritage;
+	new_drakkin_tattoo = 
+		(in_drakkin_tattoo == 0xFFFFFFFF) ? GetDrakkinTattoo() : in_drakkin_tattoo;
+	new_drakkin_details = 
+		(in_drakkin_details == 0xFFFFFFFF) ? GetDrakkinDetails() : in_drakkin_details;
+	new_aa_title = in_aa_title;
+	size = (in_size <= 0.0f) ? GetSize() : in_size;
 
 	// Reset features to Base from the Player Profile
 	if (IsClient() && in_race == 0) {
-		race             = CastToClient()->GetBaseRace();
-		gender           = CastToClient()->GetBaseGender();
-		texture          = 0xFF;
-		helmtexture      = 0xFF;
-		haircolor        = CastToClient()->GetBaseHairColor();
-		beardcolor       = CastToClient()->GetBaseBeardColor();
-		eyecolor1        = CastToClient()->GetBaseEyeColor();
-		eyecolor2        = CastToClient()->GetBaseEyeColor();
-		hairstyle        = CastToClient()->GetBaseHairStyle();
-		luclinface       = CastToClient()->GetBaseFace();
-		beard            = CastToClient()->GetBaseBeard();
-		aa_title         = 0xFF;
-		drakkin_heritage = CastToClient()->GetBaseHeritage();
-		drakkin_tattoo   = CastToClient()->GetBaseTattoo();
-		drakkin_details  = CastToClient()->GetBaseDetails();
+		race							= CastToClient()->GetBaseRace();
+		gender							= CastToClient()->GetBaseGender();
+		new_texture = texture			= 0xFF;
+		new_helmtexture = helmtexture	= 0xFF;
+		new_haircolor = haircolor		= CastToClient()->GetBaseHairColor();
+		new_beardcolor = beardcolor		= CastToClient()->GetBaseBeardColor();
+		new_eyecolor1 = eyecolor1		= CastToClient()->GetBaseEyeColor();
+		new_eyecolor2 = eyecolor2		= CastToClient()->GetBaseEyeColor();
+		new_hairstyle = hairstyle		= CastToClient()->GetBaseHairStyle();
+		new_luclinface = luclinface		= CastToClient()->GetBaseFace();
+		new_beard = beard				= CastToClient()->GetBaseBeard();
+		new_aa_title = aa_title			= 0xFF;
+		new_drakkin_heritage = drakkin_heritage	= CastToClient()->GetBaseHeritage();
+		new_drakkin_tattoo = drakkin_tattoo	= CastToClient()->GetBaseTattoo();
+		new_drakkin_details = drakkin_details	= CastToClient()->GetBaseDetails();
 		switch (race) {
 			case OGRE:
 				size = 9;
@@ -1873,18 +1798,18 @@ void Mob::SendIllusionPacket(
 	strcpy(is->charname, GetCleanName());
 	is->race             = race;
 	is->gender           = gender;
-	is->texture          = texture;
-	is->helmtexture      = helmtexture;
-	is->haircolor        = haircolor;
-	is->beardcolor       = beardcolor;
-	is->beard            = beard;
-	is->eyecolor1        = eyecolor1;
-	is->eyecolor2        = eyecolor2;
-	is->hairstyle        = hairstyle;
-	is->face             = luclinface;
-	is->drakkin_heritage = drakkin_heritage;
-	is->drakkin_tattoo   = drakkin_tattoo;
-	is->drakkin_details  = drakkin_details;
+	is->texture          = new_texture;
+	is->helmtexture      = new_helmtexture;
+	is->haircolor        = new_haircolor;
+	is->beardcolor       = new_beardcolor;
+	is->beard            = new_beard;
+	is->eyecolor1        = new_eyecolor1;
+	is->eyecolor2        = new_eyecolor2;
+	is->hairstyle        = new_hairstyle;
+	is->face             = new_luclinface;
+	is->drakkin_heritage = new_drakkin_heritage;
+	is->drakkin_tattoo   = new_drakkin_tattoo;
+	is->drakkin_details  = new_drakkin_details;
 	is->size             = size;
 
 	entity_list.QueueClients(this, outapp);
@@ -1898,17 +1823,17 @@ void Mob::SendIllusionPacket(
 		"Illusion: Race = %i, Gender = %i, Texture = %i, HelmTexture = %i, HairColor = %i, BeardColor = %i, EyeColor1 = %i, EyeColor2 = %i, HairStyle = %i, Face = %i, DrakkinHeritage = %i, DrakkinTattoo = %i, DrakkinDetails = %i, Size = %f",
 		race,
 		gender,
-		texture,
-		helmtexture,
-		haircolor,
-		beardcolor,
-		eyecolor1,
-		eyecolor2,
-		hairstyle,
-		luclinface,
-		drakkin_heritage,
-		drakkin_tattoo,
-		drakkin_details,
+		new_texture,
+		new_helmtexture,
+		new_haircolor,
+		new_beardcolor,
+		new_eyecolor1,
+		new_eyecolor2,
+		new_hairstyle,
+		new_luclinface,
+		new_drakkin_heritage,
+		new_drakkin_tattoo,
+		new_drakkin_details,
 		size);
 }
 
@@ -2121,6 +2046,16 @@ bool Mob::IsPlayerRace(uint16 in_race) {
 	return false;
 }
 
+uint16 Mob::GetFactionRace() {
+	uint16 current_race = GetRace();	
+	if (IsPlayerRace(current_race) || current_race == TREE || 
+		current_race == MINOR_ILL_OBJ) {
+		return current_race;
+	}
+	else {
+		return (GetBaseRace());
+	}
+}
 
 uint8 Mob::GetDefaultGender(uint16 in_race, uint8 in_gender) {
 	if (Mob::IsPlayerRace(in_race) || in_race == 15 || in_race == 50 || in_race == 57 || in_race == 70 || in_race == 98 || in_race == 118 || in_race == 562) {
@@ -3123,12 +3058,12 @@ void Mob::ExecWeaponProc(const EQEmu::ItemInstance *inst, uint16 spell_id, Mob *
 		twinproc = true;
 
 	if (IsBeneficialSpell(spell_id) && (!IsNPC() || (IsNPC() && CastToNPC()->GetInnateProcSpellID() != spell_id))) { // NPC innate procs don't take this path ever
-		SpellFinished(spell_id, this, EQEmu::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff, true, level_override);
+		SpellFinished(spell_id, this, EQEmu::spells::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff, true, level_override);
 		if(twinproc)
 			SpellOnTarget(spell_id, this, false, false, 0, true, level_override);
 	}
 	else if(!(on->IsClient() && on->CastToClient()->dead)) { //dont proc on dead clients
-		SpellFinished(spell_id, on, EQEmu::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff, true, level_override);
+		SpellFinished(spell_id, on, EQEmu::spells::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff, true, level_override);
 		if(twinproc)
 			SpellOnTarget(spell_id, on, false, false, 0, true, level_override);
 	}
@@ -3465,7 +3400,7 @@ void Mob::TriggerOnCast(uint32 focus_spell, uint32 spell_id, bool aa_trigger)
 			trigger_spell_id = CastToClient()->CalcAAFocus(focusTriggerOnCast, *rank, spell_id);
 
 		if (IsValidSpell(trigger_spell_id) && GetTarget())
-			SpellFinished(trigger_spell_id, GetTarget(), EQEmu::CastingSlot::Item, 0, -1,
+			SpellFinished(trigger_spell_id, GetTarget(), EQEmu::spells::CastingSlot::Item, 0, -1,
 				      spells[trigger_spell_id].ResistDiff);
 	}
 
@@ -3473,7 +3408,7 @@ void Mob::TriggerOnCast(uint32 focus_spell, uint32 spell_id, bool aa_trigger)
 		trigger_spell_id = CalcFocusEffect(focusTriggerOnCast, focus_spell, spell_id);
 
 		if (IsValidSpell(trigger_spell_id) && GetTarget()) {
-			SpellFinished(trigger_spell_id, GetTarget(), EQEmu::CastingSlot::Item, 0, -1,
+			SpellFinished(trigger_spell_id, GetTarget(), EQEmu::spells::CastingSlot::Item, 0, -1,
 				      spells[trigger_spell_id].ResistDiff);
 			CheckNumHitsRemaining(NumHit::MatchingSpells, -1, focus_spell);
 		}
@@ -3504,7 +3439,7 @@ bool Mob::TrySpellTrigger(Mob *target, uint32 spell_id, int effect)
 				{
 					// If we trigger an effect then its over.
 					if (IsValidSpell(spells[spell_id].base2[i])){
-						SpellFinished(spells[spell_id].base2[i], target, EQEmu::CastingSlot::Item, 0, -1, spells[spells[spell_id].base2[i]].ResistDiff);
+						SpellFinished(spells[spell_id].base2[i], target, EQEmu::spells::CastingSlot::Item, 0, -1, spells[spells[spell_id].base2[i]].ResistDiff);
 						return true;
 					}
 				}
@@ -3523,7 +3458,7 @@ bool Mob::TrySpellTrigger(Mob *target, uint32 spell_id, int effect)
 		if(zone->random.Int(0, 100) <= spells[spell_id].base[effect])
 		{
 			if (IsValidSpell(spells[spell_id].base2[effect])){
-				SpellFinished(spells[spell_id].base2[effect], target, EQEmu::CastingSlot::Item, 0, -1, spells[spells[spell_id].base2[effect]].ResistDiff);
+				SpellFinished(spells[spell_id].base2[effect], target, EQEmu::spells::CastingSlot::Item, 0, -1, spells[spells[spell_id].base2[effect]].ResistDiff);
 				return true; //Only trigger once of these per spell effect.
 			}
 		}
@@ -3600,7 +3535,7 @@ void Mob::TryTriggerOnValueAmount(bool IsHP, bool IsMana, bool IsEndur, bool IsP
 						}
 
 						if (use_spell){
-							SpellFinished(spells[spell_id].base[i], this, EQEmu::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
+							SpellFinished(spells[spell_id].base[i], this, EQEmu::spells::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
 
 							if(!TryFadeEffect(e))
 								BuffFadeBySlot(e);
@@ -3628,7 +3563,7 @@ void Mob::TryTwincast(Mob *caster, Mob *target, uint32 spell_id)
 			if(zone->random.Roll(focus))
 			{
 				Message(MT_Spells,"You twincast %s!",spells[spell_id].name);
-				SpellFinished(spell_id, target, EQEmu::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
+				SpellFinished(spell_id, target, EQEmu::spells::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
 			}
 		}
 	}
@@ -3646,7 +3581,7 @@ void Mob::TryTwincast(Mob *caster, Mob *target, uint32 spell_id)
 				{
 					if(zone->random.Roll(focus))
 					{
-						SpellFinished(spell_id, target, EQEmu::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
+						SpellFinished(spell_id, target, EQEmu::spells::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
 					}
 				}
 			}
@@ -3774,10 +3709,10 @@ bool Mob::TryFadeEffect(int slot)
 					if(IsValidSpell(spell_id))
 					{
 						if (IsBeneficialSpell(spell_id)) {
-							SpellFinished(spell_id, this, EQEmu::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
+							SpellFinished(spell_id, this, EQEmu::spells::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
 						}
 						else if(!(IsClient() && CastToClient()->dead)) {
-							SpellFinished(spell_id, this, EQEmu::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
+							SpellFinished(spell_id, this, EQEmu::spells::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
 						}
 						return true;
 					}
@@ -3811,7 +3746,7 @@ void Mob::TrySympatheticProc(Mob *target, uint32 spell_id)
 			SpellFinished(focus_trigger, target);
 
 		else
-			SpellFinished(focus_trigger, this, EQEmu::CastingSlot::Item, 0, -1, spells[focus_trigger].ResistDiff);
+			SpellFinished(focus_trigger, this, EQEmu::spells::CastingSlot::Item, 0, -1, spells[focus_trigger].ResistDiff);
 	}
 	// For detrimental spells, if the triggered spell is beneficial, then it will land on the caster
 	// if the triggered spell is also detrimental, then it will land on the target
@@ -3821,7 +3756,7 @@ void Mob::TrySympatheticProc(Mob *target, uint32 spell_id)
 			SpellFinished(focus_trigger, this);
 
 		else
-			SpellFinished(focus_trigger, target, EQEmu::CastingSlot::Item, 0, -1, spells[focus_trigger].ResistDiff);
+			SpellFinished(focus_trigger, target, EQEmu::spells::CastingSlot::Item, 0, -1, spells[focus_trigger].ResistDiff);
 	}
 
 	CheckNumHitsRemaining(NumHit::MatchingSpells, -1, focus_spell);
@@ -4470,7 +4405,7 @@ void Mob::TrySpellOnKill(uint8 level, uint16 spell_id)
 					if (IsValidSpell(spells[spell_id].base2[i]) && spells[spell_id].max[i] <= level)
 					{
 						if(zone->random.Roll(spells[spell_id].base[i]))
-							SpellFinished(spells[spell_id].base2[i], this, EQEmu::CastingSlot::Item, 0, -1, spells[spells[spell_id].base2[i]].ResistDiff);
+							SpellFinished(spells[spell_id].base2[i], this, EQEmu::spells::CastingSlot::Item, 0, -1, spells[spells[spell_id].base2[i]].ResistDiff);
 					}
 				}
 			}
@@ -4485,17 +4420,17 @@ void Mob::TrySpellOnKill(uint8 level, uint16 spell_id)
 
 		if(aabonuses.SpellOnKill[i] && IsValidSpell(aabonuses.SpellOnKill[i]) && (level >= aabonuses.SpellOnKill[i + 2])) {
 			if(zone->random.Roll(static_cast<int>(aabonuses.SpellOnKill[i + 1])))
-				SpellFinished(aabonuses.SpellOnKill[i], this, EQEmu::CastingSlot::Item, 0, -1, spells[aabonuses.SpellOnKill[i]].ResistDiff);
+				SpellFinished(aabonuses.SpellOnKill[i], this, EQEmu::spells::CastingSlot::Item, 0, -1, spells[aabonuses.SpellOnKill[i]].ResistDiff);
 		}
 
 		if(itembonuses.SpellOnKill[i] && IsValidSpell(itembonuses.SpellOnKill[i]) && (level >= itembonuses.SpellOnKill[i + 2])){
 			if(zone->random.Roll(static_cast<int>(itembonuses.SpellOnKill[i + 1])))
-				SpellFinished(itembonuses.SpellOnKill[i], this, EQEmu::CastingSlot::Item, 0, -1, spells[aabonuses.SpellOnKill[i]].ResistDiff);
+				SpellFinished(itembonuses.SpellOnKill[i], this, EQEmu::spells::CastingSlot::Item, 0, -1, spells[aabonuses.SpellOnKill[i]].ResistDiff);
 		}
 
 		if(spellbonuses.SpellOnKill[i] && IsValidSpell(spellbonuses.SpellOnKill[i]) && (level >= spellbonuses.SpellOnKill[i + 2])) {
 			if(zone->random.Roll(static_cast<int>(spellbonuses.SpellOnKill[i + 1])))
-				SpellFinished(spellbonuses.SpellOnKill[i], this, EQEmu::CastingSlot::Item, 0, -1, spells[aabonuses.SpellOnKill[i]].ResistDiff);
+				SpellFinished(spellbonuses.SpellOnKill[i], this, EQEmu::spells::CastingSlot::Item, 0, -1, spells[aabonuses.SpellOnKill[i]].ResistDiff);
 		}
 
 	}
@@ -4512,19 +4447,19 @@ bool Mob::TrySpellOnDeath()
 	for(int i = 0; i < MAX_SPELL_TRIGGER*2; i+=2) {
 		if(IsClient() && aabonuses.SpellOnDeath[i] && IsValidSpell(aabonuses.SpellOnDeath[i])) {
 			if(zone->random.Roll(static_cast<int>(aabonuses.SpellOnDeath[i + 1]))) {
-				SpellFinished(aabonuses.SpellOnDeath[i], this, EQEmu::CastingSlot::Item, 0, -1, spells[aabonuses.SpellOnDeath[i]].ResistDiff);
+				SpellFinished(aabonuses.SpellOnDeath[i], this, EQEmu::spells::CastingSlot::Item, 0, -1, spells[aabonuses.SpellOnDeath[i]].ResistDiff);
 			}
 		}
 
 		if(itembonuses.SpellOnDeath[i] && IsValidSpell(itembonuses.SpellOnDeath[i])) {
 			if(zone->random.Roll(static_cast<int>(itembonuses.SpellOnDeath[i + 1]))) {
-				SpellFinished(itembonuses.SpellOnDeath[i], this, EQEmu::CastingSlot::Item, 0, -1, spells[itembonuses.SpellOnDeath[i]].ResistDiff);
+				SpellFinished(itembonuses.SpellOnDeath[i], this, EQEmu::spells::CastingSlot::Item, 0, -1, spells[itembonuses.SpellOnDeath[i]].ResistDiff);
 			}
 		}
 
 		if(spellbonuses.SpellOnDeath[i] && IsValidSpell(spellbonuses.SpellOnDeath[i])) {
 			if(zone->random.Roll(static_cast<int>(spellbonuses.SpellOnDeath[i + 1]))) {
-				SpellFinished(spellbonuses.SpellOnDeath[i], this, EQEmu::CastingSlot::Item, 0, -1, spells[spellbonuses.SpellOnDeath[i]].ResistDiff);
+				SpellFinished(spellbonuses.SpellOnDeath[i], this, EQEmu::spells::CastingSlot::Item, 0, -1, spells[spellbonuses.SpellOnDeath[i]].ResistDiff);
 				}
 			}
 		}
