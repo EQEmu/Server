@@ -1401,7 +1401,8 @@ int bot_command_init(void)
 		bot_command_add("movementspeed", "Orders a bot to cast a movement speed enhancement spell", 0, bot_command_movement_speed) ||
 		bot_command_add("owneroption", "Sets options available to bot owners", 0, bot_command_owner_option) ||
 		bot_command_add("pet", "Lists the available bot pet [subcommands]", 0, bot_command_pet) ||
-		bot_command_add("petremove", "Orders a bot to remove its pet", 0, bot_subcommand_pet_remove) ||
+		bot_command_add("petgetlost", "Orders a bot to remove its summoned pet", 0, bot_subcommand_pet_get_lost) ||
+		bot_command_add("petremove", "Orders a bot to remove its charmed pet", 0, bot_subcommand_pet_remove) ||
 		bot_command_add("petsettype", "Orders a Magician bot to use a specified pet type", 0, bot_subcommand_pet_set_type) ||
 		bot_command_add("picklock", "Orders a capable bot to pick the lock of the closest door", 0, bot_command_pick_lock) ||
 		bot_command_add("portal", "Orders a Wizard bot to open a magical doorway to a specified destination", 0, bot_subcommand_portal) ||
@@ -3479,12 +3480,13 @@ void bot_command_pet(Client *c, const Seperator *sep)
 {
 	/* VS2012 code - begin */
 	std::list<const char*> subcommand_list;
+	subcommand_list.push_back("petgetlost");
 	subcommand_list.push_back("petremove");
 	subcommand_list.push_back("petsettype");
 	/* VS2012 code - end */
 	
 	/* VS2013 code
-	const std::list<const char*> subcommand_list = { "petremove", "petsettype" };
+	const std::list<const char*> subcommand_list = { "petgetlost", "petremove", "petsettype" };
 	*/
 
 	if (helper_command_alias_fail(c, "bot_command_pet", sep->arg[0], "pet"))
@@ -7431,6 +7433,37 @@ void bot_subcommand_inventory_window(Client *c, const Seperator *sep)
 	window_text.append("</c>");
 
 	c->SendPopupToClient(window_title.c_str(), window_text.c_str());
+}
+
+void bot_subcommand_pet_get_lost(Client *c, const Seperator *sep)
+{
+	if (helper_command_alias_fail(c, "bot_subcommand_pet_get_lost", sep->arg[0], "petgetlost"))
+		return;
+	if (helper_is_help_or_usage(sep->arg[1])) {
+		c->Message(m_usage, "usage: %s ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
+		return;
+	}
+	int ab_mask = ActionableBots::ABM_NoFilter;
+
+	std::list<Bot*> sbl;
+	if (ActionableBots::PopulateSBL(c, sep->arg[1], sbl, ab_mask, sep->arg[2]) == ActionableBots::ABT_None)
+		return;
+
+	int summoned_pet = 0;
+	for (auto bot_iter : sbl) {
+		if (!bot_iter->GetPet() || bot_iter->GetPet()->IsCharmed())
+			continue;
+
+		bot_iter->GetPet()->Say_StringID(PET_GETLOST_STRING);
+		bot_iter->GetPet()->Depop(false);
+		bot_iter->SetPetID(0);
+		database.botdb.DeletePetItems(bot_iter->GetBotID());
+		database.botdb.DeletePetBuffs(bot_iter->GetBotID());
+		database.botdb.DeletePetStats(bot_iter->GetBotID());
+		++summoned_pet;
+	}
+
+	c->Message(m_action, "%i of your bots released their summoned pet%s", summoned_pet, (summoned_pet == 1) ? "" : "s");
 }
 
 void bot_subcommand_pet_remove(Client *c, const Seperator *sep)
