@@ -54,7 +54,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "command.h"
 #ifdef BOTS
 #include "bot_command.h"
-#include "bot_database.h"
 #endif
 #include "zone_config.h"
 #include "titles.h"
@@ -238,18 +237,6 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
-#ifdef BOTS
-	if (!botdb.Connect(
-		Config->DatabaseHost.c_str(),
-		Config->DatabaseUsername.c_str(),
-		Config->DatabasePassword.c_str(),
-		Config->DatabaseDB.c_str(),
-		Config->DatabasePort)) {
-		Log(Logs::General, Logs::Error, "Cannot continue without a bots database connection.");
-		return 1;
-	}
-#endif
-
 	/* Register Log System and Settings */
 	LogSys.SetGMSayHandler(&Zone::GMSayHookCallBackProcess);
 	database.LoadLogSettings(LogSys.log_settings);
@@ -396,7 +383,7 @@ int main(int argc, char** argv) {
 		Log(Logs::General, Logs::Zone_Server, "%d bot commands loaded", botretval);
 
 	Log(Logs::General, Logs::Zone_Server, "Loading bot spell casting chances");
-	if (!botdb.LoadBotSpellCastingChances())
+	if (!database.botdb.LoadBotSpellCastingChances())
 		Log(Logs::General, Logs::Error, "Bot spell casting chances loading FAILED");
 #endif
 
@@ -572,9 +559,6 @@ int main(int argc, char** argv) {
 		if (InterserverTimer.Check()) {
 			InterserverTimer.Start();
 			database.ping();
-#ifdef BOTS
-			botdb.ping();
-#endif
 			entity_list.UpdateWho();
 		}
 	};

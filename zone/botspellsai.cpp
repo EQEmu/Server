@@ -2668,7 +2668,7 @@ uint8 Bot::GetChanceToCastBySpellType(uint32 spellType)
 			type_index |= pD;
 	}
 
-	return botdb.GetSpellCastingChance(spell_type_index, class_index, stance_index, type_index);
+	return database.botdb.GetSpellCastingChance(spell_type_index, class_index, stance_index, type_index);
 }
 
 #endif
