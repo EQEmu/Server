@@ -24,8 +24,6 @@ Makefile
 cmake_install.cmake
 install_manifest.txt
 [Bb]uild*/
-x64/
-x86/
 log/
 logs/
 vcpkg/
