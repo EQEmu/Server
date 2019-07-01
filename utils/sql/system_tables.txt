@@ -82,6 +82,7 @@ perl_event_export_settings
 pets
 pets_equipmentset
 pets_equipmentset_entries
+profanity_list
 proximities
 races
 saylink
