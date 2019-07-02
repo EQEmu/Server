@@ -126,8 +126,9 @@ if [[ "$OS" == "Debian" ]]; then
 	apt-get $apt_options install libssl-dev
 	
 	# Install libsodium
-	wget http://ftp.us.debian.org/debian/pool/main/libs/libsodium/libsodium-dev_1.0.11-1~bpo8+1_amd64.deb -O /home/eqemu/libsodium-dev.deb
-	wget http://ftp.us.debian.org/debian/pool/main/libs/libsodium/libsodium18_1.0.11-1~bpo8+1_amd64.deb -O /home/eqemu/libsodium18.deb
+	wget http://ftp.us.debian.org/debian/pool/main/libs/libsodium/libsodium-dev_1.0.11-2_amd64.deb -O /home/eqemu/libsodium-dev.deb
+        wget http://ftp.us.debian.org/debian/pool/main/libs/libsodium/libsodium18_1.0.11-2_amd64.deb -O /home/eqemu/libsodium18.deb
+
 	dpkg -i /home/eqemu/libsodium*.deb
 	# Cleanup after ourselves
 	rm -f /home/eqemu/libsodium-dev.deb
