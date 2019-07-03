@@ -100,6 +100,7 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include "bot.h"
 #endif
 
+#include "mob_movement_manager.h"
 
 
 extern Zone* zone;
@@ -454,7 +455,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 			{
 				mana_cost = 0;
 			} else {
-				Log(Logs::Detail, Logs::Spells, "Spell Error not enough mana spell=%d mymana=%d cost=%d\n", GetName(), spell_id, my_curmana, mana_cost);
+				Log(Logs::Detail, Logs::Spells, "Spell Error not enough mana spell=%d mymana=%d cost=%d\n", spell_id, my_curmana, mana_cost);
 				if(IsClient()) {
 					//clients produce messages... npcs should not for this case
 					Message_StringID(13, INSUFFICIENT_MANA);
@@ -4031,6 +4032,23 @@ bool Mob::FindBuff(uint16 spellid)
 	return false;
 }
 
+uint16 Mob::FindBuffBySlot(int slot) {
+	if (buffs[slot].spellid != SPELL_UNKNOWN)
+		return buffs[slot].spellid;
+	
+	return 0;
+}
+
+uint32 Mob::BuffCount() {
+	uint32 active_buff_count = 0;
+	int buff_count = GetMaxTotalSlots();
+	for (int i = 0; i < buff_count; i++) 
+		if (buffs[i].spellid != SPELL_UNKNOWN)
+			active_buff_count++;
+	
+	return active_buff_count;
+}
+
 // removes all buffs
 void Mob::BuffFadeAll()
 {
@@ -4205,7 +4223,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 	{
 		if(GetSpecialAbility(UNMEZABLE)) {
 			Log(Logs::Detail, Logs::Spells, "We are immune to Mez spells.");
-			caster->Message_StringID(MT_Shout, CANNOT_MEZ);
+			caster->Message_StringID(MT_SpellFailure, CANNOT_MEZ);
 			int32 aggro = caster->CheckAggroAmount(spell_id, this);
 			if(aggro > 0) {
 				AddToHateList(caster, aggro);
@@ -4223,7 +4241,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 			(!caster->IsNPC() || (caster->IsNPC() && !RuleB(Spells, NPCIgnoreBaseImmunity))))
 		{
 			Log(Logs::Detail, Logs::Spells, "Our level (%d) is higher than the limit of this Mez spell (%d)", GetLevel(), spells[spell_id].max[effect_index]);
-			caster->Message_StringID(MT_Shout, CANNOT_MEZ_WITH_SPELL);
+			caster->Message_StringID(MT_SpellFailure, CANNOT_MEZ_WITH_SPELL);
 			AddToHateList(caster, 1,0,true,false,false,spell_id);
 			return true;
 		}
@@ -4233,7 +4251,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 	if(GetSpecialAbility(UNSLOWABLE) && IsEffectInSpell(spell_id, SE_AttackSpeed))
 	{
 		Log(Logs::Detail, Logs::Spells, "We are immune to Slow spells.");
-		caster->Message_StringID(MT_Shout, IMMUNE_ATKSPEED);
+		caster->Message_StringID(CC_Red, IMMUNE_ATKSPEED);
 		int32 aggro = caster->CheckAggroAmount(spell_id, this);
 		if(aggro > 0) {
 			AddToHateList(caster, aggro);
@@ -4249,7 +4267,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 		effect_index = GetSpellEffectIndex(spell_id, SE_Fear);
 		if(GetSpecialAbility(UNFEARABLE)) {
 			Log(Logs::Detail, Logs::Spells, "We are immune to Fear spells.");
-			caster->Message_StringID(MT_Shout, IMMUNE_FEAR);
+			caster->Message_StringID(CC_Red, IMMUNE_FEAR);	// need to verify message type, not in MQ2Cast for easy look up
 			int32 aggro = caster->CheckAggroAmount(spell_id, this);
 			if(aggro > 0) {
 				AddToHateList(caster, aggro);
@@ -4260,7 +4278,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 		} else if(IsClient() && caster->IsClient() && (caster->CastToClient()->GetGM() == false))
 		{
 			Log(Logs::Detail, Logs::Spells, "Clients cannot fear eachother!");
-			caster->Message_StringID(MT_Shout, IMMUNE_FEAR);
+			caster->Message_StringID(CC_Red, IMMUNE_FEAR);	// need to verify message type, not in MQ2Cast for easy look up
 			return true;
 		}
 		else if(GetLevel() > spells[spell_id].max[effect_index] && spells[spell_id].max[effect_index] != 0)
@@ -4279,7 +4297,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 		{
 			Message(13, "Your are immune to fear.");
 			Log(Logs::Detail, Logs::Spells, "Clients has WarCry effect, immune to fear!");
-			caster->Message_StringID(MT_Shout, IMMUNE_FEAR);
+			caster->Message_StringID(CC_Red, IMMUNE_FEAR);	// need to verify message type, not in MQ2Cast for easy look up
 			return true;
 		}
 	}
@@ -4289,7 +4307,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 		if(GetSpecialAbility(UNCHARMABLE))
 		{
 			Log(Logs::Detail, Logs::Spells, "We are immune to Charm spells.");
-			caster->Message_StringID(MT_Shout, CANNOT_CHARM);
+			caster->Message_StringID(CC_Red, CANNOT_CHARM);	// need to verify message type, not in MQ2Cast for easy look up
 			int32 aggro = caster->CheckAggroAmount(spell_id, this);
 			if(aggro > 0) {
 				AddToHateList(caster, aggro);
@@ -4302,7 +4320,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 		if(this == caster)
 		{
 			Log(Logs::Detail, Logs::Spells, "You are immune to your own charms.");
-			caster->Message(MT_Shout, "You cannot charm yourself.");
+			caster->Message(CC_Red, "You cannot charm yourself.");	// need to look up message?
 			return true;
 		}
 
@@ -4315,8 +4333,8 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 			if(GetLevel() > spells[spell_id].max[effect_index] && spells[spell_id].max[effect_index] != 0)
 			{
 				Log(Logs::Detail, Logs::Spells, "Our level (%d) is higher than the limit of this Charm spell (%d)", GetLevel(), spells[spell_id].max[effect_index]);
-				caster->Message_StringID(MT_Shout, CANNOT_CHARM_YET);
-                AddToHateList(caster, 1,0,true,false,false,spell_id);
+				caster->Message_StringID(CC_Red, CANNOT_CHARM_YET);	// need to verify message type, not in MQ2Cast for easy look up<Paste>
+				AddToHateList(caster, 1,0,true,false,false,spell_id);
 				return true;
 			}
 		}
@@ -4330,7 +4348,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 	{
 		if(GetSpecialAbility(UNSNAREABLE)) {
 			Log(Logs::Detail, Logs::Spells, "We are immune to Snare spells.");
-			caster->Message_StringID(MT_Shout, IMMUNE_MOVEMENT);
+			caster->Message_StringID(CC_Red, IMMUNE_MOVEMENT);
 			int32 aggro = caster->CheckAggroAmount(spell_id, this);
 			if(aggro > 0) {
 				AddToHateList(caster, aggro);
@@ -4346,7 +4364,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 		if(this == caster)
 		{
 			Log(Logs::Detail, Logs::Spells, "You cannot lifetap yourself.");
-			caster->Message_StringID(MT_Shout, CANT_DRAIN_SELF);
+			caster->Message_StringID(MT_SpellFailure, CANT_DRAIN_SELF);
 			return true;
 		}
 	}
@@ -4356,7 +4374,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 		if(this == caster)
 		{
 			Log(Logs::Detail, Logs::Spells, "You cannot sacrifice yourself.");
-			caster->Message_StringID(MT_Shout, CANNOT_SAC_SELF);
+			caster->Message_StringID(MT_SpellFailure, CANNOT_SAC_SELF);
 			return true;
 		}
 	}
@@ -4818,7 +4836,22 @@ void Mob::Spin() {
 		safe_delete(outapp);
 	}
 	else {
-		GMMove(GetX(), GetY(), GetZ(), GetHeading()+5);
+		float x,y,z,h;
+
+		x=GetX();
+		y=GetY();
+		z=GetZ();
+		h=GetHeading()+5;
+
+		if (IsCorpse() || (IsClient() && !IsAIControlled())) {
+			m_Position.x = x;
+			m_Position.y = y;
+			m_Position.z = z;
+			mMovementManager->SendCommandToClients(this, 0.0, 0.0, 0.0, 0.0, 0, ClientRangeAny);
+		}
+		else {
+			Teleport(glm::vec4(x, y, z, h));
+		}
 	}
 }
 
@@ -5023,6 +5056,23 @@ void Client::UnmemSpellAll(bool update_client)
 			UnmemSpell(i, update_client);
 }
 
+uint16 Client::FindMemmedSpellBySlot(int slot) {
+	if (m_pp.mem_spells[slot] != 0xFFFFFFFF)
+		return m_pp.mem_spells[slot];
+	
+	return 0;
+}
+
+int Client::MemmedCount() {
+	int memmed_count = 0;
+	for (int i = 0; i < EQEmu::spells::SPELL_GEM_COUNT; i++)
+		if (m_pp.mem_spells[i] != 0xFFFFFFFF)
+			memmed_count++;
+		
+	return memmed_count;
+}
+
+
 void Client::ScribeSpell(uint16 spell_id, int slot, bool update_client)
 {
 	if(slot >= EQEmu::spells::SPELLBOOK_SIZE || slot < 0)
@@ -5053,7 +5103,7 @@ void Client::UnscribeSpell(int slot, bool update_client)
 	m_pp.spell_book[slot] = 0xFFFFFFFF;
 
 	database.DeleteCharacterSpell(this->CharacterID(), m_pp.spell_book[slot], slot);
-	if(update_client)
+	if(update_client && slot < EQEmu::spells::DynamicLookup(ClientVersion(), GetGM())->SpellbookSize)
 	{
 		auto outapp = new EQApplicationPacket(OP_DeleteSpell, sizeof(DeleteSpell_Struct));
 		DeleteSpell_Struct* del = (DeleteSpell_Struct*)outapp->pBuffer;
@@ -5066,9 +5116,7 @@ void Client::UnscribeSpell(int slot, bool update_client)
 
 void Client::UnscribeSpellAll(bool update_client)
 {
-	int i;
-
-	for(i = 0; i < EQEmu::spells::SPELLBOOK_SIZE; i++)
+	for(int i = 0; i < EQEmu::spells::SPELLBOOK_SIZE; i++)
 	{
 		if(m_pp.spell_book[i] != 0xFFFFFFFF)
 			UnscribeSpell(i, update_client);

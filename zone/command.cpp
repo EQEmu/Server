@@ -52,8 +52,10 @@
 #include "../common/rulesys.h"
 #include "../common/serverinfo.h"
 #include "../common/string_util.h"
-#include "../say_link.h"
+#include "../common/say_link.h"
 #include "../common/eqemu_logsys.h"
+#include "../common/profanity_manager.h"
+#include "../common/net/eqstream.h"
 
 #include "data_bucket.h"
 #include "command.h"
@@ -277,6 +279,7 @@ int command_init(void)
 		command_add("mystats", "- Show details about you or your pet", 50, command_mystats) ||
 		command_add("name", "[newname] - Rename your player target", 150, command_name) ||
 		command_add("netstats", "- Gets the network stats for a stream.", 200, command_netstats) ||
+		command_add("network", "- Admin commands for the udp network interface.", 250, command_network) ||
 		command_add("npccast", "[targetname/entityid] [spellid] - Causes NPC target to cast spellid on targetname/entityid", 80, command_npccast) ||
 		command_add("npcedit", "[column] [value] - Mega NPC editing command", 100, command_npcedit) ||
 		command_add("npcemote", "[message] - Make your NPC target emote a message.", 150, command_npcemote) ||
@@ -307,6 +310,7 @@ int command_init(void)
 		command_add("petitioninfo", "[petition number] - Get info about a petition", 20, command_petitioninfo) ||
 		command_add("pf", "- Display additional mob coordinate and wandering data", 0, command_pf) ||
 		command_add("picklock",  "Analog for ldon pick lock for the newer clients since we still don't have it working.",  0, command_picklock) ||
+		command_add("profanity", "Manage censored language.", 150, command_profanity) ||
 
 #ifdef EQPROFILE
 		command_add("profiledump", "- Dump profiling info to logs", 250, command_profiledump) ||
@@ -841,18 +845,32 @@ void command_setanim(Client *c, const Seperator *sep)
 
 void command_serverinfo(Client *c, const Seperator *sep)
 {
-#ifdef _WINDOWS
-	char intbuffer [sizeof(unsigned long)];
-	c->Message(0, "Operating system information.");
-	c->Message(0, "	%s",  Ver_name);
-	c->Message(0, "	Build number: %s",  ultoa(Ver_build, intbuffer, 10));
-	c->Message(0, "	Minor version: %s",  ultoa(Ver_min, intbuffer, 10));
-	c->Message(0, "	Major version: %s",  ultoa(Ver_maj, intbuffer, 10));
-	c->Message(0, "	Platform Id: %s",  ultoa(Ver_pid, intbuffer, 10));
-#else
-char buffer[255];
-	c->Message(0, "Operating system information: %s", GetOS(buffer));
-#endif
+	auto os = EQ::GetOS();
+	auto cpus = EQ::GetCPUs();
+	auto pid = EQ::GetPID();
+	auto rss = EQ::GetRSS();
+	auto uptime = EQ::GetUptime();
+
+	c->Message(0, "Operating System Information");
+	c->Message(0, "==================================================");
+	c->Message(0, "System: %s", os.sysname.c_str());
+	c->Message(0, "Release: %s", os.release.c_str());
+	c->Message(0, "Version: %s", os.version.c_str());
+	c->Message(0, "Machine: %s", os.machine.c_str());
+	c->Message(0, "Uptime: %.2f seconds", uptime);
+	c->Message(0, "==================================================");
+	c->Message(0, "CPU Information");
+	c->Message(0, "==================================================");
+	for (size_t i = 0; i < cpus.size(); ++i) {
+		auto &cp = cpus[i];
+		c->Message(0, "CPU #%i: %s, Speed: %.2fGhz", i, cp.model.c_str(), cp.speed);
+	}
+	c->Message(0, "==================================================");
+	c->Message(0, "Process Information");
+	c->Message(0, "==================================================");
+	c->Message(0, "PID: %u", pid);
+	c->Message(0, "RSS: %.2f MB", rss / 1048576.0);
+	c->Message(0, "==================================================");
 }
 
 void command_getvariable(Client *c, const Seperator *sep)
@@ -6407,34 +6425,29 @@ void command_beardcolor(Client *c, const Seperator *sep)
 
 void command_scribespells(Client *c, const Seperator *sep)
 {
-	uint8 max_level, min_level;
-	uint16 book_slot, curspell, count;
-	Client *t=c;
+	Client *t = c;
+	if (c->GetTarget() && c->GetTarget()->IsClient() && c->GetGM())
+		t = c->GetTarget()->CastToClient();
 
-	if(c->GetTarget() && c->GetTarget()->IsClient() && c->GetGM())
-		t=c->GetTarget()->CastToClient();
-
-	if(!sep->arg[1][0])
-	{
+	if(sep->argnum < 1 || !sep->IsNumber(1)) {
 		c->Message(0, "FORMAT: #scribespells <max level> <min level>");
 		return;
 	}
 
-	max_level = (uint8)atoi(sep->arg[1]);
-	if (!c->GetGM() && max_level > RuleI(Character, MaxLevel))
-		max_level = RuleI(Character, MaxLevel);	//default to Character:MaxLevel if we're not a GM & it's higher than the max level
-	min_level = sep->arg[2][0] ? (uint8)atoi(sep->arg[2]) : 1;	//default to 1 if there isn't a 2nd argument
-	if (!c->GetGM() && min_level > RuleI(Character, MaxLevel))
-		min_level = RuleI(Character, MaxLevel);	//default to Character:MaxLevel if we're not a GM & it's higher than the max level
+	uint8 max_level = (uint8)atol(sep->arg[1]);
+	if (!c->GetGM() && max_level > (uint8)RuleI(Character, MaxLevel))
+		max_level = (uint8)RuleI(Character, MaxLevel); // default to Character:MaxLevel if we're not a GM & it's higher than the max level
 
+	uint8 min_level = (sep->IsNumber(2) ? (uint8)atol(sep->arg[2]) : 1); // default to 1 if there isn't a 2nd argument
+	if (!c->GetGM() && min_level > (uint8)RuleI(Character, MaxLevel))
+		min_level = (uint8)RuleI(Character, MaxLevel); // default to Character:MaxLevel if we're not a GM & it's higher than the max level
 
-	if(max_level < 1 || min_level < 1)
-	{
+	if(max_level < 1 || min_level < 1) {
 		c->Message(0, "ERROR: Level must be greater than 1.");
 		return;
 	}
 	if (min_level > max_level) {
-		c->Message(0, "Error: Min Level must be less than or equal to Max Level.");
+		c->Message(0, "ERROR: Min Level must be less than or equal to Max Level.");
 		return;
 	}
 
@@ -6443,34 +6456,71 @@ void command_scribespells(Client *c, const Seperator *sep)
 		c->Message(0, "Scribing spells for %s.",  t->GetName());
 	Log(Logs::General, Logs::Normal, "Scribe spells request for %s from %s, levels: %u -> %u",  t->GetName(), c->GetName(), min_level, max_level);
 
-	for(curspell = 0, book_slot = t->GetNextAvailableSpellBookSlot(), count = 0; curspell < SPDAT_RECORDS && book_slot < EQEmu::spells::SPELLBOOK_SIZE; curspell++, book_slot = t->GetNextAvailableSpellBookSlot(book_slot))
-	{
-		if
-		(
-			spells[curspell].classes[WARRIOR] != 0 && // check if spell exists
-			spells[curspell].classes[t->GetPP().class_-1] <= max_level &&	//maximum level
-			spells[curspell].classes[t->GetPP().class_-1] >= min_level &&	//minimum level
-			spells[curspell].skill != 52
-		)
-		{
-			if (book_slot == -1) {	//no more book slots
-				t->Message(13, "Unable to scribe spell %s (%u) to spellbook: no more spell book slots available.",  spells[curspell].name, curspell);
-				if (t != c)
-					c->Message(13, "Error scribing spells: %s ran out of spell book slots on spell %s (%u)",  t->GetName(), spells[curspell].name, curspell);
-				break;
-			}
-			if(!IsDiscipline(curspell) && !t->HasSpellScribed(curspell)) {	//isn't a discipline & we don't already have it scribed
-				t->ScribeSpell(curspell, book_slot);
-				count++;
-			}
+	int book_slot = t->GetNextAvailableSpellBookSlot();
+	int spell_id = 0;
+	int count = 0;
+
+	for ( ; spell_id < SPDAT_RECORDS && book_slot < EQEmu::spells::SPELLBOOK_SIZE; ++spell_id) {
+		if (book_slot == -1) {
+			t->Message(
+				13,
+				"Unable to scribe spell %s (%i) to spellbook: no more spell book slots available.",
+				((spell_id >= 0 && spell_id < SPDAT_RECORDS) ? spells[spell_id].name : "Out-of-range"),
+				spell_id
+			);
+			if (t != c)
+				c->Message(
+					13,
+					"Error scribing spells: %s ran out of spell book slots on spell %s (%i)",
+					t->GetName(),
+					((spell_id >= 0 && spell_id < SPDAT_RECORDS) ? spells[spell_id].name : "Out-of-range"),
+					spell_id
+				);
+
+			break;
 		}
+		if (spell_id < 0 || spell_id >= SPDAT_RECORDS) {
+			c->Message(13, "FATAL ERROR: Spell id out-of-range (id: %i, min: 0, max: %i)", spell_id, SPDAT_RECORDS);
+			return;
+		}
+		if (book_slot < 0 || book_slot >= EQEmu::spells::SPELLBOOK_SIZE) {
+			c->Message(13, "FATAL ERROR: Book slot out-of-range (slot: %i, min: 0, max: %i)", book_slot, EQEmu::spells::SPELLBOOK_SIZE);
+			return;
+		}
+		
+		while (true) {
+			if (spells[spell_id].classes[WARRIOR] == 0) // check if spell exists
+				break;
+			if (spells[spell_id].classes[t->GetPP().class_ - 1] > max_level) // maximum level
+				break;
+			if (spells[spell_id].classes[t->GetPP().class_ - 1] < min_level) // minimum level
+				break;
+			if (spells[spell_id].skill == 52)
+				break;
+
+			uint16 spell_id_ = (uint16)spell_id;
+			if ((spell_id_ != spell_id) || (spell_id != spell_id_)) {
+				c->Message(13, "FATAL ERROR: Type conversion data loss with spell_id (%i != %u)", spell_id, spell_id_);
+				return;
+			}
+
+			if (!IsDiscipline(spell_id_) && !t->HasSpellScribed(spell_id)) { // isn't a discipline & we don't already have it scribed
+				t->ScribeSpell(spell_id_, book_slot);
+				++count;
+			}
+
+			break;
+		}
+
+		book_slot = t->GetNextAvailableSpellBookSlot(book_slot);
 	}
 
 	if (count > 0) {
-		t->Message(0, "Successfully scribed %u spells.",  count);
+		t->Message(0, "Successfully scribed %i spells.",  count);
 		if (t != c)
-			c->Message(0, "Successfully scribed %u spells for %s.",  count, t->GetName());
-	} else {
+			c->Message(0, "Successfully scribed %i spells for %s.",  count, t->GetName());
+	}
+	else {
 		t->Message(0, "No spells scribed.");
 		if (t != c)
 			c->Message(0, "No spells scribed for %s.",  t->GetName());
@@ -8726,28 +8776,24 @@ void command_reloadtitles(Client *c, const Seperator *sep)
 
 void command_traindisc(Client *c, const Seperator *sep)
 {
-	uint8 max_level, min_level;
-	uint16 curspell, count;
-	Client *t=c;
+	Client *t = c;
+	if (c->GetTarget() && c->GetTarget()->IsClient() && c->GetGM())
+		t = c->GetTarget()->CastToClient();
 
-	if(c->GetTarget() && c->GetTarget()->IsClient() && c->GetGM())
-		t=c->GetTarget()->CastToClient();
-
-	if(!sep->arg[1][0])
-	{
+	if (sep->argnum < 1 || !sep->IsNumber(1)) {
 		c->Message(0, "FORMAT: #traindisc <max level> <min level>");
 		return;
 	}
 
-	max_level = (uint8)atoi(sep->arg[1]);
-	if (!c->GetGM() && max_level > RuleI(Character, MaxLevel))
-		max_level = RuleI(Character, MaxLevel);	//default to Character:MaxLevel if we're not a GM & it's higher than the max level
-	min_level = sep->arg[2][0] ? (uint8)atoi(sep->arg[2]) : 1;	//default to 1 if there isn't a 2nd argument
-	if (!c->GetGM() && min_level > RuleI(Character, MaxLevel))
-		min_level = RuleI(Character, MaxLevel);	//default to Character:MaxLevel if we're not a GM & it's higher than the max level
+	uint8 max_level = (uint8)atol(sep->arg[1]);
+	if (!c->GetGM() && max_level >(uint8)RuleI(Character, MaxLevel))
+		max_level = (uint8)RuleI(Character, MaxLevel); // default to Character:MaxLevel if we're not a GM & it's higher than the max level
 
-	if(max_level < 1 || min_level < 1)
-	{
+	uint8 min_level = (sep->IsNumber(2) ? (uint8)atol(sep->arg[2]) : 1); // default to 1 if there isn't a 2nd argument
+	if (!c->GetGM() && min_level > (uint8)RuleI(Character, MaxLevel))
+		min_level = (uint8)RuleI(Character, MaxLevel); // default to Character:MaxLevel if we're not a GM & it's higher than the max level
+
+	if(max_level < 1 || min_level < 1) {
 		c->Message(0, "ERROR: Level must be greater than 1.");
 		return;
 	}
@@ -8761,34 +8807,57 @@ void command_traindisc(Client *c, const Seperator *sep)
 		c->Message(0, "Training disciplines for %s.",  t->GetName());
 	Log(Logs::General, Logs::Normal, "Train disciplines request for %s from %s, levels: %u -> %u",  t->GetName(), c->GetName(), min_level, max_level);
 
-	for(curspell = 0, count = 0; curspell < SPDAT_RECORDS; curspell++)
-	{
-		if
-		(
-			spells[curspell].classes[WARRIOR] != 0 && // check if spell exists
-			spells[curspell].classes[t->GetPP().class_-1] <= max_level &&	//maximum level
-			spells[curspell].classes[t->GetPP().class_-1] >= min_level &&	//minimum level
-			spells[curspell].skill != 52
-		)
-		{
-			if(IsDiscipline(curspell)){
-				//we may want to come up with a function like Client::GetNextAvailableSpellBookSlot() to help speed this up a little
-				for(int r = 0; r < MAX_PP_DISCIPLINES; r++) {
-					if(t->GetPP().disciplines.values[r] == curspell) {
-						t->Message(13, "You already know this discipline.");
-						break;	//continue the 1st loop
-					} else if(t->GetPP().disciplines.values[r] == 0) {
-						t->GetPP().disciplines.values[r] = curspell;
-						database.SaveCharacterDisc(t->CharacterID(), r, curspell);
-						t->SendDisciplineUpdate();
-						t->Message(0, "You have learned a new discipline!");
-						count++;	//success counter
-						break;	//continue the 1st loop
-					}	//if we get to this point, there's already a discipline in this slot, so we continue onto the next slot
-				}
+	int spell_id = 0;
+	int count = 0;
+
+	bool change = false;
+
+	for( ; spell_id < SPDAT_RECORDS; ++spell_id) {
+		if (spell_id < 0 || spell_id >= SPDAT_RECORDS) {
+			c->Message(13, "FATAL ERROR: Spell id out-of-range (id: %i, min: 0, max: %i)", spell_id, SPDAT_RECORDS);
+			return;
+		}
+
+		while (true) {
+			if (spells[spell_id].classes[WARRIOR] == 0) // check if spell exists
+				break;
+			if (spells[spell_id].classes[t->GetPP().class_ - 1] > max_level) // maximum level
+				break;
+			if (spells[spell_id].classes[t->GetPP().class_ - 1] < min_level) // minimum level
+				break;
+			if (spells[spell_id].skill == 52)
+				break;
+			
+			uint16 spell_id_ = (uint16)spell_id;
+			if ((spell_id_ != spell_id) || (spell_id != spell_id_)) {
+				c->Message(13, "FATAL ERROR: Type conversion data loss with spell_id (%i != %u)", spell_id, spell_id_);
+				return;
 			}
+
+			if (!IsDiscipline(spell_id_))
+				break;
+
+			for (uint32 r = 0; r < MAX_PP_DISCIPLINES; ++r) {
+				if (t->GetPP().disciplines.values[r] == spell_id_) {
+					t->Message(13, "You already know this discipline.");
+					break; // continue the 1st loop
+				}
+				else if (t->GetPP().disciplines.values[r] == 0) {
+					t->GetPP().disciplines.values[r] = spell_id_;
+					database.SaveCharacterDisc(t->CharacterID(), r, spell_id_);
+					change = true;
+					t->Message(0, "You have learned a new discipline!");
+					++count; // success counter
+					break; // continue the 1st loop
+				} // if we get to this point, there's already a discipline in this slot, so we continue onto the next slot
+			}
+
+			break;
 		}
 	}
+
+	if (change)
+		t->SendDisciplineUpdate();
 
 	if (count > 0) {
 		t->Message(0, "Successfully trained %u disciplines.",  count);
@@ -9429,23 +9498,77 @@ void command_netstats(Client *c, const Seperator *sep)
 {
 	if(c)
 	{
-		if(c->GetTarget() && c->GetTarget()->IsClient())
-		{
-			c->Message(0, "Sent:");
-			c->Message(0, "Total: %u, per second: %u",  c->GetTarget()->CastToClient()->Connection()->GetBytesSent(),
-				c->GetTarget()->CastToClient()->Connection()->GetBytesSentPerSecond());
-			c->Message(0, "Recieved:");
-			c->Message(0, "Total: %u, per second: %u",  c->GetTarget()->CastToClient()->Connection()->GetBytesRecieved(),
-				c->GetTarget()->CastToClient()->Connection()->GetBytesRecvPerSecond());
+		auto client = c;
+		if (c->GetTarget() && c->GetTarget()->IsClient()) {
+			client = c->GetTarget()->CastToClient();
+		}
+		
+		if (strcasecmp(sep->arg[1], "reset") == 0) {
+			auto connection = c->Connection();
+			c->Message(0, "Resetting client stats (packet loss will not read correctly after reset).");
+			connection->ResetStats();
+			return;
+		}
+		
+		auto connection = c->Connection();
+		auto opts = connection->GetManager()->GetOptions();
+		auto eqs_stats = connection->GetStats();
+		auto &stats = eqs_stats.DaybreakStats;
+		auto now = EQ::Net::Clock::now();
+		auto sec_since_stats_reset = std::chrono::duration_cast<std::chrono::duration<double>>(now - stats.created).count();
+		
+		c->Message(0, "Netstats:");
+		c->Message(0, "--------------------------------------------------------------------");
+		c->Message(0, "Sent Bytes: %u (%.2f/sec)", stats.sent_bytes, stats.sent_bytes / sec_since_stats_reset);
+		c->Message(0, "Recv Bytes: %u (%.2f/sec)", stats.recv_bytes, stats.recv_bytes / sec_since_stats_reset);
+		c->Message(0, "Bytes Before Encode (Sent): %u, Compression Rate: %.2f%%", stats.bytes_before_encode, 
+			static_cast<double>(stats.bytes_before_encode - stats.sent_bytes) / static_cast<double>(stats.bytes_before_encode) * 100.0);
+		c->Message(0, "Bytes After Decode (Recv): %u, Compression Rate: %.2f%%", stats.bytes_after_decode,
+			static_cast<double>(stats.bytes_after_decode - stats.recv_bytes) / static_cast<double>(stats.bytes_after_decode) * 100.0);
+		c->Message(0, "Min Ping: %u", stats.min_ping);
+		c->Message(0, "Max Ping: %u", stats.max_ping);
+		c->Message(0, "Last Ping: %u", stats.last_ping);
+		c->Message(0, "Average Ping: %u", stats.avg_ping);
+		c->Message(0, "--------------------------------------------------------------------");
+		c->Message(0, "(Realtime) Recv Packets: %u (%.2f/sec)", stats.recv_packets, stats.recv_packets / sec_since_stats_reset);
+		c->Message(0, "(Realtime) Sent Packets: %u (%.2f/sec)", stats.sent_packets, stats.sent_packets / sec_since_stats_reset);
+		c->Message(0, "(Sync) Recv Packets: %u", stats.sync_recv_packets);
+		c->Message(0, "(Sync) Sent Packets: %u", stats.sync_sent_packets);
+		c->Message(0, "(Sync) Remote Recv Packets: %u", stats.sync_remote_recv_packets);
+		c->Message(0, "(Sync) Remote Sent Packets: %u", stats.sync_remote_sent_packets);
+		c->Message(0, "Packet Loss In: %.2f%%", 100.0 * (1.0 - static_cast<double>(stats.sync_recv_packets) / static_cast<double>(stats.sync_remote_sent_packets)));
+		c->Message(0, "Packet Loss Out: %.2f%%", 100.0 * (1.0 - static_cast<double>(stats.sync_remote_recv_packets) / static_cast<double>(stats.sync_sent_packets)));
+		c->Message(0, "--------------------------------------------------------------------");
+		c->Message(0, "Resent Packets: %u (%.2f/sec)", stats.resent_packets, stats.resent_packets / sec_since_stats_reset);
+		c->Message(0, "Resent Fragments: %u (%.2f/sec)", stats.resent_fragments, stats.resent_fragments / sec_since_stats_reset);
+		c->Message(0, "Resent Non-Fragments: %u (%.2f/sec)", stats.resent_full, stats.resent_full / sec_since_stats_reset);
+		c->Message(0, "Dropped Datarate Packets: %u (%.2f/sec)", stats.dropped_datarate_packets, stats.dropped_datarate_packets / sec_since_stats_reset);
+		
+		if (opts.daybreak_options.outgoing_data_rate > 0.0) {
+			c->Message(0, "Outgoing Link Saturation %.2f%% (%.2fkb/sec)", 100.0 * (1.0 - ((opts.daybreak_options.outgoing_data_rate - stats.datarate_remaining) / opts.daybreak_options.outgoing_data_rate)), opts.daybreak_options.outgoing_data_rate);
+		}
+		
+		if (strcasecmp(sep->arg[1], "full") == 0) {
+			c->Message(0, "--------------------------------------------------------------------");
+			c->Message(0, "Sent Packet Types");
+			for (auto i = 0; i < _maxEmuOpcode; ++i) {
+				auto cnt = eqs_stats.SentCount[i];
+				if (cnt > 0) {
+					c->Message(0, "%s: %u (%.2f / sec)", OpcodeNames[i], cnt, cnt / sec_since_stats_reset);
+				}
+			}
 
+			c->Message(0, "--------------------------------------------------------------------");
+			c->Message(0, "Recv Packet Types");
+			for (auto i = 0; i < _maxEmuOpcode; ++i) {
+				auto cnt = eqs_stats.RecvCount[i];
+				if (cnt > 0) {
+					c->Message(0, "%s: %u (%.2f / sec)", OpcodeNames[i], cnt, cnt / sec_since_stats_reset);
+				}
+			}
 		}
-		else
-		{
-			c->Message(0, "Sent:");
-			c->Message(0, "Total: %u, per second: %u",  c->Connection()->GetBytesSent(), c->Connection()->GetBytesSentPerSecond());
-			c->Message(0, "Recieved:");
-			c->Message(0, "Total: %u, per second: %u",  c->Connection()->GetBytesRecieved(), c->Connection()->GetBytesRecvPerSecond());
-		}
+		
+		c->Message(0, "--------------------------------------------------------------------");
 	}
 }
 
@@ -11041,6 +11164,68 @@ void command_picklock(Client *c, const Seperator *sep)
 	}
 }
 
+void command_profanity(Client *c, const Seperator *sep)
+{
+	std::string arg1(sep->arg[1]);
+	
+	while (true) {
+		if (arg1.compare("list") == 0) {
+			// do nothing
+		}
+		else if (arg1.compare("clear") == 0) {
+			EQEmu::ProfanityManager::DeleteProfanityList(&database);
+			auto pack = new ServerPacket(ServerOP_RefreshCensorship);
+			worldserver.SendPacket(pack);
+			safe_delete(pack);
+		}
+		else if (arg1.compare("add") == 0) {
+			if (!EQEmu::ProfanityManager::AddProfanity(&database, sep->arg[2]))
+				c->Message(CC_Red, "Could not add '%s' to the profanity list.", sep->arg[2]);
+			auto pack = new ServerPacket(ServerOP_RefreshCensorship);
+			worldserver.SendPacket(pack);
+			safe_delete(pack);
+		}
+		else if (arg1.compare("del") == 0) {
+			if (!EQEmu::ProfanityManager::RemoveProfanity(&database, sep->arg[2]))
+				c->Message(CC_Red, "Could not delete '%s' from the profanity list.", sep->arg[2]);
+			auto pack = new ServerPacket(ServerOP_RefreshCensorship);
+			worldserver.SendPacket(pack);
+			safe_delete(pack);
+		}
+		else if (arg1.compare("reload") == 0) {
+			if (!EQEmu::ProfanityManager::UpdateProfanityList(&database))
+				c->Message(CC_Red, "Could not reload the profanity list.");
+			auto pack = new ServerPacket(ServerOP_RefreshCensorship);
+			worldserver.SendPacket(pack);
+			safe_delete(pack);
+		}
+		else {
+			break;
+		}
+
+		std::string popup;
+		const auto &list = EQEmu::ProfanityManager::GetProfanityList();
+		for (const auto &iter : list) {
+			popup.append(iter);
+			popup.append("<br>");
+		}
+		if (list.empty())
+			popup.append("** Censorship Inactive **<br>");
+		else
+			popup.append("** End of List **<br>");
+
+		c->SendPopupToClient("Profanity List", popup.c_str());
+		
+		return;
+	}
+	
+	c->Message(0, "Usage: #profanity [list] - shows profanity list");
+	c->Message(0, "Usage: #profanity [clear] - deletes all entries");
+	c->Message(0, "Usage: #profanity [add] [<word>] - adds entry");
+	c->Message(0, "Usage: #profanity [del] [<word>] - deletes entry");
+	c->Message(0, "Usage: #profanity [reload] - reloads profanity list");
+}
+
 void command_mysql(Client *c, const Seperator *sep)
 {
 	if(!sep->arg[1][0] || !sep->arg[2][0]) {
@@ -11593,15 +11778,25 @@ void command_logs(Client *c, const Seperator *sep){
 			safe_delete(pack);
 		}
 		/* #logs list_settings */
-		if (strcasecmp(sep->arg[1], "list_settings") == 0 || (strcasecmp(sep->arg[1], "set") == 0 && strcasecmp(sep->arg[3], "") == 0)){
+		if (strcasecmp(sep->arg[1], "list_settings") == 0 ||
+			(strcasecmp(sep->arg[1], "set") == 0 && strcasecmp(sep->arg[3], "") == 0)) {
 			c->Message(0, "[Category ID | console | file | gmsay | Category Description]");
 			int redisplay_columns = 0;
-			for (int i = 0; i < Logs::LogCategory::MaxCategoryID; i++){
-				if (redisplay_columns == 10){
+			for (int i            = 0; i < Logs::LogCategory::MaxCategoryID; i++) {
+				if (redisplay_columns == 10) {
 					c->Message(0, "[Category ID | console | file | gmsay | Category Description]");
 					redisplay_columns = 0;
 				}
-				c->Message(0, StringFormat("--- %i | %u | %u | %u | %s",  i, LogSys.log_settings[i].log_to_console, LogSys.log_settings[i].log_to_file, LogSys.log_settings[i].log_to_gmsay, Logs::LogCategoryName[i]).c_str());
+				c->Message(
+					0,
+					StringFormat(
+						"--- %i | %u | %u | %u | %s",
+						i,
+						LogSys.log_settings[i].log_to_console,
+						LogSys.log_settings[i].log_to_file,
+						LogSys.log_settings[i].log_to_gmsay,
+						Logs::LogCategoryName[i]
+					).c_str());
 				redisplay_columns++;
 			}
 		}
@@ -12049,6 +12244,182 @@ void command_who(Client *c, const Seperator *sep)
 	);
 
 	c->Message(5, message.c_str());
+}
+
+void command_network(Client *c, const Seperator *sep)
+{
+	if (!strcasecmp(sep->arg[1], "getopt"))
+	{
+		auto eqsi = c->Connection();
+		auto manager = eqsi->GetManager();
+		auto opts = manager->GetOptions();
+	
+		if (!strcasecmp(sep->arg[2], "all"))
+		{
+			c->Message(0, "max_packet_size: %llu", (uint64_t)opts.daybreak_options.max_packet_size);
+			c->Message(0, "max_connection_count: %llu", (uint64_t)opts.daybreak_options.max_connection_count);
+			c->Message(0, "keepalive_delay_ms: %llu", (uint64_t)opts.daybreak_options.keepalive_delay_ms);
+			c->Message(0, "resend_delay_factor: %.2f", opts.daybreak_options.resend_delay_factor);
+			c->Message(0, "resend_delay_ms: %llu", (uint64_t)opts.daybreak_options.resend_delay_ms);
+			c->Message(0, "resend_delay_min: %llu", (uint64_t)opts.daybreak_options.resend_delay_min);
+			c->Message(0, "resend_delay_max: %llu", (uint64_t)opts.daybreak_options.resend_delay_max);
+			c->Message(0, "connect_delay_ms: %llu", (uint64_t)opts.daybreak_options.connect_delay_ms);
+			c->Message(0, "connect_stale_ms: %llu", (uint64_t)opts.daybreak_options.connect_stale_ms);
+			c->Message(0, "stale_connection_ms: %llu", (uint64_t)opts.daybreak_options.stale_connection_ms);
+			c->Message(0, "crc_length: %llu", (uint64_t)opts.daybreak_options.crc_length);
+			c->Message(0, "hold_size: %llu", (uint64_t)opts.daybreak_options.hold_size);
+			c->Message(0, "hold_length_ms: %llu", (uint64_t)opts.daybreak_options.hold_length_ms);
+			c->Message(0, "simulated_in_packet_loss: %llu", (uint64_t)opts.daybreak_options.simulated_in_packet_loss);
+			c->Message(0, "simulated_out_packet_loss: %llu", (uint64_t)opts.daybreak_options.simulated_out_packet_loss);
+			c->Message(0, "tic_rate_hertz: %.2f", opts.daybreak_options.tic_rate_hertz);
+			c->Message(0, "resend_timeout: %llu", (uint64_t)opts.daybreak_options.resend_timeout);
+			c->Message(0, "connection_close_time: %llu", (uint64_t)opts.daybreak_options.connection_close_time);
+			c->Message(0, "encode_passes[0]: %llu", (uint64_t)opts.daybreak_options.encode_passes[0]);
+			c->Message(0, "encode_passes[1]: %llu", (uint64_t)opts.daybreak_options.encode_passes[1]);
+			c->Message(0, "port: %llu", (uint64_t)opts.daybreak_options.port);
+		}
+		else {
+			c->Message(0, "Unknown get option: %s", sep->arg[2]);
+			c->Message(0, "Available options:");
+			//Todo the rest of these when im less lazy.
+			//c->Message(0, "max_packet_size");
+			//c->Message(0, "max_connection_count");
+			//c->Message(0, "keepalive_delay_ms");
+			//c->Message(0, "resend_delay_factor");
+			//c->Message(0, "resend_delay_ms");
+			//c->Message(0, "resend_delay_min");
+			//c->Message(0, "resend_delay_max");
+			//c->Message(0, "connect_delay_ms");
+			//c->Message(0, "connect_stale_ms");
+			//c->Message(0, "stale_connection_ms");
+			//c->Message(0, "crc_length");
+			//c->Message(0, "hold_size");
+			//c->Message(0, "hold_length_ms");
+			//c->Message(0, "simulated_in_packet_loss");
+			//c->Message(0, "simulated_out_packet_loss");
+			//c->Message(0, "tic_rate_hertz");
+			//c->Message(0, "resend_timeout");
+			//c->Message(0, "connection_close_time");
+			//c->Message(0, "encode_passes[0]");
+			//c->Message(0, "encode_passes[1]");
+			//c->Message(0, "port");
+			c->Message(0, "all");
+		}
+	}
+	else if (!strcasecmp(sep->arg[1], "setopt"))
+	{
+		auto eqsi = c->Connection();
+		auto manager = eqsi->GetManager();
+		auto opts = manager->GetOptions();
+	
+		if (!strcasecmp(sep->arg[3], ""))
+		{
+			c->Message(0, "Missing value for set");
+			return;
+		}
+	
+		std::string value = sep->arg[3];
+		if (!strcasecmp(sep->arg[2], "max_connection_count"))
+		{
+			opts.daybreak_options.max_connection_count = std::stoull(value);
+			manager->SetOptions(opts);
+		} 
+		else if (!strcasecmp(sep->arg[2], "keepalive_delay_ms"))
+		{
+			opts.daybreak_options.keepalive_delay_ms = std::stoull(value);
+			manager->SetOptions(opts);
+		}
+		else if (!strcasecmp(sep->arg[2], "resend_delay_factor"))
+		{
+			opts.daybreak_options.resend_delay_factor = std::stod(value);
+			manager->SetOptions(opts);
+		}
+		else if (!strcasecmp(sep->arg[2], "resend_delay_ms"))
+		{
+			opts.daybreak_options.resend_delay_ms = std::stoull(value);
+			manager->SetOptions(opts);
+		}
+		else if (!strcasecmp(sep->arg[2], "resend_delay_min"))
+		{
+			opts.daybreak_options.resend_delay_min = std::stoull(value);
+			manager->SetOptions(opts);
+		}
+		else if (!strcasecmp(sep->arg[2], "resend_delay_max"))
+		{
+			opts.daybreak_options.resend_delay_max = std::stoull(value);
+			manager->SetOptions(opts);
+		}
+		else if (!strcasecmp(sep->arg[2], "connect_delay_ms"))
+		{
+			opts.daybreak_options.connect_delay_ms = std::stoull(value);
+			manager->SetOptions(opts);
+		}
+		else if (!strcasecmp(sep->arg[2], "connect_stale_ms"))
+		{
+			opts.daybreak_options.connect_stale_ms = std::stoull(value);
+			manager->SetOptions(opts);
+		}
+		else if (!strcasecmp(sep->arg[2], "stale_connection_ms"))
+		{
+			opts.daybreak_options.stale_connection_ms = std::stoull(value);
+			manager->SetOptions(opts);
+		}
+		else if (!strcasecmp(sep->arg[2], "hold_size"))
+		{
+			opts.daybreak_options.hold_size = std::stoull(value);
+			manager->SetOptions(opts);
+		}
+		else if (!strcasecmp(sep->arg[2], "hold_length_ms"))
+		{
+			opts.daybreak_options.hold_length_ms = std::stoull(value);
+			manager->SetOptions(opts);
+		}
+		else if (!strcasecmp(sep->arg[2], "simulated_in_packet_loss"))
+		{
+			opts.daybreak_options.simulated_in_packet_loss = std::stoull(value);
+			manager->SetOptions(opts);
+		}
+		else if (!strcasecmp(sep->arg[2], "simulated_out_packet_loss"))
+		{
+			opts.daybreak_options.simulated_out_packet_loss = std::stoull(value);
+			manager->SetOptions(opts);
+		}
+		else if (!strcasecmp(sep->arg[2], "resend_timeout"))
+		{
+			opts.daybreak_options.resend_timeout = std::stoull(value);
+			manager->SetOptions(opts);
+		}
+		else if (!strcasecmp(sep->arg[2], "connection_close_time"))
+		{
+			opts.daybreak_options.connection_close_time = std::stoull(value);
+			manager->SetOptions(opts);
+		}
+		else {
+			c->Message(0, "Unknown set option: %s", sep->arg[2]);
+			c->Message(0, "Available options:");
+			c->Message(0, "max_connection_count");
+			c->Message(0, "keepalive_delay_ms");
+			c->Message(0, "resend_delay_factor");
+			c->Message(0, "resend_delay_ms");
+			c->Message(0, "resend_delay_min");
+			c->Message(0, "resend_delay_max");
+			c->Message(0, "connect_delay_ms");
+			c->Message(0, "connect_stale_ms");
+			c->Message(0, "stale_connection_ms");
+			c->Message(0, "hold_size");
+			c->Message(0, "hold_length_ms");
+			c->Message(0, "simulated_in_packet_loss");
+			c->Message(0, "simulated_out_packet_loss");
+			c->Message(0, "resend_timeout");
+			c->Message(0, "connection_close_time");
+		}
+	}
+	else {
+		c->Message(0, "Unknown command: %s", sep->arg[1]);
+		c->Message(0, "Network commands avail:");
+		c->Message(0, "getopt optname - Retrieve the current option value set.");
+		c->Message(0, "setopt optname - Set the current option allowed.");
+	}
 }
 
 // All new code added to command.cpp should be BEFORE this comment line. Do no append code to this file below the BOTS code block.

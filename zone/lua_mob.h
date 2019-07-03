@@ -71,6 +71,7 @@ public:
 	void DoAnim(int anim_num, int type, bool ackreq, int filter);
 	void ChangeSize(double in_size);
 	void ChangeSize(double in_size, bool no_restriction);
+	void RandomizeFeatures(bool send_illusion, bool save_variables);
 	void GMMove(double x, double y, double z);
 	void GMMove(double x, double y, double z, double heading);
 	void GMMove(double x, double y, double z, double heading, bool send_update);
@@ -81,6 +82,8 @@ public:
 	bool IsInvisible(Lua_Mob other);
     void SetInvisible(int state);
 	bool FindBuff(int spell_id);
+	uint16 FindBuffBySlot(int slot);
+	uint32 BuffCount();
     bool FindType(int type);
 	bool FindType(int type, bool offensive);
 	bool FindType(int type, bool offensive, int threshold);
@@ -401,6 +404,7 @@ public:
 	bool IsAmnesiad();
 	int32 GetMeleeMitigation();
 	int GetWeaponDamageBonus(Lua_Item weapon, bool offhand);
+	int GetItemStat(uint32 itemid, const char* identifier);
 	Lua_StatBonuses GetItemBonuses();
 	Lua_StatBonuses GetSpellBonuses();
 	Lua_StatBonuses GetAABonuses();

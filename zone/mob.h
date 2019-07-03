@@ -159,7 +159,8 @@ public:
 		uint8 in_bracertexture,
 		uint8 in_handtexture,
 		uint8 in_legtexture,
-		uint8 in_feettexture
+		uint8 in_feettexture,
+		uint16 in_usemodel
 	);
 	virtual ~Mob();
 
@@ -384,6 +385,8 @@ public:
 	void DamageShield(Mob* other, bool spell_ds = false);
 	int32 RuneAbsorb(int32 damage, uint16 type);
 	bool FindBuff(uint16 spellid);
+	uint16 FindBuffBySlot(int slot);
+	uint32 BuffCount();
 	bool FindType(uint16 type, bool bOffensive = false, uint16 threshold = 100);
 	int16 GetBuffSlotFromType(uint16 type);
 	uint16 GetSpellIDFromSlot(uint8 slot);
@@ -442,6 +445,7 @@ public:
 	virtual void SetMaxHP() { current_hp = max_hp; }
 	virtual inline uint16 GetBaseRace() const { return base_race; }
 	virtual inline uint8 GetBaseGender() const { return base_gender; }
+	virtual uint16 GetFactionRace();
 	virtual inline uint16 GetDeity() const { return deity; }
 	virtual EQEmu::deity::DeityTypeBit GetDeityBit() { return EQEmu::deity::ConvertDeityTypeToDeityTypeBit((EQEmu::deity::DeityType)deity); }
 	inline uint16 GetRace() const { return race; }
@@ -576,8 +580,8 @@ public:
 	virtual void SetMoving(bool move) { moving = move; m_Delta = glm::vec4(); }
 	virtual void GoToBind(uint8 bindnum = 0) { }
 	virtual void Gate(uint8 bindnum = 0);
-	int GetWalkspeed() const { return(_GetWalkSpeed()); }
-	int GetRunspeed() const { return(_GetRunSpeed()); }
+	virtual int GetWalkspeed() const { return(_GetWalkSpeed()); }
+	virtual int GetRunspeed() const { return(_GetRunSpeed()); }
 	int GetBaseRunspeed() const { return base_runspeed; }
 	int GetBaseWalkspeed() const { return base_walkspeed; }
 	int GetBaseFearSpeed() const { return base_fearspeed; }
@@ -998,8 +1002,8 @@ public:
 
 	inline bool			CheckAggro(Mob* other) {return hate_list.IsEntOnHateList(other);}
 	float				CalculateHeadingToTarget(float in_x, float in_y) { return HeadingAngleToMob(in_x, in_y); }
-	void				WalkTo(float x, float y, float z);
-	void				RunTo(float x, float y, float z);
+	virtual void		WalkTo(float x, float y, float z);
+	virtual void		RunTo(float x, float y, float z);
 	void				NavigateTo(float x, float y, float z);
 	void				RotateTo(float new_heading);
 	void				RotateToWalking(float new_heading);
@@ -1090,7 +1094,7 @@ public:
 	inline glm::vec4 GetCurrentWayPoint() const { return m_CurrentWayPoint; }
 	inline float GetCWPP() const { return(static_cast<float>(cur_wp_pause)); }
 	inline int GetCWP() const { return(cur_wp); }
-	void SetCurrentWP(uint16 waypoint) { cur_wp = waypoint; }
+	void SetCurrentWP(int waypoint) { cur_wp = waypoint; }
 	virtual FACTION_VALUE GetReverseFactionCon(Mob* iOther) { return FACTION_INDIFFERENT; }
 
 	virtual const bool IsUnderwaterOnly() const { return false; }
@@ -1279,6 +1283,7 @@ protected:
 
 	uint8 gender;
 	uint16 race;
+	uint16 use_model;
 	uint8 base_gender;
 	uint16 base_race;
 	uint8 class_;

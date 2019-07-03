@@ -267,6 +267,11 @@ void Lua_Mob::ChangeSize(double in_size, bool no_restriction) {
 	self->ChangeSize(static_cast<float>(in_size), no_restriction);
 }
 
+void Lua_Mob::RandomizeFeatures(bool send_illusion, bool save_variables) {
+       Lua_Safe_Call_Void();
+       self->RandomizeFeatures(send_illusion, save_variables);
+}
+
 void Lua_Mob::GMMove(double x, double y, double z) {
 	Lua_Safe_Call_Void();
 	self->GMMove(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z));
@@ -315,6 +320,16 @@ void Lua_Mob::SetInvisible(int state) {
 bool Lua_Mob::FindBuff(int spell_id) {
 	Lua_Safe_Call_Bool();
 	return self->FindBuff(spell_id);
+}
+
+uint16 Lua_Mob::FindBuffBySlot(int slot) {
+	Lua_Safe_Call_Int();
+	return self->FindBuffBySlot(slot);
+}
+
+uint32 Lua_Mob::BuffCount() {
+	Lua_Safe_Call_Int();
+	return self->BuffCount();
 }
 
 bool Lua_Mob::FindType(int type) {
@@ -2086,6 +2101,11 @@ int Lua_Mob::GetWeaponDamageBonus(Lua_Item weapon, bool offhand) {
 	return self->GetWeaponDamageBonus(weapon, offhand);
 }
 
+int Lua_Mob::GetItemStat(uint32 itemid, const char* identifier) {
+	Lua_Safe_Call_Int();
+	return self->GetItemStat(itemid, identifier);
+}
+
 Lua_StatBonuses Lua_Mob::GetItemBonuses()
 {
 	Lua_Safe_Call_Class(Lua_StatBonuses);
@@ -2202,6 +2222,7 @@ luabind::scope lua_register_mob() {
 		.def("DoAnim", (void(Lua_Mob::*)(int,int,bool,int))&Lua_Mob::DoAnim)
 		.def("ChangeSize", (void(Lua_Mob::*)(double))&Lua_Mob::ChangeSize)
 		.def("ChangeSize", (void(Lua_Mob::*)(double,bool))&Lua_Mob::ChangeSize)
+		.def("RandomizeFeatures", (void(Lua_Mob::*)(bool,bool))&Lua_Mob::RandomizeFeatures)
 		.def("GMMove", (void(Lua_Mob::*)(double,double,double))&Lua_Mob::GMMove)
 		.def("GMMove", (void(Lua_Mob::*)(double,double,double,double))&Lua_Mob::GMMove)
 		.def("GMMove", (void(Lua_Mob::*)(double,double,double,double,bool))&Lua_Mob::GMMove)
@@ -2212,6 +2233,8 @@ luabind::scope lua_register_mob() {
 		.def("IsInvisible", (bool(Lua_Mob::*)(Lua_Mob))&Lua_Mob::IsInvisible)
 		.def("SetInvisible", &Lua_Mob::SetInvisible)
 		.def("FindBuff", &Lua_Mob::FindBuff)
+		.def("FindBuffBySlot", (uint16(Lua_Mob::*)(int))&Lua_Mob::FindBuffBySlot)
+		.def("BuffCount", &Lua_Mob::BuffCount)
 		.def("FindType", (bool(Lua_Mob::*)(int))&Lua_Mob::FindType)
 		.def("FindType", (bool(Lua_Mob::*)(int,bool))&Lua_Mob::FindType)
 		.def("FindType", (bool(Lua_Mob::*)(int,bool,int))&Lua_Mob::FindType)
@@ -2242,6 +2265,7 @@ luabind::scope lua_register_mob() {
 		.def("IsWarriorClass", &Lua_Mob::IsWarriorClass)
 		.def("GetHP", &Lua_Mob::GetHP)
 		.def("GetMaxHP", &Lua_Mob::GetMaxHP)
+		.def("GetItemStat", (int(Lua_Mob::*)(uint32,const char*))&Lua_Mob::GetItemStat)
 		.def("GetItemHPBonuses", &Lua_Mob::GetItemHPBonuses)
 		.def("GetSpellHPBonuses", &Lua_Mob::GetSpellHPBonuses)
 		.def("GetWalkspeed", &Lua_Mob::GetWalkspeed)

@@ -32,6 +32,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/eq_stream_ident.h"
 #include "../common/patches/patches.h"
 #include "../common/rulesys.h"
+#include "../common/profanity_manager.h"
 #include "../common/misc_functions.h"
 #include "../common/string_util.h"
 #include "../common/platform.h"
@@ -41,7 +42,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/eqemu_exception.h"
 #include "../common/spdat.h"
 #include "../common/eqemu_logsys.h"
+#include "../common/eqemu_logsys_fmt.h"
 
+#include "api_service.h"
 #include "zone_config.h"
 #include "masterentity.h"
 #include "worldserver.h"
@@ -51,7 +54,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "command.h"
 #ifdef BOTS
 #include "bot_command.h"
-#include "bot_database.h"
 #endif
 #include "zone_config.h"
 #include "titles.h"
@@ -66,6 +68,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/event/event_loop.h"
 #include "../common/event/timer.h"
 #include "../common/net/eqstream.h"
+#include "../common/net/servertalk_server.h"
 
 #include <iostream>
 #include <string>
@@ -234,20 +237,8 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
-#ifdef BOTS
-	if (!botdb.Connect(
-		Config->DatabaseHost.c_str(),
-		Config->DatabaseUsername.c_str(),
-		Config->DatabasePassword.c_str(),
-		Config->DatabaseDB.c_str(),
-		Config->DatabasePort)) {
-		Log(Logs::General, Logs::Error, "Cannot continue without a bots database connection.");
-		return 1;
-	}
-#endif
-
 	/* Register Log System and Settings */
-	LogSys.OnLogHookCallBackZone(&Zone::GMSayHookCallBackProcess);
+	LogSys.SetGMSayHandler(&Zone::GMSayHookCallBackProcess);
 	database.LoadLogSettings(LogSys.log_settings);
 	LogSys.StartFileLogs();
 
@@ -350,6 +341,10 @@ int main(int argc, char** argv) {
 	Log(Logs::General, Logs::Zone_Server, "Loading corpse timers");
 	database.GetDecayTimes(npcCorpseDecayTimes);
 
+	Log(Logs::General, Logs::Zone_Server, "Loading profanity list");
+	if (!EQEmu::ProfanityManager::LoadProfanityList(&database))
+		Log(Logs::General, Logs::Error, "Loading profanity list FAILED!");
+
 	Log(Logs::General, Logs::Zone_Server, "Loading commands");
 	int retval = command_init();
 	if (retval<0)
@@ -388,7 +383,7 @@ int main(int argc, char** argv) {
 		Log(Logs::General, Logs::Zone_Server, "%d bot commands loaded", botretval);
 
 	Log(Logs::General, Logs::Zone_Server, "Loading bot spell casting chances");
-	if (!botdb.LoadBotSpellCastingChances())
+	if (!database.botdb.LoadBotSpellCastingChances())
 		Log(Logs::General, Logs::Error, "Bot spell casting chances loading FAILED");
 #endif
 
@@ -441,34 +436,63 @@ int main(int argc, char** argv) {
 	Log(Logs::Detail, Logs::None, "Main thread running with thread id %d", pthread_self());
 #endif
 
+	bool worldwasconnected    = worldserver.Connected();
+	bool eqsf_open            = false;
+	bool websocker_server_opened = false;
+
 	Timer quest_timers(100);
 	UpdateWindowTitle();
-	bool worldwasconnected = worldserver.Connected();
 	std::shared_ptr<EQStreamInterface> eqss;
 	EQStreamInterface *eqsi;
-	bool eqsf_open = false;
 	std::unique_ptr<EQ::Net::EQStreamManager> eqsm;
 	std::chrono::time_point<std::chrono::system_clock> frame_prev = std::chrono::system_clock::now();
+	std::unique_ptr<EQ::Net::WebsocketServer> ws_server;
 
 	auto loop_fn = [&](EQ::Timer* t) {
 		//Advance the timer to our current point in time
 		Timer::SetCurrentTime();
 
-		//Calculate frame time
+		/**
+		 * Calculate frame time
+		 */
 		std::chrono::time_point<std::chrono::system_clock> frame_now = std::chrono::system_clock::now();
 		frame_time = std::chrono::duration_cast<std::chrono::duration<double>>(frame_now - frame_prev).count();
 		frame_prev = frame_now;
 
+		/**
+		 * Telnet server
+		 */
+		if (!websocker_server_opened && Config->ZonePort != 0) {
+			Log(
+				Logs::General,
+				Logs::Zone_Server,
+				"Websocket Server listener started (%s:%u).",
+				Config->TelnetIP.c_str(),
+				Config->ZonePort
+			);
+			ws_server.reset(new EQ::Net::WebsocketServer(Config->TelnetIP, Config->ZonePort));
+			RegisterApiService(ws_server);
+			websocker_server_opened = true;
+		}
+
+		/**
+		 * EQStreamManager
+		 */
 		if (!eqsf_open && Config->ZonePort != 0) {
 			Log(Logs::General, Logs::Zone_Server, "Starting EQ Network server on port %d", Config->ZonePort);
 
-			EQ::Net::EQStreamManagerOptions opts(Config->ZonePort, false, true);
+			EQStreamManagerInterfaceOptions opts(Config->ZonePort, false, RuleB(Network, CompressZoneStream));
+			opts.daybreak_options.resend_delay_ms = RuleI(Network, ResendDelayBaseMS);
+			opts.daybreak_options.resend_delay_factor = RuleR(Network, ResendDelayFactor);
+			opts.daybreak_options.resend_delay_min = RuleI(Network, ResendDelayMinMS);
+			opts.daybreak_options.resend_delay_max = RuleI(Network, ResendDelayMaxMS);
+			opts.daybreak_options.outgoing_data_rate = RuleR(Network, ClientDataRate);
 			eqsm.reset(new EQ::Net::EQStreamManager(opts));
 			eqsf_open = true;
 
 			eqsm->OnNewConnection([&stream_identifier](std::shared_ptr<EQ::Net::EQStream> stream) {
 				stream_identifier.AddStream(stream);
-				LogF(Logs::Detail, Logs::World_Server, "New connection from IP {0}:{1}", stream->RemoteEndpoint(), ntohs(stream->GetRemotePort()));
+				LogF(Logs::Detail, Logs::World_Server, "New connection from IP {0}:{1}", stream->GetRemoteIP(), ntohs(stream->GetRemotePort()));
 			});
 		}
 

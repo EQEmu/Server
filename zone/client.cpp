@@ -38,6 +38,7 @@ extern volatile bool RunLoops;
 #include "../common/rulesys.h"
 #include "../common/string_util.h"
 #include "../common/data_verification.h"
+#include "../common/profanity_manager.h"
 #include "data_bucket.h"
 #include "position.h"
 #include "net.h"
@@ -114,6 +115,7 @@ Client::Client(EQStreamInterface* ieqs)
 	0,	// qglobal
 	0,	// maxlevel
 	0,	// scalerate
+	0,
 	0,
 	0,
 	0,
@@ -895,6 +897,10 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		language = 0; // No need for language when drunk
 	}
 
+	// Censor the message
+	if (EQEmu::ProfanityManager::IsCensorshipActive() && (chan_num != 8))
+		EQEmu::ProfanityManager::RedactMessage(message);
+
 	switch(chan_num)
 	{
 	case 0: { /* Guild Chat */
@@ -1091,6 +1097,9 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 			}
 			break;
 		}
+
+		if (EQEmu::ProfanityManager::IsCensorshipActive())
+			EQEmu::ProfanityManager::RedactMessage(message);
 
 #ifdef BOTS
 		if (message[0] == BOT_COMMAND_CHAR) {
@@ -2595,8 +2604,11 @@ uint16 Client::GetMaxSkillAfterSpecializationRules(EQEmu::skills::SkillType skil
 
 		}
 	}
-	
+
 	Result += spellbonuses.RaiseSkillCap[skillid] + itembonuses.RaiseSkillCap[skillid] + aabonuses.RaiseSkillCap[skillid];
+
+	if (skillid == EQEmu::skills::SkillType::SkillForage)
+		Result += aabonuses.GrantForage;
 
 	return Result;
 }
@@ -2640,6 +2652,11 @@ bool Client::CheckAccess(int16 iDBLevel, int16 iDefaultLevel) {
 }
 
 void Client::MemorizeSpell(uint32 slot,uint32 spellid,uint32 scribing){
+	if (slot < 0 || slot >= EQEmu::spells::DynamicLookup(ClientVersion(), GetGM())->SpellbookSize)
+		return;
+	if ((spellid < 3 || spellid > EQEmu::spells::DynamicLookup(ClientVersion(), GetGM())->SpellIdMax) && spellid != 0xFFFFFFFF)
+		return;
+
 	auto outapp = new EQApplicationPacket(OP_MemorizeSpell, sizeof(MemorizeSpell_Struct));
 	MemorizeSpell_Struct* mss=(MemorizeSpell_Struct*)outapp->pBuffer;
 	mss->scribing=scribing;
@@ -3457,7 +3474,7 @@ float Client::CalcPriceMod(Mob* other, bool reverse)
 	float chaformula = 0;
 	if (other)
 	{
-		int factionlvl = GetFactionLevel(CharacterID(), other->CastToNPC()->GetNPCTypeID(), GetRace(), GetClass(), GetDeity(), other->CastToNPC()->GetPrimaryFaction(), other);
+		int factionlvl = GetFactionLevel(CharacterID(), other->CastToNPC()->GetNPCTypeID(), GetFactionRace(), GetClass(), GetDeity(), other->CastToNPC()->GetPrimaryFaction(), other);
 		if (factionlvl >= FACTION_APPREHENSIVE) // Apprehensive or worse.
 		{
 			if (GetCHA() > 103)
@@ -5595,6 +5612,12 @@ void Client::SuspendMinion()
 	{
 		if(m_suspendedminion.SpellID > 0)
 		{
+			if (m_suspendedminion.SpellID >= SPDAT_RECORDS) {
+				Message(13, "Invalid suspended minion spell id (%u).", m_suspendedminion.SpellID);
+				memset(&m_suspendedminion, 0, sizeof(PetInfo));
+				return;
+			}
+
 			MakePoweredPet(m_suspendedminion.SpellID, spells[m_suspendedminion.SpellID].teleport_zone,
 				m_suspendedminion.petpower, m_suspendedminion.Name, m_suspendedminion.size);
 
@@ -7692,7 +7715,7 @@ FACTION_VALUE Client::GetReverseFactionCon(Mob* iOther) {
 	if (iOther->GetPrimaryFaction() == 0)
 		return FACTION_INDIFFERENT;
 
-	return GetFactionLevel(CharacterID(), 0, GetRace(), GetClass(), GetDeity(), iOther->GetPrimaryFaction(), iOther);
+	return GetFactionLevel(CharacterID(), 0, GetFactionRace(), GetClass(), GetDeity(), iOther->GetPrimaryFaction(), iOther);
 }
 
 //o--------------------------------------------------------------
@@ -7779,7 +7802,7 @@ void Client::SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, ui
 		// Find out starting faction for this faction
 		// It needs to be used to adj max and min personal
 		// The range is still the same, 1200-3000(4200), but adjusted for base
-		database.GetFactionData(&fm, GetClass(), GetRace(), GetDeity(),
+		database.GetFactionData(&fm, GetClass(), GetFactionRace(), GetDeity(),
 			faction_id[i]);
 
 		if (quest)
@@ -7796,9 +7819,9 @@ void Client::SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, ui
 		//
 		// Adjust these values for cases where starting faction is below
 		// min or above max by not allowing any earn in those directions.
-		this_faction_min = MIN_PERSONAL_FACTION - fm.base;
+		this_faction_min = fm.min - fm.base;
 		this_faction_min = std::min(0, this_faction_min);
-		this_faction_max = MAX_PERSONAL_FACTION - fm.base;
+		this_faction_max = fm.max - fm.base;
 		this_faction_max = std::max(0, this_faction_max);
 
 		// Get the characters current value with that faction
@@ -7829,7 +7852,7 @@ void Client::SetFactionLevel2(uint32 char_id, int32 faction_id, uint8 char_class
 		// Find out starting faction for this faction
 		// It needs to be used to adj max and min personal
 		// The range is still the same, 1200-3000(4200), but adjusted for base
-		database.GetFactionData(&fm, GetClass(), GetRace(), GetDeity(),
+		database.GetFactionData(&fm, GetClass(), GetFactionRace(), GetDeity(),
 			faction_id);
 
 		// Adjust the amount you can go up or down so the resulting range
@@ -7839,9 +7862,9 @@ void Client::SetFactionLevel2(uint32 char_id, int32 faction_id, uint8 char_class
 		// min or above max by not allowing any earn/loss in those directions.
 		// At least one faction starts out way below min, so we don't want
 		// to allow loses in those cases, just massive gains.
-		this_faction_min = MIN_PERSONAL_FACTION - fm.base;
+		this_faction_min = fm.min - fm.base;
 		this_faction_min = std::min(0, this_faction_min);
-		this_faction_max = MAX_PERSONAL_FACTION - fm.base;
+		this_faction_max = fm.max - fm.base;
 		this_faction_max = std::max(0, this_faction_max);
 
 		//Get the faction modifiers
@@ -7930,8 +7953,14 @@ return;
 int32 Client::GetModCharacterFactionLevel(int32 faction_id) {
 	int32 Modded = GetCharacterFactionLevel(faction_id);
 	FactionMods fm;
-	if (database.GetFactionData(&fm, GetClass(), GetRace(), GetDeity(), faction_id))
+	if (database.GetFactionData(&fm, GetClass(), GetFactionRace(), GetDeity(), faction_id))
+	{
 		Modded += fm.base + fm.class_mod + fm.race_mod + fm.deity_mod;
+
+		//Tack on any bonuses from Alliance type spell effects
+		Modded += GetFactionBonus(faction_id);
+		Modded += GetItemFactionBonus(faction_id);
+	}
 
 	return Modded;
 }
@@ -7945,7 +7974,7 @@ void Client::MerchantRejectMessage(Mob *merchant, int primaryfaction)
 
 	// If a faction is involved, get the data.
 	if (primaryfaction > 0) {
-		if (database.GetFactionData(&fmod, GetClass(), GetRace(), GetDeity(), primaryfaction)) {
+		if (database.GetFactionData(&fmod, GetClass(), GetFactionRace(), GetDeity(), primaryfaction)) {
 			tmpFactionValue = GetCharacterFactionLevel(primaryfaction);
 			lowestvalue = std::min(std::min(tmpFactionValue, fmod.deity_mod),
 						  std::min(fmod.class_mod, fmod.race_mod));

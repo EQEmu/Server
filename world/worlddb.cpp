@@ -98,6 +98,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 		PlayerProfile_Struct pp;
 		EQEmu::InventoryProfile inv;
 
+		pp.SetPlayerProfileVersion(EQEmu::versions::ConvertClientVersionToMobVersion(client_version));
 		inv.SetInventoryVersion(client_version);
 		inv.SetGMInventory(true); // charsel can not interact with items..but, no harm in setting to full expansion support
 

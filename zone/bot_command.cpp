@@ -59,7 +59,7 @@
 
 
 #include "bot_command.h"
-#include "bot_database.h"
+#include "zonedb.h"
 #include "guild_mgr.h"
 #include "map.h"
 #include "doors.h"
@@ -1401,7 +1401,8 @@ int bot_command_init(void)
 		bot_command_add("movementspeed", "Orders a bot to cast a movement speed enhancement spell", 0, bot_command_movement_speed) ||
 		bot_command_add("owneroption", "Sets options available to bot owners", 0, bot_command_owner_option) ||
 		bot_command_add("pet", "Lists the available bot pet [subcommands]", 0, bot_command_pet) ||
-		bot_command_add("petremove", "Orders a bot to remove its pet", 0, bot_subcommand_pet_remove) ||
+		bot_command_add("petgetlost", "Orders a bot to remove its summoned pet", 0, bot_subcommand_pet_get_lost) ||
+		bot_command_add("petremove", "Orders a bot to remove its charmed pet", 0, bot_subcommand_pet_remove) ||
 		bot_command_add("petsettype", "Orders a Magician bot to use a specified pet type", 0, bot_subcommand_pet_set_type) ||
 		bot_command_add("picklock", "Orders a capable bot to pick the lock of the closest door", 0, bot_command_pick_lock) ||
 		bot_command_add("portal", "Orders a Wizard bot to open a magical doorway to a specified destination", 0, bot_subcommand_portal) ||
@@ -1422,7 +1423,7 @@ int bot_command_init(void)
 	}
 
 	std::map<std::string, std::pair<uint8, std::vector<std::string>>> bot_command_settings;
-	botdb.LoadBotCommandSettings(bot_command_settings);
+	database.botdb.LoadBotCommandSettings(bot_command_settings);
 
 	auto working_bcl = bot_command_list;
 	for (auto working_bcl_iter : working_bcl) {
@@ -1868,11 +1869,11 @@ namespace MyBots
 		std::string group_name = name;
 
 		uint32 botgroup_id = 0;
-		if (!botdb.LoadBotGroupIDForLoadBotGroup(bot_owner->CharacterID(), group_name, botgroup_id) || !botgroup_id)
+		if (!database.botdb.LoadBotGroupIDForLoadBotGroup(bot_owner->CharacterID(), group_name, botgroup_id) || !botgroup_id)
 			return;
 
 		std::map<uint32, std::list<uint32>> botgroup_list;
-		if (!botdb.LoadBotGroup(group_name, botgroup_list) || botgroup_list.find(botgroup_id) == botgroup_list.end() || !botgroup_list[botgroup_id].size())
+		if (!database.botdb.LoadBotGroup(group_name, botgroup_list) || botgroup_list.find(botgroup_id) == botgroup_list.end() || !botgroup_list[botgroup_id].size())
 			return;
 
 		std::list<Bot*> selectable_bot_list;
@@ -3441,16 +3442,34 @@ void bot_command_movement_speed(Client *c, const Seperator *sep)
 void bot_command_owner_option(Client *c, const Seperator *sep)
 {
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(m_usage, "usage: %s [deathmarquee]", sep->arg[0]);
+		c->Message(m_usage, "usage: %s [deathmarquee | statsupdate] (argument: enable | disable | null (toggles))", sep->arg[0]);
 		return;
 	}
 
 	std::string owner_option = sep->arg[1];
+	std::string flag = sep->arg[2];
 
 	if (!owner_option.compare("deathmarquee")) {
-		c->SetBotOptionDeathMarquee(!c->GetBotOptionDeathMarquee());
-		c->Message(m_action, "Bot death marquee is now %s.", (c->GetBotOptionDeathMarquee() == true ? "enabled" : "disabled"));
-		botdb.SaveOwnerOptionDeathMarquee(c->CharacterID(), c->GetBotOptionDeathMarquee());
+		if (!flag.compare("enable"))
+			c->SetBotOptionDeathMarquee(true);
+		else if (!flag.compare("disable"))
+			c->SetBotOptionDeathMarquee(false);
+		else
+			c->SetBotOptionDeathMarquee(!c->GetBotOptionDeathMarquee());
+		
+		database.botdb.SaveOwnerOptionDeathMarquee(c->CharacterID(), c->GetBotOptionDeathMarquee());
+		c->Message(m_action, "Bot 'death marquee' is now %s.", (c->GetBotOptionDeathMarquee() == true ? "enabled" : "disabled"));
+	}
+	else if (!owner_option.compare("statsupdate")) {
+		if (!flag.compare("enable"))
+			c->SetBotOptionStatsUpdate(true);
+		else if (!flag.compare("disable"))
+			c->SetBotOptionStatsUpdate(false);
+		else
+			c->SetBotOptionStatsUpdate(!c->GetBotOptionStatsUpdate());
+
+		database.botdb.SaveOwnerOptionStatsUpdate(c->CharacterID(), c->GetBotOptionStatsUpdate());
+		c->Message(m_action, "Bot 'stats update' is now %s.", (c->GetBotOptionStatsUpdate() == true ? "enabled" : "disabled"));
 	}
 	else {
 		c->Message(m_fail, "Owner option '%s' is not recognized.", owner_option.c_str());
@@ -3461,12 +3480,13 @@ void bot_command_pet(Client *c, const Seperator *sep)
 {
 	/* VS2012 code - begin */
 	std::list<const char*> subcommand_list;
+	subcommand_list.push_back("petgetlost");
 	subcommand_list.push_back("petremove");
 	subcommand_list.push_back("petsettype");
 	/* VS2012 code - end */
 	
 	/* VS2013 code
-	const std::list<const char*> subcommand_list = { "petremove", "petsettype" };
+	const std::list<const char*> subcommand_list = { "petgetlost", "petremove", "petsettype" };
 	*/
 
 	if (helper_command_alias_fail(c, "bot_command_pet", sep->arg[0], "pet"))
@@ -4222,7 +4242,7 @@ void bot_subcommand_bot_clone(Client *c, const Seperator *sep)
 	std::string error_message;
 
 	bool available_flag = false;
-	if (!botdb.QueryNameAvailablity(bot_name, available_flag)) {
+	if (!database.botdb.QueryNameAvailablity(bot_name, available_flag)) {
 		c->Message(m_fail, "%s", BotDatabase::fail::QueryNameAvailablity());
 		return;
 	}
@@ -4234,7 +4254,7 @@ void bot_subcommand_bot_clone(Client *c, const Seperator *sep)
 	uint32 max_bot_count = RuleI(Bots, CreationLimit);
 
 	uint32 bot_count = 0;
-	if (!botdb.QueryBotCount(c->CharacterID(), bot_count)) {
+	if (!database.botdb.QueryBotCount(c->CharacterID(), bot_count)) {
 		c->Message(m_fail, "%s", BotDatabase::fail::QueryBotCount());
 		return;
 	}
@@ -4244,18 +4264,18 @@ void bot_subcommand_bot_clone(Client *c, const Seperator *sep)
 	}
 
 	uint32 clone_id = 0;
-	if (!botdb.CreateCloneBot(c->CharacterID(), my_bot->GetBotID(), bot_name, clone_id) || !clone_id) {
+	if (!database.botdb.CreateCloneBot(c->CharacterID(), my_bot->GetBotID(), bot_name, clone_id) || !clone_id) {
 		c->Message(m_fail, "%s '%s'", BotDatabase::fail::CreateCloneBot(), bot_name.c_str());
 		return;
 	}
 
-	int clone_stance = BotStancePassive;
-	if (!botdb.LoadStance(my_bot->GetBotID(), clone_stance))
+	int clone_stance = EQEmu::constants::stancePassive;
+	if (!database.botdb.LoadStance(my_bot->GetBotID(), clone_stance))
 		c->Message(m_fail, "%s for bot '%s'", BotDatabase::fail::LoadStance(), my_bot->GetCleanName());
-	if (!botdb.SaveStance(clone_id, clone_stance))
+	if (!database.botdb.SaveStance(clone_id, clone_stance))
 		c->Message(m_fail, "%s for clone '%s'", BotDatabase::fail::SaveStance(), bot_name.c_str());
 
-	if (!botdb.CreateCloneBotInventory(c->CharacterID(), my_bot->GetBotID(), clone_id))
+	if (!database.botdb.CreateCloneBotInventory(c->CharacterID(), my_bot->GetBotID(), clone_id))
 		c->Message(m_fail, "%s for clone '%s'", BotDatabase::fail::CreateCloneBotInventory(), bot_name.c_str());
 	
 	c->Message(m_action, "Bot '%s' was successfully cloned to bot '%s'", my_bot->GetCleanName(), bot_name.c_str());
@@ -4503,11 +4523,11 @@ void bot_subcommand_bot_dye_armor(Client *c, const Seperator *sep)
 
 	if (ab_type == ActionableBots::ABT_All) {
 		if (dye_all) {
-			if (!botdb.SaveAllArmorColors(c->CharacterID(), rgb_value))
+			if (!database.botdb.SaveAllArmorColors(c->CharacterID(), rgb_value))
 				c->Message(m_fail, "%s", BotDatabase::fail::SaveAllArmorColors());
 		}
 		else {
-			if (!botdb.SaveAllArmorColorBySlot(c->CharacterID(), slot_id, rgb_value))
+			if (!database.botdb.SaveAllArmorColorBySlot(c->CharacterID(), slot_id, rgb_value))
 				c->Message(m_fail, "%s", BotDatabase::fail::SaveAllArmorColorBySlot());
 		}
 	}
@@ -4656,7 +4676,7 @@ void bot_subcommand_bot_follow_distance(Client *c, const Seperator *sep)
 			continue;
 
 		bot_iter->SetFollowDistance(bfd);
-		if (ab_type != ActionableBots::ABT_All && !botdb.SaveFollowDistance(c->CharacterID(), bot_iter->GetBotID(), bfd)) {
+		if (ab_type != ActionableBots::ABT_All && !database.botdb.SaveFollowDistance(c->CharacterID(), bot_iter->GetBotID(), bfd)) {
 			c->Message(m_fail, "%s for '%s'", BotDatabase::fail::SaveFollowDistance(), bot_iter->GetCleanName());
 			return;
 		}
@@ -4665,7 +4685,7 @@ void bot_subcommand_bot_follow_distance(Client *c, const Seperator *sep)
 	}
 
 	if (ab_type == ActionableBots::ABT_All) {
-		if (!botdb.SaveAllFollowDistances(c->CharacterID(), bfd)) {
+		if (!database.botdb.SaveAllFollowDistances(c->CharacterID(), bfd)) {
 			c->Message(m_fail, "%s", BotDatabase::fail::SaveAllFollowDistances());
 			return;
 		}
@@ -4834,7 +4854,7 @@ void bot_subcommand_bot_inspect_message(Client *c, const Seperator *sep)
 		if (set_flag)
 			memcpy(bot_message_struct, client_message_struct, sizeof(InspectMessage_Struct));
 
-		if (ab_type != ActionableBots::ABT_All && !botdb.SaveInspectMessage(bot_iter->GetBotID(), *bot_message_struct)) {
+		if (ab_type != ActionableBots::ABT_All && !database.botdb.SaveInspectMessage(bot_iter->GetBotID(), *bot_message_struct)) {
 			c->Message(m_fail, "%s for '%s'", BotDatabase::fail::SaveInspectMessage(), bot_iter->GetCleanName());
 			return;
 		}
@@ -4848,7 +4868,7 @@ void bot_subcommand_bot_inspect_message(Client *c, const Seperator *sep)
 		if (set_flag)
 			memcpy(&bot_message_struct, client_message_struct, sizeof(InspectMessage_Struct));
 
-		if (!botdb.SaveAllInspectMessages(c->CharacterID(), bot_message_struct)) {
+		if (!database.botdb.SaveAllInspectMessages(c->CharacterID(), bot_message_struct)) {
 			c->Message(m_fail, "%s", BotDatabase::fail::SaveAllInspectMessages());
 			return;
 		}
@@ -4904,7 +4924,7 @@ void bot_subcommand_bot_list(Client *c, const Seperator *sep)
 	}
 
 	std::list<BotsAvailableList> bots_list;
-	if (!botdb.LoadBotsList(c->CharacterID(), bots_list)) {
+	if (!database.botdb.LoadBotsList(c->CharacterID(), bots_list)) {
 		c->Message(m_fail, "%s", BotDatabase::fail::LoadBotsList());
 		return;
 	}
@@ -5061,7 +5081,7 @@ void bot_subcommand_bot_spawn(Client *c, const Seperator *sep)
 
 	if (RuleB(Bots, QuestableSpawnLimit) && !c->GetGM()) {
 		int allowed_bot_count = 0;
-		if (!botdb.LoadQuestableSpawnCount(c->CharacterID(), allowed_bot_count)) {
+		if (!database.botdb.LoadQuestableSpawnCount(c->CharacterID(), allowed_bot_count)) {
 			c->Message(m_fail, "%s", BotDatabase::fail::LoadQuestableSpawnCount());
 			return;
 		}
@@ -5082,7 +5102,7 @@ void bot_subcommand_bot_spawn(Client *c, const Seperator *sep)
 	std::string bot_name = sep->arg[1];
 
 	uint32 bot_id = 0;
-	if (!botdb.LoadBotID(c->CharacterID(), bot_name, bot_id)) {
+	if (!database.botdb.LoadBotID(c->CharacterID(), bot_name, bot_id)) {
 		c->Message(m_fail, "%s for '%s'", BotDatabase::fail::LoadBotID(), bot_name.c_str());
 		return;
 	}
@@ -5160,29 +5180,34 @@ void bot_subcommand_bot_stance(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_stance", sep->arg[0], "botstance"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(m_usage, "usage: %s [current | value: 0-6] ([actionable: target | byname] ([actionable_name]))", sep->arg[0]);
+		c->Message(m_usage, "usage: %s [current | value: 1-9] ([actionable: target | byname] ([actionable_name]))", sep->arg[0]);
 		c->Message(m_note, "value: %u(%s), %u(%s), %u(%s), %u(%s), %u(%s), %u(%s), %u(%s)",
-			BotStancePassive, GetBotStanceName(BotStancePassive),
-			BotStanceBalanced, GetBotStanceName(BotStanceBalanced),
-			BotStanceEfficient, GetBotStanceName(BotStanceEfficient),
-			BotStanceReactive, GetBotStanceName(BotStanceReactive),
-			BotStanceAggressive, GetBotStanceName(BotStanceAggressive),
-			BotStanceBurn, GetBotStanceName(BotStanceBurn),
-			BotStanceBurnAE, GetBotStanceName(BotStanceBurnAE)
+			EQEmu::constants::stancePassive, EQEmu::constants::GetStanceName(EQEmu::constants::stancePassive),
+			EQEmu::constants::stanceBalanced, EQEmu::constants::GetStanceName(EQEmu::constants::stanceBalanced),
+			EQEmu::constants::stanceEfficient, EQEmu::constants::GetStanceName(EQEmu::constants::stanceEfficient),
+			EQEmu::constants::stanceReactive, EQEmu::constants::GetStanceName(EQEmu::constants::stanceReactive),
+			EQEmu::constants::stanceAggressive, EQEmu::constants::GetStanceName(EQEmu::constants::stanceAggressive),
+			EQEmu::constants::stanceAssist, EQEmu::constants::GetStanceName(EQEmu::constants::stanceAssist),
+			EQEmu::constants::stanceBurn, EQEmu::constants::GetStanceName(EQEmu::constants::stanceBurn),
+			EQEmu::constants::stanceEfficient2, EQEmu::constants::GetStanceName(EQEmu::constants::stanceEfficient2),
+			EQEmu::constants::stanceBurnAE, EQEmu::constants::GetStanceName(EQEmu::constants::stanceBurnAE)
 		);
 		return;
 	}
 	int ab_mask = (ActionableBots::ABM_Target | ActionableBots::ABM_ByName);
 
 	bool current_flag = false;
-	auto bst = BotStanceUnknown;
+	auto bst = EQEmu::constants::stanceUnknown;
 	
 	if (!strcasecmp(sep->arg[1], "current"))
 		current_flag = true;
-	else if (sep->IsNumber(1))
-		bst = VALIDBOTSTANCE(atoi(sep->arg[1]));
+	else if (sep->IsNumber(1)) {
+		bst = (EQEmu::constants::StanceType)atoi(sep->arg[1]);
+		if (bst < EQEmu::constants::stanceUnknown || bst > EQEmu::constants::stanceBurnAE)
+			bst = EQEmu::constants::stanceUnknown;
+	}
 
-	if (!current_flag && bst == BotStanceUnknown) {
+	if (!current_flag && bst == EQEmu::constants::stanceUnknown) {
 		c->Message(m_fail, "A [current] argument or valid numeric [value] is required to use this command");
 		return;
 	}
@@ -5200,7 +5225,12 @@ void bot_subcommand_bot_stance(Client *c, const Seperator *sep)
 			bot_iter->Save();
 		}
 
-		Bot::BotGroupSay(bot_iter, "My current stance is '%s' (%u)", GetBotStanceName(bot_iter->GetBotStance()), bot_iter->GetBotStance());
+		Bot::BotGroupSay(
+			bot_iter,
+			"My current stance is '%s' (%i)",
+			EQEmu::constants::GetStanceName(bot_iter->GetBotStance()),
+			bot_iter->GetBotStance()
+		);
 	}
 }
 
@@ -5245,7 +5275,7 @@ void bot_subcommand_bot_stop_melee_level(Client *c, const Seperator *sep)
 	// [reset] falls through with initialization value
 
 	my_bot->SetStopMeleeLevel(sml);
-	if (!botdb.SaveStopMeleeLevel(c->CharacterID(), my_bot->GetBotID(), sml))
+	if (!database.botdb.SaveStopMeleeLevel(c->CharacterID(), my_bot->GetBotID(), sml))
 		c->Message(m_fail, "%s for '%s'", BotDatabase::fail::SaveStopMeleeLevel(), my_bot->GetCleanName());
 
 	c->Message(m_action, "Successfully set stop melee level for %s to %u", my_bot->GetCleanName(), sml);
@@ -5414,7 +5444,7 @@ void bot_subcommand_bot_toggle_helm(Client *c, const Seperator *sep)
 			bot_iter->SetShowHelm(helm_state);
 
 		if (ab_type != ActionableBots::ABT_All) {
-			if (!botdb.SaveHelmAppearance(c->CharacterID(), bot_iter->GetBotID(), bot_iter->GetShowHelm())) {
+			if (!database.botdb.SaveHelmAppearance(c->CharacterID(), bot_iter->GetBotID(), bot_iter->GetShowHelm())) {
 				c->Message(m_unknown, "%s for '%s'", bot_iter->GetCleanName());
 				return;
 			}
@@ -5436,11 +5466,11 @@ void bot_subcommand_bot_toggle_helm(Client *c, const Seperator *sep)
 	if (ab_type == ActionableBots::ABT_All) {
 		std::string query;
 		if (toggle_helm) {
-			if (!botdb.ToggleAllHelmAppearances(c->CharacterID()))
+			if (!database.botdb.ToggleAllHelmAppearances(c->CharacterID()))
 				c->Message(m_fail, "%s", BotDatabase::fail::ToggleAllHelmAppearances());
 		}
 		else {
-			if (!botdb.SaveAllHelmAppearances(c->CharacterID(), helm_state))
+			if (!database.botdb.SaveAllHelmAppearances(c->CharacterID(), helm_state))
 				c->Message(m_fail, "%s", BotDatabase::fail::SaveAllHelmAppearances());
 		}
 
@@ -5522,7 +5552,7 @@ void bot_subcommand_bot_update(Client *c, const Seperator *sep)
 			continue;
 
 		bot_iter->SetPetChooser(false);
-		bot_iter->CalcBotStats((sbl.size() == 1));
+		bot_iter->CalcBotStats(c->GetBotOptionStatsUpdate());
 		bot_iter->SendAppearancePacket(AT_WhoLevel, bot_iter->GetLevel(), true, true);
 		++bot_count;
 	}
@@ -5599,7 +5629,7 @@ void bot_subcommand_botgroup_add_member(Client *c, const Seperator *sep)
 	}
 
 	uint32 botgroup_id = 0;
-	if (!botdb.LoadBotGroupIDByMemberID(new_member->GetBotID(), botgroup_id)) {
+	if (!database.botdb.LoadBotGroupIDByMemberID(new_member->GetBotID(), botgroup_id)) {
 		c->Message(m_fail, "%s for '%s'", BotDatabase::fail::LoadBotGroupIDByMemberID(), new_member->GetCleanName());
 		return;
 	}
@@ -5629,7 +5659,7 @@ void bot_subcommand_botgroup_add_member(Client *c, const Seperator *sep)
 	}
 
 	botgroup_id = 0;
-	if (!botdb.LoadBotGroupIDByLeaderID(botgroup_leader->GetBotID(), botgroup_id)) {
+	if (!database.botdb.LoadBotGroupIDByLeaderID(botgroup_leader->GetBotID(), botgroup_id)) {
 		c->Message(m_fail, "%s for '%s'", BotDatabase::fail::LoadBotGroupIDByLeaderID(), botgroup_leader->GetCleanName());
 		return;
 	}
@@ -5645,14 +5675,14 @@ void bot_subcommand_botgroup_add_member(Client *c, const Seperator *sep)
 
 	database.SetGroupID(new_member->GetName(), group_inst->GetID(), new_member->GetBotID());
 
-	if (!botdb.AddMemberToBotGroup(botgroup_leader->GetBotID(), new_member->GetBotID())) {
+	if (!database.botdb.AddMemberToBotGroup(botgroup_leader->GetBotID(), new_member->GetBotID())) {
 		c->Message(m_fail, "%s - %s->%s", BotDatabase::fail::AddMemberToBotGroup(), new_member->GetCleanName(), botgroup_leader->GetCleanName());
 		Bot::RemoveBotFromGroup(new_member, botgroup_leader->GetGroup());
 		return;
 	}
 
 	std::string botgroup_name;
-	if (!botdb.LoadBotGroupNameByLeaderID(botgroup_leader->GetBotID(), botgroup_name))
+	if (!database.botdb.LoadBotGroupNameByLeaderID(botgroup_leader->GetBotID(), botgroup_name))
 		c->Message(m_fail, "%s", BotDatabase::fail::LoadBotGroupNameByLeaderID());
 
 	c->Message(m_action, "Successfully added %s to bot-group %s", new_member->GetCleanName(), botgroup_name.c_str());
@@ -5674,7 +5704,7 @@ void bot_subcommand_botgroup_create(Client *c, const Seperator *sep)
 	}
 
 	bool extant_flag = false;
-	if (!botdb.QueryBotGroupExistence(botgroup_name_arg, extant_flag)) {
+	if (!database.botdb.QueryBotGroupExistence(botgroup_name_arg, extant_flag)) {
 		c->Message(m_fail, "%s for '%s'", BotDatabase::fail::QueryBotGroupExistence(), botgroup_name_arg.c_str());
 		return;
 	}
@@ -5704,7 +5734,7 @@ void bot_subcommand_botgroup_create(Client *c, const Seperator *sep)
 	}
 
 	uint32 botgroup_id = 0;
-	if (!botdb.LoadBotGroupIDByLeaderID(botgroup_leader->GetBotID(), botgroup_id)) {
+	if (!database.botdb.LoadBotGroupIDByLeaderID(botgroup_leader->GetBotID(), botgroup_id)) {
 		c->Message(m_fail, "%s for '%s'", BotDatabase::fail::LoadBotGroupIDByLeaderID(), botgroup_leader->GetCleanName());
 		return;
 	}
@@ -5714,7 +5744,7 @@ void bot_subcommand_botgroup_create(Client *c, const Seperator *sep)
 	}
 
 	botgroup_id = 0;
-	if (!botdb.LoadBotGroupIDByMemberID(botgroup_leader->GetBotID(), botgroup_id)) {
+	if (!database.botdb.LoadBotGroupIDByMemberID(botgroup_leader->GetBotID(), botgroup_id)) {
 		c->Message(m_fail, "%s for '%s'", BotDatabase::fail::LoadBotGroupIDByMemberID(), botgroup_leader->GetCleanName());
 		return;
 	}
@@ -5729,7 +5759,7 @@ void bot_subcommand_botgroup_create(Client *c, const Seperator *sep)
 		return;
 	}
 
-	if (!botdb.CreateBotGroup(botgroup_name_arg, botgroup_leader->GetBotID())) {
+	if (!database.botdb.CreateBotGroup(botgroup_name_arg, botgroup_leader->GetBotID())) {
 		c->Message(m_fail, "%s '%s'", BotDatabase::fail::CreateBotGroup(), botgroup_name_arg.c_str());
 		safe_delete(group_inst);
 		return;
@@ -5759,7 +5789,7 @@ void bot_subcommand_botgroup_delete(Client *c, const Seperator *sep)
 	}
 
 	uint32 botgroup_id = 0;
-	if (!botdb.LoadBotGroupIDForLoadBotGroup(c->CharacterID(), botgroup_name_arg, botgroup_id)) {
+	if (!database.botdb.LoadBotGroupIDForLoadBotGroup(c->CharacterID(), botgroup_name_arg, botgroup_id)) {
 		c->Message(m_fail, "%s for '%s'", BotDatabase::fail::LoadBotGroupIDForLoadBotGroup(), botgroup_name_arg.c_str());
 		return;
 	}
@@ -5769,7 +5799,7 @@ void bot_subcommand_botgroup_delete(Client *c, const Seperator *sep)
 	}
 
 	uint32 leader_id = 0;
-	if (!botdb.LoadLeaderIDByBotGroupID(botgroup_id, leader_id)) {
+	if (!database.botdb.LoadLeaderIDByBotGroupID(botgroup_id, leader_id)) {
 		c->Message(m_fail, "%s for '%s'", BotDatabase::fail::LoadLeaderIDByBotGroupID(), botgroup_name_arg.c_str());
 		return;
 	}
@@ -5783,7 +5813,7 @@ void bot_subcommand_botgroup_delete(Client *c, const Seperator *sep)
 	MyBots::PopulateSBL_BySpawnedBots(c, sbl);
 
 	std::map<uint32, std::list<uint32>> member_list;
-	if (!botdb.LoadBotGroup(botgroup_name_arg, member_list)) {
+	if (!database.botdb.LoadBotGroup(botgroup_name_arg, member_list)) {
 		c->Message(m_fail, "%s '%s'", BotDatabase::fail::LoadBotGroup(), botgroup_name_arg.c_str());
 		return;
 	}
@@ -5807,7 +5837,7 @@ void bot_subcommand_botgroup_delete(Client *c, const Seperator *sep)
 			Bot::RemoveBotFromGroup(group_member, group_member->GetGroup());
 	}
 
-	if (!botdb.DeleteBotGroup(leader_id)) {
+	if (!database.botdb.DeleteBotGroup(leader_id)) {
 		c->Message(m_fail, "%s '%s'", BotDatabase::fail::DeleteBotGroup(), botgroup_name_arg.c_str());
 		return;
 	}
@@ -5825,7 +5855,7 @@ void bot_subcommand_botgroup_list(Client *c, const Seperator *sep)
 	}
 
 	std::list<std::pair<std::string, std::string>> botgroups_list;
-	if (!botdb.LoadBotGroupsListByOwnerID(c->CharacterID(), botgroups_list)) {
+	if (!database.botdb.LoadBotGroupsListByOwnerID(c->CharacterID(), botgroups_list)) {
 		c->Message(m_fail, "%s", BotDatabase::fail::LoadBotGroupsListByOwnerID());
 		return;
 	}
@@ -5857,7 +5887,7 @@ void bot_subcommand_botgroup_load(Client *c, const Seperator *sep)
 	}
 
 	bool extant_flag = false;
-	if (!botdb.QueryBotGroupExistence(botgroup_name_arg, extant_flag)) {
+	if (!database.botdb.QueryBotGroupExistence(botgroup_name_arg, extant_flag)) {
 		c->Message(m_fail, "%s for '%s'", BotDatabase::fail::QueryBotGroupExistence(), botgroup_name_arg.c_str());
 		return;
 	}
@@ -5887,13 +5917,13 @@ void bot_subcommand_botgroup_load(Client *c, const Seperator *sep)
 	}
 
 	uint32 botgroup_id = 0;
-	if (!botdb.LoadBotGroupIDForLoadBotGroup(c->CharacterID(), botgroup_name_arg, botgroup_id) || !botgroup_id) {
+	if (!database.botdb.LoadBotGroupIDForLoadBotGroup(c->CharacterID(), botgroup_name_arg, botgroup_id) || !botgroup_id) {
 		c->Message(m_fail, "%s for '%s'", BotDatabase::fail::LoadBotGroupIDForLoadBotGroup(), botgroup_name_arg.c_str());
 		return;
 	}
 
 	std::map<uint32, std::list<uint32>> member_list;
-	if (!botdb.LoadBotGroup(botgroup_name_arg, member_list)) {
+	if (!database.botdb.LoadBotGroup(botgroup_name_arg, member_list)) {
 		c->Message(m_fail, "%s for '%s'", BotDatabase::fail::LoadBotGroup(), botgroup_name_arg.c_str());
 		return;
 	}
@@ -5906,7 +5936,7 @@ void bot_subcommand_botgroup_load(Client *c, const Seperator *sep)
 
 	if (RuleB(Bots, QuestableSpawnLimit)) {
 		int allowed_bot_count = 0;
-		if (!botdb.LoadQuestableSpawnCount(c->CharacterID(), allowed_bot_count)) {
+		if (!database.botdb.LoadQuestableSpawnCount(c->CharacterID(), allowed_bot_count)) {
 			c->Message(m_fail, "%s", BotDatabase::fail::LoadQuestableSpawnCount());
 			return;
 		}
@@ -5929,7 +5959,7 @@ void bot_subcommand_botgroup_load(Client *c, const Seperator *sep)
 	}
 
 	uint32 leader_id = 0;
-	if (!botdb.LoadLeaderIDByBotGroupName(botgroup_name_arg, leader_id)) {
+	if (!database.botdb.LoadLeaderIDByBotGroupName(botgroup_name_arg, leader_id)) {
 		c->Message(m_fail, "%s for '%s'", BotDatabase::fail::LoadLeaderIDByBotGroupName(), botgroup_name_arg.c_str());
 		return;
 	}
@@ -6014,7 +6044,7 @@ void bot_subcommand_botgroup_remove_member(Client *c, const Seperator *sep)
 		return;
 	}
 
-	if (!botdb.RemoveMemberFromBotGroup(group_member->GetBotID())) {
+	if (!database.botdb.RemoveMemberFromBotGroup(group_member->GetBotID())) {
 		c->Message(m_fail, "%s - '%s'", BotDatabase::fail::RemoveMemberFromBotGroup(), group_member->GetCleanName());
 		return;
 	}
@@ -6636,7 +6666,7 @@ void bot_subcommand_heal_rotation_create(Client *c, const Seperator *sep)
 	bool member_fail = false;
 	bool target_fail = false;
 
-	if (!botdb.LoadHealRotation(creator_member, member_list, target_list, load_flag, member_fail, target_fail))
+	if (!database.botdb.LoadHealRotation(creator_member, member_list, target_list, load_flag, member_fail, target_fail))
 		c->Message(m_fail, "%s", BotDatabase::fail::LoadHealRotation());
 	
 	if (!load_flag) {
@@ -6709,7 +6739,7 @@ void bot_subcommand_heal_rotation_delete(Client *c, const Seperator *sep)
 	}
 
 	if (all_flag) {
-		if (botdb.DeleteAllHealRotations(c->CharacterID()))
+		if (database.botdb.DeleteAllHealRotations(c->CharacterID()))
 			c->Message(m_action, "Succeeded in deleting all heal rotations");
 		else
 			c->Message(m_fail, "%s", BotDatabase::fail::DeleteAllHealRotations());
@@ -6732,7 +6762,7 @@ void bot_subcommand_heal_rotation_delete(Client *c, const Seperator *sep)
 		return;
 	}
 
-	if (!botdb.DeleteHealRotation(current_member->GetBotID())) {
+	if (!database.botdb.DeleteHealRotation(current_member->GetBotID())) {
 		c->Message(m_fail, "%s", BotDatabase::fail::DeleteHealRotation());
 		return;
 	}
@@ -7019,7 +7049,7 @@ void bot_subcommand_heal_rotation_save(Client *c, const Seperator *sep)
 
 	bool member_fail = false;
 	bool target_fail = false;
-	if (!botdb.SaveHealRotation(current_member, member_fail, target_fail)) {
+	if (!database.botdb.SaveHealRotation(current_member, member_fail, target_fail)) {
 		c->Message(m_fail, "%s", BotDatabase::fail::SaveHealRotation());
 		return;
 	}
@@ -7220,7 +7250,7 @@ void bot_subcommand_inventory_list(Client *c, const Seperator *sep)
 
 		inst = my_bot->CastToBot()->GetBotItem(i);
 		if (!inst || !inst->GetItem()) {
-			c->Message(m_message, "I need something for my %s (slot %i)", GetBotEquipSlotName(i), i);
+			c->Message(m_message, "I need something for my %s (slot %i)", EQEmu::invslot::GetInvPossessionsSlotName(i), i);
 			continue;
 		}
 		
@@ -7230,13 +7260,13 @@ void bot_subcommand_inventory_list(Client *c, const Seperator *sep)
 		}
 
 		linker.SetItemInst(inst);
-		c->Message(m_message, "Using %s in my %s (slot %i)", linker.GenerateLink().c_str(), GetBotEquipSlotName(i), i);
+		c->Message(m_message, "Using %s in my %s (slot %i)", linker.GenerateLink().c_str(), EQEmu::invslot::GetInvPossessionsSlotName(i), i);
 
 		++inventory_count;
 	}
 
 	uint32 database_count = 0;
-	if (!botdb.QueryInventoryCount(my_bot->GetBotID(), database_count))
+	if (!database.botdb.QueryInventoryCount(my_bot->GetBotID(), database_count))
 		c->Message(m_unknown, "%s", BotDatabase::fail::QueryInventoryCount());
 
 	if (inventory_count != database_count)
@@ -7311,7 +7341,7 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 		}
 
 		my_bot->BotRemoveEquipItem(slotId);
-		my_bot->CalcBotStats();
+		my_bot->CalcBotStats(c->GetBotOptionStatsUpdate());
 	}
 
 	switch (slotId) {
@@ -7333,14 +7363,14 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 	case EQEmu::invslot::slotWaist:
 	case EQEmu::invslot::slotPowerSource:
 	case EQEmu::invslot::slotAmmo:
-		c->Message(m_message, "My %s is %s unequipped", GetBotEquipSlotName(slotId), ((itm) ? ("now") : ("already")));
+		c->Message(m_message, "My %s is %s unequipped", EQEmu::invslot::GetInvPossessionsSlotName(slotId), ((itm) ? ("now") : ("already")));
 		break;
 	case EQEmu::invslot::slotShoulders:
 	case EQEmu::invslot::slotArms:
 	case EQEmu::invslot::slotHands:
 	case EQEmu::invslot::slotLegs:
 	case EQEmu::invslot::slotFeet:
-		c->Message(m_message, "My %s are %s unequipped", GetBotEquipSlotName(slotId), ((itm) ? ("now") : ("already")));
+		c->Message(m_message, "My %s are %s unequipped", EQEmu::invslot::GetInvPossessionsSlotName(slotId), ((itm) ? ("now") : ("already")));
 		break;
 	default:
 		c->Message(m_fail, "I'm soo confused...");
@@ -7383,7 +7413,7 @@ void bot_subcommand_inventory_window(Client *c, const Seperator *sep)
 			item = inst->GetItem();
 
 		window_text.append("<c \"#FFFFFF\">");
-		window_text.append(GetBotEquipSlotName(i));
+		window_text.append(EQEmu::invslot::GetInvPossessionsSlotName(i));
 		window_text.append(": ");
 		if (item) {
 			//window_text.append("</c>");
@@ -7403,6 +7433,37 @@ void bot_subcommand_inventory_window(Client *c, const Seperator *sep)
 	window_text.append("</c>");
 
 	c->SendPopupToClient(window_title.c_str(), window_text.c_str());
+}
+
+void bot_subcommand_pet_get_lost(Client *c, const Seperator *sep)
+{
+	if (helper_command_alias_fail(c, "bot_subcommand_pet_get_lost", sep->arg[0], "petgetlost"))
+		return;
+	if (helper_is_help_or_usage(sep->arg[1])) {
+		c->Message(m_usage, "usage: %s ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
+		return;
+	}
+	int ab_mask = ActionableBots::ABM_NoFilter;
+
+	std::list<Bot*> sbl;
+	if (ActionableBots::PopulateSBL(c, sep->arg[1], sbl, ab_mask, sep->arg[2]) == ActionableBots::ABT_None)
+		return;
+
+	int summoned_pet = 0;
+	for (auto bot_iter : sbl) {
+		if (!bot_iter->GetPet() || bot_iter->GetPet()->IsCharmed())
+			continue;
+
+		bot_iter->GetPet()->Say_StringID(PET_GETLOST_STRING);
+		bot_iter->GetPet()->Depop(false);
+		bot_iter->SetPetID(0);
+		database.botdb.DeletePetItems(bot_iter->GetBotID());
+		database.botdb.DeletePetBuffs(bot_iter->GetBotID());
+		database.botdb.DeletePetStats(bot_iter->GetBotID());
+		++summoned_pet;
+	}
+
+	c->Message(m_action, "%i of your bots released their summoned pet%s", summoned_pet, (summoned_pet == 1) ? "" : "s");
 }
 
 void bot_subcommand_pet_remove(Client *c, const Seperator *sep)
@@ -7656,7 +7717,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 	}
 
 	bool available_flag = false;
-	if (!botdb.QueryNameAvailablity(bot_name, available_flag)) {
+	if (!database.botdb.QueryNameAvailablity(bot_name, available_flag)) {
 		bot_owner->Message(m_fail, "%s for '%s'", BotDatabase::fail::QueryNameAvailablity(), bot_name.c_str());
 		return bot_id;
 	}
@@ -7698,7 +7759,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 	uint32 max_bot_count = RuleI(Bots, CreationLimit);
 
 	uint32 bot_count = 0;
-	if (!botdb.QueryBotCount(bot_owner->CharacterID(), bot_count)) {
+	if (!database.botdb.QueryBotCount(bot_owner->CharacterID(), bot_count)) {
 		bot_owner->Message(m_fail, "%s", BotDatabase::fail::QueryBotCount());
 		return bot_id;
 	}
@@ -7707,16 +7768,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 		return bot_id;
 	}
 
-	auto DefaultNPCTypeStruct = Bot::CreateDefaultNPCTypeStructForBot(
-		bot_name.c_str(),
-		"",
-		bot_owner->GetLevel(),
-		bot_race,
-		bot_class,
-		bot_gender
-	);
-
-	auto my_bot = new Bot(DefaultNPCTypeStruct, bot_owner);
+	auto my_bot = new Bot(Bot::CreateDefaultNPCTypeStructForBot(bot_name.c_str(), "", bot_owner->GetLevel(), bot_race, bot_class, bot_gender), bot_owner);
 
 	if (!my_bot->Save()) {
 		bot_owner->Message(m_unknown, "Failed to create '%s' due to unknown cause", my_bot->GetCleanName());

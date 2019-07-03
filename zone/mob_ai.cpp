@@ -379,7 +379,7 @@ bool NPC::AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgain
 }
 
 bool EntityList::AICheckCloseBeneficialSpells(NPC* caster, uint8 iChance, float iRange, uint32 iSpellTypes) {
-	if((iSpellTypes & SpellTypes_Detrimental) != 0) {
+	if((iSpellTypes & SPELL_TYPES_DETRIMENTAL) != 0) {
 		//according to live, you can buff and heal through walls...
 		//now with PCs, this only applies if you can TARGET the target, but
 		// according to Rogean, Live NPCs will just cast through walls/floors, no problem..
@@ -447,7 +447,7 @@ void Mob::AI_Init()
 	maxLastFightingDelayMoving = RuleI(NPC, LastFightingDelayMovingMax);
 
 	pDontHealMeBefore = 0;
-	pDontBuffMeBefore = 0;
+	pDontBuffMeBefore = Timer::GetCurrentTime() + 400;
 	pDontDotMeBefore = 0;
 	pDontRootMeBefore = 0;
 	pDontSnareMeBefore = 0;
@@ -1574,7 +1574,18 @@ void NPC::AI_DoMovement() {
 	 */
 	if (roambox_distance > 0) {
 
-		if (!IsMoving()) {
+		// Check if we're already moving to a WP
+		// If so, if we're not moving we have arrived and need to set delay
+
+		if (GetCWP() == EQEmu::WaypointStatus::RoamBoxPauseInProgress && !IsMoving()) {
+			// We have arrived
+			time_until_can_move = Timer::GetCurrentTime() + RandomTimer(roambox_min_delay, roambox_delay);
+			SetCurrentWP(0);
+			return;
+		}
+
+		// Set a new destination
+		if (!IsMoving() && time_until_can_move < Timer::GetCurrentTime()) {
 			auto move_x = static_cast<float>(zone->random.Real(-roambox_distance, roambox_distance));
 			auto move_y = static_cast<float>(zone->random.Real(-roambox_distance, roambox_distance));
 
@@ -1625,11 +1636,12 @@ void NPC::AI_DoMovement() {
 				}
 			}
 
-			glm::vec3 destination;
-			destination.x = roambox_destination_x;
-			destination.y = roambox_destination_y;
-			destination.z = m_Position.z;
-			roambox_destination_z = zone->zonemap ? zone->zonemap->FindClosestZ(destination, nullptr) + this->GetZOffset() : 0;
+			roambox_destination_z = 0;
+			/*
+			if (zone->zonemap) {
+				roambox_destination_z = FindGroundZ(roambox_destination_x, roambox_destination_y, this->GetZOffset());
+			}
+				*/
 
 			Log(Logs::Detail,
 				Logs::NPCRoamBox,
@@ -1642,12 +1654,10 @@ void NPC::AI_DoMovement() {
 				roambox_min_y,
 				roambox_max_y,
 				roambox_destination_y);
-		}
+			Log(Logs::Detail, Logs::NPCRoamBox, "Dest Z is (%f)", roambox_destination_z);
 
-		NavigateTo(roambox_destination_x, roambox_destination_y, roambox_destination_z);
-
-		if (m_Position.x == roambox_destination_x && m_Position.y == roambox_destination_y) {
-			time_until_can_move = Timer::GetCurrentTime() + RandomTimer(roambox_min_delay, roambox_delay);
+			SetCurrentWP(EQEmu::WaypointStatus::RoamBoxPauseInProgress);
+			NavigateTo(roambox_destination_x, roambox_destination_y, roambox_destination_z);
 		}
 
 		return;
@@ -1660,7 +1670,7 @@ void NPC::AI_DoMovement() {
 		
 		int32 gridno = CastToNPC()->GetGrid();
 		
-		if (gridno > 0 || cur_wp == -2) {
+		if (gridno > 0 || cur_wp == EQEmu::WaypointStatus::QuestControlNoGrid) {
 			if (pause_timer_complete == true) { // time to pause at wp is over
 				AI_SetupNextWaypoint();
 			}    // endif (pause_timer_complete==true)
@@ -1692,7 +1702,7 @@ void NPC::AI_DoMovement() {
 					// as that is where roamer is unset and we don't want
 					// the next trip through to move again based on grid stuff.
 					doMove = false;
-					if (cur_wp == -2) {
+					if (cur_wp == EQEmu::WaypointStatus::QuestControlNoGrid) {
 						AI_SetupNextWaypoint();
 					}
 		
@@ -1790,9 +1800,8 @@ void NPC::AI_SetupNextWaypoint() {
 	else {
 		pause_timer_complete = false;
 		Log(Logs::Detail, Logs::Pathing, "We are departing waypoint %d.", cur_wp);
-		
 		//if we were under quest control (with no grid), we are done now..
-		if (cur_wp == -2) {
+		if (cur_wp == EQEmu::WaypointStatus::QuestControlNoGrid) {
 			Log(Logs::Detail, Logs::Pathing, "Non-grid quest mob has reached its quest ordered waypoint. Leaving pathing mode.");
 			roamer = false;
 			cur_wp = 0;
@@ -2427,7 +2436,7 @@ bool NPC::AI_AddNPCSpells(uint32 iDBSpellsID) {
 	}
 	DBnpcspells_Struct* parentlist = database.GetNPCSpells(spell_list->parent_list);
 #if MobAI_DEBUG_Spells >= 10
-	std::string debug_msg = StringFormat("Loading NPCSpells onto %s: dbspellsid=%u", this->GetName(), iDBSpellsID);
+	std::string debug_msg = StringFormat("Loading NPCSpells onto %s: dbspellsid=%u, level=%u", this->GetName(), iDBSpellsID, this->GetLevel());
 	if (spell_list) {
 		debug_msg.append(StringFormat(" (found, %u), parentlist=%u", spell_list->entries.size(), spell_list->parent_list));
 		if (spell_list->parent_list) {
@@ -2441,6 +2450,22 @@ bool NPC::AI_AddNPCSpells(uint32 iDBSpellsID) {
 		debug_msg.append(" (not found)");
 	}
 	Log(Logs::Detail, Logs::AI, "%s", debug_msg.c_str());
+
+#ifdef MobAI_DEBUG_Spells >= 25
+	if (parentlist) {
+		for (const auto &iter : parentlist->entries) {
+			Log(Logs::Detail, Logs::AI, "(%i) %s", iter.spellid, spells[iter.spellid].name);
+		}
+	}
+	Log(Logs::Detail, Logs::AI, "fin (parent list)");
+	if (spell_list) {
+		for (const auto &iter : spell_list->entries) {
+			Log(Logs::Detail, Logs::AI, "(%i) %s", iter.spellid, spells[iter.spellid].name);
+		}
+	}
+	Log(Logs::Detail, Logs::AI, "fin (spell list)");
+#endif
+
 #endif
 	uint16 attack_proc_spell = -1;
 	int8 proc_chance = 3;
@@ -2813,7 +2838,7 @@ DBnpcspells_Struct *ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID)
 			entry.max_hp = atoi(row[8]);
 
 			// some spell types don't make much since to be priority 0, so fix that
-			if (!(entry.type & SpellTypes_Innate) && entry.priority == 0)
+			if (!(entry.type & SPELL_TYPES_INNATE) && entry.priority == 0)
 				entry.priority = 1;
 
 			if (row[9])

@@ -55,6 +55,7 @@ SET(common_sources
 	perl_eqdb.cpp
 	perl_eqdb_res.cpp
 	proc_launcher.cpp
+	profanity_manager.cpp
 	ptimer.cpp
 	races.cpp
 	rdtsc.cpp
@@ -72,7 +73,6 @@ SET(common_sources
 	unix.cpp
 	xml_parser.cpp
 	platform.cpp
-	event/event_loop.cpp
 	json/jsoncpp.cpp
 	net/console_server.cpp
 	net/console_server_connection.cpp
@@ -86,6 +86,8 @@ SET(common_sources
 	net/servertalk_server_connection.cpp
 	net/tcp_connection.cpp
 	net/tcp_server.cpp
+	net/websocket_server.cpp
+	net/websocket_server_connection.cpp
 	patches/patches.cpp
 	patches/sod.cpp
 	patches/sod_limits.cpp
@@ -136,6 +138,7 @@ SET(common_headers
 	eqemu_config.h
 	eqemu_config_elements.h
 	eqemu_logsys.h
+	eqemu_logsys_fmt.h
 	eq_limits.h
 	eq_packet.h
 	eq_stream_ident.h
@@ -181,6 +184,7 @@ SET(common_headers
 	packet_functions.h
 	platform.h
 	proc_launcher.h
+	profanity_manager.h
 	profiler.h
 	ptimer.h
 	queue.h
@@ -207,8 +211,8 @@ SET(common_headers
 	version.h
 	xml_parser.h
 	zone_numbers.h
-	event/background_task.h
 	event/event_loop.h
+	event/task.h
 	event/timer.h
 	json/json.h
 	json/json-forwards.h
@@ -228,6 +232,8 @@ SET(common_headers
 	net/servertalk_server_connection.h
 	net/tcp_connection.h
 	net/tcp_server.h
+	net/websocket_server.h
+	net/websocket_server_connection.h
 	patches/patches.h
 	patches/sod.h
 	patches/sod_limits.h
@@ -265,10 +271,9 @@ SET(common_headers
 )
 
 SOURCE_GROUP(Event FILES
-	event/background_task.h
-	event/event_loop.cpp
 	event/event_loop.h
 	event/timer.h
+	event/task.h
 )
 
 SOURCE_GROUP(Json FILES
@@ -308,6 +313,10 @@ SOURCE_GROUP(Net FILES
 	net/tcp_connection.h
 	net/tcp_server.cpp
 	net/tcp_server.h
+	net/websocket_server.cpp
+	net/websocket_server.h
+	net/websocket_server_connection.cpp
+	net/websocket_server_connection.h
 )
 
 SOURCE_GROUP(Patches FILES

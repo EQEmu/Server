@@ -1046,7 +1046,7 @@ void PerlembParser::ExportMobVariables(bool isPlayerQuest, bool isGlobalPlayerQu
 		if (mob && npcmob && mob->IsClient()) {
 			Client* client = mob->CastToClient();
 
-			fac = client->GetFactionLevel(client->CharacterID(), npcmob->GetID(), client->GetRace(),
+			fac = client->GetFactionLevel(client->CharacterID(), npcmob->GetID(), client->GetFactionRace(),
 				client->GetClass(), client->GetDeity(), npcmob->GetPrimaryFaction(), npcmob);
 		}
 	}

@@ -4,7 +4,7 @@
 #include "../common/types.h"
 #include "../common/packet_functions.h"
 #include "../common/eq_packet_structs.h"
-#include "../net/packet.h"
+#include "../common/net/packet.h"
 #include <cereal/cereal.hpp>
 #include <cereal/types/string.hpp>
 
@@ -159,6 +159,7 @@
 #define ServerOP_SetWorldTime		0x200B
 #define ServerOP_GetWorldTime		0x200C
 #define ServerOP_SyncWorldTime		0x200E
+#define ServerOP_RefreshCensorship	0x200F
 
 #define ServerOP_LSZoneInfo			0x3001
 #define ServerOP_LSZoneStart		0x3002

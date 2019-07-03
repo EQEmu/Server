@@ -171,30 +171,27 @@ void Database::LoginIP(uint32 AccountID, const char* LoginIP) {
 	QueryDatabase(query); 
 }
 
-int16 Database::CheckStatus(uint32 account_id) {
-	std::string query = StringFormat("SELECT `status`, UNIX_TIMESTAMP(`suspendeduntil`) as `suspendeduntil`, UNIX_TIMESTAMP() as `current`"
-							" FROM `account` WHERE `id` = %i", account_id);
+int16 Database::CheckStatus(uint32 account_id)
+{
+	std::string query = StringFormat(
+	    "SELECT `status`, TIMESTAMPDIFF(SECOND, NOW(), `suspendeduntil`) FROM `account` WHERE `id` = %i",
+	    account_id);
 
-	auto results = QueryDatabase(query); 
-	if (!results.Success()) {
+	auto results = QueryDatabase(query);
+	if (!results.Success())
 		return 0;
-	}
 
 	if (results.RowCount() != 1)
 		return 0;
-	
-	auto row = results.begin(); 
-	int16 status = atoi(row[0]); 
-	int32 suspendeduntil = 0;
 
-	// MariaDB initalizes with NULL if unix_timestamp() is out of range
-	if (row[1] != nullptr) {
-		suspendeduntil = atoi(row[1]);
-	}
+	auto row = results.begin();
+	int16 status = atoi(row[0]);
+	int32 date_diff = 0;
 
-	int32 current = atoi(row[2]);
+	if (row[1] != nullptr)
+		date_diff = atoi(row[1]);
 
-	if(suspendeduntil > current)
+	if (date_diff > 0)
 		return -1;
 
 	return status;

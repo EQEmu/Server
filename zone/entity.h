@@ -116,6 +116,7 @@ public:
 
 #ifdef BOTS
 	Bot* CastToBot();
+	const Bot* CastToBot() const;
 #endif
 
 protected:

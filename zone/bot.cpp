@@ -29,7 +29,9 @@
 extern volatile bool is_zone_loaded;
 
 // This constructor is used during the bot create command
-Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm::vec4(), Ground, false), rest_timer(1) {
+Bot::Bot(NPCType *npcTypeData, Client* botOwner) : NPC(npcTypeData, nullptr, glm::vec4(), Ground, false), rest_timer(1), ping_timer(1) {
+	GiveNPCTypeData(npcTypeData);
+	
 	if(botOwner) {
 		this->SetBotOwner(botOwner);
 		this->_botOwnerCharacterID = botOwner->CharacterID();
@@ -46,23 +48,23 @@ Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm
 	_lastTotalPlayTime = 0;
 	_startTotalPlayTime = time(&_startTotalPlayTime);
 	_lastZoneId = 0;
-	_baseMR = npcTypeData.MR;
-	_baseCR = npcTypeData.CR;
-	_baseDR = npcTypeData.DR;
-	_baseFR = npcTypeData.FR;
-	_basePR = npcTypeData.PR;
-	_baseCorrup = npcTypeData.Corrup;
-	_baseAC = npcTypeData.AC;
-	_baseSTR = npcTypeData.STR;
-	_baseSTA = npcTypeData.STA;
-	_baseDEX = npcTypeData.DEX;
-	_baseAGI = npcTypeData.AGI;
-	_baseINT = npcTypeData.INT;
-	_baseWIS = npcTypeData.WIS;
-	_baseCHA = npcTypeData.CHA;
-	_baseATK = npcTypeData.ATK;
-	_baseRace = npcTypeData.race;
-	_baseGender = npcTypeData.gender;
+	_baseMR = npcTypeData->MR;
+	_baseCR = npcTypeData->CR;
+	_baseDR = npcTypeData->DR;
+	_baseFR = npcTypeData->FR;
+	_basePR = npcTypeData->PR;
+	_baseCorrup = npcTypeData->Corrup;
+	_baseAC = npcTypeData->AC;
+	_baseSTR = npcTypeData->STR;
+	_baseSTA = npcTypeData->STA;
+	_baseDEX = npcTypeData->DEX;
+	_baseAGI = npcTypeData->AGI;
+	_baseINT = npcTypeData->INT;
+	_baseWIS = npcTypeData->WIS;
+	_baseCHA = npcTypeData->CHA;
+	_baseATK = npcTypeData->ATK;
+	_baseRace = npcTypeData->race;
+	_baseGender = npcTypeData->gender;
 	RestRegenHP = 0;
 	RestRegenMana = 0;
 	RestRegenEndurance = 0;
@@ -80,6 +82,7 @@ Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm
 	SetShowHelm(true);
 	SetPauseAI(false);
 	rest_timer.Disable();
+	ping_timer.Disable();
 	SetFollowDistance(BOT_FOLLOW_DISTANCE_DEFAULT);
 	if (IsCasterClass(GetClass()))
 		SetStopMeleeLevel((uint8)RuleI(Bots, CasterStopMeleeLevel));
@@ -104,9 +107,11 @@ Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm
 }
 
 // This constructor is used when the bot is loaded out of the database
-Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double totalPlayTime, uint32 lastZoneId, NPCType npcTypeData) 
-	: NPC(&npcTypeData, nullptr, glm::vec4(), Ground, false), rest_timer(1)
+Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double totalPlayTime, uint32 lastZoneId, NPCType *npcTypeData) 
+	: NPC(npcTypeData, nullptr, glm::vec4(), Ground, false), rest_timer(1), ping_timer(1)
 {
+	GiveNPCTypeData(npcTypeData);
+	
 	this->_botOwnerCharacterID = botOwnerCharacterID;
 	if(this->_botOwnerCharacterID > 0)
 		this->SetBotOwner(entity_list.GetClientByCharID(this->_botOwnerCharacterID));
@@ -122,25 +127,25 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 	_startTotalPlayTime = time(&_startTotalPlayTime);
 	_lastZoneId = lastZoneId;
 	berserk = false;
-	_baseMR = npcTypeData.MR;
-	_baseCR = npcTypeData.CR;
-	_baseDR = npcTypeData.DR;
-	_baseFR = npcTypeData.FR;
-	_basePR = npcTypeData.PR;
-	_baseCorrup = npcTypeData.Corrup;
-	_baseAC = npcTypeData.AC;
-	_baseSTR = npcTypeData.STR;
-	_baseSTA = npcTypeData.STA;
-	_baseDEX = npcTypeData.DEX;
-	_baseAGI = npcTypeData.AGI;
-	_baseINT = npcTypeData.INT;
-	_baseWIS = npcTypeData.WIS;
-	_baseCHA = npcTypeData.CHA;
-	_baseATK = npcTypeData.ATK;
-	_baseRace = npcTypeData.race;
-	_baseGender = npcTypeData.gender;
-	current_hp = npcTypeData.current_hp;
-	current_mana = npcTypeData.Mana;
+	_baseMR = npcTypeData->MR;
+	_baseCR = npcTypeData->CR;
+	_baseDR = npcTypeData->DR;
+	_baseFR = npcTypeData->FR;
+	_basePR = npcTypeData->PR;
+	_baseCorrup = npcTypeData->Corrup;
+	_baseAC = npcTypeData->AC;
+	_baseSTR = npcTypeData->STR;
+	_baseSTA = npcTypeData->STA;
+	_baseDEX = npcTypeData->DEX;
+	_baseAGI = npcTypeData->AGI;
+	_baseINT = npcTypeData->INT;
+	_baseWIS = npcTypeData->WIS;
+	_baseCHA = npcTypeData->CHA;
+	_baseATK = npcTypeData->ATK;
+	_baseRace = npcTypeData->race;
+	_baseGender = npcTypeData->gender;
+	current_hp = npcTypeData->current_hp;
+	current_mana = npcTypeData->Mana;
 	RestRegenHP = 0;
 	RestRegenMana = 0;
 	RestRegenEndurance = 0;
@@ -153,15 +158,16 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 	SetRangerAutoWeaponSelect(false);
 
 	bool stance_flag = false;
-	if (!botdb.LoadStance(this, stance_flag) && bot_owner)
+	if (!database.botdb.LoadStance(this, stance_flag) && bot_owner)
 		bot_owner->Message(13, "%s for '%s'", BotDatabase::fail::LoadStance(), GetCleanName());
 	if (!stance_flag && bot_owner)
 		bot_owner->Message(13, "Could not locate stance for '%s'", GetCleanName());
 
-	SetTaunting((GetClass() == WARRIOR || GetClass() == PALADIN || GetClass() == SHADOWKNIGHT) && (GetBotStance() == BotStanceAggressive));
+	SetTaunting((GetClass() == WARRIOR || GetClass() == PALADIN || GetClass() == SHADOWKNIGHT) && (GetBotStance() == EQEmu::constants::stanceAggressive));
 	SetPauseAI(false);
 
 	rest_timer.Disable();
+	ping_timer.Disable();
 	SetFollowDistance(BOT_FOLLOW_DISTANCE_DEFAULT);
 	if (IsCasterClass(GetClass()))
 		SetStopMeleeLevel((uint8)RuleI(Bots, CasterStopMeleeLevel));
@@ -171,10 +177,10 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 	strcpy(this->name, this->GetCleanName());
 
 	memset(&_botInspectMessage, 0, sizeof(InspectMessage_Struct));
-	if (!botdb.LoadInspectMessage(GetBotID(), _botInspectMessage) && bot_owner)
+	if (!database.botdb.LoadInspectMessage(GetBotID(), _botInspectMessage) && bot_owner)
 		bot_owner->Message(13, "%s for '%s'", BotDatabase::fail::LoadInspectMessage(), GetCleanName());
 
-	if (!botdb.LoadGuildMembership(GetBotID(), _guildId, _guildRank, _guildName) && bot_owner)
+	if (!database.botdb.LoadGuildMembership(GetBotID(), _guildId, _guildRank, _guildName) && bot_owner)
 		bot_owner->Message(13, "%s for '%s'", BotDatabase::fail::LoadGuildMembership(), GetCleanName());
 	
 	std::string error_message;
@@ -199,12 +205,12 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 
 	GenerateBaseStats();
 
-	if (!botdb.LoadTimers(this) && bot_owner)
+	if (!database.botdb.LoadTimers(this) && bot_owner)
 		bot_owner->Message(13, "%s for '%s'", BotDatabase::fail::LoadTimers(), GetCleanName());
 
 	LoadAAs();
 
-	if (!botdb.LoadBuffs(this) && bot_owner)
+	if (!database.botdb.LoadBuffs(this) && bot_owner)
 		bot_owner->Message(13, "&s for '%s'", BotDatabase::fail::LoadBuffs(), GetCleanName());
 
 	CalcBotStats(false);
@@ -313,112 +319,253 @@ bool Bot::IsStanding() {
 	return result;
 }
 
-NPCType Bot::FillNPCTypeStruct(uint32 botSpellsID, std::string botName, std::string botLastName, uint8 botLevel, uint16 botRace, uint8 botClass, uint8 gender, float size, uint32 face, uint32 hairStyle, uint32 hairColor, uint32 eyeColor, uint32 eyeColor2, uint32 beardColor, uint32 beard, uint32 drakkinHeritage, uint32 drakkinTattoo, uint32 drakkinDetails, int32 hp, int32 mana, int32 mr, int32 cr, int32 dr, int32 fr, int32 pr, int32 corrup, int32 ac, uint32 str, uint32 sta, uint32 dex, uint32 agi, uint32 _int, uint32 wis, uint32 cha, uint32 attack) {
-	NPCType BotNPCType;
-	int CopyLength = 0;
-	CopyLength = botName.copy(BotNPCType.name, 63);
-	BotNPCType.name[CopyLength] = '\0';
-	CopyLength = 0;
-	CopyLength = botLastName.copy(BotNPCType.lastname, 69);
-	BotNPCType.lastname[CopyLength] = '\0';
-	CopyLength = 0;
-	BotNPCType.npc_spells_id = botSpellsID;
-	BotNPCType.level = botLevel;
-	BotNPCType.race = botRace;
-	BotNPCType.class_ = botClass;
-	BotNPCType.gender = gender;
-	BotNPCType.size = size;
-	BotNPCType.luclinface = face;
-	BotNPCType.hairstyle = hairStyle;
-	BotNPCType.haircolor = hairColor;
-	BotNPCType.eyecolor1 = eyeColor;
-	BotNPCType.eyecolor2 = eyeColor2;
-	BotNPCType.beardcolor = beardColor;
-	BotNPCType.beard = beard;
-	BotNPCType.drakkin_heritage = drakkinHeritage;
-	BotNPCType.drakkin_tattoo = drakkinTattoo;
-	BotNPCType.drakkin_details = drakkinDetails;
-	BotNPCType.current_hp = hp;
-	BotNPCType.Mana = mana;
-	BotNPCType.MR = mr;
-	BotNPCType.CR = cr;
-	BotNPCType.DR = dr;
-	BotNPCType.FR = fr;
-	BotNPCType.PR = pr;
-	BotNPCType.Corrup = corrup;
-	BotNPCType.AC = ac;
-	BotNPCType.STR = str;
-	BotNPCType.STA = sta;
-	BotNPCType.DEX = dex;
-	BotNPCType.AGI = agi;
-	BotNPCType.INT = _int;
-	BotNPCType.WIS = wis;
-	BotNPCType.CHA = cha;
-	BotNPCType.ATK = attack;
-	BotNPCType.npc_id = 0;
-	BotNPCType.texture = 0;
-	BotNPCType.d_melee_texture1 = 0;
-	BotNPCType.d_melee_texture2 = 0;
-	BotNPCType.qglobal = false;
-	BotNPCType.attack_speed = 0;
-	BotNPCType.runspeed = 0.7f;
-	BotNPCType.bodytype = 1;
-	BotNPCType.findable = 0;
-	BotNPCType.hp_regen = 1;
-	BotNPCType.mana_regen = 1;
-	BotNPCType.maxlevel = botLevel;
-	BotNPCType.light = 0; // due to the way that bots are coded..this is sent post-spawn
-	return BotNPCType;
+NPCType *Bot::FillNPCTypeStruct(uint32 botSpellsID, std::string botName, std::string botLastName, uint8 botLevel, uint16 botRace, uint8 botClass, uint8 gender, float size, uint32 face, uint32 hairStyle, uint32 hairColor, uint32 eyeColor, uint32 eyeColor2, uint32 beardColor, uint32 beard, uint32 drakkinHeritage, uint32 drakkinTattoo, uint32 drakkinDetails, int32 hp, int32 mana, int32 mr, int32 cr, int32 dr, int32 fr, int32 pr, int32 corrup, int32 ac, uint32 str, uint32 sta, uint32 dex, uint32 agi, uint32 _int, uint32 wis, uint32 cha, uint32 attack) {
+	auto bot_npc_type = new NPCType{ 0 };
+	int copy_length = 0;
+
+	copy_length = botName.copy(bot_npc_type->name, 63);
+	bot_npc_type->name[copy_length] = '\0';
+	copy_length = 0;
+
+	copy_length = botLastName.copy(bot_npc_type->lastname, 69);
+	bot_npc_type->lastname[copy_length] = '\0';
+	copy_length = 0;
+
+	bot_npc_type->current_hp = hp;
+	bot_npc_type->max_hp = hp;
+	bot_npc_type->size = size;
+	bot_npc_type->runspeed = 0.7f;
+	bot_npc_type->gender = gender;
+	bot_npc_type->race = botRace;
+	bot_npc_type->class_ = botClass;
+	bot_npc_type->bodytype = 1;
+	bot_npc_type->deity = EQEmu::deity::DeityAgnostic;
+	bot_npc_type->level = botLevel;
+	//bot_npc_type->npc_id = 0;
+	//bot_npc_type->texture = 0;
+	//bot_npc_type->helmtexture = 0;
+	//bot_npc_type->herosforgemodel = 0;
+	//bot_npc_type->loottable_id = 0;
+	bot_npc_type->npc_spells_id = botSpellsID;
+	//bot_npc_type->npc_spells_effects_id = 0;
+	//bot_npc_type->npc_faction_id = 0;
+	//bot_npc_type->merchanttype = 0;
+	//bot_npc_type->alt_currency_type = 0;
+	//bot_npc_type->adventure_template = 0;
+	//bot_npc_type->trap_template = 0;
+	//bot_npc_type->light = 0;
+	bot_npc_type->AC = ac;
+	bot_npc_type->Mana = mana;
+	bot_npc_type->ATK = attack;
+	bot_npc_type->STR = str;
+	bot_npc_type->STA = sta;
+	bot_npc_type->DEX = dex;
+	bot_npc_type->AGI = agi;
+	bot_npc_type->INT = _int;
+	bot_npc_type->WIS = wis;
+	bot_npc_type->CHA = cha;
+	bot_npc_type->MR = mr;
+	bot_npc_type->FR = fr;
+	bot_npc_type->CR = cr;
+	bot_npc_type->PR = pr;
+	bot_npc_type->DR = dr;
+	bot_npc_type->Corrup = corrup;
+	//bot_npc_type->PhR = 0;
+	bot_npc_type->haircolor = hairColor;
+	bot_npc_type->beardcolor = beardColor;
+	bot_npc_type->eyecolor1 = eyeColor;
+	bot_npc_type->eyecolor2 = eyeColor2;
+	bot_npc_type->hairstyle = hairStyle;
+	bot_npc_type->luclinface = face;
+	bot_npc_type->beard = beard;
+	bot_npc_type->drakkin_heritage = drakkinHeritage;
+	bot_npc_type->drakkin_tattoo = drakkinTattoo;
+	bot_npc_type->drakkin_details = drakkinDetails;
+	//bot_npc_type->armor_tint = { 0 };
+	//bot_npc_type->min_dmg = 0;
+	//bot_npc_type->max_dmg = 0;
+	//bot_npc_type->charm_ac = 0;
+	//bot_npc_type->charm_min_dmg = 0;
+	//bot_npc_type->charm_max_dmg = 0;
+	//bot_npc_type->charm_attack_delay = 0;
+	//bot_npc_type->charm_accuracy_rating = 0;
+	//bot_npc_type->charm_avoidance_rating = 0;
+	//bot_npc_type->charm_atk = 0;
+	//bot_npc_type->attack_count = 0;
+	//*bot_npc_type->special_abilities = { 0 };
+	//bot_npc_type->d_melee_texture1 = 0;
+	//bot_npc_type->d_melee_texture2 = 0;
+	//*bot_npc_type->ammo_idfile = { 0 };
+	//bot_npc_type->prim_melee_type = 0;
+	//bot_npc_type->sec_melee_type = 0;
+	//bot_npc_type->ranged_type = 0;
+	bot_npc_type->hp_regen = 1;
+	bot_npc_type->mana_regen = 1;
+	//bot_npc_type->aggroradius = 0;
+	//bot_npc_type->assistradius = 0;
+	//bot_npc_type->see_invis = 0;
+	//bot_npc_type->see_invis_undead = false;
+	//bot_npc_type->see_hide = false;
+	//bot_npc_type->see_improved_hide = false;
+	//bot_npc_type->qglobal = false;
+	//bot_npc_type->npc_aggro = false;
+	//bot_npc_type->spawn_limit = 0;
+	//bot_npc_type->mount_color = 0;
+	//bot_npc_type->attack_speed = 0.0f;
+	//bot_npc_type->attack_delay = 0;
+	//bot_npc_type->accuracy_rating = 0;
+	//bot_npc_type->avoidance_rating = 0;
+	//bot_npc_type->findable = false;
+	bot_npc_type->trackable = true;
+	//bot_npc_type->slow_mitigation = 0;
+	bot_npc_type->maxlevel = botLevel;
+	//bot_npc_type->scalerate = 0;
+	//bot_npc_type->private_corpse = false;
+	//bot_npc_type->unique_spawn_by_name = false;
+	//bot_npc_type->underwater = false;
+	//bot_npc_type->emoteid = 0;
+	//bot_npc_type->spellscale = 0.0f;
+	//bot_npc_type->healscale = 0.0f;
+	//bot_npc_type->no_target_hotkey = false;
+	//bot_npc_type->raid_target = false;
+	//bot_npc_type->armtexture = 0;
+	//bot_npc_type->bracertexture = 0;
+	//bot_npc_type->handtexture = 0;
+	//bot_npc_type->legtexture = 0;
+	//bot_npc_type->feettexture = 0;
+	//bot_npc_type->ignore_despawn = false;
+	bot_npc_type->show_name = true;
+	//bot_npc_type->untargetable = false;
+	bot_npc_type->skip_global_loot = true;
+	//bot_npc_type->rare_spawn = false;
+	bot_npc_type->stuck_behavior = Ground;
+	bot_npc_type->skip_auto_scale = true;
+
+	return bot_npc_type;
 }
 
-NPCType Bot::CreateDefaultNPCTypeStructForBot(std::string botName, std::string botLastName, uint8 botLevel, uint16 botRace, uint8 botClass, uint8 gender) {
-	NPCType Result;
-	int CopyLength = 0;
-	CopyLength = botName.copy(Result.name, 63);
-	Result.name[CopyLength] = '\0';
-	CopyLength = 0;
-	CopyLength = botLastName.copy(Result.lastname, 69);
-	Result.lastname[CopyLength] = '\0';
-	CopyLength = 0;
-	Result.level = botLevel;
-	Result.race = botRace;
-	Result.class_ = botClass;
-	Result.gender = gender;
-	// default values
-	Result.maxlevel = botLevel;
-	Result.size = 6.0;
-	Result.npc_id = 0;
-	Result.current_hp = 0;
-	Result.drakkin_details = 0;
-	Result.drakkin_heritage = 0;
-	Result.drakkin_tattoo = 0;
-	Result.runspeed = 0.7f;
-	Result.bodytype = 1;
-	Result.findable = 0;
-	Result.hp_regen = 1;
-	Result.mana_regen = 1;
-	Result.texture = 0;
-	Result.d_melee_texture1 = 0;
-	Result.d_melee_texture2 = 0;
-	Result.qglobal = false;
-	Result.npc_spells_id = 0;
-	Result.attack_speed = 0;
-	Result.STR = 75;
-	Result.STA = 75;
-	Result.DEX = 75;
-	Result.AGI = 75;
-	Result.WIS = 75;
-	Result.INT = 75;
-	Result.CHA = 75;
-	Result.ATK = 75;
-	Result.MR = 25;
-	Result.FR = 25;
-	Result.DR = 15;
-	Result.PR = 15;
-	Result.CR = 25;
-	Result.Corrup = 15;
-	Result.AC = 12;
-	return Result;
+NPCType *Bot::CreateDefaultNPCTypeStructForBot(std::string botName, std::string botLastName, uint8 botLevel, uint16 botRace, uint8 botClass, uint8 gender) {
+	auto bot_npc_type = new NPCType{ 0 };
+	int copy_length = 0;
+
+	copy_length = botName.copy(bot_npc_type->name, 63);
+	bot_npc_type->name[copy_length] = '\0';
+	copy_length = 0;
+
+	copy_length = botLastName.copy(bot_npc_type->lastname, 69);
+	bot_npc_type->lastname[copy_length] = '\0';
+	copy_length = 0;
+
+	//bot_npc_type->current_hp = 0;
+	//bot_npc_type->max_hp = 0;
+	bot_npc_type->size = 6.0f;
+	bot_npc_type->runspeed = 0.7f;
+	bot_npc_type->gender = gender;
+	bot_npc_type->race = botRace;
+	bot_npc_type->class_ = botClass;
+	bot_npc_type->bodytype = 1;
+	bot_npc_type->deity = EQEmu::deity::DeityAgnostic;
+	bot_npc_type->level = botLevel;
+	//bot_npc_type->npc_id = 0;
+	//bot_npc_type->texture = 0;
+	//bot_npc_type->helmtexture = 0;
+	//bot_npc_type->herosforgemodel = 0;
+	//bot_npc_type->loottable_id = 0;
+	//bot_npc_type->npc_spells_id = 0;
+	//bot_npc_type->npc_spells_effects_id = 0;
+	//bot_npc_type->npc_faction_id = 0;
+	//bot_npc_type->merchanttype = 0;
+	//bot_npc_type->alt_currency_type = 0;
+	//bot_npc_type->adventure_template = 0;
+	//bot_npc_type->trap_template = 0;
+	//bot_npc_type->light = 0;
+	bot_npc_type->AC = 12;
+	//bot_npc_type->Mana = 0;
+	bot_npc_type->ATK = 75;
+	bot_npc_type->STR = 75;
+	bot_npc_type->STA = 75;
+	bot_npc_type->DEX = 75;
+	bot_npc_type->AGI = 75;
+	bot_npc_type->INT = 75;
+	bot_npc_type->WIS = 75;
+	bot_npc_type->CHA = 75;
+	bot_npc_type->MR = 25;
+	bot_npc_type->FR = 25;
+	bot_npc_type->CR = 25;
+	bot_npc_type->PR = 15;
+	bot_npc_type->DR = 15;
+	bot_npc_type->Corrup = 15;
+	//bot_npc_type->PhR = 0;
+	//bot_npc_type->haircolor = 0;
+	//bot_npc_type->beardcolor = 0;
+	//bot_npc_type->eyecolor1 = 0;
+	//bot_npc_type->eyecolor2 = 0;
+	//bot_npc_type->hairstyle = 0;
+	//bot_npc_type->luclinface = 0;
+	//bot_npc_type->beard = 0;
+	//bot_npc_type->drakkin_heritage = 0;
+	//bot_npc_type->drakkin_tattoo = 0;
+	//bot_npc_type->drakkin_details = 0;
+	//bot_npc_type->armor_tint = { 0 };
+	//bot_npc_type->min_dmg = 0;
+	//bot_npc_type->max_dmg = 0;
+	//bot_npc_type->charm_ac = 0;
+	//bot_npc_type->charm_min_dmg = 0;
+	//bot_npc_type->charm_max_dmg = 0;
+	//bot_npc_type->charm_attack_delay = 0;
+	//bot_npc_type->charm_accuracy_rating = 0;
+	//bot_npc_type->charm_avoidance_rating = 0;
+	//bot_npc_type->charm_atk = 0;
+	//bot_npc_type->attack_count = 0;
+	//*bot_npc_type->special_abilities = { 0 };
+	//bot_npc_type->d_melee_texture1 = 0;
+	//bot_npc_type->d_melee_texture2 = 0;
+	//*bot_npc_type->ammo_idfile = { 0 };
+	//bot_npc_type->prim_melee_type = 0;
+	//bot_npc_type->sec_melee_type = 0;
+	//bot_npc_type->ranged_type = 0;
+	bot_npc_type->hp_regen = 1;
+	bot_npc_type->mana_regen = 1;
+	//bot_npc_type->aggroradius = 0;
+	//bot_npc_type->assistradius = 0;
+	//bot_npc_type->see_invis = 0;
+	//bot_npc_type->see_invis_undead = false;
+	//bot_npc_type->see_hide = false;
+	//bot_npc_type->see_improved_hide = false;
+	//bot_npc_type->qglobal = false;
+	//bot_npc_type->npc_aggro = false;
+	//bot_npc_type->spawn_limit = 0;
+	//bot_npc_type->mount_color = 0;
+	//bot_npc_type->attack_speed = 0.0f;
+	//bot_npc_type->attack_delay = 0;
+	//bot_npc_type->accuracy_rating = 0;
+	//bot_npc_type->avoidance_rating = 0;
+	//bot_npc_type->findable = false;
+	bot_npc_type->trackable = true;
+	//bot_npc_type->slow_mitigation = 0;
+	bot_npc_type->maxlevel = botLevel;
+	//bot_npc_type->scalerate = 0;
+	//bot_npc_type->private_corpse = false;
+	//bot_npc_type->unique_spawn_by_name = false;
+	//bot_npc_type->underwater = false;
+	//bot_npc_type->emoteid = 0;
+	//bot_npc_type->spellscale = 0.0f;
+	//bot_npc_type->healscale = 0.0f;
+	//bot_npc_type->no_target_hotkey = false;
+	//bot_npc_type->raid_target = false;
+	//bot_npc_type->armtexture = 0;
+	//bot_npc_type->bracertexture = 0;
+	//bot_npc_type->handtexture = 0;
+	//bot_npc_type->legtexture = 0;
+	//bot_npc_type->feettexture = 0;
+	//bot_npc_type->ignore_despawn = false;
+	bot_npc_type->show_name = true;
+	//bot_npc_type->untargetable = false;
+	bot_npc_type->skip_global_loot = true;
+	//bot_npc_type->rare_spawn = false;
+	bot_npc_type->stuck_behavior = Ground;
+
+	return bot_npc_type;
 }
 
 void Bot::GenerateBaseStats()
@@ -1553,25 +1700,25 @@ bool Bot::Save()
 
 	if(!GetBotID()) { // New bot record
 		uint32 bot_id = 0;
-		if (!botdb.SaveNewBot(this, bot_id) || !bot_id) {
+		if (!database.botdb.SaveNewBot(this, bot_id) || !bot_id) {
 			bot_owner->Message(13, "%s '%s'", BotDatabase::fail::SaveNewBot(), GetCleanName());
 			return false;
 		}
 		SetBotID(bot_id);
 	}
 	else { // Update existing bot record
-		if (!botdb.SaveBot(this)) {
+		if (!database.botdb.SaveBot(this)) {
 			bot_owner->Message(13, "%s '%s'", BotDatabase::fail::SaveBot(), GetCleanName());
 			return false;
 		}
 	}
 	
 	// All of these continue to process if any fail
-	if (!botdb.SaveBuffs(this))
+	if (!database.botdb.SaveBuffs(this))
 		bot_owner->Message(13, "%s for '%s'", BotDatabase::fail::SaveBuffs(), GetCleanName());
-	if (!botdb.SaveTimers(this))
+	if (!database.botdb.SaveTimers(this))
 		bot_owner->Message(13, "%s for '%s'", BotDatabase::fail::SaveTimers(), GetCleanName());
-	if (!botdb.SaveStance(this))
+	if (!database.botdb.SaveStance(this))
 		bot_owner->Message(13, "%s for '%s'", BotDatabase::fail::SaveStance(), GetCleanName());
 	
 	if (!SavePet())
@@ -1586,20 +1733,20 @@ bool Bot::DeleteBot()
 	if (!bot_owner)
 		return false;
 
-	if (!botdb.DeleteHealRotation(GetBotID())) {
+	if (!database.botdb.DeleteHealRotation(GetBotID())) {
 		bot_owner->Message(13, "%s", BotDatabase::fail::DeleteHealRotation());
 		return false;
 	}
 
 	std::string query = StringFormat("DELETE FROM `bot_heal_rotation_members` WHERE `bot_id` = '%u'", GetBotID());
-	auto results = botdb.QueryDatabase(query);
+	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
 		bot_owner->Message(13, "Failed to delete heal rotation member '%s'", GetCleanName());
 		return false;
 	}
 
 	query = StringFormat("DELETE FROM `bot_heal_rotation_targets` WHERE `target_name` LIKE '%s'", GetCleanName());
-	results = botdb.QueryDatabase(query);
+	results = database.QueryDatabase(query);
 	if (!results.Success()) {
 		bot_owner->Message(13, "Failed to delete heal rotation target '%s'", GetCleanName());
 		return false;
@@ -1615,32 +1762,32 @@ bool Bot::DeleteBot()
 
 	std::string error_message;
 
-	if (!botdb.RemoveMemberFromBotGroup(GetBotID())) {
+	if (!database.botdb.RemoveMemberFromBotGroup(GetBotID())) {
 		bot_owner->Message(13, "%s - '%s'", BotDatabase::fail::RemoveMemberFromBotGroup(), GetCleanName());
 		return false;
 	}
 
-	if (!botdb.DeleteItems(GetBotID())) {
+	if (!database.botdb.DeleteItems(GetBotID())) {
 		bot_owner->Message(13, "%s for '%s'", BotDatabase::fail::DeleteItems(), GetCleanName());
 		return false;
 	}
 
-	if (!botdb.DeleteTimers(GetBotID())) {
+	if (!database.botdb.DeleteTimers(GetBotID())) {
 		bot_owner->Message(13, "%s for '%s'", BotDatabase::fail::DeleteTimers(), GetCleanName());
 		return false;
 	}
 
-	if (!botdb.DeleteBuffs(GetBotID())) {
+	if (!database.botdb.DeleteBuffs(GetBotID())) {
 		bot_owner->Message(13, "%s for '%s'", BotDatabase::fail::DeleteBuffs(), GetCleanName());
 		return false;
 	}
 
-	if (!botdb.DeleteStance(GetBotID())) {
+	if (!database.botdb.DeleteStance(GetBotID())) {
 		bot_owner->Message(13, "%s for '%s'", BotDatabase::fail::DeleteStance(), GetCleanName());
 		return false;
 	}
 
-	if (!botdb.DeleteBot(GetBotID())) {
+	if (!database.botdb.DeleteBot(GetBotID())) {
 		bot_owner->Message(13, "%s '%s'", BotDatabase::fail::DeleteBot(), GetCleanName());
 		return false;
 	}
@@ -1684,7 +1831,7 @@ bool Bot::LoadPet()
 	std::string error_message;
 
 	uint32 pet_index = 0;
-	if (!botdb.LoadPetIndex(GetBotID(), pet_index)) {
+	if (!database.botdb.LoadPetIndex(GetBotID(), pet_index)) {
 		bot_owner->Message(13, "%s for %s's pet", BotDatabase::fail::LoadPetIndex(), GetCleanName());		
 		return false;
 	}
@@ -1692,7 +1839,7 @@ bool Bot::LoadPet()
 		return true;
 
 	uint32 saved_pet_spell_id = 0;
-	if (!botdb.LoadPetSpellID(GetBotID(), saved_pet_spell_id)) {
+	if (!database.botdb.LoadPetSpellID(GetBotID(), saved_pet_spell_id)) {
 		bot_owner->Message(13, "%s for %s's pet", BotDatabase::fail::LoadPetSpellID(), GetCleanName());
 	}
 	if (!IsValidSpell(saved_pet_spell_id)) {
@@ -1706,7 +1853,7 @@ bool Bot::LoadPet()
 	uint32 pet_hp = 0;
 	uint32 pet_spell_id = 0;
 
-	if (!botdb.LoadPetStats(GetBotID(), pet_name, pet_mana, pet_hp, pet_spell_id)) {
+	if (!database.botdb.LoadPetStats(GetBotID(), pet_name, pet_mana, pet_hp, pet_spell_id)) {
 		bot_owner->Message(13, "%s for %s's pet", BotDatabase::fail::LoadPetStats(), GetCleanName());
 		return false;
 	}
@@ -1721,12 +1868,12 @@ bool Bot::LoadPet()
 
 	SpellBuff_Struct pet_buffs[PET_BUFF_COUNT];
 	memset(pet_buffs, 0, (sizeof(SpellBuff_Struct) * PET_BUFF_COUNT));
-	if (!botdb.LoadPetBuffs(GetBotID(), pet_buffs))
+	if (!database.botdb.LoadPetBuffs(GetBotID(), pet_buffs))
 		bot_owner->Message(13, "%s for %s's pet", BotDatabase::fail::LoadPetBuffs(), GetCleanName());
 
 	uint32 pet_items[EQEmu::invslot::EQUIPMENT_COUNT];
 	memset(pet_items, 0, (sizeof(uint32) * EQEmu::invslot::EQUIPMENT_COUNT));
-	if (!botdb.LoadPetItems(GetBotID(), pet_items))
+	if (!database.botdb.LoadPetItems(GetBotID(), pet_items))
 		bot_owner->Message(13, "%s for %s's pet", BotDatabase::fail::LoadPetItems(), GetCleanName());
 
 	pet_inst->SetPetState(pet_buffs, pet_items);
@@ -1765,14 +1912,14 @@ bool Bot::SavePet()
 
 	std::string error_message;
 
-	if (!botdb.SavePetStats(GetBotID(), pet_name_str, pet_inst->GetMana(), pet_inst->GetHP(), pet_inst->GetPetSpellID())) {
+	if (!database.botdb.SavePetStats(GetBotID(), pet_name_str, pet_inst->GetMana(), pet_inst->GetHP(), pet_inst->GetPetSpellID())) {
 		bot_owner->Message(13, "%s for %s's pet", BotDatabase::fail::SavePetStats(), GetCleanName());
 		return false;
 	}
 	
-	if (!botdb.SavePetBuffs(GetBotID(), pet_buffs))
+	if (!database.botdb.SavePetBuffs(GetBotID(), pet_buffs))
 		bot_owner->Message(13, "%s for %s's pet", BotDatabase::fail::SavePetBuffs(), GetCleanName());
-	if (!botdb.SavePetItems(GetBotID(), pet_items))
+	if (!database.botdb.SavePetItems(GetBotID(), pet_items))
 		bot_owner->Message(13, "%s for %s's pet", BotDatabase::fail::SavePetItems(), GetCleanName());
 
 	return true;
@@ -1786,15 +1933,15 @@ bool Bot::DeletePet()
 	
 	std::string error_message;
 
-	if (!botdb.DeletePetItems(GetBotID())) {
+	if (!database.botdb.DeletePetItems(GetBotID())) {
 		bot_owner->Message(13, "%s for %s's pet", BotDatabase::fail::DeletePetItems(), GetCleanName());
 		return false;
 	}
-	if (!botdb.DeletePetBuffs(GetBotID())) {
+	if (!database.botdb.DeletePetBuffs(GetBotID())) {
 		bot_owner->Message(13, "%s for %s's pet", BotDatabase::fail::DeletePetBuffs(), GetCleanName());
 		return false;
 	}
-	if (!botdb.DeletePetStats(GetBotID())) {
+	if (!database.botdb.DeletePetStats(GetBotID())) {
 		bot_owner->Message(13, "%s for %s's pet", BotDatabase::fail::DeletePetStats(), GetCleanName());
 		return false;
 	}
@@ -1866,6 +2013,17 @@ bool Bot::Process() {
 
 	if(GetAppearance() == eaDead && GetHP() > 0)
 		SetAppearance(eaStanding);
+
+	if (IsMoving()) {
+		ping_timer.Disable();
+	}
+	else {
+		if (!ping_timer.Enabled())
+			ping_timer.Start(BOT_KEEP_ALIVE_INTERVAL);
+
+		if (ping_timer.Check())
+			SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0);
+	}
 
 	if (IsStunned() || IsMezzed())
 		return true;
@@ -2091,10 +2249,9 @@ void Bot::AI_Process() {
 
 	Client* bot_owner = (GetBotOwner() && GetBotOwner()->IsClient() ? GetBotOwner()->CastToClient() : nullptr);
 	Group* bot_group = GetGroup();
-	Mob* follow_mob = entity_list.GetMob(GetFollowID());
-
+	
 	// Primary reasons for not processing AI
-	if (!bot_owner || !bot_group || !follow_mob || !IsAIControlled())
+	if (!bot_owner || !bot_group || !IsAIControlled())
 		return;
 
 	if (bot_owner->IsDead()) {
@@ -2104,10 +2261,17 @@ void Bot::AI_Process() {
 		return;
 	}
 
-	// We also need a leash owner (subset of primary AI criteria)
+	// We also need a leash owner and follow mob (subset of primary AI criteria)
 	Client* leash_owner = (bot_group->GetLeader() && bot_group->GetLeader()->IsClient() ? bot_group->GetLeader()->CastToClient() : bot_owner);
 	if (!leash_owner)
 		return;
+
+	Mob* follow_mob = entity_list.GetMob(GetFollowID());
+
+	if (!follow_mob) {
+		follow_mob = leash_owner;
+		SetFollowID(leash_owner->GetID());
+	}
 
 	// Berserk updates should occur if primary AI criteria are met
 	if (GetClass() == WARRIOR || GetClass() == BERSERKER) {
@@ -2603,7 +2767,7 @@ void Bot::AI_Process() {
 				// we can't fight if we don't have a target, are stun/mezzed or dead..
 				// Stop attacking if the target is enraged
 				TEST_TARGET();
-				if (GetBotStance() == BotStancePassive || (tar->IsEnraged() && !BehindMob(tar, GetX(), GetY())))
+				if (GetBotStance() == EQEmu::constants::stancePassive || (tar->IsEnraged() && !BehindMob(tar, GetX(), GetY())))
 					return;
 
 				// First, special attack per class (kick, backstab etc..)
@@ -2730,7 +2894,7 @@ void Bot::AI_Process() {
 					FaceTarget(GetTarget());
 
 				// This is a mob that is fleeing either because it has been feared or is low on hitpoints
-				if (GetBotStance() != BotStancePassive) {
+				if (GetBotStance() != EQEmu::constants::stancePassive) {
 					AI_PursueCastCheck(); // This appears to always return true..can't trust for success/fail
 					return;
 				}
@@ -2738,7 +2902,7 @@ void Bot::AI_Process() {
 		} // end not in combat range
 
 		if (!IsMoving() && !spellend_timer.Enabled()) { // This may actually need work...
-			if (GetBotStance() == BotStancePassive)
+			if (GetBotStance() == EQEmu::constants::stancePassive)
 				return;
 			
 			if (GetTarget() && AI_EngagedCastCheck()) 
@@ -2796,7 +2960,7 @@ void Bot::AI_Process() {
 		// Ok to idle
 		if (fm_dist <= GetFollowDistance()) {
 			if (!IsMoving() && AI_think_timer->Check() && !spellend_timer.Enabled()) {
-				if (GetBotStance() != BotStancePassive) {
+				if (GetBotStance() != EQEmu::constants::stancePassive) {
 					if (!AI_IdleCastCheck() && !IsCasting() && GetClass() != BARD)
 						BotMeditate(true);
 				}
@@ -2841,7 +3005,7 @@ void Bot::AI_Process() {
 		
 		// Basically, bard bots get a chance to cast idle spells while moving
 		if (IsMoving()) {
-			if (GetBotStance() != BotStancePassive) {
+			if (GetBotStance() != EQEmu::constants::stancePassive) {
 				if (GetClass() == BARD && !spellend_timer.Enabled() && AI_think_timer->Check()) {
 					AI_IdleCastCheck();
 					return;
@@ -3111,6 +3275,7 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 		// Load pet
 		LoadPet();
 		SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0);
+		ping_timer.Start(8000);
 		// there is something askew with spawn struct appearance fields...
 		// I re-enabled this until I can sort it out
 		uint32 itemID = 0;
@@ -3136,7 +3301,7 @@ void Bot::RemoveBotItemBySlot(uint32 slotID, std::string *errorMessage)
 	if(!GetBotID())
         return;
 
-    if(!botdb.DeleteItemBySlot(GetBotID(), slotID))
+    if(!database.botdb.DeleteItemBySlot(GetBotID(), slotID))
         *errorMessage = BotDatabase::fail::DeleteItemBySlot();
 
     m_inv.DeleteItem(slotID);
@@ -3149,7 +3314,7 @@ void Bot::GetBotItems(EQEmu::InventoryProfile &inv, std::string* errorMessage)
 	if(!GetBotID())
 		return;
 
-	if (!botdb.LoadItems(GetBotID(), inv)) {
+	if (!database.botdb.LoadItems(GetBotID(), inv)) {
 		*errorMessage = BotDatabase::fail::LoadItems();
 		return;
 	}
@@ -3164,7 +3329,7 @@ uint32 Bot::GetBotItemBySlot(uint32 slotID)
 	if(!GetBotID())
         return item_id;
 
-	if (!botdb.LoadItemBySlot(GetBotID(), slotID, item_id)) {
+	if (!database.botdb.LoadItemBySlot(GetBotID(), slotID, item_id)) {
 		if (GetBotOwner() && GetBotOwner()->IsClient())
 			GetBotOwner()->CastToClient()->Message(13, "%s", BotDatabase::fail::LoadItemBySlot());
 	}
@@ -3253,7 +3418,7 @@ Bot* Bot::LoadBot(uint32 botID)
 	if (!botID)
 		return loaded_bot;
 	
-	if (!botdb.LoadBot(botID, loaded_bot)) // TODO: Consider update to message handler
+	if (!database.botdb.LoadBot(botID, loaded_bot)) // TODO: Consider update to message handler
 		return loaded_bot;
 	
 	return loaded_bot;
@@ -3268,7 +3433,7 @@ void Bot::LoadAndSpawnAllZonedBots(Client* botOwner) {
 				uint32 TempGroupId = g->GetID();
 				std::list<uint32> ActiveBots;
 				// Modified LoadGroupedBotsByGroupID to require a CharacterID
-				if (!botdb.LoadGroupedBotsByGroupID(botOwner->CharacterID(), TempGroupId, ActiveBots)) {
+				if (!database.botdb.LoadGroupedBotsByGroupID(botOwner->CharacterID(), TempGroupId, ActiveBots)) {
 					botOwner->Message(13, "%s", BotDatabase::fail::LoadGroupedBotsByGroupID());
 					return;
 				}
@@ -3334,7 +3499,7 @@ void Bot::LevelBotWithClient(Client* client, uint8 level, bool sendlvlapp) {
 			Bot* bot = *biter;
 			if(bot && (bot->GetLevel() != client->GetLevel())) {
 				bot->SetPetChooser(false); // not sure what this does, but was in bot 'update' code
-				bot->CalcBotStats(false); // TODO: look at this and see if 'true' should be passed...
+				bot->CalcBotStats(client->GetBotOptionStatsUpdate());
 				if(sendlvlapp)
 					bot->SendLevelAppearance();
 				// modified from Client::SetLevel()
@@ -3549,7 +3714,7 @@ void Bot::BotTradeSwapItem(Client* client, int16 lootSlot, const EQEmu::ItemInst
 void Bot::BotTradeAddItem(uint32 id, const EQEmu::ItemInstance* inst, int16 charges, uint32 equipableSlots, uint16 lootSlot, std::string* errorMessage, bool addToDb)
 {
 	if(addToDb) {
-		if (!botdb.SaveItemBySlot(this, lootSlot, inst)) {
+		if (!database.botdb.SaveItemBySlot(this, lootSlot, inst)) {
 			*errorMessage = BotDatabase::fail::SaveItemBySlot();
 			return;
 		}
@@ -3964,7 +4129,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 			//	// TODO: add logging
 			//}
 
-			if (!botdb.DeleteItemBySlot(GetBotID(), return_iterator.fromBotSlot))
+			if (!database.botdb.DeleteItemBySlot(GetBotID(), return_iterator.fromBotSlot))
 				client->Message(CC_Red, "%s (slot: %i, name: '%s')", BotDatabase::fail::DeleteItemBySlot(), return_iterator.fromBotSlot, (return_instance ? return_instance->GetItem()->Name : "nullptr"));
 
 			BotRemoveEquipItem(return_iterator.fromBotSlot);
@@ -3979,7 +4144,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 	for (auto& trade_iterator : client_trade) {
 		// TODO: code for stackables
 
-		if (!botdb.SaveItemBySlot(this, trade_iterator.toBotSlot, trade_iterator.tradeItemInstance))
+		if (!database.botdb.SaveItemBySlot(this, trade_iterator.toBotSlot, trade_iterator.tradeItemInstance))
 			client->Message(CC_Red, "%s (slot: %i, name: '%s')", BotDatabase::fail::SaveItemBySlot(), trade_iterator.toBotSlot, (trade_iterator.tradeItemInstance ? trade_iterator.tradeItemInstance->GetItem()->Name : "nullptr"));
 
 		m_inv.PutItem(trade_iterator.toBotSlot, *trade_iterator.tradeItemInstance);
@@ -4011,6 +4176,9 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 	size_t returned_count = client_return.size();
 
 	client->Message(CC_Lime, "Trade with '%s' resulted in %i accepted item%s, %i returned item%s.", GetCleanName(), accepted_count, ((accepted_count == 1) ? "" : "s"), returned_count, ((returned_count == 1) ? "" : "s"));
+
+	if (accepted_count)
+		CalcBotStats(client->GetBotOptionStatsUpdate());
 }
 
 bool Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill) {
@@ -5776,7 +5944,7 @@ void Bot::ProcessGuildInvite(Client* guildOfficer, Bot* botToGuild) {
 				return;
 			}
 
-			if (!botdb.SaveGuildMembership(botToGuild->GetBotID(), guildOfficer->GuildID(), GUILD_MEMBER)) {
+			if (!database.botdb.SaveGuildMembership(botToGuild->GetBotID(), guildOfficer->GuildID(), GUILD_MEMBER)) {
 				guildOfficer->Message(13, "%s for '%s'", BotDatabase::fail::SaveGuildMembership(), botToGuild->GetCleanName());
 				return;
 			}
@@ -5801,16 +5969,16 @@ bool Bot::ProcessGuildRemoval(Client* guildOfficer, std::string botName) {
 	if(guildOfficer && !botName.empty()) {
 		Bot* botToUnGuild = entity_list.GetBotByBotName(botName);
 		if(botToUnGuild) {
-			if (botdb.SaveGuildMembership(botToUnGuild->GetBotID(), 0, 0))
+			if (database.botdb.SaveGuildMembership(botToUnGuild->GetBotID(), 0, 0))
 				Result = true;
 		} else {
 			uint32 ownerId = 0;
-			if (!botdb.LoadOwnerID(botName, ownerId))
+			if (!database.botdb.LoadOwnerID(botName, ownerId))
 				guildOfficer->Message(13, "%s for '%s'", BotDatabase::fail::LoadOwnerID(), botName.c_str());
 			uint32 botId = 0;
-			if (!botdb.LoadBotID(ownerId, botName, botId))
+			if (!database.botdb.LoadBotID(ownerId, botName, botId))
 				guildOfficer->Message(13, "%s for '%s'", BotDatabase::fail::LoadBotID(), botName.c_str());
-			if (botId && botdb.SaveGuildMembership(botId, 0, 0))
+			if (botId && database.botdb.SaveGuildMembership(botId, 0, 0))
 				Result = true;
 		}
 
@@ -8049,7 +8217,7 @@ bool Bot::CheckLoreConflict(const EQEmu::ItemData* item) {
 }
 
 bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, float iRange, uint32 iSpellTypes) {
-	if((iSpellTypes&SpellTypes_Detrimental) != 0) {
+	if((iSpellTypes & SPELL_TYPES_DETRIMENTAL) != 0) {
 		Log(Logs::General, Logs::Error, "Error: detrimental spells requested from AICheckCloseBeneficialSpells!!");
 		return false;
 	}
@@ -8104,19 +8272,19 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 				Group *g = caster->GetGroup();
 				float hpRatioToHeal = 25.0f;
 				switch(caster->GetBotStance()) {
-					case BotStanceReactive:
-					case BotStanceBalanced:
-						hpRatioToHeal = 50.0f;
-						break;
-					case BotStanceBurn:
-					case BotStanceBurnAE:
-						hpRatioToHeal = 20.0f;
-						break;
-					case BotStanceAggressive:
-					case BotStanceEfficient:
-					default:
-						hpRatioToHeal = 25.0f;
-						break;
+				case EQEmu::constants::stanceReactive:
+				case EQEmu::constants::stanceBalanced:
+					hpRatioToHeal = 50.0f;
+					break;
+				case EQEmu::constants::stanceBurn:
+				case EQEmu::constants::stanceBurnAE:
+					hpRatioToHeal = 20.0f;
+					break;
+				case EQEmu::constants::stanceAggressive:
+				case EQEmu::constants::stanceEfficient:
+				default:
+					hpRatioToHeal = 25.0f;
+					break;
 				}
 
 				if(g) {
@@ -8655,11 +8823,11 @@ bool Bot::HasOrMayGetAggro() {
 }
 
 void Bot::SetDefaultBotStance() {
-	BotStanceType defaultStance = BotStanceBalanced;
+	EQEmu::constants::StanceType defaultStance = EQEmu::constants::stanceBalanced;
 	if (GetClass() == WARRIOR)
-		defaultStance = BotStanceAggressive;
+		defaultStance = EQEmu::constants::stanceAggressive;
 
-	_baseBotStance = BotStancePassive;
+	_baseBotStance = EQEmu::constants::stancePassive;
 	_botStance = defaultStance;
 }
 
@@ -8900,7 +9068,7 @@ bool Bot::DyeArmor(int16 slot_id, uint32 rgb, bool all_flag, bool save_flag)
 		if (all_flag)
 			save_slot = -2;
 
-		if (!botdb.SaveEquipmentColor(GetBotID(), save_slot, rgb)) {
+		if (!database.botdb.SaveEquipmentColor(GetBotID(), save_slot, rgb)) {
 			if (GetBotOwner() && GetBotOwner()->IsClient())
 				GetBotOwner()->CastToClient()->Message(13, "%s", BotDatabase::fail::SaveEquipmentColor());
 			return false;
@@ -8931,5 +9099,7 @@ std::string Bot::CreateSayLink(Client* c, const char* message, const char* name)
 	auto saylink = linker.GenerateLink();
 	return saylink;
 }
+
+uint8 Bot::spell_casting_chances[SPELL_TYPE_COUNT][PLAYER_CLASS_COUNT][EQEmu::constants::STANCE_TYPE_COUNT][cntHSND] = { 0 };
 
 #endif
