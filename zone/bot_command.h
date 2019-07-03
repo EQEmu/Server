@@ -652,6 +652,7 @@ void bot_subcommand_inventory_give(Client *c, const Seperator *sep);
 void bot_subcommand_inventory_list(Client *c, const Seperator *sep);
 void bot_subcommand_inventory_remove(Client *c, const Seperator *sep);
 void bot_subcommand_inventory_window(Client *c, const Seperator *sep);
+void bot_subcommand_pet_get_lost(Client *c, const Seperator *sep);
 void bot_subcommand_pet_remove(Client *c, const Seperator *sep);
 void bot_subcommand_pet_set_type(Client *c, const Seperator *sep);
 void bot_subcommand_portal(Client *c, const Seperator *sep);

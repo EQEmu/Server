@@ -1,5 +1,43 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 7/3/2019 ==
+
+Akkadius/KLS:
+    - Optimizations to packet updates introduced back into the source post network code overhaul
+    - Optimizations made to position update packets by sending updates far less frequently when not in line with zone:max_movement_update_range
+    - Optimizations made to position updates in respect to the much higher resolution of navmesh path-finding that we were using. We have cut down
+        on the resolution of path finding / updating so that we reduce the CPU overhead of path-finding and subsequent client update packets that
+        get generated this action
+    - Optimization made by adjusting ZLIB compression rate that was accidentally set to a compression level of 4 a long time ago
+    - Added #netstats admin command to troubleshoot connection issues in detail
+    - Websocket server is now available in zone and is bound to the same UDP port that the zoneserver listens on
+        - Currently implemented websocket API calls at the zone level
+             get_packet_statistics
+             get_opcode_list
+             get_npc_list_detail
+             get_door_list_detail
+             get_corpse_list_detail
+             get_object_list_detail
+             get_mob_list_detail
+             get_client_list_detail
+             get_zone_attributes
+             get_logsys_categories
+             set_logging_level
+         - Example of a Typescript client: https://gist.github.com/Akkadius/52d12d0379f36cf81c51b3b7da13db37
+     - Library Changes
+        - We now use git submodules for libraries / dependencies versus manually downloading to the dependencies folder and/or storing
+            said dependencies within our codebase itself
+        - To update dependencies (Required for compiling)
+            - git submodule init
+            - git submodule update
+        - Libraries now in submodules
+            - [glm] https://github.com/g-truc/glm.git
+            - [flm] https://github.com/fmtlib/fmt.git
+            - [libuv] https://github.com/libuv/libuv.git
+            - [cereal] https://github.com/USCiLab/cereal.git
+            - [websocketpp] https://github.com/zaphoyd/websocketpp.git
+            - [recastnavigation] https://github.com/EQEmu/recastnavigation.git
+
 == 6/24/2019 ==
 Uleat: Reworked BotDatabase into a functional add-on for ZoneDatabase
 	- Eliminated the database connection associated with class BotDatabase

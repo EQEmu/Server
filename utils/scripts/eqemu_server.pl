@@ -401,6 +401,9 @@ sub build_linux_source {
     mkdir($source_dir . "/Server/build") if (!-e $source_dir . "/Server/build");
     chdir($source_dir . "/Server/build");
 
+    print `git submodule init`;
+    print `git submodule update`;
+
     print "Generating CMake build files...\n";
     if ($os_flavor eq "fedora_core") {
         print `cmake $cmake_options -DEQEMU_BUILD_LOGIN=ON -DEQEMU_BUILD_LUA=ON -DLUA_INCLUDE_DIR=/usr/include/lua-5.1/ -G "Unix Makefiles" ..`;
@@ -812,7 +815,8 @@ sub show_menu_prompt {
                 print ">>> Windows\n";
                 print " [windows_server_download]	Updates server via latest 'stable' code\n";
                 print " [windows_server_latest]	Updates server via latest commit 'unstable'\n";
-                print " [windows_server_download_bots]	Updates server (bots) from latest 'stable'\n";
+                print " [windows_server_download_bots]	Updates server (bots) via latest 'stable'\n";
+                print " [windows_server_latest_bots]	Updates server (bots) via latest commit 'unstable'\n";
                 print " [fetch_dlls]			Grabs dll's needed to run windows binaries\n";
                 print " [setup_loginserver]		Sets up loginserver for Windows\n";
             }
@@ -874,6 +878,10 @@ sub show_menu_prompt {
         }
         elsif ($input eq "windows_server_download_bots") {
             fetch_latest_windows_binaries_bots();
+            $dc = 1;
+        }
+        elsif ($input eq "windows_server_latest_bots") {
+            fetch_latest_windows_appveyor_bots();
             $dc = 1;
         }
         elsif ($input eq "fetch_dlls") {
@@ -1400,14 +1408,37 @@ sub fetch_latest_windows_binaries {
     rmtree('updates_staged');
 }
 
-sub fetch_latest_windows_binaries_bots {
-    print "[Update] Fetching Latest Windows Binaries (unstable) with Bots...\n";
+sub fetch_latest_windows_appveyor_bots {
+    print "[Update] Fetching Latest Windows Binaries with Bots (unstable) from Appveyor... \n";
     get_remote_file("https://ci.appveyor.com/api/projects/KimLS/server/artifacts/eqemu-x86-bots.zip", "updates_staged/eqemu-x86-bots.zip", 1);
-	#::: old repository kept for reference until no issues reported
-	#::: get_remote_file($install_repository_request_url . "master_windows_build_bots.zip", "updates_staged/master_windows_build_bots.zip", 1);
+
+    print "[Update] Fetched Latest Windows Binaries (unstable) from Appveyor... \n";
+    print "[Update] Extracting... --- \n";
+    unzip('updates_staged/eqemu-x86-bots.zip', 'updates_staged/binaries/');
+    my @files;
+    my $start_dir = "updates_staged/binaries";
+    find(
+        sub { push @files, $File::Find::name unless -d; },
+        $start_dir
+    );
+    for my $file (@files) {
+        $destination_file = $file;
+        $destination_file =~ s/updates_staged\/binaries\///g;
+        print "[Update] Installing :: " . $destination_file . "\n";
+        copy_file($file, $destination_file);
+    }
+    print "[Update] Done\n";
+
+    rmtree('updates_staged');
+}
+
+sub fetch_latest_windows_binaries_bots {
+    print "[Update] Fetching Latest Windows Binaries with Bots...\n";
+    get_remote_file($install_repository_request_url . "master_windows_build_bots.zip", "updates_staged/master_windows_build_bots.zip", 1);
+
     print "[Update] Fetched Latest Windows Binaries with Bots...\n";
     print "[Update] Extracting...\n";
-    unzip('updates_staged/eqemu-x86-bots.zip', 'updates_staged/binaries/');
+    unzip('updates_staged/master_windows_build_bots.zip', 'updates_staged/binaries/');
     my @files;
     my $start_dir = "updates_staged/binaries";
     find(

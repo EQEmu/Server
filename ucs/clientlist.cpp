@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/global_define.h"
 #include "../common/string_util.h"
 #include "../common/eqemu_logsys.h"
+#include "../common/eqemu_logsys_fmt.h"
 #include "../common/misc_functions.h"
 
 #include "ucsconfig.h"
@@ -468,7 +469,7 @@ static void ProcessCommandIgnore(Client *c, std::string Ignoree) {
 }
 
 Clientlist::Clientlist(int ChatPort) {
-	EQ::Net::EQStreamManagerOptions chat_opts(ChatPort, false, false);
+	EQStreamManagerInterfaceOptions chat_opts(ChatPort, false, false);
 	chat_opts.opcode_size = 1;
 	chat_opts.daybreak_options.stale_connection_ms = 300000;
 	chat_opts.daybreak_options.resend_delay_ms = RuleI(Network, ResendDelayBaseMS);
@@ -487,7 +488,7 @@ Clientlist::Clientlist(int ChatPort) {
 		exit(1);
 
 	chatsf->OnNewConnection([this](std::shared_ptr<EQ::Net::EQStream> stream) {
-		LogF(Logs::General, Logs::Login_Server, "New Client UDP connection from {0}:{1}", stream->RemoteEndpoint(), stream->GetRemotePort());
+		LogF(Logs::General, Logs::Login_Server, "New Client UDP connection from {0}:{1}", stream->GetRemoteIP(), stream->GetRemotePort());
 		stream->SetOpcodeManager(&ChatOpMgr);
 
 		auto c = new Client(stream);
