@@ -226,7 +226,7 @@ int main(int argc, char** argv) {
 		worldserver.SetLauncherName("NONE");
 	}
 
-	Log(Logs::General, Logs::Zone_Server, "Connecting to MySQL...");
+	Log(Logs::General, Logs::Zone_Server, "Connecting to MySQL... ");
 	if (!database.Connect(
 		Config->DatabaseHost.c_str(),
 		Config->DatabaseUsername.c_str(),

@@ -22,9 +22,18 @@
 
 #include <fmt/format.h>
 
-template <typename... Args>
-void OutF(EQEmuLogSys &ls, Logs::DebugLevel debug_level, uint16 log_category, const char *fmt, const Args&... args)
+template<typename... Args>
+void OutF(
+	EQEmuLogSys &ls,
+	Logs::DebugLevel debug_level,
+	uint16 log_category,
+	const char *file,
+	const char *func,
+	int line,
+	const char *fmt,
+	const Args &... args
+)
 {
 	std::string log_str = fmt::format(fmt, args...);
-	ls.Out(debug_level, log_category, log_str);
+	ls.Out(debug_level, log_category, file, func, line, log_str);
 }

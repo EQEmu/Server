@@ -19,6 +19,7 @@
 */
 
 #include "eqemu_logsys.h"
+#include "rulesys.h"
 #include "platform.h"
 #include "string_util.h"
 #include "database.h"
@@ -96,16 +97,12 @@ EQEmuLogSys::EQEmuLogSys()
 {
 	on_log_gmsay_hook      = [](uint16 log_type, const std::string &) {};
 	on_log_console_hook    = [](uint16 debug_level, uint16 log_type, const std::string &) {};
-	bool file_logs_enabled = false;
-	int  log_platform      = 0;
 }
 
 /**
  * EQEmuLogSys Deconstructor
  */
-EQEmuLogSys::~EQEmuLogSys()
-{
-}
+EQEmuLogSys::~EQEmuLogSys() = default;
 
 void EQEmuLogSys::LoadLogSettingsDefaults()
 {
@@ -113,7 +110,7 @@ void EQEmuLogSys::LoadLogSettingsDefaults()
 	 * Get Executable platform currently running this code (Zone/World/etc)
 	 */
 	log_platform = GetExecutablePlatformInt();
-	
+
 	for (int log_category_id = Logs::AA; log_category_id != Logs::MaxCategoryID; log_category_id++) {
 		log_settings[log_category_id].log_to_console      = 0;
 		log_settings[log_category_id].log_to_file         = 0;
@@ -351,6 +348,25 @@ void EQEmuLogSys::ProcessConsoleMessage(uint16 debug_level, uint16 log_category,
 	on_log_console_hook(debug_level, log_category, message);
 }
 
+constexpr const char *str_end(const char *str)
+{
+	return *str ? str_end(str + 1) : str;
+}
+
+constexpr bool str_slant(const char *str)
+{
+	return *str == '/' ? true : (*str ? str_slant(str + 1) : false);
+}
+
+constexpr const char *r_slant(const char *str)
+{
+	return *str == '/' ? (str + 1) : r_slant(str - 1);
+}
+constexpr const char *file_name(const char *str)
+{
+	return str_slant(str) ? r_slant(str_end(str)) : str;
+}
+
 /**
  * Core logging function
  *
@@ -359,7 +375,15 @@ void EQEmuLogSys::ProcessConsoleMessage(uint16 debug_level, uint16 log_category,
  * @param message
  * @param ...
  */
-void EQEmuLogSys::Out(Logs::DebugLevel debug_level, uint16 log_category, std::string message, ...)
+void EQEmuLogSys::Out(
+	Logs::DebugLevel debug_level,
+	uint16 log_category,
+	const char *file,
+	const char *func,
+	int line,
+	const std::string &message,
+	...
+)
 {
 	bool log_to_console = true;
 	if (log_settings[log_category].log_to_console < debug_level) {
@@ -381,12 +405,18 @@ void EQEmuLogSys::Out(Logs::DebugLevel debug_level, uint16 log_category, std::st
 		return;
 	}
 
+	std::string prefix;
+
+	if (RuleB(Logging, PrintFileFunctionAndLine)) {
+		prefix = fmt::format("[{0}::{1}:{2}] ", file_name(file), func, line);
+	}
+
 	va_list args;
 	va_start(args, message);
 	std::string output_message = vStringFormat(message.c_str(), args);
 	va_end(args);
 
-	std::string output_debug_message = EQEmuLogSys::FormatOutMessageString(log_category, output_message);
+	std::string output_debug_message = EQEmuLogSys::FormatOutMessageString(log_category, prefix + output_message);
 
 	if (log_to_console) {
 		EQEmuLogSys::ProcessConsoleMessage(debug_level, log_category, output_debug_message);
@@ -463,12 +493,13 @@ void EQEmuLogSys::StartFileLogs(const std::string &log_name)
 			return;
 		}
 
-		EQEmuLogSys::Out(
+		Log(
 			Logs::General,
 			Logs::Status,
 			"Starting File Log 'logs/%s_%i.log'",
 			platform_file_name.c_str(),
-			getpid());
+			getpid()
+		);
 
 		/**
 		 * Make directory if not exists
@@ -493,12 +524,13 @@ void EQEmuLogSys::StartFileLogs(const std::string &log_name)
 			return;
 		}
 
-		EQEmuLogSys::Out(
+		Log(
 			Logs::General,
 			Logs::Status,
 			"Starting File Log 'logs/%s_%i.log'",
 			platform_file_name.c_str(),
-			getpid());
+			getpid()
+		);
 
 		/**
 		 * Open file pointer

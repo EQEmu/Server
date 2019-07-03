@@ -587,7 +587,6 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *i)
 		std::string  server_account_name;
 		std::string  server_account_password;
 
-
 		if (server.db->GetWorldRegistration(
 			long_name,
 			short_name,

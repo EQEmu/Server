@@ -21,6 +21,7 @@
 #ifndef EQEMU_LOGSYS_H
 #define EQEMU_LOGSYS_H
 
+#include <fmt/format.h>
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
@@ -158,12 +159,12 @@ namespace Logs {
 
 #define Log(debug_level, log_category, message, ...) do {\
     if (LogSys.log_settings[log_category].is_category_enabled == 1)\
-        LogSys.Out(debug_level, log_category, message, ##__VA_ARGS__);\
+        LogSys.Out(debug_level, log_category, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogF(debug_level, log_category, message, ...) do {\
     if (LogSys.log_settings[log_category].is_category_enabled == 1)\
-        OutF(LogSys, debug_level, log_category, message, ##__VA_ARGS__);\
+        OutF(LogSys, debug_level, log_category, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 class EQEmuLogSys {
@@ -188,7 +189,15 @@ public:
 	 *		- This would pipe the same category and debug level to all output formats, but the internal memory reference of log_settings would
 	 *			be checked against to see if that piped output is set to actually process it for the category and debug level
 	*/
-	void Out(Logs::DebugLevel debug_level, uint16 log_category, std::string message, ...);
+	void Out(
+		Logs::DebugLevel debug_level,
+		uint16 log_category,
+		const char *file,
+		const char *func,
+		int line,
+		const std::string &message,
+		...
+	);
 
 	/**
 	 * Used in file logs to prepend a timestamp entry for logs
@@ -218,14 +227,14 @@ public:
 	 * These are loaded via DB and have defaults loaded in LoadLogSettingsDefaults
 	 * Database loaded via Database::LoadLogSettings(log_settings)
 	*/
-	LogSettings log_settings[Logs::LogCategory::MaxCategoryID];
+	LogSettings log_settings[Logs::LogCategory::MaxCategoryID]{};
 
-	bool file_logs_enabled;
+	bool file_logs_enabled{};
 
 	/**
 	 * Sets Executable platform (Zone/World/UCS) etc.
 	 */
-	int log_platform;
+	int log_platform{};
 
 	/**
 	 * File name used in writing logs

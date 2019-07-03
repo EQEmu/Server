@@ -181,12 +181,7 @@ void Client::Handle_SessionReady(const char *data, unsigned int size)
 void Client::Handle_Login(const char *data, unsigned int size)
 {
 	if (status != cs_waiting_for_login) {
-		LogF(
-			Logs::General,
-			Logs::Error,
-			"{0} Login received after already having logged in",
-			__func__
-		);
+		LogF(Logs::General, Logs::Error, "Login received after already having logged in");
 		return;
 	}
 
@@ -194,8 +189,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 		LogF(
 			Logs::General,
 			Logs::Error,
-			"{0} Login received packet of size: {1}, this would cause a block corruption, discarding.",
-			__func__,
+			"Login received packet of size: {0}, this would cause a block corruption, discarding.",
 			size
 		);
 		return;
@@ -205,8 +199,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 		LogF(
 			Logs::General,
 			Logs::Error,
-			"{0} Login received packet of size: %u, this would cause a buffer overflow, discarding.",
-			__func__,
+			"Login received packet of size: {0}, this would cause a buffer overflow, discarding.",
 			size
 		);
 
@@ -236,12 +229,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 
 	std::string user(&outbuffer[0]);
 	if (user.length() >= outbuffer.length()) {
-		LogF(
-			Logs::General,
-			Logs::Debug,
-			"{0} Corrupt buffer sent to server, preventing buffer overflow.",
-			__func__
-		);
+		LogF(Logs::General, Logs::Debug,"Corrupt buffer sent to server, preventing buffer overflow.");
 		return;
 	}
 
@@ -272,8 +260,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 			LogF(
 				Logs::General,
 				Logs::Login_Server,
-				"{0} Attempting password based login [{1}] login [{2}] user [{3}]",
-				__func__,
+				"Attempting password based login [{0}] login [{1}] user [{2}]",
 				user,
 				db_loginserver,
 				user
@@ -287,8 +274,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 				LogF(
 					Logs::Detail,
 					Logs::Login_Server,
-					"{0} [VerifyLoginHash] Success [{1}]",
-					__func__,
+					"[VerifyLoginHash] Success [{0}]",
 					(result ? "true" : "false")
 				);
 			}
@@ -306,9 +292,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 	 */
 	if (result) {
 		LogF(
-			Logs::Detail, Logs::Login_Server, "{0} [{1}] login [{2}] user [{3}] Login succeeded",
-			__func__,
-			user,
+			Logs::Detail, Logs::Login_Server, "lgoin [{0}] user [{2}] Login succeeded",
 			db_loginserver,
 			user
 		);
@@ -317,9 +301,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 	}
 	else {
 		LogF(
-			Logs::Detail, Logs::Login_Server, "{0} [{1}] login [{2}] user [{3}] Login failed",
-			__func__,
-			user,
+			Logs::Detail, Logs::Login_Server, "lgoin [{0}] user [{2}] Login failed",
 			db_loginserver,
 			user
 		);
@@ -537,6 +519,14 @@ bool Client::VerifyLoginHash(
 			if (hash.length() == 32) { //md5 is insecure
 				for (int i = EncryptionModeMD5; i <= EncryptionModeMD5Triple; ++i) {
 					if (i != mode && eqcrypt_verify_hash(user, cred, hash, i)) {
+						LogF(
+							Logs::Detail,
+							Logs::Login_Server,
+							"user [{0}] loginserver [{1}] mode [{2}]",
+							user,
+							loginserver,
+							mode
+						);
 						server.db->UpdateLoginHash(user, loginserver, eqcrypt_hash(user, cred, mode));
 						return true;
 					}
@@ -545,6 +535,15 @@ bool Client::VerifyLoginHash(
 			else if (hash.length() == 40) { //sha1 is insecure
 				for (int i = EncryptionModeSHA; i <= EncryptionModeSHATriple; ++i) {
 					if (i != mode && eqcrypt_verify_hash(user, cred, hash, i)) {
+						LogF(
+							Logs::Detail,
+							Logs::Login_Server,
+							"user [{0}] loginserver [{1}] mode [{2}]",
+							user,
+							loginserver,
+							mode
+						);
+
 						server.db->UpdateLoginHash(user, loginserver, eqcrypt_hash(user, cred, mode));
 						return true;
 					}
@@ -553,6 +552,15 @@ bool Client::VerifyLoginHash(
 			else if (hash.length() == 128) { //sha2-512 is insecure
 				for (int i = EncryptionModeSHA512; i <= EncryptionModeSHA512Triple; ++i) {
 					if (i != mode && eqcrypt_verify_hash(user, cred, hash, i)) {
+						LogF(
+							Logs::Detail,
+							Logs::Login_Server,
+							"user [{0}] loginserver [{1}] mode [{2}]",
+							user,
+							loginserver,
+							mode
+						);
+
 						server.db->UpdateLoginHash(user, loginserver, eqcrypt_hash(user, cred, mode));
 						return true;
 					}
@@ -694,22 +702,13 @@ void Client::LoginOnStatusChange(
 )
 {
 	if (to == EQ::Net::StatusConnected) {
-		LogF(
-			Logs::Detail,
-			Logs::Login_Server,
-			"[{0}] == EQ::Net::StatusConnected",
-			__func__
-		);
+		LogF(Logs::Detail, Logs::Login_Server, "EQ::Net::StatusConnected");
 		LoginSendSessionReady();
 	}
 
 	if (to == EQ::Net::StatusDisconnecting || to == EQ::Net::StatusDisconnected) {
-		LogF(
-			Logs::Detail,
-			Logs::Login_Server,
-			"[{0}] == EQ::Net::StatusDisconnecting || EQ::Net::StatusDisconnected",
-			__func__
-		);
+		LogF(Logs::Detail, Logs::Login_Server, "EQ::Net::StatusDisconnecting || EQ::Net::StatusDisconnected");
+
 		DoFailedLogin();
 	}
 }
@@ -734,7 +733,7 @@ void Client::LoginOnStatusChangeIgnored(
 void Client::LoginOnPacketRecv(std::shared_ptr<EQ::Net::DaybreakConnection> conn, const EQ::Net::Packet &p)
 {
 	auto opcode = p.GetUInt16(0);
-	LogF(Logs::Detail, Logs::Login_Server, "[{0}] [{1}]", __func__, opcode);
+	LogF(Logs::Detail, Logs::Login_Server, "[{0}]", opcode);
 	switch (opcode) {
 		case 0x0017: //OP_ChatMessage
 			LoginSendLogin();
@@ -806,7 +805,7 @@ void Client::LoginProcessLoginResponse(const EQ::Net::Packet &p)
 	);
 
 	if (response_error > 101) {
-		LogF(Logs::Detail, Logs::Login_Server, "[{0}] response [{1}] failed login", __func__, response_error);
+		LogF(Logs::Detail, Logs::Login_Server, "response [{0}] failed login", response_error);
 		DoFailedLogin();
 		login_connection->Close();
 	}
@@ -814,8 +813,7 @@ void Client::LoginProcessLoginResponse(const EQ::Net::Packet &p)
 		LogF(
 			Logs::Detail,
 			Logs::Login_Server,
-			"[{0}] response [{1}] login succeeded user [{2}]",
-			__func__,
+			"response [{0}] login succeeded user [{1}]",
 			response_error,
 			stored_user
 		);

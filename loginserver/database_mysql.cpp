@@ -134,8 +134,7 @@ bool DatabaseMySQL::GetLoginDataFromAccountInfo(
 		LogF(
 			Logs::Detail,
 			Logs::Login_Server,
-			"[{0}] could not find account for name [{1}] login [{2}]",
-			__func__,
+			"Could not find account for name [{0}] login [{1}]",
 			name,
 			loginserver
 		);
@@ -155,8 +154,7 @@ bool DatabaseMySQL::GetLoginDataFromAccountInfo(
 	LogF(
 		Logs::Detail,
 		Logs::Login_Server,
-		"[{0}] found account for name [{1}] login [{2}]",
-		__func__,
+		"Found account for name [{0}] login [{1}]",
 		name,
 		loginserver
 	);
@@ -329,8 +327,21 @@ bool DatabaseMySQL::CreateLoginDataWithID(
  * @param loginserver
  * @param hash
  */
-void DatabaseMySQL::UpdateLoginHash(const std::string &name, const std::string &loginserver, const std::string &hash)
+void DatabaseMySQL::UpdateLoginHash(
+	const std::string &name,
+	const std::string &loginserver,
+	const std::string &hash
+)
 {
+	LogF(
+		Logs::Detail,
+		Logs::Login_Server,
+		"name [{0}] loginserver [{1}] hash [{2}]",
+		name,
+		loginserver,
+		hash
+	);
+
 	auto query = fmt::format(
 		"UPDATE {0} SET AccountPassword='{1}' WHERE AccountName='{2}' AND AccountLoginserver='{3}'",
 		server.options.GetAccountTable(),
@@ -366,6 +377,7 @@ bool DatabaseMySQL::GetWorldRegistration(
 	std::string &password
 )
 {
+
 	if (!database) {
 		return false;
 	}
