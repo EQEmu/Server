@@ -2,6 +2,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 7/3/2019 ==
 
+Akkadius/KLS:
     - Optimizations to packet updates introduced back into the source post network code overhaul
     - Optimizations made to position update packets by sending updates far less frequently when not in line with zone:max_movement_update_range
     - Optimizations made to position updates in respect to the much higher resolution of navmesh path-finding that we were using. We have cut down
