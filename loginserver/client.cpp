@@ -245,28 +245,38 @@ void Client::Handle_Login(const char *data, unsigned int size)
 	}
 	else {
 		if (server.options.IsPasswordLoginAllowed()) {
-			cred            = (&outbuffer[1 + user.length()]);
+			cred = (&outbuffer[1 + user.length()]);
 			auto components = SplitString(user, '.');
 			if (components.size() == 2) {
 				db_loginserver = components[0];
 				user           = components[1];
 			}
 
+			LogF(
+				Logs::General,
+				Logs::Login_Server,
+				"Attempting password based login [{0}] login [{1}] user [{2}]",
+				user,
+				db_loginserver,
+				user
+			);
+
 			ParseAccountString(user, user, db_loginserver);
 
-			if (server.db->GetLoginDataFromAccountInfo(user, db_loginserver, db_account_password_hash, db_account_id) ==
-				false) {
+			if (server.db->GetLoginDataFromAccountInfo(user, db_loginserver, db_account_password_hash, db_account_id)) {
+				result = VerifyLoginHash(user, db_loginserver, cred, db_account_password_hash);
+			}
+			else {
 				status = cs_creating_account;
 				AttemptLoginAccountCreation(user, cred, db_loginserver);
 				return;
 			}
-			else {
-				result = VerifyLoginHash(user, db_loginserver, cred, db_account_password_hash);
-			}
 		}
 	}
 
-	/* Login Accepted */
+	/**
+	 * Login accepted
+	 */
 	if (result) {
 		DoSuccessfulLogin(user, db_account_id, db_loginserver);
 	}
@@ -355,7 +365,11 @@ void Client::AttemptLoginAccountCreation(
 )
 {
 	if (loginserver == "eqemu") {
+
+		LogF(Logs::General, Logs::Login_Server, "Attempting login account creation via '{0}'", loginserver);
+
 		if (!server.options.CanAutoLinkAccounts()) {
+			LogF(Logs::General, Logs::Login_Server, "CanAutoLinkAccounts disabled - sending failed login");
 			DoFailedLogin();
 			return;
 		}
@@ -411,6 +425,7 @@ void Client::AttemptLoginAccountCreation(
 		);
 	}
 	else {
+
 		if (!server.options.CanAutoCreateAccounts()) {
 			DoFailedLogin();
 			return;
