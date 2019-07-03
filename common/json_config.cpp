@@ -1,20 +1,20 @@
 #include "json_config.h"
 #include <fstream>
+#include <iostream>
 
-EQ::JsonConfigFile::JsonConfigFile()
-{
-
-}
+EQ::JsonConfigFile::JsonConfigFile() = default;
 
 EQ::JsonConfigFile::JsonConfigFile(const Json::Value &value)
 {
 	m_root = value;
 }
 
-EQ::JsonConfigFile::~JsonConfigFile()
-{
-}
+EQ::JsonConfigFile::~JsonConfigFile() = default;
 
+/**
+ * @param filename
+ * @return
+ */
 EQ::JsonConfigFile EQ::JsonConfigFile::Load(const std::string &filename)
 {
 	JsonConfigFile ret;
@@ -37,7 +37,18 @@ EQ::JsonConfigFile EQ::JsonConfigFile::Load(const std::string &filename)
 	return ret;
 }
 
-std::string EQ::JsonConfigFile::GetVariableString(const std::string &title, const std::string &parameter, const std::string &default_value) {
+/**
+ * @param title
+ * @param parameter
+ * @param default_value
+ * @return
+ */
+std::string EQ::JsonConfigFile::GetVariableString(
+	const std::string &title,
+	const std::string &parameter,
+	const std::string &default_value
+)
+{
 	try {
 		if (m_root.isMember(title) && m_root[title].isMember(parameter)) {
 			return m_root[title][parameter].asString();
@@ -50,7 +61,18 @@ std::string EQ::JsonConfigFile::GetVariableString(const std::string &title, cons
 	return default_value;
 }
 
-int EQ::JsonConfigFile::GetVariableInt(const std::string &title, const std::string &parameter, const int default_value) {
+/**
+ * @param title
+ * @param parameter
+ * @param default_value
+ * @return
+ */
+int EQ::JsonConfigFile::GetVariableInt(
+	const std::string &title,
+	const std::string &parameter,
+	const int default_value
+)
+{
 	try {
 		if (m_root.isMember(title) && m_root[title].isMember(parameter)) {
 			return m_root[title][parameter].asInt();
@@ -63,7 +85,18 @@ int EQ::JsonConfigFile::GetVariableInt(const std::string &title, const std::stri
 	return default_value;
 }
 
-bool EQ::JsonConfigFile::GetVariableBool(const std::string &title, const std::string &parameter, const bool default_value) {
+/**
+ * @param title
+ * @param parameter
+ * @param default_value
+ * @return
+ */
+bool EQ::JsonConfigFile::GetVariableBool(
+	const std::string &title,
+	const std::string &parameter,
+	const bool default_value
+)
+{
 	try {
 		if (m_root.isMember(title) && m_root[title].isMember(parameter)) {
 			return m_root[title][parameter].asBool();
@@ -76,7 +109,18 @@ bool EQ::JsonConfigFile::GetVariableBool(const std::string &title, const std::st
 	return default_value;
 }
 
-double EQ::JsonConfigFile::GetVariableDouble(const std::string &title, const std::string &parameter, const double default_value) {
+/**
+ * @param title
+ * @param parameter
+ * @param default_value
+ * @return
+ */
+double EQ::JsonConfigFile::GetVariableDouble(
+	const std::string &title,
+	const std::string &parameter,
+	const double default_value
+)
+{
 	try {
 		if (m_root.isMember(title) && m_root[title].isMember(parameter)) {
 			return m_root[title][parameter].asDouble();
