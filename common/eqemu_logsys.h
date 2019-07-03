@@ -229,12 +229,12 @@ public:
 	*/
 	LogSettings log_settings[Logs::LogCategory::MaxCategoryID]{};
 
-	bool file_logs_enabled{};
+	bool file_logs_enabled = false;
 
 	/**
 	 * Sets Executable platform (Zone/World/UCS) etc.
 	 */
-	int log_platform{};
+	int log_platform = 0;
 
 	/**
 	 * File name used in writing logs

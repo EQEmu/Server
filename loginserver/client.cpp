@@ -292,7 +292,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 	 */
 	if (result) {
 		LogF(
-			Logs::Detail, Logs::Login_Server, "lgoin [{0}] user [{2}] Login succeeded",
+			Logs::Detail, Logs::Login_Server, "login [{0}] user [{2}] Login succeeded",
 			db_loginserver,
 			user
 		);
@@ -301,7 +301,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 	}
 	else {
 		LogF(
-			Logs::Detail, Logs::Login_Server, "lgoin [{0}] user [{2}] Login failed",
+			Logs::Detail, Logs::Login_Server, "login [{0}] user [{2}] Login failed",
 			db_loginserver,
 			user
 		);
