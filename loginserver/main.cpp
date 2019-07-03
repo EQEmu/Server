@@ -48,11 +48,15 @@ int main()
 	LogSys.LoadLogSettingsDefaults();
 
 	LogSys.log_settings[Logs::Error].log_to_console           = Logs::General;
-	LogSys.log_settings[Logs::Error].is_category_enabled      = Logs::General;
-	LogSys.log_settings[Logs::MySQLError].is_category_enabled = Logs::General;
+	LogSys.log_settings[Logs::Error].is_category_enabled      = 1;
 	LogSys.log_settings[Logs::MySQLError].log_to_console      = Logs::General;
-	LogSys.log_settings[Logs::Netcode].is_category_enabled    = Logs::General;
+	LogSys.log_settings[Logs::MySQLError].is_category_enabled = 1;
+	LogSys.log_settings[Logs::MySQLQuery].log_to_console      = Logs::General;
+	LogSys.log_settings[Logs::MySQLQuery].is_category_enabled = 1;
 	LogSys.log_settings[Logs::Netcode].log_to_console         = Logs::General;
+	LogSys.log_settings[Logs::Netcode].is_category_enabled    = Logs::General;
+
+	LogSys.log_settings[Logs::Login_Server].log_to_console = Logs::Detail;
 
 	Log(Logs::General, Logs::Login_Server, "Logging System Init.");
 
@@ -182,6 +186,15 @@ int main()
 #endif
 
 	Log(Logs::General, Logs::Login_Server, "Server Started.");
+
+	if (LogSys.log_settings[Logs::Login_Server].log_to_console == 1) {
+		Log(
+			Logs::General,
+			Logs::Login_Server,
+			"Loginserver logging set to level [1] for more debugging, enable detail [3]"
+		);
+	}
+
 	while (run_server) {
 		Timer::SetCurrentTime();
 		server.client_manager->Process();

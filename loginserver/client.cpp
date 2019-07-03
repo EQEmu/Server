@@ -180,24 +180,38 @@ void Client::Handle_SessionReady(const char *data, unsigned int size)
  */
 void Client::Handle_Login(const char *data, unsigned int size)
 {
+	std::string logging_function_prefix = "[Client::Handle_Login]";
+
 	if (status != cs_waiting_for_login) {
-		Log(Logs::General, Logs::Error, "Login received after already having logged in.");
+		LogF(
+			Logs::General,
+			Logs::Error,
+			"{0} Login received after already having logged in",
+			logging_function_prefix
+		);
 		return;
 	}
 
 	if ((size - 12) % 8 != 0) {
-		Log(Logs::General,
+		LogF(
+			Logs::General,
 			Logs::Error,
-			"Login received packet of size: %u, this would cause a block corruption, discarding.",
-			size);
+			"{0} Login received packet of size: {1}, this would cause a block corruption, discarding.",
+			logging_function_prefix,
+			size
+		);
 		return;
 	}
 
 	if (size < sizeof(LoginLoginRequest_Struct)) {
-		Log(Logs::General,
+		LogF(
+			Logs::General,
 			Logs::Error,
-			"Login received packet of size: %u, this would cause a buffer overflow, discarding.",
-			size);
+			"{0} Login received packet of size: %u, this would cause a buffer overflow, discarding.",
+			logging_function_prefix,
+			size
+		);
+
 		return;
 	}
 
@@ -224,7 +238,12 @@ void Client::Handle_Login(const char *data, unsigned int size)
 
 	std::string user(&outbuffer[0]);
 	if (user.length() >= outbuffer.length()) {
-		LogF(Logs::General, Logs::Debug, "Corrupt buffer sent to server, preventing buffer overflow.");
+		LogF(
+			Logs::General,
+			Logs::Debug,
+			"{0} Corrupt buffer sent to server, preventing buffer overflow.",
+			logging_function_prefix
+		);
 		return;
 	}
 
@@ -245,7 +264,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 	}
 	else {
 		if (server.options.IsPasswordLoginAllowed()) {
-			cred = (&outbuffer[1 + user.length()]);
+			cred            = (&outbuffer[1 + user.length()]);
 			auto components = SplitString(user, '.');
 			if (components.size() == 2) {
 				db_loginserver = components[0];
@@ -255,7 +274,8 @@ void Client::Handle_Login(const char *data, unsigned int size)
 			LogF(
 				Logs::General,
 				Logs::Login_Server,
-				"Attempting password based login [{0}] login [{1}] user [{2}]",
+				"{0} Attempting password based login [{1}] login [{2}] user [{3}]",
+				logging_function_prefix,
 				user,
 				db_loginserver,
 				user
@@ -265,10 +285,19 @@ void Client::Handle_Login(const char *data, unsigned int size)
 
 			if (server.db->GetLoginDataFromAccountInfo(user, db_loginserver, db_account_password_hash, db_account_id)) {
 				result = VerifyLoginHash(user, db_loginserver, cred, db_account_password_hash);
+
+				LogF(
+					Logs::Detail,
+					Logs::Login_Server,
+					"{0} [VerifyLoginHash] Success [{1}]",
+					logging_function_prefix,
+					(result ? "true" : "false")
+				);
 			}
 			else {
 				status = cs_creating_account;
 				AttemptLoginAccountCreation(user, cred, db_loginserver);
+
 				return;
 			}
 		}
@@ -278,9 +307,25 @@ void Client::Handle_Login(const char *data, unsigned int size)
 	 * Login accepted
 	 */
 	if (result) {
+		LogF(
+			Logs::Detail, Logs::Login_Server, "{0} [{1}] login [{2}] user [{3}] Login succeeded",
+			logging_function_prefix,
+			user,
+			db_loginserver,
+			user
+		);
+
 		DoSuccessfulLogin(user, db_account_id, db_loginserver);
 	}
 	else {
+		LogF(
+			Logs::Detail, Logs::Login_Server, "{0} [{1}] login [{2}] user [{3}] Login failed",
+			logging_function_prefix,
+			user,
+			db_loginserver,
+			user
+		);
+
 		DoFailedLogin();
 	}
 }
@@ -358,6 +403,11 @@ void Client::GenerateKey()
 	}
 }
 
+/**
+ * @param user
+ * @param pass
+ * @param loginserver
+ */
 void Client::AttemptLoginAccountCreation(
 	const std::string &user,
 	const std::string &pass,
@@ -403,7 +453,8 @@ void Client::AttemptLoginAccountCreation(
 						&Client::LoginOnNewConnection,
 						this,
 						std::placeholders::_1
-					));
+					)
+				);
 				login_connection_manager->OnConnectionStateChange(
 					std::bind(
 						&Client::LoginOnStatusChange,
@@ -411,14 +462,16 @@ void Client::AttemptLoginAccountCreation(
 						std::placeholders::_1,
 						std::placeholders::_2,
 						std::placeholders::_3
-					));
+					)
+				);
 				login_connection_manager->OnPacketRecv(
 					std::bind(
 						&Client::LoginOnPacketRecv,
 						this,
 						std::placeholders::_1,
 						std::placeholders::_2
-					));
+					)
+				);
 
 				login_connection_manager->Connect(addr, port);
 			}

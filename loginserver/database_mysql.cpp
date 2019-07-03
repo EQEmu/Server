@@ -121,37 +121,45 @@ bool DatabaseMySQL::GetLoginDataFromAccountInfo(
 	unsigned int &id
 )
 {
-	if (!database) {
+	auto query = fmt::format(
+		"SELECT LoginServerID, AccountPassword FROM {0} WHERE AccountName = '{1}' AND AccountLoginserver = '{2}' LIMIT 1",
+		server.options.GetAccountTable(),
+		EscapeString(name),
+		EscapeString(loginserver)
+	);
+
+	auto results = QueryDatabase(query);
+
+	if (results.RowCount() != 1) {
+		LogF(
+			Logs::Detail,
+			Logs::Login_Server,
+			"Database::GetLoginDataFromAccountInfo could not find account for name [{0}] login [{1}]",
+			name,
+			loginserver
+		);
+
 		return false;
 	}
 
-	MYSQL_RES *res;
-	MYSQL_ROW row;
-	std::stringstream query(std::stringstream::in | std::stringstream::out);
 	query << "SELECT LoginServerID, AccountPassword FROM " << server.options.GetAccountTable()
-		  << " WHERE AccountName = '";
-	query << EscapeString(name);
-	query << "' AND AccountLoginserver='";
-	query << EscapeString(loginserver);
-	query << "'";
-
-	if (mysql_query(database, query.str().c_str()) != 0) {
-		LogF(Logs::General, Logs::Error, "Mysql query failed: {0}", query.str());
+	if (!results.Success()) {
 		return false;
 	}
 
-	res = mysql_use_result(database);
+	auto row = results.begin();
 
-	if (res) {
-		while ((row = mysql_fetch_row(res)) != nullptr) {
-			id       = atoi(row[0]);
-			password = row[1];
-			mysql_free_result(res);
-			return true;
-		}
-	}
+	id       = atoi(row[0]);
+	password = row[1];
 
-	Log(Logs::General, Logs::Error, "Mysql query returned no result: %s", query.str().c_str());
+	LogF(
+		Logs::Detail,
+		Logs::Login_Server,
+		"Database::GetLoginDataFromAccountInfo found account for name [{0}] login [{1}]",
+		name,
+		loginserver
+	);
+
 	return false;
 }
 
