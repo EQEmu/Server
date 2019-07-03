@@ -34,13 +34,25 @@
 
 extern Zone *zone;
 
-EQ::Net::WebsocketLoginStatus
-CheckLogin(EQ::Net::WebsocketServerConnection *connection, const std::string &username, const std::string &password)
+/**
+ * @param connection
+ * @param username
+ * @param password
+ * @return
+ */
+EQ::Net::WebsocketLoginStatus CheckLogin(
+	EQ::Net::WebsocketServerConnection *connection,
+	const std::string &username,
+	const std::string &password
+)
 {
 	EQ::Net::WebsocketLoginStatus ret;
 	ret.logged_in = false;
 
-	ret.account_id = database.CheckLogin(username.c_str(), password.c_str());
+
+	std::string prefix = "eqemu";
+
+	ret.account_id = database.CheckLogin(username.c_str(), password.c_str(), prefix.c_str());
 
 	if (ret.account_id == 0) {
 		return ret;
@@ -54,6 +66,11 @@ CheckLogin(EQ::Net::WebsocketServerConnection *connection, const std::string &us
 	return ret;
 }
 
+/**
+ * @param connection
+ * @param params
+ * @return
+ */
 Json::Value ApiGetPacketStatistics(EQ::Net::WebsocketServerConnection *connection, Json::Value params)
 {
 	if (zone->GetZoneID() == 0) {

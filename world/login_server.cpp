@@ -361,19 +361,3 @@ void LoginServer::SendAccountUpdate(ServerPacket* pack) {
 		SendPacket(pack);
 	}
 }
-
-bool LoginServer::Connected()
-{
-	if (IsLegacy) {
-		if (legacy_client) {
-			return legacy_client->Connected();
-		}
-	}
-	else {
-		if (client) {
-			return client->Connected();
-		}
-	}
-
-	return false;
-}

@@ -27,7 +27,7 @@ extern bool run_server;
 ClientManager::ClientManager()
 {
 	int titanium_port = server.config.GetVariableInt("Titanium", "port", 5998);
-	EQ::Net::EQStreamManagerOptions titanium_opts(titanium_port, false, false);
+	EQStreamManagerInterfaceOptions titanium_opts(titanium_port, false, false);
 	titanium_stream = new EQ::Net::EQStreamManager(titanium_opts);
 	titanium_ops = new RegularOpcodeManager;
 	if (!titanium_ops->LoadOpcodes(server.config.GetVariableString("Titanium", "opcodes", "login_opcodes.conf").c_str()))
@@ -45,7 +45,7 @@ ClientManager::ClientManager()
 	});
 
 	int sod_port = server.config.GetVariableInt("SoD", "port", 5999);
-	EQ::Net::EQStreamManagerOptions sod_opts(sod_port, false, false);
+	EQStreamManagerInterfaceOptions sod_opts(sod_port, false, false);
 	sod_stream = new EQ::Net::EQStreamManager(sod_opts);
 	sod_ops = new RegularOpcodeManager;
 	if (!sod_ops->LoadOpcodes(server.config.GetVariableString("SoD", "opcodes", "login_opcodes.conf").c_str()))

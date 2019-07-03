@@ -35,14 +35,12 @@ public:
 	~LoginServer();
 
 	bool Connect();
-
 	void SendInfo();
 	void SendStatus();
 
 	void SendPacket(ServerPacket* pack);
 	void SendAccountUpdate(ServerPacket* pack);
 	bool Connected() { return IsLegacy ? legacy_client->Connected() : client->Connected(); }
-	bool MiniLogin() { return minilogin; }
 	bool CanUpdate() { return CanAccountUpdate; }
 
 private:
