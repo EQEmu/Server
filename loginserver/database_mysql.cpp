@@ -134,7 +134,8 @@ bool DatabaseMySQL::GetLoginDataFromAccountInfo(
 		LogF(
 			Logs::Detail,
 			Logs::Login_Server,
-			"Database::GetLoginDataFromAccountInfo could not find account for name [{0}] login [{1}]",
+			"[{0}] could not find account for name [{1}] login [{2}]",
+			__func__,
 			name,
 			loginserver
 		);
@@ -142,7 +143,6 @@ bool DatabaseMySQL::GetLoginDataFromAccountInfo(
 		return false;
 	}
 
-	query << "SELECT LoginServerID, AccountPassword FROM " << server.options.GetAccountTable()
 	if (!results.Success()) {
 		return false;
 	}
@@ -155,7 +155,8 @@ bool DatabaseMySQL::GetLoginDataFromAccountInfo(
 	LogF(
 		Logs::Detail,
 		Logs::Login_Server,
-		"Database::GetLoginDataFromAccountInfo found account for name [{0}] login [{1}]",
+		"[{0}] found account for name [{1}] login [{2}]",
+		__func__,
 		name,
 		loginserver
 	);

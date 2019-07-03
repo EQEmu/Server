@@ -180,14 +180,12 @@ void Client::Handle_SessionReady(const char *data, unsigned int size)
  */
 void Client::Handle_Login(const char *data, unsigned int size)
 {
-	std::string logging_function_prefix = "[Client::Handle_Login]";
-
 	if (status != cs_waiting_for_login) {
 		LogF(
 			Logs::General,
 			Logs::Error,
 			"{0} Login received after already having logged in",
-			logging_function_prefix
+			__func__
 		);
 		return;
 	}
@@ -197,7 +195,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 			Logs::General,
 			Logs::Error,
 			"{0} Login received packet of size: {1}, this would cause a block corruption, discarding.",
-			logging_function_prefix,
+			__func__,
 			size
 		);
 		return;
@@ -208,7 +206,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 			Logs::General,
 			Logs::Error,
 			"{0} Login received packet of size: %u, this would cause a buffer overflow, discarding.",
-			logging_function_prefix,
+			__func__,
 			size
 		);
 
@@ -242,7 +240,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 			Logs::General,
 			Logs::Debug,
 			"{0} Corrupt buffer sent to server, preventing buffer overflow.",
-			logging_function_prefix
+			__func__
 		);
 		return;
 	}
@@ -275,7 +273,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 				Logs::General,
 				Logs::Login_Server,
 				"{0} Attempting password based login [{1}] login [{2}] user [{3}]",
-				logging_function_prefix,
+				__func__,
 				user,
 				db_loginserver,
 				user
@@ -290,7 +288,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 					Logs::Detail,
 					Logs::Login_Server,
 					"{0} [VerifyLoginHash] Success [{1}]",
-					logging_function_prefix,
+					__func__,
 					(result ? "true" : "false")
 				);
 			}
@@ -309,7 +307,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 	if (result) {
 		LogF(
 			Logs::Detail, Logs::Login_Server, "{0} [{1}] login [{2}] user [{3}] Login succeeded",
-			logging_function_prefix,
+			__func__,
 			user,
 			db_loginserver,
 			user
@@ -320,7 +318,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 	else {
 		LogF(
 			Logs::Detail, Logs::Login_Server, "{0} [{1}] login [{2}] user [{3}] Login failed",
-			logging_function_prefix,
+			__func__,
 			user,
 			db_loginserver,
 			user
@@ -696,10 +694,22 @@ void Client::LoginOnStatusChange(
 )
 {
 	if (to == EQ::Net::StatusConnected) {
+		LogF(
+			Logs::Detail,
+			Logs::Login_Server,
+			"[{0}] == EQ::Net::StatusConnected",
+			__func__
+		);
 		LoginSendSessionReady();
 	}
 
 	if (to == EQ::Net::StatusDisconnecting || to == EQ::Net::StatusDisconnected) {
+		LogF(
+			Logs::Detail,
+			Logs::Login_Server,
+			"[{0}] == EQ::Net::StatusDisconnecting || EQ::Net::StatusDisconnected",
+			__func__
+		);
 		DoFailedLogin();
 	}
 }
@@ -724,6 +734,7 @@ void Client::LoginOnStatusChangeIgnored(
 void Client::LoginOnPacketRecv(std::shared_ptr<EQ::Net::DaybreakConnection> conn, const EQ::Net::Packet &p)
 {
 	auto opcode = p.GetUInt16(0);
+	LogF(Logs::Detail, Logs::Login_Server, "[{0}] [{1}]", __func__, opcode);
 	switch (opcode) {
 		case 0x0017: //OP_ChatMessage
 			LoginSendLogin();
@@ -767,6 +778,9 @@ void Client::LoginSendLogin()
 	login_connection->QueuePacket(p);
 }
 
+/**
+ * @param p
+ */
 void Client::LoginProcessLoginResponse(const EQ::Net::Packet &p)
 {
 	auto encrypt_size                    = p.Length() - 12;
@@ -788,13 +802,24 @@ void Client::LoginProcessLoginResponse(const EQ::Net::Packet &p)
 			std::placeholders::_1,
 			std::placeholders::_2,
 			std::placeholders::_3
-		));
+		)
+	);
 
 	if (response_error > 101) {
+		LogF(Logs::Detail, Logs::Login_Server, "[{0}] response [{1}] failed login", __func__, response_error);
 		DoFailedLogin();
 		login_connection->Close();
 	}
 	else {
+		LogF(
+			Logs::Detail,
+			Logs::Login_Server,
+			"[{0}] response [{1}] login succeeded user [{2}]",
+			__func__,
+			response_error,
+			stored_user
+		);
+
 		auto m_dbid = sp.GetUInt32(8);
 
 		CreateEQEmuAccount(stored_user, stored_pass, m_dbid);
