@@ -22,6 +22,7 @@
 #define EQEMU_DATABASEMYSQL_H
 
 #include "database.h"
+#include "../common/dbcore.h"
 
 #ifdef EQEMU_MYSQL_ENABLED
 
@@ -30,7 +31,7 @@
 #include <stdlib.h>
 #include <mysql.h>
 
-class DatabaseMySQL : public Database {
+class DatabaseMySQL : public DBcore {
 public:
 
 	DatabaseMySQL() { database = nullptr; }

@@ -379,12 +379,16 @@ void WorldServer::ProcessLSAccountUpdate(uint16_t opcode, const EQ::Net::Packet 
 	ServerLSAccountUpdate_Struct *lsau = (ServerLSAccountUpdate_Struct *) p.Data();
 	if (is_server_trusted) {
 		Log(Logs::General, Logs::Netcode, "ServerOP_LSAccountUpdate update processed for: %s", lsau->useraccount);
-		std::string name;
-		std::string password;
-		std::string email;
+		std::string name     = "";
+		std::string password = "";
+		std::string email    = "";
 		name.assign(lsau->useraccount);
 		password.assign(lsau->userpassword);
-		email.assign(lsau->useremail);
+
+		if (lsau->useremail) {
+			email.assign(lsau->useremail);
+		}
+
 		server.db->UpdateLSAccountInfo(lsau->useraccountid, name, password, email);
 	}
 }
@@ -614,9 +618,9 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *i)
 					}
 				}
 
-				/**
-				 * this is the first of two cases where we should deny access even if unregistered is allowed
-				 */
+					/**
+					 * this is the first of two cases where we should deny access even if unregistered is allowed
+					 */
 				else {
 					Log(Logs::General,
 						Logs::World_Server,

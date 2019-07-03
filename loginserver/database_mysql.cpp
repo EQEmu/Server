@@ -71,6 +71,26 @@ DatabaseMySQL::DatabaseMySQL(
 			Log(Logs::General, Logs::Error, "Failed to connect to MySQL database. Error: %s", mysql_error(database));
 			exit(1);
 		}
+
+		uint32 errnum = 0;
+		char   errbuf[MYSQL_ERRMSG_SIZE];
+		if (!Open(
+			host.c_str(),
+			user.c_str(),
+			pass.c_str(),
+			name.c_str(),
+			atoi(port.c_str()),
+			&errnum,
+			errbuf
+		)
+			) {
+			Log(Logs::General, Logs::Error, "Failed to connect to database: Error: %s", errbuf);
+			exit(1);
+		}
+		else {
+			Log(Logs::General, Logs::Status, "Using database '%s' at %s:%d", database, host, port);
+		}
+
 	}
 	else {
 		Log(Logs::General, Logs::Error, "Failed to create db object in MySQL database.");
@@ -273,25 +293,22 @@ bool DatabaseMySQL::CreateLoginDataWithID(
 	unsigned int id
 )
 {
-	if (!database) {
-		return false;
-	}
-
 	if (id == 0) {
 		return false;
 	}
 
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	std::stringstream query(std::stringstream::in | std::stringstream::out);
+	auto query = fmt::format(
+		"INSERT INTO {0} (LoginServerID, AccountLoginserver, AccountName, AccountPassword, AccountEmail, LastLoginDate, LastIPAddress) "
+		"VALUES ({1}, '{2}', '{3}', '{4}', 'local_creation', NOW(), '127.0.0.1')",
+		server.options.GetAccountTable(),
+		id,
+		EscapeString(loginserver),
+		EscapeString(name),
+		EscapeString(password)
+	);
 
-	query << "INSERT INTO " << server.options.GetAccountTable()
-		  << " (LoginServerID, AccountLoginserver, AccountName, AccountPassword, AccountEmail, LastLoginDate, LastIPAddress) ";
-	query << " VALUES(" << id << ", '" << EscapeString(loginserver) << "', '" << EscapeString(name) << "', '"
-		  << EscapeString(password) << "', 'local_creation', NOW(), '127.0.0.1'); ";
-
-	if (mysql_query(database, query.str().c_str()) != 0) {
-		Log(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
 		return false;
 	}
 
@@ -305,20 +322,15 @@ bool DatabaseMySQL::CreateLoginDataWithID(
  */
 void DatabaseMySQL::UpdateLoginHash(const std::string &name, const std::string &loginserver, const std::string &hash)
 {
-	if (!database) {
-		return;
-	}
-
 	auto query = fmt::format(
 		"UPDATE {0} SET AccountPassword='{1}' WHERE AccountName='{2}' AND AccountLoginserver='{3}'",
 		server.options.GetAccountTable(),
 		hash,
 		EscapeString(name),
-		EscapeString(loginserver));
+		EscapeString(loginserver)
+	);
 
-	if (mysql_query(database, query.c_str()) != 0) {
-		Log(Logs::General, Logs::Error, "Mysql query failed: %s", query.c_str());
-	}
+	QueryDatabase(query);
 }
 
 /**
@@ -423,19 +435,14 @@ bool DatabaseMySQL::GetWorldRegistration(
  */
 void DatabaseMySQL::UpdateLSAccountData(unsigned int id, std::string ip_address)
 {
-	if (!database) {
-		return;
-	}
+	auto query = fmt::format(
+		"UPDATE {0} SET LastIPAddress = '{2}', LastLoginDate = now() where LoginServerId = {3}",
+		server.options.GetAccountTable(),
+		ip_address,
+		id
+	);
 
-	std::stringstream query(std::stringstream::in | std::stringstream::out);
-	query << "UPDATE " << server.options.GetAccountTable() << " SET LastIPAddress = '";
-	query << ip_address;
-	query << "', LastLoginDate = now() where LoginServerID = ";
-	query << id;
-
-	if (mysql_query(database, query.str().c_str()) != 0) {
-		Log(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
-	}
+	QueryDatabase(query);
 }
 
 /**
@@ -444,21 +451,24 @@ void DatabaseMySQL::UpdateLSAccountData(unsigned int id, std::string ip_address)
  * @param password
  * @param email
  */
-void DatabaseMySQL::UpdateLSAccountInfo(unsigned int id, std::string name, std::string password, std::string email)
+void DatabaseMySQL::UpdateLSAccountInfo(
+	unsigned int id,
+	std::string name,
+	std::string password,
+	std::string email
+)
 {
-	if (!database) {
-		return;
-	}
+	auto query = fmt::format(
+		"REPLACE {0} SET LoginServerID = {1}, AccountName = '{2}', AccountPassword = sha('{3}'), AccountCreateDate = now(), "
+		"AccountEmail = '{4}', LastIPAddress = '0.0.0.0', LastLoginDate = now()",
+		server.options.GetAccountTable(),
+		id,
+		EscapeString(name),
+		EscapeString(password),
+		EscapeString(email)
+	);
 
-	std::stringstream query(std::stringstream::in | std::stringstream::out);
-	query << "REPLACE " << server.options.GetAccountTable() << " SET LoginServerID = ";
-	query << id << ", AccountName = '" << name << "', AccountPassword = sha('";
-	query << password << "'), AccountCreateDate = now(), AccountEmail = '" << email;
-	query << "', LastIPAddress = '0.0.0.0', LastLoginDate = now()";
-
-	if (mysql_query(database, query.str().c_str()) != 0) {
-		Log(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
-	}
+	QueryDatabase(query);
 }
 
 /**
@@ -468,30 +478,15 @@ void DatabaseMySQL::UpdateLSAccountInfo(unsigned int id, std::string name, std::
  */
 void DatabaseMySQL::UpdateWorldRegistration(unsigned int id, std::string long_name, std::string ip_address)
 {
-	if (!database) {
-		return;
-	}
+	auto query = fmt::format(
+		"UPDATE {0} SET ServerLastLoginDate = NOW(), ServerLastIPAddr = '{1}', ServerLongName = '{2}' WHERE ServerID = {3}",
+		server.options.GetWorldRegistrationTable(),
+		ip_address,
+		EscapeString(long_name),
+		id
+	);
 
-	char          escaped_long_name[101];
-	unsigned long length;
-	length = mysql_real_escape_string(
-		database,
-		escaped_long_name,
-		long_name.substr(0, 100).c_str(),
-		long_name.substr(0, 100).length());
-	escaped_long_name[length + 1] = 0;
-	std::stringstream query(std::stringstream::in | std::stringstream::out);
-	query << "UPDATE " << server.options.GetWorldRegistrationTable()
-		  << " SET ServerLastLoginDate = now(), ServerLastIPAddr = '";
-	query << ip_address;
-	query << "', ServerLongName = '";
-	query << escaped_long_name;
-	query << "' WHERE ServerID = ";
-	query << id;
-
-	if (mysql_query(database, query.str().c_str()) != 0) {
-		Log(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
-	}
+	QueryDatabase(query);
 }
 
 /**

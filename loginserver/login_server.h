@@ -18,6 +18,7 @@
  *
  */
 
+
 #ifndef EQEMU_LOGINSERVER_H
 #define EQEMU_LOGINSERVER_H
 

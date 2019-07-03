@@ -47,8 +47,12 @@ int main()
 
 	LogSys.LoadLogSettingsDefaults();
 
-	LogSys.log_settings[Logs::Error].log_to_console      = Logs::General;
-	LogSys.log_settings[Logs::Error].is_category_enabled = 1;
+	LogSys.log_settings[Logs::Error].log_to_console           = Logs::General;
+	LogSys.log_settings[Logs::Error].is_category_enabled      = Logs::General;
+	LogSys.log_settings[Logs::MySQLError].is_category_enabled = Logs::General;
+	LogSys.log_settings[Logs::MySQLError].log_to_console      = Logs::General;
+	LogSys.log_settings[Logs::Netcode].is_category_enabled    = Logs::General;
+	LogSys.log_settings[Logs::Netcode].log_to_console         = Logs::General;
 
 	Log(Logs::General, Logs::Login_Server, "Logging System Init.");
 
@@ -132,7 +136,6 @@ int main()
 		server.config.GetVariableString("database", "port", "3306"),
 		server.config.GetVariableString("database", "db", "peq")
 	);
-
 
 	/**
 	 * make sure our database got created okay, otherwise cleanup and exit
