@@ -18,7 +18,6 @@
  *
  */
 
-
 #include "../common/global_define.h"
 #include "database.h"
 

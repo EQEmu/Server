@@ -1,20 +1,23 @@
-/*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2010 EQEMu Development Team (http://eqemulator.net)
+/**
+ * EQEmulator: Everquest Server Emulator
+ * Copyright (C) 2001-2019 EQEmulator Development Team (https://github.com/EQEmu/Server)
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; version 2 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY except by those people which sell it, which
+ * are required to give you total support for your newly bought product;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
 
-	This program is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation; version 2 of the License.
-
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY except by those people which sell it, which
-	are required to give you total support for your newly bought product;
-	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-*/
 #ifndef EQEMU_OPTIONS_H
 #define EQEMU_OPTIONS_H
 
@@ -22,12 +25,12 @@
  * Collects options on one object, because having a bunch of global variables floating around is
  * really ugly and just a little dangerous.
  */
-class Options
-{
+class Options {
 public:
+
 	/**
-	* Constructor, sets the default options.
-	*/
+	 * Constructor: Default options
+	 */
 	Options() :
 		allow_unregistered(true),
 		trace(false),
@@ -38,7 +41,7 @@ public:
 		reject_duplicate_servers(false),
 		allow_password_login(true),
 		allow_token_login(false),
-		auto_create_accounts(false) { }
+		auto_create_accounts(false) {}
 
 	/**
 	* Sets allow_unregistered.
@@ -182,18 +185,18 @@ public:
 	inline bool IsUpdatingInsecurePasswords() const { return update_insecure_passwords; }
 
 private:
-	bool allow_unregistered;
-	bool trace;
-	bool world_trace;
-	bool dump_in_packets;
-	bool dump_out_packets;
-	bool reject_duplicate_servers;
-	bool allow_token_login;
-	bool allow_password_login;
-	bool auto_create_accounts;
-	bool auto_link_accounts;
-	bool update_insecure_passwords;
-	int encryption_mode;
+	bool        allow_unregistered;
+	bool        trace;
+	bool        world_trace;
+	bool        dump_in_packets;
+	bool        dump_out_packets;
+	bool        reject_duplicate_servers;
+	bool        allow_token_login;
+	bool        allow_password_login;
+	bool        auto_create_accounts;
+	bool        auto_link_accounts;
+	bool        update_insecure_passwords;
+	int         encryption_mode;
 	std::string local_network;
 	std::string account_table;
 	std::string world_registration_table;

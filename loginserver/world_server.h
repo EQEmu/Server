@@ -1,20 +1,23 @@
-/*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2010 EQEMu Development Team (http://eqemulator.net)
+/**
+ * EQEmulator: Everquest Server Emulator
+ * Copyright (C) 2001-2019 EQEmulator Development Team (https://github.com/EQEmu/Server)
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; version 2 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY except by those people which sell it, which
+ * are required to give you total support for your newly bought product;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
 
-	This program is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation; version 2 of the License.
-
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY except by those people which sell it, which
-	are required to give you total support for your newly bought product;
-	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-*/
 #ifndef EQEMU_WORLDSERVER_H
 #define EQEMU_WORLDSERVER_H
 
@@ -31,106 +34,79 @@
 class WorldServer
 {
 public:
-	/**
-	* Constructor, sets our connection to c.
-	*/
 	WorldServer(std::shared_ptr<EQ::Net::ServertalkServerConnection> c);
 
 	/**
-	* Destructor, frees our connection if it exists.
-	*/
+	 * Destructor, frees our connection if it exists
+	 */
 	~WorldServer();
 
 	/**
-	* Resets the basic stats of this server.
-	*/
+	 * Resets the basic stats of this server.
+	 */
 	void Reset();
 
 	/**
 	* Accesses connection, it is intentional that this is not const (trust me).
 	*/
 	std::shared_ptr<EQ::Net::ServertalkServerConnection> GetConnection() { return connection; }
-
-	/**
-	* Sets the connection to c.
-	*/
 	void SetConnection(std::shared_ptr<EQ::Net::ServertalkServerConnection> c) { connection = c; }
-
-	/**
-	* Gets the runtime id of this server.
-	*/
 	unsigned int GetRuntimeID() const { return runtime_id; }
-
-	/**
-	* Sets the runtime id of this server.
-	*/
 	void SetRuntimeID(unsigned int id) { runtime_id = id; }
-
-	/**
-	* Gets the long name of the server.
-	*/
 	std::string GetLongName() const { return long_name; }
-
-	/**
-	* Gets the short name of the server.
-	*/
 	std::string GetShortName() const { return short_name; }
 
 	/**
-	* Gets whether the server is authorized to show up on the server list or not.
-	*/
+	 * Gets whether the server is authorized to show up on the server list or not
+	 * @return
+	 */
 	bool IsAuthorized() const { return is_server_authorized; }
-
-	/**
-	* Gets the local ip of the server.
-	*/
 	std::string GetLocalIP() const { return local_ip; }
-
-	/**
-	* Gets the remote ip of the server.
-	*/
 	std::string GetRemoteIP() const { return remote_ip; }
 
 	/**
-	* Gets what kind of server this server is (legends, preferred, normal)
-	*/
+	 * Gets what kind of server this server is (legends, preferred, normal)
+	 *
+	 * @return
+	 */
 	unsigned int GetServerListID() const { return server_list_id; }
-
-	/**
-	* Gets the status of the server.
-	*/
 	int GetStatus() const { return server_status; }
-
-	/**
-	* Gets the number of zones online on the server.
-	*/
 	unsigned int GetZonesBooted() const { return zones_booted; }
-
-	/**
-	* Gets the number of players on the server.
-	*/
 	unsigned int GetPlayersOnline() const { return players_online; }
 
 	/**
-	* Takes the info struct we received from world and processes it.
-	*/
+	 * Takes the info struct we received from world and processes it
+	 *
+	 * @param i
+	 */
 	void Handle_NewLSInfo(ServerNewLSInfo_Struct* i);
 
 	/**
-	* Takes the status struct we received from world and processes it.
-	*/
+	 * Takes the status struct we received from world and processes it
+	 *
+	 * @param s
+	 */
 	void Handle_LSStatus(ServerLSStatus_Struct *s);
 
 	/**
-	* Informs world that there is a client incoming with the following data.
-	*/
+	 * Informs world that there is a client incoming with the following data.
+	 *
+	 * @param ip
+	 * @param account
+	 * @param key
+	 * @param account_id
+	 * @param loginserver_name
+	 */
 	void SendClientAuth(std::string ip, std::string account, std::string key, unsigned int account_id, const std::string &loginserver_name);
 
 private:
 
 	/**
-	* Packet processing functions:
-	*/
+	 * Packet processing functions
+	 *
+	 * @param opcode
+	 * @param p
+	 */
 	void ProcessNewLSInfo(uint16_t opcode, const EQ::Net::Packet &p);
 	void ProcessLSStatus(uint16_t opcode, const EQ::Net::Packet &p);
 	void ProcessUsertoWorldRespLeg(uint16_t opcode, const EQ::Net::Packet &p);

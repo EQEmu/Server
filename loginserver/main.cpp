@@ -80,11 +80,13 @@ int main()
 		)
 	);
 
+
 #ifdef ENABLE_SECURITY
 	server.options.EncryptionMode(server.config.GetVariableInt("security", "mode", 13));
 #else
 	server.options.EncryptionMode(server.config.GetVariableInt("security", "mode", 6));
 #endif
+
 	server.options.AllowUnregistered(server.config.GetVariableBool("security", "unregistered_allowed", true));
 	server.options.AllowTokenLogin(server.config.GetVariableBool("security", "allow_token_login", false));
 	server.options.AllowPasswordLogin(server.config.GetVariableBool("security", "allow_password_login", true));
@@ -93,44 +95,47 @@ int main()
 			"security",
 			"update_insecure_passwords",
 			true
-		));
-
+		)
+	);
 	server.options.AccountTable(server.config.GetVariableString("schema", "account_table", "tblLoginServerAccounts"));
 	server.options.WorldRegistrationTable(
 		server.config.GetVariableString(
 			"schema",
 			"world_registration_table",
 			"tblWorldServerRegistration"
-		));
+		)
+	);
 	server.options.WorldAdminRegistrationTable(
 		server.config.GetVariableString(
 			"schema",
 			"world_admin_registration_table",
 			"tblServerAdminRegistration"
-		));
+		)
+	);
 	server.options.WorldServerTypeTable(
 		server.config.GetVariableString(
 			"schema",
 			"world_server_type_table",
 			"tblServerListType"
-		));
+		)
+	);
 
 	/**
 	 * mysql connect
 	 */
-	if (server.config.GetVariableString("database", "subsystem", "MySQL").compare("MySQL") == 0) {
-		Log(Logs::General, Logs::Login_Server, "MySQL Database Init.");
-		server.db = (Database *) new DatabaseMySQL(
-			server.config.GetVariableString("database", "user", "root"),
-			server.config.GetVariableString("database", "password", ""),
-			server.config.GetVariableString("database", "host", "localhost"),
-			server.config.GetVariableString("database", "port", "3306"),
-			server.config.GetVariableString("database", "db", "peq")
-		);
-	}
+	Log(Logs::General, Logs::Login_Server, "MySQL Database Init.");
+
+	server.db = (Database *) new DatabaseMySQL(
+		server.config.GetVariableString("database", "user", "root"),
+		server.config.GetVariableString("database", "password", ""),
+		server.config.GetVariableString("database", "host", "localhost"),
+		server.config.GetVariableString("database", "port", "3306"),
+		server.config.GetVariableString("database", "db", "peq")
+	);
+
 
 	/**
-	 * Make sure our database got created okay, otherwise cleanup and exit
+	 * make sure our database got created okay, otherwise cleanup and exit
 	 */
 	if (!server.db) {
 		Log(Logs::General, Logs::Error, "Database Initialization Failure.");
@@ -143,7 +148,7 @@ int main()
 	 */
 	Log(Logs::General, Logs::Login_Server, "Server Manager Initialize.");
 	server.server_manager = new ServerManager();
-	if (!server.server_manager)
+	if (!server.server_manager) {
 		Log(Logs::General, Logs::Error, "Server Manager Failed to Start.");
 		Log(Logs::General, Logs::Login_Server, "Database System Shutdown.");
 		delete server.db;
