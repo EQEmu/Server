@@ -31,6 +31,15 @@
 
 extern LoginServer server;
 
+/**
+ * Initial connect
+ *
+ * @param user
+ * @param pass
+ * @param host
+ * @param port
+ * @param name
+ */
 DatabaseMySQL::DatabaseMySQL(
 	std::string user,
 	std::string pass,
@@ -68,6 +77,9 @@ DatabaseMySQL::DatabaseMySQL(
 	}
 }
 
+/**
+ * Deconstructor
+ */
 DatabaseMySQL::~DatabaseMySQL()
 {
 	if (database) {
@@ -75,6 +87,13 @@ DatabaseMySQL::~DatabaseMySQL()
 	}
 }
 
+/**
+ * @param name
+ * @param loginserver
+ * @param password
+ * @param id
+ * @return
+ */
 bool DatabaseMySQL::GetLoginDataFromAccountInfo(
 	const std::string &name,
 	const std::string &loginserver,
@@ -116,6 +135,14 @@ bool DatabaseMySQL::GetLoginDataFromAccountInfo(
 	return false;
 }
 
+/**
+ * @param token
+ * @param ip
+ * @param db_account_id
+ * @param db_loginserver
+ * @param user
+ * @return
+ */
 bool DatabaseMySQL::GetLoginTokenDataFromToken(
 	const std::string &token,
 	const std::string &ip,
@@ -174,6 +201,10 @@ bool DatabaseMySQL::GetLoginTokenDataFromToken(
 	return found_username && found_login_id && found_login_server_name;
 }
 
+/**
+ * @param loginserver
+ * @return
+ */
 unsigned int DatabaseMySQL::GetFreeID(const std::string &loginserver)
 {
 	if (!database) {
@@ -211,6 +242,13 @@ unsigned int DatabaseMySQL::GetFreeID(const std::string &loginserver)
 	return 1;
 }
 
+/**
+ * @param name
+ * @param password
+ * @param loginserver
+ * @param id
+ * @return
+ */
 bool DatabaseMySQL::CreateLoginData(
 	const std::string &name,
 	const std::string &password,
@@ -221,6 +259,13 @@ bool DatabaseMySQL::CreateLoginData(
 	return CreateLoginDataWithID(name, password, loginserver, GetFreeID(loginserver));
 }
 
+/**
+ * @param name
+ * @param password
+ * @param loginserver
+ * @param id
+ * @return
+ */
 bool DatabaseMySQL::CreateLoginDataWithID(
 	const std::string &name,
 	const std::string &password,
@@ -253,6 +298,11 @@ bool DatabaseMySQL::CreateLoginDataWithID(
 	return true;
 }
 
+/**
+ * @param name
+ * @param loginserver
+ * @param hash
+ */
 void DatabaseMySQL::UpdateLoginHash(const std::string &name, const std::string &loginserver, const std::string &hash)
 {
 	if (!database) {
@@ -271,9 +321,28 @@ void DatabaseMySQL::UpdateLoginHash(const std::string &name, const std::string &
 	}
 }
 
+/**
+ * @param long_name
+ * @param short_name
+ * @param id
+ * @param desc
+ * @param list_id
+ * @param trusted
+ * @param list_desc
+ * @param account
+ * @param password
+ * @return
+ */
 bool DatabaseMySQL::GetWorldRegistration(
-	std::string long_name, std::string short_name, unsigned int &id, std::string &desc, unsigned int &list_id,
-	unsigned int &trusted, std::string &list_desc, std::string &account, std::string &password
+	std::string long_name,
+	std::string short_name,
+	unsigned int &id,
+	std::string &desc,
+	unsigned int &list_id,
+	unsigned int &trusted,
+	std::string &list_desc,
+	std::string &account,
+	std::string &password
 )
 {
 	if (!database) {
@@ -348,6 +417,10 @@ bool DatabaseMySQL::GetWorldRegistration(
 	return false;
 }
 
+/**
+ * @param id
+ * @param ip_address
+ */
 void DatabaseMySQL::UpdateLSAccountData(unsigned int id, std::string ip_address)
 {
 	if (!database) {
@@ -365,6 +438,12 @@ void DatabaseMySQL::UpdateLSAccountData(unsigned int id, std::string ip_address)
 	}
 }
 
+/**
+ * @param id
+ * @param name
+ * @param password
+ * @param email
+ */
 void DatabaseMySQL::UpdateLSAccountInfo(unsigned int id, std::string name, std::string password, std::string email)
 {
 	if (!database) {
@@ -382,6 +461,11 @@ void DatabaseMySQL::UpdateLSAccountInfo(unsigned int id, std::string name, std::
 	}
 }
 
+/**
+ * @param id
+ * @param long_name
+ * @param ip_address
+ */
 void DatabaseMySQL::UpdateWorldRegistration(unsigned int id, std::string long_name, std::string ip_address)
 {
 	if (!database) {
@@ -410,6 +494,12 @@ void DatabaseMySQL::UpdateWorldRegistration(unsigned int id, std::string long_na
 	}
 }
 
+/**
+ * @param long_name
+ * @param short_name
+ * @param id
+ * @return
+ */
 bool DatabaseMySQL::CreateWorldRegistration(std::string long_name, std::string short_name, unsigned int &id)
 {
 	if (!database) {
