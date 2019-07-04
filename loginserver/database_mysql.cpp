@@ -407,77 +407,58 @@ bool Database::GetWorldRegistration(
 	std::string &password
 )
 {
+	auto query = fmt::format(
+		"SELECT\n"
+		"  ifnull(WSR.ServerID, 999999) AS ServerID,\n"
+		"  WSR.ServerTagDescription,\n"
+		"  ifnull(WSR.ServerTrusted, 0) AS ServerTrusted,\n"
+		"  ifnull(SLT.ServerListTypeID, 3) AS ServerListTypeID,\n"
+		"  SLT.ServerListTypeDescription,\n"
+		"  ifnull(WSR.ServerAdminID, 0) AS ServerAdminID\n"
+		"FROM\n"
+		"  {0} AS WSR\n"
+		"  JOIN {1} AS SLT ON WSR.ServerListTypeID = SLT.ServerListTypeID\n"
+		"WHERE\n"
+		"  WSR.ServerShortName = '{2}' LIMIT 1",
+		server.options.GetWorldRegistrationTable(),
+		server.options.GetWorldServerTypeTable(),
+		EscapeString(short_name)
+	);
 
-	if (!database) {
+	auto results = QueryDatabase(query);
+	if (!results.Success() || results.RowCount() != 1) {
 		return false;
 	}
 
-	MYSQL_RES     *res;
-	MYSQL_ROW     row;
-	char          escaped_short_name[101];
-	unsigned long length;
-	length = mysql_real_escape_string(
-		database,
-		escaped_short_name,
-		short_name.substr(0, 100).c_str(),
-		short_name.substr(0, 100).length());
-	escaped_short_name[length + 1] = 0;
-	std::stringstream query(std::stringstream::in | std::stringstream::out);
-	query
-		<< "SELECT ifnull(WSR.ServerID,999999) AS ServerID, WSR.ServerTagDescription, ifnull(WSR.ServerTrusted,0) AS ServerTrusted, ifnull(SLT.ServerListTypeID,3) AS ServerListTypeID, ";
-	query << "SLT.ServerListTypeDescription, ifnull(WSR.ServerAdminID,0) AS ServerAdminID FROM "
-		  << server.options.GetWorldRegistrationTable();
-	query << " AS WSR JOIN " << server.options.GetWorldServerTypeTable()
-		  << " AS SLT ON WSR.ServerListTypeID = SLT.ServerListTypeID";
-	query << " WHERE WSR.ServerShortName = '";
-	query << escaped_short_name;
-	query << "'";
+	auto row = results.begin();
 
-	if (mysql_query(database, query.str().c_str()) != 0) {
-		Log(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
-		return false;
-	}
+	id        = atoi(row[0]);
+	desc      = row[1];
+	trusted   = atoi(row[2]);
+	list_id   = atoi(row[3]);
+	list_desc = row[4];
 
-	res = mysql_use_result(database);
-	if (res) {
-		if ((row = mysql_fetch_row(res)) != nullptr) {
-			id        = atoi(row[0]);
-			desc      = row[1];
-			trusted   = atoi(row[2]);
-			list_id   = atoi(row[3]);
-			list_desc = row[4];
-			int db_account_id = atoi(row[5]);
-			mysql_free_result(res);
+	int db_account_id = atoi(row[5]);
+	if (db_account_id > 0) {
 
-			if (db_account_id > 0) {
-				std::stringstream query(std::stringstream::in | std::stringstream::out);
-				query << "SELECT AccountName, AccountPassword FROM " << server.options.GetWorldAdminRegistrationTable();
-				query << " WHERE ServerAdminID = " << db_account_id;
+		auto world_registration_query = fmt::format(
+			"SELECT AccountName, AccountPassword FROM {0} WHERE ServerAdminID = {1} LIMIT 1",
+			server.options.GetWorldAdminRegistrationTable(),
+			db_account_id
+		);
 
-				if (mysql_query(database, query.str().c_str()) != 0) {
-					Log(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
-					return false;
-				}
-
-				res = mysql_use_result(database);
-				if (res) {
-					if ((row = mysql_fetch_row(res)) != nullptr) {
-						account  = row[0];
-						password = row[1];
-						mysql_free_result(res);
-						return true;
-					}
-				}
-
-				Log(Logs::General, Logs::Error, "Mysql query returned no result: %s", query.str().c_str());
-				return false;
-			}
-			return true;
+		auto world_registration_results = QueryDatabase(world_registration_query);
+		if (!world_registration_results.Success() || world_registration_results.RowCount() != 1) {
+			return false;
 		}
+
+		auto world_registration_row = world_registration_results.begin();
+
+		account  = world_registration_row[0];
+		password = world_registration_row[1];
 	}
 
-	Log(Logs::General, Logs::Error, "Mysql query returned no result: %s", query.str().c_str());
-	return false;
+	return true;
 }
 
 /**
