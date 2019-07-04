@@ -3,7 +3,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 SET(eqlogin_sources
 	client.cpp
 	client_manager.cpp
-	database_mysql.cpp
+	database.cpp
 	encryption.cpp
 	main.cpp
 	server_manager.cpp
@@ -13,7 +13,7 @@ SET(eqlogin_sources
 SET(eqlogin_headers
 	client.h
 	client_manager.h
-	database_mysql.h
+	database.h
 	encryption.h
 	login_server.h
 	login_structures.h

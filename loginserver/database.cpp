@@ -20,7 +20,7 @@
 
 #include "../common/global_define.h"
 
-#include "database_mysql.h"
+#include "database.h"
 #include "login_server.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/eqemu_logsys_fmt.h"

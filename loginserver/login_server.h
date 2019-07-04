@@ -23,7 +23,7 @@
 #define EQEMU_LOGINSERVER_H
 
 #include "../common/json_config.h"
-#include "database_mysql.h"
+#include "database.h"
 #include "encryption.h"
 #include "options.h"
 #include "server_manager.h"
