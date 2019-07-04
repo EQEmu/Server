@@ -478,16 +478,19 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *i)
 	}
 	else {
 		Log(Logs::General, Logs::Error, "Handle_NewLSInfo error, local address was too long.");
+
 		return;
 	}
 
 	if (strlen(i->remote_address) <= 125) {
 		if (strlen(i->remote_address) == 0) {
 			remote_ip = GetConnection()->Handle()->RemoteIP();
-			Log(Logs::General,
+			Log(
+				Logs::General,
 				Logs::Error,
-				"Handle_NewLSInfo error, remote address was null, defaulting to stream address %s.",
-				remote_ip.c_str());
+				"Remote address was null, defaulting to stream address %s.",
+				remote_ip.c_str()
+			);
 		}
 		else {
 			remote_ip = i->remote_address;
@@ -495,10 +498,13 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *i)
 	}
 	else {
 		remote_ip = GetConnection()->Handle()->RemoteIP();
-		Log(Logs::General,
+
+		Log(
+			Logs::General,
 			Logs::Error,
 			"Handle_NewLSInfo error, remote address was too long, defaulting to stream address %s.",
-			remote_ip.c_str());
+			remote_ip.c_str()
+		);
 	}
 
 	if (strlen(i->serverversion) <= 64) {
@@ -687,11 +693,12 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *i)
 			}
 		}
 		else {
-			Log(Logs::General,
-				Logs::World_Server,
-				"Server %s(%s) attempted to log in but database couldn't find an entry but unregistered servers are allowed.",
-				long_name.c_str(),
-				short_name.c_str());
+			LogF(Logs::General,
+				 Logs::World_Server,
+				 "Server [{0}] ({1}) is not registered but unregistered servers are allowed",
+				 long_name,
+				 short_name
+			);
 
 			if (server.db->CreateWorldRegistration(long_name, short_name, server_id)) {
 				is_server_authorized = true;

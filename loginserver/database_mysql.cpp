@@ -231,39 +231,20 @@ bool Database::GetLoginTokenDataFromToken(
  */
 unsigned int Database::GetFreeID(const std::string &loginserver)
 {
-	if (!database) {
-		return false;
-	}
+	auto query = fmt::format(
+		"SELECT MAX(LoginServerID) + 1 FROM {0} WHERE AccountLoginServer='{1}'",
+		server.options.GetAccountTable(),
+		EscapeString(loginserver)
+	);
 
-	MYSQL_RES *res;
-	MYSQL_ROW row;
-	std::stringstream query(std::stringstream::in | std::stringstream::out);
-	query << "SELECT MAX(LoginServerID) + 1 FROM " << server.options.GetAccountTable() << " WHERE AccountLoginServer='";
-	query << EscapeString(loginserver) << "'";
-
-	if (mysql_query(database, query.str().c_str()) != 0) {
-		Log(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
+	auto results = QueryDatabase(query);
+	if (!results.Success() || results.RowCount() != 1) {
 		return 0;
 	}
 
-	res = mysql_use_result(database);
+	auto row = results.begin();
 
-	if (res) {
-		while ((row = mysql_fetch_row(res)) != nullptr) {
-			if (row[0] == nullptr) {
-				mysql_free_result(res);
-				return 1;
-			}
-
-			auto ret = atol(row[0]);
-			mysql_free_result(res);
-			return ret;
-		}
-
-		mysql_free_result(res);
-	}
-
-	return 1;
+	return atol(row[0]);
 }
 
 /**
