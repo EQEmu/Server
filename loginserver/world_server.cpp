@@ -23,6 +23,7 @@
 #include "login_structures.h"
 #include "config.h"
 #include "../common/eqemu_logsys.h"
+#include "../common/eqemu_logsys_fmt.h"
 
 extern LoginServer server;
 
@@ -108,11 +109,33 @@ void WorldServer::ProcessNewLSInfo(uint16_t opcode, const EQ::Net::Packet &p)
 		return;
 	}
 
-	if (server.options.IsWorldTraceOn()) {
-		Log(Logs::General, Logs::Netcode, "New Login Info Received.");
-	}
 
 	ServerNewLSInfo_Struct *info = (ServerNewLSInfo_Struct *) p.Data();
+
+	LogF(
+		Logs::General,
+		Logs::Login_Server,
+		"Received New Login Server Info \n"
+		" - name [{0}]\n"
+		" - shortname [{1}]\n"
+		" - remote_address [{2}]\n"
+		" - local_address [{3}]\n"
+		" - account [{4}]\n"
+		" - password [{5}]\n"
+		" - protocolversion [{6}]\n"
+		" - server_version [{7}]\n"
+		" - server_type [{8}]",
+		info->name,
+		info->shortname,
+		info->remote_address,
+		info->local_address,
+		info->account,
+		info->password,
+		info->protocolversion,
+		info->serverversion,
+		info->servertype
+	);
+
 	Handle_NewLSInfo(info);
 }
 
