@@ -175,51 +175,40 @@ bool Database::GetLoginTokenDataFromToken(
 	std::string &user
 )
 {
-	if (!database) {
+	auto query = fmt::format(
+		"SELECT tbllogintokens.Id, tbllogintokens.IpAddress, tbllogintokenclaims.Name, tbllogintokenclaims.Value FROM tbllogintokens "
+		"JOIN tbllogintokenclaims ON tbllogintokens.Id = tbllogintokenclaims.TokenId WHERE tbllogintokens.Expires > NOW() "
+		"AND tbllogintokens.Id='{0}' AND tbllogintokens.IpAddress='{1}'",
+		EscapeString(token),
+		EscapeString(ip)
+	);
+
+	auto results = QueryDatabase(query);
+	if (results.RowCount() == 0 || !results.Success()) {
 		return false;
 	}
-
-	MYSQL_RES *res;
-	MYSQL_ROW row;
-	std::stringstream query(std::stringstream::in | std::stringstream::out);
-	query
-		<< "SELECT tbllogintokens.Id, tbllogintokens.IpAddress, tbllogintokenclaims.Name, tbllogintokenclaims.Value FROM tbllogintokens ";
-	query
-		<< "JOIN tbllogintokenclaims ON tbllogintokens.Id = tbllogintokenclaims.TokenId WHERE tbllogintokens.Expires > NOW() AND tbllogintokens.Id='";
-	query << EscapeString(token) << "' AND tbllogintokens.IpAddress='" << EscapeString(ip) << "'";
-
-	if (mysql_query(database, query.str().c_str()) != 0) {
-		Log(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
-		return false;
-	}
-
-	res = mysql_use_result(database);
 
 	bool found_username          = false;
 	bool found_login_id          = false;
 	bool found_login_server_name = false;
-	if (res) {
-		while ((row = mysql_fetch_row(res)) != nullptr) {
-			if (strcmp(row[2], "username") == 0) {
-				user           = row[3];
-				found_username = true;
-				continue;
-			}
-
-			if (strcmp(row[2], "login_server_id") == 0) {
-				db_account_id  = atoi(row[3]);
-				found_login_id = true;
-				continue;
-			}
-
-			if (strcmp(row[2], "login_server_name") == 0) {
-				db_loginserver          = row[3];
-				found_login_server_name = true;
-				continue;
-			}
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		if (strcmp(row[2], "username") == 0) {
+			user           = row[3];
+			found_username = true;
+			continue;
 		}
 
-		mysql_free_result(res);
+		if (strcmp(row[2], "login_server_id") == 0) {
+			db_account_id  = atoi(row[3]);
+			found_login_id = true;
+			continue;
+		}
+
+		if (strcmp(row[2], "login_server_name") == 0) {
+			db_loginserver          = row[3];
+			found_login_server_name = true;
+			continue;
+		}
 	}
 
 	return found_username && found_login_id && found_login_server_name;
