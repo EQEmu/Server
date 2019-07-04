@@ -141,30 +141,40 @@ void WorldServer::ProcessNewLSInfo(uint16_t opcode, const EQ::Net::Packet &p)
 
 void WorldServer::ProcessLSStatus(uint16_t opcode, const EQ::Net::Packet &p)
 {
-	if (server.options.IsWorldTraceOn()) {
-		Log(Logs::General,
-			Logs::Netcode,
-			"Application packet received from server: 0x%.4X, (size %u)",
-			opcode,
-			p.Length());
-	}
+	Log(
+		Logs::Detail,
+		Logs::Netcode,
+		"Application packet received from server: 0x%.4X, (size %u)",
+		opcode,
+		p.Length()
+	);
 
 	if (server.options.IsDumpInPacketsOn()) {
 		DumpPacket(opcode, p);
 	}
 
 	if (p.Length() < sizeof(ServerLSStatus_Struct)) {
-		Log(Logs::General,
+		Log(
+			Logs::General,
 			Logs::Error,
-			"Received application packet from server that had opcode ServerOP_LSStatus, but was too small. Discarded to avoid buffer overrun");
+			"Received application packet from server that had opcode ServerOP_LSStatus, but was too small. Discarded to avoid buffer overrun"
+		);
+		
 		return;
 	}
 
-	if (server.options.IsWorldTraceOn()) {
-		Log(Logs::General, Logs::Netcode, "World Server Status Received.");
-	}
-
 	ServerLSStatus_Struct *ls_status = (ServerLSStatus_Struct *) p.Data();
+
+	LogF(
+		Logs::Detail,
+		Logs::Login_Server,
+		"World Server Status Update Received | Server [{0}] Status [{1}] Players [{2}] Zones [{3}]",
+		this->GetLongName(),
+		ls_status->status,
+		ls_status->num_players,
+		ls_status->num_zones
+	);
+
 	Handle_LSStatus(ls_status);
 }
 
