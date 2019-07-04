@@ -37,7 +37,7 @@ extern LoginServer server;
  * @param port
  * @param name
  */
-DatabaseMySQL::DatabaseMySQL(
+Database::Database(
 	std::string user,
 	std::string pass,
 	std::string host,
@@ -97,7 +97,7 @@ DatabaseMySQL::DatabaseMySQL(
 /**
  * Deconstructor
  */
-DatabaseMySQL::~DatabaseMySQL()
+Database::~Database()
 {
 	if (database) {
 		mysql_close(database);
@@ -111,7 +111,7 @@ DatabaseMySQL::~DatabaseMySQL()
  * @param id
  * @return
  */
-bool DatabaseMySQL::GetLoginDataFromAccountInfo(
+bool Database::GetLoginDataFromAccountInfo(
 	const std::string &name,
 	const std::string &loginserver,
 	std::string &password,
@@ -167,7 +167,7 @@ bool DatabaseMySQL::GetLoginDataFromAccountInfo(
  * @param user
  * @return
  */
-bool DatabaseMySQL::GetLoginTokenDataFromToken(
+bool Database::GetLoginTokenDataFromToken(
 	const std::string &token,
 	const std::string &ip,
 	unsigned int &db_account_id,
@@ -229,7 +229,7 @@ bool DatabaseMySQL::GetLoginTokenDataFromToken(
  * @param loginserver
  * @return
  */
-unsigned int DatabaseMySQL::GetFreeID(const std::string &loginserver)
+unsigned int Database::GetFreeID(const std::string &loginserver)
 {
 	if (!database) {
 		return false;
@@ -273,7 +273,7 @@ unsigned int DatabaseMySQL::GetFreeID(const std::string &loginserver)
  * @param id
  * @return
  */
-bool DatabaseMySQL::CreateLoginData(
+bool Database::CreateLoginData(
 	const std::string &name,
 	const std::string &password,
 	const std::string &loginserver,
@@ -290,7 +290,7 @@ bool DatabaseMySQL::CreateLoginData(
  * @param id
  * @return
  */
-bool DatabaseMySQL::CreateLoginDataWithID(
+bool Database::CreateLoginDataWithID(
 	const std::string &name,
 	const std::string &password,
 	const std::string &loginserver,
@@ -326,7 +326,7 @@ bool DatabaseMySQL::CreateLoginDataWithID(
  * @param id
  * @return
  */
-bool DatabaseMySQL::DoesLoginServerAccountExist(
+bool Database::DoesLoginServerAccountExist(
 	const std::string &name,
 	const std::string &password,
 	const std::string &loginserver,
@@ -357,7 +357,7 @@ bool DatabaseMySQL::DoesLoginServerAccountExist(
  * @param loginserver
  * @param hash
  */
-void DatabaseMySQL::UpdateLoginHash(
+void Database::UpdateLoginHash(
 	const std::string &name,
 	const std::string &loginserver,
 	const std::string &hash
@@ -395,7 +395,7 @@ void DatabaseMySQL::UpdateLoginHash(
  * @param password
  * @return
  */
-bool DatabaseMySQL::GetWorldRegistration(
+bool Database::GetWorldRegistration(
 	std::string long_name,
 	std::string short_name,
 	unsigned int &id,
@@ -484,7 +484,7 @@ bool DatabaseMySQL::GetWorldRegistration(
  * @param id
  * @param ip_address
  */
-void DatabaseMySQL::UpdateLSAccountData(unsigned int id, std::string ip_address)
+void Database::UpdateLSAccountData(unsigned int id, std::string ip_address)
 {
 	auto query = fmt::format(
 		"UPDATE {0} SET LastIPAddress = '{2}', LastLoginDate = now() where LoginServerId = {3}",
@@ -502,7 +502,7 @@ void DatabaseMySQL::UpdateLSAccountData(unsigned int id, std::string ip_address)
  * @param password
  * @param email
  */
-void DatabaseMySQL::UpdateLSAccountInfo(
+void Database::UpdateLSAccountInfo(
 	unsigned int id,
 	std::string name,
 	std::string password,
@@ -527,7 +527,7 @@ void DatabaseMySQL::UpdateLSAccountInfo(
  * @param long_name
  * @param ip_address
  */
-void DatabaseMySQL::UpdateWorldRegistration(unsigned int id, std::string long_name, std::string ip_address)
+void Database::UpdateWorldRegistration(unsigned int id, std::string long_name, std::string ip_address)
 {
 	auto query = fmt::format(
 		"UPDATE {0} SET ServerLastLoginDate = NOW(), ServerLastIPAddr = '{1}', ServerLongName = '{2}' WHERE ServerID = {3}",
@@ -546,7 +546,7 @@ void DatabaseMySQL::UpdateWorldRegistration(unsigned int id, std::string long_na
  * @param id
  * @return
  */
-bool DatabaseMySQL::CreateWorldRegistration(std::string long_name, std::string short_name, unsigned int &id)
+bool Database::CreateWorldRegistration(std::string long_name, std::string short_name, unsigned int &id)
 {
 	if (!database) {
 		return false;

@@ -38,7 +38,7 @@ public:
 	LoginServer() : db(nullptr), server_manager(nullptr) { }
 
 	EQ::JsonConfigFile config;
-	DatabaseMySQL *db;
+	Database *db;
 	Options options;
 	ServerManager *server_manager;
 	ClientManager *client_manager;

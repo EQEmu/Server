@@ -28,10 +28,10 @@
 #include <stdlib.h>
 #include <mysql.h>
 
-class DatabaseMySQL : public DBcore {
+class Database : public DBcore {
 public:
 
-	DatabaseMySQL() { database = nullptr; }
+	Database() { database = nullptr; }
 
 	/**
 	 * Constructor, tries to set our database to connect to the supplied options.
@@ -42,12 +42,12 @@ public:
 	 * @param port
 	 * @param name
 	 */
-	DatabaseMySQL(std::string user, std::string pass, std::string host, std::string port, std::string name);
+	Database(std::string user, std::string pass, std::string host, std::string port, std::string name);
 
 	/**
 	 * Destructor, frees our database if needed.
 	 */
-	~DatabaseMySQL();
+	~Database();
 	bool IsConnected() { return (database != nullptr); }
 
 	/**
