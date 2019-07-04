@@ -324,6 +324,39 @@ bool DatabaseMySQL::CreateLoginDataWithID(
 
 /**
  * @param name
+ * @param password
+ * @param loginserver
+ * @param id
+ * @return
+ */
+bool DatabaseMySQL::DoesLoginServerAccountExist(
+	const std::string &name,
+	const std::string &password,
+	const std::string &loginserver,
+	unsigned int id
+)
+{
+	if (id == 0) {
+		return false;
+	}
+
+	auto query = fmt::format(
+		"SELECT AccountName FROM {0} WHERE AccountName = '{1}' AND AccountLoginserver = '{2}'",
+		server.options.GetAccountTable(),
+		EscapeString(name),
+		EscapeString(loginserver)
+	);
+
+	auto results = QueryDatabase(query);
+	if (!results.Success() || results.RowCount() != 1) {
+		return false;
+	}
+
+	return true;
+}
+
+/**
+ * @param name
  * @param loginserver
  * @param hash
  */

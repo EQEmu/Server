@@ -133,7 +133,7 @@ int main()
 	 */
 	Log(Logs::General, Logs::Login_Server, "MySQL Database Init.");
 
-	server.db = (Database *) new DatabaseMySQL(
+	server.db = new DatabaseMySQL(
 		server.config.GetVariableString("database", "user", "root"),
 		server.config.GetVariableString("database", "password", ""),
 		server.config.GetVariableString("database", "host", "localhost"),

@@ -87,7 +87,15 @@ public:
 		const std::string &loginserver,
 		unsigned int id
 	);
+
 	virtual void UpdateLoginHash(const std::string &name, const std::string &loginserver, const std::string &hash);
+
+	virtual bool DoesLoginServerAccountExist(
+		const std::string &name,
+		const std::string &password,
+		const std::string &loginserver,
+		unsigned int id
+	);
 
 	/**
 	 * Retrieves the world registration from the long and short names provided

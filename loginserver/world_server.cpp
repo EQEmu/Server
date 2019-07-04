@@ -159,7 +159,7 @@ void WorldServer::ProcessLSStatus(uint16_t opcode, const EQ::Net::Packet &p)
 			Logs::Error,
 			"Received application packet from server that had opcode ServerOP_LSStatus, but was too small. Discarded to avoid buffer overrun"
 		);
-		
+
 		return;
 	}
 

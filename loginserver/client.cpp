@@ -590,6 +590,7 @@ void Client::DoSuccessfulLogin(const std::string &user, int db_account_id, const
 	in.s_addr = connection->GetRemoteIP();
 
 	server.db->UpdateLSAccountData(db_account_id, std::string(inet_ntoa(in)));
+
 	GenerateKey();
 
 	account_id       = db_account_id;
@@ -673,6 +674,11 @@ void Client::CreateEQEmuAccount(const std::string &user, const std::string &pass
 {
 	auto mode = server.options.GetEncryptionMode();
 	auto hash = eqcrypt_hash(user, pass, mode);
+
+	if (server.db->DoesLoginServerAccountExist(user, hash, "eqemu", id)) {
+		DoSuccessfulLogin(user, id, "eqemu");
+		return;
+	}
 
 	if (!server.db->CreateLoginDataWithID(user, hash, "eqemu", id)) {
 		DoFailedLogin();
