@@ -510,57 +510,41 @@ void Database::UpdateWorldRegistration(unsigned int id, std::string long_name, s
  */
 bool Database::CreateWorldRegistration(std::string long_name, std::string short_name, unsigned int &id)
 {
-	if (!database) {
+	auto query = fmt::format(
+		"SELECT ifnull(max(ServerID),0) + 1 FROM {0}",
+		server.options.GetWorldRegistrationTable()
+	);
+
+	auto results = QueryDatabase(query);
+	if (!results.Success() || results.RowCount() != 1) {
 		return false;
 	}
 
-	MYSQL_RES     *res;
-	MYSQL_ROW     row;
-	char          escaped_long_name[201];
-	char          escaped_short_name[101];
-	unsigned long length;
-	length = mysql_real_escape_string(
-		database,
-		escaped_long_name,
-		long_name.substr(0, 100).c_str(),
-		long_name.substr(0, 100).length());
-	escaped_long_name[length + 1] = 0;
-	length = mysql_real_escape_string(
-		database,
-		escaped_short_name,
-		short_name.substr(0, 100).c_str(),
-		short_name.substr(0, 100).length());
-	escaped_short_name[length + 1] = 0;
-	std::stringstream query(std::stringstream::in | std::stringstream::out);
-	query << "SELECT ifnull(max(ServerID),0) FROM " << server.options.GetWorldRegistrationTable();
+	auto row = results.begin();
 
-	if (mysql_query(database, query.str().c_str()) != 0) {
-		Log(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
+	id = atoi(row[0]);
+
+	auto insert_query = fmt::format(
+		"INSERT INTO {0} SET ServerID = {1}, ServerLongName = '{2}', ServerShortName = '{3}', \n"
+		"ServerListTypeID = 3, ServerAdminID = 0, ServerTrusted = 0, ServerTagDescription = ''",
+		server.options.GetWorldRegistrationTable(),
+		id,
+		long_name,
+		short_name
+	);
+
+	auto insert_results = QueryDatabase(insert_query);
+	if (!insert_results.Success()) {
+		LogF(
+			Logs::General,
+			Logs::Error,
+			"World registration did not exist in the database for {0} - {1}",
+			long_name,
+			short_name
+		);
+
 		return false;
 	}
 
-	res = mysql_use_result(database);
-	if (res) {
-		if ((row = mysql_fetch_row(res)) != nullptr) {
-			id = atoi(row[0]) + 1;
-			mysql_free_result(res);
-
-			std::stringstream query(std::stringstream::in | std::stringstream::out);
-			query << "INSERT INTO " << server.options.GetWorldRegistrationTable() << " SET ServerID = " << id;
-			query << ", ServerLongName = '" << escaped_long_name << "', ServerShortName = '" << escaped_short_name;
-			query << "', ServerListTypeID = 3, ServerAdminID = 0, ServerTrusted = 0, ServerTagDescription = ''";
-
-			if (mysql_query(database, query.str().c_str()) != 0) {
-				Log(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
-				return false;
-			}
-			return true;
-		}
-	}
-	Log(Logs::General,
-		Logs::Error,
-		"World registration did not exist in the database for %s %s",
-		long_name.c_str(),
-		short_name.c_str());
-	return false;
+	return true;
 }
