@@ -19,9 +19,6 @@
  */
 
 #include "../common/global_define.h"
-#include "database.h"
-
-#ifdef EQEMU_MYSQL_ENABLED
 
 #include "database_mysql.h"
 #include "login_server.h"
@@ -605,5 +602,3 @@ bool DatabaseMySQL::CreateWorldRegistration(std::string long_name, std::string s
 		short_name.c_str());
 	return false;
 }
-
-#endif

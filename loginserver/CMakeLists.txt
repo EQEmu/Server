@@ -13,7 +13,6 @@ SET(eqlogin_sources
 SET(eqlogin_headers
 	client.h
 	client_manager.h
-	database.h
 	database_mysql.h
 	encryption.h
 	login_server.h

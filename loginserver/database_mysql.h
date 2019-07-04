@@ -21,10 +21,7 @@
 #ifndef EQEMU_DATABASEMYSQL_H
 #define EQEMU_DATABASEMYSQL_H
 
-#include "database.h"
 #include "../common/dbcore.h"
-
-#ifdef EQEMU_MYSQL_ENABLED
 
 #include <string>
 #include <sstream>
@@ -50,8 +47,8 @@ public:
 	/**
 	 * Destructor, frees our database if needed.
 	 */
-	virtual ~DatabaseMySQL();
-	virtual bool IsConnected() { return (database != nullptr); }
+	~DatabaseMySQL();
+	bool IsConnected() { return (database != nullptr); }
 
 	/**
 	 * Retrieves the login data (password hash and account id) from the account name provided needed for client login procedure.
@@ -61,36 +58,36 @@ public:
 	 * @param id
 	 * @return
 	 */
-	virtual bool GetLoginDataFromAccountInfo(
+	bool GetLoginDataFromAccountInfo(
 		const std::string &name,
 		const std::string &loginserver,
 		std::string &password,
 		unsigned int &id
 	);
-	virtual bool GetLoginTokenDataFromToken(
+	bool GetLoginTokenDataFromToken(
 		const std::string &token,
 		const std::string &ip,
 		unsigned int &db_account_id,
 		std::string &db_loginserver,
 		std::string &user
 	);
-	virtual unsigned int GetFreeID(const std::string &loginserver);
-	virtual bool CreateLoginData(
+	unsigned int GetFreeID(const std::string &loginserver);
+	bool CreateLoginData(
 		const std::string &name,
 		const std::string &password,
 		const std::string &loginserver,
 		unsigned int &id
 	);
-	virtual bool CreateLoginDataWithID(
+	bool CreateLoginDataWithID(
 		const std::string &name,
 		const std::string &password,
 		const std::string &loginserver,
 		unsigned int id
 	);
 
-	virtual void UpdateLoginHash(const std::string &name, const std::string &loginserver, const std::string &hash);
+	void UpdateLoginHash(const std::string &name, const std::string &loginserver, const std::string &hash);
 
-	virtual bool DoesLoginServerAccountExist(
+	bool DoesLoginServerAccountExist(
 		const std::string &name,
 		const std::string &password,
 		const std::string &loginserver,
@@ -113,7 +110,7 @@ public:
 	 * @param password
 	 * @return
 	 */
-	virtual bool GetWorldRegistration(
+	bool GetWorldRegistration(
 		std::string long_name,
 		std::string short_name,
 		unsigned int &id,
@@ -125,15 +122,14 @@ public:
 		std::string &password
 	);
 
-	virtual void UpdateLSAccountData(unsigned int id, std::string ip_address);
-	virtual void UpdateLSAccountInfo(unsigned int id, std::string name, std::string password, std::string email);
-	virtual void UpdateWorldRegistration(unsigned int id, std::string long_name, std::string ip_address);
-	virtual bool CreateWorldRegistration(std::string long_name, std::string short_name, unsigned int &id);
+	void UpdateLSAccountData(unsigned int id, std::string ip_address);
+	void UpdateLSAccountInfo(unsigned int id, std::string name, std::string password, std::string email);
+	void UpdateWorldRegistration(unsigned int id, std::string long_name, std::string ip_address);
+	bool CreateWorldRegistration(std::string long_name, std::string short_name, unsigned int &id);
 protected:
 	std::string user, pass, host, port, name;
 	MYSQL       *database;
 };
 
-#endif
 #endif
 
