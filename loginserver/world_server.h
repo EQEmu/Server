@@ -34,7 +34,7 @@
 class WorldServer
 {
 public:
-	WorldServer(std::shared_ptr<EQ::Net::ServertalkServerConnection> c);
+	WorldServer(std::shared_ptr<EQ::Net::ServertalkServerConnection> worldserver_connection);
 
 	/**
 	 * Destructor, frees our connection if it exists
@@ -77,16 +77,16 @@ public:
 	/**
 	 * Takes the info struct we received from world and processes it
 	 *
-	 * @param i
+	 * @param new_worldserver_info_packet
 	 */
-	void Handle_NewLSInfo(ServerNewLSInfo_Struct* i);
+	void Handle_NewLSInfo(ServerNewLSInfo_Struct* new_worldserver_info_packet);
 
 	/**
 	 * Takes the status struct we received from world and processes it
 	 *
-	 * @param s
+	 * @param server_login_status
 	 */
-	void Handle_LSStatus(ServerLSStatus_Struct *s);
+	void Handle_LSStatus(ServerLSStatus_Struct *server_login_status);
 
 	/**
 	 * Informs world that there is a client incoming with the following data.
@@ -105,13 +105,13 @@ private:
 	 * Packet processing functions
 	 *
 	 * @param opcode
-	 * @param p
+	 * @param packet
 	 */
-	void ProcessNewLSInfo(uint16_t opcode, const EQ::Net::Packet &p);
-	void ProcessLSStatus(uint16_t opcode, const EQ::Net::Packet &p);
-	void ProcessUsertoWorldRespLeg(uint16_t opcode, const EQ::Net::Packet &p);
-	void ProcessUsertoWorldResp(uint16_t opcode, const EQ::Net::Packet &p);
-	void ProcessLSAccountUpdate(uint16_t opcode, const EQ::Net::Packet &p);
+	void ProcessNewLSInfo(uint16_t opcode, const EQ::Net::Packet &packet);
+	void ProcessLSStatus(uint16_t opcode, const EQ::Net::Packet &packet);
+	void ProcessUsertoWorldRespLeg(uint16_t opcode, const EQ::Net::Packet &packet);
+	void ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Packet &packet);
+	void ProcessLSAccountUpdate(uint16_t opcode, const EQ::Net::Packet &packet);
 
 	std::shared_ptr<EQ::Net::ServertalkServerConnection> connection;
 	unsigned int zones_booted;

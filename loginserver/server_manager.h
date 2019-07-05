@@ -61,30 +61,30 @@ public:
 	/**
 	 * Creates a server list packet for the client
 	 *
-	 * @param c
-	 * @param seq
+	 * @param client
+	 * @param sequence
 	 * @return
 	 */
-	EQApplicationPacket *CreateServerListPacket(Client *c, uint32 seq);
+	EQApplicationPacket *CreateServerListPacket(Client *client, uint32 sequence);
 
 	/**
 	 * Checks to see if there is a server exists with this name, ignoring option
 	 *
-	 * @param l_name
-	 * @param s_name
+	 * @param server_long_name
+	 * @param server_short_name
 	 * @param ignore
 	 * @return
 	 */
-	bool ServerExists(std::string l_name, std::string s_name, WorldServer *ignore = nullptr);
+	bool ServerExists(std::string server_long_name, std::string server_short_name, WorldServer *ignore = nullptr);
 
 	/**
 	 * Destroys a server with this name, ignoring option
 	 *
-	 * @param l_name
-	 * @param s_name
+	 * @param server_long_name
+	 * @param server_short_name
 	 * @param ignore
 	 */
-	void DestroyServerByName(std::string l_name, std::string s_name, WorldServer *ignore = nullptr);
+	void DestroyServerByName(std::string server_long_name, std::string server_short_name, WorldServer *ignore = nullptr);
 
 private:
 
@@ -92,11 +92,11 @@ private:
 	 * Retrieves a server(if exists) by ip address
 	 * Useful utility for the reconnect process
 	 *
-	 * @param address
+	 * @param ip_address
 	 * @param port
 	 * @return
 	 */
-	WorldServer *GetServerByAddress(const std::string &address, int port);
+	WorldServer *GetServerByAddress(const std::string &ip_address, int port);
 
 	std::unique_ptr<EQ::Net::ServertalkServer> server_connection;
 	std::list<std::unique_ptr<WorldServer>>    world_servers;

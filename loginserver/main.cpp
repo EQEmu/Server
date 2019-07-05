@@ -26,6 +26,7 @@
 #include "../common/platform.h"
 #include "../common/crash.h"
 #include "../common/eqemu_logsys.h"
+#include "../common/eqemu_logsys_fmt.h"
 #include "login_server.h"
 #include <time.h>
 #include <stdlib.h>
@@ -58,10 +59,10 @@ int main()
 
 	LogSys.log_settings[Logs::Login_Server].log_to_console = Logs::Detail;
 
-	Log(Logs::General, Logs::Login_Server, "Logging System Init.");
+	LogLoginserver("Logging System Init");
 
 	server.config = EQ::JsonConfigFile::Load("login.json");
-	Log(Logs::General, Logs::Login_Server, "Config System Init.");
+	LogLoginserver("Config System Init");
 
 	server.options.Trace(server.config.GetVariableBool("general", "trace", false));
 	server.options.WorldTrace(server.config.GetVariableBool("general", "world_trace", false));
@@ -131,7 +132,7 @@ int main()
 	/**
 	 * mysql connect
 	 */
-	Log(Logs::General, Logs::Login_Server, "MySQL Database Init.");
+	LogLoginserver("MySQL Database Init");
 
 	server.db = new Database(
 		server.config.GetVariableString("database", "user", "root"),
@@ -145,19 +146,19 @@ int main()
 	 * make sure our database got created okay, otherwise cleanup and exit
 	 */
 	if (!server.db) {
-		Log(Logs::General, Logs::Error, "Database Initialization Failure.");
-		Log(Logs::General, Logs::Login_Server, "Log System Shutdown.");
+		Error("Database Initialization Failure");
+		LogLoginserver("Log System Shutdown");
 		return 1;
 	}
 
 	/**
 	 * create server manager
 	 */
-	Log(Logs::General, Logs::Login_Server, "Server Manager Initialize.");
+	LogLoginserver("Server Manager Init");
 	server.server_manager = new ServerManager();
 	if (!server.server_manager) {
-		Log(Logs::General, Logs::Error, "Server Manager Failed to Start.");
-		Log(Logs::General, Logs::Login_Server, "Database System Shutdown.");
+		Error("Server Manager Failed to Start");
+		LogLoginserver("Database System Shutdown");
 		delete server.db;
 		return 1;
 	}
@@ -165,14 +166,14 @@ int main()
 	/**
 	 * create client manager
 	 */
-	Log(Logs::General, Logs::Login_Server, "Client Manager Initialize.");
+	LogLoginserver("Client Manager Init");
 	server.client_manager = new ClientManager();
 	if (!server.client_manager) {
-		Log(Logs::General, Logs::Error, "Client Manager Failed to Start.");
-		Log(Logs::General, Logs::Login_Server, "Server Manager Shutdown.");
+		Error("Client Manager Failed to Start");
+		LogLoginserver("Server Manager Shutdown");
 		delete server.server_manager;
 
-		Log(Logs::General, Logs::Login_Server, "Database System Shutdown.");
+		LogLoginserver("Database System Shutdown");
 		delete server.db;
 		return 1;
 	}
@@ -185,14 +186,10 @@ int main()
 #endif
 #endif
 
-	Log(Logs::General, Logs::Login_Server, "Server Started.");
+	LogLoginserver("Server Started");
 
 	if (LogSys.log_settings[Logs::Login_Server].log_to_console == 1) {
-		Log(
-			Logs::General,
-			Logs::Login_Server,
-			"Loginserver logging set to level [1] for more debugging, enable detail [3]"
-		);
+		LogLoginserver("Loginserver logging set to level [1] for more debugging, enable detail [3]");
 	}
 
 	while (run_server) {
@@ -202,13 +199,13 @@ int main()
 		Sleep(5);
 	}
 
-	Log(Logs::General, Logs::Login_Server, "Server Shutdown.");
-	Log(Logs::General, Logs::Login_Server, "Client Manager Shutdown.");
+	LogLoginserver("Server Shutdown");
+	LogLoginserver("Client Manager Shutdown");
 	delete server.client_manager;
-	Log(Logs::General, Logs::Login_Server, "Server Manager Shutdown.");
+	LogLoginserver("Server Manager Shutdown");
 	delete server.server_manager;
 
-	Log(Logs::General, Logs::Login_Server, "Database System Shutdown.");
+	LogLoginserver("Database System Shutdown");
 	delete server.db;
 	return 0;
 }

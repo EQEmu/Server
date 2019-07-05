@@ -258,11 +258,8 @@ bool Database::CreateLoginDataWithID(
 	);
 
 	auto results = QueryDatabase(query);
-	if (!results.Success()) {
-		return false;
-	}
 
-	return true;
+	return results.Success();
 }
 
 /**
@@ -309,9 +306,7 @@ void Database::UpdateLoginHash(
 	const std::string &hash
 )
 {
-	LogF(
-		Logs::Detail,
-		Logs::Login_Server,
+	LogLoginserverDetail(
 		"name [{0}] loginserver [{1}] hash [{2}]",
 		name,
 		loginserver,

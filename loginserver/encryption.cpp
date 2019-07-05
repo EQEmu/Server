@@ -23,15 +23,26 @@
 #include <openssl/md5.h>
 #include <cstring>
 #include <string>
+
 #ifdef ENABLE_SECURITY
+
 #include <sodium.h>
+
 #endif
 
 #include "encryption.h"
 
-const char* eqcrypt_block(const char *buffer_in, size_t buffer_in_sz, char* buffer_out, bool enc) {
+/**
+ * @param buffer_in
+ * @param buffer_in_sz
+ * @param buffer_out
+ * @param enc
+ * @return
+ */
+const char *eqcrypt_block(const char *buffer_in, size_t buffer_in_sz, char *buffer_out, bool enc)
+{
 	DES_key_schedule k;
-	DES_cblock v;
+	DES_cblock       v;
 
 	memset(&k, 0, sizeof(DES_key_schedule));
 	memset(&v, 0, sizeof(DES_cblock));
@@ -40,16 +51,21 @@ const char* eqcrypt_block(const char *buffer_in, size_t buffer_in_sz, char* buff
 		return nullptr;
 	}
 
-	DES_ncbc_encrypt((const unsigned char*)buffer_in, (unsigned char*)buffer_out, (long)buffer_in_sz, &k, &v, enc);
+	DES_ncbc_encrypt((const unsigned char *) buffer_in, (unsigned char *) buffer_out, (long) buffer_in_sz, &k, &v, enc);
 	return buffer_out;
 }
 
-std::string eqcrypt_md5(const std::string &msg) {
-	std::string ret;
+/**
+ * @param msg
+ * @return
+ */
+std::string eqcrypt_md5(const std::string &msg)
+{
+	std::string   ret;
 	unsigned char md5_digest[16];
-	char tmp[4];
+	char          tmp[4];
 
-	MD5((const unsigned char*)msg.c_str(), msg.length(), md5_digest);
+	MD5((const unsigned char *) msg.c_str(), msg.length(), md5_digest);
 
 	for (int i = 0; i < 16; ++i) {
 		sprintf(&tmp[0], "%02x", md5_digest[i]);
@@ -60,12 +76,17 @@ std::string eqcrypt_md5(const std::string &msg) {
 	return ret;
 }
 
-std::string eqcrypt_sha1(const std::string &msg) {
-	std::string ret;
+/**
+ * @param msg
+ * @return
+ */
+std::string eqcrypt_sha1(const std::string &msg)
+{
+	std::string   ret;
 	unsigned char sha_digest[20];
-	char tmp[4];
+	char          tmp[4];
 
-	SHA1((const unsigned char*)msg.c_str(), msg.length(), sha_digest);
+	SHA1((const unsigned char *) msg.c_str(), msg.length(), sha_digest);
 
 	for (int i = 0; i < 20; ++i) {
 		sprintf(&tmp[0], "%02x", sha_digest[i]);
@@ -76,12 +97,17 @@ std::string eqcrypt_sha1(const std::string &msg) {
 	return ret;
 }
 
-std::string eqcrypt_sha512(const std::string &msg) {
-	std::string ret;
+/**
+ * @param msg
+ * @return
+ */
+std::string eqcrypt_sha512(const std::string &msg)
+{
+	std::string   ret;
 	unsigned char sha_digest[64];
-	char tmp[4];
+	char          tmp[4];
 
-	SHA512((const unsigned char*)msg.c_str(), msg.length(), sha_digest);
+	SHA512((const unsigned char *) msg.c_str(), msg.length(), sha_digest);
 
 	for (int i = 0; i < 64; ++i) {
 		sprintf(&tmp[0], "%02x", sha_digest[i]);
@@ -94,23 +120,39 @@ std::string eqcrypt_sha512(const std::string &msg) {
 
 #ifdef ENABLE_SECURITY
 
+/**
+ * @param msg
+ * @return
+ */
 std::string eqcrypt_argon2(const std::string &msg)
 {
 	char buffer[crypto_pwhash_STRBYTES];
 
-	if (crypto_pwhash_str(&buffer[0], &msg[0], msg.length(), crypto_pwhash_OPSLIMIT_INTERACTIVE, crypto_pwhash_MEMLIMIT_INTERACTIVE) != 0) {
+	if (crypto_pwhash_str(
+		&buffer[0],
+		&msg[0],
+		msg.length(),
+		crypto_pwhash_OPSLIMIT_INTERACTIVE,
+		crypto_pwhash_MEMLIMIT_INTERACTIVE
+	) != 0) {
 		return "";
 	}
 
 	return buffer;
 }
 
+/**
+ * @param msg
+ * @return
+ */
 std::string eqcrypt_scrypt(const std::string &msg)
 {
 	char buffer[crypto_pwhash_scryptsalsa208sha256_STRBYTES];
 
-	if (crypto_pwhash_scryptsalsa208sha256_str(&buffer[0], &msg[0], msg.length(),
-		crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE, crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE) != 0) {
+	if (crypto_pwhash_scryptsalsa208sha256_str(
+		&buffer[0], &msg[0], msg.length(),
+		crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE, crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE
+	) != 0) {
 		return "";
 	}
 
@@ -119,60 +161,72 @@ std::string eqcrypt_scrypt(const std::string &msg)
 
 #endif
 
-std::string eqcrypt_hash(const std::string &username, const std::string &password, int mode) {
-	switch (mode)
-	{
-	case EncryptionModeMD5:
-		return eqcrypt_md5(password);
-	case EncryptionModeMD5PassUser:
-		return eqcrypt_md5(password + ":" + username);
-	case EncryptionModeMD5UserPass:
-		return eqcrypt_md5(username + ":" + password);
-	case EncryptionModeMD5Triple:
-		return eqcrypt_md5(eqcrypt_md5(username) + eqcrypt_md5(password));
-	case EncryptionModeSHA:
-		return eqcrypt_sha1(password);
-	case EncryptionModeSHAPassUser:
-		return eqcrypt_sha1(password + ":" + username);
-	case EncryptionModeSHAUserPass:
-		return eqcrypt_sha1(username + ":" + password);
-	case EncryptionModeSHATriple:
-		return eqcrypt_sha1(eqcrypt_sha1(username) + eqcrypt_sha1(password));
-	case EncryptionModeSHA512:
-		return eqcrypt_sha512(password);
-	case EncryptionModeSHA512PassUser:
-		return eqcrypt_sha512(password + ":" + username);
-	case EncryptionModeSHA512UserPass:
-		return eqcrypt_sha512(username + ":" + password);
-	case EncryptionModeSHA512Triple:
-		return eqcrypt_sha512(eqcrypt_sha512(username) + eqcrypt_sha512(password));
+/**
+ * @param username
+ * @param password
+ * @param mode
+ * @return
+ */
+std::string eqcrypt_hash(const std::string &username, const std::string &password, int mode)
+{
+	switch (mode) {
+		case EncryptionModeMD5:
+			return eqcrypt_md5(password);
+		case EncryptionModeMD5PassUser:
+			return eqcrypt_md5(password + ":" + username);
+		case EncryptionModeMD5UserPass:
+			return eqcrypt_md5(username + ":" + password);
+		case EncryptionModeMD5Triple:
+			return eqcrypt_md5(eqcrypt_md5(username) + eqcrypt_md5(password));
+		case EncryptionModeSHA:
+			return eqcrypt_sha1(password);
+		case EncryptionModeSHAPassUser:
+			return eqcrypt_sha1(password + ":" + username);
+		case EncryptionModeSHAUserPass:
+			return eqcrypt_sha1(username + ":" + password);
+		case EncryptionModeSHATriple:
+			return eqcrypt_sha1(eqcrypt_sha1(username) + eqcrypt_sha1(password));
+		case EncryptionModeSHA512:
+			return eqcrypt_sha512(password);
+		case EncryptionModeSHA512PassUser:
+			return eqcrypt_sha512(password + ":" + username);
+		case EncryptionModeSHA512UserPass:
+			return eqcrypt_sha512(username + ":" + password);
+		case EncryptionModeSHA512Triple:
+			return eqcrypt_sha512(eqcrypt_sha512(username) + eqcrypt_sha512(password));
 #ifdef ENABLE_SECURITY
-	case EncryptionModeArgon2:
-		return eqcrypt_argon2(password);
-	case EncryptionModeSCrypt:
-		return eqcrypt_scrypt(password);
+		case EncryptionModeArgon2:
+			return eqcrypt_argon2(password);
+		case EncryptionModeSCrypt:
+			return eqcrypt_scrypt(password);
 #endif
-		//todo bcrypt? pbkdf2?
-	default:
-		return "";
-		break;
+			//todo bcrypt? pbkdf2?
+		default:
+			return "";
+			break;
 	}
 }
 
-bool eqcrypt_verify_hash(const std::string &username, const std::string &password, const std::string &pwhash, int mode) {
-	switch (mode)
-	{
+/**
+ * @param username
+ * @param password
+ * @param pwhash
+ * @param mode
+ * @return
+ */
+bool eqcrypt_verify_hash(const std::string &username, const std::string &password, const std::string &pwhash, int mode)
+{
+	switch (mode) {
 #ifdef ENABLE_SECURITY
-	case 13:
-		return crypto_pwhash_str_verify(&pwhash[0], &password[0], password.length()) == 0;
-	case 14:
-		return crypto_pwhash_scryptsalsa208sha256_str_verify(&pwhash[0], &password[0], password.length()) == 0;
+		case 13:
+			return crypto_pwhash_str_verify(&pwhash[0], &password[0], password.length()) == 0;
+		case 14:
+			return crypto_pwhash_scryptsalsa208sha256_str_verify(&pwhash[0], &password[0], password.length()) == 0;
 #endif
-	default:
-	{
-		auto hash = eqcrypt_hash(username, password, mode);
-		return hash.compare(pwhash) == 0;
-	}
+		default: {
+			auto hash = eqcrypt_hash(username, password, mode);
+			return hash.compare(pwhash) == 0;
+		}
 	}
 
 	return false;
