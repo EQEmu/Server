@@ -107,7 +107,7 @@ void WorldServer::ProcessNewLSInfo(uint16_t opcode, const EQ::Net::Packet &packe
 	}
 
 	if (packet.Length() < sizeof(ServerNewLSInfo_Struct)) {
-		Error(
+		LogError(
 			"Received application packet from server that had opcode ServerOP_NewLSInfo, "
 			"but was too small. Discarded to avoid buffer overrun"
 		);
@@ -118,7 +118,7 @@ void WorldServer::ProcessNewLSInfo(uint16_t opcode, const EQ::Net::Packet &packe
 
 	auto *info = (ServerNewLSInfo_Struct *) packet.Data();
 
-	LogLoginserver(
+	LogInfo(
 		"Received New Login Server Info \n"
 		" - name [{0}]\n"
 		" - shortname [{1}]\n"
@@ -162,7 +162,7 @@ void WorldServer::ProcessLSStatus(uint16_t opcode, const EQ::Net::Packet &packet
 	}
 
 	if (packet.Length() < sizeof(ServerLSStatus_Struct)) {
-		Error(
+		LogError(
 			"Received application packet from server that had opcode ServerOP_LSStatus, but was too small. Discarded to avoid buffer overrun"
 		);
 
@@ -171,7 +171,7 @@ void WorldServer::ProcessLSStatus(uint16_t opcode, const EQ::Net::Packet &packet
 
 	auto *ls_status = (ServerLSStatus_Struct *) packet.Data();
 
-	LogLoginserverDetail(
+	LogDebug(
 		"World Server Status Update Received | Server [{0}] Status [{1}] Players [{2}] Zones [{3}]",
 		this->GetLongName(),
 		ls_status->status,
@@ -201,7 +201,7 @@ void WorldServer::ProcessUsertoWorldRespLeg(uint16_t opcode, const EQ::Net::Pack
 	}
 
 	if (packet.Length() < sizeof(UsertoWorldResponseLegacy_Struct)) {
-		Error(
+		LogError(
 			"Received application packet from server that had opcode ServerOP_UsertoWorldResp, "
 			"but was too small. Discarded to avoid buffer overrun"
 		);
@@ -284,7 +284,7 @@ void WorldServer::ProcessUsertoWorldRespLeg(uint16_t opcode, const EQ::Net::Pack
 		delete outapp;
 	}
 	else {
-		Error(
+		LogError(
 			"Received User-To-World Response for {0} but could not find the client referenced!",
 			user_to_world_response->lsaccountid
 		);
@@ -403,7 +403,7 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 		delete outapp;
 	}
 	else {
-		Error("Received User-To-World Response for {0} but could not find the client referenced!.",
+		LogError("Received User-To-World Response for {0} but could not find the client referenced!.",
 			  user_to_world_response->lsaccountid);
 	}
 }
@@ -427,7 +427,7 @@ void WorldServer::ProcessLSAccountUpdate(uint16_t opcode, const EQ::Net::Packet 
 	}
 
 	if (packet.Length() < sizeof(ServerLSAccountUpdate_Struct)) {
-		Error(
+		LogError(
 			"Received application packet from server that had opcode ServerLSAccountUpdate_Struct, "
 			"but was too small. Discarded to avoid buffer overrun"
 		);
@@ -464,7 +464,7 @@ void WorldServer::ProcessLSAccountUpdate(uint16_t opcode, const EQ::Net::Packet 
 void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info_packet)
 {
 	if (is_server_logged_in) {
-		Error("WorldServer::Handle_NewLSInfo called but the login server was already marked as logged in, aborting.");
+		LogError("WorldServer::Handle_NewLSInfo called but the login server was already marked as logged in, aborting.");
 		return;
 	}
 
@@ -472,7 +472,7 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info
 		account_name = new_world_server_info_packet->account;
 	}
 	else {
-		Error("Handle_NewLSInfo error, account name was too long.");
+		LogError("Handle_NewLSInfo error, account name was too long.");
 		return;
 	}
 
@@ -480,7 +480,7 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info
 		account_password = new_world_server_info_packet->password;
 	}
 	else {
-		Error("Handle_NewLSInfo error, account password was too long.");
+		LogError("Handle_NewLSInfo error, account password was too long.");
 		return;
 	}
 
@@ -488,7 +488,7 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info
 		long_name = new_world_server_info_packet->name;
 	}
 	else {
-		Error("Handle_NewLSInfo error, long name was too long.");
+		LogError("Handle_NewLSInfo error, long name was too long.");
 		return;
 	}
 
@@ -496,13 +496,13 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info
 		short_name = new_world_server_info_packet->shortname;
 	}
 	else {
-		Error("Handle_NewLSInfo error, short name was too long.");
+		LogError("Handle_NewLSInfo error, short name was too long.");
 		return;
 	}
 
 	if (strlen(new_world_server_info_packet->local_address) <= 125) {
 		if (strlen(new_world_server_info_packet->local_address) == 0) {
-			Error("Handle_NewLSInfo error, local address was null, defaulting to localhost");
+			LogError("Handle_NewLSInfo error, local address was null, defaulting to localhost");
 			local_ip = "127.0.0.1";
 		}
 		else {
@@ -510,7 +510,7 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info
 		}
 	}
 	else {
-		Error("Handle_NewLSInfo error, local address was too long.");
+		LogError("Handle_NewLSInfo error, local address was too long.");
 
 		return;
 	}
@@ -518,7 +518,7 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info
 	if (strlen(new_world_server_info_packet->remote_address) <= 125) {
 		if (strlen(new_world_server_info_packet->remote_address) == 0) {
 			remote_ip = GetConnection()->Handle()->RemoteIP();
-			Error(
+			LogError(
 				"Remote address was null, defaulting to stream address %s.",
 				remote_ip.c_str()
 			);
@@ -542,7 +542,7 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info
 		version = new_world_server_info_packet->serverversion;
 	}
 	else {
-		Error("Handle_NewLSInfo error, server version was too long.");
+		LogError("Handle_NewLSInfo error, server version was too long.");
 		return;
 	}
 
@@ -550,7 +550,7 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info
 		protocol = new_world_server_info_packet->protocolversion;
 	}
 	else {
-		Error("Handle_NewLSInfo error, protocol version was too long.");
+		LogError("Handle_NewLSInfo error, protocol version was too long.");
 		return;
 	}
 
@@ -559,13 +559,13 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info
 
 	if (server.options.IsRejectingDuplicateServers()) {
 		if (server.server_manager->ServerExists(long_name, short_name, this)) {
-			Error("World tried to login but there already exists a server that has that name");
+			LogError("World tried to login but there already exists a server that has that name");
 			return;
 		}
 	}
 	else {
 		if (server.server_manager->ServerExists(long_name, short_name, this)) {
-			Error("World tried to login but there already exists a server that has that name");
+			LogError("World tried to login but there already exists a server that has that name");
 			server.server_manager->DestroyServerByName(long_name, short_name, this);
 		}
 	}
@@ -700,14 +700,14 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info
 				 * this is the second of two cases where we should deny access even if unregistered is allowed
 				 */
 				if (server_account_name.size() > 0 || server_account_password.size() > 0) {
-					LogLoginserver(
+					LogInfo(
 						"Server [{0}] [{1}] did not login but this server required a password to login",
 						long_name,
 						short_name
 					);
 				}
 				else {
-					LogLoginserver(
+					LogInfo(
 						"Server [{0}] [{1}] did not login but unregistered servers are allowed",
 						long_name,
 						short_name
@@ -720,7 +720,7 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info
 			}
 		}
 		else {
-			LogLoginserver(
+			LogInfo(
 				"Server [{0}] ({1}) is not registered but unregistered servers are allowed",
 				long_name,
 				short_name
@@ -782,7 +782,7 @@ void WorldServer::SendClientAuth(
 		client_auth.local = 1;
 	}
 	else if (IpUtil::IsIpInPrivateRfc1918(client_address)) {
-		LogLoginserver("Client is authenticating from a local address [{0}]", client_address);
+		LogInfo("Client is authenticating from a local address [{0}]", client_address);
 		client_auth.local = 1;
 	}
 	else {
@@ -792,13 +792,13 @@ void WorldServer::SendClientAuth(
 	struct in_addr ip_addr{};
 	ip_addr.s_addr = client_auth.ip;
 
-	LogLoginserver(
+	LogInfo(
 		"Client authentication response: world_address [{0}] client_address [{1}]",
 		world_address,
 		client_address
 	);
 
-	LogLoginserver(
+	LogInfo(
 		"Sending Client Authentication Response ls_account_id [{0}] ls_name [{1}] name [{2}] key [{3}] ls_admin [{4}] "
 		" world_admin [{5}] ip [{6}] local [{7}]",
 		client_auth.lsaccount_id,

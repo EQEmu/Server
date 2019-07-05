@@ -41,7 +41,7 @@ ClientManager::ClientManager()
 			"login_opcodes.conf"
 		).c_str())) {
 
-		Error(
+		LogError(
 			"ClientManager fatal error: couldn't load opcodes for Titanium file [{0}]",
 			server.config.GetVariableString("Titanium", "opcodes", "login_opcodes.conf")
 		);
@@ -51,7 +51,7 @@ ClientManager::ClientManager()
 
 	titanium_stream->OnNewConnection(
 		[this](std::shared_ptr<EQ::Net::EQStream> stream) {
-			LogLoginserver(
+			LogInfo(
 				"New Titanium client connection from {0}:{1}",
 				stream->GetRemoteIP(),
 				stream->GetRemotePort()
@@ -69,7 +69,7 @@ ClientManager::ClientManager()
 	sod_stream = new EQ::Net::EQStreamManager(sod_opts);
 	sod_ops    = new RegularOpcodeManager;
 	if (!sod_ops->LoadOpcodes(server.config.GetVariableString("SoD", "opcodes", "login_opcodes.conf").c_str())) {
-		Error(
+		LogError(
 			"ClientManager fatal error: couldn't load opcodes for SoD file {0}",
 			server.config.GetVariableString("SoD", "opcodes", "login_opcodes.conf").c_str()
 		);
@@ -79,7 +79,7 @@ ClientManager::ClientManager()
 
 	sod_stream->OnNewConnection(
 		[this](std::shared_ptr<EQ::Net::EQStream> stream) {
-			LogLoginserver(
+			LogInfo(
 				"New SoD client connection from {0}:{1}",
 				stream->GetRemoteIP(),
 				stream->GetRemotePort()
@@ -134,7 +134,7 @@ void ClientManager::ProcessDisconnect()
 	while (iter != clients.end()) {
 		std::shared_ptr<EQStreamInterface> c = (*iter)->GetConnection();
 		if (c->CheckState(CLOSED)) {
-			LogLoginserver("Client disconnected from the server, removing client.");
+			LogInfo("Client disconnected from the server, removing client.");
 			delete (*iter);
 			iter = clients.erase(iter);
 		}
@@ -153,7 +153,7 @@ void ClientManager::RemoveExistingClient(unsigned int account_id, const std::str
 	auto iter = clients.begin();
 	while (iter != clients.end()) {
 		if ((*iter)->GetAccountID() == account_id && (*iter)->GetLoginServerName().compare(loginserver) == 0) {
-			LogLoginserver("Client attempting to log in existing client already logged in, removing existing client");
+			LogInfo("Client attempting to log in existing client already logged in, removing existing client");
 			delete (*iter);
 			iter = clients.erase(iter);
 		}

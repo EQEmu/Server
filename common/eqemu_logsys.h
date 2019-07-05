@@ -94,6 +94,12 @@ namespace Logs {
 		NPCRoamBox,
 		NPCScaling,
 		MobAppearance,
+		Info,
+		Warning,
+		Critical,
+		Emergency,
+		Alert,
+		Notice,
 		MaxCategoryID /* Don't Remove this */
 	};
 
@@ -153,13 +159,72 @@ namespace Logs {
 		"Traps",
 		"NPC Roam Box",
 		"NPC Scaling",
-		"Mob Appearance"
+		"Mob Appearance",
+		"Info",
+		"Warning",
+		"Critical",
+		"Emergency",
+		"Alert",
+		"Notice"
 	};
 }
 
-#define Error(message, ...) do {\
+/**
+ * RFC 5424
+ */
+
+#define LogEmergency(message, ...) do {\
+    if (LogSys.log_settings[Logs::Emergency].is_category_enabled == 1)\
+        OutF(LogSys, Logs::General, Logs::Emergency, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogAlert(message, ...) do {\
+    if (LogSys.log_settings[Logs::Alert].is_category_enabled == 1)\
+        OutF(LogSys, Logs::General, Logs::Alert, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogCritical(message, ...) do {\
+    if (LogSys.log_settings[Logs::Critical].is_category_enabled == 1)\
+        OutF(LogSys, Logs::General, Logs::Critical, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogError(message, ...) do {\
     if (LogSys.log_settings[Logs::Error].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Error, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+
+#define LogWarning(message, ...) do {\
+    if (LogSys.log_settings[Logs::Warning].is_category_enabled == 1)\
+        OutF(LogSys, Logs::General, Logs::Warning, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogNotice(message, ...) do {\
+    if (LogSys.log_settings[Logs::Notice].is_category_enabled == 1)\
+        OutF(LogSys, Logs::General, Logs::Notice, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogInfo(message, ...) do {\
+    if (LogSys.log_settings[Logs::Info].is_category_enabled == 1)\
+        OutF(LogSys, Logs::General, Logs::Info, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogDebug(message, ...) do {\
+    if (LogSys.log_settings[Logs::Debug].is_category_enabled == 1)\
+        OutF(LogSys, Logs::General, Logs::Debug, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+
+
+
+
+/**
+ * Other
+ */
+
+#define LogStatus(message, ...) do {\
+    if (LogSys.log_settings[Logs::Status].is_category_enabled == 1)\
+        OutF(LogSys, Logs::General, Logs::Status, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define Log(debug_level, log_category, message, ...) do {\
@@ -172,15 +237,6 @@ namespace Logs {
         OutF(LogSys, debug_level, log_category, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
-#define LogLoginserver(message, ...) do {\
-    if (LogSys.log_settings[Logs::Login_Server].is_category_enabled == 1)\
-        OutF(LogSys, Logs::General, Logs::Login_Server, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogLoginserverDetail(message, ...) do {\
-    if (LogSys.log_settings[Logs::Login_Server].is_category_enabled == 1)\
-        OutF(LogSys, Logs::Detail, Logs::Login_Server, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
 
 class EQEmuLogSys {
 public:
@@ -329,6 +385,12 @@ private:
 	 * @param message
 	 */
 	void ProcessLogWrite(uint16 debug_level, uint16 log_category, const std::string &message);
+
+	/**
+	 * @param log_category
+	 * @return
+	 */
+	bool IsRfc5424LogCategory(uint16 log_category);
 };
 
 extern EQEmuLogSys LogSys;

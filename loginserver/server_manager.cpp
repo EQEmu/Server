@@ -39,11 +39,11 @@ ServerManager::ServerManager()
 	opts.ipv6 = false;
 	server_connection->Listen(opts);
 
-	LogLoginserver("Loginserver now listening on port [{0}]", listen_port);
+	LogInfo("Loginserver now listening on port [{0}]", listen_port);
 
 	server_connection->OnConnectionIdentified(
 		"World", [this](std::shared_ptr<EQ::Net::ServertalkServerConnection> world_connection) {
-			LogLoginserver(
+			LogInfo(
 				"New world server connection from {0}:{1}",
 				world_connection->Handle()->RemoteIP(),
 				world_connection->Handle()->RemotePort()
@@ -55,7 +55,7 @@ ServerManager::ServerManager()
 					0 &&
 					(*iter)->GetConnection()->Handle()->RemotePort() == world_connection->Handle()->RemotePort()) {
 
-					LogLoginserver(
+					LogInfo(
 						"World server already existed for {0}:{1}, removing existing connection.",
 						world_connection->Handle()->RemoteIP(),
 						world_connection->Handle()->RemotePort()
@@ -138,7 +138,7 @@ EQApplicationPacket *ServerManager::CreateServerListPacket(Client *client, uint3
 			packet_size += (*iter)->GetLongName().size() + (*iter)->GetLocalIP().size() + 24;
 		}
 		else if (IpUtil::IsIpInPrivateRfc1918(client_ip)) {
-			LogLoginserver("Client is requesting server list from a local address [{0}]", client_ip);
+			LogInfo("Client is requesting server list from a local address [{0}]", client_ip);
 			packet_size += (*iter)->GetLongName().size() + (*iter)->GetLocalIP().size() + 24;
 		}
 		else {
@@ -264,14 +264,14 @@ void ServerManager::SendUserToWorldRequest(
 			found = true;
 
 			if (server.options.IsDumpInPacketsOn()) {
-				LogLoginserver("{0}", outapp.ToString());
+				LogInfo("{0}", outapp.ToString());
 			}
 		}
 		++iter;
 	}
 
 	if (!found && server.options.IsTraceOn()) {
-		Error("Client requested a user to world but supplied an invalid id of {0}", server_id);
+		LogError("Client requested a user to world but supplied an invalid id of {0}", server_id);
 	}
 }
 

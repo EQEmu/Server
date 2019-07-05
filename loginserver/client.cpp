@@ -62,19 +62,19 @@ bool Client::Process()
 		switch (app->GetOpcode()) {
 			case OP_SessionReady: {
 				if (server.options.IsTraceOn()) {
-					LogLoginserver("Session ready received from client.");
+					LogInfo("Session ready received from client.");
 				}
 				Handle_SessionReady((const char *) app->pBuffer, app->Size());
 				break;
 			}
 			case OP_Login: {
 				if (app->Size() < 20) {
-					Error("Login received but it is too small, discarding.");
+					LogError("Login received but it is too small, discarding.");
 					break;
 				}
 
 				if (server.options.IsTraceOn()) {
-					LogLoginserver("Login received from client.");
+					LogInfo("Login received from client.");
 				}
 
 				Handle_Login((const char *) app->pBuffer, app->Size());
@@ -82,12 +82,12 @@ bool Client::Process()
 			}
 			case OP_ServerListRequest: {
 				if (app->Size() < 4) {
-					Error("Server List Request received but it is too small, discarding.");
+					LogError("Server List Request received but it is too small, discarding.");
 					break;
 				}
 
 				if (server.options.IsTraceOn()) {
-					LogLoginserver("Server list request received from client.");
+					LogInfo("Server list request received from client.");
 				}
 
 				SendServerListPacket(*(uint32_t *) app->pBuffer);
@@ -95,7 +95,7 @@ bool Client::Process()
 			}
 			case OP_PlayEverquestRequest: {
 				if (app->Size() < sizeof(PlayEverquestRequest_Struct)) {
-					Error("Play received but it is too small, discarding.");
+					LogError("Play received but it is too small, discarding.");
 					break;
 				}
 
@@ -106,7 +106,7 @@ bool Client::Process()
 				if (LogSys.log_settings[Logs::Client_Server_Packet_Unhandled].is_category_enabled == 1) {
 					char dump[64];
 					app->build_header_dump(dump);
-					Error("Recieved unhandled application packet from the client: %s.", dump);
+					LogError("Recieved unhandled application packet from the client: %s.", dump);
 				}
 			}
 		}
@@ -127,12 +127,12 @@ bool Client::Process()
 void Client::Handle_SessionReady(const char *data, unsigned int size)
 {
 	if (status != cs_not_sent_session_ready) {
-		Error("Session ready received again after already being received.");
+		LogError("Session ready received again after already being received.");
 		return;
 	}
 
 	if (size < sizeof(unsigned int)) {
-		Error("Session ready was too small.");
+		LogError("Session ready was too small.");
 		return;
 	}
 
@@ -180,18 +180,18 @@ void Client::Handle_SessionReady(const char *data, unsigned int size)
 void Client::Handle_Login(const char *data, unsigned int size)
 {
 	if (status != cs_waiting_for_login) {
-		Error("Login received after already having logged in");
+		LogError("Login received after already having logged in");
 		return;
 	}
 
 	if ((size - 12) % 8 != 0) {
-		Error("Login received packet of size: {0}, this would cause a block corruption, discarding", size);
+		LogError("Login received packet of size: {0}, this would cause a block corruption, discarding", size);
 
 		return;
 	}
 
 	if (size < sizeof(LoginLoginRequest_Struct)) {
-		Error("Login received packet of size: {0}, this would cause a buffer overflow, discarding", size);
+		LogError("Login received packet of size: {0}, this would cause a buffer overflow, discarding", size);
 
 		return;
 	}
@@ -205,13 +205,13 @@ void Client::Handle_Login(const char *data, unsigned int size)
 	std::string outbuffer;
 	outbuffer.resize(size - 12);
 	if (outbuffer.length() == 0) {
-		Error("Corrupt buffer sent to server, no length.");
+		LogError("Corrupt buffer sent to server, no length.");
 		return;
 	}
 
 	auto r = eqcrypt_block(data + 10, size - 12, &outbuffer[0], 0);
 	if (r == nullptr) {
-		Error("Failed to decrypt eqcrypt block");
+		LogError("Failed to decrypt eqcrypt block");
 		return;
 	}
 
@@ -219,7 +219,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 
 	std::string user(&outbuffer[0]);
 	if (user.length() >= outbuffer.length()) {
-		Error("Corrupt buffer sent to server, preventing buffer overflow.");
+		LogError("Corrupt buffer sent to server, preventing buffer overflow.");
 		return;
 	}
 
@@ -247,7 +247,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 				user           = components[1];
 			}
 
-			LogLoginserver(
+			LogInfo(
 				"Attempting password based login [{0}] login [{1}] user [{2}]",
 				user,
 				db_loginserver,
@@ -259,7 +259,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 			if (server.db->GetLoginDataFromAccountInfo(user, db_loginserver, db_account_password_hash, db_account_id)) {
 				result = VerifyLoginHash(user, db_loginserver, cred, db_account_password_hash);
 
-				LogLoginserverDetail("[VerifyLoginHash] Success [{0}]", (result ? "true" : "false"));
+				LogDebug("[VerifyLoginHash] Success [{0}]", (result ? "true" : "false"));
 			}
 			else {
 				status = cs_creating_account;
@@ -274,7 +274,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 	 * Login accepted
 	 */
 	if (result) {
-		LogLoginserverDetail(
+		LogDebug(
 			"login [{0}] user [{1}] Login succeeded",
 			db_loginserver,
 			user
@@ -283,7 +283,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 		DoSuccessfulLogin(user, db_account_id, db_loginserver);
 	}
 	else {
-		LogLoginserverDetail(
+		LogDebug(
 			"login [{0}] user [{1}] Login failed",
 			db_loginserver,
 			user
@@ -301,7 +301,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 void Client::Handle_Play(const char *data)
 {
 	if (status != cs_logged_in) {
-		Error("Client sent a play request when they were not logged in, discarding.");
+		LogError("Client sent a play request when they were not logged in, discarding.");
 		return;
 	}
 
@@ -310,7 +310,7 @@ void Client::Handle_Play(const char *data)
 	auto       sequence_in  = (unsigned int) play->Sequence;
 
 	if (server.options.IsTraceOn()) {
-		LogLoginserver("Play received from client, server number {0} sequence {1}", server_id_in, sequence_in);
+		LogInfo("Play received from client, server number {0} sequence {1}", server_id_in, sequence_in);
 	}
 
 	this->play_server_id = (unsigned int) play->ServerNumber;
@@ -375,10 +375,10 @@ void Client::AttemptLoginAccountCreation(
 {
 	if (loginserver == "eqemu") {
 
-		LogLoginserver("Attempting login account creation via '{0}'", loginserver);
+		LogInfo("Attempting login account creation via '{0}'", loginserver);
 
 		if (!server.options.CanAutoLinkAccounts()) {
-			LogLoginserver("CanAutoLinkAccounts disabled - sending failed login");
+			LogInfo("CanAutoLinkAccounts disabled - sending failed login");
 			DoFailedLogin();
 			return;
 		}
@@ -500,7 +500,7 @@ bool Client::VerifyLoginHash(
 			if (hash.length() == 32) { //md5 is insecure
 				for (int i = EncryptionModeMD5; i <= EncryptionModeMD5Triple; ++i) {
 					if (i != mode && eqcrypt_verify_hash(user, cred, hash, i)) {
-						LogLoginserverDetail(
+						LogDebug(
 							"user [{0}] loginserver [{1}] mode [{2}]",
 							user,
 							loginserver,
@@ -514,7 +514,7 @@ bool Client::VerifyLoginHash(
 			else if (hash.length() == 40) { //sha1 is insecure
 				for (int i = EncryptionModeSHA; i <= EncryptionModeSHATriple; ++i) {
 					if (i != mode && eqcrypt_verify_hash(user, cred, hash, i)) {
-						LogLoginserverDetail(
+						LogDebug(
 							"user [{0}] loginserver [{1}] mode [{2}]",
 							user,
 							loginserver,
@@ -529,7 +529,7 @@ bool Client::VerifyLoginHash(
 			else if (hash.length() == 128) { //sha2-512 is insecure
 				for (int i = EncryptionModeSHA512; i <= EncryptionModeSHA512Triple; ++i) {
 					if (i != mode && eqcrypt_verify_hash(user, cred, hash, i)) {
-						LogLoginserverDetail(
+						LogDebug(
 							"user [{0}] loginserver [{1}] mode [{2}]",
 							user,
 							loginserver,
@@ -605,7 +605,7 @@ void Client::DoSuccessfulLogin(const std::string &user, int db_account_id, const
 	char encrypted_buffer[80] = {0};
 	auto rc                   = eqcrypt_block((const char *) login_failed_attempts, 75, encrypted_buffer, 1);
 	if (rc == nullptr) {
-		LogLoginserverDetail("Failed to encrypt eqcrypt block");
+		LogDebug("Failed to encrypt eqcrypt block");
 	}
 
 	memcpy(login_accepted->encrypt, encrypted_buffer, 80);
@@ -682,12 +682,12 @@ void Client::LoginOnStatusChange(
 )
 {
 	if (to == EQ::Net::StatusConnected) {
-		LogLoginserverDetail("EQ::Net::StatusConnected");
+		LogDebug("EQ::Net::StatusConnected");
 		LoginSendSessionReady();
 	}
 
 	if (to == EQ::Net::StatusDisconnecting || to == EQ::Net::StatusDisconnected) {
-		LogLoginserverDetail("EQ::Net::StatusDisconnecting || EQ::Net::StatusDisconnected");
+		LogDebug("EQ::Net::StatusDisconnecting || EQ::Net::StatusDisconnected");
 
 		DoFailedLogin();
 	}
@@ -785,12 +785,12 @@ void Client::LoginProcessLoginResponse(const EQ::Net::Packet &p)
 	);
 
 	if (response_error > 101) {
-		LogLoginserverDetail("response [{0}] failed login", response_error);
+		LogDebug("response [{0}] failed login", response_error);
 		DoFailedLogin();
 		login_connection->Close();
 	}
 	else {
-		LogLoginserverDetail(
+		LogDebug(
 			"response [{0}] login succeeded user [{1}]",
 			response_error,
 			stored_user

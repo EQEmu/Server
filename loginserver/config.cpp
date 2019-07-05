@@ -52,7 +52,7 @@ std::string Config::GetVariable(std::string title, std::string parameter)
 void Config::Parse(const char *file_name)
 {
 	if (file_name == nullptr) {
-		Error("Config::Parse(), file_name passed was null");
+		LogError("Config::Parse(), file_name passed was null");
 		return;
 	}
 
@@ -72,7 +72,7 @@ void Config::Parse(const char *file_name)
 				bool first = true;
 				++iter;
 				if (iter == tokens.end()) {
-					Error("Config::Parse(), EOF before title done parsing");
+					LogError("Config::Parse(), EOF before title done parsing");
 					fclose(input);
 					vars.clear();
 					return;
@@ -99,7 +99,7 @@ void Config::Parse(const char *file_name)
 			else if (mode == 1) {
 				mode++;
 				if ((*iter).compare("=") != 0) {
-					Error("Config::Parse(), invalid parse token where = should be");
+					LogError("Config::Parse(), invalid parse token where = should be");
 					fclose(input);
 					vars.clear();
 					return;
@@ -124,7 +124,7 @@ void Config::Parse(const char *file_name)
 		fclose(input);
 	}
 	else {
-		Error("Config::Parse(), file was unable to be opened for parsing");
+		LogError("Config::Parse(), file was unable to be opened for parsing");
 	}
 }
 

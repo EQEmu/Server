@@ -103,7 +103,7 @@ bool Database::GetLoginDataFromAccountInfo(
 	auto results = QueryDatabase(query);
 
 	if (results.RowCount() != 1) {
-		LogLoginserverDetail(
+		LogDebug(
 			"Could not find account for name [{0}] login [{1}]",
 			name,
 			loginserver
@@ -121,7 +121,7 @@ bool Database::GetLoginDataFromAccountInfo(
 	id       = atoi(row[0]);
 	password = row[1];
 
-	LogLoginserverDetail(
+	LogDebug(
 		"Found account for name [{0}] login [{1}]",
 		name,
 		loginserver
@@ -301,7 +301,7 @@ void Database::UpdateLoginHash(
 	const std::string &hash
 )
 {
-	LogLoginserverDetail(
+	LogDebug(
 		"name [{0}] loginserver [{1}] hash [{2}]",
 		name,
 		loginserver,

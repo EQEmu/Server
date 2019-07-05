@@ -134,6 +134,17 @@ void EQEmuLogSys::LoadLogSettingsDefaults()
 	log_settings[Logs::NPCScaling].log_to_gmsay        = Logs::General;
 
 	/**
+	 * RFC 5424
+	 */
+	log_settings[Logs::Emergency].log_to_console = Logs::General;
+	log_settings[Logs::Alert].log_to_console     = Logs::General;
+	log_settings[Logs::Critical].log_to_console  = Logs::General;
+	log_settings[Logs::Error].log_to_console     = Logs::General;
+	log_settings[Logs::Warning].log_to_console   = Logs::General;
+	log_settings[Logs::Notice].log_to_console    = Logs::General;
+	log_settings[Logs::Info].log_to_console      = Logs::General;
+
+	/**
 	 * Set Category enabled status on defaults
 	 */
 	for (int log_category_id = Logs::AA; log_category_id != Logs::MaxCategoryID; log_category_id++) {
@@ -174,6 +185,24 @@ void EQEmuLogSys::LoadLogSettingsDefaults()
 
 /**
  * @param log_category
+ * @return
+ */
+bool EQEmuLogSys::IsRfc5424LogCategory(uint16 log_category)
+{
+	return (
+		log_category == Logs::Emergency ||
+		log_category == Logs::Alert ||
+		log_category == Logs::Critical ||
+		log_category == Logs::Error ||
+		log_category == Logs::Warning ||
+		log_category == Logs::Notice ||
+		log_category == Logs::Info ||
+		log_category == Logs::Debug
+	);
+}
+
+/**
+ * @param log_category
  * @param in_message
  * @return
  */
@@ -182,13 +211,13 @@ std::string EQEmuLogSys::FormatOutMessageString(
 	const std::string &in_message
 )
 {
-	std::string ret;
-	ret.push_back('[');
-	ret.append(Logs::LogCategoryName[log_category]);
-	ret.push_back(']');
-	ret.push_back(' ');
-	ret.append(in_message);
-	return ret;
+	std::string return_string;
+
+	if (IsRfc5424LogCategory(log_category)) {
+		return_string = "[" + GetPlatformName() + "] ";
+	}
+
+	return return_string + "[" + Logs::LogCategoryName[log_category] + "] " + in_message;
 }
 
 /**
@@ -390,7 +419,7 @@ constexpr const char *r_slant(const char *str)
  * @param str
  * @return
  */
-constexpr const char *file_name(const char *str)
+constexpr const char *base_file_name(const char *str)
 {
 	return str_slant(str) ? r_slant(str_end(str)) : str;
 }
@@ -436,7 +465,7 @@ void EQEmuLogSys::Out(
 	std::string prefix;
 
 	if (RuleB(Logging, PrintFileFunctionAndLine)) {
-		prefix = fmt::format("[{0}::{1}:{2}] ", file_name(file), func, line);
+		prefix = fmt::format("[{0}::{1}:{2}] ", base_file_name(file), func, line);
 	}
 
 	va_list args;

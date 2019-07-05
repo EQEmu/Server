@@ -47,10 +47,10 @@ int main()
 
 	LogSys.LoadLogSettingsDefaults();
 
-	LogLoginserver("Logging System Init");
+	LogInfo("Logging System Init");
 
 	server.config = EQ::JsonConfigFile::Load("login.json");
-	LogLoginserver("Config System Init");
+	LogInfo("Config System Init");
 
 	server.options.Trace(server.config.GetVariableBool("general", "trace", false));
 	server.options.WorldTrace(server.config.GetVariableBool("general", "world_trace", false));
@@ -119,7 +119,7 @@ int main()
 	/**
 	 * mysql connect
 	 */
-	LogLoginserver("MySQL Database Init");
+	LogInfo("MySQL Database Init");
 
 	server.db = new Database(
 		server.config.GetVariableString("database", "user", "root"),
@@ -135,19 +135,19 @@ int main()
 	 * make sure our database got created okay, otherwise cleanup and exit
 	 */
 	if (!server.db) {
-		Error("Database Initialization Failure");
-		LogLoginserver("Log System Shutdown");
+		LogError("Database Initialization Failure");
+		LogInfo("Log System Shutdown");
 		return 1;
 	}
 
 	/**
 	 * create server manager
 	 */
-	LogLoginserver("Server Manager Init");
+	LogInfo("Server Manager Init");
 	server.server_manager = new ServerManager();
 	if (!server.server_manager) {
-		Error("Server Manager Failed to Start");
-		LogLoginserver("Database System Shutdown");
+		LogError("Server Manager Failed to Start");
+		LogInfo("Database System Shutdown");
 		delete server.db;
 		return 1;
 	}
@@ -155,14 +155,14 @@ int main()
 	/**
 	 * create client manager
 	 */
-	LogLoginserver("Client Manager Init");
+	LogInfo("Client Manager Init");
 	server.client_manager = new ClientManager();
 	if (!server.client_manager) {
-		Error("Client Manager Failed to Start");
-		LogLoginserver("Server Manager Shutdown");
+		LogError("Client Manager Failed to Start");
+		LogInfo("Server Manager Shutdown");
 		delete server.server_manager;
 
-		LogLoginserver("Database System Shutdown");
+		LogInfo("Database System Shutdown");
 		delete server.db;
 		return 1;
 	}
@@ -175,10 +175,10 @@ int main()
 #endif
 #endif
 
-	LogLoginserver("Server Started");
+	LogInfo("Server Started");
 
 	if (LogSys.log_settings[Logs::Login_Server].log_to_console == 1) {
-		LogLoginserver("Loginserver logging set to level [1] for more debugging, enable detail [3]");
+		LogInfo("Loginserver logging set to level [1] for more debugging, enable detail [3]");
 	}
 
 	while (run_server) {
@@ -188,13 +188,13 @@ int main()
 		Sleep(50);
 	}
 
-	LogLoginserver("Server Shutdown");
-	LogLoginserver("Client Manager Shutdown");
+	LogInfo("Server Shutdown");
+	LogInfo("Client Manager Shutdown");
 	delete server.client_manager;
-	LogLoginserver("Server Manager Shutdown");
+	LogInfo("Server Manager Shutdown");
 	delete server.server_manager;
 
-	LogLoginserver("Database System Shutdown");
+	LogInfo("Database System Shutdown");
 	delete server.db;
 	return 0;
 }
