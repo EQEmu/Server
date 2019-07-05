@@ -590,7 +590,6 @@ void Client::DoSuccessfulLogin(const std::string &user, int db_account_id, const
 	in.s_addr = connection->GetRemoteIP();
 
 	server.db->UpdateLSAccountData(db_account_id, std::string(inet_ntoa(in)));
-
 	GenerateKey();
 
 	account_id       = db_account_id;

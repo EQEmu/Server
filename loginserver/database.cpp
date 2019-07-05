@@ -50,47 +50,23 @@ Database::Database(
 	this->host = host;
 	this->name = name;
 
-	database = mysql_init(nullptr);
-	if (database) {
-		char r = 1;
-		mysql_options(database, MYSQL_OPT_RECONNECT, &r);
-		if (!mysql_real_connect(
-			database,
-			host.c_str(),
-			user.c_str(),
-			pass.c_str(),
-			name.c_str(),
-			atoi(port.c_str()),
-			nullptr,
-			0
-		)) {
-			mysql_close(database);
-			Log(Logs::General, Logs::Error, "Failed to connect to MySQL database. Error: %s", mysql_error(database));
-			exit(1);
-		}
-
-		uint32 errnum = 0;
-		char   errbuf[MYSQL_ERRMSG_SIZE];
-		if (!Open(
-			host.c_str(),
-			user.c_str(),
-			pass.c_str(),
-			name.c_str(),
-			atoi(port.c_str()),
-			&errnum,
-			errbuf
-		)
-			) {
-			Log(Logs::General, Logs::Error, "Failed to connect to database: Error: %s", errbuf);
-			exit(1);
-		}
-		else {
-			Log(Logs::General, Logs::Status, "Using database '%s' at %s:%d", database, host, port);
-		}
-
+	uint32 errnum = 0;
+	char   errbuf[MYSQL_ERRMSG_SIZE];
+	if (!Open(
+		host.c_str(),
+		user.c_str(),
+		pass.c_str(),
+		name.c_str(),
+		atoi(port.c_str()),
+		&errnum,
+		errbuf
+	)
+		) {
+		Log(Logs::General, Logs::Error, "Failed to connect to database: Error: %s", errbuf);
+		exit(1);
 	}
 	else {
-		Log(Logs::General, Logs::Error, "Failed to create db object in MySQL database.");
+		Log(Logs::General, Logs::Status, "Using database '%s' at %s:%d", database, host, port);
 	}
 }
 
@@ -438,7 +414,7 @@ bool Database::GetWorldRegistration(
 void Database::UpdateLSAccountData(unsigned int id, std::string ip_address)
 {
 	auto query = fmt::format(
-		"UPDATE {0} SET LastIPAddress = '{2}', LastLoginDate = now() where LoginServerId = {3}",
+		"UPDATE {0} SET LastIPAddress = '{1}', LastLoginDate = NOW() where LoginServerId = {2}",
 		server.options.GetAccountTable(),
 		ip_address,
 		id
