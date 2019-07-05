@@ -193,6 +193,10 @@ public:
 	 */
 	void CloseFileLogs();
 	void LoadLogSettingsDefaults();
+
+	/**
+	 * @param directory_name
+	 */
 	void MakeDirectory(const std::string &directory_name);
 
 	/**
@@ -216,8 +220,13 @@ public:
 
 	/**
 	 * Used in file logs to prepend a timestamp entry for logs
+	 * @param time_stamp
 	 */
 	void SetCurrentTimeStamp(char* time_stamp);
+
+	/**
+	 * @param log_name
+	 */
 	void StartFileLogs(const std::string &log_name = "");
 
 	/**
@@ -264,7 +273,14 @@ public:
 	 */
 	uint16 GetGMSayColorFromCategory(uint16 log_category);
 
+	/**
+	 * @param f
+	 */
 	void SetGMSayHandler(std::function<void(uint16 log_type, const std::string&)> f) { on_log_gmsay_hook = f; }
+
+	/**
+	 * @param f
+	 */
 	void SetConsoleHandler(std::function<void(uint16 debug_level, uint16 log_type, const std::string&)> f) { on_log_console_hook = f; }
 
 private:
@@ -282,6 +298,7 @@ private:
 
 	/**
 	 * Linux console color messages mapped by category
+	 *
 	 * @param log_category
 	 * @return
 	 */
@@ -292,11 +309,44 @@ private:
 	 */
 	uint16 GetWindowsConsoleColorFromCategory(uint16 log_category);
 
+	/**
+	 * @param debug_level
+	 * @param log_category
+	 * @param message
+	 */
 	void ProcessConsoleMessage(uint16 debug_level, uint16 log_category, const std::string &message);
+
+	/**
+	 * @param debug_level
+	 * @param log_category
+	 * @param message
+	 */
 	void ProcessGMSay(uint16 debug_level, uint16 log_category, const std::string &message);
+
+	/**
+	 * @param debug_level
+	 * @param log_category
+	 * @param message
+	 */
 	void ProcessLogWrite(uint16 debug_level, uint16 log_category, const std::string &message);
 };
 
 extern EQEmuLogSys LogSys;
+
+template<typename... Args>
+void OutF(
+	EQEmuLogSys &ls,
+	Logs::DebugLevel debug_level,
+	uint16 log_category,
+	const char *file,
+	const char *func,
+	int line,
+	const char *fmt,
+	const Args &... args
+)
+{
+	std::string log_str = fmt::format(fmt, args...);
+	ls.Out(debug_level, log_category, file, func, line, log_str);
+}
 
 #endif

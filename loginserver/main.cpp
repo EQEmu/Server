@@ -26,7 +26,6 @@
 #include "../common/platform.h"
 #include "../common/crash.h"
 #include "../common/eqemu_logsys.h"
-#include "../common/eqemu_logsys_fmt.h"
 #include "login_server.h"
 #include <time.h>
 #include <stdlib.h>

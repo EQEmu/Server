@@ -42,7 +42,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/eqemu_exception.h"
 #include "../common/spdat.h"
 #include "../common/eqemu_logsys.h"
-#include "../common/eqemu_logsys_fmt.h"
 
 #include "api_service.h"
 #include "zone_config.h"

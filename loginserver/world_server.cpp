@@ -23,7 +23,6 @@
 #include "login_structures.h"
 #include "config.h"
 #include "../common/eqemu_logsys.h"
-#include "../common/eqemu_logsys_fmt.h"
 #include "../common/ip_util.h"
 
 extern LoginServer server;

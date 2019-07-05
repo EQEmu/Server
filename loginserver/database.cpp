@@ -23,7 +23,6 @@
 #include "database.h"
 #include "login_server.h"
 #include "../common/eqemu_logsys.h"
-#include "../common/eqemu_logsys_fmt.h"
 #include "../common/string_util.h"
 
 extern LoginServer server;

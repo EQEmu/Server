@@ -24,7 +24,6 @@
 #include "../common/eqemu_logsys.h"
 #include "../common/string_util.h"
 #include "encryption.h"
-#include "../common/eqemu_logsys_fmt.h"
 
 extern LoginServer server;
 
@@ -140,10 +139,10 @@ void Client::Handle_SessionReady(const char *data, unsigned int size)
 	status = cs_waiting_for_login;
 
 	/**
-	* The packets are mostly the same but slightly different between the two versions.
-	*/
+	 * The packets are mostly the same but slightly different between the two versions
+	 */
 	if (version == cv_sod) {
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_ChatMessage, 17);
+		auto *outapp = new EQApplicationPacket(OP_ChatMessage, 17);
 		outapp->pBuffer[0]  = 0x02;
 		outapp->pBuffer[10] = 0x01;
 		outapp->pBuffer[11] = 0x65;
@@ -156,8 +155,8 @@ void Client::Handle_SessionReady(const char *data, unsigned int size)
 		delete outapp;
 	}
 	else {
-		const char          *msg    = "ChatMessage";
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_ChatMessage, 16 + strlen(msg));
+		const char *msg    = "ChatMessage";
+		auto       *outapp = new EQApplicationPacket(OP_ChatMessage, 16 + strlen(msg));
 		outapp->pBuffer[0]  = 0x02;
 		outapp->pBuffer[10] = 0x01;
 		outapp->pBuffer[11] = 0x65;
@@ -275,8 +274,8 @@ void Client::Handle_Login(const char *data, unsigned int size)
 	 * Login accepted
 	 */
 	if (result) {
-		LogF(
-			Logs::Detail, Logs::Login_Server, "login [{0}] user [{1}] Login succeeded",
+		LogLoginserverDetail(
+			"login [{0}] user [{1}] Login succeeded",
 			db_loginserver,
 			user
 		);
@@ -284,8 +283,8 @@ void Client::Handle_Login(const char *data, unsigned int size)
 		DoSuccessfulLogin(user, db_account_id, db_loginserver);
 	}
 	else {
-		LogF(
-			Logs::Detail, Logs::Login_Server, "login [{0}] user [{1}] Login failed",
+		LogLoginserverDetail(
+			"login [{0}] user [{1}] Login failed",
 			db_loginserver,
 			user
 		);
@@ -572,7 +571,7 @@ void Client::DoSuccessfulLogin(const std::string &user, int db_account_id, const
 	account_name     = user;
 	loginserver_name = db_loginserver;
 
-	auto  *outapp         = new EQApplicationPacket(OP_LoginAccepted, 10 + 80);
+	auto *outapp         = new EQApplicationPacket(OP_LoginAccepted, 10 + 80);
 	auto *login_accepted = (LoginAccepted_Struct *) outapp->pBuffer;
 	login_accepted->unknown1 = llrs.unknown1;
 	login_accepted->unknown2 = llrs.unknown2;
@@ -763,6 +762,7 @@ void Client::LoginSendLogin()
 void Client::LoginProcessLoginResponse(const EQ::Net::Packet &p)
 {
 	auto encrypt_size                    = p.Length() - 12;
+
 	if (encrypt_size % 8 > 0) {
 		encrypt_size = (encrypt_size / 8) * 8;
 	}

@@ -25,7 +25,6 @@ extern LoginServer server;
 extern bool        run_server;
 
 #include "../common/eqemu_logsys.h"
-#include "../common/eqemu_logsys_fmt.h"
 
 ClientManager::ClientManager()
 {
@@ -135,7 +134,7 @@ void ClientManager::ProcessDisconnect()
 	while (iter != clients.end()) {
 		std::shared_ptr<EQStreamInterface> c = (*iter)->GetConnection();
 		if (c->CheckState(CLOSED)) {
-			Log(Logs::General, Logs::Login_Server, "Client disconnected from the server, removing client.");
+			LogLoginserver("Client disconnected from the server, removing client.");
 			delete (*iter);
 			iter = clients.erase(iter);
 		}

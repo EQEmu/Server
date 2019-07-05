@@ -25,7 +25,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/string_util.h"
 #include "../common/misc_functions.h"
 #include "../common/eqemu_logsys.h"
-#include "../common/eqemu_logsys_fmt.h"
 
 #include "map.h"
 #include "npc.h"

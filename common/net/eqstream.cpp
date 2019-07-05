@@ -1,6 +1,5 @@
 #include "eqstream.h"
 #include "../eqemu_logsys.h"
-#include "../eqemu_logsys_fmt.h"
 
 EQ::Net::EQStreamManager::EQStreamManager(const EQStreamManagerInterfaceOptions &options) : EQStreamManagerInterface(options), m_daybreak(options.daybreak_options)
 {

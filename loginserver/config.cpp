@@ -20,7 +20,6 @@
 
 #include "../common/global_define.h"
 #include "../common/eqemu_logsys.h"
-#include "../common/eqemu_logsys_fmt.h"
 #include "config.h"
 
 /**

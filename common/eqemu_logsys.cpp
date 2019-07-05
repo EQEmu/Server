@@ -95,8 +95,8 @@ enum GameChatColor {
  */
 EQEmuLogSys::EQEmuLogSys()
 {
-	on_log_gmsay_hook      = [](uint16 log_type, const std::string &) {};
-	on_log_console_hook    = [](uint16 debug_level, uint16 log_type, const std::string &) {};
+	on_log_gmsay_hook   = [](uint16 log_type, const std::string &) {};
+	on_log_console_hook = [](uint16 debug_level, uint16 log_type, const std::string &) {};
 }
 
 /**
@@ -177,7 +177,10 @@ void EQEmuLogSys::LoadLogSettingsDefaults()
  * @param in_message
  * @return
  */
-std::string EQEmuLogSys::FormatOutMessageString(uint16 log_category, const std::string &in_message)
+std::string EQEmuLogSys::FormatOutMessageString(
+	uint16 log_category,
+	const std::string &in_message
+)
 {
 	std::string ret;
 	ret.push_back('[');
@@ -193,7 +196,11 @@ std::string EQEmuLogSys::FormatOutMessageString(uint16 log_category, const std::
  * @param log_category
  * @param message
  */
-void EQEmuLogSys::ProcessGMSay(uint16 debug_level, uint16 log_category, const std::string &message)
+void EQEmuLogSys::ProcessGMSay(
+	uint16 debug_level,
+	uint16 log_category,
+	const std::string &message
+)
 {
 	/**
 	 * Enabling Netcode based GMSay output creates a feedback loop that ultimately ends in a crash
@@ -215,7 +222,11 @@ void EQEmuLogSys::ProcessGMSay(uint16 debug_level, uint16 log_category, const st
  * @param log_category
  * @param message
  */
-void EQEmuLogSys::ProcessLogWrite(uint16 debug_level, uint16 log_category, const std::string &message)
+void EQEmuLogSys::ProcessLogWrite(
+	uint16 debug_level,
+	uint16 log_category,
+	const std::string &message
+)
 {
 	if (log_category == Logs::Crash) {
 		char time_stamp[80];
@@ -348,20 +359,37 @@ void EQEmuLogSys::ProcessConsoleMessage(uint16 debug_level, uint16 log_category,
 	on_log_console_hook(debug_level, log_category, message);
 }
 
+/**
+ * @param str
+ * @return
+ */
 constexpr const char *str_end(const char *str)
 {
 	return *str ? str_end(str + 1) : str;
 }
 
+/**
+ * @param str
+ * @return
+ */
 constexpr bool str_slant(const char *str)
 {
 	return *str == '/' ? true : (*str ? str_slant(str + 1) : false);
 }
 
+/**
+ * @param str
+ * @return
+ */
 constexpr const char *r_slant(const char *str)
 {
 	return *str == '/' ? (str + 1) : r_slant(str - 1);
 }
+
+/**
+ * @param str
+ * @return
+ */
 constexpr const char *file_name(const char *str)
 {
 	return str_slant(str) ? r_slant(str_end(str)) : str;
@@ -452,7 +480,7 @@ void EQEmuLogSys::MakeDirectory(const std::string &directory_name)
 		return;
 	_mkdir(directory_name.c_str());
 #else
-	struct stat st;
+	struct stat st{};
 	if (stat(directory_name.c_str(), &st) == 0) { // exists
 		return;
 	}
