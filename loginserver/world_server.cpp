@@ -440,7 +440,10 @@ void WorldServer::ProcessLSAccountUpdate(uint16_t opcode, const EQ::Net::Packet 
 
 	auto *loginserver_update = (ServerLSAccountUpdate_Struct *) packet.Data();
 	if (is_server_trusted) {
-		Log(Logs::General, Logs::Netcode, "ServerOP_LSAccountUpdate update processed for: %s", loginserver_update->useraccount);
+		Log(Logs::General,
+			Logs::Netcode,
+			"ServerOP_LSAccountUpdate update processed for: %s",
+			loginserver_update->useraccount);
 		std::string name     = "";
 		std::string password = "";
 		std::string email    = "";
@@ -698,18 +701,18 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info
 				 * this is the second of two cases where we should deny access even if unregistered is allowed
 				 */
 				if (server_account_name.size() > 0 || server_account_password.size() > 0) {
-					Log(Logs::General,
-						Logs::World_Server,
-						"Server %s(%s) did not attempt to log in but this server requires a password.",
-						long_name.c_str(),
-						short_name.c_str());
+					LogLoginserver(
+						"Server [{0}] [{1}] did not login but this server required a password to login",
+						long_name,
+						short_name
+					);
 				}
 				else {
-					Log(Logs::General,
-						Logs::World_Server,
-						"Server %s(%s) did not attempt to log in but unregistered servers are allowed.",
-						long_name.c_str(),
-						short_name.c_str());
+					LogLoginserver(
+						"Server [{0}] [{1}] did not login but unregistered servers are allowed",
+						long_name,
+						short_name
+					);
 
 					is_server_authorized = true;
 					SetRuntimeID(server_id);
@@ -718,11 +721,10 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info
 			}
 		}
 		else {
-			LogF(Logs::General,
-				 Logs::World_Server,
-				 "Server [{0}] ({1}) is not registered but unregistered servers are allowed",
-				 long_name,
-				 short_name
+			LogLoginserver(
+				"Server [{0}] ({1}) is not registered but unregistered servers are allowed",
+				long_name,
+				short_name
 			);
 
 			if (server.db->CreateWorldRegistration(long_name, short_name, server_id)) {

@@ -2065,7 +2065,8 @@ uint32 Database::GetGuildIDByCharID(uint32 character_id)
 	return atoi(row[0]);
 }
 
-void Database::LoadLogSettings(EQEmuLogSys::LogSettings* log_settings) {
+void Database::LoadLogSettings(EQEmuLogSys::LogSettings *log_settings)
+{
 	// log_settings previously initialized to '0' by EQEmuLogSys::LoadLogSettingsDefaults()
 
 	std::string query =

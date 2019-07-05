@@ -22,6 +22,7 @@
 #define EQEMU_DATABASEMYSQL_H
 
 #include "../common/dbcore.h"
+#include "../common/eqemu_logsys.h"
 
 #include <string>
 #include <sstream>
@@ -126,6 +127,7 @@ public:
 	void UpdateLSAccountInfo(unsigned int id, std::string name, std::string password, std::string email);
 	void UpdateWorldRegistration(unsigned int id, std::string long_name, std::string ip_address);
 	bool CreateWorldRegistration(std::string long_name, std::string short_name, unsigned int &id);
+	void LoadLogSettings(EQEmuLogSys::LogSettings *log_settings);
 protected:
 	std::string user, pass, host, port, name;
 	MYSQL       *database;
