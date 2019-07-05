@@ -274,7 +274,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 	 * Login accepted
 	 */
 	if (result) {
-		LogDebug(
+		LogInfo(
 			"login [{0}] user [{1}] Login succeeded",
 			db_loginserver,
 			user
@@ -283,7 +283,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 		DoSuccessfulLogin(user, db_account_id, db_loginserver);
 	}
 	else {
-		LogDebug(
+		LogInfo(
 			"login [{0}] user [{1}] Login failed",
 			db_loginserver,
 			user

@@ -331,9 +331,7 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 		user_to_world_response->login
 	);
 	if (client) {
-		Log(Logs::General,
-			Logs::Debug,
-			"Found client with user id of %u and account name of %s.",
+		LogDebug("Found client with user id of {0} and account name of {1}",
 			user_to_world_response->lsaccountid,
 			client->GetAccountName().c_str()
 		);

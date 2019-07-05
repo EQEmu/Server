@@ -214,10 +214,6 @@ namespace Logs {
         OutF(LogSys, Logs::General, Logs::Debug, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
-
-
-
-
 /**
  * Other
  */

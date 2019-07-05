@@ -21,6 +21,7 @@
 #else
 
 #include "unix.h"
+#include "timer.h"
 #include <pthread.h>
 
 #endif
@@ -129,29 +130,39 @@ MySQLRequestResult DBcore::QueryDatabase(const char *query, uint32 querylen, boo
 		rowCount = (uint32) mysql_num_rows(res);
 	}
 
+	BenchTimer timer;
+	timer.reset();
+
 	MySQLRequestResult requestResult(
 		res,
 		(uint32) mysql_affected_rows(&mysql),
 		rowCount,
 		(uint32) mysql_field_count(&mysql),
-		(uint32) mysql_insert_id(&mysql));
+		(uint32) mysql_insert_id(&mysql)
+	);
 
 	if (LogSys.log_settings[Logs::MySQLQuery].is_category_enabled == 1) {
 		if ((strncasecmp(query, "select", 6) == 0)) {
-			Log(Logs::General,
+			LogF(
+				Logs::General,
 				Logs::MySQLQuery,
-				"%s (%u row%s returned)",
+				"{0} ({1} row{2} returned) ({3}ms)",
 				query,
 				requestResult.RowCount(),
-				requestResult.RowCount() == 1 ? "" : "s");
+				requestResult.RowCount() == 1 ? "" : "s",
+				std::to_string(timer.elapsed())
+			);
 		}
 		else {
-			Log(Logs::General,
+			LogF(
+				Logs::General,
 				Logs::MySQLQuery,
-				"%s (%u row%s affected)",
+				"{0} ({1} row{2} affected) ({3}ms)",
 				query,
 				requestResult.RowsAffected(),
-				requestResult.RowsAffected() == 1 ? "" : "s");
+				requestResult.RowsAffected() == 1 ? "" : "s",
+				std::to_string(timer.elapsed())
+			);
 		}
 	}
 
