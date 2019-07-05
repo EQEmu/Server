@@ -747,7 +747,7 @@ RULE_INT(Faction, ThreateninglyFactionMinimum, -750)
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Logging)
-RULE_BOOL(Logging, PrintFileFunctionAndLine, true) // Ex: [World Server] [net.cpp::main:309] Loading variables...
+RULE_BOOL(Logging, PrintFileFunctionAndLine, false) // Ex: [World Server] [net.cpp::main:309] Loading variables...
 RULE_CATEGORY_END()
 
 #undef RULE_CATEGORY

@@ -108,18 +108,18 @@ void WorldServer::ProcessNewLSInfo(uint16_t opcode, const EQ::Net::Packet &packe
 	}
 
 	if (packet.Length() < sizeof(ServerNewLSInfo_Struct)) {
-		Log(Logs::General, Logs::Error,
+		Error(
 			"Received application packet from server that had opcode ServerOP_NewLSInfo, "
-			"but was too small. Discarded to avoid buffer overrun.");
+			"but was too small. Discarded to avoid buffer overrun"
+		);
+
 		return;
 	}
 
 
-	ServerNewLSInfo_Struct *info = (ServerNewLSInfo_Struct *) packet.Data();
+	auto *info = (ServerNewLSInfo_Struct *) packet.Data();
 
-	LogF(
-		Logs::General,
-		Logs::Login_Server,
+	LogLoginserver(
 		"Received New Login Server Info \n"
 		" - name [{0}]\n"
 		" - shortname [{1}]\n"

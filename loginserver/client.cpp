@@ -47,7 +47,7 @@ bool Client::Process()
 	EQApplicationPacket *app = connection->PopPacket();
 	while (app) {
 		if (server.options.IsTraceOn()) {
-			Log(Logs::General, Logs::Login_Server, "Application packet received from client (size %u)", app->Size());
+			Log(Logs::General, Logs::Netcode, "Application packet received from client (size %u)", app->Size());
 		}
 
 		if (server.options.IsDumpInPacketsOn()) {
@@ -63,19 +63,19 @@ bool Client::Process()
 		switch (app->GetOpcode()) {
 			case OP_SessionReady: {
 				if (server.options.IsTraceOn()) {
-					Log(Logs::General, Logs::Login_Server, "Session ready received from client.");
+					LogLoginserver("Session ready received from client.");
 				}
 				Handle_SessionReady((const char *) app->pBuffer, app->Size());
 				break;
 			}
 			case OP_Login: {
 				if (app->Size() < 20) {
-					Log(Logs::General, Logs::Error, "Login received but it is too small, discarding.");
+					Error("Login received but it is too small, discarding.");
 					break;
 				}
 
 				if (server.options.IsTraceOn()) {
-					Log(Logs::General, Logs::Login_Server, "Login received from client.");
+					LogLoginserver("Login received from client.");
 				}
 
 				Handle_Login((const char *) app->pBuffer, app->Size());
@@ -83,12 +83,12 @@ bool Client::Process()
 			}
 			case OP_ServerListRequest: {
 				if (app->Size() < 4) {
-					Log(Logs::General, Logs::Error, "Server List Request received but it is too small, discarding.");
+					Error("Server List Request received but it is too small, discarding.");
 					break;
 				}
 
 				if (server.options.IsTraceOn()) {
-					Log(Logs::General, Logs::Login_Server, "Server list request received from client.");
+					LogLoginserver("Server list request received from client.");
 				}
 
 				SendServerListPacket(*(uint32_t *) app->pBuffer);
@@ -96,7 +96,7 @@ bool Client::Process()
 			}
 			case OP_PlayEverquestRequest: {
 				if (app->Size() < sizeof(PlayEverquestRequest_Struct)) {
-					Log(Logs::General, Logs::Error, "Play received but it is too small, discarding.");
+					Error("Play received but it is too small, discarding.");
 					break;
 				}
 
@@ -107,7 +107,7 @@ bool Client::Process()
 				if (LogSys.log_settings[Logs::Client_Server_Packet_Unhandled].is_category_enabled == 1) {
 					char dump[64];
 					app->build_header_dump(dump);
-					Log(Logs::General, Logs::Error, "Recieved unhandled application packet from the client: %s.", dump);
+					Error("Recieved unhandled application packet from the client: %s.", dump);
 				}
 			}
 		}
@@ -128,12 +128,12 @@ bool Client::Process()
 void Client::Handle_SessionReady(const char *data, unsigned int size)
 {
 	if (status != cs_not_sent_session_ready) {
-		Log(Logs::General, Logs::Error, "Session ready received again after already being received.");
+		Error("Session ready received again after already being received.");
 		return;
 	}
 
 	if (size < sizeof(unsigned int)) {
-		Log(Logs::General, Logs::Error, "Session ready was too small.");
+		Error("Session ready was too small.");
 		return;
 	}
 
@@ -181,27 +181,18 @@ void Client::Handle_SessionReady(const char *data, unsigned int size)
 void Client::Handle_Login(const char *data, unsigned int size)
 {
 	if (status != cs_waiting_for_login) {
-		LogF(Logs::General, Logs::Error, "Login received after already having logged in");
+		Error("Login received after already having logged in");
 		return;
 	}
 
 	if ((size - 12) % 8 != 0) {
-		LogF(
-			Logs::General,
-			Logs::Error,
-			"Login received packet of size: {0}, this would cause a block corruption, discarding.",
-			size
-		);
+		Error("Login received packet of size: {0}, this would cause a block corruption, discarding", size);
+
 		return;
 	}
 
 	if (size < sizeof(LoginLoginRequest_Struct)) {
-		LogF(
-			Logs::General,
-			Logs::Error,
-			"Login received packet of size: {0}, this would cause a buffer overflow, discarding.",
-			size
-		);
+		Error("Login received packet of size: {0}, this would cause a buffer overflow, discarding", size);
 
 		return;
 	}
@@ -215,13 +206,13 @@ void Client::Handle_Login(const char *data, unsigned int size)
 	std::string outbuffer;
 	outbuffer.resize(size - 12);
 	if (outbuffer.length() == 0) {
-		LogF(Logs::General, Logs::Debug, "Corrupt buffer sent to server, no length.");
+		Error("Corrupt buffer sent to server, no length.");
 		return;
 	}
 
 	auto r = eqcrypt_block(data + 10, size - 12, &outbuffer[0], 0);
 	if (r == nullptr) {
-		LogF(Logs::General, Logs::Debug, "Failed to decrypt eqcrypt block");
+		Error("Failed to decrypt eqcrypt block");
 		return;
 	}
 
@@ -229,7 +220,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 
 	std::string user(&outbuffer[0]);
 	if (user.length() >= outbuffer.length()) {
-		LogF(Logs::General, Logs::Debug,"Corrupt buffer sent to server, preventing buffer overflow.");
+		Error("Corrupt buffer sent to server, preventing buffer overflow.");
 		return;
 	}
 
@@ -257,9 +248,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 				user           = components[1];
 			}
 
-			LogF(
-				Logs::General,
-				Logs::Login_Server,
+			LogLoginserver(
 				"Attempting password based login [{0}] login [{1}] user [{2}]",
 				user,
 				db_loginserver,
@@ -271,12 +260,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 			if (server.db->GetLoginDataFromAccountInfo(user, db_loginserver, db_account_password_hash, db_account_id)) {
 				result = VerifyLoginHash(user, db_loginserver, cred, db_account_password_hash);
 
-				LogF(
-					Logs::Detail,
-					Logs::Login_Server,
-					"[VerifyLoginHash] Success [{0}]",
-					(result ? "true" : "false")
-				);
+				LogLoginserverDetail("[VerifyLoginHash] Success [{0}]", (result ? "true" : "false"));
 			}
 			else {
 				status = cs_creating_account;
@@ -292,7 +276,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 	 */
 	if (result) {
 		LogF(
-			Logs::Detail, Logs::Login_Server, "login [{0}] user [{2}] Login succeeded",
+			Logs::Detail, Logs::Login_Server, "login [{0}] user [{1}] Login succeeded",
 			db_loginserver,
 			user
 		);
@@ -301,7 +285,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 	}
 	else {
 		LogF(
-			Logs::Detail, Logs::Login_Server, "login [{0}] user [{2}] Login failed",
+			Logs::Detail, Logs::Login_Server, "login [{0}] user [{1}] Login failed",
 			db_loginserver,
 			user
 		);
@@ -318,20 +302,16 @@ void Client::Handle_Login(const char *data, unsigned int size)
 void Client::Handle_Play(const char *data)
 {
 	if (status != cs_logged_in) {
-		Log(Logs::General, Logs::Error, "Client sent a play request when they were not logged in, discarding.");
+		Error("Client sent a play request when they were not logged in, discarding.");
 		return;
 	}
 
-	const PlayEverquestRequest_Struct *play        = (const PlayEverquestRequest_Struct *) data;
-	unsigned int                      server_id_in = (unsigned int) play->ServerNumber;
-	unsigned int                      sequence_in  = (unsigned int) play->Sequence;
+	const auto *play        = (const PlayEverquestRequest_Struct *) data;
+	auto       server_id_in = (unsigned int) play->ServerNumber;
+	auto       sequence_in  = (unsigned int) play->Sequence;
 
 	if (server.options.IsTraceOn()) {
-		Log(Logs::General,
-			Logs::Login_Server,
-			"Play received from client, server number %u sequence %u.",
-			server_id_in,
-			sequence_in);
+		LogLoginserver("Play received from client, server number {0} sequence {1}", server_id_in, sequence_in);
 	}
 
 	this->play_server_id = (unsigned int) play->ServerNumber;
@@ -396,10 +376,10 @@ void Client::AttemptLoginAccountCreation(
 {
 	if (loginserver == "eqemu") {
 
-		LogF(Logs::General, Logs::Login_Server, "Attempting login account creation via '{0}'", loginserver);
+		LogLoginserver("Attempting login account creation via '{0}'", loginserver);
 
 		if (!server.options.CanAutoLinkAccounts()) {
-			LogF(Logs::General, Logs::Login_Server, "CanAutoLinkAccounts disabled - sending failed login");
+			LogLoginserver("CanAutoLinkAccounts disabled - sending failed login");
 			DoFailedLogin();
 			return;
 		}
@@ -473,14 +453,16 @@ void Client::DoFailedLogin()
 	stored_user.clear();
 	stored_pass.clear();
 
-	EQApplicationPacket     outapp(OP_LoginAccepted, sizeof(LoginLoginFailed_Struct));
-	LoginLoginFailed_Struct *llas = (LoginLoginFailed_Struct *) outapp.pBuffer;
-	llas->unknown1 = llrs.unknown1;
-	llas->unknown2 = llrs.unknown2;
-	llas->unknown3 = llrs.unknown3;
-	llas->unknown4 = llrs.unknown4;
-	llas->unknown5 = llrs.unknown5;
-	memcpy(llas->unknown6, FailedLoginResponseData, sizeof(FailedLoginResponseData));
+	EQApplicationPacket outapp(OP_LoginAccepted, sizeof(LoginLoginFailed_Struct));
+	auto                *login_failed = (LoginLoginFailed_Struct *) outapp.pBuffer;
+
+	login_failed->unknown1 = llrs.unknown1;
+	login_failed->unknown2 = llrs.unknown2;
+	login_failed->unknown3 = llrs.unknown3;
+	login_failed->unknown4 = llrs.unknown4;
+	login_failed->unknown5 = llrs.unknown5;
+
+	memcpy(login_failed->unknown6, FailedLoginResponseData, sizeof(FailedLoginResponseData));
 
 	if (server.options.IsDumpOutPacketsOn()) {
 		DumpPacket(&outapp);
@@ -519,9 +501,7 @@ bool Client::VerifyLoginHash(
 			if (hash.length() == 32) { //md5 is insecure
 				for (int i = EncryptionModeMD5; i <= EncryptionModeMD5Triple; ++i) {
 					if (i != mode && eqcrypt_verify_hash(user, cred, hash, i)) {
-						LogF(
-							Logs::Detail,
-							Logs::Login_Server,
+						LogLoginserverDetail(
 							"user [{0}] loginserver [{1}] mode [{2}]",
 							user,
 							loginserver,
@@ -535,9 +515,7 @@ bool Client::VerifyLoginHash(
 			else if (hash.length() == 40) { //sha1 is insecure
 				for (int i = EncryptionModeSHA; i <= EncryptionModeSHATriple; ++i) {
 					if (i != mode && eqcrypt_verify_hash(user, cred, hash, i)) {
-						LogF(
-							Logs::Detail,
-							Logs::Login_Server,
+						LogLoginserverDetail(
 							"user [{0}] loginserver [{1}] mode [{2}]",
 							user,
 							loginserver,
@@ -552,9 +530,7 @@ bool Client::VerifyLoginHash(
 			else if (hash.length() == 128) { //sha2-512 is insecure
 				for (int i = EncryptionModeSHA512; i <= EncryptionModeSHA512Triple; ++i) {
 					if (i != mode && eqcrypt_verify_hash(user, cred, hash, i)) {
-						LogF(
-							Logs::Detail,
-							Logs::Login_Server,
+						LogLoginserverDetail(
 							"user [{0}] loginserver [{1}] mode [{2}]",
 							user,
 							loginserver,
@@ -586,7 +562,7 @@ void Client::DoSuccessfulLogin(const std::string &user, int db_account_id, const
 
 	server.client_manager->RemoveExistingClient(db_account_id, db_loginserver);
 
-	in_addr in;
+	in_addr in{};
 	in.s_addr = connection->GetRemoteIP();
 
 	server.db->UpdateLSAccountData(db_account_id, std::string(inet_ntoa(in)));
@@ -596,15 +572,15 @@ void Client::DoSuccessfulLogin(const std::string &user, int db_account_id, const
 	account_name     = user;
 	loginserver_name = db_loginserver;
 
-	EQApplicationPacket  *outapp         = new EQApplicationPacket(OP_LoginAccepted, 10 + 80);
-	LoginAccepted_Struct *login_accepted = (LoginAccepted_Struct *) outapp->pBuffer;
+	auto  *outapp         = new EQApplicationPacket(OP_LoginAccepted, 10 + 80);
+	auto *login_accepted = (LoginAccepted_Struct *) outapp->pBuffer;
 	login_accepted->unknown1 = llrs.unknown1;
 	login_accepted->unknown2 = llrs.unknown2;
 	login_accepted->unknown3 = llrs.unknown3;
 	login_accepted->unknown4 = llrs.unknown4;
 	login_accepted->unknown5 = llrs.unknown5;
 
-	LoginFailedAttempts_Struct *login_failed_attempts = new LoginFailedAttempts_Struct;
+	auto *login_failed_attempts = new LoginFailedAttempts_Struct;
 	memset(login_failed_attempts, 0, sizeof(LoginFailedAttempts_Struct));
 
 	login_failed_attempts->failed_attempts = 0;
@@ -630,7 +606,7 @@ void Client::DoSuccessfulLogin(const std::string &user, int db_account_id, const
 	char encrypted_buffer[80] = {0};
 	auto rc                   = eqcrypt_block((const char *) login_failed_attempts, 75, encrypted_buffer, 1);
 	if (rc == nullptr) {
-		LogF(Logs::General, Logs::Debug, "Failed to encrypt eqcrypt block");
+		LogLoginserverDetail("Failed to encrypt eqcrypt block");
 	}
 
 	memcpy(login_accepted->encrypt, encrypted_buffer, 80);
@@ -707,12 +683,12 @@ void Client::LoginOnStatusChange(
 )
 {
 	if (to == EQ::Net::StatusConnected) {
-		LogF(Logs::Detail, Logs::Login_Server, "EQ::Net::StatusConnected");
+		LogLoginserverDetail("EQ::Net::StatusConnected");
 		LoginSendSessionReady();
 	}
 
 	if (to == EQ::Net::StatusDisconnecting || to == EQ::Net::StatusDisconnected) {
-		LogF(Logs::Detail, Logs::Login_Server, "EQ::Net::StatusDisconnecting || EQ::Net::StatusDisconnected");
+		LogLoginserverDetail("EQ::Net::StatusDisconnecting || EQ::Net::StatusDisconnected");
 
 		DoFailedLogin();
 	}
@@ -738,7 +714,6 @@ void Client::LoginOnStatusChangeIgnored(
 void Client::LoginOnPacketRecv(std::shared_ptr<EQ::Net::DaybreakConnection> conn, const EQ::Net::Packet &p)
 {
 	auto opcode = p.GetUInt16(0);
-	LogF(Logs::Detail, Logs::Login_Server, "[{0}]", opcode);
 	switch (opcode) {
 		case 0x0017: //OP_ChatMessage
 			LoginSendLogin();
@@ -810,14 +785,12 @@ void Client::LoginProcessLoginResponse(const EQ::Net::Packet &p)
 	);
 
 	if (response_error > 101) {
-		LogF(Logs::Detail, Logs::Login_Server, "response [{0}] failed login", response_error);
+		LogLoginserverDetail("response [{0}] failed login", response_error);
 		DoFailedLogin();
 		login_connection->Close();
 	}
 	else {
-		LogF(
-			Logs::Detail,
-			Logs::Login_Server,
+		LogLoginserverDetail(
 			"response [{0}] login succeeded user [{1}]",
 			response_error,
 			stored_user

@@ -52,11 +52,12 @@ ClientManager::ClientManager()
 
 	titanium_stream->OnNewConnection(
 		[this](std::shared_ptr<EQ::Net::EQStream> stream) {
-			LogF(Logs::General,
-				 Logs::Login_Server,
-				 "New Titanium client connection from {0}:{1}",
-				 stream->GetRemoteIP(),
-				 stream->GetRemotePort());
+			LogLoginserver(
+				"New Titanium client connection from {0}:{1}",
+				stream->GetRemoteIP(),
+				stream->GetRemotePort()
+			);
+
 			stream->SetOpcodeManager(&titanium_ops);
 			Client *c = new Client(stream, cv_titanium);
 			clients.push_back(c);
@@ -69,8 +70,11 @@ ClientManager::ClientManager()
 	sod_stream = new EQ::Net::EQStreamManager(sod_opts);
 	sod_ops    = new RegularOpcodeManager;
 	if (!sod_ops->LoadOpcodes(server.config.GetVariableString("SoD", "opcodes", "login_opcodes.conf").c_str())) {
-		Log(Logs::General, Logs::Error, "ClientManager fatal error: couldn't load opcodes for SoD file %s.",
-			server.config.GetVariableString("SoD", "opcodes", "login_opcodes.conf").c_str());
+		Error(
+			"ClientManager fatal error: couldn't load opcodes for SoD file {0}",
+			server.config.GetVariableString("SoD", "opcodes", "login_opcodes.conf").c_str()
+		);
+
 		run_server = false;
 	}
 
@@ -150,9 +154,7 @@ void ClientManager::RemoveExistingClient(unsigned int account_id, const std::str
 	auto iter = clients.begin();
 	while (iter != clients.end()) {
 		if ((*iter)->GetAccountID() == account_id && (*iter)->GetLoginServerName().compare(loginserver) == 0) {
-			Log(Logs::General,
-				Logs::Login_Server,
-				"Client attempting to log in and existing client already logged in, removing existing client.");
+			LogLoginserver("Client attempting to log in existing client already logged in, removing existing client");
 			delete (*iter);
 			iter = clients.erase(iter);
 		}

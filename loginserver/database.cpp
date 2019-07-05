@@ -104,9 +104,7 @@ bool Database::GetLoginDataFromAccountInfo(
 	auto results = QueryDatabase(query);
 
 	if (results.RowCount() != 1) {
-		LogF(
-			Logs::Detail,
-			Logs::Login_Server,
+		LogLoginserverDetail(
 			"Could not find account for name [{0}] login [{1}]",
 			name,
 			loginserver
@@ -124,15 +122,13 @@ bool Database::GetLoginDataFromAccountInfo(
 	id       = atoi(row[0]);
 	password = row[1];
 
-	LogF(
-		Logs::Detail,
-		Logs::Login_Server,
+	LogLoginserverDetail(
 		"Found account for name [{0}] login [{1}]",
 		name,
 		loginserver
 	);
 
-	return false;
+	return true;
 }
 
 /**

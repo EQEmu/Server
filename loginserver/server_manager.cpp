@@ -265,17 +265,14 @@ void ServerManager::SendUserToWorldRequest(
 			found = true;
 
 			if (server.options.IsDumpInPacketsOn()) {
-				LogF(Logs::General, Logs::Login_Server, "{0}", outapp.ToString());
+				LogLoginserver("{0}", outapp.ToString());
 			}
 		}
 		++iter;
 	}
 
 	if (!found && server.options.IsTraceOn()) {
-		Log(Logs::General,
-			Logs::Error,
-			"Client requested a user to world but supplied an invalid id of %u.",
-			server_id);
+		Error("Client requested a user to world but supplied an invalid id of {0}", server_id);
 	}
 }
 
