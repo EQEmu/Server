@@ -35,6 +35,7 @@ SET(common_sources
 	inventory_profile.cpp
 	inventory_slot.cpp
 	ipc_mutex.cpp
+	ip_util.cpp
 	item_data.cpp
 	item_instance.cpp
 	json_config.cpp
@@ -159,6 +160,7 @@ SET(common_headers
 	inventory_profile.h
 	inventory_slot.h
 	ipc_mutex.h
+	ip_util.h
 	item_data.h
 	item_fieldlist.h
 	item_instance.h

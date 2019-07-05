@@ -18,40 +18,19 @@
  *
  */
 
-#pragma once
+#ifndef EQEMU_IP_UTIL_H
+#define EQEMU_IP_UTIL_H
 
-#include <algorithm>
-#include <cmath>
+#include "types.h"
+#include "iostream"
 
-namespace EQEmu {
-	template<typename T>
-	T Clamp(const T &value, const T &lower, const T &upper)
-	{
-		return std::max(lower, std::min(value, upper));
-	}
+class IpUtil {
+public:
 
-	template<typename T>
-	T ClampLower(const T &value, const T &lower)
-	{
-		return std::max(lower, value);
-	}
+	static uint32_t IPToUInt(const std::string &ip);
+	static bool IsIpInRange(const std::string &ip, const std::string &network, const std::string &mask);
+	static bool IsIpInPrivateRfc1918(const std::string &ip);
 
-	template<typename T>
-	T ClampUpper(const T &value, const T &upper)
-	{
-		return std::min(value, upper);
-	}
+};
 
-	template<typename T>
-	bool ValueWithin(const T &value, const T &lower, const T &upper)
-	{
-		return value >= lower && value <= upper;
-	}
-
-	template<typename T1, typename T2, typename T3>
-	bool ValueWithin(const T1 &value, const T2 &lower, const T3 &upper)
-	{
-		return value >= (T1) lower && value <= (T1) upper;
-	}
-} /*EQEmu*/
-
+#endif //EQEMU_IP_UTIL_H

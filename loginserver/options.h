@@ -104,16 +104,6 @@ public:
 	inline int GetEncryptionMode() const { return encryption_mode; }
 
 	/**
-	* Sets local_network.
-	*/
-	inline void LocalNetwork(std::string n) { local_network = n; }
-
-	/**
-	* Return the value of local_network.
-	*/
-	inline std::string GetLocalNetwork() const { return local_network; }
-
-	/**
 	* Sets account table.
 	*/
 	inline void AccountTable(std::string t) { account_table = t; }

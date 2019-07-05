@@ -68,7 +68,6 @@ int main()
 	server.options.WorldTrace(server.config.GetVariableBool("general", "world_trace", false));
 	server.options.DumpInPackets(server.config.GetVariableBool("general", "dump_packets_in", false));
 	server.options.DumpOutPackets(server.config.GetVariableBool("general", "dump_packets_out", false));
-	server.options.LocalNetwork(server.config.GetVariableString("general", "local_network", "192.168.1."));
 	server.options.RejectDuplicateServers(server.config.GetVariableBool("general", "reject_duplicate_servers", false));
 	server.options.AutoCreateAccounts(server.config.GetVariableBool("general", "auto_create_accounts", true));
 	server.options.AutoLinkAccounts(server.config.GetVariableBool("general", "auto_link_accounts", true));

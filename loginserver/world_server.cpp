@@ -24,6 +24,7 @@
 #include "config.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/eqemu_logsys_fmt.h"
+#include "../common/ip_util.h"
 
 extern LoginServer server;
 
@@ -556,17 +557,13 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info
 
 	if (server.options.IsRejectingDuplicateServers()) {
 		if (server.server_manager->ServerExists(long_name, short_name, this)) {
-			Log(Logs::General,
-				Logs::Error,
-				"World tried to login but there already exists a server that has that name.");
+			Error("World tried to login but there already exists a server that has that name");
 			return;
 		}
 	}
 	else {
 		if (server.server_manager->ServerExists(long_name, short_name, this)) {
-			Log(Logs::General,
-				Logs::Error,
-				"World tried to login but there already exists a server that has that name.");
+			Error("World tried to login but there already exists a server that has that name");
 			server.server_manager->DestroyServerByName(long_name, short_name, this);
 		}
 	}
@@ -783,7 +780,8 @@ void WorldServer::SendClientAuth(
 	if (client_address.compare(world_address) == 0) {
 		client_auth.local = 1;
 	}
-	else if (client_address.find(server.options.GetLocalNetwork()) != std::string::npos) {
+	else if (IpUtil::IsIpInPrivateRfc1918(client_address)) {
+		LogLoginserver("Client is authenticating from a local address [{0}]", client_address);
 		client_auth.local = 1;
 	}
 	else {
