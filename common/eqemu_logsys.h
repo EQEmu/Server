@@ -167,6 +167,16 @@ namespace Logs {
         OutF(LogSys, debug_level, log_category, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
+#define LogLoginserver(message, ...) do {\
+    if (LogSys.log_settings[Logs::Login_Server].is_category_enabled == 1)\
+        OutF(LogSys, Logs::General, Logs::Login_Server, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogLoginserverDetail(message, ...) do {\
+    if (LogSys.log_settings[Logs::Login_Server].is_category_enabled == 1)\
+        OutF(LogSys, Logs::Detail, Logs::Login_Server, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
 class EQEmuLogSys {
 public:
 	EQEmuLogSys();

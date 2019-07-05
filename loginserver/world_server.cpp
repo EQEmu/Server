@@ -207,36 +207,39 @@ void WorldServer::ProcessUsertoWorldRespLeg(uint16_t opcode, const EQ::Net::Pack
 		Log(Logs::General, Logs::Netcode, "User-To-World Response received.");
 	}
 
-	UsertoWorldResponseLegacy_Struct *utwr = (UsertoWorldResponseLegacy_Struct *) p.Data();
-	Log(Logs::General, Logs::Debug, "Trying to find client with user id of %u.", utwr->lsaccountid);
-	Client *c = server.client_manager->GetClient(utwr->lsaccountid, "eqemu");
+	UsertoWorldResponseLegacy_Struct *user_to_world_response = (UsertoWorldResponseLegacy_Struct *) p.Data();
+	Log(Logs::General, Logs::Debug, "Trying to find client with user id of %u.", user_to_world_response->lsaccountid);
+	Client *c = server.client_manager->GetClient(user_to_world_response->lsaccountid, "eqemu");
 	if (c) {
+
 		Log(Logs::General,
 			Logs::Debug,
 			"Found client with user id of %u and account name of %s.",
-			utwr->lsaccountid,
-			c->GetAccountName().c_str());
-		EQApplicationPacket          *outapp = new EQApplicationPacket(
+			user_to_world_response->lsaccountid,
+			c->GetAccountName().c_str()
+		);
+
+		EQApplicationPacket *outapp = new EQApplicationPacket(
 			OP_PlayEverquestResponse,
-			sizeof(PlayEverquestResponse_Struct));
-		PlayEverquestResponse_Struct *per    = (PlayEverquestResponse_Struct *) outapp->pBuffer;
+			sizeof(PlayEverquestResponse_Struct)
+		);
+
+		PlayEverquestResponse_Struct *per = (PlayEverquestResponse_Struct *) outapp->pBuffer;
 		per->Sequence     = c->GetPlaySequence();
 		per->ServerNumber = c->GetPlayServerID();
-		Log(Logs::General, Logs::Debug, "Found sequence and play of %u %u", c->GetPlaySequence(), c->GetPlayServerID());
 
-		Log(Logs::General, Logs::Netcode, "[Size: %u] %s", outapp->size, DumpPacketToString(outapp).c_str());
-
-		if (utwr->response > 0) {
+		if (user_to_world_response->response > 0) {
 			per->Allowed = 1;
 			SendClientAuth(
 				c->GetConnection()->GetRemoteAddr(),
 				c->GetAccountName(),
 				c->GetKey(),
 				c->GetAccountID(),
-				c->GetLoginServerName());
+				c->GetLoginServerName()
+			);
 		}
 
-		switch (utwr->response) {
+		switch (user_to_world_response->response) {
 			case 1:
 				per->Message = 101;
 				break;
@@ -254,16 +257,16 @@ void WorldServer::ProcessUsertoWorldRespLeg(uint16_t opcode, const EQ::Net::Pack
 				break;
 		}
 
-		if (server.options.IsTraceOn()) {
-			Log(Logs::General,
-				Logs::Netcode,
-				"Sending play response with following data, allowed %u, sequence %u, server number %u, message %u",
-				per->Allowed,
-				per->Sequence,
-				per->ServerNumber,
-				per->Message);
-			Log(Logs::General, Logs::Netcode, "[Size: %u] %s", outapp->size, DumpPacketToString(outapp).c_str());
-		}
+		LogF(Logs::General,
+			 Logs::Netcode,
+			 "Sending play response: allowed [{0}] sequence [{1}] server number [{2}] message [{3}]",
+			 per->Allowed,
+			 per->Sequence,
+			 per->ServerNumber,
+			 per->Message
+		);
+
+		Log(Logs::General, Logs::Netcode, "[Size: %u] %s", outapp->size, DumpPacketToString(outapp).c_str());
 
 		if (server.options.IsDumpOutPacketsOn()) {
 			DumpPacket(outapp);
@@ -276,7 +279,7 @@ void WorldServer::ProcessUsertoWorldRespLeg(uint16_t opcode, const EQ::Net::Pack
 		Log(Logs::General,
 			Logs::Error,
 			"Received User-To-World Response for %u but could not find the client referenced!.",
-			utwr->lsaccountid);
+			user_to_world_response->lsaccountid);
 	}
 }
 
@@ -737,16 +740,19 @@ void WorldServer::SendClientAuth(
 )
 {
 	EQ::Net::DynamicPacket outapp;
-	ClientAuth_Struct      client_auth;
+	ClientAuth_Struct      client_auth{};
+
 	client_auth.lsaccount_id = account_id;
+
 	strncpy(client_auth.name, account.c_str(), 30);
 	strncpy(client_auth.key, key.c_str(), 30);
+
 	client_auth.lsadmin    = 0;
 	client_auth.worldadmin = 0;
 	client_auth.ip         = inet_addr(ip.c_str());
 	strncpy(client_auth.lsname, &loginserver_name[0], 64);
 
-	std::string client_address(ip);
+	const std::string& client_address(ip);
 	std::string world_address(connection->Handle()->RemoteIP());
 
 	if (client_address.compare(world_address) == 0) {
@@ -758,6 +764,28 @@ void WorldServer::SendClientAuth(
 	else {
 		client_auth.local = 0;
 	}
+
+	struct in_addr ip_addr{};
+	ip_addr.s_addr = client_auth.ip;
+
+	LogLoginserver(
+		"Client authentication response: world_address [{0}] client_address [{1}]",
+		world_address,
+		client_address
+	);
+
+	LogLoginserver(
+		"Sending Client Authentication Response ls_account_id [{0}] ls_name [{1}] name [{2}] key [{3}] ls_admin [{4}] "
+		" world_admin [{5}] ip [{6}] local [{7}]",
+		client_auth.lsaccount_id,
+		client_auth.lsname,
+		client_auth.name,
+		client_auth.key,
+		client_auth.lsadmin,
+		client_auth.worldadmin,
+		inet_ntoa(ip_addr),
+		client_auth.local
+	);
 
 	outapp.PutSerialize(0, client_auth);
 	connection->Send(ServerOP_LSClientAuth, outapp);
