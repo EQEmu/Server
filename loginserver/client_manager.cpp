@@ -29,8 +29,10 @@ extern bool        run_server;
 
 ClientManager::ClientManager()
 {
-	int                             titanium_port = server.config.GetVariableInt("Titanium", "port", 5998);
+	int titanium_port = server.config.GetVariableInt("Titanium", "port", 5998);
+
 	EQStreamManagerInterfaceOptions titanium_opts(titanium_port, false, false);
+
 	titanium_stream = new EQ::Net::EQStreamManager(titanium_opts);
 	titanium_ops    = new RegularOpcodeManager;
 	if (!titanium_ops->LoadOpcodes(
@@ -39,8 +41,12 @@ ClientManager::ClientManager()
 			"opcodes",
 			"login_opcodes.conf"
 		).c_str())) {
-		Log(Logs::General, Logs::Error, "ClientManager fatal error: couldn't load opcodes for Titanium file %s.",
-			server.config.GetVariableString("Titanium", "opcodes", "login_opcodes.conf").c_str());
+
+		Error(
+			"ClientManager fatal error: couldn't load opcodes for Titanium file [{0}]",
+			server.config.GetVariableString("Titanium", "opcodes", "login_opcodes.conf")
+		);
+
 		run_server = false;
 	}
 
@@ -57,7 +63,8 @@ ClientManager::ClientManager()
 		}
 	);
 
-	int                             sod_port = server.config.GetVariableInt("SoD", "port", 5999);
+	int sod_port = server.config.GetVariableInt("SoD", "port", 5999);
+
 	EQStreamManagerInterfaceOptions sod_opts(sod_port, false, false);
 	sod_stream = new EQ::Net::EQStreamManager(sod_opts);
 	sod_ops    = new RegularOpcodeManager;
@@ -69,11 +76,12 @@ ClientManager::ClientManager()
 
 	sod_stream->OnNewConnection(
 		[this](std::shared_ptr<EQ::Net::EQStream> stream) {
-			LogF(Logs::General,
-				 Logs::Login_Server,
-				 "New SoD client connection from {0}:{1}",
-				 stream->GetRemoteIP(),
-				 stream->GetRemotePort());
+			LogLoginserver(
+				"New SoD client connection from {0}:{1}",
+				stream->GetRemoteIP(),
+				stream->GetRemotePort()
+			);
+
 			stream->SetOpcodeManager(&sod_ops);
 			Client *c = new Client(stream, cv_sod);
 			clients.push_back(c);
@@ -133,6 +141,10 @@ void ClientManager::ProcessDisconnect()
 	}
 }
 
+/**
+ * @param account_id
+ * @param loginserver
+ */
 void ClientManager::RemoveExistingClient(unsigned int account_id, const std::string &loginserver)
 {
 	auto iter = clients.begin();
@@ -150,6 +162,11 @@ void ClientManager::RemoveExistingClient(unsigned int account_id, const std::str
 	}
 }
 
+/**
+ * @param account_id
+ * @param loginserver
+ * @return
+ */
 Client *ClientManager::GetClient(unsigned int account_id, const std::string &loginserver)
 {
 	auto iter = clients.begin();

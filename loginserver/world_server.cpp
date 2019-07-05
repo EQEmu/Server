@@ -162,16 +162,14 @@ void WorldServer::ProcessLSStatus(uint16_t opcode, const EQ::Net::Packet &packet
 	}
 
 	if (packet.Length() < sizeof(ServerLSStatus_Struct)) {
-		Log(
-			Logs::General,
-			Logs::Error,
+		Error(
 			"Received application packet from server that had opcode ServerOP_LSStatus, but was too small. Discarded to avoid buffer overrun"
 		);
 
 		return;
 	}
 
-	ServerLSStatus_Struct *ls_status = (ServerLSStatus_Struct *) packet.Data();
+	auto *ls_status = (ServerLSStatus_Struct *) packet.Data();
 
 	LogLoginserverDetail(
 		"World Server Status Update Received | Server [{0}] Status [{1}] Players [{2}] Zones [{3}]",
@@ -203,10 +201,10 @@ void WorldServer::ProcessUsertoWorldRespLeg(uint16_t opcode, const EQ::Net::Pack
 	}
 
 	if (packet.Length() < sizeof(UsertoWorldResponseLegacy_Struct)) {
-		Log(Logs::General,
-			Logs::Error,
+		Error(
 			"Received application packet from server that had opcode ServerOP_UsertoWorldResp, "
-			"but was too small. Discarded to avoid buffer overrun.");
+			"but was too small. Discarded to avoid buffer overrun"
+		);
 		return;
 	}
 
@@ -217,7 +215,7 @@ void WorldServer::ProcessUsertoWorldRespLeg(uint16_t opcode, const EQ::Net::Pack
 		Log(Logs::General, Logs::Netcode, "User-To-World Response received.");
 	}
 
-	UsertoWorldResponseLegacy_Struct *user_to_world_response = (UsertoWorldResponseLegacy_Struct *) packet.Data();
+	auto *user_to_world_response = (UsertoWorldResponseLegacy_Struct *) packet.Data();
 	Log(Logs::General, Logs::Debug, "Trying to find client with user id of %u.", user_to_world_response->lsaccountid);
 	Client *c = server.client_manager->GetClient(user_to_world_response->lsaccountid, "eqemu");
 	if (c) {
@@ -229,12 +227,12 @@ void WorldServer::ProcessUsertoWorldRespLeg(uint16_t opcode, const EQ::Net::Pack
 			c->GetAccountName().c_str()
 		);
 
-		EQApplicationPacket *outapp = new EQApplicationPacket(
+		auto *outapp = new EQApplicationPacket(
 			OP_PlayEverquestResponse,
 			sizeof(PlayEverquestResponse_Struct)
 		);
 
-		PlayEverquestResponse_Struct *per = (PlayEverquestResponse_Struct *) outapp->pBuffer;
+		auto *per = (PlayEverquestResponse_Struct *) outapp->pBuffer;
 		per->Sequence     = c->GetPlaySequence();
 		per->ServerNumber = c->GetPlayServerID();
 
@@ -326,36 +324,49 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 		Log(Logs::General, Logs::Netcode, "User-To-World Response received.");
 	}
 
-	UsertoWorldResponse_Struct *utwr = (UsertoWorldResponse_Struct *) packet.Data();
-	Log(Logs::General, Logs::Debug, "Trying to find client with user id of %u.", utwr->lsaccountid);
-	Client *c = server.client_manager->GetClient(utwr->lsaccountid, utwr->login);
-	if (c) {
+	auto user_to_world_response = (UsertoWorldResponse_Struct *) packet.Data();
+	Log(Logs::General, Logs::Debug, "Trying to find client with user id of %u.", user_to_world_response->lsaccountid);
+	Client *client = server.client_manager->GetClient(
+		user_to_world_response->lsaccountid,
+		user_to_world_response->login
+	);
+	if (client) {
 		Log(Logs::General,
 			Logs::Debug,
 			"Found client with user id of %u and account name of %s.",
-			utwr->lsaccountid,
-			c->GetAccountName().c_str());
-		EQApplicationPacket          *outapp = new EQApplicationPacket(
+			user_to_world_response->lsaccountid,
+			client->GetAccountName().c_str()
+		);
+
+		auto *outapp = new EQApplicationPacket(
 			OP_PlayEverquestResponse,
-			sizeof(PlayEverquestResponse_Struct));
-		PlayEverquestResponse_Struct *per    = (PlayEverquestResponse_Struct *) outapp->pBuffer;
-		per->Sequence     = c->GetPlaySequence();
-		per->ServerNumber = c->GetPlayServerID();
-		Log(Logs::General, Logs::Debug, "Found sequence and play of %u %u", c->GetPlaySequence(), c->GetPlayServerID());
+			sizeof(PlayEverquestResponse_Struct)
+		);
+
+		auto *per = (PlayEverquestResponse_Struct *) outapp->pBuffer;
+		per->Sequence     = client->GetPlaySequence();
+		per->ServerNumber = client->GetPlayServerID();
+		Log(Logs::General,
+			Logs::Debug,
+			"Found sequence and play of %u %u",
+			client->GetPlaySequence(),
+			client->GetPlayServerID()
+		);
 
 		Log(Logs::General, Logs::Netcode, "[Size: %u] %s", outapp->size, DumpPacketToString(outapp).c_str());
 
-		if (utwr->response > 0) {
+		if (user_to_world_response->response > 0) {
 			per->Allowed = 1;
 			SendClientAuth(
-				c->GetConnection()->GetRemoteAddr(),
-				c->GetAccountName(),
-				c->GetKey(),
-				c->GetAccountID(),
-				c->GetLoginServerName());
+				client->GetConnection()->GetRemoteAddr(),
+				client->GetAccountName(),
+				client->GetKey(),
+				client->GetAccountID(),
+				client->GetLoginServerName()
+			);
 		}
 
-		switch (utwr->response) {
+		switch (user_to_world_response->response) {
 			case 1:
 				per->Message = 101;
 				break;
@@ -388,14 +399,12 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 			DumpPacket(outapp);
 		}
 
-		c->SendPlayResponse(outapp);
+		client->SendPlayResponse(outapp);
 		delete outapp;
 	}
 	else {
-		Log(Logs::General,
-			Logs::Error,
-			"Received User-To-World Response for %u but could not find the client referenced!.",
-			utwr->lsaccountid);
+		Error("Received User-To-World Response for {0} but could not find the client referenced!.",
+			  user_to_world_response->lsaccountid);
 	}
 }
 
@@ -418,77 +427,83 @@ void WorldServer::ProcessLSAccountUpdate(uint16_t opcode, const EQ::Net::Packet 
 	}
 
 	if (packet.Length() < sizeof(ServerLSAccountUpdate_Struct)) {
-		Log(Logs::General,
-			Logs::Error,
+		Error(
 			"Received application packet from server that had opcode ServerLSAccountUpdate_Struct, "
-			"but was too small. Discarded to avoid buffer overrun.");
+			"but was too small. Discarded to avoid buffer overrun"
+		);
+
 		return;
 	}
 
 	Log(Logs::General, Logs::Netcode, "ServerOP_LSAccountUpdate packet received from: %s", short_name.c_str());
-	ServerLSAccountUpdate_Struct *lsau = (ServerLSAccountUpdate_Struct *) packet.Data();
+
+	auto *loginserver_update = (ServerLSAccountUpdate_Struct *) packet.Data();
 	if (is_server_trusted) {
-		Log(Logs::General, Logs::Netcode, "ServerOP_LSAccountUpdate update processed for: %s", lsau->useraccount);
+		Log(Logs::General, Logs::Netcode, "ServerOP_LSAccountUpdate update processed for: %s", loginserver_update->useraccount);
 		std::string name     = "";
 		std::string password = "";
 		std::string email    = "";
-		name.assign(lsau->useraccount);
-		password.assign(lsau->userpassword);
+		name.assign(loginserver_update->useraccount);
+		password.assign(loginserver_update->userpassword);
 
-		if (lsau->useremail) {
-			email.assign(lsau->useremail);
+		if (loginserver_update->useremail) {
+			email.assign(loginserver_update->useremail);
 		}
 
-		server.db->UpdateLSAccountInfo(lsau->useraccountid, name, password, email);
+		server.db->UpdateLSAccountInfo(loginserver_update->useraccountid, name, password, email);
 	}
 }
 
-void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_worldserver_info_packet)
+/**
+ *
+ * @param new_world_server_info_packet
+ */
+void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info_packet)
 {
 	if (is_server_logged_in) {
 		Error("WorldServer::Handle_NewLSInfo called but the login server was already marked as logged in, aborting.");
 		return;
 	}
 
-	if (strlen(new_worldserver_info_packet->account) <= 30) {
-		account_name = new_worldserver_info_packet->account;
+	if (strlen(new_world_server_info_packet->account) <= 30) {
+		account_name = new_world_server_info_packet->account;
 	}
 	else {
 		Error("Handle_NewLSInfo error, account name was too long.");
 		return;
 	}
 
-	if (strlen(new_worldserver_info_packet->password) <= 30) {
-		account_password = new_worldserver_info_packet->password;
+	if (strlen(new_world_server_info_packet->password) <= 30) {
+		account_password = new_world_server_info_packet->password;
 	}
 	else {
 		Error("Handle_NewLSInfo error, account password was too long.");
 		return;
 	}
 
-	if (strlen(new_worldserver_info_packet->name) <= 200) {
-		long_name = new_worldserver_info_packet->name;
+	if (strlen(new_world_server_info_packet->name) <= 200) {
+		long_name = new_world_server_info_packet->name;
 	}
 	else {
 		Error("Handle_NewLSInfo error, long name was too long.");
 		return;
 	}
 
-	if (strlen(new_worldserver_info_packet->shortname) <= 50) {
-		short_name = new_worldserver_info_packet->shortname;
+	if (strlen(new_world_server_info_packet->shortname) <= 50) {
+		short_name = new_world_server_info_packet->shortname;
 	}
 	else {
 		Error("Handle_NewLSInfo error, short name was too long.");
 		return;
 	}
 
-	if (strlen(new_worldserver_info_packet->local_address) <= 125) {
-		if (strlen(new_worldserver_info_packet->local_address) == 0) {
+	if (strlen(new_world_server_info_packet->local_address) <= 125) {
+		if (strlen(new_world_server_info_packet->local_address) == 0) {
 			Error("Handle_NewLSInfo error, local address was null, defaulting to localhost");
 			local_ip = "127.0.0.1";
 		}
 		else {
-			local_ip = new_worldserver_info_packet->local_address;
+			local_ip = new_world_server_info_packet->local_address;
 		}
 	}
 	else {
@@ -497,8 +512,8 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_worldserver_info_
 		return;
 	}
 
-	if (strlen(new_worldserver_info_packet->remote_address) <= 125) {
-		if (strlen(new_worldserver_info_packet->remote_address) == 0) {
+	if (strlen(new_world_server_info_packet->remote_address) <= 125) {
+		if (strlen(new_world_server_info_packet->remote_address) == 0) {
 			remote_ip = GetConnection()->Handle()->RemoteIP();
 			Error(
 				"Remote address was null, defaulting to stream address %s.",
@@ -506,7 +521,7 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_worldserver_info_
 			);
 		}
 		else {
-			remote_ip = new_worldserver_info_packet->remote_address;
+			remote_ip = new_world_server_info_packet->remote_address;
 		}
 	}
 	else {
@@ -520,23 +535,23 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_worldserver_info_
 		);
 	}
 
-	if (strlen(new_worldserver_info_packet->serverversion) <= 64) {
-		version = new_worldserver_info_packet->serverversion;
+	if (strlen(new_world_server_info_packet->serverversion) <= 64) {
+		version = new_world_server_info_packet->serverversion;
 	}
 	else {
 		Error("Handle_NewLSInfo error, server version was too long.");
 		return;
 	}
 
-	if (strlen(new_worldserver_info_packet->protocolversion) <= 25) {
-		protocol = new_worldserver_info_packet->protocolversion;
+	if (strlen(new_world_server_info_packet->protocolversion) <= 25) {
+		protocol = new_world_server_info_packet->protocolversion;
 	}
 	else {
 		Error("Handle_NewLSInfo error, protocol version was too long.");
 		return;
 	}
 
-	server_type         = new_worldserver_info_packet->servertype;
+	server_type         = new_world_server_info_packet->servertype;
 	is_server_logged_in = true;
 
 	if (server.options.IsRejectingDuplicateServers()) {

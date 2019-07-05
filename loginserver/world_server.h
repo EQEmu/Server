@@ -77,9 +77,9 @@ public:
 	/**
 	 * Takes the info struct we received from world and processes it
 	 *
-	 * @param new_worldserver_info_packet
+	 * @param new_world_server_info_packet
 	 */
-	void Handle_NewLSInfo(ServerNewLSInfo_Struct* new_worldserver_info_packet);
+	void Handle_NewLSInfo(ServerNewLSInfo_Struct* new_world_server_info_packet);
 
 	/**
 	 * Takes the status struct we received from world and processes it

@@ -41,7 +41,7 @@ public:
 	Database *db;
 	Options options;
 	ServerManager *server_manager;
-	ClientManager *client_manager;
+	ClientManager *client_manager{};
 };
 
 #endif

@@ -20,6 +20,7 @@
 
 #include "../common/global_define.h"
 #include "../common/eqemu_logsys.h"
+#include "../common/eqemu_logsys_fmt.h"
 #include "config.h"
 
 /**
@@ -52,7 +53,7 @@ std::string Config::GetVariable(std::string title, std::string parameter)
 void Config::Parse(const char *file_name)
 {
 	if (file_name == nullptr) {
-		Log(Logs::General, Logs::Error, "Config::Parse(), file_name passed was null.");
+		Error("Config::Parse(), file_name passed was null");
 		return;
 	}
 
@@ -62,8 +63,9 @@ void Config::Parse(const char *file_name)
 		std::list<std::string> tokens;
 		Tokenize(input, tokens);
 
-		char                             mode = 0;
-		std::string                      title, param, arg;
+		char        mode = 0;
+		std::string title, param, arg;
+
 		std::list<std::string>::iterator iter = tokens.begin();
 		while (iter != tokens.end()) {
 			if ((*iter).compare("[") == 0) {
@@ -71,7 +73,7 @@ void Config::Parse(const char *file_name)
 				bool first = true;
 				++iter;
 				if (iter == tokens.end()) {
-					Log(Logs::General, Logs::Error, "Config::Parse(), EOF before title done parsing.");
+					Error("Config::Parse(), EOF before title done parsing");
 					fclose(input);
 					vars.clear();
 					return;
@@ -98,7 +100,7 @@ void Config::Parse(const char *file_name)
 			else if (mode == 1) {
 				mode++;
 				if ((*iter).compare("=") != 0) {
-					Log(Logs::General, Logs::Error, "Config::Parse(), invalid parse token where = should be.");
+					Error("Config::Parse(), invalid parse token where = should be");
 					fclose(input);
 					vars.clear();
 					return;
@@ -123,7 +125,7 @@ void Config::Parse(const char *file_name)
 		fclose(input);
 	}
 	else {
-		Log(Logs::General, Logs::Error, "Config::Parse(), file was unable to be opened for parsing.");
+		Error("Config::Parse(), file was unable to be opened for parsing");
 	}
 }
 

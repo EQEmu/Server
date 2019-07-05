@@ -148,8 +148,9 @@ EQApplicationPacket *ServerManager::CreateServerListPacket(Client *client, uint3
 		++iter;
 	}
 
-	EQApplicationPacket     *outapp      = new EQApplicationPacket(OP_ServerListResponse, packet_size);
-	ServerListHeader_Struct *server_list = (ServerListHeader_Struct *) outapp->pBuffer;
+	auto *outapp      = new EQApplicationPacket(OP_ServerListResponse, packet_size);
+	auto *server_list = (ServerListHeader_Struct *) outapp->pBuffer;
+
 	server_list->Unknown1 = sequence;
 	server_list->Unknown2 = 0x00000000;
 	server_list->Unknown3 = 0x01650000;
@@ -253,10 +254,11 @@ void ServerManager::SendUserToWorldRequest(
 		if ((*iter)->GetRuntimeID() == server_id) {
 			EQ::Net::DynamicPacket outapp;
 			outapp.Resize(sizeof(UsertoWorldRequest_Struct));
-			UsertoWorldRequest_Struct *utwr = (UsertoWorldRequest_Struct *) outapp.Data();
-			utwr->worldid     = server_id;
-			utwr->lsaccountid = client_account_id;
-			strncpy(utwr->login, &client_loginserver[0], 64);
+
+			auto *user_to_world_request = (UsertoWorldRequest_Struct *) outapp.Data();
+			user_to_world_request->worldid     = server_id;
+			user_to_world_request->lsaccountid = client_account_id;
+			strncpy(user_to_world_request->login, &client_loginserver[0], 64);
 			(*iter)->GetConnection()->Send(ServerOP_UsertoWorldReq, outapp);
 			found = true;
 
@@ -294,7 +296,8 @@ bool ServerManager::ServerExists(
 			continue;
 		}
 
-		if ((*iter)->GetLongName().compare(server_long_name) == 0 && (*iter)->GetShortName().compare(server_short_name) == 0) {
+		if ((*iter)->GetLongName().compare(server_long_name) == 0 &&
+			(*iter)->GetShortName().compare(server_short_name) == 0) {
 			return true;
 		}
 
@@ -321,7 +324,8 @@ void ServerManager::DestroyServerByName(
 			continue;
 		}
 
-		if ((*iter)->GetLongName().compare(server_long_name) == 0 && (*iter)->GetShortName().compare(server_short_name) == 0) {
+		if ((*iter)->GetLongName().compare(server_long_name) == 0 &&
+			(*iter)->GetShortName().compare(server_short_name) == 0) {
 			(*iter)->GetConnection()->Handle()->Disconnect();
 			iter = world_servers.erase(iter);
 			continue;

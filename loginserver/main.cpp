@@ -196,7 +196,7 @@ int main()
 		Timer::SetCurrentTime();
 		server.client_manager->Process();
 		EQ::EventLoop::Get().Process();
-		Sleep(5);
+		Sleep(50);
 	}
 
 	LogLoginserver("Server Shutdown");
