@@ -192,7 +192,7 @@ bool Database::GetLoginTokenDataFromToken(
 unsigned int Database::GetFreeID(const std::string &loginserver)
 {
 	auto query = fmt::format(
-		"SELECT MAX(LoginServerID) + 1 FROM {0} WHERE AccountLoginServer='{1}'",
+		"SELECT IFNULL(MAX(LoginServerID), 0) + 1 FROM {0} WHERE AccountLoginServer='{1}'",
 		server.options.GetAccountTable(),
 		EscapeString(loginserver)
 	);
@@ -204,7 +204,7 @@ unsigned int Database::GetFreeID(const std::string &loginserver)
 
 	auto row = results.begin();
 
-	return atol(row[0]);
+	return std::stoi(row[0]);
 }
 
 /**

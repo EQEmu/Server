@@ -198,9 +198,14 @@ void Client::Handle_Login(const char *data, unsigned int size)
 
 	char *login_packet_buffer = nullptr;
 
-	unsigned int db_account_id  = 0;
-	std::string  db_loginserver = "eqemu";
-	std::string  db_account_password_hash;
+	unsigned int db_account_id = 0;
+
+	std::string db_loginserver = "local";
+	if (server.options.CanAutoLinkAccounts()) {
+		db_loginserver = "eqemu";
+	}
+
+	std::string db_account_password_hash;
 
 	std::string outbuffer;
 	outbuffer.resize(size - 12);
@@ -310,7 +315,12 @@ void Client::Handle_Play(const char *data)
 	auto       sequence_in  = (unsigned int) play->Sequence;
 
 	if (server.options.IsTraceOn()) {
-		LogInfo("Play received from client, server number {0} sequence {1}", server_id_in, sequence_in);
+		LogInfo(
+			"Play received from client [{0}] server number {1} sequence {2}",
+			GetAccountName(),
+			server_id_in,
+			sequence_in
+		);
 	}
 
 	this->play_server_id = (unsigned int) play->ServerNumber;
@@ -373,9 +383,9 @@ void Client::AttemptLoginAccountCreation(
 	const std::string &loginserver
 )
 {
-	if (loginserver == "eqemu") {
+	LogInfo("Attempting login account creation via '{0}'", loginserver);
 
-		LogInfo("Attempting login account creation via '{0}'", loginserver);
+	if (loginserver == "eqemu") {
 
 		if (!server.options.CanAutoLinkAccounts()) {
 			LogInfo("CanAutoLinkAccounts disabled - sending failed login");

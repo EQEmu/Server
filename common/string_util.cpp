@@ -249,7 +249,6 @@ void ParseAccountString(const std::string &s, std::string &account, std::string 
 		account = split[1];
 	}
 	else if(split.size() == 1) {
-		loginserver = "eqemu";
 		account = split[0];
 	}
 }

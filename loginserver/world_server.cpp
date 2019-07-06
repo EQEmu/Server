@@ -798,7 +798,7 @@ void WorldServer::SendClientAuth(
 
 	LogInfo(
 		"Sending Client Authentication Response ls_account_id [{0}] ls_name [{1}] name [{2}] key [{3}] ls_admin [{4}] "
-		" world_admin [{5}] ip [{6}] local [{7}]",
+		"world_admin [{5}] ip [{6}] local [{7}]",
 		client_auth.lsaccount_id,
 		client_auth.lsname,
 		client_auth.name,
