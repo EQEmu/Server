@@ -520,11 +520,10 @@ void Database::LoadLogSettings(EQEmuLogSys::LogSettings *log_settings)
 					"logsys_categories "
 					"ORDER BY log_category_id";
 
-	auto results = QueryDatabase(query);
+	auto results         = QueryDatabase(query);
+	int  log_category_id = 0;
 
-	int log_category_id = 0;
-
-	int categories_in_database[1000] = {};
+	int *categories_in_database = new int[1000];
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		log_category_id = atoi(row[0]);
@@ -564,15 +563,14 @@ void Database::LoadLogSettings(EQEmuLogSys::LogSettings *log_settings)
 	 * Auto inject categories that don't exist in the database...
 	 */
 	for (int log_index = Logs::AA; log_index != Logs::MaxCategoryID; log_index++) {
-		if (!categories_in_database[log_index]) {
+		if (categories_in_database[log_index] != 1) {
 
-			Log(Logs::General,
-				Logs::Status,
-				"New Log Category '%s' doesn't exist... Automatically adding to `logsys_categories` table...",
+			LogInfo(
+				"New Log Category [{0}] doesn't exist... Automatically adding to [logsys_categories] table...",
 				Logs::LogCategoryName[log_index]
 			);
 
-			std::string inject_query = StringFormat(
+			auto inject_query = fmt::format(
 				"INSERT INTO logsys_categories "
 				"(log_category_id, "
 				"log_category_description, "
@@ -580,15 +578,17 @@ void Database::LoadLogSettings(EQEmuLogSys::LogSettings *log_settings)
 				"log_to_file, "
 				"log_to_gmsay) "
 				"VALUES "
-				"(%i, '%s', %i, %i, %i)",
+				"({0}, '{1}', {2}, {3}, {4})",
 				log_index,
-				EscapeString(Logs::LogCategoryName[log_index]).c_str(),
-				log_settings[log_category_id].log_to_console,
-				log_settings[log_category_id].log_to_file,
-				log_settings[log_category_id].log_to_gmsay
+				EscapeString(Logs::LogCategoryName[log_index]),
+				std::to_string(log_settings[log_index].log_to_console),
+				std::to_string(log_settings[log_index].log_to_file),
+				std::to_string(log_settings[log_index].log_to_gmsay)
 			);
 
 			QueryDatabase(inject_query);
 		}
 	}
+
+	delete[] categories_in_database;
 }

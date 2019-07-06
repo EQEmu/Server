@@ -123,26 +123,26 @@ void EQEmuLogSys::LoadLogSettingsDefaults()
 	/**
 	 * Set Defaults
 	 */
-	log_settings[Logs::World_Server].log_to_console    = Logs::General;
-	log_settings[Logs::Zone_Server].log_to_console     = Logs::General;
-	log_settings[Logs::QS_Server].log_to_console       = Logs::General;
-	log_settings[Logs::UCS_Server].log_to_console      = Logs::General;
-	log_settings[Logs::Crash].log_to_console           = Logs::General;
-	log_settings[Logs::MySQLError].log_to_console      = Logs::General;
-	log_settings[Logs::Login_Server].log_to_console    = Logs::General;
-	log_settings[Logs::Headless_Client].log_to_console = Logs::General;
-	log_settings[Logs::NPCScaling].log_to_gmsay        = Logs::General;
+	log_settings[Logs::World_Server].log_to_console    = static_cast<uint8>(Logs::General);
+	log_settings[Logs::Zone_Server].log_to_console     = static_cast<uint8>(Logs::General);
+	log_settings[Logs::QS_Server].log_to_console       = static_cast<uint8>(Logs::General);
+	log_settings[Logs::UCS_Server].log_to_console      = static_cast<uint8>(Logs::General);
+	log_settings[Logs::Crash].log_to_console           = static_cast<uint8>(Logs::General);
+	log_settings[Logs::MySQLError].log_to_console      = static_cast<uint8>(Logs::General);
+	log_settings[Logs::Login_Server].log_to_console    = static_cast<uint8>(Logs::General);
+	log_settings[Logs::Headless_Client].log_to_console = static_cast<uint8>(Logs::General);
+	log_settings[Logs::NPCScaling].log_to_gmsay        = static_cast<uint8>(Logs::General);
 
 	/**
 	 * RFC 5424
 	 */
-	log_settings[Logs::Emergency].log_to_console = Logs::General;
-	log_settings[Logs::Alert].log_to_console     = Logs::General;
-	log_settings[Logs::Critical].log_to_console  = Logs::General;
-	log_settings[Logs::Error].log_to_console     = Logs::General;
-	log_settings[Logs::Warning].log_to_console   = Logs::General;
-	log_settings[Logs::Notice].log_to_console    = Logs::General;
-	log_settings[Logs::Info].log_to_console      = Logs::General;
+	log_settings[Logs::Emergency].log_to_console = static_cast<uint8>(Logs::General);
+	log_settings[Logs::Alert].log_to_console     = static_cast<uint8>(Logs::General);
+	log_settings[Logs::Critical].log_to_console  = static_cast<uint8>(Logs::General);
+	log_settings[Logs::Error].log_to_console     = static_cast<uint8>(Logs::General);
+	log_settings[Logs::Warning].log_to_console   = static_cast<uint8>(Logs::General);
+	log_settings[Logs::Notice].log_to_console    = static_cast<uint8>(Logs::General);
+	log_settings[Logs::Info].log_to_console      = static_cast<uint8>(Logs::General);
 
 	/**
 	 * Set Category enabled status on defaults
