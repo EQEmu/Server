@@ -71,6 +71,9 @@ MySQLRequestResult DBcore::QueryDatabase(std::string query, bool retryOnFailureO
 
 MySQLRequestResult DBcore::QueryDatabase(const char *query, uint32 querylen, bool retryOnFailureOnce)
 {
+	BenchTimer timer;
+	timer.reset();
+
 	LockMutex lock(&MDatabase);
 
 	// Reconnect if we are not connected before hand.
@@ -129,9 +132,6 @@ MySQLRequestResult DBcore::QueryDatabase(const char *query, uint32 querylen, boo
 	if (res != nullptr) {
 		rowCount = (uint32) mysql_num_rows(res);
 	}
-
-	BenchTimer timer;
-	timer.reset();
 
 	MySQLRequestResult requestResult(
 		res,
