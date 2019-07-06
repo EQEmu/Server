@@ -414,10 +414,11 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 
 	is_player_zoning = (li->zoning == 1);
 
-	uint32 id = atoi(name);
+	LogDebug("Receiving Login Info Packet from Client | name [{0}] password [{1}]", name, password);
 
+	uint32 id = atoi(name);
 	if (id == 0) {
-		Log(Logs::General, Logs::World_Server, "Login ID is 0, disconnecting.");
+		LogWarning("Receiving Login Info Packet from Client | account_id is 0 - disconnecting");
 		return false;
 	}
 

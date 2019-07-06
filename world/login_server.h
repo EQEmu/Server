@@ -47,7 +47,7 @@ private:
 	void ProcessUsertoWorldReqLeg(uint16_t opcode, EQ::Net::Packet &p);
 	void ProcessUsertoWorldReq(uint16_t opcode, EQ::Net::Packet &p);
 	void ProcessLSClientAuth(uint16_t opcode, EQ::Net::Packet &p);
-	void ProcessLSClientAuthLeg(uint16_t opcode, EQ::Net::Packet &p);
+	void ProcessLSClientAuthLegacy(uint16_t opcode, EQ::Net::Packet &p);
 	void ProcessLSFatalError(uint16_t opcode, EQ::Net::Packet &p);
 	void ProcessSystemwideMessage(uint16_t opcode, EQ::Net::Packet &p);
 	void ProcessLSRemoteAddr(uint16_t opcode, EQ::Net::Packet &p);

@@ -225,15 +225,15 @@ bool Database::CreateLoginData(
 }
 
 /**
- * @param name
- * @param password
+ * @param in_account_name
+ * @param in_account_password
  * @param loginserver
  * @param id
  * @return
  */
 bool Database::CreateLoginDataWithID(
-	const std::string &name,
-	const std::string &password,
+	const std::string &in_account_name,
+	const std::string &in_account_password,
 	const std::string &loginserver,
 	unsigned int id
 )
@@ -248,8 +248,8 @@ bool Database::CreateLoginDataWithID(
 		server.options.GetAccountTable(),
 		id,
 		EscapeString(loginserver),
-		EscapeString(name),
-		EscapeString(password)
+		EscapeString(in_account_name),
+		EscapeString(in_account_password)
 	);
 
 	auto results = QueryDatabase(query);

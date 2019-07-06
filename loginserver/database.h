@@ -80,8 +80,8 @@ public:
 		unsigned int &id
 	);
 	bool CreateLoginDataWithID(
-		const std::string &name,
-		const std::string &password,
+		const std::string &in_account_name,
+		const std::string &in_account_password,
 		const std::string &loginserver,
 		unsigned int id
 	);

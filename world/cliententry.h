@@ -28,7 +28,7 @@ public:
 	void	Update(ZoneServer* zoneserver, ServerClientList_Struct* scl, int8 iOnline = CLE_Status_InZone);
 	void	LSUpdate(ZoneServer* zoneserver);
 	void	LSZoneChange(ZoneToZone_Struct* ztz);
-	bool	CheckAuth(uint32 iLSID, const char* key);
+	bool	CheckAuth(uint32 loginserver_account_id, const char* key_password);
 	void	SetOnline(ZoneServer* iZS, int8 iOnline);
 	void	SetOnline(int8 iOnline = CLE_Status_Online);
 	void	SetChar(uint32 iCharID, const char* iCharName);
@@ -42,10 +42,10 @@ public:
 	void	Camp(ZoneServer* iZS = 0);
 
 	// Login Server stuff
-	inline const char*  LoginServer() const   { return pLoginServer; }
+	inline const char*  LoginServer() const   { return source_loginserver; }
 	inline uint32		LSID()	const		{ return pLSID; }
 	inline uint32		LSAccountID() const	{ return pLSID; }
-	inline const char*	LSName() const		{ return plsname; }
+	inline const char*	LSName() const		{ return loginserver_account_name; }
 	inline int16		WorldAdmin() const	{ return pworldadmin; }
 	inline const char*	GetLSKey() const	{ return plskey; }
 	inline const int8	GetOnline() const	{ return pOnline; }
@@ -95,9 +95,9 @@ private:
 	uint8	stale;
 
 	// Login Server stuff
-	char	pLoginServer[64]; //Loginserver we came from.
+	char	source_loginserver[64]; //Loginserver we came from.
 	uint32	pLSID;
-	char	plsname[32];
+	char	loginserver_account_name[32];
 	char	plskey[16];
 	int16	pworldadmin;		// Login server's suggested admin status setting
 	bool	plocal;

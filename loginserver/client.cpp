@@ -560,11 +560,15 @@ bool Client::VerifyLoginHash(
 }
 
 /**
- * @param user
+ * @param in_account_name
  * @param db_account_id
  * @param db_loginserver
  */
-void Client::DoSuccessfulLogin(const std::string &user, int db_account_id, const std::string &db_loginserver)
+void Client::DoSuccessfulLogin(
+	const std::string in_account_name,
+	int db_account_id,
+	const std::string &db_loginserver
+)
 {
 	stored_user.clear();
 	stored_pass.clear();
@@ -578,7 +582,7 @@ void Client::DoSuccessfulLogin(const std::string &user, int db_account_id, const
 	GenerateKey();
 
 	account_id       = db_account_id;
-	account_name     = user;
+	account_name     = in_account_name;
 	loginserver_name = db_loginserver;
 
 	auto *outapp         = new EQApplicationPacket(OP_LoginAccepted, 10 + 80);
@@ -650,25 +654,29 @@ void Client::CreateLocalAccount(const std::string &user, const std::string &pass
 }
 
 /**
- * @param user
- * @param pass
- * @param id
+ * @param in_account_name
+ * @param in_account_password
+ * @param loginserver_account_id
  */
-void Client::CreateEQEmuAccount(const std::string &user, const std::string &pass, unsigned int id)
+void Client::CreateEQEmuAccount(
+	const std::string &in_account_name,
+	const std::string &in_account_password,
+	unsigned int loginserver_account_id
+)
 {
 	auto mode = server.options.GetEncryptionMode();
-	auto hash = eqcrypt_hash(user, pass, mode);
+	auto hash = eqcrypt_hash(in_account_name, in_account_password, mode);
 
-	if (server.db->DoesLoginServerAccountExist(user, hash, "eqemu", id)) {
-		DoSuccessfulLogin(user, id, "eqemu");
+	if (server.db->DoesLoginServerAccountExist(in_account_name, hash, "eqemu", loginserver_account_id)) {
+		DoSuccessfulLogin(in_account_name, loginserver_account_id, "eqemu");
 		return;
 	}
 
-	if (!server.db->CreateLoginDataWithID(user, hash, "eqemu", id)) {
+	if (!server.db->CreateLoginDataWithID(in_account_name, hash, "eqemu", loginserver_account_id)) {
 		DoFailedLogin();
 	}
 	else {
-		DoSuccessfulLogin(user, id, "eqemu");
+		DoSuccessfulLogin(in_account_name, loginserver_account_id, "eqemu");
 	}
 }
 

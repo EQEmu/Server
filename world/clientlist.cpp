@@ -410,15 +410,18 @@ void ClientList::CLEKeepAlive(uint32 numupdates, uint32* wid) {
 	}
 }
 
-ClientListEntry* ClientList::CheckAuth(uint32 iLSID, const char* iKey) {
-	LinkedListIterator<ClientListEntry*> iterator(clientlist);
+ClientListEntry *ClientList::CheckAuth(uint32 iLSID, const char *iKey)
+{
+	LinkedListIterator<ClientListEntry *> iterator(clientlist);
 
 	iterator.Reset();
-	while(iterator.MoreElements()) {
-		if (iterator.GetData()->CheckAuth(iLSID, iKey))
+	while (iterator.MoreElements()) {
+		if (iterator.GetData()->CheckAuth(iLSID, iKey)) {
 			return iterator.GetData();
+		}
 		iterator.Advance();
 	}
+
 	return 0;
 }
 

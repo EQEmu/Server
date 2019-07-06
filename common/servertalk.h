@@ -519,35 +519,35 @@ struct ServerLSPlayerZoneChange_Struct {
 };
 
 struct ClientAuth_Struct {
-	uint32 lsaccount_id; // ID# in login server's db
-	char lsname[64];
-	char name[30]; // username in login server's db
+	uint32 loginserver_account_id; // ID# in login server's db
+	char loginserver_name[64];
+	char account_name[30]; // username in login server's db
 	char key[30]; // the Key the client will present
 	uint8 lsadmin; // login server admin level
-	int16 worldadmin; // login's suggested worldadmin level setting for this user, up to the world if they want to obey it
+	int16 is_world_admin; // login's suggested worldadmin level setting for this user, up to the world if they want to obey it
 	uint32 ip;
-	uint8 local; // 1 if the client is from the local network
+	uint8 is_client_from_local_network; // 1 if the client is from the local network
 
 	template <class Archive>
 	void serialize(Archive &ar)
 	{
-		ar(lsaccount_id, lsname, name, key, lsadmin, worldadmin, ip, local);
+		ar(loginserver_account_id, loginserver_name, account_name, key, lsadmin, is_world_admin, ip, is_client_from_local_network);
 	}
 };
 
 struct ClientAuthLegacy_Struct {
-	uint32 lsaccount_id; // ID# in login server's db
-	char name[30]; // username in login server's db
+	uint32 loginserver_account_id; // ID# in login server's db
+	char loginserver_account_name[30]; // username in login server's db
 	char key[30]; // the Key the client will present
-	uint8 lsadmin; // login server admin level
-	int16 worldadmin; // login's suggested worldadmin level setting for this user, up to the world if they want to obey it
+	uint8 loginserver_admin_level; // login server admin level
+	int16 is_world_admin; // login's suggested worldadmin level setting for this user, up to the world if they want to obey it
 	uint32 ip;
-	uint8 local; // 1 if the client is from the local network
+	uint8 is_client_from_local_network; // 1 if the client is from the local network
 
 	template <class Archive>
 	void serialize(Archive &ar)
 	{
-		ar(lsaccount_id, name, key, lsadmin, worldadmin, ip, local);
+		ar(loginserver_account_id, loginserver_account_name, key, loginserver_admin_level, is_world_admin, ip, is_client_from_local_network);
 	}
 };
 

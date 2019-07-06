@@ -56,7 +56,7 @@ WorldServer::WorldServer(std::shared_ptr<EQ::Net::ServertalkServerConnection> wo
 	worldserver_connection->OnMessage(
 		ServerOP_UsertoWorldRespLeg,
 		std::bind(
-			&WorldServer::ProcessUsertoWorldRespLeg,
+			&WorldServer::ProcessUserToWorldResponseLegacy,
 			this,
 			std::placeholders::_1,
 			std::placeholders::_2
@@ -186,7 +186,7 @@ void WorldServer::ProcessLSStatus(uint16_t opcode, const EQ::Net::Packet &packet
  * @param opcode
  * @param packet
  */
-void WorldServer::ProcessUsertoWorldRespLeg(uint16_t opcode, const EQ::Net::Packet &packet)
+void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Net::Packet &packet)
 {
 	if (server.options.IsWorldTraceOn()) {
 		Log(Logs::General,
@@ -205,6 +205,7 @@ void WorldServer::ProcessUsertoWorldRespLeg(uint16_t opcode, const EQ::Net::Pack
 			"Received application packet from server that had opcode ServerOP_UsertoWorldResp, "
 			"but was too small. Discarded to avoid buffer overrun"
 		);
+
 		return;
 	}
 
@@ -216,15 +217,15 @@ void WorldServer::ProcessUsertoWorldRespLeg(uint16_t opcode, const EQ::Net::Pack
 	}
 
 	auto *user_to_world_response = (UsertoWorldResponseLegacy_Struct *) packet.Data();
-	Log(Logs::General, Logs::Debug, "Trying to find client with user id of %u.", user_to_world_response->lsaccountid);
+
+	LogDebug("Trying to find client with user id of [{0}]", user_to_world_response->lsaccountid);
 	Client *c = server.client_manager->GetClient(user_to_world_response->lsaccountid, "eqemu");
 	if (c) {
 
-		Log(Logs::General,
-			Logs::Debug,
-			"Found client with user id of %u and account name of %s.",
+		LogDebug(
+			"Found client with user id of [{0}] and account name of [{1}]",
 			user_to_world_response->lsaccountid,
-			c->GetAccountName().c_str()
+			c->GetAccountName()
 		);
 
 		auto *outapp = new EQApplicationPacket(
@@ -763,28 +764,28 @@ void WorldServer::SendClientAuth(
 	EQ::Net::DynamicPacket outapp;
 	ClientAuth_Struct      client_auth{};
 
-	client_auth.lsaccount_id = account_id;
+	client_auth.loginserver_account_id = account_id;
 
-	strncpy(client_auth.name, account.c_str(), 30);
+	strncpy(client_auth.account_name, account.c_str(), 30);
 	strncpy(client_auth.key, key.c_str(), 30);
 
 	client_auth.lsadmin    = 0;
-	client_auth.worldadmin = 0;
+	client_auth.is_world_admin = 0;
 	client_auth.ip         = inet_addr(ip.c_str());
-	strncpy(client_auth.lsname, &loginserver_name[0], 64);
+	strncpy(client_auth.loginserver_name, &loginserver_name[0], 64);
 
 	const std::string &client_address(ip);
 	std::string       world_address(connection->Handle()->RemoteIP());
 
 	if (client_address.compare(world_address) == 0) {
-		client_auth.local = 1;
+		client_auth.is_client_from_local_network = 1;
 	}
 	else if (IpUtil::IsIpInPrivateRfc1918(client_address)) {
 		LogInfo("Client is authenticating from a local address [{0}]", client_address);
-		client_auth.local = 1;
+		client_auth.is_client_from_local_network = 1;
 	}
 	else {
-		client_auth.local = 0;
+		client_auth.is_client_from_local_network = 0;
 	}
 
 	struct in_addr ip_addr{};
@@ -799,14 +800,14 @@ void WorldServer::SendClientAuth(
 	LogInfo(
 		"Sending Client Authentication Response ls_account_id [{0}] ls_name [{1}] name [{2}] key [{3}] ls_admin [{4}] "
 		"world_admin [{5}] ip [{6}] local [{7}]",
-		client_auth.lsaccount_id,
-		client_auth.lsname,
-		client_auth.name,
+		client_auth.loginserver_account_id,
+		client_auth.loginserver_name,
+		client_auth.account_name,
 		client_auth.key,
 		client_auth.lsadmin,
-		client_auth.worldadmin,
+		client_auth.is_world_admin,
 		inet_ntoa(ip_addr),
-		client_auth.local
+		client_auth.is_client_from_local_network
 	);
 
 	outapp.PutSerialize(0, client_auth);

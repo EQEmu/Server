@@ -190,9 +190,9 @@ public:
 		const std::string &hash
 	);
 
-	void DoSuccessfulLogin(const std::string &user, int db_account_id, const std::string &db_loginserver);
+	void DoSuccessfulLogin(const std::string in_account_name, int db_account_id, const std::string &db_loginserver);
 	void CreateLocalAccount(const std::string &user, const std::string &pass);
-	void CreateEQEmuAccount(const std::string &user, const std::string &pass, unsigned int id);
+	void CreateEQEmuAccount(const std::string &in_account_name, const std::string &in_account_password, unsigned int loginserver_account_id);
 
 private:
 	EQEmu::Random                      random;
