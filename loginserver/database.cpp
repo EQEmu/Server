@@ -95,8 +95,7 @@ bool Database::GetLoginDataFromAccountInfo(
 )
 {
 	auto query = fmt::format(
-		"SELECT LoginServerID, AccountPassword FROM {0} WHERE AccountName = '{1}' AND AccountLoginserver = '{2}' LIMIT 1",
-		server.options.GetAccountTable(),
+		"SELECT id, account_password FROM login_accounts WHERE account_name = '{0}' AND source_loginserver = '{1}' LIMIT 1",
 		EscapeString(name),
 		EscapeString(loginserver)
 	);
@@ -193,8 +192,7 @@ bool Database::GetLoginTokenDataFromToken(
 unsigned int Database::GetFreeID(const std::string &loginserver)
 {
 	auto query = fmt::format(
-		"SELECT IFNULL(MAX(LoginServerID), 0) + 1 FROM {0} WHERE AccountLoginServer='{1}'",
-		server.options.GetAccountTable(),
+		"SELECT IFNULL(MAX(id), 0) + 1 FROM login_accounts WHERE source_loginserver = '{0}'",
 		EscapeString(loginserver)
 	);
 
@@ -222,7 +220,10 @@ bool Database::CreateLoginData(
 	unsigned int &id
 )
 {
-	return CreateLoginDataWithID(name, password, loginserver, GetFreeID(loginserver));
+	uint32 free_id = GetFreeID(loginserver);
+	id = free_id;
+
+	return CreateLoginDataWithID(name, password, loginserver, free_id);
 }
 
 /**
@@ -244,9 +245,8 @@ bool Database::CreateLoginDataWithID(
 	}
 
 	auto query = fmt::format(
-		"INSERT INTO {0} (LoginServerID, AccountLoginserver, AccountName, AccountPassword, AccountEmail, LastLoginDate, LastIPAddress) "
-		"VALUES ({1}, '{2}', '{3}', '{4}', 'local_creation', NOW(), '127.0.0.1')",
-		server.options.GetAccountTable(),
+		"INSERT INTO login_accounts (id, source_loginserver, account_name, account_password, account_email, last_login_date, last_ip_address, created_at) "
+		"VALUES ({0}, '{1}', '{2}', '{3}', 'local_creation', NOW(), '127.0.0.1', NOW())",
 		id,
 		EscapeString(loginserver),
 		EscapeString(in_account_name),
@@ -277,8 +277,7 @@ bool Database::DoesLoginServerAccountExist(
 	}
 
 	auto query = fmt::format(
-		"SELECT AccountName FROM {0} WHERE AccountName = '{1}' AND AccountLoginserver = '{2}'",
-		server.options.GetAccountTable(),
+		"SELECT AccountName FROM login_accounts WHERE account_name = '{0}' AND source_loginserver = '{1}'",
 		EscapeString(name),
 		EscapeString(loginserver)
 	);
@@ -310,8 +309,7 @@ void Database::UpdateLoginHash(
 	);
 
 	auto query = fmt::format(
-		"UPDATE {0} SET AccountPassword='{1}' WHERE AccountName='{2}' AND AccountLoginserver='{3}'",
-		server.options.GetAccountTable(),
+		"UPDATE login_accounts SET account_password = '{0}' WHERE account_name = '{1}' AND source_loginserver = '{2}'",
 		hash,
 		EscapeString(name),
 		EscapeString(loginserver)
@@ -346,19 +344,17 @@ bool Database::GetWorldRegistration(
 {
 	auto query = fmt::format(
 		"SELECT\n"
-		"  ifnull(WSR.ServerID, 999999) AS ServerID,\n"
-		"  WSR.ServerTagDescription,\n"
-		"  ifnull(WSR.ServerTrusted, 0) AS ServerTrusted,\n"
-		"  ifnull(SLT.ServerListTypeID, 3) AS ServerListTypeID,\n"
-		"  SLT.ServerListTypeDescription,\n"
-		"  ifnull(WSR.ServerAdminID, 0) AS ServerAdminID\n"
+		"  ifnull(WSR.id, 999999) AS server_id,\n"
+		"  WSR.tag_description,\n"
+		"  ifnull(WSR.is_server_trusted, 0) AS is_server_trusted,\n"
+		"  ifnull(SLT.id, 3) AS login_server_list_type_id,\n"
+		"  SLT.description,\n"
+		"  ifnull(WSR.login_server_admin_id, 0) AS login_server_admin_id\n"
 		"FROM\n"
-		"  {0} AS WSR\n"
-		"  JOIN {1} AS SLT ON WSR.ServerListTypeID = SLT.ServerListTypeID\n"
+		"  login_world_servers AS WSR\n"
+		"  JOIN login_server_list_types AS SLT ON WSR.login_server_list_type_id = SLT.id\n"
 		"WHERE\n"
-		"  WSR.ServerShortName = '{2}' LIMIT 1",
-		server.options.GetWorldRegistrationTable(),
-		server.options.GetWorldServerTypeTable(),
+		"  WSR.short_name = '{0}' LIMIT 1",
 		EscapeString(short_name)
 	);
 
@@ -379,8 +375,7 @@ bool Database::GetWorldRegistration(
 	if (db_account_id > 0) {
 
 		auto world_registration_query = fmt::format(
-			"SELECT AccountName, AccountPassword FROM {0} WHERE ServerAdminID = {1} LIMIT 1",
-			server.options.GetWorldAdminRegistrationTable(),
+			"SELECT account_name, account_password FROM login_server_admins WHERE id = {0} LIMIT 1",
 			db_account_id
 		);
 
@@ -405,8 +400,7 @@ bool Database::GetWorldRegistration(
 void Database::UpdateLSAccountData(unsigned int id, std::string ip_address)
 {
 	auto query = fmt::format(
-		"UPDATE {0} SET LastIPAddress = '{1}', LastLoginDate = NOW() where LoginServerId = {2}",
-		server.options.GetAccountTable(),
+		"UPDATE login_accounts SET last_ip_address = '{0}', last_login_date = NOW() where id = {1}",
 		ip_address,
 		id
 	);
@@ -428,9 +422,8 @@ void Database::UpdateLSAccountInfo(
 )
 {
 	auto query = fmt::format(
-		"REPLACE {0} SET LoginServerID = {1}, AccountName = '{2}', AccountPassword = sha('{3}'), AccountCreateDate = now(), "
-		"AccountEmail = '{4}', LastIPAddress = '0.0.0.0', LastLoginDate = now()",
-		server.options.GetAccountTable(),
+		"REPLACE login_accounts SET id = {0}, account_name = '{1}', account_password = sha('{2}'), "
+		"account_email = '{3}', last_ip_address = '0.0.0.0', last_login_date = now()",
 		id,
 		EscapeString(name),
 		EscapeString(password),
@@ -448,8 +441,7 @@ void Database::UpdateLSAccountInfo(
 void Database::UpdateWorldRegistration(unsigned int id, std::string long_name, std::string ip_address)
 {
 	auto query = fmt::format(
-		"UPDATE {0} SET ServerLastLoginDate = NOW(), ServerLastIPAddr = '{1}', ServerLongName = '{2}' WHERE ServerID = {3}",
-		server.options.GetWorldRegistrationTable(),
+		"UPDATE login_world_servers SET last_login_date = NOW(), last_ip_address = '{0}', long_name = '{1}' WHERE id = {2}",
 		ip_address,
 		EscapeString(long_name),
 		id
@@ -471,8 +463,7 @@ bool Database::CreateWorldRegistration(
 )
 {
 	auto query = fmt::format(
-		"SELECT ifnull(max(ServerID),0) + 1 FROM {0}",
-		server.options.GetWorldRegistrationTable()
+		"SELECT ifnull(max(id),0) + 1 FROM login_world_servers"
 	);
 
 	auto results = QueryDatabase(query);
@@ -485,9 +476,8 @@ bool Database::CreateWorldRegistration(
 	id = atoi(row[0]);
 
 	auto insert_query = fmt::format(
-		"INSERT INTO {0} SET ServerID = {1}, ServerLongName = '{2}', ServerShortName = '{3}', \n"
-		"ServerListTypeID = 3, ServerAdminID = 0, ServerTrusted = 0, ServerTagDescription = ''",
-		server.options.GetWorldRegistrationTable(),
+		"INSERT INTO login_world_servers SET id = {0}, long_name = '{1}', short_name = '{2}', \n"
+		"login_server_list_type_id = 3, login_server_admin_id = 0, is_server_trusted = 0, tag_description = ''",
 		id,
 		long_name,
 		short_name
