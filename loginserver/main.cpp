@@ -26,7 +26,10 @@
 #include "../common/platform.h"
 #include "../common/crash.h"
 #include "../common/eqemu_logsys.h"
+#include "../common/http/httplib.h"
 #include "login_server.h"
+#include "loginserver_webserver.h"
+#include "loginserver_command_handler.h"
 #include <time.h>
 #include <stdlib.h>
 #include <string>
@@ -40,7 +43,7 @@ void CatchSignal(int sig_num)
 {
 }
 
-int main()
+int main(int argc, char** argv)
 {
 	RegisterExecutablePlatform(ExePlatformLogin);
 	set_exception_handler();
@@ -156,7 +159,7 @@ int main()
 	 * create client manager
 	 */
 	LogInfo("Client Manager Init");
-	server.client_manager = new ClientManager();
+	server.client_manager           = new ClientManager();
 	if (!server.client_manager) {
 		LogError("Client Manager Failed to Start");
 		LogInfo("Server Manager Shutdown");
@@ -176,25 +179,46 @@ int main()
 #endif
 
 	LogInfo("Server Started");
-
 	if (LogSys.log_settings[Logs::Login_Server].log_to_console == 1) {
 		LogInfo("Loginserver logging set to level [1] for more debugging, enable detail [3]");
 	}
+
+	/**
+	 * Web API
+	 */
+	httplib::Server api;
+	int             web_api_port    = server.config.GetVariableInt("web_api", "port", 6000);
+	bool            web_api_enabled = server.config.GetVariableBool("web_api", "enabled", true);
+	if (web_api_enabled) {
+		api.bind("0.0.0.0", web_api_port);
+		LogInfo("Webserver API now listening on port [{0}]", web_api_port);
+		LoginserverWebserver::RegisterRoutes(api);
+	}
+
+	LoginserverCommandHandler::CommandHandler(argc, argv);
 
 	while (run_server) {
 		Timer::SetCurrentTime();
 		server.client_manager->Process();
 		EQ::EventLoop::Get().Process();
-		Sleep(50);
+
+		if (web_api_enabled) {
+			api.poll();
+		}
+
+		Sleep(5);
 	}
 
 	LogInfo("Server Shutdown");
+
 	LogInfo("Client Manager Shutdown");
 	delete server.client_manager;
+
 	LogInfo("Server Manager Shutdown");
 	delete server.server_manager;
 
 	LogInfo("Database System Shutdown");
 	delete server.db;
+
 	return 0;
 }

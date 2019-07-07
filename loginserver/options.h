@@ -37,7 +37,6 @@ public:
 		dump_in_packets(false),
 		dump_out_packets(false),
 		encryption_mode(5),
-		local_network("127.0.0.1"),
 		reject_duplicate_servers(false),
 		allow_password_login(true),
 		allow_token_login(false),
@@ -187,7 +186,6 @@ private:
 	bool        auto_link_accounts;
 	bool        update_insecure_passwords;
 	int         encryption_mode;
-	std::string local_network;
 	std::string account_table;
 	std::string world_registration_table;
 	std::string world_admin_registration_table;

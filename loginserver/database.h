@@ -128,6 +128,15 @@ public:
 	void UpdateWorldRegistration(unsigned int id, std::string long_name, std::string ip_address);
 	bool CreateWorldRegistration(std::string long_name, std::string short_name, unsigned int &id);
 	void LoadLogSettings(EQEmuLogSys::LogSettings *log_settings);
+
+	/**
+	 * @param write_mode
+	 * @param read_mode
+	 * @return
+	 */
+	std::string CreateLoginserverApiToken(bool write_mode, bool read_mode);
+	MySQLRequestResult GetLoginserverApiTokens();
+
 protected:
 	std::string user, pass, host, port, name;
 	MYSQL       *database;

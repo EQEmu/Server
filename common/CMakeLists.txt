@@ -122,6 +122,7 @@ SET(common_headers
 	crash.h
 	crc16.h
 	crc32.h
+	cli/argh.h
 	data_verification.h
 	database.h
 	dbcore.h
@@ -156,6 +157,7 @@ SET(common_headers
 	global_define.h
 	guild_base.h
 	guilds.h
+	http/httplib.h
 	inventory_profile.h
 	inventory_slot.h
 	ipc_mutex.h

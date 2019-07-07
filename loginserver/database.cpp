@@ -24,6 +24,7 @@
 #include "login_server.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/string_util.h"
+#include "../common/util/uuid.h"
 
 extern LoginServer server;
 
@@ -463,7 +464,11 @@ void Database::UpdateWorldRegistration(unsigned int id, std::string long_name, s
  * @param id
  * @return
  */
-bool Database::CreateWorldRegistration(std::string long_name, std::string short_name, unsigned int &id)
+bool Database::CreateWorldRegistration(
+	std::string long_name,
+	std::string short_name,
+	unsigned int &id
+)
 {
 	auto query = fmt::format(
 		"SELECT ifnull(max(ServerID),0) + 1 FROM {0}",
@@ -502,6 +507,44 @@ bool Database::CreateWorldRegistration(std::string long_name, std::string short_
 	}
 
 	return true;
+}
+
+/**
+ * @param long_name
+ * @param short_name
+ * @param id
+ * @return
+ */
+std::string Database::CreateLoginserverApiToken(
+	bool write_mode,
+	bool read_mode
+)
+{
+	std::string token = EQ::Util::UUID::Generate().ToString();
+	auto        query = fmt::format(
+		"INSERT INTO loginserver_api_tokens (token, can_write, can_read, created_at) VALUES ('{0}', {1}, {2}, NOW())",
+		token,
+		(write_mode ? "1" : "0"),
+		(read_mode ? "1" : "0")
+	);
+
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		return "";
+	}
+
+	return token;
+}
+
+/**
+ * @param long_name
+ * @param short_name
+ * @param id
+ * @return
+ */
+MySQLRequestResult Database::GetLoginserverApiTokens()
+{
+	return QueryDatabase("SELECT token, can_write, can_read FROM loginserver_api_tokens");
 }
 
 /**

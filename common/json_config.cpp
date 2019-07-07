@@ -12,16 +12,18 @@ EQ::JsonConfigFile::JsonConfigFile(const Json::Value &value)
 EQ::JsonConfigFile::~JsonConfigFile() = default;
 
 /**
- * @param filename
+ * @param file_name
  * @return
  */
-EQ::JsonConfigFile EQ::JsonConfigFile::Load(const std::string &filename)
+EQ::JsonConfigFile EQ::JsonConfigFile::Load(
+	const std::string &file_name
+)
 {
 	JsonConfigFile ret;
 	ret.m_root = Json::Value();
 
 	std::ifstream ifs;
-	ifs.open(filename, std::ifstream::in);
+	ifs.open(file_name, std::ifstream::in);
 
 	if (!ifs.good()) {
 		return ret;
@@ -35,6 +37,31 @@ EQ::JsonConfigFile EQ::JsonConfigFile::Load(const std::string &filename)
 	}
 
 	return ret;
+}
+
+/**
+ * @param file_name
+ * @return
+ */
+void EQ::JsonConfigFile::Save(
+	const std::string &file_name
+)
+{
+	std::ofstream opened_config_file;
+	opened_config_file.open(file_name);
+
+	/**
+	 * Grab and build config contents
+	 */
+	Json::StreamWriterBuilder write_builder;
+	write_builder["indentation"] = "  ";
+	std::string document = Json::writeString(write_builder, m_root);
+
+	/**
+	 * Write current contents and close
+	 */
+	opened_config_file << document;
+	opened_config_file.close();
 }
 
 /**

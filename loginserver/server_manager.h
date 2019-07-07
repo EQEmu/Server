@@ -86,6 +86,11 @@ public:
 	 */
 	void DestroyServerByName(std::string server_long_name, std::string server_short_name, WorldServer *ignore = nullptr);
 
+	/**
+	 * @return
+	 */
+	const std::list<std::unique_ptr<WorldServer>> &getWorldServers() const;
+
 private:
 
 	/**
@@ -100,6 +105,7 @@ private:
 
 	std::unique_ptr<EQ::Net::ServertalkServer> server_connection;
 	std::list<std::unique_ptr<WorldServer>>    world_servers;
+
 };
 
 #endif

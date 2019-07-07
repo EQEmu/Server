@@ -11,7 +11,8 @@ namespace EQ
 		JsonConfigFile(const Json::Value &value);
 		~JsonConfigFile();
 
-		static JsonConfigFile Load(const std::string &filename);
+		static JsonConfigFile Load(const std::string &file_name);
+		void Save(const std::string &file_name);
 
 		std::string GetVariableString(const std::string &title, const std::string &parameter, const std::string &default_value);
 		int GetVariableInt(const std::string &title, const std::string &parameter, const int default_value);

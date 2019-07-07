@@ -332,3 +332,11 @@ void ServerManager::DestroyServerByName(
 		++iter;
 	}
 }
+
+/**
+ * @return
+ */
+const std::list<std::unique_ptr<WorldServer>> &ServerManager::getWorldServers() const
+{
+	return world_servers;
+}

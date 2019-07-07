@@ -193,7 +193,6 @@ namespace Logs {
         OutF(LogSys, Logs::General, Logs::Error, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
-
 #define LogWarning(message, ...) do {\
     if (LogSys.log_settings[Logs::Warning].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Warning, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
