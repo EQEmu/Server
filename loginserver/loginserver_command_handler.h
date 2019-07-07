@@ -28,6 +28,7 @@ namespace LoginserverCommandHandler {
 	void CommandHandler(int argc, char **argv);
 	void CreateLoginserverApiToken(int argc, char **argv, argh::parser &cmd);
 	void ListLoginserverApiTokens(int argc, char **argv, argh::parser &cmd);
+	void CreateLocalLoginserverAccount(int argc, char **argv, argh::parser &cmd);
 };
 
 

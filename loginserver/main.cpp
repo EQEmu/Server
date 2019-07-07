@@ -75,7 +75,7 @@ int main(int argc, char** argv)
 		server.config.GetVariableString(
 			"general",
 			"default_loginserver_name",
-			"peq"
+			"local"
 		)
 	);
 

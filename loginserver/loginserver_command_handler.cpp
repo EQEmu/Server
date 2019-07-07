@@ -72,6 +72,7 @@ namespace LoginserverCommandHandler {
 		std::map<std::string, void (*)(int argc, char **argv, argh::parser &cmd)> function_map;
 		function_map["create-loginserver-api-token"] = &LoginserverCommandHandler::CreateLoginserverApiToken;
 		function_map["list-loginserver-api-tokens"]  = &LoginserverCommandHandler::ListLoginserverApiTokens;
+		function_map["create-loginserver-account"]   = &LoginserverCommandHandler::CreateLocalLoginserverAccount;
 
 		std::map<std::string, void (*)(int argc, char **argv, argh::parser &cmd)>::const_iterator it  = function_map.begin();
 		std::map<std::string, void (*)(int argc, char **argv, argh::parser &cmd)>::const_iterator end = function_map.end();
@@ -79,6 +80,12 @@ namespace LoginserverCommandHandler {
 		bool ran_command = false;
 		while (it != end) {
 			if (it->first == argv[1]) {
+				std::cout << std::endl;
+				std::cout << "###########################################################" << std::endl;
+				std::cout << "# Executing CLI Command" << std::endl;
+				std::cout << "###########################################################" << std::endl;
+				std::cout << std::endl;
+
 				(it->second)(argc, argv, cmd);
 				ran_command = true;
 			}
@@ -91,8 +98,12 @@ namespace LoginserverCommandHandler {
 			std::cout << "# Loginserver CLI Menu" << std::endl;
 			std::cout << "###########################################################" << std::endl;
 			std::cout << std::endl;
+			std::cout << "# API" << std::endl;
 			std::cout << "> create-loginserver-api-token --write --read" << std::endl;
 			std::cout << "> list-loginserver-api-tokens" << std::endl;
+			std::cout << std::endl;
+			std::cout << "# Accounts" << std::endl;
+			std::cout << "> create-loginserver-account --username=* --password=*" << std::endl;
 			std::cout << std::endl;
 			std::cout << std::endl;
 		}
@@ -139,4 +150,30 @@ namespace LoginserverCommandHandler {
 			);
 		}
 	}
+
+	/**
+	 * @param argc
+	 * @param argv
+	 * @param cmd
+	 */
+	void CreateLocalLoginserverAccount(int argc, char **argv, argh::parser &cmd)
+	{
+		if (cmd("--username").str().empty() || cmd("--username").str().empty()) {
+			LogInfo("Command Example: create-loginserver-account --username=user --password=password");
+			exit(1);
+		}
+
+		std::string user     = cmd("--username").str();
+		std::string password = cmd("--password").str();
+
+		auto mode = server.options.GetEncryptionMode();
+		auto hash = eqcrypt_hash(user, password, mode);
+
+		unsigned int db_id    = 0;
+		std::string  db_login = server.options.GetDefaultLoginServerName();
+		if (!server.db->CreateLoginData(user, hash, db_login, db_id)) {
+
+		}
+	}
+
 }
