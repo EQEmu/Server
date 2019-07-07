@@ -24,6 +24,7 @@
 #include "../common/util/uuid.h"
 #include "login_server.h"
 #include "loginserver_webserver.h"
+#include "account_management.h"
 
 extern LoginServer server;
 
@@ -163,17 +164,7 @@ namespace LoginserverCommandHandler {
 			exit(1);
 		}
 
-		std::string user     = cmd("--username").str();
-		std::string password = cmd("--password").str();
-
-		auto mode = server.options.GetEncryptionMode();
-		auto hash = eqcrypt_hash(user, password, mode);
-
-		unsigned int db_id    = 0;
-		std::string  db_login = server.options.GetDefaultLoginServerName();
-		if (!server.db->CreateLoginData(user, hash, db_login, db_id)) {
-
-		}
+		AccountManagement::CreateLocalLoginServerAccount(cmd("--username").str(), cmd("--password").str());
 	}
 
 }

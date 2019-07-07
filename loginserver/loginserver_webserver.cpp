@@ -23,6 +23,7 @@
 #include "login_server.h"
 #include "../common/json/json.h"
 #include "../common/string_util.h"
+#include "account_management.h"
 
 extern LoginServer server;
 
@@ -38,7 +39,6 @@ namespace LoginserverWebserver {
 
 		api.Get(
 			"/servers/list", [](const httplib::Request &request, httplib::Response &res) {
-
 				LoginserverWebserver::TokenManager::AuthCanRead(request, res);
 
 				Json::Value response;
@@ -55,6 +55,27 @@ namespace LoginserverWebserver {
 					row["players_online"]    = (*iter)->GetPlayersOnline();
 					response.append(row);
 					++iter;
+				}
+
+				LoginserverWebserver::SendResponse(response, res);
+			}
+		);
+
+		api.Post(
+			"/account/create", [](const httplib::Request &request, httplib::Response &res) {
+				LoginserverWebserver::TokenManager::AuthCanWrite(request, res);
+
+				Json::Value response;
+				bool account_created = AccountManagement::CreateLocalLoginServerAccount(
+					request.get_param_value("username"),
+					request.get_param_value("password")
+				);
+
+				if (account_created) {
+					response["message"] = "Account created successfully!";
+				}
+				else {
+					response["message"] = "Account failed to create!";
 				}
 
 				LoginserverWebserver::SendResponse(response, res);

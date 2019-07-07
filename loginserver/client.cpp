@@ -87,7 +87,7 @@ bool Client::Process()
 				}
 
 				if (server.options.IsTraceOn()) {
-					LogInfo("Server list request received from client.");
+					LogDebug("Server list request received from client.");
 				}
 
 				SendServerListPacket(*(uint32_t *) app->pBuffer);

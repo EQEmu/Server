@@ -1,6 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 SET(eqlogin_sources
+	account_management.cpp
 	client.cpp
 	client_manager.cpp
 	database.cpp
@@ -13,6 +14,7 @@ SET(eqlogin_sources
 )
 
 SET(eqlogin_headers
+	account_management.h
 	client.h
 	client_manager.h
 	database.h

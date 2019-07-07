@@ -231,3 +231,38 @@ bool eqcrypt_verify_hash(const std::string &username, const std::string &passwor
 
 	return false;
 }
+
+std::string GetEncryptionByModeId(uint32 mode) {
+	switch (mode) {
+		case EncryptionModeMD5:
+			return "MD5";
+		case EncryptionModeMD5PassUser:
+			return "MD5PassUser";
+		case EncryptionModeMD5UserPass:
+			return "MD5UserPass";
+		case EncryptionModeMD5Triple:
+			return "MD5Triple";
+		case EncryptionModeSHA:
+			return "SHA";
+		case EncryptionModeSHAPassUser:
+			return "SHAPassUser";
+		case EncryptionModeSHAUserPass:
+			return "SHAUserPass";
+		case EncryptionModeSHATriple:
+			return "SHATriple";
+		case EncryptionModeSHA512:
+			return "SHA512";
+		case EncryptionModeSHA512PassUser:
+			return "SHA512PassUser";
+		case EncryptionModeSHA512UserPass:
+			return "SHA512UserPass";
+		case EncryptionModeSHA512Triple:
+			return "SHA512Triple";
+		case EncryptionModeArgon2:
+			return "Argon2";
+		case EncryptionModeSCrypt:
+			return "SCrypt";
+		default:
+			return "";
+	}
+}
