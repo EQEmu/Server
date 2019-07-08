@@ -277,7 +277,7 @@ bool Database::DoesLoginServerAccountExist(
 	}
 
 	auto query = fmt::format(
-		"SELECT AccountName FROM login_accounts WHERE account_name = '{0}' AND source_loginserver = '{1}'",
+		"SELECT account_name FROM login_accounts WHERE account_name = '{0}' AND source_loginserver = '{1}'",
 		EscapeString(name),
 		EscapeString(loginserver)
 	);

@@ -64,13 +64,18 @@ namespace LoginserverWebserver {
 		api.Post(
 			"/account/create", [](const httplib::Request &request, httplib::Response &res) {
 				LoginserverWebserver::TokenManager::AuthCanWrite(request, res);
+				Json::Value request_body    = LoginserverWebserver::ParseRequestBody(request);
+				std::string username        = request_body.get("username", "").asString();
+				std::string password        = request_body.get("password", "").asString();
 
 				Json::Value response;
-				bool account_created = AccountManagement::CreateLocalLoginServerAccount(
-					request.get_param_value("username"),
-					request.get_param_value("password")
-				);
+				if (username.empty() || password.empty()) {
+					response["message"] = "Username or password not set";
+					LoginserverWebserver::SendResponse(response, res);
+					return;
+				}
 
+				bool account_created = AccountManagement::CreateLocalLoginServerAccount(username, password);
 				if (account_created) {
 					response["message"] = "Account created successfully!";
 				}
@@ -106,6 +111,20 @@ namespace LoginserverWebserver {
 
 		response_payload << payload;
 		res.set_content(response_payload.str(), "application/json");
+	}
+
+	/**
+	 * @param payload
+	 * @param res
+	 */
+	Json::Value ParseRequestBody(const httplib::Request &request)
+	{
+		std::stringstream ss;
+		ss.str(request.body);
+		Json::Value request_body;
+		ss >> request_body;
+
+		return request_body;
 	}
 
 	/**

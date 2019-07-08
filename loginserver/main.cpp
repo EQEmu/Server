@@ -96,28 +96,6 @@ int main(int argc, char** argv)
 			true
 		)
 	);
-	server.options.AccountTable(server.config.GetVariableString("schema", "account_table", "tblLoginServerAccounts"));
-	server.options.WorldRegistrationTable(
-		server.config.GetVariableString(
-			"schema",
-			"world_registration_table",
-			"tblWorldServerRegistration"
-		)
-	);
-	server.options.WorldAdminRegistrationTable(
-		server.config.GetVariableString(
-			"schema",
-			"world_admin_registration_table",
-			"tblServerAdminRegistration"
-		)
-	);
-	server.options.WorldServerTypeTable(
-		server.config.GetVariableString(
-			"schema",
-			"world_server_type_table",
-			"tblServerListType"
-		)
-	);
 
 	/**
 	 * mysql connect

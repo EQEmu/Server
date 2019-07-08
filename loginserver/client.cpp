@@ -385,8 +385,9 @@ void Client::AttemptLoginAccountCreation(
 {
 	LogInfo("Attempting login account creation via '{0}'", loginserver);
 
-	if (loginserver == "eqemu") {
+#ifdef LSPX
 
+	if (loginserver == "eqemu") {
 		if (!server.options.CanAutoLinkAccounts()) {
 			LogInfo("CanAutoLinkAccounts disabled - sending failed login");
 			DoFailedLogin();
@@ -445,16 +446,17 @@ void Client::AttemptLoginAccountCreation(
 				login_connection_manager->Connect(addr, port);
 			}
 		);
+
+		return;
 	}
-	else {
+#endif
 
-		if (!server.options.CanAutoCreateAccounts()) {
-			DoFailedLogin();
-			return;
-		}
-
+	if (server.options.CanAutoCreateAccounts() && loginserver == "local") {
 		CreateLocalAccount(user, pass);
+		return;
 	}
+
+	DoFailedLogin();
 }
 
 void Client::DoFailedLogin()

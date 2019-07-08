@@ -52,6 +52,7 @@ namespace LoginserverWebserver {
 
 	void RegisterRoutes(httplib::Server &api);
 	void SendResponse(const Json::Value &payload, httplib::Response &res);
+	static Json::Value ParseRequestBody(const httplib::Request &request);
 };
 
 #endif //EQEMU_LOGINSERVER_WEBSERVER_H

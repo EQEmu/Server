@@ -103,46 +103,6 @@ public:
 	inline int GetEncryptionMode() const { return encryption_mode; }
 
 	/**
-	* Sets account table.
-	*/
-	inline void AccountTable(std::string t) { account_table = t; }
-
-	/**
-	* Return the value of world account table.
-	*/
-	inline std::string GetAccountTable() const { return account_table; }
-
-	/**
-	* Sets world registration table.
-	*/
-	inline void WorldRegistrationTable(std::string t) { world_registration_table = t; }
-
-	/**
-	* Return the value of world registration table.
-	*/
-	inline std::string GetWorldRegistrationTable() const { return world_registration_table; }
-
-	/**
-	* Sets world admin account table.
-	*/
-	inline void WorldAdminRegistrationTable(std::string t) { world_admin_registration_table = t; }
-
-	/**
-	* Return the value of world admin account table.
-	*/
-	inline std::string GetWorldAdminRegistrationTable() const { return world_admin_registration_table; }
-
-	/**
-	* Sets world server type table.
-	*/
-	inline void WorldServerTypeTable(std::string t) { world_server_type_table = t; }
-
-	/**
-	* Return the value of world server type table.
-	*/
-	inline std::string GetWorldServerTypeTable() const { return world_server_type_table; }
-
-	/**
 	* Sets whether we are rejecting duplicate servers or not.
 	*/
 	inline void RejectDuplicateServers(bool b) { reject_duplicate_servers = b; }
@@ -186,10 +146,6 @@ private:
 	bool        auto_link_accounts;
 	bool        update_insecure_passwords;
 	int         encryption_mode;
-	std::string account_table;
-	std::string world_registration_table;
-	std::string world_admin_registration_table;
-	std::string world_server_type_table;
 	std::string eqemu_loginserver_address;
 	std::string default_loginserver_name;
 };
