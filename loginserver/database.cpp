@@ -452,7 +452,7 @@ bool Database::CreateWorldRegistration(
 	unsigned int &id
 )
 {
-	auto results = QueryDatabase("SELECT max(id) + 1 FROM login_world_servers");
+	auto results = QueryDatabase("SELECT IFNULL(max(id), 0) + 1 FROM login_world_servers");
 	if (!results.Success() || results.RowCount() != 1) {
 		return false;
 	}
