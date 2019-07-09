@@ -332,20 +332,18 @@ Database::DbWorldRegistration Database::GetWorldRegistration(
 {
 	auto query = fmt::format(
 		"SELECT\n"
-		"  ifnull(WSR.id, 999999) AS server_id,\n"
+		"  WSR.id,\n"
 		"  WSR.tag_description,\n"
-		"  ifnull(WSR.is_server_trusted, 0) AS is_server_trusted,\n"
-		"  ifnull(SLT.id, 3) AS login_server_list_type_id,\n"
+		"  WSR.is_server_trusted,\n"
+		"  SLT.id,\n"
 		"  SLT.description,\n"
 		"  ifnull(WSR.login_server_admin_id, 0) AS login_server_admin_id\n"
 		"FROM\n"
 		"  login_world_servers AS WSR\n"
 		"  JOIN login_server_list_types AS SLT ON WSR.login_server_list_type_id = SLT.id\n"
 		"WHERE\n"
-		"  WSR.short_name = '{0}' AND (WSR.last_ip_address = '{1}' OR WSR.last_ip_address = '{2}') LIMIT 1",
-		EscapeString(short_name),
-		EscapeString(remote_ip),
-		EscapeString(local_ip)
+		"  WSR.short_name = '{0}' LIMIT 1",
+		EscapeString(short_name)
 	);
 
 	Database::DbWorldRegistration world_registration{};
@@ -442,46 +440,41 @@ void Database::UpdateWorldRegistration(unsigned int id, std::string long_name, s
 }
 
 /**
- * @param long_name
- * @param short_name
+ * @param server_long_name
+ * @param server_short_name
  * @param id
  * @return
  */
 bool Database::CreateWorldRegistration(
-	std::string long_name,
-	std::string short_name,
+	std::string server_long_name,
+	std::string server_short_name,
+	std::string server_remote_ip,
 	unsigned int &id
 )
 {
-	auto query = fmt::format(
-		"SELECT ifnull(max(id),0) + 1 FROM login_world_servers"
-	);
-
-	auto results = QueryDatabase(query);
+	auto results = QueryDatabase("SELECT max(id) + 1 FROM login_world_servers");
 	if (!results.Success() || results.RowCount() != 1) {
 		return false;
 	}
 
 	auto row = results.begin();
 
-	id = atoi(row[0]);
-
+	id = std::stoi(row[0]);
 	auto insert_query = fmt::format(
-		"INSERT INTO login_world_servers SET id = {0}, long_name = '{1}', short_name = '{2}', \n"
+		"INSERT INTO login_world_servers SET id = {0}, long_name = '{1}', short_name = '{2}', last_ip_address = '{3}', \n"
 		"login_server_list_type_id = 3, login_server_admin_id = 0, is_server_trusted = 0, tag_description = ''",
 		id,
-		long_name,
-		short_name
+		server_long_name,
+		server_short_name,
+		server_remote_ip
 	);
 
 	auto insert_results = QueryDatabase(insert_query);
 	if (!insert_results.Success()) {
-		LogF(
-			Logs::General,
-			Logs::Error,
-			"World registration did not exist in the database for {0} - {1}",
-			long_name,
-			short_name
+		LogError(
+			"Failed to register world server {0} - {1}",
+			server_long_name,
+			server_short_name
 		);
 
 		return false;

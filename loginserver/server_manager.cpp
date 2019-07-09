@@ -300,8 +300,7 @@ bool ServerManager::ServerExists(
 			continue;
 		}
 
-		if ((*iter)->GetServerLongName().compare(server_long_name) == 0 &&
-			(*iter)->GetServerShortName().compare(server_short_name) == 0) {
+		if ((*iter)->GetServerLongName() == server_long_name && (*iter)->GetServerShortName() == server_short_name) {
 			return true;
 		}
 

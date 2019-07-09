@@ -186,12 +186,17 @@ public:
 	void UpdateWorldRegistration(unsigned int id, std::string long_name, std::string ip_address);
 
 	/**
-	 * @param long_name
-	 * @param short_name
+	 * @param server_long_name
+	 * @param server_short_name
 	 * @param id
 	 * @return
 	 */
-	bool CreateWorldRegistration(std::string long_name, std::string short_name, unsigned int &id);
+	bool CreateWorldRegistration(
+		std::string server_long_name,
+		std::string server_short_name,
+		std::string server_remote_ip,
+		unsigned int &id
+	);
 
 	/**
 	 * @param log_settings

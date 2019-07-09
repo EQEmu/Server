@@ -642,10 +642,9 @@ void Client::DoSuccessfulLogin(
  */
 void Client::CreateLocalAccount(const std::string &username, const std::string &password)
 {
-	auto mode = server.options.GetEncryptionMode();
-	auto hash = eqcrypt_hash(username, password, mode);
-
-	unsigned int db_id    = 0;
+	auto         mode  = server.options.GetEncryptionMode();
+	auto         hash  = eqcrypt_hash(username, password, mode);
+	unsigned int db_id = 0;
 	if (!server.db->CreateLoginData(username, hash, "local", db_id)) {
 		DoFailedLogin();
 	}

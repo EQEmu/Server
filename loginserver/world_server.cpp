@@ -471,7 +471,7 @@ void WorldServer::ProcessLSAccountUpdate(uint16_t opcode, const EQ::Net::Packet 
  */
 void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info_packet)
 {
-	if (is_server_logged_in) {
+	if (IsServerLoggedIn()) {
 		LogError("WorldServer::Handle_NewLSInfo called but the login server was already marked as logged in, aborting");
 		return;
 	}
@@ -796,7 +796,6 @@ bool WorldServer::HandleNewLoginserverInfoUnregisteredAllowed(
 )
 {
 	if (world_registration.loaded) {
-
 		this
 			->SetServerDescription(world_registration.server_description)
 			->SetServerId(world_registration.server_id)
@@ -824,7 +823,7 @@ bool WorldServer::HandleNewLoginserverInfoUnregisteredAllowed(
 					this->GetServerShortName()
 				);
 
-				if (IsServerTrusted()) {
+				if (this->IsServerTrusted()) {
 					LogDebug("WorldServer::HandleNewLoginserverRegisteredOnly | ServerOP_LSAccountUpdate sent to world");
 					EQ::Net::DynamicPacket outapp;
 					connection->Send(ServerOP_LSAccountUpdate, outapp);
@@ -879,7 +878,12 @@ bool WorldServer::HandleNewLoginserverInfoUnregisteredAllowed(
 		/**
 		 * Auto create a registration
 		 */
-		if (!server.db->CreateWorldRegistration(long_name, short_name, server_id)) {
+		if (!server.db->CreateWorldRegistration(
+			GetServerLongName(),
+			GetServerShortName(),
+			GetRemoteIp(),
+			server_id
+		)) {
 			return false;
 		}
 	}
