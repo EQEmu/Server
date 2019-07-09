@@ -449,7 +449,8 @@ bool Database::CreateWorldRegistration(
 	std::string server_long_name,
 	std::string server_short_name,
 	std::string server_remote_ip,
-	unsigned int &id
+	unsigned int &id,
+	unsigned int &server_admin_id
 )
 {
 	auto results = QueryDatabase("SELECT IFNULL(max(id), 0) + 1 FROM login_world_servers");
@@ -462,11 +463,12 @@ bool Database::CreateWorldRegistration(
 	id = std::stoi(row[0]);
 	auto insert_query = fmt::format(
 		"INSERT INTO login_world_servers SET id = {0}, long_name = '{1}', short_name = '{2}', last_ip_address = '{3}', \n"
-		"login_server_list_type_id = 3, login_server_admin_id = 0, is_server_trusted = 0, tag_description = ''",
+		"login_server_list_type_id = 3, login_server_admin_id = {4}, is_server_trusted = 0, tag_description = ''",
 		id,
 		server_long_name,
 		server_short_name,
-		server_remote_ip
+		server_remote_ip,
+		server_admin_id
 	);
 
 	auto insert_results = QueryDatabase(insert_query);
@@ -655,11 +657,42 @@ bool Database::DoesLoginserverWorldAdminAccountExist(
 )
 {
 	auto query = fmt::format(
-		"SELECT account_name FROM login_server_admins WHERE account_name = '{0}'",
+		"SELECT account_name FROM login_server_admins WHERE account_name = '{0}' LIMIT 1",
 		EscapeString(account_name)
 	);
 
 	auto results = QueryDatabase(query);
 
 	return (results.RowCount() == 1);
+}
+
+/**
+ * @param account_name
+ * @return
+ */
+Database::DbLoginServerAdmin Database::GetLoginServerAdmin(const std::string &account_name)
+{
+	auto query = fmt::format(
+		"SELECT id, account_name, account_password, first_name, last_name, email, registration_date, registration_ip_address"
+		" FROM login_server_admins WHERE account_name = '{0}' LIMIT 1",
+		EscapeString(account_name)
+	);
+
+	auto results = QueryDatabase(query);
+
+	Database::DbLoginServerAdmin login_server_admin{};
+	if (results.RowCount() == 1) {
+		auto row = results.begin();
+		login_server_admin.loaded                  = true;
+		login_server_admin.id                      = std::stoi(row[0]);
+		login_server_admin.account_name            = row[1];
+		login_server_admin.account_password        = row[2];
+		login_server_admin.first_name              = row[3];
+		login_server_admin.last_name               = row[4];
+		login_server_admin.email                   = row[5];
+		login_server_admin.registration_date       = row[7];
+		login_server_admin.registration_ip_address = row[8];
+	}
+
+	return login_server_admin;
 }

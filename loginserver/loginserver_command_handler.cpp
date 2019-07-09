@@ -192,7 +192,7 @@ namespace LoginserverCommandHandler {
 			cmd("--password").str().empty() ||
 			cmd("--email").str().empty()) {
 
-			LogInfo("Command Example: create-loginserver-account --username=user --password=password");
+			LogInfo("Command Example: create-loginserver-world-admin-account --username=* --password=* --email=*");
 			exit(1);
 		}
 

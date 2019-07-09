@@ -195,7 +195,8 @@ public:
 		std::string server_long_name,
 		std::string server_short_name,
 		std::string server_remote_ip,
-		unsigned int &id
+		unsigned int &id,
+		unsigned int &server_admin_id
 	);
 
 	/**
@@ -234,6 +235,20 @@ public:
 	 * @return
 	 */
 	bool DoesLoginserverWorldAdminAccountExist(const std::string &account_name);
+
+	struct DbLoginServerAdmin {
+		bool        loaded = false;
+		uint32      id;
+		std::string account_name;
+		std::string account_password;
+		std::string first_name;
+		std::string last_name;
+		std::string email;
+		std::string registration_date;
+		std::string registration_ip_address;
+	};
+
+	Database::DbLoginServerAdmin GetLoginServerAdmin(const std::string &account_name);
 
 protected:
 	std::string user, pass, host, port, name;

@@ -875,6 +875,23 @@ bool WorldServer::HandleNewLoginserverInfoUnregisteredAllowed(
 			return true;
 		}
 
+		Database::DbLoginServerAdmin login_server_admin =
+			server.db->GetLoginServerAdmin(GetAccountName());
+
+		uint32 server_admin_id = 0;
+
+		if (login_server_admin.loaded) {
+			auto mode = server.options.GetEncryptionMode();
+			if (eqcrypt_verify_hash(
+				GetAccountName(),
+				GetAccountPassword(),
+				login_server_admin.account_password,
+				mode
+			)) {
+				server_admin_id = login_server_admin.id;
+			}
+		}
+
 		/**
 		 * Auto create a registration
 		 */
@@ -882,7 +899,8 @@ bool WorldServer::HandleNewLoginserverInfoUnregisteredAllowed(
 			GetServerLongName(),
 			GetServerShortName(),
 			GetRemoteIp(),
-			server_id
+			server_id,
+			server_admin_id
 		)) {
 			return false;
 		}
