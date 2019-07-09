@@ -505,11 +505,49 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info
 		}
 	}
 
+	uint32 world_server_admin_id = 0;
+
+	/**
+	 * If our world is trying to authenticate, let's try and pull the owner first to try associating
+	 * with a world short_name
+	 */
+	if (!GetAccountName().empty() && !GetAccountPassword().empty()) {
+		Database::DbLoginServerAdmin
+			login_server_admin = server.db->GetLoginServerAdmin(GetAccountName());
+
+		if (login_server_admin.loaded) {
+			LogDebug(
+				"WorldServer::Handle_NewLSInfo | Attempting to authenticate world admin... [{0}] ({1}) against worldserver [{2}]",
+				GetAccountName(),
+				login_server_admin.id,
+				GetServerShortName()
+			);
+
+			/**
+			 * Validate password hash
+			 */
+			auto mode = server.options.GetEncryptionMode();
+			if (eqcrypt_verify_hash(
+				GetAccountName(),
+				GetAccountPassword(),
+				login_server_admin.account_password,
+				mode
+			)) {
+				LogDebug(
+					"WorldServer::Handle_NewLSInfo | Authenticating world admin... [{0}] ({1}) success! World ({2})",
+					GetAccountName(),
+					login_server_admin.id,
+					GetServerShortName()
+				);
+				world_server_admin_id = login_server_admin.id;
+			}
+		}
+	}
+
 	Database::DbWorldRegistration
 		world_registration = server.db->GetWorldRegistration(
 		GetServerShortName(),
-		GetRemoteIp(),
-		GetLocalIp()
+		world_server_admin_id
 	);
 
 	if (!server.options.IsUnregisteredAllowed()) {
@@ -876,10 +914,9 @@ bool WorldServer::HandleNewLoginserverInfoUnregisteredAllowed(
 		}
 
 		Database::DbLoginServerAdmin login_server_admin =
-			server.db->GetLoginServerAdmin(GetAccountName());
+										 server.db->GetLoginServerAdmin(GetAccountName());
 
 		uint32 server_admin_id = 0;
-
 		if (login_server_admin.loaded) {
 			auto mode = server.options.GetEncryptionMode();
 			if (eqcrypt_verify_hash(

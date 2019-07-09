@@ -320,14 +320,12 @@ void Database::UpdateLoginHash(
 
 /**
  * @param short_name
- * @param remote_ip
- * @param local_ip
+ * @param login_world_server_admin_id
  * @return
  */
 Database::DbWorldRegistration Database::GetWorldRegistration(
 	const std::string &short_name,
-	const std::string &remote_ip,
-	const std::string &local_ip
+	uint32 login_world_server_admin_id
 )
 {
 	auto query = fmt::format(
@@ -342,8 +340,9 @@ Database::DbWorldRegistration Database::GetWorldRegistration(
 		"  login_world_servers AS WSR\n"
 		"  JOIN login_server_list_types AS SLT ON WSR.login_server_list_type_id = SLT.id\n"
 		"WHERE\n"
-		"  WSR.short_name = '{0}' LIMIT 1",
-		EscapeString(short_name)
+		"  WSR.short_name = '{0}' WSR.login_server_admin_id = {1} AND LIMIT 1",
+		EscapeString(short_name),
+		login_world_server_admin_id
 	);
 
 	Database::DbWorldRegistration world_registration{};
