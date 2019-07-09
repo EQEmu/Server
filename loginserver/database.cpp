@@ -525,7 +525,7 @@ std::string Database::CreateLoginserverApiToken(
  */
 MySQLRequestResult Database::GetLoginserverApiTokens()
 {
-	return QueryDatabase("SELECT token, can_write, can_read FROM loginserver_api_tokens");
+	return QueryDatabase("SELECT token, can_write, can_read FROM login_api_tokens");
 }
 
 /**
