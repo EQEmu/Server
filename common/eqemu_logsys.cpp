@@ -468,9 +468,10 @@ void EQEmuLogSys::Out(
 		prefix = fmt::format("[{0}::{1}:{2}] ", base_file_name(file), func, line);
 	}
 
+	auto msg_cstr = message.c_str();
 	va_list args;
-	va_start(args, message);
-	std::string output_message = vStringFormat(message.c_str(), args);
+	va_start(args, msg_cstr);
+	std::string output_message = vStringFormat(msg_cstr, args);
 	va_end(args);
 
 	std::string output_debug_message = EQEmuLogSys::FormatOutMessageString(log_category, prefix + output_message);

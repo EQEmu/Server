@@ -21,11 +21,18 @@
 #ifndef EQEMU_LOGSYS_H
 #define EQEMU_LOGSYS_H
 
-#include <fmt/format.h>
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
 #include <functional>
+
+#ifdef _WIN32
+#ifdef utf16_to_utf8
+#undef utf16_to_utf8
+#endif
+#endif
+
+#include <fmt/format.h>
 #include "types.h"
 
 namespace Logs {

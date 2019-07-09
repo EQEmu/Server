@@ -2,8 +2,9 @@
 #include <winsock2.h>
 #endif
 
-#include "../common/misc_functions.h"
-#include "../common/eqemu_logsys.h"
+#include "misc_functions.h"
+#include "eqemu_logsys.h"
+#include "timer.h"
 
 #include "dbcore.h"
 
@@ -21,7 +22,6 @@
 #else
 
 #include "unix.h"
-#include "timer.h"
 #include <pthread.h>
 
 #endif
