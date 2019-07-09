@@ -70,3 +70,59 @@ bool AccountManagement::CreateLocalLoginServerAccount(
 
 	return false;
 }
+
+/**
+ * @param username
+ * @param password
+ * @param email
+ * @return
+ */
+bool AccountManagement::CreateLoginserverWorldAdminAccount(
+	const std::string &username,
+	const std::string &password,
+	const std::string &email,
+	const std::string &first_name,
+	const std::string &last_name,
+	const std::string &ip_address
+)
+{
+	auto mode = server.options.GetEncryptionMode();
+	auto hash = eqcrypt_hash(username, password, mode);
+
+	LogInfo(
+		"Attempting to create world admin account | username [{0}] encryption algorithm [{1}] ({2})",
+		username,
+		GetEncryptionByModeId(mode),
+		mode
+	);
+
+	if (server.db->DoesLoginserverWorldAdminAccountExist(username)) {
+		LogInfo(
+			"Attempting to create world admin account for user [{0}] but already exists!",
+			username
+		);
+
+		return false;
+	}
+
+	if (server.db->CreateLoginserverWorldAdminAccount(
+		username,
+		hash,
+		first_name,
+		last_name,
+		email,
+		ip_address
+	)) {
+		LogInfo(
+			"Account creation success for user [{0}] encryption algorithm [{1}] ({2})",
+			username,
+			GetEncryptionByModeId(mode),
+			mode
+		);
+		return true;
+	}
+
+	LogError("Failed to create world admin account account for user [{0}]!", username);
+
+	return false;
+}

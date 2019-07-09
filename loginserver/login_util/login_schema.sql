@@ -17,7 +17,7 @@ DROP TABLE IF EXISTS `login_server_admins`;
 CREATE TABLE `login_server_admins` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `account_name` varchar(30) NOT NULL,
-  `account_password` varchar(100) NOT NULL,
+  `account_password` varchar(255) NOT NULL,
   `first_name` varchar(50) NOT NULL,
   `last_name` varchar(50) NOT NULL,
   `email` varchar(100) NOT NULL,

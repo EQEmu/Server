@@ -64,19 +64,29 @@ namespace LoginserverCommandHandler {
 
 		argh::parser cmd;
 		cmd.parse(argc, argv, argh::parser::PREFER_PARAM_FOR_UNREG_OPTION);
-
 		LoginserverCommandHandler::DisplayDebug(cmd);
 
 		/**
 		 * Declare command mapping
 		 */
 		std::map<std::string, void (*)(int argc, char **argv, argh::parser &cmd)> function_map;
-		function_map["create-loginserver-api-token"] = &LoginserverCommandHandler::CreateLoginserverApiToken;
-		function_map["list-loginserver-api-tokens"]  = &LoginserverCommandHandler::ListLoginserverApiTokens;
-		function_map["create-loginserver-account"]   = &LoginserverCommandHandler::CreateLocalLoginserverAccount;
 
-		std::map<std::string, void (*)(int argc, char **argv, argh::parser &cmd)>::const_iterator it  = function_map.begin();
-		std::map<std::string, void (*)(int argc, char **argv, argh::parser &cmd)>::const_iterator end = function_map.end();
+		function_map["create-loginserver-api-token"]           = &LoginserverCommandHandler::CreateLoginserverApiToken;
+		function_map["list-loginserver-api-tokens"]            = &LoginserverCommandHandler::ListLoginserverApiTokens;
+		function_map["create-loginserver-account"]             = &LoginserverCommandHandler::CreateLocalLoginserverAccount;
+		function_map["create-loginserver-world-admin-account"] = &LoginserverCommandHandler::CreateLoginserverWorldAdminAccount;
+
+		std::map<std::string, void (*)(
+			int argc,
+			char **argv,
+			argh::parser &cmd
+		)>::const_iterator it = function_map.begin();
+
+		std::map<std::string, void (*)(
+			int argc,
+			char **argv,
+			argh::parser &cmd
+		)>::const_iterator end = function_map.end();
 
 		bool ran_command = false;
 		while (it != end) {
@@ -103,8 +113,11 @@ namespace LoginserverCommandHandler {
 			std::cout << "> create-loginserver-api-token --write --read" << std::endl;
 			std::cout << "> list-loginserver-api-tokens" << std::endl;
 			std::cout << std::endl;
-			std::cout << "# Accounts" << std::endl;
+			std::cout << "# User Accounts" << std::endl;
 			std::cout << "> create-loginserver-account --username=* --password=*" << std::endl;
+			std::cout << std::endl;
+			std::cout << "# World Accounts" << std::endl;
+			std::cout << "> create-loginserver-world-admin-account --username=* --password=* --email=*" << std::endl;
 			std::cout << std::endl;
 			std::cout << std::endl;
 		}
@@ -159,12 +172,35 @@ namespace LoginserverCommandHandler {
 	 */
 	void CreateLocalLoginserverAccount(int argc, char **argv, argh::parser &cmd)
 	{
-		if (cmd("--username").str().empty() || cmd("--username").str().empty()) {
+		if (cmd("--username").str().empty() || cmd("--password").str().empty()) {
 			LogInfo("Command Example: create-loginserver-account --username=user --password=password");
 			exit(1);
 		}
 
 		AccountManagement::CreateLocalLoginServerAccount(cmd("--username").str(), cmd("--password").str());
+	}
+
+	/**
+	 * @param argc
+	 * @param argv
+	 * @param cmd
+	 */
+	void CreateLoginserverWorldAdminAccount(int argc, char **argv, argh::parser &cmd)
+	{
+		if (
+			cmd("--username").str().empty() ||
+			cmd("--password").str().empty() ||
+			cmd("--email").str().empty()) {
+
+			LogInfo("Command Example: create-loginserver-account --username=user --password=password");
+			exit(1);
+		}
+
+		AccountManagement::CreateLoginserverWorldAdminAccount(
+			cmd("--username").str(),
+			cmd("--password").str(),
+			cmd("--email").str()
+		);
 	}
 
 }

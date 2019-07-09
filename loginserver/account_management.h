@@ -24,7 +24,28 @@
 
 class AccountManagement {
 public:
+
+	/**
+	 * @param username
+	 * @param password
+	 * @return
+	 */
 	static bool CreateLocalLoginServerAccount(std::string username, std::string password);
+
+	/**
+	 * @param username
+	 * @param password
+	 * @param email
+	 * @return
+	 */
+	static bool CreateLoginserverWorldAdminAccount(
+		const std::string &username,
+		const std::string &password,
+		const std::string &email,
+		const std::string &first_name = "",
+		const std::string &last_name = "",
+		const std::string &ip_address = ""
+	);
 };
 
 

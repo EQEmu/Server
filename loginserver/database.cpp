@@ -57,7 +57,7 @@ Database::Database(
 		user.c_str(),
 		pass.c_str(),
 		name.c_str(),
-		atoi(port.c_str()),
+		std::stoi(port),
 		&errnum,
 		errbuf
 	)
@@ -66,7 +66,7 @@ Database::Database(
 		exit(1);
 	}
 	else {
-		Log(Logs::General, Logs::Status, "Using database '%s' at %s:%d", database, host, port);
+		LogStatus("Using database [{0}] at [{1}:{2}]", name, host, port);
 	}
 }
 
@@ -477,6 +477,7 @@ bool Database::CreateWorldRegistration(
 			server_short_name
 		);
 
+
 		return false;
 	}
 
@@ -608,4 +609,57 @@ void Database::LoadLogSettings(EQEmuLogSys::LogSettings *log_settings)
 	}
 
 	delete[] categories_in_database;
+}
+
+/**
+ * @param account_name
+ * @param account_password
+ * @param first_name
+ * @param last_name
+ * @param email
+ * @param ip_address
+ * @return
+ */
+bool Database::CreateLoginserverWorldAdminAccount(
+	const std::string &account_name,
+	const std::string &account_password,
+	const std::string &first_name,
+	const std::string &last_name,
+	const std::string &email,
+	const std::string &ip_address
+)
+{
+	auto query = fmt::format(
+		"INSERT INTO login_server_admins (account_name, account_password, first_name, last_name, email, registration_date, "
+		"registration_ip_address) "
+		"VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', NOW(), '{5}')",
+		EscapeString(account_name),
+		EscapeString(account_password),
+		EscapeString(first_name),
+		EscapeString(last_name),
+		EscapeString(email),
+		ip_address
+	);
+
+	auto results = QueryDatabase(query);
+
+	return results.Success();
+}
+
+/**
+ * @param account_name
+ * @return
+ */
+bool Database::DoesLoginserverWorldAdminAccountExist(
+	const std::string &account_name
+)
+{
+	auto query = fmt::format(
+		"SELECT account_name FROM login_server_admins WHERE account_name = '{0}'",
+		EscapeString(account_name)
+	);
+
+	auto results = QueryDatabase(query);
+
+	return (results.RowCount() == 1);
 }

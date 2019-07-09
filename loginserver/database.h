@@ -159,9 +159,9 @@ public:
 	 * @return
 	 */
 	Database::DbWorldRegistration GetWorldRegistration(
-		const std::string& short_name,
-		const std::string& remote_ip,
-		const std::string& local_ip
+		const std::string &short_name,
+		const std::string &remote_ip,
+		const std::string &local_ip
 	);
 
 	/**
@@ -211,9 +211,33 @@ public:
 	std::string CreateLoginserverApiToken(bool write_mode, bool read_mode);
 	MySQLRequestResult GetLoginserverApiTokens();
 
+	/**
+	 * @param account_name
+	 * @param account_password
+	 * @param first_name
+	 * @param last_name
+	 * @param email
+	 * @param ip_address
+	 * @return
+	 */
+	bool CreateLoginserverWorldAdminAccount(
+		const std::string &account_name,
+		const std::string &account_password,
+		const std::string &first_name,
+		const std::string &last_name,
+		const std::string &email,
+		const std::string &ip_address
+	);
+
+	/**
+	 * @param account_name
+	 * @return
+	 */
+	bool DoesLoginserverWorldAdminAccountExist(const std::string &account_name);
+
 protected:
 	std::string user, pass, host, port, name;
-	MYSQL       *database;
+	MYSQL       *database{};
 };
 
 #endif
