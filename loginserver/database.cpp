@@ -622,7 +622,7 @@ void Database::LoadLogSettings(EQEmuLogSys::LogSettings *log_settings)
  * @param ip_address
  * @return
  */
-bool Database::CreateLoginserverWorldAdminAccount(
+uint32 Database::CreateLoginserverWorldAdminAccount(
 	const std::string &account_name,
 	const std::string &account_password,
 	const std::string &first_name,
@@ -645,7 +645,7 @@ bool Database::CreateLoginserverWorldAdminAccount(
 
 	auto results = QueryDatabase(query);
 
-	return results.Success();
+	return (results.Success() ? results.LastInsertedID() : 0);
 }
 
 /**

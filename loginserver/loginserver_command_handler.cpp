@@ -71,10 +71,10 @@ namespace LoginserverCommandHandler {
 		 */
 		std::map<std::string, void (*)(int argc, char **argv, argh::parser &cmd)> function_map;
 
-		function_map["create-loginserver-api-token"]           = &LoginserverCommandHandler::CreateLoginserverApiToken;
-		function_map["list-loginserver-api-tokens"]            = &LoginserverCommandHandler::ListLoginserverApiTokens;
 		function_map["create-loginserver-account"]             = &LoginserverCommandHandler::CreateLocalLoginserverAccount;
+		function_map["create-loginserver-api-token"]           = &LoginserverCommandHandler::CreateLoginserverApiToken;
 		function_map["create-loginserver-world-admin-account"] = &LoginserverCommandHandler::CreateLoginserverWorldAdminAccount;
+		function_map["list-loginserver-api-tokens"]            = &LoginserverCommandHandler::ListLoginserverApiTokens;
 
 		std::map<std::string, void (*)(
 			int argc,
@@ -153,14 +153,12 @@ namespace LoginserverCommandHandler {
 	 */
 	void ListLoginserverApiTokens(int argc, char **argv, argh::parser &cmd)
 	{
-		for (auto it = server.token_manager->loaded_api_tokens.begin();
-			it != server.token_manager->loaded_api_tokens.end();
-			++it) {
+		for (auto &it : server.token_manager->loaded_api_tokens) {
 			LogInfo(
 				"token [{0}] can_write [{1}] can_read [{2}]",
-				it->second.token,
-				it->second.can_write,
-				it->second.can_read
+				it.second.token,
+				it.second.can_write,
+				it.second.can_read
 			);
 		}
 	}
@@ -177,7 +175,10 @@ namespace LoginserverCommandHandler {
 			exit(1);
 		}
 
-		AccountManagement::CreateLocalLoginServerAccount(cmd("--username").str(), cmd("--password").str());
+		AccountManagement::CreateLocalLoginServerAccount(
+			cmd("--username").str(),
+			cmd("--password").str()
+		);
 	}
 
 	/**

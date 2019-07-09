@@ -221,7 +221,7 @@ public:
 	 * @param ip_address
 	 * @return
 	 */
-	bool CreateLoginserverWorldAdminAccount(
+	uint32 CreateLoginserverWorldAdminAccount(
 		const std::string &account_name,
 		const std::string &account_password,
 		const std::string &first_name,

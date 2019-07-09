@@ -105,19 +105,22 @@ bool AccountManagement::CreateLoginserverWorldAdminAccount(
 		return false;
 	}
 
-	if (server.db->CreateLoginserverWorldAdminAccount(
+	uint32 created_world_admin_id = server.db->CreateLoginserverWorldAdminAccount(
 		username,
 		hash,
 		first_name,
 		last_name,
 		email,
 		ip_address
-	)) {
+	);
+
+	if (created_world_admin_id > 0) {
 		LogInfo(
-			"Account creation success for user [{0}] encryption algorithm [{1}] ({2})",
+			"Account creation success for user [{0}] encryption algorithm [{1}] ({2}) new admin id [{3}]",
 			username,
 			GetEncryptionByModeId(mode),
-			mode
+			mode,
+			created_world_admin_id
 		);
 		return true;
 	}
