@@ -913,8 +913,7 @@ bool WorldServer::HandleNewLoginserverInfoUnregisteredAllowed(
 			return true;
 		}
 
-		Database::DbLoginServerAdmin login_server_admin =
-										 server.db->GetLoginServerAdmin(GetAccountName());
+		Database::DbLoginServerAdmin login_server_admin = server.db->GetLoginServerAdmin(GetAccountName());
 
 		uint32 server_admin_id = 0;
 		if (login_server_admin.loaded) {
