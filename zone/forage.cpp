@@ -180,7 +180,7 @@ bool Client::CanFish() {
 		const float LineLength = RuleR(Watermap, FishingLineLength);
 		int HeadingDegrees;
 
-		HeadingDegrees = (int) ((GetHeading()*360)/256);
+		HeadingDegrees = (int) ((GetHeading()*360)/512);
 		HeadingDegrees = HeadingDegrees % 360;
 
 		rodPosition.x = m_Position.x + RodLength * sin(HeadingDegrees * M_PI/180.0f);

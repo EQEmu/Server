@@ -251,9 +251,17 @@ bool Mob::CheckWillAggro(Mob *mob) {
 			return false;
 	}
 
-	Mob *ownr = mob->GetOwner();
-	if(ownr && ownr->IsClient() && !ownr->CastToClient()->ClientFinishedLoading())
+	/**
+	 * Pets shouldn't scan for aggro
+	 */
+	if (this->GetOwner()) {
 		return false;
+	}
+
+	Mob *pet_owner = mob->GetOwner();
+	if (pet_owner && pet_owner->IsClient()) {
+		return false;
+	}
 
 	float iAggroRange = GetAggroRange();
 
@@ -727,6 +735,7 @@ type', in which case, the answer is yes.
 		}
 
 #ifdef BOTS
+		// this is HIGHLY inefficient
 		bool HasRuleDefined = false;
 		bool IsBotAttackAllowed = false;
 		IsBotAttackAllowed = Bot::IsBotAttackAllowed(mob1, mob2, HasRuleDefined);

@@ -86,6 +86,8 @@ SET(common_sources
 	net/servertalk_server_connection.cpp
 	net/tcp_connection.cpp
 	net/tcp_server.cpp
+	net/websocket_server.cpp
+	net/websocket_server_connection.cpp
 	patches/patches.cpp
 	patches/sod.cpp
 	patches/sod_limits.cpp
@@ -136,6 +138,7 @@ SET(common_headers
 	eqemu_config.h
 	eqemu_config_elements.h
 	eqemu_logsys.h
+	eqemu_logsys_fmt.h
 	eq_limits.h
 	eq_packet.h
 	eq_stream_ident.h
@@ -229,6 +232,8 @@ SET(common_headers
 	net/servertalk_server_connection.h
 	net/tcp_connection.h
 	net/tcp_server.h
+	net/websocket_server.h
+	net/websocket_server_connection.h
 	patches/patches.h
 	patches/sod.h
 	patches/sod_limits.h
@@ -308,6 +313,10 @@ SOURCE_GROUP(Net FILES
 	net/tcp_connection.h
 	net/tcp_server.cpp
 	net/tcp_server.h
+	net/websocket_server.cpp
+	net/websocket_server.h
+	net/websocket_server_connection.cpp
+	net/websocket_server_connection.h
 )
 
 SOURCE_GROUP(Patches FILES

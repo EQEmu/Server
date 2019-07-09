@@ -3,6 +3,7 @@
 
 #include "../common/eq_packet_structs.h"
 #include "../common/linked_list.h"
+#include "../common/json/json.h"
 #include "../common/timer.h"
 #include "../common/rulesys.h"
 #include "../common/servertalk.h"
@@ -69,6 +70,8 @@ public:
 	int GetClientCount();
 	void GetClients(const char *zone_name, std::vector<ClientListEntry *> &into);
 
+	void GetClientList(Json::Value &response);
+
 private:
 	void OnTick(EQ::Timer *t);
 	inline uint32 GetNextCLEID() { return NextCLEID++; }
@@ -80,6 +83,7 @@ private:
 	Timer	CLStale_timer;
 	uint32 NextCLEID;
 	LinkedList<ClientListEntry *> clientlist;
+
 
 	std::unique_ptr<EQ::Timer> m_tick;
 };

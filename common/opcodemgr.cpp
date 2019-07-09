@@ -16,6 +16,7 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
+#include "eqemu_logsys.h"
 #include "emu_opcodes.h"
 #include "opcodemgr.h"
 
@@ -31,7 +32,7 @@ OpcodeManager::OpcodeManager() {
 bool OpcodeManager::LoadOpcodesFile(const char *filename, OpcodeSetStrategy *s, bool report_errors) {
 	FILE *opf = fopen(filename, "r");
 	if(opf == nullptr) {
-		fprintf(stderr, "Unable to open opcodes file '%s'. Thats bad.\n", filename);
+		Log(Logs::General, Logs::Error, "Unable to open opcodes file '%s'", filename);
 		return(false);
 	}
 

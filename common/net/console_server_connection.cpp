@@ -4,6 +4,7 @@
 #include "../eqemu_logsys.h"
 #include "../servertalk.h"
 #include "../rulesys.h"
+#include <fmt/format.h>
 
 EQ::Net::ConsoleServerConnection::ConsoleServerConnection(ConsoleServer *parent, std::shared_ptr<TCPConnection> connection)
 {

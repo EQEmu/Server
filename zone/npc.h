@@ -468,6 +468,7 @@ public:
 
 	virtual int GetStuckBehavior() const { return NPCTypedata_ours ? NPCTypedata_ours->stuck_behavior : NPCTypedata->stuck_behavior; }
 
+	inline bool IsSkipAutoScale() const { return skip_auto_scale; }
 
 protected:
 
@@ -612,6 +613,7 @@ protected:
 private:
 	uint32	loottable_id;
 	bool	skip_global_loot;
+	bool	skip_auto_scale;
 	bool	p_depop;
 };
 

@@ -55,6 +55,7 @@
 #include "../common/say_link.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/profanity_manager.h"
+#include "../common/net/eqstream.h"
 
 #include "data_bucket.h"
 #include "command.h"
@@ -844,18 +845,32 @@ void command_setanim(Client *c, const Seperator *sep)
 
 void command_serverinfo(Client *c, const Seperator *sep)
 {
-#ifdef _WINDOWS
-	char intbuffer [sizeof(unsigned long)];
-	c->Message(0, "Operating system information.");
-	c->Message(0, "	%s",  Ver_name);
-	c->Message(0, "	Build number: %s",  ultoa(Ver_build, intbuffer, 10));
-	c->Message(0, "	Minor version: %s",  ultoa(Ver_min, intbuffer, 10));
-	c->Message(0, "	Major version: %s",  ultoa(Ver_maj, intbuffer, 10));
-	c->Message(0, "	Platform Id: %s",  ultoa(Ver_pid, intbuffer, 10));
-#else
-char buffer[255];
-	c->Message(0, "Operating system information: %s", GetOS(buffer));
-#endif
+	auto os = EQ::GetOS();
+	auto cpus = EQ::GetCPUs();
+	auto pid = EQ::GetPID();
+	auto rss = EQ::GetRSS();
+	auto uptime = EQ::GetUptime();
+
+	c->Message(0, "Operating System Information");
+	c->Message(0, "==================================================");
+	c->Message(0, "System: %s", os.sysname.c_str());
+	c->Message(0, "Release: %s", os.release.c_str());
+	c->Message(0, "Version: %s", os.version.c_str());
+	c->Message(0, "Machine: %s", os.machine.c_str());
+	c->Message(0, "Uptime: %.2f seconds", uptime);
+	c->Message(0, "==================================================");
+	c->Message(0, "CPU Information");
+	c->Message(0, "==================================================");
+	for (size_t i = 0; i < cpus.size(); ++i) {
+		auto &cp = cpus[i];
+		c->Message(0, "CPU #%i: %s, Speed: %.2fGhz", i, cp.model.c_str(), cp.speed);
+	}
+	c->Message(0, "==================================================");
+	c->Message(0, "Process Information");
+	c->Message(0, "==================================================");
+	c->Message(0, "PID: %u", pid);
+	c->Message(0, "RSS: %.2f MB", rss / 1048576.0);
+	c->Message(0, "==================================================");
 }
 
 void command_getvariable(Client *c, const Seperator *sep)
@@ -9481,23 +9496,77 @@ void command_netstats(Client *c, const Seperator *sep)
 {
 	if(c)
 	{
-		if(c->GetTarget() && c->GetTarget()->IsClient())
-		{
-			c->Message(0, "Sent:");
-			c->Message(0, "Total: %u, per second: %u",  c->GetTarget()->CastToClient()->Connection()->GetBytesSent(),
-				c->GetTarget()->CastToClient()->Connection()->GetBytesSentPerSecond());
-			c->Message(0, "Recieved:");
-			c->Message(0, "Total: %u, per second: %u",  c->GetTarget()->CastToClient()->Connection()->GetBytesRecieved(),
-				c->GetTarget()->CastToClient()->Connection()->GetBytesRecvPerSecond());
+		auto client = c;
+		if (c->GetTarget() && c->GetTarget()->IsClient()) {
+			client = c->GetTarget()->CastToClient();
+		}
+		
+		if (strcasecmp(sep->arg[1], "reset") == 0) {
+			auto connection = c->Connection();
+			c->Message(0, "Resetting client stats (packet loss will not read correctly after reset).");
+			connection->ResetStats();
+			return;
+		}
+		
+		auto connection = c->Connection();
+		auto opts = connection->GetManager()->GetOptions();
+		auto eqs_stats = connection->GetStats();
+		auto &stats = eqs_stats.DaybreakStats;
+		auto now = EQ::Net::Clock::now();
+		auto sec_since_stats_reset = std::chrono::duration_cast<std::chrono::duration<double>>(now - stats.created).count();
+		
+		c->Message(0, "Netstats:");
+		c->Message(0, "--------------------------------------------------------------------");
+		c->Message(0, "Sent Bytes: %u (%.2f/sec)", stats.sent_bytes, stats.sent_bytes / sec_since_stats_reset);
+		c->Message(0, "Recv Bytes: %u (%.2f/sec)", stats.recv_bytes, stats.recv_bytes / sec_since_stats_reset);
+		c->Message(0, "Bytes Before Encode (Sent): %u, Compression Rate: %.2f%%", stats.bytes_before_encode, 
+			static_cast<double>(stats.bytes_before_encode - stats.sent_bytes) / static_cast<double>(stats.bytes_before_encode) * 100.0);
+		c->Message(0, "Bytes After Decode (Recv): %u, Compression Rate: %.2f%%", stats.bytes_after_decode,
+			static_cast<double>(stats.bytes_after_decode - stats.recv_bytes) / static_cast<double>(stats.bytes_after_decode) * 100.0);
+		c->Message(0, "Min Ping: %u", stats.min_ping);
+		c->Message(0, "Max Ping: %u", stats.max_ping);
+		c->Message(0, "Last Ping: %u", stats.last_ping);
+		c->Message(0, "Average Ping: %u", stats.avg_ping);
+		c->Message(0, "--------------------------------------------------------------------");
+		c->Message(0, "(Realtime) Recv Packets: %u (%.2f/sec)", stats.recv_packets, stats.recv_packets / sec_since_stats_reset);
+		c->Message(0, "(Realtime) Sent Packets: %u (%.2f/sec)", stats.sent_packets, stats.sent_packets / sec_since_stats_reset);
+		c->Message(0, "(Sync) Recv Packets: %u", stats.sync_recv_packets);
+		c->Message(0, "(Sync) Sent Packets: %u", stats.sync_sent_packets);
+		c->Message(0, "(Sync) Remote Recv Packets: %u", stats.sync_remote_recv_packets);
+		c->Message(0, "(Sync) Remote Sent Packets: %u", stats.sync_remote_sent_packets);
+		c->Message(0, "Packet Loss In: %.2f%%", 100.0 * (1.0 - static_cast<double>(stats.sync_recv_packets) / static_cast<double>(stats.sync_remote_sent_packets)));
+		c->Message(0, "Packet Loss Out: %.2f%%", 100.0 * (1.0 - static_cast<double>(stats.sync_remote_recv_packets) / static_cast<double>(stats.sync_sent_packets)));
+		c->Message(0, "--------------------------------------------------------------------");
+		c->Message(0, "Resent Packets: %u (%.2f/sec)", stats.resent_packets, stats.resent_packets / sec_since_stats_reset);
+		c->Message(0, "Resent Fragments: %u (%.2f/sec)", stats.resent_fragments, stats.resent_fragments / sec_since_stats_reset);
+		c->Message(0, "Resent Non-Fragments: %u (%.2f/sec)", stats.resent_full, stats.resent_full / sec_since_stats_reset);
+		c->Message(0, "Dropped Datarate Packets: %u (%.2f/sec)", stats.dropped_datarate_packets, stats.dropped_datarate_packets / sec_since_stats_reset);
+		
+		if (opts.daybreak_options.outgoing_data_rate > 0.0) {
+			c->Message(0, "Outgoing Link Saturation %.2f%% (%.2fkb/sec)", 100.0 * (1.0 - ((opts.daybreak_options.outgoing_data_rate - stats.datarate_remaining) / opts.daybreak_options.outgoing_data_rate)), opts.daybreak_options.outgoing_data_rate);
+		}
+		
+		if (strcasecmp(sep->arg[1], "full") == 0) {
+			c->Message(0, "--------------------------------------------------------------------");
+			c->Message(0, "Sent Packet Types");
+			for (auto i = 0; i < _maxEmuOpcode; ++i) {
+				auto cnt = eqs_stats.SentCount[i];
+				if (cnt > 0) {
+					c->Message(0, "%s: %u (%.2f / sec)", OpcodeNames[i], cnt, cnt / sec_since_stats_reset);
+				}
+			}
 
+			c->Message(0, "--------------------------------------------------------------------");
+			c->Message(0, "Recv Packet Types");
+			for (auto i = 0; i < _maxEmuOpcode; ++i) {
+				auto cnt = eqs_stats.RecvCount[i];
+				if (cnt > 0) {
+					c->Message(0, "%s: %u (%.2f / sec)", OpcodeNames[i], cnt, cnt / sec_since_stats_reset);
+				}
+			}
 		}
-		else
-		{
-			c->Message(0, "Sent:");
-			c->Message(0, "Total: %u, per second: %u",  c->Connection()->GetBytesSent(), c->Connection()->GetBytesSentPerSecond());
-			c->Message(0, "Recieved:");
-			c->Message(0, "Total: %u, per second: %u",  c->Connection()->GetBytesRecieved(), c->Connection()->GetBytesRecvPerSecond());
-		}
+		
+		c->Message(0, "--------------------------------------------------------------------");
 	}
 }
 
@@ -11703,15 +11772,25 @@ void command_logs(Client *c, const Seperator *sep){
 			safe_delete(pack);
 		}
 		/* #logs list_settings */
-		if (strcasecmp(sep->arg[1], "list_settings") == 0 || (strcasecmp(sep->arg[1], "set") == 0 && strcasecmp(sep->arg[3], "") == 0)){
+		if (strcasecmp(sep->arg[1], "list_settings") == 0 ||
+			(strcasecmp(sep->arg[1], "set") == 0 && strcasecmp(sep->arg[3], "") == 0)) {
 			c->Message(0, "[Category ID | console | file | gmsay | Category Description]");
 			int redisplay_columns = 0;
-			for (int i = 0; i < Logs::LogCategory::MaxCategoryID; i++){
-				if (redisplay_columns == 10){
+			for (int i            = 0; i < Logs::LogCategory::MaxCategoryID; i++) {
+				if (redisplay_columns == 10) {
 					c->Message(0, "[Category ID | console | file | gmsay | Category Description]");
 					redisplay_columns = 0;
 				}
-				c->Message(0, StringFormat("--- %i | %u | %u | %u | %s",  i, LogSys.log_settings[i].log_to_console, LogSys.log_settings[i].log_to_file, LogSys.log_settings[i].log_to_gmsay, Logs::LogCategoryName[i]).c_str());
+				c->Message(
+					0,
+					StringFormat(
+						"--- %i | %u | %u | %u | %s",
+						i,
+						LogSys.log_settings[i].log_to_console,
+						LogSys.log_settings[i].log_to_file,
+						LogSys.log_settings[i].log_to_gmsay,
+						Logs::LogCategoryName[i]
+					).c_str());
 				redisplay_columns++;
 			}
 		}
@@ -12166,33 +12245,32 @@ void command_network(Client *c, const Seperator *sep)
 	if (!strcasecmp(sep->arg[1], "getopt"))
 	{
 		auto eqsi = c->Connection();
-		auto dbc = eqsi->GetRawConnection();
-		auto manager = dbc->GetManager();
-		auto &opts = manager->GetOptions();
-
+		auto manager = eqsi->GetManager();
+		auto opts = manager->GetOptions();
+	
 		if (!strcasecmp(sep->arg[2], "all"))
 		{
-			c->Message(0, "max_packet_size: %llu", opts.max_packet_size);
-			c->Message(0, "max_connection_count: %llu", opts.max_connection_count);
-			c->Message(0, "keepalive_delay_ms: %llu", opts.keepalive_delay_ms);
-			c->Message(0, "resend_delay_factor: %.2f", opts.resend_delay_factor);
-			c->Message(0, "resend_delay_ms: %llu", opts.resend_delay_ms);
-			c->Message(0, "resend_delay_min: %llu", opts.resend_delay_min);
-			c->Message(0, "resend_delay_max: %llu", opts.resend_delay_max);
-			c->Message(0, "connect_delay_ms: %llu", opts.connect_delay_ms);
-			c->Message(0, "connect_stale_ms: %llu", opts.connect_stale_ms);
-			c->Message(0, "stale_connection_ms: %llu", opts.stale_connection_ms);
-			c->Message(0, "crc_length: %llu", opts.crc_length);
-			c->Message(0, "hold_size: %llu", opts.hold_size);
-			c->Message(0, "hold_length_ms: %llu", opts.hold_length_ms);
-			c->Message(0, "simulated_in_packet_loss: %llu", opts.simulated_in_packet_loss);
-			c->Message(0, "simulated_out_packet_loss: %llu", opts.simulated_out_packet_loss);
-			c->Message(0, "tic_rate_hertz: %.2f", opts.tic_rate_hertz);
-			c->Message(0, "resend_timeout: %llu", opts.resend_timeout);
-			c->Message(0, "connection_close_time: %llu", opts.connection_close_time);
-			c->Message(0, "encode_passes[0]: %llu", opts.encode_passes[0]);
-			c->Message(0, "encode_passes[1]: %llu", opts.encode_passes[1]);
-			c->Message(0, "port: %llu", opts.port);
+			c->Message(0, "max_packet_size: %llu", (uint64_t)opts.daybreak_options.max_packet_size);
+			c->Message(0, "max_connection_count: %llu", (uint64_t)opts.daybreak_options.max_connection_count);
+			c->Message(0, "keepalive_delay_ms: %llu", (uint64_t)opts.daybreak_options.keepalive_delay_ms);
+			c->Message(0, "resend_delay_factor: %.2f", opts.daybreak_options.resend_delay_factor);
+			c->Message(0, "resend_delay_ms: %llu", (uint64_t)opts.daybreak_options.resend_delay_ms);
+			c->Message(0, "resend_delay_min: %llu", (uint64_t)opts.daybreak_options.resend_delay_min);
+			c->Message(0, "resend_delay_max: %llu", (uint64_t)opts.daybreak_options.resend_delay_max);
+			c->Message(0, "connect_delay_ms: %llu", (uint64_t)opts.daybreak_options.connect_delay_ms);
+			c->Message(0, "connect_stale_ms: %llu", (uint64_t)opts.daybreak_options.connect_stale_ms);
+			c->Message(0, "stale_connection_ms: %llu", (uint64_t)opts.daybreak_options.stale_connection_ms);
+			c->Message(0, "crc_length: %llu", (uint64_t)opts.daybreak_options.crc_length);
+			c->Message(0, "hold_size: %llu", (uint64_t)opts.daybreak_options.hold_size);
+			c->Message(0, "hold_length_ms: %llu", (uint64_t)opts.daybreak_options.hold_length_ms);
+			c->Message(0, "simulated_in_packet_loss: %llu", (uint64_t)opts.daybreak_options.simulated_in_packet_loss);
+			c->Message(0, "simulated_out_packet_loss: %llu", (uint64_t)opts.daybreak_options.simulated_out_packet_loss);
+			c->Message(0, "tic_rate_hertz: %.2f", opts.daybreak_options.tic_rate_hertz);
+			c->Message(0, "resend_timeout: %llu", (uint64_t)opts.daybreak_options.resend_timeout);
+			c->Message(0, "connection_close_time: %llu", (uint64_t)opts.daybreak_options.connection_close_time);
+			c->Message(0, "encode_passes[0]: %llu", (uint64_t)opts.daybreak_options.encode_passes[0]);
+			c->Message(0, "encode_passes[1]: %llu", (uint64_t)opts.daybreak_options.encode_passes[1]);
+			c->Message(0, "port: %llu", (uint64_t)opts.daybreak_options.port);
 		}
 		else {
 			c->Message(0, "Unknown get option: %s", sep->arg[2]);
@@ -12225,76 +12303,90 @@ void command_network(Client *c, const Seperator *sep)
 	else if (!strcasecmp(sep->arg[1], "setopt"))
 	{
 		auto eqsi = c->Connection();
-		auto dbc = eqsi->GetRawConnection();
-		auto manager = dbc->GetManager();
-		auto &opts = manager->GetOptions();
-
+		auto manager = eqsi->GetManager();
+		auto opts = manager->GetOptions();
+	
 		if (!strcasecmp(sep->arg[3], ""))
 		{
 			c->Message(0, "Missing value for set");
 			return;
 		}
-
+	
 		std::string value = sep->arg[3];
 		if (!strcasecmp(sep->arg[2], "max_connection_count"))
 		{
-			opts.max_connection_count = std::stoull(value);
+			opts.daybreak_options.max_connection_count = std::stoull(value);
+			manager->SetOptions(opts);
 		} 
 		else if (!strcasecmp(sep->arg[2], "keepalive_delay_ms"))
 		{
-			opts.keepalive_delay_ms = std::stoull(value);
+			opts.daybreak_options.keepalive_delay_ms = std::stoull(value);
+			manager->SetOptions(opts);
 		}
 		else if (!strcasecmp(sep->arg[2], "resend_delay_factor"))
 		{
-			opts.resend_delay_factor = std::stod(value);
+			opts.daybreak_options.resend_delay_factor = std::stod(value);
+			manager->SetOptions(opts);
 		}
 		else if (!strcasecmp(sep->arg[2], "resend_delay_ms"))
 		{
-			opts.resend_delay_ms = std::stoull(value);
+			opts.daybreak_options.resend_delay_ms = std::stoull(value);
+			manager->SetOptions(opts);
 		}
 		else if (!strcasecmp(sep->arg[2], "resend_delay_min"))
 		{
-			opts.resend_delay_min = std::stoull(value);
+			opts.daybreak_options.resend_delay_min = std::stoull(value);
+			manager->SetOptions(opts);
 		}
 		else if (!strcasecmp(sep->arg[2], "resend_delay_max"))
 		{
-			opts.resend_delay_max = std::stoull(value);
+			opts.daybreak_options.resend_delay_max = std::stoull(value);
+			manager->SetOptions(opts);
 		}
 		else if (!strcasecmp(sep->arg[2], "connect_delay_ms"))
 		{
-			opts.connect_delay_ms = std::stoull(value);
+			opts.daybreak_options.connect_delay_ms = std::stoull(value);
+			manager->SetOptions(opts);
 		}
 		else if (!strcasecmp(sep->arg[2], "connect_stale_ms"))
 		{
-			opts.connect_stale_ms = std::stoull(value);
+			opts.daybreak_options.connect_stale_ms = std::stoull(value);
+			manager->SetOptions(opts);
 		}
 		else if (!strcasecmp(sep->arg[2], "stale_connection_ms"))
 		{
-			opts.stale_connection_ms = std::stoull(value);
+			opts.daybreak_options.stale_connection_ms = std::stoull(value);
+			manager->SetOptions(opts);
 		}
 		else if (!strcasecmp(sep->arg[2], "hold_size"))
 		{
-			opts.hold_size = std::stoull(value);
+			opts.daybreak_options.hold_size = std::stoull(value);
+			manager->SetOptions(opts);
 		}
 		else if (!strcasecmp(sep->arg[2], "hold_length_ms"))
 		{
-			opts.hold_length_ms = std::stoull(value);
+			opts.daybreak_options.hold_length_ms = std::stoull(value);
+			manager->SetOptions(opts);
 		}
 		else if (!strcasecmp(sep->arg[2], "simulated_in_packet_loss"))
 		{
-			opts.simulated_in_packet_loss = std::stoull(value);
+			opts.daybreak_options.simulated_in_packet_loss = std::stoull(value);
+			manager->SetOptions(opts);
 		}
 		else if (!strcasecmp(sep->arg[2], "simulated_out_packet_loss"))
 		{
-			opts.simulated_out_packet_loss = std::stoull(value);
+			opts.daybreak_options.simulated_out_packet_loss = std::stoull(value);
+			manager->SetOptions(opts);
 		}
 		else if (!strcasecmp(sep->arg[2], "resend_timeout"))
 		{
-			opts.resend_timeout = std::stoull(value);
+			opts.daybreak_options.resend_timeout = std::stoull(value);
+			manager->SetOptions(opts);
 		}
 		else if (!strcasecmp(sep->arg[2], "connection_close_time"))
 		{
-			opts.connection_close_time = std::stoull(value);
+			opts.daybreak_options.connection_close_time = std::stoull(value);
+			manager->SetOptions(opts);
 		}
 		else {
 			c->Message(0, "Unknown set option: %s", sep->arg[2]);

@@ -1,6 +1,7 @@
 #include "servertalk_legacy_client_connection.h"
 #include "dns.h"
 #include "../eqemu_logsys.h"
+#include "../eqemu_logsys_fmt.h"
 
 EQ::Net::ServertalkLegacyClient::ServertalkLegacyClient(const std::string &addr, int port, bool ipv6)
 	: m_timer(std::unique_ptr<EQ::Timer>(new EQ::Timer(100, true, std::bind(&EQ::Net::ServertalkLegacyClient::Connect, this))))

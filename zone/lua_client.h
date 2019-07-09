@@ -135,6 +135,8 @@ public:
 	void UnmemSpellBySpellID(int32 spell_id);
 	void UnmemSpellAll();
 	void UnmemSpellAll(bool update_client);
+	uint16 FindMemmedSpellBySlot(int slot);
+	int MemmedCount();
 	void ScribeSpell(int spell_id, int slot);
 	void ScribeSpell(int spell_id, int slot, bool update_client);
 	void UnscribeSpell(int slot);
@@ -148,7 +150,9 @@ public:
 	void UntrainDisc(int slot, bool update_client);
 	void UntrainDiscAll();
 	void UntrainDiscAll(bool update_client);
+	bool IsStanding();
 	bool IsSitting();
+	bool IsCrouching();
 	void SetFeigned(bool v);
 	bool GetFeigned();
 	bool AutoSplitEnabled();
