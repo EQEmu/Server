@@ -472,7 +472,7 @@ struct ServerLSAccountUpdate_Struct {			// for updating info on login server
 	uint32	useraccountid;				// player account ID
 	char	useraccount[31];			// player account name
 	char	userpassword[51];			// player account password
-	char	useremail[101];				// player account email address
+	char	user_email[101];				// player account email address
 };
 
 struct ServerLSStatus_Struct {

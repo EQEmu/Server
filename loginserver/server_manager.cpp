@@ -121,7 +121,7 @@ EQApplicationPacket *ServerManager::CreateServerListPacket(Client *client, uint3
 {
 	unsigned int packet_size  = sizeof(ServerListHeader_Struct);
 	unsigned int server_count = 0;
-	in_addr      in;
+	in_addr      in{};
 	in.s_addr = client->GetConnection()->GetRemoteIP();
 	std::string client_ip = inet_ntoa(in);
 
@@ -174,13 +174,13 @@ EQApplicationPacket *ServerManager::CreateServerListPacket(Client *client, uint3
 
 	iter = world_servers.begin();
 	while (iter != world_servers.end()) {
-		if ((*iter)->IsAuthorized() == false) {
+		if (!(*iter)->IsAuthorized()) {
 			++iter;
 			continue;
 		}
 
 		std::string world_ip = (*iter)->GetConnection()->Handle()->RemoteIP();
-		if (world_ip.compare(client_ip) == 0) {
+		if (world_ip == client_ip) {
 			memcpy(data_pointer, (*iter)->GetLocalIP().c_str(), (*iter)->GetLocalIP().size());
 			data_pointer += ((*iter)->GetLocalIP().size() + 1);
 		}

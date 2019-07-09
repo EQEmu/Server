@@ -36,6 +36,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "clientlist.h"
 #include "world_config.h"
 
+
 extern ZSList        zoneserver_list;
 extern ClientList    client_list;
 extern uint32        numzones;
@@ -544,24 +545,27 @@ void LoginServer::SendStatus()
 	pack->size    = sizeof(ServerLSStatus_Struct);
 	pack->pBuffer = new uchar[pack->size];
 	memset(pack->pBuffer, 0, pack->size);
-	ServerLSStatus_Struct *lss = (ServerLSStatus_Struct *) pack->pBuffer;
+	auto loginserver_status = (ServerLSStatus_Struct *) pack->pBuffer;
 
 	if (WorldConfig::get()->Locked) {
-		lss->status = -2;
+		loginserver_status->status = -2;
 	}
 	else if (numzones <= 0) {
-		lss->status = -2;
+		loginserver_status->status = -2;
 	}
 	else {
-		lss->status = numplayers;
+		loginserver_status->status = numplayers;
 	}
 
-	lss->num_zones   = numzones;
-	lss->num_players = numplayers;
+	loginserver_status->num_zones   = numzones;
+	loginserver_status->num_players = numplayers;
 	SendPacket(pack);
 	delete pack;
 }
 
+/**
+ * @param pack
+ */
 void LoginServer::SendPacket(ServerPacket *pack)
 {
 	if (IsLegacy) {
@@ -578,15 +582,15 @@ void LoginServer::SendPacket(ServerPacket *pack)
 
 void LoginServer::SendAccountUpdate(ServerPacket *pack)
 {
-	ServerLSAccountUpdate_Struct *s = (ServerLSAccountUpdate_Struct *) pack->pBuffer;
+	auto *ls_account_update = (ServerLSAccountUpdate_Struct *) pack->pBuffer;
 	if (CanUpdate()) {
-		Log(Logs::Detail,
-			Logs::World_Server,
-			"Sending ServerOP_LSAccountUpdate packet to loginserver: %s:%d",
+		LogInfo(
+			"Sending ServerOP_LSAccountUpdate packet to loginserver: [{0}]:[{1}]",
 			LoginServerAddress,
-			LoginServerPort);
-		strn0cpy(s->worldaccount, LoginAccount.c_str(), 30);
-		strn0cpy(s->worldpassword, LoginPassword.c_str(), 30);
+			LoginServerPort
+		);
+		strn0cpy(ls_account_update->worldaccount, LoginAccount.c_str(), 30);
+		strn0cpy(ls_account_update->worldpassword, LoginPassword.c_str(), 30);
 		SendPacket(pack);
 	}
 }

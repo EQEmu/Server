@@ -383,11 +383,10 @@ void Client::AttemptLoginAccountCreation(
 	const std::string &loginserver
 )
 {
-	LogInfo("Attempting login account creation via '{0}'", loginserver);
-
 #ifdef LSPX
-
 	if (loginserver == "eqemu") {
+		LogInfo("Attempting login account creation via '{0}'", loginserver);
+
 		if (!server.options.CanAutoLinkAccounts()) {
 			LogInfo("CanAutoLinkAccounts disabled - sending failed login");
 			DoFailedLogin();
@@ -452,6 +451,7 @@ void Client::AttemptLoginAccountCreation(
 #endif
 
 	if (server.options.CanAutoCreateAccounts() && loginserver == "local") {
+		LogInfo("CanAutoCreateAccounts enabled, attempting to creating account [{0}]", user);
 		CreateLocalAccount(user, pass);
 		return;
 	}

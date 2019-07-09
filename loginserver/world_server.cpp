@@ -32,16 +32,16 @@ extern LoginServer server;
  */
 WorldServer::WorldServer(std::shared_ptr<EQ::Net::ServertalkServerConnection> worldserver_connection)
 {
-	connection             = worldserver_connection;
-	zones_booted           = 0;
-	players_online         = 0;
-	server_status          = 0;
-	server_id             = 0;
-	server_list_type_id         = 0;
-	server_process_type            = 0;
+	connection           = worldserver_connection;
+	zones_booted         = 0;
+	players_online       = 0;
+	server_status        = 0;
+	server_id            = 0;
+	server_list_type_id  = 0;
+	server_process_type  = 0;
 	is_server_authorized = false;
-	is_server_trusted      = false;
-	is_server_logged_in    = false;
+	is_server_trusted    = false;
+	is_server_logged_in  = false;
 
 	worldserver_connection->OnMessage(
 		ServerOP_NewLSInfo,
@@ -79,13 +79,13 @@ WorldServer::~WorldServer() = default;
 void WorldServer::Reset()
 {
 	server_id;
-	zones_booted           = 0;
-	players_online         = 0;
-	server_status          = 0;
-	server_list_type_id         = 0;
-	server_process_type            = 0;
+	zones_booted         = 0;
+	players_online       = 0;
+	server_status        = 0;
+	server_list_type_id  = 0;
+	server_process_type  = 0;
 	is_server_authorized = false;
-	is_server_logged_in    = false;
+	is_server_logged_in  = false;
 }
 
 /**
@@ -219,13 +219,13 @@ void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Ne
 	auto *user_to_world_response = (UsertoWorldResponseLegacy_Struct *) packet.Data();
 
 	LogDebug("Trying to find client with user id of [{0}]", user_to_world_response->lsaccountid);
-	Client *c = server.client_manager->GetClient(user_to_world_response->lsaccountid, "eqemu");
-	if (c) {
+	Client *client = server.client_manager->GetClient(user_to_world_response->lsaccountid, "eqemu");
+	if (client) {
 
 		LogDebug(
 			"Found client with user id of [{0}] and account name of [{1}]",
 			user_to_world_response->lsaccountid,
-			c->GetAccountName()
+			client->GetAccountName()
 		);
 
 		auto *outapp = new EQApplicationPacket(
@@ -234,17 +234,17 @@ void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Ne
 		);
 
 		auto *per = (PlayEverquestResponse_Struct *) outapp->pBuffer;
-		per->Sequence     = c->GetPlaySequence();
-		per->ServerNumber = c->GetPlayServerID();
+		per->Sequence     = client->GetPlaySequence();
+		per->ServerNumber = client->GetPlayServerID();
 
 		if (user_to_world_response->response > 0) {
 			per->Allowed = 1;
 			SendClientAuth(
-				c->GetConnection()->GetRemoteAddr(),
-				c->GetAccountName(),
-				c->GetKey(),
-				c->GetAccountID(),
-				c->GetLoginServerName()
+				client->GetConnection()->GetRemoteAddr(),
+				client->GetAccountName(),
+				client->GetKey(),
+				client->GetAccountID(),
+				client->GetLoginServerName()
 			);
 		}
 
@@ -281,7 +281,7 @@ void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Ne
 			DumpPacket(outapp);
 		}
 
-		c->SendPlayResponse(outapp);
+		client->SendPlayResponse(outapp);
 		delete outapp;
 	}
 	else {
@@ -311,10 +311,11 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 	}
 
 	if (packet.Length() < sizeof(UsertoWorldResponse_Struct)) {
-		Log(Logs::General,
-			Logs::Error,
+		LogError(
 			"Received application packet from server that had opcode ServerOP_UsertoWorldResp, "
-			"but was too small. Discarded to avoid buffer overrun");
+			"but was too small. Discarded to avoid buffer overrun"
+		);
+
 		return;
 	}
 
@@ -326,11 +327,13 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 	}
 
 	auto user_to_world_response = (UsertoWorldResponse_Struct *) packet.Data();
-	Log(Logs::General, Logs::Debug, "Trying to find client with user id of %u.", user_to_world_response->lsaccountid);
+	LogDebug("Trying to find client with user id of [{0}]", user_to_world_response->lsaccountid);
+
 	Client *client = server.client_manager->GetClient(
 		user_to_world_response->lsaccountid,
 		user_to_world_response->login
 	);
+
 	if (client) {
 		LogDebug("Found client with user id of {0} and account name of {1}",
 				 user_to_world_response->lsaccountid,
@@ -345,9 +348,9 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 		auto *per = (PlayEverquestResponse_Struct *) outapp->pBuffer;
 		per->Sequence     = client->GetPlaySequence();
 		per->ServerNumber = client->GetPlayServerID();
-		Log(Logs::General,
-			Logs::Debug,
-			"Found sequence and play of %u %u",
+
+		LogDebug(
+			"Found sequence and play of [{0}] [{1}]",
 			client->GetPlaySequence(),
 			client->GetPlayServerID()
 		);
@@ -402,8 +405,10 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 		delete outapp;
 	}
 	else {
-		LogError("Received User-To-World Response for {0} but could not find the client referenced!.",
-				 user_to_world_response->lsaccountid);
+		LogError(
+			"Received User-To-World Response for {0} but could not find the client referenced!.",
+			user_to_world_response->lsaccountid
+		);
 	}
 }
 
@@ -437,22 +442,25 @@ void WorldServer::ProcessLSAccountUpdate(uint16_t opcode, const EQ::Net::Packet 
 	Log(Logs::General, Logs::Netcode, "ServerOP_LSAccountUpdate packet received from: %s", short_name.c_str());
 
 	auto *loginserver_update = (ServerLSAccountUpdate_Struct *) packet.Data();
-	if (is_server_trusted) {
-		Log(Logs::General,
-			Logs::Netcode,
-			"ServerOP_LSAccountUpdate update processed for: %s",
-			loginserver_update->useraccount);
-		std::string name     = "";
-		std::string password = "";
-		std::string email    = "";
+	if (IsServerTrusted()) {
+		LogDebug("ServerOP_LSAccountUpdate update processed for: [{0}]", loginserver_update->useraccount);
+		std::string name;
+		std::string password;
+		std::string email;
+
 		name.assign(loginserver_update->useraccount);
 		password.assign(loginserver_update->userpassword);
 
-		if (loginserver_update->useremail) {
-			email.assign(loginserver_update->useremail);
+		if (loginserver_update->user_email) {
+			email.assign(loginserver_update->user_email);
 		}
 
-		server.db->UpdateLSAccountInfo(loginserver_update->useraccountid, name, password, email);
+		server.db->UpdateLSAccountInfo(
+			loginserver_update->useraccountid,
+			name,
+			password,
+			email
+		);
 	}
 }
 
@@ -473,8 +481,7 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info
 		return;
 	}
 
-	this
-		->SetAccountPassword(new_world_server_info_packet->account_password)
+	this->SetAccountPassword(new_world_server_info_packet->account_password)
 		->SetLongName(new_world_server_info_packet->server_long_name)
 		->SetShortName(new_world_server_info_packet->server_short_name)
 		->SetLocalIp(new_world_server_info_packet->local_ip_address)
@@ -486,30 +493,40 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info
 		->SetAccountName(new_world_server_info_packet->account_name);
 
 	if (server.options.IsRejectingDuplicateServers()) {
-		if (server.server_manager->ServerExists(long_name, short_name, this)) {
+		if (server.server_manager->ServerExists(GetServerLongName(), GetServerShortName(), this)) {
 			LogError("World tried to login but there already exists a server that has that name");
 			return;
 		}
 	}
 	else {
-		if (server.server_manager->ServerExists(long_name, short_name, this)) {
-			LogError("World tried to login but there already exists a server that has that name");
+		if (server.server_manager->ServerExists(GetServerLongName(), GetServerShortName(), this)) {
+			LogInfo("World tried to login but there already exists a server that has that name");
 			server.server_manager->DestroyServerByName(long_name, short_name, this);
 		}
 	}
 
 	Database::DbWorldRegistration
-		world_registration = server.db->GetWorldRegistration(short_name, remote_ip_address, local_ip);
+		world_registration = server.db->GetWorldRegistration(
+		GetServerShortName(),
+		GetRemoteIp(),
+		GetLocalIp()
+	);
 
 	if (!server.options.IsUnregisteredAllowed()) {
-		if (!this->HandleNewLoginserverRegisteredOnly(world_registration)){
-			LogError("WorldServer::HandleNewLoginserverRegisteredOnly checks failed");
+		if (!this->HandleNewLoginserverRegisteredOnly(world_registration)) {
+			LogError(
+				"WorldServer::HandleNewLoginserverRegisteredOnly checks failed with server [{0}]",
+				this->GetServerLongName()
+			);
 			return;
 		}
 	}
 	else {
-		if (!this->HandleNewLoginserverInfoUnregisteredAllowed(world_registration)){
-			LogError("WorldServer::HandleNewLoginserverInfoUnregisteredAllowed checks failed");
+		if (!this->HandleNewLoginserverInfoUnregisteredAllowed(world_registration)) {
+			LogError(
+				"WorldServer::HandleNewLoginserverInfoUnregisteredAllowed checks failed with server [{0}]",
+				this->GetServerLongName()
+			);
 			return;
 		}
 	}
@@ -526,9 +543,9 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info
  */
 void WorldServer::Handle_LSStatus(ServerLSStatus_Struct *server_login_status)
 {
-	players_online = server_login_status->num_players;
-	zones_booted   = server_login_status->num_zones;
-	server_status  = server_login_status->status;
+	SetPlayersOnline(server_login_status->num_players);
+	SetZonesBooted(server_login_status->num_zones);
+	SetServerStatus(server_login_status->status);
 }
 
 /**
@@ -663,7 +680,7 @@ bool WorldServer::HandleNewLoginserverInfoValidation(
 		if (strlen(new_world_server_info_packet->remote_ip_address) == 0) {
 			this->SetRemoteIp(GetConnection()->Handle()->RemoteIP());
 
-			LogError(
+			LogWarning(
 				"Remote address was null, defaulting to stream address {0}",
 				remote_ip_address
 			);
@@ -675,8 +692,8 @@ bool WorldServer::HandleNewLoginserverInfoValidation(
 	else {
 		this->SetRemoteIp(GetConnection()->Handle()->RemoteIP());
 
-		LogError(
-			"Handle_NewLSInfo error, remote address was too long, defaulting to stream address [{0}]",
+		LogWarning(
+			"Handle_NewLSInfo remote address was too long, defaulting to stream address [{0}]",
 			remote_ip_address
 		);
 	}
@@ -690,7 +707,8 @@ bool WorldServer::HandleNewLoginserverInfoValidation(
  */
 bool WorldServer::HandleNewLoginserverRegisteredOnly(
 	Database::DbWorldRegistration &world_registration
-) {
+)
+{
 	if (!this->GetAccountName().empty() && !this->GetAccountPassword().empty()) {
 		if (world_registration.loaded) {
 			bool does_world_server_not_require_authentication = (
@@ -775,7 +793,8 @@ bool WorldServer::HandleNewLoginserverRegisteredOnly(
  */
 bool WorldServer::HandleNewLoginserverInfoUnregisteredAllowed(
 	Database::DbWorldRegistration &world_registration
-) {
+)
+{
 	if (world_registration.loaded) {
 
 		this
@@ -872,7 +891,7 @@ bool WorldServer::HandleNewLoginserverInfoUnregisteredAllowed(
  * @param in_server_list_id
  * @return
  */
-WorldServer * WorldServer::SetServerListTypeId(unsigned int in_server_list_id)
+WorldServer *WorldServer::SetServerListTypeId(unsigned int in_server_list_id)
 {
 	server_list_type_id = in_server_list_id;
 
@@ -890,7 +909,7 @@ const std::string &WorldServer::GetServerDescription() const
 /**
  * @param in_server_description
  */
-WorldServer * WorldServer::SetServerDescription(const std::string &in_server_description)
+WorldServer *WorldServer::SetServerDescription(const std::string &in_server_description)
 {
 	WorldServer::server_description = in_server_description;
 
@@ -908,7 +927,7 @@ bool WorldServer::IsServerAuthorized() const
 /**
  * @param in_is_server_authorized
  */
-WorldServer * WorldServer::SetIsServerAuthorized(bool in_is_server_authorized)
+WorldServer *WorldServer::SetIsServerAuthorized(bool in_is_server_authorized)
 {
 	WorldServer::is_server_authorized = in_is_server_authorized;
 
@@ -926,7 +945,7 @@ bool WorldServer::IsServerLoggedIn() const
 /**
  * @param in_is_server_logged_in
  */
-WorldServer * WorldServer::SetIsServerLoggedIn(bool in_is_server_logged_in)
+WorldServer *WorldServer::SetIsServerLoggedIn(bool in_is_server_logged_in)
 {
 	WorldServer::is_server_logged_in = in_is_server_logged_in;
 
@@ -944,7 +963,7 @@ bool WorldServer::IsServerTrusted() const
 /**
  * @param in_is_server_trusted
  */
-WorldServer * WorldServer::SetIsServerTrusted(bool in_is_server_trusted)
+WorldServer *WorldServer::SetIsServerTrusted(bool in_is_server_trusted)
 {
 	WorldServer::is_server_trusted = in_is_server_trusted;
 
@@ -954,7 +973,7 @@ WorldServer * WorldServer::SetIsServerTrusted(bool in_is_server_trusted)
 /**
  * @param in_zones_booted
  */
-WorldServer * WorldServer::SetZonesBooted(unsigned int in_zones_booted)
+WorldServer *WorldServer::SetZonesBooted(unsigned int in_zones_booted)
 {
 	WorldServer::zones_booted = in_zones_booted;
 
@@ -964,7 +983,7 @@ WorldServer * WorldServer::SetZonesBooted(unsigned int in_zones_booted)
 /**
  * @param in_players_online
  */
-WorldServer * WorldServer::SetPlayersOnline(unsigned int in_players_online)
+WorldServer *WorldServer::SetPlayersOnline(unsigned int in_players_online)
 {
 	WorldServer::players_online = in_players_online;
 
@@ -974,7 +993,7 @@ WorldServer * WorldServer::SetPlayersOnline(unsigned int in_players_online)
 /**
  * @param in_server_status
  */
-WorldServer * WorldServer::SetServerStatus(int in_server_status)
+WorldServer *WorldServer::SetServerStatus(int in_server_status)
 {
 	WorldServer::server_status = in_server_status;
 
@@ -984,7 +1003,7 @@ WorldServer * WorldServer::SetServerStatus(int in_server_status)
 /**
  * @param in_server_process_type
  */
-WorldServer * WorldServer::SetServerProcessType(unsigned int in_server_process_type)
+WorldServer *WorldServer::SetServerProcessType(unsigned int in_server_process_type)
 {
 	WorldServer::server_process_type = in_server_process_type;
 
@@ -994,7 +1013,7 @@ WorldServer * WorldServer::SetServerProcessType(unsigned int in_server_process_t
 /**
  * @param in_long_name
  */
-WorldServer * WorldServer::SetLongName(const std::string &in_long_name)
+WorldServer *WorldServer::SetLongName(const std::string &in_long_name)
 {
 	WorldServer::long_name = in_long_name;
 
@@ -1004,7 +1023,7 @@ WorldServer * WorldServer::SetLongName(const std::string &in_long_name)
 /**
  * @param in_short_name
  */
-WorldServer * WorldServer::SetShortName(const std::string &in_short_name)
+WorldServer *WorldServer::SetShortName(const std::string &in_short_name)
 {
 	WorldServer::short_name = in_short_name;
 
@@ -1014,7 +1033,7 @@ WorldServer * WorldServer::SetShortName(const std::string &in_short_name)
 /**
  * @param in_account_name
  */
-WorldServer * WorldServer::SetAccountName(const std::string &in_account_name)
+WorldServer *WorldServer::SetAccountName(const std::string &in_account_name)
 {
 	WorldServer::account_name = in_account_name;
 
@@ -1024,7 +1043,7 @@ WorldServer * WorldServer::SetAccountName(const std::string &in_account_name)
 /**
  * @param in_account_password
  */
-WorldServer * WorldServer::SetAccountPassword(const std::string &in_account_password)
+WorldServer *WorldServer::SetAccountPassword(const std::string &in_account_password)
 {
 	WorldServer::account_password = in_account_password;
 
@@ -1034,7 +1053,7 @@ WorldServer * WorldServer::SetAccountPassword(const std::string &in_account_pass
 /**
  * @param in_remote_ip
  */
-WorldServer * WorldServer::SetRemoteIp(const std::string &in_remote_ip)
+WorldServer *WorldServer::SetRemoteIp(const std::string &in_remote_ip)
 {
 	WorldServer::remote_ip_address = in_remote_ip;
 
@@ -1044,7 +1063,7 @@ WorldServer * WorldServer::SetRemoteIp(const std::string &in_remote_ip)
 /**
  * @param in_local_ip
  */
-WorldServer * WorldServer::SetLocalIp(const std::string &in_local_ip)
+WorldServer *WorldServer::SetLocalIp(const std::string &in_local_ip)
 {
 	WorldServer::local_ip = in_local_ip;
 
@@ -1054,7 +1073,7 @@ WorldServer * WorldServer::SetLocalIp(const std::string &in_local_ip)
 /**
  * @param in_protocol
  */
-WorldServer * WorldServer::SetProtocol(const std::string &in_protocol)
+WorldServer *WorldServer::SetProtocol(const std::string &in_protocol)
 {
 	WorldServer::protocol = in_protocol;
 
@@ -1064,7 +1083,7 @@ WorldServer * WorldServer::SetProtocol(const std::string &in_protocol)
 /**
  * @param in_version
  */
-WorldServer * WorldServer::SetVersion(const std::string &in_version)
+WorldServer *WorldServer::SetVersion(const std::string &in_version)
 {
 	WorldServer::version = in_version;
 

@@ -503,7 +503,7 @@ std::string Database::CreateLoginserverApiToken(
 {
 	std::string token = EQ::Util::UUID::Generate().ToString();
 	auto        query = fmt::format(
-		"INSERT INTO loginserver_api_tokens (token, can_write, can_read, created_at) VALUES ('{0}', {1}, {2}, NOW())",
+		"INSERT INTO login_api_tokens (token, can_write, can_read, created_at) VALUES ('{0}', {1}, {2}, NOW())",
 		token,
 		(write_mode ? "1" : "0"),
 		(read_mode ? "1" : "0")

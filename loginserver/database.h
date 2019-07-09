@@ -65,6 +65,15 @@ public:
 		std::string &password,
 		unsigned int &id
 	);
+
+	/**
+	 * @param token
+	 * @param ip
+	 * @param db_account_id
+	 * @param db_loginserver
+	 * @param user
+	 * @return
+	 */
 	bool GetLoginTokenDataFromToken(
 		const std::string &token,
 		const std::string &ip,
@@ -72,13 +81,34 @@ public:
 		std::string &db_loginserver,
 		std::string &user
 	);
+
+	/**
+	 * @param loginserver
+	 * @return
+	 */
 	unsigned int GetFreeID(const std::string &loginserver);
+
+	/**
+	 * @param name
+	 * @param password
+	 * @param loginserver
+	 * @param id
+	 * @return
+	 */
 	bool CreateLoginData(
 		const std::string &name,
 		const std::string &password,
 		const std::string &loginserver,
 		unsigned int &id
 	);
+
+	/**
+	 * @param in_account_name
+	 * @param in_account_password
+	 * @param loginserver
+	 * @param id
+	 * @return
+	 */
 	bool CreateLoginDataWithID(
 		const std::string &in_account_name,
 		const std::string &in_account_password,
@@ -86,8 +116,20 @@ public:
 		unsigned int id
 	);
 
+	/**
+	 * @param name
+	 * @param loginserver
+	 * @param hash
+	 */
 	void UpdateLoginHash(const std::string &name, const std::string &loginserver, const std::string &hash);
 
+	/**
+	 * @param name
+	 * @param password
+	 * @param loginserver
+	 * @param id
+	 * @return
+	 */
 	bool DoesLoginServerAccountExist(
 		const std::string &name,
 		const std::string &password,
@@ -122,10 +164,38 @@ public:
 		const std::string& local_ip
 	);
 
+	/**
+	 * @param id
+	 * @param ip_address
+	 */
 	void UpdateLSAccountData(unsigned int id, std::string ip_address);
+
+	/**
+	 * @param id
+	 * @param name
+	 * @param password
+	 * @param email
+	 */
 	void UpdateLSAccountInfo(unsigned int id, std::string name, std::string password, std::string email);
+
+	/**
+	 * @param id
+	 * @param long_name
+	 * @param ip_address
+	 */
 	void UpdateWorldRegistration(unsigned int id, std::string long_name, std::string ip_address);
+
+	/**
+	 * @param long_name
+	 * @param short_name
+	 * @param id
+	 * @return
+	 */
 	bool CreateWorldRegistration(std::string long_name, std::string short_name, unsigned int &id);
+
+	/**
+	 * @param log_settings
+	 */
 	void LoadLogSettings(EQEmuLogSys::LogSettings *log_settings);
 
 	/**

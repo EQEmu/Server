@@ -63,6 +63,7 @@ int main(int argc, char** argv)
 	server.options.AutoCreateAccounts(server.config.GetVariableBool("general", "auto_create_accounts", true));
 	server.options.AutoLinkAccounts(server.config.GetVariableBool("general", "auto_link_accounts", true));
 
+#ifdef LSPX
 	server.options.EQEmuLoginServerAddress(
 		server.config.GetVariableString(
 			"general",
@@ -78,6 +79,7 @@ int main(int argc, char** argv)
 			"local"
 		)
 	);
+#endif
 
 
 #ifdef ENABLE_SECURITY
@@ -137,7 +139,7 @@ int main(int argc, char** argv)
 	 * create client manager
 	 */
 	LogInfo("Client Manager Init");
-	server.client_manager           = new ClientManager();
+	server.client_manager = new ClientManager();
 	if (!server.client_manager) {
 		LogError("Client Manager Failed to Start");
 		LogInfo("Server Manager Shutdown");
@@ -174,6 +176,19 @@ int main(int argc, char** argv)
 	}
 
 	LoginserverCommandHandler::CommandHandler(argc, argv);
+
+	LogInfo("[Config] IsTraceOn [{0}]", server.options.IsTraceOn());
+	LogInfo("[Config] IsWorldTraceOn [{0}]", server.options.IsWorldTraceOn());
+	LogInfo("[Config] IsDumpInPacketsOn [{0}]", server.options.IsDumpInPacketsOn());
+	LogInfo("[Config] IsDumpOutPacketsOn [{0}]", server.options.IsDumpOutPacketsOn());
+	LogInfo("[Config] IsRejectingDuplicateServers [{0}]", server.options.IsRejectingDuplicateServers());
+	LogInfo("[Config] CanAutoCreateAccounts [{0}]", server.options.CanAutoCreateAccounts());
+	LogInfo("[Config] CanAutoLinkAccounts [{0}]", server.options.CanAutoLinkAccounts());
+	LogInfo("[Config] GetEncryptionMode [{0}]", server.options.GetEncryptionMode());
+	LogInfo("[Config] IsUnregisteredAllowed [{0}]", server.options.IsUnregisteredAllowed());
+	LogInfo("[Config] IsTokenLoginAllowed [{0}]", server.options.IsTokenLoginAllowed());
+	LogInfo("[Config] IsPasswordLoginAllowed [{0}]", server.options.IsPasswordLoginAllowed());
+	LogInfo("[Config] IsUpdatingInsecurePasswords [{0}]", server.options.IsUpdatingInsecurePasswords());
 
 	while (run_server) {
 		Timer::SetCurrentTime();
