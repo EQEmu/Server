@@ -534,7 +534,7 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info
 	server.db->UpdateWorldRegistration(
 		GetServerId(),
 		GetServerLongName(),
-		GetConnection()->Handle()->RemoteIP()
+		GetRemoteIp()
 	);
 }
 
