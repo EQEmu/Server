@@ -80,7 +80,7 @@ ServerManager::ServerManager()
 					LogF(Logs::General,
 						 Logs::World_Server,
 						 "World server {0} has been disconnected, removing.",
-						 (*iter)->GetLongName().c_str());
+						 (*iter)->GetServerLongName().c_str());
 					world_servers.erase(iter);
 					return;
 				}
@@ -125,24 +125,30 @@ EQApplicationPacket *ServerManager::CreateServerListPacket(Client *client, uint3
 	in.s_addr = client->GetConnection()->GetRemoteIP();
 	std::string client_ip = inet_ntoa(in);
 
+	LogDebug("ServerManager::CreateServerListPacket via client address [{0}]", client_ip);
+
 	auto iter = world_servers.begin();
 	while (iter != world_servers.end()) {
-		if ((*iter)->IsAuthorized() == false) {
+		if (!(*iter)->IsAuthorized()) {
+			LogDebug(
+				"ServerManager::CreateServerListPacket | Server [{0}] via IP [{1}] is not authorized to be listed",
+				(*iter)->GetServerLongName(),
+				(*iter)->GetConnection()->Handle()->RemoteIP()
+			);
 			++iter;
 			continue;
 		}
 
 		std::string world_ip = (*iter)->GetConnection()->Handle()->RemoteIP();
-
-		if (world_ip.compare(client_ip) == 0) {
-			packet_size += (*iter)->GetLongName().size() + (*iter)->GetLocalIP().size() + 24;
+		if (world_ip == client_ip) {
+			packet_size += (*iter)->GetServerLongName().size() + (*iter)->GetLocalIP().size() + 24;
 		}
 		else if (IpUtil::IsIpInPrivateRfc1918(client_ip)) {
 			LogInfo("Client is requesting server list from a local address [{0}]", client_ip);
-			packet_size += (*iter)->GetLongName().size() + (*iter)->GetLocalIP().size() + 24;
+			packet_size += (*iter)->GetServerLongName().size() + (*iter)->GetLocalIP().size() + 24;
 		}
 		else {
-			packet_size += (*iter)->GetLongName().size() + (*iter)->GetRemoteIP().size() + 24;
+			packet_size += (*iter)->GetServerLongName().size() + (*iter)->GetRemoteIP().size() + 24;
 		}
 
 		server_count++;
@@ -203,11 +209,11 @@ EQApplicationPacket *ServerManager::CreateServerListPacket(Client *client, uint3
 
 		data_pointer += 4;
 
-		*(unsigned int *) data_pointer = (*iter)->GetRuntimeID();
+		*(unsigned int *) data_pointer = (*iter)->GetServerId();
 		data_pointer += 4;
 
-		memcpy(data_pointer, (*iter)->GetLongName().c_str(), (*iter)->GetLongName().size());
-		data_pointer += ((*iter)->GetLongName().size() + 1);
+		memcpy(data_pointer, (*iter)->GetServerLongName().c_str(), (*iter)->GetServerLongName().size());
+		data_pointer += ((*iter)->GetServerLongName().size() + 1);
 
 		memcpy(data_pointer, "EN", 2);
 		data_pointer += 3;
@@ -252,7 +258,7 @@ void ServerManager::SendUserToWorldRequest(
 	auto iter  = world_servers.begin();
 	bool found = false;
 	while (iter != world_servers.end()) {
-		if ((*iter)->GetRuntimeID() == server_id) {
+		if ((*iter)->GetServerId() == server_id) {
 			EQ::Net::DynamicPacket outapp;
 			outapp.Resize(sizeof(UsertoWorldRequest_Struct));
 
@@ -294,8 +300,8 @@ bool ServerManager::ServerExists(
 			continue;
 		}
 
-		if ((*iter)->GetLongName().compare(server_long_name) == 0 &&
-			(*iter)->GetShortName().compare(server_short_name) == 0) {
+		if ((*iter)->GetServerLongName().compare(server_long_name) == 0 &&
+			(*iter)->GetServerShortName().compare(server_short_name) == 0) {
 			return true;
 		}
 
@@ -322,8 +328,8 @@ void ServerManager::DestroyServerByName(
 			continue;
 		}
 
-		if ((*iter)->GetLongName().compare(server_long_name) == 0 &&
-			(*iter)->GetShortName().compare(server_short_name) == 0) {
+		if ((*iter)->GetServerLongName().compare(server_long_name) == 0 &&
+			(*iter)->GetServerShortName().compare(server_short_name) == 0) {
 			(*iter)->GetConnection()->Handle()->Disconnect();
 			iter = world_servers.erase(iter);
 			continue;

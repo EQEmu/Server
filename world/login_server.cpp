@@ -516,22 +516,22 @@ void LoginServer::SendInfo()
 	pack->pBuffer = new uchar[pack->size];
 	memset(pack->pBuffer, 0, pack->size);
 	ServerNewLSInfo_Struct *lsi = (ServerNewLSInfo_Struct *) pack->pBuffer;
-	strcpy(lsi->protocolversion, EQEMU_PROTOCOL_VERSION);
-	strcpy(lsi->serverversion, LOGIN_VERSION);
-	strcpy(lsi->name, Config->LongName.c_str());
-	strcpy(lsi->shortname, Config->ShortName.c_str());
-	strn0cpy(lsi->account, LoginAccount.c_str(), 30);
-	strn0cpy(lsi->password, LoginPassword.c_str(), 30);
+	strcpy(lsi->protocol_version, EQEMU_PROTOCOL_VERSION);
+	strcpy(lsi->server_version, LOGIN_VERSION);
+	strcpy(lsi->server_long_name, Config->LongName.c_str());
+	strcpy(lsi->server_short_name, Config->ShortName.c_str());
+	strn0cpy(lsi->account_name, LoginAccount.c_str(), 30);
+	strn0cpy(lsi->account_password, LoginPassword.c_str(), 30);
 	if (Config->WorldAddress.length()) {
-		strcpy(lsi->remote_address, Config->WorldAddress.c_str());
+		strcpy(lsi->remote_ip_address, Config->WorldAddress.c_str());
 	}
 	if (Config->LocalAddress.length()) {
-		strcpy(lsi->local_address, Config->LocalAddress.c_str());
+		strcpy(lsi->local_ip_address, Config->LocalAddress.c_str());
 	}
 	else {
 		auto local_addr = IsLegacy ? legacy_client->Handle()->LocalIP() : client->Handle()->LocalIP();
-		strcpy(lsi->local_address, local_addr.c_str());
-		WorldConfig::SetLocalAddress(lsi->local_address);
+		strcpy(lsi->local_ip_address, local_addr.c_str());
+		WorldConfig::SetLocalAddress(lsi->local_ip_address);
 	}
 	SendPacket(pack);
 	delete pack;

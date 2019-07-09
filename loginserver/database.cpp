@@ -319,27 +319,15 @@ void Database::UpdateLoginHash(
 }
 
 /**
- * @param long_name
  * @param short_name
- * @param id
- * @param desc
- * @param list_id
- * @param trusted
- * @param list_desc
- * @param account
- * @param password
+ * @param remote_ip
+ * @param local_ip
  * @return
  */
-bool Database::GetWorldRegistration(
-	std::string long_name,
-	std::string short_name,
-	unsigned int &id,
-	std::string &desc,
-	unsigned int &list_id,
-	unsigned int &trusted,
-	std::string &list_desc,
-	std::string &account,
-	std::string &password
+Database::DbWorldRegistration Database::GetWorldRegistration(
+	const std::string &short_name,
+	const std::string &remote_ip,
+	const std::string &local_ip
 )
 {
 	auto query = fmt::format(
@@ -354,43 +342,46 @@ bool Database::GetWorldRegistration(
 		"  login_world_servers AS WSR\n"
 		"  JOIN login_server_list_types AS SLT ON WSR.login_server_list_type_id = SLT.id\n"
 		"WHERE\n"
-		"  WSR.short_name = '{0}' LIMIT 1",
-		EscapeString(short_name)
+		"  WSR.short_name = '{0}' AND (WSR.last_ip_address = '{1}' OR WSR.last_ip_address = '{2}') LIMIT 1",
+		EscapeString(short_name),
+		EscapeString(remote_ip),
+		EscapeString(local_ip)
 	);
+
+	Database::DbWorldRegistration world_registration{};
 
 	auto results = QueryDatabase(query);
 	if (!results.Success() || results.RowCount() != 1) {
-		return false;
+		return world_registration;
 	}
 
 	auto row = results.begin();
 
-	id        = atoi(row[0]);
-	desc      = row[1];
-	trusted   = atoi(row[2]);
-	list_id   = atoi(row[3]);
-	list_desc = row[4];
+	world_registration.loaded                  = true;
+	world_registration.server_id               = std::stoi(row[0]);
+	world_registration.server_description      = row[1];
+	world_registration.server_list_type        = std::stoi(row[3]);
+	world_registration.is_server_trusted       = std::stoi(row[2]) > 0;
+	world_registration.server_list_description = row[4];
 
-	int db_account_id = atoi(row[5]);
-	if (db_account_id > 0) {
-
-		auto world_registration_query = fmt::format(
-			"SELECT account_name, account_password FROM login_server_admins WHERE id = {0} LIMIT 1",
-			db_account_id
-		);
-
-		auto world_registration_results = QueryDatabase(world_registration_query);
-		if (!world_registration_results.Success() || world_registration_results.RowCount() != 1) {
-			return false;
-		}
-
-		auto world_registration_row = world_registration_results.begin();
-
-		account  = world_registration_row[0];
-		password = world_registration_row[1];
+	int db_account_id = std::stoi(row[5]);
+	if (db_account_id <= 0) {
+		return world_registration;
 	}
 
-	return true;
+	auto world_registration_query = fmt::format(
+		"SELECT account_name, account_password FROM login_server_admins WHERE id = {0} LIMIT 1",
+		db_account_id
+	);
+
+	auto world_registration_results = QueryDatabase(world_registration_query);
+	if (world_registration_results.Success() && world_registration_results.RowCount() == 1) {
+		auto world_registration_row = world_registration_results.begin();
+		world_registration.server_admin_account_name     = world_registration_row[0];
+		world_registration.server_admin_account_password = world_registration_row[1];
+	}
+
+	return world_registration;
 }
 
 /**

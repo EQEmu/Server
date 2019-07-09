@@ -95,32 +95,31 @@ public:
 		unsigned int id
 	);
 
+	struct DbWorldRegistration {
+		bool        loaded            = false;
+		int32       server_id         = 0;
+		int8        server_list_type  = 3;
+		bool        is_server_trusted = false;
+		std::string server_description;
+		std::string server_list_description;
+		std::string server_admin_account_name;
+		std::string server_admin_account_password;
+	};
+
 	/**
 	 * Retrieves the world registration from the long and short names provided
 	 * Needed for world login procedure
-	 * Returns true if the record was found, false otherwise.
+	 * Returns true if the record was found, false otherwise
 	 *
-	 * @param long_name
 	 * @param short_name
-	 * @param id
-	 * @param desc
-	 * @param list_id
-	 * @param trusted
-	 * @param list_desc
-	 * @param account
-	 * @param password
+	 * @param remote_ip
+	 * @param local_ip
 	 * @return
 	 */
-	bool GetWorldRegistration(
-		std::string long_name,
-		std::string short_name,
-		unsigned int &id,
-		std::string &desc,
-		unsigned int &list_id,
-		unsigned int &trusted,
-		std::string &list_desc,
-		std::string &account,
-		std::string &password
+	Database::DbWorldRegistration GetWorldRegistration(
+		const std::string& short_name,
+		const std::string& remote_ip,
+		const std::string& local_ip
 	);
 
 	void UpdateLSAccountData(unsigned int id, std::string ip_address);

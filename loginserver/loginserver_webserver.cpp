@@ -45,8 +45,8 @@ namespace LoginserverWebserver {
 				auto        iter = server.server_manager->getWorldServers().begin();
 				while (iter != server.server_manager->getWorldServers().end()) {
 					Json::Value row;
-					row["server_long_name"]  = (*iter)->GetLongName();
-					row["server_short_name"] = (*iter)->GetLongName();
+					row["server_long_name"]  = (*iter)->GetServerLongName();
+					row["server_short_name"] = (*iter)->GetServerLongName();
 					row["server_list_id"]    = (*iter)->GetServerListID();
 					row["server_status"]     = (*iter)->GetStatus();
 					row["zones_booted"]      = (*iter)->GetZonesBooted();
