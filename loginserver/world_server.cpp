@@ -756,7 +756,12 @@ bool WorldServer::HandleNewLoginserverRegisteredOnly(
 
 			bool does_world_server_pass_authentication_check = (
 				world_registration.server_admin_account_name == this->GetAccountName() &&
-				world_registration.server_admin_account_password == this->GetAccountPassword()
+					eqcrypt_verify_hash(
+						GetAccountName(),
+						GetAccountPassword(),
+						world_registration.server_admin_account_password,
+						server.options.GetEncryptionMode()
+					)
 			);
 
 			this
@@ -842,7 +847,12 @@ bool WorldServer::HandleNewLoginserverInfoUnregisteredAllowed(
 
 		bool does_world_server_pass_authentication_check = (
 			world_registration.server_admin_account_name == this->GetAccountName() &&
-			world_registration.server_admin_account_password == this->GetAccountPassword()
+				eqcrypt_verify_hash(
+					GetAccountName(),
+					GetAccountPassword(),
+					world_registration.server_admin_account_password,
+					server.options.GetEncryptionMode()
+				)
 		);
 
 		bool does_world_server_have_non_empty_credentials = (
@@ -852,7 +862,6 @@ bool WorldServer::HandleNewLoginserverInfoUnregisteredAllowed(
 
 		if (does_world_server_have_non_empty_credentials) {
 			if (does_world_server_pass_authentication_check) {
-
 				this->SetIsServerAuthorized(true);
 
 				LogInfo(
