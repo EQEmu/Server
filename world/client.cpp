@@ -416,7 +416,7 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app)
 	}
 
 	is_player_zoning = (login_info->zoning == 1);
-	
+
 	uint32 id = std::stoi(name);
 	if (id == 0) {
 		LogWarning("Receiving Login Info Packet from Client | account_id is 0 - disconnecting");

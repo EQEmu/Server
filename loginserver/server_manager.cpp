@@ -142,13 +142,36 @@ EQApplicationPacket *ServerManager::CreateServerListPacket(Client *client, uint3
 		std::string world_ip = (*iter)->GetConnection()->Handle()->RemoteIP();
 		if (world_ip == client_ip) {
 			packet_size += (*iter)->GetServerLongName().size() + (*iter)->GetLocalIP().size() + 24;
+
+			LogDebug(
+				"CreateServerListPacket | Building list entry | Client [{0}] IP [{1}] Server Long Name [{2}] Server IP [{3}] (Local)",
+				client->GetAccountName(),
+				client_ip,
+				(*iter)->GetServerLongName(),
+				(*iter)->GetLocalIP()
+			);
 		}
 		else if (IpUtil::IsIpInPrivateRfc1918(client_ip)) {
-			LogInfo("Client is requesting server list from a local address [{0}]", client_ip);
 			packet_size += (*iter)->GetServerLongName().size() + (*iter)->GetLocalIP().size() + 24;
+
+			LogDebug(
+				"CreateServerListPacket | Building list entry | Client [{0}] IP [{1}] Server Long Name [{2}] Server IP [{3}] (Local)",
+				client->GetAccountName(),
+				client_ip,
+				(*iter)->GetServerLongName(),
+				(*iter)->GetLocalIP()
+			);
 		}
 		else {
 			packet_size += (*iter)->GetServerLongName().size() + (*iter)->GetRemoteIP().size() + 24;
+
+			LogDebug(
+				"CreateServerListPacket | Building list entry | Client [{0}] IP [{1}] Server Long Name [{2}] Server IP [{3}] (Remote)",
+				client->GetAccountName(),
+				client_ip,
+				(*iter)->GetServerLongName(),
+				(*iter)->GetRemoteIP()
+			);
 		}
 
 		server_count++;
