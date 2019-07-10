@@ -293,7 +293,23 @@ bool ClientListEntry::CheckStale()
 
 bool ClientListEntry::CheckAuth(uint32 loginserver_account_id, const char *key_password)
 {
+	LogDebug(
+		"ClientListEntry::CheckAuth ls_account_id [{0}] key_password [{1}] plskey [{2}]",
+		loginserver_account_id,
+		key_password,
+		plskey
+	);
 	if (pLSID == loginserver_account_id && strncmp(plskey, key_password, 10) == 0) {
+
+		LogDebug(
+			"ClientListEntry::CheckAuth ls_account_id [{0}] key_password [{1}] plskey [{2}] lsid [{3}] paccountid [{4}]",
+			loginserver_account_id,
+			key_password,
+			plskey,
+			LSID(),
+			paccountid
+		);
+
 		if (paccountid == 0 && LSID() > 0) {
 			int16 default_account_status = WorldConfig::get()->DefaultStatus;
 
