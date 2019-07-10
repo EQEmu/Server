@@ -7342,6 +7342,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		c->Message(0, "#npcedit no_target - Set an NPC's ability to be targeted with the target hotkey");
 		c->Message(0, "#npcedit version - Set an NPC's version");
 		c->Message(0, "#npcedit slow_mitigation - Set an NPC's slow mitigation");
+		c->Message(0, "#npcedit flymode - Set an NPC's flymode [0 = ground, 1 = flying, 2 = levitate, 3 = water, 4 = floating]");
 
 	}
 
@@ -7355,7 +7356,14 @@ void command_npcedit(Client *c, const Seperator *sep)
 
 	if (strcasecmp(sep->arg[1], "lastname") == 0) {
         c->Message(15,"NPCID %u now has the lastname %s.", npcTypeID, sep->argplus[2]);
-		std::string query = StringFormat("UPDATE npc_types SET lastname = '%s' WHERE id = %i",  sep->argplus[2],npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET lastname = '%s' WHERE id = %i", sep->argplus[2],npcTypeID);
+		database.QueryDatabase(query);
+		return;
+	}
+
+	if (strcasecmp(sep->arg[1], "flymode") == 0) {
+        c->Message(15,"NPCID %u now has flymode [%s]", npcTypeID, sep->argplus[2]);
+		std::string query = StringFormat("UPDATE npc_types SET flymode = '%s' WHERE id = %i",  sep->argplus[2],npcTypeID);
 		database.QueryDatabase(query);
 		return;
 	}
