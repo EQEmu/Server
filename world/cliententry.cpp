@@ -31,13 +31,23 @@ extern LoginServerList loginserverlist;
 extern ClientList      client_list;
 extern volatile bool   RunLoops;
 
+/**
+ * @param in_id
+ * @param in_loginserver_id
+ * @param in_loginserver_name
+ * @param in_login_name
+ * @param in_login_key
+ * @param in_is_world_admin
+ * @param ip
+ * @param local
+ */
 ClientListEntry::ClientListEntry(
 	uint32 in_id,
-	uint32 iLSID,
-	const char *iLoginServerName,
-	const char *iLoginName,
-	const char *iLoginKey,
-	int16 iWorldAdmin,
+	uint32 in_loginserver_id,
+	const char *in_loginserver_name,
+	const char *in_login_name,
+	const char *in_login_key,
+	int16 in_is_world_admin,
 	uint32 ip,
 	uint8 local
 )
@@ -45,17 +55,29 @@ ClientListEntry::ClientListEntry(
 {
 	ClearVars(true);
 
-	pIP   = ip;
-	pLSID = iLSID;
-	if (iLSID > 0) {
+	LogDebug(
+		"ClientListEntry in_id [{0}] in_loginserver_id [{1}] in_loginserver_name [{2}] in_login_name [{3}] in_login_key [{4}] "
+		" in_is_world_admin [{5}] ip [{6}] local [{7}]",
+		in_id,
+		in_loginserver_id,
+		in_loginserver_name,
+		in_login_name,
+		in_login_key,
+		in_is_world_admin,
+		ip,
+		local
+	);
 
-		paccountid = database.GetAccountIDFromLSID(iLoginServerName, iLSID, paccountname, &padmin);
+	pIP   = ip;
+	pLSID = in_loginserver_id;
+	if (in_loginserver_id > 0) {
+		paccountid = database.GetAccountIDFromLSID(in_loginserver_name, in_loginserver_id, paccountname, &padmin);
 	}
 
-	strn0cpy(loginserver_account_name, iLoginName, sizeof(loginserver_account_name));
-	strn0cpy(plskey, iLoginKey, sizeof(plskey));
-	strn0cpy(source_loginserver, iLoginServerName, sizeof(source_loginserver));
-	pworldadmin = iWorldAdmin;
+	strn0cpy(loginserver_account_name, in_login_name, sizeof(loginserver_account_name));
+	strn0cpy(plskey, in_login_key, sizeof(plskey));
+	strn0cpy(source_loginserver, in_loginserver_name, sizeof(source_loginserver));
+	pworldadmin = in_is_world_admin;
 	plocal      = (local == 1);
 
 	pinstance       = 0;

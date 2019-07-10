@@ -21,8 +21,35 @@ struct ServerClientList_Struct;
 
 class ClientListEntry {
 public:
-	ClientListEntry(uint32 id, uint32 iLSID, const char *iLoginServerName, const char* iLoginName, const char* iLoginKey, int16 iWorldAdmin = 0, uint32 ip = 0, uint8 local=0);
-	ClientListEntry(uint32 id, ZoneServer* iZS, ServerClientList_Struct* scl, int8 iOnline);
+
+	/**
+	 * @param id
+	 * @param in_loginserver_id
+	 * @param in_loginserver_name
+	 * @param in_login_name
+	 * @param in_login_key
+	 * @param in_is_world_admin
+	 * @param ip
+	 * @param local
+	 */
+	ClientListEntry(
+		uint32 id,
+		uint32 in_loginserver_id,
+		const char *in_loginserver_name,
+		const char *in_login_name,
+		const char *in_login_key,
+		int16 in_is_world_admin = 0,
+		uint32 ip = 0,
+		uint8 local = 0
+	);
+
+	/**
+	 * @param id
+	 * @param iZS
+	 * @param scl
+	 * @param iOnline
+	 */
+	ClientListEntry(uint32 id, ZoneServer *iZS, ServerClientList_Struct *scl, int8 iOnline);
 	~ClientListEntry();
 	bool	CheckStale();
 	void	Update(ZoneServer* zoneserver, ServerClientList_Struct* scl, int8 iOnline = CLE_Status_InZone);
@@ -91,42 +118,42 @@ private:
 
 	const uint32	id;
 	uint32	pIP;
-	int8	pOnline;
-	uint8	stale;
+	int8	pOnline{};
+	uint8	stale{};
 
 	// Login Server stuff
-	char	source_loginserver[64]; //Loginserver we came from.
+	char	source_loginserver[64]{}; //Loginserver we came from.
 	uint32	pLSID;
-	char	loginserver_account_name[32];
-	char	plskey[16];
+	char	loginserver_account_name[32]{};
+	char	plskey[16]{};
 	int16	pworldadmin;		// Login server's suggested admin status setting
 	bool	plocal;
 
 	// Account stuff
 	uint32	paccountid;
-	char	paccountname[32];
+	char	paccountname[32]{};
 	MD5		pMD5Pass;
-	int16	padmin;
+	int16	padmin{};
 
 	// Character info
-	ZoneServer* pzoneserver;
-	uint32	pzone;
+	ZoneServer* pzoneserver{};
+	uint32	pzone{};
 	uint16	pinstance;
-	uint32	pcharid;
-	char	pname[64];
-	uint8	plevel;
-	uint8	pclass_;
-	uint16	prace;
-	uint8	panon;
-	uint8	ptellsoff;
-	uint32	pguild_id;
-	bool	pLFG;
-	uint8	gm;
-	uint8	pClientVersion;
+	uint32	pcharid{};
+	char	pname[64]{};
+	uint8	plevel{};
+	uint8	pclass_{};
+	uint16	prace{};
+	uint8	panon{};
+	uint8	ptellsoff{};
+	uint32	pguild_id{};
+	bool	pLFG{};
+	uint8	gm{};
+	uint8	pClientVersion{};
 	uint8	pLFGFromLevel;
 	uint8	pLFGToLevel;
 	bool	pLFGMatchFilter;
-	char	pLFGComments[64];
+	char	pLFGComments[64]{};
 
 	// Tell Queue -- really a vector :D
 	std::vector<ServerChannelMessage_Struct *> tell_queue;
