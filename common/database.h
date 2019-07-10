@@ -184,7 +184,7 @@ public:
 
 	uint32	CheckLogin(const char* name, const char* password, const char *loginserver, int16* oStatus = 0);
 	uint32	CreateAccount(const char* name, const char* password, int16 status, const char* loginserver, uint32 lsaccount_id);
-	uint32	GetAccountIDFromLSID(const std::string& iLoginServer, uint32 iLSID, char* oAccountName = 0, int16* oStatus = 0);
+	uint32	GetAccountIDFromLSID(const std::string& in_loginserver_id, uint32 in_loginserver_account_id, char* in_account_name = 0, int16* in_status = 0);
 	uint8	GetAgreementFlag(uint32 acctid);
 
 	void	GetAccountFromID(uint32 id, char* oAccountName, int16* oStatus);

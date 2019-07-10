@@ -394,35 +394,36 @@ void Client::SendPostEnterWorld() {
 	safe_delete(outapp);
 }
 
-bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
+bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app)
+{
 	if (app->size != sizeof(LoginInfo_Struct)) {
 		return false;
 	}
-	
-	LoginInfo_Struct *li=(LoginInfo_Struct *)app->pBuffer;
+
+	auto *login_info = (LoginInfo_Struct *) app->pBuffer;
 
 	// Quagmire - max len for name is 18, pass 15
-	char name[19] = {0};
+	char name[19]     = {0};
 	char password[16] = {0};
-	strn0cpy(name, (char*)li->login_info,18);
-	strn0cpy(password, (char*)&(li->login_info[strlen(name)+1]), 15);
+	strn0cpy(name, (char *) login_info->login_info, 18);
+	strn0cpy(password, (char *) &(login_info->login_info[strlen(name) + 1]), 15);
+
+	LogDebug("Receiving Login Info Packet from Client | name [{0}] password [{1}]", name, password);
 
 	if (strlen(password) <= 1) {
 		Log(Logs::Detail, Logs::World_Server, "Login without a password");
 		return false;
 	}
 
-	is_player_zoning = (li->zoning == 1);
-
-	LogDebug("Receiving Login Info Packet from Client | name [{0}] password [{1}]", name, password);
-
-	uint32 id = atoi(name);
+	is_player_zoning = (login_info->zoning == 1);
+	
+	uint32 id = std::stoi(name);
 	if (id == 0) {
 		LogWarning("Receiving Login Info Packet from Client | account_id is 0 - disconnecting");
 		return false;
 	}
 
-	if (cle = client_list.CheckAuth(id, password)) {
+	if ((cle = client_list.CheckAuth(id, password))) {
 		if (!is_player_zoning) {
 			// Track who is in and who is out of the game
 			char *inout= (char *) "";

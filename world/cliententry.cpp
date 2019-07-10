@@ -80,10 +80,6 @@ ClientListEntry::ClientListEntry(
 	pworldadmin = in_is_world_admin;
 	plocal      = (local == 1);
 
-	pinstance       = 0;
-	pLFGFromLevel   = 0;
-	pLFGToLevel     = 0;
-	pLFGMatchFilter = false;
 	memset(pLFGComments, 0, 64);
 }
 

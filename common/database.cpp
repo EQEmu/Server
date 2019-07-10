@@ -1210,19 +1210,25 @@ bool Database::AddToNameFilter(const char* name) {
 	return true;
 }
 
+/**
+ * @param in_loginserver_id
+ * @param in_loginserver_account_id
+ * @param in_account_name
+ * @param in_status
+ * @return
+ */
 uint32 Database::GetAccountIDFromLSID(
-	const std::string &iLoginServer,
-	uint32 iLSID, char *oAccountName,
-	int16 *oStatus
+	const std::string &in_loginserver_id,
+	uint32 in_loginserver_account_id,
+	char *in_account_name,
+	int16 *in_status
 )
 {
 	uint32 account_id = 0;
-	//iLoginServer is set by config so don't need to worry about escaping it.
-
 	auto query = fmt::format(
 		"SELECT id, name, status FROM account WHERE lsaccount_id = {0} AND ls_id = '{1}'",
-		iLSID,
-		iLoginServer
+		in_loginserver_account_id,
+		in_loginserver_id
 	);
 
 	auto results = QueryDatabase(query);
@@ -1236,13 +1242,13 @@ uint32 Database::GetAccountIDFromLSID(
 	}
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		account_id = atoi(row[0]);
+		account_id = std::stoi(row[0]);
 
-		if (oAccountName) {
-			strcpy(oAccountName, row[1]);
+		if (in_account_name) {
+			strcpy(in_account_name, row[1]);
 		}
-		if (oStatus) {
-			*oStatus = atoi(row[2]);
+		if (in_status) {
+			*in_status = std::stoi(row[2]);
 		}
 	}
 

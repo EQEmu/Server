@@ -138,7 +138,7 @@ private:
 	// Character info
 	ZoneServer* pzoneserver{};
 	uint32	pzone{};
-	uint16	pinstance;
+	uint16	pinstance{};
 	uint32	pcharid{};
 	char	pname[64]{};
 	uint8	plevel{};
@@ -150,9 +150,9 @@ private:
 	bool	pLFG{};
 	uint8	gm{};
 	uint8	pClientVersion{};
-	uint8	pLFGFromLevel;
-	uint8	pLFGToLevel;
-	bool	pLFGMatchFilter;
+	uint8	pLFGFromLevel{};
+	uint8	pLFGToLevel{};
+	bool	pLFGMatchFilter{};
 	char	pLFGComments[64]{};
 
 	// Tell Queue -- really a vector :D
