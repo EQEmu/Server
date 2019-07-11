@@ -813,10 +813,54 @@ void MobMovementManager::UpdatePathGround(Mob * who, float x, float y, float z, 
 	}
 
 	AdjustRoute(route, who);
+	   
+	
+	
+	//avoid doing any processing if the mob is stuck to allow normal stuck code to work.
+	if (!stuck)
+	{
 
+		//there are times when the routes returned are no differen than where the mob is currently standing. What basically happens
+		//is a mob will get 'stuck' in such a way that it should be moving but the 'moving' place is the exact same spot it is at. 
+		//this is a problem and creates an area of ground that if a mob gets to, will stay there forever. If socal this creates a 
+		//"Ball of Death" (tm). This code tries to prevent this by simply warping the mob to the requested x/y. Better to have a warp than 
+		//have stuck mobs.
+
+		auto routeNode = route.begin();
+		bool noValidPath = true;
+		while (routeNode != route.end() && noValidPath == true) {
+			auto &currentNode = (*routeNode);
+
+			if (routeNode == route.end())
+			{
+				continue;
+			}
+
+			if (!(currentNode.pos.x == who->GetX() && currentNode.pos.y == who->GetY()))
+			{
+				//if one of the nodes to move to, is not our current node, pass it.
+				noValidPath = false;
+				break;
+			}
+			//move to the next node
+			routeNode++;
+
+		}
+
+		if (noValidPath)
+		{
+			//we are 'stuck' in a path, lets just get out of this by 'teleporting' to the next position.
+			PushTeleportTo(ent.second, x, y, z,
+				CalculateHeadingAngleBetweenPositions(who->GetX(), who->GetY(), x, y));
+			return;
+		}
+
+	}
+	
 	auto iter = route.begin();
 	glm::vec3 previous_pos(who->GetX(), who->GetY(), who->GetZ());
 	bool first_node = true;
+
 
 	while (iter != route.end()) {
 		auto &current_node = (*iter);
