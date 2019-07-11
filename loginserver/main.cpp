@@ -61,7 +61,7 @@ int main(int argc, char** argv)
 	server.options.DumpOutPackets(server.config.GetVariableBool("general", "dump_packets_out", false));
 	server.options.RejectDuplicateServers(server.config.GetVariableBool("general", "reject_duplicate_servers", false));
 	server.options.AutoCreateAccounts(server.config.GetVariableBool("general", "auto_create_accounts", true));
-	server.options.AutoLinkAccounts(server.config.GetVariableBool("general", "auto_link_accounts", true));
+	server.options.AutoLinkAccounts(server.config.GetVariableBool("general", "auto_link_accounts", false));
 
 #ifdef LSPX
 	server.options.EQEmuLoginServerAddress(
