@@ -226,6 +226,11 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	merchant_open         = GetClass() == MERCHANT;
 	adventure_template_id = npc_type_data->adventure_template;
 	flymode               = iflymode;
+
+	if (npc_type_data->flymode >= 0) {
+		flymode = static_cast<GravityBehavior>(npc_type_data->flymode);
+	}
+
 	guard_anim            = eaStanding;
 	roambox_distance      = 0;
 	roambox_max_x         = -2;
