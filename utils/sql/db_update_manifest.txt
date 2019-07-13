@@ -394,6 +394,7 @@
 9138|2018_12_12_convert_to_client_functions.sql|SELECT `id` FROM `faction_list` WHERE `id` > 4999|empty|
 9139|2019_03_25_optional_npc_model.sql|SHOW COLUMNS FROM `npc_types` LIKE 'model'|empty|
 9140|2019_07_03_update_range.sql|SHOW COLUMNS FROM `npc_types` LIKE 'max_movement_update_range'|empty|
+9141|2019_07_10_npc_flymode.sql|SHOW COLUMNS FROM `npc_types` LIKE 'flymode'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
