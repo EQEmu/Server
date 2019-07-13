@@ -99,52 +99,6 @@ ClientListEntry* ClientList::GetCLE(uint32 iID) {
 	return 0;
 }
 
-//Account Limiting Code to limit the number of characters allowed on from a single account at once.
-void ClientList::EnforceSessionLimit(uint32 iLSAccountID) {
-
-	ClientListEntry* ClientEntry = 0;
-
-	LinkedListIterator<ClientListEntry*> iterator(clientlist, BACKWARD);
-
-	int CharacterCount = 0;
-
-	iterator.Reset();
-
-	while(iterator.MoreElements()) {
-
-		ClientEntry = iterator.GetData();
-
-		if ((ClientEntry->LSAccountID() == iLSAccountID) &&
-			((ClientEntry->Admin() <= (RuleI(World, ExemptAccountLimitStatus))) || (RuleI(World, ExemptAccountLimitStatus) < 0))) {
-
-			CharacterCount++;
-
-			if (CharacterCount >= (RuleI(World, AccountSessionLimit))){
-				// If we have a char name, they are in a zone, so send a kick to the zone server
-				if(strlen(ClientEntry->name())) {
-
-					auto pack =
-					    new ServerPacket(ServerOP_KickPlayer, sizeof(ServerKickPlayer_Struct));
-					ServerKickPlayer_Struct* skp = (ServerKickPlayer_Struct*) pack->pBuffer;
-					strcpy(skp->adminname, "SessionLimit");
-					strcpy(skp->name, ClientEntry->name());
-					skp->adminrank = 255;
-					zoneserver_list.SendPacket(pack);
-					safe_delete(pack);
-				}
-
-				ClientEntry->SetOnline(CLE_Status_Offline);
-
-				iterator.RemoveCurrent();
-
-				continue;
-			}
-		}
-		iterator.Advance();
-	}
-}
-
-
 //Check current CLE Entry IPs against incoming connection
 
 void ClientList::GetCLEIP(uint32 iIP) {
@@ -272,7 +226,7 @@ ClientListEntry* ClientList::FindCharacter(const char* name) {
 		}
 		iterator.Advance();
 	}
-	return 0;
+	return nullptr;
 }
 
 ClientListEntry* ClientList::FindCLEByAccountID(uint32 iAccID) {
@@ -285,7 +239,7 @@ ClientListEntry* ClientList::FindCLEByAccountID(uint32 iAccID) {
 		}
 		iterator.Advance();
 	}
-	return 0;
+	return nullptr;
 }
 
 ClientListEntry* ClientList::FindCLEByCharacterID(uint32 iCharID) {
@@ -298,7 +252,20 @@ ClientListEntry* ClientList::FindCLEByCharacterID(uint32 iCharID) {
 		}
 		iterator.Advance();
 	}
-	return 0;
+	return nullptr;
+}
+
+ClientListEntry* ClientList::FindCLEByLSID(uint32 iLSID) {
+	LinkedListIterator<ClientListEntry*> iterator(clientlist);
+
+	iterator.Reset();
+	while (iterator.MoreElements()) {
+		if (iterator.GetData()->LSID() == iLSID) {
+			return iterator.GetData();
+		}
+		iterator.Advance();
+	}
+	return nullptr;
 }
 
 void ClientList::SendCLEList(const int16& admin, const char* to, WorldTCPConnection* connection, const char* iName) {

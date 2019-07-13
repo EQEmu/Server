@@ -35,6 +35,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "worlddb.h"
 #include "zonelist.h"
 #include "clientlist.h"
+#include "cliententry.h"
 #include "world_config.h"
 
 extern ZSList zoneserver_list;
@@ -65,38 +66,58 @@ void LoginServer::ProcessUsertoWorldReq(uint16_t opcode, EQ::Net::Packet &p) {
 	uint32 id = database.GetAccountIDFromLSID(utwr->lsaccountid);
 	int16 status = database.CheckStatus(id);
 
-	auto outpack = new ServerPacket;
-	outpack->opcode = ServerOP_UsertoWorldResp;
-	outpack->size = sizeof(UsertoWorldResponse_Struct);
-	outpack->pBuffer = new uchar[outpack->size];
-	memset(outpack->pBuffer, 0, outpack->size);
-	UsertoWorldResponse_Struct* utwrs = (UsertoWorldResponse_Struct*)outpack->pBuffer;
+	ServerPacket outpack;
+	outpack.opcode = ServerOP_UsertoWorldResp;
+	outpack.size = sizeof(UsertoWorldResponse_Struct);
+	outpack.pBuffer = new uchar[outpack.size];
+	memset(outpack.pBuffer, 0, outpack.size);
+	UsertoWorldResponse_Struct* utwrs = (UsertoWorldResponse_Struct*)outpack.pBuffer;
 	utwrs->lsaccountid = utwr->lsaccountid;
 	utwrs->ToID = utwr->FromID;
+	utwrs->worldid = utwr->worldid;
+	utwrs->response = UserToWorldStatusSuccess;
 
 	if (Config->Locked == true)
 	{
-		if ((status == 0 || status < 100) && (status != -2 || status != -1))
-			utwrs->response = 0;
-		if (status >= 100)
-			utwrs->response = 1;
-	}
-	else {
-		utwrs->response = 1;
+		if (status < 100) {
+			utwrs->response = UserToWorldStatusWorldUnavail;
+			SendPacket(&outpack);
+			return;
+		}
 	}
 
 	int32 x = Config->MaxClients;
-	if ((int32)numplayers >= x && x != -1 && x != 255 && status < 80)
-		utwrs->response = -3;
+	if ((int32)numplayers >= x && x != -1 && x != 255 && status < 80) {
+		utwrs->response = UserToWorldStatusWorldAtCapacity;
+		SendPacket(&outpack);
+		return;
+	}
 
-	if (status == -1)
-		utwrs->response = -1;
-	if (status == -2)
-		utwrs->response = -2;
+	if (status == -1) {
+		utwrs->response = UserToWorldStatusSuspended;
+		SendPacket(&outpack);
+		return;
+	}
 
-	utwrs->worldid = utwr->worldid;
-	SendPacket(outpack);
-	delete outpack;
+	if (status == -2) {
+		utwrs->response = UserToWorldStatusBanned;
+		SendPacket(&outpack);
+		return;
+	}
+
+	if (RuleB(World, DisallowDuplicateAccountLogins)) {
+		auto cle = client_list.FindCLEByLSID(utwr->lsaccountid);
+		if (cle != nullptr) {
+			auto status = cle->GetOnline();
+			if (CLE_Status_Never != status && CLE_Status_Offline != status) {
+				utwrs->response = UserToWorldStatusAlreadyOnline;
+				SendPacket(&outpack);
+				return;
+			}
+		}
+	}
+
+	SendPacket(&outpack);
 }
 
 void LoginServer::ProcessLSClientAuth(uint16_t opcode, EQ::Net::Packet &p) {
@@ -105,13 +126,6 @@ void LoginServer::ProcessLSClientAuth(uint16_t opcode, EQ::Net::Packet &p) {
 
 	try {
 		auto slsca = p.GetSerialize<ClientAuth_Struct>(0);
-
-		if (RuleI(World, AccountSessionLimit) >= 0) {
-			// Enforce the limit on the number of characters on the same account that can be
-			// online at the same time.
-			client_list.EnforceSessionLimit(slsca.lsaccount_id);
-		}
-
 		client_list.CLEAdd(slsca.lsaccount_id, slsca.name, slsca.key, slsca.worldadmin, slsca.ip, slsca.local);
 	}
 	catch (std::exception &ex) {

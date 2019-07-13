@@ -225,8 +225,6 @@ RULE_BOOL(World, MaxClientsSetByStatus, false) // If True, IP Limiting will be s
 RULE_BOOL(World, EnableIPExemptions, false) // If True, ip_exemptions table is used, if there is no entry for the IP it will default to RuleI(World, MaxClientsPerIP)
 RULE_BOOL(World, ClearTempMerchantlist, true) // Clears temp merchant items when world boots.
 RULE_BOOL(World, DeleteStaleCorpeBackups, true) // Deletes stale corpse backups older than 2 weeks.
-RULE_INT(World, AccountSessionLimit, -1) //Max number of characters allowed on at once from a single account (-1 is disabled)
-RULE_INT(World, ExemptAccountLimitStatus, -1) //Min status required to be exempt from multi-session per account limiting (-1 is disabled)
 RULE_BOOL(World, GMAccountIPList, false) // Check ip list against GM Accounts, AntiHack GM Accounts.
 RULE_INT(World, MinGMAntiHackStatus, 1) //Minimum GM status to check against AntiHack list
 RULE_INT(World, SoFStartZoneID, -1) //Sets the Starting Zone for SoF Clients separate from Titanium Clients (-1 is disabled)
@@ -241,10 +239,11 @@ RULE_BOOL (World, IPLimitDisconnectAll, false)
 RULE_BOOL(World, MaxClientsSimplifiedLogic, false) // New logic that only uses ExemptMaxClientsStatus and MaxClientsPerIP. Done on the loginserver. This mimics the P99-style special IP rules.
 RULE_INT (World, TellQueueSize, 20)
 RULE_BOOL(World, StartZoneSameAsBindOnCreation, true) //Should the start zone ALWAYS be the same location as your bind?
+RULE_BOOL(World, DisallowDuplicateAccountLogins, true)
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Zone)
-RULE_INT(Zone, ClientLinkdeadMS, 180000) //the time a client remains link dead on the server after a sudden disconnection
+RULE_INT(Zone, ClientLinkdeadMS, 90000) //the time a client remains link dead on the server after a sudden disconnection
 RULE_INT(Zone, GraveyardTimeMS, 1200000) //ms time until a player corpse is moved to a zone's graveyard, if one is specified for the zone
 RULE_BOOL(Zone, EnableShadowrest, 1) // enables or disables the shadowrest zone feature for player corpses. Default is turned on.
 RULE_BOOL(Zone, UsePlayerCorpseBackups, true) // Keeps backups of player corpses.
