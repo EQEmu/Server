@@ -409,12 +409,12 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		if (pack->size < sizeof(ServerChannelMessage_Struct))
 			break;
 		ServerChannelMessage_Struct* scm = (ServerChannelMessage_Struct*)pack->pBuffer;
-		if (scm->chan_num == 20)
+		if (scm->chan_num == ChatChannel_UCSRelay)
 		{
 			UCSLink.SendMessage(scm->from, scm->message);
 			break;
 		}
-		if (scm->chan_num == 7 || scm->chan_num == 14) {
+		if (scm->chan_num == ChatChannel_Tell || scm->chan_num == ChatChannel_TellEcho) {
 			if (scm->deliverto[0] == '*') {
 
 				if (console) {
@@ -486,7 +486,8 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				cle->Server()->SendPacket(pack);
 		}
 		else {
-			if (scm->chan_num == 5 || scm->chan_num == 6 || scm->chan_num == 11) {
+			if (scm->chan_num == ChatChannel_OOC || scm->chan_num == ChatChannel_Broadcast
+				|| scm->chan_num == ChatChannel_GMSAY) {
 				if (console) {
 					console->SendChannelMessage(scm, [&scm]() {
 						auto pack = new ServerPacket(ServerOP_ChannelMessage,

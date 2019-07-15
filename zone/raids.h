@@ -177,8 +177,8 @@ public:
 	void	SendHPManaEndPacketsFrom(Mob *mob);
 	void	SendManaPacketFrom(Mob *mob);
 	void	SendEndurancePacketFrom(Mob *mob);
-	void	RaidSay(const char *msg, Client *c);
-	void	RaidGroupSay(const char *msg, Client *c);
+	void	RaidSay(const char *msg, Client *c, uint8 language, uint8 lang_skill);
+	void	RaidGroupSay(const char *msg, Client *c, uint8 language, uint8 lang_skill);
 
 	//Packet Functions
 	void	SendRaidCreate(Client *to);

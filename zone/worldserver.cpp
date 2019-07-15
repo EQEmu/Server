@@ -200,28 +200,34 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			break;
 		ServerChannelMessage_Struct* scm = (ServerChannelMessage_Struct*)pack->pBuffer;
 		if (scm->deliverto[0] == 0) {
-			entity_list.ChannelMessageFromWorld(scm->from, scm->to, scm->chan_num, scm->guilddbid, scm->language, scm->message);
+			entity_list.ChannelMessageFromWorld(scm->from, scm->to, scm->chan_num, scm->guilddbid, scm->language, scm->lang_skill, scm->message);
 		}
 		else {
 			Client* client = entity_list.GetClientByName(scm->deliverto);
-			if (client) {
-				if (client->Connected()) {
+			if (client && client->Connected()) {
+				if (scm->chan_num == ChatChannel_TellEcho) {
 					if (scm->queued == 1) // tell was queued
 						client->Tell_StringID(QUEUED_TELL, scm->to, scm->message);
 					else if (scm->queued == 2) // tell queue was full
 						client->Tell_StringID(QUEUE_TELL_FULL, scm->to, scm->message);
 					else if (scm->queued == 3) // person was offline
 						client->Message_StringID(MT_TellEcho, TOLD_NOT_ONLINE, scm->to);
-					else // normal stuff
-						client->ChannelMessageSend(scm->from, scm->to, scm->chan_num, scm->language, scm->message);
-					if (!scm->noreply && scm->chan_num != 2) { //dont echo on group chat
-															   // if it's a tell, echo back so it shows up
-						scm->noreply = true;
-						scm->chan_num = 14;
+					else // normal tell echo "You told Soanso, 'something'"
+							// tell echo doesn't use language, so it looks normal to you even if nobody can understand your tells
+						client->ChannelMessageSend(scm->from, scm->to, scm->chan_num, 0, 100, scm->message);
+				}
+				else if (scm->chan_num == ChatChannel_Tell) {
+					client->ChannelMessageSend(scm->from, scm->to, scm->chan_num, scm->language, scm->lang_skill, scm->message);
+					if (scm->queued == 0) { // this is not a queued tell
+						// if it's a tell, echo back to acknowledge it and make it show on the sender's client
+						scm->chan_num = ChatChannel_TellEcho;
 						memset(scm->deliverto, 0, sizeof(scm->deliverto));
 						strcpy(scm->deliverto, scm->from);
 						SendPacket(pack);
 					}
+				}
+				else {
+					client->ChannelMessageSend(scm->from, scm->to, scm->chan_num, scm->language, scm->lang_skill, scm->message);
 				}
 			}
 		}
@@ -1352,7 +1358,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 							if (r->members[x].GroupNumber == rmsg->gid) {
 								if (r->members[x].member->GetFilter(FilterGroupChat) != 0)
 								{
-									r->members[x].member->ChannelMessageSend(rmsg->from, r->members[x].member->GetName(), 2, 0, rmsg->message);
+									r->members[x].member->ChannelMessageSend(rmsg->from, r->members[x].member->GetName(), ChatChannel_Group, rmsg->language, rmsg->lang_skill, rmsg->message);
 								}
 							}
 						}
@@ -1377,7 +1383,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 						{
 							if (r->members[x].member->GetFilter(FilterGroupChat) != 0)
 							{
-								r->members[x].member->ChannelMessageSend(rmsg->from, r->members[x].member->GetName(), 15, 0, rmsg->message);
+								r->members[x].member->ChannelMessageSend(rmsg->from, r->members[x].member->GetName(), ChatChannel_Raid, rmsg->language, rmsg->lang_skill, rmsg->message);
 							}
 						}
 					}
@@ -1950,7 +1956,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	}
 }
 
-bool WorldServer::SendChannelMessage(Client* from, const char* to, uint8 chan_num, uint32 guilddbid, uint8 language, const char* message, ...) {
+bool WorldServer::SendChannelMessage(Client* from, const char* to, uint8 chan_num, uint32 guilddbid, uint8 language, uint8 lang_skill, const char* message, ...) {
 	if (!worldserver.Connected())
 		return false;
 	va_list argptr;
@@ -1984,6 +1990,7 @@ bool WorldServer::SendChannelMessage(Client* from, const char* to, uint8 chan_nu
 	scm->chan_num = chan_num;
 	scm->guilddbid = guilddbid;
 	scm->language = language;
+	scm->lang_skill = lang_skill;
 	scm->queued = 0;
 	strcpy(scm->message, buffer);
 

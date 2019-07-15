@@ -1235,31 +1235,17 @@ void EntityList::ChannelMessage(Mob *from, uint8 chan_num, uint8 language,
 	while(it != client_list.end()) {
 		Client *client = it->second;
 		eqFilterType filter = FilterNone;
-		if (chan_num == 3) //shout
+		if (chan_num == ChatChannel_Shout) //shout
 			filter = FilterShouts;
-		else if (chan_num == 4) //auction
+		else if (chan_num == ChatChannel_Auction) //auction
 			filter = FilterAuctions;
 		//
 		// Only say is limited in range
-		if (chan_num != 8 || Distance(client->GetPosition(), from->GetPosition()) < 200)
+		if (chan_num != ChatChannel_Say || Distance(client->GetPosition(), from->GetPosition()) < 200)
 			if (filter == FilterNone || client->GetFilter(filter) != FilterHide)
 				client->ChannelMessageSend(from->GetName(), 0, chan_num, language, lang_skill, buffer);
 		++it;
 	}
-}
-
-void EntityList::ChannelMessageSend(Mob *to, uint8 chan_num, uint8 language, const char *message, ...)
-{
-	if (!to->IsClient())
-		return;
-	va_list argptr;
-	char buffer[4096];
-
-	va_start(argptr, message);
-	vsnprintf(buffer, 4096, message, argptr);
-	va_end(argptr);
-
-	to->CastToClient()->ChannelMessageSend(0, 0, chan_num, language, buffer);
 }
 
 void EntityList::SendZoneSpawns(Client *client)
@@ -1995,22 +1981,22 @@ Client *EntityList::GetClientByAccID(uint32 accid)
 }
 
 void EntityList::ChannelMessageFromWorld(const char *from, const char *to,
-		uint8 chan_num, uint32 guild_id, uint8 language, const char *message)
+		uint8 chan_num, uint32 guild_id, uint8 language, uint8 lang_skill, const char *message)
 {
 	for (auto it = client_list.begin(); it != client_list.end(); ++it) {
 		Client *client = it->second;
-		if (chan_num == 0) {
+		if (chan_num == ChatChannel_Guild) {
 			if (!client->IsInGuild(guild_id))
 				continue;
 			if (!guild_mgr.CheckPermission(guild_id, client->GuildRank(), GUILD_HEAR))
 				continue;
 			if (client->GetFilter(FilterGuildChat) == FilterHide)
 				continue;
-		} else if (chan_num == 5) {
+		} else if (chan_num == ChatChannel_OOC) {
 			if (client->GetFilter(FilterOOC) == FilterHide)
 				continue;
 		}
-		client->ChannelMessageSend(from, to, chan_num, language, message);
+		client->ChannelMessageSend(from, to, chan_num, language, lang_skill, message);
 	}
 }
 
@@ -3880,7 +3866,7 @@ void EntityList::GroupMessage(uint32 gid, const char *from, const char *message)
 			g = it->second->GetGroup();
 			if (g) {
 				if (g->GetID() == gid)
-					it->second->ChannelMessageSend(from, it->second->GetName(), 2, 0, message);
+					it->second->ChannelMessageSend(from, it->second->GetName(), ChatChannel_Group, 0, 100, message);
 			}
 		}
 		++it;
