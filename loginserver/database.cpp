@@ -62,7 +62,7 @@ Database::Database(
 		errbuf
 	)
 		) {
-		Log(Logs::General, Logs::Error, "Failed to connect to database: Error: %s", errbuf);
+		LogError("Failed to connect to database: Error: [{0}]", errbuf);
 		exit(1);
 	}
 	else {

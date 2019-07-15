@@ -46,7 +46,7 @@ bool Client::Process()
 	EQApplicationPacket *app = connection->PopPacket();
 	while (app) {
 		if (server.options.IsTraceOn()) {
-			Log(Logs::General, Logs::Netcode, "Application packet received from client (size %u)", app->Size());
+			LogDebug("Application packet received from client (size {0})", app->Size());
 		}
 
 		if (server.options.IsDumpInPacketsOn()) {
@@ -62,19 +62,19 @@ bool Client::Process()
 		switch (app->GetOpcode()) {
 			case OP_SessionReady: {
 				if (server.options.IsTraceOn()) {
-					LogInfo("Session ready received from client.");
+					LogInfo("Session ready received from client");
 				}
 				Handle_SessionReady((const char *) app->pBuffer, app->Size());
 				break;
 			}
 			case OP_Login: {
 				if (app->Size() < 20) {
-					LogError("Login received but it is too small, discarding.");
+					LogError("Login received but it is too small, discarding");
 					break;
 				}
 
 				if (server.options.IsTraceOn()) {
-					LogInfo("Login received from client.");
+					LogInfo("Login received from client");
 				}
 
 				Handle_Login((const char *) app->pBuffer, app->Size());
@@ -82,12 +82,12 @@ bool Client::Process()
 			}
 			case OP_ServerListRequest: {
 				if (app->Size() < 4) {
-					LogError("Server List Request received but it is too small, discarding.");
+					LogError("Server List Request received but it is too small, discarding");
 					break;
 				}
 
 				if (server.options.IsTraceOn()) {
-					LogDebug("Server list request received from client.");
+					LogDebug("Server list request received from client");
 				}
 
 				SendServerListPacket(*(uint32_t *) app->pBuffer);
@@ -95,7 +95,7 @@ bool Client::Process()
 			}
 			case OP_PlayEverquestRequest: {
 				if (app->Size() < sizeof(PlayEverquestRequest_Struct)) {
-					LogError("Play received but it is too small, discarding.");
+					LogError("Play received but it is too small, discarding");
 					break;
 				}
 
@@ -127,12 +127,12 @@ bool Client::Process()
 void Client::Handle_SessionReady(const char *data, unsigned int size)
 {
 	if (status != cs_not_sent_session_ready) {
-		LogError("Session ready received again after already being received.");
+		LogError("Session ready received again after already being received");
 		return;
 	}
 
 	if (size < sizeof(unsigned int)) {
-		LogError("Session ready was too small.");
+		LogError("Session ready was too small");
 		return;
 	}
 
@@ -210,7 +210,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 	std::string outbuffer;
 	outbuffer.resize(size - 12);
 	if (outbuffer.length() == 0) {
-		LogError("Corrupt buffer sent to server, no length.");
+		LogError("Corrupt buffer sent to server, no length");
 		return;
 	}
 
@@ -224,7 +224,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 
 	std::string user(&outbuffer[0]);
 	if (user.length() >= outbuffer.length()) {
-		LogError("Corrupt buffer sent to server, preventing buffer overflow.");
+		LogError("Corrupt buffer sent to server, preventing buffer overflow");
 		return;
 	}
 
@@ -306,7 +306,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 void Client::Handle_Play(const char *data)
 {
 	if (status != cs_logged_in) {
-		LogError("Client sent a play request when they were not logged in, discarding.");
+		LogError("Client sent a play request when they were not logged in, discarding");
 		return;
 	}
 
@@ -347,7 +347,7 @@ void Client::SendServerListPacket(uint32 seq)
 void Client::SendPlayResponse(EQApplicationPacket *outapp)
 {
 	if (server.options.IsTraceOn()) {
-		Log(Logs::General, Logs::Netcode, "Sending play response for %s.", GetAccountName().c_str());
+		LogDebug("Sending play response for {0}", GetAccountName());
 		// server_log->LogPacket(log_network_trace, (const char*)outapp->pBuffer, outapp->size);
 	}
 	connection->QueuePacket(outapp);

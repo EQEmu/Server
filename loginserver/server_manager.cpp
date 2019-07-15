@@ -77,10 +77,10 @@ ServerManager::ServerManager()
 			auto iter = world_servers.begin();
 			while (iter != world_servers.end()) {
 				if ((*iter)->GetConnection()->GetUUID() == c->GetUUID()) {
-					LogF(Logs::General,
-						 Logs::World_Server,
-						 "World server {0} has been disconnected, removing.",
-						 (*iter)->GetServerLongName().c_str());
+					LogInfo(
+						"World server {0} has been disconnected, removing.",
+						(*iter)->GetServerLongName()
+					);
 					world_servers.erase(iter);
 					return;
 				}

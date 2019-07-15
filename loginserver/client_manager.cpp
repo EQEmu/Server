@@ -28,7 +28,7 @@ extern bool        run_server;
 
 ClientManager::ClientManager()
 {
-	int titanium_port = server.config.GetVariableInt("Titanium", "port", 5998);
+	int titanium_port = server.config.GetVariableInt("client_configuration", "titanium_port", 5998);
 
 	EQStreamManagerInterfaceOptions titanium_opts(titanium_port, false, false);
 
@@ -36,14 +36,14 @@ ClientManager::ClientManager()
 	titanium_ops    = new RegularOpcodeManager;
 	if (!titanium_ops->LoadOpcodes(
 		server.config.GetVariableString(
-			"Titanium",
-			"opcodes",
+			"client_configuration",
+			"titanium_opcodes",
 			"login_opcodes.conf"
 		).c_str())) {
 
 		LogError(
 			"ClientManager fatal error: couldn't load opcodes for Titanium file [{0}]",
-			server.config.GetVariableString("Titanium", "opcodes", "login_opcodes.conf")
+			server.config.GetVariableString("client_configuration", "titanium_opcodes", "login_opcodes.conf")
 		);
 
 		run_server = false;
@@ -63,15 +63,22 @@ ClientManager::ClientManager()
 		}
 	);
 
-	int sod_port = server.config.GetVariableInt("SoD", "port", 5999);
+	int sod_port = server.config.GetVariableInt("client_configuration", "sod_port", 5999);
 
 	EQStreamManagerInterfaceOptions sod_opts(sod_port, false, false);
 	sod_stream = new EQ::Net::EQStreamManager(sod_opts);
 	sod_ops    = new RegularOpcodeManager;
-	if (!sod_ops->LoadOpcodes(server.config.GetVariableString("SoD", "opcodes", "login_opcodes.conf").c_str())) {
+	if (
+		!sod_ops->LoadOpcodes(
+			server.config.GetVariableString(
+				"client_configuration",
+				"sod_opcodes",
+				"login_opcodes.conf"
+			).c_str()
+		)) {
 		LogError(
 			"ClientManager fatal error: couldn't load opcodes for SoD file {0}",
-			server.config.GetVariableString("SoD", "opcodes", "login_opcodes.conf").c_str()
+			server.config.GetVariableString("client_configuration", "sod_opcodes", "login_opcodes.conf").c_str()
 		);
 
 		run_server = false;
@@ -118,7 +125,7 @@ void ClientManager::Process()
 	auto iter = clients.begin();
 	while (iter != clients.end()) {
 		if ((*iter)->Process() == false) {
-			Log(Logs::General, Logs::Debug, "Client had a fatal error and had to be removed from the login.");
+			LogWarning("Client had a fatal error and had to be removed from the login");
 			delete (*iter);
 			iter = clients.erase(iter);
 		}
@@ -134,7 +141,7 @@ void ClientManager::ProcessDisconnect()
 	while (iter != clients.end()) {
 		std::shared_ptr<EQStreamInterface> c = (*iter)->GetConnection();
 		if (c->CheckState(CLOSED)) {
-			LogInfo("Client disconnected from the server, removing client.");
+			LogInfo("Client disconnected from the server, removing client");
 			delete (*iter);
 			iter = clients.erase(iter);
 		}

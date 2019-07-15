@@ -55,13 +55,25 @@ int main(int argc, char** argv)
 	server.config = EQ::JsonConfigFile::Load("login.json");
 	LogInfo("Config System Init");
 
-	server.options.Trace(server.config.GetVariableBool("general", "trace", false));
-	server.options.WorldTrace(server.config.GetVariableBool("general", "world_trace", false));
-	server.options.DumpInPackets(server.config.GetVariableBool("general", "dump_packets_in", false));
-	server.options.DumpOutPackets(server.config.GetVariableBool("general", "dump_packets_out", false));
-	server.options.RejectDuplicateServers(server.config.GetVariableBool("general", "reject_duplicate_servers", false));
-	server.options.AutoCreateAccounts(server.config.GetVariableBool("general", "auto_create_accounts", true));
-	server.options.AutoLinkAccounts(server.config.GetVariableBool("general", "auto_link_accounts", false));
+	/**
+	 * options: logging
+	 */
+	server.options.Trace(server.config.GetVariableBool("logging", "trace", false));
+	server.options.WorldTrace(server.config.GetVariableBool("logging", "world_trace", false));
+	server.options.DumpInPackets(server.config.GetVariableBool("logging", "dump_packets_in", false));
+	server.options.DumpOutPackets(server.config.GetVariableBool("logging", "dump_packets_out", false));
+
+	/**
+	 * options: worldservers
+	 */
+	server.options.RejectDuplicateServers(server.config.GetVariableBool("worldservers", "reject_duplicate_servers", false));
+	server.options.AllowUnregistered(server.config.GetVariableBool("worldservers", "unregistered_allowed", true));
+
+	/**
+	 * options: account
+	 */
+	server.options.AutoCreateAccounts(server.config.GetVariableBool("account", "auto_create_accounts", true));
+	server.options.AutoLinkAccounts(server.config.GetVariableBool("account", "auto_link_accounts", false));
 
 #ifdef LSPX
 	server.options.EQEmuLoginServerAddress(
@@ -88,7 +100,6 @@ int main(int argc, char** argv)
 	server.options.EncryptionMode(server.config.GetVariableInt("security", "mode", 6));
 #endif
 
-	server.options.AllowUnregistered(server.config.GetVariableBool("security", "unregistered_allowed", true));
 	server.options.AllowTokenLogin(server.config.GetVariableBool("security", "allow_token_login", false));
 	server.options.AllowPasswordLogin(server.config.GetVariableBool("security", "allow_password_login", true));
 	server.options.UpdateInsecurePasswords(
@@ -177,18 +188,18 @@ int main(int argc, char** argv)
 
 	LoginserverCommandHandler::CommandHandler(argc, argv);
 
-	LogInfo("[Config] IsTraceOn [{0}]", server.options.IsTraceOn());
-	LogInfo("[Config] IsWorldTraceOn [{0}]", server.options.IsWorldTraceOn());
-	LogInfo("[Config] IsDumpInPacketsOn [{0}]", server.options.IsDumpInPacketsOn());
-	LogInfo("[Config] IsDumpOutPacketsOn [{0}]", server.options.IsDumpOutPacketsOn());
-	LogInfo("[Config] IsRejectingDuplicateServers [{0}]", server.options.IsRejectingDuplicateServers());
-	LogInfo("[Config] CanAutoCreateAccounts [{0}]", server.options.CanAutoCreateAccounts());
-	LogInfo("[Config] CanAutoLinkAccounts [{0}]", server.options.CanAutoLinkAccounts());
-	LogInfo("[Config] GetEncryptionMode [{0}]", server.options.GetEncryptionMode());
-	LogInfo("[Config] IsUnregisteredAllowed [{0}]", server.options.IsUnregisteredAllowed());
-	LogInfo("[Config] IsTokenLoginAllowed [{0}]", server.options.IsTokenLoginAllowed());
-	LogInfo("[Config] IsPasswordLoginAllowed [{0}]", server.options.IsPasswordLoginAllowed());
-	LogInfo("[Config] IsUpdatingInsecurePasswords [{0}]", server.options.IsUpdatingInsecurePasswords());
+	LogInfo("[Config] [Logging] IsTraceOn [{0}]", server.options.IsTraceOn());
+	LogInfo("[Config] [Logging] IsWorldTraceOn [{0}]", server.options.IsWorldTraceOn());
+	LogInfo("[Config] [Logging] IsDumpInPacketsOn [{0}]", server.options.IsDumpInPacketsOn());
+	LogInfo("[Config] [Logging] IsDumpOutPacketsOn [{0}]", server.options.IsDumpOutPacketsOn());
+	LogInfo("[Config] [Account] CanAutoCreateAccounts [{0}]", server.options.CanAutoCreateAccounts());
+	LogInfo("[Config] [Account] CanAutoLinkAccounts [{0}]", server.options.CanAutoLinkAccounts());
+	LogInfo("[Config] [WorldServer] IsRejectingDuplicateServers [{0}]", server.options.IsRejectingDuplicateServers());
+	LogInfo("[Config] [WorldServer] IsUnregisteredAllowed [{0}]", server.options.IsUnregisteredAllowed());
+	LogInfo("[Config] [Security] GetEncryptionMode [{0}]", server.options.GetEncryptionMode());
+	LogInfo("[Config] [Security] IsTokenLoginAllowed [{0}]", server.options.IsTokenLoginAllowed());
+	LogInfo("[Config] [Security] IsPasswordLoginAllowed [{0}]", server.options.IsPasswordLoginAllowed());
+	LogInfo("[Config] [Security] IsUpdatingInsecurePasswords [{0}]", server.options.IsUpdatingInsecurePasswords());
 
 	while (run_server) {
 		Timer::SetCurrentTime();

@@ -95,11 +95,11 @@ void WorldServer::Reset()
 void WorldServer::ProcessNewLSInfo(uint16_t opcode, const EQ::Net::Packet &packet)
 {
 	if (server.options.IsWorldTraceOn()) {
-		Log(Logs::General,
-			Logs::Netcode,
-			"Application packet received from server: 0x%.4X, (size %u)",
+		LogDebug(
+			"Application packet received from server: {0}, (size {1})",
 			opcode,
-			packet.Length());
+			packet.Length()
+		);
 	}
 
 	if (server.options.IsDumpInPacketsOn()) {
@@ -189,11 +189,11 @@ void WorldServer::ProcessLSStatus(uint16_t opcode, const EQ::Net::Packet &packet
 void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Net::Packet &packet)
 {
 	if (server.options.IsWorldTraceOn()) {
-		Log(Logs::General,
-			Logs::Netcode,
-			"Application packet received from server: 0x%.4X, (size %u)",
+		LogDebug(
+			"Application packet received from server: {0}, (size {1})",
 			opcode,
-			packet.Length());
+			packet.Length()
+		);
 	}
 
 	if (server.options.IsDumpInPacketsOn()) {
@@ -213,7 +213,7 @@ void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Ne
 	//Because this is a part of the client login procedure it makes tracking client errors
 	//While keeping world server spam with multiple servers connected almost impossible.
 	if (server.options.IsTraceOn()) {
-		Log(Logs::General, Logs::Netcode, "User-To-World Response received");
+		LogDebug("User-To-World Response received");
 	}
 
 	auto *user_to_world_response = (UsertoWorldResponseLegacy_Struct *) packet.Data();
@@ -266,16 +266,17 @@ void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Ne
 				break;
 		}
 
-		LogF(Logs::General,
-			 Logs::Netcode,
-			 "Sending play response: allowed [{0}] sequence [{1}] server number [{2}] message [{3}]",
-			 per->Allowed,
-			 per->Sequence,
-			 per->ServerNumber,
-			 per->Message
-		);
+		if (server.options.IsWorldTraceOn()) {
+			LogDebug(
+				"Sending play response: allowed [{0}] sequence [{1}] server number [{2}] message [{3}]",
+				per->Allowed,
+				per->Sequence,
+				per->ServerNumber,
+				per->Message
+			);
 
-		Log(Logs::General, Logs::Netcode, "[Size: %u] %s", outapp->size, DumpPacketToString(outapp).c_str());
+			LogDebug("[Size: {0}] {1}", outapp->size, DumpPacketToString(outapp));
+		}
 
 		if (server.options.IsDumpOutPacketsOn()) {
 			DumpPacket(outapp);
@@ -299,11 +300,11 @@ void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Ne
 void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Packet &packet)
 {
 	if (server.options.IsWorldTraceOn()) {
-		Log(Logs::General,
-			Logs::Netcode,
+		LogDebug(
 			"Application packet received from server: 0x%.4X, (size %u)",
 			opcode,
-			packet.Length());
+			packet.Length()
+		);
 	}
 
 	if (server.options.IsDumpInPacketsOn()) {
@@ -323,7 +324,7 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 	//Because this is a part of the client login procedure it makes tracking client errors
 	//While keeping world server spam with multiple servers connected almost impossible.
 	if (server.options.IsTraceOn()) {
-		Log(Logs::General, Logs::Netcode, "User-To-World Response received");
+		LogDebug("User-To-World Response received");
 	}
 
 	auto user_to_world_response = (UsertoWorldResponse_Struct *) packet.Data();
@@ -355,7 +356,7 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 			client->GetPlayServerID()
 		);
 
-		Log(Logs::General, Logs::Netcode, "[Size: %u] %s", outapp->size, DumpPacketToString(outapp).c_str());
+		LogDebug("[Size: {0}] {1}", outapp->size, DumpPacketToString(outapp));
 
 		if (user_to_world_response->response > 0) {
 			per->Allowed = 1;
@@ -387,14 +388,14 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 		}
 
 		if (server.options.IsTraceOn()) {
-			Log(Logs::General,
-				Logs::Netcode,
-				"Sending play response with following data, allowed %u, sequence %u, server number %u, message %u",
+			LogDebug(
+				"Sending play response with following data, allowed {0}, sequence {1}, server number {2}, message {3}",
 				per->Allowed,
 				per->Sequence,
 				per->ServerNumber,
-				per->Message);
-			Log(Logs::General, Logs::Netcode, "[Size: %u] %s", outapp->size, DumpPacketToString(outapp).c_str());
+				per->Message
+			);
+			LogDebug("[Size: {0}] {1}", outapp->size, DumpPacketToString(outapp));
 		}
 
 		if (server.options.IsDumpOutPacketsOn()) {
@@ -419,11 +420,11 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 void WorldServer::ProcessLSAccountUpdate(uint16_t opcode, const EQ::Net::Packet &packet)
 {
 	if (server.options.IsWorldTraceOn()) {
-		Log(Logs::General,
-			Logs::Netcode,
-			"Application packet received from server: 0x%.4X, (size %u)",
+		LogDebug(
+			"Application packet received from server: {0}, (size {1})",
 			opcode,
-			packet.Length());
+			packet.Length()
+		);
 	}
 
 	if (server.options.IsDumpInPacketsOn()) {
@@ -439,7 +440,9 @@ void WorldServer::ProcessLSAccountUpdate(uint16_t opcode, const EQ::Net::Packet 
 		return;
 	}
 
-	Log(Logs::General, Logs::Netcode, "ServerOP_LSAccountUpdate packet received from: %s", short_name.c_str());
+	if (server.options.IsWorldTraceOn()) {
+		LogDebug("ServerOP_LSAccountUpdate packet received from [{0}]", short_name);
+	}
 
 	auto *loginserver_update = (ServerLSAccountUpdate_Struct *) packet.Data();
 	if (IsServerTrusted()) {
@@ -756,12 +759,12 @@ bool WorldServer::HandleNewLoginserverRegisteredOnly(
 
 			bool does_world_server_pass_authentication_check = (
 				world_registration.server_admin_account_name == this->GetAccountName() &&
-					eqcrypt_verify_hash(
-						GetAccountName(),
-						GetAccountPassword(),
-						world_registration.server_admin_account_password,
-						server.options.GetEncryptionMode()
-					)
+				eqcrypt_verify_hash(
+					GetAccountName(),
+					GetAccountPassword(),
+					world_registration.server_admin_account_password,
+					server.options.GetEncryptionMode()
+				)
 			);
 
 			this
@@ -847,12 +850,12 @@ bool WorldServer::HandleNewLoginserverInfoUnregisteredAllowed(
 
 		bool does_world_server_pass_authentication_check = (
 			world_registration.server_admin_account_name == this->GetAccountName() &&
-				eqcrypt_verify_hash(
-					GetAccountName(),
-					GetAccountPassword(),
-					world_registration.server_admin_account_password,
-					server.options.GetEncryptionMode()
-				)
+			eqcrypt_verify_hash(
+				GetAccountName(),
+				GetAccountPassword(),
+				world_registration.server_admin_account_password,
+				server.options.GetEncryptionMode()
+			)
 		);
 
 		bool does_world_server_have_non_empty_credentials = (

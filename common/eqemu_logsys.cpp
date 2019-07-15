@@ -317,6 +317,8 @@ std::string EQEmuLogSys::GetLinuxConsoleColorFromCategory(uint16 log_category)
 		case Logs::Normal:
 			return LC_YELLOW;
 		case Logs::MySQLError:
+		case Logs::Warning:
+		case Logs::Critical:
 		case Logs::Error:
 			return LC_RED;
 		case Logs::MySQLQuery:
