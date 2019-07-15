@@ -257,7 +257,7 @@ namespace EQ
 				resend_delay_min = 150;
 				resend_delay_max = 5000;
 				connect_delay_ms = 500;
-				stale_connection_ms = 90000;
+				stale_connection_ms = 30000;
 				connect_stale_ms = 5000;
 				crc_length = 2;
 				max_packet_size = 512;
@@ -269,7 +269,7 @@ namespace EQ
 				simulated_in_packet_loss = 0;
 				simulated_out_packet_loss = 0;
 				tic_rate_hertz = 60.0;
-				resend_timeout = 90000;
+				resend_timeout = 30000;
 				connection_close_time = 2000;
 				outgoing_data_rate = 0.0;
 			}
