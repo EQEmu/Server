@@ -560,9 +560,8 @@ bool Client::Process() {
 		OnDisconnect(true);
 		Log(Logs::General, Logs::Zone_Server, "Client linkdead: %s", name);
 
-		if (GetGM()) {
-			if (GetMerc())
-			{
+		if (Admin() > 100) {
+			if (GetMerc()) {
 				GetMerc()->Save();
 				GetMerc()->Depop();
 			}

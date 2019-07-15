@@ -64,9 +64,9 @@ namespace LoginserverWebserver {
 		api.Post(
 			"/account/create", [](const httplib::Request &request, httplib::Response &res) {
 				LoginserverWebserver::TokenManager::AuthCanWrite(request, res);
-				Json::Value request_body    = LoginserverWebserver::ParseRequestBody(request);
-				std::string username        = request_body.get("username", "").asString();
-				std::string password        = request_body.get("password", "").asString();
+				Json::Value request_body = LoginserverWebserver::ParseRequestBody(request);
+				std::string username     = request_body.get("username", "").asString();
+				std::string password     = request_body.get("password", "").asString();
 
 				Json::Value response;
 				if (username.empty() || password.empty()) {
@@ -137,7 +137,7 @@ namespace LoginserverWebserver {
 			user_token = LoginserverWebserver::TokenManager::CheckApiAuthorizationHeaders(request);
 
 		if (!user_token.can_read) {
-			Json::Value response;
+			Json::Value       response;
 			std::stringstream response_payload;
 			response["message"] = "Authorization token is either invalid or cannot read!";
 			response_payload << response;
@@ -165,7 +165,7 @@ namespace LoginserverWebserver {
 			user_token = LoginserverWebserver::TokenManager::CheckApiAuthorizationHeaders(request);
 
 		if (!user_token.can_write) {
-			Json::Value response;
+			Json::Value       response;
 			std::stringstream response_payload;
 			response["message"] = "Authorization token is either invalid or cannot write!";
 			response_payload << response;
