@@ -193,7 +193,9 @@ int main(int argc, char** argv)
 	LogInfo("[Config] [Logging] IsDumpInPacketsOn [{0}]", server.options.IsDumpInPacketsOn());
 	LogInfo("[Config] [Logging] IsDumpOutPacketsOn [{0}]", server.options.IsDumpOutPacketsOn());
 	LogInfo("[Config] [Account] CanAutoCreateAccounts [{0}]", server.options.CanAutoCreateAccounts());
+#ifdef LSPX
 	LogInfo("[Config] [Account] CanAutoLinkAccounts [{0}]", server.options.CanAutoLinkAccounts());
+#endif
 	LogInfo("[Config] [WorldServer] IsRejectingDuplicateServers [{0}]", server.options.IsRejectingDuplicateServers());
 	LogInfo("[Config] [WorldServer] IsUnregisteredAllowed [{0}]", server.options.IsUnregisteredAllowed());
 	LogInfo("[Config] [Security] GetEncryptionMode [{0}]", server.options.GetEncryptionMode());

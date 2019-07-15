@@ -171,13 +171,15 @@ void WorldServer::ProcessLSStatus(uint16_t opcode, const EQ::Net::Packet &packet
 
 	auto *ls_status = (ServerLSStatus_Struct *) packet.Data();
 
-	LogDebug(
-		"World Server Status Update Received | Server [{0}] Status [{1}] Players [{2}] Zones [{3}]",
-		this->GetServerLongName(),
-		ls_status->status,
-		ls_status->num_players,
-		ls_status->num_zones
-	);
+	if (server.options.IsWorldTraceOn()) {
+		LogDebug(
+			"World Server Status Update Received | Server [{0}] Status [{1}] Players [{2}] Zones [{3}]",
+			this->GetServerLongName(),
+			ls_status->status,
+			ls_status->num_players,
+			ls_status->num_zones
+		);
+	}
 
 	Handle_LSStatus(ls_status);
 }
