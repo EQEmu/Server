@@ -352,7 +352,8 @@ struct ServerChannelMessage_Struct {
 	bool noreply;
 	uint16 chan_num;
 	uint32 guilddbid;
-	uint16 language;
+	uint8 language;
+	uint8 lang_skill;
 	uint8 queued; // 0 = not queued, 1 = queued, 2 = queue full, 3 = offline
 	char message[0];
 };
@@ -865,6 +866,8 @@ struct ServerRaidGroupAction_Struct { //add / remove depends on opcode.
 struct ServerRaidMessage_Struct {
 	uint32 rid;
 	uint32 gid;
+	uint8 language;
+	uint8 lang_skill;
 	char from[64];
 	char message[0];
 };

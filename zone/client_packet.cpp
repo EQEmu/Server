@@ -4181,7 +4181,12 @@ void Client::Handle_OP_ChannelMessage(const EQApplicationPacket *app)
 		return;
 	}
 
-	ChannelMessageReceived(cm->chan_num, cm->language, cm->skill_in_language, cm->message, cm->targetname);
+	uint8 skill_in_language = 100;
+	if (cm->language < MAX_PP_LANGUAGE)
+	{
+		skill_in_language = m_pp.languages[cm->language];
+	}
+	ChannelMessageReceived(cm->chan_num, cm->language, skill_in_language, cm->message, cm->targetname);
 	return;
 }
 
