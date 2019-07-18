@@ -87,6 +87,7 @@ typedef enum {
 	_eaMaxAppearance
 } EmuAppearance;
 
+#define MT_NPCQuestSay			10
 // msg_type's for custom usercolors
 #define MT_Say					256
 #define MT_Tell					257

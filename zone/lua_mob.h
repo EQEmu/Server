@@ -169,6 +169,7 @@ public:
 	void Message_StringID(int type, int string_id, uint32 distance);
 	void Say(const char *message);
 	void QuestSay(Lua_Client client, const char *message);
+	void QuestSay(Lua_Client client, const char *message, luabind::adl::object opts);
 	void Shout(const char *message);
 	void Emote(const char *message);
 	void InterruptSpell();
