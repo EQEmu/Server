@@ -2366,7 +2366,7 @@ luabind::scope lua_register_ruleb() {
 }
 
 luabind::scope lua_register_journal_speakmode() {
-	return luabind::class_<Journal_SpeakMode>("Journal_SpeakMode")
+	return luabind::class_<Journal_SpeakMode>("SpeakMode")
 		.enum_("constants")
 		[
 			luabind::value("Raw", static_cast<int>(Journal::SpeakMode::Raw)),
@@ -2379,7 +2379,7 @@ luabind::scope lua_register_journal_speakmode() {
 }
 
 luabind::scope lua_register_journal_mode() {
-	return luabind::class_<Journal_Mode>("Journal_Mode")
+	return luabind::class_<Journal_Mode>("JournalMode")
 		.enum_("constants")
 		[
 			luabind::value("None", static_cast<int>(Journal::Mode::None)),
