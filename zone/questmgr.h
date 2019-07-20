@@ -62,8 +62,7 @@ public:
 
 	//quest functions
 	void echo(int colour, const char *str);
-	void say(const char *str);
-	void say(const char *str, uint8 language);
+	void say(const char *str, Journal::Options &opts);
 	void me(const char *str);
 	void summonitem(uint32 itemid, int16 charges = -1);
 	void write(const char *file, const char *str);

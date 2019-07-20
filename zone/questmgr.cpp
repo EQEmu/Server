@@ -154,30 +154,19 @@ void QuestManager::echo(int colour, const char *str) {
 	entity_list.MessageClose(initiator, false, 200, colour, str);
 }
 
-void QuestManager::say(const char *str) {
+void QuestManager::say(const char *str, Journal::Options &opts) {
 	QuestManagerCurrentQuestVars();
 	if (!owner) {
 		Log(Logs::General, Logs::Quests, "QuestManager::say called with nullptr owner. Probably syntax error in quest file.");
 		return;
 	}
 	else {
-		if(RuleB(NPC, EnableNPCQuestJournal) && initiator) {
-			owner->QuestJournalledSay(initiator, str);
+		if (!RuleB(NPC, EnableNPCQuestJournal))
+			opts.journal_mode = Journal::Mode::None;
+		if (initiator) {
+			opts.target_spawn_id = initiator->GetID();
+			owner->QuestJournalledSay(initiator, str, opts);
 		}
-		else {
-			owner->Say(str);
-		}
-	}
-}
-
-void QuestManager::say(const char *str, uint8 language) {
-	QuestManagerCurrentQuestVars();
-	if (!owner) {
-		Log(Logs::General, Logs::Quests, "QuestManager::say called with nullptr owner. Probably syntax error in quest file.");
-		return;
-	}
-	else {
-		entity_list.ChannelMessage(owner, 8, language, str);
 	}
 }
 

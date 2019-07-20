@@ -1277,21 +1277,19 @@ void Client::Message(uint32 type, const char* message, ...) {
 	vsnprintf(buffer, 4096, message, argptr);
 	va_end(argptr);
 
-	size_t len = strlen(buffer);
+	SerializeBuffer buf(sizeof(SpecialMesgHeader_Struct) + 12 + 64 + 64);
+	buf.WriteInt8(static_cast<int8>(Journal::SpeakMode::Raw));
+	buf.WriteInt8(static_cast<int8>(Journal::Mode::None));
+	buf.WriteInt8(0); // language
+	buf.WriteUInt32(type);
+	buf.WriteUInt32(0); // target spawn ID used for journal filtering, ignored here
+	buf.WriteString(""); // send name, not applicable here
+	buf.WriteInt32(0); // location, client seems to ignore
+	buf.WriteInt32(0);
+	buf.WriteInt32(0);
+	buf.WriteString(buffer);
 
-	//client dosent like our packet all the time unless
-	//we make it really big, then it seems to not care that
-	//our header is malformed.
-	//len = 4096 - sizeof(SpecialMesg_Struct);
-
-	uint32 len_packet = sizeof(SpecialMesg_Struct)+len;
-	auto app = new EQApplicationPacket(OP_SpecialMesg, len_packet);
-	SpecialMesg_Struct* sm=(SpecialMesg_Struct*)app->pBuffer;
-	sm->header[0] = 0x00; // Header used for #emote style messages..
-	sm->header[1] = 0x00; // Play around with these to see other types
-	sm->header[2] = 0x00;
-	sm->msg_type = type;
-	memcpy(sm->message, buffer, len+1);
+	auto app = new EQApplicationPacket(OP_SpecialMesg, buf);
 
 	FastQueuePacket(&app);
 
@@ -1308,65 +1306,23 @@ void Client::FilteredMessage(Mob *sender, uint32 type, eqFilterType filter, cons
 	vsnprintf(buffer, 4096, message, argptr);
 	va_end(argptr);
 
-	size_t len = strlen(buffer);
+	SerializeBuffer buf(sizeof(SpecialMesgHeader_Struct) + 12 + 64 + 64);
+	buf.WriteInt8(static_cast<int8>(Journal::SpeakMode::Raw));
+	buf.WriteInt8(static_cast<int8>(Journal::Mode::None));
+	buf.WriteInt8(0); // language
+	buf.WriteUInt32(type);
+	buf.WriteUInt32(0); // target spawn ID used for journal filtering, ignored here
+	buf.WriteString(""); // send name, not applicable here
+	buf.WriteInt32(0); // location, client seems to ignore
+	buf.WriteInt32(0);
+	buf.WriteInt32(0);
+	buf.WriteString(buffer);
 
-	//client dosent like our packet all the time unless
-	//we make it really big, then it seems to not care that
-	//our header is malformed.
-	//len = 4096 - sizeof(SpecialMesg_Struct);
-
-	uint32 len_packet = sizeof(SpecialMesg_Struct) + len;
-	auto app = new EQApplicationPacket(OP_SpecialMesg, len_packet);
-	SpecialMesg_Struct* sm = (SpecialMesg_Struct*)app->pBuffer;
-	sm->header[0] = 0x00; // Header used for #emote style messages..
-	sm->header[1] = 0x00; // Play around with these to see other types
-	sm->header[2] = 0x00;
-	sm->msg_type = type;
-	memcpy(sm->message, buffer, len + 1);
+	auto app = new EQApplicationPacket(OP_SpecialMesg, buf);
 
 	FastQueuePacket(&app);
 
 	safe_delete_array(buffer);
-}
-
-void Client::QuestJournalledMessage(const char *npcname, const char* message) {
-
-	// npcnames longer than 60 characters crash the client when they log back in
-	const int MaxNPCNameLength = 60;
-	// I assume there is an upper safe limit on the message length. Don't know what it is, but 4000 doesn't crash
-	// the client.
-	const int MaxMessageLength = 4000;
-
-	char OutNPCName[MaxNPCNameLength+1];
-	char OutMessage[MaxMessageLength+1];
-
-	// Apparently Visual C++ snprintf is not C99 compliant and doesn't put the null terminator
-	// in if the formatted string >= the maximum length, so we put it in.
-	//
-	snprintf(OutNPCName, MaxNPCNameLength, "%s", npcname); OutNPCName[MaxNPCNameLength]='\0';
-	snprintf(OutMessage, MaxMessageLength, "%s", message); OutMessage[MaxMessageLength]='\0';
-
-	uint32 len_packet = sizeof(SpecialMesg_Struct) + strlen(OutNPCName) + strlen(OutMessage);
-	auto app = new EQApplicationPacket(OP_SpecialMesg, len_packet);
-	SpecialMesg_Struct* sm=(SpecialMesg_Struct*)app->pBuffer;
-
-	sm->header[0] = 0;
-	sm->header[1] = 2;
-	sm->header[2] = 0;
-	sm->msg_type = 0x0a;
-	sm->target_spawn_id = GetID();
-
-	char *dest = &sm->sayer[0];
-
-	memcpy(dest, OutNPCName, strlen(OutNPCName) + 1);
-
-	dest = dest + strlen(OutNPCName) + 13;
-
-	memcpy(dest, OutMessage, strlen(OutMessage) + 1);
-
-	QueuePacket(app);
-
-	safe_delete(app);
 }
 
 void Client::SetMaxHP() {

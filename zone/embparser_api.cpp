@@ -155,12 +155,31 @@ XS(XS__say); // prototype to pass -Wmissing-prototypes
 XS(XS__say) {
 	dXSARGS;
 
-	if (items == 1)
-		quest_manager.say(SvPV_nolen(ST(0)));
-	else if (items == 2)
-		quest_manager.say(SvPV_nolen(ST(0)), (int) SvIV(ST(1)));
-	else
-		Perl_croak(aTHX_ "Usage: quest::say(string message, int language_id])");
+	Journal::Options opts;
+	// we currently default to these
+	opts.speak_mode = Journal::SpeakMode::Say;
+	opts.journal_mode = Journal::Mode::Log2;
+	opts.language = 0;
+	opts.message_type = MT_NPCQuestSay;
+	if (items == 0 || items > 5) {
+		Perl_croak(aTHX_ "Usage: quest::say(string message, [int language_id], [int message_type], [int speak_mode], [int journal_mode])");
+	} else if (items == 2) {
+		opts.language = (int)SvIV(ST(1));
+	} else if (items == 3) {
+		opts.language = (int)SvIV(ST(1));
+		opts.message_type = (int)SvIV(ST(2));
+	} else if (items == 4) {
+		opts.language = (int)SvIV(ST(1));
+		opts.message_type = (int)SvIV(ST(2));
+		opts.speak_mode = (Journal::SpeakMode)SvIV(ST(3));
+	} else if (items == 5) {
+		opts.language = (int)SvIV(ST(1));
+		opts.message_type = (int)SvIV(ST(2));
+		opts.speak_mode = (Journal::SpeakMode)SvIV(ST(3));
+		opts.journal_mode = (Journal::Mode)SvIV(ST(4));
+	}
+
+	quest_manager.say(SvPV_nolen(ST(0)), opts);
 
 	XSRETURN_EMPTY;
 }
