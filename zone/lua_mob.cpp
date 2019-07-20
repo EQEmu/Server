@@ -753,6 +753,11 @@ void Lua_Mob::Say(const char *message) {
 	self->Say(message);
 }
 
+void Lua_Mob::Say(const char* message, int language) {
+	Lua_Safe_Call_Void();
+	entity_list.ChannelMessage(self, ChatChannel_Say, language, message); // these run through the client channels and probably shouldn't for NPCs, but oh well
+}
+
 void Lua_Mob::QuestSay(Lua_Client client, const char *message) {
 	Lua_Safe_Call_Void();
 	Journal::Options journal_opts;
@@ -819,6 +824,11 @@ void Lua_Mob::QuestSay(Lua_Client client, const char *message, luabind::adl::obj
 void Lua_Mob::Shout(const char *message) {
 	Lua_Safe_Call_Void();
 	self->Shout(message);
+}
+
+void Lua_Mob::Shout(const char* message, int language) {
+	Lua_Safe_Call_Void();
+	entity_list.ChannelMessage(self, ChatChannel_Shout, language, message);
 }
 
 void Lua_Mob::Emote(const char *message) {
@@ -2377,10 +2387,12 @@ luabind::scope lua_register_mob() {
 		.def("GetSize", &Lua_Mob::GetSize)
 		.def("Message", &Lua_Mob::Message)
 		.def("Message_StringID", &Lua_Mob::Message_StringID)
-		.def("Say", &Lua_Mob::Say)
+		.def("Say", (void(Lua_Mob::*)(const char*))& Lua_Mob::Say)
+		.def("Say", (void(Lua_Mob::*)(const char*, int))& Lua_Mob::Say)
 		.def("QuestSay", (void(Lua_Mob::*)(Lua_Client,const char *))&Lua_Mob::QuestSay)
 		.def("QuestSay", (void(Lua_Mob::*)(Lua_Client,const char *,luabind::adl::object))&Lua_Mob::QuestSay)
-		.def("Shout", &Lua_Mob::Shout)
+		.def("Shout", (void(Lua_Mob::*)(const char*))& Lua_Mob::Shout)
+		.def("Shout", (void(Lua_Mob::*)(const char*, int))& Lua_Mob::Shout)
 		.def("Emote", &Lua_Mob::Emote)
 		.def("InterruptSpell", (void(Lua_Mob::*)(void))&Lua_Mob::InterruptSpell)
 		.def("InterruptSpell", (void(Lua_Mob::*)(int))&Lua_Mob::InterruptSpell)
