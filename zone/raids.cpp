@@ -446,7 +446,7 @@ uint32 Raid::GetGroup(Client *c)
 	return 0xFFFFFFFF;
 }
 
-void Raid::RaidSay(const char *msg, Client *c)
+void Raid::RaidSay(const char *msg, Client *c, uint8 language, uint8 lang_skill)
 {
 	if(!c)
 		return;
@@ -455,6 +455,8 @@ void Raid::RaidSay(const char *msg, Client *c)
 	ServerRaidMessage_Struct *rga = (ServerRaidMessage_Struct*)pack->pBuffer;
 	rga->rid = GetID();
 	rga->gid = 0xFFFFFFFF;
+	rga->language = language;
+	rga->lang_skill = lang_skill;
 	strn0cpy(rga->from, c->GetName(), 64);
 
 	strcpy(rga->message, msg); // this is safe because we are allocating enough space for the entire msg above
@@ -463,7 +465,7 @@ void Raid::RaidSay(const char *msg, Client *c)
 	safe_delete(pack);
 }
 
-void Raid::RaidGroupSay(const char *msg, Client *c)
+void Raid::RaidGroupSay(const char *msg, Client *c, uint8 language, uint8 lang_skill)
 {
 	if(!c)
 		return;
@@ -477,6 +479,8 @@ void Raid::RaidGroupSay(const char *msg, Client *c)
 	ServerRaidMessage_Struct *rga = (ServerRaidMessage_Struct*)pack->pBuffer;
 	rga->rid = GetID();
 	rga->gid = groupToUse;
+	rga->language = language;
+	rga->lang_skill = lang_skill;
 	strn0cpy(rga->from, c->GetName(), 64);
 
 	strcpy(rga->message, msg); // this is safe because we are allocating enough space for the entire msg above

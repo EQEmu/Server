@@ -887,7 +887,7 @@ void command_chat(Client *c, const Seperator *sep)
 	if (sep->arg[2][0] == 0)
 		c->Message(0, "Usage: #chat [channum] [message]");
 	else
-		if (!worldserver.SendChannelMessage(0, 0, (uint8) atoi(sep->arg[1]), 0, 0, sep->argplus[2]))
+		if (!worldserver.SendChannelMessage(0, 0, (uint8) atoi(sep->arg[1]), 0, 0, 100, sep->argplus[2]))
 			c->Message(0, "Error: World server disconnected");
 }
 
@@ -2808,7 +2808,7 @@ void command_level(Client *c, const Seperator *sep)
 	if ((level <= 0) || ((level > RuleI(Character, MaxLevel)) && (c->Admin() < commandLevelAboveCap))) {
 		c->Message(0, "Error: #Level: Invalid Level");
 	}
-	else if (c->Admin() < 100) {
+	else if (c->Admin() < RuleI(GM, MinStatusToLevelTarget)) {
 		c->SetLevel(level, true);
 #ifdef BOTS
 		if(RuleB(Bots, BotLevelsWithOwner))

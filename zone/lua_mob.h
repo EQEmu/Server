@@ -168,8 +168,11 @@ public:
 	void Message(int type, const char *message);
 	void Message_StringID(int type, int string_id, uint32 distance);
 	void Say(const char *message);
+	void Say(const char* message, int language);
 	void QuestSay(Lua_Client client, const char *message);
+	void QuestSay(Lua_Client client, const char *message, luabind::adl::object opts);
 	void Shout(const char *message);
+	void Shout(const char* message, int language);
 	void Emote(const char *message);
 	void InterruptSpell();
 	void InterruptSpell(int spell_id);

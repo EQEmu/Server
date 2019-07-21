@@ -823,7 +823,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 	{
 		if(strcmp(targetname, "discard") != 0)
 		{
-			if(chan_num == 3 || chan_num == 4 || chan_num == 5 || chan_num == 7)
+			if(chan_num == ChatChannel_Shout || chan_num == ChatChannel_Auction || chan_num == ChatChannel_OOC || chan_num == ChatChannel_Tell)
 			{
 				if(GlobalChatLimiterTimer)
 				{
@@ -869,7 +869,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		auto pack = new ServerPacket(ServerOP_Speech, sizeof(Server_Speech_Struct) + strlen(message) + 1);
 		Server_Speech_Struct* sem = (Server_Speech_Struct*) pack->pBuffer;
 
-		if(chan_num == 0)
+		if(chan_num == ChatChannel_Guild)
 			sem->guilddbid = GuildID();
 		else
 			sem->guilddbid = 0;
@@ -892,30 +892,38 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 	if(!mod_client_message(message, chan_num)) { return; }
 
 	// Garble the message based on drunkness
-	if (m_pp.intoxication > 0) {
+	if (m_pp.intoxication > 0 && !(RuleB(Chat, ServerWideOOC) && chan_num == ChatChannel_OOC) && !GetGM()) {
 		GarbleMessage(message, (int)(m_pp.intoxication / 3));
 		language = 0; // No need for language when drunk
+		lang_skill = 100;
+	}
+
+	// some channels don't use languages
+	if (chan_num == ChatChannel_OOC || chan_num == ChatChannel_GMSAY || chan_num == ChatChannel_Broadcast || chan_num == ChatChannel_Petition)
+	{
+		language = 0;
+		lang_skill = 100;
 	}
 
 	// Censor the message
-	if (EQEmu::ProfanityManager::IsCensorshipActive() && (chan_num != 8))
+	if (EQEmu::ProfanityManager::IsCensorshipActive() && (chan_num != ChatChannel_Say))
 		EQEmu::ProfanityManager::RedactMessage(message);
 
 	switch(chan_num)
 	{
-	case 0: { /* Guild Chat */
+	case ChatChannel_Guild: { /* Guild Chat */
 		if (!IsInAGuild())
 			Message_StringID(MT_DefaultText, GUILD_NOT_MEMBER2);	//You are not a member of any guild.
 		else if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_SPEAK))
 			Message(0, "Error: You dont have permission to speak to the guild.");
-		else if (!worldserver.SendChannelMessage(this, targetname, chan_num, GuildID(), language, message))
+		else if (!worldserver.SendChannelMessage(this, targetname, chan_num, GuildID(), language, lang_skill, message))
 			Message(0, "Error: World server disconnected");
 		break;
 	}
-	case 2: { /* Group Chat */
+	case ChatChannel_Group: { /* Group Chat */
 		Raid* raid = entity_list.GetRaidByClient(this);
 		if(raid) {
-			raid->RaidGroupSay((const char*) message, this);
+			raid->RaidGroupSay((const char*) message, this, language, lang_skill);
 			break;
 		}
 
@@ -925,14 +933,14 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		}
 		break;
 	}
-	case 15: { /* Raid Say */
+	case ChatChannel_Raid: { /* Raid Say */
 		Raid* raid = entity_list.GetRaidByClient(this);
 		if(raid){
-			raid->RaidSay((const char*) message, this);
+			raid->RaidSay((const char*) message, this, language, lang_skill);
 		}
 		break;
 	}
-	case 3: { /* Shout */
+	case ChatChannel_Shout: { /* Shout */
 		Mob *sender = this;
 		if (GetPet() && GetTarget() == GetPet() && GetPet()->FindType(SE_VoiceGraft))
 			sender = GetPet();
@@ -940,13 +948,13 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		entity_list.ChannelMessage(sender, chan_num, language, lang_skill, message);
 		break;
 	}
-	case 4: { /* Auction */
+	case ChatChannel_Auction: { /* Auction */
 		if(RuleB(Chat, ServerWideAuction))
 		{
 			if(!global_channel_timer.Check())
 			{
 				if(strlen(targetname) == 0)
-					ChannelMessageReceived(5, language, lang_skill, message, "discard"); //Fast typer or spammer??
+					ChannelMessageReceived(chan_num, language, lang_skill, message, "discard"); //Fast typer or spammer??
 				else
 					return;
 			}
@@ -966,7 +974,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 				}
 			}
 
-			if (!worldserver.SendChannelMessage(this, 0, 4, 0, language, message))
+			if (!worldserver.SendChannelMessage(this, 0, chan_num, 0, language, lang_skill, message))
 			Message(0, "Error: World server disconnected");
 		}
 		else if(!RuleB(Chat, ServerWideAuction)) {
@@ -975,17 +983,17 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 			if (GetPet() && GetTarget() == GetPet() && GetPet()->FindType(SE_VoiceGraft))
 			sender = GetPet();
 
-		entity_list.ChannelMessage(sender, chan_num, language, message);
+			entity_list.ChannelMessage(sender, chan_num, language, lang_skill, message);
 		}
 		break;
 	}
-	case 5: { /* OOC */
+	case ChatChannel_OOC: { /* OOC */
 		if(RuleB(Chat, ServerWideOOC))
 		{
 			if(!global_channel_timer.Check())
 			{
 				if(strlen(targetname) == 0)
-					ChannelMessageReceived(5, language, lang_skill, message, "discard"); //Fast typer or spammer??
+					ChannelMessageReceived(chan_num, language, lang_skill, message, "discard"); //Fast typer or spammer??
 				else
 					return;
 			}
@@ -1010,7 +1018,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 				}
 			}
 
-			if (!worldserver.SendChannelMessage(this, 0, 5, 0, language, message))
+			if (!worldserver.SendChannelMessage(this, 0, chan_num, 0, language, lang_skill, message))
 			{
 				Message(0, "Error: World server disconnected");
 			}
@@ -1022,19 +1030,19 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 			if (GetPet() && GetTarget() == GetPet() && GetPet()->FindType(SE_VoiceGraft))
 				sender = GetPet();
 
-			entity_list.ChannelMessage(sender, chan_num, language, message);
+			entity_list.ChannelMessage(sender, chan_num, language, lang_skill, message);
 		}
 		break;
 	}
-	case 6: /* Broadcast */
-	case 11: { /* GM Say */
+	case ChatChannel_Broadcast: /* Broadcast */
+	case ChatChannel_GMSAY: { /* GM Say */
 		if (!(admin >= 80))
 			Message(0, "Error: Only GMs can use this channel");
-		else if (!worldserver.SendChannelMessage(this, targetname, chan_num, 0, language, message))
+		else if (!worldserver.SendChannelMessage(this, targetname, chan_num, 0, language, lang_skill, message))
 			Message(0, "Error: World server disconnected");
 		break;
 	}
-	case 7: { /* Tell */
+	case ChatChannel_Tell: { /* Tell */
 			if(!global_channel_timer.Check())
 			{
 				if(strlen(targetname) == 0)
@@ -1078,11 +1086,11 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 				target_name[x] = '\0';
 			}
 
-			if(!worldserver.SendChannelMessage(this, target_name, chan_num, 0, language, message))
+			if(!worldserver.SendChannelMessage(this, target_name, chan_num, 0, language, lang_skill, message))
 				Message(0, "Error: World server disconnected");
 		break;
 	}
-	case 8: { /* Say */
+	case ChatChannel_Say: { /* Say */
 		if(message[0] == COMMAND_CHAR) {
 			if(command_dispatch(this, message) == -2) {
 				if(parse->PlayerHasQuestSub(EVENT_COMMAND)) {
@@ -1158,14 +1166,14 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		}
 		break;
 	}
-	case 20:
+	case ChatChannel_UCSRelay:
 	{
 		// UCS Relay for Underfoot and later.
-		if(!worldserver.SendChannelMessage(this, 0, chan_num, 0, language, message))
+		if(!worldserver.SendChannelMessage(this, 0, chan_num, 0, language, lang_skill, message))
 			Message(0, "Error: World server disconnected");
 		break;
 	}
-	case 22:
+	case ChatChannel_Emotes:
 	{
 		// Emotes for Underfoot and later.
 		// crash protection -- cheater
@@ -1187,11 +1195,6 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		Message(0, "Channel (%i) not implemented", (uint16)chan_num);
 	}
 	}
-}
-
-// if no language skill is specified, call the function with a skill of 100.
-void Client::ChannelMessageSend(const char* from, const char* to, uint8 chan_num, uint8 language, const char* message, ...) {
-	ChannelMessageSend(from, to, chan_num, language, 100, message);
 }
 
 void Client::ChannelMessageSend(const char* from, const char* to, uint8 chan_num, uint8 language, uint8 lang_skill, const char* message, ...) {
@@ -1218,7 +1221,7 @@ void Client::ChannelMessageSend(const char* from, const char* to, uint8 chan_num
 	}
 	if (to != 0)
 		strcpy((char *) cm->targetname, to);
-	else if (chan_num == 7)
+	else if (chan_num == ChatChannel_Tell)
 		strcpy(cm->targetname, m_pp.name);
 	else
 		cm->targetname[0] = 0;
@@ -1227,7 +1230,7 @@ void Client::ChannelMessageSend(const char* from, const char* to, uint8 chan_num
 
 	if (language < MAX_PP_LANGUAGE) {
 		ListenerSkill = m_pp.languages[language];
-		if (ListenerSkill == 0) {
+		if (ListenerSkill < 24) {
 			cm->language = (MAX_PP_LANGUAGE - 1); // in an unknown tongue
 		}
 		else {
@@ -1253,7 +1256,7 @@ void Client::ChannelMessageSend(const char* from, const char* to, uint8 chan_num
 	bool weAreNotSender = strcmp(this->GetCleanName(), cm->sender);
 
 	if (senderCanTrainSelf || weAreNotSender) {
-		if ((chan_num == 2) && (ListenerSkill < 100)) {	// group message in unmastered language, check for skill up
+		if ((chan_num == ChatChannel_Group) && (ListenerSkill < 100)) {	// group message in unmastered language, check for skill up
 			if (m_pp.languages[language] <= lang_skill)
 				CheckLanguageSkillIncrease(language, lang_skill);
 		}
@@ -1274,21 +1277,19 @@ void Client::Message(uint32 type, const char* message, ...) {
 	vsnprintf(buffer, 4096, message, argptr);
 	va_end(argptr);
 
-	size_t len = strlen(buffer);
+	SerializeBuffer buf(sizeof(SpecialMesgHeader_Struct) + 12 + 64 + 64);
+	buf.WriteInt8(static_cast<int8>(Journal::SpeakMode::Raw));
+	buf.WriteInt8(static_cast<int8>(Journal::Mode::None));
+	buf.WriteInt8(0); // language
+	buf.WriteUInt32(type);
+	buf.WriteUInt32(0); // target spawn ID used for journal filtering, ignored here
+	buf.WriteString(""); // send name, not applicable here
+	buf.WriteInt32(0); // location, client seems to ignore
+	buf.WriteInt32(0);
+	buf.WriteInt32(0);
+	buf.WriteString(buffer);
 
-	//client dosent like our packet all the time unless
-	//we make it really big, then it seems to not care that
-	//our header is malformed.
-	//len = 4096 - sizeof(SpecialMesg_Struct);
-
-	uint32 len_packet = sizeof(SpecialMesg_Struct)+len;
-	auto app = new EQApplicationPacket(OP_SpecialMesg, len_packet);
-	SpecialMesg_Struct* sm=(SpecialMesg_Struct*)app->pBuffer;
-	sm->header[0] = 0x00; // Header used for #emote style messages..
-	sm->header[1] = 0x00; // Play around with these to see other types
-	sm->header[2] = 0x00;
-	sm->msg_type = type;
-	memcpy(sm->message, buffer, len+1);
+	auto app = new EQApplicationPacket(OP_SpecialMesg, buf);
 
 	FastQueuePacket(&app);
 
@@ -1305,65 +1306,23 @@ void Client::FilteredMessage(Mob *sender, uint32 type, eqFilterType filter, cons
 	vsnprintf(buffer, 4096, message, argptr);
 	va_end(argptr);
 
-	size_t len = strlen(buffer);
+	SerializeBuffer buf(sizeof(SpecialMesgHeader_Struct) + 12 + 64 + 64);
+	buf.WriteInt8(static_cast<int8>(Journal::SpeakMode::Raw));
+	buf.WriteInt8(static_cast<int8>(Journal::Mode::None));
+	buf.WriteInt8(0); // language
+	buf.WriteUInt32(type);
+	buf.WriteUInt32(0); // target spawn ID used for journal filtering, ignored here
+	buf.WriteString(""); // send name, not applicable here
+	buf.WriteInt32(0); // location, client seems to ignore
+	buf.WriteInt32(0);
+	buf.WriteInt32(0);
+	buf.WriteString(buffer);
 
-	//client dosent like our packet all the time unless
-	//we make it really big, then it seems to not care that
-	//our header is malformed.
-	//len = 4096 - sizeof(SpecialMesg_Struct);
-
-	uint32 len_packet = sizeof(SpecialMesg_Struct) + len;
-	auto app = new EQApplicationPacket(OP_SpecialMesg, len_packet);
-	SpecialMesg_Struct* sm = (SpecialMesg_Struct*)app->pBuffer;
-	sm->header[0] = 0x00; // Header used for #emote style messages..
-	sm->header[1] = 0x00; // Play around with these to see other types
-	sm->header[2] = 0x00;
-	sm->msg_type = type;
-	memcpy(sm->message, buffer, len + 1);
+	auto app = new EQApplicationPacket(OP_SpecialMesg, buf);
 
 	FastQueuePacket(&app);
 
 	safe_delete_array(buffer);
-}
-
-void Client::QuestJournalledMessage(const char *npcname, const char* message) {
-
-	// npcnames longer than 60 characters crash the client when they log back in
-	const int MaxNPCNameLength = 60;
-	// I assume there is an upper safe limit on the message length. Don't know what it is, but 4000 doesn't crash
-	// the client.
-	const int MaxMessageLength = 4000;
-
-	char OutNPCName[MaxNPCNameLength+1];
-	char OutMessage[MaxMessageLength+1];
-
-	// Apparently Visual C++ snprintf is not C99 compliant and doesn't put the null terminator
-	// in if the formatted string >= the maximum length, so we put it in.
-	//
-	snprintf(OutNPCName, MaxNPCNameLength, "%s", npcname); OutNPCName[MaxNPCNameLength]='\0';
-	snprintf(OutMessage, MaxMessageLength, "%s", message); OutMessage[MaxMessageLength]='\0';
-
-	uint32 len_packet = sizeof(SpecialMesg_Struct) + strlen(OutNPCName) + strlen(OutMessage);
-	auto app = new EQApplicationPacket(OP_SpecialMesg, len_packet);
-	SpecialMesg_Struct* sm=(SpecialMesg_Struct*)app->pBuffer;
-
-	sm->header[0] = 0;
-	sm->header[1] = 2;
-	sm->header[2] = 0;
-	sm->msg_type = 0x0a;
-	sm->target_spawn_id = GetID();
-
-	char *dest = &sm->sayer[0];
-
-	memcpy(dest, OutNPCName, strlen(OutNPCName) + 1);
-
-	dest = dest + strlen(OutNPCName) + 13;
-
-	memcpy(dest, OutMessage, strlen(OutMessage) + 1);
-
-	QueuePacket(app);
-
-	safe_delete(app);
 }
 
 void Client::SetMaxHP() {

@@ -2911,9 +2911,13 @@ void Mob::Emote(const char *format, ...)
 		GENERIC_EMOTE, GetCleanName(), buf);
 }
 
-void Mob::QuestJournalledSay(Client *QuestInitiator, const char *str)
+void Mob::QuestJournalledSay(Client *QuestInitiator, const char *str, Journal::Options &opts)
 {
-		entity_list.QuestJournalledSayClose(this, QuestInitiator, 200, GetCleanName(), str);
+	// just in case
+	if (opts.target_spawn_id == 0 && QuestInitiator)
+		opts.target_spawn_id = QuestInitiator->GetID();
+
+	entity_list.QuestJournalledSayClose(this, QuestInitiator, 200, GetCleanName(), str, opts);
 }
 
 const char *Mob::GetCleanName()

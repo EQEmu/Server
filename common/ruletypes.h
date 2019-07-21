@@ -205,6 +205,7 @@ RULE_CATEGORY_END()
 RULE_CATEGORY(GM)
 RULE_INT(GM, MinStatusToSummonItem, 250)
 RULE_INT(GM, MinStatusToZoneAnywhere, 250)
+RULE_INT(GM, MinStatusToLevelTarget, 100)
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(World)
