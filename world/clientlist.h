@@ -66,6 +66,7 @@ public:
 	void	CLEKeepAlive(uint32 numupdates, uint32* wid);
 	void	CLEAdd(uint32 iLSID, const char* iLoginName, const char* iLoginKey, int16 iWorldAdmin = 0, uint32 ip = 0, uint8 local=0);
 	void	UpdateClientGuild(uint32 char_id, uint32 guild_id);
+	void	RemoveCLEByLSID(uint32 iLSID);
 
 	int GetClientCount();
 	void GetClients(const char *zone_name, std::vector<ClientListEntry *> &into);
