@@ -1245,15 +1245,16 @@ void ClientList::UpdateClientGuild(uint32 char_id, uint32 guild_id) {
 
 void ClientList::RemoveCLEByLSID(uint32 iLSID)
 {
-	LinkedListIterator<ClientListEntry*> iterator(clientlist);
+	LinkedListIterator<ClientListEntry *> iterator(clientlist);
 
 	iterator.Reset();
 	while (iterator.MoreElements()) {
 		if (iterator.GetData()->LSAccountID() == iLSID) {
 			iterator.RemoveCurrent();
 		}
-		else
+		else {
 			iterator.Advance();
+		}
 	}
 }
 
