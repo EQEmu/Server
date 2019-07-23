@@ -703,9 +703,11 @@ def is_hint_in_path(hint, path):
     elif (joined_index == -1 and not pretext_index == -1) or\
             (not joined_index == -1 and not pretext_index == -1 and joined_index > pretext_index):
         partial_hints = hint.split('&&', 1)
-        found_index = path.find(partial_hints[0])
-        if found_index == -1:
-            return False
+        found_index = 0
+        if not partial_hints[0] == '':
+            found_index = path.find(partial_hints[0])
+            if found_index == -1:
+                return False
         
         start_index = found_index + len(partial_hints[0])
         for alt_hint in partial_hints[1].split('^'):
