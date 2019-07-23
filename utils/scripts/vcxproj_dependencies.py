@@ -340,18 +340,18 @@ def check_for_version_discrepancies():
             'include': [
                 '',  # 'NOT FOUND'
                 '',  # 'install'
-                '/dependencies/zlib_x##/include',  # 'dependencies'
+                '/server/dependencies/zlib_x##/include',  # 'dependencies'
                 # not sure if this should be '/libs/zlibng' or '/build/libs/zlibng' based on cmake behavior
-                '/build/libs/zlibng',  # 'libs'
-                '/vcpkg/vcpkg-export-##/installed/x##-windows/include',  # 'vcpkg'
-                '/build/libs/zlibng',  # 'static'
+                '/server/libs/zlibng',  # 'libs'
+                '/server/vcpkg/vcpkg-export-##/installed/x##-windows/include',  # 'vcpkg'
+                '/server/build/libs/zlibng',  # 'static'
                 ''  # 'submodule'
             ],
             'source': [
                 '',  # 'NOT FOUND'
                 '',  # 'install'
                 '',  # 'dependencies'
-                '/libs/zlibng',  # 'libs'
+                '/server/libs/zlibng',  # 'libs'
                 '',  # 'vcpkg'
                 '',  # 'static'
                 ''  # 'submodule'
@@ -359,10 +359,10 @@ def check_for_version_discrepancies():
             'library': [
                 '',  # 'NOT FOUND'
                 '',  # 'install'
-                'dependencies/zlib_x##/lib/zdll.lib',  # 'dependencies'
+                '/server/dependencies/zlib_x##/lib/zdll.lib',  # 'dependencies'
                 '',  # 'libs'
-                '/vcpkg/vcpkg-export-##/installed/x##-windows/&&lib/zlib.lib^debug/lib/zlibd.lib',  # 'vcpkg'
-                '/build/libs/zlibng/##&&zlibstatic.lib^zlibstaticd.lib',  # 'static'
+                '/server/vcpkg/vcpkg-export-##/installed/x##-windows/&&lib/zlib.lib^debug/lib/zlibd.lib',  # 'vcpkg'
+                '/server/build/libs/zlibng/##&&zlibstatic.lib^zlibstaticd.lib',  # 'static'
                 ''  # 'submodule'
             ]
         },
@@ -399,16 +399,16 @@ def check_for_version_discrepancies():
             'include': [
                 '',  # 'NOT FOUND'
                 '',  # 'install'
-                '/dependencies/luaj_x##/src',  # 'dependencies'
+                '/server/dependencies/luaj_x##/src',  # 'dependencies'
                 '',  # 'libs'
-                '/vcpkg/vcpkg-export-##/installed/x##-windows/include',  # 'vcpkg'
+                '/server/vcpkg/vcpkg-export-##/installed/x##-windows/include',  # 'vcpkg'
                 '',  # 'static'
                 ''  # 'submodule'
             ],
             'source': [
                 '',  # 'NOT FOUND'
                 '',  # 'install'
-                '/dependencies/luaj_x##/src',  # 'dependencies'
+                '/server/dependencies/luaj_x##/src',  # 'dependencies'
                 '',  # 'libs'
                 '',  # 'vcpkg'
                 '',  # 'static'
@@ -417,10 +417,10 @@ def check_for_version_discrepancies():
             'library': [
                 '',  # 'NOT FOUND'
                 '',  # 'install'
-                '/dependencies/luaj_x##/bin/lua51.lib',  # 'dependencies'
+                '/server/dependencies/luaj_x##/bin/lua51.lib',  # 'dependencies'
                 '',  # 'libs'
                 # debug lua package likely incorrect..should be 'lua51d.lib' - or whatever debug version is
-                '/vcpkg/vcpkg-export-##/installed/x##-windows/&&lib/lua51.lib^debug/lib/lua51.lib',  # 'vcpkg'
+                '/server/vcpkg/vcpkg-export-##/installed/x##-windows/&&lib/lua51.lib^debug/lib/lua51.lib',  # 'vcpkg'
                 '',  # 'static'
                 ''  # 'submodule'
             ]
@@ -429,9 +429,9 @@ def check_for_version_discrepancies():
             'include': [
                 '',  # 'NOT FOUND'
                 '',  # 'install'
-                '/dependencies/boost',  # 'dependencies'
+                '/server/dependencies/boost',  # 'dependencies'
                 '',  # 'libs'
-                '/vcpkg/vcpkg-export-##/installed/x##-windows/include',  # 'vcpkg'
+                '/server/vcpkg/vcpkg-export-##/installed/x##-windows/include',  # 'vcpkg'
                 '',  # 'static'
                 ''  # 'submodule'
             ],
@@ -447,9 +447,9 @@ def check_for_version_discrepancies():
             'library': [
                 '',  # 'NOT FOUND'
                 '',  # 'install'
-                '/dependencies/boost',  # 'dependencies'
+                '/server/dependencies/boost',  # 'dependencies'
                 '',  # 'libs'
-                '/vcpkg/vcpkg-export',  # 'vcpkg'
+                '/server/vcpkg/vcpkg-export',  # 'vcpkg'
                 '',  # 'static'
                 ''  # 'submodule'
             ]
@@ -458,9 +458,9 @@ def check_for_version_discrepancies():
             'include': [
                 '',  # 'NOT FOUND'
                 '',  # 'install'
-                '/dependencies/libsodium/include',  # 'dependencies'
+                '/server/dependencies/libsodium/include',  # 'dependencies'
                 '',  # 'libs'
-                '/vcpkg/vcpkg-export-##/installed/x##-windows/include',  # 'vcpkg'
+                '/server/vcpkg/vcpkg-export-##/installed/x##-windows/include',  # 'vcpkg'
                 '',  # 'static'
                 ''  # 'submodule'
             ],
@@ -476,10 +476,11 @@ def check_for_version_discrepancies():
             'library': [
                 '',  # 'NOT FOUND'
                 '',  # 'install'
-                'dependencies/libsodium/##/dynamic/libsodium.lib',  # 'dependencies'
+                '/server/dependencies/libsodium/##/dynamic/libsodium.lib',  # 'dependencies'
                 '',  # 'libs'
                 # debug libsodium package likely incorrect..should be 'libsodiumd.lib' - or whatever debug version is
-                '/vcpkg/vcpkg-export-##/installed/x##-windows/&&lib/libsodium.lib^debug/lib/libsodium.lib',  # 'vcpkg'
+                '/server/vcpkg/vcpkg-export-##/installed/x##-windows/&&lib/libsodium.lib^'
+                'debug/lib/libsodium.lib',  # 'vcpkg'
                 '',  # 'static'
                 ''  # 'submodule'
             ]
@@ -488,9 +489,9 @@ def check_for_version_discrepancies():
             'include': [
                 '',  # 'NOT FOUND'
                 '',  # 'install'
-                '/dependencies/openssl_x##/include',  # 'dependencies'
+                '/server/dependencies/openssl_x##/include',  # 'dependencies'
                 '',  # 'libs'
-                '/vcpkg/vcpkg-export-##/installed/x##-windows/include',  # 'vcpkg'
+                '/server/vcpkg/vcpkg-export-##/installed/x##-windows/include',  # 'vcpkg'
                 '',  # 'static'
                 ''  # 'submodule'
             ],
@@ -506,12 +507,12 @@ def check_for_version_discrepancies():
             'library': [
                 '',  # 'NOT FOUND'
                 '',  # 'install'
-                '/dependencies/openssl_x##/lib/VC/&&libeay32MD.lib^libeay32MDd.lib^'
+                '/server/dependencies/openssl_x##/lib/VC/&&libeay32MD.lib^libeay32MDd.lib^'
                      'ssleay32MD.lib^ssleay32MDd.lib',  # 'dependencies'
                 '',  # 'libs'
                 # debug openssl package likely incorrect..should be
                 # 'libeay32d.lib' and 'ssleay32d.lib' - or whatever debug versions are
-                '/vcpkg/vcpkg-export-##/installed/x##-windows/&&lib/libeay32.lib^'
+                '/server/vcpkg/vcpkg-export-##/installed/x##-windows/&&lib/libeay32.lib^'
                      'lib/ssleay32.lib^debug/lib/libeay32.lib^debug/lib/ssleay32.lib',  # 'vcpkg'
                 '',  # 'static'
                 ''  # 'submodule'
@@ -521,51 +522,61 @@ def check_for_version_discrepancies():
     # {[project]:{[build]:{[resource]:{[library]:{[reference]:priority}}}}}
     context_tree = {}
     # {[library]:priority}
-    global_priorities = {
-        'mysql': 0,
-        'zlib': 0,
-        'perl': 0,
-        'lua': 0,
-        'boost': 0,
-        'sodium': 0,
-        'openssl': 0
-    }
+    global_priorities = {}
+    # {[build]:{[library]:priority}}
+    build_priorities = {}
     # loop for discovering first occurence dependency sources (assumes same search precedence as compiler includes)
-    for key1 in project_dependencies:
-        if key1 not in context_tree.keys():
-            context_tree[key1] = {}
-        for key2 in project_dependencies[key1]:
-            if key2 not in context_tree[key1].keys():
-                context_tree[key1][key2] = {}
-            for key3 in project_dependencies[key1][key2]:
-                if key3 not in context_tree[key1][key2].keys():
-                    context_tree[key1][key2][key3] = {}
-                for key4 in project_dependencies[key1][key2][key3]:
-                    for path in project_dependencies[key1][key2][key3][key4]:
+    for project in project_dependencies:
+        if project not in context_tree.keys():
+            context_tree[project] = {}
+        for build in project_dependencies[project]:
+            if build not in context_tree[project].keys():
+                context_tree[project][build] = {}
+            if build not in build_priorities.keys():
+                build_priorities[build] = {}
+            for resource in project_dependencies[project][build]:
+                if resource not in context_tree[project][build].keys():
+                    context_tree[project][build][resource] = {}
+                for reference_project in project_dependencies[project][build][resource]:
+                    for path in project_dependencies[project][build][resource][reference_project]:
                         for library in libraries:
-                            if library not in context_tree[key1][key2][key3].keys():
-                                context_tree[key1][key2][key3][library] = {}
+                            if library not in context_tree[project][build][resource].keys():
+                                context_tree[project][build][resource][library] = {}
+                            if library not in build_priorities[build].keys():
+                                build_priorities[build][library] = 0
+                            if library not in global_priorities.keys():
+                                global_priorities[library] = 0
                             for reference in references:
-                                if reference not in context_tree[key1][key2][key3][library].keys():
-                                    context_tree[key1][key2][key3][library][reference] = 0
-                                elif not context_tree[key1][key2][key3][library][reference] == 0:
+                                if reference not in context_tree[project][build][resource][library].keys():
+                                    context_tree[project][build][resource][library][reference] = 0
+                                elif not context_tree[project][build][resource][library][reference] == 0:
                                     continue
                                 for priority in priorities:
                                     if hints[library][reference][priority] == '':
                                         continue
                                     for hint in hints[library][reference][priority].split('|'):
                                         if is_hint_in_path(hint, path):
-                                            context_tree[key1][key2][key3][library][reference] = priority
-                                            if context_tree[key1][key2][key3][library][reference] >\
+                                            context_tree[project][build][resource][library][reference] = priority
+                                            if context_tree[project][build][resource][library][reference] >\
+                                                    build_priorities[build][library]:
+                                                build_priorities[build][library] =\
+                                                    context_tree[project][build][resource][library][reference]
+                                            if context_tree[project][build][resource][library][reference] >\
                                                     global_priorities[library]:
                                                 global_priorities[library] =\
-                                                    context_tree[key1][key2][key3][library][reference]
+                                                    context_tree[project][build][resource][library][reference]
     twrite('{0}<Global>'.format(col1))
     for library in libraries:
         twrite('{0}<Library Name="{1}">{2}</Library>'.format(col2, library, global_priorities[library]))
     twrite('{0}</Global>'.format(col1))
     twrite('')
-    # loop for dumping 'ConflictTree'
+    for build in build_priorities.keys():
+        twrite('{0}<Build Type="{1}">'.format(col1, build))
+        for library in libraries:
+            twrite('{0}<Library Name="{1}">{2}</Library>'.format(col2, library, build_priorities[build][library]))
+        twrite('{0}</Build>'.format(col1))
+    twrite('')
+    # loop for dumping 'ContextTree'
     for project in context_tree:
         twrite('{0}<Project Path="{1}">'.format(col1, project))
         for build in context_tree[project]:
@@ -612,11 +623,21 @@ def check_for_version_discrepancies():
                                 )
                             )
                         continue
-                    r_flag = False
+                    if build_priorities[build][library] == 0:
+                        if QUIET_REPORT is False:
+                            rwrite(
+                                '> No Build Library \'{0}\' .. skipping Project:Build:Resource'
+                                ' "{1}":"{2}":"{3}"'.format(
+                                    library,
+                                    project,
+                                    build,
+                                    resource
+                                )
+                            )
+                        continue
                     for reference in context_tree[project][build][resource][library]:
                         if context_tree[project][build][resource][library][reference] == 0:
                             continue
-                        r_flag = True
                         if not global_priorities[library] == context_tree[project][build][resource][library][reference]:
                             rwrite(
                                 '> Global-Project Library \'{0}\' mis-match \'{1}!={2}\''
@@ -631,6 +652,7 @@ def check_for_version_discrepancies():
                                     resource
                                 )
                             )
+                        # 'builds' are allowed to have different dependencies..so, we'll start crossing at 'resource'
                         for cross_resource in context_tree[project][build]:
                             for cross_reference in context_tree[project][build][cross_resource][library]:
                                 if cross_resource == resource and cross_reference == reference:
@@ -657,14 +679,6 @@ def check_for_version_discrepancies():
                                             build
                                         )
                                     )
-                    if r_flag is False and QUIET_REPORT is False:
-                        rwrite(
-                            '> No References found for Library \'{0}\' in Project "{1}":"{2}"'.format(
-                                library,
-                                project,
-                                resource
-                            )
-                        )
     
     return
 
@@ -716,7 +730,7 @@ def is_hint_in_path(hint, path):
             if path[start_index:].find(alt_hint) == 0:
                 return True
             
-            return False
+        return False
         
     else:
         return False
