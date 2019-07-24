@@ -26,6 +26,8 @@
 #EQEMU_BUILD_CLIENT_FILES
 #EQEMU_USE_MAP_MMFS
 #EQEMU_MAP_DIR
+#EQEMU_ARCH
+#EQEMU_ARCH_ALT
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 IF(POLICY CMP0074)
@@ -57,33 +59,37 @@ ENDIF(MSVC OR MINGW)
 
 IF(MSVC)
 	IF(CMAKE_CL_64)
-		SET(ZLIB_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/zlib_x64")
-		SET(MYSQL_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/mysql_x64")
-		SET(LUA_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/luaj_x64")
-		SET(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/openssl_x64")
-		SET(SODIUM_INCLUDE_HINTS "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/libsodium/include")
-		IF(MSVC_VERSION GREATER 1800)
-			SET(SODIUM_LIBRARY_HINTS "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/libsodium/x64/Release/v140/dynamic")
-		ELSEIF(MSVC_VERSION EQUAL 1800)
-			SET(SODIUM_LIBRARY_HINTS "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/libsodium/x64/Release/v120/dynamic")
-		ELSE()
-			SET(SODIUM_LIBRARY_HINTS "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/libsodium/x64/Release/v110/dynamic")
-		ENDIF()
+		SET(EQEMU_ARCH "x64")
+		SET(EQEMU_ARCH_ALT "x64")
 	ELSE(CMAKE_CL_64)
-		SET(ZLIB_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/zlib_x86")
-		SET(MYSQL_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/mysql_x86")
-		SET(LUA_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/luaj_x86")
-		SET(SODIUM_INCLUDE_HINTS "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/libsodium/include")
-		SET(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/openssl_x86")
-		IF(MSVC_VERSION GREATER 1800)
-			SET(SODIUM_LIBRARY_HINTS "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/libsodium/Win32/Release/v140/dynamic")
-		ELSEIF(MSVC_VERSION EQUAL 1800)
-			SET(SODIUM_LIBRARY_HINTS "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/libsodium/Win32/Release/v120/dynamic")
-		ELSE()
-			SET(SODIUM_LIBRARY_HINTS "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/libsodium/Win32/Release/v110/dynamic")
-		ENDIF()
+		SET(EQEMU_ARCH "x86")
+		SET(EQEMU_ARCH_ALT "Win32")
 	ENDIF(CMAKE_CL_64)
-
+	
+	SET(MYSQL_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/mysql_${EQEMU_ARCH}")
+	
+	IF(VCPKG_TOOLCHAIN)
+		IF(NOT MSVC_VERSION GREATER 1800)
+			SET(SODIUM_INCLUDE_HINTS "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/libsodium/include")
+		ENDIF()
+	ELSE(VCPKG_TOOLCHAIN)
+		SET(ZLIB_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/zlib_${EQEMU_ARCH}")
+		SET(LUA_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/luaj_${EQEMU_ARCH}")
+		SET(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/openssl_${EQEMU_ARCH}")
+		
+		SET(SODIUM_INCLUDE_HINTS "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/libsodium/include")
+	ENDIF(VCPKG_TOOLCHAIN)
+	
+	IF(SODIUM_INCLUDE_HINTS)
+		IF(MSVC_VERSION GREATER 1800)
+			SET(SODIUM_LIBRARY_HINTS "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/libsodium/${EQEMU_ARCH_ALT}/Release/v140/dynamic")
+		ELSEIF(MSVC_VERSION EQUAL 1800)
+			SET(SODIUM_LIBRARY_HINTS "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/libsodium/${EQEMU_ARCH_ALT}/Release/v120/dynamic")
+		ELSE()
+			SET(SODIUM_LIBRARY_HINTS "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/libsodium/${EQEMU_ARCH_ALT}/Release/v110/dynamic")
+		ENDIF()
+	ENDIF(SODIUM_INCLUDE_HINTS)
+	
 	#disable CRT warnings on windows cause they're annoying as shit and we use C functions everywhere
 	OPTION(EQEMU_DISABLE_CRT_SECURE_WARNINGS "Disable Secure CRT Warnings" ON)
 	IF(EQEMU_DISABLE_CRT_SECURE_WARNINGS)
@@ -320,8 +326,14 @@ IF(ZLIB_FOUND)
 		SET(SERVER_LIBS ${SERVER_LIBS} ${ZLIB_LIBRARY})
 	ENDIF()
 ELSE()
+	# NOTE: This processing chain is broken.
+	# Path "${CMAKE_CURRENT_BINARY_DIR}/libs/zlibng" is added to ${SERVER_LIBS}..but, the current CMake process does not
+	# generate the "${CMAKE_CURRENT_SOURCE_DIR}/build/lib/zlibng" and create the required "zconf.h" file. A path to
+	# a valid ZLIB package is required to trigger this process. "${CMAKE_CURRENT_SOURCE_DIR}/libs/zlibng/zconf.h" is not
+	# valid due to the extension name change to "../zlibng/zconf.h.in" during the ZLIB project creation process.
 	INCLUDE_DIRECTORIES(BEFORE SYSTEM "${CMAKE_CURRENT_BINARY_DIR}/libs/zlibng" "${CMAKE_CURRENT_SOURCE_DIR}/libs/zlibng")
 	SET(SERVER_LIBS ${SERVER_LIBS} "zlibstatic")
+	MESSAGE(STATUS "Could NOT find ZLIB - using ZLIBSTATIC package.")
 ENDIF()
 
 IF(WIN32)
