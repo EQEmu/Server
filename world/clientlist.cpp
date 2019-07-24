@@ -64,8 +64,6 @@ void ClientList::Process() {
 			struct in_addr in;
 			in.s_addr = iterator.GetData()->GetIP();
 			Log(Logs::Detail, Logs::World_Server,"Removing client from %s:%d", inet_ntoa(in), iterator.GetData()->GetPort());
-//the client destructor should take care of this.
-//			iterator.GetData()->Free();
 			iterator.RemoveCurrent();
 		}
 		else

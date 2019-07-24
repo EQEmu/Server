@@ -121,6 +121,8 @@ void ClientListEntry::SetOnline(ZoneServer* iZS, int8 iOnline) {
 }
 
 void ClientListEntry::SetOnline(int8 iOnline) {
+	Log(Logs::Detail, Logs::World_Server, "ClientListEntry::SetOnline for %s(%i) = %i", AccountName(), AccountID(), iOnline);
+
 	if (iOnline >= CLE_Status_Online && pOnline < CLE_Status_Online)
 		numplayers++;
 	else if (iOnline < CLE_Status_Online && pOnline >= CLE_Status_Online) {

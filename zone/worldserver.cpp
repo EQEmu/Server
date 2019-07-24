@@ -547,6 +547,23 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
+	case ServerOP_DropClient: {
+		if (pack->size != sizeof(ServerZoneDropClient_Struct)) {
+			break;
+		}
+
+		ServerZoneDropClient_Struct* drop = (ServerZoneDropClient_Struct*)pack->pBuffer;
+		if (zone) {
+			zone->RemoveAuth(drop->lsid);
+		
+			auto client = entity_list.GetClientByLSID(drop->lsid);
+			if (client) {
+				client->Kick();
+				client->Save();
+			}
+		}
+		break;
+	}
 	case ServerOP_ZonePlayer: {
 		ServerZonePlayer_Struct* szp = (ServerZonePlayer_Struct*)pack->pBuffer;
 		Client* client = entity_list.GetClientByName(szp->name);

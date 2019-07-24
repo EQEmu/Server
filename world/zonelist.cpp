@@ -708,6 +708,13 @@ void ZSList::WorldShutDown(uint32 time, uint32 interval)
 	}
 }
 
+void ZSList::DropClient(uint32 lsid) {
+	ServerPacket packet(ServerOP_DropClient, sizeof(ServerZoneDropClient_Struct));
+	auto drop = (ServerZoneDropClient_Struct*)packet.pBuffer;
+	drop->lsid = lsid;
+	SendPacket(&packet);
+}
+
 void ZSList::OnTick(EQ::Timer *t)
 {
 	if (!EventSubscriptionWatcher::Get()->IsSubscribed("EQW::ZoneUpdate")) {

@@ -1713,6 +1713,18 @@ Client *EntityList::GetClientByWID(uint32 iWID)
 	return nullptr;
 }
 
+Client *EntityList::GetClientByLSID(uint32 iLSID)
+{
+	auto it = client_list.begin();
+	while (it != client_list.end()) {
+		if (it->second->LSAccountID() == iLSID) {
+			return it->second;
+		}
+		++it;
+	}
+	return nullptr;
+}
+
 Client *EntityList::GetRandomClient(const glm::vec3& location, float Distance, Client *ExcludeClient)
 {
 	std::vector<Client *> ClientsInRange;

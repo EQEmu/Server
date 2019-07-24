@@ -1457,6 +1457,7 @@ void ZoneServer::IncomingClient(Client* client) {
 	s->accid = client->GetAccountID();
 	s->admin = client->GetAdmin();
 	s->charid = client->GetCharID();
+	s->lsid = client->GetLSID();
 	if (client->GetCLE())
 		s->tellsoff = client->GetCLE()->TellsOff();
 	strn0cpy(s->charname, client->GetCharName(), sizeof(s->charname));

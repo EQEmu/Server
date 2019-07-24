@@ -52,6 +52,7 @@ struct ZoneClientAuth_Struct {
 	uint32 accid;
 	int16  admin;
 	uint32 charid;
+	uint32 lsid;
 	bool   tellsoff;
 	char   charname[64];
 	char   lskey[30];
@@ -244,6 +245,7 @@ public:
 	void ReloadStaticData();
 	void ReloadWorld(uint32 Option);
 	void RemoveAuth(const char *iCharName);
+	void RemoveAuth(uint32 lsid);
 	void Repop(uint32 delay = 0);
 	void RepopClose(const glm::vec4 &client_position, uint32 repop_distance);
 	void RequestUCSServerStatus();
