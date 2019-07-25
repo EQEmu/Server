@@ -66,7 +66,7 @@ def main():
     print 'Checking for version discrepancies...'
     check_for_version_discrepancies()
     close_output_files()
-    print '\n..fin'
+    print '\n__fin__'
     
     return
 
@@ -299,11 +299,10 @@ def check_for_version_discrepancies():
     # use all lowercase for path description
     # use forward slash ('/') for directory name breaks
     # use '|' token for multiple hints ('my_file_path_1|my_file_path_2')
+    # use '!!' token for explicit argument ('/perl/core!!' will find '../perl/core' but not '../perl/core/perl512.lib')
     # use '##' token for joined hints ('my_file_##_1')
-    # use '&&' and '^' tokens for multiple argument hints ('my_file_&&path_1^path_2')
-    # joined hints may be nested until the multiple argument token is used..
-    # ..then, only argument separators ('^') may be used
-    # (i.e., 'my_file_path_1|my_file_##_2|my_##_##&&_3^_4')
+    # use '&&', '^' and '@' tokens for multiple argument hints ('my_file_&&path_1^path_2^path_3@')
+    # (i.e., 'my_file_path_1|my_file_##_2|my_##_##&&_3^_4!!@')
     # {[library]:{[reference]:[[priority]:hint]}}
     hints = {
         # Notes:
@@ -342,7 +341,7 @@ def check_for_version_discrepancies():
                 '',  # 'install'
                 '/server/dependencies/zlib_x##/include',  # 'dependencies'
                 # not sure if this should be '/libs/zlibng' or '/build/libs/zlibng' based on cmake behavior
-                '/server/libs/zlibng',  # 'libs'
+                '/server/build/libs/zlibng',  # 'libs'
                 '/server/vcpkg/vcpkg-export-##/installed/x##-windows/include',  # 'vcpkg'
                 '/server/build/libs/zlibng',  # 'static'
                 ''  # 'submodule'
@@ -361,15 +360,16 @@ def check_for_version_discrepancies():
                 '',  # 'install'
                 '/server/dependencies/zlib_x##/lib/zdll.lib',  # 'dependencies'
                 '',  # 'libs'
-                '/server/vcpkg/vcpkg-export-##/installed/x##-windows/&&lib/zlib.lib^debug/lib/zlibd.lib',  # 'vcpkg'
-                '/server/build/libs/zlibng/##&&zlibstatic.lib^zlibstaticd.lib',  # 'static'
+                '/server/vcpkg/vcpkg-export-##/installed/x##-windows/&&lib/zlib.lib!!'
+                '^debug/lib/zlibd.lib!!@',  # 'vcpkg'
+                '/server/build/libs/zlibng/##&&zlibstatic.lib!!^zlibstaticd.lib!!@',  # 'static'
                 ''  # 'submodule'
             ]
         },
         'perl': {
             'include': [
                 '',  # 'NOT FOUND'
-                '/perl/lib/core',  # 'install'
+                '/perl/lib/core!!',  # 'install'
                 '',  # 'dependencies'
                 '',  # 'libs'
                 '',  # 'vcpkg'
@@ -420,7 +420,8 @@ def check_for_version_discrepancies():
                 '/server/dependencies/luaj_x##/bin/lua51.lib',  # 'dependencies'
                 '',  # 'libs'
                 # debug lua package likely incorrect..should be 'lua51d.lib' - or whatever debug version is
-                '/server/vcpkg/vcpkg-export-##/installed/x##-windows/&&lib/lua51.lib^debug/lib/lua51.lib',  # 'vcpkg'
+                '/server/vcpkg/vcpkg-export-##/installed/x##-windows/&&lib/lua51.lib!!'
+                '^debug/lib/lua51.lib!!@',  # 'vcpkg'
                 '',  # 'static'
                 ''  # 'submodule'
             ]
@@ -440,7 +441,7 @@ def check_for_version_discrepancies():
                 '',  # 'install'
                 '',  # 'dependencies'
                 '',  # 'libs'
-                '',  # 'vcpkg'
+                '/server/vcpkg/vcpkg-export-##/installed/x##-windows/include',  # 'vcpkg'
                 '',  # 'static'
                 ''  # 'submodule'
             ],
@@ -449,7 +450,7 @@ def check_for_version_discrepancies():
                 '',  # 'install'
                 '/server/dependencies/boost',  # 'dependencies'
                 '',  # 'libs'
-                '/server/vcpkg/vcpkg-export',  # 'vcpkg'
+                '/server/vcpkg/vcpkg-export-##/installed/x##-windows/lib!!',  # 'vcpkg'
                 '',  # 'static'
                 ''  # 'submodule'
             ]
@@ -479,8 +480,8 @@ def check_for_version_discrepancies():
                 '/server/dependencies/libsodium/##/dynamic/libsodium.lib',  # 'dependencies'
                 '',  # 'libs'
                 # debug libsodium package likely incorrect..should be 'libsodiumd.lib' - or whatever debug version is
-                '/server/vcpkg/vcpkg-export-##/installed/x##-windows/&&lib/libsodium.lib^'
-                'debug/lib/libsodium.lib',  # 'vcpkg'
+                '/server/vcpkg/vcpkg-export-##/installed/x##-windows/&&lib/libsodium.lib!!^'
+                'debug/lib/libsodium.lib!!@',  # 'vcpkg'
                 '',  # 'static'
                 ''  # 'submodule'
             ]
@@ -507,13 +508,13 @@ def check_for_version_discrepancies():
             'library': [
                 '',  # 'NOT FOUND'
                 '',  # 'install'
-                '/server/dependencies/openssl_x##/lib/VC/&&libeay32MD.lib^libeay32MDd.lib^'
-                     'ssleay32MD.lib^ssleay32MDd.lib',  # 'dependencies'
+                '/server/dependencies/openssl_x##/lib/VC/&&libeay32MD.lib!!^libeay32MDd.lib!!^'
+                     'ssleay32MD.lib!!^ssleay32MDd.lib!!@',  # 'dependencies'
                 '',  # 'libs'
                 # debug openssl package likely incorrect..should be
                 # 'libeay32d.lib' and 'ssleay32d.lib' - or whatever debug versions are
-                '/server/vcpkg/vcpkg-export-##/installed/x##-windows/&&lib/libeay32.lib^'
-                     'lib/ssleay32.lib^debug/lib/libeay32.lib^debug/lib/ssleay32.lib',  # 'vcpkg'
+                '/server/vcpkg/vcpkg-export-##/installed/x##-windows/&&lib/libeay32.lib!!^'
+                     'lib/ssleay32.lib!!^debug/lib/libeay32.lib!!^debug/lib/ssleay32.lib!!@',  # 'vcpkg'
                 '',  # 'static'
                 ''  # 'submodule'
             ]
@@ -555,28 +556,31 @@ def check_for_version_discrepancies():
                                     if hints[library][reference][priority] == '':
                                         continue
                                     for hint in hints[library][reference][priority].split('|'):
-                                        if is_hint_in_path(hint, path):
-                                            context_tree[project][build][resource][library][reference] = priority
-                                            if context_tree[project][build][resource][library][reference] >\
-                                                    build_priorities[build][library]:
-                                                build_priorities[build][library] =\
-                                                    context_tree[project][build][resource][library][reference]
-                                            if context_tree[project][build][resource][library][reference] >\
-                                                    global_priorities[library]:
-                                                global_priorities[library] =\
-                                                    context_tree[project][build][resource][library][reference]
+                                        if not find_hint_in_path(hint, path) == -1:
+                                            if priority > context_tree[project][build][resource][library][reference]:
+                                                context_tree[project][build][resource][library][reference] = priority
+                                                if context_tree[project][build][resource][library][reference] >\
+                                                        build_priorities[build][library]:
+                                                    build_priorities[build][library] =\
+                                                        context_tree[project][build][resource][library][reference]
+                                                if context_tree[project][build][resource][library][reference] >\
+                                                        global_priorities[library]:
+                                                    global_priorities[library] =\
+                                                        context_tree[project][build][resource][library][reference]
+    # loop for dumping 'global_priorities'
     twrite('{0}<Global>'.format(col1))
     for library in libraries:
         twrite('{0}<Library Name="{1}">{2}</Library>'.format(col2, library, global_priorities[library]))
     twrite('{0}</Global>'.format(col1))
     twrite('')
-    for build in build_priorities.keys():
+    # loop for dumping 'build_priorities'
+    for build in build_priorities:
         twrite('{0}<Build Type="{1}">'.format(col1, build))
         for library in libraries:
             twrite('{0}<Library Name="{1}">{2}</Library>'.format(col2, library, build_priorities[build][library]))
         twrite('{0}</Build>'.format(col1))
     twrite('')
-    # loop for dumping 'ContextTree'
+    # loop for dumping 'context_tree'
     for project in context_tree:
         twrite('{0}<Project Path="{1}">'.format(col1, project))
         for build in context_tree[project]:
@@ -683,23 +687,37 @@ def check_for_version_discrepancies():
     return
 
 
-def is_hint_in_path(hint, path):
+def find_hint_in_path(hint, path):
     """
     Helper function for parsing and checking for hints in paths
     
     Hints strings should be split ('|') and passed as a singular hint into this function
     
-    A re-write could allow for nested split models
-    
     """
     
     if hint == '' or path == '':
-        return False
+        return -1
     
     joined_index = hint.find('##')
     pretext_index = hint.find('&&')
     if joined_index == -1 and pretext_index == -1:
-        return hint in path
+        if '^' in hint or '@' in hint:
+            print '..malformed or improper handling of hint: \'{0}\' path: \'{1}\''.format(hint, path)
+            
+            return -1
+        
+        explicit_index = hint.find('!!')
+        if explicit_index == -1:
+            return path.find(hint)
+        
+        else:
+            explicit_hint = hint[:explicit_index]
+            found_index = path.find(explicit_hint)
+            if (len(explicit_hint) + found_index) == len(path):
+                return found_index
+        
+            else:
+                return -1
     
     elif (not joined_index == -1 and pretext_index == -1) or\
             (not joined_index == -1 and not pretext_index == -1 and joined_index < pretext_index):
@@ -707,33 +725,42 @@ def is_hint_in_path(hint, path):
         for partial_hint in hint.split('##', 1):
             if partial_hint == '':
                 continue
-            if not is_hint_in_path(partial_hint, path[start_index:]):
-                return False
+            found_index = find_hint_in_path(partial_hint, path[start_index:])
+            if found_index == -1:
+                return found_index
             
-            start_index = path.find(partial_hint, start_index) + len(partial_hint)
+            start_index = found_index + len(partial_hint)
         
-        return True
+        return start_index
     
     elif (joined_index == -1 and not pretext_index == -1) or\
             (not joined_index == -1 and not pretext_index == -1 and joined_index > pretext_index):
-        partial_hints = hint.split('&&', 1)
+        pretext_hints = hint.split('&&', 1)
         found_index = 0
-        if not partial_hints[0] == '':
-            found_index = path.find(partial_hints[0])
+        if not pretext_hints[0] == '':
+            found_index = find_hint_in_path(pretext_hints[0], path)
             if found_index == -1:
-                return False
+                return found_index
         
-        start_index = found_index + len(partial_hints[0])
-        for alt_hint in partial_hints[1].split('^'):
-            if alt_hint == '':
+        start_index = found_index + len(pretext_hints[0])
+        partial_hints = pretext_hints[1].split('@', 1)
+        for partial_hint in partial_hints:
+            if partial_hint == '':
                 continue
-            if path[start_index:].find(alt_hint) == 0:
-                return True
-            
-        return False
+            for alt_hint in partial_hint.split('^'):
+                if alt_hint == '':
+                    continue
+                found_index = find_hint_in_path(alt_hint, path[start_index:])
+                if found_index == 0:
+                    if not partial_hints[1] == '':
+                        print '..unhandled hint method: \'{0}\''.format(partial_hints[1])
+                    else:
+                        return found_index
+        
+        return -1
         
     else:
-        return False
+        return -1
 
 
 def close_output_files():
