@@ -555,18 +555,22 @@ def check_for_version_discrepancies():
                                 for priority in priorities:
                                     if hints[library][reference][priority] == '':
                                         continue
+                                    hint_found = False
                                     for hint in hints[library][reference][priority].split('|'):
                                         if not find_hint_in_path(hint, path) == -1:
-                                            if priority > context_tree[project][build][resource][library][reference]:
-                                                context_tree[project][build][resource][library][reference] = priority
-                                                if context_tree[project][build][resource][library][reference] >\
-                                                        build_priorities[build][library]:
-                                                    build_priorities[build][library] =\
-                                                        context_tree[project][build][resource][library][reference]
-                                                if context_tree[project][build][resource][library][reference] >\
-                                                        global_priorities[library]:
-                                                    global_priorities[library] =\
-                                                        context_tree[project][build][resource][library][reference]
+                                            context_tree[project][build][resource][library][reference] = priority
+                                            if context_tree[project][build][resource][library][reference] >\
+                                                    build_priorities[build][library]:
+                                                build_priorities[build][library] =\
+                                                    context_tree[project][build][resource][library][reference]
+                                            if context_tree[project][build][resource][library][reference] >\
+                                                    global_priorities[library]:
+                                                global_priorities[library] =\
+                                                    context_tree[project][build][resource][library][reference]
+                                            hint_found = True
+                                            break
+                                    if hint_found is True:
+                                        break
     # loop for dumping 'global_priorities'
     twrite('{0}<Global>'.format(col1))
     for library in libraries:
