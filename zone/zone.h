@@ -244,7 +244,7 @@ public:
 	void LoadZoneDoors(const char *zone, int16 version);
 	void ReloadStaticData();
 	void ReloadWorld(uint32 Option);
-	void RemoveAuth(const char *iCharName);
+	void RemoveAuth(const char *iCharName, const char *iLSKey);
 	void RemoveAuth(uint32 lsid);
 	void Repop(uint32 delay = 0);
 	void RepopClose(const glm::vec4 &client_position, uint32 repop_distance);

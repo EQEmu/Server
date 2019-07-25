@@ -57,7 +57,6 @@ public:
 	ClientListEntry* FindCharacter(const char* name);
 	ClientListEntry* FindCLEByAccountID(uint32 iAccID);
 	ClientListEntry* FindCLEByCharacterID(uint32 iCharID);
-	ClientListEntry* FindCLEByLSID(uint32 iLSID);
 	ClientListEntry* GetCLE(uint32 iID);
 	void	GetCLEIP(uint32 iIP);
 	uint32	GetCLEIPCount(uint32 iLSAccountID);
@@ -67,6 +66,7 @@ public:
 	void	CLEAdd(uint32 iLSID, const char* iLoginName, const char* iLoginKey, int16 iWorldAdmin = 0, uint32 ip = 0, uint8 local=0);
 	void	UpdateClientGuild(uint32 char_id, uint32 guild_id);
 	void	RemoveCLEByLSID(uint32 iLSID);
+	bool    IsAccountInGame(uint32 iLSID);
 
 	int GetClientCount();
 	void GetClients(const char *zone_name, std::vector<ClientListEntry *> &into);

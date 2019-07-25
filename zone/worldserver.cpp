@@ -534,6 +534,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		ServerZoneIncomingClient_Struct* szic = (ServerZoneIncomingClient_Struct*)pack->pBuffer;
 		if (is_zone_loaded) {
 			SetZoneData(zone->GetZoneID(), zone->GetInstanceID());
+
 			if (szic->zoneid == zone->GetZoneID()) {
 				zone->AddAuth(szic);
 				// This packet also doubles as "incoming client" notification, lets not shut down before they get here

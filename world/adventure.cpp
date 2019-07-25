@@ -287,7 +287,7 @@ void Adventure::Finished(AdventureWinStatus ws)
 		ClientListEntry *current = client_list.FindCharacter((*iter).c_str());
 		if(current)
 		{
-			if(current->Online() == CLE_Status_InZone)
+			if(current->Online() == CLE_Status::InZone)
 			{
 				//We can send our packets only.
 				auto pack =

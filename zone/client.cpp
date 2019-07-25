@@ -446,7 +446,7 @@ Client::~Client() {
 	numclients--;
 	UpdateWindowTitle();
 	if(zone)
-		zone->RemoveAuth(GetName());
+		zone->RemoveAuth(GetName(), lskey);
 
 	//let the stream factory know were done with this stream
 	eqs->Close();
