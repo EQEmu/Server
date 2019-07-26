@@ -144,7 +144,7 @@ def fixup_path(project_path, dependency_path):
                 leading = leading[:leading.rfind('/')]
                 trailing = trailing[3:]
             trailing = trailing.lower()
-            trailing = '{0}/{1};'.format(leading, trailing)
+            trailing = '{0}/{1}'.format(leading, trailing)
         else:  # unix
             print '..processing unix-style path fix-up'
             while '../' in trailing:
@@ -297,7 +297,7 @@ def check_for_version_discrepancies():
         6: 'submodule'
     }
     # use all lowercase for path description
-    # use forward slash ('/') for directory name breaks
+    # use forward slash ('/') for directory name separators
     # use '|' token for multiple hints ('my_file_path_1|my_file_path_2')
     # use '!!' token for explicit argument ('/perl/core!!' will find '../perl/core' but not '../perl/core/perl512.lib')
     # use '##' token for joined hints ('my_file_##_1')
@@ -341,16 +341,16 @@ def check_for_version_discrepancies():
                 '',  # 'install'
                 '/server/dependencies/zlib_x##/include',  # 'dependencies'
                 # not sure if this should be '/libs/zlibng' or '/build/libs/zlibng' based on cmake behavior
-                '/server/build/libs/zlibng',  # 'libs'
+                '/server/build/libs/zlibng!!',  # 'libs'
                 '/server/vcpkg/vcpkg-export-##/installed/x##-windows/include',  # 'vcpkg'
-                '/server/build/libs/zlibng',  # 'static'
+                '/server/build/libs/zlibng!!',  # 'static'
                 ''  # 'submodule'
             ],
             'source': [
                 '',  # 'NOT FOUND'
                 '',  # 'install'
                 '',  # 'dependencies'
-                '/server/libs/zlibng',  # 'libs'
+                '/server/libs/zlibng!!',  # 'libs'
                 '',  # 'vcpkg'
                 '',  # 'static'
                 ''  # 'submodule'
@@ -362,7 +362,8 @@ def check_for_version_discrepancies():
                 '',  # 'libs'
                 '/server/vcpkg/vcpkg-export-##/installed/x##-windows/&&lib/zlib.lib!!'
                 '^debug/lib/zlibd.lib!!@',  # 'vcpkg'
-                '/server/build/libs/zlibng/##&&zlibstatic.lib!!^zlibstaticd.lib!!@',  # 'static'
+                '/server/build/libs/zlibng/&&debug/zlibstaticd.lib!!^minsizerel/zlibstatic.lib!!'
+                '^release/zlibstatic.lib!!^relwithdebinfo/zlibstatic.lib!!@',  # 'static'
                 ''  # 'submodule'
             ]
         },
@@ -555,18 +556,32 @@ def check_for_version_discrepancies():
                                 for priority in priorities:
                                     if hints[library][reference][priority] == '':
                                         continue
+                                    hint_found = False
                                     for hint in hints[library][reference][priority].split('|'):
                                         if not find_hint_in_path(hint, path) == -1:
-                                            if priority > context_tree[project][build][resource][library][reference]:
-                                                context_tree[project][build][resource][library][reference] = priority
-                                                if context_tree[project][build][resource][library][reference] >\
-                                                        build_priorities[build][library]:
-                                                    build_priorities[build][library] =\
-                                                        context_tree[project][build][resource][library][reference]
-                                                if context_tree[project][build][resource][library][reference] >\
-                                                        global_priorities[library]:
-                                                    global_priorities[library] =\
-                                                        context_tree[project][build][resource][library][reference]
+                                            context_tree[project][build][resource][library][reference] = priority
+                                            if context_tree[project][build][resource][library][reference] >\
+                                                    build_priorities[build][library]:
+                                                build_priorities[build][library] =\
+                                                    context_tree[project][build][resource][library][reference]
+                                            if context_tree[project][build][resource][library][reference] >\
+                                                    global_priorities[library]:
+                                                global_priorities[library] =\
+                                                    context_tree[project][build][resource][library][reference]
+                                            hint_found = True
+                                            break
+                                    if hint_found is True:
+                                        break
+    # loop for hack to fix odd behavior caused by 'FindZLIB.cmake' - ref: '../server/build/libs/zlibng/zconf.h'
+    # this does not change anything in the build files..only silences a false discrepancy due to mixing priority types
+    if global_priorities['zlib'] == 5:
+        for project in context_tree:
+            for build in context_tree[project]:
+                for resource in context_tree[project][build]:
+                    if context_tree[project][build][resource]['zlib']['source'] == 3:
+                        context_tree[project][build][resource]['zlib']['source'] = 5
+                    if context_tree[project][build][resource]['zlib']['include'] == 3:
+                        context_tree[project][build][resource]['zlib']['include'] = 5
     # loop for dumping 'global_priorities'
     twrite('{0}<Global>'.format(col1))
     for library in libraries:
