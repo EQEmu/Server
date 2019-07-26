@@ -273,8 +273,8 @@ bool ClientListEntry::CheckStale() {
 	if (stale > 20) {
 		if (pOnline > CLE_Status::Offline)
 			SetOnline(CLE_Status::Offline);
-		else
-			return true;
+
+		return true;
 	}
 	return false;
 }

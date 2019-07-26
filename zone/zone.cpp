@@ -1138,6 +1138,7 @@ void Zone::RemoveAuth(uint32 lsid)
 		ZoneClientAuth_Struct* zca = iterator.GetData();
 		if (zca->lsid == lsid) {
 			iterator.RemoveCurrent();
+			continue;
 		}
 		iterator.Advance();
 	}

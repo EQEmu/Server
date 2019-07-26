@@ -1166,8 +1166,8 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	*/
 	Client* client = entity_list.GetClientByName(cze->char_name);
 	if (!zone->GetAuth(ip, cze->char_name, &WID, &account_id, &character_id, &admin, lskey, &tellsoff)) {
-		Log(Logs::General, Logs::Error, "GetAuth() returned false kicking client");
-		if (client != 0) {
+		Log(Logs::General, Logs::Client_Login, "%s failed zone auth check.", cze->char_name);
+		if (nullptr != client) {
 			client->Save();
 			client->Kick();
 		}

@@ -88,7 +88,6 @@ extern volatile bool UCSServerAvailable_;
 
 Client::Client(EQStreamInterface* ieqs)
 :	autobootup_timeout(RuleI(World, ZoneAutobootTimeoutMS)),
-	CLE_keepalive_timer(RuleI(World, ClientKeepaliveTimeoutMS)),
 	connect(1000),
 	eqs(ieqs)
 {
@@ -1124,10 +1123,9 @@ bool Client::Process() {
 		SendApproveWorld();
 		connect.Disable();
 	}
-	if (CLE_keepalive_timer.Check()) {
-		if (cle)
-			cle->KeepAlive();
-	}
+
+	if (cle)
+		cle->KeepAlive();
 
 	/************ Get all packets from packet manager out queue and process them ************/
 	EQApplicationPacket *app = 0;
