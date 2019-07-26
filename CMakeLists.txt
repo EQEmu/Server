@@ -326,14 +326,10 @@ IF(ZLIB_FOUND)
 		SET(SERVER_LIBS ${SERVER_LIBS} ${ZLIB_LIBRARY})
 	ENDIF()
 ELSE()
-	# NOTE: This processing chain is broken.
-	# Path "${CMAKE_CURRENT_BINARY_DIR}/libs/zlibng" is added to ${SERVER_LIBS}..but, the current CMake process does not
-	# generate the "${CMAKE_CURRENT_SOURCE_DIR}/build/lib/zlibng" and create the required "zconf.h" file. A path to
-	# a valid ZLIB package is required to trigger this process. "${CMAKE_CURRENT_SOURCE_DIR}/libs/zlibng/zconf.h" is not
-	# valid due to the extension name change to "../zlibng/zconf.h.in" during the ZLIB project creation process.
+	MESSAGE(STATUS "Could NOT find ZLIB - using ZLIBSTATIC package.")
+	SET(EQEMU_BUILD_ZLIB ON)
 	INCLUDE_DIRECTORIES(BEFORE SYSTEM "${CMAKE_CURRENT_BINARY_DIR}/libs/zlibng" "${CMAKE_CURRENT_SOURCE_DIR}/libs/zlibng")
 	SET(SERVER_LIBS ${SERVER_LIBS} "zlibstatic")
-	MESSAGE(STATUS "Could NOT find ZLIB - using ZLIBSTATIC package.")
 ENDIF()
 
 IF(WIN32)
