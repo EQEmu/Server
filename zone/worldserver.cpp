@@ -559,7 +559,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		
 			auto client = entity_list.GetClientByLSID(drop->lsid);
 			if (client) {
-				client->Kick();
+				client->Kick("Dropped by world CLE subsystem");
 				client->Save();
 			}
 		}

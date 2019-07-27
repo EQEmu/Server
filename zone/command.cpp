@@ -1912,7 +1912,7 @@ void command_permaclass(Client *c, const Seperator *sep)
 		Log(Logs::General, Logs::Normal, "Class change request from %s for %s, requested class:%i",  c->GetName(), t->GetName(), atoi(sep->arg[1]) );
 		t->SetBaseClass(atoi(sep->arg[1]));
 		t->Save();
-		t->Kick();
+		t->Kick("Class was changed.");
 	}
 }
 
@@ -3895,7 +3895,7 @@ void command_kick(Client *c, const Seperator *sep)
 				client->Message(0, "You have been kicked by %s", c->GetName());
 				auto outapp = new EQApplicationPacket(OP_GMKick, 0);
 				client->QueuePacket(outapp);
-				client->Kick();
+				client->Kick("Ordered kicked by command");
 				c->Message(0, "Kick: local: kicking %s",  sep->arg[1]);
 			}
 		}
@@ -5187,7 +5187,7 @@ void command_name(Client *c, const Seperator *sep)
 			c->Message(0, "Successfully renamed %s to %s",  oldname, sep->arg[1]);
 			// until we get the name packet working right this will work
 			c->Message(0, "Sending player to char select.");
-			target->Kick();
+			target->Kick("Name was changed");
 		}
 		else
 			c->Message(13, "ERROR: Unable to rename %s. Check that the new name '%s' isn't already taken.",  oldname, sep->arg[2]);

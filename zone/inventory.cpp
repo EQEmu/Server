@@ -1608,7 +1608,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 				banker ? banker->GetName() : "UNKNOWN NPC", distance);
 			database.SetMQDetectionFlag(AccountName(), GetName(), hacked_string, zone->GetShortName());
 			safe_delete_array(hacked_string);
-			Kick();	// Kicking player to avoid item loss do to client and server inventories not being sync'd
+			Kick("Inventory desync");	// Kicking player to avoid item loss do to client and server inventories not being sync'd
 			return false;
 		}
 	}
@@ -1822,7 +1822,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 	// Step 4: Check for entity trade
 	if (dst_slot_id >= EQEmu::invslot::TRADE_BEGIN && dst_slot_id <= EQEmu::invslot::TRADE_END) {
 		if (src_slot_id != EQEmu::invslot::slotCursor) {
-			Kick();
+			Kick("Trade with non-cursor item");
 			return false;
 		}
 		if (with) {

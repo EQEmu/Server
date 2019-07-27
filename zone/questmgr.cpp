@@ -809,7 +809,7 @@ void QuestManager::changedeity(int diety_id) {
 			initiator->SetDeity(diety_id);
 			initiator->Message(15,"Your Deity has been changed/set to: %i", diety_id);
 			initiator->Save(1);
-			initiator->Kick();
+			initiator->Kick("Deity change by QuestManager");
 		}
 		else
 		{
@@ -943,7 +943,7 @@ void QuestManager::permaclass(int class_id) {
 	//Makes the client the class specified
 	initiator->SetBaseClass(class_id);
 	initiator->Save(2);
-	initiator->Kick();
+	initiator->Kick("Base class change by QuestManager");
 }
 
 void QuestManager::permarace(int race_id) {
@@ -951,7 +951,7 @@ void QuestManager::permarace(int race_id) {
 	//Makes the client the race specified
 	initiator->SetBaseRace(race_id);
 	initiator->Save(2);
-	initiator->Kick();
+	initiator->Kick("Base race change by QuestManager");
 }
 
 void QuestManager::permagender(int gender_id) {
@@ -959,7 +959,7 @@ void QuestManager::permagender(int gender_id) {
 	//Makes the client the gender specified
 	initiator->SetBaseGender(gender_id);
 	initiator->Save(2);
-	initiator->Kick();
+	initiator->Kick("Base gender change by QuestManager");
 }
 
 uint16 QuestManager::scribespells(uint8 max_level, uint8 min_level) {

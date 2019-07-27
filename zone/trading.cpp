@@ -112,7 +112,7 @@ void Trade::AddEntity(uint16 trade_slot_id, uint32 stack_size) {
 	// (it just didn't handle partial stack move actions)
 	if (stack_size > 0) {
 		if (!inst->IsStackable() || !inst2 || !inst2->GetItem() || (inst->GetID() != inst2->GetID()) || (stack_size > inst->GetCharges())) {
-			client->Kick();
+			client->Kick("Error stacking item in trade");
 			return;
 		}
 
@@ -138,7 +138,7 @@ void Trade::AddEntity(uint16 trade_slot_id, uint32 stack_size) {
 	}
 	else {
 		if (inst2 && inst2->GetID()) {
-			client->Kick();
+			client->Kick("Attempting to add null item to trade");
 			return;
 		}
 
