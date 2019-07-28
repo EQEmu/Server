@@ -1118,6 +1118,7 @@ bool Client::Process() {
 		Log(Logs::General, Logs::World_Server, "Zone bootup timer expired, bootup failed or too slow.");
 		TellClientZoneUnavailable();
 	}
+
 	if(connect.Check()){
 		SendGuildList();// Send OPCode: OP_GuildsList
 		SendApproveWorld();
@@ -1188,9 +1189,6 @@ void Client::EnterWorld(bool TryBootup) {
 	}
 	else
 		zone_server = zoneserver_list.FindByZoneID(zone_id);
-
-	//Tell all the zones to drop any client with this lsid because we're coming back in.
-	zoneserver_list.DropClient(GetLSID());
 
 	const char *zone_name = database.GetZoneName(zone_id, true);
 	if (zone_server) {
