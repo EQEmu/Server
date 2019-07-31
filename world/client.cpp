@@ -104,6 +104,7 @@ Client::Client(EQStreamInterface* ieqs)
 	char_name[0] = 0;
 	charid = 0;
 	zone_waiting_for_bootup = 0;
+	enter_world_triggered = false;
 	StartInTutorial = false;
 
 	m_ClientVersion = eqs->ClientVersion();
@@ -1192,8 +1193,16 @@ void Client::EnterWorld(bool TryBootup) {
 
 	const char *zone_name = database.GetZoneName(zone_id, true);
 	if (zone_server) {
-		// warn the world we're comming, so it knows not to shutdown
-		zone_server->IncomingClient(this);
+		if (false == enter_world_triggered) {
+			//Drop any clients we own in other zones.
+			zoneserver_list.DropClient(GetLSID(), zone_server);
+
+			// warn the zone we're coming
+			zone_server->IncomingClient(this);
+
+			//tell the server not to trigger this multiple times before we get a zone unavailable
+			enter_world_triggered = true;
+		}
 	}
 	else {
 		if (TryBootup) {
@@ -1212,9 +1221,17 @@ void Client::EnterWorld(bool TryBootup) {
 			return;
 		}
 	}
+
 	zone_waiting_for_bootup = 0;
 
-	if(!cle) {
+	if (GetAdmin() < 80 && zoneserver_list.IsZoneLocked(zone_id)) {
+		Log(Logs::General, Logs::World_Server, "Enter world failed. Zone is locked.");
+		TellClientZoneUnavailable();
+		return;
+	}
+
+	if (!cle) {
+		TellClientZoneUnavailable();
 		return;
 	}
 
@@ -1231,12 +1248,6 @@ void Client::EnterWorld(bool TryBootup) {
 	);
 
 	if (seen_character_select) {
-		if (GetAdmin() < 80 && zoneserver_list.IsZoneLocked(zone_id)) {
-			Log(Logs::General, Logs::World_Server, "Enter world failed. Zone is locked.");
-			TellClientZoneUnavailable();
-			return;
-		}
-
 		auto pack = new ServerPacket;
 		pack->opcode = ServerOP_AcceptWorldEntrance;
 		pack->size = sizeof(WorldToZone_Struct);
@@ -1356,6 +1367,7 @@ void Client::TellClientZoneUnavailable() {
 
 	zone_id = 0;
 	zone_waiting_for_bootup = 0;
+	enter_world_triggered = false;
 	autobootup_timeout.Disable();
 }
 

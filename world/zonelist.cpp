@@ -708,11 +708,16 @@ void ZSList::WorldShutDown(uint32 time, uint32 interval)
 	}
 }
 
-void ZSList::DropClient(uint32 lsid) {
+void ZSList::DropClient(uint32 lsid, ZoneServer *ignore_zoneserver) {
 	ServerPacket packet(ServerOP_DropClient, sizeof(ServerZoneDropClient_Struct));
 	auto drop = (ServerZoneDropClient_Struct*)packet.pBuffer;
 	drop->lsid = lsid;
-	SendPacket(&packet);
+
+	for (auto &zs : zone_server_list) {
+		if (zs.get() != ignore_zoneserver) {
+			zs->SendPacket(&packet);
+		}
+	}
 }
 
 void ZSList::OnTick(EQ::Timer *t)
