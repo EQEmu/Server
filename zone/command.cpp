@@ -4490,7 +4490,7 @@ void command_gmzone(Client *c, const Seperator *sep)
 		identifier = sep->arg[3];
 	}
 
-	std::string bucket_key             = StringFormat("%s-%s-%u-instance", zone_short_name, zone_version, identifier.c_str());
+	std::string bucket_key             = StringFormat("%s-%s-%u-instance", zone_short_name, identifier.c_str(), zone_version);
 	std::string existing_zone_instance = DataBucket::GetData(bucket_key);
 
 	if (existing_zone_instance.length() > 0) {
