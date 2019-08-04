@@ -330,7 +330,7 @@ bool Database::DoesLoginServerAccountExist(
  * @param loginserver
  * @param hash
  */
-void Database::UpdateLoginHash(
+void Database::UpdateLoginserverAccountPasswordHash(
 	const std::string &name,
 	const std::string &loginserver,
 	const std::string &hash

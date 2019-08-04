@@ -189,3 +189,52 @@ bool AccountManagement::CheckLoginserverUserCredentials(
 
 	return validated_credentials;
 }
+
+
+/**
+ * @param in_account_username
+ * @param in_account_password
+ * @return
+ */
+bool AccountManagement::UpdateLoginserverUserCredentials(
+	const std::string &in_account_username,
+	const std::string &in_account_password,
+	const std::string &source_loginserver
+)
+{
+	auto mode = server.options.GetEncryptionMode();
+
+	Database::DbLoginServerAccount
+		login_server_account = server.db->GetLoginServerAccountByAccountName(
+		in_account_username,
+		source_loginserver
+	);
+
+	if (!login_server_account.loaded) {
+		LogError(
+			"ChangeLoginserverUserCredentials account [{0}] source_loginserver [{1}] not found!",
+			in_account_username,
+			source_loginserver
+		);
+
+		return false;
+	}
+
+	server.db->UpdateLoginserverAccountPasswordHash(
+		in_account_username,
+		source_loginserver,
+		eqcrypt_hash(
+			in_account_username,
+			in_account_password,
+			mode
+		)
+	);
+
+	LogDebug(
+		"ChangeLoginserverUserCredentials account [{0}] source_loginserver [{1}] credentials updated!",
+		in_account_username,
+		source_loginserver
+	);
+
+	return true;
+}

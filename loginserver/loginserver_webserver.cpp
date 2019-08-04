@@ -94,7 +94,6 @@ namespace LoginserverWebserver {
 				Json::Value request_body = LoginserverWebserver::ParseRequestBody(request);
 				std::string username     = request_body.get("username", "").asString();
 				std::string password     = request_body.get("password", "").asString();
-				std::string email        = request_body.get("email", "").asString();
 
 				Json::Value response;
 				if (username.empty() || password.empty()) {
@@ -113,6 +112,47 @@ namespace LoginserverWebserver {
 				}
 				else {
 					response["error"] = "Credentials invalid!";
+				}
+
+				LoginserverWebserver::SendResponse(response, res);
+			}
+		);
+
+		api.Post(
+			"/account/credentials/update/local", [](const httplib::Request &request, httplib::Response &res) {
+				LoginserverWebserver::TokenManager::AuthCanWrite(request, res);
+				Json::Value request_body = LoginserverWebserver::ParseRequestBody(request);
+				std::string username     = request_body.get("username", "").asString();
+				std::string password     = request_body.get("password", "").asString();
+
+				Json::Value response;
+				if (username.empty() || password.empty()) {
+					response["message"] = "Username or password not set";
+					LoginserverWebserver::SendResponse(response, res);
+					return;
+				}
+
+				Database::DbLoginServerAccount
+					login_server_account = server.db->GetLoginServerAccountByAccountName(
+					username
+				);
+
+				if (!login_server_account.loaded) {
+					response["error"] = "Failed to find associated loginserver account!";
+					LoginserverWebserver::SendResponse(response, res);
+					return;
+				}
+
+				bool credentials_valid = AccountManagement::UpdateLoginserverUserCredentials(
+					username,
+					password
+				);
+
+				if (credentials_valid) {
+					response["message"] = "Loginserver account credentials updated!";
+				}
+				else {
+					response["error"] = "Failed to update loginserver account credentials!";
 				}
 
 				LoginserverWebserver::SendResponse(response, res);

@@ -121,7 +121,10 @@ public:
 	 * @param loginserver
 	 * @param hash
 	 */
-	void UpdateLoginHash(const std::string &name, const std::string &loginserver, const std::string &hash);
+	void UpdateLoginserverAccountPasswordHash(
+		const std::string &name,
+		const std::string &loginserver,
+		const std::string &hash);
 
 	/**
 	 * @param name

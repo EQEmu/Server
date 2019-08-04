@@ -31,6 +31,7 @@ namespace LoginserverCommandHandler {
 	void CreateLocalLoginserverAccount(int argc, char **argv, argh::parser &cmd, std::string &description);
 	void CreateLoginserverWorldAdminAccount(int argc, char **argv, argh::parser &cmd, std::string &description);
 	void CheckLoginserverUserCredentials(int argc, char **argv, argh::parser &cmd, std::string &description);
+	void UpdateLoginserverUserCredentials(int argc, char **argv, argh::parser &cmd, std::string &description);
 };
 
 

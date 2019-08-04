@@ -43,7 +43,7 @@ void CatchSignal(int sig_num)
 {
 }
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
 	RegisterExecutablePlatform(ExePlatformLogin);
 	set_exception_handler();
@@ -68,7 +68,12 @@ int main(int argc, char** argv)
 	/**
 	 * options: worldservers
 	 */
-	server.options.RejectDuplicateServers(server.config.GetVariableBool("worldservers", "reject_duplicate_servers", false));
+	server.options.RejectDuplicateServers(
+		server.config.GetVariableBool(
+			"worldservers",
+			"reject_duplicate_servers",
+			false
+		));
 	server.options.AllowUnregistered(server.config.GetVariableBool("worldservers", "unregistered_allowed", true));
 
 	/**
@@ -154,7 +159,7 @@ int main(int argc, char** argv)
 	 * create client manager
 	 */
 	LogInfo("Client Manager Init");
-	server.client_manager = new ClientManager();
+	server.client_manager           = new ClientManager();
 	if (!server.client_manager) {
 		LogError("Client Manager Failed to Start");
 		LogInfo("Server Manager Shutdown");
@@ -192,6 +197,9 @@ int main(int argc, char** argv)
 
 	if (argc > 1) {
 		LogSys.LoadLogSettingsDefaults();
+		LogSys.log_settings[Logs::Debug].log_to_console      = static_cast<uint8>(Logs::General);
+		LogSys.log_settings[Logs::Debug].is_category_enabled = 1;
+
 		LoginserverCommandHandler::CommandHandler(argc, argv);
 	}
 

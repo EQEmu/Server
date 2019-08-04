@@ -177,17 +177,17 @@ public:
 	/**
 	 * Verifies a login hash, will also attempt to update a login hash if needed
 	 *
-	 * @param user
-	 * @param loginserver
-	 * @param cred
-	 * @param hash
+	 * @param account_username
+	 * @param source_loginserver
+	 * @param account_password
+	 * @param password_hash
 	 * @return
 	 */
 	bool VerifyLoginHash(
-		const std::string &user,
-		const std::string &loginserver,
-		const std::string &cred,
-		const std::string &hash
+		const std::string &account_username,
+		const std::string &source_loginserver,
+		const std::string &account_password,
+		const std::string &password_hash
 	);
 
 	void DoSuccessfulLogin(const std::string in_account_name, int db_account_id, const std::string &db_loginserver);

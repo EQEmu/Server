@@ -486,21 +486,21 @@ void Client::DoFailedLogin()
 /**
  * Verifies a login hash, will also attempt to update a login hash if needed
  *
- * @param user
- * @param loginserver
- * @param cred
- * @param hash
+ * @param account_username
+ * @param source_loginserver
+ * @param account_password
+ * @param password_hash
  * @return
  */
 bool Client::VerifyLoginHash(
-	const std::string &user,
-	const std::string &loginserver,
-	const std::string &cred,
-	const std::string &hash
+	const std::string &account_username,
+	const std::string &source_loginserver,
+	const std::string &account_password,
+	const std::string &password_hash
 )
 {
 	auto mode = server.options.GetEncryptionMode();
-	if (eqcrypt_verify_hash(user, cred, hash, mode)) {
+	if (eqcrypt_verify_hash(account_username, account_password, password_hash, mode)) {
 		return true;
 	}
 	else {
@@ -509,46 +509,67 @@ bool Client::VerifyLoginHash(
 				mode = EncryptionModeArgon2;
 			}
 
-			if (hash.length() == 32) { //md5 is insecure
+			if (password_hash.length() == 32) { //md5 is insecure
 				for (int i = EncryptionModeMD5; i <= EncryptionModeMD5Triple; ++i) {
-					if (i != mode && eqcrypt_verify_hash(user, cred, hash, i)) {
+					if (i != mode && eqcrypt_verify_hash(account_username, account_password, password_hash, i)) {
 						LogDebug(
 							"user [{0}] loginserver [{1}] mode [{2}]",
-							user,
-							loginserver,
+							account_username,
+							source_loginserver,
 							mode
 						);
-						server.db->UpdateLoginHash(user, loginserver, eqcrypt_hash(user, cred, mode));
+						server.db->UpdateLoginserverAccountPasswordHash(
+							account_username,
+							source_loginserver,
+							eqcrypt_hash(
+								account_username,
+								account_password,
+								mode
+							));
 						return true;
 					}
 				}
 			}
-			else if (hash.length() == 40) { //sha1 is insecure
+			else if (password_hash.length() == 40) { //sha1 is insecure
 				for (int i = EncryptionModeSHA; i <= EncryptionModeSHATriple; ++i) {
-					if (i != mode && eqcrypt_verify_hash(user, cred, hash, i)) {
+					if (i != mode && eqcrypt_verify_hash(account_username, account_password, password_hash, i)) {
 						LogDebug(
 							"user [{0}] loginserver [{1}] mode [{2}]",
-							user,
-							loginserver,
+							account_username,
+							source_loginserver,
 							mode
 						);
 
-						server.db->UpdateLoginHash(user, loginserver, eqcrypt_hash(user, cred, mode));
+						server.db->UpdateLoginserverAccountPasswordHash(
+							account_username,
+							source_loginserver,
+							eqcrypt_hash(
+								account_username,
+								account_password,
+								mode
+							));
 						return true;
 					}
 				}
 			}
-			else if (hash.length() == 128) { //sha2-512 is insecure
+			else if (password_hash.length() == 128) { //sha2-512 is insecure
 				for (int i = EncryptionModeSHA512; i <= EncryptionModeSHA512Triple; ++i) {
-					if (i != mode && eqcrypt_verify_hash(user, cred, hash, i)) {
+					if (i != mode && eqcrypt_verify_hash(account_username, account_password, password_hash, i)) {
 						LogDebug(
 							"user [{0}] loginserver [{1}] mode [{2}]",
-							user,
-							loginserver,
+							account_username,
+							source_loginserver,
 							mode
 						);
 
-						server.db->UpdateLoginHash(user, loginserver, eqcrypt_hash(user, cred, mode));
+						server.db->UpdateLoginserverAccountPasswordHash(
+							account_username,
+							source_loginserver,
+							eqcrypt_hash(
+								account_username,
+								account_password,
+								mode
+							));
 						return true;
 					}
 				}

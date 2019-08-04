@@ -143,7 +143,6 @@ void EQEmuLogSys::LoadLogSettingsDefaults()
 	log_settings[Logs::Warning].log_to_console   = static_cast<uint8>(Logs::General);
 	log_settings[Logs::Notice].log_to_console    = static_cast<uint8>(Logs::General);
 	log_settings[Logs::Info].log_to_console      = static_cast<uint8>(Logs::General);
-	log_settings[Logs::Debug].log_to_console     = static_cast<uint8>(Logs::General);
 
 	/**
 	 * Set Category enabled status on defaults
