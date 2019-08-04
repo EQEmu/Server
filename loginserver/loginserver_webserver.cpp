@@ -71,7 +71,7 @@ namespace LoginserverWebserver {
 
 				Json::Value response;
 				if (username.empty() || password.empty()) {
-					response["message"] = "Username or password not set";
+					response["error"] = "Username or password not set";
 					LoginserverWebserver::SendResponse(response, res);
 					return;
 				}
@@ -97,7 +97,7 @@ namespace LoginserverWebserver {
 
 				Json::Value response;
 				if (username.empty() || password.empty()) {
-					response["message"] = "Username or password not set";
+					response["error"] = "Username or password not set";
 					LoginserverWebserver::SendResponse(response, res);
 					return;
 				}
@@ -127,7 +127,7 @@ namespace LoginserverWebserver {
 
 				Json::Value response;
 				if (username.empty() || password.empty()) {
-					response["message"] = "Username or password not set";
+					response["error"] = "Username or password not set";
 					LoginserverWebserver::SendResponse(response, res);
 					return;
 				}
