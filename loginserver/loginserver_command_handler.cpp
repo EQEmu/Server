@@ -214,6 +214,7 @@ namespace LoginserverCommandHandler {
 	 * @param argv
 	 * @param cmd
 	 * @param description
+	 */
 	void UpdateLoginserverUserCredentials(int argc, char **argv, argh::parser &cmd, std::string &description)
 	{
 		description = "Change user login credentials";
