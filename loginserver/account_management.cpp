@@ -134,3 +134,58 @@ bool AccountManagement::CreateLoginserverWorldAdminAccount(
 
 	return false;
 }
+
+/**
+ * @param in_account_username
+ * @param in_account_password
+ * @return
+ */
+bool AccountManagement::CheckLoginserverUserCredentials(
+	const std::string &in_account_username,
+	const std::string &in_account_password,
+	const std::string &source_loginserver
+)
+{
+	auto mode = server.options.GetEncryptionMode();
+
+	Database::DbLoginServerAccount
+		login_server_admin = server.db->GetLoginServerAccountByAccountName(
+		in_account_username,
+		source_loginserver
+	);
+
+	if (!login_server_admin.loaded) {
+		LogError(
+			"CheckLoginUserCredentials account [{0}] source_loginserver [{1}] not found!",
+			in_account_username,
+			source_loginserver
+		);
+
+		return false;
+	}
+
+	bool validated_credentials = eqcrypt_verify_hash(
+		in_account_username,
+		in_account_password,
+		login_server_admin.account_password,
+		mode
+	);
+
+	if (!validated_credentials) {
+		LogError(
+			"CheckLoginUserCredentials account [{0}] source_loginserver [{1}] invalid credentials!",
+			in_account_username,
+			source_loginserver
+		);
+
+		return false;
+	}
+
+	LogDebug(
+		"CheckLoginUserCredentials account [{0}] source_loginserver [{1}] credentials validated success!",
+		in_account_username,
+		source_loginserver
+	);
+
+	return validated_credentials;
+}

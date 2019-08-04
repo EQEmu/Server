@@ -48,6 +48,17 @@ public:
 		const std::string &last_name = "",
 		const std::string &ip_address = ""
 	);
+
+	/**
+	 * @param in_account_username
+	 * @param in_account_password
+	 * @return
+	 */
+	static bool CheckLoginserverUserCredentials(
+		const std::string &in_account_username,
+		const std::string &in_account_password,
+		const std::string &source_loginserver = "local"
+	);
 };
 
 

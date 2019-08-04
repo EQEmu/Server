@@ -143,6 +143,7 @@ void EQEmuLogSys::LoadLogSettingsDefaults()
 	log_settings[Logs::Warning].log_to_console   = static_cast<uint8>(Logs::General);
 	log_settings[Logs::Notice].log_to_console    = static_cast<uint8>(Logs::General);
 	log_settings[Logs::Info].log_to_console      = static_cast<uint8>(Logs::General);
+	log_settings[Logs::Debug].log_to_console     = static_cast<uint8>(Logs::General);
 
 	/**
 	 * Set Category enabled status on defaults
@@ -470,7 +471,7 @@ void EQEmuLogSys::Out(
 		prefix = fmt::format("[{0}::{1}:{2}] ", base_file_name(file), func, line);
 	}
 
-	auto msg_cstr = message.c_str();
+	auto    msg_cstr = message.c_str();
 	va_list args;
 	va_start(args, msg_cstr);
 	std::string output_message = vStringFormat(msg_cstr, args);

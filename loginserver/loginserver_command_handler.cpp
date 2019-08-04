@@ -50,10 +50,11 @@ namespace LoginserverCommandHandler {
 		/**
 		 * Register commands
 		 */
-		function_map["login-user:create"]    = &LoginserverCommandHandler::CreateLocalLoginserverAccount;
-		function_map["web-api-token:create"] = &LoginserverCommandHandler::CreateLoginserverApiToken;
-		function_map["web-api-token:list"]   = &LoginserverCommandHandler::ListLoginserverApiTokens;
-		function_map["world-admin:create"]   = &LoginserverCommandHandler::CreateLoginserverWorldAdminAccount;
+		function_map["login-user:create"]            = &LoginserverCommandHandler::CreateLocalLoginserverAccount;
+		function_map["login-user:check-credentials"] = &LoginserverCommandHandler::CheckLoginserverUserCredentials;
+		function_map["web-api-token:create"]         = &LoginserverCommandHandler::CreateLoginserverApiToken;
+		function_map["web-api-token:list"]           = &LoginserverCommandHandler::ListLoginserverApiTokens;
+		function_map["world-admin:create"]           = &LoginserverCommandHandler::CreateLoginserverWorldAdminAccount;
 
 		EQEmuCommand::HandleMenu(function_map, cmd, argc, argv);
 	}
@@ -179,4 +180,31 @@ namespace LoginserverCommandHandler {
 		);
 	}
 
+	/**
+	 * @param argc
+	 * @param argv
+	 * @param cmd
+	 * @param description
+	 */
+	void CheckLoginserverUserCredentials(int argc, char **argv, argh::parser &cmd, std::string &description)
+	{
+		description = "Check user login credentials";
+
+		std::vector<std::string> arguments = {
+			"--username",
+			"--password"
+		};
+		std::vector<std::string> options   = {};
+
+		if (cmd[{"-h", "--help"}]) {
+			return;
+		}
+
+		EQEmuCommand::ValidateCmdInput(arguments, options, cmd, argc, argv);
+
+		AccountManagement::CheckLoginserverUserCredentials(
+			cmd("--username").str(),
+			cmd("--password").str()
+		);
+	}
 }

@@ -87,6 +87,37 @@ namespace LoginserverWebserver {
 				LoginserverWebserver::SendResponse(response, res);
 			}
 		);
+
+		api.Post(
+			"/account/credentials/validate/local", [](const httplib::Request &request, httplib::Response &res) {
+				LoginserverWebserver::TokenManager::AuthCanRead(request, res);
+				Json::Value request_body = LoginserverWebserver::ParseRequestBody(request);
+				std::string username     = request_body.get("username", "").asString();
+				std::string password     = request_body.get("password", "").asString();
+				std::string email        = request_body.get("email", "").asString();
+
+				Json::Value response;
+				if (username.empty() || password.empty()) {
+					response["message"] = "Username or password not set";
+					LoginserverWebserver::SendResponse(response, res);
+					return;
+				}
+
+				bool credentials_valid = AccountManagement::CheckLoginserverUserCredentials(
+					username,
+					password
+				);
+
+				if (credentials_valid) {
+					response["message"] = "Credentials valid!";
+				}
+				else {
+					response["error"] = "Credentials invalid!";
+				}
+
+				LoginserverWebserver::SendResponse(response, res);
+			}
+		);
 	}
 
 	/**
@@ -146,8 +177,7 @@ namespace LoginserverWebserver {
 			res.set_header("response_set", "true");
 
 			LogWarning(
-				"AuthCanRead access failure | token [{0}] remote_address [{1}] user_agent [{2}]",
-				user_token.token,
+				"AuthCanRead access failure remote_address [{0}] user_agent [{1}]",
 				user_token.remote_address,
 				user_token.user_agent
 			);
@@ -174,8 +204,7 @@ namespace LoginserverWebserver {
 			res.set_header("response_set", "true");
 
 			LogWarning(
-				"AuthCanWrite access failure | token [{0}] remote_address [{1}] user_agent [{2}]",
-				user_token.token,
+				"AuthCanWrite access failure remote_address [{0}] user_agent [{1}]",
 				user_token.remote_address,
 				user_token.user_agent
 			);

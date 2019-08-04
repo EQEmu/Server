@@ -248,6 +248,24 @@ public:
 
 	Database::DbLoginServerAdmin GetLoginServerAdmin(const std::string &account_name);
 
+	struct DbLoginServerAccount {
+		bool        loaded = false;
+		uint32      id;
+		std::string account_name;
+		std::string account_password;
+		std::string account_email;
+		std::string source_loginserver;
+		std::string last_login_date;
+		std::string last_ip_address;
+		std::string created_at;
+		std::string updated_at;
+	};
+
+	Database::DbLoginServerAccount GetLoginServerAccountByAccountName(
+		const std::string &account_name,
+		const std::string &source_loginserver = "local"
+	);
+
 	/**
 	 * @param name
 	 * @param password

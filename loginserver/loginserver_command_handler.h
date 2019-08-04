@@ -30,6 +30,7 @@ namespace LoginserverCommandHandler {
 	void ListLoginserverApiTokens(int argc, char **argv, argh::parser &cmd, std::string &description);
 	void CreateLocalLoginserverAccount(int argc, char **argv, argh::parser &cmd, std::string &description);
 	void CreateLoginserverWorldAdminAccount(int argc, char **argv, argh::parser &cmd, std::string &description);
+	void CheckLoginserverUserCredentials(int argc, char **argv, argh::parser &cmd, std::string &description);
 };
 
 

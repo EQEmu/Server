@@ -730,3 +730,40 @@ Database::DbLoginServerAdmin Database::GetLoginServerAdmin(const std::string &ac
 
 	return login_server_admin;
 }
+
+/**
+ * @param account_name
+ * @return
+ */
+Database::DbLoginServerAccount Database::GetLoginServerAccountByAccountName(
+	const std::string &account_name,
+	const std::string &source_loginserver
+)
+{
+	auto query = fmt::format(
+		"SELECT id, account_name, account_password, account_email, source_loginserver, last_ip_address, last_login_date, "
+		"created_at, updated_at"
+		" FROM login_accounts WHERE account_name = '{0}' and source_loginserver = '{1}' LIMIT 1",
+		EscapeString(account_name),
+		EscapeString(source_loginserver)
+	);
+
+	auto results = QueryDatabase(query);
+
+	Database::DbLoginServerAccount login_server_account{};
+	if (results.RowCount() == 1) {
+		auto row = results.begin();
+		login_server_account.loaded             = true;
+		login_server_account.id                 = std::stoi(row[0]);
+		login_server_account.account_name       = row[1];
+		login_server_account.account_password   = row[2];
+		login_server_account.account_email      = row[3];
+		login_server_account.source_loginserver = row[4];
+		login_server_account.last_ip_address    = row[5];
+		login_server_account.last_login_date    = row[6];
+		login_server_account.created_at         = row[7];
+		login_server_account.updated_at         = row[8];
+	}
+
+	return login_server_account;
+}
