@@ -76,7 +76,7 @@ namespace LoginserverWebserver {
 					return;
 				}
 
-				bool account_created = AccountManagement::CreateLocalLoginServerAccount(username, password);
+				bool account_created = AccountManagement::CreateLocalLoginServerAccount(username, password, email);
 				if (account_created) {
 					response["message"] = "Account created successfully!";
 				}
@@ -218,10 +218,11 @@ namespace LoginserverWebserver {
 		}
 
 		LogDebug(
-			"Authentication Request | remote_address [{0}] user_agent [{1}] authorization_key [{2}]",
+			"Authentication Request | remote_address [{0}] user_agent [{1}] authorization_key [{2}] request_path [{3}]",
 			user_token.remote_address,
 			user_token.user_agent,
-			authorization_key
+			authorization_key,
+			request.path
 		);
 
 		return user_token;
