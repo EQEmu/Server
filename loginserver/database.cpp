@@ -227,6 +227,41 @@ bool Database::CreateLoginData(
 }
 
 /**
+ * @param name
+ * @param password
+ * @param loginserver
+ * @param email
+ * @return
+ */
+uint32 Database::CreateLoginAccount(
+	const std::string &name,
+	const std::string &password,
+	const std::string &loginserver,
+	const std::string &email
+)
+{
+	uint32 free_id = GetFreeID(loginserver);
+
+	if (free_id <= 0) {
+		return 0;
+	}
+
+	auto query = fmt::format(
+		"INSERT INTO login_accounts (id, source_loginserver, account_name, account_password, account_email, last_login_date, last_ip_address, created_at) "
+		"VALUES ({0}, '{1}', '{2}', '{3}', '{4}', NOW(), '127.0.0.1', NOW())",
+		free_id,
+		EscapeString(loginserver),
+		EscapeString(name),
+		EscapeString(password),
+		EscapeString(email)
+	);
+
+	auto results = QueryDatabase(query);
+
+	return (results.Success() ? free_id : 0);
+}
+
+/**
  * @param in_account_name
  * @param in_account_password
  * @param loginserver

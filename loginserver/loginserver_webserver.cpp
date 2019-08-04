@@ -67,6 +67,7 @@ namespace LoginserverWebserver {
 				Json::Value request_body = LoginserverWebserver::ParseRequestBody(request);
 				std::string username     = request_body.get("username", "").asString();
 				std::string password     = request_body.get("password", "").asString();
+				std::string email        = request_body.get("email", "").asString();
 
 				Json::Value response;
 				if (username.empty() || password.empty()) {

@@ -26,11 +26,13 @@ extern LoginServer server;
 /**
  * @param username
  * @param password
+ * @param email
  * @return
  */
-bool AccountManagement::CreateLocalLoginServerAccount(
+uint32 AccountManagement::CreateLocalLoginServerAccount(
 	std::string username,
-	std::string password
+	std::string password,
+	std::string email
 )
 {
 	auto mode = server.options.GetEncryptionMode();
@@ -46,29 +48,32 @@ bool AccountManagement::CreateLocalLoginServerAccount(
 	unsigned int db_id          = 0;
 	std::string  db_loginserver = server.options.GetDefaultLoginServerName();
 	if (server.db->DoesLoginServerAccountExist(username, hash, db_loginserver, 1)) {
-		LogInfo(
+		LogWarning(
 			"Attempting to create local login account for user [{0}] login [{1}] db_id [{2}] but already exists!",
 			username,
 			db_loginserver,
 			db_id
 		);
 
-		return false;
+		return 0;
 	}
 
-	if (server.db->CreateLoginData(username, hash, db_loginserver, db_id)) {
+	uint32 created_account_id = server.db->CreateLoginAccount(username, hash, db_loginserver, email);
+	if (created_account_id > 0) {
 		LogInfo(
-			"Account creation success for user [{0}] encryption algorithm [{1}] ({2})",
+			"Account creation success for user [{0}] encryption algorithm [{1}] ({2}) id: [{3}]",
 			username,
 			GetEncryptionByModeId(mode),
-			mode
+			mode,
+			created_account_id
 		);
-		return true;
+
+		return created_account_id;
 	}
 
 	LogError("Failed to create local login account for user [{0}]!", username);
 
-	return false;
+	return 0;
 }
 
 /**
@@ -97,7 +102,7 @@ bool AccountManagement::CreateLoginserverWorldAdminAccount(
 	);
 
 	if (server.db->DoesLoginserverWorldAdminAccountExist(username)) {
-		LogInfo(
+		LogWarning(
 			"Attempting to create world admin account for user [{0}] but already exists!",
 			username
 		);

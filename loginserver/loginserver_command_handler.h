@@ -19,17 +19,17 @@
  */
 
 #include "iostream"
-#include "../common/cli/argh.h"
+#include "../common/cli/eqemu_command_handler.h"
 
 #ifndef EQEMU_LOGINSERVER_COMMAND_HANDLER_H
 #define EQEMU_LOGINSERVER_COMMAND_HANDLER_H
 
 namespace LoginserverCommandHandler {
 	void CommandHandler(int argc, char **argv);
-	void CreateLoginserverApiToken(int argc, char **argv, argh::parser &cmd);
-	void ListLoginserverApiTokens(int argc, char **argv, argh::parser &cmd);
-	void CreateLocalLoginserverAccount(int argc, char **argv, argh::parser &cmd);
-	void CreateLoginserverWorldAdminAccount(int argc, char **argv, argh::parser &cmd);
+	void CreateLoginserverApiToken(int argc, char **argv, argh::parser &cmd, std::string &description);
+	void ListLoginserverApiTokens(int argc, char **argv, argh::parser &cmd, std::string &description);
+	void CreateLocalLoginserverAccount(int argc, char **argv, argh::parser &cmd, std::string &description);
+	void CreateLoginserverWorldAdminAccount(int argc, char **argv, argh::parser &cmd, std::string &description);
 };
 
 

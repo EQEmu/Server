@@ -31,30 +31,6 @@ extern LoginServer server;
 namespace LoginserverCommandHandler {
 
 	/**
-	 * @param cmd
-	 */
-	void DisplayDebug(argh::parser &cmd)
-	{
-		if (cmd[{"-d", "--debug"}]) {
-			std::cout << "Positional args:\n";
-			for (auto &pos_arg : cmd)
-				std::cout << '\t' << pos_arg << std::endl;
-
-			std::cout << "Positional args:\n";
-			for (auto &pos_arg : cmd.pos_args())
-				std::cout << '\t' << pos_arg << std::endl;
-
-			std::cout << "\nFlags:\n";
-			for (auto &flag : cmd.flags())
-				std::cout << '\t' << flag << std::endl;
-
-			std::cout << "\nParameters:\n";
-			for (auto &param : cmd.params())
-				std::cout << '\t' << param.first << " : " << param.second << std::endl;
-		}
-	}
-
-	/**
 	 * @param argc
 	 * @param argv
 	 */
@@ -64,74 +40,46 @@ namespace LoginserverCommandHandler {
 
 		argh::parser cmd;
 		cmd.parse(argc, argv, argh::parser::PREFER_PARAM_FOR_UNREG_OPTION);
-		LoginserverCommandHandler::DisplayDebug(cmd);
+		EQEmuCommand::DisplayDebug(cmd);
 
 		/**
 		 * Declare command mapping
 		 */
-		std::map<std::string, void (*)(int argc, char **argv, argh::parser &cmd)> function_map;
+		auto function_map = EQEmuCommand::function_map;
 
-		function_map["create-loginserver-account"]             = &LoginserverCommandHandler::CreateLocalLoginserverAccount;
-		function_map["create-loginserver-api-token"]           = &LoginserverCommandHandler::CreateLoginserverApiToken;
-		function_map["create-loginserver-world-admin-account"] = &LoginserverCommandHandler::CreateLoginserverWorldAdminAccount;
-		function_map["list-loginserver-api-tokens"]            = &LoginserverCommandHandler::ListLoginserverApiTokens;
+		/**
+		 * Register commands
+		 */
+		function_map["login-user:create"]    = &LoginserverCommandHandler::CreateLocalLoginserverAccount;
+		function_map["web-api-token:create"] = &LoginserverCommandHandler::CreateLoginserverApiToken;
+		function_map["web-api-token:list"]   = &LoginserverCommandHandler::ListLoginserverApiTokens;
+		function_map["world-admin:create"]   = &LoginserverCommandHandler::CreateLoginserverWorldAdminAccount;
 
-		std::map<std::string, void (*)(
-			int argc,
-			char **argv,
-			argh::parser &cmd
-		)>::const_iterator it = function_map.begin();
-
-		std::map<std::string, void (*)(
-			int argc,
-			char **argv,
-			argh::parser &cmd
-		)>::const_iterator end = function_map.end();
-
-		bool ran_command = false;
-		while (it != end) {
-			if (it->first == argv[1]) {
-				std::cout << std::endl;
-				std::cout << "###########################################################" << std::endl;
-				std::cout << "# Executing CLI Command" << std::endl;
-				std::cout << "###########################################################" << std::endl;
-				std::cout << std::endl;
-
-				(it->second)(argc, argv, cmd);
-				ran_command = true;
-			}
-			++it;
-		}
-
-		if (cmd[{"-h", "--help"}] || !ran_command) {
-			std::cout << std::endl;
-			std::cout << "###########################################################" << std::endl;
-			std::cout << "# Loginserver CLI Menu" << std::endl;
-			std::cout << "###########################################################" << std::endl;
-			std::cout << std::endl;
-			std::cout << "# API" << std::endl;
-			std::cout << "> create-loginserver-api-token --write --read" << std::endl;
-			std::cout << "> list-loginserver-api-tokens" << std::endl;
-			std::cout << std::endl;
-			std::cout << "# User Accounts" << std::endl;
-			std::cout << "> create-loginserver-account --username=* --password=*" << std::endl;
-			std::cout << std::endl;
-			std::cout << "# World Accounts" << std::endl;
-			std::cout << "> create-loginserver-world-admin-account --username=* --password=* --email=*" << std::endl;
-			std::cout << std::endl;
-			std::cout << std::endl;
-		}
-
-		exit(1);
+		EQEmuCommand::HandleMenu(function_map, cmd, argc, argv);
 	}
 
 	/**
 	 * @param argc
 	 * @param argv
 	 * @param cmd
+	 * @param description
 	 */
-	void CreateLoginserverApiToken(int argc, char **argv, argh::parser &cmd)
+	void CreateLoginserverApiToken(int argc, char **argv, argh::parser &cmd, std::string &description)
 	{
+		description = "Creates Loginserver API Token";
+
+		if (cmd[{"-h", "--help"}]) {
+			return;
+		}
+
+		std::vector<std::string> arguments = {};
+		std::vector<std::string> options   = {
+			"--read",
+			"--write"
+		};
+
+		EQEmuCommand::ValidateCmdInput(arguments, options, cmd, argc, argv);
+
 		bool can_read  = cmd[{"-r", "--read"}];
 		bool can_write = cmd[{"-w", "--write"}];
 
@@ -150,9 +98,16 @@ namespace LoginserverCommandHandler {
 	 * @param argc
 	 * @param argv
 	 * @param cmd
+	 * @param description
 	 */
-	void ListLoginserverApiTokens(int argc, char **argv, argh::parser &cmd)
+	void ListLoginserverApiTokens(int argc, char **argv, argh::parser &cmd, std::string &description)
 	{
+		description = "Lists Loginserver API Tokens";
+
+		if (cmd[{"-h", "--help"}]) {
+			return;
+		}
+
 		for (auto &it : server.token_manager->loaded_api_tokens) {
 			LogInfo(
 				"token [{0}] can_write [{1}] can_read [{2}]",
@@ -167,17 +122,30 @@ namespace LoginserverCommandHandler {
 	 * @param argc
 	 * @param argv
 	 * @param cmd
+	 * @param description
 	 */
-	void CreateLocalLoginserverAccount(int argc, char **argv, argh::parser &cmd)
+	void CreateLocalLoginserverAccount(int argc, char **argv, argh::parser &cmd, std::string &description)
 	{
-		if (cmd("--username").str().empty() || cmd("--password").str().empty()) {
-			LogInfo("Command Example: create-loginserver-account --username=user --password=password");
-			exit(1);
+		description = "Creates Local Loginserver Account";
+
+		std::vector<std::string> arguments = {
+			"--username",
+			"--password"
+		};
+		std::vector<std::string> options   = {
+			"--email=*"
+		};
+
+		if (cmd[{"-h", "--help"}]) {
+			return;
 		}
+
+		EQEmuCommand::ValidateCmdInput(arguments, options, cmd, argc, argv);
 
 		AccountManagement::CreateLocalLoginServerAccount(
 			cmd("--username").str(),
-			cmd("--password").str()
+			cmd("--password").str(),
+			cmd("--email").str()
 		);
 	}
 
@@ -185,17 +153,24 @@ namespace LoginserverCommandHandler {
 	 * @param argc
 	 * @param argv
 	 * @param cmd
+	 * @param description
 	 */
-	void CreateLoginserverWorldAdminAccount(int argc, char **argv, argh::parser &cmd)
+	void CreateLoginserverWorldAdminAccount(int argc, char **argv, argh::parser &cmd, std::string &description)
 	{
-		if (
-			cmd("--username").str().empty() ||
-			cmd("--password").str().empty() ||
-			cmd("--email").str().empty()) {
+		description = "Creates Loginserver World Administrator Account";
 
-			LogInfo("Command Example: create-loginserver-world-admin-account --username=* --password=* --email=*");
-			exit(1);
+		std::vector<std::string> arguments = {
+			"--username",
+			"--password"
+			"--email"
+		};
+		std::vector<std::string> options   = {};
+
+		if (cmd[{"-h", "--help"}]) {
+			return;
 		}
+
+		EQEmuCommand::ValidateCmdInput(arguments, options, cmd, argc, argv);
 
 		AccountManagement::CreateLoginserverWorldAdminAccount(
 			cmd("--username").str(),

@@ -213,7 +213,7 @@ void EQ::Net::ServertalkClient::ProcessHello(EQ::Net::Packet &p)
 				}
 			}
 			else {
-				LogF(Logs::General, Logs::Error, "Could not process hello, size != {0}", 1 + crypto_box_PUBLICKEYBYTES + crypto_box_NONCEBYTES);
+				LogError("Could not process hello, size != {0}", 1 + crypto_box_PUBLICKEYBYTES + crypto_box_NONCEBYTES);
 			}
 		}
 		else {
@@ -225,7 +225,7 @@ void EQ::Net::ServertalkClient::ProcessHello(EQ::Net::Packet &p)
 		}
 	}
 	catch (std::exception &ex) {
-		LogF(Logs::General, Logs::Error, "Error parsing hello from server: {0}", ex.what());
+		LogError("Error parsing hello from server: {0}", ex.what());
 		m_connection->Disconnect();
 
 		if (m_on_connect_cb) {
@@ -252,7 +252,7 @@ void EQ::Net::ServertalkClient::ProcessHello(EQ::Net::Packet &p)
 		}
 }
 	catch (std::exception &ex) {
-		LogF(Logs::General, Logs::Error, "Error parsing hello from server: {0}", ex.what());
+		LogError("Error parsing hello from server: {0}", ex.what());
 		m_connection->Disconnect();
 
 		if (m_on_connect_cb) {
@@ -275,7 +275,7 @@ void EQ::Net::ServertalkClient::ProcessMessage(EQ::Net::Packet &p)
 				std::unique_ptr<unsigned char[]> decrypted_text(new unsigned char[message_len]);
 				if (crypto_box_open_easy_afternm(&decrypted_text[0], (unsigned char*)&data[0], length, m_nonce_theirs, m_shared_key))
 				{
-					LogF(Logs::General, Logs::Error, "Error decrypting message from server");
+					LogError("Error decrypting message from server");
 					(*(uint64_t*)&m_nonce_theirs[0])++;
 					return;
 				}
@@ -323,7 +323,7 @@ void EQ::Net::ServertalkClient::ProcessMessage(EQ::Net::Packet &p)
 		}
 	}
 	catch (std::exception &ex) {
-		LogF(Logs::General, Logs::Error, "Error parsing message from server: {0}", ex.what());
+		LogError("Error parsing message from server: {0}", ex.what());
 	}
 }
 

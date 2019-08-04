@@ -3,6 +3,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 SET(common_sources
 	base_packet.cpp
 	classes.cpp
+	cli/eqemu_command_handler.cpp
 	compression.cpp
 	condition.cpp
 	crash.cpp
@@ -108,8 +109,7 @@ SET(common_sources
 	tinyxml/tinyxmlerror.cpp
 	tinyxml/tinyxmlparser.cpp
 	util/directory.cpp
-	util/uuid.cpp
-)
+	util/uuid.cpp)
 
 SET(common_headers
 	any.h
@@ -123,6 +123,8 @@ SET(common_headers
 	crc16.h
 	crc32.h
 	cli/argh.h
+	cli/eqemu_command_handler.h
+	cli/terminal_color.hpp
 	data_verification.h
 	database.h
 	dbcore.h
@@ -270,8 +272,7 @@ SET(common_headers
 	tinyxml/tinyxml.h
 	util/memory_stream.h
 	util/directory.h
-	util/uuid.h
-)
+	util/uuid.h)
 
 SOURCE_GROUP(Event FILES
 	event/event_loop.h

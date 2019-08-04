@@ -248,6 +248,20 @@ public:
 
 	Database::DbLoginServerAdmin GetLoginServerAdmin(const std::string &account_name);
 
+	/**
+	 * @param name
+	 * @param password
+	 * @param loginserver
+	 * @param email
+	 * @return
+	 */
+	uint32 CreateLoginAccount(
+		const std::string &name,
+		const std::string &password,
+		const std::string &loginserver = "local",
+		const std::string &email = "local_creation"
+	);
+
 protected:
 	std::string user, pass, host, port, name;
 	MYSQL       *database{};

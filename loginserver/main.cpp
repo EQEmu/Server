@@ -48,9 +48,11 @@ int main(int argc, char** argv)
 	RegisterExecutablePlatform(ExePlatformLogin);
 	set_exception_handler();
 
-	LogSys.LoadLogSettingsDefaults();
-
 	LogInfo("Logging System Init");
+
+	if (argc == 1) {
+		LogSys.LoadLogSettingsDefaults();
+	}
 
 	server.config = EQ::JsonConfigFile::Load("login.json");
 	LogInfo("Config System Init");
@@ -123,7 +125,9 @@ int main(int argc, char** argv)
 		server.config.GetVariableString("database", "db", "peq")
 	);
 
-	server.db->LoadLogSettings(LogSys.log_settings);
+	if (argc == 1) {
+		server.db->LoadLogSettings(LogSys.log_settings);
+	}
 
 	/**
 	 * make sure our database got created okay, otherwise cleanup and exit
@@ -186,7 +190,10 @@ int main(int argc, char** argv)
 		LoginserverWebserver::RegisterRoutes(api);
 	}
 
-	LoginserverCommandHandler::CommandHandler(argc, argv);
+	if (argc > 1) {
+		LogSys.LoadLogSettingsDefaults();
+		LoginserverCommandHandler::CommandHandler(argc, argv);
+	}
 
 	LogInfo("[Config] [Logging] IsTraceOn [{0}]", server.options.IsTraceOn());
 	LogInfo("[Config] [Logging] IsWorldTraceOn [{0}]", server.options.IsWorldTraceOn());

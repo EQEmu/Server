@@ -427,7 +427,7 @@ int main(int argc, char** argv) {
 	Log(Logs::General, Logs::World_Server, "Server (TCP) listener started.");
 
 	server_connection->OnConnectionIdentified("Zone", [&console](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
-		LogF(Logs::General, Logs::World_Server, "New Zone Server connection from {2} at {0}:{1}",
+		LogInfo("New Zone Server connection from {2} at {0}:{1}",
 			connection->Handle()->RemoteIP(), connection->Handle()->RemotePort(), connection->GetUUID());
 
 		numzones++;
@@ -435,7 +435,7 @@ int main(int argc, char** argv) {
 	});
 
 	server_connection->OnConnectionRemoved("Zone", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
-		LogF(Logs::General, Logs::World_Server, "Removed Zone Server connection from {0}",
+		LogInfo("Removed Zone Server connection from {0}",
 			connection->GetUUID());
 
 		numzones--;
@@ -443,35 +443,35 @@ int main(int argc, char** argv) {
 	});
 
 	server_connection->OnConnectionIdentified("Launcher", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
-		LogF(Logs::General, Logs::World_Server, "New Launcher connection from {2} at {0}:{1}",
+		LogInfo("New Launcher connection from {2} at {0}:{1}",
 			connection->Handle()->RemoteIP(), connection->Handle()->RemotePort(), connection->GetUUID());
 
 		launcher_list.Add(connection);
 	});
 
 	server_connection->OnConnectionRemoved("Launcher", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
-		LogF(Logs::General, Logs::World_Server, "Removed Launcher connection from {0}",
+		LogInfo("Removed Launcher connection from {0}",
 			connection->GetUUID());
 
 		launcher_list.Remove(connection);
 	});
 
 	server_connection->OnConnectionIdentified("QueryServ", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
-		LogF(Logs::General, Logs::World_Server, "New Query Server connection from {2} at {0}:{1}",
+		LogInfo("New Query Server connection from {2} at {0}:{1}",
 			connection->Handle()->RemoteIP(), connection->Handle()->RemotePort(), connection->GetUUID());
 
 		QSLink.AddConnection(connection);
 	});
 
 	server_connection->OnConnectionRemoved("QueryServ", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
-		LogF(Logs::General, Logs::World_Server, "Removed Query Server connection from {0}",
+		LogInfo("Removed Query Server connection from {0}",
 			connection->GetUUID());
 
 		QSLink.RemoveConnection(connection);
 	});
 
 	server_connection->OnConnectionIdentified("UCS", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
-		LogF(Logs::General, Logs::World_Server, "New UCS Server connection from {2} at {0}:{1}",
+		LogInfo("New UCS Server connection from {2} at {0}:{1}",
 			connection->Handle()->RemoteIP(), connection->Handle()->RemotePort(), connection->GetUUID());
 
 		UCSLink.SetConnection(connection);
@@ -480,7 +480,7 @@ int main(int argc, char** argv) {
 	});
 
 	server_connection->OnConnectionRemoved("UCS", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
-		LogF(Logs::General, Logs::World_Server, "Removed Query Server connection from {0}",
+		LogInfo("Removed Query Server connection from {0}",
 			connection->GetUUID());
 
 		UCSLink.SetConnection(nullptr);
@@ -489,14 +489,14 @@ int main(int argc, char** argv) {
 	});
 
 	server_connection->OnConnectionIdentified("WebInterface", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
-		LogF(Logs::General, Logs::World_Server, "New WebInterface Server connection from {2} at {0}:{1}",
+		LogInfo("New WebInterface Server connection from {2} at {0}:{1}",
 			connection->Handle()->RemoteIP(), connection->Handle()->RemotePort(), connection->GetUUID());
 
 		web_interface.AddConnection(connection);
 	});
 
 	server_connection->OnConnectionRemoved("WebInterface", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
-		LogF(Logs::General, Logs::World_Server, "Removed WebInterface Server connection from {0}",
+		LogInfo("Removed WebInterface Server connection from {0}",
 			connection->GetUUID());
 
 		web_interface.RemoveConnection(connection);

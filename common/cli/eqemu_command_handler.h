@@ -17,38 +17,60 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-#ifndef EQEMU_ACCOUNT_MANAGEMENT_H
-#define EQEMU_ACCOUNT_MANAGEMENT_H
 
-#include "iostream"
-#include "../common/types.h"
+#ifndef EQEMU_EQEMU_COMMAND_HANDLER_H
+#define EQEMU_EQEMU_COMMAND_HANDLER_H
 
-class AccountManagement {
-public:
+#include "argh.h"
+#include "terminal_color.hpp"
+
+namespace EQEmuCommand {
+
+	extern std::map<std::string, void (*)(
+		int argc,
+		char **argv,
+		argh::parser &cmd,
+		std::string &description
+	)> function_map;
 
 	/**
-	 * @param username
-	 * @param password
-	 * @param email
-	 * @return
+	 * @param arguments
+	 * @param options
+	 * @param cmd
+	 * @param argc
+	 * @param argv
 	 */
-	static uint32 CreateLocalLoginServerAccount(std::string username, std::string password, std::string email = "");
+	void ValidateCmdInput(
+		std::vector<std::string> &arguments,
+		std::vector<std::string> &options,
+		argh::parser &cmd,
+		int argc,
+		char **argv
+	);
 
 	/**
-	 * @param username
-	 * @param password
-	 * @param email
-	 * @return
+	 * @param cmd
 	 */
-	static bool CreateLoginserverWorldAdminAccount(
-		const std::string &username,
-		const std::string &password,
-		const std::string &email,
-		const std::string &first_name = "",
-		const std::string &last_name = "",
-		const std::string &ip_address = ""
+	void DisplayDebug(argh::parser &cmd);
+
+	/**
+	 * @param in_function_map
+	 * @param cmd
+	 * @param argc
+	 * @param argv
+	 */
+	void HandleMenu(
+		std::map<std::string, void (*)(
+			int argc,
+			char **argv,
+			argh::parser &cmd,
+			std::string &description
+		)> &in_function_map,
+		argh::parser &cmd,
+		int argc,
+		char **argv
 	);
 };
 
 
-#endif //EQEMU_ACCOUNT_MANAGEMENT_H
+#endif //EQEMU_EQEMU_COMMAND_HANDLER_H
