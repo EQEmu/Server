@@ -22,7 +22,6 @@
 #define EQEMU_EQEMU_COMMAND_HANDLER_H
 
 #include "argh.h"
-#include "terminal_color.hpp"
 
 namespace EQEmuCommand {
 
