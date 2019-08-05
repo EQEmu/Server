@@ -1128,7 +1128,10 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	UpdateActiveLight();
 	ns->spawn.light		= m_Light.Type[EQEmu::lightsource::LightActive];
 
-	ns->spawn.showhelm = (helmtexture && helmtexture != 0xFF) ? 1 : 0;
+	if (IsNPC() && race == ERUDITE)
+		ns->spawn.showhelm = 1;
+	else
+		ns->spawn.showhelm = (helmtexture && helmtexture != 0xFF) ? 1 : 0;
 
 	ns->spawn.invis		= (invisible || hidden) ? 1 : 0;	// TODO: load this before spawning players
 	ns->spawn.NPC		= IsClient() ? 0 : 1;
@@ -2911,9 +2914,13 @@ void Mob::Emote(const char *format, ...)
 		GENERIC_EMOTE, GetCleanName(), buf);
 }
 
-void Mob::QuestJournalledSay(Client *QuestInitiator, const char *str)
+void Mob::QuestJournalledSay(Client *QuestInitiator, const char *str, Journal::Options &opts)
 {
-		entity_list.QuestJournalledSayClose(this, QuestInitiator, 200, GetCleanName(), str);
+	// just in case
+	if (opts.target_spawn_id == 0 && QuestInitiator)
+		opts.target_spawn_id = QuestInitiator->GetID();
+
+	entity_list.QuestJournalledSayClose(this, QuestInitiator, 200, GetCleanName(), str, opts);
 }
 
 const char *Mob::GetCleanName()

@@ -15,109 +15,80 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-// Serverinfo.cpp - Server information gathering functions, used in #serverinfo - Windows specific
-// I'm not sure quite how to get this exact information in *nix, hopefully someone can fill that in
-// -T7g
-// Implement preliminary support for *nix variants
-// misanthropicfiend
 
-#ifdef _WINDOWS
-#include <windows.h>
+#include "serverinfo.h"
+#include <uv.h>
 
-char Ver_name[100];
-DWORD Ver_build, Ver_min, Ver_maj, Ver_pid;
+size_t EQ::GetRSS()
+{
+	size_t rss = 0;
 
-int GetOS()	{
-
-	strcpy(Ver_name, "Unknown operating system");
-
-	OSVERSIONINFO Ver_os;
-	Ver_os.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-
-	if(!(GetVersionEx(&Ver_os))) return 1;
-
-	Ver_build = Ver_os.dwBuildNumber & 0xFFFF;
-	Ver_min = Ver_os.dwMinorVersion;
-	Ver_maj = Ver_os.dwMajorVersion;
-	Ver_pid = Ver_os.dwPlatformId;
-
-	if ((Ver_pid == 1) && (Ver_maj == 4))
-	{
-		if ((Ver_min < 10) && (Ver_build == 950))
-		{
-			strcpy(Ver_name, "Microsoft Windows 95");
-		}
-		else if ((Ver_min < 10) &&
-				((Ver_build > 950) && (Ver_build <= 1080)))
-		{
-			strcpy(Ver_name, "Microsoft Windows 95 SP1");
-		}
-		else if ((Ver_min < 10) && (Ver_build > 1080))
-		{
-			strcpy(Ver_name, "Microsoft Windows 95 OSR2");
-		}
-		else if ((Ver_min == 10) && (Ver_build == 1998))
-		{
-			strcpy(Ver_name, "Microsoft Windows 98");
-		}
-		else if ((Ver_min == 10) &&
-				((Ver_build > 1998) && (Ver_build < 2183)))
-		{
-			strcpy(Ver_name, "Microsoft Windows 98, Service Pack 1");
-		}
-		else if ((Ver_min == 10) && (Ver_build >= 2183))
-		{
-			strcpy(Ver_name, "Microsoft Windows 98 Second Edition");
-		}
-		else if (Ver_min == 90)
-		{
-			strcpy(Ver_name, "Microsoft Windows ME");
-		}
-	}
-	else if (Ver_pid == 2)
-	{
-		if ((Ver_maj == 3) && (Ver_min == 51))
-		{
-			strcpy(Ver_name, "Microsoft Windows NT 3.51");
-		}
-		else if ((Ver_maj == 4) && (Ver_min == 0))
-		{
-			strcpy(Ver_name, "Microsoft Windows NT 4");
-		}
-		else if ((Ver_maj == 5) && (Ver_min == 0))
-		{
-			strcpy(Ver_name, "Microsoft Windows 2000");
-		}
-		else if ((Ver_maj == 5) && (Ver_min == 1))
-		{
-			strcpy(Ver_name, "Microsoft Windows XP");
-		}
-		else if ((Ver_maj == 5) && (Ver_min == 2))
-		{
-			strcpy(Ver_name, "Microsoft Windows 2003");
-		}
+	if (0 != uv_resident_set_memory(&rss)) {
+		return 0;
 	}
 
-	return 0;
+	return rss;
 }
 
-#else
+double EQ::GetUptime()
+{
+	double uptime = 0.0;
 
-#include <sys/utsname.h>
-#include <stdio.h>
-#include <string.h>
-
-char* GetOS(char* os_string) {
-	utsname info;
-
-	if(uname(&info)==0) {
-		snprintf(os_string, 99, "%s %s %s %s %s", info.sysname, info.nodename, info.release, info.version, info.machine);
-	} else {
-		strncpy(os_string, "Error determining OS & version!", 25);
+	if (0 != uv_uptime(&uptime)) {
+		return 0.0;
 	}
 
-	return os_string;
-
+	return uptime;
 }
 
-#endif
+size_t EQ::GetPID()
+{
+	return uv_os_getpid();
+}
+
+std::vector<eq_cpu_info_t> EQ::GetCPUs()
+{
+	std::vector<eq_cpu_info_t> ret;
+	uv_cpu_info_t *cpu_info = nullptr;
+	int count = 0;
+
+	if (0 != uv_cpu_info(&cpu_info, &count)) {
+		return ret;
+	}
+
+	ret.reserve(count);
+	for (int i = 0; i < count; ++i) {
+		eq_cpu_info_t r;
+		auto &entry = cpu_info[i];
+
+		r.model = entry.model;
+		r.speed = entry.speed / 1000.0;
+		r.time_user = entry.cpu_times.user;
+		r.time_sys = entry.cpu_times.sys;
+		r.time_idle = entry.cpu_times.idle;
+		r.time_nice = entry.cpu_times.nice;
+		r.time_irq = entry.cpu_times.irq;
+
+		ret.push_back(r);
+	}
+
+	uv_free_cpu_info(cpu_info, count);
+	return ret;
+}
+
+eq_utsname_t EQ::GetOS()
+{
+	eq_utsname_t ret;
+	uv_utsname_t name;
+
+	if (0 != uv_os_uname(&name)) {
+		return ret;
+	}
+
+	ret.machine = name.machine;
+	ret.release = name.release;
+	ret.sysname = name.sysname;
+	ret.version = name.version;
+
+	return ret;
+}

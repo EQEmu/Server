@@ -205,6 +205,7 @@ RULE_CATEGORY_END()
 RULE_CATEGORY(GM)
 RULE_INT(GM, MinStatusToSummonItem, 250)
 RULE_INT(GM, MinStatusToZoneAnywhere, 250)
+RULE_INT(GM, MinStatusToLevelTarget, 100)
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(World)
@@ -225,8 +226,6 @@ RULE_BOOL(World, MaxClientsSetByStatus, false) // If True, IP Limiting will be s
 RULE_BOOL(World, EnableIPExemptions, false) // If True, ip_exemptions table is used, if there is no entry for the IP it will default to RuleI(World, MaxClientsPerIP)
 RULE_BOOL(World, ClearTempMerchantlist, true) // Clears temp merchant items when world boots.
 RULE_BOOL(World, DeleteStaleCorpeBackups, true) // Deletes stale corpse backups older than 2 weeks.
-RULE_INT(World, AccountSessionLimit, -1) //Max number of characters allowed on at once from a single account (-1 is disabled)
-RULE_INT(World, ExemptAccountLimitStatus, -1) //Min status required to be exempt from multi-session per account limiting (-1 is disabled)
 RULE_BOOL(World, GMAccountIPList, false) // Check ip list against GM Accounts, AntiHack GM Accounts.
 RULE_INT(World, MinGMAntiHackStatus, 1) //Minimum GM status to check against AntiHack list
 RULE_INT(World, SoFStartZoneID, -1) //Sets the Starting Zone for SoF Clients separate from Titanium Clients (-1 is disabled)
@@ -241,10 +240,11 @@ RULE_BOOL (World, IPLimitDisconnectAll, false)
 RULE_BOOL(World, MaxClientsSimplifiedLogic, false) // New logic that only uses ExemptMaxClientsStatus and MaxClientsPerIP. Done on the loginserver. This mimics the P99-style special IP rules.
 RULE_INT (World, TellQueueSize, 20)
 RULE_BOOL(World, StartZoneSameAsBindOnCreation, true) //Should the start zone ALWAYS be the same location as your bind?
+RULE_BOOL(World, EnforceCharacterLimitAtLogin, false)
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Zone)
-RULE_INT(Zone, ClientLinkdeadMS, 180000) //the time a client remains link dead on the server after a sudden disconnection
+RULE_INT(Zone, ClientLinkdeadMS, 90000) //the time a client remains link dead on the server after a sudden disconnection
 RULE_INT(Zone, GraveyardTimeMS, 1200000) //ms time until a player corpse is moved to a zone's graveyard, if one is specified for the zone
 RULE_BOOL(Zone, EnableShadowrest, 1) // enables or disables the shadowrest zone feature for player corpses. Default is turned on.
 RULE_BOOL(Zone, UsePlayerCorpseBackups, true) // Keeps backups of player corpses.
@@ -286,35 +286,11 @@ RULE_INT(Map, FindBestZHeightAdjust, 1)		// Adds this to the current Z before se
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Pathing)
-// Some of these rules may benefit by being made into columns in the zone table,
-// for instance, in dungeons, the min LOS distances could be substantially lowered.
-RULE_BOOL(Pathing, Aggro, true)		// Enable pathing for aggroed mobs.
-RULE_BOOL(Pathing, AggroReturnToGrid, true)	// Enable pathing for aggroed roaming mobs returning to their previous waypoint.
 RULE_BOOL(Pathing, Guard, true)		// Enable pathing for mobs moving to their guard point.
 RULE_BOOL(Pathing, Find, true)		// Enable pathing for FindPerson requests from the client.
 RULE_BOOL(Pathing, Fear, true)		// Enable pathing for fear
-RULE_REAL(Pathing, ZDiffThresholdNew, 80)	// If a mob las LOS to it's target, it will run to it if the Z difference is < this.
-RULE_INT(Pathing, LOSCheckFrequency, 1000)	// A mob will check for LOS to it's target this often (milliseconds).
-RULE_INT(Pathing, RouteUpdateFrequencyShort, 1000)	// How often a new route will be calculated if the target has moved.
-RULE_INT(Pathing, RouteUpdateFrequencyLong, 5000)	// How often a new route will be calculated if the target has moved.
-// When a path has a path node route and it's target changes position, if it has RouteUpdateFrequencyNodeCount or less nodes to go on it's
-// current path, it will recalculate it's path based on the RouteUpdateFrequencyShort timer, otherwise it will use the
-// RouteUpdateFrequencyLong timer.
-RULE_INT(Pathing, RouteUpdateFrequencyNodeCount, 5)
-RULE_REAL(Pathing, MinDistanceForLOSCheckShort, 40000) // (NoRoot). While following a path, only check for LOS to target within this distance.
-RULE_REAL(Pathing, MinDistanceForLOSCheckLong, 1000000) // (NoRoot). Min distance when initially attempting to acquire the target.
-RULE_INT(Pathing, MinNodesLeftForLOSCheck, 4)	// Only check for LOS when we are down to this many path nodes left to run.
-// This next rule was put in for situations where the mob and it's target may be on different sides of a 'hazard', e.g. a pit
-// If the mob has LOS to it's target, even though there is a hazard in it's way, it may break off from the node path and run at
-// the target, only to later detect the hazard and re-acquire a node path. Depending upon the placement of the path nodes, this
-// can lead to the mob looping. The rule is intended to allow the mob to at least get closer to it's target each time before
-// checking LOS and trying to head straight for it.
-RULE_INT(Pathing, MinNodesTraversedForLOSCheck, 3)	// Only check for LOS after we have traversed this many path nodes.
-RULE_INT(Pathing, CullNodesFromStart, 1)		// Checks LOS from Start point to second node for this many nodes and removes first node if there is LOS
-RULE_INT(Pathing, CullNodesFromEnd, 1)		// Checks LOS from End point to second to last node for this many nodes and removes last node if there is LOS
-RULE_REAL(Pathing, CandidateNodeRangeXY, 400)		// When searching for path start/end nodes, only nodes within this range will be considered.
-RULE_REAL(Pathing, CandidateNodeRangeZ, 10)		// When searching for path start/end nodes, only nodes within this range will be considered.
-RULE_REAL(Pathing, NavmeshStepSize, 30.0f)
+RULE_REAL(Pathing, NavmeshStepSize, 100.0f)
+RULE_REAL(Pathing, ShortMovementUpdateRange, 130.0f)
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Watermap)
@@ -707,9 +683,10 @@ RULE_CATEGORY_END()
 RULE_CATEGORY(Network)
 RULE_INT(Network, ResendDelayBaseMS, 100)
 RULE_REAL(Network, ResendDelayFactor, 1.5)
-RULE_INT(Network, ResendDelayMinMS, 100)
+RULE_INT(Network, ResendDelayMinMS, 300)
 RULE_INT(Network, ResendDelayMaxMS, 5000)
-RULE_INT(Network, ResendsPerCycle, 1000)
+RULE_REAL(Network, ClientDataRate, 0.0) // KB / sec, 0.0 disabled
+RULE_BOOL(Network, CompressZoneStream, true)
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(QueryServ)

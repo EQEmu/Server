@@ -84,6 +84,7 @@ class EQEmuConfig
 		// From <files/>
 		std::string SpellsFile;
 		std::string OpCodesFile;
+		std::string MailOpCodesFile;
 		std::string PluginPlFile;
 
 		// From <directories/>

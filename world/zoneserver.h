@@ -19,9 +19,9 @@
 #define ZONESERVER_H
 
 #include "world_tcp_connection.h"
-#include "../net/servertalk_server.h"
-#include "../event/timer.h"
-#include "../timer.h"
+#include "../common/net/servertalk_server.h"
+#include "../common/event/timer.h"
+#include "../common/timer.h"
 #include "console.h"
 #include <string.h>
 #include <string>

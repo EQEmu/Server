@@ -36,6 +36,8 @@ struct BodyTypes { };
 struct Filters { };
 struct MessageTypes { };
 struct Rule { };
+struct Journal_SpeakMode { };
+struct Journal_Mode { };
 
 struct lua_registered_event {
 	std::string encounter_name;
@@ -2232,6 +2234,7 @@ luabind::scope lua_register_message_types() {
 	return luabind::class_<MessageTypes>("MT")
 		.enum_("constants")
 		[
+			luabind::value("NPCQuestSay", MT_NPCQuestSay),
 			luabind::value("Say", MT_Say),
 			luabind::value("Tell", MT_Tell),
 			luabind::value("Group", MT_Group),
@@ -2359,6 +2362,29 @@ luabind::scope lua_register_ruleb() {
 	return luabind::namespace_("RuleB")
 		[
 			luabind::def("Get", &get_ruleb)
+		];
+}
+
+luabind::scope lua_register_journal_speakmode() {
+	return luabind::class_<Journal_SpeakMode>("SpeakMode")
+		.enum_("constants")
+		[
+			luabind::value("Raw", static_cast<int>(Journal::SpeakMode::Raw)),
+			luabind::value("Say", static_cast<int>(Journal::SpeakMode::Say)),
+			luabind::value("Shout", static_cast<int>(Journal::SpeakMode::Shout)),
+			luabind::value("EmoteAlt", static_cast<int>(Journal::SpeakMode::EmoteAlt)),
+			luabind::value("Emote", static_cast<int>(Journal::SpeakMode::Emote)),
+			luabind::value("Group", static_cast<int>(Journal::SpeakMode::Group))
+		];
+}
+
+luabind::scope lua_register_journal_mode() {
+	return luabind::class_<Journal_Mode>("JournalMode")
+		.enum_("constants")
+		[
+			luabind::value("None", static_cast<int>(Journal::Mode::None)),
+			luabind::value("Log1", static_cast<int>(Journal::Mode::Log1)),
+			luabind::value("Log2", static_cast<int>(Journal::Mode::Log2))
 		];
 }
 

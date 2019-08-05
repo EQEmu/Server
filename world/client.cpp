@@ -88,7 +88,6 @@ extern volatile bool UCSServerAvailable_;
 
 Client::Client(EQStreamInterface* ieqs)
 :	autobootup_timeout(RuleI(World, ZoneAutobootTimeoutMS)),
-	CLE_keepalive_timer(RuleI(World, ClientKeepaliveTimeoutMS)),
 	connect(1000),
 	eqs(ieqs)
 {
@@ -115,7 +114,7 @@ Client::Client(EQStreamInterface* ieqs)
 
 Client::~Client() {
 	if (RunLoops && cle && zone_id == 0)
-		cle->SetOnline(CLE_Status_Offline);
+		cle->SetOnline(CLE_Status::Offline);
 
 	numclients--;
 
@@ -185,7 +184,7 @@ void Client::SendExpansionInfo() {
 
 void Client::SendCharInfo() {
 	if (cle) {
-		cle->SetOnline(CLE_Status_CharSelect);
+		cle->SetOnline(CLE_Status::CharSelect);
 	}
 
 	if (m_ClientVersionBit & EQEmu::versions::maskRoFAndLater) {
@@ -461,7 +460,7 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 			// Track who is in and who is out of the game
 			char *inout= (char *) "";
 			
-			if (cle->GetOnline() == CLE_Status_Never){
+			if (cle->GetOnline() == CLE_Status::Never){
 				// Desktop -> Char Select
 				inout = (char *) "In";
 			}
@@ -474,7 +473,7 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 			// Either from a fresh client launch or coming back from the game.
 			// Exiting the game entirely does not come through here.
 			// Could use a Logging Out Completely message somewhere.
-			cle->SetOnline(CLE_Status_CharSelect);
+			cle->SetOnline(CLE_Status::CharSelect);
 			
 			Log(Logs::General, Logs::World_Server, 
 				"Account (%s) Logging(%s) to character select :: LSID: %d ", 
@@ -1076,7 +1075,7 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 		{
 			// I don't see this getting executed on logout
 			eqs->Close();
-			cle->SetOnline(CLE_Status_Offline); //allows this player to log in again without an ip restriction.
+			cle->SetOnline(CLE_Status::Offline); //allows this player to log in again without an ip restriction.
 			return false;
 		}
 		case OP_ZoneChange:
@@ -1124,10 +1123,9 @@ bool Client::Process() {
 		SendApproveWorld();
 		connect.Disable();
 	}
-	if (CLE_keepalive_timer.Check()) {
-		if (cle)
-			cle->KeepAlive();
-	}
+
+	if (cle)
+		cle->KeepAlive();
 
 	/************ Get all packets from packet manager out queue and process them ************/
 	EQApplicationPacket *app = 0;
@@ -1191,6 +1189,8 @@ void Client::EnterWorld(bool TryBootup) {
 	else
 		zone_server = zoneserver_list.FindByZoneID(zone_id);
 
+	//Tell all the zones to drop any client with this lsid because we're coming back in.
+	zoneserver_list.DropClient(GetLSID());
 
 	const char *zone_name = database.GetZoneName(zone_id, true);
 	if (zone_server) {
@@ -1344,7 +1344,7 @@ void Client::Clearance(int8 response)
 	safe_delete(outapp);
 
 	if (cle)
-		cle->SetOnline(CLE_Status_Zoning);
+		cle->SetOnline(CLE_Status::Zoning);
 }
 
 void Client::TellClientZoneUnavailable() {

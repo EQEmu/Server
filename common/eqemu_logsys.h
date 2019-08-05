@@ -21,7 +21,6 @@
 #ifndef EQEMU_LOGSYS_H
 #define EQEMU_LOGSYS_H
 
-#include <fmt/format.h>
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
@@ -164,7 +163,7 @@ namespace Logs {
 
 #define LogF(debug_level, log_category, message, ...) do {\
     if (LogSys.log_settings[log_category].is_category_enabled == 1)\
-        LogSys.OutF(debug_level, log_category, message, ##__VA_ARGS__);\
+        OutF(LogSys, debug_level, log_category, message, ##__VA_ARGS__);\
 } while (0)
 
 class EQEmuLogSys {
@@ -196,13 +195,6 @@ public:
 	 */
 	void SetCurrentTimeStamp(char* time_stamp);
 	void StartFileLogs(const std::string &log_name = "");
-
-	template <typename... Args>
-	void OutF(Logs::DebugLevel debug_level, uint16 log_category, const char *fmt, const Args&... args)
-	{
-		std::string log_str = fmt::format(fmt, args...);
-		Out(debug_level, log_category, log_str);
-	}
 
 	/**
      * LogSettings Struct
@@ -248,7 +240,8 @@ public:
 	 */
 	uint16 GetGMSayColorFromCategory(uint16 log_category);
 
-	void OnLogHookCallBackZone(std::function<void(uint16 log_type, const std::string&)> f) { on_log_gmsay_hook = f; }
+	void SetGMSayHandler(std::function<void(uint16 log_type, const std::string&)> f) { on_log_gmsay_hook = f; }
+	void SetConsoleHandler(std::function<void(uint16 debug_level, uint16 log_type, const std::string&)> f) { on_log_console_hook = f; }
 
 private:
 
@@ -256,6 +249,7 @@ private:
 	 * Callback pointer to zone process for hooking logs to zone using GMSay
 	 */
 	std::function<void(uint16 log_category, const std::string&)> on_log_gmsay_hook;
+	std::function<void(uint16 debug_level, uint16 log_category, const std::string&)> on_log_console_hook;
 
 	/**
 	 * Formats log messages like '[Category] This is a log message'

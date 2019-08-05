@@ -1166,8 +1166,8 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	*/
 	Client* client = entity_list.GetClientByName(cze->char_name);
 	if (!zone->GetAuth(ip, cze->char_name, &WID, &account_id, &character_id, &admin, lskey, &tellsoff)) {
-		Log(Logs::General, Logs::Error, "GetAuth() returned false kicking client");
-		if (client != 0) {
+		Log(Logs::General, Logs::Client_Login, "%s failed zone auth check.", cze->char_name);
+		if (nullptr != client) {
 			client->Save();
 			client->Kick();
 		}
@@ -1528,7 +1528,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	}
 
 #ifdef BOTS
-	botdb.LoadOwnerOptions(this);
+	database.botdb.LoadOwnerOptions(this);
 	// TODO: mod below function for loading spawned botgroups
 	Bot::LoadAndSpawnAllZonedBots(this);
 #endif
@@ -4181,7 +4181,12 @@ void Client::Handle_OP_ChannelMessage(const EQApplicationPacket *app)
 		return;
 	}
 
-	ChannelMessageReceived(cm->chan_num, cm->language, cm->skill_in_language, cm->message, cm->targetname);
+	uint8 skill_in_language = 100;
+	if (cm->language < MAX_PP_LANGUAGE)
+	{
+		skill_in_language = m_pp.languages[cm->language];
+	}
+	ChannelMessageReceived(cm->chan_num, cm->language, skill_in_language, cm->message, cm->targetname);
 	return;
 }
 

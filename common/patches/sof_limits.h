@@ -328,7 +328,11 @@ namespace SoF
 
 		const int SPELL_ID_MAX = 15999;
 		const int SPELLBOOK_SIZE = 480;
+		// Be careful not to confuse these two..SoF disc release has a special requirement...
+		// - The number of available spell gems HAS NOT increased from 9 at this point
+		// - The profile allocation HAS increased to 10 at this point
 		const int SPELL_GEM_COUNT = static_cast<uint32>(CastingSlot::MaxGems);
+		const int SPELL_GEM_PROFILE_SIZE = 10; // special case declaration
 		
 		const int LONG_BUFFS = 25;
 		const int SHORT_BUFFS = 15;

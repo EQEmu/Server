@@ -87,6 +87,7 @@ typedef enum {
 	_eaMaxAppearance
 } EmuAppearance;
 
+#define MT_NPCQuestSay			10
 // msg_type's for custom usercolors
 #define MT_Say					256
 #define MT_Tell					257
@@ -522,5 +523,26 @@ static const uint8 SkillDamageTypes[EQEmu::skills::HIGHEST_SKILL + 1] = // chang
 #define INVALID_INDEX	-1
 
 static const uint32 MAX_SPELL_DB_ID_VAL = 65535;
+
+enum ChatChannelNames : uint16
+{
+	ChatChannel_Guild = 0,
+	ChatChannel_Group = 2,
+	ChatChannel_Shout = 3,
+	ChatChannel_Auction = 4,
+	ChatChannel_OOC = 5,
+	ChatChannel_Broadcast = 6,
+	ChatChannel_Tell = 7,
+	ChatChannel_Say = 8,
+	ChatChannel_Petition = 10,
+	ChatChannel_GMSAY = 11,
+	ChatChannel_TellEcho = 14,
+	ChatChannel_Raid = 15,
+
+	ChatChannel_UNKNOWN_Guild = 17,
+	ChatChannel_UNKNOWN_GMSAY = 18,
+	ChatChannel_UCSRelay = 20,
+	ChatChannel_Emotes = 22
+};
 
 #endif /*COMMON_EQ_CONSTANTS_H*/
