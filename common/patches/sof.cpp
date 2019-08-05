@@ -1116,7 +1116,10 @@ namespace SoF
 		}
 		OUT(deity);
 		OUT(intoxication);
+
 		OUT_array(spellSlotRefresh, spells::SPELL_GEM_COUNT);
+		eq->spellSlotRefresh[9] = 0; // 10th slot is not valid in this release
+
 		OUT(abilitySlotRefresh);
 		OUT(points); // Relocation Test
 		//	OUT(unknown0166[4]);
@@ -1177,7 +1180,10 @@ namespace SoF
 		}
 
 		//	OUT(unknown4184[128]);
+
 		OUT_array(mem_spells, spells::SPELL_GEM_COUNT);
+		eq->mem_spells[9] = 0xFFFFFFFFU; // 10th slot is not valid in this release
+
 		//	OUT(unknown04396[32]);
 		OUT(platinum);
 		OUT(gold);
