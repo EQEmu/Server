@@ -213,6 +213,7 @@ SET(common_headers
 	zone_numbers.h
 	event/event_loop.h
 	event/task.h
+	event/task_scheduler.h
 	event/timer.h
 	json/json.h
 	json/json-forwards.h

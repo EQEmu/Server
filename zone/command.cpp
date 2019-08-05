@@ -56,6 +56,7 @@
 #include "../common/eqemu_logsys.h"
 #include "../common/profanity_manager.h"
 #include "../common/net/eqstream.h"
+#include "../common/event/task_scheduler.h"
 
 #include "data_bucket.h"
 #include "command.h"
@@ -78,6 +79,7 @@ extern TaskManager *taskmanager;
 extern FastMath g_Math;
 void CatchSignal(int sig_num);
 
+EQ::Event::TaskScheduler task_scheduler;
 
 int commandcount;					// how many commands we have
 
@@ -395,6 +397,7 @@ int command_init(void)
 		command_add("tempname", "[newname] - Temporarily renames your target. Leave name blank to restore the original name.", 100, command_tempname) ||
 		command_add("petname", "[newname] - Temporarily renames your pet. Leave name blank to restore the original name.", 100, command_petname) ||
 		command_add("test", "Test command", 200, command_test) ||
+		command_add("test_login", "Test login command", 200, command_test_login) ||
 		command_add("texture", "[texture] [helmtexture] - Change your or your target's appearance, use 255 to show equipment", 10, command_texture) ||
 		command_add("time", "[HH] [MM] - Set EQ time", 90, command_time) ||
 		command_add("timers", "- Display persistent timers for target", 200, command_timers) ||
@@ -12422,6 +12425,53 @@ void command_network(Client *c, const Seperator *sep)
 		c->Message(0, "getopt optname - Retrieve the current option value set.");
 		c->Message(0, "setopt optname - Set the current option allowed.");
 	}
+}
+
+void command_test_login(Client *c, const Seperator *sep) {
+	auto res = task_scheduler.Enqueue([]() -> bool {
+		bool running = true;
+		bool ret = false;
+		EQ::Net::DaybreakConnectionManager mgr;
+		std::shared_ptr<EQ::Net::DaybreakConnection> c;
+
+		mgr.OnNewConnection([&](std::shared_ptr<EQ::Net::DaybreakConnection> connection) {
+			c = connection;
+		});
+
+		mgr.OnConnectionStateChange([&](std::shared_ptr<EQ::Net::DaybreakConnection> conn, EQ::Net::DbProtocolStatus from, EQ::Net::DbProtocolStatus to) {
+			if (EQ::Net::StatusConnected == to) {
+				EQ::Net::DynamicPacket p;
+				p.PutUInt16(0, 1); //OP_SessionReady
+				p.PutUInt32(2, 2);
+				c->QueuePacket(p);
+			}
+			else if (EQ::Net::StatusDisconnected == to) {
+				running = false;
+			}
+		});
+
+		mgr.OnPacketRecv([&](std::shared_ptr<EQ::Net::DaybreakConnection> conn, const EQ::Net::Packet & p) {
+			auto opcode = p.GetUInt16(0);
+			switch (opcode) {
+			case 0x0017: //OP_ChatMessage
+				//Would do the actual sending and parsing here if eqcrypto wasn't in loginserver.
+				ret = true;
+				running = false;
+				break;
+			}
+		});
+
+		mgr.Connect("127.0.0.1", 5999);
+
+		auto &loop = EQ::EventLoop::Get();
+		while (true == running) {
+			loop.Process();
+		}
+
+		return ret;
+	});
+
+	c->Message(0, "Result was %s", res.get() ? "true" : "false");
 }
 
 // All new code added to command.cpp should be BEFORE this comment line. Do no append code to this file below the BOTS code block.
