@@ -592,8 +592,8 @@ bool Client::Process() {
 	// only if client is not feigned
 	if (zone->CanDoCombat() && ret && !GetFeigned() && client_scan_npc_aggro_timer.Check()) {
 		int npc_scan_count = 0;
-		for (auto it = close_mobs.begin(); it != close_mobs.end(); ++it) {
-			Mob *mob = it->first;
+		for (auto & close_mob : close_mobs) {
+			Mob *mob = close_mob.first;
 
 			if (!mob)
 				continue;
@@ -604,6 +604,7 @@ bool Client::Process() {
 			if (mob->CheckWillAggro(this) && !mob->CheckAggro(this)) {
 				mob->AddToHateList(this, 25);
 			}
+
 			npc_scan_count++;
 		}
 		Log(Logs::General, Logs::Aggro, "Checking Reverse Aggro (client->npc) scanned_npcs (%i)", npc_scan_count);

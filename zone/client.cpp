@@ -136,6 +136,7 @@ Client::Client(EQStreamInterface* ieqs)
 	forget_timer(0),
 	autosave_timer(RuleI(Character, AutosaveIntervalS) * 1000),
 	client_scan_npc_aggro_timer(RuleI(Aggro, ClientAggroCheckInterval) * 1000),
+	client_zone_wide_full_position_update_timer(5 * 60 * 1000),
 	tribute_timer(Tribute_duration),
 	proximity_timer(ClientProximity_interval),
 	TaskPeriodic_Timer(RuleI(TaskSystem, PeriodicCheckTimer) * 1000),
@@ -9114,4 +9115,17 @@ bool Client::GotoPlayer(std::string player_name)
 	}
 
 	return false;
+}
+
+glm::vec4 &Client::GetLastPositionBeforeBulkUpdate()
+{
+	return last_position_before_bulk_update;
+}
+
+/**
+ * @param in_last_position_before_bulk_update
+ */
+void Client::SetLastPositionBeforeBulkUpdate(glm::vec4 in_last_position_before_bulk_update)
+{
+	Client::last_position_before_bulk_update = in_last_position_before_bulk_update;
 }
