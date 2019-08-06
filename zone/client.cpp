@@ -9116,3 +9116,16 @@ bool Client::GotoPlayer(std::string player_name)
 
 	return false;
 }
+
+glm::vec4 &Client::GetLastPositionBeforeBulkUpdate()
+{
+	return last_position_before_bulk_update;
+}
+
+/**
+ * @param in_last_position_before_bulk_update
+ */
+void Client::SetLastPositionBeforeBulkUpdate(glm::vec4 in_last_position_before_bulk_update)
+{
+	Client::last_position_before_bulk_update = in_last_position_before_bulk_update;
+}
