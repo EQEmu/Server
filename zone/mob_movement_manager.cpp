@@ -26,11 +26,11 @@ public:
 
 class RotateToCommand : public IMovementCommand {
 public:
-	RotateToCommand(double rotate_to, double dir, MobMovementMode mode)
+	RotateToCommand(double rotate_to, double dir, MobMovementMode mob_movement_mode)
 	{
 		m_rotate_to      = rotate_to;
 		m_rotate_to_dir  = dir;
-		m_rotate_to_mode = mode;
+		m_rotate_to_mode = mob_movement_mode;
 		m_started        = false;
 	}
 
@@ -265,7 +265,7 @@ protected:
 
 class SwimToCommand : public MoveToCommand {
 public:
-	SwimToCommand(float x, float y, float z, MobMovementMode mode) : MoveToCommand(x, y, z, mode)
+	SwimToCommand(float x, float y, float z, MobMovementMode mob_movement_mode) : MoveToCommand(x, y, z, mob_movement_mode)
 	{
 
 	}
@@ -564,6 +564,9 @@ void MobMovementManager::Process()
 	}
 }
 
+/**
+ * @param mob
+ */
 void MobMovementManager::AddMob(Mob *mob)
 {
 	_impl->Entries.insert(std::make_pair(mob, MobMovementEntry()));
@@ -714,6 +717,7 @@ void MobMovementManager::StopNavigation(Mob *who)
  * @param delta_heading
  * @param anim
  * @param range
+ * @param single_client
  */
 void MobMovementManager::SendCommandToClients(
 	Mob *mob,
@@ -722,7 +726,8 @@ void MobMovementManager::SendCommandToClients(
 	float delta_z,
 	float delta_heading,
 	int anim,
-	ClientRange range
+	ClientRange range,
+	Client* single_client
 )
 {
 	if (range == ClientRangeNone) {
@@ -736,6 +741,10 @@ void MobMovementManager::SendCommandToClients(
 
 	if (range == ClientRangeAny) {
 		for (auto &c : _impl->Clients) {
+			if (single_client && c != single_client) {
+				continue;
+			}
+
 			_impl->Stats.TotalSent++;
 
 			if (anim != 0) {
@@ -756,6 +765,10 @@ void MobMovementManager::SendCommandToClients(
 		float long_range  = zone->GetMaxMovementUpdateRange();
 
 		for (auto &c : _impl->Clients) {
+			if (single_client && c != single_client) {
+				continue;
+			}
+
 			float distance = c->CalculateDistance(mob->GetX(), mob->GetY(), mob->GetZ());
 
 			bool match = false;
@@ -859,7 +872,7 @@ void MobMovementManager::ClearStats()
 }
 
 /**
- * @param position_update_server_struct
+ * @param position_update
  * @param mob
  * @param delta_x
  * @param delta_y
@@ -868,7 +881,7 @@ void MobMovementManager::ClearStats()
  * @param anim
  */
 void MobMovementManager::FillCommandStruct(
-	PlayerPositionUpdateServer_Struct *position_update_server_struct,
+	PlayerPositionUpdateServer_Struct *position_update,
 	Mob *mob,
 	float delta_x,
 	float delta_y,
@@ -877,17 +890,17 @@ void MobMovementManager::FillCommandStruct(
 	int anim
 )
 {
-	memset(position_update_server_struct, 0x00, sizeof(PlayerPositionUpdateServer_Struct));
-	position_update_server_struct->spawn_id      = mob->GetID();
-	position_update_server_struct->x_pos         = FloatToEQ19(mob->GetX());
-	position_update_server_struct->y_pos         = FloatToEQ19(mob->GetY());
-	position_update_server_struct->z_pos         = FloatToEQ19(mob->GetZ());
-	position_update_server_struct->heading       = FloatToEQ12(mob->GetHeading());
-	position_update_server_struct->delta_x       = FloatToEQ13(delta_x);
-	position_update_server_struct->delta_y       = FloatToEQ13(delta_y);
-	position_update_server_struct->delta_z       = FloatToEQ13(delta_z);
-	position_update_server_struct->delta_heading = FloatToEQ10(delta_heading);
-	position_update_server_struct->animation     = (mob->IsBot() ? (int) ((float) anim / 1.785714f) : anim);
+	memset(position_update, 0x00, sizeof(PlayerPositionUpdateServer_Struct));
+	position_update->spawn_id      = mob->GetID();
+	position_update->x_pos         = FloatToEQ19(mob->GetX());
+	position_update->y_pos         = FloatToEQ19(mob->GetY());
+	position_update->z_pos         = FloatToEQ19(mob->GetZ());
+	position_update->heading       = FloatToEQ12(mob->GetHeading());
+	position_update->delta_x       = FloatToEQ13(delta_x);
+	position_update->delta_y       = FloatToEQ13(delta_y);
+	position_update->delta_z       = FloatToEQ13(delta_z);
+	position_update->delta_heading = FloatToEQ10(delta_heading);
+	position_update->animation     = (mob->IsBot() ? (int) ((float) anim / 1.785714f) : anim);
 }
 
 /**
@@ -954,8 +967,6 @@ void MobMovementManager::UpdatePathGround(Mob *who, float x, float y, float z, M
 	}
 
 	AdjustRoute(route, who);
-
-
 
 	//avoid doing any processing if the mob is stuck to allow normal stuck code to work.
 	if (!stuck) {
@@ -1208,11 +1219,11 @@ void MobMovementManager::PushTeleportTo(MobMovementEntry &ent, float x, float y,
  * @param x
  * @param y
  * @param z
- * @param mode
+ * @param mob_movement_mode
  */
-void MobMovementManager::PushMoveTo(MobMovementEntry &ent, float x, float y, float z, MobMovementMode mode)
+void MobMovementManager::PushMoveTo(MobMovementEntry &ent, float x, float y, float z, MobMovementMode mob_movement_mode)
 {
-	ent.Commands.push_back(std::unique_ptr<IMovementCommand>(new MoveToCommand(x, y, z, mode)));
+	ent.Commands.push_back(std::unique_ptr<IMovementCommand>(new MoveToCommand(x, y, z, mob_movement_mode)));
 }
 
 /**
@@ -1220,20 +1231,20 @@ void MobMovementManager::PushMoveTo(MobMovementEntry &ent, float x, float y, flo
  * @param x
  * @param y
  * @param z
- * @param mode
+ * @param mob_movement_mode
  */
-void MobMovementManager::PushSwimTo(MobMovementEntry &ent, float x, float y, float z, MobMovementMode mode)
+void MobMovementManager::PushSwimTo(MobMovementEntry &ent, float x, float y, float z, MobMovementMode mob_movement_mode)
 {
-	ent.Commands.push_back(std::unique_ptr<IMovementCommand>(new SwimToCommand(x, y, z, mode)));
+	ent.Commands.push_back(std::unique_ptr<IMovementCommand>(new SwimToCommand(x, y, z, mob_movement_mode)));
 }
 
 /**
  * @param ent
  * @param who
  * @param to
- * @param mode
+ * @param mob_movement_mode
  */
-void MobMovementManager::PushRotateTo(MobMovementEntry &ent, Mob *who, float to, MobMovementMode mode)
+void MobMovementManager::PushRotateTo(MobMovementEntry &ent, Mob *who, float to, MobMovementMode mob_movement_mode)
 {
 	auto from = FixHeading(who->GetHeading());
 	to = FixHeading(to);
@@ -1252,7 +1263,7 @@ void MobMovementManager::PushRotateTo(MobMovementEntry &ent, Mob *who, float to,
 		diff -= 512.0;
 	}
 
-	ent.Commands.push_back(std::unique_ptr<IMovementCommand>(new RotateToCommand(to, diff > 0 ? 1.0 : -1.0, mode)));
+	ent.Commands.push_back(std::unique_ptr<IMovementCommand>(new RotateToCommand(to, diff > 0 ? 1.0 : -1.0, mob_movement_mode)));
 }
 
 /**

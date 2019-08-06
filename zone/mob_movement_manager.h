@@ -50,7 +50,18 @@ public:
 	void Teleport(Mob *who, float x, float y, float z, float heading);
 	void NavigateTo(Mob *who, float x, float y, float z, MobMovementMode mode = MovementRunning);
 	void StopNavigation(Mob *who);
-	void SendCommandToClients(Mob *mob, float delta_x, float delta_y, float delta_z, float delta_heading, int anim, ClientRange range);
+
+	void SendCommandToClients(
+		Mob *mob,
+		float delta_x,
+		float delta_y,
+		float delta_z,
+		float delta_heading,
+		int anim,
+		ClientRange range,
+		Client* single_client = nullptr
+	);
+
 	float FixHeading(float in);
 	void DumpStats(Client *client);
 	void ClearStats();
@@ -65,15 +76,15 @@ private:
 	MobMovementManager(const MobMovementManager&);
 	MobMovementManager& operator=(const MobMovementManager&);
 
-	void FillCommandStruct(PlayerPositionUpdateServer_Struct *position_update_server_struct, Mob *mob, float delta_x, float delta_y, float delta_z, float delta_heading, int anim);
+	void FillCommandStruct(PlayerPositionUpdateServer_Struct *position_update, Mob *mob, float delta_x, float delta_y, float delta_z, float delta_heading, int anim);
 	void UpdatePath(Mob *who, float x, float y, float z, MobMovementMode mob_movement_mode);
 	void UpdatePathGround(Mob *who, float x, float y, float z, MobMovementMode mode);
 	void UpdatePathUnderwater(Mob *who, float x, float y, float z, MobMovementMode movement_mode);
 	void UpdatePathBoat(Mob *who, float x, float y, float z, MobMovementMode mode);
 	void PushTeleportTo(MobMovementEntry &ent, float x, float y, float z, float heading);
-	void PushMoveTo(MobMovementEntry &ent, float x, float y, float z, MobMovementMode mode);
-	void PushSwimTo(MobMovementEntry &ent, float x, float y, float z, MobMovementMode mode);
-	void PushRotateTo(MobMovementEntry &ent, Mob *who, float to, MobMovementMode mode);
+	void PushMoveTo(MobMovementEntry &ent, float x, float y, float z, MobMovementMode mob_movement_mode);
+	void PushSwimTo(MobMovementEntry &ent, float x, float y, float z, MobMovementMode mob_movement_mode);
+	void PushRotateTo(MobMovementEntry &ent, Mob *who, float to, MobMovementMode mob_movement_mode);
 	void PushStopMoving(MobMovementEntry &mob_movement_entry);
 	void PushEvadeCombat(MobMovementEntry &mob_movement_entry);
 	void HandleStuckBehavior(Mob *who, float x, float y, float z, MobMovementMode mob_movement_mode);
