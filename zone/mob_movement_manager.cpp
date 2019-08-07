@@ -762,7 +762,7 @@ void MobMovementManager::SendCommandToClients(
 	}
 	else {
 		float short_range = RuleR(Pathing, ShortMovementUpdateRange);
-		float long_range  = zone->GetMaxMovementUpdateRange();
+		float long_range  = zone->GetNpcPositionUpdateDistance();
 
 		for (auto &c : _impl->Clients) {
 			if (single_client && c != single_client) {

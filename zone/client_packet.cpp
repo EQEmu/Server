@@ -4498,7 +4498,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 	 */
 
 	float distance_moved                      = DistanceNoZ(GetLastPositionBeforeBulkUpdate(), GetPosition());
-	bool  moved_far_enough_before_bulk_update = distance_moved >= 1200;
+	bool  moved_far_enough_before_bulk_update = distance_moved >= zone->GetNpcPositionUpdateDistance();
 	bool  is_ready_to_update                  = (
 		client_zone_wide_full_position_update_timer.Check() || moved_far_enough_before_bulk_update
 	);
@@ -4515,8 +4515,8 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 				continue;
 			}
 
-			float distance_from_client_to_ignore = zone->GetMaxMovementUpdateRange() - 100;
-			if (CalculateDistance(entity->GetX(), entity->GetY(), entity->GetZ()) <= distance_from_client_to_ignore) {
+			float distance_from_client_to_ignore = zone->GetNpcPositionUpdateDistance();
+			if (entity->IsMoving() && CalculateDistance(entity->GetX(), entity->GetY(), entity->GetZ()) <= distance_from_client_to_ignore) {
 				continue;
 			}
 
