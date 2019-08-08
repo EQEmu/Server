@@ -272,7 +272,7 @@ public:
 		const char *file,
 		const char *func,
 		int line,
-		const std::string &message,
+		const char *message,
 		...
 	);
 
@@ -410,7 +410,7 @@ void OutF(
 )
 {
 	std::string log_str = fmt::format(fmt, args...);
-	ls.Out(debug_level, log_category, file, func, line, log_str);
+	ls.Out(debug_level, log_category, file, func, line, log_str.c_str());
 }
 
 #endif

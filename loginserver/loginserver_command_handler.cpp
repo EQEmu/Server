@@ -163,7 +163,7 @@ namespace LoginserverCommandHandler {
 
 		std::vector<std::string> arguments = {
 			"--username",
-			"--password"
+			"--password",
 			"--email"
 		};
 		std::vector<std::string> options   = {};

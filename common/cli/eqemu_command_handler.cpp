@@ -81,12 +81,12 @@ namespace EQEmuCommand {
 
 		if (!arguments_filled || argc == 2) {
 			std::string arguments_string;
-			for (auto   &arg : arguments) {
+			for (auto &arg : arguments) {
 				arguments_string += "  " + arg + "=*\n";
 			}
 
 			std::string options_string;
-			for (auto   &opt : options) {
+			for (auto &opt : options) {
 				options_string += "  " + opt + "\n";
 			}
 

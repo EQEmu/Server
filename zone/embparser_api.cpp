@@ -3618,11 +3618,11 @@ XS(XS__debug) {
 			return;
 
 		if (debug_level == Logs::General) {
-			Log(Logs::General, Logs::QuestDebug, log_message);
+			Log(Logs::General, Logs::QuestDebug, log_message.c_str());
 		} else if (debug_level == Logs::Moderate) {
-			Log(Logs::Moderate, Logs::QuestDebug, log_message);
+			Log(Logs::Moderate, Logs::QuestDebug, log_message.c_str());
 		} else if (debug_level == Logs::Detail) {
-			Log(Logs::Detail, Logs::QuestDebug, log_message);
+			Log(Logs::Detail, Logs::QuestDebug, log_message.c_str());
 		}
 	}
 	XSRETURN_EMPTY;
