@@ -161,32 +161,32 @@ namespace LoginserverWebserver {
 
 		api.Post(
 			"/account/credentials/validate/external", [](const httplib::Request &request, httplib::Response &res) {
-			LoginserverWebserver::TokenManager::AuthCanRead(request, res);
-			Json::Value request_body = LoginserverWebserver::ParseRequestBody(request);
-			std::string username = request_body.get("username", "").asString();
-			std::string password = request_body.get("password", "").asString();
+				LoginserverWebserver::TokenManager::AuthCanRead(request, res);
+				Json::Value request_body = LoginserverWebserver::ParseRequestBody(request);
+				std::string username     = request_body.get("username", "").asString();
+				std::string password     = request_body.get("password", "").asString();
 
-			Json::Value response;
-			if (username.empty() || password.empty()) {
-				response["error"] = "Username or password not set";
+				Json::Value response;
+				if (username.empty() || password.empty()) {
+					response["error"] = "Username or password not set";
+					LoginserverWebserver::SendResponse(response, res);
+					return;
+				}
+
+				bool credentials_valid = AccountManagement::CheckExternalLoginserverUserCredentials(
+					username,
+					password
+				);
+
+				if (credentials_valid) {
+					response["message"] = "Credentials valid!";
+				}
+				else {
+					response["error"] = "Credentials invalid!";
+				}
+
 				LoginserverWebserver::SendResponse(response, res);
-				return;
 			}
-
-			bool credentials_valid = AccountManagement::CheckExternalLoginserverUserCredentials(
-				username,
-				password
-			);
-
-			if (credentials_valid) {
-				response["message"] = "Credentials valid!";
-			}
-			else {
-				response["error"] = "Credentials invalid!";
-			}
-
-			LoginserverWebserver::SendResponse(response, res);
-		}
 		);
 	}
 

@@ -24,7 +24,7 @@
 #include "../common/event/event_loop.h"
 #include "../common/net/dns.h"
 
-extern LoginServer server;
+extern LoginServer       server;
 EQ::Event::TaskScheduler task_runner;
 
 /**
@@ -243,99 +243,112 @@ bool AccountManagement::UpdateLoginserverUserCredentials(
 	return true;
 }
 
-bool AccountManagement::CheckExternalLoginserverUserCredentials(const std::string &in_account_username, const std::string &in_account_password)
+bool AccountManagement::CheckExternalLoginserverUserCredentials(
+	const std::string &in_account_username,
+	const std::string &in_account_password
+)
 {
-	auto res = task_runner.Enqueue([&]() -> bool {
-		bool running = true;
-		bool ret = false;
-		EQ::Net::DaybreakConnectionManager mgr;
-		std::shared_ptr<EQ::Net::DaybreakConnection> c;
+	auto res = task_runner.Enqueue(
+		[&]() -> bool {
+			bool                                         running = true;
+			bool                                         ret     = false;
+			EQ::Net::DaybreakConnectionManager           mgr;
+			std::shared_ptr<EQ::Net::DaybreakConnection> c;
 
-		mgr.OnNewConnection([&](std::shared_ptr<EQ::Net::DaybreakConnection> connection) {
-			c = connection;
-		});
-
-		mgr.OnConnectionStateChange([&](std::shared_ptr<EQ::Net::DaybreakConnection> conn, EQ::Net::DbProtocolStatus from, EQ::Net::DbProtocolStatus to) {
-			if (EQ::Net::StatusConnected == to) {
-				EQ::Net::DynamicPacket p;
-				p.PutUInt16(0, 1); //OP_SessionReady
-				p.PutUInt32(2, 2);
-				c->QueuePacket(p);
-			}
-			else if (EQ::Net::StatusDisconnected == to) {
-				running = false;
-			}
-		});
-
-		mgr.OnPacketRecv([&](std::shared_ptr<EQ::Net::DaybreakConnection> conn, const EQ::Net::Packet &p) {
-			auto opcode = p.GetUInt16(0);
-			switch (opcode) {
-			case 0x0017: //OP_ChatMessage 
-			{
-				size_t buffer_len = in_account_username.length() + in_account_password.length() + 2;
-				std::unique_ptr<char[]> buffer(new char[buffer_len]);
-
-				strcpy(&buffer[0], in_account_username.c_str());
-				strcpy(&buffer[in_account_username.length() + 1], in_account_password.c_str());
-
-				size_t encrypted_len = buffer_len;
-
-				if (encrypted_len % 8 > 0) {
-					encrypted_len = ((encrypted_len / 8) + 1) * 8;
+			mgr.OnNewConnection(
+				[&](std::shared_ptr<EQ::Net::DaybreakConnection> connection) {
+					c = connection;
 				}
+			);
 
-				EQ::Net::DynamicPacket p;
-				p.Resize(12 + encrypted_len);
-				p.PutUInt16(0, 2); //OP_Login
-				p.PutUInt32(2, 3);
-
-				eqcrypt_block(&buffer[0], buffer_len, (char*)p.Data() + 12, true);
-				c->QueuePacket(p);
-				break;
-			}
-			case 0x0018:
-			{
-				auto encrypt_size = p.Length() - 12;
-				if (encrypt_size % 8 > 0) {
-					encrypt_size = (encrypt_size / 8) * 8;
+			mgr.OnConnectionStateChange(
+				[&](
+					std::shared_ptr<EQ::Net::DaybreakConnection> conn,
+					EQ::Net::DbProtocolStatus from,
+					EQ::Net::DbProtocolStatus to
+				) {
+					if (EQ::Net::StatusConnected == to) {
+						EQ::Net::DynamicPacket p;
+						p.PutUInt16(0, 1); //OP_SessionReady
+						p.PutUInt32(2, 2);
+						c->QueuePacket(p);
+					}
+					else if (EQ::Net::StatusDisconnected == to) {
+						running = false;
+					}
 				}
+			);
 
-				std::unique_ptr<char[]> decrypted(new char[encrypt_size]);
+			mgr.OnPacketRecv(
+				[&](std::shared_ptr<EQ::Net::DaybreakConnection> conn, const EQ::Net::Packet &p) {
+					auto opcode = p.GetUInt16(0);
+					switch (opcode) {
+						case 0x0017: //OP_ChatMessage
+						{
+							size_t                  buffer_len =
+														in_account_username.length() + in_account_password.length() + 2;
+							std::unique_ptr<char[]> buffer(new char[buffer_len]);
 
-				eqcrypt_block((char*)p.Data() + 12, encrypt_size, &decrypted[0], false);
+							strcpy(&buffer[0], in_account_username.c_str());
+							strcpy(&buffer[in_account_username.length() + 1], in_account_password.c_str());
 
-				EQ::Net::StaticPacket sp(&decrypted[0], encrypt_size);
-				auto response_error = sp.GetUInt16(1);
+							size_t encrypted_len = buffer_len;
 
-				if (response_error > 101) {
-					ret = false;
-					running = false;
+							if (encrypted_len % 8 > 0) {
+								encrypted_len = ((encrypted_len / 8) + 1) * 8;
+							}
+
+							EQ::Net::DynamicPacket p;
+							p.Resize(12 + encrypted_len);
+							p.PutUInt16(0, 2); //OP_Login
+							p.PutUInt32(2, 3);
+
+							eqcrypt_block(&buffer[0], buffer_len, (char *) p.Data() + 12, true);
+							c->QueuePacket(p);
+							break;
+						}
+						case 0x0018: {
+							auto encrypt_size                    = p.Length() - 12;
+							if (encrypt_size % 8 > 0) {
+								encrypt_size = (encrypt_size / 8) * 8;
+							}
+
+							std::unique_ptr<char[]> decrypted(new char[encrypt_size]);
+
+							eqcrypt_block((char *) p.Data() + 12, encrypt_size, &decrypted[0], false);
+
+							EQ::Net::StaticPacket sp(&decrypted[0], encrypt_size);
+							auto                  response_error = sp.GetUInt16(1);
+
+							{
+								ret     = response_error <= 101;
+								running = false;
+							}
+							break;
+						}
+					}
 				}
-				else {
-					ret = true;
-					running = false;
+			);
+
+			EQ::Net::DNSLookup(
+				"login.eqemulator.net", 5999, false, [&](const std::string &addr) {
+					if (addr.empty()) {
+						ret     = false;
+						running = false;
+					}
+
+					mgr.Connect(addr, 5999);
 				}
-				break;
-			}
-			}
-		});
+			);
 
-		EQ::Net::DNSLookup("login.eqemulator.net", 5999, false, [&](const std::string &addr) {
-			if (addr == "") {
-				ret = false;
-				running = false;
+			auto &loop = EQ::EventLoop::Get();
+			while (running) {
+				loop.Process();
 			}
 
-			mgr.Connect(addr, 5999);
-		});
-
-		auto &loop = EQ::EventLoop::Get();
-		while (true == running) {
-			loop.Process();
+			return ret;
 		}
-
-		return ret;
-	});
+	);
 
 	return res.get();
 }

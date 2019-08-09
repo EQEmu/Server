@@ -148,10 +148,10 @@ namespace EQEmuCommand {
 			int max_command_length = 0;
 
 			for (auto &it: in_function_map) {
-				if (it.first.length() > max_command_length) {
-					std::stringstream command;
-					command << termcolor::colorize << termcolor::yellow << it.first << termcolor::reset;
-					max_command_length = command.str().length() + 5;
+				std::stringstream command;
+				command << termcolor::colorize << termcolor::yellow << it.first << termcolor::reset;
+				if (command.str().length() > max_command_length) {
+					max_command_length = command.str().length() + 1;
 				}
 			}
 

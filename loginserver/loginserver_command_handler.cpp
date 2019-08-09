@@ -50,13 +50,13 @@ namespace LoginserverCommandHandler {
 		/**
 		 * Register commands
 		 */
-		function_map["login-user:check-credentials"]  = &LoginserverCommandHandler::CheckLoginserverUserCredentials;
-		function_map["login-user:check-external-credentials"]  = &LoginserverCommandHandler::CheckExternalLoginserverUserCredentials;
-		function_map["login-user:create"]             = &LoginserverCommandHandler::CreateLocalLoginserverAccount;
-		function_map["login-user:update-credentials"] = &LoginserverCommandHandler::UpdateLoginserverUserCredentials;
-		function_map["web-api-token:create"]          = &LoginserverCommandHandler::CreateLoginserverApiToken;
-		function_map["web-api-token:list"]            = &LoginserverCommandHandler::ListLoginserverApiTokens;
-		function_map["world-admin:create"]            = &LoginserverCommandHandler::CreateLoginserverWorldAdminAccount;
+		function_map["login-user:check-credentials"]          = &LoginserverCommandHandler::CheckLoginserverUserCredentials;
+		function_map["login-user:check-external-credentials"] = &LoginserverCommandHandler::CheckExternalLoginserverUserCredentials;
+		function_map["login-user:create"]                     = &LoginserverCommandHandler::CreateLocalLoginserverAccount;
+		function_map["login-user:update-credentials"]         = &LoginserverCommandHandler::UpdateLoginserverUserCredentials;
+		function_map["web-api-token:create"]                  = &LoginserverCommandHandler::CreateLoginserverApiToken;
+		function_map["web-api-token:list"]                    = &LoginserverCommandHandler::ListLoginserverApiTokens;
+		function_map["world-admin:create"]                    = &LoginserverCommandHandler::CreateLoginserverWorldAdminAccount;
 
 		EQEmuCommand::HandleMenu(function_map, cmd, argc, argv);
 	}
