@@ -51,6 +51,7 @@ namespace LoginserverCommandHandler {
 		 * Register commands
 		 */
 		function_map["login-user:check-credentials"]  = &LoginserverCommandHandler::CheckLoginserverUserCredentials;
+		function_map["login-user:check-external-credentials"]  = &LoginserverCommandHandler::CheckExternalLoginserverUserCredentials;
 		function_map["login-user:create"]             = &LoginserverCommandHandler::CreateLocalLoginserverAccount;
 		function_map["login-user:update-credentials"] = &LoginserverCommandHandler::UpdateLoginserverUserCredentials;
 		function_map["web-api-token:create"]          = &LoginserverCommandHandler::CreateLoginserverApiToken;
@@ -203,10 +204,12 @@ namespace LoginserverCommandHandler {
 
 		EQEmuCommand::ValidateCmdInput(arguments, options, cmd, argc, argv);
 
-		AccountManagement::CheckLoginserverUserCredentials(
+		auto res = AccountManagement::CheckLoginserverUserCredentials(
 			cmd("--username").str(),
 			cmd("--password").str()
 		);
+
+		LogInfo("Credentials were {0}", res == true ? "accepted" : "not accepted");
 	}
 
 	/**
@@ -235,5 +238,35 @@ namespace LoginserverCommandHandler {
 			cmd("--username").str(),
 			cmd("--password").str()
 		);
+	}
+
+	/**
+	 * @param argc
+	 * @param argv
+	 * @param cmd
+	 * @param description
+	 */
+	void CheckExternalLoginserverUserCredentials(int argc, char **argv, argh::parser &cmd, std::string &description)
+	{
+		description = "Check user external login credentials";
+
+		std::vector<std::string> arguments = {
+			"--username",
+			"--password"
+		};
+		std::vector<std::string> options   = {};
+
+		if (cmd[{"-h", "--help"}]) {
+			return;
+		}
+
+		EQEmuCommand::ValidateCmdInput(arguments, options, cmd, argc, argv);
+
+		auto res = AccountManagement::CheckExternalLoginserverUserCredentials(
+			cmd("--username").str(),
+			cmd("--password").str()
+		);
+
+		LogInfo("Credentials were {0}", res == true ? "accepted" : "not accepted");
 	}
 }

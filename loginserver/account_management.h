@@ -70,6 +70,16 @@ public:
 		const std::string &in_account_password,
 		const std::string &source_loginserver = "local"
 	);
+
+	/**
+	 * @param in_account_username
+	 * @param in_account_password
+	 * @return
+	 */
+	static bool CheckExternalLoginserverUserCredentials(
+		const std::string &in_account_username,
+		const std::string &in_account_password
+	);
 };
 
 
