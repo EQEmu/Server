@@ -239,10 +239,18 @@ namespace LoginserverWebserver {
 	 */
 	Json::Value ParseRequestBody(const httplib::Request &request)
 	{
-		std::stringstream ss;
-		ss.str(request.body);
 		Json::Value request_body;
-		ss >> request_body;
+
+		try {
+			std::stringstream ss;
+			ss.str(request.body);
+			ss >> request_body;
+		}
+		catch (std::exception&) {
+			request_body["error"] = "Payload invalid";
+
+			return request_body;
+		}
 
 		return request_body;
 	}
