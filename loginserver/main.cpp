@@ -90,6 +90,7 @@ int main(int argc, char **argv)
 			"login.eqemulator.net:5999"
 		)
 	);
+#endif
 
 	server.options.DefaultLoginServerName(
 		server.config.GetVariableString(
@@ -98,8 +99,6 @@ int main(int argc, char **argv)
 			"local"
 		)
 	);
-#endif
-
 
 #ifdef ENABLE_SECURITY
 	server.options.EncryptionMode(server.config.GetVariableInt("security", "mode", 13));
