@@ -240,7 +240,7 @@ RULE_BOOL (World, IPLimitDisconnectAll, false)
 RULE_BOOL(World, MaxClientsSimplifiedLogic, false) // New logic that only uses ExemptMaxClientsStatus and MaxClientsPerIP. Done on the loginserver. This mimics the P99-style special IP rules.
 RULE_INT (World, TellQueueSize, 20)
 RULE_BOOL(World, StartZoneSameAsBindOnCreation, true) //Should the start zone ALWAYS be the same location as your bind?
-RULE_BOOL(World, DisallowDuplicateAccountLogins, true)
+RULE_BOOL(World, EnforceCharacterLimitAtLogin, false)
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Zone)

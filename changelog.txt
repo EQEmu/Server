@@ -1,5 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 8/6/2019 ==
+Akkadius: Optimizations to movement updates to eliminate ghosting possibilities in larger zones
+
+== 7/22/2019 ==
+Uleat: Added script 'vcxproj_dependencies.py' - a script to help determine conflicting project dependencies (alpha-stage)
+
 == 7/10/2019 ==
 
 Akkadius: Add #npcedit flymode [0 = ground, 1 = flying, 2 = levitate, 3 = water, 4 = floating]

@@ -298,7 +298,8 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	if(IsClient()) {
 		char temp[64];
 		sprintf(temp, "%d", spell_id);
-		parse->EventPlayer(EVENT_CAST_BEGIN, CastToClient(), temp, 0);
+		if (parse->EventPlayer(EVENT_CAST_BEGIN, CastToClient(), temp, 0) != 0)
+			return false;
 	} else if(IsNPC()) {
 		char temp[64];
 		sprintf(temp, "%d", spell_id);

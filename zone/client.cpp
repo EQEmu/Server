@@ -136,6 +136,7 @@ Client::Client(EQStreamInterface* ieqs)
 	forget_timer(0),
 	autosave_timer(RuleI(Character, AutosaveIntervalS) * 1000),
 	client_scan_npc_aggro_timer(RuleI(Aggro, ClientAggroCheckInterval) * 1000),
+	client_zone_wide_full_position_update_timer(5 * 60 * 1000),
 	tribute_timer(Tribute_duration),
 	proximity_timer(ClientProximity_interval),
 	TaskPeriodic_Timer(RuleI(TaskSystem, PeriodicCheckTimer) * 1000),
@@ -446,7 +447,7 @@ Client::~Client() {
 	numclients--;
 	UpdateWindowTitle();
 	if(zone)
-	zone->RemoveAuth(GetName());
+		zone->RemoveAuth(GetName(), lskey);
 
 	//let the stream factory know were done with this stream
 	eqs->Close();
@@ -845,7 +846,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 				{
 					if(AttemptedMessages > RuleI(Chat, MaxMessagesBeforeKick))
 					{
-						Kick();
+						Kick("Sent too many chat messages at once.");
 						return;
 					}
 					if(GlobalChatLimiterTimer)
@@ -2586,13 +2587,19 @@ void Client::SetPVP(bool toggle, bool message) {
 	Save();
 }
 
+void Client::Kick(const std::string &reason) {
+	client_state = CLIENT_KICKED;
+
+	Log(Logs::General, Logs::Client_Login, "Client [%s] kicked, reason [%s]", GetCleanName(), reason.c_str());
+}
+
 void Client::WorldKick() {
 	auto outapp = new EQApplicationPacket(OP_GMKick, sizeof(GMKick_Struct));
 	GMKick_Struct* gmk = (GMKick_Struct *)outapp->pBuffer;
 	strcpy(gmk->name,GetName());
 	QueuePacket(outapp);
 	safe_delete(outapp);
-	Kick();
+	Kick("World kick issued");
 }
 
 void Client::GMKill() {
@@ -9114,4 +9121,17 @@ bool Client::GotoPlayer(std::string player_name)
 	}
 
 	return false;
+}
+
+glm::vec4 &Client::GetLastPositionBeforeBulkUpdate()
+{
+	return last_position_before_bulk_update;
+}
+
+/**
+ * @param in_last_position_before_bulk_update
+ */
+void Client::SetLastPositionBeforeBulkUpdate(glm::vec4 in_last_position_before_bulk_update)
+{
+	Client::last_position_before_bulk_update = in_last_position_before_bulk_update;
 }

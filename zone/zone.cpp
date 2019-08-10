@@ -55,6 +55,7 @@
 #include "zone_config.h"
 #include "mob_movement_manager.h"
 #include "npc_scale_manager.h"
+#include "../common/data_verification.h"
 
 #include <time.h>
 #include <ctime>
@@ -864,6 +865,8 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	m_last_ucss_update = 0;
 
 	mMovementManager = &MobMovementManager::Get();
+
+	SetNpcPositionUpdateDistance(0);
 }
 
 Zone::~Zone() {
@@ -1106,6 +1109,7 @@ void Zone::AddAuth(ServerZoneIncomingClient_Struct* szic) {
 	zca->accid = szic->accid;
 	zca->admin = szic->admin;
 	zca->charid = szic->charid;
+	zca->lsid = szic->lsid;
 	zca->tellsoff = szic->tellsoff;
 	strn0cpy(zca->charname, szic->charname, sizeof(zca->charname));
 	strn0cpy(zca->lskey, szic->lskey, sizeof(zca->lskey));
@@ -1113,16 +1117,31 @@ void Zone::AddAuth(ServerZoneIncomingClient_Struct* szic) {
 	client_auth_list.Insert(zca);
 }
 
-void Zone::RemoveAuth(const char* iCharName)
+void Zone::RemoveAuth(const char* iCharName, const char* iLSKey)
 {
 	LinkedListIterator<ZoneClientAuth_Struct*> iterator(client_auth_list);
 
 	iterator.Reset();
 	while (iterator.MoreElements()) {
 		ZoneClientAuth_Struct* zca = iterator.GetData();
-		if (strcasecmp(zca->charname, iCharName) == 0) {
-		iterator.RemoveCurrent();
-		return;
+		if (strcasecmp(zca->charname, iCharName) == 0 && strcasecmp(zca->lskey, iLSKey) == 0) {
+			iterator.RemoveCurrent();
+			return;
+		}
+		iterator.Advance();
+	}
+}
+
+void Zone::RemoveAuth(uint32 lsid)
+{
+	LinkedListIterator<ZoneClientAuth_Struct*> iterator(client_auth_list);
+
+	iterator.Reset();
+	while (iterator.MoreElements()) {
+		ZoneClientAuth_Struct* zca = iterator.GetData();
+		if (zca->lsid == lsid) {
+			iterator.RemoveCurrent();
+			continue;
 		}
 		iterator.Advance();
 	}
@@ -1178,9 +1197,9 @@ uint32 Zone::CountAuth() {
 bool Zone::Process() {
 	spawn_conditions.Process();
 
-	if(spawn2_timer.Check()) {
+	if (spawn2_timer.Check()) {
 
-		LinkedListIterator<Spawn2*> iterator(spawn2_list);
+		LinkedListIterator<Spawn2 *> iterator(spawn2_list);
 
 		EQEmu::InventoryProfile::CleanDirty();
 
@@ -1196,10 +1215,15 @@ bool Zone::Process() {
 			}
 		}
 
-		if(adv_data && !did_adventure_actions)
+		if (adv_data && !did_adventure_actions) {
 			DoAdventureActions();
+		}
 
+		if (GetNpcPositionUpdateDistance() == 0) {
+			CalculateNpcUpdateDistanceSpread();
+		}
 	}
+
 	if(initgrids_timer.Check()) {
 		//delayed grid loading stuff.
 		initgrids_timer.Disable();
@@ -2348,4 +2372,60 @@ void Zone::SetUCSServerAvailable(bool ucss_available, uint32 update_timestamp) {
 	}
 	if (m_last_ucss_update < update_timestamp)
 		m_ucss_available = ucss_available;
+}
+
+int Zone::GetNpcPositionUpdateDistance() const
+{
+	return npc_position_update_distance;
+}
+
+void Zone::SetNpcPositionUpdateDistance(int in_npc_position_update_distance)
+{
+	Zone::npc_position_update_distance = in_npc_position_update_distance;
+}
+
+void Zone::CalculateNpcUpdateDistanceSpread()
+{
+	float max_x = 0;
+	float max_y = 0;
+	float min_x = 0;
+	float min_y = 0;
+
+	auto &mob_list = entity_list.GetMobList();
+
+	for (auto &it : mob_list) {
+		Mob *entity = it.second;
+		if (!entity->IsNPC()) {
+			continue;
+		}
+
+		if (entity->GetX() <= min_x) {
+			min_x = entity->GetX();
+		}
+
+		if (entity->GetY() <= min_y) {
+			min_y = entity->GetY();
+		}
+
+		if (entity->GetX() >= max_x) {
+			max_x = entity->GetX();
+		}
+
+		if (entity->GetY() >= max_y) {
+			max_y = entity->GetY();
+		}
+	}
+
+	int x_spread        = int(abs(max_x - min_x));
+	int y_spread        = int(abs(max_y - min_y));
+	int combined_spread = int(abs((x_spread + y_spread) / 2));
+	int update_distance = EQEmu::ClampLower(int(combined_spread / 4), int(zone->GetMaxMovementUpdateRange()));
+
+	SetNpcPositionUpdateDistance(update_distance);
+
+	Log(Logs::General, Logs::Debug,
+		"NPC update spread distance set to [%i] combined_spread [%i]",
+		update_distance,
+		combined_spread
+	);
 }

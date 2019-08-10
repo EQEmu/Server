@@ -108,19 +108,11 @@ void LoginServer::ProcessUsertoWorldReqLeg(uint16_t opcode, EQ::Net::Packet &p)
 		return;
 	}
 
-	if (RuleB(World, DisallowDuplicateAccountLogins)) {
-		auto cle = client_list.FindCLEByLSID(utwr->lsaccountid);
-		if (cle != nullptr) {
-			auto status = cle->GetOnline();
-			if (CLE_Status_Zoning == status || CLE_Status_InZone == status) {
-				utwrs->response = UserToWorldStatusAlreadyOnline;
-				SendPacket(&outpack);
-				return;
-			}
-			else {
-				//our existing cle is in a state we can login to, mark the old as stale and remove it.
-				client_list.RemoveCLEByLSID(utwr->lsaccountid);
-			}
+	if (RuleB(World, EnforceCharacterLimitAtLogin)) {
+		if (client_list.IsAccountInGame(utwr->lsaccountid)) {
+			utwrs->response = UserToWorldStatusAlreadyOnline;
+			SendPacket(&outpack);
+			return;
 		}
 	}
 

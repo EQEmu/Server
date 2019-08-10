@@ -379,6 +379,7 @@ void Database::LogMerchantTransaction(QSMerchantLogTransaction_Struct* QS, uint3
 
 }
 
+// this function does not delete the ServerPacket, so it must be handled at call site
 void Database::GeneralQueryReceive(ServerPacket *pack) {
 	/*
 		These are general queries passed from anywhere in zone instead of packing structures and breaking them down again and again
@@ -393,7 +394,6 @@ void Database::GeneralQueryReceive(ServerPacket *pack) {
 		Log(Logs::Detail, Logs::QS_Server, "%s", query.c_str());
 	}
 
-	safe_delete(pack);
 	safe_delete_array(queryBuffer);
 }
 
