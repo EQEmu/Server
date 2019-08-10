@@ -2590,7 +2590,7 @@ void Client::SetPVP(bool toggle, bool message) {
 void Client::Kick(const std::string &reason) {
 	client_state = CLIENT_KICKED;
 
-	database.CreateKickEvent(GetName(), reason);
+	Log(Logs::General, Logs::Client_Login, "Client [%s] kicked, reason [%s]", GetCleanName(), reason.c_str());
 }
 
 void Client::WorldKick() {

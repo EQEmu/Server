@@ -292,7 +292,6 @@ public:
 	void SavePetInfo(Client *c);
 	void RemoveTempFactions(Client *c);
 	void UpdateItemRecastTimestamps(uint32 char_id, uint32 recast_type, uint32 timestamp);
-	void CreateKickEvent(const std::string &character_name, const std::string &reason);
 
 	bool DeleteCharacterAAs(uint32 character_id);
 	bool DeleteCharacterBandolier(uint32 character_id, uint32 band_id);

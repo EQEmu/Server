@@ -3835,14 +3835,6 @@ void ZoneDatabase::UpdateItemRecastTimestamps(uint32 char_id, uint32 recast_type
 	QueryDatabase(query);
 }
 
-void ZoneDatabase::CreateKickEvent(const std::string &character_name, const std::string &reason)
-{
-	std::string query =
-		StringFormat("INSERT INTO character_kick_events (Name, Reason) VALUES ('%s', '%s')", character_name.c_str(), reason.c_str());
-
-	QueryDatabase(query);
-}
-
 void ZoneDatabase::LoadPetInfo(Client *client)
 {
 
