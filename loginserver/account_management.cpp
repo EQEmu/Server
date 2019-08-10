@@ -242,15 +242,16 @@ bool AccountManagement::UpdateLoginserverUserCredentials(
 	return true;
 }
 
-bool AccountManagement::CheckExternalLoginserverUserCredentials(
+uint32 AccountManagement::CheckExternalLoginserverUserCredentials(
 	const std::string &in_account_username,
 	const std::string &in_account_password
 )
 {
 	auto res = task_runner.Enqueue(
-		[&]() -> bool {
-			bool                                         running = true;
-			bool                                         ret     = false;
+		[&]() -> uint32 {
+			bool   running = true;
+			uint32 ret     = 0;
+
 			EQ::Net::DaybreakConnectionManager           mgr;
 			std::shared_ptr<EQ::Net::DaybreakConnection> c;
 
@@ -284,8 +285,9 @@ bool AccountManagement::CheckExternalLoginserverUserCredentials(
 					switch (opcode) {
 						case 0x0017: //OP_ChatMessage
 						{
-							size_t                  buffer_len =
-														in_account_username.length() + in_account_password.length() + 2;
+							size_t buffer_len =
+									   in_account_username.length() + in_account_password.length() + 2;
+
 							std::unique_ptr<char[]> buffer(new char[buffer_len]);
 
 							strcpy(&buffer[0], in_account_username.c_str());
@@ -318,9 +320,10 @@ bool AccountManagement::CheckExternalLoginserverUserCredentials(
 
 							EQ::Net::StaticPacket sp(&decrypted[0], encrypt_size);
 							auto                  response_error = sp.GetUInt16(1);
+							auto                  m_dbid         = sp.GetUInt32(8);
 
 							{
-								ret     = response_error <= 101;
+								ret = (response_error <= 101 ? m_dbid : 0);
 								running = false;
 							}
 							break;
@@ -332,7 +335,7 @@ bool AccountManagement::CheckExternalLoginserverUserCredentials(
 			EQ::Net::DNSLookup(
 				"login.eqemulator.net", 5999, false, [&](const std::string &addr) {
 					if (addr.empty()) {
-						ret     = false;
+						ret     = 0;
 						running = false;
 					}
 

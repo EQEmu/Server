@@ -191,13 +191,14 @@ namespace LoginserverWebserver {
 					return;
 				}
 
-				bool credentials_valid = AccountManagement::CheckExternalLoginserverUserCredentials(
+				uint32 account_id = AccountManagement::CheckExternalLoginserverUserCredentials(
 					username,
 					password
 				);
 
-				if (credentials_valid) {
-					response["message"] = "Credentials valid!";
+				if (account_id > 0) {
+					response["message"]            = "Credentials valid!";
+					response["data"]["account_id"] = account_id;
 				}
 				else {
 					response["error"] = "Credentials invalid!";
@@ -246,7 +247,7 @@ namespace LoginserverWebserver {
 			ss.str(request.body);
 			ss >> request_body;
 		}
-		catch (std::exception&) {
+		catch (std::exception &) {
 			request_body["error"] = "Payload invalid";
 
 			return request_body;

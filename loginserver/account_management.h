@@ -76,7 +76,7 @@ public:
 	 * @param in_account_password
 	 * @return
 	 */
-	static bool CheckExternalLoginserverUserCredentials(
+	static uint32 CheckExternalLoginserverUserCredentials(
 		const std::string &in_account_username,
 		const std::string &in_account_password
 	);
