@@ -114,13 +114,14 @@ namespace LoginserverWebserver {
 					return;
 				}
 
-				bool credentials_valid = AccountManagement::CheckLoginserverUserCredentials(
+				uint32 login_account_id = AccountManagement::CheckLoginserverUserCredentials(
 					username,
 					password
 				);
 
-				if (credentials_valid) {
-					response["message"] = "Credentials valid!";
+				if (login_account_id > 0) {
+					response["message"]            = "Credentials valid!";
+					response["data"]["account_id"] = login_account_id;
 				}
 				else {
 					response["error"] = "Credentials invalid!";

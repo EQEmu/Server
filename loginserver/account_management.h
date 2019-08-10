@@ -54,7 +54,7 @@ public:
 	 * @param in_account_password
 	 * @return
 	 */
-	static bool CheckLoginserverUserCredentials(
+	static uint32 CheckLoginserverUserCredentials(
 		const std::string &in_account_username,
 		const std::string &in_account_password,
 		const std::string &source_loginserver = "local"

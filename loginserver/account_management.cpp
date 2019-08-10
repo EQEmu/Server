@@ -143,7 +143,7 @@ bool AccountManagement::CreateLoginserverWorldAdminAccount(
  * @param in_account_password
  * @return
  */
-bool AccountManagement::CheckLoginserverUserCredentials(
+uint32 AccountManagement::CheckLoginserverUserCredentials(
 	const std::string &in_account_username,
 	const std::string &in_account_password,
 	const std::string &source_loginserver
@@ -181,7 +181,7 @@ bool AccountManagement::CheckLoginserverUserCredentials(
 			source_loginserver
 		);
 
-		return false;
+		return 0;
 	}
 
 	LogDebug(
@@ -190,7 +190,7 @@ bool AccountManagement::CheckLoginserverUserCredentials(
 		source_loginserver
 	);
 
-	return validated_credentials;
+	return login_server_admin.id;
 }
 
 
