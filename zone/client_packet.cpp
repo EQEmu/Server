@@ -1684,7 +1684,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	/**
 	 * DevTools Load Settings
 	 */
-	if (Admin() >= 200) {
+	if (Admin() >= EQEmu::DevTools::GM_ACCOUNT_STATUS_LEVEL) {
 		std::string dev_tools_window_key = StringFormat("%i-dev-tools-window-disabled", AccountID());
 		if (DataBucket::GetData(dev_tools_window_key) == "true") {
 			dev_tools_window_enabled = false;
