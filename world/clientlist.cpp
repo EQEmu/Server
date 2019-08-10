@@ -253,6 +253,19 @@ ClientListEntry* ClientList::FindCLEByCharacterID(uint32 iCharID) {
 	return nullptr;
 }
 
+ClientListEntry* ClientList::FindCLEByLSID(uint32 iLSID) {
+	LinkedListIterator<ClientListEntry*> iterator(clientlist);
+
+	iterator.Reset();
+	while (iterator.MoreElements()) {
+		if (iterator.GetData()->LSID() == iLSID) {
+			return iterator.GetData();
+		}
+		iterator.Advance();
+	}
+	return nullptr;
+}
+
 void ClientList::SendCLEList(const int16& admin, const char* to, WorldTCPConnection* connection, const char* iName) {
 	LinkedListIterator<ClientListEntry*> iterator(clientlist);
 	char* output = 0;

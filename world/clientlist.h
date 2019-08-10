@@ -55,6 +55,7 @@ public:
 	ClientListEntry* FindCharacter(const char* name);
 	ClientListEntry* FindCLEByAccountID(uint32 iAccID);
 	ClientListEntry* FindCLEByCharacterID(uint32 iCharID);
+	ClientListEntry* FindCLEByLSID(uint32 iLSID);
 	ClientListEntry* GetCLE(uint32 iID);
 	void	GetCLEIP(uint32 iIP);
 	uint32	GetCLEIPCount(uint32 iLSAccountID);
