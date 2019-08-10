@@ -536,6 +536,13 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			SetZoneData(zone->GetZoneID(), zone->GetInstanceID());
 
 			if (szic->zoneid == zone->GetZoneID()) {
+				auto client = entity_list.GetClientByLSID(szic->lsid);
+				if (client) {
+					client->Kick("Dropped by world CLE subsystem");
+					client->Save();
+				}
+
+				zone->RemoveAuth(szic->lsid);
 				zone->AddAuth(szic);
 				// This packet also doubles as "incoming client" notification, lets not shut down before they get here
 				zone->StartShutdownTimer(AUTHENTICATION_TIMEOUT * 1000);
@@ -559,7 +566,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		
 			auto client = entity_list.GetClientByLSID(drop->lsid);
 			if (client) {
-				client->Kick();
+				client->Kick("Dropped by world CLE subsystem");
 				client->Save();
 			}
 		}

@@ -846,7 +846,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 				{
 					if(AttemptedMessages > RuleI(Chat, MaxMessagesBeforeKick))
 					{
-						Kick();
+						Kick("Sent too many chat messages at once.");
 						return;
 					}
 					if(GlobalChatLimiterTimer)
@@ -2587,13 +2587,19 @@ void Client::SetPVP(bool toggle, bool message) {
 	Save();
 }
 
+void Client::Kick(const std::string &reason) {
+	client_state = CLIENT_KICKED;
+
+	Log(Logs::General, Logs::Client_Login, "Client [%s] kicked, reason [%s]", GetCleanName(), reason.c_str());
+}
+
 void Client::WorldKick() {
 	auto outapp = new EQApplicationPacket(OP_GMKick, sizeof(GMKick_Struct));
 	GMKick_Struct* gmk = (GMKick_Struct *)outapp->pBuffer;
 	strcpy(gmk->name,GetName());
 	QueuePacket(outapp);
 	safe_delete(outapp);
-	Kick();
+	Kick("World kick issued");
 }
 
 void Client::GMKill() {

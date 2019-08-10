@@ -489,7 +489,7 @@ void Client::ResetAA() {
 	database.DeleteCharacterLeadershipAAs(CharacterID());
 	// undefined for these clients
 	if (ClientVersionBit() & EQEmu::versions::maskTitaniumAndEarlier)
-		Kick();
+		Kick("AA Reset on client that doesn't support it");
 }
 
 void Client::SendClearAA()
