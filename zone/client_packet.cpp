@@ -4515,12 +4515,17 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 				continue;
 			}
 
-			float distance_from_client_to_ignore = zone->GetNpcPositionUpdateDistance();
-			if (entity->IsMoving() && CalculateDistance(entity->GetX(), entity->GetY(), entity->GetZ()) <= distance_from_client_to_ignore) {
-				continue;
+			int animation_speed = 0;
+			if (entity->IsMoving()) {
+				if (entity->IsRunning()) {
+					animation_speed = (entity->IsFeared() ? entity->GetFearSpeed() : entity->GetRunspeed());
+				}
+				else {
+					animation_speed = entity->GetWalkspeed();
+				}
 			}
 
-			mob_movement_manager.SendCommandToClients(entity, 0.0, 0.0, 0.0, 0.0, 0, ClientRangeAny, this);
+			mob_movement_manager.SendCommandToClients(entity, 0.0, 0.0, 0.0, 0.0, animation_speed, ClientRangeAny, this);
 		}
 
 		SetLastPositionBeforeBulkUpdate(GetPosition());
