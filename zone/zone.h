@@ -126,6 +126,9 @@ public:
 	bool Process();
 	bool SaveZoneCFG();
 
+	int GetNpcPositionUpdateDistance() const;
+	void SetNpcPositionUpdateDistance(int in_npc_position_update_distance);
+
 	char *adv_data;
 
 	const char *GetSpellBlockedMessage(uint32 spell_id, const glm::vec3 &location);
@@ -219,6 +222,7 @@ public:
 	void ChangeWeather();
 	void ClearBlockedSpells();
 	void ClearNPCTypeCache(int id);
+	void CalculateNpcUpdateDistanceSpread();
 	void DelAggroMob() { aggroedmobs--; }
 	void DeleteQGlobal(std::string name, uint32 npcID, uint32 charID, uint32 zoneID);
 	void Despawn(uint32 spawngroupID);
@@ -290,7 +294,7 @@ public:
 		 */
 		find_replace(message, std::string("%"), std::string("."));
 
-		if (message.find("\n") != std::string::npos) {
+		if (message.find('\n') != std::string::npos) {
 			auto message_split = SplitString(message, '\n');
 			entity_list.MessageStatus(
 				0,
@@ -345,6 +349,7 @@ private:
 	glm::vec4 m_Graveyard;
 	int       default_ruleset;
 	int       totalBS;
+	int       npc_position_update_distance;
 	int32     aggroedmobs;
 	uint8     zone_type;
 	uint16    instanceversion;

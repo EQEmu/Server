@@ -1128,7 +1128,10 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	UpdateActiveLight();
 	ns->spawn.light		= m_Light.Type[EQEmu::lightsource::LightActive];
 
-	ns->spawn.showhelm = (helmtexture && helmtexture != 0xFF) ? 1 : 0;
+	if (IsNPC() && race == ERUDITE)
+		ns->spawn.showhelm = 1;
+	else
+		ns->spawn.showhelm = (helmtexture && helmtexture != 0xFF) ? 1 : 0;
 
 	ns->spawn.invis		= (invisible || hidden) ? 1 : 0;	// TODO: load this before spawning players
 	ns->spawn.NPC		= IsClient() ? 0 : 1;

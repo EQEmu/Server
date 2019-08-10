@@ -60,6 +60,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "water_map.h"
 #include "worldserver.h"
 #include "zone.h"
+#include "mob_movement_manager.h"
 
 #ifdef BOTS
 #include "bot.h"
@@ -804,6 +805,8 @@ void Client::CompleteConnect()
 	SendDisciplineTimers();
 
 	parse->EventPlayer(EVENT_ENTER_ZONE, this, "", 0);
+
+	SetLastPositionBeforeBulkUpdate(GetPosition());
 
 	/* This sub event is for if a player logs in for the first time since entering world. */
 	if (firstlogon == 1) {
@@ -1679,7 +1682,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	/**
 	 * DevTools Load Settings
 	 */
-	if (Admin() >= 200) {
+	if (Admin() >= EQEmu::DevTools::GM_ACCOUNT_STATUS_LEVEL) {
 		std::string dev_tools_window_key = StringFormat("%i-dev-tools-window-disabled", AccountID());
 		if (DataBucket::GetData(dev_tools_window_key) == "true") {
 			dev_tools_window_enabled = false;
@@ -4464,16 +4467,16 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 	
 	/* Handle client aggro scanning timers NPCs */
 	is_client_moving = (ppu->y_pos == m_Position.y && ppu->x_pos == m_Position.x) ? false : true;
-	
+
 	if (is_client_moving) {
 		Log(Logs::Detail, Logs::Normal, "ClientUpdate: Client is moving - scan timer is: %u",
 			client_scan_npc_aggro_timer.GetDuration());
 		if (client_scan_npc_aggro_timer.GetDuration() > 1000) {
 			client_scan_npc_aggro_timer.Disable();
 			client_scan_npc_aggro_timer.Start(500);
-	
 		}
-	} else {
+	}
+	else {
 		Log(Logs::Detail, Logs::Normal, "ClientUpdate: Client is NOT moving - scan timer is: %u",
 			client_scan_npc_aggro_timer.GetDuration());
 		if (client_scan_npc_aggro_timer.GetDuration() < 1000) {
@@ -4481,7 +4484,51 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 			client_scan_npc_aggro_timer.Start(3000);
 		}
 	}
-	
+
+	/**
+	 * On a normal basis we limit mob movement updates based on distance
+	 * This ensures we send a periodic full zone update to a client that has started moving after 5 or so minutes
+	 *
+	 * For very large zones we will also force a full update based on distance
+	 *
+	 * We ignore a small distance around us so that we don't interrupt already pathing deltas as those npcs will appear
+	 * to full stop when they are actually still pathing
+	 */
+
+	float distance_moved                      = DistanceNoZ(GetLastPositionBeforeBulkUpdate(), GetPosition());
+	bool  moved_far_enough_before_bulk_update = distance_moved >= zone->GetNpcPositionUpdateDistance();
+	bool  is_ready_to_update                  = (
+		client_zone_wide_full_position_update_timer.Check() || moved_far_enough_before_bulk_update
+	);
+
+	if (is_client_moving && is_ready_to_update) {
+		Log(Logs::Detail, Logs::Normal, "[%s] Client Zone Wide Position Update NPCs", GetCleanName());
+
+		auto &mob_movement_manager = MobMovementManager::Get();
+		auto &mob_list             = entity_list.GetMobList();
+
+		for (auto &it : mob_list) {
+			Mob *entity = it.second;
+			if (!entity->IsNPC()) {
+				continue;
+			}
+
+			int animation_speed = 0;
+			if (entity->IsMoving()) {
+				if (entity->IsRunning()) {
+					animation_speed = (entity->IsFeared() ? entity->GetFearSpeed() : entity->GetRunspeed());
+				}
+				else {
+					animation_speed = entity->GetWalkspeed();
+				}
+			}
+
+			mob_movement_manager.SendCommandToClients(entity, 0.0, 0.0, 0.0, 0.0, animation_speed, ClientRangeAny, this);
+		}
+
+		SetLastPositionBeforeBulkUpdate(GetPosition());
+	}
+
 	float new_heading = EQ12toFloat(ppu->heading);
 	int32 new_animation = ppu->animation;
 	
