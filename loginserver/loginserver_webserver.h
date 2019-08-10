@@ -46,8 +46,8 @@ namespace LoginserverWebserver {
 		static bool TokenExists(const std::string &token);
 		token_data GetToken(const std::string &token);
 		static token_data CheckApiAuthorizationHeaders(const httplib::Request &request);
-		static void AuthCanRead(const httplib::Request &request, httplib::Response &res);
-		static void AuthCanWrite(const httplib::Request &request, httplib::Response &res);
+		static bool AuthCanRead(const httplib::Request &request, httplib::Response &res);
+		static bool AuthCanWrite(const httplib::Request &request, httplib::Response &res);
 	};
 
 	void RegisterRoutes(httplib::Server &api);

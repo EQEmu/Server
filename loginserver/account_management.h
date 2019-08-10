@@ -32,7 +32,7 @@ public:
 	 * @param email
 	 * @return
 	 */
-	static uint32 CreateLocalLoginServerAccount(std::string username, std::string password, std::string email = "");
+	static int32 CreateLocalLoginServerAccount(std::string username, std::string password, std::string email = "");
 
 	/**
 	 * @param username

@@ -39,7 +39,9 @@ namespace LoginserverWebserver {
 
 		api.Get(
 			"/servers/list", [](const httplib::Request &request, httplib::Response &res) {
-				LoginserverWebserver::TokenManager::AuthCanRead(request, res);
+				if (!LoginserverWebserver::TokenManager::AuthCanRead(request, res)) {
+					return;
+				}
 
 				Json::Value response;
 				auto        iter = server.server_manager->getWorldServers().begin();
@@ -63,7 +65,10 @@ namespace LoginserverWebserver {
 
 		api.Post(
 			"/account/create", [](const httplib::Request &request, httplib::Response &res) {
-				LoginserverWebserver::TokenManager::AuthCanWrite(request, res);
+				if (!LoginserverWebserver::TokenManager::AuthCanWrite(request, res)) {
+					return;
+				}
+
 				Json::Value request_body = LoginserverWebserver::ParseRequestBody(request);
 				std::string username     = request_body.get("username", "").asString();
 				std::string password     = request_body.get("password", "").asString();
@@ -76,12 +81,16 @@ namespace LoginserverWebserver {
 					return;
 				}
 
-				bool account_created = AccountManagement::CreateLocalLoginServerAccount(username, password, email);
-				if (account_created) {
-					response["message"] = "Account created successfully!";
+				int32 account_created_id = AccountManagement::CreateLocalLoginServerAccount(username, password, email);
+				if (account_created_id > 0) {
+					response["message"]            = "Account created successfully!";
+					response["data"]["account_id"] = account_created_id;
+				}
+				else if (account_created_id == -1) {
+					response["error"] = "Account already exists!";
 				}
 				else {
-					response["message"] = "Account failed to create!";
+					response["error"] = "Account failed to create!";
 				}
 
 				LoginserverWebserver::SendResponse(response, res);
@@ -90,7 +99,10 @@ namespace LoginserverWebserver {
 
 		api.Post(
 			"/account/credentials/validate/local", [](const httplib::Request &request, httplib::Response &res) {
-				LoginserverWebserver::TokenManager::AuthCanRead(request, res);
+				if (!LoginserverWebserver::TokenManager::AuthCanRead(request, res)) {
+					return;
+				}
+
 				Json::Value request_body = LoginserverWebserver::ParseRequestBody(request);
 				std::string username     = request_body.get("username", "").asString();
 				std::string password     = request_body.get("password", "").asString();
@@ -120,7 +132,10 @@ namespace LoginserverWebserver {
 
 		api.Post(
 			"/account/credentials/update/local", [](const httplib::Request &request, httplib::Response &res) {
-				LoginserverWebserver::TokenManager::AuthCanWrite(request, res);
+				if (!LoginserverWebserver::TokenManager::AuthCanWrite(request, res)) {
+					return;
+				}
+
 				Json::Value request_body = LoginserverWebserver::ParseRequestBody(request);
 				std::string username     = request_body.get("username", "").asString();
 				std::string password     = request_body.get("password", "").asString();
@@ -161,7 +176,10 @@ namespace LoginserverWebserver {
 
 		api.Post(
 			"/account/credentials/validate/external", [](const httplib::Request &request, httplib::Response &res) {
-				LoginserverWebserver::TokenManager::AuthCanRead(request, res);
+				if (!LoginserverWebserver::TokenManager::AuthCanRead(request, res)) {
+					return;
+				}
+
 				Json::Value request_body = LoginserverWebserver::ParseRequestBody(request);
 				std::string username     = request_body.get("username", "").asString();
 				std::string password     = request_body.get("password", "").asString();
@@ -233,7 +251,7 @@ namespace LoginserverWebserver {
 	 * @param request
 	 * @param res
 	 */
-	void LoginserverWebserver::TokenManager::AuthCanRead(const httplib::Request &request, httplib::Response &res)
+	bool LoginserverWebserver::TokenManager::AuthCanRead(const httplib::Request &request, httplib::Response &res)
 	{
 		LoginserverWebserver::TokenManager::token_data
 			user_token = LoginserverWebserver::TokenManager::CheckApiAuthorizationHeaders(request);
@@ -252,15 +270,17 @@ namespace LoginserverWebserver {
 				user_token.user_agent
 			);
 
-			return;
+			return false;
 		}
+
+		return true;
 	}
 
 	/**
 	 * @param request
 	 * @param res
 	 */
-	void LoginserverWebserver::TokenManager::AuthCanWrite(const httplib::Request &request, httplib::Response &res)
+	bool LoginserverWebserver::TokenManager::AuthCanWrite(const httplib::Request &request, httplib::Response &res)
 	{
 		LoginserverWebserver::TokenManager::token_data
 			user_token = LoginserverWebserver::TokenManager::CheckApiAuthorizationHeaders(request);
@@ -279,8 +299,10 @@ namespace LoginserverWebserver {
 				user_token.user_agent
 			);
 
-			return;
+			return false;
 		}
+
+		return true;
 	}
 
 	/**

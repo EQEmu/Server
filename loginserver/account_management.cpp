@@ -33,7 +33,7 @@ EQ::Event::TaskScheduler task_runner;
  * @param email
  * @return
  */
-uint32 AccountManagement::CreateLocalLoginServerAccount(
+int32 AccountManagement::CreateLocalLoginServerAccount(
 	std::string username,
 	std::string password,
 	std::string email
@@ -53,13 +53,12 @@ uint32 AccountManagement::CreateLocalLoginServerAccount(
 	std::string  db_loginserver = server.options.GetDefaultLoginServerName();
 	if (server.db->DoesLoginServerAccountExist(username, hash, db_loginserver, 1)) {
 		LogWarning(
-			"Attempting to create local login account for user [{0}] login [{1}] db_id [{2}] but already exists!",
+			"Attempting to create local login account for user [{0}] login [{1}] but already exists!",
 			username,
-			db_loginserver,
-			db_id
+			db_loginserver
 		);
 
-		return 0;
+		return -1;
 	}
 
 	uint32 created_account_id = server.db->CreateLoginAccount(username, hash, db_loginserver, email);
@@ -72,7 +71,7 @@ uint32 AccountManagement::CreateLocalLoginServerAccount(
 			created_account_id
 		);
 
-		return created_account_id;
+		return (int32) created_account_id;
 	}
 
 	LogError("Failed to create local login account for user [{0}]!", username);

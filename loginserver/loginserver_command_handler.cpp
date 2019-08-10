@@ -267,6 +267,6 @@ namespace LoginserverCommandHandler {
 			cmd("--password").str()
 		);
 
-		LogInfo("Credentials were {0}", res == true ? "accepted" : "not accepted");
+		LogInfo("Credentials were {0}", res ? "accepted" : "not accepted");
 	}
 }
