@@ -3838,32 +3838,32 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 	}
 
 	if (client != GetOwner()) {
-		client->Message(CC_Red, "You are not the owner of this bot - Trade Canceled.");
+		client->Message(Chat::Red, "You are not the owner of this bot - Trade Canceled.");
 		client->ResetTrade();
 		return;
 	}
 	if ((beginSlotID != invslot::TRADE_BEGIN) && (beginSlotID != invslot::slotCursor)) {
-		client->Message(CC_Red, "Trade request processing from illegal 'begin' slot - Trade Canceled.");
+		client->Message(Chat::Red, "Trade request processing from illegal 'begin' slot - Trade Canceled.");
 		client->ResetTrade();
 		return;
 	}
 	if ((endSlotID != invslot::TRADE_END) && (endSlotID != invslot::slotCursor)) {
-		client->Message(CC_Red, "Trade request processing from illegal 'end' slot - Trade Canceled.");
+		client->Message(Chat::Red, "Trade request processing from illegal 'end' slot - Trade Canceled.");
 		client->ResetTrade();
 		return;
 	}
 	if (((beginSlotID == invslot::slotCursor) && (endSlotID != invslot::slotCursor)) || ((beginSlotID != invslot::slotCursor) && (endSlotID == invslot::slotCursor))) {
-		client->Message(CC_Red, "Trade request processing illegal slot range - Trade Canceled.");
+		client->Message(Chat::Red, "Trade request processing illegal slot range - Trade Canceled.");
 		client->ResetTrade();
 		return;
 	}
 	if (endSlotID < beginSlotID) {
-		client->Message(CC_Red, "Trade request processing in reverse slot order - Trade Canceled.");
+		client->Message(Chat::Red, "Trade request processing in reverse slot order - Trade Canceled.");
 		client->ResetTrade();
 		return;
 	}
 	if (client->IsEngaged() || IsEngaged()) {
-		client->Message(CC_Yellow, "You may not perform a trade while engaged - Trade Canceled!");
+		client->Message(Chat::Yellow, "You may not perform a trade while engaged - Trade Canceled!");
 		client->ResetTrade();
 		return;
 	}
@@ -3879,23 +3879,23 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 
 		if (!trade_instance->GetItem()) {
 			// TODO: add logging
-			client->Message(CC_Red, "A server error was encountered while processing client slot %i - Trade Canceled.", trade_index);
+			client->Message(Chat::Red, "A server error was encountered while processing client slot %i - Trade Canceled.", trade_index);
 			client->ResetTrade();
 			return;
 		}
 		if ((trade_index != invslot::slotCursor) && !trade_instance->IsDroppable()) {
 			// TODO: add logging
-			client->Message(CC_Red, "Trade hack detected - Trade Canceled.");
+			client->Message(Chat::Red, "Trade hack detected - Trade Canceled.");
 			client->ResetTrade();
 			return;
 		}
 		if (trade_instance->IsStackable() && (trade_instance->GetCharges() < trade_instance->GetItem()->StackSize)) { // temp until partial stacks are implemented
-			client->Message(CC_Yellow, "'%s' is only a partially stacked item - Trade Canceled!", trade_instance->GetItem()->Name);
+			client->Message(Chat::Yellow, "'%s' is only a partially stacked item - Trade Canceled!", trade_instance->GetItem()->Name);
 			client->ResetTrade();
 			return;
 		}
 		if (CheckLoreConflict(trade_instance->GetItem())) {
-			client->Message(CC_Yellow, "This bot already has lore equipment matching the item '%s' - Trade Canceled!", trade_instance->GetItem()->Name);
+			client->Message(Chat::Yellow, "This bot already has lore equipment matching the item '%s' - Trade Canceled!", trade_instance->GetItem()->Name);
 			client->ResetTrade();
 			return;
 		}
@@ -3925,13 +3925,13 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 			
 			if ((trade_iterator.tradeItemInstance->GetItem()->LoreGroup == -1) && (check_iterator.tradeItemInstance->GetItem()->ID == trade_iterator.tradeItemInstance->GetItem()->ID)) {
 				// TODO: add logging
-				client->Message(CC_Red, "Trade hack detected - Trade Canceled.");
+				client->Message(Chat::Red, "Trade hack detected - Trade Canceled.");
 				client->ResetTrade();
 				return;
 			}
 			if ((trade_iterator.tradeItemInstance->GetItem()->LoreGroup > 0) && (check_iterator.tradeItemInstance->GetItem()->LoreGroup == trade_iterator.tradeItemInstance->GetItem()->LoreGroup)) {
 				// TODO: add logging
-				client->Message(CC_Red, "Trade hack detected - Trade Canceled.");
+				client->Message(Chat::Red, "Trade hack detected - Trade Canceled.");
 				client->ResetTrade();
 				return;
 			}
@@ -4040,14 +4040,14 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 
 		if (!return_instance->GetItem()) {
 			// TODO: add logging
-			client->Message(CC_Red, "A server error was encountered while processing bot slot %i - Trade Canceled.", return_iterator.fromBotSlot);
+			client->Message(Chat::Red, "A server error was encountered while processing bot slot %i - Trade Canceled.", return_iterator.fromBotSlot);
 			client->ResetTrade();
 			return;
 		}
 		// non-failing checks above are causing this to trigger (i.e., !ItemClassCommon and !IsEquipable{race, class, min_level})
 		// this process is hindered by not having bots use the inventory trade method (TODO: implement bot inventory use)
 		if (client->CheckLoreConflict(return_instance->GetItem())) {
-			client->Message(CC_Yellow, "You already have lore equipment matching the item '%s' - Trade Canceled!", return_instance->GetItem()->Name);
+			client->Message(Chat::Yellow, "You already have lore equipment matching the item '%s' - Trade Canceled!", return_instance->GetItem()->Name);
 			client->ResetTrade();
 			return;
 		}
@@ -4104,7 +4104,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 		}
 
 		if (return_iterator.toClientSlot == invslot::SLOT_INVALID) {
-			client->Message(CC_Yellow, "You do not have room to complete this trade - Trade Canceled!");
+			client->Message(Chat::Yellow, "You do not have room to complete this trade - Trade Canceled!");
 			client->ResetTrade();
 			return;
 		}
@@ -4130,7 +4130,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 			//}
 
 			if (!database.botdb.DeleteItemBySlot(GetBotID(), return_iterator.fromBotSlot))
-				client->Message(CC_Red, "%s (slot: %i, name: '%s')", BotDatabase::fail::DeleteItemBySlot(), return_iterator.fromBotSlot, (return_instance ? return_instance->GetItem()->Name : "nullptr"));
+				client->Message(Chat::Red, "%s (slot: %i, name: '%s')", BotDatabase::fail::DeleteItemBySlot(), return_iterator.fromBotSlot, (return_instance ? return_instance->GetItem()->Name : "nullptr"));
 
 			BotRemoveEquipItem(return_iterator.fromBotSlot);
 			if (return_instance)
@@ -4145,7 +4145,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 		// TODO: code for stackables
 
 		if (!database.botdb.SaveItemBySlot(this, trade_iterator.toBotSlot, trade_iterator.tradeItemInstance))
-			client->Message(CC_Red, "%s (slot: %i, name: '%s')", BotDatabase::fail::SaveItemBySlot(), trade_iterator.toBotSlot, (trade_iterator.tradeItemInstance ? trade_iterator.tradeItemInstance->GetItem()->Name : "nullptr"));
+			client->Message(Chat::Red, "%s (slot: %i, name: '%s')", BotDatabase::fail::SaveItemBySlot(), trade_iterator.toBotSlot, (trade_iterator.tradeItemInstance ? trade_iterator.tradeItemInstance->GetItem()->Name : "nullptr"));
 
 		m_inv.PutItem(trade_iterator.toBotSlot, *trade_iterator.tradeItemInstance);
 		this->BotAddEquipItem(trade_iterator.toBotSlot, (trade_iterator.tradeItemInstance ? trade_iterator.tradeItemInstance->GetID() : 0));
@@ -4190,9 +4190,9 @@ bool Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, EQEmu::skills::Sk
 	Mob *my_owner = GetBotOwner();
 	if (my_owner && my_owner->IsClient() && my_owner->CastToClient()->GetBotOptionDeathMarquee()) {
 		if (killerMob)
-			my_owner->CastToClient()->SendMarqueeMessage(CC_Yellow, 510, 0, 1000, 3000, StringFormat("%s has been slain by %s", GetCleanName(), killerMob->GetCleanName()));
+			my_owner->CastToClient()->SendMarqueeMessage(Chat::Yellow, 510, 0, 1000, 3000, StringFormat("%s has been slain by %s", GetCleanName(), killerMob->GetCleanName()));
 		else
-			my_owner->CastToClient()->SendMarqueeMessage(CC_Yellow, 510, 0, 1000, 3000, StringFormat("%s has been slain", GetCleanName()));
+			my_owner->CastToClient()->SendMarqueeMessage(Chat::Yellow, 510, 0, 1000, 3000, StringFormat("%s has been slain", GetCleanName()));
 	}
 
 	Mob *give_exp = hate_list.GetDamageTopOnHateList(this);
