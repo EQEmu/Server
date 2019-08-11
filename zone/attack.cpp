@@ -1914,7 +1914,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 	//Check that we can attack before we calc heading and face our target
 	if (!IsAttackAllowed(other)) {
 		if (this->GetOwnerID())
-			this->Say_StringID(NOT_LEGAL_TARGET);
+			this->SayString(NOT_LEGAL_TARGET);
 		if (other) {
 			if (other->IsClient())
 				other->CastToClient()->RemoveXTarget(this, false);

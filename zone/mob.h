@@ -734,13 +734,13 @@ public:
 			const char *message7 = nullptr, const char *message8 = nullptr,
 			const char *message9 = nullptr) { }
 	void Say(const char *format, ...);
-	void Say_StringID(uint32 string_id, const char *message3 = 0, const char *message4 = 0, const char *message5 = 0,
+	void SayString(uint32 string_id, const char *message3 = 0, const char *message4 = 0, const char *message5 = 0,
 		const char *message6 = 0, const char *message7 = 0, const char *message8 = 0, const char *message9 = 0);
-	void Say_StringID(uint32 type, uint32 string_id, const char *message3 = 0, const char *message4 = 0, const char *message5 = 0,
+	void SayString(uint32 type, uint32 string_id, const char *message3 = 0, const char *message4 = 0, const char *message5 = 0,
 		const char *message6 = 0, const char *message7 = 0, const char *message8 = 0, const char *message9 = 0);
-	void SayTo_StringID(Client *to, uint32 string_id, const char *message3 = 0, const char *message4 = 0, const char *message5 = 0,
+	void SayString(Client *to, uint32 string_id, const char *message3 = 0, const char *message4 = 0, const char *message5 = 0,
 		const char *message6 = 0, const char *message7 = 0, const char *message8 = 0, const char *message9 = 0);
-	void SayTo_StringID(Client *to, uint32 type, uint32 string_id, const char *message3 = 0, const char *message4 = 0, const char *message5 = 0,
+	void SayString(Client *to, uint32 type, uint32 string_id, const char *message3 = 0, const char *message4 = 0, const char *message5 = 0,
 		const char *message6 = 0, const char *message7 = 0, const char *message8 = 0, const char *message9 = 0);
 	void Shout(const char *format, ...);
 	void Emote(const char *format, ...);

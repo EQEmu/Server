@@ -2844,7 +2844,7 @@ void Mob::Say(const char *format, ...)
 //
 // this is like the above, but the first parameter is a string id
 //
-void Mob::Say_StringID(uint32 string_id, const char *message3, const char *message4, const char *message5, const char *message6, const char *message7, const char *message8, const char *message9)
+void Mob::SayString(uint32 string_id, const char *message3, const char *message4, const char *message5, const char *message6, const char *message7, const char *message8, const char *message9)
 {
 	char string_id_str[10];
 
@@ -2857,7 +2857,7 @@ void Mob::Say_StringID(uint32 string_id, const char *message3, const char *messa
 	);
 }
 
-void Mob::Say_StringID(uint32 type, uint32 string_id, const char *message3, const char *message4, const char *message5, const char *message6, const char *message7, const char *message8, const char *message9)
+void Mob::SayString(uint32 type, uint32 string_id, const char *message3, const char *message4, const char *message5, const char *message6, const char *message7, const char *message8, const char *message9)
 {
 	char string_id_str[10];
 
@@ -2870,7 +2870,7 @@ void Mob::Say_StringID(uint32 type, uint32 string_id, const char *message3, cons
 	);
 }
 
-void Mob::SayTo_StringID(Client *to, uint32 string_id, const char *message3, const char *message4, const char *message5, const char *message6, const char *message7, const char *message8, const char *message9)
+void Mob::SayString(Client *to, uint32 string_id, const char *message3, const char *message4, const char *message5, const char *message6, const char *message7, const char *message8, const char *message9)
 {
 	if (!to)
 		return;
@@ -2880,7 +2880,7 @@ void Mob::SayTo_StringID(Client *to, uint32 string_id, const char *message3, con
 	to->MessageString(Chat::NPCQuestSay, GENERIC_STRINGID_SAY, GetCleanName(), string_id_str.c_str(), message3, message4, message5, message6, message7, message8, message9);
 }
 
-void Mob::SayTo_StringID(Client *to, uint32 type, uint32 string_id, const char *message3, const char *message4, const char *message5, const char *message6, const char *message7, const char *message8, const char *message9)
+void Mob::SayString(Client *to, uint32 type, uint32 string_id, const char *message3, const char *message4, const char *message5, const char *message6, const char *message7, const char *message8, const char *message9)
 {
 	if (!to)
 		return;

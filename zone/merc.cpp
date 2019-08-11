@@ -1637,11 +1637,11 @@ void Merc::AI_Process() {
 				// TODO: Do mercs berserk? Find this out on live...
 				//if (GetClass() == WARRIOR || GetClass() == BERSERKER) {
 				//      if(GetHP() > 0 && !berserk && this->GetHPRatio() < 30) {
-				//              entity_list.MessageClose_StringID(this, false, 200, 0, BERSERK_START, GetName());
+				//              entity_list.MessageCloseString(this, false, 200, 0, BERSERK_START, GetName());
 				//              this->berserk = true;
 				//      }
 				//      if (berserk && this->GetHPRatio() > 30) {
-				//              entity_list.MessageClose_StringID(this, false, 200, 0, BERSERK_END, GetName());
+				//              entity_list.MessageCloseString(this, false, 200, 0, BERSERK_END, GetName());
 				//              this->berserk = false;
 				//      }
 				//}

@@ -1233,7 +1233,7 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 			return;
 		duration = 11;
 		reuse = 60*60;
-		entity_list.MessageClose_StringID(this, false, 100, 0, DISCIPLINE_FEARLESS, GetName());
+		entity_list.MessageCloseString(this, false, 100, 0, DISCIPLINE_FEARLESS, GetName());
 		//entity_list.MessageClose(this, false, 100, 0, "%s becomes fearless!", GetName());
 		break;
 	}

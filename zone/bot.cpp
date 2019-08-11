@@ -2276,12 +2276,12 @@ void Bot::AI_Process() {
 	// Berserk updates should occur if primary AI criteria are met
 	if (GetClass() == WARRIOR || GetClass() == BERSERKER) {
 		if (!berserk && GetHP() > 0 && GetHPRatio() < 30.0f) {
-			entity_list.MessageClose_StringID(this, false, 200, 0, BERSERK_START, GetName());
+			entity_list.MessageCloseString(this, false, 200, 0, BERSERK_START, GetName());
 			berserk = true;
 		}
 
 		if (berserk && GetHPRatio() >= 30.0f) {
-			entity_list.MessageClose_StringID(this, false, 200, 0, BERSERK_END, GetName());
+			entity_list.MessageCloseString(this, false, 200, 0, BERSERK_END, GetName());
 			berserk = false;
 		}
 	}
@@ -5364,7 +5364,7 @@ bool Bot::TryFinishingBlow(Mob *defender, int &damage)
 		if (defender->GetLevel() <= levelreq && (chance >= zone->random.Int(1, 1000))) {
 			Log(Logs::Detail, Logs::Combat, "Landed a finishing blow: levelreq at %d, other level %d",
 				levelreq, defender->GetLevel());
-			entity_list.MessageClose_StringID(this, false, 200, Chat::MeleeCrit, FINISHING_BLOW, GetName());
+			entity_list.MessageCloseString(this, false, 200, Chat::MeleeCrit, FINISHING_BLOW, GetName());
 			damage = fb_damage;
 			return true;
 		} else {
@@ -5572,7 +5572,7 @@ void Bot::TryBackstab(Mob *other, int ReuseTime) {
 	if (bIsBehind || bCanFrontalBS) {
 		int chance = (10 + (GetDEX() / 10) + (itembonuses.HeroicDEX / 10));
 		if(level >= 60 && other->GetLevel() <= 45 && !other->CastToNPC()->IsEngaged() && other->GetHP()<= 32000 && other->IsNPC() && zone->random.Real(0, 99) < chance) {
-			entity_list.MessageClose_StringID(this, false, 200, Chat::MeleeCrit, ASSASSINATES, GetName());
+			entity_list.MessageCloseString(this, false, 200, Chat::MeleeCrit, ASSASSINATES, GetName());
 			RogueAssassinate(other);
 		} else {
 			RogueBackstab(other);

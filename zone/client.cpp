@@ -7948,7 +7948,7 @@ void Client::MerchantRejectMessage(Mob *merchant, int primaryfaction)
 	}
 	// If no primary faction or biggest influence is your faction hit
 	if (primaryfaction <= 0 || lowestvalue == tmpFactionValue) {
-		merchant->Say_StringID(zone->random.Int(WONT_SELL_DEEDS1, WONT_SELL_DEEDS6));
+		merchant->SayString(zone->random.Int(WONT_SELL_DEEDS1, WONT_SELL_DEEDS6));
 	} else if (lowestvalue == fmod.race_mod) { // race biggest
 		// Non-standard race (ex. illusioned to wolf)
 		if (GetRace() > PLAYER_RACE_COUNT) {
@@ -7967,7 +7967,7 @@ void Client::MerchantRejectMessage(Mob *merchant, int primaryfaction)
 				messageid = WONT_SELL_NONSTDRACE1;
 				break;
 			}
-			merchant->Say_StringID(messageid);
+			merchant->SayString(messageid);
 		} else { // normal player races
 			messageid = zone->random.Int(1, 4);
 			switch (messageid) {
@@ -7987,15 +7987,15 @@ void Client::MerchantRejectMessage(Mob *merchant, int primaryfaction)
 				messageid = WONT_SELL_RACE1;
 				break;
 			}
-			merchant->Say_StringID(messageid, itoa(GetRace()));
+			merchant->SayString(messageid, itoa(GetRace()));
 		}
 	} else if (lowestvalue == fmod.class_mod) {
-		merchant->Say_StringID(zone->random.Int(WONT_SELL_CLASS1, WONT_SELL_CLASS5), itoa(GetClass()));
+		merchant->SayString(zone->random.Int(WONT_SELL_CLASS1, WONT_SELL_CLASS5), itoa(GetClass()));
 	} else {
 		// Must be deity - these two sound the best for that.
 		// Can't use a message with a field, GUI wants class/race names.
 		// for those message IDs.  These are straight text.
-		merchant->Say_StringID(zone->random.Int(WONT_SELL_DEEDS1, WONT_SELL_DEEDS2));
+		merchant->SayString(zone->random.Int(WONT_SELL_DEEDS1, WONT_SELL_DEEDS2));
 	}
 	return;
 }

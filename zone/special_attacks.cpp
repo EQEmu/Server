@@ -1953,7 +1953,7 @@ void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool FromSpell,
 			}
 
 			if (who->CanTalk())
-				who->Say_StringID(SUCCESSFUL_TAUNT, GetCleanName());
+				who->SayString(SUCCESSFUL_TAUNT, GetCleanName());
 		} else {
 			MessageString(Chat::SpellFailure, FAILED_TAUNT);
 		}

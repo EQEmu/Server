@@ -1527,7 +1527,7 @@ void Client::OPGMTraining(const EQApplicationPacket *app)
 	// welcome message
 	if (pTrainer && pTrainer->IsNPC())
 	{
-		pTrainer->Say_StringID(zone->random.Int(1204, 1207), GetCleanName());
+		pTrainer->SayString(zone->random.Int(1204, 1207), GetCleanName());
 	}
 }
 
@@ -1556,7 +1556,7 @@ void Client::OPGMEndTraining(const EQApplicationPacket *app)
 	// goodbye message
 	if (pTrainer->IsNPC())
 	{
-		pTrainer->Say_StringID(zone->random.Int(1208, 1211), GetCleanName());
+		pTrainer->SayString(zone->random.Int(1208, 1211), GetCleanName());
 	}
 }
 

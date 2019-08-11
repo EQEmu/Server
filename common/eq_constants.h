@@ -71,7 +71,7 @@
 //#define AT_Trader 300		// Bazaar Trader Mode (not present in SoF or RoF2)
 
 // animations for AT_Anim
-#define ANIM_FREEZE	102
+#define ANIM_FREEZE	    102
 #define	ANIM_STAND		0x64
 #define	ANIM_SIT		0x6e
 #define	ANIM_CROUCH		0x6f
