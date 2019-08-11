@@ -1671,9 +1671,9 @@ void EntityList::DuelMessage(Mob *winner, Mob *loser, bool flee)
 		//might want some sort of distance check in here?
 		if (cur != winner && cur != loser) {
 			if (flee)
-				cur->Message_StringID(15, DUEL_FLED, winner->GetName(),loser->GetName(),loser->GetName());
+				cur->Message_StringID(Chat::Yellow, DUEL_FLED, winner->GetName(),loser->GetName(),loser->GetName());
 			else
-				cur->Message_StringID(15, DUEL_FINISHED, winner->GetName(),loser->GetName());
+				cur->Message_StringID(Chat::Yellow, DUEL_FINISHED, winner->GetName(),loser->GetName());
 		}
 		++it;
 	}
@@ -2099,6 +2099,23 @@ void EntityList::MessageClose_StringID(Mob *sender, bool skipsender, float dist,
 	}
 }
 
+/**
+ * @param sender
+ * @param skipsender
+ * @param dist
+ * @param type
+ * @param filter
+ * @param string_id
+ * @param message1
+ * @param message2
+ * @param message3
+ * @param message4
+ * @param message5
+ * @param message6
+ * @param message7
+ * @param message8
+ * @param message9
+ */
 void EntityList::FilteredMessageClose_StringID(Mob *sender, bool skipsender,
 		float dist, uint32 type, eqFilterType filter, uint32 string_id,
 		const char *message1, const char *message2, const char *message3,
@@ -2774,7 +2791,7 @@ void EntityList::CorpseFix(Client* c)
 		Corpse* corpse = it->second;
 		if (corpse->IsNPCCorpse()) {
 			if (DistanceNoZ(c->GetPosition(), corpse->GetPosition()) < 100) {
-				c->Message(15, "Attempting to fix %s", it->second->GetCleanName());
+				c->Message(Chat::Yellow, "Attempting to fix %s", it->second->GetCleanName());
 				corpse->GMMove(corpse->GetX(), corpse->GetY(), c->GetZ() + 2, 0);
 			}
 		}
@@ -4632,7 +4649,7 @@ void EntityList::ExpeditionWarning(uint32 minutes_left)
 
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
-		it->second->Message_StringID(15, EXPEDITION_MIN_REMAIN, itoa((int)minutes_left));
+		it->second->Message_StringID(Chat::Yellow, EXPEDITION_MIN_REMAIN, itoa((int)minutes_left));
 		it->second->QueuePacket(outapp);
 		++it;
 	}

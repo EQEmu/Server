@@ -203,11 +203,11 @@ void Mob::Tune_FindACByPctMitigation(Mob* defender, Mob *attacker, float pct_mit
 				Message(0, "#Tune - [WARNING] Mitigation can not be further decreased due to minium hit value (%i).",minhit);
 
 			if (defender->IsNPC()){
-				Message(7, "#Tune - Recommended NPC AC ADJUSTMENT ( %i ) on ' %s ' for an average mitigation of (+ %.0f) pct from attacker ' %s '.",add_ac,defender->GetCleanName(), pct_mitigation, attacker->GetCleanName());
+				Message(Chat::LightGray, "#Tune - Recommended NPC AC ADJUSTMENT ( %i ) on ' %s ' for an average mitigation of (+ %.0f) pct from attacker ' %s '.",add_ac,defender->GetCleanName(), pct_mitigation, attacker->GetCleanName());
 				Message(0, "#SET: [NPC Attack STAT] = [%i]",add_ac + defender->CastToNPC()->GetRawAC());
 			}
 			if (defender->IsClient()){
-				Message(7, "#Tune - Recommended CLIENT AC ADJUSTMENT ( %i ) on ' %s ' for an average mitigation of (+ %.0f) pct from attacker ' %s '.",add_ac,defender->GetCleanName(), pct_mitigation, attacker->GetCleanName());
+				Message(Chat::LightGray, "#Tune - Recommended CLIENT AC ADJUSTMENT ( %i ) on ' %s ' for an average mitigation of (+ %.0f) pct from attacker ' %s '.",add_ac,defender->GetCleanName(), pct_mitigation, attacker->GetCleanName());
 				Message(0, "#Modify (+/-): [Client AC STAT/SE_AC(1)] [%i]",add_ac);
 			}
 
@@ -693,7 +693,7 @@ void Mob::Tune_FindAccuaryByHitChance(Mob* defender, Mob *attacker, float hit_ch
 		tmp_hit_chance = Tune_CheckHitChance(defender, attacker, skillinuse, EQEmu::invslot::slotPrimary, 0, false, 0, avoid_override, add_acc);
 
 		if (Msg >= 3)
-			Message(15, "#Tune - Processing... [%i] [ACCURACY %i] Hit Chance %.2f ",j,add_acc,tmp_hit_chance);
+			Message(Chat::Yellow, "#Tune - Processing... [%i] [ACCURACY %i] Hit Chance %.2f ",j,add_acc,tmp_hit_chance);
 
 		if (interval > 0 && tmp_hit_chance >= hit_chance){
 			end = true;
@@ -727,8 +727,8 @@ void Mob::Tune_FindAccuaryByHitChance(Mob* defender, Mob *attacker, float hit_ch
 		add_acc = add_acc + interval;
 	}
 
-	Message(7, "#Tune - Error: Unable to find desired result for (%.0f) pct - Increase interval (%i) AND/OR max loop value (%i) and run again.", hit_chance, interval, max_loop);
-	Message(7, "#Tune - Parse ended at ACCURACY ADJUSTMENTT ( %i ) at hit chance of (%.0f) / (%.0f) pct.",add_acc,tmp_hit_chance / hit_chance);
+	Message(Chat::LightGray, "#Tune - Error: Unable to find desired result for (%.0f) pct - Increase interval (%i) AND/OR max loop value (%i) and run again.", hit_chance, interval, max_loop);
+	Message(Chat::LightGray, "#Tune - Parse ended at ACCURACY ADJUSTMENTT ( %i ) at hit chance of (%.0f) / (%.0f) pct.",add_acc,tmp_hit_chance / hit_chance);
 }
 
 void Mob::Tune_FindAvoidanceByHitChance(Mob* defender, Mob *attacker, float hit_chance, int interval, int max_loop, int acc_override, int Msg)

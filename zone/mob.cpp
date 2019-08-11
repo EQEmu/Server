@@ -2709,7 +2709,7 @@ bool Mob::HateSummon() {
 	if(target)
 	{
 		if(summon_level == 1) {
-			entity_list.MessageClose(this, true, 500, MT_Say, "%s says,'You will not evade me, %s!' ", GetCleanName(), target->GetCleanName() );
+			entity_list.MessageClose(this, true, 500, Chat::Say, "%s says 'You will not evade me, %s!' ", GetCleanName(), target->GetCleanName() );
 
 			if (target->IsClient())
 				target->CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), m_Position.x, m_Position.y, m_Position.z, target->GetHeading(), 0, SummonPC);
@@ -2718,7 +2718,7 @@ bool Mob::HateSummon() {
 
 			return true;
 		} else if(summon_level == 2) {
-			entity_list.MessageClose(this, true, 500, MT_Say, "%s says,'You will not evade me, %s!'", GetCleanName(), target->GetCleanName());
+			entity_list.MessageClose(this, true, 500, Chat::Say, "%s says 'You will not evade me, %s!'", GetCleanName(), target->GetCleanName());
 			GMMove(target->GetX(), target->GetY(), target->GetZ());
 		}
 	}
@@ -2875,7 +2875,7 @@ void Mob::SayTo_StringID(Client *to, uint32 string_id, const char *message3, con
 
 	auto string_id_str = std::to_string(string_id);
 
-	to->Message_StringID(10, GENERIC_STRINGID_SAY, GetCleanName(), string_id_str.c_str(), message3, message4, message5, message6, message7, message8, message9);
+	to->Message_StringID(Chat::NPCQuestSay, GENERIC_STRINGID_SAY, GetCleanName(), string_id_str.c_str(), message3, message4, message5, message6, message7, message8, message9);
 }
 
 void Mob::SayTo_StringID(Client *to, uint32 type, uint32 string_id, const char *message3, const char *message4, const char *message5, const char *message6, const char *message7, const char *message8, const char *message9)
@@ -2897,7 +2897,7 @@ void Mob::Shout(const char *format, ...)
 	vsnprintf(buf, 1000, format, ap);
 	va_end(ap);
 
-	entity_list.Message_StringID(this, false, MT_Shout,
+	entity_list.Message_StringID(this, false, Chat::Shout,
 		GENERIC_SHOUT, GetCleanName(), buf);
 }
 
@@ -3569,7 +3569,7 @@ void Mob::TryTwincast(Mob *caster, Mob *target, uint32 spell_id)
 		{
 			if(zone->random.Roll(focus))
 			{
-				Message(MT_Spells,"You twincast %s!",spells[spell_id].name);
+				Message(Chat::Spells,"You twincast %s!", spells[spell_id].name);
 				SpellFinished(spell_id, target, EQEmu::spells::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
 			}
 		}
@@ -4887,16 +4887,16 @@ void Mob::SlowMitigation(Mob* caster)
 	if (GetSlowMitigation() && caster && caster->IsClient())
 	{
 		if ((GetSlowMitigation() > 0) && (GetSlowMitigation() < 26))
-			caster->Message_StringID(MT_SpellFailure, SLOW_MOSTLY_SUCCESSFUL);
+			caster->Message_StringID(Chat::SpellFailure, SLOW_MOSTLY_SUCCESSFUL);
 
 		else if ((GetSlowMitigation() >= 26) && (GetSlowMitigation() < 74))
-			caster->Message_StringID(MT_SpellFailure, SLOW_PARTIALLY_SUCCESSFUL);
+			caster->Message_StringID(Chat::SpellFailure, SLOW_PARTIALLY_SUCCESSFUL);
 
 		else if ((GetSlowMitigation() >= 74) && (GetSlowMitigation() < 101))
-			caster->Message_StringID(MT_SpellFailure, SLOW_SLIGHTLY_SUCCESSFUL);
+			caster->Message_StringID(Chat::SpellFailure, SLOW_SLIGHTLY_SUCCESSFUL);
 
 		else if (GetSlowMitigation() > 100)
-			caster->Message_StringID(MT_SpellFailure, SPELL_OPPOSITE_EFFECT);
+			caster->Message_StringID(Chat::SpellFailure, SPELL_OPPOSITE_EFFECT);
 	}
 }
 

@@ -122,7 +122,7 @@ bool Adventure::Process()
 		else if(status == AS_WaitingForPrimaryEndTime)
 		{
 			//Do partial failure: send a message to the clients that they can only get a certain amount of points.
-			SendAdventureMessage(13, "You failed to complete your adventure in time. Complete your adventure goal within 30 minutes to "
+			SendAdventureMessage(Chat::Red, "You failed to complete your adventure in time. Complete your adventure goal within 30 minutes to "
 				"receive a lesser reward. This adventure will end in 30 minutes and your party will be ejected from the dungeon.");
 			SetStatus(AS_WaitingForSecondaryEndTime);
 		}

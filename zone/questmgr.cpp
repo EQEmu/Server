@@ -807,13 +807,13 @@ void QuestManager::changedeity(int diety_id) {
 		if(initiator->IsClient())
 		{
 			initiator->SetDeity(diety_id);
-			initiator->Message(15,"Your Deity has been changed/set to: %i", diety_id);
+			initiator->Message(Chat::Yellow,"Your Deity has been changed/set to: %i", diety_id);
 			initiator->Save(1);
 			initiator->Kick("Deity change by QuestManager");
 		}
 		else
 		{
-			initiator->Message(15,"Error changing Deity");
+			initiator->Message(Chat::Yellow,"Error changing Deity");
 		}
 	}
 }
@@ -929,11 +929,11 @@ void QuestManager::surname(const char *name) {
 		if(initiator->IsClient())
 		{
 			initiator->ChangeLastName(name);
-			initiator->Message(15,"Your surname has been changed/set to: %s", name);
+			initiator->Message(Chat::Yellow,"Your surname has been changed/set to: %s", name);
 		}
 		else
 		{
-			initiator->Message(15,"Error changing/setting surname");
+			initiator->Message(Chat::Yellow,"Error changing/setting surname");
 		}
 	}
 }
@@ -986,11 +986,11 @@ uint16 QuestManager::scribespells(uint8 max_level, uint8 min_level) {
 			break;
 		}
 		if (spell_id < 0 || spell_id >= SPDAT_RECORDS) {
-			initiator->Message(13, "FATAL ERROR: Spell id out-of-range (id: %i, min: 0, max: %i)", spell_id, SPDAT_RECORDS);
+			initiator->Message(Chat::Red, "FATAL ERROR: Spell id out-of-range (id: %i, min: 0, max: %i)", spell_id, SPDAT_RECORDS);
 			return count;
 		}
 		if (book_slot < 0 || book_slot >= EQEmu::spells::SPELLBOOK_SIZE) {
-			initiator->Message(13, "FATAL ERROR: Book slot out-of-range (slot: %i, min: 0, max: %i)", book_slot, EQEmu::spells::SPELLBOOK_SIZE);
+			initiator->Message(Chat::Red, "FATAL ERROR: Book slot out-of-range (slot: %i, min: 0, max: %i)", book_slot, EQEmu::spells::SPELLBOOK_SIZE);
 			return count;
 		}
 
@@ -1008,7 +1008,7 @@ uint16 QuestManager::scribespells(uint8 max_level, uint8 min_level) {
 
 			uint16 spell_id_ = (uint16)spell_id;
 			if ((spell_id_ != spell_id) || (spell_id != spell_id_)) {
-				initiator->Message(13, "FATAL ERROR: Type conversion data loss with spell_id (%i != %u)", spell_id, spell_id_);
+				initiator->Message(Chat::Red, "FATAL ERROR: Type conversion data loss with spell_id (%i != %u)", spell_id, spell_id_);
 				return count;
 			}
 
@@ -1059,7 +1059,7 @@ uint16 QuestManager::traindiscs(uint8 max_level, uint8 min_level) {
 
 	for( ; spell_id < SPDAT_RECORDS; ++spell_id) {
 		if (spell_id < 0 || spell_id >= SPDAT_RECORDS) {
-			initiator->Message(13, "FATAL ERROR: Spell id out-of-range (id: %i, min: 0, max: %i)", spell_id, SPDAT_RECORDS);
+			initiator->Message(Chat::Red, "FATAL ERROR: Spell id out-of-range (id: %i, min: 0, max: %i)", spell_id, SPDAT_RECORDS);
 			return count;
 		}
 
@@ -1077,7 +1077,7 @@ uint16 QuestManager::traindiscs(uint8 max_level, uint8 min_level) {
 
 			uint16 spell_id_ = (uint16)spell_id;
 			if ((spell_id_ != spell_id) || (spell_id != spell_id_)) {
-				initiator->Message(13, "FATAL ERROR: Type conversion data loss with spell_id (%i != %u)", spell_id, spell_id_);
+				initiator->Message(Chat::Red, "FATAL ERROR: Type conversion data loss with spell_id (%i != %u)", spell_id, spell_id_);
 				return count;
 			}
 
@@ -1086,7 +1086,7 @@ uint16 QuestManager::traindiscs(uint8 max_level, uint8 min_level) {
 
 			for (uint32 r = 0; r < MAX_PP_DISCIPLINES; r++) {
 				if (initiator->GetPP().disciplines.values[r] == spell_id_) {
-					initiator->Message(13, "You already know this discipline.");
+					initiator->Message(Chat::Red, "You already know this discipline.");
 					break; // continue the 1st loop
 				}
 				else if (initiator->GetPP().disciplines.values[r] == 0) {
@@ -1190,7 +1190,7 @@ void QuestManager::givecash(int copper, int silver, int gold, int platinum) {
 		}
 		tmp += " pieces.";
 		if (initiator)
-			initiator->Message(MT_OOC, tmp.c_str());
+			initiator->Message(Chat::OOC, tmp.c_str());
 	}
 }
 
@@ -2164,7 +2164,7 @@ bool QuestManager::createBot(const char *name, const char *lastname, uint8 level
 	{
 		if(Bot::SpawnedBotCount(initiator->CharacterID()) >= MaxBotCreate)
 		{
-			initiator->Message(15,"You have the maximum number of bots allowed.");
+			initiator->Message(Chat::Yellow,"You have the maximum number of bots allowed.");
 			return false;
 		}
 
@@ -2657,13 +2657,13 @@ uint16 QuestManager::CreateInstance(const char *zone, int16 version, uint32 dura
 		uint16 id = 0;
 		if(!database.GetUnusedInstanceID(id))
 		{
-			initiator->Message(13, "Server was unable to find a free instance id.");
+			initiator->Message(Chat::Red, "Server was unable to find a free instance id.");
 			return 0;
 		}
 
 		if(!database.CreateInstance(id, zone_id, version, duration))
 		{
-			initiator->Message(13, "Server was unable to create a new instance.");
+			initiator->Message(Chat::Red, "Server was unable to create a new instance.");
 			return 0;
 		}
 		return id;
@@ -2776,9 +2776,9 @@ void QuestManager::RemoveFromInstance(uint16 instance_id)
 	if (initiator)
 	{
 		if (database.RemoveClientFromInstance(instance_id, initiator->CharacterID()))
-			initiator->Message(MT_Say, "Removed client from instance.");
+			initiator->Message(Chat::Say, "Removed client from instance.");
 		else
-			initiator->Message(MT_Say, "Failed to remove client from instance.");
+			initiator->Message(Chat::Say, "Failed to remove client from instance.");
 	}
 }
 
@@ -2794,11 +2794,11 @@ void QuestManager::RemoveAllFromInstance(uint16 instance_id)
 		std::list<uint32> charid_list;
 
 		if (database.RemoveClientsFromInstance(instance_id))
-			initiator->Message(MT_Say, "Removed all players from instance.");
+			initiator->Message(Chat::Say, "Removed all players from instance.");
 		else
 		{
 			database.GetCharactersInInstance(instance_id, charid_list);
-			initiator->Message(MT_Say, "Failed to remove %i player(s) from instance.", charid_list.size()); // once the expedition system is in, this message it not relevant
+			initiator->Message(Chat::Say, "Failed to remove %i player(s) from instance.", charid_list.size()); // once the expedition system is in, this message it not relevant
 		}
 	}
 }

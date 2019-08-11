@@ -889,14 +889,14 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 
 	if(IsPlayerCorpse() && !corpse_db_id) { // really should try to resave in this case
 		// SendLootReqErrorPacket(client, 0);
-		client->Message(13, "Warning: Corpse's dbid = 0! Corpse will not survive zone shutdown!");
+		client->Message(Chat::Red, "Warning: Corpse's dbid = 0! Corpse will not survive zone shutdown!");
 		std::cout << "Error: PlayerCorpse::MakeLootRequestPackets: dbid = 0!" << std::endl;
 		// return;
 	}
 
 	if(is_locked && client->Admin() < 100) {
 		SendLootReqErrorPacket(client, LootResponse::SomeoneElse);
-		client->Message(13, "Error: Corpse locked by GM.");
+		client->Message(Chat::Red, "Error: Corpse locked by GM.");
 		return;
 	}
 
@@ -960,7 +960,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 		loot_coin = (tmp[0] == 1 && tmp[1] == '\0');
 
 	if (loot_request_type == LootRequestType::GMPeek || loot_request_type == LootRequestType::GMAllowed) {
-		client->Message(15, "This corpse contains %u platinum, %u gold, %u silver and %u copper.",
+		client->Message(Chat::Yellow, "This corpse contains %u platinum, %u gold, %u silver and %u copper.",
 			GetPlatinum(), GetGold(), GetSilver(), GetCopper());
 
 		auto outapp = new EQApplicationPacket(OP_MoneyOnCorpse, sizeof(moneyOnCorpseStruct));
@@ -1035,7 +1035,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 		else {
 			Log(Logs::General, Logs::Inventory, "MakeLootRequestPackets() PlayerKillItem %i not found", pkitemid);
 
-			client->Message(CC_Red, "PlayerKillItem (id: %i) could not be found!", pkitemid);
+			client->Message(Chat::Red, "PlayerKillItem (id: %i) could not be found!", pkitemid);
 		}
 
 		client->QueuePacket(app);
@@ -1129,7 +1129,7 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 
 	/* To prevent item loss for a player using 'Loot All' who doesn't have inventory space for all their items. */
 	if (RuleB(Character, CheckCursorEmptyWhenLooting) && !client->GetInv().CursorEmpty()) {
-		client->Message(13, "You may not loot an item while you have an item on your cursor.");
+		client->Message(Chat::Red, "You may not loot an item while you have an item on your cursor.");
 		client->QueuePacket(app);
 		SendEndLootErrorPacket(client);
 		/* Unlock corpse for others */
@@ -1146,7 +1146,7 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 
 	if (IsPlayerCorpse() && !CanPlayerLoot(client->CharacterID()) && !become_npc &&
 		(char_id != client->CharacterID() && client->Admin() < 150)) {
-		client->Message(13, "Error: This is a player corpse and you dont own it.");
+		client->Message(Chat::Red, "Error: This is a player corpse and you dont own it.");
 		client->QueuePacket(app);
 		SendEndLootErrorPacket(client);
 		return;
@@ -1155,13 +1155,13 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 	if (is_locked && client->Admin() < 100) {
 		client->QueuePacket(app);
 		SendLootReqErrorPacket(client, LootResponse::SomeoneElse);
-		client->Message(13, "Error: Corpse locked by GM.");
+		client->Message(Chat::Red, "Error: Corpse locked by GM.");
 		return;
 	}
 
 	if (IsPlayerCorpse() && (char_id != client->CharacterID()) && CanPlayerLoot(client->CharacterID()) &&
 		GetPlayerKillItem() == 0) {
-		client->Message(13, "Error: You cannot loot any more items from this corpse.");
+		client->Message(Chat::Red, "Error: You cannot loot any more items from this corpse.");
 		client->QueuePacket(app);
 		SendEndLootErrorPacket(client);
 		ResetLooter();
@@ -1201,7 +1201,7 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 
 	if (client && inst) {
 		if (client->CheckLoreConflict(item)) {
-			client->Message_StringID(0, LOOT_LORE_ERROR);
+			client->Message_StringID(Chat::White, LOOT_LORE_ERROR);
 			client->QueuePacket(app);
 			SendEndLootErrorPacket(client);
 			ResetLooter();
@@ -1214,7 +1214,7 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 				EQEmu::ItemInstance *itm = inst->GetAugment(i);
 				if (itm) {
 					if (client->CheckLoreConflict(itm->GetItem())) {
-						client->Message_StringID(0, LOOT_LORE_ERROR);
+						client->Message_StringID(Chat::White, LOOT_LORE_ERROR);
 						client->QueuePacket(app);
 						SendEndLootErrorPacket(client);
 						ResetLooter();
@@ -1236,7 +1236,7 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 		args.push_back(this);
 		if (parse->EventPlayer(EVENT_LOOT, client, buf, 0, &args) != 0) {
 			lootitem->auto_loot = -1;
-			client->Message_StringID(CC_Red, LOOT_NOT_ALLOWED, inst->GetItem()->Name);
+			client->Message_StringID(Chat::Red, LOOT_NOT_ALLOWED, inst->GetItem()->Name);
 			client->QueuePacket(app);
 			delete inst;
 			return;
@@ -1312,18 +1312,18 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 
 		linker.GenerateLink();
 
-		client->Message_StringID(MT_LootMessages, LOOTED_MESSAGE, linker.Link().c_str());
+		client->Message_StringID(Chat::Loot, LOOTED_MESSAGE, linker.Link().c_str());
 
 		if (!IsPlayerCorpse()) {
 			Group *g = client->GetGroup();
 			if (g != nullptr) {
-				g->GroupMessage_StringID(client, MT_LootMessages, OTHER_LOOTED_MESSAGE,
+				g->GroupMessage_StringID(client, Chat::Loot, OTHER_LOOTED_MESSAGE,
 					client->GetName(), linker.Link().c_str());
 			}
 			else {
 				Raid *r = client->GetRaid();
 				if (r != nullptr) {
-					r->RaidMessage_StringID(client, MT_LootMessages, OTHER_LOOTED_MESSAGE,
+					r->RaidMessage_StringID(client, Chat::Loot, OTHER_LOOTED_MESSAGE,
 						client->GetName(), linker.Link().c_str());
 				}
 			}
@@ -1426,7 +1426,7 @@ bool Corpse::Summon(Client* client, bool spell, bool CheckDistance) {
 	if (!spell) {
 		if (this->GetCharID() == client->CharacterID()) {
 			if (IsLocked() && client->Admin() < 100) {
-				client->Message(13, "That corpse is locked by a GM.");
+				client->Message(Chat::Red, "That corpse is locked by a GM.");
 				return false;
 			}
 			if (!CheckDistance || (DistanceSquaredNoZ(m_Position, client->GetPosition()) <= dist2)) {

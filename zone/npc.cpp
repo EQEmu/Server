@@ -1577,7 +1577,7 @@ void NPC::PickPocket(Client* thief)
 	//make sure were allowed to target them:
 	int over_level = GetLevel();
 	if(over_level > (thief->GetLevel() + THIEF_PICKPOCKET_OVER)) {
-		thief->Message(13, "You are too inexperienced to pick pocket this target");
+		thief->Message(Chat::Red, "You are too inexperienced to pick pocket this target");
 		thief->SendPickPocketResponse(this, 0, PickPocketFailed);
 		//should we check aggro
 		return;
@@ -1587,7 +1587,7 @@ void NPC::PickPocket(Client* thief)
 		if (zone->CanDoCombat())
 			AddToHateList(thief, 50);
 		Say("Stop thief!");
-		thief->Message(13, "You are noticed trying to steal!");
+		thief->Message(Chat::Red, "You are noticed trying to steal!");
 		thief->SendPickPocketResponse(this, 0, PickPocketFailed);
 		return;
 	}
@@ -1744,17 +1744,17 @@ void NPC::Disarm(Client* client, int chance) {
 				SendWearChange(matslot);
 			if ((CastToMob()->GetBodyType() == BT_Humanoid || CastToMob()->GetBodyType() == BT_Summoned) && eslot == EQEmu::invslot::slotPrimary)
 				Say("Ahh! My weapon!");
-			client->Message_StringID(MT_Skills, DISARM_SUCCESS, this->GetCleanName());
+			client->Message_StringID(Chat::Skills, DISARM_SUCCESS, this->GetCleanName());
 			if (chance != 1000)
 				client->CheckIncreaseSkill(EQEmu::skills::SkillDisarm, nullptr, 4);
 			return;
 		}
-		client->Message_StringID(MT_Skills, DISARM_FAILED);
+		client->Message_StringID(Chat::Skills, DISARM_FAILED);
 		if (chance != 1000)
 			client->CheckIncreaseSkill(EQEmu::skills::SkillDisarm, nullptr, 2);
 		return;
 	}
-	client->Message_StringID(MT_Skills, DISARM_FAILED);
+	client->Message_StringID(Chat::Skills, DISARM_FAILED);
 }
 
 void Mob::NPCSpecialAttacks(const char* parse, int permtag, bool reset, bool remove) {

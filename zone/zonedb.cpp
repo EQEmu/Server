@@ -3061,10 +3061,10 @@ bool ZoneDatabase::SaveMerc(Merc *merc) {
 
 		auto results = database.QueryDatabase(query);
 		if(!results.Success()) {
-			owner->Message(13, results.ErrorMessage().c_str());
+			owner->Message(Chat::Red, results.ErrorMessage().c_str());
 			return false;
 		} else if (results.RowsAffected() != 1) {
-			owner->Message(13, "Unable to save merc to the database.");
+			owner->Message(Chat::Red, "Unable to save merc to the database.");
 			return false;
 		}
 
@@ -3095,10 +3095,10 @@ bool ZoneDatabase::SaveMerc(Merc *merc) {
 
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-		owner->Message(13, results.ErrorMessage().c_str());
+		owner->Message(Chat::Red, results.ErrorMessage().c_str());
 		return false;
 	} else if (results.RowsAffected() != 1) {
-		owner->Message(13, "Unable to save merc to the database.");
+		owner->Message(Chat::Red, "Unable to save merc to the database.");
 		return false;
 	}
 
