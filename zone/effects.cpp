@@ -623,7 +623,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 		/*char val1[20]={0};*/	//unused
 		/*char val2[20]={0};*/	//unused
 		uint32 remain = p_timers.GetRemainingTime(DiscTimer);
-		//MessageString(Chat::WhiteSmoke, DISCIPLINE_CANUSEIN, ConvertArray((remain)/60,val1), ConvertArray(remain%60,val2));
+		//MessageString(Chat::White, DISCIPLINE_CANUSEIN, ConvertArray((remain)/60,val1), ConvertArray(remain%60,val2));
 		Message(0, "You can use this discipline in %d minutes %d seconds.", ((remain)/60), (remain%60));
 		return(false);
 	}

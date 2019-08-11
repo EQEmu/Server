@@ -84,7 +84,7 @@ namespace
 {
 //#define BCSTSPELLDUMP // only needed if you're adding/tailoring bot command spells and need a file dump
 
-#define m_message Chat::WhiteSmoke
+#define m_message Chat::White
 #define m_action Chat::Yellow
 #define m_note Chat::Gray
 #define m_usage Chat::Cyan
@@ -7310,7 +7310,7 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 		itm = itminst->GetItem();
 
 	if (itminst && itm && c->CheckLoreConflict(itm)) {
-		c->MessageString(Chat::WhiteSmoke, PICK_LORE);
+		c->MessageString(Chat::White, PICK_LORE);
 		return;
 	}
 
@@ -7324,7 +7324,7 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 		if (!c->CheckLoreConflict(itma->GetItem()))
 			continue;
 
-		c->MessageString(Chat::WhiteSmoke, PICK_LORE);
+		c->MessageString(Chat::White, PICK_LORE);
 		return;
 	}
 	

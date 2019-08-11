@@ -223,7 +223,7 @@ void Client::GoFish()
 
 	//TODO: generate a message if we're already fishing
 	/*if (!fishing_timer.Check()) {	//this isn't the right check, may need to add something to the Client class like 'bool is_fishing'
-		MessageString(Chat::WhiteSmoke, ALREADY_FISHING);	//You are already fishing!
+		MessageString(Chat::White, ALREADY_FISHING);	//You are already fishing!
 		return;
 	}*/
 

@@ -4004,7 +4004,7 @@ void Corpse::CastRezz(uint16 spellid, Mob* Caster)
 	/*
 	if(!can_rez) {
 		if(Caster && Caster->IsClient())
-			Caster->MessageString(Chat::WhiteSmoke, CORPSE_TOO_OLD);
+			Caster->MessageString(Chat::White, CORPSE_TOO_OLD);
 		return;
 	}
 	*/

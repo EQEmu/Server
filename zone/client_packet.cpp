@@ -4825,7 +4825,7 @@ void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 			Message(0, "This corpse can be resurrected for %i minutes and %i seconds.", min, sec);
 			}
 			else {
-			MessageString(Chat::WhiteSmoke, CORPSE_TOO_OLD);
+			MessageString(Chat::White, CORPSE_TOO_OLD);
 			}
 			*/
 		}
