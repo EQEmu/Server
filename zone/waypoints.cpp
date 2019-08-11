@@ -70,7 +70,7 @@ void NPC::AI_SetRoambox(float distance, float max_x, float min_x, float max_y, f
 
 void NPC::DisplayWaypointInfo(Client *c) {
 
-	c->Message(0, "Mob is on grid %d, in spawn group %d, on waypoint %d/%d",
+	c->Message(Chat::White, "Mob is on grid %d, in spawn group %d, on waypoint %d/%d",
 		GetGrid(),
 		GetSp2(),
 		GetCurWp(),
@@ -81,7 +81,7 @@ void NPC::DisplayWaypointInfo(Client *c) {
 	cur = Waypoints.begin();
 	end = Waypoints.end();
 	for (; cur != end; ++cur) {
-		c->Message(0, "Waypoint %d: (%.2f,%.2f,%.2f,%.2f) pause %d",
+		c->Message(Chat::White, "Waypoint %d: (%.2f,%.2f,%.2f,%.2f) pause %d",
 			cur->index,
 			cur->x,
 			cur->y,
@@ -895,7 +895,7 @@ void ZoneDatabase::AssignGrid(Client *client, int grid, int spawn2id) {
 		return;
 	}
 
-	client->Message(0, "Grid assign: spawn2 id = %d updated", spawn2id);
+	client->Message(Chat::White, "Grid assign: spawn2 id = %d updated", spawn2id);
 }
 
 

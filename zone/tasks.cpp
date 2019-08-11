@@ -1266,18 +1266,18 @@ void TaskManager::ExplainTask(Client*c, int TaskID) {
 	if(!c) return;
 
 	if((TaskID<=0) || (TaskID>=MAXTASKS)) {
-		c->Message(0, "TaskID out-of-range.");
+		c->Message(Chat::White, "TaskID out-of-range.");
 		return;
 	}
 
 	if(Tasks[TaskID] == nullptr) {
-		c->Message(0, "Task does not exist.");
+		c->Message(Chat::White, "Task does not exist.");
 		return;
 	}
 
 	char Explanation[1000], *ptr;
-	c->Message(0, "Task %4i: Title: %s", TaskID, Tasks[TaskID]->Description.c_str());
-	c->Message(0, "%3i Activities", Tasks[TaskID]->ActivityCount);
+	c->Message(Chat::White, "Task %4i: Title: %s", TaskID, Tasks[TaskID]->Description.c_str());
+	c->Message(Chat::White, "%3i Activities", Tasks[TaskID]->ActivityCount);
 	ptr = Explanation;
 	for(int i=0; i<Tasks[TaskID]->ActivityCount; i++) {
 
@@ -1936,7 +1936,7 @@ void ClientTaskState::IncrementDoneCount(Client *c, TaskInformation *Task, int T
 		// Send the updated task/activity list to the client
 		taskmanager->SendSingleActiveTaskToClient(c, *info, TaskComplete, false);
 		// Inform the client the task has been updated, both by a chat message
-		c->Message(0, "Your task '%s' has been updated.", Task->Title.c_str());
+		c->Message(Chat::White, "Your task '%s' has been updated.", Task->Title.c_str());
 
 		if(Task->Activity[ActivityID].GoalMethod != METHODQUEST) {
 			if (!ignore_quest_update){
@@ -2306,12 +2306,12 @@ void ClientTaskState::ResetTaskActivity(Client *c, int TaskID, int ActivityID)
 
 void ClientTaskState::ShowClientTasks(Client *c)
 {
-	c->Message(0, "Task Information:");
+	c->Message(Chat::White, "Task Information:");
 	if (ActiveTask.TaskID != TASKSLOTEMPTY) {
-		c->Message(0, "Task: %i %s", ActiveTask.TaskID, taskmanager->Tasks[ActiveTask.TaskID]->Title.c_str());
-		c->Message(0, "  Description: [%s]\n", taskmanager->Tasks[ActiveTask.TaskID]->Description.c_str());
+		c->Message(Chat::White, "Task: %i %s", ActiveTask.TaskID, taskmanager->Tasks[ActiveTask.TaskID]->Title.c_str());
+		c->Message(Chat::White, "  Description: [%s]\n", taskmanager->Tasks[ActiveTask.TaskID]->Description.c_str());
 		for (int j = 0; j < taskmanager->GetActivityCount(ActiveTask.TaskID); j++) {
-			c->Message(0, "  Activity: %2d, DoneCount: %2d, Status: %d (0=Hidden, 1=Active, 2=Complete)",
+			c->Message(Chat::White, "  Activity: %2d, DoneCount: %2d, Status: %d (0=Hidden, 1=Active, 2=Complete)",
 				   ActiveTask.Activity[j].ActivityID, ActiveTask.Activity[j].DoneCount,
 				   ActiveTask.Activity[j].State);
 		}
@@ -2321,11 +2321,11 @@ void ClientTaskState::ShowClientTasks(Client *c)
 		if (ActiveQuests[i].TaskID == TASKSLOTEMPTY)
 			continue;
 
-		c->Message(0, "Quest: %i %s", ActiveQuests[i].TaskID,
+		c->Message(Chat::White, "Quest: %i %s", ActiveQuests[i].TaskID,
 			   taskmanager->Tasks[ActiveQuests[i].TaskID]->Title.c_str());
-		c->Message(0, "  Description: [%s]\n", taskmanager->Tasks[ActiveQuests[i].TaskID]->Description.c_str());
+		c->Message(Chat::White, "  Description: [%s]\n", taskmanager->Tasks[ActiveQuests[i].TaskID]->Description.c_str());
 		for (int j = 0; j < taskmanager->GetActivityCount(ActiveQuests[i].TaskID); j++) {
-			c->Message(0, "  Activity: %2d, DoneCount: %2d, Status: %d (0=Hidden, 1=Active, 2=Complete)",
+			c->Message(Chat::White, "  Activity: %2d, DoneCount: %2d, Status: %d (0=Hidden, 1=Active, 2=Complete)",
 				   ActiveQuests[i].Activity[j].ActivityID, ActiveQuests[i].Activity[j].DoneCount,
 				   ActiveQuests[i].Activity[j].State);
 		}
@@ -3309,7 +3309,7 @@ void ClientTaskState::AcceptNewTask(Client *c, int TaskID, int NPCID, bool enfor
 		ActiveTaskCount++;
 
 	taskmanager->SendSingleActiveTaskToClient(c, *active_slot, false, true);
-	c->Message(0, "You have been assigned the task '%s'.", taskmanager->Tasks[TaskID]->Title.c_str());
+	c->Message(Chat::White, "You have been assigned the task '%s'.", taskmanager->Tasks[TaskID]->Title.c_str());
 
 	std::string buf = std::to_string(TaskID);
 

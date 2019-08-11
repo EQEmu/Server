@@ -1211,7 +1211,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 					if(!HasInstrument) {	// if the instrument is missing, log it and interrupt the song
 						Log(Logs::Detail, Logs::Spells, "Song %d: Canceled. Missing required instrument %d", spell_id, component);
 						if(c->GetGM())
-							c->Message(0, "Your GM status allows you to finish casting even though you're missing a required instrument.");
+							c->Message(Chat::White, "Your GM status allows you to finish casting even though you're missing a required instrument.");
 						else {
 							InterruptSpell();
 							return;
@@ -1248,7 +1248,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 
 			if (missingreags) {
 				if(c->GetGM())
-					c->Message(0, "Your GM status allows you to finish casting even though you're missing required components.");
+					c->Message(Chat::White, "Your GM status allows you to finish casting even though you're missing required components.");
 				else {
 					InterruptSpell();
 					return;

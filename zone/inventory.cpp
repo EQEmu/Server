@@ -3397,7 +3397,7 @@ bool Client::InterrogateInventory(Client* requester, bool log, bool silent, bool
 		Log(Logs::General, Logs::Error, "Client::InterrogateInventory() called for %s by %s with an error state of %s", GetName(), requester->GetName(), (error ? "TRUE" : "FALSE"));
 	}
 	if (!silent) {
-		requester->Message(1, "--- Inventory Interrogation Report for %s (requested by: %s, error state: %s) ---", GetName(), requester->GetName(), (error ? "TRUE" : "FALSE"));
+		requester->Message(Chat::Default, "--- Inventory Interrogation Report for %s (requested by: %s, error state: %s) ---", GetName(), requester->GetName(), (error ? "TRUE" : "FALSE"));
 	}
 
 	// call InterrogateInventory_ for report
@@ -3419,8 +3419,8 @@ bool Client::InterrogateInventory(Client* requester, bool log, bool silent, bool
 		Log(Logs::Detail, Logs::None, "[CLIENT] Client::InterrogateInventory() -- End");
 	}
 	if (!silent) {
-		requester->Message(1, "Target interrogation flag: %s", (GetInterrogateInvState() ? "TRUE" : "FALSE"));
-		requester->Message(1, "--- End of Interrogation Report ---");
+		requester->Message(Chat::Default, "Target interrogation flag: %s", (GetInterrogateInvState() ? "TRUE" : "FALSE"));
+		requester->Message(Chat::Default, "--- End of Interrogation Report ---");
 	}
 
 	instmap.clear();

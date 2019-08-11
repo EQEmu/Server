@@ -611,7 +611,7 @@ void NPC::ClearItemList() {
 
 void NPC::QueryLoot(Client* to)
 {
-	to->Message(0, "| # Current Loot (%s) LootTableID: %i", GetName(), GetLoottableID());
+	to->Message(Chat::White, "| # Current Loot (%s) LootTableID: %i", GetName(), GetLoottableID());
 
 	int item_count = 0;
 	for (auto cur  = itemlist.begin(); cur != itemlist.end(); ++cur, ++item_count) {
@@ -639,7 +639,7 @@ void NPC::QueryLoot(Client* to)
 		);
 	}
 
-	to->Message(0, "| %i Platinum %i Gold %i Silver %i Copper", platinum, gold, silver, copper);
+	to->Message(Chat::White, "| %i Platinum %i Gold %i Silver %i Copper", platinum, gold, silver, copper);
 }
 
 void NPC::AddCash(uint16 in_copper, uint16 in_silver, uint16 in_gold, uint16 in_platinum) {
@@ -1190,17 +1190,17 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* 
 
 		if (client) {
 			// Notify client of spawn data
-			client->Message(0, "New spawn:");
-			client->Message(0, "Name: %s", npc->name);
-			client->Message(0, "Race: %u", npc->race);
-			client->Message(0, "Level: %u", npc->level);
-			client->Message(0, "Material: %u", npc->texture);
-			client->Message(0, "Current/Max HP: %i", npc->max_hp);
-			client->Message(0, "Gender: %u", npc->gender);
-			client->Message(0, "Class: %u", npc->class_);
-			client->Message(0, "Weapon Item Number: %u/%u", npc->d_melee_texture1, npc->d_melee_texture2);
-			client->Message(0, "MerchantID: %u", npc->MerchantType);
-			client->Message(0, "Bodytype: %u", npc->bodytype);
+			client->Message(Chat::White, "New spawn:");
+			client->Message(Chat::White, "Name: %s", npc->name);
+			client->Message(Chat::White, "Race: %u", npc->race);
+			client->Message(Chat::White, "Level: %u", npc->level);
+			client->Message(Chat::White, "Material: %u", npc->texture);
+			client->Message(Chat::White, "Current/Max HP: %i", npc->max_hp);
+			client->Message(Chat::White, "Gender: %u", npc->gender);
+			client->Message(Chat::White, "Class: %u", npc->class_);
+			client->Message(Chat::White, "Weapon Item Number: %u/%u", npc->d_melee_texture1, npc->d_melee_texture2);
+			client->Message(Chat::White, "MerchantID: %u", npc->MerchantType);
+			client->Message(Chat::White, "Bodytype: %u", npc->bodytype);
 		}
 
 		return npc;
@@ -1471,7 +1471,7 @@ uint32 ZoneDatabase::AddNPCTypes(const char *zone, uint32 zone_version, Client *
 	npc_type_id = results.LastInsertedID();
 
 	if (client)
-		client->Message(0, "%s npc_type ID %i created successfully!", numberlessName, npc_type_id);
+		client->Message(Chat::White, "%s npc_type ID %i created successfully!", numberlessName, npc_type_id);
 
 	return 1;
 }
@@ -1694,7 +1694,7 @@ void NPC::PickPocket(Client* thief)
 		return;
 	}
 
-	thief->Message(0, "This target's pockets are empty");
+	thief->Message(Chat::White, "This target's pockets are empty");
 	thief->SendPickPocketResponse(this, 0, PickPocketFailed);
 }
 

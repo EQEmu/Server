@@ -578,7 +578,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		printf("Zoning %s to %s(%u) - %u\n", client != nullptr ? client->GetCleanName() : "Unknown", szp->zone, database.GetZoneID(szp->zone), szp->instance_id);
 		if (client != 0) {
 			if (strcasecmp(szp->adminname, szp->name) == 0)
-				client->Message(0, "Zoning to: %s", szp->zone);
+				client->Message(Chat::White, "Zoning to: %s", szp->zone);
 			else if (client->GetAnon() == 1 && client->Admin() > szp->adminrank)
 				break;
 			else {

@@ -199,7 +199,7 @@ void Group::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinu
 			Client *c = members[i]->CastToClient();
 			//I could not get MoneyOnCorpse to work, so we use this
 			c->AddMoneyToPP(cpsplit, spsplit, gpsplit, ppsplit, true);
-			c->Message(2, msg.c_str());
+			c->Message(Chat::Green, msg.c_str());
 		}
 	}
 }
@@ -1680,9 +1680,9 @@ void Group::NotifyMainTank(Client *c, uint8 toggle)
 	if (c->ClientVersion() < EQEmu::versions::ClientVersion::SoD)
 	{
 		if(toggle)
-			c->Message(0, "%s is now Main Tank.", MainTankName.c_str());
+			c->Message(Chat::White, "%s is now Main Tank.", MainTankName.c_str());
 		else
-			c->Message(0, "%s is no longer Main Tank.", MainTankName.c_str());
+			c->Message(Chat::White, "%s is no longer Main Tank.", MainTankName.c_str());
 	}
 	else
 	{
@@ -1775,9 +1775,9 @@ void Group::NotifyPuller(Client *c, uint8 toggle)
 	if (c->ClientVersion() < EQEmu::versions::ClientVersion::SoD)
 	{
 		if(toggle)
-			c->Message(0, "%s is now Puller.", PullerName.c_str());
+			c->Message(Chat::White, "%s is now Puller.", PullerName.c_str());
 		else
-			c->Message(0, "%s is no longer Puller.", PullerName.c_str());
+			c->Message(Chat::White, "%s is no longer Puller.", PullerName.c_str());
 	}
 	else
 	{

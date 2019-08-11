@@ -551,7 +551,7 @@ void Mob::TryBackstab(Mob *other, int ReuseTime) {
 
 	if (bIsBehind || bCanFrontalBS || (IsNPC() && CanFacestab())) { // Player is behind other OR can do Frontal Backstab
 		if (bCanFrontalBS && IsClient()) // I don't think there is any message ...
-			CastToClient()->Message(0,"Your fierce attack is executed with such grace, your target did not see it coming!");
+			CastToClient()->Message(Chat::White,"Your fierce attack is executed with such grace, your target did not see it coming!");
 
 		RogueBackstab(other,false,ReuseTime);
 		if (level > 54) {

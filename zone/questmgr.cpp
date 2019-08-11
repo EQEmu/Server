@@ -1097,7 +1097,7 @@ uint16 QuestManager::traindiscs(uint8 max_level, uint8 min_level) {
 							initiator->GetPP().disciplines.values[r] = spell_id_;
 							database.SaveCharacterDisc(char_id, r, spell_id_);
 							change = true;
-							initiator->Message(0, "You have learned a new discipline!");
+							initiator->Message(Chat::White, "You have learned a new discipline!");
 							++count; // success counter
 						}
 						break; // continue the 1st loop
@@ -1109,7 +1109,7 @@ uint16 QuestManager::traindiscs(uint8 max_level, uint8 min_level) {
 							initiator->GetPP().disciplines.values[r] = spell_id_;
 							database.SaveCharacterDisc(char_id, r, spell_id_);
 							change = true;
-							initiator->Message(0, "You have learned a new discipline!");
+							initiator->Message(Chat::White, "You have learned a new discipline!");
 							++count;
 						}
 						break;
@@ -1118,7 +1118,7 @@ uint16 QuestManager::traindiscs(uint8 max_level, uint8 min_level) {
 						initiator->GetPP().disciplines.values[r] = spell_id_;
 						database.SaveCharacterDisc(char_id, r, spell_id_);
 						change = true;;
-						initiator->Message(0, "You have learned a new discipline!");
+						initiator->Message(Chat::White, "You have learned a new discipline!");
 						++count; // success counter
 						break; // continue the 1st loop
 					}
@@ -1411,7 +1411,7 @@ void QuestManager::itemlink(int item_id) {
 		linker.SetLinkType(EQEmu::saylink::SayLinkItemData);
 		linker.SetItemData(item);
 
-		initiator->Message(0, "%s tells you, %s", owner->GetCleanName(), linker.GenerateLink().c_str());
+		initiator->Message(Chat::White, "%s tells you, %s", owner->GetCleanName(), linker.GenerateLink().c_str());
 	}
 }
 
@@ -2171,11 +2171,11 @@ bool QuestManager::createBot(const char *name, const char *lastname, uint8 level
 		std::string test_name = name;
 		bool available_flag = false;
 		if(!database.botdb.QueryNameAvailablity(test_name, available_flag)) {
-			initiator->Message(0, "%s for '%s'", BotDatabase::fail::QueryNameAvailablity(), (char*)name);
+			initiator->Message(Chat::White, "%s for '%s'", BotDatabase::fail::QueryNameAvailablity(), (char*)name);
 			return false;
 		}
 		if (!available_flag) {
-			initiator->Message(0, "The name %s is already being used or is invalid. Please choose a different name.", (char*)name);
+			initiator->Message(Chat::White, "The name %s is already being used or is invalid. Please choose a different name.", (char*)name);
 			return false;
 		}
 
@@ -2184,23 +2184,23 @@ bool QuestManager::createBot(const char *name, const char *lastname, uint8 level
 		if(NewBot)
 		{
 			if(!NewBot->IsValidRaceClassCombo()) {
-				initiator->Message(0, "That Race/Class combination cannot be created.");
+				initiator->Message(Chat::White, "That Race/Class combination cannot be created.");
 				return false;
 			}
 
 			if(!NewBot->IsValidName()) {
-				initiator->Message(0, "%s has invalid characters. You can use only the A-Z, a-z and _ characters in a bot name.", NewBot->GetCleanName());
+				initiator->Message(Chat::White, "%s has invalid characters. You can use only the A-Z, a-z and _ characters in a bot name.", NewBot->GetCleanName());
 				return false;
 			}
 
 			// Now that all validation is complete, we can save our newly created bot
 			if(!NewBot->Save())
 			{
-				initiator->Message(0, "Unable to save %s as a bot.", NewBot->GetCleanName());
+				initiator->Message(Chat::White, "Unable to save %s as a bot.", NewBot->GetCleanName());
 			}
 			else
 			{
-				initiator->Message(0, "%s saved as bot %u.", NewBot->GetCleanName(), NewBot->GetBotID());
+				initiator->Message(Chat::White, "%s saved as bot %u.", NewBot->GetCleanName(), NewBot->GetBotID());
 				return true;
 			}
 		}

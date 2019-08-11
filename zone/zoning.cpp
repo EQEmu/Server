@@ -814,7 +814,7 @@ bool Client::HasZoneFlag(uint32 zone_id) const {
 
 void Client::SendZoneFlagInfo(Client *to) const {
 	if(zone_flags.empty()) {
-		to->Message(0, "%s has no zone flags.", GetName());
+		to->Message(Chat::White, "%s has no zone flags.", GetName());
 		return;
 	}
 
@@ -823,7 +823,7 @@ void Client::SendZoneFlagInfo(Client *to) const {
 	end = zone_flags.end();
 	char empty[1] = { '\0' };
 
-	to->Message(0, "Flags for %s:", GetName());
+	to->Message(Chat::White, "Flags for %s:", GetName());
 
 	for(; cur != end; ++cur) {
 		uint32 zoneid = *cur;
@@ -843,7 +843,7 @@ void Client::SendZoneFlagInfo(Client *to) const {
 			strcpy(flag_name, "(ERROR GETTING NAME)");
 		}
 
-		to->Message(0, "Has Flag %s for zone %s (%d,%s)", flag_name, long_name, zoneid, short_name);
+		to->Message(Chat::White, "Has Flag %s for zone %s (%d,%s)", flag_name, long_name, zoneid, short_name);
 		if(long_name != empty)
 			delete[] long_name;
 	}

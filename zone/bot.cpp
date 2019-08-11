@@ -3256,7 +3256,7 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 		this->texture = 0; //0xFF;
 
 		if(this->Save())
-			this->GetBotOwner()->CastToClient()->Message(0, "%s saved.", this->GetCleanName());
+			this->GetBotOwner()->CastToClient()->Message(Chat::White, "%s saved.", this->GetCleanName());
 		else
 			this->GetBotOwner()->CastToClient()->Message(Chat::Red, "%s save failed!", this->GetCleanName());
 
@@ -5987,7 +5987,7 @@ bool Bot::ProcessGuildRemoval(Client* guildOfficer, std::string botName) {
 			GuildManageRemove_Struct* gm = (GuildManageRemove_Struct*) outapp->pBuffer;
 			gm->guildeqid = guildOfficer->GuildID();
 			strcpy(gm->member, botName.c_str());
-			guildOfficer->Message(0, "%s successfully removed from your guild.", botName.c_str());
+			guildOfficer->Message(Chat::White, "%s successfully removed from your guild.", botName.c_str());
 			entity_list.QueueClientsGuild(guildOfficer, outapp, false, gm->guildeqid);
 			safe_delete(outapp);
 		}
@@ -8180,7 +8180,7 @@ void Bot::CalcBotStats(bool showtext) {
 	}
 
 	//if(this->Save())
-	//	this->GetBotOwner()->CastToClient()->Message(0, "%s saved.", this->GetCleanName());
+	//	this->GetBotOwner()->CastToClient()->Message(Chat::White, "%s saved.", this->GetCleanName());
 	//else
 	//	this->GetBotOwner()->CastToClient()->Message(Chat::Red, "%s save failed!", this->GetCleanName());
 
@@ -8868,7 +8868,7 @@ bool Bot::UseDiscipline(uint32 spell_id, uint32 target) {
 				SetDisciplineRecastTimer(spells[spell_id].EndurTimerIndex, spell.recast_time);
 		} else {
 			uint32 remain = (GetDisciplineRemainingTime(this, spells[spell_id].EndurTimerIndex) / 1000);
-			GetOwner()->Message(0, "%s can use this discipline in %d minutes %d seconds.", GetCleanName(), (remain / 60), (remain % 60));
+			GetOwner()->Message(Chat::White, "%s can use this discipline in %d minutes %d seconds.", GetCleanName(), (remain / 60), (remain % 60));
 			return false;
 		}
 	}

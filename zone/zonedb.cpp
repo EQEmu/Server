@@ -3544,10 +3544,10 @@ void ZoneDatabase::ListAllInstances(Client* client, uint32 charid)
 
     char name[64];
     database.GetCharName(charid, name);
-    client->Message(0, "%s is part of the following instances:", name);
+    client->Message(Chat::White, "%s is part of the following instances:", name);
 
     for (auto row = results.begin(); row != results.end(); ++row) {
-        client->Message(0, "%s - id: %lu, version: %lu", database.GetZoneName(atoi(row[1])),
+        client->Message(Chat::White, "%s - id: %lu, version: %lu", database.GetZoneName(atoi(row[1])),
 				(unsigned long)atoi(row[0]), (unsigned long)atoi(row[2]));
     }
 }

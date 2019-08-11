@@ -355,7 +355,7 @@ void PathfinderNavmesh::DebugCommand(Client *c, const Seperator *sep)
 {
 	if (sep->arg[1][0] == '\0' || !strcasecmp(sep->arg[1], "help"))
 	{
-		c->Message(0, "#path show: Plots a path from the user to their target.");
+		c->Message(Chat::White, "#path show: Plots a path from the user to their target.");
 		return;
 	}
 

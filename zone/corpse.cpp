@@ -1371,7 +1371,7 @@ void Corpse::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 
 void Corpse::QueryLoot(Client* to) {
 	int x = 0, y = 0; // x = visible items, y = total items
-	to->Message(0, "Coin: %ip, %ig, %is, %ic", platinum, gold, silver, copper);
+	to->Message(Chat::White, "Coin: %ip, %ig, %is, %ic", platinum, gold, silver, copper);
 
 	ItemList::iterator cur,end;
 	cur = itemlist.begin();
@@ -1405,19 +1405,19 @@ void Corpse::QueryLoot(Client* to) {
 			const EQEmu::ItemData* item = database.GetItem(sitem->item_id);
 
 			if (item)
-				to->Message(0, "LootSlot: %i Item: %s (%d), Count: %i", sitem->lootslot, item->Name, item->ID, sitem->charges);
+				to->Message(Chat::White, "LootSlot: %i Item: %s (%d), Count: %i", sitem->lootslot, item->Name, item->ID, sitem->charges);
 			else
-				to->Message(0, "Error: 0x%04x", sitem->item_id);
+				to->Message(Chat::White, "Error: 0x%04x", sitem->item_id);
 
 			y++;
 		}
 	}
 
 	if (IsPlayerCorpse()) {
-		to->Message(0, "%i visible %s (%i total) on %s (DBID: %i).", x, x==1?"item":"items", y, this->GetName(), this->GetCorpseDBID());
+		to->Message(Chat::White, "%i visible %s (%i total) on %s (DBID: %i).", x, x==1?"item":"items", y, this->GetName(), this->GetCorpseDBID());
 	}
 	else {
-		to->Message(0, "%i %s on %s.", y, y==1?"item":"items", this->GetName());
+		to->Message(Chat::White, "%i %s on %s.", y, y==1?"item":"items", this->GetName());
 	}
 }
 
@@ -1434,7 +1434,7 @@ bool Corpse::Summon(Client* client, bool spell, bool CheckDistance) {
 				is_corpse_changed = true;
 			}
 			else {
-				client->Message(0, "Corpse is too far away.");
+				client->Message(Chat::White, "Corpse is too far away.");
 				return false;
 			}
 		}
@@ -1449,14 +1449,14 @@ bool Corpse::Summon(Client* client, bool spell, bool CheckDistance) {
 						is_corpse_changed = true;
 					}
 					else {
-						client->Message(0, "Corpse is too far away.");
+						client->Message(Chat::White, "Corpse is too far away.");
 						return false;
 					}
 					consented = true;
 				}
 			}
 			if(!consented) {
-				client->Message(0, "You do not have permission to move this corpse.");
+				client->Message(Chat::White, "You do not have permission to move this corpse.");
 				return false;
 			}
 		}

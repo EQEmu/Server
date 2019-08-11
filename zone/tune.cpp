@@ -249,9 +249,9 @@ int32 Mob::Tune_MeleeMitigation(Mob* GM, Mob *attacker, int32 damage, int32 minh
 
 	if (Msg){
 		
-		GM->Message(0, "######### Melee Mitigation Report: Start [Detail Level %i]#########", Msg);
-		GM->Message(0, "#ATTACKER: %s", attacker->GetCleanName());
-		GM->Message(0, "#DEFENDER: %s", defender->GetCleanName());
+		GM->Message(Chat::White, "######### Melee Mitigation Report: Start [Detail Level %i]#########", Msg);
+		GM->Message(Chat::White, "#ATTACKER: %s", attacker->GetCleanName());
+		GM->Message(Chat::White, "#DEFENDER: %s", defender->GetCleanName());
 	}
 
 	if (RuleB(Combat, UseIntervalAC)) {
@@ -264,16 +264,16 @@ int32 Mob::Tune_MeleeMitigation(Mob* GM, Mob *attacker, int32 damage, int32 minh
 		float weight = 0.0;
 
 		if (Msg >= 2){
-			GM->Message(0, " "); 
-			GM->Message(0, "### Calculate Mitigation Rating ###"); 
+			GM->Message(Chat::White, " ");
+			GM->Message(Chat::White, "### Calculate Mitigation Rating ###");
 			if (aabonuses.CombatStability)
-				GM->Message(0, "# %i #### DEFENDER SE_CombatStability(259) AA Bonus", aabonuses.CombatStability);
+				GM->Message(Chat::White, "# %i #### DEFENDER SE_CombatStability(259) AA Bonus", aabonuses.CombatStability);
 			if (spellbonuses.CombatStability)
-				GM->Message(0, "# %i #### DEFENDER SE_CombatStability(259) Spell Bonus", spellbonuses.CombatStability);
+				GM->Message(Chat::White, "# %i #### DEFENDER SE_CombatStability(259) Spell Bonus", spellbonuses.CombatStability);
 			if (itembonuses.CombatStability)
-				GM->Message(0, "# %i #### DEFENDER SE_CombatStability(259) Worn Bonus", itembonuses.CombatStability);
+				GM->Message(Chat::White, "# %i #### DEFENDER SE_CombatStability(259) Worn Bonus", itembonuses.CombatStability);
 
-			GM->Message(0, "# %.2f #### DEFENDER Base Soft Cap", softcap);
+			GM->Message(Chat::White, "# %.2f #### DEFENDER Base Soft Cap", softcap);
 		}
 
 		float monkweight = RuleI(Combat, MonkACBonusWeight);
@@ -287,11 +287,11 @@ int32 Mob::Tune_MeleeMitigation(Mob* GM, Mob *attacker, int32 damage, int32 minh
 				armor = ac_override;
 			
 			if (Msg >=2 ){
-				GM->Message(0, "# %i #### DEFENDER AC Equiped/Worn Bonus", itembonuses.AC);
-				GM->Message(0, "# %i #### DEFENDER SE_ArmorClass(1) AA Bonus", aabonuses.AC);
-				GM->Message(0, "# %i #### DEFENDER SE_ArmorClass(1) Spell Bonus", spellbonuses.AC);
-				GM->Message(0, "# %i #### DEFENDER Shield AC", shield_ac);
-				GM->Message(0, "# %i #### DEFENDER Total Client Armor - NO shield", armor);
+				GM->Message(Chat::White, "# %i #### DEFENDER AC Equiped/Worn Bonus", itembonuses.AC);
+				GM->Message(Chat::White, "# %i #### DEFENDER SE_ArmorClass(1) AA Bonus", aabonuses.AC);
+				GM->Message(Chat::White, "# %i #### DEFENDER SE_ArmorClass(1) Spell Bonus", spellbonuses.AC);
+				GM->Message(Chat::White, "# %i #### DEFENDER Shield AC", shield_ac);
+				GM->Message(Chat::White, "# %i #### DEFENDER Total Client Armor - NO shield", armor);
 			}
 			
 		} else if (IsNPC()) {
@@ -301,9 +301,9 @@ int32 Mob::Tune_MeleeMitigation(Mob* GM, Mob *attacker, int32 damage, int32 minh
 				armor = ac_override;
 
 			if (Msg >=2 ){
-				GM->Message(0, "# %i #### DEFENDER AC Equiped/Worn Bonus", itembonuses.AC);
-				GM->Message(0, "# %i #### DEFENDER SE_ArmorClass(1) Spell Bonus", spellbonuses.AC);
-				GM->Message(0, "# %i #### DEFENDER NPC AC Stat", CastToNPC()->GetRawAC());
+				GM->Message(Chat::White, "# %i #### DEFENDER AC Equiped/Worn Bonus", itembonuses.AC);
+				GM->Message(Chat::White, "# %i #### DEFENDER SE_ArmorClass(1) Spell Bonus", spellbonuses.AC);
+				GM->Message(Chat::White, "# %i #### DEFENDER NPC AC Stat", CastToNPC()->GetRawAC());
 			}
 
 			int PetACBonus = 0;
@@ -311,7 +311,7 @@ int32 Mob::Tune_MeleeMitigation(Mob* GM, Mob *attacker, int32 damage, int32 minh
 			if (!IsPet()){
 				armor = (armor / RuleR(Combat, NPCACFactor));
 				if (Msg >=2 )
-					GM->Message(0, "# %i #### DEFENDER NPC Armor after RuleR(Combat, NPCACFactor) %.2f", armor, RuleR(Combat, NPCACFactor));
+					GM->Message(Chat::White, "# %i #### DEFENDER NPC Armor after RuleR(Combat, NPCACFactor) %.2f", armor, RuleR(Combat, NPCACFactor));
 			}
 
 			Mob *owner = nullptr;
@@ -325,18 +325,18 @@ int32 Mob::Tune_MeleeMitigation(Mob* GM, Mob *attacker, int32 damage, int32 minh
 
 				if (Msg >=2 ){
 				if (owner->aabonuses.PetMeleeMitigation)
-					GM->Message(0, "# %i #### DEFENDER Pet Owner SE_PetMeleeMitigation(379) AA Bonus", owner->aabonuses.PetMeleeMitigation);
+					GM->Message(Chat::White, "# %i #### DEFENDER Pet Owner SE_PetMeleeMitigation(379) AA Bonus", owner->aabonuses.PetMeleeMitigation);
 				if (owner->spellbonuses.PetMeleeMitigation)
-					GM->Message(0, "# %i #### DEFENDER Pet Owner SE_PetMeleeMitigation(379) Spell Bonus",owner->spellbonuses.PetMeleeMitigation);
+					GM->Message(Chat::White, "# %i #### DEFENDER Pet Owner SE_PetMeleeMitigation(379) Spell Bonus",owner->spellbonuses.PetMeleeMitigation);
 				if (owner->itembonuses.PetMeleeMitigation)
-					GM->Message(0, "# %i #### DEFENDER Pet Owner SE_PetMeleeMitigation(379) Worn Bonus", owner->itembonuses.PetMeleeMitigation);
+					GM->Message(Chat::White, "# %i #### DEFENDER Pet Owner SE_PetMeleeMitigation(379) Worn Bonus", owner->itembonuses.PetMeleeMitigation);
 				}
 			}
 
 			armor += spellbonuses.AC + itembonuses.AC + PetACBonus + 1;
 
 			if (Msg >= 2)
-				GM->Message(0, "# %i #### DEFENDER NPC Total Base Armor",armor);
+				GM->Message(Chat::White, "# %i #### DEFENDER NPC Total Base Armor",armor);
 		}
 
 		if (opts) {
@@ -405,38 +405,38 @@ int32 Mob::Tune_MeleeMitigation(Mob* GM, Mob *attacker, int32 damage, int32 minh
 			
 			armor = softcap + softcap_armor;
 			if (Msg >= 2)
-				GM->Message(0, "# %i #### DEFENDER Final Armor [Soft Cap %i Soft Cap Armor %i]",armor, softcap,softcap_armor);
+				GM->Message(Chat::White, "# %i #### DEFENDER Final Armor [Soft Cap %i Soft Cap Armor %i]",armor, softcap,softcap_armor);
 		}
 		int tmp_armor = armor;
 		if (GetClass() == WIZARD || GetClass() == MAGICIAN ||
 				GetClass() == NECROMANCER || GetClass() == ENCHANTER){
 			mitigation_rating = ((GetSkill(EQEmu::skills::SkillDefense) + itembonuses.HeroicAGI / 10) / 4.0) + armor + 1;
 			if (Msg >= 2)
-				GM->Message(0, "# + %.2f #### DEFENDER Armor Bonus [Defense Skill %i Heroic Agi %i]", mitigation_rating - tmp_armor, GetSkill(EQEmu::skills::SkillDefense), itembonuses.HeroicAGI);
+				GM->Message(Chat::White, "# + %.2f #### DEFENDER Armor Bonus [Defense Skill %i Heroic Agi %i]", mitigation_rating - tmp_armor, GetSkill(EQEmu::skills::SkillDefense), itembonuses.HeroicAGI);
 		}
 		else{
 			mitigation_rating = ((GetSkill(EQEmu::skills::SkillDefense) + itembonuses.HeroicAGI / 10) / 3.0) + (armor * 1.333333) + 1;
 			if (Msg >= 2)
-				GM->Message(0, "# + %.2f #### DEFENDER Armor Bonus [Defense Skill %i Heroic Agi %i]", mitigation_rating - tmp_armor, GetSkill(EQEmu::skills::SkillDefense), itembonuses.HeroicAGI);
+				GM->Message(Chat::White, "# + %.2f #### DEFENDER Armor Bonus [Defense Skill %i Heroic Agi %i]", mitigation_rating - tmp_armor, GetSkill(EQEmu::skills::SkillDefense), itembonuses.HeroicAGI);
 
 		}
 		mitigation_rating *= 0.847;
 
 		if (Msg >= 1)
-			GM->Message(0, "# %.2f #### DEFENDER Final Mitigation Rating", mitigation_rating);
+			GM->Message(Chat::White, "# %.2f #### DEFENDER Final Mitigation Rating", mitigation_rating);
 
 		
 		if (Msg >= 2){
-			GM->Message(0, " ");
-			GM->Message(0, "### Mitigation Bonus Effects ###"); 
+			GM->Message(Chat::White, " ");
+			GM->Message(Chat::White, "### Mitigation Bonus Effects ###");
 			if (itembonuses.MeleeMitigation)
-				GM->Message(0, "# %i #### DEFENDER Item Mod2 Shielding", itembonuses.MeleeMitigation);
+				GM->Message(Chat::White, "# %i #### DEFENDER Item Mod2 Shielding", itembonuses.MeleeMitigation);
 			if (aabonuses.MeleeMitigationEffect)
-				GM->Message(0, "# %i #### DEFENDER SE_MeleeMitigation(168) AA Bonus", aabonuses.MeleeMitigationEffect);
+				GM->Message(Chat::White, "# %i #### DEFENDER SE_MeleeMitigation(168) AA Bonus", aabonuses.MeleeMitigationEffect);
 			if (spellbonuses.MeleeMitigationEffect)
-				GM->Message(0, "# %i #### DEFENDER SE_MeleeMitigation(168) Spell Bonus", spellbonuses.MeleeMitigationEffect);
+				GM->Message(Chat::White, "# %i #### DEFENDER SE_MeleeMitigation(168) Spell Bonus", spellbonuses.MeleeMitigationEffect);
 			if (itembonuses.MeleeMitigationEffect)
-				GM->Message(0, "# %i #### DEFENDER SE_MeleeMitigation(168) Worn Bonus", itembonuses.MeleeMitigationEffect);
+				GM->Message(Chat::White, "# %i #### DEFENDER SE_MeleeMitigation(168) Worn Bonus", itembonuses.MeleeMitigationEffect);
 		}
 
 		mitigation_rating = mod_mitigation_rating(mitigation_rating, attacker);
@@ -458,31 +458,31 @@ int32 Mob::Tune_MeleeMitigation(Mob* GM, Mob *attacker, int32 damage, int32 minh
 		attack_rating = attacker->mod_attack_rating(attack_rating, this);
 
 		if (Msg >= 2){
-			GM->Message(0, " "); 
-			GM->Message(0, "### Calculate Attack Rating ###"); 
+			GM->Message(Chat::White, " ");
+			GM->Message(Chat::White, "### Calculate Attack Rating ###");
 			if (attacker->IsClient()){
-				GM->Message(0, "# %i #### ATTACKER Worn/Equip ATK Bonus", attacker->itembonuses.ATK);
-				GM->Message(0, "# %i #### ATTACKER SE_ATK(2) AA Bonus", attacker->aabonuses.ATK);
-				GM->Message(0, "# %i #### ATTACKER SE_ATK(2) spell Bonus", attacker->spellbonuses.ATK);
-				GM->Message(0, "# %i #### ATTACKER Leadership Bonus", attacker->CastToClient()->GroupLeadershipAAOffenseEnhancement());
-				GM->Message(0, "# %i #### ATTACKER Worn/Equip ATK Bonus", attacker->itembonuses.ATK);
-				GM->Message(0, "# %i #### ATTACKER Worn/Equip ATK Bonus", attacker->itembonuses.ATK);
-				GM->Message(0, "# %.2f #### ATTACKER Strength Stat ATK Bonus [Stat Amt: %i]", ((attacker->GetSTR()-66) * 0.9),attacker->GetSTR());
-				GM->Message(0, "# %.2f #### ATTACKER Offensive Skill ATK Bonus [Stat Amt: %i]", (attacker->GetSkill(EQEmu::skills::SkillOffense)*1.345), attacker->GetSkill(EQEmu::skills::SkillOffense));
+				GM->Message(Chat::White, "# %i #### ATTACKER Worn/Equip ATK Bonus", attacker->itembonuses.ATK);
+				GM->Message(Chat::White, "# %i #### ATTACKER SE_ATK(2) AA Bonus", attacker->aabonuses.ATK);
+				GM->Message(Chat::White, "# %i #### ATTACKER SE_ATK(2) spell Bonus", attacker->spellbonuses.ATK);
+				GM->Message(Chat::White, "# %i #### ATTACKER Leadership Bonus", attacker->CastToClient()->GroupLeadershipAAOffenseEnhancement());
+				GM->Message(Chat::White, "# %i #### ATTACKER Worn/Equip ATK Bonus", attacker->itembonuses.ATK);
+				GM->Message(Chat::White, "# %i #### ATTACKER Worn/Equip ATK Bonus", attacker->itembonuses.ATK);
+				GM->Message(Chat::White, "# %.2f #### ATTACKER Strength Stat ATK Bonus [Stat Amt: %i]", ((attacker->GetSTR()-66) * 0.9),attacker->GetSTR());
+				GM->Message(Chat::White, "# %.2f #### ATTACKER Offensive Skill ATK Bonus [Stat Amt: %i]", (attacker->GetSkill(EQEmu::skills::SkillOffense)*1.345), attacker->GetSkill(EQEmu::skills::SkillOffense));
 			}
 				
 			else{
-				GM->Message(0, "# %i #### ATTACKER Worn/Equip ATK Bonus", attacker->itembonuses.ATK);
-				GM->Message(0, "# %i #### ATTACKER SE_ATK(2) spell Bonus", attacker->spellbonuses.ATK);
-				GM->Message(0, "# %i #### ATTACKER NPC ATK Stat", attacker->CastToNPC()->ATK);
-				GM->Message(0, "# %.2f #### ATTACKER Strength Stat ATK Bonus [Stat Amt: %i]", ((attacker->GetSTR()-66) * 0.9),attacker->GetSTR());
-				GM->Message(0, "# %.2f #### ATTACKER Offensive Skill ATK Bonus [Stat Amt: %i]", (attacker->GetSkill(EQEmu::skills::SkillOffense)*1.345), attacker->GetSkill(EQEmu::skills::SkillOffense));
+				GM->Message(Chat::White, "# %i #### ATTACKER Worn/Equip ATK Bonus", attacker->itembonuses.ATK);
+				GM->Message(Chat::White, "# %i #### ATTACKER SE_ATK(2) spell Bonus", attacker->spellbonuses.ATK);
+				GM->Message(Chat::White, "# %i #### ATTACKER NPC ATK Stat", attacker->CastToNPC()->ATK);
+				GM->Message(Chat::White, "# %.2f #### ATTACKER Strength Stat ATK Bonus [Stat Amt: %i]", ((attacker->GetSTR()-66) * 0.9),attacker->GetSTR());
+				GM->Message(Chat::White, "# %.2f #### ATTACKER Offensive Skill ATK Bonus [Stat Amt: %i]", (attacker->GetSkill(EQEmu::skills::SkillOffense)*1.345), attacker->GetSkill(EQEmu::skills::SkillOffense));
 			}
 		}
 
 		if (Msg >= 1){
-			GM->Message(0, "# %.2f #### ATTACKER Final Attack Rating", attack_rating);
-			GM->Message(0, "######### Melee Mitigation Report: Complete #########", Msg);
+			GM->Message(Chat::White, "# %.2f #### ATTACKER Final Attack Rating", attack_rating);
+			GM->Message(Chat::White, "######### Melee Mitigation Report: Complete #########", Msg);
 		}
 
 
