@@ -58,7 +58,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 	if (!database.GetPoweredPetEntry(spells[spell_id].teleport_zone, act_power, &record))
 	{
 		Log(Logs::General, Logs::Error, "Unknown swarm pet spell id: %d, check pets table", spell_id);
-		Message(13, "Unable to find data for pet %s", spells[spell_id].teleport_zone);
+		Message(Chat::Red, "Unable to find data for pet %s", spells[spell_id].teleport_zone);
 		return;
 	}
 
@@ -1091,7 +1091,7 @@ void Client::FinishAlternateAdvancementPurchase(AA::Rank *rank, bool ignore_cost
 	SendAlternateAdvancementStats();
 
 	if(rank->prev) {
-		Message_StringID(15, AA_IMPROVE,
+		MessageString(Chat::Yellow, AA_IMPROVE,
 						 std::to_string(rank->title_sid).c_str(),
 						 std::to_string(rank->prev->current_value).c_str(),
 						 std::to_string(cost).c_str(),
@@ -1104,7 +1104,7 @@ void Client::FinishAlternateAdvancementPurchase(AA::Rank *rank, bool ignore_cost
 		}
 	}
 	else {
-		Message_StringID(15, AA_GAIN_ABILITY,
+		MessageString(Chat::Yellow, AA_GAIN_ABILITY,
 						 std::to_string(rank->title_sid).c_str(),
 						 std::to_string(cost).c_str(),
 						 cost == 1 ? std::to_string(AA_POINT).c_str() : std::to_string(AA_POINTS).c_str());
@@ -1179,11 +1179,11 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 		uint32 aaremain_sec = aaremain % 60;
 
 		if(aaremain_hr >= 1) {
-			Message(13, "You can use this ability again in %u hour(s) %u minute(s) %u seconds",
+			Message(Chat::Red, "You can use this ability again in %u hour(s) %u minute(s) %u seconds",
 			aaremain_hr, aaremain_min, aaremain_sec);
 		}
 		else {
-			Message(13, "You can use this ability again in %u minute(s) %u seconds",
+			Message(Chat::Red, "You can use this ability again in %u minute(s) %u seconds",
 			aaremain_min, aaremain_sec);
 		}
 
@@ -1200,7 +1200,7 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 		CommonBreakInvisible();
 
 	if (spells[rank->spell].sneak && (!hidden || (hidden && (Timer::GetCurrentTime() - tmHidden) < 4000))) {
-		Message_StringID(MT_SpellFailure, SNEAK_RESTRICT);
+		MessageString(Chat::SpellFailure, SNEAK_RESTRICT);
 		return;
 	}
 	//
@@ -1214,7 +1214,7 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 			SetAppearance(eaStanding, false);
 
 		if (GetAppearance() != eaStanding) {
-			Message_StringID(MT_SpellFailure, STAND_TO_CAST);
+			MessageString(Chat::SpellFailure, STAND_TO_CAST);
 			return;
 		}
 	}

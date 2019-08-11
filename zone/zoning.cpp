@@ -96,7 +96,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 				//that can be a valid un-zolicited zone request?
 
 				//Todo cheat detection
-				Message(13, "Invalid unsolicited zone request.");
+				Message(Chat::Red, "Invalid unsolicited zone request.");
 				Log(Logs::General, Logs::Error, "Zoning %s: Invalid unsolicited zone request to zone id '%d'.", GetName(), target_zone_id);
 				SendZoneCancel(zc);
 				return;
@@ -142,14 +142,14 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		//make sure we are in it and it's unexpired.
 		if(!database.VerifyInstanceAlive(target_instance_id, CharacterID()))
 		{
-			Message(13, "Instance ID was expired or you were not in it.");
+			Message(Chat::Red, "Instance ID was expired or you were not in it.");
 			SendZoneCancel(zc);
 			return;
 		}
 
 		if(!database.VerifyZoneInstance(target_zone_id, target_instance_id))
 		{
-			Message(13, "Instance ID was %u does not go with zone id %u", target_instance_id, target_zone_id);
+			Message(Chat::Red, "Instance ID was %u does not go with zone id %u", target_instance_id, target_zone_id);
 			SendZoneCancel(zc);
 			return;
 		}
@@ -159,7 +159,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	const char *target_zone_name = database.GetZoneName(target_zone_id);
 	if(target_zone_name == nullptr) {
 		//invalid zone...
-		Message(13, "Invalid target zone ID.");
+		Message(Chat::Red, "Invalid target zone ID.");
 		Log(Logs::General, Logs::Error, "Zoning %s: Unable to get zone name for zone id '%d'.", GetName(), target_zone_id);
 		SendZoneCancel(zc);
 		return;
@@ -172,7 +172,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	char flag_needed[128];
 	if(!database.GetSafePoints(target_zone_name, database.GetInstanceVersion(target_instance_id), &safe_x, &safe_y, &safe_z, &minstatus, &minlevel, flag_needed)) {
 		//invalid zone...
-		Message(13, "Invalid target zone while getting safe points.");
+		Message(Chat::Red, "Invalid target zone while getting safe points.");
 		Log(Logs::General, Logs::Error, "Zoning %s: Unable to get safe coordinates for zone '%s'.", GetName(), target_zone_name);
 		SendZoneCancel(zc);
 		return;
@@ -277,7 +277,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		//the flag needed string is not empty, meaning a flag is required.
 		if(Admin() < minStatusToIgnoreZoneFlags && !HasZoneFlag(target_zone_id))
 		{
-			Message(13, "You do not have the flag to enter %s.", target_zone_name);
+			Message(Chat::Red, "You do not have the flag to enter %s.", target_zone_name);
 			myerror = ZONE_ERROR_NOEXPERIENCE;
 		}
 	}
@@ -453,7 +453,7 @@ void Client::ProcessMovePC(uint32 zoneID, uint32 instance_id, float x, float y, 
 			ZonePC(zoneID, instance_id, x, y, z, heading, ignorerestrictions, zm);
 			break;
 		case GMSummon:
-			Message(15, "You have been summoned by a GM!");
+			Message(Chat::Yellow, "You have been summoned by a GM!");
 			ZonePC(zoneID, instance_id, x, y, z, heading, ignorerestrictions, zm);
 			break;
 		case ZoneToBindPoint:
@@ -463,11 +463,11 @@ void Client::ProcessMovePC(uint32 zoneID, uint32 instance_id, float x, float y, 
 			ZonePC(zoneID, instance_id, x, y, z, heading, ignorerestrictions, zm);
 			break;
 		case SummonPC:
-			Message(15, "You have been summoned!");
+			Message(Chat::Yellow, "You have been summoned!");
 			ZonePC(zoneID, instance_id, x, y, z, heading, ignorerestrictions, zm);
 			break;
 		case Rewind:
-			Message(15, "Rewinding to previous location.");
+			Message(Chat::Yellow, "Rewinding to previous location.");
 			ZonePC(zoneID, instance_id, x, y, z, heading, ignorerestrictions, zm);
 			break;
 		default:
@@ -486,7 +486,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 	database.GetZoneLongName(pShortZoneName, &pZoneName);
 
 	if(!pZoneName) {
-		Message(13, "Invalid zone number specified");
+		Message(Chat::Red, "Invalid zone number specified");
 		safe_delete_array(pZoneName);
 		return;
 	}
@@ -560,7 +560,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			Entity* entity = entity_list.GetID(entity_id_being_looted);
 			if (entity == 0)
 			{
-				Message(13, "Error: OP_EndLootRequest: Corpse not found (ent = 0)");
+				Message(Chat::Red, "Error: OP_EndLootRequest: Corpse not found (ent = 0)");
 				if (ClientVersion() >= EQEmu::versions::ClientVersion::SoD)
 					Corpse::SendEndLootErrorPacket(this);
 				else
@@ -568,7 +568,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			}
 			else if (!entity->IsCorpse())
 			{
-				Message(13, "Error: OP_EndLootRequest: Corpse not found (!entity->IsCorpse())");
+				Message(Chat::Red, "Error: OP_EndLootRequest: Corpse not found (!entity->IsCorpse())");
 				Corpse::SendLootReqErrorPacket(this);
 			}
 			else
@@ -723,7 +723,7 @@ void Client::Gate(uint8 bindnum) {
 }
 
 void NPC::Gate(uint8 bindnum) {
-	entity_list.MessageClose_StringID(this, true, RuleI(Range, SpellMessages), MT_Spells, GATES, GetCleanName());
+	entity_list.MessageCloseString(this, true, RuleI(Range, SpellMessages), Chat::Spells, GATES, GetCleanName());
 
 	Mob::Gate(bindnum);
 }
@@ -814,7 +814,7 @@ bool Client::HasZoneFlag(uint32 zone_id) const {
 
 void Client::SendZoneFlagInfo(Client *to) const {
 	if(zone_flags.empty()) {
-		to->Message(0, "%s has no zone flags.", GetName());
+		to->Message(Chat::White, "%s has no zone flags.", GetName());
 		return;
 	}
 
@@ -823,7 +823,7 @@ void Client::SendZoneFlagInfo(Client *to) const {
 	end = zone_flags.end();
 	char empty[1] = { '\0' };
 
-	to->Message(0, "Flags for %s:", GetName());
+	to->Message(Chat::White, "Flags for %s:", GetName());
 
 	for(; cur != end; ++cur) {
 		uint32 zoneid = *cur;
@@ -843,7 +843,7 @@ void Client::SendZoneFlagInfo(Client *to) const {
 			strcpy(flag_name, "(ERROR GETTING NAME)");
 		}
 
-		to->Message(0, "Has Flag %s for zone %s (%d,%s)", flag_name, long_name, zoneid, short_name);
+		to->Message(Chat::White, "Has Flag %s for zone %s (%d,%s)", flag_name, long_name, zoneid, short_name);
 		if(long_name != empty)
 			delete[] long_name;
 	}

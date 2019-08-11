@@ -743,9 +743,9 @@ void Lua_Mob::Message(int type, const char *message) {
 	self->Message(type, message);
 }
 
-void Lua_Mob::Message_StringID(int type, int string_id, uint32 distance) {
+void Lua_Mob::MessageString(int type, int string_id, uint32 distance) {
 	Lua_Safe_Call_Void();
-	self->Message_StringID(type, string_id, distance);
+	self->MessageString(type, string_id, distance);
 }
 
 void Lua_Mob::Say(const char *message) {
@@ -764,7 +764,7 @@ void Lua_Mob::QuestSay(Lua_Client client, const char *message) {
 	journal_opts.speak_mode = Journal::SpeakMode::Say;
 	journal_opts.journal_mode = RuleB(NPC, EnableNPCQuestJournal) ? Journal::Mode::Log2 : Journal::Mode::None;
 	journal_opts.language = 0;
-	journal_opts.message_type = MT_NPCQuestSay;
+	journal_opts.message_type = Chat::NPCQuestSay;
 	journal_opts.target_spawn_id = 0;
 	self->QuestJournalledSay(client, message, journal_opts);
 }
@@ -777,7 +777,7 @@ void Lua_Mob::QuestSay(Lua_Client client, const char *message, luabind::adl::obj
 	journal_opts.speak_mode = Journal::SpeakMode::Say;
 	journal_opts.journal_mode = Journal::Mode::Log2;
 	journal_opts.language = 0;
-	journal_opts.message_type = MT_NPCQuestSay;
+	journal_opts.message_type = Chat::NPCQuestSay;
 	journal_opts.target_spawn_id = 0;
 
 	if (luabind::type(opts) == LUA_TTABLE) {
@@ -2386,7 +2386,8 @@ luabind::scope lua_register_mob() {
 		.def("SetCurrentWP", &Lua_Mob::SetCurrentWP)
 		.def("GetSize", &Lua_Mob::GetSize)
 		.def("Message", &Lua_Mob::Message)
-		.def("Message_StringID", &Lua_Mob::Message_StringID)
+		.def("MessageString", &Lua_Mob::MessageString)
+		.def("Message_StringID", &Lua_Mob::MessageString)
 		.def("Say", (void(Lua_Mob::*)(const char*))& Lua_Mob::Say)
 		.def("Say", (void(Lua_Mob::*)(const char*, int))& Lua_Mob::Say)
 		.def("QuestSay", (void(Lua_Mob::*)(Lua_Client,const char *))&Lua_Mob::QuestSay)

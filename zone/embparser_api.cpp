@@ -160,7 +160,7 @@ XS(XS__say) {
 	opts.speak_mode = Journal::SpeakMode::Say;
 	opts.journal_mode = Journal::Mode::Log2;
 	opts.language = 0;
-	opts.message_type = MT_NPCQuestSay;
+	opts.message_type = Chat::NPCQuestSay;
 	if (items == 0 || items > 5) {
 		Perl_croak(aTHX_ "Usage: quest::say(string message, [int language_id], [int message_type], [int speak_mode], [int journal_mode])");
 	} else if (items == 2) {

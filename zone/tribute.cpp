@@ -93,7 +93,7 @@ void Client::ToggleTribute(bool enabled) {
 		}
 
 		if(cost > m_pp.tribute_points) {
-			Message(13, "You do not have enough tribute points to activate your tribute!");
+			Message(Chat::Red, "You do not have enough tribute points to activate your tribute!");
 			ToggleTribute(false);
 			return;
 		}
@@ -250,7 +250,7 @@ int32 Client::TributeItem(uint32 slot, uint32 quantity) {
 	pts = mod_tribute_item_value(pts, m_inv[slot]);
 
 	if(pts < 1) {
-		Message(13, "This item is worthless for favor.");
+		Message(Chat::Red, "This item is worthless for favor.");
 		return(0);
 	}
 
@@ -277,7 +277,7 @@ int32 Client::TributeItem(uint32 slot, uint32 quantity) {
 //returns the number of points received from the tribute
 int32 Client::TributeMoney(uint32 platinum) {
 	if(!TakeMoneyFromPP(platinum * 1000)) {
-		Message(13, "You do not have that much money!");
+		Message(Chat::Red, "You do not have that much money!");
 		return(0);
 	}
 

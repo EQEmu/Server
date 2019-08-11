@@ -199,7 +199,7 @@ void Group::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinu
 			Client *c = members[i]->CastToClient();
 			//I could not get MoneyOnCorpse to work, so we use this
 			c->AddMoneyToPP(cpsplit, spsplit, gpsplit, ppsplit, true);
-			c->Message(2, msg.c_str());
+			c->Message(Chat::Green, msg.c_str());
 		}
 	}
 }
@@ -1236,7 +1236,7 @@ void Group::VerifyGroup() {
 	}
 }
 
-void Group::GroupMessage_StringID(Mob* sender, uint32 type, uint32 string_id, const char* message,const char* message2,const char* message3,const char* message4,const char* message5,const char* message6,const char* message7,const char* message8,const char* message9, uint32 distance) {
+void Group::GroupMessageString(Mob* sender, uint32 type, uint32 string_id, const char* message,const char* message2,const char* message3,const char* message4,const char* message5,const char* message6,const char* message7,const char* message8,const char* message9, uint32 distance) {
 	uint32 i;
 	for (i = 0; i < MAX_GROUP_MEMBERS; i++) {
 		if(members[i] == nullptr)
@@ -1248,7 +1248,7 @@ void Group::GroupMessage_StringID(Mob* sender, uint32 type, uint32 string_id, co
 		if(!members[i]->IsClient())
 			continue;
 
-		members[i]->Message_StringID(type, string_id, message, message2, message3, message4, message5, message6, message7, message8, message9, 0);
+		members[i]->MessageString(type, string_id, message, message2, message3, message4, message5, message6, message7, message8, message9, 0);
 	}
 }
 
@@ -1680,9 +1680,9 @@ void Group::NotifyMainTank(Client *c, uint8 toggle)
 	if (c->ClientVersion() < EQEmu::versions::ClientVersion::SoD)
 	{
 		if(toggle)
-			c->Message(0, "%s is now Main Tank.", MainTankName.c_str());
+			c->Message(Chat::White, "%s is now Main Tank.", MainTankName.c_str());
 		else
-			c->Message(0, "%s is no longer Main Tank.", MainTankName.c_str());
+			c->Message(Chat::White, "%s is no longer Main Tank.", MainTankName.c_str());
 	}
 	else
 	{
@@ -1775,9 +1775,9 @@ void Group::NotifyPuller(Client *c, uint8 toggle)
 	if (c->ClientVersion() < EQEmu::versions::ClientVersion::SoD)
 	{
 		if(toggle)
-			c->Message(0, "%s is now Puller.", PullerName.c_str());
+			c->Message(Chat::White, "%s is now Puller.", PullerName.c_str());
 		else
-			c->Message(0, "%s is no longer Puller.", PullerName.c_str());
+			c->Message(Chat::White, "%s is no longer Puller.", PullerName.c_str());
 	}
 	else
 	{

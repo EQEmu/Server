@@ -611,7 +611,7 @@ void NPC::ClearItemList() {
 
 void NPC::QueryLoot(Client* to)
 {
-	to->Message(0, "| # Current Loot (%s) LootTableID: %i", GetName(), GetLoottableID());
+	to->Message(Chat::White, "| # Current Loot (%s) LootTableID: %i", GetName(), GetLoottableID());
 
 	int item_count = 0;
 	for (auto cur  = itemlist.begin(); cur != itemlist.end(); ++cur, ++item_count) {
@@ -639,7 +639,7 @@ void NPC::QueryLoot(Client* to)
 		);
 	}
 
-	to->Message(0, "| %i Platinum %i Gold %i Silver %i Copper", platinum, gold, silver, copper);
+	to->Message(Chat::White, "| %i Platinum %i Gold %i Silver %i Copper", platinum, gold, silver, copper);
 }
 
 void NPC::AddCash(uint16 in_copper, uint16 in_silver, uint16 in_gold, uint16 in_platinum) {
@@ -1190,17 +1190,17 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* 
 
 		if (client) {
 			// Notify client of spawn data
-			client->Message(0, "New spawn:");
-			client->Message(0, "Name: %s", npc->name);
-			client->Message(0, "Race: %u", npc->race);
-			client->Message(0, "Level: %u", npc->level);
-			client->Message(0, "Material: %u", npc->texture);
-			client->Message(0, "Current/Max HP: %i", npc->max_hp);
-			client->Message(0, "Gender: %u", npc->gender);
-			client->Message(0, "Class: %u", npc->class_);
-			client->Message(0, "Weapon Item Number: %u/%u", npc->d_melee_texture1, npc->d_melee_texture2);
-			client->Message(0, "MerchantID: %u", npc->MerchantType);
-			client->Message(0, "Bodytype: %u", npc->bodytype);
+			client->Message(Chat::White, "New spawn:");
+			client->Message(Chat::White, "Name: %s", npc->name);
+			client->Message(Chat::White, "Race: %u", npc->race);
+			client->Message(Chat::White, "Level: %u", npc->level);
+			client->Message(Chat::White, "Material: %u", npc->texture);
+			client->Message(Chat::White, "Current/Max HP: %i", npc->max_hp);
+			client->Message(Chat::White, "Gender: %u", npc->gender);
+			client->Message(Chat::White, "Class: %u", npc->class_);
+			client->Message(Chat::White, "Weapon Item Number: %u/%u", npc->d_melee_texture1, npc->d_melee_texture2);
+			client->Message(Chat::White, "MerchantID: %u", npc->MerchantType);
+			client->Message(Chat::White, "Bodytype: %u", npc->bodytype);
 		}
 
 		return npc;
@@ -1471,7 +1471,7 @@ uint32 ZoneDatabase::AddNPCTypes(const char *zone, uint32 zone_version, Client *
 	npc_type_id = results.LastInsertedID();
 
 	if (client)
-		client->Message(0, "%s npc_type ID %i created successfully!", numberlessName, npc_type_id);
+		client->Message(Chat::White, "%s npc_type ID %i created successfully!", numberlessName, npc_type_id);
 
 	return 1;
 }
@@ -1577,7 +1577,7 @@ void NPC::PickPocket(Client* thief)
 	//make sure were allowed to target them:
 	int over_level = GetLevel();
 	if(over_level > (thief->GetLevel() + THIEF_PICKPOCKET_OVER)) {
-		thief->Message(13, "You are too inexperienced to pick pocket this target");
+		thief->Message(Chat::Red, "You are too inexperienced to pick pocket this target");
 		thief->SendPickPocketResponse(this, 0, PickPocketFailed);
 		//should we check aggro
 		return;
@@ -1587,7 +1587,7 @@ void NPC::PickPocket(Client* thief)
 		if (zone->CanDoCombat())
 			AddToHateList(thief, 50);
 		Say("Stop thief!");
-		thief->Message(13, "You are noticed trying to steal!");
+		thief->Message(Chat::Red, "You are noticed trying to steal!");
 		thief->SendPickPocketResponse(this, 0, PickPocketFailed);
 		return;
 	}
@@ -1694,7 +1694,7 @@ void NPC::PickPocket(Client* thief)
 		return;
 	}
 
-	thief->Message(0, "This target's pockets are empty");
+	thief->Message(Chat::White, "This target's pockets are empty");
 	thief->SendPickPocketResponse(this, 0, PickPocketFailed);
 }
 
@@ -1744,17 +1744,17 @@ void NPC::Disarm(Client* client, int chance) {
 				SendWearChange(matslot);
 			if ((CastToMob()->GetBodyType() == BT_Humanoid || CastToMob()->GetBodyType() == BT_Summoned) && eslot == EQEmu::invslot::slotPrimary)
 				Say("Ahh! My weapon!");
-			client->Message_StringID(MT_Skills, DISARM_SUCCESS, this->GetCleanName());
+			client->MessageString(Chat::Skills, DISARM_SUCCESS, this->GetCleanName());
 			if (chance != 1000)
 				client->CheckIncreaseSkill(EQEmu::skills::SkillDisarm, nullptr, 4);
 			return;
 		}
-		client->Message_StringID(MT_Skills, DISARM_FAILED);
+		client->MessageString(Chat::Skills, DISARM_FAILED);
 		if (chance != 1000)
 			client->CheckIncreaseSkill(EQEmu::skills::SkillDisarm, nullptr, 2);
 		return;
 	}
-	client->Message_StringID(MT_Skills, DISARM_FAILED);
+	client->MessageString(Chat::Skills, DISARM_FAILED);
 }
 
 void Mob::NPCSpecialAttacks(const char* parse, int permtag, bool reset, bool remove) {
@@ -2592,7 +2592,7 @@ void NPC::DoNPCEmote(uint8 event_, uint16 emoteid)
 		else if(nes->type == 2)
 			this->Shout("%s",nes->text);
 		else if(nes->type == 3)
-			entity_list.MessageClose_StringID(this, true, 200, 10, GENERIC_STRING, nes->text);
+			entity_list.MessageCloseString(this, true, 200, 10, GENERIC_STRING, nes->text);
 		else
 			this->Say("%s",nes->text);
 	}

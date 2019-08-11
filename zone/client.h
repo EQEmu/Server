@@ -90,23 +90,6 @@ public:
 	bool ack_req;
 };
 
-enum { //Type arguments to the Message* routines.
-	//all not explicitly listed are the same grey color
-	clientMessageWhite0 = 0,
-	clientMessageLoot = 2, //dark green
-	clientMessageTradeskill = 4, //light blue
-	clientMessageTell = 5, //magenta
-	clientMessageWhite = 7,
-	clientMessageWhite2 = 10,
-	clientMessageLightGrey = 12,
-	clientMessageError = 13, //red
-	clientMessageGreen = 14,
-	clientMessageYellow = 15,
-	clientMessageBlue = 16,
-	clientMessageGroup = 18, //cyan
-	clientMessageWhite3 = 20,
-};
-
 #define SPELLBAR_UNLOCK 0x2bc
 enum { //scribing argument to MemorizeSpell
 	memSpellUnknown = -1, // this modifies some state data
@@ -295,11 +278,11 @@ public:
 	void SendBazaarWelcome();
 	void DyeArmor(EQEmu::TintProfile* dye);
 	uint8 SlotConvert(uint8 slot,bool bracer=false);
-	void Message_StringID(uint32 type, uint32 string_id, uint32 distance = 0);
-	void Message_StringID(uint32 type, uint32 string_id, const char* message,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0, uint32 distance = 0);
+	void MessageString(uint32 type, uint32 string_id, uint32 distance = 0);
+	void MessageString(uint32 type, uint32 string_id, const char* message,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0, uint32 distance = 0);
 	bool FilteredMessageCheck(Mob *sender, eqFilterType filter);
-	void FilteredMessage_StringID(Mob *sender, uint32 type, eqFilterType filter, uint32 string_id);
-	void FilteredMessage_StringID(Mob *sender, uint32 type, eqFilterType filter,
+	void FilteredMessageString(Mob *sender, uint32 type, eqFilterType filter, uint32 string_id);
+	void FilteredMessageString(Mob *sender, uint32 type, eqFilterType filter,
 					uint32 string_id, const char *message1, const char *message2 = nullptr,
 					const char *message3 = nullptr, const char *message4 = nullptr,
 					const char *message5 = nullptr, const char *message6 = nullptr,

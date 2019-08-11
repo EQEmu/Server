@@ -84,12 +84,12 @@ namespace
 {
 //#define BCSTSPELLDUMP // only needed if you're adding/tailoring bot command spells and need a file dump
 
-#define m_message CC_WhiteSmoke
-#define m_action CC_Yellow
-#define m_note CC_Gray
-#define m_usage CC_Cyan
-#define m_fail CC_Red
-#define m_unknown CC_Magenta
+#define m_message Chat::White
+#define m_action Chat::Yellow
+#define m_note Chat::Gray
+#define m_usage Chat::Cyan
+#define m_fail Chat::Red
+#define m_unknown Chat::Magenta
 
 #define HP_RATIO_DELTA 5.0f
 
@@ -4833,7 +4833,7 @@ void bot_subcommand_bot_inspect_message(Client *c, const Seperator *sep)
 		set_flag = true;
 	}
 	else if (strcasecmp(sep->arg[1], "clear")) {
-		c->Message(15, "This command requires a [set | clear] argument");
+		c->Message(Chat::Yellow, "This command requires a [set | clear] argument");
 		return;
 	}
 
@@ -7284,7 +7284,7 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 	int ab_mask = (ActionableBots::ABM_Target | ActionableBots::ABM_ByName);
 
 	if (c->GetTradeskillObject() || (c->trade->state == Trading)) {
-		c->Message_StringID(MT_Tell, MERCHANT_BUSY);
+		c->MessageString(Chat::Tell, MERCHANT_BUSY);
 		return;
 	}
 
@@ -7310,7 +7310,7 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 		itm = itminst->GetItem();
 
 	if (itminst && itm && c->CheckLoreConflict(itm)) {
-		c->Message_StringID(0, PICK_LORE);
+		c->MessageString(Chat::White, PICK_LORE);
 		return;
 	}
 
@@ -7324,7 +7324,7 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 		if (!c->CheckLoreConflict(itma->GetItem()))
 			continue;
 
-		c->Message_StringID(0, PICK_LORE);
+		c->MessageString(Chat::White, PICK_LORE);
 		return;
 	}
 	
@@ -7454,7 +7454,7 @@ void bot_subcommand_pet_get_lost(Client *c, const Seperator *sep)
 		if (!bot_iter->GetPet() || bot_iter->GetPet()->IsCharmed())
 			continue;
 
-		bot_iter->GetPet()->Say_StringID(PET_GETLOST_STRING);
+		bot_iter->GetPet()->SayString(PET_GETLOST_STRING);
 		bot_iter->GetPet()->Depop(false);
 		bot_iter->SetPetID(0);
 		database.botdb.DeletePetItems(bot_iter->GetBotID());
@@ -7500,7 +7500,7 @@ void bot_subcommand_pet_remove(Client *c, const Seperator *sep)
 		}
 
 		if (bot_iter->GetPet()) {
-			bot_iter->GetPet()->Say_StringID(PET_GETLOST_STRING);
+			bot_iter->GetPet()->SayString(PET_GETLOST_STRING);
 			bot_iter->GetPet()->Depop(false);
 			bot_iter->SetPetID(0);
 		}

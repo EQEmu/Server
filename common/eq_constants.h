@@ -71,7 +71,7 @@
 //#define AT_Trader 300		// Bazaar Trader Mode (not present in SoF or RoF2)
 
 // animations for AT_Anim
-#define ANIM_FREEZE	102
+#define ANIM_FREEZE	    102
 #define	ANIM_STAND		0x64
 #define	ANIM_SIT		0x6e
 #define	ANIM_CROUCH		0x6f
@@ -87,200 +87,114 @@ typedef enum {
 	_eaMaxAppearance
 } EmuAppearance;
 
-#define MT_NPCQuestSay			10
-// msg_type's for custom usercolors
-#define MT_Say					256
-#define MT_Tell					257
-#define MT_Group				258
-#define MT_Guild				259
-#define MT_OOC					260
-#define MT_Auction				261
-#define MT_Shout				262
-#define MT_Emote				263
-#define MT_Spells				264
-#define MT_YouHitOther			265
-#define MT_OtherHitsYou			266
-#define MT_YouMissOther			267
-#define MT_OtherMissesYou		268
-#define MT_Broadcasts			269
-#define MT_Skills				270
-#define MT_Disciplines			271
-#define	MT_Unused1				272
-#define MT_DefaultText			273
-#define MT_Unused2				274
-#define MT_MerchantOffer		275
-#define MT_MerchantBuySell		276
-#define	MT_YourDeath			277
-#define MT_OtherDeath			278
-#define MT_OtherHits			279
-#define MT_OtherMisses			280
-#define	MT_Who					281
-#define MT_YellForHelp			282
-#define MT_NonMelee				283
-#define MT_WornOff				284
-#define MT_MoneySplit			285
-#define MT_LootMessages			286
-#define MT_DiceRoll				287
-#define MT_OtherSpells			288
-#define MT_SpellFailure			289
-#define MT_Chat					290
-#define MT_Channel1				291
-#define MT_Channel2				292
-#define MT_Channel3				293
-#define MT_Channel4				294
-#define MT_Channel5				295
-#define MT_Channel6				296
-#define MT_Channel7				297
-#define MT_Channel8				298
-#define MT_Channel9				299
-#define MT_Channel10			300
-#define MT_CritMelee			301
-#define MT_SpellCrits			302
-#define MT_TooFarAway			303
-#define MT_NPCRampage			304
-#define MT_NPCFlurry			305
-#define MT_NPCEnrage			306
-#define MT_SayEcho				307
-#define MT_TellEcho				308
-#define MT_GroupEcho			309
-#define MT_GuildEcho			310
-#define MT_OOCEcho				311
-#define MT_AuctionEcho			312
-#define MT_ShoutECho			313
-#define MT_EmoteEcho			314
-#define MT_Chat1Echo			315
-#define MT_Chat2Echo			316
-#define MT_Chat3Echo			317
-#define MT_Chat4Echo			318
-#define MT_Chat5Echo			319
-#define MT_Chat6Echo			320
-#define MT_Chat7Echo			321
-#define MT_Chat8Echo			322
-#define MT_Chat9Echo			323
-#define MT_Chat10Echo			324
-#define MT_DoTDamage			325
-#define MT_ItemLink				326
-#define MT_RaidSay				327
-#define MT_MyPet				328
-#define MT_DS					329
-#define MT_Leadership			330
-#define MT_PetFlurry			331
-#define MT_PetCrit				332
-#define MT_FocusEffect			333
-#define MT_Experience			334
-#define MT_System				335
-#define MT_PetSpell				336
-#define MT_PetResponse			337
-#define MT_ItemSpeech			338
-#define MT_StrikeThrough		339
-#define MT_Stun					340
+namespace Chat {
+	const uint16 White       = 0;
+	const uint16 DimGray     = 1;
+	const uint16 Default     = 1;
+	const uint16 Green       = 2;
+	const uint16 BrightBlue  = 3;
+	const uint16 LightBlue   = 4;
+	const uint16 Magenta     = 5;
+	const uint16 Gray        = 6;
+	const uint16 LightGray   = 7;
+	const uint16 NPCQuestSay = 10;
+	const uint16 DarkGray    = 12;
+	const uint16 Red         = 13;
+	const uint16 Lime        = 14;
+	const uint16 Yellow      = 15;
+	const uint16 Blue        = 16;
+	const uint16 LightNavy   = 17;
+	const uint16 Cyan        = 18;
+	const uint16 Black       = 20;
 
-// TODO: Really should combine above and below into one
-
-//from showeq
-enum ChatColor
-{
-	/*
-	CC_Default					= 0,
-	CC_DarkGrey					= 1,
-	CC_DarkGreen				= 2,
-	CC_DarkBlue					= 3,
-	CC_Purple					= 5,
-	CC_LightGrey				= 6,
-	*/
-
-	CC_WhiteSmoke				= 0,	// FF|F0F0F0
-	CC_Green					= 2,	// FF|008000
-	CC_BrightBlue				= 3,	// FF|0040FF
-	CC_Magenta					= 5,	// FF|F000F0
-	CC_Gray						= 6,	// FF|808080
-	CC_LightGray				= 7,	// FF|E0E0E0
-	//CC_WhiteSmoke2				= 10,	// FF|F0F0F0
-	CC_DarkGray					= 12,	// FF|A0A0A0
-	CC_Red						= 13,	// FF|F00000
-	CC_Lime						= 14,	// FF|00F000
-	CC_Yellow					= 15,	// FF|F0F000
-	CC_Blue						= 16,	// FF|0000F0
-	CC_LightNavy				= 17,	// FF|0000AF
-	CC_Cyan						= 18,	// FF|00F0F0
-	CC_Black					= 20,	// FF|000000
-	
-	// any index <= 255 that is not defined above
-	CC_DimGray					= 1,	// FF|606060
-	CC_Default					= 1,
-
-	CC_User_Say					= 256,
-	CC_User_Tell				= 257,
-	CC_User_Group				= 258,
-	CC_User_Guild				= 259,
-	CC_User_OOC					= 260,
-	CC_User_Auction				= 261,
-	CC_User_Shout				= 262,
-	CC_User_Emote				= 263,
-	CC_User_Spells				= 264,
-	CC_User_YouHitOther			= 265,
-	CC_User_OtherHitYou			= 266,
-	CC_User_YouMissOther		= 267,
-	CC_User_OtherMissYou		= 268,
-	CC_User_Duels				= 269,
-	CC_User_Skills				= 270,
-	CC_User_Disciplines			= 271,
-	CC_User_Default				= 273,
-	CC_User_MerchantOffer		= 275,
-	CC_User_MerchantExchange	= 276,
-	CC_User_YourDeath			= 277,
-	CC_User_OtherDeath			= 278,
-	CC_User_OtherHitOther		= 279,
-	CC_User_OtherMissOther		= 280,
-	CC_User_Who					= 281,
-	CC_User_Yell				= 282,
-	CC_User_NonMelee			= 283,
-	CC_User_SpellWornOff		= 284,
-	CC_User_MoneySplit			= 285,
-	CC_User_Loot				= 286,
-	CC_User_Random				= 287,
-	CC_User_OtherSpells			= 288,
-	CC_User_SpellFailure		= 289,
-	CC_User_ChatChannel			= 290,
-	CC_User_Chat1				= 291,
-	CC_User_Chat2				= 292,
-	CC_User_Chat3				= 293,
-	CC_User_Chat4				= 294,
-	CC_User_Chat5				= 295,
-	CC_User_Chat6				= 296,
-	CC_User_Chat7				= 297,
-	CC_User_Chat8				= 298,
-	CC_User_Chat9				= 299,
-	CC_User_Chat10				= 300,
-	CC_User_MeleeCrit			= 301,
-	CC_User_SpellCrit			= 302,
-	CC_User_TooFarAway			= 303,
-	CC_User_NPCRampage			= 304,
-	CC_User_NPCFurry			= 305,
-	CC_User_NPCEnrage			= 306,
-	CC_User_EchoSay				= 307,
-	CC_User_EchoTell			= 308,
-	CC_User_EchoGroup			= 309,
-	CC_User_EchoGuild			= 310,
-	CC_User_EchoOOC				= 311,
-	CC_User_EchoAuction			= 312,
-	CC_User_EchoShout			= 313,
-	CC_User_EchoEmote			= 314,
-	CC_User_EchoChat1			= 315,
-	CC_User_EchoChat2			= 316,
-	CC_User_EchoChat3			= 317,
-	CC_User_EchoChat4			= 318,
-	CC_User_EchoChat5			= 319,
-	CC_User_EchoChat6			= 320,
-	CC_User_EchoChat7			= 321,
-	CC_User_EchoChat8			= 322,
-	CC_User_EchoChat9			= 323,
-	CC_User_EchoChat10			= 324,
-	CC_User_UnusedAtThisTime	= 325,
-	CC_User_ItemTags			= 326,
-	CC_User_RaidSay				= 327,
-	CC_User_MyPet				= 328,
-	CC_User_DamageShield		= 329,
+	/**
+	 * User colors
+	 */
+	const uint16 Say              = 256;
+	const uint16 Tell             = 257;
+	const uint16 Group            = 258;
+	const uint16 Guild            = 259;
+	const uint16 OOC              = 260;
+	const uint16 Auction          = 261;
+	const uint16 Shout            = 262;
+	const uint16 Emote            = 263;
+	const uint16 Spells           = 264;
+	const uint16 YouHitOther      = 265;
+	const uint16 OtherHitYou      = 266;
+	const uint16 YouMissOther     = 267;
+	const uint16 OtherMissYou     = 268;
+	const uint16 Broadcasts       = 269;
+	const uint16 Skills           = 270;
+	const uint16 Disciplines      = 271;
+	const uint16 Unused1          = 272;
+	const uint16 DefaultText      = 273;
+	const uint16 Unused2          = 274;
+	const uint16 MerchantOffer    = 275;
+	const uint16 MerchantExchange = 276;
+	const uint16 YourDeath        = 277;
+	const uint16 OtherDeath       = 278;
+	const uint16 OtherHitOther    = 279;
+	const uint16 OtherMissOther   = 280;
+	const uint16 Who              = 281;
+	const uint16 YellForHelp      = 282;
+	const uint16 NonMelee         = 283;
+	const uint16 SpellWornOff     = 284;
+	const uint16 MoneySplit       = 285;
+	const uint16 Loot             = 286;
+	const uint16 DiceRoll         = 287;
+	const uint16 OtherSpells      = 288;
+	const uint16 SpellFailure     = 289;
+	const uint16 ChatChannel      = 290;
+	const uint16 Chat1            = 291;
+	const uint16 Chat2            = 292;
+	const uint16 Chat3            = 293;
+	const uint16 Chat4            = 294;
+	const uint16 Chat5            = 295;
+	const uint16 Chat6            = 296;
+	const uint16 Chat7            = 297;
+	const uint16 Chat8            = 298;
+	const uint16 Chat9            = 299;
+	const uint16 Chat10           = 300;
+	const uint16 MeleeCrit        = 301;
+	const uint16 SpellCrit        = 302;
+	const uint16 TooFarAway       = 303;
+	const uint16 NPCRampage       = 304;
+	const uint16 NPCFlurry        = 305;
+	const uint16 NPCEnrage        = 306;
+	const uint16 EchoSay          = 307;
+	const uint16 EchoTell         = 308;
+	const uint16 EchoGroup        = 309;
+	const uint16 EchoGuild        = 310;
+	const uint16 EchoOOC          = 311;
+	const uint16 EchoAuction      = 312;
+	const uint16 EchoShout        = 313;
+	const uint16 EchoEmote        = 314;
+	const uint16 EchoChat1        = 315;
+	const uint16 EchoChat2        = 316;
+	const uint16 EchoChat3        = 317;
+	const uint16 EchoChat4        = 318;
+	const uint16 EchoChat5        = 319;
+	const uint16 EchoChat6        = 320;
+	const uint16 EchoChat7        = 321;
+	const uint16 EchoChat8        = 322;
+	const uint16 EchoChat9        = 323;
+	const uint16 EchoChat10       = 324;
+	const uint16 DotDamage        = 325;
+	const uint16 ItemLink         = 326;
+	const uint16 RaidSay          = 327;
+	const uint16 MyPet            = 328;
+	const uint16 DamageShield     = 329;
+	const uint16 LeaderShip       = 330;
+	const uint16 PetFlurry        = 331;
+	const uint16 PetCritical      = 332;
+	const uint16 FocusEffect      = 333;
+	const uint16 Experience       = 334;
+	const uint16 System           = 335;
+	const uint16 PetSpell         = 336;
+	const uint16 PetResponse      = 337;
+	const uint16 ItemSpeech       = 338;
+	const uint16 StrikeThrough    = 339;
+	const uint16 Stun             = 340;
 };
 
 //ZoneChange_Struct->success values

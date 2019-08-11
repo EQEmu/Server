@@ -624,7 +624,7 @@ inline void NPCCommandsMenu(Client* client, NPC* npc)
 
 	if (menu_commands.length() > 0) {
 		std::string dev_menu = "[" + EQEmu::SayLinkEngine::GenerateQuestSaylink("#devtools", false, "DevTools") + "] ";;
-		client->Message(0, "| %s [Show Commands] %s", dev_menu.c_str(), menu_commands.c_str());
+		client->Message(Chat::White, "| %s [Show Commands] %s", dev_menu.c_str(), menu_commands.c_str());
 	}
 }
 

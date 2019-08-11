@@ -21,14 +21,14 @@ std::vector<int> GlobalLootManager::GetGlobalLootTables(NPC *mob) const
 void GlobalLootManager::ShowZoneGlobalLoot(Client *to) const
 {
 	for (auto &e : m_entries)
-		to->Message(0, " %s : %d table %d", e.GetDescription().c_str(), e.GetID(), e.GetLootTableID());
+		to->Message(Chat::White, " %s : %d table %d", e.GetDescription().c_str(), e.GetID(), e.GetLootTableID());
 }
 
 void GlobalLootManager::ShowNPCGlobalLoot(Client *to, NPC *who) const
 {
 	for (auto &e : m_entries) {
 		if (e.PassesRules(who))
-			to->Message(0, " %s : %d table %d", e.GetDescription().c_str(), e.GetID(), e.GetLootTableID());
+			to->Message(Chat::White, " %s : %d table %d", e.GetDescription().c_str(), e.GetID(), e.GetLootTableID());
 	}
 }
 
