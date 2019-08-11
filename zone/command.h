@@ -182,6 +182,7 @@ void command_netstats(Client *c, const Seperator *sep);
 void command_network(Client *c, const Seperator *sep);
 void command_npccast(Client *c, const Seperator *sep);
 void command_npcedit(Client *c, const Seperator *sep);
+void command_npceditmass(Client *c, const Seperator *sep);
 void command_npcemote(Client *c, const Seperator *sep);
 void command_npcloot(Client *c, const Seperator *sep);
 void command_npcsay(Client *c, const Seperator *sep);
