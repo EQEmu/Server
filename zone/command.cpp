@@ -7337,6 +7337,15 @@ void command_npceditmass(Client *c, const Seperator *sep)
 		zone->GetInstanceVersion()
 	);
 
+	std::string status = "(Searching)";
+
+	if (strcasecmp(sep->arg[5], "apply") == 0) {
+		status = "(Applying)";
+	}
+
+	std::vector <std::string> npc_ids;
+
+	int found_count = 0;
 	results = database.QueryDatabase(query);
 	for (auto row = results.begin(); row != results.end(); ++row) {
 
@@ -7352,16 +7361,60 @@ void command_npceditmass(Client *c, const Seperator *sep)
 		c->Message(
 			15,
 			fmt::format(
-				"NPC ({0}) [{1}] ({2}) [{3}] Current ({4}) [{5}] New [{6}]",
+				"NPC ({0}) [{1}] ({2}) [{3}] Current ({4}) [{5}] New [{6}] {7}",
 				npc_id,
 				npc_name,
 				search_column,
 				search_column_value,
 				change_column,
 				change_column_current_value,
-				change_value
+				change_value,
+				status
 			).c_str()
 		);
+
+		npc_ids.push_back(npc_id);
+
+		found_count++;
+	}
+
+	std::string saylink = fmt::format(
+		"#npceditmass {} {} {} {} apply",
+		search_column,
+		search_value,
+		change_column,
+		change_value
+	);
+
+	if (strcasecmp(sep->arg[5], "apply") == 0) {
+		std::string npc_ids_string = implode(",", npc_ids);
+		if (npc_ids_string.empty()) {
+			c->Message(Chat::Red, "Error: Ran into an unknown error compiling NPC IDs");
+			return;
+		}
+
+		database.QueryDatabase(
+			fmt::format(
+				"UPDATE `npc_types` SET {} = {} WHERE id IN ({})",
+				change_column,
+				change_value,
+				npc_ids_string
+			)
+		);
+
+		c->Message(Chat::Yellow, "Changes applied to (%i) NPC's", found_count);
+		zone->Repop();
+	}
+	else {
+		c->Message(Chat::Yellow, "Found (%i) NPC's that match this search...", found_count);
+
+		if (found_count > 0) {
+			c->Message(
+				Chat::Yellow, "To apply these changes, click <%s> or type [%s]",
+				EQEmu::SayLinkEngine::GenerateQuestSaylink(saylink, false, "Apply").c_str(),
+				saylink.c_str()
+			);
+		}
 	}
 }
 
@@ -12232,7 +12285,7 @@ void command_scale(Client *c, const Seperator *sep)
 
 			c->Message(Chat::Yellow, "Found (%i) NPC's that match this search...", found_count);
 			c->Message(
-				15, "To apply these changes, click <%s> or type %s",
+				Chat::Yellow, "To apply these changes, click <%s> or type %s",
 				EQEmu::SayLinkEngine::GenerateQuestSaylink(saylink, false, "Apply").c_str(),
 				saylink.c_str()
 			);

@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 8/11/2019 ==
+Akkadius: Added bulk edit command #npceditmass <column-to-search> <column-search-value> <change-column> <change-value>
+
 == 8/6/2019 ==
 Akkadius: Optimizations to movement updates to eliminate ghosting possibilities in larger zones
 
