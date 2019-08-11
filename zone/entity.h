@@ -321,10 +321,39 @@ public:
 	void	MessageStatus(uint32 to_guilddbid, int to_minstatus, uint32 type, const char* message, ...);
 	void	MessageClose(Mob* sender, bool skipsender, float dist, uint32 type, const char* message, ...);
 	void	FilteredMessageClose(Mob* sender, bool skipsender, float dist, uint32 type, eqFilterType filter, const char* message, ...);
-	void	Message_StringID(Mob *sender, bool skipsender, uint32 type, uint32 string_id, const char* message1=0,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0);
-	void	FilteredMessage_StringID(Mob *sender, bool skipsender, uint32 type, eqFilterType filter, uint32 string_id, const char* message1=0,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0);
-	void	MessageClose_StringID(Mob *sender, bool skipsender, float dist, uint32 type, uint32 string_id, const char* message1=0,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0);
-	void	FilteredMessageClose_StringID(Mob *sender, bool skipsender, float dist, uint32 type, eqFilterType filter, uint32 string_id, const char* message1=0,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0);
+	void	MessageString(Mob *sender, bool skipsender, uint32 type, uint32 string_id, const char* message1=0,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0);
+	void	FilteredMessageString(Mob *sender, bool skipsender, uint32 type, eqFilterType filter, uint32 string_id, const char* message1=0,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0);
+	void	MessageCloseString(
+		Mob *sender,
+		bool skipsender,
+		float dist,
+		uint32 type,
+		uint32 string_id,
+		const char *message1 = 0,
+		const char *message2 = 0,
+		const char *message3 = 0,
+		const char *message4 = 0,
+		const char *message5 = 0,
+		const char *message6 = 0,
+		const char *message7 = 0,
+		const char *message8 = 0,
+		const char *message9 = 0);
+	void	FilteredMessageCloseString(
+		Mob *sender,
+		bool skipsender,
+		float dist,
+		uint32 type,
+		eqFilterType filter,
+		uint32 string_id,
+		const char *message1 = 0,
+		const char *message2 = 0,
+		const char *message3 = 0,
+		const char *message4 = 0,
+		const char *message5 = 0,
+		const char *message6 = 0,
+		const char *message7 = 0,
+		const char *message8 = 0,
+		const char *message9 = 0);
 	void	ChannelMessageFromWorld(const char* from, const char* to, uint8 chan_num, uint32 guilddbid, uint8 language, uint8 lang_skill, const char* message);
 	void	ChannelMessage(Mob* from, uint8 chan_num, uint8 language, const char* message, ...);
 	void	ChannelMessage(Mob* from, uint8 chan_num, uint8 language, uint8 lang_skill, const char* message, ...);

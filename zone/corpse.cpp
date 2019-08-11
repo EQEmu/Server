@@ -1201,7 +1201,7 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 
 	if (client && inst) {
 		if (client->CheckLoreConflict(item)) {
-			client->Message_StringID(Chat::White, LOOT_LORE_ERROR);
+			client->MessageString(Chat::White, LOOT_LORE_ERROR);
 			client->QueuePacket(app);
 			SendEndLootErrorPacket(client);
 			ResetLooter();
@@ -1214,7 +1214,7 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 				EQEmu::ItemInstance *itm = inst->GetAugment(i);
 				if (itm) {
 					if (client->CheckLoreConflict(itm->GetItem())) {
-						client->Message_StringID(Chat::White, LOOT_LORE_ERROR);
+						client->MessageString(Chat::White, LOOT_LORE_ERROR);
 						client->QueuePacket(app);
 						SendEndLootErrorPacket(client);
 						ResetLooter();
@@ -1236,7 +1236,7 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 		args.push_back(this);
 		if (parse->EventPlayer(EVENT_LOOT, client, buf, 0, &args) != 0) {
 			lootitem->auto_loot = -1;
-			client->Message_StringID(Chat::Red, LOOT_NOT_ALLOWED, inst->GetItem()->Name);
+			client->MessageString(Chat::Red, LOOT_NOT_ALLOWED, inst->GetItem()->Name);
 			client->QueuePacket(app);
 			delete inst;
 			return;
@@ -1312,18 +1312,18 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 
 		linker.GenerateLink();
 
-		client->Message_StringID(Chat::Loot, LOOTED_MESSAGE, linker.Link().c_str());
+		client->MessageString(Chat::Loot, LOOTED_MESSAGE, linker.Link().c_str());
 
 		if (!IsPlayerCorpse()) {
 			Group *g = client->GetGroup();
 			if (g != nullptr) {
-				g->GroupMessage_StringID(client, Chat::Loot, OTHER_LOOTED_MESSAGE,
+				g->GroupMessageString(client, Chat::Loot, OTHER_LOOTED_MESSAGE,
 					client->GetName(), linker.Link().c_str());
 			}
 			else {
 				Raid *r = client->GetRaid();
 				if (r != nullptr) {
-					r->RaidMessage_StringID(client, Chat::Loot, OTHER_LOOTED_MESSAGE,
+					r->RaidMessageString(client, Chat::Loot, OTHER_LOOTED_MESSAGE,
 						client->GetName(), linker.Link().c_str());
 				}
 			}

@@ -2808,7 +2808,7 @@ void Bot::AI_Process() {
 					int32 flurrychance = (aabonuses.FlurryChance + spellbonuses.FlurryChance + itembonuses.FlurryChance);
 					if (flurrychance) {
 						if (zone->random.Int(0, 100) < flurrychance) {
-							Message_StringID(Chat::NPCFlurry, YOU_FLURRY);
+							MessageString(Chat::NPCFlurry, YOU_FLURRY);
 							Attack(tar, EQEmu::invslot::slotPrimary, false);
 							
 							TEST_TARGET();
@@ -6444,11 +6444,11 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, EQEmu::spells::CastingSlo
 			if(!IsValidSpell(spell_id) || casting_spell_id || delaytimer || spellend_timer.Enabled() || IsStunned() || IsFeared() || IsMezzed() || (IsSilenced() && !IsDiscipline(spell_id)) || (IsAmnesiad() && IsDiscipline(spell_id))) {
 				Log(Logs::Detail, Logs::Spells, "Spell casting canceled: not able to cast now. Valid? %d, casting %d, waiting? %d, spellend? %d, stunned? %d, feared? %d, mezed? %d, silenced? %d", IsValidSpell(spell_id), casting_spell_id, delaytimer, spellend_timer.Enabled(), IsStunned(), IsFeared(), IsMezzed(), IsSilenced() );
 				if(IsSilenced() && !IsDiscipline(spell_id))
-					Message_StringID(Chat::Red, SILENCED_STRING);
+					MessageString(Chat::Red, SILENCED_STRING);
 
 				if(IsAmnesiad() && IsDiscipline(spell_id))
 
-					Message_StringID(Chat::Red, MELEE_SILENCE);
+					MessageString(Chat::Red, MELEE_SILENCE);
 
 				if(casting_spell_id)
 					AI_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
@@ -6458,7 +6458,7 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, EQEmu::spells::CastingSlo
 		}
 
 		if(IsDetrimentalSpell(spell_id) && !zone->CanDoCombat()){
-			Message_StringID(Chat::Red, SPELL_WOULDNT_HOLD);
+			MessageString(Chat::Red, SPELL_WOULDNT_HOLD);
 			if(casting_spell_id)
 				AI_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
 

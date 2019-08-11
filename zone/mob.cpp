@@ -2835,7 +2835,7 @@ void Mob::Say(const char *format, ...)
 		talker = this;
 	}
 
-	entity_list.MessageClose_StringID(
+	entity_list.MessageCloseString(
 		talker, false, 200, 10,
 		GENERIC_SAY, GetCleanName(), buf
 	);
@@ -2850,7 +2850,8 @@ void Mob::Say_StringID(uint32 string_id, const char *message3, const char *messa
 
 	snprintf(string_id_str, 10, "%d", string_id);
 
-	entity_list.MessageClose_StringID(this, false, 200, 10,
+	entity_list.MessageCloseString(
+		this, false, 200, 10,
 		GENERIC_STRINGID_SAY, GetCleanName(), string_id_str, message3, message4, message5,
 		message6, message7, message8, message9
 	);
@@ -2862,7 +2863,8 @@ void Mob::Say_StringID(uint32 type, uint32 string_id, const char *message3, cons
 
 	snprintf(string_id_str, 10, "%d", string_id);
 
-	entity_list.MessageClose_StringID(this, false, 200, type,
+	entity_list.MessageCloseString(
+		this, false, 200, type,
 		GENERIC_STRINGID_SAY, GetCleanName(), string_id_str, message3, message4, message5,
 		message6, message7, message8, message9
 	);
@@ -2875,7 +2877,7 @@ void Mob::SayTo_StringID(Client *to, uint32 string_id, const char *message3, con
 
 	auto string_id_str = std::to_string(string_id);
 
-	to->Message_StringID(Chat::NPCQuestSay, GENERIC_STRINGID_SAY, GetCleanName(), string_id_str.c_str(), message3, message4, message5, message6, message7, message8, message9);
+	to->MessageString(Chat::NPCQuestSay, GENERIC_STRINGID_SAY, GetCleanName(), string_id_str.c_str(), message3, message4, message5, message6, message7, message8, message9);
 }
 
 void Mob::SayTo_StringID(Client *to, uint32 type, uint32 string_id, const char *message3, const char *message4, const char *message5, const char *message6, const char *message7, const char *message8, const char *message9)
@@ -2885,7 +2887,7 @@ void Mob::SayTo_StringID(Client *to, uint32 type, uint32 string_id, const char *
 
 	auto string_id_str = std::to_string(string_id);
 
-	to->Message_StringID(type, GENERIC_STRINGID_SAY, GetCleanName(), string_id_str.c_str(), message3, message4, message5, message6, message7, message8, message9);
+	to->MessageString(type, GENERIC_STRINGID_SAY, GetCleanName(), string_id_str.c_str(), message3, message4, message5, message6, message7, message8, message9);
 }
 
 void Mob::Shout(const char *format, ...)
@@ -2897,7 +2899,7 @@ void Mob::Shout(const char *format, ...)
 	vsnprintf(buf, 1000, format, ap);
 	va_end(ap);
 
-	entity_list.Message_StringID(this, false, Chat::Shout,
+	entity_list.MessageString(this, false, Chat::Shout,
 		GENERIC_SHOUT, GetCleanName(), buf);
 }
 
@@ -2910,8 +2912,10 @@ void Mob::Emote(const char *format, ...)
 	vsnprintf(buf, 1000, format, ap);
 	va_end(ap);
 
-	entity_list.MessageClose_StringID(this, false, 200, 10,
-		GENERIC_EMOTE, GetCleanName(), buf);
+	entity_list.MessageCloseString(
+		this, false, 200, 10,
+		GENERIC_EMOTE, GetCleanName(), buf
+	);
 }
 
 void Mob::QuestJournalledSay(Client *QuestInitiator, const char *str, Journal::Options &opts)
@@ -4887,16 +4891,16 @@ void Mob::SlowMitigation(Mob* caster)
 	if (GetSlowMitigation() && caster && caster->IsClient())
 	{
 		if ((GetSlowMitigation() > 0) && (GetSlowMitigation() < 26))
-			caster->Message_StringID(Chat::SpellFailure, SLOW_MOSTLY_SUCCESSFUL);
+			caster->MessageString(Chat::SpellFailure, SLOW_MOSTLY_SUCCESSFUL);
 
 		else if ((GetSlowMitigation() >= 26) && (GetSlowMitigation() < 74))
-			caster->Message_StringID(Chat::SpellFailure, SLOW_PARTIALLY_SUCCESSFUL);
+			caster->MessageString(Chat::SpellFailure, SLOW_PARTIALLY_SUCCESSFUL);
 
 		else if ((GetSlowMitigation() >= 74) && (GetSlowMitigation() < 101))
-			caster->Message_StringID(Chat::SpellFailure, SLOW_SLIGHTLY_SUCCESSFUL);
+			caster->MessageString(Chat::SpellFailure, SLOW_SLIGHTLY_SUCCESSFUL);
 
 		else if (GetSlowMitigation() > 100)
-			caster->Message_StringID(Chat::SpellFailure, SPELL_OPPOSITE_EFFECT);
+			caster->MessageString(Chat::SpellFailure, SPELL_OPPOSITE_EFFECT);
 	}
 }
 

@@ -1744,17 +1744,17 @@ void NPC::Disarm(Client* client, int chance) {
 				SendWearChange(matslot);
 			if ((CastToMob()->GetBodyType() == BT_Humanoid || CastToMob()->GetBodyType() == BT_Summoned) && eslot == EQEmu::invslot::slotPrimary)
 				Say("Ahh! My weapon!");
-			client->Message_StringID(Chat::Skills, DISARM_SUCCESS, this->GetCleanName());
+			client->MessageString(Chat::Skills, DISARM_SUCCESS, this->GetCleanName());
 			if (chance != 1000)
 				client->CheckIncreaseSkill(EQEmu::skills::SkillDisarm, nullptr, 4);
 			return;
 		}
-		client->Message_StringID(Chat::Skills, DISARM_FAILED);
+		client->MessageString(Chat::Skills, DISARM_FAILED);
 		if (chance != 1000)
 			client->CheckIncreaseSkill(EQEmu::skills::SkillDisarm, nullptr, 2);
 		return;
 	}
-	client->Message_StringID(Chat::Skills, DISARM_FAILED);
+	client->MessageString(Chat::Skills, DISARM_FAILED);
 }
 
 void Mob::NPCSpecialAttacks(const char* parse, int permtag, bool reset, bool remove) {
@@ -2592,7 +2592,7 @@ void NPC::DoNPCEmote(uint8 event_, uint16 emoteid)
 		else if(nes->type == 2)
 			this->Shout("%s",nes->text);
 		else if(nes->type == 3)
-			entity_list.MessageClose_StringID(this, true, 200, 10, GENERIC_STRING, nes->text);
+			entity_list.MessageCloseString(this, true, 200, 10, GENERIC_STRING, nes->text);
 		else
 			this->Say("%s",nes->text);
 	}

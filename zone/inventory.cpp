@@ -853,7 +853,7 @@ void Client::SendCursorBuffer()
 	if (!lore_pass) {
 		Log(Logs::General, Logs::Inventory, "(%s) Duplicate lore items are not allowed - destroying item %s(id:%u) on cursor",
 			GetName(), test_item->Name, test_item->ID);
-		Message_StringID(Chat::Loot, 290);
+		MessageString(Chat::Loot, 290);
 		parse->EventItem(EVENT_DESTROY_ITEM, this, test_inst, nullptr, "", 0);
 		DeleteItemInInventory(EQEmu::invslot::slotCursor);
 		SendCursorBuffer();
@@ -1555,7 +1555,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			if (!lore_pass) {
 				Log(Logs::General, Logs::Inventory, "(%s) Duplicate lore items are not allowed - destroying item %s(id:%u) on cursor",
 					GetName(), test_item->Name, test_item->ID);
-				Message_StringID(Chat::Loot, 290);
+				MessageString(Chat::Loot, 290);
 				parse->EventItem(EVENT_DESTROY_ITEM, this, test_inst, nullptr, "", 0);
 				DeleteItemInInventory(EQEmu::invslot::slotCursor, 0, true);
 			}

@@ -333,18 +333,18 @@ void Client::CalculateLeadershipExp(uint32 &add_exp, uint8 conlevel)
 					uint32 mentor_exp = exp * (GetGroup()->GetMentorPercent() / 100.0f);
 					exp -= mentor_exp;
 					mentoree->AddLeadershipEXP(mentor_exp, 0); // ends up rounded down
-					mentoree->Message_StringID(Chat::LeaderShip, GAIN_GROUP_LEADERSHIP_EXP);
+					mentoree->MessageString(Chat::LeaderShip, GAIN_GROUP_LEADERSHIP_EXP);
 				}
 				if (exp > 0)
 				{
 					// possible if you mentor 100% to the other client
 					AddLeadershipEXP(exp, 0); // ends up rounded up if mentored, no idea how live actually does it
-					Message_StringID(Chat::LeaderShip, GAIN_GROUP_LEADERSHIP_EXP);
+					MessageString(Chat::LeaderShip, GAIN_GROUP_LEADERSHIP_EXP);
 				}
 			}
 			else
 			{
-				Message_StringID(Chat::LeaderShip, MAX_GROUP_LEADERSHIP_POINTS);
+				MessageString(Chat::LeaderShip, MAX_GROUP_LEADERSHIP_POINTS);
 			}
 		}
 		else
@@ -357,11 +357,11 @@ void Client::CalculateLeadershipExp(uint32 &add_exp, uint8 conlevel)
 					&& RuleI(Character, KillsPerRaidLeadershipAA) > 0)
 				{
 					AddLeadershipEXP(0, RAID_EXP_PER_POINT / RuleI(Character, KillsPerRaidLeadershipAA));
-					Message_StringID(Chat::LeaderShip, GAIN_RAID_LEADERSHIP_EXP);
+					MessageString(Chat::LeaderShip, GAIN_RAID_LEADERSHIP_EXP);
 				}
 				else
 				{
-					Message_StringID(Chat::LeaderShip, MAX_RAID_LEADERSHIP_POINTS);
+					MessageString(Chat::LeaderShip, MAX_RAID_LEADERSHIP_POINTS);
 				}
 			}
 			else
@@ -378,17 +378,17 @@ void Client::CalculateLeadershipExp(uint32 &add_exp, uint8 conlevel)
 						uint32 mentor_exp = exp * (raid->GetMentorPercent(group_id) / 100.0f);
 						exp -= mentor_exp;
 						mentoree->AddLeadershipEXP(mentor_exp, 0);
-						mentoree->Message_StringID(Chat::LeaderShip, GAIN_GROUP_LEADERSHIP_EXP);
+						mentoree->MessageString(Chat::LeaderShip, GAIN_GROUP_LEADERSHIP_EXP);
 					}
 					if (exp > 0)
 					{
 						AddLeadershipEXP(exp, 0);
-						Message_StringID(Chat::LeaderShip, GAIN_GROUP_LEADERSHIP_EXP);
+						MessageString(Chat::LeaderShip, GAIN_GROUP_LEADERSHIP_EXP);
 					}
 				}
 				else
 				{
-					Message_StringID(Chat::LeaderShip, MAX_GROUP_LEADERSHIP_POINTS);
+					MessageString(Chat::LeaderShip, MAX_GROUP_LEADERSHIP_POINTS);
 				}
 			}
 		}
@@ -565,22 +565,22 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 		if (isrezzexp) {
 			if (RuleI(Character, ShowExpValues) > 0) 
 				Message(Chat::Experience, "You regain %s experience from resurrection. %s", exp_amount_message.c_str(), exp_percent_message.c_str());
-			else Message_StringID(Chat::Experience, REZ_REGAIN);
+			else MessageString(Chat::Experience, REZ_REGAIN);
 		} else {
 			if (membercount > 1) {
 				if (RuleI(Character, ShowExpValues) > 0) 
 					Message(Chat::Experience, "You have gained %s party experience! %s", exp_amount_message.c_str(), exp_percent_message.c_str());
-				else Message_StringID(Chat::Experience, GAIN_GROUPXP);
+				else MessageString(Chat::Experience, GAIN_GROUPXP);
 			}
 			else if (IsRaidGrouped()) {
 				if (RuleI(Character, ShowExpValues) > 0) 
 					Message(Chat::Experience, "You have gained %s raid experience! %s", exp_amount_message.c_str(), exp_percent_message.c_str());
-				else Message_StringID(Chat::Experience, GAIN_RAIDEXP);
+				else MessageString(Chat::Experience, GAIN_RAIDEXP);
 			} 
 			else {
 				if (RuleI(Character, ShowExpValues) > 0) 
 					Message(Chat::Experience, "You have gained %s experience! %s", exp_amount_message.c_str(), exp_percent_message.c_str());
-				else Message_StringID(Chat::Experience, GAIN_XP);
+				else MessageString(Chat::Experience, GAIN_XP);
 			}
 		}
 	}
@@ -656,7 +656,7 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 
 		//Message(Chat::Yellow, "You have gained %d skill points!!", m_pp.aapoints - last_unspentAA);
 		char val1[20]={0};
-		Message_StringID(Chat::Experience, GAIN_ABILITY_POINT, ConvertArray(m_pp.aapoints, val1),m_pp.aapoints == 1 ? "" : "(s)");	//You have gained an ability point! You now have %1 ability point%2.
+		MessageString(Chat::Experience, GAIN_ABILITY_POINT, ConvertArray(m_pp.aapoints, val1),m_pp.aapoints == 1 ? "" : "(s)");	//You have gained an ability point! You now have %1 ability point%2.
 		
 		/* QS: PlayerLogAARate */
 		if (RuleB(QueryServ, PlayerLogAARate)){
@@ -699,18 +699,18 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 		if (level_increase)
 		{
 			if (level_count == 1)
-				Message_StringID(Chat::Experience, GAIN_LEVEL, ConvertArray(check_level, val1));
+				MessageString(Chat::Experience, GAIN_LEVEL, ConvertArray(check_level, val1));
 			else
 				Message(Chat::Yellow, "Welcome to level %i!", check_level);
 
 			if (check_level == RuleI(Character, DeathItemLossLevel))
-				Message_StringID(Chat::Yellow, CORPSE_ITEM_LOST);
+				MessageString(Chat::Yellow, CORPSE_ITEM_LOST);
 
 			if (check_level == RuleI(Character, DeathExpLossLevel))
-				Message_StringID(Chat::Yellow, CORPSE_EXP_LOST);
+				MessageString(Chat::Yellow, CORPSE_EXP_LOST);
 		}
 		else
-			Message_StringID(Chat::Experience, LOSE_LEVEL, ConvertArray(check_level, val1));
+			MessageString(Chat::Experience, LOSE_LEVEL, ConvertArray(check_level, val1));
 
 #ifdef BOTS
 		uint8 myoldlevel = GetLevel();
@@ -758,7 +758,7 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 		char val1[20]={0};
 		char val2[20]={0};
 		char val3[20]={0};
-		Message_StringID(Chat::Experience, GM_GAINXP, ConvertArray(set_aaxp,val1),ConvertArray(set_exp,val2),ConvertArray(GetEXPForLevel(GetLevel()+1),val3));	//[GM] You have gained %1 AXP and %2 EXP (%3).
+		MessageString(Chat::Experience, GM_GAINXP, ConvertArray(set_aaxp,val1),ConvertArray(set_exp,val2),ConvertArray(GetEXPForLevel(GetLevel()+1),val3));	//[GM] You have gained %1 AXP and %2 EXP (%3).
 	}
 }
 
@@ -1077,12 +1077,12 @@ void Client::SetLeadershipEXP(uint32 group_exp, uint32 raid_exp) {
 	while(group_exp >= GROUP_EXP_PER_POINT) {
 		group_exp -= GROUP_EXP_PER_POINT;
 		m_pp.group_leadership_points++;
-		Message_StringID(Chat::LeaderShip, GAIN_GROUP_LEADERSHIP_POINT);
+		MessageString(Chat::LeaderShip, GAIN_GROUP_LEADERSHIP_POINT);
 	}
 	while(raid_exp >= RAID_EXP_PER_POINT) {
 		raid_exp -= RAID_EXP_PER_POINT;
 		m_pp.raid_leadership_points++;
-		Message_StringID(Chat::LeaderShip, GAIN_RAID_LEADERSHIP_POINT);
+		MessageString(Chat::LeaderShip, GAIN_RAID_LEADERSHIP_POINT);
 	}
 
 	m_pp.group_leadership_exp = group_exp;

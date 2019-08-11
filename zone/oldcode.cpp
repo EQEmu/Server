@@ -1198,7 +1198,7 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 		char val1[20]={0};
 		char val2[20]={0};
 		uint32 remain = p_timers.GetRemainingTime(pTimerDisciplineReuse);
-		Message_StringID(Chat::WhiteSmoke,DISCIPLINE_CANUSEIN,ConvertArray((remain)/60,val1),ConvertArray(remain%60,val2));
+		MessageString(Chat::WhiteSmoke,DISCIPLINE_CANUSEIN,ConvertArray((remain)/60,val1),ConvertArray(remain%60,val2));
 		//Message(0,"You can use a new discipline in %i minutes %i seconds.", (disc_timer.GetRemainingTime()/1000)/60,	disc_timer.GetRemainingTime()/1000%60);
 		return;
 	}

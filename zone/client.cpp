@@ -914,7 +914,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 	{
 	case ChatChannel_Guild: { /* Guild Chat */
 		if (!IsInAGuild())
-			Message_StringID(Chat::DefaultText, GUILD_NOT_MEMBER2);	//You are not a member of any guild.
+			MessageString(Chat::DefaultText, GUILD_NOT_MEMBER2);	//You are not a member of any guild.
 		else if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_SPEAK))
 			Message(0, "Error: You dont have permission to speak to the guild.");
 		else if (!worldserver.SendChannelMessage(this, targetname, chan_num, GuildID(), language, lang_skill, message))
@@ -1509,7 +1509,7 @@ void Client::IncreaseLanguageSkill(int skill_id, int value) {
 	QueuePacket(outapp);
 	safe_delete(outapp);
 
-	Message_StringID( Chat::Skills, LANG_SKILL_IMPROVED ); //Notify client
+	MessageString( Chat::Skills, LANG_SKILL_IMPROVED ); //Notify client
 }
 
 void Client::AddSkill(EQEmu::skills::SkillType skillid, uint16 value) {
@@ -2578,7 +2578,7 @@ void Client::SetPVP(bool toggle, bool message) {
 
 	if (message) {
 		if(GetPVP())
-			this->Message_StringID(Chat::Shout,PVP_ON);
+			this->MessageString(Chat::Shout,PVP_ON);
 		else
 			Message(Chat::Red, "You no longer follow the ways of discord.");
 	}
@@ -2714,22 +2714,22 @@ void Client::Disarm(Client* disarmer, int chance) {
 					if (matslot != EQEmu::textures::materialInvalid)
 						SendWearChange(matslot);
 				}
-				Message_StringID(Chat::Skills, DISARMED);
+				MessageString(Chat::Skills, DISARMED);
 				if (disarmer != this)
-					disarmer->Message_StringID(Chat::Skills, DISARM_SUCCESS, this->GetCleanName());
+					disarmer->MessageString(Chat::Skills, DISARM_SUCCESS, this->GetCleanName());
 				if (chance != 1000)
 					disarmer->CheckIncreaseSkill(EQEmu::skills::SkillDisarm, nullptr, 4);
 				CalcBonuses();
 				// CalcEnduranceWeightFactor();
 				return;
 			}
-			disarmer->Message_StringID(Chat::Skills, DISARM_FAILED);
+			disarmer->MessageString(Chat::Skills, DISARM_FAILED);
 			if (chance != 1000)
 				disarmer->CheckIncreaseSkill(EQEmu::skills::SkillDisarm, nullptr, 2);
 			return;
 		}
 	}
-	disarmer->Message_StringID(Chat::Skills, DISARM_FAILED);
+	disarmer->MessageString(Chat::Skills, DISARM_FAILED);
 }
 
 bool Client::BindWound(Mob *bindmob, bool start, bool fail)
@@ -2771,7 +2771,7 @@ bool Client::BindWound(Mob *bindmob, bool start, bool fail)
 			} else {
 				// send bindmob "stand still"
 				if (!bindmob->IsAIControlled() && bindmob != this) {
-					bindmob->CastToClient()->Message_StringID(Chat::Yellow,
+					bindmob->CastToClient()->MessageString(Chat::Yellow,
 										  YOU_ARE_BEING_BANDAGED);
 				} else if (bindmob->IsAIControlled() && bindmob != this) {
 					; // Tell IPC to stand still?
@@ -3075,7 +3075,7 @@ void Client::ServerFilter(SetServerFilter_Struct* filter){
 }
 
 // this version is for messages with no parameters
-void Client::Message_StringID(uint32 type, uint32 string_id, uint32 distance)
+void Client::MessageString(uint32 type, uint32 string_id, uint32 distance)
 {
 	if (GetFilter(FilterSpellDamage) == FilterHide && type == Chat::NonMelee)
 		return;
@@ -3103,7 +3103,7 @@ void Client::Message_StringID(uint32 type, uint32 string_id, uint32 distance)
 // to load the eqstr file and count them in the string.
 // This hack sucks but it's gonna work for now.
 //
-void Client::Message_StringID(uint32 type, uint32 string_id, const char* message1,
+void Client::MessageString(uint32 type, uint32 string_id, const char* message1,
 	const char* message2,const char* message3,const char* message4,
 	const char* message5,const char* message6,const char* message7,
 	const char* message8,const char* message9, uint32 distance)
@@ -3126,7 +3126,7 @@ void Client::Message_StringID(uint32 type, uint32 string_id, const char* message
 
 	if(!message1)
 	{
-		Message_StringID(type, string_id);	// use the simple message instead
+		MessageString(type, string_id);	// use the simple message instead
 		return;
 	}
 
@@ -3205,7 +3205,7 @@ bool Client::FilteredMessageCheck(Mob *sender, eqFilterType filter)
 	return true;
 }
 
-void Client::FilteredMessage_StringID(Mob *sender, uint32 type,
+void Client::FilteredMessageString(Mob *sender, uint32 type,
 		eqFilterType filter, uint32 string_id)
 {
 	if (!FilteredMessageCheck(sender, filter))
@@ -3224,7 +3224,7 @@ void Client::FilteredMessage_StringID(Mob *sender, uint32 type,
 	return;
 }
 
-void Client::FilteredMessage_StringID(Mob *sender, uint32 type, eqFilterType filter, uint32 string_id,
+void Client::FilteredMessageString(Mob *sender, uint32 type, eqFilterType filter, uint32 string_id,
 		const char *message1, const char *message2, const char *message3,
 		const char *message4, const char *message5, const char *message6,
 		const char *message7, const char *message8, const char *message9)
@@ -3240,7 +3240,7 @@ void Client::FilteredMessage_StringID(Mob *sender, uint32 type, eqFilterType fil
 		type = 4;
 
 	if (!message1) {
-		FilteredMessage_StringID(sender, type, filter, string_id);	// use the simple message instead
+		FilteredMessageString(sender, type, filter, string_id);	// use the simple message instead
 		return;
 	}
 
@@ -3281,7 +3281,7 @@ void Client::Tell_StringID(uint32 string_id, const char *who, const char *messag
 	char string_id_str[10];
 	snprintf(string_id_str, 10, "%d", string_id);
 
-	Message_StringID(Chat::EchoTell, TELL_QUEUED_MESSAGE, who, string_id_str, message);
+	MessageString(Chat::EchoTell, TELL_QUEUED_MESSAGE, who, string_id_str, message);
 }
 
 void Client::SetTint(int16 in_slot, uint32 color) {
@@ -3344,7 +3344,7 @@ void Client::SetLanguageSkill(int langid, int value)
 	QueuePacket(outapp);
 	safe_delete(outapp);
 
-	Message_StringID( Chat::Skills, LANG_SKILL_IMPROVED ); //Notify the client
+	MessageString( Chat::Skills, LANG_SKILL_IMPROVED ); //Notify the client
 }
 
 void Client::LinkDead()
@@ -3432,7 +3432,7 @@ void Client::Escape()
 	entity_list.RemoveFromTargets(this, true);
 	SetInvisible(1);
 
-	Message_StringID(Chat::Skills, ESCAPE);
+	MessageString(Chat::Skills, ESCAPE);
 }
 
 float Client::CalcPriceMod(Mob* other, bool reverse)
@@ -3872,13 +3872,13 @@ void Client::SacrificeConfirm(Client *caster)
 	}
 
 	if (GetLevel() < RuleI(Spells, SacrificeMinLevel)) {
-		caster->Message_StringID(Chat::Red, SAC_TOO_LOW); // This being is not a worthy sacrifice.
+		caster->MessageString(Chat::Red, SAC_TOO_LOW); // This being is not a worthy sacrifice.
 		safe_delete(outapp);
 		return;
 	}
 
 	if (GetLevel() > RuleI(Spells, SacrificeMaxLevel)) {
-		caster->Message_StringID(Chat::Red, SAC_TOO_HIGH);
+		caster->MessageString(Chat::Red, SAC_TOO_HIGH);
 		safe_delete(outapp);
 		return;
 	}
@@ -3947,7 +3947,7 @@ void Client::Sacrifice(Client *caster)
 				caster->SummonItem(RuleI(Spells, SacrificeItemID));
 		}
 	} else {
-		caster->Message_StringID(Chat::Red, SAC_TOO_LOW); // This being is not a worthy sacrifice.
+		caster->MessageString(Chat::Red, SAC_TOO_LOW); // This being is not a worthy sacrifice.
 	}
 }
 
@@ -4932,7 +4932,7 @@ void Client::HandleLDoNOpen(NPC *target)
 		{
 			if(target->GetLDoNTrapSpellID() != 0)
 			{
-				Message_StringID(Chat::Red, LDON_ACCIDENT_SETOFF2);
+				MessageString(Chat::Red, LDON_ACCIDENT_SETOFF2);
 				target->SpellFinished(target->GetLDoNTrapSpellID(), this, EQEmu::spells::CastingSlot::Item, 0, -1, spells[target->GetLDoNTrapSpellID()].ResistDiff);
 				target->SetLDoNTrapSpellID(0);
 				target->SetLDoNTrapped(false);
@@ -4948,7 +4948,7 @@ void Client::HandleLDoNOpen(NPC *target)
 
 		if(target->IsLDoNLocked())
 		{
-			Message_StringID(Chat::Skills, LDON_STILL_LOCKED, target->GetCleanName());
+			MessageString(Chat::Skills, LDON_STILL_LOCKED, target->GetCleanName());
 			return;
 		}
 		else
@@ -4982,13 +4982,13 @@ void Client::HandleLDoNSenseTraps(NPC *target, uint16 skill, uint8 type)
 		{
 			if((target->GetLDoNTrapType() == LDoNTypeCursed || target->GetLDoNTrapType() == LDoNTypeMagical) && type != target->GetLDoNTrapType())
 			{
-				Message_StringID(Chat::Skills, LDON_CANT_DETERMINE_TRAP, target->GetCleanName());
+				MessageString(Chat::Skills, LDON_CANT_DETERMINE_TRAP, target->GetCleanName());
 				return;
 			}
 
 			if(target->IsLDoNTrapDetected())
 			{
-				Message_StringID(Chat::Skills, LDON_CERTAIN_TRAP, target->GetCleanName());
+				MessageString(Chat::Skills, LDON_CERTAIN_TRAP, target->GetCleanName());
 			}
 			else
 			{
@@ -4997,10 +4997,10 @@ void Client::HandleLDoNSenseTraps(NPC *target, uint16 skill, uint8 type)
 				{
 				case -1:
 				case 0:
-					Message_StringID(Chat::Skills, LDON_DONT_KNOW_TRAPPED, target->GetCleanName());
+					MessageString(Chat::Skills, LDON_DONT_KNOW_TRAPPED, target->GetCleanName());
 					break;
 				case 1:
-					Message_StringID(Chat::Skills, LDON_CERTAIN_TRAP, target->GetCleanName());
+					MessageString(Chat::Skills, LDON_CERTAIN_TRAP, target->GetCleanName());
 					target->SetLDoNTrapDetected(true);
 					break;
 				default:
@@ -5010,7 +5010,7 @@ void Client::HandleLDoNSenseTraps(NPC *target, uint16 skill, uint8 type)
 		}
 		else
 		{
-			Message_StringID(Chat::Skills, LDON_CERTAIN_NOT_TRAP, target->GetCleanName());
+			MessageString(Chat::Skills, LDON_CERTAIN_NOT_TRAP, target->GetCleanName());
 		}
 	}
 }
@@ -5023,13 +5023,13 @@ void Client::HandleLDoNDisarm(NPC *target, uint16 skill, uint8 type)
 		{
 			if(!target->IsLDoNTrapped())
 			{
-				Message_StringID(Chat::Skills, LDON_WAS_NOT_TRAPPED, target->GetCleanName());
+				MessageString(Chat::Skills, LDON_WAS_NOT_TRAPPED, target->GetCleanName());
 				return;
 			}
 
 			if((target->GetLDoNTrapType() == LDoNTypeCursed || target->GetLDoNTrapType() == LDoNTypeMagical) && type != target->GetLDoNTrapType())
 			{
-				Message_StringID(Chat::Skills, LDON_HAVE_NOT_DISARMED, target->GetCleanName());
+				MessageString(Chat::Skills, LDON_HAVE_NOT_DISARMED, target->GetCleanName());
 				return;
 			}
 
@@ -5048,13 +5048,13 @@ void Client::HandleLDoNDisarm(NPC *target, uint16 skill, uint8 type)
 				target->SetLDoNTrapDetected(false);
 				target->SetLDoNTrapped(false);
 				target->SetLDoNTrapSpellID(0);
-				Message_StringID(Chat::Skills, LDON_HAVE_DISARMED, target->GetCleanName());
+				MessageString(Chat::Skills, LDON_HAVE_DISARMED, target->GetCleanName());
 				break;
 			case 0:
-				Message_StringID(Chat::Skills, LDON_HAVE_NOT_DISARMED, target->GetCleanName());
+				MessageString(Chat::Skills, LDON_HAVE_NOT_DISARMED, target->GetCleanName());
 				break;
 			case -1:
-				Message_StringID(Chat::Red, LDON_ACCIDENT_SETOFF2);
+				MessageString(Chat::Red, LDON_ACCIDENT_SETOFF2);
 				target->SpellFinished(target->GetLDoNTrapSpellID(), this, EQEmu::spells::CastingSlot::Item, 0, -1, spells[target->GetLDoNTrapSpellID()].ResistDiff);
 				target->SetLDoNTrapSpellID(0);
 				target->SetLDoNTrapped(false);
@@ -5073,7 +5073,7 @@ void Client::HandleLDoNPickLock(NPC *target, uint16 skill, uint8 type)
 		{
 			if(target->IsLDoNTrapped())
 			{
-				Message_StringID(Chat::Red, LDON_ACCIDENT_SETOFF2);
+				MessageString(Chat::Red, LDON_ACCIDENT_SETOFF2);
 				target->SpellFinished(target->GetLDoNTrapSpellID(), this, EQEmu::spells::CastingSlot::Item, 0, -1, spells[target->GetLDoNTrapSpellID()].ResistDiff);
 				target->SetLDoNTrapSpellID(0);
 				target->SetLDoNTrapped(false);
@@ -5082,7 +5082,7 @@ void Client::HandleLDoNPickLock(NPC *target, uint16 skill, uint8 type)
 
 			if(!target->IsLDoNLocked())
 			{
-				Message_StringID(Chat::Skills, LDON_WAS_NOT_LOCKED, target->GetCleanName());
+				MessageString(Chat::Skills, LDON_WAS_NOT_LOCKED, target->GetCleanName());
 				return;
 			}
 
@@ -5098,11 +5098,11 @@ void Client::HandleLDoNPickLock(NPC *target, uint16 skill, uint8 type)
 			{
 			case 0:
 			case -1:
-				Message_StringID(Chat::Skills, LDON_PICKLOCK_FAILURE, target->GetCleanName());
+				MessageString(Chat::Skills, LDON_PICKLOCK_FAILURE, target->GetCleanName());
 				break;
 			case 1:
 				target->SetLDoNLocked(false);
-				Message_StringID(Chat::Skills, LDON_PICKLOCK_SUCCESS, target->GetCleanName());
+				MessageString(Chat::Skills, LDON_PICKLOCK_SUCCESS, target->GetCleanName());
 				break;
 			}
 		}
@@ -5607,7 +5607,7 @@ void Client::SuspendMinion()
 
 			CurrentPet->SetMana(m_suspendedminion.Mana);
 
-			Message_StringID(Chat::Magenta, SUSPEND_MINION_UNSUSPEND, CurrentPet->GetCleanName());
+			MessageString(Chat::Magenta, SUSPEND_MINION_UNSUSPEND, CurrentPet->GetCleanName());
 
 			memset(&m_suspendedminion, 0, sizeof(struct PetInfo));
 			// TODO: These pet command states need to be synced ...
@@ -5637,19 +5637,19 @@ void Client::SuspendMinion()
 		{
 			if(m_suspendedminion.SpellID > 0)
 			{
-				Message_StringID(Chat::Red,ONLY_ONE_PET);
+				MessageString(Chat::Red,ONLY_ONE_PET);
 
 				return;
 			}
 			else if(CurrentPet->IsEngaged())
 			{
-				Message_StringID(Chat::Red,SUSPEND_MINION_FIGHTING);
+				MessageString(Chat::Red,SUSPEND_MINION_FIGHTING);
 
 				return;
 			}
 			else if(entity_list.Fighting(CurrentPet))
 			{
-				Message_StringID(Chat::Blue,SUSPEND_MINION_HAS_AGGRO);
+				MessageString(Chat::Blue,SUSPEND_MINION_HAS_AGGRO);
 			}
 			else
 			{
@@ -5666,7 +5666,7 @@ void Client::SuspendMinion()
 				else
 					strn0cpy(m_suspendedminion.Name, CurrentPet->GetName(), 64); // Name stays even at rank 1
 
-				Message_StringID(Chat::Magenta, SUSPEND_MINION_SUSPEND, CurrentPet->GetCleanName());
+				MessageString(Chat::Magenta, SUSPEND_MINION_SUSPEND, CurrentPet->GetCleanName());
 
 				CurrentPet->Depop(false);
 
@@ -5675,7 +5675,7 @@ void Client::SuspendMinion()
 		}
 		else
 		{
-			Message_StringID(Chat::Red, ONLY_SUMMONED_PETS);
+			MessageString(Chat::Red, ONLY_SUMMONED_PETS);
 
 			return;
 		}
@@ -6149,16 +6149,16 @@ void Client::LocateCorpse()
 
 	if(ClosestCorpse)
 	{
-		Message_StringID(Chat::Spells, SENSE_CORPSE_DIRECTION);
+		MessageString(Chat::Spells, SENSE_CORPSE_DIRECTION);
 		SetHeading(CalculateHeadingToTarget(ClosestCorpse->GetX(), ClosestCorpse->GetY()));
 		SetTarget(ClosestCorpse);
 		SendTargetCommand(ClosestCorpse->GetID());
 		SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0, true);
 	}
 	else if(!GetTarget())
-		Message_StringID(Chat::Red, SENSE_CORPSE_NONE);
+		MessageString(Chat::Red, SENSE_CORPSE_NONE);
 	else
-		Message_StringID(Chat::Red, SENSE_CORPSE_NOT_NAME);
+		MessageString(Chat::Red, SENSE_CORPSE_NOT_NAME);
 }
 
 void Client::NPCSpawn(NPC *target_npc, const char *identifier, uint32 extra)
@@ -6218,7 +6218,7 @@ void Client::DragCorpses()
 		if (!corpse || !corpse->IsPlayerCorpse() ||
 				corpse->CastToCorpse()->IsBeingLooted() ||
 				!corpse->CastToCorpse()->Summon(this, false, false)) {
-			Message_StringID(Chat::DefaultText, CORPSEDRAG_STOP);
+			MessageString(Chat::DefaultText, CORPSEDRAG_STOP);
 			It = DraggedCorpses.erase(It);
 			if (It == DraggedCorpses.end())
 				break;
@@ -7623,7 +7623,7 @@ void Client::DuplicateLoreMessage(uint32 ItemID)
 {
 	if (!(m_ClientVersionBit & EQEmu::versions::maskRoFAndLater))
 	{
-		Message_StringID(Chat::White, PICK_LORE);
+		MessageString(Chat::White, PICK_LORE);
 		return;
 	}
 
@@ -7632,7 +7632,7 @@ void Client::DuplicateLoreMessage(uint32 ItemID)
 	if(!item)
 		return;
 
-	Message_StringID(Chat::White, PICK_LORE, item->Name);
+	MessageString(Chat::White, PICK_LORE, item->Name);
 }
 
 void Client::GarbleMessage(char *message, uint8 variance)
@@ -8031,13 +8031,13 @@ void Client::SendFactionMessage(int32 tmpvalue, int32 faction_id, int32 faction_
 	if (tmpvalue == 0 || temp == 1 || temp == 2)
 		return;
 	else if (faction_value >= this_faction_max)
-		Message_StringID(Chat::Yellow, FACTION_BEST, name);
+		MessageString(Chat::Yellow, FACTION_BEST, name);
 	else if (faction_value <= this_faction_min)
-		Message_StringID(Chat::Yellow, FACTION_WORST, name);
+		MessageString(Chat::Yellow, FACTION_WORST, name);
 	else if (tmpvalue > 0 && faction_value < this_faction_max && !RuleB(Client, UseLiveFactionMessage))
-		Message_StringID(Chat::Yellow, FACTION_BETTER, name);
+		MessageString(Chat::Yellow, FACTION_BETTER, name);
 	else if (tmpvalue < 0 && faction_value > this_faction_min && !RuleB(Client, UseLiveFactionMessage))
-		Message_StringID(Chat::Yellow, FACTION_WORSE, name);
+		MessageString(Chat::Yellow, FACTION_WORSE, name);
 	else if (RuleB(Client, UseLiveFactionMessage))
 		Message(Chat::Yellow, "Your faction standing with %s has been adjusted by %i.", name, tmpvalue); //New Live faction message (14261)
 
@@ -8365,7 +8365,7 @@ void Client::Consume(const EQEmu::ItemData *item, uint8 type, int16 slot, bool a
 		DeleteItemInInventory(slot, 1, false);
 
 		if (!auto_consume) // no message if the client consumed for us
-			entity_list.MessageClose_StringID(this, true, 50, 0, EATING_MESSAGE, GetName(), item->Name);
+			entity_list.MessageCloseString(this, true, 50, 0, EATING_MESSAGE, GetName(), item->Name);
 
 		Log(Logs::General, Logs::Food, "Eating from slot: %i", (int)slot);
 
@@ -8383,7 +8383,7 @@ void Client::Consume(const EQEmu::ItemData *item, uint8 type, int16 slot, bool a
 		    increase, m_pp.thirst_level);
 
 		if (!auto_consume) // no message if the client consumed for us
-			entity_list.MessageClose_StringID(this, true, 50, 0, DRINKING_MESSAGE, GetName(), item->Name);
+			entity_list.MessageCloseString(this, true, 50, 0, DRINKING_MESSAGE, GetName(), item->Name);
 
 		Log(Logs::General, Logs::Food, "Drinking from slot: %i", (int)slot);
 	}

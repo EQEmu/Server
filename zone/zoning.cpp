@@ -723,7 +723,7 @@ void Client::Gate(uint8 bindnum) {
 }
 
 void NPC::Gate(uint8 bindnum) {
-	entity_list.MessageClose_StringID(this, true, RuleI(Range, SpellMessages), Chat::Spells, GATES, GetCleanName());
+	entity_list.MessageCloseString(this, true, RuleI(Range, SpellMessages), Chat::Spells, GATES, GetCleanName());
 
 	Mob::Gate(bindnum);
 }

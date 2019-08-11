@@ -211,7 +211,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					else if (scm->queued == 2) // tell queue was full
 						client->Tell_StringID(QUEUE_TELL_FULL, scm->to, scm->message);
 					else if (scm->queued == 3) // person was offline
-						client->Message_StringID(Chat::EchoTell, TOLD_NOT_ONLINE, scm->to);
+						client->MessageString(Chat::EchoTell, TOLD_NOT_ONLINE, scm->to);
 					else // normal tell echo "You told Soanso, 'something'"
 							// tell echo doesn't use language, so it looks normal to you even if nobody can understand your tells
 						client->ChannelMessageSend(scm->from, scm->to, scm->chan_num, 0, 100, scm->message);
@@ -414,7 +414,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			Client* client = entity_list.GetClientByID(wars->id);
 			if (client) {
 				if (pack->size == 64)//no results
-					client->Message_StringID(Chat::White, WHOALL_NO_RESULTS);
+					client->MessageString(Chat::White, WHOALL_NO_RESULTS);
 				else {
 					auto outapp = new EQApplicationPacket(OP_WhoAllResponse, pack->size);
 					memcpy(outapp->pBuffer, pack->pBuffer, pack->size);
@@ -783,7 +783,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		Client* c = entity_list.GetClientByName(Rezzer);
 
 		if (c)
-			c->Message_StringID(Chat::SpellWornOff, REZZ_ALREADY_PENDING);
+			c->MessageString(Chat::SpellWornOff, REZZ_ALREADY_PENDING);
 
 		break;
 	}
@@ -1485,7 +1485,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		ServerOP_Consent_Struct* s = (ServerOP_Consent_Struct*)pack->pBuffer;
 		Client* client = entity_list.GetClientByName(s->ownername);
 		if (client) {
-			client->Message_StringID(Chat::White, s->message_string_id);
+			client->MessageString(Chat::White, s->message_string_id);
 		}
 		break;
 	}
@@ -1729,7 +1729,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		if (c)
 		{
 			c->ClearPendingAdventureDoorClick();
-			c->Message_StringID(Chat::Red, 5141);
+			c->MessageString(Chat::Red, 5141);
 		}
 		break;
 	}

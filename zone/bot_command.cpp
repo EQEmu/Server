@@ -7284,7 +7284,7 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 	int ab_mask = (ActionableBots::ABM_Target | ActionableBots::ABM_ByName);
 
 	if (c->GetTradeskillObject() || (c->trade->state == Trading)) {
-		c->Message_StringID(Chat::Tell, MERCHANT_BUSY);
+		c->MessageString(Chat::Tell, MERCHANT_BUSY);
 		return;
 	}
 
@@ -7310,7 +7310,7 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 		itm = itminst->GetItem();
 
 	if (itminst && itm && c->CheckLoreConflict(itm)) {
-		c->Message_StringID(Chat::WhiteSmoke, PICK_LORE);
+		c->MessageString(Chat::WhiteSmoke, PICK_LORE);
 		return;
 	}
 
@@ -7324,7 +7324,7 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 		if (!c->CheckLoreConflict(itma->GetItem()))
 			continue;
 
-		c->Message_StringID(Chat::WhiteSmoke, PICK_LORE);
+		c->MessageString(Chat::WhiteSmoke, PICK_LORE);
 		return;
 	}
 	
