@@ -167,6 +167,10 @@ void QuestManager::say(const char *str, Journal::Options &opts) {
 			opts.target_spawn_id = initiator->GetID();
 			owner->QuestJournalledSay(initiator, str, opts);
 		}
+		else {
+			// Non initiated Say() like from a quest waypoint.
+			owner->Say(str);
+		}
 	}
 }
 
