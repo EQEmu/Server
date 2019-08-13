@@ -3923,8 +3923,8 @@ bool Entity::CheckCoordLosNoZLeaps(float cur_x, float cur_y, float cur_z,
 	return false;
 }
 
-void EntityList::QuestJournalledSayClose(Mob *sender, Client *QuestInitiator,
-		float dist, const char* mobname, const char* message, Journal::Options &opts)
+void EntityList::QuestJournalledSayClose(Mob *sender, float dist, const char *mobname, const char *message,
+					 Journal::Options &opts)
 {
 	SerializeBuffer buf(sizeof(SpecialMesgHeader_Struct) + 12 + 64 + 64);
 

@@ -2924,7 +2924,7 @@ void Mob::QuestJournalledSay(Client *QuestInitiator, const char *str, Journal::O
 	if (opts.target_spawn_id == 0 && QuestInitiator)
 		opts.target_spawn_id = QuestInitiator->GetID();
 
-	entity_list.QuestJournalledSayClose(this, QuestInitiator, 200, GetCleanName(), str, opts);
+	entity_list.QuestJournalledSayClose(this, 200, GetCleanName(), str, opts);
 }
 
 const char *Mob::GetCleanName()
