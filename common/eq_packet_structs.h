@@ -5422,7 +5422,7 @@ struct UpdateMovementEntry {
 	/* 00 */	float Y;
 	/* 04 */	float X;
 	/* 08 */	float Z;
-	/* 12 */	byte type;
+	/* 12 */	uint8 type;
 	/* 13 */	unsigned int timestamp;
 	/* 17 */
 };

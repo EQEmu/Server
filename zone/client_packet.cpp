@@ -5869,7 +5869,7 @@ void Client::Handle_OP_FloatListThing(const EQApplicationPacket *app) {
 	auto m_MovementHistory = (UpdateMovementEntry*)app->pBuffer;
 	for (int index = 0; index < (app->size) / sizeof(UpdateMovementEntry); index++) {
 		switch (m_MovementHistory[index].type) {
-		case EQEmu::UpdateMovement::TeleportA:
+		case EQEmu::UpdateMovementType::TeleportA:
 			if (!warp_grace_period_timer.Enabled() && RuleB(Zone, EnableMQWarpDetector) && (this->Admin() < RuleI(Zone, MQWarpExemptStatus) || (RuleI(Zone, MQWarpExemptStatus)) == -1)) {
 					Message(Chat::Red, "Warp detected.");
 					char hString[250];
@@ -5880,7 +5880,7 @@ void Client::Handle_OP_FloatListThing(const EQApplicationPacket *app) {
 				warp_grace_period_timer.Disable();
 			}
 			break;
-		case EQEmu::UpdateMovement::ZoneLine:
+		case EQEmu::UpdateMovementType::ZoneLine:
 			warp_grace_period_timer.Start(EQEmu::Warp::GracePeriod, false);
 			break;
 		}
