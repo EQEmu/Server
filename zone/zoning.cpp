@@ -477,6 +477,7 @@ void Client::ProcessMovePC(uint32 zoneID, uint32 instance_id, float x, float y, 
 }
 
 void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z, float heading, uint8 ignorerestrictions, ZoneMode zm) {
+	warp_grace_period_timer.Start(EQEmu::Warp::GracePeriod, false);
 	bool ReadyToZone = true;
 	int iZoneNameLength = 0;
 	const char*	pShortZoneName = nullptr;

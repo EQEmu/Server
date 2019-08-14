@@ -197,7 +197,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_FeignDeath] = &Client::Handle_OP_FeignDeath;
 	ConnectedOpcodes[OP_FindPersonRequest] = &Client::Handle_OP_FindPersonRequest;
 	ConnectedOpcodes[OP_Fishing] = &Client::Handle_OP_Fishing;
-	ConnectedOpcodes[OP_FloatListThing] = &Client::Handle_OP_Ignore;
+	ConnectedOpcodes[OP_FloatListThing] = &Client::Handle_OP_FloatListThing;
 	ConnectedOpcodes[OP_Forage] = &Client::Handle_OP_Forage;
 	ConnectedOpcodes[OP_FriendsWho] = &Client::Handle_OP_FriendsWho;
 	ConnectedOpcodes[OP_GetGuildMOTD] = &Client::Handle_OP_GetGuildMOTD;
@@ -5863,6 +5863,30 @@ void Client::Handle_OP_Fishing(const EQApplicationPacket *app)
 	return;
 	// Changes made based on Bobs work on foraging. Now can set items in the forage database table to
 	// forage for.
+}
+
+void Client::Handle_OP_FloatListThing(const EQApplicationPacket *app) {
+	UpdateMovementEntry* m_MovementHistory = new UpdateMovementEntry[(app->size) / sizeof(UpdateMovementEntry)];
+	m_MovementHistory = (UpdateMovementEntry*)app->pBuffer;
+	for (int index = 0; index < (app->size) / sizeof(UpdateMovementEntry); index++) {
+		switch (m_MovementHistory[index].type) {
+		case 3:
+			if (!warp_grace_period_timer.Enabled() && RuleB(Zone, EnableMQWarpDetector) && (this->Admin() < RuleI(Zone, MQWarpExemptStatus) || (RuleI(Zone, MQWarpExemptStatus)) == -1)) {
+					Message(Chat::Red, "Warp detected.");
+					char hString[250];
+					sprintf(hString, "/MQWarp with location %.2f, %.2f, %.2f", GetX(), GetY(), GetZ());
+					database.SetMQDetectionFlag(this->account_name, this->name, hString, zone->GetShortName());
+					worldserver.SendEmoteMessage(0, 0, 50, Chat::Yellow, "%s used MQWarp with location %.2f, %.2f, %.2f", this->name, this->GetX(), this->GetY(), this->GetZ());
+			}
+			else {
+				warp_grace_period_timer.Disable();
+			}
+			break;
+		case 4:
+			warp_grace_period_timer.Start(EQEmu::Warp::GracePeriod, false);
+			break;
+		}
+	}
 }
 
 void Client::Handle_OP_Forage(const EQApplicationPacket *app)

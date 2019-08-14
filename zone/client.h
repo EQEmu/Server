@@ -228,6 +228,7 @@ public:
 
 	std::unordered_map<Mob *, float> close_mobs;
 	bool is_client_moving;
+	Timer warp_grace_period_timer;
 
 	void SetDisplayMobInfoWindow(bool display_mob_info_window);
 	bool GetDisplayMobInfoWindow() const;

@@ -317,6 +317,10 @@ namespace EQEmu
 		QuestControlGrid = -1
 	};
 
+	enum Warp : int {
+		GracePeriod = 1000
+	};
+
 } /*EQEmu*/
 
 #endif /*COMMON_EMU_CONSTANTS_H*/
