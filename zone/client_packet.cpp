@@ -5866,23 +5866,21 @@ void Client::Handle_OP_Fishing(const EQApplicationPacket *app)
 }
 
 void Client::Handle_OP_FloatListThing(const EQApplicationPacket *app) {
-	UpdateMovementEntry* m_MovementHistory = new UpdateMovementEntry[(app->size) / sizeof(UpdateMovementEntry)];
-	m_MovementHistory = (UpdateMovementEntry*)app->pBuffer;
+	auto m_MovementHistory = (UpdateMovementEntry*)app->pBuffer;
 	for (int index = 0; index < (app->size) / sizeof(UpdateMovementEntry); index++) {
 		switch (m_MovementHistory[index].type) {
-		case 3:
+		case EQEmu::UpdateMovement::TeleportA:
 			if (!warp_grace_period_timer.Enabled() && RuleB(Zone, EnableMQWarpDetector) && (this->Admin() < RuleI(Zone, MQWarpExemptStatus) || (RuleI(Zone, MQWarpExemptStatus)) == -1)) {
 					Message(Chat::Red, "Warp detected.");
 					char hString[250];
 					sprintf(hString, "/MQWarp with location %.2f, %.2f, %.2f", GetX(), GetY(), GetZ());
 					database.SetMQDetectionFlag(this->account_name, this->name, hString, zone->GetShortName());
-					worldserver.SendEmoteMessage(0, 0, 50, Chat::Yellow, "%s used MQWarp with location %.2f, %.2f, %.2f", this->name, this->GetX(), this->GetY(), this->GetZ());
 			}
 			else {
 				warp_grace_period_timer.Disable();
 			}
 			break;
-		case 4:
+		case EQEmu::UpdateMovement::ZoneLine:
 			warp_grace_period_timer.Start(EQEmu::Warp::GracePeriod, false);
 			break;
 		}
