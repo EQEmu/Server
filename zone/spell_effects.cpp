@@ -2116,7 +2116,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 							       caster->GetY(), caster->GetZ(), caster->GetHeading(), 2,
 							       SummonPC);
 					Message(Chat::Yellow, "You have been summoned!");
-					entity_list.ClearAggro(this);
+					// only for beneficial spells like Call of the Hero
+					// This clear probably isn't actually needed, but need to investigate more
+					if (IsBeneficialSpell(spell_id))
+						entity_list.ClearAggro(this);
 				} else
 					caster->Message(Chat::Red, "This spell can only be cast on players.");
 
