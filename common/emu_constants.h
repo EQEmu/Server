@@ -329,8 +329,8 @@ namespace EQEmu
 		Unknown0x5,
 		Unknown0x6,
 		SpellA, // Titanium - UF
-		Unknown0x8
-		SpellB, // Used in RoF+
+		Unknown0x8,
+		SpellB // Used in RoF+
 	};
 
 } /*EQEmu*/
