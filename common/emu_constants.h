@@ -321,13 +321,16 @@ namespace EQEmu
 		GracePeriod = 1000
 	};
 
-	enum UpdateMovementType : byte {
+	enum UpdateMovementType : uint8 {
 		Collision = 1,
-		TeleportB = 2,
-		TeleportA = 3,
-		ZoneLine = 4,
-		SpellA = 7, // Titanium - UF
-		SpellB = 9, // Used in RoF+
+		TeleportB,
+		TeleportA,
+		ZoneLine,
+		Unknown0x5,
+		Unknown0x6,
+		SpellA, // Titanium - UF
+		Unknown0x8
+		SpellB, // Used in RoF+
 	};
 
 } /*EQEmu*/
