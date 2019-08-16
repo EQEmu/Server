@@ -383,6 +383,7 @@ int command_init(void)
 		command_add("shutdown", "- Shut this zone process down", 150, command_shutdown) ||
 		command_add("size", "[size] - Change size of you or your target", 50, command_size) ||
 		command_add("spawn", "[name] [race] [level] [material] [hp] [gender] [class] [priweapon] [secweapon] [merchantid] - Spawn an NPC", 10, command_spawn) ||
+		command_add("spawneditmass", "Mass editing spawn command", 150, command_spawneditmass) ||
 		command_add("spawnfix", "- Find targeted NPC in database based on its X/Y/heading and update the database to make it spawn at your current location/heading.", 170, command_spawnfix) ||
 		command_add("spawnstatus", "- Show respawn timer status", 100, command_spawnstatus) ||
 		command_add("spellinfo", "[spellid] - Get detailed info about a spell", 10, command_spellinfo) ||
@@ -2826,6 +2827,136 @@ void command_level(Client *c, const Seperator *sep)
 #endif
 			}
 		}
+	}
+}
+
+void command_spawneditmass(Client *c, const Seperator *sep)
+{
+	std::string query = fmt::format(
+		SQL(
+			SELECT
+			npc_types.id,
+			npc_types.name,
+			spawn2.respawntime,
+			spawn2.id
+				FROM
+					npc_types
+				JOIN spawnentry ON spawnentry.npcID = npc_types.id
+				JOIN spawn2 ON spawn2.spawngroupID = spawnentry.spawngroupID
+				WHERE
+				spawn2.zone = '{0}' and spawn2.version = {1}
+				GROUP BY npc_types.id
+		),
+		zone->GetShortName(),
+		zone->GetInstanceVersion()
+	);
+
+	std::string status = "(Searching)";
+
+	if (strcasecmp(sep->arg[4], "apply") == 0) {
+		status = "(Applying)";
+	}
+
+	std::string search_value;
+	std::string edit_option;
+	std::string edit_value;
+	std::string apply_set;
+
+	if (sep->arg[1]) {
+		search_value = sep->arg[1];
+	}
+
+	if (sep->arg[2]) {
+		edit_option = sep->arg[2];
+	}
+
+	if (sep->arg[3]) {
+		edit_value = sep->arg[3];
+	}
+
+	if (sep->arg[4]) {
+		apply_set = sep->arg[4];
+	}
+
+	if (!edit_option.empty() && edit_value.empty()) {
+		c->Message(Chat::Yellow, "Please specify an edit option value | #npceditmass <search> <option> <value>");
+		return;
+	}
+
+	std::vector<std::string> npc_ids;
+	std::vector<std::string> spawn2_ids;
+
+	int  found_count = 0;
+	auto results     = database.QueryDatabase(query);
+
+	for (auto row = results.begin(); row != results.end(); ++row) {
+
+		std::string npc_id       = row[0];
+		std::string npc_name     = row[1];
+		std::string respawn_time = row[2];
+		std::string spawn2_id    = row[3];
+
+		if (npc_name.find(search_value) == std::string::npos) {
+			continue;
+		}
+
+		c->Message(
+			Chat::Yellow,
+			fmt::format(
+				"NPC ({0}) [{1}] respawn_time [{2}] {3}",
+				npc_id,
+				npc_name,
+				respawn_time,
+				status
+			).c_str()
+		);
+
+		npc_ids.push_back(npc_id);
+		spawn2_ids.push_back(spawn2_id);
+
+		found_count++;
+	}
+
+	c->Message(Chat::Yellow, "Found [%i] NPC Spawn2 entries that match this criteria in this zone", found_count);
+	if (edit_option.empty()) {
+		c->Message(Chat::Yellow, "Please specify an edit option | #npceditmass <search> <option>");
+		c->Message(Chat::Yellow, "Options [respawn_time]");
+		return;
+	}
+
+	std::string saylink = fmt::format(
+		"#spawneditmass {} {} {} apply",
+		search_value,
+		edit_option,
+		edit_value
+	);
+
+	if (found_count > 0) {
+		c->Message(
+			Chat::Yellow, "To apply these changes, click <%s> or type [%s]",
+			EQEmu::SayLinkEngine::GenerateQuestSaylink(saylink, false, "Apply").c_str(),
+			saylink.c_str()
+		);
+	}
+
+	if (edit_option == "respawn_time" && apply_set == "apply") {
+		std::string spawn2_ids_string = implode(",", spawn2_ids);
+		if (spawn2_ids_string.empty()) {
+			c->Message(Chat::Red, "Error: Ran into an unknown error compiling Spawn2 IDs");
+			return;
+		}
+
+		database.QueryDatabase(
+			fmt::format(
+				SQL(
+					UPDATE spawn2 SET respawntime = {} WHERE id IN({})
+				),
+				std::stoi(edit_value),
+				spawn2_ids_string
+			)
+		);
+
+		c->Message(Chat::Yellow, "Updated [%i] spawns", found_count);
 	}
 }
 
@@ -7506,7 +7637,7 @@ void command_npceditmass(Client *c, const Seperator *sep)
 		}
 
 		c->Message(
-			15,
+			Chat::Yellow,
 			fmt::format(
 				"NPC ({0}) [{1}] ({2}) [{3}] Current ({4}) [{5}] New [{6}] {7}",
 				npc_id,

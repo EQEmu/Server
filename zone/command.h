@@ -288,6 +288,7 @@ void command_showzonegloballoot(Client *c, const Seperator *sep);
 void command_shutdown(Client *c, const Seperator *sep);
 void command_size(Client *c, const Seperator *sep);
 void command_spawn(Client *c, const Seperator *sep);
+void command_spawneditmass(Client *c, const Seperator *sep);
 void command_spawnfix(Client *c, const Seperator *sep);
 void command_spawnstatus(Client *c, const Seperator *sep);
 void command_spellinfo(Client *c, const Seperator *sep);
