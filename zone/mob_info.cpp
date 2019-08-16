@@ -278,7 +278,7 @@ inline std::string GetMobAttributeByString(Mob *mob, const std::string &attribut
 			return std::to_string((int)npc->GetWalkspeed());
 		}
 		if (attribute == "spawngroup") {
-			return std::to_string(npc->GetSp2());
+			return std::to_string(npc->GetSpawnGroupId());
 		}
 		if (attribute == "grid") {
 			return std::to_string(npc->GetGrid());

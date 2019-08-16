@@ -1579,7 +1579,25 @@ void NPC::AI_DoMovement() {
 
 		if (GetCWP() == EQEmu::WaypointStatus::RoamBoxPauseInProgress && !IsMoving()) {
 			// We have arrived
-			time_until_can_move = Timer::GetCurrentTime() + RandomTimer(roambox_min_delay, roambox_delay);
+
+			int roambox_move_delay = EQEmu::ClampLower(GetRoamboxDelay(), GetRoamboxMinDelay());
+			int move_delay_max     = (roambox_move_delay > 0 ? roambox_move_delay : (int) GetRoamboxMinDelay() * 4);
+			int random_timer       = RandomTimer(
+				GetRoamboxMinDelay(),
+				move_delay_max
+			);
+
+			Log(
+				Logs::Detail,
+				Logs::NPCRoamBox, "(%s) Timer calc | random_timer [%i] roambox_move_delay [%i] move_min [%i] move_max [%i]",
+				this->GetCleanName(),
+				random_timer,
+				roambox_move_delay,
+				(int) GetRoamboxMinDelay(),
+				move_delay_max
+			);
+
+			time_until_can_move = Timer::GetCurrentTime() + random_timer;
 			SetCurrentWP(0);
 			return;
 		}
@@ -1636,25 +1654,51 @@ void NPC::AI_DoMovement() {
 				}
 			}
 
-			roambox_destination_z = 0;
-			/*
-			if (zone->zonemap) {
-				roambox_destination_z = FindGroundZ(roambox_destination_x, roambox_destination_y, this->GetZOffset());
-			}
-				*/
+			PathfinderOptions opts;
+			opts.smooth_path = true;
+			opts.step_size   = RuleR(Pathing, NavmeshStepSize);
+			opts.offset      = GetZOffset();
+			opts.flags       = PathingNotDisabled ^ PathingZoneLine;
 
-			Log(Logs::Detail,
+			auto partial = false;
+			auto stuck   = false;
+			auto route   = zone->pathing->FindPath(
+				glm::vec3(GetX(), GetY(), GetZ()),
+				glm::vec3(
+					roambox_destination_x,
+					roambox_destination_y,
+					GetGroundZ(roambox_destination_x, roambox_destination_y)
+				),
+				partial,
+				stuck,
+				opts
+			);
+
+			if (route.empty()) {
+				Log(
+					Logs::Detail,
+					Logs::NPCRoamBox, "(%s) We don't have a path route... exiting...",
+					this->GetCleanName()
+				);
+				return;
+			}
+
+			roambox_destination_z = 0;
+
+			Log(
+				Logs::General,
 				Logs::NPCRoamBox,
-				"Calculate | NPC: %s distance %.3f | min_x %.3f | max_x %.3f | final_x %.3f | min_y %.3f | max_y %.3f | final_y %.3f",
+				"NPC (%s) distance [%.0f] X (min/max) [%.0f / %.0f] Y (min/max) [%.0f / %.0f] | Dest x/y/z [%.0f / %.0f / %.0f]",
 				this->GetCleanName(),
 				roambox_distance,
 				roambox_min_x,
 				roambox_max_x,
-				roambox_destination_x,
 				roambox_min_y,
 				roambox_max_y,
-				roambox_destination_y);
-			Log(Logs::Detail, Logs::NPCRoamBox, "Dest Z is (%f)", roambox_destination_z);
+				roambox_destination_x,
+				roambox_destination_y,
+				roambox_destination_z
+			);
 
 			SetCurrentWP(EQEmu::WaypointStatus::RoamBoxPauseInProgress);
 			NavigateTo(roambox_destination_x, roambox_destination_y, roambox_destination_z);

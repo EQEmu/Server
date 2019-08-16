@@ -973,11 +973,13 @@ bool Mob::CombatRange(Mob* other)
 }
 
 //Father Nitwit's LOS code
-bool Mob::CheckLosFN(Mob* other) {
+bool Mob::CheckLosFN(Mob *other)
+{
 	bool Result = false;
 
-	if(other)
+	if (other) {
 		Result = CheckLosFN(other->GetX(), other->GetY(), other->GetZ(), other->GetSize());
+	}
 
 	SetLastLosState(Result);
 

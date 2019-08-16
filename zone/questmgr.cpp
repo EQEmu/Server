@@ -234,59 +234,48 @@ Mob* QuestManager::unique_spawn(int npc_type, int grid, int unused, const glm::v
 	return nullptr;
 }
 
-Mob* QuestManager::spawn_from_spawn2(uint32 spawn2_id)
+Mob *QuestManager::spawn_from_spawn2(uint32 spawn2_id)
 {
-	LinkedListIterator<Spawn2*> iterator(zone->spawn2_list);
+	LinkedListIterator<Spawn2 *> iterator(zone->spawn2_list);
 	iterator.Reset();
 	Spawn2 *found_spawn = nullptr;
 
-	while(iterator.MoreElements())
-	{
-		Spawn2* cur = iterator.GetData();
+	while (iterator.MoreElements()) {
+		Spawn2 *cur = iterator.GetData();
 		iterator.Advance();
-		if(cur->GetID() == spawn2_id)
-		{
+		if (cur->GetID() == spawn2_id) {
 			found_spawn = cur;
 			break;
 		}
 	}
 
-	if(found_spawn)
-	{
-		SpawnGroup* sg = zone->spawn_group_list.GetSpawnGroup(found_spawn->SpawnGroupID());
-		if(!sg)
-		{
-			database.LoadSpawnGroupsByID(found_spawn->SpawnGroupID(),&zone->spawn_group_list);
-			sg = zone->spawn_group_list.GetSpawnGroup(found_spawn->SpawnGroupID());
-			if(!sg)
-			{
+	if (found_spawn) {
+		SpawnGroup *spawn_group = zone->spawn_group_list.GetSpawnGroup(found_spawn->SpawnGroupID());
+		if (!spawn_group) {
+			database.LoadSpawnGroupsByID(found_spawn->SpawnGroupID(), &zone->spawn_group_list);
+			spawn_group = zone->spawn_group_list.GetSpawnGroup(found_spawn->SpawnGroupID());
+			if (!spawn_group) {
 				return nullptr;
 			}
 		}
-		uint32 npcid = sg->GetNPCType();
-		if(npcid == 0)
-		{
+		uint32 npcid = spawn_group->GetNPCType();
+		if (npcid == 0) {
 			return nullptr;
 		}
 
-		const NPCType* tmp = database.LoadNPCTypesData(npcid);
-		if(!tmp)
-		{
+		const NPCType *tmp = database.LoadNPCTypesData(npcid);
+		if (!tmp) {
 			return nullptr;
 		}
 
-		if(tmp->unique_spawn_by_name)
-		{
-			if(!entity_list.LimitCheckName(tmp->name))
-			{
+		if (tmp->unique_spawn_by_name) {
+			if (!entity_list.LimitCheckName(tmp->name)) {
 				return nullptr;
 			}
 		}
 
-		if(tmp->spawn_limit > 0)
-		{
-			if(!entity_list.LimitCheckType(npcid, tmp->spawn_limit))
-			{
+		if (tmp->spawn_limit > 0) {
+			if (!entity_list.LimitCheckType(npcid, tmp->spawn_limit)) {
 				return nullptr;
 			}
 		}
@@ -294,21 +283,35 @@ Mob* QuestManager::spawn_from_spawn2(uint32 spawn2_id)
 		database.UpdateRespawnTime(spawn2_id, zone->GetInstanceID(), 0);
 		found_spawn->SetCurrentNPCID(npcid);
 
-        auto position = glm::vec4(found_spawn->GetX(), found_spawn->GetY(), found_spawn->GetZ(), found_spawn->GetHeading());
+		auto position = glm::vec4(
+			found_spawn->GetX(),
+			found_spawn->GetY(),
+			found_spawn->GetZ(),
+			found_spawn->GetHeading()
+		);
+
 		auto npc = new NPC(tmp, found_spawn, position, GravityBehavior::Water);
 
 		found_spawn->SetNPCPointer(npc);
 		npc->AddLootTable();
-		if (npc->DropsGlobalLoot())
+		if (npc->DropsGlobalLoot()) {
 			npc->CheckGlobalLootTables();
-		npc->SetSp2(found_spawn->SpawnGroupID());
+		}
+		npc->SetSpawnGroupId(found_spawn->SpawnGroupID());
 		entity_list.AddNPC(npc);
 		entity_list.LimitAddNPC(npc);
 
-		if (sg->roamdist && sg->roambox[0] && sg->roambox[1] && sg->roambox[2] && sg->roambox[3] && sg->delay &&
-			sg->min_delay)
-			npc->AI_SetRoambox(sg->roamdist, sg->roambox[0], sg->roambox[1], sg->roambox[2], sg->roambox[3],
-					   sg->delay, sg->min_delay);
+		if (spawn_group->roamdist > 0) {
+			npc->AI_SetRoambox(
+				spawn_group->roamdist,
+				spawn_group->roambox[0],
+				spawn_group->roambox[1],
+				spawn_group->roambox[2],
+				spawn_group->roambox[3],
+				spawn_group->delay,
+				spawn_group->min_delay
+			);
+		}
 		if (zone->InstantGrids()) {
 			found_spawn->LoadGrid();
 		}

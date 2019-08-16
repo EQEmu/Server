@@ -225,7 +225,7 @@ Json::Value ApiGetNpcListDetail(EQ::Net::WebsocketServerConnection *connection, 
 		row["sec_skill"]       = npc->GetSecSkill();
 		row["silver"]          = npc->GetSilver();
 		row["slow_mitigation"] = npc->GetSlowMitigation();
-		row["sp2"]             = npc->GetSp2();
+		row["spawn_group_id"]  = npc->GetSpawnGroupId();
 		row["swarm_owner"]     = npc->GetSwarmOwner();
 		row["swarm_target"]    = npc->GetSwarmTarget();
 		row["waypoint_max"]    = npc->GetWaypointMax();

@@ -146,33 +146,33 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 		size = GetRaceGenderDefaultHeight(race, gender);
 	}
 
-	taunting     = false;
-	proximity    = nullptr;
-	copper       = 0;
-	silver       = 0;
-	gold         = 0;
-	platinum     = 0;
-	max_dmg      = npc_type_data->max_dmg;
-	min_dmg      = npc_type_data->min_dmg;
-	attack_count = npc_type_data->attack_count;
-	grid         = 0;
-	wp_m         = 0;
-	max_wp       = 0;
-	save_wp      = 0;
-	spawn_group  = 0;
-	swarmInfoPtr = nullptr;
-	spellscale   = npc_type_data->spellscale;
-	healscale    = npc_type_data->healscale;
-	pAggroRange  = npc_type_data->aggroradius;
-	pAssistRange = npc_type_data->assistradius;
-	findable     = npc_type_data->findable;
-	trackable    = npc_type_data->trackable;
-	MR           = npc_type_data->MR;
-	CR           = npc_type_data->CR;
-	DR           = npc_type_data->DR;
-	FR           = npc_type_data->FR;
-	PR           = npc_type_data->PR;
-	Corrup       = npc_type_data->Corrup;
+	taunting       = false;
+	proximity      = nullptr;
+	copper         = 0;
+	silver         = 0;
+	gold           = 0;
+	platinum       = 0;
+	max_dmg        = npc_type_data->max_dmg;
+	min_dmg        = npc_type_data->min_dmg;
+	attack_count   = npc_type_data->attack_count;
+	grid           = 0;
+	wp_m           = 0;
+	max_wp         = 0;
+	save_wp        = 0;
+	spawn_group_id = 0;
+	swarmInfoPtr   = nullptr;
+	spellscale     = npc_type_data->spellscale;
+	healscale      = npc_type_data->healscale;
+	pAggroRange    = npc_type_data->aggroradius;
+	pAssistRange   = npc_type_data->assistradius;
+	findable       = npc_type_data->findable;
+	trackable      = npc_type_data->trackable;
+	MR             = npc_type_data->MR;
+	CR             = npc_type_data->CR;
+	DR             = npc_type_data->DR;
+	FR             = npc_type_data->FR;
+	PR             = npc_type_data->PR;
+	Corrup         = npc_type_data->Corrup;
 	PhR          = npc_type_data->PhR;
 	STR          = npc_type_data->STR;
 	STA          = npc_type_data->STA;
@@ -1270,7 +1270,7 @@ uint32 ZoneDatabase::CreateNewNPCCommand(const char *zone, uint32 zone_version, 
 	}
 	uint32 spawngroupid = results.LastInsertedID();
 
-	spawn->SetSp2(spawngroupid);
+	spawn->SetSpawnGroupId(spawngroupid);
 	spawn->SetNPCTypeID(npc_type_id);
 
 	query = StringFormat("INSERT INTO spawn2 (zone, version, x, y, z, respawntime, heading, spawngroupID) "
@@ -1355,7 +1355,7 @@ uint32 ZoneDatabase::DeleteSpawnLeaveInNPCTypeTable(const char *zone, Client *cl
 
 	std::string query = StringFormat("SELECT id, spawngroupID FROM spawn2 WHERE "
 					 "zone='%s' AND spawngroupID=%i",
-					 zone, spawn->GetSp2());
+					 zone, spawn->GetSpawnGroupId());
 	auto results = QueryDatabase(query);
 	if (!results.Success())
 		return 0;
@@ -1396,7 +1396,7 @@ uint32 ZoneDatabase::DeleteSpawnRemoveFromNPCTypeTable(const char *zone, uint32 
 
 	std::string query = StringFormat("SELECT id, spawngroupID FROM spawn2 WHERE zone = '%s' "
 					 "AND (version = %u OR version = -1) AND spawngroupID = %i",
-					 zone, zone_version, spawn->GetSp2());
+					 zone, zone_version, spawn->GetSpawnGroupId());
 	auto results = QueryDatabase(query);
 	if (!results.Success())
 		return 0;
@@ -2923,4 +2923,16 @@ bool NPC::IsProximitySet()
 	}
 
 	return false;
+}
+
+void NPC::SetSimpleRoamBox(float box_size, float move_distance, int move_delay)
+{
+	AI_SetRoambox(
+		(move_distance != 0 ? move_distance : box_size / 2),
+		GetX() + box_size,
+		GetX() - box_size,
+		GetY() + box_size,
+		GetY() - box_size,
+		move_delay
+	);
 }
