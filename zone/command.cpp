@@ -223,7 +223,7 @@ int command_init(void)
 		command_add("gm", "- Turn player target's or your GM flag on or off", 80, command_gm) ||
 		command_add("gmspeed", "[on/off] - Turn GM speed hack on/off for you or your player target", 100, command_gmspeed) ||
 		command_add("gmzone", "[zone_short_name] [zone_version=0] [identifier=gmzone] - Zones to a private GM instance", 100, command_gmzone) ||
-		command_add("goto", "[x] [y] [z] - Teleport to the provided coordinates or to your target", 10, command_goto) ||
+		command_add("goto", "[playername] or [x y z] [h] - Teleport to the provided coordinates or to your target", 10, command_goto) ||
 		command_add("grid", "[add/delete] [grid_num] [wandertype] [pausetype] - Create/delete a wandering grid", 170, command_grid) ||
 		command_add("guild", "- Guild manipulation commands. Use argument help for more info.", 10, command_guild) ||
 		command_add("guildapprove", "[guildapproveid] - Approve a guild with specified ID (guild creator receives the id)", 0, command_guildapprove) ||
@@ -5501,23 +5501,23 @@ void command_loc(Client *c, const Seperator *sep)
 
 void command_goto(Client *c, const Seperator *sep)
 {
-	/**
-	 * Goto via target and no args
-	 */
-	if (sep->arg[1][0] == '\0' && c->GetTarget()) {
+	std::string arg1 = sep->arg[1];
+
+	bool goto_via_target_no_args = sep->arg[1][0] == '\0' && c->GetTarget();
+	bool goto_via_player_name    = !sep->IsNumber(1) && !arg1.empty();
+	bool goto_via_x_y_z          = sep->IsNumber(1) && sep->IsNumber(2) && sep->IsNumber(3);
+
+	if (goto_via_target_no_args) {
 		c->MovePC(
 			zone->GetZoneID(),
 			zone->GetInstanceID(),
 			c->GetTarget()->GetX(),
 			c->GetTarget()->GetY(),
 			c->GetTarget()->GetZ(),
-			c->GetTarget()->GetHeading());
+			c->GetTarget()->GetHeading()
+		);
 	}
-
-	/**
-	 * Goto via player name
-	 */
-	else if (!sep->IsNumber(1) && sep->arg[1]) {
+	else if (goto_via_player_name) {
 
 		/**
 		 * Find them in zone first
@@ -5532,7 +5532,8 @@ void command_goto(Client *c, const Seperator *sep)
 				client->GetX(),
 				client->GetY(),
 				client->GetZ(),
-				client->GetHeading());
+				client->GetHeading()
+			);
 
 			c->Message(Chat::Yellow, "Goto player '%s' same zone", player_name_string.c_str());
 		}
@@ -5543,21 +5544,18 @@ void command_goto(Client *c, const Seperator *sep)
 			c->Message(Chat::Yellow, "Player '%s' not found", player_name_string.c_str());
 		}
 	}
-
-	/**
-	 * Goto via x y z
-	 */
-	else if (sep->IsNumber(1) && sep->IsNumber(2) && sep->IsNumber(3)) {
+	else if (goto_via_x_y_z) {
 		c->MovePC(
 			zone->GetZoneID(),
 			zone->GetInstanceID(),
 			atof(sep->arg[1]),
 			atof(sep->arg[2]),
 			atof(sep->arg[3]),
-			c->GetHeading());
+			(sep->arg[4] ? atof(sep->arg[4]) : c->GetHeading())
+		);
 	}
 	else {
-		c->Message(Chat::White, "Usage: #goto [x y z]");
+		c->Message(Chat::White, "Usage: #goto [x y z] [h]");
 		c->Message(Chat::White, "Usage: #goto [player_name]");
 	}
 }
@@ -6696,46 +6694,53 @@ void command_wpinfo(Client *c, const Seperator *sep)
 
 void command_wpadd(Client *c, const Seperator *sep)
 {
-	int	type1=0,
-		type2=0,
-		pause=0;	// Defaults for a new grid
+	int type1 = 0,
+		type2 = 0,
+		pause = 0;    // Defaults for a new grid
 
-	Mob *t=c->GetTarget();
-	if (t && t->IsNPC())
-	{
-		Spawn2* s2info = t->CastToNPC()->respawn2;
+	Mob *target = c->GetTarget();
+	if (target && target->IsNPC()) {
+		Spawn2 *s2info = target->CastToNPC()->respawn2;
 
-		if(s2info == nullptr)	// Can't figure out where this mob's spawn came from... maybe a dynamic mob created by #spawn
+		if (s2info ==
+			nullptr)    // Can't figure out where this mob's spawn came from... maybe a dynamic mob created by #spawn
 		{
-			c->Message(Chat::White,"#wpadd FAILED -- Can't determine which spawn record in the database this mob came from!");
+			c->Message(
+				Chat::White,
+				"#wpadd FAILED -- Can't determine which spawn record in the database this mob came from!"
+			);
 			return;
 		}
 
-		if (sep->arg[1][0])
-		{
-			if (atoi(sep->arg[1]) >= 0)
-				pause=atoi(sep->arg[1]);
-			else
-			{
-				c->Message(Chat::White,"Usage: #wpadd [pause] [-h]");
+		if (sep->arg[1][0]) {
+			if (atoi(sep->arg[1]) >= 0) {
+				pause = atoi(sep->arg[1]);
+			}
+			else {
+				c->Message(Chat::White, "Usage: #wpadd [pause] [-h]");
 				return;
 			}
 		}
 		auto position = c->GetPosition();
-		if (strcmp("-h",sep->arg[2]) != 0)
+		if (strcmp("-h", sep->arg[2]) != 0) {
 			position.w = -1;
+		}
 
 		uint32 tmp_grid = database.AddWPForSpawn(c, s2info->GetID(), position, pause, type1, type2, zone->GetZoneID());
-		if (tmp_grid)
-			t->CastToNPC()->SetGrid(tmp_grid);
+		if (tmp_grid) {
+			target->CastToNPC()->SetGrid(tmp_grid);
+		}
 
-		t->CastToNPC()->AssignWaypoints(t->CastToNPC()->GetGrid());
-		c->Message(Chat::White,"Waypoint added. Use #wpinfo to see waypoints for this NPC (may need to #repop first).");
+		target->CastToNPC()->AssignWaypoints(target->CastToNPC()->GetGrid());
+		c->Message(
+			Chat::White,
+			"Waypoint added. Use #wpinfo to see waypoints for this NPC (may need to #repop first)."
+		);
 	}
-	else
-		c->Message(Chat::White,"You must target an NPC to use this.");
+	else {
+		c->Message(Chat::White, "You must target an NPC to use this.");
+	}
 }
-
 
 void command_interrupt(Client *c, const Seperator *sep)
 {
