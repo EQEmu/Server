@@ -7426,6 +7426,8 @@ void command_npceditmass(Client *c, const Seperator *sep)
 	bool valid_search_column = false;
 	auto results             = database.QueryDatabase(query);
 
+	std::vector <std::string> possible_column_options;
+
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		if (row[0] == change_column) {
 			valid_change_column = true;
@@ -7433,15 +7435,21 @@ void command_npceditmass(Client *c, const Seperator *sep)
 		if (row[0] == search_column) {
 			valid_search_column = true;
 		}
+
+		possible_column_options.push_back(row[0]);
 	}
+
+	std::string options_glue = ", ";
 
 	if (!valid_search_column) {
 		c->Message(Chat::Red, "You must specify a valid search column. [%s] is not valid", search_column.c_str());
+		c->Message(Chat::Yellow, "Possible columns [%s]", implode(options_glue, possible_column_options).c_str());
 		return;
 	}
 
 	if (!valid_change_column) {
 		c->Message(Chat::Red, "You must specify a valid change column. [%s] is not valid", change_column.c_str());
+		c->Message(Chat::Yellow, "Possible columns [%s]", implode(options_glue, possible_column_options).c_str());
 		return;
 	}
 

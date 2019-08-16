@@ -7,6 +7,7 @@ Akkadius: Implemented command #roambox remove
 Akkadius: Implemented LUA NPC:SetSimpleRoamBox(box_size, [move_distance], [move_delay]);
 Akkadius: Implemented Perl $npc->SetSimpleRoamBox(box_size, [move_distance], [move_delay]);
 Akkadius: Spawngroup data now hot reloads on #repop
+Akkadius: Command #npceditmass now lists column options when one isn't properly specified
 
 == 8/11/2019 ==
 Akkadius: Added bulk edit command #npceditmass <column-to-search> <column-search-value> <change-column> <change-value>
