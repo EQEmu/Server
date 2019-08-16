@@ -57,7 +57,16 @@ void NPC::AI_SetRoambox(float max_distance, float roam_distance_variance, uint32
 	);
 }
 
-void NPC::AI_SetRoambox(float distance, float max_x, float min_x, float max_y, float min_y, uint32 delay, uint32 min_delay) {
+void NPC::AI_SetRoambox(
+	float distance,
+	float max_x,
+	float min_x,
+	float max_y,
+	float min_y,
+	uint32 delay,
+	uint32 min_delay
+)
+{
 	roambox_distance      = distance;
 	roambox_max_x         = max_x;
 	roambox_min_x         = min_x;
@@ -70,18 +79,18 @@ void NPC::AI_SetRoambox(float distance, float max_x, float min_x, float max_y, f
 
 void NPC::DisplayWaypointInfo(Client *c) {
 
-	c->Message(0, "Mob is on grid %d, in spawn group %d, on waypoint %d/%d",
-		GetGrid(),
-		GetSp2(),
-		GetCurWp(),
-		GetMaxWp());
+	c->Message(Chat::White, "Mob is on grid %d, in spawn group %d, on waypoint %d/%d",
+			   GetGrid(),
+			   GetSpawnGroupId(),
+			   GetCurWp(),
+			   GetMaxWp());
 
 
 	std::vector<wplist>::iterator cur, end;
 	cur = Waypoints.begin();
 	end = Waypoints.end();
 	for (; cur != end; ++cur) {
-		c->Message(0, "Waypoint %d: (%.2f,%.2f,%.2f,%.2f) pause %d",
+		c->Message(Chat::White, "Waypoint %d: (%.2f,%.2f,%.2f,%.2f) pause %d",
 			cur->index,
 			cur->x,
 			cur->y,
@@ -895,7 +904,7 @@ void ZoneDatabase::AssignGrid(Client *client, int grid, int spawn2id) {
 		return;
 	}
 
-	client->Message(0, "Grid assign: spawn2 id = %d updated", spawn2id);
+	client->Message(Chat::White, "Grid assign: spawn2 id = %d updated", spawn2id);
 }
 
 

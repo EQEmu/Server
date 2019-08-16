@@ -77,6 +77,10 @@ namespace EQEmu
 
 	} // namespace invtype
 
+	namespace DevTools {
+		const int32 GM_ACCOUNT_STATUS_LEVEL = 150;
+	}
+
 	namespace popupresponse {
 		const int32 SERVER_INTERNAL_USE_BASE = 2000000000;
 		const int32 MOB_INFO_DISMISS         = 2000000001;

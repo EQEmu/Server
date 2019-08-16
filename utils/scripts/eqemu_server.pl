@@ -454,6 +454,7 @@ sub do_installer_routines {
         fetch_latest_windows_appveyor();
         get_remote_file($install_repository_request_url . "lua51.dll", "lua51.dll", 1);
         get_remote_file($install_repository_request_url . "zlib1.dll", "zlib1.dll", 1);
+		get_remote_file($install_repository_request_url . "zlib1.pdb", "zlib1.pdb", 1);
         get_remote_file($install_repository_request_url . "libmysql.dll", "libmysql.dll", 1);
     }
 
@@ -1587,22 +1588,24 @@ sub add_login_server_firewall_rules {
         print "If firewall rules don't add you must run this script (eqemu_server.pl) as administrator\n";
         print "\n";
         print "[Install] Instructions \n";
-        print "[Install] In order to connect your server to the loginserver you must point your eqemu_config.xml to your local server similar to the following:\n";
+        print "[Install] In order to connect your server to the loginserver you must point your eqemu_config.json to your local server similar to the following:\n";
         print "
-	<loginserver1>
-		<host>login.eqemulator.net</host>
-		<port>5998</port>
-		<account></account>
-		<password></password>
-	</loginserver1>
-	<loginserver2>
-		<host>127.0.0.1</host>
-		<port>5998</port>
-		<account></account>
-		<password></password>
-	</loginserver2>
+	\"loginserver1\" : {
+		\"account\" : \"\",
+		\"host\" : \"login.eqemulator.net\",
+		\"password\" : \"\",
+		\"port\" : \"5998\",
+		\"legacy\": \"1\"
+	},
+	\"loginserver2\" : {
+		\"account\" : \"\",
+		\"host\" : \"192.168.197.129\",
+		\"password\" : \"\",
+		\"port\" : \"5998\"
+	},
+	\"localaddress\" : \"192.168.197.129\",
 		";
-        print "[Install] When done, make sure your EverQuest client points to your loginserver's IP (In this case it would be 127.0.0.1) in the eqhosts.txt file\n";
+        print "[Install] When done, make sure your EverQuest client points to your loginserver's IP (In this case it would be 192.168.197.129) in the eqhosts.txt file\n";
     }
 }
 
@@ -1640,9 +1643,10 @@ sub check_windows_firewall_rules {
 }
 
 sub fetch_server_dlls {
-    print "[Download] Fetching lua51.dll, zlib1.dll, libmysql.dll...\n";
+    print "[Download] Fetching lua51.dll, zlib1.dll, zlib1.pdb, libmysql.dll...\n";
     get_remote_file($install_repository_request_url . "lua51.dll", "lua51.dll", 1);
     get_remote_file($install_repository_request_url . "zlib1.dll", "zlib1.dll", 1);
+	get_remote_file($install_repository_request_url . "zlib1.pdb", "zlib1.pdb", 1);
     get_remote_file($install_repository_request_url . "libmysql.dll", "libmysql.dll", 1);
 }
 

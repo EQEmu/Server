@@ -813,7 +813,7 @@ void Raid::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinum
 		//I could not get MoneyOnCorpse to work, so we use this
 		members[i].member->AddMoneyToPP(cpsplit, spsplit, gpsplit, ppsplit, true);
 
-		members[i].member->Message(2, msg.c_str());
+		members[i].member->Message(Chat::Green, msg.c_str());
 		}
 	}
 }
@@ -1712,12 +1712,12 @@ const char *Raid::GetClientNameByIndex(uint8 index)
 	return members[index].membername;
 }
 
-void Raid::RaidMessage_StringID(Mob* sender, uint32 type, uint32 string_id, const char* message,const char* message2,const char* message3,const char* message4,const char* message5,const char* message6,const char* message7,const char* message8,const char* message9, uint32 distance) {
+void Raid::RaidMessageString(Mob* sender, uint32 type, uint32 string_id, const char* message,const char* message2,const char* message3,const char* message4,const char* message5,const char* message6,const char* message7,const char* message8,const char* message9, uint32 distance) {
 	uint32 i;
 	for (i = 0; i < MAX_RAID_MEMBERS; i++) {
 		if(members[i].member) {
 			if(members[i].member != sender)
-				members[i].member->Message_StringID(type, string_id, message, message2, message3, message4, message5, message6, message7, message8, message9, distance);
+				members[i].member->MessageString(type, string_id, message, message2, message3, message4, message5, message6, message7, message8, message9, distance);
 		}
 	}
 }

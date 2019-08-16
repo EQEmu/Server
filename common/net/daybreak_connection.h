@@ -257,7 +257,7 @@ namespace EQ
 				resend_delay_min = 150;
 				resend_delay_max = 5000;
 				connect_delay_ms = 500;
-				stale_connection_ms = 30000;
+				stale_connection_ms = 60000;
 				connect_stale_ms = 5000;
 				crc_length = 2;
 				max_packet_size = 512;

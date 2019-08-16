@@ -161,12 +161,10 @@ void QuestManager::say(const char *str, Journal::Options &opts) {
 		return;
 	}
 	else {
-		if (!RuleB(NPC, EnableNPCQuestJournal))
+		// if there is no initiator we still want stuff to work (timers, signals, waypoints, etc)
+		if (!RuleB(NPC, EnableNPCQuestJournal) || initiator == nullptr)
 			opts.journal_mode = Journal::Mode::None;
-		if (initiator) {
-			opts.target_spawn_id = initiator->GetID();
-			owner->QuestJournalledSay(initiator, str, opts);
-		}
+		owner->QuestJournalledSay(initiator, str, opts);
 	}
 }
 
@@ -236,59 +234,48 @@ Mob* QuestManager::unique_spawn(int npc_type, int grid, int unused, const glm::v
 	return nullptr;
 }
 
-Mob* QuestManager::spawn_from_spawn2(uint32 spawn2_id)
+Mob *QuestManager::spawn_from_spawn2(uint32 spawn2_id)
 {
-	LinkedListIterator<Spawn2*> iterator(zone->spawn2_list);
+	LinkedListIterator<Spawn2 *> iterator(zone->spawn2_list);
 	iterator.Reset();
 	Spawn2 *found_spawn = nullptr;
 
-	while(iterator.MoreElements())
-	{
-		Spawn2* cur = iterator.GetData();
+	while (iterator.MoreElements()) {
+		Spawn2 *cur = iterator.GetData();
 		iterator.Advance();
-		if(cur->GetID() == spawn2_id)
-		{
+		if (cur->GetID() == spawn2_id) {
 			found_spawn = cur;
 			break;
 		}
 	}
 
-	if(found_spawn)
-	{
-		SpawnGroup* sg = zone->spawn_group_list.GetSpawnGroup(found_spawn->SpawnGroupID());
-		if(!sg)
-		{
-			database.LoadSpawnGroupsByID(found_spawn->SpawnGroupID(),&zone->spawn_group_list);
-			sg = zone->spawn_group_list.GetSpawnGroup(found_spawn->SpawnGroupID());
-			if(!sg)
-			{
+	if (found_spawn) {
+		SpawnGroup *spawn_group = zone->spawn_group_list.GetSpawnGroup(found_spawn->SpawnGroupID());
+		if (!spawn_group) {
+			database.LoadSpawnGroupsByID(found_spawn->SpawnGroupID(), &zone->spawn_group_list);
+			spawn_group = zone->spawn_group_list.GetSpawnGroup(found_spawn->SpawnGroupID());
+			if (!spawn_group) {
 				return nullptr;
 			}
 		}
-		uint32 npcid = sg->GetNPCType();
-		if(npcid == 0)
-		{
+		uint32 npcid = spawn_group->GetNPCType();
+		if (npcid == 0) {
 			return nullptr;
 		}
 
-		const NPCType* tmp = database.LoadNPCTypesData(npcid);
-		if(!tmp)
-		{
+		const NPCType *tmp = database.LoadNPCTypesData(npcid);
+		if (!tmp) {
 			return nullptr;
 		}
 
-		if(tmp->unique_spawn_by_name)
-		{
-			if(!entity_list.LimitCheckName(tmp->name))
-			{
+		if (tmp->unique_spawn_by_name) {
+			if (!entity_list.LimitCheckName(tmp->name)) {
 				return nullptr;
 			}
 		}
 
-		if(tmp->spawn_limit > 0)
-		{
-			if(!entity_list.LimitCheckType(npcid, tmp->spawn_limit))
-			{
+		if (tmp->spawn_limit > 0) {
+			if (!entity_list.LimitCheckType(npcid, tmp->spawn_limit)) {
 				return nullptr;
 			}
 		}
@@ -296,21 +283,35 @@ Mob* QuestManager::spawn_from_spawn2(uint32 spawn2_id)
 		database.UpdateRespawnTime(spawn2_id, zone->GetInstanceID(), 0);
 		found_spawn->SetCurrentNPCID(npcid);
 
-        auto position = glm::vec4(found_spawn->GetX(), found_spawn->GetY(), found_spawn->GetZ(), found_spawn->GetHeading());
+		auto position = glm::vec4(
+			found_spawn->GetX(),
+			found_spawn->GetY(),
+			found_spawn->GetZ(),
+			found_spawn->GetHeading()
+		);
+
 		auto npc = new NPC(tmp, found_spawn, position, GravityBehavior::Water);
 
 		found_spawn->SetNPCPointer(npc);
 		npc->AddLootTable();
-		if (npc->DropsGlobalLoot())
+		if (npc->DropsGlobalLoot()) {
 			npc->CheckGlobalLootTables();
-		npc->SetSp2(found_spawn->SpawnGroupID());
+		}
+		npc->SetSpawnGroupId(found_spawn->SpawnGroupID());
 		entity_list.AddNPC(npc);
 		entity_list.LimitAddNPC(npc);
 
-		if (sg->roamdist && sg->roambox[0] && sg->roambox[1] && sg->roambox[2] && sg->roambox[3] && sg->delay &&
-			sg->min_delay)
-			npc->AI_SetRoambox(sg->roamdist, sg->roambox[0], sg->roambox[1], sg->roambox[2], sg->roambox[3],
-					   sg->delay, sg->min_delay);
+		if (spawn_group->roamdist > 0) {
+			npc->AI_SetRoambox(
+				spawn_group->roamdist,
+				spawn_group->roambox[0],
+				spawn_group->roambox[1],
+				spawn_group->roambox[2],
+				spawn_group->roambox[3],
+				spawn_group->delay,
+				spawn_group->min_delay
+			);
+		}
 		if (zone->InstantGrids()) {
 			found_spawn->LoadGrid();
 		}
@@ -807,13 +808,13 @@ void QuestManager::changedeity(int diety_id) {
 		if(initiator->IsClient())
 		{
 			initiator->SetDeity(diety_id);
-			initiator->Message(15,"Your Deity has been changed/set to: %i", diety_id);
+			initiator->Message(Chat::Yellow,"Your Deity has been changed/set to: %i", diety_id);
 			initiator->Save(1);
-			initiator->Kick();
+			initiator->Kick("Deity change by QuestManager");
 		}
 		else
 		{
-			initiator->Message(15,"Error changing Deity");
+			initiator->Message(Chat::Yellow,"Error changing Deity");
 		}
 	}
 }
@@ -929,11 +930,11 @@ void QuestManager::surname(const char *name) {
 		if(initiator->IsClient())
 		{
 			initiator->ChangeLastName(name);
-			initiator->Message(15,"Your surname has been changed/set to: %s", name);
+			initiator->Message(Chat::Yellow,"Your surname has been changed/set to: %s", name);
 		}
 		else
 		{
-			initiator->Message(15,"Error changing/setting surname");
+			initiator->Message(Chat::Yellow,"Error changing/setting surname");
 		}
 	}
 }
@@ -943,7 +944,7 @@ void QuestManager::permaclass(int class_id) {
 	//Makes the client the class specified
 	initiator->SetBaseClass(class_id);
 	initiator->Save(2);
-	initiator->Kick();
+	initiator->Kick("Base class change by QuestManager");
 }
 
 void QuestManager::permarace(int race_id) {
@@ -951,7 +952,7 @@ void QuestManager::permarace(int race_id) {
 	//Makes the client the race specified
 	initiator->SetBaseRace(race_id);
 	initiator->Save(2);
-	initiator->Kick();
+	initiator->Kick("Base race change by QuestManager");
 }
 
 void QuestManager::permagender(int gender_id) {
@@ -959,7 +960,7 @@ void QuestManager::permagender(int gender_id) {
 	//Makes the client the gender specified
 	initiator->SetBaseGender(gender_id);
 	initiator->Save(2);
-	initiator->Kick();
+	initiator->Kick("Base gender change by QuestManager");
 }
 
 uint16 QuestManager::scribespells(uint8 max_level, uint8 min_level) {
@@ -986,11 +987,11 @@ uint16 QuestManager::scribespells(uint8 max_level, uint8 min_level) {
 			break;
 		}
 		if (spell_id < 0 || spell_id >= SPDAT_RECORDS) {
-			initiator->Message(13, "FATAL ERROR: Spell id out-of-range (id: %i, min: 0, max: %i)", spell_id, SPDAT_RECORDS);
+			initiator->Message(Chat::Red, "FATAL ERROR: Spell id out-of-range (id: %i, min: 0, max: %i)", spell_id, SPDAT_RECORDS);
 			return count;
 		}
 		if (book_slot < 0 || book_slot >= EQEmu::spells::SPELLBOOK_SIZE) {
-			initiator->Message(13, "FATAL ERROR: Book slot out-of-range (slot: %i, min: 0, max: %i)", book_slot, EQEmu::spells::SPELLBOOK_SIZE);
+			initiator->Message(Chat::Red, "FATAL ERROR: Book slot out-of-range (slot: %i, min: 0, max: %i)", book_slot, EQEmu::spells::SPELLBOOK_SIZE);
 			return count;
 		}
 
@@ -1008,7 +1009,7 @@ uint16 QuestManager::scribespells(uint8 max_level, uint8 min_level) {
 
 			uint16 spell_id_ = (uint16)spell_id;
 			if ((spell_id_ != spell_id) || (spell_id != spell_id_)) {
-				initiator->Message(13, "FATAL ERROR: Type conversion data loss with spell_id (%i != %u)", spell_id, spell_id_);
+				initiator->Message(Chat::Red, "FATAL ERROR: Type conversion data loss with spell_id (%i != %u)", spell_id, spell_id_);
 				return count;
 			}
 
@@ -1059,7 +1060,7 @@ uint16 QuestManager::traindiscs(uint8 max_level, uint8 min_level) {
 
 	for( ; spell_id < SPDAT_RECORDS; ++spell_id) {
 		if (spell_id < 0 || spell_id >= SPDAT_RECORDS) {
-			initiator->Message(13, "FATAL ERROR: Spell id out-of-range (id: %i, min: 0, max: %i)", spell_id, SPDAT_RECORDS);
+			initiator->Message(Chat::Red, "FATAL ERROR: Spell id out-of-range (id: %i, min: 0, max: %i)", spell_id, SPDAT_RECORDS);
 			return count;
 		}
 
@@ -1077,7 +1078,7 @@ uint16 QuestManager::traindiscs(uint8 max_level, uint8 min_level) {
 
 			uint16 spell_id_ = (uint16)spell_id;
 			if ((spell_id_ != spell_id) || (spell_id != spell_id_)) {
-				initiator->Message(13, "FATAL ERROR: Type conversion data loss with spell_id (%i != %u)", spell_id, spell_id_);
+				initiator->Message(Chat::Red, "FATAL ERROR: Type conversion data loss with spell_id (%i != %u)", spell_id, spell_id_);
 				return count;
 			}
 
@@ -1086,7 +1087,7 @@ uint16 QuestManager::traindiscs(uint8 max_level, uint8 min_level) {
 
 			for (uint32 r = 0; r < MAX_PP_DISCIPLINES; r++) {
 				if (initiator->GetPP().disciplines.values[r] == spell_id_) {
-					initiator->Message(13, "You already know this discipline.");
+					initiator->Message(Chat::Red, "You already know this discipline.");
 					break; // continue the 1st loop
 				}
 				else if (initiator->GetPP().disciplines.values[r] == 0) {
@@ -1097,7 +1098,7 @@ uint16 QuestManager::traindiscs(uint8 max_level, uint8 min_level) {
 							initiator->GetPP().disciplines.values[r] = spell_id_;
 							database.SaveCharacterDisc(char_id, r, spell_id_);
 							change = true;
-							initiator->Message(0, "You have learned a new discipline!");
+							initiator->Message(Chat::White, "You have learned a new discipline!");
 							++count; // success counter
 						}
 						break; // continue the 1st loop
@@ -1109,7 +1110,7 @@ uint16 QuestManager::traindiscs(uint8 max_level, uint8 min_level) {
 							initiator->GetPP().disciplines.values[r] = spell_id_;
 							database.SaveCharacterDisc(char_id, r, spell_id_);
 							change = true;
-							initiator->Message(0, "You have learned a new discipline!");
+							initiator->Message(Chat::White, "You have learned a new discipline!");
 							++count;
 						}
 						break;
@@ -1118,7 +1119,7 @@ uint16 QuestManager::traindiscs(uint8 max_level, uint8 min_level) {
 						initiator->GetPP().disciplines.values[r] = spell_id_;
 						database.SaveCharacterDisc(char_id, r, spell_id_);
 						change = true;;
-						initiator->Message(0, "You have learned a new discipline!");
+						initiator->Message(Chat::White, "You have learned a new discipline!");
 						++count; // success counter
 						break; // continue the 1st loop
 					}
@@ -1190,7 +1191,7 @@ void QuestManager::givecash(int copper, int silver, int gold, int platinum) {
 		}
 		tmp += " pieces.";
 		if (initiator)
-			initiator->Message(MT_OOC, tmp.c_str());
+			initiator->Message(Chat::OOC, tmp.c_str());
 	}
 }
 
@@ -1411,7 +1412,7 @@ void QuestManager::itemlink(int item_id) {
 		linker.SetLinkType(EQEmu::saylink::SayLinkItemData);
 		linker.SetItemData(item);
 
-		initiator->Message(0, "%s tells you, %s", owner->GetCleanName(), linker.GenerateLink().c_str());
+		initiator->Message(Chat::White, "%s tells you, %s", owner->GetCleanName(), linker.GenerateLink().c_str());
 	}
 }
 
@@ -2164,18 +2165,18 @@ bool QuestManager::createBot(const char *name, const char *lastname, uint8 level
 	{
 		if(Bot::SpawnedBotCount(initiator->CharacterID()) >= MaxBotCreate)
 		{
-			initiator->Message(15,"You have the maximum number of bots allowed.");
+			initiator->Message(Chat::Yellow,"You have the maximum number of bots allowed.");
 			return false;
 		}
 
 		std::string test_name = name;
 		bool available_flag = false;
 		if(!database.botdb.QueryNameAvailablity(test_name, available_flag)) {
-			initiator->Message(0, "%s for '%s'", BotDatabase::fail::QueryNameAvailablity(), (char*)name);
+			initiator->Message(Chat::White, "%s for '%s'", BotDatabase::fail::QueryNameAvailablity(), (char*)name);
 			return false;
 		}
 		if (!available_flag) {
-			initiator->Message(0, "The name %s is already being used or is invalid. Please choose a different name.", (char*)name);
+			initiator->Message(Chat::White, "The name %s is already being used or is invalid. Please choose a different name.", (char*)name);
 			return false;
 		}
 
@@ -2184,23 +2185,23 @@ bool QuestManager::createBot(const char *name, const char *lastname, uint8 level
 		if(NewBot)
 		{
 			if(!NewBot->IsValidRaceClassCombo()) {
-				initiator->Message(0, "That Race/Class combination cannot be created.");
+				initiator->Message(Chat::White, "That Race/Class combination cannot be created.");
 				return false;
 			}
 
 			if(!NewBot->IsValidName()) {
-				initiator->Message(0, "%s has invalid characters. You can use only the A-Z, a-z and _ characters in a bot name.", NewBot->GetCleanName());
+				initiator->Message(Chat::White, "%s has invalid characters. You can use only the A-Z, a-z and _ characters in a bot name.", NewBot->GetCleanName());
 				return false;
 			}
 
 			// Now that all validation is complete, we can save our newly created bot
 			if(!NewBot->Save())
 			{
-				initiator->Message(0, "Unable to save %s as a bot.", NewBot->GetCleanName());
+				initiator->Message(Chat::White, "Unable to save %s as a bot.", NewBot->GetCleanName());
 			}
 			else
 			{
-				initiator->Message(0, "%s saved as bot %u.", NewBot->GetCleanName(), NewBot->GetBotID());
+				initiator->Message(Chat::White, "%s saved as bot %u.", NewBot->GetCleanName(), NewBot->GetBotID());
 				return true;
 			}
 		}
@@ -2657,13 +2658,13 @@ uint16 QuestManager::CreateInstance(const char *zone, int16 version, uint32 dura
 		uint16 id = 0;
 		if(!database.GetUnusedInstanceID(id))
 		{
-			initiator->Message(13, "Server was unable to find a free instance id.");
+			initiator->Message(Chat::Red, "Server was unable to find a free instance id.");
 			return 0;
 		}
 
 		if(!database.CreateInstance(id, zone_id, version, duration))
 		{
-			initiator->Message(13, "Server was unable to create a new instance.");
+			initiator->Message(Chat::Red, "Server was unable to create a new instance.");
 			return 0;
 		}
 		return id;
@@ -2776,9 +2777,9 @@ void QuestManager::RemoveFromInstance(uint16 instance_id)
 	if (initiator)
 	{
 		if (database.RemoveClientFromInstance(instance_id, initiator->CharacterID()))
-			initiator->Message(MT_Say, "Removed client from instance.");
+			initiator->Message(Chat::Say, "Removed client from instance.");
 		else
-			initiator->Message(MT_Say, "Failed to remove client from instance.");
+			initiator->Message(Chat::Say, "Failed to remove client from instance.");
 	}
 }
 
@@ -2794,11 +2795,11 @@ void QuestManager::RemoveAllFromInstance(uint16 instance_id)
 		std::list<uint32> charid_list;
 
 		if (database.RemoveClientsFromInstance(instance_id))
-			initiator->Message(MT_Say, "Removed all players from instance.");
+			initiator->Message(Chat::Say, "Removed all players from instance.");
 		else
 		{
 			database.GetCharactersInInstance(instance_id, charid_list);
-			initiator->Message(MT_Say, "Failed to remove %i player(s) from instance.", charid_list.size()); // once the expedition system is in, this message it not relevant
+			initiator->Message(Chat::Say, "Failed to remove %i player(s) from instance.", charid_list.size()); // once the expedition system is in, this message it not relevant
 		}
 	}
 }

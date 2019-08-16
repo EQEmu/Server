@@ -174,7 +174,7 @@ XS(XS_Client_Kick) {
 		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->Kick();
+		THIS->Kick("Perl Quest");
 	}
 	XSRETURN_EMPTY;
 }
