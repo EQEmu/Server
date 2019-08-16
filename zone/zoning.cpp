@@ -421,6 +421,7 @@ void Client::MovePC(uint32 zoneID, uint32 instanceID, float x, float y, float z,
 
 void Client::ProcessMovePC(uint32 zoneID, uint32 instance_id, float x, float y, float z, float heading, uint8 ignorerestrictions, ZoneMode zm)
 {
+	warp_grace_period_timer.Start(EQEmu::Warp::GracePeriod, false);
 	// From what I have read, dragged corpses should stay with the player for Intra-zone summons etc, but we can implement that later.
 	ClearDraggedCorpses();
 
@@ -477,7 +478,6 @@ void Client::ProcessMovePC(uint32 zoneID, uint32 instance_id, float x, float y, 
 }
 
 void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z, float heading, uint8 ignorerestrictions, ZoneMode zm) {
-	warp_grace_period_timer.Start(EQEmu::Warp::GracePeriod, false);
 	bool ReadyToZone = true;
 	int iZoneNameLength = 0;
 	const char*	pShortZoneName = nullptr;

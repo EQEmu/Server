@@ -318,7 +318,7 @@ namespace EQEmu
 	};
 
 	enum Warp : int {
-		GracePeriod = 1000
+		GracePeriod = 2000
 	};
 
 	enum UpdateMovementType : uint8 {
