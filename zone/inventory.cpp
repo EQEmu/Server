@@ -185,7 +185,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 
 	// make sure the item exists
 	if(item == nullptr) {
-		Message(13, "Item %u does not exist.", item_id);
+		Message(Chat::Red, "Item %u does not exist.", item_id);
 		Log(Logs::Detail, Logs::Inventory, "Player %s on account %s attempted to create an item with an invalid id.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u, Aug6: %u)\n",
 			GetName(), account_name, item_id, aug1, aug2, aug3, aug4, aug5, aug6);
 
@@ -194,13 +194,13 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 	// check that there is not a lore conflict between base item and existing inventory
 	else if(CheckLoreConflict(item)) {
 		// DuplicateLoreMessage(item_id);
-		Message(13, "You already have a lore %s (%i) in your inventory.", item->Name, item_id);
+		Message(Chat::Red, "You already have a lore %s (%i) in your inventory.", item->Name, item_id);
 
 		return false;
 	}
 	// check to make sure we are augmenting an augmentable item
 	else if (((!item->IsClassCommon()) || (item->AugType > 0)) && (aug1 | aug2 | aug3 | aug4 | aug5 | aug6)) {
-		Message(13, "You can not augment an augment or a non-common class item.");
+		Message(Chat::Red, "You can not augment an augment or a non-common class item.");
 		Log(Logs::Detail, Logs::Inventory, "Player %s on account %s attempted to augment an augment or a non-common class item.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u, Aug5: %u)\n",
 			GetName(), account_name, item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
 
@@ -214,7 +214,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 	// check to make sure we are a GM if the item is GM-only
 	/*
 	else if(item->MinStatus && ((this->Admin() < item->MinStatus) || (this->Admin() < RuleI(GM, MinStatusToSummonItem)))) {
-		Message(13, "You are not a GM or do not have the status to summon this item.");
+		Message(Chat::Red, "You are not a GM or do not have the status to summon this item.");
 		Log(Logs::Detail, Logs::Inventory, "Player %s on account %s attempted to create a GM-only item with a status of %i.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u, Aug6: %u, MinStatus: %u)\n",
 			GetName(), account_name, this->Admin(), item->ID, aug1, aug2, aug3, aug4, aug5, aug6, item->MinStatus);
 
@@ -237,7 +237,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 
 		if(augtest == nullptr) {
 			if(augments[iter]) {
-				Message(13, "Augment %u (Aug%i) does not exist.", augments[iter], iter + 1);
+				Message(Chat::Red, "Augment %u (Aug%i) does not exist.", augments[iter], iter + 1);
 				Log(Logs::Detail, Logs::Inventory, "Player %s on account %s attempted to create an augment (Aug%i) with an invalid id.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u, Aug6: %u)\n",
 					GetName(), account_name, (iter + 1), item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
 
@@ -248,13 +248,13 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 			// check that there is not a lore conflict between augment and existing inventory
 			if(CheckLoreConflict(augtest)) {
 				// DuplicateLoreMessage(augtest->ID);
-				Message(13, "You already have a lore %s (%u) in your inventory.", augtest->Name, augtest->ID);
+				Message(Chat::Red, "You already have a lore %s (%u) in your inventory.", augtest->Name, augtest->ID);
 				
 				return false;
 			}
 			// check that augment is an actual augment
 			else if(augtest->AugType == 0) {
-				Message(13, "%s (%u) (Aug%i) is not an actual augment.", augtest->Name, augtest->ID, iter + 1);
+				Message(Chat::Red, "%s (%u) (Aug%i) is not an actual augment.", augtest->Name, augtest->ID, iter + 1);
 				Log(Logs::Detail, Logs::Inventory, "Player %s on account %s attempted to use a non-augment item (Aug%i) as an augment.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u, Aug6: %u)\n",
 					GetName(), account_name, item->ID, (iter + 1), aug1, aug2, aug3, aug4, aug5, aug6);
 				
@@ -266,7 +266,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 			// check to make sure we are a GM if the augment is GM-only
 			/*
 			else if(augtest->MinStatus && ((this->Admin() < augtest->MinStatus) || (this->Admin() < RuleI(GM, MinStatusToSummonItem)))) {
-				Message(13, "You are not a GM or do not have the status to summon this augment.");
+				Message(Chat::Red, "You are not a GM or do not have the status to summon this augment.");
 				Log(Logs::Detail, Logs::Inventory, "Player %s on account %s attempted to create a GM-only augment (Aug%i) with a status of %i.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u, MinStatus: %u)\n",
 					GetName(), account_name, (iter + 1), this->Admin(), item->ID, aug1, aug2, aug3, aug4, aug5, aug6, item->MinStatus);
 
@@ -277,7 +277,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 			// check for augment type allowance
 			if(enforcewear) {
 				if ((item->AugSlotType[iter] == EQEmu::item::AugTypeNone) || !(((uint32)1 << (item->AugSlotType[iter] - 1)) & augtest->AugType)) {
-					Message(13, "Augment %u (Aug%i) is not acceptable wear on Item %u.", augments[iter], iter + 1, item->ID);
+					Message(Chat::Red, "Augment %u (Aug%i) is not acceptable wear on Item %u.", augments[iter], iter + 1, item->ID);
 					Log(Logs::Detail, Logs::Inventory, "Player %s on account %s attempted to augment an item with an unacceptable augment type (Aug%i).\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u, Aug6: %u)\n",
 						GetName(), account_name, (iter + 1), item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
 
@@ -285,7 +285,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 				}
 
 				if(item->AugSlotVisible[iter] == 0) {
-					Message(13, "Item %u has not evolved enough to accept Augment %u (Aug%i).", item->ID, augments[iter], iter + 1);
+					Message(Chat::Red, "Item %u has not evolved enough to accept Augment %u (Aug%i).", item->ID, augments[iter], iter + 1);
 					Log(Logs::Detail, Logs::Inventory, "Player %s on account %s attempted to augment an unevolved item with augment type (Aug%i).\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u, Aug6: %u)\n",
 						GetName(), account_name, (iter + 1), item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
 
@@ -462,7 +462,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 				}
 
 				if(restrictfail) {
-					Message(13, "Augment %u (Aug%i) is restricted from wear on Item %u.", augments[iter], (iter + 1), item->ID);
+					Message(Chat::Red, "Augment %u (Aug%i) is restricted from wear on Item %u.", augments[iter], (iter + 1), item->ID);
 					Log(Logs::Detail, Logs::Inventory, "Player %s on account %s attempted to augment an item with a restricted augment (Aug%i).\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u, Aug6: %u)\n",
 						GetName(), account_name, (iter + 1), item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
 
@@ -473,7 +473,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 			if(enforceusable) {
 				// check for class usability
 				if(item->Classes && !(classes &= augtest->Classes)) {
-					Message(13, "Augment %u (Aug%i) will result in an item not usable by any class.", augments[iter], (iter + 1));
+					Message(Chat::Red, "Augment %u (Aug%i) will result in an item not usable by any class.", augments[iter], (iter + 1));
 					Log(Logs::Detail, Logs::Inventory, "Player %s on account %s attempted to create an item unusable by any class.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u, Aug6: %u)\n",
 						GetName(), account_name, item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
 
@@ -482,7 +482,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 
 				// check for race usability
 				if(item->Races && !(races &= augtest->Races)) {
-					Message(13, "Augment %u (Aug%i) will result in an item not usable by any race.", augments[iter], (iter + 1));
+					Message(Chat::Red, "Augment %u (Aug%i) will result in an item not usable by any race.", augments[iter], (iter + 1));
 					Log(Logs::Detail, Logs::Inventory, "Player %s on account %s attempted to create an item unusable by any race.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u, Aug6: %u)\n",
 						GetName(), account_name, item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
 
@@ -491,7 +491,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 
 				// check for slot usability
 				if(item->Slots && !(slots &= augtest->Slots)) {
-					Message(13, "Augment %u (Aug%i) will result in an item not usable in any slot.", augments[iter], (iter + 1));
+					Message(Chat::Red, "Augment %u (Aug%i) will result in an item not usable in any slot.", augments[iter], (iter + 1));
 					Log(Logs::Detail, Logs::Inventory, "Player %s on account %s attempted to create an item unusable in any slot.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u, Aug6: %u)\n",
 						GetName(), account_name, item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
 
@@ -517,7 +517,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 	EQEmu::ItemInstance* inst = database.CreateItem(item, charges);
 
 	if(inst == nullptr) {
-		Message(13, "An unknown server error has occurred and your item was not created.");
+		Message(Chat::Red, "An unknown server error has occurred and your item was not created.");
 		// this goes to logfile since this is a major error
 		Log(Logs::General, Logs::Error, "Player %s on account %s encountered an unknown item creation error.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u, Aug6: %u)\n",
 			GetName(), account_name, item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
@@ -652,7 +652,7 @@ void Client::DropItem(int16 slot_id, bool recurse)
 	} else {
 		// Item doesn't exist in inventory!
 		Log(Logs::General, Logs::Inventory, "DropItem() - No item found in slot %i", slot_id);
-		Message(13, "Error: Item not found in slot %i", slot_id);
+		Message(Chat::Red, "Error: Item not found in slot %i", slot_id);
 		return;
 	}
 
@@ -752,14 +752,14 @@ void Client::DropInst(const EQEmu::ItemInstance* inst)
 {
 	if (!inst) {
 		// Item doesn't exist in inventory!
-		Message(13, "Error: Item not found");
+		Message(Chat::Red, "Error: Item not found");
 		return;
 	}
 
 
 	if (inst->GetItem()->NoDrop == 0)
 	{
-		Message(13, "This item is NODROP. Deleting.");
+		Message(Chat::Red, "This item is NODROP. Deleting.");
 		return;
 	}
 
@@ -853,7 +853,7 @@ void Client::SendCursorBuffer()
 	if (!lore_pass) {
 		Log(Logs::General, Logs::Inventory, "(%s) Duplicate lore items are not allowed - destroying item %s(id:%u) on cursor",
 			GetName(), test_item->Name, test_item->ID);
-		Message_StringID(MT_LootMessages, 290);
+		MessageString(Chat::Loot, 290);
 		parse->EventItem(EVENT_DESTROY_ITEM, this, test_inst, nullptr, "", 0);
 		DeleteItemInInventory(EQEmu::invslot::slotCursor);
 		SendCursorBuffer();
@@ -1520,7 +1520,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 	if(!IsValidSlot(src_slot_check)){
 		// SoF+ sends a Unix timestamp (should be int32) for src and dst slots every 10 minutes for some reason.
 		if(src_slot_check < 2147483647)
-			Message(13, "Warning: Invalid slot move from slot %u to slot %u with %u charges!", src_slot_check, dst_slot_check, stack_count_check);
+			Message(Chat::Red, "Warning: Invalid slot move from slot %u to slot %u with %u charges!", src_slot_check, dst_slot_check, stack_count_check);
 		Log(Logs::Detail, Logs::Inventory, "Invalid slot move from slot %u to slot %u with %u charges!", src_slot_check, dst_slot_check, stack_count_check);
 		return false;
 	}
@@ -1528,7 +1528,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 	if(!IsValidSlot(dst_slot_check)) {
 		// SoF+ sends a Unix timestamp (should be int32) for src and dst slots every 10 minutes for some reason.
 		if(src_slot_check < 2147483647)
-			Message(13, "Warning: Invalid slot move from slot %u to slot %u with %u charges!", src_slot_check, dst_slot_check, stack_count_check);
+			Message(Chat::Red, "Warning: Invalid slot move from slot %u to slot %u with %u charges!", src_slot_check, dst_slot_check, stack_count_check);
 		Log(Logs::Detail, Logs::Inventory, "Invalid slot move from slot %u to slot %u with %u charges!", src_slot_check, dst_slot_check, stack_count_check);
 		return false;
 	}
@@ -1555,7 +1555,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			if (!lore_pass) {
 				Log(Logs::General, Logs::Inventory, "(%s) Duplicate lore items are not allowed - destroying item %s(id:%u) on cursor",
 					GetName(), test_item->Name, test_item->ID);
-				Message_StringID(MT_LootMessages, 290);
+				MessageString(Chat::Loot, 290);
 				parse->EventItem(EVENT_DESTROY_ITEM, this, test_inst, nullptr, "", 0);
 				DeleteItemInInventory(EQEmu::invslot::slotCursor, 0, true);
 			}
@@ -1608,7 +1608,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 				banker ? banker->GetName() : "UNKNOWN NPC", distance);
 			database.SetMQDetectionFlag(AccountName(), GetName(), hacked_string, zone->GetShortName());
 			safe_delete_array(hacked_string);
-			Kick();	// Kicking player to avoid item loss do to client and server inventories not being sync'd
+			Kick("Inventory desync");	// Kicking player to avoid item loss do to client and server inventories not being sync'd
 			return false;
 		}
 	}
@@ -1624,7 +1624,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		//SetTint(dst_slot_id,src_inst->GetColor());
 		if (src_inst->GetCharges() > 0 && (src_inst->GetCharges() < (int16)move_in->number_in_stack || move_in->number_in_stack > src_inst->GetItem()->StackSize))
 		{
-			Message(13,"Error: Insufficient number in stack.");
+			Message(Chat::Red,"Error: Insufficient number in stack.");
 			return false;
 		}
 	}
@@ -1650,7 +1650,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		}
 		if (srcitemid==17899 || srcbagid==17899 || dstitemid==17899 || dstbagid==17899){
 			this->Trader_EndTrader();
-			this->Message(13,"You cannot move your Trader Satchels, or items inside them, while Trading.");
+			this->Message(Chat::Red,"You cannot move your Trader Satchels, or items inside them, while Trading.");
 		}
 	}
 
@@ -1822,14 +1822,14 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 	// Step 4: Check for entity trade
 	if (dst_slot_id >= EQEmu::invslot::TRADE_BEGIN && dst_slot_id <= EQEmu::invslot::TRADE_END) {
 		if (src_slot_id != EQEmu::invslot::slotCursor) {
-			Kick();
+			Kick("Trade with non-cursor item");
 			return false;
 		}
 		if (with) {
 			Log(Logs::Detail, Logs::Inventory, "Trade item move from slot %d to slot %d (trade with %s)", src_slot_id, dst_slot_id, with->GetName());
 			// Fill Trade list with items from cursor
 			if (!m_inv[EQEmu::invslot::slotCursor]) {
-				Message(13, "Error: Cursor item not located on server!");
+				Message(Chat::Red, "Error: Cursor item not located on server!");
 				return false;
 			}
 
@@ -1939,7 +1939,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 				fail_message = "You are not sufficient level to use this item.";
 			
 			if (fail_message)
-				Message(CC_Red, "%s", fail_message);
+				Message(Chat::Red, "%s", fail_message);
 
 			return false;
 		}
@@ -2008,7 +2008,7 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 	// resync the 'from' and 'to' slots on an as-needed basis
 	// Not as effective as the full process, but less intrusive to gameplay
 	Log(Logs::Detail, Logs::Inventory, "Inventory desyncronization. (charname: %s, source: %i, destination: %i)", GetName(), move_slots->from_slot, move_slots->to_slot);
-	Message(15, "Inventory Desyncronization detected: Resending slot data...");
+	Message(Chat::Yellow, "Inventory Desyncronization detected: Resending slot data...");
 
 	if (move_slots->from_slot >= EQEmu::invslot::EQUIPMENT_BEGIN && move_slots->from_slot <= EQEmu::invbag::CURSOR_BAG_END) {
 		int16 resync_slot = (EQEmu::InventoryProfile::CalcSlotId(move_slots->from_slot) == INVALID_INDEX) ? move_slots->from_slot : EQEmu::InventoryProfile::CalcSlotId(move_slots->from_slot);
@@ -2031,9 +2031,9 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 				safe_delete(outapp);
 			}
 			safe_delete(token_inst);
-			Message(14, "Source slot %i resyncronized.", move_slots->from_slot);
+			Message(Chat::Lime, "Source slot %i resyncronized.", move_slots->from_slot);
 		}
-		else { Message(13, "Could not resyncronize source slot %i.", move_slots->from_slot); }
+		else { Message(Chat::Red, "Could not resyncronize source slot %i.", move_slots->from_slot); }
 	}
 	else {
 		int16 resync_slot = (EQEmu::InventoryProfile::CalcSlotId(move_slots->from_slot) == INVALID_INDEX) ? move_slots->from_slot : EQEmu::InventoryProfile::CalcSlotId(move_slots->from_slot);
@@ -2046,11 +2046,11 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 				SendItemPacket(resync_slot, m_inv[resync_slot], ItemPacketTrade);
 
 				safe_delete(token_inst);
-				Message(14, "Source slot %i resyncronized.", move_slots->from_slot);
+				Message(Chat::Lime, "Source slot %i resyncronized.", move_slots->from_slot);
 			}
-			else { Message(13, "Could not resyncronize source slot %i.", move_slots->from_slot); }
+			else { Message(Chat::Red, "Could not resyncronize source slot %i.", move_slots->from_slot); }
 		}
-		else { Message(13, "Could not resyncronize source slot %i.", move_slots->from_slot); }
+		else { Message(Chat::Red, "Could not resyncronize source slot %i.", move_slots->from_slot); }
 	}
 
 	if (move_slots->to_slot >= EQEmu::invslot::EQUIPMENT_BEGIN && move_slots->to_slot <= EQEmu::invbag::CURSOR_BAG_END) {
@@ -2073,9 +2073,9 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 				safe_delete(outapp);
 			}
 			safe_delete(token_inst);
-			Message(14, "Destination slot %i resyncronized.", move_slots->to_slot);
+			Message(Chat::Lime, "Destination slot %i resyncronized.", move_slots->to_slot);
 		}
-		else { Message(13, "Could not resyncronize destination slot %i.", move_slots->to_slot); }
+		else { Message(Chat::Red, "Could not resyncronize destination slot %i.", move_slots->to_slot); }
 	}
 	else {
 		int16 resync_slot = (EQEmu::InventoryProfile::CalcSlotId(move_slots->to_slot) == INVALID_INDEX) ? move_slots->to_slot : EQEmu::InventoryProfile::CalcSlotId(move_slots->to_slot);
@@ -2088,11 +2088,11 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 				SendItemPacket(resync_slot, m_inv[resync_slot], ItemPacketTrade);
 
 				safe_delete(token_inst);
-				Message(14, "Destination slot %i resyncronized.", move_slots->to_slot);
+				Message(Chat::Lime, "Destination slot %i resyncronized.", move_slots->to_slot);
 			}
-			else { Message(13, "Could not resyncronize destination slot %i.", move_slots->to_slot); }
+			else { Message(Chat::Red, "Could not resyncronize destination slot %i.", move_slots->to_slot); }
 		}
-		else { Message(13, "Could not resyncronize destination slot %i.", move_slots->to_slot); }
+		else { Message(Chat::Red, "Could not resyncronize destination slot %i.", move_slots->to_slot); }
 	}
 }
 
@@ -2219,7 +2219,7 @@ void Client::DyeArmor(EQEmu::TintProfile* dye){
 				SendWearChange(i);
 			}
 			else{
-				Message(13,"Could not locate A Vial of Prismatic Dye.");
+				Message(Chat::Red,"Could not locate A Vial of Prismatic Dye.");
 				return;
 			}
 		}
@@ -3397,7 +3397,7 @@ bool Client::InterrogateInventory(Client* requester, bool log, bool silent, bool
 		Log(Logs::General, Logs::Error, "Client::InterrogateInventory() called for %s by %s with an error state of %s", GetName(), requester->GetName(), (error ? "TRUE" : "FALSE"));
 	}
 	if (!silent) {
-		requester->Message(1, "--- Inventory Interrogation Report for %s (requested by: %s, error state: %s) ---", GetName(), requester->GetName(), (error ? "TRUE" : "FALSE"));
+		requester->Message(Chat::Default, "--- Inventory Interrogation Report for %s (requested by: %s, error state: %s) ---", GetName(), requester->GetName(), (error ? "TRUE" : "FALSE"));
 	}
 
 	// call InterrogateInventory_ for report
@@ -3406,9 +3406,9 @@ bool Client::InterrogateInventory(Client* requester, bool log, bool silent, bool
 	}
 
 	if (error) {
-		Message(13, "An error has been discovered in your inventory!");
-		Message(13, "Do not log out, zone or re-arrange items until this");
-		Message(13, "issue has been resolved or item loss may occur!");
+		Message(Chat::Red, "An error has been discovered in your inventory!");
+		Message(Chat::Red, "Do not log out, zone or re-arrange items until this");
+		Message(Chat::Red, "issue has been resolved or item loss may occur!");
 
 		if (allowtrip)
 			TripInterrogateInvState();
@@ -3419,8 +3419,8 @@ bool Client::InterrogateInventory(Client* requester, bool log, bool silent, bool
 		Log(Logs::Detail, Logs::None, "[CLIENT] Client::InterrogateInventory() -- End");
 	}
 	if (!silent) {
-		requester->Message(1, "Target interrogation flag: %s", (GetInterrogateInvState() ? "TRUE" : "FALSE"));
-		requester->Message(1, "--- End of Interrogation Report ---");
+		requester->Message(Chat::Default, "Target interrogation flag: %s", (GetInterrogateInvState() ? "TRUE" : "FALSE"));
+		requester->Message(Chat::Default, "--- End of Interrogation Report ---");
 	}
 
 	instmap.clear();
@@ -3466,7 +3466,7 @@ void Client::InterrogateInventory_(bool errorcheck, Client* requester, int16 hea
 				head, depth, i.c_str(), p.c_str(), e.c_str());
 		}
 		if (!silent) {
-			requester->Message(6, "%i:%i - inst: %s - parent: %s%s",
+			requester->Message(Chat::Gray, "%i:%i - inst: %s - parent: %s%s",
 				head, depth, i.c_str(), p.c_str(), e.c_str());
 		}
 

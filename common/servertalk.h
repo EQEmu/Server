@@ -80,6 +80,7 @@
 #define ServerOP_GroupJoin			0x003e //for joining ooz folks
 #define ServerOP_UpdateSpawn		0x003f
 #define ServerOP_SpawnStatusChange	0x0040
+#define ServerOP_DropClient         0x0041	// DropClient
 #define ServerOP_ReloadTasks		0x0060
 #define ServerOP_DepopAllPlayersCorpses	0x0061
 #define ServerOP_ReloadTitles		0x0062
@@ -213,6 +214,15 @@ enum {	QSG_LFGuild_PlayerMatches = 0, QSG_LFGuild_UpdatePlayerInfo, QSG_LFGuild_
 
 #define ServerOP_Speech			0x4513
 
+enum {
+	UserToWorldStatusWorldUnavail = 0,
+	UserToWorldStatusSuccess = 1,
+	UserToWorldStatusSuspended = -1,
+	UserToWorldStatusBanned = -2,
+	UserToWorldStatusWorldAtCapacity = -3,
+	UserToWorldStatusAlreadyOnline = -4
+};
+
 /************ PACKET RELATED STRUCT ************/
 class ServerPacket
 {
@@ -308,9 +318,15 @@ struct ServerZoneIncomingClient_Struct {
 	uint32	accid;
 	int16	admin;
 	uint32	charid;
+	uint32  lsid;
 	bool	tellsoff;
 	char	charname[64];
 	char	lskey[30];
+};
+
+struct ServerZoneDropClient_Struct
+{
+	uint32 lsid;
 };
 
 struct ServerChangeWID_Struct {
@@ -343,7 +359,8 @@ struct ServerChannelMessage_Struct {
 	bool noreply;
 	uint16 chan_num;
 	uint32 guilddbid;
-	uint16 language;
+	uint8 language;
+	uint8 lang_skill;
 	uint8 queued; // 0 = not queued, 1 = queued, 2 = queue full, 3 = offline
 	char message[0];
 };
@@ -856,6 +873,8 @@ struct ServerRaidGroupAction_Struct { //add / remove depends on opcode.
 struct ServerRaidMessage_Struct {
 	uint32 rid;
 	uint32 gid;
+	uint8 language;
+	uint8 lang_skill;
 	char from[64];
 	char message[0];
 };

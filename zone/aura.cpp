@@ -710,13 +710,13 @@ void Mob::MakeAura(uint16 spell_id)
 
 	AuraRecord record;
 	if (!database.GetAuraEntry(spell_id, record)) {
-		Message(13, "Unable to find data for aura %s", spells[spell_id].name);
+		Message(Chat::Red, "Unable to find data for aura %s", spells[spell_id].name);
 		Log(Logs::General, Logs::Error, "Unable to find data for aura %d, check auras table.", spell_id);
 		return;
 	}
 
 	if (!IsValidSpell(record.spell_id)) {
-		Message(13, "Casted spell (%d) is not valid for aura %s", record.spell_id, spells[spell_id].name);
+		Message(Chat::Red, "Casted spell (%d) is not valid for aura %s", record.spell_id, spells[spell_id].name);
 		Log(Logs::General, Logs::Error, "Casted spell (%d) is not valid for aura %d, check auras table.",
 		    record.spell_id, spell_id);
 		return;
@@ -744,7 +744,7 @@ void Mob::MakeAura(uint16 spell_id)
 
 	const auto base = database.LoadNPCTypesData(record.npc_type);
 	if (base == nullptr) {
-		Message(13, "Unable to load NPC data for aura %s", spells[spell_id].teleport_zone);
+		Message(Chat::Red, "Unable to load NPC data for aura %s", spells[spell_id].teleport_zone);
 		Log(Logs::General, Logs::Error,
 		    "Unable to load NPC data for aura %s (NPC ID %d), check auras and npc_types tables.",
 		    spells[spell_id].teleport_zone, record.npc_type);
@@ -841,10 +841,10 @@ void Mob::AddTrap(Aura *aura, AuraRecord &record)
 bool Mob::CanSpawnAura(bool trap)
 {
 	if (trap && !HasFreeTrapSlots()) {
-		Message_StringID(MT_SpellFailure, NO_MORE_TRAPS);
+		MessageString(Chat::SpellFailure, NO_MORE_TRAPS);
 		return false;
 	} else if (!trap && !HasFreeAuraSlots()) {
-		Message_StringID(MT_SpellFailure, NO_MORE_AURAS);
+		MessageString(Chat::SpellFailure, NO_MORE_AURAS);
 		return false;
 	}
 
@@ -878,8 +878,6 @@ void Mob::RemoveAllAuras()
 	}
 
 	trap_mgr.count = 0;
-
-	return;
 }
 
 void Mob::RemoveAura(int spawn_id, bool skip_strip, bool expired)
@@ -891,7 +889,7 @@ void Mob::RemoveAura(int spawn_id, bool skip_strip, bool expired)
 				aura.aura->Depop(skip_strip);
 			if (expired && IsClient()) {
 				CastToClient()->SendColoredText(
-				    CC_Yellow, StringFormat("%s has expired.", aura.name)); // TODO: verify color
+					Chat::Yellow, StringFormat("%s has expired.", aura.name)); // TODO: verify color
 				// need to update client UI too
 				auto app = new EQApplicationPacket(OP_UpdateAura, sizeof(AuraDestory_Struct));
 				auto ads = (AuraDestory_Struct *)app->pBuffer;
@@ -920,7 +918,7 @@ void Mob::RemoveAura(int spawn_id, bool skip_strip, bool expired)
 				aura.aura->Depop(skip_strip);
 			if (expired && IsClient())
 				CastToClient()->SendColoredText(
-				    CC_Yellow, StringFormat("%s has expired.", aura.name)); // TODO: verify color
+					Chat::Yellow, StringFormat("%s has expired.", aura.name)); // TODO: verify color
 			while (trap_mgr.count - 1 > i) {
 				i++;
 				aura.spawn_id = trap_mgr.auras[i].spawn_id;

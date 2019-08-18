@@ -3702,7 +3702,7 @@ XS(XS_Mob_Message_StringID) {
 			distance = (uint32) SvUV(ST(3));
 		}
 
-		THIS->Message_StringID(type, string_id, distance);
+		THIS->MessageString(type, string_id, distance);
 	}
 	XSRETURN_EMPTY;
 }

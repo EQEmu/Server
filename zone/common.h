@@ -272,6 +272,31 @@ enum class LootRequestType : uint8 {
 	AllowedPVPDefined,
 };
 
+namespace Journal {
+	enum class SpeakMode : uint8 {
+		Raw = 0,	// this just uses the raw message
+		Say = 1,	// prints with "%1 says,%2 '%3'" if in another language else "%1 says '%2'"
+		Shout = 2,	// prints with "%1 shouts,%2 '%3'" if in another language else "%1 shouts '%2'"
+		EmoteAlt = 3,	// prints "%2", this should just be the same as raw ...
+		Emote = 4,	// prints "%1 %2" if message doesn't start with "\" or "@", else "%1%2"
+		Group = 5	// prints "%1 tells the group,%2 '%3'"
+	};
+
+	enum class Mode : uint8 {
+		None = 0,
+		Log1 = 1, // 1 and 2 log to journal
+		Log2 = 2, // our current code uses 2
+	};
+
+	struct Options {
+		SpeakMode speak_mode;
+		Mode journal_mode;
+		int8 language;
+		uint32 message_type;
+		uint32 target_spawn_id; // who the message is talking to (limits journaling)
+	};
+};
+
 //this is our internal representation of the BUFF struct, can put whatever we want in it
 struct Buffs_Struct {
 	uint16	spellid;

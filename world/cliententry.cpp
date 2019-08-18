@@ -73,7 +73,7 @@ ClientListEntry::ClientListEntry(uint32 in_id, uint32 iAccID, const char* iAccNa
 	memset(pLFGComments, 0, 64);
 }
 
-ClientListEntry::ClientListEntry(uint32 in_id, ZoneServer* iZS, ServerClientList_Struct* scl, int8 iOnline)
+ClientListEntry::ClientListEntry(uint32 in_id, ZoneServer* iZS, ServerClientList_Struct* scl, CLE_Status iOnline)
 : id(in_id)
 {
 	ClearVars(true);
@@ -94,7 +94,7 @@ ClientListEntry::ClientListEntry(uint32 in_id, ZoneServer* iZS, ServerClientList
 	pLFGMatchFilter = false;
 	memset(pLFGComments, 0, 64);
 
-	if (iOnline >= CLE_Status_Zoning)
+	if (iOnline >= CLE_Status::Zoning)
 		Update(iZS, scl, iOnline);
 	else
 		SetOnline(iOnline);
@@ -115,22 +115,24 @@ void ClientListEntry::SetChar(uint32 iCharID, const char* iCharName) {
 	strn0cpy(pname, iCharName, sizeof(pname));
 }
 
-void ClientListEntry::SetOnline(ZoneServer* iZS, int8 iOnline) {
+void ClientListEntry::SetOnline(ZoneServer* iZS, CLE_Status iOnline) {
 	if (iZS == this->Server())
 		SetOnline(iOnline);
 }
 
-void ClientListEntry::SetOnline(int8 iOnline) {
-	if (iOnline >= CLE_Status_Online && pOnline < CLE_Status_Online)
+void ClientListEntry::SetOnline(CLE_Status iOnline) {
+	Log(Logs::General, Logs::World_Server, "ClientListEntry::SetOnline for %s(%i) = %i", AccountName(), AccountID(), iOnline);
+
+	if (iOnline >= CLE_Status::Online && pOnline < CLE_Status::Online)
 		numplayers++;
-	else if (iOnline < CLE_Status_Online && pOnline >= CLE_Status_Online) {
+	else if (iOnline < CLE_Status::Online && pOnline >= CLE_Status::Online) {
 		numplayers--;
 	}
-	if (iOnline != CLE_Status_Online || pOnline < CLE_Status_Online)
+	if (iOnline != CLE_Status::Online || pOnline < CLE_Status::Online)
 		pOnline = iOnline;
-	if (iOnline < CLE_Status_Zoning)
+	if (iOnline < CLE_Status::Zoning)
 		Camp();
-	if (pOnline >= CLE_Status_Online)
+	if (pOnline >= CLE_Status::Online)
 		stale = 0;
 }
 void ClientListEntry::LSUpdate(ZoneServer* iZS){
@@ -161,7 +163,7 @@ void ClientListEntry::LSZoneChange(ZoneToZone_Struct* ztz){
 		safe_delete(pack);
 	}
 }
-void ClientListEntry::Update(ZoneServer* iZS, ServerClientList_Struct* scl, int8 iOnline) {
+void ClientListEntry::Update(ZoneServer* iZS, ServerClientList_Struct* scl, CLE_Status iOnline) {
 	if (pzoneserver != iZS) {
 		if (pzoneserver){
 			pzoneserver->RemovePlayer();
@@ -208,7 +210,7 @@ void ClientListEntry::Update(ZoneServer* iZS, ServerClientList_Struct* scl, int8
 	SetOnline(iOnline);
 }
 
-void ClientListEntry::LeavingZone(ZoneServer* iZS, int8 iOnline) {
+void ClientListEntry::LeavingZone(ZoneServer* iZS, CLE_Status iOnline) {
 	if (iZS != 0 && iZS != pzoneserver)
 		return;
 	SetOnline(iOnline);
@@ -223,7 +225,7 @@ void ClientListEntry::LeavingZone(ZoneServer* iZS, int8 iOnline) {
 
 void ClientListEntry::ClearVars(bool iAll) {
 	if (iAll) {
-		pOnline = CLE_Status_Never;
+		pOnline = CLE_Status::Never;
 		stale = 0;
 
 		pLSID = 0;
@@ -269,10 +271,10 @@ void ClientListEntry::Camp(ZoneServer* iZS) {
 bool ClientListEntry::CheckStale() {
 	stale++;
 	if (stale > 20) {
-		if (pOnline > CLE_Status_Offline)
-			SetOnline(CLE_Status_Offline);
-		else
-			return true;
+		if (pOnline > CLE_Status::Offline)
+			SetOnline(CLE_Status::Offline);
+
+		return true;
 	}
 	return false;
 }

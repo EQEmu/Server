@@ -270,7 +270,7 @@ bool Spawn2::Process() {
 		if (npc->DropsGlobalLoot()) {
 			npc->CheckGlobalLootTables();
 		}
-		npc->SetSp2(spawngroup_id_);
+		npc->SetSpawnGroupId(spawngroup_id_);
 		npc->SaveGuardPointAnim(anim);
 		npc->SetAppearance((EmuAppearance) anim);
 		entity_list.AddNPC(npc);
@@ -280,9 +280,7 @@ bool Spawn2::Process() {
 		/**
 		 * Roambox init
 		 */
-		if (spawn_group->roamdist && spawn_group->roambox[0] && spawn_group->roambox[1] && spawn_group->roambox[2] &&
-			spawn_group->roambox[3] && spawn_group->delay && spawn_group->min_delay) {
-
+		if (spawn_group->roamdist > 0) {
 			npc->AI_SetRoambox(
 				spawn_group->roamdist,
 				spawn_group->roambox[0],
@@ -304,7 +302,8 @@ bool Spawn2::Process() {
 				npcid,
 				x,
 				y,
-				z);
+				z
+			);
 
 			LoadGrid();
 		}

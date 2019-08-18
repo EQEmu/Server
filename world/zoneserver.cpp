@@ -409,12 +409,12 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		if (pack->size < sizeof(ServerChannelMessage_Struct))
 			break;
 		ServerChannelMessage_Struct* scm = (ServerChannelMessage_Struct*)pack->pBuffer;
-		if (scm->chan_num == 20)
+		if (scm->chan_num == ChatChannel_UCSRelay)
 		{
 			UCSLink.SendMessage(scm->from, scm->message);
 			break;
 		}
-		if (scm->chan_num == 7 || scm->chan_num == 14) {
+		if (scm->chan_num == ChatChannel_Tell || scm->chan_num == ChatChannel_TellEcho) {
 			if (scm->deliverto[0] == '*') {
 
 				if (console) {
@@ -437,7 +437,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			}
 
 			ClientListEntry* cle = client_list.FindCharacter(scm->deliverto);
-			if (cle == 0 || cle->Online() < CLE_Status_Zoning ||
+			if (cle == 0 || cle->Online() < CLE_Status::Zoning ||
 				(cle->TellsOff() && ((cle->Anon() == 1 && scm->fromadmin < cle->Admin()) || scm->fromadmin < 80))) {
 				if (!scm->noreply) {
 					ClientListEntry* sender = client_list.FindCharacter(scm->from);
@@ -450,7 +450,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 					sender->Server()->SendPacket(pack);
 				}
 			}
-			else if (cle->Online() == CLE_Status_Zoning) {
+			else if (cle->Online() == CLE_Status::Zoning) {
 				if (!scm->noreply) {
 					ClientListEntry* sender = client_list.FindCharacter(scm->from);
 					if (cle->TellQueueFull()) {
@@ -486,7 +486,8 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				cle->Server()->SendPacket(pack);
 		}
 		else {
-			if (scm->chan_num == 5 || scm->chan_num == 6 || scm->chan_num == 11) {
+			if (scm->chan_num == ChatChannel_OOC || scm->chan_num == ChatChannel_Broadcast
+				|| scm->chan_num == ChatChannel_GMSAY) {
 				if (console) {
 					console->SendChannelMessage(scm, [&scm]() {
 						auto pack = new ServerPacket(ServerOP_ChannelMessage,
@@ -517,7 +518,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 
 			ClientListEntry* cle = client_list.FindCharacter(svm->To);
 
-			if (!cle || (cle->Online() < CLE_Status_Zoning) || !cle->Server()) {
+			if (!cle || (cle->Online() < CLE_Status::Zoning) || !cle->Server()) {
 
 				zoneserver_list.SendEmoteMessage(svm->From, 0, 0, 0, "'%s is not online at this time'", svm->To);
 
@@ -1456,6 +1457,7 @@ void ZoneServer::IncomingClient(Client* client) {
 	s->accid = client->GetAccountID();
 	s->admin = client->GetAdmin();
 	s->charid = client->GetCharID();
+	s->lsid = client->GetLSID();
 	if (client->GetCLE())
 		s->tellsoff = client->GetCLE()->TellsOff();
 	strn0cpy(s->charname, client->GetCharName(), sizeof(s->charname));

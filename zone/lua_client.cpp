@@ -47,7 +47,7 @@ bool Lua_Client::InZone() {
 
 void Lua_Client::Kick() {
 	Lua_Safe_Call_Void();
-	self->Kick();
+	self->Kick("Lua Quest");
 }
 
 void Lua_Client::Disconnect() {

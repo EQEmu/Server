@@ -159,7 +159,7 @@ void Lua_NPC::SetSaveWaypoint(int wp) {
 
 void Lua_NPC::SetSp2(int sg2) {
 	Lua_Safe_Call_Void();
-	self->SetSp2(sg2);
+	self->SetSpawnGroupId(sg2);
 }
 
 int Lua_NPC::GetWaypointMax() {
@@ -174,7 +174,7 @@ int Lua_NPC::GetGrid() {
 
 uint32 Lua_NPC::GetSp2() {
 	Lua_Safe_Call_Int();
-	return self->GetSp2();
+	return self->GetSpawnGroupId();
 }
 
 int Lua_NPC::GetNPCFactionID() {
@@ -529,6 +529,24 @@ int Lua_NPC::GetAvoidanceRating()
 	return self->GetAvoidanceRating();
 }
 
+void Lua_NPC::SetSimpleRoamBox(float box_size)
+{
+	Lua_Safe_Call_Void();
+	self->SetSimpleRoamBox(box_size);
+}
+
+void Lua_NPC::SetSimpleRoamBox(float box_size, float move_distance)
+{
+	Lua_Safe_Call_Void();
+	self->SetSimpleRoamBox(box_size, move_distance);
+}
+
+void Lua_NPC::SetSimpleRoamBox(float box_size, float move_distance, int move_delay)
+{
+	Lua_Safe_Call_Void();
+	self->SetSimpleRoamBox(box_size, move_distance, move_delay);
+}
+
 luabind::scope lua_register_npc() {
 	return luabind::class_<Lua_NPC, Lua_Mob>("NPC")
 		.def(luabind::constructor<>())
@@ -614,6 +632,9 @@ luabind::scope lua_register_npc() {
 		.def("GetGuardPointZ", (float(Lua_NPC::*)(void))&Lua_NPC::GetGuardPointZ)
 		.def("SetPrimSkill", (void(Lua_NPC::*)(int))&Lua_NPC::SetPrimSkill)
 		.def("SetSecSkill", (void(Lua_NPC::*)(int))&Lua_NPC::SetSecSkill)
+		.def("SetSimpleRoamBox", (void(Lua_NPC::*)(float))&Lua_NPC::SetSimpleRoamBox)
+		.def("SetSimpleRoamBox", (void(Lua_NPC::*)(float, float))&Lua_NPC::SetSimpleRoamBox)
+		.def("SetSimpleRoamBox", (void(Lua_NPC::*)(float, float, int))&Lua_NPC::SetSimpleRoamBox)
 		.def("GetPrimSkill", (int(Lua_NPC::*)(void))&Lua_NPC::GetPrimSkill)
 		.def("GetSecSkill", (int(Lua_NPC::*)(void))&Lua_NPC::GetSecSkill)
 		.def("GetSwarmOwner", (int(Lua_NPC::*)(void))&Lua_NPC::GetSwarmOwner)

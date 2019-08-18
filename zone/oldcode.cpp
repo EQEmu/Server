@@ -1198,7 +1198,7 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 		char val1[20]={0};
 		char val2[20]={0};
 		uint32 remain = p_timers.GetRemainingTime(pTimerDisciplineReuse);
-		Message_StringID(0,DISCIPLINE_CANUSEIN,ConvertArray((remain)/60,val1),ConvertArray(remain%60,val2));
+		MessageString(Chat::White,DISCIPLINE_CANUSEIN,ConvertArray((remain)/60,val1),ConvertArray(remain%60,val2));
 		//Message(0,"You can use a new discipline in %i minutes %i seconds.", (disc_timer.GetRemainingTime()/1000)/60,	disc_timer.GetRemainingTime()/1000%60);
 		return;
 	}
@@ -1233,7 +1233,7 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 			return;
 		duration = 11;
 		reuse = 60*60;
-		entity_list.MessageClose_StringID(this, false, 100, 0, DISCIPLINE_FEARLESS, GetName());
+		entity_list.MessageCloseString(this, false, 100, 0, DISCIPLINE_FEARLESS, GetName());
 		//entity_list.MessageClose(this, false, 100, 0, "%s becomes fearless!", GetName());
 		break;
 	}

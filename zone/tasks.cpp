@@ -678,7 +678,7 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state)
 		if (taskID == TASKSLOTEMPTY)
 			continue;
 		if (!Tasks[taskID]) {
-			c->Message(13,
+			c->Message(Chat::Red,
 				   "Active Task Slot %i, references a task (%i), that does not exist. "
 				   "Removing from memory. Contact a GM to resolve this.",
 				   i, taskID);
@@ -691,7 +691,7 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state)
 		for (int j = 0; j < Tasks[taskID]->ActivityCount; j++) {
 
 			if (state->ActiveTasks[i].Activity[j].ActivityID != j) {
-				c->Message(13,
+				c->Message(Chat::Red,
 					   "Active Task %i, %s. Activity count does not match expected value."
 					   "Removing from memory. Contact a GM to resolve this.",
 					   taskID, Tasks[taskID]->Title.c_str());
@@ -1001,7 +1001,7 @@ void TaskManager::TaskSetSelector(Client *c, ClientTaskState *state, Mob *mob, i
 		return;
 
 	if (TaskSets[TaskSetID].empty()) {
-		mob->SayTo_StringID(c, CC_Yellow, MAX_ACTIVE_TASKS, c->GetName()); // I think this is suppose to be yellow
+		mob->SayString(c, Chat::Yellow, MAX_ACTIVE_TASKS, c->GetName()); // I think this is suppose to be yellow
 		return;
 	}
 
@@ -1033,7 +1033,7 @@ void TaskManager::TaskSetSelector(Client *c, ClientTaskState *state, Mob *mob, i
 	if (TaskListIndex > 0) {
 		SendTaskSelector(c, mob, TaskListIndex, TaskList);
 	} else {
-		mob->SayTo_StringID(c, CC_Yellow, MAX_ACTIVE_TASKS, c->GetName()); // check color, I think this might be only for (Shared) Tasks, w/e -- think should be yellow
+		mob->SayString(c, Chat::Yellow, MAX_ACTIVE_TASKS, c->GetName()); // check color, I think this might be only for (Shared) Tasks, w/e -- think should be yellow
 	}
 
 	return;
@@ -1065,7 +1065,7 @@ void TaskManager::TaskQuestSetSelector(Client *c, ClientTaskState *state, Mob *m
 	if (TaskListIndex > 0) {
 		SendTaskSelector(c, mob, TaskListIndex, TaskList);
 	} else {
-		mob->SayTo_StringID(c, CC_Yellow, MAX_ACTIVE_TASKS, c->GetName()); // check color, I think this might be only for (Shared) Tasks, w/e -- think should be yellow
+		mob->SayString(c, Chat::Yellow, MAX_ACTIVE_TASKS, c->GetName()); // check color, I think this might be only for (Shared) Tasks, w/e -- think should be yellow
 	}
 
 	return;
@@ -1266,18 +1266,18 @@ void TaskManager::ExplainTask(Client*c, int TaskID) {
 	if(!c) return;
 
 	if((TaskID<=0) || (TaskID>=MAXTASKS)) {
-		c->Message(0, "TaskID out-of-range.");
+		c->Message(Chat::White, "TaskID out-of-range.");
 		return;
 	}
 
 	if(Tasks[TaskID] == nullptr) {
-		c->Message(0, "Task does not exist.");
+		c->Message(Chat::White, "Task does not exist.");
 		return;
 	}
 
 	char Explanation[1000], *ptr;
-	c->Message(0, "Task %4i: Title: %s", TaskID, Tasks[TaskID]->Description.c_str());
-	c->Message(0, "%3i Activities", Tasks[TaskID]->ActivityCount);
+	c->Message(Chat::White, "Task %4i: Title: %s", TaskID, Tasks[TaskID]->Description.c_str());
+	c->Message(Chat::White, "%3i Activities", Tasks[TaskID]->ActivityCount);
 	ptr = Explanation;
 	for(int i=0; i<Tasks[TaskID]->ActivityCount; i++) {
 
@@ -1936,7 +1936,7 @@ void ClientTaskState::IncrementDoneCount(Client *c, TaskInformation *Task, int T
 		// Send the updated task/activity list to the client
 		taskmanager->SendSingleActiveTaskToClient(c, *info, TaskComplete, false);
 		// Inform the client the task has been updated, both by a chat message
-		c->Message(0, "Your task '%s' has been updated.", Task->Title.c_str());
+		c->Message(Chat::White, "Your task '%s' has been updated.", Task->Title.c_str());
 
 		if(Task->Activity[ActivityID].GoalMethod != METHODQUEST) {
 			if (!ignore_quest_update){
@@ -2001,7 +2001,7 @@ void ClientTaskState::RewardTask(Client *c, TaskInformation *Task) {
 				c->SummonItem(Task->RewardID);
 				Item = database.GetItem(Task->RewardID);
 				if(Item)
-					c->Message(15, "You receive %s as a reward.", Item->Name);
+					c->Message(Chat::Yellow, "You receive %s as a reward.", Item->Name);
 			}
 			break;
 		}
@@ -2012,7 +2012,7 @@ void ClientTaskState::RewardTask(Client *c, TaskInformation *Task) {
 				c->SummonItem(RewardList[i]);
 				Item = database.GetItem(RewardList[i]);
 				if(Item)
-					c->Message(15, "You receive %s as a reward.", Item->Name);
+					c->Message(Chat::Yellow, "You receive %s as a reward.", Item->Name);
 			}
 			break;
 		}
@@ -2024,7 +2024,7 @@ void ClientTaskState::RewardTask(Client *c, TaskInformation *Task) {
 	}
 
 	if (!Task->completion_emote.empty())
-		c->SendColoredText(CC_Yellow, Task->completion_emote); // unsure if they use this packet or color, should work
+		c->SendColoredText(Chat::Yellow, Task->completion_emote); // unsure if they use this packet or color, should work
 
 	// just use normal NPC faction ID stuff
 	if (Task->faction_reward)
@@ -2081,7 +2081,7 @@ void ClientTaskState::RewardTask(Client *c, TaskInformation *Task) {
 			CashMessage += " copper";
 		}
 		CashMessage += " pieces.";
-		c->Message(15,CashMessage.c_str());
+		c->Message(Chat::Yellow,CashMessage.c_str());
 	}
 	int32 EXPReward = Task->XPReward;
 	if(EXPReward > 0) {
@@ -2306,12 +2306,12 @@ void ClientTaskState::ResetTaskActivity(Client *c, int TaskID, int ActivityID)
 
 void ClientTaskState::ShowClientTasks(Client *c)
 {
-	c->Message(0, "Task Information:");
+	c->Message(Chat::White, "Task Information:");
 	if (ActiveTask.TaskID != TASKSLOTEMPTY) {
-		c->Message(0, "Task: %i %s", ActiveTask.TaskID, taskmanager->Tasks[ActiveTask.TaskID]->Title.c_str());
-		c->Message(0, "  Description: [%s]\n", taskmanager->Tasks[ActiveTask.TaskID]->Description.c_str());
+		c->Message(Chat::White, "Task: %i %s", ActiveTask.TaskID, taskmanager->Tasks[ActiveTask.TaskID]->Title.c_str());
+		c->Message(Chat::White, "  Description: [%s]\n", taskmanager->Tasks[ActiveTask.TaskID]->Description.c_str());
 		for (int j = 0; j < taskmanager->GetActivityCount(ActiveTask.TaskID); j++) {
-			c->Message(0, "  Activity: %2d, DoneCount: %2d, Status: %d (0=Hidden, 1=Active, 2=Complete)",
+			c->Message(Chat::White, "  Activity: %2d, DoneCount: %2d, Status: %d (0=Hidden, 1=Active, 2=Complete)",
 				   ActiveTask.Activity[j].ActivityID, ActiveTask.Activity[j].DoneCount,
 				   ActiveTask.Activity[j].State);
 		}
@@ -2321,11 +2321,11 @@ void ClientTaskState::ShowClientTasks(Client *c)
 		if (ActiveQuests[i].TaskID == TASKSLOTEMPTY)
 			continue;
 
-		c->Message(0, "Quest: %i %s", ActiveQuests[i].TaskID,
+		c->Message(Chat::White, "Quest: %i %s", ActiveQuests[i].TaskID,
 			   taskmanager->Tasks[ActiveQuests[i].TaskID]->Title.c_str());
-		c->Message(0, "  Description: [%s]\n", taskmanager->Tasks[ActiveQuests[i].TaskID]->Description.c_str());
+		c->Message(Chat::White, "  Description: [%s]\n", taskmanager->Tasks[ActiveQuests[i].TaskID]->Description.c_str());
 		for (int j = 0; j < taskmanager->GetActivityCount(ActiveQuests[i].TaskID); j++) {
-			c->Message(0, "  Activity: %2d, DoneCount: %2d, Status: %d (0=Hidden, 1=Active, 2=Complete)",
+			c->Message(Chat::White, "  Activity: %2d, DoneCount: %2d, Status: %d (0=Hidden, 1=Active, 2=Complete)",
 				   ActiveQuests[i].Activity[j].ActivityID, ActiveQuests[i].Activity[j].DoneCount,
 				   ActiveQuests[i].Activity[j].State);
 		}
@@ -3204,14 +3204,14 @@ void ClientTaskState::RemoveTask(Client *c, int sequenceNumber, TaskType type)
 void ClientTaskState::AcceptNewTask(Client *c, int TaskID, int NPCID, bool enforce_level_requirement)
 {
 	if (!taskmanager || TaskID < 0 || TaskID >= MAXTASKS) {
-		c->Message(13, "Task system not functioning, or TaskID %i out of range.", TaskID);
+		c->Message(Chat::Red, "Task system not functioning, or TaskID %i out of range.", TaskID);
 		return;
 	}
 
 	auto task = taskmanager->Tasks[TaskID];
 
 	if (task == nullptr) {
-		c->Message(13, "Invalid TaskID %i", TaskID);
+		c->Message(Chat::Red, "Invalid TaskID %i", TaskID);
 		return;
 	}
 
@@ -3235,7 +3235,7 @@ void ClientTaskState::AcceptNewTask(Client *c, int TaskID, int NPCID, bool enfor
 	}
 
 	if (max_tasks) {
-		c->Message(13, "You already have the maximum allowable number of active tasks (%i)", MAXACTIVEQUESTS);
+		c->Message(Chat::Red, "You already have the maximum allowable number of active tasks (%i)", MAXACTIVEQUESTS);
 		return;
 	}
 
@@ -3243,14 +3243,14 @@ void ClientTaskState::AcceptNewTask(Client *c, int TaskID, int NPCID, bool enfor
 	if (task->type == TaskType::Quest) {
 		for (int i = 0; i < MAXACTIVEQUESTS; i++) {
 			if (ActiveQuests[i].TaskID == TaskID) {
-				c->Message(13, "You have already been assigned this task.");
+				c->Message(Chat::Red, "You have already been assigned this task.");
 				return;
 			}
 		}
 	}
 
 	if (enforce_level_requirement && !taskmanager->AppropriateLevel(TaskID, c->GetLevel())) {
-		c->Message(13, "You are outside the level range of this task.");
+		c->Message(Chat::Red, "You are outside the level range of this task.");
 		return;
 	}
 
@@ -3287,7 +3287,7 @@ void ClientTaskState::AcceptNewTask(Client *c, int TaskID, int NPCID, bool enfor
 
 	// This shouldn't happen unless there is a bug in the handling of ActiveTaskCount somewhere
 	if (active_slot == nullptr) {
-		c->Message(13, "You already have the maximum allowable number of active tasks (%i)", MAXACTIVEQUESTS);
+		c->Message(Chat::Red, "You already have the maximum allowable number of active tasks (%i)", MAXACTIVEQUESTS);
 		return;
 	}
 
@@ -3309,14 +3309,14 @@ void ClientTaskState::AcceptNewTask(Client *c, int TaskID, int NPCID, bool enfor
 		ActiveTaskCount++;
 
 	taskmanager->SendSingleActiveTaskToClient(c, *active_slot, false, true);
-	c->Message(0, "You have been assigned the task '%s'.", taskmanager->Tasks[TaskID]->Title.c_str());
+	c->Message(Chat::White, "You have been assigned the task '%s'.", taskmanager->Tasks[TaskID]->Title.c_str());
 
 	std::string buf = std::to_string(TaskID);
 
 	NPC *npc = entity_list.GetID(NPCID)->CastToNPC();
 	if(!npc) {
-		c->Message(clientMessageYellow, "Task Giver ID is %i", NPCID);
-		c->Message(clientMessageError, "Unable to find NPC to send EVENT_TASKACCEPTED to. Report this bug.");
+		c->Message(Chat::Yellow, "Task Giver ID is %i", NPCID);
+		c->Message(Chat::Red, "Unable to find NPC to send EVENT_TASKACCEPTED to. Report this bug.");
 		return;
 	}
 

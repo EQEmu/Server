@@ -57,6 +57,7 @@ public:
 	void SOPZoneBootup(const char *adminname, uint32 ZoneServerID, const char *zonename, bool iMakeStatic = false);
 	void UpdateUCSServerAvailable(bool ucss_available = true);
 	void WorldShutDown(uint32 time, uint32 interval);
+	void DropClient(uint32 lsid, ZoneServer *ignore_zoneserver);
 
 	ZoneServer*	FindByPort(uint16 port);
 	ZoneServer* FindByID(uint32 ZoneID);

@@ -608,7 +608,7 @@ void HateList::PrintHateListToClient(Client *c)
 	while (iterator != list.end())
 	{
 		struct_HateList *e = (*iterator);
-		c->Message(0, "- name: %s, damage: %d, hate: %d",
+		c->Message(Chat::White, "- name: %s, damage: %d, hate: %d",
 			(e->entity_on_hatelist && e->entity_on_hatelist->GetName()) ? e->entity_on_hatelist->GetName() : "(null)",
 			e->hatelist_damage, e->stored_hate_amount);
 

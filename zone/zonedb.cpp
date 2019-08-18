@@ -3061,10 +3061,10 @@ bool ZoneDatabase::SaveMerc(Merc *merc) {
 
 		auto results = database.QueryDatabase(query);
 		if(!results.Success()) {
-			owner->Message(13, results.ErrorMessage().c_str());
+			owner->Message(Chat::Red, results.ErrorMessage().c_str());
 			return false;
 		} else if (results.RowsAffected() != 1) {
-			owner->Message(13, "Unable to save merc to the database.");
+			owner->Message(Chat::Red, "Unable to save merc to the database.");
 			return false;
 		}
 
@@ -3095,10 +3095,10 @@ bool ZoneDatabase::SaveMerc(Merc *merc) {
 
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-		owner->Message(13, results.ErrorMessage().c_str());
+		owner->Message(Chat::Red, results.ErrorMessage().c_str());
 		return false;
 	} else if (results.RowsAffected() != 1) {
-		owner->Message(13, "Unable to save merc to the database.");
+		owner->Message(Chat::Red, "Unable to save merc to the database.");
 		return false;
 	}
 
@@ -3544,10 +3544,10 @@ void ZoneDatabase::ListAllInstances(Client* client, uint32 charid)
 
     char name[64];
     database.GetCharName(charid, name);
-    client->Message(0, "%s is part of the following instances:", name);
+    client->Message(Chat::White, "%s is part of the following instances:", name);
 
     for (auto row = results.begin(); row != results.end(); ++row) {
-        client->Message(0, "%s - id: %lu, version: %lu", database.GetZoneName(atoi(row[1])),
+        client->Message(Chat::White, "%s - id: %lu, version: %lu", database.GetZoneName(atoi(row[1])),
 				(unsigned long)atoi(row[0]), (unsigned long)atoi(row[2]));
     }
 }

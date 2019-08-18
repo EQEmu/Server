@@ -165,21 +165,26 @@ void WorldServer::ProcessUsertoWorldResp(uint16_t opcode, const EQ::Net::Packet 
 
 		switch (utwr->response)
 		{
-		case 1:
+		case UserToWorldStatusSuccess:
 			per->Message = 101;
 			break;
-		case 0:
+		case UserToWorldStatusWorldUnavail:
 			per->Message = 326;
 			break;
-		case -1:
+		case UserToWorldStatusSuspended:
 			per->Message = 337;
 			break;
-		case -2:
+		case UserToWorldStatusBanned:
 			per->Message = 338;
 			break;
-		case -3:
-			per->Message = 303;
+		case UserToWorldStatusWorldAtCapacity:
+			per->Message = 339;
 			break;
+		case UserToWorldStatusAlreadyOnline:
+			per->Message = 111;
+			break;
+		default:
+			per->Message = 102;
 		}
 
 		if (server.options.IsTraceOn())
