@@ -245,12 +245,12 @@ bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnG
 		auto newSpawnEntry = new SpawnEntry(atoi(row[1]), atoi(row[2]), atoi(row[3]), row[4] ? atoi(row[4]) : 0);
 		SpawnGroup *sg = spawn_group_list->GetSpawnGroup(atoi(row[0]));
 
-		if (!spawn_group) {
+		if (!sq) {
 			safe_delete(new_spawn_entry);
 			continue;
 		}
 
-		spawn_group->AddSpawnEntry(new_spawn_entry);
+		sq->AddSpawnEntry(new_spawn_entry);
 	}
 
 	return true;
