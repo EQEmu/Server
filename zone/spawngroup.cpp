@@ -343,7 +343,7 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawn_group_id, SpawnGroupList *spawn
 			continue;
 		}
 
-		spawn_group->AddSpawnEntry(newSpawnEntry);
+		sg->AddSpawnEntry(newSpawnEntry);
 	}
 
 	return true;
