@@ -257,12 +257,12 @@ bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnG
 		auto newSpawnEntry = new SpawnEntry(atoi(row[1]), atoi(row[2]), atoi(row[3]), row[4] ? atoi(row[4]) : 0);
 		SpawnGroup *sg = spawn_group_list->GetSpawnGroup(atoi(row[0]));
 
-		if (!sq) {
-			safe_delete(new_spawn_entry);
+		if (!sg) {
+			safe_delete(newSpawnEntry);
 			continue;
 		}
 
-		sq->AddSpawnEntry(new_spawn_entry);
+		sg->AddSpawnEntry(newSpawnEntry);
 	}
 
 	return true;
@@ -327,7 +327,7 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawn_group_id, SpawnGroupList *spawn
 		"spawnentry.npcid, spawnentry.chance, "
 		"spawnentry.condition_value_filter, spawngroup.spawn_limit "
 		"FROM spawnentry, spawngroup WHERE spawnentry.spawngroupID = '%i' "
-		"AND spawngroup.spawn_limit = '0' ORDER BY chance", spawngroupid);
+		"AND spawngroup.spawn_limit = '0' ORDER BY chance", spawn_group_id);
 
 	results = QueryDatabase(query);
 	if (!results.Success()) {
@@ -343,7 +343,7 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawn_group_id, SpawnGroupList *spawn
 			continue;
 		}
 
-		spawn_group->AddSpawnEntry(new_spawn_entry);
+		spawn_group->AddSpawnEntry(newSpawnEntry);
 	}
 
 	return true;
