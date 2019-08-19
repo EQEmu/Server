@@ -221,10 +221,22 @@ bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnG
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 
-		auto newSpawnGroup = new SpawnGroup(atoi(row[0]), row[1], atoi(row[2]), atof(row[3]), atof(row[4]),
-						    atof(row[5]), atof(row[6]), atof(row[7]), atoi(row[8]),
-						    atoi(row[9]), atoi(row[10]), atoi(row[11]));
-		spawn_group_list->AddSpawnGroup(newSpawnGroup);
+		auto new_spawn_group = new SpawnGroup(
+			atoi(row[0]),
+			row[1],
+			atoi(row[2]),
+			atof(row[3]),
+			atof(row[4]),
+			atof(row[5]),
+			atof(row[6]),
+			atof(row[7]),
+			atoi(row[8]),
+			atoi(row[9]),
+			atoi(row[10]),
+			atoi(row[11])
+		);
+
+		spawn_group_list->AddSpawnGroup(new_spawn_group);
 	}
 
 	query = StringFormat("SELECT DISTINCT spawnentry.spawngroupID, npcid, "
