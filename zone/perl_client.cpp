@@ -5562,6 +5562,55 @@ XS(XS_Client_AddAlternateCurrencyValue) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_SetAlternateCurrencyValue); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_SetAlternateCurrencyValue) {
+	dXSARGS;
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: Client::SetAlternateCurrencyValue(THIS, uint32 currency_id, int32 amount)");
+	{
+		Client *THIS;
+		uint32 currency_id = (uint32) SvUV(ST(1));
+		int32  amount      = (int32) SvUV(ST(2));
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Client *, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		THIS->SetAlternateCurrencyValue(currency_id, amount);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_GetAlternateCurrencyValue); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_GetAlternateCurrencyValue) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::GetAlternateCurrencyValue(THIS, uint32 currency_id)");
+	{
+		Client *THIS;
+		uint32 currency_id = (uint32) SvUV(ST(1));
+		int32  RETVAL 	   = 0;
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Client *, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->GetAlternateCurrencyValue(currency_id);
+		XSprePUSH;
+		PUSHi((IV) RETVAL);
+	}
+	XSRETURN(1);
+}
+
 XS(XS_Client_SendWebLink); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SendWebLink) {
 	dXSARGS;
@@ -6350,6 +6399,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GetAccountFlag"), XS_Client_GetAccountFlag, file, "$$");
 	newXSproto(strcpy(buf, "GetAggroCount"), XS_Client_GetAggroCount, file, "$");
 	newXSproto(strcpy(buf, "GetAllMoney"), XS_Client_GetAllMoney, file, "$");
+	newXSproto(strcpy(buf, "GetAlternateCurrencyValue"), XS_Client_GetAlternateCurrencyValue, file, "$$");
 	newXSproto(strcpy(buf, "GetAnon"), XS_Client_GetAnon, file, "$");
 	newXSproto(strcpy(buf, "GetAugmentAt"), XS_Client_GetAugmentAt, file, "$$$");
 	newXSproto(strcpy(buf, "GetAugmentIDAt"), XS_Client_GetAugmentIDAt, file, "$$$");
@@ -6487,6 +6537,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "SetAAPoints"), XS_Client_SetAAPoints, file, "$$");
 	newXSproto(strcpy(buf, "SetAATitle"), XS_Client_SetAATitle, file, "$$;$");
 	newXSproto(strcpy(buf, "SetAccountFlag"), XS_Client_SetAccountFlag, file, "$$");
+	newXSproto(strcpy(buf, "SetAlternateCurrencyValue"), XS_Client_SetAlternateCurrencyValue, file, "$$$");
 	newXSproto(strcpy(buf, "SetBaseClass"), XS_Client_SetBaseClass, file, "$$");
 	newXSproto(strcpy(buf, "SetBaseGender"), XS_Client_SetBaseGender, file, "$$");
 	newXSproto(strcpy(buf, "SetBaseRace"), XS_Client_SetBaseRace, file, "$$");

@@ -1210,6 +1210,16 @@ void Lua_Client::AddAlternateCurrencyValue(uint32 currency, int amount) {
 	self->AddAlternateCurrencyValue(currency, amount, 1);
 }
 
+void Lua_Client::SetAlternateCurrencyValue(uint32 currency, int amount) {
+	Lua_Safe_Call_Void();
+	self->SetAlternateCurrencyValue(currency, amount);
+}
+
+int Lua_Client::GetAlternateCurrencyValue(uint32 currency) {
+	Lua_Safe_Call_Int();
+	return self->GetAlternateCurrencyValue(currency);
+}
+
 void Lua_Client::SendWebLink(const char *site) {
 	Lua_Safe_Call_Void();
 	self->SendWebLink(site);
@@ -1760,6 +1770,8 @@ luabind::scope lua_register_client() {
 		.def("OpenLFGuildWindow", (void(Lua_Client::*)(void))&Lua_Client::OpenLFGuildWindow)
 		.def("Signal", (void(Lua_Client::*)(uint32))&Lua_Client::Signal)
 		.def("AddAlternateCurrencyValue", (void(Lua_Client::*)(uint32,int))&Lua_Client::AddAlternateCurrencyValue)
+		.def("SetAlternateCurrencyValue", (void(Lua_Client::*)(uint32,int))&Lua_Client::SetAlternateCurrencyValue)
+		.def("GetAlternateCurrencyValue", (int(Lua_Client::*)(uint32))&Lua_Client::GetAlternateCurrencyValue)
 		.def("SendWebLink", (void(Lua_Client::*)(const char *))&Lua_Client::SendWebLink)
 		.def("HasSpellScribed", (bool(Lua_Client::*)(int))&Lua_Client::HasSpellScribed)
 		.def("SetAccountFlag", (void(Lua_Client::*)(std::string,std::string))&Lua_Client::SetAccountFlag)

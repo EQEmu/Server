@@ -269,6 +269,8 @@ public:
 	void OpenLFGuildWindow();
 	void Signal(uint32 id);
 	void AddAlternateCurrencyValue(uint32 currency, int amount);
+	void SetAlternateCurrencyValue(uint32 currency, int amount);
+	int GetAlternateCurrencyValue(uint32 currency);
 	void SendWebLink(const char *site);
 	bool HasSpellScribed(int spell_id);
 	void SetAccountFlag(std::string flag, std::string val);
