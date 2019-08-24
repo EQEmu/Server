@@ -30,3 +30,4 @@ vcpkg/
 
 .idea/*
 *cbp
+.editorconfig
