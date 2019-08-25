@@ -4284,17 +4284,17 @@ void bot_subcommand_bot_clone(Client *c, const Seperator *sep)
 void bot_subcommand_bot_create(Client *c, const Seperator *sep)
 {
 	const std::string class_substrs[17] = { "",
-		"%u(WAR)", "%u(CLR)", "%u(PAL)", "%u(RNG)",
-		"%u(SHD)", "%u(DRU)", "%u(MNK)", "%u(BRD)",
-		"%u(ROG)", "%u(SHM)", "%u(NEC)", "%u(WIZ)",
-		"%u(MAG)", "%u(ENC)", "%u(BST)", "%u(BER)"
+		"%u (WAR)", "%u (CLR)", "%u (PAL)", "%u (RNG)",
+		"%u (SHD)", "%u (DRU)", "%u (MNK)", "%u (BRD)",
+		"%u (ROG)", "%u (SHM)", "%u (NEC)", "%u (WIZ)",
+		"%u (MAG)", "%u (ENC)", "%u (BST)", "%u (BER)"
 	};
 
 	const std::string race_substrs[17] = { "",
-		"%u(HUM)", "%u(BAR)", "%u(ERU)", "%u(ELF)",
-		"%u(HIE)", "%u(DEF)", "%u(HEF)", "%u(DWF)",
-		"%u(TRL)", "%u(OGR)", "%u(HFL)", "%u(GNM)",
-		"%u(IKS)", "%u(VAH)", "%u(FRG)", "%u(DRK)"
+		"%u (HUM)", "%u (BAR)", "%u (ERU)", "%u (ELF)",
+		"%u (HIE)", "%u (DEF)", "%u (HEF)", "%u (DWF)",
+		"%u (TRL)", "%u (OGR)", "%u (HFL)", "%u (GNM)",
+		"%u (IKS)", "%u (VAH)", "%u (FRG)", "%u (DRK)"
 	};
 
 	const uint16 race_values[17] = { 0,
@@ -4305,54 +4305,70 @@ void bot_subcommand_bot_create(Client *c, const Seperator *sep)
 	};
 
 	const std::string gender_substrs[2] = {
-		"%u(M)", "%u(F)",
+		"%u (M)", "%u (F)",
 	};
-
-	std::string msg_class = "class:";
-	std::string msg_race = "race:";
-	std::string msg_gender = "gender:";
-	std::string msg_separator;
-
-	msg_separator = " ";
-	for (int i = 0; i <= 15; ++i) {
-		if (((1 << i) & RuleI(Bots, AllowedClasses)) == 0)
-			continue;
-
-		msg_class.append(const_cast<const std::string&>(msg_separator));
-		msg_class.append(StringFormat(class_substrs[i + 1].c_str(), (i + 1)));
-
-		msg_separator = ", ";
-	}
-
-	msg_separator = " ";
-	for (int i = 0; i <= 15; ++i) {
-		if (((1 << i) & RuleI(Bots, AllowedRaces)) == 0)
-			continue;
-
-		msg_race.append(const_cast<const std::string&>(msg_separator));
-		msg_race.append(StringFormat(race_substrs[i + 1].c_str(), race_values[i + 1]));
-
-		msg_separator = ", ";
-	}
-
-	msg_separator = " ";
-	for (int i = 0; i <= 1; ++i) {
-		if (((1 << i) & RuleI(Bots, AllowedGenders)) == 0)
-			continue;
-
-		msg_gender.append(const_cast<const std::string&>(msg_separator));
-		msg_gender.append(StringFormat(gender_substrs[i].c_str(), i));
-
-		msg_separator = ", ";
-	}
 
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_create", sep->arg[0], "botcreate"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
 		c->Message(m_usage, "usage: %s [bot_name] [bot_class] [bot_race] [bot_gender]", sep->arg[0]);
-		c->Message(m_note, msg_class.c_str());
-		c->Message(m_note, msg_race.c_str());
-		c->Message(m_note, msg_gender.c_str());
+		std::string window_title = "Bot Create Options";
+		std::string window_text;
+		std::string message_separator;
+		int object_count = 0;
+		const int object_max = 5;
+
+		window_text.append("<c \"#FFFFFF\">Classes:<c \"#FFFF\">");
+		message_separator = " ";
+		object_count = 1;
+		for (int i = 0; i <= 15; ++i) {
+			if (((1 << i) & RuleI(Bots, AllowedClasses)) == 0)
+				continue;
+
+			window_text.append(const_cast<const std::string&>(message_separator));
+			if (object_count >= object_max) {
+				window_text.append("<br>");
+				object_count = 0;
+			}
+			window_text.append(StringFormat(class_substrs[i + 1].c_str(), (i + 1)));
+			++object_count;
+			message_separator = ", ";
+		}
+		window_text.append("<br><br>");
+
+		window_text.append("<c \"#FFFFFF\">Races:<c \"#FFFF\">");
+		message_separator = " ";
+		object_count = 1;
+		for (int i = 0; i <= 15; ++i) {
+			if (((1 << i) & RuleI(Bots, AllowedRaces)) == 0)
+				continue;
+
+			window_text.append(const_cast<const std::string&>(message_separator));
+			if (object_count >= object_max) {
+				window_text.append("<br>");
+				object_count = 0;
+			}
+			window_text.append(StringFormat(race_substrs[i + 1].c_str(), race_values[i + 1]));
+			++object_count;
+			message_separator = ", ";
+		}
+		window_text.append("<br><br>");
+
+		window_text.append("<c \"#FFFFFF\">Genders:<c \"#FFFF\">");
+		message_separator = " ";
+		for (int i = 0; i <= 1; ++i) {
+			if (((1 << i) & RuleI(Bots, AllowedGenders)) == 0)
+				continue;
+
+			window_text.append(const_cast<const std::string&>(message_separator));
+			window_text.append(StringFormat(gender_substrs[i].c_str(), i));
+
+			message_separator = ", ";
+		}
+
+
+		c->SendPopupToClient(window_title.c_str(), window_text.c_str());
+
 		return;
 	}
 
@@ -4363,19 +4379,19 @@ void bot_subcommand_bot_create(Client *c, const Seperator *sep)
 	std::string bot_name = sep->arg[1];
 
 	if (sep->arg[2][0] == '\0' || !sep->IsNumber(2)) {
-		c->Message(m_fail, msg_class.c_str());
+		c->Message(m_fail, "Invalid Class!");
 		return;
 	}
 	uint8 bot_class = atoi(sep->arg[2]);
 
 	if (sep->arg[3][0] == '\0' || !sep->IsNumber(3)) {
-		c->Message(m_fail, msg_race.c_str());
+		c->Message(m_fail, "Invalid Race!");
 		return;
 	}
 	uint16 bot_race = atoi(sep->arg[3]);
 
 	if (sep->arg[4][0] == '\0') {
-		c->Message(m_fail, msg_gender.c_str());
+		c->Message(m_fail, "Invalid Gender!");
 		return;
 	}
 	uint8 bot_gender = atoi(sep->arg[4]);
