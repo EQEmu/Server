@@ -131,6 +131,9 @@ public:
 	void MerchantCloseShop();
 	int GetRawAC();
 	int GetAvoidanceRating();
+	void SetSimpleRoamBox(float box_size);
+	void SetSimpleRoamBox(float box_size, float move_distance);
+	void SetSimpleRoamBox(float box_size, float move_distance, int move_delay);
 };
 
 #endif

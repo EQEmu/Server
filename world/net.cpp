@@ -123,7 +123,7 @@ int main(int argc, char** argv) {
 	if (!std::ifstream("eqemu_config.json")) {
 		CheckForServerScript(true);
 		/* Run EQEmu Server script (Checks for database updates) */
-		system("perl eqemu_server.pl convert_xml");
+		if(system("perl eqemu_server.pl convert_xml"));
 	}
 	else {
 		/* Download EQEmu Server Maintenance Script if doesn't exist */
@@ -627,9 +627,9 @@ void CheckForServerScript(bool force_download) {
 
 		std::cout << "Pulling down EQEmu Server Maintenance Script (eqemu_server.pl)..." << std::endl;
 #ifdef _WIN32
-		system("perl -MLWP::UserAgent -e \"require LWP::UserAgent;  my $ua = LWP::UserAgent->new; $ua->timeout(10); $ua->env_proxy; my $response = $ua->get('https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/eqemu_server.pl'); if ($response->is_success){ open(FILE, '> eqemu_server.pl'); print FILE $response->decoded_content; close(FILE); }\"");
+		if(system("perl -MLWP::UserAgent -e \"require LWP::UserAgent;  my $ua = LWP::UserAgent->new; $ua->timeout(10); $ua->env_proxy; my $response = $ua->get('https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/eqemu_server.pl'); if ($response->is_success){ open(FILE, '> eqemu_server.pl'); print FILE $response->decoded_content; close(FILE); }\""));
 #else
-		system("wget -N --no-check-certificate --quiet -O eqemu_server.pl https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/eqemu_server.pl");
+		if(system("wget -N --no-check-certificate --quiet -O eqemu_server.pl https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/eqemu_server.pl"));
 #endif
 	}
 }

@@ -1102,7 +1102,9 @@ void LuaParser::MapFunctions(lua_State *L) {
 			lua_register_rules_const(),
 			lua_register_rulei(),
 			lua_register_ruler(),
-			lua_register_ruleb()
+			lua_register_ruleb(),
+			lua_register_journal_speakmode(),
+			lua_register_journal_mode()
 		];
 
 	} catch(std::exception &ex) {
@@ -1298,8 +1300,6 @@ QuestEventID LuaParser::ConvertLuaEvent(QuestEventID evt) {
 	}
 }
 
-#endif
-
 void LuaParser::MeleeMitigation(Mob *self, Mob *attacker, DamageHitInfo &hit, ExtraAttackOptions *opts, bool &ignoreDefault)
 {
 	for (auto &mod : mods_) {
@@ -1372,3 +1372,5 @@ uint32 LuaParser::GetExperienceForKill(Client *self, Mob *against, bool &ignoreD
 	}
 	return retval;
 }
+
+#endif

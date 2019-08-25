@@ -471,7 +471,7 @@ static void ProcessCommandIgnore(Client *c, std::string Ignoree) {
 Clientlist::Clientlist(int ChatPort) {
 	EQStreamManagerInterfaceOptions chat_opts(ChatPort, false, false);
 	chat_opts.opcode_size = 1;
-	chat_opts.daybreak_options.stale_connection_ms = 300000;
+	chat_opts.daybreak_options.stale_connection_ms = 600000;
 	chat_opts.daybreak_options.resend_delay_ms = RuleI(Network, ResendDelayBaseMS);
 	chat_opts.daybreak_options.resend_delay_factor = RuleR(Network, ResendDelayFactor);
 	chat_opts.daybreak_options.resend_delay_min = RuleI(Network, ResendDelayMinMS);

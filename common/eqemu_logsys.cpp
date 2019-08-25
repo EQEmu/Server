@@ -81,14 +81,6 @@ namespace Console {
 	};
 }
 
-enum GameChatColor {
-	yellow       = 15,
-	red          = 13,
-	light_green  = 14,
-	light_cyan   = 258,
-	light_purple = 5
-};
-
 /**
  * EQEmuLogSys Constructor
  */
@@ -306,22 +298,22 @@ uint16 EQEmuLogSys::GetGMSayColorFromCategory(uint16 log_category)
 	switch (log_category) {
 		case Logs::Status:
 		case Logs::Normal:
-			return GameChatColor::yellow;
+			return Chat::Yellow;
 		case Logs::MySQLError:
 		case Logs::Error:
-			return GameChatColor::red;
+			return Chat::Red;
 		case Logs::MySQLQuery:
 		case Logs::Debug:
-			return GameChatColor::light_green;
+			return Chat::Lime;
 		case Logs::Quests:
-			return GameChatColor::light_cyan;
+			return Chat::Group;
 		case Logs::Commands:
 		case Logs::Mercenaries:
-			return GameChatColor::light_purple;
+			return Chat::Magenta;
 		case Logs::Crash:
-			return GameChatColor::red;
+			return Chat::Red;
 		default:
-			return GameChatColor::yellow;
+			return Chat::Yellow;
 	}
 }
 

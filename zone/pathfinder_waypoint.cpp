@@ -200,9 +200,9 @@ void PathfinderWaypoint::DebugCommand(Client *c, const Seperator *sep)
 {
 	if(sep->arg[1][0] == '\0' || !strcasecmp(sep->arg[1], "help"))
 	{
-		c->Message(0, "Syntax: #path shownodes: Spawns a npc to represent every npc node.");
-		c->Message(0, "#path show: Plots a path from the user to their target.");
-		c->Message(0, "#path info node_id: Gives information about node info (requires shownode target).");
+		c->Message(Chat::White, "Syntax: #path shownodes: Spawns a npc to represent every npc node.");
+		c->Message(Chat::White, "#path show: Plots a path from the user to their target.");
+		c->Message(Chat::White, "#path info node_id: Gives information about node info (requires shownode target).");
 		return;
 	}
 	
@@ -425,11 +425,11 @@ void PathfinderWaypoint::NodeInfo(Client *c)
 		return;
 	}
 
-	c->Message(0, "Pathing node: %i at (%.2f, %.2f, %.2f) with bestz %.2f",
+	c->Message(Chat::White, "Pathing node: %i at (%.2f, %.2f, %.2f) with bestz %.2f",
 		node->id, node->v.x, node->v.y, node->v.z, node->bestz);
 
 	for (auto &edge : node->edges) {
-		c->Message(0, "id: %i, distance: %.2f, door id: %i, is teleport: %i",
+		c->Message(Chat::White, "id: %i, distance: %.2f, door id: %i, is teleport: %i",
 			edge.first,
 			edge.second.distance,
 			edge.second.door_id,

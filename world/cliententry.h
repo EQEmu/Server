@@ -8,13 +8,15 @@
 #include "../common/rulesys.h"
 #include <vector>
 
-
-#define CLE_Status_Never		-1
-#define CLE_Status_Offline		0
-#define CLE_Status_Online		1	// Will not overwrite more specific online status
-#define CLE_Status_CharSelect	2
-#define CLE_Status_Zoning		3
-#define CLE_Status_InZone		4
+typedef enum
+{
+	Never,
+	Offline,
+	Online,
+	CharSelect,
+	Zoning,
+	InZone
+} CLE_Status;
 
 class ZoneServer;
 struct ServerClientList_Struct;
@@ -23,25 +25,25 @@ class ClientListEntry {
 public:
 	ClientListEntry(uint32 id, uint32 iLSID, const char* iLoginName, const char* iLoginKey, int16 iWorldAdmin = 0, uint32 ip = 0, uint8 local=0);
 	ClientListEntry(uint32 id, uint32 iAccID, const char* iAccName, MD5& iMD5Pass, int16 iAdmin = 0);
-	ClientListEntry(uint32 id, ZoneServer* iZS, ServerClientList_Struct* scl, int8 iOnline);
+	ClientListEntry(uint32 id, ZoneServer* iZS, ServerClientList_Struct* scl, CLE_Status iOnline);
 	~ClientListEntry();
 	bool	CheckStale();
-	void	Update(ZoneServer* zoneserver, ServerClientList_Struct* scl, int8 iOnline = CLE_Status_InZone);
+	void	Update(ZoneServer* zoneserver, ServerClientList_Struct* scl, CLE_Status iOnline = CLE_Status::InZone);
 	void	LSUpdate(ZoneServer* zoneserver);
 	void	LSZoneChange(ZoneToZone_Struct* ztz);
 	bool	CheckAuth(uint32 iLSID, const char* key);
 	bool	CheckAuth(const char* iName, MD5& iMD5Password);
 	bool	CheckAuth(uint32 id, const char* key, uint32 ip);
-	void	SetOnline(ZoneServer* iZS, int8 iOnline);
-	void	SetOnline(int8 iOnline = CLE_Status_Online);
+	void	SetOnline(ZoneServer* iZS, CLE_Status iOnline);
+	void	SetOnline(CLE_Status iOnline = CLE_Status::Online);
 	void	SetChar(uint32 iCharID, const char* iCharName);
-	inline int8		Online()		{ return pOnline; }
+	inline CLE_Status Online()		{ return pOnline; }
 	inline const uint32	GetID() const	{ return id; }
 	inline const uint32	GetIP() const	{ return pIP; }
 	inline void			SetIP(const uint32& iIP) { pIP = iIP; }
 	inline void			KeepAlive()		{ stale = 0; }
 	inline uint8			GetStaleCounter() const { return stale; }
-	void	LeavingZone(ZoneServer* iZS = 0, int8 iOnline = CLE_Status_Offline);
+	void	LeavingZone(ZoneServer* iZS = 0, CLE_Status iOnline = CLE_Status::Offline);
 	void	Camp(ZoneServer* iZS = 0);
 
 	// Login Server stuff
@@ -50,7 +52,7 @@ public:
 	inline const char*	LSName() const		{ return plsname; }
 	inline int16		WorldAdmin() const	{ return pworldadmin; }
 	inline const char*	GetLSKey() const	{ return plskey; }
-	inline const int8	GetOnline() const	{ return pOnline; }
+	inline const CLE_Status	GetOnline() const	{ return pOnline; }
 
 	// Account stuff
 	inline uint32		AccountID() const		{ return paccountid; }
@@ -93,7 +95,7 @@ private:
 
 	const uint32	id;
 	uint32	pIP;
-	int8	pOnline;
+	CLE_Status pOnline;
 	uint8	stale;
 
 	// Login Server stuff

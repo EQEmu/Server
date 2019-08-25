@@ -161,14 +161,14 @@ bool Client::CanFish() {
 
 	if (!Pole || !Pole->IsClassCommon() || Pole->GetItem()->ItemType != EQEmu::item::ItemTypeFishingPole) {
 		if (m_inv.HasItemByUse(EQEmu::item::ItemTypeFishingPole, 1, invWhereWorn | invWherePersonal | invWhereBank | invWhereSharedBank | invWhereTrading | invWhereCursor))	//We have a fishing pole somewhere, just not equipped
-			Message_StringID(MT_Skills, FISHING_EQUIP_POLE);	//You need to put your fishing pole in your primary hand.
+			MessageString(Chat::Skills, FISHING_EQUIP_POLE);	//You need to put your fishing pole in your primary hand.
 		else	//We don't have a fishing pole anywhere
-			Message_StringID(MT_Skills, FISHING_NO_POLE);	//You can't fish without a fishing pole, go buy one.
+			MessageString(Chat::Skills, FISHING_NO_POLE);	//You can't fish without a fishing pole, go buy one.
 		return false;
 	}
 
 	if (!Bait || !Bait->IsClassCommon() || Bait->GetItem()->ItemType != EQEmu::item::ItemTypeFishingBait) {
-		Message_StringID(MT_Skills, FISHING_NO_BAIT);	//You can't fish without fishing bait, go buy some.
+		MessageString(Chat::Skills, FISHING_NO_BAIT);	//You can't fish without fishing bait, go buy some.
 		return false;
 	}
 
@@ -190,7 +190,7 @@ bool Client::CanFish() {
 		float bestz = zone->zonemap->FindBestZ(rodPosition, nullptr);
 		float len = m_Position.z - bestz;
 		if(len > LineLength || len < 0.0f) {
-			Message_StringID(MT_Skills, FISHING_LAND);
+			MessageString(Chat::Skills, FISHING_LAND);
 			return false;
 		}
 
@@ -203,7 +203,7 @@ bool Client::CanFish() {
 			bool in_water = zone->watermap->InWater(dest) || zone->watermap->InVWater(dest);
 
 			if (in_lava) {
-				Message_StringID(MT_Skills, FISHING_LAVA);	//Trying to catch a fire elemental or something?
+				MessageString(Chat::Skills, FISHING_LAVA);	//Trying to catch a fire elemental or something?
 				return false;
 			}
 
@@ -212,7 +212,7 @@ bool Client::CanFish() {
 			}
 		}
 
-		Message_StringID(MT_Skills, FISHING_LAND);
+		MessageString(Chat::Skills, FISHING_LAND);
 		return false;
 	}
 	return true;
@@ -223,7 +223,7 @@ void Client::GoFish()
 
 	//TODO: generate a message if we're already fishing
 	/*if (!fishing_timer.Check()) {	//this isn't the right check, may need to add something to the Client class like 'bool is_fishing'
-		Message_StringID(0, ALREADY_FISHING);	//You are already fishing!
+		MessageString(Chat::White, ALREADY_FISHING);	//You are already fishing!
 		return;
 	}*/
 
@@ -293,12 +293,12 @@ void Client::GoFish()
 
 							entity_list.AddNPC(npc);
 
-							Message(MT_Emote,
+							Message(Chat::Emote,
 								"You fish up a little more than you bargained for...");
 						}
 					}
 					else {
-						Message(MT_Emote, "You notice something lurking just below the water's surface...");
+						Message(Chat::Emote, "You notice something lurking just below the water's surface...");
 					}
 				}
 			}
@@ -315,17 +315,17 @@ void Client::GoFish()
 		const EQEmu::ItemData* food_item = database.GetItem(food_id);
 
 		if (food_item->ItemType  != EQEmu::item::ItemTypeFood) {
-			Message_StringID(MT_Skills, FISHING_SUCCESS);
+			MessageString(Chat::Skills, FISHING_SUCCESS);
 		}
 		else {
-			Message_StringID(MT_Skills, FISHING_SUCCESS_FISH_NAME, food_item->Name);
+			MessageString(Chat::Skills, FISHING_SUCCESS_FISH_NAME, food_item->Name);
 		}
 
 		EQEmu::ItemInstance* inst = database.CreateItem(food_item, 1);
 		if(inst != nullptr) {
 			if(CheckLoreConflict(inst->GetItem()))
 			{
-				Message_StringID(0, DUP_LORE);
+				MessageString(Chat::White, DUP_LORE);
 				safe_delete(inst);
 			}
 			else
@@ -351,13 +351,13 @@ void Client::GoFish()
 		//chance to use bait when you dont catch anything...
 		if (zone->random.Int(0, 4) == 1) {
 			DeleteItemInInventory(bslot, 1, true);	//do we need client update?
-			Message_StringID(MT_Skills, FISHING_LOST_BAIT);	//You lost your bait!
+			MessageString(Chat::Skills, FISHING_LOST_BAIT);	//You lost your bait!
 		} else {
 			if (zone->random.Int(0, 15) == 1)	//give about a 1 in 15 chance to spill your beer. we could make this a rule, but it doesn't really seem worth it
 				//TODO: check for & consume an alcoholic beverage from inventory when this triggers, and set it as a rule that's disabled by default
-				Message_StringID(MT_Skills, FISHING_SPILL_BEER);	//You spill your beer while bringing in your line.
+				MessageString(Chat::Skills, FISHING_SPILL_BEER);	//You spill your beer while bringing in your line.
 			else
-				Message_StringID(MT_Skills, FISHING_FAILED);	//You didn't catch anything.
+				MessageString(Chat::Skills, FISHING_FAILED);	//You didn't catch anything.
 		}
 
 		parse->EventPlayer(EVENT_FISH_FAILURE, this, "", 0);
@@ -367,7 +367,7 @@ void Client::GoFish()
 	//this is potentially exploitable in that they can fish
 	//and then swap out items in primary slot... too lazy to fix right now
 	if (zone->random.Int(0, 49) == 1) {
-		Message_StringID(MT_Skills, FISHING_POLE_BROKE);	//Your fishing pole broke!
+		MessageString(Chat::Skills, FISHING_POLE_BROKE);	//Your fishing pole broke!
 		DeleteItemInInventory(EQEmu::invslot::slotPrimary, 0, true);
 	}
 
@@ -434,13 +434,13 @@ void Client::ForageItem(bool guarantee) {
 				break;
 			}
 
-		Message_StringID(MT_Skills, stringid);
+		MessageString(Chat::Skills, stringid);
 		EQEmu::ItemInstance* inst = database.CreateItem(food_item, 1);
 		if(inst != nullptr) {
 			// check to make sure it isn't a foraged lore item
 			if(CheckLoreConflict(inst->GetItem()))
 			{
-				Message_StringID(0, DUP_LORE);
+				MessageString(Chat::White, DUP_LORE);
 				safe_delete(inst);
 			}
 			else {
@@ -462,12 +462,12 @@ void Client::ForageItem(bool guarantee) {
 
 		int ChanceSecondForage = aabonuses.ForageAdditionalItems + itembonuses.ForageAdditionalItems + spellbonuses.ForageAdditionalItems;
 		if(!guarantee && zone->random.Roll(ChanceSecondForage)) {
-			Message_StringID(MT_Skills, FORAGE_MASTERY);
+			MessageString(Chat::Skills, FORAGE_MASTERY);
 			ForageItem(true);
 		}
 
 	} else {
-		Message_StringID(MT_Skills, FORAGE_FAILED);
+		MessageString(Chat::Skills, FORAGE_FAILED);
 		parse->EventPlayer(EVENT_FORAGE_FAILURE, this, "", 0);
 	}
 

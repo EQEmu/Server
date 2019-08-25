@@ -130,7 +130,7 @@
 	int32	GetFollowID();
 
 	virtual void	Message(int32 type, const char* message, ...);
-	virtual void	Message_StringID(int32 type, int32 string_id, int32 distance = 0);
+	virtual void	MessageString(int32 type, int32 string_id, int32 distance = 0);
 	void Say(const char *format, ...);
 	void Shout(const char *format, ...);
 	void Emote(const char *format, ...);

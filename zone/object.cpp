@@ -572,7 +572,7 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 
 			if (sender->ClientVersion() >= EQEmu::versions::ClientVersion::RoF) {
 				coa->drop_id = 0xFFFFFFFF;
-				sender->Message(0, "Someone else is using that. Try again later.");
+				sender->Message(Chat::White, "Someone else is using that. Try again later.");
 			}
 		}
 
