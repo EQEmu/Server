@@ -1,6 +1,14 @@
+#ifdef EQEMU_USE_OPENSSL
 #include <openssl/des.h>
 #include <openssl/sha.h>
 #include <openssl/md5.h>
+#endif
+#ifdef EQEMU_USE_MBEDTLS
+#include <mbedtls/des.h>
+#include <mbedtls/md5.h>
+#include <mbedtls/sha1.h>
+#include <mbedtls/sha512.h>
+#endif
 #include <cstring>
 #include <string>
 #ifdef ENABLE_SECURITY
@@ -8,22 +16,90 @@
 #endif
 
 const char* eqcrypt_block(const char *buffer_in, size_t buffer_in_sz, char* buffer_out, bool enc) {
+#ifdef EQEMU_USE_MBEDTLS
+	if (enc) {
+		if (buffer_in_sz % 8 != 0) {
+			auto temp_buffer_sz = ((buffer_in_sz / 8) + 1) * 8;
+			unsigned char *temp_buffer = new unsigned char[temp_buffer_sz];
+			unsigned char *temp_buffer_in = &temp_buffer[0];
+			unsigned char *temp_buffer_out = &temp_buffer[temp_buffer_sz];
+
+			memset(temp_buffer, 0, temp_buffer_sz * 2);
+			memcpy(temp_buffer_in, buffer_in, buffer_in_sz);
+
+			unsigned char key[MBEDTLS_DES_KEY_SIZE];
+			unsigned char iv[8];
+			memset(&key, 0, MBEDTLS_DES_KEY_SIZE);
+			memset(&iv, 0, 8);
+
+			mbedtls_des_context context;
+			mbedtls_des_setkey_enc(&context, key);
+			mbedtls_des_crypt_cbc(&context, MBEDTLS_DES_ENCRYPT, temp_buffer_sz, iv, (const unsigned char*)temp_buffer_in, (unsigned char*)temp_buffer_out);
+
+			memcpy(buffer_out, temp_buffer_out, temp_buffer_sz);
+			delete[] temp_buffer;
+		}
+		else {
+			unsigned char key[MBEDTLS_DES_KEY_SIZE];
+			unsigned char iv[8];
+			memset(&key, 0, MBEDTLS_DES_KEY_SIZE);
+			memset(&iv, 0, 8);
+
+			mbedtls_des_context context;
+			mbedtls_des_setkey_enc(&context, key);
+			mbedtls_des_crypt_cbc(&context, MBEDTLS_DES_ENCRYPT, buffer_in_sz, iv, (const unsigned char*)buffer_in, (unsigned char*)buffer_out);
+		}
+	}
+	else {
+		if (buffer_in_sz && buffer_in_sz % 8 != 0) {
+			return nullptr;
+		}
+
+		unsigned char key[MBEDTLS_DES_KEY_SIZE];
+		unsigned char iv[8];
+		memset(&key, 0, MBEDTLS_DES_KEY_SIZE);
+		memset(&iv, 0, 8);
+	
+		mbedtls_des_context context;
+		mbedtls_des_setkey_dec(&context, key);
+		mbedtls_des_crypt_cbc(&context, MBEDTLS_DES_DECRYPT, buffer_in_sz, iv, (const unsigned char*)buffer_in, (unsigned char*)buffer_out);
+	}
+#endif
+
+#ifdef EQEMU_USE_OPENSSL
 	DES_key_schedule k;
 	DES_cblock v;
-
+	
 	memset(&k, 0, sizeof(DES_key_schedule));
 	memset(&v, 0, sizeof(DES_cblock));
-
+	
 	if (!enc && buffer_in_sz && buffer_in_sz % 8 != 0) {
 		return nullptr;
 	}
-
+	
 	DES_ncbc_encrypt((const unsigned char*)buffer_in, (unsigned char*)buffer_out, (long)buffer_in_sz, &k, &v, enc);
+#endif
 	return buffer_out;
 }
 
 std::string eqcrypt_md5(const std::string &msg) {
 	std::string ret;
+	ret.reserve(32);
+	
+#ifdef EQEMU_USE_MBEDTLS
+	unsigned char digest[16];
+	char temp[4];
+
+	if (0 == mbedtls_md5_ret((const unsigned char*)msg.c_str(), msg.length(), digest)) {
+		for (int i = 0; i < 16; ++i) {
+			sprintf(&temp[0], "%02x", digest[i]);
+			ret.push_back(temp[0]);
+			ret.push_back(temp[1]);
+		}
+	}
+#endif
+
+#ifdef EQEMU_USE_OPENSSL
 	unsigned char md5_digest[16];
 	char tmp[4];
 
@@ -34,12 +110,29 @@ std::string eqcrypt_md5(const std::string &msg) {
 		ret.push_back(tmp[0]);
 		ret.push_back(tmp[1]);
 	}
+#endif
 
 	return ret;
 }
 
 std::string eqcrypt_sha1(const std::string &msg) {
 	std::string ret;
+	ret.reserve(40);
+
+#ifdef EQEMU_USE_MBEDTLS
+	unsigned char digest[20];
+	char temp[4];
+
+	if (0 == mbedtls_sha1_ret((const unsigned char*)msg.c_str(), msg.length(), digest)) {
+		for (int i = 0; i < 20; ++i) {
+			sprintf(&temp[0], "%02x", digest[i]);
+			ret.push_back(temp[0]);
+			ret.push_back(temp[1]);
+		}
+	}
+#endif
+
+#ifdef EQEMU_USE_OPENSSL
 	unsigned char sha_digest[20];
 	char tmp[4];
 
@@ -50,12 +143,29 @@ std::string eqcrypt_sha1(const std::string &msg) {
 		ret.push_back(tmp[0]);
 		ret.push_back(tmp[1]);
 	}
+#endif
 
 	return ret;
 }
 
 std::string eqcrypt_sha512(const std::string &msg) {
 	std::string ret;
+	ret.reserve(128);
+
+#ifdef EQEMU_USE_MBEDTLS
+	unsigned char digest[64];
+	char temp[4];
+
+	if (0 == mbedtls_sha512_ret((const unsigned char*)msg.c_str(), msg.length(), digest, 0)) {
+		for (int i = 0; i < 64; ++i) {
+			sprintf(&temp[0], "%02x", digest[i]);
+			ret.push_back(temp[0]);
+			ret.push_back(temp[1]);
+		}
+	}
+#endif
+
+#ifdef EQEMU_USE_OPENSSL
 	unsigned char sha_digest[64];
 	char tmp[4];
 
@@ -66,6 +176,7 @@ std::string eqcrypt_sha512(const std::string &msg) {
 		ret.push_back(tmp[0]);
 		ret.push_back(tmp[1]);
 	}
+#endif
 
 	return ret;
 }
