@@ -1435,6 +1435,25 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 		}
 	}
 
+#ifdef BOTS
+	if (GetOwner() && GetOwner()->IsBot() && GetOwner()->CastToBot()->GetBotOwner() && GetOwner()->CastToBot()->GetBotOwner()->IsClient()) {
+		auto bot_owner = GetOwner()->CastToBot()->GetBotOwner()->CastToClient();
+		if (bot_owner) {
+			bot_owner->QueuePacket(&hp_packet, false);
+			group = entity_list.GetGroupByClient(bot_owner);
+
+			if (group) {
+				group->SendHPPacketsFrom(this);
+			}
+
+			Raid *raid = entity_list.GetRaidByClient(bot_owner);
+			if (raid) {
+				raid->SendHPManaEndPacketsFrom(this);
+			}
+		}
+	}
+#endif
+
 	if (GetPet() && GetPet()->IsClient()) {
 		GetPet()->CastToClient()->QueuePacket(&hp_packet, false);
 	}
