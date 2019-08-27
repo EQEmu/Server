@@ -118,6 +118,7 @@ OPTION(EQEMU_DEPOP_INVALIDATES_CACHE "#repop invalidates the npc_types cache (wi
 OPTION(EQEMU_ENABLE_BOTS "Enable Bots" OFF)
 OPTION(EQEMU_COMMANDS_LOGGING "Enable GM Command logs" ON)
 OPTION(EQEMU_BUILD_SERVER "Build the game server." ON)
+OPTION(EQEMU_BUILD_LOGIN "Build the login server." ON)
 OPTION(EQEMU_BUILD_HC "Build the headless client." OFF)
 OPTION(EQEMU_BUILD_TESTS "Build utility tests." OFF)
 OPTION(EQEMU_BUILD_CLIENT_FILES "Build Client Import/Export Data Programs." ON)
@@ -233,7 +234,7 @@ ENDIF()
 
 #use zlib if exists
 IF(ZLIB_FOUND)
-	OPTION(EQEMU_BUILD_ZLIB "Build internal version of zlib." OFF)
+	OPTION(EQEMU_BUILD_ZLIB "Build internal version of zlib." ON)
 	IF(EQEMU_BUILD_ZLIB)
 		SET(ZLIB_LIBRARY_TYPE "zlib-ng")
 		SET(ZLIB_LIBRARY_LIBS "zlibstatic")
