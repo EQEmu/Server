@@ -95,6 +95,7 @@ namespace
 
 	enum { EffectIDFirst = 1, EffectIDLast = 12 };
 
+#define VALIDATECLASSID(x) ((x >= WARRIOR && x <= BERSERKER) ? (x) : (0))
 #define CLASSIDTOINDEX(x) ((x >= WARRIOR && x <= BERSERKER) ? (x - 1) : (0))
 #define EFFECTIDTOINDEX(x) ((x >= EffectIDFirst && x <= EffectIDLast) ? (x - 1) : (0))
 #define AILMENTIDTOINDEX(x) ((x >= BCEnum::AT_Blindness && x <= BCEnum::AT_Corruption) ? (x - 1) : (0))
@@ -3443,16 +3444,17 @@ void bot_command_owner_option(Client *c, const Seperator *sep)
 {
 	if (helper_is_help_or_usage(sep->arg[1])) {
 		c->Message(m_usage, "usage: %s [deathmarquee | statsupdate] (argument: enable | disable | null (toggles))", sep->arg[0]);
+		c->Message(m_usage, "usage: %s [spawnmessage] [argument: say | tell | silent | class | default]", sep->arg[0]);
 		return;
 	}
 
 	std::string owner_option = sep->arg[1];
-	std::string flag = sep->arg[2];
+	std::string argument = sep->arg[2];
 
 	if (!owner_option.compare("deathmarquee")) {
-		if (!flag.compare("enable"))
+		if (!argument.compare("enable"))
 			c->SetBotOptionDeathMarquee(true);
-		else if (!flag.compare("disable"))
+		else if (!argument.compare("disable"))
 			c->SetBotOptionDeathMarquee(false);
 		else
 			c->SetBotOptionDeathMarquee(!c->GetBotOptionDeathMarquee());
@@ -3461,15 +3463,44 @@ void bot_command_owner_option(Client *c, const Seperator *sep)
 		c->Message(m_action, "Bot 'death marquee' is now %s.", (c->GetBotOptionDeathMarquee() == true ? "enabled" : "disabled"));
 	}
 	else if (!owner_option.compare("statsupdate")) {
-		if (!flag.compare("enable"))
+		if (!argument.compare("enable"))
 			c->SetBotOptionStatsUpdate(true);
-		else if (!flag.compare("disable"))
+		else if (!argument.compare("disable"))
 			c->SetBotOptionStatsUpdate(false);
 		else
 			c->SetBotOptionStatsUpdate(!c->GetBotOptionStatsUpdate());
 
 		database.botdb.SaveOwnerOptionStatsUpdate(c->CharacterID(), c->GetBotOptionStatsUpdate());
 		c->Message(m_action, "Bot 'stats update' is now %s.", (c->GetBotOptionStatsUpdate() == true ? "enabled" : "disabled"));
+	}
+	else if (!owner_option.compare("spawnmessage")) {
+		if (!argument.compare("say")) {
+			c->SetBotOptionSpawnMessageSay();
+		}
+		else if (!argument.compare("tell")) {
+			c->SetBotOptionSpawnMessageTell();
+		}
+		else if (!argument.compare("silent")) {
+			c->SetBotOptionSpawnMessageSilent();
+		}
+		else if (!argument.compare("class")) {
+			c->SetBotOptionSpawnMessageClassSpecific(true);
+		}
+		else if (!argument.compare("default")) {
+			c->SetBotOptionSpawnMessageClassSpecific(false);
+		}
+		else {
+			c->Message(m_fail, "Owner option '%s' argument '%s' is not recognized.", owner_option.c_str(), argument.c_str());
+			return;
+		}
+
+		database.botdb.SaveOwnerOptionSpawnMessage(
+			c->CharacterID(),
+			c->GetBotOptionSpawnMessageSay(),
+			c->GetBotOptionSpawnMessageTell(),
+			c->GetBotOptionSpawnMessageClassSpecific()
+		);
+		c->Message(m_action, "Bot 'spawn message' is now %s.", argument.c_str());
 	}
 	else {
 		c->Message(m_fail, "Owner option '%s' is not recognized.", owner_option.c_str());
@@ -5169,8 +5200,9 @@ void bot_subcommand_bot_spawn(Client *c, const Seperator *sep)
 		return;
 	}
 
-	static const char* bot_spawn_message[16] = {
-		"A solid weapon is my ally!", // WARRIOR / 'generic'
+	static const char* bot_spawn_message[17] = {
+		"I am ready to fight!", // DEFAULT
+		"A solid weapon is my ally!", // WARRIOR
 		"The pious shall never die!", // CLERIC
 		"I am the symbol of Light!", // PALADIN
 		"There are enemies near!", // RANGER
@@ -5188,7 +5220,14 @@ void bot_subcommand_bot_spawn(Client *c, const Seperator *sep)
 		"My bloodthirst shall not be quenched!" // BERSERKER
 	};
 
-	Bot::BotGroupSay(my_bot, "%s", bot_spawn_message[CLASSIDTOINDEX(my_bot->GetClass())]);
+	uint8 message_index = 0;
+	if (c->GetBotOptionSpawnMessageClassSpecific())
+		message_index = VALIDATECLASSID(my_bot->GetClass());
+
+	if (c->GetBotOptionSpawnMessageSay())
+		Bot::BotGroupSay(my_bot, "%s", bot_spawn_message[message_index]);
+	else if (c->GetBotOptionSpawnMessageTell())
+		c->Message(Chat::Tell, "%s tells you, \"%s\"", my_bot->GetCleanName(), bot_spawn_message[message_index]);
 }
 
 void bot_subcommand_bot_stance(Client *c, const Seperator *sep)
