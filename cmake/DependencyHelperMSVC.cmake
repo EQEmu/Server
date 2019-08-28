@@ -1,15 +1,21 @@
 OPTION(EQEMU_FETCH_MSVC_DEPENDENCIES "Automatically fetch vcpkg dependencies for MSCV" ON)
+OPTION(EQEMU_FETCH_MSVC_DEPENDENCIES_PERL "Automatically fetch perl dependencies for MSCV" ON)
+
 MARK_AS_ADVANCED(EQEMU_FETCH_MSVC_DEPENDENCIES)
+MARK_AS_ADVANCED(EQEMU_FETCH_MSVC_DEPENDENCIES_PERL)
 
 SET(EQEMU_MSVC_DEPENDENCIES_VCPKG_X86 "https://github.com/EQEmu/Server/releases/download/v1.2/vcpkg-export-x86.zip" CACHE STRING "The location that windows x86 dependencies will be pulled from.")
 SET(EQEMU_MSVC_DEPENDENCIES_VCPKG_X64 "https://github.com/EQEmu/Server/releases/download/v1.2/vcpkg-export-x64.zip" CACHE STRING "The location that windows x64 dependencies will be pulled from.")
+SET(EQEMU_MSVC_DEPENDENCIES_PERL_X86 "http://strawberryperl.com/download/5.30.0.1/strawberry-perl-5.30.0.1-32bit-portable.zip" CACHE STRING "The location that windows x86 perl dependencies will be pulled from.")
+SET(EQEMU_MSVC_DEPENDENCIES_PERL_X64 "http://strawberryperl.com/download/5.30.0.1/strawberry-perl-5.30.0.1-64bit-portable.zip" CACHE STRING "The location that windows x64 perl dependencies will be pulled from.")
 
 MARK_AS_ADVANCED(EQEMU_WINDOWS_DEPENDENCIES_X86)
 MARK_AS_ADVANCED(EQEMU_WINDOWS_DEPENDENCIES_X64)
+MARK_AS_ADVANCED(EQEMU_MSVC_DEPENDENCIES_PERL_X86)
+MARK_AS_ADVANCED(EQEMU_MSVC_DEPENDENCIES_PERL_X64)
 
 IF(EQEMU_FETCH_MSVC_DEPENDENCIES AND NOT DEFINED VCPKG_TARGET_TRIPLET)
-	MESSAGE(STATUS "No existing vcpkg found for MSVC")
-	MESSAGE(STATUS "Downloading existing dependencies from releases...")
+	MESSAGE(STATUS "Downloading existing vcpkg dependencies from releases...")
 	
 	IF(CMAKE_SIZEOF_VOID_P EQUAL 8)
 		SET(DEP_URL ${EQEMU_MSVC_DEPENDENCIES_VCPKG_X64})
@@ -42,6 +48,36 @@ IF(EQEMU_FETCH_MSVC_DEPENDENCIES AND NOT DEFINED VCPKG_TARGET_TRIPLET)
 	ELSE()
 		INCLUDE("${PROJECT_SOURCE_DIR}/vcpkg/vcpkg-export-20180828-145854/scripts/buildsystems/vcpkg.cmake")
 	ENDIF()
+ENDIF()
+
+IF(EQEMU_FETCH_MSVC_DEPENDENCIES_PERL AND NOT DEFINED PERL_LIBRARY)
+	MESSAGE(STATUS "Downloading existing perl dependencies...")
 	
-	#TODO: Perl, will be more complicated
+	IF(CMAKE_SIZEOF_VOID_P EQUAL 8)
+		SET(DEP_URL ${EQEMU_MSVC_DEPENDENCIES_PERL_X64})
+	ELSE()
+		SET(DEP_URL ${EQEMU_MSVC_DEPENDENCIES_PERL_X86})
+	ENDIF()
+	
+	EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E remove_directory ${PROJECT_SOURCE_DIR}/perl)
+	EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_SOURCE_DIR}/perl)
+	
+	FILE(DOWNLOAD ${DEP_URL} ${PROJECT_SOURCE_DIR}/perl/perl.zip 
+		SHOW_PROGRESS
+		STATUS DOWNLOAD_STATUS)
+		
+	LIST(GET DOWNLOAD_STATUS 0 STATUS_CODE)
+	IF(NOT STATUS_CODE EQUAL 0)
+		MESSAGE(FATAL_ERROR "Was unable to download dependencies from ${DEP_URL}")
+	ENDIF()
+	
+	MESSAGE(STATUS "Extracting files")
+	EXECUTE_PROCESS(
+		COMMAND ${CMAKE_COMMAND} -E tar xzf ${PROJECT_SOURCE_DIR}/perl/perl.zip
+		WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/perl
+	)
+	
+	SET(PERL_EXECUTABLE ${PROJECT_SOURCE_DIR}/perl/perl/bin/perl.exe)
+	SET(PERL_INCLUDE_PATH ${PROJECT_SOURCE_DIR}/perl/perl/lib/CORE)
+	SET(PERL_LIBRARY ${PROJECT_SOURCE_DIR}/perl/perl/lib/CORE/libperl530.a)
 ENDIF()

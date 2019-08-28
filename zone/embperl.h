@@ -25,6 +25,10 @@ Eglin
 #ifndef WIN32
 extern "C" {	//the perl headers dont do this for us...
 #endif
+#if _MSC_VER
+#define __inline__ __inline
+#define __builtin_expect 
+#endif
 #include <perl.h>
 #include <XSUB.h>
 #ifndef WIN32
