@@ -141,6 +141,7 @@ public:
 	bool LoadOwnerOptions(Client *owner);
 	bool SaveOwnerOptionDeathMarquee(const uint32 owner_id, const bool flag);
 	bool SaveOwnerOptionStatsUpdate(const uint32 owner_id, const bool flag);
+	bool SaveOwnerOptionSpawnMessage(const uint32 owner_id, const bool say, const bool tell, const bool class_specific);
 
 	/* Bot bot-group functions   */
 	bool QueryBotGroupExistence(const std::string& botgroup_name, bool& extant_flag);

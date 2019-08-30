@@ -7465,8 +7465,13 @@ void Bot::DoEnduranceUpkeep() {
 void Bot::Camp(bool databaseSave) {
 	Sit();
 
-	if(IsGrouped())
+	//auto group = GetGroup();
+	if(GetGroup())
 		RemoveBotFromGroup(this, GetGroup());
+
+	// RemoveBotFromGroup() code is too complicated for this to work as-is (still needs to be addressed to prevent memory leaks)
+	//if (group->GroupCount() < 2)
+	//	group->DisbandGroup();
 
 	LeaveHealRotationMemberPool();
 
