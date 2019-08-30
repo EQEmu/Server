@@ -18,6 +18,8 @@
 
 #ifdef BOTS
 
+#include <fmt/format.h>
+
 #include "../common/global_define.h"
 #include "../common/rulesys.h"
 #include "../common/string_util.h"
@@ -50,6 +52,37 @@ bool BotDatabase::LoadBotCommandSettings(std::map<std::string, std::pair<uint8, 
 	}
 
 	return true;
+}
+
+bool BotDatabase::UpdateBotCommandSettings(const std::vector<std::pair<std::string, uint8>> &injected, const std::vector<std::string> &orphaned)
+{
+	bool return_value = true;
+
+	if (injected.size()) {
+
+		query = fmt::format(
+			"REPLACE INTO `bot_command_settings`(`bot_command`, `access`) VALUES {}",
+			implode(",", string_string("(", ")"), join_pair(string_string(), ",", string_string("'", "'"), injected))
+		);
+
+		if (!database.QueryDatabase(query).Success()) {
+			return_value = false;
+		}
+	}
+
+	if (orphaned.size()) {
+
+		query = fmt::format(
+			"DELETE FROM `bot_command_settings` WHERE `bot_command` IN ({})",
+			implode(",", string_string("'", "'"), orphaned)
+		);
+
+		if (!database.QueryDatabase(query).Success()) {
+			return_value = false;
+		}
+	}
+
+	return return_value;
 }
 
 bool BotDatabase::LoadBotSpellCastingChances()

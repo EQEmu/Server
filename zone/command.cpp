@@ -453,34 +453,89 @@ int command_init(void)
 	std::map<std::string, std::pair<uint8, std::vector<std::string>>> command_settings;
 	database.GetCommandSettings(command_settings);
 
+	std::vector<std::pair<std::string, uint8>> injected_command_settings;
+	std::vector<std::string> orphaned_command_settings;
+
 	std::map<std::string, CommandRecord *> working_cl = commandlist;
 	for (auto iter_cl = working_cl.begin(); iter_cl != working_cl.end(); ++iter_cl) {
+
 		auto iter_cs = command_settings.find(iter_cl->first);
 		if (iter_cs == command_settings.end()) {
-			if (iter_cl->second->access == 0)
-				Log(Logs::General, Logs::Commands, "command_init(): Warning: Command '%s' defaulting to access level 0!", iter_cl->first.c_str());
+
+			injected_command_settings.push_back(std::pair<std::string, uint8>(iter_cl->first, iter_cl->second->access));
+			Log(Logs::General,
+				Logs::Status,
+				"New Command '%s' found... Adding to `command_settings` table with access '%u'...",
+				iter_cl->first.c_str(),
+				iter_cl->second->access
+			);
+
+			if (iter_cl->second->access == 0) {
+				Log(Logs::General,
+					Logs::Commands,
+					"command_init(): Warning: Command '%s' defaulting to access level 0!",
+					iter_cl->first.c_str()
+				);
+			}
+			
 			continue;
 		}
 
 		iter_cl->second->access = iter_cs->second.first;
-		Log(Logs::General, Logs::Commands, "command_init(): - Command '%s' set to access level %d.", iter_cl->first.c_str(), iter_cs->second.first);
-		if (iter_cs->second.second.empty())
+		Log(Logs::General,
+			Logs::Commands,
+			"command_init(): - Command '%s' set to access level %d.",
+			iter_cl->first.c_str(),
+			iter_cs->second.first
+		);
+		
+		if (iter_cs->second.second.empty()) {
 			continue;
+		}
 
-		for (auto iter_aka = iter_cs->second.second.begin(); iter_aka != iter_cs->second.second.end();
-		     ++iter_aka) {
-			if (iter_aka->empty())
+		for (auto iter_aka = iter_cs->second.second.begin(); iter_aka != iter_cs->second.second.end(); ++iter_aka) {
+			if (iter_aka->empty()) {
 				continue;
+			}
+
 			if (commandlist.find(*iter_aka) != commandlist.end()) {
-				Log(Logs::General, Logs::Commands, "command_init(): Warning: Alias '%s' already exists as a command - skipping!", iter_aka->c_str());
+				Log(Logs::General,
+					Logs::Commands,
+					"command_init(): Warning: Alias '%s' already exists as a command - skipping!",
+					iter_aka->c_str()
+				);
+				
 				continue;
 			}
 
 			commandlist[*iter_aka] = iter_cl->second;
 			commandaliases[*iter_aka] = iter_cl->first;
 
-			Log(Logs::General, Logs::Commands, "command_init(): - Alias '%s' added to command '%s'.", iter_aka->c_str(), commandaliases[*iter_aka].c_str());
+			Log(Logs::General,
+				Logs::Commands,
+				"command_init(): - Alias '%s' added to command '%s'.",
+				iter_aka->c_str(),
+				commandaliases[*iter_aka].c_str()
+			);
 		}
+	}
+
+	for (auto cs_iter : command_settings) {
+
+		auto cl_iter = commandlist.find(cs_iter.first);
+		if (cl_iter == commandlist.end()) {
+
+			orphaned_command_settings.push_back(cs_iter.first);
+			Log(Logs::General,
+				Logs::Status,
+				"Command '%s' no longer exists... Deleting orphaned entry from `command_settings` table...",
+				cs_iter.first.c_str()
+			);
+		}
+	}
+
+	if (injected_command_settings.size() || orphaned_command_settings.size()) {
+		database.UpdateCommandSettings(injected_command_settings, orphaned_command_settings);
 	}
 
 	command_dispatch = command_realdispatch;

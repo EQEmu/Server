@@ -1,5 +1,10 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 8/30/2019 ==
+Uleat: Added code to inject new commands and remove orphaned commands from both command systems
+	- New commands are added with their status (`access`) set to the server default value - no aliases are defined
+	- Defunct commands will have their orhpaned entries removed from the command settings table for each system
+
 == 8/16/2019 ==
 Akkadius: Simplified the use of roamboxes and improved the AI for roambox pathing https://i.imgur.com/z33u7y9.gif
 Akkadius: Implemented command #roambox set <box_size> [move_delay]

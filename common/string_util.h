@@ -31,6 +31,10 @@ std::vector<std::string> split(std::string str_to_split, char delimiter);
 const std::string StringFormat(const char* format, ...);
 const std::string vStringFormat(const char* format, va_list args);
 std::string implode(std::string glue, std::vector<std::string> src);
+typedef std::pair<std::string, std::string> string_string;
+std::string implode(std::string glue, string_string encapsulation, std::vector<std::string> src);
+// wanted to make 'join_pair' a template function..this will do for now
+std::vector<std::string> join_pair(string_string outer_encap, std::string joiner, string_string inner_encap, std::vector<std::pair<std::string, uint8>> src);
 std::vector<std::string> SplitString(const std::string &s, char delim);
 std::string EscapeString(const char *src, size_t sz);
 std::string EscapeString(const std::string &s);

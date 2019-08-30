@@ -18,6 +18,7 @@
 
 #include <iostream>
 #include <cstring>
+#include <fmt/format.h>
 
 #if defined(_MSC_VER) && _MSC_VER >= 1800
 	#include <algorithm>
@@ -1467,6 +1468,37 @@ bool SharedDatabase::GetCommandSettings(std::map<std::string, std::pair<uint8, s
 	}
 
     return true;
+}
+
+bool SharedDatabase::UpdateCommandSettings(const std::vector<std::pair<std::string, uint8>> &injected, const std::vector<std::string> &orphaned)
+{
+	bool return_value = true;
+
+	if (injected.size()) {
+
+		std::string query = fmt::format(
+			"REPLACE INTO `command_settings`(`command`, `access`) VALUES {}",
+			implode(",", string_string("(", ")"), join_pair(string_string(), ",", string_string("'", "'"), injected))
+		);
+
+		if (!QueryDatabase(query).Success()) {
+			return_value = false;
+		}
+	}
+
+	if (orphaned.size()) {
+
+		std::string query = fmt::format(
+			"DELETE FROM `command_settings` WHERE `command` IN ({})",
+			implode(",", string_string("'", "'"), orphaned)
+		);
+
+		if (!QueryDatabase(query).Success()) {
+			return_value = false;
+		}
+	}
+
+	return return_value;
 }
 
 bool SharedDatabase::LoadSkillCaps(const std::string &prefix) {

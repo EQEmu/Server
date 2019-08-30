@@ -43,6 +43,7 @@ class BotDatabase
 {
 public:
 	bool LoadBotCommandSettings(std::map<std::string, std::pair<uint8, std::vector<std::string>>> &bot_command_settings);
+	bool UpdateBotCommandSettings(const std::vector<std::pair<std::string, uint8>> &injected, const std::vector<std::string> &orphaned);
 	bool LoadBotSpellCastingChances();
 
 
