@@ -1432,8 +1432,8 @@ int bot_command_init(void)
 	auto working_bcl = bot_command_list;
 	for (auto working_bcl_iter : working_bcl) {
 
-		auto bot_command_settings_iter = bot_command_settings.find(working_bcl_iter.first);
-		if (bot_command_settings_iter == bot_command_settings.end()) {
+		auto bcs_iter = bot_command_settings.find(working_bcl_iter.first);
+		if (bcs_iter == bot_command_settings.end()) {
 
 			injected_bot_command_settings.push_back(std::pair<std::string, uint8>(working_bcl_iter.first, working_bcl_iter.second->access));
 			Log(Logs::General,
@@ -1454,32 +1454,42 @@ int bot_command_init(void)
 			continue;
 		}
 
-		working_bcl_iter.second->access = bot_command_settings_iter->second.first;
+		working_bcl_iter.second->access = bcs_iter->second.first;
 		Log(Logs::General,
 			Logs::Commands,
 			"bot_command_init(): - Bot Command '%s' set to access level %d.",
 			working_bcl_iter.first.c_str(),
-			bot_command_settings_iter->second.first
+			bcs_iter->second.first
 		);
 		
-		if (bot_command_settings_iter->second.second.empty()) {
+		if (bcs_iter->second.second.empty()) {
 			continue;
 		}
 
-		for (auto alias_iter : bot_command_settings_iter->second.second) {
+		for (auto alias_iter : bcs_iter->second.second) {
 			if (alias_iter.empty()) {
 				continue;
 			}
 
 			if (bot_command_list.find(alias_iter) != bot_command_list.end()) {
-				Log(Logs::General, Logs::Commands, "bot_command_init(): Warning: Alias '%s' already exists as a bot command - skipping!", alias_iter.c_str());
+				Log(Logs::General,
+					Logs::Commands,
+					"bot_command_init(): Warning: Alias '%s' already exists as a bot command - skipping!",
+					alias_iter.c_str()
+				);
+
 				continue;
 			}
 
 			bot_command_list[alias_iter] = working_bcl_iter.second;
 			bot_command_aliases[alias_iter] = working_bcl_iter.first;
 
-			Log(Logs::General, Logs::Commands, "bot_command_init(): - Alias '%s' added to bot command '%s'.", alias_iter.c_str(), bot_command_aliases[alias_iter].c_str());
+			Log(Logs::General,
+				Logs::Commands,
+				"bot_command_init(): - Alias '%s' added to bot command '%s'.",
+				alias_iter.c_str(),
+				bot_command_aliases[alias_iter].c_str()
+			);
 		}
 	}
 
