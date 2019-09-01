@@ -162,7 +162,7 @@ public:
 	inline void SetZoneHasCurrentTime(bool time) { zone_has_current_time = time; }
 	inline void ShowNPCGlobalLoot(Client *to, NPC *who) { m_global_loot.ShowNPCGlobalLoot(to, who); }
 	inline void ShowZoneGlobalLoot(Client *to) { m_global_loot.ShowZoneGlobalLoot(to); }
-	int GetTotalBlockedSpells() { return totalBS; }
+	int GetZoneTotalBlockedSpells() { return zone_total_blocked_spells; }
 	int SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charges, bool sold = false);
 	int32 MobsAggroCount() { return aggroedmobs; }
 
@@ -234,7 +234,7 @@ public:
 	void LoadAdventureFlavor();
 	void LoadAlternateAdvancement();
 	void LoadAlternateCurrencies();
-	void LoadBlockedSpells(uint32 zoneid);
+	void LoadZoneBlockedSpells(uint32 zone_id);
 	void LoadLDoNTrapEntries();
 	void LoadLDoNTraps();
 	void LoadLevelEXPMods();
@@ -348,7 +348,7 @@ private:
 	glm::vec3 m_SafePoint;
 	glm::vec4 m_Graveyard;
 	int       default_ruleset;
-	int       totalBS;
+	int       zone_total_blocked_spells;
 	int       npc_position_update_distance;
 	int32     aggroedmobs;
 	uint8     zone_type;
