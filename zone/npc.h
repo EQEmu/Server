@@ -294,7 +294,7 @@ public:
 	int32 GetNPCHPRegen() const { return hp_regen + itembonuses.HPRegen + spellbonuses.HPRegen; }
 	inline const char* GetAmmoIDfile() const { return ammo_idfile; }
 
-	void ModifyStatsOnCharm(bool bRemoved);
+	void ModifyStatsOnCharm(bool is_charm_removed);
 
 	//waypoint crap
 	int					GetMaxWp() const { return max_wp; }
