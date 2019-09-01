@@ -341,6 +341,7 @@ RULE_INT(Spells, CharismaEffectiveness, 10) // Deterimes how much resist modific
 RULE_INT(Spells, CharismaEffectivenessCap, 255) // Deterimes how much resist modification charisma applies to charm/pacify checks. Default 10 CHA = -1 resist mod.
 RULE_BOOL(Spells, CharismaCharmDuration, false) // Allow CHA resist mod to extend charm duration.
 RULE_INT(Spells, CharmBreakCheckChance, 25) //Determines chance for a charm break check to occur each buff tick.
+RULE_BOOL(Spells, CharmDisablesSpecialAbilities, false) //When charm is cast on an NPC, strip their special abilities
 RULE_INT(Spells, MaxCastTimeReduction, 50) //Max percent your spell cast time can be reduced by spell haste
 RULE_INT(Spells, RootBreakFromSpells, 55) //Chance for root to break when cast on.
 RULE_INT(Spells, DeathSaveCharismaMod, 3) //Determines how much charisma effects chance of death save firing.

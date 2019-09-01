@@ -209,6 +209,7 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	default_accuracy_rating  = npc_type_data->accuracy_rating;
 	default_avoidance_rating = npc_type_data->avoidance_rating;
 	default_atk              = npc_type_data->ATK;
+	strn0cpy(default_special_abilities, npc_type_data->special_abilities, 512);
 
 	// used for when getting charmed, if 0, doesn't swap
 	charm_ac               = npc_type_data->charm_ac;
@@ -2855,6 +2856,8 @@ void NPC::ModifyStatsOnCharm(bool bRemoved)
 			base_damage = round((default_max_dmg - default_min_dmg) / 1.9);
 			min_damage = default_min_dmg - round(base_damage / 10.0);
 		}
+		if (RuleB(Spells, CharmDisablesSpecialAbilities))
+			ProcessSpecialAbilities(default_special_abilities);
 	} else {
 		if (charm_ac)
 			AC = charm_ac;
@@ -2870,6 +2873,8 @@ void NPC::ModifyStatsOnCharm(bool bRemoved)
 			base_damage = round((charm_max_dmg - charm_min_dmg) / 1.9);
 			min_damage = charm_min_dmg - round(base_damage / 10.0);
 		}
+		if (RuleB(Spells, CharmDisablesSpecialAbilities))
+			ClearSpecialAbilities();
 	}
 	// the rest of the stats aren't cached, so lets just do these two instead of full CalcBonuses()
 	SetAttackTimer();
