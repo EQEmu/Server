@@ -62,7 +62,16 @@ bool BotDatabase::UpdateBotCommandSettings(const std::vector<std::pair<std::stri
 
 		query = fmt::format(
 			"REPLACE INTO `bot_command_settings`(`bot_command`, `access`) VALUES {}",
-			implode(",", string_string("(", ")"), join_pair(string_string(), ",", string_string("'", "'"), injected))
+			implode(
+				",",
+				std::pair<char, char>('(', ')'),
+				join_pair(
+					",",
+					std::pair<char, char>('\'', '\''),
+					std::pair<char, char>('\'', '\''),
+					injected
+				)
+			)
 		);
 
 		if (!database.QueryDatabase(query).Success()) {
@@ -74,7 +83,7 @@ bool BotDatabase::UpdateBotCommandSettings(const std::vector<std::pair<std::stri
 
 		query = fmt::format(
 			"DELETE FROM `bot_command_settings` WHERE `bot_command` IN ({})",
-			implode(",", string_string("'", "'"), orphaned)
+			implode(",", std::pair<char, char>('\'', '\''), orphaned)
 		);
 
 		if (!database.QueryDatabase(query).Success()) {

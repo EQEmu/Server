@@ -1478,7 +1478,16 @@ bool SharedDatabase::UpdateCommandSettings(const std::vector<std::pair<std::stri
 
 		std::string query = fmt::format(
 			"REPLACE INTO `command_settings`(`command`, `access`) VALUES {}",
-			implode(",", string_string("(", ")"), join_pair(string_string(), ",", string_string("'", "'"), injected))
+			implode(
+				",",
+				std::pair<char, char>('(', ')'),
+				join_pair(
+					",",
+					std::pair<char, char>('\'', '\''),
+					std::pair<char, char>('\'', '\''),
+					injected
+				)
+			)
 		);
 
 		if (!QueryDatabase(query).Success()) {
@@ -1490,7 +1499,7 @@ bool SharedDatabase::UpdateCommandSettings(const std::vector<std::pair<std::stri
 
 		std::string query = fmt::format(
 			"DELETE FROM `command_settings` WHERE `command` IN ({})",
-			implode(",", string_string("'", "'"), orphaned)
+			implode(",", std::pair<char, char>('\'', '\''), orphaned)
 		);
 
 		if (!QueryDatabase(query).Success()) {

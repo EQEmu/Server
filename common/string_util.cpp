@@ -16,7 +16,6 @@
 
 #include "string_util.h"
 #include <algorithm>
-#include <fmt/format.h>
 
 #ifdef _WINDOWS
 	#include <windows.h>
@@ -145,52 +144,6 @@ std::string implode(std::string glue, std::vector<std::string> src)
 	return final_output;
 }
 
-std::string implode(std::string glue, string_string encapsulation, std::vector<std::string> src)
-{
-	if (src.empty()) {
-		return {};
-	}
-
-	std::ostringstream                 output;
-	std::vector<std::string>::iterator src_iter;
-
-	for (src_iter = src.begin(); src_iter != src.end(); src_iter++) {
-		output << encapsulation.first << *src_iter << encapsulation.second << glue;
-	}
-
-	std::string final_output = output.str();
-	final_output.resize(output.str().size() - glue.size());
-
-	return final_output;
-}
-
-std::vector<std::string> join_pair(string_string outer_encap, std::string joiner, string_string inner_encap, std::vector<std::pair<std::string, uint8>> src)
-{
-	if (src.empty()) {
-		return {};
-	}
-
-	std::vector<std::string> output;
-
-	for (auto src_iter : src) {
-		output.push_back(
-			fmt::format(
-				"{}{}{}{}{}{}{}{}{}",
-				outer_encap.first,
-				inner_encap.first,
-				src_iter.first,
-				inner_encap.second,
-				joiner,
-				inner_encap.first,
-				src_iter.second,
-				inner_encap.second,
-				outer_encap.second
-			)
-		);
-	}
-
-	return output;
-}
 
 std::string EscapeString(const std::string &s) {
 	std::string ret;

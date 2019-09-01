@@ -31,10 +31,58 @@ std::vector<std::string> split(std::string str_to_split, char delimiter);
 const std::string StringFormat(const char* format, ...);
 const std::string vStringFormat(const char* format, va_list args);
 std::string implode(std::string glue, std::vector<std::string> src);
-typedef std::pair<std::string, std::string> string_string;
-std::string implode(std::string glue, string_string encapsulation, std::vector<std::string> src);
-// wanted to make 'join_pair' a template function..this will do for now
-std::vector<std::string> join_pair(string_string outer_encap, std::string joiner, string_string inner_encap, std::vector<std::pair<std::string, uint8>> src);
+
+template <typename T>
+std::string implode(std::string glue, std::pair<char, char> encapsulation, std::vector<T> src)
+{
+	if (src.empty()) {
+		return {};
+	}
+
+	std::ostringstream output;
+	
+	for (const T &src_iter : src) {
+		output << encapsulation.first << src_iter << encapsulation.second << glue;
+	}
+
+	std::string final_output = output.str();
+	final_output.resize(output.str().size() - glue.size());
+
+	return final_output;
+}
+
+// this requires that #include<fmt/format.h> be included in whatever file the invocation is made from
+template <typename T1, typename T2>
+std::vector<std::string> join_pair(std::string glue, std::pair<char, char> first_encap, std::pair<char, char> second_encap, std::vector<std::pair<T1, T2>> src)
+{
+	if (src.empty()) {
+		return {};
+	}
+
+	std::vector<std::string> output;
+
+	for (const std::pair<T1, T2> &src_iter : src) {
+		output.push_back(
+			// There are issues with including <fmt/format.h> in a header file that result in compile
+			// failure. I'm not sure if this applies only within the same project or across projects.
+			// Since templates act similar to macros in regards to initialization, this call should be
+			// safe so long as the '#include<fmt/format.h>' rule above is observed.
+			fmt::format(
+				"{}{}{}{}{}{}{}",
+				first_encap.first,
+				src_iter.first,
+				first_encap.second,
+				glue,
+				second_encap.first,
+				src_iter.second,
+				second_encap.second
+			)
+		);
+	}
+
+	return output;
+}
+
 std::vector<std::string> SplitString(const std::string &s, char delim);
 std::string EscapeString(const char *src, size_t sz);
 std::string EscapeString(const std::string &s);
