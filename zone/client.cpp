@@ -2327,7 +2327,7 @@ void Client::AddMoneyToPP(uint32 copper, uint32 silver, uint32 gold, uint32 plat
 	SaveCurrency();
 
 #if (EQDEBUG>=5)
-		Log(Logs::General, Logs::None, "Client::AddMoneyToPP() %s should have: plat:%i gold:%i silver:%i copper:%i",
+		LogDebug("Client::AddMoneyToPP() [{}] should have: plat:[{}] gold:[{}] silver:[{}] copper:[{}]",
 			GetName(), m_pp.platinum, m_pp.gold, m_pp.silver, m_pp.copper);
 #endif
 }
@@ -4915,14 +4915,14 @@ void Client::HandleLDoNOpen(NPC *target)
 	{
 		if(target->GetClass() != LDON_TREASURE)
 		{
-			Log(Logs::General, Logs::None, "%s tried to open %s but %s was not a treasure chest.",
+			LogDebug("[{}] tried to open [{}] but [{}] was not a treasure chest",
 				GetName(), target->GetName(), target->GetName());
 			return;
 		}
 
 		if(DistanceSquaredNoZ(m_Position, target->GetPosition()) > RuleI(Adventure, LDoNTrapDistanceUse))
 		{
-			Log(Logs::General, Logs::None, "%s tried to open %s but %s was out of range",
+			LogDebug("[{}] tried to open [{}] but [{}] was out of range",
 				GetName(), target->GetName(), target->GetName());
 			Message(Chat::Red, "Treasure chest out of range.");
 			return;

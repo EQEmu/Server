@@ -294,9 +294,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 
 	// Don't aggro new clients if we are already engaged unless PROX_AGGRO is set
 	if (IsEngaged() && (!GetSpecialAbility(PROX_AGGRO) || (GetSpecialAbility(PROX_AGGRO) && !CombatRange(mob)))) {
-		Log(Logs::Moderate, Logs::Aggro,
-			"%s is in combat, and does not have prox_aggro, or does and is out of combat range with %s",
-			GetName(), mob->GetName());
+		LogAggro("[{}] is in combat, and does not have prox_aggro, or does and is out of combat range with [{}]", GetName(), mob->GetName());
 		return false;
 	}
 
@@ -356,7 +354,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	{
 		//FatherNiwtit: make sure we can see them. last since it is very expensive
 		if(CheckLosFN(mob)) {
-			Log(Logs::Detail, Logs::Aggro, "Check aggro for %s target %s.", GetName(), mob->GetName());
+			LogAggro("Check aggro for [{}] target [{}]", GetName(), mob->GetName());
 			return( mod_will_aggro(mob, this) );
 		}
 	}
@@ -388,18 +386,18 @@ bool Mob::CheckWillAggro(Mob *mob) {
 		{
 			//FatherNiwtit: make sure we can see them. last since it is very expensive
 			if(CheckLosFN(mob)) {
-				Log(Logs::Detail, Logs::Aggro, "Check aggro for %s target %s.", GetName(), mob->GetName());
+				LogAggro("Check aggro for [{}] target [{}]", GetName(), mob->GetName());
 				return( mod_will_aggro(mob, this) );
 			}
 		}
 	}
 
-	Log(Logs::Detail, Logs::Aggro, "Is In zone?:%d\n", mob->InZone());
-	Log(Logs::Detail, Logs::Aggro, "Dist^2: %f\n", dist2);
-	Log(Logs::Detail, Logs::Aggro, "Range^2: %f\n", iAggroRange2);
-	Log(Logs::Detail, Logs::Aggro, "Faction: %d\n", fv);
-	Log(Logs::Detail, Logs::Aggro, "Int: %d\n", GetINT());
-	Log(Logs::Detail, Logs::Aggro, "Con: %d\n", GetLevelCon(mob->GetLevel()));
+	LogAggro("Is In zone?:[{}]\n", mob->InZone());
+	LogAggro("Dist^2: [{}]\n", dist2);
+	LogAggro("Range^2: [{}]\n", iAggroRange2);
+	LogAggro("Faction: [{}]\n", fv);
+	LogAggro("Int: [{}]\n", GetINT());
+	LogAggro("Con: [{}]\n", GetLevelCon(mob->GetLevel()));
 
 	return(false);
 }
@@ -519,7 +517,7 @@ void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
 					//Father Nitwit: make sure we can see them.
 					if(mob->CheckLosFN(sender)) {
 #if (EQDEBUG>=5)
-						Log(Logs::General, Logs::None, "AIYellForHelp(\"%s\",\"%s\") %s attacking %s Dist %f Z %f",
+						LogDebug("AIYellForHelp(\"[{}]\",\"[{}]\") [{}] attacking [{}] Dist [{}] Z [{}]",
 							sender->GetName(), attacker->GetName(), mob->GetName(),
 							attacker->GetName(), DistanceSquared(mob->GetPosition(),
 							sender->GetPosition()), std::abs(sender->GetZ()+mob->GetZ()));

@@ -888,8 +888,7 @@ void ZoneDatabase::UpdateTraderItemCharges(int CharID, uint32 SerialNumber, int3
                                     Charges, CharID, SerialNumber);
     auto results = QueryDatabase(query);
     if (!results.Success())
-		Log(Logs::Detail, Logs::None, "[CLIENT] Failed to update charges for trader item: %i for char_id: %i, the error was: %s\n",
-                                SerialNumber, CharID, results.ErrorMessage().c_str());
+		LogDebug("[CLIENT] Failed to update charges for trader item: [{}] for char_id: [{}], the error was: [{}]\n", SerialNumber, CharID, results.ErrorMessage().c_str());
 
 }
 
@@ -1524,13 +1523,12 @@ bool ZoneDatabase::SaveCharacterBindPoint(uint32 character_id, const BindStruct 
 			 "%u, %u, %f, %f, %f, %f, %i)",
 			 character_id, bind.zoneId, bind.instance_id, bind.x, bind.y, bind.z, bind.heading, bind_num);
 
-	Log(Logs::General, Logs::None, "ZoneDatabase::SaveCharacterBindPoint for character ID: %i zone_id: %u "
-					   "instance_id: %u position: %f %f %f %f bind_num: %u",
+	LogDebug("ZoneDatabase::SaveCharacterBindPoint for character ID: [{}] zone_id: [{}] instance_id: [{}] position: [{}] [{}] [{}] [{}] bind_num: [{}]",
 		character_id, bind.zoneId, bind.instance_id, bind.x, bind.y, bind.z, bind.heading, bind_num);
 
 	auto results = QueryDatabase(query);
 	if (!results.RowsAffected())
-		Log(Logs::General, Logs::None, "ERROR Bind Home Save: %s. %s", results.ErrorMessage().c_str(),
+		LogDebug("ERROR Bind Home Save: [{}]. [{}]", results.ErrorMessage().c_str(),
 			query.c_str());
 
 	return true;

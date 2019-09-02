@@ -1773,8 +1773,7 @@ void Client::Handle_OP_AcceptNewTask(const EQApplicationPacket *app)
 {
 
 	if (app->size != sizeof(AcceptNewTask_Struct)) {
-		Log(Logs::General, Logs::None, "Size mismatch in OP_AcceptNewTask expected %i got %i",
-			sizeof(AcceptNewTask_Struct), app->size);
+		LogDebug("Size mismatch in OP_AcceptNewTask expected [{}] got [{}]", sizeof(AcceptNewTask_Struct), app->size);
 		DumpPacket(app);
 		return;
 	}
@@ -2112,8 +2111,7 @@ void Client::Handle_OP_AdventureMerchantSell(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Adventure_Sell_Struct))
 	{
-		Log(Logs::General, Logs::None, "Size mismatch on OP_AdventureMerchantSell: got %u expected %u",
-			app->size, sizeof(Adventure_Sell_Struct));
+		LogDebug("Size mismatch on OP_AdventureMerchantSell: got [{}] expected [{}]", app->size, sizeof(Adventure_Sell_Struct));
 		DumpPacket(app);
 		return;
 	}
@@ -2918,8 +2916,7 @@ void Client::Handle_OP_AugmentInfo(const EQApplicationPacket *app)
 	// Some clients this seems to nuke the charm text (ex. Adventurer's Stone)
 
 	if (app->size != sizeof(AugmentInfo_Struct)) {
-		Log(Logs::General, Logs::None, "Size mismatch in OP_AugmentInfo expected %i got %i",
-			sizeof(AugmentInfo_Struct), app->size);
+		LogDebug("Size mismatch in OP_AugmentInfo expected [{}] got [{}]", sizeof(AugmentInfo_Struct), app->size);
 		DumpPacket(app);
 		return;
 	}
@@ -3317,8 +3314,7 @@ void Client::Handle_OP_Bandolier(const EQApplicationPacket *app)
 	// Although there are three different structs for OP_Bandolier, they are all the same size.
 	//
 	if (app->size != sizeof(BandolierCreate_Struct)) {
-		Log(Logs::General, Logs::None, "Size mismatch in OP_Bandolier expected %i got %i",
-			sizeof(BandolierCreate_Struct), app->size);
+		LogDebug("Size mismatch in OP_Bandolier expected [{}] got [{}]", sizeof(BandolierCreate_Struct), app->size);
 		DumpPacket(app);
 		return;
 	}
@@ -3748,8 +3744,7 @@ void Client::Handle_OP_BlockedBuffs(const EQApplicationPacket *app)
 
 	if (app->size != sizeof(BlockedBuffs_Struct))
 	{
-		Log(Logs::General, Logs::None, "Size mismatch in OP_BlockedBuffs expected %i got %i",
-			sizeof(BlockedBuffs_Struct), app->size);
+		LogDebug("Size mismatch in OP_BlockedBuffs expected [{}] got [{}]", sizeof(BlockedBuffs_Struct), app->size);
 
 		DumpPacket(app);
 
@@ -3970,8 +3965,7 @@ void Client::Handle_OP_CancelTask(const EQApplicationPacket *app)
 {
 
 	if (app->size != sizeof(CancelTask_Struct)) {
-		Log(Logs::General, Logs::None, "Size mismatch in OP_CancelTask expected %i got %i",
-			sizeof(CancelTask_Struct), app->size);
+		LogDebug("Size mismatch in OP_CancelTask expected [{}] got [{}]", sizeof(CancelTask_Struct), app->size);
 		DumpPacket(app);
 		return;
 	}
@@ -4221,8 +4215,7 @@ void Client::Handle_OP_ClearNPCMarks(const EQApplicationPacket *app)
 
 	if (app->size != 0)
 	{
-		Log(Logs::General, Logs::None, "Size mismatch in OP_ClearNPCMarks expected 0 got %i",
-			app->size);
+		LogDebug("Size mismatch in OP_ClearNPCMarks expected 0 got [{}]", app->size);
 
 		DumpPacket(app);
 
@@ -5114,8 +5107,7 @@ void Client::Handle_OP_DelegateAbility(const EQApplicationPacket *app)
 
 	if (app->size != sizeof(DelegateAbility_Struct))
 	{
-		Log(Logs::General, Logs::None, "Size mismatch in OP_DelegateAbility expected %i got %i",
-			sizeof(DelegateAbility_Struct), app->size);
+		LogDebug("Size mismatch in OP_DelegateAbility expected [{}] got [{}]", sizeof(DelegateAbility_Struct), app->size);
 
 		DumpPacket(app);
 
@@ -5388,8 +5380,7 @@ void Client::Handle_OP_DoGroupLeadershipAbility(const EQApplicationPacket *app)
 
 	if (app->size != sizeof(DoGroupLeadershipAbility_Struct)) {
 
-		Log(Logs::General, Logs::None, "Size mismatch in OP_DoGroupLeadershipAbility expected %i got %i",
-			sizeof(DoGroupLeadershipAbility_Struct), app->size);
+		LogDebug("Size mismatch in OP_DoGroupLeadershipAbility expected [{}] got [{}]", sizeof(DoGroupLeadershipAbility_Struct), app->size);
 
 		DumpPacket(app);
 
@@ -5440,8 +5431,7 @@ void Client::Handle_OP_DoGroupLeadershipAbility(const EQApplicationPacket *app)
 	}
 
 	default:
-		Log(Logs::General, Logs::None, "Got unhandled OP_DoGroupLeadershipAbility Ability: %d Parameter: %d",
-			dglas->Ability, dglas->Parameter);
+		LogDebug("Got unhandled OP_DoGroupLeadershipAbility Ability: [{}] Parameter: [{}]", dglas->Ability, dglas->Parameter);
 		break;
 	}
 }
@@ -6227,8 +6217,7 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 
 	if (app->size < sizeof(GMSearchCorpse_Struct))
 	{
-		Log(Logs::General, Logs::None, "OP_GMSearchCorpse size lower than expected: got %u expected at least %u",
-			app->size, sizeof(GMSearchCorpse_Struct));
+		LogDebug("OP_GMSearchCorpse size lower than expected: got [{}] expected at least [{}]", app->size, sizeof(GMSearchCorpse_Struct));
 		DumpPacket(app);
 		return;
 	}
@@ -6880,8 +6869,7 @@ void Client::Handle_OP_GroupUpdate(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(GroupUpdate_Struct))
 	{
-		Log(Logs::General, Logs::None, "Size mismatch on OP_GroupUpdate: got %u expected %u",
-			app->size, sizeof(GroupUpdate_Struct));
+		LogDebug("Size mismatch on OP_GroupUpdate: got [{}] expected [{}]", app->size, sizeof(GroupUpdate_Struct));
 		DumpPacket(app);
 		return;
 	}
@@ -7878,8 +7866,7 @@ void Client::Handle_OP_GuildStatus(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(GuildStatus_Struct))
 	{
-		Log(Logs::General, Logs::None, "Size mismatch in OP_GuildStatus expected %i got %i",
-			sizeof(GuildStatus_Struct), app->size);
+		LogDebug("Size mismatch in OP_GuildStatus expected [{}] got [{}]", sizeof(GuildStatus_Struct), app->size);
 
 		DumpPacket(app);
 
@@ -7935,8 +7922,7 @@ void Client::Handle_OP_GuildUpdateURLAndChannel(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(GuildUpdateURLAndChannel_Struct))
 	{
-		Log(Logs::General, Logs::None, "Size mismatch in OP_GuildUpdateURLAndChannel expected %i got %i",
-			sizeof(GuildUpdateURLAndChannel_Struct), app->size);
+		LogDebug("Size mismatch in OP_GuildUpdateURLAndChannel expected [{}] got [{}]", sizeof(GuildUpdateURLAndChannel_Struct), app->size);
 
 		DumpPacket(app);
 
@@ -8052,8 +8038,7 @@ void Client::Handle_OP_HideCorpse(const EQApplicationPacket *app)
 	//
 	if (app->size != sizeof(HideCorpse_Struct))
 	{
-		Log(Logs::General, Logs::None, "Size mismatch in OP_HideCorpse expected %i got %i",
-			sizeof(HideCorpse_Struct), app->size);
+		LogDebug("Size mismatch in OP_HideCorpse expected [{}] got [{}]", sizeof(HideCorpse_Struct), app->size);
 
 		DumpPacket(app);
 
@@ -10758,11 +10743,7 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 {
 
 	if (app->size != sizeof(PopupResponse_Struct)) {
-		Log(Logs::General,
-			Logs::None,
-			"Size mismatch in OP_PopupResponse expected %i got %i",
-			sizeof(PopupResponse_Struct),
-			app->size);
+		LogDebug("Size mismatch in OP_PopupResponse expected [{}] got [{}]", sizeof(PopupResponse_Struct), app->size);
 
 		DumpPacket(app);
 		return;
@@ -10806,8 +10787,7 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 void Client::Handle_OP_PotionBelt(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(MovePotionToBelt_Struct)) {
-		Log(Logs::General, Logs::None, "Size mismatch in OP_PotionBelt expected %i got %i",
-			sizeof(MovePotionToBelt_Struct), app->size);
+		LogDebug("Size mismatch in OP_PotionBelt expected [{}] got [{}]", sizeof(MovePotionToBelt_Struct), app->size);
 		DumpPacket(app);
 		return;
 	}
@@ -10930,8 +10910,7 @@ void Client::Handle_OP_PVPLeaderBoardDetailsRequest(const EQApplicationPacket *a
 	//
 	if (app->size != sizeof(PVPLeaderBoardDetailsRequest_Struct))
 	{
-		Log(Logs::General, Logs::None, "Size mismatch in OP_PVPLeaderBoardDetailsRequest expected %i got %i",
-			sizeof(PVPLeaderBoardDetailsRequest_Struct), app->size);
+		LogDebug("Size mismatch in OP_PVPLeaderBoardDetailsRequest expected [{}] got [{}]", sizeof(PVPLeaderBoardDetailsRequest_Struct), app->size);
 
 		DumpPacket(app);
 
@@ -10957,8 +10936,7 @@ void Client::Handle_OP_PVPLeaderBoardRequest(const EQApplicationPacket *app)
 	//
 	if (app->size != sizeof(PVPLeaderBoardRequest_Struct))
 	{
-		Log(Logs::General, Logs::None, "Size mismatch in OP_PVPLeaderBoardRequest expected %i got %i",
-			sizeof(PVPLeaderBoardRequest_Struct), app->size);
+		LogDebug("Size mismatch in OP_PVPLeaderBoardRequest expected [{}] got [{}]", sizeof(PVPLeaderBoardRequest_Struct), app->size);
 
 		DumpPacket(app);
 
@@ -11902,8 +11880,7 @@ void Client::Handle_OP_RemoveBlockedBuffs(const EQApplicationPacket *app)
 
 	if (app->size != sizeof(BlockedBuffs_Struct))
 	{
-		Log(Logs::General, Logs::None, "Size mismatch in OP_RemoveBlockedBuffs expected %i got %i",
-			sizeof(BlockedBuffs_Struct), app->size);
+		LogDebug("Size mismatch in OP_RemoveBlockedBuffs expected [{}] got [{}]", sizeof(BlockedBuffs_Struct), app->size);
 
 		DumpPacket(app);
 
@@ -12087,8 +12064,7 @@ void Client::Handle_OP_RespawnWindow(const EQApplicationPacket *app)
 	//
 	if (app->size != 4)
 	{
-		Log(Logs::General, Logs::None, "Size mismatch in OP_RespawnWindow expected %i got %i",
-			4, app->size);
+		LogDebug("Size mismatch in OP_RespawnWindow expected [{}] got [{}]", 4, app->size);
 		DumpPacket(app);
 		return;
 	}
@@ -13629,8 +13605,7 @@ void Client::Handle_OP_TaskHistoryRequest(const EQApplicationPacket *app)
 {
 
 	if (app->size != sizeof(TaskHistoryRequest_Struct)) {
-		Log(Logs::General, Logs::None, "Size mismatch in OP_TaskHistoryRequest expected %i got %i",
-			sizeof(TaskHistoryRequest_Struct), app->size);
+		LogDebug("Size mismatch in OP_TaskHistoryRequest expected [{}] got [{}]", sizeof(TaskHistoryRequest_Struct), app->size);
 		DumpPacket(app);
 		return;
 	}
@@ -14431,9 +14406,7 @@ void Client::Handle_OP_TributeUpdate(const EQApplicationPacket *app)
 void Client::Handle_OP_VetClaimRequest(const EQApplicationPacket *app)
 {
 	if (app->size < sizeof(VeteranClaim)) {
-		Log(Logs::General, Logs::None,
-			"OP_VetClaimRequest size lower than expected: got %u expected at least %u", app->size,
-			sizeof(VeteranClaim));
+		LogDebug("OP_VetClaimRequest size lower than expected: got [{}] expected at least [{}]", app->size, sizeof(VeteranClaim));
 		DumpPacket(app);
 		return;
 	}
@@ -14463,8 +14436,7 @@ void Client::Handle_OP_VoiceMacroIn(const EQApplicationPacket *app)
 
 	if (app->size != sizeof(VoiceMacroIn_Struct)) {
 
-		Log(Logs::General, Logs::None, "Size mismatch in OP_VoiceMacroIn expected %i got %i",
-			sizeof(VoiceMacroIn_Struct), app->size);
+		LogDebug("Size mismatch in OP_VoiceMacroIn expected [{}] got [{}]", sizeof(VoiceMacroIn_Struct), app->size);
 
 		DumpPacket(app);
 
@@ -14482,8 +14454,7 @@ void Client::Handle_OP_VoiceMacroIn(const EQApplicationPacket *app)
 void Client::Handle_OP_UpdateAura(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(AuraDestory_Struct)) {
-		Log(Logs::General, Logs::None, "Size mismatch in OP_UpdateAura expected %i got %i",
-		    sizeof(AuraDestory_Struct), app->size);
+		LogDebug("Size mismatch in OP_UpdateAura expected [{}] got [{}]", sizeof(AuraDestory_Struct), app->size);
 		return;
 	}
 
