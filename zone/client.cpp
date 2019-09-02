@@ -914,7 +914,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 	{
 	case ChatChannel_Guild: { /* Guild Chat */
 		if (!IsInAGuild())
-			Message_StringID(MT_DefaultText, GUILD_NOT_MEMBER2);	//You are not a member of any guild.
+			MessageString(Chat::DefaultText, GUILD_NOT_MEMBER2);	//You are not a member of any guild.
 		else if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_SPEAK))
 			Message(0, "Error: You dont have permission to speak to the guild.");
 		else if (!worldserver.SendChannelMessage(this, targetname, chan_num, GuildID(), language, lang_skill, message))
@@ -1097,11 +1097,11 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 				if(parse->PlayerHasQuestSub(EVENT_COMMAND)) {
 					int i = parse->EventPlayer(EVENT_COMMAND, this, message, 0);
 					if(i == 0 && !RuleB(Chat, SuppressCommandErrors)) {
-						Message(13, "Command '%s' not recognized.", message);
+						Message(Chat::Red, "Command '%s' not recognized.", message);
 					}
 				} else {
 					if(!RuleB(Chat, SuppressCommandErrors))
-						Message(13, "Command '%s' not recognized.", message);
+						Message(Chat::Red, "Command '%s' not recognized.", message);
 				}
 			}
 			break;
@@ -1116,12 +1116,12 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 				if (parse->PlayerHasQuestSub(EVENT_COMMAND)) {
 					int i = parse->EventPlayer(EVENT_COMMAND, this, message, 0);
 					if (i == 0 && !RuleB(Chat, SuppressCommandErrors)) {
-						Message(13, "Bot command '%s' not recognized.", message);
+						Message(Chat::Red, "Bot command '%s' not recognized.", message);
 					}
 				}
 				else {
 					if (!RuleB(Chat, SuppressCommandErrors))
-						Message(13, "Bot command '%s' not recognized.", message);
+						Message(Chat::Red, "Bot command '%s' not recognized.", message);
 				}
 			}
 			break;
@@ -1265,11 +1265,11 @@ void Client::ChannelMessageSend(const char* from, const char* to, uint8 chan_num
 }
 
 void Client::Message(uint32 type, const char* message, ...) {
-	if (GetFilter(FilterSpellDamage) == FilterHide && type == MT_NonMelee)
+	if (GetFilter(FilterSpellDamage) == FilterHide && type == Chat::NonMelee)
 		return;
-	if (GetFilter(FilterMeleeCrits) == FilterHide && type == MT_CritMelee) //98 is self...
+	if (GetFilter(FilterMeleeCrits) == FilterHide && type == Chat::MeleeCrit) //98 is self...
 		return;
-	if (GetFilter(FilterSpellCrits) == FilterHide && type == MT_SpellCrits)
+	if (GetFilter(FilterSpellCrits) == FilterHide && type == Chat::SpellCrit)
 		return;
 
 	va_list argptr;
@@ -1509,7 +1509,7 @@ void Client::IncreaseLanguageSkill(int skill_id, int value) {
 	QueuePacket(outapp);
 	safe_delete(outapp);
 
-	Message_StringID( MT_Skills, LANG_SKILL_IMPROVED ); //Notify client
+	MessageString( Chat::Skills, LANG_SKILL_IMPROVED ); //Notify client
 }
 
 void Client::AddSkill(EQEmu::skills::SkillType skillid, uint16 value) {
@@ -2047,7 +2047,7 @@ bool Client::ChangeFirstName(const char* in_firstname, const char* gmname)
 void Client::SetGM(bool toggle) {
 	m_pp.gm = toggle ? 1 : 0;
 	m_inv.SetGMInventory((bool)m_pp.gm);
-	Message(13, "You are %s a GM.", m_pp.gm ? "now" : "no longer");
+	Message(Chat::Red, "You are %s a GM.", m_pp.gm ? "now" : "no longer");
 	SendAppearancePacket(AT_GM, m_pp.gm);
 	Save();
 	UpdateWho();
@@ -2550,7 +2550,7 @@ uint16 Client::GetMaxSkillAfterSpecializationRules(EQEmu::skills::SkillType skil
 			}
 			else
 			{
-				Message(13, "Your spell casting specializations skills have been reset. "
+				Message(Chat::Red, "Your spell casting specializations skills have been reset. "
 						"Only %i primary specialization skill is allowed.", MaxSpecializations);
 
 				for (int i = EQEmu::skills::SkillSpecializeAbjure; i <= EQEmu::skills::SkillSpecializeEvocation; ++i)
@@ -2578,9 +2578,9 @@ void Client::SetPVP(bool toggle, bool message) {
 
 	if (message) {
 		if(GetPVP())
-			this->Message_StringID(MT_Shout,PVP_ON);
+			this->MessageString(Chat::Shout,PVP_ON);
 		else
-			Message(13, "You no longer follow the ways of discord.");
+			Message(Chat::Red, "You no longer follow the ways of discord.");
 	}
 
 	SendAppearancePacket(AT_PVP, GetPVP());
@@ -2714,22 +2714,22 @@ void Client::Disarm(Client* disarmer, int chance) {
 					if (matslot != EQEmu::textures::materialInvalid)
 						SendWearChange(matslot);
 				}
-				Message_StringID(MT_Skills, DISARMED);
+				MessageString(Chat::Skills, DISARMED);
 				if (disarmer != this)
-					disarmer->Message_StringID(MT_Skills, DISARM_SUCCESS, this->GetCleanName());
+					disarmer->MessageString(Chat::Skills, DISARM_SUCCESS, this->GetCleanName());
 				if (chance != 1000)
 					disarmer->CheckIncreaseSkill(EQEmu::skills::SkillDisarm, nullptr, 4);
 				CalcBonuses();
 				// CalcEnduranceWeightFactor();
 				return;
 			}
-			disarmer->Message_StringID(MT_Skills, DISARM_FAILED);
+			disarmer->MessageString(Chat::Skills, DISARM_FAILED);
 			if (chance != 1000)
 				disarmer->CheckIncreaseSkill(EQEmu::skills::SkillDisarm, nullptr, 2);
 			return;
 		}
 	}
-	disarmer->Message_StringID(MT_Skills, DISARM_FAILED);
+	disarmer->MessageString(Chat::Skills, DISARM_FAILED);
 }
 
 bool Client::BindWound(Mob *bindmob, bool start, bool fail)
@@ -2771,7 +2771,7 @@ bool Client::BindWound(Mob *bindmob, bool start, bool fail)
 			} else {
 				// send bindmob "stand still"
 				if (!bindmob->IsAIControlled() && bindmob != this) {
-					bindmob->CastToClient()->Message_StringID(clientMessageYellow,
+					bindmob->CastToClient()->MessageString(Chat::Yellow,
 										  YOU_ARE_BEING_BANDAGED);
 				} else if (bindmob->IsAIControlled() && bindmob != this) {
 					; // Tell IPC to stand still?
@@ -2855,7 +2855,7 @@ bool Client::BindWound(Mob *bindmob, bool start, bool fail)
 						}
 						else {
 							// I dont have the real, live
-							Message(15, "You cannot bind wounds above %d%% hitpoints.",
+							Message(Chat::Yellow, "You cannot bind wounds above %d%% hitpoints.",
 								max_percent);
 							if (bindmob != this && bindmob->IsClient())
 								bindmob->CastToClient()->Message(
@@ -2916,9 +2916,9 @@ bool Client::BindWound(Mob *bindmob, bool start, bool fail)
 							bindmob->SendHPUpdate();
 						}
 						else {
-							Message(15, "You cannot bind wounds above %d%% hitpoints", max_percent);
+							Message(Chat::Yellow, "You cannot bind wounds above %d%% hitpoints", max_percent);
 							if (bindmob != this && bindmob->IsClient())
-								bindmob->CastToClient()->Message(15, "You cannot have your wounds bound above %d%% hitpoints", max_percent);
+								bindmob->CastToClient()->Message(Chat::Yellow, "You cannot have your wounds bound above %d%% hitpoints", max_percent);
 						}
 					}
 				}
@@ -3075,13 +3075,13 @@ void Client::ServerFilter(SetServerFilter_Struct* filter){
 }
 
 // this version is for messages with no parameters
-void Client::Message_StringID(uint32 type, uint32 string_id, uint32 distance)
+void Client::MessageString(uint32 type, uint32 string_id, uint32 distance)
 {
-	if (GetFilter(FilterSpellDamage) == FilterHide && type == MT_NonMelee)
+	if (GetFilter(FilterSpellDamage) == FilterHide && type == Chat::NonMelee)
 		return;
-	if (GetFilter(FilterMeleeCrits) == FilterHide && type == MT_CritMelee) //98 is self...
+	if (GetFilter(FilterMeleeCrits) == FilterHide && type == Chat::MeleeCrit) //98 is self...
 		return;
-	if (GetFilter(FilterSpellCrits) == FilterHide && type == MT_SpellCrits)
+	if (GetFilter(FilterSpellCrits) == FilterHide && type == Chat::SpellCrit)
 		return;
 	auto outapp = new EQApplicationPacket(OP_SimpleMessage, 12);
 	SimpleMessage_Struct* sms = (SimpleMessage_Struct*)outapp->pBuffer;
@@ -3103,30 +3103,30 @@ void Client::Message_StringID(uint32 type, uint32 string_id, uint32 distance)
 // to load the eqstr file and count them in the string.
 // This hack sucks but it's gonna work for now.
 //
-void Client::Message_StringID(uint32 type, uint32 string_id, const char* message1,
+void Client::MessageString(uint32 type, uint32 string_id, const char* message1,
 	const char* message2,const char* message3,const char* message4,
 	const char* message5,const char* message6,const char* message7,
 	const char* message8,const char* message9, uint32 distance)
 {
-	if (GetFilter(FilterSpellDamage) == FilterHide && type == MT_NonMelee)
+	if (GetFilter(FilterSpellDamage) == FilterHide && type == Chat::NonMelee)
 		return;
-	if (GetFilter(FilterMeleeCrits) == FilterHide && type == MT_CritMelee) //98 is self...
+	if (GetFilter(FilterMeleeCrits) == FilterHide && type == Chat::MeleeCrit) //98 is self...
 		return;
-	if (GetFilter(FilterSpellCrits) == FilterHide && type == MT_SpellCrits)
+	if (GetFilter(FilterSpellCrits) == FilterHide && type == Chat::SpellCrit)
 		return;
-	if (GetFilter(FilterDamageShields) == FilterHide && type == MT_DS)
+	if (GetFilter(FilterDamageShields) == FilterHide && type == Chat::DamageShield)
 		return;
 
 	int i = 0, argcount = 0, length = 0;
 	char *bufptr = nullptr;
 	const char *message_arg[9] = {0};
 
-	if(type==MT_Emote)
+	if(type==Chat::Emote)
 		type=4;
 
 	if(!message1)
 	{
-		Message_StringID(type, string_id);	// use the simple message instead
+		MessageString(type, string_id);	// use the simple message instead
 		return;
 	}
 
@@ -3205,7 +3205,7 @@ bool Client::FilteredMessageCheck(Mob *sender, eqFilterType filter)
 	return true;
 }
 
-void Client::FilteredMessage_StringID(Mob *sender, uint32 type,
+void Client::FilteredMessageString(Mob *sender, uint32 type,
 		eqFilterType filter, uint32 string_id)
 {
 	if (!FilteredMessageCheck(sender, filter))
@@ -3224,7 +3224,7 @@ void Client::FilteredMessage_StringID(Mob *sender, uint32 type,
 	return;
 }
 
-void Client::FilteredMessage_StringID(Mob *sender, uint32 type, eqFilterType filter, uint32 string_id,
+void Client::FilteredMessageString(Mob *sender, uint32 type, eqFilterType filter, uint32 string_id,
 		const char *message1, const char *message2, const char *message3,
 		const char *message4, const char *message5, const char *message6,
 		const char *message7, const char *message8, const char *message9)
@@ -3236,11 +3236,11 @@ void Client::FilteredMessage_StringID(Mob *sender, uint32 type, eqFilterType fil
 	char *bufptr = nullptr;
 	const char *message_arg[9] = {0};
 
-	if (type == MT_Emote)
+	if (type == Chat::Emote)
 		type = 4;
 
 	if (!message1) {
-		FilteredMessage_StringID(sender, type, filter, string_id);	// use the simple message instead
+		FilteredMessageString(sender, type, filter, string_id);	// use the simple message instead
 		return;
 	}
 
@@ -3281,7 +3281,7 @@ void Client::Tell_StringID(uint32 string_id, const char *who, const char *messag
 	char string_id_str[10];
 	snprintf(string_id_str, 10, "%d", string_id);
 
-	Message_StringID(MT_TellEcho, TELL_QUEUED_MESSAGE, who, string_id_str, message);
+	MessageString(Chat::EchoTell, TELL_QUEUED_MESSAGE, who, string_id_str, message);
 }
 
 void Client::SetTint(int16 in_slot, uint32 color) {
@@ -3344,7 +3344,7 @@ void Client::SetLanguageSkill(int langid, int value)
 	QueuePacket(outapp);
 	safe_delete(outapp);
 
-	Message_StringID( MT_Skills, LANG_SKILL_IMPROVED ); //Notify the client
+	MessageString( Chat::Skills, LANG_SKILL_IMPROVED ); //Notify the client
 }
 
 void Client::LinkDead()
@@ -3432,7 +3432,7 @@ void Client::Escape()
 	entity_list.RemoveFromTargets(this, true);
 	SetInvisible(1);
 
-	Message_StringID(MT_Skills, ESCAPE);
+	MessageString(Chat::Skills, ESCAPE);
 }
 
 float Client::CalcPriceMod(Mob* other, bool reverse)
@@ -3828,9 +3828,9 @@ void Client::EnteringMessages(Client* client)
 		uint8 flag = database.GetAgreementFlag(client->AccountID());
 		if(!flag)
 		{
-			client->Message(13,"You must agree to the Rules, before you can move. (type #serverrules to view the rules)");
-			client->Message(13,"You must agree to the Rules, before you can move. (type #serverrules to view the rules)");
-			client->Message(13,"You must agree to the Rules, before you can move. (type #serverrules to view the rules)");
+			client->Message(Chat::Red,"You must agree to the Rules, before you can move. (type #serverrules to view the rules)");
+			client->Message(Chat::Red,"You must agree to the Rules, before you can move. (type #serverrules to view the rules)");
+			client->Message(Chat::Red,"You must agree to the Rules, before you can move. (type #serverrules to view the rules)");
 			client->SendAppearancePacket(AT_Anim, ANIM_FREEZE);
 		}
 	}
@@ -3845,7 +3845,7 @@ void Client::SendRules(Client* client)
 
 	auto lines = SplitString(rules, '\n');
 	for (auto&& e : lines)
-		client->Message(0, "%s", e.c_str());
+		client->Message(Chat::White, "%s", e.c_str());
 }
 
 void Client::SetEndurance(int32 newEnd)
@@ -3872,13 +3872,13 @@ void Client::SacrificeConfirm(Client *caster)
 	}
 
 	if (GetLevel() < RuleI(Spells, SacrificeMinLevel)) {
-		caster->Message_StringID(13, SAC_TOO_LOW); // This being is not a worthy sacrifice.
+		caster->MessageString(Chat::Red, SAC_TOO_LOW); // This being is not a worthy sacrifice.
 		safe_delete(outapp);
 		return;
 	}
 
 	if (GetLevel() > RuleI(Spells, SacrificeMaxLevel)) {
-		caster->Message_StringID(13, SAC_TOO_HIGH);
+		caster->MessageString(Chat::Red, SAC_TOO_HIGH);
 		safe_delete(outapp);
 		return;
 	}
@@ -3947,7 +3947,7 @@ void Client::Sacrifice(Client *caster)
 				caster->SummonItem(RuleI(Spells, SacrificeItemID));
 		}
 	} else {
-		caster->Message_StringID(13, SAC_TOO_LOW); // This being is not a worthy sacrifice.
+		caster->MessageString(Chat::Red, SAC_TOO_LOW); // This being is not a worthy sacrifice.
 	}
 }
 
@@ -4222,7 +4222,7 @@ void Client::KeyRingAdd(uint32 item_id)
 		return;
 	}
 
-	Message(4,"Added to keyring.");
+	Message(Chat::LightBlue,"Added to keyring.");
 
 	keyring.push_back(item_id);
 }
@@ -4238,11 +4238,11 @@ bool Client::KeyRingCheck(uint32 item_id)
 
 void Client::KeyRingList()
 {
-	Message(4,"Keys on Keyring:");
+	Message(Chat::LightBlue,"Keys on Keyring:");
 	const EQEmu::ItemData *item = nullptr;
 	for (auto iter = keyring.begin(); iter != keyring.end(); ++iter) {
 		if ((item = database.GetItem(*iter))!=nullptr) {
-			Message(4,item->Name);
+			Message(Chat::LightBlue,item->Name);
 		}
 	}
 }
@@ -4414,8 +4414,8 @@ bool Client::GroupFollow(Client* inviter) {
 
 			if (group->GetID() == 0)
 			{
-				Message(13, "Unable to get new group id. Cannot create group.");
-				inviter->Message(13, "Unable to get new group id. Cannot create group.");
+				Message(Chat::Red, "Unable to get new group id. Cannot create group.");
+				inviter->Message(Chat::Red, "Unable to get new group id. Cannot create group.");
 				return false;
 			}
 
@@ -4924,7 +4924,7 @@ void Client::HandleLDoNOpen(NPC *target)
 		{
 			Log(Logs::General, Logs::None, "%s tried to open %s but %s was out of range",
 				GetName(), target->GetName(), target->GetName());
-			Message(13, "Treasure chest out of range.");
+			Message(Chat::Red, "Treasure chest out of range.");
 			return;
 		}
 
@@ -4932,7 +4932,7 @@ void Client::HandleLDoNOpen(NPC *target)
 		{
 			if(target->GetLDoNTrapSpellID() != 0)
 			{
-				Message_StringID(13, LDON_ACCIDENT_SETOFF2);
+				MessageString(Chat::Red, LDON_ACCIDENT_SETOFF2);
 				target->SpellFinished(target->GetLDoNTrapSpellID(), this, EQEmu::spells::CastingSlot::Item, 0, -1, spells[target->GetLDoNTrapSpellID()].ResistDiff);
 				target->SetLDoNTrapSpellID(0);
 				target->SetLDoNTrapped(false);
@@ -4948,7 +4948,7 @@ void Client::HandleLDoNOpen(NPC *target)
 
 		if(target->IsLDoNLocked())
 		{
-			Message_StringID(MT_Skills, LDON_STILL_LOCKED, target->GetCleanName());
+			MessageString(Chat::Skills, LDON_STILL_LOCKED, target->GetCleanName());
 			return;
 		}
 		else
@@ -4982,13 +4982,13 @@ void Client::HandleLDoNSenseTraps(NPC *target, uint16 skill, uint8 type)
 		{
 			if((target->GetLDoNTrapType() == LDoNTypeCursed || target->GetLDoNTrapType() == LDoNTypeMagical) && type != target->GetLDoNTrapType())
 			{
-				Message_StringID(MT_Skills, LDON_CANT_DETERMINE_TRAP, target->GetCleanName());
+				MessageString(Chat::Skills, LDON_CANT_DETERMINE_TRAP, target->GetCleanName());
 				return;
 			}
 
 			if(target->IsLDoNTrapDetected())
 			{
-				Message_StringID(MT_Skills, LDON_CERTAIN_TRAP, target->GetCleanName());
+				MessageString(Chat::Skills, LDON_CERTAIN_TRAP, target->GetCleanName());
 			}
 			else
 			{
@@ -4997,10 +4997,10 @@ void Client::HandleLDoNSenseTraps(NPC *target, uint16 skill, uint8 type)
 				{
 				case -1:
 				case 0:
-					Message_StringID(MT_Skills, LDON_DONT_KNOW_TRAPPED, target->GetCleanName());
+					MessageString(Chat::Skills, LDON_DONT_KNOW_TRAPPED, target->GetCleanName());
 					break;
 				case 1:
-					Message_StringID(MT_Skills, LDON_CERTAIN_TRAP, target->GetCleanName());
+					MessageString(Chat::Skills, LDON_CERTAIN_TRAP, target->GetCleanName());
 					target->SetLDoNTrapDetected(true);
 					break;
 				default:
@@ -5010,7 +5010,7 @@ void Client::HandleLDoNSenseTraps(NPC *target, uint16 skill, uint8 type)
 		}
 		else
 		{
-			Message_StringID(MT_Skills, LDON_CERTAIN_NOT_TRAP, target->GetCleanName());
+			MessageString(Chat::Skills, LDON_CERTAIN_NOT_TRAP, target->GetCleanName());
 		}
 	}
 }
@@ -5023,13 +5023,13 @@ void Client::HandleLDoNDisarm(NPC *target, uint16 skill, uint8 type)
 		{
 			if(!target->IsLDoNTrapped())
 			{
-				Message_StringID(MT_Skills, LDON_WAS_NOT_TRAPPED, target->GetCleanName());
+				MessageString(Chat::Skills, LDON_WAS_NOT_TRAPPED, target->GetCleanName());
 				return;
 			}
 
 			if((target->GetLDoNTrapType() == LDoNTypeCursed || target->GetLDoNTrapType() == LDoNTypeMagical) && type != target->GetLDoNTrapType())
 			{
-				Message_StringID(MT_Skills, LDON_HAVE_NOT_DISARMED, target->GetCleanName());
+				MessageString(Chat::Skills, LDON_HAVE_NOT_DISARMED, target->GetCleanName());
 				return;
 			}
 
@@ -5048,13 +5048,13 @@ void Client::HandleLDoNDisarm(NPC *target, uint16 skill, uint8 type)
 				target->SetLDoNTrapDetected(false);
 				target->SetLDoNTrapped(false);
 				target->SetLDoNTrapSpellID(0);
-				Message_StringID(MT_Skills, LDON_HAVE_DISARMED, target->GetCleanName());
+				MessageString(Chat::Skills, LDON_HAVE_DISARMED, target->GetCleanName());
 				break;
 			case 0:
-				Message_StringID(MT_Skills, LDON_HAVE_NOT_DISARMED, target->GetCleanName());
+				MessageString(Chat::Skills, LDON_HAVE_NOT_DISARMED, target->GetCleanName());
 				break;
 			case -1:
-				Message_StringID(13, LDON_ACCIDENT_SETOFF2);
+				MessageString(Chat::Red, LDON_ACCIDENT_SETOFF2);
 				target->SpellFinished(target->GetLDoNTrapSpellID(), this, EQEmu::spells::CastingSlot::Item, 0, -1, spells[target->GetLDoNTrapSpellID()].ResistDiff);
 				target->SetLDoNTrapSpellID(0);
 				target->SetLDoNTrapped(false);
@@ -5073,7 +5073,7 @@ void Client::HandleLDoNPickLock(NPC *target, uint16 skill, uint8 type)
 		{
 			if(target->IsLDoNTrapped())
 			{
-				Message_StringID(13, LDON_ACCIDENT_SETOFF2);
+				MessageString(Chat::Red, LDON_ACCIDENT_SETOFF2);
 				target->SpellFinished(target->GetLDoNTrapSpellID(), this, EQEmu::spells::CastingSlot::Item, 0, -1, spells[target->GetLDoNTrapSpellID()].ResistDiff);
 				target->SetLDoNTrapSpellID(0);
 				target->SetLDoNTrapped(false);
@@ -5082,13 +5082,13 @@ void Client::HandleLDoNPickLock(NPC *target, uint16 skill, uint8 type)
 
 			if(!target->IsLDoNLocked())
 			{
-				Message_StringID(MT_Skills, LDON_WAS_NOT_LOCKED, target->GetCleanName());
+				MessageString(Chat::Skills, LDON_WAS_NOT_LOCKED, target->GetCleanName());
 				return;
 			}
 
 			if((target->GetLDoNTrapType() == LDoNTypeCursed || target->GetLDoNTrapType() == LDoNTypeMagical) && type != target->GetLDoNTrapType())
 			{
-				Message(MT_Skills, "You cannot unlock %s with this skill.", target->GetCleanName());
+				Message(Chat::Skills, "You cannot unlock %s with this skill.", target->GetCleanName());
 				return;
 			}
 
@@ -5098,11 +5098,11 @@ void Client::HandleLDoNPickLock(NPC *target, uint16 skill, uint8 type)
 			{
 			case 0:
 			case -1:
-				Message_StringID(MT_Skills, LDON_PICKLOCK_FAILURE, target->GetCleanName());
+				MessageString(Chat::Skills, LDON_PICKLOCK_FAILURE, target->GetCleanName());
 				break;
 			case 1:
 				target->SetLDoNLocked(false);
-				Message_StringID(MT_Skills, LDON_PICKLOCK_SUCCESS, target->GetCleanName());
+				MessageString(Chat::Skills, LDON_PICKLOCK_SUCCESS, target->GetCleanName());
 				break;
 			}
 		}
@@ -5161,7 +5161,7 @@ void Client::SummonAndRezzAllCorpses()
 	int CorpseCount = database.SummonAllCharacterCorpses(CharacterID(), zone->GetZoneID(), zone->GetInstanceID(), GetPosition());
 	if(CorpseCount <= 0)
 	{
-		Message(clientMessageYellow, "You have no corpses to summnon.");
+		Message(Chat::Yellow, "You have no corpses to summnon.");
 		return;
 	}
 
@@ -5170,7 +5170,7 @@ void Client::SummonAndRezzAllCorpses()
 	if(RezzExp > 0)
 		SetEXP(GetEXP() + RezzExp, GetAAXP(), true);
 
-	Message(clientMessageYellow, "All your corpses have been summoned to your feet and have received a 100% resurrection.");
+	Message(Chat::Yellow, "All your corpses have been summoned to your feet and have received a 100% resurrection.");
 }
 
 void Client::SummonAllCorpses(const glm::vec4& position)
@@ -5250,7 +5250,7 @@ void Client::SetStartZone(uint32 zoneid, float x, float y, float z)
 	// setting city to zero allows the player to use /setstartcity to set the city themselves
 	if(zoneid == 0) {
 		m_pp.binds[4].zoneId = 0;
-		this->Message(15,"Your starting city has been reset. Use /setstartcity to choose a new one");
+		this->Message(Chat::Yellow,"Your starting city has been reset. Use /setstartcity to choose a new one");
 		return;
 	}
 
@@ -5579,7 +5579,7 @@ void Client::SuspendMinion()
 		if(m_suspendedminion.SpellID > 0)
 		{
 			if (m_suspendedminion.SpellID >= SPDAT_RECORDS) {
-				Message(13, "Invalid suspended minion spell id (%u).", m_suspendedminion.SpellID);
+				Message(Chat::Red, "Invalid suspended minion spell id (%u).", m_suspendedminion.SpellID);
 				memset(&m_suspendedminion, 0, sizeof(PetInfo));
 				return;
 			}
@@ -5591,7 +5591,7 @@ void Client::SuspendMinion()
 
 			if(!CurrentPet)
 			{
-				Message(13, "Failed to recall suspended minion.");
+				Message(Chat::Red, "Failed to recall suspended minion.");
 				return;
 			}
 
@@ -5607,7 +5607,7 @@ void Client::SuspendMinion()
 
 			CurrentPet->SetMana(m_suspendedminion.Mana);
 
-			Message_StringID(clientMessageTell, SUSPEND_MINION_UNSUSPEND, CurrentPet->GetCleanName());
+			MessageString(Chat::Magenta, SUSPEND_MINION_UNSUSPEND, CurrentPet->GetCleanName());
 
 			memset(&m_suspendedminion, 0, sizeof(struct PetInfo));
 			// TODO: These pet command states need to be synced ...
@@ -5637,19 +5637,19 @@ void Client::SuspendMinion()
 		{
 			if(m_suspendedminion.SpellID > 0)
 			{
-				Message_StringID(clientMessageError,ONLY_ONE_PET);
+				MessageString(Chat::Red,ONLY_ONE_PET);
 
 				return;
 			}
 			else if(CurrentPet->IsEngaged())
 			{
-				Message_StringID(clientMessageError,SUSPEND_MINION_FIGHTING);
+				MessageString(Chat::Red,SUSPEND_MINION_FIGHTING);
 
 				return;
 			}
 			else if(entity_list.Fighting(CurrentPet))
 			{
-				Message_StringID(clientMessageBlue,SUSPEND_MINION_HAS_AGGRO);
+				MessageString(Chat::Blue,SUSPEND_MINION_HAS_AGGRO);
 			}
 			else
 			{
@@ -5666,7 +5666,7 @@ void Client::SuspendMinion()
 				else
 					strn0cpy(m_suspendedminion.Name, CurrentPet->GetName(), 64); // Name stays even at rank 1
 
-				Message_StringID(clientMessageTell, SUSPEND_MINION_SUSPEND, CurrentPet->GetCleanName());
+				MessageString(Chat::Magenta, SUSPEND_MINION_SUSPEND, CurrentPet->GetCleanName());
 
 				CurrentPet->Depop(false);
 
@@ -5675,7 +5675,7 @@ void Client::SuspendMinion()
 		}
 		else
 		{
-			Message_StringID(clientMessageError, ONLY_SUMMONED_PETS);
+			MessageString(Chat::Red, ONLY_SUMMONED_PETS);
 
 			return;
 		}
@@ -5748,7 +5748,7 @@ void Client::ProcessInspectRequest(Client* requestee, Client* requester) {
 		strcpy(insr->text, requestee->GetInspectMessage().text);
 
 		// There could be an OP for this..or not... (Ti clients are not processed here..this message is generated client-side)
-		if(requestee->IsClient() && (requestee != requester)) { requestee->Message(0, "%s is looking at your equipment...", requester->GetName()); }
+		if(requestee->IsClient() && (requestee != requester)) { requestee->Message(Chat::White, "%s is looking at your equipment...", requester->GetName()); }
 
 		requester->QueuePacket(outapp); // Send answer to requester
 		safe_delete(outapp);
@@ -6149,16 +6149,16 @@ void Client::LocateCorpse()
 
 	if(ClosestCorpse)
 	{
-		Message_StringID(MT_Spells, SENSE_CORPSE_DIRECTION);
+		MessageString(Chat::Spells, SENSE_CORPSE_DIRECTION);
 		SetHeading(CalculateHeadingToTarget(ClosestCorpse->GetX(), ClosestCorpse->GetY()));
 		SetTarget(ClosestCorpse);
 		SendTargetCommand(ClosestCorpse->GetID());
 		SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0, true);
 	}
 	else if(!GetTarget())
-		Message_StringID(clientMessageError, SENSE_CORPSE_NONE);
+		MessageString(Chat::Red, SENSE_CORPSE_NONE);
 	else
-		Message_StringID(clientMessageError, SENSE_CORPSE_NOT_NAME);
+		MessageString(Chat::Red, SENSE_CORPSE_NOT_NAME);
 }
 
 void Client::NPCSpawn(NPC *target_npc, const char *identifier, uint32 extra)
@@ -6218,7 +6218,7 @@ void Client::DragCorpses()
 		if (!corpse || !corpse->IsPlayerCorpse() ||
 				corpse->CastToCorpse()->IsBeingLooted() ||
 				!corpse->CastToCorpse()->Summon(this, false, false)) {
-			Message_StringID(MT_DefaultText, CORPSEDRAG_STOP);
+			MessageString(Chat::DefaultText, CORPSEDRAG_STOP);
 			It = DraggedCorpses.erase(It);
 			if (It == DraggedCorpses.end())
 				break;
@@ -6235,7 +6235,7 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 	if(!database.GetPetEntry(spells[spell_id].teleport_zone, &record))
 	{
 		Log(Logs::General, Logs::Error, "Unknown doppelganger spell id: %d, check pets table", spell_id);
-		Message(13, "Unable to find data for pet %s", spells[spell_id].teleport_zone);
+		Message(Chat::Red, "Unable to find data for pet %s", spells[spell_id].teleport_zone);
 		return;
 	}
 
@@ -6850,35 +6850,35 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 			goto Extra_Info;
 		}
 		else {
-			client->Message(15, "The window has exceeded its character limit, displaying stats to chat window:");
+			client->Message(Chat::Yellow, "The window has exceeded its character limit, displaying stats to chat window:");
 		}
 	}
 
-	client->Message(15, "~~~~~ %s %s ~~~~~", GetCleanName(), GetLastName());
-	client->Message(0, " Level: %i Class: %i Race: %i DS: %i/%i Size: %1.1f  Weight: %.1f/%d  ", GetLevel(), GetClass(), GetRace(), GetDS(), RuleI(Character, ItemDamageShieldCap), GetSize(), (float)CalcCurrentWeight() / 10.0f, GetSTR());
-	client->Message(0, " HP: %i/%i  HP Regen: %i/%i",GetHP(), GetMaxHP(), CalcHPRegen(), CalcHPRegenCap());
-	client->Message(0, " compute_tohit: %i TotalToHit: %i", compute_tohit(skill), GetTotalToHit(skill, 0));
-	client->Message(0, " compute_defense: %i TotalDefense: %i", compute_defense(), GetTotalDefense());
-	client->Message(0, " offense: %i mitigation ac: %i", offense(skill), GetMitigationAC());
+	client->Message(Chat::Yellow, "~~~~~ %s %s ~~~~~", GetCleanName(), GetLastName());
+	client->Message(Chat::White, " Level: %i Class: %i Race: %i DS: %i/%i Size: %1.1f  Weight: %.1f/%d  ", GetLevel(), GetClass(), GetRace(), GetDS(), RuleI(Character, ItemDamageShieldCap), GetSize(), (float)CalcCurrentWeight() / 10.0f, GetSTR());
+	client->Message(Chat::White, " HP: %i/%i  HP Regen: %i/%i",GetHP(), GetMaxHP(), CalcHPRegen(), CalcHPRegenCap());
+	client->Message(Chat::White, " compute_tohit: %i TotalToHit: %i", compute_tohit(skill), GetTotalToHit(skill, 0));
+	client->Message(Chat::White, " compute_defense: %i TotalDefense: %i", compute_defense(), GetTotalDefense());
+	client->Message(Chat::White, " offense: %i mitigation ac: %i", offense(skill), GetMitigationAC());
 	if(CalcMaxMana() > 0)
-		client->Message(0, " Mana: %i/%i  Mana Regen: %i/%i", GetMana(), GetMaxMana(), CalcManaRegen(), CalcManaRegenCap());
-	client->Message(0, " End.: %i/%i  End. Regen: %i/%i",GetEndurance(), GetMaxEndurance(), CalcEnduranceRegen(), CalcEnduranceRegenCap());
-	client->Message(0, " ATK: %i  Worn/Spell ATK %i/%i  Server Side ATK: %i", GetTotalATK(), RuleI(Character, ItemATKCap), GetATKBonus(), GetATK());
-	client->Message(0, " Haste: %i / %i (Item: %i + Spell: %i + Over: %i)", GetHaste(), RuleI(Character, HasteCap), itembonuses.haste, spellbonuses.haste + spellbonuses.hastetype2, spellbonuses.hastetype3 + ExtraHaste);
-	client->Message(0, " STR: %i  STA: %i  DEX: %i  AGI: %i  INT: %i  WIS: %i  CHA: %i", GetSTR(), GetSTA(), GetDEX(), GetAGI(), GetINT(), GetWIS(), GetCHA());
-	client->Message(0, " hSTR: %i  hSTA: %i  hDEX: %i  hAGI: %i  hINT: %i  hWIS: %i  hCHA: %i", GetHeroicSTR(), GetHeroicSTA(), GetHeroicDEX(), GetHeroicAGI(), GetHeroicINT(), GetHeroicWIS(), GetHeroicCHA());
-	client->Message(0, " MR: %i  PR: %i  FR: %i  CR: %i  DR: %i Corruption: %i PhR: %i", GetMR(), GetPR(), GetFR(), GetCR(), GetDR(), GetCorrup(), GetPhR());
-	client->Message(0, " hMR: %i  hPR: %i  hFR: %i  hCR: %i  hDR: %i hCorruption: %i", GetHeroicMR(), GetHeroicPR(), GetHeroicFR(), GetHeroicCR(), GetHeroicDR(), GetHeroicCorrup());
-	client->Message(0, " Shielding: %i  Spell Shield: %i  DoT Shielding: %i Stun Resist: %i  Strikethrough: %i  Avoidance: %i  Accuracy: %i  Combat Effects: %i", GetShielding(), GetSpellShield(), GetDoTShield(), GetStunResist(), GetStrikeThrough(), GetAvoidance(), GetAccuracy(), GetCombatEffects());
-	client->Message(0, " Heal Amt.: %i  Spell Dmg.: %i  Clairvoyance: %i DS Mitigation: %i", GetHealAmt(), GetSpellDmg(), GetClair(), GetDSMit());
+		client->Message(Chat::White, " Mana: %i/%i  Mana Regen: %i/%i", GetMana(), GetMaxMana(), CalcManaRegen(), CalcManaRegenCap());
+	client->Message(Chat::White, " End.: %i/%i  End. Regen: %i/%i",GetEndurance(), GetMaxEndurance(), CalcEnduranceRegen(), CalcEnduranceRegenCap());
+	client->Message(Chat::White, " ATK: %i  Worn/Spell ATK %i/%i  Server Side ATK: %i", GetTotalATK(), RuleI(Character, ItemATKCap), GetATKBonus(), GetATK());
+	client->Message(Chat::White, " Haste: %i / %i (Item: %i + Spell: %i + Over: %i)", GetHaste(), RuleI(Character, HasteCap), itembonuses.haste, spellbonuses.haste + spellbonuses.hastetype2, spellbonuses.hastetype3 + ExtraHaste);
+	client->Message(Chat::White, " STR: %i  STA: %i  DEX: %i  AGI: %i  INT: %i  WIS: %i  CHA: %i", GetSTR(), GetSTA(), GetDEX(), GetAGI(), GetINT(), GetWIS(), GetCHA());
+	client->Message(Chat::White, " hSTR: %i  hSTA: %i  hDEX: %i  hAGI: %i  hINT: %i  hWIS: %i  hCHA: %i", GetHeroicSTR(), GetHeroicSTA(), GetHeroicDEX(), GetHeroicAGI(), GetHeroicINT(), GetHeroicWIS(), GetHeroicCHA());
+	client->Message(Chat::White, " MR: %i  PR: %i  FR: %i  CR: %i  DR: %i Corruption: %i PhR: %i", GetMR(), GetPR(), GetFR(), GetCR(), GetDR(), GetCorrup(), GetPhR());
+	client->Message(Chat::White, " hMR: %i  hPR: %i  hFR: %i  hCR: %i  hDR: %i hCorruption: %i", GetHeroicMR(), GetHeroicPR(), GetHeroicFR(), GetHeroicCR(), GetHeroicDR(), GetHeroicCorrup());
+	client->Message(Chat::White, " Shielding: %i  Spell Shield: %i  DoT Shielding: %i Stun Resist: %i  Strikethrough: %i  Avoidance: %i  Accuracy: %i  Combat Effects: %i", GetShielding(), GetSpellShield(), GetDoTShield(), GetStunResist(), GetStrikeThrough(), GetAvoidance(), GetAccuracy(), GetCombatEffects());
+	client->Message(Chat::White, " Heal Amt.: %i  Spell Dmg.: %i  Clairvoyance: %i DS Mitigation: %i", GetHealAmt(), GetSpellDmg(), GetClair(), GetDSMit());
 	if(GetClass() == BARD)
-		client->Message(0, " Singing: %i  Brass: %i  String: %i Percussion: %i Wind: %i", GetSingMod(), GetBrassMod(), GetStringMod(), GetPercMod(), GetWindMod());
+		client->Message(Chat::White, " Singing: %i  Brass: %i  String: %i Percussion: %i Wind: %i", GetSingMod(), GetBrassMod(), GetStringMod(), GetPercMod(), GetWindMod());
 
 	Extra_Info:
 
-	client->Message(0, " BaseRace: %i  Gender: %i  BaseGender: %i Texture: %i  HelmTexture: %i", GetBaseRace(), GetGender(), GetBaseGender(), GetTexture(), GetHelmTexture());
+	client->Message(Chat::White, " BaseRace: %i  Gender: %i  BaseGender: %i Texture: %i  HelmTexture: %i", GetBaseRace(), GetGender(), GetBaseGender(), GetTexture(), GetHelmTexture());
 	if (client->Admin() >= 100) {
-		client->Message(0, "  CharID: %i  EntityID: %i  PetID: %i  OwnerID: %i  AIControlled: %i  Targetted: %i", CharacterID(), GetID(), GetPetID(), GetOwnerID(), IsAIControlled(), targeted);
+		client->Message(Chat::White, "  CharID: %i  EntityID: %i  PetID: %i  OwnerID: %i  AIControlled: %i  Targetted: %i", CharacterID(), GetID(), GetPetID(), GetOwnerID(), IsAIControlled(), targeted);
 	}
 }
 
@@ -7248,17 +7248,17 @@ void Client::ShowXTargets(Client *c)
 		return;
 
 	for(int i = 0; i < GetMaxXTargets(); ++i)
-		c->Message(0, "Xtarget Slot: %i, Type: %2i, ID: %4i, Name: %s", i, XTargets[i].Type, XTargets[i].ID, XTargets[i].Name);
+		c->Message(Chat::White, "Xtarget Slot: %i, Type: %2i, ID: %4i, Name: %s", i, XTargets[i].Type, XTargets[i].ID, XTargets[i].Name);
 	auto &list = GetXTargetAutoMgr()->get_list();
 	 // yeah, I kept having to do something for debugging to tell if managers were the same object or not :P
 	 // so lets use the address as an "ID"
-	c->Message(0, "XTargetAutoMgr ID %p size %d", GetXTargetAutoMgr(), list.size());
+	c->Message(Chat::White, "XTargetAutoMgr ID %p size %d", GetXTargetAutoMgr(), list.size());
 	int count = 0;
 	for (auto &e : list) {
-		c->Message(0, "spawn id %d count %d", e.spawn_id, e.count);
+		c->Message(Chat::White, "spawn id %d count %d", e.spawn_id, e.count);
 		count++;
 		if (count == 20) { // lets not spam too many ...
-			c->Message(0, " ... ");
+			c->Message(Chat::White, " ... ");
 			break;
 		}
 	}
@@ -7623,7 +7623,7 @@ void Client::DuplicateLoreMessage(uint32 ItemID)
 {
 	if (!(m_ClientVersionBit & EQEmu::versions::maskRoFAndLater))
 	{
-		Message_StringID(0, PICK_LORE);
+		MessageString(Chat::White, PICK_LORE);
 		return;
 	}
 
@@ -7632,7 +7632,7 @@ void Client::DuplicateLoreMessage(uint32 ItemID)
 	if(!item)
 		return;
 
-	Message_StringID(0, PICK_LORE, item->Name);
+	MessageString(Chat::White, PICK_LORE, item->Name);
 }
 
 void Client::GarbleMessage(char *message, uint8 variance)
@@ -7796,7 +7796,7 @@ void Client::SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, ui
 
 		UpdatePersonalFaction(char_id, npc_value[i], faction_id[i], &current_value, temp[i], this_faction_min, this_faction_max);
 
-		//Message(14, "Min(%d) Max(%d) Before(%d), After(%d)\n", this_faction_min, this_faction_max, faction_before_hit, current_value);
+		//Message(Chat::Lime, "Min(%d) Max(%d) Before(%d), After(%d)\n", this_faction_min, this_faction_max, faction_before_hit, current_value);
 
 		SendFactionMessage(npc_value[i], faction_id[i], faction_before_hit, current_value, temp[i], this_faction_min, this_faction_max);
 	}
@@ -7839,7 +7839,7 @@ void Client::SetFactionLevel2(uint32 char_id, int32 faction_id, uint8 char_class
 
 		UpdatePersonalFaction(char_id, value, faction_id, &current_value, temp, this_faction_min, this_faction_max);
 
-		//Message(14, "Min(%d) Max(%d) Before(%d), After(%d)\n", this_faction_min, this_faction_max, faction_before_hit, current_value);
+		//Message(Chat::Lime, "Min(%d) Max(%d) Before(%d), After(%d)\n", this_faction_min, this_faction_max, faction_before_hit, current_value);
 
 		SendFactionMessage(value, faction_id, faction_before_hit, current_value, temp, this_faction_min, this_faction_max);
 	}
@@ -7948,7 +7948,7 @@ void Client::MerchantRejectMessage(Mob *merchant, int primaryfaction)
 	}
 	// If no primary faction or biggest influence is your faction hit
 	if (primaryfaction <= 0 || lowestvalue == tmpFactionValue) {
-		merchant->Say_StringID(zone->random.Int(WONT_SELL_DEEDS1, WONT_SELL_DEEDS6));
+		merchant->SayString(zone->random.Int(WONT_SELL_DEEDS1, WONT_SELL_DEEDS6));
 	} else if (lowestvalue == fmod.race_mod) { // race biggest
 		// Non-standard race (ex. illusioned to wolf)
 		if (GetRace() > PLAYER_RACE_COUNT) {
@@ -7967,7 +7967,7 @@ void Client::MerchantRejectMessage(Mob *merchant, int primaryfaction)
 				messageid = WONT_SELL_NONSTDRACE1;
 				break;
 			}
-			merchant->Say_StringID(messageid);
+			merchant->SayString(messageid);
 		} else { // normal player races
 			messageid = zone->random.Int(1, 4);
 			switch (messageid) {
@@ -7987,15 +7987,15 @@ void Client::MerchantRejectMessage(Mob *merchant, int primaryfaction)
 				messageid = WONT_SELL_RACE1;
 				break;
 			}
-			merchant->Say_StringID(messageid, itoa(GetRace()));
+			merchant->SayString(messageid, itoa(GetRace()));
 		}
 	} else if (lowestvalue == fmod.class_mod) {
-		merchant->Say_StringID(zone->random.Int(WONT_SELL_CLASS1, WONT_SELL_CLASS5), itoa(GetClass()));
+		merchant->SayString(zone->random.Int(WONT_SELL_CLASS1, WONT_SELL_CLASS5), itoa(GetClass()));
 	} else {
 		// Must be deity - these two sound the best for that.
 		// Can't use a message with a field, GUI wants class/race names.
 		// for those message IDs.  These are straight text.
-		merchant->Say_StringID(zone->random.Int(WONT_SELL_DEEDS1, WONT_SELL_DEEDS2));
+		merchant->SayString(zone->random.Int(WONT_SELL_DEEDS1, WONT_SELL_DEEDS2));
 	}
 	return;
 }
@@ -8031,15 +8031,15 @@ void Client::SendFactionMessage(int32 tmpvalue, int32 faction_id, int32 faction_
 	if (tmpvalue == 0 || temp == 1 || temp == 2)
 		return;
 	else if (faction_value >= this_faction_max)
-		Message_StringID(15, FACTION_BEST, name);
+		MessageString(Chat::Yellow, FACTION_BEST, name);
 	else if (faction_value <= this_faction_min)
-		Message_StringID(15, FACTION_WORST, name);
+		MessageString(Chat::Yellow, FACTION_WORST, name);
 	else if (tmpvalue > 0 && faction_value < this_faction_max && !RuleB(Client, UseLiveFactionMessage))
-		Message_StringID(15, FACTION_BETTER, name);
+		MessageString(Chat::Yellow, FACTION_BETTER, name);
 	else if (tmpvalue < 0 && faction_value > this_faction_min && !RuleB(Client, UseLiveFactionMessage))
-		Message_StringID(15, FACTION_WORSE, name);
+		MessageString(Chat::Yellow, FACTION_WORSE, name);
 	else if (RuleB(Client, UseLiveFactionMessage))
-		Message(15, "Your faction standing with %s has been adjusted by %i.", name, tmpvalue); //New Live faction message (14261)
+		Message(Chat::Yellow, "Your faction standing with %s has been adjusted by %i.", name, tmpvalue); //New Live faction message (14261)
 
 	return;
 }
@@ -8365,7 +8365,7 @@ void Client::Consume(const EQEmu::ItemData *item, uint8 type, int16 slot, bool a
 		DeleteItemInInventory(slot, 1, false);
 
 		if (!auto_consume) // no message if the client consumed for us
-			entity_list.MessageClose_StringID(this, true, 50, 0, EATING_MESSAGE, GetName(), item->Name);
+			entity_list.MessageCloseString(this, true, 50, 0, EATING_MESSAGE, GetName(), item->Name);
 
 		Log(Logs::General, Logs::Food, "Eating from slot: %i", (int)slot);
 
@@ -8383,7 +8383,7 @@ void Client::Consume(const EQEmu::ItemData *item, uint8 type, int16 slot, bool a
 		    increase, m_pp.thirst_level);
 
 		if (!auto_consume) // no message if the client consumed for us
-			entity_list.MessageClose_StringID(this, true, 50, 0, DRINKING_MESSAGE, GetName(), item->Name);
+			entity_list.MessageCloseString(this, true, 50, 0, DRINKING_MESSAGE, GetName(), item->Name);
 
 		Log(Logs::General, Logs::Food, "Drinking from slot: %i", (int)slot);
 	}
@@ -8428,7 +8428,7 @@ void Client::ExpeditionSay(const char *str, int ExpID) {
 		return;
 
 	if(results.RowCount() == 0) {
-		this->Message(14, "You say to the expedition, '%s'", str);
+		this->Message(Chat::Lime, "You say to the expedition, '%s'", str);
 		return;
 	}
 
@@ -8531,7 +8531,7 @@ void Client::SendHPUpdateMarquee(){
 		return;
 
 	std::string health_update_notification = StringFormat("Health: %u%%", health_percentage);
-	this->SendMarqueeMessage(15, 510, 0, 3000, 3000, health_update_notification);
+	this->SendMarqueeMessage(Chat::Yellow, 510, 0, 3000, 3000, health_update_notification);
 }
 
 uint32 Client::GetMoney(uint8 type, uint8 subtype) {
@@ -9044,7 +9044,7 @@ void Client::SetPrimaryWeaponOrnamentation(uint32 model_id)
 		SendItemPacket(EQEmu::invslot::slotPrimary, primary_item, ItemPacketTrade);
 		WearChange(EQEmu::textures::weaponPrimary, static_cast<uint16>(model_id), 0);
 
-		Message(15, "Your primary weapon appearance has been modified");
+		Message(Chat::Yellow, "Your primary weapon appearance has been modified");
 	}
 }
 
@@ -9067,7 +9067,7 @@ void Client::SetSecondaryWeaponOrnamentation(uint32 model_id)
 		SendItemPacket(EQEmu::invslot::slotSecondary, secondary_item, ItemPacketTrade);
 		WearChange(EQEmu::textures::weaponSecondary, static_cast<uint16>(model_id), 0);
 		
-		Message(15, "Your secondary weapon appearance has been modified");
+		Message(Chat::Yellow, "Your secondary weapon appearance has been modified");
 	}
 }
 
@@ -9107,7 +9107,7 @@ bool Client::GotoPlayer(std::string player_name)
 		auto heading     = static_cast<float>(atof(row[5]));
 
 		if (instance_id > 0 && !database.CheckInstanceExists(instance_id)) {
-			this->Message(15, "Instance no longer exists...");
+			this->Message(Chat::Yellow, "Instance no longer exists...");
 			return false;
 		}
 

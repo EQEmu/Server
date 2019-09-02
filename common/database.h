@@ -94,6 +94,8 @@ class PTimerList;
 #	define _ISNAN_(a) std::isnan(a)
 #endif
 
+#define SQL(...) #__VA_ARGS__
+
 class Database : public DBcore {
 public:
 	Database();

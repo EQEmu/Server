@@ -835,27 +835,27 @@ void MobMovementManager::DumpStats(Client *client)
 	auto current_time = static_cast<double>(Timer::GetCurrentTime()) / 1000.0;
 	auto total_time   = current_time - _impl->Stats.LastResetTime;
 
-	client->Message(MT_System, "Dumping Movement Stats:");
+	client->Message(Chat::System, "Dumping Movement Stats:");
 	client->Message(
-		MT_System,
+		Chat::System,
 		"Total Sent: %u (%.2f / sec)",
 		_impl->Stats.TotalSent,
 		static_cast<double>(_impl->Stats.TotalSent) / total_time
 	);
 	client->Message(
-		MT_System,
+		Chat::System,
 		"Total Heading: %u (%.2f / sec)",
 		_impl->Stats.TotalSentHeading,
 		static_cast<double>(_impl->Stats.TotalSentHeading) / total_time
 	);
 	client->Message(
-		MT_System,
+		Chat::System,
 		"Total Movement: %u (%.2f / sec)",
 		_impl->Stats.TotalSentMovement,
 		static_cast<double>(_impl->Stats.TotalSentMovement) / total_time
 	);
 	client->Message(
-		MT_System,
+		Chat::System,
 		"Total Position: %u (%.2f / sec)",
 		_impl->Stats.TotalSentPosition,
 		static_cast<double>(_impl->Stats.TotalSentPosition) / total_time

@@ -242,7 +242,7 @@ Json::Value ApiGetNpcListDetail(EQ::Net::WebsocketServerConnection *connection, 
 		row["sec_skill"]       = npc->GetSecSkill();
 		row["silver"]          = npc->GetSilver();
 		row["slow_mitigation"] = npc->GetSlowMitigation();
-		row["sp2"]             = npc->GetSp2();
+		row["spawn_group_id"]  = npc->GetSpawnGroupId();
 		row["swarm_owner"]     = npc->GetSwarmOwner();
 		row["swarm_target"]    = npc->GetSwarmTarget();
 		row["waypoint_max"]    = npc->GetWaypointMax();
@@ -820,7 +820,7 @@ Json::Value ApiGetZoneAttributes(EQ::Net::WebsocketServerConnection *connection,
 	row["mobs_aggro_count"]        = zone->MobsAggroCount();
 	row["save_zone_cfg"]           = zone->SaveZoneCFG();
 	row["short_name"]              = zone->GetShortName();
-	row["total_blocked_spells"]    = zone->GetTotalBlockedSpells();
+	row["total_blocked_spells"]    = zone->GetZoneTotalBlockedSpells();
 	row["zone_id"]                 = zone->GetZoneID();
 	row["zone_type"]               = zone->GetZoneType();
 

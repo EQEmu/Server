@@ -454,6 +454,7 @@ sub do_installer_routines {
         fetch_latest_windows_appveyor();
         get_remote_file($install_repository_request_url . "lua51.dll", "lua51.dll", 1);
         get_remote_file($install_repository_request_url . "zlib1.dll", "zlib1.dll", 1);
+		get_remote_file($install_repository_request_url . "zlib1.pdb", "zlib1.pdb", 1);
         get_remote_file($install_repository_request_url . "libmysql.dll", "libmysql.dll", 1);
     }
 
@@ -1642,9 +1643,10 @@ sub check_windows_firewall_rules {
 }
 
 sub fetch_server_dlls {
-    print "[Download] Fetching lua51.dll, zlib1.dll, libmysql.dll...\n";
+    print "[Download] Fetching lua51.dll, zlib1.dll, zlib1.pdb, libmysql.dll...\n";
     get_remote_file($install_repository_request_url . "lua51.dll", "lua51.dll", 1);
     get_remote_file($install_repository_request_url . "zlib1.dll", "zlib1.dll", 1);
+	get_remote_file($install_repository_request_url . "zlib1.pdb", "zlib1.pdb", 1);
     get_remote_file($install_repository_request_url . "libmysql.dll", "libmysql.dll", 1);
 }
 

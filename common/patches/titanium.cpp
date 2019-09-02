@@ -2303,7 +2303,10 @@ namespace Titanium
 		ob << '|' << itoa(item->SkillModType);
 
 		ob << '|' << itoa(item->BaneDmgRace);
-		ob << '|' << itoa(item->BaneDmgAmt);
+		if (item->BaneDmgAmt > 255)
+			ob << '|' << "255";
+		else
+			ob << '|' << itoa(item->BaneDmgAmt);
 		ob << '|' << itoa(item->BaneDmgBody);
 
 		ob << '|' << itoa(item->Magic);

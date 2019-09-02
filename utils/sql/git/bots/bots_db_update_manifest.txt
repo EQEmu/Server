@@ -23,6 +23,7 @@
 9022|2019_02_07_bots_stance_type_update.sql|SELECT * FROM `bot_spell_casting_chances` WHERE `spell_type_index` = '255' AND `class_id` = '255' AND `stance_index` = '0'|not_empty|
 9023|2019_06_22_bots_owner_option_stats_update.sql|SHOW COLUMNS FROM `bot_owner_options` LIKE 'stats_update'|empty|
 9024|2019_06_27_bots_pet_get_lost.sql|SELECT `bot_command` FROM `bot_command_settings` WHERE `bot_command` LIKE 'petgetlost'|empty|
+9025|2019_08_26_bots_owner_option_spawn_message.sql|SHOW COLUMNS FROM `bot_owner_options` LIKE 'spawn_message_enabled'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

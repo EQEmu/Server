@@ -1,5 +1,20 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 8/16/2019 ==
+Akkadius: Simplified the use of roamboxes and improved the AI for roambox pathing https://i.imgur.com/z33u7y9.gif
+Akkadius: Implemented command #roambox set <box_size> [move_delay]
+Akkadius: Implemented command #roambox remove
+Akkadius: Implemented LUA NPC:SetSimpleRoamBox(box_size, [move_distance], [move_delay]);
+Akkadius: Implemented Perl $npc->SetSimpleRoamBox(box_size, [move_distance], [move_delay]);
+Akkadius: Spawngroup data now hot reloads on #repop
+Akkadius: Command #npceditmass now lists column options when one isn't properly specified
+Akkadius: Implemented command #spawneditmass <search> <option> <value> with options [respawn_time] currently implemented
+
+== 8/11/2019 ==
+Akkadius: Added bulk edit command #npceditmass <column-to-search> <column-search-value> <change-column> <change-value>
+Akkadius: Modified #findzone to include clickable saylinks to both regular zone (if able) and private gmzone instances
+Akkadius: Added #findzone expansion <expansion-number> to show zones via expansion
+
 == 8/6/2019 ==
 Akkadius: Optimizations to movement updates to eliminate ghosting possibilities in larger zones
 

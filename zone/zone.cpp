@@ -822,11 +822,11 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	Weather_Timer = new Timer(60000);
 	Weather_Timer->Start();
 	Log(Logs::General, Logs::None, "The next weather check for zone: %s will be in %i seconds.", short_name, Weather_Timer->GetRemainingTime()/1000);
-	zone_weather = 0;
-	weather_intensity = 0;
-	blocked_spells = nullptr;
-	totalBS = 0;
-	zone_has_current_time = false;
+	zone_weather              = 0;
+	weather_intensity         = 0;
+	blocked_spells            = nullptr;
+	zone_total_blocked_spells = 0;
+	zone_has_current_time     = false;
 
 	Instance_Shutdown_Timer = nullptr;
 	bool is_perma = false;
@@ -972,7 +972,7 @@ bool Zone::Init(bool iStaticZone) {
 
 	//load up the zone's doors (prints inside)
 	zone->LoadZoneDoors(zone->GetShortName(), zone->GetInstanceVersion());
-	zone->LoadBlockedSpells(zone->GetZoneID());
+	zone->LoadZoneBlockedSpells(zone->GetZoneID());
 
 	//clear trader items if we are loading the bazaar
 	if(strncasecmp(short_name,"bazaar",6)==0) {
@@ -1485,6 +1485,8 @@ bool Zone::Depop(bool StartSpawnTimer) {
 	// clear spell cache
 	database.ClearNPCSpells();
 
+	zone->spawn_group_list.ReloadSpawnGroups();
+
 	return true;
 }
 
@@ -1770,14 +1772,14 @@ void Zone::SpawnStatus(Mob* client) {
 	while(iterator.MoreElements())
 	{
 		if (iterator.GetData()->timer.GetRemainingTime() == 0xFFFFFFFF)
-			client->Message(0, "  %d: %1.1f, %1.1f, %1.1f: disabled", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ());
+			client->Message(Chat::White, "  %d: %1.1f, %1.1f, %1.1f: disabled", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ());
 		else
-			client->Message(0, "  %d: %1.1f, %1.1f, %1.1f: %1.2f", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ(), (float)iterator.GetData()->timer.GetRemainingTime() / 1000);
+			client->Message(Chat::White, "  %d: %1.1f, %1.1f, %1.1f: %1.2f", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ(), (float)iterator.GetData()->timer.GetRemainingTime() / 1000);
 
 		x++;
 		iterator.Advance();
 	}
-	client->Message(0, "%i spawns listed.", x);
+	client->Message(Chat::White, "%i spawns listed.", x);
 }
 
 void Zone::ShowEnabledSpawnStatus(Mob* client)
@@ -1792,7 +1794,7 @@ void Zone::ShowEnabledSpawnStatus(Mob* client)
 	{
 		if (iterator.GetData()->timer.GetRemainingTime() != 0xFFFFFFFF)
 		{
-			client->Message(0, "  %d: %1.1f, %1.1f, %1.1f: %1.2f", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ(), (float)iterator.GetData()->timer.GetRemainingTime() / 1000);
+			client->Message(Chat::White, "  %d: %1.1f, %1.1f, %1.1f: %1.2f", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ(), (float)iterator.GetData()->timer.GetRemainingTime() / 1000);
 			iEnabledCount++;
 		}
 
@@ -1800,7 +1802,7 @@ void Zone::ShowEnabledSpawnStatus(Mob* client)
 		iterator.Advance();
 	}
 
-	client->Message(0, "%i of %i spawns listed.", iEnabledCount, x);
+	client->Message(Chat::White, "%i of %i spawns listed.", iEnabledCount, x);
 }
 
 void Zone::ShowDisabledSpawnStatus(Mob* client)
@@ -1815,7 +1817,7 @@ void Zone::ShowDisabledSpawnStatus(Mob* client)
 	{
 		if (iterator.GetData()->timer.GetRemainingTime() == 0xFFFFFFFF)
 		{
-			client->Message(0, "  %d: %1.1f, %1.1f, %1.1f: disabled", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ());
+			client->Message(Chat::White, "  %d: %1.1f, %1.1f, %1.1f: disabled", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ());
 			iDisabledCount++;
 		}
 
@@ -1823,7 +1825,7 @@ void Zone::ShowDisabledSpawnStatus(Mob* client)
 		iterator.Advance();
 	}
 
-	client->Message(0, "%i of %i spawns listed.", iDisabledCount, x);
+	client->Message(Chat::White, "%i of %i spawns listed.", iDisabledCount, x);
 }
 
 void Zone::ShowSpawnStatusByID(Mob* client, uint32 spawnid)
@@ -1839,9 +1841,9 @@ void Zone::ShowSpawnStatusByID(Mob* client, uint32 spawnid)
 		if (iterator.GetData()->GetID() == spawnid)
 		{
 			if (iterator.GetData()->timer.GetRemainingTime() == 0xFFFFFFFF)
-				client->Message(0, "  %d: %1.1f, %1.1f, %1.1f: disabled", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ());
+				client->Message(Chat::White, "  %d: %1.1f, %1.1f, %1.1f: disabled", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ());
 			else
-				client->Message(0, "  %d: %1.1f, %1.1f, %1.1f: %1.2f", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ(), (float)iterator.GetData()->timer.GetRemainingTime() / 1000);
+				client->Message(Chat::White, "  %d: %1.1f, %1.1f, %1.1f: %1.2f", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ(), (float)iterator.GetData()->timer.GetRemainingTime() / 1000);
 
 			iSpawnIDCount++;
 
@@ -1853,9 +1855,9 @@ void Zone::ShowSpawnStatusByID(Mob* client, uint32 spawnid)
 	}
 
 	if(iSpawnIDCount > 0)
-		client->Message(0, "%i of %i spawns listed.", iSpawnIDCount, x);
+		client->Message(Chat::White, "%i of %i spawns listed.", iSpawnIDCount, x);
 	else
-		client->Message(0, "No matching spawn id was found in this zone.");
+		client->Message(Chat::White, "No matching spawn id was found in this zone.");
 }
 
 bool ZoneDatabase::GetDecayTimes(npcDecayTimes_Struct *npcCorpseDecayTimes)
@@ -1878,17 +1880,21 @@ bool ZoneDatabase::GetDecayTimes(npcDecayTimes_Struct *npcCorpseDecayTimes)
 	return true;
 }
 
-void Zone::weatherSend(Client* client)
+void Zone::weatherSend(Client *client)
 {
 	auto outapp = new EQApplicationPacket(OP_Weather, 8);
-	if(zone_weather>0)
-		outapp->pBuffer[0] = zone_weather-1;
-	if(zone_weather>0)
+	if (zone_weather > 0) {
+		outapp->pBuffer[0] = zone_weather - 1;
+	}
+	if (zone_weather > 0) {
 		outapp->pBuffer[4] = zone->weather_intensity;
-	if (client)
+	}
+	if (client) {
 		client->QueuePacket(outapp);
-	else
+	}
+	else {
 		entity_list.QueueClients(0, outapp);
+	}
 	safe_delete(outapp);
 }
 
@@ -1906,15 +1912,13 @@ void Zone::SetGraveyard(uint32 zoneid, const glm::vec4& graveyardPosition) {
 	m_Graveyard = graveyardPosition;
 }
 
-void Zone::LoadBlockedSpells(uint32 zoneid)
+void Zone::LoadZoneBlockedSpells(uint32 zone_id)
 {
-	if(!blocked_spells)
-	{
-		totalBS = database.GetBlockedSpellsCount(zoneid);
-		if(totalBS > 0){
-			blocked_spells = new ZoneSpellsBlocked[totalBS];
-			if(!database.LoadBlockedSpells(totalBS, blocked_spells, zoneid))
-			{
+	if (!blocked_spells) {
+		zone_total_blocked_spells = database.GetBlockedSpellsCount(zone_id);
+		if (zone_total_blocked_spells > 0) {
+			blocked_spells = new ZoneSpellsBlocked[zone_total_blocked_spells];
+			if (!database.LoadBlockedSpells(zone_total_blocked_spells, blocked_spells, zone_id)) {
 				Log(Logs::General, Logs::Error, "... Failed to load blocked spells.");
 				ClearBlockedSpells();
 			}
@@ -1924,102 +1928,89 @@ void Zone::LoadBlockedSpells(uint32 zoneid)
 
 void Zone::ClearBlockedSpells()
 {
-	if(blocked_spells){
+	if (blocked_spells) {
 		safe_delete_array(blocked_spells);
-		totalBS = 0;
+		zone_total_blocked_spells = 0;
 	}
 }
 
-bool Zone::IsSpellBlocked(uint32 spell_id, const glm::vec3& location)
+bool Zone::IsSpellBlocked(uint32 spell_id, const glm::vec3 &location)
 {
-	if (blocked_spells)
-	{
+	if (blocked_spells) {
 		bool exception = false;
 		bool block_all = false;
-		for (int x = 0; x < totalBS; x++)
-		{
-			if (blocked_spells[x].spellid == spell_id)
-			{
+
+		for (int x = 0; x < GetZoneTotalBlockedSpells(); x++) {
+			if (blocked_spells[x].spellid == spell_id) {
 				exception = true;
 			}
 
-			if (blocked_spells[x].spellid == 0)
-			{
+			if (blocked_spells[x].spellid == 0) {
 				block_all = true;
 			}
 		}
 
-		for (int x = 0; x < totalBS; x++)
-		{
-			// If spellid is 0, block all spells in the zone
-			if (block_all)
-			{
-				// If the same zone has entries other than spellid 0, they act as exceptions and are allowed
-				if (exception)
-				{
-					return false;
-				}
-				else
-				{
-					return true;
-				}
-			}
-			else
-			{
-				if (spell_id != blocked_spells[x].spellid)
-				{
-					continue;
-				}
+		// If all spells are blocked and this is an exception, it is not blocked
+		if (block_all && exception) {
+			return false;
+		}
 
-				switch (blocked_spells[x].type)
-				{
-					case 1:
-					{
+		for (int x = 0; x < GetZoneTotalBlockedSpells(); x++) {
+			// Spellid of 0 matches all spells
+			if (0 != blocked_spells[x].spellid && spell_id != blocked_spells[x].spellid) {
+				continue;
+			}
+
+			switch (blocked_spells[x].type) {
+				case ZoneBlockedSpellTypes::ZoneWide: {
+					return true;
+					break;
+				}
+				case ZoneBlockedSpellTypes::Region: {
+					if (IsWithinAxisAlignedBox(
+						location,
+						blocked_spells[x].m_Location - blocked_spells[x].m_Difference,
+						blocked_spells[x].m_Location + blocked_spells[x].m_Difference
+					)) {
 						return true;
-						break;
 					}
-					case 2:
-					{
-						if (IsWithinAxisAlignedBox(location, blocked_spells[x].m_Location - blocked_spells[x].m_Difference, blocked_spells[x].m_Location + blocked_spells[x].m_Difference))
-							return true;
-						break;
-					}
-					default:
-					{
-						continue;
-						break;
-					}
+					break;
+				}
+				default: {
+					continue;
+					break;
 				}
 			}
 		}
 	}
+
 	return false;
 }
 
-const char* Zone::GetSpellBlockedMessage(uint32 spell_id, const glm::vec3& location)
+const char *Zone::GetSpellBlockedMessage(uint32 spell_id, const glm::vec3 &location)
 {
-	if(blocked_spells)
-	{
-		for(int x = 0; x < totalBS; x++)
-		{
-			if(spell_id != blocked_spells[x].spellid && blocked_spells[x].spellid != 0)
+	if (blocked_spells) {
+		for (int x = 0; x < GetZoneTotalBlockedSpells(); x++) {
+			if (spell_id != blocked_spells[x].spellid && blocked_spells[x].spellid != 0) {
 				continue;
+			}
 
-			switch(blocked_spells[x].type)
-			{
-				case 1:
-				{
+			switch (blocked_spells[x].type) {
+				case ZoneBlockedSpellTypes::ZoneWide: {
 					return blocked_spells[x].message;
 					break;
 				}
-				case 2:
-				{
-					if(IsWithinAxisAlignedBox(location, blocked_spells[x].m_Location - blocked_spells[x].m_Difference, blocked_spells[x].m_Location + blocked_spells[x].m_Difference))
+				case ZoneBlockedSpellTypes::Region: {
+					if (IsWithinAxisAlignedBox(
+						location,
+						blocked_spells[x].m_Location - blocked_spells[x].m_Difference,
+						blocked_spells[x].m_Location + blocked_spells[x].m_Difference
+					)) {
 						return blocked_spells[x].message;
+					}
 					break;
 				}
-				default:
-				{
+				default: {
 					continue;
 					break;
 				}
