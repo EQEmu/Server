@@ -9847,7 +9847,7 @@ void Client::Handle_OP_OpenContainer(const EQApplicationPacket *app)
 
 void Client::Handle_OP_OpenGuildTributeMaster(const EQApplicationPacket *app)
 {
-	Log(Logs::Detail, Logs::Tribute, "Received OP_OpenGuildTributeMaster of length %d", app->size);
+	LogTribute("Received OP_OpenGuildTributeMaster of length [{}]", app->size);
 
 	if (app->size != sizeof(StartTribute_Struct))
 		printf("Error in OP_OpenGuildTributeMaster. Expected size of: %zu, but got: %i\n", sizeof(StartTribute_Struct), app->size);
@@ -9878,7 +9878,7 @@ void Client::Handle_OP_OpenInventory(const EQApplicationPacket *app)
 
 void Client::Handle_OP_OpenTributeMaster(const EQApplicationPacket *app)
 {
-	Log(Logs::Detail, Logs::Tribute, "Received OP_OpenTributeMaster of length %d", app->size);
+	LogTribute("Received OP_OpenTributeMaster of length [{}]", app->size);
 
 	if (app->size != sizeof(StartTribute_Struct))
 		printf("Error in OP_OpenTributeMaster. Expected size of: %zu, but got: %i\n", sizeof(StartTribute_Struct), app->size);
@@ -12158,7 +12158,7 @@ void Client::Handle_OP_SaveOnZoneReq(const EQApplicationPacket *app)
 
 void Client::Handle_OP_SelectTribute(const EQApplicationPacket *app)
 {
-	Log(Logs::Detail, Logs::Tribute, "Received OP_SelectTribute of length %d", app->size);
+	LogTribute("Received OP_SelectTribute of length [{}]", app->size);
 
 	//we should enforce being near a real tribute master to change this
 	//but im not sure how I wanna do that right now.
@@ -14317,7 +14317,7 @@ void Client::Handle_OP_Translocate(const EQApplicationPacket *app)
 
 void Client::Handle_OP_TributeItem(const EQApplicationPacket *app)
 {
-	Log(Logs::Detail, Logs::Tribute, "Received OP_TributeItem of length %d", app->size);
+	LogTribute("Received OP_TributeItem of length [{}]", app->size);
 
 	//player donates an item...
 	if (app->size != sizeof(TributeItem_Struct))
@@ -14335,7 +14335,7 @@ void Client::Handle_OP_TributeItem(const EQApplicationPacket *app)
 
 		t->tribute_points = TributeItem(t->slot, t->quantity);
 
-		Log(Logs::Detail, Logs::Tribute, "Sending tribute item reply with %d points", t->tribute_points);
+		LogTribute("Sending tribute item reply with [{}] points", t->tribute_points);
 
 		QueuePacket(app);
 	}
@@ -14344,7 +14344,7 @@ void Client::Handle_OP_TributeItem(const EQApplicationPacket *app)
 
 void Client::Handle_OP_TributeMoney(const EQApplicationPacket *app)
 {
-	Log(Logs::Detail, Logs::Tribute, "Received OP_TributeMoney of length %d", app->size);
+	LogTribute("Received OP_TributeMoney of length [{}]", app->size);
 
 	//player donates money
 	if (app->size != sizeof(TributeMoney_Struct))
@@ -14362,7 +14362,7 @@ void Client::Handle_OP_TributeMoney(const EQApplicationPacket *app)
 
 		t->tribute_points = TributeMoney(t->platinum);
 
-		Log(Logs::Detail, Logs::Tribute, "Sending tribute money reply with %d points", t->tribute_points);
+		LogTribute("Sending tribute money reply with [{}] points", t->tribute_points);
 
 		QueuePacket(app);
 	}
@@ -14371,14 +14371,14 @@ void Client::Handle_OP_TributeMoney(const EQApplicationPacket *app)
 
 void Client::Handle_OP_TributeNPC(const EQApplicationPacket *app)
 {
-	Log(Logs::Detail, Logs::Tribute, "Received OP_TributeNPC of length %d", app->size);
+	LogTribute("Received OP_TributeNPC of length [{}]", app->size);
 
 	return;
 }
 
 void Client::Handle_OP_TributeToggle(const EQApplicationPacket *app)
 {
-	Log(Logs::Detail, Logs::Tribute, "Received OP_TributeToggle of length %d", app->size);
+	LogTribute("Received OP_TributeToggle of length [{}]", app->size);
 
 	if (app->size != sizeof(uint32))
 		LogError("Invalid size on OP_TributeToggle packet");
@@ -14391,7 +14391,7 @@ void Client::Handle_OP_TributeToggle(const EQApplicationPacket *app)
 
 void Client::Handle_OP_TributeUpdate(const EQApplicationPacket *app)
 {
-	Log(Logs::Detail, Logs::Tribute, "Received OP_TributeUpdate of length %d", app->size);
+	LogTribute("Received OP_TributeUpdate of length [{}]", app->size);
 
 	//sent when the client changes their tribute settings...
 	if (app->size != sizeof(TributeInfo_Struct))
