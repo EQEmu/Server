@@ -338,7 +338,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 		{
 			if(pack->size != sizeof(ServerGuildRankUpdate_Struct))
 			{
-				Log(Logs::General, Logs::Error, "Received ServerOP_RankUpdate of incorrect size %d, expected %d",
+				LogError("Received ServerOP_RankUpdate of incorrect size [{}], expected [{}]",
 					pack->size, sizeof(ServerGuildRankUpdate_Struct));
 
 				return;

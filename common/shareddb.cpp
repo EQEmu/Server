@@ -485,8 +485,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, EQEmu::InventoryProfile *inv, bool
 		const EQEmu::ItemData *item = GetItem(item_id);
 
 		if (!item) {
-			Log(Logs::General, Logs::Error,
-				"Warning: %s %i has an invalid item_id %i in inventory slot %i",
+			LogError("Warning: [{}] [{}] has an invalid item_id [{}] in inventory slot [{}]",
 				((is_charid == true) ? "charid" : "acctid"), id, item_id, slot_id);
 			continue;
 		}
@@ -534,8 +533,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, EQEmu::InventoryProfile *inv, bool
 		if (put_slot_id != INVALID_INDEX)
 			continue;
 
-		Log(Logs::General, Logs::Error,
-			"Warning: Invalid slot_id for item in shared bank inventory: %s=%i, item_id=%i, slot_id=%i",
+		LogError("Warning: Invalid slot_id for item in shared bank inventory: [{}]=[{}], item_id=[{}], slot_id=[{}]",
 			((is_charid == true) ? "charid" : "acctid"), id, item_id, slot_id);
 
 		if (is_charid)
@@ -623,8 +621,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQEmu::InventoryProfile *inv)
 		const EQEmu::ItemData *item = GetItem(item_id);
 
 		if (!item) {
-			Log(Logs::General, Logs::Error,
-				"Warning: charid %i has an invalid item_id %i in inventory slot %i", char_id, item_id,
+			LogError("Warning: charid [{}] has an invalid item_id [{}] in inventory slot [{}]", char_id, item_id,
 				slot_id);
 			continue;
 		}
@@ -708,8 +705,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQEmu::InventoryProfile *inv)
 
 		// Save ptr to item in inventory
 		if (put_slot_id == INVALID_INDEX) {
-			Log(Logs::General, Logs::Error,
-				"Warning: Invalid slot_id for item in inventory: charid=%i, item_id=%i, slot_id=%i",
+			LogError("Warning: Invalid slot_id for item in inventory: charid=[{}], item_id=[{}], slot_id=[{}]",
 				char_id, item_id, slot_id);
 		}
 	}
@@ -717,8 +713,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQEmu::InventoryProfile *inv)
 	if (cv_conflict) {
 		char char_name[64] = "";
 		GetCharName(char_id, char_name);
-		Log(Logs::General, Logs::Error,
-			"ClientVersion/Expansion conflict during inventory load at zone entry for '%s' (charid: %u, inver: %s, gmi: %s)",
+		LogError("ClientVersion/Expansion conflict during inventory load at zone entry for [{}] (charid: [{}], inver: [{}], gmi: [{}])",
 			char_name,
 			char_id,
 			EQEmu::versions::MobVersionName(inv->InventoryVersion()),

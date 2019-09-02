@@ -446,11 +446,6 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 			args.push_back(const_cast<EQApplicationPacket*>(app));
 			parse->EventPlayer(EVENT_UNHANDLED_OPCODE, this, "", 1, &args);
 
-#if EQDEBUG >= 10
-			Log(Logs::General, Logs::Error, "HandlePacket() Opcode error: Unexpected packet during CLIENT_CONNECTING: opcode:"
-				" %s (#%d eq=0x%04x), size: %i", OpcodeNames[opcode], opcode, 0, app->size);
-			DumpPacket(app);
-#endif
 			break;
 		}
 
@@ -927,7 +922,7 @@ return;
 void Client::Handle_Connect_OP_ApproveZone(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(ApproveZone_Struct)) {
-		Log(Logs::General, Logs::Error, "Invalid size on OP_ApproveZone: Expected %i, Got %i",
+		LogError("Invalid size on OP_ApproveZone: Expected [{}], Got [{}]",
 			sizeof(ApproveZone_Struct), app->size);
 		return;
 	}
@@ -940,7 +935,7 @@ void Client::Handle_Connect_OP_ApproveZone(const EQApplicationPacket *app)
 void Client::Handle_Connect_OP_ClientError(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(ClientError_Struct)) {
-		Log(Logs::General, Logs::Error, "Invalid size on OP_ClientError: Expected %i, Got %i",
+		LogError("Invalid size on OP_ClientError: Expected [{}], Got [{}]",
 			sizeof(ClientError_Struct), app->size);
 		return;
 	}
@@ -1102,7 +1097,7 @@ void Client::Handle_Connect_OP_SpawnAppearance(const EQApplicationPacket *app)
 void Client::Handle_Connect_OP_TGB(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(uint32)) {
-		Log(Logs::General, Logs::Error, "Invalid size on OP_TGB: Expected %i, Got %i",
+		LogError("Invalid size on OP_TGB: Expected [{}], Got [{}]",
 			sizeof(uint32), app->size);
 		return;
 	}
@@ -1183,7 +1178,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		struct in_addr ghost_addr;
 		ghost_addr.s_addr = eqs->GetRemoteIP();
 
-		Log(Logs::General, Logs::Error, "Ghosting client: Account ID:%i Name:%s Character:%s IP:%s",
+		LogError("Ghosting client: Account ID:[{}] Name:[{}] Character:[{}] IP:[{}]",
 			client->AccountID(), client->AccountName(), client->GetName(), inet_ntoa(ghost_addr));
 		client->Save();
 		client->Disconnect();
@@ -2791,9 +2786,7 @@ void Client::Handle_OP_AltCurrencySellSelection(const EQApplicationPacket *app)
 void Client::Handle_OP_Animation(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Animation_Struct)) {
-		Log(Logs::General, Logs::Error, "Received invalid sized "
-			"OP_Animation: got %d, expected %d", app->size,
-			sizeof(Animation_Struct));
+		LogError("Received invalid sized OP_Animation: got [{}], expected [{}]", app->size, sizeof(Animation_Struct));
 		DumpPacket(app);
 		return;
 	}
@@ -2944,7 +2937,7 @@ void Client::Handle_OP_AugmentInfo(const EQApplicationPacket *app)
 void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(AugmentItem_Struct)) {
-		Log(Logs::General, Logs::Error, "Invalid size for AugmentItem_Struct: Expected: %i, Got: %i",
+		LogError("Invalid size for AugmentItem_Struct: Expected: [{}], Got: [{}]",
 			sizeof(AugmentItem_Struct), app->size);
 		return;
 	}
@@ -3593,7 +3586,7 @@ void Client::Handle_OP_Barter(const EQApplicationPacket *app)
 void Client::Handle_OP_BazaarInspect(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(BazaarInspect_Struct)) {
-		Log(Logs::General, Logs::Error, "Invalid size for BazaarInspect_Struct: Expected %i, Got %i",
+		LogError("Invalid size for BazaarInspect_Struct: Expected [{}], Got [{}]",
 			sizeof(BazaarInspect_Struct), app->size);
 		return;
 	}
@@ -4275,7 +4268,7 @@ void Client::Handle_OP_ClickDoor(const EQApplicationPacket *app)
 void Client::Handle_OP_ClickObject(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(ClickObject_Struct)) {
-		Log(Logs::General, Logs::Error, "Invalid size on ClickObject_Struct: Expected %i, Got %i",
+		LogError("Invalid size on ClickObject_Struct: Expected [{}], Got [{}]",
 			sizeof(ClickObject_Struct), app->size);
 		return;
 	}
@@ -4322,7 +4315,7 @@ void Client::Handle_OP_ClickObjectAction(const EQApplicationPacket *app)
 	else
 	{
 		if (app->size != sizeof(ClickObjectAction_Struct)) {
-			Log(Logs::General, Logs::Error, "Invalid size on OP_ClickObjectAction: Expected %i, Got %i",
+			LogError("Invalid size on OP_ClickObjectAction: Expected [{}], Got [{}]",
 				sizeof(ClickObjectAction_Struct), app->size);
 			return;
 		}
@@ -4377,7 +4370,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 	if (app->size != sizeof(PlayerPositionUpdateClient_Struct)
 		&& app->size != (sizeof(PlayerPositionUpdateClient_Struct) + 1)
 			) {
-		Log(Logs::General, Logs::Error, "OP size error: OP_ClientUpdate expected:%i got:%i",
+		LogError("OP size error: OP_ClientUpdate expected:[{}] got:[{}]",
 			sizeof(PlayerPositionUpdateClient_Struct), app->size);
 		return;
 	}
@@ -5084,8 +5077,7 @@ void Client::Handle_OP_CrystalReclaim(const EQApplicationPacket *app)
 void Client::Handle_OP_Damage(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(CombatDamage_Struct)) {
-		Log(Logs::General, Logs::Error, "Received invalid sized OP_Damage: got %d, expected %d", app->size,
-			sizeof(CombatDamage_Struct));
+		LogError("Received invalid sized OP_Damage: got [{}], expected [{}]", app->size, sizeof(CombatDamage_Struct));
 		DumpPacket(app);
 		return;
 	}
@@ -5530,9 +5522,7 @@ void Client::Handle_OP_Dye(const EQApplicationPacket *app)
 void Client::Handle_OP_Emote(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Emote_Struct)) {
-		Log(Logs::General, Logs::Error, "Received invalid sized "
-			"OP_Emote: got %d, expected %d", app->size,
-			sizeof(Emote_Struct));
+		LogError("Received invalid sized OP_Emote: got [{}], expected [{}]", app->size, sizeof(Emote_Struct));
 		DumpPacket(app);
 		return;
 	}
@@ -5621,8 +5611,7 @@ void Client::Handle_OP_EnvDamage(const EQApplicationPacket *app)
 	}
 
 	if (app->size != sizeof(EnvDamage2_Struct)) {
-		Log(Logs::General, Logs::Error, "Received invalid sized OP_EnvDamage: got %d, expected %d", app->size,
-			sizeof(EnvDamage2_Struct));
+		LogError("Received invalid sized OP_EnvDamage: got [{}], expected [{}]", app->size, sizeof(EnvDamage2_Struct));
 		DumpPacket(app);
 		return;
 	}
@@ -5675,7 +5664,7 @@ void Client::Handle_OP_EnvDamage(const EQApplicationPacket *app)
 void Client::Handle_OP_FaceChange(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(FaceChange_Struct)) {
-		Log(Logs::General, Logs::Error, "Invalid size for OP_FaceChange: Expected: %i, Got: %i",
+		LogError("Invalid size for OP_FaceChange: Expected: [{}], Got: [{}]",
 			sizeof(FaceChange_Struct), app->size);
 		return;
 	}
@@ -6456,7 +6445,7 @@ void Client::Handle_OP_GroupAcknowledge(const EQApplicationPacket *app)
 void Client::Handle_OP_GroupCancelInvite(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(GroupCancel_Struct)) {
-		Log(Logs::General, Logs::Error, "Invalid size for OP_GroupCancelInvite: Expected: %i, Got: %i",
+		LogError("Invalid size for OP_GroupCancelInvite: Expected: [{}], Got: [{}]",
 			sizeof(GroupCancel_Struct), app->size);
 		return;
 	}
@@ -6500,7 +6489,7 @@ void Client::Handle_OP_GroupDelete(const EQApplicationPacket *app)
 void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(GroupGeneric_Struct)) {
-		Log(Logs::General, Logs::Error, "Invalid size for GroupGeneric_Struct: Expected: %i, Got: %i",
+		LogError("Invalid size for GroupGeneric_Struct: Expected: [{}], Got: [{}]",
 			sizeof(GroupGeneric_Struct), app->size);
 		return;
 	}
@@ -6681,7 +6670,7 @@ void Client::Handle_OP_GroupFollow(const EQApplicationPacket *app)
 void Client::Handle_OP_GroupFollow2(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(GroupGeneric_Struct)) {
-		Log(Logs::General, Logs::Error, "Invalid size for OP_GroupFollow: Expected: %i, Got: %i",
+		LogError("Invalid size for OP_GroupFollow: Expected: [{}], Got: [{}]",
 			sizeof(GroupGeneric_Struct), app->size);
 		return;
 	}
@@ -6730,7 +6719,7 @@ void Client::Handle_OP_GroupInvite(const EQApplicationPacket *app)
 void Client::Handle_OP_GroupInvite2(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(GroupInvite_Struct)) {
-		Log(Logs::General, Logs::Error, "Invalid size for OP_GroupInvite: Expected: %i, Got: %i",
+		LogError("Invalid size for OP_GroupInvite: Expected: [{}], Got: [{}]",
 			sizeof(GroupInvite_Struct), app->size);
 		return;
 	}
@@ -8092,8 +8081,7 @@ void Client::Handle_OP_Ignore(const EQApplicationPacket *app)
 void Client::Handle_OP_Illusion(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Illusion_Struct)) {
-		Log(Logs::General, Logs::Error, "Received invalid sized OP_Illusion: got %d, expected %d", app->size,
-			sizeof(Illusion_Struct));
+		LogError("Received invalid sized OP_Illusion: got [{}], expected [{}]", app->size, sizeof(Illusion_Struct));
 		DumpPacket(app);
 		return;
 	}
@@ -8218,7 +8206,7 @@ void Client::Handle_OP_InstillDoubt(const EQApplicationPacket *app)
 void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(ItemViewRequest_Struct)) {
-		Log(Logs::General, Logs::Error, "Wrong size on OP_ItemLinkClick. Got: %i, Expected: %i", app->size,
+		LogError("Wrong size on OP_ItemLinkClick. Got: [{}], Expected: [{}]", app->size,
 			sizeof(ItemViewRequest_Struct));
 		DumpPacket(app);
 		return;
@@ -8319,7 +8307,7 @@ void Client::Handle_OP_ItemLinkResponse(const EQApplicationPacket *app)
 void Client::Handle_OP_ItemName(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(ItemNamePacket_Struct)) {
-		Log(Logs::General, Logs::Error, "Invalid size for ItemNamePacket_Struct: Expected: %i, Got: %i",
+		LogError("Invalid size for ItemNamePacket_Struct: Expected: [{}], Got: [{}]",
 			sizeof(ItemNamePacket_Struct), app->size);
 		return;
 	}
@@ -11732,7 +11720,7 @@ void Client::Handle_OP_ReadBook(const EQApplicationPacket *app)
 void Client::Handle_OP_RecipeAutoCombine(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(RecipeAutoCombine_Struct)) {
-		Log(Logs::General, Logs::Error, "Invalid size for RecipeAutoCombine_Struct: Expected: %i, Got: %i",
+		LogError("Invalid size for RecipeAutoCombine_Struct: Expected: [{}], Got: [{}]",
 			sizeof(RecipeAutoCombine_Struct), app->size);
 		return;
 	}
@@ -11746,7 +11734,7 @@ void Client::Handle_OP_RecipeAutoCombine(const EQApplicationPacket *app)
 void Client::Handle_OP_RecipeDetails(const EQApplicationPacket *app)
 {
 	if (app->size < sizeof(uint32)) {
-		Log(Logs::General, Logs::Error, "Invalid size for RecipeDetails Request: Expected: %i, Got: %i",
+		LogError("Invalid size for RecipeDetails Request: Expected: [{}], Got: [{}]",
 			sizeof(uint32), app->size);
 		return;
 	}
@@ -11760,7 +11748,7 @@ void Client::Handle_OP_RecipeDetails(const EQApplicationPacket *app)
 void Client::Handle_OP_RecipesFavorite(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(TradeskillFavorites_Struct)) {
-		Log(Logs::General, Logs::Error, "Invalid size for TradeskillFavorites_Struct: Expected: %i, Got: %i",
+		LogError("Invalid size for TradeskillFavorites_Struct: Expected: [{}], Got: [{}]",
 			sizeof(TradeskillFavorites_Struct), app->size);
 		return;
 	}
@@ -11833,7 +11821,7 @@ void Client::Handle_OP_RecipesFavorite(const EQApplicationPacket *app)
 void Client::Handle_OP_RecipesSearch(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(RecipesSearch_Struct)) {
-		Log(Logs::General, Logs::Error, "Invalid size for RecipesSearch_Struct: Expected: %i, Got: %i",
+		LogError("Invalid size for RecipesSearch_Struct: Expected: [{}], Got: [{}]",
 			sizeof(RecipesSearch_Struct), app->size);
 		return;
 	}
@@ -12314,9 +12302,7 @@ void Client::Handle_OP_SetGuildMOTD(const EQApplicationPacket *app)
 void Client::Handle_OP_SetRunMode(const EQApplicationPacket *app)
 {
 	if (app->size < sizeof(SetRunMode_Struct)) {
-		Log(Logs::General, Logs::Error, "Received invalid sized "
-			"OP_SetRunMode: got %d, expected %d", app->size,
-			sizeof(SetRunMode_Struct));
+		LogError("Received invalid sized OP_SetRunMode: got [{}], expected [{}]", app->size, sizeof(SetRunMode_Struct));
 		DumpPacket(app);
 		return;
 	}
@@ -12331,9 +12317,7 @@ void Client::Handle_OP_SetRunMode(const EQApplicationPacket *app)
 void Client::Handle_OP_SetServerFilter(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(SetServerFilter_Struct)) {
-		Log(Logs::General, Logs::Error, "Received invalid sized "
-			"OP_SetServerFilter: got %d, expected %d", app->size,
-			sizeof(SetServerFilter_Struct));
+		LogError("Received invalid sized OP_SetServerFilter: got [{}], expected [{}]", app->size, sizeof(SetServerFilter_Struct));
 		DumpPacket(app);
 		return;
 	}
@@ -12533,7 +12517,7 @@ void Client::Handle_OP_ShopEnd(const EQApplicationPacket *app)
 void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Merchant_Sell_Struct)) {
-		Log(Logs::General, Logs::Error, "Invalid size on OP_ShopPlayerBuy: Expected %i, Got %i",
+		LogError("Invalid size on OP_ShopPlayerBuy: Expected [{}], Got [{}]",
 			sizeof(Merchant_Sell_Struct), app->size);
 		return;
 	}
@@ -12773,7 +12757,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 			qsaudit->items[0].aug_5 = 0;
 
 			if (freeslotid != INVALID_INDEX) {
-				Log(Logs::General, Logs::Error, "Handle_OP_ShopPlayerBuy: QS Audit could not locate merchant (%u) purchased item in player (%u) inventory slot (%i)",
+				LogError("Handle_OP_ShopPlayerBuy: QS Audit could not locate merchant ([{}]) purchased item in player ([{}]) inventory slot ([{}])",
 					qsaudit->merchant_id, qsaudit->char_id, freeslotid);
 			}
 		}
@@ -12801,7 +12785,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Merchant_Purchase_Struct)) {
-		Log(Logs::General, Logs::Error, "Invalid size on OP_ShopPlayerSell: Expected %i, Got %i",
+		LogError("Invalid size on OP_ShopPlayerSell: Expected [{}], Got [{}]",
 			sizeof(Merchant_Purchase_Struct), app->size);
 		return;
 	}
@@ -13717,7 +13701,7 @@ void Client::Handle_OP_TrackTarget(const EQApplicationPacket *app)
 
 	if (app->size != sizeof(TrackTarget_Struct))
 	{
-		Log(Logs::General, Logs::Error, "Invalid size for OP_TrackTarget: Expected: %i, Got: %i",
+		LogError("Invalid size for OP_TrackTarget: Expected: [{}], Got: [{}]",
 			sizeof(TrackTarget_Struct), app->size);
 		return;
 	}
@@ -14289,7 +14273,7 @@ void Client::Handle_OP_TraderShop(const EQApplicationPacket *app)
 void Client::Handle_OP_TradeSkillCombine(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(NewCombine_Struct)) {
-		Log(Logs::General, Logs::Error, "Invalid size for NewCombine_Struct: Expected: %i, Got: %i",
+		LogError("Invalid size for NewCombine_Struct: Expected: [{}], Got: [{}]",
 			sizeof(NewCombine_Struct), app->size);
 		return;
 	}

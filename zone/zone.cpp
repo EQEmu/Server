@@ -176,7 +176,7 @@ bool Zone::LoadZoneObjects()
 			 zoneid, instanceversion);
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-		Log(Logs::General, Logs::Error, "Error Loading Objects from DB: %s",
+		LogError("Error Loading Objects from DB: [{}]",
 			results.ErrorMessage().c_str());
 		return false;
 	}

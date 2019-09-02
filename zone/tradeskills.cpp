@@ -940,7 +940,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	//handle caps
 	if(spec->nofail) {
 		chance = 100;	//cannot fail.
-		Log(Logs::Detail, Logs::Tradeskills, "...This combine cannot fail.");
+		LogTradeskills("This combine cannot fail");
 	} else if(over_trivial >= 0) {
 		// At reaching trivial the chance goes to 95% going up an additional
 		// percent for every 40 skillpoints above the trivial.
@@ -960,8 +960,8 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 		chance = 95;
 	}
 
-	Log(Logs::Detail, Logs::Tradeskills, "...Current skill: %d , Trivial: %d , Success chance: %f percent", user_skill , spec->trivial , chance);
-	Log(Logs::Detail, Logs::Tradeskills, "...Bonusstat: %d , INT: %d , WIS: %d , DEX: %d , STR: %d", bonusstat , GetINT() , GetWIS() , GetDEX() , GetSTR());
+	LogTradeskills("Current skill: [{}] , Trivial: [{}] , Success chance: [{}] percent", user_skill , spec->trivial , chance);
+	LogTradeskills("Bonusstat: [{}] , INT: [{}] , WIS: [{}] , DEX: [{}] , STR: [{}]", bonusstat , GetINT() , GetWIS() , GetDEX() , GetSTR());
 
 	float res = zone->random.Real(0, 99);
 	int aa_chance = 0;
@@ -980,7 +980,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 
 		MessageString(Chat::LightBlue, TRADESKILL_SUCCEED, spec->name.c_str());
 
-		Log(Logs::Detail, Logs::Tradeskills, "Tradeskill success");
+		LogTradeskills("Tradeskill success");
 
 		itr = spec->onsuccess.begin();
 		while(itr != spec->onsuccess.end() && !spec->quest) {
@@ -1012,7 +1012,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 
 		MessageString(Chat::Emote,TRADESKILL_FAILED);
 
-		Log(Logs::Detail, Logs::Tradeskills, "Tradeskill failed");
+		LogTradeskills("Tradeskill failed");
 			if (this->GetGroup())
 		{
 			entity_list.MessageGroup(this, true, Chat::Skills,"%s was unsuccessful in %s tradeskill attempt.",GetName(),this->GetGender() == 0 ? "his" : this->GetGender() == 1 ? "her" : "its");
@@ -1091,9 +1091,9 @@ void Client::CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float
 			NotifyNewTitlesAvailable();
 	}
 
-	Log(Logs::Detail, Logs::Tradeskills, "...skillup_modifier: %f , success_modifier: %d , stat modifier: %d", skillup_modifier , success_modifier , stat_modifier);
-	Log(Logs::Detail, Logs::Tradeskills, "...Stage1 chance was: %f percent", chance_stage1);
-	Log(Logs::Detail, Logs::Tradeskills, "...Stage2 chance was: %f percent. 0 percent means stage1 failed", chance_stage2);
+	LogTradeskills("skillup_modifier: [{}] , success_modifier: [{}] , stat modifier: [{}]", skillup_modifier , success_modifier , stat_modifier);
+	LogTradeskills("Stage1 chance was: [{}] percent", chance_stage1);
+	LogTradeskills("Stage2 chance was: [{}] percent. 0 percent means stage1 failed", chance_stage2);
 }
 
 bool ZoneDatabase::GetTradeRecipe(const EQEmu::ItemInstance* container, uint8 c_type, uint32 some_id,
