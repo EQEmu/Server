@@ -115,15 +115,15 @@ void EQEmuLogSys::LoadLogSettingsDefaults()
 	/**
 	 * Set Defaults
 	 */
-	log_settings[Logs::World_Server].log_to_console    = static_cast<uint8>(Logs::General);
-	log_settings[Logs::Zone_Server].log_to_console     = static_cast<uint8>(Logs::General);
-	log_settings[Logs::QS_Server].log_to_console       = static_cast<uint8>(Logs::General);
-	log_settings[Logs::UCS_Server].log_to_console      = static_cast<uint8>(Logs::General);
-	log_settings[Logs::Crash].log_to_console           = static_cast<uint8>(Logs::General);
-	log_settings[Logs::MySQLError].log_to_console      = static_cast<uint8>(Logs::General);
-	log_settings[Logs::Login_Server].log_to_console    = static_cast<uint8>(Logs::General);
-	log_settings[Logs::Headless_Client].log_to_console = static_cast<uint8>(Logs::General);
-	log_settings[Logs::NPCScaling].log_to_gmsay        = static_cast<uint8>(Logs::General);
+	log_settings[Logs::WorldServer].log_to_console    = static_cast<uint8>(Logs::General);
+	log_settings[Logs::ZoneServer].log_to_console     = static_cast<uint8>(Logs::General);
+	log_settings[Logs::QSServer].log_to_console       = static_cast<uint8>(Logs::General);
+	log_settings[Logs::UCSServer].log_to_console      = static_cast<uint8>(Logs::General);
+	log_settings[Logs::Crash].log_to_console          = static_cast<uint8>(Logs::General);
+	log_settings[Logs::MySQLError].log_to_console     = static_cast<uint8>(Logs::General);
+	log_settings[Logs::Loginserver].log_to_console    = static_cast<uint8>(Logs::General);
+	log_settings[Logs::HeadlessClient].log_to_console = static_cast<uint8>(Logs::General);
+	log_settings[Logs::NPCScaling].log_to_gmsay       = static_cast<uint8>(Logs::General);
 
 	/**
 	 * RFC 5424

@@ -168,7 +168,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			break;
 		}
 		default:
-			Log(Logs::Detail, Logs::QS_Server, "Received unhandled ServerOP_QueryServGeneric", Type);
+			Log(Logs::Detail, Logs::QSServer, "Received unhandled ServerOP_QueryServGeneric", Type);
 			break;
 		}
 		break;

@@ -62,7 +62,7 @@ LoginServer::~LoginServer()
 void LoginServer::ProcessUsertoWorldReqLeg(uint16_t opcode, EQ::Net::Packet &p)
 {
 	const WorldConfig *Config = WorldConfig::get();
-	Log(Logs::Detail, Logs::World_Server, "Recevied ServerPacket from LS OpCode 0x04x", opcode);
+	Log(Logs::Detail, Logs::WorldServer, "Recevied ServerPacket from LS OpCode 0x04x", opcode);
 
 	UsertoWorldRequestLegacy_Struct *utwr  = (UsertoWorldRequestLegacy_Struct *) p.Data();
 	uint32                          id     = database.GetAccountIDFromLSID("eqemu", utwr->lsaccountid);
@@ -122,7 +122,7 @@ void LoginServer::ProcessUsertoWorldReqLeg(uint16_t opcode, EQ::Net::Packet &p)
 void LoginServer::ProcessUsertoWorldReq(uint16_t opcode, EQ::Net::Packet &p)
 {
 	const WorldConfig *Config = WorldConfig::get();
-	Log(Logs::Detail, Logs::World_Server, "Recevied ServerPacket from LS OpCode 0x04x", opcode);
+	Log(Logs::Detail, Logs::WorldServer, "Recevied ServerPacket from LS OpCode 0x04x", opcode);
 
 	UsertoWorldRequest_Struct *utwr  = (UsertoWorldRequest_Struct *) p.Data();
 	uint32                    id     = database.GetAccountIDFromLSID(utwr->login, utwr->lsaccountid);
@@ -182,7 +182,7 @@ void LoginServer::ProcessUsertoWorldReq(uint16_t opcode, EQ::Net::Packet &p)
 void LoginServer::ProcessLSClientAuthLegacy(uint16_t opcode, EQ::Net::Packet &p)
 {
 	const WorldConfig *Config = WorldConfig::get();
-	Log(Logs::Detail, Logs::World_Server, "Received ServerPacket from LS OpCode 0x04x", opcode);
+	Log(Logs::Detail, Logs::WorldServer, "Received ServerPacket from LS OpCode 0x04x", opcode);
 
 	try {
 		auto client_authentication_request = p.GetSerialize<ClientAuthLegacy_Struct>(0);
@@ -216,7 +216,7 @@ void LoginServer::ProcessLSClientAuthLegacy(uint16_t opcode, EQ::Net::Packet &p)
 void LoginServer::ProcessLSClientAuth(uint16_t opcode, EQ::Net::Packet &p)
 {
 	const WorldConfig *Config = WorldConfig::get();
-	Log(Logs::Detail, Logs::World_Server, "Received ServerPacket from LS OpCode 0x04x", opcode);
+	Log(Logs::Detail, Logs::WorldServer, "Received ServerPacket from LS OpCode 0x04x", opcode);
 
 	try {
 		auto client_authentication_request = p.GetSerialize<ClientAuth_Struct>(0);
@@ -251,18 +251,18 @@ void LoginServer::ProcessLSClientAuth(uint16_t opcode, EQ::Net::Packet &p)
 void LoginServer::ProcessLSFatalError(uint16_t opcode, EQ::Net::Packet &p)
 {
 	const WorldConfig *Config = WorldConfig::get();
-	Log(Logs::Detail, Logs::World_Server, "Recevied ServerPacket from LS OpCode 0x04x", opcode);
+	Log(Logs::Detail, Logs::WorldServer, "Recevied ServerPacket from LS OpCode 0x04x", opcode);
 
-	Log(Logs::Detail, Logs::World_Server, "Login server responded with FatalError.");
+	Log(Logs::Detail, Logs::WorldServer, "Login server responded with FatalError.");
 	if (p.Length() > 1) {
-		Log(Logs::Detail, Logs::World_Server, "     %s", (const char *) p.Data());
+		Log(Logs::Detail, Logs::WorldServer, "     %s", (const char *) p.Data());
 	}
 }
 
 void LoginServer::ProcessSystemwideMessage(uint16_t opcode, EQ::Net::Packet &p)
 {
 	const WorldConfig *Config = WorldConfig::get();
-	Log(Logs::Detail, Logs::World_Server, "Recevied ServerPacket from LS OpCode 0x04x", opcode);
+	Log(Logs::Detail, Logs::WorldServer, "Recevied ServerPacket from LS OpCode 0x04x", opcode);
 
 	ServerSystemwideMessage *swm = (ServerSystemwideMessage *) p.Data();
 	zoneserver_list.SendEmoteMessageRaw(0, 0, 0, swm->type, swm->message);
@@ -271,20 +271,20 @@ void LoginServer::ProcessSystemwideMessage(uint16_t opcode, EQ::Net::Packet &p)
 void LoginServer::ProcessLSRemoteAddr(uint16_t opcode, EQ::Net::Packet &p)
 {
 	const WorldConfig *Config = WorldConfig::get();
-	Log(Logs::Detail, Logs::World_Server, "Recevied ServerPacket from LS OpCode 0x04x", opcode);
+	Log(Logs::Detail, Logs::WorldServer, "Recevied ServerPacket from LS OpCode 0x04x", opcode);
 
 	if (!Config->WorldAddress.length()) {
 		WorldConfig::SetWorldAddress((char *) p.Data());
-		Log(Logs::Detail, Logs::World_Server, "Loginserver provided %s as world address", (const char *) p.Data());
+		Log(Logs::Detail, Logs::WorldServer, "Loginserver provided %s as world address", (const char *) p.Data());
 	}
 }
 
 void LoginServer::ProcessLSAccountUpdate(uint16_t opcode, EQ::Net::Packet &p)
 {
 	const WorldConfig *Config = WorldConfig::get();
-	Log(Logs::Detail, Logs::World_Server, "Recevied ServerPacket from LS OpCode 0x04x", opcode);
+	Log(Logs::Detail, Logs::WorldServer, "Recevied ServerPacket from LS OpCode 0x04x", opcode);
 
-	Log(Logs::Detail, Logs::World_Server, "Received ServerOP_LSAccountUpdate packet from loginserver");
+	Log(Logs::Detail, Logs::WorldServer, "Received ServerOP_LSAccountUpdate packet from loginserver");
 	CanAccountUpdate = true;
 }
 
@@ -292,7 +292,7 @@ bool LoginServer::Connect()
 {
 	char errbuf[1024];
 	if ((LoginServerIP = ResolveIP(LoginServerAddress, errbuf)) == 0) {
-		Log(Logs::Detail, Logs::World_Server, "Unable to resolve '%s' to an IP.", LoginServerAddress);
+		Log(Logs::Detail, Logs::WorldServer, "Unable to resolve '%s' to an IP.", LoginServerAddress);
 		return false;
 	}
 

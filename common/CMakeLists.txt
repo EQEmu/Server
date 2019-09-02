@@ -142,6 +142,7 @@ SET(common_headers
 	eqemu_config.h
 	eqemu_config_elements.h
 	eqemu_logsys.h
+	eqemu_logsys_log_aliases.h
 	eq_limits.h
 	eq_packet.h
 	eq_stream_ident.h

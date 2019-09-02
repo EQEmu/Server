@@ -590,7 +590,7 @@ void ConsoleZoneBootup(
 		strcpy(&tmpname[1], connection->UserName().c_str());
 
 		Log(Logs::Detail,
-			Logs::World_Server,
+			Logs::WorldServer,
 			"Console ZoneBootup: %s, %s, %s",
 			tmpname,
 			args[1].c_str(),

@@ -178,7 +178,7 @@ int main(int argc, char **argv)
 #endif
 
 	LogInfo("Server Started");
-	if (LogSys.log_settings[Logs::Login_Server].log_to_console == 1) {
+	if (LogSys.log_settings[Logs::Loginserver].log_to_console == 1) {
 		LogInfo("Loginserver logging set to level [1] for more debugging, enable detail [3]");
 	}
 

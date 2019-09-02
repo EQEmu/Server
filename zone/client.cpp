@@ -766,7 +766,7 @@ bool Client::SendAllPackets() {
 		if(eqs)
 			eqs->FastQueuePacket((EQApplicationPacket **)&cp->app, cp->ack_req);
 		clientpackets.pop_front();
-		Log(Logs::Moderate, Logs::Client_Server_Packet, "Transmitting a packet");
+		Log(Logs::Moderate, Logs::PacketClientServer, "Transmitting a packet");
 	}
 	return true;
 }
@@ -814,7 +814,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 	char message[4096];
 	strn0cpy(message, orig_message, sizeof(message));
 
-	Log(Logs::Detail, Logs::Zone_Server, "Client::ChannelMessageReceived() Channel:%i message:'%s'", chan_num, message);
+	Log(Logs::Detail, Logs::ZoneServer, "Client::ChannelMessageReceived() Channel:%i message:'%s'", chan_num, message);
 
 	if (targetname == nullptr) {
 		targetname = (!GetTarget()) ? "" : GetTarget()->GetName();
@@ -1636,7 +1636,7 @@ void Client::UpdateAdmin(bool iFromDB) {
 
 	if(m_pp.gm)
 	{
-		Log(Logs::Moderate, Logs::Zone_Server, "%s - %s is a GM", __FUNCTION__ , GetName());
+		Log(Logs::Moderate, Logs::ZoneServer, "%s - %s is a GM", __FUNCTION__ , GetName());
 // no need for this, having it set in pp you already start as gm
 // and it's also set in your spawn packet so other people see it too
 //		SendAppearancePacket(AT_GM, 1, false);
@@ -2590,7 +2590,7 @@ void Client::SetPVP(bool toggle, bool message) {
 void Client::Kick(const std::string &reason) {
 	client_state = CLIENT_KICKED;
 
-	Log(Logs::General, Logs::Client_Login, "Client [%s] kicked, reason [%s]", GetCleanName(), reason.c_str());
+	Log(Logs::General, Logs::ClientLogin, "Client [%s] kicked, reason [%s]", GetCleanName(), reason.c_str());
 }
 
 void Client::WorldKick() {

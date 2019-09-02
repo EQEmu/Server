@@ -116,8 +116,8 @@ void Database::AddSpeech(const char* from, const char* to, const char* message, 
 	safe_delete_array(escapedMessage);
 	auto results = QueryDatabase(query);
 	if(!results.Success()) {
-		Log(Logs::Detail, Logs::QS_Server, "Failed Speech Entry Insert: %s", results.ErrorMessage().c_str());
-		Log(Logs::Detail, Logs::QS_Server, "%s", query.c_str());
+		Log(Logs::Detail, Logs::QSServer, "Failed Speech Entry Insert: %s", results.ErrorMessage().c_str());
+		Log(Logs::Detail, Logs::QSServer, "%s", query.c_str());
 	}
 
 
@@ -132,8 +132,8 @@ void Database::LogPlayerDropItem(QSPlayerDropItem_Struct* QS) {
 
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		Log(Logs::Detail, Logs::QS_Server, "Failed Drop Record Insert: %s", results.ErrorMessage().c_str());
-		Log(Logs::Detail, Logs::QS_Server, "%s", query.c_str());
+		Log(Logs::Detail, Logs::QSServer, "Failed Drop Record Insert: %s", results.ErrorMessage().c_str());
+		Log(Logs::Detail, Logs::QSServer, "%s", query.c_str());
 	}
 
 	if (QS->_detail_count == 0)
@@ -150,8 +150,8 @@ void Database::LogPlayerDropItem(QSPlayerDropItem_Struct* QS) {
 							 QS->items[i].aug_3, QS->items[i].aug_4, QS->items[i].aug_5);
 		results = QueryDatabase(query);
 		if (!results.Success()) {
-			Log(Logs::Detail, Logs::QS_Server, "Failed Drop Record Entry Insert: %s", results.ErrorMessage().c_str());
-			Log(Logs::Detail, Logs::QS_Server, "%s", query.c_str());
+			Log(Logs::Detail, Logs::QSServer, "Failed Drop Record Entry Insert: %s", results.ErrorMessage().c_str());
+			Log(Logs::Detail, Logs::QSServer, "%s", query.c_str());
 		}
 	}
 }
@@ -169,8 +169,8 @@ void Database::LogPlayerTrade(QSPlayerLogTrade_Struct* QS, uint32 detailCount) {
                                     QS->char2_money.silver, QS->char2_money.copper, QS->char2_count);
     auto results = QueryDatabase(query);
 	if(!results.Success()) {
-		Log(Logs::Detail, Logs::QS_Server, "Failed Trade Log Record Insert: %s", results.ErrorMessage().c_str());
-		Log(Logs::Detail, Logs::QS_Server, "%s", query.c_str());
+		Log(Logs::Detail, Logs::QSServer, "Failed Trade Log Record Insert: %s", results.ErrorMessage().c_str());
+		Log(Logs::Detail, Logs::QSServer, "%s", query.c_str());
 	}
 
 	if(detailCount == 0)
@@ -189,8 +189,8 @@ void Database::LogPlayerTrade(QSPlayerLogTrade_Struct* QS, uint32 detailCount) {
                             QS->items[i].aug_3, QS->items[i].aug_4, QS->items[i].aug_5);
         results = QueryDatabase(query);
         if(!results.Success()) {
-            Log(Logs::Detail, Logs::QS_Server, "Failed Trade Log Record Entry Insert: %s", results.ErrorMessage().c_str());
-            Log(Logs::Detail, Logs::QS_Server, "%s", query.c_str());
+            Log(Logs::Detail, Logs::QSServer, "Failed Trade Log Record Entry Insert: %s", results.ErrorMessage().c_str());
+            Log(Logs::Detail, Logs::QSServer, "%s", query.c_str());
         }
 
     }
@@ -212,8 +212,8 @@ void Database::LogPlayerHandin(QSPlayerLogHandin_Struct* QS, uint32 detailCount)
                                     QS->npc_count);
     auto results = QueryDatabase(query);
 	if(!results.Success()) {
-		Log(Logs::Detail, Logs::QS_Server, "Failed Handin Log Record Insert: %s", results.ErrorMessage().c_str());
-		Log(Logs::Detail, Logs::QS_Server, "%s", query.c_str());
+		Log(Logs::Detail, Logs::QSServer, "Failed Handin Log Record Insert: %s", results.ErrorMessage().c_str());
+		Log(Logs::Detail, Logs::QSServer, "%s", query.c_str());
 	}
 
 	if(detailCount == 0)
@@ -231,8 +231,8 @@ void Database::LogPlayerHandin(QSPlayerLogHandin_Struct* QS, uint32 detailCount)
                             QS->items[i].aug_2, QS->items[i].aug_3, QS->items[i].aug_4,
                             QS->items[i].aug_5);
         if(!results.Success()) {
-            Log(Logs::Detail, Logs::QS_Server, "Failed Handin Log Record Entry Insert: %s", results.ErrorMessage().c_str());
-            Log(Logs::Detail, Logs::QS_Server, "%s", query.c_str());
+            Log(Logs::Detail, Logs::QSServer, "Failed Handin Log Record Entry Insert: %s", results.ErrorMessage().c_str());
+            Log(Logs::Detail, Logs::QSServer, "%s", query.c_str());
         }
     }
 
@@ -246,8 +246,8 @@ void Database::LogPlayerNPCKill(QSPlayerLogNPCKill_Struct* QS, uint32 members){
                                     QS->s1.NPCID, QS->s1.Type, QS->s1.ZoneID);
 	auto results = QueryDatabase(query);
 	if(!results.Success()) {
-		Log(Logs::Detail, Logs::QS_Server, "Failed NPC Kill Log Record Insert: %s", results.ErrorMessage().c_str());
-		Log(Logs::Detail, Logs::QS_Server, "%s", query.c_str());
+		Log(Logs::Detail, Logs::QSServer, "Failed NPC Kill Log Record Insert: %s", results.ErrorMessage().c_str());
+		Log(Logs::Detail, Logs::QSServer, "%s", query.c_str());
 	}
 
 	if(members == 0)
@@ -261,8 +261,8 @@ void Database::LogPlayerNPCKill(QSPlayerLogNPCKill_Struct* QS, uint32 members){
                             lastIndex, QS->Chars[i].char_id);
 		auto results = QueryDatabase(query);
 		if(!results.Success()) {
-			Log(Logs::Detail, Logs::QS_Server, "Failed NPC Kill Log Entry Insert: %s", results.ErrorMessage().c_str());
-			Log(Logs::Detail, Logs::QS_Server, "%s", query.c_str());
+			Log(Logs::Detail, Logs::QSServer, "Failed NPC Kill Log Entry Insert: %s", results.ErrorMessage().c_str());
+			Log(Logs::Detail, Logs::QSServer, "%s", query.c_str());
 		}
 
 	}
@@ -276,8 +276,8 @@ void Database::LogPlayerDelete(QSPlayerLogDelete_Struct* QS, uint32 items) {
                                     QS->char_id, QS->stack_size, QS->char_count, QS->char_count);
     auto results = QueryDatabase(query);
 	if(!results.Success()) {
-		Log(Logs::Detail, Logs::QS_Server, "Failed Delete Log Record Insert: %s", results.ErrorMessage().c_str());
-		Log(Logs::Detail, Logs::QS_Server, "%s", query.c_str());
+		Log(Logs::Detail, Logs::QSServer, "Failed Delete Log Record Insert: %s", results.ErrorMessage().c_str());
+		Log(Logs::Detail, Logs::QSServer, "%s", query.c_str());
 	}
 
 	if(items == 0)
@@ -294,8 +294,8 @@ void Database::LogPlayerDelete(QSPlayerLogDelete_Struct* QS, uint32 items) {
                             QS->items[i].aug_5);
         results = QueryDatabase(query);
         if(!results.Success()) {
-            Log(Logs::Detail, Logs::QS_Server, "Failed Delete Log Record Entry Insert: %s", results.ErrorMessage().c_str());
-            Log(Logs::Detail, Logs::QS_Server, "%s", query.c_str());
+            Log(Logs::Detail, Logs::QSServer, "Failed Delete Log Record Entry Insert: %s", results.ErrorMessage().c_str());
+            Log(Logs::Detail, Logs::QSServer, "%s", query.c_str());
         }
 
     }
@@ -312,8 +312,8 @@ void Database::LogPlayerMove(QSPlayerLogMove_Struct* QS, uint32 items) {
                                     QS->char_count, QS->postaction);
     auto results = QueryDatabase(query);
 	if(!results.Success()) {
-		Log(Logs::Detail, Logs::QS_Server, "Failed Move Log Record Insert: %s", results.ErrorMessage().c_str());
-		Log(Logs::Detail, Logs::QS_Server, "%s", query.c_str());
+		Log(Logs::Detail, Logs::QSServer, "Failed Move Log Record Insert: %s", results.ErrorMessage().c_str());
+		Log(Logs::Detail, Logs::QSServer, "%s", query.c_str());
 	}
 
 	if(items == 0)
@@ -330,8 +330,8 @@ void Database::LogPlayerMove(QSPlayerLogMove_Struct* QS, uint32 items) {
                             QS->items[i].aug_3, QS->items[i].aug_4, QS->items[i].aug_5);
         results = QueryDatabase(query);
         if(!results.Success()) {
-            Log(Logs::Detail, Logs::QS_Server, "Failed Move Log Record Entry Insert: %s", results.ErrorMessage().c_str());
-            Log(Logs::Detail, Logs::QS_Server, "%s", query.c_str());
+            Log(Logs::Detail, Logs::QSServer, "Failed Move Log Record Entry Insert: %s", results.ErrorMessage().c_str());
+            Log(Logs::Detail, Logs::QSServer, "%s", query.c_str());
         }
 
     }
@@ -353,8 +353,8 @@ void Database::LogMerchantTransaction(QSMerchantLogTransaction_Struct* QS, uint3
                                     QS->char_money.copper, QS->char_count);
     auto results = QueryDatabase(query);
 	if(!results.Success()) {
-		Log(Logs::Detail, Logs::QS_Server, "Failed Transaction Log Record Insert: %s", results.ErrorMessage().c_str());
-		Log(Logs::Detail, Logs::QS_Server, "%s", query.c_str());
+		Log(Logs::Detail, Logs::QSServer, "Failed Transaction Log Record Insert: %s", results.ErrorMessage().c_str());
+		Log(Logs::Detail, Logs::QSServer, "%s", query.c_str());
 	}
 
 	if(items == 0)
@@ -371,8 +371,8 @@ void Database::LogMerchantTransaction(QSMerchantLogTransaction_Struct* QS, uint3
                             QS->items[i].aug_5);
         results = QueryDatabase(query);
         if(!results.Success()) {
-            Log(Logs::Detail, Logs::QS_Server, "Failed Transaction Log Record Entry Insert: %s", results.ErrorMessage().c_str());
-            Log(Logs::Detail, Logs::QS_Server, "%s", query.c_str());
+            Log(Logs::Detail, Logs::QSServer, "Failed Transaction Log Record Entry Insert: %s", results.ErrorMessage().c_str());
+            Log(Logs::Detail, Logs::QSServer, "%s", query.c_str());
         }
 
     }
@@ -390,8 +390,8 @@ void Database::GeneralQueryReceive(ServerPacket *pack) {
 	std::string query(queryBuffer);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		Log(Logs::Detail, Logs::QS_Server, "Failed Delete Log Record Insert: %s", results.ErrorMessage().c_str());
-		Log(Logs::Detail, Logs::QS_Server, "%s", query.c_str());
+		Log(Logs::Detail, Logs::QSServer, "Failed Delete Log Record Insert: %s", results.ErrorMessage().c_str());
+		Log(Logs::Detail, Logs::QSServer, "%s", query.c_str());
 	}
 
 	safe_delete_array(queryBuffer);

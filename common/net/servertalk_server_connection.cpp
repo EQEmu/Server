@@ -201,8 +201,8 @@ void EQ::Net::ServertalkServerConnection::ProcessHandshake(EQ::Net::Packet &p, b
 {
 #ifdef ENABLE_SECURITY
 	if (downgrade_security && m_allow_downgrade && m_encrypted) {
-		LogF(Logs::General, Logs::TCP_Connection, "Downgraded encrypted connection to plaintext because otherside didn't support encryption {0}:{1}", 
-			m_connection->RemoteIP(), m_connection->RemotePort());
+		LogF(Logs::General, Logs::TCPConnection, "Downgraded encrypted connection to plaintext because otherside didn't support encryption {0}:{1}",
+			 m_connection->RemoteIP(), m_connection->RemotePort());
 		m_encrypted = false;
 	}
 

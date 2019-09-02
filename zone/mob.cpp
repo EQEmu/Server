@@ -1322,7 +1322,7 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 			 * This is to prevent excessive packet sending under trains/fast combat
 			 */
 			if (this->CastToClient()->hp_self_update_throttle_timer.Check() || force_update_all) {
-				Log(Logs::General, Logs::HP_Update,
+				Log(Logs::General, Logs::HPUpdate,
 					"Mob::SendHPUpdate :: Update HP of self (%s) HP: %i last: %i skip_self: %s",
 					this->GetCleanName(),
 					current_hp,
@@ -1356,14 +1356,14 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 	int8 current_hp_percent = static_cast<int8>(max_hp == 0 ? 0 : static_cast<int>(current_hp * 100 / max_hp));
 
 	Log(Logs::General,
-		Logs::HP_Update,
+		Logs::HPUpdate,
 		"Mob::SendHPUpdate :: SendHPUpdate %s HP is %i last %i",
 		this->GetCleanName(),
 		current_hp_percent,
 		last_hp_percent);
 
 	if (current_hp_percent == last_hp_percent && !force_update_all) {
-		Log(Logs::General, Logs::HP_Update, "Mob::SendHPUpdate :: Same HP - skipping update");
+		Log(Logs::General, Logs::HPUpdate, "Mob::SendHPUpdate :: Same HP - skipping update");
 		ResetHPUpdateTimer();
 		return;
 	}
@@ -1373,7 +1373,7 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 			this->CastToClient()->SendHPUpdateMarquee();
 		}
 
-		Log(Logs::General, Logs::HP_Update, "Mob::SendHPUpdate :: HP Changed - Send update");
+		Log(Logs::General, Logs::HPUpdate, "Mob::SendHPUpdate :: HP Changed - Send update");
 
 		last_hp_percent = current_hp_percent;
 	}

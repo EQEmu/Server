@@ -53,7 +53,7 @@ namespace Logs {
 		AI,
 		Aggro,
 		Attack,
-		Client_Server_Packet,
+		PacketClientServer,
 		Combat,
 		Commands,
 		Crash,
@@ -67,34 +67,34 @@ namespace Logs {
 		Normal,
 		Object,
 		Pathing,
-		QS_Server,
+		QSServer,
 		Quests,
 		Rules,
 		Skills,
 		Spawns,
 		Spells,
 		Status,
-		TCP_Connection,
+		TCPConnection,
 		Tasks,
 		Tradeskills,
 		Trading,
 		Tribute,
-		UCS_Server,
-		WebInterface_Server,
-		World_Server,
-		Zone_Server,
+		UCSServer,
+		WebInterfaceServer,
+		WorldServer,
+		ZoneServer,
 		MySQLError,
 		MySQLQuery,
 		Mercenaries,
 		QuestDebug,
-		Server_Client_Packet,
-		Client_Server_Packet_Unhandled,
-		Server_Client_Packet_With_Dump,
-		Client_Server_Packet_With_Dump,
-		Login_Server,
-		Client_Login,
-		Headless_Client,
-		HP_Update,
+		PacketServerClient,
+		PacketClientServerUnhandled,
+		PacketServerClientWithDump,
+		PacketClientServerWithDump,
+		Loginserver,
+		ClientLogin,
+		HeadlessClient,
+		HPUpdate,
 		FixZ,
 		Food,
 		Traps,
@@ -176,69 +176,7 @@ namespace Logs {
 	};
 }
 
-/**
- * RFC 5424
- */
-
-#define LogEmergency(message, ...) do {\
-    if (LogSys.log_settings[Logs::Emergency].is_category_enabled == 1)\
-        OutF(LogSys, Logs::General, Logs::Emergency, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogAlert(message, ...) do {\
-    if (LogSys.log_settings[Logs::Alert].is_category_enabled == 1)\
-        OutF(LogSys, Logs::General, Logs::Alert, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogCritical(message, ...) do {\
-    if (LogSys.log_settings[Logs::Critical].is_category_enabled == 1)\
-        OutF(LogSys, Logs::General, Logs::Critical, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogError(message, ...) do {\
-    if (LogSys.log_settings[Logs::Error].is_category_enabled == 1)\
-        OutF(LogSys, Logs::General, Logs::Error, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogWarning(message, ...) do {\
-    if (LogSys.log_settings[Logs::Warning].is_category_enabled == 1)\
-        OutF(LogSys, Logs::General, Logs::Warning, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogNotice(message, ...) do {\
-    if (LogSys.log_settings[Logs::Notice].is_category_enabled == 1)\
-        OutF(LogSys, Logs::General, Logs::Notice, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogInfo(message, ...) do {\
-    if (LogSys.log_settings[Logs::Info].is_category_enabled == 1)\
-        OutF(LogSys, Logs::General, Logs::Info, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogDebug(message, ...) do {\
-    if (LogSys.log_settings[Logs::Debug].is_category_enabled == 1)\
-        OutF(LogSys, Logs::General, Logs::Debug, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-/**
- * Other
- */
-
-#define LogStatus(message, ...) do {\
-    if (LogSys.log_settings[Logs::Status].is_category_enabled == 1)\
-        OutF(LogSys, Logs::General, Logs::Status, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define Log(debug_level, log_category, message, ...) do {\
-    if (LogSys.log_settings[log_category].is_category_enabled == 1)\
-        LogSys.Out(debug_level, log_category, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogF(debug_level, log_category, message, ...) do {\
-    if (LogSys.log_settings[log_category].is_category_enabled == 1)\
-        OutF(LogSys, debug_level, log_category, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
+#include "eqemu_logsys_log_aliases.h"
 
 class EQEmuLogSys {
 public:

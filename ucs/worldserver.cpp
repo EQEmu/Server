@@ -61,7 +61,7 @@ void WorldServer::ProcessMessage(uint16 opcode, EQ::Net::Packet &p)
 	ServerPacket tpack(opcode, p);
 	ServerPacket *pack = &tpack;
 
-	Log(Logs::Detail, Logs::UCS_Server, "Received Opcode: %4X", opcode);
+	Log(Logs::Detail, Logs::UCSServer, "Received Opcode: %4X", opcode);
 
 	switch (opcode)
 	{
@@ -82,7 +82,7 @@ void WorldServer::ProcessMessage(uint16 opcode, EQ::Net::Packet &p)
 
 		std::string Message = Buffer;
 
-		Log(Logs::Detail, Logs::UCS_Server, "Player: %s, Sent Message: %s", From, Message.c_str());
+		Log(Logs::Detail, Logs::UCSServer, "Player: %s, Sent Message: %s", From, Message.c_str());
 
 		Client *c = g_Clientlist->FindCharacter(From);
 
@@ -93,7 +93,7 @@ void WorldServer::ProcessMessage(uint16 opcode, EQ::Net::Packet &p)
 
 		if (!c)
 		{
-			Log(Logs::Detail, Logs::UCS_Server, "Client not found.");
+			Log(Logs::Detail, Logs::UCSServer, "Client not found.");
 			break;
 		}
 

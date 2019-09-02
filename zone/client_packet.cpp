@@ -420,14 +420,14 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 	if (LogSys.log_settings[Logs::LogCategory::Netcode].is_category_enabled == 1) {
 		char buffer[64];
 		app->build_header_dump(buffer);
-		Log(Logs::Detail, Logs::Client_Server_Packet, "Dispatch opcode: %s", buffer);
+		Log(Logs::Detail, Logs::PacketClientServer, "Dispatch opcode: %s", buffer);
 	}
 
-	if (LogSys.log_settings[Logs::Client_Server_Packet].is_category_enabled == 1)
-		Log(Logs::General, Logs::Client_Server_Packet, "[%s - 0x%04x] [Size: %u]", OpcodeManager::EmuToName(app->GetOpcode()), app->GetOpcode(), app->Size());
+	if (LogSys.log_settings[Logs::PacketClientServer].is_category_enabled == 1)
+		Log(Logs::General, Logs::PacketClientServer, "[%s - 0x%04x] [Size: %u]", OpcodeManager::EmuToName(app->GetOpcode()), app->GetOpcode(), app->Size());
 
-	if (LogSys.log_settings[Logs::Client_Server_Packet_With_Dump].is_category_enabled == 1)
-		Log(Logs::General, Logs::Client_Server_Packet_With_Dump, "[%s - 0x%04x] [Size: %u] %s", OpcodeManager::EmuToName(app->GetOpcode()), app->GetOpcode(), app->Size(), DumpPacketToString(app).c_str());
+	if (LogSys.log_settings[Logs::PacketClientServerWithDump].is_category_enabled == 1)
+		Log(Logs::General, Logs::PacketClientServerWithDump, "[%s - 0x%04x] [Size: %u] %s", OpcodeManager::EmuToName(app->GetOpcode()), app->GetOpcode(), app->Size(), DumpPacketToString(app).c_str());
 
 	EmuOpcode opcode = app->GetOpcode();
 	if (opcode == OP_AckPacket) {
@@ -475,10 +475,10 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 			args.push_back(const_cast<EQApplicationPacket*>(app));
 			parse->EventPlayer(EVENT_UNHANDLED_OPCODE, this, "", 0, &args);
 
-			if (LogSys.log_settings[Logs::Client_Server_Packet_Unhandled].is_category_enabled == 1) {
+			if (LogSys.log_settings[Logs::PacketClientServerUnhandled].is_category_enabled == 1) {
 				char buffer[64];
 				app->build_header_dump(buffer);
-				Log(Logs::General, Logs::Client_Server_Packet_Unhandled, "%s %s", buffer, DumpPacketToString(app).c_str());
+				Log(Logs::General, Logs::PacketClientServerUnhandled, "%s %s", buffer, DumpPacketToString(app).c_str());
 			}
 			break;
 		}
@@ -1169,7 +1169,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	*/
 	Client* client = entity_list.GetClientByName(cze->char_name);
 	if (!zone->GetAuth(ip, cze->char_name, &WID, &account_id, &character_id, &admin, lskey, &tellsoff)) {
-		Log(Logs::General, Logs::Client_Login, "%s failed zone auth check.", cze->char_name);
+		Log(Logs::General, Logs::ClientLogin, "%s failed zone auth check.", cze->char_name);
 		if (nullptr != client) {
 			client->Save();
 			client->Kick("Failed auth check");
@@ -11590,7 +11590,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 				client_moved->GetRaid()->SendHPManaEndPacketsTo(client_moved);
 				client_moved->GetRaid()->SendHPManaEndPacketsFrom(client_moved);
 
-				Log(Logs::General, Logs::HP_Update,
+				Log(Logs::General, Logs::HPUpdate,
 					"Client::Handle_OP_RaidCommand :: %s sending and recieving HP/Mana/End updates",
 					client_moved->GetCleanName()
 				);

@@ -5819,7 +5819,7 @@ void command_time(Client *c, const Seperator *sep)
 		}
 		c->Message(Chat::Red, "Setting world time to %s:%i (Timezone: 0)...",  sep->arg[1], minutes);
 		zone->SetTime(atoi(sep->arg[1])+1, minutes);
-		Log(Logs::General, Logs::Zone_Server, "%s :: Setting world time to %s:%i (Timezone: 0)...", c->GetCleanName(), sep->arg[1], minutes);
+		Log(Logs::General, Logs::ZoneServer, "%s :: Setting world time to %s:%i (Timezone: 0)...", c->GetCleanName(), sep->arg[1], minutes);
 	}
 	else {
 		c->Message(Chat::Red, "To set the Time: #time HH [MM]");
@@ -5834,7 +5834,7 @@ void command_time(Client *c, const Seperator *sep)
 			zone->zone_time.getEQTimeZoneMin()
 			);
 		c->Message(Chat::Red, "It is now %s.", timeMessage);
-		Log(Logs::General, Logs::Zone_Server, "Current Time is: %s", timeMessage);
+		Log(Logs::General, Logs::ZoneServer, "Current Time is: %s", timeMessage);
 	}
 }
 
@@ -8523,7 +8523,7 @@ void command_ucs(Client *c, const Seperator *sep)
 	if (!c)
 		return;
 
-	Log(Logs::Detail, Logs::UCS_Server, "Character %s attempting ucs reconnect while ucs server is %savailable",
+	Log(Logs::Detail, Logs::UCSServer, "Character %s attempting ucs reconnect while ucs server is %savailable",
 		c->GetName(), (zone->IsUCSServerAvailable() ? "" : "un"));
 
 	if (zone->IsUCSServerAvailable()) {

@@ -473,7 +473,7 @@ void Object::RandomSpawn(bool send_packet) {
 		} 
 	}
 
-	Log(Logs::Detail, Logs::Zone_Server, "Object::RandomSpawn(%s): %d (%.2f, %.2f, %.2f)", m_data.object_name, m_inst->GetID(), m_data.x, m_data.y, m_data.z);
+	Log(Logs::Detail, Logs::ZoneServer, "Object::RandomSpawn(%s): %d (%.2f, %.2f, %.2f)", m_data.object_name, m_inst->GetID(), m_data.x, m_data.y, m_data.z);
 	
 	respawn_timer.Disable();
 
