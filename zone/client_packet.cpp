@@ -3243,7 +3243,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 			}
 			break;
 		default: // Unknown
-			Log(Logs::General, Logs::Inventory, "Unrecognized augmentation action - cslot: %i aslot: %i cidx: %i aidx: %i act: %i dest: %i",
+			LogInventory("Unrecognized augmentation action - cslot: [{}] aslot: [{}] cidx: [{}] aidx: [{}] act: [{}] dest: [{}]",
 				in_augment->container_slot, in_augment->augment_slot, in_augment->container_index, in_augment->augment_index, in_augment->augment_action, in_augment->dest_inst_id);
 			break;
 		}
@@ -5016,7 +5016,7 @@ void Client::Handle_OP_CrashDump(const EQApplicationPacket *app)
 void Client::Handle_OP_CreateObject(const EQApplicationPacket *app)
 {
 	if (LogSys.log_settings[Logs::Inventory].is_category_enabled)
-		Log(Logs::Detail, Logs::Inventory, "Handle_OP_CreateObject() [psize: %u] %s", app->size, DumpPacketToString(app).c_str());
+		LogInventory("Handle_OP_CreateObject() [psize: [{}]] [{}]", app->size, DumpPacketToString(app).c_str());
 
 	DropItem(EQEmu::invslot::slotCursor);
 	return;

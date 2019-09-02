@@ -241,12 +241,12 @@ bool Client::Process() {
 		if (RuleB(Character, ActiveInvSnapshots) && time(nullptr) >= GetNextInvSnapshotTime()) {
 			if (database.SaveCharacterInvSnapshot(CharacterID())) {
 				SetNextInvSnapshot(RuleI(Character, InvSnapshotMinIntervalM));
-				Log(Logs::Moderate, Logs::Inventory, "Successful inventory snapshot taken of %s - setting next interval for %i minute%s.",
+				LogInventory("Successful inventory snapshot taken of [{}] - setting next interval for [{}] minute[{}]",
 					GetName(), RuleI(Character, InvSnapshotMinIntervalM), (RuleI(Character, InvSnapshotMinIntervalM) == 1 ? "" : "s"));
 			}
 			else {
 				SetNextInvSnapshot(RuleI(Character, InvSnapshotMinRetryM));
-				Log(Logs::Moderate, Logs::Inventory, "Failed to take inventory snapshot of %s - retrying in %i minute%s.",
+				LogInventory("Failed to take inventory snapshot of [{}] - retrying in [{}] minute[{}]",
 					GetName(), RuleI(Character, InvSnapshotMinRetryM), (RuleI(Character, InvSnapshotMinRetryM) == 1 ? "" : "s"));
 			}
 		}
@@ -741,7 +741,7 @@ void Client::BulkSendInventoryItems()
 		if(inst) {
 			bool is_arrow = (inst->GetItem()->ItemType == EQEmu::item::ItemTypeArrow) ? true : false;
 			int16 free_slot_id = m_inv.FindFreeSlot(inst->IsClassBag(), true, inst->GetItem()->Size, is_arrow);
-			Log(Logs::Detail, Logs::Inventory, "Incomplete Trade Transaction: Moving %s from slot %i to %i", inst->GetItem()->Name, slot_id, free_slot_id);
+			LogInventory("Incomplete Trade Transaction: Moving [{}] from slot [{}] to [{}]", inst->GetItem()->Name, slot_id, free_slot_id);
 			PutItemInInventory(free_slot_id, *inst, false);
 			database.SaveInventory(character_id, nullptr, slot_id);
 			safe_delete(inst);
@@ -770,7 +770,7 @@ void Client::BulkSendInventoryItems()
 		inst->Serialize(ob, slot_id);
 
 		if (ob.tellp() == last_pos)
-			Log(Logs::General, Logs::Inventory, "Serialization failed on item slot %d during BulkSendInventoryItems.  Item skipped.", slot_id);
+			LogInventory("Serialization failed on item slot [{}] during BulkSendInventoryItems. Item skipped", slot_id);
 		
 		last_pos = ob.tellp();
 	}
@@ -784,7 +784,7 @@ void Client::BulkSendInventoryItems()
 		inst->Serialize(ob, slot_id);
 
 		if (ob.tellp() == last_pos)
-			Log(Logs::General, Logs::Inventory, "Serialization failed on item slot %d during BulkSendInventoryItems.  Item skipped.", slot_id);
+			LogInventory("Serialization failed on item slot [{}] during BulkSendInventoryItems. Item skipped", slot_id);
 
 		last_pos = ob.tellp();
 	}
@@ -798,7 +798,7 @@ void Client::BulkSendInventoryItems()
 		inst->Serialize(ob, slot_id);
 
 		if (ob.tellp() == last_pos)
-			Log(Logs::General, Logs::Inventory, "Serialization failed on item slot %d during BulkSendInventoryItems.  Item skipped.", slot_id);
+			LogInventory("Serialization failed on item slot [{}] during BulkSendInventoryItems. Item skipped", slot_id);
 
 		last_pos = ob.tellp();
 	}

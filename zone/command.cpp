@@ -5710,7 +5710,7 @@ void command_iteminfo(Client *c, const Seperator *sep)
 	}
 	auto item = inst->GetItem();
 	if (!item) {
-		Log(Logs::General, Logs::Inventory, "(%s) Command #iteminfo processed an item with no data pointer");
+		LogInventory("([{}]) Command #iteminfo processed an item with no data pointer");
 		c->Message(Chat::Red, "Error: This item has no data reference");
 		return;
 	}

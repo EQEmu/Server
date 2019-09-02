@@ -2081,7 +2081,7 @@ bool ZoneDatabase::SaveCharacterInvSnapshot(uint32 character_id) {
 		character_id
 	);
 	auto results = database.QueryDatabase(query);
-	Log(Logs::Moderate, Logs::Inventory, "ZoneDatabase::SaveCharacterInventorySnapshot %i (%s)", character_id, (results.Success() ? "pass" : "fail"));
+	LogInventory("ZoneDatabase::SaveCharacterInventorySnapshot [{}] ([{}])", character_id, (results.Success() ? "pass" : "fail"));
 	return results.Success();
 }
 
@@ -2363,7 +2363,7 @@ bool ZoneDatabase::RestoreCharacterInvSnapshot(uint32 character_id, uint32 times
 	);
 	results = database.QueryDatabase(query);
 
-	Log(Logs::General, Logs::Inventory, "ZoneDatabase::RestoreCharacterInvSnapshot() %s snapshot for %u @ %u",
+	LogInventory("ZoneDatabase::RestoreCharacterInvSnapshot() [{}] snapshot for [{}] @ [{}]",
 		(results.Success() ? "restored" : "failed to restore"), character_id, timestamp);
 
 	return results.Success();
