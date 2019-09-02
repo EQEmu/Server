@@ -2872,7 +2872,7 @@ void Bot::AI_Process() {
 		else { // To far away to fight (GetTarget() validity can be iffy below this point - including outer scopes)
 			if (AI_movement_timer->Check() && (!spellend_timer.Enabled() || GetClass() == BARD)) { // Pursue processing
 				if (GetTarget() && !IsRooted()) {
-					Log(Logs::Detail, Logs::AI, "Pursuing %s while engaged.", GetTarget()->GetCleanName());
+					LogAI("Pursuing [{}] while engaged", GetTarget()->GetCleanName());
 
 					Goal = GetTarget()->GetPosition();
 										
@@ -3177,7 +3177,7 @@ void Bot::PetAIProcess() {
 				else if (botPet->GetTarget() && botPet->GetAIMovementTimer()->Check()) {
 					botPet->SetRunAnimSpeed(0);
 					if(!botPet->IsRooted()) {
-						Log(Logs::Detail, Logs::AI, "Pursuing %s while engaged.", botPet->GetTarget()->GetCleanName());
+						LogAI("Pursuing [{}] while engaged", botPet->GetTarget()->GetCleanName());
 						botPet->RunTo(botPet->GetTarget()->GetX(), botPet->GetTarget()->GetY(), botPet->GetTarget()->GetZ());
 						return;
 					} else {

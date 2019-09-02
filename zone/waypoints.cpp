@@ -179,19 +179,14 @@ void NPC::MoveTo(const glm::vec4 &position, bool saveguardspot)
 	if (IsNPC() && GetGrid() != 0) {    // he is on a grid
 		if (GetGrid() < 0) {    // currently stopped by a quest command
 			SetGrid(0 - GetGrid());    // get him moving again
-			Log(Logs::Detail,
-				Logs::AI,
-				"MoveTo during quest wandering. Canceling quest wandering and going back to grid %d when MoveTo is done.",
-				GetGrid());
+			LogAI("MoveTo during quest wandering. Canceling quest wandering and going back to grid [{}] when MoveTo is done", GetGrid());
 		}
 		AI_walking_timer->Disable();    // disable timer in case he is paused at a wp
 		if (cur_wp >= 0) {    // we've not already done a MoveTo()
 			save_wp = cur_wp;    // save the current waypoint
 			cur_wp  = EQEmu::WaypointStatus::QuestControlGrid;
 		}
-		Log(Logs::Detail,
-			Logs::AI,
-			"MoveTo %s, pausing regular grid wandering. Grid %d, save_wp %d",
+		LogAI("MoveTo [{}], pausing regular grid wandering. Grid [{}], save_wp [{}]",
 			to_string(static_cast<glm::vec3>(position)).c_str(),
 			-GetGrid(),
 			save_wp);
@@ -200,7 +195,7 @@ void NPC::MoveTo(const glm::vec4 &position, bool saveguardspot)
 		roamer  = true;
 		save_wp = 0;
 		cur_wp  = EQEmu::WaypointStatus::QuestControlNoGrid;
-		Log(Logs::Detail, Logs::AI, "MoveTo %s without a grid.", to_string(static_cast<glm::vec3>(position)).c_str());
+		LogAI("MoveTo [{}] without a grid", to_string(static_cast<glm::vec3>(position)).c_str());
 	}
 
 	glm::vec3 dest(position);
@@ -218,10 +213,7 @@ void NPC::MoveTo(const glm::vec4 &position, bool saveguardspot)
 		if (m_GuardPoint.w == -1)
 			m_GuardPoint.w = this->CalculateHeadingToTarget(position.x, position.y);
 
-		Log(Logs::Detail,
-			Logs::AI,
-			"Setting guard position to %s",
-			to_string(static_cast<glm::vec3>(m_GuardPoint)).c_str());
+		LogAI("Setting guard position to [{}]", to_string(static_cast<glm::vec3>(m_GuardPoint)).c_str());
 	}
 
 	cur_wp_pause        = 0;
@@ -234,7 +226,7 @@ void NPC::MoveTo(const glm::vec4 &position, bool saveguardspot)
 void NPC::UpdateWaypoint(int wp_index)
 {
 	if (wp_index >= static_cast<int>(Waypoints.size())) {
-		Log(Logs::Detail, Logs::AI, "Update to waypoint %d failed. Not found.", wp_index);
+		LogAI("Update to waypoint [{}] failed. Not found", wp_index);
 		return;
 	}
 	std::vector<wplist>::iterator cur;
@@ -243,7 +235,7 @@ void NPC::UpdateWaypoint(int wp_index)
 
 	m_CurrentWayPoint = glm::vec4(cur->x, cur->y, cur->z, cur->heading);
 	cur_wp_pause = cur->pause;
-	Log(Logs::Detail, Logs::AI, "Next waypoint %d: (%.3f, %.3f, %.3f, %.3f)", wp_index, m_CurrentWayPoint.x, m_CurrentWayPoint.y, m_CurrentWayPoint.z, m_CurrentWayPoint.w);
+	LogAI("Next waypoint [{}]: ({}, {}, {}, {})", wp_index, m_CurrentWayPoint.x, m_CurrentWayPoint.y, m_CurrentWayPoint.z, m_CurrentWayPoint.w);
 
 }
 
@@ -431,7 +423,7 @@ void NPC::SaveGuardSpot(const glm::vec4 &pos)
 
 	if (m_GuardPoint.w == 0)
 		m_GuardPoint.w = 0.0001;		//hack to make IsGuarding simpler
-	LogF(Logs::Detail, Logs::AI, "Setting guard position to {0}", to_string(static_cast<glm::vec3>(m_GuardPoint)));
+	LogAI("Setting guard position to {0}", to_string(static_cast<glm::vec3>(m_GuardPoint)));
 }
 
 void NPC::NextGuardPosition() {
@@ -565,7 +557,7 @@ void Mob::SendTo(float new_x, float new_y, float new_z) {
 	m_Position.x = new_x;
 	m_Position.y = new_y;
 	m_Position.z = new_z;
-	Log(Logs::Detail, Logs::AI, "Sent To (%.3f, %.3f, %.3f)", new_x, new_y, new_z);
+	LogAI("Sent To ({}, {}, {})", new_x, new_y, new_z);
 
 	if (flymode == GravityBehavior::Flying)
 		return;
@@ -581,7 +573,7 @@ void Mob::SendTo(float new_x, float new_y, float new_z) {
 
 			float newz = zone->zonemap->FindBestZ(dest, nullptr);
 
-			Log(Logs::Detail, Logs::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz, m_Position.x, m_Position.y, m_Position.z);
+			LogAI("BestZ returned {} at {}, {}, {}", newz, m_Position.x, m_Position.y, m_Position.z);
 
 			if ((newz > -2000) && std::abs(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaSendTo)) // Sanity check.
 				m_Position.z = newz + 1;
