@@ -1342,7 +1342,7 @@ bool Client::GenPassKey(char* key) {
 }
 
 void Client::QueuePacket(const EQApplicationPacket* app, bool ack_req) {
-	LogInfo("Sending EQApplicationPacket OpCode {:#04x}", app->GetOpcode());
+	LogNetcode("Sending EQApplicationPacket OpCode {:#04x}", app->GetOpcode());
 
 	ack_req = true;	// It's broke right now, dont delete this line till fix it. =P
 	eqs->QueuePacket(app, ack_req);

@@ -81,7 +81,7 @@ bool Database::Connect(const char* host, const char* user, const char* passwd, c
 	}
 	else
 	{
-		Log(Logs::General, Logs::Status, "Using database '%s' at %s:%d",database,host,port);
+		LogInfo("Using database [{}] at [{}]:[{}]",database,host,port);
 		return true;
 	}
 }

@@ -679,7 +679,7 @@ int32 ZoneDatabase::GetDoorsDBCountPlusOne(const char *zone_name, int16 version)
 }
 
 bool ZoneDatabase::LoadDoors(int32 door_count, Door *into, const char *zone_name, int16 version) {
-	Log(Logs::General, Logs::Status, "Loading Doors from database...");
+	LogInfo("Loading Doors from database");
 
 	std::string query = StringFormat(
 			" SELECT "

@@ -45,7 +45,7 @@ WaterMap* WaterMap::LoadWaterMapfile(std::string zone_name) {
 				wm = nullptr;
 			}
 
-			Log(Logs::General, Logs::Status, "Loaded Water Map V%u file %s", version, file_path.c_str());
+			LogInfo("Loaded Water Map V[{}] file [{}]", version, file_path.c_str());
 
 			fclose(f);
 			return wm;
@@ -56,7 +56,7 @@ WaterMap* WaterMap::LoadWaterMapfile(std::string zone_name) {
 				wm = nullptr;
 			}
 
-			Log(Logs::General, Logs::Status, "Loaded Water Map V%u file %s", version, file_path.c_str());
+			LogInfo("Loaded Water Map V[{}] file [{}]", version, file_path.c_str());
 
 			fclose(f);
 			return wm;

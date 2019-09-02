@@ -122,7 +122,7 @@ void EQStreamIdentifier::Process() {
 			}
 			case EQStreamInterface::MatchFailed:
 				//do nothing...
-				LogNetcode("[StreamIdentify] [{}:{}]: Tried patch [{}] and it did not match", long2ip(r.stream->GetRemoteIP()).c_str(), ntohs(r.stream->GetRemotePort()), p->name.c_str());
+				LogNetcode("[StreamIdentify] [{}:{}] Tried patch [{}] and it did not match", long2ip(r.stream->GetRemoteIP()).c_str(), ntohs(r.stream->GetRemotePort()), p->name.c_str());
 				break;
 			}
 		}

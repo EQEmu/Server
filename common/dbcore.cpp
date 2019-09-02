@@ -93,11 +93,11 @@ MySQLRequestResult DBcore::QueryDatabase(const char *query, uint32 querylen, boo
 		if (errorNumber == CR_SERVER_LOST || errorNumber == CR_SERVER_GONE_ERROR) {
 
 			if (retryOnFailureOnce) {
-				Log(Logs::General, Logs::Status, "Database Error: Lost connection, attempting to recover...");
+				LogInfo("Database Error: Lost connection, attempting to recover");
 				MySQLRequestResult requestResult = QueryDatabase(query, querylen, false);
 
 				if (requestResult.Success()) {
-					Log(Logs::General, Logs::Status, "Reconnection to database successful");
+					LogInfo("Reconnection to database successful");
 					return requestResult;
 				}
 
