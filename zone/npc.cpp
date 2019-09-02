@@ -1903,7 +1903,7 @@ void Mob::NPCSpecialAttacks(const char* parse, int permtag, bool reset, bool rem
 	{
 		if(database.SetSpecialAttkFlag(this->GetNPCTypeID(), orig_parse))
 		{
-			Log(Logs::General, Logs::Normal, "NPCTypeID: %i flagged to '%s' for Special Attacks.\n",this->GetNPCTypeID(),orig_parse);
+			LogInfo("NPCTypeID: [{}] flagged to [{}] for Special Attacks.\n",this->GetNPCTypeID(),orig_parse);
 		}
 	}
 }

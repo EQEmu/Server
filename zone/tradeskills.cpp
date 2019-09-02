@@ -1400,7 +1400,7 @@ void Client::LearnRecipe(uint32 recipeID)
 	}
 
 	if (results.RowCount() != 1) {
-		Log(Logs::General, Logs::Normal, "Client::LearnRecipe - RecipeID: %d had %d occurences.", recipeID, results.RowCount());
+		LogInfo("Client::LearnRecipe - RecipeID: [{}] had [{}] occurences", recipeID, results.RowCount());
 		return;
 	}
 

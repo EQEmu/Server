@@ -2067,7 +2067,7 @@ void Client::ReadBook(BookRequest_Struct *book) {
 
 	if (booktxt2[0] != '\0') {
 #if EQDEBUG >= 6
-		Log(Logs::General, Logs::Normal, "Client::ReadBook() textfile:%s Text:%s", txtfile, booktxt2.c_str());
+		LogInfo("Client::ReadBook() textfile:[{}] Text:[{}]", txtfile, booktxt2.c_str());
 #endif
 		auto outapp = new EQApplicationPacket(OP_ReadBook, length + sizeof(BookText_Struct));
 

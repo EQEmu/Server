@@ -144,7 +144,7 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 		delete pack;
 	}
 
-	Log(Logs::General, Logs::Normal, "---- Zone server %s, listening on port:%i ----", zonename, ZoneConfig::get()->ZonePort);
+	LogInfo("---- Zone server [{}], listening on port:[{}] ----", zonename, ZoneConfig::get()->ZonePort);
 	LogInfo("Zone Bootup: [{}] ([{}]: [{}])", zonename, iZoneID, iInstanceID);
 	parse->Init();
 	UpdateWindowTitle();
@@ -718,7 +718,7 @@ void Zone::Shutdown(bool quite)
 	petition_list.ClearPetitions();
 	zone->SetZoneHasCurrentTime(false);
 	if (!quite)
-		Log(Logs::General, Logs::Normal, "Zone shutdown: going to sleep");
+		LogInfo("Zone shutdown: going to sleep");
 	is_zone_loaded = false;
 
 	zone->ResetAuth();

@@ -4510,7 +4510,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 	);
 
 	if (is_client_moving && is_ready_to_update) {
-		Log(Logs::Detail, Logs::Normal, "[%s] Client Zone Wide Position Update NPCs", GetCleanName());
+		LogInfo("[[{}]] Client Zone Wide Position Update NPCs", GetCleanName());
 
 		auto &mob_movement_manager = MobMovementManager::Get();
 		auto &mob_list             = entity_list.GetMobList();

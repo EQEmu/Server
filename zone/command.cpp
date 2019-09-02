@@ -1376,7 +1376,7 @@ void command_viewpetition(Client *c, const Seperator *sep)
     if (!results.Success())
         return;
 
-    Log(Logs::General, Logs::Normal, "View petition request from %s, petition number: %i",  c->GetName(), atoi(sep->argplus[1]) );
+    LogInfo("View petition request from [{}], petition number: [{}]",  c->GetName(), atoi(sep->argplus[1]) );
 
     if (results.RowCount() == 0) {
         c->Message(Chat::Red,"There was an error in your request: ID not found! Please check the Id and try again.");
@@ -1401,7 +1401,7 @@ void command_petitioninfo(Client *c, const Seperator *sep)
     if (!results.Success())
         return;
 
-    Log(Logs::General, Logs::Normal, "Petition information request from %s, petition number:",  c->GetName(), atoi(sep->argplus[1]) );
+    LogInfo("Petition information request from [{}], petition number:",  c->GetName(), atoi(sep->argplus[1]) );
 
     if (results.RowCount() == 0) {
 		c->Message(Chat::Red,"There was an error in your request: ID not found! Please check the Id and try again.");
@@ -1427,7 +1427,7 @@ void command_delpetition(Client *c, const Seperator *sep)
 	if (!results.Success())
         return;
 
-    Log(Logs::General, Logs::Normal, "Delete petition request from %s, petition number:",  c->GetName(), atoi(sep->argplus[1]) );
+    LogInfo("Delete petition request from [{}], petition number:",  c->GetName(), atoi(sep->argplus[1]) );
 
 }
 
@@ -1913,7 +1913,7 @@ void command_permaclass(Client *c, const Seperator *sep)
 		c->Message(Chat::White,"Target is not a client.");
 	else {
 		c->Message(Chat::White, "Setting %s's class...Sending to char select.",  t->GetName());
-		Log(Logs::General, Logs::Normal, "Class change request from %s for %s, requested class:%i",  c->GetName(), t->GetName(), atoi(sep->arg[1]) );
+		LogInfo("Class change request from [{}] for [{}], requested class:[{}]",  c->GetName(), t->GetName(), atoi(sep->arg[1]) );
 		t->SetBaseClass(atoi(sep->arg[1]));
 		t->Save();
 		t->Kick("Class was changed.");
@@ -1935,7 +1935,7 @@ void command_permarace(Client *c, const Seperator *sep)
 		c->Message(Chat::White,"Target is not a client.");
 	else {
 		c->Message(Chat::White, "Setting %s's race - zone to take effect", t->GetName());
-		Log(Logs::General, Logs::Normal, "Permanant race change request from %s for %s, requested race:%i",  c->GetName(), t->GetName(), atoi(sep->arg[1]) );
+		LogInfo("Permanant race change request from [{}] for [{}], requested race:[{}]",  c->GetName(), t->GetName(), atoi(sep->arg[1]) );
 		uint32 tmp = Mob::GetDefaultGender(atoi(sep->arg[1]), t->GetBaseGender());
 		t->SetBaseRace(atoi(sep->arg[1]));
 		t->SetBaseGender(tmp);
@@ -1959,7 +1959,7 @@ void command_permagender(Client *c, const Seperator *sep)
 		c->Message(Chat::White,"Target is not a client.");
 	else {
 		c->Message(Chat::White, "Setting %s's gender - zone to take effect", t->GetName());
-		Log(Logs::General, Logs::Normal, "Permanant gender change request from %s for %s, requested gender:%i",  c->GetName(), t->GetName(), atoi(sep->arg[1]) );
+		LogInfo("Permanant gender change request from [{}] for [{}], requested gender:[{}]",  c->GetName(), t->GetName(), atoi(sep->arg[1]) );
 		t->SetBaseGender(atoi(sep->arg[1]));
 		t->Save();
 		t->SendIllusionPacket(atoi(sep->arg[1]));
@@ -2298,7 +2298,7 @@ void command_dbspawn2(Client *c, const Seperator *sep)
 {
 
 	if (sep->IsNumber(1) && sep->IsNumber(2) && sep->IsNumber(3)) {
-		Log(Logs::General, Logs::Normal, "Spawning database spawn");
+		LogInfo("Spawning database spawn");
 		uint16 cond = 0;
 		int16 cond_min = 0;
 		if(sep->IsNumber(4)) {
@@ -2707,7 +2707,7 @@ void command_setlanguage(Client *c, const Seperator *sep)
 	}
 	else
 	{
-		Log(Logs::General, Logs::Normal, "Set language request from %s, target:%s lang_id:%i value:%i",  c->GetName(), c->GetTarget()->GetName(), atoi(sep->arg[1]), atoi(sep->arg[2]) );
+		LogInfo("Set language request from [{}], target:[{}] lang_id:[{}] value:[{}]",  c->GetName(), c->GetTarget()->GetName(), atoi(sep->arg[1]), atoi(sep->arg[2]) );
 		uint8 langid = (uint8)atoi(sep->arg[1]);
 		uint8 value = (uint8)atoi(sep->arg[2]);
 		c->GetTarget()->CastToClient()->SetLanguageSkill( langid, value );
@@ -2732,7 +2732,7 @@ void command_setskill(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "       x = 0 to %d",  HIGHEST_CAN_SET_SKILL);
 	}
 	else {
-		Log(Logs::General, Logs::Normal, "Set skill request from %s, target:%s skill_id:%i value:%i",  c->GetName(), c->GetTarget()->GetName(), atoi(sep->arg[1]), atoi(sep->arg[2]) );
+		LogInfo("Set skill request from [{}], target:[{}] skill_id:[{}] value:[{}]",  c->GetName(), c->GetTarget()->GetName(), atoi(sep->arg[1]), atoi(sep->arg[2]) );
 		int skill_num = atoi(sep->arg[1]);
 		uint16 skill_value = atoi(sep->arg[2]);
 		if (skill_num <= EQEmu::skills::HIGHEST_SKILL)
@@ -2752,7 +2752,7 @@ void command_setskillall(Client *c, const Seperator *sep)
 	}
 	else {
 		if (c->Admin() >= commandSetSkillsOther || c->GetTarget()==c || c->GetTarget()==0) {
-			Log(Logs::General, Logs::Normal, "Set ALL skill request from %s, target:%s",  c->GetName(), c->GetTarget()->GetName());
+			LogInfo("Set ALL skill request from [{}], target:[{}]",  c->GetName(), c->GetTarget()->GetName());
 			uint16 level = atoi(sep->arg[1]);
 			for (EQEmu::skills::SkillType skill_num = EQEmu::skills::Skill1HBlunt; skill_num <= EQEmu::skills::HIGHEST_SKILL; skill_num = (EQEmu::skills::SkillType)(skill_num + 1)) {
 				c->GetTarget()->CastToClient()->SetSkill(skill_num, level);
@@ -4150,7 +4150,7 @@ void command_listpetition(Client *c, const Seperator *sep)
 	if (!results.Success())
         return;
 
-    Log(Logs::General, Logs::Normal, "Petition list requested by %s",  c->GetName());
+    LogInfo("Petition list requested by [{}]",  c->GetName());
 
     if (results.RowCount() == 0)
         return;
@@ -4884,7 +4884,7 @@ void command_lastname(Client *c, const Seperator *sep)
 
 	if(c->GetTarget() && c->GetTarget()->IsClient())
 		t=c->GetTarget()->CastToClient();
-	Log(Logs::General, Logs::Normal, "#lastname request from %s for %s",  c->GetName(), t->GetName());
+	LogInfo("#lastname request from [{}] for [{}]",  c->GetName(), t->GetName());
 
 	if(strlen(sep->arg[1]) <= 70)
 		t->ChangeLastName(sep->arg[1]);
@@ -5968,12 +5968,9 @@ void command_guild(Client *c, const Seperator *sep)
 			}
 
 			if(guild_id == GUILD_NONE) {
-				Log(Logs::Detail, Logs::Guilds, "%s: Removing %s (%d) from guild with GM command.",  c->GetName(),
-					sep->arg[2], charid);
+				Log(Logs::Detail, Logs::Guilds, "%s: Removing %s (%d) from guild with GM command.",  c->GetName(), sep->arg[2], charid);
 			} else {
-				Log(Logs::Detail, Logs::Guilds, "%s: Putting %s (%d) into guild %s (%d) with GM command.",  c->GetName(),
-					sep->arg[2], charid,
-					guild_mgr.GetGuildName(guild_id), guild_id);
+				Log(Logs::Detail, Logs::Guilds, "%s: Putting %s (%d) into guild %s (%d) with GM command.",  c->GetName(), sep->arg[2], charid, guild_mgr.GetGuildName(guild_id), guild_id);
 			}
 
 			if(!guild_mgr.SetGuild(charid, guild_id, GUILD_MEMBER)) {
@@ -6641,7 +6638,7 @@ void command_scribespells(Client *c, const Seperator *sep)
 	t->Message(Chat::White, "Scribing spells to spellbook.");
 	if(t != c)
 		c->Message(Chat::White, "Scribing spells for %s.",  t->GetName());
-	Log(Logs::General, Logs::Normal, "Scribe spells request for %s from %s, levels: %u -> %u",  t->GetName(), c->GetName(), min_level, max_level);
+	LogInfo("Scribe spells request for [{}] from [{}], levels: [{}] -> [{}]",  t->GetName(), c->GetName(), min_level, max_level);
 
 	int book_slot = t->GetNextAvailableSpellBookSlot();
 	int spell_id = 0;
@@ -6735,7 +6732,7 @@ void command_scribespell(Client *c, const Seperator *sep) {
 		if(t != c)
 			c->Message(Chat::White, "Scribing spell: %s (%i) for %s.",  spells[spell_id].name, spell_id, t->GetName());
 
-		Log(Logs::General, Logs::Normal, "Scribe spell: %s (%i) request for %s from %s.",  spells[spell_id].name, spell_id, t->GetName(), c->GetName());
+		LogInfo("Scribe spell: [{}] ([{}]) request for [{}] from [{}]",  spells[spell_id].name, spell_id, t->GetName(), c->GetName());
 
 		if (spells[spell_id].classes[WARRIOR] != 0 && spells[spell_id].skill != 52 && spells[spell_id].classes[t->GetPP().class_ - 1] > 0 && !IsDiscipline(spell_id)) {
 			book_slot = t->GetNextAvailableSpellBookSlot();
@@ -6782,7 +6779,7 @@ void command_unscribespell(Client *c, const Seperator *sep) {
 			if(t != c)
 				c->Message(Chat::White, "Unscribing spell: %s (%i) for %s.",  spells[spell_id].name, spell_id, t->GetName());
 
-			Log(Logs::General, Logs::Normal, "Unscribe spell: %s (%i) request for %s from %s.",  spells[spell_id].name, spell_id, t->GetName(), c->GetName());
+			LogInfo("Unscribe spell: [{}] ([{}]) request for [{}] from [{}]",  spells[spell_id].name, spell_id, t->GetName(), c->GetName());
 		}
 		else {
 			t->Message(Chat::Red, "Unable to unscribe spell: %s (%i) from your spellbook. This spell is not scribed.",  spells[spell_id].name, spell_id);
@@ -9268,7 +9265,7 @@ void command_traindisc(Client *c, const Seperator *sep)
 	t->Message(Chat::White, "Training disciplines");
 	if(t != c)
 		c->Message(Chat::White, "Training disciplines for %s.",  t->GetName());
-	Log(Logs::General, Logs::Normal, "Train disciplines request for %s from %s, levels: %u -> %u",  t->GetName(), c->GetName(), min_level, max_level);
+	LogInfo("Train disciplines request for [{}] from [{}], levels: [{}] -> [{}]",  t->GetName(), c->GetName(), min_level, max_level);
 
 	int spell_id = 0;
 	int count = 0;

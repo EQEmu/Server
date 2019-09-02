@@ -823,7 +823,7 @@ void Client::SetLevel(uint8 set_level, bool command)
 	safe_delete(outapp);
 	this->SendAppearancePacket(AT_WhoLevel, set_level); // who level change
 
-	Log(Logs::General, Logs::Normal, "Setting Level for %s to %i", GetName(), set_level);
+	LogInfo("Setting Level for [{}] to [{}]", GetName(), set_level);
 
 	CalcBonuses();
 
