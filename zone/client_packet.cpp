@@ -4477,16 +4477,14 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 	is_client_moving = (ppu->y_pos == m_Position.y && ppu->x_pos == m_Position.x) ? false : true;
 
 	if (is_client_moving) {
-		LogInfo("ClientUpdate: Client is moving - scan timer is: [{}]",
-			client_scan_npc_aggro_timer.GetDuration());
+		LogDebug("ClientUpdate: Client is moving - scan timer is: [{}]", client_scan_npc_aggro_timer.GetDuration());
 		if (client_scan_npc_aggro_timer.GetDuration() > 1000) {
 			client_scan_npc_aggro_timer.Disable();
 			client_scan_npc_aggro_timer.Start(500);
 		}
 	}
 	else {
-		LogInfo("ClientUpdate: Client is NOT moving - scan timer is: [{}]",
-			client_scan_npc_aggro_timer.GetDuration());
+		LogDebug("ClientUpdate: Client is NOT moving - scan timer is: [{}]", client_scan_npc_aggro_timer.GetDuration());
 		if (client_scan_npc_aggro_timer.GetDuration() < 1000) {
 			client_scan_npc_aggro_timer.Disable();
 			client_scan_npc_aggro_timer.Start(3000);
@@ -4510,7 +4508,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 	);
 
 	if (is_client_moving && is_ready_to_update) {
-		LogInfo("[[{}]] Client Zone Wide Position Update NPCs", GetCleanName());
+		LogDebug("[[{}]] Client Zone Wide Position Update NPCs", GetCleanName());
 
 		auto &mob_movement_manager = MobMovementManager::Get();
 		auto &mob_list             = entity_list.GetMobList();
@@ -4547,8 +4545,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 	
 	/* Visual Debugging */
 	if (RuleB(Character, OPClientUpdateVisualDebug)) {
-		LogDebug("ClientUpdate: ppu x: [{}] y: [{}] z: [{}] h: [{}]", ppu->x_pos, ppu->y_pos, ppu->z_pos,
-			ppu->heading);
+		LogDebug("ClientUpdate: ppu x: [{}] y: [{}] z: [{}] h: [{}]", ppu->x_pos, ppu->y_pos, ppu->z_pos, ppu->heading);
 		this->SendAppearanceEffect(78, 0, 0, 0, 0);
 		this->SendAppearanceEffect(41, 0, 0, 0, 0);
 	}
