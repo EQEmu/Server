@@ -374,14 +374,14 @@ int main(int argc, char** argv) {
 	}
 
 #ifdef BOTS
-	Log(Logs::General, Logs::Zone_Server, "Loading bot commands");
+	LogInfo("Loading bot commands");
 	int botretval = bot_command_init();
 	if (botretval<0)
 		LogError("Bot command loading failed");
 	else
-		Log(Logs::General, Logs::Zone_Server, "%d bot commands loaded", botretval);
+		LogInfo("[{}] bot commands loaded", botretval);
 
-	Log(Logs::General, Logs::Zone_Server, "Loading bot spell casting chances");
+	LogInfo("Loading bot spell casting chances");
 	if (!database.botdb.LoadBotSpellCastingChances())
 		LogError("Bot spell casting chances loading failed");
 #endif
@@ -614,7 +614,7 @@ int main(int argc, char** argv) {
 
 void CatchSignal(int sig_num) {
 #ifdef _WINDOWS
-	Log(Logs::General, Logs::Zone_Server, "Recieved signal: %i", sig_num);
+	LogInfo("Recieved signal: [{}]", sig_num);
 #endif
 	RunLoops = false;
 }
