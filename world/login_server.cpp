@@ -419,7 +419,7 @@ bool LoginServer::Connect()
 			[this](EQ::Net::ServertalkClient *client) {
 				if (client) {
 					LogInfo(
-						"Connected to Loginserver: {0}:{1}",
+						"Connected to Loginserver: [{0}:{1}]",
 						LoginServerAddress,
 						LoginServerPort
 					);
@@ -436,7 +436,7 @@ bool LoginServer::Connect()
 				}
 				else {
 					LogInfo(
-						"Could not connect to Loginserver: {0}:{1}",
+						"Could not connect to Loginserver: [{0}:{1}]",
 						LoginServerAddress,
 						LoginServerPort
 					);
