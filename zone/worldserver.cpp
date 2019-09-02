@@ -191,7 +191,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		if (pack->size != sizeof(ServerConnectInfo))
 			break;
 		ServerConnectInfo* sci = (ServerConnectInfo*)pack->pBuffer;
-		Log(Logs::Detail, Logs::ZoneServer, "World assigned Port: %d for this zone.", sci->port);
+		LogInfo("World assigned Port: [{}] for this zone", sci->port);
 		ZoneConfig::SetZonePort(sci->port);
 		break;
 	}
@@ -794,7 +794,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	}
 	case ServerOP_SyncWorldTime: {
 		if (zone != 0 && !zone->is_zone_time_localized) {
-			Log(Logs::Moderate, Logs::ZoneServer, "%s Received Message SyncWorldTime", __FUNCTION__);
+			LogInfo("[{}] Received Message SyncWorldTime", __FUNCTION__);
 
 			eqTimeOfDay* newtime = (eqTimeOfDay*)pack->pBuffer;
 			zone->zone_time.SetCurrentEQTimeOfDay(newtime->start_eqtime, newtime->start_realtime);

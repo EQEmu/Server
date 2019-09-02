@@ -459,16 +459,10 @@ int main(int argc, char** argv) {
 		frame_prev = frame_now;
 
 		/**
-		 * Telnet server
+		 * Websocket server
 		 */
 		if (!websocker_server_opened && Config->ZonePort != 0) {
-			Log(
-				Logs::General,
-				Logs::ZoneServer,
-				"Websocket Server listener started (%s:%u).",
-				Config->TelnetIP.c_str(),
-				Config->ZonePort
-			);
+			LogInfo("Websocket Server listener started ([{}]:[{}])", Config->TelnetIP.c_str(), Config->ZonePort);
 			ws_server.reset(new EQ::Net::WebsocketServer(Config->TelnetIP, Config->ZonePort));
 			RegisterApiService(ws_server);
 			websocker_server_opened = true;

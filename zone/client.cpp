@@ -814,7 +814,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 	char message[4096];
 	strn0cpy(message, orig_message, sizeof(message));
 
-	Log(Logs::Detail, Logs::ZoneServer, "Client::ChannelMessageReceived() Channel:%i message:'%s'", chan_num, message);
+	LogInfo("Client::ChannelMessageReceived() Channel:[{}] message:[{}]", chan_num, message);
 
 	if (targetname == nullptr) {
 		targetname = (!GetTarget()) ? "" : GetTarget()->GetName();
@@ -1636,7 +1636,7 @@ void Client::UpdateAdmin(bool iFromDB) {
 
 	if(m_pp.gm)
 	{
-		Log(Logs::Moderate, Logs::ZoneServer, "%s - %s is a GM", __FUNCTION__ , GetName());
+		LogInfo("[{}] - [{}] is a GM", __FUNCTION__ , GetName());
 // no need for this, having it set in pp you already start as gm
 // and it's also set in your spawn packet so other people see it too
 //		SendAppearancePacket(AT_GM, 1, false);

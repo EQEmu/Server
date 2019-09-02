@@ -1462,12 +1462,7 @@ void Zone::StartShutdownTimer(uint32 set_time) {
 		LogInfo("Zone::StartShutdownTimer set to {}", set_time);
 	}
 
-	Log(Logs::Detail, Logs::ZoneServer,
-	    "Zone::StartShutdownTimer trigger - set_time: %u remaining_time: %u diff: %i",
-	    set_time,
-	    autoshutdown_timer.GetRemainingTime(),
-	    (set_time - autoshutdown_timer.GetRemainingTime())
-	);
+	LogInfo("Zone::StartShutdownTimer trigger - set_time: [{}] remaining_time: [{}] diff: [{}]", set_time, autoshutdown_timer.GetRemainingTime(), (set_time - autoshutdown_timer.GetRemainingTime()));
 }
 
 bool Zone::Depop(bool StartSpawnTimer) {
