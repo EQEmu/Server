@@ -1775,7 +1775,7 @@ void NPC::AI_DoMovement() {
 		else if (gridno < 0) {    // this mob is under quest control
 			if (pause_timer_complete == true) { // time to pause has ended
 				SetGrid(0 - GetGrid()); // revert to AI control
-				Log(Logs::Detail, Logs::Pathing, "Quest pathing is finished. Resuming on grid %d", GetGrid());
+				LogPathing("Quest pathing is finished. Resuming on grid [{}]", GetGrid());
 		
 				SetAppearance(eaStanding, false);
 		
@@ -1843,10 +1843,10 @@ void NPC::AI_SetupNextWaypoint() {
 	}
 	else {
 		pause_timer_complete = false;
-		Log(Logs::Detail, Logs::Pathing, "We are departing waypoint %d.", cur_wp);
+		LogPathing("We are departing waypoint [{}]", cur_wp);
 		//if we were under quest control (with no grid), we are done now..
 		if (cur_wp == EQEmu::WaypointStatus::QuestControlNoGrid) {
-			Log(Logs::Detail, Logs::Pathing, "Non-grid quest mob has reached its quest ordered waypoint. Leaving pathing mode.");
+			LogPathing("Non-grid quest mob has reached its quest ordered waypoint. Leaving pathing mode");
 			roamer = false;
 			cur_wp = 0;
 		}

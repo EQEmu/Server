@@ -104,7 +104,7 @@ void NPC::StopWandering()
 	roamer = false;
 	CastToNPC()->SetGrid(0);
 	StopNavigation();
-	Log(Logs::Detail, Logs::Pathing, "Stop Wandering requested.");
+	LogPathing("Stop Wandering requested");
 	return;
 }
 
@@ -123,11 +123,11 @@ void NPC::ResumeWandering()
 				cur_wp = save_wp;
 				UpdateWaypoint(cur_wp);	// have him head to last destination from here
 			}
-			Log(Logs::Detail, Logs::Pathing, "Resume Wandering requested. Grid %d, wp %d", GetGrid(), cur_wp);
+			LogPathing("Resume Wandering requested. Grid [{}], wp [{}]", GetGrid(), cur_wp);
 		}
 		else if (AI_walking_timer->Enabled())
 		{	// we are at a waypoint paused normally
-			Log(Logs::Detail, Logs::Pathing, "Resume Wandering on timed pause. Grid %d, wp %d", GetGrid(), cur_wp);
+			LogPathing("Resume Wandering on timed pause. Grid [{}], wp [{}]", GetGrid(), cur_wp);
 			AI_walking_timer->Trigger();	// disable timer to end pause now
 		}
 		else
@@ -159,7 +159,7 @@ void NPC::PauseWandering(int pausetime)
 	if (GetGrid() != 0) {
 		moving = false;
 		DistractedFromGrid = true;
-		Log(Logs::Detail, Logs::Pathing, "Paused Wandering requested. Grid %d. Resuming in %d ms (0=not until told)", GetGrid(), pausetime);
+		LogPathing("Paused Wandering requested. Grid [{}]. Resuming in [{}] ms (0=not until told)", GetGrid(), pausetime);
 		StopNavigation();
 		if (pausetime < 1) {	// negative grid number stops him dead in his tracks until ResumeWandering()
 			SetGrid(0 - GetGrid());
@@ -609,7 +609,7 @@ void Mob::SendToFixZ(float new_x, float new_y, float new_z) {
 
 			float newz = zone->zonemap->FindBestZ(dest, nullptr);
 
-			Log(Logs::Moderate, Logs::Pathing, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz, m_Position.x, m_Position.y, m_Position.z);
+			LogPathing("BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz, m_Position.x, m_Position.y, m_Position.z);
 
 			if ((newz > -2000) && std::abs(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaSendTo)) // Sanity check.
 				m_Position.z = newz + 1;
