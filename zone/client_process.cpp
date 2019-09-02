@@ -1611,12 +1611,12 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 		EQEmu::skills::SkillType skill = (EQEmu::skills::SkillType)gmskill->skill_id;
 
 		if(!CanHaveSkill(skill)) {
-			Log(Logs::Detail, Logs::Skills, "Tried to train skill %d, which is not allowed.", skill);
+			LogSkills("Tried to train skill [{}], which is not allowed", skill);
 			return;
 		}
 
 		if(MaxSkill(skill) == 0) {
-			Log(Logs::Detail, Logs::Skills, "Tried to train skill %d, but training is not allowed at this level.", skill);
+			LogSkills("Tried to train skill [{}], but training is not allowed at this level", skill);
 			return;
 		}
 

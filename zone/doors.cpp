@@ -325,7 +325,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger) {
 					float player_pick_lock_skill = sender->GetSkill(EQEmu::skills::SkillPickLock);
 					sender->CheckIncreaseSkill(EQEmu::skills::SkillPickLock, nullptr, 1);
 
-					Log(Logs::General, Logs::Skills, "Client has lockpicks: skill=%f", player_pick_lock_skill);
+					LogSkills("Client has lockpicks: skill=[{}]", player_pick_lock_skill);
 
 					if (GetLockpick() <= player_pick_lock_skill) {
 						if (!IsDoorOpen()) {

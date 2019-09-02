@@ -5209,7 +5209,7 @@ void Client::Handle_OP_Disarm(const EQApplicationPacket *app) {
 		return;
 
 	if (app->size != sizeof(Disarm_Struct)) {
-		Log(Logs::General, Logs::Skills, "Size mismatch for Disarm_Struct packet");
+		LogSkills("Size mismatch for Disarm_Struct packet");
 		return;
 	}
 
