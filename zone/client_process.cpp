@@ -1801,8 +1801,7 @@ void Client::DoStaminaHungerUpdate()
 	auto outapp = new EQApplicationPacket(OP_Stamina, sizeof(Stamina_Struct));
 	Stamina_Struct *sta = (Stamina_Struct *)outapp->pBuffer;
 
-	Log(Logs::General, Logs::Food, "Client::DoStaminaHungerUpdate() hunger_level: %i thirst_level: %i before loss",
-	    m_pp.hunger_level, m_pp.thirst_level);
+	LogFood("Client::DoStaminaHungerUpdate() hunger_level: [{}] thirst_level: [{}] before loss", m_pp.hunger_level, m_pp.thirst_level);
 
 	if (zone->GetZoneID() != 151 && !GetGM()) {
 		int loss = RuleI(Character, FoodLossPerUpdate);
@@ -1823,9 +1822,7 @@ void Client::DoStaminaHungerUpdate()
 		sta->water = 6000;
 	}
 
-	Log(Logs::General, Logs::Food,
-	    "Client::DoStaminaHungerUpdate() Current hunger_level: %i = (%i minutes left) thirst_level: %i = (%i "
-	    "minutes left) - after loss",
+	LogFood("Client::DoStaminaHungerUpdate() Current hunger_level: [{}] = ([{}] minutes left) thirst_level: [{}] = ([{}] minutes left) - after loss",
 	    m_pp.hunger_level, m_pp.hunger_level, m_pp.thirst_level, m_pp.thirst_level);
 
 	FastQueuePacket(&outapp);

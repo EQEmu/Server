@@ -692,7 +692,7 @@ bool Client::Save(uint8 iCommitNow) {
 	database.SaveCharacterTribute(this->CharacterID(), &m_pp);
 	SaveTaskState(); /* Save Character Task */
 
-	Log(Logs::General, Logs::Food, "Client::Save - hunger_level: %i thirst_level: %i", m_pp.hunger_level, m_pp.thirst_level);
+	LogFood("Client::Save - hunger_level: [{}] thirst_level: [{}]", m_pp.hunger_level, m_pp.thirst_level);
 
 	// perform snapshot before SaveCharacterData() so that m_epp will contain the updated time
 	if (RuleB(Character, ActiveInvSnapshots) && time(nullptr) >= GetNextInvSnapshotTime()) {
@@ -8359,15 +8359,14 @@ void Client::Consume(const EQEmu::ItemData *item, uint8 type, int16 slot, bool a
 
 		m_pp.hunger_level += increase;
 
-		Log(Logs::General, Logs::Food, "Consuming food, points added to hunger_level: %i - current_hunger: %i",
-		    increase, m_pp.hunger_level);
+		LogFood("Consuming food, points added to hunger_level: [{}] - current_hunger: [{}]", increase, m_pp.hunger_level);
 
 		DeleteItemInInventory(slot, 1, false);
 
 		if (!auto_consume) // no message if the client consumed for us
 			entity_list.MessageCloseString(this, true, 50, 0, EATING_MESSAGE, GetName(), item->Name);
 
-		Log(Logs::General, Logs::Food, "Eating from slot: %i", (int)slot);
+		LogFood("Eating from slot: [{}]", (int)slot);
 
 	} else {
 		increase = mod_drink_value(item, increase);
@@ -8379,13 +8378,12 @@ void Client::Consume(const EQEmu::ItemData *item, uint8 type, int16 slot, bool a
 
 		DeleteItemInInventory(slot, 1, false);
 
-		Log(Logs::General, Logs::Food, "Consuming drink, points added to thirst_level: %i current_thirst: %i",
-		    increase, m_pp.thirst_level);
+		LogFood("Consuming drink, points added to thirst_level: [{}] current_thirst: [{}]", increase, m_pp.thirst_level);
 
 		if (!auto_consume) // no message if the client consumed for us
 			entity_list.MessageCloseString(this, true, 50, 0, DRINKING_MESSAGE, GetName(), item->Name);
 
-		Log(Logs::General, Logs::Food, "Drinking from slot: %i", (int)slot);
+		LogFood("Drinking from slot: [{}]", (int)slot);
 	}
 }
 
