@@ -52,16 +52,16 @@ int main() {
 	set_exception_handler(); 
 	Timer LFGuildExpireTimer(60000);  
 
-	Log(Logs::General, Logs::QSServer, "Starting EQEmu QueryServ.");
+	LogInfo("Starting EQEmu QueryServ");
 	if (!queryservconfig::LoadConfig()) {
-		Log(Logs::General, Logs::QSServer, "Loading server configuration failed.");
+		LogInfo("Loading server configuration failed");
 		return 1;
 	}
 
 	Config = queryservconfig::get(); 
 	WorldShortName = Config->ShortName; 
 
-	Log(Logs::General, Logs::QSServer, "Connecting to MySQL...");
+	LogInfo("Connecting to MySQL");
 	
 	/* MySQL Connection */
 	if (!database.Connect(
@@ -70,7 +70,7 @@ int main() {
 		Config->QSDatabasePassword.c_str(),
 		Config->QSDatabaseDB.c_str(),
 		Config->QSDatabasePort)) {
-		Log(Logs::General, Logs::QSServer, "Cannot continue without a database connection.");
+		LogInfo("Cannot continue without a database connection");
 		return 1;
 	}
 
@@ -79,11 +79,11 @@ int main() {
 	LogSys.StartFileLogs();
 
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
-		Log(Logs::General, Logs::QSServer, "Could not set signal handler");
+		LogInfo("Could not set signal handler");
 		return 1;
 	}
 	if (signal(SIGTERM, CatchSignal) == SIG_ERR)	{
-		Log(Logs::General, Logs::QSServer, "Could not set signal handler");
+		LogInfo("Could not set signal handler");
 		return 1;
 	}
 
