@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
 
 	Log(Logs::General, Logs::Status, "Shared Memory Loader Program");
 	if(!EQEmuConfig::LoadConfig()) {
-		Log(Logs::General, Logs::Error, "Unable to load configuration file.");
+		LogError("Unable to load configuration file");
 		return 1;
 	}
 
@@ -86,8 +86,7 @@ int main(int argc, char **argv) {
 	Log(Logs::General, Logs::Status, "Connecting to database...");
 	if(!database.Connect(Config->DatabaseHost.c_str(), Config->DatabaseUsername.c_str(),
 		Config->DatabasePassword.c_str(), Config->DatabaseDB.c_str(), Config->DatabasePort)) {
-		Log(Logs::General, Logs::Error, "Unable to connect to the database, cannot continue without a "
-			"database connection");
+		LogError("Unable to connect to the database, cannot continue without a database connection");
 		return 1;
 	}
 
@@ -185,7 +184,7 @@ int main(int argc, char **argv) {
 		try {
 			LoadItems(&database, hotfix_name);
 		} catch(std::exception &ex) {
-			Log(Logs::General, Logs::Error, "%s", ex.what());
+			LogError("{}", ex.what());
 			return 1;
 		}
 	}
@@ -195,7 +194,7 @@ int main(int argc, char **argv) {
 		try {
 			LoadFactions(&database, hotfix_name);
 		} catch(std::exception &ex) {
-			Log(Logs::General, Logs::Error, "%s", ex.what());
+			LogError("{}", ex.what());
 			return 1;
 		}
 	}
@@ -205,7 +204,7 @@ int main(int argc, char **argv) {
 		try {
 			LoadLoot(&database, hotfix_name);
 		} catch(std::exception &ex) {
-			Log(Logs::General, Logs::Error, "%s", ex.what());
+			LogError("{}", ex.what());
 			return 1;
 		}
 	}
@@ -215,7 +214,7 @@ int main(int argc, char **argv) {
 		try {
 			LoadSkillCaps(&database, hotfix_name);
 		} catch(std::exception &ex) {
-			Log(Logs::General, Logs::Error, "%s", ex.what());
+			LogError("{}", ex.what());
 			return 1;
 		}
 	}
@@ -225,7 +224,7 @@ int main(int argc, char **argv) {
 		try {
 			LoadSpells(&database, hotfix_name);
 		} catch(std::exception &ex) {
-			Log(Logs::General, Logs::Error, "%s", ex.what());
+			LogError("{}", ex.what());
 			return 1;
 		}
 	}
@@ -235,7 +234,7 @@ int main(int argc, char **argv) {
 		try {
 			LoadBaseData(&database, hotfix_name);
 		} catch(std::exception &ex) {
-			Log(Logs::General, Logs::Error, "%s", ex.what());
+			LogError("{}", ex.what());
 			return 1;
 		}
 	}

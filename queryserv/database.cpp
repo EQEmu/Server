@@ -69,7 +69,7 @@ bool Database::Connect(const char* host, const char* user, const char* passwd, c
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	if (!Open(host, user, passwd, database, port, &errnum, errbuf))
 	{
-		Log(Logs::General, Logs::Error, "Failed to connect to database: Error: %s", errbuf);
+		LogError("Failed to connect to database: Error: {}", errbuf);
 		HandleMysqlError(errnum);
 
 		return false;

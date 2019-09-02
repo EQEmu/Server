@@ -5819,7 +5819,7 @@ void command_time(Client *c, const Seperator *sep)
 		}
 		c->Message(Chat::Red, "Setting world time to %s:%i (Timezone: 0)...",  sep->arg[1], minutes);
 		zone->SetTime(atoi(sep->arg[1])+1, minutes);
-		Log(Logs::General, Logs::ZoneServer, "%s :: Setting world time to %s:%i (Timezone: 0)...", c->GetCleanName(), sep->arg[1], minutes);
+		LogInfo("{} :: Setting world time to {}:{} (Timezone: 0)...", c->GetCleanName(), sep->arg[1], minutes);
 	}
 	else {
 		c->Message(Chat::Red, "To set the Time: #time HH [MM]");
@@ -5834,7 +5834,7 @@ void command_time(Client *c, const Seperator *sep)
 			zone->zone_time.getEQTimeZoneMin()
 			);
 		c->Message(Chat::Red, "It is now %s.", timeMessage);
-		Log(Logs::General, Logs::ZoneServer, "Current Time is: %s", timeMessage);
+		LogInfo("Current Time is: {}", timeMessage);
 	}
 }
 

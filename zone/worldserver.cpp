@@ -816,12 +816,12 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				(eq_time.hour >= 13) ? "pm" : "am"
 				);
 
-			Log(Logs::General, Logs::ZoneServer, "Time Broadcast Packet: %s", time_message);
+			LogInfo("Time Broadcast Packet: {}", time_message);
 			zone->SetZoneHasCurrentTime(true);
 
 		}
 		if (zone && zone->is_zone_time_localized) {
-			Log(Logs::General, Logs::ZoneServer, "Received request to sync time from world, but our time is localized currently");
+			LogInfo("Received request to sync time from world, but our time is localized currently");
 		}
 		break;
 	}
@@ -1942,32 +1942,32 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	case ServerOP_ChangeSharedMem:
 	{
 		std::string hotfix_name = std::string((char*)pack->pBuffer);
-		Log(Logs::General, Logs::ZoneServer, "Loading items");
+		LogInfo("Loading items");
 		if (!database.LoadItems(hotfix_name)) {
 			Log(Logs::General, Logs::Error, "Loading items FAILED!");
 		}
 
-		Log(Logs::General, Logs::ZoneServer, "Loading npc faction lists");
+		LogInfo("Loading npc faction lists");
 		if (!database.LoadNPCFactionLists(hotfix_name)) {
 			Log(Logs::General, Logs::Error, "Loading npcs faction lists FAILED!");
 		}
 
-		Log(Logs::General, Logs::ZoneServer, "Loading loot tables");
+		LogInfo("Loading loot tables");
 		if (!database.LoadLoot(hotfix_name)) {
 			Log(Logs::General, Logs::Error, "Loading loot FAILED!");
 		}
 
-		Log(Logs::General, Logs::ZoneServer, "Loading skill caps");
+		LogInfo("Loading skill caps");
 		if (!database.LoadSkillCaps(std::string(hotfix_name))) {
 			Log(Logs::General, Logs::Error, "Loading skill caps FAILED!");
 		}
 
-		Log(Logs::General, Logs::ZoneServer, "Loading spells");
+		LogInfo("Loading spells");
 		if (!database.LoadSpells(hotfix_name, &SPDAT_RECORDS, &spells)) {
 			Log(Logs::General, Logs::Error, "Loading spells FAILED!");
 		}
 
-		Log(Logs::General, Logs::ZoneServer, "Loading base data");
+		LogInfo("Loading base data");
 		if (!database.LoadBaseData(hotfix_name)) {
 			Log(Logs::General, Logs::Error, "Loading base data FAILED!");
 		}

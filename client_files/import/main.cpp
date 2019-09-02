@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
 
 	Log(Logs::General, Logs::Status, "Client Files Import Utility");
 	if(!EQEmuConfig::LoadConfig()) {
-		Log(Logs::General, Logs::Error, "Unable to load configuration file.");
+		LogError("Unable to load configuration file.");
 		return 1;
 	}
 
@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
 	Log(Logs::General, Logs::Status, "Connecting to database...");
 	if(!database.Connect(Config->DatabaseHost.c_str(), Config->DatabaseUsername.c_str(),
 		Config->DatabasePassword.c_str(), Config->DatabaseDB.c_str(), Config->DatabasePort)) {
-		Log(Logs::General, Logs::Error, "Unable to connect to the database, cannot continue without a "
+		LogError("Unable to connect to the database, cannot continue without a "
 			"database connection");
 		return 1;
 	}
@@ -100,7 +100,7 @@ void ImportSpells(SharedDatabase *db) {
 	Log(Logs::General, Logs::Status, "Importing Spells...");
 	FILE *f = fopen("import/spells_us.txt", "r");
 	if(!f) {
-		Log(Logs::General, Logs::Error, "Unable to open import/spells_us.txt to read, skipping.");
+		LogError("Unable to open import/spells_us.txt to read, skipping.");
 		return;
 	}
 
@@ -189,7 +189,7 @@ void ImportSkillCaps(SharedDatabase *db) {
 
 	FILE *f = fopen("import/SkillCaps.txt", "r");
 	if(!f) {
-		Log(Logs::General, Logs::Error, "Unable to open import/SkillCaps.txt to read, skipping.");
+		LogError("Unable to open import/SkillCaps.txt to read, skipping.");
 		return;
 	}
 
@@ -224,7 +224,7 @@ void ImportBaseData(SharedDatabase *db) {
 
 	FILE *f = fopen("import/BaseData.txt", "r");
 	if(!f) {
-		Log(Logs::General, Logs::Error, "Unable to open import/BaseData.txt to read, skipping.");
+		LogError("Unable to open import/BaseData.txt to read, skipping.");
 		return;
 	}
 
@@ -269,7 +269,7 @@ void ImportDBStrings(SharedDatabase *db) {
 
 	FILE *f = fopen("import/dbstr_us.txt", "r");
 	if(!f) {
-		Log(Logs::General, Logs::Error, "Unable to open import/dbstr_us.txt to read, skipping.");
+		LogError("Unable to open import/dbstr_us.txt to read, skipping.");
 		return;
 	}
 

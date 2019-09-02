@@ -41,7 +41,7 @@ int main(int argc, char **argv) {
 
 	Log(Logs::General, Logs::Status, "Client Files Export Utility");
 	if(!EQEmuConfig::LoadConfig()) {
-		Log(Logs::General, Logs::Error, "Unable to load configuration file.");
+		LogError("Unable to load configuration file");
 		return 1;
 	}
 
@@ -51,8 +51,7 @@ int main(int argc, char **argv) {
 	Log(Logs::General, Logs::Status, "Connecting to database...");
 	if(!database.Connect(Config->DatabaseHost.c_str(), Config->DatabaseUsername.c_str(),
 		Config->DatabasePassword.c_str(), Config->DatabaseDB.c_str(), Config->DatabasePort)) {
-		Log(Logs::General, Logs::Error, "Unable to connect to the database, cannot continue without a "
-			"database connection");
+		LogError("Unable to connect to the database, cannot continue without a database connection");
 		return 1;
 	}
 
@@ -98,7 +97,7 @@ void ExportSpells(SharedDatabase *db) {
 
 	FILE *f = fopen("export/spells_us.txt", "w");
 	if(!f) {
-		Log(Logs::General, Logs::Error, "Unable to open export/spells_us.txt to write, skipping.");
+		LogError("Unable to open export/spells_us.txt to write, skipping.");
 		return;
 	}
 
@@ -169,7 +168,7 @@ void ExportSkillCaps(SharedDatabase *db) {
 
 	FILE *f = fopen("export/SkillCaps.txt", "w");
 	if(!f) {
-		Log(Logs::General, Logs::Error, "Unable to open export/SkillCaps.txt to write, skipping.");
+		LogError("Unable to open export/SkillCaps.txt to write, skipping.");
 		return;
 	}
 
@@ -198,7 +197,7 @@ void ExportBaseData(SharedDatabase *db) {
 
 	FILE *f = fopen("export/BaseData.txt", "w");
 	if(!f) {
-		Log(Logs::General, Logs::Error, "Unable to open export/BaseData.txt to write, skipping.");
+		LogError("Unable to open export/BaseData.txt to write, skipping.");
 		return;
 	}
 
@@ -229,7 +228,7 @@ void ExportDBStrings(SharedDatabase *db) {
 
 	FILE *f = fopen("export/dbstr_us.txt", "w");
 	if(!f) {
-		Log(Logs::General, Logs::Error, "Unable to open export/dbstr_us.txt to write, skipping.");
+		LogError("Unable to open export/dbstr_us.txt to write, skipping.");
 		return;
 	}
 

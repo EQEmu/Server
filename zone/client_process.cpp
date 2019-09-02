@@ -559,7 +559,7 @@ bool Client::Process() {
 
 	if (client_state != CLIENT_LINKDEAD && !eqs->CheckState(ESTABLISHED)) {
 		OnDisconnect(true);
-		Log(Logs::General, Logs::ZoneServer, "Client linkdead: %s", name);
+		LogInfo("Client linkdead: {}", name);
 
 		if (Admin() > 100) {
 			if (GetMerc()) {

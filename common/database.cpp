@@ -64,7 +64,7 @@ bool Database::Connect(const char* host, const char* user, const char* passwd, c
 	uint32 errnum= 0;
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	if (!Open(host, user, passwd, database, port, &errnum, errbuf)) {
-		Log(Logs::General, Logs::Error, "Failed to connect to database: Error: %s", errbuf);
+		LogError("Failed to connect to database: Error: {}", errbuf);
 		return false;
 	}
 	else {
@@ -327,7 +327,7 @@ bool Database::DeleteCharacter(char *name) {
 	auto results = QueryDatabase(query);
 	for (auto row = results.begin(); row != results.end(); ++row) { charid = atoi(row[0]); }
 	if (charid <= 0){
-		Log(Logs::General, Logs::Error, "Database::DeleteCharacter :: Character (%s) not found, stopping delete...", name);
+		LogError("Database::DeleteCharacter :: Character ({}) not found, stopping delete...", name);
 		return false;
 	}
 
@@ -714,7 +714,7 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, EQEmu
 	charid = GetCharacterID(pp->name);
 
 	if(!charid) {
-		Log(Logs::General, Logs::Error, "StoreCharacter: no character id");
+		LogError("StoreCharacter: no character id");
 		return false;
 	}
 
@@ -1551,7 +1551,7 @@ void Database::SetGroupID(const char* name, uint32 id, uint32 charid, uint32 ism
 		auto results = QueryDatabase(query);
 
 		if (!results.Success())
-			Log(Logs::General, Logs::Error, "Error deleting character from group id: %s", results.ErrorMessage().c_str());
+			LogError("Error deleting character from group id: {}", results.ErrorMessage().c_str());
 
 		return;
 	}
