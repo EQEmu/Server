@@ -2153,7 +2153,7 @@ void NPC::ModifyNPCStat(const char *identifier, const char *new_value)
 	std::string variable_key = StringFormat("modify_stat_%s", id.c_str());
 	SetEntityVariable(variable_key.c_str(), new_value);
 
-	Log(Logs::Detail, Logs::NPCScaling, "NPC::ModifyNPCStat key: %s val: %s ", variable_key.c_str(), new_value);
+	LogNPCScaling("NPC::ModifyNPCStat key: [{}] val: [{}] ", variable_key.c_str(), new_value);
 
 	if (id == "ac") {
 		AC = atoi(val.c_str());
