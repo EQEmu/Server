@@ -571,7 +571,7 @@ XS(XS_NPC_SetSp2) {
 		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->SetSp2(sg2);
+		THIS->SetSpawnGroupId(sg2);
 	}
 	XSRETURN_EMPTY;
 }
@@ -644,7 +644,7 @@ XS(XS_NPC_GetSp2) {
 		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetSp2();
+		RETVAL = THIS->GetSpawnGroupId();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
 	}
@@ -2377,6 +2377,42 @@ XS(XS_NPC_GetCombatState) {
 	XSRETURN(1);
 }
 
+XS(XS_NPC_SetSimpleRoamBox); /* prototype to pass -Wmissing-prototypes */
+XS(XS_NPC_SetSimpleRoamBox) {
+	dXSARGS;
+	if (items < 2)
+		Perl_croak(aTHX_ "Usage: NPC::SetSimpleRoamBox(THIS, box_size, move_distance, move_delay)");
+	{
+		NPC *THIS;
+
+		auto  box_size      = (float) SvNV(ST(1));
+		float move_distance = 0;
+		int   move_delay    = 0;
+
+		if (items >= 3) {
+			move_distance = (float) SvNV(ST(2));
+		}
+
+		if (items >= 4) {
+			move_delay = (int) SvIV(ST(3));
+		}
+
+		if (sv_derived_from(ST(0), "NPC")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(NPC *, tmp);
+		}
+		else {
+			Perl_croak(aTHX_ "THIS is not of type NPC");
+		}
+		if (THIS == nullptr) {
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+		}
+
+		THIS->SetSimpleRoamBox(box_size, move_distance, move_delay);
+	}
+	XSRETURN_EMPTY;
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -2488,6 +2524,7 @@ XS(boot_NPC) {
 	newXSproto(strcpy(buf, "ChangeLastName"), XS_NPC_ChangeLastName, file, "$:$");
 	newXSproto(strcpy(buf, "ClearLastName"), XS_NPC_ClearLastName, file, "$");
 	newXSproto(strcpy(buf, "GetCombatState"), XS_NPC_GetCombatState, file, "$");
+	newXSproto(strcpy(buf, "SetSimpleRoamBox"), XS_NPC_SetSimpleRoamBox, file, "$$;$$");
 	XSRETURN_YES;
 }
 

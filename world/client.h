@@ -82,6 +82,7 @@ private:
 	bool	is_player_zoning;
 	Timer	autobootup_timeout;
 	uint32	zone_waiting_for_bootup;
+	bool	enter_world_triggered;
 
 	bool StartInTutorial;
 	EQEmu::versions::ClientVersion m_ClientVersion;
@@ -94,7 +95,6 @@ private:
 	void SetClassLanguages(PlayerProfile_Struct *pp);
 
 	ClientListEntry* cle;
-	Timer	CLE_keepalive_timer;
 	Timer	connect;
 	bool firstlogin;
 	bool seen_character_select;

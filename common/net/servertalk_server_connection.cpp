@@ -1,6 +1,7 @@
 #include "servertalk_server_connection.h"
 #include "servertalk_server.h"
 #include "../eqemu_logsys.h"
+#include "../eqemu_logsys_fmt.h"
 #include "../util/uuid.h"
 
 EQ::Net::ServertalkServerConnection::ServertalkServerConnection(std::shared_ptr<EQ::Net::TCPConnection> c, EQ::Net::ServertalkServer *parent, bool encrypted, bool allow_downgrade)

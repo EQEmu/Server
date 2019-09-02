@@ -30,7 +30,8 @@ bool WaterMapV2::InLava(const glm::vec3& location) const {
 }
 
 bool WaterMapV2::InLiquid(const glm::vec3& location) const {
-	return InWater(location) || InLava(location) || InVWater(location);
+	auto rt = ReturnRegionType(location);
+	return rt == RegionTypeWater || rt == RegionTypeVWater || rt == RegionTypeLava;
 }
 
 bool WaterMapV2::InPvP(const glm::vec3& location) const {

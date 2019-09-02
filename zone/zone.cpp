@@ -55,6 +55,7 @@
 #include "zone_config.h"
 #include "mob_movement_manager.h"
 #include "npc_scale_manager.h"
+#include "../common/data_verification.h"
 
 #include <time.h>
 #include <ctime>
@@ -821,11 +822,11 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	Weather_Timer = new Timer(60000);
 	Weather_Timer->Start();
 	Log(Logs::General, Logs::None, "The next weather check for zone: %s will be in %i seconds.", short_name, Weather_Timer->GetRemainingTime()/1000);
-	zone_weather = 0;
-	weather_intensity = 0;
-	blocked_spells = nullptr;
-	totalBS = 0;
-	zone_has_current_time = false;
+	zone_weather              = 0;
+	weather_intensity         = 0;
+	blocked_spells            = nullptr;
+	zone_total_blocked_spells = 0;
+	zone_has_current_time     = false;
 
 	Instance_Shutdown_Timer = nullptr;
 	bool is_perma = false;
@@ -864,6 +865,8 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	m_last_ucss_update = 0;
 
 	mMovementManager = &MobMovementManager::Get();
+
+	SetNpcPositionUpdateDistance(0);
 }
 
 Zone::~Zone() {
@@ -969,7 +972,7 @@ bool Zone::Init(bool iStaticZone) {
 
 	//load up the zone's doors (prints inside)
 	zone->LoadZoneDoors(zone->GetShortName(), zone->GetInstanceVersion());
-	zone->LoadBlockedSpells(zone->GetZoneID());
+	zone->LoadZoneBlockedSpells(zone->GetZoneID());
 
 	//clear trader items if we are loading the bazaar
 	if(strncasecmp(short_name,"bazaar",6)==0) {
@@ -1070,14 +1073,14 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_id)
 	map_name = nullptr;
 
 	if(!database.GetZoneCFG(database.GetZoneID(filename), instance_id, &newzone_data, can_bind,
-		can_combat, can_levitate, can_castoutdoor, is_city, is_hotzone, allow_mercs, zone_type, default_ruleset, &map_name))
+		can_combat, can_levitate, can_castoutdoor, is_city, is_hotzone, allow_mercs, max_movement_update_range, zone_type, default_ruleset, &map_name))
 	{
 		// If loading a non-zero instance failed, try loading the default
 		if (instance_id != 0)
 		{
 			safe_delete_array(map_name);
 			if(!database.GetZoneCFG(database.GetZoneID(filename), 0, &newzone_data, can_bind, can_combat, can_levitate, 
-				can_castoutdoor, is_city, is_hotzone, allow_mercs, zone_type, default_ruleset, &map_name))
+				can_castoutdoor, is_city, is_hotzone, allow_mercs, max_movement_update_range, zone_type, default_ruleset, &map_name))
 				{
 				Log(Logs::General, Logs::Error, "Error loading the Zone Config.");
 				return false;
@@ -1106,6 +1109,7 @@ void Zone::AddAuth(ServerZoneIncomingClient_Struct* szic) {
 	zca->accid = szic->accid;
 	zca->admin = szic->admin;
 	zca->charid = szic->charid;
+	zca->lsid = szic->lsid;
 	zca->tellsoff = szic->tellsoff;
 	strn0cpy(zca->charname, szic->charname, sizeof(zca->charname));
 	strn0cpy(zca->lskey, szic->lskey, sizeof(zca->lskey));
@@ -1113,16 +1117,31 @@ void Zone::AddAuth(ServerZoneIncomingClient_Struct* szic) {
 	client_auth_list.Insert(zca);
 }
 
-void Zone::RemoveAuth(const char* iCharName)
+void Zone::RemoveAuth(const char* iCharName, const char* iLSKey)
 {
 	LinkedListIterator<ZoneClientAuth_Struct*> iterator(client_auth_list);
 
 	iterator.Reset();
 	while (iterator.MoreElements()) {
 		ZoneClientAuth_Struct* zca = iterator.GetData();
-		if (strcasecmp(zca->charname, iCharName) == 0) {
-		iterator.RemoveCurrent();
-		return;
+		if (strcasecmp(zca->charname, iCharName) == 0 && strcasecmp(zca->lskey, iLSKey) == 0) {
+			iterator.RemoveCurrent();
+			return;
+		}
+		iterator.Advance();
+	}
+}
+
+void Zone::RemoveAuth(uint32 lsid)
+{
+	LinkedListIterator<ZoneClientAuth_Struct*> iterator(client_auth_list);
+
+	iterator.Reset();
+	while (iterator.MoreElements()) {
+		ZoneClientAuth_Struct* zca = iterator.GetData();
+		if (zca->lsid == lsid) {
+			iterator.RemoveCurrent();
+			continue;
 		}
 		iterator.Advance();
 	}
@@ -1178,9 +1197,9 @@ uint32 Zone::CountAuth() {
 bool Zone::Process() {
 	spawn_conditions.Process();
 
-	if(spawn2_timer.Check()) {
+	if (spawn2_timer.Check()) {
 
-		LinkedListIterator<Spawn2*> iterator(spawn2_list);
+		LinkedListIterator<Spawn2 *> iterator(spawn2_list);
 
 		EQEmu::InventoryProfile::CleanDirty();
 
@@ -1196,10 +1215,15 @@ bool Zone::Process() {
 			}
 		}
 
-		if(adv_data && !did_adventure_actions)
+		if (adv_data && !did_adventure_actions) {
 			DoAdventureActions();
+		}
 
+		if (GetNpcPositionUpdateDistance() == 0) {
+			CalculateNpcUpdateDistanceSpread();
+		}
 	}
+
 	if(initgrids_timer.Check()) {
 		//delayed grid loading stuff.
 		initgrids_timer.Disable();
@@ -1460,6 +1484,8 @@ bool Zone::Depop(bool StartSpawnTimer) {
 
 	// clear spell cache
 	database.ClearNPCSpells();
+
+	zone->spawn_group_list.ReloadSpawnGroups();
 
 	return true;
 }
@@ -1746,14 +1772,14 @@ void Zone::SpawnStatus(Mob* client) {
 	while(iterator.MoreElements())
 	{
 		if (iterator.GetData()->timer.GetRemainingTime() == 0xFFFFFFFF)
-			client->Message(0, "  %d: %1.1f, %1.1f, %1.1f: disabled", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ());
+			client->Message(Chat::White, "  %d: %1.1f, %1.1f, %1.1f: disabled", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ());
 		else
-			client->Message(0, "  %d: %1.1f, %1.1f, %1.1f: %1.2f", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ(), (float)iterator.GetData()->timer.GetRemainingTime() / 1000);
+			client->Message(Chat::White, "  %d: %1.1f, %1.1f, %1.1f: %1.2f", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ(), (float)iterator.GetData()->timer.GetRemainingTime() / 1000);
 
 		x++;
 		iterator.Advance();
 	}
-	client->Message(0, "%i spawns listed.", x);
+	client->Message(Chat::White, "%i spawns listed.", x);
 }
 
 void Zone::ShowEnabledSpawnStatus(Mob* client)
@@ -1768,7 +1794,7 @@ void Zone::ShowEnabledSpawnStatus(Mob* client)
 	{
 		if (iterator.GetData()->timer.GetRemainingTime() != 0xFFFFFFFF)
 		{
-			client->Message(0, "  %d: %1.1f, %1.1f, %1.1f: %1.2f", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ(), (float)iterator.GetData()->timer.GetRemainingTime() / 1000);
+			client->Message(Chat::White, "  %d: %1.1f, %1.1f, %1.1f: %1.2f", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ(), (float)iterator.GetData()->timer.GetRemainingTime() / 1000);
 			iEnabledCount++;
 		}
 
@@ -1776,7 +1802,7 @@ void Zone::ShowEnabledSpawnStatus(Mob* client)
 		iterator.Advance();
 	}
 
-	client->Message(0, "%i of %i spawns listed.", iEnabledCount, x);
+	client->Message(Chat::White, "%i of %i spawns listed.", iEnabledCount, x);
 }
 
 void Zone::ShowDisabledSpawnStatus(Mob* client)
@@ -1791,7 +1817,7 @@ void Zone::ShowDisabledSpawnStatus(Mob* client)
 	{
 		if (iterator.GetData()->timer.GetRemainingTime() == 0xFFFFFFFF)
 		{
-			client->Message(0, "  %d: %1.1f, %1.1f, %1.1f: disabled", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ());
+			client->Message(Chat::White, "  %d: %1.1f, %1.1f, %1.1f: disabled", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ());
 			iDisabledCount++;
 		}
 
@@ -1799,7 +1825,7 @@ void Zone::ShowDisabledSpawnStatus(Mob* client)
 		iterator.Advance();
 	}
 
-	client->Message(0, "%i of %i spawns listed.", iDisabledCount, x);
+	client->Message(Chat::White, "%i of %i spawns listed.", iDisabledCount, x);
 }
 
 void Zone::ShowSpawnStatusByID(Mob* client, uint32 spawnid)
@@ -1815,9 +1841,9 @@ void Zone::ShowSpawnStatusByID(Mob* client, uint32 spawnid)
 		if (iterator.GetData()->GetID() == spawnid)
 		{
 			if (iterator.GetData()->timer.GetRemainingTime() == 0xFFFFFFFF)
-				client->Message(0, "  %d: %1.1f, %1.1f, %1.1f: disabled", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ());
+				client->Message(Chat::White, "  %d: %1.1f, %1.1f, %1.1f: disabled", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ());
 			else
-				client->Message(0, "  %d: %1.1f, %1.1f, %1.1f: %1.2f", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ(), (float)iterator.GetData()->timer.GetRemainingTime() / 1000);
+				client->Message(Chat::White, "  %d: %1.1f, %1.1f, %1.1f: %1.2f", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ(), (float)iterator.GetData()->timer.GetRemainingTime() / 1000);
 
 			iSpawnIDCount++;
 
@@ -1829,36 +1855,9 @@ void Zone::ShowSpawnStatusByID(Mob* client, uint32 spawnid)
 	}
 
 	if(iSpawnIDCount > 0)
-		client->Message(0, "%i of %i spawns listed.", iSpawnIDCount, x);
+		client->Message(Chat::White, "%i of %i spawns listed.", iSpawnIDCount, x);
 	else
-		client->Message(0, "No matching spawn id was found in this zone.");
-}
-
-
-bool Zone::RemoveSpawnEntry(uint32 spawnid)
-{
-	LinkedListIterator<Spawn2*> iterator(spawn2_list);
-
-
-	iterator.Reset();
-	while(iterator.MoreElements())
-	{
-		if(iterator.GetData()->GetID() == spawnid)
-		{
-			iterator.RemoveCurrent();
-			return true;
-		}
-		else
-		iterator.Advance();
-	}
-return false;
-}
-
-bool Zone::RemoveSpawnGroup(uint32 in_id) {
-	if(spawn_group_list.RemoveSpawnGroup(in_id))
-		return true;
-	else
-		return false;
+		client->Message(Chat::White, "No matching spawn id was found in this zone.");
 }
 
 bool ZoneDatabase::GetDecayTimes(npcDecayTimes_Struct *npcCorpseDecayTimes)
@@ -1881,17 +1880,21 @@ bool ZoneDatabase::GetDecayTimes(npcDecayTimes_Struct *npcCorpseDecayTimes)
 	return true;
 }
 
-void Zone::weatherSend(Client* client)
+void Zone::weatherSend(Client *client)
 {
 	auto outapp = new EQApplicationPacket(OP_Weather, 8);
-	if(zone_weather>0)
-		outapp->pBuffer[0] = zone_weather-1;
-	if(zone_weather>0)
+	if (zone_weather > 0) {
+		outapp->pBuffer[0] = zone_weather - 1;
+	}
+	if (zone_weather > 0) {
 		outapp->pBuffer[4] = zone->weather_intensity;
-	if (client)
+	}
+	if (client) {
 		client->QueuePacket(outapp);
-	else
+	}
+	else {
 		entity_list.QueueClients(0, outapp);
+	}
 	safe_delete(outapp);
 }
 
@@ -1909,15 +1912,13 @@ void Zone::SetGraveyard(uint32 zoneid, const glm::vec4& graveyardPosition) {
 	m_Graveyard = graveyardPosition;
 }
 
-void Zone::LoadBlockedSpells(uint32 zoneid)
+void Zone::LoadZoneBlockedSpells(uint32 zone_id)
 {
-	if(!blocked_spells)
-	{
-		totalBS = database.GetBlockedSpellsCount(zoneid);
-		if(totalBS > 0){
-			blocked_spells = new ZoneSpellsBlocked[totalBS];
-			if(!database.LoadBlockedSpells(totalBS, blocked_spells, zoneid))
-			{
+	if (!blocked_spells) {
+		zone_total_blocked_spells = database.GetBlockedSpellsCount(zone_id);
+		if (zone_total_blocked_spells > 0) {
+			blocked_spells = new ZoneSpellsBlocked[zone_total_blocked_spells];
+			if (!database.LoadBlockedSpells(zone_total_blocked_spells, blocked_spells, zone_id)) {
 				Log(Logs::General, Logs::Error, "... Failed to load blocked spells.");
 				ClearBlockedSpells();
 			}
@@ -1927,102 +1928,89 @@ void Zone::LoadBlockedSpells(uint32 zoneid)
 
 void Zone::ClearBlockedSpells()
 {
-	if(blocked_spells){
+	if (blocked_spells) {
 		safe_delete_array(blocked_spells);
-		totalBS = 0;
+		zone_total_blocked_spells = 0;
 	}
 }
 
-bool Zone::IsSpellBlocked(uint32 spell_id, const glm::vec3& location)
+bool Zone::IsSpellBlocked(uint32 spell_id, const glm::vec3 &location)
 {
-	if (blocked_spells)
-	{
+	if (blocked_spells) {
 		bool exception = false;
 		bool block_all = false;
-		for (int x = 0; x < totalBS; x++)
-		{
-			if (blocked_spells[x].spellid == spell_id)
-			{
+
+		for (int x = 0; x < GetZoneTotalBlockedSpells(); x++) {
+			if (blocked_spells[x].spellid == spell_id) {
 				exception = true;
 			}
 
-			if (blocked_spells[x].spellid == 0)
-			{
+			if (blocked_spells[x].spellid == 0) {
 				block_all = true;
 			}
 		}
 
-		for (int x = 0; x < totalBS; x++)
-		{
-			// If spellid is 0, block all spells in the zone
-			if (block_all)
-			{
-				// If the same zone has entries other than spellid 0, they act as exceptions and are allowed
-				if (exception)
-				{
-					return false;
-				}
-				else
-				{
-					return true;
-				}
-			}
-			else
-			{
-				if (spell_id != blocked_spells[x].spellid)
-				{
-					continue;
-				}
+		// If all spells are blocked and this is an exception, it is not blocked
+		if (block_all && exception) {
+			return false;
+		}
 
-				switch (blocked_spells[x].type)
-				{
-					case 1:
-					{
+		for (int x = 0; x < GetZoneTotalBlockedSpells(); x++) {
+			// Spellid of 0 matches all spells
+			if (0 != blocked_spells[x].spellid && spell_id != blocked_spells[x].spellid) {
+				continue;
+			}
+
+			switch (blocked_spells[x].type) {
+				case ZoneBlockedSpellTypes::ZoneWide: {
+					return true;
+					break;
+				}
+				case ZoneBlockedSpellTypes::Region: {
+					if (IsWithinAxisAlignedBox(
+						location,
+						blocked_spells[x].m_Location - blocked_spells[x].m_Difference,
+						blocked_spells[x].m_Location + blocked_spells[x].m_Difference
+					)) {
 						return true;
-						break;
 					}
-					case 2:
-					{
-						if (IsWithinAxisAlignedBox(location, blocked_spells[x].m_Location - blocked_spells[x].m_Difference, blocked_spells[x].m_Location + blocked_spells[x].m_Difference))
-							return true;
-						break;
-					}
-					default:
-					{
-						continue;
-						break;
-					}
+					break;
+				}
+				default: {
+					continue;
+					break;
 				}
 			}
 		}
 	}
+
 	return false;
 }
 
-const char* Zone::GetSpellBlockedMessage(uint32 spell_id, const glm::vec3& location)
+const char *Zone::GetSpellBlockedMessage(uint32 spell_id, const glm::vec3 &location)
 {
-	if(blocked_spells)
-	{
-		for(int x = 0; x < totalBS; x++)
-		{
-			if(spell_id != blocked_spells[x].spellid && blocked_spells[x].spellid != 0)
+	if (blocked_spells) {
+		for (int x = 0; x < GetZoneTotalBlockedSpells(); x++) {
+			if (spell_id != blocked_spells[x].spellid && blocked_spells[x].spellid != 0) {
 				continue;
+			}
 
-			switch(blocked_spells[x].type)
-			{
-				case 1:
-				{
+			switch (blocked_spells[x].type) {
+				case ZoneBlockedSpellTypes::ZoneWide: {
 					return blocked_spells[x].message;
 					break;
 				}
-				case 2:
-				{
-					if(IsWithinAxisAlignedBox(location, blocked_spells[x].m_Location - blocked_spells[x].m_Difference, blocked_spells[x].m_Location + blocked_spells[x].m_Difference))
+				case ZoneBlockedSpellTypes::Region: {
+					if (IsWithinAxisAlignedBox(
+						location,
+						blocked_spells[x].m_Location - blocked_spells[x].m_Difference,
+						blocked_spells[x].m_Location + blocked_spells[x].m_Difference
+					)) {
 						return blocked_spells[x].message;
+					}
 					break;
 				}
-				default:
-				{
+				default: {
 					continue;
 					break;
 				}
@@ -2375,4 +2363,60 @@ void Zone::SetUCSServerAvailable(bool ucss_available, uint32 update_timestamp) {
 	}
 	if (m_last_ucss_update < update_timestamp)
 		m_ucss_available = ucss_available;
+}
+
+int Zone::GetNpcPositionUpdateDistance() const
+{
+	return npc_position_update_distance;
+}
+
+void Zone::SetNpcPositionUpdateDistance(int in_npc_position_update_distance)
+{
+	Zone::npc_position_update_distance = in_npc_position_update_distance;
+}
+
+void Zone::CalculateNpcUpdateDistanceSpread()
+{
+	float max_x = 0;
+	float max_y = 0;
+	float min_x = 0;
+	float min_y = 0;
+
+	auto &mob_list = entity_list.GetMobList();
+
+	for (auto &it : mob_list) {
+		Mob *entity = it.second;
+		if (!entity->IsNPC()) {
+			continue;
+		}
+
+		if (entity->GetX() <= min_x) {
+			min_x = entity->GetX();
+		}
+
+		if (entity->GetY() <= min_y) {
+			min_y = entity->GetY();
+		}
+
+		if (entity->GetX() >= max_x) {
+			max_x = entity->GetX();
+		}
+
+		if (entity->GetY() >= max_y) {
+			max_y = entity->GetY();
+		}
+	}
+
+	int x_spread        = int(abs(max_x - min_x));
+	int y_spread        = int(abs(max_y - min_y));
+	int combined_spread = int(abs((x_spread + y_spread) / 2));
+	int update_distance = EQEmu::ClampLower(int(combined_spread / 4), int(zone->GetMaxMovementUpdateRange()));
+
+	SetNpcPositionUpdateDistance(update_distance);
+
+	Log(Logs::General, Logs::Debug,
+		"NPC update spread distance set to [%i] combined_spread [%i]",
+		update_distance,
+		combined_spread
+	);
 }

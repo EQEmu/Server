@@ -25,6 +25,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 #include "../common/string_util.h"
 #include "../common/eqemu_logsys.h"
+#include "../common/eqemu_logsys_fmt.h"
 #include "../common/queue.h"
 #include "../common/timer.h"
 #include "../common/eq_packet.h"
@@ -122,7 +123,7 @@ int main(int argc, char** argv) {
 	if (!std::ifstream("eqemu_config.json")) {
 		CheckForServerScript(true);
 		/* Run EQEmu Server script (Checks for database updates) */
-		system("perl eqemu_server.pl convert_xml");
+		if(system("perl eqemu_server.pl convert_xml"));
 	}
 	else {
 		/* Download EQEmu Server Maintenance Script if doesn't exist */
@@ -497,11 +498,12 @@ int main(int argc, char** argv) {
 		web_interface.RemoveConnection(connection);
 	});
 
-	EQ::Net::EQStreamManagerOptions opts(9000, false, false);
+	EQStreamManagerInterfaceOptions opts(9000, false, false);
 	opts.daybreak_options.resend_delay_ms = RuleI(Network, ResendDelayBaseMS);
 	opts.daybreak_options.resend_delay_factor = RuleR(Network, ResendDelayFactor);
 	opts.daybreak_options.resend_delay_min = RuleI(Network, ResendDelayMinMS);
 	opts.daybreak_options.resend_delay_max = RuleI(Network, ResendDelayMaxMS);
+	opts.daybreak_options.outgoing_data_rate = RuleR(Network, ClientDataRate);
 
 	EQ::Net::EQStreamManager eqsm(opts);
 
@@ -520,7 +522,7 @@ int main(int argc, char** argv) {
 
 	eqsm.OnNewConnection([&stream_identifier](std::shared_ptr<EQ::Net::EQStream> stream) {
 		stream_identifier.AddStream(stream);
-		LogF(Logs::Detail, Logs::World_Server, "New connection from IP {0}:{1}", stream->RemoteEndpoint(), ntohs(stream->GetRemotePort()));
+		LogF(Logs::Detail, Logs::World_Server, "New connection from IP {0}:{1}", stream->GetRemoteIP(), ntohs(stream->GetRemotePort()));
 	});
 
 	while (RunLoops) {
@@ -625,9 +627,9 @@ void CheckForServerScript(bool force_download) {
 
 		std::cout << "Pulling down EQEmu Server Maintenance Script (eqemu_server.pl)..." << std::endl;
 #ifdef _WIN32
-		system("perl -MLWP::UserAgent -e \"require LWP::UserAgent;  my $ua = LWP::UserAgent->new; $ua->timeout(10); $ua->env_proxy; my $response = $ua->get('https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/eqemu_server.pl'); if ($response->is_success){ open(FILE, '> eqemu_server.pl'); print FILE $response->decoded_content; close(FILE); }\"");
+		if(system("perl -MLWP::UserAgent -e \"require LWP::UserAgent;  my $ua = LWP::UserAgent->new; $ua->timeout(10); $ua->env_proxy; my $response = $ua->get('https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/eqemu_server.pl'); if ($response->is_success){ open(FILE, '> eqemu_server.pl'); print FILE $response->decoded_content; close(FILE); }\""));
 #else
-		system("wget -N --no-check-certificate --quiet -O eqemu_server.pl https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/eqemu_server.pl");
+		if(system("wget -N --no-check-certificate --quiet -O eqemu_server.pl https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/eqemu_server.pl"));
 #endif
 	}
 }

@@ -90,23 +90,6 @@ public:
 	bool ack_req;
 };
 
-enum { //Type arguments to the Message* routines.
-	//all not explicitly listed are the same grey color
-	clientMessageWhite0 = 0,
-	clientMessageLoot = 2, //dark green
-	clientMessageTradeskill = 4, //light blue
-	clientMessageTell = 5, //magenta
-	clientMessageWhite = 7,
-	clientMessageWhite2 = 10,
-	clientMessageLightGrey = 12,
-	clientMessageError = 13, //red
-	clientMessageGreen = 14,
-	clientMessageYellow = 15,
-	clientMessageBlue = 16,
-	clientMessageGroup = 18, //cyan
-	clientMessageWhite3 = 20,
-};
-
 #define SPELLBAR_UNLOCK 0x2bc
 enum { //scribing argument to MemorizeSpell
 	memSpellUnknown = -1, // this modifies some state data
@@ -295,11 +278,11 @@ public:
 	void SendBazaarWelcome();
 	void DyeArmor(EQEmu::TintProfile* dye);
 	uint8 SlotConvert(uint8 slot,bool bracer=false);
-	void Message_StringID(uint32 type, uint32 string_id, uint32 distance = 0);
-	void Message_StringID(uint32 type, uint32 string_id, const char* message,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0, uint32 distance = 0);
+	void MessageString(uint32 type, uint32 string_id, uint32 distance = 0);
+	void MessageString(uint32 type, uint32 string_id, const char* message,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0, uint32 distance = 0);
 	bool FilteredMessageCheck(Mob *sender, eqFilterType filter);
-	void FilteredMessage_StringID(Mob *sender, uint32 type, eqFilterType filter, uint32 string_id);
-	void FilteredMessage_StringID(Mob *sender, uint32 type, eqFilterType filter,
+	void FilteredMessageString(Mob *sender, uint32 type, eqFilterType filter, uint32 string_id);
+	void FilteredMessageString(Mob *sender, uint32 type, eqFilterType filter,
 					uint32 string_id, const char *message1, const char *message2 = nullptr,
 					const char *message3 = nullptr, const char *message4 = nullptr,
 					const char *message5 = nullptr, const char *message6 = nullptr,
@@ -338,11 +321,9 @@ public:
 	void QueuePacket(const EQApplicationPacket* app, bool ack_req = true, CLIENT_CONN_STATUS = CLIENT_CONNECTINGALL, eqFilterType filter=FilterNone);
 	void FastQueuePacket(EQApplicationPacket** app, bool ack_req = true, CLIENT_CONN_STATUS = CLIENT_CONNECTINGALL);
 	void ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_skill, const char* orig_message, const char* targetname=nullptr);
-	void ChannelMessageSend(const char* from, const char* to, uint8 chan_num, uint8 language, const char* message, ...);
 	void ChannelMessageSend(const char* from, const char* to, uint8 chan_num, uint8 language, uint8 lang_skill, const char* message, ...);
 	void Message(uint32 type, const char* message, ...);
 	void FilteredMessage(Mob *sender, uint32 type, eqFilterType filter, const char* message, ...);
-	void QuestJournalledMessage(const char *npcname, const char* message);
 	void VoiceMacroReceived(uint32 Type, char *Target, uint32 MacroNumber);
 	void SendSound();
 	void LearnRecipe(uint32 recipeID);
@@ -373,9 +354,9 @@ public:
 	inline bool ClientDataLoaded() const { return client_data_loaded; }
 	inline bool Connected() const { return (client_state == CLIENT_CONNECTED); }
 	inline bool InZone() const { return (client_state == CLIENT_CONNECTED || client_state == CLIENT_LINKDEAD); }
-	inline void Kick() { client_state = CLIENT_KICKED; }
 	inline void Disconnect() { eqs->Close(); client_state = DISCONNECTED; }
 	inline bool IsLD() const { return (bool) (client_state == CLIENT_LINKDEAD); }
+	void Kick(const std::string &reason);
 	void WorldKick();
 	inline uint8 GetAnon() const { return m_pp.anon; }
 	inline PlayerProfile_Struct& GetPP() { return m_pp; }
@@ -781,6 +762,8 @@ public:
 	void UnmemSpell(int slot, bool update_client = true);
 	void UnmemSpellBySpellID(int32 spell_id);
 	void UnmemSpellAll(bool update_client = true);
+	uint16 FindMemmedSpellBySlot(int slot);
+	int MemmedCount();
 	void ScribeSpell(uint16 spell_id, int slot, bool update_client = true);
 	void UnscribeSpell(int slot, bool update_client = true);
 	void UnscribeSpellAll(bool update_client = true);
@@ -791,7 +774,9 @@ public:
 	uint32 GetCharMaxLevelFromQGlobal();
 	uint32 GetCharMaxLevelFromBucket();
 
+	inline bool IsStanding() const {return (playeraction == 0);}
 	inline bool IsSitting() const {return (playeraction == 1);}
+	inline bool IsCrouching() const {return (playeraction == 2);}
 	inline bool IsBecomeNPC() const { return npcflag; }
 	inline uint8 GetBecomeNPCLevel() const { return npclevel; }
 	inline void SetBecomeNPC(bool flag) { npcflag = flag; }
@@ -1307,6 +1292,9 @@ public:
 
 	uint32 trapid; //ID of trap player has triggered. This is cleared when the player leaves the trap's radius, or it despawns.
 
+	void SetLastPositionBeforeBulkUpdate(glm::vec4 in_last_position_before_bulk_update);
+	glm::vec4 &GetLastPositionBeforeBulkUpdate();
+
 protected:
 	friend class Mob;
 	void CalcItemBonuses(StatBonuses* newbon);
@@ -1515,6 +1503,7 @@ private:
 	Timer forget_timer; // our 2 min everybody forgets you timer
 	Timer autosave_timer;
 	Timer client_scan_npc_aggro_timer;
+	Timer client_zone_wide_full_position_update_timer;
 	Timer tribute_timer;
 
 	Timer proximity_timer;
@@ -1537,6 +1526,7 @@ private:
 	Timer position_update_timer; /* Timer used when client hasn't updated within a 10 second window */
 
 	glm::vec3 m_Proximity;
+	glm::vec4 last_position_before_bulk_update;
 
 	void BulkSendInventoryItems();
 
@@ -1638,18 +1628,35 @@ private:
 #ifdef BOTS
 	struct BotOwnerOptions {
 		bool death_marquee;
+		bool stats_update;
+		bool spawn_message_say;
+		bool spawn_message_tell;
+		bool spawn_message_class_specific;
 	};
 
 	BotOwnerOptions bot_owner_options;
 
 	const BotOwnerOptions DefaultBotOwnerOptions = {
-		false // death_marquee
+		false,	// death_marquee
+		false,	// stats_update
+		false,	// spawn_message_say
+		true,	// spawn_message_tell
+		true	// spawn_message_class_specific
 	};
 
 public:
 	void SetBotOptionDeathMarquee(bool flag) { bot_owner_options.death_marquee = flag; }
+	void SetBotOptionStatsUpdate(bool flag) { bot_owner_options.stats_update = flag; }
+	void SetBotOptionSpawnMessageSay() { bot_owner_options.spawn_message_say = true; bot_owner_options.spawn_message_tell = false; }
+	void SetBotOptionSpawnMessageTell() { bot_owner_options.spawn_message_say = false; bot_owner_options.spawn_message_tell = true; }
+	void SetBotOptionSpawnMessageSilent() { bot_owner_options.spawn_message_say = false; bot_owner_options.spawn_message_tell = false; }
+	void SetBotOptionSpawnMessageClassSpecific(bool flag) { bot_owner_options.spawn_message_class_specific = flag; }
 
 	bool GetBotOptionDeathMarquee() const { return bot_owner_options.death_marquee; }
+	bool GetBotOptionStatsUpdate() const { return bot_owner_options.stats_update; }
+	bool GetBotOptionSpawnMessageSay() const { return bot_owner_options.spawn_message_say; }
+	bool GetBotOptionSpawnMessageTell() const { return bot_owner_options.spawn_message_tell; }
+	bool GetBotOptionSpawnMessageClassSpecific() const { return bot_owner_options.spawn_message_class_specific; }
 
 private:		
 #endif

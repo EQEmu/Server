@@ -11,6 +11,10 @@
 #include "aa_ability.h"
 #include "event_codes.h"
 
+#ifdef BOTS
+#include "bot_database.h"
+#endif
+
 class Client;
 class Corpse;
 class Merc;
@@ -382,7 +386,21 @@ public:
 	bool	LoadAlternateAdvancement(Client *c);
 
 	/* Zone related   */
-	bool		GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct *data, bool &can_bind, bool &can_combat, bool &can_levitate, bool &can_castoutdoor, bool &is_city, bool &is_hotzone, bool &allow_mercs, uint8 &zone_type, int &ruleset, char **map_filename);
+	bool		GetZoneCFG(
+		uint32 zoneid, 
+		uint16 instance_id, 
+		NewZone_Struct *data, 
+		bool &can_bind, 
+		bool &can_combat, 
+		bool &can_levitate, 
+		bool &can_castoutdoor, 
+		bool &is_city, 
+		bool &is_hotzone, 
+		bool &allow_mercs, 
+		double &max_movement_update_range, 
+		uint8 &zone_type, 
+		int &ruleset, 
+		char **map_filename);
 	bool		SaveZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct* zd);
 	bool		LoadStaticZonePoints(LinkedList<ZonePoint*>* zone_point_list,const char* zonename, uint32 version);
 	bool		UpdateZoneSafeCoords(const char* zonename, const glm::vec3& location);
@@ -391,7 +409,7 @@ public:
 
 	/* Spawns and Spawn Points  */
 	bool		LoadSpawnGroups(const char* zone_name, uint16 version, SpawnGroupList* spawn_group_list);
-	bool		LoadSpawnGroupsByID(int spawngroupid, SpawnGroupList* spawn_group_list);
+	bool		LoadSpawnGroupsByID(int spawn_group_id, SpawnGroupList* spawn_group_list);
 	bool		PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spawn2_list, int16 version, uint32 repopdelay = 0);
 	bool		PopulateZoneSpawnListClose(uint32 zoneid, LinkedList<Spawn2*> &spawn2_list, int16 version, const glm::vec4& client_position, uint32 repop_distance);
 	Spawn2*		LoadSpawn2(LinkedList<Spawn2*> &spawn2_list, uint32 spawn2id, uint32 timeleft);
@@ -534,6 +552,11 @@ public:
 
 	/* Things which really dont belong here... */
 	int16	CommandRequirement(const char* commandname);
+
+#ifdef BOTS
+	// bot database add-on to eliminate the need for a second database connection
+	BotDatabase botdb;
+#endif
 
 protected:
 	void ZDBInitVars();

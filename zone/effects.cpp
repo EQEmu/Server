@@ -122,11 +122,12 @@ int32 Mob::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 			else if (IsNPC() && CastToNPC()->GetSpellScale())
 				value = int(static_cast<float>(value) * CastToNPC()->GetSpellScale() / 100.0f);
 
-			entity_list.MessageClose_StringID(this, true, 100, MT_SpellCrits,
-					OTHER_CRIT_BLAST, GetName(), itoa(-value));
+			entity_list.MessageCloseString(
+				this, true, 100, Chat::SpellCrit,
+				OTHER_CRIT_BLAST, GetName(), itoa(-value));
 
 			if (IsClient())
-				Message_StringID(MT_SpellCrits, YOU_CRIT_BLAST, itoa(-value));
+				MessageString(Chat::SpellCrit, YOU_CRIT_BLAST, itoa(-value));
 
 			return value;
 		}
@@ -306,11 +307,12 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 			value = int(static_cast<float>(value) * CastToNPC()->GetHealScale() / 100.0f);
 
 		if (Critical) {
-			entity_list.MessageClose_StringID(this, true, 100, MT_SpellCrits,
-					OTHER_CRIT_HEAL, GetName(), itoa(value));
+			entity_list.MessageCloseString(
+				this, true, 100, Chat::SpellCrit,
+				OTHER_CRIT_HEAL, GetName(), itoa(value));
 
 			if (IsClient())
-				Message_StringID(MT_SpellCrits, YOU_CRIT_HEAL, itoa(value));
+				MessageString(Chat::SpellCrit, YOU_CRIT_HEAL, itoa(value));
 		}
 
 		return value;
@@ -432,13 +434,13 @@ bool Client::TrainDiscipline(uint32 itemid) {
 	//get the item info
 	const EQEmu::ItemData *item = database.GetItem(itemid);
 	if(item == nullptr) {
-		Message(13, "Unable to find the tome you turned in!");
+		Message(Chat::Red, "Unable to find the tome you turned in!");
 		Log(Logs::General, Logs::Error, "Unable to find turned in tome id %lu\n", (unsigned long)itemid);
 		return(false);
 	}
 
 	if (!item->IsClassCommon() || item->ItemType != EQEmu::item::ItemTypeSpell) {
-		Message(13, "Invalid item type, you cannot learn from this item.");
+		Message(Chat::Red, "Invalid item type, you cannot learn from this item.");
 		//summon them the item back...
 		SummonItem(itemid);
 		return(false);
@@ -462,7 +464,7 @@ bool Client::TrainDiscipline(uint32 itemid) {
 		item->Name[5] == ':' &&
 		item->Name[6] == ' '
 		)) {
-		Message(13, "This item is not a tome.");
+		Message(Chat::Red, "This item is not a tome.");
 		//summon them the item back...
 		SummonItem(itemid);
 		return(false);
@@ -470,7 +472,7 @@ bool Client::TrainDiscipline(uint32 itemid) {
 
 	int myclass = GetClass();
 	if(myclass == WIZARD || myclass == ENCHANTER || myclass == MAGICIAN || myclass == NECROMANCER) {
-		Message(13, "Your class cannot learn from this tome.");
+		Message(Chat::Red, "Your class cannot learn from this tome.");
 		//summon them the item back...
 		SummonItem(itemid);
 		return(false);
@@ -480,7 +482,7 @@ bool Client::TrainDiscipline(uint32 itemid) {
 	//can we use the item?
 	uint32 cbit = 1 << (myclass-1);
 	if(!(item->Classes & cbit)) {
-		Message(13, "Your class cannot learn from this tome.");
+		Message(Chat::Red, "Your class cannot learn from this tome.");
 		//summon them the item back...
 		SummonItem(itemid);
 		return(false);
@@ -488,7 +490,7 @@ bool Client::TrainDiscipline(uint32 itemid) {
 
 	uint32 spell_id = item->Scroll.Effect;
 	if(!IsValidSpell(spell_id)) {
-		Message(13, "This tome contains invalid knowledge.");
+		Message(Chat::Red, "This tome contains invalid knowledge.");
 		return(false);
 	}
 
@@ -496,14 +498,14 @@ bool Client::TrainDiscipline(uint32 itemid) {
 	const SPDat_Spell_Struct &spell = spells[spell_id];
 	uint8 level_to_use = spell.classes[myclass - 1];
 	if(level_to_use == 255) {
-		Message(13, "Your class cannot learn from this tome.");
+		Message(Chat::Red, "Your class cannot learn from this tome.");
 		//summon them the item back...
 		SummonItem(itemid);
 		return(false);
 	}
 
 	if(level_to_use > GetLevel()) {
-		Message(13, "You must be at least level %d to learn this discipline.", level_to_use);
+		Message(Chat::Red, "You must be at least level %d to learn this discipline.", level_to_use);
 		//summon them the item back...
 		SummonItem(itemid);
 		return(false);
@@ -513,7 +515,7 @@ bool Client::TrainDiscipline(uint32 itemid) {
 	int r;
 	for(r = 0; r < MAX_PP_DISCIPLINES; r++) {
 		if(m_pp.disciplines.values[r] == spell_id) {
-			Message(13, "You already know this discipline.");
+			Message(Chat::Red, "You already know this discipline.");
 			//summon them the item back...
 			SummonItem(itemid);
 			return(false);
@@ -525,7 +527,7 @@ bool Client::TrainDiscipline(uint32 itemid) {
 			return(true);
 		}
 	}
-	Message(13, "You have learned too many disciplines and can learn no more.");
+	Message(Chat::Red, "You have learned too many disciplines and can learn no more.");
 	return(false);
 }
 
@@ -537,7 +539,7 @@ void Client::TrainDiscBySpellID(int32 spell_id)
 			m_pp.disciplines.values[i] = spell_id;
 			database.SaveCharacterDisc(this->CharacterID(), i, spell_id);
 			SendDisciplineUpdate();
-			Message(15, "You have learned a new combat ability!");
+			Message(Chat::Yellow, "You have learned a new combat ability!");
 			return;
 		}
 	}
@@ -581,7 +583,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 
 	//make sure we can use it..
 	if(!IsValidSpell(spell_id)) {
-		Message(13, "This tome contains invalid knowledge.");
+		Message(Chat::Red, "This tome contains invalid knowledge.");
 		return(false);
 	}
 
@@ -589,13 +591,13 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 	const SPDat_Spell_Struct &spell = spells[spell_id];
 	uint8 level_to_use = spell.classes[GetClass() - 1];
 	if(level_to_use == 255) {
-		Message(13, "Your class cannot learn from this tome.");
+		Message(Chat::Red, "Your class cannot learn from this tome.");
 		//should summon them a new one...
 		return(false);
 	}
 
 	if(level_to_use > GetLevel()) {
-		Message_StringID(13, DISC_LEVEL_USE_ERROR);
+		MessageString(Chat::Red, DISC_LEVEL_USE_ERROR);
 		//should summon them a new one...
 		return(false);
 	}
@@ -607,7 +609,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 
 	// sneak attack discs require you to be hidden for 4 seconds before use
 	if (spell.sneak && (!hidden || (hidden && (Timer::GetCurrentTime() - tmHidden) < 4000))) {
-		Message_StringID(MT_SpellFailure, SNEAK_RESTRICT);
+		MessageString(Chat::SpellFailure, SNEAK_RESTRICT);
 		return false;
 	}
 
@@ -621,7 +623,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 		/*char val1[20]={0};*/	//unused
 		/*char val2[20]={0};*/	//unused
 		uint32 remain = p_timers.GetRemainingTime(DiscTimer);
-		//Message_StringID(0, DISCIPLINE_CANUSEIN, ConvertArray((remain)/60,val1), ConvertArray(remain%60,val2));
+		//MessageString(Chat::White, DISCIPLINE_CANUSEIN, ConvertArray((remain)/60,val1), ConvertArray(remain%60,val2));
 		Message(0, "You can use this discipline in %d minutes %d seconds.", ((remain)/60), (remain%60));
 		return(false);
 	}

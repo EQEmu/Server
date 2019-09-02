@@ -413,7 +413,7 @@ namespace EQEmu
 		int32	SkillModMax;	// Max skill point modification
 		uint32	SkillModType;	// Type of skill for SkillModValue to apply to
 		uint32	BaneDmgRace;	// Bane Damage Race
-		int8	BaneDmgAmt;		// Bane Damage Body Amount
+		int32	BaneDmgAmt;		// Bane Damage Body Amount
 		uint32	BaneDmgBody;	// Bane Damage Body
 		bool	Magic;			// True=Magic Item, False=not
 		int32	CastTime_;

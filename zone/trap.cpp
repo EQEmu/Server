@@ -373,13 +373,13 @@ void EntityList::GetTrapInfo(Client* client)
 		if (cur->IsTrap())
 		{
 			bool isset = (cur->chkarea_timer.Enabled() && !cur->reset_timer.Enabled());
-			client->Message(CC_Default, " Trap: (%d) found at %0.2f,%0.2f,%0.2f. Times Triggered: %d Is Active: %d Group: %d Message: %s", cur->trap_id, cur->m_Position.x, cur->m_Position.y, cur->m_Position.z, cur->times_triggered, isset, cur->group, cur->message.c_str());
+			client->Message(Chat::Default, " Trap: (%d) found at %0.2f,%0.2f,%0.2f. Times Triggered: %d Is Active: %d Group: %d Message: %s", cur->trap_id, cur->m_Position.x, cur->m_Position.y, cur->m_Position.z, cur->times_triggered, isset, cur->group, cur->message.c_str());
 			++count;
 		}
 		++it;
 	}
 
-	client->Message(CC_Default, "%d traps found.", count);
+	client->Message(Chat::Default, "%d traps found.", count);
 }
 
 void EntityList::ClearTrapPointers()

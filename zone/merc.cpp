@@ -1618,7 +1618,7 @@ void Merc::AI_Process() {
 					{
 						if(zone->random.Roll(flurrychance))
 						{
-							Message_StringID(MT_NPCFlurry, YOU_FLURRY);
+							MessageString(Chat::NPCFlurry, YOU_FLURRY);
 							Attack(GetTarget(), EQEmu::invslot::slotPrimary, false);
 							Attack(GetTarget(), EQEmu::invslot::slotPrimary, false);
 						}
@@ -1637,11 +1637,11 @@ void Merc::AI_Process() {
 				// TODO: Do mercs berserk? Find this out on live...
 				//if (GetClass() == WARRIOR || GetClass() == BERSERKER) {
 				//      if(GetHP() > 0 && !berserk && this->GetHPRatio() < 30) {
-				//              entity_list.MessageClose_StringID(this, false, 200, 0, BERSERK_START, GetName());
+				//              entity_list.MessageCloseString(this, false, 200, 0, BERSERK_START, GetName());
 				//              this->berserk = true;
 				//      }
 				//      if (berserk && this->GetHPRatio() > 30) {
-				//              entity_list.MessageClose_StringID(this, false, 200, 0, BERSERK_END, GetName());
+				//              entity_list.MessageCloseString(this, false, 200, 0, BERSERK_END, GetName());
 				//              this->berserk = false;
 				//      }
 				//}
@@ -2623,7 +2623,7 @@ int16 Merc::GetFocusEffect(focusType type, uint16 spell_id) {
 			realTotal = CalcFocusEffect(type, UsedFocusID, spell_id);
 
 		if (realTotal != 0 && UsedItem)
-			Message_StringID(MT_Spells, BEGINS_TO_GLOW, UsedItem->Name);
+			MessageString(Chat::Spells, BEGINS_TO_GLOW, UsedItem->Name);
 	}
 
 	//Check if spell focus effect exists for the client.
@@ -5321,10 +5321,10 @@ void Client::UpdateMercTimer()
 			Log(Logs::General, Logs::Mercenaries, "UpdateMercTimer Complete for %s.", GetName());
 
 			// Normal upkeep charge message
-			//Message(7, "You have been charged a mercenary upkeep cost of %i plat, and %i gold and your mercenary upkeep cost timer has been reset to 15 minutes.", upkeep_plat, upkeep_gold, (int)(RuleI(Mercs, UpkeepIntervalMS) / 1000 / 60));
+			//Message(Chat::LightGray, "You have been charged a mercenary upkeep cost of %i plat, and %i gold and your mercenary upkeep cost timer has been reset to 15 minutes.", upkeep_plat, upkeep_gold, (int)(RuleI(Mercs, UpkeepIntervalMS) / 1000 / 60));
 
 			// Message below given when too low level to be charged
-			//Message(7, "Your mercenary waived an upkeep cost of %i plat, and %i gold or %i %s and your mercenary upkeep cost timer has been reset to %i minutes", upkeep_plat, upkeep_gold, 1, "Bayle Marks", (int)(RuleI(Mercs, UpkeepIntervalMS) / 1000 / 60));
+			//Message(Chat::LightGray, "Your mercenary waived an upkeep cost of %i plat, and %i gold or %i %s and your mercenary upkeep cost timer has been reset to %i minutes", upkeep_plat, upkeep_gold, 1, "Bayle Marks", (int)(RuleI(Mercs, UpkeepIntervalMS) / 1000 / 60));
 		}
 	}
 }

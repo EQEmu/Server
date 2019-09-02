@@ -1099,10 +1099,6 @@ void PerlembParser::ExportZoneVariables(std::string &package_name) {
 	}
 }
 
-#define HASITEM_FIRST 0
-#define HASITEM_LAST 29 // this includes worn plus 8 base slots
-#define HASITEM_ISNULLITEM(item) ((item==-1) || (item==0))
-
 void PerlembParser::ExportItemVariables(std::string &package_name, Mob *mob) {
 	if(mob && mob->IsClient())
 	{
@@ -1111,11 +1107,11 @@ void PerlembParser::ExportItemVariables(std::string &package_name, Mob *mob) {
 		//start with an empty hash
 		perl->eval(std::string("%").append(hashname).append(" = ();").c_str());
 
-		for(int slot = HASITEM_FIRST; slot <= HASITEM_LAST; slot++)
+		for(int slot = EQEmu::invslot::EQUIPMENT_BEGIN; slot <= EQEmu::invslot::GENERAL_END; slot++)
 		{
 			char *hi_decl=nullptr;
 			int itemid = mob->CastToClient()->GetItemIDAt(slot);
-			if(!HASITEM_ISNULLITEM(itemid))
+			if(itemid != -1 && itemid != 0)
 			{
 				MakeAnyLenString(&hi_decl, "push (@{$%s{%d}},%d);", hashname.c_str(), itemid, slot);
 				perl->eval(hi_decl);
@@ -1129,17 +1125,13 @@ void PerlembParser::ExportItemVariables(std::string &package_name, Mob *mob) {
 		perl->eval(std::string("%").append(hashname).append(" = ();").c_str());
 		char *hi_decl = nullptr;
 		int itemid = mob->CastToClient()->GetItemIDAt(EQEmu::invslot::slotCursor);
-		if(!HASITEM_ISNULLITEM(itemid)) {
+		if(itemid != -1 && itemid != 0) {
 			MakeAnyLenString(&hi_decl, "push (@{$%s{%d}},%d);",hashname.c_str(), itemid, EQEmu::invslot::slotCursor);
 			perl->eval(hi_decl);
 			safe_delete_array(hi_decl);
 		}
 	}
 }
-
-#undef HASITEM_FIRST
-#undef HASITEM_LAST
-#undef HASITEM_ISNULLITEM
 
 void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID event, uint32 objid, const char * data,
 	NPC* npcmob, EQEmu::ItemInstance* item_inst, Mob* mob, uint32 extradata, std::vector<EQEmu::Any> *extra_pointers)

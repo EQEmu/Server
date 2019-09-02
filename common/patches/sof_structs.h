@@ -885,7 +885,7 @@ struct PlayerProfile_Struct //23576 Octets
 /*00060*/ BindStruct binds[5];			// Bind points (primary is first)
 /*00160*/ uint32  deity;				// deity
 /*00164*/ uint32  intoxication;			// Alcohol level (in ticks till sober?)
-/*00168*/ uint32  spellSlotRefresh[spells::SPELL_GEM_COUNT]; // Refresh time (millis) - 4 Octets Each
+/*00168*/ uint32  spellSlotRefresh[spells::SPELL_GEM_PROFILE_SIZE]; // Refresh time (millis) - 4 Octets Each
 /*00208*/ uint32  abilitySlotRefresh;
 /*00212*/ uint8   haircolor;			// Player hair color
 /*00213*/ uint8   beardcolor;			// Player beard color
@@ -912,7 +912,7 @@ struct PlayerProfile_Struct //23576 Octets
 /*04173*/ uint8 unknown02264[147];		// was [139]
 /*04312*/ uint32   spell_book[spells::SPELLBOOK_SIZE];	// List of the Spells in spellbook 480 = 60 pages
 /*06232*/ uint8   unknown4184[128];		// was [136]
-/*06396*/ uint32   mem_spells[spells::SPELL_GEM_COUNT]; // List of spells memorized
+/*06396*/ uint32   mem_spells[spells::SPELL_GEM_PROFILE_SIZE]; // List of spells memorized
 /*06436*/ uint8 unknown04396[28];		//#### uint8 unknown04396[32]; in Titanium ####[28]
 /*06464*/ uint32  platinum;				// Platinum Pieces on player
 /*06468*/ uint32  gold;					// Gold Pieces on player
@@ -3768,7 +3768,7 @@ struct AnnoyingZoneUnknown_Struct {
 };
 
 struct LoadSpellSet_Struct {
-	uint32 spell[spells::SPELL_GEM_COUNT];
+	uint32 spell[spells::SPELL_GEM_PROFILE_SIZE];
 	uint32 unknown;
 };
 

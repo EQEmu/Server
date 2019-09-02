@@ -81,20 +81,13 @@ namespace Console {
 	};
 }
 
-enum GameChatColor {
-	yellow       = 15,
-	red          = 13,
-	light_green  = 14,
-	light_cyan   = 258,
-	light_purple = 5
-};
-
 /**
  * EQEmuLogSys Constructor
  */
 EQEmuLogSys::EQEmuLogSys()
 {
 	on_log_gmsay_hook      = [](uint16 log_type, const std::string &) {};
+	on_log_console_hook    = [](uint16 debug_level, uint16 log_type, const std::string &) {};
 	bool file_logs_enabled = false;
 	int  log_platform      = 0;
 }
@@ -305,22 +298,22 @@ uint16 EQEmuLogSys::GetGMSayColorFromCategory(uint16 log_category)
 	switch (log_category) {
 		case Logs::Status:
 		case Logs::Normal:
-			return GameChatColor::yellow;
+			return Chat::Yellow;
 		case Logs::MySQLError:
 		case Logs::Error:
-			return GameChatColor::red;
+			return Chat::Red;
 		case Logs::MySQLQuery:
 		case Logs::Debug:
-			return GameChatColor::light_green;
+			return Chat::Lime;
 		case Logs::Quests:
-			return GameChatColor::light_cyan;
+			return Chat::Group;
 		case Logs::Commands:
 		case Logs::Mercenaries:
-			return GameChatColor::light_purple;
+			return Chat::Magenta;
 		case Logs::Crash:
-			return GameChatColor::red;
+			return Chat::Red;
 		default:
-			return GameChatColor::yellow;
+			return Chat::Yellow;
 	}
 }
 
@@ -346,6 +339,8 @@ void EQEmuLogSys::ProcessConsoleMessage(uint16 debug_level, uint16 log_category,
 #else
 	std::cout << EQEmuLogSys::GetLinuxConsoleColorFromCategory(log_category) << message << LC_RESET << std::endl;
 #endif
+
+	on_log_console_hook(debug_level, log_category, message);
 }
 
 /**

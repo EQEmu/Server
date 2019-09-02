@@ -30,6 +30,7 @@ const std::string ucfirst(std::string s);
 std::vector<std::string> split(std::string str_to_split, char delimiter);
 const std::string StringFormat(const char* format, ...);
 const std::string vStringFormat(const char* format, va_list args);
+std::string implode(std::string glue, std::vector<std::string> src);
 std::vector<std::string> SplitString(const std::string &s, char delim);
 std::string EscapeString(const char *src, size_t sz);
 std::string EscapeString(const std::string &s);

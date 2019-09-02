@@ -3,6 +3,7 @@
 
 #include "../common/eq_packet_structs.h"
 #include "../common/linked_list.h"
+#include "../common/json/json.h"
 #include "../common/timer.h"
 #include "../common/rulesys.h"
 #include "../common/servertalk.h"
@@ -60,14 +61,17 @@ public:
 	void	GetCLEIP(uint32 iIP);
 	uint32	GetCLEIPCount(uint32 iLSAccountID);
 	void	DisconnectByIP(uint32 iIP);
-	void	EnforceSessionLimit(uint32 iLSAccountID);
 	void	CLCheckStale();
 	void	CLEKeepAlive(uint32 numupdates, uint32* wid);
 	void	CLEAdd(uint32 iLSID, const char* iLoginName, const char* iLoginKey, int16 iWorldAdmin = 0, uint32 ip = 0, uint8 local=0);
 	void	UpdateClientGuild(uint32 char_id, uint32 guild_id);
+	void	RemoveCLEByLSID(uint32 iLSID);
+	bool    IsAccountInGame(uint32 iLSID);
 
 	int GetClientCount();
 	void GetClients(const char *zone_name, std::vector<ClientListEntry *> &into);
+
+	void GetClientList(Json::Value &response);
 
 private:
 	void OnTick(EQ::Timer *t);
@@ -80,6 +84,7 @@ private:
 	Timer	CLStale_timer;
 	uint32 NextCLEID;
 	LinkedList<ClientListEntry *> clientlist;
+
 
 	std::unique_ptr<EQ::Timer> m_tick;
 };
