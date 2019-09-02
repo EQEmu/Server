@@ -1731,16 +1731,16 @@ void Client::Handle_0x0193(const EQApplicationPacket *app)
 
 void Client::Handle_OP_AAAction(const EQApplicationPacket *app)
 {
-	Log(Logs::Detail, Logs::AA, "Received OP_AAAction");
+	LogAA("Received OP_AAAction");
 
 	if (app->size != sizeof(AA_Action)) {
-		Log(Logs::General, Logs::AA, "Error! OP_AAAction size didnt match!");
+		LogAA("Error! OP_AAAction size didnt match!");
 		return;
 	}
 	AA_Action* action = (AA_Action*)app->pBuffer;
 
 	if (action->action == aaActionActivate) {//AA Hotkey
-		Log(Logs::Detail, Logs::AA, "Activating AA %d", action->ability);
+		LogAA("Activating AA [{}]", action->ability);
 		ActivateAlternateAdvancementAbility(action->ability, action->target_id);
 	}
 	else if (action->action == aaActionBuy) {
@@ -1765,7 +1765,7 @@ void Client::Handle_OP_AAAction(const EQApplicationPacket *app)
 		SendAlternateAdvancementTable();
 	}
 	else {
-		Log(Logs::General, Logs::AA, "Unknown AA action : %u %u %u %d", action->action, action->ability, action->target_id, action->exp_value);
+		LogAA("Unknown AA action : [{}] [{}] [{}] [{}]", action->action, action->ability, action->target_id, action->exp_value);
 	}
 }
 
