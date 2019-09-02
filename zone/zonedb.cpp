@@ -781,14 +781,14 @@ Trader_Struct* ZoneDatabase::LoadTraderItem(uint32 char_id)
 	std::string query = StringFormat("SELECT * FROM trader WHERE char_id = %i ORDER BY slot_id LIMIT 80", char_id);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		Log(Logs::Detail, Logs::Trading, "Failed to load trader information!\n");
+		LogTrading("Failed to load trader information!\n");
 		return loadti;
 	}
 
 	loadti->Code = BazaarTrader_ShowItems;
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		if (atoi(row[5]) >= 80 || atoi(row[4]) < 0) {
-			Log(Logs::Detail, Logs::Trading, "Bad Slot number when trying to load trader information!\n");
+			LogTrading("Bad Slot number when trying to load trader information!\n");
 			continue;
 		}
 
@@ -806,13 +806,13 @@ TraderCharges_Struct* ZoneDatabase::LoadTraderItemWithCharges(uint32 char_id)
 	std::string query = StringFormat("SELECT * FROM trader WHERE char_id=%i ORDER BY slot_id LIMIT 80", char_id);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		Log(Logs::Detail, Logs::Trading, "Failed to load trader information!\n");
+		LogTrading("Failed to load trader information!\n");
 		return loadti;
 	}
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		if (atoi(row[5]) >= 80 || atoi(row[5]) < 0) {
-			Log(Logs::Detail, Logs::Trading, "Bad Slot number when trying to load trader information!\n");
+			LogTrading("Bad Slot number when trying to load trader information!\n");
 			continue;
 		}
 
@@ -832,7 +832,7 @@ EQEmu::ItemInstance* ZoneDatabase::LoadSingleTraderItem(uint32 CharID, int Seria
         return nullptr;
 
 	if (results.RowCount() == 0) {
-        Log(Logs::Detail, Logs::Trading, "Bad result from query\n"); fflush(stdout);
+    LogTrading("Bad result from query\n"); fflush(stdout);
         return nullptr;
     }
 
@@ -845,7 +845,7 @@ EQEmu::ItemInstance* ZoneDatabase::LoadSingleTraderItem(uint32 CharID, int Seria
 	const EQEmu::ItemData *item = database.GetItem(ItemID);
 
 	if(!item) {
-		Log(Logs::Detail, Logs::Trading, "Unable to create item\n");
+		LogTrading("Unable to create item\n");
 		fflush(stdout);
 		return nullptr;
 	}
@@ -855,7 +855,7 @@ EQEmu::ItemInstance* ZoneDatabase::LoadSingleTraderItem(uint32 CharID, int Seria
 
     EQEmu::ItemInstance* inst = database.CreateItem(item);
 	if(!inst) {
-		Log(Logs::Detail, Logs::Trading, "Unable to create item instance\n");
+		LogTrading("Unable to create item instance\n");
 		fflush(stdout);
 		return nullptr;
 	}
@@ -882,7 +882,7 @@ void ZoneDatabase::SaveTraderItem(uint32 CharID, uint32 ItemID, uint32 SerialNum
 }
 
 void ZoneDatabase::UpdateTraderItemCharges(int CharID, uint32 SerialNumber, int32 Charges) {
-	Log(Logs::Detail, Logs::Trading, "ZoneDatabase::UpdateTraderItemCharges(%i, %i, %i)", CharID, SerialNumber, Charges);
+	LogTrading("ZoneDatabase::UpdateTraderItemCharges([{}], [{}], [{}])", CharID, SerialNumber, Charges);
 
 	std::string query = StringFormat("UPDATE trader SET charges = %i WHERE char_id = %i AND serialnumber = %i",
                                     Charges, CharID, SerialNumber);
@@ -895,7 +895,7 @@ void ZoneDatabase::UpdateTraderItemCharges(int CharID, uint32 SerialNumber, int3
 
 void ZoneDatabase::UpdateTraderItemPrice(int CharID, uint32 ItemID, uint32 Charges, uint32 NewPrice) {
 
-	Log(Logs::Detail, Logs::Trading, "ZoneDatabase::UpdateTraderPrice(%i, %i, %i, %i)", CharID, ItemID, Charges, NewPrice);
+	LogTrading("ZoneDatabase::UpdateTraderPrice([{}], [{}], [{}], [{}])", CharID, ItemID, Charges, NewPrice);
 
 	const EQEmu::ItemData *item = database.GetItem(ItemID);
 
@@ -903,7 +903,7 @@ void ZoneDatabase::UpdateTraderItemPrice(int CharID, uint32 ItemID, uint32 Charg
 		return;
 
 	if(NewPrice == 0) {
-		Log(Logs::Detail, Logs::Trading, "Removing Trader items from the DB for CharID %i, ItemID %i", CharID, ItemID);
+		LogTrading("Removing Trader items from the DB for CharID [{}], ItemID [{}]", CharID, ItemID);
 
         std::string query = StringFormat("DELETE FROM trader WHERE char_id = %i AND item_id = %i",CharID, ItemID);
         auto results = QueryDatabase(query);

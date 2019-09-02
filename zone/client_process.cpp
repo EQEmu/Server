@@ -709,7 +709,7 @@ void Client::OnDisconnect(bool hard_disconnect) {
 	Mob *Other = trade->With();
 	if(Other)
 	{
-		Log(Logs::Detail, Logs::Trading, "Client disconnected during a trade. Returning their items.");
+		LogTrading("Client disconnected during a trade. Returning their items");
 		FinishTrade(this);
 
 		if(Other->IsClient())
@@ -976,7 +976,7 @@ uint8 Client::WithCustomer(uint16 NewCustomer){
 	Client* c = entity_list.GetClientByID(CustomerID);
 
 	if(!c) {
-		Log(Logs::Detail, Logs::Trading, "Previous customer has gone away.");
+		LogTrading("Previous customer has gone away");
 		CustomerID = NewCustomer;
 		return 1;
 	}
