@@ -891,7 +891,7 @@ int32 Merc::CalcMaxMana()
 		break;
 			  }
 	default: {
-		Log(Logs::General, Logs::None, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
+		LogDebug("Invalid Class [{}] in CalcMaxMana", GetCasterClass());
 		max_mana = 0;
 		break;
 			 }
@@ -912,7 +912,7 @@ int32 Merc::CalcMaxMana()
 	}
 
 #if EQDEBUG >= 11
-	Log(Logs::General, Logs::None, "Merc::CalcMaxMana() called for %s - returning %d", GetName(), max_mana);
+	LogDebug("Merc::CalcMaxMana() called for [{}] - returning [{}]", GetName(), max_mana);
 #endif
 	return max_mana;
 }

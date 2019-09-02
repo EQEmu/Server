@@ -492,7 +492,7 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 	case CLIENT_LINKDEAD:
 		break;
 	default:
-		Log(Logs::General, Logs::None, "Unknown client_state: %d\n", client_state);
+		LogDebug("Unknown client_state: [{}]\n", client_state);
 		break;
 	}
 
@@ -793,7 +793,7 @@ void Client::CompleteConnect()
 
 	//enforce some rules..
 	if (!CanBeInZone()) {
-		Log(Logs::Detail, Logs::None, "[CLIENT] Kicking char from zone, not allowed here");
+		LogDebug("[CLIENT] Kicking char from zone, not allowed here");
 		GoToSafeCoords(database.GetZoneID("arena"), 0);
 		return;
 	}
@@ -2879,7 +2879,7 @@ void Client::Handle_OP_ApplyPoison(const EQApplicationPacket *app)
 void Client::Handle_OP_Assist(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(EntityId_Struct)) {
-		Log(Logs::General, Logs::None, "Size mismatch in OP_Assist expected %i got %i", sizeof(EntityId_Struct), app->size);
+		LogDebug("Size mismatch in OP_Assist expected [{}] got [{}]", sizeof(EntityId_Struct), app->size);
 		return;
 	}
 
@@ -2912,7 +2912,7 @@ void Client::Handle_OP_Assist(const EQApplicationPacket *app)
 void Client::Handle_OP_AssistGroup(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(EntityId_Struct)) {
-		Log(Logs::General, Logs::None, "Size mismatch in OP_AssistGroup expected %i got %i", sizeof(EntityId_Struct), app->size);
+		LogDebug("Size mismatch in OP_AssistGroup expected [{}] got [{}]", sizeof(EntityId_Struct), app->size);
 		return;
 	}
 	QueuePacket(app);
@@ -3309,7 +3309,7 @@ void Client::Handle_OP_AutoAttack2(const EQApplicationPacket *app)
 void Client::Handle_OP_AutoFire(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(bool)) {
-		Log(Logs::General, Logs::None, "Size mismatch in OP_AutoFire expected %i got %i", sizeof(bool), app->size);
+		LogDebug("Size mismatch in OP_AutoFire expected [{}] got [{}]", sizeof(bool), app->size);
 		DumpPacket(app);
 		return;
 	}
@@ -3344,7 +3344,7 @@ void Client::Handle_OP_Bandolier(const EQApplicationPacket *app)
 		SetBandolier(app);
 		break;
 	default:
-		Log(Logs::General, Logs::None, "Unknown Bandolier action %i", bs->Action);
+		LogDebug("Unknown Bandolier action [{}]", bs->Action);
 		break;
 	}
 }
@@ -3353,7 +3353,7 @@ void Client::Handle_OP_BankerChange(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(BankerChange_Struct) && app->size != 4) //Titanium only sends 4 Bytes for this
 	{
-		Log(Logs::General, Logs::None, "Size mismatch in OP_BankerChange expected %i got %i", sizeof(BankerChange_Struct), app->size);
+		LogDebug("Size mismatch in OP_BankerChange expected [{}] got [{}]", sizeof(BankerChange_Struct), app->size);
 		DumpPacket(app);
 		return;
 	}
@@ -3438,7 +3438,7 @@ void Client::Handle_OP_Barter(const EQApplicationPacket *app)
 
 	if (app->size < 4)
 	{
-		Log(Logs::General, Logs::None, "OP_Barter packet below minimum expected size. The packet was %i bytes.", app->size);
+		LogDebug("OP_Barter packet below minimum expected size. The packet was [{}] bytes", app->size);
 		DumpPacket(app);
 		return;
 	}
@@ -3742,7 +3742,7 @@ void Client::Handle_OP_Bind_Wound(const EQApplicationPacket *app)
 		LogError("Bindwound on non-exsistant mob from [{}]", this->GetName());
 	}
 	else {
-		Log(Logs::General, Logs::None, "BindWound in: to:\'%s\' from=\'%s\'", bindmob->GetName(), GetName());
+		LogDebug("BindWound in: to:\'[{}]\' from=\'[{}]\'", bindmob->GetName(), GetName());
 		BindWound(bindmob, true);
 	}
 	return;
@@ -4206,7 +4206,7 @@ void Client::Handle_OP_ClearBlockedBuffs(const EQApplicationPacket *app)
 
 	if (app->size != 1)
 	{
-		Log(Logs::General, Logs::None, "Size mismatch in OP_ClearBlockedBuffs expected 1 got %i", app->size);
+		LogDebug("Size mismatch in OP_ClearBlockedBuffs expected 1 got [{}]", app->size);
 
 		DumpPacket(app);
 
@@ -4662,7 +4662,7 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Consider_Struct))
 	{
-		Log(Logs::General, Logs::None, "Size mismatch in Consider expected %i got %i", sizeof(Consider_Struct), app->size);
+		LogDebug("Size mismatch in Consider expected [{}] got [{}]", sizeof(Consider_Struct), app->size);
 		return;
 	}
 	Consider_Struct* conin = (Consider_Struct*)app->pBuffer;
@@ -4787,7 +4787,7 @@ void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Consider_Struct))
 	{
-		Log(Logs::General, Logs::None, "Size mismatch in Consider corpse expected %i got %i", sizeof(Consider_Struct), app->size);
+		LogDebug("Size mismatch in Consider corpse expected [{}] got [{}]", sizeof(Consider_Struct), app->size);
 		return;
 	}
 	Consider_Struct* conin = (Consider_Struct*)app->pBuffer;
@@ -5991,7 +5991,7 @@ void Client::Handle_OP_GMEmoteZone(const EQApplicationPacket *app)
 void Client::Handle_OP_GMEndTraining(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(GMTrainEnd_Struct)) {
-		Log(Logs::General, Logs::None, "Size mismatch in OP_GMEndTraining expected %i got %i", sizeof(GMTrainEnd_Struct), app->size);
+		LogDebug("Size mismatch in OP_GMEndTraining expected [{}] got [{}]", sizeof(GMTrainEnd_Struct), app->size);
 		DumpPacket(app);
 		return;
 	}
@@ -6363,7 +6363,7 @@ void Client::Handle_OP_GMToggle(const EQApplicationPacket *app)
 void Client::Handle_OP_GMTraining(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(GMTrainee_Struct)) {
-		Log(Logs::General, Logs::None, "Size mismatch in OP_GMTraining expected %i got %i", sizeof(GMTrainee_Struct), app->size);
+		LogDebug("Size mismatch in OP_GMTraining expected [{}] got [{}]", sizeof(GMTrainee_Struct), app->size);
 		DumpPacket(app);
 		return;
 	}
@@ -6374,7 +6374,7 @@ void Client::Handle_OP_GMTraining(const EQApplicationPacket *app)
 void Client::Handle_OP_GMTrainSkill(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(GMSkillChange_Struct)) {
-		Log(Logs::General, Logs::None, "Size mismatch in OP_GMTrainSkill expected %i got %i", sizeof(GMSkillChange_Struct), app->size);
+		LogDebug("Size mismatch in OP_GMTrainSkill expected [{}] got [{}]", sizeof(GMSkillChange_Struct), app->size);
 		DumpPacket(app);
 		return;
 	}
@@ -6508,7 +6508,7 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 		return;
 	}
 
-	Log(Logs::General, Logs::None, "Member Disband Request from %s\n", GetName());
+	LogDebug("Member Disband Request from [{}]\n", GetName());
 
 	GroupGeneric_Struct* gd = (GroupGeneric_Struct*)app->pBuffer;
 
@@ -6803,7 +6803,7 @@ void Client::Handle_OP_GroupMakeLeader(const EQApplicationPacket *app)
 		if (g->IsLeader(this))
 			g->ChangeLeader(NewLeader);
 		else {
-			Log(Logs::General, Logs::None, "Group /makeleader request originated from non-leader member: %s", GetName());
+			LogDebug("Group /makeleader request originated from non-leader member: [{}]", GetName());
 			DumpPacket(app);
 		}
 	}
@@ -6913,7 +6913,7 @@ void Client::Handle_OP_GroupUpdate(const EQApplicationPacket *app)
 			if (group->IsLeader(this))
 				group->ChangeLeader(newleader);
 			else {
-				Log(Logs::General, Logs::None, "Group /makeleader request originated from non-leader member: %s", GetName());
+				LogDebug("Group /makeleader request originated from non-leader member: [{}]", GetName());
 				DumpPacket(app);
 			}
 		}
@@ -6922,7 +6922,7 @@ void Client::Handle_OP_GroupUpdate(const EQApplicationPacket *app)
 
 	default:
 	{
-		Log(Logs::General, Logs::None, "Received unhandled OP_GroupUpdate requesting action %u", gu->action);
+		LogDebug("Received unhandled OP_GroupUpdate requesting action [{}]", gu->action);
 		DumpPacket(app);
 		return;
 	}
@@ -7992,7 +7992,7 @@ void Client::Handle_OP_Hide(const EQApplicationPacket *app)
 	if (app->size == 4) {
 		auto data = app->ReadUInt32(0);
 		if (data)
-			Log(Logs::Detail, Logs::None, "Got OP_Hide with unexpected data %d", data);
+			LogDebug("Got OP_Hide with unexpected data [{}]", data);
 		return;
 	}
 
@@ -8550,7 +8550,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 	}
 
 	if (slot_id < 0) {
-		Log(Logs::General, Logs::None, "Unknown slot being used by %s, slot being used is: %i", GetName(), request->slot);
+		LogDebug("Unknown slot being used by [{}], slot being used is: [{}]", GetName(), request->slot);
 		return;
 	}
 
@@ -8598,7 +8598,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 	if (spell_id > 0 && (spells[spell_id].targettype == ST_Pet || spells[spell_id].targettype == ST_SummonedPet))
 		target_id = GetPetID();
 
-	Log(Logs::General, Logs::None, "OP ItemVerifyRequest: spell=%i, target=%i, inv=%i", spell_id, target_id, slot_id);
+	LogDebug("OP ItemVerifyRequest: spell=[{}], target=[{}], inv=[{}]", spell_id, target_id, slot_id);
 
 	if (m_inv.SupportsClickCasting(slot_id) || ((item->ItemType == EQEmu::item::ItemTypePotion || item->PotionBelt) && m_inv.SupportsPotionBeltCasting(slot_id))) // sanity check
 	{
@@ -8636,7 +8636,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 
 		if ((spell_id <= 0) && (item->ItemType != EQEmu::item::ItemTypeFood && item->ItemType != EQEmu::item::ItemTypeDrink && item->ItemType != EQEmu::item::ItemTypeAlcohol && item->ItemType != EQEmu::item::ItemTypeSpell))
 		{
-			Log(Logs::General, Logs::None, "Item with no effect right clicked by %s", GetName());
+			LogDebug("Item with no effect right clicked by [{}]", GetName());
 		}
 		else if (inst->IsClassCommon())
 		{
@@ -8713,7 +8713,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 				{
 					if (item->ItemType != EQEmu::item::ItemTypeFood && item->ItemType != EQEmu::item::ItemTypeDrink && item->ItemType != EQEmu::item::ItemTypeAlcohol)
 					{
-						Log(Logs::General, Logs::None, "Error: unknown item->Click.Type (%i)", item->Click.Type);
+						LogDebug("Error: unknown item->Click.Type ([{}])", item->Click.Type);
 					}
 					else
 					{
@@ -8731,7 +8731,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 						else if (item->ItemType == EQEmu::item::ItemTypeAlcohol)
 						{
 #if EQDEBUG >= 1
-							Log(Logs::General, Logs::None, "Drinking Alcohol from slot:%i", slot_id);
+							LogDebug("Drinking Alcohol from slot:[{}]", slot_id);
 #endif
 							// This Seems to be handled in OP_DeleteItem handling
 							//DeleteItemInInventory(slot_id, 1, false);
@@ -8760,7 +8760,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 				}
 				else
 				{
-					Log(Logs::General, Logs::None, "Error: unknown item->Click.Type (%i)", item->Click.Type);
+					LogDebug("Error: unknown item->Click.Type ([{}])", item->Click.Type);
 				}
 			}
 		}
@@ -8902,7 +8902,7 @@ void Client::Handle_OP_LDoNSenseTraps(const EQApplicationPacket *app)
 void Client::Handle_OP_LeadershipExpToggle(const EQApplicationPacket *app)
 {
 	if (app->size != 1) {
-		Log(Logs::General, Logs::None, "Size mismatch in OP_LeadershipExpToggle expected %i got %i", 1, app->size);
+		LogDebug("Size mismatch in OP_LeadershipExpToggle expected [{}] got [{}]", 1, app->size);
 		DumpPacket(app);
 		return;
 	}
@@ -9253,7 +9253,7 @@ void Client::Handle_OP_LoadSpellSet(const EQApplicationPacket *app)
 
 void Client::Handle_OP_Logout(const EQApplicationPacket *app)
 {
-	Log(Logs::Detail, Logs::None, "%s sent a logout packet.", GetName());
+	LogDebug("[{}] sent a logout packet", GetName());
 
 	SendLogoutPackets();
 
@@ -9412,7 +9412,7 @@ void Client::Handle_OP_MercenaryCommand(const EQApplicationPacket *app)
 	if (app->size != sizeof(MercenaryCommand_Struct))
 	{
 		Message(Chat::Red, "Size mismatch in OP_MercenaryCommand expected %i got %i", sizeof(MercenaryCommand_Struct), app->size);
-		Log(Logs::General, Logs::None, "Size mismatch in OP_MercenaryCommand expected %i got %i", sizeof(MercenaryCommand_Struct), app->size);
+		LogDebug("Size mismatch in OP_MercenaryCommand expected [{}] got [{}]", sizeof(MercenaryCommand_Struct), app->size);
 		DumpPacket(app);
 		return;
 	}
@@ -9467,7 +9467,7 @@ void Client::Handle_OP_MercenaryDataRequest(const EQApplicationPacket *app)
 	// The payload is 4 bytes. The EntityID of the Mercenary Liason which are of class 71.
 	if (app->size != sizeof(MercenaryMerchantShopRequest_Struct))
 	{
-		Log(Logs::General, Logs::None, "Size mismatch in OP_MercenaryDataRequest expected 4 got %i", app->size);
+		LogDebug("Size mismatch in OP_MercenaryDataRequest expected 4 got [{}]", app->size);
 
 		DumpPacket(app);
 
@@ -9599,7 +9599,7 @@ void Client::Handle_OP_MercenaryDataUpdateRequest(const EQApplicationPacket *app
 	if (app->size != 0)
 	{
 		Message(Chat::Red, "Size mismatch in OP_MercenaryDataUpdateRequest expected 0 got %i", app->size);
-		Log(Logs::General, Logs::None, "Size mismatch in OP_MercenaryDataUpdateRequest expected 0 got %i", app->size);
+		LogDebug("Size mismatch in OP_MercenaryDataUpdateRequest expected 0 got [{}]", app->size);
 		DumpPacket(app);
 		return;
 	}
@@ -9618,7 +9618,7 @@ void Client::Handle_OP_MercenaryDismiss(const EQApplicationPacket *app)
 	if (app->size > 1)
 	{
 		Message(Chat::Red, "Size mismatch in OP_MercenaryDismiss expected 0 got %i", app->size);
-		Log(Logs::General, Logs::None, "Size mismatch in OP_MercenaryDismiss expected 0 got %i", app->size);
+		LogDebug("Size mismatch in OP_MercenaryDismiss expected 0 got [{}]", app->size);
 		DumpPacket(app);
 		return;
 	}
@@ -9642,7 +9642,7 @@ void Client::Handle_OP_MercenaryHire(const EQApplicationPacket *app)
 	// The payload is 16 bytes. First four bytes are the Merc ID (Template ID)
 	if (app->size != sizeof(MercenaryMerchantRequest_Struct))
 	{
-		Log(Logs::General, Logs::None, "Size mismatch in OP_MercenaryHire expected %i got %i", sizeof(MercenaryMerchantRequest_Struct), app->size);
+		LogDebug("Size mismatch in OP_MercenaryHire expected [{}] got [{}]", sizeof(MercenaryMerchantRequest_Struct), app->size);
 
 		DumpPacket(app);
 
@@ -9713,7 +9713,7 @@ void Client::Handle_OP_MercenarySuspendRequest(const EQApplicationPacket *app)
 	if (app->size != sizeof(SuspendMercenary_Struct))
 	{
 		Message(Chat::Red, "Size mismatch in OP_MercenarySuspendRequest expected %i got %i", sizeof(SuspendMercenary_Struct), app->size);
-		Log(Logs::General, Logs::None, "Size mismatch in OP_MercenarySuspendRequest expected %i got %i", sizeof(SuspendMercenary_Struct), app->size);
+		LogDebug("Size mismatch in OP_MercenarySuspendRequest expected [{}] got [{}]", sizeof(SuspendMercenary_Struct), app->size);
 		DumpPacket(app);
 		return;
 	}
@@ -9736,7 +9736,7 @@ void Client::Handle_OP_MercenaryTimerRequest(const EQApplicationPacket *app)
 	if (app->size > 1)
 	{
 		Message(Chat::Red, "Size mismatch in OP_MercenaryTimerRequest expected 0 got %i", app->size);
-		Log(Logs::General, Logs::None, "Size mismatch in OP_MercenaryTimerRequest expected 0 got %i", app->size);
+		LogDebug("Size mismatch in OP_MercenaryTimerRequest expected 0 got [{}]", app->size);
 		DumpPacket(app);
 		return;
 	}
@@ -10829,7 +10829,7 @@ void Client::Handle_OP_PotionBelt(const EQApplicationPacket *app)
 
 	MovePotionToBelt_Struct *mptbs = (MovePotionToBelt_Struct*)app->pBuffer;
 	if (!EQEmu::ValueWithin(mptbs->SlotNumber, 0U, 3U)) {
-		Log(Logs::General, Logs::None, "Client::Handle_OP_PotionBelt mptbs->SlotNumber out of range.");
+		LogDebug("Client::Handle_OP_PotionBelt mptbs->SlotNumber out of range");
 		return;
 	}
 
@@ -10852,7 +10852,7 @@ void Client::Handle_OP_PotionBelt(const EQApplicationPacket *app)
 void Client::Handle_OP_PurchaseLeadershipAA(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(uint32)) {
-		Log(Logs::General, Logs::None, "Size mismatch in OP_LeadershipExpToggle expected %i got %i", 1, app->size);
+		LogDebug("Size mismatch in OP_LeadershipExpToggle expected [{}] got [{}]", 1, app->size);
 		DumpPacket(app);
 		return;
 	}
@@ -11770,7 +11770,7 @@ void Client::Handle_OP_RecipesFavorite(const EQApplicationPacket *app)
 
 	TradeskillFavorites_Struct* tsf = (TradeskillFavorites_Struct*)app->pBuffer;
 
-	Log(Logs::General, Logs::None, "Requested Favorites for: %d - %d\n", tsf->object_type, tsf->some_id);
+	LogDebug("Requested Favorites for: [{}] - [{}]\n", tsf->object_type, tsf->some_id);
 
 	// results show that object_type is combiner type
 	// some_id = 0 if world combiner, item number otherwise
@@ -11845,7 +11845,7 @@ void Client::Handle_OP_RecipesSearch(const EQApplicationPacket *app)
 	rss->query[55] = '\0';	//just to be sure.
 
 
-	Log(Logs::General, Logs::None, "Requested search recipes for: %d - %d\n", rss->object_type, rss->some_id);
+	LogDebug("Requested search recipes for: [{}] - [{}]\n", rss->object_type, rss->some_id);
 
 	// make where clause segment for container(s)
 	char containers[30];
@@ -11975,7 +11975,7 @@ void Client::Handle_OP_RemoveBlockedBuffs(const EQApplicationPacket *app)
 void Client::Handle_OP_RemoveTrap(const EQApplicationPacket *app)
 {
 	if (app->size != 4) {// just an int
-		Log(Logs::General, Logs::None, "Size mismatch in OP_RemoveTrap expected 4 got %i", app->size);
+		LogDebug("Size mismatch in OP_RemoveTrap expected 4 got [{}]", app->size);
 		DumpPacket(app);
 		return;
 	}
@@ -12152,7 +12152,7 @@ void Client::Handle_OP_Sacrifice(const EQApplicationPacket *app)
 {
 
 	if (app->size != sizeof(Sacrifice_Struct)) {
-		Log(Logs::General, Logs::None, "Size mismatch in OP_Sacrifice expected %i got %i", sizeof(Sacrifice_Struct), app->size);
+		LogDebug("Size mismatch in OP_Sacrifice expected [{}] got [{}]", sizeof(Sacrifice_Struct), app->size);
 		DumpPacket(app);
 		return;
 	}
@@ -12419,7 +12419,7 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 void Client::Handle_OP_SetTitle(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(SetTitle_Struct)) {
-		Log(Logs::General, Logs::None, "Size mismatch in OP_SetTitle expected %i got %i", sizeof(SetTitle_Struct), app->size);
+		LogDebug("Size mismatch in OP_SetTitle expected [{}] got [{}]", sizeof(SetTitle_Struct), app->size);
 		DumpPacket(app);
 		return;
 	}
@@ -12544,7 +12544,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	t1.start();
 	Merchant_Sell_Struct* mp = (Merchant_Sell_Struct*)app->pBuffer;
 #if EQDEBUG >= 5
-	Log(Logs::General, Logs::None, "%s, purchase item..", GetName());
+	LogDebug("[{}], purchase item", GetName());
 	DumpPacket(app);
 #endif
 
@@ -13332,7 +13332,7 @@ void Client::Handle_OP_Surname(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Surname_Struct))
 	{
-		Log(Logs::General, Logs::None, "Size mismatch in Surname expected %i got %i", sizeof(Surname_Struct), app->size);
+		LogDebug("Size mismatch in Surname expected [{}] got [{}]", sizeof(Surname_Struct), app->size);
 		return;
 	}
 
@@ -14313,7 +14313,7 @@ void Client::Handle_OP_Translocate(const EQApplicationPacket *app)
 {
 
 	if (app->size != sizeof(Translocate_Struct)) {
-		Log(Logs::General, Logs::None, "Size mismatch in OP_Translocate expected %i got %i", sizeof(Translocate_Struct), app->size);
+		LogDebug("Size mismatch in OP_Translocate expected [{}] got [{}]", sizeof(Translocate_Struct), app->size);
 		DumpPacket(app);
 		return;
 	}
@@ -14554,7 +14554,7 @@ void Client::Handle_OP_XTargetAutoAddHaters(const EQApplicationPacket *app)
 {
 	if (app->size != 1)
 	{
-		Log(Logs::General, Logs::None, "Size mismatch in OP_XTargetAutoAddHaters, expected 1, got %i", app->size);
+		LogDebug("Size mismatch in OP_XTargetAutoAddHaters, expected 1, got [{}]", app->size);
 		DumpPacket(app);
 		return;
 	}
@@ -14566,7 +14566,7 @@ void Client::Handle_OP_XTargetAutoAddHaters(const EQApplicationPacket *app)
 void Client::Handle_OP_XTargetOpen(const EQApplicationPacket *app)
 {
 	if (app->size != 4) {
-		Log(Logs::General, Logs::None, "Size mismatch in OP_XTargetOpen, expected 1, got %i", app->size);
+		LogDebug("Size mismatch in OP_XTargetOpen, expected 1, got [{}]", app->size);
 		DumpPacket(app);
 		return;
 	}
@@ -14579,7 +14579,7 @@ void Client::Handle_OP_XTargetRequest(const EQApplicationPacket *app)
 {
 	if (app->size < 12)
 	{
-		Log(Logs::General, Logs::None, "Size mismatch in OP_XTargetRequest, expected at least 12, got %i", app->size);
+		LogDebug("Size mismatch in OP_XTargetRequest, expected at least 12, got [{}]", app->size);
 		DumpPacket(app);
 		return;
 	}
@@ -14802,7 +14802,7 @@ void Client::Handle_OP_XTargetRequest(const EQApplicationPacket *app)
 	}
 
 	default:
-		Log(Logs::General, Logs::None, "Unhandled XTarget Type %i", Type);
+		LogDebug("Unhandled XTarget Type [{}]", Type);
 		break;
 	}
 

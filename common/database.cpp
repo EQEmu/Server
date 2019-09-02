@@ -1594,7 +1594,7 @@ uint32 Database::GetGroupID(const char* name){
 	if (results.RowCount() == 0)
 	{
 		// Commenting this out until logging levels can prevent this from going to console
-		//Log(Logs::General, Logs::None,, "Character not in a group: %s", name);
+		//Log(Logs::General, Logs::None,, "Character not in a group: [{}]", name);
 		return 0;
 	}
 
@@ -1641,7 +1641,7 @@ void Database::SetGroupLeaderName(uint32 gid, const char* name) {
 	result = QueryDatabase(query);
 
 	if(!result.Success()) {
-		Log(Logs::General, Logs::None, "Error in Database::SetGroupLeaderName: %s", result.ErrorMessage().c_str());
+		LogDebug("Error in Database::SetGroupLeaderName: [{}]", result.ErrorMessage().c_str());
 	}
 }
 

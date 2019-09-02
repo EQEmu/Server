@@ -6007,7 +6007,7 @@ int32 Bot::CalcMaxMana() {
 			break;
 		}
 		default: {
-			Log(Logs::General, Logs::None, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
+			LogDebug("Invalid Class [{}] in CalcMaxMana", GetCasterClass());
 			max_mana = 0;
 			break;
 		}

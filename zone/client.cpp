@@ -377,7 +377,7 @@ Client::~Client() {
 		ToggleBuyerMode(false);
 
 	if(conn_state != ClientConnectFinished) {
-		Log(Logs::General, Logs::None, "Client '%s' was destroyed before reaching the connected state:", GetName());
+		LogDebug("Client [{}] was destroyed before reaching the connected state:", GetName());
 		ReportConnectingState();
 	}
 
@@ -538,31 +538,31 @@ void Client::SendLogoutPackets() {
 void Client::ReportConnectingState() {
 	switch(conn_state) {
 	case NoPacketsReceived:		//havent gotten anything
-		Log(Logs::General, Logs::None, "Client has not sent us an initial zone entry packet.");
+		LogDebug("Client has not sent us an initial zone entry packet");
 		break;
 	case ReceivedZoneEntry:		//got the first packet, loading up PP
-		Log(Logs::General, Logs::None, "Client sent initial zone packet, but we never got their player info from the database.");
+		LogDebug("Client sent initial zone packet, but we never got their player info from the database");
 		break;
 	case PlayerProfileLoaded:	//our DB work is done, sending it
-		Log(Logs::General, Logs::None, "We were sending the player profile, tributes, tasks, spawns, time and weather, but never finished.");
+		LogDebug("We were sending the player profile, tributes, tasks, spawns, time and weather, but never finished");
 		break;
 	case ZoneInfoSent:		//includes PP, tributes, tasks, spawns, time and weather
-		Log(Logs::General, Logs::None, "We successfully sent player info and spawns, waiting for client to request new zone.");
+		LogDebug("We successfully sent player info and spawns, waiting for client to request new zone");
 		break;
 	case NewZoneRequested:	//received and sent new zone request
-		Log(Logs::General, Logs::None, "We received client's new zone request, waiting for client spawn request.");
+		LogDebug("We received client's new zone request, waiting for client spawn request");
 		break;
 	case ClientSpawnRequested:	//client sent ReqClientSpawn
-		Log(Logs::General, Logs::None, "We received the client spawn request, and were sending objects, doors, zone points and some other stuff, but never finished.");
+		LogDebug("We received the client spawn request, and were sending objects, doors, zone points and some other stuff, but never finished");
 		break;
 	case ZoneContentsSent:		//objects, doors, zone points
-		Log(Logs::General, Logs::None, "The rest of the zone contents were successfully sent, waiting for client ready notification.");
+		LogDebug("The rest of the zone contents were successfully sent, waiting for client ready notification");
 		break;
 	case ClientReadyReceived:	//client told us its ready, send them a bunch of crap like guild MOTD, etc
-		Log(Logs::General, Logs::None, "We received client ready notification, but never finished Client::CompleteConnect");
+		LogDebug("We received client ready notification, but never finished Client::CompleteConnect");
 		break;
 	case ClientConnectFinished:	//client finally moved to finished state, were done here
-		Log(Logs::General, Logs::None, "Client is successfully connected.");
+		LogDebug("Client is successfully connected");
 		break;
 	};
 }
@@ -2287,7 +2287,7 @@ void Client::AddMoneyToPP(uint64 copper, bool updateclient){
 
 	SaveCurrency();
 
-	Log(Logs::General, Logs::None, "Client::AddMoneyToPP() %s should have: plat:%i gold:%i silver:%i copper:%i", GetName(), m_pp.platinum, m_pp.gold, m_pp.silver, m_pp.copper);
+	LogDebug("Client::AddMoneyToPP() [{}] should have: plat:[{}] gold:[{}] silver:[{}] copper:[{}]", GetName(), m_pp.platinum, m_pp.gold, m_pp.silver, m_pp.copper);
 }
 
 void Client::EVENT_ITEM_ScriptStopReturn(){

@@ -489,7 +489,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 					if(!target_zone) {
 #ifdef SPELL_EFFECT_SPAM
-						Log(Logs::General, Logs::None, "Succor/Evacuation Spell In Same Zone.");
+						LogDebug("Succor/Evacuation Spell In Same Zone");
 #endif
 							if(IsClient())
 								CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), x, y, z, heading, 0, EvacToSafeCoords);
@@ -498,7 +498,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					}
 					else {
 #ifdef SPELL_EFFECT_SPAM
-						Log(Logs::General, Logs::None, "Succor/Evacuation Spell To Another Zone.");
+						LogDebug("Succor/Evacuation Spell To Another Zone");
 #endif
 						if(IsClient())
 							CastToClient()->MovePC(target_zone, x, y, z, heading);
@@ -3345,7 +3345,7 @@ snare has both of them negative, yet their range should work the same:
 				result = ubase * (caster_level * (formula - 2000) + 1);
 			}
 			else
-				Log(Logs::General, Logs::None, "Unknown spell effect value forumula %d", formula);
+				LogDebug("Unknown spell effect value forumula [{}]", formula);
 		}
 	}
 

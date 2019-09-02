@@ -432,7 +432,7 @@ int main(int argc, char** argv) {
 	RegisterAllPatches(stream_identifier);
 
 #ifndef WIN32
-	Log(Logs::Detail, Logs::None, "Main thread running with thread id %d", pthread_self());
+	LogDebug("Main thread running with thread id [{}]", pthread_self());
 #endif
 
 	bool worldwasconnected    = worldserver.Connected();
