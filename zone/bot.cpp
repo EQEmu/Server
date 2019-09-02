@@ -1312,7 +1312,7 @@ int32 Bot::acmod() {
 	else
 		return (65 + ((agility - 300) / 21));
 #if EQDEBUG >= 11
-	Log(Logs::General, Logs::Error, "Error in Bot::acmod(): Agility: %i, Level: %i",agility,level);
+	LogError("Error in Bot::acmod(): Agility: [{}], Level: [{}]",agility,level);
 #endif
 	return 0;
 }
@@ -2351,7 +2351,7 @@ void Bot::AI_Process() {
 		Mob* delete_me = HealRotationTarget();
 		if (AIHealRotation(HealRotationTarget(), UseHealRotationFastHeals())) {
 #if (EQDEBUG >= 12)
-			Log(Logs::General, Logs::Error, "Bot::AI_Process() - Casting succeeded (m: %s, t: %s) : AdvHR(true)", GetCleanName(), ((delete_me) ? (delete_me->GetCleanName()) : ("nullptr")));
+			LogError("Bot::AI_Process() - Casting succeeded (m: [{}], t: [{}]) : AdvHR(true)", GetCleanName(), ((delete_me) ? (delete_me->GetCleanName()) : ("nullptr")));
 #endif
 			m_member_of_heal_rotation->SetMemberIsCasting(this);
 			m_member_of_heal_rotation->UpdateTargetHealingStats(HealRotationTarget());
@@ -2359,7 +2359,7 @@ void Bot::AI_Process() {
 		}
 		else {
 #if (EQDEBUG >= 12)
-			Log(Logs::General, Logs::Error, "Bot::AI_Process() - Casting failed (m: %s, t: %s) : AdvHR(false)", GetCleanName(), ((delete_me) ? (delete_me->GetCleanName()) : ("nullptr")));
+			LogError("Bot::AI_Process() - Casting failed (m: [{}], t: [{}]) : AdvHR(false)", GetCleanName(), ((delete_me) ? (delete_me->GetCleanName()) : ("nullptr")));
 #endif
 			m_member_of_heal_rotation->SetMemberIsCasting(this, false);
 			AdvanceHealRotation(false);
@@ -4315,7 +4315,7 @@ void Bot::AddToHateList(Mob* other, uint32 hate, int32 damage, bool iYellForHelp
 bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts) {	
 	if (!other) {
 		SetTarget(nullptr);
-		Log(Logs::General, Logs::Error, "A null Mob object was passed to Bot::Attack for evaluation!");
+		LogError("A null Mob object was passed to Bot::Attack for evaluation!");
 		return false;
 	}
 
@@ -8223,7 +8223,7 @@ bool Bot::CheckLoreConflict(const EQEmu::ItemData* item) {
 
 bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, float iRange, uint32 iSpellTypes) {
 	if((iSpellTypes & SPELL_TYPES_DETRIMENTAL) != 0) {
-		Log(Logs::General, Logs::Error, "Error: detrimental spells requested from AICheckCloseBeneficialSpells!!");
+		LogError("Error: detrimental spells requested from AICheckCloseBeneficialSpells!!");
 		return false;
 	}
 

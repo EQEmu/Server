@@ -765,7 +765,7 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 void Client::SetLevel(uint8 set_level, bool command)
 {
 	if (GetEXPForLevel(set_level) == 0xFFFFFFFF) {
-		Log(Logs::General, Logs::Error, "Client::SetLevel() GetEXPForLevel(%i) = 0xFFFFFFFF", set_level);
+		LogError("Client::SetLevel() GetEXPForLevel([{}]) = 0xFFFFFFFF", set_level);
 		return;
 	}
 
@@ -1131,15 +1131,16 @@ uint32 Client::GetCharMaxLevelFromQGlobal() {
 	return 0;
 }
 
-uint32 Client::GetCharMaxLevelFromBucket() {
-	uint32 char_id = this->CharacterID();
-	std::string query = StringFormat("SELECT value FROM data_buckets WHERE `key` = '%i-CharMaxLevel'", char_id);
-	auto results = database.QueryDatabase(query);
+uint32 Client::GetCharMaxLevelFromBucket()
+{
+	uint32      char_id = this->CharacterID();
+	std::string query   = StringFormat("SELECT value FROM data_buckets WHERE `key` = '%i-CharMaxLevel'", char_id);
+	auto        results = database.QueryDatabase(query);
 	if (!results.Success()) {
-        Log(Logs::General, Logs::Error, "Data bucket for CharMaxLevel for char ID %i failed.", char_id);
-        return 0;
-    }
-	
+		LogError("Data bucket for CharMaxLevel for char ID [{}] failed", char_id);
+		return 0;
+	}
+
 	if (results.RowCount() > 0) {
 		auto row = results.begin();
 		return atoi(row[0]);

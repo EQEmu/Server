@@ -147,7 +147,7 @@ int main(int argc, char** argv) {
 
 	LogInfo("Loading server configuration..");
 	if (!ZoneConfig::LoadConfig()) {
-		Log(Logs::General, Logs::Error, "Loading server configuration failed.");
+		LogError("Loading server configuration failed");
 		return 1;
 	}
 	Config = ZoneConfig::get();
@@ -232,7 +232,7 @@ int main(int argc, char** argv) {
 		Config->DatabasePassword.c_str(),
 		Config->DatabaseDB.c_str(),
 		Config->DatabasePort)) {
-		Log(Logs::General, Logs::Error, "Cannot continue without a database connection.");
+		LogError("Cannot continue without a database connection");
 		return 1;
 	}
 
@@ -261,16 +261,16 @@ int main(int argc, char** argv) {
 	* Setup nice signal handlers
 	*/
 	if (signal(SIGINT, CatchSignal) == SIG_ERR) {
-		Log(Logs::General, Logs::Error, "Could not set signal handler");
+		LogError("Could not set signal handler");
 		return 1;
 	}
 	if (signal(SIGTERM, CatchSignal) == SIG_ERR) {
-		Log(Logs::General, Logs::Error, "Could not set signal handler");
+		LogError("Could not set signal handler");
 		return 1;
 	}
 #ifndef WIN32
 	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR) {
-		Log(Logs::General, Logs::Error, "Could not set signal handler");
+		LogError("Could not set signal handler");
 		return 1;
 	}
 #endif
@@ -293,35 +293,35 @@ int main(int argc, char** argv) {
 
 	LogInfo("Loading items");
 	if (!database.LoadItems(hotfix_name)) {
-		Log(Logs::General, Logs::Error, "Loading items FAILED!");
-		Log(Logs::General, Logs::Error, "Failed. But ignoring error and going on...");
+		LogError("Loading items failed!");
+		LogError("Failed. But ignoring error and going on..");
 	}
 
 	LogInfo("Loading npc faction lists");
 	if (!database.LoadNPCFactionLists(hotfix_name)) {
-		Log(Logs::General, Logs::Error, "Loading npcs faction lists FAILED!");
+		LogError("Loading npcs faction lists failed!");
 		return 1;
 	}
 	LogInfo("Loading loot tables");
 	if (!database.LoadLoot(hotfix_name)) {
-		Log(Logs::General, Logs::Error, "Loading loot FAILED!");
+		LogError("Loading loot failed!");
 		return 1;
 	}
 	LogInfo("Loading skill caps");
 	if (!database.LoadSkillCaps(std::string(hotfix_name))) {
-		Log(Logs::General, Logs::Error, "Loading skill caps FAILED!");
+		LogError("Loading skill caps failed!");
 		return 1;
 	}
 
 	LogInfo("Loading spells");
 	if (!database.LoadSpells(hotfix_name, &SPDAT_RECORDS, &spells)) {
-		Log(Logs::General, Logs::Error, "Loading spells FAILED!");
+		LogError("Loading spells failed!");
 		return 1;
 	}
 
 	LogInfo("Loading base data");
 	if (!database.LoadBaseData(hotfix_name)) {
-		Log(Logs::General, Logs::Error, "Loading base data FAILED!");
+		LogError("Loading base data failed!");
 		return 1;
 	}
 
@@ -342,12 +342,12 @@ int main(int argc, char** argv) {
 
 	LogInfo("Loading profanity list");
 	if (!EQEmu::ProfanityManager::LoadProfanityList(&database))
-		Log(Logs::General, Logs::Error, "Loading profanity list FAILED!");
+		LogError("Loading profanity list failed!");
 
 	LogInfo("Loading commands");
 	int retval = command_init();
 	if (retval<0)
-		Log(Logs::General, Logs::Error, "Command loading FAILED");
+		LogError("Command loading failed");
 	else
 		LogInfo("{} commands loaded", retval);
 
@@ -357,7 +357,7 @@ int main(int argc, char** argv) {
 		if (database.GetVariable("RuleSet", tmp)) {
 			LogInfo("Loading rule set [{}]", tmp.c_str());
 			if (!RuleManager::Instance()->LoadRules(&database, tmp.c_str(), false)) {
-				Log(Logs::General, Logs::Error, "Failed to load ruleset '%s', falling back to defaults.", tmp.c_str());
+				LogError("Failed to load ruleset [{}], falling back to defaults", tmp.c_str());
 			}
 		}
 		else {
@@ -377,13 +377,13 @@ int main(int argc, char** argv) {
 	Log(Logs::General, Logs::Zone_Server, "Loading bot commands");
 	int botretval = bot_command_init();
 	if (botretval<0)
-		Log(Logs::General, Logs::Error, "Bot command loading FAILED");
+		LogError("Bot command loading failed");
 	else
 		Log(Logs::General, Logs::Zone_Server, "%d bot commands loaded", botretval);
 
 	Log(Logs::General, Logs::Zone_Server, "Loading bot spell casting chances");
 	if (!database.botdb.LoadBotSpellCastingChances())
-		Log(Logs::General, Logs::Error, "Bot spell casting chances loading FAILED");
+		LogError("Bot spell casting chances loading failed");
 #endif
 
 	if (RuleB(TaskSystem, EnableTaskSystem)) {
@@ -423,7 +423,7 @@ int main(int argc, char** argv) {
 		LogInfo("Entering sleep mode");
 	}
 	else if (!Zone::Bootup(database.GetZoneID(zone_name), instance_id, true)) {
-		Log(Logs::General, Logs::Error, "Zone Bootup failed :: Zone::Bootup");
+		LogError("Zone Bootup failed :: Zone::Bootup");
 		zone = 0;
 	}
 

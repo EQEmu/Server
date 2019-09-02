@@ -836,7 +836,7 @@ bool Corpse::Process() {
 				Log(Logs::General, Logs::None, "Tagged %s player corpse has buried.", this->GetName());
 			}
 			else {
-				Log(Logs::General, Logs::Error, "Unable to bury %s player corpse.", this->GetName());
+				LogError("Unable to bury [{}] player corpse", this->GetName());
 				return true;
 			}
 		}

@@ -1914,7 +1914,7 @@ bool EntityList::Merc_AICheckCloseBeneficialSpells(Merc* caster, uint8 iChance, 
 		// according to Rogean, Live NPCs will just cast through walls/floors, no problem..
 		//
 		// This check was put in to address an idle-mob CPU issue
-		Log(Logs::General, Logs::Error, "Error: detrimental spells requested from AICheckCloseBeneficialSpells!!");
+		LogError("Error: detrimental spells requested from AICheckCloseBeneficialSpells!!");
 		return(false);
 	}
 
@@ -4494,7 +4494,7 @@ bool Merc::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, boo
 {
 	if (!other) {
 		SetTarget(nullptr);
-		Log(Logs::General, Logs::Error, "A null Mob object was passed to Merc::Attack() for evaluation!");
+		LogError("A null Mob object was passed to Merc::Attack() for evaluation!");
 		return false;
 	}
 
@@ -6181,7 +6181,7 @@ void NPC::LoadMercTypes() {
 	auto results = database.QueryDatabase(query);
 	if (!results.Success())
 	{
-		Log(Logs::General, Logs::Error, "Error in NPC::LoadMercTypes()");
+		LogError("Error in NPC::LoadMercTypes()");
 		return;
 	}
 
@@ -6214,7 +6214,7 @@ void NPC::LoadMercs() {
 
 	if (!results.Success())
 	{
-		Log(Logs::General, Logs::Error, "Error in NPC::LoadMercTypes()");
+		LogError("Error in NPC::LoadMercTypes()");
 		return;
 	}
 

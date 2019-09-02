@@ -428,7 +428,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			}
 		}
 		else
-			Log(Logs::General, Logs::Error, "WhoAllReturnStruct: Could not get return struct!");
+			LogError("WhoAllReturnStruct: Could not get return struct!");
 		break;
 	}
 	case ServerOP_EmoteMessage: {
@@ -827,7 +827,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	}
 	case ServerOP_RefreshCensorship: {
 		if (!EQEmu::ProfanityManager::LoadProfanityList(&database))
-			Log(Logs::General, Logs::Error, "Received request to refresh the profanity list..but, the action failed");
+			LogError("Received request to refresh the profanity list..but, the action failed");
 		break;
 	}
 	case ServerOP_ChangeWID: {
@@ -1436,7 +1436,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		if (NewCorpse)
 			NewCorpse->Spawn();
 		else
-			Log(Logs::General, Logs::Error, "Unable to load player corpse id %u for zone %s.", s->player_corpse_id, zone->GetShortName());
+			LogError("Unable to load player corpse id [{}] for zone [{}]", s->player_corpse_id, zone->GetShortName());
 
 		break;
 	}
@@ -1944,32 +1944,32 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		std::string hotfix_name = std::string((char*)pack->pBuffer);
 		LogInfo("Loading items");
 		if (!database.LoadItems(hotfix_name)) {
-			Log(Logs::General, Logs::Error, "Loading items FAILED!");
+			LogError("Loading items failed!");
 		}
 
 		LogInfo("Loading npc faction lists");
 		if (!database.LoadNPCFactionLists(hotfix_name)) {
-			Log(Logs::General, Logs::Error, "Loading npcs faction lists FAILED!");
+			LogError("Loading npcs faction lists failed!");
 		}
 
 		LogInfo("Loading loot tables");
 		if (!database.LoadLoot(hotfix_name)) {
-			Log(Logs::General, Logs::Error, "Loading loot FAILED!");
+			LogError("Loading loot failed!");
 		}
 
 		LogInfo("Loading skill caps");
 		if (!database.LoadSkillCaps(std::string(hotfix_name))) {
-			Log(Logs::General, Logs::Error, "Loading skill caps FAILED!");
+			LogError("Loading skill caps failed!");
 		}
 
 		LogInfo("Loading spells");
 		if (!database.LoadSpells(hotfix_name, &SPDAT_RECORDS, &spells)) {
-			Log(Logs::General, Logs::Error, "Loading spells FAILED!");
+			LogError("Loading spells failed!");
 		}
 
 		LogInfo("Loading base data");
 		if (!database.LoadBaseData(hotfix_name)) {
-			Log(Logs::General, Logs::Error, "Loading base data FAILED!");
+			LogError("Loading base data failed!");
 		}
 		break;
 	}
@@ -2190,7 +2190,7 @@ uint32 WorldServer::NextGroupID() {
 	if (cur_groupid >= last_groupid) {
 		//this is an error... This means that 50 groups were created before
 		//1 packet could make the zone->world->zone trip... so let it error.
-		Log(Logs::General, Logs::Error, "Ran out of group IDs before the server sent us more.");
+		LogError("Ran out of group IDs before the server sent us more");
 		return(0);
 	}
 	if (cur_groupid > (last_groupid - /*50*/995)) {

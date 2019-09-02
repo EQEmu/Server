@@ -84,7 +84,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 	const NPCType *npc_type = database.LoadNPCTypesData(pet.npc_id);
 	if (npc_type == nullptr) {
 		//log write
-		Log(Logs::General, Logs::Error, "Unknown npc type for swarm pet spell id: %d", spell_id);
+		LogError("Unknown npc type for swarm pet spell id: [{}]", spell_id);
 		Message(0, "Unable to find pet!");
 		return;
 	}
@@ -183,7 +183,7 @@ void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_overrid
 	const NPCType *npc_type = database.LoadNPCTypesData(typesid);
 	if(npc_type == nullptr) {
 		//log write
-		Log(Logs::General, Logs::Error, "Unknown npc type for swarm pet type id: %d", typesid);
+		LogError("Unknown npc type for swarm pet type id: [{}]", typesid);
 		Message(0,"Unable to find pet!");
 		return;
 	}
@@ -1655,7 +1655,7 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 			abilities[ability->id] = std::unique_ptr<AA::Ability>(ability);
 		}
 	} else {
-		Log(Logs::General, Logs::Error, "Failed to load Alternate Advancement Abilities");
+		LogError("Failed to load Alternate Advancement Abilities");
 		return false;
 	}
 
@@ -1690,7 +1690,7 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 			ranks[rank->id] = std::unique_ptr<AA::Rank>(rank);
 		}
 	} else {
-		Log(Logs::General, Logs::Error, "Failed to load Alternate Advancement Ability Ranks");
+		LogError("Failed to load Alternate Advancement Ability Ranks");
 		return false;
 	}
 
@@ -1717,7 +1717,7 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 			}
 		}
 	} else {
-		Log(Logs::General, Logs::Error, "Failed to load Alternate Advancement Ability Rank Effects");
+		LogError("Failed to load Alternate Advancement Ability Rank Effects");
 		return false;
 	}
 
@@ -1742,7 +1742,7 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 			}
 		}
 	} else {
-		Log(Logs::General, Logs::Error, "Failed to load Alternate Advancement Ability Rank Prereqs");
+		LogError("Failed to load Alternate Advancement Ability Rank Prereqs");
 		return false;
 	}
 

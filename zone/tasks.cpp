@@ -54,31 +54,34 @@ TaskManager::~TaskManager() {
 	}
 }
 
-bool TaskManager::LoadTaskSets() {
+bool TaskManager::LoadTaskSets()
+{
 
 	// Clear all task sets in memory. Done so we can reload them on the fly if required by just calling
 	// this method again.
-	for(int i=0; i<MAXTASKSETS; i++)
+	for (int i = 0; i < MAXTASKSETS; i++)
 		TaskSets[i].clear();
 
-    std::string query = StringFormat("SELECT `id`, `taskid` from `tasksets` "
-                                    "WHERE `id` > 0 AND `id` < %i "
-                                    "AND `taskid` >= 0 AND `taskid` < %i "
-                                    "ORDER BY `id`, `taskid` ASC",
-                                    MAXTASKSETS, MAXTASKS);
-    auto results = database.QueryDatabase(query);
-    if (!results.Success()) {
-        Log(Logs::General, Logs::Error, "[TASKS]Error in TaskManager::LoadTaskSets: %s", results.ErrorMessage().c_str());
+	std::string query   = StringFormat(
+		"SELECT `id`, `taskid` from `tasksets` "
+		"WHERE `id` > 0 AND `id` < %i "
+		"AND `taskid` >= 0 AND `taskid` < %i "
+		"ORDER BY `id`, `taskid` ASC",
+		MAXTASKSETS, MAXTASKS
+	);
+	auto        results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		LogError("Error in TaskManager::LoadTaskSets: [{}]", results.ErrorMessage().c_str());
 		return false;
-    }
+	}
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-        int taskSet = atoi(row[0]);
-        int taskID = atoi(row[1]);
+		int taskSet = atoi(row[0]);
+		int taskID  = atoi(row[1]);
 
-        TaskSets[taskSet].push_back(taskID);
-        Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] Adding TaskID %4i to TaskSet %4i", taskID, taskSet);
-    }
+		TaskSets[taskSet].push_back(taskID);
+		Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] Adding TaskID %4i to TaskSet %4i", taskID, taskSet);
+	}
 
 	return true;
 }
@@ -130,7 +133,7 @@ bool TaskManager::LoadTasks(int singleTask)
 
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-		Log(Logs::General, Logs::Error, ERR_MYSQLERROR, results.ErrorMessage().c_str());
+		LogError(ERR_MYSQLERROR, results.ErrorMessage().c_str());
 		return false;
 	}
 
@@ -188,7 +191,7 @@ bool TaskManager::LoadTasks(int singleTask)
 				 singleTask, MAXACTIVITIESPERTASK);
 	results = database.QueryDatabase(query);
 	if (!results.Success()) {
-		Log(Logs::General, Logs::Error, ERR_MYSQLERROR, results.ErrorMessage().c_str());
+		LogError(ERR_MYSQLERROR, results.ErrorMessage().c_str());
 		return false;
 	}
 
@@ -318,7 +321,7 @@ bool TaskManager::SaveClientState(Client *c, ClientTaskState *state)
 				    state->ActiveTasks[task].AcceptedTime);
 				auto results = database.QueryDatabase(query);
 				if (!results.Success()) {
-					Log(Logs::General, Logs::Error, ERR_MYSQLERROR, results.ErrorMessage().c_str());
+					LogError(ERR_MYSQLERROR, results.ErrorMessage().c_str());
 				} else {
 					state->ActiveTasks[task].Updated = false;
 				}
@@ -362,7 +365,7 @@ bool TaskManager::SaveClientState(Client *c, ClientTaskState *state)
 			auto results = database.QueryDatabase(query);
 
 			if (!results.Success()) {
-				Log(Logs::General, Logs::Error, ERR_MYSQLERROR, results.ErrorMessage().c_str());
+				LogError(ERR_MYSQLERROR, results.ErrorMessage().c_str());
 				continue;
 			}
 
@@ -398,7 +401,7 @@ bool TaskManager::SaveClientState(Client *c, ClientTaskState *state)
 		    StringFormat(completedTaskQuery, characterID, state->CompletedTasks[i].CompletedTime, taskID, -1);
 		auto results = database.QueryDatabase(query);
 		if (!results.Success()) {
-			Log(Logs::General, Logs::Error, ERR_MYSQLERROR, results.ErrorMessage().c_str());
+			LogError(ERR_MYSQLERROR, results.ErrorMessage().c_str());
 			continue;
 		}
 
@@ -416,7 +419,7 @@ bool TaskManager::SaveClientState(Client *c, ClientTaskState *state)
 					     taskID, j);
 			results = database.QueryDatabase(query);
 			if (!results.Success())
-				Log(Logs::General, Logs::Error, ERR_MYSQLERROR, results.ErrorMessage().c_str());
+				LogError(ERR_MYSQLERROR, results.ErrorMessage().c_str());
 		}
 	}
 

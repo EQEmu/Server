@@ -681,17 +681,20 @@ void ZoneDatabase::GetEventLogs(const char* name,char* target,uint32 account_id,
 void ZoneDatabase::LoadWorldContainer(uint32 parentid, EQEmu::ItemInstance* container)
 {
 	if (!container) {
-		Log(Logs::General, Logs::Error, "Programming error: LoadWorldContainer passed nullptr pointer");
+		LogError("Programming error: LoadWorldContainer passed nullptr pointer");
 		return;
 	}
 
-	std::string query = StringFormat("SELECT bagidx, itemid, charges, augslot1, augslot2, augslot3, augslot4, augslot5, augslot6 "
-                                    "FROM object_contents WHERE parentid = %i", parentid);
-    auto results = QueryDatabase(query);
-    if (!results.Success()) {
-        Log(Logs::General, Logs::Error, "Error in DB::LoadWorldContainer: %s", results.ErrorMessage().c_str());
-        return;
-    }
+	std::string query   = StringFormat(
+		"SELECT bagidx, itemid, charges, augslot1, augslot2, augslot3, augslot4, augslot5, augslot6 "
+		"FROM object_contents WHERE parentid = %i", parentid
+	);
+
+	auto        results = QueryDatabase(query);
+	if (!results.Success()) {
+		LogError("Error in DB::LoadWorldContainer: [{}]", results.ErrorMessage().c_str());
+		return;
+	}
 
     for (auto row = results.begin(); row != results.end(); ++row) {
         uint8 index = (uint8)atoi(row[0]);
@@ -754,7 +757,7 @@ void ZoneDatabase::SaveWorldContainer(uint32 zone_id, uint32 parent_id, const EQ
 										augslot[0], augslot[1], augslot[2], augslot[3], augslot[4], augslot[5]);
         auto results = QueryDatabase(query);
         if (!results.Success())
-            Log(Logs::General, Logs::Error, "Error in ZoneDatabase::SaveWorldContainer: %s", results.ErrorMessage().c_str());
+      LogError("Error in ZoneDatabase::SaveWorldContainer: [{}]", results.ErrorMessage().c_str());
 
     }
 
@@ -766,7 +769,7 @@ void ZoneDatabase::DeleteWorldContainer(uint32 parent_id, uint32 zone_id)
 	std::string query = StringFormat("DELETE FROM object_contents WHERE parentid = %i AND zoneid = %i", parent_id, zone_id);
     auto results = QueryDatabase(query);
 	if (!results.Success())
-		Log(Logs::General, Logs::Error, "Error in ZoneDatabase::DeleteWorldContainer: %s", results.ErrorMessage().c_str());
+		LogError("Error in ZoneDatabase::DeleteWorldContainer: [{}]", results.ErrorMessage().c_str());
 
 }
 
@@ -2295,7 +2298,7 @@ bool ZoneDatabase::RestoreCharacterInvSnapshot(uint32 character_id, uint32 times
 	// we should know what we're doing by the time we call this function..but,
 	// this is to prevent inventory deletions where no timestamp entries exists
 	if (!ValidateCharacterInvSnapshotTimestamp(character_id, timestamp)) {
-		Log(Logs::General, Logs::Error, "ZoneDatabase::RestoreCharacterInvSnapshot() called for id: %u without valid snapshot entries @ %u", character_id, timestamp);
+		LogError("ZoneDatabase::RestoreCharacterInvSnapshot() called for id: [{}] without valid snapshot entries @ [{}]", character_id, timestamp);
 		return false;
 	}
 
@@ -3113,12 +3116,12 @@ void ZoneDatabase::SaveMercBuffs(Merc *merc) {
 	Buffs_Struct *buffs = merc->GetBuffs();
 
 	// Remove any existing buff saves
-    std::string query = StringFormat("DELETE FROM merc_buffs WHERE MercId = %u", merc->GetMercID());
-    auto results = database.QueryDatabase(query);
-    if(!results.Success()) {
-        Log(Logs::General, Logs::Error, "Error While Deleting Merc Buffs before save: %s", results.ErrorMessage().c_str());
-        return;
-    }
+	std::string query   = StringFormat("DELETE FROM merc_buffs WHERE MercId = %u", merc->GetMercID());
+	auto        results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		LogError("Error While Deleting Merc Buffs before save: [{}]", results.ErrorMessage().c_str());
+		return;
+	}
 
 	for (int buffCount = 0; buffCount <= BUFF_COUNT; buffCount++) {
 		if(buffs[buffCount].spellid == 0 || buffs[buffCount].spellid == SPELL_UNKNOWN)
@@ -3142,7 +3145,7 @@ void ZoneDatabase::SaveMercBuffs(Merc *merc) {
                             buffs[buffCount].caston_z, buffs[buffCount].ExtraDIChance);
         results = database.QueryDatabase(query);
         if(!results.Success()) {
-            Log(Logs::General, Logs::Error, "Error Saving Merc Buffs: %s", results.ErrorMessage().c_str());
+      LogError("Error Saving Merc Buffs: [{}]", results.ErrorMessage().c_str());
             break;
         }
 	}
@@ -3161,7 +3164,7 @@ void ZoneDatabase::LoadMercBuffs(Merc *merc) {
                                     merc->GetMercID());
     auto results = database.QueryDatabase(query);
 	if(!results.Success()) {
-		Log(Logs::General, Logs::Error, "Error Loading Merc Buffs: %s", results.ErrorMessage().c_str());
+		LogError("Error Loading Merc Buffs: [{}]", results.ErrorMessage().c_str());
 		return;
 	}
 
@@ -3206,7 +3209,7 @@ void ZoneDatabase::LoadMercBuffs(Merc *merc) {
 	query = StringFormat("DELETE FROM merc_buffs WHERE MercId = %u", merc->GetMercID());
     results = database.QueryDatabase(query);
     if(!results.Success())
-        Log(Logs::General, Logs::Error, "Error Loading Merc Buffs: %s", results.ErrorMessage().c_str());
+    LogError("Error Loading Merc Buffs: [{}]", results.ErrorMessage().c_str());
 
 }
 
@@ -3222,14 +3225,14 @@ bool ZoneDatabase::DeleteMerc(uint32 merc_id) {
 	auto results = database.QueryDatabase(query);
 	if(!results.Success())
 	{
-		Log(Logs::General, Logs::Error, "Error Deleting Merc Buffs: %s", results.ErrorMessage().c_str());
+		LogError("Error Deleting Merc Buffs: [{}]", results.ErrorMessage().c_str());
 	}
 
 	query = StringFormat("DELETE FROM mercs WHERE MercID = '%u'", merc_id);
 	results = database.QueryDatabase(query);
 	if(!results.Success())
 	{
-		Log(Logs::General, Logs::Error, "Error Deleting Merc: %s", results.ErrorMessage().c_str());
+		LogError("Error Deleting Merc: [{}]", results.ErrorMessage().c_str());
 		return false;
 	}
 
@@ -3247,7 +3250,7 @@ void ZoneDatabase::LoadMercEquipment(Merc *merc) {
                                     merc->GetLevel(), merc->GetLevel());
     auto results = database.QueryDatabase(query);
 	if(!results.Success()) {
-		Log(Logs::General, Logs::Error, "Error Loading Merc Inventory: %s", results.ErrorMessage().c_str());
+		LogError("Error Loading Merc Inventory: [{}]", results.ErrorMessage().c_str());
 		return;
 	}
 
@@ -4602,11 +4605,11 @@ Corpse* ZoneDatabase::SummonBuriedCharacterCorpses(uint32 char_id, uint32 dest_z
 		if (!corpse)
             continue;
 
-        entity_list.AddCorpse(corpse);
-        corpse->SetDecayTimer(RuleI(Character, CorpseDecayTimeMS));
-        corpse->Spawn();
-        if (!UnburyCharacterCorpse(corpse->GetCorpseDBID(), dest_zone_id, dest_instance_id, position))
-            Log(Logs::General, Logs::Error, "Unable to unbury a summoned player corpse for character id %u.", char_id);
+		entity_list.AddCorpse(corpse);
+		corpse->SetDecayTimer(RuleI(Character, CorpseDecayTimeMS));
+		corpse->Spawn();
+		if (!UnburyCharacterCorpse(corpse->GetCorpseDBID(), dest_zone_id, dest_instance_id, position))
+			LogError("Unable to unbury a summoned player corpse for character id [{}]", char_id);
 	}
 
 	return corpse;
@@ -4645,7 +4648,7 @@ bool ZoneDatabase::SummonAllCharacterCorpses(uint32 char_id, uint32 dest_zone_id
 			++CorpseCount;
 		}
 		else{
-			Log(Logs::General, Logs::Error, "Unable to construct a player corpse for character id %u.", char_id);
+			LogError("Unable to construct a player corpse for character id [{}]", char_id);
 		}
 	}
 

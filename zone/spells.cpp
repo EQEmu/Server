@@ -285,7 +285,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		if (itm && (itm->GetItem()->Click.Type == EQEmu::item::ItemEffectEquipClick) && item_slot > EQEmu::invslot::EQUIPMENT_END){
 			if (CastToClient()->ClientVersion() < EQEmu::versions::ClientVersion::SoF) {
 				// They are attempting to cast a must equip clicky without having it equipped
-				Log(Logs::General, Logs::Error, "HACKER: %s (account: %s) attempted to click an equip-only effect on item %s (id: %d) without equiping it!", CastToClient()->GetCleanName(), CastToClient()->AccountName(), itm->GetItem()->Name, itm->GetItem()->ID);
+				LogError("HACKER: [{}] (account: [{}]) attempted to click an equip-only effect on item [{}] (id: [{}]) without equiping it!", CastToClient()->GetCleanName(), CastToClient()->AccountName(), itm->GetItem()->Name, itm->GetItem()->ID);
 				database.SetHackerFlag(CastToClient()->AccountName(), CastToClient()->GetCleanName(), "Clicking equip-only item without equiping it");
 			}
 			else {
@@ -5200,28 +5200,50 @@ bool Client::SpellGlobalCheck(uint16 spell_id, uint32 char_id) {
 
     query = StringFormat("SELECT value FROM quest_globals "
                         "WHERE charid = %i AND name = '%s'",
-                        char_id, spell_global_name.c_str());
-    results = database.QueryDatabase(query);
-    if (!results.Success()) {
-        Log(Logs::General, Logs::Error, "Spell ID %i query of spell_globals with Name: '%s' Value: '%i' failed", spell_id, spell_global_name.c_str(), spell_global_value);
-        return false;
-    }
+						 char_id, spell_global_name.c_str());
+	results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		LogError(
+			"Spell ID [{}] query of spell_globals with Name: [{}] Value: [{}] failed",
+			spell_id,
+			spell_global_name.c_str(),
+			spell_global_value
+		);
 
-    if (results.RowCount() != 1) {
-        Log(Logs::General, Logs::Error, "Char ID: %i does not have the Qglobal Name: '%s' for Spell ID %i", char_id, spell_global_name.c_str(), spell_id);
-        return false;
-    }
+		return false;
+	}
 
-    row = results.begin();
-    global_value = atoi(row[0]);
-    if (global_value == spell_global_value)
-        return true; // If the values match from both tables, allow the spell to be scribed
-    else if (global_value > spell_global_value)
-        return true; // Check if the qglobal value is greater than the require spellglobal value
+	if (results.RowCount() != 1) {
+		LogError(
+			"Char ID: [{}] does not have the Qglobal Name: [{}] for Spell ID [{}]",
+			char_id,
+			spell_global_name.c_str(),
+			spell_id
+		);
 
-    // If no matching result found in qglobals, don't scribe this spell
-    Log(Logs::General, Logs::Error, "Char ID: %i Spell_globals Name: '%s' Value: '%i' did not match QGlobal Value: '%i' for Spell ID %i", char_id, spell_global_name.c_str(), spell_global_value, global_value, spell_id);
-    return false;
+		return false;
+	}
+
+	row          = results.begin();
+	global_value = atoi(row[0]);
+	if (global_value == spell_global_value) {
+		return true; // If the values match from both tables, allow the spell to be scribed
+	}
+	else if (global_value > spell_global_value) {
+		return true;
+	} // Check if the qglobal value is greater than the require spellglobal value
+
+	// If no matching result found in qglobals, don't scribe this spell
+	LogError(
+		"Char ID: [{}] SpellGlobals Name: [{}] Value: [{}] did not match QGlobal Value: [{}] for Spell ID [{}]",
+		char_id,
+		spell_global_name.c_str(),
+		spell_global_value,
+		global_value,
+		spell_id
+	);
+
+	return false;
 }
 
 bool Client::SpellBucketCheck(uint16 spell_id, uint32 char_id) {
@@ -5241,18 +5263,30 @@ bool Client::SpellBucketCheck(uint16 spell_id, uint32 char_id) {
 	spell_bucket_value = atoi(row[1]);
 	if (spell_bucket_name.empty())
 		return true;
-	
-	query = StringFormat("SELECT value FROM data_buckets WHERE `key` = '%i-%s'", char_id, spell_bucket_name.c_str());
+
+	query   = StringFormat("SELECT value FROM data_buckets WHERE `key` = '%i-%s'", char_id, spell_bucket_name.c_str());
 	results = database.QueryDatabase(query);
 	if (!results.Success()) {
-        Log(Logs::General, Logs::Error, "Spell bucket %s for spell ID %i for char ID %i failed.", spell_bucket_name.c_str(), spell_id, char_id);
-        return false;
-    }
+		LogError(
+			"Spell bucket [{}] for spell ID [{}] for char ID [{}] failed",
+			spell_bucket_name.c_str(),
+			spell_id,
+			char_id
+		);
 
-    if (results.RowCount() != 1) {
-        Log(Logs::General, Logs::Error, "Spell bucket %s does not exist for spell ID %i for char ID %i.", spell_bucket_name.c_str(), spell_id, char_id);
-        return false;
-    }
+		return false;
+	}
+
+	if (results.RowCount() != 1) {
+		LogError(
+			"Spell bucket [{}] does not exist for spell ID [{}] for char ID [{}]",
+			spell_bucket_name.c_str(),
+			spell_id,
+			char_id
+		);
+
+		return false;
+	}
 
     row = results.begin();
 
@@ -5264,7 +5298,7 @@ bool Client::SpellBucketCheck(uint16 spell_id, uint32 char_id) {
         return true; // Check if the data bucket value is greater than the required spell bucket value
 
     // If no matching result found in spell buckets, don't scribe this spell
-    Log(Logs::General, Logs::Error, "Spell bucket %s for spell ID %i for char ID %i did not match value %i.",  spell_bucket_name.c_str(), spell_id, char_id, spell_bucket_value);
+  LogError("Spell bucket [{}] for spell ID [{}] for char ID [{}] did not match value [{}]", spell_bucket_name.c_str(), spell_id, char_id, spell_bucket_value);
     return false;
 }
 

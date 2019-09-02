@@ -1029,10 +1029,10 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
         event.condition_id = atoi(row[1]);
         event.period = atoi(row[2]);
 
-        if(event.period == 0) {
-            Log(Logs::General, Logs::Error, "Refusing to load spawn event #%d because it has a period of 0\n", event.id);
-            continue;
-        }
+		if (event.period == 0) {
+			LogError("Refusing to load spawn event #[{}] because it has a period of 0\n", event.id);
+			continue;
+		}
 
         event.next.minute = atoi(row[3]);
         event.next.hour = atoi(row[4]);

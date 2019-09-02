@@ -519,21 +519,21 @@ void command_deinit(void)
 int command_add(std::string command_name, const char *desc, int access, CmdFuncPtr function)
 {
 	if (command_name.empty()) {
-		Log(Logs::General, Logs::Error, "command_add() - Command added with empty name string - check command.cpp.");
+		LogError("command_add() - Command added with empty name string - check command.cpp");
 		return -1;
 	}
 	if (function == nullptr) {
-		Log(Logs::General, Logs::Error, "command_add() - Command '%s' added without a valid function pointer - check command.cpp.", command_name.c_str());
+		LogError("command_add() - Command [{}] added without a valid function pointer - check command.cpp", command_name.c_str());
 		return -1;
 	}
 	if (commandlist.count(command_name) != 0) {
-		Log(Logs::General, Logs::Error, "command_add() - Command '%s' is a duplicate command name - check command.cpp.", command_name.c_str());
+		LogError("command_add() - Command [{}] is a duplicate command name - check command.cpp", command_name.c_str());
 		return -1;
 	}
 	for (auto iter = commandlist.begin(); iter != commandlist.end(); ++iter) {
 		if (iter->second->function != function)
 			continue;
-		Log(Logs::General, Logs::Error, "command_add() - Command '%s' equates to an alias of '%s' - check command.cpp.", command_name.c_str(), iter->first.c_str());
+		LogError("command_add() - Command [{}] equates to an alias of [{}] - check command.cpp", command_name.c_str(), iter->first.c_str());
 		return -1;
 	}
 
@@ -591,7 +591,7 @@ int command_realdispatch(Client *c, const char *message)
 	}
 
 	if(cur->function == nullptr) {
-		Log(Logs::General, Logs::Error, "Command '%s' has a null function\n",  cstr.c_str());
+		LogError("Command [{}] has a null function\n", cstr.c_str());
 		return(-1);
 	} else {
 		//dispatch C++ command

@@ -544,13 +544,7 @@ void EQEmuLogSys::StartFileLogs(const std::string &log_name)
 			return;
 		}
 
-		Log(
-			Logs::General,
-			Logs::Status,
-			"Starting File Log 'logs/%s_%i.log'",
-			platform_file_name.c_str(),
-			getpid()
-		);
+		LogInfo("Starting File Log [logs/{}_{}.log]", platform_file_name.c_str(), getpid());
 
 		/**
 		 * Make directory if not exists
@@ -570,18 +564,11 @@ void EQEmuLogSys::StartFileLogs(const std::string &log_name)
 		/**
 		 * All other processes
 		 */
-
 		if (platform_file_name.empty()) {
 			return;
 		}
 
-		Log(
-			Logs::General,
-			Logs::Status,
-			"Starting File Log 'logs/%s_%i.log'",
-			platform_file_name.c_str(),
-			getpid()
-		);
+		LogInfo("Starting File Log [logs/{}_{}.log]", platform_file_name.c_str(), getpid());
 
 		/**
 		 * Open file pointer

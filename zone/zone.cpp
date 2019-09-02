@@ -560,18 +560,18 @@ void Zone::LoadMercTemplates(){
 	merc_templates.clear();
     std::string query = "SELECT `class_id`, `proficiency_id`, `stance_id`, `isdefault` FROM "
                         "`merc_stance_entries` ORDER BY `class_id`, `proficiency_id`, `stance_id`";
-    auto results = database.QueryDatabase(query);
+	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-		Log(Logs::General, Logs::Error, "Error in ZoneDatabase::LoadMercTemplates()");
+		LogError("Error in ZoneDatabase::LoadMercTemplates()");
 	}
 	else {
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			MercStanceInfo tempMercStanceInfo;
 
-			tempMercStanceInfo.ClassID = atoi(row[0]);
+			tempMercStanceInfo.ClassID       = atoi(row[0]);
 			tempMercStanceInfo.ProficiencyID = atoi(row[1]);
-			tempMercStanceInfo.StanceID = atoi(row[2]);
-			tempMercStanceInfo.IsDefault = atoi(row[3]);
+			tempMercStanceInfo.StanceID      = atoi(row[2]);
+			tempMercStanceInfo.IsDefault     = atoi(row[3]);
 
 			merc_stances.push_back(tempMercStanceInfo);
 		}
@@ -583,11 +583,11 @@ void Zone::LoadMercTemplates(){
             "AS CostFormula, MTem.clientversion, MTem.merc_npc_type_id "
             "FROM merc_types MTyp, merc_templates MTem, merc_subtypes MS "
             "WHERE MTem.merc_type_id = MTyp.merc_type_id AND MTem.merc_subtype_id = MS.merc_subtype_id "
-            "ORDER BY MTyp.race_id, MS.class_id, MTyp.proficiency_id;";
-    results = database.QueryDatabase(query);
-    if (!results.Success()) {
-        Log(Logs::General, Logs::Error, "Error in ZoneDatabase::LoadMercTemplates()");
-        return;
+			"ORDER BY MTyp.race_id, MS.class_id, MTyp.proficiency_id;";
+	results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		LogError("Error in ZoneDatabase::LoadMercTemplates()");
+		return;
 	}
 
     for (auto row = results.begin(); row != results.end(); ++row) {
@@ -630,7 +630,7 @@ void Zone::LoadLevelEXPMods(){
     const std::string query = "SELECT level, exp_mod, aa_exp_mod FROM level_exp_mods";
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
-        Log(Logs::General, Logs::Error, "Error in ZoneDatabase::LoadEXPLevelMods()");
+    LogError("Error in ZoneDatabase::LoadEXPLevelMods()");
         return;
     }
 
@@ -652,11 +652,11 @@ void Zone::LoadMercSpells(){
                             "FROM merc_spell_lists msl, merc_spell_list_entries msle "
                             "WHERE msle.merc_spell_list_id = msl.merc_spell_list_id "
                             "ORDER BY msl.class_id, msl.proficiency_id, msle.spell_type, msle.minlevel, msle.slot;";
-    auto results = database.QueryDatabase(query);
-    if (!results.Success()) {
-        Log(Logs::General, Logs::Error, "Error in Zone::LoadMercSpells()");
-        return;
-    }
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		LogError("Error in Zone::LoadMercSpells()");
+		return;
+	}
 
     for (auto row = results.begin(); row != results.end(); ++row) {
         uint32 classid;
@@ -744,7 +744,7 @@ void Zone::LoadZoneDoors(const char* zone, int16 version)
 	auto dlist = new Door[count];
 
 	if(!database.LoadDoors(count, dlist, zone, version)) {
-		Log(Logs::General, Logs::Error, "... Failed to load doors.");
+		LogError(" Failed to load doors");
 		delete[] dlist;
 		return;
 	}
@@ -812,7 +812,7 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 			Log(Logs::General, Logs::None, "Loaded a graveyard for zone %s: graveyard zoneid is %u at %s.", short_name, graveyard_zoneid(), to_string(m_Graveyard).c_str());
 		}
 		else {
-			Log(Logs::General, Logs::Error, "Unable to load the graveyard id %i for zone %s.", graveyard_id(), short_name);
+			LogError("Unable to load the graveyard id [{}] for zone [{}]", graveyard_id(), short_name);
 		}
 	}
 	if (long_name == 0) {
@@ -917,38 +917,38 @@ bool Zone::Init(bool iStaticZone) {
 
 	Log(Logs::General, Logs::Status, "Loading spawn conditions...");
 	if(!spawn_conditions.LoadSpawnConditions(short_name, instanceid)) {
-		Log(Logs::General, Logs::Error, "Loading spawn conditions failed, continuing without them.");
+		LogError("Loading spawn conditions failed, continuing without them");
 	}
 
 	Log(Logs::General, Logs::Status, "Loading static zone points...");
 	if (!database.LoadStaticZonePoints(&zone_point_list, short_name, GetInstanceVersion())) {
-		Log(Logs::General, Logs::Error, "Loading static zone points failed.");
+		LogError("Loading static zone points failed");
 		return false;
 	}
 
 	Log(Logs::General, Logs::Status, "Loading spawn groups...");
 	if (!database.LoadSpawnGroups(short_name, GetInstanceVersion(), &spawn_group_list)) {
-		Log(Logs::General, Logs::Error, "Loading spawn groups failed.");
+		LogError("Loading spawn groups failed");
 		return false;
 	}
 
 	Log(Logs::General, Logs::Status, "Loading spawn2 points...");
 	if (!database.PopulateZoneSpawnList(zoneid, spawn2_list, GetInstanceVersion()))
 	{
-		Log(Logs::General, Logs::Error, "Loading spawn2 points failed.");
+		LogError("Loading spawn2 points failed");
 		return false;
 	}
 
 	Log(Logs::General, Logs::Status, "Loading player corpses...");
 	if (!database.LoadCharacterCorpses(zoneid, instanceid)) {
-		Log(Logs::General, Logs::Error, "Loading player corpses failed.");
+		LogError("Loading player corpses failed");
 		return false;
 	}
 
 	Log(Logs::General, Logs::Status, "Loading traps...");
 	if (!database.LoadTraps(short_name, GetInstanceVersion()))
 	{
-		Log(Logs::General, Logs::Error, "Loading traps failed.");
+		LogError("Loading traps failed");
 		return false;
 	}
 
@@ -958,13 +958,13 @@ bool Zone::Init(bool iStaticZone) {
 	Log(Logs::General, Logs::Status, "Loading ground spawns...");
 	if (!LoadGroundSpawns())
 	{
-		Log(Logs::General, Logs::Error, "Loading ground spawns failed. continuing.");
+		LogError("Loading ground spawns failed. continuing");
 	}
 
 	Log(Logs::General, Logs::Status, "Loading World Objects from DB...");
 	if (!LoadZoneObjects())
 	{
-		Log(Logs::General, Logs::Error, "Loading World Objects failed. continuing.");
+		LogError("Loading World Objects failed. continuing");
 	}
 
 	Log(Logs::General, Logs::Status, "Flushing old respawn timers...");
@@ -1027,27 +1027,27 @@ void Zone::ReloadStaticData() {
 	Log(Logs::General, Logs::Status, "Reloading static zone points...");
 	zone_point_list.Clear();
 	if (!database.LoadStaticZonePoints(&zone_point_list, GetShortName(), GetInstanceVersion())) {
-		Log(Logs::General, Logs::Error, "Loading static zone points failed.");
+		LogError("Loading static zone points failed");
 	}
 
 	Log(Logs::General, Logs::Status, "Reloading traps...");
 	entity_list.RemoveAllTraps();
 	if (!database.LoadTraps(GetShortName(), GetInstanceVersion()))
 	{
-		Log(Logs::General, Logs::Error, "Reloading traps failed.");
+		LogError("Reloading traps failed");
 	}
 
 	Log(Logs::General, Logs::Status, "Reloading ground spawns...");
 	if (!LoadGroundSpawns())
 	{
-		Log(Logs::General, Logs::Error, "Reloading ground spawns failed. continuing.");
+		LogError("Reloading ground spawns failed. continuing");
 	}
 
 	entity_list.RemoveAllObjects();
 	Log(Logs::General, Logs::Status, "Reloading World Objects from DB...");
 	if (!LoadZoneObjects())
 	{
-		Log(Logs::General, Logs::Error, "Reloading World Objects failed. continuing.");
+		LogError("Reloading World Objects failed. continuing");
 	}
 
 	entity_list.RemoveAllDoors();
@@ -1082,7 +1082,7 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_id)
 			if(!database.GetZoneCFG(database.GetZoneID(filename), 0, &newzone_data, can_bind, can_combat, can_levitate, 
 				can_castoutdoor, is_city, is_hotzone, allow_mercs, max_movement_update_range, zone_type, default_ruleset, &map_name))
 				{
-				Log(Logs::General, Logs::Error, "Error loading the Zone Config.");
+				LogError("Error loading the Zone Config");
 				return false;
 				}
 		}
@@ -1919,7 +1919,7 @@ void Zone::LoadZoneBlockedSpells(uint32 zone_id)
 		if (zone_total_blocked_spells > 0) {
 			blocked_spells = new ZoneSpellsBlocked[zone_total_blocked_spells];
 			if (!database.LoadBlockedSpells(zone_total_blocked_spells, blocked_spells, zone_id)) {
-				Log(Logs::General, Logs::Error, "... Failed to load blocked spells.");
+				LogError(" Failed to load blocked spells");
 				ClearBlockedSpells();
 			}
 		}

@@ -711,7 +711,7 @@ void Mob::MakeAura(uint16 spell_id)
 	AuraRecord record;
 	if (!database.GetAuraEntry(spell_id, record)) {
 		Message(Chat::Red, "Unable to find data for aura %s", spells[spell_id].name);
-		Log(Logs::General, Logs::Error, "Unable to find data for aura %d, check auras table.", spell_id);
+		LogError("Unable to find data for aura [{}], check auras table", spell_id);
 		return;
 	}
 

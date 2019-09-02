@@ -132,7 +132,7 @@ void NPC::ResumeWandering()
 		}
 		else
 		{
-			Log(Logs::General, Logs::Error, "NPC not paused - can't resume wandering: %lu", (unsigned long)GetNPCTypeID());
+			LogError("NPC not paused - can't resume wandering: [{}]", (unsigned long)GetNPCTypeID());
 			return;
 		}
 
@@ -147,7 +147,7 @@ void NPC::ResumeWandering()
 	}
 	else
 	{
-		Log(Logs::General, Logs::Error, "NPC not on grid - can't resume wandering: %lu", (unsigned long)GetNPCTypeID());
+		LogError("NPC not on grid - can't resume wandering: [{}]", (unsigned long)GetNPCTypeID());
 	}
 	return;
 }
@@ -169,7 +169,7 @@ void NPC::PauseWandering(int pausetime)
 		}
 	}
 	else {
-		Log(Logs::General, Logs::Error, "NPC not on grid - can't pause wandering: %lu", (unsigned long)GetNPCTypeID());
+		LogError("NPC not on grid - can't pause wandering: [{}]", (unsigned long)GetNPCTypeID());
 	}
 	return;
 }

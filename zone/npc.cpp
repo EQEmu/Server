@@ -617,11 +617,11 @@ void NPC::QueryLoot(Client* to)
 	int item_count = 0;
 	for (auto cur  = itemlist.begin(); cur != itemlist.end(); ++cur, ++item_count) {
 		if (!(*cur)) {
-			Log(Logs::General, Logs::Error, "NPC::QueryLoot() - ItemList error, null item");
+			LogError("NPC::QueryLoot() - ItemList error, null item");
 			continue;
 		}
 		if (!(*cur)->item_id || !database.GetItem((*cur)->item_id)) {
-			Log(Logs::General, Logs::Error, "NPC::QueryLoot() - Database error, invalid item");
+			LogError("NPC::QueryLoot() - Database error, invalid item");
 			continue;
 		}
 

@@ -1061,7 +1061,7 @@ private:
 		std::string query = "SELECT `short_name`, `long_name` FROM `zone` WHERE '' NOT IN (`short_name`, `long_name`)";
 		auto results = database.QueryDatabase(query);
 		if (!results.Success()) {
-			Log(Logs::General, Logs::Error, "load_teleport_zone_names() - Error in zone names query: %s", results.ErrorMessage().c_str());
+			LogError("load_teleport_zone_names() - Error in zone names query: [{}]", results.ErrorMessage().c_str());
 			return;
 		}
 
@@ -1090,7 +1090,7 @@ private:
 	static void status_report() {
 		Log(Logs::General, Logs::Commands, "load_bot_command_spells(): - 'RuleI(Bots, CommandSpellRank)' set to %i.", RuleI(Bots, CommandSpellRank));
 		if (bot_command_spells.empty()) {
-			Log(Logs::General, Logs::Error, "load_bot_command_spells() - 'bot_command_spells' is empty.");
+			LogError("load_bot_command_spells() - 'bot_command_spells' is empty");
 			return;
 		}
 
@@ -1497,21 +1497,21 @@ void bot_command_deinit(void)
 int bot_command_add(std::string bot_command_name, const char *desc, int access, BotCmdFuncPtr function)
 {
 	if (bot_command_name.empty()) {
-		Log(Logs::General, Logs::Error, "bot_command_add() - Bot command added with empty name string - check bot_command.cpp.");
+		LogError("bot_command_add() - Bot command added with empty name string - check bot_command.cpp");
 		return -1;
 	}
 	if (function == nullptr) {
-		Log(Logs::General, Logs::Error, "bot_command_add() - Bot command '%s' added without a valid function pointer - check bot_command.cpp.", bot_command_name.c_str());
+		LogError("bot_command_add() - Bot command [{}] added without a valid function pointer - check bot_command.cpp", bot_command_name.c_str());
 		return -1;
 	}
 	if (bot_command_list.count(bot_command_name) != 0) {
-		Log(Logs::General, Logs::Error, "bot_command_add() - Bot command '%s' is a duplicate bot command name - check bot_command.cpp.", bot_command_name.c_str());
+		LogError("bot_command_add() - Bot command [{}] is a duplicate bot command name - check bot_command.cpp", bot_command_name.c_str());
 		return -1;
 	}
 	for (auto iter : bot_command_list) {
 		if (iter.second->function != function)
 			continue;
-		Log(Logs::General, Logs::Error, "bot_command_add() - Bot command '%s' equates to an alias of '%s' - check bot_command.cpp.", bot_command_name.c_str(), iter.first.c_str());
+		LogError("bot_command_add() - Bot command [{}] equates to an alias of [{}] - check bot_command.cpp", bot_command_name.c_str(), iter.first.c_str());
 		return -1;
 	}
 
@@ -1570,7 +1570,7 @@ int bot_command_real_dispatch(Client *c, const char *message)
 	}
 
 	if(cur->function == nullptr) {
-		Log(Logs::General, Logs::Error, "Bot command '%s' has a null function\n",  cstr.c_str());
+		LogError("Bot command [{}] has a null function\n", cstr.c_str());
 		return(-1);
 	} else {
 		//dispatch C++ bot command

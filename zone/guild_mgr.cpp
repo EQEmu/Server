@@ -261,7 +261,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 	switch(pack->opcode) {
 	case ServerOP_RefreshGuild: {
 		if(pack->size != sizeof(ServerGuildRefresh_Struct)) {
-			Log(Logs::General, Logs::Error, "Received ServerOP_RefreshGuild of incorrect size %d, expected %d", pack->size, sizeof(ServerGuildRefresh_Struct));
+			LogError("Received ServerOP_RefreshGuild of incorrect size [{}], expected [{}]", pack->size, sizeof(ServerGuildRefresh_Struct));
 			return;
 		}
 		ServerGuildRefresh_Struct *s = (ServerGuildRefresh_Struct *) pack->pBuffer;
@@ -295,7 +295,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 
 	case ServerOP_GuildCharRefresh: {
 		if(pack->size != sizeof(ServerGuildCharRefresh_Struct)) {
-			Log(Logs::General, Logs::Error, "Received ServerOP_RefreshGuild of incorrect size %d, expected %d", pack->size, sizeof(ServerGuildCharRefresh_Struct));
+			LogError("Received ServerOP_RefreshGuild of incorrect size [{}], expected [{}]", pack->size, sizeof(ServerGuildCharRefresh_Struct));
 			return;
 		}
 		ServerGuildCharRefresh_Struct *s = (ServerGuildCharRefresh_Struct *) pack->pBuffer;
@@ -364,7 +364,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 
 	case ServerOP_DeleteGuild: {
 		if(pack->size != sizeof(ServerGuildID_Struct)) {
-			Log(Logs::General, Logs::Error, "Received ServerOP_DeleteGuild of incorrect size %d, expected %d", pack->size, sizeof(ServerGuildID_Struct));
+			LogError("Received ServerOP_DeleteGuild of incorrect size [{}], expected [{}]", pack->size, sizeof(ServerGuildID_Struct));
 			return;
 		}
 		ServerGuildID_Struct *s = (ServerGuildID_Struct *) pack->pBuffer;
@@ -683,7 +683,7 @@ void GuildBankManager::SendGuildBank(Client *c)
 
 	if(Iterator == Banks.end())
 	{
-		Log(Logs::General, Logs::Error, "Unable to find guild bank for guild ID %i", c->GuildID());
+		LogError("Unable to find guild bank for guild ID [{}]", c->GuildID());
 
 		return;
 	}
@@ -856,7 +856,7 @@ bool GuildBankManager::AddItem(uint32 GuildID, uint8 Area, uint32 ItemID, int32 
 
 	if(Iterator == Banks.end())
 	{
-		Log(Logs::General, Logs::Error, "Unable to find guild bank for guild ID %i", GuildID);
+		LogError("Unable to find guild bank for guild ID [{}]", GuildID);
 
 		return false;
 	}
@@ -902,7 +902,7 @@ bool GuildBankManager::AddItem(uint32 GuildID, uint8 Area, uint32 ItemID, int32 
 
 	if(Slot < 0)
 	{
-		Log(Logs::General, Logs::Error, "No space to add item to the guild bank.");
+		LogError("No space to add item to the guild bank");
 
 		return false;
 	}
