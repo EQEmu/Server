@@ -258,7 +258,7 @@ void PathfinderWaypoint::Load(const std::string &filename) {
 	
 		fread(&Head, sizeof(Head), 1, f);
 	
-		Log(Logs::General, Logs::Status, "Path File Header: Version %ld, PathNodes %ld",
+		LogInfo("Path File Header: Version [{}], PathNodes [{}]",
 			(long)Head.version, (long)Head.PathNodeCount);
 	
 		if (Head.version == 2)

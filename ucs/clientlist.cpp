@@ -304,7 +304,7 @@ static void ProcessMailTo(Client *c, std::string MailMessage) {
 
 		if (!database.SendMail(Recipient, c->MailBoxName(), Subject, Body, RecipientsString)) {
 
-			Log(Logs::Detail, Logs::UCSServer, "Failed in SendMail(%s, %s, %s, %s)", Recipient.c_str(),
+			LogInfo("Failed in SendMail([{}], [{}], [{}], [{}])", Recipient.c_str(),
 				c->MailBoxName().c_str(), Subject.c_str(), RecipientsString.c_str());
 
 			int PacketLength = 10 + Recipient.length() + Subject.length();
@@ -573,7 +573,7 @@ void Clientlist::CheckForStaleConnections(Client *c) {
 
 			in.s_addr = (*Iterator)->ClientStream->GetRemoteIP();
 
-			Log(Logs::Detail, Logs::UCSServer, "Client connection from %s:%d closed.", inet_ntoa(in),
+			LogInfo("Client connection from [{}]:[{}] closed", inet_ntoa(in),
 				ntohs((*Iterator)->ClientStream->GetRemotePort()));
 
 			safe_delete((*Iterator));
@@ -592,7 +592,7 @@ void Clientlist::Process()
 			struct in_addr in;
 			in.s_addr = (*it)->ClientStream->GetRemoteIP();
 
-			Log(Logs::Detail, Logs::UCSServer, "Client connection from %s:%d closed.", inet_ntoa(in),
+			LogInfo("Client connection from [{}]:[{}] closed", inet_ntoa(in),
 				ntohs((*it)->ClientStream->GetRemotePort()));
 
 			safe_delete((*it));
@@ -618,8 +618,7 @@ void Clientlist::Process()
 				VARSTRUCT_DECODE_STRING(MailBox, PacketBuffer);
 
 				if (strlen(PacketBuffer) != 9) {
-					Log(Logs::Detail, Logs::UCSServer,
-						"Mail key is the wrong size. Version of world incompatible with UCS.");
+					LogInfo("Mail key is the wrong size. Version of world incompatible with UCS.");
 					KeyValid = false;
 					break;
 				}
@@ -640,12 +639,11 @@ void Clientlist::Process()
 				else
 					CharacterName = MailBoxString.substr(LastPeriod + 1);
 
-				Log(Logs::Detail, Logs::UCSServer, "Received login for user %s with key %s",
+				LogInfo("Received login for user [{}] with key [{}]",
 					MailBox, Key);
 
 				if (!database.VerifyMailKey(CharacterName, (*it)->ClientStream->GetRemoteIP(), Key)) {
-					Log(Logs::Detail, Logs::UCSServer,
-						"Chat Key for %s does not match, closing connection.", MailBox);
+					LogError("Chat Key for %s does not match, closing connection.", MailBox);
 					KeyValid = false;
 					break;
 				}
@@ -680,10 +678,9 @@ void Clientlist::Process()
 			struct in_addr in;
 			in.s_addr = (*it)->ClientStream->GetRemoteIP();
 
-			Log(Logs::Detail, Logs::UCSServer,
-				"Force disconnecting client: %s:%d, KeyValid=%i, GetForceDisconnect()=%i",
-				inet_ntoa(in), ntohs((*it)->ClientStream->GetRemotePort()), KeyValid,
-				(*it)->GetForceDisconnect());
+			LogInfo("Force disconnecting client: [{}]:[{}], KeyValid=[{}], GetForceDisconnect()=[{}]",
+					inet_ntoa(in), ntohs((*it)->ClientStream->GetRemotePort()), KeyValid,
+					(*it)->GetForceDisconnect());
 
 			(*it)->ClientStream->Close();
 
@@ -1392,7 +1389,7 @@ void Client::SendChannelMessageByNumber(std::string Message) {
 		}
 	}
 
-	Log(Logs::Detail, Logs::UCSServer, "%s tells %s, [%s]", GetName().c_str(), RequiredChannel->GetName().c_str(),
+	LogInfo("[{}] tells [{}], [[{}]]", GetName().c_str(), RequiredChannel->GetName().c_str(),
 		Message.substr(MessageStart + 1).c_str());
 
 	if (RuleB(Chat, EnableAntiSpam))
@@ -2353,13 +2350,13 @@ std::string Client::MailBoxName() {
 
 	if ((Characters.empty()) || (CurrentMailBox > (Characters.size() - 1)))
 	{
-		Log(Logs::Detail, Logs::UCSServer, "MailBoxName() called with CurrentMailBox set to %i and Characters.size() is %i",
+		LogInfo("MailBoxName() called with CurrentMailBox set to [{}] and Characters.size() is [{}]",
 			CurrentMailBox, Characters.size());
 
 		return "";
 	}
 
-	Log(Logs::Detail, Logs::UCSServer, "MailBoxName() called with CurrentMailBox set to %i and Characters.size() is %i",
+	LogInfo("MailBoxName() called with CurrentMailBox set to [{}] and Characters.size() is [{}]",
 		CurrentMailBox, Characters.size());
 
 	return Characters[CurrentMailBox].Name;

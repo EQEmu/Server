@@ -2967,7 +2967,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 
 		EQEmu::ItemInstance *itemOneToPush = nullptr, *itemTwoToPush = nullptr;
 
-		//Log(Logs::DebugLevel::Moderate, Logs::Debug, "cslot: %i aslot: %i cidx: %i aidx: %i act: %i dest: %i",
+		//Log(Logs::DebugLevel::Moderate, Logs::Debug, "cslot: [{}] aslot: [{}] cidx: [{}] aidx: [{}] act: [{}] dest: [{}]",
 		//	in_augment->container_slot, in_augment->augment_slot, in_augment->container_index, in_augment->augment_index, in_augment->augment_action, in_augment->dest_inst_id);
 
 		EQEmu::ItemInstance *tobe_auged = nullptr, *old_aug = nullptr, *new_aug = nullptr, *aug = nullptr, *solvent = nullptr;
@@ -4477,7 +4477,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 	is_client_moving = (ppu->y_pos == m_Position.y && ppu->x_pos == m_Position.x) ? false : true;
 
 	if (is_client_moving) {
-		Log(Logs::Detail, Logs::Normal, "ClientUpdate: Client is moving - scan timer is: %u",
+		LogInfo("ClientUpdate: Client is moving - scan timer is: [{}]",
 			client_scan_npc_aggro_timer.GetDuration());
 		if (client_scan_npc_aggro_timer.GetDuration() > 1000) {
 			client_scan_npc_aggro_timer.Disable();
@@ -4485,7 +4485,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 		}
 	}
 	else {
-		Log(Logs::Detail, Logs::Normal, "ClientUpdate: Client is NOT moving - scan timer is: %u",
+		LogInfo("ClientUpdate: Client is NOT moving - scan timer is: [{}]",
 			client_scan_npc_aggro_timer.GetDuration());
 		if (client_scan_npc_aggro_timer.GetDuration() < 1000) {
 			client_scan_npc_aggro_timer.Disable();
@@ -4547,7 +4547,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 	
 	/* Visual Debugging */
 	if (RuleB(Character, OPClientUpdateVisualDebug)) {
-		Log(Logs::General, Logs::Debug, "ClientUpdate: ppu x: %f y: %f z: %f h: %u", ppu->x_pos, ppu->y_pos, ppu->z_pos,
+		LogDebug("ClientUpdate: ppu x: [{}] y: [{}] z: [{}] h: [{}]", ppu->x_pos, ppu->y_pos, ppu->z_pos,
 			ppu->heading);
 		this->SendAppearanceEffect(78, 0, 0, 0, 0);
 		this->SendAppearanceEffect(41, 0, 0, 0, 0);

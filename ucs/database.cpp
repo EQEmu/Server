@@ -213,7 +213,7 @@ int Database::FindCharacter(const char *characterName)
 	safe_delete_array(safeCharName);
 
 	if (results.RowCount() != 1) {
-		Log(Logs::Detail, Logs::UCSServer, "Bad result from FindCharacter query for character %s",
+		LogInfo("Bad result from FindCharacter query for character [{}]",
 			characterName);
 		return -1;
 	}

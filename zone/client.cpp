@@ -2558,7 +2558,7 @@ uint16 Client::GetMaxSkillAfterSpecializationRules(EQEmu::skills::SkillType skil
 
 				Save();
 
-				Log(Logs::General, Logs::Normal, "Reset %s's caster specialization skills to 1. "
+				LogInfo("Reset [{}]'s caster specialization skills to 1"
 								"Too many specializations skills were above 50.", GetCleanName());
 			}
 

@@ -1847,7 +1847,7 @@ const char* Database::GetRaidLeaderName(uint32 raid_id)
 	auto results = QueryDatabase(query);
 
 	if (!results.Success()) {
-		Log(Logs::General, Logs::Debug, "Unable to get Raid Leader Name for Raid ID: %u", raid_id);
+		LogDebug("Unable to get Raid Leader Name for Raid ID: [{}]", raid_id);
 		return "UNKNOWN";
 	}
 

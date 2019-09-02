@@ -458,12 +458,12 @@ int command_init(void)
 		auto iter_cs = command_settings.find(iter_cl->first);
 		if (iter_cs == command_settings.end()) {
 			if (iter_cl->second->access == 0)
-				Log(Logs::General, Logs::Commands, "command_init(): Warning: Command '%s' defaulting to access level 0!", iter_cl->first.c_str());
+				LogCommands("command_init(): Warning: Command [{}] defaulting to access level 0!", iter_cl->first.c_str());
 			continue;
 		}
 
 		iter_cl->second->access = iter_cs->second.first;
-		Log(Logs::General, Logs::Commands, "command_init(): - Command '%s' set to access level %d.", iter_cl->first.c_str(), iter_cs->second.first);
+		LogCommands("command_init(): - Command [{}] set to access level [{}]", iter_cl->first.c_str(), iter_cs->second.first);
 		if (iter_cs->second.second.empty())
 			continue;
 
@@ -472,14 +472,14 @@ int command_init(void)
 			if (iter_aka->empty())
 				continue;
 			if (commandlist.find(*iter_aka) != commandlist.end()) {
-				Log(Logs::General, Logs::Commands, "command_init(): Warning: Alias '%s' already exists as a command - skipping!", iter_aka->c_str());
+				LogCommands("command_init(): Warning: Alias [{}] already exists as a command - skipping!", iter_aka->c_str());
 				continue;
 			}
 
 			commandlist[*iter_aka] = iter_cl->second;
 			commandaliases[*iter_aka] = iter_cl->first;
 
-			Log(Logs::General, Logs::Commands, "command_init(): - Alias '%s' added to command '%s'.", iter_aka->c_str(), commandaliases[*iter_aka].c_str());
+			LogCommands("command_init(): - Alias [{}] added to command [{}]", iter_aka->c_str(), commandaliases[*iter_aka].c_str());
 		}
 	}
 
@@ -587,7 +587,7 @@ int command_realdispatch(Client *c, const char *message)
 	}
 
 	if(cur->access >= COMMANDS_LOGGING_MIN_STATUS) {
-		Log(Logs::General, Logs::Commands, "%s (%s) used command: %s (target=%s)",  c->GetName(), c->AccountName(), message, c->GetTarget()?c->GetTarget()->GetName():"NONE");
+		LogCommands("[{}] ([{}]) used command: [{}] (target=[{}])",  c->GetName(), c->AccountName(), message, c->GetTarget()?c->GetTarget()->GetName():"NONE");
 	}
 
 	if(cur->function == nullptr) {
@@ -8519,7 +8519,7 @@ void command_ucs(Client *c, const Seperator *sep)
 	if (!c)
 		return;
 
-	Log(Logs::Detail, Logs::UCSServer, "Character %s attempting ucs reconnect while ucs server is %savailable",
+	LogInfo("Character [{}] attempting ucs reconnect while ucs server is [{}] available",
 		c->GetName(), (zone->IsUCSServerAvailable() ? "" : "un"));
 
 	if (zone->IsUCSServerAvailable()) {
@@ -12210,7 +12210,7 @@ void command_logtest(Client *c, const Seperator *sep){
 		uint32 i = 0;
 		t = std::clock();
 		for (i = 0; i < atoi(sep->arg[1]); i++){
-			Log(Logs::General, Logs::Debug, "[%u] Test #2... Took %f seconds", i, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
+			LogDebug("[[{}]] Test #2 Took [{}] seconds", i, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
 		}
 
 	}
@@ -12308,7 +12308,7 @@ void command_mysqltest(Client *c, const Seperator *sep)
 			auto results = database.QueryDatabase(query);
 		}
 	}
-	Log(Logs::General, Logs::Debug, "MySQL Test... Took %f seconds", ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
+	LogDebug("MySQL Test Took [{}] seconds", ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
 }
 
 void command_resetaa_timer(Client *c, const Seperator *sep) {

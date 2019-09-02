@@ -1088,14 +1088,14 @@ private:
 	}
 
 	static void status_report() {
-		Log(Logs::General, Logs::Commands, "load_bot_command_spells(): - 'RuleI(Bots, CommandSpellRank)' set to %i.", RuleI(Bots, CommandSpellRank));
+		LogCommands("load_bot_command_spells(): - 'RuleI(Bots, CommandSpellRank)' set to [{}]", RuleI(Bots, CommandSpellRank));
 		if (bot_command_spells.empty()) {
 			LogError("load_bot_command_spells() - 'bot_command_spells' is empty");
 			return;
 		}
 
 		for (int i = BCEnum::SpellTypeFirst; i <= BCEnum::SpellTypeLast; ++i)
-			Log(Logs::General, Logs::Commands, "load_bot_command_spells(): - '%s' returned %u spell entries.",
+			LogCommands("load_bot_command_spells(): - [{}] returned [{}] spell entries",
 				BCEnum::SpellTypeEnumToString(static_cast<BCEnum::SpType>(i)).c_str(), bot_command_spells[static_cast<BCEnum::SpType>(i)].size());
 	}
 
@@ -1431,12 +1431,12 @@ int bot_command_init(void)
 		auto bot_command_settings_iter = bot_command_settings.find(working_bcl_iter.first);
 		if (bot_command_settings_iter == bot_command_settings.end()) {
 			if (working_bcl_iter.second->access == 0)
-				Log(Logs::General, Logs::Commands, "bot_command_init(): Warning: Bot Command '%s' defaulting to access level 0!", working_bcl_iter.first.c_str());
+				LogCommands("bot_command_init(): Warning: Bot Command [{}] defaulting to access level 0!", working_bcl_iter.first.c_str());
 			continue;
 		}
 
 		working_bcl_iter.second->access = bot_command_settings_iter->second.first;
-		Log(Logs::General, Logs::Commands, "bot_command_init(): - Bot Command '%s' set to access level %d.", working_bcl_iter.first.c_str(), bot_command_settings_iter->second.first);
+		LogCommands("bot_command_init(): - Bot Command [{}] set to access level [{}]", working_bcl_iter.first.c_str(), bot_command_settings_iter->second.first);
 		if (bot_command_settings_iter->second.second.empty())
 			continue;
 
@@ -1444,14 +1444,14 @@ int bot_command_init(void)
 			if (alias_iter.empty())
 				continue;
 			if (bot_command_list.find(alias_iter) != bot_command_list.end()) {
-				Log(Logs::General, Logs::Commands, "bot_command_init(): Warning: Alias '%s' already exists as a bot command - skipping!", alias_iter.c_str());
+				LogCommands("bot_command_init(): Warning: Alias [{}] already exists as a bot command - skipping!", alias_iter.c_str());
 				continue;
 			}
 
 			bot_command_list[alias_iter] = working_bcl_iter.second;
 			bot_command_aliases[alias_iter] = working_bcl_iter.first;
 
-			Log(Logs::General, Logs::Commands, "bot_command_init(): - Alias '%s' added to bot command '%s'.", alias_iter.c_str(), bot_command_aliases[alias_iter].c_str());
+			LogCommands("bot_command_init(): - Alias [{}] added to bot command [{}]", alias_iter.c_str(), bot_command_aliases[alias_iter].c_str());
 		}
 	}
 
@@ -1566,7 +1566,7 @@ int bot_command_real_dispatch(Client *c, const char *message)
 	}
 
 	if(cur->access >= COMMANDS_LOGGING_MIN_STATUS) {
-		Log(Logs::General, Logs::Commands, "%s (%s) used bot command: %s (target=%s)",  c->GetName(), c->AccountName(), message, c->GetTarget()?c->GetTarget()->GetName():"NONE");
+		LogCommands("[{}] ([{}]) used bot command: [{}] (target=[{}])",  c->GetName(), c->AccountName(), message, c->GetTarget()?c->GetTarget()->GetName():"NONE");
 	}
 
 	if(cur->function == nullptr) {
@@ -4254,7 +4254,7 @@ void bot_subcommand_bot_clone(Client *c, const Seperator *sep)
 	}
 	if (!my_bot->GetBotID()) {
 		c->Message(m_unknown, "An unknown error has occured - BotName: %s, BotID: %u", my_bot->GetCleanName(), my_bot->GetBotID());
-		Log(Logs::General, Logs::Commands, "bot_command_clone(): - Error: Active bot reported invalid ID (BotName: %s, BotID: %u, OwnerName: %s, OwnerID: %u, AcctName: %s, AcctID: %u)",
+		LogCommands("bot_command_clone(): - Error: Active bot reported invalid ID (BotName: [{}], BotID: [{}], OwnerName: [{}], OwnerID: [{}], AcctName: [{}], AcctID: [{}])",
 			my_bot->GetCleanName(), my_bot->GetBotID(), c->GetCleanName(), c->CharacterID(), c->AccountName(), c->AccountID());
 		return;
 	}

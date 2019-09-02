@@ -204,7 +204,7 @@ bool ZoneDatabase::GetZoneCFG(
 
 	//not in the DB yet:
 	zone_data->gravity = atof(row[56]);
-	Log(Logs::General, Logs::Debug, "Zone Gravity is %f", zone_data->gravity);
+	LogDebug("Zone Gravity is [{}]", zone_data->gravity);
 	allow_mercs = true;
 
 	zone_data->FastRegenHP = atoi(row[57]);
@@ -2382,7 +2382,7 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 	std::string where_condition = "";
 
 	if (bulk_load) {
-		Log(Logs::General, Logs::Debug, "Performing bulk NPC Types load");
+		LogDebug("Performing bulk NPC Types load");
 		where_condition = StringFormat(
 			"INNER JOIN spawnentry ON npc_types.id = spawnentry.npcID "
 			"INNER JOIN spawn2 ON spawnentry.spawngroupID = spawn2.spawngroupID "

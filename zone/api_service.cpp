@@ -864,7 +864,7 @@ Json::Value ApiSetLoggingLevel(EQ::Net::WebsocketServerConnection *connection, J
 
 	response["status"] = "Category doesn't exist";
 
-	Log(Logs::General, Logs::Status, "Logging category is %i and level is %i",
+	LogInfo("Logging category is [{}] and level is [{}]",
 		logging_category,
 		logging_level
 	);

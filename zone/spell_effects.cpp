@@ -4712,7 +4712,7 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 					return 0;
 				break;
 			default:
-				Log(Logs::General, Logs::Normal, "CalcFocusEffect: unknown limit spelltype %d",
+				LogInfo("CalcFocusEffect: unknown limit spelltype [{}]",
 					focus_spell.base[i]);
 			}
 			break;
@@ -5090,7 +5090,7 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 		// this spits up a lot of garbage when calculating spell focuses
 		// since they have all kinds of extra effects on them.
 		default:
-			Log(Logs::General, Logs::Normal, "CalcFocusEffect: unknown effectid %d",
+			LogInfo("CalcFocusEffect: unknown effectid [{}]",
 				focus_spell.effectid[i]);
 #endif
 		}

@@ -47,7 +47,7 @@ ChatChannel::ChatChannel(std::string inName, std::string inOwner, std::string in
 
 	Moderated = false;
 
-	Log(Logs::Detail, Logs::UCSServer, "New ChatChannel created: Name: [%s], Owner: [%s], Password: [%s], MinStatus: %i",
+	LogInfo("New ChatChannel created: Name: [[{}]], Owner: [[{}]], Password: [[{}]], MinStatus: [{}]",
 		Name.c_str(), Owner.c_str(), Password.c_str(), MinimumStatus);
 
 }
@@ -402,7 +402,7 @@ void ChatChannel::SendMessageToChannel(std::string Message, Client* Sender) {
 
 		if(ChannelClient)
 		{
-			Log(Logs::Detail, Logs::UCSServer, "Sending message to %s from %s",
+			LogInfo("Sending message to [{}] from [{}]",
 				ChannelClient->GetName().c_str(), Sender->GetName().c_str());
 
 			if (cv_messages[static_cast<uint32>(ChannelClient->GetClientVersion())].length() == 0) {
@@ -581,7 +581,7 @@ void ChatChannelList::Process() {
 
 		if(CurrentChannel && CurrentChannel->ReadyToDelete()) {
 
-			Log(Logs::Detail, Logs::UCSServer, "Empty temporary password protected channel %s being destroyed.",
+			LogInfo("Empty temporary password protected channel [{}] being destroyed",
 				CurrentChannel->GetName().c_str());
 
 			RemoveChannel(CurrentChannel);
