@@ -5968,9 +5968,9 @@ void command_guild(Client *c, const Seperator *sep)
 			}
 
 			if(guild_id == GUILD_NONE) {
-				Log(Logs::Detail, Logs::Guilds, "%s: Removing %s (%d) from guild with GM command.",  c->GetName(), sep->arg[2], charid);
+				LogGuilds("[{}]: Removing [{}] ([{}]) from guild with GM command",  c->GetName(), sep->arg[2], charid);
 			} else {
-				Log(Logs::Detail, Logs::Guilds, "%s: Putting %s (%d) into guild %s (%d) with GM command.",  c->GetName(), sep->arg[2], charid, guild_mgr.GetGuildName(guild_id), guild_id);
+				LogGuilds("[{}]: Putting [{}] ([{}]) into guild [{}] ([{}]) with GM command",  c->GetName(), sep->arg[2], charid, guild_mgr.GetGuildName(guild_id), guild_id);
 			}
 
 			if(!guild_mgr.SetGuild(charid, guild_id, GUILD_MEMBER)) {
@@ -6017,8 +6017,7 @@ void command_guild(Client *c, const Seperator *sep)
 				return;
 			}
 
-			Log(Logs::Detail, Logs::Guilds, "%s: Setting %s (%d)'s guild rank to %d with GM command.",  c->GetName(),
-				sep->arg[2], charid, rank);
+			LogGuilds("[{}]: Setting [{}] ([{}])'s guild rank to [{}] with GM command", c->GetName(), sep->arg[2], charid, rank);
 
 			if(!guild_mgr.SetGuildRank(charid, rank))
 				c->Message(Chat::Red, "Error while setting rank %d on '%s'.",  rank, sep->arg[2]);
@@ -6059,7 +6058,7 @@ void command_guild(Client *c, const Seperator *sep)
 
 				uint32 id = guild_mgr.CreateGuild(sep->argplus[3], leader);
 
-				Log(Logs::Detail, Logs::Guilds, "%s: Creating guild %s with leader %d with GM command. It was given id %lu.",  c->GetName(),
+				LogGuilds("[{}]: Creating guild [{}] with leader [{}] with GM command. It was given id [{}]",  c->GetName(),
 					sep->argplus[3], leader, (unsigned long)id);
 
 				if (id == GUILD_NONE)
@@ -6098,7 +6097,7 @@ void command_guild(Client *c, const Seperator *sep)
 				}
 			}
 
-			Log(Logs::Detail, Logs::Guilds, "%s: Deleting guild %s (%d) with GM command.",  c->GetName(),
+			LogGuilds("[{}]: Deleting guild [{}] ([{}]) with GM command",  c->GetName(),
 				guild_mgr.GetGuildName(id), id);
 
 			if (!guild_mgr.DeleteGuild(id))
@@ -6132,7 +6131,7 @@ void command_guild(Client *c, const Seperator *sep)
 				}
 			}
 
-			Log(Logs::Detail, Logs::Guilds, "%s: Renaming guild %s (%d) to '%s' with GM command.",  c->GetName(),
+			LogGuilds("[{}]: Renaming guild [{}] ([{}]) to [{}] with GM command",  c->GetName(),
 				guild_mgr.GetGuildName(id), id, sep->argplus[3]);
 
 			if (!guild_mgr.RenameGuild(id, sep->argplus[3]))
@@ -6183,7 +6182,7 @@ void command_guild(Client *c, const Seperator *sep)
 					}
 				}
 
-				Log(Logs::Detail, Logs::Guilds, "%s: Setting leader of guild %s (%d) to %d with GM command.",  c->GetName(),
+				LogGuilds("[{}]: Setting leader of guild [{}] ([{}]) to [{}] with GM command",  c->GetName(),
 					guild_mgr.GetGuildName(id), id, leader);
 
 				if(!guild_mgr.SetGuildLeader(id, leader))
