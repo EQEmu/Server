@@ -78,7 +78,7 @@ namespace Titanium
 			//TODO: figure out how to support shared memory with multiple patches...
 			opcodes = new RegularOpcodeManager();
 			if (!opcodes->LoadOpcodes(opfile.c_str())) {
-				Log(Logs::General, Logs::Netcode, "[OPCODES] Error loading opcodes file %s. Not registering patch %s.", opfile.c_str(), name);
+				LogNetcode("[OPCODES] Error loading opcodes file [{}]. Not registering patch [{}]", opfile.c_str(), name);
 				return;
 			}
 		}
@@ -104,7 +104,7 @@ namespace Titanium
 
 
 
-		Log(Logs::General, Logs::Netcode, "[IDENTIFY] Registered patch %s", name);
+		LogNetcode("[StreamIdentify] Registered patch [{}]", name);
 	}
 
 	void Reload()
@@ -121,10 +121,10 @@ namespace Titanium
 			opfile += name;
 			opfile += ".conf";
 			if (!opcodes->ReloadOpcodes(opfile.c_str())) {
-				Log(Logs::General, Logs::Netcode, "[OPCODES] Error reloading opcodes file %s for patch %s.", opfile.c_str(), name);
+				LogNetcode("[OPCODES] Error reloading opcodes file [{}] for patch [{}]", opfile.c_str(), name);
 				return;
 			}
-			Log(Logs::General, Logs::Netcode, "[OPCODES] Reloaded opcodes for patch %s", name);
+			LogNetcode("[OPCODES] Reloaded opcodes for patch [{}]", name);
 		}
 	}
 
@@ -337,7 +337,7 @@ namespace Titanium
 		for (int r = 0; r < itemcount; r++, eq++) {
 			SerializeItem(ob, (const EQEmu::ItemInstance*)eq->inst, ServerToTitaniumSlot(eq->slot_id), 0);
 			if (ob.tellp() == last_pos)
-				Log(Logs::General, Logs::Netcode, "Titanium::ENCODE(OP_CharInventory) Serialization failed on item slot %d during OP_CharInventory.  Item skipped.", eq->slot_id);
+				LogNetcode("Titanium::ENCODE(OP_CharInventory) Serialization failed on item slot [{}] during OP_CharInventory.  Item skipped", eq->slot_id);
 			
 			last_pos = ob.tellp();
 		}
@@ -822,7 +822,7 @@ namespace Titanium
 
 		SerializeItem(ob, (const EQEmu::ItemInstance*)int_struct->inst, ServerToTitaniumSlot(int_struct->slot_id), 0);
 		if (ob.tellp() == last_pos) {
-			Log(Logs::General, Logs::Netcode, "Titanium::ENCODE(OP_ItemPacket) Serialization failed on item slot %d.", int_struct->slot_id);
+			LogNetcode("Titanium::ENCODE(OP_ItemPacket) Serialization failed on item slot [{}]", int_struct->slot_id);
 			delete in;
 			return;
 		}
@@ -1510,7 +1510,7 @@ namespace Titanium
 
 		if (EntryCount == 0 || ((in->size % sizeof(Track_Struct))) != 0)
 		{
-			Log(Logs::General, Logs::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(Track_Struct));
+			LogNetcode("[STRUCTS] Wrong size on outbound [{}]: Got [{}], expected multiple of [{}]", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(Track_Struct));
 			delete in;
 			return;
 		}
@@ -1628,7 +1628,7 @@ namespace Titanium
 		//determine and verify length
 		int entrycount = in->size / sizeof(Spawn_Struct);
 		if (entrycount == 0 || (in->size % sizeof(Spawn_Struct)) != 0) {
-			Log(Logs::General, Logs::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(Spawn_Struct));
+			LogNetcode("[STRUCTS] Wrong size on outbound [{}]: Got [{}], expected multiple of [{}]", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(Spawn_Struct));
 			delete in;
 			return;
 		}
@@ -2540,7 +2540,7 @@ namespace Titanium
 			titanium_slot = server_slot;
 		}
 
-		Log(Logs::Detail, Logs::Netcode, "Convert Server Slot %i to Titanium Slot %i", server_slot, titanium_slot);
+		LogNetcode("Convert Server Slot [{}] to Titanium Slot [{}]", server_slot, titanium_slot);
 
 		return titanium_slot;
 	}
@@ -2627,7 +2627,7 @@ namespace Titanium
 			server_slot = titanium_slot;
 		}
 
-		Log(Logs::Detail, Logs::Netcode, "Convert Titanium Slot %i to Server Slot %i", titanium_slot, server_slot);
+		LogNetcode("Convert Titanium Slot [{}] to Server Slot [{}]", titanium_slot, server_slot);
 
 		return server_slot;
 	}
@@ -2648,7 +2648,7 @@ namespace Titanium
 			server_slot = titanium_corpse_slot + 4;
 		}
 
-		Log(Logs::Detail, Logs::Netcode, "Convert Titanium Corpse Slot %i to Server Corpse Slot %i", titanium_corpse_slot, server_slot);
+		LogNetcode("Convert Titanium Corpse Slot [{}] to Server Corpse Slot [{}]", titanium_corpse_slot, server_slot);
 
 		return server_slot;
 	}
