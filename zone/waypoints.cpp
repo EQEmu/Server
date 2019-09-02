@@ -637,9 +637,7 @@ float Mob::GetFixedZ(const glm::vec3 &destination, int32 z_find_offset) {
 
 		auto duration = timer.elapsed();
 
-		Log(Logs::Moderate,
-			Logs::FixZ,
-			"Mob::GetFixedZ() (%s) returned %4.3f at %4.3f, %4.3f, %4.3f - Took %lf",
+		LogFixZ("Mob::GetFixedZ() ([{}]) returned [{}] at [{}], [{}], [{}] - Took [{}]",
 			this->GetCleanName(),
 			new_z,
 			destination.x,
@@ -682,11 +680,7 @@ void Mob::FixZ(int32 z_find_offset /*= 5*/, bool fix_client_z /*= false*/) {
 			this->SendAppearanceEffect(103, 0, 0, 0, 0);
 		}
 
-		Log(Logs::General,
-			Logs::FixZ,
-			"%s is failing to find Z %f",
-			this->GetCleanName(),
-			std::abs(m_Position.z - new_z));
+		LogFixZ("[{}] is failing to find Z [{}]", this->GetCleanName(), std::abs(m_Position.z - new_z));
 	}
 }
 
