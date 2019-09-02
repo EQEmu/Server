@@ -252,7 +252,7 @@ uint32 Database::CreateAccount(
 
 bool Database::DeleteAccount(const char* name, const char *loginserver) {
 	std::string query = StringFormat("DELETE FROM account WHERE name='%s' AND ls_id='%s'", name, loginserver);
-	Log(Logs::General, Logs::WorldServer, "Account Attempting to be deleted:'%s:%s'", loginserver, name);
+	LogInfo("Account Attempting to be deleted:'[{}]:[{}]'", loginserver, name);
 
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
@@ -299,7 +299,7 @@ bool Database::ReserveName(uint32 account_id, char* name) {
 	auto results = QueryDatabase(query);
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		if (row[0] && atoi(row[0]) > 0){
-			Log(Logs::General, Logs::WorldServer, "Account: %i tried to request name: %s, but it is already taken...", account_id, name);
+			LogInfo("Account: [{}] tried to request name: [{}], but it is already taken", account_id, name);
 			return false;
 		}
 	}
@@ -317,10 +317,10 @@ bool Database::ReserveName(uint32 account_id, char* name) {
 bool Database::DeleteCharacter(char *name) {
 	uint32 charid = 0;
 	if(!name ||	!strlen(name)) {
-		Log(Logs::General, Logs::WorldServer, "DeleteCharacter: request to delete without a name (empty char slot)");
+		LogInfo("DeleteCharacter: request to delete without a name (empty char slot)");
 		return false;
 	}
-	Log(Logs::General, Logs::WorldServer, "Database::DeleteCharacter name : '%s'", name);
+	LogInfo("Database::DeleteCharacter name : [{}]", name);
 
 	/* Get id from character_data before deleting record so we can clean up the rest of the tables */
 	std::string query = StringFormat("SELECT `id` from `character_data` WHERE `name` = '%s'", name);
@@ -2237,7 +2237,7 @@ struct TimeOfDay_Struct Database::LoadTime(time_t &realtime)
 	auto results = QueryDatabase(query);
 
 	if (!results.Success() || results.RowCount() == 0){
-		Log(Logs::Detail, Logs::WorldServer, "Loading EQ time of day failed. Using defaults.");
+		LogInfo("Loading EQ time of day failed. Using defaults");
 		eqTime.minute = 0;
 		eqTime.hour = 9;
 		eqTime.day = 1;

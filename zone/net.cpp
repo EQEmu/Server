@@ -503,7 +503,7 @@ int main(int argc, char** argv) {
 			//now that we know what patch they are running, start up their client object
 			struct in_addr	in;
 			in.s_addr = eqsi->GetRemoteIP();
-			Log(Logs::Detail, Logs::WorldServer, "New client from %s:%d", inet_ntoa(in), ntohs(eqsi->GetRemotePort()));
+			LogInfo("New client from [{}]:[{}]", inet_ntoa(in), ntohs(eqsi->GetRemotePort()));
 			auto client = new Client(eqsi);
 			entity_list.AddClient(client);
 		}
