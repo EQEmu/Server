@@ -49,21 +49,21 @@ class RuleManager {
 public:
 	//generate our rule enums:
 	typedef enum {
-	#define RULE_INT(cat, rule, default_value) \
+	#define RULE_INT(cat, rule, default_value, notes) \
 		Int__##rule,
 	#include "ruletypes.h"
 		_IntRuleCount
 	} IntType;
 
 	typedef enum {
-	#define RULE_REAL(cat, rule, default_value) \
+	#define RULE_REAL(cat, rule, default_value, notes) \
 		Real__##rule,
 	#include "ruletypes.h"
 		_RealRuleCount
 	} RealType;
 
 	typedef enum {
-	#define RULE_BOOL(cat, rule, default_value) \
+	#define RULE_BOOL(cat, rule, default_value, notes) \
 		Bool__##rule,
 	#include "ruletypes.h"
 		_BoolRuleCount
@@ -113,6 +113,9 @@ public:
 	void ResetRules(bool reload = false);
 	bool LoadRules(Database *db, const char *ruleset = nullptr, bool reload = false);
 	void SaveRules(Database *db, const char *ruleset = nullptr);
+	bool UpdateChangedRules(Database *db, const char *ruleset_name, bool quiet_update = false);
+	bool UpdateInjectedRules(Database *db, const char *ruleset_name, bool quiet_update = false);
+	bool UpdateOrphanedRules(Database *db, bool quiet_update = false);
 
 private:
 	RuleManager();
@@ -137,8 +140,16 @@ private:
 
 	static bool _FindRule(const char *rule_name, RuleType &type_into, uint16 &index_into);
 	static const char *_GetRuleName(RuleType type, uint16 index);
+	static const std::string &_GetRuleNotes(RuleType type, uint16 index);
 	static int _FindOrCreateRuleset(Database *db, const char *ruleset);
 	void _SaveRule(Database *db, RuleType type, uint16 index);
+	bool _UpdateRules(
+		Database *db,
+		const char *ruleset_name,
+		const int ruleset_id,
+		const std::vector<std::tuple<int, std::string, std::string, std::string>> &injected,
+		const std::vector<std::string> &orphaned
+	);
 
 	static const char *s_categoryNames[];
 	typedef struct {
@@ -146,6 +157,7 @@ private:
 		CategoryType category;
 		RuleType type;
 		uint16 rule_index;	//index into its 'type' array
+		std::string notes;
 	} RuleInfo;
 	static const RuleInfo s_RuleInfo[];
 

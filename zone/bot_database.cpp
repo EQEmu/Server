@@ -65,12 +65,7 @@ bool BotDatabase::UpdateBotCommandSettings(const std::vector<std::pair<std::stri
 			implode(
 				",",
 				std::pair<char, char>('(', ')'),
-				join_pair(
-					",",
-					std::pair<char, char>('\'', '\''),
-					std::pair<char, char>('\'', '\''),
-					injected
-				)
+				join_pair(",", std::pair<char, char>('\'', '\''), injected)
 			)
 		);
 

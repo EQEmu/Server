@@ -20,6 +20,7 @@
 #include <string.h>
 #include <vector>
 #include <cstdarg>
+#include <tuple>
 
 #include "types.h"
 
@@ -33,27 +34,27 @@ const std::string vStringFormat(const char* format, va_list args);
 std::string implode(std::string glue, std::vector<std::string> src);
 
 template <typename T>
-std::string implode(std::string glue, std::pair<char, char> encapsulation, std::vector<T> src)
+std::string implode(const std::string &glue, const std::pair<char, char> &encapsulation, const std::vector<T> &src)
 {
 	if (src.empty()) {
 		return {};
 	}
 
-	std::ostringstream output;
+	std::ostringstream oss;
 	
 	for (const T &src_iter : src) {
-		output << encapsulation.first << src_iter << encapsulation.second << glue;
+		oss << encapsulation.first << src_iter << encapsulation.second << glue;
 	}
 
-	std::string final_output = output.str();
-	final_output.resize(output.str().size() - glue.size());
-
-	return final_output;
+	std::string output(oss.str());
+	output.resize(output.size() - glue.size());
+	
+	return output;
 }
 
-// this requires that #include<fmt/format.h> be included in whatever file the invocation is made from
+// this requires that #include<fmt/format.h> be included in whatever code file the invocation is made from
 template <typename T1, typename T2>
-std::vector<std::string> join_pair(std::string glue, std::pair<char, char> first_encap, std::pair<char, char> second_encap, std::vector<std::pair<T1, T2>> src)
+std::vector<std::string> join_pair(const std::string &glue, const std::pair<char, char> &encapsulation, const std::vector<std::pair<T1, T2>> &src)
 {
 	if (src.empty()) {
 		return {};
@@ -65,17 +66,55 @@ std::vector<std::string> join_pair(std::string glue, std::pair<char, char> first
 		output.push_back(
 			// There are issues with including <fmt/format.h> in a header file that result in compile
 			// failure. I'm not sure if this applies only within the same project or across projects.
-			// Since templates act similar to macros in regards to initialization, this call should be
-			// safe so long as the '#include<fmt/format.h>' rule above is observed.
+			// Since templates act similar to macros in regards to initialization, this definition
+			// should be safe so long as the '#include<fmt/format.h>' rule above is observed.
 			fmt::format(
 				"{}{}{}{}{}{}{}",
-				first_encap.first,
+				encapsulation.first,
 				src_iter.first,
-				first_encap.second,
+				encapsulation.second,
 				glue,
-				second_encap.first,
+				encapsulation.first,
 				src_iter.second,
-				second_encap.second
+				encapsulation.second
+			)
+		);
+	}
+
+	return output;
+}
+
+// this requires that #include<fmt/format.h> be included in whatever code file the invocation is made from
+template <typename T1, typename T2, typename T3, typename T4>
+std::vector<std::string> join_tuple(const std::string &glue, const std::pair<char, char> &encapsulation, const std::vector<std::tuple<T1, T2, T3, T4>> &src)
+{
+	if (src.empty()) {
+		return {};
+	}
+
+	std::vector<std::string> output;
+
+	for (const std::tuple<T1, T2, T3, T4> &src_iter : src) {
+
+		output.push_back(
+			// note: see join_pair(...)
+			fmt::format(
+				"{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}",
+				encapsulation.first,
+				std::get<0>(src_iter),
+				encapsulation.second,
+				glue,
+				encapsulation.first,
+				std::get<1>(src_iter),
+				encapsulation.second,
+				glue,
+				encapsulation.first,
+				std::get<2>(src_iter),
+				encapsulation.second,
+				glue,
+				encapsulation.first,
+				std::get<3>(src_iter),
+				encapsulation.second
 			)
 		);
 	}
