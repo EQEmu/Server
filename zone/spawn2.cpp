@@ -184,12 +184,18 @@ bool Spawn2::Process() {
 			return false;
 		}
 
+		uint16 condition_value=1;
+
+		if (condition_id > 0) {
+			condition_value = zone->spawn_conditions.GetCondition(zone->GetShortName(), zone->GetInstanceID(), condition_id);
+		}
+
 		//have the spawn group pick an NPC for us
-		uint32 npcid = spawn_group->GetNPCType();
+		uint32 npcid = spawn_group->GetNPCType(condition_value);
 		if (npcid == 0) {
 			Log(Logs::Detail,
 				Logs::Spawns,
-				"Spawn2 %d: Spawn group %d did not yeild an NPC! not spawning.",
+				"Spawn2 %d: Spawn group %d did not yield an NPC! not spawning.",
 				spawn2_id,
 				spawngroup_id_);
 
@@ -202,7 +208,7 @@ bool Spawn2::Process() {
 		if (tmp == nullptr) {
 			Log(Logs::Detail,
 				Logs::Spawns,
-				"Spawn2 %d: Spawn group %d yeilded an invalid NPC type %d",
+				"Spawn2 %d: Spawn group %d yielded an invalid NPC type %d",
 				spawn2_id,
 				spawngroup_id_,
 				npcid);
@@ -214,7 +220,7 @@ bool Spawn2::Process() {
 			if (!entity_list.LimitCheckName(tmp->name)) {
 				Log(Logs::Detail,
 					Logs::Spawns,
-					"Spawn2 %d: Spawn group %d yeilded NPC type %d, which is unique and one already exists.",
+					"Spawn2 %d: Spawn group %d yielded NPC type %d, which is unique and one already exists.",
 					spawn2_id,
 					spawngroup_id_,
 					npcid);
@@ -227,7 +233,7 @@ bool Spawn2::Process() {
 			if (!entity_list.LimitCheckType(npcid, tmp->spawn_limit)) {
 				Log(Logs::Detail,
 					Logs::Spawns,
-					"Spawn2 %d: Spawn group %d yeilded NPC type %d, which is over its spawn limit (%d)",
+					"Spawn2 %d: Spawn group %d yielded NPC type %d, which is over its spawn limit (%d)",
 					spawn2_id,
 					spawngroup_id_,
 					npcid,
@@ -881,19 +887,19 @@ void SpawnConditionManager::ExecEvent(SpawnEvent &event, bool send_update) {
 		break;
 	case SpawnEvent::ActionAdd:
 		new_value += event.argument;
-		Log(Logs::Detail, Logs::Spawns, "Event %d: Executing. Adding %d to condition %d, yeilding %d.", event.id, event.argument, event.condition_id, new_value);
+		Log(Logs::Detail, Logs::Spawns, "Event %d: Executing. Adding %d to condition %d, yielding %d.", event.id, event.argument, event.condition_id, new_value);
 		break;
 	case SpawnEvent::ActionSubtract:
 		new_value -= event.argument;
-		Log(Logs::Detail, Logs::Spawns, "Event %d: Executing. Subtracting %d from condition %d, yeilding %d.", event.id, event.argument, event.condition_id, new_value);
+		Log(Logs::Detail, Logs::Spawns, "Event %d: Executing. Subtracting %d from condition %d, yielding %d.", event.id, event.argument, event.condition_id, new_value);
 		break;
 	case SpawnEvent::ActionMultiply:
 		new_value *= event.argument;
-		Log(Logs::Detail, Logs::Spawns, "Event %d: Executing. Multiplying condition %d by %d, yeilding %d.", event.id, event.condition_id, event.argument, new_value);
+		Log(Logs::Detail, Logs::Spawns, "Event %d: Executing. Multiplying condition %d by %d, yielding %d.", event.id, event.condition_id, event.argument, new_value);
 		break;
 	case SpawnEvent::ActionDivide:
 		new_value /= event.argument;
-		Log(Logs::Detail, Logs::Spawns, "Event %d: Executing. Dividing condition %d by %d, yeilding %d.", event.id, event.condition_id, event.argument, new_value);
+		Log(Logs::Detail, Logs::Spawns, "Event %d: Executing. Dividing condition %d by %d, yielding %d.", event.id, event.condition_id, event.argument, new_value);
 		break;
 	default:
 		Log(Logs::Detail, Logs::Spawns, "Event %d: Invalid event action type %d", event.id, event.action);

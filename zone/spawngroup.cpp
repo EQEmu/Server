@@ -28,11 +28,12 @@
 extern EntityList entity_list;
 extern Zone       *zone;
 
-SpawnEntry::SpawnEntry(uint32 in_NPCType, int in_chance, uint8 in_npc_spawn_limit)
+SpawnEntry::SpawnEntry(uint32 in_NPCType, int in_chance, uint16 in_filter, uint8 in_npc_spawn_limit)
 {
-	NPCType         = in_NPCType;
-	chance          = in_chance;
-	npc_spawn_limit = in_npc_spawn_limit;
+	NPCType                = in_NPCType;
+	chance                 = in_chance;
+	condition_value_filter = in_filter;
+	npc_spawn_limit        = in_npc_spawn_limit;
 }
 
 SpawnGroup::SpawnGroup(
@@ -64,7 +65,7 @@ SpawnGroup::SpawnGroup(
 	despawn_timer = despawn_timer_in;
 }
 
-uint32 SpawnGroup::GetNPCType()
+uint32 SpawnGroup::GetNPCType(uint16 in_filter)
 {
 #if EQDEBUG >= 10
 	Log(Logs::General, Logs::None, "SpawnGroup[%08x]::GetNPCType()", (uint32) this);
@@ -87,13 +88,15 @@ uint32 SpawnGroup::GetNPCType()
 			continue;
 		}
 
+		if (se->condition_value_filter != in_filter)
+			continue;
+
 		totalchance += se->chance;
 		possible.push_back(se);
 	}
 	if (totalchance == 0) {
 		return 0;
 	}
-
 
 	int32 roll = 0;
 	roll = zone->random.Int(0, totalchance - 1);
@@ -242,6 +245,7 @@ bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnG
 			spawnentry.spawngroupID,
 			npcid,
 			chance,
+			condition_value_filter,
 			npc_types.spawn_limit
 				AS sl
 				FROM
@@ -266,7 +270,8 @@ bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnG
 		auto new_spawn_entry = new SpawnEntry(
 			atoi(row[1]),
 			atoi(row[2]),
-			(row[3] ? atoi(row[3]) : 0)
+			atoi(row[3]),
+			(row[4] ? atoi(row[4]) : 0)
 		);
 
 		SpawnGroup *spawn_group = spawn_group_list->GetSpawnGroup(atoi(row[0]));
@@ -342,6 +347,7 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawn_group_id, SpawnGroupList *spawn
 			(spawnentry.spawngroupID),
 			spawnentry.npcid,
 			spawnentry.chance,
+			spawnentry.condition_value_filter,
 			spawngroup.spawn_limit
 				FROM
 				spawnentry,
@@ -362,7 +368,8 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawn_group_id, SpawnGroupList *spawn
 		auto new_spawn_entry = new SpawnEntry(
 			atoi(row[1]),
 			atoi(row[2]),
-			(row[3] ? atoi(row[3]) : 0)
+			atoi(row[3]),
+			(row[4] ? atoi(row[4]) : 0)
 		);
 
 		SpawnGroup *spawn_group = spawn_group_list->GetSpawnGroup(atoi(row[0]));

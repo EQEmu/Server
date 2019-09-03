@@ -395,6 +395,7 @@
 9139|2019_03_25_optional_npc_model.sql|SHOW COLUMNS FROM `npc_types` LIKE 'model'|empty|
 9140|2019_07_03_update_range.sql|SHOW COLUMNS FROM `zone` LIKE 'max_movement_update_range'|empty|
 9141|2019_07_10_npc_flymode.sql|SHOW COLUMNS FROM `npc_types` LIKE 'flymode'|empty|
+9142|2019_09_02_required_spawn_filter.sql|SHOW COLUMNS FROM `spawnentry` LIKE 'condition_value_filter'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
