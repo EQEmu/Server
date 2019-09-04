@@ -258,7 +258,16 @@ Mob *QuestManager::spawn_from_spawn2(uint32 spawn2_id)
 				return nullptr;
 			}
 		}
-		uint32 npcid = spawn_group->GetNPCType();
+
+		uint16 condition_value=1;
+		uint16 condition_id=found_spawn->GetSpawnCondition();
+
+		if (condition_id > 0) {
+			condition_value = zone->spawn_conditions.GetCondition(zone->GetShortName(), zone->GetInstanceID(), condition_id);
+		}
+
+		uint32 npcid = spawn_group->GetNPCType(condition_value);
+
 		if (npcid == 0) {
 			return nullptr;
 		}

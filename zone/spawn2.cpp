@@ -176,8 +176,14 @@ bool Spawn2::Process() {
 			return false;
 		}
 
+		uint16 condition_value=1;
+
+		if (condition_id > 0) {
+			condition_value = zone->spawn_conditions.GetCondition(zone->GetShortName(), zone->GetInstanceID(), condition_id);
+		}
+
 		//have the spawn group pick an NPC for us
-		uint32 npcid = spawn_group->GetNPCType();
+		uint32 npcid = spawn_group->GetNPCType(condition_value);
 		if (npcid == 0) {
 			LogSpawns("Spawn2 [{}]: Spawn group [{}] did not yeild an NPC! not spawning", spawn2_id, spawngroup_id_);
 
@@ -850,19 +856,19 @@ void SpawnConditionManager::ExecEvent(SpawnEvent &event, bool send_update) {
 		break;
 	case SpawnEvent::ActionAdd:
 		new_value += event.argument;
-		LogSpawns("Event [{}]: Executing. Adding [{}] to condition [{}], yeilding [{}]", event.id, event.argument, event.condition_id, new_value);
+		LogSpawns("Event [{}]: Executing. Adding [{}] to condition [{}], yielding [{}]", event.id, event.argument, event.condition_id, new_value);
 		break;
 	case SpawnEvent::ActionSubtract:
 		new_value -= event.argument;
-		LogSpawns("Event [{}]: Executing. Subtracting [{}] from condition [{}], yeilding [{}]", event.id, event.argument, event.condition_id, new_value);
+		LogSpawns("Event [{}]: Executing. Subtracting [{}] from condition [{}], yielding [{}]", event.id, event.argument, event.condition_id, new_value);
 		break;
 	case SpawnEvent::ActionMultiply:
 		new_value *= event.argument;
-		LogSpawns("Event [{}]: Executing. Multiplying condition [{}] by [{}], yeilding [{}]", event.id, event.condition_id, event.argument, new_value);
+		LogSpawns("Event [{}]: Executing. Multiplying condition [{}] by [{}], yielding [{}]", event.id, event.condition_id, event.argument, new_value);
 		break;
 	case SpawnEvent::ActionDivide:
 		new_value /= event.argument;
-		LogSpawns("Event [{}]: Executing. Dividing condition [{}] by [{}], yeilding [{}]", event.id, event.condition_id, event.argument, new_value);
+		LogSpawns("Event [{}]: Executing. Dividing condition [{}] by [{}], yielding [{}]", event.id, event.condition_id, event.argument, new_value);
 		break;
 	default:
 		LogSpawns("Event [{}]: Invalid event action type [{}]", event.id, event.action);
