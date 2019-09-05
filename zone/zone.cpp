@@ -1458,11 +1458,12 @@ void Zone::StartShutdownTimer(uint32 set_time) {
 		if (set_time == (RuleI(Zone, AutoShutdownDelay))) {
 			set_time = static_cast<uint32>(database.getZoneShutDownDelay(GetZoneID(), GetInstanceVersion()));
 		}
+
 		autoshutdown_timer.SetTimer(set_time);
-		LogInfo("Zone::StartShutdownTimer set to {}", set_time);
+		LogDebug("Zone::StartShutdownTimer set to {}", set_time);
 	}
 
-	LogInfo("Zone::StartShutdownTimer trigger - set_time: [{}] remaining_time: [{}] diff: [{}]", set_time, autoshutdown_timer.GetRemainingTime(), (set_time - autoshutdown_timer.GetRemainingTime()));
+	LogDebug("Zone::StartShutdownTimer trigger - set_time: [{}] remaining_time: [{}] diff: [{}]", set_time, autoshutdown_timer.GetRemainingTime(), (set_time - autoshutdown_timer.GetRemainingTime()));
 }
 
 bool Zone::Depop(bool StartSpawnTimer) {
