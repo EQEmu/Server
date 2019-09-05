@@ -118,24 +118,13 @@ void WorldServer::ProcessNewLSInfo(uint16_t opcode, const EQ::Net::Packet &packe
 	auto *info = (ServerNewLSInfo_Struct *) packet.Data();
 
 	LogInfo(
-		"Received New Login Server Info \n"
-		" - name [{0}]\n"
-		" - shortname [{1}]\n"
-		" - remote_address [{2}]\n"
-		" - local_address [{3}]\n"
-		" - account [{4}]\n"
-		" - password [{5}]\n"
-		" - protocolversion [{6}]\n"
-		" - server_version [{7}]\n"
-		" - server_type [{8}]",
+		"New World Server Info | name [{0}] shortname [{1}] remote_address [{2}] local_address [{3}] account [{4}] password [{5}] server_type [{6}]",
 		info->server_long_name,
 		info->server_short_name,
 		info->remote_ip_address,
 		info->local_ip_address,
 		info->account_name,
 		info->account_password,
-		info->protocol_version,
-		info->server_version,
 		info->server_process_type
 	);
 
