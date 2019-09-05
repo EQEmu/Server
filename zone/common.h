@@ -388,6 +388,7 @@ struct StatBonuses {
 	int32	skillmod[EQEmu::skills::HIGHEST_SKILL + 1];
 	int32	skillmodmax[EQEmu::skills::HIGHEST_SKILL + 1];
 	int		effective_casting_level;
+	int		adjusted_casting_skill;				// SPA 112 for fizzles
 	int		reflect_chance;						// chance to reflect incoming spell
 	uint32	singingMod;
 	uint32	Amplification;						// stacks with singingMod

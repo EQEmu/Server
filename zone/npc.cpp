@@ -209,6 +209,7 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	default_accuracy_rating  = npc_type_data->accuracy_rating;
 	default_avoidance_rating = npc_type_data->avoidance_rating;
 	default_atk              = npc_type_data->ATK;
+	strn0cpy(default_special_abilities, npc_type_data->special_abilities, 512);
 
 	// used for when getting charmed, if 0, doesn't swap
 	charm_ac               = npc_type_data->charm_ac;
@@ -2838,39 +2839,61 @@ void NPC::DepopSwarmPets()
 	}
 }
 
-void NPC::ModifyStatsOnCharm(bool bRemoved)
+void NPC::ModifyStatsOnCharm(bool is_charm_removed)
 {
-	if (bRemoved) {
-		if (charm_ac)
+	if (is_charm_removed) {
+		if (charm_ac) {
 			AC = default_ac;
-		if (charm_attack_delay)
+		}
+		if (charm_attack_delay) {
 			attack_delay = default_attack_delay;
-		if (charm_accuracy_rating)
+		}
+		if (charm_accuracy_rating) {
 			accuracy_rating = default_accuracy_rating;
-		if (charm_avoidance_rating)
+		}
+		if (charm_avoidance_rating) {
 			avoidance_rating = default_avoidance_rating;
-		if (charm_atk)
+		}
+		if (charm_atk) {
 			ATK = default_atk;
+		}
 		if (charm_min_dmg || charm_max_dmg) {
 			base_damage = round((default_max_dmg - default_min_dmg) / 1.9);
-			min_damage = default_min_dmg - round(base_damage / 10.0);
+			min_damage  = default_min_dmg - round(base_damage / 10.0);
 		}
-	} else {
-		if (charm_ac)
-			AC = charm_ac;
-		if (charm_attack_delay)
-			attack_delay = charm_attack_delay;
-		if (charm_accuracy_rating)
-			accuracy_rating = charm_accuracy_rating;
-		if (charm_avoidance_rating)
-			avoidance_rating = charm_avoidance_rating;
-		if (charm_atk)
-			ATK = charm_atk;
-		if (charm_min_dmg || charm_max_dmg) {
-			base_damage = round((charm_max_dmg - charm_min_dmg) / 1.9);
-			min_damage = charm_min_dmg - round(base_damage / 10.0);
+		if (RuleB(Spells, CharmDisablesSpecialAbilities)) {
+			ProcessSpecialAbilities(default_special_abilities);
 		}
+
+		SetAttackTimer();
+		CalcAC();
+
+		return;
 	}
+
+	if (charm_ac) {
+		AC = charm_ac;
+	}
+	if (charm_attack_delay) {
+		attack_delay = charm_attack_delay;
+	}
+	if (charm_accuracy_rating) {
+		accuracy_rating = charm_accuracy_rating;
+	}
+	if (charm_avoidance_rating) {
+		avoidance_rating = charm_avoidance_rating;
+	}
+	if (charm_atk) {
+		ATK = charm_atk;
+	}
+	if (charm_min_dmg || charm_max_dmg) {
+		base_damage = round((charm_max_dmg - charm_min_dmg) / 1.9);
+		min_damage  = charm_min_dmg - round(base_damage / 10.0);
+	}
+	if (RuleB(Spells, CharmDisablesSpecialAbilities)) {
+		ClearSpecialAbilities();
+	}
+
 	// the rest of the stats aren't cached, so lets just do these two instead of full CalcBonuses()
 	SetAttackTimer();
 	CalcAC();

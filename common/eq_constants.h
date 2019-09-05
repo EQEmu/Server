@@ -459,4 +459,9 @@ enum ChatChannelNames : uint16
 	ChatChannel_Emotes = 22
 };
 
+namespace ZoneBlockedSpellTypes {
+	const uint8 ZoneWide = 1;
+	const uint8 Region   = 2;
+};
+
 #endif /*COMMON_EQ_CONSTANTS_H*/

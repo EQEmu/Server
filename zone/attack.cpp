@@ -1387,13 +1387,13 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 		|| (GetHP() < 0)
 		|| (!IsAttackAllowed(other))
 		) {
-		Log(Logs::Detail, Logs::Combat, "Attack canceled, invalid circumstances.");
+		Log(Logs::Detail, Logs::Combat, "Attack cancelled, invalid circumstances.");
 		return false; // Only bards can attack while casting
 	}
 
 	if (DivineAura() && !GetGM()) {//cant attack while invulnerable unless your a gm
-		Log(Logs::Detail, Logs::Combat, "Attack canceled, Divine Aura is in effect.");
-		MessageString(Chat::DefaultText, DIVINE_AURA_NO_ATK);	//You can't attack while invulnerable!
+		Log(Logs::Detail, Logs::Combat, "Attack cancelled, Divine Aura is in effect.");
+		MessageString(Chat::DefaultText, DIVINE_AURA_NO_ATK);	//You can't attack while invulnerable
 		return false;
 	}
 
@@ -1412,7 +1412,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 
 	if (weapon != nullptr) {
 		if (!weapon->IsWeapon()) {
-			Log(Logs::Detail, Logs::Combat, "Attack canceled, Item %s (%d) is not a weapon.", weapon->GetItem()->Name, weapon->GetID());
+			Log(Logs::Detail, Logs::Combat, "Attack cancelled, Item %s (%d) is not a weapon.", weapon->GetItem()->Name, weapon->GetID());
 			return(false);
 		}
 		Log(Logs::Detail, Logs::Combat, "Attacking with weapon: %s (%d)", weapon->GetItem()->Name, weapon->GetID());
@@ -1952,8 +1952,8 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 	if (weapon) {
 		Log(Logs::Detail, Logs::Combat, "Attacking with weapon: %s (%d) (too bad im not using it for much)", weapon->Name, weapon->ID);
 
-		if (Hand == EQEmu::invslot::slotSecondary && weapon->ItemType == EQEmu::item::ItemTypeShield) {
-			Log(Logs::Detail, Logs::Combat, "Attack with shield canceled.");
+		if (Hand == EQEmu::invslot::slotSecondary && !weapon->IsType1HWeapon()) {
+			Log(Logs::Detail, Logs::Combat, "Attack with non-weapon cancelled.");
 			return false;
 		}
 
@@ -3941,7 +3941,7 @@ void Mob::TryWeaponProc(const EQEmu::ItemInstance* weapon_g, Mob *on, uint16 han
 	}
 
 	if (DivineAura()) {
-		Log(Logs::Detail, Logs::Combat, "Procs canceled, Divine Aura is in effect.");
+		Log(Logs::Detail, Logs::Combat, "Procs cancelled, Divine Aura is in effect.");
 		return;
 	}
 

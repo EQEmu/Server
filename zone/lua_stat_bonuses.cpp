@@ -333,6 +333,11 @@ int Lua_StatBonuses::Geteffective_casting_level() const {
 	return self->effective_casting_level;
 }
 
+int Lua_StatBonuses::Getadjusted_casting_skill() const {
+	Lua_Safe_Call_Int();
+	return self->adjusted_casting_skill;
+}
+
 int Lua_StatBonuses::Getreflect_chance() const {
 	Lua_Safe_Call_Int();
 	return self->reflect_chance;
@@ -1347,6 +1352,7 @@ luabind::scope lua_register_stat_bonuses() {
 		.def("skillmod", &Lua_StatBonuses::Getskillmod)
 		.def("skillmodmax", &Lua_StatBonuses::Getskillmodmax)
 		.def("effective_casting_level", &Lua_StatBonuses::Geteffective_casting_level)
+		.def("adjusted_casting_skill", &Lua_StatBonuses::Getadjusted_casting_skill)
 		.def("reflect_chance", &Lua_StatBonuses::Getreflect_chance)
 		.def("singingMod", &Lua_StatBonuses::GetsingingMod)
 		.def("Amplification", &Lua_StatBonuses::GetAmplification)

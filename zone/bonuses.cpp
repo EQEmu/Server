@@ -1205,8 +1205,12 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			break;
 		}
 
-		case SE_CastingLevel2:
 		case SE_CastingLevel: {
+			newbon->adjusted_casting_skill += base1;
+			break;
+		}
+
+		case SE_CastingLevel2: {
 			newbon->effective_casting_level += base1;
 			break;
 		}
@@ -1914,8 +1918,13 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				break;
 			}
 
-			case SE_CastingLevel2:
 			case SE_CastingLevel:	// Brilliance of Ro
+			{
+				new_bonus->adjusted_casting_skill += effect_value;
+				break;
+			}
+
+			case SE_CastingLevel2:
 			{
 				new_bonus->effective_casting_level += effect_value;
 				break;
@@ -3850,8 +3859,13 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					aabonuses.Corrup = effect_value;
 					break;
 
-				case SE_CastingLevel2:
 				case SE_CastingLevel:	// Brilliance of Ro
+					spellbonuses.adjusted_casting_skill = effect_value;
+					aabonuses.adjusted_casting_skill = effect_value;
+					itembonuses.adjusted_casting_skill = effect_value;
+					break;
+
+				case SE_CastingLevel2:
 					spellbonuses.effective_casting_level = effect_value;
 					aabonuses.effective_casting_level = effect_value;
 					itembonuses.effective_casting_level = effect_value;
