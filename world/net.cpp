@@ -335,12 +335,12 @@ int main(int argc, char** argv) {
 
 	//rules:
 	{
-		if (!RuleManager::Instance()->UpdateInjectedRules(&database, "default")) {
-			Log(Logs::General, Logs::World_Server, "Failed to process 'Injected Rules' for ruleset 'default' update operation.");
-		}
-
 		if (!RuleManager::Instance()->UpdateOrphanedRules(&database)) {
 			Log(Logs::General, Logs::World_Server, "Failed to process 'Orphaned Rules' update operation.");
+		}
+		
+		if (!RuleManager::Instance()->UpdateInjectedRules(&database, "default")) {
+			Log(Logs::General, Logs::World_Server, "Failed to process 'Injected Rules' for ruleset 'default' update operation.");
 		}
 
 		std::string tmp;
@@ -360,6 +360,10 @@ int main(int argc, char** argv) {
 			else {
 				Log(Logs::General, Logs::World_Server, "Loaded default rule set 'default'", tmp.c_str());
 			}
+		}
+
+		if (RuleB(World, RestoreRuleNotes) && !RuleManager::Instance()->RestoreRuleNotes(&database)) {
+			Log(Logs::General, Logs::World_Server, "Failed to process 'Restore Rule Notes' update operation.");
 		}
 	}
 

@@ -1,5 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 9/04/2019 ==
+Uleat: Added code to restore rule notes to their original values
+	- The code is inactive by default
+	- Change rule 'World:RestoreRuleNotes' to 'true' to enable this feature
+	- Rule will not exist until the server is run for the first time after updating
+
 == 9/02/2019 ==
 Uleat: Added code to inject new rules into the 'default' ruleset and remove orphaned rules from all rulesets
 	- New rules are only added using the 'default' ruleset - Other rulesets will need to be added manually or through in-game updates

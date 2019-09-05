@@ -241,6 +241,7 @@ RULE_BOOL(World, MaxClientsSimplifiedLogic, false, "New logic that only uses Exe
 RULE_INT (World, TellQueueSize, 20, "")
 RULE_BOOL(World, StartZoneSameAsBindOnCreation, true, "Should the start zone ALWAYS be the same location as your bind?")
 RULE_BOOL(World, EnforceCharacterLimitAtLogin, false, "")
+RULE_BOOL(World, RestoreRuleNotes, false, "Restores all database rule entry notes to their original text")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Zone)

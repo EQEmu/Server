@@ -215,15 +215,17 @@ bool RuleManager::_FindRule(const char *rule_name, RuleType &type_into, uint16 &
 //assumes index is valid!
 const char *RuleManager::_GetRuleName(RuleType type, uint16 index) {
 	switch (type) {
-		case IntRule:
-			return(s_RuleInfo[index].name);
-		case RealRule:
-			return(s_RuleInfo[index + _IntRuleCount].name);
-		case BoolRule:
-			return(s_RuleInfo[index + _IntRuleCount + _RealRuleCount].name);
+	case IntRule:
+		return(s_RuleInfo[index].name);
+	case RealRule:
+		return(s_RuleInfo[index+_IntRuleCount].name);
+	case BoolRule:
+		return(s_RuleInfo[index+_IntRuleCount+_RealRuleCount].name);
+	default:
+		break;
 	}
 	//should never happen
-	return("InvalidRule??");
+	return(s_RuleInfo[_IntRuleCount+_RealRuleCount+_BoolRuleCount].name); // no need to create a string when one already exists...
 }
 
 //assumes index is valid!
@@ -232,12 +234,14 @@ const std::string &RuleManager::_GetRuleNotes(RuleType type, uint16 index) {
 	case IntRule:
 		return(s_RuleInfo[index].notes);
 	case RealRule:
-		return(s_RuleInfo[index + _IntRuleCount].notes);
+		return(s_RuleInfo[index+_IntRuleCount].notes);
 	case BoolRule:
-		return(s_RuleInfo[index + _IntRuleCount + _RealRuleCount].notes);
+		return(s_RuleInfo[index+_IntRuleCount+_RealRuleCount].notes);
+	default:
+		break;
 	}
 	//should never happen
-	return(std::string());
+	return(s_RuleInfo[_IntRuleCount+_RealRuleCount+_BoolRuleCount].notes);
 }
 
 bool RuleManager::LoadRules(Database *database, const char *ruleset_name, bool reload) {
@@ -304,12 +308,8 @@ bool RuleManager::LoadRules(Database *database, const char *ruleset_name, bool r
 	return true;
 }
 
-// convert this to a single REPLACE query (it can handle it - currently at 608 rules)
 void RuleManager::SaveRules(Database *database, const char *ruleset_name) {
-	// tbh, UpdateRules() can probably be called since it will handle deletions of
-	// orphaned entries of existing rulesets as well as adding the new ones
-	// (it already does it as a single REPLACE query)
-
+	
 	if (ruleset_name != nullptr) {
 		//saving to a specific name
 		if (m_activeName != ruleset_name) {
@@ -327,10 +327,6 @@ void RuleManager::SaveRules(Database *database, const char *ruleset_name) {
 	else {
 		Log(Logs::Detail, Logs::Rules, "Saving running rules into running rule set %s", m_activeName.c_str(), m_activeRuleset);
 	}
-
-	// this should be all that is needed..with the exception of handling expansion-based rules...
-	// (those really need to be put somewhere else - probably variables)
-	//UpdateRules(database, m_activeName.c_str(), m_activeRuleset, true);
 
 	int i;
 	for (i = 0; i < _IntRuleCount; i++) {
@@ -375,11 +371,6 @@ void RuleManager::_SaveRule(Database *database, RuleType type, uint16 index) {
 	);
 
 	database->QueryDatabase(query);
-}
-
-bool RuleManager::UpdateChangedRules(Database *db, const char *ruleset_name, bool quiet_update)
-{
-	return false;
 }
 
 bool RuleManager::UpdateInjectedRules(Database *db, const char *ruleset_name, bool quiet_update)
@@ -472,11 +463,33 @@ bool RuleManager::UpdateInjectedRules(Database *db, const char *ruleset_name, bo
 	}
 
 	if (injected_rule_entries.size()) {
-		return _UpdateRules(db, ruleset_name, ruleset_id, injected_rule_entries, std::vector<std::string>());
+
+		std::string query(
+			fmt::format(
+				"REPLACE INTO `rule_values`(`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES {}",
+				implode(
+					",",
+					std::pair<char, char>('(', ')'),
+					join_tuple(",", std::pair<char, char>('\'', '\''), injected_rule_entries)
+				)
+			)
+		);
+
+		if (!db->QueryDatabase(query).Success()) {
+			return false;
+		}
+
+		Log(Logs::General,
+			Logs::Status,
+			"%u New Rule%s Added to ruleset '%s' (%i)",
+			injected_rule_entries.size(),
+			(injected_rule_entries.size() == 1 ? "" : "s"),
+			ruleset_name,
+			ruleset_id
+		);
 	}
-	else {
-		return true;
-	}
+	
+	return true;
 }
 
 bool RuleManager::UpdateOrphanedRules(Database *db, bool quiet_update)
@@ -524,113 +537,83 @@ bool RuleManager::UpdateOrphanedRules(Database *db, bool quiet_update)
 	}
 
 	if (orphaned_rule_entries.size()) {
-		return _UpdateRules(
-			db,
-			"All Rulesets",
-			-1,
-			std::vector<std::tuple<int, std::string, std::string, std::string>>(),
-			orphaned_rule_entries
+
+		std::string query (
+			fmt::format(
+				"DELETE FROM `rule_values` WHERE `rule_name` IN ({})",
+				implode(",", std::pair<char, char>('\'', '\''), orphaned_rule_entries)
+			)
+		);
+
+		if (!db->QueryDatabase(query).Success()) {
+			return false;
+		}
+
+		Log(Logs::General,
+			Logs::Status,
+			"%u Orphaned Rule%s Deleted from 'All Rulesets' (-1)",
+			orphaned_rule_entries.size(),
+			(orphaned_rule_entries.size() == 1 ? "" : "s")
 		);
 	}
-	else {
-		return true;
-	}
+	
+	return true;
 }
 
-bool RuleManager::_UpdateRules(
-	Database *db,
-	const char *ruleset_name,
-	const int ruleset_id,
-	const std::vector<std::tuple<int, std::string, std::string, std::string>> &injected,
-	const std::vector<std::string> &orphaned
-)
+bool RuleManager::RestoreRuleNotes(Database *db)
 {
-	bool return_value = true;
-
 	if (!db) {
 		return false;
 	}
 
-	if (ruleset_name == nullptr) {
+	std::string query("SELECT `ruleset_id`, `rule_name`, IFNULL(`notes`, '\\0')`notes` FROM `rule_values`");
+
+	auto results = db->QueryDatabase(query);
+	if (!results.Success()) {
 		return false;
 	}
 
-	if (injected.size()) {
+	int update_count = 0;
+	for (auto row = results.begin(); row != results.end(); ++row) {
 
-		if (ruleset_id >= 0 && strcasecmp(ruleset_name, "All Rulesets") != 0) {
+		const auto &rule = [&row]() {
 
-			std::string query(
-				fmt::format(
-					"REPLACE INTO `rule_values`(`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES {}",
-					implode(
-						",",
-						std::pair<char, char>('(', ')'),
-						join_tuple(",", std::pair<char, char>('\'', '\''), injected)
-					)
-				)
-			);
-
-			if (!db->QueryDatabase(query).Success()) {
-				return_value = false;
+			for (const auto &rule_iter : s_RuleInfo) {
+				if (strcasecmp(rule_iter.name, row[1]) == 0) {
+					return rule_iter;
+				}
 			}
-			else {
-				Log(Logs::General,
-					Logs::Status,
-					"%u New Command%s Added to ruleset '%s' (%i)",
-					injected.size(),
-					(injected.size() == 1 ? "" : "s"),
-					ruleset_name,
-					ruleset_id
-				);
-			}
+
+			return s_RuleInfo[_IntRuleCount+_RealRuleCount+_BoolRuleCount];
+		}();
+
+		if (strcasecmp(rule.name, row[1]) != 0) {
+			continue;
 		}
-		else {
-			return_value = false;
+
+		if (rule.notes.compare(row[2]) == 0) {
+			continue;
 		}
-	}
 
-	if (orphaned.size()) {
+		std::string query(
+			StringFormat(
+				"UPDATE `rule_values` SET `notes` = '%s' WHERE `ruleset_id` = '%i' AND `rule_name` = '%s'",
+				rule.notes.c_str(),
+				atoi(row[0]),
+				row[1]
+			)
+		);
 
-		std::string query;
-
-		if (ruleset_id < 0 && strcasecmp(ruleset_name, "All Rulesets") == 0) {
-
-			query = fmt::format(
-				"DELETE FROM `rule_values` WHERE `rule_name` IN ({})",
-				implode(",", std::pair<char, char>('\'', '\''), orphaned)
-			);
-		}
-		else if (ruleset_id >= 0 && strcasecmp(ruleset_name, "All Rulesets") != 0) {
-
-			query = fmt::format(
-				"DELETE FROM `rule_values` WHERE `ruleset_id` = '%i' AND `rule_name` IN ({})",
-				ruleset_id,
-				implode(",", std::pair<char, char>('\'', '\''), orphaned)
-			);
+		if (!db->QueryDatabase(query).Success()) {
+			continue;
 		}
 		
-		if (query.size() > 0) {
-
-			if (!db->QueryDatabase(query).Success()) {
-				return_value = false;
-			}
-			else {
-				Log(Logs::General,
-					Logs::Status,
-					"%u Orphaned Command%s Deleted from ruleset '%s' (%i)",
-					orphaned.size(),
-					(orphaned.size() == 1 ? "" : "s"),
-					ruleset_name,
-					ruleset_id
-				);
-			}
-		}
-		else {
-			return_value = false;
-		}
+		++update_count;
 	}
 
-	return return_value;
+	if (update_count > 0) {
+		Log(Logs::General, Logs::Status, "%u Rule Note%s Restored", update_count, (update_count == 1 ? "" : "s"));
+	}
 }
 
 int RuleManager::GetRulesetID(Database *database, const char *ruleset_name) {
