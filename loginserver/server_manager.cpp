@@ -44,7 +44,7 @@ ServerManager::ServerManager()
 	server_connection->OnConnectionIdentified(
 		"World", [this](std::shared_ptr<EQ::Net::ServertalkServerConnection> world_connection) {
 			LogInfo(
-				"New world server connection from {0}:{1}",
+				"New World Server connection from {0}:{1}",
 				world_connection->Handle()->RemoteIP(),
 				world_connection->Handle()->RemotePort()
 			);
