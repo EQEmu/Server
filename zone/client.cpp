@@ -814,7 +814,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 	char message[4096];
 	strn0cpy(message, orig_message, sizeof(message));
 
-	LogInfo("Client::ChannelMessageReceived() Channel:[{}] message:[{}]", chan_num, message);
+	LogDebug("Client::ChannelMessageReceived() Channel:[{}] message:[{}]", chan_num, message);
 
 	if (targetname == nullptr) {
 		targetname = (!GetTarget()) ? "" : GetTarget()->GetName();
