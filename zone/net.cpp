@@ -435,8 +435,8 @@ int main(int argc, char** argv) {
 	LogDebug("Main thread running with thread id [{}]", pthread_self());
 #endif
 
-	bool worldwasconnected    = worldserver.Connected();
-	bool eqsf_open            = false;
+	bool worldwasconnected       = worldserver.Connected();
+	bool eqsf_open               = false;
 	bool websocker_server_opened = false;
 
 	Timer quest_timers(100);
@@ -543,8 +543,9 @@ int main(int argc, char** argv) {
 					}
 				}
 
-				if (quest_timers.Check())
+				if (quest_timers.Check()) {
 					quest_manager.Process();
+				}
 
 			}
 		}

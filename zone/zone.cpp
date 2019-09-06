@@ -683,31 +683,31 @@ bool Zone::IsLoaded() {
 	return is_zone_loaded;
 }
 
-void Zone::Shutdown(bool quite)
+void Zone::Shutdown(bool quiet)
 {
-	if (!is_zone_loaded)
+	if (!is_zone_loaded) {
 		return;
+	}
 
 	entity_list.StopMobAI();
 
-	std::map<uint32,NPCType *>::iterator itr;
-	while(!zone->npctable.empty()) {
-		itr=zone->npctable.begin();
+	std::map<uint32, NPCType *>::iterator itr;
+	while (!zone->npctable.empty()) {
+		itr = zone->npctable.begin();
 		delete itr->second;
 		zone->npctable.erase(itr);
 	}
 
-	while(!zone->merctable.empty()) {
-		itr=zone->merctable.begin();
+	while (!zone->merctable.empty()) {
+		itr = zone->merctable.begin();
 		delete itr->second;
 		zone->merctable.erase(itr);
 	}
 
 	zone->adventure_entry_list_flavor.clear();
 
-	std::map<uint32,LDoNTrapTemplate*>::iterator itr4;
-	while(!zone->ldon_trap_list.empty())
-	{
+	std::map<uint32, LDoNTrapTemplate *>::iterator itr4;
+	while (!zone->ldon_trap_list.empty()) {
 		itr4 = zone->ldon_trap_list.begin();
 		delete itr4->second;
 		zone->ldon_trap_list.erase(itr4);
@@ -717,8 +717,10 @@ void Zone::Shutdown(bool quite)
 	LogInfo("Zone Shutdown: [{}] ([{}])", zone->GetShortName(), zone->GetZoneID());
 	petition_list.ClearPetitions();
 	zone->SetZoneHasCurrentTime(false);
-	if (!quite)
-		LogInfo("Zone shutdown: going to sleep");
+	if (!quiet) {
+		LogInfo("Zone Shutdown: Going to sleep");
+	}
+
 	is_zone_loaded = false;
 
 	zone->ResetAuth();
@@ -728,6 +730,11 @@ void Zone::Shutdown(bool quite)
 	UpdateWindowTitle();
 
 	LogSys.CloseFileLogs();
+
+	if (RuleB(Zone, KillProcessOnDynamicShutdown)) {
+		LogInfo("[KillProcessOnDynamicShutdown] Shutting down");
+		std::exit(EXIT_SUCCESS);
+	}
 }
 
 void Zone::LoadZoneDoors(const char* zone, int16 version)
