@@ -182,10 +182,10 @@ int command_init(void)
 		command_add("crashtest", "- Crash the zoneserver", 255, command_crashtest) ||
 		command_add("cvs", "- Summary of client versions currently online.", 200, command_cvs) ||
 		command_add("damage", "[amount] - Damage your target", 100, command_damage) ||
+		command_add("databuckets", "View|Delete [key] [limit]- View data buckets, limit 50 default or Delete databucket by key", 80, command_databuckets) ||
 		command_add("date", "[yyyy] [mm] [dd] [HH] [MM] - Set EQ time", 90, command_date) ||
 		command_add("dbspawn2", "[spawngroup] [respawn] [variance] - Spawn an NPC from a predefined row in the spawn2 table", 100, command_dbspawn2) ||
 		command_add("delacct", "[accountname] - Delete an account", 150, command_delacct) ||
-		command_add("deletebucket", "[key]- Deletes data bucket", 80, command_deletebucket) ||
 		command_add("deletegraveyard", "[zone name] - Deletes the graveyard for the specified zone.",  200, command_deletegraveyard) ||
 		command_add("delpetition", "[petition number] - Delete a petition", 20, command_delpetition) ||
 		command_add("depop", "- Depop your NPC target", 50, command_depop) ||
@@ -419,7 +419,6 @@ int command_init(void)
 		command_add("untraindiscs", "- Untrains all disciplines from your target.", 180, command_untraindiscs) ||
 		command_add("uptime", "[zone server id] - Get uptime of worldserver, or zone server if argument provided", 10, command_uptime) ||
 		command_add("version", "- Display current version of EQEmu server", 0, command_version) ||
-		command_add("viewbuckets", "[search string|limit]- View data buckets, limit 50 default", 80, command_viewbuckets) ||
 		command_add("viewnpctype", "[npctype id] - Show info about an npctype", 100, command_viewnpctype) ||
 		command_add("viewpetition", "[petition number] - View a petition", 20, command_viewpetition) ||
 		command_add("wc", "[wear slot] [material] - Sends an OP_WearChange for your target", 200, command_wc) ||
@@ -12576,20 +12575,26 @@ void command_scale(Client *c, const Seperator *sep)
 	}
 }
 
-void command_viewbuckets(Client *c, const Seperator *sep)
+void command_databuckets(Client *c, const Seperator *sep)
  {
-	std::string key_filter;
-	uint8 limit = 50;
-		for (int i = 1; i < 3; i++) {
+	if (sep->arg[1][0] == 0) {
+		c->Message(Chat::Yellow, "Usage: #databuckets view (partial key)|(limit) OR #databuckets delete (key)");
+		return;
+	}
+	if (strcasecmp(sep->arg[1], "view") == 0) {
+
+		std::string key_filter;
+		uint8 limit = 50;
+		for (int i = 2; i < 4; i++) {
 			if (sep->arg[i][0] == '\0')
-				 break;
+				break;
 			if (strcasecmp(sep->arg[i], "limit") == 0) {
 				limit = (uint8)atoi(sep->arg[i + 1]);
 				continue;
 			}
 		}
-		if (sep->arg[1]) {
-			key_filter = str_tolower(sep->arg[1]);
+		if (sep->arg[2]) {
+			key_filter = str_tolower(sep->arg[2]);
 		}
 		std::string query = "SELECT `id`, `key`, `value`, `expires` FROM data_buckets";
 		if (!key_filter.empty())  query += StringFormat(" WHERE `key` LIKE '%%%s%%'", key_filter.c_str());
@@ -12605,13 +12610,13 @@ void command_viewbuckets(Client *c, const Seperator *sep)
 		// put in window for easier readability in case want command line for something else
 		std::string window_title = "Data Buckets";
 		std::string window_text =
-		"<table>"
-		 "<tr>"
-		 "<td>ID</td>"
-		 "<td>Expires</td>"
-		 "<td>Key</td>"
-		 "<td>Value</td>"
-		 "</tr>";
+			"<table>"
+			"<tr>"
+			"<td>ID</td>"
+			"<td>Expires</td>"
+			"<td>Key</td>"
+			"<td>Value</td>"
+			"</tr>";
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			auto        id = static_cast<uint32>(atoi(row[0]));
 			std::string key = row[1];
@@ -12619,39 +12624,34 @@ void command_viewbuckets(Client *c, const Seperator *sep)
 			std::string expires = row[3];
 			window_text.append(StringFormat(
 				"<tr>"
-				 "<td>%u</td>"
-				 "<td>%s</td>"
-				 "<td>%s</td>"
-				 "<td>%s</td>"
-				 "</tr>",
+				"<td>%u</td>"
+				"<td>%s</td>"
+				"<td>%s</td>"
+				"<td>%s</td>"
+				"</tr>",
 				id,
 				expires.c_str(),
 				key.c_str(),
 				value.c_str()
-				 ));
+			));
 			_ctr++;
-			std::string	del_saylink = StringFormat("#deletebucket %s", key.c_str());
-			c->Message(Chat::Blue, "%s : %s",
-			EQEmu::SayLinkEngine::GenerateQuestSaylink(del_saylink, false, "Delete").c_str(), key.c_str(), "  Value:  ", value.c_str());
+			std::string	del_saylink = StringFormat("#databuckets delete %s", key.c_str());
+			c->Message(Chat::White, "%s : %s",
+				EQEmu::SayLinkEngine::GenerateQuestSaylink(del_saylink, false, "Delete").c_str(), key.c_str(), "  Value:  ", value.c_str());
 		}
 		window_text.append("</table>");
 		c->SendPopupToClient(window_title.c_str(), window_text.c_str());
 		std::string response = _ctr > 0 ? StringFormat("Found %i matching data buckets", _ctr).c_str() : "No Databuckets found.";
 		c->Message(Chat::Yellow, response.c_str());
-		c->Message(Chat::Yellow, "Usage: #viewbuckets [partial_bucket_name] ['limit' value ] - both optional (default limit 50) ");
-}
-
-void command_deletebucket(Client *c, const Seperator *sep)
-{
-	if (sep->arg[1][0] == 0) {
-		c->Message(Chat::Yellow, "Usage: #deletebucket (key) Type #viewbuckets for a list");
+	}
+	else if (strcasecmp(sep->arg[1], "delete") == 0)
+	{
+		if (DataBucket::DeleteData(sep->argplus[2]))
+			c->Message(Chat::Yellow, "data bucket %s deleted.", sep->argplus[2]);
+		else
+			c->Message(Chat::Red, "An error occurred deleting data bucket %s", sep->argplus[2]);
 		return;
 	}
-	if (DataBucket::DeleteData(sep->argplus[1]))
-		 c->Message(Chat::Yellow, "data bucket %s deleted.", sep->argplus[1]);
-	else
-		 c->Message(Chat::Red, "An error occurred deleting data bucket %s", sep->argplus[1]);
-	return;
 }
 
 void command_who(Client *c, const Seperator *sep)
