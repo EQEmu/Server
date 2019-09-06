@@ -22,6 +22,11 @@
 #include <cstdarg>
 #include <tuple>
 
+#ifndef _WIN32
+// this doesn't appear to affect linux-based systems..need feedback for _WIN64
+#include <fmt/format.h>
+#endif
+
 #include "types.h"
 
 //std::string based
@@ -52,7 +57,7 @@ std::string implode(const std::string &glue, const std::pair<char, char> &encaps
 	return output;
 }
 
-// this requires that #include<fmt/format.h> be included in whatever code file the invocation is made from
+// _WIN32 builds require that #include<fmt/format.h> be included in whatever code file the invocation is made from (no header files)
 template <typename T1, typename T2>
 std::vector<std::string> join_pair(const std::string &glue, const std::pair<char, char> &encapsulation, const std::vector<std::pair<T1, T2>> &src)
 {
@@ -64,10 +69,7 @@ std::vector<std::string> join_pair(const std::string &glue, const std::pair<char
 
 	for (const std::pair<T1, T2> &src_iter : src) {
 		output.push_back(
-			// There are issues with including <fmt/format.h> in a header file that result in compile
-			// failure. I'm not sure if this applies only within the same project or across projects.
-			// Since templates act similar to macros in regards to initialization, this definition
-			// should be safe so long as the '#include<fmt/format.h>' rule above is observed.
+			
 			fmt::format(
 				"{}{}{}{}{}{}{}",
 				encapsulation.first,
@@ -84,7 +86,7 @@ std::vector<std::string> join_pair(const std::string &glue, const std::pair<char
 	return output;
 }
 
-// this requires that #include<fmt/format.h> be included in whatever code file the invocation is made from
+// _WIN32 builds require that #include<fmt/format.h> be included in whatever code file the invocation is made from (no header files)
 template <typename T1, typename T2, typename T3, typename T4>
 std::vector<std::string> join_tuple(const std::string &glue, const std::pair<char, char> &encapsulation, const std::vector<std::tuple<T1, T2, T3, T4>> &src)
 {
@@ -97,7 +99,7 @@ std::vector<std::string> join_tuple(const std::string &glue, const std::pair<cha
 	for (const std::tuple<T1, T2, T3, T4> &src_iter : src) {
 
 		output.push_back(
-			// note: see join_pair(...)
+			
 			fmt::format(
 				"{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}",
 				encapsulation.first,
