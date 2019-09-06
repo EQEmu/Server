@@ -401,7 +401,7 @@ bool RuleManager::UpdateInjectedRules(Database *db, const char *ruleset_name, bo
 	}
 
 	// build database data entries
-	for (auto &row : results) {
+	for (auto row : results) {
 		database_data.push_back(std::string(row[0]));
 	}
 
@@ -519,7 +519,7 @@ bool RuleManager::UpdateOrphanedRules(Database *db, bool quiet_update)
 	}
 
 	// build orphaned entries
-	for (auto &row : results) {
+	for (auto row : results) {
 		
 		const auto &rd_iter = std::find(rule_data.begin(), rule_data.end(), row[0]);
 		if (rd_iter == rule_data.end()) {
