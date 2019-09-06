@@ -476,7 +476,7 @@ int main(int argc, char** argv) {
 	});
 
 	server_connection->OnConnectionRemoved("UCS", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
-		LogF(Logs::General, Logs::World_Server, "Removed Query Server connection from {0}",
+		LogF(Logs::General, Logs::World_Server, "Removed UCS Server connection from {0}",
 			connection->GetUUID());
 
 		UCSLink.SetConnection(nullptr);
