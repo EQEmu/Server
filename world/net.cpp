@@ -118,18 +118,20 @@ int main(int argc, char** argv) {
 	LogSys.LoadLogSettingsDefaults();
 	set_exception_handler();
 
-	/* If eqemu_config.json does not exist - create it from conversion... */
-	if (!std::ifstream("eqemu_config.json")) {
+	/**
+	 * Auto convert json config from xml
+	 */
+	if (!std::ifstream("eqemu_config.json") && std::ifstream("eqemu_config.xml")) {
 		CheckForServerScript(true);
-		/* Run EQEmu Server script (Checks for database updates) */
 		if(system("perl eqemu_server.pl convert_xml"));
 	}
 	else {
-		/* Download EQEmu Server Maintenance Script if doesn't exist */
 		CheckForServerScript();
 	}
 
-	/* Database Version Check */
+	/**
+	 * Database version
+	 */
 	uint32 Database_Version = CURRENT_BINARY_DATABASE_VERSION;
 	uint32 Bots_Database_Version = CURRENT_BINARY_BOTS_DATABASE_VERSION;
 	if (argc >= 2) {
@@ -142,7 +144,7 @@ int main(int argc, char** argv) {
 	// Load server configuration
 	LogInfo("Loading server configuration");
 	if (!WorldConfig::LoadConfig()) {
-		LogInfo("Loading server configuration failed");
+		LogError("Loading server configuration failed");
 		return 1;
 	}
 
@@ -151,36 +153,50 @@ int main(int argc, char** argv) {
 	LogInfo("CURRENT_VERSION: [{}]", CURRENT_VERSION);
 
 	if (signal(SIGINT, CatchSignal) == SIG_ERR) {
-		LogInfo("Could not set signal handler");
+		LogError("Could not set signal handler");
 		return 1;
 	}
 
 	if (signal(SIGTERM, CatchSignal) == SIG_ERR) {
-		LogInfo("Could not set signal handler");
+		LogError("Could not set signal handler");
 		return 1;
 	}
 
 #ifndef WIN32
 	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR) {
-		LogInfo("Could not set signal handler");
+		LogError("Could not set signal handler");
 		return 1;
 	}
 #endif
 
-	// add login server config to list
+	/**
+	 * Add Loginserver
+	 */
 	if (Config->LoginCount == 0) {
 		if (Config->LoginHost.length()) {
-			loginserverlist.Add(Config->LoginHost.c_str(), Config->LoginPort, Config->LoginAccount.c_str(), Config->LoginPassword.c_str(), Config->LoginLegacy);
+			loginserverlist.Add(
+				Config->LoginHost.c_str(),
+				Config->LoginPort,
+				Config->LoginAccount.c_str(),
+				Config->LoginPassword.c_str(),
+				Config->LoginLegacy
+			);
 			LogInfo("Added loginserver [{}]:[{}]", Config->LoginHost.c_str(), Config->LoginPort);
 		}
 	}
 	else {
-		LinkedList<LoginConfig*> loginlist = Config->loginlist;
-		LinkedListIterator<LoginConfig*> iterator(loginlist);
+		LinkedList<LoginConfig *> loginlist = Config->loginlist;
+		LinkedListIterator<LoginConfig *> iterator(loginlist);
 		iterator.Reset();
 		while (iterator.MoreElements()) {
-			loginserverlist.Add(iterator.GetData()->LoginHost.c_str(), iterator.GetData()->LoginPort, iterator.GetData()->LoginAccount.c_str(), iterator.GetData()->LoginPassword.c_str(),
-				iterator.GetData()->LoginLegacy);
+			loginserverlist.Add(
+				iterator.GetData()->LoginHost.c_str(),
+				iterator.GetData()->LoginPort,
+				iterator.GetData()->LoginAccount.c_str(),
+				iterator.GetData()->LoginPassword.c_str(),
+				iterator.GetData()->LoginLegacy
+			);
+
 			LogInfo("Added loginserver [{}]:[{}]", iterator.GetData()->LoginHost.c_str(), iterator.GetData()->LoginPort);
 			iterator.Advance();
 		}
@@ -193,7 +209,7 @@ int main(int argc, char** argv) {
 		Config->DatabasePassword.c_str(),
 		Config->DatabaseDB.c_str(),
 		Config->DatabasePort)) {
-		LogInfo("Cannot continue without a database connection");
+		LogError("Cannot continue without a database connection");
 		return 1;
 	}
 	guild_mgr.SetDatabase(&database);
@@ -330,10 +346,12 @@ int main(int argc, char** argv) {
 	database.ClearInvSnapshots();
 	LogInfo("Loading items");
 	if (!database.LoadItems(hotfix_name))
-		LogInfo("Error: Could not load item data. But ignoring");
+		LogError("Error: Could not load item data. But ignoring");
 	LogInfo("Loading skill caps");
 	if (!database.LoadSkillCaps(std::string(hotfix_name)))
-		LogInfo("Error: Could not load skill cap data. But ignoring");
+		LogError("Error: Could not load skill cap data. But ignoring");
+
+
 	LogInfo("Loading guilds");
 	guild_mgr.LoadGuilds();
 	//rules:
@@ -350,7 +368,7 @@ int main(int argc, char** argv) {
 				LogInfo("No rule set configured, using default rules");
 			}
 			else {
-				LogInfo("Loaded default rule set 'default'", tmp.c_str());
+				LogInfo("Loaded default rule set [default]", tmp.c_str());
 			}
 		}
 
@@ -539,7 +557,7 @@ int main(int argc, char** argv) {
 		//check the stream identifier for any now-identified streams
 		while ((eqsi = stream_identifier.PopIdentified())) {
 			//now that we know what patch they are running, start up their client object
-			struct in_addr	in;
+			struct in_addr	in{};
 			in.s_addr = eqsi->GetRemoteIP();
 			if (RuleB(World, UseBannedIPsTable)) { //Lieka: Check to see if we have the responsibility for blocking IPs.
 				LogInfo("Checking inbound connection [{}] against BannedIPs table", inet_ntoa(in));
@@ -573,9 +591,9 @@ int main(int argc, char** argv) {
 			TimeOfDay_Struct tod;
 			zoneserver_list.worldclock.GetCurrentEQTimeOfDay(time(0), &tod);
 			if (!database.SaveTime(tod.minute, tod.hour, tod.day, tod.month, tod.year))
-				LogInfo("Failed to save eqtime");
+				LogError("Failed to save eqtime");
 			else
-				LogInfo("EQTime successfully saved");
+				LogDebug("EQTime successfully saved");
 		}
 
 		zoneserver_list.Process();
