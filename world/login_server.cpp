@@ -80,7 +80,7 @@ void LoginServer::ProcessUsertoWorldReqLeg(uint16_t opcode, EQ::Net::Packet &p)
 	);
 
 	ServerPacket outpack;
-	outpack.opcode  = ServerOP_UsertoWorldResp;
+	outpack.opcode  = ServerOP_UsertoWorldRespLeg;
 	outpack.size    = sizeof(UsertoWorldResponseLegacy_Struct);
 	outpack.pBuffer = new uchar[outpack.size];
 	memset(outpack.pBuffer, 0, outpack.size);
