@@ -144,7 +144,15 @@ void LoginServer::ProcessUsertoWorldReq(uint16_t opcode, EQ::Net::Packet &p)
 	uint32                    id     = database.GetAccountIDFromLSID(utwr->login, utwr->lsaccountid);
 	int16                     status = database.CheckStatus(id);
 
-	LogDebug("[ProcessUsertoWorldReq] id [{}] status [{}] account_id [{}]", id, status, utwr->lsaccountid);
+	LogDebug(
+		"[ProcessUsertoWorldReq] id [{}] status [{}] account_id [{}] world_id [{}] from_id [{}] to_id [{}]",
+		id,
+		status,
+		utwr->lsaccountid,
+		utwr->worldid,
+		utwr->FromID,
+		utwr->ToID
+	);
 
 	ServerPacket outpack;
 	outpack.opcode  = ServerOP_UsertoWorldResp;
@@ -161,6 +169,7 @@ void LoginServer::ProcessUsertoWorldReq(uint16_t opcode, EQ::Net::Packet &p)
 
 	if (Config->Locked == true) {
 		if (status < 100) {
+			LogDebug("[ProcessUsertoWorldReq] Server locked and status is not high enough for account_id [{0}]", utwr->lsaccountid);
 			utwrs->response = UserToWorldStatusWorldUnavail;
 			SendPacket(&outpack);
 			return;
@@ -169,18 +178,21 @@ void LoginServer::ProcessUsertoWorldReq(uint16_t opcode, EQ::Net::Packet &p)
 
 	int32 x = Config->MaxClients;
 	if ((int32) numplayers >= x && x != -1 && x != 255 && status < 80) {
+		LogDebug("[ProcessUsertoWorldReq] World at capacity account_id [{0}]", utwr->lsaccountid);
 		utwrs->response = UserToWorldStatusWorldAtCapacity;
 		SendPacket(&outpack);
 		return;
 	}
 
 	if (status == -1) {
+		LogDebug("[ProcessUsertoWorldReq] User suspended account_id [{0}]", utwr->lsaccountid);
 		utwrs->response = UserToWorldStatusSuspended;
 		SendPacket(&outpack);
 		return;
 	}
 
 	if (status == -2) {
+		LogDebug("[ProcessUsertoWorldReq] User banned account_id [{0}]", utwr->lsaccountid);
 		utwrs->response = UserToWorldStatusBanned;
 		SendPacket(&outpack);
 		return;
@@ -188,11 +200,14 @@ void LoginServer::ProcessUsertoWorldReq(uint16_t opcode, EQ::Net::Packet &p)
 
 	if (RuleB(World, EnforceCharacterLimitAtLogin)) {
 		if (client_list.IsAccountInGame(utwr->lsaccountid)) {
+			LogDebug("[ProcessUsertoWorldReq] User already online account_id [{0}]", utwr->lsaccountid);
 			utwrs->response = UserToWorldStatusAlreadyOnline;
 			SendPacket(&outpack);
 			return;
 		}
 	}
+
+	LogDebug("[ProcessUsertoWorldReq] Sent response to account_id [{0}]", utwr->lsaccountid);
 
 	SendPacket(&outpack);
 }
