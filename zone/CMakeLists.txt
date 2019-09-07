@@ -5,8 +5,9 @@ SET(zone_sources
 	aa_ability.cpp
 	aggro.cpp
 	aggromanager.cpp
-	aura.cpp
+	api_service.cpp
 	attack.cpp
+	aura.cpp
 	beacon.cpp
 	bonuses.cpp
 	bot.cpp
@@ -140,12 +141,14 @@ SET(zone_sources
 	zone.cpp
 	zone_config.cpp
 	zonedb.cpp
-	zoning.cpp)
+	zoning.cpp
+)
 
 SET(zone_headers
 	aa.h
 	aa_ability.h
 	aggromanager.h
+	api_service.h
 	aura.h
 	basic_functions.h
 	beacon.h
@@ -158,7 +161,7 @@ SET(zone_headers
 	command.h
 	common.h
 	corpse.h
-   data_bucket.h
+	data_bucket.h
 	doors.h
 	embparser.h
 	embperl.h

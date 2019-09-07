@@ -200,28 +200,34 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			break;
 		ServerChannelMessage_Struct* scm = (ServerChannelMessage_Struct*)pack->pBuffer;
 		if (scm->deliverto[0] == 0) {
-			entity_list.ChannelMessageFromWorld(scm->from, scm->to, scm->chan_num, scm->guilddbid, scm->language, scm->message);
+			entity_list.ChannelMessageFromWorld(scm->from, scm->to, scm->chan_num, scm->guilddbid, scm->language, scm->lang_skill, scm->message);
 		}
 		else {
 			Client* client = entity_list.GetClientByName(scm->deliverto);
-			if (client) {
-				if (client->Connected()) {
+			if (client && client->Connected()) {
+				if (scm->chan_num == ChatChannel_TellEcho) {
 					if (scm->queued == 1) // tell was queued
 						client->Tell_StringID(QUEUED_TELL, scm->to, scm->message);
 					else if (scm->queued == 2) // tell queue was full
 						client->Tell_StringID(QUEUE_TELL_FULL, scm->to, scm->message);
 					else if (scm->queued == 3) // person was offline
-						client->Message_StringID(MT_TellEcho, TOLD_NOT_ONLINE, scm->to);
-					else // normal stuff
-						client->ChannelMessageSend(scm->from, scm->to, scm->chan_num, scm->language, scm->message);
-					if (!scm->noreply && scm->chan_num != 2) { //dont echo on group chat
-															   // if it's a tell, echo back so it shows up
-						scm->noreply = true;
-						scm->chan_num = 14;
+						client->MessageString(Chat::EchoTell, TOLD_NOT_ONLINE, scm->to);
+					else // normal tell echo "You told Soanso, 'something'"
+							// tell echo doesn't use language, so it looks normal to you even if nobody can understand your tells
+						client->ChannelMessageSend(scm->from, scm->to, scm->chan_num, 0, 100, scm->message);
+				}
+				else if (scm->chan_num == ChatChannel_Tell) {
+					client->ChannelMessageSend(scm->from, scm->to, scm->chan_num, scm->language, scm->lang_skill, scm->message);
+					if (scm->queued == 0) { // this is not a queued tell
+						// if it's a tell, echo back to acknowledge it and make it show on the sender's client
+						scm->chan_num = ChatChannel_TellEcho;
 						memset(scm->deliverto, 0, sizeof(scm->deliverto));
 						strcpy(scm->deliverto, scm->from);
 						SendPacket(pack);
 					}
+				}
+				else {
+					client->ChannelMessageSend(scm->from, scm->to, scm->chan_num, scm->language, scm->lang_skill, scm->message);
 				}
 			}
 		}
@@ -368,15 +374,15 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			switch (ztz->response)
 			{
 			case -2: {
-				entity->CastToClient()->Message(13, "You do not own the required locations to enter this zone.");
+				entity->CastToClient()->Message(Chat::Red, "You do not own the required locations to enter this zone.");
 				break;
 			}
 			case -1: {
-				entity->CastToClient()->Message(13, "The zone is currently full, please try again later.");
+				entity->CastToClient()->Message(Chat::Red, "The zone is currently full, please try again later.");
 				break;
 			}
 			case 0: {
-				entity->CastToClient()->Message(13, "All zone servers are taken at this time, please try again later.");
+				entity->CastToClient()->Message(Chat::Red, "All zone servers are taken at this time, please try again later.");
 				break;
 			}
 			}
@@ -408,7 +414,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			Client* client = entity_list.GetClientByID(wars->id);
 			if (client) {
 				if (pack->size == 64)//no results
-					client->Message_StringID(0, WHOALL_NO_RESULTS);
+					client->MessageString(Chat::White, WHOALL_NO_RESULTS);
 				else {
 					auto outapp = new EQApplicationPacket(OP_WhoAllResponse, pack->size);
 					memcpy(outapp->pBuffer, pack->pBuffer, pack->size);
@@ -528,7 +534,15 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		ServerZoneIncomingClient_Struct* szic = (ServerZoneIncomingClient_Struct*)pack->pBuffer;
 		if (is_zone_loaded) {
 			SetZoneData(zone->GetZoneID(), zone->GetInstanceID());
+
 			if (szic->zoneid == zone->GetZoneID()) {
+				auto client = entity_list.GetClientByLSID(szic->lsid);
+				if (client) {
+					client->Kick("Dropped by world CLE subsystem");
+					client->Save();
+				}
+
+				zone->RemoveAuth(szic->lsid);
 				zone->AddAuth(szic);
 				// This packet also doubles as "incoming client" notification, lets not shut down before they get here
 				zone->StartShutdownTimer(AUTHENTICATION_TIMEOUT * 1000);
@@ -541,13 +555,30 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
+	case ServerOP_DropClient: {
+		if (pack->size != sizeof(ServerZoneDropClient_Struct)) {
+			break;
+		}
+
+		ServerZoneDropClient_Struct* drop = (ServerZoneDropClient_Struct*)pack->pBuffer;
+		if (zone) {
+			zone->RemoveAuth(drop->lsid);
+		
+			auto client = entity_list.GetClientByLSID(drop->lsid);
+			if (client) {
+				client->Kick("Dropped by world CLE subsystem");
+				client->Save();
+			}
+		}
+		break;
+	}
 	case ServerOP_ZonePlayer: {
 		ServerZonePlayer_Struct* szp = (ServerZonePlayer_Struct*)pack->pBuffer;
 		Client* client = entity_list.GetClientByName(szp->name);
 		printf("Zoning %s to %s(%u) - %u\n", client != nullptr ? client->GetCleanName() : "Unknown", szp->zone, database.GetZoneID(szp->zone), szp->instance_id);
 		if (client != 0) {
 			if (strcasecmp(szp->adminname, szp->name) == 0)
-				client->Message(0, "Zoning to: %s", szp->zone);
+				client->Message(Chat::White, "Zoning to: %s", szp->zone);
 			else if (client->GetAnon() == 1 && client->Admin() > szp->adminrank)
 				break;
 			else {
@@ -752,7 +783,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		Client* c = entity_list.GetClientByName(Rezzer);
 
 		if (c)
-			c->Message_StringID(MT_WornOff, REZZ_ALREADY_PENDING);
+			c->MessageString(Chat::SpellWornOff, REZZ_ALREADY_PENDING);
 
 		break;
 	}
@@ -879,7 +910,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				entity_list.AddGroup(group);
 
 				if (group->GetID() == 0) {
-					Inviter->Message(13, "Unable to get new group id. Cannot create group.");
+					Inviter->Message(Chat::Red, "Unable to get new group id. Cannot create group.");
 					break;
 				}
 
@@ -1352,7 +1383,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 							if (r->members[x].GroupNumber == rmsg->gid) {
 								if (r->members[x].member->GetFilter(FilterGroupChat) != 0)
 								{
-									r->members[x].member->ChannelMessageSend(rmsg->from, r->members[x].member->GetName(), 2, 0, rmsg->message);
+									r->members[x].member->ChannelMessageSend(rmsg->from, r->members[x].member->GetName(), ChatChannel_Group, rmsg->language, rmsg->lang_skill, rmsg->message);
 								}
 							}
 						}
@@ -1377,7 +1408,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 						{
 							if (r->members[x].member->GetFilter(FilterGroupChat) != 0)
 							{
-								r->members[x].member->ChannelMessageSend(rmsg->from, r->members[x].member->GetName(), 15, 0, rmsg->message);
+								r->members[x].member->ChannelMessageSend(rmsg->from, r->members[x].member->GetName(), ChatChannel_Raid, rmsg->language, rmsg->lang_skill, rmsg->message);
 							}
 						}
 					}
@@ -1454,7 +1485,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		ServerOP_Consent_Struct* s = (ServerOP_Consent_Struct*)pack->pBuffer;
 		Client* client = entity_list.GetClientByName(s->ownername);
 		if (client) {
-			client->Message_StringID(0, s->message_string_id);
+			client->MessageString(Chat::White, s->message_string_id);
 		}
 		break;
 	}
@@ -1698,7 +1729,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		if (c)
 		{
 			c->ClearPendingAdventureDoorClick();
-			c->Message_StringID(13, 5141);
+			c->MessageString(Chat::Red, 5141);
 		}
 		break;
 	}
@@ -1720,7 +1751,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		if (c)
 		{
 			c->ClearPendingAdventureLeave();
-			c->Message(13, "You cannot leave this adventure at this time.");
+			c->Message(Chat::Red, "You cannot leave this adventure at this time.");
 		}
 		break;
 	}
@@ -1773,10 +1804,10 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	}
 	case ServerOP_ReloadRules: {
 		worldserver.SendEmoteMessage(
-				0, 0, 0, 15,
-				"Rules reloaded for Zone: '%s' Instance ID: %u",
-				zone->GetLongName(),
-				zone->GetInstanceID()
+			0, 0, 100, 15,
+			"Rules reloaded for Zone: '%s' Instance ID: %u",
+			zone->GetLongName(),
+			zone->GetInstanceID()
 		);
 		RuleManager::Instance()->LoadRules(&database, RuleManager::Instance()->GetActiveRuleset(), true);
 		break;
@@ -1950,7 +1981,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	}
 }
 
-bool WorldServer::SendChannelMessage(Client* from, const char* to, uint8 chan_num, uint32 guilddbid, uint8 language, const char* message, ...) {
+bool WorldServer::SendChannelMessage(Client* from, const char* to, uint8 chan_num, uint32 guilddbid, uint8 language, uint8 lang_skill, const char* message, ...) {
 	if (!worldserver.Connected())
 		return false;
 	va_list argptr;
@@ -1984,6 +2015,7 @@ bool WorldServer::SendChannelMessage(Client* from, const char* to, uint8 chan_nu
 	scm->chan_num = chan_num;
 	scm->guilddbid = guilddbid;
 	scm->language = language;
+	scm->lang_skill = lang_skill;
 	scm->queued = 0;
 	strcpy(scm->message, buffer);
 

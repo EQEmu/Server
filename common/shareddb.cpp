@@ -998,7 +998,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 		item.SkillModMax = (int32)atoul(row[ItemField::skillmodmax]);
 		item.SkillModType = (uint32)atoul(row[ItemField::skillmodtype]);
 		item.BaneDmgRace = (uint32)atoul(row[ItemField::banedmgrace]);
-		item.BaneDmgAmt = (int8)atoi(row[ItemField::banedmgamt]);
+		item.BaneDmgAmt = (int32)atoul(row[ItemField::banedmgamt]);
 		item.BaneDmgBody = (uint32)atoul(row[ItemField::banedmgbody]);
 		item.Magic = (atoi(row[ItemField::magic]) == 0) ? false : true;
 		item.CastTime_ = (int32)atoul(row[ItemField::casttime_]);

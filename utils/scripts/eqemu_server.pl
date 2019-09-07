@@ -401,6 +401,9 @@ sub build_linux_source {
     mkdir($source_dir . "/Server/build") if (!-e $source_dir . "/Server/build");
     chdir($source_dir . "/Server/build");
 
+    print `git submodule init`;
+    print `git submodule update`;
+
     print "Generating CMake build files...\n";
     if ($os_flavor eq "fedora_core") {
         print `cmake $cmake_options -DEQEMU_BUILD_LOGIN=ON -DEQEMU_BUILD_LUA=ON -DLUA_INCLUDE_DIR=/usr/include/lua-5.1/ -G "Unix Makefiles" ..`;
@@ -451,6 +454,7 @@ sub do_installer_routines {
         fetch_latest_windows_appveyor();
         get_remote_file($install_repository_request_url . "lua51.dll", "lua51.dll", 1);
         get_remote_file($install_repository_request_url . "zlib1.dll", "zlib1.dll", 1);
+		get_remote_file($install_repository_request_url . "zlib1.pdb", "zlib1.pdb", 1);
         get_remote_file($install_repository_request_url . "libmysql.dll", "libmysql.dll", 1);
     }
 
@@ -466,9 +470,19 @@ sub do_installer_routines {
     print `"$path" --host $host --user $user --password="$pass" -N -B -e "DROP DATABASE IF EXISTS $db_name;"`;
     print `"$path" --host $host --user $user --password="$pass" -N -B -e "CREATE DATABASE $db_name"`;
 
+    my $world_path = "world";
+    if (-e "bin/world") {
+        $world_path = "bin/world";
+    }
+
     #::: Get Binary DB version
-    if ($OS eq "Windows") { @db_version = split(': ', `world db_version`); }
-    if ($OS eq "Linux") { @db_version   = split(': ', `./world db_version`); }
+    if ($OS eq "Windows") {
+        @db_version = split(': ', `$world_path db_version`);
+    }
+    if ($OS eq "Linux") {
+        @db_version = split(': ', `./$world_path db_version`);
+    }
+
     $binary_database_version            = trim($db_version[1]);
 
     #::: Local DB Version
@@ -644,6 +658,14 @@ sub do_self_update_check_routine {
         }
         else {
             print "[Update] No script update necessary...\n";
+
+            if (-e "db_update") {
+                unlink("db_update");
+            }
+
+            if (-e "updates_staged") {
+                unlink("updates_staged");
+            }
         }
 
         unlink("updates_staged/eqemu_server.pl");
@@ -804,7 +826,8 @@ sub show_menu_prompt {
                 print ">>> Windows\n";
                 print " [windows_server_download]	Updates server via latest 'stable' code\n";
                 print " [windows_server_latest]	Updates server via latest commit 'unstable'\n";
-                print " [windows_server_download_bots]	Updates server (bots) from latest 'stable'\n";
+                print " [windows_server_download_bots]	Updates server (bots) via latest 'stable'\n";
+                print " [windows_server_latest_bots]	Updates server (bots) via latest commit 'unstable'\n";
                 print " [fetch_dlls]			Grabs dll's needed to run windows binaries\n";
                 print " [setup_loginserver]		Sets up loginserver for Windows\n";
             }
@@ -866,6 +889,10 @@ sub show_menu_prompt {
         }
         elsif ($input eq "windows_server_download_bots") {
             fetch_latest_windows_binaries_bots();
+            $dc = 1;
+        }
+        elsif ($input eq "windows_server_latest_bots") {
+            fetch_latest_windows_appveyor_bots();
             $dc = 1;
         }
         elsif ($input eq "fetch_dlls") {
@@ -1392,9 +1419,34 @@ sub fetch_latest_windows_binaries {
     rmtree('updates_staged');
 }
 
+sub fetch_latest_windows_appveyor_bots {
+    print "[Update] Fetching Latest Windows Binaries with Bots (unstable) from Appveyor... \n";
+    get_remote_file("https://ci.appveyor.com/api/projects/KimLS/server/artifacts/eqemu-x86-bots.zip", "updates_staged/eqemu-x86-bots.zip", 1);
+
+    print "[Update] Fetched Latest Windows Binaries (unstable) from Appveyor... \n";
+    print "[Update] Extracting... --- \n";
+    unzip('updates_staged/eqemu-x86-bots.zip', 'updates_staged/binaries/');
+    my @files;
+    my $start_dir = "updates_staged/binaries";
+    find(
+        sub { push @files, $File::Find::name unless -d; },
+        $start_dir
+    );
+    for my $file (@files) {
+        $destination_file = $file;
+        $destination_file =~ s/updates_staged\/binaries\///g;
+        print "[Update] Installing :: " . $destination_file . "\n";
+        copy_file($file, $destination_file);
+    }
+    print "[Update] Done\n";
+
+    rmtree('updates_staged');
+}
+
 sub fetch_latest_windows_binaries_bots {
     print "[Update] Fetching Latest Windows Binaries with Bots...\n";
     get_remote_file($install_repository_request_url . "master_windows_build_bots.zip", "updates_staged/master_windows_build_bots.zip", 1);
+
     print "[Update] Fetched Latest Windows Binaries with Bots...\n";
     print "[Update] Extracting...\n";
     unzip('updates_staged/master_windows_build_bots.zip', 'updates_staged/binaries/');
@@ -1546,22 +1598,24 @@ sub add_login_server_firewall_rules {
         print "If firewall rules don't add you must run this script (eqemu_server.pl) as administrator\n";
         print "\n";
         print "[Install] Instructions \n";
-        print "[Install] In order to connect your server to the loginserver you must point your eqemu_config.xml to your local server similar to the following:\n";
+        print "[Install] In order to connect your server to the loginserver you must point your eqemu_config.json to your local server similar to the following:\n";
         print "
-	<loginserver1>
-		<host>login.eqemulator.net</host>
-		<port>5998</port>
-		<account></account>
-		<password></password>
-	</loginserver1>
-	<loginserver2>
-		<host>127.0.0.1</host>
-		<port>5998</port>
-		<account></account>
-		<password></password>
-	</loginserver2>
+	\"loginserver1\" : {
+		\"account\" : \"\",
+		\"host\" : \"login.eqemulator.net\",
+		\"password\" : \"\",
+		\"port\" : \"5998\",
+		\"legacy\": \"1\"
+	},
+	\"loginserver2\" : {
+		\"account\" : \"\",
+		\"host\" : \"192.168.197.129\",
+		\"password\" : \"\",
+		\"port\" : \"5998\"
+	},
+	\"localaddress\" : \"192.168.197.129\",
 		";
-        print "[Install] When done, make sure your EverQuest client points to your loginserver's IP (In this case it would be 127.0.0.1) in the eqhosts.txt file\n";
+        print "[Install] When done, make sure your EverQuest client points to your loginserver's IP (In this case it would be 192.168.197.129) in the eqhosts.txt file\n";
     }
 }
 
@@ -1599,9 +1653,10 @@ sub check_windows_firewall_rules {
 }
 
 sub fetch_server_dlls {
-    print "[Download] Fetching lua51.dll, zlib1.dll, libmysql.dll...\n";
+    print "[Download] Fetching lua51.dll, zlib1.dll, zlib1.pdb, libmysql.dll...\n";
     get_remote_file($install_repository_request_url . "lua51.dll", "lua51.dll", 1);
     get_remote_file($install_repository_request_url . "zlib1.dll", "zlib1.dll", 1);
+	get_remote_file($install_repository_request_url . "zlib1.pdb", "zlib1.pdb", 1);
     get_remote_file($install_repository_request_url . "libmysql.dll", "libmysql.dll", 1);
 }
 

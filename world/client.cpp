@@ -88,7 +88,6 @@ extern volatile bool UCSServerAvailable_;
 
 Client::Client(EQStreamInterface* ieqs)
 :	autobootup_timeout(RuleI(World, ZoneAutobootTimeoutMS)),
-	CLE_keepalive_timer(RuleI(World, ClientKeepaliveTimeoutMS)),
 	connect(1000),
 	eqs(ieqs)
 {
@@ -105,6 +104,7 @@ Client::Client(EQStreamInterface* ieqs)
 	char_name[0] = 0;
 	charid = 0;
 	zone_waiting_for_bootup = 0;
+	enter_world_triggered = false;
 	StartInTutorial = false;
 
 	m_ClientVersion = eqs->ClientVersion();
@@ -115,7 +115,7 @@ Client::Client(EQStreamInterface* ieqs)
 
 Client::~Client() {
 	if (RunLoops && cle && zone_id == 0)
-		cle->SetOnline(CLE_Status_Offline);
+		cle->SetOnline(CLE_Status::Offline);
 
 	numclients--;
 
@@ -185,7 +185,7 @@ void Client::SendExpansionInfo() {
 
 void Client::SendCharInfo() {
 	if (cle) {
-		cle->SetOnline(CLE_Status_CharSelect);
+		cle->SetOnline(CLE_Status::CharSelect);
 	}
 
 	if (m_ClientVersionBit & EQEmu::versions::maskRoFAndLater) {
@@ -461,7 +461,7 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 			// Track who is in and who is out of the game
 			char *inout= (char *) "";
 			
-			if (cle->GetOnline() == CLE_Status_Never){
+			if (cle->GetOnline() == CLE_Status::Never){
 				// Desktop -> Char Select
 				inout = (char *) "In";
 			}
@@ -474,7 +474,7 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 			// Either from a fresh client launch or coming back from the game.
 			// Exiting the game entirely does not come through here.
 			// Could use a Logging Out Completely message somewhere.
-			cle->SetOnline(CLE_Status_CharSelect);
+			cle->SetOnline(CLE_Status::CharSelect);
 			
 			Log(Logs::General, Logs::World_Server, 
 				"Account (%s) Logging(%s) to character select :: LSID: %d ", 
@@ -1076,7 +1076,7 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 		{
 			// I don't see this getting executed on logout
 			eqs->Close();
-			cle->SetOnline(CLE_Status_Offline); //allows this player to log in again without an ip restriction.
+			cle->SetOnline(CLE_Status::Offline); //allows this player to log in again without an ip restriction.
 			return false;
 		}
 		case OP_ZoneChange:
@@ -1119,15 +1119,15 @@ bool Client::Process() {
 		Log(Logs::General, Logs::World_Server, "Zone bootup timer expired, bootup failed or too slow.");
 		TellClientZoneUnavailable();
 	}
+
 	if(connect.Check()){
 		SendGuildList();// Send OPCode: OP_GuildsList
 		SendApproveWorld();
 		connect.Disable();
 	}
-	if (CLE_keepalive_timer.Check()) {
-		if (cle)
-			cle->KeepAlive();
-	}
+
+	if (cle)
+		cle->KeepAlive();
 
 	/************ Get all packets from packet manager out queue and process them ************/
 	EQApplicationPacket *app = 0;
@@ -1191,11 +1191,18 @@ void Client::EnterWorld(bool TryBootup) {
 	else
 		zone_server = zoneserver_list.FindByZoneID(zone_id);
 
-
 	const char *zone_name = database.GetZoneName(zone_id, true);
 	if (zone_server) {
-		// warn the world we're comming, so it knows not to shutdown
-		zone_server->IncomingClient(this);
+		if (false == enter_world_triggered) {
+			//Drop any clients we own in other zones.
+			zoneserver_list.DropClient(GetLSID(), zone_server);
+
+			// warn the zone we're coming
+			zone_server->IncomingClient(this);
+
+			//tell the server not to trigger this multiple times before we get a zone unavailable
+			enter_world_triggered = true;
+		}
 	}
 	else {
 		if (TryBootup) {
@@ -1214,9 +1221,17 @@ void Client::EnterWorld(bool TryBootup) {
 			return;
 		}
 	}
+
 	zone_waiting_for_bootup = 0;
 
-	if(!cle) {
+	if (GetAdmin() < 80 && zoneserver_list.IsZoneLocked(zone_id)) {
+		Log(Logs::General, Logs::World_Server, "Enter world failed. Zone is locked.");
+		TellClientZoneUnavailable();
+		return;
+	}
+
+	if (!cle) {
+		TellClientZoneUnavailable();
 		return;
 	}
 
@@ -1233,12 +1248,6 @@ void Client::EnterWorld(bool TryBootup) {
 	);
 
 	if (seen_character_select) {
-		if (GetAdmin() < 80 && zoneserver_list.IsZoneLocked(zone_id)) {
-			Log(Logs::General, Logs::World_Server, "Enter world failed. Zone is locked.");
-			TellClientZoneUnavailable();
-			return;
-		}
-
 		auto pack = new ServerPacket;
 		pack->opcode = ServerOP_AcceptWorldEntrance;
 		pack->size = sizeof(WorldToZone_Struct);
@@ -1344,7 +1353,7 @@ void Client::Clearance(int8 response)
 	safe_delete(outapp);
 
 	if (cle)
-		cle->SetOnline(CLE_Status_Zoning);
+		cle->SetOnline(CLE_Status::Zoning);
 }
 
 void Client::TellClientZoneUnavailable() {
@@ -1358,6 +1367,7 @@ void Client::TellClientZoneUnavailable() {
 
 	zone_id = 0;
 	zone_waiting_for_bootup = 0;
+	enter_world_triggered = false;
 	autobootup_timeout.Disable();
 }
 

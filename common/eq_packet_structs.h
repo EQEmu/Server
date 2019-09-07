@@ -1188,6 +1188,20 @@ struct SpecialMesg_Struct
 /*24*/	char	message[1];				// What is being said?
 };
 
+struct SpecialMesgHeader_Struct
+{
+/*00*/	char	SpeakMode;				// 2 shouts, 4 %1 %2, 3 %2, 5 tells group, 0 copy, default says
+/*01*/	char	JournalMode;			// 1 and 2 go to journal
+/*02*/	char	language;
+/*03*/	uint32	msg_type;				// Color of text (see MT_*** below)
+/*07*/	uint32	target_spawn_id;		// Who is it being said to?
+/*11*/ // speaker's name
+/*xx*/ // unknown, location, client doesn't care
+/*xx*/ // unknown
+/*xx*/ // unknown
+/*xx*/ // message
+};
+
 /*
 ** When somebody changes what they're wearing or give a pet a weapon (model changes)
 ** Length: 19 Bytes
