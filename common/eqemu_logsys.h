@@ -335,6 +335,7 @@ private:
 
 extern EQEmuLogSys LogSys;
 
+/**
 template<typename... Args>
 void OutF(
 	EQEmuLogSys &ls,
@@ -350,5 +351,11 @@ void OutF(
 	std::string log_str = fmt::format(fmt, args...);
 	ls.Out(debug_level, log_category, file, func, line, log_str.c_str());
 }
+ **/
+
+#define OutF(ls, debug_level, log_category, file, func, line, formatStr, ...) \
+do { \
+    ls.Out(debug_level, log_category, file, func, line, fmt::format(formatStr, ##__VA_ARGS__).c_str()); \
+} while(0)
 
 #endif
