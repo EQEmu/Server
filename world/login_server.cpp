@@ -69,13 +69,14 @@ void LoginServer::ProcessUsertoWorldReqLeg(uint16_t opcode, EQ::Net::Packet &p)
 	int16                           status = database.CheckStatus(id);
 
 	LogDebug(
-		"[ProcessUsertoWorldReqLeg] id [{}] status [{}] account_id [{}] world_id [{}] from_id [{}] to_id [{}]",
+		"[ProcessUsertoWorldReqLeg] id [{}] status [{}] account_id [{}] world_id [{}] from_id [{}] to_id [{}] ip [{}]",
 		id,
 		status,
 		utwr->lsaccountid,
 		utwr->worldid,
 		utwr->FromID,
-		utwr->ToID
+		utwr->ToID,
+		utwr->IPAddr
 	);
 
 	ServerPacket outpack;
@@ -145,13 +146,14 @@ void LoginServer::ProcessUsertoWorldReq(uint16_t opcode, EQ::Net::Packet &p)
 	int16                     status = database.CheckStatus(id);
 
 	LogDebug(
-		"[ProcessUsertoWorldReq] id [{}] status [{}] account_id [{}] world_id [{}] from_id [{}] to_id [{}]",
+		"[ProcessUsertoWorldReq] id [{}] status [{}] account_id [{}] world_id [{}] from_id [{}] to_id [{}] ip [{}]",
 		id,
 		status,
 		utwr->lsaccountid,
 		utwr->worldid,
 		utwr->FromID,
-		utwr->ToID
+		utwr->ToID,
+		utwr->IPAddr
 	);
 
 	ServerPacket outpack;

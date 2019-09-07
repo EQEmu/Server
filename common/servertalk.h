@@ -710,20 +710,20 @@ struct UsertoWorldRequest_Struct {
 };
 
 struct UsertoWorldResponseLegacy_Struct {
-	uint32	lsaccountid;
-	uint32	worldid;
-	int8	response; // -3) World Full, -2) Banned, -1) Suspended, 0) Denied, 1) Allowed
-	uint32	FromID;
-	uint32	ToID;
+	uint32 lsaccountid;
+	uint32 worldid;
+	int8   response; // -3) World Full, -2) Banned, -1) Suspended, 0) Denied, 1) Allowed
+	uint32 FromID;
+	uint32 ToID;
 };
 
 struct UsertoWorldResponse_Struct {
-	uint32	lsaccountid;
-	uint32	worldid;
-	int8	response; // -3) World Full, -2) Banned, -1) Suspended, 0) Denied, 1) Allowed
-	uint32	FromID;
-	uint32	ToID;
-	char	login[64];
+	uint32 lsaccountid;
+	uint32 worldid;
+	int8   response; // -3) World Full, -2) Banned, -1) Suspended, 0) Denied, 1) Allowed
+	uint32 FromID;
+	uint32 ToID;
+	char   login[64];
 };
 
 // generic struct to be used for alot of simple zone->world questions
