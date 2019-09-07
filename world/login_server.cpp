@@ -68,7 +68,15 @@ void LoginServer::ProcessUsertoWorldReqLeg(uint16_t opcode, EQ::Net::Packet &p)
 	uint32                          id     = database.GetAccountIDFromLSID("eqemu", utwr->lsaccountid);
 	int16                           status = database.CheckStatus(id);
 
-	LogDebug("[ProcessUsertoWorldReqLeg] id [{}] status [{}] account_id [{}]", id, status, utwr->lsaccountid);
+	LogDebug(
+		"[ProcessUsertoWorldReqLeg] id [{}] status [{}] account_id [{}] world_id [{}] from_id [{}] to_id [{}]",
+		id,
+		status,
+		utwr->lsaccountid,
+		utwr->worldid,
+		utwr->FromID,
+		utwr->ToID
+	);
 
 	ServerPacket outpack;
 	outpack.opcode  = ServerOP_UsertoWorldResp;
@@ -82,9 +90,9 @@ void LoginServer::ProcessUsertoWorldReqLeg(uint16_t opcode, EQ::Net::Packet &p)
 	utwrs->worldid     = utwr->worldid;
 	utwrs->response    = UserToWorldStatusSuccess;
 
-	if (Config->Locked == true)
-	{
+	if (Config->Locked) {
 		if (status < 100) {
+			LogDebug("[ProcessUsertoWorldReqLeg] Server locked and status is not high enough for account_id [{0}]", utwr->lsaccountid);
 			utwrs->response = UserToWorldStatusWorldUnavail;
 			SendPacket(&outpack);
 			return;
@@ -92,19 +100,22 @@ void LoginServer::ProcessUsertoWorldReqLeg(uint16_t opcode, EQ::Net::Packet &p)
 	}
 
 	int32 x = Config->MaxClients;
-	if ((int32)numplayers >= x && x != -1 && x != 255 && status < 80) {
+	if ((int32) numplayers >= x && x != -1 && x != 255 && status < 80) {
+		LogDebug("[ProcessUsertoWorldReqLeg] World at capacity account_id [{0}]", utwr->lsaccountid);
 		utwrs->response = UserToWorldStatusWorldAtCapacity;
 		SendPacket(&outpack);
 		return;
 	}
 
 	if (status == -1) {
+		LogDebug("[ProcessUsertoWorldReqLeg] User suspended account_id [{0}]", utwr->lsaccountid);
 		utwrs->response = UserToWorldStatusSuspended;
 		SendPacket(&outpack);
 		return;
 	}
 
 	if (status == -2) {
+		LogDebug("[ProcessUsertoWorldReqLeg] User banned account_id [{0}]", utwr->lsaccountid);
 		utwrs->response = UserToWorldStatusBanned;
 		SendPacket(&outpack);
 		return;
@@ -112,6 +123,7 @@ void LoginServer::ProcessUsertoWorldReqLeg(uint16_t opcode, EQ::Net::Packet &p)
 
 	if (RuleB(World, EnforceCharacterLimitAtLogin)) {
 		if (client_list.IsAccountInGame(utwr->lsaccountid)) {
+			LogDebug("[ProcessUsertoWorldReqLeg] User already online account_id [{0}]", utwr->lsaccountid);
 			utwrs->response = UserToWorldStatusAlreadyOnline;
 			SendPacket(&outpack);
 			return;
