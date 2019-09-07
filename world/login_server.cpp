@@ -130,6 +130,8 @@ void LoginServer::ProcessUsertoWorldReqLeg(uint16_t opcode, EQ::Net::Packet &p)
 		}
 	}
 
+	LogDebug("[ProcessUsertoWorldReqLeg] Sent response to account_id [{0}]", utwr->lsaccountid);
+
 	SendPacket(&outpack);
 }
 
