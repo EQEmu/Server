@@ -62,11 +62,13 @@ LoginServer::~LoginServer()
 void LoginServer::ProcessUsertoWorldReqLeg(uint16_t opcode, EQ::Net::Packet &p)
 {
 	const WorldConfig *Config = WorldConfig::get();
-	LogNetcode("Received ServerPacket from LS OpCode {:#04x}", opcode);
+	LogNetcode("[ProcessUsertoWorldReqLeg] Received ServerPacket from LS OpCode {:#04x}", opcode);
 
 	UsertoWorldRequestLegacy_Struct *utwr  = (UsertoWorldRequestLegacy_Struct *) p.Data();
 	uint32                          id     = database.GetAccountIDFromLSID("eqemu", utwr->lsaccountid);
 	int16                           status = database.CheckStatus(id);
+
+	LogDebug("[ProcessUsertoWorldReqLeg] id [{}] status [{}] account_id [{}]", id, status, utwr->lsaccountid);
 
 	ServerPacket outpack;
 	outpack.opcode  = ServerOP_UsertoWorldResp;
@@ -122,11 +124,13 @@ void LoginServer::ProcessUsertoWorldReqLeg(uint16_t opcode, EQ::Net::Packet &p)
 void LoginServer::ProcessUsertoWorldReq(uint16_t opcode, EQ::Net::Packet &p)
 {
 	const WorldConfig *Config = WorldConfig::get();
-	LogNetcode("Received ServerPacket from LS OpCode {:#04x}", opcode);
+	LogNetcode("[ProcessUsertoWorldReq] Received ServerPacket from LS OpCode {:#04x}", opcode);
 
 	UsertoWorldRequest_Struct *utwr  = (UsertoWorldRequest_Struct *) p.Data();
 	uint32                    id     = database.GetAccountIDFromLSID(utwr->login, utwr->lsaccountid);
 	int16                     status = database.CheckStatus(id);
+
+	LogDebug("[ProcessUsertoWorldReq] id [{}] status [{}] account_id [{}]", id, status, utwr->lsaccountid);
 
 	ServerPacket outpack;
 	outpack.opcode  = ServerOP_UsertoWorldResp;
