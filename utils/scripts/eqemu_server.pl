@@ -470,9 +470,19 @@ sub do_installer_routines {
     print `"$path" --host $host --user $user --password="$pass" -N -B -e "DROP DATABASE IF EXISTS $db_name;"`;
     print `"$path" --host $host --user $user --password="$pass" -N -B -e "CREATE DATABASE $db_name"`;
 
+    my $world_path = "world";
+    if (-e "bin/world") {
+        $world_path = "bin/world";
+    }
+
     #::: Get Binary DB version
-    if ($OS eq "Windows") { @db_version = split(': ', `world db_version`); }
-    if ($OS eq "Linux") { @db_version   = split(': ', `./world db_version`); }
+    if ($OS eq "Windows") {
+        @db_version = split(': ', `$world_path db_version`);
+    }
+    if ($OS eq "Linux") {
+        @db_version = split(': ', `./$world_path db_version`);
+    }
+
     $binary_database_version            = trim($db_version[1]);
 
     #::: Local DB Version
