@@ -72,6 +72,13 @@ bool BotDatabase::UpdateBotCommandSettings(const std::vector<std::pair<std::stri
 		if (!database.QueryDatabase(query).Success()) {
 			return_value = false;
 		}
+
+		Log(Logs::General,
+			Logs::Status,
+			"%u New Bot Command%s Added",
+			injected.size(),
+			(injected.size() == 1 ? "" : "s")
+		);
 	}
 
 	if (orphaned.size()) {
@@ -84,6 +91,13 @@ bool BotDatabase::UpdateBotCommandSettings(const std::vector<std::pair<std::stri
 		if (!database.QueryDatabase(query).Success()) {
 			return_value = false;
 		}
+
+		Log(Logs::General,
+			Logs::Status,
+			"%u Orphaned Bot Command%s Deleted",
+			orphaned.size(),
+			(orphaned.size() == 1 ? "" : "s")
+		);
 	}
 
 	return return_value;

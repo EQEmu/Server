@@ -1488,6 +1488,13 @@ bool SharedDatabase::UpdateCommandSettings(const std::vector<std::pair<std::stri
 		if (!QueryDatabase(query).Success()) {
 			return_value = false;
 		}
+
+		Log(Logs::General,
+			Logs::Status,
+			"%u New Command%s Added",
+			injected.size(),
+			(injected.size() == 1 ? "" : "s")
+		);
 	}
 
 	if (orphaned.size()) {
@@ -1500,6 +1507,13 @@ bool SharedDatabase::UpdateCommandSettings(const std::vector<std::pair<std::stri
 		if (!QueryDatabase(query).Success()) {
 			return_value = false;
 		}
+
+		Log(Logs::General,
+			Logs::Status,
+			"%u Orphaned Command%s Deleted",
+			orphaned.size(),
+			(orphaned.size() == 1 ? "" : "s")
+		);
 	}
 
 	return return_value;
