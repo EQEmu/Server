@@ -596,10 +596,10 @@ bool RuleManager::RestoreRuleNotes(Database *db)
 		}
 
 		std::string query(
-			StringFormat(
-				"UPDATE `rule_values` SET `notes` = '%s' WHERE `ruleset_id` = '%i' AND `rule_name` = '%s'",
-				rule.notes.c_str(),
-				atoi(row[0]),
+			fmt::format(
+				"UPDATE `rule_values` SET `notes` = '{}' WHERE `ruleset_id` = '{}' AND `rule_name` = '{}'",
+				EscapeString(rule.notes),
+				row[0],
 				row[1]
 			)
 		);
