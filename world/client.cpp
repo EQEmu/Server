@@ -443,7 +443,7 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app)
 			// Could use a Logging Out Completely message somewhere.
 			cle->SetOnline(CLE_Status::CharSelect);
 			
-			LogInfo("Account ({}) Logging({}) to character select :: LSID [{}] ",cle->AccountName(), inout, cle->LSID());
+			LogInfo("Account ({}) Logging({}) to character select :: LSID [{}] ", cle->AccountName(), inout, cle->LSID());
 		}
 		else {
 			cle->SetOnline();
@@ -1198,7 +1198,7 @@ void Client::EnterWorld(bool TryBootup) {
 	cle->SetChar(charid, char_name);
 	database.UpdateLiveChar(char_name, GetAccountID());
 
-	LogInfo(,
+	LogInfo(
 		"({}) [{}] [{}] (Zone ID [{}]: Instance ID: [{}]) ",
 		char_name,
 		(seen_character_select ? "Zoning from character select" : "Zoning to"), 
