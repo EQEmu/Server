@@ -414,7 +414,7 @@ sub build_linux_source {
     print "Building EQEmu Server code. This will take a while.";
 
     #::: Build
-    print `make`;
+    print `make -j\$(nproc)`
 
     chdir($current_directory);
 
