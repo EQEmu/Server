@@ -84,7 +84,7 @@ void LoginServer::ProcessUsertoWorldReqLeg(uint16_t opcode, EQ::Net::Packet &p)
 	outpack.pBuffer = new uchar[outpack.size];
 	memset(outpack.pBuffer, 0, outpack.size);
 
-	UsertoWorldResponse_Struct *utwrs = (UsertoWorldResponse_Struct *) outpack.pBuffer;
+	UsertoWorldResponseLegacy_Struct *utwrs = (UsertoWorldResponseLegacy_Struct *) outpack.pBuffer;
 	utwrs->lsaccountid = utwr->lsaccountid;
 	utwrs->ToID        = utwr->FromID;
 	utwrs->worldid     = utwr->worldid;
