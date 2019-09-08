@@ -290,7 +290,7 @@ void LoginServer::ProcessLSFatalError(uint16_t opcode, EQ::Net::Packet &p)
 
 	LogInfo("Login server responded with FatalError");
 	if (p.Length() > 1) {
-		LogInfo("     [{}]", (const char *) p.Data());
+		LogError("Error [{}]", (const char *) p.Data());
 	}
 }
 

@@ -131,6 +131,7 @@ int main(int argc, char **argv)
 
 	if (argc == 1) {
 		server.db->LoadLogSettings(LogSys.log_settings);
+		LogSys.StartFileLogs();
 	}
 
 	/**
