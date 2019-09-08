@@ -110,16 +110,16 @@ void ClientList::GetCLEIP(uint32 iIP) {
 		countCLEIPs = iterator.GetData();		
 		if ((countCLEIPs->GetIP() == iIP) && ((countCLEIPs->Admin() < (RuleI(World, ExemptMaxClientsStatus))) || (RuleI(World, ExemptMaxClientsStatus) < 0))) { // If the IP matches, and the connection admin status is below the exempt status, or exempt status is less than 0 (no-one is exempt)
 			IPInstances++; // Increment the occurences of this IP address
-			Log(Logs::General, Logs::ClientLogin, "Account ID: %i Account Name: %s IP: %s.", countCLEIPs->LSID(), countCLEIPs->LSName(), long2ip(countCLEIPs->GetIP()).c_str());
+			LogClientLogin("Account ID: [{}] Account Name: [{}] IP: [{}]", countCLEIPs->LSID(), countCLEIPs->LSName(), long2ip(countCLEIPs->GetIP()).c_str());
 			if (RuleB(World, EnableIPExemptions)) {
-				Log(Logs::General, Logs::ClientLogin, "Account ID: %i Account Name: %s IP: %s IP Instances: %i Max IP Instances: %i", countCLEIPs->LSID(), countCLEIPs->LSName(), long2ip(countCLEIPs->GetIP()).c_str(), IPInstances, database.GetIPExemption(long2ip(countCLEIPs->GetIP()).c_str()));
+				LogClientLogin("Account ID: [{}] Account Name: [{}] IP: [{}] IP Instances: [{}] Max IP Instances: [{}]", countCLEIPs->LSID(), countCLEIPs->LSName(), long2ip(countCLEIPs->GetIP()).c_str(), IPInstances, database.GetIPExemption(long2ip(countCLEIPs->GetIP()).c_str()));
 				if (IPInstances > database.GetIPExemption(long2ip(countCLEIPs->GetIP()).c_str())) {
 					if(RuleB(World, IPLimitDisconnectAll)) {
-						Log(Logs::General, Logs::ClientLogin, "Disconnect: All accounts on IP %s", long2ip(countCLEIPs->GetIP()).c_str());
+						LogClientLogin("Disconnect: All accounts on IP [{}]", long2ip(countCLEIPs->GetIP()).c_str());
 						DisconnectByIP(iIP);
 						return;
 					} else {
-						Log(Logs::General, Logs::ClientLogin, "Disconnect: Account %s on IP %s.", countCLEIPs->LSName(), long2ip(countCLEIPs->GetIP()).c_str());
+						LogClientLogin("Disconnect: Account [{}] on IP [{}]", countCLEIPs->LSName(), long2ip(countCLEIPs->GetIP()).c_str());
 						countCLEIPs->SetOnline(CLE_Status::Offline);
 						iterator.RemoveCurrent();
 						continue;
@@ -128,14 +128,14 @@ void ClientList::GetCLEIP(uint32 iIP) {
 			} else {
 				if (IPInstances > (RuleI(World, MaxClientsPerIP))) { // If the number of connections exceeds the lower limit
 					if (RuleB(World, MaxClientsSetByStatus)) { // If MaxClientsSetByStatus is set to True, override other IP Limit Rules
-						Log(Logs::General, Logs::ClientLogin, "Account ID: %i Account Name: %s IP: %s IP Instances: %i Max IP Instances: %i", countCLEIPs->LSID(), countCLEIPs->LSName(), long2ip(countCLEIPs->GetIP()).c_str(), IPInstances, countCLEIPs->Admin());
+						LogClientLogin("Account ID: [{}] Account Name: [{}] IP: [{}] IP Instances: [{}] Max IP Instances: [{}]", countCLEIPs->LSID(), countCLEIPs->LSName(), long2ip(countCLEIPs->GetIP()).c_str(), IPInstances, countCLEIPs->Admin());
 						if (IPInstances > countCLEIPs->Admin()) { // The IP Limit is set by the status of the account if status > MaxClientsPerIP	
 							if(RuleB(World, IPLimitDisconnectAll)) {
-								Log(Logs::General, Logs::ClientLogin, "Disconnect: All accounts on IP %s", long2ip(countCLEIPs->GetIP()).c_str());
+								LogClientLogin("Disconnect: All accounts on IP [{}]", long2ip(countCLEIPs->GetIP()).c_str());
 								DisconnectByIP(iIP);
 								return;
 							} else {
-								Log(Logs::General, Logs::ClientLogin, "Disconnect: Account %s on IP %s.", countCLEIPs->LSName(), long2ip(countCLEIPs->GetIP()).c_str());
+								LogClientLogin("Disconnect: Account [{}] on IP [{}]", countCLEIPs->LSName(), long2ip(countCLEIPs->GetIP()).c_str());
 								countCLEIPs->SetOnline(CLE_Status::Offline); // Remove the connection
 								iterator.RemoveCurrent();
 								continue;
@@ -143,22 +143,22 @@ void ClientList::GetCLEIP(uint32 iIP) {
 						}
 					} else if ((countCLEIPs->Admin() < RuleI(World, AddMaxClientsStatus)) || (RuleI(World, AddMaxClientsStatus) < 0)) { // Else if the Admin status of the connection is not eligible for the higher limit, or there is no higher limit (AddMaxClientStatus < 0)
 						if(RuleB(World, IPLimitDisconnectAll)) {								
-							Log(Logs::General, Logs::ClientLogin, "Disconnect: All accounts on IP %s", long2ip(countCLEIPs->GetIP()).c_str());
+							LogClientLogin("Disconnect: All accounts on IP [{}]", long2ip(countCLEIPs->GetIP()).c_str());
 							DisconnectByIP(iIP);
 							return;
 						} else {
-							Log(Logs::General, Logs::ClientLogin, "Disconnect: Account %s on IP %s.", countCLEIPs->LSName(), long2ip(countCLEIPs->GetIP()).c_str());
+							LogClientLogin("Disconnect: Account [{}] on IP [{}]", countCLEIPs->LSName(), long2ip(countCLEIPs->GetIP()).c_str());
 							countCLEIPs->SetOnline(CLE_Status::Offline); // Remove the connection
 							iterator.RemoveCurrent();
 							continue;
 						}
 					} else if (IPInstances > RuleI(World, AddMaxClientsPerIP)) { // else they are eligible for the higher limit, but if they exceed that	
 						if(RuleB(World, IPLimitDisconnectAll)) {
-							Log(Logs::General, Logs::ClientLogin, "Disconnect: All accounts on IP %s", long2ip(countCLEIPs->GetIP()).c_str());
+							LogClientLogin("Disconnect: All accounts on IP [{}]", long2ip(countCLEIPs->GetIP()).c_str());
 							DisconnectByIP(iIP);
 							return;
 						} else {
-							Log(Logs::General, Logs::ClientLogin, "Disconnect: Account %s on IP %s.", countCLEIPs->LSName(), long2ip(countCLEIPs->GetIP()).c_str());
+							LogClientLogin("Disconnect: Account [{}] on IP [{}]", countCLEIPs->LSName(), long2ip(countCLEIPs->GetIP()).c_str());
 							countCLEIPs->SetOnline(CLE_Status::Offline); // Remove the connection
 							iterator.RemoveCurrent();
 							continue;
