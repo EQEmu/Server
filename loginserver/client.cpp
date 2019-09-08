@@ -246,7 +246,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 	else {
 		if (server.options.IsPasswordLoginAllowed()) {
 			cred            = (&outbuffer[1 + user.length()]);
-			auto components = SplitString(user, '.');
+			auto components = SplitString(user, ':');
 			if (components.size() == 2) {
 				db_loginserver = components[0];
 				user           = components[1];
