@@ -456,6 +456,26 @@ int command_init(void)
 	std::vector<std::pair<std::string, uint8>> injected_command_settings;
 	std::vector<std::string> orphaned_command_settings;
 
+	for (auto cs_iter : command_settings) {
+
+		auto cl_iter = commandlist.find(cs_iter.first);
+		if (cl_iter == commandlist.end()) {
+
+			orphaned_command_settings.push_back(cs_iter.first);
+			Log(Logs::General,
+				Logs::Status,
+				"Command '%s' no longer exists... Deleting orphaned entry from `command_settings` table...",
+				cs_iter.first.c_str()
+			);
+		}
+	}
+
+	if (orphaned_command_settings.size()) {
+		if (!database.UpdateOrphanedCommandSettings(orphaned_command_settings)) {
+			Log(Logs::General, Logs::Zone_Server, "Failed to process 'Orphaned Commands' update operation.");
+		}
+	}
+
 	auto working_cl = commandlist;
 	for (auto working_cl_iter : working_cl) {
 
@@ -520,22 +540,10 @@ int command_init(void)
 		}
 	}
 
-	for (auto cs_iter : command_settings) {
-
-		auto cl_iter = commandlist.find(cs_iter.first);
-		if (cl_iter == commandlist.end()) {
-
-			orphaned_command_settings.push_back(cs_iter.first);
-			Log(Logs::General,
-				Logs::Status,
-				"Command '%s' no longer exists... Deleting orphaned entry from `command_settings` table...",
-				cs_iter.first.c_str()
-			);
+	if (injected_command_settings.size()) {
+		if (!database.UpdateInjectedCommandSettings(injected_command_settings)) {
+			Log(Logs::General, Logs::Zone_Server, "Failed to process 'Injected Commands' update operation.");
 		}
-	}
-
-	if (injected_command_settings.size() || orphaned_command_settings.size()) {
-		database.UpdateCommandSettings(injected_command_settings, orphaned_command_settings);
 	}
 
 	command_dispatch = command_realdispatch;

@@ -54,10 +54,8 @@ bool BotDatabase::LoadBotCommandSettings(std::map<std::string, std::pair<uint8, 
 	return true;
 }
 
-bool BotDatabase::UpdateBotCommandSettings(const std::vector<std::pair<std::string, uint8>> &injected, const std::vector<std::string> &orphaned)
+bool BotDatabase::UpdateInjectedBotCommandSettings(const std::vector<std::pair<std::string, uint8>> &injected)
 {
-	bool return_value = true;
-
 	if (injected.size()) {
 
 		query = fmt::format(
@@ -70,7 +68,7 @@ bool BotDatabase::UpdateBotCommandSettings(const std::vector<std::pair<std::stri
 		);
 
 		if (!database.QueryDatabase(query).Success()) {
-			return_value = false;
+			return false;
 		}
 
 		Log(Logs::General,
@@ -81,6 +79,11 @@ bool BotDatabase::UpdateBotCommandSettings(const std::vector<std::pair<std::stri
 		);
 	}
 
+	return true;
+}
+
+bool BotDatabase::UpdateOrphanedBotCommandSettings(const std::vector<std::string> &orphaned)
+{
 	if (orphaned.size()) {
 
 		query = fmt::format(
@@ -89,7 +92,7 @@ bool BotDatabase::UpdateBotCommandSettings(const std::vector<std::pair<std::stri
 		);
 
 		if (!database.QueryDatabase(query).Success()) {
-			return_value = false;
+			return false;
 		}
 
 		Log(Logs::General,
@@ -100,7 +103,7 @@ bool BotDatabase::UpdateBotCommandSettings(const std::vector<std::pair<std::stri
 		);
 	}
 
-	return return_value;
+	return true;
 }
 
 bool BotDatabase::LoadBotSpellCastingChances()

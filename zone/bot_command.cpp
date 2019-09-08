@@ -1429,6 +1429,26 @@ int bot_command_init(void)
 	std::vector<std::pair<std::string, uint8>> injected_bot_command_settings;
 	std::vector<std::string> orphaned_bot_command_settings;
 
+	for (auto bcs_iter : bot_command_settings) {
+
+		auto bcl_iter = bot_command_list.find(bcs_iter.first);
+		if (bcl_iter == bot_command_list.end()) {
+
+			orphaned_bot_command_settings.push_back(bcs_iter.first);
+			Log(Logs::General,
+				Logs::Status,
+				"Bot Command '%s' no longer exists... Deleting orphaned entry from `bot_command_settings` table...",
+				bcs_iter.first.c_str()
+			);
+		}
+	}
+
+	if (orphaned_bot_command_settings.size()) {
+		if (!database.botdb.UpdateOrphanedBotCommandSettings(orphaned_bot_command_settings)) {
+			Log(Logs::General, Logs::Zone_Server, "Failed to process 'Orphaned Bot Commands' update operation.");
+		}
+	}
+
 	auto working_bcl = bot_command_list;
 	for (auto working_bcl_iter : working_bcl) {
 
@@ -1493,22 +1513,10 @@ int bot_command_init(void)
 		}
 	}
 
-	for (auto bcs_iter : bot_command_settings) {
-
-		auto bcl_iter = bot_command_list.find(bcs_iter.first);
-		if (bcl_iter == bot_command_list.end()) {
-
-			orphaned_bot_command_settings.push_back(bcs_iter.first);
-			Log(Logs::General,
-				Logs::Status,
-				"Bot Command '%s' no longer exists... Deleting orphaned entry from `bot_command_settings` table...",
-				bcs_iter.first.c_str()
-			);
+	if (injected_bot_command_settings.size()) {
+		if (!database.botdb.UpdateInjectedBotCommandSettings(injected_bot_command_settings)) {
+			Log(Logs::General, Logs::Zone_Server, "Failed to process 'Injected Bot Commands' update operation.");
 		}
-	}
-
-	if (injected_bot_command_settings.size() || orphaned_bot_command_settings.size()) {
-		database.botdb.UpdateBotCommandSettings(injected_bot_command_settings, orphaned_bot_command_settings);
 	}
 	
 	bot_command_dispatch = bot_command_real_dispatch;

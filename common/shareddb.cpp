@@ -1470,10 +1470,8 @@ bool SharedDatabase::GetCommandSettings(std::map<std::string, std::pair<uint8, s
     return true;
 }
 
-bool SharedDatabase::UpdateCommandSettings(const std::vector<std::pair<std::string, uint8>> &injected, const std::vector<std::string> &orphaned)
+bool SharedDatabase::UpdateInjectedCommandSettings(const std::vector<std::pair<std::string, uint8>> &injected)
 {
-	bool return_value = true;
-
 	if (injected.size()) {
 
 		std::string query = fmt::format(
@@ -1486,7 +1484,7 @@ bool SharedDatabase::UpdateCommandSettings(const std::vector<std::pair<std::stri
 		);
 
 		if (!QueryDatabase(query).Success()) {
-			return_value = false;
+			return false;
 		}
 
 		Log(Logs::General,
@@ -1497,6 +1495,11 @@ bool SharedDatabase::UpdateCommandSettings(const std::vector<std::pair<std::stri
 		);
 	}
 
+	return true;
+}
+
+bool SharedDatabase::UpdateOrphanedCommandSettings(const std::vector<std::string> &orphaned)
+{
 	if (orphaned.size()) {
 
 		std::string query = fmt::format(
@@ -1505,7 +1508,7 @@ bool SharedDatabase::UpdateCommandSettings(const std::vector<std::pair<std::stri
 		);
 
 		if (!QueryDatabase(query).Success()) {
-			return_value = false;
+			return false;
 		}
 
 		Log(Logs::General,
@@ -1516,7 +1519,7 @@ bool SharedDatabase::UpdateCommandSettings(const std::vector<std::pair<std::stri
 		);
 	}
 
-	return return_value;
+	return true;
 }
 
 bool SharedDatabase::LoadSkillCaps(const std::string &prefix) {
