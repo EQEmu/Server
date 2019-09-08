@@ -31,7 +31,7 @@ public:
 	 * @param password
 	 * @param email
 	 * @param source_loginserver
-	 * @param ls_account_id
+	 * @param login_account_id
 	 * @return
 	 */
 	static int32 CreateLoginServerAccount(
@@ -39,7 +39,7 @@ public:
 		std::string password,
 		std::string email = "",
 		const std::string &source_loginserver = "local",
-		uint32 ls_account_id = 0
+		uint32 login_account_id = 0
 	);
 
 	/**
