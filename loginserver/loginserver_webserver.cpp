@@ -81,7 +81,48 @@ namespace LoginserverWebserver {
 					return;
 				}
 
-				int32 account_created_id = AccountManagement::CreateLocalLoginServerAccount(username, password, email);
+				int32 account_created_id = AccountManagement::CreateLoginServerAccount(username, password, email);
+				if (account_created_id > 0) {
+					response["message"]            = "Account created successfully!";
+					response["data"]["account_id"] = account_created_id;
+				}
+				else if (account_created_id == -1) {
+					response["error"] = "Account already exists!";
+				}
+				else {
+					response["error"] = "Account failed to create!";
+				}
+
+				LoginserverWebserver::SendResponse(response, res);
+			}
+		);
+
+		api.Post(
+			"/account/create/external", [](const httplib::Request &request, httplib::Response &res) {
+				if (!LoginserverWebserver::TokenManager::AuthCanWrite(request, res)) {
+					return;
+				}
+
+				Json::Value request_body = LoginserverWebserver::ParseRequestBody(request);
+				std::string username     = request_body.get("username", "").asString();
+				std::string password     = request_body.get("password", "").asString();
+				std::string email        = request_body.get("email", "").asString();
+
+				Json::Value response;
+				if (username.empty() || password.empty()) {
+					response["error"] = "Username or password not set";
+					LoginserverWebserver::SendResponse(response, res);
+					return;
+				}
+
+				std::string source_loginserver = "eqemu";
+				int32       account_created_id = AccountManagement::CreateLoginServerAccount(
+					username,
+					password,
+					email,
+					source_loginserver
+				);
+
 				if (account_created_id > 0) {
 					response["message"]            = "Account created successfully!";
 					response["data"]["account_id"] = account_created_id;

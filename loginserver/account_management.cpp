@@ -33,10 +33,11 @@ EQ::Event::TaskScheduler task_runner;
  * @param email
  * @return
  */
-int32 AccountManagement::CreateLocalLoginServerAccount(
+int32 AccountManagement::CreateLoginServerAccount(
 	std::string username,
 	std::string password,
-	std::string email
+	std::string email,
+	const std::string &source_loginserver
 )
 {
 	auto mode = server.options.GetEncryptionMode();
@@ -49,19 +50,18 @@ int32 AccountManagement::CreateLocalLoginServerAccount(
 		mode
 	);
 
-	unsigned int db_id          = 0;
-	std::string  db_loginserver = server.options.GetDefaultLoginServerName();
-	if (server.db->DoesLoginServerAccountExist(username, hash, db_loginserver, 1)) {
+	unsigned int db_id = 0;
+	if (server.db->DoesLoginServerAccountExist(username, hash, source_loginserver, 1)) {
 		LogWarning(
 			"Attempting to create local login account for user [{0}] login [{1}] but already exists!",
 			username,
-			db_loginserver
+			source_loginserver
 		);
 
 		return -1;
 	}
 
-	uint32 created_account_id = server.db->CreateLoginAccount(username, hash, db_loginserver, email);
+	uint32 created_account_id = server.db->CreateLoginAccount(username, hash, source_loginserver, email);
 	if (created_account_id > 0) {
 		LogInfo(
 			"Account creation success for user [{0}] encryption algorithm [{1}] ({2}) id: [{3}]",
@@ -323,7 +323,7 @@ uint32 AccountManagement::CheckExternalLoginserverUserCredentials(
 							auto                  m_dbid         = sp.GetUInt32(8);
 
 							{
-								ret = (response_error <= 101 ? m_dbid : 0);
+								ret     = (response_error <= 101 ? m_dbid : 0);
 								running = false;
 							}
 							break;

@@ -145,7 +145,7 @@ namespace LoginserverCommandHandler {
 
 		EQEmuCommand::ValidateCmdInput(arguments, options, cmd, argc, argv);
 
-		AccountManagement::CreateLocalLoginServerAccount(
+		AccountManagement::CreateLoginServerAccount(
 			cmd("--username").str(),
 			cmd("--password").str(),
 			cmd("--email").str()
