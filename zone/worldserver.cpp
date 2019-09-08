@@ -85,6 +85,8 @@ void WorldServer::Connect()
 	});
 
 	m_connection->OnMessage(std::bind(&WorldServer::HandleMessage, this, std::placeholders::_1, std::placeholders::_2));
+
+	m_keepalive.reset(new EQ::Timer(2500, true, std::bind(&WorldServer::OnKeepAlive, this, std::placeholders::_1)));
 }
 
 bool WorldServer::SendPacket(ServerPacket *pack)
@@ -563,7 +565,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		ServerZoneDropClient_Struct* drop = (ServerZoneDropClient_Struct*)pack->pBuffer;
 		if (zone) {
 			zone->RemoveAuth(drop->lsid);
-		
+
 			auto client = entity_list.GetClientByLSID(drop->lsid);
 			if (client) {
 				client->Kick("Dropped by world CLE subsystem");
@@ -2351,4 +2353,10 @@ void WorldServer::RequestTellQueue(const char *who)
 	SendPacket(pack);
 	safe_delete(pack);
 	return;
+}
+
+void WorldServer::OnKeepAlive(EQ::Timer *t)
+{
+	ServerPacket pack(ServerOP_KeepAlive, 0);
+	SendPacket(&pack);
 }

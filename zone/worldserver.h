@@ -72,7 +72,10 @@ private:
 	uint32 cur_groupid;
 	uint32 last_groupid;
 
+	void OnKeepAlive(EQ::Timer *t);
+
 	std::unique_ptr<EQ::Net::ServertalkClient> m_connection;
+	std::unique_ptr<EQ::Timer> m_keepalive;
 };
 #endif
 
