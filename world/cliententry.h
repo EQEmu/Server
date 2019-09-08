@@ -18,6 +18,15 @@ typedef enum
 	InZone
 } CLE_Status;
 
+static const char * CLEStatusString[] = {
+	"Never",
+	"Offline",
+	"Online",
+	"CharSelect",
+	"Zoning",
+	"InZone"
+};
+
 class ZoneServer;
 struct ServerClientList_Struct;
 
