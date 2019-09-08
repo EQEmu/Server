@@ -107,7 +107,7 @@ namespace LoginserverWebserver {
 				std::string username         = request_body.get("username", "").asString();
 				std::string password         = request_body.get("password", "").asString();
 				std::string email            = request_body.get("email", "").asString();
-				uint32      login_account_id = request_body.get("account_id", "").asInt();
+				uint32      login_account_id = request_body.get("login_account_id", "").asInt();
 
 				Json::Value response;
 				if (username.empty() || password.empty()) {
