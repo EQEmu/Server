@@ -175,6 +175,55 @@ namespace LoginserverWebserver {
 			}
 		);
 
+
+		api.Post(
+			"/account/credentials/update/external", [](const httplib::Request &request, httplib::Response &res) {
+				if (!LoginserverWebserver::TokenManager::AuthCanWrite(request, res)) {
+					return;
+				}
+
+				Json::Value request_body = LoginserverWebserver::ParseRequestBody(request);
+				std::string username     = request_body.get("username", "").asString();
+				std::string password     = request_body.get("password", "").asString();
+
+				Json::Value response;
+				if (username.empty() || password.empty()) {
+					response["error"] = "Username or password not set";
+					LoginserverWebserver::SendResponse(response, res);
+					return;
+				}
+
+				std::string source_loginserver = "eqemu";
+
+				Database::DbLoginServerAccount
+					login_server_account = server.db->GetLoginServerAccountByAccountName(
+					username,
+					source_loginserver
+				);
+
+				if (!login_server_account.loaded) {
+					response["error"] = "Failed to find associated loginserver account!";
+					LoginserverWebserver::SendResponse(response, res);
+					return;
+				}
+
+				bool credentials_valid = AccountManagement::UpdateLoginserverUserCredentials(
+					username,
+					password,
+					source_loginserver
+				);
+
+				if (credentials_valid) {
+					response["message"] = "Loginserver account credentials updated!";
+				}
+				else {
+					response["error"] = "Failed to update loginserver account credentials!";
+				}
+
+				LoginserverWebserver::SendResponse(response, res);
+			}
+		);
+
 		api.Post(
 			"/account/credentials/validate/external", [](const httplib::Request &request, httplib::Response &res) {
 				if (!LoginserverWebserver::TokenManager::AuthCanRead(request, res)) {
