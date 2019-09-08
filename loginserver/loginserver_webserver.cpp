@@ -103,10 +103,11 @@ namespace LoginserverWebserver {
 					return;
 				}
 
-				Json::Value request_body = LoginserverWebserver::ParseRequestBody(request);
-				std::string username     = request_body.get("username", "").asString();
-				std::string password     = request_body.get("password", "").asString();
-				std::string email        = request_body.get("email", "").asString();
+				Json::Value request_body     = LoginserverWebserver::ParseRequestBody(request);
+				std::string username         = request_body.get("username", "").asString();
+				std::string password         = request_body.get("password", "").asString();
+				std::string email            = request_body.get("email", "").asString();
+				uint32      login_account_id = request_body.get("account_id", "").asInt();
 
 				Json::Value response;
 				if (username.empty() || password.empty()) {
@@ -120,7 +121,8 @@ namespace LoginserverWebserver {
 					username,
 					password,
 					email,
-					source_loginserver
+					source_loginserver,
+					login_account_id
 				);
 
 				if (account_created_id > 0) {

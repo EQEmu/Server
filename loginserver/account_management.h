@@ -31,13 +31,15 @@ public:
 	 * @param password
 	 * @param email
 	 * @param source_loginserver
+	 * @param ls_account_id
 	 * @return
 	 */
 	static int32 CreateLoginServerAccount(
 		std::string username,
 		std::string password,
 		std::string email = "",
-		const std::string &source_loginserver = "local"
+		const std::string &source_loginserver = "local",
+		uint32 ls_account_id = 0
 	);
 
 	/**

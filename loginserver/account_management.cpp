@@ -31,13 +31,16 @@ EQ::Event::TaskScheduler task_runner;
  * @param username
  * @param password
  * @param email
+ * @param source_loginserver
+ * @param ls_account_id
  * @return
  */
 int32 AccountManagement::CreateLoginServerAccount(
 	std::string username,
 	std::string password,
 	std::string email,
-	const std::string &source_loginserver
+	const std::string &source_loginserver,
+	uint32 ls_account_id
 )
 {
 	auto mode = server.options.GetEncryptionMode();
@@ -61,7 +64,13 @@ int32 AccountManagement::CreateLoginServerAccount(
 		return -1;
 	}
 
-	uint32 created_account_id = server.db->CreateLoginAccount(username, hash, source_loginserver, email);
+	uint32 created_account_id = 0;
+	if (ls_account_id > 0) {
+		created_account_id = server.db->CreateLoginDataWithID(username, hash, source_loginserver, ls_account_id);
+	} else {
+		created_account_id = server.db->CreateLoginAccount(username, hash, source_loginserver, email);
+	}
+
 	if (created_account_id > 0) {
 		LogInfo(
 			"Account creation success for user [{0}] encryption algorithm [{1}] ({2}) id: [{3}]",
