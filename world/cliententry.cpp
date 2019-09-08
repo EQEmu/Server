@@ -138,7 +138,7 @@ void ClientListEntry::SetOnline(ZoneServer *iZS, CLE_Status iOnline)
 
 void ClientListEntry::SetOnline(CLE_Status iOnline)
 {
-	LogInfo(
+	LogDebug(
 		"ClientListEntry::SetOnline for [{}] ({}) = {}",
 		AccountName(),
 		AccountID(),
@@ -160,7 +160,6 @@ void ClientListEntry::SetOnline(CLE_Status iOnline)
 	if (pOnline >= CLE_Status::Online) {
 		stale = 0;
 	}
-
 }
 
 void ClientListEntry::LSUpdate(ZoneServer *iZS)
