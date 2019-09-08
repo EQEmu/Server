@@ -362,7 +362,7 @@ int main(int argc, char** argv) {
 			}
 		}
 
-		if (RuleB(World, RestoreRuleNotes) && !RuleManager::Instance()->RestoreRuleNotes(&database)) {
+		if (!RuleManager::Instance()->RestoreRuleNotes(&database)) {
 			Log(Logs::General, Logs::World_Server, "Failed to process 'Restore Rule Notes' update operation.");
 		}
 	}
