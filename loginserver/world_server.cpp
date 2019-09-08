@@ -545,6 +545,8 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info
 					GetServerShortName()
 				);
 				world_server_admin_id = login_server_admin.id;
+
+				this->SetIsServerAuthorized(true);
 			}
 		}
 	}
