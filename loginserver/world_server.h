@@ -26,6 +26,7 @@
 #include "../common/servertalk.h"
 #include "../common/packet_dump.h"
 #include "database.h"
+#include "../common/event/timer.h"
 #include <string>
 #include <memory>
 
@@ -179,6 +180,13 @@ private:
 	bool is_server_authorized;
 	bool is_server_logged_in;
 	bool is_server_trusted;
+
+	/**
+	 * Keepalive
+	 * @param t
+	 */
+	void OnKeepAlive(EQ::Timer *t);
+	std::unique_ptr<EQ::Timer> m_keepalive;
 
 };
 

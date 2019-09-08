@@ -446,7 +446,6 @@ bool LoginServer::Connect()
 				std::placeholders::_2
 			)
 		);
-
 	}
 	else {
 		client.reset(new EQ::Net::ServertalkClient(LoginServerAddress, LoginServerPort, false, "World", ""));
@@ -553,6 +552,8 @@ bool LoginServer::Connect()
 		);
 	}
 
+	m_keepalive.reset(new EQ::Timer(5000, true, std::bind(&LoginServer::OnKeepAlive, this, std::placeholders::_1)));
+
 	return true;
 }
 
@@ -642,4 +643,10 @@ void LoginServer::SendAccountUpdate(ServerPacket *pack)
 		strn0cpy(ls_account_update->worldpassword, LoginPassword.c_str(), 30);
 		SendPacket(pack);
 	}
+}
+
+void LoginServer::OnKeepAlive(EQ::Timer *t)
+{
+	ServerPacket pack(ServerOP_KeepAlive, 0);
+	SendPacket(&pack);
 }

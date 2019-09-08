@@ -53,6 +53,9 @@ private:
 	void ProcessLSRemoteAddr(uint16_t opcode, EQ::Net::Packet &p);
 	void ProcessLSAccountUpdate(uint16_t opcode, EQ::Net::Packet &p);
 
+	void OnKeepAlive(EQ::Timer *t);
+	std::unique_ptr<EQ::Timer> m_keepalive;
+
 	std::unique_ptr<EQ::Net::ServertalkClient> client;
 	std::unique_ptr<EQ::Net::ServertalkLegacyClient> legacy_client;
 	std::unique_ptr<EQ::Timer> statusupdate_timer;

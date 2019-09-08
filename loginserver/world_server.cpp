@@ -71,6 +71,8 @@ WorldServer::WorldServer(std::shared_ptr<EQ::Net::ServertalkServerConnection> wo
 		ServerOP_LSAccountUpdate,
 		std::bind(&WorldServer::ProcessLSAccountUpdate, this, std::placeholders::_1, std::placeholders::_2)
 	);
+
+	m_keepalive.reset(new EQ::Timer(5000, true, std::bind(&WorldServer::OnKeepAlive, this, std::placeholders::_1)));
 }
 
 WorldServer::~WorldServer() = default;
@@ -1230,4 +1232,10 @@ const std::string &WorldServer::GetProtocol() const
 const std::string &WorldServer::GetVersion() const
 {
 	return version;
+}
+
+void WorldServer::OnKeepAlive(EQ::Timer *t)
+{
+	ServerPacket pack(ServerOP_KeepAlive, 0);
+	connection->SendPacket(&pack);
 }
