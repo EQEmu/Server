@@ -27,6 +27,8 @@
 #include "bot.h"
 #include "client.h"
 
+#include <fmt/format.h>
+
 
 bool BotDatabase::LoadBotCommandSettings(std::map<std::string, std::pair<uint8, std::vector<std::string>>> &bot_command_settings)
 {
@@ -2153,111 +2155,92 @@ bool BotDatabase::SaveStopMeleeLevel(const uint32 owner_id, const uint32 bot_id,
 
 bool BotDatabase::LoadOwnerOptions(Client *owner)
 {
-	if (!owner || !owner->CharacterID())
-		return false;
-
-	query = StringFormat(
-		"SELECT `death_marquee`, `stats_update`, `spawn_message_enabled`, `spawn_message_type` FROM `bot_owner_options`"
-		" WHERE `owner_id` = '%u'",
-		owner->CharacterID()
-	);
-	auto results = database.QueryDatabase(query);
-	if (!results.Success())
-		return false;
-	if (!results.RowCount()) {
-		query = StringFormat("REPLACE INTO `bot_owner_options` (`owner_id`) VALUES ('%u')", owner->CharacterID());
-		results = database.QueryDatabase(query);
-
+	if (!owner || !owner->CharacterID()) {
 		return false;
 	}
 
-	auto row = results.begin();
-	owner->SetBotOptionDeathMarquee((atoi(row[0]) != 0));
-	owner->SetBotOptionStatsUpdate((atoi(row[1]) != 0));
-	switch (atoi(row[2])) {
-	case 2:
-		owner->SetBotOptionSpawnMessageSay();
-		break;
-	case 1:
-		owner->SetBotOptionSpawnMessageTell();
-		break;
+	query = fmt::format("SELECT `option_type`, `option_value` FROM `bot_owner_options` WHERE `owner_id` = '{}'", owner->CharacterID());
+
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		return false;
+	}
+
+	for (auto row : results) {
+		
+		owner->SetBotOption(static_cast<Client::BotOwnerOption>(atoul(row[0])), (atoul(row[1]) != 0));
+	}
+
+	return true;
+}
+
+bool BotDatabase::SaveOwnerOption(const uint32 owner_id, size_t type, const bool flag)
+{
+	if (!owner_id) {
+		return false;
+	}
+
+	switch (static_cast<Client::BotOwnerOption>(type)) {
+	case Client::booDeathMarquee:
+	case Client::booStatsUpdate:
+	case Client::booSpawnMessageClassSpecific: {
+
+		query = fmt::format(
+			"REPLACE INTO `bot_owner_options`(`owner_id`, `option_type`, `option_value`) VALUES ('{}', '{}', '{}')",
+			owner_id,
+			type,
+			(flag == true ? 1 : 0)
+		);
+
+		auto results = database.QueryDatabase(query);
+		if (!results.Success()) {
+			return false;
+		}
+
+		return true;
+	}
 	default:
-		owner->SetBotOptionSpawnMessageSilent();
-		break;
+		return false;
 	}
-	owner->SetBotOptionSpawnMessageClassSpecific((atoi(row[3]) != 0));
-
-	return true;
 }
 
-bool BotDatabase::SaveOwnerOptionDeathMarquee(const uint32 owner_id, const bool flag)
+bool BotDatabase::SaveOwnerOption(const uint32 owner_id, const std::pair<size_t, size_t> type, const std::pair<bool, bool> flag)
 {
-	if (!owner_id)
+	if (!owner_id) {
 		return false;
+	}
 
-	query = StringFormat(
-		"UPDATE `bot_owner_options`"
-		" SET `death_marquee` = '%u'"
-		" WHERE `owner_id` = '%u'",
-		(flag == true ? 1 : 0),
-		owner_id
-	);
-	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	switch (static_cast<Client::BotOwnerOption>(type.first)) {
+	case Client::booSpawnMessageSay:
+	case Client::booSpawnMessageTell: {
+		switch (static_cast<Client::BotOwnerOption>(type.second)) {
+		case Client::booSpawnMessageSay:
+		case Client::booSpawnMessageTell: {
+
+			query = fmt::format(
+				"REPLACE INTO `bot_owner_options`(`owner_id`, `option_type`, `option_value`) VALUES ('{}', '{}', '{}'), ('{}', '{}', '{}')",
+				owner_id,
+				type.first,
+				(flag.first == true ? 1 : 0),
+				owner_id,
+				type.second,
+				(flag.second == true ? 1 : 0)
+			);
+
+			auto results = database.QueryDatabase(query);
+			if (!results.Success()) {
+				return false;
+			}
+
+			return true;
+		}
+		default:
+			return false;
+		}
+	}
+	default:
 		return false;
-
-	return true;
-}
-
-bool BotDatabase::SaveOwnerOptionStatsUpdate(const uint32 owner_id, const bool flag)
-{
-	if (!owner_id)
-		return false;
-
-	query = StringFormat(
-		"UPDATE `bot_owner_options`"
-		" SET `stats_update` = '%u'"
-		" WHERE `owner_id` = '%u'",
-		(flag == true ? 1 : 0),
-		owner_id
-	);
-	auto results = database.QueryDatabase(query);
-	if (!results.Success())
-		return false;
-
-	return true;
-}
-
-bool BotDatabase::SaveOwnerOptionSpawnMessage(const uint32 owner_id, const bool say, const bool tell, const bool class_specific)
-{
-	if (!owner_id)
-		return false;
-
-	uint8 enabled_value = 0;
-	if (say)
-		enabled_value = 2;
-	else if (tell)
-		enabled_value = 1;
-
-	uint8 type_value = 0;
-	if (class_specific)
-		type_value = 1;
-
-	query = StringFormat(
-		"UPDATE `bot_owner_options`"
-		" SET"
-		" `spawn_message_enabled` = '%u',"
-		" `spawn_message_type` = '%u'"
-		" WHERE `owner_id` = '%u'",
-		enabled_value,
-		type_value,
-		owner_id
-	);
-	auto results = database.QueryDatabase(query);
-	if (!results.Success())
-		return false;
-
-	return true;
+	}
 }
 
 

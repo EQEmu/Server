@@ -3499,7 +3499,7 @@ void Bot::LevelBotWithClient(Client* client, uint8 level, bool sendlvlapp) {
 			Bot* bot = *biter;
 			if(bot && (bot->GetLevel() != client->GetLevel())) {
 				bot->SetPetChooser(false); // not sure what this does, but was in bot 'update' code
-				bot->CalcBotStats(client->GetBotOptionStatsUpdate());
+				bot->CalcBotStats(client->GetBotOption(Client::booStatsUpdate));
 				if(sendlvlapp)
 					bot->SendLevelAppearance();
 				// modified from Client::SetLevel()
@@ -4178,7 +4178,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 	client->Message(Chat::Lime, "Trade with '%s' resulted in %i accepted item%s, %i returned item%s.", GetCleanName(), accepted_count, ((accepted_count == 1) ? "" : "s"), returned_count, ((returned_count == 1) ? "" : "s"));
 
 	if (accepted_count)
-		CalcBotStats(client->GetBotOptionStatsUpdate());
+		CalcBotStats(client->GetBotOption(Client::booStatsUpdate));
 }
 
 bool Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill) {
@@ -4188,7 +4188,7 @@ bool Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, EQEmu::skills::Sk
 	Save();
 
 	Mob *my_owner = GetBotOwner();
-	if (my_owner && my_owner->IsClient() && my_owner->CastToClient()->GetBotOptionDeathMarquee()) {
+	if (my_owner && my_owner->IsClient() && my_owner->CastToClient()->GetBotOption(Client::booDeathMarquee)) {
 		if (killerMob)
 			my_owner->CastToClient()->SendMarqueeMessage(Chat::Yellow, 510, 0, 1000, 3000, StringFormat("%s has been slain by %s", GetCleanName(), killerMob->GetCleanName()));
 		else

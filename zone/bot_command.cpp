@@ -3443,63 +3443,180 @@ void bot_command_movement_speed(Client *c, const Seperator *sep)
 void bot_command_owner_option(Client *c, const Seperator *sep)
 {
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(m_usage, "usage: %s [deathmarquee | statsupdate] (argument: enable | disable | null (toggles))", sep->arg[0]);
-		c->Message(m_usage, "usage: %s [spawnmessage] [argument: say | tell | silent | class | default]", sep->arg[0]);
+
+		c->Message(m_usage, "usage: %s [option] [argument | null]", sep->arg[0]);
+		
+		std::string window_title = "Bot Owner Options";
+		std::string window_text =
+			"<table>"
+				"<tr>"
+					"<td><c \"#FFFFFF\">Option</td>"
+					"<td>Argument</td>"
+					"<td>Notes</td>"
+				"</tr>"
+				"<tr>"
+					"<td><c \"#FFFFFF\">deathmarquee</td>"
+					"<td><c \"#00FF00\">enable</td>"
+					"<td></td>"
+				"</tr>"
+				"<tr>"
+					"<td></td>"
+					"<td><c \"#00FF00\">disable</td>"
+					"<td></td>"
+				"</tr>"
+				"<tr>"
+					"<td></td>"
+					"<td><c \"#00FFFF\">null</td>"
+					"<td><c \"#AAAAAA\">(toggles)</td>"
+				"</tr>"
+				"<tr>"
+					"<td><c \"#FFFFFF\">statsupdate</td>"
+					"<td><c \"#00FF00\">enable</td>"
+					"<td></td>"
+				"</tr>"
+				"<tr>"
+					"<td></td>"
+					"<td><c \"#00FF00\">disable</td>"
+					"<td></td>"
+				"</tr>"
+				"<tr>"
+					"<td></td>"
+					"<td><c \"#00FFFF\">null</td>"
+					"<td><c \"#AAAAAA\">(toggles)</td>"
+				"</tr>"
+				"<tr>"
+					"<td><c \"#FFFFFF\">spawnmessage</td>"
+					"<td><c \"#00FF00\">say</td>"
+					"<td></td>"
+				"</tr>"
+				"<tr>"
+					"<td></td>"
+					"<td><c \"#00FF00\">tell</td>"
+					"<td></td>"
+				"</tr>"
+				"<tr>"
+					"<td></td>"
+					"<td><c \"#00FF00\">silent</td>"
+					"<td></td>"
+				"</tr>"
+				"<tr>"
+					"<td></td>"
+					"<td><c \"#00FF00\">class</td>"
+					"<td></td>"
+				"</tr>"
+				"<tr>"
+					"<td></td>"
+					"<td><c \"#00FF00\">default</td>"
+					"<td></td>"
+				"</tr>"
+			"</table>";
+		
+		c->SendPopupToClient(window_title.c_str(), window_text.c_str());
+
 		return;
 	}
 
-	std::string owner_option = sep->arg[1];
-	std::string argument = sep->arg[2];
+	std::string owner_option(sep->arg[1]);
+	std::string argument(sep->arg[2]);
 
 	if (!owner_option.compare("deathmarquee")) {
-		if (!argument.compare("enable"))
-			c->SetBotOptionDeathMarquee(true);
-		else if (!argument.compare("disable"))
-			c->SetBotOptionDeathMarquee(false);
-		else
-			c->SetBotOptionDeathMarquee(!c->GetBotOptionDeathMarquee());
-		
-		database.botdb.SaveOwnerOptionDeathMarquee(c->CharacterID(), c->GetBotOptionDeathMarquee());
-		c->Message(m_action, "Bot 'death marquee' is now %s.", (c->GetBotOptionDeathMarquee() == true ? "enabled" : "disabled"));
-	}
-	else if (!owner_option.compare("statsupdate")) {
-		if (!argument.compare("enable"))
-			c->SetBotOptionStatsUpdate(true);
-		else if (!argument.compare("disable"))
-			c->SetBotOptionStatsUpdate(false);
-		else
-			c->SetBotOptionStatsUpdate(!c->GetBotOptionStatsUpdate());
 
-		database.botdb.SaveOwnerOptionStatsUpdate(c->CharacterID(), c->GetBotOptionStatsUpdate());
-		c->Message(m_action, "Bot 'stats update' is now %s.", (c->GetBotOptionStatsUpdate() == true ? "enabled" : "disabled"));
-	}
-	else if (!owner_option.compare("spawnmessage")) {
-		if (!argument.compare("say")) {
-			c->SetBotOptionSpawnMessageSay();
+		if (!argument.compare("enable")) {
+			c->SetBotOption(Client::booDeathMarquee, true);
 		}
-		else if (!argument.compare("tell")) {
-			c->SetBotOptionSpawnMessageTell();
-		}
-		else if (!argument.compare("silent")) {
-			c->SetBotOptionSpawnMessageSilent();
-		}
-		else if (!argument.compare("class")) {
-			c->SetBotOptionSpawnMessageClassSpecific(true);
-		}
-		else if (!argument.compare("default")) {
-			c->SetBotOptionSpawnMessageClassSpecific(false);
+		else if (!argument.compare("disable")) {
+			c->SetBotOption(Client::booDeathMarquee, false);
 		}
 		else {
+			c->SetBotOption(Client::booDeathMarquee, !c->GetBotOption(Client::booDeathMarquee));
+		}
+		
+		database.botdb.SaveOwnerOption(c->CharacterID(), Client::booDeathMarquee, c->GetBotOption(Client::booDeathMarquee));
+
+		c->Message(m_action, "Bot 'death marquee' is now %s.", (c->GetBotOption(Client::booDeathMarquee) == true ? "enabled" : "disabled"));
+	}
+	else if (!owner_option.compare("statsupdate")) {
+
+		if (!argument.compare("enable")) {
+			c->SetBotOption(Client::booStatsUpdate, true);
+		}
+		else if (!argument.compare("disable")) {
+			c->SetBotOption(Client::booStatsUpdate, false);
+		}
+		else {
+			c->SetBotOption(Client::booStatsUpdate, !c->GetBotOption(Client::booStatsUpdate));
+		}
+
+		database.botdb.SaveOwnerOption(c->CharacterID(), Client::booStatsUpdate, c->GetBotOption(Client::booStatsUpdate));
+
+		c->Message(m_action, "Bot 'stats update' is now %s.", (c->GetBotOption(Client::booStatsUpdate) == true ? "enabled" : "disabled"));
+	}
+	else if (!owner_option.compare("spawnmessage")) {
+
+		Client::BotOwnerOption boo = Client::_booCount;
+
+		if (!argument.compare("say")) {
+
+			boo = Client::booSpawnMessageSay;
+			c->SetBotOption(Client::booSpawnMessageSay, true);
+			c->SetBotOption(Client::booSpawnMessageTell, false);
+		}
+		else if (!argument.compare("tell")) {
+
+			boo = Client::booSpawnMessageSay;
+			c->SetBotOption(Client::booSpawnMessageSay, false);
+			c->SetBotOption(Client::booSpawnMessageTell, true);
+		}
+		else if (!argument.compare("silent")) {
+
+			boo = Client::booSpawnMessageSay;
+			c->SetBotOption(Client::booSpawnMessageSay, false);
+			c->SetBotOption(Client::booSpawnMessageTell, false);
+		}
+		else if (!argument.compare("class")) {
+
+			boo = Client::booSpawnMessageClassSpecific;
+			c->SetBotOption(Client::booSpawnMessageClassSpecific, true);
+		}
+		else if (!argument.compare("default")) {
+
+			boo = Client::booSpawnMessageClassSpecific;
+			c->SetBotOption(Client::booSpawnMessageClassSpecific, false);
+		}
+		else {
+
 			c->Message(m_fail, "Owner option '%s' argument '%s' is not recognized.", owner_option.c_str(), argument.c_str());
 			return;
 		}
 
-		database.botdb.SaveOwnerOptionSpawnMessage(
-			c->CharacterID(),
-			c->GetBotOptionSpawnMessageSay(),
-			c->GetBotOptionSpawnMessageTell(),
-			c->GetBotOptionSpawnMessageClassSpecific()
-		);
+		if (boo == Client::booSpawnMessageSay) {
+
+			database.botdb.SaveOwnerOption(
+				c->CharacterID(),
+				std::pair<size_t, size_t>(
+					Client::booSpawnMessageSay,
+					Client::booSpawnMessageTell
+				),
+				std::pair<bool, bool>(
+					c->GetBotOption(Client::booSpawnMessageSay),
+					c->GetBotOption(Client::booSpawnMessageTell)
+				)
+			);
+		}
+		else if (boo == Client::booSpawnMessageClassSpecific) {
+
+			database.botdb.SaveOwnerOption(
+				c->CharacterID(),
+				Client::booSpawnMessageClassSpecific,
+				c->GetBotOption(Client::booSpawnMessageClassSpecific)
+			);
+		}
+		else {
+
+			c->Message(m_action, "Bot 'spawn message' is now ERROR.");
+			return;
+		}
+
 		c->Message(m_action, "Bot 'spawn message' is now %s.", argument.c_str());
 	}
 	else {
@@ -5221,13 +5338,16 @@ void bot_subcommand_bot_spawn(Client *c, const Seperator *sep)
 	};
 
 	uint8 message_index = 0;
-	if (c->GetBotOptionSpawnMessageClassSpecific())
+	if (c->GetBotOption(Client::booSpawnMessageClassSpecific)) {
 		message_index = VALIDATECLASSID(my_bot->GetClass());
+	}
 
-	if (c->GetBotOptionSpawnMessageSay())
+	if (c->GetBotOption(Client::booSpawnMessageSay)) {
 		Bot::BotGroupSay(my_bot, "%s", bot_spawn_message[message_index]);
-	else if (c->GetBotOptionSpawnMessageTell())
+	}
+	else if (c->GetBotOption(Client::booSpawnMessageTell)) {
 		c->Message(Chat::Tell, "%s tells you, \"%s\"", my_bot->GetCleanName(), bot_spawn_message[message_index]);
+	}
 }
 
 void bot_subcommand_bot_stance(Client *c, const Seperator *sep)
@@ -5607,7 +5727,7 @@ void bot_subcommand_bot_update(Client *c, const Seperator *sep)
 			continue;
 
 		bot_iter->SetPetChooser(false);
-		bot_iter->CalcBotStats(c->GetBotOptionStatsUpdate());
+		bot_iter->CalcBotStats(c->GetBotOption(Client::booStatsUpdate));
 		bot_iter->SendAppearancePacket(AT_WhoLevel, bot_iter->GetLevel(), true, true);
 		++bot_count;
 	}
@@ -7396,7 +7516,7 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 		}
 
 		my_bot->BotRemoveEquipItem(slotId);
-		my_bot->CalcBotStats(c->GetBotOptionStatsUpdate());
+		my_bot->CalcBotStats(c->GetBotOption(Client::booStatsUpdate));
 	}
 
 	switch (slotId) {

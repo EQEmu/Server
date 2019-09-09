@@ -1626,39 +1626,26 @@ private:
 	int client_max_level;
 	
 #ifdef BOTS
-	struct BotOwnerOptions {
-		bool death_marquee;
-		bool stats_update;
-		bool spawn_message_say;
-		bool spawn_message_tell;
-		bool spawn_message_class_specific;
-	};
+	
 
-	BotOwnerOptions bot_owner_options;
-
-	const BotOwnerOptions DefaultBotOwnerOptions = {
-		false,	// death_marquee
-		false,	// stats_update
-		false,	// spawn_message_say
-		true,	// spawn_message_tell
-		true	// spawn_message_class_specific
-	};
+	
 
 public:
-	void SetBotOptionDeathMarquee(bool flag) { bot_owner_options.death_marquee = flag; }
-	void SetBotOptionStatsUpdate(bool flag) { bot_owner_options.stats_update = flag; }
-	void SetBotOptionSpawnMessageSay() { bot_owner_options.spawn_message_say = true; bot_owner_options.spawn_message_tell = false; }
-	void SetBotOptionSpawnMessageTell() { bot_owner_options.spawn_message_say = false; bot_owner_options.spawn_message_tell = true; }
-	void SetBotOptionSpawnMessageSilent() { bot_owner_options.spawn_message_say = false; bot_owner_options.spawn_message_tell = false; }
-	void SetBotOptionSpawnMessageClassSpecific(bool flag) { bot_owner_options.spawn_message_class_specific = flag; }
+	enum BotOwnerOption : size_t {
+		booDeathMarquee,
+		booStatsUpdate,
+		booSpawnMessageSay,
+		booSpawnMessageTell,
+		booSpawnMessageClassSpecific,
+		_booCount
+	};
 
-	bool GetBotOptionDeathMarquee() const { return bot_owner_options.death_marquee; }
-	bool GetBotOptionStatsUpdate() const { return bot_owner_options.stats_update; }
-	bool GetBotOptionSpawnMessageSay() const { return bot_owner_options.spawn_message_say; }
-	bool GetBotOptionSpawnMessageTell() const { return bot_owner_options.spawn_message_tell; }
-	bool GetBotOptionSpawnMessageClassSpecific() const { return bot_owner_options.spawn_message_class_specific; }
+	bool GetBotOption(BotOwnerOption boo) const;
+	void SetBotOption(BotOwnerOption boo, bool flag = true);
+	
+private:
+	bool bot_owner_options[_booCount];
 
-private:		
 #endif
 };
 
