@@ -50,7 +50,7 @@ public:
 	bool QueryNameAvailablity(const std::string& bot_name, bool& available_flag);
 	bool QueryBotCount(const uint32 owner_id, uint32& bot_count);
 	bool LoadQuestableSpawnCount(const uint32 owner_id, int& spawn_count);
-	bool LoadBotsList(const uint32 owner_id, std::list<BotsAvailableList>& bots_list);
+	bool LoadBotsList(const uint32 owner_id, std::list<BotsAvailableList>& bots_list, bool ByAccount = false);
 
 	bool LoadOwnerID(const std::string& bot_name, uint32& owner_id);
 	bool LoadOwnerID(const uint32 bot_id, uint32& owner_id);

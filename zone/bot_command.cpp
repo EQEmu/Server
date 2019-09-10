@@ -1351,10 +1351,13 @@ int bot_command_init(void)
 		bot_command_add("botspawn", "Spawns a created bot", 0, bot_subcommand_bot_spawn) ||
 		bot_command_add("botstance", "Changes the stance of a bot", 0, bot_subcommand_bot_stance) ||
 		bot_command_add("botstopmeleelevel", "Sets the level a caster or spell-casting fighter bot will stop melee combat", 0, bot_subcommand_bot_stop_melee_level) ||
+		bot_command_add("botsuffix", "Sets a bots suffix", 0, bot_subcommand_bot_suffix) ||
 		bot_command_add("botsummon", "Summons bot(s) to your location", 0, bot_subcommand_bot_summon) ||
+		bot_command_add("botsurname", "Sets a bots surname (last name)", 0, bot_subcommand_bot_surname) ||
 		bot_command_add("bottattoo", "Changes the Drakkin tattoo of a bot", 0, bot_subcommand_bot_tattoo) ||
 		bot_command_add("bottogglearcher", "Toggles a archer bot between melee and ranged weapon use", 0, bot_subcommand_bot_toggle_archer) ||
 		bot_command_add("bottogglehelm", "Toggles the helm visibility of a bot between shown and hidden", 0, bot_subcommand_bot_toggle_helm) ||
+		bot_command_add("bottitle", "Sets a bots title", 0, bot_subcommand_bot_title) ||
 		bot_command_add("botupdate", "Updates a bot to reflect any level changes that you have experienced", 0, bot_subcommand_bot_update) ||
 		bot_command_add("botwoad", "Changes the Barbarian woad of a bot", 0, bot_subcommand_bot_woad) ||
 		bot_command_add("charm", "Attempts to have a bot charm your target", 0, bot_command_charm) ||
@@ -4525,7 +4528,7 @@ void bot_subcommand_bot_create(Client *c, const Seperator *sep)
 		return;
 	}
 	std::string bot_name = sep->arg[1];
-
+	bot_name = ucfirst(bot_name);
 	if (sep->arg[2][0] == '\0' || !sep->IsNumber(2)) {
 		c->Message(m_fail, "Invalid Class!");
 		return;
@@ -5053,17 +5056,22 @@ void bot_subcommand_bot_list(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_list", sep->arg[0], "botlist"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(m_usage, "usage: %s ([class] [value]) ([race] [value]) ([name] [partial-full])", sep->arg[0]);
+		c->Message(m_usage, "usage: %s (account) ([class] [value]) ([race] [value]) ([name] [partial-full])", sep->arg[0]);
 		c->Message(m_note, "note: filter criteria is orderless and optional");
 		return;
 	}
-
+	bool Account = false;
+	int seps = 1;
 	uint32 filter_value[FilterCount];
 	int name_criteria_arg = 0;
 	memset(&filter_value, 0, sizeof(uint32) * FilterCount);
 
 	int filter_mask = 0;
-	for (int i = 1; i < (FilterCount * 2); i += 2) {
+	if (strcasecmp(sep->arg[1], "account") == 0) {
+		Account = true;
+		seps = 2;
+	}
+	for (int i = seps; i < (FilterCount * 2); i += 2) {
 		if (sep->arg[i][0] == '\0')
 			break;
 
@@ -5088,7 +5096,7 @@ void bot_subcommand_bot_list(Client *c, const Seperator *sep)
 	}
 
 	std::list<BotsAvailableList> bots_list;
-	if (!database.botdb.LoadBotsList(c->CharacterID(), bots_list)) {
+	if (!database.botdb.LoadBotsList(c->CharacterID(), bots_list, Account)) {
 		c->Message(m_fail, "%s", BotDatabase::fail::LoadBotsList());
 		return;
 	}
@@ -5098,6 +5106,7 @@ void bot_subcommand_bot_list(Client *c, const Seperator *sep)
 	}
 
 	int bot_count = 0;
+	int bots_owned = 0;
 	for (auto bots_iter : bots_list) {
 		if (filter_mask) {
 			if ((filter_mask & MaskClass) && filter_value[FilterClass] != bots_iter.Class)
@@ -5113,23 +5122,26 @@ void bot_subcommand_bot_list(Client *c, const Seperator *sep)
 					continue;
 			}
 		}
-
-		c->Message(m_message, "%s is a level %u %s %s %s",
-			bots_iter.Name,
+		Bot * botCheckNotOnline = entity_list.GetBotByBotName(bots_iter.Name);
+		std::string	botspawn_saylink = StringFormat("^botspawn %s", bots_iter.Name);
+		c->Message(Chat::White, "%s is a level %u %s %s %s who is owned by %s",
+			((c->CharacterID() == bots_iter.Owner_ID) && (!botCheckNotOnline) ? (EQEmu::SayLinkEngine::GenerateQuestSaylink(botspawn_saylink, false, bots_iter.Name).c_str()) : (bots_iter.Name)),
 			bots_iter.Level,
 			Bot::RaceIdToString(bots_iter.Race).c_str(),
 			((bots_iter.Gender == FEMALE) ? ("Female") : ((bots_iter.Gender == MALE) ? ("Male") : ("Neuter"))),
-			Bot::ClassIdToString(bots_iter.Class).c_str()
+			Bot::ClassIdToString(bots_iter.Class).c_str(),
+			bots_iter.Owner
 		);
-
+		if (c->CharacterID() == bots_iter.Owner_ID) { ++bots_owned; }
 		++bot_count;
 	}
 	if (!bot_count) {
-		c->Message(m_fail, "You have no bots meeting this criteria");
+		c->Message(Chat::Red, "You have no bots meeting this criteria");
 	}
 	else {
-		c->Message(m_action, "%i of %i bot%s shown", bot_count, bots_list.size(), ((bot_count != 1) ? ("s") : ("")));
-		c->Message(m_message, "Your limit is %i bot%s", RuleI(Bots, CreationLimit), ((RuleI(Bots, CreationLimit) != 1) ? ("s") : ("")));
+		c->Message(Chat::Yellow, "%i of %i bot%s shown.", bot_count, bots_list.size(), ((bot_count != 1) ? ("s") : ("")));
+		c->Message(Chat::Yellow, "%i of %i bot%s are owned by you. (You may spawn any available by clicking name)", bots_owned, bot_count, ((bot_count != 1) ? ("s") : ("")));
+		c->Message(Chat::White, "Your limit is %i bot%s", RuleI(Bots, CreationLimit), ((RuleI(Bots, CreationLimit) != 1) ? ("s") : ("")));
 	}
 }
 
@@ -5172,6 +5184,103 @@ void bot_subcommand_bot_out_of_combat(Client *c, const Seperator *sep)
 			bot_iter->SetAltOutOfCombatBehavior(behavior_state);
 		
 		helper_bot_out_of_combat(c, bot_iter);
+	}
+}
+
+void bot_subcommand_bot_surname(Client *c, const Seperator *sep)
+{
+	if (sep->arg[1][0] == '\0' || sep->IsNumber(1)) {
+		c->Message(Chat::Red, "You must specify a [surname] to use this command (use _ to define spaces or -remove to clear.)");
+		return;
+	}
+	auto my_bot = ActionableBots::AsTarget_ByBot(c);
+	if (!my_bot) {
+		c->Message(Chat::Red, "You must <target> a bot that you own to use this command");
+		return;
+	}
+	if (strlen(sep->arg[1]) > 31) {
+		c->Message(Chat::Red, "Surname must be 31 characters or less.");
+		return;
+	}
+	std::string bot_surname = sep->arg[1];
+	bot_surname = (bot_surname == "-remove") ? "" : bot_surname;
+	std::replace(bot_surname.begin(), bot_surname.end(), '_', ' ');
+	my_bot->SetSurname(bot_surname);
+	if (!database.botdb.SaveBot(my_bot)) {
+		c->Message(Chat::Red, BotDatabase::fail::SaveBot());
+		return;
+	}
+	else {
+		auto outapp = new EQApplicationPacket(OP_GMLastName, sizeof(GMLastName_Struct));
+		GMLastName_Struct * gmn = (GMLastName_Struct*)outapp->pBuffer;
+		strcpy(gmn->name, my_bot->GetCleanName());
+		strcpy(gmn->gmname, my_bot->GetCleanName());
+		strcpy(gmn->lastname, my_bot->GetSurname().c_str());
+		gmn->unknown[0] = 1;
+		gmn->unknown[1] = 1;
+		gmn->unknown[2] = 1;
+		gmn->unknown[3] = 1;
+		entity_list.QueueClients(my_bot->CastToClient(), outapp);
+		safe_delete(outapp);
+		c->Message(Chat::Yellow, "Bot Surname Saved.");
+	}
+}
+
+void bot_subcommand_bot_title(Client *c, const Seperator *sep)
+{
+	if (sep->arg[1][0] == '\0' || sep->IsNumber(1)) {
+		c->Message(Chat::Red, "You must specify a [title] to use this command. (use _ to define spaces or -remove to clear.)");
+		return;
+	}
+	auto my_bot = ActionableBots::AsTarget_ByBot(c);
+	if (!my_bot) {
+		c->Message(Chat::Red, "You must <target> a bot that you own to use this command");
+		return;
+	}
+	if (strlen(sep->arg[1]) > 31) {
+		c->Message(Chat::Red, "Title must be 31 characters or less.");
+		return;
+	}
+	std::string bot_title = sep->arg[1];
+	bot_title = (bot_title == "-remove") ? "" : bot_title;
+	std::replace(bot_title.begin(), bot_title.end(), '_', ' ');
+	my_bot->SetTitle(bot_title);
+	if (!database.botdb.SaveBot(my_bot)) {
+		c->Message(Chat::Red, BotDatabase::fail::SaveBot());
+		return;
+	}
+	else {
+		my_bot->CastToClient()->SetAATitle(my_bot->GetTitle().c_str());
+		c->Message(Chat::Yellow, "Bot Title Saved.");
+	}
+}
+
+void bot_subcommand_bot_suffix(Client *c, const Seperator *sep)
+{
+	if (sep->arg[1][0] == '\0' || sep->IsNumber(1)) {
+		c->Message(Chat::Red, "You must specify a [suffix] to use this command. (use _ to define spaces or -remove to clear.)");
+		return;
+	}
+	auto my_bot = ActionableBots::AsTarget_ByBot(c);
+	if (!my_bot) {
+		c->Message(Chat::Red, "You must <target> a bot that you own to use this command");
+		return;
+	}
+	if (strlen(sep->arg[1]) > 31) {
+		c->Message(Chat::Red, "Suffix must be 31 characters or less.");
+		return;
+	}
+	std::string bot_suffix = sep->arg[1];
+	bot_suffix = (bot_suffix == "-remove") ? "" : bot_suffix;
+	std::replace(bot_suffix.begin(), bot_suffix.end(), '_', ' ');
+	my_bot->SetSuffix(bot_suffix);
+	if (!database.botdb.SaveBot(my_bot)) {
+		c->Message(Chat::Red, BotDatabase::fail::SaveBot());
+		return;
+	}
+	else {
+		my_bot->CastToClient()->SetTitleSuffix(my_bot->GetSuffix().c_str());
+		c->Message(Chat::Yellow, "Bot Suffix Saved.");
 	}
 }
 

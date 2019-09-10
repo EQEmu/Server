@@ -255,6 +255,18 @@ void Bot::SetBotSpellID(uint32 newSpellID) {
 	this->npc_spells_id = newSpellID;
 }
 
+void  Bot::SetSurname(std::string bot_surname) {
+	_surname = bot_surname.substr(0, 31);
+}
+
+void  Bot::SetTitle(std::string bot_title) {
+		_title = bot_title.substr(0, 31);
+}
+
+void  Bot::SetSuffix(std::string bot_suffix) {
+		_suffix = bot_suffix.substr(0, 31);
+}
+
 uint32 Bot::GetBotArcheryRange() {
 	const EQEmu::ItemInstance *range_inst = GetBotItem(EQEmu::invslot::slotRange);
 	const EQEmu::ItemInstance *ammo_inst = GetBotItem(EQEmu::invslot::slotAmmo);
@@ -3260,7 +3272,7 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 		else
 			this->GetBotOwner()->CastToClient()->Message(Chat::Red, "%s save failed!", this->GetCleanName());
 
-		// Spawn the bot at the bow owner's loc
+		// Spawn the bot at the bot owner's loc
 		this->m_Position.x = botCharacterOwner->GetX();
 		this->m_Position.y = botCharacterOwner->GetY();
 		this->m_Position.z = botCharacterOwner->GetZ();
@@ -3365,6 +3377,9 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		ns->spawn.helm = helmtexture; //(GetShowHelm() ? helmtexture : 0); //0xFF;
 		ns->spawn.equip_chest2 = texture; //0xFF;
 		ns->spawn.show_name = true;
+		strcpy(ns->spawn.lastName, GetSurname().c_str());
+		strcpy(ns->spawn.title, GetTitle().c_str());
+		strcpy(ns->spawn.suffix, GetSuffix().c_str());
 		const EQEmu::ItemData* item = nullptr;
 		const EQEmu::ItemInstance* inst = nullptr;
 		uint32 spawnedbotid = 0;
