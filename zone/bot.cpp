@@ -255,6 +255,18 @@ void Bot::SetBotSpellID(uint32 newSpellID) {
 	this->npc_spells_id = newSpellID;
 }
 
+void  Bot::SetSurname(std::string bot_surname) {
+	_surname = bot_surname.substr(0, 31);
+}
+
+void  Bot::SetTitle(std::string bot_title) {
+		_title = bot_title.substr(0, 31);
+}
+
+void  Bot::SetSuffix(std::string bot_suffix) {
+		_suffix = bot_suffix.substr(0, 31);
+}
+
 uint32 Bot::GetBotArcheryRange() {
 	const EQEmu::ItemInstance *range_inst = GetBotItem(EQEmu::invslot::slotRange);
 	const EQEmu::ItemInstance *ammo_inst = GetBotItem(EQEmu::invslot::slotAmmo);
@@ -3260,7 +3272,7 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 		else
 			this->GetBotOwner()->CastToClient()->Message(Chat::Red, "%s save failed!", this->GetCleanName());
 
-		// Spawn the bot at the bow owner's loc
+		// Spawn the bot at the bot owner's loc
 		this->m_Position.x = botCharacterOwner->GetX();
 		this->m_Position.y = botCharacterOwner->GetY();
 		this->m_Position.z = botCharacterOwner->GetZ();
@@ -3365,6 +3377,9 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		ns->spawn.helm = helmtexture; //(GetShowHelm() ? helmtexture : 0); //0xFF;
 		ns->spawn.equip_chest2 = texture; //0xFF;
 		ns->spawn.show_name = true;
+		strcpy(ns->spawn.lastName, GetSurname().c_str());
+		strcpy(ns->spawn.title, GetTitle().c_str());
+		strcpy(ns->spawn.suffix, GetSuffix().c_str());
 		const EQEmu::ItemData* item = nullptr;
 		const EQEmu::ItemInstance* inst = nullptr;
 		uint32 spawnedbotid = 0;
@@ -3499,7 +3514,7 @@ void Bot::LevelBotWithClient(Client* client, uint8 level, bool sendlvlapp) {
 			Bot* bot = *biter;
 			if(bot && (bot->GetLevel() != client->GetLevel())) {
 				bot->SetPetChooser(false); // not sure what this does, but was in bot 'update' code
-				bot->CalcBotStats(client->GetBotOptionStatsUpdate());
+				bot->CalcBotStats(client->GetBotOption(Client::booStatsUpdate));
 				if(sendlvlapp)
 					bot->SendLevelAppearance();
 				// modified from Client::SetLevel()
@@ -4178,7 +4193,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 	client->Message(Chat::Lime, "Trade with '%s' resulted in %i accepted item%s, %i returned item%s.", GetCleanName(), accepted_count, ((accepted_count == 1) ? "" : "s"), returned_count, ((returned_count == 1) ? "" : "s"));
 
 	if (accepted_count)
-		CalcBotStats(client->GetBotOptionStatsUpdate());
+		CalcBotStats(client->GetBotOption(Client::booStatsUpdate));
 }
 
 bool Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill) {
@@ -4188,7 +4203,7 @@ bool Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, EQEmu::skills::Sk
 	Save();
 
 	Mob *my_owner = GetBotOwner();
-	if (my_owner && my_owner->IsClient() && my_owner->CastToClient()->GetBotOptionDeathMarquee()) {
+	if (my_owner && my_owner->IsClient() && my_owner->CastToClient()->GetBotOption(Client::booDeathMarquee)) {
 		if (killerMob)
 			my_owner->CastToClient()->SendMarqueeMessage(Chat::Yellow, 510, 0, 1000, 3000, StringFormat("%s has been slain by %s", GetCleanName(), killerMob->GetCleanName()));
 		else
