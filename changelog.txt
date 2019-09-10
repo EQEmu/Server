@@ -1,27 +1,5 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
-== 9/04/2019 ==
-Uleat: Added code to restore rule notes to their original values
-	- The code is inactive by default
-	- Change rule 'World:RestoreRuleNotes' to 'true' to enable this feature
-	- Rule will not exist until the server is run for the first time after updating
-
-== 9/02/2019 ==
-Uleat: Added code to inject new rules into the 'default' ruleset and remove orphaned rules from all rulesets
-	- New rules are only added using the 'default' ruleset - Other rulesets will need to be added manually or through in-game updates
-	 -- Rule notes are now loaded into the system's hard-coded entries and will now propagate properly into database updates
-	- Defunct rules will have their orhpaned entries removed from the `rule_values` table for the all rulesets
-
-Note: If you would like to add these rules before starting your server so that you can modify them, start world.exe
-manually and wait for the console messages to finish. It should take 5-10 seconds, or so. The world log should contain
-a list of the added and removed entries, IF the `file` field of the 'Status' logging category is set to 1 or higher.
-(Don't forget to manually stop the process after the update is complete.)
-
-== 8/30/2019 ==
-Uleat: Added code to inject new commands and remove orphaned commands from both command systems
-	- New commands are added with their status (`access`) set to the server default value - no aliases are defined
-	- Defunct commands will have their orhpaned entries removed from the command settings table for each system
-
 == 8/16/2019 ==
 Akkadius: Simplified the use of roamboxes and improved the AI for roambox pathing https://i.imgur.com/z33u7y9.gif
 Akkadius: Implemented command #roambox set <box_size> [move_delay]

@@ -4122,15 +4122,7 @@ bool ZoneDatabase::LoadFactionData()
 
 	Log(Logs::General, Logs::Status, "%u Faction%s loaded...", faction_ids.size(), (faction_ids.size() == 1 ? "" : "s"));
 
-	// this can be removed once the 'io_work' branch has been merged
-	std::vector<std::string> faction_id_strings;
-	for (auto id : faction_ids) {
-		faction_id_strings.push_back(fmt::format("'{}'", id));
-	}
-	const std::string faction_id_criteria(implode(",", faction_id_strings));
-
-	// code to activate (note above)
-	//const std::string faction_id_criteria(implode(",", std::pair<char, char>('\'', '\''), faction_ids));
+	const std::string faction_id_criteria(implode(",", std::pair<char, char>('\'', '\''), faction_ids));
 
 	// load faction mins/maxes
 	query = fmt::format("SELECT `client_faction_id`, `min`, `max` FROM `faction_base_data` WHERE `client_faction_id` IN ({})", faction_id_criteria);
