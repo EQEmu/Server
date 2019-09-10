@@ -18,6 +18,7 @@
 
 #include <iostream>
 #include <cstring>
+#include <fmt/format.h>
 
 #if defined(_MSC_VER) && _MSC_VER >= 1800
 	#include <algorithm>
@@ -1467,6 +1468,58 @@ bool SharedDatabase::GetCommandSettings(std::map<std::string, std::pair<uint8, s
 	}
 
     return true;
+}
+
+bool SharedDatabase::UpdateInjectedCommandSettings(const std::vector<std::pair<std::string, uint8>> &injected)
+{
+	if (injected.size()) {
+
+		std::string query = fmt::format(
+			"REPLACE INTO `command_settings`(`command`, `access`) VALUES {}",
+			implode(
+				",",
+				std::pair<char, char>('(', ')'),
+				join_pair(",", std::pair<char, char>('\'', '\''), injected)
+			)
+		);
+
+		if (!QueryDatabase(query).Success()) {
+			return false;
+		}
+
+		Log(Logs::General,
+			Logs::Status,
+			"%u New Command%s Added",
+			injected.size(),
+			(injected.size() == 1 ? "" : "s")
+		);
+	}
+
+	return true;
+}
+
+bool SharedDatabase::UpdateOrphanedCommandSettings(const std::vector<std::string> &orphaned)
+{
+	if (orphaned.size()) {
+
+		std::string query = fmt::format(
+			"DELETE FROM `command_settings` WHERE `command` IN ({})",
+			implode(",", std::pair<char, char>('\'', '\''), orphaned)
+		);
+
+		if (!QueryDatabase(query).Success()) {
+			return false;
+		}
+
+		Log(Logs::General,
+			Logs::Status,
+			"%u Orphaned Command%s Deleted",
+			orphaned.size(),
+			(orphaned.size() == 1 ? "" : "s")
+		);
+	}
+
+	return true;
 }
 
 bool SharedDatabase::LoadSkillCaps(const std::string &prefix) {

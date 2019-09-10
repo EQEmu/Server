@@ -332,16 +332,28 @@ int main(int argc, char** argv) {
 		Log(Logs::General, Logs::World_Server, "Error: Could not load skill cap data. But ignoring");
 	Log(Logs::General, Logs::World_Server, "Loading guilds..");
 	guild_mgr.LoadGuilds();
+
 	//rules:
 	{
+		if (!RuleManager::Instance()->UpdateOrphanedRules(&database)) {
+			Log(Logs::General, Logs::World_Server, "Failed to process 'Orphaned Rules' update operation.");
+		}
+		
+		if (!RuleManager::Instance()->UpdateInjectedRules(&database, "default")) {
+			Log(Logs::General, Logs::World_Server, "Failed to process 'Injected Rules' for ruleset 'default' update operation.");
+		}
+
 		std::string tmp;
 		if (database.GetVariable("RuleSet", tmp)) {
+
 			Log(Logs::General, Logs::World_Server, "Loading rule set '%s'", tmp.c_str());
+
 			if (!RuleManager::Instance()->LoadRules(&database, tmp.c_str(), false)) {
 				Log(Logs::General, Logs::World_Server, "Failed to load ruleset '%s', falling back to defaults.", tmp.c_str());
 			}
 		}
 		else {
+
 			if (!RuleManager::Instance()->LoadRules(&database, "default", false)) {
 				Log(Logs::General, Logs::World_Server, "No rule set configured, using default rules");
 			}
@@ -350,16 +362,18 @@ int main(int argc, char** argv) {
 			}
 		}
 
-		EQEmu::InitializeDynamicLookups();
-		Log(Logs::General, Logs::World_Server, "Initialized dynamic dictionary entries");
+		if (!RuleManager::Instance()->RestoreRuleNotes(&database)) {
+			Log(Logs::General, Logs::World_Server, "Failed to process 'Restore Rule Notes' update operation.");
+		}
 	}
+
+	EQEmu::InitializeDynamicLookups();
+	Log(Logs::General, Logs::World_Server, "Initialized dynamic dictionary entries");
 
 	if (RuleB(World, ClearTempMerchantlist)) {
 		Log(Logs::General, Logs::World_Server, "Clearing temporary merchant lists..");
 		database.ClearMerchantTemp();
 	}
-
-	RuleManager::Instance()->SaveRules(&database);
 
 	Log(Logs::General, Logs::World_Server, "Loading EQ time of day..");
 	TimeOfDay_Struct eqTime;

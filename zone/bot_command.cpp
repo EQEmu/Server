@@ -1429,35 +1429,99 @@ int bot_command_init(void)
 	std::map<std::string, std::pair<uint8, std::vector<std::string>>> bot_command_settings;
 	database.botdb.LoadBotCommandSettings(bot_command_settings);
 
+	std::vector<std::pair<std::string, uint8>> injected_bot_command_settings;
+	std::vector<std::string> orphaned_bot_command_settings;
+
+	for (auto bcs_iter : bot_command_settings) {
+
+		auto bcl_iter = bot_command_list.find(bcs_iter.first);
+		if (bcl_iter == bot_command_list.end()) {
+
+			orphaned_bot_command_settings.push_back(bcs_iter.first);
+			Log(Logs::General,
+				Logs::Status,
+				"Bot Command '%s' no longer exists... Deleting orphaned entry from `bot_command_settings` table...",
+				bcs_iter.first.c_str()
+			);
+		}
+	}
+
+	if (orphaned_bot_command_settings.size()) {
+		if (!database.botdb.UpdateOrphanedBotCommandSettings(orphaned_bot_command_settings)) {
+			Log(Logs::General, Logs::Zone_Server, "Failed to process 'Orphaned Bot Commands' update operation.");
+		}
+	}
+
 	auto working_bcl = bot_command_list;
 	for (auto working_bcl_iter : working_bcl) {
-		auto bot_command_settings_iter = bot_command_settings.find(working_bcl_iter.first);
-		if (bot_command_settings_iter == bot_command_settings.end()) {
-			if (working_bcl_iter.second->access == 0)
-				Log(Logs::General, Logs::Commands, "bot_command_init(): Warning: Bot Command '%s' defaulting to access level 0!", working_bcl_iter.first.c_str());
+
+		auto bcs_iter = bot_command_settings.find(working_bcl_iter.first);
+		if (bcs_iter == bot_command_settings.end()) {
+
+			injected_bot_command_settings.push_back(std::pair<std::string, uint8>(working_bcl_iter.first, working_bcl_iter.second->access));
+			Log(Logs::General,
+				Logs::Status,
+				"New Bot Command '%s' found... Adding to `bot_command_settings` table with access '%u'...",
+				working_bcl_iter.first.c_str(),
+				working_bcl_iter.second->access
+			);
+
+			if (working_bcl_iter.second->access == 0) {
+				Log(Logs::General,
+					Logs::Commands,
+					"bot_command_init(): Warning: Bot Command '%s' defaulting to access level 0!",
+					working_bcl_iter.first.c_str()
+				);
+			}
+			
 			continue;
 		}
 
-		working_bcl_iter.second->access = bot_command_settings_iter->second.first;
-		Log(Logs::General, Logs::Commands, "bot_command_init(): - Bot Command '%s' set to access level %d.", working_bcl_iter.first.c_str(), bot_command_settings_iter->second.first);
-		if (bot_command_settings_iter->second.second.empty())
+		working_bcl_iter.second->access = bcs_iter->second.first;
+		Log(Logs::General,
+			Logs::Commands,
+			"bot_command_init(): - Bot Command '%s' set to access level %d.",
+			working_bcl_iter.first.c_str(),
+			bcs_iter->second.first
+		);
+		
+		if (bcs_iter->second.second.empty()) {
 			continue;
+		}
 
-		for (auto alias_iter : bot_command_settings_iter->second.second) {
-			if (alias_iter.empty())
+		for (auto alias_iter : bcs_iter->second.second) {
+			if (alias_iter.empty()) {
 				continue;
+			}
+
 			if (bot_command_list.find(alias_iter) != bot_command_list.end()) {
-				Log(Logs::General, Logs::Commands, "bot_command_init(): Warning: Alias '%s' already exists as a bot command - skipping!", alias_iter.c_str());
+				Log(Logs::General,
+					Logs::Commands,
+					"bot_command_init(): Warning: Alias '%s' already exists as a bot command - skipping!",
+					alias_iter.c_str()
+				);
+
 				continue;
 			}
 
 			bot_command_list[alias_iter] = working_bcl_iter.second;
 			bot_command_aliases[alias_iter] = working_bcl_iter.first;
 
-			Log(Logs::General, Logs::Commands, "bot_command_init(): - Alias '%s' added to bot command '%s'.", alias_iter.c_str(), bot_command_aliases[alias_iter].c_str());
+			Log(Logs::General,
+				Logs::Commands,
+				"bot_command_init(): - Alias '%s' added to bot command '%s'.",
+				alias_iter.c_str(),
+				bot_command_aliases[alias_iter].c_str()
+			);
 		}
 	}
 
+	if (injected_bot_command_settings.size()) {
+		if (!database.botdb.UpdateInjectedBotCommandSettings(injected_bot_command_settings)) {
+			Log(Logs::General, Logs::Zone_Server, "Failed to process 'Injected Bot Commands' update operation.");
+		}
+	}
+	
 	bot_command_dispatch = bot_command_real_dispatch;
 
 	BCSpells::Load();

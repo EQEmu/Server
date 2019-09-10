@@ -18,6 +18,8 @@
 
 #ifdef BOTS
 
+#include <fmt/format.h>
+
 #include "../common/global_define.h"
 #include "../common/rulesys.h"
 #include "../common/string_util.h"
@@ -49,6 +51,58 @@ bool BotDatabase::LoadBotCommandSettings(std::map<std::string, std::pair<uint8, 
 			if (!iter.empty())
 				bot_command_settings[row[0]].second.push_back(iter);
 		}
+	}
+
+	return true;
+}
+
+bool BotDatabase::UpdateInjectedBotCommandSettings(const std::vector<std::pair<std::string, uint8>> &injected)
+{
+	if (injected.size()) {
+
+		query = fmt::format(
+			"REPLACE INTO `bot_command_settings`(`bot_command`, `access`) VALUES {}",
+			implode(
+				",",
+				std::pair<char, char>('(', ')'),
+				join_pair(",", std::pair<char, char>('\'', '\''), injected)
+			)
+		);
+
+		if (!database.QueryDatabase(query).Success()) {
+			return false;
+		}
+
+		Log(Logs::General,
+			Logs::Status,
+			"%u New Bot Command%s Added",
+			injected.size(),
+			(injected.size() == 1 ? "" : "s")
+		);
+	}
+
+	return true;
+}
+
+bool BotDatabase::UpdateOrphanedBotCommandSettings(const std::vector<std::string> &orphaned)
+{
+	if (orphaned.size()) {
+
+		query = fmt::format(
+			"DELETE FROM `bot_command_settings` WHERE `bot_command` IN ({})",
+			implode(",", std::pair<char, char>('\'', '\''), orphaned)
+		);
+
+		if (!database.QueryDatabase(query).Success()) {
+			return false;
+		}
+
+		Log(Logs::General,
+			Logs::Status,
+			"%u Orphaned Bot Command%s Deleted",
+			orphaned.size(),
+			(orphaned.size() == 1 ? "" : "s")
+		);
 	}
 
 	return true;
