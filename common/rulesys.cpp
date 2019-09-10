@@ -379,10 +379,6 @@ bool RuleManager::UpdateInjectedRules(Database *db, const char *ruleset_name, bo
 	std::map<std::string, std::pair<std::string, const std::string *>> rule_data;
 	std::vector<std::tuple<int, std::string, std::string, std::string>> injected_rule_entries;
 
-	if (!db) {
-		return false;
-	}
-
 	if (ruleset_name == nullptr) {
 		return false;
 	}
@@ -497,10 +493,6 @@ bool RuleManager::UpdateOrphanedRules(Database *db, bool quiet_update)
 	std::vector<std::string> rule_data;
 	std::vector<std::string> orphaned_rule_entries;
 
-	if (!db) {
-		return false;
-	}
-
 	// load database rule names
 	std::string query("SELECT `rule_name` FROM `rule_values` GROUP BY `rule_name`");
 
@@ -562,10 +554,6 @@ bool RuleManager::UpdateOrphanedRules(Database *db, bool quiet_update)
 
 bool RuleManager::RestoreRuleNotes(Database *db)
 {
-	if (!db) {
-		return false;
-	}
-
 	std::string query("SELECT `ruleset_id`, `rule_name`, IFNULL(`notes`, '\\0')`notes` FROM `rule_values`");
 
 	auto results = db->QueryDatabase(query);
