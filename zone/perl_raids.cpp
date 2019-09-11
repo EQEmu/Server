@@ -420,8 +420,7 @@ XS(XS_Raid_TeleportGroup); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_TeleportGroup) {
 	dXSARGS;
 	if (items != 8)
-		Perl_croak(aTHX_
-		           "Usage: Raid::TeleportGroup(THIS, Mob* sender, uint32 zone_id, float x, float y, float z, float heading, uint32 group_id)");
+		Perl_croak(aTHX_ "Usage: Raid::TeleportGroup(THIS, Mob* sender, uint32 zone_id, float x, float y, float z, float heading, uint32 group_id)");
 	{
 		Raid   *THIS;
 		Mob    *sender;
@@ -457,8 +456,7 @@ XS(XS_Raid_TeleportRaid); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_TeleportRaid) {
 	dXSARGS;
 	if (items != 7)
-		Perl_croak(aTHX_
-		           "Usage: Raid::TeleportRaid(THIS, Mob* sender, uint32 zone_id, float x, float y, float z, float heading)");
+		Perl_croak(aTHX_ "Usage: Raid::TeleportRaid(THIS, Mob* sender, uint32 zone_id, float x, float y, float z, float heading)");
 	{
 		Raid   *THIS;
 		Mob    *sender;
