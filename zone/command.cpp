@@ -454,33 +454,96 @@ int command_init(void)
 	std::map<std::string, std::pair<uint8, std::vector<std::string>>> command_settings;
 	database.GetCommandSettings(command_settings);
 
-	std::map<std::string, CommandRecord *> working_cl = commandlist;
-	for (auto iter_cl = working_cl.begin(); iter_cl != working_cl.end(); ++iter_cl) {
-		auto iter_cs = command_settings.find(iter_cl->first);
-		if (iter_cs == command_settings.end()) {
-			if (iter_cl->second->access == 0)
-				Log(Logs::General, Logs::Commands, "command_init(): Warning: Command '%s' defaulting to access level 0!", iter_cl->first.c_str());
+	std::vector<std::pair<std::string, uint8>> injected_command_settings;
+	std::vector<std::string> orphaned_command_settings;
+
+	for (auto cs_iter : command_settings) {
+
+		auto cl_iter = commandlist.find(cs_iter.first);
+		if (cl_iter == commandlist.end()) {
+
+			orphaned_command_settings.push_back(cs_iter.first);
+			Log(Logs::General,
+				Logs::Status,
+				"Command '%s' no longer exists... Deleting orphaned entry from `command_settings` table...",
+				cs_iter.first.c_str()
+			);
+		}
+	}
+
+	if (orphaned_command_settings.size()) {
+		if (!database.UpdateOrphanedCommandSettings(orphaned_command_settings)) {
+			Log(Logs::General, Logs::Zone_Server, "Failed to process 'Orphaned Commands' update operation.");
+		}
+	}
+
+	auto working_cl = commandlist;
+	for (auto working_cl_iter : working_cl) {
+
+		auto cs_iter = command_settings.find(working_cl_iter.first);
+		if (cs_iter == command_settings.end()) {
+
+			injected_command_settings.push_back(std::pair<std::string, uint8>(working_cl_iter.first, working_cl_iter.second->access));
+			Log(Logs::General,
+				Logs::Status,
+				"New Command '%s' found... Adding to `command_settings` table with access '%u'...",
+				working_cl_iter.first.c_str(),
+				working_cl_iter.second->access
+			);
+
+			if (working_cl_iter.second->access == 0) {
+				Log(Logs::General,
+					Logs::Commands,
+					"command_init(): Warning: Command '%s' defaulting to access level 0!",
+					working_cl_iter.first.c_str()
+				);
+			}
+			
 			continue;
 		}
 
-		iter_cl->second->access = iter_cs->second.first;
-		Log(Logs::General, Logs::Commands, "command_init(): - Command '%s' set to access level %d.", iter_cl->first.c_str(), iter_cs->second.first);
-		if (iter_cs->second.second.empty())
+		working_cl_iter.second->access = cs_iter->second.first;
+		Log(Logs::General,
+			Logs::Commands,
+			"command_init(): - Command '%s' set to access level %d.",
+			working_cl_iter.first.c_str(),
+			cs_iter->second.first
+		);
+		
+		if (cs_iter->second.second.empty()) {
 			continue;
+		}
 
-		for (auto iter_aka = iter_cs->second.second.begin(); iter_aka != iter_cs->second.second.end();
-		     ++iter_aka) {
-			if (iter_aka->empty())
-				continue;
-			if (commandlist.find(*iter_aka) != commandlist.end()) {
-				Log(Logs::General, Logs::Commands, "command_init(): Warning: Alias '%s' already exists as a command - skipping!", iter_aka->c_str());
+		for (auto alias_iter : cs_iter->second.second) {
+			if (alias_iter.empty()) {
 				continue;
 			}
 
-			commandlist[*iter_aka] = iter_cl->second;
-			commandaliases[*iter_aka] = iter_cl->first;
+			if (commandlist.find(alias_iter) != commandlist.end()) {
+				Log(Logs::General,
+					Logs::Commands,
+					"command_init(): Warning: Alias '%s' already exists as a command - skipping!",
+					alias_iter.c_str()
+				);
+				
+				continue;
+			}
 
-			Log(Logs::General, Logs::Commands, "command_init(): - Alias '%s' added to command '%s'.", iter_aka->c_str(), commandaliases[*iter_aka].c_str());
+			commandlist[alias_iter] = working_cl_iter.second;
+			commandaliases[alias_iter] = working_cl_iter.first;
+
+			Log(Logs::General,
+				Logs::Commands,
+				"command_init(): - Alias '%s' added to command '%s'.",
+				alias_iter.c_str(),
+				commandaliases[alias_iter].c_str()
+			);
+		}
+	}
+
+	if (injected_command_settings.size()) {
+		if (!database.UpdateInjectedCommandSettings(injected_command_settings)) {
+			Log(Logs::General, Logs::Zone_Server, "Failed to process 'Injected Commands' update operation.");
 		}
 	}
 

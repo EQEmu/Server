@@ -15,6 +15,7 @@
 
 #include <ctime>
 #include <iostream>
+#include <fmt/format.h>
 
 extern Zone* zone;
 
@@ -4072,60 +4073,113 @@ bool ZoneDatabase::SetCharacterFactionLevel(uint32 char_id, int32 faction_id, in
 
 bool ZoneDatabase::LoadFactionData()
 {
-	std::string query = "SELECT MAX(id) FROM faction_list";
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
+	std::string query("SELECT MAX(`id`) FROM `faction_list`");
+
+	auto faction_max_results = QueryDatabase(query);
+	if (!faction_max_results.Success() || faction_max_results.RowCount() == 0) {
 		return false;
 	}
 
-    if (results.RowCount() == 0)
-        return false;
+    auto fmr_row = faction_max_results.begin();
 
-    auto row = results.begin();
+	max_faction = atoul(fmr_row[0]);
+	faction_array = new Faction *[max_faction + 1];
 
-	max_faction = row[0] ? atoi(row[0]) : 0;
-    faction_array = new Faction*[max_faction+1];
-    for(unsigned int index=0; index<max_faction; index++)
-        faction_array[index] = nullptr;
+	memset(faction_array, 0, (sizeof(Faction*) * (max_faction + 1)));
+	
+	std::vector<size_t> faction_ids;
+	
+	// load factions
+    query = "SELECT `id`, `name`, `base` FROM `faction_list`";
 
-    query = "SELECT id, name, base FROM faction_list";
-    results = QueryDatabase(query);
-    if (!results.Success()) {
+    auto faction_results = QueryDatabase(query);
+    if (!faction_results.Success()) {
         return false;
     }
 
-    for (row = results.begin(); row != results.end(); ++row) {
-        uint32 index = atoi(row[0]);
+	for (auto fr_row : faction_results) {
+
+		uint32 index = atoul(fr_row[0]);
+		if (index > max_faction) {
+			Log(Logs::General, Logs::Error, "Faction '%u' is out-of-bounds for faction array size!", index);
+			continue;
+		}
+
+		// this should never hit since `id` is keyed..but, it alleviates any risk of lost pointers
+		if (faction_array[index] != nullptr) {
+			Log(Logs::General, Logs::Error, "Faction '%u' has already been assigned! (Duplicate Entry)", index);
+			continue;
+		}
+
 		faction_array[index] = new Faction;
-		strn0cpy(faction_array[index]->name, row[1], 50);
-		faction_array[index]->base = atoi(row[2]);
+		strn0cpy(faction_array[index]->name, fr_row[1], 50);
+		faction_array[index]->base = atoi(fr_row[2]);
 		faction_array[index]->min = MIN_PERSONAL_FACTION;
 		faction_array[index]->max = MAX_PERSONAL_FACTION;
+		
+		faction_ids.push_back(index);
+	}
 
-		// Load in the mimimum and maximum faction that can be earned for this faction
-		query = StringFormat("SELECT `min` , `max` FROM `faction_base_data` WHERE client_faction_id = %u", index);
-		auto baseResults = QueryDatabase(query);
-		if (!baseResults.Success() || baseResults.RowCount() == 0) {
-			Log(Logs::General, Logs::General, "Faction %d has no base data", (int)index);
-		}
-		else {
-			for (auto modRow = baseResults.begin(); modRow != baseResults.end(); ++modRow) {
-				faction_array[index]->min = atoi(modRow[0]);
-				faction_array[index]->max = atoi(modRow[1]);
-				Log(Logs::General, Logs::None, "Min(%d), Max(%d) for faction (%u)",faction_array[index]->min, faction_array[index]->max, index);
+	Log(Logs::General, Logs::Status, "%u Faction%s loaded...", faction_ids.size(), (faction_ids.size() == 1 ? "" : "s"));
+
+	const std::string faction_id_criteria(implode(",", std::pair<char, char>('\'', '\''), faction_ids));
+
+	// load faction mins/maxes
+	query = fmt::format("SELECT `client_faction_id`, `min`, `max` FROM `faction_base_data` WHERE `client_faction_id` IN ({})", faction_id_criteria);
+
+	auto base_results = QueryDatabase(query);
+	if (base_results.Success()) {
+
+		for (auto br_row : base_results) {
+
+			uint32 index = atoul(br_row[0]);
+			if (index > max_faction) {
+				Log(Logs::General, Logs::Error, "Faction '%u' is out-of-bounds for faction array size in Base adjustment!", index);
+				continue;
 			}
+
+			if (faction_array[index] == nullptr) {
+				Log(Logs::General, Logs::Error, "Faction '%u' does not exist for Base adjustment!", index);
+				continue;
+			}
+
+			faction_array[index]->min = atoi(br_row[1]);
+			faction_array[index]->max = atoi(br_row[2]);
 		}
 
-		// Load in modifiers to the faction based on characters race, class and diety.
-		query = StringFormat("SELECT `mod`, `mod_name` FROM `faction_list_mod` WHERE faction_id = %u", index);
-		auto modResults = QueryDatabase(query);
-		if (!modResults.Success())
-			continue;
+		Log(Logs::General, Logs::Status, "%u Faction Base%s loaded...", base_results.RowCount(), (base_results.RowCount() == 1 ? "" : "s"));
+	}
+	else {
+		Log(Logs::General, Logs::Status, "Unable to load Faction Base data...");
+	}
+	
+	// load race, class and diety modifiers
+	query = fmt::format("SELECT `faction_id`, `mod`, `mod_name` FROM `faction_list_mod` WHERE `faction_id` IN ({})", faction_id_criteria);
 
-		for (auto modRow = modResults.begin(); modRow != modResults.end(); ++modRow) {
-			faction_array[index]->mods[modRow[1]] = atoi(modRow[0]);
+	auto modifier_results = QueryDatabase(query);
+	if (modifier_results.Success()) {
+
+		for (auto mr_row : modifier_results) {
+
+			uint32 index = atoul(mr_row[0]);
+			if (index > max_faction) {
+				Log(Logs::General, Logs::Error, "Faction '%u' is out-of-bounds for faction array size in Modifier adjustment!", index);
+				continue;
+			}
+
+			if (faction_array[index] == nullptr) {
+				Log(Logs::General, Logs::Error, "Faction '%u' does not exist for Modifier adjustment!", index);
+				continue;
+			}
+
+			faction_array[index]->mods[mr_row[2]] = atoi(mr_row[1]);
 		}
-    }
+
+		Log(Logs::General, Logs::Status, "%u Faction Modifier%s loaded...", modifier_results.RowCount(), (modifier_results.RowCount() == 1 ? "" : "s"));
+	}
+	else {
+		Log(Logs::General, Logs::Status, "Unable to load Faction Modifier data...");
+	}
 
 	return true;
 }

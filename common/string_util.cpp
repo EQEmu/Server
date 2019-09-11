@@ -144,6 +144,7 @@ std::string implode(std::string glue, std::vector<std::string> src)
 	return final_output;
 }
 
+
 std::string EscapeString(const std::string &s) {
 	std::string ret;
 

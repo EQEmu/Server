@@ -1429,35 +1429,99 @@ int bot_command_init(void)
 	std::map<std::string, std::pair<uint8, std::vector<std::string>>> bot_command_settings;
 	database.botdb.LoadBotCommandSettings(bot_command_settings);
 
+	std::vector<std::pair<std::string, uint8>> injected_bot_command_settings;
+	std::vector<std::string> orphaned_bot_command_settings;
+
+	for (auto bcs_iter : bot_command_settings) {
+
+		auto bcl_iter = bot_command_list.find(bcs_iter.first);
+		if (bcl_iter == bot_command_list.end()) {
+
+			orphaned_bot_command_settings.push_back(bcs_iter.first);
+			Log(Logs::General,
+				Logs::Status,
+				"Bot Command '%s' no longer exists... Deleting orphaned entry from `bot_command_settings` table...",
+				bcs_iter.first.c_str()
+			);
+		}
+	}
+
+	if (orphaned_bot_command_settings.size()) {
+		if (!database.botdb.UpdateOrphanedBotCommandSettings(orphaned_bot_command_settings)) {
+			Log(Logs::General, Logs::Zone_Server, "Failed to process 'Orphaned Bot Commands' update operation.");
+		}
+	}
+
 	auto working_bcl = bot_command_list;
 	for (auto working_bcl_iter : working_bcl) {
-		auto bot_command_settings_iter = bot_command_settings.find(working_bcl_iter.first);
-		if (bot_command_settings_iter == bot_command_settings.end()) {
-			if (working_bcl_iter.second->access == 0)
-				Log(Logs::General, Logs::Commands, "bot_command_init(): Warning: Bot Command '%s' defaulting to access level 0!", working_bcl_iter.first.c_str());
+
+		auto bcs_iter = bot_command_settings.find(working_bcl_iter.first);
+		if (bcs_iter == bot_command_settings.end()) {
+
+			injected_bot_command_settings.push_back(std::pair<std::string, uint8>(working_bcl_iter.first, working_bcl_iter.second->access));
+			Log(Logs::General,
+				Logs::Status,
+				"New Bot Command '%s' found... Adding to `bot_command_settings` table with access '%u'...",
+				working_bcl_iter.first.c_str(),
+				working_bcl_iter.second->access
+			);
+
+			if (working_bcl_iter.second->access == 0) {
+				Log(Logs::General,
+					Logs::Commands,
+					"bot_command_init(): Warning: Bot Command '%s' defaulting to access level 0!",
+					working_bcl_iter.first.c_str()
+				);
+			}
+			
 			continue;
 		}
 
-		working_bcl_iter.second->access = bot_command_settings_iter->second.first;
-		Log(Logs::General, Logs::Commands, "bot_command_init(): - Bot Command '%s' set to access level %d.", working_bcl_iter.first.c_str(), bot_command_settings_iter->second.first);
-		if (bot_command_settings_iter->second.second.empty())
+		working_bcl_iter.second->access = bcs_iter->second.first;
+		Log(Logs::General,
+			Logs::Commands,
+			"bot_command_init(): - Bot Command '%s' set to access level %d.",
+			working_bcl_iter.first.c_str(),
+			bcs_iter->second.first
+		);
+		
+		if (bcs_iter->second.second.empty()) {
 			continue;
+		}
 
-		for (auto alias_iter : bot_command_settings_iter->second.second) {
-			if (alias_iter.empty())
+		for (auto alias_iter : bcs_iter->second.second) {
+			if (alias_iter.empty()) {
 				continue;
+			}
+
 			if (bot_command_list.find(alias_iter) != bot_command_list.end()) {
-				Log(Logs::General, Logs::Commands, "bot_command_init(): Warning: Alias '%s' already exists as a bot command - skipping!", alias_iter.c_str());
+				Log(Logs::General,
+					Logs::Commands,
+					"bot_command_init(): Warning: Alias '%s' already exists as a bot command - skipping!",
+					alias_iter.c_str()
+				);
+
 				continue;
 			}
 
 			bot_command_list[alias_iter] = working_bcl_iter.second;
 			bot_command_aliases[alias_iter] = working_bcl_iter.first;
 
-			Log(Logs::General, Logs::Commands, "bot_command_init(): - Alias '%s' added to bot command '%s'.", alias_iter.c_str(), bot_command_aliases[alias_iter].c_str());
+			Log(Logs::General,
+				Logs::Commands,
+				"bot_command_init(): - Alias '%s' added to bot command '%s'.",
+				alias_iter.c_str(),
+				bot_command_aliases[alias_iter].c_str()
+			);
 		}
 	}
 
+	if (injected_bot_command_settings.size()) {
+		if (!database.botdb.UpdateInjectedBotCommandSettings(injected_bot_command_settings)) {
+			Log(Logs::General, Logs::Zone_Server, "Failed to process 'Injected Bot Commands' update operation.");
+		}
+	}
+	
 	bot_command_dispatch = bot_command_real_dispatch;
 
 	BCSpells::Load();
@@ -3446,63 +3510,180 @@ void bot_command_movement_speed(Client *c, const Seperator *sep)
 void bot_command_owner_option(Client *c, const Seperator *sep)
 {
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(m_usage, "usage: %s [deathmarquee | statsupdate] (argument: enable | disable | null (toggles))", sep->arg[0]);
-		c->Message(m_usage, "usage: %s [spawnmessage] [argument: say | tell | silent | class | default]", sep->arg[0]);
+
+		c->Message(m_usage, "usage: %s [option] [argument | null]", sep->arg[0]);
+		
+		std::string window_title = "Bot Owner Options";
+		std::string window_text =
+			"<table>"
+				"<tr>"
+					"<td><c \"#FFFFFF\">Option</td>"
+					"<td>Argument</td>"
+					"<td>Notes</td>"
+				"</tr>"
+				"<tr>"
+					"<td><c \"#FFFFFF\">deathmarquee</td>"
+					"<td><c \"#00FF00\">enable</td>"
+					"<td></td>"
+				"</tr>"
+				"<tr>"
+					"<td></td>"
+					"<td><c \"#00FF00\">disable</td>"
+					"<td></td>"
+				"</tr>"
+				"<tr>"
+					"<td></td>"
+					"<td><c \"#00FFFF\">null</td>"
+					"<td><c \"#AAAAAA\">(toggles)</td>"
+				"</tr>"
+				"<tr>"
+					"<td><c \"#FFFFFF\">statsupdate</td>"
+					"<td><c \"#00FF00\">enable</td>"
+					"<td></td>"
+				"</tr>"
+				"<tr>"
+					"<td></td>"
+					"<td><c \"#00FF00\">disable</td>"
+					"<td></td>"
+				"</tr>"
+				"<tr>"
+					"<td></td>"
+					"<td><c \"#00FFFF\">null</td>"
+					"<td><c \"#AAAAAA\">(toggles)</td>"
+				"</tr>"
+				"<tr>"
+					"<td><c \"#FFFFFF\">spawnmessage</td>"
+					"<td><c \"#00FF00\">say</td>"
+					"<td></td>"
+				"</tr>"
+				"<tr>"
+					"<td></td>"
+					"<td><c \"#00FF00\">tell</td>"
+					"<td></td>"
+				"</tr>"
+				"<tr>"
+					"<td></td>"
+					"<td><c \"#00FF00\">silent</td>"
+					"<td></td>"
+				"</tr>"
+				"<tr>"
+					"<td></td>"
+					"<td><c \"#00FF00\">class</td>"
+					"<td></td>"
+				"</tr>"
+				"<tr>"
+					"<td></td>"
+					"<td><c \"#00FF00\">default</td>"
+					"<td></td>"
+				"</tr>"
+			"</table>";
+		
+		c->SendPopupToClient(window_title.c_str(), window_text.c_str());
+
 		return;
 	}
 
-	std::string owner_option = sep->arg[1];
-	std::string argument = sep->arg[2];
+	std::string owner_option(sep->arg[1]);
+	std::string argument(sep->arg[2]);
 
 	if (!owner_option.compare("deathmarquee")) {
-		if (!argument.compare("enable"))
-			c->SetBotOptionDeathMarquee(true);
-		else if (!argument.compare("disable"))
-			c->SetBotOptionDeathMarquee(false);
-		else
-			c->SetBotOptionDeathMarquee(!c->GetBotOptionDeathMarquee());
-		
-		database.botdb.SaveOwnerOptionDeathMarquee(c->CharacterID(), c->GetBotOptionDeathMarquee());
-		c->Message(m_action, "Bot 'death marquee' is now %s.", (c->GetBotOptionDeathMarquee() == true ? "enabled" : "disabled"));
-	}
-	else if (!owner_option.compare("statsupdate")) {
-		if (!argument.compare("enable"))
-			c->SetBotOptionStatsUpdate(true);
-		else if (!argument.compare("disable"))
-			c->SetBotOptionStatsUpdate(false);
-		else
-			c->SetBotOptionStatsUpdate(!c->GetBotOptionStatsUpdate());
 
-		database.botdb.SaveOwnerOptionStatsUpdate(c->CharacterID(), c->GetBotOptionStatsUpdate());
-		c->Message(m_action, "Bot 'stats update' is now %s.", (c->GetBotOptionStatsUpdate() == true ? "enabled" : "disabled"));
-	}
-	else if (!owner_option.compare("spawnmessage")) {
-		if (!argument.compare("say")) {
-			c->SetBotOptionSpawnMessageSay();
+		if (!argument.compare("enable")) {
+			c->SetBotOption(Client::booDeathMarquee, true);
 		}
-		else if (!argument.compare("tell")) {
-			c->SetBotOptionSpawnMessageTell();
-		}
-		else if (!argument.compare("silent")) {
-			c->SetBotOptionSpawnMessageSilent();
-		}
-		else if (!argument.compare("class")) {
-			c->SetBotOptionSpawnMessageClassSpecific(true);
-		}
-		else if (!argument.compare("default")) {
-			c->SetBotOptionSpawnMessageClassSpecific(false);
+		else if (!argument.compare("disable")) {
+			c->SetBotOption(Client::booDeathMarquee, false);
 		}
 		else {
+			c->SetBotOption(Client::booDeathMarquee, !c->GetBotOption(Client::booDeathMarquee));
+		}
+		
+		database.botdb.SaveOwnerOption(c->CharacterID(), Client::booDeathMarquee, c->GetBotOption(Client::booDeathMarquee));
+
+		c->Message(m_action, "Bot 'death marquee' is now %s.", (c->GetBotOption(Client::booDeathMarquee) == true ? "enabled" : "disabled"));
+	}
+	else if (!owner_option.compare("statsupdate")) {
+
+		if (!argument.compare("enable")) {
+			c->SetBotOption(Client::booStatsUpdate, true);
+		}
+		else if (!argument.compare("disable")) {
+			c->SetBotOption(Client::booStatsUpdate, false);
+		}
+		else {
+			c->SetBotOption(Client::booStatsUpdate, !c->GetBotOption(Client::booStatsUpdate));
+		}
+
+		database.botdb.SaveOwnerOption(c->CharacterID(), Client::booStatsUpdate, c->GetBotOption(Client::booStatsUpdate));
+
+		c->Message(m_action, "Bot 'stats update' is now %s.", (c->GetBotOption(Client::booStatsUpdate) == true ? "enabled" : "disabled"));
+	}
+	else if (!owner_option.compare("spawnmessage")) {
+
+		Client::BotOwnerOption boo = Client::_booCount;
+
+		if (!argument.compare("say")) {
+
+			boo = Client::booSpawnMessageSay;
+			c->SetBotOption(Client::booSpawnMessageSay, true);
+			c->SetBotOption(Client::booSpawnMessageTell, false);
+		}
+		else if (!argument.compare("tell")) {
+
+			boo = Client::booSpawnMessageSay;
+			c->SetBotOption(Client::booSpawnMessageSay, false);
+			c->SetBotOption(Client::booSpawnMessageTell, true);
+		}
+		else if (!argument.compare("silent")) {
+
+			boo = Client::booSpawnMessageSay;
+			c->SetBotOption(Client::booSpawnMessageSay, false);
+			c->SetBotOption(Client::booSpawnMessageTell, false);
+		}
+		else if (!argument.compare("class")) {
+
+			boo = Client::booSpawnMessageClassSpecific;
+			c->SetBotOption(Client::booSpawnMessageClassSpecific, true);
+		}
+		else if (!argument.compare("default")) {
+
+			boo = Client::booSpawnMessageClassSpecific;
+			c->SetBotOption(Client::booSpawnMessageClassSpecific, false);
+		}
+		else {
+
 			c->Message(m_fail, "Owner option '%s' argument '%s' is not recognized.", owner_option.c_str(), argument.c_str());
 			return;
 		}
 
-		database.botdb.SaveOwnerOptionSpawnMessage(
-			c->CharacterID(),
-			c->GetBotOptionSpawnMessageSay(),
-			c->GetBotOptionSpawnMessageTell(),
-			c->GetBotOptionSpawnMessageClassSpecific()
-		);
+		if (boo == Client::booSpawnMessageSay) {
+
+			database.botdb.SaveOwnerOption(
+				c->CharacterID(),
+				std::pair<size_t, size_t>(
+					Client::booSpawnMessageSay,
+					Client::booSpawnMessageTell
+				),
+				std::pair<bool, bool>(
+					c->GetBotOption(Client::booSpawnMessageSay),
+					c->GetBotOption(Client::booSpawnMessageTell)
+				)
+			);
+		}
+		else if (boo == Client::booSpawnMessageClassSpecific) {
+
+			database.botdb.SaveOwnerOption(
+				c->CharacterID(),
+				Client::booSpawnMessageClassSpecific,
+				c->GetBotOption(Client::booSpawnMessageClassSpecific)
+			);
+		}
+		else {
+
+			c->Message(m_action, "Bot 'spawn message' is now ERROR.");
+			return;
+		}
+
 		c->Message(m_action, "Bot 'spawn message' is now %s.", argument.c_str());
 	}
 	else {
@@ -5330,13 +5511,16 @@ void bot_subcommand_bot_spawn(Client *c, const Seperator *sep)
 	};
 
 	uint8 message_index = 0;
-	if (c->GetBotOptionSpawnMessageClassSpecific())
+	if (c->GetBotOption(Client::booSpawnMessageClassSpecific)) {
 		message_index = VALIDATECLASSID(my_bot->GetClass());
+	}
 
-	if (c->GetBotOptionSpawnMessageSay())
+	if (c->GetBotOption(Client::booSpawnMessageSay)) {
 		Bot::BotGroupSay(my_bot, "%s", bot_spawn_message[message_index]);
-	else if (c->GetBotOptionSpawnMessageTell())
+	}
+	else if (c->GetBotOption(Client::booSpawnMessageTell)) {
 		c->Message(Chat::Tell, "%s tells you, \"%s\"", my_bot->GetCleanName(), bot_spawn_message[message_index]);
+	}
 }
 
 void bot_subcommand_bot_stance(Client *c, const Seperator *sep)
@@ -5716,7 +5900,7 @@ void bot_subcommand_bot_update(Client *c, const Seperator *sep)
 			continue;
 
 		bot_iter->SetPetChooser(false);
-		bot_iter->CalcBotStats(c->GetBotOptionStatsUpdate());
+		bot_iter->CalcBotStats(c->GetBotOption(Client::booStatsUpdate));
 		bot_iter->SendAppearancePacket(AT_WhoLevel, bot_iter->GetLevel(), true, true);
 		++bot_count;
 	}
@@ -7505,7 +7689,7 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 		}
 
 		my_bot->BotRemoveEquipItem(slotId);
-		my_bot->CalcBotStats(c->GetBotOptionStatsUpdate());
+		my_bot->CalcBotStats(c->GetBotOption(Client::booStatsUpdate));
 	}
 
 	switch (slotId) {

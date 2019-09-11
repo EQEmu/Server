@@ -24,6 +24,7 @@
 9023|2019_06_22_bots_owner_option_stats_update.sql|SHOW COLUMNS FROM `bot_owner_options` LIKE 'stats_update'|empty|
 9024|2019_06_27_bots_pet_get_lost.sql|SELECT `bot_command` FROM `bot_command_settings` WHERE `bot_command` LIKE 'petgetlost'|empty|
 9025|2019_08_26_bots_owner_option_spawn_message.sql|SHOW COLUMNS FROM `bot_owner_options` LIKE 'spawn_message_enabled'|empty|
+9026|2019_09_09_bots_owner_options_rework.sql|SHOW COLUMNS FROM `bot_owner_options` LIKE 'option_type'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
