@@ -354,16 +354,27 @@ int main(int argc, char** argv) {
 
 	LogInfo("Loading guilds");
 	guild_mgr.LoadGuilds();
+
 	//rules:
 	{
+		if (!RuleManager::Instance()->UpdateOrphanedRules(&database)) {
+			LogInfo("Failed to process 'Orphaned Rules' update operation.");
+		}
+		
+		if (!RuleManager::Instance()->UpdateInjectedRules(&database, "default")) {
+			LogInfo("Failed to process 'Injected Rules' for ruleset 'default' update operation.");
+		}
+
 		std::string tmp;
 		if (database.GetVariable("RuleSet", tmp)) {
 			LogInfo("Loading rule set [{}]", tmp.c_str());
+
 			if (!RuleManager::Instance()->LoadRules(&database, tmp.c_str(), false)) {
 				LogInfo("Failed to load ruleset [{}], falling back to defaults", tmp.c_str());
 			}
 		}
 		else {
+
 			if (!RuleManager::Instance()->LoadRules(&database, "default", false)) {
 				LogInfo("No rule set configured, using default rules");
 			}
@@ -372,16 +383,18 @@ int main(int argc, char** argv) {
 			}
 		}
 
-		EQEmu::InitializeDynamicLookups();
-		LogInfo("Initialized dynamic dictionary entries");
+		if (!RuleManager::Instance()->RestoreRuleNotes(&database)) {
+			LogInfo("Failed to process 'Restore Rule Notes' update operation.");
+		}
 	}
+
+	EQEmu::InitializeDynamicLookups();
+	LogInfo("Initialized dynamic dictionary entries");
 
 	if (RuleB(World, ClearTempMerchantlist)) {
 		LogInfo("Clearing temporary merchant lists");
 		database.ClearMerchantTemp();
 	}
-
-	RuleManager::Instance()->SaveRules(&database);
 
 	LogInfo("Loading EQ time of day");
 	TimeOfDay_Struct eqTime;

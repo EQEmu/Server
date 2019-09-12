@@ -20,6 +20,12 @@
 #include <string.h>
 #include <vector>
 #include <cstdarg>
+#include <tuple>
+
+#ifndef _WIN32
+// this doesn't appear to affect linux-based systems..need feedback for _WIN64
+#include <fmt/format.h>
+#endif
 
 #include "types.h"
 
@@ -31,6 +37,93 @@ std::vector<std::string> split(std::string str_to_split, char delimiter);
 const std::string StringFormat(const char* format, ...);
 const std::string vStringFormat(const char* format, va_list args);
 std::string implode(std::string glue, std::vector<std::string> src);
+
+template <typename T>
+std::string implode(const std::string &glue, const std::pair<char, char> &encapsulation, const std::vector<T> &src)
+{
+	if (src.empty()) {
+		return {};
+	}
+
+	std::ostringstream oss;
+	
+	for (const T &src_iter : src) {
+		oss << encapsulation.first << src_iter << encapsulation.second << glue;
+	}
+
+	std::string output(oss.str());
+	output.resize(output.size() - glue.size());
+	
+	return output;
+}
+
+// _WIN32 builds require that #include<fmt/format.h> be included in whatever code file the invocation is made from (no header files)
+template <typename T1, typename T2>
+std::vector<std::string> join_pair(const std::string &glue, const std::pair<char, char> &encapsulation, const std::vector<std::pair<T1, T2>> &src)
+{
+	if (src.empty()) {
+		return {};
+	}
+
+	std::vector<std::string> output;
+
+	for (const std::pair<T1, T2> &src_iter : src) {
+		output.push_back(
+			
+			fmt::format(
+				"{}{}{}{}{}{}{}",
+				encapsulation.first,
+				src_iter.first,
+				encapsulation.second,
+				glue,
+				encapsulation.first,
+				src_iter.second,
+				encapsulation.second
+			)
+		);
+	}
+
+	return output;
+}
+
+// _WIN32 builds require that #include<fmt/format.h> be included in whatever code file the invocation is made from (no header files)
+template <typename T1, typename T2, typename T3, typename T4>
+std::vector<std::string> join_tuple(const std::string &glue, const std::pair<char, char> &encapsulation, const std::vector<std::tuple<T1, T2, T3, T4>> &src)
+{
+	if (src.empty()) {
+		return {};
+	}
+
+	std::vector<std::string> output;
+
+	for (const std::tuple<T1, T2, T3, T4> &src_iter : src) {
+
+		output.push_back(
+			
+			fmt::format(
+				"{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}",
+				encapsulation.first,
+				std::get<0>(src_iter),
+				encapsulation.second,
+				glue,
+				encapsulation.first,
+				std::get<1>(src_iter),
+				encapsulation.second,
+				glue,
+				encapsulation.first,
+				std::get<2>(src_iter),
+				encapsulation.second,
+				glue,
+				encapsulation.first,
+				std::get<3>(src_iter),
+				encapsulation.second
+			)
+		);
+	}
+
+	return output;
+}
+
 std::vector<std::string> SplitString(const std::string &s, char delim);
 std::string EscapeString(const char *src, size_t sz);
 std::string EscapeString(const std::string &s);

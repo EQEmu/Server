@@ -49,21 +49,21 @@ class RuleManager {
 public:
 	//generate our rule enums:
 	typedef enum {
-	#define RULE_INT(cat, rule, default_value) \
+	#define RULE_INT(cat, rule, default_value, notes) \
 		Int__##rule,
 	#include "ruletypes.h"
 		_IntRuleCount
 	} IntType;
 
 	typedef enum {
-	#define RULE_REAL(cat, rule, default_value) \
+	#define RULE_REAL(cat, rule, default_value, notes) \
 		Real__##rule,
 	#include "ruletypes.h"
 		_RealRuleCount
 	} RealType;
 
 	typedef enum {
-	#define RULE_BOOL(cat, rule, default_value) \
+	#define RULE_BOOL(cat, rule, default_value, notes) \
 		Bool__##rule,
 	#include "ruletypes.h"
 		_BoolRuleCount
@@ -97,6 +97,9 @@ public:
 	static const char *GetRuleName(IntType t) { return(s_RuleInfo[t].name); }
 	static const char *GetRuleName(RealType t) { return(s_RuleInfo[t+_IntRuleCount].name); }
 	static const char *GetRuleName(BoolType t) { return(s_RuleInfo[t+_IntRuleCount+_RealRuleCount].name); }
+	static const std::string &GetRuleNotes(IntType t) { return(s_RuleInfo[t].notes); }
+	static const std::string &GetRuleNotes(RealType t) { return(s_RuleInfo[t+_IntRuleCount].notes); }
+	static const std::string &GetRuleNotes(BoolType t) { return(s_RuleInfo[t+_IntRuleCount+_RealRuleCount].notes); }
 	static uint32 CountRules() { return(_RulesCount); }
 	static CategoryType FindCategory(const char *catname);
 	bool ListRules(const char *catname, std::vector<const char *> &into);
@@ -113,6 +116,9 @@ public:
 	void ResetRules(bool reload = false);
 	bool LoadRules(Database *db, const char *ruleset = nullptr, bool reload = false);
 	void SaveRules(Database *db, const char *ruleset = nullptr);
+	bool UpdateInjectedRules(Database *db, const char *ruleset_name, bool quiet_update = false);
+	bool UpdateOrphanedRules(Database *db, bool quiet_update = false);
+	bool RestoreRuleNotes(Database *db);
 
 private:
 	RuleManager();
@@ -137,15 +143,17 @@ private:
 
 	static bool _FindRule(const char *rule_name, RuleType &type_into, uint16 &index_into);
 	static const char *_GetRuleName(RuleType type, uint16 index);
+	static const std::string &_GetRuleNotes(RuleType type, uint16 index);
 	static int _FindOrCreateRuleset(Database *db, const char *ruleset);
 	void _SaveRule(Database *db, RuleType type, uint16 index);
-
+	
 	static const char *s_categoryNames[];
 	typedef struct {
 		const char *name;
 		CategoryType category;
 		RuleType type;
 		uint16 rule_index;	//index into its 'type' array
+		const std::string notes;
 	} RuleInfo;
 	static const RuleInfo s_RuleInfo[];
 

@@ -43,6 +43,8 @@ class BotDatabase
 {
 public:
 	bool LoadBotCommandSettings(std::map<std::string, std::pair<uint8, std::vector<std::string>>> &bot_command_settings);
+	bool UpdateInjectedBotCommandSettings(const std::vector<std::pair<std::string, uint8>> &injected);
+	bool UpdateOrphanedBotCommandSettings(const std::vector<std::string> &orphaned);
 	bool LoadBotSpellCastingChances();
 
 
@@ -50,7 +52,7 @@ public:
 	bool QueryNameAvailablity(const std::string& bot_name, bool& available_flag);
 	bool QueryBotCount(const uint32 owner_id, uint32& bot_count);
 	bool LoadQuestableSpawnCount(const uint32 owner_id, int& spawn_count);
-	bool LoadBotsList(const uint32 owner_id, std::list<BotsAvailableList>& bots_list);
+	bool LoadBotsList(const uint32 owner_id, std::list<BotsAvailableList>& bots_list, bool ByAccount = false);
 
 	bool LoadOwnerID(const std::string& bot_name, uint32& owner_id);
 	bool LoadOwnerID(const uint32 bot_id, uint32& owner_id);
@@ -139,10 +141,9 @@ public:
 	bool SaveStopMeleeLevel(const uint32 owner_id, const uint32 bot_id, const uint8 sml_value);
 
 	bool LoadOwnerOptions(Client *owner);
-	bool SaveOwnerOptionDeathMarquee(const uint32 owner_id, const bool flag);
-	bool SaveOwnerOptionStatsUpdate(const uint32 owner_id, const bool flag);
-	bool SaveOwnerOptionSpawnMessage(const uint32 owner_id, const bool say, const bool tell, const bool class_specific);
-
+	bool SaveOwnerOption(const uint32 owner_id, size_t type, const bool flag);
+	bool SaveOwnerOption(const uint32 owner_id, const std::pair<size_t, size_t> type, const std::pair<bool, bool> flag);
+	
 	/* Bot bot-group functions   */
 	bool QueryBotGroupExistence(const std::string& botgroup_name, bool& extant_flag);
 

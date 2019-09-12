@@ -399,11 +399,13 @@ sub build_linux_source {
     print `git clone https://github.com/EQEmu/Server.git`;
 
     mkdir($source_dir . "/Server/build") if (!-e $source_dir . "/Server/build");
-    chdir($source_dir . "/Server/build");
+    chdir($source_dir . "/Server");
 
     print `git submodule init`;
     print `git submodule update`;
 
+    chdir($source_dir . "/Server/build");
+    
     print "Generating CMake build files...\n";
     if ($os_flavor eq "fedora_core") {
         print `cmake $cmake_options -DEQEMU_BUILD_LOGIN=ON -DEQEMU_BUILD_LUA=ON -DLUA_INCLUDE_DIR=/usr/include/lua-5.1/ -G "Unix Makefiles" ..`;

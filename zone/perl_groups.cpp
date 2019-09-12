@@ -486,8 +486,7 @@ XS(XS_Group_TeleportGroup); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Group_TeleportGroup) {
 	dXSARGS;
 	if (items != 7)
-		Perl_croak(aTHX_
-		           "Usage: Group::TeleportGroup(THIS, Mob* sender, uint32 zone_id, float x, float y, float z, float heading)");
+		Perl_croak(aTHX_ "Usage: Group::TeleportGroup(THIS, Mob* sender, uint32 zone_id, float x, float y, float z, float heading)");
 	{
 		Group  *THIS;
 		Mob    *sender;

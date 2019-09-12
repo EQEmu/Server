@@ -182,6 +182,7 @@ int command_init(void)
 		command_add("crashtest", "- Crash the zoneserver", 255, command_crashtest) ||
 		command_add("cvs", "- Summary of client versions currently online.", 200, command_cvs) ||
 		command_add("damage", "[amount] - Damage your target", 100, command_damage) ||
+		command_add("databuckets", "View|Delete [key] [limit]- View data buckets, limit 50 default or Delete databucket by key", 80, command_databuckets) ||
 		command_add("date", "[yyyy] [mm] [dd] [HH] [MM] - Set EQ time", 90, command_date) ||
 		command_add("dbspawn2", "[spawngroup] [respawn] [variance] - Spawn an NPC from a predefined row in the spawn2 table", 100, command_dbspawn2) ||
 		command_add("delacct", "[accountname] - Delete an account", 150, command_delacct) ||
@@ -453,33 +454,90 @@ int command_init(void)
 	std::map<std::string, std::pair<uint8, std::vector<std::string>>> command_settings;
 	database.GetCommandSettings(command_settings);
 
-	std::map<std::string, CommandRecord *> working_cl = commandlist;
-	for (auto iter_cl = working_cl.begin(); iter_cl != working_cl.end(); ++iter_cl) {
-		auto iter_cs = command_settings.find(iter_cl->first);
-		if (iter_cs == command_settings.end()) {
-			if (iter_cl->second->access == 0)
-				LogCommands("command_init(): Warning: Command [{}] defaulting to access level 0!", iter_cl->first.c_str());
+	std::vector<std::pair<std::string, uint8>> injected_command_settings;
+	std::vector<std::string> orphaned_command_settings;
+
+	for (auto cs_iter : command_settings) {
+
+		auto cl_iter = commandlist.find(cs_iter.first);
+		if (cl_iter == commandlist.end()) {
+
+			orphaned_command_settings.push_back(cs_iter.first);
+			LogInfo(
+				"Command '%s' no longer exists... Deleting orphaned entry from `command_settings` table...",
+				cs_iter.first.c_str()
+			);
+		}
+	}
+
+	if (orphaned_command_settings.size()) {
+		if (!database.UpdateOrphanedCommandSettings(orphaned_command_settings)) {
+			LogInfo("Failed to process 'Orphaned Commands' update operation.");
+		}
+	}
+
+	auto working_cl = commandlist;
+	for (auto working_cl_iter : working_cl) {
+
+		auto cs_iter = command_settings.find(working_cl_iter.first);
+		if (cs_iter == command_settings.end()) {
+
+			injected_command_settings.push_back(std::pair<std::string, uint8>(working_cl_iter.first, working_cl_iter.second->access));
+			LogInfo(
+				"New Command '%s' found... Adding to `command_settings` table with access '%u'...",
+				working_cl_iter.first.c_str(),
+				working_cl_iter.second->access
+			);
+
+			if (working_cl_iter.second->access == 0) {
+				LogCommands(
+					"command_init(): Warning: Command '%s' defaulting to access level 0!",
+					working_cl_iter.first.c_str()
+				);
+			}
+			
 			continue;
 		}
 
-		iter_cl->second->access = iter_cs->second.first;
-		LogCommands("command_init(): - Command [{}] set to access level [{}]", iter_cl->first.c_str(), iter_cs->second.first);
-		if (iter_cs->second.second.empty())
+		working_cl_iter.second->access = cs_iter->second.first;
+		LogCommands(
+			"command_init(): - Command '%s' set to access level %d.",
+			working_cl_iter.first.c_str(),
+			cs_iter->second.first
+		);
+		
+		if (cs_iter->second.second.empty()) {
 			continue;
+		}
 
-		for (auto iter_aka = iter_cs->second.second.begin(); iter_aka != iter_cs->second.second.end();
-		     ++iter_aka) {
-			if (iter_aka->empty())
-				continue;
-			if (commandlist.find(*iter_aka) != commandlist.end()) {
-				LogCommands("command_init(): Warning: Alias [{}] already exists as a command - skipping!", iter_aka->c_str());
+		for (auto alias_iter : cs_iter->second.second) {
+			if (alias_iter.empty()) {
 				continue;
 			}
 
-			commandlist[*iter_aka] = iter_cl->second;
-			commandaliases[*iter_aka] = iter_cl->first;
+			if (commandlist.find(alias_iter) != commandlist.end()) {
+				LogCommands(
+					"command_init(): Warning: Alias '%s' already exists as a command - skipping!",
+					alias_iter.c_str()
+				);
+				
+				continue;
+			}
 
-			LogCommands("command_init(): - Alias [{}] added to command [{}]", iter_aka->c_str(), commandaliases[*iter_aka].c_str());
+			commandlist[alias_iter] = working_cl_iter.second;
+			commandaliases[alias_iter] = working_cl_iter.first;
+
+			LogCommands(
+				"command_init(): - Alias '%s' added to command '%s'.",
+				alias_iter.c_str(),
+				commandaliases[alias_iter].c_str()
+			);
+		}
+	}
+
+	if (injected_command_settings.size()) {
+		if (!database.UpdateInjectedCommandSettings(injected_command_settings)) {
+			LogInfo("Failed to process 'Injected Commands' update operation.");
 		}
 	}
 
@@ -12580,6 +12638,85 @@ void command_scale(Client *c, const Seperator *sep)
 				saylink.c_str()
 			);
 		}
+	}
+}
+
+void command_databuckets(Client *c, const Seperator *sep)
+ {
+	if (sep->arg[1][0] == 0) {
+		c->Message(Chat::Yellow, "Usage: #databuckets view (partial key)|(limit) OR #databuckets delete (key)");
+		return;
+	}
+	if (strcasecmp(sep->arg[1], "view") == 0) {
+
+		std::string key_filter;
+		uint8 limit = 50;
+		for (int i = 2; i < 4; i++) {
+			if (sep->arg[i][0] == '\0')
+				break;
+			if (strcasecmp(sep->arg[i], "limit") == 0) {
+				limit = (uint8)atoi(sep->arg[i + 1]);
+				continue;
+			}
+		}
+		if (sep->arg[2]) {
+			key_filter = str_tolower(sep->arg[2]);
+		}
+		std::string query = "SELECT `id`, `key`, `value`, `expires` FROM data_buckets";
+		if (!key_filter.empty())  query += StringFormat(" WHERE `key` LIKE '%%%s%%'", key_filter.c_str());
+		query += StringFormat(" LIMIT %u", limit);
+		auto results = database.QueryDatabase(query);
+		if (!results.Success())
+			return;
+		if (results.RowCount() == 0) {
+			c->Message(Chat::Yellow, "No data_buckets found");
+			return;
+		}
+		int _ctr = 0;
+		// put in window for easier readability in case want command line for something else
+		std::string window_title = "Data Buckets";
+		std::string window_text =
+			"<table>"
+			"<tr>"
+			"<td>ID</td>"
+			"<td>Expires</td>"
+			"<td>Key</td>"
+			"<td>Value</td>"
+			"</tr>";
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			auto        id = static_cast<uint32>(atoi(row[0]));
+			std::string key = row[1];
+			std::string value = row[2];
+			std::string expires = row[3];
+			window_text.append(StringFormat(
+				"<tr>"
+				"<td>%u</td>"
+				"<td>%s</td>"
+				"<td>%s</td>"
+				"<td>%s</td>"
+				"</tr>",
+				id,
+				expires.c_str(),
+				key.c_str(),
+				value.c_str()
+			));
+			_ctr++;
+			std::string	del_saylink = StringFormat("#databuckets delete %s", key.c_str());
+			c->Message(Chat::White, "%s : %s",
+				EQEmu::SayLinkEngine::GenerateQuestSaylink(del_saylink, false, "Delete").c_str(), key.c_str(), "  Value:  ", value.c_str());
+		}
+		window_text.append("</table>");
+		c->SendPopupToClient(window_title.c_str(), window_text.c_str());
+		std::string response = _ctr > 0 ? StringFormat("Found %i matching data buckets", _ctr).c_str() : "No Databuckets found.";
+		c->Message(Chat::Yellow, response.c_str());
+	}
+	else if (strcasecmp(sep->arg[1], "delete") == 0)
+	{
+		if (DataBucket::DeleteData(sep->argplus[2]))
+			c->Message(Chat::Yellow, "data bucket %s deleted.", sep->argplus[2]);
+		else
+			c->Message(Chat::Red, "An error occurred deleting data bucket %s", sep->argplus[2]);
+		return;
 	}
 }
 

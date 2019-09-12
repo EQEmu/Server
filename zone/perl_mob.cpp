@@ -794,8 +794,7 @@ XS(XS_Mob_Attack); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_Attack) {
 	dXSARGS;
 	if (items < 2 || items > 4)
-		Perl_croak(aTHX_
-		           "Usage: Mob::Attack(THIS, Mob* other, [int hand = 13 [prim|sec]], [bool from_riposte = false])");
+		Perl_croak(aTHX_ "Usage: Mob::Attack(THIS, Mob* other, [int hand = 13 [prim|sec]], [bool from_riposte = false])");
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -842,8 +841,7 @@ XS(XS_Mob_Damage); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_Damage) {
 	dXSARGS;
 	if (items < 5 || items > 8)
-		Perl_croak(aTHX_
-		           "Usage: Mob::Damage(THIS, Mob* from, int32 damage, uint16 spell_id, int attack_skill, [bool avoidable = true], [int8 buffslot = -1], [bool buff_tic = false])");
+		Perl_croak(aTHX_ "Usage: Mob::Damage(THIS, Mob* from, int32 damage, uint16 spell_id, int attack_skill, [bool avoidable = true], [int8 buffslot = -1], [bool buff_tic = false])");
 	{
 		Mob *THIS;
 		Mob *from;
@@ -1447,8 +1445,7 @@ XS(XS_Mob_MakeTempPet); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_MakeTempPet) {
 	dXSARGS;
 	if (items < 2 || items > 6)
-		Perl_croak(aTHX_
-		           "Usage: Mob::MakeTempPet(THIS, uint16 spell_id, [string name = nullptr], [uint32 duration = 0], [Mob* target = nullptr], [bool sticktarg = 0])");
+		Perl_croak(aTHX_ "Usage: Mob::MakeTempPet(THIS, uint16 spell_id, [string name = nullptr], [uint32 duration = 0], [Mob* target = nullptr], [bool sticktarg = 0])");
 	{
 		Mob *THIS;
 		uint16 spell_id = (uint16) SvUV(ST(1));
@@ -1498,8 +1495,7 @@ XS(XS_Mob_TypesTempPet); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_TypesTempPet) {
 	dXSARGS;
 	if (items < 2 || items > 7)
-		Perl_croak(aTHX_
-		           "Usage: Mob::TypesTempPet(THIS, uint32 type_id, [string name = nullptr], [uint32 duration = 0], [bool follow = 0], [Mob* target = nullptr], [bool stick_targ = 0])");
+		Perl_croak(aTHX_ "Usage: Mob::TypesTempPet(THIS, uint32 type_id, [string name = nullptr], [uint32 duration = 0], [bool follow = 0], [Mob* target = nullptr], [bool stick_targ = 0])");
 	{
 		Mob *THIS;
 		uint32 typesid = (uint32) SvUV(ST(1));
@@ -3680,8 +3676,7 @@ XS(XS_Mob_Message_StringID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_Message_StringID) {
 	dXSARGS;
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_
-		           "Usage: Mob::Message_StringID(THIS, uint32 emote_color_type, uint32 string_id, [uint32 distance = 0])");
+		Perl_croak(aTHX_ "Usage: Mob::Message_StringID(THIS, uint32 emote_color_type, uint32 string_id, [uint32 distance = 0])");
 	{
 		Mob *THIS;
 		uint32 type      = (uint32) SvUV(ST(1));
@@ -3805,8 +3800,7 @@ XS(XS_Mob_CastSpell); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_CastSpell) {
 	dXSARGS;
 	if (items < 3 || items > 7)
-		Perl_croak(aTHX_
-		           "Usage: Mob::CastSpell(THIS, uint16 spell_id, uint16 target_id, [int slot = 22], [int32 cast_time = -1], [int32 mana_cost = -1], [int16 resist_adjust = 0])");
+		Perl_croak(aTHX_ "Usage: Mob::CastSpell(THIS, uint16 spell_id, uint16 target_id, [int slot = 22], [int32 cast_time = -1], [int32 mana_cost = -1], [int16 resist_adjust = 0])");
 	{
 		Mob *THIS;
 		uint16             spell_id  = (uint16) SvUV(ST(1));
@@ -3862,8 +3856,7 @@ XS(XS_Mob_SpellFinished); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SpellFinished) {
 	dXSARGS;
 	if (items < 2 || items > 5)
-		Perl_croak(aTHX_
-		           "Usage: Mob::SpellFinished(uint16 spell_id, [Mob* spell_target = this], [uint16 mana_cost = 0], [uint16 resist_diff = 0])");
+		Perl_croak(aTHX_ "Usage: Mob::SpellFinished(uint16 spell_id, [Mob* spell_target = this], [uint16 mana_cost = 0], [uint16 resist_diff = 0])");
 	{
 		Mob *THIS;
 		uint16 spell_id = (uint16) SvUV(ST(1));
@@ -4045,8 +4038,7 @@ XS(XS_Mob_CanBuffStack); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_CanBuffStack) {
 	dXSARGS;
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_
-		           "Usage: Mob::CanBuffStack(THIS, uint16 spell_id, uint8 caster_level, [bool fail_if_overwritten = false])");
+		Perl_croak(aTHX_ "Usage: Mob::CanBuffStack(THIS, uint16 spell_id, uint8 caster_level, [bool fail_if_overwritten = false])");
 	{
 		Mob *THIS;
 		int    RETVAL;
@@ -5044,8 +5036,7 @@ XS(XS_Mob_AddToHateList); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_AddToHateList) {
 	dXSARGS;
 	if (items < 2 || items > 7)
-		Perl_croak(aTHX_
-		           "Usage: Mob::AddToHateList(THIS, Mob* other, [int32 hate = 0], [int32 damage = 0], [bool yell_for_help = true], [bool frenzy = false], [bool buff_tic = false])");
+		Perl_croak(aTHX_ "Usage: Mob::AddToHateList(THIS, Mob* other, [int32 hate = 0], [int32 damage = 0], [bool yell_for_help = true], [bool frenzy = false], [bool buff_tic = false])");
 	{
 		Mob *THIS;
 		Mob *other;
@@ -5609,8 +5600,7 @@ XS(XS_Mob_NavigateTo); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_NavigateTo) {
 	dXSARGS;
 	if (items < 4 || items > 5)
-		Perl_croak(aTHX_
-		           "Usage: Mob::NavigateTo(THIS, float x, float y, float z)");
+		Perl_croak(aTHX_ "Usage: Mob::NavigateTo(THIS, float x, float y, float z)");
 	{
 		Mob *THIS;
 		float x     = (float) SvNV(ST(1));
@@ -5735,8 +5725,7 @@ XS(XS_Mob_NPCSpecialAttacks); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_NPCSpecialAttacks) {
 	dXSARGS;
 	if (items < 3 || items > 5)
-		Perl_croak(aTHX_
-		           "Usage: Mob::NPCSpecialAttacks(THIS, string abilities_string, int perm_tag, [bool reset = true], [bool remove = true])");
+		Perl_croak(aTHX_ "Usage: Mob::NPCSpecialAttacks(THIS, string abilities_string, int perm_tag, [bool reset = true], [bool remove = true])");
 	{
 		Mob  *THIS;
 		char *parse = (char *) SvPV_nolen(ST(1));
@@ -6476,8 +6465,7 @@ XS(XS_Mob_DoSpecialAttackDamage); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_DoSpecialAttackDamage) {
 	dXSARGS;
 	if (items < 4 || items > 6)
-		Perl_croak(aTHX_
-		           "Usage: Mob::DoSpecialAttackDamage(THIS, Mob* target, int skill, int32 max_damage, [int32 min_damage = 1], [int32 hate_override = -11])");
+		Perl_croak(aTHX_ "Usage: Mob::DoSpecialAttackDamage(THIS, Mob* target, int skill, int32 max_damage, [int32 min_damage = 1], [int32 hate_override = -11])");
 	{
 		Mob *THIS;
 		Mob *target;
@@ -6620,8 +6608,7 @@ XS(XS_Mob_ProjectileAnim); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_ProjectileAnim) {
 	dXSARGS;
 	if (items < 3 || items > 9)
-		Perl_croak(aTHX_
-		           "Usage: Mob::ProjectileAnim(THIS, Mob* mob, int item_id, [bool is_arrow = false], [float speed = 0], [float angle = 0], [float tilt = 0], [float arc = 0])");
+		Perl_croak(aTHX_ "Usage: Mob::ProjectileAnim(THIS, Mob* mob, int item_id, [bool is_arrow = false], [float speed = 0], [float angle = 0], [float tilt = 0], [float arc = 0])");
 
 	{
 		Mob *THIS;
@@ -6703,8 +6690,7 @@ XS(XS_Mob_SendAppearanceEffect); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SendAppearanceEffect) {
 	dXSARGS;
 	if (items < 2 || items > 7)
-		Perl_croak(aTHX_
-		           "Usage: Mob::SendAppearanceEffect(THIS, int32 param_1, [int32 param_2 = 0], [int32 param_3 = 0], [int32 param_4 = 0], [int32 param_5 = 0], [Client* single_client_to_send_to = null])");
+		Perl_croak(aTHX_ "Usage: Mob::SendAppearanceEffect(THIS, int32 param_1, [int32 param_2 = 0], [int32 param_3 = 0], [int32 param_4 = 0], [int32 param_5 = 0], [Client* single_client_to_send_to = null])");
 	{
 		Mob *THIS;
 		int32 parm1 = (int32) SvIV(ST(1));
@@ -6833,8 +6819,7 @@ XS(XS_Mob_SendIllusion); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SendIllusion) {
 	dXSARGS;
 	if (items < 2 || items > 14)
-		Perl_croak(aTHX_
-		           "Usage: Mob::SendIllusion(THIS, uint16 race, [uint8 gender = 0xFF], [uint8 texture  face = 0xFF], [uint8 hairstyle = 0xFF], [uint8 hair_color = 0xFF], [uint8 beard = 0xFF], [uint8 beard_color =FF], [uint32 drakkin_tattoo = 0xFFFFFFFF], [uint32 drakkin_details = 0xFFFFFFFF], [float size = -1])");
+		Perl_croak(aTHX_ "Usage: Mob::SendIllusion(THIS, uint16 race, [uint8 gender = 0xFF], [uint8 texture  face = 0xFF], [uint8 hairstyle = 0xFF], [uint8 hair_color = 0xFF], [uint8 beard = 0xFF], [uint8 beard_color =FF], [uint32 drakkin_tattoo = 0xFFFFFFFF], [uint32 drakkin_details = 0xFFFFFFFF], [float size = -1])");
 	{
 		Mob *THIS;
 		uint16 race             = (uint16) SvIV(ST(1));
@@ -6882,8 +6867,7 @@ XS(XS_Mob_CameraEffect); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_CameraEffect) {
 	dXSARGS;
 	if (items < 2 || items > 5)
-		Perl_croak(aTHX_
-		           "Usage: Mob::CameraEffect(THIS, uint32 duration, [uint32 intensity = 0], [Client* single_client = nullptr], [bool is_world_wide = false])");
+		Perl_croak(aTHX_ "Usage: Mob::CameraEffect(THIS, uint32 duration, [uint32 intensity = 0], [Client* single_client = nullptr], [bool is_world_wide = false])");
 	{
 		Mob *THIS;
 		uint32 duration  = (uint32) SvUV(ST(1));
@@ -6925,8 +6909,7 @@ XS(XS_Mob_SpellEffect); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SpellEffect) {
 	dXSARGS;
 	if (items < 2 || items > 8)
-		Perl_croak(aTHX_
-		           "Usage: Mob::SpellEffect(THIS, uint32 effect, [uint32 duration = 5000], [uint32 finish_delay = 0], [bool zone_wide = false], [uint32 unk20 = 3000], [bool perm_effect = false], [Client* single_client])");
+		Perl_croak(aTHX_ "Usage: Mob::SpellEffect(THIS, uint32 effect, [uint32 duration = 5000], [uint32 finish_delay = 0], [bool zone_wide = false], [uint32 unk20 = 3000], [bool perm_effect = false], [Client* single_client])");
 	{
 		Mob *THIS;
 		uint32 effect       = (uint32) SvUV(ST(1));
@@ -7054,8 +7037,7 @@ XS(XS_Mob_SetGlobal);
 XS(XS_Mob_SetGlobal) {
 	dXSARGS;
 	if (items < 5 || items > 6)
-		Perl_croak(aTHX_
-		           "Usage: SetGlobal(THIS, string var_name, string new_value, int options, string duration, [Mob* other = nullptr])");
+		Perl_croak(aTHX_ "Usage: SetGlobal(THIS, string var_name, string new_value, int options, string duration, [Mob* other = nullptr])");
 	{
 		Mob  *THIS;
 		char *varname  = (char *) SvPV_nolen(ST(1));
@@ -7091,8 +7073,7 @@ XS(XS_Mob_TarGlobal);
 XS(XS_Mob_TarGlobal) {
 	dXSARGS;
 	if (items != 7)
-		Perl_croak(aTHX_
-		           "Usage: TarGlobal(THIS, string var_name, string value, string duration, int npc_id, int character_id, int zone_id)");
+		Perl_croak(aTHX_ "Usage: TarGlobal(THIS, string var_name, string value, string duration, int npc_id, int character_id, int zone_id)");
 	{
 		Mob  *THIS;
 		char *varname  = (char *) SvPV_nolen(ST(1));
@@ -7141,8 +7122,7 @@ XS(XS_Mob_SetSlotTint); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetSlotTint) {
 	dXSARGS;
 	if (items != 5)
-		Perl_croak(aTHX_
-		           "Usage: Mob::SetSlotTint(THIS, uint8 material_slot, uint8 red_tint, uint8 green_tint, uint8 blue_tint)");
+		Perl_croak(aTHX_ "Usage: Mob::SetSlotTint(THIS, uint8 material_slot, uint8 red_tint, uint8 green_tint, uint8 blue_tint)");
 	{
 		Mob *THIS;
 		uint8 material_slot = (uint8) SvIV(ST(1));
@@ -7167,8 +7147,7 @@ XS(XS_Mob_WearChange); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_WearChange) {
 	dXSARGS;
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_
-		           "Usage: Mob::WearChange(THIS, uint8 material_slot, uint16 texture, [uint32 color = 0, uint32 hero_forge_model = 0])");
+		Perl_croak(aTHX_ "Usage: Mob::WearChange(THIS, uint8 material_slot, uint16 texture, [uint32 color = 0, uint32 hero_forge_model = 0])");
 	{
 		Mob *THIS;
 		uint8  material_slot    = (uint8) SvIV(ST(1));
@@ -7598,8 +7577,7 @@ XS(XS_Mob_DoMeleeSkillAttackDmg); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_DoMeleeSkillAttackDmg) {
 	dXSARGS;
 	if (items != 7)
-		Perl_croak(aTHX_
-		           "Usage: Mob::DoMeleeSkillAttackDmg(THIS, Mob* target, uint16 weapon_damage, int skill, int16 chance_mod, int16 focus, uint8 can_riposte)");
+		Perl_croak(aTHX_ "Usage: Mob::DoMeleeSkillAttackDmg(THIS, Mob* target, uint16 weapon_damage, int skill, int16 chance_mod, int16 focus, uint8 can_riposte)");
 	{
 		Mob *THIS;
 		Mob *target;
@@ -7634,8 +7612,7 @@ XS(XS_Mob_DoArcheryAttackDmg); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_DoArcheryAttackDmg) {
 	dXSARGS;
 	if (items != 7)
-		Perl_croak(aTHX_
-		           "Usage: Mob::DoArcheryAttackDmg(THIS, Mob* target, [range_weapon_item_instance = nullptr], [ammo_item_instance = nullptr], uint16 weapon_damage, int16 chance_mod, int16 focus)");
+		Perl_croak(aTHX_ "Usage: Mob::DoArcheryAttackDmg(THIS, Mob* target, [range_weapon_item_instance = nullptr], [ammo_item_instance = nullptr], uint16 weapon_damage, int16 chance_mod, int16 focus)");
 	{
 		Mob                 *THIS;
 		Mob                 *target;
@@ -7670,8 +7647,7 @@ XS(XS_Mob_DoThrowingAttackDmg); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_DoThrowingAttackDmg) {
 	dXSARGS;
 	if (items != 7)
-		Perl_croak(aTHX_
-		           "Usage: Mob::DoThrowingAttackDmg(THIS, Mob* target, [range_weapon_item_instance = nullptr], [ammo_item_instance = nullptr], uint16 weapon_damage, int16 chance_mod, int16 focus)");
+		Perl_croak(aTHX_ "Usage: Mob::DoThrowingAttackDmg(THIS, Mob* target, [range_weapon_item_instance = nullptr], [ammo_item_instance = nullptr], uint16 weapon_damage, int16 chance_mod, int16 focus)");
 	{
 		Mob                 *THIS;
 		Mob                 *target;

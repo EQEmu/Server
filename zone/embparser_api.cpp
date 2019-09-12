@@ -226,8 +226,7 @@ XS(XS__spawn);
 XS(XS__spawn) {
 	dXSARGS;
 	if (items != 6)
-		Perl_croak(aTHX_
-		           "Usage: quest::spawn(int npc_type_id, int grid_id, int int_unused, float x, float y, float z)");
+		Perl_croak(aTHX_ "Usage: quest::spawn(int npc_type_id, int grid_id, int int_unused, float x, float y, float z)");
 
 	uint16 RETVAL;
 	dXSTARG;
@@ -249,8 +248,7 @@ XS(XS__spawn2);
 XS(XS__spawn2) {
 	dXSARGS;
 	if (items != 7)
-		Perl_croak(aTHX_
-		           "Usage: quest::spawn2(int npc_type_id, int grid_id, int int_unused, float x, float y, float z, float heading)");
+		Perl_croak(aTHX_ "Usage: quest::spawn2(int npc_type_id, int grid_id, int int_unused, float x, float y, float z, float heading)");
 
 	uint16 RETVAL;
 	dXSTARG;
@@ -272,8 +270,7 @@ XS(XS__unique_spawn);
 XS(XS__unique_spawn) {
 	dXSARGS;
 	if (items != 6 && items != 7)
-		Perl_croak(aTHX_
-		           "Usage: quest::unique_spawn(int npc_type_id, int grid_id, int int_unused, float x, float y, float z, [float heading])");
+		Perl_croak(aTHX_ "Usage: quest::unique_spawn(int npc_type_id, int grid_id, int int_unused, float x, float y, float z, [float heading])");
 
 	uint16 RETVAL;
 	dXSTARG;
@@ -1315,8 +1312,7 @@ XS(XS__targlobal);
 XS(XS__targlobal) {
 	dXSARGS;
 	if (items != 6)
-		Perl_croak(aTHX_
-		           "Usage: quest::targlobal(stirng key, string value, string duration, int npc_id, int chararacter_id, int zone_id)");
+		Perl_croak(aTHX_ "Usage: quest::targlobal(stirng key, string value, string duration, int npc_id, int chararacter_id, int zone_id)");
 
 	char *key       = (char *) SvPV_nolen(ST(0));
 	char *str_value = (char *) SvPV_nolen(ST(1));
@@ -1411,8 +1407,7 @@ XS(XS__moveto);
 XS(XS__moveto) {
 	dXSARGS;
 	if (items != 3 && items != 4 && items != 5)
-		Perl_croak(aTHX_
-		           "Usage: quest::moveto(float x, float y, float z, [float heading], [bool save_guard_location])");
+		Perl_croak(aTHX_ "Usage: quest::moveto(float x, float y, float z, [float heading], [bool save_guard_location])");
 
 	float x = (float) SvNV(ST(0));
 	float y = (float) SvNV(ST(1));
@@ -1561,8 +1556,7 @@ XS(XS__set_proximity);
 XS(XS__set_proximity) {
 	dXSARGS;
 	if (items != 4 && items != 6 && items != 7)
-		Perl_croak(aTHX_
-		           "Usage: quest::set_proximity(float min_x, float max_x, float min_y, float max_y, [float min_z], [float max_z], [say])");
+		Perl_croak(aTHX_ "Usage: quest::set_proximity(float min_x, float max_x, float min_y, float max_y, [float min_z], [float max_z], [say])");
 
 	float min_x = (float) SvNV(ST(0));
 	float max_x = (float) SvNV(ST(1));
@@ -1643,8 +1637,7 @@ XS(XS__spawn_condition);
 XS(XS__spawn_condition) {
 	dXSARGS;
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_
-		           "Usage: quest::spawn_condition(string zone_short, [int instance_id], uint16 condition_id, int16 value)");
+		Perl_croak(aTHX_ "Usage: quest::spawn_condition(string zone_short, [int instance_id], uint16 condition_id, int16 value)");
 
 	if (items == 3) {
 		char   *zone_short  = (char *) SvPV_nolen(ST(0));
@@ -1701,8 +1694,7 @@ XS(XS__toggle_spawn_event);
 XS(XS__toggle_spawn_event) {
 	dXSARGS;
 	if (items != 4)
-		Perl_croak(aTHX_
-		           "Usage: quest::toggle_spawn_event(uint32 event_id, [bool is_enabled = false], [bool is_strict = false], [bool reset_base = false])");
+		Perl_croak(aTHX_ "Usage: quest::toggle_spawn_event(uint32 event_id, [bool is_enabled = false], [bool is_strict = false], [bool reset_base = false])");
 
 	uint32 event_id   = (int) SvIV(ST(0));
 	bool   is_enabled = ((int) SvIV(ST(1))) == 0 ? false : true;
@@ -1763,8 +1755,7 @@ XS(XS__summonburiedplayercorpse);
 XS(XS__summonburiedplayercorpse) {
 	dXSARGS;
 	if (items != 5)
-		Perl_croak(aTHX_
-		           "Usage: quest::summonburiedplayercorpse(uint32 char_id, float dest_x, float dest_y, float dest_z, float dest_heading)");
+		Perl_croak(aTHX_ "Usage: quest::summonburiedplayercorpse(uint32 char_id, float dest_x, float dest_y, float dest_z, float dest_heading)");
 
 	bool   RETVAL;
 	uint32 char_id  = (int) SvIV(ST(0));
@@ -1781,8 +1772,7 @@ XS(XS__summonallplayercorpses);
 XS(XS__summonallplayercorpses) {
 	dXSARGS;
 	if (items != 5)
-		Perl_croak(aTHX_
-		           "Usage: quest::summonallplayercorpses(int char_id, float dest_x, float dest_y, float dest_z, float dest_heading)");
+		Perl_croak(aTHX_ "Usage: quest::summonallplayercorpses(int char_id, float dest_x, float dest_y, float dest_z, float dest_heading)");
 
 	bool   RETVAL;
 	uint32 char_id  = (int) SvIV(ST(0));
@@ -2038,8 +2028,7 @@ XS(XS__playerfeature);
 XS(XS__playerfeature) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_
-		           "Usage: quest::playerfeature(string feature [race|gender|texture|helm|haircolor|beardcolor|eyecolor1|eyecolor2|hair|face|beard|heritage|tatoo|details|size], int setting)");
+		Perl_croak(aTHX_ "Usage: quest::playerfeature(string feature [race|gender|texture|helm|haircolor|beardcolor|eyecolor1|eyecolor2|hair|face|beard|heritage|tatoo|details|size], int setting)");
 
 	char *str_value = (char *) SvPV_nolen(ST(0));
 	int  int_value  = (int) SvIV(ST(1));
@@ -2053,8 +2042,7 @@ XS(XS__npcfeature);
 XS(XS__npcfeature) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_
-		           "Usage: quest::npcfeature(string feature [race|gender|texture|helm|haircolor|beardcolor|eyecolor1|eyecolor2|hair|face|beard|heritage|tatoo|details|size], int value)");
+		Perl_croak(aTHX_ "Usage: quest::npcfeature(string feature [race|gender|texture|helm|haircolor|beardcolor|eyecolor1|eyecolor2|hair|face|beard|heritage|tatoo|details|size], int value)");
 
 	char *str_value = (char *) SvPV_nolen(ST(0));
 	int  int_value  = (int) SvIV(ST(1));
@@ -2281,8 +2269,7 @@ XS(XS__updatetaskactivity) {
 		}
 		quest_manager.updatetaskactivity(task_id, activity_id, count, ignore_quest_update);
 	} else {
-		Perl_croak(aTHX_
-		           "Usage: quest::updatetaskactivity(int task_id, int activity_id, [int count], [bool ignore_quest_update = false])");
+		Perl_croak(aTHX_ "Usage: quest::updatetaskactivity(int task_id, int activity_id, [int count], [bool ignore_quest_update = false])");
 	}
 
 	XSRETURN_EMPTY;
@@ -2570,8 +2557,7 @@ XS(XS__popup) {
 	int duration = 0;
 
 	if ((items < 2) || (items > 5))
-		Perl_croak(aTHX_
-		           "Usage: quest::popup(string window_title, string message, int popup_id, int buttons, int duration)");
+		Perl_croak(aTHX_ "Usage: quest::popup(string window_title, string message, int popup_id, int buttons, int duration)");
 
 	if (items >= 3)
 		popup_id = (int) SvIV(ST(2));
@@ -2652,8 +2638,7 @@ XS(XS__CreateGroundObject);
 XS(XS__CreateGroundObject) {
 	dXSARGS;
 	if (items != 5 && items != 6)
-		Perl_croak(aTHX_
-		           "Usage: quest::creategroundobject(int item_id, float x, float y, float z, float heading, [uint32 decay_time-ms = 300000])");
+		Perl_croak(aTHX_ "Usage: quest::creategroundobject(int item_id, float x, float y, float z, float heading, [uint32 decay_time-ms = 300000])");
 
 	int    item_id = (int) SvIV(ST(0));
 	float  x       = (float) SvNV(ST(1));
@@ -2676,8 +2661,7 @@ XS(XS__CreateGroundObjectFromModel);
 XS(XS__CreateGroundObjectFromModel) {
 	dXSARGS;
 	if (items < 5 || items > 7)
-		Perl_croak(aTHX_
-		           "Usage: quest::creategroundobjectfrommodel(string model_name, float x, float y, float z, float heading, [int object_type], [uint32 decay_time-ms = 300000])");
+		Perl_croak(aTHX_ "Usage: quest::creategroundobjectfrommodel(string model_name, float x, float y, float z, float heading, [int object_type], [uint32 decay_time-ms = 300000])");
 
 	char   *modelname  = (char *) SvPV_nolen(ST(0));
 	float  x           = (float) SvNV(ST(1));
@@ -2702,8 +2686,7 @@ XS(XS__CreateDoor);
 XS(XS__CreateDoor) {
 	dXSARGS;
 	if (items < 5 || items > 7)
-		Perl_croak(aTHX_
-		           "Usage: quest::createdoor(string model_name, float x, float y, float z, float heading, [int object_type = 58], [int size = 100])");
+		Perl_croak(aTHX_ "Usage: quest::createdoor(string model_name, float x, float y, float z, float heading, [int object_type = 58], [int size = 100])");
 
 	char   *modelname  = (char *) SvPV_nolen(ST(0));
 	float  x           = (float) SvNV(ST(1));
@@ -3032,8 +3015,7 @@ XS(XS__MovePCInstance);
 XS(XS__MovePCInstance) {
 	dXSARGS;
 	if (items != 5 && items != 6)
-		Perl_croak(aTHX_
-		           "Usage: quest::MovePCInstance(int zone_id, int instance_id, float x, float y, float z, [float heading])");
+		Perl_croak(aTHX_ "Usage: quest::MovePCInstance(int zone_id, int instance_id, float x, float y, float z, [float heading])");
 
 	int   zone_id    = (int) SvIV(ST(0));
 	int   instanceid = (int) SvIV(ST(1));
@@ -3286,8 +3268,7 @@ XS(XS__wearchange);
 XS(XS__wearchange) {
 	dXSARGS;
 	if (items < 2)
-		Perl_croak(aTHX_
-		           "Usage: quest::wearchange(uint8 slot, uint16 texture_id, [uint32 hero_forge_model_id = 0], [uint32 elite_material_id = 0])");
+		Perl_croak(aTHX_ "Usage: quest::wearchange(uint8 slot, uint16 texture_id, [uint32 hero_forge_model_id = 0], [uint32 elite_material_id = 0])");
 
 	uint8  slot       = (int) SvUV(ST(0));
 	uint16 texture_id = (int) SvUV(ST(1));
@@ -3535,8 +3516,7 @@ XS(XS__crosszonesetentityvariablebynpctypeid) {
 	dXSARGS;
 
 	if (items != 3)
-		Perl_croak(aTHX_
-		           "Usage: quest::crosszonesetentityvariablebynpctypeid(int npc_type_id, string key, string value)");
+		Perl_croak(aTHX_ "Usage: quest::crosszonesetentityvariablebynpctypeid(int npc_type_id, string key, string value)");
 
 	if (items == 3) {
 		uint32     npc_type_id = (uint32) SvIV(ST(0));
@@ -3553,8 +3533,7 @@ XS(XS__crosszonesetentityvariablebyclientname) {
 	dXSARGS;
 
 	if (items != 3)
-		Perl_croak(aTHX_
-		           "Usage: quest::crosszonesetentityvariablebyclientname(string client_name, string key, string value)");
+		Perl_croak(aTHX_ "Usage: quest::crosszonesetentityvariablebyclientname(string client_name, string key, string value)");
 
 	if (items == 3) {
 		const char *client_name = (const char *) SvPV_nolen(ST(0));
@@ -3586,8 +3565,7 @@ XS(XS__worldwidemarquee);
 XS(XS__worldwidemarquee) {
 	dXSARGS;
 	if (items != 6)
-		Perl_croak(aTHX_
-		           "Usage: quest::worldwidemarquee(uint32 color_id, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, string message)");
+		Perl_croak(aTHX_ "Usage: quest::worldwidemarquee(uint32 color_id, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, string message)");
 
 	if (items == 6) {
 		uint32 color_id = (uint32) SvIV(ST(0));
