@@ -432,6 +432,7 @@ void ZSList::SendChannelMessageRaw(const char* from, const char* to, uint8 chan_
 	}
 
 	scm->language = language;
+	scm->lang_skill = 100;
 	scm->chan_num = chan_num;
 	strcpy(&scm->message[0], message);
 
