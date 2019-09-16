@@ -564,16 +564,16 @@ bool RuleManager::RestoreRuleNotes(Database *db)
 	int update_count = 0;
 	for (auto row = results.begin(); row != results.end(); ++row) {
 
-		const auto &rule = [&row]() {
+		auto rule = [](const char *rule_name) {
 
-			for (const auto &rule_iter : s_RuleInfo) {
-				if (strcasecmp(rule_iter.name, row[1]) == 0) {
+			for (auto rule_iter : s_RuleInfo) {
+				if (strcasecmp(rule_iter.name, rule_name) == 0) {
 					return rule_iter;
 				}
 			}
 
 			return s_RuleInfo[_IntRuleCount+_RealRuleCount+_BoolRuleCount];
-		}();
+		}(row[1]);
 
 		if (strcasecmp(rule.name, row[1]) != 0) {
 			continue;
