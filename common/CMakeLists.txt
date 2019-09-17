@@ -73,7 +73,6 @@ SET(common_sources
 	textures.cpp
 	timer.cpp
 	unix.cpp
-	xml_parser.cpp
 	platform.cpp
 	json/jsoncpp.cpp
 	net/console_server.cpp
@@ -104,10 +103,6 @@ SET(common_sources
 	patches/uf.cpp
 	patches/uf_limits.cpp
 	StackWalker/StackWalker.cpp
-	tinyxml/tinystr.cpp
-	tinyxml/tinyxml.cpp
-	tinyxml/tinyxmlerror.cpp
-	tinyxml/tinyxmlparser.cpp
 	util/directory.cpp
 	util/uuid.cpp)
 
@@ -215,7 +210,6 @@ SET(common_headers
 	unix.h
 	useperl.h
 	version.h
-	xml_parser.h
 	zone_numbers.h
 	event/event_loop.h
 	event/task.h
@@ -269,8 +263,6 @@ SET(common_headers
 	patches/uf_ops.h
 	patches/uf_structs.h
 	StackWalker/StackWalker.h
-	tinyxml/tinystr.h
-	tinyxml/tinyxml.h
 	util/memory_stream.h
 	util/directory.h
 	util/uuid.h)
@@ -373,15 +365,6 @@ SOURCE_GROUP(StackWalker FILES
 	StackWalker/StackWalker.cpp
 )
 
-SOURCE_GROUP(TinyXML FILES
-	tinyxml/tinystr.h
-	tinyxml/tinyxml.h
-	tinyxml/tinystr.cpp
-	tinyxml/tinyxml.cpp
-	tinyxml/tinyxmlerror.cpp
-	tinyxml/tinyxmlparser.cpp
-)
-
 SOURCE_GROUP(Util FILES
 	util/memory_stream.h
 	util/directory.cpp
@@ -390,7 +373,7 @@ SOURCE_GROUP(Util FILES
 	util/uuid.h
 )
 
-INCLUDE_DIRECTORIES(Patches SocketLib StackWalker TinyXML)
+INCLUDE_DIRECTORIES(Patches SocketLib StackWalker)
 
 ADD_LIBRARY(common ${common_sources} ${common_headers})
 
