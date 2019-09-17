@@ -1501,7 +1501,7 @@ bool SharedDatabase::UpdateOrphanedCommandSettings(const std::vector<std::string
 		}
 
 		LogInfo(
-			"%u Orphaned Command%s Deleted",
+			"{} Orphaned Command{} Deleted",
 			orphaned.size(),
 			(orphaned.size() == 1 ? "" : "s")
 		);
