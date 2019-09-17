@@ -4121,7 +4121,7 @@ bool ZoneDatabase::LoadFactionData()
 		faction_ids.push_back(index);
 	}
 
-	LogInfo("%u Faction%s loaded...", faction_ids.size(), (faction_ids.size() == 1 ? "" : "s"));
+	LogInfo("[{}] Faction(s) loaded...", faction_ids.size());
 
 	const std::string faction_id_criteria(implode(",", std::pair<char, char>('\'', '\''), faction_ids));
 
@@ -4135,12 +4135,12 @@ bool ZoneDatabase::LoadFactionData()
 
 			uint32 index = atoul(br_row[0]);
 			if (index > max_faction) {
-				LogError("Faction '%u' is out-of-bounds for faction array size in Base adjustment!", index);
+				LogError("Faction [{}] is out-of-bounds for faction array size in Base adjustment!", index);
 				continue;
 			}
 
 			if (faction_array[index] == nullptr) {
-				LogError("Faction '%u' does not exist for Base adjustment!", index);
+				LogError("Faction [{}] does not exist for Base adjustment!", index);
 				continue;
 			}
 
@@ -4148,7 +4148,7 @@ bool ZoneDatabase::LoadFactionData()
 			faction_array[index]->max = atoi(br_row[2]);
 		}
 
-		LogInfo("%u Faction Base%s loaded...", base_results.RowCount(), (base_results.RowCount() == 1 ? "" : "s"));
+		LogInfo("[{}] Faction Base(s) loaded...", base_results.RowCount());
 	}
 	else {
 		LogInfo("Unable to load Faction Base data...");
