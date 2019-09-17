@@ -554,7 +554,7 @@ bool RuleManager::UpdateOrphanedRules(Database *db, bool quiet_update)
 
 bool RuleManager::RestoreRuleNotes(Database *db)
 {
-	std::string query("SELECT `ruleset_id`, `rule_name`, IFNULL(`notes`, '\\0')`notes` FROM `rule_values`");
+	std::string query("SELECT `ruleset_id`, `rule_name`, `notes` FROM `rule_values`");
 
 	auto results = db->QueryDatabase(query);
 	if (!results.Success()) {
@@ -579,7 +579,7 @@ bool RuleManager::RestoreRuleNotes(Database *db)
 			continue;
 		}
 
-		if (rule.notes.compare(row[2]) == 0) {
+		if (row[2] != nullptr && rule.notes.compare(row[2]) == 0) {
 			continue;
 		}
 
