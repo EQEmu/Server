@@ -42,7 +42,7 @@ namespace LoginserverWebserver {
 		server.token_manager->LoadApiTokens();
 
 		api.Get(
-			"/servers/list", [](const httplib::Request &request, httplib::Response &res) {
+			"/v1/servers/list", [](const httplib::Request &request, httplib::Response &res) {
 				if (!LoginserverWebserver::TokenManager::AuthCanRead(request, res)) {
 					return;
 				}
@@ -68,7 +68,7 @@ namespace LoginserverWebserver {
 		);
 
 		api.Post(
-			"/account/create", [](const httplib::Request &request, httplib::Response &res) {
+			"/v1/account/create", [](const httplib::Request &request, httplib::Response &res) {
 				if (!LoginserverWebserver::TokenManager::AuthCanWrite(request, res)) {
 					return;
 				}
@@ -105,7 +105,7 @@ namespace LoginserverWebserver {
 		);
 
 		api.Post(
-			"/account/create/external", [](const httplib::Request &request, httplib::Response &res) {
+			"/v1/account/create/external", [](const httplib::Request &request, httplib::Response &res) {
 				if (!LoginserverWebserver::TokenManager::AuthCanWrite(request, res)) {
 					return;
 				}
@@ -151,7 +151,7 @@ namespace LoginserverWebserver {
 		);
 
 		api.Post(
-			"/account/credentials/validate/local", [](const httplib::Request &request, httplib::Response &res) {
+			"/v1/account/credentials/validate/local", [](const httplib::Request &request, httplib::Response &res) {
 				if (!LoginserverWebserver::TokenManager::AuthCanRead(request, res)) {
 					return;
 				}
@@ -187,7 +187,7 @@ namespace LoginserverWebserver {
 		);
 
 		api.Post(
-			"/account/credentials/update/local", [](const httplib::Request &request, httplib::Response &res) {
+			"/v1/account/credentials/update/local", [](const httplib::Request &request, httplib::Response &res) {
 				if (!LoginserverWebserver::TokenManager::AuthCanWrite(request, res)) {
 					return;
 				}
@@ -235,7 +235,7 @@ namespace LoginserverWebserver {
 
 
 		api.Post(
-			"/account/credentials/update/external", [](const httplib::Request &request, httplib::Response &res) {
+			"/v1/account/credentials/update/external", [](const httplib::Request &request, httplib::Response &res) {
 				if (!LoginserverWebserver::TokenManager::AuthCanWrite(request, res)) {
 					return;
 				}
@@ -283,7 +283,7 @@ namespace LoginserverWebserver {
 		);
 
 		api.Post(
-			"/account/credentials/validate/external", [](const httplib::Request &request, httplib::Response &res) {
+			"/v1/account/credentials/validate/external", [](const httplib::Request &request, httplib::Response &res) {
 				if (!LoginserverWebserver::TokenManager::AuthCanRead(request, res)) {
 					return;
 				}
