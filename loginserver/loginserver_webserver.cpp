@@ -29,6 +29,10 @@ extern LoginServer server;
 
 namespace LoginserverWebserver {
 
+	constexpr static int HTTP_RESPONSE_OK           = 200;
+	constexpr static int HTTP_RESPONSE_BAD_REQUEST  = 400;
+	constexpr static int HTTP_RESPONSE_UNAUTHORIZED = 401;
+
 	/**
 	 * @param api
 	 */
@@ -77,6 +81,7 @@ namespace LoginserverWebserver {
 				Json::Value response;
 				if (username.empty() || password.empty()) {
 					response["error"] = "Username or password not set";
+					res.status = HTTP_RESPONSE_BAD_REQUEST;
 					LoginserverWebserver::SendResponse(response, res);
 					return;
 				}
@@ -87,9 +92,11 @@ namespace LoginserverWebserver {
 					response["data"]["account_id"] = account_created_id;
 				}
 				else if (account_created_id == -1) {
+					res.status = HTTP_RESPONSE_BAD_REQUEST;
 					response["error"] = "Account already exists!";
 				}
 				else {
+					res.status = HTTP_RESPONSE_BAD_REQUEST;
 					response["error"] = "Account failed to create!";
 				}
 
@@ -111,6 +118,7 @@ namespace LoginserverWebserver {
 
 				Json::Value response;
 				if (username.empty() || password.empty()) {
+					res.status = HTTP_RESPONSE_BAD_REQUEST;
 					response["error"] = "Username or password not set";
 					LoginserverWebserver::SendResponse(response, res);
 					return;
@@ -130,9 +138,11 @@ namespace LoginserverWebserver {
 					response["data"]["account_id"] = account_created_id;
 				}
 				else if (account_created_id == -1) {
+					res.status = HTTP_RESPONSE_BAD_REQUEST;
 					response["error"] = "Account already exists!";
 				}
 				else {
+					res.status = HTTP_RESPONSE_BAD_REQUEST;
 					response["error"] = "Account failed to create!";
 				}
 
@@ -152,6 +162,7 @@ namespace LoginserverWebserver {
 
 				Json::Value response;
 				if (username.empty() || password.empty()) {
+					res.status = HTTP_RESPONSE_BAD_REQUEST;
 					response["error"] = "Username or password not set";
 					LoginserverWebserver::SendResponse(response, res);
 					return;
@@ -167,6 +178,7 @@ namespace LoginserverWebserver {
 					response["data"]["account_id"] = login_account_id;
 				}
 				else {
+					res.status = HTTP_RESPONSE_BAD_REQUEST;
 					response["error"] = "Credentials invalid!";
 				}
 
@@ -186,6 +198,7 @@ namespace LoginserverWebserver {
 
 				Json::Value response;
 				if (username.empty() || password.empty()) {
+					res.status = HTTP_RESPONSE_BAD_REQUEST;
 					response["error"] = "Username or password not set";
 					LoginserverWebserver::SendResponse(response, res);
 					return;
@@ -197,6 +210,7 @@ namespace LoginserverWebserver {
 				);
 
 				if (!login_server_account.loaded) {
+					res.status = HTTP_RESPONSE_BAD_REQUEST;
 					response["error"] = "Failed to find associated loginserver account!";
 					LoginserverWebserver::SendResponse(response, res);
 					return;
@@ -211,6 +225,7 @@ namespace LoginserverWebserver {
 					response["message"] = "Loginserver account credentials updated!";
 				}
 				else {
+					res.status = HTTP_RESPONSE_BAD_REQUEST;
 					response["error"] = "Failed to update loginserver account credentials!";
 				}
 
@@ -295,6 +310,7 @@ namespace LoginserverWebserver {
 				}
 				else {
 					response["error"] = "Credentials invalid!";
+					res.status = HTTP_RESPONSE_BAD_REQUEST;
 				}
 
 				LoginserverWebserver::SendResponse(response, res);
@@ -363,6 +379,8 @@ namespace LoginserverWebserver {
 			std::stringstream response_payload;
 			response["message"] = "Authorization token is either invalid or cannot read!";
 			response_payload << response;
+
+			res.status = HTTP_RESPONSE_UNAUTHORIZED;
 			res.set_content(response_payload.str(), "application/json");
 			res.set_header("response_set", "true");
 
@@ -392,6 +410,8 @@ namespace LoginserverWebserver {
 			std::stringstream response_payload;
 			response["message"] = "Authorization token is either invalid or cannot write!";
 			response_payload << response;
+
+			res.status = HTTP_RESPONSE_UNAUTHORIZED;
 			res.set_content(response_payload.str(), "application/json");
 			res.set_header("response_set", "true");
 
@@ -456,8 +476,9 @@ namespace LoginserverWebserver {
 	 */
 	void TokenManager::LoadApiTokens()
 	{
-		auto      results = server.db->GetLoginserverApiTokens();
-		for (auto row     = results.begin(); row != results.end(); ++row) {
+		auto      results     = server.db->GetLoginserverApiTokens();
+		int       token_count = 0;
+		for (auto row         = results.begin(); row != results.end(); ++row) {
 			LoginserverWebserver::TokenManager::token_data token_data;
 			token_data.token     = row[0];
 			token_data.can_write = std::stoi(row[1]) > 0;
@@ -476,7 +497,11 @@ namespace LoginserverWebserver {
 					token_data
 				)
 			);
+
+			token_count++;
 		}
+
+		LogInfo("Loaded [{}] API tokens", token_count);
 	}
 
 	/**
