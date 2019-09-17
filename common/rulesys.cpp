@@ -602,6 +602,8 @@ bool RuleManager::RestoreRuleNotes(Database *db)
 	if (update_count > 0) {
 		Log(Logs::General, Logs::Status, "%u Rule Note%s Restored", update_count, (update_count == 1 ? "" : "s"));
 	}
+
+	return true;
 }
 
 int RuleManager::GetRulesetID(Database *database, const char *ruleset_name) {
