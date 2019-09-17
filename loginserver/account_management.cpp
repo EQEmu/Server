@@ -193,7 +193,7 @@ uint32 AccountManagement::CheckLoginserverUserCredentials(
 		return 0;
 	}
 
-	LogDebug(
+	LogInfo(
 		"CheckLoginUserCredentials account [{0}] source_loginserver [{1}] credentials validated success!",
 		in_account_username,
 		source_loginserver
@@ -242,7 +242,7 @@ bool AccountManagement::UpdateLoginserverUserCredentials(
 		)
 	);
 
-	LogDebug(
+	LogInfo(
 		"ChangeLoginserverUserCredentials account [{0}] source_loginserver [{1}] credentials updated!",
 		in_account_username,
 		source_loginserver
