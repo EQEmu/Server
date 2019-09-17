@@ -550,7 +550,7 @@ bool RuleManager::UpdateOrphanedRules(Database *db, bool quiet_update)
 
 bool RuleManager::RestoreRuleNotes(Database *db)
 {
-	std::string query("SELECT `ruleset_id`, `rule_name`, IFNULL(`notes`, '\\0')`notes` FROM `rule_values`");
+	std::string query("SELECT `ruleset_id`, `rule_name`, `notes` FROM `rule_values`");
 
 	auto results = db->QueryDatabase(query);
 	if (!results.Success()) {
@@ -560,22 +560,22 @@ bool RuleManager::RestoreRuleNotes(Database *db)
 	int update_count = 0;
 	for (auto row = results.begin(); row != results.end(); ++row) {
 
-		const auto &rule = [&row]() {
+		auto rule = [](const char *rule_name) {
 
-			for (const auto &rule_iter : s_RuleInfo) {
-				if (strcasecmp(rule_iter.name, row[1]) == 0) {
+			for (auto rule_iter : s_RuleInfo) {
+				if (strcasecmp(rule_iter.name, rule_name) == 0) {
 					return rule_iter;
 				}
 			}
 
 			return s_RuleInfo[_IntRuleCount+_RealRuleCount+_BoolRuleCount];
-		}();
+		}(row[1]);
 
 		if (strcasecmp(rule.name, row[1]) != 0) {
 			continue;
 		}
 
-		if (rule.notes.compare(row[2]) == 0) {
+		if (row[2] != nullptr && rule.notes.compare(row[2]) == 0) {
 			continue;
 		}
 
@@ -598,6 +598,8 @@ bool RuleManager::RestoreRuleNotes(Database *db)
 	if (update_count > 0) {
 		LogInfo("%u Rule Note%s Restored", update_count, (update_count == 1 ? "" : "s"));
 	}
+
+	return true;
 }
 
 int RuleManager::GetRulesetID(Database *database, const char *ruleset_name) {
