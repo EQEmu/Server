@@ -447,7 +447,7 @@ bool RuleManager::UpdateInjectedRules(Database *db, const char *ruleset_name, bo
 
 			if (!quiet_update) {
 				LogInfo(
-					"New Rule '%s' found... Adding to `rule_values` table with ruleset '%s' (%i) and rule value '%s'...",
+					"Adding new rule [{}] ruleset [{}] ({}) value [{}]",
 					rd_iter.first.c_str(),
 					ruleset_name,
 					ruleset_id,
@@ -475,9 +475,8 @@ bool RuleManager::UpdateInjectedRules(Database *db, const char *ruleset_name, bo
 		}
 
 		LogInfo(
-			"%u New Rule%s Added to ruleset '%s' (%i)",
+			"[{}] New rule(s) added to ruleset [{}] [{}]",
 			injected_rule_entries.size(),
-			(injected_rule_entries.size() == 1 ? "" : "s"),
 			ruleset_name,
 			ruleset_id
 		);
@@ -518,7 +517,7 @@ bool RuleManager::UpdateOrphanedRules(Database *db, bool quiet_update)
 
 			if (!quiet_update) {
 				LogInfo(
-					"Rule '%s' no longer exists... Deleting orphaned entry from `rule_values` table...",
+					"Rule [{}] no longer exists... Deleting orphaned entry from `rule_values` table...",
 					row[0]
 				);
 			}
@@ -539,7 +538,7 @@ bool RuleManager::UpdateOrphanedRules(Database *db, bool quiet_update)
 		}
 
 		LogInfo(
-			"%u Orphaned Rule%s Deleted from 'All Rulesets' (-1)",
+			"[{}] Orphaned Rule%s Deleted from 'All Rulesets' (-1)",
 			orphaned_rule_entries.size(),
 			(orphaned_rule_entries.size() == 1 ? "" : "s")
 		);
@@ -596,7 +595,7 @@ bool RuleManager::RestoreRuleNotes(Database *db)
 	}
 
 	if (update_count > 0) {
-		LogInfo("%u Rule Note%s Restored", update_count, (update_count == 1 ? "" : "s"));
+		LogInfo("[{}] Rule Note [{}] Restored", update_count, (update_count == 1 ? "" : "s"));
 	}
 
 	return true;

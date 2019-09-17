@@ -501,7 +501,7 @@ namespace LoginserverWebserver {
 			token_count++;
 		}
 
-		LogInfo("Loaded [{}] API tokens", token_count);
+		LogInfo("Loaded [{}] API token(s)", token_count);
 	}
 
 	/**
