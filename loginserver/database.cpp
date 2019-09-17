@@ -499,8 +499,8 @@ bool Database::CreateWorldRegistration(
 		"INSERT INTO login_world_servers SET id = {0}, long_name = '{1}', short_name = '{2}', last_ip_address = '{3}', \n"
 		"login_server_list_type_id = 3, login_server_admin_id = {4}, is_server_trusted = 0, tag_description = ''",
 		id,
-		server_long_name,
-		server_short_name,
+		EscapeString(server_long_name),
+		EscapeString(server_short_name),
 		server_remote_ip,
 		server_admin_id
 	);
@@ -512,7 +512,6 @@ bool Database::CreateWorldRegistration(
 			server_long_name,
 			server_short_name
 		);
-
 
 		return false;
 	}
