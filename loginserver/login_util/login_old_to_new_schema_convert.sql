@@ -80,3 +80,8 @@ SELECT
   `Note`
 FROM
   tblWorldServerRegistration;
+
+DROP TABLE tblLoginServerAccounts;
+DROP TABLE tblServerAdminRegistration;
+DROP TABLE tblWorldServerRegistration;
+DROP TABLE tblServerListType;
