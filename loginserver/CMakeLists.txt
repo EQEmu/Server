@@ -1,25 +1,26 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 SET(eqlogin_sources
+	account_management.cpp
 	client.cpp
 	client_manager.cpp
-	config.cpp
-	database_mysql.cpp
-	database_postgresql.cpp
+	database.cpp
 	encryption.cpp
+	loginserver_command_handler.cpp
+	loginserver_webserver.cpp
 	main.cpp
 	server_manager.cpp
 	world_server.cpp
 )
 
 SET(eqlogin_headers
+	account_management.h
 	client.h
 	client_manager.h
-	config.h
 	database.h
-	database_mysql.h
-	database_postgresql.h
 	encryption.h
+	loginserver_command_handler.h
+	loginserver_webserver.h
 	login_server.h
 	login_structures.h
 	options.h

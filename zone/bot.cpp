@@ -1324,7 +1324,7 @@ int32 Bot::acmod() {
 	else
 		return (65 + ((agility - 300) / 21));
 #if EQDEBUG >= 11
-	Log(Logs::General, Logs::Error, "Error in Bot::acmod(): Agility: %i, Level: %i",agility,level);
+	LogError("Error in Bot::acmod(): Agility: [{}], Level: [{}]",agility,level);
 #endif
 	return 0;
 }
@@ -2081,7 +2081,7 @@ void Bot::BotRangedAttack(Mob* other) {
 	//make sure the attack and ranged timers are up
 	//if the ranged timer is disabled, then they have no ranged weapon and shouldent be attacking anyhow
 	if((attack_timer.Enabled() && !attack_timer.Check(false)) || (ranged_timer.Enabled() && !ranged_timer.Check())) {
-		Log(Logs::Detail, Logs::Combat, "Bot Archery attack canceled. Timer not up. Attack %d, ranged %d", attack_timer.GetRemainingTime(), ranged_timer.GetRemainingTime());
+		LogCombat("Bot Archery attack canceled. Timer not up. Attack [{}], ranged [{}]", attack_timer.GetRemainingTime(), ranged_timer.GetRemainingTime());
 		Message(0, "Error: Timer not up. Attack %d, ranged %d", attack_timer.GetRemainingTime(), ranged_timer.GetRemainingTime());
 		return;
 	}
@@ -2099,7 +2099,7 @@ void Bot::BotRangedAttack(Mob* other) {
 	if(!RangeWeapon || !Ammo)
 		return;
 
-	Log(Logs::Detail, Logs::Combat, "Shooting %s with bow %s (%d) and arrow %s (%d)", other->GetCleanName(), RangeWeapon->Name, RangeWeapon->ID, Ammo->Name, Ammo->ID);
+	LogCombat("Shooting [{}] with bow [{}] ([{}]) and arrow [{}] ([{}])", other->GetCleanName(), RangeWeapon->Name, RangeWeapon->ID, Ammo->Name, Ammo->ID);
 	if(!IsAttackAllowed(other) || IsCasting() || DivineAura() || IsStunned() || IsMezzed() || (GetAppearance() == eaDead))
 		return;
 
@@ -2109,21 +2109,21 @@ void Bot::BotRangedAttack(Mob* other) {
 
 	//break invis when you attack
 	if(invisible) {
-		Log(Logs::Detail, Logs::Combat, "Removing invisibility due to melee attack.");
+		LogCombat("Removing invisibility due to melee attack");
 		BuffFadeByEffect(SE_Invisibility);
 		BuffFadeByEffect(SE_Invisibility2);
 		invisible = false;
 	}
 
 	if(invisible_undead) {
-		Log(Logs::Detail, Logs::Combat, "Removing invisibility vs. undead due to melee attack.");
+		LogCombat("Removing invisibility vs. undead due to melee attack");
 		BuffFadeByEffect(SE_InvisVsUndead);
 		BuffFadeByEffect(SE_InvisVsUndead2);
 		invisible_undead = false;
 	}
 
 	if(invisible_animals) {
-		Log(Logs::Detail, Logs::Combat, "Removing invisibility vs. animals due to melee attack.");
+		LogCombat("Removing invisibility vs. animals due to melee attack");
 		BuffFadeByEffect(SE_InvisVsAnimals);
 		invisible_animals = false;
 	}
@@ -2363,7 +2363,7 @@ void Bot::AI_Process() {
 		Mob* delete_me = HealRotationTarget();
 		if (AIHealRotation(HealRotationTarget(), UseHealRotationFastHeals())) {
 #if (EQDEBUG >= 12)
-			Log(Logs::General, Logs::Error, "Bot::AI_Process() - Casting succeeded (m: %s, t: %s) : AdvHR(true)", GetCleanName(), ((delete_me) ? (delete_me->GetCleanName()) : ("nullptr")));
+			LogError("Bot::AI_Process() - Casting succeeded (m: [{}], t: [{}]) : AdvHR(true)", GetCleanName(), ((delete_me) ? (delete_me->GetCleanName()) : ("nullptr")));
 #endif
 			m_member_of_heal_rotation->SetMemberIsCasting(this);
 			m_member_of_heal_rotation->UpdateTargetHealingStats(HealRotationTarget());
@@ -2371,7 +2371,7 @@ void Bot::AI_Process() {
 		}
 		else {
 #if (EQDEBUG >= 12)
-			Log(Logs::General, Logs::Error, "Bot::AI_Process() - Casting failed (m: %s, t: %s) : AdvHR(false)", GetCleanName(), ((delete_me) ? (delete_me->GetCleanName()) : ("nullptr")));
+			LogError("Bot::AI_Process() - Casting failed (m: [{}], t: [{}]) : AdvHR(false)", GetCleanName(), ((delete_me) ? (delete_me->GetCleanName()) : ("nullptr")));
 #endif
 			m_member_of_heal_rotation->SetMemberIsCasting(this, false);
 			AdvanceHealRotation(false);
@@ -2884,7 +2884,7 @@ void Bot::AI_Process() {
 		else { // To far away to fight (GetTarget() validity can be iffy below this point - including outer scopes)
 			if (AI_movement_timer->Check() && (!spellend_timer.Enabled() || GetClass() == BARD)) { // Pursue processing
 				if (GetTarget() && !IsRooted()) {
-					Log(Logs::Detail, Logs::AI, "Pursuing %s while engaged.", GetTarget()->GetCleanName());
+					LogAI("Pursuing [{}] while engaged", GetTarget()->GetCleanName());
 
 					Goal = GetTarget()->GetPosition();
 										
@@ -3189,7 +3189,7 @@ void Bot::PetAIProcess() {
 				else if (botPet->GetTarget() && botPet->GetAIMovementTimer()->Check()) {
 					botPet->SetRunAnimSpeed(0);
 					if(!botPet->IsRooted()) {
-						Log(Logs::Detail, Logs::AI, "Pursuing %s while engaged.", botPet->GetTarget()->GetCleanName());
+						LogAI("Pursuing [{}] while engaged", botPet->GetTarget()->GetCleanName());
 						botPet->RunTo(botPet->GetTarget()->GetX(), botPet->GetTarget()->GetY(), botPet->GetTarget()->GetZ());
 						return;
 					} else {
@@ -4286,7 +4286,7 @@ void Bot::Damage(Mob *from, int32 damage, uint16 spell_id, EQEmu::skills::SkillT
 
 	//handle EVENT_ATTACK. Resets after we have not been attacked for 12 seconds
 	if(attacked_timer.Check()) {
-		Log(Logs::Detail, Logs::Combat, "Triggering EVENT_ATTACK due to attack by %s", from->GetName());
+		LogCombat("Triggering EVENT_ATTACK due to attack by [{}]", from->GetName());
 		parse->EventNPC(EVENT_ATTACK, this, from, "", 0);
 	}
 
@@ -4294,7 +4294,7 @@ void Bot::Damage(Mob *from, int32 damage, uint16 spell_id, EQEmu::skills::SkillT
 	// if spell is lifetap add hp to the caster
 	if (spell_id != SPELL_UNKNOWN && IsLifetapSpell(spell_id)) {
 		int healed = GetActSpellHealing(spell_id, damage);
-		Log(Logs::Detail, Logs::Combat, "Applying lifetap heal of %d to %s", healed, GetCleanName());
+		LogCombat("Applying lifetap heal of [{}] to [{}]", healed, GetCleanName());
 		HealDamage(healed);
 		entity_list.MessageClose(this, true, 300, Chat::Spells, "%s beams a smile at %s", GetCleanName(), from->GetCleanName() );
 	}
@@ -4330,13 +4330,13 @@ void Bot::AddToHateList(Mob* other, uint32 hate, int32 damage, bool iYellForHelp
 bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts) {	
 	if (!other) {
 		SetTarget(nullptr);
-		Log(Logs::General, Logs::Error, "A null Mob object was passed to Bot::Attack for evaluation!");
+		LogError("A null Mob object was passed to Bot::Attack for evaluation!");
 		return false;
 	}
 
 	if ((GetHP() <= 0) || (GetAppearance() == eaDead)) {
 		SetTarget(nullptr);
-		Log(Logs::Detail, Logs::Combat, "Attempted to attack %s while unconscious or, otherwise, appearing dead", other->GetCleanName());
+		LogCombat("Attempted to attack [{}] while unconscious or, otherwise, appearing dead", other->GetCleanName());
 		return false;
 	}
 
@@ -4348,20 +4348,20 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 	// takes more to compare a call result, load for a call, load a compare to address and compare, and finally
 	// push a value to an address than to just load for a call and push a value to an address.
 	
-	Log(Logs::Detail, Logs::Combat, "Attacking %s with hand %d %s", other->GetCleanName(), Hand, (FromRiposte ? "(this is a riposte)" : ""));
+	LogCombat("Attacking [{}] with hand [{}] [{}]", other->GetCleanName(), Hand, (FromRiposte ? "(this is a riposte)" : ""));
 	if ((IsCasting() && (GetClass() != BARD) && !IsFromSpell) || (!IsAttackAllowed(other))) {
 		if(this->GetOwnerID())
 			entity_list.MessageClose(this, 1, 200, 10, "%s says, '%s is not a legal target master.'", this->GetCleanName(), this->GetTarget()->GetCleanName());
 
 		if(other) {
 			RemoveFromHateList(other);
-			Log(Logs::Detail, Logs::Combat, "I am not allowed to attack %s", other->GetCleanName());
+			LogCombat("I am not allowed to attack [{}]", other->GetCleanName());
 		}
 		return false;
 	}
 
 	if(DivineAura()) {//cant attack while invulnerable
-		Log(Logs::Detail, Logs::Combat, "Attack canceled, Divine Aura is in effect.");
+		LogCombat("Attack canceled, Divine Aura is in effect");
 		return false;
 	}
 
@@ -4379,19 +4379,19 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 
 	if(weapon != nullptr) {
 		if (!weapon->IsWeapon()) {
-			Log(Logs::Detail, Logs::Combat, "Attack canceled, Item %s (%d) is not a weapon.", weapon->GetItem()->Name, weapon->GetID());
+			LogCombat("Attack canceled, Item [{}] ([{}]) is not a weapon", weapon->GetItem()->Name, weapon->GetID());
 			return false;
 		}
-		Log(Logs::Detail, Logs::Combat, "Attacking with weapon: %s (%d)", weapon->GetItem()->Name, weapon->GetID());
+		LogCombat("Attacking with weapon: [{}] ([{}])", weapon->GetItem()->Name, weapon->GetID());
 	}
 	else
-		Log(Logs::Detail, Logs::Combat, "Attacking without a weapon.");
+		LogCombat("Attacking without a weapon");
 
 	// calculate attack_skill and skillinuse depending on hand and weapon
 	// also send Packet to near clients
 	DamageHitInfo my_hit;
 	my_hit.skill = AttackAnimation(Hand, weapon);
-	Log(Logs::Detail, Logs::Combat, "Attacking with %s in slot %d using skill %d", weapon?weapon->GetItem()->Name:"Fist", Hand, my_hit.skill);
+	LogCombat("Attacking with [{}] in slot [{}] using skill [{}]", weapon?weapon->GetItem()->Name:"Fist", Hand, my_hit.skill);
 
 	// Now figure out damage
 	my_hit.damage_done = 1;
@@ -4439,7 +4439,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 			}
 		}
 
-		Log(Logs::Detail, Logs::Combat, "Damage calculated: base %d min damage %d skill %d", my_hit.base_damage, my_hit.min_damage, my_hit.skill);
+		LogCombat("Damage calculated: base [{}] min damage [{}] skill [{}]", my_hit.base_damage, my_hit.min_damage, my_hit.skill);
 
 		int hit_chance_bonus = 0;
 		my_hit.offense = offense(my_hit.skill);
@@ -4457,7 +4457,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 
 		DoAttack(other, my_hit, opts);
 
-		Log(Logs::Detail, Logs::Combat, "Final damage after all reductions: %d", my_hit.damage_done);
+		LogCombat("Final damage after all reductions: [{}]", my_hit.damage_done);
 	} else {
 		my_hit.damage_done = DMG_INVULNERABLE;
 	}
@@ -5069,7 +5069,7 @@ int32 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 							return 0;
 						break;
 					default:
-						Log(Logs::General, Logs::Normal, "CalcFocusEffect: unknown limit spelltype %d", focus_spell.base[i]);
+						LogInfo("CalcFocusEffect: unknown limit spelltype [{}]", focus_spell.base[i]);
 				}
 				break;
 
@@ -5283,7 +5283,7 @@ int32 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 				break;
 			}
 			default:
-				Log(Logs::General, Logs::Spells, "CalcFocusEffect: unknown effectid %d", focus_spell.effectid[i]);
+				LogSpells("CalcFocusEffect: unknown effectid [{}]", focus_spell.effectid[i]);
 				break;
 		}
 	}
@@ -5323,7 +5323,7 @@ float Bot::GetProcChances(float ProcBonus, uint16 hand) {
 		ProcChance += (ProcChance * ProcBonus / 100.0f);
 	}
 
-	Log(Logs::Detail, Logs::Combat, "Proc chance %.2f (%.2f from bonuses)", ProcChance, ProcBonus);
+	LogCombat("Proc chance [{}] ([{}] from bonuses)", ProcChance, ProcBonus);
 	return ProcChance;
 }
 
@@ -5377,13 +5377,13 @@ bool Bot::TryFinishingBlow(Mob *defender, int &damage)
 		int fb_damage = aabonuses.FinishingBlow[1];
 		int levelreq = aabonuses.FinishingBlowLvl[0];
 		if (defender->GetLevel() <= levelreq && (chance >= zone->random.Int(1, 1000))) {
-			Log(Logs::Detail, Logs::Combat, "Landed a finishing blow: levelreq at %d, other level %d",
+			LogCombat("Landed a finishing blow: levelreq at [{}], other level [{}]",
 				levelreq, defender->GetLevel());
 			entity_list.MessageCloseString(this, false, 200, Chat::MeleeCrit, FINISHING_BLOW, GetName());
 			damage = fb_damage;
 			return true;
 		} else {
-			Log(Logs::Detail, Logs::Combat, "FAILED a finishing blow: levelreq at %d, other level %d",
+			LogCombat("failed a finishing blow: levelreq at [{}], other level [{}]",
 				levelreq, defender->GetLevel());
 			return false;
 		}
@@ -5392,14 +5392,14 @@ bool Bot::TryFinishingBlow(Mob *defender, int &damage)
 }
 
 void Bot::DoRiposte(Mob* defender) {
-	Log(Logs::Detail, Logs::Combat, "Preforming a riposte");
+	LogCombat("Preforming a riposte");
 	if (!defender)
 		return;
 
 	defender->Attack(this, EQEmu::invslot::slotPrimary, true);
 	int32 DoubleRipChance = (defender->GetAABonuses().GiveDoubleRiposte[0] + defender->GetSpellBonuses().GiveDoubleRiposte[0] + defender->GetItemBonuses().GiveDoubleRiposte[0]);
 	if(DoubleRipChance && (DoubleRipChance >= zone->random.Int(0, 100))) {
-		Log(Logs::Detail, Logs::Combat, "Preforming a double riposte (%d percent chance)", DoubleRipChance);
+		LogCombat("Preforming a double riposte ([{}] percent chance)", DoubleRipChance);
 		defender->Attack(this, EQEmu::invslot::slotPrimary, true);
 	}
 
@@ -6022,7 +6022,7 @@ int32 Bot::CalcMaxMana() {
 			break;
 		}
 		default: {
-			Log(Logs::General, Logs::None, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
+			LogDebug("Invalid Class [{}] in CalcMaxMana", GetCasterClass());
 			max_mana = 0;
 			break;
 		}
@@ -6450,14 +6450,14 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, EQEmu::spells::CastingSlo
 					uint32* oSpellWillFinish, uint32 item_slot, int16 *resist_adjust, uint32 aa_id) {
 	bool Result = false;
 	if(zone && !zone->IsSpellBlocked(spell_id, glm::vec3(GetPosition()))) {
-		Log(Logs::Detail, Logs::Spells, "CastSpell called for spell %s (%d) on entity %d, slot %d, time %d, mana %d, from item slot %d", spells[spell_id].name, spell_id, target_id, slot, cast_time, mana_cost, (item_slot==0xFFFFFFFF)?999:item_slot);
+		// LogSpells("CastSpell called for spell [{}] ([{}]) on entity [{}], slot [{}], time [{}], mana [{}], from item slot [{}]", spells[spell_id].name, spell_id, target_id, slot, cast_time, mana_cost, (item_slot==0xFFFFFFFF)?999:item_slot);
 
 		if(casting_spell_id == spell_id)
 			ZeroCastingVars();
 
 		if(GetClass() != BARD) {
 			if(!IsValidSpell(spell_id) || casting_spell_id || delaytimer || spellend_timer.Enabled() || IsStunned() || IsFeared() || IsMezzed() || (IsSilenced() && !IsDiscipline(spell_id)) || (IsAmnesiad() && IsDiscipline(spell_id))) {
-				Log(Logs::Detail, Logs::Spells, "Spell casting canceled: not able to cast now. Valid? %d, casting %d, waiting? %d, spellend? %d, stunned? %d, feared? %d, mezed? %d, silenced? %d", IsValidSpell(spell_id), casting_spell_id, delaytimer, spellend_timer.Enabled(), IsStunned(), IsFeared(), IsMezzed(), IsSilenced() );
+				LogSpells("Spell casting canceled: not able to cast now. Valid? [{}], casting [{}], waiting? [{}], spellend? [{}], stunned? [{}], feared? [{}], mezed? [{}], silenced? [{}]", IsValidSpell(spell_id), casting_spell_id, delaytimer, spellend_timer.Enabled(), IsStunned(), IsFeared(), IsMezzed(), IsSilenced() );
 				if(IsSilenced() && !IsDiscipline(spell_id))
 					MessageString(Chat::Red, SILENCED_STRING);
 
@@ -6481,7 +6481,7 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, EQEmu::spells::CastingSlo
 		}
 
 		if(DivineAura()) {
-			Log(Logs::Detail, Logs::Spells, "Spell casting canceled: cannot cast while Divine Aura is in effect.");
+			LogSpells("Spell casting canceled: cannot cast while Divine Aura is in effect");
 			InterruptSpell(173, 0x121, false);
 			return false;
 		}
@@ -6491,13 +6491,13 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, EQEmu::spells::CastingSlo
 			InterruptSpell(fizzle_msg, 0x121, spell_id);
 
 			uint32 use_mana = ((spells[spell_id].mana) / 4);
-			Log(Logs::Detail, Logs::Spells, "Spell casting canceled: fizzled. %d mana has been consumed", use_mana);
+			LogSpells("Spell casting canceled: fizzled. [{}] mana has been consumed", use_mana);
 			SetMana(GetMana() - use_mana);
 			return false;
 		}
 
 		if (HasActiveSong()) {
-			Log(Logs::Detail, Logs::Spells, "Casting a new spell/song while singing a song. Killing old song %d.", bardsong);
+			LogSpells("Casting a new spell/song while singing a song. Killing old song [{}]", bardsong);
 			bardsong = 0;
 			bardsong_target_id = 0;
 			bardsong_slot = EQEmu::spells::CastingSlot::Gem1;
@@ -6611,19 +6611,19 @@ bool Bot::IsImmuneToSpell(uint16 spell_id, Mob *caster) {
 			if(caster->IsBot()) {
 				if(spells[spell_id].targettype == ST_Undead) {
 					if((GetBodyType() != BT_SummonedUndead) && (GetBodyType() != BT_Undead) && (GetBodyType() != BT_Vampire)) {
-						Log(Logs::Detail, Logs::Spells, "Bot's target is not an undead.");
+						LogSpells("Bot's target is not an undead");
 						return true;
 					}
 				}
 				if(spells[spell_id].targettype == ST_Summoned) {
 					if((GetBodyType() != BT_SummonedUndead) && (GetBodyType() != BT_Summoned) && (GetBodyType() != BT_Summoned2) && (GetBodyType() != BT_Summoned3)) {
-						Log(Logs::Detail, Logs::Spells, "Bot's target is not a summoned creature.");
+						LogSpells("Bot's target is not a summoned creature");
 						return true;
 					}
 				}
 			}
 
-			Log(Logs::Detail, Logs::Spells, "No bot immunities to spell %d found.", spell_id);
+			LogSpells("No bot immunities to spell [{}] found", spell_id);
 		}
 	}
 
@@ -6774,7 +6774,7 @@ bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQEmu::
 					if((spelltypeequal || spelltypetargetequal) || spelltypeclassequal || slotequal) {
 						if(((spells[thespell].effectid[0] == 0) && (spells[thespell].base[0] < 0)) &&
 							(spellTarget->GetHP() < ((spells[thespell].base[0] * (-1)) + 100))) {
-							Log(Logs::General, Logs::Spells, "Bot::DoFinishedSpellSingleTarget - GroupBuffing failure");
+							LogSpells("Bot::DoFinishedSpellSingleTarget - GroupBuffing failure");
 							return false;
 						}
 
@@ -8238,7 +8238,7 @@ bool Bot::CheckLoreConflict(const EQEmu::ItemData* item) {
 
 bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, float iRange, uint32 iSpellTypes) {
 	if((iSpellTypes & SPELL_TYPES_DETRIMENTAL) != 0) {
-		Log(Logs::General, Logs::Error, "Error: detrimental spells requested from AICheckCloseBeneficialSpells!!");
+		LogError("Error: detrimental spells requested from AICheckCloseBeneficialSpells!!");
 		return false;
 	}
 

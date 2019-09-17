@@ -1,7 +1,6 @@
 #include "servertalk_server_connection.h"
 #include "servertalk_server.h"
 #include "../eqemu_logsys.h"
-#include "../eqemu_logsys_fmt.h"
 #include "../util/uuid.h"
 
 EQ::Net::ServertalkServerConnection::ServertalkServerConnection(std::shared_ptr<EQ::Net::TCPConnection> c, EQ::Net::ServertalkServer *parent, bool encrypted, bool allow_downgrade)
@@ -202,8 +201,8 @@ void EQ::Net::ServertalkServerConnection::ProcessHandshake(EQ::Net::Packet &p, b
 {
 #ifdef ENABLE_SECURITY
 	if (downgrade_security && m_allow_downgrade && m_encrypted) {
-		LogF(Logs::General, Logs::TCP_Connection, "Downgraded encrypted connection to plaintext because otherside didn't support encryption {0}:{1}", 
-			m_connection->RemoteIP(), m_connection->RemotePort());
+		LogF(Logs::General, Logs::TCPConnection, "Downgraded encrypted connection to plaintext because otherside didn't support encryption {0}:{1}",
+			 m_connection->RemoteIP(), m_connection->RemotePort());
 		m_encrypted = false;
 	}
 
@@ -221,7 +220,7 @@ void EQ::Net::ServertalkServerConnection::ProcessHandshake(EQ::Net::Packet &p, b
 
 				if (crypto_box_open_easy_afternm(&decrypted_text[0], (unsigned char*)p.Data() + crypto_box_PUBLICKEYBYTES + crypto_box_NONCEBYTES, cipher_len, m_nonce_theirs, m_shared_key))
 				{
-					LogF(Logs::General, Logs::Error, "Error decrypting handshake from client, dropping connection.");
+					LogError("Error decrypting handshake from client, dropping connection.");
 					m_connection->Disconnect();
 					return;
 				}
@@ -230,7 +229,7 @@ void EQ::Net::ServertalkServerConnection::ProcessHandshake(EQ::Net::Packet &p, b
 				std::string credentials = (const char*)&decrypted_text[0] + (m_identifier.length() + 1);
 
 				if (!m_parent->CheckCredentials(credentials)) {
-					LogF(Logs::General, Logs::Error, "Got incoming connection with invalid credentials during handshake, dropping connection.");
+					LogError("Got incoming connection with invalid credentials during handshake, dropping connection.");
 					m_connection->Disconnect();
 					return;
 				}
@@ -240,7 +239,7 @@ void EQ::Net::ServertalkServerConnection::ProcessHandshake(EQ::Net::Packet &p, b
 			}
 		}
 		catch (std::exception &ex) {
-			LogF(Logs::General, Logs::Error, "Error parsing handshake from client: {0}", ex.what());
+			LogError("Error parsing handshake from client: {0}", ex.what());
 			m_connection->Disconnect();
 		}
 	}
@@ -250,7 +249,7 @@ void EQ::Net::ServertalkServerConnection::ProcessHandshake(EQ::Net::Packet &p, b
 			auto credentials = p.GetCString(m_identifier.length() + 1);
 
 			if (!m_parent->CheckCredentials(credentials)) {
-				LogF(Logs::General, Logs::Error, "Got incoming connection with invalid credentials during handshake, dropping connection.");
+				LogError("Got incoming connection with invalid credentials during handshake, dropping connection.");
 				m_connection->Disconnect();
 				return;
 			}
@@ -258,7 +257,7 @@ void EQ::Net::ServertalkServerConnection::ProcessHandshake(EQ::Net::Packet &p, b
 			m_parent->ConnectionIdentified(this);
 		}
 		catch (std::exception &ex) {
-			LogF(Logs::General, Logs::Error, "Error parsing handshake from client: {0}", ex.what());
+			LogError("Error parsing handshake from client: {0}", ex.what());
 			m_connection->Disconnect();
 		}
 	}
@@ -268,7 +267,7 @@ void EQ::Net::ServertalkServerConnection::ProcessHandshake(EQ::Net::Packet &p, b
 		auto credentials = p.GetCString(m_identifier.length() + 1);
 
 		if (!m_parent->CheckCredentials(credentials)) {
-			LogF(Logs::General, Logs::Error, "Got incoming connection with invalid credentials during handshake, dropping connection.");
+			LogError("Got incoming connection with invalid credentials during handshake, dropping connection.");
 			m_connection->Disconnect();
 			return;
 		}
@@ -276,7 +275,7 @@ void EQ::Net::ServertalkServerConnection::ProcessHandshake(EQ::Net::Packet &p, b
 		m_parent->ConnectionIdentified(this);
 	}
 	catch (std::exception &ex) {
-		LogF(Logs::General, Logs::Error, "Error parsing handshake from client: {0}", ex.what());
+		LogError("Error parsing handshake from client: {0}", ex.what());
 		m_connection->Disconnect();
 	}
 #endif
@@ -296,7 +295,7 @@ void EQ::Net::ServertalkServerConnection::ProcessMessage(EQ::Net::Packet &p)
 
 				if (crypto_box_open_easy_afternm(&decrypted_text[0], (unsigned char*)&data[0], length, m_nonce_theirs, m_shared_key))
 				{
-					LogF(Logs::General, Logs::Error, "Error decrypting message from client");
+					LogError("Error decrypting message from client");
 					(*(uint64_t*)&m_nonce_theirs[0])++;
 					return;
 				}
@@ -344,6 +343,6 @@ void EQ::Net::ServertalkServerConnection::ProcessMessage(EQ::Net::Packet &p)
 		}
 	}
 	catch (std::exception &ex) {
-		LogF(Logs::General, Logs::Error, "Error parsing message from client: {0}", ex.what());
+		LogError("Error parsing message from client: {0}", ex.what());
 	}
 }

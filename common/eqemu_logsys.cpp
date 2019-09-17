@@ -19,6 +19,7 @@
 */
 
 #include "eqemu_logsys.h"
+#include "rulesys.h"
 #include "platform.h"
 #include "string_util.h"
 #include "database.h"
@@ -86,18 +87,14 @@ namespace Console {
  */
 EQEmuLogSys::EQEmuLogSys()
 {
-	on_log_gmsay_hook      = [](uint16 log_type, const std::string &) {};
-	on_log_console_hook    = [](uint16 debug_level, uint16 log_type, const std::string &) {};
-	bool file_logs_enabled = false;
-	int  log_platform      = 0;
+	on_log_gmsay_hook   = [](uint16 log_type, const std::string &) {};
+	on_log_console_hook = [](uint16 debug_level, uint16 log_type, const std::string &) {};
 }
 
 /**
  * EQEmuLogSys Deconstructor
  */
-EQEmuLogSys::~EQEmuLogSys()
-{
-}
+EQEmuLogSys::~EQEmuLogSys() = default;
 
 void EQEmuLogSys::LoadLogSettingsDefaults()
 {
@@ -105,7 +102,7 @@ void EQEmuLogSys::LoadLogSettingsDefaults()
 	 * Get Executable platform currently running this code (Zone/World/etc)
 	 */
 	log_platform = GetExecutablePlatformInt();
-	
+
 	for (int log_category_id = Logs::AA; log_category_id != Logs::MaxCategoryID; log_category_id++) {
 		log_settings[log_category_id].log_to_console      = 0;
 		log_settings[log_category_id].log_to_file         = 0;
@@ -118,15 +115,26 @@ void EQEmuLogSys::LoadLogSettingsDefaults()
 	/**
 	 * Set Defaults
 	 */
-	log_settings[Logs::World_Server].log_to_console    = Logs::General;
-	log_settings[Logs::Zone_Server].log_to_console     = Logs::General;
-	log_settings[Logs::QS_Server].log_to_console       = Logs::General;
-	log_settings[Logs::UCS_Server].log_to_console      = Logs::General;
-	log_settings[Logs::Crash].log_to_console           = Logs::General;
-	log_settings[Logs::MySQLError].log_to_console      = Logs::General;
-	log_settings[Logs::Login_Server].log_to_console    = Logs::General;
-	log_settings[Logs::Headless_Client].log_to_console = Logs::General;
-	log_settings[Logs::NPCScaling].log_to_gmsay        = Logs::General;
+	log_settings[Logs::WorldServer].log_to_console    = static_cast<uint8>(Logs::General);
+	log_settings[Logs::ZoneServer].log_to_console     = static_cast<uint8>(Logs::General);
+	log_settings[Logs::QSServer].log_to_console       = static_cast<uint8>(Logs::General);
+	log_settings[Logs::UCSServer].log_to_console      = static_cast<uint8>(Logs::General);
+	log_settings[Logs::Crash].log_to_console          = static_cast<uint8>(Logs::General);
+	log_settings[Logs::MySQLError].log_to_console     = static_cast<uint8>(Logs::General);
+	log_settings[Logs::Loginserver].log_to_console    = static_cast<uint8>(Logs::General);
+	log_settings[Logs::HeadlessClient].log_to_console = static_cast<uint8>(Logs::General);
+	log_settings[Logs::NPCScaling].log_to_gmsay       = static_cast<uint8>(Logs::General);
+
+	/**
+	 * RFC 5424
+	 */
+	log_settings[Logs::Emergency].log_to_console = static_cast<uint8>(Logs::General);
+	log_settings[Logs::Alert].log_to_console     = static_cast<uint8>(Logs::General);
+	log_settings[Logs::Critical].log_to_console  = static_cast<uint8>(Logs::General);
+	log_settings[Logs::Error].log_to_console     = static_cast<uint8>(Logs::General);
+	log_settings[Logs::Warning].log_to_console   = static_cast<uint8>(Logs::General);
+	log_settings[Logs::Notice].log_to_console    = static_cast<uint8>(Logs::General);
+	log_settings[Logs::Info].log_to_console      = static_cast<uint8>(Logs::General);
 
 	/**
 	 * Set Category enabled status on defaults
@@ -169,18 +177,39 @@ void EQEmuLogSys::LoadLogSettingsDefaults()
 
 /**
  * @param log_category
+ * @return
+ */
+bool EQEmuLogSys::IsRfc5424LogCategory(uint16 log_category)
+{
+	return (
+		log_category == Logs::Emergency ||
+		log_category == Logs::Alert ||
+		log_category == Logs::Critical ||
+		log_category == Logs::Error ||
+		log_category == Logs::Warning ||
+		log_category == Logs::Notice ||
+		log_category == Logs::Info ||
+		log_category == Logs::Debug
+	);
+}
+
+/**
+ * @param log_category
  * @param in_message
  * @return
  */
-std::string EQEmuLogSys::FormatOutMessageString(uint16 log_category, const std::string &in_message)
+std::string EQEmuLogSys::FormatOutMessageString(
+	uint16 log_category,
+	const std::string &in_message
+)
 {
-	std::string ret;
-	ret.push_back('[');
-	ret.append(Logs::LogCategoryName[log_category]);
-	ret.push_back(']');
-	ret.push_back(' ');
-	ret.append(in_message);
-	return ret;
+	std::string return_string;
+
+	if (IsRfc5424LogCategory(log_category)) {
+		return_string = "[" + GetPlatformName() + "] ";
+	}
+
+	return return_string + "[" + Logs::LogCategoryName[log_category] + "] " + in_message;
 }
 
 /**
@@ -188,7 +217,11 @@ std::string EQEmuLogSys::FormatOutMessageString(uint16 log_category, const std::
  * @param log_category
  * @param message
  */
-void EQEmuLogSys::ProcessGMSay(uint16 debug_level, uint16 log_category, const std::string &message)
+void EQEmuLogSys::ProcessGMSay(
+	uint16 debug_level,
+	uint16 log_category,
+	const std::string &message
+)
 {
 	/**
 	 * Enabling Netcode based GMSay output creates a feedback loop that ultimately ends in a crash
@@ -210,7 +243,11 @@ void EQEmuLogSys::ProcessGMSay(uint16 debug_level, uint16 log_category, const st
  * @param log_category
  * @param message
  */
-void EQEmuLogSys::ProcessLogWrite(uint16 debug_level, uint16 log_category, const std::string &message)
+void EQEmuLogSys::ProcessLogWrite(
+	uint16 debug_level,
+	uint16 log_category,
+	const std::string &message
+)
 {
 	if (log_category == Logs::Crash) {
 		char time_stamp[80];
@@ -272,6 +309,8 @@ std::string EQEmuLogSys::GetLinuxConsoleColorFromCategory(uint16 log_category)
 		case Logs::Normal:
 			return LC_YELLOW;
 		case Logs::MySQLError:
+		case Logs::Warning:
+		case Logs::Critical:
 		case Logs::Error:
 			return LC_RED;
 		case Logs::MySQLQuery:
@@ -344,6 +383,42 @@ void EQEmuLogSys::ProcessConsoleMessage(uint16 debug_level, uint16 log_category,
 }
 
 /**
+ * @param str
+ * @return
+ */
+constexpr const char *str_end(const char *str)
+{
+	return *str ? str_end(str + 1) : str;
+}
+
+/**
+ * @param str
+ * @return
+ */
+constexpr bool str_slant(const char *str)
+{
+	return *str == '/' ? true : (*str ? str_slant(str + 1) : false);
+}
+
+/**
+ * @param str
+ * @return
+ */
+constexpr const char *r_slant(const char *str)
+{
+	return *str == '/' ? (str + 1) : r_slant(str - 1);
+}
+
+/**
+ * @param str
+ * @return
+ */
+constexpr const char *base_file_name(const char *str)
+{
+	return str_slant(str) ? r_slant(str_end(str)) : str;
+}
+
+/**
  * Core logging function
  *
  * @param debug_level
@@ -351,7 +426,15 @@ void EQEmuLogSys::ProcessConsoleMessage(uint16 debug_level, uint16 log_category,
  * @param message
  * @param ...
  */
-void EQEmuLogSys::Out(Logs::DebugLevel debug_level, uint16 log_category, std::string message, ...)
+void EQEmuLogSys::Out(
+	Logs::DebugLevel debug_level,
+	uint16 log_category,
+	const char *file,
+	const char *func,
+	int line,
+	const char *message,
+	...
+)
 {
 	bool log_to_console = true;
 	if (log_settings[log_category].log_to_console < debug_level) {
@@ -373,12 +456,18 @@ void EQEmuLogSys::Out(Logs::DebugLevel debug_level, uint16 log_category, std::st
 		return;
 	}
 
+	std::string prefix;
+
+	if (RuleB(Logging, PrintFileFunctionAndLine)) {
+		prefix = fmt::format("[{0}::{1}:{2}] ", base_file_name(file), func, line);
+	}
+
 	va_list args;
 	va_start(args, message);
-	std::string output_message = vStringFormat(message.c_str(), args);
+	std::string output_message = vStringFormat(message, args);
 	va_end(args);
 
-	std::string output_debug_message = EQEmuLogSys::FormatOutMessageString(log_category, output_message);
+	std::string output_debug_message = EQEmuLogSys::FormatOutMessageString(log_category, prefix + output_message);
 
 	if (log_to_console) {
 		EQEmuLogSys::ProcessConsoleMessage(debug_level, log_category, output_debug_message);
@@ -414,7 +503,7 @@ void EQEmuLogSys::MakeDirectory(const std::string &directory_name)
 		return;
 	_mkdir(directory_name.c_str());
 #else
-	struct stat st;
+	struct stat st{};
 	if (stat(directory_name.c_str(), &st) == 0) { // exists
 		return;
 	}
@@ -455,12 +544,7 @@ void EQEmuLogSys::StartFileLogs(const std::string &log_name)
 			return;
 		}
 
-		EQEmuLogSys::Out(
-			Logs::General,
-			Logs::Status,
-			"Starting File Log 'logs/%s_%i.log'",
-			platform_file_name.c_str(),
-			getpid());
+		LogInfo("Starting File Log [logs/{}_{}.log]", platform_file_name.c_str(), getpid());
 
 		/**
 		 * Make directory if not exists
@@ -480,17 +564,11 @@ void EQEmuLogSys::StartFileLogs(const std::string &log_name)
 		/**
 		 * All other processes
 		 */
-
 		if (platform_file_name.empty()) {
 			return;
 		}
 
-		EQEmuLogSys::Out(
-			Logs::General,
-			Logs::Status,
-			"Starting File Log 'logs/%s_%i.log'",
-			platform_file_name.c_str(),
-			getpid());
+		LogInfo("Starting File Log [logs/{}_{}.log]", platform_file_name.c_str(), getpid());
 
 		/**
 		 * Open file pointer

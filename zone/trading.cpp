@@ -87,7 +87,7 @@ void Trade::AddEntity(uint16 trade_slot_id, uint32 stack_size) {
 
 	if (!owner || !owner->IsClient()) {
 		// This should never happen
-		Log(Logs::General, Logs::None, "Programming error: NPC's should not call Trade::AddEntity()");
+		LogDebug("Programming error: NPC's should not call Trade::AddEntity()");
 		return;
 	}
 
@@ -127,7 +127,7 @@ void Trade::AddEntity(uint16 trade_slot_id, uint32 stack_size) {
 			inst2->SetCharges(stack_size + inst2->GetCharges());
 		}
 
-		Log(Logs::Detail, Logs::Trading, "%s added partial item '%s' stack (qty: %i) to trade slot %i", owner->GetName(), inst->GetItem()->Name, stack_size, trade_slot_id);
+		LogTrading("[{}] added partial item [{}] stack (qty: [{}]) to trade slot [{}]", owner->GetName(), inst->GetItem()->Name, stack_size, trade_slot_id);
 
 		if (_stack_size > 0)
 			inst->SetCharges(_stack_size);
@@ -144,7 +144,7 @@ void Trade::AddEntity(uint16 trade_slot_id, uint32 stack_size) {
 
 		SendItemData(inst, trade_slot_id);
 
-		Log(Logs::Detail, Logs::Trading, "%s added item '%s' to trade slot %i", owner->GetName(), inst->GetItem()->Name, trade_slot_id);
+		LogTrading("[{}] added item [{}] to trade slot [{}]", owner->GetName(), inst->GetItem()->Name, trade_slot_id);
 
 		client->PutItemInInventory(trade_slot_id, *inst);
 		client->DeleteItemInInventory(EQEmu::invslot::slotCursor);
@@ -297,7 +297,7 @@ void Trade::LogTrade()
 void Trade::DumpTrade()
 {
 	Mob* with = With();
-	Log(Logs::Detail, Logs::Trading, "Dumping trade data: '%s' in TradeState %i with '%s'",
+	LogTrading("Dumping trade data: [{}] in TradeState [{}] with [{}]",
 		this->owner->GetName(), state, ((with==nullptr)?"(null)":with->GetName()));
 
 	if (!owner->IsClient())
@@ -308,7 +308,7 @@ void Trade::DumpTrade()
 		const EQEmu::ItemInstance* inst = trader->GetInv().GetItem(i);
 
 		if (inst) {
-			Log(Logs::Detail, Logs::Trading, "Item %i (Charges=%i, Slot=%i, IsBag=%s)",
+			LogTrading("Item [{}] (Charges=[{}], Slot=[{}], IsBag=[{}])",
 				inst->GetItem()->ID, inst->GetCharges(),
 				i, ((inst->IsClassBag()) ? "True" : "False"));
 
@@ -316,7 +316,7 @@ void Trade::DumpTrade()
 				for (uint8 j = EQEmu::invbag::SLOT_BEGIN; j <= EQEmu::invbag::SLOT_END; j++) {
 					inst = trader->GetInv().GetItem(i, j);
 					if (inst) {
-						Log(Logs::Detail, Logs::Trading, "\tBagItem %i (Charges=%i, Slot=%i)",
+						LogTrading("\tBagItem [{}] (Charges=[{}], Slot=[{}])",
 							inst->GetItem()->ID, inst->GetCharges(),
 							EQEmu::InventoryProfile::CalcSlotId(i, j));
 					}
@@ -325,7 +325,7 @@ void Trade::DumpTrade()
 		}
 	}
 
-	Log(Logs::Detail, Logs::Trading, "\tpp:%i, gp:%i, sp:%i, cp:%i", pp, gp, sp, cp);
+	LogTrading("\tpp:[{}], gp:[{}], sp:[{}], cp:[{}]", pp, gp, sp, cp);
 }
 
 
@@ -369,7 +369,7 @@ void Client::ResetTrade() {
 					break;
 
 				if (partial_inst->GetID() != inst->GetID()) {
-					Log(Logs::Detail, Logs::None, "[CLIENT] Client::ResetTrade() - an incompatible location reference was returned by Inventory::FindFreeSlotForTradeItem()");
+					LogDebug("[CLIENT] Client::ResetTrade() - an incompatible location reference was returned by Inventory::FindFreeSlotForTradeItem()");
 
 					break;
 				}
@@ -459,7 +459,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 		bool qs_log = false;
 
 		if(other) {
-			Log(Logs::Detail, Logs::Trading, "Finishing trade with client %s", other->GetName());
+			LogTrading("Finishing trade with client [{}]", other->GetName());
 
 			this->AddMoneyToPP(other->trade->cp, other->trade->sp, other->trade->gp, other->trade->pp, true);
 
@@ -492,7 +492,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 				const EQEmu::ItemInstance* inst = m_inv[trade_slot];
 
 				if (inst && inst->IsClassBag()) {
-					Log(Logs::Detail, Logs::Trading, "Giving container %s (%d) in slot %d to %s", inst->GetItem()->Name, inst->GetItem()->ID, trade_slot, other->GetName());
+					LogTrading("Giving container [{}] ([{}]) in slot [{}] to [{}]", inst->GetItem()->Name, inst->GetItem()->ID, trade_slot, other->GetName());
 
 					// TODO: need to check bag items/augments for no drop..everything for attuned...
 					if (inst->GetItem()->NoDrop != 0 || Admin() >= RuleI(Character, MinStatusForNoDropExemptions) || RuleI(World, FVNoDropFlag) == 1 || other == this) {
@@ -500,7 +500,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 
 						if (free_slot != INVALID_INDEX) {
 							if (other->PutItemInInventory(free_slot, *inst, true)) {
-								Log(Logs::Detail, Logs::Trading, "Container %s (%d) successfully transferred, deleting from trade slot.", inst->GetItem()->Name, inst->GetItem()->ID);
+								LogTrading("Container [{}] ([{}]) successfully transferred, deleting from trade slot", inst->GetItem()->Name, inst->GetItem()->ID);
 								if (qs_log) {
 									auto detail = new QSTradeItems_Struct;
 
@@ -552,17 +552,17 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 								}
 							}
 							else {
-								Log(Logs::Detail, Logs::Trading, "Transfer of container %s (%d) to %s failed, returning to giver.", inst->GetItem()->Name, inst->GetItem()->ID, other->GetName());
+								LogTrading("Transfer of container [{}] ([{}]) to [{}] failed, returning to giver", inst->GetItem()->Name, inst->GetItem()->ID, other->GetName());
 								PushItemOnCursor(*inst, true);
 							}
 						}
 						else {
-							Log(Logs::Detail, Logs::Trading, "%s's inventory is full, returning container %s (%d) to giver.", other->GetName(), inst->GetItem()->Name, inst->GetItem()->ID);
+							LogTrading("[{}]'s inventory is full, returning container [{}] ([{}]) to giver", other->GetName(), inst->GetItem()->Name, inst->GetItem()->ID);
 							PushItemOnCursor(*inst, true);
 						}
 					}
 					else {
-						Log(Logs::Detail, Logs::Trading, "Container %s (%d) is NoDrop, returning to giver.", inst->GetItem()->Name, inst->GetItem()->ID);
+						LogTrading("Container [{}] ([{}]) is NoDrop, returning to giver", inst->GetItem()->Name, inst->GetItem()->ID);
 						PushItemOnCursor(*inst, true);
 					}
 
@@ -588,7 +588,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 							break;
 
 						if (partial_inst->GetID() != inst->GetID()) {
-							Log(Logs::Detail, Logs::Trading, "[CLIENT] Client::ResetTrade() - an incompatible location reference was returned by Inventory::FindFreeSlotForTradeItem()");
+							LogTrading("[CLIENT] Client::ResetTrade() - an incompatible location reference was returned by Inventory::FindFreeSlotForTradeItem()");
 							break;
 						}
 
@@ -606,10 +606,10 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 							inst->SetCharges(0);
 						}
 
-						Log(Logs::Detail, Logs::Trading, "Transferring partial stack %s (%d) in slot %d to %s", inst->GetItem()->Name, inst->GetItem()->ID, trade_slot, other->GetName());
+						LogTrading("Transferring partial stack [{}] ([{}]) in slot [{}] to [{}]", inst->GetItem()->Name, inst->GetItem()->ID, trade_slot, other->GetName());
 
 						if (other->PutItemInInventory(partial_slot, *partial_inst, true)) {
-							Log(Logs::Detail, Logs::Trading, "Partial stack %s (%d) successfully transferred, deleting %i charges from trade slot.",
+							LogTrading("Partial stack [{}] ([{}]) successfully transferred, deleting [{}] charges from trade slot",
 								inst->GetItem()->Name, inst->GetItem()->ID, (old_charges - inst->GetCharges()));
 							if (qs_log) {
 								auto detail = new QSTradeItems_Struct;
@@ -635,7 +635,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 							}
 						}
 						else {
-							Log(Logs::Detail, Logs::Trading, "Transfer of partial stack %s (%d) to %s failed, returning %i charges to trade slot.",
+							LogTrading("Transfer of partial stack [{}] ([{}]) to [{}] failed, returning [{}] charges to trade slot",
 								inst->GetItem()->Name, inst->GetItem()->ID, other->GetName(), (old_charges - inst->GetCharges()));
 
 							inst->SetCharges(old_charges);
@@ -710,7 +710,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 				const EQEmu::ItemInstance* inst = m_inv[trade_slot];
 
 				if (inst) {
-					Log(Logs::Detail, Logs::Trading, "Giving item %s (%d) in slot %d to %s", inst->GetItem()->Name, inst->GetItem()->ID, trade_slot, other->GetName());
+					LogTrading("Giving item [{}] ([{}]) in slot [{}] to [{}]", inst->GetItem()->Name, inst->GetItem()->ID, trade_slot, other->GetName());
 
 					// TODO: need to check bag items/augments for no drop..everything for attuned...
 					if (inst->GetItem()->NoDrop != 0 || Admin() >= RuleI(Character, MinStatusForNoDropExemptions) || RuleI(World, FVNoDropFlag) == 1 || other == this) {
@@ -718,7 +718,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 
 						if (free_slot != INVALID_INDEX) {
 							if (other->PutItemInInventory(free_slot, *inst, true)) {
-								Log(Logs::Detail, Logs::Trading, "Item %s (%d) successfully transferred, deleting from trade slot.", inst->GetItem()->Name, inst->GetItem()->ID);
+								LogTrading("Item [{}] ([{}]) successfully transferred, deleting from trade slot", inst->GetItem()->Name, inst->GetItem()->ID);
 								if (qs_log) {
 									auto detail = new QSTradeItems_Struct;
 
@@ -771,17 +771,17 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 								}
 							}
 							else {
-								Log(Logs::Detail, Logs::Trading, "Transfer of Item %s (%d) to %s failed, returning to giver.", inst->GetItem()->Name, inst->GetItem()->ID, other->GetName());
+								LogTrading("Transfer of Item [{}] ([{}]) to [{}] failed, returning to giver", inst->GetItem()->Name, inst->GetItem()->ID, other->GetName());
 								PushItemOnCursor(*inst, true);
 							}
 						}
 						else {
-							Log(Logs::Detail, Logs::Trading, "%s's inventory is full, returning item %s (%d) to giver.", other->GetName(), inst->GetItem()->Name, inst->GetItem()->ID);
+							LogTrading("[{}]'s inventory is full, returning item [{}] ([{}]) to giver", other->GetName(), inst->GetItem()->Name, inst->GetItem()->ID);
 							PushItemOnCursor(*inst, true);
 						}
 					}
 					else {
-						Log(Logs::Detail, Logs::Trading, "Item %s (%d) is NoDrop, returning to giver.", inst->GetItem()->Name, inst->GetItem()->ID);
+						LogTrading("Item [{}] ([{}]) is NoDrop, returning to giver", inst->GetItem()->Name, inst->GetItem()->ID);
 						PushItemOnCursor(*inst, true);
 					}
 
@@ -1178,7 +1178,7 @@ void Client::SendTraderItem(uint32 ItemID, uint16 Quantity) {
 	const EQEmu::ItemData* item = database.GetItem(ItemID);
 
 	if(!item){
-		Log(Logs::Detail, Logs::Trading, "Bogus item deleted in Client::SendTraderItem!\n");
+		LogTrading("Bogus item deleted in Client::SendTraderItem!\n");
 		return;
 	}
 
@@ -1237,10 +1237,8 @@ void Client::BulkSendTraderInventory(uint32 char_id) {
 				safe_delete(inst);
 			}
 			else
-				Log(Logs::Detail, Logs::Trading, "Client::BulkSendTraderInventory nullptr inst pointer");
+				LogTrading("Client::BulkSendTraderInventory nullptr inst pointer");
 		}
-		else
-			Log(Logs::Detail, Logs::Trading, "Client::BulkSendTraderInventory nullptr item pointer or item is NODROP %8X",item);
 	}
 	safe_delete(TraderItems);
 }
@@ -1263,7 +1261,7 @@ uint32 Client::FindTraderItemSerialNumber(int32 ItemID) {
 			}
 		}
 	}
-	Log(Logs::Detail, Logs::Trading, "Client::FindTraderItemSerialNumber Couldn't find item! Item ID %i", ItemID);
+	LogTrading("Client::FindTraderItemSerialNumber Couldn't find item! Item ID [{}]", ItemID);
 
 	return 0;
 }
@@ -1286,7 +1284,7 @@ EQEmu::ItemInstance* Client::FindTraderItemBySerialNumber(int32 SerialNumber){
 			}
 		}
 	}
-	Log(Logs::Detail, Logs::Trading, "Client::FindTraderItemBySerialNumber Couldn't find item! Serial No. was %i", SerialNumber);
+	LogTrading("Client::FindTraderItemBySerialNumber Couldn't find item! Serial No. was [{}]", SerialNumber);
 
 	return nullptr;
 }
@@ -1348,7 +1346,7 @@ uint16 Client::FindTraderItem(int32 SerialNumber, uint16 Quantity){
 			}
 		}
 	}
-	Log(Logs::Detail, Logs::Trading, "Could NOT find a match for Item: %i with a quantity of: %i on Trader: %s\n",
+	LogTrading("Could NOT find a match for Item: [{}] with a quantity of: [{}] on Trader: [{}]\n",
 					SerialNumber , Quantity, this->GetName());
 
 	return 0;
@@ -1359,7 +1357,7 @@ void Client::NukeTraderItem(uint16 Slot,int16 Charges,uint16 Quantity,Client* Cu
 	if(!Customer)
 		return;
 
-	Log(Logs::Detail, Logs::Trading, "NukeTraderItem(Slot %i, Charges %i, Quantity %i", Slot, Charges, Quantity);
+	LogTrading("NukeTraderItem(Slot [{}], Charges [{}], Quantity [{}]", Slot, Charges, Quantity);
 
 	if(Quantity < Charges)
 	{
@@ -1446,7 +1444,7 @@ void Client::FindAndNukeTraderItem(int32 SerialNumber, uint16 Quantity, Client* 
 
 		if (!item)
 		{
-			Log(Logs::Detail, Logs::Trading, "Could not find Item: %i on Trader: %s", SerialNumber, Quantity, this->GetName());
+			LogTrading("Could not find Item: [{}] on Trader: [{}]", SerialNumber, Quantity, this->GetName());
 			return;
 		}
 
@@ -1457,7 +1455,7 @@ void Client::FindAndNukeTraderItem(int32 SerialNumber, uint16 Quantity, Client* 
 		if (!Stackable)
 			Quantity = (Charges > 0) ? Charges : 1;
 
-		Log(Logs::Detail, Logs::Trading, "FindAndNuke %s, Charges %i, Quantity %i", item->GetItem()->Name, Charges, Quantity);
+		LogTrading("FindAndNuke [{}], Charges [{}], Quantity [{}]", item->GetItem()->Name, Charges, Quantity);
 
 		if (Charges <= Quantity || (Charges <= 0 && Quantity==1) || !Stackable)
 		{
@@ -1499,7 +1497,7 @@ void Client::FindAndNukeTraderItem(int32 SerialNumber, uint16 Quantity, Client* 
 
 		}
 	}
-	Log(Logs::Detail, Logs::Trading, "Could NOT find a match for Item: %i with a quantity of: %i on Trader: %s\n",SerialNumber,
+	LogTrading("Could NOT find a match for Item: [{}] with a quantity of: [{}] on Trader: [{}]\n",SerialNumber,
 					Quantity,this->GetName());
 }
 
@@ -1599,7 +1597,7 @@ void Client::BuyTraderItem(TraderBuy_Struct* tbs, Client* Trader, const EQApplic
 	BuyItem = Trader->FindTraderItemBySerialNumber(tbs->ItemID);
 
 	if(!BuyItem) {
-		Log(Logs::Detail, Logs::Trading, "Unable to find item on trader.");
+		LogTrading("Unable to find item on trader");
 		TradeRequestFailed(app);
 		safe_delete(outapp);
 		return;
@@ -1607,7 +1605,7 @@ void Client::BuyTraderItem(TraderBuy_Struct* tbs, Client* Trader, const EQApplic
 
 	tbs->Price = BuyItem->GetPrice();
 
-	Log(Logs::Detail, Logs::Trading, "Buyitem: Name: %s, IsStackable: %i, Requested Quantity: %i, Charges on Item %i",
+	LogTrading("Buyitem: Name: [{}], IsStackable: [{}], Requested Quantity: [{}], Charges on Item [{}]",
 					BuyItem->GetItem()->Name, BuyItem->IsStackable(), tbs->Quantity, BuyItem->GetCharges());
 	// If the item is not stackable, then we can only be buying one of them.
 	if(!BuyItem->IsStackable())
@@ -1625,13 +1623,12 @@ void Client::BuyTraderItem(TraderBuy_Struct* tbs, Client* Trader, const EQApplic
 			outtbs->Quantity = tbs->Quantity;
 	}
 
-	Log(Logs::Detail, Logs::Trading, "Actual quantity that will be traded is %i", outtbs->Quantity);
+	LogTrading("Actual quantity that will be traded is [{}]", outtbs->Quantity);
 
 	if((tbs->Price * outtbs->Quantity) <= 0) {
 		Message(Chat::Red, "Internal error. Aborting trade. Please report this to the ServerOP. Error code is 1");
 		Trader->Message(Chat::Red, "Internal error. Aborting trade. Please report this to the ServerOP. Error code is 1");
-		Log(Logs::General, Logs::Error, "Bazaar: Zero price transaction between %s and %s aborted."
-						"Item: %s, Charges: %i, TBS: Qty %i, Price: %i",
+		LogError("Bazaar: Zero price transaction between [{}] and [{}] aborted. Item: [{}], Charges: [{}], TBS: Qty [{}], Price: [{}]",
 						GetName(), Trader->GetName(),
 						BuyItem->GetItem()->Name, BuyItem->GetCharges(), tbs->Quantity, tbs->Price);
 		TradeRequestFailed(app);
@@ -1668,7 +1665,7 @@ void Client::BuyTraderItem(TraderBuy_Struct* tbs, Client* Trader, const EQApplic
 		return;
 	}
 
-	Log(Logs::Detail, Logs::Trading, "Customer Paid: %d in Copper", TotalCost);
+	LogTrading("Customer Paid: [{}] in Copper", TotalCost);
 
 	uint32 platinum = TotalCost / 1000;
 	TotalCost -= (platinum * 1000);
@@ -1680,7 +1677,7 @@ void Client::BuyTraderItem(TraderBuy_Struct* tbs, Client* Trader, const EQApplic
 
 	Trader->AddMoneyToPP(copper, silver, gold, platinum, true);
 
-	Log(Logs::Detail, Logs::Trading, "Trader Received: %d Platinum, %d Gold, %d Silver, %d Copper", platinum, gold, silver, copper);
+	LogTrading("Trader Received: [{}] Platinum, [{}] Gold, [{}] Silver, [{}] Copper", platinum, gold, silver, copper);
 
 	ReturnTraderReq(app, outtbs->Quantity, ItemID);
 
@@ -1939,7 +1936,7 @@ void Client::SendBazaarResults(uint32 TraderID, uint32 Class_, uint32 Race, uint
 		return;
     }
 
-    Log(Logs::Detail, Logs::Trading, "SRCH: %s", query.c_str());
+  LogTrading("SRCH: [{}]", query.c_str());
 
     int Size = 0;
     uint32 ID = 0;
@@ -1984,7 +1981,7 @@ void Client::SendBazaarResults(uint32 TraderID, uint32 Class_, uint32 Race, uint
 		    ID = Trader2->GetID();
 		    VARSTRUCT_ENCODE_TYPE(uint32, bufptr, ID);
 	    } else {
-		    Log(Logs::Detail, Logs::Trading, "Unable to find trader: %i\n", atoi(row[1]));
+		  LogTrading("Unable to find trader: [{}]\n", atoi(row[1]));
 		    VARSTRUCT_ENCODE_TYPE(uint32, bufptr, 0);
 	    }
 	    Cost = atoi(row[5]);
@@ -2074,7 +2071,7 @@ static void UpdateTraderCustomerItemsAdded(uint32 CustomerID, TraderCharges_Stru
 			if(inst->IsStackable())
 				inst->SetMerchantCount(gis->Charges[i]);
 
-			Log(Logs::Detail, Logs::Trading, "Sending price update for %s, Serial No. %i with %i charges",
+			LogTrading("Sending price update for [{}], Serial No. [{}] with [{}] charges",
 							item->Name, gis->SerialNumber[i], gis->Charges[i]);
 
 			Customer->SendItemPacket(EQEmu::invslot::slotCursor, inst, ItemPacketMerchant); // MainCursor?
@@ -2120,7 +2117,7 @@ static void UpdateTraderCustomerPriceChanged(uint32 CustomerID, TraderCharges_St
 					tdis->ItemID = gis->SerialNumber[i];
 				}
 				tdis->ItemID = gis->SerialNumber[i];
-				Log(Logs::Detail, Logs::Trading, "Telling customer to remove item %i with %i charges and S/N %i",
+				LogTrading("Telling customer to remove item [{}] with [{}] charges and S/N [{}]",
 								ItemID, Charges, gis->SerialNumber[i]);
 
 
@@ -2132,7 +2129,7 @@ static void UpdateTraderCustomerPriceChanged(uint32 CustomerID, TraderCharges_St
 		return;
 	}
 
-	Log(Logs::Detail, Logs::Trading, "Sending price updates to customer %s", Customer->GetName());
+	LogTrading("Sending price updates to customer [{}]", Customer->GetName());
 
 	EQEmu::ItemInstance* inst = database.CreateItem(item);
 
@@ -2158,7 +2155,7 @@ static void UpdateTraderCustomerPriceChanged(uint32 CustomerID, TraderCharges_St
 
 		inst->SetMerchantSlot(gis->SerialNumber[i]);
 
-		Log(Logs::Detail, Logs::Trading, "Sending price update for %s, Serial No. %i with %i charges",
+		LogTrading("Sending price update for [{}], Serial No. [{}] with [{}] charges",
 						item->Name, gis->SerialNumber[i], gis->Charges[i]);
 
 		Customer->SendItemPacket(EQEmu::invslot::slotCursor, inst, ItemPacketMerchant); // MainCursor??
@@ -2174,7 +2171,7 @@ void Client::HandleTraderPriceUpdate(const EQApplicationPacket *app) {
 	//
 	TraderPriceUpdate_Struct* tpus = (TraderPriceUpdate_Struct*)app->pBuffer;
 
-	Log(Logs::Detail, Logs::Trading, "Received Price Update for %s, Item Serial No. %i, New Price %i",
+	LogTrading("Received Price Update for [{}], Item Serial No. [{}], New Price [{}]",
 					GetName(), tpus->SerialNumber, tpus->NewPrice);
 
 	// Pull the items this Trader currently has for sale from the trader table.
@@ -2182,7 +2179,7 @@ void Client::HandleTraderPriceUpdate(const EQApplicationPacket *app) {
 	TraderCharges_Struct* gis = database.LoadTraderItemWithCharges(CharacterID());
 
 	if(!gis) {
-		Log(Logs::Detail, Logs::None, "[CLIENT] Error retrieving Trader items details to update price.");
+		LogDebug("[CLIENT] Error retrieving Trader items details to update price");
 		return;
 	}
 
@@ -2202,7 +2199,7 @@ void Client::HandleTraderPriceUpdate(const EQApplicationPacket *app) {
 		if((gis->ItemID[i] > 0) && (gis->SerialNumber[i] == tpus->SerialNumber)) {
 			// We found the item that the Trader wants to change the price of (or add back up for sale).
 			//
-			Log(Logs::Detail, Logs::Trading, "ItemID is %i, Charges is %i", gis->ItemID[i], gis->Charges[i]);
+			LogTrading("ItemID is [{}], Charges is [{}]", gis->ItemID[i], gis->Charges[i]);
 
 			IDOfItemToUpdate = gis->ItemID[i];
 
@@ -2228,7 +2225,7 @@ void Client::HandleTraderPriceUpdate(const EQApplicationPacket *app) {
 			return ;
 		}
 
-		Log(Logs::Detail, Logs::Trading, "Unable to find item to update price for. Rechecking trader satchels");
+		LogTrading("Unable to find item to update price for. Rechecking trader satchels");
 
 		// Find what is in their Trader Satchels
 		GetItems_Struct* newgis=GetTraderItems();
@@ -2241,7 +2238,7 @@ void Client::HandleTraderPriceUpdate(const EQApplicationPacket *app) {
 
 			if((newgis->Items[i] > 0) && (newgis->SerialNumber[i] == tpus->SerialNumber)) {
 
-				Log(Logs::Detail, Logs::Trading, "Found new Item to Add, ItemID is %i, Charges is %i", newgis->Items[i],
+				LogTrading("Found new Item to Add, ItemID is [{}], Charges is [{}]", newgis->Items[i],
 								newgis->Charges[i]);
 
 				IDOfItemToAdd = newgis->Items[i];
@@ -2259,7 +2256,7 @@ void Client::HandleTraderPriceUpdate(const EQApplicationPacket *app) {
 
 		if(!IDOfItemToAdd || !item) {
 
-			Log(Logs::Detail, Logs::Trading, "Item not found in Trader Satchels either.");
+			LogTrading("Item not found in Trader Satchels either");
 			tpus->SubAction = BazaarPriceChange_Fail;
 			QueuePacket(app);
 			Trader_EndTrader();
@@ -2304,7 +2301,7 @@ void Client::HandleTraderPriceUpdate(const EQApplicationPacket *app) {
 				gis->SerialNumber[i] = newgis->SerialNumber[i];
 				gis->ItemCost[i] = tpus->NewPrice;
 
-				Log(Logs::Detail, Logs::Trading, "Adding new item for %s. ItemID %i, SerialNumber %i, Charges %i, Price: %i, Slot %i",
+				LogTrading("Adding new item for [{}]. ItemID [{}], SerialNumber [{}], Charges [{}], Price: [{}], Slot [{}]",
 							GetName(), newgis->Items[i], newgis->SerialNumber[i], newgis->Charges[i],
 							tpus->NewPrice, i);
 			}
@@ -2350,7 +2347,7 @@ void Client::HandleTraderPriceUpdate(const EQApplicationPacket *app) {
 	QueuePacket(app);
 
 	if(OldPrice == tpus->NewPrice) {
-		Log(Logs::Detail, Logs::Trading, "The new price is the same as the old one.");
+		LogTrading("The new price is the same as the old one");
 		safe_delete(gis);
 		return;
 	}
@@ -2371,7 +2368,7 @@ void Client::SendBuyerResults(char* searchString, uint32 searchID) {
 
 	// This method is called when a potential seller in the /barter window searches for matching buyers
 	//
-	Log(Logs::Detail, Logs::None, "[CLIENT] Client::SendBuyerResults %s\n", searchString);
+	LogDebug("[CLIENT] Client::SendBuyerResults [{}]\n", searchString);
 
 	auto escSearchString = new char[strlen(searchString) * 2 + 1];
 	database.DoEscapeString(escSearchString, searchString, strlen(searchString));
@@ -2619,7 +2616,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 					Quantity = i;
 					break;
 				}
-				Log(Logs::General, Logs::Error, "Unexpected error while moving item from seller to buyer.");
+				LogError("Unexpected error while moving item from seller to buyer");
 				Message(Chat::Red, "Internal error while processing transaction.");
 				return;
 			}
@@ -2627,7 +2624,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 			EQEmu::ItemInstance* ItemToTransfer = m_inv.PopItem(SellerSlot);
 
 			if(!ItemToTransfer || !Buyer->MoveItemToInventory(ItemToTransfer, true)) {
-				Log(Logs::General, Logs::Error, "Unexpected error while moving item from seller to buyer.");
+				LogError("Unexpected error while moving item from seller to buyer");
 				Message(Chat::Red, "Internal error while processing transaction.");
 
 				if(ItemToTransfer)
@@ -2665,7 +2662,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 			int16 SellerSlot = m_inv.HasItem(ItemID, 1, invWhereWorn|invWherePersonal|invWhereCursor);
 
 			if (SellerSlot == INVALID_INDEX) {
-				Log(Logs::General, Logs::Error, "Unexpected error while moving item from seller to buyer.");
+				LogError("Unexpected error while moving item from seller to buyer");
 				Message(Chat::Red, "Internal error while processing transaction.");
 				return;
 			}
@@ -2673,7 +2670,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 			EQEmu::ItemInstance* ItemToTransfer = m_inv.PopItem(SellerSlot);
 
 			if(!ItemToTransfer) {
-				Log(Logs::General, Logs::Error, "Unexpected error while moving item from seller to buyer.");
+				LogError("Unexpected error while moving item from seller to buyer");
 				Message(Chat::Red, "Internal error while processing transaction.");
 				return;
 			}
@@ -2685,7 +2682,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 				QuantityMoved += ItemToTransfer->GetCharges();
 
 				if(!Buyer->MoveItemToInventory(ItemToTransfer, true)) {
-					Log(Logs::General, Logs::Error, "Unexpected error while moving item from seller to buyer.");
+					LogError("Unexpected error while moving item from seller to buyer");
 					Message(Chat::Red, "Internal error while processing transaction.");
 					safe_delete(ItemToTransfer);
 					return;
@@ -2720,7 +2717,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 				ItemToTransfer->SetCharges(QuantityToRemoveFromStack);
 
 				if(!Buyer->MoveItemToInventory(ItemToTransfer, true)) {
-					Log(Logs::General, Logs::Error, "Unexpected error while moving item from seller to buyer.");
+					LogError("Unexpected error while moving item from seller to buyer");
 					Message(Chat::Red, "Internal error while processing transaction.");
 					safe_delete(ItemToTransfer);
 					return;
@@ -2955,11 +2952,11 @@ void Client::UpdateBuyLine(const EQApplicationPacket *app) {
 
 	bool LoreConflict = CheckLoreConflict(item);
 
-	Log(Logs::Detail, Logs::Trading, "UpdateBuyLine: Char: %s BuySlot: %i ItemID %i %s Quantity %i Toggle: %i Price %i ItemCount %i LoreConflict %i",
+	LogTrading("UpdateBuyLine: Char: [{}] BuySlot: [{}] ItemID [{}] [{}] Quantity [{}] Toggle: [{}] Price [{}] ItemCount [{}] LoreConflict [{}]",
 					GetName(), BuySlot, ItemID, item->Name, Quantity, ToggleOnOff, Price, ItemCount, LoreConflict);
 
 	if((item->NoDrop != 0) && !LoreConflict && (Quantity > 0) && HasMoney(Quantity * Price) && ToggleOnOff && (ItemCount == 0)) {
-		Log(Logs::Detail, Logs::Trading, "Adding to database");
+		LogTrading("Adding to database");
 		database.AddBuyLine(CharacterID(), BuySlot, ItemID, ItemName, Quantity, Price);
 		QueuePacket(app);
 	}

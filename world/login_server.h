@@ -35,34 +35,35 @@ public:
 	~LoginServer();
 
 	bool Connect();
-
 	void SendInfo();
-	void SendNewInfo();
 	void SendStatus();
 
 	void SendPacket(ServerPacket* pack);
 	void SendAccountUpdate(ServerPacket* pack);
-	bool Connected();
-	bool MiniLogin() { return minilogin; }
+	bool Connected() { return IsLegacy ? legacy_client->Connected() : client->Connected(); }
 	bool CanUpdate() { return CanAccountUpdate; }
 
 private:
+	void ProcessUsertoWorldReqLeg(uint16_t opcode, EQ::Net::Packet &p);
 	void ProcessUsertoWorldReq(uint16_t opcode, EQ::Net::Packet &p);
 	void ProcessLSClientAuth(uint16_t opcode, EQ::Net::Packet &p);
+	void ProcessLSClientAuthLegacy(uint16_t opcode, EQ::Net::Packet &p);
 	void ProcessLSFatalError(uint16_t opcode, EQ::Net::Packet &p);
 	void ProcessSystemwideMessage(uint16_t opcode, EQ::Net::Packet &p);
 	void ProcessLSRemoteAddr(uint16_t opcode, EQ::Net::Packet &p);
 	void ProcessLSAccountUpdate(uint16_t opcode, EQ::Net::Packet &p);
 
-	bool minilogin;
+	void OnKeepAlive(EQ::Timer *t);
+	std::unique_ptr<EQ::Timer> m_keepalive;
+
 	std::unique_ptr<EQ::Net::ServertalkClient> client;
 	std::unique_ptr<EQ::Net::ServertalkLegacyClient> legacy_client;
 	std::unique_ptr<EQ::Timer> statusupdate_timer;
 	char	LoginServerAddress[256];
 	uint32	LoginServerIP;
 	uint16	LoginServerPort;
-	char	LoginAccount[32];
-	char	LoginPassword[32];
+	std::string LoginAccount;
+	std::string LoginPassword;
 	bool	CanAccountUpdate;
 	bool    IsLegacy;
 };

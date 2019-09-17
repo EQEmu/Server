@@ -241,12 +241,12 @@ bool Client::Process() {
 		if (RuleB(Character, ActiveInvSnapshots) && time(nullptr) >= GetNextInvSnapshotTime()) {
 			if (database.SaveCharacterInvSnapshot(CharacterID())) {
 				SetNextInvSnapshot(RuleI(Character, InvSnapshotMinIntervalM));
-				Log(Logs::Moderate, Logs::Inventory, "Successful inventory snapshot taken of %s - setting next interval for %i minute%s.",
+				LogInventory("Successful inventory snapshot taken of [{}] - setting next interval for [{}] minute[{}]",
 					GetName(), RuleI(Character, InvSnapshotMinIntervalM), (RuleI(Character, InvSnapshotMinIntervalM) == 1 ? "" : "s"));
 			}
 			else {
 				SetNextInvSnapshot(RuleI(Character, InvSnapshotMinRetryM));
-				Log(Logs::Moderate, Logs::Inventory, "Failed to take inventory snapshot of %s - retrying in %i minute%s.",
+				LogInventory("Failed to take inventory snapshot of [{}] - retrying in [{}] minute[{}]",
 					GetName(), RuleI(Character, InvSnapshotMinRetryM), (RuleI(Character, InvSnapshotMinRetryM) == 1 ? "" : "s"));
 			}
 		}
@@ -559,11 +559,10 @@ bool Client::Process() {
 
 	if (client_state != CLIENT_LINKDEAD && !eqs->CheckState(ESTABLISHED)) {
 		OnDisconnect(true);
-		Log(Logs::General, Logs::Zone_Server, "Client linkdead: %s", name);
+		LogInfo("Client linkdead: {}", name);
 
-		if (GetGM()) {
-			if (GetMerc())
-			{
+		if (Admin() > 100) {
+			if (GetMerc()) {
 				GetMerc()->Save();
 				GetMerc()->Depop();
 			}
@@ -608,7 +607,7 @@ bool Client::Process() {
 
 			npc_scan_count++;
 		}
-		Log(Logs::General, Logs::Aggro, "Checking Reverse Aggro (client->npc) scanned_npcs (%i)", npc_scan_count);
+		LogAggro("Checking Reverse Aggro (client->npc) scanned_npcs ([{}])", npc_scan_count);
 	}
 
 	if (client_state != CLIENT_LINKDEAD && (client_state == CLIENT_ERROR || client_state == DISCONNECTED || client_state == CLIENT_KICKED || !eqs->CheckState(ESTABLISHED)))
@@ -710,7 +709,7 @@ void Client::OnDisconnect(bool hard_disconnect) {
 	Mob *Other = trade->With();
 	if(Other)
 	{
-		Log(Logs::Detail, Logs::Trading, "Client disconnected during a trade. Returning their items.");
+		LogTrading("Client disconnected during a trade. Returning their items");
 		FinishTrade(this);
 
 		if(Other->IsClient())
@@ -742,7 +741,7 @@ void Client::BulkSendInventoryItems()
 		if(inst) {
 			bool is_arrow = (inst->GetItem()->ItemType == EQEmu::item::ItemTypeArrow) ? true : false;
 			int16 free_slot_id = m_inv.FindFreeSlot(inst->IsClassBag(), true, inst->GetItem()->Size, is_arrow);
-			Log(Logs::Detail, Logs::Inventory, "Incomplete Trade Transaction: Moving %s from slot %i to %i", inst->GetItem()->Name, slot_id, free_slot_id);
+			LogInventory("Incomplete Trade Transaction: Moving [{}] from slot [{}] to [{}]", inst->GetItem()->Name, slot_id, free_slot_id);
 			PutItemInInventory(free_slot_id, *inst, false);
 			database.SaveInventory(character_id, nullptr, slot_id);
 			safe_delete(inst);
@@ -771,7 +770,7 @@ void Client::BulkSendInventoryItems()
 		inst->Serialize(ob, slot_id);
 
 		if (ob.tellp() == last_pos)
-			Log(Logs::General, Logs::Inventory, "Serialization failed on item slot %d during BulkSendInventoryItems.  Item skipped.", slot_id);
+			LogInventory("Serialization failed on item slot [{}] during BulkSendInventoryItems. Item skipped", slot_id);
 		
 		last_pos = ob.tellp();
 	}
@@ -785,7 +784,7 @@ void Client::BulkSendInventoryItems()
 		inst->Serialize(ob, slot_id);
 
 		if (ob.tellp() == last_pos)
-			Log(Logs::General, Logs::Inventory, "Serialization failed on item slot %d during BulkSendInventoryItems.  Item skipped.", slot_id);
+			LogInventory("Serialization failed on item slot [{}] during BulkSendInventoryItems. Item skipped", slot_id);
 
 		last_pos = ob.tellp();
 	}
@@ -799,7 +798,7 @@ void Client::BulkSendInventoryItems()
 		inst->Serialize(ob, slot_id);
 
 		if (ob.tellp() == last_pos)
-			Log(Logs::General, Logs::Inventory, "Serialization failed on item slot %d during BulkSendInventoryItems.  Item skipped.", slot_id);
+			LogInventory("Serialization failed on item slot [{}] during BulkSendInventoryItems. Item skipped", slot_id);
 
 		last_pos = ob.tellp();
 	}
@@ -887,7 +886,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 		// Account for merchant lists with gaps.
 		if (ml.slot >= i) {
 			if (ml.slot > i)
-				Log(Logs::General, Logs::None, "(WARNING) Merchantlist contains gap at slot %d. Merchant: %d, NPC: %d", i, merchant_id, npcid);
+				LogDebug("(WARNING) Merchantlist contains gap at slot [{}]. Merchant: [{}], NPC: [{}]", i, merchant_id, npcid);
 			i = ml.slot + 1;
 		}
 	}
@@ -977,7 +976,7 @@ uint8 Client::WithCustomer(uint16 NewCustomer){
 	Client* c = entity_list.GetClientByID(CustomerID);
 
 	if(!c) {
-		Log(Logs::Detail, Logs::Trading, "Previous customer has gone away.");
+		LogTrading("Previous customer has gone away");
 		CustomerID = NewCustomer;
 		return 1;
 	}
@@ -989,7 +988,7 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 {
 	if(PendingRezzXP < 0) {
 		// pendingrezexp is set to -1 if we are not expecting an OP_RezzAnswer
-		Log(Logs::Detail, Logs::Spells, "Unexpected OP_RezzAnswer. Ignoring it.");
+		LogSpells("Unexpected OP_RezzAnswer. Ignoring it");
 		Message(Chat::Red, "You have already been resurrected.\n");
 		return;
 	}
@@ -999,7 +998,7 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 		// Mark the corpse as rezzed in the database, just in case the corpse has buried, or the zone the
 		// corpse is in has shutdown since the rez spell was cast.
 		database.MarkCorpseAsRezzed(PendingRezzDBID);
-		Log(Logs::Detail, Logs::Spells, "Player %s got a %i Rezz, spellid %i in zone%i, instance id %i",
+		LogSpells("Player [{}] got a [{}] Rezz, spellid [{}] in zone[{}], instance id [{}]",
 				this->name, (uint16)spells[SpellID].base[0],
 				SpellID, ZoneID, InstanceID);
 
@@ -1053,7 +1052,7 @@ void Client::OPMemorizeSpell(const EQApplicationPacket* app)
 {
 	if(app->size != sizeof(MemorizeSpell_Struct))
 	{
-		Log(Logs::General, Logs::Error, "Wrong size on OP_MemorizeSpell. Got: %i, Expected: %i", app->size, sizeof(MemorizeSpell_Struct));
+		LogError("Wrong size on OP_MemorizeSpell. Got: [{}], Expected: [{}]", app->size, sizeof(MemorizeSpell_Struct));
 		DumpPacket(app);
 		return;
 	}
@@ -1612,12 +1611,12 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 		EQEmu::skills::SkillType skill = (EQEmu::skills::SkillType)gmskill->skill_id;
 
 		if(!CanHaveSkill(skill)) {
-			Log(Logs::Detail, Logs::Skills, "Tried to train skill %d, which is not allowed.", skill);
+			LogSkills("Tried to train skill [{}], which is not allowed", skill);
 			return;
 		}
 
 		if(MaxSkill(skill) == 0) {
-			Log(Logs::Detail, Logs::Skills, "Tried to train skill %d, but training is not allowed at this level.", skill);
+			LogSkills("Tried to train skill [{}], but training is not allowed at this level", skill);
 			return;
 		}
 
@@ -1802,8 +1801,7 @@ void Client::DoStaminaHungerUpdate()
 	auto outapp = new EQApplicationPacket(OP_Stamina, sizeof(Stamina_Struct));
 	Stamina_Struct *sta = (Stamina_Struct *)outapp->pBuffer;
 
-	Log(Logs::General, Logs::Food, "Client::DoStaminaHungerUpdate() hunger_level: %i thirst_level: %i before loss",
-	    m_pp.hunger_level, m_pp.thirst_level);
+	LogFood("Client::DoStaminaHungerUpdate() hunger_level: [{}] thirst_level: [{}] before loss", m_pp.hunger_level, m_pp.thirst_level);
 
 	if (zone->GetZoneID() != 151 && !GetGM()) {
 		int loss = RuleI(Character, FoodLossPerUpdate);
@@ -1824,9 +1822,7 @@ void Client::DoStaminaHungerUpdate()
 		sta->water = 6000;
 	}
 
-	Log(Logs::General, Logs::Food,
-	    "Client::DoStaminaHungerUpdate() Current hunger_level: %i = (%i minutes left) thirst_level: %i = (%i "
-	    "minutes left) - after loss",
+	LogFood("Client::DoStaminaHungerUpdate() Current hunger_level: [{}] = ([{}] minutes left) thirst_level: [{}] = ([{}] minutes left) - after loss",
 	    m_pp.hunger_level, m_pp.hunger_level, m_pp.thirst_level, m_pp.thirst_level);
 
 	FastQueuePacket(&outapp);
@@ -2005,7 +2001,7 @@ void Client::HandleRespawnFromHover(uint32 Option)
 		{
 			if (PendingRezzXP < 0 || PendingRezzSpellID == 0)
 			{
-				Log(Logs::Detail, Logs::Spells, "Unexpected Rezz from hover request.");
+				LogSpells("Unexpected Rezz from hover request");
 				return;
 			}
 			SetHP(GetMaxHP() / 5);
@@ -2039,10 +2035,10 @@ void Client::HandleRespawnFromHover(uint32 Option)
 
 			if (corpse && corpse->IsCorpse())
 			{
-				Log(Logs::Detail, Logs::Spells, "Hover Rez in zone %s for corpse %s",
+				LogSpells("Hover Rez in zone [{}] for corpse [{}]",
 						zone->GetShortName(), PendingRezzCorpseName.c_str());
 
-				Log(Logs::Detail, Logs::Spells, "Found corpse. Marking corpse as rezzed.");
+				LogSpells("Found corpse. Marking corpse as rezzed");
 
 				corpse->IsRezzed(true);
 				corpse->CompleteResurrection();

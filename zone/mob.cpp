@@ -1322,7 +1322,7 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 			 * This is to prevent excessive packet sending under trains/fast combat
 			 */
 			if (this->CastToClient()->hp_self_update_throttle_timer.Check() || force_update_all) {
-				Log(Logs::General, Logs::HP_Update,
+				Log(Logs::General, Logs::HPUpdate,
 					"Mob::SendHPUpdate :: Update HP of self (%s) HP: %i last: %i skip_self: %s",
 					this->GetCleanName(),
 					current_hp,
@@ -1356,14 +1356,14 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 	int8 current_hp_percent = static_cast<int8>(max_hp == 0 ? 0 : static_cast<int>(current_hp * 100 / max_hp));
 
 	Log(Logs::General,
-		Logs::HP_Update,
+		Logs::HPUpdate,
 		"Mob::SendHPUpdate :: SendHPUpdate %s HP is %i last %i",
 		this->GetCleanName(),
 		current_hp_percent,
 		last_hp_percent);
 
 	if (current_hp_percent == last_hp_percent && !force_update_all) {
-		Log(Logs::General, Logs::HP_Update, "Mob::SendHPUpdate :: Same HP - skipping update");
+		Log(Logs::General, Logs::HPUpdate, "Mob::SendHPUpdate :: Same HP - skipping update");
 		ResetHPUpdateTimer();
 		return;
 	}
@@ -1373,7 +1373,7 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 			this->CastToClient()->SendHPUpdateMarquee();
 		}
 
-		Log(Logs::General, Logs::HP_Update, "Mob::SendHPUpdate :: HP Changed - Send update");
+		Log(Logs::General, Logs::HPUpdate, "Mob::SendHPUpdate :: HP Changed - Send update");
 
 		last_hp_percent = current_hp_percent;
 	}
@@ -1840,9 +1840,7 @@ void Mob::SendIllusionPacket(
 	/* Refresh armor and tints after send illusion packet */
 	this->SendArmorAppearance();
 
-	Log(Logs::Detail,
-		Logs::Spells,
-		"Illusion: Race = %i, Gender = %i, Texture = %i, HelmTexture = %i, HairColor = %i, BeardColor = %i, EyeColor1 = %i, EyeColor2 = %i, HairStyle = %i, Face = %i, DrakkinHeritage = %i, DrakkinTattoo = %i, DrakkinDetails = %i, Size = %f",
+	LogSpells("Illusion: Race = [{}], Gender = [{}], Texture = [{}], HelmTexture = [{}], HairColor = [{}], BeardColor = [{}], EyeColor1 = [{}], EyeColor2 = [{}], HairStyle = [{}], Face = [{}], DrakkinHeritage = [{}], DrakkinTattoo = [{}], DrakkinDetails = [{}], Size = [{}]",
 		race,
 		gender,
 		new_texture,
@@ -3063,7 +3061,7 @@ void Mob::ExecWeaponProc(const EQEmu::ItemInstance *inst, uint16 spell_id, Mob *
 	if(!IsValidSpell(spell_id)) { // Check for a valid spell otherwise it will crash through the function
 		if(IsClient()){
 			Message(0, "Invalid spell proc %u", spell_id);
-			Log(Logs::Detail, Logs::Spells, "Player %s, Weapon Procced invalid spell %u", this->GetName(), spell_id);
+			LogSpells("Player [{}], Weapon Procced invalid spell [{}]", this->GetName(), spell_id);
 		}
 		return;
 	}
@@ -4629,7 +4627,7 @@ void Mob::MeleeLifeTap(int32 damage) {
 	if(lifetap_amt && damage > 0){
 
 		lifetap_amt = damage * lifetap_amt / 100;
-		Log(Logs::Detail, Logs::Combat, "Melee lifetap healing for %d damage.", damage);
+		LogCombat("Melee lifetap healing for [{}] damage", damage);
 
 		if (lifetap_amt > 0)
 			HealDamage(lifetap_amt); //Heal self for modified damage amount.

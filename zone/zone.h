@@ -84,7 +84,7 @@ class MobMovementManager;
 class Zone {
 public:
 	static bool Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone = false);
-	static void Shutdown(bool quite = false);
+	static void Shutdown(bool quiet = false);
 
 	Zone(uint32 in_zoneid, uint32 in_instanceid, const char *in_short_name);
 	~Zone();

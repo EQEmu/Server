@@ -139,11 +139,11 @@ bool EQWHTTPHandler::CheckAuth() const {
 	int16 status = 0;
 	uint32 acctid = database.CheckLogin(m_username.c_str(), m_password.c_str(), &status);
 	if(acctid == 0) {
-		Log(Logs::Detail, Logs::World_Server, "Login autentication failed for %s with '%s'", m_username.c_str(), m_password.c_str());
+		LogInfo("Login autentication failed for [{}] with [{}]", m_username.c_str(), m_password.c_str());
 		return(false);
 	}
 	if(status < httpLoginStatus) {
-		Log(Logs::Detail, Logs::World_Server, "Login of %s failed: status too low.", m_username.c_str());
+		LogInfo("Login of [{}] failed: status too low", m_username.c_str());
 		return(false);
 	}
 
@@ -278,29 +278,29 @@ void EQWHTTPServer::CreateNewConnection(uint32 ID, SOCKET in_socket, uint32 irIP
 }
 
 void EQWHTTPServer::Stop() {
-	Log(Logs::Detail, Logs::World_Server, "Requesting that HTTP Service stop.");
+	LogInfo("Requesting that HTTP Service stop");
 	m_running = false;
 	Close();
 }
 
 bool EQWHTTPServer::Start(uint16 port, const char *mime_file) {
 	if(m_running) {
-		Log(Logs::Detail, Logs::World_Server, "HTTP Service is already running on port %d", m_port);
+		LogInfo("HTTP Service is already running on port [{}]", m_port);
 		return(false);
 	}
 
 	//load up our nice mime types
 	if(!EQWHTTPHandler::LoadMimeTypes(mime_file)) {
-		Log(Logs::Detail, Logs::World_Server, "Failed to load mime types from '%s'", mime_file);
+		LogInfo("Failed to load mime types from [{}]", mime_file);
 		return(false);
 	} else {
-		Log(Logs::Detail, Logs::World_Server, "Loaded mime types from %s", mime_file);
+		LogInfo("Loaded mime types from [{}]", mime_file);
 	}
 
 	//fire up the server thread
 	char errbuf[TCPServer_ErrorBufferSize];
 	if(!Open(port, errbuf)) {
-		Log(Logs::Detail, Logs::World_Server, "Unable to bind to port %d for HTTP service: %s", port, errbuf);
+		LogInfo("Unable to bind to port [{}] for HTTP service: [{}]", port, errbuf);
 		return(false);
 	}
 

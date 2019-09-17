@@ -41,13 +41,13 @@ void StructStrategy::ErrorEncoder(EQApplicationPacket **in_p, std::shared_ptr<EQ
 	EQApplicationPacket *p = *in_p;
 	*in_p = nullptr;
 
-	Log(Logs::General, Logs::Netcode, "[STRUCTS] Error encoding opcode %s: no encoder provided. Dropping.", OpcodeManager::EmuToName(p->GetOpcode()));
+	LogNetcode("[STRUCTS] Error encoding opcode [{}]: no encoder provided. Dropping", OpcodeManager::EmuToName(p->GetOpcode()));
 
 	delete p;
 }
 
 void StructStrategy::ErrorDecoder(EQApplicationPacket *p) {
-	Log(Logs::General, Logs::Netcode, "[STRUCTS] Error decoding opcode %s: no decoder provided. Invalidating.", OpcodeManager::EmuToName(p->GetOpcode()));
+	LogNetcode("[STRUCTS] Error decoding opcode [{}]: no decoder provided. Invalidating", OpcodeManager::EmuToName(p->GetOpcode()));
 	p->SetOpcode(OP_Unknown);
 }
 

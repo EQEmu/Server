@@ -803,7 +803,7 @@ bool Corpse::Process() {
 			spc->zone_id = zone->graveyard_zoneid();
 			worldserver.SendPacket(pack);
 			safe_delete(pack);
-			Log(Logs::General, Logs::None, "Moved %s player corpse to the designated graveyard in zone %s.", this->GetName(), database.GetZoneName(zone->graveyard_zoneid()));
+			LogDebug("Moved [{}] player corpse to the designated graveyard in zone [{}]", this->GetName(), database.GetZoneName(zone->graveyard_zoneid()));
 			corpse_db_id = 0;
 		}
 
@@ -833,10 +833,10 @@ bool Corpse::Process() {
 				Save();
 				player_corpse_depop = true;
 				corpse_db_id = 0;
-				Log(Logs::General, Logs::None, "Tagged %s player corpse has buried.", this->GetName());
+				LogDebug("Tagged [{}] player corpse has buried", this->GetName());
 			}
 			else {
-				Log(Logs::General, Logs::Error, "Unable to bury %s player corpse.", this->GetName());
+				LogError("Unable to bury [{}] player corpse", this->GetName());
 				return true;
 			}
 		}
@@ -943,7 +943,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 
 	}
 
-	Log(Logs::Moderate, Logs::Inventory, "MakeLootRequestPackets() LootRequestType %u for %s", loot_request_type, client->GetName());
+	LogInventory("MakeLootRequestPackets() LootRequestType [{}] for [{}]", (int) loot_request_type, client->GetName());
 
 	if (loot_request_type == LootRequestType::Forbidden) {
 		SendLootReqErrorPacket(client, LootResponse::NotAtThisTime);
@@ -1027,13 +1027,13 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 			if (pkitem->RecastDelay)
 				pkinst->SetRecastTimestamp(timestamps.count(pkitem->RecastType) ? timestamps.at(pkitem->RecastType) : 0);
 
-			Log(Logs::Detail, Logs::Inventory, "MakeLootRequestPackets() Slot %u, Item '%s'", EQEmu::invslot::CORPSE_BEGIN, pkitem->Name);
+			LogInventory("MakeLootRequestPackets() Slot [{}], Item [{}]", EQEmu::invslot::CORPSE_BEGIN, pkitem->Name);
 
 			client->SendItemPacket(EQEmu::invslot::CORPSE_BEGIN, pkinst, ItemPacketLoot);
 			safe_delete(pkinst);
 		}
 		else {
-			Log(Logs::General, Logs::Inventory, "MakeLootRequestPackets() PlayerKillItem %i not found", pkitemid);
+			LogInventory("MakeLootRequestPackets() PlayerKillItem [{}] not found", pkitemid);
 
 			client->Message(Chat::Red, "PlayerKillItem (id: %i) could not be found!", pkitemid);
 		}
@@ -1083,7 +1083,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 		if (item->RecastDelay)
 			inst->SetRecastTimestamp(timestamps.count(item->RecastType) ? timestamps.at(item->RecastType) : 0);
 
-		Log(Logs::Moderate, Logs::Inventory, "MakeLootRequestPackets() Slot %i, Item '%s'", loot_slot, item->Name);
+		LogInventory("MakeLootRequestPackets() Slot [{}], Item [{}]", loot_slot, item->Name);
 
 		client->SendItemPacket(loot_slot, inst, ItemPacketLoot);
 		safe_delete(inst);
@@ -1107,7 +1107,7 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 
 	auto lootitem = (LootingItem_Struct *)app->pBuffer;
 
-	Log(Logs::Moderate, Logs::Inventory, "LootItem() LootRequestType %u, Slot %u for %s", loot_request_type, lootitem->slot_id, client->GetName());
+	LogInventory("LootItem() LootRequestType [{}], Slot [{}] for [{}]", (int) loot_request_type, lootitem->slot_id, client->GetName());
 
 	if (loot_request_type < LootRequestType::GMAllowed) { // LootRequestType::Forbidden and LootRequestType::GMPeek
 		client->QueuePacket(app);

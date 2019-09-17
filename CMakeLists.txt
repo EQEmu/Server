@@ -6,16 +6,8 @@
 #EQEMU_DISABLE_SAFESEH
 #EQEMU_BUILD_MSVC_MP
 #EQEMU_DEBUG_LEVEL
-#EQEMU_LOG_LEVEL_STATUS
-#EQEMU_LOG_LEVEL_NORMAL
-#EQEMU_LOG_LEVEL_ERROR
 #EQEMU_LOG_LEVEL_DEBUG
-#EQEMU_LOG_LEVEL_QUEST
-#EQEMU_LOG_LEVEL_COMMANDS
-#EQEMU_LOG_LEVEL_CRASH
-#EQEMU_DEPOP_INVALIDATES_CACHE
 #EQEMU_ENABLE_BOTS
-#EQEMU_DISABLE_LOGSYS
 #EQEMU_COMMANDS_LOGGING
 #EQEMU_BUILD_SERVER
 #EQEMU_BUILD_LOGIN
@@ -150,36 +142,6 @@ SET(EQEMU_DEBUG_LEVEL 5 CACHE STRING "EQEmu debug level:
 	10 - More errors than you ever wanted to see"
 )
 
-SET(EQEMU_LOG_LEVEL_STATUS 2 CACHE STRING "EQEmu logging level for [Status]:
-	0 - Disabled
-	1 - Ouput to File Enabled
-	2 - Output to stdout Enabled
-	3 - Output to File and stdout Enabled
-	8 - Output to stderr Enabled
-	9 - Output to File and stderr Enabled
-	11 - Output to File, stdout and stderr Enabled"
-)
-
-SET(EQEMU_LOG_LEVEL_NORMAL 3 CACHE STRING "EQEmu logging level for [Normal]:
-	0 - Disabled
-	1 - Ouput to File Enabled
-	2 - Output to stdout Enabled
-	3 - Output to File and stdout Enabled
-	8 - Output to stderr Enabled
-	9 - Output to File and stderr Enabled
-	11 - Output to File, stdout and stderr Enabled"
-)
-
-SET(EQEMU_LOG_LEVEL_ERROR 2 CACHE STRING "EQEmu logging level for [Error]:
-	0 - Disabled
-	1 - Ouput to File Enabled
-	2 - Output to stdout Enabled
-	3 - Output to File and stdout Enabled
-	8 - Output to stderr Enabled
-	9 - Output to File and stderr Enabled
-	11 - Output to File, stdout and stderr Enabled"
-)
-
 SET(EQEMU_LOG_LEVEL_DEBUG 3 CACHE STRING "EQEmu logging level for [Debug]:
 	0 - Disabled
 	1 - Ouput to File Enabled
@@ -190,46 +152,13 @@ SET(EQEMU_LOG_LEVEL_DEBUG 3 CACHE STRING "EQEmu logging level for [Debug]:
 	11 - Output to File, stdout and stderr Enabled"
 )
 
-SET(EQEMU_LOG_LEVEL_QUEST 2 CACHE STRING "EQEmu logging level for [Quest]:
-	0 - Disabled
-	1 - Ouput to File Enabled
-	2 - Output to stdout Enabled
-	3 - Output to File and stdout Enabled
-	8 - Output to stderr Enabled
-	9 - Output to File and stderr Enabled
-	11 - Output to File, stdout and stderr Enabled"
-)
+OPTION(EQEMU_LSPX "" OFF)
+MARK_AS_ADVANCED(EQEMU_LSPX)
 
-SET(EQEMU_LOG_LEVEL_COMMANDS 1 CACHE STRING "EQEmu logging level for [Commands]:
-	0 - Disabled
-	1 - Ouput to File Enabled
-	2 - Output to stdout Enabled
-	3 - Output to File and stdout Enabled
-	8 - Output to stderr Enabled
-	9 - Output to File and stderr Enabled
-	11 - Output to File, stdout and stderr Enabled"
-)
-
-SET(EQEMU_LOG_LEVEL_CRASH 3 CACHE STRING "EQEmu logging level for [Crash]:
-	0 - Disabled
-	1 - Ouput to File Enabled
-	2 - Output to stdout Enabled
-	3 - Output to File and stdout Enabled
-	8 - Output to stderr Enabled
-	9 - Output to File and stderr Enabled
-	11 - Output to File, stdout and stderr Enabled"
-)
-
-MARK_AS_ADVANCED(EQEMU_LOG_LEVEL_STATUS EQEMU_LOG_LEVEL_NORMAL EQEMU_LOG_LEVEL_ERROR EQEMU_LOG_LEVEL_DEBUG EQEMU_LOG_LEVEL_QUEST EQEMU_LOG_LEVEL_COMMANDS EQEMU_LOG_LEVEL_CRASH)
-
-#NPC Types Cache Behavior
-OPTION(EQEMU_DEPOP_INVALIDATES_CACHE "#repop invalidates the npc_types cache (will cause a larger database hit on #repop but is more convienent)." ON)
+MARK_AS_ADVANCED(EQEMU_LOG_LEVEL_DEBUG)
 
 #Bots are a compile time option so on/off
 OPTION(EQEMU_ENABLE_BOTS "Enable Bots" OFF)
-
-#Disable entire _mlog system (excludes trade/command logs)
-OPTION(EQEMU_DISABLE_LOGSYS "Disable Logging INI System" ON)
 
 #Enable GM Command log system
 OPTION(EQEMU_COMMANDS_LOGGING "Enable GM Command logs" ON)
@@ -238,9 +167,9 @@ IF(EQEMU_COMMANDS_LOGGING)
 	ADD_DEFINITIONS(-DCOMMANDS_LOGGING)
 ENDIF(EQEMU_COMMANDS_LOGGING)
 
-IF(EQEMU_DISABLE_LOGSYS)
-	ADD_DEFINITIONS(-DDISABLE_LOGSYS)
-ENDIF(EQEMU_DISABLE_LOGSYS)
+IF(EQEMU_LSPX)
+	ADD_DEFINITIONS(-DLSPX=ON)
+ENDIF(EQEMU_LSPX)
 
 IF(EQEMU_ENABLE_BOTS)
 	ADD_DEFINITIONS(-DBOTS)
@@ -284,13 +213,7 @@ ADD_DEFINITIONS(-DEQDEBUG=${EQEMU_DEBUG_LEVEL})
 ADD_DEFINITIONS(-DINVERSEXY)
 ADD_DEFINITIONS(-DFIELD_ITEMS)
 ADD_DEFINITIONS(-DMAP_DIR="${EQEMU_MAP_DIR}")
-ADD_DEFINITIONS(-DLOG_LEVEL_STATUS=${EQEMU_LOG_LEVEL_STATUS})
-ADD_DEFINITIONS(-DLOG_LEVEL_NORMAL=${EQEMU_LOG_LEVEL_NORMAL})
-ADD_DEFINITIONS(-DLOG_LEVEL_ERROR=${EQEMU_LOG_LEVEL_ERROR})
 ADD_DEFINITIONS(-DLOG_LEVEL_DEBUG=${EQEMU_LOG_LEVEL_DEBUG})
-ADD_DEFINITIONS(-DLOG_LEVEL_QUEST=${EQEMU_LOG_LEVEL_QUEST})
-ADD_DEFINITIONS(-DLOG_LEVEL_COMMANDS=${EQEMU_LOG_LEVEL_COMMANDS})
-ADD_DEFINITIONS(-DLOG_LEVEL_CRASH=${EQEMU_LOG_LEVEL_CRASH})
 ADD_DEFINITIONS(-DGLM_FORCE_RADIANS)
 ADD_DEFINITIONS(-DGLM_FORCE_CTOR_INIT)
 ADD_DEFINITIONS(-DGLM_ENABLE_EXPERIMENTAL)

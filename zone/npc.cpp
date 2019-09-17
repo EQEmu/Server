@@ -617,11 +617,11 @@ void NPC::QueryLoot(Client* to)
 	int item_count = 0;
 	for (auto cur  = itemlist.begin(); cur != itemlist.end(); ++cur, ++item_count) {
 		if (!(*cur)) {
-			Log(Logs::General, Logs::Error, "NPC::QueryLoot() - ItemList error, null item");
+			LogError("NPC::QueryLoot() - ItemList error, null item");
 			continue;
 		}
 		if (!(*cur)->item_id || !database.GetItem((*cur)->item_id)) {
-			Log(Logs::General, Logs::Error, "NPC::QueryLoot() - Database error, invalid item");
+			LogError("NPC::QueryLoot() - Database error, invalid item");
 			continue;
 		}
 
@@ -1903,7 +1903,7 @@ void Mob::NPCSpecialAttacks(const char* parse, int permtag, bool reset, bool rem
 	{
 		if(database.SetSpecialAttkFlag(this->GetNPCTypeID(), orig_parse))
 		{
-			Log(Logs::General, Logs::Normal, "NPCTypeID: %i flagged to '%s' for Special Attacks.\n",this->GetNPCTypeID(),orig_parse);
+			LogInfo("NPCTypeID: [{}] flagged to [{}] for Special Attacks.\n",this->GetNPCTypeID(),orig_parse);
 		}
 	}
 }
@@ -2153,7 +2153,7 @@ void NPC::ModifyNPCStat(const char *identifier, const char *new_value)
 	std::string variable_key = StringFormat("modify_stat_%s", id.c_str());
 	SetEntityVariable(variable_key.c_str(), new_value);
 
-	Log(Logs::Detail, Logs::NPCScaling, "NPC::ModifyNPCStat key: %s val: %s ", variable_key.c_str(), new_value);
+	LogNPCScaling("NPC::ModifyNPCStat key: [{}] val: [{}] ", variable_key.c_str(), new_value);
 
 	if (id == "ac") {
 		AC = atoi(val.c_str());
