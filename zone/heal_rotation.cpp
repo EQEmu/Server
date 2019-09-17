@@ -906,7 +906,7 @@ void HealRotation::bias_targets()
 
 	for (auto tlist_iter : m_target_pool) {
 		if (!tlist_iter) { continue; }
-		LogError("([{}]) [{}] (hp: %3.1f%%, at: [{}], dontheal: [{}], crit(base): [{}]([{}]), safe(base): [{}]([{}]), hcnt(ext): [{}]([{}]), hfreq(ext): [{}]([{}]))",
+		LogError("([{}]) [{}] (hp: [{}], at: [{}], dontheal: [{}], crit(base): [{}]([{}]), safe(base): [{}]([{}]), hcnt(ext): [{}]([{}]), hfreq(ext): [{}]([{}]))",
 			(++target_index), tlist_iter->GetCleanName(),
 			tlist_iter->GetHPRatio(),
 			ClassArmorType(tlist_iter->GetClass()),

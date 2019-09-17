@@ -1479,9 +1479,8 @@ bool SharedDatabase::UpdateInjectedCommandSettings(const std::vector<std::pair<s
 		}
 
 		LogInfo(
-			"%u New Command%s Added",
-			injected.size(),
-			(injected.size() == 1 ? "" : "s")
+			"[{0}] New Command(s) Added",
+			injected.size()
 		);
 	}
 

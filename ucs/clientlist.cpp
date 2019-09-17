@@ -643,7 +643,7 @@ void Clientlist::Process()
 					MailBox, Key);
 
 				if (!database.VerifyMailKey(CharacterName, (*it)->ClientStream->GetRemoteIP(), Key)) {
-					LogError("Chat Key for %s does not match, closing connection.", MailBox);
+					LogError("Chat Key for [{}] does not match, closing connection.", MailBox);
 					KeyValid = false;
 					break;
 				}
@@ -668,7 +668,7 @@ void Clientlist::Process()
 			}
 
 			default: {
-				LogInfo("Unhandled chat opcode %8X", opcode);
+				LogInfo("Unhandled chat opcode {:#04x}", opcode);
 				break;
 			}
 			}

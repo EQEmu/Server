@@ -464,7 +464,7 @@ int command_init(void)
 
 			orphaned_command_settings.push_back(cs_iter.first);
 			LogInfo(
-				"Command '%s' no longer exists... Deleting orphaned entry from `command_settings` table...",
+				"Command [{}] no longer exists... Deleting orphaned entry from `command_settings` table...",
 				cs_iter.first.c_str()
 			);
 		}
@@ -484,14 +484,14 @@ int command_init(void)
 
 			injected_command_settings.push_back(std::pair<std::string, uint8>(working_cl_iter.first, working_cl_iter.second->access));
 			LogInfo(
-				"New Command '%s' found... Adding to `command_settings` table with access '%u'...",
+				"New Command [{}] found... Adding to `command_settings` table with access [{}]...",
 				working_cl_iter.first.c_str(),
 				working_cl_iter.second->access
 			);
 
 			if (working_cl_iter.second->access == 0) {
 				LogCommands(
-					"command_init(): Warning: Command '%s' defaulting to access level 0!",
+					"command_init(): Warning: Command [{}] defaulting to access level 0!",
 					working_cl_iter.first.c_str()
 				);
 			}
@@ -501,7 +501,7 @@ int command_init(void)
 
 		working_cl_iter.second->access = cs_iter->second.first;
 		LogCommands(
-			"command_init(): - Command '%s' set to access level %d.",
+			"command_init(): - Command [{}] set to access level [{}]",
 			working_cl_iter.first.c_str(),
 			cs_iter->second.first
 		);
@@ -517,7 +517,7 @@ int command_init(void)
 
 			if (commandlist.find(alias_iter) != commandlist.end()) {
 				LogCommands(
-					"command_init(): Warning: Alias '%s' already exists as a command - skipping!",
+					"command_init(): Warning: Alias [{}] already exists as a command - skipping!",
 					alias_iter.c_str()
 				);
 				
@@ -528,7 +528,7 @@ int command_init(void)
 			commandaliases[alias_iter] = working_cl_iter.first;
 
 			LogCommands(
-				"command_init(): - Alias '%s' added to command '%s'.",
+				"command_init(): - Alias [{}] added to command [{}]",
 				alias_iter.c_str(),
 				commandaliases[alias_iter].c_str()
 			);

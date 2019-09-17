@@ -4176,10 +4176,10 @@ bool ZoneDatabase::LoadFactionData()
 			faction_array[index]->mods[mr_row[2]] = atoi(mr_row[1]);
 		}
 
-		Log(Logs::General, Logs::Status, "%u Faction Modifier%s loaded...", modifier_results.RowCount(), (modifier_results.RowCount() == 1 ? "" : "s"));
+		LogInfo("[{}] Faction Modifier(s) loaded", modifier_results.RowCount());
 	}
 	else {
-		Log(Logs::General, Logs::Status, "Unable to load Faction Modifier data...");
+		LogError("Unable to load Faction Modifier data");
 	}
 
 	return true;

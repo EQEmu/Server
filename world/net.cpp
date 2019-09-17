@@ -327,7 +327,7 @@ int main(int argc, char** argv) {
 	std::string hotfix_name;
 	if (database.GetVariable("hotfix_name", hotfix_name)) {
 		if (!hotfix_name.empty()) {
-			LogInfo("Current hotfix in use: '%s'", hotfix_name.c_str());
+			LogInfo("Current hotfix in use: [{}]", hotfix_name.c_str());
 		}
 	}
 

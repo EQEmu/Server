@@ -106,7 +106,7 @@ bool Client::Process()
 				if (LogSys.log_settings[Logs::PacketClientServerUnhandled].is_category_enabled == 1) {
 					char dump[64];
 					app->build_header_dump(dump);
-					LogError("Recieved unhandled application packet from the client: %s.", dump);
+					LogError("Recieved unhandled application packet from the client: [{}]", dump);
 				}
 			}
 		}

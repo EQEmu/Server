@@ -976,7 +976,7 @@ EQRawApplicationPacket *p=nullptr;
 		if(OpMgr != nullptr && *OpMgr != nullptr) {
 			EmuOpcode emu_op = (*OpMgr)->EQToEmu(p->opcode);
 			if(emu_op == OP_Unknown) {
-				LogNetcode("Unable to convert EQ opcode 0x%.4x to an Application opcode", p->opcode);
+				LogNetcode("Unable to convert EQ opcode {:#04x} to an Application opcode", p->opcode);
 			}
 
 			p->SetOpcode(emu_op);
@@ -1417,19 +1417,19 @@ EQStream::MatchState EQStream::CheckSignature(const Signature *sig) {
 		} else if(p->opcode == sig->first_eq_opcode) {
 			//opcode matches, check length..
 			if(p->size == sig->first_length) {
-				LogNetcode("[StreamIdentify] [{}]:[{}]: First opcode matched 0x%x and length matched [{}]", long2ip(GetRemoteIP()).c_str(), ntohs(GetRemotePort()), sig->first_eq_opcode, p->size);
+				LogNetcode("[StreamIdentify] [{}]:[{}]: First opcode matched {:#04x} and length matched [{}]", long2ip(GetRemoteIP()).c_str(), ntohs(GetRemotePort()), sig->first_eq_opcode, p->size);
 				res = MatchSuccessful;
 			} else if(sig->first_length == 0) {
-				LogNetcode("[StreamIdentify] [{}]:[{}]: First opcode matched 0x%x and length ([{}]) is ignored", long2ip(GetRemoteIP()).c_str(), ntohs(GetRemotePort()), sig->first_eq_opcode, p->size);
+				LogNetcode("[StreamIdentify] [{}]:[{}]: First opcode matched {:#04x} and length ([{}]) is ignored", long2ip(GetRemoteIP()).c_str(), ntohs(GetRemotePort()), sig->first_eq_opcode, p->size);
 				res = MatchSuccessful;
 			} else {
 				//opcode matched but length did not.
-				LogNetcode("[StreamIdentify] [{}]:[{}]: First opcode matched 0x%x, but length [{}] did not match expected [{}]", long2ip(GetRemoteIP()).c_str(), ntohs(GetRemotePort()), sig->first_eq_opcode, p->size, sig->first_length);
+				LogNetcode("[StreamIdentify] [{}]:[{}]: First opcode matched {:#04x}, but length [{}] did not match expected [{}]", long2ip(GetRemoteIP()).c_str(), ntohs(GetRemotePort()), sig->first_eq_opcode, p->size, sig->first_length);
 				res = MatchFailed;
 			}
 		} else {
 			//first opcode did not match..
-			LogNetcode("[StreamIdentify] [{}]:[{}]: First opcode 0x%x did not match expected 0x%x", long2ip(GetRemoteIP()).c_str(), ntohs(GetRemotePort()), p->opcode, sig->first_eq_opcode);
+			LogNetcode("[StreamIdentify] [{}]:[{}]: First opcode {:#04x} did not match expected {:#04x}", long2ip(GetRemoteIP()).c_str(), ntohs(GetRemotePort()), p->opcode, sig->first_eq_opcode);
 			res = MatchFailed;
 		}
 	}
