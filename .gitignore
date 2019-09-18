@@ -31,3 +31,6 @@ perl/
 
 .idea/*
 *cbp
+
+submodules/*
+cmake-build-debug/

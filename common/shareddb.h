@@ -71,6 +71,8 @@ class SharedDatabase : public Database
 		void	LoadCharacterInspectMessage(uint32 character_id, InspectMessage_Struct* message);
 		void	SaveCharacterInspectMessage(uint32 character_id, const InspectMessage_Struct* message);
 		bool	GetCommandSettings(std::map<std::string, std::pair<uint8, std::vector<std::string>>> &command_settings);
+		bool	UpdateInjectedCommandSettings(const std::vector<std::pair<std::string, uint8>> &injected);
+		bool	UpdateOrphanedCommandSettings(const std::vector<std::string> &orphaned);
 		uint32	GetTotalTimeEntitledOnAccount(uint32 AccountID);
 		void	SetMailKey(int CharID, int IPAddress, int MailKey);
 		std::string	GetMailKey(int CharID, bool key_only = false);

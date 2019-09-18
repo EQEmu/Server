@@ -74,20 +74,19 @@ int main(int argc, char **argv) {
 	LogSys.LoadLogSettingsDefaults();
 	set_exception_handler();
 
-	Log(Logs::General, Logs::Status, "Shared Memory Loader Program");
+	LogInfo("Shared Memory Loader Program");
 	if(!EQEmuConfig::LoadConfig()) {
-		Log(Logs::General, Logs::Error, "Unable to load configuration file.");
+		LogError("Unable to load configuration file");
 		return 1;
 	}
 
 	auto Config = EQEmuConfig::get();
 
 	SharedDatabase database;
-	Log(Logs::General, Logs::Status, "Connecting to database...");
+	LogInfo("Connecting to database");
 	if(!database.Connect(Config->DatabaseHost.c_str(), Config->DatabaseUsername.c_str(),
 		Config->DatabasePassword.c_str(), Config->DatabaseDB.c_str(), Config->DatabasePort)) {
-		Log(Logs::General, Logs::Error, "Unable to connect to the database, cannot continue without a "
-			"database connection");
+		LogError("Unable to connect to the database, cannot continue without a database connection");
 		return 1;
 	}
 
@@ -97,7 +96,7 @@ int main(int argc, char **argv) {
 
 	std::string shared_mem_directory = Config->SharedMemDir;
 	if (MakeDirectory(shared_mem_directory)) {
-		Log(Logs::General, Logs::Status, "Shared Memory folder doesn't exist, so we created it... '%s'", shared_mem_directory.c_str());
+		LogInfo("Shared Memory folder doesn't exist, so we created it [{}]", shared_mem_directory.c_str());
 	}
 
 	database.LoadVariables();
@@ -106,7 +105,7 @@ int main(int argc, char **argv) {
 	std::string db_hotfix_name;
 	if (database.GetVariable("hotfix_name", db_hotfix_name)) {
 		if (!db_hotfix_name.empty() && strcasecmp("hotfix_", db_hotfix_name.c_str()) == 0) {
-			Log(Logs::General, Logs::Status, "Current hotfix in variables is the default %s, clearing out variable", db_hotfix_name.c_str());
+			LogInfo("Current hotfix in variables is the default [{}], clearing out variable", db_hotfix_name.c_str());
 			std::string query = StringFormat("UPDATE `variables` SET `value`='' WHERE (`varname`='hotfix_name')");
 			database.QueryDatabase(query);
 		}
@@ -177,65 +176,65 @@ int main(int argc, char **argv) {
 	}
 
 	if(hotfix_name.length() > 0) {
-		Log(Logs::General, Logs::Status, "Writing data for hotfix '%s'", hotfix_name.c_str());
+		LogInfo("Writing data for hotfix [{}]", hotfix_name.c_str());
 	}
 	
 	if(load_all || load_items) {
-		Log(Logs::General, Logs::Status, "Loading items...");
+		LogInfo("Loading items");
 		try {
 			LoadItems(&database, hotfix_name);
 		} catch(std::exception &ex) {
-			Log(Logs::General, Logs::Error, "%s", ex.what());
+			LogError("{}", ex.what());
 			return 1;
 		}
 	}
 	
 	if(load_all || load_factions) {
-		Log(Logs::General, Logs::Status, "Loading factions...");
+		LogInfo("Loading factions");
 		try {
 			LoadFactions(&database, hotfix_name);
 		} catch(std::exception &ex) {
-			Log(Logs::General, Logs::Error, "%s", ex.what());
+			LogError("{}", ex.what());
 			return 1;
 		}
 	}
 	
 	if(load_all || load_loot) {
-		Log(Logs::General, Logs::Status, "Loading loot...");
+		LogInfo("Loading loot");
 		try {
 			LoadLoot(&database, hotfix_name);
 		} catch(std::exception &ex) {
-			Log(Logs::General, Logs::Error, "%s", ex.what());
+			LogError("{}", ex.what());
 			return 1;
 		}
 	}
 	
 	if(load_all || load_skill_caps) {
-		Log(Logs::General, Logs::Status, "Loading skill caps...");
+		LogInfo("Loading skill caps");
 		try {
 			LoadSkillCaps(&database, hotfix_name);
 		} catch(std::exception &ex) {
-			Log(Logs::General, Logs::Error, "%s", ex.what());
+			LogError("{}", ex.what());
 			return 1;
 		}
 	}
 	
 	if(load_all || load_spells) {
-		Log(Logs::General, Logs::Status, "Loading spells...");
+		LogInfo("Loading spells");
 		try {
 			LoadSpells(&database, hotfix_name);
 		} catch(std::exception &ex) {
-			Log(Logs::General, Logs::Error, "%s", ex.what());
+			LogError("{}", ex.what());
 			return 1;
 		}
 	}
 	
 	if(load_all || load_bd) {
-		Log(Logs::General, Logs::Status, "Loading base data...");
+		LogInfo("Loading base data");
 		try {
 			LoadBaseData(&database, hotfix_name);
 		} catch(std::exception &ex) {
-			Log(Logs::General, Logs::Error, "%s", ex.what());
+			LogError("{}", ex.what());
 			return 1;
 		}
 	}

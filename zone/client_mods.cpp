@@ -576,7 +576,7 @@ int32 Client::CalcMaxMana()
 				break;
 			}
 		default: {
-				Log(Logs::Detail, Logs::Spells, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
+				LogSpells("Invalid Class [{}] in CalcMaxMana", GetCasterClass());
 				max_mana = 0;
 				break;
 			}
@@ -594,7 +594,7 @@ int32 Client::CalcMaxMana()
 			current_mana = curMana_cap;
 		}
 	}
-	Log(Logs::Detail, Logs::Spells, "Client::CalcMaxMana() called for %s - returning %d", GetName(), max_mana);
+	LogSpells("Client::CalcMaxMana() called for [{}] - returning [{}]", GetName(), max_mana);
 	return max_mana;
 }
 
@@ -678,13 +678,13 @@ int32 Client::CalcBaseMana()
 				break;
 			}
 		default: {
-				Log(Logs::General, Logs::None, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
+				LogDebug("Invalid Class [{}] in CalcMaxMana", GetCasterClass());
 				max_m = 0;
 				break;
 			}
 	}
 	#if EQDEBUG >= 11
-	Log(Logs::General, Logs::None, "Client::CalcBaseMana() called for %s - returning %d", GetName(), max_m);
+	LogDebug("Client::CalcBaseMana() called for [{}] - returning [{}]", GetName(), max_m);
 	#endif
 	return max_m;
 }
@@ -1597,8 +1597,9 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id) const
 		effectmod = 10;
 	if (!nocap && effectmod > effectmodcap) // if the cap is calculated to be 0 using new rules, no cap.
 		effectmod = effectmodcap;
-	Log(Logs::Detail, Logs::Spells, "%s::GetInstrumentMod() spell=%d mod=%d modcap=%d\n", GetName(), spell_id,
-		effectmod, effectmodcap);
+
+	LogSpells("[{}]::GetInstrumentMod() spell=[{}] mod=[{}] modcap=[{}]\n", GetName(), spell_id, effectmod, effectmodcap);
+
 	return effectmod;
 }
 

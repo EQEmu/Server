@@ -57,7 +57,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 	PetRecord record;
 	if (!database.GetPoweredPetEntry(spells[spell_id].teleport_zone, act_power, &record))
 	{
-		Log(Logs::General, Logs::Error, "Unknown swarm pet spell id: %d, check pets table", spell_id);
+		LogError("Unknown swarm pet spell id: {}, check pets table", spell_id);
 		Message(Chat::Red, "Unable to find data for pet %s", spells[spell_id].teleport_zone);
 		return;
 	}
@@ -84,7 +84,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 	const NPCType *npc_type = database.LoadNPCTypesData(pet.npc_id);
 	if (npc_type == nullptr) {
 		//log write
-		Log(Logs::General, Logs::Error, "Unknown npc type for swarm pet spell id: %d", spell_id);
+		LogError("Unknown npc type for swarm pet spell id: [{}]", spell_id);
 		Message(0, "Unable to find pet!");
 		return;
 	}
@@ -183,7 +183,7 @@ void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_overrid
 	const NPCType *npc_type = database.LoadNPCTypesData(typesid);
 	if(npc_type == nullptr) {
 		//log write
-		Log(Logs::General, Logs::Error, "Unknown npc type for swarm pet type id: %d", typesid);
+		LogError("Unknown npc type for swarm pet type id: [{}]", typesid);
 		Message(0,"Unable to find pet!");
 		return;
 	}
@@ -1562,17 +1562,17 @@ bool Mob::CanPurchaseAlternateAdvancementRank(AA::Rank *rank, bool check_price, 
 }
 
 void Zone::LoadAlternateAdvancement() {
-	Log(Logs::General, Logs::Status, "Loading Alternate Advancement Data...");
+	LogInfo("Loading Alternate Advancement Data");
 	if(!database.LoadAlternateAdvancementAbilities(aa_abilities,
 		aa_ranks))
 	{
 		aa_abilities.clear();
 		aa_ranks.clear();
-		Log(Logs::General, Logs::Status, "Failed to load Alternate Advancement Data");
+		LogInfo("Failed to load Alternate Advancement Data");
 		return;
 	}
 
-	Log(Logs::General, Logs::Status, "Processing Alternate Advancement Data...");
+	LogInfo("Processing Alternate Advancement Data");
 	for(const auto &ability : aa_abilities) {
 		ability.second->first = GetAlternateAdvancementRank(ability.second->first_rank_id);
 
@@ -1623,13 +1623,13 @@ void Zone::LoadAlternateAdvancement() {
 		}
 	}
 
-	Log(Logs::General, Logs::Status, "Loaded Alternate Advancement Data");
+	LogInfo("Loaded Alternate Advancement Data");
 }
 
 bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std::unique_ptr<AA::Ability>> &abilities,
 													std::unordered_map<int, std::unique_ptr<AA::Rank>> &ranks)
 {
-	Log(Logs::General, Logs::Status, "Loading Alternate Advancement Abilities...");
+	LogInfo("Loading Alternate Advancement Abilities");
 	abilities.clear();
 	std::string query = "SELECT id, name, category, classes, races, deities, drakkin_heritage, status, type, charges, "
 		"grant_only, first_rank_id FROM aa_ability WHERE enabled = 1";
@@ -1655,13 +1655,13 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 			abilities[ability->id] = std::unique_ptr<AA::Ability>(ability);
 		}
 	} else {
-		Log(Logs::General, Logs::Error, "Failed to load Alternate Advancement Abilities");
+		LogError("Failed to load Alternate Advancement Abilities");
 		return false;
 	}
 
-	Log(Logs::General, Logs::Status, "Loaded %d Alternate Advancement Abilities", (int)abilities.size());
+	LogInfo("Loaded [{}] Alternate Advancement Abilities", (int)abilities.size());
 
-	Log(Logs::General, Logs::Status, "Loading Alternate Advancement Ability Ranks...");
+	LogInfo("Loading Alternate Advancement Ability Ranks");
 	ranks.clear();
 	query = "SELECT id, upper_hotkey_sid, lower_hotkey_sid, title_sid, desc_sid, cost, level_req, spell, spell_type, recast_time, "
 		"next_id, expansion FROM aa_ranks";
@@ -1690,13 +1690,13 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 			ranks[rank->id] = std::unique_ptr<AA::Rank>(rank);
 		}
 	} else {
-		Log(Logs::General, Logs::Error, "Failed to load Alternate Advancement Ability Ranks");
+		LogError("Failed to load Alternate Advancement Ability Ranks");
 		return false;
 	}
 
-	Log(Logs::General, Logs::Status, "Loaded %d Alternate Advancement Ability Ranks", (int)ranks.size());
+	LogInfo("Loaded [{}] Alternate Advancement Ability Ranks", (int)ranks.size());
 
-	Log(Logs::General, Logs::Status, "Loading Alternate Advancement Ability Rank Effects...");
+	LogInfo("Loading Alternate Advancement Ability Rank Effects");
 	query = "SELECT rank_id, slot, effect_id, base1, base2 FROM aa_rank_effects";
 	results = QueryDatabase(query);
 	if(results.Success()) {
@@ -1717,13 +1717,13 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 			}
 		}
 	} else {
-		Log(Logs::General, Logs::Error, "Failed to load Alternate Advancement Ability Rank Effects");
+		LogError("Failed to load Alternate Advancement Ability Rank Effects");
 		return false;
 	}
 
-	Log(Logs::General, Logs::Status, "Loaded Alternate Advancement Ability Rank Effects");
+	LogInfo("Loaded Alternate Advancement Ability Rank Effects");
 
-	Log(Logs::General, Logs::Status, "Loading Alternate Advancement Ability Rank Prereqs...");
+	LogInfo("Loading Alternate Advancement Ability Rank Prereqs");
 	query = "SELECT rank_id, aa_id, points FROM aa_rank_prereqs";
 	results = QueryDatabase(query);
 	if(results.Success()) {
@@ -1742,11 +1742,11 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 			}
 		}
 	} else {
-		Log(Logs::General, Logs::Error, "Failed to load Alternate Advancement Ability Rank Prereqs");
+		LogError("Failed to load Alternate Advancement Ability Rank Prereqs");
 		return false;
 	}
 
-	Log(Logs::General, Logs::Status, "Loaded Alternate Advancement Ability Rank Prereqs");
+	LogInfo("Loaded Alternate Advancement Ability Rank Prereqs");
 
 	return true;
 }

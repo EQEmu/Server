@@ -1222,8 +1222,7 @@ XS(XS_EntityList_MessageStatus); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_MessageStatus) {
 	dXSARGS;
 	if (items < 5)
-		Perl_croak(aTHX_
-		           "Usage: EntityList::MessageStatus(THIS, uint32 guild_id, uint32 emote_color_type, string message)");
+		Perl_croak(aTHX_ "Usage: EntityList::MessageStatus(THIS, uint32 guild_id, uint32 emote_color_type, string message)");
 	{
 		EntityList *THIS;
 		uint32     to_guilddbid = (uint32) SvUV(ST(1));
@@ -1248,8 +1247,7 @@ XS(XS_EntityList_MessageClose); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_MessageClose) {
 	dXSARGS;
 	if (items < 6)
-		Perl_croak(aTHX_
-		           "Usage: EntityList::MessageClose(THIS, Mob* sender, bool skip_sender, float distance, uint32 emote_color_type, string message)");
+		Perl_croak(aTHX_ "Usage: EntityList::MessageClose(THIS, Mob* sender, bool skip_sender, float distance, uint32 emote_color_type, string message)");
 	{
 		EntityList *THIS;
 		Mob        *sender;
@@ -1682,8 +1680,7 @@ XS(XS_EntityList_MessageGroup); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_MessageGroup) {
 	dXSARGS;
 	if (items < 5)
-		Perl_croak(aTHX_
-		           "Usage: EntityList::MessageGroup(THIS, Mob* sender, bool skip_close, uint32 emote_color_type, string message)");
+		Perl_croak(aTHX_ "Usage: EntityList::MessageGroup(THIS, Mob* sender, bool skip_close, uint32 emote_color_type, string message)");
 	{
 		EntityList *THIS;
 		Mob        *sender;
@@ -1716,8 +1713,7 @@ XS(XS_EntityList_GetRandomClient); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_GetRandomClient) {
 	dXSARGS;
 	if ((items < 5) || (items > 6))
-		Perl_croak(aTHX_
-		           "Usage: EntityList::GetRandomClient(THIS, float x, float y, float z, float distance, [Client* exclude_client = nullptr])");
+		Perl_croak(aTHX_ "Usage: EntityList::GetRandomClient(THIS, float x, float y, float z, float distance, [Client* exclude_client = nullptr])");
 	{
 		EntityList *THIS;
 		Client     *RETVAL, *c = nullptr;

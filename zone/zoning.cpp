@@ -44,12 +44,12 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 
 	bZoning = true;
 	if (app->size != sizeof(ZoneChange_Struct)) {
-		Log(Logs::General, Logs::None, "Wrong size: OP_ZoneChange, size=%d, expected %d", app->size, sizeof(ZoneChange_Struct));
+		LogDebug("Wrong size: OP_ZoneChange, size=[{}], expected [{}]", app->size, sizeof(ZoneChange_Struct));
 		return;
 	}
 
 #if EQDEBUG >= 5
-	Log(Logs::General, Logs::None, "Zone request from %s", GetName());
+	LogDebug("Zone request from [{}]", GetName());
 	DumpPacket(app);
 #endif
 	ZoneChange_Struct* zc=(ZoneChange_Struct*)app->pBuffer;
@@ -97,7 +97,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 
 				//Todo cheat detection
 				Message(Chat::Red, "Invalid unsolicited zone request.");
-				Log(Logs::General, Logs::Error, "Zoning %s: Invalid unsolicited zone request to zone id '%d'.", GetName(), target_zone_id);
+				LogError("Zoning [{}]: Invalid unsolicited zone request to zone id [{}]", GetName(), target_zone_id);
 				SendZoneCancel(zc);
 				return;
 			}
@@ -129,7 +129,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 			//if we didnt get a zone point, or its to a different zone,
 			//then we assume this is invalid.
 			if(!zone_point || zone_point->target_zone_id != target_zone_id) {
-				Log(Logs::General, Logs::Error, "Zoning %s: Invalid unsolicited zone request to zone id '%d'.", GetName(), target_zone_id);
+				LogError("Zoning [{}]: Invalid unsolicited zone request to zone id [{}]", GetName(), target_zone_id);
 				//todo cheat detection
 				SendZoneCancel(zc);
 				return;
@@ -160,7 +160,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	if(target_zone_name == nullptr) {
 		//invalid zone...
 		Message(Chat::Red, "Invalid target zone ID.");
-		Log(Logs::General, Logs::Error, "Zoning %s: Unable to get zone name for zone id '%d'.", GetName(), target_zone_id);
+		LogError("Zoning [{}]: Unable to get zone name for zone id [{}]", GetName(), target_zone_id);
 		SendZoneCancel(zc);
 		return;
 	}
@@ -173,7 +173,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	if(!database.GetSafePoints(target_zone_name, database.GetInstanceVersion(target_instance_id), &safe_x, &safe_y, &safe_z, &minstatus, &minlevel, flag_needed)) {
 		//invalid zone...
 		Message(Chat::Red, "Invalid target zone while getting safe points.");
-		Log(Logs::General, Logs::Error, "Zoning %s: Unable to get safe coordinates for zone '%s'.", GetName(), target_zone_name);
+		LogError("Zoning [{}]: Unable to get safe coordinates for zone [{}]", GetName(), target_zone_name);
 		SendZoneCancel(zc);
 		return;
 	}
@@ -193,7 +193,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	switch(zone_mode) {
 	case EvacToSafeCoords:
 	case ZoneToSafeCoords:
-		Log(Logs::General, Logs::None, "Zoning %s to safe coords (%f,%f,%f) in %s (%d)", GetName(), safe_x, safe_y, safe_z, target_zone_name, target_zone_id);
+		LogDebug("Zoning [{}] to safe coords ([{}],[{}],[{}]) in [{}] ([{}])", GetName(), safe_x, safe_y, safe_z, target_zone_name, target_zone_id);
 		dest_x = safe_x;
 		dest_y = safe_y;
 		dest_z = safe_z;
@@ -253,7 +253,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 
 		//could not find a valid reason for them to be zoning, stop it.
 		//todo cheat detection
-		Log(Logs::General, Logs::Error, "Zoning %s: Invalid unsolicited zone request to zone id '%s'. Not near a zone point.", GetName(), target_zone_name);
+		LogError("Zoning [{}]: Invalid unsolicited zone request to zone id [{}]. Not near a zone point", GetName(), target_zone_name);
 		SendZoneCancel(zc);
 		return;
 	default:
@@ -288,7 +288,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		//we have successfully zoned
 		DoZoneSuccess(zc, target_zone_id, target_instance_id, dest_x, dest_y, dest_z, dest_h, ignorerestrictions);
 	} else {
-		Log(Logs::General, Logs::Error, "Zoning %s: Rules prevent this char from zoning into '%s'", GetName(), target_zone_name);
+		LogError("Zoning [{}]: Rules prevent this char from zoning into [{}]", GetName(), target_zone_name);
 		SendZoneError(zc, myerror);
 	}
 }
@@ -313,7 +313,7 @@ void Client::SendZoneCancel(ZoneChange_Struct *zc) {
 
 void Client::SendZoneError(ZoneChange_Struct *zc, int8 err)
 {
-	Log(Logs::General, Logs::Error, "Zone %i is not available because target wasn't found or character insufficent level", zc->zoneID);
+	LogError("Zone [{}] is not available because target wasn't found or character insufficent level", zc->zoneID);
 
 	EQApplicationPacket *outapp = nullptr;
 	outapp = new EQApplicationPacket(OP_ZoneChange, sizeof(ZoneChange_Struct));
@@ -348,7 +348,7 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 	if(this->GetPet())
 		entity_list.RemoveFromHateLists(this->GetPet());
 
-	Log(Logs::General, Logs::Status, "Zoning '%s' to: %s (%i) - (%i) x=%f, y=%f, z=%f", m_pp.name, database.GetZoneName(zone_id), zone_id, instance_id, dest_x, dest_y, dest_z);
+	LogInfo("Zoning [{}] to: [{}] ([{}]) - ([{}]) x [{}] y [{}] z [{}]", m_pp.name, database.GetZoneName(zone_id), zone_id, instance_id, dest_x, dest_y, dest_z);
 
 	//set the player's coordinates in the new zone so they have them
 	//when they zone into it
@@ -471,7 +471,7 @@ void Client::ProcessMovePC(uint32 zoneID, uint32 instance_id, float x, float y, 
 			ZonePC(zoneID, instance_id, x, y, z, heading, ignorerestrictions, zm);
 			break;
 		default:
-			Log(Logs::General, Logs::Error, "Client::ProcessMovePC received a reguest to perform an unsupported client zone operation.");
+			LogError("Client::ProcessMovePC received a reguest to perform an unsupported client zone operation");
 			break;
 	}
 }
@@ -530,7 +530,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			heading = m_pp.binds[0].heading;
 
 			zonesummon_ignorerestrictions = 1;
-			Log(Logs::General, Logs::None, "Player %s has died and will be zoned to bind point in zone: %s at LOC x=%f, y=%f, z=%f, heading=%f", 
+			LogDebug("Player [{}] has died and will be zoned to bind point in zone: [{}] at LOC x=[{}], y=[{}], z=[{}], heading=[{}]", 
 					GetName(), pZoneName, m_pp.binds[0].x, m_pp.binds[0].y, m_pp.binds[0].z, m_pp.binds[0].heading);
 			break;
 		case SummonPC:
@@ -539,7 +539,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			SetHeading(heading);
 			break;
 		case Rewind:
-			Log(Logs::General, Logs::None, "%s has requested a /rewind from %f, %f, %f, to %f, %f, %f in %s", GetName(), 
+			LogDebug("[{}] has requested a /rewind from [{}], [{}], [{}], to [{}], [{}], [{}] in [{}]", GetName(), 
 					m_Position.x, m_Position.y, m_Position.z, 
 					m_RewindLocation.x, m_RewindLocation.y, m_RewindLocation.z, zone->GetShortName());
 			m_ZoneSummonLocation = glm::vec3(x, y, z);
@@ -547,7 +547,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			SetHeading(heading);
 			break;
 		default:
-			Log(Logs::General, Logs::Error, "Client::ZonePC() received a reguest to perform an unsupported client zone operation.");
+			LogError("Client::ZonePC() received a reguest to perform an unsupported client zone operation");
 			ReadyToZone = false;
 			break;
 	}
@@ -683,7 +683,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			safe_delete(outapp);
 		}
 
-		Log(Logs::Detail, Logs::None, "Player %s has requested a zoning to LOC x=%f, y=%f, z=%f, heading=%f in zoneid=%i", GetName(), x, y, z, heading, zoneID);
+		LogDebug("Player [{}] has requested a zoning to LOC x=[{}], y=[{}], z=[{}], heading=[{}] in zoneid=[{}]", GetName(), x, y, z, heading, zoneID);
 		//Clear zonesummon variables if we're zoning to our own zone
 		//Client wont generate a zone change packet to the server in this case so
 		//They aren't needed and it keeps behavior on next zone attempt from being undefined.
@@ -777,7 +777,7 @@ void Client::SetZoneFlag(uint32 zone_id) {
 	std::string query = StringFormat("INSERT INTO zone_flags (charID,zoneID) VALUES(%d,%d)", CharacterID(), zone_id);
 	auto results = database.QueryDatabase(query);
 	if(!results.Success())
-		Log(Logs::General, Logs::Error, "MySQL Error while trying to set zone flag for %s: %s", GetName(), results.ErrorMessage().c_str());
+		LogError("MySQL Error while trying to set zone flag for [{}]: [{}]", GetName(), results.ErrorMessage().c_str());
 }
 
 void Client::ClearZoneFlag(uint32 zone_id) {
@@ -790,7 +790,7 @@ void Client::ClearZoneFlag(uint32 zone_id) {
 	std::string query = StringFormat("DELETE FROM zone_flags WHERE charID=%d AND zoneID=%d", CharacterID(), zone_id);
 	auto results = database.QueryDatabase(query);
 	if(!results.Success())
-		Log(Logs::General, Logs::Error, "MySQL Error while trying to clear zone flag for %s: %s", GetName(), results.ErrorMessage().c_str());
+		LogError("MySQL Error while trying to clear zone flag for [{}]: [{}]", GetName(), results.ErrorMessage().c_str());
 
 }
 
@@ -800,7 +800,7 @@ void Client::LoadZoneFlags() {
 	std::string query = StringFormat("SELECT zoneID from zone_flags WHERE charID=%d", CharacterID());
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-		Log(Logs::General, Logs::Error, "MySQL Error while trying to load zone flags for %s: %s", GetName(), results.ErrorMessage().c_str());
+		LogError("MySQL Error while trying to load zone flags for [{}]: [{}]", GetName(), results.ErrorMessage().c_str());
 		return;
 	}
 
@@ -863,23 +863,23 @@ bool Client::CanBeInZone() {
 	char flag_needed[128];
 	if(!database.GetSafePoints(zone->GetShortName(), zone->GetInstanceVersion(), &safe_x, &safe_y, &safe_z, &minstatus, &minlevel, flag_needed)) {
 		//this should not happen...
-		Log(Logs::Detail, Logs::None, "[CLIENT] Unable to query zone info for ourself '%s'", zone->GetShortName());
+		LogDebug("[CLIENT] Unable to query zone info for ourself [{}]", zone->GetShortName());
 		return(false);
 	}
 
 	if(GetLevel() < minlevel) {
-		Log(Logs::Detail, Logs::None, "[CLIENT] Character does not meet min level requirement (%d < %d)!", GetLevel(), minlevel);
+		LogDebug("[CLIENT] Character does not meet min level requirement ([{}] < [{}])!", GetLevel(), minlevel);
 		return(false);
 	}
 	if(Admin() < minstatus) {
-		Log(Logs::Detail, Logs::None, "[CLIENT] Character does not meet min status requirement (%d < %d)!", Admin(), minstatus);
+		LogDebug("[CLIENT] Character does not meet min status requirement ([{}] < [{}])!", Admin(), minstatus);
 		return(false);
 	}
 
 	if(flag_needed[0] != '\0') {
 		//the flag needed string is not empty, meaning a flag is required.
 		if(Admin() < minStatusToIgnoreZoneFlags && !HasZoneFlag(zone->GetZoneID())) {
-			Log(Logs::Detail, Logs::None, "[CLIENT] Character does not have the flag to be in this zone (%s)!", flag_needed);
+			LogDebug("[CLIENT] Character does not have the flag to be in this zone ([{}])!", flag_needed);
 			return(false);
 		}
 	}

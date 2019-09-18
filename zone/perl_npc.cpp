@@ -97,8 +97,7 @@ XS(XS_NPC_AddItem); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_AddItem) {
 	dXSARGS;
 	if (items < 2 || items > 10)
-		Perl_croak(aTHX_
-		           "Usage: NPC::AddItem(THIS, uint32 item_id, [uint16 charges = 0], [bool equip_item = true], [uint32 aug1 = 0], [uint32 aug2 = 0], [uint32 aug3 = 0], [uint32 aug4 = 0], [uint32 aug5 = 0], [uint32 aug6 = 0])");
+		Perl_croak(aTHX_ "Usage: NPC::AddItem(THIS, uint32 item_id, [uint16 charges = 0], [bool equip_item = true], [uint32 aug1 = 0], [uint32 aug2 = 0], [uint32 aug3 = 0], [uint32 aug4 = 0], [uint32 aug5 = 0], [uint32 aug6 = 0])");
 	{
 		NPC    *THIS;
 		uint32 itemid    = (uint32) SvUV(ST(1));
@@ -1283,8 +1282,7 @@ XS(XS_NPC_MoveTo); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_MoveTo) {
 	dXSARGS;
 	if (items != 4 && items != 5 && items != 6)
-		Perl_croak(aTHX_
-		           "Usage: NPC::MoveTo(THIS, float x, float y, float z, [float heading], [bool save_guard_location = false])");
+		Perl_croak(aTHX_ "Usage: NPC::MoveTo(THIS, float x, float y, float z, [float heading], [bool save_guard_location = false])");
 	{
 		NPC   *THIS;
 		float mtx = (float) SvNV(ST(1));
@@ -1391,8 +1389,7 @@ XS(XS_NPC_AI_SetRoambox); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_AI_SetRoambox) {
 	dXSARGS;
 	if (items < 6 || items > 8)
-		Perl_croak(aTHX_
-		           "Usage: NPC::AI_SetRoambox(THIS, float distance, float max_x, float min_x, float max_y, float min_y, [uint32 max_delay = 2500], [uint32 min_delay = 2500])");
+		Perl_croak(aTHX_ "Usage: NPC::AI_SetRoambox(THIS, float distance, float max_x, float min_x, float max_y, float min_y, [uint32 max_delay = 2500], [uint32 min_delay = 2500])");
 	{
 		NPC    *THIS;
 		float  iDist = (float) SvNV(ST(1));
@@ -1852,8 +1849,7 @@ XS(XS_NPC_AddSpellToNPCList); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_AddSpellToNPCList) {
 	dXSARGS;
 	if (items != 7)
-		Perl_croak(aTHX_
-		           "Usage: NPC::AddAISpell(THIS, int priority, int spell_id, int type, int mana_cost, int recast_delay, int resist_adjust)");
+		Perl_croak(aTHX_ "Usage: NPC::AddAISpell(THIS, int priority, int spell_id, int type, int mana_cost, int recast_delay, int resist_adjust)");
 	{
 		NPC *THIS;
 		int priority      = (int) SvIV(ST(1));

@@ -270,7 +270,12 @@ public:
 	bool GetNeedsHateRedux(Mob *tar);
 	bool HasOrMayGetAggro();
 	void SetDefaultBotStance();
-
+	void SetSurname(std::string bot_surname);
+	void SetTitle(std::string bot_title);
+	void SetSuffix(std::string bot_suffix);
+	std::string GetSurname() { return _surname; }
+	std::string GetTitle() { return _title; }
+	std::string GetSuffix() { return _suffix; }
 	inline virtual int32	GetMaxStat();
 	inline virtual int32	GetMaxResist();
 	inline virtual int32	GetMaxSTR();
@@ -650,6 +655,9 @@ private:
 	uint32 _guildId;
 	uint8 _guildRank;
 	std::string _guildName;
+	std::string _surname;
+	std::string _title;
+	std::string _suffix;
 	uint32 _lastZoneId;
 	bool _rangerAutoWeaponSelect;
 	BotRoleType _botRole;

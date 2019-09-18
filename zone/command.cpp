@@ -182,6 +182,7 @@ int command_init(void)
 		command_add("crashtest", "- Crash the zoneserver", 255, command_crashtest) ||
 		command_add("cvs", "- Summary of client versions currently online.", 200, command_cvs) ||
 		command_add("damage", "[amount] - Damage your target", 100, command_damage) ||
+		command_add("databuckets", "View|Delete [key] [limit]- View data buckets, limit 50 default or Delete databucket by key", 80, command_databuckets) ||
 		command_add("date", "[yyyy] [mm] [dd] [HH] [MM] - Set EQ time", 90, command_date) ||
 		command_add("dbspawn2", "[spawngroup] [respawn] [variance] - Spawn an NPC from a predefined row in the spawn2 table", 100, command_dbspawn2) ||
 		command_add("delacct", "[accountname] - Delete an account", 150, command_delacct) ||
@@ -453,33 +454,90 @@ int command_init(void)
 	std::map<std::string, std::pair<uint8, std::vector<std::string>>> command_settings;
 	database.GetCommandSettings(command_settings);
 
-	std::map<std::string, CommandRecord *> working_cl = commandlist;
-	for (auto iter_cl = working_cl.begin(); iter_cl != working_cl.end(); ++iter_cl) {
-		auto iter_cs = command_settings.find(iter_cl->first);
-		if (iter_cs == command_settings.end()) {
-			if (iter_cl->second->access == 0)
-				Log(Logs::General, Logs::Commands, "command_init(): Warning: Command '%s' defaulting to access level 0!", iter_cl->first.c_str());
+	std::vector<std::pair<std::string, uint8>> injected_command_settings;
+	std::vector<std::string> orphaned_command_settings;
+
+	for (auto cs_iter : command_settings) {
+
+		auto cl_iter = commandlist.find(cs_iter.first);
+		if (cl_iter == commandlist.end()) {
+
+			orphaned_command_settings.push_back(cs_iter.first);
+			LogInfo(
+				"Command [{}] no longer exists... Deleting orphaned entry from `command_settings` table...",
+				cs_iter.first.c_str()
+			);
+		}
+	}
+
+	if (orphaned_command_settings.size()) {
+		if (!database.UpdateOrphanedCommandSettings(orphaned_command_settings)) {
+			LogInfo("Failed to process 'Orphaned Commands' update operation.");
+		}
+	}
+
+	auto working_cl = commandlist;
+	for (auto working_cl_iter : working_cl) {
+
+		auto cs_iter = command_settings.find(working_cl_iter.first);
+		if (cs_iter == command_settings.end()) {
+
+			injected_command_settings.push_back(std::pair<std::string, uint8>(working_cl_iter.first, working_cl_iter.second->access));
+			LogInfo(
+				"New Command [{}] found... Adding to `command_settings` table with access [{}]...",
+				working_cl_iter.first.c_str(),
+				working_cl_iter.second->access
+			);
+
+			if (working_cl_iter.second->access == 0) {
+				LogCommands(
+					"command_init(): Warning: Command [{}] defaulting to access level 0!",
+					working_cl_iter.first.c_str()
+				);
+			}
+			
 			continue;
 		}
 
-		iter_cl->second->access = iter_cs->second.first;
-		Log(Logs::General, Logs::Commands, "command_init(): - Command '%s' set to access level %d.", iter_cl->first.c_str(), iter_cs->second.first);
-		if (iter_cs->second.second.empty())
+		working_cl_iter.second->access = cs_iter->second.first;
+		LogCommands(
+			"command_init(): - Command [{}] set to access level [{}]",
+			working_cl_iter.first.c_str(),
+			cs_iter->second.first
+		);
+		
+		if (cs_iter->second.second.empty()) {
 			continue;
+		}
 
-		for (auto iter_aka = iter_cs->second.second.begin(); iter_aka != iter_cs->second.second.end();
-		     ++iter_aka) {
-			if (iter_aka->empty())
-				continue;
-			if (commandlist.find(*iter_aka) != commandlist.end()) {
-				Log(Logs::General, Logs::Commands, "command_init(): Warning: Alias '%s' already exists as a command - skipping!", iter_aka->c_str());
+		for (auto alias_iter : cs_iter->second.second) {
+			if (alias_iter.empty()) {
 				continue;
 			}
 
-			commandlist[*iter_aka] = iter_cl->second;
-			commandaliases[*iter_aka] = iter_cl->first;
+			if (commandlist.find(alias_iter) != commandlist.end()) {
+				LogCommands(
+					"command_init(): Warning: Alias [{}] already exists as a command - skipping!",
+					alias_iter.c_str()
+				);
+				
+				continue;
+			}
 
-			Log(Logs::General, Logs::Commands, "command_init(): - Alias '%s' added to command '%s'.", iter_aka->c_str(), commandaliases[*iter_aka].c_str());
+			commandlist[alias_iter] = working_cl_iter.second;
+			commandaliases[alias_iter] = working_cl_iter.first;
+
+			LogCommands(
+				"command_init(): - Alias [{}] added to command [{}]",
+				alias_iter.c_str(),
+				commandaliases[alias_iter].c_str()
+			);
+		}
+	}
+
+	if (injected_command_settings.size()) {
+		if (!database.UpdateInjectedCommandSettings(injected_command_settings)) {
+			LogInfo("Failed to process 'Injected Commands' update operation.");
 		}
 	}
 
@@ -519,21 +577,21 @@ void command_deinit(void)
 int command_add(std::string command_name, const char *desc, int access, CmdFuncPtr function)
 {
 	if (command_name.empty()) {
-		Log(Logs::General, Logs::Error, "command_add() - Command added with empty name string - check command.cpp.");
+		LogError("command_add() - Command added with empty name string - check command.cpp");
 		return -1;
 	}
 	if (function == nullptr) {
-		Log(Logs::General, Logs::Error, "command_add() - Command '%s' added without a valid function pointer - check command.cpp.", command_name.c_str());
+		LogError("command_add() - Command [{}] added without a valid function pointer - check command.cpp", command_name.c_str());
 		return -1;
 	}
 	if (commandlist.count(command_name) != 0) {
-		Log(Logs::General, Logs::Error, "command_add() - Command '%s' is a duplicate command name - check command.cpp.", command_name.c_str());
+		LogError("command_add() - Command [{}] is a duplicate command name - check command.cpp", command_name.c_str());
 		return -1;
 	}
 	for (auto iter = commandlist.begin(); iter != commandlist.end(); ++iter) {
 		if (iter->second->function != function)
 			continue;
-		Log(Logs::General, Logs::Error, "command_add() - Command '%s' equates to an alias of '%s' - check command.cpp.", command_name.c_str(), iter->first.c_str());
+		LogError("command_add() - Command [{}] equates to an alias of [{}] - check command.cpp", command_name.c_str(), iter->first.c_str());
 		return -1;
 	}
 
@@ -587,11 +645,11 @@ int command_realdispatch(Client *c, const char *message)
 	}
 
 	if(cur->access >= COMMANDS_LOGGING_MIN_STATUS) {
-		Log(Logs::General, Logs::Commands, "%s (%s) used command: %s (target=%s)",  c->GetName(), c->AccountName(), message, c->GetTarget()?c->GetTarget()->GetName():"NONE");
+		LogCommands("[{}] ([{}]) used command: [{}] (target=[{}])",  c->GetName(), c->AccountName(), message, c->GetTarget()?c->GetTarget()->GetName():"NONE");
 	}
 
 	if(cur->function == nullptr) {
-		Log(Logs::General, Logs::Error, "Command '%s' has a null function\n",  cstr.c_str());
+		LogError("Command [{}] has a null function\n", cstr.c_str());
 		return(-1);
 	} else {
 		//dispatch C++ command
@@ -1376,7 +1434,7 @@ void command_viewpetition(Client *c, const Seperator *sep)
     if (!results.Success())
         return;
 
-    Log(Logs::General, Logs::Normal, "View petition request from %s, petition number: %i",  c->GetName(), atoi(sep->argplus[1]) );
+    LogInfo("View petition request from [{}], petition number: [{}]",  c->GetName(), atoi(sep->argplus[1]) );
 
     if (results.RowCount() == 0) {
         c->Message(Chat::Red,"There was an error in your request: ID not found! Please check the Id and try again.");
@@ -1401,7 +1459,7 @@ void command_petitioninfo(Client *c, const Seperator *sep)
     if (!results.Success())
         return;
 
-    Log(Logs::General, Logs::Normal, "Petition information request from %s, petition number:",  c->GetName(), atoi(sep->argplus[1]) );
+    LogInfo("Petition information request from [{}], petition number:",  c->GetName(), atoi(sep->argplus[1]) );
 
     if (results.RowCount() == 0) {
 		c->Message(Chat::Red,"There was an error in your request: ID not found! Please check the Id and try again.");
@@ -1427,7 +1485,7 @@ void command_delpetition(Client *c, const Seperator *sep)
 	if (!results.Success())
         return;
 
-    Log(Logs::General, Logs::Normal, "Delete petition request from %s, petition number:",  c->GetName(), atoi(sep->argplus[1]) );
+    LogInfo("Delete petition request from [{}], petition number:",  c->GetName(), atoi(sep->argplus[1]) );
 
 }
 
@@ -1913,7 +1971,7 @@ void command_permaclass(Client *c, const Seperator *sep)
 		c->Message(Chat::White,"Target is not a client.");
 	else {
 		c->Message(Chat::White, "Setting %s's class...Sending to char select.",  t->GetName());
-		Log(Logs::General, Logs::Normal, "Class change request from %s for %s, requested class:%i",  c->GetName(), t->GetName(), atoi(sep->arg[1]) );
+		LogInfo("Class change request from [{}] for [{}], requested class:[{}]",  c->GetName(), t->GetName(), atoi(sep->arg[1]) );
 		t->SetBaseClass(atoi(sep->arg[1]));
 		t->Save();
 		t->Kick("Class was changed.");
@@ -1935,7 +1993,7 @@ void command_permarace(Client *c, const Seperator *sep)
 		c->Message(Chat::White,"Target is not a client.");
 	else {
 		c->Message(Chat::White, "Setting %s's race - zone to take effect", t->GetName());
-		Log(Logs::General, Logs::Normal, "Permanant race change request from %s for %s, requested race:%i",  c->GetName(), t->GetName(), atoi(sep->arg[1]) );
+		LogInfo("Permanant race change request from [{}] for [{}], requested race:[{}]",  c->GetName(), t->GetName(), atoi(sep->arg[1]) );
 		uint32 tmp = Mob::GetDefaultGender(atoi(sep->arg[1]), t->GetBaseGender());
 		t->SetBaseRace(atoi(sep->arg[1]));
 		t->SetBaseGender(tmp);
@@ -1959,7 +2017,7 @@ void command_permagender(Client *c, const Seperator *sep)
 		c->Message(Chat::White,"Target is not a client.");
 	else {
 		c->Message(Chat::White, "Setting %s's gender - zone to take effect", t->GetName());
-		Log(Logs::General, Logs::Normal, "Permanant gender change request from %s for %s, requested gender:%i",  c->GetName(), t->GetName(), atoi(sep->arg[1]) );
+		LogInfo("Permanant gender change request from [{}] for [{}], requested gender:[{}]",  c->GetName(), t->GetName(), atoi(sep->arg[1]) );
 		t->SetBaseGender(atoi(sep->arg[1]));
 		t->Save();
 		t->SendIllusionPacket(atoi(sep->arg[1]));
@@ -2298,7 +2356,7 @@ void command_dbspawn2(Client *c, const Seperator *sep)
 {
 
 	if (sep->IsNumber(1) && sep->IsNumber(2) && sep->IsNumber(3)) {
-		Log(Logs::General, Logs::Normal, "Spawning database spawn");
+		LogInfo("Spawning database spawn");
 		uint16 cond = 0;
 		int16 cond_min = 0;
 		if(sep->IsNumber(4)) {
@@ -2320,13 +2378,18 @@ void command_shutdown(Client *c, const Seperator *sep)
 
 void command_delacct(Client *c, const Seperator *sep)
 {
-	if(sep->arg[1][0] == 0)
+	if (sep->arg[1][0] == 0)
 		c->Message(Chat::White, "Format: #delacct accountname");
-	else
-		if (database.DeleteAccount(sep->arg[1]))
+	else {
+		std::string user;
+		std::string loginserver;
+		ParseAccountString(sep->arg[1], user, loginserver);
+
+		if (database.DeleteAccount(user.c_str(), loginserver.c_str()))
 			c->Message(Chat::White, "The account was deleted.");
 		else
 			c->Message(Chat::White, "Unable to delete account.");
+	}
 }
 
 void command_setpass(Client *c, const Seperator *sep)
@@ -2334,8 +2397,12 @@ void command_setpass(Client *c, const Seperator *sep)
 	if(sep->argnum != 2)
 		c->Message(Chat::White, "Format: #setpass accountname password");
 	else {
+		std::string user;
+		std::string loginserver;
+		ParseAccountString(sep->arg[1], user, loginserver);
+
 		int16 tmpstatus = 0;
-		uint32 tmpid = database.GetAccountIDByName(sep->arg[1], &tmpstatus);
+		uint32 tmpid = database.GetAccountIDByName(user.c_str(), loginserver.c_str(), &tmpstatus);
 		if (!tmpid)
 			c->Message(Chat::White, "Error: Account not found");
 		else if (tmpstatus > c->Admin())
@@ -2356,7 +2423,7 @@ void command_setlsinfo(Client *c, const Seperator *sep)
 		ServerLSAccountUpdate_Struct* s = (ServerLSAccountUpdate_Struct *) pack->pBuffer;
 		s->useraccountid = c->LSAccountID();
 		strn0cpy(s->useraccount, c->AccountName(), 30);
-		strn0cpy(s->useremail, sep->arg[1], 100);
+		strn0cpy(s->user_email, sep->arg[1], 100);
 		strn0cpy(s->userpassword, sep->arg[2], 50);
 		worldserver.SendPacket(pack);
 		c->Message(Chat::White, "Login Server update packet sent.");
@@ -2698,7 +2765,7 @@ void command_setlanguage(Client *c, const Seperator *sep)
 	}
 	else
 	{
-		Log(Logs::General, Logs::Normal, "Set language request from %s, target:%s lang_id:%i value:%i",  c->GetName(), c->GetTarget()->GetName(), atoi(sep->arg[1]), atoi(sep->arg[2]) );
+		LogInfo("Set language request from [{}], target:[{}] lang_id:[{}] value:[{}]",  c->GetName(), c->GetTarget()->GetName(), atoi(sep->arg[1]), atoi(sep->arg[2]) );
 		uint8 langid = (uint8)atoi(sep->arg[1]);
 		uint8 value = (uint8)atoi(sep->arg[2]);
 		c->GetTarget()->CastToClient()->SetLanguageSkill( langid, value );
@@ -2723,7 +2790,7 @@ void command_setskill(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "       x = 0 to %d",  HIGHEST_CAN_SET_SKILL);
 	}
 	else {
-		Log(Logs::General, Logs::Normal, "Set skill request from %s, target:%s skill_id:%i value:%i",  c->GetName(), c->GetTarget()->GetName(), atoi(sep->arg[1]), atoi(sep->arg[2]) );
+		LogInfo("Set skill request from [{}], target:[{}] skill_id:[{}] value:[{}]",  c->GetName(), c->GetTarget()->GetName(), atoi(sep->arg[1]), atoi(sep->arg[2]) );
 		int skill_num = atoi(sep->arg[1]);
 		uint16 skill_value = atoi(sep->arg[2]);
 		if (skill_num <= EQEmu::skills::HIGHEST_SKILL)
@@ -2743,7 +2810,7 @@ void command_setskillall(Client *c, const Seperator *sep)
 	}
 	else {
 		if (c->Admin() >= commandSetSkillsOther || c->GetTarget()==c || c->GetTarget()==0) {
-			Log(Logs::General, Logs::Normal, "Set ALL skill request from %s, target:%s",  c->GetName(), c->GetTarget()->GetName());
+			LogInfo("Set ALL skill request from [{}], target:[{}]",  c->GetName(), c->GetTarget()->GetName());
 			uint16 level = atoi(sep->arg[1]);
 			for (EQEmu::skills::SkillType skill_num = EQEmu::skills::Skill1HBlunt; skill_num <= EQEmu::skills::HIGHEST_SKILL; skill_num = (EQEmu::skills::SkillType)(skill_num + 1)) {
 				c->GetTarget()->CastToClient()->SetSkill(skill_num, level);
@@ -4141,7 +4208,7 @@ void command_listpetition(Client *c, const Seperator *sep)
 	if (!results.Success())
         return;
 
-    Log(Logs::General, Logs::Normal, "Petition list requested by %s",  c->GetName());
+    LogInfo("Petition list requested by [{}]",  c->GetName());
 
     if (results.RowCount() == 0)
         return;
@@ -4875,7 +4942,7 @@ void command_lastname(Client *c, const Seperator *sep)
 
 	if(c->GetTarget() && c->GetTarget()->IsClient())
 		t=c->GetTarget()->CastToClient();
-	Log(Logs::General, Logs::Normal, "#lastname request from %s for %s",  c->GetName(), t->GetName());
+	LogInfo("#lastname request from [{}] for [{}]",  c->GetName(), t->GetName());
 
 	if(strlen(sep->arg[1]) <= 70)
 		t->ChangeLastName(sep->arg[1]);
@@ -5701,7 +5768,7 @@ void command_iteminfo(Client *c, const Seperator *sep)
 	}
 	auto item = inst->GetItem();
 	if (!item) {
-		Log(Logs::General, Logs::Inventory, "(%s) Command #iteminfo processed an item with no data pointer");
+		LogInventory("([{}]) Command #iteminfo processed an item with no data pointer");
 		c->Message(Chat::Red, "Error: This item has no data reference");
 		return;
 	}
@@ -5773,8 +5840,8 @@ void command_flag(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "Usage: #flag [status] [acctname]");
 
 	else if (c->Admin() < commandChangeFlags) {
-//this check makes banning players by less than this level
-//impossible, but i'll leave it in anyways
+		//this check makes banning players by less than this level
+		//impossible, but i'll leave it in anyways
 		c->Message(Chat::White, "You may only refresh your own flag, doing so now.");
 		c->UpdateAdmin();
 	}
@@ -5787,11 +5854,15 @@ void command_flag(Client *c, const Seperator *sep)
 			c->Message(Chat::White, "Unable to set GM Flag.");
 		else {
 			c->Message(Chat::White, "Set GM Flag on account.");
-			auto pack = new ServerPacket(ServerOP_FlagUpdate, 6);
-			*((uint32*) pack->pBuffer) = database.GetAccountIDByName(sep->argplus[2]);
-			*((int16*) &pack->pBuffer[4]) = atoi(sep->arg[1]);
-			worldserver.SendPacket(pack);
-			delete pack;
+
+			std::string user;
+			std::string loginserver;
+			ParseAccountString(sep->argplus[2], user, loginserver);
+
+			ServerPacket pack(ServerOP_FlagUpdate, 6);
+			*((uint32*) pack.pBuffer) = database.GetAccountIDByName(user.c_str(), loginserver.c_str());
+			*((int16*) &pack.pBuffer[4]) = atoi(sep->arg[1]);
+			worldserver.SendPacket(&pack);
 		}
 	}
 }
@@ -5806,7 +5877,7 @@ void command_time(Client *c, const Seperator *sep)
 		}
 		c->Message(Chat::Red, "Setting world time to %s:%i (Timezone: 0)...",  sep->arg[1], minutes);
 		zone->SetTime(atoi(sep->arg[1])+1, minutes);
-		Log(Logs::General, Logs::Zone_Server, "%s :: Setting world time to %s:%i (Timezone: 0)...", c->GetCleanName(), sep->arg[1], minutes);
+		LogInfo("{} :: Setting world time to {}:{} (Timezone: 0)...", c->GetCleanName(), sep->arg[1], minutes);
 	}
 	else {
 		c->Message(Chat::Red, "To set the Time: #time HH [MM]");
@@ -5821,7 +5892,7 @@ void command_time(Client *c, const Seperator *sep)
 			zone->zone_time.getEQTimeZoneMin()
 			);
 		c->Message(Chat::Red, "It is now %s.", timeMessage);
-		Log(Logs::General, Logs::Zone_Server, "Current Time is: %s", timeMessage);
+		LogInfo("Current Time is: {}", timeMessage);
 	}
 }
 
@@ -5955,12 +6026,9 @@ void command_guild(Client *c, const Seperator *sep)
 			}
 
 			if(guild_id == GUILD_NONE) {
-				Log(Logs::Detail, Logs::Guilds, "%s: Removing %s (%d) from guild with GM command.",  c->GetName(),
-					sep->arg[2], charid);
+				LogGuilds("[{}]: Removing [{}] ([{}]) from guild with GM command",  c->GetName(), sep->arg[2], charid);
 			} else {
-				Log(Logs::Detail, Logs::Guilds, "%s: Putting %s (%d) into guild %s (%d) with GM command.",  c->GetName(),
-					sep->arg[2], charid,
-					guild_mgr.GetGuildName(guild_id), guild_id);
+				LogGuilds("[{}]: Putting [{}] ([{}]) into guild [{}] ([{}]) with GM command",  c->GetName(), sep->arg[2], charid, guild_mgr.GetGuildName(guild_id), guild_id);
 			}
 
 			if(!guild_mgr.SetGuild(charid, guild_id, GUILD_MEMBER)) {
@@ -6007,8 +6075,7 @@ void command_guild(Client *c, const Seperator *sep)
 				return;
 			}
 
-			Log(Logs::Detail, Logs::Guilds, "%s: Setting %s (%d)'s guild rank to %d with GM command.",  c->GetName(),
-				sep->arg[2], charid, rank);
+			LogGuilds("[{}]: Setting [{}] ([{}])'s guild rank to [{}] with GM command", c->GetName(), sep->arg[2], charid, rank);
 
 			if(!guild_mgr.SetGuildRank(charid, rank))
 				c->Message(Chat::Red, "Error while setting rank %d on '%s'.",  rank, sep->arg[2]);
@@ -6049,7 +6116,7 @@ void command_guild(Client *c, const Seperator *sep)
 
 				uint32 id = guild_mgr.CreateGuild(sep->argplus[3], leader);
 
-				Log(Logs::Detail, Logs::Guilds, "%s: Creating guild %s with leader %d with GM command. It was given id %lu.",  c->GetName(),
+				LogGuilds("[{}]: Creating guild [{}] with leader [{}] with GM command. It was given id [{}]",  c->GetName(),
 					sep->argplus[3], leader, (unsigned long)id);
 
 				if (id == GUILD_NONE)
@@ -6088,7 +6155,7 @@ void command_guild(Client *c, const Seperator *sep)
 				}
 			}
 
-			Log(Logs::Detail, Logs::Guilds, "%s: Deleting guild %s (%d) with GM command.",  c->GetName(),
+			LogGuilds("[{}]: Deleting guild [{}] ([{}]) with GM command",  c->GetName(),
 				guild_mgr.GetGuildName(id), id);
 
 			if (!guild_mgr.DeleteGuild(id))
@@ -6122,7 +6189,7 @@ void command_guild(Client *c, const Seperator *sep)
 				}
 			}
 
-			Log(Logs::Detail, Logs::Guilds, "%s: Renaming guild %s (%d) to '%s' with GM command.",  c->GetName(),
+			LogGuilds("[{}]: Renaming guild [{}] ([{}]) to [{}] with GM command",  c->GetName(),
 				guild_mgr.GetGuildName(id), id, sep->argplus[3]);
 
 			if (!guild_mgr.RenameGuild(id, sep->argplus[3]))
@@ -6173,7 +6240,7 @@ void command_guild(Client *c, const Seperator *sep)
 					}
 				}
 
-				Log(Logs::Detail, Logs::Guilds, "%s: Setting leader of guild %s (%d) to %d with GM command.",  c->GetName(),
+				LogGuilds("[{}]: Setting leader of guild [{}] ([{}]) to [{}] with GM command",  c->GetName(),
 					guild_mgr.GetGuildName(id), id, leader);
 
 				if(!guild_mgr.SetGuildLeader(id, leader))
@@ -6628,7 +6695,7 @@ void command_scribespells(Client *c, const Seperator *sep)
 	t->Message(Chat::White, "Scribing spells to spellbook.");
 	if(t != c)
 		c->Message(Chat::White, "Scribing spells for %s.",  t->GetName());
-	Log(Logs::General, Logs::Normal, "Scribe spells request for %s from %s, levels: %u -> %u",  t->GetName(), c->GetName(), min_level, max_level);
+	LogInfo("Scribe spells request for [{}] from [{}], levels: [{}] -> [{}]",  t->GetName(), c->GetName(), min_level, max_level);
 
 	int book_slot = t->GetNextAvailableSpellBookSlot();
 	int spell_id = 0;
@@ -6722,7 +6789,7 @@ void command_scribespell(Client *c, const Seperator *sep) {
 		if(t != c)
 			c->Message(Chat::White, "Scribing spell: %s (%i) for %s.",  spells[spell_id].name, spell_id, t->GetName());
 
-		Log(Logs::General, Logs::Normal, "Scribe spell: %s (%i) request for %s from %s.",  spells[spell_id].name, spell_id, t->GetName(), c->GetName());
+		LogInfo("Scribe spell: [{}] ([{}]) request for [{}] from [{}]",  spells[spell_id].name, spell_id, t->GetName(), c->GetName());
 
 		if (spells[spell_id].classes[WARRIOR] != 0 && spells[spell_id].skill != 52 && spells[spell_id].classes[t->GetPP().class_ - 1] > 0 && !IsDiscipline(spell_id)) {
 			book_slot = t->GetNextAvailableSpellBookSlot();
@@ -6769,7 +6836,7 @@ void command_unscribespell(Client *c, const Seperator *sep) {
 			if(t != c)
 				c->Message(Chat::White, "Unscribing spell: %s (%i) for %s.",  spells[spell_id].name, spell_id, t->GetName());
 
-			Log(Logs::General, Logs::Normal, "Unscribe spell: %s (%i) request for %s from %s.",  spells[spell_id].name, spell_id, t->GetName(), c->GetName());
+			LogInfo("Unscribe spell: [{}] ([{}]) request for [{}] from [{}]",  spells[spell_id].name, spell_id, t->GetName(), c->GetName());
 		}
 		else {
 			t->Message(Chat::Red, "Unable to unscribe spell: %s (%i) from your spellbook. This spell is not scribed.",  spells[spell_id].name, spell_id);
@@ -8510,7 +8577,7 @@ void command_ucs(Client *c, const Seperator *sep)
 	if (!c)
 		return;
 
-	Log(Logs::Detail, Logs::UCS_Server, "Character %s attempting ucs reconnect while ucs server is %savailable",
+	LogInfo("Character [{}] attempting ucs reconnect while ucs server is [{}] available",
 		c->GetName(), (zone->IsUCSServerAvailable() ? "" : "un"));
 
 	if (zone->IsUCSServerAvailable()) {
@@ -9255,7 +9322,7 @@ void command_traindisc(Client *c, const Seperator *sep)
 	t->Message(Chat::White, "Training disciplines");
 	if(t != c)
 		c->Message(Chat::White, "Training disciplines for %s.",  t->GetName());
-	Log(Logs::General, Logs::Normal, "Train disciplines request for %s from %s, levels: %u -> %u",  t->GetName(), c->GetName(), min_level, max_level);
+	LogInfo("Train disciplines request for [{}] from [{}], levels: [{}] -> [{}]",  t->GetName(), c->GetName(), min_level, max_level);
 
 	int spell_id = 0;
 	int count = 0;
@@ -12201,7 +12268,7 @@ void command_logtest(Client *c, const Seperator *sep){
 		uint32 i = 0;
 		t = std::clock();
 		for (i = 0; i < atoi(sep->arg[1]); i++){
-			Log(Logs::General, Logs::Debug, "[%u] Test #2... Took %f seconds", i, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
+			LogDebug("[[{}]] Test #2 Took [{}] seconds", i, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
 		}
 
 	}
@@ -12299,7 +12366,7 @@ void command_mysqltest(Client *c, const Seperator *sep)
 			auto results = database.QueryDatabase(query);
 		}
 	}
-	Log(Logs::General, Logs::Debug, "MySQL Test... Took %f seconds", ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
+	LogDebug("MySQL Test Took [{}] seconds", ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
 }
 
 void command_resetaa_timer(Client *c, const Seperator *sep) {
@@ -12571,6 +12638,85 @@ void command_scale(Client *c, const Seperator *sep)
 				saylink.c_str()
 			);
 		}
+	}
+}
+
+void command_databuckets(Client *c, const Seperator *sep)
+ {
+	if (sep->arg[1][0] == 0) {
+		c->Message(Chat::Yellow, "Usage: #databuckets view (partial key)|(limit) OR #databuckets delete (key)");
+		return;
+	}
+	if (strcasecmp(sep->arg[1], "view") == 0) {
+
+		std::string key_filter;
+		uint8 limit = 50;
+		for (int i = 2; i < 4; i++) {
+			if (sep->arg[i][0] == '\0')
+				break;
+			if (strcasecmp(sep->arg[i], "limit") == 0) {
+				limit = (uint8)atoi(sep->arg[i + 1]);
+				continue;
+			}
+		}
+		if (sep->arg[2]) {
+			key_filter = str_tolower(sep->arg[2]);
+		}
+		std::string query = "SELECT `id`, `key`, `value`, `expires` FROM data_buckets";
+		if (!key_filter.empty())  query += StringFormat(" WHERE `key` LIKE '%%%s%%'", key_filter.c_str());
+		query += StringFormat(" LIMIT %u", limit);
+		auto results = database.QueryDatabase(query);
+		if (!results.Success())
+			return;
+		if (results.RowCount() == 0) {
+			c->Message(Chat::Yellow, "No data_buckets found");
+			return;
+		}
+		int _ctr = 0;
+		// put in window for easier readability in case want command line for something else
+		std::string window_title = "Data Buckets";
+		std::string window_text =
+			"<table>"
+			"<tr>"
+			"<td>ID</td>"
+			"<td>Expires</td>"
+			"<td>Key</td>"
+			"<td>Value</td>"
+			"</tr>";
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			auto        id = static_cast<uint32>(atoi(row[0]));
+			std::string key = row[1];
+			std::string value = row[2];
+			std::string expires = row[3];
+			window_text.append(StringFormat(
+				"<tr>"
+				"<td>%u</td>"
+				"<td>%s</td>"
+				"<td>%s</td>"
+				"<td>%s</td>"
+				"</tr>",
+				id,
+				expires.c_str(),
+				key.c_str(),
+				value.c_str()
+			));
+			_ctr++;
+			std::string	del_saylink = StringFormat("#databuckets delete %s", key.c_str());
+			c->Message(Chat::White, "%s : %s",
+				EQEmu::SayLinkEngine::GenerateQuestSaylink(del_saylink, false, "Delete").c_str(), key.c_str(), "  Value:  ", value.c_str());
+		}
+		window_text.append("</table>");
+		c->SendPopupToClient(window_title.c_str(), window_text.c_str());
+		std::string response = _ctr > 0 ? StringFormat("Found %i matching data buckets", _ctr).c_str() : "No Databuckets found.";
+		c->Message(Chat::Yellow, response.c_str());
+	}
+	else if (strcasecmp(sep->arg[1], "delete") == 0)
+	{
+		if (DataBucket::DeleteData(sep->argplus[2]))
+			c->Message(Chat::Yellow, "data bucket %s deleted.", sep->argplus[2]);
+		else
+			c->Message(Chat::Red, "An error occurred deleting data bucket %s", sep->argplus[2]);
+		return;
 	}
 }
 

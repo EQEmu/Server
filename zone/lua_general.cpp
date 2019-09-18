@@ -1368,14 +1368,14 @@ double lua_clock() {
 }
 
 void lua_debug(std::string message) {
-	Log(Logs::General, Logs::QuestDebug, message);
+	Log(Logs::General, Logs::QuestDebug, message.c_str());
 }
 
 void lua_debug(std::string message, int level) {
 	if (level < Logs::General || level > Logs::Detail)
 		return;
 
-	Log(static_cast<Logs::DebugLevel>(level), Logs::QuestDebug, message);
+	Log(static_cast<Logs::DebugLevel>(level), Logs::QuestDebug, message.c_str());
 }
 
 void lua_update_zone_header(std::string type, std::string value) {
@@ -2327,17 +2327,17 @@ luabind::scope lua_register_rules_const() {
 	return luabind::class_<Rule>("Rule")
 		.enum_("constants")
 	[
-#define RULE_INT(cat, rule, default_value) \
+#define RULE_INT(cat, rule, default_value, notes) \
 		luabind::value(#rule, RuleManager::Int__##rule),
 #include "../common/ruletypes.h"
 		luabind::value("_IntRuleCount", RuleManager::_IntRuleCount),
 #undef RULE_INT
-#define RULE_REAL(cat, rule, default_value) \
+#define RULE_REAL(cat, rule, default_value, notes) \
 		luabind::value(#rule, RuleManager::Real__##rule),
 #include "../common/ruletypes.h"
 		luabind::value("_RealRuleCount", RuleManager::_RealRuleCount),
 #undef RULE_REAL
-#define RULE_BOOL(cat, rule, default_value) \
+#define RULE_BOOL(cat, rule, default_value, notes) \
 		luabind::value(#rule, RuleManager::Bool__##rule),
 #include "../common/ruletypes.h"
 		luabind::value("_BoolRuleCount", RuleManager::_BoolRuleCount)

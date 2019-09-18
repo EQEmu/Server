@@ -1,3 +1,14 @@
+############################################
+# Deprecated
+############################################
+#
+# New changelog can be found here
+# https://eqemu.gitbook.io/changelog/
+#
+############################################
+# Deprecated
+############################################
+
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 8/16/2019 ==
@@ -73,48 +84,48 @@ Uleat: Reworked BotDatabase into a functional add-on for ZoneDatabase
 == 3/1/2019 ==
 Noudess: Major faction conversion to use client data.
 
-	Pull request #802 New min/max personal faction per faction. Use of actual 
+	Pull request #802 New min/max personal faction per faction. Use of actual
 	client mods for race/class/deity.
 
 	This PR involves major changes to your database and your quests.
 
-	The clients recently exposed raw data included 
+	The clients recently exposed raw data included
 
 	- the min/max personal faction for each faction
 	- the actual faction id the client uses for each faction
-	- the actual mods that come into play when a PC cons an opponent that 
+	- the actual mods that come into play when a PC cons an opponent that
 	  determine your overall con to that faction.
 
 
-	The approach I took resulted in minimal change to the code base.  I did 
-	alter the code to enforce the new validated min/max from the client.  This 
-	min/max applies to personally earned faction.  So if a faction has a min 
-	of 0 and a max of 2000, that means your personally earned value can never 
-	go below 0 or over 2000.  The actual con, will, however often do so because 
-	of class/race/deity modifications.  I also changed the con ranges, per 
+	The approach I took resulted in minimal change to the code base.  I did
+	alter the code to enforce the new validated min/max from the client.  This
+	min/max applies to personally earned faction.  So if a faction has a min
+	of 0 and a max of 2000, that means your personally earned value can never
+	go below 0 or over 2000.  The actual con, will, however often do so because
+	of class/race/deity modifications.  I also changed the con ranges, per
 	Mackal's data that was proven to be accurate:
 
-	Ally = 1100+ 
-	Warmly = 750 to 1099 
-	Kindly = 500 to 749 
-	Amiable = 100 to 499 
-	Indifferent = 0 to 99 
-	Apprehensive = -1 to -100 
-	Dubious = -101 to -500 
-	Threateningly = -501 to -750 
-	Ready to Attack = -751 
+	Ally = 1100+
+	Warmly = 750 to 1099
+	Kindly = 500 to 749
+	Amiable = 100 to 499
+	Indifferent = 0 to 99
+	Apprehensive = -1 to -100
+	Dubious = -101 to -500
+	Threateningly = -501 to -750
+	Ready to Attack = -751
 
-	The above means that dubious is a much smaller range now.  For that reason 
-	the scripts modify any custom faction base values to put them in the same 
+	The above means that dubious is a much smaller range now.  For that reason
+	the scripts modify any custom faction base values to put them in the same
 	range, hopefully as the creators of the custom factions intended.
 
-	Also to be noted as characters that have a faction between -501 and -700 
-	wont be dubious anymore, they will be threateningly.  This is expected with 
-	the new ranges, but might take players by suprise as the old ranges we used 
+	Also to be noted as characters that have a faction between -501 and -700
+	wont be dubious anymore, they will be threateningly.  This is expected with
+	the new ranges, but might take players by suprise as the old ranges we used
 	were more liberal but were incorrect.
 
-	The database is changed extensively, but really only content.  We're 
-	translating faction_list to use the clients ids.  As such every place a 
+	The database is changed extensively, but really only content.  We're
+	translating faction_list to use the clients ids.  As such every place a
 	faction_is is used, namely (see below) are being converted.
 
 	- faction_list
@@ -123,41 +134,41 @@ Noudess: Major faction conversion to use client data.
 	- npc_faction_entries (faction_id field only)
 	- faction_values
 
-	Quests will also automatically be adjusted.  This MUST be done after the 
-	PR sql and before starting the server.  This is automated by 
+	Quests will also automatically be adjusted.  This MUST be done after the
+	PR sql and before starting the server.  This is automated by
 	eqemu_server.pl (or starting world)
 
-	Be assured, custom factions that you may have created, or obsolete or 
-	duplicate factions in our original faction_list, that you may have used, 
-	will be preserved.  Anything that does not map directly is being moved to 
-	the 5000 range in faction_list and any references are corrected to point 
+	Be assured, custom factions that you may have created, or obsolete or
+	duplicate factions in our original faction_list, that you may have used,
+	will be preserved.  Anything that does not map directly is being moved to
+	the 5000 range in faction_list and any references are corrected to point
 	there.
 
-	A great example of this is Ebon Mask and Hall of the Ebon Mask.  Many peqdb 
-	style servers have both of these.  Some have used one, some the other.  We 
-	map Ebon Mask to the clients Ebon mask and the Hall of the Ebon Mask gets 
-	moved to the 5000 range, and all its references are preserved.  However, 
-	if you would like to make proper use of client mobs to Ebon mask, or other 
-	factions that have duplicitous entries, I recommend you manually move to 
-	using the correct one.  In that way all of the new raw data mapped in from 
-	the client into faction_list_mod will get used instead of what your db had 
+	A great example of this is Ebon Mask and Hall of the Ebon Mask.  Many peqdb
+	style servers have both of these.  Some have used one, some the other.  We
+	map Ebon Mask to the clients Ebon mask and the Hall of the Ebon Mask gets
+	moved to the 5000 range, and all its references are preserved.  However,
+	if you would like to make proper use of client mobs to Ebon mask, or other
+	factions that have duplicitous entries, I recommend you manually move to
+	using the correct one.  In that way all of the new raw data mapped in from
+	the client into faction_list_mod will get used instead of what your db had
 	before these values were known.
 
-	In my experience converting 4 different server's data, there are only 
+	In my experience converting 4 different server's data, there are only
 	about 20 factions moved into the 5000 range.
 
-	This PR has only 1 new, permanent table faction_base_data, which is taken 
-	right from the client.  The base field is left in case you want to mod your 
-	server, but we are very sure that the client doesn't use a base.  It uses 
-	global mods to race or class for this as you'll see in the 
+	This PR has only 1 new, permanent table faction_base_data, which is taken
+	right from the client.  The base field is left in case you want to mod your
+	server, but we are very sure that the client doesn't use a base.  It uses
+	global mods to race or class for this as you'll see in the
 	new faction_list_mod.
 
 	The PR makes many backup tables, and two mapping tables that are used during
-	the conversion process to fix quests.  This table was hand created by 
-	analysis.  This table serves no purpose after conversion except an audit 
+	the conversion process to fix quests.  This table was hand created by
+	analysis.  This table serves no purpose after conversion except an audit
 	trail if we see any issues.
 
-	I will release a new PR that will clean up all these backups and temporary 
+	I will release a new PR that will clean up all these backups and temporary
 	tables in about a month.
 
 == 2/7/2019 ==
@@ -327,7 +338,7 @@ Kinglykrab: Added multiple new instance related quest functions.
 
 	Added spell buckets, similar to spell globals.
 		- Uses a new spell_buckets table and the Spells:EnableSpellBuckets rule.
-	
+
 	Added max level by data bucket.
 		- Uses data bucket char_id-CharMaxLevel and Character:PerCharacterBucketMaxLevel rule.
 
@@ -337,7 +348,7 @@ Uleat: Added bot owner options
 	- options are saved in the database and therefore, persistent
 	- Implemented option 'deathmarquee'
 	-- toggles client owner flag to show marquee message when a bot dies (default: disabled)
-	
+
 == 10/07/2018 ==
 Uleat: Fixed a few bot issues..
 	- Fix for bot item trades not attuning
@@ -353,27 +364,27 @@ Uleat: Fixed a few bot issues..
 Uleat: Notes for manual conversion of quest script inventory slot values
 	- You should use reference/lookup values provided by the lua and perl apis to avoid skirting safety checks
 		and to ensure that the values used are the correct ones for your needs
-	
+
 	[perl api examples]
 		old:
 			1) my $charmitem = $client->GetItemIDAt(0);
 			2) for($for_x = 22; $for_x < 30; $for_x++) {...}
 			3) for($slot1 = 0; $slot1 <= 30; $slot1++) {...}
-		
+
 		new:
 			1) my $charmitem = $client->GetItemIDAt(quest::getinventoryslotid("charm"));
 			2) for($for_x = quest::getinventoryslotid("general.begin"); $for_x <= quest::getinventoryslotid("general.end"); $for_x++) {...} ** notice change of conditional
 			3) for($slot1 = quest::getinventoryslotid("possessions.begin"); $slot1 <= quest::getinventoryslotid("possessions.end"); $slot1++) {...}
-	
+
 	[lua api examples]
 		old:
 			1) if(e.self:GetItemIDAt(30) == 31599) then ...
 			2) for i = 0, 30, 1 do ...
-			
+
 		new:
 			1) if(e.self:GetItemIDAt(Slot.Cursor) == 31599) then ...
 			2) for i = Slot.PossessionsBegin, Slot.PossessionsEnd, 1 do ...
-	
+
 	- If you need to manually assign bag slot ranges to individual 'general' slots, use this assignment for now:
 		-- General1  (23) = 251 .. 260
 		-- General2  (24) = 261 .. 270
@@ -386,13 +397,13 @@ Uleat: Notes for manual conversion of quest script inventory slot values
 		-- General9  (31) = 331 .. 340
 		-- General10 (32) = 341 .. 350
 		-- Cursor    (33) = 351 .. 360
-	
+
 	- If you need to manually assign ammo or powersource slots, use these values:
 		-- PowerSource = 21
 		-- Ammo = 22
-	
+
 	- All slot values not addressed above remain the same
-	
+
 	- Additional information can be found at:
 		-- https://github.com/EQEmu/Server/wiki/Inventory-Slots
 		-- https://github.com/EQEmu/Server/wiki/Perl-API
@@ -425,11 +436,11 @@ Uleat: Activation of RoF+ clients' two additional general slots and integration 
 	- Database will have existing inventory slot values modified to the new standard and table `items` entries will
 		also be updated to the 'correct' equipable slot bitmask
 	- Script (quest) updates are required with this change
-	
+
 Note: The proper way to reference inventory slots is to use either instrinsic lookups (c/c++ & perl) or to use valid
 	const ref declarations (c/c++ & lua). Any other method is not guaranteed to be accurate and may result in item loss
 	and/or unexpected/undefined behavior.
-	
+
 
 == 07/10/2018 ==
 Akkadius: Adjusted DataBuckets to use other acceptable time formats
@@ -533,7 +544,7 @@ Uleat: Re-work of Bot::AI_Process(). Overall behavior is much improved.
 	- Added combat 'jitter' movement to complement the existing rogue movement
 	- Attack can now be aborted if target contains no leash owner nor bot hate and leash owner turns off auto-attack
 	- Please report any issues with the bot AI code
-	
+
 Added a work-around for heal rotations crashing the server - under certain conditions.
 
 == 01/28/2018 ==
@@ -576,7 +587,7 @@ Values stored in the database are 0-6000, previously we capped it at 6000 but pr
 == 7/14/2017 ==
 Akkadius: HP Update tuning - HP Updates are now forced when a client is targeted
 Akkadius: Client position updates should be smoother (granted the client has a good connection)
-	- Clients should also no longer randomly disappear 
+	- Clients should also no longer randomly disappear
 
 == 7/11/2017 ==
 Akkadius: Raid/Group/XTarget HP/Mana/Endurance updates now only send when percentage changes
@@ -613,7 +624,7 @@ Akkadius: Fixed issues with Z correctness when NPCs are engaged with players fol
 Akkadius: NPC corpses should fall into the ground far less
 
 == 6/25/2017 ==
-Akkadius: New rules made by developers are now automatically created when world boots up, this keeps 
+Akkadius: New rules made by developers are now automatically created when world boots up, this keeps
 	from having to issue schema SQL updates every time rules are added.
 	- Whenever a rule isn't present in the database, it will be automatically created
 Akkadius: Sped up saylink retrieval x1000 helpful for dialogues, plugins with many saylinks
@@ -630,11 +641,11 @@ KLS: Merge eqstream branch
 			- Because of changes to the TCP stack, lsreconnect and echo have been disabled.
 	- The server tic rate has been changed to be approx 30 fps from 500+ fps.
 		- Changed how missiles and movement were calculated slightly to account for this (Missiles in particular are not perfect but close enough).
-	
+
 	- Breaking changes:
 		- Users who use the cmake install feature should be aware that the install directory is now %cmake_install_dir%/bin instead of just %cmake_install_dir%/
 		- To support new features such as encryption the underlying protocol had to change... however some servers such as the public login server will be slow to change so we've included a compatibility layer for legacy login connections:
-			- You should add <legacy>1</legacy> to the login section of your configuration file when connecting to a server that is using the old protocol.  
+			- You should add <legacy>1</legacy> to the login section of your configuration file when connecting to a server that is using the old protocol.
 			- The central eqemu login server uses the old protocol and probably will for the forseeable future so if your server is connecting to it be sure to add that tag to your configuration file in that section.
 			- Telnet no longer uses the same port as the Server to Server connection and because of this the tcp tag no longer has any effect on telnet connections.
 				- To enable telnet you need to add a telnet tag in the world section of configuration such as:
@@ -646,11 +657,11 @@ Akkadius: [Performance] Reworked how all log calls are made in the source
 	- Before we used Log.Out, we will now use a macro Log(
 		- Before: Log.Out(Logs::General, Logs::Status, "Importing Spells...");
 		- After: Log(Logs::General, Logs::Status, "Importing Spells...");
-	- The difference is 
+	- The difference is
 		1) It's 200-300x faster especially when log statements are inside very hot code paths. We already
-			had most hot paths checked before we logged them, but this blankets all existing logging calls now and not just the 
+			had most hot paths checked before we logged them, but this blankets all existing logging calls now and not just the
 			select few we had picked out in the source.
-		2) Strings don't get copied to the stack, popped and pushed constantly even when we hit a log statement that 
+		2) Strings don't get copied to the stack, popped and pushed constantly even when we hit a log statement that
 			actually isn't going to log anything.
 				- We do an 'if (LogSys.log_settings[log_category].is_category_enabled == 1)' before we call a log function
 					in the log macro so the log function doesn't get called at all if we're not logging the category
@@ -660,16 +671,16 @@ Akkadius: [Performance] Reworked how all log calls are made in the source
 
 == 03/30/2017 ==
 Akkadius: [Performance] Fixed an overhead issue where many hot paths would trigger quest subroutines and beneath that the code would
-	try to see if a quest existed perpetually (checking if file exists) even though it should have determined the quest 
+	try to see if a quest existed perpetually (checking if file exists) even though it should have determined the quest
 	didn't exist the first time.
 	- This caused a lot of overhead in an instance where an entire zone of NPC's is pathing, triggering EVENT_WAYPOINT_ARRIVE
-	and EVENT_WAYPOINT_DEPART when there is no global_npc.pl/lua, or all NPC's pathing don't have a quest assigned, similar 
+	and EVENT_WAYPOINT_DEPART when there is no global_npc.pl/lua, or all NPC's pathing don't have a quest assigned, similar
 	behavior would occur. This goes for any other type of quests: spells, items, encounters etc.
 
 == 03/28/2017 ==
 Akkadius: [Performance] Fixed a large overhead issue where every single NPC in a zone was checking to depop themselves
 	as a swarm pet every 3ms regardless of being a swarm pet or not. Swarm pets now check to depop only when their timer is up
-Akkadius: [Performance] Removed a timer where clients would constantly calculate light amount on equipment every 600ms, instead 
+Akkadius: [Performance] Removed a timer where clients would constantly calculate light amount on equipment every 600ms, instead
 	clients will update light when changing equipment or entering a zone
 Akkadius: [Performance] Disabled enraged timer checks for NPC's that do not actually have enrage as a special attack
 Akkadius: [Performance] Don't process ProjectileAttack checks for NPC's that are not engaged in any combat
@@ -680,7 +691,7 @@ Akkadius: [Performance] Reworked how client to NPC aggro checks are made
 		check an entire entity list with distance calcs and other checks for aggro, with many clients in a zone and many NPC's this would
 		add a lot of unecessary overhead. A temporary adjustment on 3/25 was made and upped the check to 6 seconds.
 	- Now, there is a new methodology to scanning. The client will build a cache list of NPC's within close range as defined in new rule:
-		RULE_INT(Range, ClientNPCScan, 300) and will also get any NPC that has an aggro range beyond that defined range to use in 
+		RULE_INT(Range, ClientNPCScan, 300) and will also get any NPC that has an aggro range beyond that defined range to use in
 		the frequent checks for aggro, the result is far less overhead
 	- Client scanning changes when moving versus not moving, the client will scan aggro every 500 milliseconds while moving, and
 		3000 millseconds aggro check when not moving, with a 6000ms re-fetch for close NPC's
@@ -689,7 +700,7 @@ Akkadius: [Performance] Reworked how client to NPC aggro checks are made
 
 == 03/25/2017 ==
 Akkadius: [Performance] Reduced CPU footprint in non-combat zones doing constant checks for combat related activities
-Akkadius: [Performance] Reduced CPU footprint in cases where a client is checking for aggro excessively every 750 millseconds. This has 
+Akkadius: [Performance] Reduced CPU footprint in cases where a client is checking for aggro excessively every 750 millseconds. This has
 	been adjusted to 6 seconds per new rule RULE_INT(Aggro, ClientAggroCheckInterval)
 	- When zones have many players, with many NPC's, this adds up quickly
 
@@ -706,7 +717,7 @@ Akkadius: [Performance]
 	RULE_INT ( Range, SongMessages, 75)
 	RULE_INT ( Range, MobPositionUpdates, 600)
 	RULE_INT ( Range, CriticalDamage, 80)
-	
+
  - (Readability) Also cleaned up some formatting in messaging and packets so it is easier to understand what is going on with the code
 
 == 03/09/2017 ==
@@ -7728,13 +7739,13 @@ Trevius: Food and Drink will now actually give stats.
 
 Required SQL: utils/sql/svn/229_spells_table.sql
 
-==11/22/2008
+==11/22/2008==
 Trevius/AndMetal: Corrected the output of #showstats to provide accurate Attack Rating calculations.
 Derision: Initialise animation to zero in the Mob constructor to prevent players sometimes appearing to run off when they first spawn.
 Derision: /buyer /barter fix.
 Trevius: Added Account Limiting to allow limiting how many characters can be logged in per account at once - See Optional SQL.
 
-==11/20/2008
+==11/20/2008==
 Derision: Implemented /buyer (cash compensation only) and /barter. Update your patch_Titanium.conf from the utils directory.
 
 REQUIRED SQL:
@@ -7753,19 +7764,19 @@ CREATE TABLE `buyer` (
 ALTER TABLE `trader_audit` ADD `trantype` TINYINT NOT NULL DEFAULT '0';
 
 
-==11/20/2008
+==11/20/2008==
 cavedude00: (aza77) Added quest::collectitems.
 cavedude00: (Rocker8956) Zones with IDs higher than 255 can now be instanced.
 
-==11/19/2008
+==11/19/2008==
 seveianrex: (Varkalas) WAR Sturdiness AA Fix
 AndMetal: zone-*.log files on Linux will allow read access to group members. You may need to erase any existing logs to see the change.
 AndMetal: Added some logging for spell crits (SPELLS__CRITS)
 
-==11/18/2008
+==11/18/2008==
 Derision: Bazaar: Added support for changing prices without ending Trader mode.
 
-==11/16/2008
+==11/16/2008==
 Derision: Added command 'undyeme' to restore all a player's armor slots to their natural undyed state.
 Trevius: (Denivia) Changed Expansive Mind AA so that it raises the Worn Mana Regen Cap (as it should) instead of just increasing mana regen.
 Derision: Bazaar bug fix relating to items with -1 max charges.
@@ -7774,7 +7785,7 @@ Optional SQL:
 
 INSERT INTO commands (command, access, description) VALUES ('undyeme', 0, 'Remove dye from all of your armor slots');
 
-==11/15/2008
+==11/15/2008==
 seveianrex: Implemented AA use of SE_Accuracy (Ranger GoD AA "Precision of the Pathfinder" will have an effect now)
 seveianrex: Implemented Enchanter GoD AA "Mesmerization Mastery"
 seveianrex: Adjusted Monk Kick Mastery damage modifiers slightly.
@@ -7784,7 +7795,7 @@ Derision: Added Rule World:TutorialZoneID, default 189 (tutorialb).
 Derision: MinPrice/MaxPrice in the Bazaar search window are now interpreted correctly as values in Platinum.
 Derision: Bazaar bug fix.
 
-==11/14/2008
+==11/14/2008==
 seveianrex: Adjusted Coat of Thistles AA modifier.
 seveianrex: Implemented Pet Crits for NEC/MAG/BST (Deaths Fury, Elemental Fury, Warders Fury GoD era AAs)
 Derision: Bazaar Trader mode (not Barter). Please test it well.
@@ -7815,20 +7826,20 @@ CREATE TABLE `trader_audit` (
 
 UPDATE doors set opentype=155 where opentype=154 and zone='bazaar';
 
-==11/12/2008
+==11/12/2008==
 Congdar: Bots: add command #bot lore - Casts Identify on the item on your mouse pointer
 seveianrex: Tweaked the Slay Undead damage to once again. Damage should be in-line with live numbers now.
 Angelox: (Kobaz): Fix for 'PIC register bx clobbered in asm' error
 Angelox: Improved filtering on [bot track rare] option for Ranger
 Angelox: Added option [bot track near] for Ranger
 
-==11/11/2008
+==11/11/2008==
 Congdar: Bots: fix ghosting when runnning up to targets
 
-==11/10/2008
+==11/10/2008==
 Trevius/Derision: Fix for GM Training Point exploit when de-leveling and leveling up again
 
-==11/10/2008
+==11/10/2008==
 Derision: Implemented Looking For Group/Looking For Players Window. patch_Titanium_conf has been updated.
 Derision: Visual Studio users should add world/lfplist.h and world/lfplist.cpp to their project.
 
@@ -7837,7 +7848,7 @@ REQUIRED SQL:
 ALTER TABLE `character_` ADD `lfp` TINYINT( 1 ) UNSIGNED NOT NULL DEFAULT '0';
 ALTER TABLE `character_` ADD `lfg` TINYINT( 1 ) UNSIGNED NOT NULL DEFAULT '0';
 
-==11/08/2008
+==11/08/2008==
 Congdar: Bots: add command #bot resurrectme
 Congdar: Bots: modify heal ai, more mana calcs
 Congdar: Added Rule to allow melee to bind anywhere casters can bind, default is false
@@ -7846,7 +7857,7 @@ optional sql:
 seveianrex: Figured out what was crashing ranged procs. Is fixed and fully implemented now. Rangers rejoice..
 seveianrex: Modified the way #melody works to improve the delay between songs being casted. Bards rejoice..
 
-==11/07/2008
+==11/07/2008==
 seveianrex: GoD Rogue AA's: Seized Opportunity, Triple Backstab implemented
 seveianrex: (LeftRoad) Provide a damage message to client when mob is killed by a spell
 Congdar: Bots: reduce spam, fix crash when fighting Dain, change mana/hp from npc to client like calcs
@@ -7857,16 +7868,16 @@ INSERT INTO commands (command, access, description) VALUES ('melody', 0, 'A supp
 
 seveianrex: Added support for defensive and ranged spell-effect based procs. Having some zone-crash issues with the ranged proc code for some reason, so it's commented out until I can fix it.
 
-==11/05/2008
+==11/05/2008==
 Derision: Dyed armor color should now show up correctly to other players.
 Derision: Implemented the Potion Belt.
 
-==11/03/2008
+==11/03/2008==
 seveianrex: Added some scaling to the way NPC hitboxes are calculated. This corrects some of the issues with mobs like Wurms/Dragons who you could hit from miles away.
 seveianrex: NPCs who are 5% HP or lower, are fleeing, and have a decent snare on will no longer cover so much distance.
 seveianrex: Implemented Mob::GetSnaredAmount() function, utilized in the above. Returns the ABS() value of the snare.
 
-==11/01/2008
+==11/01/2008==
 seveianrex: GoD AA Implementations: [CLR] Touch of the Divine, [BRD] Internal Metronome, [SHD] Improved Consumption of the Soul
 Derision: Allow backtick through the CleanName filter.
 Derision: Pickpocket should no longer occasionally bug the UI.
@@ -7874,23 +7885,23 @@ Derision: Pickpocketing money should no longer show twice the amount taken in th
 Derision: Looting stackable PVPItem now works.
 Derision: Client now updates correctly when a charge on an item with a right click effect is used. Update your patch_Titanium.conf
 
-==10/31/2008
+==10/31/2008==
 seveianrex: Monk updates: Strikethrough AA, Mend Worsen Frequency Tweak, Kick Mastery AA Fix
 seveianrex: Implemented Pet Flurries for MAG/BST/NEC
 Derision: Extended quest::popup to take optional PopupID and buttontype (OK or YES/NO) fields.
 
-==10/30/2008
+==10/30/2008==
 KLS: Spell crits should work reasonably well once again.
 Derision: Fixed inability to jump introduced in Rev161.
 
-==10/29/2008
+==10/29/2008==
 Derision: Mobs in water should no longer sink to the bottom.
 cavedude00: Added rule to enable DeathExpLossMultiplier, or to use server code default.
 
 Optional SQL:
 Insert into rule_values values (0, 'Character:UseDeathExpLossMult', 'true');
 
-==10/27/2008
+==10/27/2008==
 seveianrex: Added server-side code for WAR sturdiness AA
 Angelox: (Cbodmer) Experience loss based on cbodmers formula with added rule to regulate loss amount
 Trevius: (Denivia) Added Critical Spell Damage for Lifetaps with the proper AAs
@@ -7898,7 +7909,7 @@ Trevius: (Denivia) Added Critical Spell Damage for Lifetaps with the proper AAs
 Optional SQL (options are 0-10, defaults to 3):
 Insert into rule_values values (0, 'Character:DeathExpLossMultiplier', 3);
 
-==10/26/2008
+==10/26/2008==
 Derision: Implemented Bandolier. Test thoroughly before trusting it with your Epic.
 Derision: Minor change to enable the spell Tiny Companion to work.
 
@@ -7906,7 +7917,7 @@ Derision: Minor change to enable the spell Tiny Companion to work.
 seveianrex: Slay Undead tweak + message gender fix, Tradeskill message gender fix
 Trevius: Updated SQL file for R142 to correct some altadv_vars AA table issues with AA requirements
 
-==10/24/2008
+==10/24/2008==
 seveianrex: Implemented various GoD AAs: Coat of Thistles, Rapid Strikes, Elemental Durability, Subtlety2, Strengthened Strike, Vicious Smash
 seveianrex: Implemented GoD Monk AA "Kick Mastery"
 Trevius: Adjusted the new Frenzy AAs code to fix a crash
@@ -7919,7 +7930,7 @@ Derision: 'Killing' LDoN chest type objects(e.g. Vermin Nests) will now update k
 KLS: Revert Lag fixes that were causing movement and facing abnormalities.
 KLS: Fix to a few problems with quest::creategroundobject that was causing it to not work in some situations.
 
-==10/23/2008
+==10/23/2008==
 Congdar: Clone NoDrop removal code to NoRent, Lore, NoTrade.  Optionally enabled in the db Variables table DisasbleNoDrop=1 DisableNoRent=true DisableLore=1 DisableNoTrade=1
 Congdar: Bot code cleanup, method call reduction
 Congdar: Bot DoubleAttack method is more like clients
@@ -7946,7 +7957,7 @@ Required SQL:
 
 ALTER TABLE `tasks` ADD `repeatable` TINYINT( 1 ) UNSIGNED NOT NULL DEFAULT '1';
 
-==10/22/2008
+==10/22/2008==
 AndMetal: Fix for item links to prevent occasional zone crashes
 AndMetal: Critical DOTs should now work correctly
 AndMetal: Fixed sql/svn/125_aggrozone.sql to work with current command table schema
@@ -7958,7 +7969,7 @@ AndMetal: Support for +Stat Cap (Wunshi's Focusing, etc)
 AndMetal: New rules for tweaking spell crits: Spells:BaseCritChance(0), Spells:BaseCritRatio(0), Spells:WizCritLevel(12), Spells:WizCritChance(7), Spells:WizCritRatio(15)
 AndMetal: Loot messages will now have item links instead of just the item name
 
-==10/21/2008
+==10/21/2008==
 KLS: Some changes to make compiling with profiler enabled more error free.
 KLS: Added player quest event EVENT_TASK_STAGE_COMPLETE exports $task_id and $activity_id.
 KLS: Added player quest event EVENT_PICK_UP exports $picked_up_id for when a player picks up a ground spawn or dropped item.
@@ -7966,7 +7977,7 @@ KLS: Added quest::CreateGroundObject(itemid, x, y, z, heading) which lets the qu
 KLS: Objects should decay after they're loaded back into the world. Might want to backup your objects table till I can confirm this works 100%.
 KLS: Lowered ground object decay time from 30 min to 5 min.
 
-==10/20/2008
+==10/20/2008==
 AndMetal: (erde) Moved SVN SQL updates to utils/sql/svn. File name will start with the revision they were introduced & optional updates have optional somewhere at the beginning of the name
 Derision/Trevius: Implemented sub EVENT_AGGRO_SAY
 AndMetal: Implemented Reverse Damage Shield
@@ -7974,7 +7985,7 @@ AndMetal: Fixed +Damage Shield on items so that it doesn't work without having a
 AndMetal: (seveianrex) Hate w[h]iped on CoH
 AndMetal: (via Yeahlight) New command: #aggrozone. Requires 100 status by default
 
-==10/19/2008
+==10/19/2008==
 Angelox: Added a start to Bot tracking - Thanks Derision for all the help and know-how.
 Derision: Altered damage shield message processing to be more like (the same?) as live.
 Derision: If it exists, damage shield types are read from a new table (damageshieldtypes)
@@ -7982,7 +7993,7 @@ Derision: If no entry exists in the table, a default based on resist type is use
 
 Optional SQL: See utils/sql/damageshieldtypes.sql
 
-==10/18/2008
+==10/18/2008==
 KLS: Reworked classic style traps.
 KLS: Debuff style traps should function perfectly, the level field in the DB gives what level the caster is for resists in this case.
 KLS: Added respawn and respawn variance to traps.
@@ -8004,12 +8015,12 @@ ALTER TABLE `traps` ADD `respawn_time` INT(11) UNSIGNED DEFAULT '60' NOT NULL AF
 ALTER TABLE `traps` ADD `level` MEDIUMINT(4) UNSIGNED DEFAULT '1' NOT NULL AFTER `skill`;
 ALTER TABLE `traps` ADD `respawn_var` INT(11) UNSIGNED DEFAULT '0' NOT NULL AFTER `respawn_time`;
 
-==10/17/2008
+==10/17/2008==
 KLS: Tweaks to /pet attack
 KLS: Renamed WhipeHateList to WipeHateList so I never have to view that spelling monster ever again.
 cavedude00: (Rocker8956) Added shutdowndelay to zone query.
 
-==10/16/2008
+==10/16/2008==
 Derision: Cosmetic change to foraging to correctly identify food/drink items.
 cavedude00: Added rules to determine if /ooc and /auction should be server wide (true) or zone wide (false - Live Like).
 cavedude00: #peqzone can no longer be used if invulnerable.
@@ -8021,14 +8032,14 @@ Optional SQL:
 insert into rule_values values (0, 'Chat:ServerWideOOC', 'true');
 insert into rule_values values (0, 'Chat:ServerWideAuction', 'true');
 
-==10/15/2008
+==10/15/2008==
 Derision: Added OP_LevelAppearance to utils/patch_Titanium.conf and it is now sent to nearby clients (eye candy when you level)
 Derision: (seveianrex) Alcohol Drinking / Skillup Fix
 KLS: Change to proc code to correct some oddities with % chance to proc.
 KLS: Changed how avoidance bonuses are calculated to be like other melee bonuses.
 KLS: (seveianrex) Basic Pet Focus Implementation.
 
-==10/14/2008
+==10/14/2008==
 Trevius: Charm Spells set to max level of 0 now have unlimited max level as they should
 Derision: Player pets should no longer be fearable if npcspecialattks contains 'D'.
 cavedude00: (Rocker8956) Changes to quest::getlevel and quest::setinstflag/setinstflagmanually to reduce DB access
@@ -8036,21 +8047,21 @@ cavedude00: (Rocker8956) Added quest::getinstflag
 KLS: Fixed crash in shutdown delay, please test things for crashes before adding them, this was pretty obvious.
 Derision: Removed requirement to be grouped for Translocate spells.
 
-==10/13/2008
+==10/13/2008==
 Derision: Looting your corpse while liched/wolf form etc should now auto-equip items
 
-==10/12/2008
+==10/12/2008==
 Derision: No more binding wounds while feigning death.
 Derision: (Rocker8956) Movegrp quest command fix.
 Derision: (LeftRoad) TEMPORARY(NORENT) items in a character inventory will be retained if you log back into that character within 30 minutes.
 KLS: Implemented Raid::TeleportGroup() and Raid::TeleportRaid(), untested but should work.
 KLS: (seveianrex) Critical DoT and Sinister Strikes AA.
 
-==10/11/2008
+==10/11/2008==
 Derision: Resurrection fix.
 KLS: Rebalanced skill ups.
 
-==10/10/2008
+==10/10/2008==
 AndMetal: Added functions to calculate AA bonuses just like item & spell bonuses (not turned on yet)
 Condgar: Fix for Bots wont Attack
 Congdar: Fix low level bots hitting too hard
@@ -8058,7 +8069,7 @@ Derision: Prevent two instances of possible zone crashes due to null pointers.
 Trevius: (Striat) Added quest commands for zone and world emotes - quest::ze() & quest::we()
 Derision: Recalculate Pet bonuses on zoning before setting current HP/Mana.
 
-==10/09/2008
+==10/09/2008==
 Congdar: Replace Client IsEngaged() checks in Bot Source with bot aggro check
 Trevius: (AndMetal) Added quest Object SetOOCRegen() to adjust NPC Out of Combat Regen on the fly.
 Trevius: Relocated the Empty Corpse check code so that the Decay Time rule for it will now work.
@@ -8069,18 +8080,18 @@ Derision: Reworked code to stop mobs fleeing if they have buddies to account for
 Optional SQL:
 Insert into rule_values values (0, 'Character:MaxExpLevel', 0);
 
-==10/08/2008
+==10/08/2008==
 Congdar: Fix orphaned bots when camping/zoning
 Congdar: Link bot assist with client auto attack
 Derision: Added #titlesuffix command to add a title after a player's name.
 
-==10/07/2008
+==10/07/2008==
 Congdar: Allow bot pets to be the main tank in a bot raid
 Congdar: Remove old Sense Heading skill check
 AndMetal: Web interface will now list open petitions.
 Derision: #title should now prefix the target player's name, e.g. #title Lord_Protector (underscores are replaced with spaces, max 31 chars)
 
-==10/06/2008
+==10/06/2008==
 Angelox: Fix Bot names in group window (now is 'Mybot' instead of 'Mybot000')
 cavedude00: (erde) Fix for world and zone crashing when compiled on VS 2008 in release mode.
 cavedude00: (Rocker8956) Zone shutdown timer rule.
@@ -8094,7 +8105,7 @@ INSERT INTO rule_values VALUES (1,'Zone:AutoShutdownDelay', 5000);
 Derision: Total time playing <character> in /played now maintained across sessions.
 Derision: Corrected OP_DuelResponse/OP_DuelResponse2/OP_Shielding opcodes in utils/patch_Titanium.conf
 
-==10/04/2008
+==10/04/2008==
 Congdar: Double Attack redo, tested working
 Congdar: Fix Bot follow bug when a bot gets killed
 Derision: Added minlevel and maxlevel fields to tasks table and new quest function istaskappropriate(task).
@@ -8107,7 +8118,7 @@ Required SQL:
 ALTER TABLE `tasks` ADD `minlevel` TINYINT UNSIGNED NOT NULL DEFAULT '0',
 ADD `maxlevel` TINYINT UNSIGNED NOT NULL DEFAULT '0';
 
-==10/03/2008
+==10/03/2008==
 Congdar: Add EQOffline Bot Source
 Derision: Removed 'stepped' column from task table. See http://eqemulator.net/forums/showthread.php?p=157613
 Derision: Added display of Task Description to #task show to aid in debugging a reported problem.
@@ -8119,25 +8130,25 @@ KLS: Fix to crash in monk special attack function.
 
 Required SQL: ALTER TABLE `tasks` DROP `stepped` ;
 
-==10/02/2008
+==10/02/2008==
 KLS: (Congdar) Update to Tech. of Master Wu AA.
 KLS: Revert of double attack change, people reporting non warriors were no longer double attacking properly.
 KLS: Compile Warning in Database::GetZoneName()
 KLS: Change to IsPlayerIllusionSpell() to make it more consistant, illusion spells can be more than 49 so we work off behavior and effect now.
 KLS: Added AA__Message logs to project illusion code to try to track down an error.
 
-==10/01/2008
+==10/01/2008==
 Derision: (erde) VS2008 Compile Fix (#if (_MSC_VER < 1500) #define vsnprintf _vsnprintf #endif
 Derision: Fix to stop zone crashing when looting PVPItem and PVPReward is set to 3.
 cavedude00: Group members will no longer recieve a split when a player corpse is looted.
 
-==9/30/2008
+==9/30/2008==
 Derision: Task activities with an activitytype of <= 0 in the activities table will be sent with an activitytype of 9 to the client.
 Derision: The reward field in the task table will now be displayed even if rewardid=0
 cavedude00: (Rocker8956) Added quest function to get average group/raid level.
 cavedude00: (Rocker8956) Changes to setinstflagmanually to allow deletion of instance flags and to allow manual flagging of raids, groups, and individuals.
 
-==9/29/2008
+==9/29/2008==
 cavedude00: Added rule World:ClearTempMerchantlist to control whether world clears temp merchant items when started or not.
 AndMetal: (Congdar) New Double Attack logic
 Angelox: Keyring code fix, so clicky portals that require keys will work too.
@@ -8147,11 +8158,11 @@ AndMetal: Ayonae's Tutelage should now calculate bonus for Singing
 Optional SQL:
 insert into rule_values values (0,'World:ClearTempMerchantlist','true');
 
-==9/28/2008
+==9/28/2008==
 AndMetal: Fixed exploit for pets ignoring Fear by using /pet commands
 AndMetal: #wp add will now use the highest value in the grid_entries table + 1 if you don't use a Waypoint # or use 0
 
-==09/26/2008
+==09/26/2008==
 cavedude00: (AndMetal) Deathblow AA
 cavedude00: (AndMetal) Swift Journey AA
 cavedude00: (AndMetal) Convalescence and Healthy Aura AAs
@@ -8166,7 +8177,7 @@ Optional SQL:
 Insert into rule_values values (0, 'World:AddMaxClientsPerIP', -1 );
 Insert into rule_values values (0, 'World:AddMaxClientsStatus', -1 );
 
-==09/25/2008
+==09/25/2008==
 cavedude00: (trevius) IP Limiting Minor Fix
 cavedude00: (trevius) New Quest Command quest::clearspawntimers()
 cavedude00: (trevius) New Quest Command quest::traindiscs()
@@ -8195,7 +8206,7 @@ cavedude00: Several minor forage/fishing fixes
 Required SQL is in utils/sql/09252008.sql
 Make sure you update your .conf files, also found in utils!
 
-==09/01/2008
+==09/01/2008==
 KLS: (derision) Crash Fix.
 KLS: (haecz) Non-Melee damage filter.
 KLS: (LordKahel) Lore Slotted Augment.
@@ -8225,12 +8236,12 @@ CREATE TABLE `blocked_spells` (
   PRIMARY KEY  (`id`)
 )
 
-==08/15/2008
+==08/15/2008==
 KLS: Fix for groups clearing on new group create.
 KLS: Fix for null row access in Database::GetLeaderName()
 KLS: CountDispellableBuffs now will validate buffs spells.
 
-==08/14/2008
+==08/14/2008==
 KLS: Very basic work on raids.
 KLS: Moved group id calls to their own database as to not be blocked by long character_ selects and such.
 
@@ -8243,7 +8254,7 @@ CREATE TABLE `group_id` (
 )
 ENGINE = InnoDB;
 
-==08/13/2008
+==08/13/2008==
 KLS: Added dispel field for npc spells as 512.
 KLS: NPCs should be smarter about when they choose to cast certain spells; namely dots, lifetaps and dispels.
 KLS: NPCs should continue to cast nuke spells for a longer period of time.
@@ -8263,7 +8274,7 @@ UPDATE npc_spells_entries SET type='512' WHERE spellid='49';
 UPDATE npc_spells_entries SET type='512' WHERE spellid='1526';
 UPDATE npc_spells_entries SET type='512' WHERE spellid='1697';
 
-==08/11/2008
+==08/11/2008==
 KLS: Group leader info should transfer to a new zone when the leader transfers to that zone.
 KLS: Will now force a group update to players not in zone, text not correct.
 KLS: Added #refreshgroup command - will refresh group visually from DB
@@ -8282,15 +8293,15 @@ CREATE TABLE `group_leaders` (
 )
 ENGINE = InnoDB;
 
-==08/09/2008
+==08/09/2008==
 KLS: Minor tweaks to heal aggro.
 
-==08/07/2008
+==08/07/2008==
 KLS: Bald char fix revert, will try something else.
 KLS: Wake The Dead initial implementation.
 KLS: Hopefully better bald character fix base on kraeger's findings.
 
-==08/04/2008
+==08/04/2008==
 KLS: (Derision) Pet Buff Window Implemented.
 KLS: Charmed pets should now function with the pet window, as well as appear correctly in group.
 KLS: Added rule Character:SkillUpModifier (100) to govern how fasts skill ups happen on a server.  100% = normal chance, 200% = double normal chance.
@@ -8311,26 +8322,26 @@ KLS: Roughly implemented Skill Attack spell effect.
 Required:
 patch_6.2.conf and patch_Titanium.conf files have changed be sure to update them.
 
-==07/21/2008
+==07/21/2008==
 KLS: (irv0) Fix for out of order ack not being sent in some situations.
 KLS: (Derision) Pet bar OOC update fix.
 KLS: Should have made client pets unable to give experience, untested but should work.
 KLS: Healing aggro should function better for people not on the hate list.
 KLS: Some work on public tradeskill objects saving their content between uses.
 
-==06/22/2008
+==06/22/2008==
 KLS: Changed world/clientlist.cpp's line endings back to unix style line endings
 KLS: Fixed up ipban based on updated code from TheLieka.
 
-==06/21/2008
+==06/21/2008==
 KLS: Belated updates to azone including (derision)EQG fixes and some changes to make it easier to compile under windows.
 KLS: Fixed inconsistant line endings in ruletypes.h; there are probably more line ending changes I didn't catch, please try to keep your line endings consistant with what's in the repo.
 
-==06/19/2008
+==06/19/2008==
 Scorpious2k (Knightly): Correction of divine intervention text
 Scorpious2k (LordKahel): Support for defensive Instinct and Reflexive Mastery AA
 
-==06/18/2008
+==06/18/2008==
 Scorpious2k (Derision): Fix for flee runspeed - linear flee speed reduction as HP drops
 Scorpious2k (Derision): Rule to prevent mobs from fleeing if they are being helped by other NPCs
 Scorpious2k (haecz): Distance check for corpse dragging
@@ -8340,7 +8351,7 @@ Scorpious2k (greggg230): Faction will now show on /con for agnostic players
 Scorpious2k (BatCountry): Correction of a zone crash caused by reloading rules
 Scorpious2k (Congdar): Eliminated array index error/zone crash in spells
 
-==06/17/2008
+==06/17/2008==
 Scorpious2k (TheLieka): Ban by IP
 Scorpious2k (cavedude/TheLieka): Ability to limit melee guys from being bound in certain zones. This changes the canbind
             column of the zone table. Value 0 means noone can bind, value 1 means only casters can bind, value 2 means
@@ -8357,7 +8368,7 @@ Optional SQL:
 Insert into rule_values values (0, 'World:UseBannedIPsTable', 0);
 Update zone set canbind = 2 where zoneidnumber in (1,2,3,8,9,10,19,23,24,29,40,41,42,45,49,52,54,55,60,61,62,67,75,82,83,106,155);
 
-==06/14/2008
+==06/14/2008==
 Scorpious2k(Trevius): Door names can now go beyond the 16 char limit to allow doors and other objects from later expansions
                        to be used. The new max is 32 characters.
 Scorpious2k(Derision): New fear adjustment to cause mobs to flee at the correct rates instead of running very fast at certain
@@ -8374,7 +8385,7 @@ Scorpious2k(Striat): Quest Commands for Temp Race, Texture, Size and Gender Chan
 Required sql:
 ALTER TABLE `doors` MODIFY COLUMN `name` VARCHAR(32) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL;
 
-==05/30/2008
+==05/30/2008==
 Scorpious2k: (Derision/Wiz) Added code to implement fear.
 KLS: (Leika) Implemented detection of various MQ activities.
 KLS: EVENT_CAST_ON should now export $spell_id properly.
@@ -8393,7 +8404,7 @@ CREATE TABLE `hackers` (
   PRIMARY KEY  (`id`)
 ) AUTO_INCREMENT=8;
 
-==04/26/2008
+==04/26/2008==
 KLS: Should have fixed discipline and combat ability timer overlap.
 KLS: Added a rule for partial hits on fear, seperate from normal resist partial hits.
 KLS: Fixed some quirks in the aggro system.
@@ -8408,10 +8419,10 @@ Required SQL:
 alter table `zone` add column `canlevitate` tinyint (4) DEFAULT '1' NOT NULL  after `cancombat`
 alter table `zone` add column `castoutdoor` tinyint (4) DEFAULT '1' NOT NULL  after `canlevitate`;
 
-==04/22/2008
+==04/22/2008==
 Rogean: Server-side check for removing detrimental spells.
 
-==04/13/2008
+==04/13/2008==
 Rogean: Fixed a hack to sell no-drop items to merchants. (Reported by KingMort)
 Rogean: Fixed #hideme, it won't show you zone in and then disappear anymore. (Reported by KingMort)
 Rogean: Fixed /summon.
@@ -8420,7 +8431,7 @@ Rogean: Changes to /who all and GM's:
 	You will not show up to players of lower status if your /anon and #gm on, if your #gm off and /anon you will show up as
 	a normal player, regardless of statuses.
 
-==04/09/2008
+==04/09/2008==
 KLS: (AiliaMorisato)Fixed death packet bindzoneid and attack_skill fields being switched.
 KLS: Added rule based caps for all PoP item abilities.
 KLS: Agility will now affect a defenders chance to be missed slightly.
@@ -8447,20 +8458,20 @@ Required SQL:
 ALTER TABLE npc_types ADD ATK MEDIUMINT NOT NULL DEFAULT '0';
 ALTER TABLE npc_types ADD Accuracy MEDIUMINT NOT NULL DEFAULT '0';
 
-==04/01/2008
+==04/01/2008==
 Rogean: Fixed a merchant purchase packet exploit.
 
-==02/28/2008
+==02/28/2008==
 WildcardX: Tweaked the code for the Divine Intervention spell line code and the Unfailing Divinity AA ability.
 
-==02/27/2008
+==02/27/2008==
 WildcardX: Implemented HeadShot AA Ability.
 WildcardX: Archery and throwing attacks will not cause you to suffer injury from your target's damage shield.
 WildcardX: Implemented Spell: Death Pact.
 WildcardX: Implemented Spell: Divine Intervention.
 WildcardX: Implemented Unfailing Divinity AA Ability.
 
-==02/25/2008
+==02/25/2008==
 WildcardX: Enchanters can now control their pets if they purchased the Animation Empathy AA.
 WildcardX: Mobs now have a chance to resist fear spell line each tic.
 WildcardX: Mobs now have a chance to resist charm spell line each tic.
@@ -8468,21 +8479,21 @@ WildcardX: Implemented Total Domination AA.
 WildcardX: Reworked new charisma test. This test now evaluates factors like MR, CHA, mob and caster levels. It yields better live-like results.
 WildcardX: Enchanter pets now get the /pet report and /pet health commands by default.
 
-==02/23/2008
+==02/23/2008==
 WildcardX: Only characters with Pet Affinity AA can have group buffs casted on their pets.
 WildcardX: Fixed a bug that would not allow a rune buff to be used in some situations.
 
-==02/22/2008
+==02/22/2008==
 WildcardX: Characters can now have only one caster specialization skill above 50. If more than one specialization skill is detected above 50, then all specialization skills are reset to 1.
 WildcardX: Reworked mana reduction calculations.
 WildcardX: Implemented spell casting specilization checks.
 
-==02/21/2008
+==02/21/2008==
 WildcardX: Removed the possible fix for the Call of Hero spell as it didnt actually fix the issue after extensive testing.
 WildcardX: Added new command #scribespell. This will scribe a specified spell into the target's spell book.
 WildcardX: Added new command #unscribespell. This will unscribe a specified spell from the target's spell book.
 
-==02/20/2008
+==02/20/2008==
 KLS: Zone crash fix caused by calling the TryWeaponProc() method when dead.
 WildcardX: Changed the quest function depopzone() to accept a parameter to specify if the spawn timers should resume or become disabled. 0 = Disable, 1 = Enable.
 WildcardX: Added the quest function repopzone(). This function will cause a zone to repop it's spawns normally.
@@ -8490,28 +8501,28 @@ WildcardX: Possible fix for a zoning bug caused by the Call Of Hero spell.
 WildcardX: Harmony/Pacify line of spells will now cause aggro when resisted.
 WildcardX: Added a check against CHA to avoid aggro from a resisted Harmony/Pacify spell.
 
-==02/19/2008
+==02/19/2008==
 WildcardX: Found a small efficiency for the code that determines if an item is equipable.
 WildcardX: Re-worked the rune spell buff code to make it more efficient and reduce CPU utilization.
 WildcardX: Added the quest function depopall(int npctype_id). This will remove all mobs from the zone with the specified npctype_id.
 WildcardX: Added the quest function depopzone(). This will remove all mobs from the zone and NOT cause a repop.
 
-==02/10/2008
+==02/10/2008==
 WildcardX: Mesmerize line of spells will now cause aggro when casted on a mesmerize immune mob.
 WildcardX: Fixed enchanter spell Theft of Thought. This spell will now work as described.
 WildcardX: The pacify/harmony line of spells will no longer require a line of sight check to complete a cast.
 
-==01/28/2008
+==01/28/2008==
 WildcardX: Regenerated perl_mob.cpp due to deprecating the following methods: GetFamiliar(), SetFamiliar(), GetRune(), SetRune(), GetMagicRune(), SetMagicRune().
 WildcardX: Enchanters, this is your patch! Characters will now benefit from all rune and spell rune spell effects all spell buffs will provide, consistent with spell rules.
 WildcardX: Rune and spell rune spell buffs will now persist zoning and camping.
 WildcardX: Fixed a zone crash caused by TryWeaponProc() method.
 
-==01/27/2008
+==01/27/2008==
 WildcardX: Subtle changes to zoning code to allow both the 6.2 and Titanium client to perform all zoning operations similiar to live.
 WildcardX: Fixed #zone and #goto commands for both the 6.2 and Titanium client.
 
-==01/25/2008
+==01/25/2008==
 WildcardX: Regenerated perl_client.cpp and perl_groups.cpp due to parameter changes for Group::TeleportGroup and Client::MovePC methods. Changes to some quest files may be necessary.
 WildcardX: void	MovePC(int32 zoneID, float x, float y, float z, float heading)
 WildcardX: void	TeleportGroup(Mob* sender, int32 zoneID, float x, float y, float z, float heading)
@@ -8533,7 +8544,7 @@ EVENT_ENTERZONE with no special var
 EVENT_LEVEL_UP with no special var
 
 
-==01/24/2008
+==01/24/2008==
 WildcardX: Removed a 64 character cap length on merchant names sent during a merchant greeting.
 WildcardX: Fixed a bug that allowed players looting their corpse at just the right time, to duplicate their items.
 WildcardX: Fixed a bug I caused in group portals when I corrected the Succor/Evac line.
@@ -8546,7 +8557,7 @@ WildcardX: (cavedude) Created Character:DeathItemLossLevel rule to define when a
 Required SQL:
 insert into rule_values values(0, 'Character:DeathItemLossLevel', 10);
 
-==01/22/2008
+==01/22/2008==
 KLS: Clients will be immune to proximity aggro until they are finished loading now.
 KLS: Slightly reduced the melee accuracy of clients.
 KLS: Melee mitigation should now properly enforce minimum damage.
@@ -8559,7 +8570,7 @@ KLS: Figured in a work around for corpses between the server and client becoming
 KLS: AA Consumption of the soul should now function correctly.
 KLS: AA Soul Abrasion should now function correctly
 
-==01/19/2008
+==01/19/2008==
 KLS: Slightly reduced the effectivness of the Flurry AA
 KLS: Speed of the Knight AA implemented
 KLS: Evade will now reduce hate by a static amount, the static amount of hate increased slightly.
@@ -8596,11 +8607,11 @@ Changed Spells:SpellAggroModifier to Aggro:SpellAggroMod ( 100 )
 Changed Spells:BardSpellAggroMod to Aggro:SongAggroMod ( 33 )
 Changed Spells:PetSpellAggroMod to Aggro:PetSpellAggroMod ( 10 )
 
-==01/16/2008
+==01/16/2008==
 KLS: Updated AA_Data.sql with various small fixes.
 KLS: Changed HasPet() to check for the existance of the pet as mob as well as the petid, should sync up with GetPet() nicely now.
 
-==01/15/2008
+==01/15/2008==
 KLS: LDoN /open will only check for class now, client does not enforce bodytype so neither will the server.
 KLS: Numhits in disciplines should work correctly now
 KLS: Changed many instances where HasPet() was being checked to verify that we have a valid pet pointer from GetPet(), GetPet() will be used instead, (it is possible to have a valid pet ID and an invalid GetPet() pointer)
@@ -8610,10 +8621,10 @@ KLS: PickPocket should now correctly skill up on it's own through normal use.
 KLS: GetMinLevel(int16 spell_id) will now return 0 if the level for the class was 255 instead of 255, many buff formulas do not work well with 255 which can cause some issues when a class can use a clicky item with a spell they cannot scribe normally.
 KLS: GetProcID() should no longer have hard coded values.. whatever these represented are no longer valid in the current spell data.
 
-==01/14/2008
+==01/14/2008==
 WildcardX: Replaced the corpse consent system with one that allows cross zone player consents.
 
-==01/13/2008
+==01/13/2008==
 FatherNitwit: (Derision) Added tool (awater) to extract BSP tree with region type info from .s3d files into .wtr files.
 FatherNitwit: (Derision) Added support for zone to load .wtr files.
 FatherNitwit: (Derision) Employ water file to prevent under water mobs from sinking.
@@ -8627,10 +8638,10 @@ Watermap:CheckForWaterWhenFishing (Default: false)
 Watermap:FishingRodLength (Default: 30)
 Watermap:FishingLineLength (Default: 40)
 
-==01/12/2008
+==01/12/2008==
 WildcardX: (cavedude) Fixed beastlord pet sizes.
 
-==01/09/2008
+==01/09/2008==
 KLS: Starting items will now be saved if they are placed in slots other than the primary 8, this includes inside bags and on the character's inventory and bank slots
 KLS: Kick at level 55 or higher now has a chance to act as a spell interrupt as bash does.
 KLS: (TheLieka) Stun Immunity for Frontal Stuns on Ogres
@@ -8648,24 +8659,24 @@ Combat:PetAttackMagicLevel (Default: 30)
 NPC:SayPauseTimeInSec (Default: 5)
 NPC:OOCRegen (Default: 0)
 
-==12/06/2007
+==12/06/2007==
 KLS: Fixed logic on duration 7 formula.. again.
 
-==12/02/2007
+==12/02/2007==
 KLS: Reworked buff duration formula 7 calculations.
 KLS: (Cripp)Added (Missing?) pathing z rules.
 
-==11/30/2007
+==11/30/2007==
 FatherNitwit: Reworked pathing z code to be rules based instead of built time options.
 
-==11/29/2007
+==11/29/2007==
 FatherNitwit: (Derision) Fix BestZ pathing cleanup code top stop hopping.
 FatherNitwit: (Derision) New fix-z-on-load feature.
 
-==11/28/2007
+==11/28/2007==
 Rogean: Fixed another no-drop trade hack.
 
-==11/26/2007
+==11/26/2007==
 KLS: Dynamic zones will now not attempt to boot up more than one instance of the zone if two or more clients request it in quick succession.
 KLS: Fixed: qglobals will now not be exported for npcs that do not have the qglobal flag set in the perl parser.
 KLS: Added a new npc special attack 'H' for immune to aggro, mobs with this set should not aggro no matter what a person does to them.
@@ -8676,32 +8687,32 @@ KLS: Players will now be able to target themselves for group spells if they are 
 KLS: Fixed some buff duration oddities.
 KLS: Level should have somewhat less of an impact for players in the resist code.
 
-==11/14/2007
+==11/14/2007==
 KLS: Swarm pets should be forced to correctly depop after their owner disappears.
 KLS: NPCs should be able to use swarm pets correctly now.
 KLS: #traindisc should no longer learn disciplines over already known disciplines.
 KLS: Added a few more known spell effects to spdat.h, not implemented any yet
 KLS: Rez experience should now only goto regular experience, not AA experience.
 
-==11/07/2007
+==11/07/2007==
 KLS: Reworked swarm pets a bit
 KLS: Swarm pets should no longer crash zones(I hope)
 KLS: Swarm pets will now gain all their information from the normal pet tables and the spell data, as a result the aa_swarmpets table is now obsolete.
 
-==11/06/2007
+==11/06/2007==
 KLS: Reverted client timeouts.
 KLS: Fixed NPC HP and Mana Regen not loading from DB for NPCs
 
-==11/05/2007
+==11/05/2007==
 WildcardX: Fixed a bug that prevented player corpse summoning spells from working on Linux platforms.
 
-==11/04/2007
+==11/04/2007==
 WildcardX: The spell "Reanimation" will no longer restore any player experience. This is a 0% experience resurrection.
 WildcardX: Corpses moved by a consented player will now remember where it was moved to, even after a zone restart.
 WildcardX: Necromancers and Shadowknights can now summon corpses belonging to other players.
 WildcardX: Corrected a bug that would have allowed Necromancers and Shadownights to summon corpses belonging to non-grouped party members.
 
-==11/03/2007
+==11/03/2007==
 WildcardX: (Cavedude) Implemented perl wrappers for new quest methods supporting the Shadowrest zone implementation.
 WildcardX: Fixed a bug that prevented a player from experiencing resurrection effects in designated no combat zones.
 WildcardX: Fixed a bug in graveyard system that could leave a player corpse in the database, but without a location.
@@ -8717,7 +8728,7 @@ alter table player_corpses add column IsBurried TINYINT(3) NOT NULL default 0;
 alter table player_corpses add column WasAtGraveyard TINYINT(3) NOT NULL default 0;
 insert into rule_values values(0, 'Zone:EnableShadowrest', 0);
 
-==11/01/2007
+==11/01/2007==
 WildcardX: (TheLieka) Bug fix to discontinue player invisibility when the player loots.
 WildcardX: (TheLieka) Bug fix to remove a type from the #npcedit loottable command.
 WildcardX: Implemented corpse graveyard support for all zones. Once a zone is configured for a graveyard, a zone restart is necessary.
@@ -8742,7 +8753,7 @@ CREATE TABLE `graveyard` (
 
 insert into rule_values values(0, 'Zone:GraveyardTimeMS', 1200000);
 
-==10/19/2007
+==10/19/2007==
 WildcardX: (Bleh) Enhancement to avoid a zone crash by avoiding a null pointer.
 WildcardX: (UrbeIT) Bug fix to allow pet spells to effect players in PVP.
 WildcardX: (UrbeIT) Bug fix to allow players to remain invisible while in PVP.
@@ -8753,26 +8764,26 @@ WildcardX: (zydria) Bug fix to allow players to meditate while mounted.
 WildcardX: (Cavedude) Enhancement to allow berserkers and rangers the chance to triple attack.
 WildcardX: (Cavedude) Enhancement to quest::movepc method to accept a heading value.
 
-==10/17/2007
+==10/17/2007==
 KLS: Quick fix to quest::movegrp
 
-==10/11/2007
+==10/11/2007==
 KLS: Familiars should fall under the pet system instead of their own system now, familiars should act in a much more behaved fashion when it comes to functionality shared with normal pets.
 KLS: Added a network timeout for clients in zone, clients should linkdead from zone when their connection is suddenly severed.
 KLS: (AiliaMorisato) Added some checks for item bonuses, bonuses should not calculate if the item is not equipable.
 KLS: NPCs should now accept signals while engaged in combat.
 
-==10/10/2007
+==10/10/2007==
 FatherNitwit: Quick fix for Divine Aura on pets exploit (KingMort)
 
-==10/09/2007
+==10/09/2007==
 KLS: Tweaked my AC system a bit, should get less default defense and the system should be much more lienent overall,
 goal is to allow people to see more of a benefit from having AC.
 
-==09/24/2007
+==09/24/2007==
 FatherNitwit: (sfisque) Quick adjustment to item fishing probability.
 
-==09/07/2007
+==09/07/2007==
 KLS: Fixed melee mitigation and tweaks and a small fix to AC.
 KLS: Small changes to the order in the getweapondamage code to make it a little more efficient
 KLS: Added a field that allows you to override a factions innate desire to assist their own faction in battle to the npc_faction table
@@ -8787,7 +8798,7 @@ KLS: Lockpicking should work once again
 KLS: Should hopefully no longer be possible to use teleport doors when they are in the closed position.
 KLS: Added basic AC mitigation, not on by default uncomment #define USE_INT_AC in features.h to use it.
 
-==08/31/2007
+==08/31/2007==
 KLS: (gernblan) Added spawn group info to #npcstats
 KLS: (TheLieka) Fix for zone exp modifiers not being used
 KLS: (inkubus) Lull and harmony spells should land on enemy targets and not cause any aggro, still some work to be done on the AE portion.
@@ -8796,7 +8807,7 @@ KLS: (cbodmer) Support for LDoN style boxes (class 62 + body type 33) implemente
 KLS: The error in acmod() should no longer complain as much.
 Required: Opcode files have changed, be sure to update to the latest .conf files.
 
-==08/30/2007
+==08/30/2007==
 KLS: Reworked Mob::GetWeaponDamage(), it will now return damage done by any item and NULL and will return a
 value zero or less if we can't hit a mob with said item
 KLS: Applied new GetWeaponDamage() to Attack and Special Attack code
@@ -8810,58 +8821,58 @@ KLS: Changed NPC_DW_CHANCE in features.h to 100% as default as opposed to the pr
 KLS: Archery will be affected by various crit AA effects and spell bonuses
 KLS: Applied haste and slow modifiers to basic NPC special attacks such as kick and bash.
 
-==08/26/2007
+==08/26/2007==
 KLS: Fixed a misplaced field in the titanium spawn structure that was causing some spawn display issues on titanium.
 
-==08/16/2007
+==08/16/2007==
 KLS: Some cleaning up on autofire code
 KLS: Reintroduction of item animation for archery
 
-==08/15/2007
+==08/15/2007==
 KLS: Fixed an /autofire crash
 KLS: Added some conditions to RangedAttack() for now. Should keep from using ranged attacks when we shouldn't be allowed to attack.
 
-==08/14/2007
+==08/14/2007==
 KLS: Added /autofire
 KLS: Fixed up SetAttackTimer() calculations a bit, especially when it comes to ranged attacks. Hopefully fewer instances where ranged attacks will be wasted because of the attack timer.
 KLS: Ranged attack crits will now work no matter your chance to hit, also changed the appearances a tiny bit and added a min range check for /autofire.
 KLS: Removed ReadBook packet size checking for now.. it was checking a wrong size and canceling out legitimate book requests
 Make sure to update your .conf files to get /autoattack to work.
 
-==08/12/2007
+==08/12/2007==
 KLS: A little bit more tinkering with how potions and stacks work.
 
-==08/11/2007
+==08/11/2007==
 KLS: Fixed stackable potions in the item packet, they should now appear to have 1 charge instead of 0.
 KLS: Added support for stackable items above 20.
 KLS: Fixed forage, it will no longer overwrite slot 30 to create it's item, instead it will push the item onto the cursor like it should.
 
-==08/10/2007
+==08/10/2007==
 KLS: Fixed a stacking issue and made res effects not count to normal stacking rules.
 KLS: Implemented a few more passive AA effects.
 KLS: Added CanThisClassBlock() for the avoid code
 KLS: Addressed some inconsistancies in the CanThisClass line of functions, GM classes should be able to do everything their base class can now.
 
-==08/01/2007
+==08/01/2007==
 FatherNitwit: (cavedude) Fix Iksar BL pet appearance.
 
-==07/30/2007
+==07/30/2007==
 Rogean: Fixed an item dupe exploit.
 
-==07/28/2007
+==07/28/2007==
 Rogean: Put in checks for No Drop Trading Hacks
 
-==07/26/2007
+==07/26/2007==
 KLS: Updated AA_Data.sql, still work to be done but should now be more complete than older AA sources.
 
-==07/22/2007
+==07/22/2007==
 FatherNitwit: Fixed another memory leak in world and zone.
 KLS: Fixed up some message types so they match the client correctly.
 
-==07/21/2007
+==07/21/2007==
 Rogean: Fixed LDoN Merchant Item Inspect
 
-==07/20/2007
+==07/20/2007==
 FatherNitwit: (Striat) Fix for typos in perlparser.cpp to fix quest::me and quest::echo.
 FatherNitwit: (Striat) Fix argument type in quest::setguild.
 FatherNitwit: Fixed quest::settime
@@ -8874,28 +8885,28 @@ Changes to opcode files:
 patch_Titanium.conf: OP_TargetHoTT=0x6a12
 patch_6.2.conf: OP_TargetHoTT=0x3ef6
 
-==07/16/2007
+==07/16/2007==
 FatherNitwit: (Glather) Fix for mobs showing weapons
 FatherNitwit: (Cbodmer) Notify owner when buffs wear off pets.
 
-==6/06/2007
+==6/06/2007==
 KLS: (Darkonig) Change to the way tradeskill containers are handled.
 KLS: (Darkonig) Change to item->isStackable() implementation, should let certain items that the client lets stack also stack server-side.
 
-==6/01/2007
+==6/01/2007==
 KLS: Addressed a memory leak in spell code and a memory leak in NPC destruction code.
 
-==4/13/2007
+==4/13/2007==
 KLS: Fixed an issue with buff duration inc. that was causing buffs to lose their effects (I hope)
 
-==4/08/2007
+==4/08/2007==
 KLS: Added support for the skill Frenzy.
 KLS: Various tweaks and changes to some passive AA abilities.
 KLS: Added #traindisc to train disciplines on the target player, #scribespells should no longer memorize disciplines to the spellbook.
 KLS: Fixed an issue with spells that require components that use item ids higher than 32k
 KLS: Fixed an issue with AAs and focus effects that increase buff duration not appearing correctly for clients until they zone.
 
-==4/02/2007
+==4/02/2007==
 KLS: Implemented number6 inspired item cooldown timers.
 KLS: Added rules: NPC:MinorNPCCorpseDecayTimeMS & NPC:MajorNPCCorpseDecayTimeMS to set the decay time in millisecond of mobs below 55 and greater or equal to 55 respectively
 KLS: Addressed an issue that caused some beneficial spells to generate incorrect aggro amounts.
@@ -8909,14 +8920,14 @@ KLS: Made mend skill checks more lienent, shouldn't ever fail after 200 skill, s
 KLS: Initial implementation of hp balance spell effect.
 KLS: Focus effects that limit max level should now correctly reduce the effect by a percentage if the spell is over the level cap
 
-==3/26/2007
+==3/26/2007==
 FatherNitwit: Optimized the merchantlist_temp query on boot.
 
-==3/14/2007
+==3/14/2007==
 KLS: Put in FNW's requested changes to tradeskill combines from the other day that I almost forgot about
 KLS: Tradeskill combines should check for container type now.
 
-==3/11/2007
+==3/11/2007==
 KLS: Attack() will not set our target unless we have no target now.
 KLS: Tweaked some invis and hide stuff to hopefully catch more situations where it should break correctly.
 KLS: Fixed the spell critical hit ratio to be accurate.
@@ -8925,13 +8936,13 @@ KLS: NPCs will no longer be restricted by the number of targets on their AE spel
 KLS: Spells base_1 will load as a 32 bit signed int instead of a 16 bit signed int, should correct some oddities with certain spells. For example certain summon spells using large item ids.
 KLS: Fixed a tradeskill exploit with tradeskill containers and experimentation.
 
-==3/10/2007
+==3/10/2007==
 Rogean: Fixed #si and minstatus
 
-==3/3/2007
+==3/3/2007==
 FatherNitwit: Finally rewrote 'make depend' to properly track dependencies in linux builds
 
-==2/22/2007
+==2/22/2007==
 KLS: Some more changes to AA system:
 KLS: altadv_vars.cost_inc will now be unsigned to allow your skills to cost less per level
 KLS: Client side aa effects are now loaded from the database once again
@@ -8956,7 +8967,7 @@ CREATE TABLE aa_effects (
 Optional SQL:
 Resource AA_Data.sql
 
-==2/18/2007
+==2/18/2007==
 WildcardX: Player casted area of effect detrimental spells will not longer have an affect on players not engaged in PvP.
 WildcardX: Fixed spawnlimit setting to control the maximum times a given npc_type can spawn in the same zone.
 WildcardX: (Bleh) Fixed player emote animations.
@@ -8964,7 +8975,7 @@ WildcardX: Implemented a server-side check of a Client object's target to avoid 
 WildcardX: Fixed a zone crash that could occurr during a monk special attack or a rogue's backstab attack.
 WildcardX: Area of effect beneficial spells will no longer affect non-player characters.
 
-==2/16/2007
+==2/16/2007==
 KLS: Updating Changelog AA work to be more clear as well as the required SQL.
 
 Required SQL:
@@ -8973,7 +8984,7 @@ alter table altadv_vars add column cost_inc tinyint(4) not null default 0;
 Optionally:
 Source in AA_data.sql
 
-==2/15/2007
+==2/15/2007==
 WildcardX: Commented out the code supporting the deprecated OP_CloseContainer opcode.
 WildcardX: Fixed world containers so when one player has closed a world container, another player can open it without the need for the first player to leave the zone.
 KLS: Initial release of ongoing AA work
@@ -8997,7 +9008,7 @@ KLS: Fixed a int to float conversion issue in CalcRecommendedLevelBonus() (as pe
 KLS: Fixed a crash issue related to resists, should help those crashing after zoning with a spell that has a heartbeat resist such as root.
 KLS: Removed an unused spell function that didn't make much sense.
 
-==2/14/2007
+==2/14/2007==
 WildcardX: Implemented a cap of 4 mobs affected by targeted area of effect spells. This is consistent with EQ live.
 WildcardX: Implemented the succor line of spells.
 WildcardX: Specific mobs can now be toggled as findable or not findable by the track skill. Mobs which are not findable will not appear on any track lists.
@@ -9005,10 +9016,10 @@ WildcardX: Specific mobs can now be toggled as findable or not findable by the t
 Required SQL:
 alter table npc_types add column trackable tinyint(4) not null default 1;
 
-==2/13/2007
+==2/13/2007==
 WildcardX: Fixed bug that broke #zone command.
 
-==2/11/2007
+==2/11/2007==
 WildcardX: Further enhancements to zone weather system to reduce the amount of work necessary to perform weather and to make it more logical.
 WildcardX: Added a new opcode for both 6.2 and Titanium clients, OP_ZonePlayerToBind=0x385e. Please be sure to update your .conf files.
 WildcardX: Implemented the beginnings of what will become a new "system" to deal with zoning.
@@ -9022,21 +9033,21 @@ WildcardX: (Cavedude) Implemented yet another container type to perform even mor
 WildcardX: Added additional logging to zone "debug" and "error" to support zoning and intra-zone movement.
 WildcardX: Group members disbanding in another zone will still fail to appear as removed from group from other group members, but disbanding this group member when he/she rejoins group in zone will no longer crash the zone and you will be able to re-add this former group member without having to destroy the whole group.
 
-==2/10/2007
+==2/10/2007==
 FatherNitwit: Reworked NPC Idle spell casting to avoid extra LOS checks (based on KLS's observations)
 FatherNitwit: Reworked NPC spell casting timers to be more consistent.
 
-==2/9/2007
+==2/9/2007==
 Doodman: Fixed AdventurePoints_Update_Struct to be the correct struct.  Same structure for both 6.2 and Ti.  Changed core structure.
 
-==2/1/2007
+==2/1/2007==
 WildcardX: (Bleh) Fixed quest globals.
 WildcardX: Fixed the common error message MakeNameUnique() has been recording in logs about being unable to make a unique name for mobs greater than 100 in a zone.
 
 Required SQL:
 ALTER TABLE quest_globals CHANGE expdate expdate INT;
 
-==1/29/2007
+==1/29/2007==
 WildcardX: Cleaned up zone weather code for better efficiency. Weather checks will be more frequent when their is snow or rain and less frequent when the sun is out.
 WildcardX: Made weather log messages more consistent and informative.
 WildcardX: Druids are now replace bards has the second best tracker in the game. This is consistent with live.
@@ -9045,11 +9056,11 @@ WildcardX: Clients will now see their coins update from quests or player trades.
 WildcardX: The server is now using the OP_MoneyUpdate opcode, instead of OP_MoneyOnCorpse opcode for coin updates.
 WildcardX: Clients entering a zone will now receive a weather packet. This will ensure all clients in the same zone will experience the same weather.
 
-==1/23/2007
+==1/23/2007==
 KLS: Fixed the change log so the current entries are correct
 KLS: Fixed a small but significant crash.
 
-==1/15/2007
+==1/15/2007==
 KLS: Fixed an issue with storing timers.
 KLS: Added in hide and basic support of hide improving AAs later
 KLS: Some more changes to how procs work, perma procs will not be influenced by mob stats, should make them easier to balance.
@@ -9066,7 +9077,7 @@ Optional SQL:
 UPDATE `npc_types` SET `see_hide` = 1 WHERE see_invis = '1';
 UPDATE `npc_types` SET `see_hide` = 1 WHERE see_invis_undead = '1';
 
-==1/07/2007
+==1/07/2007==
 KLS: action_struct unknown06 renamed to instrument_mod to reflect it's behavior
 KLS: WildCardX inspired weapon proc rate changes, proc rates should now load as a signed int instead of an unsigned int and should correctly calculate.
 KLS: Some changes to the expired function of ptimers, it should return if the timer is expired whether or not the timer is enabled. This avoids certain situations where timers are disabled and then run down without ever being reenabled and essentially being locked down forever unless the database admin resets it manually.
@@ -9084,7 +9095,7 @@ KLS: Spin effects are now correctly capped at a max of level 55, all targets abo
 KLS: SE_LimitEffect should now correctly deal with any effect type the spell has and not just the ones hard coded into the server.
 KLS: (Cripp)Fix for zone heading
 
-==12/24/2006
+==12/24/2006==
 KLS: (WildcardX) Fix for generic tradeskill container combines
 KLS: (WildcardX) Fix for quest::depop and multipul mobs in the same zone that share a NPCType ID
 KLS: (WildcardX) Zones can now be flagged to disallow offensive actions.
@@ -9102,7 +9113,7 @@ UPDATE `zone` SET `cancombat` = 0 WHERE short_name = 'nexus';
 UPDATE `zone` SET `cancombat` = 0 WHERE short_name = 'poknowledge';
 UPDATE `zone` SET `cancombat` = 0 WHERE short_name = 'potranquility';
 
-==12/19/2006
+==12/19/2006==
 KLS: Fixed up Illusions a bit
 KLS: Fixed a bug where the base2[0] field of a spell was not getting loaded correctly
 KLS: Implemented Sacrifice Spells
@@ -9117,38 +9128,38 @@ KLS: If a player is at max level the experience he has will cap at the max exper
 KLS: The max level you can group with and gain experience is now YourLevel*1.5 instead of YourLevel+8.
 KLS: You'll only get an experience loss message if you actually lose exp now, no more You lost experience messages when you take a 0% rez.
 
-==12/15/2006
+==12/15/2006==
 FatherNitwit: Fix for possible crash when NPCs are immune to damage.
 KLS: Small fix for newly created player corpses, hopefully they will no longer act like they are npc corpses.
 KLS: Changed how recourse works a bit, it is now done after the resist check.
 KLS: Group spells should be able to land on the caster's pet now.
 KLS: Fixed crazy Bash/Kick damage.
 
-==12/09/2006
+==12/09/2006==
 KLS: Stun immune should apply to spin effects such as those found in One Hundred Blows.
 KLS: Some cleanups in special attack and resist code.
 KLS: Added a define SKILL_MAX_LEVEL in features.h that lets you define how high level you can get skills from the database, defaults to 75.
 KLS: Damage shields wont proc on yourself any longer to avoid some wierdness. They only ever procced on yourself under special conditions so it shouldn't be noticable.
 
-==12/03/2006
+==12/03/2006==
 FatherNitwit: Fixed a few issues related to quest global expiration.
 
-==12/01/2006
+==12/01/2006==
 KLS: NPC ghosting fix with rule support.
 FatherNitwit: Fixing up spell set loading crash.
 KLS: More skill fixes
 KLS: Moved the old class_skills system over to the new skills system.
 
-==11/28/2006
+==11/28/2006==
 FatherNitwit: (bleh) Added #hatelist command.
 FatherNitwit: (bleh) Work on windows build issues.
 FatherNitwit: Optimized merchant list query during zone boot.
 FatherNitwit: Fix a few race related issues in eqbuilder.
 
-==11/26/2006
+==11/26/2006==
 FatherNitwit: Fixed berserker skill cap issue that KLS found.
 
-==11/25/2006
+==11/25/2006==
 KLS: The way resists are calculate have been changed and are now somewhat tweakable with rules, and partial hits should work correctly.
 KLS: Ripostes have been seperated from the attack code and will now apply to all attacks.
 KLS: Skills and Spells that directly modify melee damage should now work and be applied to all attacks.
@@ -9161,16 +9172,16 @@ KLS: Stun Immunity will now only apply to the stun portion of the spell instead 
 KLS: Instrument Mods should send correctly on the reapplication of bard pulses.
 KLS: Spells should no longer check instant heals/damage portions of the spell for stacking purposes, several spells that should have stacked before but didn't now should properly.
 
-=11/24/2006
+=11/24/2006==
 FatherNitwit: (number6) Fix for loading saved spell sets.
 FatherNitwit: Added #giveitem as inspired from the forums.
 FatherNitwit: Changed default status required for #summonitem to 200.
 
-==11/20/2006
+==11/20/2006==
 KLS: Skill system tweaks and bug fixes.
 KLS: Bard songs will now skill up while they are being sung instead of just when first cast.
 
-=11/19/2006
+=11/19/2006==
 FatherNitwit: Completely redid skills in the code to support >252
 FatherNitwit: Skill caps are now database driven (shared mem)
 Create this table, and source in SkillCaps.sql
@@ -9182,7 +9193,7 @@ CREATE TABLE skill_caps (
  PRIMARY KEY(skillID,class,level)
 );
 
-==11/07/2006
+==11/07/2006==
 KLS: Changed how critical hits work, as a result things that could not crit before like special attacks, now can.
 KLS: Cleave like effects should be fixed to do an increase of your already standing chance to critical instead of a flat increase.
 KLS: Reworked much of the special attack code.
@@ -9191,19 +9202,19 @@ KLS: Monk skill damage will be more random but the max damage they can do has no
 KLS: Skills should be avoided less often, they were being avoided twice in the code instead of once.
 KLS: Implemented basic strikethrough.
 
-==11/06/2006
+==11/06/2006==
 FatherNitwit: (Cripp) periodic auto save.
 FatherNitwit: LostZaphod's possible win32 azone fix. (untested)
 FatherNitwit: (cbodmer) Regen multiplier rules.
 
-==11/04/2006
+==11/04/2006==
 Rogean: Haste Fixes: Fixed Haste/Slow as well as Bard Songs (Including Overcap).
 
-==11/03/2006
+==11/03/2006==
 KLS: Added Magoth's stun opcodes for both Titanium and 0.6.2 clients
 KLS: Changed Object Clear opcode for Titanium
 
-==10/30/2006
+==10/30/2006==
 FatherNitwit: (KLS) Fixes for max endurance calc on zone in
 FatherNitwit: (KLS) Fix for rulesystem category issue.
 FatherNitwit: Added rule support to world (no runtime manipulation yet)
@@ -9218,17 +9229,17 @@ KLS: GroupInvite2 opcodes found for both Titanium and 0.6.2, make sure to get th
 KLS: Glow messages should only go off for instant spells.
 KLS: How haste calculations have been calculated has been reworked somewhat, haste shouldn't break any more, nor should all hastes stack.
 
-==10/28/2006
+==10/28/2006==
 FatherNitwit: Fix for NPC weapon appearance due to loot items.
 aza77: Fixed SendAppearancePacket
 aza77: Fixed a PvP bug that caused the zone to crash on death
 
-==10/26/2006
+==10/26/2006==
 FatherNitwit: WildcardX's name cleanup.
 FatherNitwit: Tweak for 64 bit pointer support in the item code of the struct strategy.
 FatherNitwit: More const cleanup in npc.h
 
-==10/22/2006
+==10/22/2006==
 FatherNitwit: added EVENT_COMBAT triggered when an NPC engages any form of
 FatherNitwit: 	combat and when combat is over. $combat_state signals which.
 FatherNitwit: Hopefully fixed d_meele_texture
@@ -9238,14 +9249,14 @@ FatherNitwit: Reworked special attacks a bit (monk, kick, backstab):
 FatherNitwit:   they now use the standard combat hit chance forumals based on offense/defense instead of always hitting
 FatherNitwit:   they are now subject to damage avoidance (parry, riposte, etc.) like normal attacks
 
-==10/21/2006
+==10/21/2006==
 FatherNitwit: Hopefully fixed spawn timer variance.
 
-==10/18/2006
+==10/18/2006==
 FatherNitwit: Maybe fixed issue with losing items when zoning in mysql 5.
 FatherNitwit: Fixed issue with color saving properly.
 
-==10/15/2006
+==10/15/2006==
 FatherNitwit: (KLS) Implemented Endurance
 FatherNitwit: (KLS) Implemented support for seperate discipline timers
 FatherNitwit: (KLS) Fix for haste & slow issue on NPCs
@@ -9266,66 +9277,66 @@ FatherNitwit: (KLS) let dots of the same resist type stack so long as they aren'
 FatherNitwit: cleanup windows logging a bit
 FatherNitwit: (eq4me) GCC 4+ build fixes
 
-==10/05/2006
+==10/05/2006==
 FatherNitwit: (KLS) Fix for explicit spell stacking rule problem.
 
-==10/02/2006
+==10/02/2006==
 FatherNitwit: (InsaneWallaby) Tradeskill skill gain fix.
 FatherNitwit: (WildcardX) Improved spawnstatus command.
 FatherNitwit: (number6) Work around for lay hands/harm touch recovery time hang.
 FatherNitwit: Possible fix for faction sticking at min/max.
 
-==09/21/2006
+==09/21/2006==
 FatherNitwit: Revert part of bard mod fix, and fix it right.
 
-==09/20/2006
+==09/20/2006==
 FatherNitwit: Prevent stats from going negative.
 FatherNitwit: Try to prevent skills from wrapping above 252 (still no support for higher)
 FatherNitwit: Minor shop close tweak.
 FatherNitwit: (Zuesrooster) Potential bard modifier fixes.
 
-=09/07/2006
+=09/07/2006==
 FatherNitwit: (eq4me) Reworked tradeskill success and gain rates
 FatherNitwit: Potentially addressed trade coin display issue.
 FatherNitwit: Undid clickie spell component change until dicussion finishes
 
-=09/07/2006
+=09/07/2006==
 FatherNitwit: (Aramid) Fixed ability to bind.
 FatherNitwit: (Somebody, forget who) Fixed issue with reagents being consumed by clickies.
 FatherNitwit: (eq4me) Fixed tradeskill stat bonus calculation for success rate.
 FatherNitwit: Maybe fixed up zone solution file to only build perl versions, for debug and release.
 
-==08/20/2006
+==08/20/2006==
 FatherNitwit: Zero out buff counters when we occupy a new slot.
 
-==08/16/2006
+==08/16/2006==
 FatherNitwit: Glorandwarf's updated AA.h
 
-==08/14/2006
+==08/14/2006==
 FatherNitwit: More work on titanium AAs by Glorandwarf.
 FatherNitwit: (Zuesrooster) Fix for pet self buffing.
 
-==08/10/2006
+==08/10/2006==
 FatherNitwit: Changed logic in quest parser to potentially avoid windows crash (Zuesrooster)
 FatherNitwit: (Zuesrooster) fixed aggro quest related crash.
 FatherNitwit: Untested update of OP_AugmentItem (John Adams)
 FatherNitwit: A little bit further on AAs (Glorandwarf)
 
-==07/27/2006
+==07/27/2006==
 FatherNitwit: Added door info dump on click (DOORS__INFO)
 
-==07/23/2006
+==07/23/2006==
 FatherNitwit: Enforce some zone requirements on zone in too.
 FatherNitwit: Fixed minor tradeskill crash.
 
-==07/23/2006
+==07/23/2006==
 FatherNitwit: (EverHood) Archery/self PvP mitigation changes
 FatherNitwit: (EverHood) Regen tweaks
 FatherNitwit: (EverHood) Fix DoT damage and messages
 FatherNitwit: Killed erronious double-effects on regen/HoT buffs
 FatherNitwit: Fixed replace-container client side appearance issue.
 
-==07/17/2006
+==07/17/2006==
 FatherNitwit: Added new rules subsystem to allow game rules to be changed
                 at runtime. more about this will come as time goes on.
 FatherNitwit: Added #rules command to manage rules data from in game.
@@ -9352,27 +9363,27 @@ CREATE TABLE rule_values (
   PRIMARY KEY(ruleset_id,rule_name)
 );
 
-==07/16/2006
+==07/16/2006==
 FatherNitwit: (EverHood) Implemented Eye of Zomm and Bind Sight
 FatherNitwit: Reworked Eye of Zomm code
 
-==07/16/2006
+==07/16/2006==
 aza77: Fixed the lift issue + keyitems at doors
 aza77: Fixed + modified traps and added a new type of trap
 ALTER TABLE `traps` ADD `message` VARCHAR( 200 ) NOT NULL AFTER `effectvalue2` ;
 
-==07/13/2006
+==07/13/2006==
 FatherNitwit: Fixed zone crash when removing a guild member.
 aza77: Added in game guild creation variables.GuildCreation + commands #guildcreate #guildapprove #guildlist
 FatherNitwit: Fixed feign aggro crash.
 
-==07/12/2006
+==07/12/2006==
 aza77: Added triggered only doors.
 
-==07/10/2006
+==07/10/2006==
 FatherNitwit: Adding EverHood's lull fixes.
 
-==07/09/2006
+==07/09/2006==
 FatherNitwit: Wizardanim has dicovered the opcode to partiall fix AAs for Ti!!
 FatherNitwit: EverHood's Mob ghost running on (feign)death fix.
 FatherNitwit: Redid walkspeed code to be caclualted from runspeed (EverHood inspired)
@@ -9381,24 +9392,24 @@ FatherNitwit: Added EVENT_NPC_SLAY when NPCs kill another NPC. (fanman55 inspire
 FatherNitwit: Fixed up a long running memory issue in quest::ChooseRandom
 ALTER TABLE `npc_types` DROP walkspeed;
 
-==07/05/2006
+==07/05/2006==
 aza77: Added variables.Rules + commands #rules #acceptrules
 ALTER TABLE `account` ADD `rulesflag` TINYINT( 1 ) UNSIGNED NOT NULL DEFAULT '0';
 
-==07/04/2006
+==07/04/2006==
 FatherNitwit: Maybe fixing feign memory.
 FatherNitwit: EverHood's temp pets and group recourse fixes.
 FatherNitwit: EverHood's NoLongerEngaged AI fix.
 FatherNitwit: bufgix in log.ini reading.
 
-==06/29/2006
+==06/29/2006==
 aza77: Get the SQL right:
 ALTER TABLE `npc_types` CHANGE `hp_regen_rate` `hp_regen_rate` INT( 11 ) NOT
 NULL DEFAULT '0';
 ALTER TABLE `npc_types` CHANGE `mana_regen_rate` `mana_regen_rate` INT( 11 ) NOT
 NULL DEFAULT '0';
 
-==06/28/2006
+==06/28/2006==
 FatherNitwit: Added EverHood's feign memory fixes
 FatherNitwit: Reverted regen of 0 to mean "auto config", and negative to mean "no regen"
 aza77: Changed hp_regen + mana_regen such that negative values indicate no regen
@@ -9409,18 +9420,18 @@ NULL DEFAULT '0';
 UPDATE `npc_types` SET `hp_regen_rate` = '0' WHERE `hp_regen_rate` = '-1';
 UPDATE `npc_types` SET `mana_regen_rate` = '0' WHERE `mana_regen_rate` = '-1';
 
-==06/27/2006
+==06/27/2006==
 aza77: Added quest::setnextinchpevent + $inchpevent
 aza77: Added quest::sethp
 
-==06/25/2006
+==06/25/2006==
 aza77: Fixed PVP appearance issues
 FatherNitwit: Fixed the #logsql command
 
-==06/20/2006
+==06/20/2006==
 FatherNitwit: tweaked some ability timers and fixed up ranger crit damage
 
-==06/18/2006
+==06/18/2006==
 FatherNitwit: necro DOT feign death fix (unicorn97211)
 FatherNitwit: Disable kill-pet-on-feigndeath by default (features.h FEIGN_KILLS_PET)
 MySQL 5 compatibility increases (WildcardX):
@@ -9430,19 +9441,19 @@ alter table player_corpses change data data blob NULL;
 alter table player_corpses_backup change data data blob NULL;
 
 
-==06/15/2006
+==06/15/2006==
 aza: Added MySQL5 support (FOR CUSTOM COMPILE ONLY)
 ALTER TABLE spawn2 CHANGE `condition` `_condition` MEDIUMINT(8) UNSIGNED NOT
 NULL DEFAULT '0';
 
-==06/07/2006
+==06/07/2006==
 FatherNitwit: Fixed SetAATitle (#title), and experted it to perl.
 FatherNitwit: Fixed quest money reward printing. (WildcardX)
 
-==06/03/2006
+==06/03/2006==
 FatherNitwit: Fixed a client-side inventory appearance issue, may help with trade bugs.
 
-==05/31/2006
+==05/31/2006==
 FatherNitwit: (aza) Added quest::unscribespells
 FatherNitwit: fixed ranger critical hit chance.
 FatherNitwit: Implemented conditions on windows.
@@ -9455,7 +9466,7 @@ ALTER TABLE spawnentry DROP spawn_limit;
 ALTER TABLE spawngroup ADD spawn_limit tinyint(4) NOT NULL default '0';
 ALTER TABLE altadv_vars ADD class_type int unsigned NOT NULL DEFAULT 0;
 
-==05/06/2006
+==05/06/2006==
 FatherNitwit: (aza) Enabled newer froglok classes.
 FatherNitwit: (aza) Enabled several berserker combat skills.
 FatherNitwit: Fixed possibly infinite recursion in map code.
@@ -9463,53 +9474,53 @@ FatherNitwit: Holding EQStreams open until they send all their data.
 FatherNitwit: Trying to fix death disconnect (and failing)
 FatherNitwit: Maybe fixed tinkering searching.
 
-==04/24/2006
+==04/24/2006==
 FatherNitwit: Added new HTTP functionality for moving chars between accounts.
 
-==04/21/2006
+==04/21/2006==
 FatherNitwit: Fixed bane damage loading problem.
 
-==04/20/2006
+==04/20/2006==
 FatherNitwit: Hopefully fixed the unidentified stream crash and some memory leaks.
 FatherNitwit: Fixed weapon affinity huge proc bonuses
 FatherNitwit: Fixed spell-granted procs not getting removed.
 FatherNitwit: Implemented the 'procrate' field on items.
 
-==04/13/2006
+==04/13/2006==
 FatherNitwit: Fixed the issue of charmed mobs getting assists from their old friends.
 FatherNitwit: Changed version number to 0.7.0
 
-==04/13/2006
+==04/13/2006==
 FatherNitwit: fixed a crash related to client destructors and tradeskills
 FatherNitwit: Adding the incstats canges from aza on the forums.
 
-==04/01/2006
+==04/01/2006==
 FatherNitwit: FINALLY found and fixed the netcod crash I introduced a while back.
 FatherNitwit: Fixed bard group buff tics.
 FatherNitwit: Fixed the global guild chat going to everybody problem.
 
-==03/27/2006
+==03/27/2006==
 Doodman: Added queuing for future packets, fixing lag reported by Richardo
 
-==03/25/2006
+==03/25/2006==
 FatherNitwit: Fixed character deletion to remove guild member entries. (Aeris1)
 
-==03/24/2006
+==03/24/2006==
 Doodman: Added live struct strategy.  Can get to char select
 
-==03/22/2006
+==03/22/2006==
 Doodman: Fixed Ti items
 Doodman: Added some field name mappings to load_13thfloor_items script.
 UPDATE items SET stackable=1 WHERE itemtype IN (14, 15, 17, 18, 19, 27, 37, 38, 55, 56);
 
-==03/22/2006
+==03/22/2006==
 FatherNitwit: Refactored the netcode to move the opcode manager back into the stream.
 
-==03/21/2006
+==03/21/2006==
 Doodman: Merge up from Source branch
 Doodman: Fixed CreateItem
 
-==03/20/2006
+==03/20/2006==
 FatherNitwit: Fixed invisibility vs. undead to only apply to undead mobs.
 FatherNitwit: Added `slot` column to starting items to support much more robust configurations.
 FatherNitwit: Updated char backups. (noted by typhoon)
@@ -9521,11 +9532,11 @@ ALTER TABLE character_backup DROP guild;
 ALTER TABLE character_backup DROP guildrank;
 ALTER TABLE character_backup DROP publicnote;
 
-==03/19/2006
+==03/19/2006==
 FatherNitwit: A bunch of minor changes, should help some bugs in 0.6.6.
 FatherNitwit: Wrote basic guild management pages, much more needed.
 
-==03/18/2006
+==03/18/2006==
 FatherNitwit: Queue fix in netcode, should help crashing problem.
 Doodman: Redid world port allocation not start looking for a port at the begining each time
 Doodman: Made zone send it's port to world on connect, in case it is reconnecting to a restarted world
@@ -9603,10 +9614,10 @@ ALTER TABLE character_ DROP guildrank;
 ALTER TABLE character_ DROP publicnote;
 
 
-==03/11/2006
+==03/11/2006==
 FatherNitwit: Redid netcode outbound queue to properly handle sequence wrapping.
 
-==03/10/2006
+==03/10/2006==
 Doodman: Worked up serialization for Ti and Live (/snicker)
 Doodman: Converted the item table to match live (13th-floor) changes below (apply both)
 Doodman: Worked items to be compatible for both (kept loreflag and loregroup)
@@ -9637,37 +9648,37 @@ ALTER TABLE items ADD UNK134 varchar(255) not null AFTER UNK133;
 ALTER TABLE items CHANGE UNK130 potionbeltslots int not null;
 ALTER TABLE items CHANGE UNK133 stackable int not null;
 
-==03/08/2006
+==03/08/2006==
 FatherNitwit: (BatCountry) Fixed throwing item crash.
 FatherNitwit: (Hvitrev) Implemented Primsatic and Chromatic resists.
 
-==03/07/2006
+==03/07/2006==
 FatherNitwit: Fixed up adding a launcher to not falsely report an error.
 Doodman: Fixed sending old style info from world->ls (fixing minilogin)
 Doodman: Fixed TCPConnection cleanup on socket closed by the remote
 
-==03/06/2006
+==03/06/2006==
 Doodman: Fixed deadlock when zones are shutting down.
 Doodman: Fixed MakeUpperString and MakeLowerString to function correctly on a NULL string
 Doodman: Made HTTPSocket inherit from TCPConnection instead of using
 Doodman: Fixed HTTP POST processing (needs a good workout still)
 
-==03/05/2006
+==03/05/2006==
 FatherNitwit: Developed stream proxy, stream identifier, and struct strategy to support dynamic structures.
 FatherNitwit: Developed initial patch support for 0.6.2 and Titanium.
 
-==03/04/2006
+==03/04/2006==
 FatherNitwit: Fixed some broken logging in world.
 FatherNitwit: Fixed the potential crash when zone connects to world.
 
-==03/04/2006
+==03/04/2006==
 FatherNitwit: Significantly refactored the old TCPConnection/TCPServer code.
 FatherNitwit: Rewrote almost the entire web server to get rid of most of the socket lib.
 FatherNitwit: Removed everything but the HTTP framework from the socket lib.
 FatherNitwit: Rewrite better have fixed the windows crash.
 
 
-==02/28/2006
+==02/28/2006==
 Changed version number to 0.6.5-DR1
 Doodman: Put in new XML configuration object and made zone/world use them
 Doodman: Added auto ip configuration to world/LS
@@ -9710,7 +9721,7 @@ CREATE TABLE commands (
 );
 
 
-==01/20/06
+==01/20/2006==
 FatherNitwit: Reworked melee and ranged attack code significantly.
 FatherNitwit: Properly support recomended level on weapon DMG now.
 FatherNitwit: Re-implemented racial/body bane damage and elemental damage.
@@ -9720,17 +9731,17 @@ FatherNitwit: Added canbind flag to zone table to completely prevent binding in 
 Required SQL:
 ALTER TABLE zone ADD canbind TINYINT NOT NULL DEFAULT '1';
 
-==01/14/06
+==01/14/2006==
 FatherNitwit: Fixed ranged misses not generating hate.
 FatherNitwit: Find is as working as good as it ever was (straight line)
 
-==01/13/06
+==01/13/2006==
 FatherNitwit: Made some changes to buff stacking rules reguarding DoTs and beneficial overwrite.
 
-==01/12/06
+==01/12/2006==
 FatherNitwit: Fixed the "Buffs do not apply effects in client after zoning" issue.
 
-==01/09/06
+==01/09/2006==
 FatherNitwit: Made NPCs actually load: resists, attack_speed, findable
 FatherNitwit: npc_types cleanup day (they dont work or are not used):
 ALTER TABLE npc_types ADD attack_speed float NOT NULL default '0';
@@ -9738,16 +9749,16 @@ ALTER TABLE npc_types DROP ipc;
 ALTER TABLE npc_types DROP banish;
 ALTER TABLE npc_types DROP social;
 
-==01/08/06
+==01/08/2006==
 FatherNitwit: Fixed more windows compile errors on .net 2003+...
 
-==01/07/06
+==01/07/2006==
 FatherNitwit: Fixed VS.net projects and compiling. (.net 2002)
 
-==01/04/06
+==01/04/2006==
 FatherNitwit: Fixed the quad special attack to not require triple in order to work.
 
-==01/03/06
+==01/03/2006==
 FatherNitwit: Added new debug logging facility. Will be implemented further in the time to come
 FatherNitwit: Added command #mlog to manipulate the new logging facility.
 FatherNitwit: Load log settings from log.ini if present.
@@ -9766,7 +9777,7 @@ FatherNitwit: Fixed NPC buffing faction checks.
 FatherNitwit: Added LOS checks for detrimental AOE spells.
 FatherNitwit: Changed version number to 0.6.4DR1
 
-==12/30/05
+==12/30/2005==
 FatherNitwit: Fixed event_waypoint in quests
 FatherNitwit: Refactored a lot of NPC pathing code (no functional changes)
 FatherNitwit: Added zone flagging concepts/enforcement
@@ -9781,7 +9792,7 @@ CREATE TABLE zone_flags (
 );
 ALTER TABLE zone ADD flag_needed VARCHAR(128) NOT NULL DEFAULT '';
 
-==12/23/05
+==12/23/2005==
 FatherNitwit: Added #reloadstatic to reload doors, objects, zone points, etc... (zone in/out required)
 FatherNitwit: Fixed mobs to buff their friends, not their enemies.
 FatherNitwit: Allow support for quests on charmed NPCs.
@@ -9789,14 +9800,14 @@ FatherNitwit: Changed quest timers to be tied to the specific NPC, instead of th
 FatherNitwit: Fixed quest global expiration times... durations should be accurate now.
 FatherNitwit: Re-enabled Y (year) expiration times, and added a 'F' time to say it dosent expire.
 
-==12/18/05
+==12/18/2005==
 FatherNitwit: Removed doors from shared memory.
 FatherNitwit: Hopefully fixed pottery firing in kilns.
 
-==12/15/05
+==12/15/2005==
 FatherNitwit: Fixed Levitate.
 
-==12/11/05
+==12/11/2005==
 FatherNitwit: Removed some worthless fields.
 FatherNitwit: Rewrote all the pet creation code to be based on npc_types
 FatherNitwit: Completely changed the pets table.
@@ -9806,68 +9817,68 @@ You must load up the SQL in Sql-Files/pets.sql
 the new pets sql assumes NPC IDs 500-700 are free, so edit them as needed.
 ALTER TABLE npc_types DROP fixedz;
 
-==12/09/2005
+==12/09/2005==
 FatherNitwit: Fixed the issue where maxed out factions cannot be raised/lowered
 FatherNitwit: Changed faction hits to properly ignore illusions.
 FatherNitwit: Fixed an issue with converted chars and corrupt AAs. (not fully resolved)
 FatherNitwit: Fixed the issue with mobs not pathing after respawning.
 
-==12/01/2005
+==12/01/2005==
 FatherNitwit: added USE_RACE_CLASS_XP_MODS (disabled by default) to features.h
 FatherNitwit: These fields are not used:
 ALTER TABLE zone_points DROP keep_x;
 ALTER TABLE zone_points DROP keep_y;
 
-==11/28/2005 (LiveCompat)
+==11/28/2005==
 Doodman: Found additional world opcodes
 Doodman: Updated char select struct
 
-==11/24/2005
+==11/24/2005==
 FatherNitwit: just some SQL updates you should run to make the recent aggro changes less annoying.
 UPDATE npc_types SET _INT=80 WHERE _INT=75;
 UPDATE npc_types SET _INT=60 WHERE _INT=80 AND ( bodytype=3 OR bodytype=8);
 ALTER TABLE npc_types CHANGE _INT _INT mediumint(8) unsigned NOT NULL default '80';
 
-==11/17/2005
+==11/17/2005==
 FatherNitwit: Fixed a crash in the map code
 FatherNitwit: Tweaked mob usage of d_meele_texture*
 
-==11/11/2005
+==11/11/2005==
 FatherNitwit: Changed most double prescision operations to single prescision.
 
-==11/10/2005
+==11/10/2005==
 FatherNitwit: Fixed waypoint ID limit (was 65535).
 FatherNitwit: Implemented the #wpinfo command
 
-==11/05/2005
+==11/05/2005==
 FatherNitwit: Fixed the broken server side filters (reworked entirely).
 FatherNitwit: Refactored damage code to be more consistent between PCs and NPCs.
 FatherNitwit: Changed spell damage mechanism slightly to better utilize runes.
 FatherNitwit: Tweaked a bit of illusion code to be more versitile.
 
-==11/03/2005
+==11/03/2005==
 FatherNitwit: Fixed AA storage in the player profile.
 
-==10/28/2005
+==10/28/2005==
 FatherNitwit: Fixed a lot of GCC 4.0 and 64 bit problems. Should build under both better now.
 
-==10/24/2005
+==10/24/2005==
 FatherNitwit: Fixed mob int loading.
 
-==10/23/2005
+==10/23/2005==
 FatherNitwit: Fixed Client->NPC->Client riposte.
 
-==09/28/2005
+==09/28/2005==
 FatherNitwit: added quest::attacknpc and quest::attacknpctype
 FatherNitwit: Cleaned up usage of Appearance in the code
 FatherNitwit: Fixed faction ally checking for npc->npc faction
 FatherNitwit: Removed some stupid rules reguarding npc aggro
 FatherNitwit: Fixed some faction issues with aggro, guards should work reliably now.
 
-==09/25/2005
+==09/25/2005==
 FatherNitwit: Fixed incorrect usage of EXPMod variable.
 
-==09/24/2005
+==09/24/2005==
 FatherNitwit: Hopefully fixed bard instruments.
 FatherNitwit: Fixed crash when loading DoD+ spells_us.txt file
 FatherNitwit: Rewrote a ton of the perl parser internals to suck less.
@@ -9882,7 +9893,7 @@ ALTER TABLE npc_types ADD _INT MEDIUMINT UNSIGNED NOT NULL DEFAULT '75';
 ALTER TABLE npc_types ADD WIS MEDIUMINT UNSIGNED NOT NULL DEFAULT '75';
 ALTER TABLE npc_types ADD CHA MEDIUMINT UNSIGNED NOT NULL DEFAULT '75';
 
-==09/23/2005
+==09/23/2005==
 FatherNitwit: Inverted XY coordinates on in zone objects and ground spawns.
 FatherNitwit: Maybe fixed quests setting a waypoint in EVENT_WAYPOINT
 ALTER TABLE ground_spawns ADD temp_x float NOT NULL;
@@ -9900,40 +9911,40 @@ UPDATE object SET ypos=temp_x;
 ALTER TABLE object DROP temp_x;
 
 
-==09/22/2005
+==09/22/2005==
 FatherNitwit: Reworked quest signaling implementation to be less dumb. Also exported SignalNPC to perl.
 FatherNitwit: Implemented a missing bard AE DOT spell type.
 
-==09/21/2005
+==09/21/2005==
 FatherNitwit: Fixing a few issues with windows compiles and corpses.
 
-==09/19/2005
+==09/19/2005==
 FatherNitwit: Added missing packet for player death to create a corpse.
 
-==09/16/2005
+==09/16/2005==
 FatherNitwit: Fixed loot error case client hang, reported by Yablargo
 
-==09/15/2005
+==09/15/2005==
 FatherNitwit: Fixed coin trading bug reported by Windcatcher
 
-==09/12/2005
+==09/12/2005==
 FatherNitwit: Fixed adventure merchants
 
-==09/11/2005
+==09/11/2005==
 FatherNitwit: Made temp merchant lists clear on world boot.
 FatherNitwit: Fixed some shared memory issues on windows.
 FatherNitwit: exported some more mob methods to perl.
 
-==08/26/2005
+==08/26/2005==
 Doodman: Found most of the missing guild opcodes, except the manage ones.
 Doodman: Moved guildlist to shared mem (ick) since zone now sends it too.
 Doodman: Need to implement a way to recover the functionality of dynamicly
 	  adding/removing guilds with the shared mem solution
 
-==08/23/2005
+==08/23/2005==
 FatherNitwit: Added range check for all combat abilities (reported by LoOsEr)
 
-==08/21/2005
+==08/21/2005==
 FatherNitwit: Fixed gaining AA exp (buying still broken)
 FatherNitwit: Fixed weapon procs
 FatherNitwit: Added looting messages (links to come later)
@@ -9941,28 +9952,28 @@ FatherNitwit: Fixed instant spells acting like DoTs
 
 --- Version Changed to 0.6.2DR1 ---
 
-==08/05/2005
+==08/05/2005==
 FatherNitwit: Adding database support for both eye colors and beard type.
 Required SQL:
 ALTER TABLE npc_types ADD luclin_eyecolor2 int(10) unsigned NOT NULL default '1' AFTER luclin_eyecolor;
 ALTER TABLE npc_types ADD luclin_beard int(10) unsigned NOT NULL default '0' AFTER luclin_beardcolor;
 
-==08/03/2005
+==08/03/2005==
 FatherNitwit: Work on eqextractor to support the newest patch.
 FatherNitwit: Worked on spawn struct to identify the remaining missing fields.
 
-==08/02/2005
+==08/02/2005==
 FatherNitwit: Added initial fix for the shared bank dupe.
 
-==07/28/2005
+==07/28/2005==
 FatherNitwit: Fixed $wp in EVENT_WAYPOINT
 FatherNitwit: added #aggro to query aggro checking info for mobs.
 FatherNitwit: fixed a couple strange things in the aggro code.
 
-==07/07/2005
+==07/07/2005==
 FatherNitwit: Untested fix for zone point wildcards in GetClosestZone*
 
-==05/09/2005
+==05/09/2005==
 FatherNitwit: Fix some stuff related to zoning process.
 update zone set min_status=0 where min_status is null;
 update zone set min_level=0 where min_level is null;
@@ -9970,12 +9981,12 @@ alter table zone change min_status min_status tinyint(3) unsigned default 0 NOT 
 alter table zone change min_level min_level tinyint(3) unsigned default 0 NOT NULL;
 alter table zone change long_name long_name text NOT NULL DEFAULT '';
 
-==05/05/2005
+==05/05/2005==
 FatherNitwit: Theoretically fixed a no-drop trading bug.
 
 ... Lots of work on 5/12/05 patch ...
 
-==05/05/2005
+==05/05/2005==
 FatherNitwit: A bunch of work on ranged attacks and attack timers.
 FatherNitwit: Fixed issue with the first time a new char gains exp.
 FatherNitwit: Fixed delete character at char select.
@@ -9983,22 +9994,22 @@ FatherNitwit: Fixed fizzle messages.
 FatherNitwit: Fixed /goto and other cross-zone player teleporting.
 FatherNitwit: Initial work on making arrows show up when shot.
 
-==04/23/2005
+==04/23/2005==
 LethalEncounter: Fixed compile errors on Windows
 LethalEncounter: Fixed guild crash bug while logging in
 LethalEncounter: Fixed most of the guild commands
 
-==04/13/2005
+==04/13/2005==
 Cofruben: Fixed possible crashes using #npscpawn command.
 Cofruben: Added a few more cheat locators.
 
-==04/10/2005
+==04/10/2005==
 FatherNitwit: Reworked zone in code to make it more closely match live's ordering.
 FatherNitwit: Fixed up stream factory problem with dynamic zones.
 FatherNitwit: Added detailed connecting debugging.
 FatherNitwit: Work on custom titles.
 
-==04/08/2005
+==04/08/2005==
 FatherNitwit: Completely rewrote zoning code to make sense.
 FatherNitwit: Fixed some discipline related effects
 FatherNitwit: Fixed archery hit chance cap (was 47%)
@@ -10018,14 +10029,14 @@ FatherNitwit: Finally fixed no drop items in tradeskill containers for real this
 Required SQL (added to upgrade.sql):
 ALTER TABLE account ADD hideme TINYINT NOT NULL DEFAULT 0;
 
-==04/04/2005
+==04/04/2005==
 FatherNitwit: Fixed guild member list struct, identified more fields of it (showeq)
 FatherNitwit: (bUri) Fixed attack code with non-weapons and h2h weapons.
 FatherNitwit: Split zone fog types into seperate DB fields.
 FatherNitwit: Differentiated between guild and player tributes.
 Required SQL: utils/0.6.1-upgrade.sql  (will be updated until release)
 
-==01/15/2005
+==01/15/2005==
 Doodman: Fixed charges/quantity
 Doodman: Fixed IsStackable()
 Doodman: Fixed some empty Handle() functons.
@@ -10033,7 +10044,7 @@ Doodman: Added instance level nodrop.
 Required SQL:
 alter table inventory add instnodrop tinyint(1) unsigned default 0 not null;
 
-==01/13/2005
+==01/13/2005==
 Doodman: Merged source (FNW changes) in to LiveCompat
 Doodman: SendItemPacket's are now sent deflated (speeds up merchants)
 Doodman: Combining is now turned on in makefile.perl for zone
@@ -10046,7 +10057,7 @@ Doodman: New item structure is in:
 		eqitems.13th-floor.org
 	Item table convert script: utils/items-0.6.0-DR2-0.6.1-DR1-convert.sql
 
-==01/10/2005
+==01/10/2005==
 FatherNitwit: Disable sleep() in perl, it is bad news.
 FatherNitwit: Fixed guild MOTD at login (hopefully).
 FatherNitwit: Fixed minor security problem in SQL logging.
@@ -10054,7 +10065,7 @@ FatherNitwit: Added error reporting to waypoint editing commands.
 FatherNitwit: Reworked client packet handling to use opcode dispatch
   routines, which is paving the way for dynamic opcodes.
 
-==01/07/2005
+==01/07/2005==
 FatherNitwit: Fixed rogue-like skill training (sneak, etc..)
 FatherNitwit: Added spawn_limit field to spawnentry and npc_types
    which represent the maximum number of that npc_type which can spawn
@@ -10074,13 +10085,13 @@ Required Queries:
 ALTER TABLE spawnentry ADD spawn_limit TINYINT NOT NULL DEFAULT '0';
 ALTER TABLE npc_types  ADD spawn_limit TINYINT NOT NULL DEFAULT '0';
 
-==01/04/2004
+==01/04/2004==
 Doodman: opcode/struct changes to allw zoning in on live.
 
-==12/29/2204
+==12/29/2004==
 Doodman: Fixed leak in Separator
 
-==12/21/2004
+==12/21/2004==
 FatherNitwit: fixed item handing to non-quest NPCs
 FatherNitwit: delete nodrop or norent items left in world containers
 FatherNitwit: changed quest::spawn commands to return the NPC ID of the spawned mob (in XS)
@@ -10109,27 +10120,27 @@ FatherNitwit: Cleaned up eq_packet_structs.h a bit
 FatherNitwit: Required DB update:
 ALTER TABLE character_ ADD extprofile BLOB NOT NULL;
 
-==11/20/2004
+==11/20/2004==
 Doodman: Fixed merchant selling bug on merchant slot
 
-==11/18/2004
+==11/18/2004==
 Doodman: Fixed the initialization of augs on NPC loot that was causing a zone crash when looting NPC's
 
-==11/16/2004
+==11/16/2004==
 Doodman: Implemented Augmentation inserting, removal and distilling.
 Doodman: Augment saves in inventory, shared bank, player_corpse and object_contents.
 Doodman: Fixed world to detect and cleanup a zone disconnect immediately instead of when it tries to write to it.
 Doodman: Reimplmented cursor queue using an actually queue.  Should be unlimited depth now.
 Doodman: Updated items for new fields and new names.
 
-==11/10/2004
+==11/10/2004==
 LethalEncounter: Fixed a couple of corpse related bugs.
 LethalEncounter: Added in various functions for the new login system.
 
-==11/09/2004
+==11/09/2004==
 FatherNitwit: Fixed minor crash with new grid delay thing.
 
-==11/08/2004
+==11/08/2004==
 LethalEncounter: Fixed loot bug with stacked items.
 LethalEncounter: Added a 10 second timer to grid assignments to speed up zone in time.
 FatherNitwit: Fixed invalid bind zone crash.
@@ -10151,22 +10162,22 @@ FatherNitwit: Rewrote NPC spell casting code to be a ton more effecient
 FatherNitwit: Run this query (value of 1 == NPC might aggro other NPCs):
 ALTER TABLE npc_types ADD npc_aggro TINYINT NOT NULL DEFAULT '0';
 
-==11/07/2004
+==11/07/2004==
 LethalEncounter: Added in three variables per feature request.
 
-==11/06/2004
+==11/06/2004==
 LethalEncounter: Fixed Merchant bug that wouldnt let you buy anything.
 LethalEncounter: Fixed stack bug that wouldnt automatically stack any items you bought.
 
-==11/05/2004
+==11/05/2004==
 LethalEncounter: Client Freeze/Black Screen of Death bugs have been eliminated.
 LethalEncounter: Added a simple count to our linked list so we can process a few things faster and more efficiently.
 LethalEncounter: Fixed a small compile bug in regards to corpses.
 
-==11/04/2004
+==11/04/2004==
 FatherNitwit: Fixed exploit with split that kathgar found.
 
-==11/01/2004
+==11/01/2004==
 LethalEncounter: Inventory items on zone in are now sent in one packet like live instead of individual packets.  This will save on bandwidth and processing time.
 Cofruben: Added support for /makeleader command.
 FatherNitwit: Increased max buffs from 15 to 20
@@ -10189,28 +10200,28 @@ FatherNitwit: Fixed NPC -> NPC aggro, need to run these queries onan older DB:
 ALTER TABLE npc_faction_entries ADD npc_value TINYINT UNSIGNED DEFAULT '0' NOT NULL;
 UPDATE npc_faction_entries SET npc_value=1 WHERE value<0;
 
-==10/31/2004
+==10/31/2004==
 LethalEncounter: Aside from a few tweeks, merchants are finished.  They will now keep your items after you sell them like live.
 LethalEncounter: Fixed bug that caused falling damage to be calculated twice.
 LethalEncounter: Changed Sense Heading to start at 200 for new characters.
 LethalEncounter: Black screen bug should be fixed now.
 LethalEncounter: Fixed bash/slam.
 
-==10/30/2004
+==10/30/2004==
 LethalEncounter: Fixed a few issues with item charges.
 LethalEncounter: Fixed illusions.
 LethalEncounter: Rewrote the merchant code.  Its now much more efficient and instead of 81 database queries per shop request, a typical request doesnt pull anything from the db.  It loads the information at load time.
 LethalEncounter: Added in the beginning parts of temporary merchant items. (you can sell items to merchants and purchase them back) Download the merchantlist_temp table from: http://www.eqemulator.net/sql/merchantlist_temp.sql
 
-==10/27/2004
+==10/27/2004==
 Cofruben: Added LDoN adventure system.Please,source the new sql file(thanks to skorch for testing).
 LethalEncounter: Mob deaths should be sent to all players now.
 LethalEncounter: ServerType 1 will make you pvp on zone in now.  Still trying figure out why the client doesnt send any pvp special combat abilities unless your dueling.
 
-==10/26/2004
+==10/26/2004==
 Scorpious2k: Fixed guild doors
 
-==10/25/2004
+==10/25/2004==
 FatherNitwit: Fixed zone crash related to character_ query.
 FatherNitwit: Fixed book reading to give proper book window.
 FatherNitwit: At least partialy fixed pet dual weild/double attack problem.
@@ -10219,11 +10230,11 @@ FatherNitwit: Fixed archery ammo issue.
 LethalEncounter: Added ability to /consent (and /deny) other players so they can drag your corpse.
 LethalEncounter: Fixed bug where other people were able to loot your corpse.
 
-==10/24/2004
+==10/24/2004==
 LethalEncounter: Fixed bug where you lost air supply on zoning in underwater.
 LethalEncounter: Fixed GM damage bug.
 
-==10/23/2004
+==10/23/2004==
 FatherNitwit: Enable named quests by default (in features.h)
 FatherNitwit: Fixed decaying world containers problem
 FatherNitwit: Fixed undead nuke spells
@@ -10237,16 +10248,16 @@ LethalEncounter: Fixed Bazaar trader bug.
 LethalEncounter: Zones now display the proper fog when you update your zone table with the latest.
 LethalEncounter: Fixed zone crash and merchant item charge bug.
 
-==10/22/2004
+==10/22/2004==
 LethalEncounter: Fixed item deletion bug not updating client.
 
-==10/21/2004
+==10/21/2004==
 LethalEncounter: Fixed various AA related bugs.
 
-==10/20/2004
+==10/20/2004==
 LethalEncounter: Reworked zoning in, solved a couple of issues and should speed the process up a tad.
 
-==10/19/2004
+==10/19/2004==
 FatherNitwit: Fixed Disciplines and Abilities (lay hands & harm touch)
 FatherNitwit: Added new server variable: DisableNoDrop (set to 1 takes nodrop off items when loaded)
 FatherNitwit: Fixed NPC buffing through walls
@@ -10255,28 +10266,28 @@ LethalEncounter: Fixed equip bug when using two handed weapons.
 LethalEncounter: Fixed resurrect bug that let you regain xp more than once.
 LethalEncounter: Fixed bug that was making players corpses disappear on death when they shouldnt have.
 
-==10/18/2004
+==10/18/2004==
 LethalEncounter: Fixed pet only spells.
 LethalEncounter: Fixed bug that wouldnt let you loot a corpse if someone got an error looting it. (such as a dupe lore error)
 LethalEncounter: Fixed mana regen bug.
 
 
-==10/17/2004
+==10/17/2004==
 LethalEncounter: Added some debug code to make it easier for people that cant get minilogin working.
 LethalEncounter: You will now eat/drink like eqlive if you arent a GM.
 LethalEncounter: Fixed infinite recursion bug I made a few days ago :/
 
-==10/16/2004
+==10/16/2004==
 LethalEncounter: Fixed mana bug that was causing people not to regen their full mana.
 LethalEncounter: HP Adjustments, will now send your hp update every tic and only the mob you have targeted (not including group hp updates) to reduce bandwidth.
 LethalEncounter: Fixed a crash bug on character creation.  Thanks to blahblah for the help :P
 LethalEncounter: Fixed item charge bug, need to update your database.
 
-==10/15/2004
+==10/15/2004==
 LethalEncounter: Changes necessary for the new MiniLogin :)
 LethalEncounter: Z loc fix, it was placing you ten times the z loc it was supposed to :P
 
-==10/14/2004
+==10/14/2004==
 Rogean: omg we are so teh 0.6.0DR1 now~
 
 FatherNitWit:
@@ -10393,11 +10404,11 @@ FatherNitwit Improvements:
 - If a player logs/zones in to a Z below the world, they are placed at a valid Z if possible.
 - labeled new item field as attuneable, updated DB code for it
 
-==10/10/2004
+==10/10/2004==
 LethalEncounter: Fixed some issues with hp and mana.
 LethalEncounter: Fixed bug with zoning z coord.
 
-==10/09/2004
+==10/09/2004==
 LethalEncounter: Fixed spell scribing and meming.
 LethalEncounter: Merged in Xabob's expansion fixes (except regen which FNW is working on).
 LethalEncounter: Merged in RangerDown's fixed version of #spawnfix.
@@ -10405,259 +10416,259 @@ LethalEncounter: Fix for #zcolor that was brought up by rmanders on the bug foru
 LethalEncounter: Character conversions from 5.7 to 5.9 should be fixed now.
 LethalEncounter: Implicit length fix and mana struct fixed.
 
-==10/05/2004
+==10/05/2004==
 FatherNitwit: Fix name generator opcode
 FatherNitwit: Added loot table drop chance fix
 FatherNitwit: Cleaned up some map code and other thing
 
-==10/02/2004
+==10/02/2004==
 LethalEncounter: Updated AAs so they are sent based on class now.
 
-==10/02/2004
+==10/02/2004==
 LethalEncounter: Updated to version 5.9-DR2 (EQLive Compatible).
 
-==10/02/2004
+==10/02/2004==
 LethalEncounter: Updated all the structs/opcodes necessary to login using the latest client.
 
-==10/02/2004
+==10/02/2004==
 LethalEncounter: Misc AA fixes.
 
-==09/29/2004
+==09/29/2004==
 LethalEncounter: Fixed AAs, you can now buy them correctly.  Big thanks to Xabob for PacketCollecting the information for me!!
 
-==09/26/2004
+==09/26/2004==
 LethalEncounter: Fixed the displaying of AAs, moving them into two tables. Be SURE to source aa.sql for these updates.
 		 (Will fix the buying aspect soon)
 
-==09/25/2004
+==09/25/2004==
 Doodman: Fixed linux kernel 2.6.x shared memory bug.  IPC_NOWAIT is not allowd on shared memory segment operations.
 
-==09/20/2004
+==09/20/2004==
 Scorpious2k: Allow multiple Perl plug-ins
 
-==09/17/2004
+==09/17/2004==
 Doodman: (un)fixed world to hand the LS->world hand off like it did in the past
 
-==/09/12/2004
+==/09/12/2004==
 FatherNitwit: Added my LOS code and map converter. Thanks to wiz for help with testing.
 
-==/09/09/2004
+==/09/09/2004==
 FatherNitwit: Adding basics of spell specialization.
 
-==/09/07/2004
+==/09/07/2004==
 FatherNitwit: Fixed #heal on pets.
 
-==/09/05/2004
+==/09/05/2004==
 FatherNitwit: Fixed minor flaw in player profile with skills.
 FatherNitwit: Merged My Tradeskill Rewrite
 LethalEncounter: Moved zone configurations from the old flat file method to the database.
 BE SURE TO SOURCE ZONECFG.SQL!!!
 
-==/09/04/2004
+==/09/04/2004==
 FatherNitwit: Merged in ProjectEQ's 2grid system
 FatherNitwit: Fixed new style hate/regen/mana regen on items
 FatherNitwit: Collected PoP item features from equiped, not used yet
 LethalEncounter: Fixed /bug
 LethalEncounter: Fixed merchant messages/issues
 
-==/09/03/2004
+==/09/03/2004==
 FatherNitwit: Fixed almost ALL compile warnings on UNIX
 FatherNitwit: Added my named quest files patch as optional #ifdef
 FatherNitwit: Added persistent timers (client->p_timers)
 FatherNitwit: Added 508->588 byte .cfg file converter
 
-==/08/31/2004
+==/08/31/2004==
 FatherNitwit: Fixed MOB point-blank AE spells to cast (from PEQ folks)
 FatherNitwit: Fixed Spawned MOB's being permarooted.
 
-==/08/29/2004
+==/08/29/2004==
 LethalEncounter/Cofruben: LOY Guild Management tool updated.
 Cofruben: Added new perl function: quest::addloot(itemid,charges).
 
-==/08/28/2004
+==/08/28/2004==
 Cofruben: Implemented inspect code.
 
-==/08/26/2004
+==/08/26/2004==
 Wiz: Fixed a bug that was displaying unknown spells on login.
 Wiz: Fixed a bug that was causing hp to go wonky when you join a group.
 Wiz: Fixed a bug that was preventing you from attacking when invulnerable.
 Wiz: Fixed a bug that would cause invulnerability spells to stop working if you zoned.
 
-==/08/25/2004
+==/08/25/2004==
 FatherNitwit: Redid split, implemented autosplit.
 
-==/08/23/2004
+==/08/23/2004==
 Draupner: Fixed spell haste focuses
 
-==08/21/2004
+==08/21/2004==
 LethalEncounter: Finished updating few structs, can now login with latest client.  Merchants, combat, loot, etc work fine.
 
-==08/20/2004
+==08/20/2004==
 LethalEncounter: Fixed player profile.
 
-==08/12/2004
+==08/12/2004==
 Cofruben:Added basics of begging.
 Cofruben:Added group splitting.
 
-==08/10/2004
+==08/10/2004==
 Wiz: Severely cleaned up position update code and made it more efficent. Should drastically reduce update packets generated by other clients.
 Wiz: Improved the LOS calculation. It should use less CPU and work better now.
 
-==08/02/2004
+==08/02/2004==
 Scorpious2k: Changed Quest command settimer to reuse timers with same name instead of creating new
 
-==07/26/2004
+==07/26/2004==
 Cofruben: Added some perl functions,including: ding,addldonpoint,surname,permaclass/race/gender,scribespells.
 
-==07/20/2004
+==07/20/2004==
 Draupner: Added #npcedit
 
-==07/19/2004
+==07/19/2004==
 Doodman(WizeOne): Added beacon.o and embxs.o to makefile.perl
 Doodman: Fixed #serverinfo for linux.
 
-==07/12/2004
+==07/12/2004==
 Doodman(RangerDown): Added "You cannot attack while invulnerable" message.
 
-==07/10/2004
+==07/10/2004==
 Scorpious2k: Fixed AA related exploit
 Scorpious2k: Fixed AA problem where % remained if player lost levels to below 51
 
-==06/27/2004
+==06/27/2004==
 Scorpious2k: Added quest command spawn2 - same as spawn except also requires heading
 Scorpious2k: Modified Quest Globals. It now always creates a unique var if char specific (not ALL players)
 Scorpious2k: Enabled traders
 Sandy: Changed mobs so they must have SPECATK_SUMMON to summon players
 
-==06/23/2004
+==06/23/2004==
 Rogean: Mobs no longer Dual Wield with Shields
 
-==06/22/2004
+==06/22/2004==
 Sandy: Event Aggro added
 Sandy: Permaroot added
 Sandy: x,y,z variables for quests corrected
 
-==06/17/2004
+==06/17/2004==
 Dspirit: More patch 6/16 opcodes corrected
 
-==06/16/2004
+==06/16/2004==
 Dspirit: Patch 6/16 opcodes corrected
 
-==06/14/2004
+==06/14/2004==
 Dspirit: More opcodes corrected
 
-==06/13/2004
+==06/13/2004==
 Dspirit: Multiple opcodes corrected
 
-==06/12/2004
+==06/12/2004==
 LethalEncounter: #zone fixed.
 Rogean: Fixed inspecting items in adventure window.
 Rogean/Scorpious2k: AA Fixes Implimented
 
-==06/11/2004
+==06/11/2004==
 Doodman: Fixed OP_HPUpdate and SendHPUpate.  Client now gets proper HP updates.
 
-==06/11/2004
+==06/11/2004==
 Scorpious2k/Image: #reloadqst now works for perl (Reloads the entire zones quest files).
 
-==05/29/2004
+==05/29/2004==
 Scorpious2k: Changed opcode to fix trade windows >> THANKS Dspirit
 
-==05/29/2004
+==05/29/2004==
 Scorpious2k: Merged in Sandy's EVENT_HP code
 Scorpious2k: Merged in Bleh's Perl/XS enhancement
 Scorpious2k: Added quest commands for mob movement stop(),start(),pause(),resume() and moveto()
 
-==05/28/2004
+==05/28/2004==
 Doodman/Bleh: Move NPCTypes out of shared mem in to zone specific STL maps.
 Doodman/Bleh: Removed NPCTypes.o from makefile in EMuShareMem
 Doodman/Bleh: Fixed null pointer dereference in selling
 
-==5/15/2004
+==5/15/2004==
 Doodman: Upped MMF_MAX_NPCTYPE_ID to 400k to support tcsmyworlds db
 Doodman: Fixed EQNetwork.cpp to be C++ standard compliant, -not- MS compliant
 
-==5/11/2004
+==5/11/2004==
 Image: Better netcode, rawr.
 Scorpious2k: Added AC to mobs - be sure to check MobACupdate.sql
 Scorpious2k: Changed AC so it can now be controlled with serverOp variables ACreduction, ACrandom & ACfail
 Scorpious2k: Added check so items with req level can't be auto equipped if player not >= req level
 Scorpious2k: Added generic (theme = 0) LDoN point processing
 
-==5/6/2004
+==5/6/2004==
 Image: Fixed tradeskill places like smiths
 
-==4/28/2004
+==4/28/2004==
 Image: EQNetwork changes to get packets to send in order
 Image: Fixed zones getting bugged (unable to attack, see others, etc.)
 
-==4/23/2004
+==4/23/2004==
 LethalEncounter: Emu works with the latest patch now.  Sony did some crazy crap and added 4608 bytes to player profile :/
 
-==4/20/2004
+==4/20/2004==
 Image: Lifetap now works on PVP
 Image: Fixed the stacks of snare/root/speed, snare breaks speed spells (SOW,JBoots,etc.), root breaks snare, root breaks speed spells also.
 
-==4/17/2004
+==4/17/2004==
 LethalEncounter:  Fixed merchants that were broken in the last patch.
 Image:  Inventory item combining added to decrease the traffic sent on zoning.
 
-==4/16/2004
+==4/16/2004==
 LethalEncounter:  Fixed item struct that was changed in the last patch, items now work again.
 
-==4/15/2004
+==4/15/2004==
 LethalEncounter:  Fixed Player Profile that was changed in the last patch, you can now login correctly.
 
-==4/08/2004
+==4/08/2004==
 Scorpious2k & Tark: Fixed incompatability problem with Perl and combined packets
 
-==4/02/2004
+==4/02/2004==
 Image: Improvements made on the combination code.
 
-==3/29/2004
+==3/29/2004==
 Image: Combined packets now work to full extent.  Set app priority to 6 if you don't want it combined, all packets should no longer be deflated,encrypted unless priority 6.
 Scorpious2k: Fixed mob movement
 
-==3/28/2004
+==3/28/2004==
 Scorpious2k: Added quest command signal() and EVENT_SIGNAL
 Scorpious2k: Made mobs face player for EVENT_SAY and EVENT_ITEM
 Scorpious2k: Added smogo's $hasitem for perl quests
 Scorpious2k: Added selfcast() command to perl quests
 
-==3/23/2004
+==3/23/2004==
 Scorpious2k: Added AC. Probably needs major adjusting of values to match live, but its a start.
 
-==3/22/2004
+==3/22/2004==
 image: Group inviting is fixed.
 
-==3/21/2004
+==3/21/2004==
 solar: corrected an issue with channeling skill/regaining concentration
 solar: changed spell resist so that only detrimental spells are resist checked.
 	will have to flag beneficial flags that need resist checking later.
 
-==3/20/2004
+==3/20/2004==
 solar: spell resists implemented
 solar: added/fixed up some spell effects.  notable ones are the stackable
 	hastes like melody of ervaj
 solar: added new version of Wiz's CheckLos routine
 solar: fixed a problem with detrimental buffs (root, mez) not working in pvp
 
-==3/15/2004
+==3/15/2004==
 solar: door updates, find sql file in release dir - doorupdate-03-15-04.sql
 
-==3/13/2004
+==3/13/2004==
 solar: fixed zone to zone movement occasionally not working
 
-==3/10/2004
+==3/10/2004==
 solar: spells that are group only should only work on the group now.
 
-==3/07/2004
+==3/07/2004==
 solar: moving coin around should work properly now
 
-==3/06/2004
+==3/06/2004==
 solar: looted stackable items should distribute properly now.
 
-==3/05/2004
+==3/05/2004==
 solar: player armor will appear the proper color now
 solar: LoY Dye works.  You need a vial of prismatic dye for each slot you
 	want to change the color of.
@@ -10666,40 +10677,40 @@ solar: looting differentiates between left and right clicks.  left clicking
 	auto equip it.
 solar: containers can now be auto equip looted
 
-==3/02/2004
+==3/02/2004==
 solar: implemented AE location spells. ex: rain of lava, sentinel.  small
 	issue with this still; the caster continues to execute the casting
 	animation for the duration of the spell.
 
-==3/01/2004
+==3/01/2004==
 solar: started implementing AE rain type spells, still some work left to do.
 	There are 2 new files for a Beacon class that you have to add to
 	the build.
 
-==2/29/2004
+==2/29/2004==
 solar: revised and corrected a ton of spell effect stuff
 solar: corrected an hp regen issue, but need to get the proper calculations
 	for regen rates.  until corrected, clients will see their hp regen
 	and then immediately change to what the server thinks it should be
 solar: probably broke something
 
-==2/28/2004
+==2/28/2004==
 solar: spells will now consume reagents properly
 solar: lifts work again
 solar: corrected a mistake that caused spells to not finish scribing properly
 solar: fixed some memory leak issues regarding hp updates
 
-==2/25/2004
+==2/25/2004==
 Scorpious2k: Added vesuvias changes for 5.5 - luclin appearence should work now
 
-==2/22/2004
+==2/22/2004==
 solar: spells should be in working order again, more work to be done on this.
 
-==2/20/2004
+==2/20/2004==
 solar: merged vesuvias' appearance (face, beard etc) and zone change
 	 changes from the old code.
 
-==2/19/2004
+==2/19/2004==
 kathgar:  Fixed, SE_Fear, SE_SpinStun, SE_Charm for fixed duration spells and not double checking breaking
 	  Range check on Archery
 	  Skill checks on Hide and Sneak
@@ -10709,44 +10720,44 @@ kathgar:  Fixed, SE_Fear, SE_SpinStun, SE_Charm for fixed duration spells and no
 	  No EQLive fixes in this change
 solar: fixed a bug that was causing people to be set as gm when they shouldn't
 
-==2/15/2004
+==2/15/2004==
 solar: characters being created are checked for validity now.  thanks to
 	kathgar for the tables.
 
-==2/14/2004
+==2/14/2004==
 Zaphod: Added Door ZonePoint information.
 
-==2/13/2004
+==2/13/2004==
 solar: Doors should work now
 solar: adventure merchant stuff fully working (check me)
 solar: petition interface stuff believed to be working but not fully tested
 LethalEncounter: (entered by solar) fixed item opcode, items fully working
 
-==2/12/2004
+==2/12/2004==
 solar: Opcodes updated from Zaphod's list, also a few others.  All the ops
 	that are tabbed in are unconfirmed, and I marked unused ones also.
 
-==2/10/2004
+==2/10/2004==
 Image: NewSource directory created for 0.5.5 (EQLive Compatability Developement)
 Image: Few opcodes updated, also implicitlen updated.
 
-==2/8/2004
+==2/8/2004==
 solar: fixed a world crash regarding deleting an empty character slot
 
-==2/7/2004
+==2/7/2004==
 solar: AE spells working properly now
 solar: wrote all new buff duration formulas
 solar: buffs being applied will properly displace multiple buffs if needed
 solar: bard spells should keep casting while sitting now
 solar: mobs should now have a proper casting animation when they cast
 
-==2/6/2004
+==2/6/2004==
 solar: some buff stacking changes, misc spell stuff
 
-==2/5/2004
+==2/5/2004==
 solar: more spell work, bards should be in a working state, but not done.
 
-==2/3/2004
+==2/3/2004==
 Image: Divine Aura now works cross zone.
 Image: Invisibility now works cross zone.
 Image: Added a zone(""); command to quest (Zones them to the specified short zone name)
@@ -10755,43 +10766,43 @@ Image: Tons of my personal GW stuff changed, you can't see bwuhahahhah
 Image: Fixed platinum duping
 Image: Levitate now works cross zone (others see you levitate and not warping)
 
-==2/2/2004
+==2/2/2004==
 Scorpious2k: added quest global variables (requires DB change see quest_globals.txt in EQEmu Release))
 Scorpious2k: fixed faction command in parser
 
-==2/2/2004
+==2/2/2004==
 solar: worked on buff stacking and some misc spell stuff.
 
-==2/1/2004
+==2/1/2004==
 solar: group spell fixes
 solar: implemented /targetgroupbuff
 
-==1/31/2004
+==1/31/2004==
 solar: revised the StringID based messaging.
 
-==1/30/2004
+==1/30/2004==
 solar: Merged in Wiz's CheckLos() mob method
 solar: Spell casting fixes.
 solar: Channeling skill should work very similar to live now.  If you end
 	your casting where you started you have a chance to finish casting.
 solar: Line of sight is checked for spells.
 
-==1/29/2004
+==1/29/2004==
 LethalEncounter: Fixed an issue with HT and LoH not repopping, apparently fatigue in player profile was moved into the timer hours slot.
 solar: Updated death.  You shouldn't receive an extra message about being
 	punched when you die to a spell anymore.
 
-==1/28/2004
+==1/28/2004==
 solar: fixed an item dupe bug.
 
-==1/26/2004
+==1/26/2004==
 solar: various fixes to spells, more coming.
 
-==1/25/2004
+==1/25/2004==
 LethalEncounter: Fixed some issues with the guilds.
 LethalEncounter: No Rent items will now be deleted if your offline for more than 30 minutes.
 
-==1/24/2004
+==1/24/2004==
 LethalEncounter: The guild management tool has been updated and works again.
 LethalEncounter: Guilds will now work almost 100% like live, only a few of the #guild commands are left over, mainly for gm management.
 kathgar: Added #revoke and #oocmute
@@ -10806,28 +10817,28 @@ solar: /surname command corrects capitalization and rejects non alpha now.
 solar: #name fixed - renames player target
 solar: made some fixes to kathgar's revoke patch - it now works as intended.
 
-==1/23/2004
+==1/23/2004==
 solar: LD clients should now be kicked when the LD timer is up, even if engaged.
 solar: Buffs should be working correctly after zoning now.
 solar: #gassign fixes
 
-==1/22/2004
+==1/22/2004==
 solar: Corpses are now sent to clients zoning in.
 
-==1/21/2004
+==1/21/2004==
 Trumpcard: Merged in mongrels fix for undead/invis. Use update sql provided in release to update.
 solar: Buff fading should work for slots besides the first one now.  This will
 	fix the 'mez bug' that was due to the icon not being stripped.
 
-==1/20/2004=
+==1/20/2004==
 solar: sense heading skill will now improve as you move around
 
-==1/19/2004=
+==1/19/2004==
 Scorpious2k: fixed faction command for quests
 LethalEncounter: Fixed a problem with queued cursor items.
 solar: fixes to #gassign
 
-==1/18/2004=
+==1/18/2004==
 LethalEncounter: Added item and spell bonuses to the mana regen formulas, they will now help.
 LethalEncounter: Fixed a bug that was killing players even when they had hitpoints remaining.
 LethalEncounter: Added server side filters
@@ -10877,7 +10888,7 @@ LethalEncounter: You will now get hit for max damage when you are sitting and an
 LethalEncounter: Fixed loot messages.
 LethalEncounter: Fixed loot so right click autoequips correctly now.
 
-==1/4/04==
+==1/4/2004==
 MYRA: changed to new opcode for follow
 MYRA: changed to new opcode for taunt
 MYRA: use new (5.x) Status labels in who for telnet connection
@@ -10898,14 +10909,14 @@ MYRA: fixed comma bug for shout command
 MYRA: added itemlink(ItemNumber) command
 
 
-==1/2/04==
+==1/2/2004==
 LethalEncounter: Added further support for eqstr_us.txt, this should cut down on lag.
 Image: Fixed client lockup related to spells. aka 'spell sticking'.
 
-==1/1/04==
+==1/1/2004==
 LethalEncounter: Updated spell structure to new spells_us.txt format. NOTE: You must have the latest eqlive spells_us.txt in your EQEmu directory.
 
-==12/21/03 through 1/1/04==
+==12/21/03
 Image/LethalEncounter/kathgar/devn00b/Shawn319:
 
 Updated/added several opcodes to match eqlive.
@@ -10933,100 +10944,102 @@ Server no longer counts item stats in the ammo slot (as it should).
 Fixed bug with eventlog that would cause certain entries to return a MySQL syntax error.
 
 
-==12/21/03==
+==12/21/2003==
 LethalEncounter: Ive been busy the last few days updating all the opcodes and structs for the recent patch.  Nearly everything works again please post any remaining unknown opcodes to the development forum.
 
-==12/16/03==
+==12/16/2003==
 Image: Fixed #zsave and added #zunderworld so you can set the zcoord for underworld.
-==12/15/03==
+
+==12/15/2003==
 Image: Took out an HP update in NPC::Damage() reduces HP updates big time and kills network traffic.
 Image: All HP Updates are done only to targets now, TODO: Queue group clients with HP updates (once they work again)
-==12/14/03==
+
+==12/14/2003==
 LethalEncounter: Fixed a bug in tradeskills that was clearing the container before it was telling the client to.
 LethalEncounter: Fixed the opcode for mend.
 LethalEncounter: Fixed the guild trainer messages.
 LethalEncounter: Fixed char create so it creates the character with a new aa struct.
 LethalEncounter: Important fix for mob movement via waypoints and such.  Mobs now move nearly exactly like live and it uses 20 times less bandwidth than before.
 
-==12/13/03==
+==12/13/2003==
 LethalEncounter: Fixed Environmental Damage
 LethalEncounter: Added support for a new database variable called startzone.
 	To use this, add a record called startzone to the variables table and make the value the zone shortname you want players to start in. This will force all players to start in that zone.
 LethalEncounter: Fixed a bug that Shawn found where /zone wouldnt work correctly in zones with similiar names.
 
-==12/12/03==
+==12/12/2003==
 Shawn319: (Bud9weiser) Fixed start_zones bug. Players should now start in correct location as long as db is up to date.
 LethalEncounter: Item tint fix.
 LethalEncounter: Tradeskill items being deleted without correct recipe fix.
 LethalEncounter: Problem with the ' character inserting into the bug table fixed.
 
-==12/11/03==
+==12/11/2003==
 LethalEncounter: Added Archery in for pvp.
 LethalEncounter: Fixed a throw bug.
 LethalEncounter: Fixed char select colors not matching your colors in game.
 
-==12/10/03==
+==12/10/2003==
 LethalEncounter: Fixed the weapon delay bug.  Special thanks to haecz for bring this to our attention.
 LethalEncounter: Fixed dup money bug.  Special thanks to afrospy also for bring this to our attention.
 LethalEncounter: Fixed Bazaar Traders, they should work correctly.
 
-==12/09/03==
+==12/09/2003==
 LethalEncounter: Fixes for item tints and dyes.
 LethalEncounter: Fixed NPC textures finally.
 
-==12/08/03==
+==12/08/2003==
 LethalEncounter: Fixed Horses/Drogmors.
 
-==12/07/03==
+==12/07/2003==
 LethalEncounter: Fixed a bug with pets causing lag.
 LethalEncounter: Fixed a crash bug/1017 bug related to login in, people on slow/lagged connections should be able to login fairly
 consistently now.
 
-==12/02/03==
+==12/02/2003==
 LethalEncounter: Trumpcard and I completely rewrote the linked lists to improve lag, they are about 4 times more efficient now.
 LethalEncounter: Fixed a small bug with zone points. BE SURE YOUR USING THE MOST UP-TO-DATE TABLE!!
 
-==11/30/03==
+==11/30/2003==
 LethalEncounter: Fixed various loot bugs, including the duplicate lore item, blah blah blah bug..
 LethalEncounter: Fixed #zonestatus and /servers to be on multiple lines
 LethalEncounter: Fixed /who all guild tags to display the right guild
 LethalEncounter: Added the ability to send multi-lined emotes with the <BR> newline.
 LethalEncounter: Fixed the bug that gave the message: "Multiplier == 0 in Client::CalcBaseHP"
 
-==11/29/03==
+==11/29/2003==
 Image: Fixed last names for clients (When a new client zoned in, didn't send lastname).
 
-==11/28/03==
+==11/28/2003==
 LethalEncounter: Added a default instance for pets that arent created via legit spells.
 LethalEncounter: Fixed the spell scribe issues.
 
-==11/25/03==
+==11/25/2003==
 LethalEncounter: Added a new table called ground_spawns.  This will allow you to spawn items randomly throughout the zone. Use this for only random locations, use the object table for static ones.
 LethalEncounter: Added Timers for ground spawns so they will respawn based on the time you set.
 
-==11/24/03==
+==11/24/2003==
 Image: Fixed zoning and deaths so you no longer drop from the server.
 Image: Properly enabled LDoN on EQEmu.
 Image: Basic Adventure Merchant code implemented, throwing it to the STL guys to properly optimize.
 LethalEncounter: Fixed Tradeskill objects.  If the objects show up as bags, thats a db issue
 
-==11/23/03==
+==11/23/2003==
 Trumpcard:  Several zone performance enhancements, as well as changes to decrease combat lag.
 LethalEncounter: Reworked pets, they should now work properly.
 
-==11/21/03==
+==11/21/2003==
 LethalEncounter: Merchants wont trade with people while they are fighting now.
 LethalEncounter: Players can no longer attack while invulnerable.
 LethalEncounter: Fixed an AA bug that gave the player 199 aa points.
 
-==11/18/03==
+==11/18/2003==
 LethalEncounter: Lotsa cool fixes like crash fixes and guild fixes and cool stuff like that
 
-==11/17/03==
+==11/17/2003==
 LethalEncounter: Finally got /who all done and *hopefully* free of bugs.
 LethalEncounter: Fixed a crash bug with guilds and added some of the Guildmanagement features.
 
-==11/16/03==
+==11/16/2003==
 Trumpcard: Several deallocate and mem leak errors corrected.
 solar: Fixed bug with mobs assisting entities they shouldn't.  Often this
 	show itself with other mobs helping the player when the player
@@ -11034,16 +11047,16 @@ solar: Fixed bug with mobs assisting entities they shouldn't.  Often this
 LethalEncounter: Added in the GuildManagement tool. You will need 2 new columns in your character_ table for this.
 LethalEncounter: Fixed a couple crash bugs with guilds and spells.
 
-==11/15/03==
+==11/15/2003==
 solar: Fixed a bug in commands where if you didn't define an accesslevel for a command
 	in the addon.ini it would default to accesslevel 0 instead of the hardcoded default.
 solar: Modified #help command to search for a partial command specified as argument.
 solar: HP wasn't being updated to client properly and would fall out of sync
 
-==11/14/03==
+==11/14/2003==
 LethalEncounter: Fixed a bug in doors that would cause triggered doors to go into an endless loop and crash.
 
-==11/13/03==
+==11/13/2003==
 kathgar: Fixed a crash when calling ZSList::FindByZoneID() when sending an invalid zone number.
          Stack was corrupt in the backtrace, so I am not sure what called it in this way.
 LethalEncounter: Fixed animation bug with attack.
@@ -11052,44 +11065,44 @@ LethalEncounter: Character Select will now show your equipment (Existing charact
 LethalEncounter: NPCs will now equip weapons and items from the db.
 LethalEncounter: You can now give weapons and items to NPCs to equip.
 
-==11/12/03==
+==11/12/2003==
 LethalEncounter: Fixed skills, we had the struct one int32 off.
 LethalEncounter: Fixed GM Trainers, they should now work as intended.
 
-==11/11/03==
+==11/11/2003==
 Doodman: Fixed zone crash in CheckCloseArrgo() during assist checking based on
 flawed if logic.
 
-==11/11/03==
+==11/11/2003==
 LethalEncounter: Fixed Stamina issues.
 
-==11/10/03==
+==11/10/2003==
 LethalEncounter: Fixed Quests.
 LethalEncounter: A quest fix that makes them use far less memory, up to 25 MB per computer
 
-==11/09/03==
+==11/09/2003==
 LethalEncounter: Fixed zoning, zone_points should now work correctly, but make sure you have the latest ones in zone_points!
 LethalEncounter: Fixed problem with spells not scribing.
 LethalEncounter: Fixed zoning bug where you zoned back into the same zone, but it looked like you were in the new zone.
 
-==11/06/03==
+==11/06/2003==
 Image: Guildwars code and fixed a bug in MobAI for NPCs assisting clients, clients do not use
 IsEngaged(), so it always returned false, now it uses AutoAttackEnabled() in its place for clients.
 Image: Reversed the AICheckCloseSpells if statements, now sanity checks before distance check, uses less CPU usage.
 
-==11/05/03==
+==11/05/2003==
 LethalEncounter: Updated all of the opcodes that were changed in the patch today.
 LethalEncounter: Refined AA's some, added table to hold the timers for AA's so users can exploit them. Look in db.sql for the table.
 
 
-==11/04/03==
+==11/04/2003==
 LethalEncounter: Added in the basic structure for AA's and got some of them working.
 
-==11/03/03==
+==11/03/2003==
 LethalEncounter: Fixed factions.
 LethalEncounter: Fixed issues with mobs of different factions or no faction assisting.
 
-==10/29/03 to 11/02/03==
+==10/29/2003==
 LethalEncounter: Fixed X, Y coords.
 LethalEncounter: Added in groups.
 LethalEncounter: Added in trades.
@@ -11105,16 +11118,16 @@ LethalEncounter: Fixed lifts.
 LethalEncounter: Fixed automatic weather changes.  Change the default in the zone table to suit your needs. 1: normal 2: Rainy most of the time 3: Snowing most of the time
 LethalEncounter: Fixed lotsa other important stuff that I cant remember :)
 
-==10/29/03==
+==10/29/2003==
 devn00b: Yet again removed Faulty pet code. LEAVE THEM ALONE
 
-==10/17/03==
+==10/17/2003==
 Image: Zone points code put in, need some testing done on it please!
 
-==10/15/03==
+==10/15/2003==
 Image: More optimization to the aggro code and an infinite for loop fixed.
 
-==10/14/03==
+==10/14/2003==
 kathgar:  Removed deprecated guildwars code
           Added #ifdefs for IPC code, no more IsInteractive checks wasting cycles
           Fixed a memleak in NPC with attacked_timer
@@ -11124,33 +11137,31 @@ merth: Updated zone objects:
 	* Fully supports imported data from packet collector
 	* Objects dropped to ground persist zone sessions
 
-==10/13/03==
+==10/13/2003==
 Image: Optimizations to Aggro code, ~10% more efficient according to Trumpcard.
 
-==10/11/03==
+==10/11/2003==
 Trumpcard: Lots of performance improvements to combat code/AI code.  Streamlined several calls,  and found and removed unneeded calls
 	   in MobAI that were causing serious bottlenecks.  Went through and caught a few memory leaks, and converted
 	   many deletes to safe deletes.
 
-==10/10/03==
+==10/10/2003==
 LethalEncounter: Somewhere around this date I added in bazaar traders and cool features like that.
 
-==10/8/03==
+==10/8/2003==
 Trumpcard:  Starting items are now in.  LE also fixed the combat damage struct and mob hp bar updates.
 
-==10/8/03==
+==10/8/2003==
 scruffy:  Inverted the XY coordinates system to work like the EQLive system. Run invertxy.sql to update existing databases.
 
-==10/6/03==
+==10/6/2003==
 kathgar:  Added opcodes for things such as the LFG tool from SEQ, replaced some instances of static opcode use
 
-==10/5/03==
+==10/5/2003==
 devn00b: Removed Faulty pet code, replaced with working code.
 
-==09/24/03==
+==09/24/2003==
 Image: Added the functions for the GuildWars point system.
 
-==8/10/03==
+==8/10/2003==
 devn00b: Moved pets from hardcoded to DB based. need to source pets.sql
-
-============

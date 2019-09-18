@@ -435,7 +435,7 @@ bool Client::TrainDiscipline(uint32 itemid) {
 	const EQEmu::ItemData *item = database.GetItem(itemid);
 	if(item == nullptr) {
 		Message(Chat::Red, "Unable to find the tome you turned in!");
-		Log(Logs::General, Logs::Error, "Unable to find turned in tome id %lu\n", (unsigned long)itemid);
+		LogError("Unable to find turned in tome id [{}]\n", (unsigned long)itemid);
 		return(false);
 	}
 

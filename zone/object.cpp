@@ -339,7 +339,7 @@ const EQEmu::ItemInstance* Object::GetItem(uint8 index) {
 void Object::PutItem(uint8 index, const EQEmu::ItemInstance* inst)
 {
 	if (index > 9) {
-		Log(Logs::General, Logs::Error, "Object::PutItem: Invalid index specified (%i)", index);
+		LogError("Object::PutItem: Invalid index specified ([{}])", index);
 		return;
 	}
 
@@ -443,6 +443,14 @@ bool Object::Process(){
 	if(m_ground_spawn && respawn_timer.Check()){
 		RandomSpawn(true);
 	}
+
+	if (user != nullptr && !entity_list.GetClientByCharID(user->CharacterID())) {
+		m_inuse = false;
+		last_user = user;
+		user->SetTradeskillObject(nullptr);
+		user = nullptr;
+	}
+
 	return true;
 }
 
@@ -465,7 +473,7 @@ void Object::RandomSpawn(bool send_packet) {
 		} 
 	}
 
-	Log(Logs::Detail, Logs::Zone_Server, "Object::RandomSpawn(%s): %d (%.2f, %.2f, %.2f)", m_data.object_name, m_inst->GetID(), m_data.x, m_data.y, m_data.z);
+	LogInfo("Object::RandomSpawn([{}]): [{}] ([{}], [{}], [{}])", m_data.object_name, m_inst->GetID(), m_data.x, m_data.y, m_data.z);
 	
 	respawn_timer.Disable();
 
@@ -554,7 +562,6 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 		ClickObjectAction_Struct* coa = (ClickObjectAction_Struct*)outapp->pBuffer;
 
 		//TODO: there is prolly a better way to do this.
-		m_inuse = true;
 		coa->type = m_type;
 		coa->unknown16 = 0x0a;
 
@@ -576,12 +583,6 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 			}
 		}
 
-		if(sender->IsLooting())
-		{
-			coa->open = 0x00;
-			user = sender;
-		}
-
 		sender->QueuePacket(outapp);
 		safe_delete(outapp);
 
@@ -590,6 +591,7 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 			return(false);
 
 		// Starting to use this object
+		m_inuse = true;
 		sender->SetTradeskillObject(this);
 
 		user = sender;
@@ -645,7 +647,7 @@ uint32 ZoneDatabase::AddObject(uint32 type, uint32 icon, const Object_Struct& ob
     safe_delete_array(object_name);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		Log(Logs::General, Logs::Error, "Unable to insert object: %s", results.ErrorMessage().c_str());
+		LogError("Unable to insert object: [{}]", results.ErrorMessage().c_str());
 		return 0;
 	}
 
@@ -684,7 +686,7 @@ void ZoneDatabase::UpdateObject(uint32 id, uint32 type, uint32 icon, const Objec
     safe_delete_array(object_name);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		Log(Logs::General, Logs::Error, "Unable to update object: %s", results.ErrorMessage().c_str());
+		LogError("Unable to update object: [{}]", results.ErrorMessage().c_str());
 		return;
 	}
 
@@ -728,7 +730,7 @@ void ZoneDatabase::DeleteObject(uint32 id)
 	std::string query = StringFormat("DELETE FROM object WHERE id = %i", id);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		Log(Logs::General, Logs::Error, "Unable to delete object: %s", results.ErrorMessage().c_str());
+		LogError("Unable to delete object: [{}]", results.ErrorMessage().c_str());
 	}
 }
 
