@@ -537,11 +537,7 @@ bool RuleManager::UpdateOrphanedRules(Database *db, bool quiet_update)
 			return false;
 		}
 
-		LogInfo(
-			"[{}] Orphaned Rule%s Deleted from 'All Rulesets' (-1)",
-			orphaned_rule_entries.size(),
-			(orphaned_rule_entries.size() == 1 ? "" : "s")
-		);
+		LogInfo("[{}] Orphaned Rule(s) Deleted from [All Rulesets] (-1)", orphaned_rule_entries.size());
 	}
 	
 	return true;
