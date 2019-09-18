@@ -146,11 +146,11 @@ bool RuleManager::SetRule(const char *rule_name, const char *rule_value, Databas
 	switch(type) {
 		case IntRule:
 			m_RuleIntValues[index] = atoi(rule_value);
-			Log(Logs::Detail, Logs::Rules, "Set rule %s to value %d", rule_name, m_RuleIntValues[index]);
+			LogRules("Set rule [{}] to value [{}]", rule_name, m_RuleIntValues[index]);
 			break;
 		case RealRule:
 			m_RuleRealValues[index] = atof(rule_value);
-			Log(Logs::Detail, Logs::Rules, "Set rule %s to value %.13f", rule_name, m_RuleRealValues[index]);
+			LogRules("Set rule [{}] to value [{}]", rule_name, m_RuleRealValues[index]);
 			break;
 		case BoolRule:
 			uint32 val = 0;
@@ -158,7 +158,7 @@ bool RuleManager::SetRule(const char *rule_name, const char *rule_value, Databas
 				val = 1;
 
 			m_RuleBoolValues[index] = val;
-			Log(Logs::Detail, Logs::Rules, "Set rule %s to value %s", rule_name, m_RuleBoolValues[index] == 1 ? "true" : "false");
+			LogRules("Set rule [{}] to value [{}]", rule_name, m_RuleBoolValues[index] == 1 ? "true" : "false");
 			break;
 	}
 
