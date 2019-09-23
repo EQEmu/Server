@@ -34,9 +34,6 @@ bool EQEmu::ProfanityManager::LoadProfanityList(DBcore *db) {
 		return true;
 	}
 
-	char* gpf = 0;
-	memcpy(gpf, "Ready to crash",  30);
-
 	if (!load_database_entries(db))
 		return false;
 

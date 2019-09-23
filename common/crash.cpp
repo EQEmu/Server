@@ -116,12 +116,13 @@ void set_exception_handler() {
 #include <stdlib.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <sys/fcntl.h>
 
 void print_trace()
 {
-	auto uid = geteuid ();
+	auto uid = geteuid();
 
-	std::cout << "running as user id " << uid << std::endl;
+	std::string temp_output_file = "/tmp/dump-output";
 
 	char pid_buf[30];
 	sprintf(pid_buf, "%d", getpid());
@@ -129,7 +130,9 @@ void print_trace()
 	name_buf[readlink("/proc/self/exe", name_buf, 511)] = 0;
 	int child_pid = fork();
 	if (!child_pid) {
-		dup2(2, 1); // redirect output to stderr
+		int fd = open(temp_output_file.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+
+		dup2(fd, 1); // redirect output to stderr
 		fprintf(stdout, "stack trace for %s pid=%s\n", name_buf, pid_buf);
 		if (uid == 0) {
 			execlp("gdb", "gdb", "--batch", "-n", "-ex", "thread", "-ex", "bt", name_buf, pid_buf, NULL);
@@ -138,17 +141,30 @@ void print_trace()
 			execlp("sudo", "gdb", "gdb", "--batch", "-n", "-ex", "thread", "-ex", "bt", name_buf, pid_buf, NULL);
 		}
 
+		close(fd);
+
 		abort(); /* If gdb failed to start */
 	}
 	else {
 		waitpid(child_pid, NULL, 0);
 	}
+
+	std::ifstream    input(temp_output_file);
+	for (std::string line; getline(input, line);) {
+		LogCrash("{}", line);
+	}
+
+	std::remove(temp_output_file.c_str());
+
 	exit(1);
 }
 
 // crash is off or an unhandled platform
 void set_exception_handler()
 {
+	signal(SIGABRT, reinterpret_cast<void (*)(int)>(print_trace));
+	signal(SIGFPE, reinterpret_cast<void (*)(int)>(print_trace));
+	signal(SIGFPE, reinterpret_cast<void (*)(int)>(print_trace));
 	signal(SIGSEGV, reinterpret_cast<void (*)(int)>(print_trace));
 }
 #endif
