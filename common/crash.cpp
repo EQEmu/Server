@@ -111,7 +111,44 @@ void set_exception_handler() {
 	SetUnhandledExceptionFilter(windows_exception_handler);
 }
 #else
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
+void print_trace()
+{
+	auto uid = geteuid ();
+
+	std::cout << "running as user id " << uid << std::endl;
+
+	char pid_buf[30];
+	sprintf(pid_buf, "%d", getpid());
+	char name_buf[512];
+	name_buf[readlink("/proc/self/exe", name_buf, 511)] = 0;
+	int child_pid = fork();
+	if (!child_pid) {
+		dup2(2, 1); // redirect output to stderr
+		fprintf(stdout, "stack trace for %s pid=%s\n", name_buf, pid_buf);
+		if (uid == 0) {
+			execlp("gdb", "gdb", "--batch", "-n", "-ex", "thread", "-ex", "bt", name_buf, pid_buf, NULL);
+		}
+		else {
+			execlp("sudo", "gdb", "gdb", "--batch", "-n", "-ex", "thread", "-ex", "bt", name_buf, pid_buf, NULL);
+		}
+
+		abort(); /* If gdb failed to start */
+	}
+	else {
+		waitpid(child_pid, NULL, 0);
+	}
+	exit(1);
+}
+
 // crash is off or an unhandled platform
-void set_exception_handler() {
+void set_exception_handler()
+{
+	signal(SIGSEGV, reinterpret_cast<void (*)(int)>(print_trace));
 }
 #endif
