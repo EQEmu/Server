@@ -2163,6 +2163,48 @@ XS(XS_NPC_GetScore) {
 	XSRETURN(1);
 }
 
+XS(XS_NPC_MerchantOpenShop);
+XS(XS_NPC_MerchantOpenShop) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: NPC::MerchantOpenShop(THIS)");
+	{
+		NPC *THIS;
+		dXSTARG;
+		if (sv_derived_from(ST(0), "NPC")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(NPC *, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type NPC");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		THIS->MerchantOpenShop();
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_NPC_MerchantCloseShop);
+XS(XS_NPC_MerchantCloseShop) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: NPC::MerchantCloseShop(THIS)");
+	{
+		NPC *THIS;
+		dXSTARG;
+		if (sv_derived_from(ST(0), "NPC")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(NPC *, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type NPC");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		THIS->MerchantCloseShop();
+	}
+	XSRETURN_EMPTY;
+}
+
 XS(XS_NPC_AddMeleeProc);
 XS(XS_NPC_AddMeleeProc) {
 	dXSARGS;
@@ -2511,6 +2553,8 @@ XS(boot_NPC) {
 	newXSproto(strcpy(buf, "GetAvoidanceRating"), XS_NPC_GetAvoidanceRating, file, "$");
 	newXSproto(strcpy(buf, "GetSpawnKillCount"), XS_NPC_GetSpawnKillCount, file, "$");
 	newXSproto(strcpy(buf, "GetScore"), XS_NPC_GetScore, file, "$");
+	newXSproto(strcpy(buf, "MerchantOpenShop"), XS_NPC_MerchantOpenShop, file, "$");
+	newXSproto(strcpy(buf, "MerchantCloseShop"), XS_NPC_MerchantCloseShop, file, "$");
 	newXSproto(strcpy(buf, "AddMeleeProc"), XS_NPC_AddMeleeProc, file, "$$$");
 	newXSproto(strcpy(buf, "AddRangedProc"), XS_NPC_AddRangedProc, file, "$$$");
 	newXSproto(strcpy(buf, "AddDefensiveProc"), XS_NPC_AddDefensiveProc, file, "$$$");
