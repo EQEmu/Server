@@ -135,6 +135,8 @@ public:
 	void UnmemSpellBySpellID(int32 spell_id);
 	void UnmemSpellAll();
 	void UnmemSpellAll(bool update_client);
+	uint16 FindMemmedSpellBySlot(int slot);
+	int MemmedCount();
 	void ScribeSpell(int spell_id, int slot);
 	void ScribeSpell(int spell_id, int slot, bool update_client);
 	void UnscribeSpell(int slot);
@@ -148,7 +150,9 @@ public:
 	void UntrainDisc(int slot, bool update_client);
 	void UntrainDiscAll();
 	void UntrainDiscAll(bool update_client);
+	bool IsStanding();
 	bool IsSitting();
+	bool IsCrouching();
 	void SetFeigned(bool v);
 	bool GetFeigned();
 	bool AutoSplitEnabled();
@@ -265,6 +269,8 @@ public:
 	void OpenLFGuildWindow();
 	void Signal(uint32 id);
 	void AddAlternateCurrencyValue(uint32 currency, int amount);
+	void SetAlternateCurrencyValue(uint32 currency, int amount);
+	int GetAlternateCurrencyValue(uint32 currency);
 	void SendWebLink(const char *site);
 	bool HasSpellScribed(int spell_id);
 	void SetAccountFlag(std::string flag, std::string val);

@@ -240,7 +240,7 @@ void NPC::AddLootDrop(const EQEmu::ItemData *item2, ItemList* itemlist, int16 ch
 
 	auto item = new ServerLootItem_Struct;
 #if EQDEBUG>=11
-		Log(Logs::General, Logs::None, "Adding drop to npc: %s, Item: %i", GetName(), item2->ID);
+		LogDebug("Adding drop to npc: [{}], Item: [{}]", GetName(), item2->ID);
 #endif
 
 	EQApplicationPacket* outapp = nullptr;
@@ -352,7 +352,7 @@ void NPC::AddLootDrop(const EQEmu::ItemData *item2, ItemList* itemlist, int16 ch
 		}
 		else if (foundslot == EQEmu::invslot::slotSecondary
 			&& (GetOwner() != nullptr || (CanThisClassDualWield() && zone->random.Roll(NPC_DW_CHANCE)) || (item2->Damage==0)) &&
-			(item2->IsType1HWeapon() || item2->ItemType == EQEmu::item::ItemTypeShield))
+			(item2->IsType1HWeapon() || item2->ItemType == EQEmu::item::ItemTypeShield || item2->ItemType ==  EQEmu::item::ItemTypeLight))
 		{
 			if (item2->Proc.Effect!=0)
 				CastToMob()->AddProcToWeapon(item2->Proc.Effect, true);

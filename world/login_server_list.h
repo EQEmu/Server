@@ -18,14 +18,12 @@ public:
 	void	Add(const char*, uint16, const char*, const char*, bool);
 
 	bool	SendInfo();
-	bool	SendNewInfo();
 	bool	SendStatus();
 
 	bool	SendPacket(ServerPacket *pack);
 	bool	SendAccountUpdate(ServerPacket *pack);
 	bool	Connected();
 	bool	AllConnected();
-	bool	MiniLogin();
 	bool	CanUpdate();
 	size_t GetServerCount() const { return m_list.size(); }
 

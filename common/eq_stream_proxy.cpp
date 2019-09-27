@@ -42,8 +42,8 @@ void EQStreamProxy::QueuePacket(const EQApplicationPacket *p, bool ack_req) {
 		return;
 
 	if (p->GetOpcode() != OP_SpecialMesg) {
-		Log(Logs::General, Logs::Server_Client_Packet, "[%s - 0x%04x] [Size: %u]", OpcodeManager::EmuToName(p->GetOpcode()), p->GetOpcode(), p->Size());
-		Log(Logs::General, Logs::Server_Client_Packet_With_Dump, "[%s - 0x%04x] [Size: %u] %s", OpcodeManager::EmuToName(p->GetOpcode()), p->GetOpcode(), p->Size(), DumpPacketToString(p).c_str());
+		Log(Logs::General, Logs::PacketServerClient, "[%s - 0x%04x] [Size: %u]", OpcodeManager::EmuToName(p->GetOpcode()), p->GetOpcode(), p->Size());
+		Log(Logs::General, Logs::PacketServerClientWithDump, "[%s - 0x%04x] [Size: %u] %s", OpcodeManager::EmuToName(p->GetOpcode()), p->GetOpcode(), p->Size(), DumpPacketToString(p).c_str());
 	}
 
 	EQApplicationPacket *newp = p->Copy();
@@ -82,32 +82,27 @@ uint16 EQStreamProxy::GetRemotePort() const {
 	return(m_stream->GetRemotePort());
 }
 
-const uint32 EQStreamProxy::GetBytesSent() const
-{
-	return(m_stream->GetBytesSent());
-}
-
-const uint32 EQStreamProxy::GetBytesRecieved() const
-{
-	return(m_stream->GetBytesRecieved());
-}
-
-const uint32 EQStreamProxy::GetBytesSentPerSecond() const
-{
-	return(m_stream->GetBytesSentPerSecond());
-}
-
-const uint32 EQStreamProxy::GetBytesRecvPerSecond() const
-{
-	return(m_stream->GetBytesRecvPerSecond());
-}
-
 void EQStreamProxy::ReleaseFromUse() {
 	m_stream->ReleaseFromUse();
 }
 
 void EQStreamProxy::RemoveData() {
 	m_stream->RemoveData();
+}
+
+EQStreamInterface::Stats EQStreamProxy::GetStats() const
+{
+	return m_stream->GetStats();
+}
+
+void EQStreamProxy::ResetStats()
+{
+	m_stream->ResetStats();
+}
+
+EQStreamManagerInterface *EQStreamProxy::GetManager() const
+{
+	return m_stream->GetManager();
 }
 
 bool EQStreamProxy::CheckState(EQStreamState state) {

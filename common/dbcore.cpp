@@ -2,8 +2,9 @@
 #include <winsock2.h>
 #endif
 
-#include "../common/misc_functions.h"
-#include "../common/eqemu_logsys.h"
+#include "misc_functions.h"
+#include "eqemu_logsys.h"
+#include "timer.h"
 
 #include "dbcore.h"
 
@@ -14,33 +15,37 @@
 #include <string.h>
 
 #ifdef _WINDOWS
-	#define snprintf	_snprintf
-	#define strncasecmp	_strnicmp
-	#define strcasecmp	_stricmp
-	#include <process.h>
+#define snprintf	_snprintf
+#define strncasecmp	_strnicmp
+#define strcasecmp	_stricmp
+#include <process.h>
 #else
-	#include "unix.h"
-	#include <pthread.h>
+
+#include "unix.h"
+#include <pthread.h>
+
 #endif
 
 #ifdef _EQDEBUG
-	#define DEBUG_MYSQL_QUERIES 0
+#define DEBUG_MYSQL_QUERIES 0
 #else
-	#define DEBUG_MYSQL_QUERIES 0
+#define DEBUG_MYSQL_QUERIES 0
 #endif
 
-DBcore::DBcore() {
+DBcore::DBcore()
+{
 	mysql_init(&mysql);
-	pHost = 0;
-	pUser = 0;
+	pHost     = 0;
+	pUser     = 0;
 	pPassword = 0;
 	pDatabase = 0;
 	pCompress = false;
-	pSSL = false;
-	pStatus = Closed;
+	pSSL      = false;
+	pStatus   = Closed;
 }
 
-DBcore::~DBcore() {
+DBcore::~DBcore()
+{
 	mysql_close(&mysql);
 	safe_delete_array(pHost);
 	safe_delete_array(pUser);
@@ -49,7 +54,8 @@ DBcore::~DBcore() {
 }
 
 // Sends the MySQL server a keepalive
-void DBcore::ping() {
+void DBcore::ping()
+{
 	if (!MDatabase.trylock()) {
 		// well, if's it's locked, someone's using it. If someone's using it, it doesnt need a keepalive
 		return;
@@ -63,34 +69,35 @@ MySQLRequestResult DBcore::QueryDatabase(std::string query, bool retryOnFailureO
 	return QueryDatabase(query.c_str(), query.length(), retryOnFailureOnce);
 }
 
-MySQLRequestResult DBcore::QueryDatabase(const char* query, uint32 querylen, bool retryOnFailureOnce)
+MySQLRequestResult DBcore::QueryDatabase(const char *query, uint32 querylen, bool retryOnFailureOnce)
 {
+	BenchTimer timer;
+	timer.reset();
+
 	LockMutex lock(&MDatabase);
 
 	// Reconnect if we are not connected before hand.
-	if (pStatus != Connected)
+	if (pStatus != Connected) {
 		Open();
+	}
 
 	// request query. != 0 indicates some kind of error.
-	if (mysql_real_query(&mysql, query, querylen) != 0)
-	{
+	if (mysql_real_query(&mysql, query, querylen) != 0) {
 		unsigned int errorNumber = mysql_errno(&mysql);
 
-		if (errorNumber == CR_SERVER_GONE_ERROR)
+		if (errorNumber == CR_SERVER_GONE_ERROR) {
 			pStatus = Error;
+		}
 
 		// error appears to be a disconnect error, may need to try again.
-		if (errorNumber == CR_SERVER_LOST || errorNumber == CR_SERVER_GONE_ERROR)
-		{
+		if (errorNumber == CR_SERVER_LOST || errorNumber == CR_SERVER_GONE_ERROR) {
 
-			if (retryOnFailureOnce)
-			{
-				std::cout << "Database Error: Lost connection, attempting to recover...." << std::endl;
+			if (retryOnFailureOnce) {
+				LogInfo("Database Error: Lost connection, attempting to recover");
 				MySQLRequestResult requestResult = QueryDatabase(query, querylen, false);
 
-				if (requestResult.Success())
-				{
-					std::cout << "Reconnection to database successful." << std::endl;
+				if (requestResult.Success()) {
+					LogInfo("Reconnection to database successful");
 					return requestResult;
 				}
 
@@ -102,109 +109,154 @@ MySQLRequestResult DBcore::QueryDatabase(const char* query, uint32 querylen, boo
 
 			snprintf(errorBuffer, MYSQL_ERRMSG_SIZE, "#%i: %s", mysql_errno(&mysql), mysql_error(&mysql));
 
-			return MySQLRequestResult(nullptr, 0, 0, 0, 0, (uint32)mysql_errno(&mysql), errorBuffer);
+			return MySQLRequestResult(nullptr, 0, 0, 0, 0, (uint32) mysql_errno(&mysql), errorBuffer);
 		}
 
 		auto errorBuffer = new char[MYSQL_ERRMSG_SIZE];
 		snprintf(errorBuffer, MYSQL_ERRMSG_SIZE, "#%i: %s", mysql_errno(&mysql), mysql_error(&mysql));
 
 		/* Implement Logging at the Root */
-		if (mysql_errno(&mysql) > 0 && strlen(query) > 0){
+		if (mysql_errno(&mysql) > 0 && strlen(query) > 0) {
 			if (LogSys.log_settings[Logs::MySQLError].is_category_enabled == 1)
 				Log(Logs::General, Logs::MySQLError, "%i: %s \n %s", mysql_errno(&mysql), mysql_error(&mysql), query);
 		}
 
-		return MySQLRequestResult(nullptr, 0, 0, 0, 0, mysql_errno(&mysql),errorBuffer);
+		return MySQLRequestResult(nullptr, 0, 0, 0, 0, mysql_errno(&mysql), errorBuffer);
 
 	}
 
 	// successful query. get results.
-	MYSQL_RES* res = mysql_store_result(&mysql);
-	uint32 rowCount = 0;
+	MYSQL_RES *res     = mysql_store_result(&mysql);
+	uint32    rowCount = 0;
 
-	if (res != nullptr)
-        rowCount = (uint32)mysql_num_rows(res);
+	if (res != nullptr) {
+		rowCount = (uint32) mysql_num_rows(res);
+	}
 
-	MySQLRequestResult requestResult(res, (uint32)mysql_affected_rows(&mysql), rowCount, (uint32)mysql_field_count(&mysql), (uint32)mysql_insert_id(&mysql));
-	
-	if (LogSys.log_settings[Logs::MySQLQuery].is_category_enabled == 1)
-	{
+	MySQLRequestResult requestResult(
+		res,
+		(uint32) mysql_affected_rows(&mysql),
+		rowCount,
+		(uint32) mysql_field_count(&mysql),
+		(uint32) mysql_insert_id(&mysql)
+	);
+
+	if (LogSys.log_settings[Logs::MySQLQuery].is_category_enabled == 1) {
 		if ((strncasecmp(query, "select", 6) == 0)) {
-			Log(Logs::General, Logs::MySQLQuery, "%s (%u row%s returned)", query, requestResult.RowCount(), requestResult.RowCount() == 1 ? "" : "s");
+			LogF(
+				Logs::General,
+				Logs::MySQLQuery,
+				"{0} ({1} row{2} returned) ({3}ms)",
+				query,
+				requestResult.RowCount(),
+				requestResult.RowCount() == 1 ? "" : "s",
+				std::to_string(timer.elapsed())
+			);
 		}
 		else {
-			Log(Logs::General, Logs::MySQLQuery, "%s (%u row%s affected)", query, requestResult.RowsAffected(), requestResult.RowsAffected() == 1 ? "" : "s");
+			LogF(
+				Logs::General,
+				Logs::MySQLQuery,
+				"{0} ({1} row{2} affected) ({3}ms)",
+				query,
+				requestResult.RowsAffected(),
+				requestResult.RowsAffected() == 1 ? "" : "s",
+				std::to_string(timer.elapsed())
+			);
 		}
 	}
 
 	return requestResult;
 }
 
-void DBcore::TransactionBegin() {
+void DBcore::TransactionBegin()
+{
 	QueryDatabase("START TRANSACTION");
 }
 
-void DBcore::TransactionCommit() {
+void DBcore::TransactionCommit()
+{
 	QueryDatabase("COMMIT");
 }
 
-void DBcore::TransactionRollback() {
+void DBcore::TransactionRollback()
+{
 	QueryDatabase("ROLLBACK");
 }
 
-uint32 DBcore::DoEscapeString(char* tobuf, const char* frombuf, uint32 fromlen) {
+uint32 DBcore::DoEscapeString(char *tobuf, const char *frombuf, uint32 fromlen)
+{
 //	No good reason to lock the DB, we only need it in the first place to check char encoding.
 //	LockMutex lock(&MDatabase);
 	return mysql_real_escape_string(&mysql, tobuf, frombuf, fromlen);
 }
 
-bool DBcore::Open(const char* iHost, const char* iUser, const char* iPassword, const char* iDatabase,uint32 iPort, uint32* errnum, char* errbuf, bool iCompress, bool iSSL) {
+bool DBcore::Open(
+	const char *iHost,
+	const char *iUser,
+	const char *iPassword,
+	const char *iDatabase,
+	uint32 iPort,
+	uint32 *errnum,
+	char *errbuf,
+	bool iCompress,
+	bool iSSL
+)
+{
 	LockMutex lock(&MDatabase);
 	safe_delete(pHost);
 	safe_delete(pUser);
 	safe_delete(pPassword);
 	safe_delete(pDatabase);
-	pHost = strcpy(new char[strlen(iHost) + 1], iHost);
-	pUser = strcpy(new char[strlen(iUser) + 1], iUser);
+	pHost     = strcpy(new char[strlen(iHost) + 1], iHost);
+	pUser     = strcpy(new char[strlen(iUser) + 1], iUser);
 	pPassword = strcpy(new char[strlen(iPassword) + 1], iPassword);
 	pDatabase = strcpy(new char[strlen(iDatabase) + 1], iDatabase);
 	pCompress = iCompress;
-	pPort = iPort;
-	pSSL = iSSL;
+	pPort     = iPort;
+	pSSL      = iSSL;
 	return Open(errnum, errbuf);
 }
 
-bool DBcore::Open(uint32* errnum, char* errbuf) {
-	if (errbuf)
+bool DBcore::Open(uint32 *errnum, char *errbuf)
+{
+	if (errbuf) {
 		errbuf[0] = 0;
+	}
 	LockMutex lock(&MDatabase);
-	if (GetStatus() == Connected)
+	if (GetStatus() == Connected) {
 		return true;
+	}
 	if (GetStatus() == Error) {
 		mysql_close(&mysql);
-		mysql_init(&mysql);		// Initialize structure again
+		mysql_init(&mysql);        // Initialize structure again
 	}
-	if (!pHost)
+	if (!pHost) {
 		return false;
+	}
 	/*
 	Added CLIENT_FOUND_ROWS flag to the connect
 	otherwise DB update calls would say 0 rows affected when the value already equalled
 	what the function was tring to set it to, therefore the function would think it failed
 	*/
 	uint32 flags = CLIENT_FOUND_ROWS;
-	if (pCompress)
+	if (pCompress) {
 		flags |= CLIENT_COMPRESS;
-	if (pSSL)
+	}
+	if (pSSL) {
 		flags |= CLIENT_SSL;
+	}
 	if (mysql_real_connect(&mysql, pHost, pUser, pPassword, pDatabase, pPort, 0, flags)) {
 		pStatus = Connected;
 		return true;
 	}
 	else {
-		if (errnum)
+		if (errnum) {
 			*errnum = mysql_errno(&mysql);
-		if (errbuf)
+		}
+		if (errbuf) {
 			snprintf(errbuf, MYSQL_ERRMSG_SIZE, "#%i: %s", mysql_errno(&mysql), mysql_error(&mysql));
+		}
 		pStatus = Error;
 		return false;
 	}

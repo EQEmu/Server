@@ -1,12 +1,13 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.2)
 
 SET(zone_sources
 	aa.cpp
 	aa_ability.cpp
 	aggro.cpp
 	aggromanager.cpp
-	aura.cpp
+	api_service.cpp
 	attack.cpp
+	aura.cpp
 	beacon.cpp
 	bonuses.cpp
 	bot.cpp
@@ -78,6 +79,7 @@ SET(zone_sources
 	horse.cpp
 	inventory.cpp
 	loottables.cpp
+	main.cpp
 	map.cpp
 	merc.cpp
 	mob.cpp
@@ -86,7 +88,6 @@ SET(zone_sources
 	mob_movement_manager.cpp
 	mob_info.cpp
 	mod_functions.cpp
-	net.cpp
 	npc.cpp
 	npc_ai.cpp
 	npc_scale_manager.cpp
@@ -140,12 +141,14 @@ SET(zone_sources
 	zone.cpp
 	zone_config.cpp
 	zonedb.cpp
-	zoning.cpp)
+	zoning.cpp
+)
 
 SET(zone_headers
 	aa.h
 	aa_ability.h
 	aggromanager.h
+	api_service.h
 	aura.h
 	basic_functions.h
 	beacon.h
@@ -158,7 +161,7 @@ SET(zone_headers
 	command.h
 	common.h
 	corpse.h
-   data_bucket.h
+	data_bucket.h
 	doors.h
 	embparser.h
 	embperl.h
@@ -207,7 +210,6 @@ SET(zone_headers
 	merc.h
 	mob.h
 	mob_movement_manager.h
-	net.h
 	npc.h
 	npc_ai.h
 	npc_scale_manager.h
@@ -247,10 +249,6 @@ SET(zone_headers
 	zonedb.h
 	zonedump.h)
 
-IF(EQEMU_DEPOP_INVALIDATES_CACHE)
-	ADD_DEFINITIONS(-DDEPOP_INVALIDATES_NPC_TYPES_CACHE)
-ENDIF(EQEMU_DEPOP_INVALIDATES_CACHE)
-
 ADD_EXECUTABLE(zone ${zone_sources} ${zone_headers})
 
 INSTALL(TARGETS zone RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
@@ -258,13 +256,5 @@ INSTALL(TARGETS zone RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 ADD_DEFINITIONS(-DZONE)
 
 TARGET_LINK_LIBRARIES(zone ${SERVER_LIBS})
-
-IF(EQEMU_BUILD_PERL)
-	TARGET_LINK_LIBRARIES(zone ${PERL_LIBRARY})
-ENDIF()
-
-IF(EQEMU_BUILD_LUA)
-	TARGET_LINK_LIBRARIES(zone luabind ${LUA_LIBRARY})
-ENDIF(EQEMU_BUILD_LUA)
 
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)

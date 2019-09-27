@@ -9,7 +9,7 @@ namespace EQ
 	{
 	public:
 		static EventLoop &Get() {
-			static EventLoop inst;
+			static thread_local EventLoop inst;
 			return inst;
 		}
 

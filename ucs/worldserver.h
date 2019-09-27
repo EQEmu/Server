@@ -18,7 +18,7 @@
 #ifndef WORLDSERVER_H
 #define WORLDSERVER_H
 
-#include "../net/servertalk_client_connection.h"
+#include "../common/net/servertalk_client_connection.h"
 #include "../common/eq_packet_structs.h"
 #include <memory>
 

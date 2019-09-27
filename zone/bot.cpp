@@ -158,12 +158,12 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 	SetRangerAutoWeaponSelect(false);
 
 	bool stance_flag = false;
-	if (!botdb.LoadStance(this, stance_flag) && bot_owner)
-		bot_owner->Message(13, "%s for '%s'", BotDatabase::fail::LoadStance(), GetCleanName());
+	if (!database.botdb.LoadStance(this, stance_flag) && bot_owner)
+		bot_owner->Message(Chat::Red, "%s for '%s'", BotDatabase::fail::LoadStance(), GetCleanName());
 	if (!stance_flag && bot_owner)
-		bot_owner->Message(13, "Could not locate stance for '%s'", GetCleanName());
+		bot_owner->Message(Chat::Red, "Could not locate stance for '%s'", GetCleanName());
 
-	SetTaunting((GetClass() == WARRIOR || GetClass() == PALADIN || GetClass() == SHADOWKNIGHT) && (GetBotStance() == BotStanceAggressive));
+	SetTaunting((GetClass() == WARRIOR || GetClass() == PALADIN || GetClass() == SHADOWKNIGHT) && (GetBotStance() == EQEmu::constants::stanceAggressive));
 	SetPauseAI(false);
 
 	rest_timer.Disable();
@@ -177,18 +177,18 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 	strcpy(this->name, this->GetCleanName());
 
 	memset(&_botInspectMessage, 0, sizeof(InspectMessage_Struct));
-	if (!botdb.LoadInspectMessage(GetBotID(), _botInspectMessage) && bot_owner)
-		bot_owner->Message(13, "%s for '%s'", BotDatabase::fail::LoadInspectMessage(), GetCleanName());
+	if (!database.botdb.LoadInspectMessage(GetBotID(), _botInspectMessage) && bot_owner)
+		bot_owner->Message(Chat::Red, "%s for '%s'", BotDatabase::fail::LoadInspectMessage(), GetCleanName());
 
-	if (!botdb.LoadGuildMembership(GetBotID(), _guildId, _guildRank, _guildName) && bot_owner)
-		bot_owner->Message(13, "%s for '%s'", BotDatabase::fail::LoadGuildMembership(), GetCleanName());
+	if (!database.botdb.LoadGuildMembership(GetBotID(), _guildId, _guildRank, _guildName) && bot_owner)
+		bot_owner->Message(Chat::Red, "%s for '%s'", BotDatabase::fail::LoadGuildMembership(), GetCleanName());
 	
 	std::string error_message;
 
 	EquipBot(&error_message);
 	if(!error_message.empty()) {
 		if(bot_owner)
-			bot_owner->Message(13, error_message.c_str());
+			bot_owner->Message(Chat::Red, error_message.c_str());
 		error_message.clear();
 	}
 
@@ -205,13 +205,13 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 
 	GenerateBaseStats();
 
-	if (!botdb.LoadTimers(this) && bot_owner)
-		bot_owner->Message(13, "%s for '%s'", BotDatabase::fail::LoadTimers(), GetCleanName());
+	if (!database.botdb.LoadTimers(this) && bot_owner)
+		bot_owner->Message(Chat::Red, "%s for '%s'", BotDatabase::fail::LoadTimers(), GetCleanName());
 
 	LoadAAs();
 
-	if (!botdb.LoadBuffs(this) && bot_owner)
-		bot_owner->Message(13, "&s for '%s'", BotDatabase::fail::LoadBuffs(), GetCleanName());
+	if (!database.botdb.LoadBuffs(this) && bot_owner)
+		bot_owner->Message(Chat::Red, "&s for '%s'", BotDatabase::fail::LoadBuffs(), GetCleanName());
 
 	CalcBotStats(false);
 	hp_regen = CalcHPRegen();
@@ -253,6 +253,18 @@ void Bot::SetBotID(uint32 botID) {
 
 void Bot::SetBotSpellID(uint32 newSpellID) {
 	this->npc_spells_id = newSpellID;
+}
+
+void  Bot::SetSurname(std::string bot_surname) {
+	_surname = bot_surname.substr(0, 31);
+}
+
+void  Bot::SetTitle(std::string bot_title) {
+		_title = bot_title.substr(0, 31);
+}
+
+void  Bot::SetSuffix(std::string bot_suffix) {
+		_suffix = bot_suffix.substr(0, 31);
 }
 
 uint32 Bot::GetBotArcheryRange() {
@@ -439,6 +451,7 @@ NPCType *Bot::FillNPCTypeStruct(uint32 botSpellsID, std::string botName, std::st
 	bot_npc_type->skip_global_loot = true;
 	//bot_npc_type->rare_spawn = false;
 	bot_npc_type->stuck_behavior = Ground;
+	bot_npc_type->skip_auto_scale = true;
 
 	return bot_npc_type;
 }
@@ -1311,7 +1324,7 @@ int32 Bot::acmod() {
 	else
 		return (65 + ((agility - 300) / 21));
 #if EQDEBUG >= 11
-	Log(Logs::General, Logs::Error, "Error in Bot::acmod(): Agility: %i, Level: %i",agility,level);
+	LogError("Error in Bot::acmod(): Agility: [{}], Level: [{}]",agility,level);
 #endif
 	return 0;
 }
@@ -1699,29 +1712,29 @@ bool Bot::Save()
 
 	if(!GetBotID()) { // New bot record
 		uint32 bot_id = 0;
-		if (!botdb.SaveNewBot(this, bot_id) || !bot_id) {
-			bot_owner->Message(13, "%s '%s'", BotDatabase::fail::SaveNewBot(), GetCleanName());
+		if (!database.botdb.SaveNewBot(this, bot_id) || !bot_id) {
+			bot_owner->Message(Chat::Red, "%s '%s'", BotDatabase::fail::SaveNewBot(), GetCleanName());
 			return false;
 		}
 		SetBotID(bot_id);
 	}
 	else { // Update existing bot record
-		if (!botdb.SaveBot(this)) {
-			bot_owner->Message(13, "%s '%s'", BotDatabase::fail::SaveBot(), GetCleanName());
+		if (!database.botdb.SaveBot(this)) {
+			bot_owner->Message(Chat::Red, "%s '%s'", BotDatabase::fail::SaveBot(), GetCleanName());
 			return false;
 		}
 	}
 	
 	// All of these continue to process if any fail
-	if (!botdb.SaveBuffs(this))
-		bot_owner->Message(13, "%s for '%s'", BotDatabase::fail::SaveBuffs(), GetCleanName());
-	if (!botdb.SaveTimers(this))
-		bot_owner->Message(13, "%s for '%s'", BotDatabase::fail::SaveTimers(), GetCleanName());
-	if (!botdb.SaveStance(this))
-		bot_owner->Message(13, "%s for '%s'", BotDatabase::fail::SaveStance(), GetCleanName());
+	if (!database.botdb.SaveBuffs(this))
+		bot_owner->Message(Chat::Red, "%s for '%s'", BotDatabase::fail::SaveBuffs(), GetCleanName());
+	if (!database.botdb.SaveTimers(this))
+		bot_owner->Message(Chat::Red, "%s for '%s'", BotDatabase::fail::SaveTimers(), GetCleanName());
+	if (!database.botdb.SaveStance(this))
+		bot_owner->Message(Chat::Red, "%s for '%s'", BotDatabase::fail::SaveStance(), GetCleanName());
 	
 	if (!SavePet())
-		bot_owner->Message(13, "Failed to save pet for '%s'", GetCleanName());
+		bot_owner->Message(Chat::Red, "Failed to save pet for '%s'", GetCleanName());
 	
 	return true;
 }
@@ -1732,27 +1745,27 @@ bool Bot::DeleteBot()
 	if (!bot_owner)
 		return false;
 
-	if (!botdb.DeleteHealRotation(GetBotID())) {
-		bot_owner->Message(13, "%s", BotDatabase::fail::DeleteHealRotation());
+	if (!database.botdb.DeleteHealRotation(GetBotID())) {
+		bot_owner->Message(Chat::Red, "%s", BotDatabase::fail::DeleteHealRotation());
 		return false;
 	}
 
 	std::string query = StringFormat("DELETE FROM `bot_heal_rotation_members` WHERE `bot_id` = '%u'", GetBotID());
-	auto results = botdb.QueryDatabase(query);
+	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-		bot_owner->Message(13, "Failed to delete heal rotation member '%s'", GetCleanName());
+		bot_owner->Message(Chat::Red, "Failed to delete heal rotation member '%s'", GetCleanName());
 		return false;
 	}
 
 	query = StringFormat("DELETE FROM `bot_heal_rotation_targets` WHERE `target_name` LIKE '%s'", GetCleanName());
-	results = botdb.QueryDatabase(query);
+	results = database.QueryDatabase(query);
 	if (!results.Success()) {
-		bot_owner->Message(13, "Failed to delete heal rotation target '%s'", GetCleanName());
+		bot_owner->Message(Chat::Red, "Failed to delete heal rotation target '%s'", GetCleanName());
 		return false;
 	}
 
 	if (!DeletePet()) {
-		bot_owner->Message(13, "Failed to delete pet for '%s'", GetCleanName());
+		bot_owner->Message(Chat::Red, "Failed to delete pet for '%s'", GetCleanName());
 		return false;
 	}
 
@@ -1761,33 +1774,33 @@ bool Bot::DeleteBot()
 
 	std::string error_message;
 
-	if (!botdb.RemoveMemberFromBotGroup(GetBotID())) {
-		bot_owner->Message(13, "%s - '%s'", BotDatabase::fail::RemoveMemberFromBotGroup(), GetCleanName());
+	if (!database.botdb.RemoveMemberFromBotGroup(GetBotID())) {
+		bot_owner->Message(Chat::Red, "%s - '%s'", BotDatabase::fail::RemoveMemberFromBotGroup(), GetCleanName());
 		return false;
 	}
 
-	if (!botdb.DeleteItems(GetBotID())) {
-		bot_owner->Message(13, "%s for '%s'", BotDatabase::fail::DeleteItems(), GetCleanName());
+	if (!database.botdb.DeleteItems(GetBotID())) {
+		bot_owner->Message(Chat::Red, "%s for '%s'", BotDatabase::fail::DeleteItems(), GetCleanName());
 		return false;
 	}
 
-	if (!botdb.DeleteTimers(GetBotID())) {
-		bot_owner->Message(13, "%s for '%s'", BotDatabase::fail::DeleteTimers(), GetCleanName());
+	if (!database.botdb.DeleteTimers(GetBotID())) {
+		bot_owner->Message(Chat::Red, "%s for '%s'", BotDatabase::fail::DeleteTimers(), GetCleanName());
 		return false;
 	}
 
-	if (!botdb.DeleteBuffs(GetBotID())) {
-		bot_owner->Message(13, "%s for '%s'", BotDatabase::fail::DeleteBuffs(), GetCleanName());
+	if (!database.botdb.DeleteBuffs(GetBotID())) {
+		bot_owner->Message(Chat::Red, "%s for '%s'", BotDatabase::fail::DeleteBuffs(), GetCleanName());
 		return false;
 	}
 
-	if (!botdb.DeleteStance(GetBotID())) {
-		bot_owner->Message(13, "%s for '%s'", BotDatabase::fail::DeleteStance(), GetCleanName());
+	if (!database.botdb.DeleteStance(GetBotID())) {
+		bot_owner->Message(Chat::Red, "%s for '%s'", BotDatabase::fail::DeleteStance(), GetCleanName());
 		return false;
 	}
 
-	if (!botdb.DeleteBot(GetBotID())) {
-		bot_owner->Message(13, "%s '%s'", BotDatabase::fail::DeleteBot(), GetCleanName());
+	if (!database.botdb.DeleteBot(GetBotID())) {
+		bot_owner->Message(Chat::Red, "%s '%s'", BotDatabase::fail::DeleteBot(), GetCleanName());
 		return false;
 	}
 
@@ -1830,19 +1843,19 @@ bool Bot::LoadPet()
 	std::string error_message;
 
 	uint32 pet_index = 0;
-	if (!botdb.LoadPetIndex(GetBotID(), pet_index)) {
-		bot_owner->Message(13, "%s for %s's pet", BotDatabase::fail::LoadPetIndex(), GetCleanName());		
+	if (!database.botdb.LoadPetIndex(GetBotID(), pet_index)) {
+		bot_owner->Message(Chat::Red, "%s for %s's pet", BotDatabase::fail::LoadPetIndex(), GetCleanName());
 		return false;
 	}
 	if (!pet_index)
 		return true;
 
 	uint32 saved_pet_spell_id = 0;
-	if (!botdb.LoadPetSpellID(GetBotID(), saved_pet_spell_id)) {
-		bot_owner->Message(13, "%s for %s's pet", BotDatabase::fail::LoadPetSpellID(), GetCleanName());
+	if (!database.botdb.LoadPetSpellID(GetBotID(), saved_pet_spell_id)) {
+		bot_owner->Message(Chat::Red, "%s for %s's pet", BotDatabase::fail::LoadPetSpellID(), GetCleanName());
 	}
 	if (!IsValidSpell(saved_pet_spell_id)) {
-		bot_owner->Message(13, "Invalid spell id for %s's pet", GetCleanName());
+		bot_owner->Message(Chat::Red, "Invalid spell id for %s's pet", GetCleanName());
 		DeletePet();
 		return false;
 	}
@@ -1852,8 +1865,8 @@ bool Bot::LoadPet()
 	uint32 pet_hp = 0;
 	uint32 pet_spell_id = 0;
 
-	if (!botdb.LoadPetStats(GetBotID(), pet_name, pet_mana, pet_hp, pet_spell_id)) {
-		bot_owner->Message(13, "%s for %s's pet", BotDatabase::fail::LoadPetStats(), GetCleanName());
+	if (!database.botdb.LoadPetStats(GetBotID(), pet_name, pet_mana, pet_hp, pet_spell_id)) {
+		bot_owner->Message(Chat::Red, "%s for %s's pet", BotDatabase::fail::LoadPetStats(), GetCleanName());
 		return false;
 	}
 
@@ -1867,13 +1880,13 @@ bool Bot::LoadPet()
 
 	SpellBuff_Struct pet_buffs[PET_BUFF_COUNT];
 	memset(pet_buffs, 0, (sizeof(SpellBuff_Struct) * PET_BUFF_COUNT));
-	if (!botdb.LoadPetBuffs(GetBotID(), pet_buffs))
-		bot_owner->Message(13, "%s for %s's pet", BotDatabase::fail::LoadPetBuffs(), GetCleanName());
+	if (!database.botdb.LoadPetBuffs(GetBotID(), pet_buffs))
+		bot_owner->Message(Chat::Red, "%s for %s's pet", BotDatabase::fail::LoadPetBuffs(), GetCleanName());
 
 	uint32 pet_items[EQEmu::invslot::EQUIPMENT_COUNT];
 	memset(pet_items, 0, (sizeof(uint32) * EQEmu::invslot::EQUIPMENT_COUNT));
-	if (!botdb.LoadPetItems(GetBotID(), pet_items))
-		bot_owner->Message(13, "%s for %s's pet", BotDatabase::fail::LoadPetItems(), GetCleanName());
+	if (!database.botdb.LoadPetItems(GetBotID(), pet_items))
+		bot_owner->Message(Chat::Red, "%s for %s's pet", BotDatabase::fail::LoadPetItems(), GetCleanName());
 
 	pet_inst->SetPetState(pet_buffs, pet_items);
 	pet_inst->CalcBonuses();
@@ -1911,15 +1924,15 @@ bool Bot::SavePet()
 
 	std::string error_message;
 
-	if (!botdb.SavePetStats(GetBotID(), pet_name_str, pet_inst->GetMana(), pet_inst->GetHP(), pet_inst->GetPetSpellID())) {
-		bot_owner->Message(13, "%s for %s's pet", BotDatabase::fail::SavePetStats(), GetCleanName());
+	if (!database.botdb.SavePetStats(GetBotID(), pet_name_str, pet_inst->GetMana(), pet_inst->GetHP(), pet_inst->GetPetSpellID())) {
+		bot_owner->Message(Chat::Red, "%s for %s's pet", BotDatabase::fail::SavePetStats(), GetCleanName());
 		return false;
 	}
 	
-	if (!botdb.SavePetBuffs(GetBotID(), pet_buffs))
-		bot_owner->Message(13, "%s for %s's pet", BotDatabase::fail::SavePetBuffs(), GetCleanName());
-	if (!botdb.SavePetItems(GetBotID(), pet_items))
-		bot_owner->Message(13, "%s for %s's pet", BotDatabase::fail::SavePetItems(), GetCleanName());
+	if (!database.botdb.SavePetBuffs(GetBotID(), pet_buffs))
+		bot_owner->Message(Chat::Red, "%s for %s's pet", BotDatabase::fail::SavePetBuffs(), GetCleanName());
+	if (!database.botdb.SavePetItems(GetBotID(), pet_items))
+		bot_owner->Message(Chat::Red, "%s for %s's pet", BotDatabase::fail::SavePetItems(), GetCleanName());
 
 	return true;
 }
@@ -1932,16 +1945,16 @@ bool Bot::DeletePet()
 	
 	std::string error_message;
 
-	if (!botdb.DeletePetItems(GetBotID())) {
-		bot_owner->Message(13, "%s for %s's pet", BotDatabase::fail::DeletePetItems(), GetCleanName());
+	if (!database.botdb.DeletePetItems(GetBotID())) {
+		bot_owner->Message(Chat::Red, "%s for %s's pet", BotDatabase::fail::DeletePetItems(), GetCleanName());
 		return false;
 	}
-	if (!botdb.DeletePetBuffs(GetBotID())) {
-		bot_owner->Message(13, "%s for %s's pet", BotDatabase::fail::DeletePetBuffs(), GetCleanName());
+	if (!database.botdb.DeletePetBuffs(GetBotID())) {
+		bot_owner->Message(Chat::Red, "%s for %s's pet", BotDatabase::fail::DeletePetBuffs(), GetCleanName());
 		return false;
 	}
-	if (!botdb.DeletePetStats(GetBotID())) {
-		bot_owner->Message(13, "%s for %s's pet", BotDatabase::fail::DeletePetStats(), GetCleanName());
+	if (!database.botdb.DeletePetStats(GetBotID())) {
+		bot_owner->Message(Chat::Red, "%s for %s's pet", BotDatabase::fail::DeletePetStats(), GetCleanName());
 		return false;
 	}
 
@@ -2068,7 +2081,7 @@ void Bot::BotRangedAttack(Mob* other) {
 	//make sure the attack and ranged timers are up
 	//if the ranged timer is disabled, then they have no ranged weapon and shouldent be attacking anyhow
 	if((attack_timer.Enabled() && !attack_timer.Check(false)) || (ranged_timer.Enabled() && !ranged_timer.Check())) {
-		Log(Logs::Detail, Logs::Combat, "Bot Archery attack canceled. Timer not up. Attack %d, ranged %d", attack_timer.GetRemainingTime(), ranged_timer.GetRemainingTime());
+		LogCombat("Bot Archery attack canceled. Timer not up. Attack [{}], ranged [{}]", attack_timer.GetRemainingTime(), ranged_timer.GetRemainingTime());
 		Message(0, "Error: Timer not up. Attack %d, ranged %d", attack_timer.GetRemainingTime(), ranged_timer.GetRemainingTime());
 		return;
 	}
@@ -2086,7 +2099,7 @@ void Bot::BotRangedAttack(Mob* other) {
 	if(!RangeWeapon || !Ammo)
 		return;
 
-	Log(Logs::Detail, Logs::Combat, "Shooting %s with bow %s (%d) and arrow %s (%d)", other->GetCleanName(), RangeWeapon->Name, RangeWeapon->ID, Ammo->Name, Ammo->ID);
+	LogCombat("Shooting [{}] with bow [{}] ([{}]) and arrow [{}] ([{}])", other->GetCleanName(), RangeWeapon->Name, RangeWeapon->ID, Ammo->Name, Ammo->ID);
 	if(!IsAttackAllowed(other) || IsCasting() || DivineAura() || IsStunned() || IsMezzed() || (GetAppearance() == eaDead))
 		return;
 
@@ -2096,21 +2109,21 @@ void Bot::BotRangedAttack(Mob* other) {
 
 	//break invis when you attack
 	if(invisible) {
-		Log(Logs::Detail, Logs::Combat, "Removing invisibility due to melee attack.");
+		LogCombat("Removing invisibility due to melee attack");
 		BuffFadeByEffect(SE_Invisibility);
 		BuffFadeByEffect(SE_Invisibility2);
 		invisible = false;
 	}
 
 	if(invisible_undead) {
-		Log(Logs::Detail, Logs::Combat, "Removing invisibility vs. undead due to melee attack.");
+		LogCombat("Removing invisibility vs. undead due to melee attack");
 		BuffFadeByEffect(SE_InvisVsUndead);
 		BuffFadeByEffect(SE_InvisVsUndead2);
 		invisible_undead = false;
 	}
 
 	if(invisible_animals) {
-		Log(Logs::Detail, Logs::Combat, "Removing invisibility vs. animals due to melee attack.");
+		LogCombat("Removing invisibility vs. animals due to melee attack");
 		BuffFadeByEffect(SE_InvisVsAnimals);
 		invisible_animals = false;
 	}
@@ -2248,10 +2261,9 @@ void Bot::AI_Process() {
 
 	Client* bot_owner = (GetBotOwner() && GetBotOwner()->IsClient() ? GetBotOwner()->CastToClient() : nullptr);
 	Group* bot_group = GetGroup();
-	Mob* follow_mob = entity_list.GetMob(GetFollowID());
-
+	
 	// Primary reasons for not processing AI
-	if (!bot_owner || !bot_group || !follow_mob || !IsAIControlled())
+	if (!bot_owner || !bot_group || !IsAIControlled())
 		return;
 
 	if (bot_owner->IsDead()) {
@@ -2261,20 +2273,27 @@ void Bot::AI_Process() {
 		return;
 	}
 
-	// We also need a leash owner (subset of primary AI criteria)
+	// We also need a leash owner and follow mob (subset of primary AI criteria)
 	Client* leash_owner = (bot_group->GetLeader() && bot_group->GetLeader()->IsClient() ? bot_group->GetLeader()->CastToClient() : bot_owner);
 	if (!leash_owner)
 		return;
 
+	Mob* follow_mob = entity_list.GetMob(GetFollowID());
+
+	if (!follow_mob) {
+		follow_mob = leash_owner;
+		SetFollowID(leash_owner->GetID());
+	}
+
 	// Berserk updates should occur if primary AI criteria are met
 	if (GetClass() == WARRIOR || GetClass() == BERSERKER) {
 		if (!berserk && GetHP() > 0 && GetHPRatio() < 30.0f) {
-			entity_list.MessageClose_StringID(this, false, 200, 0, BERSERK_START, GetName());
+			entity_list.MessageCloseString(this, false, 200, 0, BERSERK_START, GetName());
 			berserk = true;
 		}
 
 		if (berserk && GetHPRatio() >= 30.0f) {
-			entity_list.MessageClose_StringID(this, false, 200, 0, BERSERK_END, GetName());
+			entity_list.MessageCloseString(this, false, 200, 0, BERSERK_END, GetName());
 			berserk = false;
 		}
 	}
@@ -2344,7 +2363,7 @@ void Bot::AI_Process() {
 		Mob* delete_me = HealRotationTarget();
 		if (AIHealRotation(HealRotationTarget(), UseHealRotationFastHeals())) {
 #if (EQDEBUG >= 12)
-			Log(Logs::General, Logs::Error, "Bot::AI_Process() - Casting succeeded (m: %s, t: %s) : AdvHR(true)", GetCleanName(), ((delete_me) ? (delete_me->GetCleanName()) : ("nullptr")));
+			LogError("Bot::AI_Process() - Casting succeeded (m: [{}], t: [{}]) : AdvHR(true)", GetCleanName(), ((delete_me) ? (delete_me->GetCleanName()) : ("nullptr")));
 #endif
 			m_member_of_heal_rotation->SetMemberIsCasting(this);
 			m_member_of_heal_rotation->UpdateTargetHealingStats(HealRotationTarget());
@@ -2352,7 +2371,7 @@ void Bot::AI_Process() {
 		}
 		else {
 #if (EQDEBUG >= 12)
-			Log(Logs::General, Logs::Error, "Bot::AI_Process() - Casting failed (m: %s, t: %s) : AdvHR(false)", GetCleanName(), ((delete_me) ? (delete_me->GetCleanName()) : ("nullptr")));
+			LogError("Bot::AI_Process() - Casting failed (m: [{}], t: [{}]) : AdvHR(false)", GetCleanName(), ((delete_me) ? (delete_me->GetCleanName()) : ("nullptr")));
 #endif
 			m_member_of_heal_rotation->SetMemberIsCasting(this, false);
 			AdvanceHealRotation(false);
@@ -2760,7 +2779,7 @@ void Bot::AI_Process() {
 				// we can't fight if we don't have a target, are stun/mezzed or dead..
 				// Stop attacking if the target is enraged
 				TEST_TARGET();
-				if (GetBotStance() == BotStancePassive || (tar->IsEnraged() && !BehindMob(tar, GetX(), GetY())))
+				if (GetBotStance() == EQEmu::constants::stancePassive || (tar->IsEnraged() && !BehindMob(tar, GetX(), GetY())))
 					return;
 
 				// First, special attack per class (kick, backstab etc..)
@@ -2801,7 +2820,7 @@ void Bot::AI_Process() {
 					int32 flurrychance = (aabonuses.FlurryChance + spellbonuses.FlurryChance + itembonuses.FlurryChance);
 					if (flurrychance) {
 						if (zone->random.Int(0, 100) < flurrychance) {
-							Message_StringID(MT_NPCFlurry, YOU_FLURRY);
+							MessageString(Chat::NPCFlurry, YOU_FLURRY);
 							Attack(tar, EQEmu::invslot::slotPrimary, false);
 							
 							TEST_TARGET();
@@ -2865,7 +2884,7 @@ void Bot::AI_Process() {
 		else { // To far away to fight (GetTarget() validity can be iffy below this point - including outer scopes)
 			if (AI_movement_timer->Check() && (!spellend_timer.Enabled() || GetClass() == BARD)) { // Pursue processing
 				if (GetTarget() && !IsRooted()) {
-					Log(Logs::Detail, Logs::AI, "Pursuing %s while engaged.", GetTarget()->GetCleanName());
+					LogAI("Pursuing [{}] while engaged", GetTarget()->GetCleanName());
 
 					Goal = GetTarget()->GetPosition();
 										
@@ -2887,7 +2906,7 @@ void Bot::AI_Process() {
 					FaceTarget(GetTarget());
 
 				// This is a mob that is fleeing either because it has been feared or is low on hitpoints
-				if (GetBotStance() != BotStancePassive) {
+				if (GetBotStance() != EQEmu::constants::stancePassive) {
 					AI_PursueCastCheck(); // This appears to always return true..can't trust for success/fail
 					return;
 				}
@@ -2895,7 +2914,7 @@ void Bot::AI_Process() {
 		} // end not in combat range
 
 		if (!IsMoving() && !spellend_timer.Enabled()) { // This may actually need work...
-			if (GetBotStance() == BotStancePassive)
+			if (GetBotStance() == EQEmu::constants::stancePassive)
 				return;
 			
 			if (GetTarget() && AI_EngagedCastCheck()) 
@@ -2953,7 +2972,7 @@ void Bot::AI_Process() {
 		// Ok to idle
 		if (fm_dist <= GetFollowDistance()) {
 			if (!IsMoving() && AI_think_timer->Check() && !spellend_timer.Enabled()) {
-				if (GetBotStance() != BotStancePassive) {
+				if (GetBotStance() != EQEmu::constants::stancePassive) {
 					if (!AI_IdleCastCheck() && !IsCasting() && GetClass() != BARD)
 						BotMeditate(true);
 				}
@@ -2998,7 +3017,7 @@ void Bot::AI_Process() {
 		
 		// Basically, bard bots get a chance to cast idle spells while moving
 		if (IsMoving()) {
-			if (GetBotStance() != BotStancePassive) {
+			if (GetBotStance() != EQEmu::constants::stancePassive) {
 				if (GetClass() == BARD && !spellend_timer.Enabled() && AI_think_timer->Check()) {
 					AI_IdleCastCheck();
 					return;
@@ -3170,7 +3189,7 @@ void Bot::PetAIProcess() {
 				else if (botPet->GetTarget() && botPet->GetAIMovementTimer()->Check()) {
 					botPet->SetRunAnimSpeed(0);
 					if(!botPet->IsRooted()) {
-						Log(Logs::Detail, Logs::AI, "Pursuing %s while engaged.", botPet->GetTarget()->GetCleanName());
+						LogAI("Pursuing [{}] while engaged", botPet->GetTarget()->GetCleanName());
 						botPet->RunTo(botPet->GetTarget()->GetX(), botPet->GetTarget()->GetY(), botPet->GetTarget()->GetZ());
 						return;
 					} else {
@@ -3249,11 +3268,11 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 		this->texture = 0; //0xFF;
 
 		if(this->Save())
-			this->GetBotOwner()->CastToClient()->Message(0, "%s saved.", this->GetCleanName());
+			this->GetBotOwner()->CastToClient()->Message(Chat::White, "%s saved.", this->GetCleanName());
 		else
-			this->GetBotOwner()->CastToClient()->Message(13, "%s save failed!", this->GetCleanName());
+			this->GetBotOwner()->CastToClient()->Message(Chat::Red, "%s save failed!", this->GetCleanName());
 
-		// Spawn the bot at the bow owner's loc
+		// Spawn the bot at the bot owner's loc
 		this->m_Position.x = botCharacterOwner->GetX();
 		this->m_Position.y = botCharacterOwner->GetY();
 		this->m_Position.z = botCharacterOwner->GetZ();
@@ -3294,7 +3313,7 @@ void Bot::RemoveBotItemBySlot(uint32 slotID, std::string *errorMessage)
 	if(!GetBotID())
         return;
 
-    if(!botdb.DeleteItemBySlot(GetBotID(), slotID))
+    if(!database.botdb.DeleteItemBySlot(GetBotID(), slotID))
         *errorMessage = BotDatabase::fail::DeleteItemBySlot();
 
     m_inv.DeleteItem(slotID);
@@ -3307,7 +3326,7 @@ void Bot::GetBotItems(EQEmu::InventoryProfile &inv, std::string* errorMessage)
 	if(!GetBotID())
 		return;
 
-	if (!botdb.LoadItems(GetBotID(), inv)) {
+	if (!database.botdb.LoadItems(GetBotID(), inv)) {
 		*errorMessage = BotDatabase::fail::LoadItems();
 		return;
 	}
@@ -3322,9 +3341,9 @@ uint32 Bot::GetBotItemBySlot(uint32 slotID)
 	if(!GetBotID())
         return item_id;
 
-	if (!botdb.LoadItemBySlot(GetBotID(), slotID, item_id)) {
+	if (!database.botdb.LoadItemBySlot(GetBotID(), slotID, item_id)) {
 		if (GetBotOwner() && GetBotOwner()->IsClient())
-			GetBotOwner()->CastToClient()->Message(13, "%s", BotDatabase::fail::LoadItemBySlot());
+			GetBotOwner()->CastToClient()->Message(Chat::Red, "%s", BotDatabase::fail::LoadItemBySlot());
 	}
 
 	return item_id;
@@ -3358,6 +3377,9 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		ns->spawn.helm = helmtexture; //(GetShowHelm() ? helmtexture : 0); //0xFF;
 		ns->spawn.equip_chest2 = texture; //0xFF;
 		ns->spawn.show_name = true;
+		strcpy(ns->spawn.lastName, GetSurname().c_str());
+		strcpy(ns->spawn.title, GetTitle().c_str());
+		strcpy(ns->spawn.suffix, GetSuffix().c_str());
 		const EQEmu::ItemData* item = nullptr;
 		const EQEmu::ItemInstance* inst = nullptr;
 		uint32 spawnedbotid = 0;
@@ -3411,7 +3433,7 @@ Bot* Bot::LoadBot(uint32 botID)
 	if (!botID)
 		return loaded_bot;
 	
-	if (!botdb.LoadBot(botID, loaded_bot)) // TODO: Consider update to message handler
+	if (!database.botdb.LoadBot(botID, loaded_bot)) // TODO: Consider update to message handler
 		return loaded_bot;
 	
 	return loaded_bot;
@@ -3426,8 +3448,8 @@ void Bot::LoadAndSpawnAllZonedBots(Client* botOwner) {
 				uint32 TempGroupId = g->GetID();
 				std::list<uint32> ActiveBots;
 				// Modified LoadGroupedBotsByGroupID to require a CharacterID
-				if (!botdb.LoadGroupedBotsByGroupID(botOwner->CharacterID(), TempGroupId, ActiveBots)) {
-					botOwner->Message(13, "%s", BotDatabase::fail::LoadGroupedBotsByGroupID());
+				if (!database.botdb.LoadGroupedBotsByGroupID(botOwner->CharacterID(), TempGroupId, ActiveBots)) {
+					botOwner->Message(Chat::Red, "%s", BotDatabase::fail::LoadGroupedBotsByGroupID());
 					return;
 				}
 				
@@ -3492,7 +3514,7 @@ void Bot::LevelBotWithClient(Client* client, uint8 level, bool sendlvlapp) {
 			Bot* bot = *biter;
 			if(bot && (bot->GetLevel() != client->GetLevel())) {
 				bot->SetPetChooser(false); // not sure what this does, but was in bot 'update' code
-				bot->CalcBotStats(false); // TODO: look at this and see if 'true' should be passed...
+				bot->CalcBotStats(client->GetBotOption(Client::booStatsUpdate));
 				if(sendlvlapp)
 					bot->SendLevelAppearance();
 				// modified from Client::SetLevel()
@@ -3707,7 +3729,7 @@ void Bot::BotTradeSwapItem(Client* client, int16 lootSlot, const EQEmu::ItemInst
 void Bot::BotTradeAddItem(uint32 id, const EQEmu::ItemInstance* inst, int16 charges, uint32 equipableSlots, uint16 lootSlot, std::string* errorMessage, bool addToDb)
 {
 	if(addToDb) {
-		if (!botdb.SaveItemBySlot(this, lootSlot, inst)) {
+		if (!database.botdb.SaveItemBySlot(this, lootSlot, inst)) {
 			*errorMessage = BotDatabase::fail::SaveItemBySlot();
 			return;
 		}
@@ -3831,32 +3853,32 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 	}
 
 	if (client != GetOwner()) {
-		client->Message(CC_Red, "You are not the owner of this bot - Trade Canceled.");
+		client->Message(Chat::Red, "You are not the owner of this bot - Trade Canceled.");
 		client->ResetTrade();
 		return;
 	}
 	if ((beginSlotID != invslot::TRADE_BEGIN) && (beginSlotID != invslot::slotCursor)) {
-		client->Message(CC_Red, "Trade request processing from illegal 'begin' slot - Trade Canceled.");
+		client->Message(Chat::Red, "Trade request processing from illegal 'begin' slot - Trade Canceled.");
 		client->ResetTrade();
 		return;
 	}
 	if ((endSlotID != invslot::TRADE_END) && (endSlotID != invslot::slotCursor)) {
-		client->Message(CC_Red, "Trade request processing from illegal 'end' slot - Trade Canceled.");
+		client->Message(Chat::Red, "Trade request processing from illegal 'end' slot - Trade Canceled.");
 		client->ResetTrade();
 		return;
 	}
 	if (((beginSlotID == invslot::slotCursor) && (endSlotID != invslot::slotCursor)) || ((beginSlotID != invslot::slotCursor) && (endSlotID == invslot::slotCursor))) {
-		client->Message(CC_Red, "Trade request processing illegal slot range - Trade Canceled.");
+		client->Message(Chat::Red, "Trade request processing illegal slot range - Trade Canceled.");
 		client->ResetTrade();
 		return;
 	}
 	if (endSlotID < beginSlotID) {
-		client->Message(CC_Red, "Trade request processing in reverse slot order - Trade Canceled.");
+		client->Message(Chat::Red, "Trade request processing in reverse slot order - Trade Canceled.");
 		client->ResetTrade();
 		return;
 	}
 	if (client->IsEngaged() || IsEngaged()) {
-		client->Message(CC_Yellow, "You may not perform a trade while engaged - Trade Canceled!");
+		client->Message(Chat::Yellow, "You may not perform a trade while engaged - Trade Canceled!");
 		client->ResetTrade();
 		return;
 	}
@@ -3872,23 +3894,23 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 
 		if (!trade_instance->GetItem()) {
 			// TODO: add logging
-			client->Message(CC_Red, "A server error was encountered while processing client slot %i - Trade Canceled.", trade_index);
+			client->Message(Chat::Red, "A server error was encountered while processing client slot %i - Trade Canceled.", trade_index);
 			client->ResetTrade();
 			return;
 		}
 		if ((trade_index != invslot::slotCursor) && !trade_instance->IsDroppable()) {
 			// TODO: add logging
-			client->Message(CC_Red, "Trade hack detected - Trade Canceled.");
+			client->Message(Chat::Red, "Trade hack detected - Trade Canceled.");
 			client->ResetTrade();
 			return;
 		}
 		if (trade_instance->IsStackable() && (trade_instance->GetCharges() < trade_instance->GetItem()->StackSize)) { // temp until partial stacks are implemented
-			client->Message(CC_Yellow, "'%s' is only a partially stacked item - Trade Canceled!", trade_instance->GetItem()->Name);
+			client->Message(Chat::Yellow, "'%s' is only a partially stacked item - Trade Canceled!", trade_instance->GetItem()->Name);
 			client->ResetTrade();
 			return;
 		}
 		if (CheckLoreConflict(trade_instance->GetItem())) {
-			client->Message(CC_Yellow, "This bot already has lore equipment matching the item '%s' - Trade Canceled!", trade_instance->GetItem()->Name);
+			client->Message(Chat::Yellow, "This bot already has lore equipment matching the item '%s' - Trade Canceled!", trade_instance->GetItem()->Name);
 			client->ResetTrade();
 			return;
 		}
@@ -3918,13 +3940,13 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 			
 			if ((trade_iterator.tradeItemInstance->GetItem()->LoreGroup == -1) && (check_iterator.tradeItemInstance->GetItem()->ID == trade_iterator.tradeItemInstance->GetItem()->ID)) {
 				// TODO: add logging
-				client->Message(CC_Red, "Trade hack detected - Trade Canceled.");
+				client->Message(Chat::Red, "Trade hack detected - Trade Canceled.");
 				client->ResetTrade();
 				return;
 			}
 			if ((trade_iterator.tradeItemInstance->GetItem()->LoreGroup > 0) && (check_iterator.tradeItemInstance->GetItem()->LoreGroup == trade_iterator.tradeItemInstance->GetItem()->LoreGroup)) {
 				// TODO: add logging
-				client->Message(CC_Red, "Trade hack detected - Trade Canceled.");
+				client->Message(Chat::Red, "Trade hack detected - Trade Canceled.");
 				client->ResetTrade();
 				return;
 			}
@@ -4033,14 +4055,14 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 
 		if (!return_instance->GetItem()) {
 			// TODO: add logging
-			client->Message(CC_Red, "A server error was encountered while processing bot slot %i - Trade Canceled.", return_iterator.fromBotSlot);
+			client->Message(Chat::Red, "A server error was encountered while processing bot slot %i - Trade Canceled.", return_iterator.fromBotSlot);
 			client->ResetTrade();
 			return;
 		}
 		// non-failing checks above are causing this to trigger (i.e., !ItemClassCommon and !IsEquipable{race, class, min_level})
 		// this process is hindered by not having bots use the inventory trade method (TODO: implement bot inventory use)
 		if (client->CheckLoreConflict(return_instance->GetItem())) {
-			client->Message(CC_Yellow, "You already have lore equipment matching the item '%s' - Trade Canceled!", return_instance->GetItem()->Name);
+			client->Message(Chat::Yellow, "You already have lore equipment matching the item '%s' - Trade Canceled!", return_instance->GetItem()->Name);
 			client->ResetTrade();
 			return;
 		}
@@ -4097,7 +4119,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 		}
 
 		if (return_iterator.toClientSlot == invslot::SLOT_INVALID) {
-			client->Message(CC_Yellow, "You do not have room to complete this trade - Trade Canceled!");
+			client->Message(Chat::Yellow, "You do not have room to complete this trade - Trade Canceled!");
 			client->ResetTrade();
 			return;
 		}
@@ -4122,8 +4144,8 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 			//	// TODO: add logging
 			//}
 
-			if (!botdb.DeleteItemBySlot(GetBotID(), return_iterator.fromBotSlot))
-				client->Message(CC_Red, "%s (slot: %i, name: '%s')", BotDatabase::fail::DeleteItemBySlot(), return_iterator.fromBotSlot, (return_instance ? return_instance->GetItem()->Name : "nullptr"));
+			if (!database.botdb.DeleteItemBySlot(GetBotID(), return_iterator.fromBotSlot))
+				client->Message(Chat::Red, "%s (slot: %i, name: '%s')", BotDatabase::fail::DeleteItemBySlot(), return_iterator.fromBotSlot, (return_instance ? return_instance->GetItem()->Name : "nullptr"));
 
 			BotRemoveEquipItem(return_iterator.fromBotSlot);
 			if (return_instance)
@@ -4137,8 +4159,8 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 	for (auto& trade_iterator : client_trade) {
 		// TODO: code for stackables
 
-		if (!botdb.SaveItemBySlot(this, trade_iterator.toBotSlot, trade_iterator.tradeItemInstance))
-			client->Message(CC_Red, "%s (slot: %i, name: '%s')", BotDatabase::fail::SaveItemBySlot(), trade_iterator.toBotSlot, (trade_iterator.tradeItemInstance ? trade_iterator.tradeItemInstance->GetItem()->Name : "nullptr"));
+		if (!database.botdb.SaveItemBySlot(this, trade_iterator.toBotSlot, trade_iterator.tradeItemInstance))
+			client->Message(Chat::Red, "%s (slot: %i, name: '%s')", BotDatabase::fail::SaveItemBySlot(), trade_iterator.toBotSlot, (trade_iterator.tradeItemInstance ? trade_iterator.tradeItemInstance->GetItem()->Name : "nullptr"));
 
 		m_inv.PutItem(trade_iterator.toBotSlot, *trade_iterator.tradeItemInstance);
 		this->BotAddEquipItem(trade_iterator.toBotSlot, (trade_iterator.tradeItemInstance ? trade_iterator.tradeItemInstance->GetID() : 0));
@@ -4158,17 +4180,20 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 	// trade messages
 	for (const auto& return_iterator : client_return) {
 		if (return_iterator.failedItemName.size())
-			client->Message(MT_Tell, "%s tells you, \"%s, I can't use this '%s.'\"", GetCleanName(), client->GetName(), return_iterator.failedItemName.c_str());
+			client->Message(Chat::Tell, "%s tells you, \"%s, I can't use this '%s.'\"", GetCleanName(), client->GetName(), return_iterator.failedItemName.c_str());
 	}
 	for (const auto& trade_iterator : client_trade) {
 		if (trade_iterator.acceptedItemName.size())
-			client->Message(MT_Tell, "%s tells you, \"Thank you for the '%s,' %s!\"", GetCleanName(), trade_iterator.acceptedItemName.c_str(), client->GetName());
+			client->Message(Chat::Tell, "%s tells you, \"Thank you for the '%s,' %s!\"", GetCleanName(), trade_iterator.acceptedItemName.c_str(), client->GetName());
 	}
 
 	size_t accepted_count = client_trade.size();
 	size_t returned_count = client_return.size();
 
-	client->Message(CC_Lime, "Trade with '%s' resulted in %i accepted item%s, %i returned item%s.", GetCleanName(), accepted_count, ((accepted_count == 1) ? "" : "s"), returned_count, ((returned_count == 1) ? "" : "s"));
+	client->Message(Chat::Lime, "Trade with '%s' resulted in %i accepted item%s, %i returned item%s.", GetCleanName(), accepted_count, ((accepted_count == 1) ? "" : "s"), returned_count, ((returned_count == 1) ? "" : "s"));
+
+	if (accepted_count)
+		CalcBotStats(client->GetBotOption(Client::booStatsUpdate));
 }
 
 bool Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill) {
@@ -4178,11 +4203,11 @@ bool Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, EQEmu::skills::Sk
 	Save();
 
 	Mob *my_owner = GetBotOwner();
-	if (my_owner && my_owner->IsClient() && my_owner->CastToClient()->GetBotOptionDeathMarquee()) {
+	if (my_owner && my_owner->IsClient() && my_owner->CastToClient()->GetBotOption(Client::booDeathMarquee)) {
 		if (killerMob)
-			my_owner->CastToClient()->SendMarqueeMessage(CC_Yellow, 510, 0, 1000, 3000, StringFormat("%s has been slain by %s", GetCleanName(), killerMob->GetCleanName()));
+			my_owner->CastToClient()->SendMarqueeMessage(Chat::Yellow, 510, 0, 1000, 3000, StringFormat("%s has been slain by %s", GetCleanName(), killerMob->GetCleanName()));
 		else
-			my_owner->CastToClient()->SendMarqueeMessage(CC_Yellow, 510, 0, 1000, 3000, StringFormat("%s has been slain", GetCleanName()));
+			my_owner->CastToClient()->SendMarqueeMessage(Chat::Yellow, 510, 0, 1000, 3000, StringFormat("%s has been slain", GetCleanName()));
 	}
 
 	Mob *give_exp = hate_list.GetDamageTopOnHateList(this);
@@ -4261,7 +4286,7 @@ void Bot::Damage(Mob *from, int32 damage, uint16 spell_id, EQEmu::skills::SkillT
 
 	//handle EVENT_ATTACK. Resets after we have not been attacked for 12 seconds
 	if(attacked_timer.Check()) {
-		Log(Logs::Detail, Logs::Combat, "Triggering EVENT_ATTACK due to attack by %s", from->GetName());
+		LogCombat("Triggering EVENT_ATTACK due to attack by [{}]", from->GetName());
 		parse->EventNPC(EVENT_ATTACK, this, from, "", 0);
 	}
 
@@ -4269,9 +4294,9 @@ void Bot::Damage(Mob *from, int32 damage, uint16 spell_id, EQEmu::skills::SkillT
 	// if spell is lifetap add hp to the caster
 	if (spell_id != SPELL_UNKNOWN && IsLifetapSpell(spell_id)) {
 		int healed = GetActSpellHealing(spell_id, damage);
-		Log(Logs::Detail, Logs::Combat, "Applying lifetap heal of %d to %s", healed, GetCleanName());
+		LogCombat("Applying lifetap heal of [{}] to [{}]", healed, GetCleanName());
 		HealDamage(healed);
-		entity_list.MessageClose(this, true, 300, MT_Spells, "%s beams a smile at %s", GetCleanName(), from->GetCleanName() );
+		entity_list.MessageClose(this, true, 300, Chat::Spells, "%s beams a smile at %s", GetCleanName(), from->GetCleanName() );
 	}
 
 	CommonDamage(from, damage, spell_id, attack_skill, avoidable, buffslot, iBuffTic, special);
@@ -4305,13 +4330,13 @@ void Bot::AddToHateList(Mob* other, uint32 hate, int32 damage, bool iYellForHelp
 bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts) {	
 	if (!other) {
 		SetTarget(nullptr);
-		Log(Logs::General, Logs::Error, "A null Mob object was passed to Bot::Attack for evaluation!");
+		LogError("A null Mob object was passed to Bot::Attack for evaluation!");
 		return false;
 	}
 
 	if ((GetHP() <= 0) || (GetAppearance() == eaDead)) {
 		SetTarget(nullptr);
-		Log(Logs::Detail, Logs::Combat, "Attempted to attack %s while unconscious or, otherwise, appearing dead", other->GetCleanName());
+		LogCombat("Attempted to attack [{}] while unconscious or, otherwise, appearing dead", other->GetCleanName());
 		return false;
 	}
 
@@ -4323,20 +4348,20 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 	// takes more to compare a call result, load for a call, load a compare to address and compare, and finally
 	// push a value to an address than to just load for a call and push a value to an address.
 	
-	Log(Logs::Detail, Logs::Combat, "Attacking %s with hand %d %s", other->GetCleanName(), Hand, (FromRiposte ? "(this is a riposte)" : ""));
+	LogCombat("Attacking [{}] with hand [{}] [{}]", other->GetCleanName(), Hand, (FromRiposte ? "(this is a riposte)" : ""));
 	if ((IsCasting() && (GetClass() != BARD) && !IsFromSpell) || (!IsAttackAllowed(other))) {
 		if(this->GetOwnerID())
 			entity_list.MessageClose(this, 1, 200, 10, "%s says, '%s is not a legal target master.'", this->GetCleanName(), this->GetTarget()->GetCleanName());
 
 		if(other) {
 			RemoveFromHateList(other);
-			Log(Logs::Detail, Logs::Combat, "I am not allowed to attack %s", other->GetCleanName());
+			LogCombat("I am not allowed to attack [{}]", other->GetCleanName());
 		}
 		return false;
 	}
 
 	if(DivineAura()) {//cant attack while invulnerable
-		Log(Logs::Detail, Logs::Combat, "Attack canceled, Divine Aura is in effect.");
+		LogCombat("Attack canceled, Divine Aura is in effect");
 		return false;
 	}
 
@@ -4354,19 +4379,19 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 
 	if(weapon != nullptr) {
 		if (!weapon->IsWeapon()) {
-			Log(Logs::Detail, Logs::Combat, "Attack canceled, Item %s (%d) is not a weapon.", weapon->GetItem()->Name, weapon->GetID());
+			LogCombat("Attack canceled, Item [{}] ([{}]) is not a weapon", weapon->GetItem()->Name, weapon->GetID());
 			return false;
 		}
-		Log(Logs::Detail, Logs::Combat, "Attacking with weapon: %s (%d)", weapon->GetItem()->Name, weapon->GetID());
+		LogCombat("Attacking with weapon: [{}] ([{}])", weapon->GetItem()->Name, weapon->GetID());
 	}
 	else
-		Log(Logs::Detail, Logs::Combat, "Attacking without a weapon.");
+		LogCombat("Attacking without a weapon");
 
 	// calculate attack_skill and skillinuse depending on hand and weapon
 	// also send Packet to near clients
 	DamageHitInfo my_hit;
 	my_hit.skill = AttackAnimation(Hand, weapon);
-	Log(Logs::Detail, Logs::Combat, "Attacking with %s in slot %d using skill %d", weapon?weapon->GetItem()->Name:"Fist", Hand, my_hit.skill);
+	LogCombat("Attacking with [{}] in slot [{}] using skill [{}]", weapon?weapon->GetItem()->Name:"Fist", Hand, my_hit.skill);
 
 	// Now figure out damage
 	my_hit.damage_done = 1;
@@ -4414,7 +4439,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 			}
 		}
 
-		Log(Logs::Detail, Logs::Combat, "Damage calculated: base %d min damage %d skill %d", my_hit.base_damage, my_hit.min_damage, my_hit.skill);
+		LogCombat("Damage calculated: base [{}] min damage [{}] skill [{}]", my_hit.base_damage, my_hit.min_damage, my_hit.skill);
 
 		int hit_chance_bonus = 0;
 		my_hit.offense = offense(my_hit.skill);
@@ -4432,7 +4457,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 
 		DoAttack(other, my_hit, opts);
 
-		Log(Logs::Detail, Logs::Combat, "Final damage after all reductions: %d", my_hit.damage_done);
+		LogCombat("Final damage after all reductions: [{}]", my_hit.damage_done);
 	} else {
 		my_hit.damage_done = DMG_INVULNERABLE;
 	}
@@ -5044,7 +5069,7 @@ int32 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 							return 0;
 						break;
 					default:
-						Log(Logs::General, Logs::Normal, "CalcFocusEffect: unknown limit spelltype %d", focus_spell.base[i]);
+						LogInfo("CalcFocusEffect: unknown limit spelltype [{}]", focus_spell.base[i]);
 				}
 				break;
 
@@ -5258,7 +5283,7 @@ int32 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 				break;
 			}
 			default:
-				Log(Logs::General, Logs::Spells, "CalcFocusEffect: unknown effectid %d", focus_spell.effectid[i]);
+				LogSpells("CalcFocusEffect: unknown effectid [{}]", focus_spell.effectid[i]);
 				break;
 		}
 	}
@@ -5298,7 +5323,7 @@ float Bot::GetProcChances(float ProcBonus, uint16 hand) {
 		ProcChance += (ProcChance * ProcBonus / 100.0f);
 	}
 
-	Log(Logs::Detail, Logs::Combat, "Proc chance %.2f (%.2f from bonuses)", ProcChance, ProcBonus);
+	LogCombat("Proc chance [{}] ([{}] from bonuses)", ProcChance, ProcBonus);
 	return ProcChance;
 }
 
@@ -5352,13 +5377,13 @@ bool Bot::TryFinishingBlow(Mob *defender, int &damage)
 		int fb_damage = aabonuses.FinishingBlow[1];
 		int levelreq = aabonuses.FinishingBlowLvl[0];
 		if (defender->GetLevel() <= levelreq && (chance >= zone->random.Int(1, 1000))) {
-			Log(Logs::Detail, Logs::Combat, "Landed a finishing blow: levelreq at %d, other level %d",
+			LogCombat("Landed a finishing blow: levelreq at [{}], other level [{}]",
 				levelreq, defender->GetLevel());
-			entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, FINISHING_BLOW, GetName());
+			entity_list.MessageCloseString(this, false, 200, Chat::MeleeCrit, FINISHING_BLOW, GetName());
 			damage = fb_damage;
 			return true;
 		} else {
-			Log(Logs::Detail, Logs::Combat, "FAILED a finishing blow: levelreq at %d, other level %d",
+			LogCombat("failed a finishing blow: levelreq at [{}], other level [{}]",
 				levelreq, defender->GetLevel());
 			return false;
 		}
@@ -5367,14 +5392,14 @@ bool Bot::TryFinishingBlow(Mob *defender, int &damage)
 }
 
 void Bot::DoRiposte(Mob* defender) {
-	Log(Logs::Detail, Logs::Combat, "Preforming a riposte");
+	LogCombat("Preforming a riposte");
 	if (!defender)
 		return;
 
 	defender->Attack(this, EQEmu::invslot::slotPrimary, true);
 	int32 DoubleRipChance = (defender->GetAABonuses().GiveDoubleRiposte[0] + defender->GetSpellBonuses().GiveDoubleRiposte[0] + defender->GetItemBonuses().GiveDoubleRiposte[0]);
 	if(DoubleRipChance && (DoubleRipChance >= zone->random.Int(0, 100))) {
-		Log(Logs::Detail, Logs::Combat, "Preforming a double riposte (%d percent chance)", DoubleRipChance);
+		LogCombat("Preforming a double riposte ([{}] percent chance)", DoubleRipChance);
 		defender->Attack(this, EQEmu::invslot::slotPrimary, true);
 	}
 
@@ -5562,7 +5587,7 @@ void Bot::TryBackstab(Mob *other, int ReuseTime) {
 	if (bIsBehind || bCanFrontalBS) {
 		int chance = (10 + (GetDEX() / 10) + (itembonuses.HeroicDEX / 10));
 		if(level >= 60 && other->GetLevel() <= 45 && !other->CastToNPC()->IsEngaged() && other->GetHP()<= 32000 && other->IsNPC() && zone->random.Real(0, 99) < chance) {
-			entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, ASSASSINATES, GetName());
+			entity_list.MessageCloseString(this, false, 200, Chat::MeleeCrit, ASSASSINATES, GetName());
 			RogueAssassinate(other);
 		} else {
 			RogueBackstab(other);
@@ -5930,12 +5955,12 @@ void Bot::ProcessGuildInvite(Client* guildOfficer, Bot* botToGuild) {
 	if(guildOfficer && botToGuild) {
 		if(!botToGuild->IsInAGuild()) {
 			if (!guild_mgr.CheckPermission(guildOfficer->GuildID(), guildOfficer->GuildRank(), GUILD_INVITE)) {
-				guildOfficer->Message(13, "You dont have permission to invite.");
+				guildOfficer->Message(Chat::Red, "You dont have permission to invite.");
 				return;
 			}
 
-			if (!botdb.SaveGuildMembership(botToGuild->GetBotID(), guildOfficer->GuildID(), GUILD_MEMBER)) {
-				guildOfficer->Message(13, "%s for '%s'", BotDatabase::fail::SaveGuildMembership(), botToGuild->GetCleanName());
+			if (!database.botdb.SaveGuildMembership(botToGuild->GetBotID(), guildOfficer->GuildID(), GUILD_MEMBER)) {
+				guildOfficer->Message(Chat::Red, "%s for '%s'", BotDatabase::fail::SaveGuildMembership(), botToGuild->GetCleanName());
 				return;
 			}
 			
@@ -5948,7 +5973,7 @@ void Bot::ProcessGuildInvite(Client* guildOfficer, Bot* botToGuild) {
 
 			safe_delete(pack);
 		} else {
-			guildOfficer->Message(13, "Bot is in a guild.");
+			guildOfficer->Message(Chat::Red, "Bot is in a guild.");
 			return;
 		}
 	}
@@ -5959,16 +5984,16 @@ bool Bot::ProcessGuildRemoval(Client* guildOfficer, std::string botName) {
 	if(guildOfficer && !botName.empty()) {
 		Bot* botToUnGuild = entity_list.GetBotByBotName(botName);
 		if(botToUnGuild) {
-			if (botdb.SaveGuildMembership(botToUnGuild->GetBotID(), 0, 0))
+			if (database.botdb.SaveGuildMembership(botToUnGuild->GetBotID(), 0, 0))
 				Result = true;
 		} else {
 			uint32 ownerId = 0;
-			if (!botdb.LoadOwnerID(botName, ownerId))
-				guildOfficer->Message(13, "%s for '%s'", BotDatabase::fail::LoadOwnerID(), botName.c_str());
+			if (!database.botdb.LoadOwnerID(botName, ownerId))
+				guildOfficer->Message(Chat::Red, "%s for '%s'", BotDatabase::fail::LoadOwnerID(), botName.c_str());
 			uint32 botId = 0;
-			if (!botdb.LoadBotID(ownerId, botName, botId))
-				guildOfficer->Message(13, "%s for '%s'", BotDatabase::fail::LoadBotID(), botName.c_str());
-			if (botId && botdb.SaveGuildMembership(botId, 0, 0))
+			if (!database.botdb.LoadBotID(ownerId, botName, botId))
+				guildOfficer->Message(Chat::Red, "%s for '%s'", BotDatabase::fail::LoadBotID(), botName.c_str());
+			if (botId && database.botdb.SaveGuildMembership(botId, 0, 0))
 				Result = true;
 		}
 
@@ -5977,7 +6002,7 @@ bool Bot::ProcessGuildRemoval(Client* guildOfficer, std::string botName) {
 			GuildManageRemove_Struct* gm = (GuildManageRemove_Struct*) outapp->pBuffer;
 			gm->guildeqid = guildOfficer->GuildID();
 			strcpy(gm->member, botName.c_str());
-			guildOfficer->Message(0, "%s successfully removed from your guild.", botName.c_str());
+			guildOfficer->Message(Chat::White, "%s successfully removed from your guild.", botName.c_str());
 			entity_list.QueueClientsGuild(guildOfficer, outapp, false, gm->guildeqid);
 			safe_delete(outapp);
 		}
@@ -5997,7 +6022,7 @@ int32 Bot::CalcMaxMana() {
 			break;
 		}
 		default: {
-			Log(Logs::General, Logs::None, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
+			LogDebug("Invalid Class [{}] in CalcMaxMana", GetCasterClass());
 			max_mana = 0;
 			break;
 		}
@@ -6115,7 +6140,7 @@ int32 Bot::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 			if(itembonuses.SpellDmg && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5)
 				value += (GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value) * ratio / 100);
 
-			entity_list.MessageClose(this, false, 100, MT_SpellCrits, "%s delivers a critical blast! (%d)", GetName(), -value);
+			entity_list.MessageClose(this, false, 100, Chat::SpellCrit, "%s delivers a critical blast! (%d)", GetName(), -value);
 
 			return value;
 		}
@@ -6169,7 +6194,7 @@ int32 Bot::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 
 		value += (value * target->GetHealRate(spell_id, this) / 100);
 		if (Critical)
-			entity_list.MessageClose(this, false, 100, MT_SpellCrits, "%s performs an exceptional heal! (%d)", GetName(), value);
+			entity_list.MessageClose(this, false, 100, Chat::SpellCrit, "%s performs an exceptional heal! (%d)", GetName(), value);
 
 		return value;
 	} else {
@@ -6425,20 +6450,20 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, EQEmu::spells::CastingSlo
 					uint32* oSpellWillFinish, uint32 item_slot, int16 *resist_adjust, uint32 aa_id) {
 	bool Result = false;
 	if(zone && !zone->IsSpellBlocked(spell_id, glm::vec3(GetPosition()))) {
-		Log(Logs::Detail, Logs::Spells, "CastSpell called for spell %s (%d) on entity %d, slot %d, time %d, mana %d, from item slot %d", spells[spell_id].name, spell_id, target_id, slot, cast_time, mana_cost, (item_slot==0xFFFFFFFF)?999:item_slot);
+		// LogSpells("CastSpell called for spell [{}] ([{}]) on entity [{}], slot [{}], time [{}], mana [{}], from item slot [{}]", spells[spell_id].name, spell_id, target_id, slot, cast_time, mana_cost, (item_slot==0xFFFFFFFF)?999:item_slot);
 
 		if(casting_spell_id == spell_id)
 			ZeroCastingVars();
 
 		if(GetClass() != BARD) {
 			if(!IsValidSpell(spell_id) || casting_spell_id || delaytimer || spellend_timer.Enabled() || IsStunned() || IsFeared() || IsMezzed() || (IsSilenced() && !IsDiscipline(spell_id)) || (IsAmnesiad() && IsDiscipline(spell_id))) {
-				Log(Logs::Detail, Logs::Spells, "Spell casting canceled: not able to cast now. Valid? %d, casting %d, waiting? %d, spellend? %d, stunned? %d, feared? %d, mezed? %d, silenced? %d", IsValidSpell(spell_id), casting_spell_id, delaytimer, spellend_timer.Enabled(), IsStunned(), IsFeared(), IsMezzed(), IsSilenced() );
+				LogSpells("Spell casting canceled: not able to cast now. Valid? [{}], casting [{}], waiting? [{}], spellend? [{}], stunned? [{}], feared? [{}], mezed? [{}], silenced? [{}]", IsValidSpell(spell_id), casting_spell_id, delaytimer, spellend_timer.Enabled(), IsStunned(), IsFeared(), IsMezzed(), IsSilenced() );
 				if(IsSilenced() && !IsDiscipline(spell_id))
-					Message_StringID(13, SILENCED_STRING);
+					MessageString(Chat::Red, SILENCED_STRING);
 
 				if(IsAmnesiad() && IsDiscipline(spell_id))
 
-					Message_StringID(13, MELEE_SILENCE);
+					MessageString(Chat::Red, MELEE_SILENCE);
 
 				if(casting_spell_id)
 					AI_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
@@ -6448,7 +6473,7 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, EQEmu::spells::CastingSlo
 		}
 
 		if(IsDetrimentalSpell(spell_id) && !zone->CanDoCombat()){
-			Message_StringID(13, SPELL_WOULDNT_HOLD);
+			MessageString(Chat::Red, SPELL_WOULDNT_HOLD);
 			if(casting_spell_id)
 				AI_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
 
@@ -6456,7 +6481,7 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, EQEmu::spells::CastingSlo
 		}
 
 		if(DivineAura()) {
-			Log(Logs::Detail, Logs::Spells, "Spell casting canceled: cannot cast while Divine Aura is in effect.");
+			LogSpells("Spell casting canceled: cannot cast while Divine Aura is in effect");
 			InterruptSpell(173, 0x121, false);
 			return false;
 		}
@@ -6466,13 +6491,13 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, EQEmu::spells::CastingSlo
 			InterruptSpell(fizzle_msg, 0x121, spell_id);
 
 			uint32 use_mana = ((spells[spell_id].mana) / 4);
-			Log(Logs::Detail, Logs::Spells, "Spell casting canceled: fizzled. %d mana has been consumed", use_mana);
+			LogSpells("Spell casting canceled: fizzled. [{}] mana has been consumed", use_mana);
 			SetMana(GetMana() - use_mana);
 			return false;
 		}
 
 		if (HasActiveSong()) {
-			Log(Logs::Detail, Logs::Spells, "Casting a new spell/song while singing a song. Killing old song %d.", bardsong);
+			LogSpells("Casting a new spell/song while singing a song. Killing old song [{}]", bardsong);
 			bardsong = 0;
 			bardsong_target_id = 0;
 			bardsong_slot = EQEmu::spells::CastingSlot::Gem1;
@@ -6586,19 +6611,19 @@ bool Bot::IsImmuneToSpell(uint16 spell_id, Mob *caster) {
 			if(caster->IsBot()) {
 				if(spells[spell_id].targettype == ST_Undead) {
 					if((GetBodyType() != BT_SummonedUndead) && (GetBodyType() != BT_Undead) && (GetBodyType() != BT_Vampire)) {
-						Log(Logs::Detail, Logs::Spells, "Bot's target is not an undead.");
+						LogSpells("Bot's target is not an undead");
 						return true;
 					}
 				}
 				if(spells[spell_id].targettype == ST_Summoned) {
 					if((GetBodyType() != BT_SummonedUndead) && (GetBodyType() != BT_Summoned) && (GetBodyType() != BT_Summoned2) && (GetBodyType() != BT_Summoned3)) {
-						Log(Logs::Detail, Logs::Spells, "Bot's target is not a summoned creature.");
+						LogSpells("Bot's target is not a summoned creature");
 						return true;
 					}
 				}
 			}
 
-			Log(Logs::Detail, Logs::Spells, "No bot immunities to spell %d found.", spell_id);
+			LogSpells("No bot immunities to spell [{}] found", spell_id);
 		}
 	}
 
@@ -6749,7 +6774,7 @@ bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQEmu::
 					if((spelltypeequal || spelltypetargetequal) || spelltypeclassequal || slotequal) {
 						if(((spells[thespell].effectid[0] == 0) && (spells[thespell].base[0] < 0)) &&
 							(spellTarget->GetHP() < ((spells[thespell].base[0] * (-1)) + 100))) {
-							Log(Logs::General, Logs::Spells, "Bot::DoFinishedSpellSingleTarget - GroupBuffing failure");
+							LogSpells("Bot::DoFinishedSpellSingleTarget - GroupBuffing failure");
 							return false;
 						}
 
@@ -7455,8 +7480,13 @@ void Bot::DoEnduranceUpkeep() {
 void Bot::Camp(bool databaseSave) {
 	Sit();
 
-	if(IsGrouped())
+	//auto group = GetGroup();
+	if(GetGroup())
 		RemoveBotFromGroup(this, GetGroup());
+
+	// RemoveBotFromGroup() code is too complicated for this to work as-is (still needs to be addressed to prevent memory leaks)
+	//if (group->GroupCount() < 2)
+	//	group->DisbandGroup();
 
 	LeaveHealRotationMemberPool();
 
@@ -8145,13 +8175,13 @@ void Bot::CalcBotStats(bool showtext) {
 		return;
 
 	if(showtext) {
-		GetBotOwner()->Message(15, "Updating %s...", GetCleanName());
+		GetBotOwner()->Message(Chat::Yellow, "Updating %s...", GetCleanName());
 	}
 
 	if(!IsValidRaceClassCombo()) {
-		GetBotOwner()->Message(15, "A %s - %s bot was detected. Is this Race/Class combination allowed?.", GetRaceIDName(GetRace()), GetClassIDName(GetClass(), GetLevel()));
-		GetBotOwner()->Message(15, "Previous Bots Code releases did not check Race/Class combinations during create.");
-		GetBotOwner()->Message(15, "Unless you are experiencing heavy lag, you should delete and remake this bot.");
+		GetBotOwner()->Message(Chat::Yellow, "A %s - %s bot was detected. Is this Race/Class combination allowed?.", GetRaceIDName(GetRace()), GetClassIDName(GetClass(), GetLevel()));
+		GetBotOwner()->Message(Chat::Yellow, "Previous Bots Code releases did not check Race/Class combinations during create.");
+		GetBotOwner()->Message(Chat::Yellow, "Unless you are experiencing heavy lag, you should delete and remake this bot.");
 	}
 
 	if(GetBotOwner()->GetLevel() != GetLevel())
@@ -8160,37 +8190,37 @@ void Bot::CalcBotStats(bool showtext) {
 	GenerateSpecialAttacks();
 
 	if(showtext) {
-		GetBotOwner()->Message(15, "Base stats:");
-		GetBotOwner()->Message(15, "Level: %i HP: %i AC: %i Mana: %i STR: %i STA: %i DEX: %i AGI: %i INT: %i WIS: %i CHA: %i", GetLevel(), base_hp, AC, max_mana, STR, STA, DEX, AGI, INT, WIS, CHA);
-		GetBotOwner()->Message(15, "Resists-- Magic: %i, Poison: %i, Fire: %i, Cold: %i, Disease: %i, Corruption: %i.",MR,PR,FR,CR,DR,Corrup);
+		GetBotOwner()->Message(Chat::Yellow, "Base stats:");
+		GetBotOwner()->Message(Chat::Yellow, "Level: %i HP: %i AC: %i Mana: %i STR: %i STA: %i DEX: %i AGI: %i INT: %i WIS: %i CHA: %i", GetLevel(), base_hp, AC, max_mana, STR, STA, DEX, AGI, INT, WIS, CHA);
+		GetBotOwner()->Message(Chat::Yellow, "Resists-- Magic: %i, Poison: %i, Fire: %i, Cold: %i, Disease: %i, Corruption: %i.",MR,PR,FR,CR,DR,Corrup);
 		// Test Code
 		if(GetClass() == BARD)
-			GetBotOwner()->Message(15, "Bard Skills-- Brass: %i, Percussion: %i, Singing: %i, Stringed: %i, Wind: %i",
+			GetBotOwner()->Message(Chat::Yellow, "Bard Skills-- Brass: %i, Percussion: %i, Singing: %i, Stringed: %i, Wind: %i",
 			GetSkill(EQEmu::skills::SkillBrassInstruments), GetSkill(EQEmu::skills::SkillPercussionInstruments), GetSkill(EQEmu::skills::SkillSinging), GetSkill(EQEmu::skills::SkillStringedInstruments), GetSkill(EQEmu::skills::SkillWindInstruments));
 	}
 
 	//if(this->Save())
-	//	this->GetBotOwner()->CastToClient()->Message(0, "%s saved.", this->GetCleanName());
+	//	this->GetBotOwner()->CastToClient()->Message(Chat::White, "%s saved.", this->GetCleanName());
 	//else
-	//	this->GetBotOwner()->CastToClient()->Message(13, "%s save failed!", this->GetCleanName());
+	//	this->GetBotOwner()->CastToClient()->Message(Chat::Red, "%s save failed!", this->GetCleanName());
 
 	CalcBonuses();
 
 	AI_AddNPCSpells(this->GetBotSpellID());
 
 	if(showtext) {
-		GetBotOwner()->Message(15, "%s has been updated.", GetCleanName());
-		GetBotOwner()->Message(15, "Level: %i HP: %i AC: %i Mana: %i STR: %i STA: %i DEX: %i AGI: %i INT: %i WIS: %i CHA: %i", GetLevel(), max_hp, GetAC(), max_mana, GetSTR(), GetSTA(), GetDEX(), GetAGI(), GetINT(), GetWIS(), GetCHA());
-		GetBotOwner()->Message(15, "Resists-- Magic: %i, Poison: %i, Fire: %i, Cold: %i, Disease: %i, Corruption: %i.",GetMR(),GetPR(),GetFR(),GetCR(),GetDR(),GetCorrup());
+		GetBotOwner()->Message(Chat::Yellow, "%s has been updated.", GetCleanName());
+		GetBotOwner()->Message(Chat::Yellow, "Level: %i HP: %i AC: %i Mana: %i STR: %i STA: %i DEX: %i AGI: %i INT: %i WIS: %i CHA: %i", GetLevel(), max_hp, GetAC(), max_mana, GetSTR(), GetSTA(), GetDEX(), GetAGI(), GetINT(), GetWIS(), GetCHA());
+		GetBotOwner()->Message(Chat::Yellow, "Resists-- Magic: %i, Poison: %i, Fire: %i, Cold: %i, Disease: %i, Corruption: %i.",GetMR(),GetPR(),GetFR(),GetCR(),GetDR(),GetCorrup());
 		// Test Code
 		if(GetClass() == BARD) {
-			GetBotOwner()->Message(15, "Bard Skills-- Brass: %i, Percussion: %i, Singing: %i, Stringed: %i, Wind: %i",
+			GetBotOwner()->Message(Chat::Yellow, "Bard Skills-- Brass: %i, Percussion: %i, Singing: %i, Stringed: %i, Wind: %i",
 				GetSkill(EQEmu::skills::SkillBrassInstruments) + GetBrassMod(),
 				GetSkill(EQEmu::skills::SkillPercussionInstruments) + GetPercMod(),
 				GetSkill(EQEmu::skills::SkillSinging) + GetSingMod(),
 				GetSkill(EQEmu::skills::SkillStringedInstruments) + GetStringMod(),
 				GetSkill(EQEmu::skills::SkillWindInstruments) + GetWindMod());
-			GetBotOwner()->Message(15, "Bard Skill Mods-- Brass: %i, Percussion: %i, Singing: %i, Stringed: %i, Wind: %i", GetBrassMod(), GetPercMod(), GetSingMod(), GetStringMod(), GetWindMod());
+			GetBotOwner()->Message(Chat::Yellow, "Bard Skill Mods-- Brass: %i, Percussion: %i, Singing: %i, Stringed: %i, Wind: %i", GetBrassMod(), GetPercMod(), GetSingMod(), GetStringMod(), GetWindMod());
 		}
 	}
 }
@@ -8207,8 +8237,8 @@ bool Bot::CheckLoreConflict(const EQEmu::ItemData* item) {
 }
 
 bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, float iRange, uint32 iSpellTypes) {
-	if((iSpellTypes&SpellTypes_Detrimental) != 0) {
-		Log(Logs::General, Logs::Error, "Error: detrimental spells requested from AICheckCloseBeneficialSpells!!");
+	if((iSpellTypes & SPELL_TYPES_DETRIMENTAL) != 0) {
+		LogError("Error: detrimental spells requested from AICheckCloseBeneficialSpells!!");
 		return false;
 	}
 
@@ -8262,19 +8292,19 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 				Group *g = caster->GetGroup();
 				float hpRatioToHeal = 25.0f;
 				switch(caster->GetBotStance()) {
-					case BotStanceReactive:
-					case BotStanceBalanced:
-						hpRatioToHeal = 50.0f;
-						break;
-					case BotStanceBurn:
-					case BotStanceBurnAE:
-						hpRatioToHeal = 20.0f;
-						break;
-					case BotStanceAggressive:
-					case BotStanceEfficient:
-					default:
-						hpRatioToHeal = 25.0f;
-						break;
+				case EQEmu::constants::stanceReactive:
+				case EQEmu::constants::stanceBalanced:
+					hpRatioToHeal = 50.0f;
+					break;
+				case EQEmu::constants::stanceBurn:
+				case EQEmu::constants::stanceBurnAE:
+					hpRatioToHeal = 20.0f;
+					break;
+				case EQEmu::constants::stanceAggressive:
+				case EQEmu::constants::stanceEfficient:
+				default:
+					hpRatioToHeal = 25.0f;
+					break;
 				}
 
 				if(g) {
@@ -8813,11 +8843,11 @@ bool Bot::HasOrMayGetAggro() {
 }
 
 void Bot::SetDefaultBotStance() {
-	BotStanceType defaultStance = BotStanceBalanced;
+	EQEmu::constants::StanceType defaultStance = EQEmu::constants::stanceBalanced;
 	if (GetClass() == WARRIOR)
-		defaultStance = BotStanceAggressive;
+		defaultStance = EQEmu::constants::stanceAggressive;
 
-	_baseBotStance = BotStancePassive;
+	_baseBotStance = EQEmu::constants::stancePassive;
 	_botStance = defaultStance;
 }
 
@@ -8858,7 +8888,7 @@ bool Bot::UseDiscipline(uint32 spell_id, uint32 target) {
 				SetDisciplineRecastTimer(spells[spell_id].EndurTimerIndex, spell.recast_time);
 		} else {
 			uint32 remain = (GetDisciplineRemainingTime(this, spells[spell_id].EndurTimerIndex) / 1000);
-			GetOwner()->Message(0, "%s can use this discipline in %d minutes %d seconds.", GetCleanName(), (remain / 60), (remain % 60));
+			GetOwner()->Message(Chat::White, "%s can use this discipline in %d minutes %d seconds.", GetCleanName(), (remain / 60), (remain % 60));
 			return false;
 		}
 	}
@@ -9058,9 +9088,9 @@ bool Bot::DyeArmor(int16 slot_id, uint32 rgb, bool all_flag, bool save_flag)
 		if (all_flag)
 			save_slot = -2;
 
-		if (!botdb.SaveEquipmentColor(GetBotID(), save_slot, rgb)) {
+		if (!database.botdb.SaveEquipmentColor(GetBotID(), save_slot, rgb)) {
 			if (GetBotOwner() && GetBotOwner()->IsClient())
-				GetBotOwner()->CastToClient()->Message(13, "%s", BotDatabase::fail::SaveEquipmentColor());
+				GetBotOwner()->CastToClient()->Message(Chat::Red, "%s", BotDatabase::fail::SaveEquipmentColor());
 			return false;
 		}
 	}
@@ -9089,5 +9119,7 @@ std::string Bot::CreateSayLink(Client* c, const char* message, const char* name)
 	auto saylink = linker.GenerateLink();
 	return saylink;
 }
+
+uint8 Bot::spell_casting_chances[SPELL_TYPE_COUNT][PLAYER_CLASS_COUNT][EQEmu::constants::STANCE_TYPE_COUNT][cntHSND] = { 0 };
 
 #endif

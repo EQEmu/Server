@@ -4,7 +4,7 @@
 #include "../common/types.h"
 #include "../common/packet_functions.h"
 #include "../common/eq_packet_structs.h"
-#include "../net/packet.h"
+#include "../common/net/packet.h"
 #include <cereal/cereal.hpp>
 #include <cereal/types/string.hpp>
 
@@ -80,6 +80,7 @@
 #define ServerOP_GroupJoin			0x003e //for joining ooz folks
 #define ServerOP_UpdateSpawn		0x003f
 #define ServerOP_SpawnStatusChange	0x0040
+#define ServerOP_DropClient         0x0041	// DropClient
 #define ServerOP_ReloadTasks		0x0060
 #define ServerOP_DepopAllPlayersCorpses	0x0061
 #define ServerOP_ReloadTitles		0x0062
@@ -142,14 +143,15 @@
 #define ServerOP_ClientVersionSummary 0x0215
 #define ServerOP_LSInfo				0x1000
 #define ServerOP_LSStatus			0x1001
-#define ServerOP_LSClientAuth		0x1002
+#define ServerOP_LSClientAuthLeg	0x1002
 #define ServerOP_LSFatalError		0x1003
 #define ServerOP_SystemwideMessage	0x1005
 #define ServerOP_ListWorlds			0x1006
 #define ServerOP_PeerConnect		0x1007
 #define ServerOP_NewLSInfo			0x1008
 #define ServerOP_LSRemoteAddr		0x1009
-#define ServerOP_LSAccountUpdate		0x100A
+#define ServerOP_LSAccountUpdate	0x100A
+#define ServerOP_LSClientAuth		0x100B
 
 #define ServerOP_EncapPacket		0x2007	// Packet within a packet
 #define ServerOP_WorldListUpdate	0x2008
@@ -159,6 +161,7 @@
 #define ServerOP_SetWorldTime		0x200B
 #define ServerOP_GetWorldTime		0x200C
 #define ServerOP_SyncWorldTime		0x200E
+#define ServerOP_RefreshCensorship	0x200F
 
 #define ServerOP_LSZoneInfo			0x3001
 #define ServerOP_LSZoneStart		0x3002
@@ -169,8 +172,10 @@
 #define ServerOP_LSPlayerJoinWorld	0x3007
 #define ServerOP_LSPlayerZoneChange	0x3008
 
-#define	ServerOP_UsertoWorldReq		0xAB00
-#define	ServerOP_UsertoWorldResp	0xAB01
+#define	ServerOP_UsertoWorldReqLeg	0xAB00
+#define	ServerOP_UsertoWorldRespLeg	0xAB01
+#define	ServerOP_UsertoWorldReq		0xAB02
+#define	ServerOP_UsertoWorldResp	0xAB03
 
 #define ServerOP_LauncherConnectInfo	0x3000
 #define ServerOP_LauncherZoneRequest	0x3001
@@ -211,6 +216,15 @@ enum {	QSG_LFGuild_PlayerMatches = 0, QSG_LFGuild_UpdatePlayerInfo, QSG_LFGuild_
 	QSG_LFGuild_RequestGuildInfo };
 
 #define ServerOP_Speech			0x4513
+
+enum {
+	UserToWorldStatusWorldUnavail = 0,
+	UserToWorldStatusSuccess = 1,
+	UserToWorldStatusSuspended = -1,
+	UserToWorldStatusBanned = -2,
+	UserToWorldStatusWorldAtCapacity = -3,
+	UserToWorldStatusAlreadyOnline = -4
+};
 
 /************ PACKET RELATED STRUCT ************/
 class ServerPacket
@@ -307,9 +321,15 @@ struct ServerZoneIncomingClient_Struct {
 	uint32	accid;
 	int16	admin;
 	uint32	charid;
+	uint32  lsid;
 	bool	tellsoff;
 	char	charname[64];
 	char	lskey[30];
+};
+
+struct ServerZoneDropClient_Struct
+{
+	uint32 lsid;
 };
 
 struct ServerChangeWID_Struct {
@@ -342,7 +362,8 @@ struct ServerChannelMessage_Struct {
 	bool noreply;
 	uint16 chan_num;
 	uint32 guilddbid;
-	uint16 language;
+	uint8 language;
+	uint8 lang_skill;
 	uint8 queued; // 0 = not queued, 1 = queued, 2 = queue full, 3 = offline
 	char message[0];
 };
@@ -451,15 +472,15 @@ struct ServerLSInfo_Struct {
 };
 
 struct ServerNewLSInfo_Struct {
-	char	name[201];				// name the worldserver wants
-	char	shortname[50];				// shortname the worldserver wants
-	char	remote_address[125];			// DNS address of the server
-	char	local_address[125];			// DNS address of the server
-	char	account[31];			// account name for the worldserver
-	char	password[31];			// password for the name
-	char	protocolversion[25];	// Major protocol version number
-	char	serverversion[64];		// minor server software version number
-	uint8	servertype;				// 0=world, 1=chat, 2=login, 3=MeshLogin
+	char	server_long_name[201];				// name the worldserver wants
+	char	server_short_name[50];				// shortname the worldserver wants
+	char	remote_ip_address[125];			// DNS address of the server
+	char	local_ip_address[125];			// DNS address of the server
+	char	account_name[31];			// account name for the worldserver
+	char	account_password[31];			// password for the name
+	char	protocol_version[25];	// Major protocol version number
+	char	server_version[64];		// minor server software version number
+	uint8	server_process_type;				// 0=world, 1=chat, 2=login, 3=MeshLogin
 };
 
 struct ServerLSAccountUpdate_Struct {			// for updating info on login server
@@ -468,7 +489,7 @@ struct ServerLSAccountUpdate_Struct {			// for updating info on login server
 	uint32	useraccountid;				// player account ID
 	char	useraccount[31];			// player account name
 	char	userpassword[51];			// player account password
-	char	useremail[101];				// player account email address
+	char	user_email[101];				// player account email address
 };
 
 struct ServerLSStatus_Struct {
@@ -515,18 +536,35 @@ struct ServerLSPlayerZoneChange_Struct {
 };
 
 struct ClientAuth_Struct {
-	uint32 lsaccount_id; // ID# in login server's db
-	char name[30]; // username in login server's db
+	uint32 loginserver_account_id; // ID# in login server's db
+	char loginserver_name[64];
+	char account_name[30]; // username in login server's db
 	char key[30]; // the Key the client will present
 	uint8 lsadmin; // login server admin level
-	int16 worldadmin; // login's suggested worldadmin level setting for this user, up to the world if they want to obey it
+	int16 is_world_admin; // login's suggested worldadmin level setting for this user, up to the world if they want to obey it
 	uint32 ip;
-	uint8 local; // 1 if the client is from the local network
+	uint8 is_client_from_local_network; // 1 if the client is from the local network
 
 	template <class Archive>
 	void serialize(Archive &ar)
 	{
-		ar(lsaccount_id, name, key, lsadmin, worldadmin, ip, local);
+		ar(loginserver_account_id, loginserver_name, account_name, key, lsadmin, is_world_admin, ip, is_client_from_local_network);
+	}
+};
+
+struct ClientAuthLegacy_Struct {
+	uint32 loginserver_account_id; // ID# in login server's db
+	char loginserver_account_name[30]; // username in login server's db
+	char key[30]; // the Key the client will present
+	uint8 loginserver_admin_level; // login server admin level
+	int16 is_world_admin; // login's suggested worldadmin level setting for this user, up to the world if they want to obey it
+	uint32 ip;
+	uint8 is_client_from_local_network; // 1 if the client is from the local network
+
+	template <class Archive>
+	void serialize(Archive &ar)
+	{
+		ar(loginserver_account_id, loginserver_account_name, key, loginserver_admin_level, is_world_admin, ip, is_client_from_local_network);
 	}
 };
 
@@ -654,7 +692,7 @@ struct ServerSyncWorldList_Struct {
 	bool	placeholder;
 };
 
-struct UsertoWorldRequest_Struct {
+struct UsertoWorldRequestLegacy_Struct {
 	uint32	lsaccountid;
 	uint32	worldid;
 	uint32	FromID;
@@ -662,12 +700,30 @@ struct UsertoWorldRequest_Struct {
 	char	IPAddr[64];
 };
 
-struct UsertoWorldResponse_Struct {
+struct UsertoWorldRequest_Struct {
 	uint32	lsaccountid;
 	uint32	worldid;
-	int8	response; // -3) World Full, -2) Banned, -1) Suspended, 0) Denied, 1) Allowed
 	uint32	FromID;
 	uint32	ToID;
+	char	IPAddr[64];
+	char	login[64];
+};
+
+struct UsertoWorldResponseLegacy_Struct {
+	uint32 lsaccountid;
+	uint32 worldid;
+	int8   response; // -3) World Full, -2) Banned, -1) Suspended, 0) Denied, 1) Allowed
+	uint32 FromID;
+	uint32 ToID;
+};
+
+struct UsertoWorldResponse_Struct {
+	uint32 lsaccountid;
+	uint32 worldid;
+	int8   response; // -3) World Full, -2) Banned, -1) Suspended, 0) Denied, 1) Allowed
+	uint32 FromID;
+	uint32 ToID;
+	char   login[64];
 };
 
 // generic struct to be used for alot of simple zone->world questions
@@ -855,6 +911,8 @@ struct ServerRaidGroupAction_Struct { //add / remove depends on opcode.
 struct ServerRaidMessage_Struct {
 	uint32 rid;
 	uint32 gid;
+	uint8 language;
+	uint8 lang_skill;
 	char from[64];
 	char message[0];
 };

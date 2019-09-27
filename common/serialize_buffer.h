@@ -143,7 +143,7 @@ public:
 	void WriteString(const char *str)
 	{
 		assert(str != nullptr);
-		auto len = strlen(str) + 1;
+		auto len = std::char_traits<char>::length(str) + 1;
 		if (m_pos + len > m_capacity)
 			Grow(m_capacity + len);
 		memcpy(m_buffer + m_pos, str, len);

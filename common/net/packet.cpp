@@ -1,7 +1,7 @@
 #include "packet.h"
 #include "endian.h"
-#include <fmt/format.h>
 #include <cctype>
+#include <fmt/format.h>
 
 void EQ::Net::Packet::PutInt8(size_t offset, int8_t value)
 {

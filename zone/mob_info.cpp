@@ -189,11 +189,11 @@ inline std::string GetMobAttributeByString(Mob *mob, const std::string &attribut
 	}
 
 	if (attribute == "cor") {
-		return std::to_string(mob->GetCorrup());
+		return commify(std::to_string(mob->GetCorrup())) + scaling_modified;
 	}
 
 	if (attribute == "phy") {
-		return std::to_string(mob->GetPhR());
+		return commify(std::to_string(mob->GetPhR())) + scaling_modified;
 	}
 
 	if (attribute == "name") {
@@ -278,7 +278,7 @@ inline std::string GetMobAttributeByString(Mob *mob, const std::string &attribut
 			return std::to_string((int)npc->GetWalkspeed());
 		}
 		if (attribute == "spawngroup") {
-			return std::to_string(npc->GetSp2());
+			return std::to_string(npc->GetSpawnGroupId());
 		}
 		if (attribute == "grid") {
 			return std::to_string(npc->GetGrid());
@@ -624,7 +624,7 @@ inline void NPCCommandsMenu(Client* client, NPC* npc)
 
 	if (menu_commands.length() > 0) {
 		std::string dev_menu = "[" + EQEmu::SayLinkEngine::GenerateQuestSaylink("#devtools", false, "DevTools") + "] ";;
-		client->Message(0, "| %s [Show Commands] %s", dev_menu.c_str(), menu_commands.c_str());
+		client->Message(Chat::White, "| %s [Show Commands] %s", dev_menu.c_str(), menu_commands.c_str());
 	}
 }
 
