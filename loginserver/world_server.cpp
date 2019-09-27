@@ -924,8 +924,9 @@ bool WorldServer::HandleNewLoginserverInfoUnregisteredAllowed(
 			this->GetServerShortName()
 		);
 
+		this->SetIsServerAuthorized(true);
+
 		if (world_registration.loaded) {
-			this->SetIsServerAuthorized(true);
 			return true;
 		}
 
