@@ -42,7 +42,6 @@ SET(world_headers
 	lfplist.h
 	login_server.h
 	login_server_list.h
-	net.h
 	queryserv.h
 	sof_char_create_data.h
 	ucs.h

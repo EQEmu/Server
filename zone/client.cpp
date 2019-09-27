@@ -41,7 +41,6 @@ extern volatile bool RunLoops;
 #include "../common/profanity_manager.h"
 #include "data_bucket.h"
 #include "position.h"
-#include "net.h"
 #include "worldserver.h"
 #include "zonedb.h"
 #include "petitions.h"
@@ -66,6 +65,8 @@ extern uint32 numclients;
 extern PetitionList petition_list;
 bool commandlogged;
 char entirecommand[255];
+
+void UpdateWindowTitle(char* iNewTitle);
 
 Client::Client(EQStreamInterface* ieqs)
 : Mob("No name",	// name
@@ -244,7 +245,7 @@ Client::Client(EQStreamInterface* ieqs)
 	PendingRezzSpellID = 0;
 	numclients++;
 	// emuerror;
-	UpdateWindowTitle();
+	UpdateWindowTitle(nullptr);
 	horseId = 0;
 	tgb = false;
 	tribute_master_id = 0xFFFFFFFF;
@@ -449,7 +450,7 @@ Client::~Client() {
 	ClearRespawnOptions();
 
 	numclients--;
-	UpdateWindowTitle();
+	UpdateWindowTitle(nullptr);
 	if(zone)
 		zone->RemoveAuth(GetName(), lskey);
 

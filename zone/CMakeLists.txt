@@ -79,6 +79,7 @@ SET(zone_sources
 	horse.cpp
 	inventory.cpp
 	loottables.cpp
+	main.cpp
 	map.cpp
 	merc.cpp
 	mob.cpp
@@ -87,7 +88,6 @@ SET(zone_sources
 	mob_movement_manager.cpp
 	mob_info.cpp
 	mod_functions.cpp
-	net.cpp
 	npc.cpp
 	npc_ai.cpp
 	npc_scale_manager.cpp
@@ -210,7 +210,6 @@ SET(zone_headers
 	merc.h
 	mob.h
 	mob_movement_manager.h
-	net.h
 	npc.h
 	npc_ai.h
 	npc_scale_manager.h

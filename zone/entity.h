@@ -538,6 +538,13 @@ private:
 	std::list<Area> area_list;
 	std::queue<uint16> free_ids;
 
+	Timer object_timer;
+	Timer door_timer;
+	Timer corpse_timer;
+	Timer group_timer;
+	Timer raid_timer;
+	Timer trap_timer;
+
 	// Please Do Not Declare Any EntityList Class Members After This Comment
 #ifdef BOTS
 	public:
