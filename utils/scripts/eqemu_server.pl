@@ -1489,9 +1489,9 @@ sub do_windows_login_server_setup {
     print "[Install] Done... \n";
 
     print "[Install] Pulling down Loginserver database tables...\n";
-    get_remote_file($install_repository_request_url . "login_server_tables.sql", "db_update/login_server_tables.sql");
+    get_remote_file($eqemu_repository_request_url . "loginserver/login_util/login_schema.sql", "db_update/login_schema.sql");
     print "[Install] Installing Loginserver tables...\n";
-    print get_mysql_result_from_file("db_update/login_server_tables.sql");
+    print get_mysql_result_from_file("db_update/login_schema.sql");
     print "[Install] Done...\n";
 
     add_login_server_firewall_rules();
@@ -1518,9 +1518,9 @@ sub do_linux_login_server_setup {
     print "\n Done... \n";
 
     print "[Install] Pulling down Loginserver database tables...\n";
-    get_remote_file($install_repository_request_url . "login_server_tables.sql", "db_update/login_server_tables.sql");
+    get_remote_file($eqemu_repository_request_url . "loginserver/login_util/login_schema.sql", "db_update/login_schema.sql");
     print "[Install] Installing Loginserver tables...\n";
-    print get_mysql_result_from_file("db_update/login_server_tables.sql");
+    print get_mysql_result_from_file("db_update/login_schema.sql");
     print "[Install] Done...\n\n";
 
     rmtree('updates_staged');
