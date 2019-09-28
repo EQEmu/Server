@@ -1,4 +1,4 @@
-// Copyright (c) 2003 Daniel Wallin and Arvid Norberg
+﻿// Copyright (c) 2003 Daniel Wallin and Arvid Norberg
 
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -26,28 +26,31 @@
 
 #include <luabind/config.hpp>
 
-namespace luabind { namespace detail
-{
-	// function that is used as __gc metafunction on several objects
-	template<class T>
-	inline int garbage_collector(lua_State* L)
-	{
-		T* obj = static_cast<T*>(lua_touserdata(L, -1));
-		obj->~T();
-		return 0;
-	}
+namespace luabind {
+	namespace detail {
 
-	template<class T>
-	struct garbage_collector_s
-	{
-		static int apply(lua_State* L)
+		// function that is used as __gc metafunction on several objects
+		template<class T>
+		inline int garbage_collector(lua_State* L)
 		{
 			T* obj = static_cast<T*>(lua_touserdata(L, -1));
 			obj->~T();
 			return 0;
 		}
-	};
 
-}}
+		template<class T>
+		struct garbage_collector_s
+		{
+			static int apply(lua_State* L)
+			{
+				T* obj = static_cast<T*>(lua_touserdata(L, -1));
+				obj->~T();
+				return 0;
+			}
+		};
+
+	}
+}
 
 #endif // LUABIND_GARBAGE_COLLECTOR_HPP_INCLUDED
+

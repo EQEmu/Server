@@ -1,5 +1,17 @@
-// Copyright (c) 2005 Daniel Wallin and Arvid Norberg
+/** @file
+	@brief Header
 
+	@date 2012
+
+	@author
+	Ryan Pavlik
+	<rpavlik@iastate.edu> and <abiryan@ryand.net>
+	http://academic.cleardefinition.com/
+	Iowa State University Virtual Reality Applications Center
+	Human-Computer Interaction Graduate Program
+*/
+
+//          Copyright Iowa State University 2012.
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
 // to deal in the Software without restriction, including without limitation
@@ -20,25 +32,23 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
 // OR OTHER DEALINGS IN THE SOFTWARE.
 
-#ifndef MOST_DERIVED_051018_HPP
-# define MOST_DERIVED_051018_HPP
+#ifndef INCLUDED_set_package_preload_hpp_GUID_563c882e_86f7_4ea7_8603_4594ea41737e
+#define INCLUDED_set_package_preload_hpp_GUID_563c882e_86f7_4ea7_8603_4594ea41737e
 
-# include <boost/mpl/if.hpp>
-# include <boost/type_traits/is_base_and_derived.hpp>
+// Internal Includes
+#include <luabind/config.hpp>
+#include <luabind/lua_state_fwd.hpp>
 
-namespace luabind { namespace detail {
+// Library/third-party includes
+// - none
 
-template<class Class, class WrappedClass>
-struct most_derived
-{
-    typedef typename boost::mpl::if_<
-        boost::is_base_and_derived<Class, WrappedClass>
-      , WrappedClass
-      , Class
-    >::type type;
-};
+// Standard includes
+// - none
 
-}} // namespace luabind::detail
 
-#endif // MOST_DERIVED_051018_HPP
+namespace luabind {
+
+	LUABIND_API void set_package_preload(lua_State * L, const char * modulename, int(*loader) (lua_State *));
+}
+#endif // INCLUDED_set_package_preload_hpp_GUID_563c882e_86f7_4ea7_8603_4594ea41737e
 

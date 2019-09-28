@@ -27,40 +27,18 @@
 #include <luabind/config.hpp>
 #include <luabind/detail/policy.hpp>
 
-namespace luabind { namespace detail 
-{
-	struct yield_policy
-	{
-		static void precall(lua_State*, const index_map&) {}
-		static void postcall(lua_State*, const index_map&) {}
-	};
+namespace luabind {
 
-	template<class T>
-	struct has_yield
-	{
-		BOOST_STATIC_CONSTANT(bool,
-			value = (boost::is_same<yield_policy, typename T::head>::value ||
-					  has_yield<typename T::tail>::value));
-	};
+	namespace detail {
 
-	template<>
-	struct has_yield<null_type>
-	{
-		BOOST_STATIC_CONSTANT(bool, value = false);
-	};
-}}
+		struct yield_policy
+		{
+			static void postcall(lua_State*, int /*results*/, meta::index_list_tag) {}
+		};
 
-namespace luabind
-{
-  detail::policy_cons<detail::yield_policy, detail::null_type> const yield = {};
+	}
 
-  namespace detail
-  {
-    inline void ignore_unused_yield()
-    {
-        (void)yield;
-    }
-  }
+	using yield = policy_list<call_policy_injector<detail::yield_policy>>;
 }
 
 #endif // LUABIND_YIELD_POLICY_HPP_INCLUDED

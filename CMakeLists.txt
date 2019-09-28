@@ -49,7 +49,6 @@ IF(MSVC)
 ENDIF()
 
 #Find everything we need
-FIND_PACKAGE(Boost REQUIRED)
 FIND_PACKAGE(MySQL)
 FIND_PACKAGE(MariaDB)
 FIND_PACKAGE(ZLIB)
@@ -263,11 +262,10 @@ MESSAGE(STATUS "* zlib:                                  ${ZLIB_LIBRARY_TYPE} *"
 MESSAGE(STATUS "**************************************************")
 
 #setup server libs and headers
-SET(SERVER_LIBS common ${DATABASE_LIBRARY_LIBS} ${ZLIB_LIBRARY_LIBS} ${Boost_LIBRARIES} uv_a fmt RecastNavigation::Detour)
+SET(SERVER_LIBS common ${DATABASE_LIBRARY_LIBS} ${ZLIB_LIBRARY_LIBS} uv_a fmt RecastNavigation::Detour)
 
 INCLUDE_DIRECTORIES(SYSTEM "${DATABASE_LIBRARY_INCLUDE}")
 INCLUDE_DIRECTORIES(SYSTEM "${ZLIB_LIBRARY_INCLUDE}")
-INCLUDE_DIRECTORIES(SYSTEM "${Boost_INCLUDE_DIRS}")
 INCLUDE_DIRECTORIES(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/submodules/glm")
 INCLUDE_DIRECTORIES(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/submodules/cereal/include")
 INCLUDE_DIRECTORIES(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/submodules/fmt/include")
