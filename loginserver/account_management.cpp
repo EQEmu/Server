@@ -67,7 +67,8 @@ int32 AccountManagement::CreateLoginServerAccount(
 	uint32 created_account_id = 0;
 	if (login_account_id > 0) {
 		created_account_id = server.db->CreateLoginDataWithID(username, hash, source_loginserver, login_account_id);
-	} else {
+	}
+	else {
 		created_account_id = server.db->CreateLoginAccount(username, hash, source_loginserver, email);
 	}
 
@@ -251,6 +252,59 @@ bool AccountManagement::UpdateLoginserverUserCredentials(
 	return true;
 }
 
+/**
+ * @param in_account_username
+ * @param in_account_password
+ */
+bool AccountManagement::UpdateLoginserverWorldAdminAccountPasswordByName(
+	const std::string &in_account_username,
+	const std::string &in_account_password
+)
+{
+	auto mode = server.options.GetEncryptionMode();
+	auto hash = eqcrypt_hash(in_account_username, in_account_password, mode);
+
+	bool updated_account = server.db->UpdateLoginWorldAdminAccountPasswordByUsername(
+		in_account_username,
+		hash
+	);
+
+	LogInfo(
+		"[{}] account_name [{}] status [{}]",
+		__func__,
+		in_account_username,
+		(updated_account ? "success" : "failed")
+	);
+
+	return updated_account;
+}
+
+/**
+ * @param in_account_id
+ * @param in_account_password_hash
+ */
+bool AccountManagement::UpdateLoginserverWorldAdminAccountPasswordById(
+	uint32 in_account_id,
+	const std::string &in_account_password_hash
+)
+{
+	bool updated_account = server.db->UpdateLoginWorldAdminAccountPassword(in_account_id, in_account_password_hash);
+
+	LogInfo(
+		"[{}] account_name [{}] status [{}]",
+		__func__,
+		in_account_id,
+		(updated_account ? "success" : "failed")
+	);
+
+	return updated_account;
+}
+
+/**
+ * @param in_account_username
+ * @param in_account_password
+ * @return
+ */
 uint32 AccountManagement::CheckExternalLoginserverUserCredentials(
 	const std::string &in_account_username,
 	const std::string &in_account_password

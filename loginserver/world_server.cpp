@@ -97,7 +97,7 @@ void WorldServer::ProcessNewLSInfo(uint16_t opcode, const EQ::Net::Packet &packe
 {
 	if (server.options.IsWorldTraceOn()) {
 		LogDebug(
-			"Application packet received from server: {0}, (size {1})",
+			"Application packet received from server: [{0}], (size {1})",
 			opcode,
 			packet.Length()
 		);
@@ -164,7 +164,7 @@ void WorldServer::ProcessLSStatus(uint16_t opcode, const EQ::Net::Packet &packet
 	if (server.options.IsWorldTraceOn()) {
 		LogDebug(
 			"World Server Status Update Received | Server [{0}] Status [{1}] Players [{2}] Zones [{3}]",
-			this->GetServerLongName(),
+			GetServerLongName(),
 			ls_status->status,
 			ls_status->num_players,
 			ls_status->num_zones
@@ -182,7 +182,7 @@ void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Ne
 {
 	if (server.options.IsWorldTraceOn()) {
 		LogDebug(
-			"Application packet received from server: {0}, (size {1})",
+			"Application packet received from server: [{0}], (size {1})",
 			opcode,
 			packet.Length()
 		);
@@ -272,7 +272,7 @@ void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Ne
 				per->Message
 			);
 
-			LogDebug("[Size: {0}] {1}", outapp->size, DumpPacketToString(outapp));
+			LogDebug("[Size: [{0}]] {1}", outapp->size, DumpPacketToString(outapp));
 		}
 
 		if (server.options.IsDumpOutPacketsOn()) {
@@ -284,7 +284,7 @@ void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Ne
 	}
 	else {
 		LogError(
-			"Received User-To-World Response for {0} but could not find the client referenced!",
+			"Received User-To-World Response for [{0}] but could not find the client referenced!",
 			user_to_world_response->lsaccountid
 		);
 	}
@@ -333,7 +333,7 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 	);
 
 	if (client) {
-		LogDebug("Found client with user id of {0} and account name of {1}",
+		LogDebug("Found client with user id of [{0}] and account name of {1}",
 				 user_to_world_response->lsaccountid,
 				 client->GetAccountName().c_str()
 		);
@@ -353,7 +353,7 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 			client->GetPlayServerID()
 		);
 
-		LogDebug("[Size: {0}] {1}", outapp->size, DumpPacketToString(outapp));
+		LogDebug("[Size: [{0}]] {1}", outapp->size, DumpPacketToString(outapp));
 
 		if (user_to_world_response->response > 0) {
 			per->Allowed = 1;
@@ -391,13 +391,13 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 
 		if (server.options.IsTraceOn()) {
 			LogDebug(
-				"Sending play response with following data, allowed {0}, sequence {1}, server number {2}, message {3}",
+				"Sending play response with following data, allowed [{0}], sequence {1}, server number {2}, message {3}",
 				per->Allowed,
 				per->Sequence,
 				per->ServerNumber,
 				per->Message
 			);
-			LogDebug("[Size: {0}] {1}", outapp->size, DumpPacketToString(outapp));
+			LogDebug("[Size: [{0}]] {1}", outapp->size, DumpPacketToString(outapp));
 		}
 
 		if (server.options.IsDumpOutPacketsOn()) {
@@ -409,7 +409,7 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 	}
 	else {
 		LogError(
-			"Received User-To-World Response for {0} but could not find the client referenced!.",
+			"Received User-To-World Response for [{0}] but could not find the client referenced!.",
 			user_to_world_response->lsaccountid
 		);
 	}
@@ -423,7 +423,7 @@ void WorldServer::ProcessLSAccountUpdate(uint16_t opcode, const EQ::Net::Packet 
 {
 	if (server.options.IsWorldTraceOn()) {
 		LogDebug(
-			"Application packet received from server: {0}, (size {1})",
+			"Application packet received from server: [{0}], (size {1})",
 			opcode,
 			packet.Length()
 		);
@@ -481,12 +481,12 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info
 		return;
 	}
 
-	if (!this->HandleNewLoginserverInfoValidation(new_world_server_info_packet)) {
+	if (!HandleNewLoginserverInfoValidation(new_world_server_info_packet)) {
 		LogError("WorldServer::Handle_NewLSInfo failed validation rules");
 		return;
 	}
 
-	this->SetAccountPassword(new_world_server_info_packet->account_password)
+	SetAccountPassword(new_world_server_info_packet->account_password)
 		->SetLongName(new_world_server_info_packet->server_long_name)
 		->SetShortName(new_world_server_info_packet->server_short_name)
 		->SetLocalIp(new_world_server_info_packet->local_ip_address)
@@ -505,7 +505,8 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info
 	}
 	else {
 		if (server.server_manager->ServerExists(GetServerLongName(), GetServerShortName(), this)) {
-			LogInfo("World tried to login but there already exists a server that has that name");
+			LogInfo("World tried to login but there already exists a server that has that name, destroying [{}]",
+					long_name);
 			server.server_manager->DestroyServerByName(long_name, short_name, this);
 		}
 	}
@@ -528,15 +529,11 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info
 				GetServerShortName()
 			);
 
-			/**
-			 * Validate password hash
-			 */
-			auto mode = server.options.GetEncryptionMode();
-			if (eqcrypt_verify_hash(
+			if (WorldServer::ValidateWorldServerAdminLogin(
+				login_server_admin.id,
 				GetAccountName(),
 				GetAccountPassword(),
-				login_server_admin.account_password,
-				mode
+				login_server_admin.account_password
 			)) {
 				LogDebug(
 					"WorldServer::Handle_NewLSInfo | Authenticating world admin... [{0}] ({1}) success! World ({2})",
@@ -546,7 +543,7 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info
 				);
 				world_server_admin_id = login_server_admin.id;
 
-				this->SetIsServerAuthorized(true);
+				SetIsServerAuthorized(true);
 			}
 		}
 	}
@@ -558,19 +555,19 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info
 	);
 
 	if (!server.options.IsUnregisteredAllowed()) {
-		if (!this->HandleNewLoginserverRegisteredOnly(world_registration)) {
+		if (!HandleNewLoginserverRegisteredOnly(world_registration)) {
 			LogError(
 				"WorldServer::HandleNewLoginserverRegisteredOnly checks failed with server [{0}]",
-				this->GetServerLongName()
+				GetServerLongName()
 			);
 			return;
 		}
 	}
 	else {
-		if (!this->HandleNewLoginserverInfoUnregisteredAllowed(world_registration)) {
+		if (!HandleNewLoginserverInfoUnregisteredAllowed(world_registration)) {
 			LogError(
 				"WorldServer::HandleNewLoginserverInfoUnregisteredAllowed checks failed with server [{0}]",
-				this->GetServerLongName()
+				GetServerLongName()
 			);
 			return;
 		}
@@ -710,10 +707,10 @@ bool WorldServer::HandleNewLoginserverInfoValidation(
 	if (strlen(new_world_server_info_packet->local_ip_address) <= max_server_local_address_length) {
 		if (strlen(new_world_server_info_packet->local_ip_address) == 0) {
 			LogError("Handle_NewLSInfo error, local address was null, defaulting to localhost");
-			this->SetLocalIp("127.0.0.1");
+			SetLocalIp("127.0.0.1");
 		}
 		else {
-			this->SetLocalIp(new_world_server_info_packet->local_ip_address);
+			SetLocalIp(new_world_server_info_packet->local_ip_address);
 		}
 	}
 	else {
@@ -723,19 +720,19 @@ bool WorldServer::HandleNewLoginserverInfoValidation(
 
 	if (strlen(new_world_server_info_packet->remote_ip_address) <= max_server_remote_address_length) {
 		if (strlen(new_world_server_info_packet->remote_ip_address) == 0) {
-			this->SetRemoteIp(GetConnection()->Handle()->RemoteIP());
+			SetRemoteIp(GetConnection()->Handle()->RemoteIP());
 
 			LogWarning(
-				"Remote address was null, defaulting to stream address {0}",
+				"Remote address was null, defaulting to stream address [{0}]",
 				remote_ip_address
 			);
 		}
 		else {
-			this->SetRemoteIp(new_world_server_info_packet->remote_ip_address);
+			SetRemoteIp(new_world_server_info_packet->remote_ip_address);
 		}
 	}
 	else {
-		this->SetRemoteIp(GetConnection()->Handle()->RemoteIP());
+		SetRemoteIp(GetConnection()->Handle()->RemoteIP());
 
 		LogWarning(
 			"Handle_NewLSInfo remote address was too long, defaulting to stream address [{0}]",
@@ -754,7 +751,7 @@ bool WorldServer::HandleNewLoginserverRegisteredOnly(
 	Database::DbWorldRegistration &world_registration
 )
 {
-	if (!this->GetAccountName().empty() && !this->GetAccountPassword().empty()) {
+	if (!GetAccountName().empty() && !GetAccountPassword().empty()) {
 		if (world_registration.loaded) {
 			bool does_world_server_not_require_authentication = (
 				world_registration.server_admin_account_name.empty() ||
@@ -762,39 +759,38 @@ bool WorldServer::HandleNewLoginserverRegisteredOnly(
 			);
 
 			bool does_world_server_pass_authentication_check = (
-				world_registration.server_admin_account_name == this->GetAccountName() &&
-				eqcrypt_verify_hash(
+				world_registration.server_admin_account_name == GetAccountName() &&
+				WorldServer::ValidateWorldServerAdminLogin(
+					world_registration.server_admin_id,
 					GetAccountName(),
 					GetAccountPassword(),
-					world_registration.server_admin_account_password,
-					server.options.GetEncryptionMode()
+					world_registration.server_admin_account_password
 				)
 			);
 
-			this
-				->SetServerDescription(world_registration.server_description)
+			SetServerDescription(world_registration.server_description)
 				->SetServerId(world_registration.server_id)
 				->SetIsServerTrusted(world_registration.is_server_trusted)
 				->SetServerListTypeId(world_registration.server_list_type);
 
 			if (does_world_server_not_require_authentication) {
 
-				this->SetIsServerAuthorized(true);
+				SetIsServerAuthorized(true);
 
 				LogInfo(
-					"Server long_name {0} short_name [{1}] successfully logged into account that had no user/password requirement",
-					this->GetServerLongName(),
-					this->GetServerShortName()
+					"Server long_name [{0}] short_name [{1}] successfully logged into account that had no user/password requirement",
+					GetServerLongName(),
+					GetServerShortName()
 				);
 			}
 			else if (does_world_server_pass_authentication_check) {
 
-				this->SetIsServerAuthorized(true);
+				SetIsServerAuthorized(true);
 
 				LogInfo(
-					"Server long_name {0} short_name [{1}] successfully logged in",
-					this->GetServerLongName(),
-					this->GetServerShortName()
+					"Server long_name [{0}] short_name [{1}] successfully logged in",
+					GetServerLongName(),
+					GetServerShortName()
 				);
 
 				if (IsServerTrusted()) {
@@ -805,10 +801,10 @@ bool WorldServer::HandleNewLoginserverRegisteredOnly(
 			}
 			else {
 				LogInfo(
-					"Server long_name {0} short_name [{1}] attempted to log in but account and password did not "
+					"Server long_name [{0}] short_name [{1}] attempted to log in but account and password did not "
 					"match the entry in the database, and only registered servers are allowed",
-					this->GetServerLongName(),
-					this->GetServerShortName()
+					GetServerLongName(),
+					GetServerShortName()
 				);
 
 				return false;
@@ -816,9 +812,9 @@ bool WorldServer::HandleNewLoginserverRegisteredOnly(
 		}
 		else {
 			LogInfo(
-				"Server long_name {0} short_name [{1}] attempted to log in but database couldn't find an entry and only registered servers are allowed",
-				this->GetServerLongName(),
-				this->GetServerShortName()
+				"Server long_name [{0}] short_name [{1}] attempted to log in but database couldn't find an entry and only registered servers are allowed",
+				GetServerLongName(),
+				GetServerShortName()
 			);
 
 			return false;
@@ -826,9 +822,9 @@ bool WorldServer::HandleNewLoginserverRegisteredOnly(
 	}
 	else {
 		LogInfo(
-			"Server long_name {0} short_name [{1}] did not attempt to log in but only registered servers are allowed",
-			this->GetServerLongName(),
-			this->GetServerShortName()
+			"Server long_name [{0}] short_name [{1}] did not attempt to log in but only registered servers are allowed",
+			GetServerLongName(),
+			GetServerShortName()
 		);
 
 		return false;
@@ -846,38 +842,37 @@ bool WorldServer::HandleNewLoginserverInfoUnregisteredAllowed(
 )
 {
 	if (world_registration.loaded) {
-		this
-			->SetServerDescription(world_registration.server_description)
+		SetServerDescription(world_registration.server_description)
 			->SetServerId(world_registration.server_id)
 			->SetIsServerTrusted(world_registration.is_server_trusted)
 			->SetServerListTypeId(world_registration.server_list_type);
 
 		bool does_world_server_pass_authentication_check = (
-			world_registration.server_admin_account_name == this->GetAccountName() &&
-			eqcrypt_verify_hash(
+			world_registration.server_admin_account_name == GetAccountName() &&
+			WorldServer::ValidateWorldServerAdminLogin(
+				world_registration.server_admin_id,
 				GetAccountName(),
 				GetAccountPassword(),
-				world_registration.server_admin_account_password,
-				server.options.GetEncryptionMode()
+				world_registration.server_admin_account_password
 			)
 		);
 
 		bool does_world_server_have_non_empty_credentials = (
-			!this->GetAccountName().empty() &&
-			!this->GetAccountPassword().empty()
+			!GetAccountName().empty() &&
+			!GetAccountPassword().empty()
 		);
 
 		if (does_world_server_have_non_empty_credentials) {
 			if (does_world_server_pass_authentication_check) {
-				this->SetIsServerAuthorized(true);
+				SetIsServerAuthorized(true);
 
 				LogInfo(
-					"Server long_name {0} short_name [{1}] successfully logged in",
-					this->GetServerLongName(),
-					this->GetServerShortName()
+					"Server long_name [{0}] short_name [{1}] successfully logged in",
+					GetServerLongName(),
+					GetServerShortName()
 				);
 
-				if (this->IsServerTrusted()) {
+				if (IsServerTrusted()) {
 					LogDebug("WorldServer::HandleNewLoginserverRegisteredOnly | ServerOP_LSAccountUpdate sent to world");
 					EQ::Net::DynamicPacket outapp;
 					connection->Send(ServerOP_LSAccountUpdate, outapp);
@@ -889,9 +884,9 @@ bool WorldServer::HandleNewLoginserverInfoUnregisteredAllowed(
 				 * this is the first of two cases where we should deny access even if unregistered is allowed
 				 */
 				LogInfo(
-					"Server long_name {0} short_name [{1}] attempted to log in but account and password did not match the entry in the database.",
-					this->GetServerLongName(),
-					this->GetServerShortName()
+					"Server long_name [{0}] short_name [{1}] attempted to log in but account and password did not match the entry in the database.",
+					GetServerLongName(),
+					GetServerShortName()
 				);
 			}
 		}
@@ -900,19 +895,19 @@ bool WorldServer::HandleNewLoginserverInfoUnregisteredAllowed(
 			/**
 			 * this is the second of two cases where we should deny access even if unregistered is allowed
 			 */
-			if (!this->GetAccountName().empty() || !this->GetAccountPassword().empty()) {
+			if (!GetAccountName().empty() || !GetAccountPassword().empty()) {
 				LogInfo(
 					"Server [{0}] [{1}] did not login but this server required a password to login",
-					this->GetServerLongName(),
-					this->GetServerShortName()
+					GetServerLongName(),
+					GetServerShortName()
 				);
 			}
 			else {
-				this->SetIsServerAuthorized(true);
+				SetIsServerAuthorized(true);
 				LogInfo(
 					"Server [{0}] [{1}] did not login but unregistered servers are allowed",
-					this->GetServerLongName(),
-					this->GetServerShortName()
+					GetServerLongName(),
+					GetServerShortName()
 				);
 			}
 		}
@@ -920,11 +915,11 @@ bool WorldServer::HandleNewLoginserverInfoUnregisteredAllowed(
 	else {
 		LogInfo(
 			"Server [{0}] ({1}) is not registered but unregistered servers are allowed",
-			this->GetServerLongName(),
-			this->GetServerShortName()
+			GetServerLongName(),
+			GetServerShortName()
 		);
 
-		this->SetIsServerAuthorized(true);
+		SetIsServerAuthorized(true);
 
 		if (world_registration.loaded) {
 			return true;
@@ -934,12 +929,11 @@ bool WorldServer::HandleNewLoginserverInfoUnregisteredAllowed(
 
 		uint32 server_admin_id = 0;
 		if (login_server_admin.loaded) {
-			auto mode = server.options.GetEncryptionMode();
-			if (eqcrypt_verify_hash(
+			if (WorldServer::ValidateWorldServerAdminLogin(
+				login_server_admin.id,
 				GetAccountName(),
 				GetAccountPassword(),
-				login_server_admin.account_password,
-				mode
+				login_server_admin.account_password
 			)) {
 				server_admin_id = login_server_admin.id;
 			}
@@ -960,6 +954,88 @@ bool WorldServer::HandleNewLoginserverInfoUnregisteredAllowed(
 	}
 
 	return true;
+}
+
+/**
+ * @param world_admin_id
+ * @param world_admin_username
+ * @param world_admin_password
+ * @param world_admin_password_hash
+ * @return
+ */
+bool WorldServer::ValidateWorldServerAdminLogin(
+	int world_admin_id,
+	const std::string &world_admin_username,
+	const std::string &world_admin_password,
+	const std::string &world_admin_password_hash
+)
+{
+	auto encryption_mode = server.options.GetEncryptionMode();
+	if (eqcrypt_verify_hash(world_admin_username, world_admin_password, world_admin_password_hash, encryption_mode)) {
+		return true;
+	}
+	else {
+		if (server.options.IsUpdatingInsecurePasswords()) {
+			if (encryption_mode < EncryptionModeArgon2) {
+				encryption_mode = EncryptionModeArgon2;
+			}
+
+			uint32 insecure_source_encryption_mode = 0;
+			if (world_admin_password_hash.length() == CryptoHash::md5_hash_length) {
+				for (int i = EncryptionModeMD5; i <= EncryptionModeMD5Triple; ++i) {
+					if (i != encryption_mode &&
+						eqcrypt_verify_hash(world_admin_username, world_admin_password, world_admin_password_hash, i)) {
+						LogDebug("[{}] Checking for [{}] world admin", __func__, GetEncryptionByModeId(i));
+						insecure_source_encryption_mode = i;
+					}
+				}
+			}
+			else if (world_admin_password_hash.length() == CryptoHash::sha1_hash_length &&
+					 insecure_source_encryption_mode == 0) {
+				for (int i = EncryptionModeSHA; i <= EncryptionModeSHATriple; ++i) {
+					if (i != encryption_mode &&
+						eqcrypt_verify_hash(world_admin_username, world_admin_password, world_admin_password_hash, i)) {
+						LogDebug("[{}] Checking for [{}] world admin", __func__, GetEncryptionByModeId(i));
+						insecure_source_encryption_mode = i;
+					}
+				}
+			}
+			else if (world_admin_password_hash.length() == CryptoHash::sha512_hash_length &&
+					 insecure_source_encryption_mode == 0) {
+				for (int i = EncryptionModeSHA512; i <= EncryptionModeSHA512Triple; ++i) {
+					if (i != encryption_mode &&
+						eqcrypt_verify_hash(world_admin_username, world_admin_password, world_admin_password_hash, i)) {
+						LogDebug("[{}] Checking for [{}] world admin", __func__, GetEncryptionByModeId(i));
+						insecure_source_encryption_mode = i;
+					}
+				}
+			}
+
+			if (insecure_source_encryption_mode > 0) {
+				LogInfo(
+					"[{}] Updated insecure world_admin_username [{}] from mode [{}] ({}) to mode [{}] ({})",
+					__func__,
+					world_admin_username,
+					GetEncryptionByModeId(insecure_source_encryption_mode),
+					insecure_source_encryption_mode,
+					GetEncryptionByModeId(encryption_mode),
+					encryption_mode
+				);
+
+				std::string new_password_hash = eqcrypt_hash(
+					world_admin_username,
+					world_admin_password,
+					encryption_mode
+				);
+
+				server.db->UpdateLoginWorldAdminAccountPassword(world_admin_id, new_password_hash);
+
+				return true;
+			}
+		}
+	}
+
+	return false;
 }
 
 /**

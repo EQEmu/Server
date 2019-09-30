@@ -395,15 +395,15 @@ Database::DbWorldRegistration Database::GetWorldRegistration(
 	world_registration.server_list_type        = std::stoi(row[3]);
 	world_registration.is_server_trusted       = std::stoi(row[2]) > 0;
 	world_registration.server_list_description = row[4];
+	world_registration.server_admin_id         = std::stoi(row[5]);
 
-	int db_account_id = std::stoi(row[5]);
-	if (db_account_id <= 0) {
+	if (world_registration.server_admin_id <= 0) {
 		return world_registration;
 	}
 
 	auto world_registration_query = fmt::format(
 		"SELECT account_name, account_password FROM login_server_admins WHERE id = {0} LIMIT 1",
-		db_account_id
+		world_registration.server_admin_id
 	);
 
 	auto world_registration_results = QueryDatabase(world_registration_query);
@@ -471,6 +471,47 @@ void Database::UpdateWorldRegistration(unsigned int id, std::string long_name, s
 	);
 
 	QueryDatabase(query);
+}
+
+/**
+ * @param id
+ * @param admin_account_password_hash
+ */
+bool Database::UpdateLoginWorldAdminAccountPassword(
+	unsigned int id,
+	const std::string &admin_account_password_hash
+)
+{
+	auto results = QueryDatabase(
+		fmt::format(
+			"UPDATE login_server_admins SET account_password = '{}' WHERE id = {}",
+			EscapeString(admin_account_password_hash),
+			id
+		)
+	);
+
+	return results.Success();
+}
+
+/**
+ *
+ * @param admin_account_username
+ * @param admin_account_password_hash
+ */
+bool Database::UpdateLoginWorldAdminAccountPasswordByUsername(
+	const std::string &admin_account_username,
+	const std::string &admin_account_password_hash
+)
+{
+	auto results = QueryDatabase(
+		fmt::format(
+			"UPDATE login_server_admins SET account_password = '{}' WHERE account_name = '{}'",
+			EscapeString(admin_account_password_hash),
+			EscapeString(admin_account_username)
+		)
+	);
+
+	return results.Success();
 }
 
 /**

@@ -33,8 +33,7 @@
 /**
  * World server class, controls the connected server processing.
  */
-class WorldServer
-{
+class WorldServer {
 public:
 	WorldServer(std::shared_ptr<EQ::Net::ServertalkServerConnection> worldserver_connection);
 
@@ -58,7 +57,11 @@ public:
 	 * @return
 	 */
 	unsigned int GetServerId() const { return server_id; }
-	WorldServer * SetServerId(unsigned int id) { server_id = id;  return this; }
+	WorldServer *SetServerId(unsigned int id)
+	{
+		server_id = id;
+		return this;
+	}
 
 	/**
 	 * @return
@@ -80,7 +83,7 @@ public:
 	 * @return
 	 */
 	unsigned int GetServerListID() const { return server_list_type_id; }
-	WorldServer * SetServerListTypeId(unsigned int in_server_list_id);
+	WorldServer *SetServerListTypeId(unsigned int in_server_list_id);
 
 	int GetStatus() const { return server_status; }
 	unsigned int GetZonesBooted() const { return zones_booted; }
@@ -91,7 +94,7 @@ public:
 	 *
 	 * @param new_world_server_info_packet
 	 */
-	void Handle_NewLSInfo(ServerNewLSInfo_Struct* new_world_server_info_packet);
+	void Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info_packet);
 
 	/**
 	 * Takes the status struct we received from world and processes it
@@ -111,24 +114,44 @@ public:
 	 * @param account_id
 	 * @param loginserver_name
 	 */
-	void SendClientAuth(std::string ip, std::string account, std::string key, unsigned int account_id, const std::string &loginserver_name);
+	void SendClientAuth(
+		std::string ip,
+		std::string account,
+		std::string key,
+		unsigned int account_id,
+		const std::string &loginserver_name
+	);
 
-	WorldServer * SetZonesBooted(unsigned int in_zones_booted);
-	WorldServer * SetPlayersOnline(unsigned int in_players_online);
-	WorldServer * SetServerStatus(int in_server_status);
-	WorldServer * SetServerProcessType(unsigned int in_server_process_type);
-	WorldServer * SetLongName(const std::string &in_long_name);
-	WorldServer * SetShortName(const std::string &in_short_name);
-	WorldServer * SetAccountName(const std::string &in_account_name);
-	WorldServer * SetAccountPassword(const std::string &in_account_password);
-	WorldServer * SetRemoteIp(const std::string &in_remote_ip);
-	WorldServer * SetLocalIp(const std::string &in_local_ip);
-	WorldServer * SetProtocol(const std::string &in_protocol);
-	WorldServer * SetVersion(const std::string &in_version);
-	WorldServer * SetServerDescription(const std::string &in_server_description);
-	WorldServer * SetIsServerAuthorized(bool in_is_server_authorized);
-	WorldServer * SetIsServerLoggedIn(bool in_is_server_logged_in);
-	WorldServer * SetIsServerTrusted(bool in_is_server_trusted);
+	/**
+	 * @param world_admin_id
+	 * @param world_admin_username
+	 * @param world_admin_password
+	 * @param world_admin_password_hash
+	 * @return
+	 */
+	static bool ValidateWorldServerAdminLogin(
+		int world_admin_id,
+		const std::string &world_admin_username,
+		const std::string &world_admin_password,
+		const std::string &world_admin_password_hash
+	);
+
+	WorldServer *SetZonesBooted(unsigned int in_zones_booted);
+	WorldServer *SetPlayersOnline(unsigned int in_players_online);
+	WorldServer *SetServerStatus(int in_server_status);
+	WorldServer *SetServerProcessType(unsigned int in_server_process_type);
+	WorldServer *SetLongName(const std::string &in_long_name);
+	WorldServer *SetShortName(const std::string &in_short_name);
+	WorldServer *SetAccountName(const std::string &in_account_name);
+	WorldServer *SetAccountPassword(const std::string &in_account_password);
+	WorldServer *SetRemoteIp(const std::string &in_remote_ip);
+	WorldServer *SetLocalIp(const std::string &in_local_ip);
+	WorldServer *SetProtocol(const std::string &in_protocol);
+	WorldServer *SetVersion(const std::string &in_version);
+	WorldServer *SetServerDescription(const std::string &in_server_description);
+	WorldServer *SetIsServerAuthorized(bool in_is_server_authorized);
+	WorldServer *SetIsServerLoggedIn(bool in_is_server_logged_in);
+	WorldServer *SetIsServerTrusted(bool in_is_server_trusted);
 
 	bool IsServerAuthorized() const;
 	bool IsServerLoggedIn() const;
@@ -162,24 +185,26 @@ private:
 	void ProcessLSAccountUpdate(uint16_t opcode, const EQ::Net::Packet &packet);
 
 	std::shared_ptr<EQ::Net::ServertalkServerConnection> connection;
+
 	unsigned int zones_booted;
 	unsigned int players_online;
-	int server_status;
+	int          server_status;
 	unsigned int server_id;
 	unsigned int server_list_type_id;
 	unsigned int server_process_type;
-	std::string server_description;
-	std::string long_name;
-	std::string short_name;
-	std::string account_name;
-	std::string account_password;
-	std::string remote_ip_address;
-	std::string local_ip;
-	std::string protocol;
-	std::string version;
-	bool is_server_authorized;
-	bool is_server_logged_in;
-	bool is_server_trusted;
+	std::string  server_description;
+	std::string  long_name;
+	std::string  short_name;
+	std::string  account_name;
+	std::string  account_password;
+	std::string  remote_ip_address;
+	std::string  local_ip;
+	std::string  protocol;
+	std::string  version;
+
+	bool                       is_server_authorized;
+	bool                       is_server_logged_in;
+	bool                       is_server_trusted;
 
 	/**
 	 * Keepalive
