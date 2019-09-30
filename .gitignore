@@ -35,3 +35,8 @@ Build_64/
 build_64/
 log/
 logs/
+
+submodules/
+.idea/
+cmake-build-debug
+EQEmu.cbp
