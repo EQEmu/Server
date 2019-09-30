@@ -1208,8 +1208,13 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* 
 	}
 }
 
-uint32 ZoneDatabase::CreateNewNPCCommand(const char *zone, uint32 zone_version, Client *client, NPC *spawn,
-					 uint32 extra)
+uint32 ZoneDatabase::CreateNewNPCCommand(
+	const char *zone,
+	uint32 zone_version,
+	Client *client,
+	NPC *spawn,
+	uint32 extra
+)
 {
 	uint32 npc_type_id = 0;
 
@@ -1217,18 +1222,25 @@ uint32 ZoneDatabase::CreateNewNPCCommand(const char *zone, uint32 zone_version, 
 		// Set an npc_type ID within the standard range for the current zone if possible (zone_id * 1000)
 		int starting_npc_id = client->GetZoneID() * 1000;
 
-		std::string query = StringFormat("SELECT MAX(id) FROM npc_types WHERE id >= %i AND id < %i",
-						 starting_npc_id, starting_npc_id + 1000);
+		std::string query = StringFormat(
+			"SELECT MAX(id) FROM npc_types WHERE id >= %i AND id < %i",
+			starting_npc_id,
+			starting_npc_id + 1000
+		);
+
 		auto results = QueryDatabase(query);
 		if (results.Success()) {
 			if (results.RowCount() != 0) {
 				auto row = results.begin();
 				npc_type_id = atoi(row[0]) + 1;
 				// Prevent the npc_type id from exceeding the range for this zone
-				if (npc_type_id >= (starting_npc_id + 1000))
+				if (npc_type_id >= (starting_npc_id + 1000)) {
 					npc_type_id = 0;
-			} else // No npc_type IDs set in this range yet
+				}
+			}
+			else { // No npc_type IDs set in this range yet
 				npc_type_id = starting_npc_id;
+			}
 		}
 	}
 
@@ -1293,13 +1305,23 @@ uint32 ZoneDatabase::CreateNewNPCCommand(const char *zone, uint32 zone_version, 
 	return true;
 }
 
-uint32 ZoneDatabase::AddNewNPCSpawnGroupCommand(const char *zone, uint32 zone_version, Client *client, NPC *spawn,
-						uint32 respawnTime)
+uint32 ZoneDatabase::AddNewNPCSpawnGroupCommand(
+	const char *zone,
+	uint32 zone_version,
+	Client *client,
+	NPC *spawn,
+	uint32 respawnTime
+)
 {
 	uint32 last_insert_id = 0;
 
-	std::string query = StringFormat("INSERT INTO spawngroup (name) VALUES('%s%s%i')", zone, spawn->GetName(),
-					 Timer::GetCurrentTime());
+	std::string query = fmt::format(
+		"INSERT INTO spawngroup (name) VALUES('{}{}{}')",
+		zone,
+		EscapeString(spawn->GetName()),
+		Timer::GetCurrentTime()
+	);
+
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		return 0;
@@ -1307,13 +1329,16 @@ uint32 ZoneDatabase::AddNewNPCSpawnGroupCommand(const char *zone, uint32 zone_ve
 	last_insert_id = results.LastInsertedID();
 
 	uint32 respawntime = 0;
-	uint32 spawnid = 0;
-	if (respawnTime)
+	uint32 spawnid     = 0;
+	if (respawnTime) {
 		respawntime = respawnTime;
-	else if (spawn->respawn2 && spawn->respawn2->RespawnTimer() != 0)
+	}
+	else if (spawn->respawn2 && spawn->respawn2->RespawnTimer() != 0) {
 		respawntime = spawn->respawn2->RespawnTimer();
-	else
+	}
+	else {
 		respawntime = 1200;
+	}
 
 	query = StringFormat("INSERT INTO spawn2 (zone, version, x, y, z, respawntime, heading, spawngroupID) "
 			     "VALUES('%s', %u, %f, %f, %f, %i, %f, %i)",
