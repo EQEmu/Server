@@ -88,6 +88,26 @@ public:
 		const std::string &in_account_username,
 		const std::string &in_account_password
 	);
+
+	/**
+	 * @param in_account_username
+	 * @param in_account_password
+	 * @return
+	 */
+	static bool UpdateLoginserverWorldAdminAccountPasswordByName(
+		const std::string &in_account_username,
+		const std::string &in_account_password
+	);
+
+	/**
+	 * @param in_account_id
+	 * @param in_account_password_hash
+	 * @return
+	 */
+	static bool UpdateLoginserverWorldAdminAccountPasswordById(
+		uint32 in_account_id,
+		const std::string &in_account_password_hash
+	);
 };
 
 

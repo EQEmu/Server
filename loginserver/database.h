@@ -149,6 +149,7 @@ public:
 		std::string server_list_description;
 		std::string server_admin_account_name;
 		std::string server_admin_account_password;
+		uint32 server_admin_id;
 	};
 
 	/**
@@ -267,6 +268,24 @@ public:
 	Database::DbLoginServerAccount GetLoginServerAccountByAccountName(
 		const std::string &account_name,
 		const std::string &source_loginserver = "local"
+	);
+
+	/**
+	 * @param id
+	 * @param admin_account_password_hash
+	 */
+	bool UpdateLoginWorldAdminAccountPassword(
+		unsigned int id,
+		const std::string& admin_account_password_hash
+	);
+
+	/**
+	 * @param admin_account_username
+	 * @param admin_account_password_hash
+	 */
+	bool UpdateLoginWorldAdminAccountPasswordByUsername(
+		const std::string &admin_account_username,
+		const std::string &admin_account_password_hash
 	);
 
 	/**

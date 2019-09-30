@@ -1,9 +1,9 @@
 {
   "database": {
-    "host": "mariadb", // database host
+    "host": "127.0.0.1", // database host
     "port": "3306", // database port
     "db": "peq", // database name
-    "user": "eqemu", // database user
+    "user": "root", // database user
     "password": "eqemu" // database password
   },
   "account": {

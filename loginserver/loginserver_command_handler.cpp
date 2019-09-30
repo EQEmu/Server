@@ -57,6 +57,7 @@ namespace LoginserverCommandHandler {
 		function_map["web-api-token:create"]                  = &LoginserverCommandHandler::CreateLoginserverApiToken;
 		function_map["web-api-token:list"]                    = &LoginserverCommandHandler::ListLoginserverApiTokens;
 		function_map["world-admin:create"]                    = &LoginserverCommandHandler::CreateLoginserverWorldAdminAccount;
+		function_map["world-admin:update"]                    = &LoginserverCommandHandler::UpdateLoginserverWorldAdminAccountPassword;
 
 		EQEmuCommand::HandleMenu(function_map, cmd, argc, argv);
 	}
@@ -268,5 +269,33 @@ namespace LoginserverCommandHandler {
 		);
 
 		LogInfo("Credentials were {0}", res ? "accepted" : "not accepted");
+	}
+
+	/**
+	 * @param argc
+	 * @param argv
+	 * @param cmd
+	 * @param description
+	 */
+	void UpdateLoginserverWorldAdminAccountPassword(int argc, char **argv, argh::parser &cmd, std::string &description)
+	{
+		description = "Update world admin account password";
+
+		std::vector<std::string> arguments = {
+			"--username",
+			"--password"
+		};
+		std::vector<std::string> options   = {};
+
+		if (cmd[{"-h", "--help"}]) {
+			return;
+		}
+
+		EQEmuCommand::ValidateCmdInput(arguments, options, cmd, argc, argv);
+
+		AccountManagement::UpdateLoginserverWorldAdminAccountPasswordByName(
+			cmd("--username").str(),
+			cmd("--password").str()
+		);
 	}
 }

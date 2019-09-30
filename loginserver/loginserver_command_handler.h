@@ -33,6 +33,7 @@ namespace LoginserverCommandHandler {
 	void CheckLoginserverUserCredentials(int argc, char **argv, argh::parser &cmd, std::string &description);
 	void UpdateLoginserverUserCredentials(int argc, char **argv, argh::parser &cmd, std::string &description);
 	void CheckExternalLoginserverUserCredentials(int argc, char **argv, argh::parser &cmd, std::string &description);
+	void UpdateLoginserverWorldAdminAccountPassword(int argc, char **argv, argh::parser &cmd, std::string &description);
 };
 
 

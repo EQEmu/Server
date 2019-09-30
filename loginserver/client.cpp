@@ -499,83 +499,66 @@ bool Client::VerifyLoginHash(
 	const std::string &password_hash
 )
 {
-	auto mode = server.options.GetEncryptionMode();
-	if (eqcrypt_verify_hash(account_username, account_password, password_hash, mode)) {
+	auto encryption_mode = server.options.GetEncryptionMode();
+	if (eqcrypt_verify_hash(account_username, account_password, password_hash, encryption_mode)) {
 		return true;
 	}
 	else {
 		if (server.options.IsUpdatingInsecurePasswords()) {
-			if (mode < EncryptionModeArgon2) {
-				mode = EncryptionModeArgon2;
+			if (encryption_mode < EncryptionModeArgon2) {
+				encryption_mode = EncryptionModeArgon2;
 			}
 
-			if (password_hash.length() == 32) { //md5 is insecure
+			uint32 insecure_source_encryption_mode = 0;
+			if (password_hash.length() == CryptoHash::md5_hash_length) {
 				for (int i = EncryptionModeMD5; i <= EncryptionModeMD5Triple; ++i) {
-					if (i != mode && eqcrypt_verify_hash(account_username, account_password, password_hash, i)) {
-						LogDebug(
-							"user [{0}] loginserver [{1}] mode [{2}]",
-							account_username,
-							source_loginserver,
-							mode
-						);
-						server.db->UpdateLoginserverAccountPasswordHash(
-							account_username,
-							source_loginserver,
-							eqcrypt_hash(
-								account_username,
-								account_password,
-								mode
-							));
-						return true;
+					if (i != encryption_mode &&
+						eqcrypt_verify_hash(account_username, account_password, password_hash, i)) {
+						insecure_source_encryption_mode = i;
 					}
 				}
 			}
-			else if (password_hash.length() == 40) { //sha1 is insecure
+			else if (password_hash.length() == CryptoHash::sha1_hash_length && insecure_source_encryption_mode == 0) {
 				for (int i = EncryptionModeSHA; i <= EncryptionModeSHATriple; ++i) {
-					if (i != mode && eqcrypt_verify_hash(account_username, account_password, password_hash, i)) {
-						LogDebug(
-							"user [{0}] loginserver [{1}] mode [{2}]",
-							account_username,
-							source_loginserver,
-							mode
-						);
-
-						server.db->UpdateLoginserverAccountPasswordHash(
-							account_username,
-							source_loginserver,
-							eqcrypt_hash(
-								account_username,
-								account_password,
-								mode
-							));
-						return true;
+					if (i != encryption_mode &&
+						eqcrypt_verify_hash(account_username, account_password, password_hash, i)) {
+						insecure_source_encryption_mode = i;
 					}
 				}
 			}
-			else if (password_hash.length() == 128) { //sha2-512 is insecure
+			else if (password_hash.length() == CryptoHash::sha512_hash_length && insecure_source_encryption_mode == 0) {
 				for (int i = EncryptionModeSHA512; i <= EncryptionModeSHA512Triple; ++i) {
-					if (i != mode && eqcrypt_verify_hash(account_username, account_password, password_hash, i)) {
-						LogDebug(
-							"user [{0}] loginserver [{1}] mode [{2}]",
-							account_username,
-							source_loginserver,
-							mode
-						);
-
-						server.db->UpdateLoginserverAccountPasswordHash(
-							account_username,
-							source_loginserver,
-							eqcrypt_hash(
-								account_username,
-								account_password,
-								mode
-							));
-						return true;
+					if (i != encryption_mode &&
+						eqcrypt_verify_hash(account_username, account_password, password_hash, i)) {
+						insecure_source_encryption_mode = i;
 					}
 				}
 			}
-			//argon2 is still secure
-			//scrypt is still secure
+
+			if (insecure_source_encryption_mode > 0) {
+				LogInfo(
+					"[{}] Updated insecure password user [{}] loginserver [{}] from mode [{}] ({}) to mode [{}] ({})",
+					__func__,
+					account_username,
+					source_loginserver,
+					GetEncryptionByModeId(insecure_source_encryption_mode),
+					insecure_source_encryption_mode,
+					GetEncryptionByModeId(encryption_mode),
+					encryption_mode
+				);
+
+				server.db->UpdateLoginserverAccountPasswordHash(
+					account_username,
+					source_loginserver,
+					eqcrypt_hash(
+						account_username,
+						account_password,
+						encryption_mode
+					)
+				);
+
+				return true;
+			}
 		}
 	}
 
