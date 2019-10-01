@@ -769,7 +769,7 @@ sub do_install_config_login_json {
         $db_name = "peq";
     }
 
-    $config->{"database"}{"host"} = "127.0.0.1"
+    $config->{"database"}{"host"} = "127.0.0.1";
     $config->{"database"}{"user"} = $installation_variables{"mysql_eqemu_user"};
     $config->{"database"}{"password"} = $installation_variables{"mysql_eqemu_password"};
     $config->{"database"}{"db"}       = $db_name;
@@ -1536,7 +1536,7 @@ sub do_windows_login_server_setup {
 
     print "[Install] Pulling and initializing Loginserver configuration files...\n";
     do_install_config_login_json();
-    print "[Install] Done...\n"
+    print "[Install] Done...\n";
 
     add_login_server_firewall_rules();
 
@@ -1569,7 +1569,7 @@ sub do_linux_login_server_setup {
 
     print "[Install] Pulling and initializing Loginserver configuration files...\n";
     do_install_config_login_json();
-    print "[Install] Done...\n"
+    print "[Install] Done...\n";
 
     rmtree('updates_staged');
     rmtree('db_update');
