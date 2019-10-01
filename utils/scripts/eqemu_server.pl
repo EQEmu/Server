@@ -748,7 +748,7 @@ sub do_install_config_login_json {
     get_installation_variables();
 
     #::: Fetch json template
-    get_remote_file($install_repository_request_url . "login_template.json", "login_template.json");
+    get_remote_file($eqemu_repository_request_url . "loginserver/login_util/login.json", "login_template.json");
 
     use JSON;
     my $json = new JSON();
