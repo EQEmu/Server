@@ -2693,18 +2693,22 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 #ifdef BOTS
 	// if other is a bot, add the bots client to the hate list
 	while (other->IsBot()) {
+
 		auto other_ = other->CastToBot();
-		if (!other_ || !other_->GetBotOwner())
+		if (!other_ || !other_->GetBotOwner()) {
 			break;
+		}
 
 		auto owner_ = other_->GetBotOwner()->CastToClient();
-		if (!owner_ || owner_->IsDead() || !owner_->InZone()) // added isdead and inzone checks to avoid issues in AddAutoXTarget(...) below
+		if (!owner_ || owner_->IsDead() || !owner_->InZone()) { // added isdead and inzone checks to avoid issues in AddAutoXTarget(...) below
 			break;
+		}
 
 		if (owner_->GetFeigned()) {
 			AddFeignMemory(owner_);
 		}
 		else if (!hate_list.IsEntOnHateList(owner_)) {
+
 			hate_list.AddEntToHateList(owner_, 0, 0, false, true);
 			owner_->AddAutoXTarget(this); // this was being called on dead/out-of-zone clients
 		}

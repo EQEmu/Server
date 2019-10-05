@@ -1628,9 +1628,6 @@ private:
 	
 #ifdef BOTS
 	
-
-	
-
 public:
 	enum BotOwnerOption : size_t {
 		booDeathMarquee,
@@ -1638,14 +1635,20 @@ public:
 		booSpawnMessageSay,
 		booSpawnMessageTell,
 		booSpawnMessageClassSpecific,
+		booAltCombat,
+		booAutoDefend,
 		_booCount
 	};
 
 	bool GetBotOption(BotOwnerOption boo) const;
 	void SetBotOption(BotOwnerOption boo, bool flag = true);
 	
+	bool GetBotPulling() { return m_bot_pulling; }
+	void SetBotPulling(bool flag = true) { m_bot_pulling = flag; }
+
 private:
 	bool bot_owner_options[_booCount];
+	bool m_bot_pulling;
 
 #endif
 };

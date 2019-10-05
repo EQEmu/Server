@@ -580,7 +580,7 @@ bool BotDatabase::SaveNewBot(Bot* bot_inst, uint32& bot_id)
 		bot_inst->GetPR(),
 		bot_inst->GetDR(),
 		bot_inst->GetCorrup(),
-		BOT_FOLLOW_DISTANCE_DEFAULT,
+		(uint32)BOT_FOLLOW_DISTANCE_DEFAULT,
 		(IsCasterClass(bot_inst->GetClass()) ? (uint8)RuleI(Bots, CasterStopMeleeLevel) : 255)
 	);
 	auto results = database.QueryDatabase(query);
@@ -2253,8 +2253,10 @@ bool BotDatabase::SaveOwnerOption(const uint32 owner_id, size_t type, const bool
 	switch (static_cast<Client::BotOwnerOption>(type)) {
 	case Client::booDeathMarquee:
 	case Client::booStatsUpdate:
-	case Client::booSpawnMessageClassSpecific: {
-
+	case Client::booSpawnMessageClassSpecific:
+	case Client::booAltCombat:
+	case Client::booAutoDefend:
+	{
 		query = fmt::format(
 			"REPLACE INTO `bot_owner_options`(`owner_id`, `option_type`, `option_value`) VALUES ('{}', '{}', '{}')",
 			owner_id,
@@ -2282,11 +2284,12 @@ bool BotDatabase::SaveOwnerOption(const uint32 owner_id, const std::pair<size_t,
 
 	switch (static_cast<Client::BotOwnerOption>(type.first)) {
 	case Client::booSpawnMessageSay:
-	case Client::booSpawnMessageTell: {
+	case Client::booSpawnMessageTell:
+	{
 		switch (static_cast<Client::BotOwnerOption>(type.second)) {
 		case Client::booSpawnMessageSay:
-		case Client::booSpawnMessageTell: {
-
+		case Client::booSpawnMessageTell:
+		{
 			query = fmt::format(
 				"REPLACE INTO `bot_owner_options`(`owner_id`, `option_type`, `option_value`) VALUES ('{}', '{}', '{}'), ('{}', '{}', '{}')",
 				owner_id,
