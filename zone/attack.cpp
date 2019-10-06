@@ -308,7 +308,7 @@ bool Mob::CheckHitChance(Mob* other, EQEmu::skills::SkillType skillinuse, int Ha
 	Log.Out(
 		Logs::General,
 		Logs::Combat,
-		"[%s] [Mob::CheckHitChance] Chance [%i] ToHitRoll [%i] Hit? [%s]",
+		"[%s] [Mob::CheckHitChance] Chance [%.2f] ToHitRoll [%.2f] Hit? [%s]",
 		GetCleanName(),
 		chancetohit,
 		tohit_roll,
