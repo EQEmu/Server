@@ -736,6 +736,15 @@ int32 Mob::GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit,
 	float mit_roll = zone->random.Real(0, mit_rating);
 	float atk_roll = zone->random.Real(0, atk_rating);
 
+	Log.Out(
+		Logs::General,
+		Logs::Combat,
+		"[%s] [Mob::GetMeleeMitDmg] MitigationRoll [%.2f] AtkRoll [%.2f]",
+		GetCleanName(),
+		mit_roll,
+		atk_roll
+	);
+
 	if (atk_roll > mit_roll) {
 		float a_diff = atk_roll - mit_roll;
 		float thac0 = atk_rating * RuleR(Combat, ACthac0Factor);
@@ -760,10 +769,50 @@ int32 Mob::GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit,
 		d = 20.0;
 
 	float interval = (damage - minhit) / 20.0;
+
+	Log.Out(
+		Logs::General,
+		Logs::Combat,
+		"[%s] [Mob::GetMeleeMitDmg] Interval [%.2f] d [%.2f]",
+		GetCleanName(),
+		interval,
+		d
+	);
+
 	damage -= ((int)d * interval);
 
+	Log.Out(
+		Logs::General,
+		Logs::Combat,
+		"[%s] [Mob::GetMeleeMitDmg] Damage [%.2f] Post Interval",
+		GetCleanName(),
+		damage
+	);
+
 	damage -= (minhit * itembonuses.MeleeMitigation / 100);
-	damage -= (damage *  (spellbonuses.MeleeMitigationEffect + itembonuses.MeleeMitigationEffect + aabonuses.MeleeMitigationEffect) / 100);
+
+	Log.Out(
+		Logs::General,
+		Logs::Combat,
+		"[%s] [Mob::GetMeleeMitDmg] Damage [%.2f] Mitigation [%i] Post Mitigation MinDmg",
+		GetCleanName(),
+		damage,
+		itembonuses.MeleeMitigation
+	);
+
+	damage -= (damage * (spellbonuses.MeleeMitigationEffect + itembonuses.MeleeMitigationEffect + aabonuses.MeleeMitigationEffect) / 100);
+
+	Log.Out(
+		Logs::General,
+		Logs::Combat,
+		"[%s] [Mob::GetMeleeMitDmg] Damage [%.2f] SpellMit [%i] ItemMit [%i] AAMit [%i] Post All Mit Bonuses",
+		GetCleanName(),
+		damage,
+		spellbonuses.MeleeMitigationEffect,
+		itembonuses.MeleeMitigationEffect,
+		aabonuses.MeleeMitigationEffect
+	);
+
 	return damage;
 }
 

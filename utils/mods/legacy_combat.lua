@@ -689,6 +689,14 @@ function MobGetMeleeMitDmg(defender, attacker, damage, min_damage, mitigation_ra
     local mit_roll = Random.Real(0, mitigation_rating);
     local atk_roll = Random.Real(0, attack_rating);
 
+    eq.debug(
+            string.format("[%s] [Mob::GetMeleeMitDmg] MitigationRoll [%02f] AtkRoll [%02f]",
+                    e.self:GetCleanName(),
+                    mit_roll,
+                    atk_roll
+            )
+    );
+
     if (atk_roll > mit_roll) then
         local a_diff   = atk_roll - mit_roll;
         local thac0    = attack_rating * ACthac0Factor;
@@ -716,9 +724,46 @@ function MobGetMeleeMitDmg(defender, attacker, damage, min_damage, mitigation_ra
     end
 
     local interval = (damage - min_damage) / 20.0;
+
+    eq.debug(
+            string.format("[%s] [Mob::GetMeleeMitDmg] Interval [%02f] d [%02f]",
+                    e.self:GetCleanName(),
+                    interval,
+                    d
+            )
+    );
+
     damage         = damage - (math.floor(d) * interval);
+
+    eq.debug(
+            string.format("[%s] [Mob::GetMeleeMitDmg] Damage [%02f] Post Interval",
+                    e.self:GetCleanName(),
+                    damage
+            )
+    );
+
     damage         = damage - (min_damage * defender:GetItemBonuses():MeleeMitigation() / 100);
-    damage         = damage + (damage * (defender:GetSpellBonuses():MeleeMitigationEffect() + defender:GetItemBonuses():MeleeMitigationEffect() + defender:GetAABonuses():MeleeMitigationEffect()) / 100);
+
+    eq.debug(
+            string.format("[%s] [Mob::GetMeleeMitDmg] Damage [%02f] Mitigation [%i] Post Mitigation MinDmg",
+                    e.self:GetCleanName(),
+                    damage,
+                    defender:GetItemBonuses():MeleeMitigation()
+            )
+    );
+
+    -- Changed from positive to negative per original
+    damage         = damage - (damage * (defender:GetSpellBonuses():MeleeMitigationEffect() + defender:GetItemBonuses():MeleeMitigationEffect() + defender:GetAABonuses():MeleeMitigationEffect()) / 100);
+
+    eq.debug(
+            string.format("[%s] [Mob::GetMeleeMitDmg] Damage [%02f] SpellMit [%i] ItemMit [%i] AAMit [%i] Post All Mit Bonuses",
+                    e.self:GetCleanName(),
+                    damage,
+                    defender:GetSpellBonuses():MeleeMitigationEffect(),
+                    defender:GetItemBonuses():MeleeMitigationEffect(),
+                    defender:GetAABonuses():MeleeMitigationEffect()
+            )
+    );
 
     return damage;
 end
