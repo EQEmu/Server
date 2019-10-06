@@ -522,6 +522,16 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttac
 	float aa_mit = (aabonuses.CombatStability + itembonuses.CombatStability +
 			spellbonuses.CombatStability) / 100.0f;
 
+	Log.Out(
+		Logs::General,
+		Logs::Combat,
+		"[%s] [Mob::MeleeMitigation] Stability Bonuses | AA [%i] Item [%i] Spell [%i] ",
+		GetCleanName(),
+		aabonuses.CombatStability,
+		itembonuses.CombatStability,
+		spellbonuses.CombatStability
+	);
+
 	if (RuleB(Combat, UseIntervalAC)) {
 		float softcap = (GetSkill(EQEmu::skills::SkillDefense) + GetLevel()) *
 			RuleR(Combat, SoftcapFactor) * (1.0 + aa_mit);
@@ -637,6 +647,17 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttac
 
 		attack_rating = attacker->mod_attack_rating(attack_rating, this);
 
+		Log.Out(
+			Logs::General,
+			Logs::Combat,
+			"[%s] [Mob::MeleeMitigation] Attack Rating [%.2f] Mitigation Rating [%.2f] Damage [%i] MinDmg [%i]",
+			GetCleanName(),
+			attack_rating,
+			mitigation_rating,
+			damage,
+			minhit
+		);
+
 		damage = GetMeleeMitDmg(attacker, damage, minhit, mitigation_rating, attack_rating);
 	} else {
 		////////////////////////////////////////////////////////
@@ -697,6 +718,14 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttac
 
 	if (damage < 0)
 		damage = 0;
+
+	Log.Out(
+		Logs::General,
+		Logs::Combat,
+		"[%s] [Mob::MeleeMitigation] Final Damage [%i]",
+		GetCleanName(),
+		damage
+	);
 }
 
 // This is called when the Mob is the one being hit

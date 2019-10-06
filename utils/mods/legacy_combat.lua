@@ -59,7 +59,8 @@ RogueCritThrowingChance        = 25;
 RogueDeadlyStrikeChance        = 80;
 RogueDeadlyStrikeMod           = 2;
 
--- Source Function: Mob::GetMeleeMitigation()
+-- Source Function: Mob::MeleeMitigation()
+-- Partial: Rest happens in DoMeleeMitigation
 function MeleeMitigation(e)
     e.IgnoreDefault = true;
 
@@ -478,6 +479,22 @@ function DoMeleeMitigation(defender, attacker, hit, opts)
     local weight            = 0.0;
     local monkweight        = MonkACBonusWeight;
 
+    eq.debug(
+            string.format("[%s] [Mob::MeleeMitigation] Stability Bonuses | AA [%i] Item [%i] Spell [%i]",
+                    e.self:GetCleanName(),
+                    aabonuses:CombatStability(),
+                    itembonuses:CombatStability(),
+                    spellbonuses:CombatStability()
+            )
+    );
+
+    eq.debug(
+            string.format("[%s] [Mob::MeleeMitigation] Soft Cap [%i]",
+                    e.self:GetCleanName(),
+                    softcap
+            )
+    );
+
     if defender:IsClient() then
         armor, shield_ac = GetRawACNoShield(defender);
         weight           = defender:CastToClient():CalcCurrentWeight() / 10;
@@ -582,11 +599,28 @@ function DoMeleeMitigation(defender, attacker, hit, opts)
         attack_rating = (attacker:GetATK() + (attacker:GetSkill(Skill.Offense) * 1.345) + ((attacker:GetSTR() - 66) * 0.9));
     end
 
+    eq.debug(
+            string.format("[%s] [Mob::MeleeMitigation] Attack Rating [%02f] Mitigation Rating [%02f] Damage [%i] MinDmg [%i]",
+                    e.self:GetCleanName(),
+                    mitigation_rating,
+                    attack_rating,
+                    hit_damage_done,
+                    hit.min_damage
+            )
+    );
+
     hit.damage_done = GetMeleeMitDmg(defender, attacker, hit.damage_done, hit.min_damage, mitigation_rating, attack_rating);
 
     if hit.damage_done < 0 then
         hit.damage_done = 0;
     end
+
+    eq.debug(
+            string.format("[%s] [Mob::MeleeMitigation] Final Damage [%i]",
+                    e.self:GetCleanName(),
+                    hit.damage_done
+            )
+    );
 
     return hit;
 end
