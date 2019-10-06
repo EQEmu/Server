@@ -4603,11 +4603,16 @@ int16 Mob::GetCritDmgMob(uint16 skill)
 	int critDmg_mod = 0;
 
 	// All skill dmg mod + Skill specific
-	critDmg_mod += itembonuses.CritDmgMob[EQEmu::skills::HIGHEST_SKILL + 1] + spellbonuses.CritDmgMob[EQEmu::skills::HIGHEST_SKILL + 1] + aabonuses.CritDmgMob[EQEmu::skills::HIGHEST_SKILL + 1] +
-					itembonuses.CritDmgMob[skill] + spellbonuses.CritDmgMob[skill] + aabonuses.CritDmgMob[skill];
+	critDmg_mod += itembonuses.CritDmgMob[EQEmu::skills::HIGHEST_SKILL + 1] +
+				   spellbonuses.CritDmgMob[EQEmu::skills::HIGHEST_SKILL + 1] +
+				   aabonuses.CritDmgMob[EQEmu::skills::HIGHEST_SKILL + 1] +
+				   itembonuses.CritDmgMob[skill] +
+				   spellbonuses.CritDmgMob[skill] +
+				   aabonuses.CritDmgMob[skill];
 
-	if(critDmg_mod < -100)
+	if (critDmg_mod < -100) {
 		critDmg_mod = -100;
+	}
 
 	return critDmg_mod;
 }

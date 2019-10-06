@@ -305,6 +305,16 @@ bool Mob::CheckHitChance(Mob* other, EQEmu::skills::SkillType skillinuse, int Ha
 
 	float tohit_roll = zone->random.Real(0, 100);
 
+	Log.Out(
+		Logs::General,
+		Logs::Combat,
+		"[%s] [Mob::CheckHitChance] Chance [%i] ToHitRoll [%i] Hit? [%s]",
+		GetCleanName(),
+		chancetohit,
+		tohit_roll,
+		(tohit_roll <= chancetohit) ? "true" : "false"
+	);
+
 	Log.Out(Logs::Detail, Logs::Attack, "Final hit chance: %.2f%%. Hit roll %.2f", chancetohit, tohit_roll);
 
 	return(tohit_roll <= chancetohit);

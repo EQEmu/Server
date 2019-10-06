@@ -75,7 +75,7 @@ function MeleeMitigation(e)
                     e.hit.base_damage
             )
     );
-    
+
     e.hit.damage_done = 2 * e.hit.base_damage * GetDamageTable(e.self, e.hit.skill) / 100;
     e.hit             = DoMeleeMitigation(e.self, e.other, e.hit, e.opts);
 
@@ -221,6 +221,16 @@ function CheckHitChance(e)
     end
 
     local tohit_roll = Random.Real(0, 100);
+
+    eq.debug(
+            string.format("[%s] [Mob::CheckHitChance] Chance [%i] ToHitRoll [%i] Hit? [%t]",
+                    e.self:GetCleanName(),
+                    chancetohit,
+                    tohit_roll,
+                    (tohit_roll <= chancetohit)
+            )
+    );
+
     if (tohit_roll <= chancetohit) then
         e.ReturnValue = true;
     else
