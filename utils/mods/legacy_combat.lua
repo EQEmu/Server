@@ -68,8 +68,18 @@ function MeleeMitigation(e)
         return e;
     end
 
+    eq.debug(
+            string.format("[%s] ClientAttack] Damage Table [%i] WeaponDMG [%i]",
+                    e.self:GetCleanName(),
+                    GetDamageTable(e.other, e.hit.skill),
+                    e.hit.base_damage
+            )
+    );
+
+    -- Shouldn't this be using the client e.self instead of e.other ?
     e.hit.damage_done = 2 * e.hit.base_damage * GetDamageTable(e.other, e.hit.skill) / 100;
     e.hit             = DoMeleeMitigation(e.self, e.other, e.hit, e.opts);
+
     return e;
 end
 

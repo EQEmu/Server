@@ -1168,6 +1168,16 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 			return (true);
 
 		int min_hit = 1;
+
+		Log.Out(
+			Logs::General,
+			Logs::Combat,
+			"[%s] [Client::Attack] Damage Table [%u] WeaponDMG [%i]",
+			GetCleanName(),
+			GetDamageTable(skillinuse),
+			weapon_damage
+		);
+
 		int max_hit = (2*weapon_damage*GetDamageTable(skillinuse)) / 100;
 
 		if(GetLevel() < 10 && max_hit > RuleI(Combat, HitCapPre10))
