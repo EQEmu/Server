@@ -144,7 +144,7 @@ void EQEmuLogSys::ProcessGMSay(uint16 debug_level, uint16 log_category, const st
 		return;
 
 	/* Check to see if the process that actually ran this is zone */
-	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone)
+	if (GetExecutablePlatformInt() == EQEmuExePlatform::ExePlatformZone)
 		on_log_gmsay_hook(log_category, message);
 }
 
