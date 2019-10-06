@@ -481,7 +481,7 @@ function DoMeleeMitigation(defender, attacker, hit, opts)
 
     eq.debug(
             string.format("[%s] [Mob::MeleeMitigation] Stability Bonuses | AA [%i] Item [%i] Spell [%i]",
-                    e.self:GetCleanName(),
+                    defender:GetCleanName(),
                     aabonuses:CombatStability(),
                     itembonuses:CombatStability(),
                     spellbonuses:CombatStability()
@@ -490,7 +490,7 @@ function DoMeleeMitigation(defender, attacker, hit, opts)
 
     eq.debug(
             string.format("[%s] [Mob::MeleeMitigation] Soft Cap [%i]",
-                    e.self:GetCleanName(),
+                    defender:GetCleanName(),
                     softcap
             )
     );
@@ -601,7 +601,7 @@ function DoMeleeMitigation(defender, attacker, hit, opts)
 
     eq.debug(
             string.format("[%s] [Mob::MeleeMitigation] Attack Rating [%02f] Mitigation Rating [%02f] Damage [%i] MinDmg [%i]",
-                    e.self:GetCleanName(),
+                    defender:GetCleanName(),
                     mitigation_rating,
                     attack_rating,
                     hit_damage_done,
@@ -617,7 +617,7 @@ function DoMeleeMitigation(defender, attacker, hit, opts)
 
     eq.debug(
             string.format("[%s] [Mob::MeleeMitigation] Final Damage [%i]",
-                    e.self:GetCleanName(),
+                    defender:GetCleanName(),
                     hit.damage_done
             )
     );
@@ -691,7 +691,7 @@ function MobGetMeleeMitDmg(defender, attacker, damage, min_damage, mitigation_ra
 
     eq.debug(
             string.format("[%s] [Mob::GetMeleeMitDmg] MitigationRoll [%02f] AtkRoll [%02f]",
-                    e.self:GetCleanName(),
+                    defender:GetCleanName(),
                     mit_roll,
                     atk_roll
             )
@@ -727,13 +727,13 @@ function MobGetMeleeMitDmg(defender, attacker, damage, min_damage, mitigation_ra
 
     eq.debug(
             string.format("[%s] [Mob::GetMeleeMitDmg] Interval [%02f] d [%02f]",
-                    e.self:GetCleanName(),
+                    defender:GetCleanName(),
                     interval,
                     d
             )
     );
 
-    damage         = damage - (math.floor(d) * interval);
+    damage = damage - (math.floor(d) * interval);
 
     eq.debug(
             string.format("[%s] [Mob::GetMeleeMitDmg] Damage [%02f] Post Interval",
@@ -742,22 +742,22 @@ function MobGetMeleeMitDmg(defender, attacker, damage, min_damage, mitigation_ra
             )
     );
 
-    damage         = damage - (min_damage * defender:GetItemBonuses():MeleeMitigation() / 100);
+    damage = damage - (min_damage * defender:GetItemBonuses():MeleeMitigation() / 100);
 
     eq.debug(
             string.format("[%s] [Mob::GetMeleeMitDmg] Damage [%02f] Mitigation [%i] Post Mitigation MinDmg",
-                    e.self:GetCleanName(),
+                    defender:GetCleanName(),
                     damage,
                     defender:GetItemBonuses():MeleeMitigation()
             )
     );
 
     -- Changed from positive to negative per original
-    damage         = damage - (damage * (defender:GetSpellBonuses():MeleeMitigationEffect() + defender:GetItemBonuses():MeleeMitigationEffect() + defender:GetAABonuses():MeleeMitigationEffect()) / 100);
+    damage = damage - (damage * (defender:GetSpellBonuses():MeleeMitigationEffect() + defender:GetItemBonuses():MeleeMitigationEffect() + defender:GetAABonuses():MeleeMitigationEffect()) / 100);
 
     eq.debug(
             string.format("[%s] [Mob::GetMeleeMitDmg] Damage [%02f] SpellMit [%i] ItemMit [%i] AAMit [%i] Post All Mit Bonuses",
-                    e.self:GetCleanName(),
+                    defender:GetCleanName(),
                     damage,
                     defender:GetSpellBonuses():MeleeMitigationEffect(),
                     defender:GetItemBonuses():MeleeMitigationEffect(),
@@ -790,6 +790,17 @@ function GetRawACNoShield(self)
     end
 
     ac = ac - shield_ac;
+
+    eq.debug(
+            string.format("[%s] [Client::GetRawACNoShield] AC [%i] ItemAC [%i] SpellAC [%i] AAAC [%i]",
+                    self:GetCleanName(),
+                    ac,
+                    self:GetItemBonuses():AC(),
+                    self:GetSpellBonuses():AC(),
+                    self:GetAABonuses():AC()
+            )
+    );
+
     return ac, shield_ac;
 end
 

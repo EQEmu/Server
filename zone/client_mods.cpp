@@ -2232,5 +2232,17 @@ int Client::GetRawACNoShield(int &shield_ac) const
 			}
 		}
 	}
+
+	Log.Out(
+		Logs::General,
+		Logs::Combat,
+		"[%s] [Client::GetRawACNoShield] AC [%i] ItemAC [%i] SpellAC [%i] AAAC [%i]",
+		GetName(),
+		ac,
+		itembonuses.AC,
+		spellbonuses.AC,
+		aabonuses.AC
+	);
+
 	return ac;
 }
