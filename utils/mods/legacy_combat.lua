@@ -889,6 +889,14 @@ function ApplyMeleeDamageBonus(e)
         dmgbonusmod = dmgbonusmod + e.opts.melee_damage_bonus_flat;
     end
 
+    eq.debug(
+            string.format("[%s] [Mob::ApplyMeleeDamageBonus] DmgBonusMod [%i] Dmg [%i]",
+                    e.self:GetCleanName(),
+                    dmgbonusmod,
+                    e.hit.damage_done
+            )
+    );
+
     e.hit.damage_done = e.hit.damage_done + (e.hit.damage_done * dmgbonusmod / 100);
     return e;
 end

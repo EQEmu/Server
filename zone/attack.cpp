@@ -4142,6 +4142,15 @@ void Mob::ApplyMeleeDamageBonus(uint16 skill, int32 &damage,ExtraAttackOptions *
 	if (opts)
 		dmgbonusmod += opts->melee_damage_bonus_flat;
 
+	Log.Out(
+		Logs::General,
+		Logs::Combat,
+		"[%s] [Mob::ApplyMeleeDamageBonus] DmgBonusMod [%i] Dmg [%i]",
+		GetCleanName(),
+		dmgbonusmod,
+		damage
+	);
+
 	damage += damage * dmgbonusmod / 100;
 }
 
