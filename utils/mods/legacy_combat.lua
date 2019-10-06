@@ -223,11 +223,11 @@ function CheckHitChance(e)
     local tohit_roll = Random.Real(0, 100);
 
     eq.debug(
-            string.format("[%s] [Mob::CheckHitChance] Chance [%i] ToHitRoll [%i] Hit? [%t]",
+            string.format("[%s] [Mob::CheckHitChance] Chance [%i] ToHitRoll [%i] Hit? [%s]",
                     e.self:GetCleanName(),
                     chancetohit,
                     tohit_roll,
-                    (tohit_roll <= chancetohit)
+                    (tohit_roll <= chancetohit) and "true" or "false"
             )
     );
 
@@ -626,12 +626,11 @@ function DoMeleeMitigation(defender, attacker, hit, opts)
     end
 
     eq.debug(
-            string.format("[%s] [Mob::MeleeMitigation] Attack Rating [%02f] Mitigation Rating [%02f] Damage [%i] MinDmg [%i]",
+            string.format("[%s] [Mob::MeleeMitigation] Attack Rating [%02f] Mitigation Rating [%02f] Damage [%i]",
                     defender:GetCleanName(),
-                    mitigation_rating,
                     attack_rating,
-                    hit_damage_done,
-                    hit.min_damage
+                    mitigation_rating,
+                    hit.damage_done
             )
     );
 
@@ -763,7 +762,7 @@ function MobGetMeleeMitDmg(defender, attacker, damage, min_damage, mitigation_ra
 
     eq.debug(
             string.format("[%s] [Mob::GetMeleeMitDmg] Damage [%02f] Post Interval",
-                    e.self:GetCleanName(),
+                    defender:GetCleanName(),
                     damage
             )
     );
