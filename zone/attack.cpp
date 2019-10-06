@@ -3989,6 +3989,14 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 		critChance += opts->crit_flat;
 	}
 
+	Log.Out(
+		Logs::General,
+		Logs::Combat,
+		"[%s] [Mob::TryCriticalHit] CritChance [%i]",
+		GetCleanName(),
+		critChance
+	);
+
 	if(critChance > 0) {
 
 		critChance /= 100;

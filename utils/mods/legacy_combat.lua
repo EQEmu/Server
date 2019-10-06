@@ -333,6 +333,13 @@ function TryCriticalHit(e)
         critChance = critChance + opts.crit_flat;
     end
 
+    eq.debug(
+            string.format("[%s] [Mob::TryCriticalHit] CritChance [%i]",
+                    e.self:GetCleanName(),
+                    critChance
+            )
+    );
+
     if (critChance > 0) then
 
         critChance = critChance / 100;
@@ -895,7 +902,7 @@ function CommonOutgoingHitSuccess(e)
             )
     );
 
-    e                 = TryCriticalHit(e);
+    e = TryCriticalHit(e);
     e.self:CheckNumHitsRemaining(5, -1, 65535);
     e.IgnoreDefault = true;
     return e;
