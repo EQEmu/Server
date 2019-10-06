@@ -1,3 +1,13 @@
+--[[
+    *
+    * The purpose of this lua file is to backport combat formulas pre-overhaul
+    * https://github.com/EQEmu/Server/commit/9e824876ba5dac262b121c0e60d022bb2ecc45bd
+    *
+    * If your server has years and years of content built on old formulas, it may be appropriate to use this
+    * instead of taking on the massive task of rescaling tons of carefully tested and layered content
+    *
+]]
+
 MonkACBonusWeight              = RuleI.Get(Rule.MonkACBonusWeight);
 NPCACFactor                    = RuleR.Get(Rule.NPCACFactor);
 OldACSoftcapRules              = RuleB.Get(Rule.OldACSoftcapRules);
@@ -49,6 +59,7 @@ RogueCritThrowingChance        = 25;
 RogueDeadlyStrikeChance        = 80;
 RogueDeadlyStrikeMod           = 2;
 
+-- Source Function: Mob::GetMeleeMitigation()
 function MeleeMitigation(e)
     e.IgnoreDefault = true;
 
@@ -61,6 +72,7 @@ function MeleeMitigation(e)
     return e;
 end
 
+-- Source Function: Mob::CheckHitChance()
 function CheckHitChance(e)
     e.IgnoreDefault   = true;
 
@@ -208,6 +220,7 @@ function CheckHitChance(e)
     return e;
 end
 
+-- Source Function: Mob::TryCriticalHit()
 function TryCriticalHit(e)
     e.IgnoreDefault = true;
 
@@ -348,6 +361,7 @@ function TryCriticalHit(e)
     return e;
 end
 
+-- Source Function: Mob::TryPetCriticalHit()
 function TryPetCriticalHit(self, defender, hit)
     if (hit.damage_done < 1) then
         return hit;
@@ -394,6 +408,7 @@ function TryPetCriticalHit(self, defender, hit)
     return hit;
 end
 
+-- Source Function: Mob::GetCriticalChanceBonus()
 function GetCriticalChanceBonus(self, skill)
 
     local critical_chance = 0;
@@ -412,6 +427,7 @@ function GetCriticalChanceBonus(self, skill)
     return critical_chance;
 end
 
+-- Source Function: Mob::GetCritDmgMob()
 function GetCritDmgMod(self, skill)
     local critDmg_mod  = 0;
 
@@ -429,6 +445,7 @@ function GetCritDmgMod(self, skill)
     return critDmg_mod;
 end
 
+-- Source Function: Mob::GetCrippBlowChance()
 function GetCrippBlowChance(self)
     local aabonuses    = self:GetAABonuses();
     local itembonuses  = self:GetItemBonuses();
@@ -442,6 +459,7 @@ function GetCrippBlowChance(self)
     return crip_chance;
 end
 
+-- Source Function: Mob::MeleeMitigation()
 function DoMeleeMitigation(defender, attacker, hit, opts)
     if hit.damage_done <= 0 then
         return hit;
@@ -573,6 +591,7 @@ function DoMeleeMitigation(defender, attacker, hit, opts)
     return hit;
 end
 
+-- Source Function: N/A
 function GetMeleeMitDmg(defender, attacker, damage, min_damage, mitigation_rating, attack_rating)
     if defender:IsClient() then
         return ClientGetMeleeMitDmg(defender, attacker, damage, min_damage, mitigation_rating, attack_rating);
@@ -581,6 +600,7 @@ function GetMeleeMitDmg(defender, attacker, damage, min_damage, mitigation_ratin
     end
 end
 
+-- Source Function: Client::GetMeleeMitDmg()
 function ClientGetMeleeMitDmg(defender, attacker, damage, min_damage, mitigation_rating, attack_rating)
     if (not attacker:IsNPC() or UseOldDamageIntervalRules) then
         return MobGetMeleeMitDmg(defender, attacker, damage, min_damage, mitigation_rating, attack_rating);
@@ -629,6 +649,7 @@ function ClientGetMeleeMitDmg(defender, attacker, damage, min_damage, mitigation
     return math.floor(dmg_bonus + dmg_interval * d);
 end
 
+-- Source Function: Mob::GetMeleeMitDmg()
 function MobGetMeleeMitDmg(defender, attacker, damage, min_damage, mitigation_rating, attack_rating)
     local d        = 10.0;
     local mit_roll = Random.Real(0, mitigation_rating);
@@ -668,6 +689,7 @@ function MobGetMeleeMitDmg(defender, attacker, damage, min_damage, mitigation_ra
     return damage;
 end
 
+-- Source Function: Client::GetRawACNoShield()
 function GetRawACNoShield(self)
     self            = self:CastToClient();
 
@@ -692,6 +714,7 @@ function GetRawACNoShield(self)
     return ac, shield_ac;
 end
 
+-- Source Function: Mob::GetDamageTable()
 function GetDamageTable(attacker, skill)
     if not attacker:IsClient() then
         return 100;
@@ -734,11 +757,13 @@ function GetDamageTable(attacker, skill)
     return 100;
 end
 
+-- Source Function: N/A - Not used
 function ApplyDamageTable(e)
     e.IgnoreDefault = true;
     return e;
 end
 
+-- Source Function: Mob::CommonOutgoingHitSuccess()
 function CommonOutgoingHitSuccess(e)
     e                 = ApplyMeleeDamageBonus(e);
     e.hit.damage_done = e.hit.damage_done + (e.hit.damage_done * e.other:GetSkillDmgTaken(e.hit.skill) / 100) + (e.self:GetSkillDmgAmt(e.hit.skill) + e.other:GetFcDamageAmtIncoming(e.self, 0, true, e.hit.skill));
@@ -748,6 +773,7 @@ function CommonOutgoingHitSuccess(e)
     return e;
 end
 
+-- Source Function: Mob::ApplyMeleeDamageBonus()
 function ApplyMeleeDamageBonus(e)
     local dmgbonusmod = e.self:GetMeleeDamageMod_SE(e.hit.skill);
     if (opts) then
