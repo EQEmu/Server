@@ -3769,19 +3769,25 @@ void bot_command_owner_option(Client *c, const Seperator *sep)
 	}
 	else if (!owner_option.compare("autodefend")) {
 
-		if (!argument.compare("enable")) {
-			c->SetBotOption(Client::booAutoDefend, true);
-		}
-		else if (!argument.compare("disable")) {
-			c->SetBotOption(Client::booAutoDefend, false);
+		if (RuleB(Bots, AllowOwnerAutoDefend)) {
+
+			if (!argument.compare("enable")) {
+				c->SetBotOption(Client::booAutoDefend, true);
+			}
+			else if (!argument.compare("disable")) {
+				c->SetBotOption(Client::booAutoDefend, false);
+			}
+			else {
+				c->SetBotOption(Client::booAutoDefend, !c->GetBotOption(Client::booAutoDefend));
+			}
+
+			database.botdb.SaveOwnerOption(c->CharacterID(), Client::booAutoDefend, c->GetBotOption(Client::booAutoDefend));
+
+			c->Message(m_action, "Bot 'auto defend' is now %s.", (c->GetBotOption(Client::booAutoDefend) == true ? "enabled" : "disabled"));
 		}
 		else {
-			c->SetBotOption(Client::booAutoDefend, !c->GetBotOption(Client::booAutoDefend));
+			c->Message(m_fail, "Bot owner option 'autodefend' is not allowed on this server.");
 		}
-
-		database.botdb.SaveOwnerOption(c->CharacterID(), Client::booAutoDefend, c->GetBotOption(Client::booAutoDefend));
-
-		c->Message(m_action, "Bot 'auto defend' is now %s.", (c->GetBotOption(Client::booAutoDefend) == true ? "enabled" : "disabled"));
 	}
 	else if (!owner_option.compare("current")) {
 		

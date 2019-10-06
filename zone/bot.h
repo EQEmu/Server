@@ -41,8 +41,6 @@ constexpr float BOT_FOLLOW_DISTANCE_DEFAULT = 184.0f; // as DSq value (~13.565 u
 constexpr float BOT_FOLLOW_DISTANCE_DEFAULT_MAX = 2500.0f; // as DSq value (50 units)
 constexpr float BOT_FOLLOW_DISTANCE_WALK = 1000.0f; // as DSq value (~31.623 units)
 
-constexpr float BOT_LEASH_DISTANCE = 250000.0f; // as DSq value (500 units)
-
 constexpr uint32 BOT_KEEP_ALIVE_INTERVAL = 5000; // 5 seconds
 
 //constexpr uint32 BOT_COMBAT_JITTER_INTERVAL_MIN = 5000; // 5 seconds

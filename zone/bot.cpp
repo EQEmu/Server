@@ -2397,6 +2397,7 @@ void Bot::AI_Process()
 
 	float fm_distance = DistanceSquared(m_Position, follow_mob->GetPosition());
 	float lo_distance = DistanceSquared(m_Position, leash_owner->GetPosition());
+	float leash_distance = RuleR(Bots, LeashDistance);
 
 //#pragma region CURRENTLY CASTING CHECKS
 
@@ -2551,8 +2552,8 @@ void Bot::AI_Process()
 				lo_target->IsNPC() &&
 				!lo_target->IsMezzed() &&
 				((bot_owner->GetBotOption(Client::booAutoDefend) && lo_target->GetHateAmount(leash_owner)) || leash_owner->AutoAttackEnabled()) &&
-				lo_distance <= BOT_LEASH_DISTANCE &&
-				DistanceSquared(m_Position, lo_target->GetPosition()) <= BOT_LEASH_DISTANCE &&
+				lo_distance <= leash_distance &&
+				DistanceSquared(m_Position, lo_target->GetPosition()) <= leash_distance &&
 				(CheckLosFN(lo_target) || leash_owner->CheckLosFN(lo_target)) &&
 				IsAttackAllowed(lo_target))
 			{
@@ -2579,8 +2580,8 @@ void Bot::AI_Process()
 
 					if (!bgm_target->IsMezzed() &&
 						((bot_owner->GetBotOption(Client::booAutoDefend) && bgm_target->GetHateAmount(bg_member)) || leash_owner->AutoAttackEnabled()) &&
-						lo_distance <= BOT_LEASH_DISTANCE &&
-						DistanceSquared(m_Position, bgm_target->GetPosition()) <= BOT_LEASH_DISTANCE &&
+						lo_distance <= leash_distance &&
+						DistanceSquared(m_Position, bgm_target->GetPosition()) <= leash_distance &&
 						(CheckLosFN(bgm_target) || leash_owner->CheckLosFN(bgm_target)) &&
 						IsAttackAllowed(bgm_target))
 					{
@@ -2715,7 +2716,7 @@ void Bot::AI_Process()
 				else {
 
 					// This will keep bots on target for now..but, future updates will allow for rooting/stunning
-					SetTarget(hate_list.GetEscapingEntOnHateList(leash_owner, BOT_LEASH_DISTANCE));
+					SetTarget(hate_list.GetEscapingEntOnHateList(leash_owner, leash_distance));
 					if (!GetTarget()) {
 						SetTarget(hate_list.GetEntWithMostHateOnList(this));
 					}
@@ -2783,8 +2784,8 @@ void Bot::AI_Process()
 		if (HOLDING ||
 			!tar->IsNPC() ||
 			tar->IsMezzed() ||
-			lo_distance > BOT_LEASH_DISTANCE ||
-			tar_distance > BOT_LEASH_DISTANCE ||
+			lo_distance > leash_distance ||
+			tar_distance > leash_distance ||
 			(!GetAttackingFlag() && !CheckLosFN(tar) && !leash_owner->CheckLosFN(tar)) || // This is suppose to keep bots from attacking things behind walls
 			!IsAttackAllowed(tar) ||
 			(bo_alt_combat &&
@@ -3333,7 +3334,7 @@ void Bot::AI_Process()
 
 					LogAI("Pursuing [{}] while engaged", GetTarget()->GetCleanName());
 					Goal = GetTarget()->GetPosition();
-					if (DistanceSquared(m_Position, Goal) <= BOT_LEASH_DISTANCE) {
+					if (DistanceSquared(m_Position, Goal) <= leash_distance) {
 						RunTo(Goal.x, Goal.y, Goal.z);
 					}
 					else {
@@ -3401,35 +3402,38 @@ void Bot::AI_Process()
 		// 'class Client' doesn't make use of hate_list...
 		if (bot_owner->GetAggroCount() && bot_owner->GetBotOption(Client::booAutoDefend)) {
 
-			if (NOT_HOLDING && NOT_PASSIVE) {
+			if (RuleB(Bots, AllowOwnerAutoDefend)) {
 
-				auto xhaters = bot_owner->GetXTargetAutoMgr();
-				if (xhaters && !xhaters->empty()) {
+				if (NOT_HOLDING && NOT_PASSIVE) {
 
-					for (auto hater_iter : xhaters->get_list()) {
+					auto xhaters = bot_owner->GetXTargetAutoMgr();
+					if (xhaters && !xhaters->empty()) {
 
-						if (!hater_iter.spawn_id) {
-							continue;
-						}
+						for (auto hater_iter : xhaters->get_list()) {
 
-						if (bot_owner->GetBotPulling() && bot_owner->GetTarget() && hater_iter.spawn_id == bot_owner->GetTarget()->GetID()) {
-							continue;
-						}
-
-						auto hater = entity_list.GetMob(hater_iter.spawn_id);
-						if (hater && DistanceSquared(hater->GetPosition(), bot_owner->GetPosition()) <= BOT_LEASH_DISTANCE) {
-
-							// This is roughly equivilent to npc attacking a client pet owner
-							AddToHateList(hater, 1);
-							SetTarget(hater);
-							SetAttackingFlag();
-							if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
-
-								GetPet()->AddToHateList(hater, 1);
-								GetPet()->SetTarget(hater);
+							if (!hater_iter.spawn_id) {
+								continue;
 							}
 
-							return;
+							if (bot_owner->GetBotPulling() && bot_owner->GetTarget() && hater_iter.spawn_id == bot_owner->GetTarget()->GetID()) {
+								continue;
+							}
+
+							auto hater = entity_list.GetMob(hater_iter.spawn_id);
+							if (hater && DistanceSquared(hater->GetPosition(), bot_owner->GetPosition()) <= leash_distance) {
+
+								// This is roughly equivilent to npc attacking a client pet owner
+								AddToHateList(hater, 1);
+								SetTarget(hater);
+								SetAttackingFlag();
+								if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
+
+									GetPet()->AddToHateList(hater, 1);
+									GetPet()->SetTarget(hater);
+								}
+
+								return;
+							}
 						}
 					}
 				}
