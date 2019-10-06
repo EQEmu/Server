@@ -4515,7 +4515,28 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, int32 &damage, EQEmu::skills::
 		return;
 
 	ApplyMeleeDamageBonus(skillInUse, damage, opts);
+
+	Log.Out(
+		Logs::General,
+		Logs::Combat,
+		"[%s] [Mob::CommonOutgoingHitSuccess] Dmg [%i] Post ApplyMeleeDamageBonus",
+		GetCleanName(),
+		damage
+	);
+
 	damage += (damage * defender->GetSkillDmgTaken(skillInUse, opts) / 100) + (GetSkillDmgAmt(skillInUse) + defender->GetFcDamageAmtIncoming(this, 0, true, skillInUse));
+
+	Log.Out(
+		Logs::General,
+		Logs::Combat,
+		"[%s] [Mob::CommonOutgoingHitSuccess] Dmg [%i] SkillDmgTaken [%i] SkillDmgtAmt [%i] FcDmgAmtIncoming [%i] Post DmgCalcs",
+		GetCleanName(),
+		damage,
+		defender->GetSkillDmgTaken(skillInUse, opts),
+		GetSkillDmgAmt(skillInUse),
+		defender->GetFcDamageAmtIncoming(this, 0, true, skillInUse)
+	);
+
 	TryCriticalHit(defender, skillInUse, damage,opts);
 	CheckNumHitsRemaining(NumHit::OutgoingHitSuccess);
 }

@@ -874,8 +874,27 @@ end
 
 -- Source Function: Mob::CommonOutgoingHitSuccess()
 function CommonOutgoingHitSuccess(e)
-    e                 = ApplyMeleeDamageBonus(e);
+    e = ApplyMeleeDamageBonus(e);
+
+    eq.debug(
+            string.format("[%s] [Mob::CommonOutgoingHitSuccess] Dmg [%i] Post ApplyMeleeDamageBonus",
+                    e.self:GetCleanName(),
+                    e.hit.damage_done
+            )
+    );
+
     e.hit.damage_done = e.hit.damage_done + (e.hit.damage_done * e.other:GetSkillDmgTaken(e.hit.skill) / 100) + (e.self:GetSkillDmgAmt(e.hit.skill) + e.other:GetFcDamageAmtIncoming(e.self, 0, true, e.hit.skill));
+
+    eq.debug(
+            string.format("[%s] [Mob::CommonOutgoingHitSuccess] Dmg [%i] SkillDmgTaken [%i] SkillDmgtAmt [%i] FcDmgAmtIncoming [%i] Post DmgCalcs",
+                    e.self:GetCleanName(),
+                    e.hit.damage_done,
+                    e.other:GetSkillDmgTaken(e.hit.skill),
+                    e.self:GetSkillDmgAmt(e.hit.skill),
+                    e.other:GetFcDamageAmtIncoming(e.self, 0, true, e.hit.skill)
+            )
+    );
+
     e                 = TryCriticalHit(e);
     e.self:CheckNumHitsRemaining(5, -1, 65535);
     e.IgnoreDefault = true;
