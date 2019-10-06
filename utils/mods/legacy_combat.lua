@@ -75,9 +75,8 @@ function MeleeMitigation(e)
                     e.hit.base_damage
             )
     );
-
-    -- Shouldn't this be using the client e.self instead of e.other ?
-    e.hit.damage_done = 2 * e.hit.base_damage * GetDamageTable(e.other, e.hit.skill) / 100;
+    
+    e.hit.damage_done = 2 * e.hit.base_damage * GetDamageTable(e.self, e.hit.skill) / 100;
     e.hit             = DoMeleeMitigation(e.self, e.other, e.hit, e.opts);
 
     return e;
