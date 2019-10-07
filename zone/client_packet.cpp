@@ -2848,7 +2848,7 @@ void Client::Handle_OP_ApplyPoison(const EQApplicationPacket *app)
 			
 			if (ChanceRoll < (.75 + poison_skill / 1000)) {
 				ApplyPoisonSuccessResult = 1;
-				AddProcToWeapon(poison->Proc.Effect, false, (GetDEX() / 100) + 103);
+				AddProcToWeapon(poison->Proc.Effect, false, (GetDEX() / 100) + 103, POISON_PROC);
 			}
 		}
 		else {

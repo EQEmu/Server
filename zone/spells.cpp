@@ -5394,13 +5394,31 @@ bool Mob::AddProcToWeapon(uint16 spell_id, bool bPerma, uint16 iChance, uint16 b
 		}
 		LogSpells("Too many perma procs for [{}]", GetName());
 	} else {
+		// If its a poison proc, replace any existing one if present.
+		if (base_spell_id == POISON_PROC) {
+			for (i = 0; i < MAX_PROCS; i++) {
+				// If we already have a poison proc active replace it and return
+				if (SpellProcs[i].base_spellID == POISON_PROC) {
+					SpellProcs[i].spellID = spell_id;
+					SpellProcs[i].chance = iChance;
+					SpellProcs[i].level_override = level_override;
+					Log(Logs::Detail, Logs::Spells, "Replaced poison-granted proc spell %d with chance %d to slot %d", spell_id, iChance, i);
+					return true;
+				}
+			}
+		}
+
+		// If we get here it either wasn't poison (which can only use 1 slot)
+		// or it is poison and no poison procs are currently present.
+		// Find a slot and use it as normal.
+
 		for (i = 0; i < MAX_PROCS; i++) {
 			if (SpellProcs[i].spellID == SPELL_UNKNOWN) {
 				SpellProcs[i].spellID = spell_id;
 				SpellProcs[i].chance = iChance;
 				SpellProcs[i].base_spellID = base_spell_id;;
 				SpellProcs[i].level_override = level_override;
-				LogSpells("Added spell-granted proc spell [{}] with chance [{}] to slot [{}]", spell_id, iChance, i);
+				LogSpells("Added [{}]-granted proc spell [{}] with chance [{}] to slot [{}]", (base_spell_id == POISON_PROC) ? "poison" : "spell", spell_id, iChance, i);
 				return true;
 			}
 		}
