@@ -92,7 +92,7 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 		return false;
 	}
 
-	Log(Logs::General, Logs::Status, "Booting %s (%d:%d)", zonename, iZoneID, iInstanceID);
+	LogInfo("Booting [{}] ([{}]:[{}])", zonename, iZoneID, iInstanceID);
 
 	numclients = 0;
 	zone = new Zone(iZoneID, iInstanceID, zonename);
@@ -117,13 +117,13 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 					log_levels[i]=0; //set to zero on a bogue char
 			}
 			zone->loglevelvar = log_levels[0];
-			Log(Logs::General, Logs::Status, "General logging level: %i", zone->loglevelvar);
+			LogInfo("General logging level: [{}]", zone->loglevelvar);
 			zone->merchantvar = log_levels[1];
-			Log(Logs::General, Logs::Status, "Merchant logging level: %i", zone->merchantvar);
+			LogInfo("Merchant logging level: [{}]", zone->merchantvar);
 			zone->tradevar = log_levels[2];
-			Log(Logs::General, Logs::Status, "Trade logging level: %i", zone->tradevar);
+			LogInfo("Trade logging level: [{}]", zone->tradevar);
 			zone->lootvar = log_levels[3];
-			Log(Logs::General, Logs::Status, "Loot logging level: %i", zone->lootvar);
+			LogInfo("Loot logging level: [{}]", zone->lootvar);
 		}
 		else {
 			zone->loglevelvar = uint8(tmp_i); //continue supporting only command logging (for now)
@@ -144,8 +144,8 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 		delete pack;
 	}
 
-	Log(Logs::General, Logs::Normal, "---- Zone server %s, listening on port:%i ----", zonename, ZoneConfig::get()->ZonePort);
-	Log(Logs::General, Logs::Status, "Zone Bootup: %s (%i: %i)", zonename, iZoneID, iInstanceID);
+	LogInfo("---- Zone server [{}], listening on port:[{}] ----", zonename, ZoneConfig::get()->ZonePort);
+	LogInfo("Zone Bootup: [{}] ([{}]: [{}])", zonename, iZoneID, iInstanceID);
 	parse->Init();
 	UpdateWindowTitle();
 	zone->GetTimeSync();
@@ -176,12 +176,12 @@ bool Zone::LoadZoneObjects()
 			 zoneid, instanceversion);
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-		Log(Logs::General, Logs::Error, "Error Loading Objects from DB: %s",
+		LogError("Error Loading Objects from DB: [{}]",
 			results.ErrorMessage().c_str());
 		return false;
 	}
 
-	Log(Logs::General, Logs::Status, "Loading Objects from DB...");
+	LogInfo("Loading Objects from DB");
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		if (atoi(row[9]) == 0) {
 			// Type == 0 - Static Object
@@ -300,7 +300,7 @@ bool Zone::LoadGroundSpawns() {
 
 	memset(&groundspawn, 0, sizeof(groundspawn));
 	int gsindex=0;
-	Log(Logs::General, Logs::Status, "Loading Ground Spawns from DB...");
+	LogInfo("Loading Ground Spawns from DB");
 	database.LoadGroundSpawns(zoneid, GetInstanceVersion(), &groundspawn);
 	uint32 ix=0;
 	char* name = nullptr;
@@ -419,7 +419,7 @@ uint32 Zone::GetTempMerchantQuantity(uint32 NPCID, uint32 Slot) {
 }
 
 void Zone::LoadTempMerchantData() {
-	Log(Logs::General, Logs::Status, "Loading Temporary Merchant Lists...");
+	LogInfo("Loading Temporary Merchant Lists");
 	std::string query = StringFormat(
 		"SELECT								   "
 		"DISTINCT ml.npcid,					   "
@@ -489,7 +489,7 @@ void Zone::LoadNewMerchantData(uint32 merchantid) {
 }
 
 void Zone::GetMerchantDataForZoneLoad() {
-	Log(Logs::General, Logs::Status, "Loading Merchant Lists...");
+	LogInfo("Loading Merchant Lists");
 	std::string query = StringFormat(												   
 		"SELECT																		   "
 		"DISTINCT ml.merchantid,													   "
@@ -512,7 +512,7 @@ void Zone::GetMerchantDataForZoneLoad() {
 	std::map<uint32, std::list<MerchantList> >::iterator cur;
 	uint32 npcid = 0;
 	if (results.RowCount() == 0) {
-		Log(Logs::General, Logs::None, "No Merchant Data found for %s.", GetShortName());
+		LogDebug("No Merchant Data found for [{}]", GetShortName());
 		return;
 	}
 	for (auto row = results.begin(); row != results.end(); ++row) {
@@ -560,18 +560,18 @@ void Zone::LoadMercTemplates(){
 	merc_templates.clear();
     std::string query = "SELECT `class_id`, `proficiency_id`, `stance_id`, `isdefault` FROM "
                         "`merc_stance_entries` ORDER BY `class_id`, `proficiency_id`, `stance_id`";
-    auto results = database.QueryDatabase(query);
+	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-		Log(Logs::General, Logs::Error, "Error in ZoneDatabase::LoadMercTemplates()");
+		LogError("Error in ZoneDatabase::LoadMercTemplates()");
 	}
 	else {
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			MercStanceInfo tempMercStanceInfo;
 
-			tempMercStanceInfo.ClassID = atoi(row[0]);
+			tempMercStanceInfo.ClassID       = atoi(row[0]);
 			tempMercStanceInfo.ProficiencyID = atoi(row[1]);
-			tempMercStanceInfo.StanceID = atoi(row[2]);
-			tempMercStanceInfo.IsDefault = atoi(row[3]);
+			tempMercStanceInfo.StanceID      = atoi(row[2]);
+			tempMercStanceInfo.IsDefault     = atoi(row[3]);
 
 			merc_stances.push_back(tempMercStanceInfo);
 		}
@@ -583,11 +583,11 @@ void Zone::LoadMercTemplates(){
             "AS CostFormula, MTem.clientversion, MTem.merc_npc_type_id "
             "FROM merc_types MTyp, merc_templates MTem, merc_subtypes MS "
             "WHERE MTem.merc_type_id = MTyp.merc_type_id AND MTem.merc_subtype_id = MS.merc_subtype_id "
-            "ORDER BY MTyp.race_id, MS.class_id, MTyp.proficiency_id;";
-    results = database.QueryDatabase(query);
-    if (!results.Success()) {
-        Log(Logs::General, Logs::Error, "Error in ZoneDatabase::LoadMercTemplates()");
-        return;
+			"ORDER BY MTyp.race_id, MS.class_id, MTyp.proficiency_id;";
+	results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		LogError("Error in ZoneDatabase::LoadMercTemplates()");
+		return;
 	}
 
     for (auto row = results.begin(); row != results.end(); ++row) {
@@ -630,7 +630,7 @@ void Zone::LoadLevelEXPMods(){
     const std::string query = "SELECT level, exp_mod, aa_exp_mod FROM level_exp_mods";
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
-        Log(Logs::General, Logs::Error, "Error in ZoneDatabase::LoadEXPLevelMods()");
+    LogError("Error in ZoneDatabase::LoadEXPLevelMods()");
         return;
     }
 
@@ -652,11 +652,11 @@ void Zone::LoadMercSpells(){
                             "FROM merc_spell_lists msl, merc_spell_list_entries msle "
                             "WHERE msle.merc_spell_list_id = msl.merc_spell_list_id "
                             "ORDER BY msl.class_id, msl.proficiency_id, msle.spell_type, msle.minlevel, msle.slot;";
-    auto results = database.QueryDatabase(query);
-    if (!results.Success()) {
-        Log(Logs::General, Logs::Error, "Error in Zone::LoadMercSpells()");
-        return;
-    }
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		LogError("Error in Zone::LoadMercSpells()");
+		return;
+	}
 
     for (auto row = results.begin(); row != results.end(); ++row) {
         uint32 classid;
@@ -683,42 +683,44 @@ bool Zone::IsLoaded() {
 	return is_zone_loaded;
 }
 
-void Zone::Shutdown(bool quite)
+void Zone::Shutdown(bool quiet)
 {
-	if (!is_zone_loaded)
+	if (!is_zone_loaded) {
 		return;
+	}
 
 	entity_list.StopMobAI();
 
-	std::map<uint32,NPCType *>::iterator itr;
-	while(!zone->npctable.empty()) {
-		itr=zone->npctable.begin();
+	std::map<uint32, NPCType *>::iterator itr;
+	while (!zone->npctable.empty()) {
+		itr = zone->npctable.begin();
 		delete itr->second;
 		zone->npctable.erase(itr);
 	}
 
-	while(!zone->merctable.empty()) {
-		itr=zone->merctable.begin();
+	while (!zone->merctable.empty()) {
+		itr = zone->merctable.begin();
 		delete itr->second;
 		zone->merctable.erase(itr);
 	}
 
 	zone->adventure_entry_list_flavor.clear();
 
-	std::map<uint32,LDoNTrapTemplate*>::iterator itr4;
-	while(!zone->ldon_trap_list.empty())
-	{
+	std::map<uint32, LDoNTrapTemplate *>::iterator itr4;
+	while (!zone->ldon_trap_list.empty()) {
 		itr4 = zone->ldon_trap_list.begin();
 		delete itr4->second;
 		zone->ldon_trap_list.erase(itr4);
 	}
 	zone->ldon_trap_entry_list.clear();
 
-	Log(Logs::General, Logs::Status, "Zone Shutdown: %s (%i)", zone->GetShortName(), zone->GetZoneID());
+	LogInfo("Zone Shutdown: [{}] ([{}])", zone->GetShortName(), zone->GetZoneID());
 	petition_list.ClearPetitions();
 	zone->SetZoneHasCurrentTime(false);
-	if (!quite)
-		Log(Logs::General, Logs::Normal, "Zone shutdown: going to sleep");
+	if (!quiet) {
+		LogInfo("Zone Shutdown: Going to sleep");
+	}
+
 	is_zone_loaded = false;
 
 	zone->ResetAuth();
@@ -728,23 +730,28 @@ void Zone::Shutdown(bool quite)
 	UpdateWindowTitle();
 
 	LogSys.CloseFileLogs();
+
+	if (RuleB(Zone, KillProcessOnDynamicShutdown)) {
+		LogInfo("[KillProcessOnDynamicShutdown] Shutting down");
+		std::exit(EXIT_SUCCESS);
+	}
 }
 
 void Zone::LoadZoneDoors(const char* zone, int16 version)
 {
-	Log(Logs::General, Logs::Status, "Loading doors for %s ...", zone);
+	LogInfo("Loading doors for [{}] ", zone);
 
 	uint32 maxid;
 	int32 count = database.GetDoorsCount(&maxid, zone, version);
 	if(count < 1) {
-		Log(Logs::General, Logs::Status, "... No doors loaded.");
+		LogInfo("No doors loaded");
 		return;
 	}
 
 	auto dlist = new Door[count];
 
 	if(!database.LoadDoors(count, dlist, zone, version)) {
-		Log(Logs::General, Logs::Error, "... Failed to load doors.");
+		LogError("Failed to load doors");
 		delete[] dlist;
 		return;
 	}
@@ -805,14 +812,14 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	database.GetZoneLongName(short_name, &long_name, file_name, &m_SafePoint.x, &m_SafePoint.y, &m_SafePoint.z, &pgraveyard_id, &pMaxClients);
 	if(graveyard_id() > 0)
 	{
-		Log(Logs::General, Logs::None, "Graveyard ID is %i.", graveyard_id());
+		LogDebug("Graveyard ID is [{}]", graveyard_id());
 		bool GraveYardLoaded = database.GetZoneGraveyard(graveyard_id(), &pgraveyard_zoneid, &m_Graveyard.x, &m_Graveyard.y, &m_Graveyard.z, &m_Graveyard.w);
 		
 		if (GraveYardLoaded) {
-			Log(Logs::General, Logs::None, "Loaded a graveyard for zone %s: graveyard zoneid is %u at %s.", short_name, graveyard_zoneid(), to_string(m_Graveyard).c_str());
+			LogDebug("Loaded a graveyard for zone [{}]: graveyard zoneid is [{}] at [{}]", short_name, graveyard_zoneid(), to_string(m_Graveyard).c_str());
 		}
 		else {
-			Log(Logs::General, Logs::Error, "Unable to load the graveyard id %i for zone %s.", graveyard_id(), short_name);
+			LogError("Unable to load the graveyard id [{}] for zone [{}]", graveyard_id(), short_name);
 		}
 	}
 	if (long_name == 0) {
@@ -821,7 +828,7 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	autoshutdown_timer.Start(AUTHENTICATION_TIMEOUT * 1000, false);
 	Weather_Timer = new Timer(60000);
 	Weather_Timer->Start();
-	Log(Logs::General, Logs::None, "The next weather check for zone: %s will be in %i seconds.", short_name, Weather_Timer->GetRemainingTime()/1000);
+	LogDebug("The next weather check for zone: [{}] will be in [{}] seconds", short_name, Weather_Timer->GetRemainingTime()/1000);
 	zone_weather              = 0;
 	weather_intensity         = 0;
 	blocked_spells            = nullptr;
@@ -915,59 +922,59 @@ bool Zone::Init(bool iStaticZone) {
 	zone->watermap = WaterMap::LoadWaterMapfile(zone->map_name);
 	zone->pathing  = IPathfinder::Load(zone->map_name);
 
-	Log(Logs::General, Logs::Status, "Loading spawn conditions...");
+	LogInfo("Loading spawn conditions");
 	if(!spawn_conditions.LoadSpawnConditions(short_name, instanceid)) {
-		Log(Logs::General, Logs::Error, "Loading spawn conditions failed, continuing without them.");
+		LogError("Loading spawn conditions failed, continuing without them");
 	}
 
-	Log(Logs::General, Logs::Status, "Loading static zone points...");
+	LogInfo("Loading static zone points");
 	if (!database.LoadStaticZonePoints(&zone_point_list, short_name, GetInstanceVersion())) {
-		Log(Logs::General, Logs::Error, "Loading static zone points failed.");
+		LogError("Loading static zone points failed");
 		return false;
 	}
 
-	Log(Logs::General, Logs::Status, "Loading spawn groups...");
+	LogInfo("Loading spawn groups");
 	if (!database.LoadSpawnGroups(short_name, GetInstanceVersion(), &spawn_group_list)) {
-		Log(Logs::General, Logs::Error, "Loading spawn groups failed.");
+		LogError("Loading spawn groups failed");
 		return false;
 	}
 
-	Log(Logs::General, Logs::Status, "Loading spawn2 points...");
+	LogInfo("Loading spawn2 points");
 	if (!database.PopulateZoneSpawnList(zoneid, spawn2_list, GetInstanceVersion()))
 	{
-		Log(Logs::General, Logs::Error, "Loading spawn2 points failed.");
+		LogError("Loading spawn2 points failed");
 		return false;
 	}
 
-	Log(Logs::General, Logs::Status, "Loading player corpses...");
+	LogInfo("Loading player corpses");
 	if (!database.LoadCharacterCorpses(zoneid, instanceid)) {
-		Log(Logs::General, Logs::Error, "Loading player corpses failed.");
+		LogError("Loading player corpses failed");
 		return false;
 	}
 
-	Log(Logs::General, Logs::Status, "Loading traps...");
+	LogInfo("Loading traps");
 	if (!database.LoadTraps(short_name, GetInstanceVersion()))
 	{
-		Log(Logs::General, Logs::Error, "Loading traps failed.");
+		LogError("Loading traps failed");
 		return false;
 	}
 
-	Log(Logs::General, Logs::Status, "Loading adventure flavor text...");
+	LogInfo("Loading adventure flavor text");
 	LoadAdventureFlavor();
 
-	Log(Logs::General, Logs::Status, "Loading ground spawns...");
+	LogInfo("Loading ground spawns");
 	if (!LoadGroundSpawns())
 	{
-		Log(Logs::General, Logs::Error, "Loading ground spawns failed. continuing.");
+		LogError("Loading ground spawns failed. continuing");
 	}
 
-	Log(Logs::General, Logs::Status, "Loading World Objects from DB...");
+	LogInfo("Loading World Objects from DB");
 	if (!LoadZoneObjects())
 	{
-		Log(Logs::General, Logs::Error, "Loading World Objects failed. continuing.");
+		LogError("Loading World Objects failed. continuing");
 	}
 
-	Log(Logs::General, Logs::Status, "Flushing old respawn timers...");
+	LogInfo("Flushing old respawn timers");
 	database.QueryDatabase("DELETE FROM `respawn_times` WHERE (`start` + `duration`) < UNIX_TIMESTAMP(NOW())");
 
 	//load up the zone's doors (prints inside)
@@ -1008,10 +1015,10 @@ bool Zone::Init(bool iStaticZone) {
 	petition_list.ClearPetitions();
 	petition_list.ReadDatabase();
 
-	Log(Logs::General, Logs::Status, "Loading timezone data...");
+	LogInfo("Loading timezone data");
 	zone->zone_time.setEQTimeZone(database.GetZoneTZ(zoneid, GetInstanceVersion()));
 
-	Log(Logs::General, Logs::Status, "Init Finished: ZoneID = %d, Time Offset = %d", zoneid, zone->zone_time.getEQTimeZone());
+	LogInfo("Init Finished: ZoneID = [{}], Time Offset = [{}]", zoneid, zone->zone_time.getEQTimeZone());
 
 	LoadTickItems();
 
@@ -1022,32 +1029,32 @@ bool Zone::Init(bool iStaticZone) {
 }
 
 void Zone::ReloadStaticData() {
-	Log(Logs::General, Logs::Status, "Reloading Zone Static Data...");
+	LogInfo("Reloading Zone Static Data");
 
-	Log(Logs::General, Logs::Status, "Reloading static zone points...");
+	LogInfo("Reloading static zone points");
 	zone_point_list.Clear();
 	if (!database.LoadStaticZonePoints(&zone_point_list, GetShortName(), GetInstanceVersion())) {
-		Log(Logs::General, Logs::Error, "Loading static zone points failed.");
+		LogError("Loading static zone points failed");
 	}
 
-	Log(Logs::General, Logs::Status, "Reloading traps...");
+	LogInfo("Reloading traps");
 	entity_list.RemoveAllTraps();
 	if (!database.LoadTraps(GetShortName(), GetInstanceVersion()))
 	{
-		Log(Logs::General, Logs::Error, "Reloading traps failed.");
+		LogError("Reloading traps failed");
 	}
 
-	Log(Logs::General, Logs::Status, "Reloading ground spawns...");
+	LogInfo("Reloading ground spawns");
 	if (!LoadGroundSpawns())
 	{
-		Log(Logs::General, Logs::Error, "Reloading ground spawns failed. continuing.");
+		LogError("Reloading ground spawns failed. continuing");
 	}
 
 	entity_list.RemoveAllObjects();
-	Log(Logs::General, Logs::Status, "Reloading World Objects from DB...");
+	LogInfo("Reloading World Objects from DB");
 	if (!LoadZoneObjects())
 	{
-		Log(Logs::General, Logs::Error, "Reloading World Objects failed. continuing.");
+		LogError("Reloading World Objects failed. continuing");
 	}
 
 	entity_list.RemoveAllDoors();
@@ -1063,7 +1070,7 @@ void Zone::ReloadStaticData() {
 	if (!LoadZoneCFG(zone->GetShortName(), zone->GetInstanceVersion())) // try loading the zone name...
 		LoadZoneCFG(zone->GetFileName(), zone->GetInstanceVersion()); // if that fails, try the file name, then load defaults
 
-	Log(Logs::General, Logs::Status, "Zone Static Data Reloaded.");
+	LogInfo("Zone Static Data Reloaded");
 }
 
 bool Zone::LoadZoneCFG(const char* filename, uint16 instance_id)
@@ -1082,7 +1089,7 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_id)
 			if(!database.GetZoneCFG(database.GetZoneID(filename), 0, &newzone_data, can_bind, can_combat, can_levitate, 
 				can_castoutdoor, is_city, is_hotzone, allow_mercs, max_movement_update_range, zone_type, default_ruleset, &map_name))
 				{
-				Log(Logs::General, Logs::Error, "Error loading the Zone Config.");
+				LogError("Error loading the Zone Config");
 				return false;
 				}
 		}
@@ -1093,7 +1100,7 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_id)
 	strcpy(newzone_data.zone_long_name, GetLongName());
 	strcpy(newzone_data.zone_short_name2, GetShortName());
 
-	Log(Logs::General, Logs::Status, "Successfully loaded Zone Config.");
+	LogInfo("Successfully loaded Zone Config");
 	return true;
 }
 
@@ -1203,7 +1210,7 @@ bool Zone::Process() {
 
 		EQEmu::InventoryProfile::CleanDirty();
 
-		Log(Logs::Detail, Logs::Spawns, "Running Zone::Process -> Spawn2::Process");
+		LogSpawns("Running Zone::Process -> Spawn2::Process");
 
 		iterator.Reset();
 		while (iterator.MoreElements()) {
@@ -1423,11 +1430,11 @@ void Zone::ChangeWeather()
 			weathertimer = weatherTimerRule*1000;
 			Weather_Timer->Start(weathertimer);
 		}
-		Log(Logs::General, Logs::None, "The next weather check for zone: %s will be in %i seconds.", zone->GetShortName(), Weather_Timer->GetRemainingTime()/1000);
+		LogDebug("The next weather check for zone: [{}] will be in [{}] seconds", zone->GetShortName(), Weather_Timer->GetRemainingTime()/1000);
 	}
 	else
 	{
-		Log(Logs::General, Logs::None, "The weather for zone: %s has changed. Old weather was = %i. New weather is = %i The next check will be in %i seconds. Rain chance: %i, Rain duration: %i, Snow chance %i, Snow duration: %i", zone->GetShortName(), tmpOldWeather, zone_weather,Weather_Timer->GetRemainingTime()/1000,rainchance,rainduration,snowchance,snowduration);
+		LogDebug("The weather for zone: [{}] has changed. Old weather was = [{}]. New weather is = [{}] The next check will be in [{}] seconds. Rain chance: [{}], Rain duration: [{}], Snow chance [{}], Snow duration: [{}]", zone->GetShortName(), tmpOldWeather, zone_weather,Weather_Timer->GetRemainingTime()/1000,rainchance,rainduration,snowchance,snowduration);
 		this->weatherSend();
 		if (zone->weather_intensity == 0)
 		{
@@ -1458,16 +1465,12 @@ void Zone::StartShutdownTimer(uint32 set_time) {
 		if (set_time == (RuleI(Zone, AutoShutdownDelay))) {
 			set_time = static_cast<uint32>(database.getZoneShutDownDelay(GetZoneID(), GetInstanceVersion()));
 		}
+
 		autoshutdown_timer.SetTimer(set_time);
-		Log(Logs::General, Logs::Zone_Server, "Zone::StartShutdownTimer set to %u", set_time);
+		LogDebug("Zone::StartShutdownTimer set to {}", set_time);
 	}
 
-	Log(Logs::Detail, Logs::Zone_Server,
-	    "Zone::StartShutdownTimer trigger - set_time: %u remaining_time: %u diff: %i",
-	    set_time,
-	    autoshutdown_timer.GetRemainingTime(),
-	    (set_time - autoshutdown_timer.GetRemainingTime())
-	);
+	LogDebug("Zone::StartShutdownTimer trigger - set_time: [{}] remaining_time: [{}] diff: [{}]", set_time, autoshutdown_timer.GetRemainingTime(), (set_time - autoshutdown_timer.GetRemainingTime()));
 }
 
 bool Zone::Depop(bool StartSpawnTimer) {
@@ -1528,7 +1531,7 @@ void Zone::RepopClose(const glm::vec4& client_position, uint32 repop_distance)
 	quest_manager.ClearAllTimers();
 
 	if (!database.PopulateZoneSpawnListClose(zoneid, spawn2_list, GetInstanceVersion(), client_position, repop_distance))
-		Log(Logs::General, Logs::None, "Error in Zone::Repop: database.PopulateZoneSpawnList failed");
+		LogDebug("Error in Zone::Repop: database.PopulateZoneSpawnList failed");
 
 	initgrids_timer.Start();
 
@@ -1556,7 +1559,7 @@ void Zone::Repop(uint32 delay)
 	quest_manager.ClearAllTimers();
 
 	if (!database.PopulateZoneSpawnList(zoneid, spawn2_list, GetInstanceVersion(), delay))
-		Log(Logs::General, Logs::None, "Error in Zone::Repop: database.PopulateZoneSpawnList failed");
+		LogDebug("Error in Zone::Repop: database.PopulateZoneSpawnList failed");
 
 	initgrids_timer.Start();
 
@@ -1606,7 +1609,7 @@ void Zone::SetTime(uint8 hour, uint8 minute, bool update_world /*= true*/)
 
 		/* By Default we update worlds time, but we can optionally no update world which updates the rest of the zone servers */
 		if (update_world){
-			Log(Logs::General, Logs::Zone_Server, "Setting master time on world server to: %d:%d (%d)\n", hour, minute, (int)eq_time_of_day->start_realtime);
+			LogInfo("Setting master time on world server to: {}:{} ({})\n", hour, minute, (int)eq_time_of_day->start_realtime);
 			worldserver.SendPacket(pack);
 
 			/* Set Time Localization Flag */
@@ -1615,7 +1618,7 @@ void Zone::SetTime(uint8 hour, uint8 minute, bool update_world /*= true*/)
 		/* When we don't update world, we are localizing ourselves, we become disjointed from normal syncs and set time locally */
 		else{
 
-			Log(Logs::General, Logs::Zone_Server, "Setting zone localized time...");
+			LogInfo("Setting zone localized time...");
 
 			zone->zone_time.SetCurrentEQTimeOfDay(eq_time_of_day->start_eqtime, eq_time_of_day->start_realtime);
 			auto outapp = new EQApplicationPacket(OP_TimeOfDay, sizeof(TimeOfDay_Struct));
@@ -1668,8 +1671,8 @@ ZonePoint* Zone::GetClosestZonePoint(const glm::vec3& location, uint32 to, Clien
 	if ((zone->HasWaterMap() && !zone->watermap->InZoneLine(glm::vec3(client->GetPosition()))) || (!zone->HasWaterMap() && closest_dist > 400.0f && closest_dist < max_distance2))
 	{
 		//TODO cheat detection
-		Log(Logs::General, Logs::Status, "WARNING: Closest zone point for zone id %d is %f, you might need to update your zone_points table if you dont arrive at the right spot.", to, closest_dist);
-		Log(Logs::General, Logs::Status, "<Real Zone Points>. %s", to_string(location).c_str());
+		LogInfo("WARNING: Closest zone point for zone id [{}] is [{}], you might need to update your zone_points table if you dont arrive at the right spot", to, closest_dist);
+		LogInfo("<Real Zone Points>. [{}]", to_string(location).c_str());
 	}
 
 	if(closest_dist > max_distance2)
@@ -1919,7 +1922,7 @@ void Zone::LoadZoneBlockedSpells(uint32 zone_id)
 		if (zone_total_blocked_spells > 0) {
 			blocked_spells = new ZoneSpellsBlocked[zone_total_blocked_spells];
 			if (!database.LoadBlockedSpells(zone_total_blocked_spells, blocked_spells, zone_id)) {
-				Log(Logs::General, Logs::Error, "... Failed to load blocked spells.");
+				LogError(" Failed to load blocked spells");
 				ClearBlockedSpells();
 			}
 		}

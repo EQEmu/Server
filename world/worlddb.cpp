@@ -366,14 +366,14 @@ bool WorldDatabase::GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct*
 		return false;
 	}
 
-	Log(Logs::General, Logs::Status, "SoF Start zone query: %s\n", query.c_str());
+	LogInfo("SoF Start zone query: [{}]\n", query.c_str());
 
     if (results.RowCount() == 0) {
         printf("No start_zones entry in database, using defaults\n");
 		isTitanium ? SetTitaniumDefaultStartZone(in_pp, in_cc) : SetSoFDefaultStartZone(in_pp, in_cc);
     }
     else {
-		Log(Logs::General, Logs::Status, "Found starting location in start_zones");
+		LogInfo("Found starting location in start_zones");
 		auto row = results.begin();
 		in_pp->x = atof(row[0]);
 		in_pp->y = atof(row[1]);
@@ -512,7 +512,7 @@ void WorldDatabase::GetLauncherList(std::vector<std::string> &rl) {
     const std::string query = "SELECT name FROM launcher";
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        Log(Logs::General, Logs::Error, "WorldDatabase::GetLauncherList: %s", results.ErrorMessage().c_str());
+        LogError("WorldDatabase::GetLauncherList: {}", results.ErrorMessage().c_str());
         return;
     }
 
@@ -526,7 +526,7 @@ bool WorldDatabase::GetCharacterLevel(const char *name, int &level)
 	std::string query = StringFormat("SELECT level FROM character_data WHERE name = '%s'", name);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        Log(Logs::General, Logs::Error, "WorldDatabase::GetCharacterLevel: %s", results.ErrorMessage().c_str());
+        LogError("WorldDatabase::GetCharacterLevel: {}", results.ErrorMessage().c_str());
         return false;
 	}
 

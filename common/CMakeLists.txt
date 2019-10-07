@@ -3,6 +3,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 SET(common_sources
 	base_packet.cpp
 	classes.cpp
+	cli/eqemu_command_handler.cpp
 	compression.cpp
 	condition.cpp
 	crash.cpp
@@ -35,6 +36,7 @@ SET(common_sources
 	inventory_profile.cpp
 	inventory_slot.cpp
 	ipc_mutex.cpp
+	ip_util.cpp
 	item_data.cpp
 	item_instance.cpp
 	json_config.cpp
@@ -71,7 +73,6 @@ SET(common_sources
 	textures.cpp
 	timer.cpp
 	unix.cpp
-	xml_parser.cpp
 	platform.cpp
 	json/jsoncpp.cpp
 	net/console_server.cpp
@@ -102,13 +103,8 @@ SET(common_sources
 	patches/uf.cpp
 	patches/uf_limits.cpp
 	StackWalker/StackWalker.cpp
-	tinyxml/tinystr.cpp
-	tinyxml/tinyxml.cpp
-	tinyxml/tinyxmlerror.cpp
-	tinyxml/tinyxmlparser.cpp
 	util/directory.cpp
-	util/uuid.cpp
-)
+	util/uuid.cpp)
 
 SET(common_headers
 	any.h
@@ -121,6 +117,9 @@ SET(common_headers
 	crash.h
 	crc16.h
 	crc32.h
+	cli/argh.h
+	cli/eqemu_command_handler.h
+	cli/terminal_color.hpp
 	data_verification.h
 	database.h
 	dbcore.h
@@ -138,7 +137,7 @@ SET(common_headers
 	eqemu_config.h
 	eqemu_config_elements.h
 	eqemu_logsys.h
-	eqemu_logsys_fmt.h
+	eqemu_logsys_log_aliases.h
 	eq_limits.h
 	eq_packet.h
 	eq_stream_ident.h
@@ -156,9 +155,11 @@ SET(common_headers
 	global_define.h
 	guild_base.h
 	guilds.h
+	http/httplib.h
 	inventory_profile.h
 	inventory_slot.h
 	ipc_mutex.h
+	ip_util.h
 	item_data.h
 	item_fieldlist.h
 	item_instance.h
@@ -209,7 +210,6 @@ SET(common_headers
 	unix.h
 	useperl.h
 	version.h
-	xml_parser.h
 	zone_numbers.h
 	event/event_loop.h
 	event/task.h
@@ -263,12 +263,9 @@ SET(common_headers
 	patches/uf_ops.h
 	patches/uf_structs.h
 	StackWalker/StackWalker.h
-	tinyxml/tinystr.h
-	tinyxml/tinyxml.h
 	util/memory_stream.h
 	util/directory.h
-	util/uuid.h
-)
+	util/uuid.h)
 
 SOURCE_GROUP(Event FILES
 	event/event_loop.h
@@ -368,15 +365,6 @@ SOURCE_GROUP(StackWalker FILES
 	StackWalker/StackWalker.cpp
 )
 
-SOURCE_GROUP(TinyXML FILES
-	tinyxml/tinystr.h
-	tinyxml/tinyxml.h
-	tinyxml/tinystr.cpp
-	tinyxml/tinyxml.cpp
-	tinyxml/tinyxmlerror.cpp
-	tinyxml/tinyxmlparser.cpp
-)
-
 SOURCE_GROUP(Util FILES
 	util/memory_stream.h
 	util/directory.cpp
@@ -385,7 +373,7 @@ SOURCE_GROUP(Util FILES
 	util/uuid.h
 )
 
-INCLUDE_DIRECTORIES(Patches SocketLib StackWalker TinyXML)
+INCLUDE_DIRECTORIES(Patches SocketLib StackWalker)
 
 ADD_LIBRARY(common ${common_sources} ${common_headers})
 

@@ -349,7 +349,7 @@ void Client::EnableTitle(int titleSet) {
                                     CharacterID(), titleSet);
     auto results = database.QueryDatabase(query);
 	if(!results.Success())
-		Log(Logs::General, Logs::Error, "Error in EnableTitle query for titleset %i and charid %i", titleSet, CharacterID());
+		LogError("Error in EnableTitle query for titleset [{}] and charid [{}]", titleSet, CharacterID());
 
 }
 

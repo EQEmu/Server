@@ -262,6 +262,18 @@ void find_replace(std::string &string_subject, const std::string &search_string,
 
 }
 
+void ParseAccountString(const std::string &s, std::string &account, std::string &loginserver)
+{
+	auto split = SplitString(s, ':');
+	if (split.size() == 2) {
+		loginserver = split[0];
+		account = split[1];
+	}
+	else if(split.size() == 1) {
+		account = split[0];
+	}
+}
+
 //Const char based
 
 // normal strncpy doesnt put a null term on copied strings, this one does

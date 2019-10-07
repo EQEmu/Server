@@ -153,7 +153,7 @@ elif [[ "$OS" == "red_hat" ]]; then
 	yum -y install \
                 open-vm-tools \
                 vim \
-                cmake \
+                cmake3 \
                 boost-* \
                 zlib-devel \
 		mariadb \
@@ -178,6 +178,12 @@ elif [[ "$OS" == "red_hat" ]]; then
 		"Development Tools" \
 		"Basic Web Server" \
 		"Compatibility Libraries" 
+	# Deal with the cmake 3 prerequisite on RHEL/CentOS 6/7 Note: Might break with RHEL/CentOS 8 
+	alternatives --install /usr/local/bin/cmake cmake /usr/bin/cmake3 20 \
+	--slave /usr/local/bin/ctest ctest /usr/bin/ctest3 \
+	--slave /usr/local/bin/cpack cpack /usr/bin/cpack3 \
+	--slave /usr/local/bin/ccmake ccmake /usr/bin/ccmake3 \
+	--family cmake
 
 elif [[ "$OS" == "fedora_core" ]]; then
 	# Do Fedora stuff

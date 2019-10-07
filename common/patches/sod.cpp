@@ -79,7 +79,7 @@ namespace SoD
 			//TODO: figure out how to support shared memory with multiple patches...
 			opcodes = new RegularOpcodeManager();
 			if (!opcodes->LoadOpcodes(opfile.c_str())) {
-				Log(Logs::General, Logs::Netcode, "[OPCODES] Error loading opcodes file %s. Not registering patch %s.", opfile.c_str(), name);
+				LogNetcode("[OPCODES] Error loading opcodes file [{}]. Not registering patch [{}]", opfile.c_str(), name);
 				return;
 			}
 		}
@@ -105,7 +105,7 @@ namespace SoD
 
 
 
-		Log(Logs::General, Logs::Netcode, "[IDENTIFY] Registered patch %s", name);
+		LogNetcode("[StreamIdentify] Registered patch [{}]", name);
 	}
 
 	void Reload()
@@ -122,10 +122,10 @@ namespace SoD
 			opfile += name;
 			opfile += ".conf";
 			if (!opcodes->ReloadOpcodes(opfile.c_str())) {
-				Log(Logs::General, Logs::Netcode, "[OPCODES] Error reloading opcodes file %s for patch %s.", opfile.c_str(), name);
+				LogNetcode("[OPCODES] Error reloading opcodes file [{}] for patch [{}]", opfile.c_str(), name);
 				return;
 			}
-			Log(Logs::General, Logs::Netcode, "[OPCODES] Reloaded opcodes for patch %s", name);
+			LogNetcode("[OPCODES] Reloaded opcodes for patch [{}]", name);
 		}
 	}
 
@@ -277,7 +277,7 @@ namespace SoD
 
 		if (EntryCount == 0 || (in->size % sizeof(BazaarSearchResults_Struct)) != 0)
 		{
-			Log(Logs::General, Logs::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(BazaarSearchResults_Struct));
+			LogNetcode("[STRUCTS] Wrong size on outbound [{}]: Got [{}], expected multiple of [{}]", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(BazaarSearchResults_Struct));
 			delete in;
 			return;
 		}
@@ -400,7 +400,7 @@ namespace SoD
 		for (int index = 0; index < item_count; ++index, ++eq) {
 			SerializeItem(ob, (const EQEmu::ItemInstance*)eq->inst, eq->slot_id, 0);
 			if (ob.tellp() == last_pos)
-				Log(Logs::General, Logs::Netcode, "SoD::ENCODE(OP_CharInventory) Serialization failed on item slot %d during OP_CharInventory.  Item skipped.", eq->slot_id);
+				LogNetcode("SoD::ENCODE(OP_CharInventory) Serialization failed on item slot [{}] during OP_CharInventory.  Item skipped", eq->slot_id);
 
 			last_pos = ob.tellp();
 		}
@@ -1069,7 +1069,7 @@ namespace SoD
 
 		SerializeItem(ob, (const EQEmu::ItemInstance*)int_struct->inst, int_struct->slot_id, 0);
 		if (ob.tellp() == last_pos) {
-			Log(Logs::General, Logs::Netcode, "SoD::ENCODE(OP_ItemPacket) Serialization failed on item slot %d.", int_struct->slot_id);
+			LogNetcode("SoD::ENCODE(OP_ItemPacket) Serialization failed on item slot [{}]", int_struct->slot_id);
 			delete in;
 			return;
 		}
@@ -2198,7 +2198,7 @@ namespace SoD
 
 		if (EntryCount == 0 || ((in->size % sizeof(Track_Struct))) != 0)
 		{
-			Log(Logs::General, Logs::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(Track_Struct));
+			LogNetcode("[STRUCTS] Wrong size on outbound [{}]: Got [{}], expected multiple of [{}]", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(Track_Struct));
 			delete in;
 			return;
 		}
@@ -2435,7 +2435,7 @@ namespace SoD
 		//determine and verify length
 		int entrycount = in->size / sizeof(Spawn_Struct);
 		if (entrycount == 0 || (in->size % sizeof(Spawn_Struct)) != 0) {
-			Log(Logs::General, Logs::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(Spawn_Struct));
+			LogNetcode("[STRUCTS] Wrong size on outbound [{}]: Got [{}], expected multiple of [{}]", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(Spawn_Struct));
 			delete in;
 			return;
 		}
@@ -3848,7 +3848,7 @@ namespace SoD
 			SoDSlot = serverSlot;
 		}
 
-		Log(Logs::Detail, Logs::Netcode, "Convert Server Slot %i to SoD Slot %i", serverSlot, SoDSlot);
+		LogNetcode("Convert Server Slot [{}] to SoD Slot [{}]", serverSlot, SoDSlot);
 
 		return SoDSlot;
 	}
@@ -3865,7 +3865,7 @@ namespace SoD
 			SoDSlot = server_corpse_slot - 2;
 		}
 
-		Log(Logs::Detail, Logs::Netcode, "Convert Server Corpse Slot %i to SoD Corpse Slot %i", server_corpse_slot, SoDSlot);
+		LogNetcode("Convert Server Corpse Slot [{}] to SoD Corpse Slot [{}]", server_corpse_slot, SoDSlot);
 
 		return SoDSlot;
 	}
@@ -3930,7 +3930,7 @@ namespace SoD
 			server_slot = sod_slot;
 		}
 
-		Log(Logs::Detail, Logs::Netcode, "Convert SoD Slot %i to Server Slot %i", sod_slot, server_slot);
+		LogNetcode("Convert SoD Slot [{}] to Server Slot [{}]", sod_slot, server_slot);
 
 		return server_slot;
 	}
@@ -3947,7 +3947,7 @@ namespace SoD
 			server_slot = sod_corpse_slot + 2;
 		}
 
-		Log(Logs::Detail, Logs::Netcode, "Convert SoD Corpse Slot %i to Server Corpse Slot %i", sod_corpse_slot, server_slot);
+		LogNetcode("Convert SoD Corpse Slot [{}] to Server Corpse Slot [{}]", sod_corpse_slot, server_slot);
 
 		return server_slot;
 	}

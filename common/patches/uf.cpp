@@ -79,7 +79,7 @@ namespace UF
 			//TODO: figure out how to support shared memory with multiple patches...
 			opcodes = new RegularOpcodeManager();
 			if (!opcodes->LoadOpcodes(opfile.c_str())) {
-				Log(Logs::General, Logs::Netcode, "[OPCODES] Error loading opcodes file %s. Not registering patch %s.", opfile.c_str(), name);
+				LogNetcode("[OPCODES] Error loading opcodes file [{}]. Not registering patch [{}]", opfile.c_str(), name);
 				return;
 			}
 		}
@@ -105,7 +105,7 @@ namespace UF
 
 
 
-		Log(Logs::General, Logs::Netcode, "[IDENTIFY] Registered patch %s", name);
+		LogNetcode("[StreamIdentify] Registered patch [{}]", name);
 	}
 
 	void Reload()
@@ -122,10 +122,10 @@ namespace UF
 			opfile += name;
 			opfile += ".conf";
 			if (!opcodes->ReloadOpcodes(opfile.c_str())) {
-				Log(Logs::General, Logs::Netcode, "[OPCODES] Error reloading opcodes file %s for patch %s.", opfile.c_str(), name);
+				LogNetcode("[OPCODES] Error reloading opcodes file [{}] for patch [{}]", opfile.c_str(), name);
 				return;
 			}
-			Log(Logs::General, Logs::Netcode, "[OPCODES] Reloaded opcodes for patch %s", name);
+			LogNetcode("[OPCODES] Reloaded opcodes for patch [{}]", name);
 		}
 	}
 
@@ -330,7 +330,7 @@ namespace UF
 
 		if (EntryCount == 0 || (in->size % sizeof(BazaarSearchResults_Struct)) != 0)
 		{
-			Log(Logs::General, Logs::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(BazaarSearchResults_Struct));
+			LogNetcode("[STRUCTS] Wrong size on outbound [{}]: Got [{}], expected multiple of [{}]", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(BazaarSearchResults_Struct));
 			delete in;
 			return;
 		}
@@ -520,7 +520,7 @@ namespace UF
 		for (int index = 0; index < item_count; ++index, ++eq) {
 			SerializeItem(ob, (const EQEmu::ItemInstance*)eq->inst, eq->slot_id, 0);
 			if (ob.tellp() == last_pos)
-				Log(Logs::General, Logs::Netcode, "UF::ENCODE(OP_CharInventory) Serialization failed on item slot %d during OP_CharInventory.  Item skipped.", eq->slot_id);
+				LogNetcode("UF::ENCODE(OP_CharInventory) Serialization failed on item slot [{}] during OP_CharInventory.  Item skipped", eq->slot_id);
 
 			last_pos = ob.tellp();
 		}
@@ -1277,7 +1277,7 @@ namespace UF
 
 		SerializeItem(ob, (const EQEmu::ItemInstance*)int_struct->inst, int_struct->slot_id, 0);
 		if (ob.tellp() == last_pos) {
-			Log(Logs::General, Logs::Netcode, "UF::ENCODE(OP_ItemPacket) Serialization failed on item slot %d.", int_struct->slot_id);
+			LogNetcode("UF::ENCODE(OP_ItemPacket) Serialization failed on item slot [{}]", int_struct->slot_id);
 			delete in;
 			return;
 		}
@@ -2472,7 +2472,7 @@ namespace UF
 
 		if (EntryCount == 0 || ((in->size % sizeof(Track_Struct))) != 0)
 		{
-			Log(Logs::General, Logs::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(Track_Struct));
+			LogNetcode("[STRUCTS] Wrong size on outbound [{}]: Got [{}], expected multiple of [{}]", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(Track_Struct));
 			delete in;
 			return;
 		}
@@ -2704,7 +2704,7 @@ namespace UF
 		//determine and verify length
 		int entrycount = in->size / sizeof(Spawn_Struct);
 		if (entrycount == 0 || (in->size % sizeof(Spawn_Struct)) != 0) {
-			Log(Logs::General, Logs::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(Spawn_Struct));
+			LogNetcode("[STRUCTS] Wrong size on outbound [{}]: Got [{}], expected multiple of [{}]", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(Spawn_Struct));
 			delete in;
 			return;
 		}
@@ -4206,7 +4206,7 @@ namespace UF
 			UFSlot = serverSlot;
 		}
 
-		Log(Logs::Detail, Logs::Netcode, "Convert Server Slot %i to UF Slot %i", serverSlot, UFSlot);
+		LogNetcode("Convert Server Slot [{}] to UF Slot [{}]", serverSlot, UFSlot);
 
 		return UFSlot;
 	}
@@ -4223,7 +4223,7 @@ namespace UF
 			UFSlot = serverCorpseSlot - 2;
 		}
 
-		Log(Logs::Detail, Logs::Netcode, "Convert Server Corpse Slot %i to UF Corpse Slot %i", serverCorpseSlot, UFSlot);
+		LogNetcode("Convert Server Corpse Slot [{}] to UF Corpse Slot [{}]", serverCorpseSlot, UFSlot);
 
 		return UFSlot;
 	}
@@ -4288,7 +4288,7 @@ namespace UF
 			ServerSlot = ufSlot;
 		}
 
-		Log(Logs::Detail, Logs::Netcode, "Convert UF Slot %i to Server Slot %i", ufSlot, ServerSlot);
+		LogNetcode("Convert UF Slot [{}] to Server Slot [{}]", ufSlot, ServerSlot);
 
 		return ServerSlot;
 	}
@@ -4305,7 +4305,7 @@ namespace UF
 			ServerSlot = ufCorpseSlot + 2;
 		}
 
-		Log(Logs::Detail, Logs::Netcode, "Convert UF Corpse Slot %i to Server Corpse Slot %i", ufCorpseSlot, ServerSlot);
+		LogNetcode("Convert UF Corpse Slot [{}] to Server Corpse Slot [{}]", ufCorpseSlot, ServerSlot);
 
 		return ServerSlot;
 	}

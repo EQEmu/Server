@@ -251,14 +251,14 @@ void PathfinderWaypoint::Load(const std::string &filename) {
 	
 		if (strncmp(Magic, "EQEMUPATH", 9))
 		{
-			Log(Logs::General, Logs::Error, "Bad Magic String in .path file.");
+			LogError("Bad Magic String in .path file");
 			fclose(f);
 			return;
 		}
 	
 		fread(&Head, sizeof(Head), 1, f);
 	
-		Log(Logs::General, Logs::Status, "Path File Header: Version %ld, PathNodes %ld",
+		LogInfo("Path File Header: Version [{}], PathNodes [{}]",
 			(long)Head.version, (long)Head.PathNodeCount);
 	
 		if (Head.version == 2)
@@ -271,7 +271,7 @@ void PathfinderWaypoint::Load(const std::string &filename) {
 			return;
 		}
 		else {
-			Log(Logs::General, Logs::Error, "Unsupported path file version.");
+			LogError("Unsupported path file version");
 			fclose(f);
 			return;
 		}
@@ -306,7 +306,7 @@ void PathfinderWaypoint::LoadV2(FILE *f, const PathFileHeader &header)
 			auto &node = m_impl->Nodes[i];
 			if (PathNodes[i].Neighbours[j].id > MaxNodeID)
 			{
-				Log(Logs::General, Logs::Error, "Path Node %i, Neighbour %i (%i) out of range.", i, j, PathNodes[i].Neighbours[j].id);
+				LogError("Path Node [{}], Neighbour [{}] ([{}]) out of range", i, j, PathNodes[i].Neighbours[j].id);
 				m_impl->PathFileValid = false;
 			}
 	

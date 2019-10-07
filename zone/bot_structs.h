@@ -32,6 +32,8 @@ struct BotsAvailableList {
 	uint8 Level;
 	uint16 Race;
 	uint8 Gender;
+	char Owner[64];
+	uint32 Owner_ID;
 };
 
 struct BotGroup {

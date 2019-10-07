@@ -16,15 +16,21 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
-*/
+ */
 
-#pragma once
+#ifndef EQEMU_IP_UTIL_H
+#define EQEMU_IP_UTIL_H
 
-#include <fmt/format.h>
+#include "types.h"
+#include "iostream"
 
-template <typename... Args>
-void OutF(EQEmuLogSys &ls, Logs::DebugLevel debug_level, uint16 log_category, const char *fmt, const Args&... args)
-{
-	std::string log_str = fmt::format(fmt, args...);
-	ls.Out(debug_level, log_category, log_str);
-}
+class IpUtil {
+public:
+
+	static uint32_t IPToUInt(const std::string &ip);
+	static bool IsIpInRange(const std::string &ip, const std::string &network, const std::string &mask);
+	static bool IsIpInPrivateRfc1918(const std::string &ip);
+
+};
+
+#endif //EQEMU_IP_UTIL_H

@@ -891,7 +891,7 @@ int32 Merc::CalcMaxMana()
 		break;
 			  }
 	default: {
-		Log(Logs::General, Logs::None, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
+		LogDebug("Invalid Class [{}] in CalcMaxMana", GetCasterClass());
 		max_mana = 0;
 		break;
 			 }
@@ -912,7 +912,7 @@ int32 Merc::CalcMaxMana()
 	}
 
 #if EQDEBUG >= 11
-	Log(Logs::General, Logs::None, "Merc::CalcMaxMana() called for %s - returning %d", GetName(), max_mana);
+	LogDebug("Merc::CalcMaxMana() called for [{}] - returning [{}]", GetName(), max_mana);
 #endif
 	return max_mana;
 }
@@ -1688,7 +1688,7 @@ void Merc::AI_Process() {
 			if (AI_movement_timer->Check())
 			{
 				if(!IsRooted()) {
-					Log(Logs::Detail, Logs::AI, "Pursuing %s while engaged.", GetTarget()->GetCleanName());
+					LogAI("Pursuing [{}] while engaged", GetTarget()->GetCleanName());
 					RunTo(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ());
 					return;
 				}
@@ -1807,7 +1807,7 @@ bool Merc::AI_EngagedCastCheck() {
 	{
 		AIautocastspell_timer->Disable();       //prevent the timer from going off AGAIN while we are casting.
 
-		Log(Logs::Detail, Logs::AI, "Merc Engaged autocast check triggered");
+		LogAI("Merc Engaged autocast check triggered");
 
 		int8 mercClass = GetClass();
 
@@ -1862,7 +1862,7 @@ bool Merc::AI_IdleCastCheck() {
 
 	if (AIautocastspell_timer->Check(false)) {
 #if MercAI_DEBUG_Spells >= 25
-		Log(Logs::Detail, Logs::AI, "Merc Non-Engaged autocast check triggered: %s", this->GetCleanName());
+		LogAI("Merc Non-Engaged autocast check triggered: [{}]", this->GetCleanName());
 #endif
 		AIautocastspell_timer->Disable();       //prevent the timer from going off AGAIN while we are casting.
 
@@ -1914,7 +1914,7 @@ bool EntityList::Merc_AICheckCloseBeneficialSpells(Merc* caster, uint8 iChance, 
 		// according to Rogean, Live NPCs will just cast through walls/floors, no problem..
 		//
 		// This check was put in to address an idle-mob CPU issue
-		Log(Logs::General, Logs::Error, "Error: detrimental spells requested from AICheckCloseBeneficialSpells!!");
+		LogError("Error: detrimental spells requested from AICheckCloseBeneficialSpells!!");
 		return(false);
 	}
 
@@ -4494,7 +4494,7 @@ bool Merc::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, boo
 {
 	if (!other) {
 		SetTarget(nullptr);
-		Log(Logs::General, Logs::Error, "A null Mob object was passed to Merc::Attack() for evaluation!");
+		LogError("A null Mob object was passed to Merc::Attack() for evaluation!");
 		return false;
 	}
 
@@ -6181,7 +6181,7 @@ void NPC::LoadMercTypes() {
 	auto results = database.QueryDatabase(query);
 	if (!results.Success())
 	{
-		Log(Logs::General, Logs::Error, "Error in NPC::LoadMercTypes()");
+		LogError("Error in NPC::LoadMercTypes()");
 		return;
 	}
 
@@ -6214,7 +6214,7 @@ void NPC::LoadMercs() {
 
 	if (!results.Success())
 	{
-		Log(Logs::General, Logs::Error, "Error in NPC::LoadMercTypes()");
+		LogError("Error in NPC::LoadMercTypes()");
 		return;
 	}
 

@@ -127,7 +127,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes, bool bInnates
 				) {
 
 #if MobAI_DEBUG_Spells >= 21
-				Log(Logs::Detail, Logs::AI, "Mob::AICastSpell: Casting: spellid=%u, tar=%s, dist2[%f]<=%f, mana_cost[%i]<=%i, cancast[%u]<=%u, type=%u",
+				LogAI("Mob::AICastSpell: Casting: spellid=[{}], tar=[{}], dist2[[{}]]<=[{}], mana_cost[[{}]]<=[{}], cancast[[{}]]<=[{}], type=[{}]",
 					AIspells[i].spellid, tar->GetName(), dist2, (spells[AIspells[i].spellid].range * spells[AIspells[i].spellid].range), mana_cost, GetMana(), AIspells[i].time_cancast, Timer::GetCurrentTime(), AIspells[i].type);
 #endif
 
@@ -360,7 +360,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes, bool bInnates
 			}
 #if MobAI_DEBUG_Spells >= 21
 			else {
-				Log(Logs::Detail, Logs::AI, "Mob::AICastSpell: NotCasting: spellid=%u, tar=%s, dist2[%f]<=%f, mana_cost[%i]<=%i, cancast[%u]<=%u, type=%u",
+				LogAI("Mob::AICastSpell: NotCasting: spellid=[{}], tar=[{}], dist2[[{}]]<=[{}], mana_cost[[{}]]<=[{}], cancast[[{}]]<=[{}], type=[{}]",
 					AIspells[i].spellid, tar->GetName(), dist2, (spells[AIspells[i].spellid].range * spells[AIspells[i].spellid].range), mana_cost, GetMana(), AIspells[i].time_cancast, Timer::GetCurrentTime(), AIspells[i].type);
 			}
 #endif
@@ -371,7 +371,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes, bool bInnates
 
 bool NPC::AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore) {
 #if MobAI_DEBUG_Spells >= 1
-	Log(Logs::Detail, Logs::AI, "Mob::AIDoSpellCast: spellid = %u, tar = %s, mana = %i, Name: '%s'", AIspells[i].spellid, tar->GetName(), mana_cost, spells[AIspells[i].spellid].name);
+	LogAI("Mob::AIDoSpellCast: spellid = [{}], tar = [{}], mana = [{}], Name: [{}]", AIspells[i].spellid, tar->GetName(), mana_cost, spells[AIspells[i].spellid].name);
 #endif
 	casting_spell_AIindex = i;
 
@@ -385,7 +385,7 @@ bool EntityList::AICheckCloseBeneficialSpells(NPC* caster, uint8 iChance, float 
 		// according to Rogean, Live NPCs will just cast through walls/floors, no problem..
 		//
 		// This check was put in to address an idle-mob CPU issue
-		Log(Logs::General, Logs::Error, "Error: detrimental spells requested from AICheckCloseBeneficialSpells!!");
+		LogError("Error: detrimental spells requested from AICheckCloseBeneficialSpells!!");
 		return(false);
 	}
 
@@ -1356,7 +1356,7 @@ void Mob::AI_Process() {
 				}
 				else if (AI_movement_timer->Check() && target) {
 					if (!IsRooted()) {
-						Log(Logs::Detail, Logs::AI, "Pursuing %s while engaged.", target->GetName());
+						LogAI("Pursuing [{}] while engaged", target->GetName());
 						RunTo(target->GetX(), target->GetY(), target->GetZ());
 
 					}
@@ -1721,9 +1721,7 @@ void NPC::AI_DoMovement() {
 			else if (!(AI_walking_timer->Enabled())) {    // currently moving
 				bool doMove = true;
 				if(IsPositionEqual(glm::vec2(m_CurrentWayPoint.x, m_CurrentWayPoint.y), glm::vec2(GetX(), GetY()))) {
-					Log(Logs::Detail,
-						Logs::AI,
-						"We have reached waypoint %d (%.3f,%.3f,%.3f) on grid %d",
+					LogAI("We have reached waypoint [{}] ({},{},{}) on grid [{}]",
 						cur_wp,
 						GetX(),
 						GetY(),
@@ -1775,7 +1773,7 @@ void NPC::AI_DoMovement() {
 		else if (gridno < 0) {    // this mob is under quest control
 			if (pause_timer_complete == true) { // time to pause has ended
 				SetGrid(0 - GetGrid()); // revert to AI control
-				Log(Logs::Detail, Logs::Pathing, "Quest pathing is finished. Resuming on grid %d", GetGrid());
+				LogPathing("Quest pathing is finished. Resuming on grid [{}]", GetGrid());
 		
 				SetAppearance(eaStanding, false);
 		
@@ -1790,12 +1788,7 @@ void NPC::AI_DoMovement() {
 		if (at_gp) {
 
 			if (moved) {
-				Log(Logs::Detail,
-					Logs::AI,
-					"Reached guard point (%.3f,%.3f,%.3f)",
-					m_GuardPoint.x,
-					m_GuardPoint.y,
-					m_GuardPoint.z);
+				LogAI("Reached guard point ({},{},{})", m_GuardPoint.x, m_GuardPoint.y, m_GuardPoint.z);
 
 				ClearFeignMemory();
 				moved = false;
@@ -1843,10 +1836,10 @@ void NPC::AI_SetupNextWaypoint() {
 	}
 	else {
 		pause_timer_complete = false;
-		Log(Logs::Detail, Logs::Pathing, "We are departing waypoint %d.", cur_wp);
+		LogPathing("We are departing waypoint [{}]", cur_wp);
 		//if we were under quest control (with no grid), we are done now..
 		if (cur_wp == EQEmu::WaypointStatus::QuestControlNoGrid) {
-			Log(Logs::Detail, Logs::Pathing, "Non-grid quest mob has reached its quest ordered waypoint. Leaving pathing mode.");
+			LogPathing("Non-grid quest mob has reached its quest ordered waypoint. Leaving pathing mode");
 			roamer = false;
 			cur_wp = 0;
 		}
@@ -1983,7 +1976,7 @@ bool NPC::AI_EngagedCastCheck() {
 	if (AIautocastspell_timer->Check(false)) {
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 
-		Log(Logs::Detail, Logs::AI, "Engaged autocast check triggered. Trying to cast healing spells then maybe offensive spells.");
+		LogAI("Engaged autocast check triggered. Trying to cast healing spells then maybe offensive spells");
 
 		// first try innate (spam) spells
 		if(!AICastSpell(GetTarget(), 0, SpellType_Nuke | SpellType_Lifetap | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Slow | SpellType_Debuff | SpellType_Charm | SpellType_Root, true)) {
@@ -2012,7 +2005,7 @@ bool NPC::AI_PursueCastCheck() {
 	if (AIautocastspell_timer->Check(false)) {
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 
-		Log(Logs::Detail, Logs::AI, "Engaged (pursuing) autocast check triggered. Trying to cast offensive spells.");
+		LogAI("Engaged (pursuing) autocast check triggered. Trying to cast offensive spells");
 		// checking innate (spam) spells first
 		if(!AICastSpell(GetTarget(), AISpellVar.pursue_detrimental_chance, SpellType_Root | SpellType_Nuke | SpellType_Lifetap | SpellType_Snare | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Slow | SpellType_Debuff, true)) {
 			if(!AICastSpell(GetTarget(), AISpellVar.pursue_detrimental_chance, SpellType_Root | SpellType_Nuke | SpellType_Lifetap | SpellType_Snare | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Slow | SpellType_Debuff)) {
@@ -2034,7 +2027,7 @@ bool NPC::AI_IdleCastCheck() {
 				//last duration it was set to... try to put up a more reasonable timer...
 				AIautocastspell_timer->Start(RandomTimer(AISpellVar.idle_no_sp_recast_min, AISpellVar.idle_no_sp_recast_max), false);
 
-				Log(Logs::Moderate, Logs::Spells, "Triggering AI_IdleCastCheck :: Mob %s - Min : %u Max : %u", this->GetCleanName(), AISpellVar.idle_no_sp_recast_min, AISpellVar.idle_no_sp_recast_max);
+				LogSpells("Triggering AI_IdleCastCheck :: Mob [{}] - Min : [{}] Max : [{}]", this->GetCleanName(), AISpellVar.idle_no_sp_recast_min, AISpellVar.idle_no_sp_recast_max);
 
 			}	//else, spell casting finishing will reset the timer.
 		}	//else, spell casting finishing will reset the timer.
@@ -2507,21 +2500,21 @@ bool NPC::AI_AddNPCSpells(uint32 iDBSpellsID) {
 	else {
 		debug_msg.append(" (not found)");
 	}
-	Log(Logs::Detail, Logs::AI, "%s", debug_msg.c_str());
+	LogAI("[{}]", debug_msg.c_str());
 
 #ifdef MobAI_DEBUG_Spells >= 25
 	if (parentlist) {
 		for (const auto &iter : parentlist->entries) {
-			Log(Logs::Detail, Logs::AI, "(%i) %s", iter.spellid, spells[iter.spellid].name);
+			LogAI("([{}]) [{}]", iter.spellid, spells[iter.spellid].name);
 		}
 	}
-	Log(Logs::Detail, Logs::AI, "fin (parent list)");
+	LogAI("fin (parent list)");
 	if (spell_list) {
 		for (const auto &iter : spell_list->entries) {
-			Log(Logs::Detail, Logs::AI, "(%i) %s", iter.spellid, spells[iter.spellid].name);
+			LogAI("([{}]) [{}]", iter.spellid, spells[iter.spellid].name);
 		}
 	}
-	Log(Logs::Detail, Logs::AI, "fin (spell list)");
+	LogAI("fin (spell list)");
 #endif
 
 #endif
@@ -2682,7 +2675,7 @@ bool NPC::AI_AddNPCSpellsEffects(uint32 iDBSpellsEffectsID) {
 	else {
 		debug_msg.append(" (not found)");
 	}
-	Log(Logs::Detail, Logs::AI, "%s", debug_msg.c_str());
+	LogAI("[{}]", debug_msg.c_str());
 #endif
 
 	if (parentlist) {

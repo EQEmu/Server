@@ -94,7 +94,7 @@ void ZSList::KillAll() {
 void ZSList::Process() {
 
 	if (shutdowntimer && shutdowntimer->Check()) {
-		Log(Logs::Detail, Logs::World_Server, "Shutdown timer has expired. Telling all zones to shut down and exiting. (fake sigint)");
+		LogInfo("Shutdown timer has expired. Telling all zones to shut down and exiting. (fake sigint)");
 		auto pack2 = new ServerPacket;
 		pack2->opcode = ServerOP_ShutdownAll;
 		pack2->size = 0;
@@ -432,6 +432,7 @@ void ZSList::SendChannelMessageRaw(const char* from, const char* to, uint8 chan_
 	}
 
 	scm->language = language;
+	scm->lang_skill = 100;
 	scm->chan_num = chan_num;
 	strcpy(&scm->message[0], message);
 
@@ -570,7 +571,7 @@ void ZSList::RebootZone(const char* ip1, uint16 port, const char* ip2, uint32 sk
 	s->port = port;
 	s->zoneid = zoneid;
 	if (zoneid != 0)
-		Log(Logs::Detail, Logs::World_Server, "Rebooting static zone with the ID of: %i", zoneid);
+		LogInfo("Rebooting static zone with the ID of: [{}]", zoneid);
 	tmp[z]->SendPacket(pack);
 	delete pack;
 	safe_delete_array(tmp);

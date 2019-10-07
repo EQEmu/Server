@@ -157,7 +157,7 @@ void QuestManager::echo(int colour, const char *str) {
 void QuestManager::say(const char *str, Journal::Options &opts) {
 	QuestManagerCurrentQuestVars();
 	if (!owner) {
-		Log(Logs::General, Logs::Quests, "QuestManager::say called with nullptr owner. Probably syntax error in quest file.");
+		LogQuests("QuestManager::say called with nullptr owner. Probably syntax error in quest file");
 		return;
 	}
 	else {
@@ -567,7 +567,7 @@ void QuestManager::pausetimer(const char *timer_name) {
 	{
 		if (pcur->owner && pcur->owner == owner && pcur->name == timer_name)
 		{
-			Log(Logs::General, Logs::Quests, "Timer %s is already paused for %s. Returning...", timer_name, owner->GetName());
+			LogQuests("Timer [{}] is already paused for [{}]. Returning", timer_name, owner->GetName());
 			return;
 		}
 		++pcur;
@@ -589,7 +589,7 @@ void QuestManager::pausetimer(const char *timer_name) {
 	pt.name = timername;
 	pt.owner = owner;
 	pt.time = milliseconds;
-	Log(Logs::General, Logs::Quests, "Pausing timer %s for %s with %d ms remaining.", timer_name, owner->GetName(), milliseconds);
+	LogQuests("Pausing timer [{}] for [{}] with [{}] ms remaining", timer_name, owner->GetName(), milliseconds);
 	PTimerList.push_back(pt);
 }
 
@@ -615,7 +615,7 @@ void QuestManager::resumetimer(const char *timer_name) {
 
 	if (milliseconds == 0)
 	{
-		Log(Logs::General, Logs::Quests, "Paused timer %s not found or has expired. Returning...", timer_name);
+		LogQuests("Paused timer [{}] not found or has expired. Returning", timer_name);
 		return;
 	}
 
@@ -626,14 +626,14 @@ void QuestManager::resumetimer(const char *timer_name) {
 		{
 			cur->Timer_.Enable();
 			cur->Timer_.Start(milliseconds, false);
-			Log(Logs::General, Logs::Quests, "Resuming timer %s for %s with %d ms remaining.", timer_name, owner->GetName(), milliseconds);
+			LogQuests("Resuming timer [{}] for [{}] with [{}] ms remaining", timer_name, owner->GetName(), milliseconds);
 			return;
 		}
 		++cur;
 	}
 
 	QTimerList.push_back(QuestTimer(milliseconds, owner, timer_name));
-	Log(Logs::General, Logs::Quests, "Creating a new timer and resuming %s for %s with %d ms remaining.", timer_name, owner->GetName(), milliseconds);
+	LogQuests("Creating a new timer and resuming [{}] for [{}] with [{}] ms remaining", timer_name, owner->GetName(), milliseconds);
 
 }
 
@@ -658,7 +658,7 @@ bool QuestManager::ispausedtimer(const char *timer_name) {
 void QuestManager::emote(const char *str) {
 	QuestManagerCurrentQuestVars();
 	if (!owner) {
-		Log(Logs::General, Logs::Quests, "QuestManager::emote called with nullptr owner. Probably syntax error in quest file.");
+		LogQuests("QuestManager::emote called with nullptr owner. Probably syntax error in quest file");
 		return;
 	}
 	else {
@@ -669,7 +669,7 @@ void QuestManager::emote(const char *str) {
 void QuestManager::shout(const char *str) {
 	QuestManagerCurrentQuestVars();
 	if (!owner) {
-		Log(Logs::General, Logs::Quests, "QuestManager::shout called with nullptr owner. Probably syntax error in quest file.");
+		LogQuests("QuestManager::shout called with nullptr owner. Probably syntax error in quest file");
 		return;
 	}
 	else {
@@ -680,7 +680,7 @@ void QuestManager::shout(const char *str) {
 void QuestManager::shout2(const char *str) {
 	QuestManagerCurrentQuestVars();
 	if (!owner) {
-		Log(Logs::General, Logs::Quests, "QuestManager::shout2 called with nullptr owner. Probably syntax error in quest file.");
+		LogQuests("QuestManager::shout2 called with nullptr owner. Probably syntax error in quest file");
 		return;
 	}
 	else {
@@ -699,7 +699,7 @@ void QuestManager::gmsay(const char *str, uint32 color, bool send_to_world, uint
 void QuestManager::depop(int npc_type) {
 	QuestManagerCurrentQuestVars();
 	if (!owner || !owner->IsNPC()) {
-		Log(Logs::General, Logs::Quests, "QuestManager::depop called with nullptr owner or non-NPC owner. Probably syntax error in quest file.");
+		LogQuests("QuestManager::depop called with nullptr owner or non-NPC owner. Probably syntax error in quest file");
 		return;
 	}
 	else {
@@ -729,7 +729,7 @@ void QuestManager::depop(int npc_type) {
 void QuestManager::depop_withtimer(int npc_type) {
 	QuestManagerCurrentQuestVars();
 	if (!owner || !owner->IsNPC()) {
-		Log(Logs::General, Logs::Quests, "QuestManager::depop_withtimer called with nullptr owner or non-NPC owner. Probably syntax error in quest file.");
+		LogQuests("QuestManager::depop_withtimer called with nullptr owner or non-NPC owner. Probably syntax error in quest file");
 		return;
 	}
 	else {
@@ -756,7 +756,7 @@ void QuestManager::depopall(int npc_type) {
 		entity_list.DepopAll(npc_type);
 	}
 	else {
-		Log(Logs::General, Logs::Quests, "QuestManager::depopall called with nullptr owner, non-NPC owner, or invalid NPC Type ID. Probably syntax error in quest file.");
+		LogQuests("QuestManager::depopall called with nullptr owner, non-NPC owner, or invalid NPC Type ID. Probably syntax error in quest file");
 	}
 }
 
@@ -765,7 +765,7 @@ void QuestManager::depopzone(bool StartSpawnTimer) {
 		zone->Depop(StartSpawnTimer);
 	}
 	else {
-		Log(Logs::General, Logs::Quests, "QuestManager::depopzone called with nullptr zone. Probably syntax error in quest file.");
+		LogQuests("QuestManager::depopzone called with nullptr zone. Probably syntax error in quest file");
 	}
 }
 
@@ -774,7 +774,7 @@ void QuestManager::repopzone() {
 		zone->Repop();
 	}
 	else {
-		Log(Logs::General, Logs::Quests, "QuestManager::repopzone called with nullptr zone. Probably syntax error in quest file.");
+		LogQuests("QuestManager::repopzone called with nullptr zone. Probably syntax error in quest file");
 	}
 }
 
@@ -1834,7 +1834,7 @@ void QuestManager::showgrid(int grid) {
                                     "ORDER BY `number`", grid, zone->GetZoneID());
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
-        Log(Logs::General, Logs::Quests, "Error loading grid %d for showgrid(): %s", grid, results.ErrorMessage().c_str());
+        LogQuests("Error loading grid [{}] for showgrid(): [{}]", grid, results.ErrorMessage().c_str());
 		return;
     }
 
@@ -2987,7 +2987,7 @@ void QuestManager::voicetell(const char *str, int macronum, int racenum, int gen
 			safe_delete(outapp);
 		}
 		else
-			Log(Logs::General, Logs::Quests, "QuestManager::voicetell from %s. Client %s not found.", owner->GetName(), str);
+			LogQuests("QuestManager::voicetell from [{}]. Client [{}] not found", owner->GetName(), str);
 	}
 }
 
