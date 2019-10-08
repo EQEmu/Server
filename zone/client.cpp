@@ -340,6 +340,9 @@ Client::Client(EQStreamInterface* ieqs)
 	temp_pvp = false;
 	is_client_moving = false;
 
+	m_op_charinventory_sent = 0;
+	m_op_charinventory_received = 0;
+
 	/**
 	 * GM
 	 */

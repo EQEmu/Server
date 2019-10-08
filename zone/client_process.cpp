@@ -731,83 +731,185 @@ void Client::OnDisconnect(bool hard_disconnect) {
 	Disconnect();
 }
 
-// Sends the client complete inventory used in character login
+// Sends the client complete inventory used in character login (enter world/zoning)
 void Client::BulkSendInventoryItems()
 {
-	// LINKDEAD TRADE ITEMS
-	// Move trade slot items back into normal inventory..need them there now for the proceeding validity checks
-	for (int16 slot_id = EQEmu::invslot::TRADE_BEGIN; slot_id <= EQEmu::invslot::TRADE_END; slot_id++) {
+	// Move any residual trade slot items back into normal inventory..need them there now for the proceeding validity checks
+	for (int16 slot_id = EQEmu::invslot::TRADE_BEGIN; slot_id <= EQEmu::invslot::TRADE_END; ++slot_id) {
+
 		EQEmu::ItemInstance* inst = m_inv.PopItem(slot_id);
 		if(inst) {
-			bool is_arrow = (inst->GetItem()->ItemType == EQEmu::item::ItemTypeArrow) ? true : false;
+
+			bool is_arrow = (inst->GetItem()->ItemType == EQEmu::item::ItemTypeArrow);
 			int16 free_slot_id = m_inv.FindFreeSlot(inst->IsClassBag(), true, inst->GetItem()->Size, is_arrow);
-			LogInventory("Incomplete Trade Transaction: Moving [{}] from slot [{}] to [{}]", inst->GetItem()->Name, slot_id, free_slot_id);
+			LogInventory(
+				"Incomplete Trade Transaction: Moving [{}] from slot [{}] to [{}]",
+				inst->GetItem()->Name,
+				slot_id,
+				free_slot_id
+			);
 			PutItemInInventory(free_slot_id, *inst, false);
 			database.SaveInventory(character_id, nullptr, slot_id);
 			safe_delete(inst);
 		}
 	}
 
-	bool deletenorent = database.NoRentExpired(GetName());
-	if (deletenorent) { //client was offline for more than 30 minutes, delete no rent items
-		if (RuleB(Inventory, TransformSummonedBags))
+	// Client was offline for more than 30 minutes, delete no rent items
+	bool delete_no_rent = database.NoRentExpired(GetName());
+	if (delete_no_rent) {
+
+		if (RuleB(Inventory, TransformSummonedBags)) {
 			DisenchantSummonedBags(false);
+		}
 		RemoveNoRent(false);
 	}
 
 	RemoveDuplicateLore(false);
 	MoveSlotNotAllowed(false);
 
-	EQEmu::OutBuffer ob;
-	EQEmu::OutBuffer::pos_type last_pos = ob.tellp();
+	if (RuleB(Inventory, BulkSendEnMasse)) { // Default behavior
 
-	// Possessions items
-	for (int16 slot_id = EQEmu::invslot::POSSESSIONS_BEGIN; slot_id <= EQEmu::invslot::POSSESSIONS_END; slot_id++) {
-		const EQEmu::ItemInstance* inst = m_inv[slot_id];
-		if (!inst)
-			continue;
+		EQEmu::OutBuffer ob;
+		EQEmu::OutBuffer::pos_type last_pos = ob.tellp();
 
-		inst->Serialize(ob, slot_id);
+		for (int16 slot_id = EQEmu::invslot::POSSESSIONS_BEGIN; slot_id <= EQEmu::invslot::POSSESSIONS_END; ++slot_id) {
 
-		if (ob.tellp() == last_pos)
-			LogInventory("Serialization failed on item slot [{}] during BulkSendInventoryItems. Item skipped", slot_id);
-		
-		last_pos = ob.tellp();
+			const EQEmu::ItemInstance* inst = m_inv[slot_id];
+			if (!inst) {
+				continue;
+			}
+
+			inst->Serialize(ob, slot_id);
+			if (ob.tellp() == last_pos) {
+				LogInventory("Serialization failed on item slot [{}] during BulkSendInventoryItems. Item skipped", slot_id);
+			}
+			last_pos = ob.tellp();
+		}
+
+		for (int16 slot_id = EQEmu::invslot::BANK_BEGIN; slot_id <= EQEmu::invslot::BANK_END; ++slot_id) {
+
+			const EQEmu::ItemInstance* inst = m_inv[slot_id];
+			if (!inst) {
+				continue;
+			}
+
+			inst->Serialize(ob, slot_id);
+			if (ob.tellp() == last_pos) {
+				LogInventory("Serialization failed on item slot [{}] during BulkSendInventoryItems. Item skipped", slot_id);
+			}
+			last_pos = ob.tellp();
+		}
+
+		for (int16 slot_id = EQEmu::invslot::SHARED_BANK_BEGIN; slot_id <= EQEmu::invslot::SHARED_BANK_END; ++slot_id) {
+
+			const EQEmu::ItemInstance* inst = m_inv[slot_id];
+			if (!inst) {
+				continue;
+			}
+
+			inst->Serialize(ob, slot_id);
+			if (ob.tellp() == last_pos) {
+				LogInventory("Serialization failed on item slot [{}] during BulkSendInventoryItems. Item skipped", slot_id);
+			}
+			last_pos = ob.tellp();
+		}
+
+		auto outapp = new EQApplicationPacket(OP_CharInventory);
+		outapp->size = ob.size();
+		outapp->pBuffer = ob.detach();
+		QueuePacket(outapp);
+		safe_delete(outapp);
+
+		if (ClientVersionBit() & EQEmu::versions::maskRoFAndLater) {
+			IncrementOPCharInventorySent();
+		}
 	}
+	else { // Specialized behavior
 
-	// Bank items
-	for (int16 slot_id = EQEmu::invslot::BANK_BEGIN; slot_id <= EQEmu::invslot::BANK_END; slot_id++) {
-		const EQEmu::ItemInstance* inst = m_inv[slot_id];
-		if (!inst)
-			continue;
+		for (int16 slot_id = EQEmu::invslot::POSSESSIONS_BEGIN; slot_id <= EQEmu::invslot::POSSESSIONS_END; ++slot_id) {
 
-		inst->Serialize(ob, slot_id);
+			const EQEmu::ItemInstance* inst = m_inv[slot_id];
+			if (!inst) {
+				continue;
+			}
 
-		if (ob.tellp() == last_pos)
-			LogInventory("Serialization failed on item slot [{}] during BulkSendInventoryItems. Item skipped", slot_id);
+			EQEmu::OutBuffer ob;
+			EQEmu::OutBuffer::pos_type last_pos = ob.tellp();
 
-		last_pos = ob.tellp();
+			inst->Serialize(ob, slot_id);
+			if (ob.tellp() == last_pos) {
+
+				LogInventory("Serialization failed on item slot [{}] during BulkSendInventoryItems. Item skipped", slot_id);
+				continue;
+			}
+
+			auto outapp = new EQApplicationPacket(OP_CharInventory);
+			outapp->size = ob.size();
+			outapp->pBuffer = ob.detach();
+			QueuePacket(outapp);
+			safe_delete(outapp);
+
+			if (ClientVersionBit() & EQEmu::versions::maskRoFAndLater) {
+				IncrementOPCharInventorySent();
+			}
+		}
+
+		for (int16 slot_id = EQEmu::invslot::BANK_BEGIN; slot_id <= EQEmu::invslot::BANK_END; ++slot_id) {
+
+			const EQEmu::ItemInstance* inst = m_inv[slot_id];
+			if (!inst) {
+				continue;
+			}
+
+			EQEmu::OutBuffer ob;
+			EQEmu::OutBuffer::pos_type last_pos = ob.tellp();
+
+			inst->Serialize(ob, slot_id);
+			if (ob.tellp() == last_pos) {
+
+				LogInventory("Serialization failed on item slot [{}] during BulkSendInventoryItems. Item skipped", slot_id);
+				continue;
+			}
+
+			auto outapp = new EQApplicationPacket(OP_CharInventory);
+			outapp->size = ob.size();
+			outapp->pBuffer = ob.detach();
+			QueuePacket(outapp);
+			safe_delete(outapp);
+
+			if (ClientVersionBit() & EQEmu::versions::maskRoFAndLater) {
+				IncrementOPCharInventorySent();
+			}
+		}
+
+		for (int16 slot_id = EQEmu::invslot::SHARED_BANK_BEGIN; slot_id <= EQEmu::invslot::SHARED_BANK_END; ++slot_id) {
+
+			const EQEmu::ItemInstance* inst = m_inv[slot_id];
+			if (!inst) {
+				continue;
+			}
+
+			EQEmu::OutBuffer ob;
+			EQEmu::OutBuffer::pos_type last_pos = ob.tellp();
+
+			inst->Serialize(ob, slot_id);
+			if (ob.tellp() == last_pos) {
+
+				LogInventory("Serialization failed on item slot [{}] during BulkSendInventoryItems. Item skipped", slot_id);
+				continue;
+			}
+
+			auto outapp = new EQApplicationPacket(OP_CharInventory);
+			outapp->size = ob.size();
+			outapp->pBuffer = ob.detach();
+			QueuePacket(outapp);
+			safe_delete(outapp);
+
+			if (ClientVersionBit() & EQEmu::versions::maskRoFAndLater) {
+				IncrementOPCharInventorySent();
+			}
+		}
 	}
-
-	// SharedBank items
-	for (int16 slot_id = EQEmu::invslot::SHARED_BANK_BEGIN; slot_id <= EQEmu::invslot::SHARED_BANK_END; slot_id++) {
-		const EQEmu::ItemInstance* inst = m_inv[slot_id];
-		if (!inst)
-			continue;
-
-		inst->Serialize(ob, slot_id);
-
-		if (ob.tellp() == last_pos)
-			LogInventory("Serialization failed on item slot [{}] during BulkSendInventoryItems. Item skipped", slot_id);
-
-		last_pos = ob.tellp();
-	}
-
-	auto outapp = new EQApplicationPacket(OP_CharInventory);
-	outapp->size = ob.size();
-	outapp->pBuffer = ob.detach();
-	QueuePacket(outapp);
-	safe_delete(outapp);
 }
 
 void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {

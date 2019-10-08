@@ -726,6 +726,7 @@ RULE_BOOL(Inventory, EnforceAugmentWear, true, "Forces augment wear slot validat
 RULE_BOOL(Inventory, DeleteTransformationMold, true, "False if you want mold to last forever")
 RULE_BOOL(Inventory, AllowAnyWeaponTransformation, false, "Weapons can use any weapon transformation")
 RULE_BOOL(Inventory, TransformSummonedBags, false, "Transforms summoned bags into disenchanted ones instead of deleting")
+RULE_BOOL(Inventory, BulkSendEnMasse, false, "Sends player 'Enter World' inventory as one massive packet (true = normal behavior)")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Client)

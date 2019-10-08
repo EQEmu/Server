@@ -89,6 +89,7 @@ void MapOpcodes()
 	// connecting opcode handler assignments:
 	ConnectingOpcodes[OP_ApproveZone] = &Client::Handle_Connect_OP_ApproveZone;
 	ConnectingOpcodes[OP_BlockedBuffs] = &Client::Handle_OP_BlockedBuffs;
+	ConnectingOpcodes[OP_CharInventory] = &Client::Handle_Connect_OP_CharInventory;
 	ConnectingOpcodes[OP_ClientError] = &Client::Handle_Connect_OP_ClientError;
 	ConnectingOpcodes[OP_ClientReady] = &Client::Handle_Connect_OP_ClientReady;
 	ConnectingOpcodes[OP_ClientUpdate] = &Client::Handle_Connect_OP_ClientUpdate;
@@ -932,6 +933,41 @@ void Client::Handle_Connect_OP_ApproveZone(const EQApplicationPacket *app)
 	return;
 }
 
+void Client::Handle_Connect_OP_CharInventory(const EQApplicationPacket* app)
+{
+	if (ClientVersionBit() & EQEmu::versions::maskRoFAndLater) {
+
+		IncrementOPCharInventoryReceived();
+		if (GetOpCharInventorySentCount() == GetOpCharInventoryReceivedCount()) {
+
+			/*
+				Weather Packet
+				This shouldent be moved, this seems to be what the client
+				uses to advance to the next state (sending ReqNewZone)
+			*/
+			auto outapp = new EQApplicationPacket(OP_Weather, 12);
+			Weather_Struct* ws = (Weather_Struct*)outapp->pBuffer;
+			ws->val1 = 0x000000FF;
+			if (zone->zone_weather == 1) {
+				ws->type = 0x31; // Rain
+			}
+			if (zone->zone_weather == 2) {
+
+				outapp->pBuffer[8] = 0x01;
+				ws->type = 0x02;
+			}
+			outapp->priority = 6;
+			QueuePacket(outapp);
+			safe_delete(outapp);
+
+			Handle_Connect_OP_ReqNewZone(nullptr);
+			SetAttackTimer();
+			conn_state = ZoneInfoSent;
+			zoneinpacket_timer.Start();
+		}
+	}
+}
+
 void Client::Handle_Connect_OP_ClientError(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(ClientError_Struct)) {
@@ -1655,15 +1691,20 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	this is not quite where live sends inventory, they do it after tribute
 	*/
 	if (loaditems) { /* Dont load if a length error occurs */
-		if (admin >= minStatusToBeGM)
+
+		if (admin >= minStatusToBeGM) {
 			m_inv.SetGMInventory(true); // set to true to allow expansion-restricted packets through
+		}
 
 		BulkSendInventoryItems();
+
 		/* Send stuff on the cursor which isnt sent in bulk */
 		for (auto iter = m_inv.cursor_cbegin(); iter != m_inv.cursor_cend(); ++iter) {
+
 			/* First item cursor is sent in bulk inventory packet */
-			if (iter == m_inv.cursor_cbegin())
+			if (iter == m_inv.cursor_cbegin()) {
 				continue;
+			}
 			const EQEmu::ItemInstance *inst = *iter;
 			SendItemPacket(EQEmu::invslot::slotCursor, inst, ItemPacketLimbo);
 		}
@@ -1692,31 +1733,31 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		FastQueuePacket(&outapp);
 	}
 
-	/*
-	Weather Packet
-	This shouldent be moved, this seems to be what the client
-	uses to advance to the next state (sending ReqNewZone)
-	*/
-	outapp = new EQApplicationPacket(OP_Weather, 12);
-	Weather_Struct *ws = (Weather_Struct *)outapp->pBuffer;
-	ws->val1 = 0x000000FF;
-	if (zone->zone_weather == 1) { ws->type = 0x31; } // Rain
-	if (zone->zone_weather == 2) {
-		outapp->pBuffer[8] = 0x01;
-		ws->type = 0x02;
-	}
-	outapp->priority = 6;
-	QueuePacket(outapp);
-	safe_delete(outapp);
+	if (ClientVersionBit() & EQEmu::versions::maskUFAndEarlier) { // RoF+ moved to Client::Handle_Connect_OP_CharInventory(...)
 
-	if (ClientVersion() >= EQEmu::versions::ClientVersion::RoF) {
-		Handle_Connect_OP_ReqNewZone(nullptr);
-	}
+		/*
+		Weather Packet
+		This shouldent be moved, this seems to be what the client
+		uses to advance to the next state (sending ReqNewZone)
+		*/
+		outapp = new EQApplicationPacket(OP_Weather, 12);
+		Weather_Struct* ws = (Weather_Struct*)outapp->pBuffer;
+		ws->val1 = 0x000000FF;
+		if (zone->zone_weather == 1) {
+			ws->type = 0x31; // Rain
+		}
+		if (zone->zone_weather == 2) {
+			outapp->pBuffer[8] = 0x01;
+			ws->type = 0x02;
+		}
+		outapp->priority = 6;
+		QueuePacket(outapp);
+		safe_delete(outapp);
 
-	SetAttackTimer();
-	conn_state = ZoneInfoSent;
-	zoneinpacket_timer.Start();
-	return;
+		SetAttackTimer();
+		conn_state = ZoneInfoSent;
+		zoneinpacket_timer.Start();
+	}
 }
 
 // connected opcode handlers

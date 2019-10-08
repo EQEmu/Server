@@ -721,6 +721,11 @@ public:
 
 	void OnDisconnect(bool hard_disconnect);
 
+	void IncrementOPCharInventorySent(size_t count = 1) { m_op_charinventory_sent += count; }
+	void IncrementOPCharInventoryReceived(size_t count = 1) { m_op_charinventory_received += count; }
+	size_t GetOpCharInventorySentCount() { return m_op_charinventory_sent; }
+	size_t GetOpCharInventoryReceivedCount() { return m_op_charinventory_received; }
+
 	uint16 GetSkillPoints() { return m_pp.points;}
 	void SetSkillPoints(int inp) { m_pp.points = inp;}
 
@@ -1626,6 +1631,9 @@ private:
 
 	int client_max_level;
 	
+	size_t m_op_charinventory_sent;
+	size_t m_op_charinventory_received;
+
 #ifdef BOTS
 	
 public:
