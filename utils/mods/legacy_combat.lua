@@ -372,7 +372,18 @@ function TryCriticalHit(e)
                 end
             end
 
-            critMod             = critMod + GetCritDmgMod(self, e.hit.skill) * 2;
+            critMod = critMod + GetCritDmgMod(self, e.hit.skill) * 2;
+
+            eq.debug(
+                    string.format("[%s] [Mob::TryCriticalHit] CritChance [%i] CritMod [%i] GetCritDmgMod [%i] CripSuccess [%s]",
+                            e.self:GetCleanName(),
+                            critChance,
+                            critMod,
+                            GetCritDmgMod(self, e.hit.skill),
+                            (crip_success) and "true" or "false"
+                    )
+            );
+
             e.hit.damage_done   = e.hit.damage_done * critMod / 100;
 
             local deadlySuccess = false;

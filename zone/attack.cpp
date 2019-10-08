@@ -4051,6 +4051,18 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 			}
 
 			critMod += GetCritDmgMob(skill) * 2; // To account for base crit mod being 200 not 100
+
+			Log.Out(
+				Logs::General,
+				Logs::Combat,
+				"[%s] [Mob::TryCriticalHit] CritChance [%.2f] CritMod [%u] GetCritDmgMod [%i] CripSuccess [%s]",
+				GetCleanName(),
+				critChance,
+				critMod,
+				GetCritDmgMob(skill),
+				crip_success ? "true" : "false"
+			);
+
 			damage = damage * critMod / 100;
 
 			bool deadlySuccess = false;
