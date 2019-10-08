@@ -69,15 +69,25 @@ function MeleeMitigation(e)
     end
 
     eq.debug(
-            string.format("[%s] ClientAttack] Damage Table [%i] WeaponDMG [%i]",
+            string.format("[%s] [ClientAttack] Damage Table [%i] WeaponDMG [%i]",
                     e.self:GetCleanName(),
                     GetDamageTable(e.other, e.hit.skill),
                     e.hit.base_damage
             )
     );
 
-    e.hit.damage_done = 2 * e.hit.base_damage * GetDamageTable(e.self, e.hit.skill) / 100;
-    e.hit             = DoMeleeMitigation(e.self, e.other, e.hit, e.opts);
+    e.hit.damage_done = 2 * e.hit.base_damage * GetDamageTable(e.other, e.hit.skill) / 100;
+
+    eq.debug(
+            string.format("[%s] [ClientAttack] DamageDone [%i] BaseDamage [%i] HitSkill [%i]",
+                    e.self:GetCleanName(),
+                    e.hit.damage_done,
+                    e.hit.base_damage,
+                    e.hit.skill
+            )
+    );
+
+    e.hit = DoMeleeMitigation(e.self, e.other, e.hit, e.opts);
 
     return e;
 end
@@ -450,6 +460,19 @@ function GetCriticalChanceBonus(self, skill)
     critical_chance       = critical_chance + itembonuses:CriticalHitChance(skill);
     critical_chance       = critical_chance + spellbonuses:CriticalHitChance(skill);
     critical_chance       = critical_chance + aabonuses:CriticalHitChance(skill);
+
+    eq.debug(
+            string.format("[%s] [Mob::GetCriticalChanceBonus] Bonuses | Item [%i] Spell [%i] AA [%i] | 2nd Item [%i] Spell [%i] AA [%i] Final Chance [%i]",
+                    e.self:GetCleanName(),
+                    itembonuses:CriticalHitChance(Skill.HIGHEST_SKILL + 1),
+                    spellbonuses:CriticalHitChance(Skill.HIGHEST_SKILL + 1),
+                    aabonuses:CriticalHitChance(Skill.HIGHEST_SKILL + 1),
+                    itembonuses:CriticalHitChance(skill),
+                    spellbonuses:CriticalHitChance(skill),
+                    aabonuses:CriticalHitChance(skill),
+                    critical_chance
+            )
+    );
 
     return critical_chance;
 end

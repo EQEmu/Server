@@ -4653,11 +4653,30 @@ int16 Mob::GetCriticalChanceBonus(uint16 skill)
 	int critical_chance = 0;
 
 	// All skills + Skill specific
-	critical_chance += itembonuses.CriticalHitChance[EQEmu::skills::HIGHEST_SKILL + 1] + spellbonuses.CriticalHitChance[EQEmu::skills::HIGHEST_SKILL + 1] + aabonuses.CriticalHitChance[EQEmu::skills::HIGHEST_SKILL + 1] +
-						itembonuses.CriticalHitChance[skill] + spellbonuses.CriticalHitChance[skill] + aabonuses.CriticalHitChance[skill];
+	critical_chance += itembonuses.CriticalHitChance[EQEmu::skills::HIGHEST_SKILL + 1] +
+					   spellbonuses.CriticalHitChance[EQEmu::skills::HIGHEST_SKILL + 1] +
+					   aabonuses.CriticalHitChance[EQEmu::skills::HIGHEST_SKILL + 1] +
+					   itembonuses.CriticalHitChance[skill] +
+					   spellbonuses.CriticalHitChance[skill] +
+					   aabonuses.CriticalHitChance[skill];
 
-	if(critical_chance < -100)
+	Log.Out(
+		Logs::General,
+		Logs::Combat,
+		"[%s] [Mob::GetCriticalChanceBonus] Bonuses | Item [%i] Spell [%i] AA [%i] | 2nd Item [%i] Spell [%i] AA [%i] Final Chance [%i]",
+		GetCleanName(),
+		itembonuses.CriticalHitChance[EQEmu::skills::HIGHEST_SKILL + 1],
+		spellbonuses.CriticalHitChance[EQEmu::skills::HIGHEST_SKILL + 1],
+		aabonuses.CriticalHitChance[EQEmu::skills::HIGHEST_SKILL + 1],
+		itembonuses.CriticalHitChance[skill],
+		spellbonuses.CriticalHitChance[skill],
+		aabonuses.CriticalHitChance[skill],
+		critical_chance
+	);
+
+	if (critical_chance < -100) {
 		critical_chance = -100;
+	}
 
 	return critical_chance;
 }

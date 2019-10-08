@@ -554,6 +554,14 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttac
 		float monkweight = RuleI(Combat, MonkACBonusWeight);
 		monkweight = mod_monk_weight(monkweight, attacker);
 
+		Log.Out(
+			Logs::General,
+			Logs::Combat,
+			"[%s] [Mob::MeleeMitigation] Soft Cap [%.2f]",
+			GetCleanName(),
+			softcap
+		);
+
 		if (IsClient()) {
 			armor = CastToClient()->GetRawACNoShield(shield_ac);
 			weight = (CastToClient()->CalcCurrentWeight() / 10.0);
@@ -1189,6 +1197,16 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 		);
 
 		int max_hit = (2*weapon_damage*GetDamageTable(skillinuse)) / 100;
+
+		Log.Out(
+			Logs::General,
+			Logs::Combat,
+			"[%s] [ClientAttack] DamageDone [%i] BaseDamage [%i] HitSkill [%i]",
+			GetCleanName(),
+			max_hit,
+			weapon_damage,
+			skillinuse
+		);
 
 		if(GetLevel() < 10 && max_hit > RuleI(Combat, HitCapPre10))
 			max_hit = (RuleI(Combat, HitCapPre10));
