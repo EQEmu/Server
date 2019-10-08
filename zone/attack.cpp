@@ -3995,12 +3995,24 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 
 		//Get Base CritChance from Dex. (200 = ~1.6%, 255 = ~2.0%, 355 = ~2.20%) Fall off rate > 255
 		//http://giline.versus.jp/shiden/su.htm , http://giline.versus.jp/shiden/damage_e.htm
-		if (GetDEX() <= 255)
+		if (GetDEX() <= 255) {
 			critChance += (float(GetDEX()) / 125.0f);
-		else if (GetDEX() > 255)
-			critChance += (float(GetDEX()-255)/ 500.0f) + 2.0f;
-		critChance += critChance*(float)CritChanceBonus /100.0f;
+		}
+		else if (GetDEX() > 255) {
+			critChance += (float(GetDEX() - 255) / 500.0f) + 2.0f;
+		}
+		critChance += critChance * (float) CritChanceBonus / 100.0f;
 	}
+
+	Log.Out(
+		Logs::General,
+		Logs::Combat,
+		"[%s] [Mob::TryCriticalHit] CritChance [%.2f] CritChanceBonus [%i] Dex [%i] Post-Dex-Block",
+		GetCleanName(),
+		critChance,
+		CritChanceBonus,
+		GetDEX()
+	);
 
 	if(opts) {
 		critChance *= opts->crit_percent;
@@ -4010,7 +4022,7 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 	Log.Out(
 		Logs::General,
 		Logs::Combat,
-		"[%s] [Mob::TryCriticalHit] CritChance [%i]",
+		"[%s] [Mob::TryCriticalHit] CritChance [%.2f]",
 		GetCleanName(),
 		critChance
 	);

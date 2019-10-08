@@ -344,9 +344,11 @@ function TryCriticalHit(e)
     end
 
     eq.debug(
-            string.format("[%s] [Mob::TryCriticalHit] CritChance [%i]",
+            string.format("[%s] [Mob::TryCriticalHit] CritChance [%i] CritChanceBonus [%i] Dex [%i] Post-Dex-Block",
                     e.self:GetCleanName(),
-                    critChance
+                    critChance,
+                    CritChanceBonus,
+                    e.self:GetDEX()
             )
     );
 
@@ -463,7 +465,7 @@ function GetCriticalChanceBonus(self, skill)
 
     eq.debug(
             string.format("[%s] [Mob::GetCriticalChanceBonus] Bonuses | Item [%i] Spell [%i] AA [%i] | 2nd Item [%i] Spell [%i] AA [%i] Final Chance [%i]",
-                    e.self:GetCleanName(),
+                    self:GetCleanName(),
                     itembonuses:CriticalHitChance(Skill.HIGHEST_SKILL + 1),
                     spellbonuses:CriticalHitChance(Skill.HIGHEST_SKILL + 1),
                     aabonuses:CriticalHitChance(Skill.HIGHEST_SKILL + 1),
