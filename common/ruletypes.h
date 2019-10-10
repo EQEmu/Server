@@ -492,6 +492,7 @@ RULE_BOOL(Combat, ClassicMasterWu, false, "classic master wu uses a random speci
 RULE_INT(Combat, LevelToStopDamageCaps, 0, "1 will effectively disable them, 20 should give basically same results as old incorrect system")
 RULE_BOOL(Combat, ClassicNPCBackstab, false, "true disables npc facestab - npcs get normal attack if not behind")
 RULE_BOOL(Combat, UseNPCDamageClassLevelMods, true, "Uses GetClassLevelDamageMod calc in npc_scale_manager")
+RULE_BOOL(Combat, UseExtendedPoisonProcs, false, "Allow old school poisons to last until characrer zones, at a lower proc rate")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(NPC)
