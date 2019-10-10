@@ -2809,12 +2809,8 @@ void Client::Handle_OP_ApplyPoison(const EQApplicationPacket *app)
 
 	uint32 ApplyPoisonSuccessResult = 0;
 
-	const EQEmu::ItemInstance* PrimaryWeapon = GetInv().GetItem(EQEmu::invslot::slotPrimary);
-	const EQEmu::ItemInstance* SecondaryWeapon = GetInv().GetItem(EQEmu::invslot::slotSecondary);
 	const EQEmu::ItemInstance* PoisonItemInstance = GetInv().GetItem(ApplyPoisonData->inventorySlot);
 
-	const EQEmu::ItemData* primary = (PrimaryWeapon ? PrimaryWeapon->GetItem() : nullptr);
-	const EQEmu::ItemData* secondary = (SecondaryWeapon ? SecondaryWeapon->GetItem() : nullptr);
 	const EQEmu::ItemData* poison = (PoisonItemInstance ? PoisonItemInstance->GetItem() : nullptr);
 
 	bool IsPoison = (poison && poison->ItemType == EQEmu::item::ItemTypePoison);
@@ -2828,10 +2824,7 @@ void Client::Handle_OP_ApplyPoison(const EQApplicationPacket *app)
 			// Poison is too high to apply.
 			MessageString(Chat::LightBlue, POISON_TOO_HIGH);
 		}
-		else if ((primary && 
-				primary->ItemType == EQEmu::item::ItemType1HPiercing) ||
-			(secondary && 
-			secondary->ItemType == EQEmu::item::ItemType1HPiercing)) {
+		else {
 
 			double ChanceRoll = zone->random.Real(0, 1);
 
@@ -2850,9 +2843,6 @@ void Client::Handle_OP_ApplyPoison(const EQApplicationPacket *app)
 				ApplyPoisonSuccessResult = 1;
 				AddProcToWeapon(poison->Proc.Effect, false, (GetDEX() / 100) + 103, POISON_PROC);
 			}
-		}
-		else {
-			Message(Chat::Red, "A piercing weapon must be wielded to apply poison.");
 		}
 
 		// Live always deletes the item, success or failure. Even if too high.
