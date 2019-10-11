@@ -492,6 +492,7 @@ RULE_BOOL(Combat, ClassicMasterWu, false, "classic master wu uses a random speci
 RULE_INT(Combat, LevelToStopDamageCaps, 0, "1 will effectively disable them, 20 should give basically same results as old incorrect system")
 RULE_BOOL(Combat, ClassicNPCBackstab, false, "true disables npc facestab - npcs get normal attack if not behind")
 RULE_BOOL(Combat, UseNPCDamageClassLevelMods, true, "Uses GetClassLevelDamageMod calc in npc_scale_manager")
+RULE_BOOL(Combat, UseExtendedPoisonProcs, false, "Allow old school poisons to last until characrer zones, at a lower proc rate")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(NPC)
@@ -595,6 +596,8 @@ RULE_INT(Bots, CasterStopMeleeLevel, 13, "Level at which caster bots stop melee 
 RULE_INT(Bots, AllowedClasses, 0xFFFFFFFF, "Bitmask of allowed bot classes")
 RULE_INT(Bots, AllowedRaces, 0xFFFFFFFF, "Bitmask of allowed bot races")
 RULE_INT(Bots, AllowedGenders, 0x3, "Bitmask of allowed bot genders")
+RULE_BOOL(Bots, AllowOwnerAutoDefend, false, "When active, bots will defend their owner on enemy aggro")
+RULE_REAL(Bots, LeashDistance, 562500.0f, "Distance a bot is allowed to travel from leash owner before being pulled back (squared value)")
 RULE_CATEGORY_END()
 #endif
 

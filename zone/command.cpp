@@ -7740,7 +7740,7 @@ void command_npceditmass(Client *c, const Seperator *sep)
 
 		database.QueryDatabase(
 			fmt::format(
-				"UPDATE `npc_types` SET {} = {} WHERE id IN ({})",
+				"UPDATE `npc_types` SET {} = '{}' WHERE id IN ({})",
 				change_column,
 				change_value,
 				npc_ids_string

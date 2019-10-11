@@ -1367,6 +1367,13 @@ double lua_clock() {
 	return static_cast<double>(t) / 1000.0;
 }
 
+void lua_log(int category, std::string message) {
+	if (category < Logs::None || category >= Logs::MaxCategoryID)
+		return;
+
+	Log(Logs::General, static_cast<Logs::LogCategory>(category), message.c_str());
+}
+
 void lua_debug(std::string message) {
 	Log(Logs::General, Logs::QuestDebug, message.c_str());
 }
@@ -1376,6 +1383,10 @@ void lua_debug(std::string message, int level) {
 		return;
 
 	Log(static_cast<Logs::DebugLevel>(level), Logs::QuestDebug, message.c_str());
+}
+
+void lua_log_combat(std::string message) {
+	Log(Logs::General, Logs::Combat, message.c_str());
 }
 
 void lua_update_zone_header(std::string type, std::string value) {
@@ -1772,8 +1783,10 @@ luabind::scope lua_register_general() {
 		luabind::def("reloadzonestaticdata", &lua_reloadzonestaticdata),
 		luabind::def("clock", &lua_clock),
 		luabind::def("create_npc", &lua_create_npc),
+		luabind::def("log", (void(*)(int, std::string))&lua_log),
 		luabind::def("debug", (void(*)(std::string))&lua_debug),
-		luabind::def("debug", (void(*)(std::string, int))&lua_debug)
+		luabind::def("debug", (void(*)(std::string, int))&lua_debug),
+		luabind::def("log_combat", (void(*)(std::string))&lua_log_combat)
 	];
 }
 

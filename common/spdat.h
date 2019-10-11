@@ -22,6 +22,7 @@
 #include "skills.h"
 
 #define SPELL_UNKNOWN 0xFFFF
+#define POISON_PROC 0xFFFE
 #define SPELLBOOK_UNKNOWN 0xFFFFFFFF		//player profile spells are 32 bit
 
 //some spell IDs which will prolly change, but are needed

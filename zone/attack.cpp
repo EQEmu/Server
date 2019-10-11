@@ -2692,18 +2692,22 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 #ifdef BOTS
 	// if other is a bot, add the bots client to the hate list
 	while (other->IsBot()) {
+
 		auto other_ = other->CastToBot();
-		if (!other_ || !other_->GetBotOwner())
+		if (!other_ || !other_->GetBotOwner()) {
 			break;
+		}
 
 		auto owner_ = other_->GetBotOwner()->CastToClient();
-		if (!owner_ || owner_->IsDead() || !owner_->InZone()) // added isdead and inzone checks to avoid issues in AddAutoXTarget(...) below
+		if (!owner_ || owner_->IsDead() || !owner_->InZone()) { // added isdead and inzone checks to avoid issues in AddAutoXTarget(...) below
 			break;
+		}
 
 		if (owner_->GetFeigned()) {
 			AddFeignMemory(owner_);
 		}
 		else if (!hate_list.IsEntOnHateList(owner_)) {
+
 			hate_list.AddEntToHateList(owner_, 0, 0, false, true);
 			owner_->AddAutoXTarget(this); // this was being called on dead/out-of-zone clients
 		}
@@ -4064,11 +4068,16 @@ void Mob::TrySpellProc(const EQEmu::ItemInstance *inst, const EQEmu::ItemData *w
 	if (!weapon && hand == EQEmu::invslot::slotRange && GetSpecialAbility(SPECATK_RANGED_ATK))
 		rangedattk = true;
 
+	int16 poison_slot=-1;
+
 	for (uint32 i = 0; i < MAX_PROCS; i++) {
 		if (IsPet() && hand != EQEmu::invslot::slotPrimary) //Pets can only proc spell procs from their primay hand (ie; beastlord pets)
 			continue; // If pets ever can proc from off hand, this will need to change
 
-					  // Not ranged
+		if (!weapon || (SpellProcs[i].base_spellID == POISON_PROC && weapon->ItemType != EQEmu::item::ItemType1HPiercing))
+			continue; // Old school poison will only proc with 1HP equipped.
+
+		// Not ranged
 		if (!rangedattk) {
 			// Perma procs (AAs)
 			if (PermaProcs[i].spellID != SPELL_UNKNOWN) {
@@ -4083,6 +4092,11 @@ void Mob::TrySpellProc(const EQEmu::ItemInstance *inst, const EQEmu::ItemData *w
 
 			// Spell procs (buffs)
 			if (SpellProcs[i].spellID != SPELL_UNKNOWN) {
+				if (SpellProcs[i].base_spellID == POISON_PROC) {
+					poison_slot=i;					
+					continue; // Process the poison proc last per @mackal
+				}
+
 				float chance = ProcChance * (static_cast<float>(SpellProcs[i].chance) / 100.0f);
 				if (zone->random.Roll(chance)) {
 					LogCombat("Spell proc [{}] procing spell [{}] ([{}] percent chance)", i, SpellProcs[i].spellID, chance);
@@ -4112,6 +4126,21 @@ void Mob::TrySpellProc(const EQEmu::ItemInstance *inst, const EQEmu::ItemData *w
 			}
 		}
 	}
+
+	if (poison_slot > -1) {
+		bool one_shot = !RuleB(Combat, UseExtendedPoisonProcs);
+		float chance = (one_shot) ? 100.0f : ProcChance * (static_cast<float>(SpellProcs[poison_slot].chance) / 100.0f);
+		uint16 spell_id = SpellProcs[poison_slot].spellID;
+
+		if (zone->random.Roll(chance)) {
+			LogCombat("Poison proc [{}] procing spell [{}] ([{}] percent chance)", poison_slot, spell_id, chance);
+			SendBeginCast(spell_id, 0);
+			ExecWeaponProc(nullptr, spell_id, on, SpellProcs[poison_slot].level_override);
+			if (one_shot) {
+				RemoveProcFromWeapon(spell_id);
+			}
+		}
+	}	
 
 	if (HasSkillProcs() && hand != EQEmu::invslot::slotRange) { //We check ranged skill procs within the attack functions.
 		uint16 skillinuse = 28;

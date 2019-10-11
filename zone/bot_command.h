@@ -586,6 +586,7 @@ void bot_command_rune(Client *c, const Seperator *sep);
 void bot_command_send_home(Client *c, const Seperator *sep);
 void bot_command_size(Client *c, const Seperator *sep);
 void bot_command_summon_corpse(Client *c, const Seperator *sep);
+void bot_command_suspend(Client *c, const Seperator *sep);
 void bot_command_taunt(Client *c, const Seperator *sep);
 void bot_command_track(Client *c, const Seperator *sep);
 void bot_command_water_breathing(Client *c, const Seperator *sep);
