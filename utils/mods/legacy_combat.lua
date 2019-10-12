@@ -68,7 +68,7 @@ function MeleeMitigation(e)
         return e;
     end
 
-    eq.debug(
+    eq.log_combat(
             string.format("[%s] [ClientAttack] Damage Table [%i] WeaponDMG [%i]",
                     e.self:GetCleanName(),
                     GetDamageTable(e.other, e.hit.skill),
@@ -78,7 +78,7 @@ function MeleeMitigation(e)
 
     e.hit.damage_done = 2 * e.hit.base_damage * GetDamageTable(e.other, e.hit.skill) / 100;
 
-    eq.debug(
+    eq.log_combat(
             string.format("[%s] [ClientAttack] DamageDone [%i] BaseDamage [%i] HitSkill [%i]",
                     e.self:GetCleanName(),
                     e.hit.damage_done,
@@ -232,7 +232,7 @@ function CheckHitChance(e)
 
     local tohit_roll = Random.Real(0, 100);
 
-    eq.debug(
+    eq.log_combat(
             string.format("[%s] [Mob::CheckHitChance] Chance [%i] ToHitRoll [%i] Hit? [%s]",
                     e.self:GetCleanName(),
                     chancetohit,
@@ -343,7 +343,7 @@ function TryCriticalHit(e)
         critChance = critChance + opts.crit_flat;
     end
 
-    eq.debug(
+    eq.log_combat(
             string.format("[%s] [Mob::TryCriticalHit] CritChance [%i] CritChanceBonus [%i] Dex [%i] Post-Dex-Block",
                     e.self:GetCleanName(),
                     critChance,
@@ -374,7 +374,7 @@ function TryCriticalHit(e)
 
             critMod = critMod + GetCritDmgMod(self, e.hit.skill) * 2;
 
-            eq.debug(
+            eq.log_combat(
                     string.format("[%s] [Mob::TryCriticalHit] CritChance [%i] CritMod [%i] GetCritDmgMod [%i] CripSuccess [%s]",
                             e.self:GetCleanName(),
                             critChance,
@@ -437,7 +437,7 @@ function TryPetCriticalHit(self, defender, hit)
     local CritPetChance   = owner:GetAABonuses():PetCriticalHit() + owner:GetItemBonuses():PetCriticalHit() + owner:GetSpellBonuses():PetCriticalHit();
     local CritChanceBonus = GetCriticalChanceBonus(self, hit.skill);
 
-    eq.debug(
+    eq.log_combat(
             string.format("[%s] [Mob::TryPetCriticalHit] CritPetChance [%i] CritChanceBonus [%i] | Bonuses AA [%i] Item [%i] Spell [%i]",
                     e.self:GetCleanName(),
                     CritPetChance,
@@ -452,7 +452,7 @@ function TryPetCriticalHit(self, defender, hit)
         critChance = critChance + CritPetChance;
         critChance = critChance + (critChance * CritChanceBonus / 100.0);
 
-        eq.debug(
+        eq.log_combat(
                 string.format("[%s] [Mob::TryPetCriticalHit] critChance [%i] PostCalcs",
                         e.self:GetCleanName(),
                         critChance
@@ -469,7 +469,7 @@ function TryPetCriticalHit(self, defender, hit)
             critMod           = critMod + GetCritDmgMod(self, hit.skill) * 2;
             hit.damage_done   = (hit.damage_done * critMod) / 100;
 
-            eq.debug(
+            eq.log_combat(
                     string.format("[%s] [Mob::TryPetCriticalHit] critMod [%i] DmgMod [%i] DamageDone [%i]",
                             e.self:GetCleanName(),
                             critMod,
@@ -508,7 +508,7 @@ function GetCriticalChanceBonus(self, skill)
     critical_chance       = critical_chance + spellbonuses:CriticalHitChance(skill);
     critical_chance       = critical_chance + aabonuses:CriticalHitChance(skill);
 
-    eq.debug(
+    eq.log_combat(
             string.format("[%s] [Mob::GetCriticalChanceBonus] Bonuses | Item [%i] Spell [%i] AA [%i] | 2nd Item [%i] Spell [%i] AA [%i] Final Chance [%i]",
                     self:GetCleanName(),
                     itembonuses:CriticalHitChance(Skill.HIGHEST_SKILL + 1),
@@ -578,7 +578,7 @@ function DoMeleeMitigation(defender, attacker, hit, opts)
     local weight            = 0.0;
     local monkweight        = MonkACBonusWeight;
 
-    eq.debug(
+    eq.log_combat(
             string.format("[%s] [Mob::MeleeMitigation] Stability Bonuses | AA [%i] Item [%i] Spell [%i]",
                     defender:GetCleanName(),
                     aabonuses:CombatStability(),
@@ -587,7 +587,7 @@ function DoMeleeMitigation(defender, attacker, hit, opts)
             )
     );
 
-    eq.debug(
+    eq.log_combat(
             string.format("[%s] [Mob::MeleeMitigation] Soft Cap [%i]",
                     defender:GetCleanName(),
                     softcap
@@ -698,7 +698,7 @@ function DoMeleeMitigation(defender, attacker, hit, opts)
         attack_rating = (attacker:GetATK() + (attacker:GetSkill(Skill.Offense) * 1.345) + ((attacker:GetSTR() - 66) * 0.9));
     end
 
-    eq.debug(
+    eq.log_combat(
             string.format("[%s] [Mob::MeleeMitigation] Attack Rating [%02f] Mitigation Rating [%02f] Damage [%i]",
                     defender:GetCleanName(),
                     attack_rating,
@@ -713,7 +713,7 @@ function DoMeleeMitigation(defender, attacker, hit, opts)
         hit.damage_done = 0;
     end
 
-    eq.debug(
+    eq.log_combat(
             string.format("[%s] [Mob::MeleeMitigation] Final Damage [%i]",
                     defender:GetCleanName(),
                     hit.damage_done
@@ -787,7 +787,7 @@ function MobGetMeleeMitDmg(defender, attacker, damage, min_damage, mitigation_ra
     local mit_roll = Random.Real(0, mitigation_rating);
     local atk_roll = Random.Real(0, attack_rating);
 
-    eq.debug(
+    eq.log_combat(
             string.format("[%s] [Mob::GetMeleeMitDmg] MitigationRoll [%02f] AtkRoll [%02f]",
                     defender:GetCleanName(),
                     mit_roll,
@@ -823,7 +823,7 @@ function MobGetMeleeMitDmg(defender, attacker, damage, min_damage, mitigation_ra
 
     local interval = (damage - min_damage) / 20.0;
 
-    eq.debug(
+    eq.log_combat(
             string.format("[%s] [Mob::GetMeleeMitDmg] Interval [%02f] d [%02f]",
                     defender:GetCleanName(),
                     interval,
@@ -833,7 +833,7 @@ function MobGetMeleeMitDmg(defender, attacker, damage, min_damage, mitigation_ra
 
     damage = damage - (math.floor(d) * interval);
 
-    eq.debug(
+    eq.log_combat(
             string.format("[%s] [Mob::GetMeleeMitDmg] Damage [%02f] Post Interval",
                     defender:GetCleanName(),
                     damage
@@ -842,7 +842,7 @@ function MobGetMeleeMitDmg(defender, attacker, damage, min_damage, mitigation_ra
 
     damage = damage - (min_damage * defender:GetItemBonuses():MeleeMitigation() / 100);
 
-    eq.debug(
+    eq.log_combat(
             string.format("[%s] [Mob::GetMeleeMitDmg] Damage [%02f] Mitigation [%i] Post Mitigation MinDmg",
                     defender:GetCleanName(),
                     damage,
@@ -853,7 +853,7 @@ function MobGetMeleeMitDmg(defender, attacker, damage, min_damage, mitigation_ra
     -- Changed from positive to negative per original
     damage = damage - (damage * (defender:GetSpellBonuses():MeleeMitigationEffect() + defender:GetItemBonuses():MeleeMitigationEffect() + defender:GetAABonuses():MeleeMitigationEffect()) / 100);
 
-    eq.debug(
+    eq.log_combat(
             string.format("[%s] [Mob::GetMeleeMitDmg] Damage [%02f] SpellMit [%i] ItemMit [%i] AAMit [%i] Post All Mit Bonuses",
                     defender:GetCleanName(),
                     damage,
@@ -889,7 +889,7 @@ function GetRawACNoShield(self)
 
     ac = ac - shield_ac;
 
-    eq.debug(
+    eq.log_combat(
             string.format("[%s] [Client::GetRawACNoShield] AC [%i] ItemAC [%i] SpellAC [%i] AAAC [%i]",
                     self:GetCleanName(),
                     ac,
@@ -955,7 +955,7 @@ end
 function CommonOutgoingHitSuccess(e)
     e = ApplyMeleeDamageBonus(e);
 
-    eq.debug(
+    eq.log_combat(
             string.format("[%s] [Mob::CommonOutgoingHitSuccess] Dmg [%i] Post ApplyMeleeDamageBonus",
                     e.self:GetCleanName(),
                     e.hit.damage_done
@@ -964,7 +964,7 @@ function CommonOutgoingHitSuccess(e)
 
     e.hit.damage_done = e.hit.damage_done + (e.hit.damage_done * e.other:GetSkillDmgTaken(e.hit.skill) / 100) + (e.self:GetSkillDmgAmt(e.hit.skill) + e.other:GetFcDamageAmtIncoming(e.self, 0, true, e.hit.skill));
 
-    eq.debug(
+    eq.log_combat(
             string.format("[%s] [Mob::CommonOutgoingHitSuccess] Dmg [%i] SkillDmgTaken [%i] SkillDmgtAmt [%i] FcDmgAmtIncoming [%i] Post DmgCalcs",
                     e.self:GetCleanName(),
                     e.hit.damage_done,
@@ -987,7 +987,7 @@ function ApplyMeleeDamageBonus(e)
         dmgbonusmod = dmgbonusmod + e.opts.melee_damage_bonus_flat;
     end
 
-    eq.debug(
+    eq.log_combat(
             string.format("[%s] [Mob::ApplyMeleeDamageBonus] DmgBonusMod [%i] Dmg [%i]",
                     e.self:GetCleanName(),
                     dmgbonusmod,
