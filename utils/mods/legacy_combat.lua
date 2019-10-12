@@ -437,9 +437,28 @@ function TryPetCriticalHit(self, defender, hit)
     local CritPetChance   = owner:GetAABonuses():PetCriticalHit() + owner:GetItemBonuses():PetCriticalHit() + owner:GetSpellBonuses():PetCriticalHit();
     local CritChanceBonus = GetCriticalChanceBonus(self, hit.skill);
 
+    eq.debug(
+            string.format("[%s] [Mob::TryPetCriticalHit] CritPetChance [%i] CritChanceBonus [%i] | Bonuses AA [%i] Item [%i] Spell [%i]",
+                    e.self:GetCleanName(),
+                    CritPetChance,
+                    CritChanceBonus,
+                    owner:GetAABonuses():PetCriticalHit(),
+                    owner:GetItemBonuses():PetCriticalHit(),
+                    owner:GetSpellBonuses():PetCriticalHit()
+            )
+    );
+
     if (CritPetChance or critChance) then
         critChance = critChance + CritPetChance;
         critChance = critChance + (critChance * CritChanceBonus / 100.0);
+
+        eq.debug(
+                string.format("[%s] [Mob::TryPetCriticalHit] critChance [%i] PostCalcs",
+                        e.self:GetCleanName(),
+                        critChance
+                )
+        );
+
     end
 
     if (critChance > 0) then
@@ -449,9 +468,24 @@ function TryPetCriticalHit(self, defender, hit)
             local entity_list = eq.get_entity_list();
             critMod           = critMod + GetCritDmgMod(self, hit.skill) * 2;
             hit.damage_done   = (hit.damage_done * critMod) / 100;
-            entity_list:FilteredMessageClose(this, false, CriticalMessageRange,
-                    MT.CritMelee, Filter.MeleeCrits, string.format('%s scores a critical hit! (%d)',
-                            self:GetCleanName(), e.hit.damage_done));
+
+            eq.debug(
+                    string.format("[%s] [Mob::TryPetCriticalHit] critMod [%i] DmgMod [%i] DamageDone [%i]",
+                            e.self:GetCleanName(),
+                            critMod,
+                            GetCritDmgMod(self, hit.skill),
+                            hit.damage_done
+                    )
+            );
+
+            entity_list:FilteredMessageClose(
+                    this,
+                    false,
+                    CriticalMessageRange,
+                    MT.CritMelee,
+                    Filter.MeleeCrits,
+                    string.format('%s scores a critical hit! (%d)', self:GetCleanName(), e.hit.damage_done)
+            );
         end
     end
 
@@ -497,13 +531,16 @@ function GetCritDmgMod(self, skill)
     local aabonuses    = self:GetAABonuses();
     local itembonuses  = self:GetItemBonuses();
     local spellbonuses = self:GetSpellBonuses();
-
     critDmg_mod        = critDmg_mod + itembonuses:CritDmgMod(Skill.HIGHEST_SKILL + 1);
     critDmg_mod        = critDmg_mod + spellbonuses:CritDmgMod(Skill.HIGHEST_SKILL + 1);
     critDmg_mod        = critDmg_mod + aabonuses:CritDmgMod(Skill.HIGHEST_SKILL + 1);
     critDmg_mod        = critDmg_mod + itembonuses:CritDmgMod(skill);
     critDmg_mod        = critDmg_mod + spellbonuses:CritDmgMod(skill);
     critDmg_mod        = critDmg_mod + aabonuses:CritDmgMod(skill);
+
+    if (critDmg_mod < -100) then
+        critDmg_mod = -100;
+    end
 
     return critDmg_mod;
 end

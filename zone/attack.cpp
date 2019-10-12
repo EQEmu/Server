@@ -3889,12 +3889,32 @@ void Mob::TryPetCriticalHit(Mob *defender, uint16 skill, int32 &damage)
 	int32 CritPetChance = owner->aabonuses.PetCriticalHit + owner->itembonuses.PetCriticalHit + owner->spellbonuses.PetCriticalHit;
 	int32 CritChanceBonus = GetCriticalChanceBonus(skill);
 
+	Log.Out(
+		Logs::General,
+		Logs::Combat,
+		"[%s] [Mob::TryPetCriticalHit] CritPetChance [%i] CritChanceBonus [%i] | Bonuses AA [%i] Item [%i] Spell [%i]",
+		GetCleanName(),
+		CritPetChance,
+		CritChanceBonus,
+		owner->aabonuses.PetCriticalHit,
+		owner->itembonuses.PetCriticalHit,
+		owner->spellbonuses.PetCriticalHit
+	);
+
 	if (CritPetChance || critChance) {
 
 		//For pets use PetCriticalHit for base chance, pets do not innately critical with without it
 		//even if buffed with a CritChanceBonus effects.
 		critChance += CritPetChance;
 		critChance += critChance*CritChanceBonus/100.0f;
+
+		Log.Out(
+			Logs::General,
+			Logs::Combat,
+			"[%s] [Mob::TryPetCriticalHit] critChance [%.2f] PostCalcs",
+			GetCleanName(),
+			critChance
+		);
 	}
 
 	if(critChance > 0){
@@ -3905,9 +3925,27 @@ void Mob::TryPetCriticalHit(Mob *defender, uint16 skill, int32 &damage)
 		{
 			critMod += GetCritDmgMob(skill) * 2; // To account for base crit mod being 200 not 100
 			damage = (damage * critMod) / 100;
-			entity_list.FilteredMessageClose_StringID(this, false, 200,
-					MT_CritMelee, FilterMeleeCrits, CRITICAL_HIT,
-					GetCleanName(), itoa(damage));
+
+			Log.Out(
+				Logs::General,
+				Logs::Combat,
+				"[%s] [Mob::TryPetCriticalHit] critMod [%.2f] DmgMod [%i] DamageDone [%i]",
+				GetCleanName(),
+				critMod,
+				GetCritDmgMob(skill),
+				damage
+			);
+
+			entity_list.FilteredMessageClose_StringID(
+				this,
+				false,
+				200,
+				MT_CritMelee,
+				FilterMeleeCrits,
+				CRITICAL_HIT,
+				GetCleanName(),
+				itoa(damage)
+			);
 		}
 	}
 }
