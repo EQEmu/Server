@@ -1,17 +1,5 @@
-/** @file
-	@brief Header
+// Copyright (c) 2005 Daniel Wallin
 
-	@date 2012
-
-	@author
-	Ryan Pavlik
-	<rpavlik@iastate.edu> and <abiryan@ryand.net>
-	http://academic.cleardefinition.com/
-	Iowa State University Virtual Reality Applications Center
-	Human-Computer Interaction Graduate Program
-*/
-
-//          Copyright Iowa State University 2012.
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
 // to deal in the Software without restriction, including without limitation
@@ -32,25 +20,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
 // OR OTHER DEALINGS IN THE SOFTWARE.
 
-#ifndef INCLUDED_function_introspection_hpp_GUID_b55783e7_e6da_4816_925e_9256245c1065
-#define INCLUDED_function_introspection_hpp_GUID_b55783e7_e6da_4816_925e_9256245c1065
+#ifndef LUABIND_GET_POINTER_051023_HPP
+# define LUABIND_GET_POINTER_051023_HPP
 
-// Internal Includes
-#include <luabind/config.hpp>
-#include <luabind/lua_state_fwd.hpp>
+//
+// We need these overloads in the luabind namespace.
+//
 
-// Library/third-party includes
-// - none
-
-// Standard includes
-// - none
-
+# include <boost/get_pointer.hpp>
 
 namespace luabind {
 
-	LUABIND_API int bind_function_introspection(lua_State * L);
+using boost::get_pointer;
 
-} // end of namespace luabind
+} // namespace luabind
 
-#endif // INCLUDED_function_introspection_hpp_GUID_b55783e7_e6da_4816_925e_9256245c1065
+#endif // LUABIND_GET_POINTER_051023_HPP
 
