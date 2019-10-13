@@ -28,7 +28,5 @@
 #include <luabind/class.hpp>
 #include <luabind/function.hpp>
 #include <luabind/open.hpp>
-#include <luabind/detail/conversion_policies/conversion_policies.hpp>
 
 #endif // LUABIND_BIND_HPP_INCLUDED
-

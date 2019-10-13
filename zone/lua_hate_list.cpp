@@ -63,7 +63,7 @@ luabind::scope lua_register_hate_entry() {
 
 luabind::scope lua_register_hate_list() {
 	return luabind::class_<Lua_HateList>("HateList")
-			.def_readwrite("entries", &Lua_HateList::entries, luabind::return_stl_iterator());
+			.def_readwrite("entries", &Lua_HateList::entries, luabind::return_stl_iterator);
 }
 
 #endif

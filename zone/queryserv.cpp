@@ -21,6 +21,7 @@ Copyright (C) 2001-2014 EQEMu Development Team (http://eqemulator.net)
 #include "../common/string_util.h"
 #include "queryserv.h"
 #include "worldserver.h"
+#include "net.h"
 
 
 extern WorldServer worldserver;

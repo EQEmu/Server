@@ -26,8 +26,6 @@
 
 #include <luabind/config.hpp>
 
-#include <luabind/lua_state_fwd.hpp>
-
 namespace luabind {
 
 	LUABIND_API void open(lua_State* L);

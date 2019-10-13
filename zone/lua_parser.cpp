@@ -1300,6 +1300,8 @@ QuestEventID LuaParser::ConvertLuaEvent(QuestEventID evt) {
 	}
 }
 
+#endif
+
 void LuaParser::MeleeMitigation(Mob *self, Mob *attacker, DamageHitInfo &hit, ExtraAttackOptions *opts, bool &ignoreDefault)
 {
 	for (auto &mod : mods_) {
@@ -1372,5 +1374,3 @@ uint32 LuaParser::GetExperienceForKill(Client *self, Mob *against, bool &ignoreD
 	}
 	return retval;
 }
-
-#endif
