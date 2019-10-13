@@ -33,6 +33,7 @@
 #include "../common/guilds.h"
 
 #include "guild_mgr.h"
+#include "net.h"
 #include "petitions.h"
 #include "quest_parser_collection.h"
 #include "raids.h"
@@ -55,6 +56,7 @@
 extern Zone *zone;
 extern volatile bool is_zone_loaded;
 extern WorldServer worldserver;
+extern NetConnection net;
 extern uint32 numclients;
 extern PetitionList petition_list;
 
@@ -298,13 +300,6 @@ const Bot *Entity::CastToBot() const
 #endif
 
 EntityList::EntityList()
-	:
-	object_timer(5000),
-	door_timer(5000),
-	corpse_timer(2000),
-	group_timer(1000),
-	raid_timer(1000),
-	trap_timer(1000)
 {
 	// set up ids between 1 and 1500
 	// neither client or server performs well if you have
@@ -354,7 +349,7 @@ void EntityList::TrapProcess()
 		return;
 
 	if (trap_list.empty()) {
-		trap_timer.Disable();
+		net.trap_timer.Disable();
 		return;
 	}
 
@@ -393,7 +388,7 @@ void EntityList::GroupProcess()
 		return;
 
 	if (group_list.empty()) {
-		group_timer.Disable();
+		net.group_timer.Disable();
 		return;
 	}
 
@@ -417,7 +412,7 @@ void EntityList::RaidProcess()
 		return;
 
 	if (raid_list.empty()) {
-		raid_timer.Disable();
+		net.raid_timer.Disable();
 		return;
 	}
 
@@ -432,7 +427,7 @@ void EntityList::DoorProcess()
 		return;
 #endif
 	if (door_list.empty()) {
-		door_timer.Disable();
+		net.door_timer.Disable();
 		return;
 	}
 
@@ -450,7 +445,7 @@ void EntityList::DoorProcess()
 void EntityList::ObjectProcess()
 {
 	if (object_list.empty()) {
-		object_timer.Disable();
+		net.object_timer.Disable();
 		return;
 	}
 
@@ -469,7 +464,7 @@ void EntityList::ObjectProcess()
 void EntityList::CorpseProcess()
 {
 	if (corpse_list.empty()) {
-		corpse_timer.Disable(); // No corpses in list
+		net.corpse_timer.Disable(); // No corpses in list
 		return;
 	}
 
@@ -611,8 +606,8 @@ void EntityList::AddGroup(Group *group, uint32 gid)
 {
 	group->SetID(gid);
 	group_list.push_back(group);
-	if (!group_timer.Enabled())
-		group_timer.Start();
+	if (!net.group_timer.Enabled())
+		net.group_timer.Start();
 #if EQDEBUG >= 5
 	CheckGroupList(__FILE__, __LINE__);
 #endif
@@ -636,8 +631,8 @@ void EntityList::AddRaid(Raid *raid, uint32 gid)
 {
 	raid->SetID(gid);
 	raid_list.push_back(raid);
-	if (!raid_timer.Enabled())
-		raid_timer.Start();
+	if (!net.raid_timer.Enabled())
+		net.raid_timer.Start();
 }
 
 
@@ -654,8 +649,8 @@ void EntityList::AddCorpse(Corpse *corpse, uint32 in_id)
 	corpse->CalcCorpseName();
 	corpse_list.insert(std::pair<uint16, Corpse *>(corpse->GetID(), corpse));
 
-	if (!corpse_timer.Enabled())
-		corpse_timer.Start();
+	if (!net.corpse_timer.Enabled())
+		net.corpse_timer.Start();
 }
 
 void EntityList::AddNPC(NPC *npc, bool SendSpawnPacket, bool dontqueue)
@@ -757,8 +752,8 @@ void EntityList::AddObject(Object *obj, bool SendSpawnPacket)
 
 	object_list.insert(std::pair<uint16, Object *>(obj->GetID(), obj));
 
-	if (!object_timer.Enabled())
-		object_timer.Start();
+	if (!net.object_timer.Enabled())
+		net.object_timer.Start();
 }
 
 void EntityList::AddDoor(Doors *door)
@@ -766,16 +761,16 @@ void EntityList::AddDoor(Doors *door)
 	door->SetEntityID(GetFreeID());
 	door_list.insert(std::pair<uint16, Doors *>(door->GetEntityID(), door));
 
-	if (!door_timer.Enabled())
-		door_timer.Start();
+	if (!net.door_timer.Enabled())
+		net.door_timer.Start();
 }
 
 void EntityList::AddTrap(Trap *trap)
 {
 	trap->SetID(GetFreeID());
 	trap_list.insert(std::pair<uint16, Trap *>(trap->GetID(), trap));
-	if (!trap_timer.Enabled())
-		trap_timer.Start();
+	if (!net.trap_timer.Enabled())
+		net.trap_timer.Start();
 }
 
 void EntityList::AddBeacon(Beacon *beacon)

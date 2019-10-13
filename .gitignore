@@ -27,7 +27,6 @@ install_manifest.txt
 log/
 logs/
 vcpkg/
-perl/
 
 .idea/*
 *cbp

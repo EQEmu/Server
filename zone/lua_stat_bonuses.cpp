@@ -1,5 +1,3 @@
-#ifdef LUA_EQEMU
-
 #include "lua.hpp"
 #include <luabind/luabind.hpp>
 
@@ -1545,5 +1543,3 @@ luabind::scope lua_register_stat_bonuses() {
 		.def("AssassinateLevel", &Lua_StatBonuses::GetAssassinateLevel)
 		.def("ReduceTradeskillFail", &Lua_StatBonuses::GetReduceTradeskillFail);
 }
-
-#endif

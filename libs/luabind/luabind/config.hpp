@@ -20,26 +20,57 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
 // OR OTHER DEALINGS IN THE SOFTWARE.
 
+
 #ifndef LUABIND_CONFIG_HPP_INCLUDED
 #define LUABIND_CONFIG_HPP_INCLUDED
+
+#include <boost/config.hpp>
+
+#ifdef BOOST_MSVC
+	#define LUABIND_ANONYMOUS_FIX static
+#else
+	#define LUABIND_ANONYMOUS_FIX
+#endif
+
+#if defined (BOOST_MSVC) && (BOOST_MSVC <= 1200)
+
+#define for if (false) {} else for
+
+#include <cstring>
+
+namespace std
+{
+	using ::strlen;
+	using ::strcmp;
+	using ::type_info;
+}
+
+#endif
+
+
+#if defined (BOOST_MSVC) && (BOOST_MSVC <= 1300)
+	#define LUABIND_MSVC_TYPENAME
+#else
+	#define LUABIND_MSVC_TYPENAME typename
+#endif
 
 // the maximum number of arguments of functions that's
 // registered. Must at least be 2
 #ifndef LUABIND_MAX_ARITY
-#define LUABIND_MAX_ARITY 100
+	#define LUABIND_MAX_ARITY 10
 #elif LUABIND_MAX_ARITY <= 1
-#undef LUABIND_MAX_ARITY
-#define LUABIND_MAX_ARITY 2
+	#undef LUABIND_MAX_ARITY
+	#define LUABIND_MAX_ARITY 2
 #endif
 
 // the maximum number of classes one class
 // can derive from
 // max bases must at least be 1
 #ifndef LUABIND_MAX_BASES
-#define LUABIND_MAX_BASES 100
+	#define LUABIND_MAX_BASES 4
 #elif LUABIND_MAX_BASES <= 0
-#undef LUABIND_MAX_BASES
-#define LUABIND_MAX_BASES 1
+	#undef LUABIND_MAX_BASES
+	#define LUABIND_MAX_BASES 1
 #endif
 
 // LUABIND_NO_ERROR_CHECKING
@@ -70,17 +101,11 @@
 // C code has undefined behavior, lua is written in C).
 
 #ifdef LUABIND_DYNAMIC_LINK
-# if defined (_WIN32)
+# ifdef BOOST_WINDOWS
 #  ifdef LUABIND_BUILDING
 #   define LUABIND_API __declspec(dllexport)
 #  else
 #   define LUABIND_API __declspec(dllimport)
-#  endif
-# elif defined (__CYGWIN__)
-#  ifdef LUABIND_BUILDING
-#   define LUABIND_API __attribute__ ((dllexport))
-#  else
-#   define LUABIND_API __attribute__ ((dllimport))
 #  endif
 # else
 #  if defined(_GNUC_) && _GNUC_ >=4
@@ -93,19 +118,9 @@
 # define LUABIND_API
 #endif
 
-// This switches between using tag arguments / structure specialization for code size tests
-#define LUABIND_NO_INTERNAL_TAG_ARGUMENTS
-
 namespace luabind {
 
-	LUABIND_API void disable_super_deprecation();
-
-	namespace detail {
-		const int max_argument_count = 100;
-		const int max_hierarchy_depth = 100;
-	}
-
-	const int no_match = -(detail::max_argument_count*detail::max_hierarchy_depth + 1);
+LUABIND_API void disable_super_deprecation();
 
 } // namespace luabind
 
