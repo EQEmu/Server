@@ -24,40 +24,62 @@
 #ifndef LUABIND_PRIMITIVES_HPP_INCLUDED
 #define LUABIND_PRIMITIVES_HPP_INCLUDED
 
-	// std::reference_wrapper...
-#include <type_traits>  // std::true_type...
+#include <algorithm>
 #include <cstring>
 
-namespace luabind {
-	namespace detail {
+#include <luabind/config.hpp>
+#include <luabind/detail/yes_no.hpp>
 
-		template<class T>
-		struct type_ {};
+namespace luabind { namespace detail
+{
+	template<class T>
+	struct identity
+	{
+		typedef T type;
+	};
 
-		struct ltstr
-		{
-			bool operator()(const char* s1, const char* s2) const { return std::strcmp(s1, s2) < 0; }
-		};
+	template<class T>
+    struct type_ {};
 
-		template<int N>
-		struct aligned
-		{
-			char storage[N];
-		};
+	struct null_type {};
 
-		// returns the offset added to a Derived* when cast to a Base*
-		template<class Derived, class Base>
-		ptrdiff_t ptr_offset(type_<Derived>, type_<Base>)
-		{
-			aligned<sizeof(Derived)> obj;
-			Derived* ptr = reinterpret_cast<Derived*>(&obj);
+/*	typedef char yes_t;
+	typedef double no_t;*/
 
-			return ptrdiff_t(static_cast<char*>(static_cast<void*>(static_cast<Base*>(ptr)))
-				- static_cast<char*>(static_cast<void*>(ptr)));
-		}
+	struct lua_to_cpp {};
+	struct cpp_to_lua {};
 
+	template<class T> struct by_value {};
+	template<class T> struct by_reference {};
+	template<class T> struct by_const_reference {};
+	template<class T> struct by_pointer {};
+	template<class T> struct by_const_pointer {};
+
+	struct converter_policy_tag {};
+
+	struct ltstr
+	{
+		bool operator()(const char* s1, const char* s2) const { return std::strcmp(s1, s2) < 0; }
+	};
+
+	template<int N>
+	struct aligned 
+	{
+		char storage[N];
+	};
+
+	// returns the offset added to a Derived* when cast to a Base*
+	// TODO: return ptrdiff
+	template<class Derived, class Base>
+	int ptr_offset(type_<Derived>, type_<Base>)
+	{
+		aligned<sizeof(Derived)> obj;
+		Derived* ptr = reinterpret_cast<Derived*>(&obj);
+
+		return int(static_cast<char*>(static_cast<void*>(static_cast<Base*>(ptr)))
+		- static_cast<char*>(static_cast<void*>(ptr)));
 	}
-}
+
+}}
 
 #endif // LUABIND_PRIMITIVES_HPP_INCLUDED
-

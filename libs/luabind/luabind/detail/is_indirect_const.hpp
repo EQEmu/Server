@@ -20,13 +20,51 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
 // OR OTHER DEALINGS IN THE SOFTWARE.
 
-#define LUABIND_BUILDING
+#ifndef IS_INDIRECT_CONST_040211_HPP
+#define IS_INDIRECT_CONST_040211_HPP
 
-#include <luabind/operator.hpp>
+#include <luabind/detail/yes_no.hpp>
+#include <boost/type_traits/is_const.hpp>
+#include <boost/mpl/bool.hpp>
 
-namespace luabind
-{
-	LUABIND_API self_type self;
-	LUABIND_API const_self_type const_self;
-}
+namespace luabind {
+
+    namespace detail {
+
+    template<class T>
+    typename boost::is_const<T>::type
+    is_indirect_const_check(T(*)(), int);
+
+    template<class T>
+    typename boost::is_const<T>::type 
+    is_indirect_const_check(T*(*)(), long);
+
+    template<class T>
+    typename boost::is_const<T>::type 
+    is_indirect_const_check(T&(*)(), long);
+    
+    yes_t to_yes_no(boost::mpl::true_);
+    no_t to_yes_no(boost::mpl::false_);
+
+    } // namespace detail
+
+    // returns true for:
+    //    T = U*  is_const<U>
+    //    T = U&  is_const<U>
+    //    T = U   is_const<U>
+    template<class T>
+    struct is_indirect_const
+    {
+        BOOST_STATIC_CONSTANT(int, value = (
+            sizeof(
+                detail::to_yes_no(
+                    detail::is_indirect_const_check((T(*)())0, 0L)
+            ))
+         == sizeof(detail::yes_t)
+        ));
+    };
+
+} // namespace luabind
+
+#endif // IS_INDIRECT_CONST_040211_HPP
 

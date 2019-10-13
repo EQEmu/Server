@@ -20,19 +20,33 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
 // OR OTHER DEALINGS IN THE SOFTWARE.
 
-#ifndef LUABIND_LUA_STATE_FWD_HPP
-#define LUABIND_LUA_STATE_FWD_HPP
+#if !BOOST_PP_IS_ITERATING
+# error Do not include object_call.hpp directly!
+#endif
 
-#ifndef LUABIND_CPLUSPLUS_LUA
-extern "C"
+#include <boost/preprocessor/repetition/enum_params.hpp>
+#include <boost/preprocessor/repetition/enum_binary_params.hpp>
+#include <boost/preprocessor/facilities/intercept.hpp>
+
+#define N BOOST_PP_ITERATION()
+
+template<BOOST_PP_ENUM_PARAMS(N, class A)>
+call_proxy<
+    Derived
+  , boost::tuples::tuple<
+        BOOST_PP_ENUM_BINARY_PARAMS(N, A, const* BOOST_PP_INTERCEPT)
+    >
+> operator()(BOOST_PP_ENUM_BINARY_PARAMS(N, A, const& a))
 {
-#endif
+    typedef boost::tuples::tuple<
+        BOOST_PP_ENUM_BINARY_PARAMS(N, A, const* BOOST_PP_INTERCEPT)
+    > arguments;
 
-	struct lua_State;
-
-#ifndef LUABIND_CPLUSPLUS_LUA
+    return call_proxy<Derived, arguments>(
+        derived()
+      , arguments(BOOST_PP_ENUM_PARAMS(N, &a))
+    );
 }
-#endif
 
-#endif // LUABIND_BACK_REFERENCE_FWD_040510_HPP
+#undef N
 
