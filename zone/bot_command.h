@@ -578,6 +578,7 @@ void bot_command_movement_speed(Client *c, const Seperator *sep);
 void bot_command_owner_option(Client *c, const Seperator *sep);
 void bot_command_pet(Client *c, const Seperator *sep);
 void bot_command_pick_lock(Client *c, const Seperator *sep);
+void bot_command_precombat(Client* c, const Seperator* sep);
 void bot_command_pull(Client *c, const Seperator *sep);
 void bot_command_release(Client *c, const Seperator *sep);
 void bot_command_resistance(Client *c, const Seperator *sep);

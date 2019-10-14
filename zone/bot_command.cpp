@@ -1411,6 +1411,7 @@ int bot_command_init(void)
 		bot_command_add("petremove", "Orders a bot to remove its charmed pet", 0, bot_subcommand_pet_remove) ||
 		bot_command_add("petsettype", "Orders a Magician bot to use a specified pet type", 0, bot_subcommand_pet_set_type) ||
 		bot_command_add("picklock", "Orders a capable bot to pick the lock of the closest door", 0, bot_command_pick_lock) ||
+		bot_command_add("precombat", "Sets flag used to determine pre-combat behavior", 0, bot_command_precombat) ||
 		bot_command_add("portal", "Orders a Wizard bot to open a magical doorway to a specified destination", 0, bot_subcommand_portal) ||
 		bot_command_add("pull", "Orders a designated bot to 'pull' an enemy", 0, bot_command_pull) ||
 		bot_command_add("release", "Releases a suspended bot's AI processing (with hate list wipe)", 0, bot_command_release) ||
@@ -3752,24 +3753,30 @@ void bot_command_owner_option(Client *c, const Seperator *sep)
 		c->Message(m_action, "Bot 'spawn message' is now %s.", argument.c_str());
 	}
 	else if (!owner_option.compare("altcombat")) {
+		
+		if (RuleB(Bots, AllowOwnerOptionAltCombat)) {
 
-		if (!argument.compare("enable")) {
-			c->SetBotOption(Client::booAltCombat, true);
-		}
-		else if (!argument.compare("disable")) {
-			c->SetBotOption(Client::booAltCombat, false);
+			if (!argument.compare("enable")) {
+				c->SetBotOption(Client::booAltCombat, true);
+			}
+			else if (!argument.compare("disable")) {
+				c->SetBotOption(Client::booAltCombat, false);
+			}
+			else {
+				c->SetBotOption(Client::booAltCombat, !c->GetBotOption(Client::booAltCombat));
+			}
+
+			database.botdb.SaveOwnerOption(c->CharacterID(), Client::booAltCombat, c->GetBotOption(Client::booAltCombat));
+
+			c->Message(m_action, "Bot 'alt combat' is now %s.", (c->GetBotOption(Client::booAltCombat) == true ? "enabled" : "disabled"));
 		}
 		else {
-			c->SetBotOption(Client::booAltCombat, !c->GetBotOption(Client::booAltCombat));
+			c->Message(m_fail, "Bot owner option 'altcombat' is not allowed on this server.");
 		}
-
-		database.botdb.SaveOwnerOption(c->CharacterID(), Client::booAltCombat, c->GetBotOption(Client::booAltCombat));
-
-		c->Message(m_action, "Bot 'alt combat' is now %s.", (c->GetBotOption(Client::booAltCombat) == true ? "enabled" : "disabled"));
 	}
 	else if (!owner_option.compare("autodefend")) {
 
-		if (RuleB(Bots, AllowOwnerAutoDefend)) {
+		if (RuleB(Bots, AllowOwnerOptionAutoDefend)) {
 
 			if (!argument.compare("enable")) {
 				c->SetBotOption(Client::booAutoDefend, true);
@@ -3809,8 +3816,8 @@ void bot_command_owner_option(Client *c, const Seperator *sep)
 			(c->GetBotOption(Client::booStatsUpdate) ? "enabled" : "disabled"),
 			(c->GetBotOption(Client::booSpawnMessageSay) ? "say" : (c->GetBotOption(Client::booSpawnMessageTell) ? "tell" : "silent")),
 			(c->GetBotOption(Client::booSpawnMessageClassSpecific) ? "class" : "default"),
-			(c->GetBotOption(Client::booAltCombat) ? "enabled" : "disabled"),
-			(c->GetBotOption(Client::booAutoDefend) ? "enabled" : "disabled")
+			(RuleB(Bots, AllowOwnerOptionAltCombat) ? (c->GetBotOption(Client::booAltCombat) ? "enabled" : "disabled") : "restricted"),
+			(RuleB(Bots, AllowOwnerOptionAutoDefend) ? (c->GetBotOption(Client::booAutoDefend) ? "enabled" : "disabled") : "restricted")
 		);
 		
 		c->SendPopupToClient(window_title.c_str(), window_text.c_str());
@@ -3894,6 +3901,38 @@ void bot_command_pick_lock(Client *c, const Seperator *sep)
 		}
 	}
 	c->Message(m_action, "%i door%s attempted - %i door%s successful", door_count, ((door_count != 1) ? ("s") : ("")), open_count, ((open_count != 1) ? ("s") : ("")));
+}
+
+void bot_command_precombat(Client* c, const Seperator* sep)
+{
+	if (helper_command_alias_fail(c, "bot_command_precombat", sep->arg[0], "precombat")) {
+		return;
+	}
+	if (helper_is_help_or_usage(sep->arg[1])) {
+
+		c->Message(m_usage, "usage: %s ([set | clear])", sep->arg[0]);
+		return;
+	}
+
+	if (!c->GetTarget() || !c->IsAttackAllowed(c->GetTarget())) {
+
+		c->Message(m_fail, "This command requires an attackable target.");
+		return;
+	}
+
+	std::string argument(sep->arg[1]);
+
+	if (!argument.compare("set")) {
+		c->SetBotPrecombat(true);
+	}
+	else if (!argument.compare("clear")) {
+		c->SetBotPrecombat(false);
+	}
+	else {
+		c->SetBotPrecombat(!c->GetBotPrecombat());
+	}
+
+	c->Message(m_action, "Precombat flag is now %s.", (c->GetBotPrecombat() == true ? "set" : "clear"));
 }
 
 // TODO: Rework to allow owner specificed criteria for puller

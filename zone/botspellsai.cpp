@@ -1167,15 +1167,18 @@ bool Bot::AI_IdleCastCheck() {
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 
 		bool pre_combat = false;
-		Mob* test_against = nullptr;
+		Client* test_against = nullptr;
 
-		if (HasGroup() && GetGroup()->GetLeader() && GetGroup()->GetLeader()->IsClient())
-			test_against = GetGroup()->GetLeader();
-		else if (GetOwner() && GetOwner()->IsClient())
-			test_against = GetOwner();
+		if (HasGroup() && GetGroup()->GetLeader() && GetGroup()->GetLeader()->IsClient()) {
+			test_against = GetGroup()->GetLeader()->CastToClient();
+		}
+		else if (GetOwner() && GetOwner()->IsClient()) {
+			test_against = GetOwner()->CastToClient();
+		}
 
-		if (test_against && test_against->GetTarget() && test_against->GetTarget()->IsNPC() && !test_against->GetTarget()->IsPet())
-			pre_combat = true;
+		if (test_against) {
+			pre_combat = test_against->GetBotPrecombat();
+		}
 
 		//Ok, IdleCastCheck depends of class.
 		switch (GetClass()) {

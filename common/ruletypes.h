@@ -596,7 +596,8 @@ RULE_INT(Bots, CasterStopMeleeLevel, 13, "Level at which caster bots stop melee 
 RULE_INT(Bots, AllowedClasses, 0xFFFFFFFF, "Bitmask of allowed bot classes")
 RULE_INT(Bots, AllowedRaces, 0xFFFFFFFF, "Bitmask of allowed bot races")
 RULE_INT(Bots, AllowedGenders, 0x3, "Bitmask of allowed bot genders")
-RULE_BOOL(Bots, AllowOwnerAutoDefend, false, "When active, bots will defend their owner on enemy aggro")
+RULE_BOOL(Bots, AllowOwnerOptionAltCombat, true, "When option is enabled, bots will use an auto-/shared-aggro combat model")
+RULE_BOOL(Bots, AllowOwnerOptionAutoDefend, true, "When option is enabled, bots will defend their owner on enemy aggro")
 RULE_REAL(Bots, LeashDistance, 562500.0f, "Distance a bot is allowed to travel from leash owner before being pulled back (squared value)")
 RULE_CATEGORY_END()
 #endif

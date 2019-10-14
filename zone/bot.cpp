@@ -2465,7 +2465,7 @@ void Bot::AI_Process()
 
 //#pragma endregion
 
-	bool bo_alt_combat = bot_owner->GetBotOption(Client::booAltCombat);
+	bool bo_alt_combat = (RuleB(Bots, AllowOwnerOptionAltCombat) && bot_owner->GetBotOption(Client::booAltCombat));
 
 //#pragma region ATTACK FLAG
 
@@ -3402,7 +3402,7 @@ void Bot::AI_Process()
 		// 'class Client' doesn't make use of hate_list...
 		if (bot_owner->GetAggroCount() && bot_owner->GetBotOption(Client::booAutoDefend)) {
 
-			if (RuleB(Bots, AllowOwnerAutoDefend)) {
+			if (RuleB(Bots, AllowOwnerOptionAutoDefend)) {
 
 				if (NOT_HOLDING && NOT_PASSIVE) {
 

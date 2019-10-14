@@ -1646,9 +1646,13 @@ public:
 	bool GetBotPulling() { return m_bot_pulling; }
 	void SetBotPulling(bool flag = true) { m_bot_pulling = flag; }
 
+	bool GetBotPrecombat() { return m_bot_precombat; }
+	void SetBotPrecombat(bool flag = true) { m_bot_precombat = flag; }
+
 private:
 	bool bot_owner_options[_booCount];
 	bool m_bot_pulling;
+	bool m_bot_precombat;
 
 #endif
 };
