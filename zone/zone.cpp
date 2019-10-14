@@ -39,7 +39,6 @@
 
 #include "guild_mgr.h"
 #include "map.h"
-#include "net.h"
 #include "npc.h"
 #include "object.h"
 #include "pathfinder_null.h"
@@ -68,7 +67,6 @@
 #endif
 
 extern bool staticzone;
-extern NetConnection net;
 extern PetitionList petition_list;
 extern QuestParserCollection* parse;
 extern uint32 numclients;
@@ -80,6 +78,8 @@ Mutex MZoneShutdown;
 
 volatile bool is_zone_loaded = false;
 Zone* zone = 0;
+
+void UpdateWindowTitle(char* iNewTitle);
 
 bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	const char* zonename = database.GetZoneName(iZoneID);
@@ -147,7 +147,7 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	LogInfo("---- Zone server [{}], listening on port:[{}] ----", zonename, ZoneConfig::get()->ZonePort);
 	LogInfo("Zone Bootup: [{}] ([{}]: [{}])", zonename, iZoneID, iInstanceID);
 	parse->Init();
-	UpdateWindowTitle();
+	UpdateWindowTitle(nullptr);
 	zone->GetTimeSync();
 
 	zone->RequestUCSServerStatus();
@@ -727,7 +727,7 @@ void Zone::Shutdown(bool quiet)
 	safe_delete(zone);
 	entity_list.ClearAreas();
 	parse->ReloadQuests(true);
-	UpdateWindowTitle();
+	UpdateWindowTitle(nullptr);
 
 	LogSys.CloseFileLogs();
 
