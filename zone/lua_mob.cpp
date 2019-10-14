@@ -2229,9 +2229,9 @@ bool Lua_Mob::IsBerserk() {
 	return self->IsBerserk();
 }
 
-bool Lua_Mob::TryFinishingBlow(Lua_Mob defender, int *damage) {
+bool Lua_Mob::TryFinishingBlow(Lua_Mob defender, int &damage) {
 	Lua_Safe_Call_Bool();
-	return self->TryFinishingBlow(defender, *damage);
+	return self->TryFinishingBlow(defender, damage);
 }
 
 int Lua_Mob::GetBodyType()
@@ -2636,7 +2636,7 @@ luabind::scope lua_register_mob() {
 		.def("AttackAnimation", &Lua_Mob::AttackAnimation)
 		.def("GetWeaponDamage", &Lua_Mob::GetWeaponDamage)
 		.def("IsBerserk", &Lua_Mob::IsBerserk)
-		.def("TryFinishingBlow", (bool(Lua_Mob::*)(int*))&Lua_Mob::TryFinishingBlow)
+		.def("TryFinishingBlow", &Lua_Mob::TryFinishingBlow)
 		.def("GetBodyType", &Lua_Mob::GetBodyType)
 		.def("GetOrigBodyType", &Lua_Mob::GetOrigBodyType)
 		.def("CheckNumHitsRemaining", &Lua_Mob::CheckNumHitsRemaining);

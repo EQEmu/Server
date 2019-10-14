@@ -1,18 +1,5 @@
-/**
-	@file
-	@brief Implementation
+// Copyright (c) 2004 Daniel Wallin and Arvid Norberg
 
-	@date 2012
-
-	@author
-	Ryan Pavlik
-	<rpavlik@iastate.edu> and <abiryan@ryand.net>
-	http://academic.cleardefinition.com/
-	Iowa State University Virtual Reality Applications Center
-	Human-Computer Interaction Graduate Program
-*/
-
-//          Copyright Iowa State University 2012.
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
 // to deal in the Software without restriction, including without limitation
@@ -33,28 +20,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
 // OR OTHER DEALINGS IN THE SOFTWARE.
 
-#define LUABIND_BUILDING
+#ifndef POINTEE_SIZEOF_040211_HPP
+#define POINTEE_SIZEOF_040211_HPP
 
-// Internal Includes
-#include <luabind/set_package_preload.hpp>
-#include <luabind/config.hpp>           // for LUABIND_API
-#include <luabind/detail/object.hpp>    // for object, rawget, globals
-#include <luabind/detail/conversion_policies/conversion_policies.hpp>
-
-// Library/third-party includes
-#include <luabind/lua_include.hpp>      // for lua_pushstring, lua_rawset, etc
-
-// Standard includes
-// - none
-
+#include <boost/mpl/int.hpp>
 
 namespace luabind {
-	LUABIND_API void set_package_preload(lua_State * L, const char * modulename, int(*loader) (lua_State *)) {
-		rawget(rawget(globals(L), "package"), "preload").push(L);
-		lua_pushcclosure(L, loader, 0);
-		lua_setfield(L, -2, modulename);
-		lua_pop(L, 1);
-	}
+
+    namespace detail {
+
+    template<class T> T& deref_type(T(*)(), int);
+    template<class T> T& deref_type(T*(*)(), long);
+
+    } // namespace detail
+
+    // returns the indirect sizeof U, as in
+    //    sizeof(T*) = sizeof(T)
+    //    sizeof(T&) = sizeof(T)
+    //    sizeof(T)  = sizeof(T)
+    template<class T>
+    struct pointee_sizeof
+    {
+        BOOST_STATIC_CONSTANT(int, value = (
+            sizeof(detail::deref_type((T(*)())0), 0L)
+        ));
+
+        typedef boost::mpl::int_<value> type;
+    };
 
 } // namespace luabind
+
+#endif // POINTEE_SIZEOF_040211_HPP
 
