@@ -26,9 +26,13 @@
 #include <luabind/prefix.hpp>
 #include <exception>
 #include <luabind/config.hpp>
-#include <luabind/typeid.hpp>
+#include <luabind/error_callback_fun.hpp>
+#include <luabind/lua_state_fwd.hpp>
+#include <string>
 
-struct lua_State;
+#ifndef LUABIND_NO_EXCEPTIONS
+#include <luabind/typeid.hpp>
+#endif
 
 namespace luabind
 {
@@ -38,22 +42,19 @@ namespace luabind
 	// this exception usually means that the lua function you called
 	// from C++ failed with an error code. You will have to
 	// read the error code from the top of the lua stack
-	// the reason why this exception class doesn't contain
-	// the message itself is that std::string's copy constructor
+	// note that std::string's copy constructor
 	// may throw, if the copy constructor of an exception that is
 	// being thrown throws another exception, terminate will be called
 	// and the entire application is killed.
 	class LUABIND_API error : public std::exception
 	{
 	public:
-		explicit error(lua_State* L): m_L(L) {}
-		lua_State* state() const throw() { return m_L; }
-		virtual const char* what() const throw()
-		{
-			return "lua runtime error";
-		}
+		explicit error(lua_State* L);
+
+		virtual const char* what() const throw();
+
 	private:
-		lua_State* m_L;
+		std::string m_message;
 	};
 
 	// if an object_cast<>() fails, this is thrown
@@ -62,7 +63,7 @@ namespace luabind
 	class LUABIND_API cast_failed : public std::exception
 	{
 	public:
-		cast_failed(lua_State* L, type_id const& i): m_L(L), m_info(i) {}
+		cast_failed(lua_State* L, type_id const& i) : m_L(L), m_info(i) {}
 		lua_State* state() const throw() { return m_L; }
 		type_id info() const throw() { return m_info; }
 		virtual const char* what() const throw() { return "unable to make cast"; }
@@ -73,9 +74,6 @@ namespace luabind
 
 #else
 
-	typedef void(*error_callback_fun)(lua_State*);
-	typedef void(*cast_failed_callback_fun)(lua_State*, type_id const&);
-
 	LUABIND_API void set_error_callback(error_callback_fun e);
 	LUABIND_API void set_cast_failed_callback(cast_failed_callback_fun c);
 	LUABIND_API error_callback_fun get_error_callback();
@@ -83,7 +81,6 @@ namespace luabind
 
 #endif
 
-	typedef int(*pcall_callback_fun)(lua_State*);
 	LUABIND_API void set_pcall_callback(pcall_callback_fun e);
 	LUABIND_API pcall_callback_fun get_pcall_callback();
 

@@ -44,7 +44,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "quest_parser_collection.h"
 #include "guild_mgr.h"
 #include "mob.h"
-#include "net.h"
 #include "petitions.h"
 #include "raids.h"
 #include "string_ids.h"
@@ -59,7 +58,6 @@ extern Zone* zone;
 extern volatile bool is_zone_loaded;
 extern void CatchSignal(int);
 extern WorldServer worldserver;
-extern NetConnection net;
 extern PetitionList petition_list;
 extern uint32 numclients;
 extern volatile bool RunLoops;
