@@ -47,7 +47,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "zone_config.h"
 #include "masterentity.h"
 #include "worldserver.h"
-#include "net.h"
 #include "zone.h"
 #include "queryserv.h"
 #include "command.h"
@@ -96,7 +95,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 volatile bool RunLoops = true;
 extern volatile bool is_zone_loaded;
 
-NetConnection net;
 EntityList entity_list;
 WorldServer worldserver;
 uint32 numclients = 0;
@@ -115,6 +113,9 @@ const ZoneConfig *Config;
 double frame_time = 0.0;
 
 void Shutdown();
+void UpdateWindowTitle(char* iNewTitle);
+void CatchSignal(int sig_num);
+
 extern void MapOpcodes();
 
 int main(int argc, char** argv) {
@@ -440,7 +441,7 @@ int main(int argc, char** argv) {
 	bool websocker_server_opened = false;
 
 	Timer quest_timers(100);
-	UpdateWindowTitle();
+	UpdateWindowTitle(nullptr);
 	std::shared_ptr<EQStreamInterface> eqss;
 	EQStreamInterface *eqsi;
 	std::unique_ptr<EQ::Net::EQStreamManager> eqsm;
@@ -514,23 +515,12 @@ int main(int argc, char** argv) {
 
 		if (is_zone_loaded) {
 			{
-				if (net.group_timer.Enabled() && net.group_timer.Check())
-					entity_list.GroupProcess();
-
-				if (net.door_timer.Enabled() && net.door_timer.Check())
-					entity_list.DoorProcess();
-
-				if (net.object_timer.Enabled() && net.object_timer.Check())
-					entity_list.ObjectProcess();
-
-				if (net.corpse_timer.Enabled() && net.corpse_timer.Check())
-					entity_list.CorpseProcess();
-
-				if (net.trap_timer.Enabled() && net.trap_timer.Check())
-					entity_list.TrapProcess();
-
-				if (net.raid_timer.Enabled() && net.raid_timer.Check())
-					entity_list.RaidProcess();
+				entity_list.GroupProcess();
+				entity_list.DoorProcess();
+				entity_list.ObjectProcess();
+				entity_list.CorpseProcess();
+				entity_list.TrapProcess();
+				entity_list.RaidProcess();
 
 				entity_list.Process();
 				entity_list.MobProcess();
@@ -620,60 +610,6 @@ void Shutdown()
 	RunLoops = false;
 	LogInfo("Shutting down...");
 	LogSys.CloseFileLogs();
-}
-
-uint32 NetConnection::GetIP()
-{
-	char name[255 + 1];
-	size_t len = 0;
-	hostent* host = 0;
-
-	if (gethostname(name, len) < 0 || len <= 0)
-	{
-		return 0;
-	}
-
-	host = (hostent*)gethostbyname(name);
-	if (host == 0)
-	{
-		return 0;
-	}
-
-	return inet_addr(host->h_addr);
-}
-
-uint32 NetConnection::GetIP(char* name)
-{
-	hostent* host = 0;
-
-	host = (hostent*)gethostbyname(name);
-	if (host == 0)
-	{
-		return 0;
-	}
-
-	return inet_addr(host->h_addr);
-
-}
-
-NetConnection::NetConnection()
-	:
-	object_timer(5000),
-	door_timer(5000),
-	corpse_timer(2000),
-	group_timer(1000),
-	raid_timer(1000),
-	trap_timer(1000)
-{
-	group_timer.Disable();
-	raid_timer.Disable();
-	corpse_timer.Disable();
-	door_timer.Disable();
-	object_timer.Disable();
-	trap_timer.Disable();
-}
-
-NetConnection::~NetConnection() {
 }
 
 /* Update Window Title with relevant information */
