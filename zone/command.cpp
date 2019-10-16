@@ -3061,6 +3061,7 @@ void command_texture(Client *c, const Seperator *sep)
 {
 
 	uint16 texture;
+
 	if (sep->IsNumber(1) && atoi(sep->arg[1]) >= 0 && atoi(sep->arg[1]) <= 255) {
 		texture = atoi(sep->arg[1]);
 		uint8 helm = 0xFF;
@@ -3072,9 +3073,9 @@ void command_texture(Client *c, const Seperator *sep)
 			{
 				c->SendTextureWC(i, texture);
 			}
-		else if ((c->GetTarget()->GetRace() > 0 && c->GetTarget()->GetRace() <= 12) ||
-			c->GetTarget()->GetRace() == 128 || c->GetTarget()->GetRace() == 130 ||
-			c->GetTarget()->GetRace() == 330 || c->GetTarget()->GetRace() == 522) {
+		else if ((c->GetTarget()->GetModel() > 0 && c->GetTarget()->GetModel() <= 12) ||
+			c->GetTarget()->GetModel() == 128 || c->GetTarget()->GetModel() == 130 ||
+			c->GetTarget()->GetModel() == 330 || c->GetTarget()->GetModel() == 522) {
 			for (i = EQEmu::textures::textureBegin; i <= EQEmu::textures::LastTintableTexture; i++)
 			{
 				c->GetTarget()->SendTextureWC(i, texture);
@@ -3093,7 +3094,7 @@ void command_texture(Client *c, const Seperator *sep)
 			}
 
 			if ((c->GetTarget()) && (c->Admin() >= commandTextureOthers))
-				c->GetTarget()->SendIllusionPacket(c->GetTarget()->GetRace(), 0xFF, texture, helm);
+				c->GetTarget()->SendIllusionPacket(c->GetTarget()->GetModel(), 0xFF, texture, helm);
 			else
 				c->SendIllusionPacket(c->GetRace(), 0xFF, texture, helm);
 		}
