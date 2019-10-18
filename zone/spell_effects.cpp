@@ -489,7 +489,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 					if(!target_zone) {
 #ifdef SPELL_EFFECT_SPAM
-						Log(Logs::General, Logs::None, "Succor/Evacuation Spell In Same Zone.");
+						LogDebug("Succor/Evacuation Spell In Same Zone");
 #endif
 							if(IsClient())
 								CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), x, y, z, heading, 0, EvacToSafeCoords);
@@ -498,7 +498,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					}
 					else {
 #ifdef SPELL_EFFECT_SPAM
-						Log(Logs::General, Logs::None, "Succor/Evacuation Spell To Another Zone.");
+						LogDebug("Succor/Evacuation Spell To Another Zone");
 #endif
 						if(IsClient())
 							CastToClient()->MovePC(target_zone, x, y, z, heading);
@@ -710,7 +710,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						stun_resist += aabonuses.StunResist;
 
 					if (stun_resist <= 0 || zone->random.Int(0,99) >= stun_resist) {
-						Log(Logs::Detail, Logs::Combat, "Stunned. We had %d percent resist chance.", stun_resist);
+						LogCombat("Stunned. We had [{}] percent resist chance", stun_resist);
 
 						if (caster && caster->IsClient())
 							effect_value += effect_value*caster->GetFocusEffect(focusFcStunTimeMod, spell_id)/100;
@@ -720,7 +720,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						if (IsClient())
 							MessageString(Chat::Stun, SHAKE_OFF_STUN);
 
-						Log(Logs::Detail, Logs::Combat, "Stun Resisted. We had %d percent resist chance.", stun_resist);
+						LogCombat("Stun Resisted. We had [{}] percent resist chance", stun_resist);
 					}
 				}
 				break;
@@ -1678,7 +1678,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				if (IsCorpse() && CastToCorpse()->IsPlayerCorpse()) {
 
 					if(caster)
-						Log(Logs::Detail, Logs::Spells, " corpse being rezzed using spell %i by %s",
+						LogSpells(" corpse being rezzed using spell [{}] by [{}]",
 							spell_id, caster->GetName());
 
 					CastToCorpse()->CastRezz(spell_id, caster);
@@ -1810,7 +1810,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					}
 					else {
 						MessageString(Chat::LightBlue, TARGET_NOT_FOUND);
-						Log(Logs::General, Logs::Error, "%s attempted to cast spell id %u with spell effect SE_SummonCorpse, but could not cast target into a Client object.", GetCleanName(), spell_id);
+						LogError("[{}] attempted to cast spell id [{}] with spell effect SE_SummonCorpse, but could not cast target into a Client object", GetCleanName(), spell_id);
 					}
 				}
 
@@ -3060,7 +3060,7 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 		int oval = effect_value;
 		int mod = ApplySpellEffectiveness(spell_id, instrument_mod, true, caster_id);
 		effect_value = effect_value * mod / 10;
-		Log(Logs::Detail, Logs::Spells, "Effect value %d altered with bard modifier of %d to yeild %d",
+		LogSpells("Effect value [{}] altered with bard modifier of [{}] to yeild [{}]",
 			oval, mod, effect_value);
 	}
 
@@ -3123,7 +3123,7 @@ snare has both of them negative, yet their range should work the same:
 		updownsign = 1;
 	}
 
-	Log(Logs::Detail, Logs::Spells, "CSEV: spell %d, formula %d, base %d, max %d, lvl %d. Up/Down %d",
+	LogSpells("CSEV: spell [{}], formula [{}], base [{}], max [{}], lvl [{}]. Up/Down [{}]",
 		spell_id, formula, base, max, caster_level, updownsign);
 
 	switch(formula)
@@ -3345,7 +3345,7 @@ snare has both of them negative, yet their range should work the same:
 				result = ubase * (caster_level * (formula - 2000) + 1);
 			}
 			else
-				Log(Logs::General, Logs::None, "Unknown spell effect value forumula %d", formula);
+				LogDebug("Unknown spell effect value forumula [{}]", formula);
 		}
 	}
 
@@ -3370,7 +3370,7 @@ snare has both of them negative, yet their range should work the same:
 	if (base < 0 && result > 0)
 		result *= -1;
 
-	Log(Logs::Detail, Logs::Spells, "Result: %d (orig %d), cap %d %s", result, oresult, max, (base < 0 && result > 0)?"Inverted due to negative base":"");
+	LogSpells("Result: [{}] (orig [{}]), cap [{}] [{}]", result, oresult, max, (base < 0 && result > 0)?"Inverted due to negative base":"");
 
 	return result;
 }
@@ -3397,12 +3397,12 @@ void Mob::BuffProcess()
 					--buffs[buffs_i].ticsremaining;
 
 					if (buffs[buffs_i].ticsremaining < 0) {
-						Log(Logs::Detail, Logs::Spells, "Buff %d in slot %d has expired. Fading.", buffs[buffs_i].spellid, buffs_i);
+						LogSpells("Buff [{}] in slot [{}] has expired. Fading", buffs[buffs_i].spellid, buffs_i);
 						BuffFadeBySlot(buffs_i);
 					}
 					else
 					{
-						Log(Logs::Detail, Logs::Spells, "Buff %d in slot %d has %d tics remaining.", buffs[buffs_i].spellid, buffs_i, buffs[buffs_i].ticsremaining);
+						LogSpells("Buff [{}] in slot [{}] has [{}] tics remaining", buffs[buffs_i].spellid, buffs_i, buffs[buffs_i].ticsremaining);
 					}
 				}
 				else if (IsClient() && !(CastToClient()->ClientVersionBit() & EQEmu::versions::maskSoFAndLater))
@@ -3733,7 +3733,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 	if (IsClient() && !CastToClient()->IsDead())
 		CastToClient()->MakeBuffFadePacket(buffs[slot].spellid, slot);
 
-	Log(Logs::Detail, Logs::Spells, "Fading buff %d from slot %d", buffs[slot].spellid, slot);
+	LogSpells("Fading buff [{}] from slot [{}]", buffs[slot].spellid, slot);
 
 	if(spells[buffs[slot].spellid].viral_targets > 0) {
 		bool last_virus = true;
@@ -4712,7 +4712,7 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 					return 0;
 				break;
 			default:
-				Log(Logs::General, Logs::Normal, "CalcFocusEffect: unknown limit spelltype %d",
+				LogInfo("CalcFocusEffect: unknown limit spelltype [{}]",
 					focus_spell.base[i]);
 			}
 			break;
@@ -5090,7 +5090,7 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 		// this spits up a lot of garbage when calculating spell focuses
 		// since they have all kinds of extra effects on them.
 		default:
-			Log(Logs::General, Logs::Normal, "CalcFocusEffect: unknown effectid %d",
+			LogInfo("CalcFocusEffect: unknown effectid [{}]",
 				focus_spell.effectid[i]);
 #endif
 		}

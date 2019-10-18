@@ -25,7 +25,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 #include "../common/string_util.h"
 #include "../common/eqemu_logsys.h"
-#include "../common/eqemu_logsys_fmt.h"
 #include "../common/queue.h"
 #include "../common/timer.h"
 #include "../common/eq_packet.h"
@@ -119,18 +118,20 @@ int main(int argc, char** argv) {
 	LogSys.LoadLogSettingsDefaults();
 	set_exception_handler();
 
-	/* If eqemu_config.json does not exist - create it from conversion... */
-	if (!std::ifstream("eqemu_config.json")) {
+	/**
+	 * Auto convert json config from xml
+	 */
+	if (!std::ifstream("eqemu_config.json") && std::ifstream("eqemu_config.xml")) {
 		CheckForServerScript(true);
-		/* Run EQEmu Server script (Checks for database updates) */
 		if(system("perl eqemu_server.pl convert_xml"));
 	}
 	else {
-		/* Download EQEmu Server Maintenance Script if doesn't exist */
 		CheckForServerScript();
 	}
 
-	/* Database Version Check */
+	/**
+	 * Database version
+	 */
 	uint32 Database_Version = CURRENT_BINARY_DATABASE_VERSION;
 	uint32 Bots_Database_Version = CURRENT_BINARY_BOTS_DATABASE_VERSION;
 	if (argc >= 2) {
@@ -141,60 +142,74 @@ int main(int argc, char** argv) {
 	}
 
 	// Load server configuration
-	Log(Logs::General, Logs::World_Server, "Loading server configuration..");
+	LogInfo("Loading server configuration");
 	if (!WorldConfig::LoadConfig()) {
-		Log(Logs::General, Logs::World_Server, "Loading server configuration failed.");
+		LogError("Loading server configuration failed");
 		return 1;
 	}
 
 	Config = WorldConfig::get();
 
-	Log(Logs::General, Logs::World_Server, "CURRENT_VERSION: %s", CURRENT_VERSION);
+	LogInfo("CURRENT_VERSION: [{}]", CURRENT_VERSION);
 
 	if (signal(SIGINT, CatchSignal) == SIG_ERR) {
-		Log(Logs::General, Logs::World_Server, "Could not set signal handler");
+		LogError("Could not set signal handler");
 		return 1;
 	}
 
 	if (signal(SIGTERM, CatchSignal) == SIG_ERR) {
-		Log(Logs::General, Logs::World_Server, "Could not set signal handler");
+		LogError("Could not set signal handler");
 		return 1;
 	}
 
 #ifndef WIN32
 	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR) {
-		Log(Logs::General, Logs::World_Server, "Could not set signal handler");
+		LogError("Could not set signal handler");
 		return 1;
 	}
 #endif
 
-	// add login server config to list
+	/**
+	 * Add Loginserver
+	 */
 	if (Config->LoginCount == 0) {
 		if (Config->LoginHost.length()) {
-			loginserverlist.Add(Config->LoginHost.c_str(), Config->LoginPort, Config->LoginAccount.c_str(), Config->LoginPassword.c_str(), Config->LoginLegacy);
-			Log(Logs::General, Logs::World_Server, "Added loginserver %s:%i", Config->LoginHost.c_str(), Config->LoginPort);
+			loginserverlist.Add(
+				Config->LoginHost.c_str(),
+				Config->LoginPort,
+				Config->LoginAccount.c_str(),
+				Config->LoginPassword.c_str(),
+				Config->LoginLegacy
+			);
+			LogInfo("Added loginserver [{}]:[{}]", Config->LoginHost.c_str(), Config->LoginPort);
 		}
 	}
 	else {
-		LinkedList<LoginConfig*> loginlist = Config->loginlist;
-		LinkedListIterator<LoginConfig*> iterator(loginlist);
+		LinkedList<LoginConfig *> loginlist = Config->loginlist;
+		LinkedListIterator<LoginConfig *> iterator(loginlist);
 		iterator.Reset();
 		while (iterator.MoreElements()) {
-			loginserverlist.Add(iterator.GetData()->LoginHost.c_str(), iterator.GetData()->LoginPort, iterator.GetData()->LoginAccount.c_str(), iterator.GetData()->LoginPassword.c_str(),
-				iterator.GetData()->LoginLegacy);
-			Log(Logs::General, Logs::World_Server, "Added loginserver %s:%i", iterator.GetData()->LoginHost.c_str(), iterator.GetData()->LoginPort);
+			loginserverlist.Add(
+				iterator.GetData()->LoginHost.c_str(),
+				iterator.GetData()->LoginPort,
+				iterator.GetData()->LoginAccount.c_str(),
+				iterator.GetData()->LoginPassword.c_str(),
+				iterator.GetData()->LoginLegacy
+			);
+
+			LogInfo("Added loginserver [{}]:[{}]", iterator.GetData()->LoginHost.c_str(), iterator.GetData()->LoginPort);
 			iterator.Advance();
 		}
 	}
 
-	Log(Logs::General, Logs::World_Server, "Connecting to MySQL %s@%s:%i...", Config->DatabaseUsername.c_str(), Config->DatabaseHost.c_str(), Config->DatabasePort);
+	LogInfo("Connecting to MySQL [{}]@[{}]:[{}]", Config->DatabaseUsername.c_str(), Config->DatabaseHost.c_str(), Config->DatabasePort);
 	if (!database.Connect(
 		Config->DatabaseHost.c_str(),
 		Config->DatabaseUsername.c_str(),
 		Config->DatabasePassword.c_str(),
 		Config->DatabaseDB.c_str(),
 		Config->DatabasePort)) {
-		Log(Logs::General, Logs::World_Server, "Cannot continue without a database connection.");
+		LogError("Cannot continue without a database connection");
 		return 1;
 	}
 	guild_mgr.SetDatabase(&database);
@@ -230,7 +245,12 @@ int main(int argc, char** argv) {
 			if (argc == 5) {
 				if (Seperator::IsNumber(argv[4])) {
 					if (atoi(argv[4]) >= 0 && atoi(argv[4]) <= 255) {
-						if (database.CreateAccount(argv[2], argv[3], atoi(argv[4])) == 0) {
+						std::string user;
+						std::string loginserver;
+
+						ParseAccountString(argv[2], user, loginserver);
+
+						if (database.CreateAccount(argv[2], argv[3], atoi(argv[4]), loginserver.c_str(), 0) == 0) {
 							std::cerr << "database.CreateAccount failed." << std::endl;
 							return 1;
 						}
@@ -298,84 +318,85 @@ int main(int argc, char** argv) {
 	}
 
 	if (!ignore_db) {
-		Log(Logs::General, Logs::World_Server, "Checking Database Conversions..");
+		LogInfo("Checking Database Conversions");
 		database.CheckDatabaseConversions();
 	}
-	Log(Logs::General, Logs::World_Server, "Loading variables..");
+	LogInfo("Loading variables");
 	database.LoadVariables();
 
 	std::string hotfix_name;
 	if (database.GetVariable("hotfix_name", hotfix_name)) {
 		if (!hotfix_name.empty()) {
-			Log(Logs::General, Logs::Zone_Server, "Current hotfix in use: '%s'", hotfix_name.c_str());
+			LogInfo("Current hotfix in use: [{}]", hotfix_name.c_str());
 		}
 	}
 
-	Log(Logs::General, Logs::World_Server, "Purging expired data buckets...");
+	LogInfo("Purging expired data buckets");
 	database.PurgeAllDeletedDataBuckets();
 
-	Log(Logs::General, Logs::World_Server, "Loading zones..");
+	LogInfo("Loading zones");
 	database.LoadZoneNames();
-	Log(Logs::General, Logs::World_Server, "Clearing groups..");
+	LogInfo("Clearing groups");
 	database.ClearGroup();
-	Log(Logs::General, Logs::World_Server, "Clearing raids..");
+	LogInfo("Clearing raids");
 	database.ClearRaid();
 	database.ClearRaidDetails();
 	database.ClearRaidLeader();
-	Log(Logs::General, Logs::World_Server, "Clearing inventory snapshots..");
+	LogInfo("Clearing inventory snapshots");
 	database.ClearInvSnapshots();
-	Log(Logs::General, Logs::World_Server, "Loading items..");
+	LogInfo("Loading items");
 	if (!database.LoadItems(hotfix_name))
-		Log(Logs::General, Logs::World_Server, "Error: Could not load item data. But ignoring");
-	Log(Logs::General, Logs::World_Server, "Loading skill caps..");
+		LogError("Error: Could not load item data. But ignoring");
+	LogInfo("Loading skill caps");
 	if (!database.LoadSkillCaps(std::string(hotfix_name)))
-		Log(Logs::General, Logs::World_Server, "Error: Could not load skill cap data. But ignoring");
-	Log(Logs::General, Logs::World_Server, "Loading guilds..");
+		LogError("Error: Could not load skill cap data. But ignoring");
+
+
+	LogInfo("Loading guilds");
 	guild_mgr.LoadGuilds();
 
 	//rules:
 	{
 		if (!RuleManager::Instance()->UpdateOrphanedRules(&database)) {
-			Log(Logs::General, Logs::World_Server, "Failed to process 'Orphaned Rules' update operation.");
+			LogInfo("Failed to process 'Orphaned Rules' update operation.");
 		}
 		
 		if (!RuleManager::Instance()->UpdateInjectedRules(&database, "default")) {
-			Log(Logs::General, Logs::World_Server, "Failed to process 'Injected Rules' for ruleset 'default' update operation.");
+			LogInfo("Failed to process 'Injected Rules' for ruleset 'default' update operation.");
 		}
 
 		std::string tmp;
 		if (database.GetVariable("RuleSet", tmp)) {
-
-			Log(Logs::General, Logs::World_Server, "Loading rule set '%s'", tmp.c_str());
+			LogInfo("Loading rule set [{}]", tmp.c_str());
 
 			if (!RuleManager::Instance()->LoadRules(&database, tmp.c_str(), false)) {
-				Log(Logs::General, Logs::World_Server, "Failed to load ruleset '%s', falling back to defaults.", tmp.c_str());
+				LogInfo("Failed to load ruleset [{}], falling back to defaults", tmp.c_str());
 			}
 		}
 		else {
 
 			if (!RuleManager::Instance()->LoadRules(&database, "default", false)) {
-				Log(Logs::General, Logs::World_Server, "No rule set configured, using default rules");
+				LogInfo("No rule set configured, using default rules");
 			}
 			else {
-				Log(Logs::General, Logs::World_Server, "Loaded default rule set 'default'", tmp.c_str());
+				LogInfo("Loaded default rule set [default]", tmp.c_str());
 			}
 		}
 
 		if (!RuleManager::Instance()->RestoreRuleNotes(&database)) {
-			Log(Logs::General, Logs::World_Server, "Failed to process 'Restore Rule Notes' update operation.");
+			LogInfo("Failed to process 'Restore Rule Notes' update operation.");
 		}
 	}
 
 	EQEmu::InitializeDynamicLookups();
-	Log(Logs::General, Logs::World_Server, "Initialized dynamic dictionary entries");
+	LogInfo("Initialized dynamic dictionary entries");
 
 	if (RuleB(World, ClearTempMerchantlist)) {
-		Log(Logs::General, Logs::World_Server, "Clearing temporary merchant lists..");
+		LogInfo("Clearing temporary merchant lists");
 		database.ClearMerchantTemp();
 	}
 
-	Log(Logs::General, Logs::World_Server, "Loading EQ time of day..");
+	LogInfo("Loading EQ time of day");
 	TimeOfDay_Struct eqTime;
 	time_t realtime;
 	eqTime = database.LoadTime(realtime);
@@ -383,7 +404,7 @@ int main(int argc, char** argv) {
 	Timer EQTimeTimer(600000);
 	EQTimeTimer.Start(600000);
 
-	Log(Logs::General, Logs::World_Server, "Loading launcher list..");
+	LogInfo("Loading launcher list");
 	launcher_list.LoadList();
 
 	std::string tmp;
@@ -391,37 +412,37 @@ int main(int argc, char** argv) {
 	if (tmp.length() == 1 && tmp[0] == '1') {
 		holdzones = true;
 	}
-	Log(Logs::General, Logs::World_Server, "Reboot zone modes %s", holdzones ? "ON" : "OFF");
+	LogInfo("Reboot zone modes [{}]", holdzones ? "ON" : "OFF");
 
-	Log(Logs::General, Logs::World_Server, "Deleted %i stale player corpses from database", database.DeleteStalePlayerCorpses());
+	LogInfo("Deleted [{}] stale player corpses from database", database.DeleteStalePlayerCorpses());
 
-	Log(Logs::General, Logs::World_Server, "Loading adventures...");
+	LogInfo("Loading adventures");
 	if (!adventure_manager.LoadAdventureTemplates())
 	{
-		Log(Logs::General, Logs::World_Server, "Unable to load adventure templates.");
+		LogInfo("Unable to load adventure templates");
 	}
 
 	if (!adventure_manager.LoadAdventureEntries())
 	{
-		Log(Logs::General, Logs::World_Server, "Unable to load adventure templates.");
+		LogInfo("Unable to load adventure templates");
 	}
 
 	adventure_manager.Load();
 	adventure_manager.LoadLeaderboardInfo();
 
-	Log(Logs::General, Logs::World_Server, "Purging expired instances");
+	LogInfo("Purging expired instances");
 	database.PurgeExpiredInstances();
 
 	Timer PurgeInstanceTimer(450000);
 	PurgeInstanceTimer.Start(450000);
 
-	Log(Logs::General, Logs::World_Server, "Loading char create info...");
+	LogInfo("Loading char create info");
 	database.LoadCharacterCreateAllocations();
 	database.LoadCharacterCreateCombos();
 
 	std::unique_ptr<EQ::Net::ConsoleServer> console;
 	if (Config->TelnetEnabled) {
-		Log(Logs::General, Logs::World_Server, "Console (TCP) listener started.");
+		LogInfo("Console (TCP) listener started");
 		console.reset(new EQ::Net::ConsoleServer(Config->TelnetIP, Config->TelnetTCPPort));
 		RegisterConsoleFunctions(console);
 	}
@@ -434,18 +455,20 @@ int main(int argc, char** argv) {
 	server_opts.ipv6 = false;
 	server_opts.credentials = Config->SharedKey;
 	server_connection->Listen(server_opts);
-	Log(Logs::General, Logs::World_Server, "Server (TCP) listener started.");
+	LogInfo("Server (TCP) listener started");
 
-	server_connection->OnConnectionIdentified("Zone", [&console](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
-		LogF(Logs::General, Logs::World_Server, "New Zone Server connection from {2} at {0}:{1}",
-			connection->Handle()->RemoteIP(), connection->Handle()->RemotePort(), connection->GetUUID());
+	server_connection->OnConnectionIdentified(
+		"Zone", [&console](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
+			LogInfo("New Zone Server connection from [{2}] at [{0}:{1}]",
+					connection->Handle()->RemoteIP(), connection->Handle()->RemotePort(), connection->GetUUID());
 
-		numzones++;
-		zoneserver_list.Add(new ZoneServer(connection, console.get()));
-	});
+			numzones++;
+			zoneserver_list.Add(new ZoneServer(connection, console.get()));
+		}
+	);
 
 	server_connection->OnConnectionRemoved("Zone", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
-		LogF(Logs::General, Logs::World_Server, "Removed Zone Server connection from {0}",
+		LogInfo("Removed Zone Server connection from [{0}]",
 			connection->GetUUID());
 
 		numzones--;
@@ -453,35 +476,35 @@ int main(int argc, char** argv) {
 	});
 
 	server_connection->OnConnectionIdentified("Launcher", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
-		LogF(Logs::General, Logs::World_Server, "New Launcher connection from {2} at {0}:{1}",
+		LogInfo("New Launcher connection from [{2}] at [{0}:{1}]",
 			connection->Handle()->RemoteIP(), connection->Handle()->RemotePort(), connection->GetUUID());
 
 		launcher_list.Add(connection);
 	});
 
 	server_connection->OnConnectionRemoved("Launcher", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
-		LogF(Logs::General, Logs::World_Server, "Removed Launcher connection from {0}",
+		LogInfo("Removed Launcher connection from [{0}]",
 			connection->GetUUID());
 
 		launcher_list.Remove(connection);
 	});
 
 	server_connection->OnConnectionIdentified("QueryServ", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
-		LogF(Logs::General, Logs::World_Server, "New Query Server connection from {2} at {0}:{1}",
+		LogInfo("New Query Server connection from [{2}] at [{0}:{1}]",
 			connection->Handle()->RemoteIP(), connection->Handle()->RemotePort(), connection->GetUUID());
 
 		QSLink.AddConnection(connection);
 	});
 
 	server_connection->OnConnectionRemoved("QueryServ", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
-		LogF(Logs::General, Logs::World_Server, "Removed Query Server connection from {0}",
+		LogInfo("Removed Query Server connection from [{0}]",
 			connection->GetUUID());
 
 		QSLink.RemoveConnection(connection);
 	});
 
 	server_connection->OnConnectionIdentified("UCS", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
-		LogF(Logs::General, Logs::World_Server, "New UCS Server connection from {2} at {0}:{1}",
+		LogInfo("New UCS Server connection from [{2}] at [{0}:{1}]",
 			connection->Handle()->RemoteIP(), connection->Handle()->RemotePort(), connection->GetUUID());
 
 		UCSLink.SetConnection(connection);
@@ -490,7 +513,7 @@ int main(int argc, char** argv) {
 	});
 
 	server_connection->OnConnectionRemoved("UCS", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
-		LogF(Logs::General, Logs::World_Server, "Removed UCS Server connection from {0}",
+			LogInfo("Removed UCS Server connection from [{0}]",
 			connection->GetUUID());
 
 		UCSLink.SetConnection(nullptr);
@@ -499,14 +522,14 @@ int main(int argc, char** argv) {
 	});
 
 	server_connection->OnConnectionIdentified("WebInterface", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
-		LogF(Logs::General, Logs::World_Server, "New WebInterface Server connection from {2} at {0}:{1}",
+		LogInfo("New WebInterface Server connection from [{2}] at [{0}:{1}]",
 			connection->Handle()->RemoteIP(), connection->Handle()->RemotePort(), connection->GetUUID());
 
 		web_interface.AddConnection(connection);
 	});
 
 	server_connection->OnConnectionRemoved("WebInterface", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
-		LogF(Logs::General, Logs::World_Server, "Removed WebInterface Server connection from {0}",
+		LogInfo("Removed WebInterface Server connection from [{0}]",
 			connection->GetUUID());
 
 		web_interface.RemoveConnection(connection);
@@ -536,7 +559,7 @@ int main(int argc, char** argv) {
 
 	eqsm.OnNewConnection([&stream_identifier](std::shared_ptr<EQ::Net::EQStream> stream) {
 		stream_identifier.AddStream(stream);
-		LogF(Logs::Detail, Logs::World_Server, "New connection from IP {0}:{1}", stream->GetRemoteIP(), ntohs(stream->GetRemotePort()));
+		LogInfo("New connection from IP {0}:{1}", stream->GetRemoteIP(), ntohs(stream->GetRemotePort()));
 	});
 
 	while (RunLoops) {
@@ -549,23 +572,23 @@ int main(int argc, char** argv) {
 		//check the stream identifier for any now-identified streams
 		while ((eqsi = stream_identifier.PopIdentified())) {
 			//now that we know what patch they are running, start up their client object
-			struct in_addr	in;
+			struct in_addr	in{};
 			in.s_addr = eqsi->GetRemoteIP();
 			if (RuleB(World, UseBannedIPsTable)) { //Lieka: Check to see if we have the responsibility for blocking IPs.
-				Log(Logs::Detail, Logs::World_Server, "Checking inbound connection %s against BannedIPs table", inet_ntoa(in));
+				LogInfo("Checking inbound connection [{}] against BannedIPs table", inet_ntoa(in));
 				if (!database.CheckBannedIPs(inet_ntoa(in))) { //Lieka: Check inbound IP against banned IP table.
-					Log(Logs::Detail, Logs::World_Server, "Connection %s PASSED banned IPs check. Processing connection.", inet_ntoa(in));
+					LogInfo("Connection [{}] PASSED banned IPs check. Processing connection", inet_ntoa(in));
 					auto client = new Client(eqsi);
 					// @merth: client->zoneattempt=0;
 					client_list.Add(client);
 				}
 				else {
-					Log(Logs::General, Logs::World_Server, "Connection from %s FAILED banned IPs check. Closing connection.", inet_ntoa(in));
+					LogInfo("Connection from [{}] failed banned IPs check. Closing connection", inet_ntoa(in));
 					eqsi->Close(); //Lieka: If the inbound IP is on the banned table, close the EQStream.
 				}
 			}
 			if (!RuleB(World, UseBannedIPsTable)) {
-				Log(Logs::Detail, Logs::World_Server, "New connection from %s:%d, processing connection", inet_ntoa(in), ntohs(eqsi->GetRemotePort()));
+				LogInfo("New connection from [{}]:[{}], processing connection", inet_ntoa(in), ntohs(eqsi->GetRemotePort()));
 				auto client = new Client(eqsi);
 				// @merth: client->zoneattempt=0;
 				client_list.Add(client);
@@ -583,9 +606,9 @@ int main(int argc, char** argv) {
 			TimeOfDay_Struct tod;
 			zoneserver_list.worldclock.GetCurrentEQTimeOfDay(time(0), &tod);
 			if (!database.SaveTime(tod.minute, tod.hour, tod.day, tod.month, tod.year))
-				Log(Logs::General, Logs::World_Server, "Failed to save eqtime.");
+				LogError("Failed to save eqtime");
 			else
-				Log(Logs::Detail, Logs::World_Server, "EQTime successfully saved.");
+				LogDebug("EQTime successfully saved");
 		}
 
 		zoneserver_list.Process();
@@ -604,18 +627,18 @@ int main(int argc, char** argv) {
 		EQ::EventLoop::Get().Process();
 		Sleep(5);
 	}
-	Log(Logs::General, Logs::World_Server, "World main loop completed.");
-	Log(Logs::General, Logs::World_Server, "Shutting down zone connections (if any).");
+	LogInfo("World main loop completed");
+	LogInfo("Shutting down zone connections (if any)");
 	zoneserver_list.KillAll();
-	Log(Logs::General, Logs::World_Server, "Zone (TCP) listener stopped.");
-	Log(Logs::General, Logs::World_Server, "Signaling HTTP service to stop...");
+	LogInfo("Zone (TCP) listener stopped");
+	LogInfo("Signaling HTTP service to stop");
 	LogSys.CloseFileLogs();
 
 	return 0;
 }
 
 void CatchSignal(int sig_num) {
-	Log(Logs::General, Logs::World_Server, "Caught signal %d", sig_num);
+	LogInfo("Caught signal [{}]", sig_num);
 	RunLoops = false;
 }
 

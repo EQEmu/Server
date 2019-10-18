@@ -25,6 +25,14 @@
 #include <fstream>
 #include <stdio.h>
 #include <functional>
+
+#ifdef _WIN32
+#ifdef utf16_to_utf8
+#undef utf16_to_utf8
+#endif
+#endif
+
+#include <fmt/format.h>
 #include "types.h"
 
 namespace Logs {
@@ -45,7 +53,7 @@ namespace Logs {
 		AI,
 		Aggro,
 		Attack,
-		Client_Server_Packet,
+		PacketClientServer,
 		Combat,
 		Commands,
 		Crash,
@@ -59,40 +67,46 @@ namespace Logs {
 		Normal,
 		Object,
 		Pathing,
-		QS_Server,
+		QSServer,
 		Quests,
 		Rules,
 		Skills,
 		Spawns,
 		Spells,
 		Status,
-		TCP_Connection,
+		TCPConnection,
 		Tasks,
 		Tradeskills,
 		Trading,
 		Tribute,
-		UCS_Server,
-		WebInterface_Server,
-		World_Server,
-		Zone_Server,
+		UCSServer,
+		WebInterfaceServer,
+		WorldServer,
+		ZoneServer,
 		MySQLError,
 		MySQLQuery,
 		Mercenaries,
 		QuestDebug,
-		Server_Client_Packet,
-		Client_Server_Packet_Unhandled,
-		Server_Client_Packet_With_Dump,
-		Client_Server_Packet_With_Dump,
-		Login_Server,
-		Client_Login,
-		Headless_Client,
-		HP_Update,
+		PacketServerClient,
+		PacketClientServerUnhandled,
+		PacketServerClientWithDump,
+		PacketClientServerWithDump,
+		Loginserver,
+		ClientLogin,
+		HeadlessClient,
+		HPUpdate,
 		FixZ,
 		Food,
 		Traps,
 		NPCRoamBox,
 		NPCScaling,
 		MobAppearance,
+		Info,
+		Warning,
+		Critical,
+		Emergency,
+		Alert,
+		Notice,
 		MaxCategoryID /* Don't Remove this */
 	};
 
@@ -152,19 +166,17 @@ namespace Logs {
 		"Traps",
 		"NPC Roam Box",
 		"NPC Scaling",
-		"Mob Appearance"
+		"Mob Appearance",
+		"Info",
+		"Warning",
+		"Critical",
+		"Emergency",
+		"Alert",
+		"Notice"
 	};
 }
 
-#define Log(debug_level, log_category, message, ...) do {\
-    if (LogSys.log_settings[log_category].is_category_enabled == 1)\
-        LogSys.Out(debug_level, log_category, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogF(debug_level, log_category, message, ...) do {\
-    if (LogSys.log_settings[log_category].is_category_enabled == 1)\
-        OutF(LogSys, debug_level, log_category, message, ##__VA_ARGS__);\
-} while (0)
+#include "eqemu_logsys_log_aliases.h"
 
 class EQEmuLogSys {
 public:
@@ -177,6 +189,10 @@ public:
 	 */
 	void CloseFileLogs();
 	void LoadLogSettingsDefaults();
+
+	/**
+	 * @param directory_name
+	 */
 	void MakeDirectory(const std::string &directory_name);
 
 	/**
@@ -188,12 +204,25 @@ public:
 	 *		- This would pipe the same category and debug level to all output formats, but the internal memory reference of log_settings would
 	 *			be checked against to see if that piped output is set to actually process it for the category and debug level
 	*/
-	void Out(Logs::DebugLevel debug_level, uint16 log_category, std::string message, ...);
+	void Out(
+		Logs::DebugLevel debug_level,
+		uint16 log_category,
+		const char *file,
+		const char *func,
+		int line,
+		const char *message,
+		...
+	);
 
 	/**
 	 * Used in file logs to prepend a timestamp entry for logs
+	 * @param time_stamp
 	 */
 	void SetCurrentTimeStamp(char* time_stamp);
+
+	/**
+	 * @param log_name
+	 */
 	void StartFileLogs(const std::string &log_name = "");
 
 	/**
@@ -218,14 +247,14 @@ public:
 	 * These are loaded via DB and have defaults loaded in LoadLogSettingsDefaults
 	 * Database loaded via Database::LoadLogSettings(log_settings)
 	*/
-	LogSettings log_settings[Logs::LogCategory::MaxCategoryID];
+	LogSettings log_settings[Logs::LogCategory::MaxCategoryID]{};
 
-	bool file_logs_enabled;
+	bool file_logs_enabled = false;
 
 	/**
 	 * Sets Executable platform (Zone/World/UCS) etc.
 	 */
-	int log_platform;
+	int log_platform = 0;
 
 	/**
 	 * File name used in writing logs
@@ -240,7 +269,14 @@ public:
 	 */
 	uint16 GetGMSayColorFromCategory(uint16 log_category);
 
+	/**
+	 * @param f
+	 */
 	void SetGMSayHandler(std::function<void(uint16 log_type, const std::string&)> f) { on_log_gmsay_hook = f; }
+
+	/**
+	 * @param f
+	 */
 	void SetConsoleHandler(std::function<void(uint16 debug_level, uint16 log_type, const std::string&)> f) { on_log_console_hook = f; }
 
 private:
@@ -258,6 +294,7 @@ private:
 
 	/**
 	 * Linux console color messages mapped by category
+	 *
 	 * @param log_category
 	 * @return
 	 */
@@ -268,11 +305,57 @@ private:
 	 */
 	uint16 GetWindowsConsoleColorFromCategory(uint16 log_category);
 
+	/**
+	 * @param debug_level
+	 * @param log_category
+	 * @param message
+	 */
 	void ProcessConsoleMessage(uint16 debug_level, uint16 log_category, const std::string &message);
+
+	/**
+	 * @param debug_level
+	 * @param log_category
+	 * @param message
+	 */
 	void ProcessGMSay(uint16 debug_level, uint16 log_category, const std::string &message);
+
+	/**
+	 * @param debug_level
+	 * @param log_category
+	 * @param message
+	 */
 	void ProcessLogWrite(uint16 debug_level, uint16 log_category, const std::string &message);
+
+	/**
+	 * @param log_category
+	 * @return
+	 */
+	bool IsRfc5424LogCategory(uint16 log_category);
 };
 
 extern EQEmuLogSys LogSys;
+
+/**
+template<typename... Args>
+void OutF(
+	EQEmuLogSys &ls,
+	Logs::DebugLevel debug_level,
+	uint16 log_category,
+	const char *file,
+	const char *func,
+	int line,
+	const char *fmt,
+	const Args &... args
+)
+{
+	std::string log_str = fmt::format(fmt, args...);
+	ls.Out(debug_level, log_category, file, func, line, log_str.c_str());
+}
+ **/
+
+#define OutF(ls, debug_level, log_category, file, func, line, formatStr, ...) \
+do { \
+    ls.Out(debug_level, log_category, file, func, line, fmt::format(formatStr, ##__VA_ARGS__).c_str()); \
+} while(0)
 
 #endif

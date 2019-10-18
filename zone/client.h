@@ -1399,6 +1399,7 @@ private:
 	uint32 WID;
 	uint32 account_id;
 	char account_name[30];
+	char loginserver[64];
 	uint32 lsaccountid;
 	char lskey[30];
 	int16 admin;
@@ -1627,9 +1628,6 @@ private:
 	
 #ifdef BOTS
 	
-
-	
-
 public:
 	enum BotOwnerOption : size_t {
 		booDeathMarquee,
@@ -1637,14 +1635,24 @@ public:
 		booSpawnMessageSay,
 		booSpawnMessageTell,
 		booSpawnMessageClassSpecific,
+		booAltCombat,
+		booAutoDefend,
 		_booCount
 	};
 
 	bool GetBotOption(BotOwnerOption boo) const;
 	void SetBotOption(BotOwnerOption boo, bool flag = true);
 	
+	bool GetBotPulling() { return m_bot_pulling; }
+	void SetBotPulling(bool flag = true) { m_bot_pulling = flag; }
+
+	bool GetBotPrecombat() { return m_bot_precombat; }
+	void SetBotPrecombat(bool flag = true) { m_bot_precombat = flag; }
+
 private:
 	bool bot_owner_options[_booCount];
+	bool m_bot_pulling;
+	bool m_bot_precombat;
 
 #endif
 };

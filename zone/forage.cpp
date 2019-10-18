@@ -62,17 +62,17 @@ uint32 ZoneDatabase::GetZoneForage(uint32 ZoneID, uint8 skill) {
 		return 0;
 	}
 
-	uint8 index = 0;
-    for (auto row = results.begin(); row != results.end(); ++row, ++index) {
-        if (index >= FORAGE_ITEM_LIMIT)
-            break;
+	uint8     index = 0;
+	for (auto row   = results.begin(); row != results.end(); ++row, ++index) {
+		if (index >= FORAGE_ITEM_LIMIT) {
+			break;
+		}
 
-        item[index] = atoi(row[0]);
-        chance[index] = atoi(row[1]) + chancepool;
-        Log(Logs::General, Logs::Error, "Possible Forage: %d with a %d chance", item[index], chance[index]);
-        chancepool = chance[index];
-    }
-
+		item[index]   = atoi(row[0]);
+		chance[index] = atoi(row[1]) + chancepool;
+		LogError("Possible Forage: [{}] with a [{}] chance", item[index], chance[index]);
+		chancepool = chance[index];
+	}
 
 	if(chancepool == 0 || index < 1)
 		return 0;
@@ -413,7 +413,7 @@ void Client::ForageItem(bool guarantee) {
 		const EQEmu::ItemData* food_item = database.GetItem(foragedfood);
 
 		if(!food_item) {
-			Log(Logs::General, Logs::Error, "nullptr returned from database.GetItem in ClientForageItem");
+			LogError("nullptr returned from database.GetItem in ClientForageItem");
 			return;
 		}
 

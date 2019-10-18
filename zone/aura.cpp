@@ -711,13 +711,13 @@ void Mob::MakeAura(uint16 spell_id)
 	AuraRecord record;
 	if (!database.GetAuraEntry(spell_id, record)) {
 		Message(Chat::Red, "Unable to find data for aura %s", spells[spell_id].name);
-		Log(Logs::General, Logs::Error, "Unable to find data for aura %d, check auras table.", spell_id);
+		LogError("Unable to find data for aura [{}], check auras table", spell_id);
 		return;
 	}
 
 	if (!IsValidSpell(record.spell_id)) {
 		Message(Chat::Red, "Casted spell (%d) is not valid for aura %s", record.spell_id, spells[spell_id].name);
-		Log(Logs::General, Logs::Error, "Casted spell (%d) is not valid for aura %d, check auras table.",
+		LogError("Casted spell ([{}]) is not valid for aura [{}], check auras table",
 		    record.spell_id, spell_id);
 		return;
 	}
@@ -745,9 +745,7 @@ void Mob::MakeAura(uint16 spell_id)
 	const auto base = database.LoadNPCTypesData(record.npc_type);
 	if (base == nullptr) {
 		Message(Chat::Red, "Unable to load NPC data for aura %s", spells[spell_id].teleport_zone);
-		Log(Logs::General, Logs::Error,
-		    "Unable to load NPC data for aura %s (NPC ID %d), check auras and npc_types tables.",
-		    spells[spell_id].teleport_zone, record.npc_type);
+		LogError("Unable to load NPC data for aura [{}] (NPC ID [{}]), check auras and npc_types tables", spells[spell_id].teleport_zone, record.npc_type);
 		return;
 	}
 

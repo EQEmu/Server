@@ -213,7 +213,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	PetRecord record;
 	if(!database.GetPoweredPetEntry(pettype, act_power, &record)) {
 		Message(Chat::Red, "Unable to find data for pet %s", pettype);
-		Log(Logs::General, Logs::Error, "Unable to find data for pet %s, check pets table.", pettype);
+		LogError("Unable to find data for pet [{}], check pets table", pettype);
 		return;
 	}
 
@@ -221,7 +221,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	const NPCType *base = database.LoadNPCTypesData(record.npc_type);
 	if(base == nullptr) {
 		Message(Chat::Red, "Unable to load NPC data for pet %s", pettype);
-		Log(Logs::General, Logs::Error, "Unable to load NPC data for pet %s (NPC ID %d), check pets and npc_types tables.", pettype, record.npc_type);
+		LogError("Unable to load NPC data for pet [{}] (NPC ID [{}]), check pets and npc_types tables", pettype, record.npc_type);
 		return;
 	}
 
@@ -374,7 +374,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 			npc_type->helmtexture = monster->helmtexture;
 			npc_type->herosforgemodel = monster->herosforgemodel;
 		} else
-			Log(Logs::General, Logs::Error, "Error loading NPC data for monster summoning pet (NPC ID %d)", monsterid);
+			LogError("Error loading NPC data for monster summoning pet (NPC ID [{}])", monsterid);
 
 	}
 
@@ -665,7 +665,7 @@ bool ZoneDatabase::GetBasePetItems(int32 equipmentset, uint32 *items) {
 
 		if (results.RowCount() != 1) {
 			// invalid set reference, it doesn't exist
-			Log(Logs::General, Logs::Error, "Error in GetBasePetItems equipment set '%d' does not exist", curset);
+			LogError("Error in GetBasePetItems equipment set [{}] does not exist", curset);
 			return false;
 		}
 

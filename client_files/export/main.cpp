@@ -39,20 +39,19 @@ int main(int argc, char **argv) {
 	LogSys.LoadLogSettingsDefaults();
 	set_exception_handler();
 
-	Log(Logs::General, Logs::Status, "Client Files Export Utility");
+	LogInfo("Client Files Export Utility");
 	if(!EQEmuConfig::LoadConfig()) {
-		Log(Logs::General, Logs::Error, "Unable to load configuration file.");
+		LogError("Unable to load configuration file");
 		return 1;
 	}
 
 	auto Config = EQEmuConfig::get();
 
 	SharedDatabase database;
-	Log(Logs::General, Logs::Status, "Connecting to database...");
+	LogInfo("Connecting to database");
 	if(!database.Connect(Config->DatabaseHost.c_str(), Config->DatabaseUsername.c_str(),
 		Config->DatabasePassword.c_str(), Config->DatabaseDB.c_str(), Config->DatabasePort)) {
-		Log(Logs::General, Logs::Error, "Unable to connect to the database, cannot continue without a "
-			"database connection");
+		LogError("Unable to connect to the database, cannot continue without a database connection");
 		return 1;
 	}
 
@@ -94,11 +93,11 @@ int main(int argc, char **argv) {
 }
 
 void ExportSpells(SharedDatabase *db) {
-	Log(Logs::General, Logs::Status, "Exporting Spells...");
+	LogInfo("Exporting Spells");
 
 	FILE *f = fopen("export/spells_us.txt", "w");
 	if(!f) {
-		Log(Logs::General, Logs::Error, "Unable to open export/spells_us.txt to write, skipping.");
+		LogError("Unable to open export/spells_us.txt to write, skipping.");
 		return;
 	}
 
@@ -165,11 +164,11 @@ int GetSkill(SharedDatabase *db, int skill_id, int class_id, int level) {
 }
 
 void ExportSkillCaps(SharedDatabase *db) {
-	Log(Logs::General, Logs::Status, "Exporting Skill Caps...");
+	LogInfo("Exporting Skill Caps");
 
 	FILE *f = fopen("export/SkillCaps.txt", "w");
 	if(!f) {
-		Log(Logs::General, Logs::Error, "Unable to open export/SkillCaps.txt to write, skipping.");
+		LogError("Unable to open export/SkillCaps.txt to write, skipping.");
 		return;
 	}
 
@@ -194,11 +193,11 @@ void ExportSkillCaps(SharedDatabase *db) {
 }
 
 void ExportBaseData(SharedDatabase *db) {
-	Log(Logs::General, Logs::Status, "Exporting Base Data...");
+	LogInfo("Exporting Base Data");
 
 	FILE *f = fopen("export/BaseData.txt", "w");
 	if(!f) {
-		Log(Logs::General, Logs::Error, "Unable to open export/BaseData.txt to write, skipping.");
+		LogError("Unable to open export/BaseData.txt to write, skipping.");
 		return;
 	}
 
@@ -225,11 +224,11 @@ void ExportBaseData(SharedDatabase *db) {
 }
 
 void ExportDBStrings(SharedDatabase *db) {
-	Log(Logs::General, Logs::Status, "Exporting DB Strings...");
+	LogInfo("Exporting DB Strings");
 
 	FILE *f = fopen("export/dbstr_us.txt", "w");
 	if(!f) {
-		Log(Logs::General, Logs::Error, "Unable to open export/dbstr_us.txt to write, skipping.");
+		LogError("Unable to open export/dbstr_us.txt to write, skipping.");
 		return;
 	}
 

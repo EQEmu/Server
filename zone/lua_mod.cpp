@@ -1,3 +1,5 @@
+#ifdef LUA_EQEMU
+
 #include "lua.hpp"
 #include <luabind/luabind.hpp>
 #include <luabind/object.hpp>
@@ -629,3 +631,5 @@ void LuaMod::GetExperienceForKill(Client *self, Mob *against, uint32 &returnValu
 		lua_pop(L, n);
 	}
 }
+
+#endif

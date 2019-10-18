@@ -68,7 +68,7 @@ EXTERN_C XS(boot_qc)
 	file[255] = '\0';
 
 	if(items != 1)
-		Log(Logs::General, Logs::Error, "boot_qc does not take any arguments.");
+		LogError("boot_qc does not take any arguments");
 	
 	char buf[128];	//shouldent have any function names longer than this.
 	

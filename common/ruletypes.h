@@ -274,6 +274,7 @@ RULE_INT(Zone, MinOfflineTimeToReplenishments, 21600, "21600 seconds is 6 Hours"
 RULE_BOOL(Zone, UseZoneController, true, "Enables the ability to use persistent quest based zone controllers (zone_controller.pl/lua)")
 RULE_BOOL(Zone, EnableZoneControllerGlobals, false, "Enables the ability to use quest globals with the zone controller NPC")
 RULE_INT(Zone, GlobalLootMultiplier, 1, "Sets Global Loot drop multiplier for database based drops, useful for double, triple loot etc")
+RULE_BOOL(Zone, KillProcessOnDynamicShutdown, true, "When process has booted a zone and has hit its zone shut down timer, it will hard kill the process to free memory back to the OS")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Map)
@@ -491,6 +492,7 @@ RULE_BOOL(Combat, ClassicMasterWu, false, "classic master wu uses a random speci
 RULE_INT(Combat, LevelToStopDamageCaps, 0, "1 will effectively disable them, 20 should give basically same results as old incorrect system")
 RULE_BOOL(Combat, ClassicNPCBackstab, false, "true disables npc facestab - npcs get normal attack if not behind")
 RULE_BOOL(Combat, UseNPCDamageClassLevelMods, true, "Uses GetClassLevelDamageMod calc in npc_scale_manager")
+RULE_BOOL(Combat, UseExtendedPoisonProcs, false, "Allow old school poisons to last until characrer zones, at a lower proc rate")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(NPC)
@@ -594,6 +596,9 @@ RULE_INT(Bots, CasterStopMeleeLevel, 13, "Level at which caster bots stop melee 
 RULE_INT(Bots, AllowedClasses, 0xFFFFFFFF, "Bitmask of allowed bot classes")
 RULE_INT(Bots, AllowedRaces, 0xFFFFFFFF, "Bitmask of allowed bot races")
 RULE_INT(Bots, AllowedGenders, 0x3, "Bitmask of allowed bot genders")
+RULE_BOOL(Bots, AllowOwnerOptionAltCombat, true, "When option is enabled, bots will use an auto-/shared-aggro combat model")
+RULE_BOOL(Bots, AllowOwnerOptionAutoDefend, true, "When option is enabled, bots will defend their owner on enemy aggro")
+RULE_REAL(Bots, LeashDistance, 562500.0f, "Distance a bot is allowed to travel from leash owner before being pulled back (squared value)")
 RULE_CATEGORY_END()
 #endif
 
@@ -745,6 +750,10 @@ RULE_INT(Faction, IndifferentlyFactionMinimum, 0, "")
 RULE_INT(Faction, ApprehensivelyFactionMinimum, -100, "")
 RULE_INT(Faction, DubiouslyFactionMinimum, -500, "")
 RULE_INT(Faction, ThreateninglyFactionMinimum, -750, "")
+RULE_CATEGORY_END()
+
+RULE_CATEGORY(Logging)
+RULE_BOOL(Logging, PrintFileFunctionAndLine, false, "Ex: [World Server] [net.cpp::main:309] Loading variables...")
 RULE_CATEGORY_END()
 
 #undef RULE_CATEGORY

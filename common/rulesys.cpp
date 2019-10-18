@@ -146,11 +146,11 @@ bool RuleManager::SetRule(const char *rule_name, const char *rule_value, Databas
 	switch(type) {
 		case IntRule:
 			m_RuleIntValues[index] = atoi(rule_value);
-			Log(Logs::Detail, Logs::Rules, "Set rule %s to value %d", rule_name, m_RuleIntValues[index]);
+			LogRules("Set rule [{}] to value [{}]", rule_name, m_RuleIntValues[index]);
 			break;
 		case RealRule:
 			m_RuleRealValues[index] = atof(rule_value);
-			Log(Logs::Detail, Logs::Rules, "Set rule %s to value %.13f", rule_name, m_RuleRealValues[index]);
+			LogRules("Set rule [{}] to value [{}]", rule_name, m_RuleRealValues[index]);
 			break;
 		case BoolRule:
 			uint32 val = 0;
@@ -158,7 +158,7 @@ bool RuleManager::SetRule(const char *rule_name, const char *rule_value, Databas
 				val = 1;
 
 			m_RuleBoolValues[index] = val;
-			Log(Logs::Detail, Logs::Rules, "Set rule %s to value %s", rule_name, m_RuleBoolValues[index] == 1 ? "true" : "false");
+			LogRules("Set rule [{}] to value [{}]", rule_name, m_RuleBoolValues[index] == 1 ? "true" : "false");
 			break;
 	}
 
@@ -446,9 +446,8 @@ bool RuleManager::UpdateInjectedRules(Database *db, const char *ruleset_name, bo
 			);
 
 			if (!quiet_update) {
-				Log(Logs::General,
-					Logs::Status,
-					"New Rule '%s' found... Adding to `rule_values` table with ruleset '%s' (%i) and rule value '%s'...",
+				LogInfo(
+					"Adding new rule [{}] ruleset [{}] ({}) value [{}]",
 					rd_iter.first.c_str(),
 					ruleset_name,
 					ruleset_id,
@@ -475,11 +474,9 @@ bool RuleManager::UpdateInjectedRules(Database *db, const char *ruleset_name, bo
 			return false;
 		}
 
-		Log(Logs::General,
-			Logs::Status,
-			"%u New Rule%s Added to ruleset '%s' (%i)",
+		LogInfo(
+			"[{}] New rule(s) added to ruleset [{}] [{}]",
 			injected_rule_entries.size(),
-			(injected_rule_entries.size() == 1 ? "" : "s"),
 			ruleset_name,
 			ruleset_id
 		);
@@ -519,9 +516,8 @@ bool RuleManager::UpdateOrphanedRules(Database *db, bool quiet_update)
 			orphaned_rule_entries.push_back(std::string(row[0]));
 
 			if (!quiet_update) {
-				Log(Logs::General,
-					Logs::Status,
-					"Rule '%s' no longer exists... Deleting orphaned entry from `rule_values` table...",
+				LogInfo(
+					"Rule [{}] no longer exists... Deleting orphaned entry from `rule_values` table...",
 					row[0]
 				);
 			}
@@ -541,12 +537,7 @@ bool RuleManager::UpdateOrphanedRules(Database *db, bool quiet_update)
 			return false;
 		}
 
-		Log(Logs::General,
-			Logs::Status,
-			"%u Orphaned Rule%s Deleted from 'All Rulesets' (-1)",
-			orphaned_rule_entries.size(),
-			(orphaned_rule_entries.size() == 1 ? "" : "s")
-		);
+		LogInfo("[{}] Orphaned Rule(s) Deleted from [All Rulesets] (-1)", orphaned_rule_entries.size());
 	}
 	
 	return true;
@@ -554,7 +545,7 @@ bool RuleManager::UpdateOrphanedRules(Database *db, bool quiet_update)
 
 bool RuleManager::RestoreRuleNotes(Database *db)
 {
-	std::string query("SELECT `ruleset_id`, `rule_name`, IFNULL(`notes`, '\\0')`notes` FROM `rule_values`");
+	std::string query("SELECT `ruleset_id`, `rule_name`, `notes` FROM `rule_values`");
 
 	auto results = db->QueryDatabase(query);
 	if (!results.Success()) {
@@ -564,22 +555,22 @@ bool RuleManager::RestoreRuleNotes(Database *db)
 	int update_count = 0;
 	for (auto row = results.begin(); row != results.end(); ++row) {
 
-		const auto &rule = [&row]() {
+		auto rule = [](const char *rule_name) {
 
-			for (const auto &rule_iter : s_RuleInfo) {
-				if (strcasecmp(rule_iter.name, row[1]) == 0) {
+			for (auto rule_iter : s_RuleInfo) {
+				if (strcasecmp(rule_iter.name, rule_name) == 0) {
 					return rule_iter;
 				}
 			}
 
 			return s_RuleInfo[_IntRuleCount+_RealRuleCount+_BoolRuleCount];
-		}();
+		}(row[1]);
 
 		if (strcasecmp(rule.name, row[1]) != 0) {
 			continue;
 		}
 
-		if (rule.notes.compare(row[2]) == 0) {
+		if (row[2] != nullptr && rule.notes.compare(row[2]) == 0) {
 			continue;
 		}
 
@@ -600,8 +591,10 @@ bool RuleManager::RestoreRuleNotes(Database *db)
 	}
 
 	if (update_count > 0) {
-		Log(Logs::General, Logs::Status, "%u Rule Note%s Restored", update_count, (update_count == 1 ? "" : "s"));
+		LogInfo("[{}] Rule Note [{}] Restored", update_count, (update_count == 1 ? "" : "s"));
 	}
+
+	return true;
 }
 
 int RuleManager::GetRulesetID(Database *database, const char *ruleset_name) {

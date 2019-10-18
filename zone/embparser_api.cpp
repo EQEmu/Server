@@ -3580,6 +3580,25 @@ XS(XS__worldwidemarquee) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS__log);
+XS(XS__log) {
+	dXSARGS;
+	if (items != 1 && items != 2) {
+		Perl_croak(aTHX_ "Usage: quest::log(uint8 log_category, string message)");
+	}
+	else {
+		uint8       log_category = (uint8)SvIV(ST(0));
+		std::string log_message = (std::string) SvPV_nolen(ST(1));
+		
+		if (log_category >= Logs::MaxCategoryID) {
+			return;
+		}
+
+		Log(Logs::General, log_category, log_message.c_str());
+	}
+	XSRETURN_EMPTY;
+}
+
 XS(XS__debug);
 XS(XS__debug) {
 	dXSARGS;
@@ -3596,15 +3615,30 @@ XS(XS__debug) {
 			return;
 
 		if (debug_level == Logs::General) {
-			Log(Logs::General, Logs::QuestDebug, log_message);
+			Log(Logs::General, Logs::QuestDebug, log_message.c_str());
 		} else if (debug_level == Logs::Moderate) {
-			Log(Logs::Moderate, Logs::QuestDebug, log_message);
+			Log(Logs::Moderate, Logs::QuestDebug, log_message.c_str());
 		} else if (debug_level == Logs::Detail) {
-			Log(Logs::Detail, Logs::QuestDebug, log_message);
+			Log(Logs::Detail, Logs::QuestDebug, log_message.c_str());
 		}
 	}
 	XSRETURN_EMPTY;
 }
+
+XS(XS__log_combat);
+XS(XS__log_combat) {
+	dXSARGS;
+	if (items != 1) {
+		Perl_croak(aTHX_ "Usage: quest::log_combat(string message)");
+	}
+	else {
+
+		std::string log_message = (std::string) SvPV_nolen(ST(0));
+		Log(Logs::General, Logs::Combat, log_message.c_str());
+	}
+	XSRETURN_EMPTY;
+}
+
 
 XS(XS__UpdateZoneHeader);
 XS(XS__UpdateZoneHeader) {
@@ -3725,7 +3759,7 @@ EXTERN_C XS(boot_quest) {
 	file[255] = '\0';
 
 	if (items != 1)
-		Log(Logs::General, Logs::Error, "boot_quest does not take any arguments.");
+		LogError("boot_quest does not take any arguments");
 
 	char buf[128];    //shouldent have any function names longer than this.
 
@@ -3862,6 +3896,8 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "itemlink"), XS__itemlink, file);
 	newXS(strcpy(buf, "lasttaskinset"), XS__lasttaskinset, file);
 	newXS(strcpy(buf, "level"), XS__level, file);
+	newXS(strcpy(buf, "log"), XS__log, file);
+	newXS(strcpy(buf, "log_combat"), XS__log_combat, file);
 	newXS(strcpy(buf, "me"), XS__me, file);
 	newXS(strcpy(buf, "modifynpcstat"), XS__ModifyNPCStat, file);
 	newXS(strcpy(buf, "movegrp"), XS__movegrp, file);

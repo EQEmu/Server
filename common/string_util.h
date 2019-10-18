@@ -132,6 +132,7 @@ void ToLowerString(std::string &s);
 void ToUpperString(std::string &s);
 std::string JoinString(const std::vector<std::string>& ar, const std::string &delim);
 void find_replace(std::string& string_subject, const std::string& search_string, const std::string& replace_string);
+void ParseAccountString(const std::string &s, std::string &account, std::string &loginserver);
 
 //const char based
 

@@ -46,7 +46,7 @@ static uint32 ScaleAAXPBasedOnCurrentAATotal(int earnedAA, uint32 add_aaxp)
 	// Are we within the scaling window?
 	if (earnedAA >= aaLimit || earnedAA < aaMinimum)
 	{
-		Log(Logs::Detail, Logs::None, "Not within AA scaling window.");
+		LogDebug("Not within AA scaling window");
 
 		// At or past the limit.  We're done.
 		return add_aaxp;
@@ -524,7 +524,7 @@ void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 }
 
 void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
-	Log(Logs::Detail, Logs::None, "Attempting to Set Exp for %s (XP: %u, AAXP: %u, Rez: %s)", this->GetCleanName(), set_exp, set_aaxp, isrezzexp ? "true" : "false");
+	LogDebug("Attempting to Set Exp for [{}] (XP: [{}], AAXP: [{}], Rez: [{}])", this->GetCleanName(), set_exp, set_aaxp, isrezzexp ? "true" : "false");
 
 	auto max_AAXP = GetRequiredAAExperience();
 	if (max_AAXP == 0 || GetEXPForLevel(GetLevel()) == 0xFFFFFFFF) {
@@ -643,7 +643,7 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 
 		//figure out how many AA points we get from the exp were setting
 		m_pp.aapoints = set_aaxp / max_AAXP;
-		Log(Logs::Detail, Logs::None, "Calculating additional AA Points from AAXP for %s: %u / %u = %.1f points", this->GetCleanName(), set_aaxp, max_AAXP, (float)set_aaxp / (float)max_AAXP);
+		LogDebug("Calculating additional AA Points from AAXP for [{}]: [{}] / [{}] = [{}] points", this->GetCleanName(), set_aaxp, max_AAXP, (float)set_aaxp / (float)max_AAXP);
 
 		//get remainder exp points, set in PP below
 		set_aaxp = set_aaxp - (max_AAXP * m_pp.aapoints);
@@ -765,7 +765,7 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 void Client::SetLevel(uint8 set_level, bool command)
 {
 	if (GetEXPForLevel(set_level) == 0xFFFFFFFF) {
-		Log(Logs::General, Logs::Error, "Client::SetLevel() GetEXPForLevel(%i) = 0xFFFFFFFF", set_level);
+		LogError("Client::SetLevel() GetEXPForLevel([{}]) = 0xFFFFFFFF", set_level);
 		return;
 	}
 
@@ -823,7 +823,7 @@ void Client::SetLevel(uint8 set_level, bool command)
 	safe_delete(outapp);
 	this->SendAppearancePacket(AT_WhoLevel, set_level); // who level change
 
-	Log(Logs::General, Logs::Normal, "Setting Level for %s to %i", GetName(), set_level);
+	LogInfo("Setting Level for [{}] to [{}]", GetName(), set_level);
 
 	CalcBonuses();
 
@@ -1131,15 +1131,16 @@ uint32 Client::GetCharMaxLevelFromQGlobal() {
 	return 0;
 }
 
-uint32 Client::GetCharMaxLevelFromBucket() {
-	uint32 char_id = this->CharacterID();
-	std::string query = StringFormat("SELECT value FROM data_buckets WHERE `key` = '%i-CharMaxLevel'", char_id);
-	auto results = database.QueryDatabase(query);
+uint32 Client::GetCharMaxLevelFromBucket()
+{
+	uint32      char_id = this->CharacterID();
+	std::string query   = StringFormat("SELECT value FROM data_buckets WHERE `key` = '%i-CharMaxLevel'", char_id);
+	auto        results = database.QueryDatabase(query);
 	if (!results.Success()) {
-        Log(Logs::General, Logs::Error, "Data bucket for CharMaxLevel for char ID %i failed.", char_id);
-        return 0;
-    }
-	
+		LogError("Data bucket for CharMaxLevel for char ID [{}] failed", char_id);
+		return 0;
+	}
+
 	if (results.RowCount() > 0) {
 		auto row = results.begin();
 		return atoi(row[0]);

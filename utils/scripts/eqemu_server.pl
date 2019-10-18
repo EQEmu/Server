@@ -744,6 +744,46 @@ sub do_install_config_json {
     unlink("eqemu_config_template.json");
 }
 
+sub do_install_config_login_json {
+    get_installation_variables();
+
+    #::: Fetch json template
+    get_remote_file($eqemu_repository_request_url . "loginserver/login_util/login.json", "login_template.json");
+
+    use JSON;
+    my $json = new JSON();
+
+    my $content;
+    open(my $fh, '<', "login_template.json") or die "cannot open file $filename"; {
+        local $/;
+        $content = <$fh>;
+    }
+    close($fh);
+
+    $config = $json->decode($content);
+
+    if ($installation_variables{"mysql_eqemu_db_name"}) {
+        $db_name = $installation_variables{"mysql_eqemu_db_name"};
+    }
+    else {
+        $db_name = "peq";
+    }
+
+    $config->{"database"}{"host"} = "127.0.0.1";
+    $config->{"database"}{"user"} = $installation_variables{"mysql_eqemu_user"};
+    $config->{"database"}{"password"} = $installation_variables{"mysql_eqemu_password"};
+    $config->{"database"}{"db"}       = $db_name;
+
+    $json->canonical(1);
+    $json->indent_length(5);
+
+    open(my $fh, '>', 'login.json');
+    print $fh $json->pretty->indent_length(5)->utf8->encode($config);
+    close $fh;
+
+    unlink("login_template.json");
+}
+
 sub fetch_utility_scripts {
     if ($OS eq "Windows") {
         get_remote_file($install_repository_request_url . "t_database_backup.bat", "t_database_backup.bat");
@@ -1489,9 +1529,13 @@ sub do_windows_login_server_setup {
     print "[Install] Done... \n";
 
     print "[Install] Pulling down Loginserver database tables...\n";
-    get_remote_file($install_repository_request_url . "login_server_tables.sql", "db_update/login_server_tables.sql");
+    get_remote_file($eqemu_repository_request_url . "loginserver/login_util/login_schema.sql", "db_update/login_schema.sql");
     print "[Install] Installing Loginserver tables...\n";
-    print get_mysql_result_from_file("db_update/login_server_tables.sql");
+    print get_mysql_result_from_file("db_update/login_schema.sql");
+    print "[Install] Done...\n";
+
+    print "[Install] Pulling and initializing Loginserver configuration files...\n";
+    do_install_config_login_json();
     print "[Install] Done...\n";
 
     add_login_server_firewall_rules();
@@ -1518,44 +1562,22 @@ sub do_linux_login_server_setup {
     print "\n Done... \n";
 
     print "[Install] Pulling down Loginserver database tables...\n";
-    get_remote_file($install_repository_request_url . "login_server_tables.sql", "db_update/login_server_tables.sql");
+    get_remote_file($eqemu_repository_request_url . "loginserver/login_util/login_schema.sql", "db_update/login_schema.sql");
     print "[Install] Installing Loginserver tables...\n";
-    print get_mysql_result_from_file("db_update/login_server_tables.sql");
+    print get_mysql_result_from_file("db_update/login_schema.sql");
     print "[Install] Done...\n\n";
+
+    print "[Install] Pulling and initializing Loginserver configuration files...\n";
+    do_install_config_login_json();
+    print "[Install] Done...\n";
 
     rmtree('updates_staged');
     rmtree('db_update');
 
-    get_remote_file($install_repository_request_url . "linux/login.ini", "login_template.ini");
     get_remote_file($install_repository_request_url . "linux/login_opcodes.conf", "login_opcodes.conf");
     get_remote_file($install_repository_request_url . "linux/login_opcodes_sod.conf", "login_opcodes_sod.conf");
     get_remote_file($install_repository_request_url . "linux/server_start_with_login.sh", "server_start_with_login.sh");
     system("chmod 755 *.sh");
-
-    get_installation_variables();
-    my $db_name     = $installation_variables{"mysql_eqemu_db_name"};
-    my $db_user     = $installation_variables{"mysql_eqemu_user"};
-    my $db_password = $installation_variables{"mysql_eqemu_password"};
-
-    #::: Open new config file
-    open(NEW_CONFIG, '>', 'login.ini');
-
-    #::: Iterate through template and replace variables...
-    open(FILE_TEMPLATE, "login_template.ini");
-    while (<FILE_TEMPLATE>) {
-        chomp;
-        $o = $_;
-        #::: Find replace variables
-        if ($o =~ /db/i) { $o       = "db = " . $db_name; }
-        if ($o =~ /user/i) { $o     = "user = " . $db_user; }
-        if ($o =~ /password/i) { $o = "password = " . $db_password; }
-
-        print NEW_CONFIG $o . "\n";
-    }
-
-    close(FILE_TEMPLATE);
-    close(NEW_CONFIG);
-    unlink("login_template.ini");
 
     print "[Install] Press any key to continue...\n";
 

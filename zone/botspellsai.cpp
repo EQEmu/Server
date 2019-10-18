@@ -1134,7 +1134,7 @@ bool Bot::AI_PursueCastCheck() {
 
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 
-		Log(Logs::Detail, Logs::AI, "Bot Engaged (pursuing) autocast check triggered. Trying to cast offensive spells.");
+		LogAI("Bot Engaged (pursuing) autocast check triggered. Trying to cast offensive spells");
 
 		if(!AICastSpell(GetTarget(), 100, SpellType_Snare)) {
 			if(!AICastSpell(GetTarget(), 100, SpellType_Lifetap)) {
@@ -1162,20 +1162,23 @@ bool Bot::AI_IdleCastCheck() {
 
 	if (AIautocastspell_timer->Check(false)) {
 #if BotAI_DEBUG_Spells >= 25
-		Log(Logs::Detail, Logs::AI, "Bot Non-Engaged autocast check triggered: %s", this->GetCleanName());
+		LogAI("Bot Non-Engaged autocast check triggered: [{}]", this->GetCleanName());
 #endif
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 
 		bool pre_combat = false;
-		Mob* test_against = nullptr;
+		Client* test_against = nullptr;
 
-		if (HasGroup() && GetGroup()->GetLeader() && GetGroup()->GetLeader()->IsClient())
-			test_against = GetGroup()->GetLeader();
-		else if (GetOwner() && GetOwner()->IsClient())
-			test_against = GetOwner();
+		if (HasGroup() && GetGroup()->GetLeader() && GetGroup()->GetLeader()->IsClient()) {
+			test_against = GetGroup()->GetLeader()->CastToClient();
+		}
+		else if (GetOwner() && GetOwner()->IsClient()) {
+			test_against = GetOwner()->CastToClient();
+		}
 
-		if (test_against && test_against->GetTarget() && test_against->GetTarget()->IsNPC() && !test_against->GetTarget()->IsPet())
-			pre_combat = true;
+		if (test_against) {
+			pre_combat = test_against->GetBotPrecombat();
+		}
 
 		//Ok, IdleCastCheck depends of class.
 		switch (GetClass()) {
@@ -1310,7 +1313,7 @@ bool Bot::AI_EngagedCastCheck() {
 		EQEmu::constants::StanceType botStance = GetBotStance();
 		bool mayGetAggro = HasOrMayGetAggro();
 
-		Log(Logs::Detail, Logs::AI, "Engaged autocast check triggered (BOTS). Trying to cast healing spells then maybe offensive spells.");
+		LogAI("Engaged autocast check triggered (BOTS). Trying to cast healing spells then maybe offensive spells");
 
 		if(botClass == CLERIC) {
 			if(!AICastSpell(GetTarget(), GetChanceToCastBySpellType(SpellType_Escape), SpellType_Escape)) {
@@ -1560,11 +1563,11 @@ bool Bot::AIHealRotation(Mob* tar, bool useFastHeals) {
 	}
 
 #if BotAI_DEBUG_Spells >= 10
-	Log(Logs::Detail, Logs::AI, "Bot::AIHealRotation: heal spellid = %u, fastheals = %c, casterlevel = %u",
+	LogAI("Bot::AIHealRotation: heal spellid = [{}], fastheals = [{}], casterlevel = [{}]",
 		botSpell.SpellId, ((useFastHeals) ? ('T') : ('F')), GetLevel());
 #endif
 #if BotAI_DEBUG_Spells >= 25
-	Log(Logs::Detail, Logs::AI, "Bot::AIHealRotation: target = %s, current_time = %u, donthealmebefore = %u", tar->GetCleanName(), Timer::GetCurrentTime(), tar->DontHealMeBefore());
+	LogAI("Bot::AIHealRotation: target = [{}], current_time = [{}], donthealmebefore = [{}]", tar->GetCleanName(), Timer::GetCurrentTime(), tar->DontHealMeBefore());
 #endif
 
 	// If there is still no spell id, then there isn't going to be one so we are done

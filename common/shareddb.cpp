@@ -124,7 +124,7 @@ void SharedDatabase::SetMailKey(int CharID, int IPAddress, int MailKey)
 		MailKeyString, CharID);
 	auto results = QueryDatabase(query);
 	if (!results.Success())
-		Log(Logs::General, Logs::Error, "SharedDatabase::SetMailKey(%i, %s) : %s", CharID, MailKeyString, results.ErrorMessage().c_str());
+		LogError("SharedDatabase::SetMailKey({}, {}) : {}", CharID, MailKeyString, results.ErrorMessage().c_str());
 
 }
 
@@ -467,8 +467,6 @@ bool SharedDatabase::GetSharedBank(uint32 id, EQEmu::InventoryProfile *inv, bool
 				     id);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		Log(Logs::General, Logs::Error, "Database::GetSharedBank(uint32 account_id): %s",
-			results.ErrorMessage().c_str());
 		return false;
 	}
 
@@ -488,8 +486,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, EQEmu::InventoryProfile *inv, bool
 		const EQEmu::ItemData *item = GetItem(item_id);
 
 		if (!item) {
-			Log(Logs::General, Logs::Error,
-				"Warning: %s %i has an invalid item_id %i in inventory slot %i",
+			LogError("Warning: [{}] [{}] has an invalid item_id [{}] in inventory slot [{}]",
 				((is_charid == true) ? "charid" : "acctid"), id, item_id, slot_id);
 			continue;
 		}
@@ -537,8 +534,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, EQEmu::InventoryProfile *inv, bool
 		if (put_slot_id != INVALID_INDEX)
 			continue;
 
-		Log(Logs::General, Logs::Error,
-			"Warning: Invalid slot_id for item in shared bank inventory: %s=%i, item_id=%i, slot_id=%i",
+		LogError("Warning: Invalid slot_id for item in shared bank inventory: [{}]=[{}], item_id=[{}], slot_id=[{}]",
 			((is_charid == true) ? "charid" : "acctid"), id, item_id, slot_id);
 
 		if (is_charid)
@@ -562,7 +558,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQEmu::InventoryProfile *inv)
 			 char_id);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		Log(Logs::General, Logs::Error, "If you got an error related to the 'instnodrop' field, run the "
+		LogError("If you got an error related to the 'instnodrop' field, run the "
 						    "following SQL Queries:\nalter table inventory add instnodrop "
 						    "tinyint(1) unsigned default 0 not null;\n");
 		return false;
@@ -626,8 +622,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQEmu::InventoryProfile *inv)
 		const EQEmu::ItemData *item = GetItem(item_id);
 
 		if (!item) {
-			Log(Logs::General, Logs::Error,
-				"Warning: charid %i has an invalid item_id %i in inventory slot %i", char_id, item_id,
+			LogError("Warning: charid [{}] has an invalid item_id [{}] in inventory slot [{}]", char_id, item_id,
 				slot_id);
 			continue;
 		}
@@ -700,8 +695,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQEmu::InventoryProfile *inv)
 			put_slot_id = inv->PushCursor(*inst);
 		} else if (slot_id >= 3111 && slot_id <= 3179) {
 			// Admins: please report any occurrences of this error
-			Log(Logs::General, Logs::Error, "Warning: Defunct location for item in inventory: "
-							    "charid=%i, item_id=%i, slot_id=%i .. pushing to cursor...",
+			LogError("Warning: Defunct location for item in inventory: charid={}, item_id={}, slot_id={} .. pushing to cursor...",
 				char_id, item_id, slot_id);
 			put_slot_id = inv->PushCursor(*inst);
 		} else {
@@ -712,8 +706,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQEmu::InventoryProfile *inv)
 
 		// Save ptr to item in inventory
 		if (put_slot_id == INVALID_INDEX) {
-			Log(Logs::General, Logs::Error,
-				"Warning: Invalid slot_id for item in inventory: charid=%i, item_id=%i, slot_id=%i",
+			LogError("Warning: Invalid slot_id for item in inventory: charid=[{}], item_id=[{}], slot_id=[{}]",
 				char_id, item_id, slot_id);
 		}
 	}
@@ -721,8 +714,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQEmu::InventoryProfile *inv)
 	if (cv_conflict) {
 		char char_name[64] = "";
 		GetCharName(char_id, char_name);
-		Log(Logs::General, Logs::Error,
-			"ClientVersion/Expansion conflict during inventory load at zone entry for '%s' (charid: %u, inver: %s, gmi: %s)",
+		LogError("ClientVersion/Expansion conflict during inventory load at zone entry for [{}] (charid: [{}], inver: [{}], gmi: [{}])",
 			char_name,
 			char_id,
 			EQEmu::versions::MobVersionName(inv->InventoryVersion()),
@@ -747,7 +739,7 @@ bool SharedDatabase::GetInventory(uint32 account_id, char *name, EQEmu::Inventor
 			 name, account_id);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		Log(Logs::General, Logs::Error, "If you got an error related to the 'instnodrop' field, run the "
+		LogError("If you got an error related to the 'instnodrop' field, run the "
 						    "following SQL Queries:\nalter table inventory add instnodrop "
 						    "tinyint(1) unsigned default 0 not null;\n");
 		return false;
@@ -835,8 +827,7 @@ bool SharedDatabase::GetInventory(uint32 account_id, char *name, EQEmu::Inventor
 
 		// Save ptr to item in inventory
 		if (put_slot_id == INVALID_INDEX)
-			Log(Logs::General, Logs::Error, "Warning: Invalid slot_id for item in inventory: name=%s, "
-							    "acctid=%i, item_id=%i, slot_id=%i",
+			LogError("Warning: Invalid slot_id for item in inventory: name={}, acctid={}, item_id={}, slot_id={}",
 				name, account_id, item_id, slot_id);
 	}
 
@@ -912,7 +903,7 @@ bool SharedDatabase::LoadItems(const std::string &prefix) {
 		items_hash = std::unique_ptr<EQEmu::FixedMemoryHashSet<EQEmu::ItemData>>(new EQEmu::FixedMemoryHashSet<EQEmu::ItemData>(reinterpret_cast<uint8*>(items_mmf->Get()), items_mmf->Size()));
 		mutex.Unlock();
 	} catch(std::exception& ex) {
-		Log(Logs::General, Logs::Error, "Error Loading Items: %s", ex.what());
+		LogError("Error Loading Items: {}", ex.what());
 		return false;
 	}
 
@@ -1173,7 +1164,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 		try {
 			hash.insert(item.ID, item);
 		} catch (std::exception &ex) {
-			Log(Logs::General, Logs::Error, "Database::LoadItems: %s", ex.what());
+			LogError("Database::LoadItems: {}", ex.what());
 			break;
 		}
 	}
@@ -1230,7 +1221,7 @@ std::string SharedDatabase::GetBook(const char *txtfile, int16 *language)
 	}
 
     if (results.RowCount() == 0) {
-        Log(Logs::General, Logs::Error, "No book to send, (%s)", txtfile);
+        LogError("No book to send, ({})", txtfile);
         txtout.assign(" ",1);
         return txtout;
     }
@@ -1335,7 +1326,7 @@ bool SharedDatabase::LoadNPCFactionLists(const std::string &prefix) {
 		faction_hash = std::unique_ptr<EQEmu::FixedMemoryHashSet<NPCFactionList>>(new EQEmu::FixedMemoryHashSet<NPCFactionList>(reinterpret_cast<uint8*>(faction_mmf->Get()), faction_mmf->Size()));
 		mutex.Unlock();
 	} catch(std::exception& ex) {
-		Log(Logs::General, Logs::Error, "Error Loading npc factions: %s", ex.what());
+		LogError("Error Loading npc factions: {}", ex.what());
 		return false;
 	}
 
@@ -1353,8 +1344,8 @@ EQEmu::ItemInstance* SharedDatabase::CreateItem(uint32 item_id, int16 charges, u
 		inst = CreateBaseItem(item, charges);
 
 		if (inst == nullptr) {
-			Log(Logs::General, Logs::Error, "Error: valid item data returned a null reference for EQEmu::ItemInstance creation in SharedDatabase::CreateItem()");
-			Log(Logs::General, Logs::Error, "Item Data = ID: %u, Name: %s, Charges: %i", item->ID, item->Name, charges);
+			LogError("Error: valid item data returned a null reference for EQEmu::ItemInstance creation in SharedDatabase::CreateItem()");
+			LogError("Item Data = ID: {}, Name: {}, Charges: {}", item->ID, item->Name, charges);
 			return nullptr;
 		}
 
@@ -1379,8 +1370,8 @@ EQEmu::ItemInstance* SharedDatabase::CreateItem(const EQEmu::ItemData* item, int
 		inst = CreateBaseItem(item, charges);
 
 		if (inst == nullptr) {
-			Log(Logs::General, Logs::Error, "Error: valid item data returned a null reference for EQEmu::ItemInstance creation in SharedDatabase::CreateItem()");
-			Log(Logs::General, Logs::Error, "Item Data = ID: %u, Name: %s, Charges: %i", item->ID, item->Name, charges);
+			LogError("Error: valid item data returned a null reference for EQEmu::ItemInstance creation in SharedDatabase::CreateItem()");
+			LogError("Item Data = ID: {}, Name: {}, Charges: {}", item->ID, item->Name, charges);
 			return nullptr;
 		}
 
@@ -1410,8 +1401,8 @@ EQEmu::ItemInstance* SharedDatabase::CreateBaseItem(const EQEmu::ItemData* item,
 		inst = new EQEmu::ItemInstance(item, charges);
 
 		if (inst == nullptr) {
-			Log(Logs::General, Logs::Error, "Error: valid item data returned a null reference for EQEmu::ItemInstance creation in SharedDatabase::CreateBaseItem()");
-			Log(Logs::General, Logs::Error, "Item Data = ID: %u, Name: %s, Charges: %i", item->ID, item->Name, charges);
+			LogError("Error: valid item data returned a null reference for EQEmu::ItemInstance creation in SharedDatabase::CreateBaseItem()");
+			LogError("Item Data = ID: {}, Name: {}, Charges: {}", item->ID, item->Name, charges);
 			return nullptr;
 		}
 
@@ -1487,11 +1478,9 @@ bool SharedDatabase::UpdateInjectedCommandSettings(const std::vector<std::pair<s
 			return false;
 		}
 
-		Log(Logs::General,
-			Logs::Status,
-			"%u New Command%s Added",
-			injected.size(),
-			(injected.size() == 1 ? "" : "s")
+		LogInfo(
+			"[{0}] New Command(s) Added",
+			injected.size()
 		);
 	}
 
@@ -1511,9 +1500,8 @@ bool SharedDatabase::UpdateOrphanedCommandSettings(const std::vector<std::string
 			return false;
 		}
 
-		Log(Logs::General,
-			Logs::Status,
-			"%u Orphaned Command%s Deleted",
+		LogInfo(
+			"{} Orphaned Command{} Deleted",
 			orphaned.size(),
 			(orphaned.size() == 1 ? "" : "s")
 		);
@@ -1538,7 +1526,7 @@ bool SharedDatabase::LoadSkillCaps(const std::string &prefix) {
 		skill_caps_mmf = std::unique_ptr<EQEmu::MemoryMappedFile>(new EQEmu::MemoryMappedFile(file_name));
 		mutex.Unlock();
 	} catch(std::exception &ex) {
-		Log(Logs::General, Logs::Error, "Error loading skill caps: %s", ex.what());
+		LogError("Error loading skill caps: {}", ex.what());
 		return false;
 	}
 
@@ -1554,7 +1542,7 @@ void SharedDatabase::LoadSkillCaps(void *data) {
 	const std::string query = "SELECT skillID, class, level, cap FROM skill_caps ORDER BY skillID, class, level";
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        Log(Logs::General, Logs::Error, "Error loading skill caps from database: %s", results.ErrorMessage().c_str());
+        LogError("Error loading skill caps from database: {}", results.ErrorMessage().c_str());
         return;
 	}
 
@@ -1698,7 +1686,7 @@ bool SharedDatabase::LoadSpells(const std::string &prefix, int32 *records, const
 		mutex.Unlock();
 	}
 	catch(std::exception& ex) {
-		Log(Logs::General, Logs::Error, "Error Loading Spells: %s", ex.what());
+		LogError("Error Loading Spells: {}", ex.what());
 		return false;
 	}
 	return true;
@@ -1715,7 +1703,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
     }
 
     if(results.ColumnCount() <= SPELL_LOAD_FIELD_COUNT) {
-		Log(Logs::Detail, Logs::Spells, "Fatal error loading spells: Spell field count < SPELL_LOAD_FIELD_COUNT(%u)", SPELL_LOAD_FIELD_COUNT);
+		LogSpells("Fatal error loading spells: Spell field count < SPELL_LOAD_FIELD_COUNT([{}])", SPELL_LOAD_FIELD_COUNT);
 		return;
     }
 
@@ -1725,7 +1713,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
     for (auto row = results.begin(); row != results.end(); ++row) {
         tempid = atoi(row[0]);
         if(tempid >= max_spells) {
-            Log(Logs::Detail, Logs::Spells, "Non fatal error: spell.id >= max_spells, ignoring.");
+      LogSpells("Non fatal error: spell.id >= max_spells, ignoring");
             continue;
         }
 
@@ -1902,7 +1890,7 @@ bool SharedDatabase::LoadBaseData(const std::string &prefix) {
 		base_data_mmf = std::unique_ptr<EQEmu::MemoryMappedFile>(new EQEmu::MemoryMappedFile(file_name));
 		mutex.Unlock();
 	} catch(std::exception& ex) {
-		Log(Logs::General, Logs::Error, "Error Loading Base Data: %s", ex.what());
+		LogError("Error Loading Base Data: {}", ex.what());
 		return false;
 	}
 
@@ -1926,22 +1914,22 @@ void SharedDatabase::LoadBaseData(void *data, int max_level) {
         cl = atoi(row[1]);
 
         if(lvl <= 0) {
-            Log(Logs::General, Logs::Error, "Non fatal error: base_data.level <= 0, ignoring.");
+            LogError("Non fatal error: base_data.level <= 0, ignoring.");
             continue;
         }
 
         if(lvl >= max_level) {
-            Log(Logs::General, Logs::Error, "Non fatal error: base_data.level >= max_level, ignoring.");
+            LogError("Non fatal error: base_data.level >= max_level, ignoring.");
             continue;
         }
 
         if(cl <= 0) {
-            Log(Logs::General, Logs::Error, "Non fatal error: base_data.cl <= 0, ignoring.");
+            LogError("Non fatal error: base_data.cl <= 0, ignoring.");
             continue;
         }
 
         if(cl > 16) {
-            Log(Logs::General, Logs::Error, "Non fatal error: base_data.class > 16, ignoring.");
+            LogError("Non fatal error: base_data.class > 16, ignoring.");
             continue;
         }
 
@@ -2149,7 +2137,7 @@ bool SharedDatabase::LoadLoot(const std::string &prefix) {
 			loot_drop_mmf->Size()));
 		mutex.Unlock();
 	} catch(std::exception &ex) {
-		Log(Logs::General, Logs::Error, "Error loading loot: %s", ex.what());
+		LogError("Error loading loot: {}", ex.what());
 		return false;
 	}
 
@@ -2165,7 +2153,7 @@ const LootTable_Struct* SharedDatabase::GetLootTable(uint32 loottable_id) {
 			return &loot_table_hash->at(loottable_id);
 		}
 	} catch(std::exception &ex) {
-		Log(Logs::General, Logs::Error, "Could not get loot table: %s", ex.what());
+		LogError("Could not get loot table: {}", ex.what());
 	}
 	return nullptr;
 }
@@ -2179,7 +2167,7 @@ const LootDrop_Struct* SharedDatabase::GetLootDrop(uint32 lootdrop_id) {
 			return &loot_drop_hash->at(lootdrop_id);
 		}
 	} catch(std::exception &ex) {
-		Log(Logs::General, Logs::Error, "Could not get loot drop: %s", ex.what());
+		LogError("Could not get loot drop: {}", ex.what());
 	}
 	return nullptr;
 }

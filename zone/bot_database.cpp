@@ -18,8 +18,6 @@
 
 #ifdef BOTS
 
-#include <fmt/format.h>
-
 #include "../common/global_define.h"
 #include "../common/rulesys.h"
 #include "../common/string_util.h"
@@ -582,7 +580,7 @@ bool BotDatabase::SaveNewBot(Bot* bot_inst, uint32& bot_id)
 		bot_inst->GetPR(),
 		bot_inst->GetDR(),
 		bot_inst->GetCorrup(),
-		BOT_FOLLOW_DISTANCE_DEFAULT,
+		(uint32)BOT_FOLLOW_DISTANCE_DEFAULT,
 		(IsCasterClass(bot_inst->GetClass()) ? (uint8)RuleI(Bots, CasterStopMeleeLevel) : 255)
 	);
 	auto results = database.QueryDatabase(query);
@@ -1195,7 +1193,7 @@ bool BotDatabase::LoadItems(const uint32 bot_id, EQEmu::InventoryProfile& invent
 			(uint32)atoul(row[14])
 		);
 		if (!item_inst) {
-			Log(Logs::General, Logs::Error, "Warning: bot_id '%i' has an invalid item_id '%i' in inventory slot '%i'", bot_id, item_id, slot_id);
+			LogError("Warning: bot_id [{}] has an invalid item_id [{}] in inventory slot [{}]", bot_id, item_id, slot_id);
 			continue;
 		}
 
@@ -1248,7 +1246,7 @@ bool BotDatabase::LoadItems(const uint32 bot_id, EQEmu::InventoryProfile& invent
 		item_inst->SetOrnamentHeroModel((uint32)atoul(row[8]));
 
 		if (inventory_inst.PutItem(slot_id, *item_inst) == INVALID_INDEX)
-			Log(Logs::General, Logs::Error, "Warning: Invalid slot_id for item in inventory: bot_id = '%i', item_id = '%i', slot_id = '%i'", bot_id, item_id, slot_id);
+			LogError("Warning: Invalid slot_id for item in inventory: bot_id = [{}], item_id = [{}], slot_id = [{}]", bot_id, item_id, slot_id);
 
 		safe_delete(item_inst);
 	}
@@ -2255,8 +2253,10 @@ bool BotDatabase::SaveOwnerOption(const uint32 owner_id, size_t type, const bool
 	switch (static_cast<Client::BotOwnerOption>(type)) {
 	case Client::booDeathMarquee:
 	case Client::booStatsUpdate:
-	case Client::booSpawnMessageClassSpecific: {
-
+	case Client::booSpawnMessageClassSpecific:
+	case Client::booAltCombat:
+	case Client::booAutoDefend:
+	{
 		query = fmt::format(
 			"REPLACE INTO `bot_owner_options`(`owner_id`, `option_type`, `option_value`) VALUES ('{}', '{}', '{}')",
 			owner_id,
@@ -2284,11 +2284,12 @@ bool BotDatabase::SaveOwnerOption(const uint32 owner_id, const std::pair<size_t,
 
 	switch (static_cast<Client::BotOwnerOption>(type.first)) {
 	case Client::booSpawnMessageSay:
-	case Client::booSpawnMessageTell: {
+	case Client::booSpawnMessageTell:
+	{
 		switch (static_cast<Client::BotOwnerOption>(type.second)) {
 		case Client::booSpawnMessageSay:
-		case Client::booSpawnMessageTell: {
-
+		case Client::booSpawnMessageTell:
+		{
 			query = fmt::format(
 				"REPLACE INTO `bot_owner_options`(`owner_id`, `option_type`, `option_value`) VALUES ('{}', '{}', '{}'), ('{}', '{}', '{}')",
 				owner_id,

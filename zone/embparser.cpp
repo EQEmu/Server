@@ -145,7 +145,7 @@ void PerlembParser::ReloadQuests() {
 			perl = nullptr;
 		}
 
-		Log(Logs::General, Logs::Status, "Error re-initializing perlembed: %s", e.what());
+		LogInfo("Error re-initializing perlembed: [{}]", e.what());
 		throw e.what();
 	}
 

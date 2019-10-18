@@ -41,7 +41,6 @@ extern volatile bool RunLoops;
 #include "../common/profanity_manager.h"
 #include "data_bucket.h"
 #include "position.h"
-#include "net.h"
 #include "worldserver.h"
 #include "zonedb.h"
 #include "petitions.h"
@@ -66,6 +65,8 @@ extern uint32 numclients;
 extern PetitionList petition_list;
 bool commandlogged;
 char entirecommand[255];
+
+void UpdateWindowTitle(char* iNewTitle);
 
 Client::Client(EQStreamInterface* ieqs)
 : Mob("No name",	// name
@@ -244,7 +245,7 @@ Client::Client(EQStreamInterface* ieqs)
 	PendingRezzSpellID = 0;
 	numclients++;
 	// emuerror;
-	UpdateWindowTitle();
+	UpdateWindowTitle(nullptr);
 	horseId = 0;
 	tgb = false;
 	tribute_master_id = 0xFFFFFFFF;
@@ -352,6 +353,11 @@ Client::Client(EQStreamInterface* ieqs)
 	bot_owner_options[booSpawnMessageSay] = false;
 	bot_owner_options[booSpawnMessageTell] = true;
 	bot_owner_options[booSpawnMessageClassSpecific] = true;
+	bot_owner_options[booAltCombat] = RuleB(Bots, AllowOwnerOptionAltCombat);
+	bot_owner_options[booAutoDefend] = RuleB(Bots, AllowOwnerOptionAutoDefend);
+
+	SetBotPulling(false);
+	SetBotPrecombat(false);
 #endif
 
 	AI_Init();
@@ -381,7 +387,7 @@ Client::~Client() {
 		ToggleBuyerMode(false);
 
 	if(conn_state != ClientConnectFinished) {
-		Log(Logs::General, Logs::None, "Client '%s' was destroyed before reaching the connected state:", GetName());
+		LogDebug("Client [{}] was destroyed before reaching the connected state:", GetName());
 		ReportConnectingState();
 	}
 
@@ -449,7 +455,7 @@ Client::~Client() {
 	ClearRespawnOptions();
 
 	numclients--;
-	UpdateWindowTitle();
+	UpdateWindowTitle(nullptr);
 	if(zone)
 		zone->RemoveAuth(GetName(), lskey);
 
@@ -542,31 +548,31 @@ void Client::SendLogoutPackets() {
 void Client::ReportConnectingState() {
 	switch(conn_state) {
 	case NoPacketsReceived:		//havent gotten anything
-		Log(Logs::General, Logs::None, "Client has not sent us an initial zone entry packet.");
+		LogDebug("Client has not sent us an initial zone entry packet");
 		break;
 	case ReceivedZoneEntry:		//got the first packet, loading up PP
-		Log(Logs::General, Logs::None, "Client sent initial zone packet, but we never got their player info from the database.");
+		LogDebug("Client sent initial zone packet, but we never got their player info from the database");
 		break;
 	case PlayerProfileLoaded:	//our DB work is done, sending it
-		Log(Logs::General, Logs::None, "We were sending the player profile, tributes, tasks, spawns, time and weather, but never finished.");
+		LogDebug("We were sending the player profile, tributes, tasks, spawns, time and weather, but never finished");
 		break;
 	case ZoneInfoSent:		//includes PP, tributes, tasks, spawns, time and weather
-		Log(Logs::General, Logs::None, "We successfully sent player info and spawns, waiting for client to request new zone.");
+		LogDebug("We successfully sent player info and spawns, waiting for client to request new zone");
 		break;
 	case NewZoneRequested:	//received and sent new zone request
-		Log(Logs::General, Logs::None, "We received client's new zone request, waiting for client spawn request.");
+		LogDebug("We received client's new zone request, waiting for client spawn request");
 		break;
 	case ClientSpawnRequested:	//client sent ReqClientSpawn
-		Log(Logs::General, Logs::None, "We received the client spawn request, and were sending objects, doors, zone points and some other stuff, but never finished.");
+		LogDebug("We received the client spawn request, and were sending objects, doors, zone points and some other stuff, but never finished");
 		break;
 	case ZoneContentsSent:		//objects, doors, zone points
-		Log(Logs::General, Logs::None, "The rest of the zone contents were successfully sent, waiting for client ready notification.");
+		LogDebug("The rest of the zone contents were successfully sent, waiting for client ready notification");
 		break;
 	case ClientReadyReceived:	//client told us its ready, send them a bunch of crap like guild MOTD, etc
-		Log(Logs::General, Logs::None, "We received client ready notification, but never finished Client::CompleteConnect");
+		LogDebug("We received client ready notification, but never finished Client::CompleteConnect");
 		break;
 	case ClientConnectFinished:	//client finally moved to finished state, were done here
-		Log(Logs::General, Logs::None, "Client is successfully connected.");
+		LogDebug("Client is successfully connected");
 		break;
 	};
 }
@@ -696,7 +702,7 @@ bool Client::Save(uint8 iCommitNow) {
 	database.SaveCharacterTribute(this->CharacterID(), &m_pp);
 	SaveTaskState(); /* Save Character Task */
 
-	Log(Logs::General, Logs::Food, "Client::Save - hunger_level: %i thirst_level: %i", m_pp.hunger_level, m_pp.thirst_level);
+	LogFood("Client::Save - hunger_level: [{}] thirst_level: [{}]", m_pp.hunger_level, m_pp.thirst_level);
 
 	// perform snapshot before SaveCharacterData() so that m_epp will contain the updated time
 	if (RuleB(Character, ActiveInvSnapshots) && time(nullptr) >= GetNextInvSnapshotTime()) {
@@ -770,7 +776,7 @@ bool Client::SendAllPackets() {
 		if(eqs)
 			eqs->FastQueuePacket((EQApplicationPacket **)&cp->app, cp->ack_req);
 		clientpackets.pop_front();
-		Log(Logs::Moderate, Logs::Client_Server_Packet, "Transmitting a packet");
+		Log(Logs::Moderate, Logs::PacketClientServer, "Transmitting a packet");
 	}
 	return true;
 }
@@ -818,7 +824,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 	char message[4096];
 	strn0cpy(message, orig_message, sizeof(message));
 
-	Log(Logs::Detail, Logs::Zone_Server, "Client::ChannelMessageReceived() Channel:%i message:'%s'", chan_num, message);
+	LogDebug("Client::ChannelMessageReceived() Channel:[{}] message:[{}]", chan_num, message);
 
 	if (targetname == nullptr) {
 		targetname = (!GetTarget()) ? "" : GetTarget()->GetName();
@@ -1640,7 +1646,7 @@ void Client::UpdateAdmin(bool iFromDB) {
 
 	if(m_pp.gm)
 	{
-		Log(Logs::Moderate, Logs::Zone_Server, "%s - %s is a GM", __FUNCTION__ , GetName());
+		LogInfo("[{}] - [{}] is a GM", __FUNCTION__ , GetName());
 // no need for this, having it set in pp you already start as gm
 // and it's also set in your spawn packet so other people see it too
 //		SendAppearancePacket(AT_GM, 1, false);
@@ -2071,7 +2077,7 @@ void Client::ReadBook(BookRequest_Struct *book) {
 
 	if (booktxt2[0] != '\0') {
 #if EQDEBUG >= 6
-		Log(Logs::General, Logs::Normal, "Client::ReadBook() textfile:%s Text:%s", txtfile, booktxt2.c_str());
+		LogInfo("Client::ReadBook() textfile:[{}] Text:[{}]", txtfile, booktxt2.c_str());
 #endif
 		auto outapp = new EQApplicationPacket(OP_ReadBook, length + sizeof(BookText_Struct));
 
@@ -2291,7 +2297,7 @@ void Client::AddMoneyToPP(uint64 copper, bool updateclient){
 
 	SaveCurrency();
 
-	Log(Logs::General, Logs::None, "Client::AddMoneyToPP() %s should have: plat:%i gold:%i silver:%i copper:%i", GetName(), m_pp.platinum, m_pp.gold, m_pp.silver, m_pp.copper);
+	LogDebug("Client::AddMoneyToPP() [{}] should have: plat:[{}] gold:[{}] silver:[{}] copper:[{}]", GetName(), m_pp.platinum, m_pp.gold, m_pp.silver, m_pp.copper);
 }
 
 void Client::EVENT_ITEM_ScriptStopReturn(){
@@ -2331,7 +2337,7 @@ void Client::AddMoneyToPP(uint32 copper, uint32 silver, uint32 gold, uint32 plat
 	SaveCurrency();
 
 #if (EQDEBUG>=5)
-		Log(Logs::General, Logs::None, "Client::AddMoneyToPP() %s should have: plat:%i gold:%i silver:%i copper:%i",
+		LogDebug("Client::AddMoneyToPP() [{}] should have: plat:[{}] gold:[{}] silver:[{}] copper:[{}]",
 			GetName(), m_pp.platinum, m_pp.gold, m_pp.silver, m_pp.copper);
 #endif
 }
@@ -2423,13 +2429,13 @@ bool Client::CheckIncreaseSkill(EQEmu::skills::SkillType skillid, Mob *against_w
 		if(zone->random.Real(0, 99) < Chance)
 		{
 			SetSkill(skillid, GetRawSkill(skillid) + 1);
-			Log(Logs::Detail, Logs::Skills, "Skill %d at value %d successfully gain with %d%%chance (mod %d)", skillid, skillval, Chance, chancemodi);
+			LogSkills("Skill [{}] at value [{}] successfully gain with [{}]% chance (mod [{}])", skillid, skillval, Chance, chancemodi);
 			return true;
 		} else {
-			Log(Logs::Detail, Logs::Skills, "Skill %d at value %d failed to gain with %d%%chance (mod %d)", skillid, skillval, Chance, chancemodi);
+			LogSkills("Skill [{}] at value [{}] failed to gain with [{}]% chance (mod [{}])", skillid, skillval, Chance, chancemodi);
 		}
 	} else {
-		Log(Logs::Detail, Logs::Skills, "Skill %d at value %d cannot increase due to maxmum %d", skillid, skillval, maxskill);
+		LogSkills("Skill [{}] at value [{}] cannot increase due to maxmum [{}]", skillid, skillval, maxskill);
 	}
 	return false;
 }
@@ -2450,10 +2456,10 @@ void Client::CheckLanguageSkillIncrease(uint8 langid, uint8 TeacherSkill) {
 
 		if(zone->random.Real(0,100) < Chance) {	// if they make the roll
 			IncreaseLanguageSkill(langid);	// increase the language skill by 1
-			Log(Logs::Detail, Logs::Skills, "Language %d at value %d successfully gain with %.4f%%chance", langid, LangSkill, Chance);
+			LogSkills("Language [{}] at value [{}] successfully gain with [{}] % chance", langid, LangSkill, Chance);
 		}
 		else
-			Log(Logs::Detail, Logs::Skills, "Language %d at value %d failed to gain with %.4f%%chance", langid, LangSkill, Chance);
+			LogSkills("Language [{}] at value [{}] failed to gain with [{}] % chance", langid, LangSkill, Chance);
 	}
 }
 
@@ -2562,7 +2568,7 @@ uint16 Client::GetMaxSkillAfterSpecializationRules(EQEmu::skills::SkillType skil
 
 				Save();
 
-				Log(Logs::General, Logs::Normal, "Reset %s's caster specialization skills to 1. "
+				LogInfo("Reset [{}]'s caster specialization skills to 1"
 								"Too many specializations skills were above 50.", GetCleanName());
 			}
 
@@ -2594,7 +2600,7 @@ void Client::SetPVP(bool toggle, bool message) {
 void Client::Kick(const std::string &reason) {
 	client_state = CLIENT_KICKED;
 
-	Log(Logs::General, Logs::Client_Login, "Client [%s] kicked, reason [%s]", GetCleanName(), reason.c_str());
+	LogClientLogin("Client [{}] kicked, reason [{}]", GetCleanName(), reason.c_str());
 }
 
 void Client::WorldKick() {
@@ -4919,14 +4925,14 @@ void Client::HandleLDoNOpen(NPC *target)
 	{
 		if(target->GetClass() != LDON_TREASURE)
 		{
-			Log(Logs::General, Logs::None, "%s tried to open %s but %s was not a treasure chest.",
+			LogDebug("[{}] tried to open [{}] but [{}] was not a treasure chest",
 				GetName(), target->GetName(), target->GetName());
 			return;
 		}
 
 		if(DistanceSquaredNoZ(m_Position, target->GetPosition()) > RuleI(Adventure, LDoNTrapDistanceUse))
 		{
-			Log(Logs::General, Logs::None, "%s tried to open %s but %s was out of range",
+			LogDebug("[{}] tried to open [{}] but [{}] was out of range",
 				GetName(), target->GetName(), target->GetName());
 			Message(Chat::Red, "Treasure chest out of range.");
 			return;
@@ -6238,7 +6244,7 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 	PetRecord record;
 	if(!database.GetPetEntry(spells[spell_id].teleport_zone, &record))
 	{
-		Log(Logs::General, Logs::Error, "Unknown doppelganger spell id: %d, check pets table", spell_id);
+		LogError("Unknown doppelganger spell id: [{}], check pets table", spell_id);
 		Message(Chat::Red, "Unable to find data for pet %s", spells[spell_id].teleport_zone);
 		return;
 	}
@@ -6252,7 +6258,7 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 
 	const NPCType *npc_type = database.LoadNPCTypesData(pet.npc_id);
 	if(npc_type == nullptr) {
-		Log(Logs::General, Logs::Error, "Unknown npc type for doppelganger spell id: %d", spell_id);
+		LogError("Unknown npc type for doppelganger spell id: [{}]", spell_id);
 		Message(0,"Unable to find pet!");
 		return;
 	}
@@ -8363,15 +8369,14 @@ void Client::Consume(const EQEmu::ItemData *item, uint8 type, int16 slot, bool a
 
 		m_pp.hunger_level += increase;
 
-		Log(Logs::General, Logs::Food, "Consuming food, points added to hunger_level: %i - current_hunger: %i",
-		    increase, m_pp.hunger_level);
+		LogFood("Consuming food, points added to hunger_level: [{}] - current_hunger: [{}]", increase, m_pp.hunger_level);
 
 		DeleteItemInInventory(slot, 1, false);
 
 		if (!auto_consume) // no message if the client consumed for us
 			entity_list.MessageCloseString(this, true, 50, 0, EATING_MESSAGE, GetName(), item->Name);
 
-		Log(Logs::General, Logs::Food, "Eating from slot: %i", (int)slot);
+		LogFood("Eating from slot: [{}]", (int)slot);
 
 	} else {
 		increase = mod_drink_value(item, increase);
@@ -8383,13 +8388,12 @@ void Client::Consume(const EQEmu::ItemData *item, uint8 type, int16 slot, bool a
 
 		DeleteItemInInventory(slot, 1, false);
 
-		Log(Logs::General, Logs::Food, "Consuming drink, points added to thirst_level: %i current_thirst: %i",
-		    increase, m_pp.thirst_level);
+		LogFood("Consuming drink, points added to thirst_level: [{}] current_thirst: [{}]", increase, m_pp.thirst_level);
 
 		if (!auto_consume) // no message if the client consumed for us
 			entity_list.MessageCloseString(this, true, 50, 0, DRINKING_MESSAGE, GetName(), item->Name);
 
-		Log(Logs::General, Logs::Food, "Drinking from slot: %i", (int)slot);
+		LogFood("Drinking from slot: [{}]", (int)slot);
 	}
 }
 

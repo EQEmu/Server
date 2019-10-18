@@ -90,7 +90,7 @@ bool ZoneServer::SetZone(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	char*	longname;
 
 	if (iZoneID)
-		Log(Logs::Detail, Logs::World_Server, "Setting to '%s' (%d:%d)%s", (zn) ? zn : "", iZoneID, iInstanceID,
+		Log(Logs::Detail, Logs::WorldServer, "Setting to '%s' (%d:%d)%s", (zn) ? zn : "", iZoneID, iInstanceID,
 			iStaticZone ? " (Static)" : "");
 
 	zone_server_zone_id = iZoneID;
@@ -541,10 +541,10 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 
 		RezzPlayer_Struct* sRezz = (RezzPlayer_Struct*)pack->pBuffer;
 		if (zoneserver_list.SendPacket(pack)) {
-			Log(Logs::Detail, Logs::World_Server, "Sent Rez packet for %s", sRezz->rez.your_name);
+			LogInfo("Sent Rez packet for [{}]", sRezz->rez.your_name);
 		}
 		else {
-			Log(Logs::Detail, Logs::World_Server, "Could not send Rez packet for %s", sRezz->rez.your_name);
+			LogInfo("Could not send Rez packet for [{}]", sRezz->rez.your_name);
 		}
 		break;
 	}
@@ -589,21 +589,21 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			ServerConnectInfo* sci = (ServerConnectInfo*)p.pBuffer;
 			sci->port = client_port;
 			SendPacket(&p);
-			Log(Logs::Detail, Logs::World_Server, "Auto zone port configuration. Telling zone to use port %d", client_port);
+			LogInfo("Auto zone port configuration. Telling zone to use port [{}]", client_port);
 		}
 		else {
 			client_port = sci->port;
-			Log(Logs::Detail, Logs::World_Server, "Zone specified port %d.", client_port);
+			LogInfo("Zone specified port [{}]", client_port);
 		}
 
 		if (sci->address[0]) {
 			strn0cpy(client_address, sci->address, 250);
-			Log(Logs::Detail, Logs::World_Server, "Zone specified address %s.", sci->address);
+			LogInfo("Zone specified address [{}]", sci->address);
 		}
 
 		if (sci->local_address[0]) {
 			strn0cpy(client_local_address, sci->local_address, 250);
-			Log(Logs::Detail, Logs::World_Server, "Zone specified local address %s.", sci->address);
+			LogInfo("Zone specified local address [{}]", sci->address);
 		}
 
 		if (sci->process_id) {
@@ -617,7 +617,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		const LaunchName_Struct* ln = (const LaunchName_Struct*)pack->pBuffer;
 		launcher_name = ln->launcher_name;
 		launched_name = ln->zone_name;
-		Log(Logs::Detail, Logs::World_Server, "Zone started with name %s by launcher %s", launched_name.c_str(), launcher_name.c_str());
+		LogInfo("Zone started with name [{}] by launcher [{}]", launched_name.c_str(), launcher_name.c_str());
 		break;
 	}
 	case ServerOP_ShutdownAll: {
@@ -700,12 +700,11 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		if (WorldConfig::get()->UpdateStats)
 			client = client_list.FindCharacter(ztz->name);
 
-		Log(Logs::Detail, Logs::World_Server, "ZoneToZone request for %s current zone %d req zone %d\n",
-			ztz->name, ztz->current_zone_id, ztz->requested_zone_id);
+		LogInfo("ZoneToZone request for [{}] current zone [{}] req zone [{}]", ztz->name, ztz->current_zone_id, ztz->requested_zone_id);
 
 		/* This is a request from the egress zone */
 		if (GetZoneID() == ztz->current_zone_id && GetInstanceID() == ztz->current_instance_id) {
-			Log(Logs::Detail, Logs::World_Server, "Processing ZTZ for egress from zone for client %s\n", ztz->name);
+			LogInfo("Processing ZTZ for egress from zone for client [{}]", ztz->name);
 
 			if (ztz->admin < 80 && ztz->ignorerestrictions < 2 && zoneserver_list.IsZoneLocked(ztz->requested_zone_id)) {
 				ztz->response = 0;
@@ -723,20 +722,20 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 
 			/* Zone was already running*/
 			if (ingress_server) {
-				Log(Logs::Detail, Logs::World_Server, "Found a zone already booted for %s\n", ztz->name);
+				LogInfo("Found a zone already booted for [{}]", ztz->name);
 				ztz->response = 1;
 			}
 			/* Boot the Zone*/
 			else {
 				int server_id;
 				if ((server_id = zoneserver_list.TriggerBootup(ztz->requested_zone_id, ztz->requested_instance_id))) {
-					Log(Logs::Detail, Logs::World_Server, "Successfully booted a zone for %s\n", ztz->name);
+					LogInfo("Successfully booted a zone for [{}]", ztz->name);
 					// bootup successful, ready to rock
 					ztz->response = 1;
 					ingress_server = zoneserver_list.FindByID(server_id);
 				}
 				else {
-					Log(Logs::Detail, Logs::World_Server, "FAILED to boot a zone for %s\n", ztz->name);
+					LogError("failed to boot a zone for [{}]", ztz->name);
 					// bootup failed, send back error code 0
 					ztz->response = 0;
 				}
@@ -751,7 +750,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		/* Response from Ingress server, route back to egress */
 		else {
 
-			Log(Logs::Detail, Logs::World_Server, "Processing ZTZ for ingress to zone for client %s\n", ztz->name);
+			LogInfo("Processing ZTZ for ingress to zone for client [{}]", ztz->name);
 			ZoneServer *egress_server = nullptr;
 			if (ztz->current_instance_id > 0) {
 				egress_server = zoneserver_list.FindByInstanceID(ztz->current_instance_id);
@@ -769,7 +768,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	}
 	case ServerOP_ClientList: {
 		if (pack->size != sizeof(ServerClientList_Struct)) {
-			Log(Logs::Detail, Logs::World_Server, "Wrong size on ServerOP_ClientList. Got: %d, Expected: %d", pack->size, sizeof(ServerClientList_Struct));
+			LogInfo("Wrong size on ServerOP_ClientList. Got: [{}], Expected: [{}]", pack->size, sizeof(ServerClientList_Struct));
 			break;
 		}
 		client_list.ClientUpdate(this, (ServerClientList_Struct*)pack->pBuffer);
@@ -778,7 +777,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	case ServerOP_ClientListKA: {
 		ServerClientListKeepAlive_Struct* sclka = (ServerClientListKeepAlive_Struct*)pack->pBuffer;
 		if (pack->size < 4 || pack->size != 4 + (4 * sclka->numupdates)) {
-			Log(Logs::Detail, Logs::World_Server, "Wrong size on ServerOP_ClientListKA. Got: %d, Expected: %d", pack->size, (4 + (4 * sclka->numupdates)));
+			LogInfo("Wrong size on ServerOP_ClientListKA. Got: [{}], Expected: [{}]", pack->size, (4 + (4 * sclka->numupdates)));
 			break;
 		}
 		client_list.CLEKeepAlive(sclka->numupdates, sclka->wid);
@@ -893,7 +892,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	}
 	case ServerOP_GMGoto: {
 		if (pack->size != sizeof(ServerGMGoto_Struct)) {
-			Log(Logs::Detail, Logs::World_Server, "Wrong size on ServerOP_GMGoto. Got: %d, Expected: %d", pack->size, sizeof(ServerGMGoto_Struct));
+			LogInfo("Wrong size on ServerOP_GMGoto. Got: [{}], Expected: [{}]", pack->size, sizeof(ServerGMGoto_Struct));
 			break;
 		}
 		ServerGMGoto_Struct* gmg = (ServerGMGoto_Struct*)pack->pBuffer;
@@ -913,7 +912,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	}
 	case ServerOP_Lock: {
 		if (pack->size != sizeof(ServerLock_Struct)) {
-			Log(Logs::Detail, Logs::World_Server, "Wrong size on ServerOP_Lock. Got: %d, Expected: %d", pack->size, sizeof(ServerLock_Struct));
+			LogInfo("Wrong size on ServerOP_Lock. Got: [{}], Expected: [{}]", pack->size, sizeof(ServerLock_Struct));
 			break;
 		}
 		ServerLock_Struct* slock = (ServerLock_Struct*)pack->pBuffer;
@@ -938,7 +937,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	}
 	case ServerOP_Motd: {
 		if (pack->size != sizeof(ServerMotd_Struct)) {
-			Log(Logs::Detail, Logs::World_Server, "Wrong size on ServerOP_Motd. Got: %d, Expected: %d", pack->size, sizeof(ServerMotd_Struct));
+			LogInfo("Wrong size on ServerOP_Motd. Got: [{}], Expected: [{}]", pack->size, sizeof(ServerMotd_Struct));
 			break;
 		}
 		ServerMotd_Struct* smotd = (ServerMotd_Struct*)pack->pBuffer;
@@ -949,7 +948,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	}
 	case ServerOP_Uptime: {
 		if (pack->size != sizeof(ServerUptime_Struct)) {
-			Log(Logs::Detail, Logs::World_Server, "Wrong size on ServerOP_Uptime. Got: %d, Expected: %d", pack->size, sizeof(ServerUptime_Struct));
+			LogInfo("Wrong size on ServerOP_Uptime. Got: [{}], Expected: [{}]", pack->size, sizeof(ServerUptime_Struct));
 			break;
 		}
 		ServerUptime_Struct* sus = (ServerUptime_Struct*)pack->pBuffer;
@@ -968,7 +967,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		break;
 	}
 	case ServerOP_GetWorldTime: {
-		Log(Logs::Detail, Logs::World_Server, "Broadcasting a world time update");
+		LogInfo("Broadcasting a world time update");
 		auto pack = new ServerPacket;
 
 		pack->opcode = ServerOP_SyncWorldTime;
@@ -987,17 +986,17 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		break;
 	}
 	case ServerOP_SetWorldTime: {
-		Log(Logs::Detail, Logs::World_Server, "Received SetWorldTime");
+		LogNetcode("Received SetWorldTime");
 		eqTimeOfDay* newtime = (eqTimeOfDay*)pack->pBuffer;
 		zoneserver_list.worldclock.SetCurrentEQTimeOfDay(newtime->start_eqtime, newtime->start_realtime);
-		Log(Logs::Detail, Logs::World_Server, "New time = %d-%d-%d %d:%d (%d)\n", newtime->start_eqtime.year, newtime->start_eqtime.month, (int)newtime->start_eqtime.day, (int)newtime->start_eqtime.hour, (int)newtime->start_eqtime.minute, (int)newtime->start_realtime);
+		LogInfo("New time = [{}]-[{}]-[{}] [{}]:[{}] ([{}])\n", newtime->start_eqtime.year, newtime->start_eqtime.month, (int)newtime->start_eqtime.day, (int)newtime->start_eqtime.hour, (int)newtime->start_eqtime.minute, (int)newtime->start_realtime);
 		database.SaveTime((int)newtime->start_eqtime.minute, (int)newtime->start_eqtime.hour, (int)newtime->start_eqtime.day, newtime->start_eqtime.month, newtime->start_eqtime.year);
 		zoneserver_list.SendTimeSync();
 		break;
 	}
 	case ServerOP_IPLookup: {
 		if (pack->size < sizeof(ServerGenericWorldQuery_Struct)) {
-			Log(Logs::Detail, Logs::World_Server, "Wrong size on ServerOP_IPLookup. Got: %d, Expected (at least): %d", pack->size, sizeof(ServerGenericWorldQuery_Struct));
+			LogInfo("Wrong size on ServerOP_IPLookup. Got: [{}], Expected (at least): [{}]", pack->size, sizeof(ServerGenericWorldQuery_Struct));
 			break;
 		}
 		ServerGenericWorldQuery_Struct* sgwq = (ServerGenericWorldQuery_Struct*)pack->pBuffer;
@@ -1009,7 +1008,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	}
 	case ServerOP_LockZone: {
 		if (pack->size < sizeof(ServerLockZone_Struct)) {
-			Log(Logs::Detail, Logs::World_Server, "Wrong size on ServerOP_LockZone. Got: %d, Expected: %d", pack->size, sizeof(ServerLockZone_Struct));
+			LogInfo("Wrong size on ServerOP_LockZone. Got: [{}], Expected: [{}]", pack->size, sizeof(ServerLockZone_Struct));
 			break;
 		}
 		ServerLockZone_Struct* s = (ServerLockZone_Struct*)pack->pBuffer;
@@ -1087,7 +1086,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 						zs->SendPacket(pack);
 					}
 					else {
-						Log(Logs::Detail, Logs::World_Server, "Unable to locate zone record for instance id %u in zoneserver list for ServerOP_Consent_Response operation.", s->instance_id);
+						LogInfo("Unable to locate zone record for instance id [{}] in zoneserver list for ServerOP_Consent_Response operation", s->instance_id);
 					}
 					safe_delete(pack);
 				}
@@ -1112,7 +1111,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 						zs->SendPacket(pack);
 					}
 					else {
-						Log(Logs::Detail, Logs::World_Server, "Unable to locate zone record for zone id %u in zoneserver list for ServerOP_Consent_Response operation.", s->zone_id);
+						LogInfo("Unable to locate zone record for zone id [{}] in zoneserver list for ServerOP_Consent_Response operation", s->zone_id);
 					}
 					safe_delete(pack);
 				}
@@ -1132,7 +1131,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				zs->SendPacket(pack);
 			}
 			else {
-				Log(Logs::Detail, Logs::World_Server, "Unable to locate zone record for zone id %u in zoneserver list for ServerOP_Consent_Response operation.", s->zone_id);
+				LogInfo("Unable to locate zone record for zone id [{}] in zoneserver list for ServerOP_Consent_Response operation", s->zone_id);
 			}
 			safe_delete(pack);
 		}
@@ -1151,7 +1150,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				zs->SendPacket(pack);
 			}
 			else {
-				Log(Logs::Detail, Logs::World_Server, "Unable to locate zone record for instance id %u in zoneserver list for ServerOP_Consent_Response operation.", s->instance_id);
+				LogInfo("Unable to locate zone record for instance id [{}] in zoneserver list for ServerOP_Consent_Response operation", s->instance_id);
 			}
 		}
 		else
@@ -1161,7 +1160,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				zs->SendPacket(pack);
 			}
 			else {
-				Log(Logs::Detail, Logs::World_Server, "Unable to locate zone record for zone id %u in zoneserver list for ServerOP_Consent_Response operation.", s->zone_id);
+				LogInfo("Unable to locate zone record for zone id [{}] in zoneserver list for ServerOP_Consent_Response operation", s->zone_id);
 			}
 		}
 		break;
@@ -1263,7 +1262,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 
 	case ServerOP_LSAccountUpdate:
 	{
-		Log(Logs::Detail, Logs::World_Server, "Received ServerOP_LSAccountUpdate packet from zone");
+		LogNetcode("Received ServerOP_LSAccountUpdate packet from zone");
 		loginserverlist.SendAccountUpdate(pack);
 		break;
 	}
@@ -1326,14 +1325,14 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	case ServerOP_ChangeSharedMem: {
 		std::string hotfix_name = std::string((char*)pack->pBuffer);
 
-		Log(Logs::General, Logs::World_Server, "Loading items...");
+		LogInfo("Loading items");
 		if (!database.LoadItems(hotfix_name)) {
-			Log(Logs::General, Logs::World_Server, "Error: Could not load item data. But ignoring");
+			LogInfo("Error: Could not load item data. But ignoring");
 		}
 
-		Log(Logs::General, Logs::World_Server, "Loading skill caps...");
+		LogInfo("Loading skill caps");
 		if (!database.LoadSkillCaps(hotfix_name)) {
-			Log(Logs::General, Logs::World_Server, "Error: Could not load skill cap data. But ignoring");
+			LogInfo("Error: Could not load skill cap data. But ignoring");
 		}
 
 		zoneserver_list.SendPacket(pack);
@@ -1352,7 +1351,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	}
 	default:
 	{
-		Log(Logs::Detail, Logs::World_Server, "Unknown ServerOPcode from zone 0x%04x, size %d", pack->opcode, pack->size);
+		LogInfo("Unknown ServerOPcode from zone {:#04x}, size [{}]", pack->opcode, pack->size);
 		DumpPacket(pack->pBuffer, pack->size);
 		break;
 	}

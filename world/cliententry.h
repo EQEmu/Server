@@ -18,12 +18,48 @@ typedef enum
 	InZone
 } CLE_Status;
 
+static const char * CLEStatusString[] = {
+	"Never",
+	"Offline",
+	"Online",
+	"CharSelect",
+	"Zoning",
+	"InZone"
+};
+
 class ZoneServer;
 struct ServerClientList_Struct;
 
 class ClientListEntry {
 public:
-	ClientListEntry(uint32 id, uint32 iLSID, const char* iLoginName, const char* iLoginKey, int16 iWorldAdmin = 0, uint32 ip = 0, uint8 local=0);
+
+	/**
+	 * @param id
+	 * @param in_loginserver_id
+	 * @param in_loginserver_name
+	 * @param in_login_name
+	 * @param in_login_key
+	 * @param in_is_world_admin
+	 * @param ip
+	 * @param local
+	 */
+	ClientListEntry(
+		uint32 id,
+		uint32 in_loginserver_id,
+		const char *in_loginserver_name,
+		const char *in_login_name,
+		const char *in_login_key,
+		int16 in_is_world_admin = 0,
+		uint32 ip = 0,
+		uint8 local = 0
+	);
+
+	/**
+	 * @param id
+	 * @param iZS
+	 * @param scl
+	 * @param iOnline
+	 */
 	ClientListEntry(uint32 id, uint32 iAccID, const char* iAccName, MD5& iMD5Pass, int16 iAdmin = 0);
 	ClientListEntry(uint32 id, ZoneServer* iZS, ServerClientList_Struct* scl, CLE_Status iOnline);
 	~ClientListEntry();
@@ -31,7 +67,7 @@ public:
 	void	Update(ZoneServer* zoneserver, ServerClientList_Struct* scl, CLE_Status iOnline = CLE_Status::InZone);
 	void	LSUpdate(ZoneServer* zoneserver);
 	void	LSZoneChange(ZoneToZone_Struct* ztz);
-	bool	CheckAuth(uint32 iLSID, const char* key);
+	bool	CheckAuth(uint32 loginserver_account_id, const char* key_password);
 	bool	CheckAuth(const char* iName, MD5& iMD5Password);
 	bool	CheckAuth(uint32 id, const char* key, uint32 ip);
 	void	SetOnline(ZoneServer* iZS, CLE_Status iOnline);
@@ -47,9 +83,10 @@ public:
 	void	Camp(ZoneServer* iZS = 0);
 
 	// Login Server stuff
+	inline const char*  LoginServer() const   { return source_loginserver; }
 	inline uint32		LSID()	const		{ return pLSID; }
 	inline uint32		LSAccountID() const	{ return pLSID; }
-	inline const char*	LSName() const		{ return plsname; }
+	inline const char*	LSName() const		{ return loginserver_account_name; }
 	inline int16		WorldAdmin() const	{ return pworldadmin; }
 	inline const char*	GetLSKey() const	{ return plskey; }
 	inline const CLE_Status	GetOnline() const	{ return pOnline; }
@@ -99,37 +136,38 @@ private:
 	uint8	stale;
 
 	// Login Server stuff
+	char	source_loginserver[64]{}; //Loginserver we came from.
 	uint32	pLSID;
-	char	plsname[32];
-	char	plskey[16];
+	char	loginserver_account_name[32]{};
+	char	plskey[16]{};
 	int16	pworldadmin;		// Login server's suggested admin status setting
 	bool	plocal;
 
 	// Account stuff
 	uint32	paccountid;
-	char	paccountname[32];
+	char	paccountname[32]{};
 	MD5		pMD5Pass;
-	int16	padmin;
+	int16	padmin{};
 
 	// Character info
-	ZoneServer* pzoneserver;
-	uint32	pzone;
-	uint16	pinstance;
-	uint32	pcharid;
-	char	pname[64];
-	uint8	plevel;
-	uint8	pclass_;
-	uint16	prace;
-	uint8	panon;
-	uint8	ptellsoff;
-	uint32	pguild_id;
-	bool	pLFG;
-	uint8	gm;
-	uint8	pClientVersion;
-	uint8	pLFGFromLevel;
-	uint8	pLFGToLevel;
-	bool	pLFGMatchFilter;
-	char	pLFGComments[64];
+	ZoneServer* pzoneserver{};
+	uint32	pzone{};
+	uint16	pinstance{};
+	uint32	pcharid{};
+	char	pname[64]{};
+	uint8	plevel{};
+	uint8	pclass_{};
+	uint16	prace{};
+	uint8	panon{};
+	uint8	ptellsoff{};
+	uint32	pguild_id{};
+	bool	pLFG{};
+	uint8	gm{};
+	uint8	pClientVersion{};
+	uint8	pLFGFromLevel{};
+	uint8	pLFGToLevel{};
+	bool	pLFGMatchFilter{};
+	char	pLFGComments[64]{};
 
 	// Tell Queue -- really a vector :D
 	std::vector<ServerChannelMessage_Struct *> tell_queue;

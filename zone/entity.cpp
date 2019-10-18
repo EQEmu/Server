@@ -33,7 +33,6 @@
 #include "../common/guilds.h"
 
 #include "guild_mgr.h"
-#include "net.h"
 #include "petitions.h"
 #include "quest_parser_collection.h"
 #include "raids.h"
@@ -56,7 +55,6 @@
 extern Zone *zone;
 extern volatile bool is_zone_loaded;
 extern WorldServer worldserver;
-extern NetConnection net;
 extern uint32 numclients;
 extern PetitionList petition_list;
 
@@ -76,12 +74,12 @@ Entity::~Entity()
 Client *Entity::CastToClient()
 {
 	if (this == 0x00) {
-		Log(Logs::General, Logs::Error, "CastToClient error (nullptr)");
+		LogError("CastToClient error (nullptr)");
 		return 0;
 	}
 #ifdef _EQDEBUG
 	if (!IsClient()) {
-		Log(Logs::General, Logs::Error, "CastToClient error (not client)");
+		LogError("CastToClient error (not client)");
 		return 0;
 	}
 #endif
@@ -93,7 +91,7 @@ NPC *Entity::CastToNPC()
 {
 #ifdef _EQDEBUG
 	if (!IsNPC()) {
-		Log(Logs::General, Logs::Error, "CastToNPC error (Not NPC)");
+		LogError("CastToNPC error (Not NPC)");
 		return 0;
 	}
 #endif
@@ -300,6 +298,13 @@ const Bot *Entity::CastToBot() const
 #endif
 
 EntityList::EntityList()
+	:
+	object_timer(5000),
+	door_timer(5000),
+	corpse_timer(2000),
+	group_timer(1000),
+	raid_timer(1000),
+	trap_timer(1000)
 {
 	// set up ids between 1 and 1500
 	// neither client or server performs well if you have
@@ -349,7 +354,7 @@ void EntityList::TrapProcess()
 		return;
 
 	if (trap_list.empty()) {
-		net.trap_timer.Disable();
+		trap_timer.Disable();
 		return;
 	}
 
@@ -377,7 +382,7 @@ void EntityList::CheckGroupList (const char *fname, const int fline)
 	{
 		if (*it == nullptr)
 		{
-			Log(Logs::General, Logs::Error, "nullptr group, %s:%i", fname, fline);
+			LogError("nullptr group, [{}]:[{}]", fname, fline);
 		}
 	}
 }
@@ -388,7 +393,7 @@ void EntityList::GroupProcess()
 		return;
 
 	if (group_list.empty()) {
-		net.group_timer.Disable();
+		group_timer.Disable();
 		return;
 	}
 
@@ -412,7 +417,7 @@ void EntityList::RaidProcess()
 		return;
 
 	if (raid_list.empty()) {
-		net.raid_timer.Disable();
+		raid_timer.Disable();
 		return;
 	}
 
@@ -427,7 +432,7 @@ void EntityList::DoorProcess()
 		return;
 #endif
 	if (door_list.empty()) {
-		net.door_timer.Disable();
+		door_timer.Disable();
 		return;
 	}
 
@@ -445,7 +450,7 @@ void EntityList::DoorProcess()
 void EntityList::ObjectProcess()
 {
 	if (object_list.empty()) {
-		net.object_timer.Disable();
+		object_timer.Disable();
 		return;
 	}
 
@@ -464,7 +469,7 @@ void EntityList::ObjectProcess()
 void EntityList::CorpseProcess()
 {
 	if (corpse_list.empty()) {
-		net.corpse_timer.Disable(); // No corpses in list
+		corpse_timer.Disable(); // No corpses in list
 		return;
 	}
 
@@ -535,17 +540,17 @@ void EntityList::MobProcess()
 #ifdef _WINDOWS
 				struct in_addr in;
 				in.s_addr = mob->CastToClient()->GetIP();
-				Log(Logs::General, Logs::Zone_Server, "Dropping client: Process=false, ip=%s port=%u", inet_ntoa(in), mob->CastToClient()->GetPort());
+				LogInfo("Dropping client: Process=false, ip=[{}] port=[{}]", inet_ntoa(in), mob->CastToClient()->GetPort());
 #endif
 				zone->StartShutdownTimer();
 				Group *g = GetGroupByMob(mob);
 				if(g) {
-					Log(Logs::General, Logs::Error, "About to delete a client still in a group.");
+					LogError("About to delete a client still in a group");
 					g->DelMember(mob);
 				}
 				Raid *r = entity_list.GetRaidByClient(mob->CastToClient());
 				if(r) {
-					Log(Logs::General, Logs::Error, "About to delete a client still in a raid.");
+					LogError("About to delete a client still in a raid");
 					r->MemberZoned(mob->CastToClient());
 				}
 				entity_list.RemoveClient(id);
@@ -592,8 +597,7 @@ void EntityList::AddGroup(Group *group)
 
 	uint32 gid = worldserver.NextGroupID();
 	if (gid == 0) {
-		Log(Logs::General, Logs::Error,
-				"Unable to get new group ID from world server. group is going to be broken.");
+		LogError("Unable to get new group ID from world server. group is going to be broken");
 		return;
 	}
 
@@ -607,8 +611,8 @@ void EntityList::AddGroup(Group *group, uint32 gid)
 {
 	group->SetID(gid);
 	group_list.push_back(group);
-	if (!net.group_timer.Enabled())
-		net.group_timer.Start();
+	if (!group_timer.Enabled())
+		group_timer.Start();
 #if EQDEBUG >= 5
 	CheckGroupList(__FILE__, __LINE__);
 #endif
@@ -621,8 +625,7 @@ void EntityList::AddRaid(Raid *raid)
 
 	uint32 gid = worldserver.NextGroupID();
 	if (gid == 0) {
-		Log(Logs::General, Logs::Error,
-				"Unable to get new group ID from world server. group is going to be broken.");
+		LogError("Unable to get new group ID from world server. group is going to be broken");
 		return;
 	}
 
@@ -633,8 +636,8 @@ void EntityList::AddRaid(Raid *raid, uint32 gid)
 {
 	raid->SetID(gid);
 	raid_list.push_back(raid);
-	if (!net.raid_timer.Enabled())
-		net.raid_timer.Start();
+	if (!raid_timer.Enabled())
+		raid_timer.Start();
 }
 
 
@@ -651,8 +654,8 @@ void EntityList::AddCorpse(Corpse *corpse, uint32 in_id)
 	corpse->CalcCorpseName();
 	corpse_list.insert(std::pair<uint16, Corpse *>(corpse->GetID(), corpse));
 
-	if (!net.corpse_timer.Enabled())
-		net.corpse_timer.Start();
+	if (!corpse_timer.Enabled())
+		corpse_timer.Start();
 }
 
 void EntityList::AddNPC(NPC *npc, bool SendSpawnPacket, bool dontqueue)
@@ -754,8 +757,8 @@ void EntityList::AddObject(Object *obj, bool SendSpawnPacket)
 
 	object_list.insert(std::pair<uint16, Object *>(obj->GetID(), obj));
 
-	if (!net.object_timer.Enabled())
-		net.object_timer.Start();
+	if (!object_timer.Enabled())
+		object_timer.Start();
 }
 
 void EntityList::AddDoor(Doors *door)
@@ -763,16 +766,16 @@ void EntityList::AddDoor(Doors *door)
 	door->SetEntityID(GetFreeID());
 	door_list.insert(std::pair<uint16, Doors *>(door->GetEntityID(), door));
 
-	if (!net.door_timer.Enabled())
-		net.door_timer.Start();
+	if (!door_timer.Enabled())
+		door_timer.Start();
 }
 
 void EntityList::AddTrap(Trap *trap)
 {
 	trap->SetID(GetFreeID());
 	trap_list.insert(std::pair<uint16, Trap *>(trap->GetID(), trap));
-	if (!net.trap_timer.Enabled())
-		net.trap_timer.Start();
+	if (!trap_timer.Enabled())
+		trap_timer.Start();
 }
 
 void EntityList::AddBeacon(Beacon *beacon)
@@ -817,7 +820,7 @@ void EntityList::CheckSpawnQueue()
 			auto it = npc_list.find(ns->spawn.spawnId);
 			if (it == npc_list.end()) {
 				// We must of despawned, hope that's the reason!
-				Log(Logs::General, Logs::Error, "Error in EntityList::CheckSpawnQueue: Unable to find NPC for spawnId '%u'", ns->spawn.spawnId);
+				LogError("Error in EntityList::CheckSpawnQueue: Unable to find NPC for spawnId [{}]", ns->spawn.spawnId);
 			}
 			else {
 				NPC *pnpc = it->second;
@@ -2877,7 +2880,7 @@ char *EntityList::MakeNameUnique(char *name)
 			return name;
 		}
 	}
-	Log(Logs::General, Logs::Error, "Fatal error in EntityList::MakeNameUnique: Unable to find unique name for '%s'", name);
+	LogError("Fatal error in EntityList::MakeNameUnique: Unable to find unique name for [{}]", name);
 	char tmp[64] = "!";
 	strn0cpy(&tmp[1], name, sizeof(tmp) - 1);
 	strcpy(name, tmp);
