@@ -4384,7 +4384,21 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 			/* Update the boat's position on the server, without sending an update */
 			boat->GMMove(ppu->x_pos, ppu->y_pos, ppu->z_pos, EQ12toFloat(ppu->heading), false);
 			return;
-		} else return;
+		}
+		else {
+			// Eye of Zomm needs code here to track position of the eye on server
+			// so that other clients see it.  I could add a check here for eye of zomm
+			// race, to limit this code, but this should handle any client controlled
+			// mob that gets updates from OP_ClientUpdate
+			Mob *cmob = entity_list.GetMob(ppu->spawn_id);
+			if (cmob != nullptr) {
+				cmob->SetPosition(ppu->x_pos, ppu->y_pos, ppu->z_pos);
+				cmob->SetHeading(EQ12toFloat(ppu->heading));
+				mMovementManager->SendCommandToClients(cmob, 0.0, 0.0, 0.0, 0.0, 0, ClientRangeAny, nullptr, this);
+				cmob->CastToNPC()->SaveGuardSpot(glm::vec4(ppu->x_pos, ppu->y_pos, ppu->z_pos, EQ12toFloat(ppu->heading)));
+			}
+		}
+	return;
 	}
 	
 	if (IsDraggingCorpse())

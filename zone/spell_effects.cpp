@@ -1561,7 +1561,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					char eye_name[64];
 					snprintf(eye_name, sizeof(eye_name), "Eye_of_%s", caster->GetCleanName());
 					int duration = CalcBuffDuration(caster, this, spell_id) * 6;
-					caster->TemporaryPets(spell_id, nullptr, eye_name, duration);
+					caster->TemporaryPets(spell_id, nullptr, eye_name, duration, false);
 				}
 				break;
 			}
