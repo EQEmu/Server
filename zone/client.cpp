@@ -7857,6 +7857,16 @@ void Client::SetFactionLevel2(uint32 char_id, int32 faction_id, uint8 char_class
 	return;
 }
 
+
+bool Client::ReloadCharacterFaction(Client *c, uint32 facid,uint32 charid )
+{
+	if (database.SetCharacterFactionLevel(charid, facid, 0, 0, factionvalues))
+		return true;
+	else
+		return false;
+}
+
+
 int32 Client::GetCharacterFactionLevel(int32 faction_id)
 {
 	if (faction_id <= 0)
