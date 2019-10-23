@@ -4392,10 +4392,17 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 			// mob that gets updates from OP_ClientUpdate
 			Mob *cmob = entity_list.GetMob(ppu->spawn_id);
 			if (cmob != nullptr) {
-				cmob->SetPosition(ppu->x_pos, ppu->y_pos, ppu->z_pos);
-				cmob->SetHeading(EQ12toFloat(ppu->heading));
-				mMovementManager->SendCommandToClients(cmob, 0.0, 0.0, 0.0, 0.0, 0, ClientRangeAny, nullptr, this);
-				cmob->CastToNPC()->SaveGuardSpot(glm::vec4(ppu->x_pos, ppu->y_pos, ppu->z_pos, EQ12toFloat(ppu->heading)));
+				// Make sure it's their eye..
+				char eye_name[64];
+				snprintf(eye_name, sizeof(eye_name),"Eye of %s",GetCleanName());
+				if (!strcmp(eye_name, cmob->GetCleanName())) {
+					cmob->SetPosition(ppu->x_pos, ppu->y_pos, ppu->z_pos);
+					cmob->SetHeading(EQ12toFloat(ppu->heading));
+					mMovementManager->SendCommandToClients(cmob, 0.0, 0.0, 0.0, 
+							0.0, 0, ClientRangeAny, nullptr, this);
+					cmob->CastToNPC()->SaveGuardSpot(glm::vec4(ppu->x_pos, 
+							ppu->y_pos, ppu->z_pos, EQ12toFloat(ppu->heading)));
+				}
 			}
 		}
 	return;
