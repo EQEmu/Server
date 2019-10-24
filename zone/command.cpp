@@ -3931,7 +3931,8 @@ void command_faction(Client *c, const Seperator *sep)
 		if (c->GetTarget()->IsNPC()) {
 			npcfac = c->GetTarget()->CastToNPC()->GetPrimaryFaction();
 			npcname = c->GetTarget()->CastToNPC()->GetCleanName();
-			c->Message(Chat::Yellow, "( Target Npc: %s : has primary faction id: %s )", npcname.c_str(), std::to_string(npcfac).c_str());
+			std::string blurb = fmt::format("( Target Npc: {} : has primary faction id: {} )", npcname, npcfac);
+			c->Message(Chat::Yellow, blurb.c_str());
 			c->Message(Chat::White, "Use: #setfaction [id] - to alter an NPC's faction");
 		}
 		return;
