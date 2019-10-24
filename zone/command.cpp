@@ -202,6 +202,7 @@ int command_init(void)
 		command_add("enablerecipe",  "[recipe_id] - Enables a recipe using the recipe id.",  80, command_enablerecipe) ||
 		command_add("equipitem", "[slotid(0-21)] - Equip the item on your cursor into the specified slot", 50, command_equipitem) ||
 		command_add("face", "- Change the face of your target", 80, command_face) ||
+		command_add("faction", "[Find (criteria | all ) | Review (criteria | all) | Reset (id)] - Resets Player's Faction", 80, command_faction) ||
 		command_add("findaliases", "[search term]- Searches for available command aliases, by alias or command", 0, command_findaliases) ||
 		command_add("findnpctype", "[search criteria] - Search database NPC types", 100, command_findnpctype) ||
 		command_add("findspell", "[searchstring] - Search for a spell", 50, command_findspell) ||
@@ -3916,6 +3917,105 @@ void command_findnpctype(Client *c, const Seperator *sep)
     if (count <= maxrows)
         c->Message (0, "Query complete. %i rows shown.",  count);
 
+}
+
+void command_faction(Client *c, const Seperator *sep)
+{
+	if (sep->arg[1][0] == 0) {
+		c->Message(Chat::White, "Usage: #faction -- Displays Target NPC's Primary faction");
+		c->Message(Chat::White, "Usage: #faction Find [criteria | all] -- Displays factions name & id");
+		c->Message(Chat::White, "Usage: #faction Review [criteria | all] -- Review Targeted Players faction hits");
+		c->Message(Chat::White, "Usage: #faction Reset [id] -- Reset Targeted Players specified faction to base");
+		uint32 npcfac;
+		std::string npcname;
+		if (c->GetTarget()->IsNPC()) {
+			npcfac = c->GetTarget()->CastToNPC()->GetPrimaryFaction();
+			npcname = c->GetTarget()->CastToNPC()->GetCleanName();
+			c->Message(Chat::Yellow, "( Target Npc: %s : has primary faction id: %s )", npcname.c_str(), std::to_string(npcfac).c_str());
+			c->Message(Chat::White, "Use: #setfaction [id] - to alter an NPC's faction");
+		}
+		return;
+	}
+
+	std::string faction_filter;
+	if (sep->arg[2]) {
+		faction_filter = str_tolower(sep->arg[2]);
+	}
+	if (strcasecmp(sep->arg[1], "find") == 0) {
+		std::string query;
+		if (strcasecmp(sep->arg[2], "all") == 0) {
+
+			query = "SELECT `id`,`name` FROM `faction_list`";
+		}
+		else {
+			query = fmt::format("SELECT `id`,`name` FROM `faction_list` WHERE `name` LIKE '{}'", faction_filter.c_str());
+		}
+		auto results = database.QueryDatabase(query);
+		if (!results.Success())
+			return;
+		if (results.RowCount() == 0) {
+			c->Message(Chat::Yellow, "No factions found with specified criteria");
+			return;
+		}
+		int _ctr = 0;
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			auto    id = static_cast<uint32>(atoi(row[0]));
+			std::string name = row[1];
+			_ctr++;
+			c->Message(Chat::Yellow, "%s : id: %s", name.c_str(), std::to_string(id).c_str());
+		}
+		std::string response = _ctr > 0 ? fmt::format("Found {} matching factions", _ctr).c_str() : "No factions found.";
+		c->Message(Chat::Yellow, response.c_str());
+	}
+	if (strcasecmp(sep->arg[1], "review") == 0) {
+		if (!(c->GetTarget() && c->GetTarget()->IsClient())) {
+			c->Message(Chat::Red, "Player Target Required for faction review");
+			return;
+		}
+		uint32 charid = c->GetTarget()->CastToClient()->CharacterID();
+		std::string revquery;
+		if (strcasecmp(sep->arg[2], "all") == 0) {
+			revquery = fmt::format(
+				"SELECT id,`name`, current_value FROM faction_list INNER JOIN faction_values ON faction_list.id = faction_values.faction_id WHERE char_id = {}", charid);
+		}
+		else
+		{
+			revquery = fmt::format(
+				"SELECT id,`name`, current_value FROM faction_list INNER JOIN faction_values ON faction_list.id = faction_values.faction_id WHERE `name` like '%{}%' and char_id = {}", faction_filter.c_str(), charid);
+		}
+		auto revresults = database.QueryDatabase(revquery);
+		if (!revresults.Success())
+			return;
+		if (revresults.RowCount() == 0) {
+			c->Message(Chat::Yellow, "No faction hits found. All are at base level");
+			return;
+		}
+		int _ctr2 = 0;
+		for (auto rrow = revresults.begin(); rrow != revresults.end(); ++rrow) {
+			auto    f_id = static_cast<uint32>(atoi(rrow[0]));
+			std::string cname = rrow[1];
+			std::string fvalue = rrow[2];
+			_ctr2++;
+			std::string resetlink = fmt::format("#faction reset {}", f_id);
+			c->Message(Chat::Yellow, "Reset: %s         id: %s (%s)", EQEmu::SayLinkEngine::GenerateQuestSaylink(resetlink, false, cname.c_str()).c_str(), std::to_string(f_id).c_str(), fvalue.c_str());
+		}
+		std::string response = _ctr2 > 0 ? fmt::format("Found {} matching factions", _ctr2).c_str() : "No faction hits found.";
+		c->Message(Chat::Yellow, response.c_str());
+	}
+	else if (strcasecmp(sep->arg[1], "reset") == 0)
+	{
+		if (!(c->GetTarget() && c->GetTarget()->IsClient())) {
+			c->Message(Chat::Red, "Player Target Required for faction reset");
+			return;
+		}
+		uint32 charid = c->GetTarget()->CastToClient()->CharacterID();
+		uint32 factionid = atoi(faction_filter.c_str());
+
+		if (c->GetTarget()->CastToClient()->ReloadCharacterFaction(c->GetTarget()->CastToClient(), factionid, charid))
+			c->Message(Chat::Yellow, "faction %u was cleared.", factionid);
+		else
+			c->Message(Chat::Red, "An error occurred clearing faction %u", factionid);
+	}
 }
 
 void command_findzone(Client *c, const Seperator *sep)
