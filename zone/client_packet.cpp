@@ -4390,12 +4390,9 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 			// so that other clients see it.  I could add a check here for eye of zomm
 			// race, to limit this code, but this should handle any client controlled
 			// mob that gets updates from OP_ClientUpdate
-			Mob *cmob = entity_list.GetMob(ppu->spawn_id);
-			if (cmob != nullptr) {
-				// Make sure it's their eye..
-				char eye_name[64];
-				snprintf(eye_name, sizeof(eye_name),"Eye of %s",GetCleanName());
-				if (!strcmp(eye_name, cmob->GetCleanName())) {
+			if (ppu->spawn_id == controlled_mob_id) {
+				Mob *cmob = entity_list.GetMob(ppu->spawn_id);
+				if (cmob != nullptr) {
 					cmob->SetPosition(ppu->x_pos, ppu->y_pos, ppu->z_pos);
 					cmob->SetHeading(EQ12toFloat(ppu->heading));
 					mMovementManager->SendCommandToClients(cmob, 0.0, 0.0, 0.0, 

@@ -4039,6 +4039,15 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 					SetLevel(GetOrigLevel());
 				break;
 			}
+
+			case SE_EyeOfZomm:
+			{
+				if (IsClient())
+					{
+					CastToClient()->SetControlledMobId(0);
+					}
+			}
+					
 		}
 	}
 
