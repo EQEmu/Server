@@ -36,7 +36,7 @@ Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 extern QueryServ* QServ;
 
-void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, uint32 duration_override, bool followme, bool sticktarg) {
+void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, uint32 duration_override, bool followme, bool sticktarg, uint16 *eye_id) {
 
 	//It might not be a bad idea to put these into the database, eventually..
 
@@ -164,8 +164,8 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 		summon_count--;
 	}
 
-	if (IsClient() && spell_id == SPELL_EYE_OF_ZOMM) {
-		CastToClient()->SetControlledMobId(swarm_pet_npc->GetID());
+	if (IsClient() && eye_id != nullptr) {
+		*eye_id = swarm_pet_npc->GetID();
 	}
 
 	//the target of these swarm pets will take offense to being cast on...

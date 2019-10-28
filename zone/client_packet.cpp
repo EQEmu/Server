@@ -10784,7 +10784,7 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 	}
 
 	char buf[16];
-	sprintf(buf, "%d\0", popup_response->popupid);
+	sprintf(buf, "%d", popup_response->popupid);
 
 	parse->EventPlayer(EVENT_POPUP_RESPONSE, this, buf, 0);
 
