@@ -7431,7 +7431,7 @@ void command_roambox(Client *c, const Seperator *sep)
 					delay = {}
 					WHERE id = {}
 				),
-				box_size,
+				(box_size / 2),
 				npc->GetX() - (box_size / 2),
 				npc->GetX() + (box_size / 2),
 				npc->GetY() - (box_size / 2),
