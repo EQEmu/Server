@@ -132,18 +132,36 @@ std::string SharedDatabase::GetMailKey(int CharID, bool key_only)
 {
 	std::string query = StringFormat("SELECT `mailkey` FROM `character_data` WHERE `id`='%i' LIMIT 1", CharID);
 	auto results = QueryDatabase(query);
+
 	if (!results.Success()) {
+
 		Log(Logs::Detail, Logs::MySQLError, "Error retrieving mailkey from database: %s", results.ErrorMessage().c_str());
 		return std::string();
 	}
 
-	auto row = results.begin();
-	std::string mail_key = row[0];
+	if (!results.RowCount()) {
 
-	if (mail_key.length() > 8 && key_only)
-		return mail_key.substr(8);
-	else
-		return mail_key;
+		Log(Logs::General, Logs::ClientLogin, "Error: Mailkey for character id [%i] does not exist or could not be found", CharID);
+		return std::string();
+	}
+
+	auto row = results.begin();
+	if (row != results.end()) {
+
+		std::string mail_key = row[0];
+
+		if (mail_key.length() > 8 && key_only) {
+			return mail_key.substr(8);
+		}
+		else {
+			return mail_key;
+		}
+	}
+	else {
+
+		Log(Logs::General, Logs::MySQLError, "Internal MySQL error in SharedDatabase::GetMailKey(int, bool)");
+		return std::string();
+	}
 }
 
 bool SharedDatabase::SaveCursor(uint32 char_id, std::list<EQEmu::ItemInstance*>::const_iterator &start, std::list<EQEmu::ItemInstance*>::const_iterator &end)
