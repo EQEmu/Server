@@ -7431,11 +7431,11 @@ void command_roambox(Client *c, const Seperator *sep)
 					delay = {}
 					WHERE id = {}
 				),
-				box_size,
-				npc->GetX() - 100,
-				npc->GetX() + 100,
-				npc->GetY() - 100,
-				npc->GetY() + 100,
+				(box_size / 2),
+				npc->GetX() - (box_size / 2),
+				npc->GetX() + (box_size / 2),
+				npc->GetY() - (box_size / 2),
+				npc->GetY() + (box_size / 2),
 				delay,
 				spawn_group_id
 			);
