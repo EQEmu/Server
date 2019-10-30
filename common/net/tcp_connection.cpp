@@ -203,6 +203,10 @@ int EQ::Net::TCPConnection::LocalPort() const
 
 std::string EQ::Net::TCPConnection::RemoteIP() const
 {
+	if (!m_socket) {
+		return "";
+	}
+
 	sockaddr_storage addr;
 	int addr_len = sizeof(addr);
 	uv_tcp_getpeername(m_socket, (sockaddr*)&addr, &addr_len);
