@@ -3928,7 +3928,7 @@ void command_faction(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "Usage: #faction Reset [id] -- Reset Targeted Players specified faction to base");
 		uint32 npcfac;
 		std::string npcname;
-		if (c->GetTarget()->IsNPC()) {
+		if (c->GetTarget() && c->GetTarget()->IsNPC()) {
 			npcfac = c->GetTarget()->CastToNPC()->GetPrimaryFaction();
 			npcname = c->GetTarget()->CastToNPC()->GetCleanName();
 			std::string blurb = fmt::format("( Target Npc: {} : has primary faction id: {} )", npcname, npcfac);
@@ -4005,17 +4005,32 @@ void command_faction(Client *c, const Seperator *sep)
 	}
 	else if (strcasecmp(sep->arg[1], "reset") == 0)
 	{
-		if (!(c->GetTarget() && c->GetTarget()->IsClient())) {
-			c->Message(Chat::Red, "Player Target Required for faction reset");
-			return;
-		}
-		uint32 charid = c->GetTarget()->CastToClient()->CharacterID();
-		uint32 factionid = atoi(faction_filter.c_str());
+		if (!(faction_filter == "")) {
+			if (c->GetTarget() && c->GetTarget()->IsClient())
+			{
+				if (!c->CastToClient()->GetFeigned() && c->CastToClient()->GetAggroCount() == 0)
+				{
+					uint32 charid = c->GetTarget()->CastToClient()->CharacterID();
+					uint32 factionid = atoi(faction_filter.c_str());
 
-		if (c->GetTarget()->CastToClient()->ReloadCharacterFaction(c->GetTarget()->CastToClient(), factionid, charid))
-			c->Message(Chat::Yellow, "faction %u was cleared.", factionid);
+					if (c->GetTarget()->CastToClient()->ReloadCharacterFaction(c->GetTarget()->CastToClient(), factionid, charid))
+						c->Message(Chat::Yellow, "faction %u was cleared.", factionid);
+					else
+						c->Message(Chat::Red, "An error occurred clearing faction %u", factionid);
+				}
+				else
+				{
+					c->Message(Chat::Red, "Cannot be in Combat");
+					return;
+				}
+			}
+			else {
+				c->Message(Chat::Red, "Player Target Required (whose not feigning death)");
+				return;
+			}
+		}
 		else
-			c->Message(Chat::Red, "An error occurred clearing faction %u", factionid);
+			c->Message(Chat::Red, "No faction id entered");
 	}
 }
 
