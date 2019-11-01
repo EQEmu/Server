@@ -940,7 +940,7 @@ uint32 Client::GetEXPForLevel(uint16 check_level)
 	return finalxp;
 }
 
-void Client::AddLevelBasedExp(uint8 exp_percentage, uint8 max_level) 
+void Client::AddLevelBasedExp(uint8 exp_percentage, uint8 max_level, bool ignore_mods) 
 { 
 	uint32	award;
 	uint32	xp_for_level;
@@ -958,7 +958,7 @@ void Client::AddLevelBasedExp(uint8 exp_percentage, uint8 max_level)
 	xp_for_level = GetEXPForLevel(max_level + 1) - GetEXPForLevel(max_level);
 	award = xp_for_level * exp_percentage / 100; 
 
-	if(RuleB(Zone, LevelBasedEXPMods))
+	if(RuleB(Zone, LevelBasedEXPMods) && !ignore_mods)
 	{
 		if(zone->level_exp_mod[GetLevel()].ExpMod)
 		{

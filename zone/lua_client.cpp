@@ -1065,6 +1065,11 @@ void Lua_Client::AddLevelBasedExp(int exp_pct, int max_level) {
 	self->AddLevelBasedExp(exp_pct, max_level);
 }
 
+void Lua_Client::AddLevelBasedExp(int exp_pct, int max_level, bool ignore_mods) {
+	Lua_Safe_Call_Void();
+	self->AddLevelBasedExp(exp_pct, max_level, ignore_mods);
+}
+
 void Lua_Client::IncrementAA(int aa) {
 	Lua_Safe_Call_Void();
 	self->IncrementAlternateAdvancementRank(aa);
@@ -1741,6 +1746,7 @@ luabind::scope lua_register_client() {
 		.def("GetIP", (uint32(Lua_Client::*)(void))&Lua_Client::GetIP)
 		.def("AddLevelBasedExp", (void(Lua_Client::*)(int))&Lua_Client::AddLevelBasedExp)
 		.def("AddLevelBasedExp", (void(Lua_Client::*)(int,int))&Lua_Client::AddLevelBasedExp)
+		.def("AddLevelBasedExp", (void(Lua_Client::*)(int,int,bool))&Lua_Client::AddLevelBasedExp)
 		.def("IncrementAA", (void(Lua_Client::*)(int))&Lua_Client::IncrementAA)
 		.def("GrantAlternateAdvancementAbility", (bool(Lua_Client::*)(int, int))&Lua_Client::GrantAlternateAdvancementAbility)
 		.def("GrantAlternateAdvancementAbility", (bool(Lua_Client::*)(int, int, bool))&Lua_Client::GrantAlternateAdvancementAbility)

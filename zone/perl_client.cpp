@@ -4768,12 +4768,13 @@ XS(XS_Client_GetIP) {
 XS(XS_Client_AddLevelBasedExp);
 XS(XS_Client_AddLevelBasedExp) {
 	dXSARGS;
-	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Client::AddLevelBasedExp(THIS, uint8 exp_percentage, uint8 max_level = 0)");
+	if (items < 2 || items > 4)
+		Perl_croak(aTHX_ "Usage: Client::AddLevelBasedExp(THIS, uint8 exp_percentage, uint8 max_level = 0, bool ignore_mods = false)");
 	{
 		Client *THIS;
 		uint8 exp_percentage = (uint8) SvUV(ST(1));
 		uint8 max_level      = 0;
+		bool ignore_mods	 = false;
 
 		if (sv_derived_from(ST(0), "Client")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -4785,8 +4786,11 @@ XS(XS_Client_AddLevelBasedExp) {
 
 		if (items > 2)
 			max_level = (uint8) SvUV(ST(2));
+		
+		if (items > 3)
+			ignore_mods = (bool) SvTRUE(ST(3));
 
-		THIS->AddLevelBasedExp(exp_percentage, max_level);
+		THIS->AddLevelBasedExp(exp_percentage, max_level, ignore_mods);
 	}
 	XSRETURN_EMPTY;
 }
@@ -6339,7 +6343,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "AddAlternateCurrencyValue"), XS_Client_AddAlternateCurrencyValue, file, "$$$");
 	newXSproto(strcpy(buf, "AddCrystals"), XS_Client_AddCrystals, file, "$$");
 	newXSproto(strcpy(buf, "AddEXP"), XS_Client_AddEXP, file, "$$;$$");
-	newXSproto(strcpy(buf, "AddLevelBasedExp"), XS_Client_AddLevelBasedExp, file, "$$;$");
+	newXSproto(strcpy(buf, "AddLevelBasedExp"), XS_Client_AddLevelBasedExp, file, "$$;$$");
 	newXSproto(strcpy(buf, "AddMoneyToPP"), XS_Client_AddMoneyToPP, file, "$$$$$$");
 	newXSproto(strcpy(buf, "AddPVPPoints"), XS_Client_AddPVPPoints, file, "$$");
 	newXSproto(strcpy(buf, "AddSkill"), XS_Client_AddSkill, file, "$$$");
