@@ -973,10 +973,12 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	chance = mod_tradeskill_chance(chance, spec);
 
 	if (((spec->tradeskill==75) || GetGM() || (chance > res)) || zone->random.Roll(aa_chance)) {
+
 		success_modifier = 1;
 
-		if(over_trivial < 0)
+		if (over_trivial < 0) {
 			CheckIncreaseTradeskill(bonusstat, stat_modifier, skillup_modifier, success_modifier, spec->tradeskill);
+		}
 
 		MessageString(Chat::LightBlue, TRADESKILL_SUCCEED, spec->name.c_str());
 
@@ -984,21 +986,43 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 
 		itr = spec->onsuccess.begin();
 		while(itr != spec->onsuccess.end() && !spec->quest) {
-			//should we check this crap?
+
 			SummonItem(itr->first, itr->second);
 			item = database.GetItem(itr->first);
-			if (this->GetGroup()) {
-				entity_list.MessageGroup(this, true, Chat::Skills, "%s has successfully fashioned %s!", GetName(), item->Name);
+			if (item) {
+				if (GetGroup()) {
+					entity_list.MessageGroup(this, true, Chat::Skills, "%s has successfully fashioned %s!", GetName(), item->Name);
+				}
+			}
+			else {
+				Log(
+					Logs::General,
+					Logs::Tradeskills,
+					StringFormat(
+						"Failure (null item pointer [id: %u, qty: %u]) :: recipe_id:%i tskillid:%i trivial:%i chance:%4.2f  in zoneid:%i instid:%i",
+						itr->first,
+						itr->second,
+						spec->recipe_id,
+						spec->tradeskill,
+						spec->trivial,
+						chance,
+						this->GetZoneID(),
+						this->GetInstanceID()
+					).c_str()
+				);
 			}
 
 			/* QS: Player_Log_Trade_Skill_Events */
-			if (RuleB(QueryServ, PlayerLogTradeSkillEvents)){
+			if (RuleB(QueryServ, PlayerLogTradeSkillEvents)) {
+
 				std::string event_desc = StringFormat("Success :: fashioned recipe_id:%i tskillid:%i trivial:%i chance:%4.2f  in zoneid:%i instid:%i", spec->recipe_id, spec->tradeskill, spec->trivial, chance, this->GetZoneID(), this->GetInstanceID());
 				QServ->PlayerLogEvent(Player_Log_Trade_Skill_Events, this->CharacterID(), event_desc);
 			}
 
-			if(RuleB(TaskSystem, EnableTaskSystem))
+			if (RuleB(TaskSystem, EnableTaskSystem)) {
 				UpdateTasksForItem(ActivityTradeSkill, itr->first, itr->second);
+			}
+
 			++itr;
 		}
 		return(true);

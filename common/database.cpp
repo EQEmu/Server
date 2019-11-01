@@ -97,7 +97,7 @@ uint32 Database::CheckLogin(const char* name, const char* password, const char *
 	DoEscapeString(tmpUN, name, strlen(name));
 	DoEscapeString(tmpPW, password, strlen(password));
 
-	std::string query = StringFormat("SELECT id, status FROM account WHERE name='%s' AND ls_id='%s' AND password is not null "
+	std::string query = StringFormat("SELECT id, status FROM account WHERE `name`='%s' AND ls_id='%s' AND password is not null "
 		"and length(password) > 0 and (password='%s' or password=MD5('%s'))",
 		tmpUN, EscapeString(loginserver).c_str(), tmpPW, tmpPW);
 
@@ -251,7 +251,7 @@ uint32 Database::CreateAccount(
 }
 
 bool Database::DeleteAccount(const char* name, const char *loginserver) {
-	std::string query = StringFormat("DELETE FROM account WHERE name='%s' AND ls_id='%s'", name, loginserver);
+	std::string query = StringFormat("DELETE FROM account WHERE `name`='%s' AND ls_id='%s'", name, loginserver);
 	LogInfo("Account Attempting to be deleted:'[{}]:[{}]'", loginserver, name);
 
 	auto results = QueryDatabase(query);
@@ -1226,7 +1226,7 @@ uint32 Database::GetAccountIDFromLSID(
 {
 	uint32 account_id = 0;
 	auto query = fmt::format(
-		"SELECT id, name, status FROM account WHERE lsaccount_id = {0} AND ls_id = '{1}'",
+		"SELECT id, `name`, status FROM account WHERE lsaccount_id = {0} AND ls_id = '{1}'",
 		in_loginserver_account_id,
 		in_loginserver_id
 	);
@@ -1257,7 +1257,7 @@ uint32 Database::GetAccountIDFromLSID(
 
 void Database::GetAccountFromID(uint32 id, char* oAccountName, int16* oStatus) {
 
-	std::string query = StringFormat("SELECT name, status FROM account WHERE id=%i", id);
+	std::string query = StringFormat("SELECT `name`, status FROM account WHERE id=%i", id);
 	auto results = QueryDatabase(query);
 
 	if (!results.Success()){
