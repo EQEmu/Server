@@ -4075,7 +4075,8 @@ void Mob::TrySpellProc(const EQEmu::ItemInstance *inst, const EQEmu::ItemData *w
 		if (IsPet() && hand != EQEmu::invslot::slotPrimary) //Pets can only proc spell procs from their primay hand (ie; beastlord pets)
 			continue; // If pets ever can proc from off hand, this will need to change
 
-		if (SpellProcs[i].base_spellID == POISON_PROC && weapon != nullptr && weapon->ItemType != EQEmu::item::ItemType1HPiercing)
+		if (SpellProcs[i].base_spellID == POISON_PROC && 
+		    	(!weapon || weapon->ItemType != EQEmu::item::ItemType1HPiercing))
 			continue; // Old school poison will only proc with 1HP equipped.
 
 		// Not ranged
