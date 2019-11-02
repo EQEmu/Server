@@ -12402,14 +12402,21 @@ void command_reloadaa(Client *c, const Seperator *sep) {
 	entity_list.SendAlternateAdvancementStats();
 }
 
-void command_hotfix(Client *c, const Seperator *sep) {
+inline bool file_exists(const std::string& name) {
+	std::ifstream f(name.c_str());
+	return f.good();
+}
+
+void command_hotfix(Client *c, const Seperator *sep)
+{
 	std::string hotfix;
 	database.GetVariable("hotfix_name", hotfix);
 
 	std::string hotfix_name;
-	if(!strcasecmp(hotfix.c_str(), "hotfix_")) {
+	if (!strcasecmp(hotfix.c_str(), "hotfix_")) {
 		hotfix_name = "";
-	} else {
+	}
+	else {
 		hotfix_name = "hotfix_";
 	}
 
@@ -12423,23 +12430,30 @@ void command_hotfix(Client *c, const Seperator *sep) {
 				if(system(StringFormat("shared_memory").c_str()));
 			}
 #else
-		if(hotfix_name.length() > 0) {
-			if(system(StringFormat("./shared_memory -hotfix=%s", hotfix_name.c_str()).c_str()));
-		}
-		else {
-			if(system(StringFormat("./shared_memory").c_str()));
-		}
+
+			std::string shared_memory_path = "./shared_memory";
+			if (file_exists("./bin/shared_memory")) {
+				shared_memory_path = "./bin/shared_memory";
+			}
+
+			if (hotfix_name.length() > 0) {
+				if (system(StringFormat("%s -hotfix=%s", shared_memory_path.c_str(), hotfix_name.c_str()).c_str())) {}
+			}
+			else {
+				if (system(StringFormat("%s", shared_memory_path.c_str()).c_str())) {}
+			}
 #endif
-		database.SetVariable("hotfix_name", hotfix_name);
+			database.SetVariable("hotfix_name", hotfix_name);
 
-		ServerPacket pack(ServerOP_ChangeSharedMem, hotfix_name.length() + 1);
-		if(hotfix_name.length() > 0) {
-			strcpy((char*)pack.pBuffer, hotfix_name.c_str());
+			ServerPacket pack(ServerOP_ChangeSharedMem, hotfix_name.length() + 1);
+			if (hotfix_name.length() > 0) {
+				strcpy((char *) pack.pBuffer, hotfix_name.c_str());
+			}
+			worldserver.SendPacket(&pack);
+
+			if (c) { c->Message(Chat::White, "Hotfix applied"); }
 		}
-		worldserver.SendPacket(&pack);
-
-		if (c) c->Message(Chat::White, "Hotfix applied");
-	});
+	);
 
 	t1.detach();
 }
