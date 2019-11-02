@@ -39,8 +39,22 @@ public:
 	void SendStatus();
 
 	void SendPacket(ServerPacket* pack);
-	void SendAccountUpdate(ServerPacket* pack);
-	bool Connected() { return IsLegacy ? legacy_client->Connected() : client->Connected(); }
+	void SendAccountUpdate(ServerPacket *pack);
+	bool Connected()
+	{
+		if (IsLegacy) {
+			if (legacy_client) {
+				return legacy_client->Connected();
+			}
+		}
+		else {
+			if (client) {
+				return client->Connected();
+			}
+		}
+
+		return false;
+	}
 	bool CanUpdate() { return CanAccountUpdate; }
 
 private:
