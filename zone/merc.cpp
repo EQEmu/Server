@@ -2156,7 +2156,7 @@ bool Merc::AICastSpell(int8 iChance, uint32 iSpellTypes) {
 								if(castedSpell) {
 									char* gmsg = nullptr;
 
-									if(tar != this) {
+									if(tar && tar != this) { // [tar] was implicitly valid at this point..this change is to catch any bad logic
 										//we don't need spam of bots healing themselves
 										MakeAnyLenString(&gmsg, "Casting %s on %s.", spells[selectedMercSpell.spellid].name, tar->GetCleanName());
 										if(gmsg)
