@@ -4365,7 +4365,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 	/* Boat handling */
 	if (ppu->spawn_id != GetID()) {
 		/* If player is controlling boat */
-		if (ppu->spawn_id == controlling_boat_id) {
+		if (ppu->spawn_id && ppu->spawn_id == controlling_boat_id) {
 			Mob *boat = entity_list.GetMob(controlling_boat_id);
 			if (boat == 0) {
 				controlling_boat_id = 0;

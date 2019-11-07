@@ -109,7 +109,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 		glm::vec2(8, 8), glm::vec2(-8, 8), glm::vec2(8, -8), glm::vec2(-8, -8)
 	};
 
-	NPC* swarm_pet_npc;
+	NPC* swarm_pet_npc = nullptr;
 
 	while (summon_count > 0) {
 		int pet_duration = pet.duration;
@@ -164,7 +164,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 		summon_count--;
 	}
 
-	if (IsClient() && eye_id != nullptr) {
+	if (swarm_pet_npc && IsClient() && eye_id != nullptr) {
 		*eye_id = swarm_pet_npc->GetID();
 	}
 
