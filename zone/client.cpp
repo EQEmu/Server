@@ -7695,6 +7695,14 @@ FACTION_VALUE Client::GetReverseFactionCon(Mob* iOther) {
 	return GetFactionLevel(CharacterID(), 0, GetFactionRace(), GetClass(), GetDeity(), iOther->GetPrimaryFaction(), iOther);
 }
 
+bool Client::ReloadCharacterFaction(Client *c, uint32 facid, uint32 charid)
+{
+	if (database.SetCharacterFactionLevel(charid, facid, 0, 0, factionvalues))
+		return true;
+	else
+		return false;
+}
+
 //o--------------------------------------------------------------
 //| Name: GetFactionLevel; Dec. 16, 2001
 //o--------------------------------------------------------------
