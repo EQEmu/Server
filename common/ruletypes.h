@@ -628,6 +628,7 @@ RULE_INT(Merchant, PricePenaltyPct, 4, "Determines maximum price penalty from ha
 RULE_REAL(Merchant, ChaBonusMod, 3.45, "Determines CHA cap, from 104 CHA. 3.45 is 132 CHA at apprehensive. 0.34 is 400 CHA at apprehensive")
 RULE_REAL(Merchant, ChaPenaltyMod, 1.52, "Determines CHA bottom, up to 102 CHA. 1.52 is 37 CHA at apprehensive. 0.98 is 0 CHA at apprehensive")
 RULE_BOOL(Merchant, EnableAltCurrencySell, true, "Enables the ability to resell items to alternate currency merchants")
+RULE_BOOL(Merchant, AllowCorpse, false, "Can merchants generate a corpse")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Bazaar)
