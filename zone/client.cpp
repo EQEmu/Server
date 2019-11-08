@@ -266,6 +266,7 @@ Client::Client(EQStreamInterface* ieqs)
 	PendingTranslocate = false;
 	PendingSacrifice = false;
 	controlling_boat_id = 0;
+	controlled_mob_id = 0;
 
 	if (!RuleB(Character, PerCharacterQglobalMaxLevel) && !RuleB(Character, PerCharacterBucketMaxLevel)) {
 		SetClientMaxLevel(0);

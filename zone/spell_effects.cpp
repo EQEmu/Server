@@ -1561,7 +1561,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					char eye_name[64];
 					snprintf(eye_name, sizeof(eye_name), "Eye_of_%s", caster->GetCleanName());
 					int duration = CalcBuffDuration(caster, this, spell_id) * 6;
-					caster->TemporaryPets(spell_id, nullptr, eye_name, duration);
+					uint16 eye_id=0;
+					caster->TemporaryPets(spell_id, nullptr, eye_name, duration, false, false, &eye_id);
+					if (eye_id != 0) {
+						caster->CastToClient()->SetControlledMobId(eye_id);
+					}
 				}
 				break;
 			}
@@ -4039,6 +4043,15 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 					SetLevel(GetOrigLevel());
 				break;
 			}
+
+			case SE_EyeOfZomm:
+			{
+				if (IsClient())
+					{
+					CastToClient()->SetControlledMobId(0);
+					}
+			}
+					
 		}
 	}
 

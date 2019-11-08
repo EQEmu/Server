@@ -59,7 +59,8 @@ public:
 		float delta_heading,
 		int anim,
 		ClientRange range,
-		Client* single_client = nullptr
+		Client* single_client = nullptr,
+		Client* ignore_client = nullptr
 	);
 
 	float FixHeading(float in);

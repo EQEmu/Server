@@ -4365,7 +4365,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 	/* Boat handling */
 	if (ppu->spawn_id != GetID()) {
 		/* If player is controlling boat */
-		if (ppu->spawn_id == controlling_boat_id) {
+		if (ppu->spawn_id && ppu->spawn_id == controlling_boat_id) {
 			Mob *boat = entity_list.GetMob(controlling_boat_id);
 			if (boat == 0) {
 				controlling_boat_id = 0;
@@ -4384,7 +4384,25 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 			/* Update the boat's position on the server, without sending an update */
 			boat->GMMove(ppu->x_pos, ppu->y_pos, ppu->z_pos, EQ12toFloat(ppu->heading), false);
 			return;
-		} else return;
+		}
+		else {
+			// Eye of Zomm needs code here to track position of the eye on server
+			// so that other clients see it.  I could add a check here for eye of zomm
+			// race, to limit this code, but this should handle any client controlled
+			// mob that gets updates from OP_ClientUpdate
+			if (ppu->spawn_id == controlled_mob_id) {
+				Mob *cmob = entity_list.GetMob(ppu->spawn_id);
+				if (cmob != nullptr) {
+					cmob->SetPosition(ppu->x_pos, ppu->y_pos, ppu->z_pos);
+					cmob->SetHeading(EQ12toFloat(ppu->heading));
+					mMovementManager->SendCommandToClients(cmob, 0.0, 0.0, 0.0, 
+							0.0, 0, ClientRangeAny, nullptr, this);
+					cmob->CastToNPC()->SaveGuardSpot(glm::vec4(ppu->x_pos, 
+							ppu->y_pos, ppu->z_pos, EQ12toFloat(ppu->heading)));
+				}
+			}
+		}
+	return;
 	}
 	
 	if (IsDraggingCorpse())
@@ -10766,7 +10784,7 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 	}
 
 	char buf[16];
-	sprintf(buf, "%d\0", popup_response->popupid);
+	sprintf(buf, "%d", popup_response->popupid);
 
 	parse->EventPlayer(EVENT_POPUP_RESPONSE, this, buf, 0);
 

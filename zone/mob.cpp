@@ -1208,7 +1208,7 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 		// Changing the second string made no visible difference
 		sprintf(ns->spawn.DestructibleName2, "%s", ns->spawn.name);
 		// Putting a string in the final one that was previously empty had no visible effect.
-		sprintf(ns->spawn.DestructibleString, "");
+		ns->spawn.DestructibleString[0] = '\0';
 
 		// Sets damage appearance level of the object.
 		ns->spawn.DestructibleAppearance = luclinface; // Was 0x00000000

@@ -796,6 +796,7 @@ public:
 
 	void SummonHorse(uint16 spell_id);
 	void SetHorseId(uint16 horseid_in);
+	inline void SetControlledMobId(uint16 mob_id_in) { controlled_mob_id = mob_id_in; }
 	uint16 GetHorseId() const { return horseId; }
 	bool CanMedOnHorse();
 
@@ -1431,6 +1432,7 @@ private:
 	bool berserk;
 	bool dead;
 	uint16 controlling_boat_id;
+	uint16 controlled_mob_id;
 	uint16 TrackingID;
 	uint16 CustomerID;
 	uint16 TraderID;

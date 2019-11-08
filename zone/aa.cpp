@@ -36,7 +36,7 @@ Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 extern QueryServ* QServ;
 
-void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, uint32 duration_override, bool followme, bool sticktarg) {
+void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, uint32 duration_override, bool followme, bool sticktarg, uint16 *eye_id) {
 
 	//It might not be a bad idea to put these into the database, eventually..
 
@@ -109,6 +109,8 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 		glm::vec2(8, 8), glm::vec2(-8, 8), glm::vec2(8, -8), glm::vec2(-8, -8)
 	};
 
+	NPC* swarm_pet_npc = nullptr;
+
 	while (summon_count > 0) {
 		int pet_duration = pet.duration;
 		if (duration_override > 0)
@@ -122,7 +124,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 			memcpy(npc_dup, made_npc, sizeof(NPCType));
 		}
 
-		NPC* swarm_pet_npc = new NPC(
+		swarm_pet_npc = new NPC(
 			(npc_dup != nullptr) ? npc_dup : npc_type,	//make sure we give the NPC the correct data pointer
 			0,
 			GetPosition() + glm::vec4(swarmPetLocations[summon_count], 0.0f, 0.0f),
@@ -160,6 +162,10 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 
 		entity_list.AddNPC(swarm_pet_npc, true, true);
 		summon_count--;
+	}
+
+	if (swarm_pet_npc && IsClient() && eye_id != nullptr) {
+		*eye_id = swarm_pet_npc->GetID();
 	}
 
 	//the target of these swarm pets will take offense to being cast on...

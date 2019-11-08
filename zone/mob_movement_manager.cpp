@@ -727,7 +727,8 @@ void MobMovementManager::SendCommandToClients(
 	float delta_heading,
 	int anim,
 	ClientRange range,
-	Client* single_client
+	Client* single_client,
+	Client* ignore_client
 )
 {
 	if (range == ClientRangeNone) {
@@ -742,6 +743,10 @@ void MobMovementManager::SendCommandToClients(
 	if (range == ClientRangeAny) {
 		for (auto &c : _impl->Clients) {
 			if (single_client && c != single_client) {
+				continue;
+			}
+
+			if (ignore_client && c == ignore_client) {
 				continue;
 			}
 
@@ -766,6 +771,10 @@ void MobMovementManager::SendCommandToClients(
 
 		for (auto &c : _impl->Clients) {
 			if (single_client && c != single_client) {
+				continue;
+			}
+
+			if (ignore_client && c == ignore_client) {
 				continue;
 			}
 
