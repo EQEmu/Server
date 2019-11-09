@@ -3949,7 +3949,7 @@ void command_faction(Client *c, const Seperator *sep)
 			query = "SELECT `id`,`name` FROM `faction_list`";
 		}
 		else {
-			query = fmt::format("SELECT `id`,`name` FROM `faction_list` WHERE `name` LIKE '{}'", faction_filter.c_str());
+			query = fmt::format("SELECT `id`,`name` FROM `faction_list` WHERE `name` LIKE '%{}%'", faction_filter.c_str());
 		}
 		auto results = database.QueryDatabase(query);
 		if (!results.Success())
