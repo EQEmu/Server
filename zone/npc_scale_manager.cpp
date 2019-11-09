@@ -127,7 +127,7 @@ void NpcScaleManager::ScaleNPC(NPC *npc)
 
 		npc->ModifyNPCStat("max_hit", std::to_string(max_dmg).c_str());
 	}
-	if (npc->GetHPRegen() == 0) {
+	if (npc->GetHPRegen() == 0 && is_auto_scaled) {
 		npc->ModifyNPCStat("hp_regen", std::to_string(scale_data.hp_regen_rate).c_str());
 	}
 	if (npc->GetAttackDelay() == 0) {
