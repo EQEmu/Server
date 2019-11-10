@@ -397,6 +397,7 @@
 9141|2019_07_10_npc_flymode.sql|SHOW COLUMNS FROM `npc_types` LIKE 'flymode'|empty|
 9142|2019_09_02_required_spawn_filter.sql|SHOW COLUMNS FROM `spawnentry` LIKE 'condition_value_filter'|empty|
 9143|2019_09_16_account_table_changes.sql|SHOW COLUMNS FROM `account` LIKE 'ls_id'|empty|
+9144|2019_11_09_logsys_description_update.sql|SELECT * FROM `logsys_categories`|not_empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
