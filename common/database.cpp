@@ -2134,7 +2134,6 @@ void Database::LoadLogSettings(EQEmuLogSys::LogSettings *log_settings)
 	int  log_category_id = 0;
 
 	int *categories_in_database = new int[1000];
-	int* category_description_validation = new int[1000];
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		log_category_id = atoi(row[0]);
@@ -2168,10 +2167,6 @@ void Database::LoadLogSettings(EQEmuLogSys::LogSettings *log_settings)
 		}
 
 		categories_in_database[log_category_id] = 1;
-
-		if (strcmp(row[1], Logs::LogCategoryName[log_category_id]) == 0) {
-			category_description_validation[log_category_id] = 1;
-		}
 	}
 
 	/**
@@ -2203,27 +2198,9 @@ void Database::LoadLogSettings(EQEmuLogSys::LogSettings *log_settings)
 
 			QueryDatabase(inject_query);
 		}
-		else if (category_description_validation[log_index] != 1) {
-
-			LogInfo(
-				"Updating Log Category Description [{0}]...",
-				Logs::LogCategoryName[log_index]
-			);
-
-			auto update_query = fmt::format(
-				"UPDATE logsys_categories "
-				"SET log_category_description = '{0}' "
-				"WHERE log_category_id = {1}",
-				EscapeString(Logs::LogCategoryName[log_index]),
-				log_index
-			);
-
-			QueryDatabase(update_query);
-		}
 	}
 
 	delete[] categories_in_database;
-	delete[] category_description_validation;
 }
 
 int Database::CountInvSnapshots() {
