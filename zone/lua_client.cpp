@@ -1531,6 +1531,18 @@ void Lua_Client::SetSecondaryWeaponOrnamentation(uint32 model_id) {
 	self->SetSecondaryWeaponOrnamentation(model_id);
 }
 
+void Lua_Client::SetClientMaxLevel(int value) {
+	Lua_Safe_Call_Void();
+	self->SetClientMaxLevel(value);
+}
+
+int Lua_Client::GetClientMaxLevel() {
+	Lua_Safe_Call_Int();
+	return self->GetClientMaxLevel();
+}
+
+
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 		.def(luabind::constructor<>())
@@ -1820,7 +1832,9 @@ luabind::scope lua_register_client() {
 		.def("EnableAreaEndRegen", &Lua_Client::EnableAreaEndRegen)
 		.def("DisableAreaEndRegen", &Lua_Client::DisableAreaEndRegen)
 		.def("EnableAreaRegens", &Lua_Client::EnableAreaRegens)
-		.def("DisableAreaRegens", &Lua_Client::DisableAreaRegens);
+		.def("DisableAreaRegens", &Lua_Client::DisableAreaRegens)
+		.def("SetClientMaxLevel", (void(Lua_Client::*)(int))&Lua_Client::SetClientMaxLevel)
+		.def("GetClientMaxLevel", (int(Lua_Client::*)(void))&Lua_Client::GetClientMaxLevel);
 }
 
 luabind::scope lua_register_inventory_where() {
