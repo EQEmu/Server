@@ -6317,6 +6317,56 @@ XS(XS_Client_SetSecondaryWeaponOrnamentation)
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_SetClientMaxLevel); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_SetClientMaxLevel) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::SetClientMaxLevel(THIS, int in_level)");
+	{
+		Client* THIS;
+		int in_level = (int)SvUV(ST(1));
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client*, tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		THIS->SetClientMaxLevel(in_level);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_GetClientMaxLevel); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_GetClientMaxLevel) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Client::GetClientMaxLevel(THIS)");
+	{
+		Client* THIS;
+		int RETVAL;
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client*, tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->GetClientMaxLevel();
+		XSprePUSH;
+		PUSHu((UV)RETVAL);
+	}
+	XSRETURN(1);
+}
+
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -6400,6 +6450,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GetBindZoneID"), XS_Client_GetBindZoneID, file, "$$");
 	newXSproto(strcpy(buf, "GetCarriedMoney"), XS_Client_GetCarriedMoney, file, "$");
 	newXSproto(strcpy(buf, "GetCharacterFactionLevel"), XS_Client_GetCharacterFactionLevel, file, "$$");
+	newXSproto(strcpy(buf, "GetClientMaxLevel"), XS_Client_GetClientMaxLevel, file, "$");
 	newXSproto(strcpy(buf, "GetClientVersion"), XS_Client_GetClientVersion, file, "$");
 	newXSproto(strcpy(buf, "GetClientVersionBit"), XS_Client_GetClientVersionBit, file, "$");
 	newXSproto(strcpy(buf, "GetCorpseCount"), XS_Client_GetCorpseCount, file, "$");
@@ -6526,6 +6577,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "SetBecomeNPCLevel"), XS_Client_SetBecomeNPCLevel, file, "$$");
 	newXSproto(strcpy(buf, "SetBindPoint"), XS_Client_SetBindPoint, file, "$;$$$$$");
 	newXSproto(strcpy(buf, "SetConsumption"), XS_Client_SetConsumption, file, "$$$");
+	newXSproto(strcpy(buf, "SetClientMaxLevel"), XS_Client_SetClientMaxLevel, file, "$$");
 	newXSproto(strcpy(buf, "SetCustomItemData"), XS_Client_SetCustomItemData, file, "$$$$");
 	newXSproto(strcpy(buf, "SetDeity"), XS_Client_SetDeity, file, "$$");
 	newXSproto(strcpy(buf, "SetDueling"), XS_Client_SetDueling, file, "$$");
