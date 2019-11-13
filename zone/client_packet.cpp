@@ -14099,16 +14099,25 @@ void Client::Handle_OP_TradeRequest(const EQApplicationPacket *app)
 #else
 	else if (tradee && (tradee->IsNPC() || tradee->IsBot())) {
 #endif
-		//npcs always accept
-		trade->Start(msg->to_mob_id);
+        // If the NPC is engaged, we cannot trade with it.
+        // Note that this work as intended, if the NPC is charmed
+        // you can still trade with it.
+        if (tradee->IsEngaged()) {
+            Message(0, "Your target cannot trade with you at this moment.");
+        }
+            // If it not engaged, it will automatically accept the trade.
+        else {
+            //npcs always accept
+            trade->Start(msg->to_mob_id);
 
-		auto outapp = new EQApplicationPacket(OP_TradeRequestAck, sizeof(TradeRequest_Struct));
-		TradeRequest_Struct* acc = (TradeRequest_Struct*)outapp->pBuffer;
-		acc->from_mob_id = msg->to_mob_id;
-		acc->to_mob_id = msg->from_mob_id;
-		FastQueuePacket(&outapp);
-		safe_delete(outapp);
-	}
+            EQApplicationPacket *outapp = new EQApplicationPacket(OP_TradeRequestAck, sizeof(TradeRequest_Struct));
+            TradeRequest_Struct *acc = (TradeRequest_Struct *) outapp->pBuffer;
+            acc->from_mob_id = msg->to_mob_id;
+            acc->to_mob_id = msg->from_mob_id;
+            FastQueuePacket(&outapp);
+            safe_delete(outapp);
+        }
+    }
 	return;
 	}
 
