@@ -321,8 +321,8 @@ public:
 	void SetPrimaryWeaponOrnamentation(uint32 model_id);
 	void SetSecondaryWeaponOrnamentation(uint32 model_id);
 
-	void Lua_Client::SetClientMaxLevel(int value);
-	int Lua_Client::GetClientMaxLevel();
+	void SetClientMaxLevel(int value);
+	int GetClientMaxLevel();
 };
 
 #endif
