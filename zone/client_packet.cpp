@@ -14099,7 +14099,7 @@ void Client::Handle_OP_TradeRequest(const EQApplicationPacket *app)
 #else
 	else if (tradee && (tradee->IsNPC() || tradee->IsBot())) {
 #endif
-        if (tradee->!IsEngaged()) {
+        if (!tradee->IsEngaged()) {
             trade->Start(msg->to_mob_id);
             EQApplicationPacket *outapp = new EQApplicationPacket(OP_TradeRequestAck, sizeof(TradeRequest_Struct));
             TradeRequest_Struct *acc = (TradeRequest_Struct *) outapp->pBuffer;
