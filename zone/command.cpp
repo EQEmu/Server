@@ -7712,6 +7712,11 @@ void command_npcemote(Client *c, const Seperator *sep)
 
 void command_npceditmass(Client *c, const Seperator *sep)
 {
+	if (strcasecmp(sep->arg[1], "usage") == 0) {
+		c->Message(Chat::White, "#npceditmass search_column [exact_match: =]search_value change_column change_value");
+		return;
+	}
+	
 	std::string query = SQL(
 		SELECT
 				COLUMN_NAME
@@ -7807,6 +7812,12 @@ void command_npceditmass(Client *c, const Seperator *sep)
 
 	std::vector <std::string> npc_ids;
 
+	bool exact_match = false;
+	if (search_value[0] == '=') {
+		exact_match = true;
+		search_value = search_value.substr(1);
+	}
+
 	int found_count = 0;
 	results = database.QueryDatabase(query);
 	for (auto row = results.begin(); row != results.end(); ++row) {
@@ -7816,10 +7827,17 @@ void command_npceditmass(Client *c, const Seperator *sep)
 		std::string search_column_value         = str_tolower(row[2]);
 		std::string change_column_current_value = row[3];
 
-		if (search_column_value.find(search_value) == std::string::npos) {
-			continue;
+		if (exact_match) {
+			if (search_column_value.compare(search_value) != 0) {
+				continue;
+			}
 		}
-
+		else {
+			if (search_column_value.find(search_value) == std::string::npos) {
+				continue;
+			}
+		}
+		
 		c->Message(
 			Chat::Yellow,
 			fmt::format(
