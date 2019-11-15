@@ -7859,8 +7859,9 @@ void command_npceditmass(Client *c, const Seperator *sep)
 	}
 
 	std::string saylink = fmt::format(
-		"#npceditmass {} {} {} {} apply",
+		"#npceditmass {} {}{} {} {} apply",
 		search_column,
+		(exact_match ? '=' : '\0'),
 		search_value,
 		change_column,
 		change_value
