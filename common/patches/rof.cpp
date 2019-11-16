@@ -624,6 +624,7 @@ namespace RoF
 		SETUP_DIRECT_ENCODE(PlayerPositionUpdateServer_Struct, structs::PlayerPositionUpdateServer_Struct);
 
 		OUT(spawn_id);
+		OUT(vehicle_id);
 		OUT(x_pos);
 		OUT(delta_x);
 		OUT(delta_y);
@@ -4314,6 +4315,7 @@ namespace RoF
 		SETUP_DIRECT_DECODE(PlayerPositionUpdateClient_Struct, structs::PlayerPositionUpdateClient_Struct);
 
 		IN(spawn_id);
+		IN(vehicle_id);
 		IN(sequence);
 		IN(x_pos);
 		IN(y_pos);

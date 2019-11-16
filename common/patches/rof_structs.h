@@ -1608,22 +1608,22 @@ struct RespawnWindow_Struct {
 */
 struct PlayerPositionUpdateServer_Struct
 {
-/*0000*/ uint16	spawn_id;
-/*0002*/ uint16	spawnId2;
-/*0004*/ signed	padding0004:12;
-         signed	y_pos:19;           // y coord
-	 unsigned padding:1;
-/*0008*/ signed	delta_x:13;      // change in x
-         signed	delta_heading:10;// change in heading
-         signed	padding0008:9;
-/*0012*/ signed	delta_y:13;      // change in y
-         signed	z_pos:19;           // z coord
-/*0016*/ signed	x_pos:19;           // x coord
-         signed	animation:10;   // animation
-         signed	padding0016:3;
-/*0020*/ unsigned heading:12;     // heading
-         signed	delta_z:13;      // change in z
-         signed	padding0020:7;
+/*0000*/	uint16		spawn_id;
+/*0002*/	uint16		vehicle_id;
+/*0004*/	signed		padding0004 : 12;
+			signed		y_pos : 19;			// y coord
+			unsigned	padding : 1;
+/*0008*/	signed		delta_x : 13;		// change in x
+			signed		delta_heading : 10;	// change in heading
+			signed		padding0008 : 9;
+/*0012*/	signed		delta_y : 13;		// change in y
+			signed		z_pos : 19;			// z coord
+/*0016*/	signed		x_pos : 19;			// x coord
+			signed		animation : 10;		// animation
+			signed		padding0016 : 3;
+/*0020*/	unsigned	heading : 12;		// heading
+			signed		delta_z : 13;		// change in z
+			signed		padding0020 : 7;
 /*0024*/
 };
 
@@ -1636,21 +1636,22 @@ struct PlayerPositionUpdateServer_Struct
 */
 struct PlayerPositionUpdateClient_Struct
 {
-/*0000*/ uint16		sequence;			// increments one each packet - Verified
-/*0002*/ uint16		spawn_id;			// Player's spawn id
-/*0004*/ uint8		unknown0004[6];		// ***Placeholder
-/*0010*/ float		delta_y;			// Change in y
-/*0014*/ float		x_pos;				// x coord (2nd loc value)
-/*0018*/ float		y_pos;				// y coord (1st loc value)
-/*0022*/ signed		delta_heading:10;	// change in heading
-	 unsigned	animation:10;		// ***Placeholder
-         unsigned	padding0024:12;		// animation
-/*0026*/ float		delta_z;			// Change in z
-/*0030*/ float		delta_x;			// Change in x
-/*0034*/ float		z_pos;				// z coord (3rd loc value)
-/*0038*/ unsigned	heading:12;			// Directional heading
-         unsigned	padding0040:10;		// ***Placeholder
-         unsigned	padding0041:10;		// ***Placeholder
+/*0000*/	uint16		sequence;			// increments one each packet - Verified
+/*0002*/	uint16		spawn_id;			// Player's spawn id
+/*0004*/	uint16		vehicle_id;			// Player's vehicle spawn id
+/*0006*/	uint8		unknown0004[4];		// ***Placeholder
+/*0010*/	float		delta_y;			// Change in y
+/*0014*/	float		x_pos;				// x coord (2nd loc value)
+/*0018*/	float		y_pos;				// y coord (1st loc value)
+/*0022*/	signed		delta_heading : 10;	// change in heading
+			unsigned	animation : 10;		// ***Placeholder
+			unsigned	padding0024 : 12;	// animation
+/*0026*/	float		delta_z;			// Change in z
+/*0030*/	float		delta_x;			// Change in x
+/*0034*/	float		z_pos;				// z coord (3rd loc value)
+/*0038*/	unsigned	heading : 12;		// Directional heading
+			unsigned	padding0040 : 10;	// ***Placeholder
+			unsigned	padding0041 : 10;	// ***Placeholder
 /*0042*/
 };
 

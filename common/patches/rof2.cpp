@@ -686,25 +686,6 @@ namespace RoF2
 		FINISH_ENCODE();
 	}
 
-	ENCODE(OP_ClientUpdate)
-	{
-		ENCODE_LENGTH_EXACT(PlayerPositionUpdateServer_Struct);
-		SETUP_DIRECT_ENCODE(PlayerPositionUpdateServer_Struct, structs::PlayerPositionUpdateServer_Struct);
-
-		OUT(spawn_id);
-		OUT(x_pos);
-		OUT(delta_x);
-		OUT(delta_y);
-		OUT(z_pos);
-		OUT(delta_heading);
-		OUT(y_pos);
-		OUT(delta_z);
-		OUT(animation);
-		OUT(heading);
-
-		FINISH_ENCODE();
-	}
-
 	ENCODE(OP_Consider)
 	{
 		ENCODE_LENGTH_EXACT(Consider_Struct);
@@ -4541,27 +4522,6 @@ namespace RoF2
 		IN(INT);
 		IN(CHA);
 		IN(tutorial);
-
-		FINISH_DIRECT_DECODE();
-	}
-
-	DECODE(OP_ClientUpdate)
-	{
-		// for some odd reason, there is an extra byte on the end of this on occasion..
-		DECODE_LENGTH_ATLEAST(structs::PlayerPositionUpdateClient_Struct);
-		SETUP_DIRECT_DECODE(PlayerPositionUpdateClient_Struct, structs::PlayerPositionUpdateClient_Struct);
-
-		IN(spawn_id);
-		IN(sequence);
-		IN(x_pos);
-		IN(y_pos);
-		IN(z_pos);
-		IN(heading);
-		IN(delta_x);
-		IN(delta_y);
-		IN(delta_z);
-		IN(delta_heading);
-		IN(animation);
 
 		FINISH_DIRECT_DECODE();
 	}
