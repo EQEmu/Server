@@ -2387,6 +2387,7 @@ namespace SoF
 		IN(delta_z);
 		IN(delta_heading);
 		IN(animation);
+		emu->vehicle_id = 0;
 
 		FINISH_DIRECT_DECODE();
 	}

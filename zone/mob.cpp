@@ -4445,10 +4445,11 @@ void Mob::DoKnockback(Mob *caster, uint32 pushback, uint32 pushup)
 		spu->delta_y	= FloatToEQ13(static_cast<float>(new_y));
 		spu->delta_z	= FloatToEQ13(static_cast<float>(pushup));
 		spu->heading	= FloatToEQ12(GetHeading());
-		spu->padding0002	=0;
-		spu->padding0006	=7;
-		spu->padding0014	=0x7f;
-		spu->padding0018	=0x5df27;
+		// for ref: these were not passed on to other 5 clients while on Titanium standard (change to RoF2 standard: 11/16/2019)
+		//eq->padding0002 = 0;
+		//eq->padding0006 = 0x7;
+		//eq->padding0014 = 0x7F;
+		//eq->padding0018 = 0x5dF27;
 		spu->animation = 0;
 		spu->delta_heading = FloatToEQ10(0);
 		outapp_push->priority = 6;
