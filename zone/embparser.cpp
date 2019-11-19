@@ -118,6 +118,7 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_SPAWN_ZONE",
 	"EVENT_DEATH_ZONE",
 	"EVENT_USE_SKILL",
+	"EVENT_COMBINE_VALIDATE",
 };
 
 PerlembParser::PerlembParser() : perl(nullptr) {
@@ -1438,6 +1439,24 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 			Seperator sep(data);
 			ExportVar(package_name.c_str(), "skill_id", sep.arg[0]);
 			ExportVar(package_name.c_str(), "skill_level", sep.arg[1]);
+			break;
+		}
+		case EVENT_COMBINE_VALIDATE: {
+			Seperator sep(data);
+			ExportVar(package_name.c_str(), "recipe_id", extradata);
+			ExportVar(package_name.c_str(), "validate_type", sep.arg[0]);
+
+			std::string zone_id = "-1";
+			std::string tradeskill_id = "-1";
+			if (strcmp(sep.arg[0], "check_zone") == 0) {
+				zone_id = sep.arg[1];
+			}
+			else if (strcmp(sep.arg[0], "check_tradeskill") == 0) {
+				tradeskill_id = sep.arg[1];
+			}
+			
+			ExportVar(package_name.c_str(), "zone_id", zone_id.c_str());
+			ExportVar(package_name.c_str(), "tradeskill_id", tradeskill_id.c_str());
 			break;
 		}
 

@@ -514,6 +514,31 @@ void handle_player_use_skill(QuestInterface *parse, lua_State* L, Client* client
 	lua_setfield(L, -2, "skill_level");
 }
 
+void handle_player_combine_validate(QuestInterface* parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
+									std::vector<EQEmu::Any>* extra_pointers) {
+	Seperator sep(data.c_str());
+	lua_pushinteger(L, extra_data);
+	lua_setfield(L, -2, "recipe_id");
+
+	lua_pushstring(L, sep.arg[0]);
+	lua_setfield(L, -2, "validate_type");
+
+	int zone_id = -1;
+	int tradeskill_id = -1;
+	if (strcmp(sep.arg[0], "check_zone") == 0) {
+		zone_id = std::stoi(sep.arg[1]);
+	}
+	else if (strcmp(sep.arg[0], "check_tradeskill") == 0) {
+		tradeskill_id = std::stoi(sep.arg[1]);
+	}
+
+	lua_pushinteger(L, zone_id);
+	lua_setfield(L, -2, "zone_id");
+
+	lua_pushinteger(L, tradeskill_id);
+	lua_setfield(L, -2, "tradeskill_id");
+}
+
 //Item
 void handle_item_click(QuestInterface *parse, lua_State* L, Client* client, EQEmu::ItemInstance* item, Mob *mob, std::string data, uint32 extra_data,
 					   std::vector<EQEmu::Any> *extra_pointers) {
