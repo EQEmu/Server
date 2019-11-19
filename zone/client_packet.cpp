@@ -14099,16 +14099,16 @@ void Client::Handle_OP_TradeRequest(const EQApplicationPacket *app)
 #else
 	else if (tradee && (tradee->IsNPC() || tradee->IsBot())) {
 #endif
-		//npcs always accept
-		trade->Start(msg->to_mob_id);
-
-		auto outapp = new EQApplicationPacket(OP_TradeRequestAck, sizeof(TradeRequest_Struct));
-		TradeRequest_Struct* acc = (TradeRequest_Struct*)outapp->pBuffer;
-		acc->from_mob_id = msg->to_mob_id;
-		acc->to_mob_id = msg->from_mob_id;
-		FastQueuePacket(&outapp);
-		safe_delete(outapp);
-	}
+        if (!tradee->IsEngaged()) {
+            trade->Start(msg->to_mob_id);
+            EQApplicationPacket *outapp = new EQApplicationPacket(OP_TradeRequestAck, sizeof(TradeRequest_Struct));
+            TradeRequest_Struct *acc = (TradeRequest_Struct *) outapp->pBuffer;
+            acc->from_mob_id = msg->to_mob_id;
+            acc->to_mob_id = msg->from_mob_id;
+            FastQueuePacket(&outapp);
+            safe_delete(outapp);
+        }
+    }
 	return;
 	}
 
