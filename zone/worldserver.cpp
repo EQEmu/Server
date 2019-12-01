@@ -1806,8 +1806,8 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		worldserver.SendEmoteMessage(
 			0, 0, 100, 15,
 			"Rules reloaded for Zone: '%s' Instance ID: %u",
-			zone->GetLongName(),
-			zone->GetInstanceID()
+			(zone ? zone->GetLongName() : StringFormat("Null zone pointer [pid]:[%i]", getpid()).c_str()),
+			(zone ? zone->GetInstanceID() : 0xFFFFFFFFF)
 		);
 		RuleManager::Instance()->LoadRules(&database, RuleManager::Instance()->GetActiveRuleset(), true);
 		break;
