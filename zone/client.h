@@ -1640,6 +1640,7 @@ public:
 		booSpawnMessageClassSpecific,
 		booAltCombat,
 		booAutoDefend,
+		booBuffCounter,
 		_booCount
 	};
 

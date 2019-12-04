@@ -5662,11 +5662,24 @@ void Mob::CheckNumHitsRemaining(NumHit type, int32 buff_slot, uint16 spell_id)
 	bool bDepleted = false;
 	int buff_max = GetMaxTotalSlots();
 
+#ifdef BOTS
+	std::string buff_name;
+	size_t buff_counter = 0;
+	bool buff_update = false;
+#endif
+
 	//Spell specific procs [Type 7,10,11]
 	if (IsValidSpell(spell_id)) {
 		for (int d = 0; d < buff_max; d++) {
 			if (buffs[d].spellid == spell_id && buffs[d].numhits > 0 &&
 			    spells[buffs[d].spellid].numhitstype == static_cast<int>(type)) {
+
+#ifdef BOTS
+				buff_name = spells[buffs[d].spellid].name;
+				buff_counter = (buffs[d].numhits - 1);
+				buff_update = true;
+#endif
+
 				if (--buffs[d].numhits == 0) {
 					CastOnNumHitFade(buffs[d].spellid);
 					if (!TryFadeEffect(d))
@@ -5679,6 +5692,13 @@ void Mob::CheckNumHitsRemaining(NumHit type, int32 buff_slot, uint16 spell_id)
 	} else if (type == NumHit::MatchingSpells) {
 		if (buff_slot >= 0) {
 			if (--buffs[buff_slot].numhits == 0) {
+
+#ifdef BOTS
+				buff_name = spells[buffs[buff_slot].spellid].name;
+				buff_counter = (buffs[buff_slot].numhits - 1);
+				buff_update = true;
+#endif
+
 				CastOnNumHitFade(buffs[buff_slot].spellid);
 				if (!TryFadeEffect(buff_slot))
 					BuffFadeBySlot(buff_slot , true);
@@ -5691,6 +5711,13 @@ void Mob::CheckNumHitsRemaining(NumHit type, int32 buff_slot, uint16 spell_id)
 					continue;
 
 				if (IsValidSpell(buffs[d].spellid) && m_spellHitsLeft[d] == buffs[d].spellid) {
+
+#ifdef BOTS
+					buff_name = spells[buffs[d].spellid].name;
+					buff_counter = (buffs[d].numhits - 1);
+					buff_update = true;
+#endif
+
 					if (--buffs[d].numhits == 0) {
 						CastOnNumHitFade(buffs[d].spellid);
 						m_spellHitsLeft[d] = 0;
@@ -5706,6 +5733,13 @@ void Mob::CheckNumHitsRemaining(NumHit type, int32 buff_slot, uint16 spell_id)
 		for (int d = 0; d < buff_max; d++) {
 			if (IsValidSpell(buffs[d].spellid) && buffs[d].numhits > 0 &&
 			    spells[buffs[d].spellid].numhitstype == static_cast<int>(type)) {
+
+#ifdef BOTS
+				buff_name = spells[buffs[d].spellid].name;
+				buff_counter = (buffs[d].numhits - 1);
+				buff_update = true;
+#endif
+
 				if (--buffs[d].numhits == 0) {
 					CastOnNumHitFade(buffs[d].spellid);
 					if (!TryFadeEffect(d))
@@ -5716,6 +5750,28 @@ void Mob::CheckNumHitsRemaining(NumHit type, int32 buff_slot, uint16 spell_id)
 			}
 		}
 	}
+
+#ifdef BOTS
+	if (IsBot() && buff_update) {
+		auto bot_owner = entity_list.GetBotOwnerByBotEntityID(GetID());
+		if (bot_owner && bot_owner->GetBotOption(Client::booBuffCounter)) {
+			bot_owner->CastToClient()->SendMarqueeMessage(
+				Chat::Yellow,
+				510,
+				0,
+				1000,
+				3000,
+				StringFormat(
+					"%s has [%u] hit%s remaining on '%s'",
+					GetCleanName(),
+					buff_counter,
+					(buff_counter == 1 ? "" : "s"),
+					buff_name.c_str()
+				)
+			);
+		}
+	}
+#endif
 }
 
 //for some stupid reason SK procs return theirs one base off...

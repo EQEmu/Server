@@ -236,8 +236,157 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 
 	LoadAAs();
 
-	if (!database.botdb.LoadBuffs(this) && bot_owner)
+	// copied from client CompleteConnect() handler - watch for problems
+	// (may have to move to post-spawn location if certain buffs still don't process correctly)
+	if (database.botdb.LoadBuffs(this) && bot_owner) {
+
+		//reapply some buffs
+		uint32 buff_count = GetMaxTotalSlots();
+		for (uint32 j1 = 0; j1 < buff_count; j1++) {
+			if (!IsValidSpell(buffs[j1].spellid))
+				continue;
+
+			const SPDat_Spell_Struct& spell = spells[buffs[j1].spellid];
+
+			int NimbusEffect = GetNimbusEffect(buffs[j1].spellid);
+			if (NimbusEffect) {
+				if (!IsNimbusEffectActive(NimbusEffect))
+					SendSpellEffect(NimbusEffect, 500, 0, 1, 3000, true);
+			}
+
+			for (int x1 = 0; x1 < EFFECT_COUNT; x1++) {
+				switch (spell.effectid[x1]) {
+				case SE_IllusionCopy:
+				case SE_Illusion: {
+					if (spell.base[x1] == -1) {
+						if (gender == 1)
+							gender = 0;
+						else if (gender == 0)
+							gender = 1;
+						SendIllusionPacket(GetRace(), gender, 0xFF, 0xFF);
+					}
+					else if (spell.base[x1] == -2) // WTF IS THIS
+					{
+						if (GetRace() == 128 || GetRace() == 130 || GetRace() <= 12)
+							SendIllusionPacket(GetRace(), GetGender(), spell.base2[x1], spell.max[x1]);
+					}
+					else if (spell.max[x1] > 0)
+					{
+						SendIllusionPacket(spell.base[x1], 0xFF, spell.base2[x1], spell.max[x1]);
+					}
+					else
+					{
+						SendIllusionPacket(spell.base[x1], 0xFF, 0xFF, 0xFF);
+					}
+					switch (spell.base[x1]) {
+					case OGRE:
+						SendAppearancePacket(AT_Size, 9);
+						break;
+					case TROLL:
+						SendAppearancePacket(AT_Size, 8);
+						break;
+					case VAHSHIR:
+					case BARBARIAN:
+						SendAppearancePacket(AT_Size, 7);
+						break;
+					case HALF_ELF:
+					case WOOD_ELF:
+					case DARK_ELF:
+					case FROGLOK:
+						SendAppearancePacket(AT_Size, 5);
+						break;
+					case DWARF:
+						SendAppearancePacket(AT_Size, 4);
+						break;
+					case HALFLING:
+					case GNOME:
+						SendAppearancePacket(AT_Size, 3);
+						break;
+					default:
+						SendAppearancePacket(AT_Size, 6);
+						break;
+					}
+					break;
+				}
+				//case SE_SummonHorse: {
+				//	SummonHorse(buffs[j1].spellid);
+				//	//hasmount = true;	//this was false, is that the correct thing?
+				//	break;
+				//}
+				case SE_Silence:
+				{
+					Silence(true);
+					break;
+				}
+				case SE_Amnesia:
+				{
+					Amnesia(true);
+					break;
+				}
+				case SE_DivineAura:
+				{
+					invulnerable = true;
+					break;
+				}
+				case SE_Invisibility2:
+				case SE_Invisibility:
+				{
+					invisible = true;
+					SendAppearancePacket(AT_Invis, 1);
+					break;
+				}
+				case SE_Levitate:
+				{
+					if (!zone->CanLevitate())
+					{
+						//if (!GetGM())
+						//{
+							SendAppearancePacket(AT_Levitate, 0);
+							BuffFadeByEffect(SE_Levitate);
+							//Message(Chat::Red, "You can't levitate in this zone.");
+						//}
+					}
+					else {
+						SendAppearancePacket(AT_Levitate, 2);
+					}
+					break;
+				}
+				case SE_InvisVsUndead2:
+				case SE_InvisVsUndead:
+				{
+					invisible_undead = true;
+					break;
+				}
+				case SE_InvisVsAnimals:
+				{
+					invisible_animals = true;
+					break;
+				}
+				case SE_AddMeleeProc:
+				case SE_WeaponProc:
+				{
+					AddProcToWeapon(GetProcID(buffs[j1].spellid, x1), false, 100 + spells[buffs[j1].spellid].base2[x1], buffs[j1].spellid, buffs[j1].casterlevel);
+					break;
+				}
+				case SE_DefensiveProc:
+				{
+					AddDefensiveProc(GetProcID(buffs[j1].spellid, x1), 100 + spells[buffs[j1].spellid].base2[x1], buffs[j1].spellid);
+					break;
+				}
+				case SE_RangedProc:
+				{
+					AddRangedProc(GetProcID(buffs[j1].spellid, x1), 100 + spells[buffs[j1].spellid].base2[x1], buffs[j1].spellid);
+					break;
+				}
+				}
+			}
+		}
+
+		
+	}
+	else {
 		bot_owner->Message(Chat::Red, "&s for '%s'", BotDatabase::fail::LoadBuffs(), GetCleanName());
+	}
 
 	CalcBotStats(false);
 	hp_regen = CalcHPRegen();
@@ -4726,9 +4875,9 @@ bool Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, EQEmu::skills::Sk
 	Mob *my_owner = GetBotOwner();
 	if (my_owner && my_owner->IsClient() && my_owner->CastToClient()->GetBotOption(Client::booDeathMarquee)) {
 		if (killerMob)
-			my_owner->CastToClient()->SendMarqueeMessage(Chat::Yellow, 510, 0, 1000, 3000, StringFormat("%s has been slain by %s", GetCleanName(), killerMob->GetCleanName()));
+			my_owner->CastToClient()->SendMarqueeMessage(Chat::Red, 510, 0, 1000, 3000, StringFormat("%s has been slain by %s", GetCleanName(), killerMob->GetCleanName()));
 		else
-			my_owner->CastToClient()->SendMarqueeMessage(Chat::Yellow, 510, 0, 1000, 3000, StringFormat("%s has been slain", GetCleanName()));
+			my_owner->CastToClient()->SendMarqueeMessage(Chat::Red, 510, 0, 1000, 3000, StringFormat("%s has been slain", GetCleanName()));
 	}
 
 	Mob *give_exp = hate_list.GetDamageTopOnHateList(this);
@@ -8982,6 +9131,20 @@ Bot* EntityList::GetBotByBotName(std::string botName) {
 			Bot* tempBot = *botListItr;
 			if(tempBot && std::string(tempBot->GetName()) == botName) {
 				Result = tempBot;
+				break;
+			}
+		}
+	}
+	return Result;
+}
+
+Client* EntityList::GetBotOwnerByBotEntityID(uint16 entityID) {
+	Client* Result = nullptr;
+	if (entityID > 0) {
+		for (std::list<Bot*>::iterator botListItr = bot_list.begin(); botListItr != bot_list.end(); ++botListItr) {
+			Bot* tempBot = *botListItr;
+			if (tempBot && tempBot->GetID() == entityID) {
+				Result = tempBot->GetBotOwner()->CastToClient();
 				break;
 			}
 		}

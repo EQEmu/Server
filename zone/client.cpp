@@ -356,6 +356,7 @@ Client::Client(EQStreamInterface* ieqs)
 	bot_owner_options[booSpawnMessageClassSpecific] = true;
 	bot_owner_options[booAltCombat] = RuleB(Bots, AllowOwnerOptionAltCombat);
 	bot_owner_options[booAutoDefend] = RuleB(Bots, AllowOwnerOptionAutoDefend);
+	bot_owner_options[booBuffCounter] = false;
 
 	SetBotPulling(false);
 	SetBotPrecombat(false);

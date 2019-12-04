@@ -1321,6 +1321,8 @@ int bot_command_init(void)
 	if (
 		bot_command_add("actionable", "Lists actionable command arguments and use descriptions", 0, bot_command_actionable) ||
 		bot_command_add("aggressive", "Orders a bot to use a aggressive discipline", 0, bot_command_aggressive) ||
+		bot_command_add("applypoison", "Applies cursor-held poison to a rogue bot's weapon", 0, bot_command_apply_poison) ||
+		bot_command_add("applypotion", "Applies cursor-held potion to a bot's effects", 0, bot_command_apply_potion) ||
 		bot_command_add("attack", "Orders bots to attack a designated target", 0, bot_command_attack) ||
 		bot_command_add("bindaffinity", "Orders a bot to attempt an affinity binding", 0, bot_command_bind_affinity) ||
 		bot_command_add("bot", "Lists the available bot management [subcommands]", 0, bot_command_bot) ||
@@ -2579,6 +2581,166 @@ void bot_command_aggressive(Client *c, const Seperator *sep)
 	c->Message(m_action, "%i of %i bots have used aggressive disciplines", success_count, candidate_count);
 }
 
+void bot_command_apply_poison(Client *c, const Seperator *sep)
+{
+	if (helper_command_disabled(c, RuleB(Bots, AllowApplyPoisonCommand), "applypoison")) {
+		return;
+	}
+	if (helper_command_alias_fail(c, "bot_command_apply_poison", sep->arg[0], "applypoison")) {
+		return;
+	}
+	if (helper_is_help_or_usage(sep->arg[1])) {
+
+		c->Message(m_usage, "usage: <rogue_bot_target> %s", sep->arg[0]);
+		return;
+	}
+
+	Bot *my_rogue_bot = nullptr;
+	if (c->GetTarget() && c->GetTarget()->IsBot() && c->GetTarget()->CastToBot()->GetBotOwnerCharacterID() == c->CharacterID() && c->GetTarget()->CastToBot()->GetClass() == ROGUE) {
+		my_rogue_bot = c->GetTarget()->CastToBot();
+	}
+	if (!my_rogue_bot) {
+
+		c->Message(m_fail, "You must target a rogue bot that you own to use this command!");
+		return;
+	}
+	if (my_rogue_bot->GetLevel() < 18) {
+
+		c->Message(m_fail, "Your rogue bot must be level 18 before %s can apply poison!", (my_rogue_bot->GetGender() == 1 ? "she" : "he"));
+		return;
+	}
+	
+	const auto poison_instance = c->GetInv().GetItem(EQEmu::invslot::slotCursor);
+	if (!poison_instance) {
+
+		c->Message(m_fail, "No item found on cursor!");
+		return;
+	}
+
+	auto poison_data = poison_instance->GetItem();
+	if (!poison_data) {
+
+		c->Message(m_fail, "No data found for cursor item!");
+		return;
+	}
+
+	if (poison_data->ItemType == EQEmu::item::ItemTypePoison) {
+
+		if ((~poison_data->Races) & GetPlayerRaceBit(my_rogue_bot->GetRace())) {
+
+			c->Message(m_fail, "Invalid race for weapon poison!");
+			return;
+		}
+
+		if (poison_data->Proc.Level2 > my_rogue_bot->GetLevel()) {
+
+			c->Message(m_fail, "This poison is too powerful for your intended target!");
+			return;
+		}
+
+		// generalized from client ApplyPoison handler
+		double ChanceRoll = zone->random.Real(0, 1);
+		uint16 poison_skill = 95 + ((my_rogue_bot->GetLevel() - 18) * 5);
+		if (poison_skill > 200) {
+			poison_skill = 200;
+		}
+		bool apply_poison_chance = (ChanceRoll < (.75 + poison_skill / 1000));
+
+		if (apply_poison_chance && my_rogue_bot->AddProcToWeapon(poison_data->Proc.Effect, false, (my_rogue_bot->GetDEX() / 100) + 103, POISON_PROC)) {
+			c->Message(m_action, "Successfully applied %s to %s's weapon.", poison_data->Name, my_rogue_bot->GetCleanName());
+		}
+		else {
+			c->Message(m_fail, "Failed to apply %s to %s's weapon.", poison_data->Name, my_rogue_bot->GetCleanName());
+		}
+
+		c->DeleteItemInInventory(EQEmu::invslot::slotCursor, 1, true);
+	}
+	else {
+
+		c->Message(m_fail, "Item on cursor is not a weapon poison!");
+		return;
+	}
+}
+
+void bot_command_apply_potion(Client* c, const Seperator* sep)
+{
+	if (helper_command_disabled(c, RuleB(Bots, AllowApplyPotionCommand), "applypotion")) {
+		return;
+	}
+	if (helper_command_alias_fail(c, "bot_command_apply_potion", sep->arg[0], "applypotion")) {
+		return;
+	}
+	if (helper_is_help_or_usage(sep->arg[1])) {
+
+		c->Message(m_usage, "usage: <bot_target> %s", sep->arg[0]);
+		return;
+	}
+
+	Bot* my_bot = nullptr;
+	if (c->GetTarget() && c->GetTarget()->IsBot() && c->GetTarget()->CastToBot()->GetBotOwnerCharacterID() == c->CharacterID()) {
+		my_bot = c->GetTarget()->CastToBot();
+	}
+	if (!my_bot) {
+
+		c->Message(m_fail, "You must target a bot that you own to use this command!");
+		return;
+	}
+
+	const auto potion_instance = c->GetInv().GetItem(EQEmu::invslot::slotCursor);
+	if (!potion_instance) {
+
+		c->Message(m_fail, "No item found on cursor!");
+		return;
+	}
+
+	auto potion_data = potion_instance->GetItem();
+	if (!potion_data) {
+
+		c->Message(m_fail, "No data found for cursor item!");
+		return;
+	}
+
+	if (potion_data->ItemType == EQEmu::item::ItemTypePotion && potion_data->Click.Effect > 0) {
+
+		if (RuleB(Bots, RestrictApplyPotionToRogue) && potion_data->Classes != PLAYER_CLASS_ROGUE_BIT) {
+
+			c->Message(m_fail, "This command is restricted to rogue poison potions only!");
+			return;
+		}
+		if ((~potion_data->Races) & GetPlayerRaceBit(my_bot->GetRace())) {
+
+			c->Message(m_fail, "Invalid race for potion!");
+			return;
+		}
+		if ((~potion_data->Classes) & GetPlayerClassBit(my_bot->GetClass())) {
+
+			c->Message(m_fail, "Invalid class for potion!");
+			return;
+		}
+
+		if (potion_data->Click.Level2 > my_bot->GetLevel()) {
+
+			c->Message(m_fail, "This potion is too powerful for your intended target!");
+			return;
+		}
+
+		// TODO: figure out best way to handle casting time/animation
+		if (my_bot->SpellFinished(potion_data->Click.Effect, my_bot, EQEmu::spells::CastingSlot::Item, 0)) {
+			c->Message(m_action, "Successfully applied %s to %s's buff effects.", potion_data->Name, my_bot->GetCleanName());
+		}
+		else {
+			c->Message(m_fail, "Failed to apply %s to %s's buff effects.", potion_data->Name, my_bot->GetCleanName());
+		}
+
+		c->DeleteItemInInventory(EQEmu::invslot::slotCursor, 1, true);
+	}
+	else {
+
+		c->Message(m_fail, "Item on cursor is not a potion!");
+		return;
+	}
+}
+
 void bot_command_attack(Client *c, const Seperator *sep)
 {
 	if (helper_command_alias_fail(c, "bot_command_attack", sep->arg[0], "attack")) {
@@ -3638,6 +3800,16 @@ void bot_command_owner_option(Client *c, const Seperator *sep)
 					"<td><c \"#888888\">(toggles)</td>"
 				"</tr>"
 				"<tr>"
+					"<td><c \"#CCCCCC\">buffcounter</td>"
+					"<td><c \"#00CC00\">enable <c \"#CCCCCC\">| <c \"#00CC00\">disable</td>"
+					"<td><c \"#888888\">marquee message on buff counter change</td>"
+				"</tr>"
+				"<tr>"
+					"<td></td>"
+					"<td><c \"#00CCCC\">null</td>"
+					"<td><c \"#888888\">(toggles)</td>"
+				"</tr>"
+				"<tr>"
 					"<td><c \"#CCCCCC\">current</td>"
 					"<td></td>"
 					"<td><c \"#888888\">show current settings</td>"
@@ -3796,6 +3968,22 @@ void bot_command_owner_option(Client *c, const Seperator *sep)
 			c->Message(m_fail, "Bot owner option 'autodefend' is not allowed on this server.");
 		}
 	}
+	else if (!owner_option.compare("buffcounter")) {
+
+		if (!argument.compare("enable")) {
+			c->SetBotOption(Client::booBuffCounter, true);
+		}
+		else if (!argument.compare("disable")) {
+			c->SetBotOption(Client::booBuffCounter, false);
+		}
+		else {
+			c->SetBotOption(Client::booBuffCounter, !c->GetBotOption(Client::booBuffCounter));
+		}
+
+		database.botdb.SaveOwnerOption(c->CharacterID(), Client::booBuffCounter, c->GetBotOption(Client::booBuffCounter));
+
+		c->Message(m_action, "Bot 'buff counter' is now %s.", (c->GetBotOption(Client::booBuffCounter) == true ? "enabled" : "disabled"));
+	}
 	else if (!owner_option.compare("current")) {
 		
 		std::string window_title = "Current Bot Owner Options Settings";
@@ -3811,13 +3999,15 @@ void bot_command_owner_option(Client *c, const Seperator *sep)
 				"<tr>" "<td><c \"#CCCCCC\">spawnmessage</td>" "<td><c \"#00CC00\">{}</td>" "</tr>"
 				"<tr>" "<td><c \"#CCCCCC\">altcombat</td>"    "<td><c \"#00CC00\">{}</td>" "</tr>"
 				"<tr>" "<td><c \"#CCCCCC\">autodefend</td>"   "<td><c \"#00CC00\">{}</td>" "</tr>"
+				"<tr>" "<td><c \"#CCCCCC\">buffcounter</td>"  "<td><c \"#00CC00\">{}</td>" "</tr>"
 			"</table>",
 			(c->GetBotOption(Client::booDeathMarquee) ? "enabled" : "disabled"),
 			(c->GetBotOption(Client::booStatsUpdate) ? "enabled" : "disabled"),
 			(c->GetBotOption(Client::booSpawnMessageSay) ? "say" : (c->GetBotOption(Client::booSpawnMessageTell) ? "tell" : "silent")),
 			(c->GetBotOption(Client::booSpawnMessageClassSpecific) ? "class" : "default"),
 			(RuleB(Bots, AllowOwnerOptionAltCombat) ? (c->GetBotOption(Client::booAltCombat) ? "enabled" : "disabled") : "restricted"),
-			(RuleB(Bots, AllowOwnerOptionAutoDefend) ? (c->GetBotOption(Client::booAutoDefend) ? "enabled" : "disabled") : "restricted")
+			(RuleB(Bots, AllowOwnerOptionAutoDefend) ? (c->GetBotOption(Client::booAutoDefend) ? "enabled" : "disabled") : "restricted"),
+			(c->GetBotOption(Client::booBuffCounter) ? "enabled" : "disabled")
 		);
 		
 		c->SendPopupToClient(window_title.c_str(), window_text.c_str());
@@ -8442,6 +8632,16 @@ bool helper_cast_standard_spell(Bot* casting_bot, Mob* target_mob, int spell_id,
 		Bot::BotGroupSay(casting_bot, "Attempting to cast '%s' on %s", spells[spell_id].name, target_mob->GetCleanName());
 
 	return casting_bot->CastSpell(spell_id, target_mob->GetID(), EQEmu::spells::CastingSlot::Gem2, -1, -1, dont_root_before);
+}
+
+bool helper_command_disabled(Client* bot_owner, bool rule_value, const char* command)
+{
+	if (rule_value == false) {
+		bot_owner->Message(m_fail, "Bot command %s is not enabled on this server.", command);
+		return true;
+	}
+
+	return false;
 }
 
 bool helper_command_alias_fail(Client *bot_owner, const char* command_handler, const char *alias, const char *command)
