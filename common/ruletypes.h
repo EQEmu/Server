@@ -572,7 +572,7 @@ RULE_CATEGORY_END()
 
 #ifdef BOTS
 RULE_CATEGORY(Bots)
-RULE_INT(Bots, AAExpansion, 8, "Bots get AAs through this expansion")
+RULE_INT(Bots, BotExpansionSettings, 16383, "Sets the expansion settings for bot use. Defaults to all expansions enabled up to TSS")
 RULE_BOOL(Bots, AllowCamelCaseNames, false, "Allows the use of 'MyBot' type names")
 RULE_INT(Bots, CommandSpellRank, 1, "Filters bot command spells by rank (1, 2 and 3 are valid filters - any other number allows all ranks)")
 RULE_INT(Bots, CreationLimit, 150, "Number of bots that each account can create")

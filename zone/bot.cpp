@@ -1606,7 +1606,7 @@ int32 Bot::GenerateBaseHitPoints() {
 }
 
 void Bot::LoadAAs() {
-	int maxAAExpansion = RuleI(Bots, AAExpansion); //get expansion to get AAs up to
+	
 	aa_ranks.clear();
 
 	int id = 0;
@@ -8852,15 +8852,17 @@ void Bot::CalcBotStats(bool showtext) {
 		GetBotOwner()->Message(Chat::Yellow, "Updating %s...", GetCleanName());
 	}
 
-	if(!IsValidRaceClassCombo()) {
+	// this code is annoying since many classes change their name and illusions change the race id
+	/*if(!IsValidRaceClassCombo()) {
 		GetBotOwner()->Message(Chat::Yellow, "A %s - %s bot was detected. Is this Race/Class combination allowed?.", GetRaceIDName(GetRace()), GetClassIDName(GetClass(), GetLevel()));
 		GetBotOwner()->Message(Chat::Yellow, "Previous Bots Code releases did not check Race/Class combinations during create.");
 		GetBotOwner()->Message(Chat::Yellow, "Unless you are experiencing heavy lag, you should delete and remake this bot.");
-	}
+	}*/
 
 	if(GetBotOwner()->GetLevel() != GetLevel())
 		SetLevel(GetBotOwner()->GetLevel());
 
+	LoadAAs();
 	GenerateSpecialAttacks();
 
 	if(showtext) {
