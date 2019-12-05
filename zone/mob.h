@@ -566,6 +566,7 @@ public:
 	inline const float GetBaseSize() const { return base_size; }
 	inline const GravityBehavior GetFlyMode() const { return flymode; }
 	bool IsBoat() const;
+	bool IsControllableBoat() const;
 
 	//Group
 	virtual bool HasRaid() = 0;

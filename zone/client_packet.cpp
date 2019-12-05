@@ -3838,8 +3838,9 @@ void Client::Handle_OP_BoardBoat(const EQApplicationPacket *app)
 	boatname[63] = '\0';
 
 	Mob* boat = entity_list.GetMob(boatname);
-	if (!boat || (boat->GetRace() != CONTROLLED_BOAT && boat->GetRace() != 502))
+	if (!boat || !boat->IsControllableBoat()) {
 		return;
+	}
 	controlling_boat_id = boat->GetID();	// set the client's BoatID to show that it's on this boat
 
 	Message(0, "Board boat: %s", boatname);
@@ -4941,12 +4942,16 @@ void Client::Handle_OP_ControlBoat(const EQApplicationPacket *app)
 		LogError("Wrong size: OP_ControlBoat, size=[{}], expected [{}]", app->size, sizeof(ControlBoat_Struct));
 		return;
 	}
+
 	ControlBoat_Struct* cbs = (ControlBoat_Struct*)app->pBuffer;
 	Mob* boat = entity_list.GetMob(cbs->boatId);
-	if (boat == 0)
-		return;	// do nothing if the boat isn't valid
+	if (!boat) {
 
-	if (!boat->IsNPC() || (boat->GetRace() != CONTROLLED_BOAT && boat->GetRace() != 502))
+		LogError("Player tried to take control of non-existent boat (char_id: %u, boat_eid: %u)", CharacterID(), cbs->boatId);
+		return;	// do nothing if the boat isn't valid
+	}
+
+	if (!boat->IsNPC() || !boat->IsControllableBoat())
 	{
 		char *hacked_string = nullptr;
 		MakeAnyLenString(&hacked_string, "OP_Control Boat was sent against %s which is of race %u", boat->GetName(), boat->GetRace());
@@ -4957,20 +4962,24 @@ void Client::Handle_OP_ControlBoat(const EQApplicationPacket *app)
 
 	if (cbs->TakeControl) {
 		// this uses the boat's target to indicate who has control of it. It has to check hate to make sure the boat isn't actually attacking anyone.
-		if ((boat->GetTarget() == 0) || (boat->GetTarget() == this && boat->GetHateAmount(this) == 0)) {
+		if (!boat->GetTarget() || (boat->GetTarget() == this && boat->GetHateAmount(this) == 0)) {
 			boat->SetTarget(this);
 		}
 		else {
+
 			this->MessageString(Chat::Red, IN_USE);
 			return;
 		}
 	}
-	else
-		boat->SetTarget(0);
+	else {
+		if (boat->GetTarget() == this) {
+			boat->SetTarget(nullptr);
+		}
+	}
 
-	auto outapp = new EQApplicationPacket(OP_ControlBoat, 0);
-	FastQueuePacket(&outapp);
-	safe_delete(outapp);
+	// client responds better to a packet echo than an empty op
+	QueuePacket(app);
+
 	// have the boat signal itself, so quests can be triggered by boat use
 	boat->CastToNPC()->SignalNPC(0);
 }
@@ -8940,10 +8949,13 @@ void Client::Handle_OP_LeaveBoat(const EQApplicationPacket *app)
 {
 	Mob* boat = entity_list.GetMob(this->controlling_boat_id);	// find the mob corresponding to the boat id
 	if (boat) {
-		if ((boat->GetTarget() == this) && boat->GetHateAmount(this) == 0)	// if the client somehow left while still controlling the boat (and the boat isn't attacking them)
-			boat->SetTarget(0);			// fix it to stop later problems
+		if ((boat->GetTarget() == this) && boat->GetHateAmount(this) == 0) { // if the client somehow left while still controlling the boat (and the boat isn't attacking them)
+			boat->SetTarget(nullptr); // fix it to stop later problems
+		}
 	}
+
 	this->controlling_boat_id = 0;
+
 	return;
 }
 

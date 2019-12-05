@@ -4829,7 +4829,24 @@ void Mob::RemoveNimbusEffect(int effectid)
 }
 
 bool Mob::IsBoat() const {
-	return (race == 72 || race == 73 || race == 114 || race == 404 || race == 550 || race == 551 || race == 552);
+
+	return (
+		race == RACE_SHIP_72 ||
+		race == RACE_LAUNCH_73 ||
+		race == RACE_GHOST_SHIP_114 ||
+		race == RACE_SHIP_404 ||
+		race == RACE_MERCHANT_SHIP_550 ||
+		race == RACE_PIRATE_SHIP_551 ||
+		race == RACE_GHOST_SHIP_552
+	);
+}
+
+bool Mob::IsControllableBoat() const {
+
+	return (
+		race == RACE_BOAT_141 ||
+		race == RACE_ROWBOAT_502
+	);
 }
 
 void Mob::SetBodyType(bodyType new_body, bool overwrite_orig) {
