@@ -128,6 +128,7 @@ Mob::Mob(
 	SetMoving(false);
 	moved            = false;
 	m_RewindLocation = glm::vec3();
+	m_RelativePosition = glm::vec4();
 
 	name[0] = 0;
 	orig_name[0] = 0;
