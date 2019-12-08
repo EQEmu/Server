@@ -3838,8 +3838,9 @@ void Client::Handle_OP_BoardBoat(const EQApplicationPacket *app)
 	boatname[63] = '\0';
 
 	Mob* boat = entity_list.GetMob(boatname);
-	if (!boat || (boat->GetRace() != CONTROLLED_BOAT && boat->GetRace() != 502))
+	if (!boat || !boat->IsControllableBoat()) {
 		return;
+	}
 	controlling_boat_id = boat->GetID();	// set the client's BoatID to show that it's on this boat
 
 	Message(0, "Board boat: %s", boatname);
@@ -4404,7 +4405,36 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 		}
 	return;
 	}
+
+	// At this point, all that's left is a client update.
+	// Pure boat updates, and client contolled mob updates are complete.
+	// This can still be tricky.  If ppu->vehicle_id is set, then the client
+	// position is actually an offset from the boat he is inside.
+
+	bool	on_boat = (ppu->vehicle_id != 0);
+
+	// From this point forward, we need to use a new set of variables for client
+	// position.  If the client is in a boat, we need to add the boat pos and
+	// the client offset together.
 	
+	float	cx = ppu->x_pos;
+	float	cy = ppu->y_pos;
+	float	cz = ppu->z_pos;
+	float 	new_heading = EQ12toFloat(ppu->heading);
+
+	if (on_boat) {
+		Mob *boat = entity_list.GetMob(ppu->vehicle_id);
+		if (boat == 0) {
+			LogError("Can't find boat for client position offset.");
+		}
+		else {
+			cx += boat->GetX();
+			cy += boat->GetY();
+			cz += boat->GetZ();
+			new_heading += boat->GetHeading();
+		}
+	}
+
 	if (IsDraggingCorpse())
 		DragCorpses();
 
@@ -4412,9 +4442,9 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 	float rewind_x_diff = 0;
 	float rewind_y_diff = 0;
 	
-	rewind_x_diff = ppu->x_pos - m_RewindLocation.x;
+	rewind_x_diff = cx - m_RewindLocation.x;
 	rewind_x_diff *= rewind_x_diff;
-	rewind_y_diff = ppu->y_pos - m_RewindLocation.y;
+	rewind_y_diff = cy - m_RewindLocation.y;
 	rewind_y_diff *= rewind_y_diff;
 	
 	/* 
@@ -4432,26 +4462,26 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 	*/
 	
 	if ((rewind_x_diff > 5000) || (rewind_y_diff > 5000))
-		m_RewindLocation = glm::vec3(ppu->x_pos, ppu->y_pos, ppu->z_pos);
+		m_RewindLocation = glm::vec3(cx, cy, cz);
 	
 	if (proximity_timer.Check()) {
-		entity_list.ProcessMove(this, glm::vec3(ppu->x_pos, ppu->y_pos, ppu->z_pos));
+		entity_list.ProcessMove(this, glm::vec3(cx, cy, cz));
 		if (RuleB(TaskSystem, EnableTaskSystem) && RuleB(TaskSystem, EnableTaskProximity))
-			ProcessTaskProximities(ppu->x_pos, ppu->y_pos, ppu->z_pos);
+			ProcessTaskProximities(cx, cy, cz);
 	
-		m_Proximity = glm::vec3(ppu->x_pos, ppu->y_pos, ppu->z_pos);
+		m_Proximity = glm::vec3(cx, cy, cz);
 	}
 	
 	/* Update internal state */
 	m_Delta = glm::vec4(ppu->delta_x, ppu->delta_y, ppu->delta_z, EQ10toFloat(ppu->delta_heading));
 	
-	if (IsTracking() && ((m_Position.x != ppu->x_pos) || (m_Position.y != ppu->y_pos))) {
+	if (IsTracking() && ((m_Position.x != cx) || (m_Position.y != cy))) {
 		if (zone->random.Real(0, 100) < 70)//should be good
 			CheckIncreaseSkill(EQEmu::skills::SkillTracking, nullptr, -20);
 	}
 	
 	/* Break Hide if moving without sneaking and set rewind timer if moved */
-	if (ppu->y_pos != m_Position.y || ppu->x_pos != m_Position.x) {
+	if (cy != m_Position.y || cx != m_Position.x) {
 		if ((hidden || improved_hidden) && !sneaking) {
 			hidden = false;
 			improved_hidden = false;
@@ -4470,7 +4500,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 	}
 	
 	/* Handle client aggro scanning timers NPCs */
-	is_client_moving = (ppu->y_pos == m_Position.y && ppu->x_pos == m_Position.x) ? false : true;
+	is_client_moving = (cy == m_Position.y && cx == m_Position.x) ? false : true;
 
 	if (is_client_moving) {
 		LogDebug("ClientUpdate: Client is moving - scan timer is: [{}]", client_scan_npc_aggro_timer.GetDuration());
@@ -4531,17 +4561,16 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 		SetLastPositionBeforeBulkUpdate(GetPosition());
 	}
 
-	float new_heading = EQ12toFloat(ppu->heading);
 	int32 new_animation = ppu->animation;
 	
 	/* Update internal server position from what the client has sent */
-	m_Position.x = ppu->x_pos;
-	m_Position.y = ppu->y_pos;
-	m_Position.z = ppu->z_pos;
+	m_Position.x = cx;
+	m_Position.y = cy;
+	m_Position.z = cz;
 	
 	/* Visual Debugging */
 	if (RuleB(Character, OPClientUpdateVisualDebug)) {
-		LogDebug("ClientUpdate: ppu x: [{}] y: [{}] z: [{}] h: [{}]", ppu->x_pos, ppu->y_pos, ppu->z_pos, ppu->heading);
+		LogDebug("ClientUpdate: ppu x: [{}] y: [{}] z: [{}] h: [{}]", cx, cy, cz, new_heading);
 		this->SendAppearanceEffect(78, 0, 0, 0, 0);
 		this->SendAppearanceEffect(41, 0, 0, 0, 0);
 	}
@@ -4550,7 +4579,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 	if (is_client_moving || new_heading != m_Position.w || new_animation != animation) {
 	
 		animation = ppu->animation;
-		m_Position.w = EQ12toFloat(ppu->heading);
+		m_Position.w = new_heading;
 	
 		/* Broadcast update to other clients */
 		auto outapp = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
@@ -4913,12 +4942,16 @@ void Client::Handle_OP_ControlBoat(const EQApplicationPacket *app)
 		LogError("Wrong size: OP_ControlBoat, size=[{}], expected [{}]", app->size, sizeof(ControlBoat_Struct));
 		return;
 	}
+
 	ControlBoat_Struct* cbs = (ControlBoat_Struct*)app->pBuffer;
 	Mob* boat = entity_list.GetMob(cbs->boatId);
-	if (boat == 0)
-		return;	// do nothing if the boat isn't valid
+	if (!boat) {
 
-	if (!boat->IsNPC() || (boat->GetRace() != CONTROLLED_BOAT && boat->GetRace() != 502))
+		LogError("Player tried to take control of non-existent boat (char_id: %u, boat_eid: %u)", CharacterID(), cbs->boatId);
+		return;	// do nothing if the boat isn't valid
+	}
+
+	if (!boat->IsNPC() || !boat->IsControllableBoat())
 	{
 		char *hacked_string = nullptr;
 		MakeAnyLenString(&hacked_string, "OP_Control Boat was sent against %s which is of race %u", boat->GetName(), boat->GetRace());
@@ -4929,20 +4962,24 @@ void Client::Handle_OP_ControlBoat(const EQApplicationPacket *app)
 
 	if (cbs->TakeControl) {
 		// this uses the boat's target to indicate who has control of it. It has to check hate to make sure the boat isn't actually attacking anyone.
-		if ((boat->GetTarget() == 0) || (boat->GetTarget() == this && boat->GetHateAmount(this) == 0)) {
+		if (!boat->GetTarget() || (boat->GetTarget() == this && boat->GetHateAmount(this) == 0)) {
 			boat->SetTarget(this);
 		}
 		else {
+
 			this->MessageString(Chat::Red, IN_USE);
 			return;
 		}
 	}
-	else
-		boat->SetTarget(0);
+	else {
+		if (boat->GetTarget() == this) {
+			boat->SetTarget(nullptr);
+		}
+	}
 
-	auto outapp = new EQApplicationPacket(OP_ControlBoat, 0);
-	FastQueuePacket(&outapp);
-	safe_delete(outapp);
+	// client responds better to a packet echo than an empty op
+	QueuePacket(app);
+
 	// have the boat signal itself, so quests can be triggered by boat use
 	boat->CastToNPC()->SignalNPC(0);
 }
@@ -8912,10 +8949,13 @@ void Client::Handle_OP_LeaveBoat(const EQApplicationPacket *app)
 {
 	Mob* boat = entity_list.GetMob(this->controlling_boat_id);	// find the mob corresponding to the boat id
 	if (boat) {
-		if ((boat->GetTarget() == this) && boat->GetHateAmount(this) == 0)	// if the client somehow left while still controlling the boat (and the boat isn't attacking them)
-			boat->SetTarget(0);			// fix it to stop later problems
+		if ((boat->GetTarget() == this) && boat->GetHateAmount(this) == 0) { // if the client somehow left while still controlling the boat (and the boat isn't attacking them)
+			boat->SetTarget(nullptr); // fix it to stop later problems
+		}
 	}
+
 	this->controlling_boat_id = 0;
+
 	return;
 }
 
