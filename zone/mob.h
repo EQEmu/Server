@@ -1188,8 +1188,8 @@ public:
 	int32 GetManaRegen() const;
 
 
-	// Bots HealRotation methods
 #ifdef BOTS
+	// Bots HealRotation methods
 	bool IsHealRotationTarget() { return (m_target_of_heal_rotation.use_count() && m_target_of_heal_rotation.get()); }
 	bool JoinHealRotationTargetPool(std::shared_ptr<HealRotation>* heal_rotation);
 	bool LeaveHealRotationTargetPool();
@@ -1200,6 +1200,11 @@ public:
 	float HealRotationExtendedHealFrequency();
 
 	const std::shared_ptr<HealRotation>* TargetOfHealRotation() const { return &m_target_of_heal_rotation; }
+
+
+	// not Bots HealRotation methods
+	void SetManualFollow(bool flag) { m_manual_follow = flag; }
+	bool GetManualFollow() const { return m_manual_follow; }
 #endif
 
 protected:
@@ -1581,6 +1586,8 @@ private:
 
 #ifdef BOTS
 	std::shared_ptr<HealRotation> m_target_of_heal_rotation;
+
+	bool m_manual_follow;
 #endif
 
 };

@@ -453,6 +453,10 @@ Mob::Mob(
 	PrimaryAggro = false;
 	AssistAggro = false;
 	npc_assist_cap = 0;
+
+#ifdef BOTS
+	m_manual_follow = false;
+#endif
 }
 
 Mob::~Mob()

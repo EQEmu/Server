@@ -1371,7 +1371,7 @@ int bot_command_init(void)
 		bot_command_add("depart", "Orders a bot to open a magical doorway to a specified destination", 0, bot_command_depart) ||
 		bot_command_add("escape", "Orders a bot to send a target group to a safe location within the zone", 0, bot_command_escape) ||
 		bot_command_add("findaliases", "Find available aliases for a bot command", 0, bot_command_find_aliases) ||
-		bot_command_add("follow", "Orders bots to follow a designated target", 0, bot_command_follow) ||
+		bot_command_add("follow", "Orders bots to follow a designated target (option 'chain' auto-links eligible spawned bots)", 0, bot_command_follow) ||
 		bot_command_add("guard", "Orders bots to guard their current positions", 0, bot_command_guard) ||
 		bot_command_add("healrotation", "Lists the available bot heal rotation [subcommands]", 0, bot_command_heal_rotation) ||
 		bot_command_add("healrotationadaptivetargeting", "Enables or disables adaptive targeting within the heal rotation instance", 0, bot_subcommand_heal_rotation_adaptive_targeting) ||
@@ -3213,6 +3213,7 @@ void bot_command_follow(Client *c, const Seperator *sep)
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
 		c->Message(m_usage, "usage: (<friendly_target>) %s ([option: reset]) [actionable: byname | ownergroup | botgroup | namesgroup | healrotation | spawned] ([actionable_name])", sep->arg[0]);
+		c->Message(m_usage, "usage: %s chain", sep->arg[0]);
 		return;
 	}
 	const int ab_mask = ActionableBots::ABM_Type2;
@@ -3222,8 +3223,15 @@ void bot_command_follow(Client *c, const Seperator *sep)
 	int name_arg = 2;
 	Mob* target_mob = nullptr;
 
-	std::string reset_arg = sep->arg[1];
-	if (!reset_arg.compare("reset")) {
+	std::string optional_arg = sep->arg[1];
+	if (!optional_arg.compare("chain")) {
+
+		auto chain_count = helper_bot_follow_option_chain(c);
+		c->Message(m_action, "%i of your bot%s are now chain following", chain_count, (chain_count == 1 ? "" : "s"));
+
+		return;
+	}
+	else if (!optional_arg.compare("reset")) {
 		reset = true;
 		ab_arg = 2;
 		name_arg = 3;
@@ -3250,16 +3258,21 @@ void bot_command_follow(Client *c, const Seperator *sep)
 					bot_iter->SetFollowID(c->GetID());
 				else
 					bot_iter->SetFollowID(my_group->GetLeader()->GetID());
+
+				bot_iter->SetManualFollow(false);
 			}
 			else {
 				if (bot_iter == target_mob)
 					bot_iter->SetFollowID(c->GetID());
 				else
 					bot_iter->SetFollowID(target_mob->GetID());
+
+				bot_iter->SetManualFollow(true);
 			}
 		}
 		else {
 			bot_iter->SetFollowID(0);
+			bot_iter->SetManualFollow(false);
 		}
 		if (!bot_iter->GetPet())
 			continue;
@@ -8620,6 +8633,75 @@ void helper_bot_out_of_combat(Client *bot_owner, Bot *my_bot)
 		break;
 		bot_owner->Message(m_fail, "Undefined bot class for %s", my_bot->GetCleanName());
 	}
+}
+
+int helper_bot_follow_option_chain(Client* bot_owner)
+{
+	if (!bot_owner) {
+		return 0;
+	}
+
+	std::list<Bot*> sbl;
+	MyBots::PopulateSBL_BySpawnedBots(bot_owner, sbl);
+	if (sbl.empty()) {
+		return 0;
+	}
+
+	int chain_follow_count = 0;
+	Mob* followee = bot_owner;
+
+	// only add groups that do not belong to bot_owner
+	std::map<uint32, Group*> bot_group_map;
+	for (auto bot_iter : sbl) {
+
+		if (!bot_iter || bot_iter->GetManualFollow() || bot_iter->GetGroup() == bot_owner->GetGroup()) {
+			continue;
+		}
+
+		Group* bot_group = bot_iter->GetGroup();
+		if (!bot_iter->GetGroup()) {
+			continue;
+		}
+
+		bot_group_map[bot_group->GetID()] = bot_group;
+	}
+
+	std::list<Bot*> bot_member_list;
+	if (bot_owner->GetGroup()) {
+
+		bot_owner->GetGroup()->GetBotList(bot_member_list);
+		for (auto bot_member_iter : bot_member_list) {
+
+			if (!bot_member_iter || bot_member_iter->GetBotOwnerCharacterID() != bot_owner->CharacterID() || bot_member_iter == followee || bot_member_iter->GetManualFollow()) {
+				continue;
+			}
+
+			bot_member_iter->SetFollowID(followee->GetID());
+			followee = bot_member_iter;
+			++chain_follow_count;
+		}
+	}
+
+	for (auto bot_group_iter : bot_group_map) {
+
+		if (!bot_group_iter.second) {
+			continue;
+		}
+
+		bot_group_iter.second->GetBotList(bot_member_list);
+		for (auto bot_member_iter : bot_member_list) {
+
+			if (!bot_member_iter || bot_member_iter->GetBotOwnerCharacterID() != bot_owner->CharacterID() || bot_member_iter == followee || bot_member_iter->GetManualFollow()) {
+				continue;
+			}
+
+			bot_member_iter->SetFollowID(followee->GetID());
+			followee = bot_member_iter;
+			++chain_follow_count;
+		}
+	}
+
+	return chain_follow_count;
 }
 
 bool helper_cast_standard_spell(Bot* casting_bot, Mob* target_mob, int spell_id, bool annouce_cast, uint32* dont_root_before)

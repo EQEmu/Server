@@ -672,6 +672,7 @@ void helper_bot_appearance_form_final(Client *bot_owner, Bot *my_bot);
 void helper_bot_appearance_form_update(Bot *my_bot);
 uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_class, uint16 bot_race, uint8 bot_gender);
 void helper_bot_out_of_combat(Client *bot_owner, Bot *my_bot);
+int helper_bot_follow_option_chain(Client *bot_owner);
 bool helper_cast_standard_spell(Bot* casting_bot, Mob* target_mob, int spell_id, bool annouce_cast = true, uint32* dont_root_before = nullptr);
 bool helper_command_disabled(Client *bot_owner, bool rule_value, const char *command);
 bool helper_command_alias_fail(Client *bot_owner, const char* command_handler, const char *alias, const char *command);
