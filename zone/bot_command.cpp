@@ -1403,6 +1403,7 @@ int bot_command_init(void)
 		bot_command_add("inventoryremove", "Removes an item from a bot's inventory", 0, bot_subcommand_inventory_remove) ||
 		bot_command_add("inventorywindow", "Displays all items in a bot's inventory in a pop-up window", 0, bot_subcommand_inventory_window) ||
 		bot_command_add("invisibility", "Orders a bot to cast a cloak of invisibility, or allow them to be seen", 0, bot_command_invisibility) ||
+		bot_command_add("itemuse", "Elicits a report from spawned bots that can use the item on your cursor (option 'empty' yields only empty slots)", 0, bot_command_item_use) ||
 		bot_command_add("levitation", "Orders a bot to cast a levitation spell", 0, bot_command_levitation) ||
 		bot_command_add("lull", "Orders a bot to cast a pacification spell", 0, bot_command_lull) ||
 		bot_command_add("mesmerize", "Orders a bot to cast a mesmerization spell", 0, bot_command_mesmerize) ||
@@ -3576,6 +3577,113 @@ void bot_command_invisibility(Client *c, const Seperator *sep)
 	}
 	
 	helper_no_available_bots(c, my_bot);
+}
+
+void bot_command_item_use(Client* c, const Seperator* sep)
+{
+	if (helper_is_help_or_usage(sep->arg[1])) {
+
+		c->Message(m_usage, "usage: %s ([empty])", sep->arg[0]);
+		return;
+	}
+
+	bool empty_only = false;
+	std::string arg1 = sep->arg[1];
+	if (arg1.compare("empty") == 0) {
+		empty_only = true;
+	}
+
+	const auto item_instance = c->GetInv().GetItem(EQEmu::invslot::slotCursor);
+	if (!item_instance) {
+
+		c->Message(m_fail, "No item found on cursor!");
+		return;
+	}
+
+	auto item_data = item_instance->GetItem();
+	if (!item_data) {
+
+		c->Message(m_fail, "No data found for cursor item!");
+		return;
+	}
+
+	if (item_data->ItemClass != EQEmu::item::ItemClassCommon || item_data->Slots == 0) {
+
+		c->Message(m_fail, "'%s' is not an equipable item!", item_data->Name);
+		return;
+	}
+
+	std::list<int16> equipable_slot_list;
+	for (int16 equipable_slot = EQEmu::invslot::EQUIPMENT_BEGIN; equipable_slot <= EQEmu::invslot::EQUIPMENT_END; ++equipable_slot) {
+		if (item_data->Slots & (1 << equipable_slot)) {
+			equipable_slot_list.push_back(equipable_slot);
+		}
+	}
+
+	std::string msg;
+	std::string text_link;
+
+	EQEmu::SayLinkEngine linker;
+	linker.SetLinkType(EQEmu::saylink::SayLinkItemInst);
+
+	std::list<Bot*> sbl;
+	MyBots::PopulateSBL_BySpawnedBots(c, sbl);
+
+	for (auto bot_iter : sbl) {
+
+		if (!bot_iter) {
+			continue;
+		}
+
+		if (((~item_data->Races) & GetPlayerRaceBit(bot_iter->GetRace())) || ((~item_data->Classes) & GetPlayerClassBit(bot_iter->GetClass()))) {
+			continue;
+		}
+
+		msg = StringFormat("%cinventorygive byname %s", BOT_COMMAND_CHAR, bot_iter->GetCleanName());
+		text_link = bot_iter->CreateSayLink(c, msg.c_str(), bot_iter->GetCleanName());
+		
+		for (auto slot_iter : equipable_slot_list) {
+
+			auto equipped_item = bot_iter->GetBotInv()[slot_iter];
+			if (empty_only) {
+				if (!equipped_item) {
+					
+					c->Message(
+						Chat::Say,
+						"[%s] says, 'I can use that for my %s!",
+						text_link.c_str(),
+						EQEmu::invslot::GetInvPossessionsSlotName(slot_iter)
+					);
+					bot_iter->DoAnim(29);
+				}
+			}
+			else {
+				if (equipped_item) {
+
+					linker.SetItemInst(equipped_item);
+					
+					c->Message(
+						Chat::Say,
+						"[%s] says, 'I can use that for my %s! (replaces: [%s])",
+						text_link.c_str(),
+						EQEmu::invslot::GetInvPossessionsSlotName(slot_iter),
+						linker.GenerateLink().c_str()
+					);
+					bot_iter->DoAnim(29);
+				}
+				else {
+
+					c->Message(
+						Chat::Say,
+						"[%s] says, 'I can use that for my %s!",
+						text_link.c_str(),
+						EQEmu::invslot::GetInvPossessionsSlotName(slot_iter)
+					);
+					bot_iter->DoAnim(29);
+				}
+			}
+		}
+	}
 }
 
 void bot_command_levitation(Client *c, const Seperator *sep)

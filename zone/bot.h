@@ -383,6 +383,7 @@ public:
 	void EquipBot(std::string* errorMessage);
 	bool CheckLoreConflict(const EQEmu::ItemData* item);
 	virtual void UpdateEquipmentLight() { m_Light.Type[EQEmu::lightsource::LightEquipment] = m_inv.FindBrightestLightType(); m_Light.Level[EQEmu::lightsource::LightEquipment] = EQEmu::lightsource::TypeToLevel(m_Light.Type[EQEmu::lightsource::LightEquipment]); }
+	const EQEmu::InventoryProfile& GetBotInv() const { return m_inv; }
 
 	// Static Class Methods	
 	//static void DestroyBotRaidObjects(Client* client);	// Can be removed after bot raids are dumped

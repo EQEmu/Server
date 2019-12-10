@@ -573,6 +573,7 @@ void bot_command_hold(Client *c, const Seperator *sep);
 void bot_command_identify(Client *c, const Seperator *sep);
 void bot_command_inventory(Client *c, const Seperator *sep);
 void bot_command_invisibility(Client *c, const Seperator *sep);
+void bot_command_item_use(Client *c, const Seperator *sep);
 void bot_command_levitation(Client *c, const Seperator *sep);
 void bot_command_lull(Client *c, const Seperator *sep);
 void bot_command_mesmerize(Client *c, const Seperator *sep);
