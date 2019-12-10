@@ -2456,15 +2456,16 @@ void Bot::SetHoldMode() {
 }
 
 // AI Processing for the Bot object
-void Bot::AI_Process()
-{
-	constexpr float MAX_CASTER_DISTANCE[PLAYER_CLASS_COUNT] = {
-		0, (34 * 34), (24 * 24), (28 * 28), (26 * 26), (42 * 42), 0, 0, 0, (38 * 38), (54 * 54), (48 * 48), (52 * 52), (50 * 50), (30 * 30), 0
-	//  W      C          P          R          S          D      M  B  R      S          N          W          M          E          B      B
-	//  A      L          A          N          H          R      N  R  O      H          E          I          A          N          S      E
-	//  R      R          L          G          D          U      K  D  G      M          C          Z          G          C          T      R
+
+constexpr float MAX_CASTER_DISTANCE[PLAYER_CLASS_COUNT] = {
+	0, (34 * 34), (24 * 24), (28 * 28), (26 * 26), (42 * 42), 0, 0, 0, (38 * 38), (54 * 54), (48 * 48), (52 * 52), (50 * 50), (30 * 30), 0
+//  W      C          P          R          S          D      M  B  R      S          N          W          M          E          B      B
+//  A      L          A          N          H          R      N  R  O      H          E          I          A          N          S      E
+//  R      R          L          G          D          U      K  D  G      M          C          Z          G          C          T      R
 	};
 
+void Bot::AI_Process()
+{
 #define TEST_COMBATANTS() if (!GetTarget() || GetAppearance() == eaDead) { return; }
 #define PULLING_BOT (GetPullingFlag() || GetReturningFlag())
 #define NOT_PULLING_BOT (!GetPullingFlag() && !GetReturningFlag())

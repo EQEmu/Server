@@ -3227,7 +3227,7 @@ void bot_command_follow(Client *c, const Seperator *sep)
 	if (!optional_arg.compare("chain")) {
 
 		auto chain_count = helper_bot_follow_option_chain(c);
-		c->Message(m_action, "%i of your bot%s are now chain following", chain_count, (chain_count == 1 ? "" : "s"));
+		c->Message(m_action, "%i of your bots %s now chain following you", chain_count, (chain_count == 1 ? "is" : "are"));
 
 		return;
 	}
