@@ -8863,6 +8863,10 @@ void Bot::CalcBotStats(bool showtext) {
 	if(GetBotOwner()->GetLevel() != GetLevel())
 		SetLevel(GetBotOwner()->GetLevel());
 
+	for (int sindex = 0; sindex <= EQEmu::skills::HIGHEST_SKILL; ++sindex) {
+		skills[sindex] = database.GetSkillCap(GetClass(), (EQEmu::skills::SkillType)sindex, GetLevel());
+	}
+
 	LoadAAs();
 	GenerateSpecialAttacks();
 

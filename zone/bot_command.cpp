@@ -3644,43 +3644,35 @@ void bot_command_item_use(Client* c, const Seperator* sep)
 		
 		for (auto slot_iter : equipable_slot_list) {
 
-			auto equipped_item = bot_iter->GetBotInv()[slot_iter];
-			if (empty_only) {
-				if (!equipped_item) {
-					
-					c->Message(
-						Chat::Say,
-						"[%s] says, 'I can use that for my %s!",
-						text_link.c_str(),
-						EQEmu::invslot::GetInvPossessionsSlotName(slot_iter)
-					);
-					bot_iter->DoAnim(29);
-				}
+			// needs more failure criteria - this should cover the bulk for now
+			if (slot_iter == EQEmu::invslot::slotSecondary && item_data->Damage && !bot_iter->CanThisClassDualWield()) {
+				continue;
 			}
-			else {
-				if (equipped_item) {
 
-					linker.SetItemInst(equipped_item);
-					
-					c->Message(
-						Chat::Say,
-						"[%s] says, 'I can use that for my %s! (replaces: [%s])",
-						text_link.c_str(),
-						EQEmu::invslot::GetInvPossessionsSlotName(slot_iter),
-						linker.GenerateLink().c_str()
-					);
-					bot_iter->DoAnim(29);
-				}
-				else {
+			auto equipped_item = bot_iter->GetBotInv()[slot_iter];
 
-					c->Message(
-						Chat::Say,
-						"[%s] says, 'I can use that for my %s!",
-						text_link.c_str(),
-						EQEmu::invslot::GetInvPossessionsSlotName(slot_iter)
-					);
-					bot_iter->DoAnim(29);
-				}
+			if (equipped_item && !empty_only) {
+
+				linker.SetItemInst(equipped_item);
+
+				c->Message(
+					Chat::Say,
+					"[%s] says, 'I can use that for my %s! (replaces: [%s])'",
+					text_link.c_str(),
+					EQEmu::invslot::GetInvPossessionsSlotName(slot_iter),
+					linker.GenerateLink().c_str()
+				);
+				bot_iter->DoAnim(29);
+			}
+			else if (!equipped_item) {
+
+				c->Message(
+					Chat::Say,
+					"[%s] says, 'I can use that for my %s!'",
+					text_link.c_str(),
+					EQEmu::invslot::GetInvPossessionsSlotName(slot_iter)
+				);
+				bot_iter->DoAnim(29);
 			}
 		}
 	}

@@ -307,16 +307,18 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	// some overrides -- really we need to be able to set skills for mobs in the DB
 	// There are some known low level SHM/BST pets that do not follow this, which supports
 	// the theory of needing to be able to set skills for each mob separately
-	if (moblevel > 50) {
-		skills[EQEmu::skills::SkillDoubleAttack] = 250;
-		skills[EQEmu::skills::SkillDualWield]    = 250;
-	}
-	else if (moblevel > 3) {
-		skills[EQEmu::skills::SkillDoubleAttack] = moblevel * 5;
-		skills[EQEmu::skills::SkillDualWield]    = skills[EQEmu::skills::SkillDoubleAttack];
-	}
-	else {
-		skills[EQEmu::skills::SkillDoubleAttack] = moblevel * 5;
+	if (!IsBot()) {
+		if (moblevel > 50) {
+			skills[EQEmu::skills::SkillDoubleAttack] = 250;
+			skills[EQEmu::skills::SkillDualWield] = 250;
+		}
+		else if (moblevel > 3) {
+			skills[EQEmu::skills::SkillDoubleAttack] = moblevel * 5;
+			skills[EQEmu::skills::SkillDualWield] = skills[EQEmu::skills::SkillDoubleAttack];
+		}
+		else {
+			skills[EQEmu::skills::SkillDoubleAttack] = moblevel * 5;
+		}
 	}
 
 	ldon_trapped       = false;
