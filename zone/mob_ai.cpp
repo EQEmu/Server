@@ -1138,6 +1138,17 @@ void Mob::AI_Process() {
 			return;
 		}
 
+		if (target->IsMezzed() && IsPet()) {
+
+			auto pet_owner = GetOwner();
+			if (pet_owner && pet_owner->IsClient()) {
+				pet_owner->MessageString(Chat::NPCQuestSay, CANNOT_WAKE, GetCleanName(), target->GetCleanName());
+			}
+
+			RemoveFromHateList(target);
+			return;
+		}
+
 #ifdef BOTS
 		if (IsPet() && GetOwner() && GetOwner()->IsBot() && target == GetOwner())
 		{
