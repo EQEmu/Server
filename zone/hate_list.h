@@ -41,11 +41,11 @@ public:
 	HateList();
 	~HateList();
 
-	Mob *GetClosestEntOnHateList(Mob *hater);
-	Mob *GetDamageTopOnHateList(Mob *hater);
-	Mob *GetEntWithMostHateOnList(Mob *center, Mob *skip = nullptr);
-	Mob *GetRandomEntOnHateList();
-	Mob *GetEntWithMostHateOnList();
+	Mob *GetClosestEntOnHateList(Mob *hater, bool skip_mezzed = false);
+	Mob *GetDamageTopOnHateList(Mob *hater); // didn't add 'skip_mezzed' due to calls being in ::Death()
+	Mob *GetEntWithMostHateOnList(Mob *center, Mob *skip = nullptr, bool skip_mezzed = false);
+	Mob *GetRandomEntOnHateList(bool skip_mezzed = false);
+	Mob *GetEntWithMostHateOnList(bool skip_mezzed = false);
 	Mob *GetEscapingEntOnHateList(); // returns first eligble entity
 	Mob *GetEscapingEntOnHateList(Mob *center, float range = 0.0f, bool first = false);
 
