@@ -5758,7 +5758,7 @@ void bot_subcommand_bot_list(Client *c, const Seperator *sep)
 		}
 		Bot * botCheckNotOnline = entity_list.GetBotByBotName(bots_iter.Name);
 		std::string	botspawn_saylink = StringFormat("^botspawn %s", bots_iter.Name);
-		c->Message(Chat::White, "%s is a level %u %s %s %s who is owned by %s",
+		c->Message(Chat::White, "[%s] is a level %u %s %s %s who is owned by %s",
 			((c->CharacterID() == bots_iter.Owner_ID) && (!botCheckNotOnline) ? (EQEmu::SayLinkEngine::GenerateQuestSaylink(botspawn_saylink, false, bots_iter.Name).c_str()) : (bots_iter.Name)),
 			bots_iter.Level,
 			Bot::RaceIdToString(bots_iter.Race).c_str(),

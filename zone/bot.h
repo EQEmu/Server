@@ -693,6 +693,7 @@ private:
 	
 	Timer m_evade_timer; // can be moved to pTimers at some point
 	Timer m_alt_combat_hate_timer;
+	Timer m_auto_defend_timer;
 	//Timer m_combat_jitter_timer;
 	//bool m_combat_jitter_flag;
 	bool m_guard_flag;
