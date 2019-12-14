@@ -433,15 +433,61 @@ void Bot::SetBotSpellID(uint32 newSpellID) {
 }
 
 void  Bot::SetSurname(std::string bot_surname) {
+
 	_surname = bot_surname.substr(0, 31);
+
+	if (spawned) {
+
+		auto outapp = new EQApplicationPacket(OP_GMLastName, sizeof(GMLastName_Struct));
+		GMLastName_Struct* gmn = (GMLastName_Struct*)outapp->pBuffer;
+
+		strcpy(gmn->name, GetCleanName());
+		strcpy(gmn->gmname, GetCleanName());
+		strcpy(gmn->lastname, GetSurname().c_str());
+		gmn->unknown[0] = 1;
+		gmn->unknown[1] = 1;
+		gmn->unknown[2] = 1;
+		gmn->unknown[3] = 1;
+
+		entity_list.QueueClients(this, outapp);
+		safe_delete(outapp);
+	}
 }
 
 void  Bot::SetTitle(std::string bot_title) {
-		_title = bot_title.substr(0, 31);
+
+	_title = bot_title.substr(0, 31);
+
+	if (spawned) {
+
+		auto outapp = new EQApplicationPacket(OP_SetTitleReply, sizeof(SetTitleReply_Struct));
+		SetTitleReply_Struct* strs = (SetTitleReply_Struct*)outapp->pBuffer;
+
+		strs->is_suffix = 0;
+		strn0cpy(strs->title, _title.c_str(), sizeof(strs->title));
+		strs->entity_id = GetID();
+
+		entity_list.QueueClients(this, outapp, false);
+		safe_delete(outapp);
+	}
 }
 
 void  Bot::SetSuffix(std::string bot_suffix) {
-		_suffix = bot_suffix.substr(0, 31);
+
+	_suffix = bot_suffix.substr(0, 31);
+
+	if (spawned) {
+
+		auto outapp = new EQApplicationPacket(OP_SetTitleReply, sizeof(SetTitleReply_Struct));
+		SetTitleReply_Struct* strs = (SetTitleReply_Struct*)outapp->pBuffer;
+
+		strs->is_suffix = 1;
+		strn0cpy(strs->title, _suffix.c_str(), sizeof(strs->title));
+		strs->entity_id = GetID();
+
+		entity_list.QueueClients(this, outapp, false);
+		safe_delete(outapp);
+	}
 }
 
 uint32 Bot::GetBotArcheryRange() {
