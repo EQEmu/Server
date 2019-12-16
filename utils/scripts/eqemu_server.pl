@@ -1821,6 +1821,8 @@ sub quest_files_fetch {
     if ($fc == 0) {
         print "[Update] No Quest Updates found... \n\n";
     }
+	
+	rmtree("updates_staged/");
 }
 
 sub lua_modules_fetch {
