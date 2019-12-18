@@ -2481,7 +2481,7 @@ void Bot::SetTarget(Mob* mob) {
 }
 
 void Bot::SetStopMeleeLevel(uint8 level) {
-	if (IsCasterClass(GetClass()) || IsSpellFighterClass(GetClass()))
+	if (IsCasterClass(GetClass()) || IsHybridClass(GetClass()))
 		_stopMeleeLevel = level;
 	else
 		_stopMeleeLevel = 255;
@@ -2506,10 +2506,10 @@ void Bot::SetHoldMode() {
 // AI Processing for the Bot object
 
 constexpr float MAX_CASTER_DISTANCE[PLAYER_CLASS_COUNT] = {
-	0, (34 * 34), (24 * 24), (28 * 28), (26 * 26), (42 * 42), 0, 0, 0, (38 * 38), (54 * 54), (48 * 48), (52 * 52), (50 * 50), (30 * 30), 0
-//  W      C          P          R          S          D      M  B  R      S          N          W          M          E          B      B
-//  A      L          A          N          H          R      N  R  O      H          E          I          A          N          S      E
-//  R      R          L          G          D          U      K  D  G      M          C          Z          G          C          T      R
+    0, (34 * 34), (24 * 24), (28 * 28), (26 * 26), (42 * 42), 0, (30 * 30), 0, (38 * 38), (54 * 54), (48 * 48), (52 * 52), (50 * 50), (32 * 32), 0
+//  W      C          P          R          S          D      M      B      R      S          N          W          M          E          B      B
+//  A      L          A          N          H          R      N      R      O      H          E          I          A          N          S      E
+//  R      R          L          G          D          U      K      D      G      M          C          Z          G          C          T      R
 };
 
 void Bot::AI_Process()
@@ -3390,7 +3390,7 @@ void Bot::AI_Process()
 					BotRangedAttack(tar);
 				}
 			}
-			else if (!IsBotArcher() && (IsBotNonSpellFighter() || GetLevel() < GetStopMeleeLevel())) {
+			else if (!IsBotArcher() && GetLevel() < GetStopMeleeLevel()) {
 
 				// We can't fight if we don't have a target, are stun/mezzed or dead..
 				// Stop attacking if the target is enraged

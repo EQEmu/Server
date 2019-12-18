@@ -6145,7 +6145,7 @@ void bot_subcommand_bot_stop_melee_level(Client *c, const Seperator *sep)
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
 		c->Message(m_usage, "usage: <target_bot> %s [current | reset | sync | value: 0-255]", sep->arg[0]);
-		c->Message(m_note, "note: Only caster and spell-casting fighter class bots may be modified");
+		c->Message(m_note, "note: Only caster or hybrid class bots may be modified");
 		c->Message(m_note, "note: Use [reset] to set stop melee level to server rule");
 		c->Message(m_note, "note: Use [sync] to set stop melee level to current bot level");
 		return;
@@ -6156,8 +6156,8 @@ void bot_subcommand_bot_stop_melee_level(Client *c, const Seperator *sep)
 		c->Message(m_fail, "You must <target> a bot that you own to use this command");
 		return;
 	}
-	if (!IsCasterClass(my_bot->GetClass()) && !IsSpellFighterClass(my_bot->GetClass())) {
-		c->Message(m_fail, "You must <target> a caster or spell-casting fighter class bot to use this command");
+	if (!IsCasterClass(my_bot->GetClass()) && !IsHybridClass(my_bot->GetClass())) {
+		c->Message(m_fail, "You must <target> a caster or hybrid class bot to use this command");
 		return;
 	}
 

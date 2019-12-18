@@ -1822,7 +1822,7 @@ sub quest_files_fetch {
         print "[Update] No Quest Updates found... \n\n";
     }
 	
-	rmtree("updates_staged/");
+    rmtree("updates_staged/");
 }
 
 sub lua_modules_fetch {

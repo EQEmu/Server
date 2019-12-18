@@ -573,6 +573,20 @@ bool IsNonSpellFighterClass(uint8 class_id)
 	}
 }
 
+bool IsHybridClass(uint8 class_id)
+{
+	switch (class_id) {
+	case PALADIN:
+	case RANGER:
+	case SHADOWKNIGHT:
+	case BARD:
+	case BEASTLORD:
+		return true;
+	default:
+		return false;
+	}
+}
+
 bool IsCasterClass(uint8 class_id)
 {
 	switch (class_id) {
