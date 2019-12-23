@@ -195,6 +195,9 @@ int main(int argc, char **argv)
 		LoginserverWebserver::RegisterRoutes(api);
 	}
 
+	/**
+	 * Command handler
+	 */
 	if (argc > 1) {
 		LogSys.LoadLogSettingsDefaults();
 		LogSys.log_settings[Logs::Debug].log_to_console      = static_cast<uint8>(Logs::General);

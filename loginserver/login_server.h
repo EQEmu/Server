@@ -38,6 +38,7 @@
 struct LoginServer
 {
 public:
+
 	LoginServer() : db(nullptr), server_manager(nullptr) {
 
 	}
