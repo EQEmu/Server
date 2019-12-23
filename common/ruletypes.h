@@ -157,6 +157,7 @@ RULE_BOOL(Character, OPClientUpdateVisualDebug, false, "Shows a pulse and forwar
 RULE_BOOL(Character, AllowCrossClassTrainers, false, "")
 RULE_BOOL(Character, PetsUseReagents, true, "Pets use reagent on spells")
 RULE_BOOL(Character, DismountWater, true, "Dismount horses when entering water")
+RULE_BOOL(Character, UseNoJunkFishing, false, "Disregards junk items when fishing")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)
