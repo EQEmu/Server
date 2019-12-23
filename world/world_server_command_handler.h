@@ -26,6 +26,7 @@
 
 namespace WorldserverCommandHandler {
 	void CommandHandler(int argc, char **argv);
+	void Version(int argc, char **argv, argh::parser &cmd, std::string &description);
 	void DatabaseVersion(int argc, char **argv, argh::parser &cmd, std::string &description);
 	void DatabaseSetAccountStatus(int argc, char **argv, argh::parser &cmd, std::string &description);
 };

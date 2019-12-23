@@ -46,7 +46,8 @@ namespace WorldserverCommandHandler {
 		/**
 		 * Register commands
 		 */
-		function_map["database:version"] = &WorldserverCommandHandler::DatabaseVersion;
+		function_map["world:version"]               = &WorldserverCommandHandler::Version;
+		function_map["database:version"]            = &WorldserverCommandHandler::DatabaseVersion;
 		function_map["database:set-account-status"] = &WorldserverCommandHandler::DatabaseSetAccountStatus;
 
 		EQEmuCommand::HandleMenu(function_map, cmd, argc, argv);
@@ -70,6 +71,34 @@ namespace WorldserverCommandHandler {
 
 		database_version["database_version"]      = CURRENT_BINARY_DATABASE_VERSION;
 		database_version["bots_database_version"] = CURRENT_BINARY_BOTS_DATABASE_VERSION;
+
+		std::stringstream payload;
+		payload << database_version;
+
+		std::cout << payload.str() << std::endl;
+	}
+
+	/**
+	 * @param argc
+	 * @param argv
+	 * @param cmd
+	 * @param description
+	 */
+	void Version(int argc, char **argv, argh::parser &cmd, std::string &description)
+	{
+		description = "Shows server version";
+
+		if (cmd[{"-h", "--help"}]) {
+			return;
+		}
+
+		Json::Value database_version;
+
+		database_version["bots_database_version"] = CURRENT_BINARY_BOTS_DATABASE_VERSION;
+		database_version["compile_date"]          = COMPILE_DATE;
+		database_version["compile_time"]          = COMPILE_TIME;
+		database_version["database_version"]      = CURRENT_BINARY_DATABASE_VERSION;
+		database_version["server_version"]        = CURRENT_VERSION;
 
 		std::stringstream payload;
 		payload << database_version;
