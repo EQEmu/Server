@@ -84,20 +84,22 @@ namespace EQEmuCommand {
 			}
 
 			std::string options_string;
-			for (auto &opt : options) {
+			for (auto   &opt : options) {
 				options_string += "  " + opt + "\n";
 			}
 
-			std::stringstream str;
-			str << termcolor::yellow << "\nCommand" << termcolor::reset << "\n\n";
+			std::stringstream command_string;
 
-			std::cout << fmt::format(
-				"{0}{1}{2}\n\nOptions\n{3}",
-				str.str(),
-				argv[1],
-				arguments_string,
-				options_string
-			) << std::endl;
+			command_string <<
+						   termcolor::colorize <<
+						   termcolor::yellow <<
+						   "\nCommand" <<
+						   termcolor::reset << "\n\n" <<
+						   termcolor::green << argv[1] << arguments_string << termcolor::reset << "\n" <<
+						   termcolor::yellow << (!options_string.empty() ? "\nOptions\n\n" : "") <<
+						   termcolor::reset << termcolor::cyan << options_string << termcolor::reset;
+
+			std::cout << command_string.str() << std::endl;
 
 			exit(1);
 		}
