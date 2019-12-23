@@ -167,11 +167,32 @@ namespace WorldserverCommandHandler {
 			server_tables_json.append(table);
 		}
 
+		Json::Value              login_tables_json;
+		std::vector<std::string> login_tables   = DatabaseSchema::GetLoginTables();
+		for (const auto          &table : login_tables) {
+			login_tables_json.append(table);
+		}
+
+		Json::Value              state_tables_json;
+		std::vector<std::string> state_tables   = DatabaseSchema::GetStateTables();
+		for (const auto          &table : state_tables) {
+			state_tables_json.append(table);
+		}
+
+		Json::Value              version_tables_json;
+		std::vector<std::string> version_tables = DatabaseSchema::GetVersionTables();
+		for (const auto          &table : version_tables) {
+			version_tables_json.append(table);
+		}
+
 		Json::Value schema;
 
 		schema["server_tables"]  = server_tables_json;
 		schema["player_tables"]  = player_tables_json;
 		schema["content_tables"] = content_tables_json;
+		schema["login_tables"]   = login_tables_json;
+		schema["state_tables"]   = state_tables_json;
+		schema["version_tables"] = version_tables_json;
 
 		std::stringstream payload;
 		payload << schema;

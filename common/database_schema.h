@@ -33,7 +33,13 @@ namespace DatabaseSchema {
 	static std::vector<std::string> GetPlayerTables()
 	{
 		std::vector<std::string> tables = {
+			"account",
+			"account_ip",
+			"account_flags",
+			"account_rewards",
+			"adventure_details",
 			"adventure_stats",
+			"buyer",
 			"char_recipe_list",
 			"character_activities",
 			"character_alt_currency",
@@ -55,15 +61,21 @@ namespace DatabaseSchema {
 			"character_material",
 			"character_memmed_spells",
 			"character_pet_buffs",
+			"character_pet_info",
 			"character_pet_inventory",
 			"character_potionbelt",
 			"character_skills",
 			"character_spells",
+			"character_tasks",
 			"character_tribute",
 			"completed_tasks",
 			"faction_values",
 			"friends",
+			"guild_bank",
 			"guild_members",
+			"guild_ranks",
+			"guild_relations",
+			"guilds",
 			"instance_list_player",
 			"inventory",
 			"inventory_snapshots",
@@ -71,8 +83,11 @@ namespace DatabaseSchema {
 			"mail",
 			"player_titlesets",
 			"quest_globals",
+			"sharedbank",
 			"timers",
 			"titles",
+			"trader",
+			"trader_audit",
 			"zone_flags"
 		};
 
@@ -185,15 +200,90 @@ namespace DatabaseSchema {
 	static std::vector<std::string> GetServerTables()
 	{
 		std::vector<std::string> tables = {
+			"bugs",
 			"bug_reports",
+			"command_settings",
 			"db_str",
+			"discovered_items",
 			"eqtime",
+			"eventlog",
+			"gm_ips",
+			"hackers",
+			"ip_exemptions",
+			"launcher",
+			"launcher_zones",
 			"level_exp_mods",
 			"logsys_categories",
 			"name_filter",
 			"perl_event_export_settings",
+			"petitions",
 			"profanity_list",
-			"saylink"
+			"reports",
+			"rule_sets",
+			"rule_values",
+			"saylink",
+			"variables",
+		};
+
+		return tables;
+	}
+
+	/**
+	 * Gets state tables
+	 * Tables that keep track of server state
+	 *
+	 * @return
+	 */
+	static std::vector<std::string> GetStateTables()
+	{
+		std::vector<std::string> tables = {
+			"adventure_members",
+			"chatchannels",
+			"group_id",
+			"group_leaders",
+			"item_tick",
+			"lfguild",
+			"merchantlist_temp",
+			"object_contents",
+			"raid_details",
+			"raid_leaders",
+			"raid_members",
+			"respawn_times",
+			"spell_buckets",
+			"spell_globals",
+		};
+
+		return tables;
+	}
+
+	/**
+	 * Gets login tables
+	 *
+	 * @return
+	 */
+	static std::vector<std::string> GetLoginTables()
+	{
+		std::vector<std::string> tables = {
+			"login_accounts",
+			"login_api_tokens",
+			"login_server_admins",
+			"login_server_list_types",
+			"login_world_servers",
+		};
+
+		return tables;
+	}
+
+	/**
+	 * Gets login tables
+	 *
+	 * @return
+	 */
+	static std::vector<std::string> GetVersionTables()
+	{
+		std::vector<std::string> tables = {
+			"db_version",
+			"inventory_versions",
 		};
 
 		return tables;
