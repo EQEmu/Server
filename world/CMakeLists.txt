@@ -14,7 +14,7 @@ SET(world_sources
 	lfplist.cpp
 	login_server.cpp
 	login_server_list.cpp
-	net.cpp
+	main.cpp
 	queryserv.cpp
 	ucs.cpp
 	web_interface.cpp

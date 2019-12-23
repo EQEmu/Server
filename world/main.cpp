@@ -1,20 +1,23 @@
-/*	EQEMu: Everquest Server Emulator
-Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
+/**
+ * EQEmulator: Everquest Server Emulator
+ * Copyright (C) 2001-2019 EQEmulator Development Team (https://github.com/EQEmu/Server)
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; version 2 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY except by those people which sell it, which
+ * are required to give you total support for your newly bought product;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY except by those people which sell it, which
-are required to give you total support for your newly bought product;
-without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-*/
 #include "../common/global_define.h"
 
 #include <iostream>
@@ -189,6 +192,13 @@ void RegisterLoginservers()
 	}
 }
 
+/**
+ * World process entrypoint
+ * 
+ * @param argc
+ * @param argv
+ * @return
+ */
 int main(int argc, char** argv) {
 	RegisterExecutablePlatform(ExePlatformWorld);
 	LogSys.LoadLogSettingsDefaults();
@@ -268,39 +278,7 @@ int main(int argc, char** argv) {
 	 */
 	bool ignore_db = false;
 	if (argc >= 2) {
-		std::string tmp;
-		if (strcasecmp(argv[1], "help") == 0 || strcasecmp(argv[1], "?") == 0 || strcasecmp(argv[1], "/?") == 0 || strcasecmp(argv[1], "-?") == 0 || strcasecmp(argv[1], "-h") == 0 || strcasecmp(argv[1], "-help") == 0) {
-			std::cout << "Worldserver command line commands:" << std::endl;
-			std::cout << "adduser username password flag    - adds a user account" << std::endl;
-			std::cout << "flag username flag    - sets GM flag on the account" << std::endl;
-			std::cout << "startzone zoneshortname    - sets the starting zone" << std::endl;
-			std::cout << "-holdzones    - reboots lost zones" << std::endl;
-			return 0;
-		}
-		else if (strcasecmp(argv[1], "-holdzones") == 0) {
-			std::cout << "Reboot Zones mode ON" << std::endl;
-			holdzones = true;
-		}
-		else if (strcasecmp(argv[1], "flag") == 0) {
-			if (argc == 4) {
-				if (Seperator::IsNumber(argv[3])) {
-					if (atoi(argv[3]) >= 0 && atoi(argv[3]) <= 255) {
-						if (database.SetAccountStatus(argv[2], atoi(argv[3]))) {
-							std::cout << "Account flagged: Username='" << argv[2] << "', status=" << argv[3] << std::endl;
-							return 0;
-						}
-						else {
-							std::cerr << "database.SetAccountStatus failed." << std::endl;
-							return 1;
-						}
-					}
-				}
-			}
-			std::cout << "Usage: world flag username flag" << std::endl;
-			std::cout << "flag = 0-200" << std::endl;
-			return 0;
-		}
-		else if (strcasecmp(argv[1], "ignore_db") == 0) {
+		if (strcasecmp(argv[1], "ignore_db") == 0) {
 			ignore_db = true;
 		}
 		else {
@@ -398,13 +376,6 @@ int main(int argc, char** argv) {
 
 	LogInfo("Loading launcher list");
 	launcher_list.LoadList();
-
-	std::string tmp;
-	database.GetVariable("holdzones", tmp);
-	if (tmp.length() == 1 && tmp[0] == '1') {
-		holdzones = true;
-	}
-	LogInfo("Reboot zone modes [{}]", holdzones ? "ON" : "OFF");
 
 	LogInfo("Deleted [{}] stale player corpses from database", database.DeleteStalePlayerCorpses());
 
