@@ -293,6 +293,37 @@ bool Database::SetAccountStatus(const char* name, int16 status) {
 	return true;
 }
 
+/**
+ * @param account_name
+ * @param status
+ * @return
+ */
+bool Database::SetAccountStatus(const std::string& account_name, int16 status)
+{
+	LogInfo("Account [{}] is attempting to be set to status [{}]", account_name, status);
+
+	std::string query = fmt::format(
+		SQL(
+			UPDATE account SET status = {} WHERE name = '{}'
+		),
+		status,
+		account_name
+	);
+
+	auto results = QueryDatabase(query);
+
+	if (!results.Success()) {
+		return false;
+	}
+
+	if (results.RowsAffected() == 0) {
+		LogWarning("Account [{}] does not exist!", account_name);
+		return false;
+	}
+
+	return true;
+}
+
 /* This initially creates the character during character create */
 bool Database::ReserveName(uint32 account_id, char* name) {
 	std::string query = StringFormat("SELECT `account_id`, `name` FROM `character_data` WHERE `name` = '%s'", name);

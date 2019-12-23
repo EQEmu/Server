@@ -22,6 +22,7 @@
 #include "../common/eqemu_logsys.h"
 #include "../common/json/json.h"
 #include "../common/version.h"
+#include "worlddb.h"
 
 namespace WorldserverCommandHandler {
 
@@ -45,36 +46,10 @@ namespace WorldserverCommandHandler {
 		/**
 		 * Register commands
 		 */
-		function_map["test:hello-world"] = &WorldserverCommandHandler::HelloWorld;
 		function_map["database:version"] = &WorldserverCommandHandler::DatabaseVersion;
+		function_map["database:set-account-status"] = &WorldserverCommandHandler::DatabaseSetAccountStatus;
 
 		EQEmuCommand::HandleMenu(function_map, cmd, argc, argv);
-	}
-
-	/**
-	 * @param argc
-	 * @param argv
-	 * @param cmd
-	 * @param description
-	 */
-	void HelloWorld(int argc, char **argv, argh::parser &cmd, std::string &description)
-	{
-		description = "Test command";
-
-		if (cmd[{"-h", "--help"}]) {
-			return;
-		}
-
-		std::vector<std::string> arguments = {};
-		std::vector<std::string> options   = {
-			"--hello",
-			"--write"
-		};
-
-		EQEmuCommand::ValidateCmdInput(arguments, options, cmd, argc, argv);
-
-		LogInfo("hello world!");
-
 	}
 
 	/**
@@ -100,6 +75,35 @@ namespace WorldserverCommandHandler {
 		payload << database_version;
 
 		std::cout << payload.str() << std::endl;
+	}
+
+	/**
+	 * @param argc
+	 * @param argv
+	 * @param cmd
+	 * @param description
+	 */
+	void DatabaseSetAccountStatus(int argc, char **argv, argh::parser &cmd, std::string &description)
+	{
+		description = "Sets account status by account name";
+
+		std::vector<std::string> arguments = {
+			"{name}",
+			"{status}"
+		};
+
+		std::vector<std::string> options = {};
+
+		if (cmd[{"-h", "--help"}]) {
+			return;
+		}
+
+		EQEmuCommand::ValidateCmdInput(arguments, options, cmd, argc, argv);
+
+		database.SetAccountStatus(
+			cmd(2).str(),
+			std::stoi(cmd(3).str())
+		);
 	}
 
 }
