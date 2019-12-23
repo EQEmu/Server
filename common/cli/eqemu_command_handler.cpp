@@ -123,10 +123,6 @@ namespace EQEmuCommand {
 		bool        ran_command = false;
 		for (auto   &it: in_function_map) {
 			if (it.first == argv[1]) {
-				std::cout << std::endl;
-				std::cout << "> " << termcolor::cyan << "Executing CLI Command" << termcolor::reset << std::endl;
-				std::cout << std::endl;
-
 				(it.second)(argc, argv, cmd, description);
 				ran_command = true;
 			}

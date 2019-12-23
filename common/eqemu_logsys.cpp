@@ -579,3 +579,25 @@ void EQEmuLogSys::StartFileLogs(const std::string &log_name)
 		);
 	}
 }
+
+/**
+ * Silence console logging
+ */
+void EQEmuLogSys::SilenceConsoleLogging()
+{
+	for (int log_index = Logs::AA; log_index != Logs::MaxCategoryID; log_index++) {
+		log_settings[log_index].log_to_console      = 0;
+		log_settings[log_index].is_category_enabled = 0;
+	}
+}
+
+/**
+ * Enables console logging
+ */
+void EQEmuLogSys::EnableConsoleLogging()
+{
+	for (int log_index = Logs::AA; log_index != Logs::MaxCategoryID; log_index++) {
+		log_settings[log_index].log_to_console      = Logs::General;
+		log_settings[log_index].is_category_enabled = 1;
+	}
+}

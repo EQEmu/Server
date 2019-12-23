@@ -279,6 +279,16 @@ public:
 	 */
 	void SetConsoleHandler(std::function<void(uint16 debug_level, uint16 log_type, const std::string&)> f) { on_log_console_hook = f; }
 
+	/**
+	 * Silence console logging
+	 */
+	void SilenceConsoleLogging();
+
+	/**
+	 * Turn on all console logging
+	 */
+	void EnableConsoleLogging();
+
 private:
 
 	/**

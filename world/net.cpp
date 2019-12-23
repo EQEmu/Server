@@ -86,6 +86,7 @@ union semun {
 
 #include "../common/net/servertalk_server.h"
 #include "../zone/data_bucket.h"
+#include "world_server_command_handler.h"
 
 ClientList client_list;
 GroupLFPList LFPGroupList;
@@ -113,14 +114,30 @@ inline void UpdateWindowTitle(std::string new_title) {
 #endif
 }
 
-int main(int argc, char** argv) {
-	RegisterExecutablePlatform(ExePlatformWorld);
-	LogSys.LoadLogSettingsDefaults();
-	set_exception_handler();
+void LoadDatabaseConnections()
+{
+	LogInfo(
+		"Connecting to MySQL [{}]@[{}]:[{}]",
+		Config->DatabaseUsername.c_str(),
+		Config->DatabaseHost.c_str(),
+		Config->DatabasePort
+	);
 
-	/**
-	 * Auto convert json config from xml
-	 */
+	if (!database.Connect(
+		Config->DatabaseHost.c_str(),
+		Config->DatabaseUsername.c_str(),
+		Config->DatabasePassword.c_str(),
+		Config->DatabaseDB.c_str(),
+		Config->DatabasePort
+	)) {
+		LogError("Cannot continue without a database connection");
+
+		std::exit(1);
+	}
+}
+
+void CheckForXMLConfigUpgrade()
+{
 	if (!std::ifstream("eqemu_config.json") && std::ifstream("eqemu_config.xml")) {
 		CheckForServerScript(true);
 		if(system("perl eqemu_server.pl convert_xml"));
@@ -128,50 +145,19 @@ int main(int argc, char** argv) {
 	else {
 		CheckForServerScript();
 	}
+}
 
-	/**
-	 * Database version
-	 */
-	uint32 Database_Version = CURRENT_BINARY_DATABASE_VERSION;
-	uint32 Bots_Database_Version = CURRENT_BINARY_BOTS_DATABASE_VERSION;
-	if (argc >= 2) {
-		if (strcasecmp(argv[1], "db_version") == 0) {
-			std::cout << "Binary Database Version: " << Database_Version << " : " << Bots_Database_Version << std::endl;
-			return 0;
-		}
-	}
-
-	// Load server configuration
+void LoadServerConfig()
+{
 	LogInfo("Loading server configuration");
 	if (!WorldConfig::LoadConfig()) {
 		LogError("Loading server configuration failed");
-		return 1;
+		std::exit(1);
 	}
+}
 
-	Config = WorldConfig::get();
-
-	LogInfo("CURRENT_VERSION: [{}]", CURRENT_VERSION);
-
-	if (signal(SIGINT, CatchSignal) == SIG_ERR) {
-		LogError("Could not set signal handler");
-		return 1;
-	}
-
-	if (signal(SIGTERM, CatchSignal) == SIG_ERR) {
-		LogError("Could not set signal handler");
-		return 1;
-	}
-
-#ifndef WIN32
-	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR) {
-		LogError("Could not set signal handler");
-		return 1;
-	}
-#endif
-
-	/**
-	 * Add Loginserver
-	 */
+void RegisterLoginservers()
+{
 	if (Config->LoginCount == 0) {
 		if (Config->LoginHost.length()) {
 			loginserverlist.Add(
@@ -201,23 +187,85 @@ int main(int argc, char** argv) {
 			iterator.Advance();
 		}
 	}
+}
 
-	LogInfo("Connecting to MySQL [{}]@[{}]:[{}]", Config->DatabaseUsername.c_str(), Config->DatabaseHost.c_str(), Config->DatabasePort);
-	if (!database.Connect(
-		Config->DatabaseHost.c_str(),
-		Config->DatabaseUsername.c_str(),
-		Config->DatabasePassword.c_str(),
-		Config->DatabaseDB.c_str(),
-		Config->DatabasePort)) {
-		LogError("Cannot continue without a database connection");
+int main(int argc, char** argv) {
+	RegisterExecutablePlatform(ExePlatformWorld);
+	LogSys.LoadLogSettingsDefaults();
+	set_exception_handler();
+
+	/**
+	 * Database version
+	 */
+	uint32 database_version      = CURRENT_BINARY_DATABASE_VERSION;
+	uint32 bots_database_version = CURRENT_BINARY_BOTS_DATABASE_VERSION;
+	if (argc >= 2) {
+		if (strcasecmp(argv[1], "db_version") == 0) {
+			std::cout << "Binary Database Version: " << database_version << " : " << bots_database_version << std::endl;
+			return 0;
+		}
+	}
+
+	/**
+	 * Command handler
+	 */
+	if (argc > 1) {
+		LogSys.SilenceConsoleLogging();
+
+		/**
+		 * Get Config
+		 */
+		WorldConfig::LoadConfig();
+		Config = WorldConfig::get();
+
+		/**
+		 * Load database
+		 */
+		LoadDatabaseConnections();
+
+		LogSys.EnableConsoleLogging();
+
+		WorldserverCommandHandler::CommandHandler(argc, argv);
+	}
+
+	CheckForXMLConfigUpgrade();
+	LoadServerConfig();
+
+	Config = WorldConfig::get();
+
+	LogInfo("CURRENT_VERSION: [{}]", CURRENT_VERSION);
+
+	if (signal(SIGINT, CatchSignal) == SIG_ERR) {
+		LogError("Could not set signal handler");
 		return 1;
 	}
+
+	if (signal(SIGTERM, CatchSignal) == SIG_ERR) {
+		LogError("Could not set signal handler");
+		return 1;
+	}
+
+#ifndef WIN32
+	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR) {
+		LogError("Could not set signal handler");
+		return 1;
+	}
+#endif
+
+	RegisterLoginservers();
+	LoadDatabaseConnections();
+
 	guild_mgr.SetDatabase(&database);
 
-	/* Register Log System and Settings */
+	/**
+	 * Logging
+	 */
 	database.LoadLogSettings(LogSys.log_settings);
 	LogSys.StartFileLogs();
 
+	/**
+	 * Parse simple CLI passes
+	 */
 	bool ignore_db = false;
 	if (argc >= 2) {
 		std::string tmp;
@@ -232,38 +280,6 @@ int main(int argc, char** argv) {
 		else if (strcasecmp(argv[1], "-holdzones") == 0) {
 			std::cout << "Reboot Zones mode ON" << std::endl;
 			holdzones = true;
-		}
-		else if (database.GetVariable("disablecommandline", tmp)) {
-			if (tmp.length() == 1) {
-				if (tmp[0] == '1') {
-					std::cerr << "Command line disabled in database... exiting" << std::endl;
-					return 1;
-				}
-			}
-		}
-		else if (strcasecmp(argv[1], "adduser") == 0) {
-			if (argc == 5) {
-				if (Seperator::IsNumber(argv[4])) {
-					if (atoi(argv[4]) >= 0 && atoi(argv[4]) <= 255) {
-						std::string user;
-						std::string loginserver;
-
-						ParseAccountString(argv[2], user, loginserver);
-
-						if (database.CreateAccount(argv[2], argv[3], atoi(argv[4]), loginserver.c_str(), 0) == 0) {
-							std::cerr << "database.CreateAccount failed." << std::endl;
-							return 1;
-						}
-						else {
-							std::cout << "Account created: Username='" << argv[2] << "', Password='" << argv[3] << "', status=" << argv[4] << std::endl;
-							return 0;
-						}
-					}
-				}
-			}
-			std::cout << "Usage: world adduser username password flag" << std::endl;
-			std::cout << "flag = 0, 1 or 2" << std::endl;
-			return 0;
 		}
 		else if (strcasecmp(argv[1], "flag") == 0) {
 			if (argc == 4) {
@@ -282,30 +298,6 @@ int main(int argc, char** argv) {
 			}
 			std::cout << "Usage: world flag username flag" << std::endl;
 			std::cout << "flag = 0-200" << std::endl;
-			return 0;
-		}
-		else if (strcasecmp(argv[1], "startzone") == 0) {
-			if (argc == 3) {
-				if (strlen(argv[2]) < 3) {
-					std::cerr << "Error: zone name too short" << std::endl;
-					return 1;
-				}
-				else if (strlen(argv[2]) > 15) {
-					std::cerr << "Error: zone name too long" << std::endl;
-					return 1;
-				}
-				else {
-					if (database.SetVariable("startzone", argv[2])) {
-						std::cout << "Starting zone changed: '" << argv[2] << "'" << std::endl;
-						return 0;
-					}
-					else {
-						std::cerr << "database.SetVariable failed." << std::endl;
-						return 1;
-					}
-				}
-			}
-			std::cout << "Usage: world startzone zoneshortname" << std::endl;
 			return 0;
 		}
 		else if (strcasecmp(argv[1], "ignore_db") == 0) {
@@ -360,7 +352,7 @@ int main(int argc, char** argv) {
 		if (!RuleManager::Instance()->UpdateOrphanedRules(&database)) {
 			LogInfo("Failed to process 'Orphaned Rules' update operation.");
 		}
-		
+
 		if (!RuleManager::Instance()->UpdateInjectedRules(&database, "default")) {
 			LogInfo("Failed to process 'Injected Rules' for ruleset 'default' update operation.");
 		}
