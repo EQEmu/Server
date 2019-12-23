@@ -23,6 +23,7 @@
 #include "../common/json/json.h"
 #include "../common/version.h"
 #include "worlddb.h"
+#include "../common/database_schema.h"
 
 namespace WorldserverCommandHandler {
 
@@ -49,6 +50,7 @@ namespace WorldserverCommandHandler {
 		function_map["world:version"]               = &WorldserverCommandHandler::Version;
 		function_map["database:version"]            = &WorldserverCommandHandler::DatabaseVersion;
 		function_map["database:set-account-status"] = &WorldserverCommandHandler::DatabaseSetAccountStatus;
+		function_map["database:schema"]             = &WorldserverCommandHandler::DatabaseGetSchema;
 
 		EQEmuCommand::HandleMenu(function_map, cmd, argc, argv);
 	}
@@ -133,6 +135,48 @@ namespace WorldserverCommandHandler {
 			cmd(2).str(),
 			std::stoi(cmd(3).str())
 		);
+	}
+
+	/**
+	 * @param argc
+	 * @param argv
+	 * @param cmd
+	 * @param description
+	 */
+	void DatabaseGetSchema(int argc, char **argv, argh::parser &cmd, std::string &description)
+	{
+		if (cmd[{"-h", "--help"}]) {
+			return;
+		}
+
+		Json::Value              player_tables_json;
+		std::vector<std::string> player_tables  = DatabaseSchema::GetPlayerTables();
+		for (const auto          &table : player_tables) {
+			player_tables_json.append(table);
+		}
+
+		Json::Value              content_tables_json;
+		std::vector<std::string> content_tables = DatabaseSchema::GetContentTables();
+		for (const auto          &table : content_tables) {
+			content_tables_json.append(table);
+		}
+
+		Json::Value              server_tables_json;
+		std::vector<std::string> server_tables  = DatabaseSchema::GetServerTables();
+		for (const auto          &table : server_tables) {
+			server_tables_json.append(table);
+		}
+
+		Json::Value schema;
+
+		schema["server_tables"]  = server_tables_json;
+		schema["player_tables"]  = player_tables_json;
+		schema["content_tables"] = content_tables_json;
+
+		std::stringstream payload;
+		payload << schema;
+
+		std::cout << payload.str() << std::endl;
 	}
 
 }
