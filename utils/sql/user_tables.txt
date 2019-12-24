@@ -6,7 +6,7 @@ account_rewards
 adventure_details
 adventure_members
 adventure_stats
-Banned_IPs
+banned_ips
 bugs
 buyer
 char_recipe_list
