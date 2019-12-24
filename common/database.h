@@ -120,7 +120,7 @@ public:
 
 	/* General Information Queries */
 
-	bool	AddBannedIP(char* bannedIP, const char* notes); //Add IP address to the Banned_IPs table.
+	bool	AddBannedIP(char* bannedIP, const char* notes); //Add IP address to the banned_ips table.
 	bool	AddGMIP(char* ip_address, char* name);
 	bool	CheckBannedIPs(const char* loginIP); //Check incoming connection against banned IP table.
 	bool	CheckGMIPs(const char* loginIP, uint32 account_id);

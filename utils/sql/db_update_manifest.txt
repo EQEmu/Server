@@ -398,6 +398,7 @@
 9142|2019_09_02_required_spawn_filter.sql|SHOW COLUMNS FROM `spawnentry` LIKE 'condition_value_filter'|empty|
 9143|2019_09_16_account_table_changes.sql|SHOW COLUMNS FROM `account` LIKE 'ls_id'|empty|
 9144|2019_11_09_logsys_description_update.sql|SELECT * FROM `logsys_categories`|not_empty|
+9145|2019_12_24_banned_ips_update.sql|SHOW TABLES LIKE 'Banned_IPs'|not_empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
