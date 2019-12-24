@@ -2825,7 +2825,7 @@ void Bot::AI_Process()
 
 				return;
 			}
-			else if (HasTargetReflection()) {
+			else if (GetTarget()->GetHateList().size()) {
 
 				WipeHateList();
 				SetTarget(nullptr);

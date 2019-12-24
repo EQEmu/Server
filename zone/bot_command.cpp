@@ -4264,6 +4264,12 @@ void bot_command_pull(Client *c, const Seperator *sep)
 		return;
 	}
 
+	if (target_mob->IsNPC() && target_mob->GetHateList().size()) {
+
+		c->Message(m_fail, "Your current target is already engaged!");
+		return;
+	}
+
 	Bot* bot_puller = nullptr;
 	for (auto bot_iter : sbl) {
 
