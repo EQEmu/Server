@@ -95,6 +95,31 @@ XS(XS_Mob_IsNPC) {
 	XSRETURN(1);
 }
 
+XS(XS_Mob_IsBot); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_IsBot) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Mob::IsBot(THIS)");
+	{
+		Mob* THIS;
+		bool RETVAL;
+
+		if (sv_derived_from(ST(0), "Mob")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Mob*, tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Mob");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->IsBot();
+		ST(0) = boolSV(RETVAL);
+		sv_2mortal(ST(0));
+	}
+	XSRETURN(1);
+}
+
 XS(XS_Mob_IsMob); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_IsMob) {
 	dXSARGS;
@@ -8564,6 +8589,7 @@ XS(boot_Mob) {
 
 	newXSproto(strcpy(buf, "IsClient"), XS_Mob_IsClient, file, "$");
 	newXSproto(strcpy(buf, "IsNPC"), XS_Mob_IsNPC, file, "$");
+	newXSproto(strcpy(buf, "IsBot"), XS_Mob_IsBot, file, "$");
 	newXSproto(strcpy(buf, "IsMob"), XS_Mob_IsMob, file, "$");
 	newXSproto(strcpy(buf, "IsCorpse"), XS_Mob_IsCorpse, file, "$");
 	newXSproto(strcpy(buf, "IsPlayerCorpse"), XS_Mob_IsPlayerCorpse, file, "$");
