@@ -112,6 +112,9 @@ namespace LoginserverCommandHandler {
 			return;
 		}
 
+		server.token_manager = new LoginserverWebserver::TokenManager;
+		server.token_manager->LoadApiTokens();
+
 		for (auto &it : server.token_manager->loaded_api_tokens) {
 			LogInfo(
 				"token [{0}] can_write [{1}] can_read [{2}]",
@@ -133,8 +136,8 @@ namespace LoginserverCommandHandler {
 		description = "Creates Local Loginserver Account";
 
 		std::vector<std::string> arguments = {
-			"--username",
-			"--password"
+			"{username}",
+			"{password}"
 		};
 		std::vector<std::string> options   = {
 			"--email=*"
@@ -147,8 +150,8 @@ namespace LoginserverCommandHandler {
 		EQEmuCommand::ValidateCmdInput(arguments, options, cmd, argc, argv);
 
 		AccountManagement::CreateLoginServerAccount(
-			cmd("--username").str(),
-			cmd("--password").str(),
+			cmd(2).str(),
+			cmd(3).str(),
 			cmd("--email").str()
 		);
 	}
@@ -164,9 +167,9 @@ namespace LoginserverCommandHandler {
 		description = "Creates Loginserver World Administrator Account";
 
 		std::vector<std::string> arguments = {
-			"--username",
-			"--password",
-			"--email"
+			"{username}",
+			"{password}",
+			"{email}"
 		};
 		std::vector<std::string> options   = {};
 
@@ -177,9 +180,9 @@ namespace LoginserverCommandHandler {
 		EQEmuCommand::ValidateCmdInput(arguments, options, cmd, argc, argv);
 
 		AccountManagement::CreateLoginserverWorldAdminAccount(
-			cmd("--username").str(),
-			cmd("--password").str(),
-			cmd("--email").str()
+			cmd(2).str(),
+			cmd(3).str(),
+			cmd(4).str()
 		);
 	}
 
@@ -194,8 +197,8 @@ namespace LoginserverCommandHandler {
 		description = "Check user login credentials";
 
 		std::vector<std::string> arguments = {
-			"--username",
-			"--password"
+			"{username}",
+			"{password}"
 		};
 		std::vector<std::string> options   = {};
 
@@ -206,11 +209,11 @@ namespace LoginserverCommandHandler {
 		EQEmuCommand::ValidateCmdInput(arguments, options, cmd, argc, argv);
 
 		auto res = AccountManagement::CheckLoginserverUserCredentials(
-			cmd("--username").str(),
-			cmd("--password").str()
+			cmd(2).str(),
+			cmd(3).str()
 		);
 
-		LogInfo("Credentials were {0}", res == true ? "accepted" : "not accepted");
+		LogInfo("Credentials were {0}", res != 0 ? "accepted" : "not accepted");
 	}
 
 	/**
@@ -224,8 +227,8 @@ namespace LoginserverCommandHandler {
 		description = "Change user login credentials";
 
 		std::vector<std::string> arguments = {
-			"--username",
-			"--password"
+			"{username}",
+			"{password}"
 		};
 		std::vector<std::string> options   = {};
 
@@ -236,8 +239,8 @@ namespace LoginserverCommandHandler {
 		EQEmuCommand::ValidateCmdInput(arguments, options, cmd, argc, argv);
 
 		AccountManagement::UpdateLoginserverUserCredentials(
-			cmd("--username").str(),
-			cmd("--password").str()
+			cmd(2).str(),
+			cmd(3).str()
 		);
 	}
 
@@ -252,8 +255,8 @@ namespace LoginserverCommandHandler {
 		description = "Check user external login credentials";
 
 		std::vector<std::string> arguments = {
-			"--username",
-			"--password"
+			"{username}",
+			"{password}"
 		};
 		std::vector<std::string> options   = {};
 
@@ -264,8 +267,8 @@ namespace LoginserverCommandHandler {
 		EQEmuCommand::ValidateCmdInput(arguments, options, cmd, argc, argv);
 
 		auto res = AccountManagement::CheckExternalLoginserverUserCredentials(
-			cmd("--username").str(),
-			cmd("--password").str()
+			cmd(2).str(),
+			cmd(3).str()
 		);
 
 		LogInfo("Credentials were {0}", res ? "accepted" : "not accepted");
@@ -282,8 +285,8 @@ namespace LoginserverCommandHandler {
 		description = "Update world admin account password";
 
 		std::vector<std::string> arguments = {
-			"--username",
-			"--password"
+			"{username}",
+			"{password}"
 		};
 		std::vector<std::string> options   = {};
 
@@ -294,8 +297,8 @@ namespace LoginserverCommandHandler {
 		EQEmuCommand::ValidateCmdInput(arguments, options, cmd, argc, argv);
 
 		AccountManagement::UpdateLoginserverWorldAdminAccountPasswordByName(
-			cmd("--username").str(),
-			cmd("--password").str()
+			cmd(2).str(),
+			cmd(3).str()
 		);
 	}
 }

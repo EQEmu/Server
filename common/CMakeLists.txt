@@ -122,6 +122,7 @@ SET(common_headers
 	cli/terminal_color.hpp
 	data_verification.h
 	database.h
+	database_schema.h
 	dbcore.h
 	deity.h
 	emu_constants.h

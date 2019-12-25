@@ -18,37 +18,19 @@
  *
  */
 
-#ifndef _EQEMU_VERSION_H
-#define _EQEMU_VERSION_H
+#include "iostream"
+#include "../common/cli/eqemu_command_handler.h"
 
-#define LOGIN_VERSION "0.8.0"
-#define EQEMU_PROTOCOL_VERSION "0.3.10"
+#ifndef EQEMU_WORLD_SERVER_COMMAND_HANDLER_H
+#define EQEMU_WORLD_SERVER_COMMAND_HANDLER_H
 
-#define CURRENT_VERSION "2.0"
+namespace WorldserverCommandHandler {
+	void CommandHandler(int argc, char **argv);
+	void Version(int argc, char **argv, argh::parser &cmd, std::string &description);
+	void DatabaseVersion(int argc, char **argv, argh::parser &cmd, std::string &description);
+	void DatabaseSetAccountStatus(int argc, char **argv, argh::parser &cmd, std::string &description);
+	void DatabaseGetSchema(int argc, char **argv, argh::parser &cmd, std::string &description);
+};
 
 
-/**
- * Every time a Database SQL is added to Github increment CURRENT_BINARY_DATABASE_VERSION
- * number and make sure you update the manifest
- *
- * Manifest: https://github.com/EQEmu/Server/blob/master/utils/sql/db_update_manifest.txt
- */
-
-#define CURRENT_BINARY_DATABASE_VERSION 9145
-
-#ifdef BOTS
-	#define CURRENT_BINARY_BOTS_DATABASE_VERSION 9026
-#else
-	#define CURRENT_BINARY_BOTS_DATABASE_VERSION 0 // must be 0
-#endif
-
-#define COMPILE_DATE	__DATE__
-#define COMPILE_TIME	__TIME__
-#ifndef WIN32
-	#define LAST_MODIFIED	__TIME__
-#else
-	#define LAST_MODIFIED	__TIMESTAMP__
-#endif
-
-#endif
-
+#endif //EQEMU_WORLD_SERVER_COMMAND_HANDLER_H

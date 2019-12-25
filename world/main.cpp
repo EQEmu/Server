@@ -1,20 +1,23 @@
-/*	EQEMu: Everquest Server Emulator
-Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
+/**
+ * EQEmulator: Everquest Server Emulator
+ * Copyright (C) 2001-2019 EQEmulator Development Team (https://github.com/EQEmu/Server)
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; version 2 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY except by those people which sell it, which
+ * are required to give you total support for your newly bought product;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY except by those people which sell it, which
-are required to give you total support for your newly bought product;
-without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-*/
 #include "../common/global_define.h"
 
 #include <iostream>
@@ -86,6 +89,7 @@ union semun {
 
 #include "../common/net/servertalk_server.h"
 #include "../zone/data_bucket.h"
+#include "world_server_command_handler.h"
 
 ClientList client_list;
 GroupLFPList LFPGroupList;
@@ -113,14 +117,30 @@ inline void UpdateWindowTitle(std::string new_title) {
 #endif
 }
 
-int main(int argc, char** argv) {
-	RegisterExecutablePlatform(ExePlatformWorld);
-	LogSys.LoadLogSettingsDefaults();
-	set_exception_handler();
+void LoadDatabaseConnections()
+{
+	LogInfo(
+		"Connecting to MySQL [{}]@[{}]:[{}]",
+		Config->DatabaseUsername.c_str(),
+		Config->DatabaseHost.c_str(),
+		Config->DatabasePort
+	);
 
-	/**
-	 * Auto convert json config from xml
-	 */
+	if (!database.Connect(
+		Config->DatabaseHost.c_str(),
+		Config->DatabaseUsername.c_str(),
+		Config->DatabasePassword.c_str(),
+		Config->DatabaseDB.c_str(),
+		Config->DatabasePort
+	)) {
+		LogError("Cannot continue without a database connection");
+
+		std::exit(1);
+	}
+}
+
+void CheckForXMLConfigUpgrade()
+{
 	if (!std::ifstream("eqemu_config.json") && std::ifstream("eqemu_config.xml")) {
 		CheckForServerScript(true);
 		if(system("perl eqemu_server.pl convert_xml"));
@@ -128,25 +148,104 @@ int main(int argc, char** argv) {
 	else {
 		CheckForServerScript();
 	}
+}
+
+void LoadServerConfig()
+{
+	LogInfo("Loading server configuration");
+	if (!WorldConfig::LoadConfig()) {
+		LogError("Loading server configuration failed");
+		std::exit(1);
+	}
+}
+
+void RegisterLoginservers()
+{
+	if (Config->LoginCount == 0) {
+		if (Config->LoginHost.length()) {
+			loginserverlist.Add(
+				Config->LoginHost.c_str(),
+				Config->LoginPort,
+				Config->LoginAccount.c_str(),
+				Config->LoginPassword.c_str(),
+				Config->LoginLegacy
+			);
+			LogInfo("Added loginserver [{}]:[{}]", Config->LoginHost.c_str(), Config->LoginPort);
+		}
+	}
+	else {
+		LinkedList<LoginConfig *> loginlist = Config->loginlist;
+		LinkedListIterator<LoginConfig *> iterator(loginlist);
+		iterator.Reset();
+		while (iterator.MoreElements()) {
+			if (iterator.GetData()->LoginHost.length()) {
+				loginserverlist.Add(
+					iterator.GetData()->LoginHost.c_str(),
+					iterator.GetData()->LoginPort,
+					iterator.GetData()->LoginAccount.c_str(),
+					iterator.GetData()->LoginPassword.c_str(),
+					iterator.GetData()->LoginLegacy
+				);
+
+				LogInfo(
+					"Added loginserver [{}]:[{}]",
+					iterator.GetData()->LoginHost.c_str(),
+					iterator.GetData()->LoginPort
+				);
+			}
+			iterator.Advance();
+		}
+	}
+}
+
+/**
+ * World process entrypoint
+ * 
+ * @param argc
+ * @param argv
+ * @return
+ */
+int main(int argc, char** argv) {
+	RegisterExecutablePlatform(ExePlatformWorld);
+	LogSys.LoadLogSettingsDefaults();
+	set_exception_handler();
 
 	/**
 	 * Database version
 	 */
-	uint32 Database_Version = CURRENT_BINARY_DATABASE_VERSION;
-	uint32 Bots_Database_Version = CURRENT_BINARY_BOTS_DATABASE_VERSION;
+	uint32 database_version      = CURRENT_BINARY_DATABASE_VERSION;
+	uint32 bots_database_version = CURRENT_BINARY_BOTS_DATABASE_VERSION;
 	if (argc >= 2) {
 		if (strcasecmp(argv[1], "db_version") == 0) {
-			std::cout << "Binary Database Version: " << Database_Version << " : " << Bots_Database_Version << std::endl;
+			std::cout << "Binary Database Version: " << database_version << " : " << bots_database_version << std::endl;
 			return 0;
 		}
 	}
 
-	// Load server configuration
-	LogInfo("Loading server configuration");
-	if (!WorldConfig::LoadConfig()) {
-		LogError("Loading server configuration failed");
-		return 1;
+	/**
+	 * Command handler
+	 */
+	if (argc > 1) {
+		LogSys.SilenceConsoleLogging();
+
+		/**
+		 * Get Config
+		 */
+		WorldConfig::LoadConfig();
+		Config = WorldConfig::get();
+
+		/**
+		 * Load database
+		 */
+		LoadDatabaseConnections();
+
+		LogSys.EnableConsoleLogging();
+
+		WorldserverCommandHandler::CommandHandler(argc, argv);
 	}
+
+	CheckForXMLConfigUpgrade();
+	LoadServerConfig();
 
 	Config = WorldConfig::get();
 
@@ -169,146 +268,23 @@ int main(int argc, char** argv) {
 	}
 #endif
 
-	/**
-	 * Add Loginserver
-	 */
-	if (Config->LoginCount == 0) {
-		if (Config->LoginHost.length()) {
-			loginserverlist.Add(
-				Config->LoginHost.c_str(),
-				Config->LoginPort,
-				Config->LoginAccount.c_str(),
-				Config->LoginPassword.c_str(),
-				Config->LoginLegacy
-			);
-			LogInfo("Added loginserver [{}]:[{}]", Config->LoginHost.c_str(), Config->LoginPort);
-		}
-	}
-	else {
-		LinkedList<LoginConfig *> loginlist = Config->loginlist;
-		LinkedListIterator<LoginConfig *> iterator(loginlist);
-		iterator.Reset();
-		while (iterator.MoreElements()) {
-			loginserverlist.Add(
-				iterator.GetData()->LoginHost.c_str(),
-				iterator.GetData()->LoginPort,
-				iterator.GetData()->LoginAccount.c_str(),
-				iterator.GetData()->LoginPassword.c_str(),
-				iterator.GetData()->LoginLegacy
-			);
+	RegisterLoginservers();
+	LoadDatabaseConnections();
 
-			LogInfo("Added loginserver [{}]:[{}]", iterator.GetData()->LoginHost.c_str(), iterator.GetData()->LoginPort);
-			iterator.Advance();
-		}
-	}
-
-	LogInfo("Connecting to MySQL [{}]@[{}]:[{}]", Config->DatabaseUsername.c_str(), Config->DatabaseHost.c_str(), Config->DatabasePort);
-	if (!database.Connect(
-		Config->DatabaseHost.c_str(),
-		Config->DatabaseUsername.c_str(),
-		Config->DatabasePassword.c_str(),
-		Config->DatabaseDB.c_str(),
-		Config->DatabasePort)) {
-		LogError("Cannot continue without a database connection");
-		return 1;
-	}
 	guild_mgr.SetDatabase(&database);
 
-	/* Register Log System and Settings */
+	/**
+	 * Logging
+	 */
 	database.LoadLogSettings(LogSys.log_settings);
 	LogSys.StartFileLogs();
 
+	/**
+	 * Parse simple CLI passes
+	 */
 	bool ignore_db = false;
 	if (argc >= 2) {
-		std::string tmp;
-		if (strcasecmp(argv[1], "help") == 0 || strcasecmp(argv[1], "?") == 0 || strcasecmp(argv[1], "/?") == 0 || strcasecmp(argv[1], "-?") == 0 || strcasecmp(argv[1], "-h") == 0 || strcasecmp(argv[1], "-help") == 0) {
-			std::cout << "Worldserver command line commands:" << std::endl;
-			std::cout << "adduser username password flag    - adds a user account" << std::endl;
-			std::cout << "flag username flag    - sets GM flag on the account" << std::endl;
-			std::cout << "startzone zoneshortname    - sets the starting zone" << std::endl;
-			std::cout << "-holdzones    - reboots lost zones" << std::endl;
-			return 0;
-		}
-		else if (strcasecmp(argv[1], "-holdzones") == 0) {
-			std::cout << "Reboot Zones mode ON" << std::endl;
-			holdzones = true;
-		}
-		else if (database.GetVariable("disablecommandline", tmp)) {
-			if (tmp.length() == 1) {
-				if (tmp[0] == '1') {
-					std::cerr << "Command line disabled in database... exiting" << std::endl;
-					return 1;
-				}
-			}
-		}
-		else if (strcasecmp(argv[1], "adduser") == 0) {
-			if (argc == 5) {
-				if (Seperator::IsNumber(argv[4])) {
-					if (atoi(argv[4]) >= 0 && atoi(argv[4]) <= 255) {
-						std::string user;
-						std::string loginserver;
-
-						ParseAccountString(argv[2], user, loginserver);
-
-						if (database.CreateAccount(argv[2], argv[3], atoi(argv[4]), loginserver.c_str(), 0) == 0) {
-							std::cerr << "database.CreateAccount failed." << std::endl;
-							return 1;
-						}
-						else {
-							std::cout << "Account created: Username='" << argv[2] << "', Password='" << argv[3] << "', status=" << argv[4] << std::endl;
-							return 0;
-						}
-					}
-				}
-			}
-			std::cout << "Usage: world adduser username password flag" << std::endl;
-			std::cout << "flag = 0, 1 or 2" << std::endl;
-			return 0;
-		}
-		else if (strcasecmp(argv[1], "flag") == 0) {
-			if (argc == 4) {
-				if (Seperator::IsNumber(argv[3])) {
-					if (atoi(argv[3]) >= 0 && atoi(argv[3]) <= 255) {
-						if (database.SetAccountStatus(argv[2], atoi(argv[3]))) {
-							std::cout << "Account flagged: Username='" << argv[2] << "', status=" << argv[3] << std::endl;
-							return 0;
-						}
-						else {
-							std::cerr << "database.SetAccountStatus failed." << std::endl;
-							return 1;
-						}
-					}
-				}
-			}
-			std::cout << "Usage: world flag username flag" << std::endl;
-			std::cout << "flag = 0-200" << std::endl;
-			return 0;
-		}
-		else if (strcasecmp(argv[1], "startzone") == 0) {
-			if (argc == 3) {
-				if (strlen(argv[2]) < 3) {
-					std::cerr << "Error: zone name too short" << std::endl;
-					return 1;
-				}
-				else if (strlen(argv[2]) > 15) {
-					std::cerr << "Error: zone name too long" << std::endl;
-					return 1;
-				}
-				else {
-					if (database.SetVariable("startzone", argv[2])) {
-						std::cout << "Starting zone changed: '" << argv[2] << "'" << std::endl;
-						return 0;
-					}
-					else {
-						std::cerr << "database.SetVariable failed." << std::endl;
-						return 1;
-					}
-				}
-			}
-			std::cout << "Usage: world startzone zoneshortname" << std::endl;
-			return 0;
-		}
-		else if (strcasecmp(argv[1], "ignore_db") == 0) {
+		if (strcasecmp(argv[1], "ignore_db") == 0) {
 			ignore_db = true;
 		}
 		else {
@@ -360,7 +336,7 @@ int main(int argc, char** argv) {
 		if (!RuleManager::Instance()->UpdateOrphanedRules(&database)) {
 			LogInfo("Failed to process 'Orphaned Rules' update operation.");
 		}
-		
+
 		if (!RuleManager::Instance()->UpdateInjectedRules(&database, "default")) {
 			LogInfo("Failed to process 'Injected Rules' for ruleset 'default' update operation.");
 		}
@@ -406,13 +382,6 @@ int main(int argc, char** argv) {
 
 	LogInfo("Loading launcher list");
 	launcher_list.LoadList();
-
-	std::string tmp;
-	database.GetVariable("holdzones", tmp);
-	if (tmp.length() == 1 && tmp[0] == '1') {
-		holdzones = true;
-	}
-	LogInfo("Reboot zone modes [{}]", holdzones ? "ON" : "OFF");
 
 	LogInfo("Deleted [{}] stale player corpses from database", database.DeleteStalePlayerCorpses());
 
