@@ -516,13 +516,20 @@ sub check_for_input {
 }
 
 sub check_for_world_bootup_database_update {
-    if ($OS eq "Windows") {
-        @db_version = split(': ', `world db_version`);
-    }
-    if ($OS eq "Linux") {
-        @db_version = split(': ', `./world db_version`);
+
+    my $world_path = "world";
+    if (-e "bin/world") {
+        $world_path = "bin/world";
     }
 
+    #::: Get Binary DB version
+    if ($OS eq "Windows") {
+        @db_version = split(': ', `$world_path db_version`);
+    }
+    if ($OS eq "Linux") {
+        @db_version = split(': ', `./$world_path db_version`);
+    }
+    
     $binary_database_version = trim($db_version[1]);
     $local_database_version  = trim(get_mysql_result("SELECT version FROM db_version LIMIT 1"));
 
