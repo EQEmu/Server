@@ -178,15 +178,21 @@ void RegisterLoginservers()
 		LinkedListIterator<LoginConfig *> iterator(loginlist);
 		iterator.Reset();
 		while (iterator.MoreElements()) {
-			loginserverlist.Add(
-				iterator.GetData()->LoginHost.c_str(),
-				iterator.GetData()->LoginPort,
-				iterator.GetData()->LoginAccount.c_str(),
-				iterator.GetData()->LoginPassword.c_str(),
-				iterator.GetData()->LoginLegacy
-			);
+			if (iterator.GetData()->LoginHost.length()) {
+				loginserverlist.Add(
+					iterator.GetData()->LoginHost.c_str(),
+					iterator.GetData()->LoginPort,
+					iterator.GetData()->LoginAccount.c_str(),
+					iterator.GetData()->LoginPassword.c_str(),
+					iterator.GetData()->LoginLegacy
+				);
 
-			LogInfo("Added loginserver [{}]:[{}]", iterator.GetData()->LoginHost.c_str(), iterator.GetData()->LoginPort);
+				LogInfo(
+					"Added loginserver [{}]:[{}]",
+					iterator.GetData()->LoginHost.c_str(),
+					iterator.GetData()->LoginPort
+				);
+			}
 			iterator.Advance();
 		}
 	}
