@@ -145,6 +145,8 @@ namespace WorldserverCommandHandler {
 	 */
 	void DatabaseGetSchema(int argc, char **argv, argh::parser &cmd, std::string &description)
 	{
+		description = "Displays server database schema";
+
 		if (cmd[{"-h", "--help"}]) {
 			return;
 		}
