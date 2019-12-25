@@ -226,7 +226,6 @@ public:
 	Client(EQStreamInterface * ieqs);
 	~Client();
 
-	std::unordered_map<Mob *, float> close_mobs;
 	bool is_client_moving;
 
 	void SetDisplayMobInfoWindow(bool display_mob_info_window);

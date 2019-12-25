@@ -116,7 +116,9 @@ Mob::Mob(
 	m_specialattacks(eSpecialAttacks::None),
 	attack_anim_timer(1000),
 	position_update_melee_push_timer(500),
-	hate_list_cleanup_timer(6000)
+	hate_list_cleanup_timer(6000),
+	mob_scan_close(6000),
+	mob_check_moving_timer(1000)
 {
 	mMovementManager = &MobMovementManager::Get();
 	mMovementManager->AddMob(this);
@@ -522,6 +524,16 @@ uint32 Mob::GetAppearanceValue(EmuAppearance iAppearance) {
 			break;
 	}
 	return(ANIM_STAND);
+}
+
+void Mob::GetCloseMobList(std::list<std::pair<Mob *, float>> &m_list)
+{
+	m_list.clear();
+	auto it = close_mobs.begin();
+	while (it != close_mobs.end()) {
+		m_list.push_back(std::make_pair(it->first, it->second));
+		++it;
+	}
 }
 
 void Mob::SetInvisible(uint8 state)

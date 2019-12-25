@@ -189,10 +189,10 @@ namespace WorldserverCommandHandler {
 
 		Json::Value schema;
 
-		schema["server_tables"]  = server_tables_json;
-		schema["player_tables"]  = player_tables_json;
 		schema["content_tables"] = content_tables_json;
 		schema["login_tables"]   = login_tables_json;
+		schema["player_tables"]  = player_tables_json;
+		schema["server_tables"]  = server_tables_json;
 		schema["state_tables"]   = state_tables_json;
 		schema["version_tables"] = version_tables_json;
 

@@ -36,19 +36,6 @@
 extern Zone* zone;
 //#define LOSDEBUG 6
 
-//look around a client for things which might aggro the client.
-void EntityList::CheckClientAggro(Client *around)
-{
-	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
-		Mob *mob = it->second;
-		if (mob->IsClient())	//also ensures that mob != around
-			continue;
-
-		if (mob->CheckWillAggro(around) && !mob->CheckAggro(around))
-			mob->AddToHateList(around, 25);
-	}
-}
-
 void EntityList::DescribeAggro(Client *towho, NPC *from_who, float d, bool verbose) {
 	float d2 = d*d;
 
@@ -402,22 +389,6 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	return(false);
 }
 
-Mob* EntityList::AICheckNPCtoNPCAggro(Mob* sender, float iAggroRange, float iAssistRange) {
-	if (!sender || !sender->IsNPC())
-		return(nullptr);
-
-	auto it = npc_list.begin();
-	while (it != npc_list.end()) {
-		Mob *mob = it->second;
-
-		if (sender->CheckWillAggro(mob))
-			return mob;
-		++it;
-	}
-
-	return nullptr;
-}
-
 int EntityList::GetHatedCount(Mob *attacker, Mob *exclude, bool inc_gray_con)
 {
 	// Return a list of how many non-feared, non-mezzed, non-green mobs, within aggro range, hate *attacker
@@ -462,82 +433,11 @@ int EntityList::GetHatedCount(Mob *attacker, Mob *exclude, bool inc_gray_con)
 	return Count;
 }
 
-void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
-	if(!sender || !attacker)
-		return;
-	if (sender->GetPrimaryFaction() == 0 )
-		return; // well, if we dont have a faction set, we're gonna be indiff to everybody
-
-	if (sender->HasAssistAggro())
-		return;
-
-	for (auto it = npc_list.begin(); it != npc_list.end(); ++it) {
-		NPC *mob = it->second;
-		if (!mob)
-			continue;
-
-		if (mob->CheckAggro(attacker))
-			continue;
-
-		if (sender->NPCAssistCap() >= RuleI(Combat, NPCAssistCap))
-			break;
-
-		float r = mob->GetAssistRange();
-		r = r * r;
-
-		if (
-			mob != sender
-			&& mob != attacker
-//			&& !mob->IsCorpse()
-//			&& mob->IsAIControlled()
-			&& mob->GetPrimaryFaction() != 0
-			&& DistanceSquared(mob->GetPosition(), sender->GetPosition()) <= r
-			&& !mob->IsEngaged()
-			&& ((!mob->IsPet()) || (mob->IsPet() && mob->GetOwner() && !mob->GetOwner()->IsClient()))
-				// If we're a pet we don't react to any calls for help if our owner is a client
-			)
-		{
-			//if they are in range, make sure we are not green...
-			//then jump in if they are our friend
-			if(mob->GetLevel() >= 50 || attacker->GetLevelCon(mob->GetLevel()) != CON_GRAY)
-			{
-				bool useprimfaction = false;
-				if(mob->GetPrimaryFaction() == sender->CastToNPC()->GetPrimaryFaction())
-				{
-					const NPCFactionList *cf = database.GetNPCFactionEntry(mob->GetNPCFactionID());
-					if(cf){
-						if(cf->assistprimaryfaction != 0)
-							useprimfaction = true;
-					}
-				}
-
-				if(useprimfaction || sender->GetReverseFactionCon(mob) <= FACTION_AMIABLE )
-				{
-					//attacking someone on same faction, or a friend
-					//Father Nitwit: make sure we can see them.
-					if(mob->CheckLosFN(sender)) {
-#if (EQDEBUG>=5)
-						LogDebug("AIYellForHelp(\"[{}]\",\"[{}]\") [{}] attacking [{}] Dist [{}] Z [{}]",
-							sender->GetName(), attacker->GetName(), mob->GetName(),
-							attacker->GetName(), DistanceSquared(mob->GetPosition(),
-							sender->GetPosition()), std::abs(sender->GetZ()+mob->GetZ()));
-#endif
-						mob->AddToHateList(attacker, 25, 0, false);
-						sender->AddAssistCap();
-					}
-				}
-			}
-		}
-	}
-}
-
-/*
-returns false if attack should not be allowed
-I try to list every type of conflict that's possible here, so it's easy
-to see how the decision is made. Yea, it could be condensed and made
-faster, but I'm doing it this way to make it readable and easy to modify
-*/
-
+/**
+ * @param target
+ * @param isSpellAttack
+ * @return
+ */
 bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 {
 

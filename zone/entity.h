@@ -284,7 +284,7 @@ public:
 	bool	RemoveTrap(uint16 delete_id);
 	bool	RemoveObject(uint16 delete_id);
 	bool	RemoveProximity(uint16 delete_npc_id);
-	bool	RemoveMobFromClientCloseLists(Mob *mob);
+	bool	RemoveMobFromCloseLists(Mob *mob);
 	void	RemoveAllMobs();
 	void	RemoveAllClients();
 	void	RemoveAllNPCs();
@@ -443,11 +443,7 @@ public:
 	bool	LimitCheckBoth(uint32 npc_type, uint32 spawngroup_id, int group_count, int type_count);
 	bool	LimitCheckName(const char* npc_name);
 
-	void	CheckClientAggro(Client *around);
-	Mob*	AICheckNPCtoNPCAggro(Mob* sender, float iAggroRange, float iAssistRange);
 	int		GetHatedCount(Mob *attacker, Mob *exclude, bool inc_gray_con);
-	void	AIYellForHelp(Mob* sender, Mob* attacker);
-	bool	AICheckCloseBeneficialSpells(NPC* caster, uint8 iChance, float iRange, uint32 iSpellTypes);
 	bool	Merc_AICheckCloseBeneficialSpells(Merc* caster, uint8 iChance, float iRange, uint32 iSpellTypes);
 	Mob*	GetTargetForMez(Mob* caster);
 	uint32	CheckNPCsClose(Mob *center);
@@ -501,6 +497,7 @@ public:
 	void RefreshAutoXTargets(Client *c);
 	void RefreshClientXTargets(Client *c);
 	void SendAlternateAdvancementStats();
+	void ScanCloseMobs(std::unordered_map<Mob *, float> &close_mobs, Mob *scanning_mob);
 
 	void GetTrapInfo(Client* client);
 	bool IsTrapGroupSpawned(uint32 trap_id, uint8 group);

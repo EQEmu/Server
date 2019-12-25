@@ -107,6 +107,9 @@ namespace Logs {
 		Emergency,
 		Alert,
 		Notice,
+		AIScanClose,
+		AIYellForHelp,
+		AICastBeneficialClose,
 		MaxCategoryID /* Don't Remove this */
 	};
 
@@ -172,7 +175,10 @@ namespace Logs {
 		"Critical",
 		"Emergency",
 		"Alert",
-		"Notice"
+		"Notice",
+		"AI Scan Close",
+		"AI Yell For Help",
+		"AI Cast Beneficial Close",
 	};
 }
 

@@ -2494,7 +2494,7 @@ bool EntityList::RemoveMob(uint16 delete_id)
 	auto it = mob_list.find(delete_id);
 	if (it != mob_list.end()) {
 
-		RemoveMobFromClientCloseLists(it->second);
+		RemoveMobFromCloseLists(it->second);
 
 		if (npc_list.count(delete_id))
 			entity_list.RemoveNPC(delete_id);
@@ -2512,17 +2512,19 @@ bool EntityList::RemoveMob(uint16 delete_id)
 // This is for if the ID is deleted for some reason
 bool EntityList::RemoveMob(Mob *delete_mob)
 {
-	if (delete_mob == 0)
+	if (delete_mob == 0) {
 		return true;
+	}
 
 	auto it = mob_list.begin();
 	while (it != mob_list.end()) {
 		if (it->second == delete_mob) {
-			RemoveMobFromClientCloseLists(it->second);
+			RemoveMobFromCloseLists(it->second);
 
 			safe_delete(it->second);
-			if (!corpse_list.count(it->first))
+			if (!corpse_list.count(it->first)) {
 				free_ids.push(it->first);
+			}
 			mob_list.erase(it);
 			return true;
 		}
@@ -2539,26 +2541,60 @@ bool EntityList::RemoveNPC(uint16 delete_id)
 		// make sure its proximity is removed
 		RemoveProximity(delete_id);
 		// remove from client close lists
-		RemoveMobFromClientCloseLists(npc->CastToMob());
+		RemoveMobFromCloseLists(npc->CastToMob());
 		// remove from the list
 		npc_list.erase(it);
 
 		// remove from limit list if needed
-		if (npc_limit_list.count(delete_id))
+		if (npc_limit_list.count(delete_id)) {
 			npc_limit_list.erase(delete_id);
+		}
+
 		return true;
 	}
 	return false;
 }
 
-bool EntityList::RemoveMobFromClientCloseLists(Mob *mob)
+/**
+ * @param mob
+ * @return
+ */
+bool EntityList::RemoveMobFromCloseLists(Mob *mob)
 {
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
+	auto it = mob_list.begin();
+	while (it != mob_list.end()) {
 		it->second->close_mobs.erase(mob);
 		++it;
 	}
 	return false;
+}
+
+/**
+ * @param close_mobs
+ * @param scanning_mob
+ */
+void EntityList::ScanCloseMobs(std::unordered_map<Mob *, float> &close_mobs, Mob *scanning_mob)
+{
+	float scan_range = RuleI(Range, MobCloseScanDistance) * RuleI(Range, MobCloseScanDistance);
+	int   list_count = 0;
+
+	close_mobs.clear();
+
+	auto it = mob_list.begin();
+	while (it != mob_list.end()) {
+		float distance = DistanceSquared(scanning_mob->GetPosition(), it->second->GetPosition());
+		if (distance <= scan_range) {
+			close_mobs.insert(std::pair<Mob *, float>(it->second, distance));
+			list_count++;
+		}
+		else if (it->second->GetAggroRange() >= scan_range) {
+			close_mobs.insert(std::pair<Mob *, float>(it->second, distance));
+			list_count++;
+		}
+		++it;
+	}
+
+	LogAIScanClose("Close List Size [{}] for mob [{}]", list_count, scanning_mob->GetCleanName());
 }
 
 bool EntityList::RemoveMerc(uint16 delete_id)
