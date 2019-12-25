@@ -182,12 +182,13 @@ namespace EQEmuCommand {
 			}
 
 			std::cout << std::endl;
-		}
-		else if	(!ran_command) {
-			std::cerr << "Unknown command [" << argv[1] << "] ! Try --help" << std::endl;
+
+			std::exit(1);
 		}
 
-		exit(1);
+		if (ran_command) {
+			std::exit(1);
+		}
 	}
 
 }

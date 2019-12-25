@@ -201,7 +201,7 @@ namespace DatabaseSchema {
 	static std::vector<std::string> GetServerTables()
 	{
 		std::vector<std::string> tables = {
-			"Banned_IPs",
+			"banned_ips",
 			"bugs",
 			"bug_reports",
 			"command_settings",
