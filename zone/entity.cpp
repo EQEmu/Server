@@ -2486,30 +2486,41 @@ void EntityList::RemoveAllEncounters()
 	}
 }
 
+/**
+ * @param delete_id
+ * @return
+ */
 bool EntityList::RemoveMob(uint16 delete_id)
 {
-	if (delete_id == 0)
+	if (delete_id == 0) {
 		return true;
+	}
 
 	auto it = mob_list.find(delete_id);
 	if (it != mob_list.end()) {
 
 		RemoveMobFromCloseLists(it->second);
 
-		if (npc_list.count(delete_id))
+		if (npc_list.count(delete_id)) {
 			entity_list.RemoveNPC(delete_id);
-		else if (client_list.count(delete_id))
+		}
+		else if (client_list.count(delete_id)) {
 			entity_list.RemoveClient(delete_id);
+		}
 		safe_delete(it->second);
-		if (!corpse_list.count(delete_id))
+		if (!corpse_list.count(delete_id)) {
 			free_ids.push(it->first);
+		}
 		mob_list.erase(it);
 		return true;
 	}
 	return false;
 }
 
-// This is for if the ID is deleted for some reason
+/**
+ * @param delete_mob
+ * @return
+ */
 bool EntityList::RemoveMob(Mob *delete_mob)
 {
 	if (delete_mob == 0) {
@@ -2533,19 +2544,19 @@ bool EntityList::RemoveMob(Mob *delete_mob)
 	return false;
 }
 
+/**
+ * @param delete_id
+ * @return
+ */
 bool EntityList::RemoveNPC(uint16 delete_id)
 {
 	auto it = npc_list.find(delete_id);
 	if (it != npc_list.end()) {
 		NPC *npc = it->second;
-		// make sure its proximity is removed
 		RemoveProximity(delete_id);
-		// remove from client close lists
 		RemoveMobFromCloseLists(npc->CastToMob());
-		// remove from the list
 		npc_list.erase(it);
 
-		// remove from limit list if needed
 		if (npc_limit_list.count(delete_id)) {
 			npc_limit_list.erase(delete_id);
 		}
@@ -2561,11 +2572,14 @@ bool EntityList::RemoveNPC(uint16 delete_id)
  */
 bool EntityList::RemoveMobFromCloseLists(Mob *mob)
 {
+	LogDebug("Removing mob [{}] from close lists", mob->GetCleanName());
+
 	auto it = mob_list.begin();
 	while (it != mob_list.end()) {
 		it->second->close_mobs.erase(mob);
 		++it;
 	}
+
 	return false;
 }
 

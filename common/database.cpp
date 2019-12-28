@@ -683,6 +683,7 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 		pp->RestTimer					  // " RestTimer)                 "
 	);
 	auto results = QueryDatabase(query);
+
 	/* Save Bind Points */
 	query = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, slot)"
 		" VALUES (%u, %u, %u, %f, %f, %f, %f, %i), "

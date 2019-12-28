@@ -87,8 +87,9 @@
 
 bool IsTargetableAESpell(uint16 spell_id)
 {
-	if (IsValidSpell(spell_id) && spells[spell_id].targettype == ST_AETarget)
+	if (IsValidSpell(spell_id) && spells[spell_id].targettype == ST_AETarget) {
 		return true;
+	}
 
 	return false;
 }

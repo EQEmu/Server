@@ -2153,6 +2153,8 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQEmu::skills::Skil
 	LogCombat("Fatal blow dealt by [{}] with [{}] damage, spell [{}], skill [{}]",
 		((killer_mob) ? (killer_mob->GetName()) : ("[nullptr]")), damage, spell, attack_skill);
 
+	entity_list.RemoveMobFromCloseLists(CastToMob());
+
 	Mob *oos = nullptr;
 	if (killer_mob) {
 		oos = killer_mob->GetOwnerOrSelf();

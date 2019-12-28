@@ -4793,24 +4793,32 @@ int16 Mob::CalcFearResistChance()
 	return resistchance;
 }
 
-float Mob::GetAOERange(uint16 spell_id) {
-	float range;
+/**
+ * @param spell_id
+ * @return
+ */
+float Mob::GetAOERange(uint16 spell_id)
+{
+	float range = spells[spell_id].aoerange;
 
-	range = spells[spell_id].aoerange;
-	if(range == 0)	//for TGB spells, they prolly do not have an aoe range
+	/**
+	 * For TGB
+	 */
+	if (range == 0) {
 		range = spells[spell_id].range;
-	if(range == 0)
-		range = 10;	//something....
-
-	if(IsBardSong(spell_id) && IsBeneficialSpell(spell_id)) {
-		//Live AA - Extended Notes, SionachiesCrescendo
-		float song_bonus = static_cast<float>(aabonuses.SongRange + spellbonuses.SongRange + itembonuses.SongRange);
-		range += range*song_bonus /100.0f;
 	}
 
-	range = GetActSpellRange(spell_id, range);
+	if (range == 0) {
+		range = 10;
+	}
 
-	return(range);
+	if (IsBardSong(spell_id) && IsBeneficialSpell(spell_id)) {
+		//Live AA - Extended Notes, SionachiesCrescendo
+		float song_bonus = static_cast<float>(aabonuses.SongRange + spellbonuses.SongRange + itembonuses.SongRange);
+		range += range * song_bonus / 100.0f;
+	}
+
+	return GetActSpellRange(spell_id, range);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
