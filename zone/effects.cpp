@@ -673,27 +673,42 @@ void Client::SendDisciplineTimer(uint32 timer_id, uint32 duration)
 	}
 }
 
-void EntityList::AETaunt(Client* taunter, float range, int32 bonus_hate)
+/**
+ * @param taunter
+ * @param range
+ * @param bonus_hate
+ */
+void EntityList::AETaunt(Client *taunter, float range, int32 bonus_hate)
 {
-	if (range == 0)
-		range = 40;		//Live AE taunt range - Hardcoded.
 
-	range = range * range;
+	/**
+	 * Live AE taunt range - Hardcoded.
+	 */
+	if (range == 0) {
+		range = 40;
+	}
 
-	auto it = npc_list.begin();
-	while (it != npc_list.end()) {
-		NPC *them = it->second;
-		float zdiff = taunter->GetZ() - them->GetZ();
-		if (zdiff < 0)
-			zdiff *= -1;
-		if (zdiff < 10
-				&& taunter->IsAttackAllowed(them)
-				&& DistanceSquaredNoZ(taunter->GetPosition(), them->GetPosition()) <= range) {
+	float range_squared = range * range;
+
+	for (auto &it : entity_list.GetCloseMobList(taunter, range)) {
+		Mob *them = it.second;
+
+		if (!them->IsNPC()) {
+			continue;
+		}
+
+		float z_difference = taunter->GetZ() - them->GetZ();
+		if (z_difference < 0) {
+			z_difference *= -1;
+		}
+
+		if (z_difference < 10
+			&& taunter->IsAttackAllowed(them)
+			&& DistanceSquaredNoZ(taunter->GetPosition(), them->GetPosition()) <= range_squared) {
 			if (taunter->CheckLosFN(them)) {
-				taunter->Taunt(them, true,0,true,bonus_hate);
+				taunter->Taunt(them, true, 0, true, bonus_hate);
 			}
 		}
-		++it;
 	}
 }
 
@@ -1014,31 +1029,48 @@ void EntityList::AEBardPulse(
 	}
 }
 
-// Rampage and stuff for clients. Normal and Duration rampages
-//NPCs handle it differently in Mob::Rampage
-void EntityList::AEAttack(Mob *attacker, float dist, int Hand, int count, bool IsFromSpell) {
-//Dook- Will need tweaking, currently no pets or players or horses
-	Mob *curmob = nullptr;
+/**
+ * Rampage - Normal and Duration rampages
+ * NPCs handle it differently in Mob::Rampage
+ *
+ * @param attacker
+ * @param distance
+ * @param Hand
+ * @param count
+ * @param is_from_spell
+ */
+void EntityList::AEAttack(
+	Mob *attacker,
+	float distance,
+	int Hand,
+	int count,
+	bool is_from_spell)
+{
+	Mob   *current_mob     = nullptr;
+	float distance_squared = distance * distance;
+	int   hit_count        = 0;
 
-	float dist2 = dist * dist;
+	for (auto &it : entity_list.GetCloseMobList(attacker, distance)) {
+		current_mob = it.second;
 
-	int hit = 0;
+		if (current_mob->IsNPC()
+			&& current_mob != attacker //this is not needed unless NPCs can use this
+			&& (attacker->IsAttackAllowed(current_mob))
+			&& current_mob->GetRace() != 216 && current_mob->GetRace() != 472 /* dont attack horses */
+			&& (DistanceSquared(current_mob->GetPosition(), attacker->GetPosition()) <= distance_squared)
+			) {
 
-	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
-		curmob = it->second;
-		if (curmob->IsNPC()
-				&& curmob != attacker //this is not needed unless NPCs can use this
-				&&(attacker->IsAttackAllowed(curmob))
-				&& curmob->GetRace() != 216 && curmob->GetRace() != 472 /* dont attack horses */
-				&& (DistanceSquared(curmob->GetPosition(), attacker->GetPosition()) <= dist2)
-		) {
-			if (!attacker->IsClient() || attacker->GetClass() == MONK || attacker->GetClass() == RANGER)
-				attacker->Attack(curmob, Hand, false, false, IsFromSpell);
-			else
-				attacker->CastToClient()->DoAttackRounds(curmob, Hand, IsFromSpell);
-			hit++;
-			if (count != 0 && hit >= count)
+			if (!attacker->IsClient() || attacker->GetClass() == MONK || attacker->GetClass() == RANGER) {
+				attacker->Attack(current_mob, Hand, false, false, is_from_spell);
+			}
+			else {
+				attacker->CastToClient()->DoAttackRounds(current_mob, Hand, is_from_spell);
+			}
+
+			hit_count++;
+			if (count != 0 && hit_count >= count) {
 				return;
+			}
 		}
 	}
 }

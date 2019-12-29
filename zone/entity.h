@@ -398,10 +398,10 @@ public:
 
 	void AEAttack(
 		Mob *attacker,
-		float dist,
+		float distance,
 		int Hand = EQEmu::invslot::slotPrimary,
 		int count = 0,
-		bool IsFromSpell = false
+		bool is_from_spell = false
 	);
 	void AETaunt(Client *caster, float range = 0, int32 bonus_hate = 0);
 	void AESpell(
