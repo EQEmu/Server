@@ -496,6 +496,7 @@ Mob::~Mob()
 	if (HasTempPetsActive()) {
 		entity_list.DestroyTempPets(this);
 	}
+	
 	entity_list.UnMarkNPC(GetID());
 	UninitializeBuffSlots();
 

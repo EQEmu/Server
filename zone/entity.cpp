@@ -2567,22 +2567,25 @@ bool EntityList::RemoveNPC(uint16 delete_id)
  */
 bool EntityList::RemoveMobFromCloseLists(Mob *mob)
 {
+	uint16 entity_id = mob->GetID() > 0 ? mob->GetID() : mob->GetInitialId();
+
 	LogEntityManagement(
 		"Attempting to remove mob [{}] from close lists entity_id ({})",
 		mob->GetCleanName(),
-		mob->GetInitialId()
+		entity_id
 	);
 
 	auto it = mob_list.begin();
 	while (it != mob_list.end()) {
+
 		LogEntityManagement(
 			"Removing mob [{}] from [{}] close list entity_id ({})",
 			mob->GetCleanName(),
 			it->second->GetCleanName(),
-			mob->GetInitialId()
+			entity_id
 		);
 
-		it->second->close_mobs.erase(mob->GetInitialId());
+		it->second->close_mobs.erase(entity_id);
 		++it;
 	}
 
@@ -2596,7 +2599,6 @@ bool EntityList::RemoveMobFromCloseLists(Mob *mob)
 void EntityList::ScanCloseMobs(std::unordered_map<uint16, Mob *> &close_mobs, Mob *scanning_mob)
 {
 	float scan_range = RuleI(Range, MobCloseScanDistance) * RuleI(Range, MobCloseScanDistance);
-	int   list_count = 0;
 
 	close_mobs.clear();
 
@@ -2607,16 +2609,14 @@ void EntityList::ScanCloseMobs(std::unordered_map<uint16, Mob *> &close_mobs, Mo
 		float distance = DistanceSquared(scanning_mob->GetPosition(), it->second->GetPosition());
 		if (distance <= scan_range) {
 			close_mobs.insert(std::pair<uint16, Mob *>(mob->GetID(), mob));
-			list_count++;
 		}
 		else if (it->second->GetAggroRange() >= scan_range) {
 			close_mobs.insert(std::pair<uint16, Mob *>(mob->GetID(), mob));
-			list_count++;
 		}
 		++it;
 	}
 
-	LogAIScanClose("Close List Size [{}] for mob [{}]", list_count, scanning_mob->GetCleanName());
+	LogAIScanClose("Close List Size [{}] for mob [{}]", close_mobs.size(), scanning_mob->GetCleanName());
 }
 
 bool EntityList::RemoveMerc(uint16 delete_id)

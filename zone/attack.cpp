@@ -2466,6 +2466,9 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQEmu::skills::Skil
 		entity_list.UnMarkNPC(GetID());
 		entity_list.RemoveNPC(GetID());
 
+		// entity_list.RemoveMobFromCloseLists(this);
+		close_mobs.clear();
+
 		this->SetID(0);
 
 		if (killer != 0 && emoteid != 0)
