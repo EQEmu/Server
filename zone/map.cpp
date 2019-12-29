@@ -242,46 +242,65 @@ bool Map::Load(std::string filename, bool force_mmf_overwrite)
 		return true;
 	}
 #else
-bool Map::Load(std::string filename)
+
+/**
+ * @param filename
+ * @return
+ */
+bool Map::Load(const std::string &filename)
 {
 #endif /*USE_MAP_MMFS*/
 
-	FILE *f = fopen(filename.c_str(), "rb");
-	if(f) {
+	FILE *map_file = fopen(filename.c_str(), "rb");
+	if (map_file) {
 		uint32 version;
-		if(fread(&version, sizeof(version), 1, f) != 1) {
-			fclose(f);
+		if (fread(&version, sizeof(version), 1, map_file) != 1) {
+			fclose(map_file);
 			return false;
 		}
-		
-		if(version == 0x01000000) {
+
+		if (version == 0x01000000) {
 			LogInfo("Loaded V1 Map File [{}]", filename.c_str());
-			bool v = LoadV1(f);
-			fclose(f);
+			bool loaded_map_file = LoadV1(map_file);
+			fclose(map_file);
+
+			if (loaded_map_file) {
+				LogInfo("Loaded V1 Map File [{}]", filename.c_str());
+			} else {
+				LogError("Failed to load V1 Map File [{}]", filename.c_str());
+			}
 
 #ifdef USE_MAP_MMFS
 			if (v)
 				return SaveMMF(filename, force_mmf_overwrite);
 #endif /*USE_MAP_MMFS*/
 
-			return v;
-		} else if(version == 0x02000000) {
-			LogInfo("Loaded V2 Map File [{}]", filename.c_str());
-			bool v = LoadV2(f);
-			fclose(f);
+			return loaded_map_file;
+		}
+		else if (version == 0x02000000) {
+			LogInfo("Loading V2 Map File [{}]", filename.c_str());
+			bool loaded_map_file = LoadV2(map_file);
+			fclose(map_file);
+
+			if (loaded_map_file) {
+				LogInfo("Loaded V2 Map File [{}]", filename.c_str());
+			} else {
+				LogError("Failed to load V2 Map File [{}]", filename.c_str());
+			}
 
 #ifdef USE_MAP_MMFS
 			if (v)
 				return SaveMMF(filename, force_mmf_overwrite);
 #endif /*USE_MAP_MMFS*/
 
-			return v;
-		} else {
-			fclose(f);
+			return loaded_map_file;
+		}
+		else {
+			fclose(map_file);
 			return false;
 		}
 	}
-	
+
 	return false;
 }
 

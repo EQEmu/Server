@@ -610,7 +610,7 @@ int Mob::_GetWalkSpeed() const {
 	runspeedcap += itembonuses.IncreaseRunSpeedCap + spellbonuses.IncreaseRunSpeedCap + aabonuses.IncreaseRunSpeedCap;
 	aa_mod += aabonuses.BaseMovementSpeed;
 
-	if (IsClient()) {
+	if (IsClient() && CastToClient()->GetHorseId()) {
 		Mob *horse = entity_list.GetMob(CastToClient()->GetHorseId());
 		if (horse) {
 			speed_mod = horse->GetBaseRunspeed();
@@ -668,7 +668,7 @@ int Mob::_GetRunSpeed() const {
 		{
 			speed_mod = 325;
 		}
-		else
+		else if (CastToClient()->GetHorseId())
 		{
 			Mob* horse = entity_list.GetMob(CastToClient()->GetHorseId());
 			if(horse)
