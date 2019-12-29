@@ -110,6 +110,7 @@ namespace Logs {
 		AIScanClose,
 		AIYellForHelp,
 		AICastBeneficialClose,
+		AoeCast,
 		MaxCategoryID /* Don't Remove this */
 	};
 
@@ -179,6 +180,7 @@ namespace Logs {
 		"AI Scan Close",
 		"AI Yell For Help",
 		"AI Cast Beneficial Close",
+		"AOE Cast",
 	};
 }
 

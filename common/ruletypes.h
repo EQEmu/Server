@@ -568,7 +568,7 @@ RULE_INT(Range, ClientPositionUpdates, 300, "")
 RULE_INT(Range, ClientForceSpawnUpdateRange, 1000, "")
 RULE_INT(Range, CriticalDamage, 80, "")
 RULE_INT(Range, ClientNPCScan, 300, "")
-RULE_INT(Range, MobCloseScanDistance, 300, "")
+RULE_INT(Range, MobCloseScanDistance, 600, "")
 RULE_CATEGORY_END()
 
 

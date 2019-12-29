@@ -850,11 +850,12 @@ int Mob::ACSum()
 			auto over_cap = ac - softcap;
 			ac = softcap + (over_cap * returns);
 		}
-		LogCombat("ACSum ac [{}] softcap [{}] returns [{}]", ac, softcap, returns);
+		LogCombatDetail("ACSum ac [{}] softcap [{}] returns [{}]", ac, softcap, returns);
 	}
 	else {
-		LogCombat("ACSum ac [{}]", ac);
+		LogCombatDetail("ACSum ac [{}]", ac);
 	}
+
 	return ac;
 }
 
@@ -2152,8 +2153,6 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQEmu::skills::Skil
 {
 	LogCombat("Fatal blow dealt by [{}] with [{}] damage, spell [{}], skill [{}]",
 		((killer_mob) ? (killer_mob->GetName()) : ("[nullptr]")), damage, spell, attack_skill);
-
-	entity_list.RemoveMobFromCloseLists(CastToMob());
 
 	Mob *oos = nullptr;
 	if (killer_mob) {

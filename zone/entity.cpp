@@ -2498,9 +2498,6 @@ bool EntityList::RemoveMob(uint16 delete_id)
 
 	auto it = mob_list.find(delete_id);
 	if (it != mob_list.end()) {
-
-		RemoveMobFromCloseLists(it->second);
-
 		if (npc_list.count(delete_id)) {
 			entity_list.RemoveNPC(delete_id);
 		}
@@ -2530,8 +2527,6 @@ bool EntityList::RemoveMob(Mob *delete_mob)
 	auto it = mob_list.begin();
 	while (it != mob_list.end()) {
 		if (it->second == delete_mob) {
-			RemoveMobFromCloseLists(it->second);
-
 			safe_delete(it->second);
 			if (!corpse_list.count(it->first)) {
 				free_ids.push(it->first);
@@ -2554,7 +2549,6 @@ bool EntityList::RemoveNPC(uint16 delete_id)
 	if (it != npc_list.end()) {
 		NPC *npc = it->second;
 		RemoveProximity(delete_id);
-		RemoveMobFromCloseLists(npc->CastToMob());
 		npc_list.erase(it);
 
 		if (npc_limit_list.count(delete_id)) {

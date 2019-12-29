@@ -748,37 +748,77 @@ void EntityList::AESpell(
 
 	int   target_hit_counter = 0;
 	float distance_to_target = 0;
+	float distance           = caster_mob->GetAOERange(spell_id);
 
-	for (auto &it : caster_mob->close_mobs) {
-		current_mob = it.first;
+	LogAoeCast(
+		"Close scan distance [{}] cast distance [{}]",
+		RuleI(Range, MobCloseScanDistance),
+		distance
+	);
 
-		if (!current_mob) {
-			continue;
+	if (distance <= RuleI(Range, MobCloseScanDistance)) {
+
+		LogAoeCast("Using close scan mob list");
+
+		for (auto &it : caster_mob->close_mobs) {
+			current_mob = it.first;
+
+			if (!current_mob) {
+				continue;
+			}
+
+			LogAoeCast("Checking against close scan mob [{}]", current_mob->GetCleanName());
+
+			if (!AESpellFilterCriteria(
+				current_mob,
+				caster_mob,
+				center_mob,
+				spell_id,
+				max_targets,
+				max_targets_allowed,
+				target_hit_counter,
+				distance_to_target,
+				cast_target_position,
+				affect_caster,
+				resist_adjust
+			)) {
+				continue;
+			}
+
+			current_mob->CalcSpellPowerDistanceMod(spell_id, distance_to_target);
+			caster_mob->SpellOnTarget(spell_id, current_mob, false, true, resist_adjust);
 		}
+	} else {
 
-		LogDebug("iterating [{}]", current_mob->GetCleanName());
+		LogAoeCast("Using full entity mob list");
 
-		if (!AESpellFilterCriteria(
-			current_mob,
-			caster_mob,
-			center_mob,
-			spell_id,
-			max_targets,
-			max_targets_allowed,
-			target_hit_counter,
-			distance_to_target,
-			cast_target_position,
-			affect_caster,
-			resist_adjust
-		)) {
-			continue;
+		for (auto &it : mob_list) {
+			current_mob = it.second;
+
+			LogAoeCast("Checking against full zone scan mob [{}]", current_mob->GetCleanName());
+
+			if (!AESpellFilterCriteria(
+				current_mob,
+				caster_mob,
+				center_mob,
+				spell_id,
+				max_targets,
+				max_targets_allowed,
+				target_hit_counter,
+				distance_to_target,
+				cast_target_position,
+				affect_caster,
+				resist_adjust
+			)) {
+				continue;
+			}
+
+			current_mob->CalcSpellPowerDistanceMod(spell_id, distance_to_target);
+			caster_mob->SpellOnTarget(spell_id, current_mob, false, true, resist_adjust);
 		}
-
-		current_mob->CalcSpellPowerDistanceMod(spell_id, distance_to_target);
-		caster_mob->SpellOnTarget(spell_id, current_mob, false, true, resist_adjust);
 	}
 
-	LogDebug("Done iterating [{}]", caster_mob->GetCleanName());
+	LogAoeCast("Done iterating [{}]", caster_mob->GetCleanName());
 
 	if (max_targets && max_targets_allowed) {
 		*max_targets = *max_targets - target_hit_counter;
