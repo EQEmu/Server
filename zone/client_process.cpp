@@ -266,7 +266,11 @@ bool Client::Process() {
 				Mob   *mob     = itr.second;
 				float distance = DistanceSquared(m_Position, mob->GetPosition());
 
-				if (mob->IsNPC()) {
+				if (mob->GetID() <= 0) {
+					continue;
+				}
+
+				if (mob->IsNPC() || mob->IsClient()) {
 					if (distance <= scan_range) {
 						close_mobs.insert(std::pair<uint16, Mob *>(mob->GetID(), mob));
 					}
