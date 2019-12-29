@@ -706,7 +706,7 @@ void EntityList::AETaunt(Client *taunter, float range, int32 bonus_hate)
 			&& taunter->IsAttackAllowed(them)
 			&& DistanceSquaredNoZ(taunter->GetPosition(), them->GetPosition()) <= range_squared) {
 			if (taunter->CheckLosFN(them)) {
-				taunter->Taunt(them, true, 0, true, bonus_hate);
+				taunter->Taunt(them->CastToNPC(), true, 0, true, bonus_hate);
 			}
 		}
 	}
