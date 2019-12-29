@@ -2606,6 +2606,10 @@ void EntityList::ScanCloseMobs(std::unordered_map<uint16, Mob *> &close_mobs, Mo
 	while (it != mob_list.end()) {
 		Mob *mob = it->second;
 
+		if (!mob->IsNPC() && !mob->IsClient()) {
+			continue;
+		}
+
 		float distance = DistanceSquared(scanning_mob->GetPosition(), it->second->GetPosition());
 		if (distance <= scan_range) {
 			close_mobs.insert(std::pair<uint16, Mob *>(mob->GetID(), mob));
