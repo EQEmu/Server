@@ -716,14 +716,19 @@ void EntityList::AESpell(
 	int *max_targets
 )
 {
-	Mob  *current_mob         = nullptr;
-	bool is_detrimental_spell = IsDetrimentalSpell(spell_id);
-	bool is_npc               = caster_mob->IsNPC();
-
 	const auto &cast_target_position =
 				   spells[spell_id].targettype == ST_Ring ?
 					   caster_mob->GetTargetRingLocation() :
 					   static_cast<glm::vec3>(center_mob->GetPosition());
+
+	Mob       *current_mob         = nullptr;
+	bool      is_detrimental_spell = IsDetrimentalSpell(spell_id);
+	bool      is_npc               = caster_mob->IsNPC();
+	float     distance             = caster_mob->GetAOERange(spell_id);
+	float     distance_squared     = distance * distance;
+	float     min_range2           = spells[spell_id].min_range * spells[spell_id].min_range;
+	glm::vec2 min                  = {cast_target_position.x - distance, cast_target_position.y - distance};
+	glm::vec2 max                  = {cast_target_position.x + distance, cast_target_position.y + distance};
 
 	/**
 	 * If using Old Rain Targets - there is no max target limitation
@@ -748,7 +753,6 @@ void EntityList::AESpell(
 
 	int   target_hit_counter = 0;
 	float distance_to_target = 0;
-	float distance           = caster_mob->GetAOERange(spell_id);
 
 	LogAoeCast(
 		"Close scan distance [{}] cast distance [{}]",
@@ -756,66 +760,129 @@ void EntityList::AESpell(
 		distance
 	);
 
-	if (distance <= RuleI(Range, MobCloseScanDistance)) {
+	for (auto &it : entity_list.GetCloseMobList(caster_mob, distance)) {
+		current_mob = it.second;
 
-		LogAoeCast("Using close scan mob list");
-
-		for (auto &it : caster_mob->close_mobs) {
-			current_mob = it.second;
-
-			if (!current_mob) {
-				continue;
-			}
-
-			LogAoeCast("Checking against close scan mob [{}]", current_mob->GetCleanName());
-
-			if (!AESpellFilterCriteria(
-				current_mob,
-				caster_mob,
-				center_mob,
-				spell_id,
-				max_targets,
-				max_targets_allowed,
-				target_hit_counter,
-				distance_to_target,
-				cast_target_position,
-				affect_caster,
-				resist_adjust
-			)) {
-				continue;
-			}
-
-			current_mob->CalcSpellPowerDistanceMod(spell_id, distance_to_target);
-			caster_mob->SpellOnTarget(spell_id, current_mob, false, true, resist_adjust);
+		if (!current_mob) {
+			continue;
 		}
-	} else {
 
-		LogAoeCast("Using full entity mob list");
+		LogAoeCast("Checking AOE against mob [{}]", current_mob->GetCleanName());
 
-		for (auto &it : mob_list) {
-			current_mob = it.second;
+		if (current_mob->IsClient() && !current_mob->CastToClient()->ClientFinishedLoading()) {
+			continue;
+		}
 
-			LogAoeCast("Checking against full zone scan mob [{}]", current_mob->GetCleanName());
+		if (current_mob == caster_mob && !affect_caster) {
+			continue;
+		}
 
-			if (!AESpellFilterCriteria(
-				current_mob,
-				caster_mob,
-				center_mob,
-				spell_id,
-				max_targets,
-				max_targets_allowed,
-				target_hit_counter,
-				distance_to_target,
-				cast_target_position,
-				affect_caster,
-				resist_adjust
-			)) {
+		if (spells[spell_id].targettype == ST_TargetAENoPlayersPets && current_mob->IsPetOwnerClient()) {
+			continue;
+		}
+
+		if (spells[spell_id].targettype == ST_AreaClientOnly && !current_mob->IsClient()) {
+			continue;
+		}
+
+		if (spells[spell_id].targettype == ST_AreaNPCOnly && !current_mob->IsNPC()) {
+			continue;
+		}
+
+		/**
+		 * Check PC / NPC
+		 * 1 = PC
+		 * 2 = NPC
+		 */
+		if (spells[spell_id].pcnpc_only_flag == 1 && !current_mob->IsClient() && !current_mob->IsMerc()) {
+			continue;
+		}
+
+		if (spells[spell_id].pcnpc_only_flag == 2 && (current_mob->IsClient() || current_mob->IsMerc())) {
+			continue;
+		}
+
+		if (!IsWithinAxisAlignedBox(static_cast<glm::vec2>(current_mob->GetPosition()), min, max)) {
+			continue;
+		}
+
+		distance_to_target = DistanceSquared(current_mob->GetPosition(), cast_target_position);
+
+		if (distance_to_target > distance_squared) {
+			continue;
+		}
+
+		if (distance_to_target < min_range2) {
+			continue;
+		}
+
+		if (is_npc && current_mob->IsNPC() &&
+			spells[spell_id].targettype != ST_AreaNPCOnly) {    //check npc->npc casting
+			FACTION_VALUE faction_value = current_mob->GetReverseFactionCon(caster_mob);
+			if (is_detrimental_spell) {
+				//affect mobs that are on our hate list, or
+				//which have bad faction with us
+				if (
+					!(caster_mob->CheckAggro(current_mob) ||
+					  faction_value == FACTION_THREATENLY ||
+					  faction_value == FACTION_SCOWLS)) {
+					continue;
+				}
+			}
+			else {
+				//only affect mobs we would assist.
+				if (!(faction_value <= FACTION_AMIABLE)) {
+					continue;
+				}
+			}
+		}
+
+		/**
+		 * Finally, make sure they are within range
+		 */
+		if (is_detrimental_spell) {
+			if (!caster_mob->IsAttackAllowed(current_mob, true)) {
 				continue;
 			}
-
-			current_mob->CalcSpellPowerDistanceMod(spell_id, distance_to_target);
-			caster_mob->SpellOnTarget(spell_id, current_mob, false, true, resist_adjust);
+			if (center_mob && !spells[spell_id].npc_no_los && !center_mob->CheckLosFN(current_mob)) {
+				continue;
+			}
+			if (!center_mob && !spells[spell_id].npc_no_los && !caster_mob->CheckLosFN(
+				caster_mob->GetTargetRingX(),
+				caster_mob->GetTargetRingY(),
+				caster_mob->GetTargetRingZ(),
+				current_mob->GetSize())) {
+				continue;
+			}
 		}
+		else {
+
+			/**
+			 * Check to stop casting beneficial ae buffs (to wit: bard songs) on enemies...
+			 * This does not check faction for beneficial AE buffs... only agro and attackable.
+			 * I've tested for spells that I can find without problem, but a faction-based
+			 * check may still be needed. Any changes here should also reflect in BardAEPulse()
+			 */
+			if (caster_mob->IsAttackAllowed(current_mob, true)) {
+				continue;
+			}
+			if (caster_mob->CheckAggro(current_mob)) {
+				continue;
+			}
+		}
+
+		/**
+		 * Increment hit count if max targets
+		 */
+		if (max_targets_allowed) {
+			target_hit_counter++;
+			if (target_hit_counter >= max_targets_allowed) {
+				break;
+			}
+		}
+
+		current_mob->CalcSpellPowerDistanceMod(spell_id, distance_to_target);
+		caster_mob->SpellOnTarget(spell_id, current_mob, false, true, resist_adjust);
 	}
 
 	LogAoeCast("Done iterating [{}]", caster_mob->GetCleanName());
@@ -823,155 +890,6 @@ void EntityList::AESpell(
 	if (max_targets && max_targets_allowed) {
 		*max_targets = *max_targets - target_hit_counter;
 	}
-}
-
-/**
- * @param caster_mob
- * @param center_mob
- * @param spell_id
- * @param affect_caster
- * @param resist_adjust
- * @param max_targets
- */
-bool EntityList::AESpellFilterCriteria(
-	Mob *current_mob,
-	Mob *caster_mob,
-	Mob *center_mob,
-	uint16 spell_id,
-	int *max_targets,
-	int &max_targets_allowed,
-	int &target_hit_counter,
-	float &distance_to_target,
-	const glm::vec3 &cast_target_position,
-	bool affect_caster,
-	int16 resist_adjust
-) {
-
-	if (!current_mob) {
-		return false;
-	}
-
-	bool      is_npc               = caster_mob->IsNPC();
-	float     distance             = caster_mob->GetAOERange(spell_id);
-	float     distance_squared     = distance * distance;
-	float     min_range2           = spells[spell_id].min_range * spells[spell_id].min_range;
-	bool      is_detrimental_spell = IsDetrimentalSpell(spell_id);
-	glm::vec2 min                  = {cast_target_position.x - distance, cast_target_position.y - distance};
-	glm::vec2 max                  = {cast_target_position.x + distance, cast_target_position.y + distance};
-
-	if (current_mob->IsClient() && !current_mob->CastToClient()->ClientFinishedLoading()) {
-		return false;
-	}
-
-	if (current_mob == caster_mob && !affect_caster) {
-		return false;
-	}
-
-	if (spells[spell_id].targettype == ST_TargetAENoPlayersPets && current_mob->IsPetOwnerClient()) {
-		return false;
-	}
-
-	if (spells[spell_id].targettype == ST_AreaClientOnly && !current_mob->IsClient()) {
-		return false;
-	}
-
-	if (spells[spell_id].targettype == ST_AreaNPCOnly && !current_mob->IsNPC()) {
-		return false;
-	}
-
-	/**
-	 * Check PC / NPC
-	 * 1 = PC
-	 * 2 = NPC
-	 */
-	if (spells[spell_id].pcnpc_only_flag == 1 && !current_mob->IsClient() && !current_mob->IsMerc()) {
-		return false;
-	}
-
-	if (spells[spell_id].pcnpc_only_flag == 2 && (current_mob->IsClient() || current_mob->IsMerc())) {
-		return false;
-	}
-
-	if (!IsWithinAxisAlignedBox(static_cast<glm::vec2>(current_mob->GetPosition()), min, max)) {
-		return false;
-	}
-
-	distance_to_target = DistanceSquared(current_mob->GetPosition(), cast_target_position);
-
-	if (distance_to_target > distance_squared) {
-		return false;
-	}
-
-	if (distance_to_target < min_range2) {
-		return false;
-	}
-
-	if (is_npc && current_mob->IsNPC() &&
-		spells[spell_id].targettype != ST_AreaNPCOnly) {    //check npc->npc casting
-		FACTION_VALUE faction_value = current_mob->GetReverseFactionCon(caster_mob);
-		if (is_detrimental_spell) {
-			//affect mobs that are on our hate list, or
-			//which have bad faction with us
-			if (
-				!(caster_mob->CheckAggro(current_mob) ||
-				  faction_value == FACTION_THREATENLY ||
-				  faction_value == FACTION_SCOWLS)) {
-				return false;
-			}
-		}
-		else {
-			//only affect mobs we would assist.
-			if (!(faction_value <= FACTION_AMIABLE)) {
-				return false;
-			}
-		}
-	}
-
-	/**
-	 * Finally, make sure they are within range
-	 */
-	if (is_detrimental_spell) {
-		if (!caster_mob->IsAttackAllowed(current_mob, true)) {
-			return false;
-		}
-		if (center_mob && !spells[spell_id].npc_no_los && !center_mob->CheckLosFN(current_mob)) {
-			return false;
-		}
-		if (!center_mob && !spells[spell_id].npc_no_los && !caster_mob->CheckLosFN(
-			caster_mob->GetTargetRingX(),
-			caster_mob->GetTargetRingY(),
-			caster_mob->GetTargetRingZ(),
-			current_mob->GetSize())) {
-			return false;
-		}
-	}
-	else {
-
-		/**
-		 * Check to stop casting beneficial ae buffs (to wit: bard songs) on enemies...
-		 * This does not check faction for beneficial AE buffs... only agro and attackable.
-		 * I've tested for spells that I can find without problem, but a faction-based
-		 * check may still be needed. Any changes here should also reflect in BardAEPulse()
-		 */
-		if (caster_mob->IsAttackAllowed(current_mob, true)) {
-			return false;
-		}
-		if (caster_mob->CheckAggro(current_mob)) {
-			return false;
-		}
-	}
-
-	/**
-	 * Increment hit count if max targets
-	 */
-	if (max_targets_allowed) {
-		target_hit_counter++;
-		if (target_hit_counter >= max_targets_allowed) {
-			return false;
-		}
-	}
-
-	return true;
 }
 
 void EntityList::MassGroupBuff(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster)

@@ -5030,3 +5030,18 @@ void EntityList::ReloadMerchants() {
 		}
 	}
 }
+
+/**
+ * @param mob
+ * @param distance
+ * @return
+ */
+std::unordered_map<uint16, Mob *> &EntityList::GetCloseMobList(Mob *mob, float distance)
+{
+	if (distance <= RuleI(Range, MobCloseScanDistance)) {
+		return mob->close_mobs;
+	}
+
+	return mob_list;
+}
+

@@ -412,19 +412,6 @@ public:
 		int16 resist_adjust = 0,
 		int *max_targets = nullptr
 	);
-	static bool AESpellFilterCriteria(
-		Mob *current_mob,
-		Mob *caster_mob,
-		Mob *center_mob,
-		uint16 spell_id,
-		int *max_targets,
-		int &max_targets_allowed,
-		int &target_hit_counter,
-		float &distance_to_target,
-		const glm::vec3 &cast_target_position,
-		bool affect_caster = true,
-		int16 resist_adjust = 0
-	);
 	void MassGroupBuff(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster = true);
 	void AEBardPulse(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster = true);
 
@@ -525,6 +512,8 @@ public:
 	inline const std::unordered_map<uint16, Object *> &GetObjectList() { return object_list; }
 	inline const std::unordered_map<uint16, Doors *> &GetDoorsList() { return door_list; }
 
+	std::unordered_map<uint16, Mob *> &GetCloseMobList(Mob *mob, float distance);
+
 	void	DepopAll(int NPCTypeID, bool StartSpawnTimer = true);
 
 	uint16 GetFreeID();
@@ -537,6 +526,7 @@ public:
 	bool IsTrapGroupSpawned(uint32 trap_id, uint8 group);
 	void UpdateAllTraps(bool respawn, bool repopnow = false);
 	void ClearTrapPointers();
+
 protected:
 	friend class Zone;
 	void	Depop(bool StartSpawnTimer = false);
@@ -592,6 +582,7 @@ private:
 	private:
 		std::list<Bot*> bot_list;
 #endif
+
 };
 
 class BulkZoneSpawnPacket {

@@ -171,6 +171,7 @@ public:
 	void DisplayInfo(Mob *mob);
 
 	std::unordered_map<uint16, Mob *> close_mobs;
+	std::unordered_map<uint16, Mob *>& GetSmartMobList(float distance = 0);
 	Timer mob_scan_close;
 	Timer mob_check_moving_timer;
 
