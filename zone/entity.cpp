@@ -2602,22 +2602,24 @@ void EntityList::ScanCloseMobs(std::unordered_map<uint16, Mob *> &close_mobs, Mo
 
 	close_mobs.clear();
 
-	auto it = mob_list.begin();
-	while (it != mob_list.end()) {
-		Mob *mob = it->second;
+	for (auto &e : mob_list) {
+		auto mob = e.second;
 
 		if (!mob->IsNPC() && !mob->IsClient()) {
 			continue;
 		}
 
-		float distance = DistanceSquared(scanning_mob->GetPosition(), it->second->GetPosition());
+		if (mob->GetID() <= 0) {
+			continue;
+		}
+
+		float distance = DistanceSquared(scanning_mob->GetPosition(), mob->GetPosition());
 		if (distance <= scan_range) {
 			close_mobs.insert(std::pair<uint16, Mob *>(mob->GetID(), mob));
 		}
-		else if (it->second->GetAggroRange() >= scan_range) {
+		else if (mob->GetAggroRange() >= scan_range) {
 			close_mobs.insert(std::pair<uint16, Mob *>(mob->GetID(), mob));
 		}
-		++it;
 	}
 
 	LogAIScanClose("Close List Size [{}] for mob [{}]", close_mobs.size(), scanning_mob->GetCleanName());
