@@ -170,11 +170,9 @@ public:
 
 	void DisplayInfo(Mob *mob);
 
-	std::unordered_map<Mob *, float> close_mobs;
+	std::unordered_map<uint16, Mob *> close_mobs;
 	Timer mob_scan_close;
 	Timer mob_check_moving_timer;
-
-	void GetCloseMobList(std::list<std::pair<Mob *, float>> &m_list);
 
 	//Somewhat sorted: needs documenting!
 

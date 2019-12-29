@@ -761,7 +761,7 @@ void EntityList::AESpell(
 		LogAoeCast("Using close scan mob list");
 
 		for (auto &it : caster_mob->close_mobs) {
-			current_mob = it.first;
+			current_mob = it.second;
 
 			if (!current_mob) {
 				continue;

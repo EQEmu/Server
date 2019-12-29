@@ -1366,8 +1366,7 @@ void Mob::AI_Process() {
 			 * NPC to NPC aggro (npc_aggro flag set)
 			 */
 			for (auto &close_mob : close_mobs) {
-				Mob   *mob     = close_mob.first;
-				float distance = close_mob.second;
+				Mob *mob = close_mob.second;
 
 				if (mob->IsClient()) {
 					continue;

@@ -109,6 +109,7 @@ public:
 	const Beacon	*CastToBeacon() const;
 	const Encounter *CastToEncounter() const;
 
+	inline const uint16& GetInitialId() const { return initial_id; }
 	inline const uint16& GetID() const { return id; }
 	inline const time_t& GetSpawnTimeStamp() const { return spawn_timestamp; }
 
@@ -122,10 +123,17 @@ public:
 
 protected:
 	friend class EntityList;
-	inline virtual void SetID(uint16 set_id) { id = set_id; }
+	inline virtual void SetID(uint16 set_id) {
+		id = set_id;
+
+		if (initial_id == 0 && set_id > 0) {
+			initial_id = set_id;
+		}
+	}
 	uint32 pDBAsyncWorkID;
 private:
 	uint16 id;
+	uint16 initial_id;
 	time_t spawn_timestamp;
 };
 
@@ -523,7 +531,7 @@ public:
 	void RefreshAutoXTargets(Client *c);
 	void RefreshClientXTargets(Client *c);
 	void SendAlternateAdvancementStats();
-	void ScanCloseMobs(std::unordered_map<Mob *, float> &close_mobs, Mob *scanning_mob);
+	void ScanCloseMobs(std::unordered_map<uint16, Mob *> &close_mobs, Mob *scanning_mob);
 
 	void GetTrapInfo(Client* client);
 	bool IsTrapGroupSpawned(uint32 trap_id, uint8 group);

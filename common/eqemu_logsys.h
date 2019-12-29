@@ -111,6 +111,7 @@ namespace Logs {
 		AIYellForHelp,
 		AICastBeneficialClose,
 		AoeCast,
+		EntityManagement,
 		MaxCategoryID /* Don't Remove this */
 	};
 
@@ -181,6 +182,7 @@ namespace Logs {
 		"AI Yell For Help",
 		"AI Cast Beneficial Close",
 		"AOE Cast",
+		"Entity Management",
 	};
 }
 

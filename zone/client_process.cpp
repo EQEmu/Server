@@ -268,10 +268,10 @@ bool Client::Process() {
 
 				if (mob->IsNPC()) {
 					if (distance <= scan_range) {
-						close_mobs.insert(std::pair<Mob *, float>(mob, distance));
+						close_mobs.insert(std::pair<uint16, Mob *>(mob->GetID(), mob));
 					}
 					else if ((mob->GetAggroRange() * mob->GetAggroRange()) > scan_range) {
-						close_mobs.insert(std::pair<Mob *, float>(mob, distance));
+						close_mobs.insert(std::pair<uint16, Mob *>(mob->GetID(), mob));
 					}
 				}
 			}
@@ -597,7 +597,7 @@ bool Client::Process() {
 	if (zone->CanDoCombat() && ret && !GetFeigned() && client_scan_npc_aggro_timer.Check()) {
 		int npc_scan_count = 0;
 		for (auto & close_mob : close_mobs) {
-			Mob *mob = close_mob.first;
+			Mob *mob = close_mob.second;
 
 			if (!mob)
 				continue;

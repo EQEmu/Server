@@ -500,6 +500,7 @@ Mob::~Mob()
 	UninitializeBuffSlots();
 
 	entity_list.RemoveMobFromCloseLists(this);
+	close_mobs.clear();
 
 #ifdef BOTS
 	LeaveHealRotationTargetPool();
@@ -529,16 +530,6 @@ uint32 Mob::GetAppearanceValue(EmuAppearance iAppearance) {
 			break;
 	}
 	return(ANIM_STAND);
-}
-
-void Mob::GetCloseMobList(std::list<std::pair<Mob *, float>> &m_list)
-{
-	m_list.clear();
-	auto it = close_mobs.begin();
-	while (it != close_mobs.end()) {
-		m_list.push_back(std::make_pair(it->first, it->second));
-		++it;
-	}
 }
 
 void Mob::SetInvisible(uint8 state)

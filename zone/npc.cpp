@@ -3070,21 +3070,22 @@ bool NPC::AICheckCloseBeneficialSpells(
 	 * Check through close range mobs
 	 */
 	for (auto & close_mob : close_mobs) {
-		Mob   *mob                      = close_mob.first;
-		float cached_close_mob_distance = close_mob.second;
+		Mob *mob = close_mob.second;
 
 		if (mob->IsClient()) {
 			continue;
 		}
 
-		if (cached_close_mob_distance > in_cast_range) {
+		float distance = DistanceSquared(mob->GetPosition(), GetPosition());
+
+		if (distance > in_cast_range) {
 			continue;
 		}
 
 		LogAICastBeneficialClose(
 			"NPC [{}] Distance [{}] Cast Range [{}] Caster [{}]",
 			mob->GetCleanName(),
-			cached_close_mob_distance,
+			distance,
 			in_cast_range,
 			caster->GetCleanName()
 		);
@@ -3133,9 +3134,8 @@ void NPC::AIYellForHelp(Mob *sender, Mob *attacker)
 		GetID()
 	);
 
-	for (auto & close_mob : close_mobs) {
-		Mob *mob = close_mob.first;
-
+	for (auto &close_mob : close_mobs) {
+		Mob   *mob     = close_mob.second;
 		float distance = DistanceSquared(m_Position, mob->GetPosition());
 
 		if (mob->IsClient()) {
