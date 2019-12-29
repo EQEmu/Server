@@ -6743,11 +6743,22 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 	GetRawACNoShield(shield_ac);
 
 	std::string skill_list[] = {
-		"1H Blunt","1H Slashing","2H Blunt","2H Slashing","Abjuration","Alteration","Apply Poison","Archery","Backstab","Bind Wound","Bash","Block","Brass Instruments","Channeling","Conjuration",
-		"Defense","Disarm","Disarm Traps","Divination","Dodge","Double Attack","Dragon Punch","Dual Wield","Eagle Strike","Evocation","Feign Death","Flying Kick","Forage","Hand To Hand","Hide","Kick",
-		"Meditate","Mend","Offense","Parry","Pick Lock","Piercing","Riposte","Round Kick","Safe Fall","Sense Heading","Singing","Sneak","Specialize Abjuration","Specialize Alteration","Specialize Conjuration",
-		"Specialize Divination","Specialize Evocation","Pick Pockets","Stringed_Instruments","Swimming","Throwing","Tiger Claw","Tracking","Wind Instruments","Fishing","Make Poison","Tinkering","Research","Alchemy",
-		"Baking","Tailoring","Sense Traps","Blacksmithing","Fletching","Brewing","Alcohol_Tolerance","Begging","Jewelry Making","Pottery","Percussion Instruments","Intimidation","Berserking","Taunt","Frenzy"
+		"1H Blunt","1H Slashing","2H Blunt","2H Slashing","Abjuration",
+		"Alteration","Apply Poison","Archery","Backstab","Bind Wound",
+		"Bash","Block","Brass Instruments","Channeling","Conjuration",
+		"Defense","Disarm","Disarm Traps","Divination","Dodge",
+		"Double Attack","Dragon Punch","Dual Wield","Eagle Strike","Evocation",
+		"Feign Death","Flying Kick","Forage","Hand To Hand","Hide",
+		"Kick","Meditate","Mend","Offense","Parry",
+		"Pick Lock","1H Piercing","Riposte","Round Kick","Safe Fall",
+		"Sense Heading","Singing","Sneak","Specialize Abjuration","Specialize Alteration",
+		"Specialize Conjuration","Specialize Divination","Specialize Evocation","Pick Pockets","Stringed Instruments",
+		"Swimming","Throwing","Tiger Claw","Tracking","Wind Instruments",
+		"Fishing","Make Poison","Tinkering","Research","Alchemy",
+		"Baking","Tailoring","Sense Traps","Blacksmithing","Fletching",
+		"Brewing","Alcohol_Tolerance","Begging","Jewelry Making","Pottery",
+		"Percussion Instruments","Intimidation","Berserking","Taunt","Frenzy",
+		"Remove Traps","Triple Attack","2H Piercing"
 	};
 
 	std::string skill_mods = "";
