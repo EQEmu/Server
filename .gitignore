@@ -34,3 +34,5 @@ perl/
 
 submodules/*
 cmake-build-debug/
+
+.nfs.*
