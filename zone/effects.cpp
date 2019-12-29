@@ -907,41 +907,64 @@ void EntityList::AESpell(
 	}
 }
 
-void EntityList::MassGroupBuff(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster)
+/**
+ * @param caster
+ * @param center
+ * @param spell_id
+ * @param affect_caster
+ */
+void EntityList::MassGroupBuff(
+	Mob *caster,
+	Mob *center,
+	uint16 spell_id,
+	bool affect_caster)
 {
-	Mob *curmob = nullptr;
+	Mob   *current_mob         = nullptr;
+	float distance             = caster->GetAOERange(spell_id);
+	float distance_squared     = distance * distance;
+	bool  is_detrimental_spell = IsDetrimentalSpell(spell_id);
 
-	float dist = caster->GetAOERange(spell_id);
-	float dist2 = dist * dist;
+	for (auto &it : entity_list.GetCloseMobList(caster, distance)) {
+		current_mob = it.second;
 
-	bool bad = IsDetrimentalSpell(spell_id);
-
-	for (auto & it : mob_list) {
-		curmob = it.second;
-		if (curmob == center)	//do not affect center
+		/**
+		 * Skip center
+		 */
+		if (current_mob == center) {
 			continue;
-		if (curmob == caster && !affect_caster)	//watch for caster too
-			continue;
-		if (DistanceSquared(center->GetPosition(), curmob->GetPosition()) > dist2)	//make sure they are in range
-			continue;
+		}
 
-		//Only npcs mgb should hit are client pets...
-		if (curmob->IsNPC()) {
-			Mob *owner = curmob->GetOwner();
+		/**
+		 * Skip self
+		 */
+		if (current_mob == caster && !affect_caster) {
+			continue;
+		}
+
+		if (DistanceSquared(center->GetPosition(), current_mob->GetPosition()) > distance_squared) {    //make sure they are in range
+			continue;
+		}
+
+		/**
+		 * Pets
+		 */
+		if (current_mob->IsNPC()) {
+			Mob *owner = current_mob->GetOwner();
 			if (owner) {
 				if (!owner->IsClient()) {
 					continue;
 				}
-			} else {
+			}
+			else {
 				continue;
 			}
 		}
 
-		if (bad) {
+		if (is_detrimental_spell) {
 			continue;
 		}
 
-		caster->SpellOnTarget(spell_id, curmob);
+		caster->SpellOnTarget(spell_id, current_mob);
 	}
 }
 
