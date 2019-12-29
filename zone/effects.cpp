@@ -930,57 +930,88 @@ void EntityList::MassGroupBuff(Mob *caster, Mob *center, uint16 spell_id, bool a
 	}
 }
 
-// causes caster to hit every mob within dist range of center with
-// a bard pulse of spell_id.
-// NPC spells will only affect other NPCs with compatible faction
-void EntityList::AEBardPulse(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster)
+/**
+ * Causes caster to hit every mob within dist range of center with a bard pulse of spell_id
+ * NPC spells will only affect other NPCs with compatible faction
+ *
+ * @param caster
+ * @param center
+ * @param spell_id
+ * @param affect_caster
+ */
+void EntityList::AEBardPulse(
+	Mob *caster,
+	Mob *center,
+	uint16 spell_id,
+	bool affect_caster)
 {
-	Mob *curmob = nullptr;
+	Mob   *current_mob         = nullptr;
+	float distance             = caster->GetAOERange(spell_id);
+	float distance_squared     = distance * distance;
+	bool  is_detrimental_spell = IsDetrimentalSpell(spell_id);
+	bool  is_npc               = caster->IsNPC();
 
-	float dist = caster->GetAOERange(spell_id);
-	float dist2 = dist * dist;
+	for (auto &it : entity_list.GetCloseMobList(caster, distance)) {
+		current_mob = it.second;
 
-	bool bad = IsDetrimentalSpell(spell_id);
-	bool isnpc = caster->IsNPC();
+		/**
+		 * Skip self
+		 */
+		if (current_mob == center) {
+			continue;
+		}
 
-	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
-		curmob = it->second;
-		if (curmob == center)	//do not affect center
+		if (current_mob == caster && !affect_caster) {
 			continue;
-		if (curmob == caster && !affect_caster)	//watch for caster too
+		}
+
+		if (DistanceSquared(center->GetPosition(), current_mob->GetPosition()) > distance_squared) {    //make sure they are in range
 			continue;
-		if (DistanceSquared(center->GetPosition(), curmob->GetPosition()) > dist2)	//make sure they are in range
-			continue;
-		if (isnpc && curmob->IsNPC()) {	//check npc->npc casting
-			FACTION_VALUE f = curmob->GetReverseFactionCon(caster);
-			if (bad) {
+		}
+
+		/**
+		 * check npc->npc casting
+		 */
+		if (is_npc && current_mob->IsNPC()) {
+			FACTION_VALUE faction = current_mob->GetReverseFactionCon(caster);
+			if (is_detrimental_spell) {
 				//affect mobs that are on our hate list, or
 				//which have bad faction with us
-				if (!(caster->CheckAggro(curmob) || f == FACTION_THREATENLY || f == FACTION_SCOWLS) )
+				if (!(caster->CheckAggro(current_mob) || faction == FACTION_THREATENLY || faction == FACTION_SCOWLS)) {
 					continue;
-			} else {
+				}
+			}
+			else {
 				//only affect mobs we would assist.
-				if (!(f <= FACTION_AMIABLE))
+				if (!(faction <= FACTION_AMIABLE)) {
 					continue;
+				}
 			}
 		}
-		//finally, make sure they are within range
-		if (bad) {
-			if (!center->CheckLosFN(curmob))
+
+		/**
+		 * LOS
+		 */
+		if (is_detrimental_spell) {
+			if (!center->CheckLosFN(current_mob)) {
 				continue;
-		} else { // check to stop casting beneficial ae buffs (to wit: bard songs) on enemies...
+			}
+		}
+		else { // check to stop casting beneficial ae buffs (to wit: bard songs) on enemies...
 			// See notes in AESpell() above for more info.
-			if (caster->IsAttackAllowed(curmob, true))
+			if (caster->IsAttackAllowed(current_mob, true)) {
 				continue;
-			if (caster->CheckAggro(curmob))
+			}
+			if (caster->CheckAggro(current_mob)) {
 				continue;
+			}
 		}
 
-		//if we get here... cast the spell.
-		curmob->BardPulse(spell_id, caster);
+		current_mob->BardPulse(spell_id, caster);
 	}
-	if (caster->IsClient())
+	if (caster->IsClient()) {
 		caster->CastToClient()->CheckSongSkillIncrease(spell_id);
+	}
 }
 
 // Rampage and stuff for clients. Normal and Duration rampages
