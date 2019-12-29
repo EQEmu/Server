@@ -3019,14 +3019,14 @@ void NPC::SetSimpleRoamBox(float box_size, float move_distance, int move_delay)
 /**
  * @param caster
  * @param chance
- * @param in_cast_range
+ * @param cast_range
  * @param spell_types
  * @return
  */
 bool NPC::AICheckCloseBeneficialSpells(
 	NPC *caster,
 	uint8 chance,
-	float in_cast_range,
+	float cast_range,
 	uint32 spell_types
 )
 {
@@ -3062,23 +3062,17 @@ bool NPC::AICheckCloseBeneficialSpells(
 	}
 
 	/**
-	 * Cast range
-	 */
-	in_cast_range = (in_cast_range * in_cast_range);
-
-	/**
 	 * Check through close range mobs
 	 */
-	for (auto & close_mob : close_mobs) {
+	for (auto & close_mob : entity_list.GetCloseMobList(caster, cast_range)) {
 		Mob *mob = close_mob.second;
 
 		if (mob->IsClient()) {
 			continue;
 		}
 
-		float distance = DistanceSquared(mob->GetPosition(), GetPosition());
-
-		if (distance > in_cast_range) {
+		float distance = Distance(mob->GetPosition(), caster->GetPosition());
+		if (distance > cast_range) {
 			continue;
 		}
 
@@ -3086,7 +3080,7 @@ bool NPC::AICheckCloseBeneficialSpells(
 			"NPC [{}] Distance [{}] Cast Range [{}] Caster [{}]",
 			mob->GetCleanName(),
 			distance,
-			in_cast_range,
+			cast_range,
 			caster->GetCleanName()
 		);
 
@@ -3134,7 +3128,7 @@ void NPC::AIYellForHelp(Mob *sender, Mob *attacker)
 		GetID()
 	);
 
-	for (auto &close_mob : close_mobs) {
+	for (auto &close_mob : entity_list.GetCloseMobList(sender)) {
 		Mob   *mob     = close_mob.second;
 		float distance = DistanceSquared(m_Position, mob->GetPosition());
 
@@ -3143,18 +3137,18 @@ void NPC::AIYellForHelp(Mob *sender, Mob *attacker)
 		}
 
 		float assist_range = (mob->GetAssistRange() * mob->GetAssistRange());
-
 		if (distance > assist_range) {
 			continue;
 		}
 
 		LogAIYellForHelpDetail(
-			"NPC [{}] ID [{}] is scanning - checking against NPC [{}] range [{}] dist [{}]",
+			"NPC [{}] ID [{}] is scanning - checking against NPC [{}] range [{}] dist [{}] in_range [{}]",
 			GetCleanName(),
 			GetID(),
 			mob->GetCleanName(),
 			assist_range,
-			distance
+			distance,
+			(distance < assist_range)
 		);
 
 		if (mob->CheckAggro(attacker)) {

@@ -5032,6 +5032,9 @@ void EntityList::ReloadMerchants() {
 }
 
 /**
+ * If we have a distance requested that is greater than our scanning distance
+ * then we return the full list
+ *
  * @param mob
  * @param distance
  * @return

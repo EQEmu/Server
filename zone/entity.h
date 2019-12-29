@@ -512,7 +512,7 @@ public:
 	inline const std::unordered_map<uint16, Object *> &GetObjectList() { return object_list; }
 	inline const std::unordered_map<uint16, Doors *> &GetDoorsList() { return door_list; }
 
-	std::unordered_map<uint16, Mob *> &GetCloseMobList(Mob *mob, float distance);
+	std::unordered_map<uint16, Mob *> &GetCloseMobList(Mob *mob, float distance = 0);
 
 	void	DepopAll(int NPCTypeID, bool StartSpawnTimer = true);
 
