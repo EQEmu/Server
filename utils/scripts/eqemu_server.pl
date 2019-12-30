@@ -1693,7 +1693,7 @@ sub fetch_server_dlls {
 
 sub fetch_peq_db_full {
     print "[Install] Downloading latest PEQ Database... Please wait...\n";
-    get_remote_file("http://edit.peqtgc.com/weekly/peq_beta.zip", "updates_staged/peq_beta.zip", 1);
+    get_remote_file("http://edit.projecteq.net/weekly/peq_beta.zip", "updates_staged/peq_beta.zip", 1);
     print "[Install] Downloaded latest PEQ Database... Extracting...\n";
     unzip('updates_staged/peq_beta.zip', 'updates_staged/peq_db/');
     my $start_dir = "updates_staged/peq_db";
