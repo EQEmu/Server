@@ -253,13 +253,12 @@ bool Client::Process() {
 
 		/**
 		 * Scan close range mobs
-		 *
 		 * Used in aggro checks
 		 */
-		if (npc_close_scan_timer.Check()) {
+		if (mob_close_scan_timer.Check()) {
 			close_mobs.clear();
 
-			float scan_range = (RuleI(Range, ClientNPCScan) * RuleI(Range, ClientNPCScan));
+			float scan_range = RuleI(Range, MobCloseScanDistance) * RuleI(Range, MobCloseScanDistance);
 			auto  &mob_list  = entity_list.GetMobList();
 
 			for (auto itr : mob_list) {
