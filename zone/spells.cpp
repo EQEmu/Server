@@ -1151,7 +1151,13 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	// first check for component reduction
 	if(IsClient()) {
 		int reg_focus = CastToClient()->GetFocusEffect(focusReagentCost,spell_id);//Client only
-		if(zone->random.Roll(reg_focus)) {
+		/* it seems something causes some items not to consume reagents, it's not click type or temp flag
+		 * it maybe cast time being instant, which I had a hard time disproving, so lets do that
+		 * Items that might prove this wrong: Mystic Cloak (1057), Moss Mask (1400), and a bunch others
+		 */
+		if (item && item->GetItem() && item->GetItem()->CastTime == 0) {
+			LogSpells("Spell [{}]: Casted from instant clicky, prevent reagent consumption", spell_id);
+		} else if(zone->random.Roll(reg_focus)) {
 			LogSpells("Spell [{}]: Reagent focus item prevented reagent consumption ([{}] chance)", spell_id, reg_focus);
 		} else {
 			if(reg_focus > 0)
