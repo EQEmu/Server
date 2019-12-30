@@ -967,6 +967,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 							uint16 mana_used, uint32 inventory_slot, int16 resist_adjust)
 {
 	bool IsFromItem = false;
+	EQEmu::ItemInstance *item = nullptr;
 
 	if(IsClient() && slot != CastingSlot::Item && slot != CastingSlot::PotionBelt && spells[spell_id].recast_time > 1000) { // 10 is item
 		if(!CastToClient()->GetPTimers().Expired(&database, pTimerSpellStart + spell_id, false)) {
@@ -981,10 +982,10 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	if(IsClient() && (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt))
 	{
 		IsFromItem = true;
-		EQEmu::ItemInstance *itm = CastToClient()->GetInv().GetItem(inventory_slot);
-		if(itm && itm->GetItem()->RecastDelay > 0)
+		item = CastToClient()->GetInv().GetItem(inventory_slot);
+		if(item && item->GetItem()->RecastDelay > 0)
 		{
-			if(!CastToClient()->GetPTimers().Expired(&database, (pTimerItemStart + itm->GetItem()->RecastType), false)) {
+			if(!CastToClient()->GetPTimers().Expired(&database, (pTimerItemStart + item->GetItem()->RecastType), false)) {
 				MessageString(Chat::Red, SPELL_RECAST);
 				LogSpells("Casting of [{}] canceled: item spell reuse timer not expired", spell_id);
 				StopCasting();
@@ -1298,17 +1299,16 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 		&& inventory_slot != 0xFFFFFFFF)	// 10 is an item
 	{
 		bool fromaug = false;
-		const EQEmu::ItemInstance* inst = CastToClient()->GetInv()[inventory_slot];
 		EQEmu::ItemData* augitem = nullptr;
 		uint32 recastdelay = 0;
 		uint32 recasttype = 0;
 
 		while (true) {
-			if (inst == nullptr)
+			if (item == nullptr)
 				break;
 
 			for (int r = EQEmu::invaug::SOCKET_BEGIN; r <= EQEmu::invaug::SOCKET_END; r++) {
-				const EQEmu::ItemInstance* aug_i = inst->GetAugment(r);
+				const EQEmu::ItemInstance* aug_i = item->GetAugment(r);
 
 				if (!aug_i)
 					continue;
@@ -1346,18 +1346,18 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 			}
 		}
 
-		if (inst && inst->IsClassCommon() && (inst->GetItem()->Click.Effect == spell_id) && inst->GetCharges() || fromaug)
+		if (item && item->IsClassCommon() && (item->GetItem()->Click.Effect == spell_id) && item->GetCharges() || fromaug)
 		{
-			//const ItemData* item = inst->GetItem();
-			int16 charges = inst->GetItem()->MaxCharges;
+			//const ItemData* item = item->GetItem();
+			int16 charges = item->GetItem()->MaxCharges;
 
 			if(fromaug) { charges = -1; } //Don't destroy the parent item
 
 			if(charges > -1) {	// charged item, expend a charge
-				LogSpells("Spell [{}]: Consuming a charge from item [{}] ([{}]) which had [{}]/[{}] charges", spell_id, inst->GetItem()->Name, inst->GetItem()->ID, inst->GetCharges(), inst->GetItem()->MaxCharges);
+				LogSpells("Spell [{}]: Consuming a charge from item [{}] ([{}]) which had [{}]/[{}] charges", spell_id, item->GetItem()->Name, item->GetItem()->ID, item->GetCharges(), item->GetItem()->MaxCharges);
 				DeleteChargeFromSlot = inventory_slot;
 			} else {
-				LogSpells("Spell [{}]: Cast from unlimited charge item [{}] ([{}]) ([{}] charges)", spell_id, inst->GetItem()->Name, inst->GetItem()->ID, inst->GetItem()->MaxCharges);
+				LogSpells("Spell [{}]: Cast from unlimited charge item [{}] ([{}]) ([{}] charges)", spell_id, item->GetItem()->Name, item->GetItem()->ID, item->GetItem()->MaxCharges);
 			}
 		}
 		else
