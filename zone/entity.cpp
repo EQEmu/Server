@@ -1583,41 +1583,73 @@ void EntityList::QueueClientsByXTarget(Mob *sender, const EQApplicationPacket *a
 	}
 }
 
-void EntityList::QueueCloseClients(Mob *sender, const EQApplicationPacket *app,
-		bool ignore_sender, float dist, Mob *SkipThisMob, bool ackreq, eqFilterType filter)
+/**
+ * @param sender
+ * @param app
+ * @param ignore_sender
+ * @param distance
+ * @param skipped_mob
+ * @param is_ack_required
+ * @param filter
+ */
+void EntityList::QueueCloseClients(
+	Mob *sender,
+	const EQApplicationPacket *app,
+	bool ignore_sender,
+	float distance,
+	Mob *skipped_mob,
+	bool is_ack_required,
+	eqFilterType filter
+)
 {
 	if (sender == nullptr) {
 		QueueClients(sender, app, ignore_sender);
 		return;
 	}
 
-	if (dist <= 0)
-		dist = 600;
-	float dist2 = dist * dist; //pow(dist, 2);
+	if (distance <= 0) {
+		distance = 600;
+	}
 
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
-		Client *ent = it->second;
+	float distance_squared = distance * distance;
 
-		if ((!ignore_sender || ent != sender) && (ent != SkipThisMob)) {
-			eqFilterMode filter2 = ent->GetFilter(filter);
-			if(ent->Connected() &&
-				(filter == FilterNone
-				|| filter2 == FilterShow
-				|| (filter2 == FilterShowGroupOnly && (sender == ent ||
-					(ent->GetGroup() && ent->GetGroup()->IsGroupMember(sender))))
-				|| (filter2 == FilterShowSelfOnly && ent == sender))
-			&& (DistanceSquared(ent->GetPosition(), sender->GetPosition()) <= dist2)) {
-				ent->QueuePacket(app, ackreq, Client::CLIENT_CONNECTED);
+	for (auto &e : GetCloseMobList(sender, distance)) {
+		Mob *mob = e.second;
+
+		if (!mob->IsClient()) {
+			continue;
+		}
+
+		Client *client = mob->CastToClient();
+
+		if ((!ignore_sender || client != sender) && (client != skipped_mob)) {
+
+			if (DistanceSquared(client->GetPosition(), sender->GetPosition()) <= distance_squared) {
+				continue;
+			}
+
+			if (!client->Connected()) {
+				continue;
+			}
+
+			eqFilterMode client_filter = client->GetFilter(filter);
+			if (
+				filter == FilterNone || client_filter == FilterShow ||
+				(client_filter == FilterShowGroupOnly &&
+				 (sender == client || (client->GetGroup() && client->GetGroup()->IsGroupMember(sender)))) ||
+				(client_filter == FilterShowSelfOnly && client == sender)
+				) {
+				client->QueuePacket(app, is_ack_required, Client::CLIENT_CONNECTED);
 			}
 		}
-		++it;
 	}
 }
 
 //sender can be null
-void EntityList::QueueClients(Mob *sender, const EQApplicationPacket *app,
-		bool ignore_sender, bool ackreq)
+void EntityList::QueueClients(
+	Mob *sender, const EQApplicationPacket *app,
+	bool ignore_sender, bool ackreq
+)
 {
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
