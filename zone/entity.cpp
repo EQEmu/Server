@@ -1624,7 +1624,7 @@ void EntityList::QueueCloseClients(
 
 		if ((!ignore_sender || client != sender) && (client != skipped_mob)) {
 
-			if (DistanceSquared(client->GetPosition(), sender->GetPosition()) <= distance_squared) {
+			if (DistanceSquared(client->GetPosition(), sender->GetPosition()) >= distance_squared) {
 				continue;
 			}
 
