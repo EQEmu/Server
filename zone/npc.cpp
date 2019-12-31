@@ -704,6 +704,30 @@ bool NPC::Process()
 
 	SpellProcess();
 
+	if (mob_scan_close.Check()) {
+		LogAIScanClose(
+			"is_moving [{}] npc [{}] timer [{}]",
+			moving ? "true" : "false",
+			GetCleanName(),
+			mob_scan_close.GetDuration()
+		);
+
+		entity_list.ScanCloseMobs(close_mobs, this);
+
+		if (moving) {
+			mob_scan_close.Disable();
+			mob_scan_close.Start(RandomTimer(3000, 6000));
+		}
+		else {
+			mob_scan_close.Disable();
+			mob_scan_close.Start(RandomTimer(6000, 60000));
+		}
+	}
+
+	if (mob_check_moving_timer.Check() && moving) {
+		mob_scan_close.Trigger();
+	}
+
 	if (tic_timer.Check()) {
 		parse->EventNPC(EVENT_TICK, this, nullptr, "", 0);
 		BuffProcess();
@@ -851,7 +875,7 @@ bool NPC::Process()
 
 	if (assist_timer.Check() && IsEngaged() && !Charmed() && !HasAssistAggro() &&
 	    NPCAssistCap() < RuleI(Combat, NPCAssistCap)) {
-		entity_list.AIYellForHelp(this, GetTarget());
+		AIYellForHelp(this, GetTarget());
 		if (NPCAssistCap() > 0 && !assist_cap_timer.Enabled())
 			assist_cap_timer.Start(RuleI(Combat, NPCAssistCapTimer));
 	}
@@ -2975,6 +2999,11 @@ bool NPC::IsProximitySet()
 	return false;
 }
 
+/**
+ * @param box_size
+ * @param move_distance
+ * @param move_delay
+ */
 void NPC::SetSimpleRoamBox(float box_size, float move_distance, int move_delay)
 {
 	AI_SetRoambox(
@@ -2985,4 +3014,191 @@ void NPC::SetSimpleRoamBox(float box_size, float move_distance, int move_delay)
 		GetY() - box_size,
 		move_delay
 	);
+}
+
+/**
+ * @param caster
+ * @param chance
+ * @param cast_range
+ * @param spell_types
+ * @return
+ */
+bool NPC::AICheckCloseBeneficialSpells(
+	NPC *caster,
+	uint8 chance,
+	float cast_range,
+	uint32 spell_types
+)
+{
+	if((spell_types & SPELL_TYPES_DETRIMENTAL) != 0) {
+		LogError("Detrimental spells requested from AICheckCloseBeneficialSpells!");
+		return false;
+	}
+
+	if (!caster) {
+		return false;
+	}
+
+	if (!caster->AI_HasSpells()) {
+		return false;
+	}
+
+	if (caster->GetSpecialAbility(NPC_NO_BUFFHEAL_FRIENDS)) {
+		return false;
+	}
+
+	if (chance < 100) {
+		uint8 tmp = zone->random.Int(0, 99);
+		if (tmp >= chance) {
+			return false;
+		}
+	}
+
+	/**
+	 * Indifferent
+	 */
+	if (caster->GetPrimaryFaction() == 0) {
+		return false;
+	}
+
+	/**
+	 * Check through close range mobs
+	 */
+	for (auto & close_mob : entity_list.GetCloseMobList(caster, cast_range)) {
+		Mob *mob = close_mob.second;
+
+		if (mob->IsClient()) {
+			continue;
+		}
+
+		float distance = Distance(mob->GetPosition(), caster->GetPosition());
+		if (distance > cast_range) {
+			continue;
+		}
+
+		LogAICastBeneficialClose(
+			"NPC [{}] Distance [{}] Cast Range [{}] Caster [{}]",
+			mob->GetCleanName(),
+			distance,
+			cast_range,
+			caster->GetCleanName()
+		);
+
+		if (mob->GetReverseFactionCon(caster) >= FACTION_KINDLY) {
+			continue;
+		}
+
+		if ((spell_types & SpellType_Buff) && !RuleB(NPC, BuffFriends)) {
+			if (mob != caster) {
+				spell_types = SpellType_Heal;
+			}
+		}
+
+		if (caster->AICastSpell(mob, 100, spell_types)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/**
+ * @param sender
+ * @param attacker
+ */
+void NPC::AIYellForHelp(Mob *sender, Mob *attacker)
+{
+	if (!sender || !attacker) {
+		return;
+	}
+
+	/**
+	 * If we dont have a faction set, we're gonna be indiff to everybody
+	 */
+	if (sender->GetPrimaryFaction() == 0) {
+		return;
+	}
+
+	if (sender->HasAssistAggro())
+		return;
+
+	LogAIYellForHelp(
+		"NPC [{}] ID [{}] is starting to scan",
+		GetCleanName(),
+		GetID()
+	);
+
+	for (auto &close_mob : entity_list.GetCloseMobList(sender)) {
+		Mob   *mob     = close_mob.second;
+		float distance = DistanceSquared(m_Position, mob->GetPosition());
+
+		if (mob->IsClient()) {
+			continue;
+		}
+
+		float assist_range = (mob->GetAssistRange() * mob->GetAssistRange());
+		if (distance > assist_range) {
+			continue;
+		}
+
+		LogAIYellForHelpDetail(
+			"NPC [{}] ID [{}] is scanning - checking against NPC [{}] range [{}] dist [{}] in_range [{}]",
+			GetCleanName(),
+			GetID(),
+			mob->GetCleanName(),
+			assist_range,
+			distance,
+			(distance < assist_range)
+		);
+
+		if (mob->CheckAggro(attacker)) {
+			continue;
+		}
+
+		if (sender->NPCAssistCap() >= RuleI(Combat, NPCAssistCap)) {
+			break;
+		}
+
+		if (
+			mob != sender
+			&& mob != attacker
+			&& mob->GetPrimaryFaction() != 0
+			&& !mob->IsEngaged()
+			&& ((!mob->IsPet()) || (mob->IsPet() && mob->GetOwner() && !mob->GetOwner()->IsClient()))
+			) {
+
+			/**
+			 * if they are in range, make sure we are not green...
+			 * then jump in if they are our friend
+			 */
+			if (mob->GetLevel() >= 50 || attacker->GetLevelCon(mob->GetLevel()) != CON_GRAY) {
+				bool use_primary_faction = false;
+				if (mob->GetPrimaryFaction() == sender->CastToNPC()->GetPrimaryFaction()) {
+					const NPCFactionList *cf = database.GetNPCFactionEntry(mob->CastToNPC()->GetNPCFactionID());
+					if (cf) {
+						if (cf->assistprimaryfaction != 0) {
+							use_primary_faction = true;
+						}
+					}
+				}
+
+				if (use_primary_faction || sender->GetReverseFactionCon(mob) <= FACTION_AMIABLE) {
+					//attacking someone on same faction, or a friend
+					//Father Nitwit: make sure we can see them.
+					if (mob->CheckLosFN(sender)) {
+						mob->AddToHateList(attacker, 25, 0, false);
+						sender->AddAssistCap();
+
+						LogAIYellForHelpDetail(
+							"NPC [{}] is assisting [{}] against target [{}]",
+							mob->GetCleanName(),
+							this->GetCleanName(),
+							attacker->GetCleanName()
+						);
+					}
+				}
+			}
+		}
+	}
+
 }

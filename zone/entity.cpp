@@ -62,7 +62,8 @@ extern char errorname[32];
 
 Entity::Entity()
 {
-	id = 0;
+	id              = 0;
+	initial_id      = 0;
 	spawn_timestamp = time(nullptr);
 }
 
@@ -1582,41 +1583,73 @@ void EntityList::QueueClientsByXTarget(Mob *sender, const EQApplicationPacket *a
 	}
 }
 
-void EntityList::QueueCloseClients(Mob *sender, const EQApplicationPacket *app,
-		bool ignore_sender, float dist, Mob *SkipThisMob, bool ackreq, eqFilterType filter)
+/**
+ * @param sender
+ * @param app
+ * @param ignore_sender
+ * @param distance
+ * @param skipped_mob
+ * @param is_ack_required
+ * @param filter
+ */
+void EntityList::QueueCloseClients(
+	Mob *sender,
+	const EQApplicationPacket *app,
+	bool ignore_sender,
+	float distance,
+	Mob *skipped_mob,
+	bool is_ack_required,
+	eqFilterType filter
+)
 {
 	if (sender == nullptr) {
 		QueueClients(sender, app, ignore_sender);
 		return;
 	}
 
-	if (dist <= 0)
-		dist = 600;
-	float dist2 = dist * dist; //pow(dist, 2);
+	if (distance <= 0) {
+		distance = 600;
+	}
 
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
-		Client *ent = it->second;
+	float distance_squared = distance * distance;
 
-		if ((!ignore_sender || ent != sender) && (ent != SkipThisMob)) {
-			eqFilterMode filter2 = ent->GetFilter(filter);
-			if(ent->Connected() &&
-				(filter == FilterNone
-				|| filter2 == FilterShow
-				|| (filter2 == FilterShowGroupOnly && (sender == ent ||
-					(ent->GetGroup() && ent->GetGroup()->IsGroupMember(sender))))
-				|| (filter2 == FilterShowSelfOnly && ent == sender))
-			&& (DistanceSquared(ent->GetPosition(), sender->GetPosition()) <= dist2)) {
-				ent->QueuePacket(app, ackreq, Client::CLIENT_CONNECTED);
+	for (auto &e : GetCloseMobList(sender, distance)) {
+		Mob *mob = e.second;
+
+		if (!mob->IsClient()) {
+			continue;
+		}
+
+		Client *client = mob->CastToClient();
+
+		if ((!ignore_sender || client != sender) && (client != skipped_mob)) {
+
+			if (DistanceSquared(client->GetPosition(), sender->GetPosition()) >= distance_squared) {
+				continue;
+			}
+
+			if (!client->Connected()) {
+				continue;
+			}
+
+			eqFilterMode client_filter = client->GetFilter(filter);
+			if (
+				filter == FilterNone || client_filter == FilterShow ||
+				(client_filter == FilterShowGroupOnly &&
+				 (sender == client || (client->GetGroup() && client->GetGroup()->IsGroupMember(sender)))) ||
+				(client_filter == FilterShowSelfOnly && client == sender)
+				) {
+				client->QueuePacket(app, is_ack_required, Client::CLIENT_CONNECTED);
 			}
 		}
-		++it;
 	}
 }
 
 //sender can be null
-void EntityList::QueueClients(Mob *sender, const EQApplicationPacket *app,
-		bool ignore_sender, bool ackreq)
+void EntityList::QueueClients(
+	Mob *sender, const EQApplicationPacket *app,
+	bool ignore_sender, bool ackreq
+)
 {
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
@@ -2486,43 +2519,51 @@ void EntityList::RemoveAllEncounters()
 	}
 }
 
+/**
+ * @param delete_id
+ * @return
+ */
 bool EntityList::RemoveMob(uint16 delete_id)
 {
-	if (delete_id == 0)
+	if (delete_id == 0) {
 		return true;
+	}
 
 	auto it = mob_list.find(delete_id);
 	if (it != mob_list.end()) {
-
-		RemoveMobFromClientCloseLists(it->second);
-
-		if (npc_list.count(delete_id))
+		if (npc_list.count(delete_id)) {
 			entity_list.RemoveNPC(delete_id);
-		else if (client_list.count(delete_id))
+		}
+		else if (client_list.count(delete_id)) {
 			entity_list.RemoveClient(delete_id);
+		}
 		safe_delete(it->second);
-		if (!corpse_list.count(delete_id))
+		if (!corpse_list.count(delete_id)) {
 			free_ids.push(it->first);
+		}
 		mob_list.erase(it);
 		return true;
 	}
 	return false;
 }
 
-// This is for if the ID is deleted for some reason
+/**
+ * @param delete_mob
+ * @return
+ */
 bool EntityList::RemoveMob(Mob *delete_mob)
 {
-	if (delete_mob == 0)
+	if (delete_mob == 0) {
 		return true;
+	}
 
 	auto it = mob_list.begin();
 	while (it != mob_list.end()) {
 		if (it->second == delete_mob) {
-			RemoveMobFromClientCloseLists(it->second);
-
 			safe_delete(it->second);
-			if (!corpse_list.count(it->first))
+			if (!corpse_list.count(it->first)) {
 				free_ids.push(it->first);
+			}
 			mob_list.erase(it);
 			return true;
 		}
@@ -2531,34 +2572,89 @@ bool EntityList::RemoveMob(Mob *delete_mob)
 	return false;
 }
 
+/**
+ * @param delete_id
+ * @return
+ */
 bool EntityList::RemoveNPC(uint16 delete_id)
 {
 	auto it = npc_list.find(delete_id);
 	if (it != npc_list.end()) {
 		NPC *npc = it->second;
-		// make sure its proximity is removed
 		RemoveProximity(delete_id);
-		// remove from client close lists
-		RemoveMobFromClientCloseLists(npc->CastToMob());
-		// remove from the list
 		npc_list.erase(it);
 
-		// remove from limit list if needed
-		if (npc_limit_list.count(delete_id))
+		if (npc_limit_list.count(delete_id)) {
 			npc_limit_list.erase(delete_id);
+		}
+
 		return true;
 	}
 	return false;
 }
 
-bool EntityList::RemoveMobFromClientCloseLists(Mob *mob)
+/**
+ * @param mob
+ * @return
+ */
+bool EntityList::RemoveMobFromCloseLists(Mob *mob)
 {
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
-		it->second->close_mobs.erase(mob);
+	uint16 entity_id = mob->GetID() > 0 ? mob->GetID() : mob->GetInitialId();
+
+	LogEntityManagement(
+		"Attempting to remove mob [{}] from close lists entity_id ({})",
+		mob->GetCleanName(),
+		entity_id
+	);
+
+	auto it = mob_list.begin();
+	while (it != mob_list.end()) {
+
+		LogEntityManagement(
+			"Removing mob [{}] from [{}] close list entity_id ({})",
+			mob->GetCleanName(),
+			it->second->GetCleanName(),
+			entity_id
+		);
+
+		it->second->close_mobs.erase(entity_id);
 		++it;
 	}
+
 	return false;
+}
+
+/**
+ * @param close_mobs
+ * @param scanning_mob
+ */
+void EntityList::ScanCloseMobs(std::unordered_map<uint16, Mob *> &close_mobs, Mob *scanning_mob)
+{
+	float scan_range = RuleI(Range, MobCloseScanDistance) * RuleI(Range, MobCloseScanDistance);
+
+	close_mobs.clear();
+
+	for (auto &e : mob_list) {
+		auto mob = e.second;
+
+		if (!mob->IsNPC() && !mob->IsClient()) {
+			continue;
+		}
+
+		if (mob->GetID() <= 0) {
+			continue;
+		}
+
+		float distance = DistanceSquared(scanning_mob->GetPosition(), mob->GetPosition());
+		if (distance <= scan_range) {
+			close_mobs.insert(std::pair<uint16, Mob *>(mob->GetID(), mob));
+		}
+		else if (mob->GetAggroRange() >= scan_range) {
+			close_mobs.insert(std::pair<uint16, Mob *>(mob->GetID(), mob));
+		}
+	}
+
+	LogAIScanClose("Close List Size [{}] for mob [{}]", close_mobs.size(), scanning_mob->GetCleanName());
 }
 
 bool EntityList::RemoveMerc(uint16 delete_id)
@@ -4972,3 +5068,21 @@ void EntityList::ReloadMerchants() {
 		}
 	}
 }
+
+/**
+ * If we have a distance requested that is greater than our scanning distance
+ * then we return the full list
+ *
+ * @param mob
+ * @param distance
+ * @return
+ */
+std::unordered_map<uint16, Mob *> &EntityList::GetCloseMobList(Mob *mob, float distance)
+{
+	if (distance <= RuleI(Range, MobCloseScanDistance)) {
+		return mob->close_mobs;
+	}
+
+	return mob_list;
+}
+

@@ -226,7 +226,6 @@ public:
 	Client(EQStreamInterface * ieqs);
 	~Client();
 
-	std::unordered_map<Mob *, float> close_mobs;
 	bool is_client_moving;
 
 	void SetDisplayMobInfoWindow(bool display_mob_info_window);
@@ -1524,7 +1523,7 @@ private:
 	Timer afk_toggle_timer;
 	Timer helm_toggle_timer;
 	Timer aggro_meter_timer;
-	Timer npc_close_scan_timer;
+	Timer mob_close_scan_timer;
 	Timer hp_self_update_throttle_timer; /* This is to prevent excessive packet sending under trains/fast combat */
 	Timer hp_other_update_throttle_timer; /* This is to keep clients from DOSing the server with macros that change client targets constantly */
 	Timer position_update_timer; /* Timer used when client hasn't updated within a 10 second window */

@@ -378,59 +378,6 @@ bool NPC::AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgain
 	return CastSpell(AIspells[i].spellid, tar->GetID(), EQEmu::spells::CastingSlot::Gem2, AIspells[i].manacost == -2 ? 0 : -1, mana_cost, oDontDoAgainBefore, -1, -1, 0, &(AIspells[i].resist_adjust));
 }
 
-bool EntityList::AICheckCloseBeneficialSpells(NPC* caster, uint8 iChance, float iRange, uint32 iSpellTypes) {
-	if((iSpellTypes & SPELL_TYPES_DETRIMENTAL) != 0) {
-		//according to live, you can buff and heal through walls...
-		//now with PCs, this only applies if you can TARGET the target, but
-		// according to Rogean, Live NPCs will just cast through walls/floors, no problem..
-		//
-		// This check was put in to address an idle-mob CPU issue
-		LogError("Error: detrimental spells requested from AICheckCloseBeneficialSpells!!");
-		return(false);
-	}
-
-	if(!caster)
-		return false;
-
-	if(caster->AI_HasSpells() == false)
-		return false;
-
-	if(caster->GetSpecialAbility(NPC_NO_BUFFHEAL_FRIENDS))
-		return false;
-
-	if (iChance < 100) {
-		uint8 tmp = zone->random.Int(0, 99);
-		if (tmp >= iChance)
-			return false;
-	}
-	if (caster->GetPrimaryFaction() == 0 )
-		return(false); // well, if we dont have a faction set, we're gonna be indiff to everybody
-
-	float iRange2 = iRange*iRange;
-
-	//Only iterate through NPCs
-	for (auto it = npc_list.begin(); it != npc_list.end(); ++it) {
-		NPC* mob = it->second;
-	
-		if (mob->GetReverseFactionCon(caster) >= FACTION_KINDLY) {
-			continue;
-		}
-
-		if (DistanceSquared(caster->GetPosition(), mob->GetPosition()) > iRange2) {
-			continue;
-		}
-
-		if ((iSpellTypes & SpellType_Buff) && !RuleB(NPC, BuffFriends)) {
-			if (mob != caster)
-				iSpellTypes = SpellType_Heal;
-		}
-
-		if (caster->AICastSpell(mob, 100, iSpellTypes))
-			return true;
-	}
-	return false;
-}
-
 void Mob::AI_Init()
 {
 	pAIControlled = false;
@@ -1415,12 +1362,19 @@ void Mob::AI_Process() {
 		}
 		else if (zone->CanDoCombat() && CastToNPC()->WillAggroNPCs() && AI_scan_area_timer->Check()) {
 
-			/*
-			* NPC to NPC aggro checking, npc needs npc_aggro flag
-			*/
-			Mob *temp_target = entity_list.AICheckNPCtoNPCAggro(this, GetAggroRange(), GetAssistRange());
-			if (temp_target) {
-				AddToHateList(temp_target);
+			/**
+			 * NPC to NPC aggro (npc_aggro flag set)
+			 */
+			for (auto &close_mob : close_mobs) {
+				Mob *mob = close_mob.second;
+
+				if (mob->IsClient()) {
+					continue;
+				}
+
+				if (this->CheckWillAggro(mob)) {
+					this->AddToHateList(mob);
+				}
 			}
 
 			AI_scan_area_timer->Disable();
@@ -1877,47 +1831,46 @@ void NPC::AI_SetupNextWaypoint() {
 	}
 }
 
-// Note: Mob that caused this may not get added to the hate list until after this function call completes
-void Mob::AI_Event_Engaged(Mob* attacker, bool iYellForHelp) {
-	if (!IsAIControlled())
+/**
+ * @param attacker
+ * @param yell_for_help
+ */
+void Mob::AI_Event_Engaged(Mob *attacker, bool yell_for_help)
+{
+	if (!IsAIControlled()) {
 		return;
+	}
 
 	SetAppearance(eaStanding);
 
-	/*
-		Kick off auto cast timer
-	*/
-	if (this->IsNPC())
-		this->CastToNPC()->AIautocastspell_timer->Start(300, false);
+	if (IsNPC()) {
+		CastToNPC()->AIautocastspell_timer->Start(300, false);
 
-	if (iYellForHelp) {
-		if(IsPet()) {
-			GetOwner()->AI_Event_Engaged(attacker, iYellForHelp);
-		} else if (!HasAssistAggro() && NPCAssistCap() < RuleI(Combat, NPCAssistCap)) {
-			entity_list.AIYellForHelp(this, attacker);
-			if (NPCAssistCap() > 0 && !assist_cap_timer.Enabled())
-				assist_cap_timer.Start(RuleI(Combat, NPCAssistCapTimer));
+		if (yell_for_help) {
+			if (IsPet()) {
+				GetOwner()->AI_Event_Engaged(attacker, yell_for_help);
+			}
+			else if (!HasAssistAggro() && NPCAssistCap() < RuleI(Combat, NPCAssistCap)) {
+				CastToNPC()->AIYellForHelp(this, attacker);
+				if (NPCAssistCap() > 0 && !assist_cap_timer.Enabled()) {
+					assist_cap_timer.Start(RuleI(Combat, NPCAssistCapTimer));
+				}
+			}
 		}
-	}
 
-	if(IsNPC())
-	{
-		if(CastToNPC()->GetGrid() > 0)
-		{
+		if (CastToNPC()->GetGrid() > 0) {
 			DistractedFromGrid = true;
 		}
-		if(attacker && !attacker->IsCorpse())
-		{
+		if (attacker && !attacker->IsCorpse()) {
 			//Because sometimes the AIYellForHelp triggers another engaged and then immediately a not engaged
 			//if the target dies before it goes off
-			if(attacker->GetHP() > 0)
-			{
-				if(!CastToNPC()->GetCombatEvent() && GetHP() > 0)
-				{
+			if (attacker->GetHP() > 0) {
+				if (!CastToNPC()->GetCombatEvent() && GetHP() > 0) {
 					parse->EventNPC(EVENT_COMBAT, CastToNPC(), attacker, "1", 0);
 					uint16 emoteid = GetEmoteID();
-					if(emoteid != 0)
-						CastToNPC()->DoNPCEmote(ENTERCOMBAT,emoteid);
+					if (emoteid != 0) {
+						CastToNPC()->DoNPCEmote(ENTERCOMBAT, emoteid);
+					}
 					CastToNPC()->SetCombatEvent(true);
 				}
 			}
@@ -1996,7 +1949,7 @@ bool NPC::AI_EngagedCastCheck() {
 				// try casting a heal or gate
 				if (!AICastSpell(this, AISpellVar.engaged_beneficial_self_chance, SpellType_Heal | SpellType_Escape | SpellType_InCombatBuff)) {
 					// try casting a heal on nearby
-					if (!entity_list.AICheckCloseBeneficialSpells(this, AISpellVar.engaged_beneficial_other_chance, MobAISpellRange, SpellType_Heal)) {
+					if (!AICheckCloseBeneficialSpells(this, AISpellVar.engaged_beneficial_other_chance, MobAISpellRange, SpellType_Heal)) {
 						//nobody to heal, try some detrimental spells.
 						if(!AICastSpell(GetTarget(), AISpellVar.engaged_detrimental_chance, SpellType_Nuke | SpellType_Lifetap | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Slow | SpellType_Debuff | SpellType_Charm | SpellType_Root)) {
 							//no spell to cast, try again soon.
@@ -2033,7 +1986,7 @@ bool NPC::AI_IdleCastCheck() {
 	if (AIautocastspell_timer->Check(false)) {
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 		if (!AICastSpell(this, AISpellVar.idle_beneficial_chance, SpellType_Heal | SpellType_Buff | SpellType_Pet)) {
-			if(!entity_list.AICheckCloseBeneficialSpells(this, 33, MobAISpellRange, SpellType_Heal | SpellType_Buff)) {
+			if(!AICheckCloseBeneficialSpells(this, 33, MobAISpellRange, SpellType_Heal | SpellType_Buff)) {
 				//if we didnt cast any spells, our autocast timer just resets to the
 				//last duration it was set to... try to put up a more reasonable timer...
 				AIautocastspell_timer->Start(RandomTimer(AISpellVar.idle_no_sp_recast_min, AISpellVar.idle_no_sp_recast_max), false);
