@@ -25,7 +25,11 @@
 #ifndef _WIN32
 // this doesn't appear to affect linux-based systems..need feedback for _WIN64
 #include <fmt/format.h>
-#include <cctype>
+#endif
+
+#ifdef _WINDOWS
+#include <functional>
+#include <algorithm>
 #endif
 
 #include "types.h"
