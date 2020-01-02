@@ -45,32 +45,35 @@ const std::string vStringFormat(const char* format, va_list args);
 std::string implode(std::string glue, std::vector<std::string> src);
 
 /**
- * @param s
+ * @param str
+ * @param chars
  * @return
  */
-static inline std::string &ltrim(std::string &s)
+inline std::string &ltrim(std::string &str, const std::string &chars = "\t\n\v\f\r ")
 {
-	s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
-	return s;
+	str.erase(0, str.find_first_not_of(chars));
+	return str;
 }
 
 /**
- * @param s
+ * @param str
+ * @param chars
  * @return
  */
-static inline std::string &rtrim(std::string &s)
+inline std::string &rtrim(std::string &str, const std::string &chars = "\t\n\v\f\r ")
 {
-	s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
-	return s;
+	str.erase(str.find_last_not_of(chars) + 1);
+	return str;
 }
 
 /**
- * @param s
+ * @param str
+ * @param chars
  * @return
  */
-static inline std::string &trim(std::string &s)
+inline std::string &trim(std::string &str, const std::string &chars = "\t\n\v\f\r ")
 {
-	return ltrim(rtrim(s));
+	return ltrim(rtrim(str, chars), chars);
 }
 
 template <typename T>
