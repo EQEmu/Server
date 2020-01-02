@@ -38,6 +38,35 @@ const std::string StringFormat(const char* format, ...);
 const std::string vStringFormat(const char* format, va_list args);
 std::string implode(std::string glue, std::vector<std::string> src);
 
+/**
+ * @param s
+ * @return
+ */
+static inline std::string &ltrim(std::string &s)
+{
+	s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
+	return s;
+}
+
+/**
+ * @param s
+ * @return
+ */
+static inline std::string &rtrim(std::string &s)
+{
+	s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+	return s;
+}
+
+/**
+ * @param s
+ * @return
+ */
+static inline std::string &trim(std::string &s)
+{
+	return ltrim(rtrim(s));
+}
+
 template <typename T>
 std::string implode(const std::string &glue, const std::pair<char, char> &encapsulation, const std::vector<T> &src)
 {

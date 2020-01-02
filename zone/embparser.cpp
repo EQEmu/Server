@@ -31,7 +31,7 @@
 #include <algorithm>
 #include <sstream>
 
-extern Zone* zone;
+extern Zone *zone;
 
 const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_SAY",
@@ -121,108 +121,140 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_COMBINE_VALIDATE",
 };
 
-PerlembParser::PerlembParser() : perl(nullptr) {
-	global_npc_quest_status_ = questUnloaded;
-	player_quest_status_ = questUnloaded;
+PerlembParser::PerlembParser() : perl(nullptr)
+{
+	global_npc_quest_status_    = questUnloaded;
+	player_quest_status_        = questUnloaded;
 	global_player_quest_status_ = questUnloaded;
 }
 
-PerlembParser::~PerlembParser() {
+PerlembParser::~PerlembParser()
+{
 	safe_delete(perl);
 }
 
-void PerlembParser::ReloadQuests() {
+void PerlembParser::ReloadQuests()
+{
 	try {
-		if(perl == nullptr) {
+		if (perl == nullptr) {
 			perl = new Embperl;
-		} else {
+		}
+		else {
 			perl->Reinit();
 		}
 		MapFunctions();
 	}
-	catch(std::exception &e) {
-		if(perl != nullptr) {
+	catch (std::exception &e) {
+		if (perl != nullptr) {
 			delete perl;
 			perl = nullptr;
 		}
 
-		LogInfo("Error re-initializing perlembed: [{}]", e.what());
+		LogInfo("Error Re-Initializing PerlEmbed: [{}]", e.what());
 		throw e.what();
 	}
 
 	errors_.clear();
 	npc_quest_status_.clear();
-	global_npc_quest_status_ = questUnloaded;
-	player_quest_status_ = questUnloaded;
+	global_npc_quest_status_    = questUnloaded;
+	player_quest_status_        = questUnloaded;
 	global_player_quest_status_ = questUnloaded;
 	item_quest_status_.clear();
 	spell_quest_status_.clear();
 }
 
-int PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * data, NPC* npcmob, EQEmu::ItemInstance* item_inst, Mob* mob,
-	uint32 extradata, bool global, std::vector<EQEmu::Any> *extra_pointers)
+int PerlembParser::EventCommon(
+	QuestEventID event, uint32 objid, const char *data, NPC *npcmob, EQEmu::ItemInstance *item_inst, Mob *mob,
+	uint32 extradata, bool global, std::vector<EQEmu::Any> *extra_pointers
+)
 {
-	if(!perl)
+	if (!perl) {
 		return 0;
+	}
 
-	if(event >= _LargestEventID)
+	if (event >= _LargestEventID) {
 		return 0;
+	}
 
-	bool isPlayerQuest = false;
-	bool isGlobalPlayerQuest = false;
-	bool isGlobalNPC = false;
-	bool isItemQuest = false;
-	bool isSpellQuest = false;
+	bool        isPlayerQuest       = false;
+	bool        isGlobalPlayerQuest = false;
+	bool        isGlobalNPC         = false;
+	bool        isItemQuest         = false;
+	bool        isSpellQuest        = false;
 	std::string package_name;
 
-	GetQuestTypes(isPlayerQuest, isGlobalPlayerQuest, isGlobalNPC, isItemQuest, isSpellQuest,
-		event, npcmob, item_inst, mob, global);
-	GetQuestPackageName(isPlayerQuest, isGlobalPlayerQuest, isGlobalNPC, isItemQuest, isSpellQuest,
-		package_name, event, objid, data, npcmob, item_inst, global);
+	GetQuestTypes(
+		isPlayerQuest, isGlobalPlayerQuest, isGlobalNPC, isItemQuest, isSpellQuest,
+		event, npcmob, item_inst, mob, global
+	);
+	GetQuestPackageName(
+		isPlayerQuest, isGlobalPlayerQuest, isGlobalNPC, isItemQuest, isSpellQuest,
+		package_name, event, objid, data, npcmob, item_inst, global
+	);
 
 	const char *sub_name = QuestEventSubroutines[event];
-	if(!perl->SubExists(package_name.c_str(), sub_name)) {
+	if (!perl->SubExists(package_name.c_str(), sub_name)) {
 		return 0;
 	}
 
 	int char_id = 0;
 	ExportCharID(package_name, char_id, npcmob, mob);
-	
+
 	/* Check for QGlobal export event enable */
-	if (parse->perl_event_export_settings[event].qglobals){
-		ExportQGlobals(isPlayerQuest, isGlobalPlayerQuest, isGlobalNPC, isItemQuest, isSpellQuest, package_name, npcmob, mob, char_id);
+	if (parse->perl_event_export_settings[event].qglobals) {
+		ExportQGlobals(
+			isPlayerQuest,
+			isGlobalPlayerQuest,
+			isGlobalNPC,
+			isItemQuest,
+			isSpellQuest,
+			package_name,
+			npcmob,
+			mob,
+			char_id
+		);
 	}
 
 	/* Check for Mob export event enable */
-	if (parse->perl_event_export_settings[event].mob){
-		ExportMobVariables(isPlayerQuest, isGlobalPlayerQuest, isGlobalNPC, isItemQuest, isSpellQuest, package_name, mob, npcmob);
+	if (parse->perl_event_export_settings[event].mob) {
+		ExportMobVariables(
+			isPlayerQuest,
+			isGlobalPlayerQuest,
+			isGlobalNPC,
+			isItemQuest,
+			isSpellQuest,
+			package_name,
+			mob,
+			npcmob
+		);
 	}
 
 	/* Check for Zone export event enable */
-	if (parse->perl_event_export_settings[event].zone){
+	if (parse->perl_event_export_settings[event].zone) {
 		ExportZoneVariables(package_name);
 	}
 
 	/* Check for Item export event enable */
-	if (parse->perl_event_export_settings[event].item){
+	if (parse->perl_event_export_settings[event].item) {
 		ExportItemVariables(package_name, mob);
 	}
 
 	/* Check for Event export event enable */
-	if (parse->perl_event_export_settings[event].event_variables){
+	if (parse->perl_event_export_settings[event].event_variables) {
 		ExportEventVariables(package_name, event, objid, data, npcmob, item_inst, mob, extradata, extra_pointers);
 	}
 
-	if(isPlayerQuest || isGlobalPlayerQuest){
+	if (isPlayerQuest || isGlobalPlayerQuest) {
 		return SendCommands(package_name.c_str(), sub_name, 0, mob, mob, nullptr);
 	}
-	else if(isItemQuest) {
+	else if (isItemQuest) {
 		return SendCommands(package_name.c_str(), sub_name, 0, mob, mob, item_inst);
 	}
-	else if(isSpellQuest){
-		if(mob) {
+	else if (isSpellQuest) {
+		if (mob) {
 			return SendCommands(package_name.c_str(), sub_name, 0, mob, mob, nullptr);
-		} else {
+		}
+		else {
 			return SendCommands(package_name.c_str(), sub_name, 0, npcmob, mob, nullptr);
 		}
 	}
@@ -231,169 +263,212 @@ int PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * da
 	}
 }
 
-int PerlembParser::EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-							std::vector<EQEmu::Any> *extra_pointers) {
+int PerlembParser::EventNPC(
+	QuestEventID evt, NPC *npc, Mob *init, std::string data, uint32 extra_data,
+	std::vector<EQEmu::Any> *extra_pointers
+)
+{
 	return EventCommon(evt, npc->GetNPCTypeID(), data.c_str(), npc, nullptr, init, extra_data, false, extra_pointers);
 }
 
-int PerlembParser::EventGlobalNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-								  std::vector<EQEmu::Any> *extra_pointers) {
+int PerlembParser::EventGlobalNPC(
+	QuestEventID evt, NPC *npc, Mob *init, std::string data, uint32 extra_data,
+	std::vector<EQEmu::Any> *extra_pointers
+)
+{
 	return EventCommon(evt, npc->GetNPCTypeID(), data.c_str(), npc, nullptr, init, extra_data, true, extra_pointers);
 }
 
-int PerlembParser::EventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
-								std::vector<EQEmu::Any> *extra_pointers) {
+int PerlembParser::EventPlayer(
+	QuestEventID evt, Client *client, std::string data, uint32 extra_data,
+	std::vector<EQEmu::Any> *extra_pointers
+)
+{
 	return EventCommon(evt, 0, data.c_str(), nullptr, nullptr, client, extra_data, false, extra_pointers);
 }
 
-int PerlembParser::EventGlobalPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
-									std::vector<EQEmu::Any> *extra_pointers) {
+int PerlembParser::EventGlobalPlayer(
+	QuestEventID evt, Client *client, std::string data, uint32 extra_data,
+	std::vector<EQEmu::Any> *extra_pointers
+)
+{
 	return EventCommon(evt, 0, data.c_str(), nullptr, nullptr, client, extra_data, true, extra_pointers);
 }
 
-int PerlembParser::EventItem(QuestEventID evt, Client *client, EQEmu::ItemInstance *item, Mob *mob, std::string data, uint32 extra_data,
-							std::vector<EQEmu::Any> *extra_pointers) {
+int PerlembParser::EventItem(
+	QuestEventID evt, Client *client, EQEmu::ItemInstance *item, Mob *mob, std::string data, uint32 extra_data,
+	std::vector<EQEmu::Any> *extra_pointers
+)
+{
 	// needs pointer validation on 'item' argument
 	return EventCommon(evt, item->GetID(), nullptr, nullptr, item, client, extra_data, false, extra_pointers);
 }
 
-int PerlembParser::EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data,
-							std::vector<EQEmu::Any> *extra_pointers) {
+int PerlembParser::EventSpell(
+	QuestEventID evt, NPC *npc, Client *client, uint32 spell_id, uint32 extra_data,
+	std::vector<EQEmu::Any> *extra_pointers
+)
+{
 	return EventCommon(evt, 0, itoa(spell_id), npc, nullptr, client, extra_data, false, extra_pointers);
 }
 
-bool PerlembParser::HasQuestSub(uint32 npcid, QuestEventID evt) {
+bool PerlembParser::HasQuestSub(uint32 npcid, QuestEventID evt)
+{
 	std::stringstream package_name;
 	package_name << "qst_npc_" << npcid;
 
-	if(!perl)
+	if (!perl) {
 		return false;
+	}
 
-	if(evt >= _LargestEventID)
+	if (evt >= _LargestEventID) {
 		return false;
+	}
 
 	const char *subname = QuestEventSubroutines[evt];
 
 	auto iter = npc_quest_status_.find(npcid);
-	if(iter == npc_quest_status_.end() || iter->second == QuestFailedToLoad) {
+	if (iter == npc_quest_status_.end() || iter->second == QuestFailedToLoad) {
 		return false;
 	}
 
-	return(perl->SubExists(package_name.str().c_str(), subname));
+	return (perl->SubExists(package_name.str().c_str(), subname));
 }
 
-bool PerlembParser::HasGlobalQuestSub(QuestEventID evt) {
-	if(!perl)
-		return false;
-
-	if(global_npc_quest_status_ != questLoaded) {
+bool PerlembParser::HasGlobalQuestSub(QuestEventID evt)
+{
+	if (!perl) {
 		return false;
 	}
 
-	if(evt >= _LargestEventID)
+	if (global_npc_quest_status_ != questLoaded) {
 		return false;
+	}
+
+	if (evt >= _LargestEventID) {
+		return false;
+	}
 
 	const char *subname = QuestEventSubroutines[evt];
 
-	return(perl->SubExists("qst_global_npc", subname));
+	return (perl->SubExists("qst_global_npc", subname));
 }
 
-bool PerlembParser::PlayerHasQuestSub(QuestEventID evt) {
-	if(!perl)
-		return false;
-
-	if(player_quest_status_ != questLoaded) {
+bool PerlembParser::PlayerHasQuestSub(QuestEventID evt)
+{
+	if (!perl) {
 		return false;
 	}
 
-	if(evt >= _LargestEventID)
-		return false;
-
-	const char *subname = QuestEventSubroutines[evt];
-
-	return(perl->SubExists("qst_player", subname));
-}
-
-bool PerlembParser::GlobalPlayerHasQuestSub(QuestEventID evt) {
-	if(!perl)
-		return false;
-
-	if(global_player_quest_status_ != questLoaded) {
+	if (player_quest_status_ != questLoaded) {
 		return false;
 	}
 
-	if(evt >= _LargestEventID)
+	if (evt >= _LargestEventID) {
 		return false;
+	}
 
 	const char *subname = QuestEventSubroutines[evt];
 
-	return(perl->SubExists("qst_global_player", subname));
+	return (perl->SubExists("qst_player", subname));
 }
 
-bool PerlembParser::SpellHasQuestSub(uint32 spell_id, QuestEventID evt) {
+bool PerlembParser::GlobalPlayerHasQuestSub(QuestEventID evt)
+{
+	if (!perl) {
+		return false;
+	}
+
+	if (global_player_quest_status_ != questLoaded) {
+		return false;
+	}
+
+	if (evt >= _LargestEventID) {
+		return false;
+	}
+
+	const char *subname = QuestEventSubroutines[evt];
+
+	return (perl->SubExists("qst_global_player", subname));
+}
+
+bool PerlembParser::SpellHasQuestSub(uint32 spell_id, QuestEventID evt)
+{
 	std::stringstream package_name;
 	package_name << "qst_spell_" << spell_id;
 
-	if(!perl)
-		return false;
-
-	auto iter = spell_quest_status_.find(spell_id);
-	if(iter == spell_quest_status_.end() || iter->second == QuestFailedToLoad) {
+	if (!perl) {
 		return false;
 	}
 
-	if(evt >= _LargestEventID)
+	auto iter = spell_quest_status_.find(spell_id);
+	if (iter == spell_quest_status_.end() || iter->second == QuestFailedToLoad) {
 		return false;
+	}
+
+	if (evt >= _LargestEventID) {
+		return false;
+	}
 
 	const char *subname = QuestEventSubroutines[evt];
 
-	return(perl->SubExists(package_name.str().c_str(), subname));
+	return (perl->SubExists(package_name.str().c_str(), subname));
 }
 
-bool PerlembParser::ItemHasQuestSub(EQEmu::ItemInstance *itm, QuestEventID evt) {
+bool PerlembParser::ItemHasQuestSub(EQEmu::ItemInstance *itm, QuestEventID evt)
+{
 	std::stringstream package_name;
 	package_name << "qst_item_" << itm->GetID();
 
-	if(!perl)
+	if (!perl) {
 		return false;
+	}
 
-	if (itm == nullptr)
+	if (itm == nullptr) {
 		return false;
+	}
 
-	if(evt >= _LargestEventID)
+	if (evt >= _LargestEventID) {
 		return false;
+	}
 
 	const char *subname = QuestEventSubroutines[evt];
 
 	auto iter = item_quest_status_.find(itm->GetID());
-	if(iter == item_quest_status_.end() || iter->second == QuestFailedToLoad) {
+	if (iter == item_quest_status_.end() || iter->second == QuestFailedToLoad) {
 		return false;
 	}
 
-	return(perl->SubExists(package_name.str().c_str(), subname));
+	return (perl->SubExists(package_name.str().c_str(), subname));
 }
 
-void PerlembParser::LoadNPCScript(std::string filename, int npc_id) {
+void PerlembParser::LoadNPCScript(std::string filename, int npc_id)
+{
 	std::stringstream package_name;
 	package_name << "qst_npc_" << npc_id;
 
-	if(!perl)
+	if (!perl) {
 		return;
+	}
 
 	auto iter = npc_quest_status_.find(npc_id);
-	if(iter != npc_quest_status_.end()) {
+	if (iter != npc_quest_status_.end()) {
 		return;
 	}
 
 	try {
 		perl->eval_file(package_name.str().c_str(), filename.c_str());
 	}
-	catch(const char *err)
-	{
-        std::string error = "Error compiling quest file " + filename;
-        error += ": ";
-        error += err;
-        AddError(error);
+	catch (std::string e) {
+		AddError(
+			fmt::format(
+				"Error Compiling NPC Quest File [{}] NPC ID [{}] Error [{}]",
+				filename,
+				npc_id,
+				e
+			)
+		);
+
 		npc_quest_status_[npc_id] = questFailedToLoad;
 		return;
 	}
@@ -401,23 +476,28 @@ void PerlembParser::LoadNPCScript(std::string filename, int npc_id) {
 	npc_quest_status_[npc_id] = questLoaded;
 }
 
-void PerlembParser::LoadGlobalNPCScript(std::string filename) {
-	if(!perl)
+void PerlembParser::LoadGlobalNPCScript(std::string filename)
+{
+	if (!perl) {
 		return;
+	}
 
-	if(global_npc_quest_status_ != questUnloaded) {
+	if (global_npc_quest_status_ != questUnloaded) {
 		return;
 	}
 
 	try {
 		perl->eval_file("qst_global_npc", filename.c_str());
 	}
-	catch(const char *err)
-	{
-		std::string error = "Error compiling quest file " + filename;
-        error += ": ";
-        error += err;
-        AddError(error);
+	catch (std::string e) {
+		AddError(
+			fmt::format(
+				"Error Compiling Global NPC Quest File [{}] Error [{}]",
+				filename,
+				e
+			)
+		);
+
 		global_npc_quest_status_ = questFailedToLoad;
 		return;
 	}
@@ -425,23 +505,28 @@ void PerlembParser::LoadGlobalNPCScript(std::string filename) {
 	global_npc_quest_status_ = questLoaded;
 }
 
-void PerlembParser::LoadPlayerScript(std::string filename) {
-	if(!perl)
+void PerlembParser::LoadPlayerScript(std::string filename)
+{
+	if (!perl) {
 		return;
+	}
 
-	if(player_quest_status_ != questUnloaded) {
+	if (player_quest_status_ != questUnloaded) {
 		return;
 	}
 
 	try {
 		perl->eval_file("qst_player", filename.c_str());
 	}
-	catch(const char *err)
-	{
-		std::string error = "Error compiling quest file " + filename;
-        error += ": ";
-        error += err;
-        AddError(error);
+	catch (std::string e) {
+		AddError(
+			fmt::format(
+				"Error Compiling Player Quest File [{}] Error [{}]",
+				filename,
+				e
+			)
+		);
+
 		player_quest_status_ = questFailedToLoad;
 		return;
 	}
@@ -449,23 +534,28 @@ void PerlembParser::LoadPlayerScript(std::string filename) {
 	player_quest_status_ = questLoaded;
 }
 
-void PerlembParser::LoadGlobalPlayerScript(std::string filename) {
-	if(!perl)
+void PerlembParser::LoadGlobalPlayerScript(std::string filename)
+{
+	if (!perl) {
 		return;
+	}
 
-	if(global_player_quest_status_ != questUnloaded) {
+	if (global_player_quest_status_ != questUnloaded) {
 		return;
 	}
 
 	try {
 		perl->eval_file("qst_global_player", filename.c_str());
 	}
-	catch(const char *err)
-	{
-		std::string error = "Error compiling quest file " + filename;
-        error += ": ";
-        error += err;
-        AddError(error);
+	catch (std::string e) {
+		AddError(
+			fmt::format(
+				"Error Compiling Global Player Quest File [{}] Error [{}]",
+				filename,
+				e
+			)
+		);
+
 		global_player_quest_status_ = questFailedToLoad;
 		return;
 	}
@@ -473,30 +563,37 @@ void PerlembParser::LoadGlobalPlayerScript(std::string filename) {
 	global_player_quest_status_ = questLoaded;
 }
 
-void PerlembParser::LoadItemScript(std::string filename, EQEmu::ItemInstance *item) {
-	if (item == nullptr)
+void PerlembParser::LoadItemScript(std::string filename, EQEmu::ItemInstance *item)
+{
+	if (item == nullptr) {
 		return;
+	}
 
 	std::stringstream package_name;
 	package_name << "qst_item_" << item->GetID();
 
-	if(!perl)
+	if (!perl) {
 		return;
+	}
 
 	auto iter = item_quest_status_.find(item->GetID());
-	if(iter != item_quest_status_.end()) {
+	if (iter != item_quest_status_.end()) {
 		return;
 	}
 
 	try {
 		perl->eval_file(package_name.str().c_str(), filename.c_str());
 	}
-	catch(const char *err)
-	{
-		std::string error = "Error compiling quest file " + filename;
-        error += ": ";
-        error += err;
-        AddError(error);
+	catch (std::string e) {
+		AddError(
+			fmt::format(
+				"Error Compiling Item Quest File [{}] Item ID [{}] Error [{}]",
+				filename,
+				item->GetID(),
+				e
+			)
+		);
+
 		item_quest_status_[item->GetID()] = questFailedToLoad;
 		return;
 	}
@@ -504,27 +601,33 @@ void PerlembParser::LoadItemScript(std::string filename, EQEmu::ItemInstance *it
 	item_quest_status_[item->GetID()] = questLoaded;
 }
 
-void PerlembParser::LoadSpellScript(std::string filename, uint32 spell_id) {
+void PerlembParser::LoadSpellScript(std::string filename, uint32 spell_id)
+{
 	std::stringstream package_name;
 	package_name << "qst_spell_" << spell_id;
 
-	if(!perl)
+	if (!perl) {
 		return;
+	}
 
 	auto iter = spell_quest_status_.find(spell_id);
-	if(iter != spell_quest_status_.end()) {
+	if (iter != spell_quest_status_.end()) {
 		return;
 	}
 
 	try {
 		perl->eval_file(package_name.str().c_str(), filename.c_str());
 	}
-	catch(const char *err)
-	{
-		std::string error = "Error compiling quest file " + filename;
-        error += ": ";
-        error += err;
-        AddError(error);
+	catch (std::string e) {
+		AddError(
+			fmt::format(
+				"Error Compiling Spell Quest File [{}] Spell ID [{}] Error [{}]",
+				filename,
+				spell_id,
+				e
+			)
+		);
+
 		spell_quest_status_[spell_id] = questFailedToLoad;
 		return;
 	}
@@ -532,13 +635,15 @@ void PerlembParser::LoadSpellScript(std::string filename, uint32 spell_id) {
 	spell_quest_status_[spell_id] = questLoaded;
 }
 
-void PerlembParser::AddVar(std::string name, std::string val) {
+void PerlembParser::AddVar(std::string name, std::string val)
+{
 	vars_[name] = val;
 }
 
-std::string PerlembParser::GetVar(std::string name) {
+std::string PerlembParser::GetVar(std::string name)
+{
 	auto iter = vars_.find(name);
-	if(iter != vars_.end()) {
+	if (iter != vars_.end()) {
 		return iter->second;
 	}
 
@@ -547,126 +652,157 @@ std::string PerlembParser::GetVar(std::string name) {
 
 void PerlembParser::ExportHash(const char *pkgprefix, const char *hashname, std::map<std::string, std::string> &vals)
 {
-	if(!perl)
+	if (!perl) {
 		return;
+	}
 
-	try
-	{
+	try {
 		perl->sethash(
 			std::string(pkgprefix).append("::").append(hashname).c_str(),
 			vals
 		);
-	} catch(const char *err) {
-        std::string error = "Error exporting hash: ";
-        error += err;
-        AddError(error);
+	} catch (std::string e) {
+		AddError(
+			fmt::format(
+				"Error exporting Perl hash [{}]",
+				e
+			)
+		);
 	}
 }
 
-void PerlembParser::ExportVar(const char * pkgprefix, const char * varname, int value)
+void PerlembParser::ExportVar(const char *pkgprefix, const char *varname, int value)
 {
 
-	if(!perl)
+	if (!perl) {
 		return;
+	}
 
 	try {
 		perl->seti(std::string(pkgprefix).append("::").append(varname).c_str(), value);
 
-	} catch(const char * err) {
-		std::string error = "Error exporting var: ";
-        error += err;
-        AddError(error);
+	}
+	catch (std::string e) {
+		AddError(
+			fmt::format(
+				"Error exporting Perl variable [{}]",
+				e
+			)
+		);
 	}
 }
 
-void PerlembParser::ExportVar(const char * pkgprefix, const char * varname, unsigned int value)
+void PerlembParser::ExportVar(const char *pkgprefix, const char *varname, unsigned int value)
 {
 
-	if(!perl)
+	if (!perl) {
 		return;
+	}
 
 	try {
 		perl->seti(std::string(pkgprefix).append("::").append(varname).c_str(), value);
 
-	} catch(const char * err) {
-		std::string error = "Error exporting var: ";
-        error += err;
-        AddError(error);
+	} catch (std::string e) {
+		AddError(
+			fmt::format(
+				"Error exporting Perl variable [{}]",
+				e
+			)
+		);
 	}
 }
 
-void PerlembParser::ExportVar(const char * pkgprefix, const char * varname, float value)
+void PerlembParser::ExportVar(const char *pkgprefix, const char *varname, float value)
 {
 
-	if(!perl)
+	if (!perl) {
 		return;
+	}
 
 	try {
 		perl->setd(std::string(pkgprefix).append("::").append(varname).c_str(), value);
-	} catch(const char * err) {
-		std::string error = "Error exporting var: ";
-        error += err;
-        AddError(error);
+	} catch (std::string e) {
+		AddError(
+			fmt::format(
+				"Error exporting Perl variable [{}]",
+				e
+			)
+		);
 	}
 }
 
-void PerlembParser::ExportVarComplex(const char * pkgprefix, const char *varname, const char *value)
+void PerlembParser::ExportVarComplex(const char *pkgprefix, const char *varname, const char *value)
 {
 
-	if(!perl)
+	if (!perl) {
 		return;
-	try
-	{
+	}
+	try {
 		perl->eval(std::string("$").append(pkgprefix).append("::").append(varname).append("=").append(value).append(";").c_str());
 	}
-	catch(const char * err)
-	{
-		std::string error = "Error exporting var: ";
-        error += err;
-        AddError(error);
+	catch (std::string e) {
+		AddError(
+			fmt::format(
+				"Error exporting Perl variable [{}]",
+				e
+			)
+		);
 	}
 }
 
 void PerlembParser::ExportVar(const char *pkgprefix, const char *varname, const char *value)
 {
-	if(!perl)
+	if (!perl) {
 		return;
+	}
 
-	try
-	{
+	try {
 		perl->setstr(std::string(pkgprefix).append("::").append(varname).c_str(), value);
 	}
-	catch(const char * err)
-	{
-		std::string error = "Error exporting var: ";
-        error += err;
-        AddError(error);
+	catch (std::string e) {
+		AddError(
+			fmt::format(
+				"Error exporting Perl variable [{}]",
+				e
+			)
+		);
 	}
 }
 
-int PerlembParser::SendCommands(const char *pkgprefix, const char *event, uint32 npcid, Mob* other, Mob* mob, EQEmu::ItemInstance* item_inst) {
-	if(!perl)
+int PerlembParser::SendCommands(
+	const char *pkgprefix,
+	const char *event,
+	uint32 npcid,
+	Mob *other,
+	Mob *mob,
+	EQEmu::ItemInstance *item_inst
+)
+{
+	if (!perl) {
 		return 0;
+	}
 
 	int ret_value = 0;
-	if(mob && mob->IsClient())
+	if (mob && mob->IsClient()) {
 		quest_manager.StartQuest(other, mob->CastToClient(), item_inst);
-	else
+	}
+	else {
 		quest_manager.StartQuest(other, nullptr, nullptr);
+	}
 
 	try {
 
-		std::string cmd = "package " + (std::string)(pkgprefix) + (std::string)(";");
+		std::string cmd = "package " + (std::string) (pkgprefix) + (std::string) (";");
 		perl->eval(cmd.c_str());
 
 #ifdef EMBPERL_XS_CLASSES
 
 		{
-			std::string cl = (std::string)"$" + (std::string)pkgprefix + (std::string)"::client";
-			std::string np = (std::string)"$" + (std::string)pkgprefix + (std::string)"::npc";
-			std::string qi = (std::string)"$" + (std::string)pkgprefix + (std::string)"::questitem";
-			std::string enl = (std::string)"$" + (std::string)pkgprefix + (std::string)"::entity_list";
-			if(clear_vars_.find(cl) != clear_vars_.end()) {
+			std::string cl  = (std::string) "$" + (std::string) pkgprefix + (std::string) "::client";
+			std::string np  = (std::string) "$" + (std::string) pkgprefix + (std::string) "::npc";
+			std::string qi  = (std::string) "$" + (std::string) pkgprefix + (std::string) "::questitem";
+			std::string enl = (std::string) "$" + (std::string) pkgprefix + (std::string) "::entity_list";
+			if (clear_vars_.find(cl) != clear_vars_.end()) {
 				std::string eval_str = cl;
 				eval_str += " = undef;";
 				perl->eval(eval_str.c_str());
@@ -697,15 +833,16 @@ int PerlembParser::SendCommands(const char *pkgprefix, const char *event, uint32
 		Client *curc = quest_manager.GetInitiator();
 		snprintf(namebuf, 64, "%s::client", pkgprefix);
 		SV *client = get_sv(namebuf, true);
-		if(curc != nullptr) {
+		if (curc != nullptr) {
 			sv_setref_pv(client, "Client", curc);
-		} else {
+		}
+		else {
 			//clear out the value, mainly to get rid of blessedness
 			sv_setsv(client, _empty_sv);
 		}
 
 		//only export NPC if it's a npc quest
-		if(!other->IsClient()){
+		if (!other->IsClient()) {
 			NPC *curn = quest_manager.GetNPC();
 			snprintf(namebuf, 64, "%s::npc", pkgprefix);
 			SV *npc = get_sv(namebuf, true);
@@ -713,8 +850,8 @@ int PerlembParser::SendCommands(const char *pkgprefix, const char *event, uint32
 		}
 
 		//only export QuestItem if it's an item quest
-		if(item_inst) {
-			EQEmu::ItemInstance* curi = quest_manager.GetQuestItem();
+		if (item_inst) {
+			EQEmu::ItemInstance *curi = quest_manager.GetQuestItem();
 			snprintf(namebuf, 64, "%s::questitem", pkgprefix);
 			SV *questitem = get_sv(namebuf, true);
 			sv_setref_pv(questitem, "QuestItem", curi);
@@ -730,40 +867,35 @@ int PerlembParser::SendCommands(const char *pkgprefix, const char *event, uint32
 
 #ifdef EMBPERL_XS_CLASSES
 		{
-			std::string cl = (std::string)"$" + (std::string)pkgprefix + (std::string)"::client";
-			std::string np = (std::string)"$" + (std::string)pkgprefix + (std::string)"::npc";
-			std::string qi = (std::string)"$" + (std::string)pkgprefix + (std::string)"::questitem";
-			std::string enl = (std::string)"$" + (std::string)pkgprefix + (std::string)"::entity_list";
-			clear_vars_[cl] = 1;
-			clear_vars_[np] = 1;
-			clear_vars_[qi] = 1;
+			std::string cl  = (std::string) "$" + (std::string) pkgprefix + (std::string) "::client";
+			std::string np  = (std::string) "$" + (std::string) pkgprefix + (std::string) "::npc";
+			std::string qi  = (std::string) "$" + (std::string) pkgprefix + (std::string) "::questitem";
+			std::string enl = (std::string) "$" + (std::string) pkgprefix + (std::string) "::entity_list";
+			clear_vars_[cl]  = 1;
+			clear_vars_[np]  = 1;
+			clear_vars_[qi]  = 1;
 			clear_vars_[enl] = 1;
 		}
 #endif
 
-	} catch(const char * err) {
-
-		//try to reduce some of the console spam...
-		//todo: tweak this to be more accurate at deciding what to filter (we don't want to gag legit errors)
-		if(!strstr(err,"Undefined subroutine")) {
-            std::string error = "Script error: ";
-            error += pkgprefix;
-            error += "::";
-            error += event;
-            error += " - ";
-			if(strlen(err) > 0)
-				error += err;
-            AddError(error);
-        }
+	} catch (std::string e) {
+		AddError(
+			fmt::format(
+				"Script Error | Package [{}] Event [{}] Error [{}]",
+				pkgprefix,
+				event,
+				trim(e)
+			)
+		);
 	}
 
 	quest_manager.EndQuest();
 
 #ifdef EMBPERL_XS_CLASSES
-	if(!quest_manager.QuestsRunning()) {
-		auto iter = clear_vars_.begin();
+	if (!quest_manager.QuestsRunning()) {
+		auto        iter = clear_vars_.begin();
 		std::string eval_str;
-		while(iter != clear_vars_.end()) {
+		while (iter != clear_vars_.end()) {
 			eval_str += iter->first;
 			eval_str += " = undef;";
 			++iter;
@@ -773,11 +905,13 @@ int PerlembParser::SendCommands(const char *pkgprefix, const char *event, uint32
 		try {
 			perl->eval(eval_str.c_str());
 		}
-		catch (const char * err) {
-			std::string error = "Script clear error: ";
-			if (strlen(err) > 0)
-				error += err;
-			AddError(error);
+		catch (std::string e) {
+			AddError(
+				fmt::format(
+					"Script Clear Error | Error [{}]",
+					e
+				)
+			);
 		}
 	}
 #endif
@@ -785,198 +919,221 @@ int PerlembParser::SendCommands(const char *pkgprefix, const char *event, uint32
 	return ret_value;
 }
 
-void PerlembParser::MapFunctions() {
+void PerlembParser::MapFunctions()
+{
 	_empty_sv = newSV(0);
 
 	perl->eval(
-	"{"
-	"package quest;"
-	"&boot_quest;"			//load our quest XS
-#ifdef EMBPERL_XS_CLASSES
-	"package Mob;"
-	"&boot_Mob;"			//load our Mob XS
+		"{"
+		"package quest;"
+		"&boot_quest;"            //load our quest XS
+		#ifdef EMBPERL_XS_CLASSES
+		"package Mob;"
+		"&boot_Mob;"            //load our Mob XS
 
-	"package Client;"
-	"our @ISA = qw(Mob);"	//client inherits mob.
-	"&boot_Mob;"			//load our Mob XS
-	"&boot_Client;"			//load our Client XS
+		"package Client;"
+		"our @ISA = qw(Mob);"    //client inherits mob.
+		"&boot_Mob;"            //load our Mob XS
+		"&boot_Client;"            //load our Client XS
 
-	"package NPC;"
-	"our @ISA = qw(Mob);"	//NPC inherits mob.
-	"&boot_Mob;"			//load our Mob XS
-	"&boot_NPC;"			//load our NPC XS
+		"package NPC;"
+		"our @ISA = qw(Mob);"    //NPC inherits mob.
+		"&boot_Mob;"            //load our Mob XS
+		"&boot_NPC;"            //load our NPC XS
 
-	"package Corpse;"
-	"our @ISA = qw(Mob);"	//Corpse inherits mob.
-	"&boot_Mob;"			//load our Mob XS
-	"&boot_Corpse;"			//load our Mob XS
+		"package Corpse;"
+		"our @ISA = qw(Mob);"    //Corpse inherits mob.
+		"&boot_Mob;"            //load our Mob XS
+		"&boot_Corpse;"            //load our Mob XS
 
-	"package EntityList;"
-	"&boot_EntityList;"		//load our EntityList XS
+		"package EntityList;"
+		"&boot_EntityList;"        //load our EntityList XS
 
-	"package PerlPacket;"
-	"&boot_PerlPacket;"		//load our PerlPacket XS
+		"package PerlPacket;"
+		"&boot_PerlPacket;"        //load our PerlPacket XS
 
-	"package Group;"
-	"&boot_Group;"		//load our Group XS
+		"package Group;"
+		"&boot_Group;"        //load our Group XS
 
-	"package Raid;"
-	"&boot_Raid;"		//load our Raid XS
+		"package Raid;"
+		"&boot_Raid;"        //load our Raid XS
 
-	"package QuestItem;"
-	"&boot_QuestItem;"	// load quest Item XS
+		"package QuestItem;"
+		"&boot_QuestItem;"    // load quest Item XS
 
-	"package HateEntry;"
-	"&boot_HateEntry;"	// load quest Hate XS
+		"package HateEntry;"
+		"&boot_HateEntry;"    // load quest Hate XS
 
-	"package Object;"
-	"&boot_Object;"	// load quest Object XS
+		"package Object;"
+		"&boot_Object;"    // load quest Object XS
 
-	"package Doors;"
-	"&boot_Doors;"	// load quest Doors XS
+		"package Doors;"
+		"&boot_Doors;"    // load quest Doors XS
 
-#endif
-	"package main;"
-	"}"
+		#endif
+		"package main;"
+		"}"
 	);
 }
 
-void PerlembParser::GetQuestTypes(bool &isPlayerQuest, bool &isGlobalPlayerQuest, bool &isGlobalNPC, bool &isItemQuest,
-		bool &isSpellQuest, QuestEventID event, NPC* npcmob, EQEmu::ItemInstance* item_inst, Mob* mob, bool global)
+void PerlembParser::GetQuestTypes(
+	bool &isPlayerQuest, bool &isGlobalPlayerQuest, bool &isGlobalNPC, bool &isItemQuest,
+	bool &isSpellQuest, QuestEventID event, NPC *npcmob, EQEmu::ItemInstance *item_inst, Mob *mob, bool global
+)
 {
-	if(event == EVENT_SPELL_EFFECT_CLIENT ||
+	if (event == EVENT_SPELL_EFFECT_CLIENT ||
 		event == EVENT_SPELL_EFFECT_NPC ||
 		event == EVENT_SPELL_BUFF_TIC_CLIENT ||
 		event == EVENT_SPELL_BUFF_TIC_NPC ||
 		event == EVENT_SPELL_FADE ||
-		event == EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE)
-	{
+		event == EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE) {
 		isSpellQuest = true;
 	}
-	else
-	{
-		if(!npcmob && mob) {
-			if(!item_inst) {
-				if(global) {
+	else {
+		if (!npcmob && mob) {
+			if (!item_inst) {
+				if (global) {
 					isGlobalPlayerQuest = true;
-				} else {
+				}
+				else {
 					isPlayerQuest = true;
 				}
 			}
-			else
+			else {
 				isItemQuest = true;
+			}
 		}
 	}
 }
 
-void PerlembParser::GetQuestPackageName(bool &isPlayerQuest, bool &isGlobalPlayerQuest, bool &isGlobalNPC, bool &isItemQuest,
-		bool &isSpellQuest, std::string &package_name, QuestEventID event, uint32 objid, const char * data,
-		NPC* npcmob, EQEmu::ItemInstance* item_inst, bool global)
+void PerlembParser::GetQuestPackageName(
+	bool &isPlayerQuest,
+	bool &isGlobalPlayerQuest,
+	bool &isGlobalNPC,
+	bool &isItemQuest,
+	bool &isSpellQuest,
+	std::string &package_name,
+	QuestEventID event,
+	uint32 objid,
+	const char *data,
+	NPC *npcmob,
+	EQEmu::ItemInstance *item_inst,
+	bool global
+)
 {
-	if(!isPlayerQuest && !isGlobalPlayerQuest && !isItemQuest && !isSpellQuest) {
-		if(global) {
-			isGlobalNPC = true;
+	if (!isPlayerQuest && !isGlobalPlayerQuest && !isItemQuest && !isSpellQuest) {
+		if (global) {
+			isGlobalNPC  = true;
 			package_name = "qst_global_npc";
-		} else {
+		}
+		else {
 			package_name = "qst_npc_";
 			package_name += itoa(npcmob->GetNPCTypeID());
 		}
 	}
-	else if(isItemQuest) {
+	else if (isItemQuest) {
 		// need a valid EQEmu::ItemInstance pointer check here..unsure how to cancel this process
-		const EQEmu::ItemData* item = item_inst->GetItem();
+		const EQEmu::ItemData *item = item_inst->GetItem();
 		package_name = "qst_item_";
 		package_name += itoa(item->ID);
 	}
-	else if(isPlayerQuest) {
+	else if (isPlayerQuest) {
 		package_name = "qst_player";
 	}
-	else if(isGlobalPlayerQuest) {
+	else if (isGlobalPlayerQuest) {
 		package_name = "qst_global_player";
 	}
-	else
-	{
+	else {
 		package_name = "qst_spell_";
 		package_name += data;
 	}
 }
 
-void PerlembParser::ExportCharID(const std::string &package_name, int &char_id, NPC *npcmob, Mob *mob) {
+void PerlembParser::ExportCharID(const std::string &package_name, int &char_id, NPC *npcmob, Mob *mob)
+{
 	if (mob && mob->IsClient()) {  // some events like waypoint and spawn don't have a player involved
 		char_id = mob->CastToClient()->CharacterID();
-	} else {
-		if(npcmob)
-		{
+	}
+	else {
+		if (npcmob) {
 			char_id = -static_cast<int>(npcmob->GetNPCTypeID());  // make char id negative npc id as a fudge
 		}
-		else if(mob && mob->IsNPC())
-		{
+		else if (mob && mob->IsNPC()) {
 			char_id = -static_cast<int>(mob->CastToNPC()->GetNPCTypeID());  // make char id negative npc id as a fudge
 		}
 	}
 	ExportVar(package_name.c_str(), "charid", char_id);
 }
 
-void PerlembParser::ExportQGlobals(bool isPlayerQuest, bool isGlobalPlayerQuest, bool isGlobalNPC, bool isItemQuest,
-	bool isSpellQuest, std::string &package_name, NPC *npcmob, Mob *mob, int char_id) {
+void PerlembParser::ExportQGlobals(
+	bool isPlayerQuest, bool isGlobalPlayerQuest, bool isGlobalNPC, bool isItemQuest,
+	bool isSpellQuest, std::string &package_name, NPC *npcmob, Mob *mob, int char_id
+)
+{
 	//NPC quest
-	if(!isPlayerQuest && !isGlobalPlayerQuest && !isItemQuest && !isSpellQuest)
-	{
+	if (!isPlayerQuest && !isGlobalPlayerQuest && !isItemQuest && !isSpellQuest) {
 		//only export for npcs that are global enabled.
-		if(npcmob && npcmob->GetQglobal())
-		{
+		if (npcmob && npcmob->GetQglobal()) {
 			std::map<std::string, std::string> globhash;
-			QGlobalCache *npc_c = nullptr;
-			QGlobalCache *char_c = nullptr;
-			QGlobalCache *zone_c = nullptr;
+			QGlobalCache                       *npc_c  = nullptr;
+			QGlobalCache                       *char_c = nullptr;
+			QGlobalCache                       *zone_c = nullptr;
 
 			//retrieve our globals
-			npc_c = npcmob->GetQGlobals();
-			if(mob && mob->IsClient())
+			npc_c  = npcmob->GetQGlobals();
+			if (mob && mob->IsClient()) {
 				char_c = mob->CastToClient()->GetQGlobals();
+			}
 			zone_c = zone->GetQGlobals();
 
-			if(!npc_c)
-			{
+			if (!npc_c) {
 				npc_c = npcmob->CreateQGlobals();
 				npc_c->LoadByNPCID(npcmob->GetNPCTypeID());
 			}
 
-			if(!char_c)
-			{
-				if(mob && mob->IsClient())
-				{
+			if (!char_c) {
+				if (mob && mob->IsClient()) {
 					char_c = mob->CastToClient()->CreateQGlobals();
 					char_c->LoadByCharID(mob->CastToClient()->CharacterID());
 				}
 			}
 
-			if(!zone_c)
-			{
+			if (!zone_c) {
 				zone_c = zone->CreateQGlobals();
 				zone_c->LoadByZoneID(zone->GetZoneID());
 				zone_c->LoadByGlobalContext();
 			}
 
 			std::list<QGlobal> globalMap;
-			if(npc_c)
-			{
-				QGlobalCache::Combine(globalMap, npc_c->GetBucket(), npcmob->GetNPCTypeID(), char_id, zone->GetZoneID());
+			if (npc_c) {
+				QGlobalCache::Combine(
+					globalMap,
+					npc_c->GetBucket(),
+					npcmob->GetNPCTypeID(),
+					char_id,
+					zone->GetZoneID());
 			}
 
-			if(char_c)
-			{
-				QGlobalCache::Combine(globalMap, char_c->GetBucket(), npcmob->GetNPCTypeID(), char_id, zone->GetZoneID());
+			if (char_c) {
+				QGlobalCache::Combine(
+					globalMap,
+					char_c->GetBucket(),
+					npcmob->GetNPCTypeID(),
+					char_id,
+					zone->GetZoneID());
 			}
 
-			if(zone_c)
-			{
-				QGlobalCache::Combine(globalMap, zone_c->GetBucket(), npcmob->GetNPCTypeID(), char_id, zone->GetZoneID());
+			if (zone_c) {
+				QGlobalCache::Combine(
+					globalMap,
+					zone_c->GetBucket(),
+					npcmob->GetNPCTypeID(),
+					char_id,
+					zone->GetZoneID());
 			}
 
 			auto iter = globalMap.begin();
-			while(iter != globalMap.end())
-			{
+			while (iter != globalMap.end()) {
 				globhash[(*iter).name] = (*iter).value;
 				ExportVar(package_name.c_str(), (*iter).name.c_str(), (*iter).value.c_str());
 				++iter;
@@ -984,47 +1141,41 @@ void PerlembParser::ExportQGlobals(bool isPlayerQuest, bool isGlobalPlayerQuest,
 			ExportHash(package_name.c_str(), "qglobals", globhash);
 		}
 	}
-	else
-	{
+	else {
 		std::map<std::string, std::string> globhash;
-		QGlobalCache *char_c = nullptr;
-		QGlobalCache *zone_c = nullptr;
+		QGlobalCache                       *char_c = nullptr;
+		QGlobalCache                       *zone_c = nullptr;
 
 		//retrieve our globals
-		if(mob && mob->IsClient())
+		if (mob && mob->IsClient()) {
 			char_c = mob->CastToClient()->GetQGlobals();
-		zone_c = zone->GetQGlobals();
+		}
+		zone_c                                     = zone->GetQGlobals();
 
-		if(!char_c)
-		{
-			if(mob && mob->IsClient())
-			{
+		if (!char_c) {
+			if (mob && mob->IsClient()) {
 				char_c = mob->CastToClient()->CreateQGlobals();
 				char_c->LoadByCharID(mob->CastToClient()->CharacterID());
 			}
 		}
 
-		if(!zone_c)
-		{
+		if (!zone_c) {
 			zone_c = zone->CreateQGlobals();
 			zone_c->LoadByZoneID(zone->GetZoneID());
 			zone_c->LoadByGlobalContext();
 		}
 
 		std::list<QGlobal> globalMap;
-		if(char_c)
-		{
+		if (char_c) {
 			QGlobalCache::Combine(globalMap, char_c->GetBucket(), 0, char_id, zone->GetZoneID());
 		}
 
-		if(zone_c)
-		{
+		if (zone_c) {
 			QGlobalCache::Combine(globalMap, zone_c->GetBucket(), 0, char_id, zone->GetZoneID());
 		}
 
 		auto iter = globalMap.begin();
-		while(iter != globalMap.end())
-		{
+		while (iter != globalMap.end()) {
 			globhash[(*iter).name] = (*iter).value;
 			ExportVar(package_name.c_str(), (*iter).name.c_str(), (*iter).value.c_str());
 			++iter;
@@ -1033,8 +1184,10 @@ void PerlembParser::ExportQGlobals(bool isPlayerQuest, bool isGlobalPlayerQuest,
 	}
 }
 
-void PerlembParser::ExportMobVariables(bool isPlayerQuest, bool isGlobalPlayerQuest, bool isGlobalNPC, bool isItemQuest,
-		bool isSpellQuest, std::string &package_name, Mob *mob, NPC *npcmob)
+void PerlembParser::ExportMobVariables(
+	bool isPlayerQuest, bool isGlobalPlayerQuest, bool isGlobalNPC, bool isItemQuest,
+	bool isSpellQuest, std::string &package_name, Mob *mob, NPC *npcmob
+)
 {
 	uint8 fac = 0;
 	if (mob && mob->IsClient()) {
@@ -1043,16 +1196,18 @@ void PerlembParser::ExportMobVariables(bool isPlayerQuest, bool isGlobalPlayerQu
 		ExportVar(package_name.c_str(), "status", mob->CastToClient()->Admin());
 	}
 
-	if(!isPlayerQuest && !isGlobalPlayerQuest && !isItemQuest) {
+	if (!isPlayerQuest && !isGlobalPlayerQuest && !isItemQuest) {
 		if (mob && npcmob && mob->IsClient()) {
-			Client* client = mob->CastToClient();
+			Client *client = mob->CastToClient();
 
-			fac = client->GetFactionLevel(client->CharacterID(), npcmob->GetID(), client->GetFactionRace(),
-				client->GetClass(), client->GetDeity(), npcmob->GetPrimaryFaction(), npcmob);
+			fac = client->GetFactionLevel(
+				client->CharacterID(), npcmob->GetID(), client->GetFactionRace(),
+				client->GetClass(), client->GetDeity(), npcmob->GetPrimaryFaction(), npcmob
+			);
 		}
 	}
 
-	if(mob) {
+	if (mob) {
 		ExportVar(package_name.c_str(), "name", mob->GetName());
 		ExportVar(package_name.c_str(), "race", GetRaceIDName(mob->GetRace()));
 		ExportVar(package_name.c_str(), "class", GetClassIDName(mob->GetClass()));
@@ -1060,19 +1215,17 @@ void PerlembParser::ExportMobVariables(bool isPlayerQuest, bool isGlobalPlayerQu
 		ExportVar(package_name.c_str(), "userid", mob->GetID());
 	}
 
-	if(!isPlayerQuest && !isGlobalPlayerQuest && !isItemQuest && !isSpellQuest)
-	{
-		if (npcmob)
-		{
+	if (!isPlayerQuest && !isGlobalPlayerQuest && !isItemQuest && !isSpellQuest) {
+		if (npcmob) {
 			ExportVar(package_name.c_str(), "mname", npcmob->GetName());
 			ExportVar(package_name.c_str(), "mobid", npcmob->GetID());
 			ExportVar(package_name.c_str(), "mlevel", npcmob->GetLevel());
-			ExportVar(package_name.c_str(), "hpratio",npcmob->GetHPRatio());
-			ExportVar(package_name.c_str(), "x", npcmob->GetX() );
-			ExportVar(package_name.c_str(), "y", npcmob->GetY() );
-			ExportVar(package_name.c_str(), "z", npcmob->GetZ() );
-			ExportVar(package_name.c_str(), "h", npcmob->GetHeading() );
-			if(npcmob->GetTarget()) {
+			ExportVar(package_name.c_str(), "hpratio", npcmob->GetHPRatio());
+			ExportVar(package_name.c_str(), "x", npcmob->GetX());
+			ExportVar(package_name.c_str(), "y", npcmob->GetY());
+			ExportVar(package_name.c_str(), "z", npcmob->GetZ());
+			ExportVar(package_name.c_str(), "h", npcmob->GetHeading());
+			if (npcmob->GetTarget()) {
 				ExportVar(package_name.c_str(), "targetid", npcmob->GetTarget()->GetID());
 				ExportVar(package_name.c_str(), "targetname", npcmob->GetTarget()->GetName());
 			}
@@ -1084,7 +1237,8 @@ void PerlembParser::ExportMobVariables(bool isPlayerQuest, bool isGlobalPlayerQu
 	}
 }
 
-void PerlembParser::ExportZoneVariables(std::string &package_name) {
+void PerlembParser::ExportZoneVariables(std::string &package_name)
+{
 	if (zone) {
 		ExportVar(package_name.c_str(), "zoneid", zone->GetZoneID());
 		ExportVar(package_name.c_str(), "zoneln", zone->GetLongName());
@@ -1092,7 +1246,7 @@ void PerlembParser::ExportZoneVariables(std::string &package_name) {
 		ExportVar(package_name.c_str(), "instanceid", zone->GetInstanceID());
 		ExportVar(package_name.c_str(), "instanceversion", zone->GetInstanceVersion());
 		TimeOfDay_Struct eqTime;
-		zone->zone_time.GetCurrentEQTimeOfDay( time(0), &eqTime);
+		zone->zone_time.GetCurrentEQTimeOfDay(time(0), &eqTime);
 		ExportVar(package_name.c_str(), "zonehour", eqTime.hour - 1);
 		ExportVar(package_name.c_str(), "zonemin", eqTime.minute);
 		ExportVar(package_name.c_str(), "zonetime", (eqTime.hour - 1) * 100 + eqTime.minute);
@@ -1100,20 +1254,18 @@ void PerlembParser::ExportZoneVariables(std::string &package_name) {
 	}
 }
 
-void PerlembParser::ExportItemVariables(std::string &package_name, Mob *mob) {
-	if(mob && mob->IsClient())
-	{
+void PerlembParser::ExportItemVariables(std::string &package_name, Mob *mob)
+{
+	if (mob && mob->IsClient()) {
 		std::string hashname = package_name + std::string("::hasitem");
 
 		//start with an empty hash
 		perl->eval(std::string("%").append(hashname).append(" = ();").c_str());
 
-		for(int slot = EQEmu::invslot::EQUIPMENT_BEGIN; slot <= EQEmu::invslot::GENERAL_END; slot++)
-		{
-			char *hi_decl=nullptr;
-			int itemid = mob->CastToClient()->GetItemIDAt(slot);
-			if(itemid != -1 && itemid != 0)
-			{
+		for (int slot = EQEmu::invslot::EQUIPMENT_BEGIN; slot <= EQEmu::invslot::GENERAL_END; slot++) {
+			char *hi_decl = nullptr;
+			int  itemid   = mob->CastToClient()->GetItemIDAt(slot);
+			if (itemid != -1 && itemid != 0) {
 				MakeAnyLenString(&hi_decl, "push (@{$%s{%d}},%d);", hashname.c_str(), itemid, slot);
 				perl->eval(hi_decl);
 				safe_delete_array(hi_decl);
@@ -1121,25 +1273,27 @@ void PerlembParser::ExportItemVariables(std::string &package_name, Mob *mob) {
 		}
 	}
 
-	if(mob && mob->IsClient()) {
+	if (mob && mob->IsClient()) {
 		std::string hashname = package_name + std::string("::oncursor");
 		perl->eval(std::string("%").append(hashname).append(" = ();").c_str());
 		char *hi_decl = nullptr;
-		int itemid = mob->CastToClient()->GetItemIDAt(EQEmu::invslot::slotCursor);
-		if(itemid != -1 && itemid != 0) {
-			MakeAnyLenString(&hi_decl, "push (@{$%s{%d}},%d);",hashname.c_str(), itemid, EQEmu::invslot::slotCursor);
+		int  itemid   = mob->CastToClient()->GetItemIDAt(EQEmu::invslot::slotCursor);
+		if (itemid != -1 && itemid != 0) {
+			MakeAnyLenString(&hi_decl, "push (@{$%s{%d}},%d);", hashname.c_str(), itemid, EQEmu::invslot::slotCursor);
 			perl->eval(hi_decl);
 			safe_delete_array(hi_decl);
 		}
 	}
 }
 
-void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID event, uint32 objid, const char * data,
-	NPC* npcmob, EQEmu::ItemInstance* item_inst, Mob* mob, uint32 extradata, std::vector<EQEmu::Any> *extra_pointers)
+void PerlembParser::ExportEventVariables(
+	std::string &package_name, QuestEventID event, uint32 objid, const char *data,
+	NPC *npcmob, EQEmu::ItemInstance *item_inst, Mob *mob, uint32 extradata, std::vector<EQEmu::Any> *extra_pointers
+)
 {
 	switch (event) {
 		case EVENT_SAY: {
-			if(npcmob && mob) {
+			if (npcmob && mob) {
 				npcmob->DoQuestPause(mob);
 			}
 
@@ -1150,15 +1304,15 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 		}
 
 		case EVENT_TRADE: {
-			if(extra_pointers) {
-				size_t sz = extra_pointers->size();
-				for(size_t i = 0; i < sz; ++i) {
-					EQEmu::ItemInstance *inst = EQEmu::any_cast<EQEmu::ItemInstance*>(extra_pointers->at(i));
+			if (extra_pointers) {
+				size_t      sz = extra_pointers->size();
+				for (size_t i  = 0; i < sz; ++i) {
+					EQEmu::ItemInstance *inst = EQEmu::any_cast<EQEmu::ItemInstance *>(extra_pointers->at(i));
 
 					std::string var_name = "item";
 					var_name += std::to_string(i + 1);
 
-					if(inst) {
+					if (inst) {
 						ExportVar(package_name.c_str(), var_name.c_str(), inst->GetItem()->ID);
 
 						std::string temp_var_name = var_name;
@@ -1168,7 +1322,8 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 						temp_var_name = var_name;
 						temp_var_name += "_attuned";
 						ExportVar(package_name.c_str(), temp_var_name.c_str(), inst->IsAttuned());
-					} else {
+					}
+					else {
 						ExportVar(package_name.c_str(), var_name.c_str(), 0);
 
 						std::string temp_var_name = var_name;
@@ -1206,8 +1361,7 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 				ExportVar(package_name.c_str(), "hpevent", "-1");
 				ExportVar(package_name.c_str(), "inchpevent", data);
 			}
-			else
-			{
+			else {
 				ExportVar(package_name.c_str(), "hpevent", data);
 				ExportVar(package_name.c_str(), "inchpevent", "-1");
 			}
@@ -1248,7 +1402,7 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 			break;
 		}
 
-		case EVENT_ZONE:{
+		case EVENT_ZONE: {
 			ExportVar(package_name.c_str(), "target_zone_id", data);
 			break;
 		}
@@ -1260,26 +1414,26 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 			break;
 		}
 
-		case EVENT_TASK_ACCEPTED:{
+		case EVENT_TASK_ACCEPTED: {
 			ExportVar(package_name.c_str(), "task_id", data);
 			break;
 		}
 
-		case EVENT_TASK_STAGE_COMPLETE:{
+		case EVENT_TASK_STAGE_COMPLETE: {
 			Seperator sep(data);
 			ExportVar(package_name.c_str(), "task_id", sep.arg[0]);
 			ExportVar(package_name.c_str(), "activity_id", sep.arg[1]);
 			break;
 		}
 
-		case EVENT_TASK_FAIL:{
+		case EVENT_TASK_FAIL: {
 			Seperator sep(data);
 			ExportVar(package_name.c_str(), "task_id", sep.arg[0]);
 			break;
 		}
 
 		case EVENT_TASK_COMPLETE:
-		case EVENT_TASK_UPDATE:{
+		case EVENT_TASK_UPDATE: {
 			Seperator sep(data);
 			ExportVar(package_name.c_str(), "donecount", sep.arg[0]);
 			ExportVar(package_name.c_str(), "activity_id", sep.arg[1]);
@@ -1287,7 +1441,7 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 			break;
 		}
 
-		case EVENT_PLAYER_PICKUP:{
+		case EVENT_PLAYER_PICKUP: {
 			ExportVar(package_name.c_str(), "picked_up_id", data);
 			ExportVar(package_name.c_str(), "picked_up_entity_id", extradata);
 			break;
@@ -1300,11 +1454,11 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 			break;
 		}
 
-		case EVENT_POPUP_RESPONSE:{
+		case EVENT_POPUP_RESPONSE: {
 			ExportVar(package_name.c_str(), "popupid", data);
 			break;
 		}
-		case EVENT_ENVIRONMENTAL_DAMAGE:{
+		case EVENT_ENVIRONMENTAL_DAMAGE: {
 			Seperator sep(data);
 			ExportVar(package_name.c_str(), "env_damage", sep.arg[0]);
 			ExportVar(package_name.c_str(), "env_damage_type", sep.arg[1]);
@@ -1338,8 +1492,7 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 		}
 
 		case EVENT_GROUP_CHANGE: {
-			if(mob && mob->IsClient())
-			{
+			if (mob && mob->IsClient()) {
 				ExportVar(package_name.c_str(), "grouped", mob->IsGrouped());
 				ExportVar(package_name.c_str(), "raided", mob->IsRaidGrouped());
 			}
@@ -1354,16 +1507,14 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 		case EVENT_SPELL_EFFECT_CLIENT:
 		case EVENT_SPELL_EFFECT_NPC:
 		case EVENT_SPELL_BUFF_TIC_CLIENT:
-		case EVENT_SPELL_BUFF_TIC_NPC:
-		{
+		case EVENT_SPELL_BUFF_TIC_NPC: {
 			ExportVar(package_name.c_str(), "caster_id", extradata);
 			break;
 		}
 
-		//tradeskill events
+			//tradeskill events
 		case EVENT_COMBINE_SUCCESS:
-		case EVENT_COMBINE_FAILURE:
-		{
+		case EVENT_COMBINE_FAILURE: {
 			ExportVar(package_name.c_str(), "recipe_id", extradata);
 			ExportVar(package_name.c_str(), "recipe_name", data);
 			break;
@@ -1435,7 +1586,7 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 			ExportVar(package_name.c_str(), "killed_npc_id", sep.arg[4]);
 			break;
 		}
-		case EVENT_USE_SKILL:{
+		case EVENT_USE_SKILL: {
 			Seperator sep(data);
 			ExportVar(package_name.c_str(), "skill_id", sep.arg[0]);
 			ExportVar(package_name.c_str(), "skill_level", sep.arg[1]);
@@ -1446,7 +1597,7 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 			ExportVar(package_name.c_str(), "recipe_id", extradata);
 			ExportVar(package_name.c_str(), "validate_type", sep.arg[0]);
 
-			std::string zone_id = "-1";
+			std::string zone_id       = "-1";
 			std::string tradeskill_id = "-1";
 			if (strcmp(sep.arg[0], "check_zone") == 0) {
 				zone_id = sep.arg[1];
@@ -1454,7 +1605,7 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 			else if (strcmp(sep.arg[0], "check_tradeskill") == 0) {
 				tradeskill_id = sep.arg[1];
 			}
-			
+
 			ExportVar(package_name.c_str(), "zone_id", zone_id.c_str());
 			ExportVar(package_name.c_str(), "tradeskill_id", tradeskill_id.c_str());
 			break;
