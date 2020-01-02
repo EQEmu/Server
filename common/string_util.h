@@ -28,6 +28,7 @@
 #endif
 
 #ifdef _WINDOWS
+#include <ctype.h>
 #include <functional>
 #include <algorithm>
 #endif
