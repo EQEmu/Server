@@ -108,8 +108,12 @@ void Mob::CheckFlee() {
 	}
 
 	// If we got here we are allowed to roll on flee chance if there is not other hated NPC's in the area.
-
-	if(RuleB(Combat, FleeIfNotAlone) || GetSpecialAbility(ALWAYS_FLEE) || zone->random.Roll(flee_chance) && entity_list.GetHatedCount(hate_top, this, true) == 0) {
+	// ALWAYS_FLEE, skip roll
+	// if FleeIfNotAlone is true, we skip alone check
+	// roll chance
+	if (GetSpecialAbility(ALWAYS_FLEE) ||
+	    ((RuleB(Combat, FleeIfNotAlone) || entity_list.GetHatedCount(hate_top, this, true) == 0) &&
+	     zone->random.Roll(flee_chance))) {
 		currently_fleeing = true;
 		StartFleeing();
 	}
