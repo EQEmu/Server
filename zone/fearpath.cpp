@@ -75,6 +75,7 @@ void Mob::CheckFlee() {
 
 	// Sanity Check this should never happen...
 	if(!hate_top) {
+		currently_fleeing = true;
 		StartFleeing();
 		return;
 	}
