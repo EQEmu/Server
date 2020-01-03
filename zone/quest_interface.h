@@ -85,7 +85,7 @@ public:
 	}
 
 	virtual void AddError(std::string error) {
-		LogQuests(error);
+		LogQuests("{}", error);
 
 		errors_.push_back(error);
 		if(errors_.size() > 30) {

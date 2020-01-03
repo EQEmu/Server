@@ -115,7 +115,7 @@ XS(XS_EQEmuIO_PRINT)
 
 		for (i = 0; *cur != '\0'; i++, cur++) {
 			if (*cur == '\n') {
-				LogQuests(str);
+				LogQuests("{}", str);
 				len = 0;
 				pos = i + 1;
 			}
@@ -124,7 +124,7 @@ XS(XS_EQEmuIO_PRINT)
 			}
 		}
 		if (!log_string.empty()) {
-			LogQuests(log_string);
+			LogQuests("{}", log_string);
 		}
 	}
 
