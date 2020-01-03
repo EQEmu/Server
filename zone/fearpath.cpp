@@ -125,8 +125,10 @@ void Mob::CheckFlee()
 	LogFlee(
 		"Post con-switch | Mob [{}] con [{}] hp_ratio [{}] flee_ratio [{}] flee_chance [{}]",
 		GetCleanName(),
+		con,
 		hp_ratio,
-		flee_ratio
+		flee_ratio,
+		flee_chance
 	);
 
 	// If we got here we are allowed to roll on flee chance if there is not other hated NPC's in the area.
@@ -140,6 +142,7 @@ void Mob::CheckFlee()
 		LogFlee(
 			"Passed all checks to flee | Mob [{}] con [{}] hp_ratio [{}] flee_ratio [{}] flee_chance [{}]",
 			GetCleanName(),
+			con,
 			hp_ratio,
 			flee_ratio,
 			flee_chance
