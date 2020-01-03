@@ -439,7 +439,7 @@ function TryPetCriticalHit(self, defender, hit)
 
 	eq.log_combat(
 			string.format("[%s] [Mob::TryPetCriticalHit] CritPetChance [%i] CritChanceBonus [%i] | Bonuses AA [%i] Item [%i] Spell [%i]",
-					e.self:GetCleanName(),
+					self:GetCleanName(),
 					CritPetChance,
 					CritChanceBonus,
 					owner:GetAABonuses():PetCriticalHit(),
@@ -454,7 +454,7 @@ function TryPetCriticalHit(self, defender, hit)
 
 		eq.log_combat(
 				string.format("[%s] [Mob::TryPetCriticalHit] critChance [%i] PostCalcs",
-						e.self:GetCleanName(),
+						self:GetCleanName(),
 						critChance
 				)
 		);
@@ -471,7 +471,7 @@ function TryPetCriticalHit(self, defender, hit)
 
 			eq.log_combat(
 					string.format("[%s] [Mob::TryPetCriticalHit] critMod [%i] DmgMod [%i] DamageDone [%i]",
-							e.self:GetCleanName(),
+							self:GetCleanName(),
 							critMod,
 							GetCritDmgMod(self, hit.skill),
 							hit.damage_done
