@@ -112,6 +112,7 @@ namespace Logs {
 		AICastBeneficialClose,
 		AoeCast,
 		EntityManagement,
+		Flee,
 		MaxCategoryID /* Don't Remove this */
 	};
 
@@ -183,6 +184,7 @@ namespace Logs {
 		"AI Cast Beneficial Close",
 		"AOE Cast",
 		"Entity Management",
+		"Flee",
 	};
 }
 

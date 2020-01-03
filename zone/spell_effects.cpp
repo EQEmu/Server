@@ -4011,10 +4011,9 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 				break;
 			}
 
-			case SE_ImmuneFleeing:
-			{
-				if(RuleB(Combat, EnableFearPathing)){
-					if(flee_mode) {
+			case SE_ImmuneFleeing: {
+				if (RuleB(Combat, EnableFearPathing)) {
+					if (flee_mode) {
 						currently_fleeing = true;
 						CheckFlee();
 						break;
