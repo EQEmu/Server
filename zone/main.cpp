@@ -548,29 +548,9 @@ int main(int argc, char** argv) {
 	};
 
 	EQ::Timer process_timer(loop_fn);
-	process_timer.Start(1000, true);
+	process_timer.Start(32, true);
 
-	while (RunLoops) {
-		bool previous_loaded = is_zone_loaded && numclients > 0;
-		EQ::EventLoop::Get().Process();
-
-		bool current_loaded = is_zone_loaded && numclients > 0;
-		if (previous_loaded && !current_loaded) {
-			process_timer.Stop();
-			process_timer.Start(1000, true);
-		}
-		else if (!previous_loaded && current_loaded) {
-			process_timer.Stop();
-			process_timer.Start(32, true);
-		}
-
-		if (current_loaded) {
-			Sleep(1);
-		}
-		else {
-			Sleep(10);
-		}
-	}
+	EQ::EventLoop::Get().Run();
 
 	entity_list.Clear();
 	entity_list.RemoveAllEncounters(); // gotta do it manually or rewrite lots of shit :P
