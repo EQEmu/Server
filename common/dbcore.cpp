@@ -146,7 +146,7 @@ MySQLRequestResult DBcore::QueryDatabase(const char *query, uint32 querylen, boo
 			LogF(
 				Logs::General,
 				Logs::MySQLQuery,
-				"{0} ({1} row{2} returned) ({3}ms)",
+				"{0} ({1} row{2} returned) ({3}s)",
 				query,
 				requestResult.RowCount(),
 				requestResult.RowCount() == 1 ? "" : "s",
@@ -157,7 +157,7 @@ MySQLRequestResult DBcore::QueryDatabase(const char *query, uint32 querylen, boo
 			LogF(
 				Logs::General,
 				Logs::MySQLQuery,
-				"{0} ({1} row{2} affected) ({3}ms)",
+				"{0} ({1} row{2} affected) ({3}s)",
 				query,
 				requestResult.RowsAffected(),
 				requestResult.RowsAffected() == 1 ? "" : "s",
