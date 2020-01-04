@@ -2211,6 +2211,17 @@ bool Bot::Process()
 		return false;
 	}
 
+	if (mob_scan_close.Check()) {
+		LogAIScanClose(
+			"is_moving [{}] bot [{}] timer [{}]",
+			moving ? "true" : "false",
+			GetCleanName(),
+			mob_scan_close.GetDuration()
+		);
+
+		entity_list.ScanCloseClientMobs(close_mobs, this);
+	}
+
 	SpellProcess();
 
 	if(tic_timer.Check()) {
@@ -9375,6 +9386,39 @@ void EntityList::ShowSpawnWindow(Client* client, int Distance, bool NamedOnly) {
 	WindowText += "</c>";
 	client->SendPopupToClient(WindowTitle, WindowText.c_str());
 	return;
+}
+
+/**
+ * @param close_mobs
+ * @param scanning_mob
+ */
+void EntityList::ScanCloseClientMobs(std::unordered_map<uint16, Mob*>& close_mobs, Mob* scanning_mob)
+{
+	float scan_range = RuleI(Range, MobCloseScanDistance) * RuleI(Range, MobCloseScanDistance);
+
+	close_mobs.clear();
+
+	for (auto& e : mob_list) {
+		auto mob = e.second;
+
+		if (!mob->IsClient()) {
+			continue;
+		}
+
+		if (mob->GetID() <= 0) {
+			continue;
+		}
+
+		float distance = DistanceSquared(scanning_mob->GetPosition(), mob->GetPosition());
+		if (distance <= scan_range) {
+			close_mobs.insert(std::pair<uint16, Mob*>(mob->GetID(), mob));
+		}
+		else if (mob->GetAggroRange() >= scan_range) {
+			close_mobs.insert(std::pair<uint16, Mob*>(mob->GetID(), mob));
+		}
+	}
+
+	LogAIScanClose("Close Client Mob List Size [{}] for mob [{}]", close_mobs.size(), scanning_mob->GetCleanName());
 }
 
 uint8 Bot::GetNumberNeedingHealedInGroup(uint8 hpr, bool includePets) {
