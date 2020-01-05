@@ -2503,6 +2503,7 @@ void command_grid(Client *c, const Seperator *sep)
 	else {
 		c->Message(Chat::White, "Usage: #grid add/delete grid_num wandertype pausetype");
 		c->Message(Chat::White, "Usage: #grid max - displays the highest grid ID used in this zone (for add)");
+		c->Message(Chat::White, "Usage: #grid show - displays wp nodes as boxes");
 	}
 }
 
