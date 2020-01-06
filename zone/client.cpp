@@ -1119,14 +1119,11 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 			break;
 		}
 
-		if (EQEmu::ProfanityManager::IsCensorshipActive())
-			EQEmu::ProfanityManager::RedactMessage(message);
-
 #ifdef BOTS
 		if (message[0] == BOT_COMMAND_CHAR) {
 			if (bot_command_dispatch(this, message) == -2) {
-				if (parse->PlayerHasQuestSub(EVENT_COMMAND)) {
-					int i = parse->EventPlayer(EVENT_COMMAND, this, message, 0);
+				if (parse->PlayerHasQuestSub(EVENT_BOT_COMMAND)) {
+					int i = parse->EventPlayer(EVENT_BOT_COMMAND, this, message, 0);
 					if (i == 0 && !RuleB(Chat, SuppressCommandErrors)) {
 						Message(Chat::Red, "Bot command '%s' not recognized.", message);
 					}
@@ -1139,6 +1136,10 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 			break;
 		}
 #endif
+
+		if (EQEmu::ProfanityManager::IsCensorshipActive()) {
+			EQEmu::ProfanityManager::RedactMessage(message);
+		}
 
 		Mob* sender = this;
 		if (GetPet() && GetTarget() == GetPet() && GetPet()->FindType(SE_VoiceGraft))
