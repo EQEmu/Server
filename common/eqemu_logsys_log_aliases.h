@@ -842,6 +842,42 @@
 #define LogStatusDetail(message, ...) do {\
 } while (0)
 
+#define LogAIScanClose(message, ...) do {\
+} while (0)
+
+#define LogAIScanCloseDetail(message, ...) do {\
+} while (0)
+
+#define LogAIYellForHelp(message, ...) do {\
+} while (0)
+
+#define LogAIYellForHelpDetail(message, ...) do {\
+} while (0)
+
+#define LogAICastBeneficialClose(message, ...) do {\
+} while (0)
+
+#define LogAICastBeneficialCloseDetail(message, ...) do {\
+} while (0)
+
+#define LogAoeCast(message, ...) do {\
+} while (0)
+
+#define LogAoeCastDetail(message, ...) do {\
+} while (0)
+
+#define LogEntityManagement(message, ...) do {\
+} while (0)
+
+#define LogEntityManagementDetail(message, ...) do {\
+} while (0)
+
+#define LogFlee(message, ...) do {\
+} while (0)
+
+#define LogFleeDetail(message, ...) do {\
+} while (0)
+
 #define Log(debug_level, log_category, message, ...) do {\
 } while (0)
 
