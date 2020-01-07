@@ -22,7 +22,6 @@
 #include "../common/global_define.h"
 #include "../common/shareddb.h"
 #include "../common/eqemu_config.h"
-#include "../common/platform.h"
 #include "../common/crash.h"
 #include "../common/rulesys.h"
 #include "../common/eqemu_exception.h"
@@ -33,8 +32,6 @@
 #include "skill_caps.h"
 #include "spells.h"
 #include "base_data.h"
-
-EQEmuLogSys LogSys;
 
 #ifdef _WINDOWS
 #include <direct.h>
@@ -70,8 +67,7 @@ inline bool MakeDirectory(const std::string &directory_name)
 }
 
 int main(int argc, char **argv) {
-	RegisterExecutablePlatform(ExePlatformSharedMemory);
-	LogSys.LoadLogSettingsDefaults();
+	EQEmuLogSys::Get()->LoadLogSettingsDefaults("shared_memory");
 	set_exception_handler();
 
 	LogInfo("Shared Memory Loader Program");
@@ -91,8 +87,8 @@ int main(int argc, char **argv) {
 	}
 
 	/* Register Log System and Settings */
-	database.LoadLogSettings(LogSys.log_settings);
-	LogSys.StartFileLogs();
+	database.LoadLogSettings(EQEmuLogSys::Get()->log_settings);
+	EQEmuLogSys::Get()->StartFileLogs();
 
 	std::string shared_mem_directory = Config->SharedMemDir;
 	if (MakeDirectory(shared_mem_directory)) {
@@ -239,6 +235,6 @@ int main(int argc, char **argv) {
 		}
 	}
 	
-	LogSys.CloseFileLogs();
+	EQEmuLogSys::Get()->CloseFileLogs();
 	return 0;
 }

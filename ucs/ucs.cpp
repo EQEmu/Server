@@ -23,7 +23,6 @@
 #include "../common/opcodemgr.h"
 #include "../common/rulesys.h"
 #include "../common/servertalk.h"
-#include "../common/platform.h"
 #include "../common/crash.h"
 #include "../common/event/event_loop.h"
 #include "database.h"
@@ -38,7 +37,6 @@
 
 ChatChannelList *ChannelList;
 Clientlist *g_Clientlist;
-EQEmuLogSys LogSys;
 Database database;
 WorldServer *worldserver = nullptr;
 
@@ -63,8 +61,7 @@ std::string GetMailPrefix() {
 }
 
 int main() {
-	RegisterExecutablePlatform(ExePlatformUCS);
-	LogSys.LoadLogSettingsDefaults();
+	EQEmuLogSys::Get()->LoadLogSettingsDefaults("ucs");
 	set_exception_handler();
 
 	// Check every minute for unused channels we can delete
@@ -97,8 +94,8 @@ int main() {
 	}
 
 	/* Register Log System and Settings */
-	database.LoadLogSettings(LogSys.log_settings);
-	LogSys.StartFileLogs();
+	database.LoadLogSettings(EQEmuLogSys::Get()->log_settings);
+	EQEmuLogSys::Get()->StartFileLogs();
 
 	char tmp[64];
 
@@ -162,7 +159,7 @@ int main() {
 
 	g_Clientlist->CloseAllConnections();
 
-	LogSys.CloseFileLogs();
+	EQEmuLogSys::Get()->CloseFileLogs();
 
 }
 

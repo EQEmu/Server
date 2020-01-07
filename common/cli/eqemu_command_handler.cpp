@@ -21,7 +21,6 @@
 #include <fmt/format.h>
 #include "eqemu_command_handler.h"
 #include "terminal_color.hpp"
-#include "../platform.h"
 
 namespace EQEmuCommand {
 
@@ -119,6 +118,7 @@ namespace EQEmuCommand {
 			std::string &description
 		)> &in_function_map,
 		argh::parser &cmd,
+		const std::string& platform,
 		int argc,
 		char **argv
 	)
@@ -137,7 +137,7 @@ namespace EQEmuCommand {
 			std::cout <<
 					  "> " <<
 					  termcolor::yellow <<
-					  "EQEmulator [" + GetPlatformName() + "] CLI Menu" <<
+					  "EQEmulator [" + platform + "] CLI Menu" <<
 					  termcolor::reset
 					  << std::endl
 					  << std::endl;

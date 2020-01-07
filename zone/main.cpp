@@ -35,7 +35,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/profanity_manager.h"
 #include "../common/misc_functions.h"
 #include "../common/string_util.h"
-#include "../common/platform.h"
 #include "../common/crash.h"
 #include "../common/ipc_mutex.h"
 #include "../common/memory_mapped_file.h"
@@ -106,7 +105,6 @@ QueryServ *QServ = 0;
 TaskManager *taskmanager = 0;
 NpcScaleManager *npc_scale_manager;
 QuestParserCollection *parse = 0;
-EQEmuLogSys LogSys;
 const SPDat_Spell_Struct* spells;
 int32 SPDAT_RECORDS = -1;
 const ZoneConfig *Config;
@@ -119,8 +117,7 @@ void CatchSignal(int sig_num);
 extern void MapOpcodes();
 
 int main(int argc, char** argv) {
-	RegisterExecutablePlatform(ExePlatformZone);
-	LogSys.LoadLogSettingsDefaults();
+	EQEmuLogSys::Get()->LoadLogSettingsDefaults("zone");
 
 	set_exception_handler();
 
@@ -238,9 +235,9 @@ int main(int argc, char** argv) {
 	}
 
 	/* Register Log System and Settings */
-	LogSys.SetGMSayHandler(&Zone::GMSayHookCallBackProcess);
-	database.LoadLogSettings(LogSys.log_settings);
-	LogSys.StartFileLogs();
+	EQEmuLogSys::Get()->SetGMSayHandler(&Zone::GMSayHookCallBackProcess);
+	database.LoadLogSettings(EQEmuLogSys::Get()->log_settings);
+	EQEmuLogSys::Get()->StartFileLogs();
 
 	/* Guilds */
 	guild_mgr.SetDatabase(&database);
@@ -573,7 +570,7 @@ int main(int argc, char** argv) {
 #endif
 	safe_delete(parse);
 	LogInfo("Proper zone shutdown complete.");
-	LogSys.CloseFileLogs();
+	EQEmuLogSys::Get()->CloseFileLogs();
 	return 0;
 }
 
@@ -589,7 +586,7 @@ void Shutdown()
 	Zone::Shutdown(true);
 	RunLoops = false;
 	LogInfo("Shutting down...");
-	LogSys.CloseFileLogs();
+	EQEmuLogSys::Get()->CloseFileLogs();
 }
 
 /* Update Window Title with relevant information */

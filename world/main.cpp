@@ -40,7 +40,6 @@
 #include "../common/guilds.h"
 #include "../common/eq_stream_ident.h"
 #include "../common/rulesys.h"
-#include "../common/platform.h"
 #include "../common/crash.h"
 #include "client.h"
 #include "worlddb.h"
@@ -105,7 +104,6 @@ uint32 numclients = 0;
 uint32 numzones = 0;
 bool holdzones = false;
 const WorldConfig *Config;
-EQEmuLogSys LogSys;
 WebInterfaceList web_interface;
 
 void CatchSignal(int sig_num);
@@ -206,8 +204,7 @@ void RegisterLoginservers()
  * @return
  */
 int main(int argc, char** argv) {
-	RegisterExecutablePlatform(ExePlatformWorld);
-	LogSys.LoadLogSettingsDefaults();
+	EQEmuLogSys::Get()->LoadLogSettingsDefaults("world");
 	set_exception_handler();
 
 	/**
@@ -226,7 +223,7 @@ int main(int argc, char** argv) {
 	 * Command handler
 	 */
 	if (argc > 1) {
-		LogSys.SilenceConsoleLogging();
+		EQEmuLogSys::Get()->SilenceConsoleLogging();
 
 		/**
 		 * Get Config
@@ -239,7 +236,7 @@ int main(int argc, char** argv) {
 		 */
 		LoadDatabaseConnections();
 
-		LogSys.EnableConsoleLogging();
+		EQEmuLogSys::Get()->EnableConsoleLogging();
 
 		WorldserverCommandHandler::CommandHandler(argc, argv);
 	}
@@ -276,8 +273,8 @@ int main(int argc, char** argv) {
 	/**
 	 * Logging
 	 */
-	database.LoadLogSettings(LogSys.log_settings);
-	LogSys.StartFileLogs();
+	database.LoadLogSettings(EQEmuLogSys::Get()->log_settings);
+	EQEmuLogSys::Get()->StartFileLogs();
 
 	/**
 	 * Parse simple CLI passes
@@ -601,7 +598,7 @@ int main(int argc, char** argv) {
 	zoneserver_list.KillAll();
 	LogInfo("Zone (TCP) listener stopped");
 	LogInfo("Signaling HTTP service to stop");
-	LogSys.CloseFileLogs();
+	EQEmuLogSys::Get()->CloseFileLogs();
 
 	return 0;
 }

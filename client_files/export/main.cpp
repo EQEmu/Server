@@ -22,12 +22,9 @@
 #include "../../common/global_define.h"
 #include "../../common/shareddb.h"
 #include "../../common/eqemu_config.h"
-#include "../../common/platform.h"
 #include "../../common/crash.h"
 #include "../../common/rulesys.h"
 #include "../../common/string_util.h"
-
-EQEmuLogSys LogSys;
 
 void ExportSpells(SharedDatabase *db);
 void ExportSkillCaps(SharedDatabase *db);
@@ -35,8 +32,7 @@ void ExportBaseData(SharedDatabase *db);
 void ExportDBStrings(SharedDatabase *db);
 
 int main(int argc, char **argv) {
-	RegisterExecutablePlatform(ExePlatformClientExport);
-	LogSys.LoadLogSettingsDefaults();
+	EQEmuLogSys::Get()->LoadLogSettingsDefaults("client_export");
 	set_exception_handler();
 
 	LogInfo("Client Files Export Utility");
@@ -56,8 +52,8 @@ int main(int argc, char **argv) {
 	}
 
 	/* Register Log System and Settings */
-	database.LoadLogSettings(LogSys.log_settings);
-	LogSys.StartFileLogs();
+	database.LoadLogSettings(EQEmuLogSys::Get()->log_settings);
+	EQEmuLogSys::Get()->StartFileLogs();
 
 	std::string arg_1;
 
@@ -87,7 +83,7 @@ int main(int argc, char **argv) {
 	ExportBaseData(&database);
 	ExportDBStrings(&database);
 
-	LogSys.CloseFileLogs();
+	EQEmuLogSys::Get()->CloseFileLogs();
 
 	return 0;
 }

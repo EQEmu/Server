@@ -73,7 +73,6 @@ SET(common_sources
 	textures.cpp
 	timer.cpp
 	unix.cpp
-	platform.cpp
 	json/jsoncpp.cpp
 	net/console_server.cpp
 	net/console_server_connection.cpp
@@ -184,7 +183,6 @@ SET(common_headers
 	packet_dump.h
 	packet_dump_file.h
 	packet_functions.h
-	platform.h
 	proc_launcher.h
 	profanity_manager.h
 	profiler.h

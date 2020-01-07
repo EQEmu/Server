@@ -23,7 +23,6 @@
 #include "../common/opcodemgr.h"
 #include "../common/event/event_loop.h"
 #include "../common/timer.h"
-#include "../common/platform.h"
 #include "../common/crash.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/http/httplib.h"
@@ -36,7 +35,6 @@
 #include <sstream>
 
 LoginServer server;
-EQEmuLogSys LogSys;
 bool        run_server = true;
 
 void CatchSignal(int sig_num)
@@ -132,27 +130,26 @@ void LoadServerConfig()
 
 int main(int argc, char **argv)
 {
-	RegisterExecutablePlatform(ExePlatformLogin);
 	set_exception_handler();
 
 	LogInfo("Logging System Init");
 
 	if (argc == 1) {
-		LogSys.LoadLogSettingsDefaults();
+		EQEmuLogSys::Get()->LoadLogSettingsDefaults("loginserver");
 	}
 
 	/**
 	 * Command handler
 	 */
 	if (argc > 1) {
-		LogSys.SilenceConsoleLogging();
+		EQEmuLogSys::Get()->SilenceConsoleLogging();
 
 		LoadServerConfig();
 		LoadDatabaseConnection();
 
-		LogSys.LoadLogSettingsDefaults();
-		LogSys.log_settings[Logs::Debug].log_to_console      = static_cast<uint8>(Logs::General);
-		LogSys.log_settings[Logs::Debug].is_category_enabled = 1;
+		EQEmuLogSys::Get()->LoadLogSettingsDefaults("loginserver");
+		EQEmuLogSys::Get()->log_settings[Logs::Debug].log_to_console      = static_cast<uint8>(Logs::General);
+		EQEmuLogSys::Get()->log_settings[Logs::Debug].is_category_enabled = 1;
 
 		LoginserverCommandHandler::CommandHandler(argc, argv);
 	}
@@ -165,8 +162,8 @@ int main(int argc, char **argv)
 	LoadDatabaseConnection();
 
 	if (argc == 1) {
-		server.db->LoadLogSettings(LogSys.log_settings);
-		LogSys.StartFileLogs();
+		server.db->LoadLogSettings(EQEmuLogSys::Get()->log_settings);
+		EQEmuLogSys::Get()->StartFileLogs();
 	}
 
 	/**
@@ -214,7 +211,7 @@ int main(int argc, char **argv)
 #endif
 
 	LogInfo("Server Started");
-	if (LogSys.log_settings[Logs::Loginserver].log_to_console == 1) {
+	if (EQEmuLogSys::Get()->log_settings[Logs::Loginserver].log_to_console == 1) {
 		LogInfo("Loginserver logging set to level [1] for more debugging, enable detail [3]");
 	}
 

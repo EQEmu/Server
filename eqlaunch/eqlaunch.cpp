@@ -21,7 +21,6 @@
 #include "../common/proc_launcher.h"
 #include "../common/eqemu_config.h"
 #include "../common/servertalk.h"
-#include "../common/platform.h"
 #include "../common/crash.h"
 #include "../common/unix.h"
 #include "worldserver.h"
@@ -32,15 +31,12 @@
 #include <signal.h>
 #include <time.h>
 
-EQEmuLogSys LogSys;
-
 bool RunLoops = false;
 
 void CatchSignal(int sig_num);
 
 int main(int argc, char *argv[]) {
-	RegisterExecutablePlatform(ExePlatformLaunch);
-	LogSys.LoadLogSettingsDefaults();
+	EQEmuLogSys::Get()->LoadLogSettingsDefaults("eqlaunch");
 	set_exception_handler();
 
 	std::string launcher_name;
@@ -157,7 +153,7 @@ int main(int argc, char *argv[]) {
 		delete zone->second;
 	}
 
-	LogSys.CloseFileLogs();
+	EQEmuLogSys::Get()->CloseFileLogs();
 
 	return 0;
 }

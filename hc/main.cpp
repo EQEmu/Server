@@ -1,20 +1,16 @@
 #include "../common/event/event_loop.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/crash.h"
-#include "../common/platform.h"
 #include "../common/json_config.h"
 #include <thread>
 
 #include "eq.h"
 
-EQEmuLogSys Log;
-
 int main() {
-	RegisterExecutablePlatform(ExePlatformHC);
-	Log.LoadLogSettingsDefaults();
+	EQEmuLogSys::Get()->LoadLogSettingsDefaults("headless_client");
 	set_exception_handler();
 
-	Log.OutF(Logs::General, Logs::Headless_Client, "Starting EQEmu Headless Client.");
+	LogInfo("Starting EQEmu Headless Client.");
 
 	auto config = EQ::JsonConfigFile::Load("hc.json");
 	auto config_handle = config.RawHandle();
@@ -32,13 +28,13 @@ int main() {
 			auto server = c["server"].asString();
 			auto character = c["character"].asString();
 			
-			Log.OutF(Logs::General, Logs::Headless_Client, "Connecting to {0}:{1} as Account '{2}' to Server '{3}' under Character '{4}'", host, port, user, server, character);
+			LogInfo("Connecting to {0}:{1} as Account '{2}' to Server '{3}' under Character '{4}'", host, port, user, server, character);
 
 			eq_list.push_back(std::unique_ptr<EverQuest>(new EverQuest(host, port, user, pass, server, character)));
 		}
 	}
 	catch (std::exception &ex) {
-		Log.OutF(Logs::General, Logs::Headless_Client, "Error parsing config file: {0}", ex.what());
+		LogError("Error parsing config file: {0}", ex.what());
 		return 0;
 	}
 

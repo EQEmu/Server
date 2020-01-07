@@ -52,7 +52,7 @@ namespace WorldserverCommandHandler {
 		function_map["database:set-account-status"] = &WorldserverCommandHandler::DatabaseSetAccountStatus;
 		function_map["database:schema"]             = &WorldserverCommandHandler::DatabaseGetSchema;
 
-		EQEmuCommand::HandleMenu(function_map, cmd, argc, argv);
+		EQEmuCommand::HandleMenu(function_map, cmd, "world", argc, argv);
 	}
 
 	/**

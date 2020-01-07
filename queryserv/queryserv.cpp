@@ -22,7 +22,6 @@
 #include "../common/opcodemgr.h"
 #include "../common/rulesys.h"
 #include "../common/servertalk.h"
-#include "../common/platform.h"
 #include "../common/crash.h"
 #include "../common/event/event_loop.h"
 #include "../common/timer.h"
@@ -40,15 +39,13 @@ LFGuildManager lfguildmanager;
 std::string WorldShortName;
 const queryservconfig *Config;
 WorldServer *worldserver = 0;
-EQEmuLogSys LogSys;
 
 void CatchSignal(int sig_num) { 
 	RunLoops = false; 
 }
 
 int main() {
-	RegisterExecutablePlatform(ExePlatformQueryServ);
-	LogSys.LoadLogSettingsDefaults();
+	EQEmuLogSys::Get()->LoadLogSettingsDefaults("queryserv");
 	set_exception_handler(); 
 	Timer LFGuildExpireTimer(60000);  
 
@@ -75,8 +72,8 @@ int main() {
 	}
 
 	/* Register Log System and Settings */
-	database.LoadLogSettings(LogSys.log_settings);
-	LogSys.StartFileLogs();
+	database.LoadLogSettings(EQEmuLogSys::Get()->log_settings);
+	EQEmuLogSys::Get()->StartFileLogs();
 
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
 		LogInfo("Could not set signal handler");
@@ -102,7 +99,7 @@ int main() {
 		EQ::EventLoop::Get().Process();
 		Sleep(5);
 	}
-	LogSys.CloseFileLogs();
+	EQEmuLogSys::Get()->CloseFileLogs();
 }
 
 void UpdateWindowTitle(char* iNewTitle) {

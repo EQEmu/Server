@@ -66,6 +66,7 @@ namespace EQEmuCommand {
 			std::string &description
 		)> &in_function_map,
 		argh::parser &cmd,
+		const std::string &platform,
 		int argc,
 		char **argv
 	);

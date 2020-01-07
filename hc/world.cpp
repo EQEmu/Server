@@ -21,18 +21,18 @@ WorldConnection::~WorldConnection() {
 void WorldConnection::OnNewConnection(std::shared_ptr<EQ::Net::DaybreakConnection> connection)
 {
 	m_connection = connection;
-	Log.OutF(Logs::General, Logs::Headless_Client, "Connecting to world...");
+	LogInfo("Connecting to world...");
 }
 
 void WorldConnection::OnStatusChangeActive(std::shared_ptr<EQ::Net::DaybreakConnection> conn, EQ::Net::DbProtocolStatus from, EQ::Net::DbProtocolStatus to)
 {
 	if (to == EQ::Net::StatusConnected) {
-		Log.OutF(Logs::General, Logs::Headless_Client, "World connected.");
+		LogInfo("World connected.");
 		SendClientAuth();
 	}
 
 	if (to == EQ::Net::StatusDisconnected) {
-		Log.OutF(Logs::General, Logs::Headless_Client, "World connection lost, reconnecting.");
+		LogInfo("World connection lost, reconnecting.");
 		m_connection.reset();
 		m_connection_manager->Connect(m_host, 9000);
 	}
@@ -48,7 +48,7 @@ void WorldConnection::OnStatusChangeInactive(std::shared_ptr<EQ::Net::DaybreakCo
 void WorldConnection::OnPacketRecv(std::shared_ptr<EQ::Net::DaybreakConnection> conn, const EQ::Net::Packet &p)
 {
 	auto opcode = p.GetUInt16(0);
-	Log.OutF(Logs::General, Logs::Headless_Client, "Packet in:\n{0}", p.ToString());
+	LogDebug("Packet in:\n{0}", p.ToString());
 }
 
 void WorldConnection::Kill()

@@ -20,7 +20,6 @@
 
 #include "eqemu_logsys.h"
 #include "rulesys.h"
-#include "platform.h"
 #include "string_util.h"
 #include "database.h"
 #include "misc.h"
@@ -96,13 +95,8 @@ EQEmuLogSys::EQEmuLogSys()
  */
 EQEmuLogSys::~EQEmuLogSys() = default;
 
-void EQEmuLogSys::LoadLogSettingsDefaults()
+void EQEmuLogSys::LoadLogSettingsDefaults(const std::string& platform)
 {
-	/**
-	 * Get Executable platform currently running this code (Zone/World/etc)
-	 */
-	log_platform = GetExecutablePlatformInt();
-
 	for (int log_category_id = Logs::AA; log_category_id != Logs::MaxCategoryID; log_category_id++) {
 		log_settings[log_category_id].log_to_console      = 0;
 		log_settings[log_category_id].log_to_file         = 0;
@@ -149,30 +143,7 @@ void EQEmuLogSys::LoadLogSettingsDefaults()
 		}
 	}
 
-	/**
-	 * Declare process file names for log writing=
-	 */
-	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformWorld) {
-		platform_file_name = "world";
-	}
-	else if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformQueryServ) {
-		platform_file_name = "query_server";
-	}
-	else if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone) {
-		platform_file_name = "zone";
-	}
-	else if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformUCS) {
-		platform_file_name = "ucs";
-	}
-	else if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformLogin) {
-		platform_file_name = "login";
-	}
-	else if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformLaunch) {
-		platform_file_name = "launcher";
-	}
-	else if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformHC) {
-		platform_file_name = "hc";
-	}
+	platform_file_name = platform;
 }
 
 /**
@@ -206,7 +177,7 @@ std::string EQEmuLogSys::FormatOutMessageString(
 	std::string return_string;
 
 	if (IsRfc5424LogCategory(log_category)) {
-		return_string = "[" + GetPlatformName() + "] ";
+		return_string = "[" + platform_file_name + "] ";
 	}
 
 	return return_string + "[" + Logs::LogCategoryName[log_category] + "] " + in_message;
@@ -233,7 +204,7 @@ void EQEmuLogSys::ProcessGMSay(
 	/**
 	 * Check to see if the process that actually ran this is zone
 	 */
-	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone) {
+	if (on_log_gmsay_hook) {
 		on_log_gmsay_hook(log_category, message);
 	}
 }
@@ -535,7 +506,7 @@ void EQEmuLogSys::StartFileLogs(const std::string &log_name)
 	/**
 	 * Zone
 	 */
-	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone) {
+	if (platform_file_name == "zone") {
 		if (!log_name.empty()) {
 			platform_file_name = log_name;
 		}

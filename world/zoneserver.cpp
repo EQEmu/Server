@@ -809,7 +809,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	}
 	case ServerOP_ReloadLogs: {
 		zoneserver_list.SendPacket(pack);
-		database.LoadLogSettings(LogSys.log_settings);
+		database.LoadLogSettings(EQEmuLogSys::Get()->log_settings);
 		break;
 	}
 	case ServerOP_ReloadRules: {

@@ -20,12 +20,9 @@
 #include "../../common/global_define.h"
 #include "../../common/shareddb.h"
 #include "../../common/eqemu_config.h"
-#include "../../common/platform.h"
 #include "../../common/crash.h"
 #include "../../common/rulesys.h"
 #include "../../common/string_util.h"
-
-EQEmuLogSys LogSys;
 
 void ImportSpells(SharedDatabase *db);
 void ImportSkillCaps(SharedDatabase *db);
@@ -33,8 +30,7 @@ void ImportBaseData(SharedDatabase *db);
 void ImportDBStrings(SharedDatabase *db);
 
 int main(int argc, char **argv) {
-	RegisterExecutablePlatform(ExePlatformClientImport);
-	LogSys.LoadLogSettingsDefaults();
+	EQEmuLogSys::Get()->LoadLogSettingsDefaults("client_import");
 	set_exception_handler();
 
 	LogInfo("Client Files Import Utility");
@@ -54,15 +50,15 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
-	database.LoadLogSettings(LogSys.log_settings);
-	LogSys.StartFileLogs();
+	database.LoadLogSettings(EQEmuLogSys::Get()->log_settings);
+	EQEmuLogSys::Get()->StartFileLogs();
 
 	ImportSpells(&database);
 	ImportSkillCaps(&database);
 	ImportBaseData(&database);
 	ImportDBStrings(&database);
 
-	LogSys.CloseFileLogs();
+	EQEmuLogSys::Get()->CloseFileLogs();
 	
 	return 0;
 }

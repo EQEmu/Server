@@ -2195,7 +2195,7 @@ void Database::LoadLogSettings(EQEmuLogSys::LogSettings *log_settings)
 		 * If we go through this whole loop and nothing is set to any debug level, there is no point to create a file or keep anything open
 		 */
 		if (log_settings[log_category_id].log_to_file > 0) {
-			LogSys.file_logs_enabled = true;
+			EQEmuLogSys::Get()->file_logs_enabled = true;
 		}
 
 		categories_in_database[log_category_id] = 1;

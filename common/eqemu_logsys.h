@@ -192,15 +192,19 @@ namespace Logs {
 
 class EQEmuLogSys {
 public:
-	EQEmuLogSys();
 	~EQEmuLogSys();
+
+	static EQEmuLogSys* Get() {
+		static EQEmuLogSys inst;
+		return &inst;
+	}
 
 	/**
 	 * Close File Logs wherever necessary, either at zone shutdown or entire process shutdown for everything else.
 	 * This should be handled on deconstructor but to be safe we use it anyways.
 	 */
 	void CloseFileLogs();
-	void LoadLogSettingsDefaults();
+	void LoadLogSettingsDefaults(const std::string &platform);
 
 	/**
 	 * @param directory_name
@@ -264,11 +268,6 @@ public:
 	bool file_logs_enabled = false;
 
 	/**
-	 * Sets Executable platform (Zone/World/UCS) etc.
-	 */
-	int log_platform = 0;
-
-	/**
 	 * File name used in writing logs
 	 */
 	std::string platform_file_name;
@@ -302,6 +301,9 @@ public:
 	void EnableConsoleLogging();
 
 private:
+	EQEmuLogSys();
+	EQEmuLogSys(const EQEmuLogSys&);
+	EQEmuLogSys& operator=(const EQEmuLogSys&);
 
 	/**
 	 * Callback pointer to zone process for hooking logs to zone using GMSay
@@ -355,12 +357,10 @@ private:
 	bool IsRfc5424LogCategory(uint16 log_category);
 };
 
-extern EQEmuLogSys LogSys;
-
 /**
 template<typename... Args>
 void OutF(
-	EQEmuLogSys &ls,
+	EQEmuLogSys *ls,
 	Logs::DebugLevel debug_level,
 	uint16 log_category,
 	const char *file,
@@ -377,7 +377,7 @@ void OutF(
 
 #define OutF(ls, debug_level, log_category, file, func, line, formatStr, ...) \
 do { \
-    ls.Out(debug_level, log_category, file, func, line, fmt::format(formatStr, ##__VA_ARGS__).c_str()); \
+    ls->Out(debug_level, log_category, file, func, line, fmt::format(formatStr, ##__VA_ARGS__).c_str()); \
 } while(0)
 
 #endif

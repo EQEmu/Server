@@ -28,7 +28,7 @@ EverQuest::EverQuest(const std::string &host, int port, const std::string &user,
 
 	EQ::Net::DNSLookup(m_host, port, false, [&](const std::string &addr) {
 		if (addr.empty()) {
-			Log.OutF(Logs::General, Logs::Headless_Client, "Could not resolve address: {0}", m_host);
+			LogError("Could not resolve address: {0}", m_host);
 			return;
 		}
 		else {
@@ -51,18 +51,18 @@ EverQuest::~EverQuest()
 void EverQuest::LoginOnNewConnection(std::shared_ptr<EQ::Net::DaybreakConnection> connection)
 {
 	m_login_connection = connection;
-	Log.OutF(Logs::General, Logs::Headless_Client, "Connecting...");
+	LogInfo("Connecting...");
 }
 
 void EverQuest::LoginOnStatusChangeReconnectEnabled(std::shared_ptr<EQ::Net::DaybreakConnection> conn, EQ::Net::DbProtocolStatus from, EQ::Net::DbProtocolStatus to)
 {
 	if (to == EQ::Net::StatusConnected) {
-		Log.OutF(Logs::General, Logs::Headless_Client, "Login connected.");
+		LogInfo("Login connected.");
 		LoginSendSessionReady();
 	}
 
 	if (to == EQ::Net::StatusDisconnected) {
-		Log.OutF(Logs::General, Logs::Headless_Client, "Login connection lost before we got to world, reconnecting.");
+		LogInfo("Login connection lost before we got to world, reconnecting.");
 		m_key.clear();
 		m_dbid = 0;
 		m_login_connection.reset();
@@ -165,14 +165,14 @@ void EverQuest::LoginProcessLoginResponse(const EQ::Net::Packet & p)
 	auto response_error = sp.GetUInt16(1);
 
 	if (response_error > 101) {
-		Log.OutF(Logs::General, Logs::Headless_Client, "Error logging in response code: {0}", response_error);
+		LogError("Error logging in response code: {0}", response_error);
 		LoginDisableReconnect();
 	}
 	else {
 		m_key = sp.GetCString(12);
 		m_dbid = sp.GetUInt32(8);
 
-		Log.OutF(Logs::General, Logs::Headless_Client, "Logged in successfully with dbid {0} and key {1}", m_dbid, m_key);
+		LogInfo("Logged in successfully with dbid {0} and key {1}", m_dbid, m_key);
 		LoginSendServerRequest();
 	}
 }
@@ -214,13 +214,13 @@ void EverQuest::LoginProcessServerPacketList(const EQ::Net::Packet & p)
 
 	for (auto server : m_world_servers) {
 		if (server.second.long_name.compare(m_server) == 0) {
-			Log.OutF(Logs::General, Logs::Headless_Client, "Found world server {0}, attempting to login.", m_server);
+			LogInfo("Found world server {0}, attempting to login.", m_server);
 			LoginSendPlayRequest(server.first);
 			return;
 		}
 	}
 
-	Log.OutF(Logs::General, Logs::Headless_Client, "Got response from login server but could not find world server {0} disconnecting.", m_server);
+	LogError("Got response from login server but could not find world server {0} disconnecting.", m_server);
 	LoginDisableReconnect();
 }
 
@@ -238,7 +238,7 @@ void EverQuest::LoginProcessServerPlayResponse(const EQ::Net::Packet &p)
 	}
 	else {
 		auto message = p.GetUInt16(13);
-		Log.OutF(Logs::General, Logs::Headless_Client, "Failed to login to server with message {0}");
+		LogError("Failed to login to server with message {0}");
 		LoginDisableReconnect();
 	}
 }
@@ -261,18 +261,18 @@ void EverQuest::ConnectToWorld()
 void EverQuest::WorldOnNewConnection(std::shared_ptr<EQ::Net::DaybreakConnection> connection)
 {
 	m_world_connection = connection;
-	Log.OutF(Logs::General, Logs::Headless_Client, "Connecting to world...");
+	LogInfo("Connecting to world...");
 }
 
 void EverQuest::WorldOnStatusChangeReconnectEnabled(std::shared_ptr<EQ::Net::DaybreakConnection> conn, EQ::Net::DbProtocolStatus from, EQ::Net::DbProtocolStatus to)
 {
 	if (to == EQ::Net::StatusConnected) {
-		Log.OutF(Logs::General, Logs::Headless_Client, "World connected.");
+		LogInfo("World connected.");
 		WorldSendClientAuth();
 	}
 
 	if (to == EQ::Net::StatusDisconnected) {
-		Log.OutF(Logs::General, Logs::Headless_Client, "World connection lost, reconnecting.");
+		LogInfo("World connection lost, reconnecting.");
 		m_world_connection.reset();
 		m_world_connection_manager->Connect(m_host, 9000);
 	}
@@ -293,7 +293,7 @@ void EverQuest::WorldOnPacketRecv(std::shared_ptr<EQ::Net::DaybreakConnection> c
 		WorldProcessCharacterSelect(p);
 		break;
 	default:
-		Log.OutF(Logs::General, Logs::Headless_Client, "Unhandled opcode: {0:#x}", opcode);
+		LogDebug("Unhandled opcode: {0:#x}", opcode);
 		break;
 	}
 }
@@ -339,12 +339,11 @@ void EverQuest::WorldProcessCharacterSelect(const EQ::Net::Packet &p)
 
 		idx += 274;
 		if (m_character.compare(name) == 0) {
-			Log.OutF(Logs::General, Logs::Headless_Client, "Found {0}, would attempt to login here.", m_character);
+			LogDebug("Found {0}, would attempt to login here.", m_character);
 			WorldSendEnterWorld(m_character);
 			return;
 		}
 	}
 
-	Log.OutF(Logs::General, Logs::Headless_Client, "Could not find {0}, cannot continue to login.", m_character);
+	LogError("Could not find {0}, cannot continue to login.", m_character);
 }
- 

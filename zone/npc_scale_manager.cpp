@@ -143,7 +143,7 @@ void NpcScaleManager::ScaleNPC(NPC *npc)
 		npc->ModifyNPCStat("special_abilities", scale_data.special_abilities.c_str());
 	}
 
-	if (LogSys.log_settings[Logs::NPCScaling].is_category_enabled == 1) {
+	if (EQEmuLogSys::Get()->log_settings[Logs::NPCScaling].is_category_enabled == 1) {
 		std::string scale_log;
 
 		for (const auto &stat : scaling_stats) {

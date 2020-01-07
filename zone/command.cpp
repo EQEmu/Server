@@ -12524,9 +12524,9 @@ void command_logs(Client *c, const Seperator *sep){
 					StringFormat(
 						"--- %i | %u | %u | %u | %s",
 						i,
-						LogSys.log_settings[i].log_to_console,
-						LogSys.log_settings[i].log_to_file,
-						LogSys.log_settings[i].log_to_gmsay,
+						EQEmuLogSys::Get()->log_settings[i].log_to_console,
+						EQEmuLogSys::Get()->log_settings[i].log_to_file,
+						EQEmuLogSys::Get()->log_settings[i].log_to_gmsay,
 						Logs::LogCategoryName[i]
 					).c_str());
 				redisplay_columns++;
@@ -12535,15 +12535,15 @@ void command_logs(Client *c, const Seperator *sep){
 		/* #logs set */
 		if (strcasecmp(sep->arg[1], "set") == 0){
 			if (strcasecmp(sep->arg[2], "console") == 0){
-				LogSys.log_settings[atoi(sep->arg[3])].log_to_console = atoi(sep->arg[4]);
+				EQEmuLogSys::Get()->log_settings[atoi(sep->arg[3])].log_to_console = atoi(sep->arg[4]);
 				logs_set = 1;
 			}
 			else if (strcasecmp(sep->arg[2], "file") == 0){
-				LogSys.log_settings[atoi(sep->arg[3])].log_to_file = atoi(sep->arg[4]);
+				EQEmuLogSys::Get()->log_settings[atoi(sep->arg[3])].log_to_file = atoi(sep->arg[4]);
 				logs_set = 1;
 			}
 			else if (strcasecmp(sep->arg[2], "gmsay") == 0){
-				LogSys.log_settings[atoi(sep->arg[3])].log_to_gmsay = atoi(sep->arg[4]);
+				EQEmuLogSys::Get()->log_settings[atoi(sep->arg[3])].log_to_gmsay = atoi(sep->arg[4]);
 				logs_set = 1;
 			}
 			else{
@@ -12558,10 +12558,10 @@ void command_logs(Client *c, const Seperator *sep){
 				This is used in hot places of code to check if its enabled in any way before triggering logs
 			*/
 			if (atoi(sep->arg[4]) > 0){
-				LogSys.log_settings[atoi(sep->arg[3])].is_category_enabled = 1;
+				EQEmuLogSys::Get()->log_settings[atoi(sep->arg[3])].is_category_enabled = 1;
 			}
 			else{
-				LogSys.log_settings[atoi(sep->arg[3])].is_category_enabled = 0;
+				EQEmuLogSys::Get()->log_settings[atoi(sep->arg[3])].is_category_enabled = 0;
 			}
 		}
 	}

@@ -19,7 +19,6 @@
 #define _EQPACKET_H
 
 #include "base_packet.h"
-#include "platform.h"
 #include <iostream>
 
 #ifdef STATIC_OPCODE
@@ -57,8 +56,6 @@ protected:
 
 };
 
-class EQRawApplicationPacket;
-
 class EQProtocolPacket : public BasePacket {
 	friend class EQStream;
 	friend class EQStreamPair;
@@ -68,7 +65,6 @@ public:
 	bool combine(const EQProtocolPacket *rhs);
 	uint32 serialize (unsigned char *dest) const;
 	EQProtocolPacket *Copy() { return new EQProtocolPacket(opcode,pBuffer,size); }
-	EQRawApplicationPacket *MakeAppPacket() const;
 
 	bool acked;
 	uint32 sent_time;
@@ -98,15 +94,15 @@ class EQApplicationPacket : public EQPacket {
 	friend class EQStream;
 public:
 	EQApplicationPacket() : EQPacket(OP_Unknown, nullptr, 0), opcode_bypass(0)
-		{ app_opcode_size = GetExecutablePlatform() == ExePlatformUCS ? 1 : 2; }
+		{ app_opcode_size = 2; }
 	EQApplicationPacket(const EmuOpcode op) : EQPacket(op, nullptr, 0), opcode_bypass(0)
-		{ app_opcode_size = GetExecutablePlatform() == ExePlatformUCS ? 1 : 2; }
+		{ app_opcode_size = 2; }
 	EQApplicationPacket(const EmuOpcode op, const uint32 len) : EQPacket(op, nullptr, len), opcode_bypass(0)
-		{ app_opcode_size = GetExecutablePlatform() == ExePlatformUCS ? 1 : 2; }
+		{ app_opcode_size = 2; }
 	EQApplicationPacket(const EmuOpcode op, const unsigned char *buf, const uint32 len) : EQPacket(op, buf, len), opcode_bypass(0)
-		{ app_opcode_size = GetExecutablePlatform() == ExePlatformUCS ? 1 : 2; }
+		{ app_opcode_size = 2; }
 	EQApplicationPacket(const EmuOpcode op, SerializeBuffer &buf) : EQPacket(op, buf), opcode_bypass(0)
-		{ app_opcode_size = GetExecutablePlatform() == ExePlatformUCS ? 1 : 2; }
+		{ app_opcode_size = 2; }
 	bool combine(const EQApplicationPacket *rhs);
 	uint32 serialize (uint16 opcode, unsigned char *dest) const;
 	uint32 Size() const { return size+app_opcode_size; }
@@ -132,25 +128,6 @@ private:
 
 	EQApplicationPacket(const EQApplicationPacket &p) : EQPacket(p.emu_opcode, p.pBuffer, p.size), opcode_bypass(p.opcode_bypass) { app_opcode_size = p.app_opcode_size; }
 
-};
-
-class EQRawApplicationPacket : public EQApplicationPacket {
-	friend class EQStream;
-public:
-	EQRawApplicationPacket(uint16 opcode, const unsigned char *buf, const uint32 len);
-	uint16 GetRawOpcode() const { return(opcode); }
-
-	virtual void build_raw_header_dump(char *buffer, uint16 seq=0xffff) const;
-	virtual void build_header_dump(char *buffer) const;
-	virtual void DumpRawHeader(uint16 seq=0xffff, FILE *to = stdout) const;
-	virtual void DumpRawHeaderNoTime(uint16 seq=0xffff, FILE *to = stdout) const;
-
-protected:
-
-	//the actual raw EQ opcode
-	uint16 opcode;
-
-	EQRawApplicationPacket(const unsigned char *buf, const uint32 len);
 };
 
 extern void DumpPacket(const EQApplicationPacket* app, bool iShowInfo = false);

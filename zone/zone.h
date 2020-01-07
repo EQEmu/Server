@@ -299,7 +299,7 @@ public:
 			entity_list.MessageStatus(
 				0,
 				80,
-				LogSys.GetGMSayColorFromCategory(log_category),
+				EQEmuLogSys::Get()->GetGMSayColorFromCategory(log_category),
 				"%s",
 				message_split[0].c_str()
 			);
@@ -308,14 +308,14 @@ public:
 				entity_list.MessageStatus(
 					0,
 					80,
-					LogSys.GetGMSayColorFromCategory(log_category),
+					EQEmuLogSys::Get()->GetGMSayColorFromCategory(log_category),
 					"--- %s",
 					message_split[iter].c_str()
 				);
 			}
 		}
 		else {
-			entity_list.MessageStatus(0, 80, LogSys.GetGMSayColorFromCategory(log_category), "%s", message.c_str());
+			entity_list.MessageStatus(0, 80, EQEmuLogSys::Get()->GetGMSayColorFromCategory(log_category), "%s", message.c_str());
 		}
 	}
 

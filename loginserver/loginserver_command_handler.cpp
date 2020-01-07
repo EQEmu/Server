@@ -59,7 +59,7 @@ namespace LoginserverCommandHandler {
 		function_map["world-admin:create"]                    = &LoginserverCommandHandler::CreateLoginserverWorldAdminAccount;
 		function_map["world-admin:update"]                    = &LoginserverCommandHandler::UpdateLoginserverWorldAdminAccountPassword;
 
-		EQEmuCommand::HandleMenu(function_map, cmd, argc, argv);
+		EQEmuCommand::HandleMenu(function_map, cmd, "loginserver", argc, argv);
 	}
 
 	/**
