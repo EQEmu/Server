@@ -783,6 +783,12 @@ void command_help(Client *c, const Seperator *sep)
 		commands_shown++;
 		c->Message(Chat::White, "	%c%s %s",  COMMAND_CHAR, cur->first.c_str(), cur->second->desc == nullptr?"":cur->second->desc);
 	}
+	if (parse->PlayerHasQuestSub(EVENT_COMMAND)) {
+		int i = parse->EventPlayer(EVENT_COMMAND, c, sep->msg, 0);
+		if (i >= 1) {
+			commands_shown += i;
+		}
+	}
 	c->Message(Chat::White, "%d command%s listed.",  commands_shown, commands_shown!=1?"s":"");
 
 }

@@ -3414,6 +3414,12 @@ void bot_command_help(Client *c, const Seperator *sep)
 		c->Message(m_usage, "%c%s - %s", BOT_COMMAND_CHAR, command_iter.first.c_str(), command_iter.second->desc == nullptr ? "[no description]" : command_iter.second->desc);
 		++bot_commands_shown;
 	}
+	if (parse->PlayerHasQuestSub(EVENT_BOT_COMMAND)) {
+		int i = parse->EventPlayer(EVENT_BOT_COMMAND, c, sep->msg, 0);
+		if (i >= 1) {
+			bot_commands_shown += i;
+		}
+	}
 	c->Message(m_message, "%d bot command%s listed.", bot_commands_shown, bot_commands_shown != 1 ? "s" : "");
 	c->Message(m_note, "type %ccommand [help | usage] for more information", BOT_COMMAND_CHAR);
 }

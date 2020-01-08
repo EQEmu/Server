@@ -539,6 +539,25 @@ void handle_player_combine_validate(QuestInterface* parse, lua_State* L, Client*
 	lua_setfield(L, -2, "tradeskill_id");
 }
 
+void handle_player_bot_command(QuestInterface* parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
+	std::vector<EQEmu::Any>* extra_pointers) {
+	Seperator sep(data.c_str(), ' ', 10, 100, true);
+	std::string bot_command(sep.arg[0] + 1);
+	lua_pushstring(L, bot_command.c_str());
+	lua_setfield(L, -2, "bot_command");
+
+	luabind::adl::object args = luabind::newtable(L);
+	int max_args = sep.GetMaxArgNum();
+	for (int i = 1; i < max_args; ++i) {
+		if (strlen(sep.arg[i]) > 0) {
+			args[i] = std::string(sep.arg[i]);
+		}
+	}
+
+	args.push(L);
+	lua_setfield(L, -2, "args");
+}
+
 //Item
 void handle_item_click(QuestInterface *parse, lua_State* L, Client* client, EQEmu::ItemInstance* item, Mob *mob, std::string data, uint32 extra_data,
 					   std::vector<EQEmu::Any> *extra_pointers) {
