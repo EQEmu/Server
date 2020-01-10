@@ -107,7 +107,7 @@ public:
 
 	bool	AddToNameFilter(const char* name);
 	bool	CreateCharacter(uint32 account_id, char* name, uint16 gender, uint16 race, uint16 class_, uint8 str, uint8 sta, uint8 cha, uint8 dex, uint8 int_, uint8 agi, uint8 wis, uint8 face);
-	bool	DeleteCharacter(char* name);
+	bool	DeleteCharacter(char* character_name);
 	bool	MoveCharacterToZone(const char* charname, const char* zonename);
 	bool	MoveCharacterToZone(const char* charname, const char* zonename,uint32 zoneid);
 	bool	MoveCharacterToZone(uint32 iCharID, const char* iZonename);

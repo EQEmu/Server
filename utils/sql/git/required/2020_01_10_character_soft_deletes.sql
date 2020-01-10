@@ -1,0 +1,1 @@
+ALTER TABLE `character_data` ADD COLUMN `deleted_at` datetime NULL DEFAULT NULL;

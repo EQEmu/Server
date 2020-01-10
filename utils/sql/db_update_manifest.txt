@@ -399,6 +399,7 @@
 9143|2019_09_16_account_table_changes.sql|SHOW COLUMNS FROM `account` LIKE 'ls_id'|empty|
 9144|2019_11_09_logsys_description_update.sql|SELECT * FROM db_version WHERE version >= 9143|empty|
 9145|2019_12_24_banned_ips_update.sql|SHOW TABLES LIKE 'Banned_IPs'|not_empty|
+9146|2020_01_10_character_soft_deletes.sql|SHOW COLUMNS FROM `character_data` LIKE 'deleted_at'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
