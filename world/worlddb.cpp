@@ -39,10 +39,10 @@ extern std::vector<RaceClassCombos> character_create_race_class_combos;
 void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **out_app, uint32 client_version_bit)
 {
 	EQEmu::versions::ClientVersion
+		   client_version  = EQEmu::versions::ConvertClientVersionBitToClientVersion(client_version_bit);
 	size_t character_limit = EQEmu::constants::StaticLookup(client_version)->CharacterCreationLimit;
-	
-	// Validate against absolute server max
-	if (character_limit > EQEmu::constants::CHARACTER_CREATION_LIMIT)
+
+	if (character_limit > EQEmu::constants::CHARACTER_CREATION_LIMIT) {
 		character_limit = EQEmu::constants::CHARACTER_CREATION_LIMIT;
 	}
 
