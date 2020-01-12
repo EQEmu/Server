@@ -1545,7 +1545,7 @@ void PerlembParser::ExportEventVariables(
 		case EVENT_COMMAND: {
 			Seperator sep(data);
 			ExportVar(package_name.c_str(), "command", (sep.arg[0] + 1));
-			ExportVar(package_name.c_str(), "args", (sep.argnum > 1 ? (&data[strlen(sep.arg[0]) + 1]) : "0"));
+			ExportVar(package_name.c_str(), "args", (sep.argnum >= 1 ? (&data[strlen(sep.arg[0]) + 1]) : "0"));
 			break;
 		}
 
@@ -1614,7 +1614,7 @@ void PerlembParser::ExportEventVariables(
 		case EVENT_BOT_COMMAND: {
 			Seperator sep(data);
 			ExportVar(package_name.c_str(), "bot_command", (sep.arg[0] + 1));
-			ExportVar(package_name.c_str(), "args", (sep.argnum > 1 ? (&data[strlen(sep.arg[0]) + 1]) : "0"));
+			ExportVar(package_name.c_str(), "args", (sep.argnum >= 1 ? (&data[strlen(sep.arg[0]) + 1]) : "0"));
 			break;
 		}
 
