@@ -33,7 +33,6 @@ namespace DatabaseSchema {
 	static std::vector<std::string> GetPlayerTables()
 	{
 		std::vector<std::string> tables = {
-			"aa_timers",
 			"account",
 			"account_ip",
 			"account_flags",

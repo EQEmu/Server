@@ -1,4 +1,3 @@
-aa_timers
 account
 account_ip
 account_flags
