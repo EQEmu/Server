@@ -28,6 +28,7 @@ log/
 logs/
 vcpkg/
 perl/
+.vs/
 
 .idea/*
 *cbp
