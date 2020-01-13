@@ -13270,8 +13270,8 @@ void command_bot(Client *c, const Seperator *sep)
 	}
 	
 	if (bot_command_dispatch(c, bot_message.c_str()) == -2) {
-		if (parse->PlayerHasQuestSub(EVENT_COMMAND)) {
-			int i = parse->EventPlayer(EVENT_COMMAND, c, bot_message, 0);
+		if (parse->PlayerHasQuestSub(EVENT_BOT_COMMAND)) {
+			int i = parse->EventPlayer(EVENT_BOT_COMMAND, c, bot_message, 0);
 			if (i == 0 && !RuleB(Chat, SuppressCommandErrors)) {
 				c->Message(Chat::Red, "Bot command '%s' not recognized.", bot_message.c_str());
 			}
