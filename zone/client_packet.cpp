@@ -8297,7 +8297,9 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 						parse->EventPlayer(EVENT_BOT_COMMAND, this, response.substr(1).c_str(), 0);
 					}
 #endif
-					parse->EventPlayer(EVENT_SAY, this, response.c_str(), 0);
+					else {
+						parse->EventPlayer(EVENT_SAY, this, response.c_str(), 0);
+					}
 				}
 				else {
 					Message(Chat::LightGray, "You say, '%s'", response.c_str());
@@ -8315,7 +8317,9 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 						parse->EventPlayer(EVENT_BOT_COMMAND, this, response.substr(1).c_str(), 0);
 					}
 #endif
-					parse->EventPlayer(EVENT_SAY, this, response.c_str(), 0);
+					else {
+						parse->EventPlayer(EVENT_SAY, this, response.c_str(), 0);
+					}
 				}
 				else {
 					Message(Chat::LightGray, "You say, '%s'", response.c_str());

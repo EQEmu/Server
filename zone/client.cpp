@@ -1106,14 +1106,22 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 	case ChatChannel_Say: { /* Say */
 		if(message[0] == COMMAND_CHAR) {
 			if(command_dispatch(this, message) == -2) {
-				if(parse->PlayerHasQuestSub(EVENT_COMMAND)) {
+				if (parse->PlayerHasQuestSub(EVENT_COMMAND)) {
 					int i = parse->EventPlayer(EVENT_COMMAND, this, message, 0);
-					if(i == 0 && !RuleB(Chat, SuppressCommandErrors)) {
+					if (i == 0 && !RuleB(Chat, SuppressCommandErrors)) {
 						Message(Chat::Red, "Command '%s' not recognized.", message);
 					}
-				} else {
-					if(!RuleB(Chat, SuppressCommandErrors))
+				}
+				else if (parse->PlayerHasQuestSub(EVENT_SAY)) {
+					int i = parse->EventPlayer(EVENT_SAY, this, message, 0);
+					if (i == 0 && !RuleB(Chat, SuppressCommandErrors)) {
 						Message(Chat::Red, "Command '%s' not recognized.", message);
+					}
+				}
+				else {
+					if (!RuleB(Chat, SuppressCommandErrors)) {
+						Message(Chat::Red, "Command '%s' not recognized.", message);
+					}
 				}
 			}
 			break;
@@ -1128,9 +1136,16 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 						Message(Chat::Red, "Bot command '%s' not recognized.", message);
 					}
 				}
-				else {
-					if (!RuleB(Chat, SuppressCommandErrors))
+				else if (parse->PlayerHasQuestSub(EVENT_SAY)) {
+					int i = parse->EventPlayer(EVENT_SAY, this, message, 0);
+					if (i == 0 && !RuleB(Chat, SuppressCommandErrors)) {
 						Message(Chat::Red, "Bot command '%s' not recognized.", message);
+					}
+				}
+				else {
+					if (!RuleB(Chat, SuppressCommandErrors)) {
+						Message(Chat::Red, "Bot command '%s' not recognized.", message);
+					}
 				}
 			}
 			break;
