@@ -8286,6 +8286,15 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 			if (GetTarget() && GetTarget()->IsNPC()) {
 				if (silentsaylink) {
 					parse->EventNPC(EVENT_SAY, GetTarget()->CastToNPC(), this, response.c_str(), 0);
+
+					if (response[0] == '#' && parse->PlayerHasQuestSub(EVENT_COMMAND)) {
+						parse->EventPlayer(EVENT_COMMAND, this, response.substr(1).c_str(), 0);
+					}
+#ifdef BOTS
+					else if (response[0] == '^' && parse->PlayerHasQuestSub(EVENT_BOT_COMMAND)) {
+						parse->EventPlayer(EVENT_BOT_COMMAND, this, response.substr(1).c_str(), 0);
+					}
+#endif
 					parse->EventPlayer(EVENT_SAY, this, response.c_str(), 0);
 				}
 				else {
@@ -8296,6 +8305,14 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 			}
 			else {
 				if (silentsaylink) {
+					if (response[0] == '#' && parse->PlayerHasQuestSub(EVENT_COMMAND)) {
+						parse->EventPlayer(EVENT_COMMAND, this, response.substr(1).c_str(), 0);
+					}
+#ifdef BOTS
+					else if (response[0] == '^' && parse->PlayerHasQuestSub(EVENT_BOT_COMMAND)) {
+						parse->EventPlayer(EVENT_BOT_COMMAND, this, response.substr(1).c_str(), 0);
+					}
+#endif
 					parse->EventPlayer(EVENT_SAY, this, response.c_str(), 0);
 				}
 				else {

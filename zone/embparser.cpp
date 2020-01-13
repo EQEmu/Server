@@ -1546,6 +1546,9 @@ void PerlembParser::ExportEventVariables(
 			Seperator sep(data);
 			ExportVar(package_name.c_str(), "command", (sep.arg[0] + 1));
 			ExportVar(package_name.c_str(), "args", (sep.argnum >= 1 ? (&data[strlen(sep.arg[0]) + 1]) : "0"));
+			ExportVar(package_name.c_str(), "data", objid);
+			ExportVar(package_name.c_str(), "text", data);
+			ExportVar(package_name.c_str(), "langid", extradata);
 			break;
 		}
 
@@ -1615,6 +1618,9 @@ void PerlembParser::ExportEventVariables(
 			Seperator sep(data);
 			ExportVar(package_name.c_str(), "bot_command", (sep.arg[0] + 1));
 			ExportVar(package_name.c_str(), "args", (sep.argnum >= 1 ? (&data[strlen(sep.arg[0]) + 1]) : "0"));
+			ExportVar(package_name.c_str(), "data", objid);
+			ExportVar(package_name.c_str(), "text", data);
+			ExportVar(package_name.c_str(), "langid", extradata);
 			break;
 		}
 
