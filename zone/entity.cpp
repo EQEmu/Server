@@ -2654,7 +2654,12 @@ void EntityList::ScanCloseMobs(std::unordered_map<uint16, Mob *> &close_mobs, Mo
 		}
 	}
 
-	LogAIScanClose("Close List Size [{}] for mob [{}]", close_mobs.size(), scanning_mob->GetCleanName());
+	LogAIScanClose(
+		"[{}] Scanning Close List | list_size [{}] moving [{}]",
+		scanning_mob->GetCleanName(),
+		close_mobs.size(),
+		scanning_mob->IsMoving() ? "true" : "false"
+	);
 }
 
 bool EntityList::RemoveMerc(uint16 delete_id)
