@@ -256,28 +256,7 @@ bool Client::Process() {
 		 * Used in aggro checks
 		 */
 		if (mob_close_scan_timer.Check()) {
-			close_mobs.clear();
-
-			float scan_range = RuleI(Range, MobCloseScanDistance) * RuleI(Range, MobCloseScanDistance);
-			auto  &mob_list  = entity_list.GetMobList();
-
-			for (auto itr : mob_list) {
-				Mob   *mob     = itr.second;
-				float distance = DistanceSquared(m_Position, mob->GetPosition());
-
-				if (mob->GetID() <= 0) {
-					continue;
-				}
-
-				if (mob->IsNPC() || mob->IsClient()) {
-					if (distance <= scan_range) {
-						close_mobs.insert(std::pair<uint16, Mob *>(mob->GetID(), mob));
-					}
-					else if ((mob->GetAggroRange() * mob->GetAggroRange()) > scan_range) {
-						close_mobs.insert(std::pair<uint16, Mob *>(mob->GetID(), mob));
-					}
-				}
-			}
+			entity_list.ScanCloseMobs(close_mobs, this);
 		}
 		
 		bool may_use_attacks = false;

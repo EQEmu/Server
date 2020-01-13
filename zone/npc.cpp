@@ -705,12 +705,6 @@ bool NPC::Process()
 	SpellProcess();
 
 	if (mob_scan_close.Check()) {
-		LogAIScanClose(
-			"is_moving [{}] npc [{}] timer [{}]",
-			moving ? "true" : "false",
-			GetCleanName(),
-			mob_scan_close.GetDuration()
-		);
 
 		entity_list.ScanCloseMobs(close_mobs, this);
 
