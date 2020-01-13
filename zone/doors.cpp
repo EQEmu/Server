@@ -209,6 +209,8 @@ void Doors::HandleClick(Client* sender, uint8 trigger) {
 	uint8  disable_add_to_key_ring = GetNoKeyring();
 	uint32 player_has_key          = 0;
 	uint32 player_key              = 0;
+	bool   gm_key                  = false;
+	bool   picklock_success        = false;
 
 	const EQEmu::ItemInstance *lock_pick_item = sender->GetInv().GetItem(EQEmu::invslot::slotCursor);
 	player_has_key = static_cast<uint32>(sender->GetInv().HasItem(required_key_item, 1));
@@ -216,6 +218,8 @@ void Doors::HandleClick(Client* sender, uint8 trigger) {
 	if (player_has_key != INVALID_INDEX) {
 		player_key = required_key_item;
 	}
+
+	bool is_teleport_door = (strncmp(destination_zone_name, "NONE", strlen("NONE")) != 0);
 
 	/**
 	 * Object is not triggered
@@ -226,7 +230,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger) {
 		 * Door is only triggered by an object
 		 */
 		if (trigger == 1) {
-			if (!this->IsDoorOpen() || (open_type == 58)) {
+			if ((!this->IsDoorOpen() || (open_type == 58)) && !is_teleport_door) {
 				move_door_packet->action = static_cast<uint8>(invert_state == 0 ? OPEN_DOOR : OPEN_INVDOOR);
 			} else {
 				move_door_packet->action = static_cast<uint8>(invert_state == 0 ? CLOSE_DOOR : CLOSE_INVDOOR);
@@ -247,7 +251,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger) {
 	bool is_door_open_and_open_able = (this->IsDoorOpen() && (open_type == 58));
 
 	if (is_door_not_locked || is_door_open_and_open_able || is_guild_door) {
-		if (!this->IsDoorOpen() || (this->GetOpenType() == 58)) {
+		if ((!this->IsDoorOpen() || (this->GetOpenType() == 58)) && !is_teleport_door) {
 			move_door_packet->action = static_cast<uint8>(invert_state == 0 ? OPEN_DOOR : OPEN_INVDOOR);
 		} else {
 			move_door_packet->action = static_cast<uint8>(invert_state == 0 ? CLOSE_DOOR : CLOSE_INVDOOR);
@@ -283,12 +287,12 @@ void Doors::HandleClick(Client* sender, uint8 trigger) {
 		if (sender->GetGM()) {
 			sender->MessageString(Chat::LightBlue, DOORS_GM);
 
-			if (!IsDoorOpen() || (open_type == 58)) {
+			if ((!IsDoorOpen() || (open_type == 58)) && !is_teleport_door) {
 				move_door_packet->action = static_cast<uint8>(invert_state == 0 ? OPEN_DOOR : OPEN_INVDOOR);
 			} else {
 				move_door_packet->action = static_cast<uint8>(invert_state == 0 ? CLOSE_DOOR : CLOSE_INVDOOR);
 			}
-
+			gm_key = true;
 		}
 
 		/**
@@ -308,7 +312,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger) {
 
 				sender->Message(Chat::LightBlue, "You got it open!");
 
-				if (!IsDoorOpen() || (open_type == 58)) {
+				if ((!IsDoorOpen() || (open_type == 58)) && !is_teleport_door) {
 					move_door_packet->action = static_cast<uint8>(invert_state == 0 ? OPEN_DOOR : OPEN_INVDOOR);
 				} else {
 					move_door_packet->action = static_cast<uint8>(invert_state == 0 ? CLOSE_DOOR : CLOSE_INVDOOR);
@@ -328,12 +332,13 @@ void Doors::HandleClick(Client* sender, uint8 trigger) {
 					LogSkills("Client has lockpicks: skill=[{}]", player_pick_lock_skill);
 
 					if (GetLockpick() <= player_pick_lock_skill) {
-						if (!IsDoorOpen()) {
+						if (!IsDoorOpen() && !is_teleport_door) {
 							move_door_packet->action = static_cast<uint8>(invert_state == 0 ? OPEN_DOOR : OPEN_INVDOOR);
 						} else {
 							move_door_packet->action = static_cast<uint8>(invert_state == 0 ? CLOSE_DOOR : CLOSE_INVDOOR);
 						}
 						sender->MessageString(Chat::LightBlue, DOORS_SUCCESSFUL_PICK);
+						picklock_success = true;
 					} else {
 						sender->MessageString(Chat::LightBlue, DOORS_INSUFFICIENT_SKILL);
 						safe_delete(outapp);
@@ -362,7 +367,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger) {
 			if (sender->KeyRingCheck(required_key_item)) {
 				player_key = required_key_item;
 				sender->Message(Chat::LightBlue, "You got it open!"); // more debug spam
-				if (!IsDoorOpen() || (open_type == 58)) {
+				if ((!IsDoorOpen() || (open_type == 58)) && !is_teleport_door) {
 					move_door_packet->action = static_cast<uint8>(invert_state == 0 ? OPEN_DOOR : OPEN_INVDOOR);
 				} else {
 					move_door_packet->action = static_cast<uint8>(invert_state == 0 ? CLOSE_DOOR : CLOSE_INVDOOR);
@@ -376,7 +381,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger) {
 	}
 
 	entity_list.QueueClients(sender, outapp, false);
-	if (!IsDoorOpen() || (open_type == 58)) {
+	if ((!IsDoorOpen() || (open_type == 58)) && !is_teleport_door) {
 		if (!disable_timer)
 			close_timer.Start();
 		SetOpenState(true);
@@ -384,18 +389,6 @@ void Doors::HandleClick(Client* sender, uint8 trigger) {
 		close_timer.Disable();
 		if (!disable_timer)
 			SetOpenState(false);
-	}
-
-	/*
-	 * Everything past this point assumes we opened the door
-	 *  and met all the requirements for opening
-	 *  everything to do with closed doors has already been taken care of
-	 *  we return because we don't want people using teleports on an unlocked door (exploit!)
-	 */
-
-	if ((move_door_packet->action == CLOSE_DOOR && invert_state == 0) || (move_door_packet->action == CLOSE_INVDOOR && invert_state == 1)) {
-		safe_delete(outapp);
-		return;
 	}
 
 	safe_delete(outapp);
@@ -421,8 +414,22 @@ void Doors::HandleClick(Client* sender, uint8 trigger) {
 	/**
 	 * Teleport door
 	 */
-	if (((open_type == 57) || (open_type == 58)) &&
-	    (strncmp(destination_zone_name, "NONE", strlen("NONE")) != 0)) {
+	if (((open_type == 57) || (open_type == 58)) && is_teleport_door) {
+
+		if (required_key_item != 0 && player_key == 0 && gm_key != true && picklock_success != true) {
+			LogError(
+				"Teleport door [%s][dbid:%u][eqid:%u][dest:%s] used by [%s] in zone [%s] without proper key [id:%u]",
+				door_name,
+				database_id,
+				door_id,
+				destination_zone_name,
+				sender->GetName(),
+				zone->GetShortName(),
+				required_key_item
+			);
+			sender->Message(Chat::Red, "This door requires a key for teleportation that you do not possess!");
+			return;
+		}
 
 		/**
 		 * If click destination is same zone and doesn't require a key
