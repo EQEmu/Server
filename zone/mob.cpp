@@ -459,6 +459,8 @@ Mob::Mob(
 #ifdef BOTS
 	m_manual_follow = false;
 #endif
+
+	mob_scan_close.Trigger();
 }
 
 Mob::~Mob()
