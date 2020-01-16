@@ -190,10 +190,6 @@ bool PersistentTimer::Clear(Database *db) {
 
 /* This function checks if the timer triggered */
 bool PersistentTimer::Expired(Database *db, bool iReset) {
-	if (this == nullptr) {
-		LogError("Null timer during ->Check()!?\n");
-		return(true);
-	}
 	uint32 current_time = get_current_time();
 	if (current_time-start_time >= timer_time) {
 		if (enabled && iReset) {
