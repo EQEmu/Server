@@ -199,7 +199,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 		}
 #ifdef BOTS
 		else if (this->IsBot())
-			act_power = CastToBot()->GetBotFocusEffect(Bot::BotfocusPetPower, spell_id);
+			act_power = CastToBot()->GetBotFocusEffect(focusPetPower, spell_id);
 #endif
 	}
 	else if (petpower > 0)
