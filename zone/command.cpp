@@ -2173,25 +2173,6 @@ void command_spoff(Client *c, const Seperator *sep)
 	safe_delete(outapp);
 }
 
-void command_itemtest(Client *c, const Seperator *sep)
-{
-	char chBuffer[8192] = {0};
-	//Using this to determine new item layout
-	FILE* f = nullptr;
-	if (!(f = fopen("c:\\EQEMUcvs\\ItemDump.txt",  "rb"))) {
-		c->Message(Chat::Red, "Error: Could not open c:\\EQEMUcvs\\ItemDump.txt");
-		return;
-	}
-
-	fread(chBuffer, sizeof(chBuffer), sizeof(char), f);
-	fclose(f);
-
-	auto outapp = new EQApplicationPacket(OP_ItemLinkResponse, strlen(chBuffer) + 5);
-	memcpy(&outapp->pBuffer[4], chBuffer, strlen(chBuffer));
-	c->QueuePacket(outapp);
-	safe_delete(outapp);
-}
-
 void command_gassign(Client *c, const Seperator *sep)
 {
 	if (sep->IsNumber(1) && c->GetTarget() && c->GetTarget()->IsNPC() && c->GetTarget()->CastToNPC()->GetSpawnPointID() > 0) {
