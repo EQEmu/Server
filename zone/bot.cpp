@@ -5388,6 +5388,10 @@ int32 Bot::CalcBotAAFocus(focusType type, uint32 aa_ID, uint32 points, uint16 sp
 				if (type == focusImprovedDamage && base1 > value)
 					value = base1;
 				break;
+			case SE_ImprovedDamage2:
+				if (type == focusImprovedDamage2 && base1 > value)
+					value = base1;
+				break;
 			case SE_ImprovedHeal:
 				if (type == focusImprovedHeal && base1 > value)
 					value = base1;
@@ -5499,6 +5503,11 @@ int32 Bot::CalcBotAAFocus(focusType type, uint32 aa_ID, uint32 points, uint16 sp
 					value = base1;
 				break;
 			}
+			case SE_FcDamageAmt2: {
+				if(type == focusFcDamageAmt2)
+					value = base1;
+				break;
+			}
 			case SE_FcDamageAmtCrit: {
 				if(type == focusFcDamageAmtCrit)
 					value = base1;
@@ -5567,7 +5576,7 @@ int32 Bot::GetBotFocusEffect(focusType bottype, uint16 spell_id) {
 	bool rand_effectiveness = false;
 	//Improved Healing, Damage & Mana Reduction are handled differently in that some are random percentages
 	//In these cases we need to find the most powerful effect, so that each piece of gear wont get its own chance
-	if((bottype == focusManaCost || bottype == focusImprovedHeal || bottype == focusImprovedDamage) && RuleB(Spells, LiveLikeFocusEffects))
+	if(RuleB(Spells, LiveLikeFocusEffects) && (bottype == focusManaCost || bottype == focusImprovedHeal || bottype == focusImprovedDamage || bottype == focusImprovedDamage2 || bottype == focusResistRate))
 		rand_effectiveness = true;
 
 	//Check if item focus effect exists for the client.
@@ -5860,6 +5869,20 @@ int32 Bot::CalcBotFocusEffect(focusType bottype, uint16 focus_id, uint16 spell_i
 						value = zone->random.Int(focus_spell.base[i], focus_spell.base2[i]);
 				}
 				break;
+			case SE_ImprovedDamage2:
+				if (bottype == focusImprovedDamage2) {
+					if(best_focus) {
+						if (focus_spell.base2[i] != 0)
+							value = focus_spell.base2[i];
+						else
+							value = focus_spell.base[i];
+					}
+					else if (focus_spell.base2[i] == 0 || focus_spell.base[i] == focus_spell.base2[i])
+						value = focus_spell.base[i];
+					else
+						value = zone->random.Int(focus_spell.base[i], focus_spell.base2[i]);
+				}
+				break;
 			case SE_ImprovedHeal:
 				if (bottype == focusImprovedHeal) {
 					if(best_focus) {
@@ -5978,6 +6001,11 @@ int32 Bot::CalcBotFocusEffect(focusType bottype, uint16 focus_id, uint16 spell_i
 			}
 			case SE_FcDamageAmt: {
 				if(bottype == focusFcDamageAmt)
+					value = focus_spell.base[i];
+				break;
+			}
+			case SE_FcDamageAmt2: {
+				if(bottype == focusFcDamageAmt2)
 					value = focus_spell.base[i];
 				break;
 			}
@@ -6869,6 +6897,7 @@ int32 Bot::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 		if (Critical) {
 			value = (value_BaseEffect * ratio / 100);
 			value += (value_BaseEffect * GetBotFocusEffect(focusImprovedDamage, spell_id) / 100);
+			value += (value_BaseEffect * GetBotFocusEffect(focusImprovedDamage2, spell_id) / 100);
 			value += (int(value_BaseEffect * GetBotFocusEffect(focusFcDamagePctCrit, spell_id) / 100) * ratio / 100);
 			if (target) {
 				value += (int(value_BaseEffect * target->GetVulnerability(this, spell_id, 0) / 100) * ratio / 100);
@@ -6878,6 +6907,7 @@ int32 Bot::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 			value -= (GetBotFocusEffect(focusFcDamageAmtCrit, spell_id) * ratio / 100);
 
 			value -= GetBotFocusEffect(focusFcDamageAmt, spell_id);
+			value -= GetBotFocusEffect(focusFcDamageAmt2, spell_id);
 
 			if(itembonuses.SpellDmg && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5)
 				value += (GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value) * ratio / 100);
@@ -6890,6 +6920,7 @@ int32 Bot::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 
 	value = value_BaseEffect;
 	value += (value_BaseEffect * GetBotFocusEffect(focusImprovedDamage, spell_id) / 100);
+	value += (value_BaseEffect * GetBotFocusEffect(focusImprovedDamage2, spell_id) / 100);
 	value += (value_BaseEffect * GetBotFocusEffect(focusFcDamagePctCrit, spell_id) / 100);
 	if (target) {
 		value += (value_BaseEffect * target->GetVulnerability(this, spell_id, 0) / 100);
@@ -6898,6 +6929,7 @@ int32 Bot::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 
 	value -= GetBotFocusEffect(focusFcDamageAmtCrit, spell_id);
 	value -= GetBotFocusEffect(focusFcDamageAmt, spell_id);
+	value -= GetBotFocusEffect(focusFcDamageAmt2, spell_id);
 	if(itembonuses.SpellDmg && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5)
 		value += GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value);
 
