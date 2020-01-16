@@ -262,9 +262,6 @@ public:
 	}
 
 	ServerPacket* Copy() {
-		if (this == 0) {
-			return 0;
-		}
 		ServerPacket* ret = new ServerPacket(this->opcode, this->size);
 		if (this->size)
 			memcpy(ret->pBuffer, this->pBuffer, this->size);

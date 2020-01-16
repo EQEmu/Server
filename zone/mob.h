@@ -624,8 +624,7 @@ public:
 
 	//AI
 	static uint32 GetLevelCon(uint8 mylevel, uint8 iOtherLevel);
-	inline uint32 GetLevelCon(uint8 iOtherLevel) const {
-		return this ? GetLevelCon(GetLevel(), iOtherLevel) : CON_GRAY; }
+	inline uint32 GetLevelCon(uint8 iOtherLevel) const { return GetLevelCon(GetLevel(), iOtherLevel); }
 	virtual void AddToHateList(Mob* other, uint32 hate = 0, int32 damage = 0, bool iYellForHelp = true,
 		bool bFrenzy = false, bool iBuffTic = false, uint16 spell_id = SPELL_UNKNOWN, bool pet_comand = false);
 	bool RemoveFromHateList(Mob* mob);
