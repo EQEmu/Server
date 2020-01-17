@@ -159,7 +159,7 @@ void NPC::PauseWandering(int pausetime)
 	if (GetGrid() != 0) {
 		moving = false;
 		DistractedFromGrid = true;
-		LogPathing("Paused Wandering requested. Grid [{}]. Resuming in [{}] ms (0=not until told)", GetGrid(), pausetime);
+		LogPathing("Paused Wandering requested. Grid [{}]. Resuming in [{}] seconds (0=not until told)", GetGrid(), pausetime);
 		StopNavigation();
 		if (pausetime < 1) {	// negative grid number stops him dead in his tracks until ResumeWandering()
 			SetGrid(0 - GetGrid());
