@@ -813,7 +813,7 @@ sub fetch_utility_scripts {
 
 sub setup_bots {
     if ($OS eq "Windows") {
-        fetch_latest_windows_binaries_bots();
+        fetch_latest_windows_appveyor_bots();
     }
     if ($OS eq "Linux") {
         build_linux_source("bots");
@@ -821,7 +821,7 @@ sub setup_bots {
     bots_db_management();
     run_database_check();
 
-    print "Bots should be setup, run your server and the #bot command should be available in-game\n";
+    print "Bots should be setup, run your server and the bot command should be available in-game (type '^help')\n";
 }
 
 sub show_menu_prompt {
