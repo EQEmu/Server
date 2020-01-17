@@ -113,7 +113,7 @@ bool Lua_Mob::Attack(Lua_Mob other, int hand, bool from_riposte, bool is_striket
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				options.armor_pen_flat = luabind::object_cast<int>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 			}
 		}
 
@@ -121,7 +121,7 @@ bool Lua_Mob::Attack(Lua_Mob other, int hand, bool from_riposte, bool is_striket
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				options.crit_flat = luabind::object_cast<float>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 			}
 		}
 
@@ -129,7 +129,7 @@ bool Lua_Mob::Attack(Lua_Mob other, int hand, bool from_riposte, bool is_striket
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				options.damage_flat = luabind::object_cast<int>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 			}
 		}
 
@@ -137,7 +137,7 @@ bool Lua_Mob::Attack(Lua_Mob other, int hand, bool from_riposte, bool is_striket
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				options.hate_flat = luabind::object_cast<int>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 			}
 		}
 
@@ -145,7 +145,7 @@ bool Lua_Mob::Attack(Lua_Mob other, int hand, bool from_riposte, bool is_striket
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				options.armor_pen_percent = luabind::object_cast<float>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 			}
 		}
 
@@ -153,7 +153,7 @@ bool Lua_Mob::Attack(Lua_Mob other, int hand, bool from_riposte, bool is_striket
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				options.crit_percent = luabind::object_cast<float>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 			}
 		}
 
@@ -161,7 +161,7 @@ bool Lua_Mob::Attack(Lua_Mob other, int hand, bool from_riposte, bool is_striket
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				options.damage_percent = luabind::object_cast<float>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 			}
 		}
 
@@ -169,7 +169,7 @@ bool Lua_Mob::Attack(Lua_Mob other, int hand, bool from_riposte, bool is_striket
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				options.hate_percent = luabind::object_cast<float>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 			}
 		}
 	}
@@ -785,7 +785,7 @@ void Lua_Mob::QuestSay(Lua_Client client, const char *message, luabind::adl::obj
 		if (luabind::type(cur) != LUA_TNIL) {
 			try {
 				journal_opts.speak_mode = static_cast<Journal::SpeakMode>(luabind::object_cast<int>(cur));
-			} catch (luabind::cast_failed) {
+			} catch (luabind::cast_failed &) {
 			}
 		}
 
@@ -793,7 +793,7 @@ void Lua_Mob::QuestSay(Lua_Client client, const char *message, luabind::adl::obj
 		if (luabind::type(cur) != LUA_TNIL) {
 			try {
 				journal_opts.journal_mode = static_cast<Journal::Mode>(luabind::object_cast<int>(cur));
-			} catch (luabind::cast_failed) {
+			} catch (luabind::cast_failed &) {
 			}
 		}
 
@@ -801,7 +801,7 @@ void Lua_Mob::QuestSay(Lua_Client client, const char *message, luabind::adl::obj
 		if (luabind::type(cur) != LUA_TNIL) {
 			try {
 				journal_opts.language = luabind::object_cast<int>(cur);
-			} catch (luabind::cast_failed) {
+			} catch (luabind::cast_failed &) {
 			}
 		}
 
@@ -809,7 +809,7 @@ void Lua_Mob::QuestSay(Lua_Client client, const char *message, luabind::adl::obj
 		if (luabind::type(cur) != LUA_TNIL) {
 			try {
 				journal_opts.message_type = luabind::object_cast<int>(cur);
-			} catch (luabind::cast_failed) {
+			} catch (luabind::cast_failed &) {
 			}
 		}
 	}
@@ -1568,7 +1568,7 @@ void Lua_Mob::SendIllusionPacket(luabind::adl::object illusion) {
 	if(luabind::type(cur) != LUA_TNIL) {
 		try {
 			race = luabind::object_cast<int>(cur);
-		} catch(luabind::cast_failed) {
+		} catch(luabind::cast_failed &) {
 		}
 	}
 
@@ -1576,7 +1576,7 @@ void Lua_Mob::SendIllusionPacket(luabind::adl::object illusion) {
 	if(luabind::type(cur) != LUA_TNIL) {
 		try {
 			gender = luabind::object_cast<int>(cur);
-		} catch(luabind::cast_failed) {
+		} catch(luabind::cast_failed &) {
 		}
 	}
 
@@ -1584,7 +1584,7 @@ void Lua_Mob::SendIllusionPacket(luabind::adl::object illusion) {
 	if(luabind::type(cur) != LUA_TNIL) {
 		try {
 			texture = luabind::object_cast<int>(cur);
-		} catch(luabind::cast_failed) {
+		} catch(luabind::cast_failed &) {
 		}
 	}
 
@@ -1592,7 +1592,7 @@ void Lua_Mob::SendIllusionPacket(luabind::adl::object illusion) {
 	if(luabind::type(cur) != LUA_TNIL) {
 		try {
 			helmtexture = luabind::object_cast<int>(cur);
-		} catch(luabind::cast_failed) {
+		} catch(luabind::cast_failed &) {
 		}
 	}
 
@@ -1600,7 +1600,7 @@ void Lua_Mob::SendIllusionPacket(luabind::adl::object illusion) {
 	if(luabind::type(cur) != LUA_TNIL) {
 		try {
 			haircolor = luabind::object_cast<int>(cur);
-		} catch(luabind::cast_failed) {
+		} catch(luabind::cast_failed &) {
 		}
 	}
 
@@ -1608,7 +1608,7 @@ void Lua_Mob::SendIllusionPacket(luabind::adl::object illusion) {
 	if(luabind::type(cur) != LUA_TNIL) {
 		try {
 			beardcolor = luabind::object_cast<int>(cur);
-		} catch(luabind::cast_failed) {
+		} catch(luabind::cast_failed &) {
 		}
 	}
 
@@ -1616,7 +1616,7 @@ void Lua_Mob::SendIllusionPacket(luabind::adl::object illusion) {
 	if(luabind::type(cur) != LUA_TNIL) {
 		try {
 			eyecolor1 = luabind::object_cast<int>(cur);
-		} catch(luabind::cast_failed) {
+		} catch(luabind::cast_failed &) {
 		}
 	}
 
@@ -1624,7 +1624,7 @@ void Lua_Mob::SendIllusionPacket(luabind::adl::object illusion) {
 	if(luabind::type(cur) != LUA_TNIL) {
 		try {
 			eyecolor2 = luabind::object_cast<int>(cur);
-		} catch(luabind::cast_failed) {
+		} catch(luabind::cast_failed &) {
 		}
 	}
 
@@ -1632,7 +1632,7 @@ void Lua_Mob::SendIllusionPacket(luabind::adl::object illusion) {
 	if(luabind::type(cur) != LUA_TNIL) {
 		try {
 			hairstyle = luabind::object_cast<int>(cur);
-		} catch(luabind::cast_failed) {
+		} catch(luabind::cast_failed &) {
 		}
 	}
 
@@ -1640,7 +1640,7 @@ void Lua_Mob::SendIllusionPacket(luabind::adl::object illusion) {
 	if(luabind::type(cur) != LUA_TNIL) {
 		try {
 			luclinface = luabind::object_cast<int>(cur);
-		} catch(luabind::cast_failed) {
+		} catch(luabind::cast_failed &) {
 		}
 	}
 
@@ -1648,7 +1648,7 @@ void Lua_Mob::SendIllusionPacket(luabind::adl::object illusion) {
 	if(luabind::type(cur) != LUA_TNIL) {
 		try {
 			beard = luabind::object_cast<int>(cur);
-		} catch(luabind::cast_failed) {
+		} catch(luabind::cast_failed &) {
 		}
 	}
 
@@ -1656,7 +1656,7 @@ void Lua_Mob::SendIllusionPacket(luabind::adl::object illusion) {
 	if(luabind::type(cur) != LUA_TNIL) {
 		try {
 			aa_title = luabind::object_cast<int>(cur);
-		} catch(luabind::cast_failed) {
+		} catch(luabind::cast_failed &) {
 		}
 	}
 
@@ -1664,7 +1664,7 @@ void Lua_Mob::SendIllusionPacket(luabind::adl::object illusion) {
 	if(luabind::type(cur) != LUA_TNIL) {
 		try {
 			drakkin_heritage = luabind::object_cast<int>(cur);
-		} catch(luabind::cast_failed) {
+		} catch(luabind::cast_failed &) {
 		}
 	}
 
@@ -1672,7 +1672,7 @@ void Lua_Mob::SendIllusionPacket(luabind::adl::object illusion) {
 	if(luabind::type(cur) != LUA_TNIL) {
 		try {
 			drakkin_tattoo = luabind::object_cast<int>(cur);
-		} catch(luabind::cast_failed) {
+		} catch(luabind::cast_failed &) {
 		}
 	}
 
@@ -1680,7 +1680,7 @@ void Lua_Mob::SendIllusionPacket(luabind::adl::object illusion) {
 	if(luabind::type(cur) != LUA_TNIL) {
 		try {
 			drakkin_details = luabind::object_cast<int>(cur);
-		} catch(luabind::cast_failed) {
+		} catch(luabind::cast_failed &) {
 		}
 	}
 
@@ -1688,7 +1688,7 @@ void Lua_Mob::SendIllusionPacket(luabind::adl::object illusion) {
 	if(luabind::type(cur) != LUA_TNIL) {
 		try {
 			size = luabind::object_cast<float>(cur);
-		} catch(luabind::cast_failed) {
+		} catch(luabind::cast_failed &) {
 		}
 	}
 

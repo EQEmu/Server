@@ -571,7 +571,7 @@ void lua_task_selector(luabind::adl::object table) {
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				cur_value = luabind::object_cast<int>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 			}
 		} else {
 			count = i - 1;
@@ -601,7 +601,7 @@ void lua_enable_task(luabind::adl::object table) {
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				cur_value = luabind::object_cast<int>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 			}
 		} else {
 			count = i - 1;
@@ -628,7 +628,7 @@ void lua_disable_task(luabind::adl::object table) {
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				cur_value = luabind::object_cast<int>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 			}
 		} else {
 			count = i - 1;
@@ -1156,7 +1156,7 @@ void lua_add_spawn_point(luabind::adl::object table) {
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				spawn2_id = luabind::object_cast<uint32>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 				return;
 			}
 		} else {
@@ -1167,7 +1167,7 @@ void lua_add_spawn_point(luabind::adl::object table) {
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				spawngroup_id = luabind::object_cast<uint32>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 				return;
 			}
 		} else {
@@ -1178,7 +1178,7 @@ void lua_add_spawn_point(luabind::adl::object table) {
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				x = luabind::object_cast<float>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 				return;
 			}
 		} else {
@@ -1189,7 +1189,7 @@ void lua_add_spawn_point(luabind::adl::object table) {
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				y = luabind::object_cast<float>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 				return;
 			}
 		} else {
@@ -1200,7 +1200,7 @@ void lua_add_spawn_point(luabind::adl::object table) {
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				z = luabind::object_cast<float>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 				return;
 			}
 		} else {
@@ -1211,7 +1211,7 @@ void lua_add_spawn_point(luabind::adl::object table) {
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				heading = luabind::object_cast<float>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 				return;
 			}
 		} else {
@@ -1222,7 +1222,7 @@ void lua_add_spawn_point(luabind::adl::object table) {
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				respawn = luabind::object_cast<uint32>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 				return;
 			}
 		} else {
@@ -1233,7 +1233,7 @@ void lua_add_spawn_point(luabind::adl::object table) {
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				variance = luabind::object_cast<uint32>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 				return;
 			}
 		} else {
@@ -1244,7 +1244,7 @@ void lua_add_spawn_point(luabind::adl::object table) {
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				timeleft = luabind::object_cast<uint32>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 			}
 		}
 
@@ -1252,7 +1252,7 @@ void lua_add_spawn_point(luabind::adl::object table) {
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				grid = luabind::object_cast<uint32>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 			}
 		}
 
@@ -1260,7 +1260,7 @@ void lua_add_spawn_point(luabind::adl::object table) {
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				condition_id = luabind::object_cast<int>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 			}
 		}
 
@@ -1268,7 +1268,7 @@ void lua_add_spawn_point(luabind::adl::object table) {
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				condition_min_value = luabind::object_cast<int>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 			}
 		}
 
@@ -1276,7 +1276,7 @@ void lua_add_spawn_point(luabind::adl::object table) {
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				enabled = luabind::object_cast<bool>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 			}
 		}
 
@@ -1284,7 +1284,7 @@ void lua_add_spawn_point(luabind::adl::object table) {
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				animation = luabind::object_cast<int>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 			}
 		}
 
@@ -1399,7 +1399,7 @@ void lua_update_zone_header(std::string type, std::string value) {
 		try { \
 			npc_type->name = luabind::object_cast<c_type>(cur); \
 		} \
-		catch(luabind::cast_failed) { \
+		catch(luabind::cast_failed &) { \
 			npc_type->size = default_value; \
 		} \
 	} \
@@ -1415,7 +1415,7 @@ void lua_update_zone_header(std::string type, std::string value) {
 			std::string tmp = luabind::object_cast<std::string>(cur); \
 			strncpy(npc_type->name, tmp.c_str(), str_length); \
 		} \
-		catch(luabind::cast_failed) { \
+		catch(luabind::cast_failed &) { \
 			strncpy(npc_type->name, default_value, str_length); \
 		} \
 	} \
