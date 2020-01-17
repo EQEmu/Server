@@ -1397,7 +1397,7 @@ void Lua_Client::QuestReward(Lua_Mob target, luabind::adl::object reward) {
 	if (luabind::type(cur) != LUA_TNIL) {
 		try {
 			copper = luabind::object_cast<uint32>(cur);
-		} catch (luabind::cast_failed) {
+		} catch (luabind::cast_failed &) {
 		}
 	}
 
@@ -1405,7 +1405,7 @@ void Lua_Client::QuestReward(Lua_Mob target, luabind::adl::object reward) {
 	if (luabind::type(cur) != LUA_TNIL) {
 		try {
 			silver = luabind::object_cast<uint32>(cur);
-		} catch (luabind::cast_failed) {
+		} catch (luabind::cast_failed &) {
 		}
 	}
 
@@ -1413,7 +1413,7 @@ void Lua_Client::QuestReward(Lua_Mob target, luabind::adl::object reward) {
 	if (luabind::type(cur) != LUA_TNIL) {
 		try {
 			gold = luabind::object_cast<uint32>(cur);
-		} catch (luabind::cast_failed) {
+		} catch (luabind::cast_failed &) {
 		}
 	}
 
@@ -1421,7 +1421,7 @@ void Lua_Client::QuestReward(Lua_Mob target, luabind::adl::object reward) {
 	if (luabind::type(cur) != LUA_TNIL) {
 		try {
 			platinum = luabind::object_cast<uint32>(cur);
-		} catch (luabind::cast_failed) {
+		} catch (luabind::cast_failed &) {
 		}
 	}
 
@@ -1429,7 +1429,7 @@ void Lua_Client::QuestReward(Lua_Mob target, luabind::adl::object reward) {
 	if (luabind::type(cur) != LUA_TNIL) {
 		try {
 			itemid = luabind::object_cast<uint32>(cur);
-		} catch (luabind::cast_failed) {
+		} catch (luabind::cast_failed &) {
 		}
 	}
 
@@ -1437,7 +1437,7 @@ void Lua_Client::QuestReward(Lua_Mob target, luabind::adl::object reward) {
 	if (luabind::type(cur) != LUA_TNIL) {
 		try {
 			exp = luabind::object_cast<uint32>(cur);
-		} catch (luabind::cast_failed) {
+		} catch (luabind::cast_failed &) {
 		}
 	}
 
@@ -1445,7 +1445,7 @@ void Lua_Client::QuestReward(Lua_Mob target, luabind::adl::object reward) {
 	if (luabind::type(cur) != LUA_TNIL) {
 		try {
 			faction = luabind::object_cast<bool>(cur);
-		} catch (luabind::cast_failed) {
+		} catch (luabind::cast_failed &) {
 		}
 	}
 
