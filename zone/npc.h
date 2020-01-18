@@ -103,6 +103,8 @@ namespace EQEmu
 class NPC : public Mob
 {
 public:
+	class EventNpcStatsMonitor;
+
 	static NPC* SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* client = nullptr);
 	static bool	SpawnZoneController();
 	static int8 GetAILevel(bool iForceReRead = false);

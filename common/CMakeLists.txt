@@ -44,6 +44,7 @@ SET(common_sources
 	md5.cpp
 	memory_buffer.cpp
 	memory_mapped_file.cpp
+	metric_manager.cpp
 	misc.cpp
 	misc_functions.cpp
 	mutex.cpp
@@ -173,6 +174,8 @@ SET(common_headers
 	md5.h
 	memory_buffer.h
 	memory_mapped_file.h
+	metric_event.h
+	metric_manager.h
 	misc.h
 	misc_functions.h
 	mutex.h

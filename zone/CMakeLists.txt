@@ -82,6 +82,7 @@ SET(zone_sources
 	main.cpp
 	map.cpp
 	merc.cpp
+	metric_event_types.cpp
 	mob.cpp
 	mob_ai.cpp
 	mob_appearance.cpp

@@ -448,6 +448,18 @@ uint32 NPC::GetRoamboxMinDelay() const
 
 NPC::~NPC()
 {
+	auto metric_event = GetMetricEvent();
+	if (metric_event) {
+
+		switch (metric_event->GetEventType()) {
+		case EQEmu::MetricEvent::EventType::eventNpcStatsMonitor:
+			metric_event->Finalize();
+			SetMetricEvent(nullptr);
+		default:
+			break;
+		}
+	}
+
 	AI_Stop();
 
 	if(proximity != nullptr) {

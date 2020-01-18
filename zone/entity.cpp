@@ -65,6 +65,8 @@ Entity::Entity()
 	id              = 0;
 	initial_id      = 0;
 	spawn_timestamp = time(nullptr);
+
+	m_metric_event = nullptr;
 }
 
 Entity::~Entity()

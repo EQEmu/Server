@@ -26,6 +26,7 @@
 #include "../common/servertalk.h"
 #include "../common/bodytypes.h"
 #include "../common/eq_constants.h"
+#include "../common/metric_event.h"
 
 #include "position.h"
 #include "zonedump.h"
@@ -121,6 +122,9 @@ public:
 	const Bot* CastToBot() const;
 #endif
 
+	EQEmu::MetricEvent* GetMetricEvent() { return m_metric_event; }
+	bool SetMetricEvent(EQEmu::MetricEvent* metric_event) { if (!m_metric_event) { m_metric_event = metric_event; return true; } else { return false; } }
+
 protected:
 	friend class EntityList;
 	inline virtual void SetID(uint16 set_id) {
@@ -135,6 +139,8 @@ private:
 	uint16 id;
 	uint16 initial_id;
 	time_t spawn_timestamp;
+
+	EQEmu::MetricEvent* m_metric_event;
 };
 
 class EntityList

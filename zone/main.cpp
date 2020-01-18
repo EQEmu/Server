@@ -42,6 +42,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/eqemu_exception.h"
 #include "../common/spdat.h"
 #include "../common/eqemu_logsys.h"
+#include "../common/metric_manager.h"
 
 #include "api_service.h"
 #include "zone_config.h"
@@ -111,6 +112,7 @@ const SPDat_Spell_Struct* spells;
 int32 SPDAT_RECORDS = -1;
 const ZoneConfig *Config;
 double frame_time = 0.0;
+EQEmu::MetricManager metrics;
 
 void Shutdown();
 void UpdateWindowTitle(char* iNewTitle);
@@ -537,6 +539,7 @@ int main(int argc, char** argv) {
 					quest_manager.Process();
 				}
 
+				metrics.Process();
 			}
 		}
 
