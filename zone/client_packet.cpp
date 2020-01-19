@@ -862,7 +862,7 @@ void Client::CompleteConnect()
 	CalcItemScale();
 	DoItemEnterZone();
 
-	if (zone->GetZoneID() == RuleI(World, GuildBankZoneID) && GuildBanks)
+	if (zone && zone->GetZoneID() == RuleI(World, GuildBankZoneID) && GuildBanks)
 		GuildBanks->SendGuildBank(this);
 
 	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoD)
@@ -11270,7 +11270,9 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 								if (!client_to_add) {
 									if (group->members[x]->IsClient()) {
 										client_to_add = group->members[x]->CastToClient();
-										raid->SetGroupLeader(client_to_add->GetName());
+										if (client_to_add) { 
+											raid->SetGroupLeader(client_to_add->GetName());
+										}
 									}
 								}
 								if (group->IsLeader(group->members[x])) {
@@ -11329,7 +11331,9 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 									if (!addClientig) {
 										if (player_invited_group->members[x]->IsClient()) {
 											addClientig = player_invited_group->members[x]->CastToClient();
-											raid->SetGroupLeader(addClientig->GetName());
+											if (addClientig) { 
+												raid->SetGroupLeader(addClientig->GetName());
+											}
 										}
 									}
 									if (player_invited_group->IsLeader(player_invited_group->members[x])) {

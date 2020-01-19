@@ -196,14 +196,14 @@ bool Zone::LoadZoneObjects()
 			strn0cpy(d.zone_name, shortname, sizeof(d.zone_name));
 			d.db_id = 1000000000 + atoi(row[0]); // Out of range of normal use for doors.id
 			d.door_id = -1;			     // Client doesn't care if these are all the same door_id
-			d.pos_x = atof(row[2]);		     // xpos
-			d.pos_y = atof(row[3]);		     // ypos
-			d.pos_z = atof(row[4]);		     // zpos
-			d.heading = atof(row[5]);	    // heading
+			d.pos_x = static_cast<decltype(d.pos_x)>(atof(row[2]));		     // xpos
+			d.pos_y = static_cast<decltype(d.pos_y)>(atof(row[3]));		     // ypos
+			d.pos_z = static_cast<decltype(d.pos_z)>(atof(row[4]));		     // zpos
+			d.heading = static_cast<decltype(d.heading)>(atof(row[5]));	    // heading
 
 			strn0cpy(d.door_name, row[8], sizeof(d.door_name)); // objectname
 			// Strip trailing "_ACTORDEF" if present. Client won't accept it for doors.
-			int len = strlen(d.door_name);
+			auto len = strlen(d.door_name);
 			if ((len > 9) && (memcmp(&d.door_name[len - 9], "_ACTORDEF", 10) == 0))
 				d.door_name[len - 9] = '\0';
 
@@ -239,10 +239,10 @@ bool Zone::LoadZoneObjects()
 
 		id = (uint32)atoi(row[0]);
 		data.zone_id = atoi(row[1]);
-		data.x = atof(row[2]);
-		data.y = atof(row[3]);
-		data.z = atof(row[4]);
-		data.heading = atof(row[5]);
+		data.x = static_cast<decltype(data.x)>(atof(row[2]));
+		data.y = static_cast<decltype(data.y)>(atof(row[3]));
+		data.z = static_cast<decltype(data.z)>(atof(row[4]));
+		data.heading = static_cast<decltype(data.heading)>(atof(row[5]));
 		itemid = (uint32)atoi(row[6]);
 		charges = (int16)atoi(row[7]);
 		strcpy(data.object_name, row[8]);
@@ -256,9 +256,9 @@ bool Zone::LoadZoneObjects()
 		data.unknown020 = (uint32)atoi(row[13]);
 		data.unknown024 = (uint32)atoi(row[14]);
 		data.unknown076 = (uint32)atoi(row[15]);
-		data.size = atof(row[16]);
-		data.tilt_x = atof(row[17]);
-		data.tilt_y = atof(row[18]);
+		data.size = static_cast<decltype(data.size)>(atof(row[16]));
+		data.tilt_x = static_cast<decltype(data.tilt_x)>(atof(row[17]));
+		data.tilt_y = static_cast<decltype(data.tilt_y)>(atof(row[18]));
 		data.unknown084 = 0;
 
 		EQEmu::ItemInstance *inst = nullptr;
@@ -453,9 +453,9 @@ void Zone::LoadTempMerchantData() {
 			}
 			npcid = ml.npcid;
 		}
-		ml.slot = atoul(row[1]);
-		ml.charges = atoul(row[2]);
-		ml.item = atoul(row[3]);
+		ml.slot = static_cast<decltype(ml.slot)>(atoul(row[1]));
+		ml.charges = static_cast<decltype(ml.charges)>(atoul(row[2]));
+		ml.item = static_cast<decltype(ml.item)>(atoul(row[3]));
 		ml.origslot = ml.slot;
 		cur->second.push_back(ml);
 	}
@@ -475,13 +475,13 @@ void Zone::LoadNewMerchantData(uint32 merchantid) {
     for(auto row = results.begin(); row != results.end(); ++row) {
         MerchantList ml;
         ml.id = merchantid;
-        ml.item = atoul(row[0]);
-        ml.slot = atoul(row[1]);
-        ml.faction_required = atoul(row[2]);
-        ml.level_required = atoul(row[3]);
-        ml.alt_currency_cost = atoul(row[4]);
-        ml.classes_required = atoul(row[5]);
-		ml.probability = atoul(row[6]);
+		ml.item = static_cast<decltype(ml.item)>(atoul(row[0]));
+		ml.slot = static_cast<decltype(ml.slot)>(atoul(row[1]));
+		ml.faction_required = static_cast<decltype(ml.faction_required)>(atoul(row[2]));
+		ml.level_required = static_cast<decltype(ml.level_required)>(atoul(row[3]));
+		ml.alt_currency_cost = static_cast<decltype(ml.alt_currency_cost)>(atoul(row[4]));
+		ml.classes_required = static_cast<decltype(ml.classes_required)>(atoul(row[5]));
+		ml.probability = static_cast<decltype(ml.probability)>(atoul(row[6]));
         merlist.push_back(ml);
     }
 
@@ -542,13 +542,13 @@ void Zone::GetMerchantDataForZoneLoad() {
 			continue;
 		}
 
-		ml.slot = atoul(row[1]);
-		ml.item = atoul(row[2]);
-		ml.faction_required = atoul(row[3]);
-		ml.level_required = atoul(row[4]);
-		ml.alt_currency_cost = atoul(row[5]);
-		ml.classes_required = atoul(row[6]);
-		ml.probability = atoul(row[7]);
+		ml.slot = static_cast<decltype(ml.slot)>(atoul(row[1]));
+		ml.item = static_cast<decltype(ml.item)>(atoul(row[2]));
+		ml.faction_required = static_cast<decltype(ml.faction_required)>(atoul(row[3]));
+		ml.level_required = static_cast<decltype(ml.level_required)>(atoul(row[4]));
+		ml.alt_currency_cost = static_cast<decltype(ml.alt_currency_cost)>(atoul(row[5]));
+		ml.classes_required = static_cast<decltype(ml.classes_required)>(atoul(row[6]));
+		ml.probability = static_cast<decltype(ml.probability)>(atoul(row[7]));
 		cur->second.push_back(ml);
 	}
 
@@ -635,9 +635,9 @@ void Zone::LoadLevelEXPMods(){
     }
 
     for (auto row = results.begin(); row != results.end(); ++row) {
-        uint32 index = atoi(row[0]);
-		float exp_mod = atof(row[1]);
-		float aa_exp_mod = atof(row[2]);
+		uint32 index = atoi(row[0]);
+		auto exp_mod = static_cast<float>(atof(row[1]));
+		auto aa_exp_mod = static_cast<float>(atof(row[2]));
 		level_exp_mod[index].ExpMod = exp_mod;
 		level_exp_mod[index].AAExpMod = aa_exp_mod;
     }
@@ -1746,15 +1746,15 @@ bool ZoneDatabase::LoadStaticZonePoints(LinkedList<ZonePoint*>* zone_point_list,
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		auto zp = new ZonePoint;
 
-		zp->x = atof(row[0]);
-		zp->y = atof(row[1]);
-		zp->z = atof(row[2]);
-		zp->target_x = atof(row[3]);
-		zp->target_y = atof(row[4]);
-		zp->target_z = atof(row[5]);
+		zp->x = static_cast<decltype(zp->x)>(atof(row[0]));
+		zp->y = static_cast<decltype(zp->y)>(atof(row[1]));
+		zp->z = static_cast<decltype(zp->z)>(atof(row[2]));
+		zp->target_x = static_cast<decltype(zp->target_x)>(atof(row[3]));
+		zp->target_y = static_cast<decltype(zp->target_y)>(atof(row[4]));
+		zp->target_z = static_cast<decltype(zp->target_z)>(atof(row[5]));
 		zp->target_zone_id = atoi(row[6]);
-		zp->heading = atof(row[7]);
-		zp->target_heading = atof(row[8]);
+		zp->heading = static_cast<decltype(zp->heading)>(atof(row[7]));
+		zp->target_heading = static_cast<decltype(zp->target_heading)>(atof(row[8]));
 		zp->number = atoi(row[9]);
 		zp->target_zone_instance = atoi(row[10]);
 		zp->client_version_mask = (uint32)strtoul(row[11], nullptr, 0);

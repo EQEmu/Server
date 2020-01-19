@@ -474,16 +474,17 @@ Mob *HateList::GetEntWithMostHateOnList(Mob *center, Mob *skip, bool skip_mezzed
 				++iterator;
 				continue;
 			}
+			if (cur->entity_on_hatelist != nullptr) {
+				if (skip_mezzed && cur->entity_on_hatelist->IsMezzed()) {
+					++iterator;
+					continue;
+				}
 
-			if (skip_mezzed && cur->entity_on_hatelist->IsMezzed()) {
-				++iterator;
-				continue;
-			}
-
-			if (cur->entity_on_hatelist != nullptr && ((cur->stored_hate_amount > hate) || cur->is_entity_frenzy))
-			{
-				top_hate = cur->entity_on_hatelist;
-				hate = cur->stored_hate_amount;
+				if (cur->stored_hate_amount > hate || cur->is_entity_frenzy)
+				{
+					top_hate = cur->entity_on_hatelist;
+					hate = cur->stored_hate_amount;
+				}
 			}
 			++iterator;
 		}

@@ -2300,7 +2300,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 				SpellOnTarget(spell_id, this);
 				entity_list.MassGroupBuff(this, this, spell_id, true);
 			}
-			else
+			else if(spell_target)
 			{
 				// at this point spell_target is a member of the other group, or the
 				// caster if they're not using TGB
