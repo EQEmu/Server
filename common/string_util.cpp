@@ -314,7 +314,9 @@ const char *MakeLowerString(const char *source) {
 
 void MakeLowerString(const char *source, char *target) {
 	if (!source || !target) {
-		*target = 0;
+		if (target) { 
+			*target = 0;
+		}
 		return;
 	}
 	while (*source)
