@@ -724,7 +724,7 @@ int Mob::GetClassRaceACBonus()
 			hardcap = 32;
 			softcap = 15;
 		}
-		int weight = IsClient() ? CastToClient()->CalcCurrentWeight() : 0;
+		int weight = IsClient() ? CastToClient()->CalcCurrentWeight()/10 : 0;
 		if (weight < hardcap - 1) {
 			int temp = level + 5;
 			if (weight > softcap) {
