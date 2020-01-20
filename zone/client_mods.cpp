@@ -610,14 +610,13 @@ int32 Client::CalcBaseMana()
 		case 'I':
 			WisInt = GetINT();
 			if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+				ConvertedWisInt = WisInt;
+				int over200 = WisInt;
 				if (WisInt > 100) {
-					ConvertedWisInt = (((WisInt - 100) * 5 / 2) + 100);
-					if (WisInt > 201) {
-						ConvertedWisInt -= ((WisInt - 201) * 5 / 4);
+					if (WisInt > 200) {
+						over200 = (WisInt - 200) / -2 + WisInt;
 					}
-				}
-				else {
-					ConvertedWisInt = WisInt;
+					ConvertedWisInt = (3 * over200 - 300) / 2 + over200;
 				}
 				auto base_data = database.GetBaseData(GetLevel(), GetClass());
 				if (base_data) {
@@ -643,14 +642,13 @@ int32 Client::CalcBaseMana()
 		case 'W':
 			WisInt = GetWIS();
 			if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+				ConvertedWisInt = WisInt;
+				int over200 = WisInt;
 				if (WisInt > 100) {
-					ConvertedWisInt = (((WisInt - 100) * 5 / 2) + 100);
-					if (WisInt > 201) {
-						ConvertedWisInt -= ((WisInt - 201) * 5 / 4);
+					if (WisInt > 200) {
+						over200 = (WisInt - 200) / -2 + WisInt;
 					}
-				}
-				else {
-					ConvertedWisInt = WisInt;
+					ConvertedWisInt = (3 * over200 - 300) / 2 + over200;
 				}
 				auto base_data = database.GetBaseData(GetLevel(), GetClass());
 				if (base_data) {
