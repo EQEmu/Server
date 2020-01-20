@@ -1820,6 +1820,63 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 				break;
 			}
+			case SE_SummonCorpseZone:
+			{
+#ifdef SPELL_EFFECT_SPAM
+				snprintf(effect_desc, _EDLEN, "Summon Corpse Zone");
+#endif
+				if (!IsNPC()) {
+					Client* client_target = this->CastToClient();
+					Group* group = entity_list.GetGroupByClient(client_target);
+					if(group) {
+						if(!group->IsGroupMember(client_target)) {
+							if (caster != this) {
+								caster->Message(Chat::Red, "Your target must be a group member for this spell.");
+								break;
+							}
+						}
+					} else if (caster) {
+						Raid *raid = entity_list.GetRaidByClient(caster->CastToClient());
+						if(raid) {
+							uint32 group_id = 0xFFFFFFFF;
+							group_id = raid->GetGroup(caster->GetName());
+							if(group_id < 11) {
+								if(raid->GetGroup(client_target->GetName()) != group_id) {
+									caster->Message(Chat::Red, "Your target must be a group member for this spell.");
+									break;
+								}
+							}
+						} else {
+							if(caster != this) {
+								caster->Message(Chat::Red, "Your target must be a group member for this spell.");
+								break;
+							}
+						}
+					}
+					
+					if(client_target) {
+						entity_list.RemoveAllCorpsesByCharID(client_target->CharacterID());
+						int client_corpse_count = database.SummonAllCharacterCorpses(client_target->CharacterID(), zone->GetZoneID(), zone->GetInstanceID(), client_target->GetPosition());
+						if(client_corpse_count <= 0) {							
+							if (caster == this) {
+								Message(Chat::Yellow, "You have no corpses to summon.");
+							} else {
+								caster->Message(Chat::Yellow, "%s has no corpses to summon.", client_target->GetCleanName());
+							}
+						} else {							
+							if (caster == this) {
+								Message(Chat::Spells, "Summoning your corpses.");
+							} else {
+								caster->MessageString(Chat::Spells, SUMMONING_CORPSE_ZONE, client_target->GetCleanName());
+							}
+						}
+					} else {
+						MessageString(Chat::Spells, TARGET_NOT_FOUND);
+						LogError("[{}] attempted to cast spell id [{}] with spell effect SE_SummonCorpseZone, but could not cast target into a Client object", GetCleanName(), spell_id);
+					}
+				}
+				break;
+			}
 			case SE_AddMeleeProc:
 			case SE_WeaponProc:
 			{
