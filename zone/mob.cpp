@@ -503,6 +503,8 @@ Mob::~Mob()
 	UninitializeBuffSlots();
 
 	entity_list.RemoveMobFromCloseLists(this);
+	entity_list.RemoveAuraFromMobs(this);
+
 	close_mobs.clear();
 
 #ifdef BOTS

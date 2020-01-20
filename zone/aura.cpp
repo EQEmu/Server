@@ -6,8 +6,9 @@
 #include "raids.h"
 
 Aura::Aura(NPCType *type_data, Mob *owner, AuraRecord &record)
-    : NPC(type_data, 0, owner->GetPosition(), GravityBehavior::Flying), spell_id(record.spell_id), distance(record.distance),
-      remove_timer(record.duration), movement_timer(100), process_timer(1000), aura_id(-1)
+	: NPC(type_data, 0, owner->GetPosition(), GravityBehavior::Flying), spell_id(record.spell_id),
+	  distance(record.distance),
+	  remove_timer(record.duration), movement_timer(100), process_timer(1000), aura_id(-1)
 {
 	GiveNPCTypeData(type_data); // we will delete this later on
 	m_owner = owner->GetID();
@@ -17,42 +18,48 @@ Aura::Aura(NPCType *type_data, Mob *owner, AuraRecord &record)
 		cast_timer.Disable(); // we don't want to be enabled yet
 	}
 
-	if (record.aura_type < static_cast<int>(AuraType::Max))
+	if (record.aura_type < static_cast<int>(AuraType::Max)) {
 		type = static_cast<AuraType>(record.aura_type);
-	else
+	}
+	else {
 		type = AuraType::OnAllGroupMembers;
+	}
 
-	if (record.spawn_type < static_cast<int>(AuraSpawns::Max))
+	if (record.spawn_type < static_cast<int>(AuraSpawns::Max)) {
 		spawn_type = static_cast<AuraSpawns>(record.spawn_type);
-	else
+	}
+	else {
 		spawn_type = AuraSpawns::GroupMembers;
+	}
 
-	if (record.movement < static_cast<int>(AuraMovement::Max))
+	if (record.movement < static_cast<int>(AuraMovement::Max)) {
 		movement_type = static_cast<AuraMovement>(record.movement);
-	else
+	}
+	else {
 		movement_type = AuraMovement::Follow;
+	}
 
 	switch (type) {
-	case AuraType::OnAllFriendlies:
-		process_func = &Aura::ProcessOnAllFriendlies;
-		break;
-	case AuraType::OnAllGroupMembers:
-		process_func = &Aura::ProcessOnAllGroupMembers;
-		break;
-	case AuraType::OnGroupMembersPets:
-		process_func = &Aura::ProcessOnGroupMembersPets;
-		break;
-	case AuraType::Totem:
-		process_func = &Aura::ProcessTotem;
-		break;
-	case AuraType::EnterTrap:
-		process_func = &Aura::ProcessEnterTrap;
-		break;
-	case AuraType::ExitTrap:
-		process_func = &Aura::ProcessExitTrap;
-		break;
-	default:
-		process_func = nullptr;
+		case AuraType::OnAllFriendlies:
+			process_func = &Aura::ProcessOnAllFriendlies;
+			break;
+		case AuraType::OnAllGroupMembers:
+			process_func = &Aura::ProcessOnAllGroupMembers;
+			break;
+		case AuraType::OnGroupMembersPets:
+			process_func = &Aura::ProcessOnGroupMembersPets;
+			break;
+		case AuraType::Totem:
+			process_func = &Aura::ProcessTotem;
+			break;
+		case AuraType::EnterTrap:
+			process_func = &Aura::ProcessEnterTrap;
+			break;
+		case AuraType::ExitTrap:
+			process_func = &Aura::ProcessExitTrap;
+			break;
+		default:
+			process_func = nullptr;
 	}
 }
 
@@ -64,9 +71,9 @@ Mob *Aura::GetOwner()
 // not 100% sure how this one should work and PVP affects ...
 void Aura::ProcessOnAllFriendlies(Mob *owner)
 {
-	auto &mob_list = entity_list.GetMobList(); // read only reference so we can do it all inline
+	auto          &mob_list = entity_list.GetCloseMobList(this, distance);
 	std::set<int> delayed_remove;
-	bool is_buff = IsBuffSpell(spell_id); // non-buff spells don't cast on enter
+	bool          is_buff   = IsBuffSpell(spell_id); // non-buff spells don't cast on enter
 
 	for (auto &e : mob_list) {
 		auto mob = e.second;
@@ -74,13 +81,16 @@ void Aura::ProcessOnAllFriendlies(Mob *owner)
 			auto it = casted_on.find(mob->GetID());
 
 			if (it != casted_on.end()) { // we are already on the list, let's check for removal
-				if (DistanceSquared(GetPosition(), mob->GetPosition()) > distance)
+				if (DistanceSquared(GetPosition(), mob->GetPosition()) > distance) {
 					delayed_remove.insert(mob->GetID());
-			} else { // not on list, lets check if we're in range
+				}
+			}
+			else { // not on list, lets check if we're in range
 				if (DistanceSquared(GetPosition(), mob->GetPosition()) <= distance) {
 					casted_on.insert(mob->GetID());
-					if (is_buff)
+					if (is_buff) {
 						SpellFinished(spell_id, mob);
+					}
 				}
 			}
 		}
@@ -88,30 +98,34 @@ void Aura::ProcessOnAllFriendlies(Mob *owner)
 
 	for (auto &e : delayed_remove) {
 		auto mob = entity_list.GetMob(e);
-		if (mob != nullptr && is_buff) // some auras cast instant spells so no need to remove
+		if (mob != nullptr && is_buff) { // some auras cast instant spells so no need to remove
 			mob->BuffFadeBySpellIDAndCaster(spell_id, GetID());
+		}
 		casted_on.erase(e);
 	}
 
 	// so if we have a cast timer and our set isn't empty and timer is disabled we need to enable it
-	if (cast_timer.GetDuration() > 0 && !cast_timer.Enabled() && !casted_on.empty())
+	if (cast_timer.GetDuration() > 0 && !cast_timer.Enabled() && !casted_on.empty()) {
 		cast_timer.Start();
+	}
 
-	if (!cast_timer.Enabled() || !cast_timer.Check())
+	if (!cast_timer.Enabled() || !cast_timer.Check()) {
 		return;
+	}
 
 	for (auto &e : casted_on) {
 		auto mob = entity_list.GetMob(e);
-		if (mob != nullptr)
+		if (mob != nullptr) {
 			SpellFinished(spell_id, mob);
+		}
 	}
 }
 
 void Aura::ProcessOnAllGroupMembers(Mob *owner)
 {
-	auto &mob_list = entity_list.GetMobList(); // read only reference so we can do it all inline
+	auto          &mob_list = entity_list.GetCloseMobList(this, distance);
 	std::set<int> delayed_remove;
-	bool is_buff = IsBuffSpell(spell_id); // non-buff spells don't cast on enter
+	bool          is_buff   = IsBuffSpell(spell_id); // non-buff spells don't cast on enter
 
 	if (owner->IsRaidGrouped() && owner->IsClient()) { // currently raids are just client, but safety check
 		auto raid = owner->GetRaid();
@@ -126,9 +140,12 @@ void Aura::ProcessOnAllGroupMembers(Mob *owner)
 			auto idx = raid->GetPlayerIndex(c);
 			if (c->GetID() == m_owner) {
 				return DistanceSquared(GetPosition(), c->GetPosition()) <= distance;
-			} else if (idx == 0xFFFFFFFF || raid->members[idx].GroupNumber != group_id || raid->members[idx].GroupNumber == 0xFFFFFFFF) {
+			}
+			else if (idx == 0xFFFFFFFF || raid->members[idx].GroupNumber != group_id ||
+					 raid->members[idx].GroupNumber == 0xFFFFFFFF) {
 				return false;
-			} else if (DistanceSquared(GetPosition(), c->GetPosition()) > distance) {
+			}
+			else if (DistanceSquared(GetPosition(), c->GetPosition()) > distance) {
 				return false;
 			}
 			return true;
@@ -138,9 +155,12 @@ void Aura::ProcessOnAllGroupMembers(Mob *owner)
 			auto idx = raid->GetPlayerIndex(m->GetOwner()->CastToClient());
 			if (m->GetOwner()->GetID() == m_owner) {
 				return DistanceSquared(GetPosition(), m->GetPosition()) <= distance;
-			} else if (idx == 0xFFFFFFFF || raid->members[idx].GroupNumber != group_id || raid->members[idx].GroupNumber == 0xFFFFFFFF) {
+			}
+			else if (idx == 0xFFFFFFFF || raid->members[idx].GroupNumber != group_id ||
+					 raid->members[idx].GroupNumber == 0xFFFFFFFF) {
 				return false;
-			} else if (DistanceSquared(GetPosition(), m->GetPosition()) > distance) {
+			}
+			else if (DistanceSquared(GetPosition(), m->GetPosition()) > distance) {
 				return false;
 			}
 			return true;
@@ -148,14 +168,18 @@ void Aura::ProcessOnAllGroupMembers(Mob *owner)
 
 		auto verify_raid_client_swarm = [&raid, &group_id, this](NPC *n) {
 			auto owner = entity_list.GetMob(n->GetSwarmOwner());
-			if (owner == nullptr)
+			if (owner == nullptr) {
 				return false;
+			}
 			auto idx = raid->GetPlayerIndex(owner->CastToClient());
 			if (owner->GetID() == m_owner) {
 				return DistanceSquared(GetPosition(), n->GetPosition()) <= distance;
-			} else if (idx == 0xFFFFFFFF || raid->members[idx].GroupNumber != group_id || raid->members[idx].GroupNumber == 0xFFFFFFFF) {
+			}
+			else if (idx == 0xFFFFFFFF || raid->members[idx].GroupNumber != group_id ||
+					 raid->members[idx].GroupNumber == 0xFFFFFFFF) {
 				return false;
-			} else if (DistanceSquared(GetPosition(), n->GetPosition()) > distance) {
+			}
+			else if (DistanceSquared(GetPosition(), n->GetPosition()) > distance) {
 				return false;
 			}
 			return true;
@@ -164,40 +188,52 @@ void Aura::ProcessOnAllGroupMembers(Mob *owner)
 		for (auto &e : mob_list) {
 			auto mob = e.second;
 			// step 1: check if we're already managing this NPC's buff
-			auto it = casted_on.find(mob->GetID());
+			auto it  = casted_on.find(mob->GetID());
 			if (it != casted_on.end()) {
 				// verify still good!
 				if (mob->IsClient()) {
-					if (!verify_raid_client(mob->CastToClient()))
+					if (!verify_raid_client(mob->CastToClient())) {
 						delayed_remove.insert(mob->GetID());
-				} else if (mob->IsPet() && mob->IsPetOwnerClient() && mob->GetOwner()) {
-					if (!verify_raid_client_pet(mob))
-						delayed_remove.insert(mob->GetID());
-				} else if (mob->IsNPC() && mob->IsPetOwnerClient()) {
-					auto npc = mob->CastToNPC();
-					if (!verify_raid_client_swarm(npc))
-						delayed_remove.insert(mob->GetID());
+					}
 				}
-			} else { // we're not on it!
+				else if (mob->IsPet() && mob->IsPetOwnerClient() && mob->GetOwner()) {
+					if (!verify_raid_client_pet(mob)) {
+						delayed_remove.insert(mob->GetID());
+					}
+				}
+				else if (mob->IsNPC() && mob->IsPetOwnerClient()) {
+					auto npc = mob->CastToNPC();
+					if (!verify_raid_client_swarm(npc)) {
+						delayed_remove.insert(mob->GetID());
+					}
+				}
+			}
+			else { // we're not on it!
 				if (mob->IsClient() && verify_raid_client(mob->CastToClient())) {
 					casted_on.insert(mob->GetID());
-					if (is_buff)
+					if (is_buff) {
 						SpellFinished(spell_id, mob);
-				} else if (mob->IsPet() && mob->IsPetOwnerClient() && mob->GetOwner() && verify_raid_client_pet(mob)) {
+					}
+				}
+				else if (mob->IsPet() && mob->IsPetOwnerClient() && mob->GetOwner() && verify_raid_client_pet(mob)) {
 					casted_on.insert(mob->GetID());
-					if (is_buff)
+					if (is_buff) {
 						SpellFinished(spell_id, mob);
-				} else if (mob->IsNPC() && mob->IsPetOwnerClient()) {
+					}
+				}
+				else if (mob->IsNPC() && mob->IsPetOwnerClient()) {
 					auto npc = mob->CastToNPC();
 					if (verify_raid_client_swarm(npc)) {
 						casted_on.insert(mob->GetID());
-						if (is_buff)
+						if (is_buff) {
 							SpellFinished(spell_id, mob);
+						}
 					}
 				}
 			}
 		}
-	} else if (owner->IsGrouped()) {
+	}
+	else if (owner->IsGrouped()) {
 		auto group = owner->GetGroup();
 		if (group == nullptr) { // uh oh
 			owner->RemoveAura(GetID(), false, true);
@@ -207,107 +243,133 @@ void Aura::ProcessOnAllGroupMembers(Mob *owner)
 		// lambdas to make for loop less ugly
 		auto verify_group_pet = [&group, this](Mob *m) {
 			auto owner = m->GetOwner();
-			if (owner != nullptr && group->IsGroupMember(owner) && DistanceSquared(GetPosition(), m->GetPosition()) <= distance)
+			if (owner != nullptr && group->IsGroupMember(owner) &&
+				DistanceSquared(GetPosition(), m->GetPosition()) <= distance) {
 				return true;
+			}
 			return false;
 		};
 
 		auto verify_group_swarm = [&group, this](NPC *n) {
 			auto owner = entity_list.GetMob(n->GetSwarmOwner());
-			if (owner != nullptr && group->IsGroupMember(owner) && DistanceSquared(GetPosition(), n->GetPosition()) <= distance)
+			if (owner != nullptr && group->IsGroupMember(owner) &&
+				DistanceSquared(GetPosition(), n->GetPosition()) <= distance) {
 				return true;
+			}
 			return false;
 		};
 
 		for (auto &e : mob_list) {
 			auto mob = e.second;
-			auto it = casted_on.find(mob->GetID());
+			auto it  = casted_on.find(mob->GetID());
 
 			if (it != casted_on.end()) { // make sure we're still valid
 				if (mob->IsPet()) {
-					if (!verify_group_pet(mob))
+					if (!verify_group_pet(mob)) {
 						delayed_remove.insert(mob->GetID());
-				} else if (mob->IsNPC() && mob->CastToNPC()->GetSwarmInfo()) {
-					if (!verify_group_swarm(mob->CastToNPC()))
+					}
+				}
+				else if (mob->IsNPC() && mob->CastToNPC()->GetSwarmInfo()) {
+					if (!verify_group_swarm(mob->CastToNPC())) {
 						delayed_remove.insert(mob->GetID());
-				} else if (!group->IsGroupMember(mob) || DistanceSquared(GetPosition(), mob->GetPosition()) > distance) {
+					}
+				}
+				else if (!group->IsGroupMember(mob) || DistanceSquared(GetPosition(), mob->GetPosition()) > distance) {
 					delayed_remove.insert(mob->GetID());
 				}
-			} else { // not on, check if we should be!
+			}
+			else { // not on, check if we should be!
 				if (mob->IsPet() && verify_group_pet(mob)) {
 					casted_on.insert(mob->GetID());
-					if (is_buff)
+					if (is_buff) {
 						SpellFinished(spell_id, mob);
-				} else if (mob->IsNPC() && mob->CastToNPC()->GetSwarmInfo() && verify_group_swarm(mob->CastToNPC())) {
+					}
+				}
+				else if (mob->IsNPC() && mob->CastToNPC()->GetSwarmInfo() && verify_group_swarm(mob->CastToNPC())) {
 					casted_on.insert(mob->GetID());
-					if (is_buff)
+					if (is_buff) {
 						SpellFinished(spell_id, mob);
-				} else if (group->IsGroupMember(mob) && DistanceSquared(GetPosition(), mob->GetPosition()) <= distance) {
+					}
+				}
+				else if (group->IsGroupMember(mob) && DistanceSquared(GetPosition(), mob->GetPosition()) <= distance) {
 					casted_on.insert(mob->GetID());
-					if (is_buff)
+					if (is_buff) {
 						SpellFinished(spell_id, mob);
+					}
 				}
 			}
 		}
-	} else {
-		auto verify_solo = [&owner, this](Mob *m) {
-			if (m->IsPet() && m->GetOwnerID() == owner->GetID())
+	}
+	else {
+		auto      verify_solo = [&owner, this](Mob *m) {
+			if (m->IsPet() && m->GetOwnerID() == owner->GetID()) {
 				return true;
-			else if (m->IsNPC() && m->CastToNPC()->GetSwarmOwner() == owner->GetID())
+			}
+			else if (m->IsNPC() && m->CastToNPC()->GetSwarmOwner() == owner->GetID()) {
 				return true;
-			else if (m->GetID() == owner->GetID())
+			}
+			else if (m->GetID() == owner->GetID()) {
 				return true;
-			else
+			}
+			else {
 				return false;
+			}
 		};
 		for (auto &e : mob_list) {
-			auto mob = e.second;
-			auto it = casted_on.find(mob->GetID());
+			auto mob  = e.second;
+			auto it   = casted_on.find(mob->GetID());
 			bool good = verify_solo(mob);
 
 			if (it != casted_on.end()) { // make sure still valid
 				if (!good || DistanceSquared(GetPosition(), mob->GetPosition()) > distance) {
 					delayed_remove.insert(mob->GetID());
 				}
-			} else if (good && DistanceSquared(GetPosition(), mob->GetPosition()) <= distance) {
+			}
+			else if (good && DistanceSquared(GetPosition(), mob->GetPosition()) <= distance) {
 				casted_on.insert(mob->GetID());
-				if (is_buff)
+				if (is_buff) {
 					SpellFinished(spell_id, mob);
+				}
 			}
 		}
 	}
 
 	for (auto &e : delayed_remove) {
 		auto mob = entity_list.GetMob(e);
-		if (mob != nullptr && is_buff) // some auras cast instant spells so no need to remove
+		if (mob != nullptr && is_buff) { // some auras cast instant spells so no need to remove
 			mob->BuffFadeBySpellIDAndCaster(spell_id, GetID());
+		}
 		casted_on.erase(e);
 	}
 
 	// so if we have a cast timer and our set isn't empty and timer is disabled we need to enable it
-	if (cast_timer.GetDuration() > 0 && !cast_timer.Enabled() && !casted_on.empty())
+	if (cast_timer.GetDuration() > 0 && !cast_timer.Enabled() && !casted_on.empty()) {
 		cast_timer.Start();
+	}
 
-	if (!cast_timer.Enabled() || !cast_timer.Check())
+	if (!cast_timer.Enabled() || !cast_timer.Check()) {
 		return;
+	}
 
 	// some auras have to recast (DRU for example, non-buff too)
 	for (auto &e : casted_on) {
 		auto mob = entity_list.GetMob(e);
-		if (mob != nullptr)
+		if (mob != nullptr) {
 			SpellFinished(spell_id, mob);
+		}
 	}
 }
 
 void Aura::ProcessOnGroupMembersPets(Mob *owner)
 {
-	auto &mob_list = entity_list.GetMobList(); // read only reference so we can do it all inline
+	auto          &mob_list    = entity_list.GetCloseMobList(this,distance);
 	std::set<int> delayed_remove;
-	bool is_buff = IsBuffSpell(spell_id); // non-buff spells don't cast on enter
+	bool          is_buff      = IsBuffSpell(spell_id); // non-buff spells don't cast on enter
 	// This type can either live on the pet (level 55/70 MAG aura) or on the pet owner (level 85 MAG aura)
-	auto group_member = owner->GetOwnerOrSelf();
+	auto          group_member = owner->GetOwnerOrSelf();
 
-	if (group_member->IsRaidGrouped() && group_member->IsClient()) { // currently raids are just client, but safety check
+	if (group_member->IsRaidGrouped() &&
+		group_member->IsClient()) { // currently raids are just client, but safety check
 		auto raid = group_member->GetRaid();
 		if (raid == nullptr) { // well shit
 			owner->RemoveAura(GetID(), false, true);
@@ -320,9 +382,12 @@ void Aura::ProcessOnGroupMembersPets(Mob *owner)
 			auto idx = raid->GetPlayerIndex(m->GetOwner()->CastToClient());
 			if (m->GetOwner()->GetID() == group_member->GetID()) {
 				return DistanceSquared(GetPosition(), m->GetPosition()) <= distance;
-			} else if (idx == 0xFFFFFFFF || raid->members[idx].GroupNumber != group_id || raid->members[idx].GroupNumber == 0xFFFFFFFF) {
+			}
+			else if (idx == 0xFFFFFFFF || raid->members[idx].GroupNumber != group_id ||
+					 raid->members[idx].GroupNumber == 0xFFFFFFFF) {
 				return false;
-			} else if (DistanceSquared(GetPosition(), m->GetPosition()) > distance) {
+			}
+			else if (DistanceSquared(GetPosition(), m->GetPosition()) > distance) {
 				return false;
 			}
 			return true;
@@ -330,14 +395,18 @@ void Aura::ProcessOnGroupMembersPets(Mob *owner)
 
 		auto verify_raid_client_swarm = [&raid, &group_id, &group_member, this](NPC *n) {
 			auto owner = entity_list.GetMob(n->GetSwarmOwner());
-			if (owner == nullptr)
+			if (owner == nullptr) {
 				return false;
+			}
 			auto idx = raid->GetPlayerIndex(owner->CastToClient());
 			if (owner->GetID() == group_member->GetID()) {
 				return DistanceSquared(GetPosition(), n->GetPosition()) <= distance;
-			} else if (idx == 0xFFFFFFFF || raid->members[idx].GroupNumber != group_id || raid->members[idx].GroupNumber == 0xFFFFFFFF) {
+			}
+			else if (idx == 0xFFFFFFFF || raid->members[idx].GroupNumber != group_id ||
+					 raid->members[idx].GroupNumber == 0xFFFFFFFF) {
 				return false;
-			} else if (DistanceSquared(GetPosition(), n->GetPosition()) > distance) {
+			}
+			else if (DistanceSquared(GetPosition(), n->GetPosition()) > distance) {
 				return false;
 			}
 			return true;
@@ -346,35 +415,44 @@ void Aura::ProcessOnGroupMembersPets(Mob *owner)
 		for (auto &e : mob_list) {
 			auto mob = e.second;
 			// step 1: check if we're already managing this NPC's buff
-			auto it = casted_on.find(mob->GetID());
+			auto it  = casted_on.find(mob->GetID());
 			if (it != casted_on.end()) {
 				// verify still good!
 				if (mob->IsPet() && mob->IsPetOwnerClient() && mob->GetOwner()) {
-					if (!verify_raid_client_pet(mob))
+					if (!verify_raid_client_pet(mob)) {
 						delayed_remove.insert(mob->GetID());
-				} else if (mob->IsNPC() && mob->IsPetOwnerClient()) {
-					auto npc = mob->CastToNPC();
-					if (!verify_raid_client_swarm(npc))
-						delayed_remove.insert(mob->GetID());
+					}
 				}
-			} else { // we're not on it!
+				else if (mob->IsNPC() && mob->IsPetOwnerClient()) {
+					auto npc = mob->CastToNPC();
+					if (!verify_raid_client_swarm(npc)) {
+						delayed_remove.insert(mob->GetID());
+					}
+				}
+			}
+			else { // we're not on it!
 				if (mob->IsClient()) {
 					continue; // never hit client
-				} else if (mob->IsPet() && mob->IsPetOwnerClient() && mob->GetOwner() && verify_raid_client_pet(mob)) {
+				}
+				else if (mob->IsPet() && mob->IsPetOwnerClient() && mob->GetOwner() && verify_raid_client_pet(mob)) {
 					casted_on.insert(mob->GetID());
-					if (is_buff)
+					if (is_buff) {
 						SpellFinished(spell_id, mob);
-				} else if (mob->IsNPC() && mob->IsPetOwnerClient()) {
+					}
+				}
+				else if (mob->IsNPC() && mob->IsPetOwnerClient()) {
 					auto npc = mob->CastToNPC();
 					if (verify_raid_client_swarm(npc)) {
 						casted_on.insert(mob->GetID());
-						if (is_buff)
+						if (is_buff) {
 							SpellFinished(spell_id, mob);
+						}
 					}
 				}
 			}
 		}
-	} else if (group_member->IsGrouped()) {
+	}
+	else if (group_member->IsGrouped()) {
 		auto group = group_member->GetGroup();
 		if (group == nullptr) { // uh oh
 			owner->RemoveAura(GetID(), false, true);
@@ -384,111 +462,131 @@ void Aura::ProcessOnGroupMembersPets(Mob *owner)
 		// lambdas to make for loop less ugly
 		auto verify_group_pet = [&group, this](Mob *m) {
 			auto owner = m->GetOwner();
-			if (owner != nullptr && group->IsGroupMember(owner) && DistanceSquared(GetPosition(), m->GetPosition()) <= distance)
-				return true;
-			return false;
+			return owner != nullptr && group->IsGroupMember(owner) &&
+				   DistanceSquared(GetPosition(), m->GetPosition()) <= distance;
 		};
 
 		auto verify_group_swarm = [&group, this](NPC *n) {
 			auto owner = entity_list.GetMob(n->GetSwarmOwner());
-			if (owner != nullptr && group->IsGroupMember(owner) && DistanceSquared(GetPosition(), n->GetPosition()) <= distance)
-				return true;
-			return false;
+			return owner != nullptr && group->IsGroupMember(owner) &&
+				   DistanceSquared(GetPosition(), n->GetPosition()) <= distance;
 		};
 
 		for (auto &e : mob_list) {
 			auto mob = e.second;
-			auto it = casted_on.find(mob->GetID());
+			auto it  = casted_on.find(mob->GetID());
 
 			if (it != casted_on.end()) { // make sure we're still valid
 				if (mob->IsPet()) {
-					if (!verify_group_pet(mob))
+					if (!verify_group_pet(mob)) {
 						delayed_remove.insert(mob->GetID());
-				} else if (mob->IsNPC() && mob->CastToNPC()->GetSwarmInfo()) {
-					if (!verify_group_swarm(mob->CastToNPC()))
-						delayed_remove.insert(mob->GetID());
+					}
 				}
-			} else { // not on, check if we should be!
+				else if (mob->IsNPC() && mob->CastToNPC()->GetSwarmInfo()) {
+					if (!verify_group_swarm(mob->CastToNPC())) {
+						delayed_remove.insert(mob->GetID());
+					}
+				}
+			}
+			else { // not on, check if we should be!
 				if (mob->IsClient()) {
 					continue;
-				} else if (mob->IsPet() && verify_group_pet(mob)) {
+				}
+				else if (mob->IsPet() && verify_group_pet(mob)) {
 					casted_on.insert(mob->GetID());
-					if (is_buff)
+					if (is_buff) {
 						SpellFinished(spell_id, mob);
-				} else if (mob->IsNPC() && mob->CastToNPC()->GetSwarmInfo() && verify_group_swarm(mob->CastToNPC())) {
+					}
+				}
+				else if (mob->IsNPC() && mob->CastToNPC()->GetSwarmInfo() && verify_group_swarm(mob->CastToNPC())) {
 					casted_on.insert(mob->GetID());
-					if (is_buff)
+					if (is_buff) {
 						SpellFinished(spell_id, mob);
+					}
 				}
 			}
 		}
-	} else {
-		auto verify_solo = [&group_member, this](Mob *m) {
-			if (m->IsPet() && m->GetOwnerID() == group_member->GetID())
+	}
+	else {
+		auto      verify_solo = [&group_member, this](Mob *m) {
+			if (m->IsPet() && m->GetOwnerID() == group_member->GetID()) {
 				return true;
-			else if (m->IsNPC() && m->CastToNPC()->GetSwarmOwner() == group_member->GetID())
+			}
+			else if (m->IsNPC() && m->CastToNPC()->GetSwarmOwner() == group_member->GetID()) {
 				return true;
-			else
+			}
+			else {
 				return false;
+			}
 		};
 		for (auto &e : mob_list) {
-			auto mob = e.second;
-			auto it = casted_on.find(mob->GetID());
+			auto mob  = e.second;
+			auto it   = casted_on.find(mob->GetID());
 			bool good = verify_solo(mob);
 
 			if (it != casted_on.end()) { // make sure still valid
 				if (!good || DistanceSquared(GetPosition(), mob->GetPosition()) > distance) {
 					delayed_remove.insert(mob->GetID());
 				}
-			} else if (good && DistanceSquared(GetPosition(), mob->GetPosition()) <= distance) {
+			}
+			else if (good && DistanceSquared(GetPosition(), mob->GetPosition()) <= distance) {
 				casted_on.insert(mob->GetID());
-				if (is_buff)
+				if (is_buff) {
 					SpellFinished(spell_id, mob);
+				}
 			}
 		}
 	}
 
 	for (auto &e : delayed_remove) {
 		auto mob = entity_list.GetMob(e);
-		if (mob != nullptr && is_buff) // some auras cast instant spells so no need to remove
+		if (mob != nullptr && is_buff) { // some auras cast instant spells so no need to remove
 			mob->BuffFadeBySpellIDAndCaster(spell_id, GetID());
+		}
 		casted_on.erase(e);
 	}
 
 	// so if we have a cast timer and our set isn't empty and timer is disabled we need to enable it
-	if (cast_timer.GetDuration() > 0 && !cast_timer.Enabled() && !casted_on.empty())
+	if (cast_timer.GetDuration() > 0 && !cast_timer.Enabled() && !casted_on.empty()) {
 		cast_timer.Start();
+	}
 
-	if (!cast_timer.Enabled() || !cast_timer.Check())
+	if (!cast_timer.Enabled() || !cast_timer.Check()) {
 		return;
+	}
 
 	// some auras have to recast (DRU for example, non-buff too)
 	for (auto &e : casted_on) {
 		auto mob = entity_list.GetMob(e);
-		if (mob != nullptr)
+		if (mob != nullptr) {
 			SpellFinished(spell_id, mob);
+		}
 	}
 }
 
 void Aura::ProcessTotem(Mob *owner)
 {
-	auto &mob_list = entity_list.GetMobList(); // read only reference so we can do it all inline
+	auto          &mob_list = entity_list.GetCloseMobList(this, distance);
 	std::set<int> delayed_remove;
-	bool is_buff = IsBuffSpell(spell_id); // non-buff spells don't cast on enter
+	bool          is_buff   = IsBuffSpell(spell_id); // non-buff spells don't cast on enter
 
 	for (auto &e : mob_list) {
 		auto mob = e.second;
-		if (mob == this)
+		if (mob == this) {
 			continue;
-		if (mob == owner)
+		}
+		if (mob == owner) {
 			continue;
+		}
 		if (owner->IsAttackAllowed(mob)) { // might need more checks ...
 			bool in_range = DistanceSquared(GetPosition(), mob->GetPosition()) <= distance;
-			auto it = casted_on.find(mob->GetID());
+			auto it       = casted_on.find(mob->GetID());
 			if (it != casted_on.end()) {
-				if (!in_range)
+				if (!in_range) {
 					delayed_remove.insert(mob->GetID());
-			} else if (in_range) {
+				}
+			}
+			else if (in_range) {
 				casted_on.insert(mob->GetID());
 				SpellFinished(spell_id, mob);
 			}
@@ -497,33 +595,38 @@ void Aura::ProcessTotem(Mob *owner)
 
 	for (auto &e : delayed_remove) {
 		auto mob = entity_list.GetMob(e);
-		if (mob != nullptr && is_buff) // some auras cast instant spells so no need to remove
+		if (mob != nullptr && is_buff) { // some auras cast instant spells so no need to remove
 			mob->BuffFadeBySpellIDAndCaster(spell_id, GetID());
+		}
 		casted_on.erase(e);
 	}
 
 	// so if we have a cast timer and our set isn't empty and timer is disabled we need to enable it
-	if (cast_timer.GetDuration() > 0 && !cast_timer.Enabled() && !casted_on.empty())
+	if (cast_timer.GetDuration() > 0 && !cast_timer.Enabled() && !casted_on.empty()) {
 		cast_timer.Start();
+	}
 
-	if (!cast_timer.Enabled() || !cast_timer.Check())
+	if (!cast_timer.Enabled() || !cast_timer.Check()) {
 		return;
+	}
 
 	for (auto &e : casted_on) {
 		auto mob = entity_list.GetMob(e);
-		if (mob != nullptr)
+		if (mob != nullptr) {
 			SpellFinished(spell_id, mob);
+		}
 	}
 }
 
 void Aura::ProcessEnterTrap(Mob *owner)
 {
-	auto &mob_list = entity_list.GetMobList(); // read only reference so we can do it all inline
+	auto &mob_list = entity_list.GetCloseMobList(this, distance);
 
 	for (auto &e : mob_list) {
 		auto mob = e.second;
-		if (mob == this)
+		if (mob == this) {
 			continue;
+		}
 		// might need more checks ...
 		if (owner->IsAttackAllowed(mob) && DistanceSquared(GetPosition(), mob->GetPosition()) <= distance) {
 			SpellFinished(spell_id, mob);
@@ -535,23 +638,25 @@ void Aura::ProcessEnterTrap(Mob *owner)
 
 void Aura::ProcessExitTrap(Mob *owner)
 {
-	auto &mob_list = entity_list.GetMobList(); // read only reference so we can do it all inline
+	auto &mob_list = entity_list.GetCloseMobList(this, distance);
 
 	for (auto &e : mob_list) {
 		auto mob = e.second;
-		if (mob == this)
+		if (mob == this) {
 			continue;
+		}
 		// might need more checks ...
 		if (owner->IsAttackAllowed(mob)) {
 			bool in_range = DistanceSquared(GetPosition(), mob->GetPosition()) <= distance;
-			auto it = casted_on.find(mob->GetID());
+			auto it       = casted_on.find(mob->GetID());
 			if (it != casted_on.end()) {
 				if (!in_range) {
 					SpellFinished(spell_id, mob);
 					owner->RemoveAura(GetID(), false); // if we're a buff we don't want to strip :P
 					break;
 				}
-			} else if (in_range) {
+			}
+			else if (in_range) {
 				casted_on.insert(mob->GetID());
 			}
 		}
@@ -562,9 +667,14 @@ void Aura::ProcessExitTrap(Mob *owner)
 // and hard to reason about
 void Aura::ProcessSpawns()
 {
-	const auto &clients = entity_list.GetClientList();
-	for (auto &e : clients) {
-		auto c = e.second;
+	const auto &clients = entity_list.GetCloseMobList(this, distance);
+	for (auto  &e : clients) {
+		if (!e.second->IsClient()) {
+			continue;
+		}
+
+		auto c = e.second->CastToClient();
+
 		bool spawned = spawned_for.find(c->GetID()) != spawned_for.end();
 		if (ShouldISpawnFor(c)) {
 			if (!spawned) {
@@ -574,21 +684,22 @@ void Aura::ProcessSpawns()
 				SendArmorAppearance(c);
 				spawned_for.insert(c->GetID());
 			}
-		} else if (spawned) {
+		}
+		else if (spawned) {
 			EQApplicationPacket app;
 			CreateDespawnPacket(&app, false);
 			c->QueuePacket(&app);
 			spawned_for.erase(c->GetID());
 		}
 	}
-	return;
 }
 
 bool Aura::Process()
 {
 	// Aura::Depop clears buffs
-	if (p_depop)
+	if (p_depop) {
 		return false;
+	}
 
 	auto owner = entity_list.GetMob(m_owner);
 	if (owner == nullptr) {
@@ -604,7 +715,7 @@ bool Aura::Process()
 	if (movement_type == AuraMovement::Follow && GetPosition() != owner->GetPosition() && movement_timer.Check()) {
 		m_Position = owner->GetPosition();
 		auto app = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
-		auto spu = (PlayerPositionUpdateServer_Struct*)app->pBuffer;
+		auto spu = (PlayerPositionUpdateServer_Struct *) app->pBuffer;
 		MakeSpawnUpdate(spu);
 		auto it = spawned_for.begin();
 		while (it != spawned_for.end()) {
@@ -612,7 +723,8 @@ bool Aura::Process()
 			if (client) {
 				client->QueuePacket(app);
 				++it;
-			} else {
+			}
+			else {
 				it = spawned_for.erase(it);
 			}
 		}
@@ -620,14 +732,17 @@ bool Aura::Process()
 	}
 	// TODO: waypoints?
 
-	if (!process_timer.Check())
+	if (!process_timer.Check()) {
 		return true;
+	}
 
-	if (spawn_type != AuraSpawns::Noone)
-		ProcessSpawns(); // bit of a hack
+	if (spawn_type != AuraSpawns::Noone) {
+		ProcessSpawns();
+	} // bit of a hack
 
-	if (process_func)
+	if (process_func) {
 		process_func(*this, owner);
+	}
 
 	// TODO: quest calls
 	return true;
@@ -635,49 +750,61 @@ bool Aura::Process()
 
 bool Aura::ShouldISpawnFor(Client *c)
 {
-	if (spawn_type == AuraSpawns::Noone)
+	if (spawn_type == AuraSpawns::Noone) {
 		return false;
+	}
 
-	if (spawn_type == AuraSpawns::Everyone)
+	if (spawn_type == AuraSpawns::Everyone) {
 		return true;
+	}
 
 	// hey, it's our owner!
-	if (c->GetID() == m_owner)
+	if (c->GetID() == m_owner) {
 		return true;
+	}
 
 	// so this one is a bit trickier
 	auto owner = GetOwner();
-	if (owner == nullptr)
-		return false; // hmm
+	if (owner == nullptr) {
+		return false;
+	} // hmm
 
 	owner = owner->GetOwnerOrSelf(); // pet auras we need the pet's owner
-	if (owner == nullptr) // shouldn't really be needed
+	if (owner == nullptr) { // shouldn't really be needed
 		return false;
+	}
 
 	// gotta check again for pet aura case -.-
-	if (owner == c)
+	if (owner == c) {
 		return true;
+	}
 
 	if (owner->IsRaidGrouped() && owner->IsClient()) {
 		auto raid = owner->GetRaid();
-		if (raid == nullptr)
-			return false; // hmm
-		auto group_id = raid->GetGroup(owner->CastToClient());
-		if (group_id == 0xFFFFFFFF) // owner handled above, and they're in a raid and groupless
+		if (raid == nullptr) {
 			return false;
+		} // hmm
+		auto group_id = raid->GetGroup(owner->CastToClient());
+		if (group_id == 0xFFFFFFFF) { // owner handled above, and they're in a raid and groupless
+			return false;
+		}
 
 		auto idx = raid->GetPlayerIndex(c);
-		if (idx == 0xFFFFFFFF) // they're not in our raid!
+		if (idx == 0xFFFFFFFF) { // they're not in our raid!
 			return false;
+		}
 
-		if (raid->members[idx].GroupNumber != group_id) // in our raid, but not our group
+		if (raid->members[idx].GroupNumber != group_id) { // in our raid, but not our group
 			return false;
+		}
 
 		return true; // we got here so we know that 1 they're in our raid and 2 they're in our group!
-	} else if (owner->IsGrouped()) {
+	}
+	else if (owner->IsGrouped()) {
 		auto group = owner->GetGroup();
-		if (group == nullptr)
-			return false; // hmm
+		if (group == nullptr) {
+			return false;
+		} // hmm
 
 		// easy, in our group
 		return group->IsGroupMember(c);
@@ -693,22 +820,23 @@ void Aura::Depop(bool skip_strip)
 	if (!skip_strip && IsBuffSpell(spell_id)) {
 		for (auto &e : casted_on) {
 			auto mob = entity_list.GetMob(e);
-			if (mob != nullptr)
+			if (mob != nullptr) {
 				mob->BuffFadeBySpellIDAndCaster(spell_id, GetID());
+			}
 		}
 	}
 	casted_on.clear();
 	p_depop = true;
 }
 
-// This creates an aura from a casted spell
 void Mob::MakeAura(uint16 spell_id)
 {
 	// TODO: verify room in AuraMgr
-	if (!IsValidSpell(spell_id))
+	if (!IsValidSpell(spell_id)) {
 		return;
+	}
 
-	AuraRecord record;
+	AuraRecord record{};
 	if (!database.GetAuraEntry(spell_id, record)) {
 		Message(Chat::Red, "Unable to find data for aura %s", spells[spell_id].name);
 		LogError("Unable to find data for aura [{}], check auras table", spell_id);
@@ -718,7 +846,7 @@ void Mob::MakeAura(uint16 spell_id)
 	if (!IsValidSpell(record.spell_id)) {
 		Message(Chat::Red, "Casted spell (%d) is not valid for aura %s", record.spell_id, spells[spell_id].name);
 		LogError("Casted spell ([{}]) is not valid for aura [{}], check auras table",
-		    record.spell_id, spell_id);
+				 record.spell_id, spell_id);
 		return;
 	}
 
@@ -729,23 +857,28 @@ void Mob::MakeAura(uint16 spell_id)
 	bool trap = false;
 
 	switch (static_cast<AuraType>(record.aura_type)) {
-	case AuraType::ExitTrap:
-	case AuraType::EnterTrap:
-	case AuraType::Totem:
-		trap = true;
-		break;
-	default:
-		trap = false;
-		break;
+		case AuraType::ExitTrap:
+		case AuraType::EnterTrap:
+		case AuraType::Totem:
+			trap = true;
+			break;
+		default:
+			trap = false;
+			break;
 	}
 
-	if (!CanSpawnAura(trap))
+	if (!CanSpawnAura(trap)) {
 		return;
+	}
 
 	const auto base = database.LoadNPCTypesData(record.npc_type);
 	if (base == nullptr) {
 		Message(Chat::Red, "Unable to load NPC data for aura %s", spells[spell_id].teleport_zone);
-		LogError("Unable to load NPC data for aura [{}] (NPC ID [{}]), check auras and npc_types tables", spells[spell_id].teleport_zone, record.npc_type);
+		LogError(
+			"Unable to load NPC data for aura [{}] (NPC ID [{}]), check auras and npc_types tables",
+			spells[spell_id].teleport_zone,
+			record.npc_type
+		);
 		return;
 	}
 
@@ -756,65 +889,82 @@ void Mob::MakeAura(uint16 spell_id)
 
 	auto npc = new Aura(npc_type, this, record);
 	npc->SetAuraID(spell_id);
-	if (trap)
-		npc->TryMoveAlong(5.0f, 0.0f, false); // try to place 5 units in front
+	if (trap) {
+		npc->TryMoveAlong(5.0f, 0.0f, false);
+	} // try to place 5 units in front
 	entity_list.AddNPC(npc, false);
 
-	if (trap)
+	if (trap) {
 		AddTrap(npc, record);
-	else
+	}
+	else {
 		AddAura(npc, record);
+	}
 }
 
 bool ZoneDatabase::GetAuraEntry(uint16 spell_id, AuraRecord &record)
 {
-	auto query = StringFormat("SELECT npc_type, name, spell_id, distance, aura_type, spawn_type, movement, "
-				  "duration, icon, cast_time FROM auras WHERE type='%d'",
-				  spell_id);
+	auto query = StringFormat(
+		"SELECT npc_type, name, spell_id, distance, aura_type, spawn_type, movement, "
+		"duration, icon, cast_time FROM auras WHERE type='%d'",
+		spell_id
+	);
 
 	auto results = QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
+	}
 
-	if (results.RowCount() != 1)
+	if (results.RowCount() != 1) {
 		return false;
+	}
 
 	auto row = results.begin();
 
 	record.npc_type = atoi(row[0]);
 	strn0cpy(record.name, row[1], 64);
-	record.spell_id = atoi(row[2]);
-	record.distance = atoi(row[3]);
+	record.spell_id   = atoi(row[2]);
+	record.distance   = atoi(row[3]);
 	record.distance *= record.distance; // so we can avoid sqrt
-	record.aura_type = atoi(row[4]);
+	record.aura_type  = atoi(row[4]);
 	record.spawn_type = atoi(row[5]);
-	record.movement = atoi(row[6]);
-	record.duration = atoi(row[7]) * 1000; // DB is in seconds
-	record.icon = atoi(row[8]);
-	record.cast_time = atoi(row[9]) * 1000; // DB is in seconds
+	record.movement   = atoi(row[6]);
+	record.duration   = atoi(row[7]) * 1000; // DB is in seconds
+	record.icon       = atoi(row[8]);
+	record.cast_time  = atoi(row[9]) * 1000; // DB is in seconds
 
 	return true;
 }
 
 void Mob::AddAura(Aura *aura, AuraRecord &record)
 {
+	LogAura(
+		"[AddAura] aura owner [{}] spawn_id [{}] aura_name [{}]",
+		GetCleanName(),
+		aura->GetID(),
+		aura->GetCleanName()
+	);
+
 	// this is called only when it's safe
 	assert(aura != nullptr);
 	strn0cpy(aura_mgr.auras[aura_mgr.count].name, aura->GetCleanName(), 64);
 	aura_mgr.auras[aura_mgr.count].spawn_id = aura->GetID();
-	aura_mgr.auras[aura_mgr.count].aura = aura;
-	if (record.icon == -1)
+	aura_mgr.auras[aura_mgr.count].aura     = aura;
+	if (record.icon == -1) {
 		aura_mgr.auras[aura_mgr.count].icon = spells[record.spell_id].new_icon;
-	else
+	}
+	else {
 		aura_mgr.auras[aura_mgr.count].icon = record.icon;
+	}
+
 	if (IsClient()) {
-		auto outapp = new EQApplicationPacket(OP_UpdateAura, sizeof(AuraCreate_Struct));
-		auto aura_create = (AuraCreate_Struct *)outapp->pBuffer;
+		auto outapp      = new EQApplicationPacket(OP_UpdateAura, sizeof(AuraCreate_Struct));
+		auto aura_create = (AuraCreate_Struct *) outapp->pBuffer;
 		aura_create->action = 0;
-		aura_create->type = 1; // this can be 0 sometimes too
+		aura_create->type   = 1; // this can be 0 sometimes too
 		strn0cpy(aura_create->aura_name, aura_mgr.auras[aura_mgr.count].name, 64);
 		aura_create->entity_id = aura_mgr.auras[aura_mgr.count].spawn_id;
-		aura_create->icon = aura_mgr.auras[aura_mgr.count].icon;
+		aura_create->icon      = aura_mgr.auras[aura_mgr.count].icon;
 		CastToClient()->FastQueuePacket(&outapp);
 	}
 	// we can increment this now
@@ -823,15 +973,24 @@ void Mob::AddAura(Aura *aura, AuraRecord &record)
 
 void Mob::AddTrap(Aura *aura, AuraRecord &record)
 {
+	LogAura(
+		"[AddTrap] aura owner [{}] spawn_id [{}] aura_name [{}]",
+		GetCleanName(),
+		aura->GetID(),
+		aura->GetCleanName()
+	);
+
 	// this is called only when it's safe
 	assert(aura != nullptr);
 	strn0cpy(trap_mgr.auras[trap_mgr.count].name, aura->GetCleanName(), 64);
 	trap_mgr.auras[trap_mgr.count].spawn_id = aura->GetID();
-	trap_mgr.auras[trap_mgr.count].aura = aura;
-	if (record.icon == -1)
+	trap_mgr.auras[trap_mgr.count].aura     = aura;
+	if (record.icon == -1) {
 		trap_mgr.auras[trap_mgr.count].icon = spells[record.spell_id].new_icon;
-	else
+	}
+	else {
 		trap_mgr.auras[trap_mgr.count].icon = record.icon;
+	}
 	// doesn't send to client
 	trap_mgr.count++;
 }
@@ -841,7 +1000,8 @@ bool Mob::CanSpawnAura(bool trap)
 	if (trap && !HasFreeTrapSlots()) {
 		MessageString(Chat::SpellFailure, NO_MORE_TRAPS);
 		return false;
-	} else if (!trap && !HasFreeAuraSlots()) {
+	}
+	else if (!trap && !HasFreeAuraSlots()) {
 		MessageString(Chat::SpellFailure, NO_MORE_AURAS);
 		return false;
 	}
@@ -861,8 +1021,16 @@ void Mob::RemoveAllAuras()
 	// this is sent on camp/zone, so it just despawns?
 	if (aura_mgr.count) {
 		for (auto &e : aura_mgr.auras) {
-			if (e.aura)
+			if (e.aura) {
+				LogAura(
+					"[RemoveAllAuras] aura owner [{}] spawn_id [{}] aura_name [{}]",
+					GetCleanName(),
+					e.spawn_id,
+					e.name
+				);
+
 				e.aura->Depop();
+			}
 		}
 	}
 
@@ -870,8 +1038,16 @@ void Mob::RemoveAllAuras()
 
 	if (trap_mgr.count) {
 		for (auto &e : trap_mgr.auras) {
-			if (e.aura)
+			if (e.aura) {
+				LogAura(
+					"[RemoveAllAuras] trap owner [{}] spawn_id [{}] aura_name [{}]",
+					GetCleanName(),
+					e.spawn_id,
+					e.name
+				);
+
 				e.aura->Depop();
+			}
 		}
 	}
 
@@ -883,24 +1059,36 @@ void Mob::RemoveAura(int spawn_id, bool skip_strip, bool expired)
 	for (int i = 0; i < aura_mgr.count; ++i) {
 		auto &aura = aura_mgr.auras[i];
 		if (aura.spawn_id == spawn_id) {
-			if (aura.aura)
+			LogAura(
+				"[RemoveAura] mob [{}] spawn_id [{}] skip_strip [{}] expired [{}]",
+				GetCleanName(),
+				spawn_id,
+				skip_strip ? "true" : "false",
+				expired ? "true" : "false"
+			);
+
+			if (aura.aura) {
 				aura.aura->Depop(skip_strip);
+			}
 			if (expired && IsClient()) {
+				// TODO: verify color
 				CastToClient()->SendColoredText(
-					Chat::Yellow, StringFormat("%s has expired.", aura.name)); // TODO: verify color
+					Chat::Yellow,
+					StringFormat("%s has expired.", aura.name)
+				);
 				// need to update client UI too
 				auto app = new EQApplicationPacket(OP_UpdateAura, sizeof(AuraDestory_Struct));
-				auto ads = (AuraDestory_Struct *)app->pBuffer;
-				ads->action = 1; // delete
+				auto ads = (AuraDestory_Struct *) app->pBuffer;
+				ads->action    = 1; // delete
 				ads->entity_id = spawn_id;
 				CastToClient()->QueuePacket(app);
 				safe_delete(app);
 			}
 			while (aura_mgr.count - 1 > i) {
 				i++;
-				aura.spawn_id = aura_mgr.auras[i].spawn_id;
-				aura.icon = aura_mgr.auras[i].icon;
-				aura.aura = aura_mgr.auras[i].aura;
+				aura.spawn_id          = aura_mgr.auras[i].spawn_id;
+				aura.icon              = aura_mgr.auras[i].icon;
+				aura.aura              = aura_mgr.auras[i].aura;
 				aura_mgr.auras[i].aura = nullptr;
 				strn0cpy(aura.name, aura_mgr.auras[i].name, 64);
 			}
@@ -912,16 +1100,18 @@ void Mob::RemoveAura(int spawn_id, bool skip_strip, bool expired)
 	for (int i = 0; i < trap_mgr.count; ++i) {
 		auto &aura = trap_mgr.auras[i];
 		if (aura.spawn_id == spawn_id) {
-			if (aura.aura)
+			if (aura.aura) {
 				aura.aura->Depop(skip_strip);
-			if (expired && IsClient())
+			}
+			if (expired && IsClient()) {
 				CastToClient()->SendColoredText(
-					Chat::Yellow, StringFormat("%s has expired.", aura.name)); // TODO: verify color
+					Chat::Yellow, StringFormat("%s has expired.", aura.name));
+			} // TODO: verify color
 			while (trap_mgr.count - 1 > i) {
 				i++;
-				aura.spawn_id = trap_mgr.auras[i].spawn_id;
-				aura.icon = trap_mgr.auras[i].icon;
-				aura.aura = trap_mgr.auras[i].aura;
+				aura.spawn_id          = trap_mgr.auras[i].spawn_id;
+				aura.icon              = trap_mgr.auras[i].icon;
+				aura.aura              = trap_mgr.auras[i].aura;
 				trap_mgr.auras[i].aura = nullptr;
 				strn0cpy(aura.name, trap_mgr.auras[i].name, 64);
 			}
@@ -930,6 +1120,5 @@ void Mob::RemoveAura(int spawn_id, bool skip_strip, bool expired)
 		}
 	}
 
-	return;
 }
 

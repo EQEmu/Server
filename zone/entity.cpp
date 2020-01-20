@@ -2625,6 +2625,24 @@ bool EntityList::RemoveMobFromCloseLists(Mob *mob)
 }
 
 /**
+ * @param mob
+ * @return
+ */
+void EntityList::RemoveAuraFromMobs(Mob *aura)
+{
+	LogEntityManagement(
+		"Attempting to remove aura [{}] from mobs entity_id ({})",
+		aura->GetCleanName(),
+		aura->GetID()
+	);
+
+	for (auto &it : mob_list) {
+		auto mob = it.second;
+		mob->RemoveAura(aura->GetID());
+	}
+}
+
+/**
  * @param close_mobs
  * @param scanning_mob
  */
