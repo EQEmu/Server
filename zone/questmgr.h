@@ -172,6 +172,8 @@ public:
 	bool summonburiedplayercorpse(uint32 char_id, const glm::vec4& position);
 	bool summonallplayercorpses(uint32 char_id, const glm::vec4& position);
 	uint32 getplayerburiedcorpsecount(uint32 char_id);
+	int getplayercorpsecount(uint32 char_id);
+	int getplayercorpsecountbyzoneid(uint32 char_id, uint32 zone_id);
 	bool buryplayercorpse(uint32 char_id);
 	void forcedooropen(uint32 doorid, bool altmode);
 	void forcedoorclose(uint32 doorid, bool altmode);

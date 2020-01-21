@@ -549,6 +549,14 @@ void lua_summon_all_player_corpses(uint32 char_id, float x, float y, float z, fl
 	quest_manager.summonallplayercorpses(char_id, glm::vec4(x, y, z, h));
 }
 
+int lua_get_player_corpse_count(uint32 char_id) {
+	return database.CountCharacterCorpses(char_id);
+}
+
+int lua_get_player_corpse_count_by_zone_id(uint32 char_id, uint32 zone_id) {
+	return database.CountCharacterCorpsesByZoneID(char_id, zone_id);
+}
+
 int lua_get_player_buried_corpse_count(uint32 char_id) {
 	return quest_manager.getplayerburiedcorpsecount(char_id);
 }
@@ -1663,6 +1671,8 @@ luabind::scope lua_register_general() {
 		luabind::def("toggle_spawn_event", &lua_toggle_spawn_event),
 		luabind::def("summon_buried_player_corpse", &lua_summon_buried_player_corpse),
 		luabind::def("summon_all_player_corpses", &lua_summon_all_player_corpses),
+		luabind::def("get_player_corpse_count", &lua_get_player_corpse_count),
+		luabind::def("get_player_corpse_count_by_zone_id", &lua_get_player_corpse_count_by_zone_id),
 		luabind::def("get_player_buried_corpse_count", &lua_get_player_buried_corpse_count),
 		luabind::def("bury_player_corpse", &lua_bury_player_corpse),
 		luabind::def("task_selector", &lua_task_selector),
