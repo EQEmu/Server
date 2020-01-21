@@ -4707,6 +4707,47 @@ bool ZoneDatabase::SummonAllCharacterCorpses(uint32 char_id, uint32 dest_zone_id
 	return (CorpseCount > 0);
 }
 
+int ZoneDatabase::CountCharacterCorpses(uint32 char_id) {
+	std::string query = fmt::format(
+		SQL(
+			SELECT
+			COUNT(*)
+			FROM
+			character_corpses
+			WHERE
+			charid = '{}'
+		),
+		char_id
+	);
+	auto results = QueryDatabase(query);
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		return atoi(row[0]);
+	}
+	return 0;
+}
+
+int ZoneDatabase::CountCharacterCorpsesByZoneID(uint32 char_id, uint32 zone_id) {
+	std::string query = fmt::format(
+		SQL(
+			SELECT
+			COUNT(*)
+			FROM
+			character_corpses
+			WHERE
+			charid = '{}'
+			AND
+			zone_id = '{}'
+		),
+		char_id,
+		zone_id
+	);
+	auto results = QueryDatabase(query);
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		return atoi(row[0]);
+	}
+	return 0;
+}
+
 bool ZoneDatabase::UnburyCharacterCorpse(uint32 db_id, uint32 new_zone_id, uint16 new_instance_id, const glm::vec4& position) {
 	std::string query = StringFormat("UPDATE `character_corpses` "
                                     "SET `is_buried` = 0, `zone_id` = %u, `instance_id` = %u, "
