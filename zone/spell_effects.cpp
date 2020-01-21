@@ -1820,6 +1820,58 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 				break;
 			}
+			case SE_SummonCorpseZone:
+			{
+				if (IsClient()) {
+					Client* client_target = this->CastToClient();
+					if (client_target->IsGrouped()) {
+						Group* group = client_target->GetGroup();
+						if (!group->IsGroupMember(caster)) {
+							if (caster != this) {
+								caster->MessageString(Chat::Red, SUMMON_ONLY_GROUP_CORPSE);	
+								break;
+							}
+						}
+					} else if (caster) {
+						if (caster->IsRaidGrouped()) {
+							Raid *raid = caster->GetRaid();
+							uint32 group_id = raid->GetGroup(caster->GetName());
+							if (group_id > 0 && group_id < MAX_RAID_GROUPS) {
+								if (raid->GetGroup(client_target->GetName()) != group_id) {
+									caster->MessageString(Chat::Red, SUMMON_ONLY_GROUP_CORPSE);
+									break;
+								}
+							}
+						} else {
+							if (caster != this) {
+								caster->MessageString(Chat::Red, SUMMON_ONLY_GROUP_CORPSE);
+								break;
+							}
+						}
+					}
+					
+					if (client_target) {
+						if (database.CountCharacterCorpses(client_target->CharacterID()) == 0) {
+							if (caster == this) {
+								Message(Chat::Yellow, "You have no corpses to summon.");
+							} else {
+								caster->Message(Chat::Yellow, "%s has no corpses to summon.", client_target->GetCleanName());
+							}
+						} else {
+							if (caster == this) {
+								Message(Chat::Spells, "Summoning your corpses.");
+							} else {
+								caster->MessageString(Chat::Spells, SUMMONING_CORPSE_ZONE, client_target->GetCleanName());
+							}
+							client_target->SummonAllCorpses(client_target->GetPosition());
+						}
+					} else {
+						MessageString(Chat::Spells, TARGET_NOT_FOUND);
+						LogError("[{}] attempted to cast spell id [{}] with spell effect SE_SummonCorpseZone, but could not cast target into a Client object", GetCleanName(), spell_id);
+					}
+				}
+				break;
+			}
 			case SE_AddMeleeProc:
 			case SE_WeaponProc:
 			{
