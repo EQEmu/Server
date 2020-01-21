@@ -1824,34 +1824,34 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			{
 				if (IsClient()) {
 					Client* client_target = this->CastToClient();
-					if(client_target->IsGrouped()) {
+					if (client_target->IsGrouped()) {
 						Group* group = client_target->GetGroup();
-						if(!group->IsGroupMember(caster)) {
+						if (!group->IsGroupMember(caster)) {
 							if (caster != this) {
 								caster->MessageString(Chat::Red, SUMMON_ONLY_GROUP_CORPSE);	
 								break;
 							}
 						}
 					} else if (caster) {
-						if(caster->IsRaidGrouped()) {
+						if (caster->IsRaidGrouped()) {
 							Raid *raid = caster->GetRaid();
 							uint32 group_id = raid->GetGroup(caster->GetName());
-							if(group_id > 0 && group_id < MAX_RAID_GROUPS) {
-								if(raid->GetGroup(client_target->GetName()) != group_id) {
+							if (group_id > 0 && group_id < MAX_RAID_GROUPS) {
+								if (raid->GetGroup(client_target->GetName()) != group_id) {
 									caster->MessageString(Chat::Red, SUMMON_ONLY_GROUP_CORPSE);
 									break;
 								}
 							}
 						} else {
-							if(caster != this) {
+							if (caster != this) {
 								caster->MessageString(Chat::Red, SUMMON_ONLY_GROUP_CORPSE);
 								break;
 							}
 						}
 					}
 					
-					if(client_target) {
-						if(database.CountCharacterCorpses(client_target->CharacterID()) == 0) {
+					if (client_target) {
+						if (database.CountCharacterCorpses(client_target->CharacterID()) == 0) {
 							if (caster == this) {
 								Message(Chat::Yellow, "You have no corpses to summon.");
 							} else {
