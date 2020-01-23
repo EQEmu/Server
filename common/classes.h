@@ -135,6 +135,7 @@ uint8 GetClassIDFromPlayerClassBit(uint32 player_class_bit);
 bool IsFighterClass(uint8 class_id);
 bool IsSpellFighterClass(uint8 class_id);
 bool IsNonSpellFighterClass(uint8 class_id);
+bool IsHybridClass(uint8 class_id);
 bool IsCasterClass(uint8 class_id);
 bool IsINTCasterClass(uint8 class_id);
 bool IsWISCasterClass(uint8 class_id);

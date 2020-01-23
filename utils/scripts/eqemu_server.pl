@@ -399,11 +399,13 @@ sub build_linux_source {
     print `git clone https://github.com/EQEmu/Server.git`;
 
     mkdir($source_dir . "/Server/build") if (!-e $source_dir . "/Server/build");
-    chdir($source_dir . "/Server/build");
+    chdir($source_dir . "/Server");
 
     print `git submodule init`;
     print `git submodule update`;
 
+    chdir($source_dir . "/Server/build");
+    
     print "Generating CMake build files...\n";
     if ($os_flavor eq "fedora_core") {
         print `cmake $cmake_options -DEQEMU_BUILD_LOGIN=ON -DEQEMU_BUILD_LUA=ON -DLUA_INCLUDE_DIR=/usr/include/lua-5.1/ -G "Unix Makefiles" ..`;
@@ -454,6 +456,7 @@ sub do_installer_routines {
         fetch_latest_windows_appveyor();
         get_remote_file($install_repository_request_url . "lua51.dll", "lua51.dll", 1);
         get_remote_file($install_repository_request_url . "zlib1.dll", "zlib1.dll", 1);
+		get_remote_file($install_repository_request_url . "zlib1.pdb", "zlib1.pdb", 1);
         get_remote_file($install_repository_request_url . "libmysql.dll", "libmysql.dll", 1);
     }
 
@@ -469,9 +472,19 @@ sub do_installer_routines {
     print `"$path" --host $host --user $user --password="$pass" -N -B -e "DROP DATABASE IF EXISTS $db_name;"`;
     print `"$path" --host $host --user $user --password="$pass" -N -B -e "CREATE DATABASE $db_name"`;
 
+    my $world_path = "world";
+    if (-e "bin/world") {
+        $world_path = "bin/world";
+    }
+
     #::: Get Binary DB version
-    if ($OS eq "Windows") { @db_version = split(': ', `world db_version`); }
-    if ($OS eq "Linux") { @db_version   = split(': ', `./world db_version`); }
+    if ($OS eq "Windows") {
+        @db_version = split(': ', `$world_path db_version`);
+    }
+    if ($OS eq "Linux") {
+        @db_version = split(': ', `./$world_path db_version`);
+    }
+
     $binary_database_version            = trim($db_version[1]);
 
     #::: Local DB Version
@@ -503,13 +516,20 @@ sub check_for_input {
 }
 
 sub check_for_world_bootup_database_update {
-    if ($OS eq "Windows") {
-        @db_version = split(': ', `world db_version`);
-    }
-    if ($OS eq "Linux") {
-        @db_version = split(': ', `./world db_version`);
+
+    my $world_path = "world";
+    if (-e "bin/world") {
+        $world_path = "bin/world";
     }
 
+    #::: Get Binary DB version
+    if ($OS eq "Windows") {
+        @db_version = split(': ', `$world_path db_version`);
+    }
+    if ($OS eq "Linux") {
+        @db_version = split(': ', `./$world_path db_version`);
+    }
+    
     $binary_database_version = trim($db_version[1]);
     $local_database_version  = trim(get_mysql_result("SELECT version FROM db_version LIMIT 1"));
 
@@ -731,6 +751,46 @@ sub do_install_config_json {
     unlink("eqemu_config_template.json");
 }
 
+sub do_install_config_login_json {
+    get_installation_variables();
+
+    #::: Fetch json template
+    get_remote_file($eqemu_repository_request_url . "loginserver/login_util/login.json", "login_template.json");
+
+    use JSON;
+    my $json = new JSON();
+
+    my $content;
+    open(my $fh, '<', "login_template.json") or die "cannot open file $filename"; {
+        local $/;
+        $content = <$fh>;
+    }
+    close($fh);
+
+    $config = $json->decode($content);
+
+    if ($installation_variables{"mysql_eqemu_db_name"}) {
+        $db_name = $installation_variables{"mysql_eqemu_db_name"};
+    }
+    else {
+        $db_name = "peq";
+    }
+
+    $config->{"database"}{"host"} = "127.0.0.1";
+    $config->{"database"}{"user"} = $installation_variables{"mysql_eqemu_user"};
+    $config->{"database"}{"password"} = $installation_variables{"mysql_eqemu_password"};
+    $config->{"database"}{"db"}       = $db_name;
+
+    $json->canonical(1);
+    $json->indent_length(5);
+
+    open(my $fh, '>', 'login.json');
+    print $fh $json->pretty->indent_length(5)->utf8->encode($config);
+    close $fh;
+
+    unlink("login_template.json");
+}
+
 sub fetch_utility_scripts {
     if ($OS eq "Windows") {
         get_remote_file($install_repository_request_url . "t_database_backup.bat", "t_database_backup.bat");
@@ -753,7 +813,7 @@ sub fetch_utility_scripts {
 
 sub setup_bots {
     if ($OS eq "Windows") {
-        fetch_latest_windows_binaries_bots();
+        fetch_latest_windows_appveyor_bots();
     }
     if ($OS eq "Linux") {
         build_linux_source("bots");
@@ -761,7 +821,7 @@ sub setup_bots {
     bots_db_management();
     run_database_check();
 
-    print "Bots should be setup, run your server and the #bot command should be available in-game\n";
+    print "Bots should be setup, run your server and the bot command should be available in-game (type '^help')\n";
 }
 
 sub show_menu_prompt {
@@ -1476,9 +1536,13 @@ sub do_windows_login_server_setup {
     print "[Install] Done... \n";
 
     print "[Install] Pulling down Loginserver database tables...\n";
-    get_remote_file($install_repository_request_url . "login_server_tables.sql", "db_update/login_server_tables.sql");
+    get_remote_file($eqemu_repository_request_url . "loginserver/login_util/login_schema.sql", "db_update/login_schema.sql");
     print "[Install] Installing Loginserver tables...\n";
-    print get_mysql_result_from_file("db_update/login_server_tables.sql");
+    print get_mysql_result_from_file("db_update/login_schema.sql");
+    print "[Install] Done...\n";
+
+    print "[Install] Pulling and initializing Loginserver configuration files...\n";
+    do_install_config_login_json();
     print "[Install] Done...\n";
 
     add_login_server_firewall_rules();
@@ -1505,44 +1569,22 @@ sub do_linux_login_server_setup {
     print "\n Done... \n";
 
     print "[Install] Pulling down Loginserver database tables...\n";
-    get_remote_file($install_repository_request_url . "login_server_tables.sql", "db_update/login_server_tables.sql");
+    get_remote_file($eqemu_repository_request_url . "loginserver/login_util/login_schema.sql", "db_update/login_schema.sql");
     print "[Install] Installing Loginserver tables...\n";
-    print get_mysql_result_from_file("db_update/login_server_tables.sql");
+    print get_mysql_result_from_file("db_update/login_schema.sql");
     print "[Install] Done...\n\n";
+
+    print "[Install] Pulling and initializing Loginserver configuration files...\n";
+    do_install_config_login_json();
+    print "[Install] Done...\n";
 
     rmtree('updates_staged');
     rmtree('db_update');
 
-    get_remote_file($install_repository_request_url . "linux/login.ini", "login_template.ini");
     get_remote_file($install_repository_request_url . "linux/login_opcodes.conf", "login_opcodes.conf");
     get_remote_file($install_repository_request_url . "linux/login_opcodes_sod.conf", "login_opcodes_sod.conf");
     get_remote_file($install_repository_request_url . "linux/server_start_with_login.sh", "server_start_with_login.sh");
     system("chmod 755 *.sh");
-
-    get_installation_variables();
-    my $db_name     = $installation_variables{"mysql_eqemu_db_name"};
-    my $db_user     = $installation_variables{"mysql_eqemu_user"};
-    my $db_password = $installation_variables{"mysql_eqemu_password"};
-
-    #::: Open new config file
-    open(NEW_CONFIG, '>', 'login.ini');
-
-    #::: Iterate through template and replace variables...
-    open(FILE_TEMPLATE, "login_template.ini");
-    while (<FILE_TEMPLATE>) {
-        chomp;
-        $o = $_;
-        #::: Find replace variables
-        if ($o =~ /db/i) { $o       = "db = " . $db_name; }
-        if ($o =~ /user/i) { $o     = "user = " . $db_user; }
-        if ($o =~ /password/i) { $o = "password = " . $db_password; }
-
-        print NEW_CONFIG $o . "\n";
-    }
-
-    close(FILE_TEMPLATE);
-    close(NEW_CONFIG);
-    unlink("login_template.ini");
 
     print "[Install] Press any key to continue...\n";
 
@@ -1587,22 +1629,24 @@ sub add_login_server_firewall_rules {
         print "If firewall rules don't add you must run this script (eqemu_server.pl) as administrator\n";
         print "\n";
         print "[Install] Instructions \n";
-        print "[Install] In order to connect your server to the loginserver you must point your eqemu_config.xml to your local server similar to the following:\n";
+        print "[Install] In order to connect your server to the loginserver you must point your eqemu_config.json to your local server similar to the following:\n";
         print "
-	<loginserver1>
-		<host>login.eqemulator.net</host>
-		<port>5998</port>
-		<account></account>
-		<password></password>
-	</loginserver1>
-	<loginserver2>
-		<host>127.0.0.1</host>
-		<port>5998</port>
-		<account></account>
-		<password></password>
-	</loginserver2>
+	\"loginserver1\" : {
+		\"account\" : \"\",
+		\"host\" : \"login.eqemulator.net\",
+		\"password\" : \"\",
+		\"port\" : \"5998\",
+		\"legacy\": \"1\"
+	},
+	\"loginserver2\" : {
+		\"account\" : \"\",
+		\"host\" : \"192.168.197.129\",
+		\"password\" : \"\",
+		\"port\" : \"5998\"
+	},
+	\"localaddress\" : \"192.168.197.129\",
 		";
-        print "[Install] When done, make sure your EverQuest client points to your loginserver's IP (In this case it would be 127.0.0.1) in the eqhosts.txt file\n";
+        print "[Install] When done, make sure your EverQuest client points to your loginserver's IP (In this case it would be 192.168.197.129) in the eqhosts.txt file\n";
     }
 }
 
@@ -1640,15 +1684,16 @@ sub check_windows_firewall_rules {
 }
 
 sub fetch_server_dlls {
-    print "[Download] Fetching lua51.dll, zlib1.dll, libmysql.dll...\n";
+    print "[Download] Fetching lua51.dll, zlib1.dll, zlib1.pdb, libmysql.dll...\n";
     get_remote_file($install_repository_request_url . "lua51.dll", "lua51.dll", 1);
     get_remote_file($install_repository_request_url . "zlib1.dll", "zlib1.dll", 1);
+	get_remote_file($install_repository_request_url . "zlib1.pdb", "zlib1.pdb", 1);
     get_remote_file($install_repository_request_url . "libmysql.dll", "libmysql.dll", 1);
 }
 
 sub fetch_peq_db_full {
     print "[Install] Downloading latest PEQ Database... Please wait...\n";
-    get_remote_file("http://edit.peqtgc.com/weekly/peq_beta.zip", "updates_staged/peq_beta.zip", 1);
+    get_remote_file("http://edit.projecteq.net/weekly/peq_beta.zip", "updates_staged/peq_beta.zip", 1);
     print "[Install] Downloaded latest PEQ Database... Extracting...\n";
     unzip('updates_staged/peq_beta.zip', 'updates_staged/peq_db/');
     my $start_dir = "updates_staged/peq_db";
@@ -1783,6 +1828,8 @@ sub quest_files_fetch {
     if ($fc == 0) {
         print "[Update] No Quest Updates found... \n\n";
     }
+	
+    rmtree("updates_staged/");
 }
 
 sub lua_modules_fetch {

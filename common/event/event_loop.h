@@ -21,6 +21,10 @@ namespace EQ
 			uv_run(&m_loop, UV_RUN_NOWAIT);
 		}
 
+		void Run() {
+			uv_run(&m_loop, UV_RUN_DEFAULT);
+		}
+
 		uv_loop_t* Handle() { return &m_loop; }
 
 	private:

@@ -1,7 +1,6 @@
 #include "servertalk_client_connection.h"
 #include "dns.h"
 #include "../eqemu_logsys.h"
-#include "../eqemu_logsys_fmt.h"
 
 EQ::Net::ServertalkClient::ServertalkClient(const std::string &addr, int port, bool ipv6, const std::string &identifier, const std::string &credentials)
 	: m_timer(std::unique_ptr<EQ::Timer>(new EQ::Timer(100, true, std::bind(&EQ::Net::ServertalkClient::Connect, this))))
@@ -79,15 +78,15 @@ void EQ::Net::ServertalkClient::Connect()
 	m_connecting = true;
 	EQ::Net::TCPConnection::Connect(m_addr, m_port, false, [this](std::shared_ptr<EQ::Net::TCPConnection> connection) {
 		if (connection == nullptr) {
-			LogF(Logs::General, Logs::TCP_Connection, "Error connecting to {0}:{1}, attempting to reconnect...", m_addr, m_port);
+			LogF(Logs::General, Logs::TCPConnection, "Error connecting to {0}:{1}, attempting to reconnect...", m_addr, m_port);
 			m_connecting = false;
 			return;
 		}
 
-		LogF(Logs::General, Logs::TCP_Connection, "Connected to {0}:{1}", m_addr, m_port);
+		LogF(Logs::General, Logs::TCPConnection, "Connected to {0}:{1}", m_addr, m_port);
 		m_connection = connection;
 		m_connection->OnDisconnect([this](EQ::Net::TCPConnection *c) {
-			LogF(Logs::General, Logs::TCP_Connection, "Connection lost to {0}:{1}, attempting to reconnect...", m_addr, m_port);
+			LogF(Logs::General, Logs::TCPConnection, "Connection lost to {0}:{1}, attempting to reconnect...", m_addr, m_port);
 			m_encrypted = false;
 			m_connection.reset();
 		});
@@ -214,7 +213,7 @@ void EQ::Net::ServertalkClient::ProcessHello(EQ::Net::Packet &p)
 				}
 			}
 			else {
-				LogF(Logs::General, Logs::Error, "Could not process hello, size != {0}", 1 + crypto_box_PUBLICKEYBYTES + crypto_box_NONCEBYTES);
+				LogError("Could not process hello, size != {0}", 1 + crypto_box_PUBLICKEYBYTES + crypto_box_NONCEBYTES);
 			}
 		}
 		else {
@@ -226,7 +225,7 @@ void EQ::Net::ServertalkClient::ProcessHello(EQ::Net::Packet &p)
 		}
 	}
 	catch (std::exception &ex) {
-		LogF(Logs::General, Logs::Error, "Error parsing hello from server: {0}", ex.what());
+		LogError("Error parsing hello from server: {0}", ex.what());
 		m_connection->Disconnect();
 
 		if (m_on_connect_cb) {
@@ -253,7 +252,7 @@ void EQ::Net::ServertalkClient::ProcessHello(EQ::Net::Packet &p)
 		}
 }
 	catch (std::exception &ex) {
-		LogF(Logs::General, Logs::Error, "Error parsing hello from server: {0}", ex.what());
+		LogError("Error parsing hello from server: {0}", ex.what());
 		m_connection->Disconnect();
 
 		if (m_on_connect_cb) {
@@ -276,7 +275,7 @@ void EQ::Net::ServertalkClient::ProcessMessage(EQ::Net::Packet &p)
 				std::unique_ptr<unsigned char[]> decrypted_text(new unsigned char[message_len]);
 				if (crypto_box_open_easy_afternm(&decrypted_text[0], (unsigned char*)&data[0], length, m_nonce_theirs, m_shared_key))
 				{
-					LogF(Logs::General, Logs::Error, "Error decrypting message from server");
+					LogError("Error decrypting message from server");
 					(*(uint64_t*)&m_nonce_theirs[0])++;
 					return;
 				}
@@ -324,7 +323,7 @@ void EQ::Net::ServertalkClient::ProcessMessage(EQ::Net::Packet &p)
 		}
 	}
 	catch (std::exception &ex) {
-		LogF(Logs::General, Logs::Error, "Error parsing message from server: {0}", ex.what());
+		LogError("Error parsing message from server: {0}", ex.what());
 	}
 }
 

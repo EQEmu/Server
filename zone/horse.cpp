@@ -79,8 +79,8 @@ const NPCType *Horse::BuildHorseType(uint16 spell_id) {
 	}
 
 	if (results.RowCount() != 1) {
-        Log(Logs::General, Logs::Error, "No Database entry for mount: %s, check the horses table", fileName);
-        return nullptr;
+		LogError("No Database entry for mount: [{}], check the horses table", fileName);
+		return nullptr;
 	}
 
     auto row = results.begin();
@@ -118,11 +118,11 @@ const NPCType *Horse::BuildHorseType(uint16 spell_id) {
 
 void Client::SummonHorse(uint16 spell_id) {
 	if (GetHorseId() != 0) {
-		Message(13,"You already have a Horse. Get off, Fatbutt!");
+		Message(Chat::Red,"You already have a Horse. Get off, Fatbutt!");
 		return;
 	}
 	if(!Horse::IsHorseSpell(spell_id)) {
-		Log(Logs::General, Logs::Error, "%s tried to summon an unknown horse, spell id %d", GetName(), spell_id);
+		LogError("[{}] tried to summon an unknown horse, spell id [{}]", GetName(), spell_id);
 		return;
 	}
 

@@ -355,7 +355,7 @@ void PathfinderNavmesh::DebugCommand(Client *c, const Seperator *sep)
 {
 	if (sep->arg[1][0] == '\0' || !strcasecmp(sep->arg[1], "help"))
 	{
-		c->Message(0, "#path show: Plots a path from the user to their target.");
+		c->Message(Chat::White, "#path show: Plots a path from the user to their target.");
 		return;
 	}
 
@@ -475,7 +475,7 @@ void PathfinderNavmesh::Load(const std::string &path)
 			m_impl->nav_mesh->addTile(data, data_size, DT_TILE_FREE_DATA, tile_ref, 0);
 		}
 
-		Log(Logs::General, Logs::Status, "Loaded Navmesh V%u file %s", version, path.c_str());
+		LogInfo("Loaded Navmesh V[{}] file [{}]", version, path.c_str());
 	}
 }
 

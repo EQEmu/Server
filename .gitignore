@@ -27,6 +27,12 @@ install_manifest.txt
 log/
 logs/
 vcpkg/
+perl/
 
 .idea/*
 *cbp
+
+submodules/*
+cmake-build-debug/
+
+.nfs.*

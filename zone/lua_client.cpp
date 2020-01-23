@@ -47,7 +47,7 @@ bool Lua_Client::InZone() {
 
 void Lua_Client::Kick() {
 	Lua_Safe_Call_Void();
-	self->Kick();
+	self->Kick("Lua Quest");
 }
 
 void Lua_Client::Disconnect() {
@@ -1065,6 +1065,11 @@ void Lua_Client::AddLevelBasedExp(int exp_pct, int max_level) {
 	self->AddLevelBasedExp(exp_pct, max_level);
 }
 
+void Lua_Client::AddLevelBasedExp(int exp_pct, int max_level, bool ignore_mods) {
+	Lua_Safe_Call_Void();
+	self->AddLevelBasedExp(exp_pct, max_level, ignore_mods);
+}
+
 void Lua_Client::IncrementAA(int aa) {
 	Lua_Safe_Call_Void();
 	self->IncrementAlternateAdvancementRank(aa);
@@ -1208,6 +1213,16 @@ void Lua_Client::Signal(uint32 id) {
 void Lua_Client::AddAlternateCurrencyValue(uint32 currency, int amount) {
 	Lua_Safe_Call_Void();
 	self->AddAlternateCurrencyValue(currency, amount, 1);
+}
+
+void Lua_Client::SetAlternateCurrencyValue(uint32 currency, int amount) {
+	Lua_Safe_Call_Void();
+	self->SetAlternateCurrencyValue(currency, amount);
+}
+
+int Lua_Client::GetAlternateCurrencyValue(uint32 currency) {
+	Lua_Safe_Call_Int();
+	return self->GetAlternateCurrencyValue(currency);
 }
 
 void Lua_Client::SendWebLink(const char *site) {
@@ -1382,7 +1397,7 @@ void Lua_Client::QuestReward(Lua_Mob target, luabind::adl::object reward) {
 	if (luabind::type(cur) != LUA_TNIL) {
 		try {
 			copper = luabind::object_cast<uint32>(cur);
-		} catch (luabind::cast_failed) {
+		} catch (luabind::cast_failed &) {
 		}
 	}
 
@@ -1390,7 +1405,7 @@ void Lua_Client::QuestReward(Lua_Mob target, luabind::adl::object reward) {
 	if (luabind::type(cur) != LUA_TNIL) {
 		try {
 			silver = luabind::object_cast<uint32>(cur);
-		} catch (luabind::cast_failed) {
+		} catch (luabind::cast_failed &) {
 		}
 	}
 
@@ -1398,7 +1413,7 @@ void Lua_Client::QuestReward(Lua_Mob target, luabind::adl::object reward) {
 	if (luabind::type(cur) != LUA_TNIL) {
 		try {
 			gold = luabind::object_cast<uint32>(cur);
-		} catch (luabind::cast_failed) {
+		} catch (luabind::cast_failed &) {
 		}
 	}
 
@@ -1406,7 +1421,7 @@ void Lua_Client::QuestReward(Lua_Mob target, luabind::adl::object reward) {
 	if (luabind::type(cur) != LUA_TNIL) {
 		try {
 			platinum = luabind::object_cast<uint32>(cur);
-		} catch (luabind::cast_failed) {
+		} catch (luabind::cast_failed &) {
 		}
 	}
 
@@ -1414,7 +1429,7 @@ void Lua_Client::QuestReward(Lua_Mob target, luabind::adl::object reward) {
 	if (luabind::type(cur) != LUA_TNIL) {
 		try {
 			itemid = luabind::object_cast<uint32>(cur);
-		} catch (luabind::cast_failed) {
+		} catch (luabind::cast_failed &) {
 		}
 	}
 
@@ -1422,7 +1437,7 @@ void Lua_Client::QuestReward(Lua_Mob target, luabind::adl::object reward) {
 	if (luabind::type(cur) != LUA_TNIL) {
 		try {
 			exp = luabind::object_cast<uint32>(cur);
-		} catch (luabind::cast_failed) {
+		} catch (luabind::cast_failed &) {
 		}
 	}
 
@@ -1430,7 +1445,7 @@ void Lua_Client::QuestReward(Lua_Mob target, luabind::adl::object reward) {
 	if (luabind::type(cur) != LUA_TNIL) {
 		try {
 			faction = luabind::object_cast<bool>(cur);
-		} catch (luabind::cast_failed) {
+		} catch (luabind::cast_failed &) {
 		}
 	}
 
@@ -1515,6 +1530,18 @@ void Lua_Client::SetSecondaryWeaponOrnamentation(uint32 model_id) {
 	Lua_Safe_Call_Void();
 	self->SetSecondaryWeaponOrnamentation(model_id);
 }
+
+void Lua_Client::SetClientMaxLevel(int value) {
+	Lua_Safe_Call_Void();
+	self->SetClientMaxLevel(value);
+}
+
+int Lua_Client::GetClientMaxLevel() {
+	Lua_Safe_Call_Int();
+	return self->GetClientMaxLevel();
+}
+
+
 
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
@@ -1731,6 +1758,7 @@ luabind::scope lua_register_client() {
 		.def("GetIP", (uint32(Lua_Client::*)(void))&Lua_Client::GetIP)
 		.def("AddLevelBasedExp", (void(Lua_Client::*)(int))&Lua_Client::AddLevelBasedExp)
 		.def("AddLevelBasedExp", (void(Lua_Client::*)(int,int))&Lua_Client::AddLevelBasedExp)
+		.def("AddLevelBasedExp", (void(Lua_Client::*)(int,int,bool))&Lua_Client::AddLevelBasedExp)
 		.def("IncrementAA", (void(Lua_Client::*)(int))&Lua_Client::IncrementAA)
 		.def("GrantAlternateAdvancementAbility", (bool(Lua_Client::*)(int, int))&Lua_Client::GrantAlternateAdvancementAbility)
 		.def("GrantAlternateAdvancementAbility", (bool(Lua_Client::*)(int, int, bool))&Lua_Client::GrantAlternateAdvancementAbility)
@@ -1760,6 +1788,8 @@ luabind::scope lua_register_client() {
 		.def("OpenLFGuildWindow", (void(Lua_Client::*)(void))&Lua_Client::OpenLFGuildWindow)
 		.def("Signal", (void(Lua_Client::*)(uint32))&Lua_Client::Signal)
 		.def("AddAlternateCurrencyValue", (void(Lua_Client::*)(uint32,int))&Lua_Client::AddAlternateCurrencyValue)
+		.def("SetAlternateCurrencyValue", (void(Lua_Client::*)(uint32,int))&Lua_Client::SetAlternateCurrencyValue)
+		.def("GetAlternateCurrencyValue", (int(Lua_Client::*)(uint32))&Lua_Client::GetAlternateCurrencyValue)
 		.def("SendWebLink", (void(Lua_Client::*)(const char *))&Lua_Client::SendWebLink)
 		.def("HasSpellScribed", (bool(Lua_Client::*)(int))&Lua_Client::HasSpellScribed)
 		.def("SetAccountFlag", (void(Lua_Client::*)(std::string,std::string))&Lua_Client::SetAccountFlag)
@@ -1802,7 +1832,9 @@ luabind::scope lua_register_client() {
 		.def("EnableAreaEndRegen", &Lua_Client::EnableAreaEndRegen)
 		.def("DisableAreaEndRegen", &Lua_Client::DisableAreaEndRegen)
 		.def("EnableAreaRegens", &Lua_Client::EnableAreaRegens)
-		.def("DisableAreaRegens", &Lua_Client::DisableAreaRegens);
+		.def("DisableAreaRegens", &Lua_Client::DisableAreaRegens)
+		.def("SetClientMaxLevel", (void(Lua_Client::*)(int))&Lua_Client::SetClientMaxLevel)
+		.def("GetClientMaxLevel", (int(Lua_Client::*)(void))&Lua_Client::GetClientMaxLevel);
 }
 
 luabind::scope lua_register_inventory_where() {

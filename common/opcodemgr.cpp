@@ -32,7 +32,7 @@ OpcodeManager::OpcodeManager() {
 bool OpcodeManager::LoadOpcodesFile(const char *filename, OpcodeSetStrategy *s, bool report_errors) {
 	FILE *opf = fopen(filename, "r");
 	if(opf == nullptr) {
-		Log(Logs::General, Logs::Error, "Unable to open opcodes file '%s'", filename);
+		LogError("Unable to open opcodes file [{}]", filename);
 		return(false);
 	}
 

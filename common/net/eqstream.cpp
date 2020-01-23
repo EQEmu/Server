@@ -1,6 +1,5 @@
 #include "eqstream.h"
 #include "../eqemu_logsys.h"
-#include "../eqemu_logsys_fmt.h"
 
 EQ::Net::EQStreamManager::EQStreamManager(const EQStreamManagerInterfaceOptions &options) : EQStreamManagerInterface(options), m_daybreak(options.daybreak_options)
 {
@@ -185,23 +184,23 @@ EQStreamInterface::MatchState EQ::Net::EQStream::CheckSignature(const Signature 
 
 		if (opcode == sig->first_eq_opcode) {
 			if (length == sig->first_length) {
-				LogF(Logs::General, Logs::Netcode, "[IDENT_TRACE] {0}:{1}: First opcode matched {2:#x} and length matched {3}",
+				LogF(Logs::General, Logs::Netcode, "[StreamIdentify] {0}:{1}: First opcode matched {2:#x} and length matched {3}",
 					m_connection->RemoteEndpoint(), m_connection->RemotePort(), sig->first_eq_opcode, length);
 				return MatchSuccessful;
 			}
 			else if (length == 0) {
-				LogF(Logs::General, Logs::Netcode, "[IDENT_TRACE] {0}:{1}: First opcode matched {2:#x} and length is ignored.",
+				LogF(Logs::General, Logs::Netcode, "[StreamIdentify] {0}:{1}: First opcode matched {2:#x} and length is ignored.",
 					m_connection->RemoteEndpoint(), m_connection->RemotePort(), sig->first_eq_opcode);
 				return MatchSuccessful;
 			}
 			else {
-				LogF(Logs::General, Logs::Netcode, "[IDENT_TRACE] {0}:{1}: First opcode matched {2:#x} but length {3} did not match expected {4}",
+				LogF(Logs::General, Logs::Netcode, "[StreamIdentify] {0}:{1}: First opcode matched {2:#x} but length {3} did not match expected {4}",
 					m_connection->RemoteEndpoint(), m_connection->RemotePort(), sig->first_eq_opcode, length, sig->first_length);
 				return MatchFailed;
 			}
 		}
 		else {
-			LogF(Logs::General, Logs::Netcode, "[IDENT_TRACE] {0}:{1}: First opcode {1:#x} did not match expected {2:#x}",
+			LogF(Logs::General, Logs::Netcode, "[StreamIdentify] {0}:{1}: First opcode {1:#x} did not match expected {2:#x}",
 				m_connection->RemoteEndpoint(), m_connection->RemotePort(), opcode, sig->first_eq_opcode);
 			return MatchFailed;
 		}

@@ -93,7 +93,7 @@ void Client::ToggleTribute(bool enabled) {
 		}
 
 		if(cost > m_pp.tribute_points) {
-			Message(13, "You do not have enough tribute points to activate your tribute!");
+			Message(Chat::Red, "You do not have enough tribute points to activate your tribute!");
 			ToggleTribute(false);
 			return;
 		}
@@ -220,7 +220,7 @@ void Client::ChangeTributeSettings(TributeInfo_Struct *t) {
 
 void Client::SendTributeDetails(uint32 client_id, uint32 tribute_id) {
 	if(tribute_list.count(tribute_id) != 1) {
-		Log(Logs::General, Logs::Error, "Details request for invalid tribute %lu", (unsigned long)tribute_id);
+		LogError("Details request for invalid tribute [{}]", (unsigned long)tribute_id);
 		return;
 	}
 	TributeData &td = tribute_list[tribute_id];
@@ -250,7 +250,7 @@ int32 Client::TributeItem(uint32 slot, uint32 quantity) {
 	pts = mod_tribute_item_value(pts, m_inv[slot]);
 
 	if(pts < 1) {
-		Message(13, "This item is worthless for favor.");
+		Message(Chat::Red, "This item is worthless for favor.");
 		return(0);
 	}
 
@@ -277,7 +277,7 @@ int32 Client::TributeItem(uint32 slot, uint32 quantity) {
 //returns the number of points received from the tribute
 int32 Client::TributeMoney(uint32 platinum) {
 	if(!TakeMoneyFromPP(platinum * 1000)) {
-		Message(13, "You do not have that much money!");
+		Message(Chat::Red, "You do not have that much money!");
 		return(0);
 	}
 
@@ -409,28 +409,28 @@ bool ZoneDatabase::LoadTributes() {
 		return false;
 	}
 
-    for (auto row = results.begin(); row != results.end(); ++row) {
-        uint32 id = atoul(row[0]);
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		uint32 id = atoul(row[0]);
 
-        if(tribute_list.count(id) != 1) {
-            Log(Logs::General, Logs::Error, "Error in LoadTributes: unknown tribute %lu in tribute_levels", (unsigned long)id);
-            continue;
-        }
+		if (tribute_list.count(id) != 1) {
+			LogError("Error in LoadTributes: unknown tribute [{}] in tribute_levels", (unsigned long) id);
+			continue;
+		}
 
-        TributeData &cur = tribute_list[id];
+		TributeData &cur = tribute_list[id];
 
-        if(cur.tier_count >= MAX_TRIBUTE_TIERS) {
-            Log(Logs::General, Logs::Error, "Error in LoadTributes: on tribute %lu: more tiers defined than permitted", (unsigned long)id);
-            continue;
-        }
+		if (cur.tier_count >= MAX_TRIBUTE_TIERS) {
+			LogError("Error in LoadTributes: on tribute [{}]: more tiers defined than permitted", (unsigned long) id);
+			continue;
+		}
 
-        TributeLevel_Struct &s = cur.tiers[cur.tier_count];
+		TributeLevel_Struct &s = cur.tiers[cur.tier_count];
 
-        s.level = atoul(row[1]);
-        s.cost = atoul(row[2]);
-        s.tribute_item_id = atoul(row[3]);
-        cur.tier_count++;
-    }
+		s.level           = atoul(row[1]);
+		s.cost            = atoul(row[2]);
+		s.tribute_item_id = atoul(row[3]);
+		cur.tier_count++;
+	}
 
 	return true;
 }

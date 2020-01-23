@@ -44,7 +44,14 @@ extern LoginServerList loginserverlist;
 struct EQ::Net::ConsoleLoginStatus CheckLogin(const std::string &username, const std::string &password)
 {
 	struct EQ::Net::ConsoleLoginStatus ret;
-	ret.account_id = database.CheckLogin(username.c_str(), password.c_str());
+
+	std::string prefix   = "eqemu";
+	std::string raw_user = "";
+
+	ParseAccountString(username, raw_user, prefix);
+
+	ret.account_id = database.CheckLogin(raw_user.c_str(), password.c_str(), prefix.c_str());
+
 	if (ret.account_id == 0) {
 		return ret;
 	}
@@ -229,6 +236,7 @@ void ConsoleMd5(
 
 	uint8 md5[16];
 	MD5::Generate((const uchar *) args[0].c_str(), strlen(args[0].c_str()), md5);
+
 	connection->SendLine(
 		StringFormat(
 			"MD5: %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
@@ -248,7 +256,8 @@ void ConsoleMd5(
 			md5[13],
 			md5[14],
 			md5[15]
-		));
+		)
+	);
 }
 
 /**
@@ -581,7 +590,7 @@ void ConsoleZoneBootup(
 		strcpy(&tmpname[1], connection->UserName().c_str());
 
 		Log(Logs::Detail,
-			Logs::World_Server,
+			Logs::WorldServer,
 			"Console ZoneBootup: %s, %s, %s",
 			tmpname,
 			args[1].c_str(),
@@ -711,19 +720,16 @@ void ConsoleSetPass(
 		connection->SendLine("Format: setpass accountname password");
 	}
 	else {
+		std::string prefix   = "eqemu";
+		std::string raw_user = "";
+
+		ParseAccountString(args[0], raw_user, prefix);
+
 		int16  tmpstatus = 0;
-		uint32 tmpid     = database.GetAccountIDByName(args[0].c_str(), &tmpstatus);
+		uint32 tmpid     = database.GetAccountIDByName(raw_user.c_str(), prefix.c_str(), &tmpstatus);
+
 		if (!tmpid) {
 			connection->SendLine("Error: Account not found");
-		}
-		else if (tmpstatus > connection->Admin()) {
-			connection->SendLine("Cannot change password: Account's status is higher than yours");
-		}
-		else if (database.SetLocalPassword(tmpid, args[1].c_str())) {
-			connection->SendLine("Password changed.");
-		}
-		else {
-			connection->SendLine("Error changing password.");
 		}
 	}
 }

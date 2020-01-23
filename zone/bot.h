@@ -37,21 +37,22 @@
 
 #include <sstream>
 
-#define BOT_FOLLOW_DISTANCE_DEFAULT 184 // as DSq value (~13.565 units)
-#define BOT_FOLLOW_DISTANCE_DEFAULT_MAX 2500 // as DSq value (50 units)
-#define BOT_FOLLOW_DISTANCE_WALK 1000 // as DSq value (~31.623 units)
+constexpr float BOT_FOLLOW_DISTANCE_DEFAULT = 184.0f; // as DSq value (~13.565 units)
+constexpr float BOT_FOLLOW_DISTANCE_DEFAULT_MAX = 2500.0f; // as DSq value (50 units)
+constexpr float BOT_FOLLOW_DISTANCE_WALK = 1000.0f; // as DSq value (~31.623 units)
 
-#define BOT_LEASH_DISTANCE 250000 // as DSq value (500 units)
+constexpr uint32 BOT_KEEP_ALIVE_INTERVAL = 5000; // 5 seconds
 
-#define BOT_KEEP_ALIVE_INTERVAL 5000 // 5 seconds
+//constexpr uint32 BOT_COMBAT_JITTER_INTERVAL_MIN = 5000; // 5 seconds
+//constexpr uint32 BOT_COMBAT_JITTER_INTERVAL_MAX = 20000; // 20 seconds
 
 extern WorldServer worldserver;
 
-const int BotAISpellRange = 100; // TODO: Write a method that calcs what the bot's spell range is based on spell, equipment, AA, whatever and replace this
-const int MaxSpellTimer = 15;
-const int MaxDisciplineTimer = 10;
-const int DisciplineReuseStart = MaxSpellTimer + 1;
-const int MaxTimer = MaxSpellTimer + MaxDisciplineTimer;
+constexpr int BotAISpellRange = 100; // TODO: Write a method that calcs what the bot's spell range is based on spell, equipment, AA, whatever and replace this
+constexpr int MaxSpellTimer = 15;
+constexpr int MaxDisciplineTimer = 10;
+constexpr int DisciplineReuseStart = MaxSpellTimer + 1;
+constexpr int MaxTimer = MaxSpellTimer + MaxDisciplineTimer;
 
 
 
@@ -98,40 +99,6 @@ class Bot : public NPC {
 	friend class Mob;
 public:
 	// Class enums
-	enum BotfocusType {	//focus types
-		BotfocusSpellHaste = 1,
-		BotfocusSpellDuration,
-		BotfocusRange,
-		BotfocusReagentCost,
-		BotfocusManaCost,
-		BotfocusImprovedHeal,
-		BotfocusImprovedDamage,
-		BotfocusImprovedDOT,		//i dont know about this...
-		BotfocusFcDamagePctCrit,
-		BotfocusImprovedUndeadDamage,
-		BotfocusPetPower,
-		BotfocusResistRate,
-		BotfocusSpellHateMod,
-		BotfocusTriggerOnCast,
-		BotfocusSpellVulnerability,
-		BotfocusTwincast,
-		BotfocusSympatheticProc,
-		BotfocusFcDamageAmt,
-		BotfocusFcDamageAmtCrit,
-		BotfocusSpellDurByTic,
-		BotfocusSwarmPetDuration,
-		BotfocusReduceRecastTime,
-		BotfocusBlockNextSpell,
-		BotfocusFcHealPctIncoming,
-		BotfocusFcDamageAmtIncoming,
-		BotfocusFcHealAmtIncoming,
-		BotfocusFcBaseEffects,
-		BotfocusIncreaseNumHits,
-		BotfocusFcHealPctCritIncoming,
-		BotfocusFcHealAmt,
-		BotfocusFcHealAmtCrit,
-	};
-
 	enum BotTradeType {	// types of trades a bot can do
 		BotTradeClientNormal,
 		BotTradeClientNoDropNoTrade
@@ -260,17 +227,36 @@ public:
 	void Stand();
 	bool IsSitting();
 	bool IsStanding();
-	virtual int GetWalkspeed() const { return (int)((float)_GetWalkSpeed() * 1.785714f); } // 1.25 / 0.7 = 1.7857142857142857142857142857143
-	virtual int GetRunspeed() const { return (int)((float)_GetRunSpeed() * 1.785714f); }
+	virtual int GetWalkspeed() const { return (int)((float)_GetWalkSpeed() * 1.785714285f); } // 1.25 / 0.7 = 1.7857142857142857142857142857143
+	virtual int GetRunspeed() const { return (int)((float)_GetRunSpeed() * 1.785714285f); }
 	virtual void WalkTo(float x, float y, float z);
 	virtual void RunTo(float x, float y, float z);
+	virtual void StopMoving();
+	virtual void StopMoving(float new_heading);
+	//bool GetCombatJitterFlag() { return m_combat_jitter_flag; }
+	bool GetGuardFlag() { return m_guard_flag; }
+	void SetGuardFlag(bool flag = true) { m_guard_flag = flag; }
+	bool GetHoldFlag() { return m_hold_flag; }
+	void SetHoldFlag(bool flag = true) { m_hold_flag = flag; }
+	bool GetAttackFlag() { return m_attack_flag; }
+	void SetAttackFlag(bool flag = true) { m_attack_flag = flag; }
+	bool GetAttackingFlag() { return m_attacking_flag; }
+	bool GetPullFlag() { return m_pull_flag; }
+	void SetPullFlag(bool flag = true) { m_pull_flag = flag; }
+	bool GetPullingFlag() { return m_pulling_flag; }
+	bool GetReturningFlag() { return m_returning_flag; }
 	bool UseDiscipline(uint32 spell_id, uint32 target);
 	uint8 GetNumberNeedingHealedInGroup(uint8 hpr, bool includePets);
 	bool GetNeedsCured(Mob *tar);
 	bool GetNeedsHateRedux(Mob *tar);
 	bool HasOrMayGetAggro();
 	void SetDefaultBotStance();
-
+	void SetSurname(std::string bot_surname);
+	void SetTitle(std::string bot_title);
+	void SetSuffix(std::string bot_suffix);
+	std::string GetSurname() { return _surname; }
+	std::string GetTitle() { return _title; }
+	std::string GetSuffix() { return _suffix; }
 	inline virtual int32	GetMaxStat();
 	inline virtual int32	GetMaxResist();
 	inline virtual int32	GetMaxSTR();
@@ -333,6 +319,7 @@ public:
 	uint8 GetStopMeleeLevel() { return _stopMeleeLevel; }
 	void SetStopMeleeLevel(uint8 level);
 	void SetGuardMode();
+	void SetHoldMode();
 	
 	// Mob AI Virtual Override Methods
 	virtual void AI_Process();
@@ -362,6 +349,7 @@ public:
 	void EquipBot(std::string* errorMessage);
 	bool CheckLoreConflict(const EQEmu::ItemData* item);
 	virtual void UpdateEquipmentLight() { m_Light.Type[EQEmu::lightsource::LightEquipment] = m_inv.FindBrightestLightType(); m_Light.Level[EQEmu::lightsource::LightEquipment] = EQEmu::lightsource::TypeToLevel(m_Light.Type[EQEmu::lightsource::LightEquipment]); }
+	const EQEmu::InventoryProfile& GetBotInv() const { return m_inv; }
 
 	// Static Class Methods	
 	//static void DestroyBotRaidObjects(Client* client);	// Can be removed after bot raids are dumped
@@ -614,9 +602,9 @@ protected:
 	virtual void PetAIProcess();
 	virtual void BotMeditate(bool isSitting);
 	virtual bool CheckBotDoubleAttack(bool Triple = false);
-	virtual int32 GetBotFocusEffect(BotfocusType bottype, uint16 spell_id);
-	virtual int32 CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spell_id, bool best_focus=false);
-	virtual int32 CalcBotAAFocus(BotfocusType type, uint32 aa_ID, uint32 points, uint16 spell_id);
+	virtual int32 GetBotFocusEffect(focusType bottype, uint16 spell_id);
+	virtual int32 CalcBotFocusEffect(focusType bottype, uint16 focus_id, uint16 spell_id, bool best_focus=false);
+	virtual int32 CalcBotAAFocus(focusType type, uint32 aa_ID, uint32 points, uint16 spell_id);
 	virtual void PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* client);
 	virtual bool AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = 0);
 
@@ -650,6 +638,9 @@ private:
 	uint32 _guildId;
 	uint8 _guildRank;
 	std::string _guildName;
+	std::string _surname;
+	std::string _title;
+	std::string _suffix;
 	uint32 _lastZoneId;
 	bool _rangerAutoWeaponSelect;
 	BotRoleType _botRole;
@@ -666,7 +657,19 @@ private:
 	int32	end_regen;
 	uint32 timers[MaxTimer];
 	
-	Timer evade_timer; // can be moved to pTimers at some point
+	Timer m_evade_timer; // can be moved to pTimers at some point
+	Timer m_alt_combat_hate_timer;
+	Timer m_auto_defend_timer;
+	//Timer m_combat_jitter_timer;
+	//bool m_combat_jitter_flag;
+	bool m_guard_flag;
+	bool m_hold_flag;
+	bool m_attack_flag;
+	bool m_attacking_flag;
+	bool m_pull_flag;
+	bool m_pulling_flag;
+	bool m_returning_flag;
+	eStandingPetOrder m_previous_pet_order;
 
 	BotCastingRoles m_CastingRoles;
 
@@ -708,6 +711,10 @@ private:
 	int32 GenerateBaseManaPoints();
 	void GenerateSpecialAttacks();
 	void SetBotID(uint32 botID);
+	//void SetCombatJitterFlag(bool flag = true) { m_combat_jitter_flag = flag; }
+	void SetAttackingFlag(bool flag = true) { m_attacking_flag = flag; }
+	void SetPullingFlag(bool flag = true) { m_pulling_flag = flag; }
+	void SetReturningFlag(bool flag = true) { m_returning_flag = flag; }
 
 	// Private "Inventory" Methods
 	void GetBotItems(EQEmu::InventoryProfile &inv, std::string* errorMessage);

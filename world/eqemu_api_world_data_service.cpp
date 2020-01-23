@@ -32,6 +32,10 @@ void callGetZoneList(Json::Value &response)
 	for (auto &zone : zoneserver_list.getZoneServerList()) {
 		Json::Value row;
 
+		if (!zone->IsConnected()) {
+			continue;
+		}
+
 		row["booting_up"]           = zone->IsBootingUp();
 		row["client_address"]       = zone->GetCAddress();
 		row["client_local_address"] = zone->GetCLocalAddress();

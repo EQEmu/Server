@@ -100,8 +100,8 @@ const std::string &EQEmu::SayLinkEngine::GenerateLink()
 	if ((m_Link.length() == 0) || (m_Link.length() > (EQEmu::constants::SAY_LINK_MAXIMUM_SIZE))) {
 		m_Error = true;
 		m_Link  = "<LINKER ERROR>";
-		Log(Logs::General, Logs::Error, "SayLinkEngine::GenerateLink() failed to generate a useable say link");
-		Log(Logs::General, Logs::Error, ">> LinkType: %i, Lengths: {link: %u(%u), body: %u(%u), text: %u(%u)}",
+		LogError("SayLinkEngine::GenerateLink() failed to generate a useable say link");
+		LogError(">> LinkType: {}, Lengths: {link: {}({}), body: {}({}), text: {}({})}",
 			m_LinkType,
 			m_Link.length(),
 			EQEmu::constants::SAY_LINK_MAXIMUM_SIZE,
@@ -110,8 +110,8 @@ const std::string &EQEmu::SayLinkEngine::GenerateLink()
 			m_LinkText.length(),
 			EQEmu::constants::SAY_LINK_TEXT_SIZE
 		);
-		Log(Logs::General, Logs::Error, ">> LinkBody: %s", m_LinkBody.c_str());
-		Log(Logs::General, Logs::Error, ">> LinkText: %s", m_LinkText.c_str());
+		LogError(">> LinkBody: {}", m_LinkBody.c_str());
+		LogError(">> LinkText: {}", m_LinkText.c_str());
 	}
 
 	return m_Link;
@@ -316,7 +316,7 @@ std::string EQEmu::SayLinkEngine::GenerateQuestSaylink(std::string saylink_text,
 
 			results = database.QueryDatabase(insert_query);
 			if (!results.Success()) {
-				Log(Logs::General, Logs::Error, "Error in saylink phrase queries %s", results.ErrorMessage().c_str());
+				LogError("Error in saylink phrase queries {}", results.ErrorMessage().c_str());
 			}
 			else {
 				saylink_id = results.LastInsertedID();

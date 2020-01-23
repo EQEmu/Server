@@ -143,6 +143,9 @@ public:
 	virtual bool	AI_IdleCastCheck();
 	virtual void	AI_Event_SpellCastFinished(bool iCastSucceeded, uint16 slot);
 
+	bool AICheckCloseBeneficialSpells(NPC* caster, uint8 chance, float cast_range, uint32 spell_types);
+	void AIYellForHelp(Mob* sender, Mob* attacker);
+
 	void LevelScale();
 
 	virtual void SetTarget(Mob* mob);
@@ -214,13 +217,13 @@ public:
 
 	virtual int32 CalcMaxMana();
 	void SetGrid(int32 grid_){ grid=grid_; }
-	void SetSp2(uint32 sg2){ spawn_group=sg2; }
+	void SetSpawnGroupId(uint32 sg2){ spawn_group_id =sg2; }
 	void SetWaypointMax(uint16 wp_){ wp_m=wp_; }
 	void SetSaveWaypoint(uint16 wp_){ save_wp=wp_; }
 
 	uint16 GetWaypointMax() const { return wp_m; }
 	int32 GetGrid() const { return grid; }
-	uint32 GetSp2() const { return spawn_group; }
+	uint32 GetSpawnGroupId() const { return spawn_group_id; }
 	uint32 GetSpawnPointID() const;
 
 	glm::vec4 const GetSpawnPoint() const { return m_SpawnPoint; }
@@ -294,7 +297,7 @@ public:
 	int32 GetNPCHPRegen() const { return hp_regen + itembonuses.HPRegen + spellbonuses.HPRegen; }
 	inline const char* GetAmmoIDfile() const { return ammo_idfile; }
 
-	void ModifyStatsOnCharm(bool bRemoved);
+	void ModifyStatsOnCharm(bool is_charm_removed);
 
 	//waypoint crap
 	int					GetMaxWp() const { return max_wp; }
@@ -453,6 +456,8 @@ public:
 
 	bool IgnoreDespawn() { return ignore_despawn; }
 
+	void SetSimpleRoamBox(float box_size, float move_distance = 0, int move_delay = 0);
+
 	float GetRoamboxMaxX() const;
 	float GetRoamboxMaxY() const;
 	float GetRoamboxMinX() const;
@@ -478,13 +483,13 @@ protected:
 	friend class EntityList;
 	friend class Aura;
 	std::list<struct NPCFaction*> faction_list;
-	uint32	copper;
-	uint32	silver;
-	uint32	gold;
-	uint32	platinum;
-	int32	grid;
-	uint32	spawn_group;
-	uint16	wp_m;
+	uint32                        copper;
+	uint32                        silver;
+	uint32                        gold;
+	uint32                        platinum;
+	int32                         grid;
+	uint32                        spawn_group_id;
+	uint16                        wp_m;
 
 	int32	npc_faction_id;
 	int32	primary_faction;
@@ -539,6 +544,7 @@ protected:
 	int default_accuracy_rating;
 	int default_avoidance_rating;
 	int default_atk;
+	char default_special_abilities[512];
 
 	// when charmed, switch to these
 	int charm_ac;

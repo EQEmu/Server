@@ -16,7 +16,7 @@ void UCSConnection::SetConnection(std::shared_ptr<EQ::Net::ServertalkServerConne
 {
 	if (Stream && Stream->Handle())
 	{
-		Log(Logs::Detail, Logs::UCS_Server, "Incoming UCS Connection while we were already connected to a UCS.");
+		LogInfo("Incoming UCS Connection while we were already connected to a UCS");
 		Stream->Handle()->Disconnect();
 	}
 
@@ -46,12 +46,12 @@ void UCSConnection::ProcessPacket(uint16 opcode, EQ::Net::Packet &p)
 		}
 		case ServerOP_ZAAuth:
 		{
-			Log(Logs::Detail, Logs::UCS_Server, "Got authentication from UCS when they are already authenticated.");
+			LogInfo("Got authentication from UCS when they are already authenticated");
 			break;
 		}
 		default:
 		{
-			Log(Logs::Detail, Logs::UCS_Server, "Unknown ServerOPcode from UCS 0x%04x, size %d", opcode, pack->size);
+			LogInfo("Unknown ServerOPcode from UCS {:#04x}, size [{}]", opcode, pack->size);
 			DumpPacket(pack->pBuffer, pack->size);
 			break;
 		}

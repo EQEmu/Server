@@ -65,10 +65,10 @@ void LauncherList::Process() {
 			std::map<std::string, LauncherLink *>::iterator res;
 			res = m_launchers.find(name);
 			if (res != m_launchers.end()) {
-				Log(Logs::Detail, Logs::World_Server, "Ghosting launcher %s", name.c_str());
+				LogInfo("Ghosting launcher [{}]", name.c_str());
 				delete res->second;
 			}
-			Log(Logs::Detail, Logs::World_Server, "Removing pending launcher %d. Adding %s to active list.", l->GetID(), name.c_str());
+			LogInfo("Removing pending launcher [{}]. Adding [{}] to active list", l->GetID(), name.c_str());
 			//put the launcher in the list.
 			m_launchers[name] = l;
 		}
@@ -99,7 +99,7 @@ LauncherLink *LauncherList::FindByZone(const char *short_name) {
 
 void LauncherList::Add(std::shared_ptr<EQ::Net::ServertalkServerConnection> conn) {
 	auto it = new LauncherLink(nextID++, conn);
-	Log(Logs::Detail, Logs::World_Server, "Adding pending launcher %d", it->GetID());
+	LogInfo("Adding pending launcher [{}]", it->GetID());
 	m_pendingLaunchers.push_back(it);
 }
 
