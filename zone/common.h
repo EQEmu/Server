@@ -647,6 +647,19 @@ enum {
 	SKILLUP_FAILURE = 2
 };
 
+enum {
+	GridCircular,
+	GridRandom10,
+	GridRandom,
+	GridPatrol,
+	GridOneWayRepop,
+	GridRand5LoS,
+	GridOneWayDepop,
+	GridCenterPoint,
+	GridRandomCenterPoint,
+	GridRandomPath
+};
+
 typedef enum {
 	petFamiliar,		//only listens to /pet get lost
 	petAnimation,		//does not listen to any commands

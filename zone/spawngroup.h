@@ -49,13 +49,15 @@ public:
 		int delay_in,
 		int despawn_in,
 		uint32 despawn_timer_in,
-		int min_delay_in
+		int min_delay_in,
+		bool wp_spawns_in
 	);
 
 	~SpawnGroup();
 	uint32 GetNPCType(uint16 condition_value_filter=1);
 	void AddSpawnEntry(SpawnEntry *newEntry);
 	uint32 id;
+	bool wp_spawns;			// if true, spawn NPCs at a random waypoint location (if spawnpoint has a grid) instead of the spawnpoint's loc
 	float  roamdist;
 	float  roambox[4];
 	int    min_delay;

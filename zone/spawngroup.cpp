@@ -48,7 +48,8 @@ SpawnGroup::SpawnGroup(
 	int delay_in,
 	int despawn_in,
 	uint32 despawn_timer_in,
-	int min_delay_in
+	int min_delay_in,
+	bool wp_spawns_in
 )
 {
 	id = in_id;
@@ -63,6 +64,7 @@ SpawnGroup::SpawnGroup(
 	delay         = delay_in;
 	despawn       = despawn_in;
 	despawn_timer = despawn_timer_in;
+	wp_spawns = wp_spawns_in;
 }
 
 uint32 SpawnGroup::GetNPCType(uint16 in_filter)
@@ -198,7 +200,8 @@ bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnG
 			spawngroup.delay,
 			spawngroup.despawn,
 			spawngroup.despawn_timer,
-			spawngroup.mindelay
+			spawngroup.mindelay,
+			spawngroup.wp_spawns
 				FROM
 				spawn2,
 			spawngroup
@@ -229,7 +232,8 @@ bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnG
 			atoi(row[8]),
 			atoi(row[9]),
 			atoi(row[10]),
-			atoi(row[11])
+			atoi(row[11]),
+			atoi(row[12])
 		);
 
 		spawn_group_list->AddSpawnGroup(new_spawn_group);
@@ -305,7 +309,8 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawn_group_id, SpawnGroupList *spawn
 			spawngroup.delay,
 			spawngroup.despawn,
 			spawngroup.despawn_timer,
-			spawngroup.mindelay
+			spawngroup.mindelay,
+			spawngroup.wp_spawns
 				FROM
 					spawngroup
 				WHERE
@@ -332,7 +337,8 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawn_group_id, SpawnGroupList *spawn
 			atoi(row[8]),
 			atoi(row[9]),
 			atoi(row[10]),
-			atoi(row[11])
+			atoi(row[11]),
+			atoi(row[12])
 		);
 
 		spawn_group_list->AddSpawnGroup(new_spawn_group);
