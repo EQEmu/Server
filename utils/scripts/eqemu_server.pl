@@ -547,10 +547,7 @@ sub check_for_world_bootup_database_update {
             sleep(1);
             bots_db_management();
             run_database_check();
-            print "[Update] Continuing bootup\n";
             analytics_insertion("auto database bots upgrade world", $db . " :: Binary DB Version / Local DB Version :: " . $binary_database_version . " / " . $local_database_version);
-
-            exit;
         }
         else {
             print "[Update] Bots database up to Date: Continuing World Bootup...\n";
