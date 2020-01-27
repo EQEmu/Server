@@ -74,6 +74,11 @@ class Corpse : public Mob {
 	uint32			GetDecayTime()				{ if (!corpse_decay_timer.Enabled()) return 0xFFFFFFFF; else return corpse_decay_timer.GetRemainingTime(); }
 	uint32			GetRezTime()				{ if (!corpse_rez_timer.Enabled()) return 0; else return corpse_rez_timer.GetRemainingTime(); }
 	void			SetDecayTimer(uint32 decay_time);
+	void			SetConsentGroupID(uint32 id) { if (IsPlayerCorpse()) { consent_group_id = id; } }
+	void			SetConsentRaidID(uint32 id)  { if (IsPlayerCorpse()) { consent_raid_id = id; } }
+	void			SetConsentGuildID(uint32 id) { if (IsPlayerCorpse()) { consent_guild_id = id; } }
+	void			AddConsentName(const char* name);
+	void			RemoveConsentName(const char* name);
 
 	void			Delete();
 	void			Bury();
@@ -142,6 +147,9 @@ private:
 	int32		player_kill_item; /* Determines if Player Kill Item */
 	uint32		corpse_db_id; /* Corpse Database ID (Player Corpse) */
 	uint32		char_id; /* Character ID */
+	uint32		consent_group_id = 0; /* consented group id */
+	uint32		consent_raid_id  = 0; /* consented raid id  */
+	uint32		consent_guild_id = 0; /* consented guild id */
 	ItemList	itemlist; /* Internal Item list used for corpses */
 	uint32		copper;
 	uint32		silver;
@@ -160,6 +168,7 @@ private:
 	Timer		corpse_graveyard_timer;
 	Timer		loot_cooldown_timer; /* Delay between loot actions on the corpse entity */
 	EQEmu::TintProfile item_tint;
+	std::vector<std::string> consent_names;
 
 	LootRequestType	loot_request_type;
 };

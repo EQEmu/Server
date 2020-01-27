@@ -122,11 +122,13 @@
 #define LOOT_LORE_ERROR				371		//You cannot loot this Lore Item. You already have one.
 #define PICK_LORE					379		//You cannot pick up a lore item you already possess.
 #define POISON_TOO_HIGH				382		// This poison is too high level for you to apply.
+#define CORPSE_TOO_FAR				389		//The corpse is too far away to summon.
 #define CONSENT_DENIED				390		//You do not have consent to summon that corpse.
 #define DISCIPLINE_RDY				393		//You are ready to use a new discipline now.
 #define CONSENT_INVALID_NAME		397		//Not a valid consent name.
 #define CONSENT_NPC					398		//You cannot consent NPC\'s.
 #define CONSENT_YOURSELF			399		//You cannot consent yourself.
+#define CONSENT_WAIT				400		//You must wait 2 seconds between consents.
 #define SONG_NEEDS_DRUM				405		//You need to play a percussion instrument for this song
 #define SONG_NEEDS_WIND				406		//You need to play a wind instrument for this song
 #define SONG_NEEDS_STRINGS			407		//You need to play a stringed instrument for this song
@@ -266,6 +268,8 @@
 #define REZZ_ALREADY_PENDING		1379	//You were unable to restore the corpse to life, but you may have success with a later attempt.
 #define IN_USE						1406	//Someone else is using that. Try again later.
 #define DUEL_FLED					1408	//%1 has defeated %2 in a duel to the death! %3 has fled like a cowardly dog!
+#define GIVE_CONSENT				1427	//You have given %1 permission to drag your corpse in %2.
+#define DENY_CONSENT				1428	//You have denied %1 permission to drag your corpse in %2.
 #define MEMBER_OF_YOUR_GUILD		1429
 #define OFFICER_OF_YOUR_GUILD		1430
 #define LEADER_OF_YOUR_GUILD		1431

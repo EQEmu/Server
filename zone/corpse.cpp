@@ -282,6 +282,12 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 		allowed_looters[i] = 0;
 	}
 
+	Group* grp = nullptr;
+	Raid* raid = nullptr;
+	consent_group_id = (client->AutoConsentGroupEnabled() && (grp = client->GetGroup())) ? grp->GetID() : 0;
+	consent_raid_id  = (client->AutoConsentRaidEnabled() && (raid = client->GetRaid())) ? raid->GetID() : 0;
+	consent_guild_id = client->AutoConsentGuildEnabled() ? client->GuildID() : 0;
+
 	is_corpse_changed		= true;
 	rez_experience			= in_rezexp;
 	can_corpse_be_rezzed			= true;
@@ -645,6 +651,25 @@ void Corpse::DepopNPCCorpse() {
 
 void Corpse::DepopPlayerCorpse() {
 	player_corpse_depop = true;
+}
+
+void Corpse::AddConsentName(const char* add_name)
+{
+	for (const auto& n : consent_names) {
+		if (strcasecmp(n.c_str(), add_name) == 0) {
+			return;
+		}
+	}
+	consent_names.emplace_back(add_name);
+}
+
+void Corpse::RemoveConsentName(const char* rem_name)
+{
+	consent_names.erase(std::remove_if(consent_names.begin(), consent_names.end(),
+		[rem_name](const std::string& n) {
+			return strcasecmp(n.c_str(), rem_name) == 0;
+		}
+	), consent_names.end());
 }
 
 uint32 Corpse::CountItems() {
@@ -1434,29 +1459,43 @@ bool Corpse::Summon(Client* client, bool spell, bool CheckDistance) {
 				is_corpse_changed = true;
 			}
 			else {
-				client->Message(Chat::White, "Corpse is too far away.");
+				client->MessageString(Chat::Red, CORPSE_TOO_FAR);
 				return false;
 			}
 		}
 		else
 		{
 			bool consented = false;
-			std::list<std::string>::iterator itr;
-			for(itr = client->consent_list.begin(); itr != client->consent_list.end(); ++itr) {
-				if(strcmp(this->GetOwnerName(), itr->c_str()) == 0) {
-					if (!CheckDistance || (DistanceSquaredNoZ(m_Position, client->GetPosition()) <= dist2)) {
-						GMMove(client->GetX(), client->GetY(), client->GetZ());
-						is_corpse_changed = true;
-					}
-					else {
-						client->Message(Chat::White, "Corpse is too far away.");
-						return false;
-					}
+			for (const auto& n : consent_names) {
+				if (strcasecmp(client->GetName(), n.c_str()) == 0) {
+					consented = true;
+					break;
+				}
+			}
+
+			if (!consented) {
+				Group* grp = nullptr;
+				Raid* raid = nullptr;
+				if ((consent_guild_id && consent_guild_id != GUILD_NONE && client->GuildID() == consent_guild_id) ||
+				    (consent_group_id && (grp = client->GetGroup()) && grp->GetID() == consent_group_id) ||
+				    (consent_raid_id  && (raid = client->GetRaid()) && raid->GetID() == consent_raid_id))
+				{
 					consented = true;
 				}
 			}
-			if(!consented) {
-				client->Message(Chat::White, "You do not have permission to move this corpse.");
+
+			if (consented) {
+				if (!CheckDistance || (DistanceSquaredNoZ(m_Position, client->GetPosition()) <= dist2)) {
+					GMMove(client->GetX(), client->GetY(), client->GetZ());
+					is_corpse_changed = true;
+				}
+				else {
+					client->MessageString(Chat::Red, CORPSE_TOO_FAR);
+					return false;
+				}
+			}
+			else {
+				client->MessageString(Chat::Red, CONSENT_DENIED);
 				return false;
 			}
 		}
