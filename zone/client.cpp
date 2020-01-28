@@ -6294,6 +6294,8 @@ void Client::ConsentCorpses(const char* consent_name, bool deny)
 				scs->consent_id = GuildID();
 			}
 			scs->consent_type = EQEmu::consent::Guild;
+			// update all corpses in db so buried/unloaded corpses see new consent id
+			database.UpdateCharacterCorpseConsent(CharacterID(), scs->consent_id);
 		}
 		worldserver.SendPacket(pack);
 		safe_delete(pack);
