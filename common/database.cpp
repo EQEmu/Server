@@ -371,6 +371,7 @@ bool Database::DeleteCharacter(char *character_name) {
 				UPDATE
 				character_data
 				SET
+				name = SUBSTRING(CONCAT(name, '-deleted-', UNIX_TIMESTAMP()), 1, 64),
 				deleted_at = NOW()
 				WHERE
 				id = '{}'

@@ -2216,11 +2216,18 @@ sub get_bots_db_version {
 }
 
 sub bots_db_management {
+
+    my $world_path = "world";
+    if (-e "bin/world") {
+        $world_path = "bin/world";
+    }
+
+    #::: Get Binary DB version
     if ($OS eq "Windows") {
-        @db_version = split(': ', `world db_version`);
+        @db_version = split(': ', `$world_path db_version`);
     }
     if ($OS eq "Linux") {
-        @db_version = split(': ', `./world db_version`);
+        @db_version = split(': ', `./$world_path db_version`);
     }
 
     #::: Main Binary Database version
