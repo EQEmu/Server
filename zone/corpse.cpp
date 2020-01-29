@@ -283,10 +283,16 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 		allowed_looters[i] = 0;
 	}
 
-	Group* grp = nullptr;
-	Raid* raid = nullptr;
-	consent_group_id = (client->AutoConsentGroupEnabled() && (grp = client->GetGroup())) ? grp->GetID() : 0;
-	consent_raid_id  = (client->AutoConsentRaidEnabled() && (raid = client->GetRaid())) ? raid->GetID() : 0;
+	if (client->AutoConsentGroupEnabled()) {
+		Group* grp = client->GetGroup();
+		consent_group_id = grp ? grp->GetID() : 0;
+	}
+
+	if (client->AutoConsentRaidEnabled()) {
+		Raid* raid = client->GetRaid();
+		consent_raid_id = raid ? raid->GetID() : 0;
+	}
+
 	consent_guild_id = client->AutoConsentGuildEnabled() ? client->GuildID() : 0;
 
 	is_corpse_changed		= true;
@@ -1474,13 +1480,20 @@ bool Corpse::Summon(Client* client, bool spell, bool CheckDistance) {
 				}
 			}
 
-			if (!consented) {
-				Group* grp = nullptr;
-				Raid* raid = nullptr;
-				if ((consent_guild_id && consent_guild_id != GUILD_NONE && client->GuildID() == consent_guild_id) ||
-				    (consent_group_id && (grp = client->GetGroup()) && grp->GetID() == consent_group_id) ||
-				    (consent_raid_id  && (raid = client->GetRaid()) && raid->GetID() == consent_raid_id))
-				{
+			if (!consented && consent_guild_id && consent_guild_id != GUILD_NONE) {
+				if (client->GuildID() == consent_guild_id) {
+					consented = true;
+				}
+			}
+			if (!consented && consent_group_id) {
+				Group* grp = client->GetGroup();
+				if (grp && grp->GetID() == consent_group_id) {
+					consented = true;
+				}
+			}
+			if (!consented && consent_raid_id) {
+				Raid* raid = client->GetRaid();
+				if (raid && raid->GetID() == consent_raid_id) {
 					consented = true;
 				}
 			}

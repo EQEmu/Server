@@ -1064,29 +1064,34 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		ServerOP_Consent_Struct* s = (ServerOP_Consent_Struct*)pack->pBuffer;
 
 		ZoneServer* owner_zs = nullptr;
-		if ((s->instance_id != 0 && (owner_zs = zoneserver_list.FindByInstanceID(s->instance_id))) ||
-		    (s->instance_id == 0 && (owner_zs = zoneserver_list.FindByZoneID(s->zone_id))))
-		{
+		if (s->instance_id == 0) {
+			owner_zs = zoneserver_list.FindByZoneID(s->zone_id);
+		}
+		else {
+			owner_zs = zoneserver_list.FindByInstanceID(s->instance_id);
+		}
+
+		if (owner_zs) {
 			owner_zs->SendPacket(pack);
 		}
-		else
-		{
+		else {
 			LogInfo("Unable to locate zone record for zone id [{}] or instance id [{}] in zoneserver list for ServerOP_Consent_Response operation", s->zone_id, s->instance_id);
 		}
 
-		if (s->consent_type == EQEmu::consent::Normal)
-		{
+		if (s->consent_type == EQEmu::consent::Normal) {
 			// send the message to the client being granted or denied permission
-			if (ClientListEntry* cle = client_list.FindCharacter(s->grantname))
-			{
+			ClientListEntry* cle = client_list.FindCharacter(s->grantname);
+			if (cle) {
 				ZoneServer* granted_zs = nullptr;
-				if ((cle->instance() != 0 && (granted_zs = zoneserver_list.FindByInstanceID(cle->instance()))) ||
-				    (cle->instance() == 0 && (granted_zs = zoneserver_list.FindByZoneID(cle->zone()))))
-				{
-					// avoid sending twice if owner and granted are in same zone
-					if (granted_zs != owner_zs) {
-						granted_zs->SendPacket(pack);
-					}
+				if (cle->instance() == 0) {
+					granted_zs = zoneserver_list.FindByZoneID(cle->zone());
+				}
+				else {
+					granted_zs = zoneserver_list.FindByInstanceID(cle->instance());
+				}
+				// avoid sending twice if owner and granted are in same zone
+				if (granted_zs && granted_zs != owner_zs) {
+					granted_zs->SendPacket(pack);
 				}
 			}
 		}

@@ -1467,8 +1467,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			}
 		}
 
-		if (found_corpse)
-		{
+		if (found_corpse) {
 			// forward the grant/deny message for this zone to both owner and granted
 			auto outapp = new ServerPacket(ServerOP_Consent_Response, sizeof(ServerOP_Consent_Struct));
 			ServerOP_Consent_Struct* scs = (ServerOP_Consent_Struct*)outapp->pBuffer;
@@ -1484,10 +1483,9 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	}
 	case ServerOP_Consent_Response: {
 		ServerOP_Consent_Struct* s = (ServerOP_Consent_Struct*)pack->pBuffer;
-		if (s->consent_type == EQEmu::consent::Normal)
-		{
-			if (Client* client = entity_list.GetClientByName(s->grantname))
-			{
+		if (s->consent_type == EQEmu::consent::Normal) {
+			Client* grant_client = entity_list.GetClientByName(s->grantname);
+			if (grant_client) {
 				// send the message to the client being granted or denied permission
 				auto outapp = new EQApplicationPacket(OP_ConsentResponse, sizeof(ConsentResponse_Struct));
 				ConsentResponse_Struct* crs = (ConsentResponse_Struct*)outapp->pBuffer;
@@ -1495,12 +1493,12 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				strcpy(crs->ownername, s->ownername);
 				crs->permission = s->permission;
 				strn0cpy(crs->zonename, s->zonename, sizeof(crs->zonename));
-				client->QueuePacket(outapp);
+				grant_client->QueuePacket(outapp);
 				safe_delete(outapp);
 			}
 		}
-		if (Client* client = entity_list.GetClientByName(s->ownername))
-		{
+		Client* client = entity_list.GetClientByName(s->ownername);
+		if (client) {
 			// send owner consent/deny confirmation message
 			client->MessageString(Chat::White, s->message_string_id, s->grantname, s->zonename);
 		}
