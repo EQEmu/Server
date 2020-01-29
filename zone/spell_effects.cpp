@@ -286,6 +286,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					dmg = -dmg;
 				}
 
+				// hack fix for client health not reflecting server value
+				last_hp = 0;
+
 				//do any AAs apply to these spells?
 				if(dmg < 0) {
 					if (!PassCastRestriction(false, spells[spell_id].base2[i], true))
