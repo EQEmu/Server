@@ -658,9 +658,6 @@ int Mob::GetClassRaceACBonus()
 	int ac_bonus = 0;
 	auto level = GetLevel();
 	if (GetClass() == MONK) {
-	int ac_bonus = 0;
-	auto level = GetLevel();
-	if (GetClass() == MONK) {
 		int hardcap = 30;
 		int softcap = 14;
 		if (level > 99) {
