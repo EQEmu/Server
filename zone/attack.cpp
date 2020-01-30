@@ -658,89 +658,89 @@ int Mob::GetClassRaceACBonus()
 	int ac_bonus = 0;
 	auto level = GetLevel();
 	if (GetClass() == MONK) {
+	int ac_bonus = 0;
+	auto level = GetLevel();
+	if (GetClass() == MONK) {
 		int hardcap = 30;
-		double softcap = 14.9;
+		int softcap = 14;
 		if (level > 99) {
 			hardcap = 58;
-			softcap = 35.9;
+			softcap = 35;
 		}
 		else if (level > 94) {
 			hardcap = 57;
-			softcap = 34.9;
+			softcap = 34;
 		}
 		else if (level > 89) {
 			hardcap = 56;
-			softcap = 33.9;
+			softcap = 33;
 		}
 		else if (level > 84) {
 			hardcap = 55;
-			softcap = 32.9;
+			softcap = 32;
 		}
 		else if (level > 79) {
 			hardcap = 54;
-			softcap = 31.9;
+			softcap = 31;
 		}
 		else if (level > 74) {
 			hardcap = 53;
-			softcap = 30.9;
+			softcap = 30;
 		}
 		else if (level > 69) {
 			hardcap = 53;
-			softcap = 28.9;
+			softcap = 28;
 		}
 		else if (level > 64) {
 			hardcap = 53;
-			softcap = 26.9;
+			softcap = 26;
 		}
 		else if (level > 63) {
 			hardcap = 50;
-			softcap = 24.9;
+			softcap = 24;
 		}
 		else if (level > 61) {
 			hardcap = 47;
-			softcap = 24.9;
+			softcap = 24;
 		}
 		else if (level > 59) {
 			hardcap = 45;
-			softcap = 24.9;
+			softcap = 24;
 		}
 		else if (level > 54) {
 			hardcap = 40;
-			softcap = 20.9;
+			softcap = 20;
 		}
 		else if (level > 50) {
 			hardcap = 38;
-			softcap = 18.9;
+			softcap = 18;
 		}
 		else if (level > 44) {
 			hardcap = 36;
-			softcap = 17.9;
+			softcap = 17;
 		}
 		else if (level > 29) {
 			hardcap = 34;
-			softcap = 16.9;
+			softcap = 16;
 		}
 		else if (level > 14) {
 			hardcap = 32;
-			softcap = 15.9;
+			softcap = 15;
 		}
-
-		double weight = IsClient() ? CastToClient()->CalcCurrentWeight()/10.0 : 0;
-
+		double weight = IsClient() ? CastToClient()->CalcCurrentWeight()/10.0:0;
 		if (weight < hardcap - 1) {
 			double temp = level + 5;
 			if (weight > softcap) {
-				double redux = (weight - softcap) * 6.66667;
-				redux = (100.0 - redux) * 0.01;
-				temp = temp * redux;
+				double redux = static_cast<double>(weight - softcap) * 6.66667;
+				redux = (100.0 - std::min(100.0, redux)) * 0.01;
+				temp = std::max(0.0, temp * redux);
 			}
-			ac_bonus = (4.0 * temp) / 3;
-			//LogError("weight[{}] temp[{}] ac_bonus[{}]", weight, temp, ac_bonus);
+			ac_bonus = static_cast<int>((4.0 * temp) / 3.0);
 		}
 		else if (weight > hardcap + 1) {
 			double temp = level + 5;
-			double multiplier = std::min(1.0, (weight - (hardcap - 10.0)) / 100.0);
-			temp = (4.0 * temp) / 3;
+			double multiplier = std::min(1.0, (weight - (static_cast<double>(hardcap) - 10.0)) / 100.0);
+			temp = (4.0 * temp) / 3.0;
 			ac_bonus -= static_cast<int>(temp * multiplier);
 		}
 	}
