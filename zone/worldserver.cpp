@@ -1489,8 +1489,8 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				// send the message to the client being granted or denied permission
 				auto outapp = new EQApplicationPacket(OP_ConsentResponse, sizeof(ConsentResponse_Struct));
 				ConsentResponse_Struct* crs = (ConsentResponse_Struct*)outapp->pBuffer;
-				strcpy(crs->grantname, s->grantname);
-				strcpy(crs->ownername, s->ownername);
+				strn0cpy(crs->grantname, s->grantname, sizeof(crs->grantname));
+				strn0cpy(crs->ownername, s->ownername, sizeof(crs->ownername));
 				crs->permission = s->permission;
 				strn0cpy(crs->zonename, s->zonename, sizeof(crs->zonename));
 				grant_client->QueuePacket(outapp);

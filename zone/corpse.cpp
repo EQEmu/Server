@@ -662,21 +662,25 @@ void Corpse::DepopPlayerCorpse() {
 
 void Corpse::AddConsentName(const char* add_name)
 {
-	for (const auto& n : consent_names) {
-		if (strcasecmp(n.c_str(), add_name) == 0) {
-			return;
+	if (add_name) {
+		for (const auto& n : consent_names) {
+			if (strcasecmp(n.c_str(), add_name) == 0) {
+				return;
+			}
 		}
+		consent_names.emplace_back(add_name);
 	}
-	consent_names.emplace_back(add_name);
 }
 
 void Corpse::RemoveConsentName(const char* rem_name)
 {
-	consent_names.erase(std::remove_if(consent_names.begin(), consent_names.end(),
-		[rem_name](const std::string& n) {
-			return strcasecmp(n.c_str(), rem_name) == 0;
-		}
-	), consent_names.end());
+	if (rem_name) {
+		consent_names.erase(std::remove_if(consent_names.begin(), consent_names.end(),
+			[rem_name](const std::string& n) {
+				return strcasecmp(n.c_str(), rem_name) == 0;
+			}
+		), consent_names.end());
+	}
 }
 
 uint32 Corpse::CountItems() {
