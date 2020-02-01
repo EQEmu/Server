@@ -27,9 +27,20 @@ void ZoneReload::HotReloadQuests()
 	timer.reset();
 
 	entity_list.ClearAreas();
-	parse->ReloadQuests();
-	zone->Repop(0);
+
+	parse->ReloadQuests(RuleB(HotReload, QuestsResetTimersWithReload));
+
+	if (RuleB(HotReload, QuestsRepopWithReload)) {
+		zone->Repop(0);
+	}
 	zone->SetQuestHotReloadQueued(false);
 
-	LogHotReload("[Quests] Reloading scripts in zone [{}] Time [{:.2f}]", zone->GetShortName(), timer.elapsed());
+	LogHotReload(
+		"[Quests] Reloading scripts in zone [{}] repop_with_reload [{}] reset_timers [{}] when_not_in_combat [{}] Time [{:.4f}]",
+		zone->GetShortName(),
+		(RuleB(HotReload, QuestsRepopWithReload) ? "true" : "false"),
+		(RuleB(HotReload, QuestsResetTimersWithReload) ? "true" : "false"),
+		(RuleB(HotReload, QuestsRepopWhenPlayersNotInCombat) ? "true" : "false"),
+		timer.elapsed()
+	);
 }

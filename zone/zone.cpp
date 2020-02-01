@@ -1239,11 +1239,14 @@ bool Zone::Process() {
 		LogHotReloadDetail("Hot reload timer check...");
 
 		bool perform_reload = true;
-		for (auto &it : entity_list.GetClientList()) {
-			auto client = it.second;
-			if (client->GetAggroCount() > 0) {
-				perform_reload = false;
-				break;
+
+		if (RuleB(HotReload, QuestsRepopWhenPlayersNotInCombat)) {
+			for (auto &it : entity_list.GetClientList()) {
+				auto client = it.second;
+				if (client->GetAggroCount() > 0) {
+					perform_reload = false;
+					break;
+				}
 			}
 		}
 
