@@ -771,7 +771,7 @@ void Mob::FixZ(int32 z_find_offset /*= 5*/, bool fix_client_z /*= false*/) {
 float Mob::GetZOffset() const {
 	float offset = 3.125f;
 
-	switch (race) {
+	switch (GetModel()) {
 		case RACE_BASILISK_436:
 			offset = 0.577f;
 			break;
