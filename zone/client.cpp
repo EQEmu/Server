@@ -8533,7 +8533,7 @@ void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold,
 	memset(outapp->pBuffer, 0, sizeof(QuestReward_Struct));
 	QuestReward_Struct* qr = (QuestReward_Struct*)outapp->pBuffer;
 
-	qr->mob_id = target->GetID();		// Entity ID for the from mob name
+	qr->mob_id = target ? target->GetID() : 0;		// Entity ID for the from mob name
 	qr->target_id = GetID();			// The Client ID (this)
 	qr->copper = copper;
 	qr->silver = silver;
@@ -8550,7 +8550,7 @@ void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold,
 
 	if (faction)
 	{
-		if (target->IsNPC())
+		if (target && target->IsNPC())
 		{
 			int32 nfl_id = target->CastToNPC()->GetNPCFactionID();
 			SetFactionLevel(CharacterID(), nfl_id, GetBaseClass(), GetBaseRace(), GetDeity(), true);
@@ -8575,7 +8575,7 @@ void Client::QuestReward(Mob* target, const QuestReward_Struct &reward, bool fac
 	memcpy(qr, &reward, sizeof(QuestReward_Struct));
 
 	// not set in caller because reasons
-	qr->mob_id = target->GetID();		// Entity ID for the from mob name
+	qr->mob_id = target ? target->GetID() : 0;		// Entity ID for the from mob name
 
 	if (reward.copper > 0 || reward.silver > 0 || reward.gold > 0 || reward.platinum > 0)
 		AddMoneyToPP(reward.copper, reward.silver, reward.gold, reward.platinum, false);
@@ -8586,7 +8586,7 @@ void Client::QuestReward(Mob* target, const QuestReward_Struct &reward, bool fac
 
 	if (faction)
 	{
-		if (target->IsNPC())
+		if (target && target->IsNPC())
 		{
 			int32 nfl_id = target->CastToNPC()->GetNPCFactionID();
 			SetFactionLevel(CharacterID(), nfl_id, GetBaseClass(), GetBaseRace(), GetDeity(), true);
