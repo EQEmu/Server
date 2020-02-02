@@ -8539,7 +8539,7 @@ void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold,
 	qr->silver = silver;
 	qr->gold = gold;
 	qr->platinum = platinum;
-	qr->item_id = itemid;
+	qr->item_id[0] = itemid;
 	qr->exp_reward = exp;
 
 	if (copper > 0 || silver > 0 || gold > 0 || platinum > 0)
