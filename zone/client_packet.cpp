@@ -11130,6 +11130,11 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 				break;
 			}
 
+			if (player_to_invite_group && player_to_invite_group->IsGroupMember(this)) {
+				MessageString(Chat::Red, ALREADY_IN_PARTY);
+				break;
+			}
+
 			if (player_to_invite_group && !player_to_invite_group->IsLeader(player_to_invite)) {
 				Message(Chat::Red, "You can only invite an ungrouped player or group leader to join your raid.");
 				break;
