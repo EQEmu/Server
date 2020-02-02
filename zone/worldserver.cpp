@@ -1475,7 +1475,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			if (zone) {
 				strn0cpy(scs->zonename, zone->GetLongName(), sizeof(scs->zonename));
 			}
-			scs->message_string_id = s->permission ? GIVE_CONSENT : DENY_CONSENT;
 			worldserver.SendPacket(outapp);
 			safe_delete(outapp);
 		}
@@ -1483,24 +1482,25 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	}
 	case ServerOP_Consent_Response: {
 		ServerOP_Consent_Struct* s = (ServerOP_Consent_Struct*)pack->pBuffer;
+		Client* owner_client = entity_list.GetClientByName(s->ownername);
+		Client* grant_client = nullptr;
 		if (s->consent_type == EQEmu::consent::Normal) {
-			Client* grant_client = entity_list.GetClientByName(s->grantname);
-			if (grant_client) {
-				// send the message to the client being granted or denied permission
-				auto outapp = new EQApplicationPacket(OP_ConsentResponse, sizeof(ConsentResponse_Struct));
-				ConsentResponse_Struct* crs = (ConsentResponse_Struct*)outapp->pBuffer;
-				strn0cpy(crs->grantname, s->grantname, sizeof(crs->grantname));
-				strn0cpy(crs->ownername, s->ownername, sizeof(crs->ownername));
-				crs->permission = s->permission;
-				strn0cpy(crs->zonename, s->zonename, sizeof(crs->zonename));
-				grant_client->QueuePacket(outapp);
-				safe_delete(outapp);
-			}
+			grant_client = entity_list.GetClientByName(s->grantname);
 		}
-		Client* client = entity_list.GetClientByName(s->ownername);
-		if (client) {
-			// send owner consent/deny confirmation message
-			client->MessageString(Chat::White, s->message_string_id, s->grantname, s->zonename);
+		if (owner_client || grant_client) {
+			auto outapp = new EQApplicationPacket(OP_ConsentResponse, sizeof(ConsentResponse_Struct));
+			ConsentResponse_Struct* crs = (ConsentResponse_Struct*)outapp->pBuffer;
+			strn0cpy(crs->grantname, s->grantname, sizeof(crs->grantname));
+			strn0cpy(crs->ownername, s->ownername, sizeof(crs->ownername));
+			crs->permission = s->permission;
+			strn0cpy(crs->zonename, s->zonename, sizeof(crs->zonename));
+			if (owner_client) {
+				owner_client->QueuePacket(outapp); // confirmation message to the owner
+			}
+			if (grant_client) {
+				grant_client->QueuePacket(outapp); // message to the client being granted/denied
+			}
+			safe_delete(outapp);
 		}
 		break;
 	}

@@ -6272,7 +6272,6 @@ void Client::ConsentCorpses(const char* consent_name, bool deny)
 		strn0cpy(scs->grantname, consent_name, sizeof(scs->grantname));
 		strn0cpy(scs->ownername, GetName(), sizeof(scs->ownername));
 		strn0cpy(scs->zonename, "Unknown", sizeof(scs->zonename));
-		scs->message_string_id = 0;
 		scs->permission = deny ? 0 : 1;
 		scs->zone_id = zone->GetZoneID();
 		scs->instance_id = zone->GetInstanceID();

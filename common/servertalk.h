@@ -870,7 +870,6 @@ struct ServerOP_Consent_Struct {
 	uint8 permission;
 	uint32 zone_id;
 	uint16 instance_id;
-	uint32 message_string_id;
 	uint8  consent_type; // 0 = normal, 1 = group, 2 = raid, 3 = guild
 	uint32 consent_id;
 };
