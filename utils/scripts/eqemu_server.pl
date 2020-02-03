@@ -2020,15 +2020,6 @@ sub do_bots_db_schema_drop {
     print get_mysql_result_from_file("db_update/drop_bots.sql");
 
     print "[Database] Removing bot database tables...\n";
-    print get_mysql_result("DELETE FROM `rule_values` WHERE `rule_name` LIKE 'Bots:%';");
-
-    if (get_mysql_result("SHOW TABLES LIKE 'commands'") ne "" && $db) {
-        print get_mysql_result("DELETE FROM `commands` WHERE `command` LIKE 'bot';");
-    }
-
-    if (get_mysql_result("SHOW TABLES LIKE 'command_settings'") ne "" && $db) {
-        print get_mysql_result("DELETE FROM `command_settings` WHERE `command` LIKE 'bot';");
-    }
 
     if (get_mysql_result("SHOW KEYS FROM `group_id` WHERE `Key_name` LIKE 'PRIMARY'") ne "" && $db) {
         print get_mysql_result("ALTER TABLE `group_id` DROP PRIMARY KEY;");
@@ -2061,70 +2052,6 @@ sub modify_db_for_bots {
         print get_mysql_result("ALTER TABLE `group_id` DROP PRIMARY KEY;");
     }
     print get_mysql_result("ALTER TABLE `group_id` ADD PRIMARY KEY USING BTREE(`groupid`, `charid`, `name`, `ismerc`);");
-
-    if (get_mysql_result("SHOW TABLES LIKE 'command_settings'") ne "" && get_mysql_result("SELECT `command` FROM `command_settings` WHERE `command` LIKE 'bot'") eq "" && $db) {
-        print get_mysql_result("INSERT INTO `command_settings` VALUES ('bot', '0', '');");
-    }
-
-    if (get_mysql_result("SHOW TABLES LIKE 'commands'") ne "" && get_mysql_result("SELECT `command` FROM `commands` WHERE `command` LIKE 'bot'") eq "" && $db) {
-        print get_mysql_result("INSERT INTO `commands` VALUES ('bot', '0');");
-    }
-
-    if (get_mysql_result("SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'Bots:BotAAExpansion'") ne "" && $db) {
-        print get_mysql_result("UPDATE `rule_values` SET `rule_name` = 'Bots:AAExpansion' WHERE `rule_name` LIKE 'Bots:BotAAExpansion';");
-    }
-    if (get_mysql_result("SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'Bots:AAExpansion'") eq "" && $db) {
-        print get_mysql_result("INSERT INTO `rule_values` VALUES ('1', 'Bots:AAExpansion', '8', 'The expansion through which bots will obtain AAs');");
-    }
-
-    if (get_mysql_result("SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'Bots:CreateBotCount'") ne "" && $db) {
-        print get_mysql_result("UPDATE `rule_values` SET `rule_name` = 'Bots:CreationLimit' WHERE `rule_name` LIKE 'Bots:CreateBotCount';");
-    }
-    if (get_mysql_result("SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'Bots:CreationLimit'") eq "" && $db) {
-        print get_mysql_result("INSERT INTO `rule_values` VALUES ('1', 'Bots:CreationLimit', '150', 'Number of bots that each account can create');");
-    }
-
-    if (get_mysql_result("SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'Bots:BotFinishBuffing'") ne "" && $db) {
-        print get_mysql_result("UPDATE `rule_values` SET `rule_name` = 'Bots:FinishBuffing' WHERE `rule_name` LIKE 'Bots:BotFinishBuffing';");
-    }
-    if (get_mysql_result("SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'Bots:FinishBuffing'") eq "" && $db) {
-        print get_mysql_result("INSERT INTO `rule_values` VALUES ('1', 'Bots:FinishBuffing', 'false', 'Allow for buffs to complete even if the bot caster is out of mana.  Only affects buffing out of combat.');");
-    }
-
-    if (get_mysql_result("SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'Bots:BotGroupBuffing'") ne "" && $db) {
-        print get_mysql_result("UPDATE `rule_values` SET `rule_name` = 'Bots:GroupBuffing' WHERE `rule_name` LIKE 'Bots:BotGroupBuffing';");
-    }
-    if (get_mysql_result("SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'Bots:GroupBuffing'") eq "" && $db) {
-        print get_mysql_result("INSERT INTO `rule_values` VALUES ('1', 'Bots:GroupBuffing', 'false', 'Bots will cast single target buffs as group buffs, default is false for single. Does not make single target buffs work for MGB.');");
-    }
-
-    if (get_mysql_result("SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'Bots:BotManaRegen'") ne "" && $db) {
-        print get_mysql_result("UPDATE `rule_values` SET `rule_name` = 'Bots:ManaRegen' WHERE `rule_name` LIKE 'Bots:BotManaRegen';");
-    }
-    if (get_mysql_result("SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'Bots:ManaRegen'") eq "" && $db) {
-        print get_mysql_result("INSERT INTO `rule_values` VALUES ('1', 'Bots:ManaRegen', '3.0', 'Adjust mana regen for bots, 1 is fast and higher numbers slow it down 3 is about the same as players.');");
-    }
-
-    if (get_mysql_result("SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'Bots:BotQuest'") ne "" && $db) {
-        print get_mysql_result("UPDATE `rule_values` SET `rule_name` = 'Bots:QuestableSpawnLimit' WHERE `rule_name` LIKE 'Bots:BotQuest';");
-    }
-    if (get_mysql_result("SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'Bots:QuestableSpawnLimit'") eq "" && $db) {
-        print get_mysql_result("INSERT INTO `rule_values` VALUES ('1', 'Bots:QuestableSpawnLimit', 'false', 'Optional quest method to manage bot spawn limits using the quest_globals name bot_spawn_limit, see: /bazaar/Aediles_Thrall.pl');");
-    }
-
-    if (get_mysql_result("SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'Bots:BotSpellQuest'") ne "" && $db) {
-        print get_mysql_result("UPDATE `rule_values` SET `rule_name` = 'Bots:QuestableSpells' WHERE `rule_name` LIKE 'Bots:BotSpellQuest';");
-    }
-    if (get_mysql_result("SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'Bots:QuestableSpells'") eq "" && $db) {
-        print get_mysql_result("INSERT INTO `rule_values` VALUES ('1', 'Bots:QuestableSpells', 'false', 'Anita Thrall\\\'s (Anita_Thrall.pl) Bot Spell Scriber quests.');");
-    }
-
-    if (get_mysql_result("SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'Bots:SpawnBotCount'") ne "" && $db) {
-        print get_mysql_result("UPDATE `rule_values` SET `rule_name` = 'Bots:SpawnLimit' WHERE `rule_name` LIKE 'Bots:SpawnBotCount';");
-    }
-    if (get_mysql_result("SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'Bots:SpawnLimit'") eq "" && $db) {
-        print get_mysql_result("INSERT INTO `rule_values` VALUES ('1', 'Bots:SpawnLimit', '71', 'Number of bots a character can have spawned at one time, You + 71 bots is a 12 group raid');");
-    }
 
     convert_existing_bot_data();
 }
