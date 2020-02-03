@@ -726,18 +726,18 @@ int Mob::GetClassRaceACBonus()
 		}
 		int weight = IsClient() ? CastToClient()->CalcCurrentWeight()/10 : 0;
 		if (weight < hardcap - 1) {
-			int temp = level + 5;
+			double temp = level + 5;
 			if (weight > softcap) {
-				double redux = (weight - softcap) * 6.66667;
+				double redux = static_cast<double>(weight - softcap) * 6.66667;
 				redux = (100.0 - std::min(100.0, redux)) * 0.01;
-				temp = std::max(0, static_cast<int>(temp * redux));
+				temp = std::max(0.0, temp * redux);
 			}
-			ac_bonus = (4 * temp) / 3;
+			ac_bonus = static_cast<int>((4.0 * temp) / 3.0);
 		}
 		else if (weight > hardcap + 1) {
-			int temp = level + 5;
-			double multiplier = std::min(1.0, (weight - (hardcap - 10.0)) / 100.0);
-			temp = (4 * temp) / 3;
+			double temp = level + 5;
+			double multiplier = std::min(1.0, (weight - (static_cast<double>(hardcap) - 10.0)) / 100.0);
+			temp = (4.0 * temp) / 3.0;
 			ac_bonus -= static_cast<int>(temp * multiplier);
 		}
 	}

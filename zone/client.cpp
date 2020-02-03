@@ -8533,13 +8533,13 @@ void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold,
 	memset(outapp->pBuffer, 0, sizeof(QuestReward_Struct));
 	QuestReward_Struct* qr = (QuestReward_Struct*)outapp->pBuffer;
 
-	qr->mob_id = target->GetID();		// Entity ID for the from mob name
+	qr->mob_id = target ? target->GetID() : 0;		// Entity ID for the from mob name
 	qr->target_id = GetID();			// The Client ID (this)
 	qr->copper = copper;
 	qr->silver = silver;
 	qr->gold = gold;
 	qr->platinum = platinum;
-	qr->item_id = itemid;
+	qr->item_id[0] = itemid;
 	qr->exp_reward = exp;
 
 	if (copper > 0 || silver > 0 || gold > 0 || platinum > 0)
@@ -8550,7 +8550,7 @@ void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold,
 
 	if (faction)
 	{
-		if (target->IsNPC())
+		if (target && target->IsNPC())
 		{
 			int32 nfl_id = target->CastToNPC()->GetNPCFactionID();
 			SetFactionLevel(CharacterID(), nfl_id, GetBaseClass(), GetBaseRace(), GetDeity(), true);
@@ -8561,6 +8561,42 @@ void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold,
 
 	if (exp > 0)
 		AddEXP(exp);
+
+	QueuePacket(outapp, true, Client::CLIENT_CONNECTED);
+	safe_delete(outapp);
+}
+
+void Client::QuestReward(Mob* target, const QuestReward_Struct &reward, bool faction)
+{
+	auto outapp = new EQApplicationPacket(OP_Sound, sizeof(QuestReward_Struct));
+	memset(outapp->pBuffer, 0, sizeof(QuestReward_Struct));
+	QuestReward_Struct* qr = (QuestReward_Struct*)outapp->pBuffer;
+
+	memcpy(qr, &reward, sizeof(QuestReward_Struct));
+
+	// not set in caller because reasons
+	qr->mob_id = target ? target->GetID() : 0;		// Entity ID for the from mob name
+
+	if (reward.copper > 0 || reward.silver > 0 || reward.gold > 0 || reward.platinum > 0)
+		AddMoneyToPP(reward.copper, reward.silver, reward.gold, reward.platinum, false);
+
+	for (int i = 0; i < QUESTREWARD_COUNT; ++i)
+		if (reward.item_id[i] > 0)
+			SummonItem(reward.item_id[i], 0, 0, 0, 0, 0, 0, false, EQEmu::invslot::slotCursor);
+
+	if (faction)
+	{
+		if (target && target->IsNPC())
+		{
+			int32 nfl_id = target->CastToNPC()->GetNPCFactionID();
+			SetFactionLevel(CharacterID(), nfl_id, GetBaseClass(), GetBaseRace(), GetDeity(), true);
+			qr->faction = target->CastToNPC()->GetPrimaryFaction();
+			qr->faction_mod = 1; // Too lazy to get real value, not sure if this is even used by client anyhow.
+		}
+	}
+
+	if (reward.exp_reward> 0)
+		AddEXP(reward.exp_reward);
 
 	QueuePacket(outapp, true, Client::CLIENT_CONNECTED);
 	safe_delete(outapp);
