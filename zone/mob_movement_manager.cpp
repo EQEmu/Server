@@ -1300,7 +1300,9 @@ void MobMovementManager::PushEvadeCombat(MobMovementEntry &mob_movement_entry)
  */
 void MobMovementManager::HandleStuckBehavior(Mob *who, float x, float y, float z, MobMovementMode mob_movement_mode)
 {
-	auto             sb       = who->GetStuckBehavior();
+	LogDebug("Handle stuck behavior for {0} at ({1}, {2}, {3}) with movement_mode {4}", who->GetName(), x, y, z, mob_movement_mode);
+
+	auto sb = who->GetStuckBehavior();
 	MobStuckBehavior behavior = RunToTarget;
 
 	if (sb >= 0 && sb < MaxStuckBehavior) {
@@ -1308,7 +1310,7 @@ void MobMovementManager::HandleStuckBehavior(Mob *who, float x, float y, float z
 	}
 
 	auto eiter = _impl->Entries.find(who);
-	auto &ent  = (*eiter);
+	auto &ent = (*eiter);
 
 	switch (sb) {
 		case RunToTarget:
@@ -1323,8 +1325,7 @@ void MobMovementManager::HandleStuckBehavior(Mob *who, float x, float y, float z
 			PushStopMoving(ent.second);
 			break;
 		case EvadeCombat:
-			//PushEvadeCombat(ent.second);
-			PushStopMoving(ent.second);
+			PushEvadeCombat(ent.second);
 			break;
 	}
 }
