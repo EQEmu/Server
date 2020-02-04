@@ -12,8 +12,6 @@
 
 extern Zone *zone;
 
-const int MaxNavmeshNodes = 1024;
-
 struct PathfinderNavmesh::Implementation
 {
 	dtNavMesh *nav_mesh;
@@ -36,19 +34,19 @@ PathfinderNavmesh::~PathfinderNavmesh()
 IPathfinder::IPath PathfinderNavmesh::FindRoute(const glm::vec3 &start, const glm::vec3 &end, bool &partial, bool &stuck, int flags)
 {
 	partial = false;
-
+	
 	if (!m_impl->nav_mesh) {
 		return IPath();
 	}
-
+	
 	if (!m_impl->query) {
 		m_impl->query = dtAllocNavMeshQuery();
 	}
-
-	m_impl->query->init(m_impl->nav_mesh, MaxNavmeshNodes);
+	
+	m_impl->query->init(m_impl->nav_mesh, RuleI(Pathing, MaxNavmeshNodes));
 	glm::vec3 current_location(start.x, start.z, start.y);
 	glm::vec3 dest_location(end.x, end.z, end.y);
-
+	
 	dtQueryFilter filter;
 	filter.setIncludeFlags(flags);
 	filter.setAreaCost(0, 1.0f); //Normal
@@ -61,48 +59,48 @@ IPathfinder::IPath PathfinderNavmesh::FindRoute(const glm::vec3 &start, const gl
 	filter.setAreaCost(8, 1.0f); //General Area
 	filter.setAreaCost(9, 0.1f); //Portal
 	filter.setAreaCost(10, 0.1f); //Prefer
-
+	
 	dtPolyRef start_ref;
 	dtPolyRef end_ref;
 	glm::vec3 ext(5.0f, 100.0f, 5.0f);
-
+	
 	m_impl->query->findNearestPoly(&current_location[0], &ext[0], &filter, &start_ref, 0);
 	m_impl->query->findNearestPoly(&dest_location[0], &ext[0], &filter, &end_ref, 0);
-
+	
 	if (!start_ref || !end_ref) {
 		return IPath();
 	}
-
+	
 	int npoly = 0;
 	dtPolyRef path[1024] = { 0 };
 	auto status = m_impl->query->findPath(start_ref, end_ref, &current_location[0], &dest_location[0], &filter, path, &npoly, 1024);
-
+	
 	if (npoly) {
 		glm::vec3 epos = dest_location;
 		if (path[npoly - 1] != end_ref) {
 			m_impl->query->closestPointOnPoly(path[npoly - 1], &dest_location[0], &epos[0], 0);
 			partial = true;
-
+	
 			auto dist = DistanceSquared(epos, current_location);
 			if (dist < 10000.0f) {
 				stuck = true;
 			}
 		}
-
+	
 		float straight_path[2048 * 3];
 		unsigned char straight_path_flags[2048];
-
+	
 		int n_straight_polys;
 		dtPolyRef straight_path_polys[2048];
-
+	
 		status = m_impl->query->findStraightPath(&current_location[0], &epos[0], path, npoly,
 			straight_path, straight_path_flags,
 			straight_path_polys, &n_straight_polys, 2048, DT_STRAIGHTPATH_AREA_CROSSINGS);
-
+	
 		if (dtStatusFailed(status)) {
 			return IPath();
 		}
-
+	
 		if (n_straight_polys) {
 			IPath Route;
 			for (int i = 0; i < n_straight_polys; ++i)
@@ -111,9 +109,9 @@ IPathfinder::IPath PathfinderNavmesh::FindRoute(const glm::vec3 &start, const gl
 				node.x = straight_path[i * 3];
 				node.z = straight_path[i * 3 + 1];
 				node.y = straight_path[i * 3 + 2];
-
+	
 				Route.push_back(node);
-
+	
 				unsigned short flag = 0;
 				if (dtStatusSucceed(m_impl->nav_mesh->getPolyFlags(straight_path_polys[i], &flag))) {
 					if (flag & 512) {
@@ -121,11 +119,11 @@ IPathfinder::IPath PathfinderNavmesh::FindRoute(const glm::vec3 &start, const gl
 					}
 				}
 			}
-
+	
 			return Route;
 		}
 	}
-
+	
 	IPath Route;
 	Route.push_back(end);
 	return Route;
@@ -134,19 +132,19 @@ IPathfinder::IPath PathfinderNavmesh::FindRoute(const glm::vec3 &start, const gl
 IPathfinder::IPath PathfinderNavmesh::FindPath(const glm::vec3 &start, const glm::vec3 &end, bool &partial, bool &stuck, const PathfinderOptions &opts)
 {
 	partial = false;
-
+	
 	if (!m_impl->nav_mesh) {
 		return IPath();
 	}
-
+	
 	if (!m_impl->query) {
 		m_impl->query = dtAllocNavMeshQuery();
 	}
-
-	m_impl->query->init(m_impl->nav_mesh, MaxNavmeshNodes);
+	
+	m_impl->query->init(m_impl->nav_mesh, RuleI(Pathing, MaxNavmeshNodes));
 	glm::vec3 current_location(start.x, start.z, start.y);
 	glm::vec3 dest_location(end.x, end.z, end.y);
-
+	
 	dtQueryFilter filter;
 	filter.setIncludeFlags(opts.flags);
 	filter.setAreaCost(0, opts.flag_cost[0]); //Normal
@@ -159,83 +157,78 @@ IPathfinder::IPath PathfinderNavmesh::FindPath(const glm::vec3 &start, const glm
 	filter.setAreaCost(8, opts.flag_cost[7]); //General Area
 	filter.setAreaCost(9, opts.flag_cost[8]); //Portal
 	filter.setAreaCost(10, opts.flag_cost[9]); //Prefer
-
+	
 	static const int max_polys = 256;
 	dtPolyRef start_ref;
 	dtPolyRef end_ref;
 	glm::vec3 ext(10.0f, 200.0f, 10.0f);
-
+	
 	m_impl->query->findNearestPoly(&current_location[0], &ext[0], &filter, &start_ref, 0);
 	m_impl->query->findNearestPoly(&dest_location[0], &ext[0], &filter, &end_ref, 0);
-
+	
 	if (!start_ref || !end_ref) {
 		return IPath();
 	}
-
+	
 	int npoly = 0;
 	dtPolyRef path[max_polys] = { 0 };
-	m_impl->query->findPath(start_ref, end_ref, &current_location[0], &dest_location[0], &filter, path, &npoly, max_polys);
-
+	auto status = m_impl->query->findPath(start_ref, end_ref, &current_location[0], &dest_location[0], &filter, path, &npoly, max_polys);
+	
 	if (npoly) {
 		glm::vec3 epos = dest_location;
 		if (path[npoly - 1] != end_ref) {
 			m_impl->query->closestPointOnPoly(path[npoly - 1], &dest_location[0], &epos[0], 0);
 			partial = true;
-
-			auto dist = DistanceSquared(epos, current_location);
-			if (dist < 10000.0f) {
-				stuck = true;
-			}
 		}
-
+	
 		int n_straight_polys;
 		glm::vec3 straight_path[max_polys];
 		unsigned char straight_path_flags[max_polys];
 		dtPolyRef straight_path_polys[max_polys];
-
+	
 		auto status = m_impl->query->findStraightPath(&current_location[0], &epos[0], path, npoly,
 			(float*)&straight_path[0], straight_path_flags,
 			straight_path_polys, &n_straight_polys, 2048, DT_STRAIGHTPATH_AREA_CROSSINGS | DT_STRAIGHTPATH_ALL_CROSSINGS);
-
+	
 		if (dtStatusFailed(status)) {
 			return IPath();
 		}
-
+	
 		if (n_straight_polys) {
 			if (opts.smooth_path) {
 				IPath Route;
-
+	
 				//Add the first point
 				{
 					auto &flag = straight_path_flags[0];
 					if (flag & DT_STRAIGHTPATH_OFFMESH_CONNECTION) {
 						auto &p = straight_path[0];
-
+	
 						Route.push_back(glm::vec3(p.x, p.z, p.y));
 					}
 					else {
 						auto &p = straight_path[0];
-
+	
 						float h = 0.0f;
 						if (dtStatusSucceed(GetPolyHeightOnPath(path, npoly, p, &h))) {
 							p.y = h + opts.offset;
 						}
-
+	
 						Route.push_back(glm::vec3(p.x, p.z, p.y));
 					}
 				}
-
+	
 				for (int i = 0; i < n_straight_polys - 1; ++i)
 				{
 					auto &flag = straight_path_flags[i];
-
+	
 					if (flag & DT_STRAIGHTPATH_OFFMESH_CONNECTION) {
 						auto &poly = straight_path_polys[i];
-
+	
 						auto &p2 = straight_path[i + 1];
 						glm::vec3 node(p2.x, p2.z, p2.y);
 						Route.push_back(node);
-
+	
 						unsigned short pflag = 0;
 						if (dtStatusSucceed(m_impl->nav_mesh->getPolyFlags(straight_path_polys[i], &pflag))) {
 							if (pflag & 512) {
@@ -250,12 +243,12 @@ IPathfinder::IPath PathfinderNavmesh::FindPath(const glm::vec3 &start, const glm
 						auto dir = glm::normalize(p2 - p1);
 						float total = 0.0f;
 						glm::vec3 previous_pt = p1;
-
+	
 						while (total < dist) {
 							glm::vec3 current_pt;
 							float dist_to_move = opts.step_size;
 							float ff = opts.step_size / 2.0f;
-
+	
 							if (total + dist_to_move + ff >= dist) {
 								current_pt = p2;
 								total = dist;
@@ -264,18 +257,18 @@ IPathfinder::IPath PathfinderNavmesh::FindPath(const glm::vec3 &start, const glm
 								total += dist_to_move;
 								current_pt = p1 + dir * total;
 							}
-
+	
 							float h = 0.0f;
 							if (dtStatusSucceed(GetPolyHeightOnPath(path, npoly, current_pt, &h))) {
 								current_pt.y = h + opts.offset;
 							}
-
+	
 							Route.push_back(glm::vec3(current_pt.x, current_pt.z, current_pt.y));
 							previous_pt = current_pt;
 						}
 					}
 				}
-
+	
 				return Route;
 			}
 			else {
@@ -285,7 +278,7 @@ IPathfinder::IPath PathfinderNavmesh::FindPath(const glm::vec3 &start, const glm
 					auto &current = straight_path[i];
 					glm::vec3 node(current.x, current.z, current.y);
 					Route.push_back(node);
-
+	
 					unsigned short flag = 0;
 					if (dtStatusSucceed(m_impl->nav_mesh->getPolyFlags(straight_path_polys[i], &flag))) {
 						if (flag & 512) {
@@ -293,7 +286,7 @@ IPathfinder::IPath PathfinderNavmesh::FindPath(const glm::vec3 &start, const glm
 						}
 					}
 				}
-
+	
 				return Route;
 			}
 		}
@@ -313,7 +306,7 @@ glm::vec3 PathfinderNavmesh::GetRandomLocation(const glm::vec3 &start)
 
 	if (!m_impl->query) {
 		m_impl->query = dtAllocNavMeshQuery();
-		m_impl->query->init(m_impl->nav_mesh, MaxNavmeshNodes);
+		m_impl->query->init(m_impl->nav_mesh, RuleI(Pathing, MaxNavmeshNodes));
 	}
 
 	dtQueryFilter filter;
