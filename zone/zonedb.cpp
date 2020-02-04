@@ -4321,7 +4321,7 @@ uint32 ZoneDatabase::UpdateCharacterCorpse(uint32 db_id, uint32 char_id, const c
 
 uint32 ZoneDatabase::UpdateCharacterCorpseConsent(uint32 charid, uint32 guildid)
 {
-	std::string query = StringFormat("UPDATE `character_corpses` SET `guild_consent_id` = %u WHERE `charid` = %u", guildid, charid);
+	std::string query = fmt::format("UPDATE `character_corpses` SET `guild_consent_id` = '{}' WHERE charid = '{}'", guildid, charid);
 	auto results = QueryDatabase(query);
 	return results.RowsAffected();
 }

@@ -6255,12 +6255,9 @@ void Client::DragCorpses()
 	}
 }
 
-void Client::ConsentCorpses(const char* consent_name, bool deny)
+void Client::ConsentCorpses(std::string consent_name, bool deny)
 {
-	if (!consent_name) {
-		return;
-	}
-	else if (strcasecmp(consent_name, GetName()) == 0) {
+	if (strcasecmp(consent_name.c_str(), GetName()) == 0) {
 		MessageString(Chat::Red, CONSENT_YOURSELF);
 	}
 	else if (!consent_throttle_timer.Check()) {
@@ -6269,7 +6266,7 @@ void Client::ConsentCorpses(const char* consent_name, bool deny)
 	else {
 		auto pack = new ServerPacket(ServerOP_Consent, sizeof(ServerOP_Consent_Struct));
 		ServerOP_Consent_Struct* scs = (ServerOP_Consent_Struct*)pack->pBuffer;
-		strn0cpy(scs->grantname, consent_name, sizeof(scs->grantname));
+		strn0cpy(scs->grantname, consent_name.c_str(), sizeof(scs->grantname));
 		strn0cpy(scs->ownername, GetName(), sizeof(scs->ownername));
 		strn0cpy(scs->zonename, "Unknown", sizeof(scs->zonename));
 		scs->permission = deny ? 0 : 1;

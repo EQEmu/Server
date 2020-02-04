@@ -138,7 +138,7 @@ Corpse* Corpse::LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std:
 	pc->drakkin_details = pcs->drakkin_details;
 	pc->IsRezzed(rezzed);
 	pc->become_npc = false;
-	pc->consent_guild_id = guild_consent_id;
+	pc->consented_guild_id = guild_consent_id;
 
 	pc->UpdateEquipmentLight(); // itemlist populated above..need to determine actual values
 	
@@ -285,15 +285,15 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 
 	if (client->AutoConsentGroupEnabled()) {
 		Group* grp = client->GetGroup();
-		consent_group_id = grp ? grp->GetID() : 0;
+		consented_group_id = grp ? grp->GetID() : 0;
 	}
 
 	if (client->AutoConsentRaidEnabled()) {
 		Raid* raid = client->GetRaid();
-		consent_raid_id = raid ? raid->GetID() : 0;
+		consented_raid_id = raid ? raid->GetID() : 0;
 	}
 
-	consent_guild_id = client->AutoConsentGuildEnabled() ? client->GuildID() : 0;
+	consented_guild_id = client->AutoConsentGuildEnabled() ? client->GuildID() : 0;
 
 	is_corpse_changed		= true;
 	rez_experience			= in_rezexp;
@@ -624,11 +624,11 @@ bool Corpse::Save() {
 
 	/* Create New Corpse*/
 	if (corpse_db_id == 0) {
-		corpse_db_id = database.SaveCharacterCorpse(char_id, corpse_name, zone->GetZoneID(), zone->GetInstanceID(), dbpc, m_Position, consent_guild_id);
+		corpse_db_id = database.SaveCharacterCorpse(char_id, corpse_name, zone->GetZoneID(), zone->GetInstanceID(), dbpc, m_Position, consented_guild_id);
 	}
 	/* Update Corpse Data */
 	else{
-		corpse_db_id = database.UpdateCharacterCorpse(corpse_db_id, char_id, corpse_name, zone->GetZoneID(), zone->GetInstanceID(), dbpc, m_Position, consent_guild_id, IsRezzed());
+		corpse_db_id = database.UpdateCharacterCorpse(corpse_db_id, char_id, corpse_name, zone->GetZoneID(), zone->GetInstanceID(), dbpc, m_Position, consented_guild_id, IsRezzed());
 	}
 
 	safe_delete_array(dbpc);
@@ -660,27 +660,23 @@ void Corpse::DepopPlayerCorpse() {
 	player_corpse_depop = true;
 }
 
-void Corpse::AddConsentName(const char* add_name)
+void Corpse::AddConsentName(std::string consent_player_name)
 {
-	if (add_name) {
-		for (const auto& n : consent_names) {
-			if (strcasecmp(n.c_str(), add_name) == 0) {
-				return;
-			}
+	for (const auto& consented_player_name : consented_player_names) {
+		if (strcasecmp(consented_player_name.c_str(), consent_player_name.c_str()) == 0) {
+			return;
 		}
-		consent_names.emplace_back(add_name);
 	}
+	consented_player_names.emplace_back(consent_player_name);
 }
 
-void Corpse::RemoveConsentName(const char* rem_name)
+void Corpse::RemoveConsentName(std::string consent_player_name)
 {
-	if (rem_name) {
-		consent_names.erase(std::remove_if(consent_names.begin(), consent_names.end(),
-			[rem_name](const std::string& n) {
-				return strcasecmp(n.c_str(), rem_name) == 0;
-			}
-		), consent_names.end());
-	}
+	consented_player_names.erase(std::remove_if(consented_player_names.begin(), consented_player_names.end(),
+		[consent_player_name](const std::string& consented_player_name) {
+			return strcasecmp(consented_player_name.c_str(), consent_player_name.c_str()) == 0;
+		}
+	), consented_player_names.end());
 }
 
 uint32 Corpse::CountItems() {
@@ -1477,27 +1473,27 @@ bool Corpse::Summon(Client* client, bool spell, bool CheckDistance) {
 		else
 		{
 			bool consented = false;
-			for (const auto& n : consent_names) {
-				if (strcasecmp(client->GetName(), n.c_str()) == 0) {
+			for (const auto& consented_player_name : consented_player_names) {
+				if (strcasecmp(client->GetName(), consented_player_name.c_str()) == 0) {
 					consented = true;
 					break;
 				}
 			}
 
-			if (!consented && consent_guild_id && consent_guild_id != GUILD_NONE) {
-				if (client->GuildID() == consent_guild_id) {
+			if (!consented && consented_guild_id && consented_guild_id != GUILD_NONE) {
+				if (client->GuildID() == consented_guild_id) {
 					consented = true;
 				}
 			}
-			if (!consented && consent_group_id) {
+			if (!consented && consented_group_id) {
 				Group* grp = client->GetGroup();
-				if (grp && grp->GetID() == consent_group_id) {
+				if (grp && grp->GetID() == consented_group_id) {
 					consented = true;
 				}
 			}
-			if (!consented && consent_raid_id) {
+			if (!consented && consented_raid_id) {
 				Raid* raid = client->GetRaid();
-				if (raid && raid->GetID() == consent_raid_id) {
+				if (raid && raid->GetID() == consented_raid_id) {
 					consented = true;
 				}
 			}
