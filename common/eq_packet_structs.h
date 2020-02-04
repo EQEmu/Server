@@ -35,6 +35,7 @@ static const uint32 MAX_MERC = 100;
 static const uint32 MAX_MERC_GRADES = 10;
 static const uint32 MAX_MERC_STANCES = 10;
 static const uint32 BLOCKED_BUFF_COUNT = 20;
+static const uint32 QUESTREWARD_COUNT = 8;
 
 
 /*
@@ -2180,14 +2181,7 @@ struct QuestReward_Struct
 	/*024*/ uint32	silver;		// Gives silver to the client
 	/*028*/ uint32	gold;		// Gives gold to the client
 	/*032*/ uint32	platinum;	// Gives platinum to the client
-	/*036*/ uint32	item_id;
-	/*040*/ uint32	unknown040;
-	/*044*/ uint32	unknown044;
-	/*048*/ uint32	unknown048;
-	/*052*/ uint32	unknown052;
-	/*056*/ uint32	unknown056;
-	/*060*/ uint32	unknown060;
-	/*064*/ uint32	unknown064;
+	/*036*/ int32	item_id[QUESTREWARD_COUNT];	// -1 for nothing
 	/*068*/
 };
 

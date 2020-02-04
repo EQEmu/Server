@@ -222,7 +222,7 @@ bool StringIsNumber(const std::string &s) {
 		auto r = stod(s);
 		return true;
 	}
-	catch (std::exception) {
+	catch (std::exception &) {
 		return false;
 	}
 }

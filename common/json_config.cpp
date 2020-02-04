@@ -32,7 +32,7 @@ EQ::JsonConfigFile EQ::JsonConfigFile::Load(
 	try {
 		ifs >> ret.m_root;
 	}
-	catch (std::exception) {
+	catch (std::exception &) {
 		return ret;
 	}
 
@@ -81,7 +81,7 @@ std::string EQ::JsonConfigFile::GetVariableString(
 			return m_root[title][parameter].asString();
 		}
 	}
-	catch (std::exception) {
+	catch (std::exception &) {
 		return default_value;
 	}
 
@@ -105,7 +105,7 @@ int EQ::JsonConfigFile::GetVariableInt(
 			return m_root[title][parameter].asInt();
 		}
 	}
-	catch (std::exception) {
+	catch (std::exception &) {
 		return default_value;
 	}
 
@@ -129,7 +129,7 @@ bool EQ::JsonConfigFile::GetVariableBool(
 			return m_root[title][parameter].asBool();
 		}
 	}
-	catch (std::exception) {
+	catch (std::exception &) {
 		return default_value;
 	}
 
@@ -153,7 +153,7 @@ double EQ::JsonConfigFile::GetVariableDouble(
 			return m_root[title][parameter].asDouble();
 		}
 	}
-	catch (std::exception) {
+	catch (std::exception &) {
 		return default_value;
 	}
 

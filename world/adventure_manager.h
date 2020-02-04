@@ -34,7 +34,6 @@ public:
 	void AddFinishedEvent(AdventureFinishEvent fe) { finished_list.push_back(fe); Save(); }
 	bool PopFinishedEvent(const char *name, AdventureFinishEvent &fe);
 	void Save();
-	void Load();
 
 	Adventure **GetFinishedAdventures(const char *player, int &count);
 	Adventure *GetActiveAdventure(const char *player);

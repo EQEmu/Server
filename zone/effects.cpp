@@ -809,11 +809,13 @@ void EntityList::AESpell(
 		 * 1 = PC
 		 * 2 = NPC
 		 */
-		if (spells[spell_id].pcnpc_only_flag == 1 && !current_mob->IsClient() && !current_mob->IsMerc()) {
+		if (spells[spell_id].pcnpc_only_flag == 1 && !current_mob->IsClient() && !current_mob->IsMerc() &&
+		    !current_mob->IsBot()) {
 			continue;
 		}
 
-		if (spells[spell_id].pcnpc_only_flag == 2 && (current_mob->IsClient() || current_mob->IsMerc())) {
+		if (spells[spell_id].pcnpc_only_flag == 2 &&
+		    (current_mob->IsClient() || current_mob->IsMerc() || current_mob->IsBot())) {
 			continue;
 		}
 

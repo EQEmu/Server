@@ -98,7 +98,7 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_DUEL_LOSE",
 	"EVENT_ENCOUNTER_LOAD",
 	"EVENT_ENCOUNTER_UNLOAD",
-	"EVENT_SAY",
+	"EVENT_COMMAND",
 	"EVENT_DROP_ITEM",
 	"EVENT_DESTROY_ITEM",
 	"EVENT_FEIGN_DEATH",
@@ -119,6 +119,7 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_DEATH_ZONE",
 	"EVENT_USE_SKILL",
 	"EVENT_COMBINE_VALIDATE",
+	"EVENT_BOT_COMMAND"
 };
 
 PerlembParser::PerlembParser() : perl(nullptr)
@@ -1542,9 +1543,12 @@ void PerlembParser::ExportEventVariables(
 		}
 
 		case EVENT_COMMAND: {
+			Seperator sep(data);
+			ExportVar(package_name.c_str(), "command", (sep.arg[0] + 1));
+			ExportVar(package_name.c_str(), "args", (sep.argnum >= 1 ? (&data[strlen(sep.arg[0]) + 1]) : "0"));
+			ExportVar(package_name.c_str(), "data", objid);
 			ExportVar(package_name.c_str(), "text", data);
-			ExportVar(package_name.c_str(), "data", "0");
-			ExportVar(package_name.c_str(), "langid", "0");
+			ExportVar(package_name.c_str(), "langid", extradata);
 			break;
 		}
 
@@ -1608,6 +1612,15 @@ void PerlembParser::ExportEventVariables(
 
 			ExportVar(package_name.c_str(), "zone_id", zone_id.c_str());
 			ExportVar(package_name.c_str(), "tradeskill_id", tradeskill_id.c_str());
+			break;
+		}
+		case EVENT_BOT_COMMAND: {
+			Seperator sep(data);
+			ExportVar(package_name.c_str(), "bot_command", (sep.arg[0] + 1));
+			ExportVar(package_name.c_str(), "args", (sep.argnum >= 1 ? (&data[strlen(sep.arg[0]) + 1]) : "0"));
+			ExportVar(package_name.c_str(), "data", objid);
+			ExportVar(package_name.c_str(), "text", data);
+			ExportVar(package_name.c_str(), "langid", extradata);
 			break;
 		}
 

@@ -341,65 +341,89 @@ bool Database::ReserveName(uint32 account_id, char* name) {
 	return true;
 }
 
-/*
-	Delete the character with the name "name"
-	returns false on failure, true otherwise
-*/
-bool Database::DeleteCharacter(char *name) {
-	uint32 charid = 0;
-	if(!name ||	!strlen(name)) {
+/**
+ * @param character_name
+ * @return
+ */
+bool Database::DeleteCharacter(char *character_name) {
+	uint32 character_id = 0;
+	if(!character_name || !strlen(character_name)) {
 		LogInfo("DeleteCharacter: request to delete without a name (empty char slot)");
 		return false;
 	}
-	LogInfo("Database::DeleteCharacter name : [{}]", name);
 
-	/* Get id from character_data before deleting record so we can clean up the rest of the tables */
-	std::string query = StringFormat("SELECT `id` from `character_data` WHERE `name` = '%s'", name);
-	auto results = QueryDatabase(query);
-	for (auto row = results.begin(); row != results.end(); ++row) { charid = atoi(row[0]); }
-	if (charid <= 0){
-		LogError("Database::DeleteCharacter :: Character ({}) not found, stopping delete...", name);
+	std::string query   = StringFormat("SELECT `id` from `character_data` WHERE `name` = '%s'", character_name);
+	auto        results = QueryDatabase(query);
+	for (auto   row     = results.begin(); row != results.end(); ++row) {
+		character_id = atoi(row[0]);
+	}
+
+	if (character_id <= 0) {
+		LogError("DeleteCharacter | Invalid Character ID [{}]", character_name);
 		return false;
 	}
 
-	query = StringFormat("DELETE FROM `quest_globals` WHERE `charid` = '%d'", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_activities` WHERE `charid` = '%d'", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_enabledtasks` WHERE `charid` = '%d'", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_tasks` WHERE `charid` = '%d'", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `completed_tasks` WHERE `charid` = '%d'", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `friends` WHERE `charid` = '%d'", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `mail` WHERE `charid` = '%d'", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `timers` WHERE `char_id` = '%d'", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `inventory` WHERE `charid` = '%d'", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `char_recipe_list` WHERE `char_id` = '%d'", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `adventure_stats` WHERE `player_id` ='%d'", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `zone_flags` WHERE `charID` = '%d'", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `titles` WHERE `char_id` = '%d'", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `player_titlesets` WHERE `char_id` = '%d'", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `keyring` WHERE `char_id` = '%d'", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `faction_values` WHERE `char_id` = '%d'", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `instance_list_player` WHERE `charid` = '%d'", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_data` WHERE `id` = '%d'", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_skills` WHERE `id` = %u", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_languages` WHERE `id` = %u", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_bind` WHERE `id` = %u", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_alternate_abilities` WHERE `id` = %u", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_currency` WHERE `id` = %u", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_data` WHERE `id` = %u", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_spells` WHERE `id` = %u", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_memmed_spells` WHERE `id` = %u", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_disciplines` WHERE `id` = %u", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_material` WHERE `id` = %u", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_tribute` WHERE `id` = %u", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_bandolier` WHERE `id` = %u", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_potionbelt` WHERE `id` = %u", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_inspect_messages` WHERE `id` = %u", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_leadership_abilities` WHERE `id` = %u", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_alt_currency` WHERE `char_id` = '%d'", charid); QueryDatabase(query);
+	std::string delete_type = "hard-deleted";
+	if (RuleB(Character, SoftDeletes)) {
+		delete_type       = "soft-deleted";
+		std::string query = fmt::format(
+			SQL(
+				UPDATE
+				character_data
+				SET
+				name = SUBSTRING(CONCAT(name, '-deleted-', UNIX_TIMESTAMP()), 1, 64),
+				deleted_at = NOW()
+				WHERE
+				id = '{}'
+			),
+			character_id
+		);
+
+		QueryDatabase(query);
+
+		return true;
+	}
+
+	LogInfo("DeleteCharacter | Character [{}] ({}) is being [{}]", character_name, character_id, delete_type);
+
+	query = StringFormat("DELETE FROM `quest_globals` WHERE `charid` = '%d'", character_id); QueryDatabase(query);
+	query = StringFormat("DELETE FROM `character_activities` WHERE `charid` = '%d'", character_id); QueryDatabase(query);
+	query = StringFormat("DELETE FROM `character_enabledtasks` WHERE `charid` = '%d'", character_id); QueryDatabase(query);
+	query = StringFormat("DELETE FROM `character_tasks` WHERE `charid` = '%d'", character_id); QueryDatabase(query);
+	query = StringFormat("DELETE FROM `completed_tasks` WHERE `charid` = '%d'", character_id); QueryDatabase(query);
+	query = StringFormat("DELETE FROM `friends` WHERE `charid` = '%d'", character_id); QueryDatabase(query);
+	query = StringFormat("DELETE FROM `mail` WHERE `charid` = '%d'", character_id); QueryDatabase(query);
+	query = StringFormat("DELETE FROM `timers` WHERE `char_id` = '%d'", character_id); QueryDatabase(query);
+	query = StringFormat("DELETE FROM `inventory` WHERE `charid` = '%d'", character_id); QueryDatabase(query);
+	query = StringFormat("DELETE FROM `char_recipe_list` WHERE `char_id` = '%d'", character_id); QueryDatabase(query);
+	query = StringFormat("DELETE FROM `adventure_stats` WHERE `player_id` ='%d'", character_id); QueryDatabase(query);
+	query = StringFormat("DELETE FROM `zone_flags` WHERE `charID` = '%d'", character_id); QueryDatabase(query);
+	query = StringFormat("DELETE FROM `titles` WHERE `char_id` = '%d'", character_id); QueryDatabase(query);
+	query = StringFormat("DELETE FROM `player_titlesets` WHERE `char_id` = '%d'", character_id); QueryDatabase(query);
+	query = StringFormat("DELETE FROM `keyring` WHERE `char_id` = '%d'", character_id); QueryDatabase(query);
+	query = StringFormat("DELETE FROM `faction_values` WHERE `char_id` = '%d'", character_id); QueryDatabase(query);
+	query = StringFormat("DELETE FROM `instance_list_player` WHERE `charid` = '%d'", character_id); QueryDatabase(query);
+	query = StringFormat("DELETE FROM `character_data` WHERE `id` = '%d'", character_id); QueryDatabase(query);
+	query = StringFormat("DELETE FROM `character_skills` WHERE `id` = %u", character_id); QueryDatabase(query);
+	query = StringFormat("DELETE FROM `character_languages` WHERE `id` = %u", character_id); QueryDatabase(query);
+	query = StringFormat("DELETE FROM `character_bind` WHERE `id` = %u", character_id); QueryDatabase(query);
+	query = StringFormat("DELETE FROM `character_alternate_abilities` WHERE `id` = %u", character_id); QueryDatabase(query);
+	query = StringFormat("DELETE FROM `character_currency` WHERE `id` = %u", character_id); QueryDatabase(query);
+	query = StringFormat("DELETE FROM `character_data` WHERE `id` = %u", character_id); QueryDatabase(query);
+	query = StringFormat("DELETE FROM `character_spells` WHERE `id` = %u", character_id); QueryDatabase(query);
+	query = StringFormat("DELETE FROM `character_memmed_spells` WHERE `id` = %u", character_id); QueryDatabase(query);
+	query = StringFormat("DELETE FROM `character_disciplines` WHERE `id` = %u", character_id); QueryDatabase(query);
+	query = StringFormat("DELETE FROM `character_material` WHERE `id` = %u", character_id); QueryDatabase(query);
+	query = StringFormat("DELETE FROM `character_tribute` WHERE `id` = %u", character_id); QueryDatabase(query);
+	query = StringFormat("DELETE FROM `character_bandolier` WHERE `id` = %u", character_id); QueryDatabase(query);
+	query = StringFormat("DELETE FROM `character_potionbelt` WHERE `id` = %u", character_id); QueryDatabase(query);
+	query = StringFormat("DELETE FROM `character_inspect_messages` WHERE `id` = %u", character_id); QueryDatabase(query);
+	query = StringFormat("DELETE FROM `character_leadership_abilities` WHERE `id` = %u", character_id); QueryDatabase(query);
+	query = StringFormat("DELETE FROM `character_alt_currency` WHERE `char_id` = '%d'", character_id); QueryDatabase(query);
 #ifdef BOTS
-	query = StringFormat("DELETE FROM `guild_members` WHERE `char_id` = '%d' AND GetMobTypeById(%i) = 'C'", charid); // note: only use of GetMobTypeById()
+	query = StringFormat("DELETE FROM `guild_members` WHERE `char_id` = '%d' AND GetMobTypeById(%i) = 'C'", character_id); // note: only use of GetMobTypeById()
 #else
-	query = StringFormat("DELETE FROM `guild_members` WHERE `char_id` = '%d'", charid);
+	query = StringFormat("DELETE FROM `guild_members` WHERE `char_id` = '%d'", character_id);
 #endif
 	QueryDatabase(query);
 

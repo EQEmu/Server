@@ -113,6 +113,7 @@ namespace Logs {
 		AoeCast,
 		EntityManagement,
 		Flee,
+		Aura,
 		MaxCategoryID /* Don't Remove this */
 	};
 
@@ -185,6 +186,7 @@ namespace Logs {
 		"AOE Cast",
 		"Entity Management",
 		"Flee",
+		"Aura",
 	};
 }
 

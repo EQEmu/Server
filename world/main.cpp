@@ -396,7 +396,6 @@ int main(int argc, char** argv) {
 		LogInfo("Unable to load adventure templates");
 	}
 
-	adventure_manager.Load();
 	adventure_manager.LoadLeaderboardInfo();
 
 	LogInfo("Purging expired instances");

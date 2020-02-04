@@ -99,40 +99,6 @@ class Bot : public NPC {
 	friend class Mob;
 public:
 	// Class enums
-	enum BotfocusType {	//focus types
-		BotfocusSpellHaste = 1,
-		BotfocusSpellDuration,
-		BotfocusRange,
-		BotfocusReagentCost,
-		BotfocusManaCost,
-		BotfocusImprovedHeal,
-		BotfocusImprovedDamage,
-		BotfocusImprovedDOT,		//i dont know about this...
-		BotfocusFcDamagePctCrit,
-		BotfocusImprovedUndeadDamage,
-		BotfocusPetPower,
-		BotfocusResistRate,
-		BotfocusSpellHateMod,
-		BotfocusTriggerOnCast,
-		BotfocusSpellVulnerability,
-		BotfocusTwincast,
-		BotfocusSympatheticProc,
-		BotfocusFcDamageAmt,
-		BotfocusFcDamageAmtCrit,
-		BotfocusSpellDurByTic,
-		BotfocusSwarmPetDuration,
-		BotfocusReduceRecastTime,
-		BotfocusBlockNextSpell,
-		BotfocusFcHealPctIncoming,
-		BotfocusFcDamageAmtIncoming,
-		BotfocusFcHealAmtIncoming,
-		BotfocusFcBaseEffects,
-		BotfocusIncreaseNumHits,
-		BotfocusFcHealPctCritIncoming,
-		BotfocusFcHealAmt,
-		BotfocusFcHealAmtCrit,
-	};
-
 	enum BotTradeType {	// types of trades a bot can do
 		BotTradeClientNormal,
 		BotTradeClientNoDropNoTrade
@@ -636,9 +602,9 @@ protected:
 	virtual void PetAIProcess();
 	virtual void BotMeditate(bool isSitting);
 	virtual bool CheckBotDoubleAttack(bool Triple = false);
-	virtual int32 GetBotFocusEffect(BotfocusType bottype, uint16 spell_id);
-	virtual int32 CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spell_id, bool best_focus=false);
-	virtual int32 CalcBotAAFocus(BotfocusType type, uint32 aa_ID, uint32 points, uint16 spell_id);
+	virtual int32 GetBotFocusEffect(focusType bottype, uint16 spell_id);
+	virtual int32 CalcBotFocusEffect(focusType bottype, uint16 focus_id, uint16 spell_id, bool best_focus=false);
+	virtual int32 CalcBotAAFocus(focusType type, uint32 aa_ID, uint32 points, uint16 spell_id);
 	virtual void PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* client);
 	virtual bool AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = 0);
 

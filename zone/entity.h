@@ -293,6 +293,7 @@ public:
 	bool	RemoveObject(uint16 delete_id);
 	bool	RemoveProximity(uint16 delete_npc_id);
 	bool	RemoveMobFromCloseLists(Mob *mob);
+	void    RemoveAuraFromMobs(Mob *aura);
 	void	RemoveAllMobs();
 	void	RemoveAllClients();
 	void	RemoveAllNPCs();
@@ -584,7 +585,6 @@ private:
 	private:
 		std::list<Bot*> bot_list;
 #endif
-
 };
 
 class BulkZoneSpawnPacket {

@@ -21,9 +21,9 @@
 9020|2018_08_13_bots_inventory_update.sql|SELECT * FROM `inventory_versions` WHERE `version` = 2 and `bot_step` = 0|not_empty|
 9021|2018_10_09_bots_owner_options.sql|SHOW TABLES LIKE 'bot_owner_options'|empty|
 9022|2019_02_07_bots_stance_type_update.sql|SELECT * FROM `bot_spell_casting_chances` WHERE `spell_type_index` = '255' AND `class_id` = '255' AND `stance_index` = '0'|not_empty|
-9023|2019_06_22_bots_owner_option_stats_update.sql|SHOW COLUMNS FROM `bot_owner_options` LIKE 'stats_update'|empty|
+9023|2019_06_22_bots_owner_option_stats_update.sql|SELECT * FROM db_version WHERE bots_version >= 9023|empty|
 9024|2019_06_27_bots_pet_get_lost.sql|SELECT `bot_command` FROM `bot_command_settings` WHERE `bot_command` LIKE 'petgetlost'|empty|
-9025|2019_08_26_bots_owner_option_spawn_message.sql|SHOW COLUMNS FROM `bot_owner_options` LIKE 'spawn_message_enabled'|empty|
+9025|2019_08_26_bots_owner_option_spawn_message.sql|SELECT * FROM db_version WHERE bots_version >= 9025|empty|
 9026|2019_09_09_bots_owner_options_rework.sql|SHOW COLUMNS FROM `bot_owner_options` LIKE 'option_type'|empty|
 
 # Upgrade conditions:

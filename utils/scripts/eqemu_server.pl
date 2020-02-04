@@ -813,7 +813,7 @@ sub fetch_utility_scripts {
 
 sub setup_bots {
     if ($OS eq "Windows") {
-        fetch_latest_windows_binaries_bots();
+        fetch_latest_windows_appveyor_bots();
     }
     if ($OS eq "Linux") {
         build_linux_source("bots");
@@ -821,7 +821,7 @@ sub setup_bots {
     bots_db_management();
     run_database_check();
 
-    print "Bots should be setup, run your server and the #bot command should be available in-game\n";
+    print "Bots should be setup, run your server and the bot command should be available in-game (type '^help')\n";
 }
 
 sub show_menu_prompt {
@@ -2216,11 +2216,18 @@ sub get_bots_db_version {
 }
 
 sub bots_db_management {
+
+    my $world_path = "world";
+    if (-e "bin/world") {
+        $world_path = "bin/world";
+    }
+
+    #::: Get Binary DB version
     if ($OS eq "Windows") {
-        @db_version = split(': ', `world db_version`);
+        @db_version = split(': ', `$world_path db_version`);
     }
     if ($OS eq "Linux") {
-        @db_version = split(': ', `./world db_version`);
+        @db_version = split(': ', `./$world_path db_version`);
     }
 
     #::: Main Binary Database version

@@ -186,6 +186,7 @@ Mob::Mob(
 
 	last_hp_percent = 0;
 	last_hp         = 0;
+	last_max_hp     = 0;
 
 	current_speed = base_runspeed;
 
@@ -459,6 +460,8 @@ Mob::Mob(
 #ifdef BOTS
 	m_manual_follow = false;
 #endif
+
+	mob_scan_close.Trigger();
 }
 
 Mob::~Mob()
@@ -501,6 +504,8 @@ Mob::~Mob()
 	UninitializeBuffSlots();
 
 	entity_list.RemoveMobFromCloseLists(this);
+	entity_list.RemoveAuraFromMobs(this);
+
 	close_mobs.clear();
 
 #ifdef BOTS
@@ -1330,6 +1335,16 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 	 * If our HP is different from last HP update call - let's update selves
 	 */
 	if (IsClient()) {
+
+		// delay to allow the client to catch up on buff states
+		if (max_hp != last_max_hp) {
+
+			last_max_hp = max_hp;
+			CastToClient()->hp_self_update_throttle_timer.Trigger();
+
+			return;
+		}
+
 		if (current_hp != last_hp || force_update_all) {
 
 			/**
@@ -1337,10 +1352,12 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 			 */
 			if (this->CastToClient()->hp_self_update_throttle_timer.Check() || force_update_all) {
 				Log(Logs::General, Logs::HPUpdate,
-					"Mob::SendHPUpdate :: Update HP of self (%s) HP: %i last: %i skip_self: %s",
+					"Mob::SendHPUpdate :: Update HP of self (%s) HP: %i/%i last: %i/%i skip_self: %s",
 					this->GetCleanName(),
 					current_hp,
+					max_hp,
 					last_hp,
+					last_max_hp,
 					(skip_self ? "true" : "false")
 				);
 
@@ -1367,7 +1384,7 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 		}
 	}
 
-	int8 current_hp_percent = static_cast<int8>(max_hp == 0 ? 0 : static_cast<int>(current_hp * 100 / max_hp));
+	auto current_hp_percent = GetIntHPRatio();
 
 	Log(Logs::General,
 		Logs::HPUpdate,

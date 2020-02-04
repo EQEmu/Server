@@ -19,9 +19,6 @@
 #include "types.h"
 #include <cstring>
 
-#define ENC(c) (((c) & 0x3f) + ' ')
-#define DEC(c)	(((c) - ' ') & 0x3f)
-
 std::map<int,std::string> DBFieldNames;
 
 #ifndef WIN32
@@ -331,64 +328,6 @@ void LoadItemDBFieldNames() {
 	DBFieldNames[111]="unknown113";
 	DBFieldNames[112]="unknown114";
 	DBFieldNames[113]="unknown115";		// ? (end quote)
-}
-
-void encode_length(unsigned long length, char *out)
-{
-char buf[4];
-	memcpy(buf,&length,sizeof(unsigned long));
-	encode_chunk(buf,3,out);
-}
-
-unsigned long encode(char *in, unsigned long length, char *out)
-{
-unsigned long used=0,len=0;
-	while(used<length) {
-		encode_chunk(in+used,length-used,out+len);
-		used+=3;
-		len+=4;
-	}
-	*(out+len)=0;
-
-	return len;
-}
-
-unsigned long decode_length(char *in)
-{
-int length;
-char buf[4];
-	decode_chunk(in,&buf[0]);
-	buf[3]=0;
-	memcpy(&length,buf,sizeof(unsigned long));
-
-	return length;
-}
-
-void decode(char *in, char *out)
-{
-char *ptr=in;
-char *outptr=out;
-	while(*ptr) {
-		decode_chunk(ptr,outptr);
-		ptr+=4;
-		outptr+=3;
-	}
-	*outptr=0;
-}
-
-void encode_chunk(char *in, int len, char *out)
-{
-	*out=ENC(in[0] >> 2);
-	*(out+1)=ENC((in[0] << 4)|(((len<2 ? 0 : in[1]) >> 4) & 0xF));
-	*(out+2)=ENC(((len<2 ? 0 : in[1]) << 2)|(((len<3 ? 0 : in[2]) >> 6) & 0x3));
-	*(out+3)=ENC((len<3 ? 0 : in[2]));
-}
-
-void decode_chunk(char *in, char *out)
-{
-	*out = DEC(*in) << 2 | DEC(in[1]) >> 4;
-	*(out+1) = DEC(in[1]) << 4 | DEC(in[2]) >> 2;
-	*(out+2) = DEC(in[2]) << 6 | DEC(in[3]);
 }
 
 void dump_message_column(unsigned char *buffer, unsigned long length, std::string leader, FILE *to)

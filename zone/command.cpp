@@ -783,6 +783,12 @@ void command_help(Client *c, const Seperator *sep)
 		commands_shown++;
 		c->Message(Chat::White, "	%c%s %s",  COMMAND_CHAR, cur->first.c_str(), cur->second->desc == nullptr?"":cur->second->desc);
 	}
+	if (parse->PlayerHasQuestSub(EVENT_COMMAND)) {
+		int i = parse->EventPlayer(EVENT_COMMAND, c, sep->msg, 0);
+		if (i >= 1) {
+			commands_shown += i;
+		}
+	}
 	c->Message(Chat::White, "%d command%s listed.",  commands_shown, commands_shown!=1?"s":"");
 
 }
@@ -2163,25 +2169,6 @@ void command_spoff(Client *c, const Seperator *sep)
 {
 	auto outapp = new EQApplicationPacket(OP_ManaChange, 0);
 	outapp->priority = 5;
-	c->QueuePacket(outapp);
-	safe_delete(outapp);
-}
-
-void command_itemtest(Client *c, const Seperator *sep)
-{
-	char chBuffer[8192] = {0};
-	//Using this to determine new item layout
-	FILE* f = nullptr;
-	if (!(f = fopen("c:\\EQEMUcvs\\ItemDump.txt",  "rb"))) {
-		c->Message(Chat::Red, "Error: Could not open c:\\EQEMUcvs\\ItemDump.txt");
-		return;
-	}
-
-	fread(chBuffer, sizeof(chBuffer), sizeof(char), f);
-	fclose(f);
-
-	auto outapp = new EQApplicationPacket(OP_ItemLinkResponse, strlen(chBuffer) + 5);
-	memcpy(&outapp->pBuffer[4], chBuffer, strlen(chBuffer));
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
 }
@@ -13264,8 +13251,8 @@ void command_bot(Client *c, const Seperator *sep)
 	}
 	
 	if (bot_command_dispatch(c, bot_message.c_str()) == -2) {
-		if (parse->PlayerHasQuestSub(EVENT_COMMAND)) {
-			int i = parse->EventPlayer(EVENT_COMMAND, c, bot_message, 0);
+		if (parse->PlayerHasQuestSub(EVENT_BOT_COMMAND)) {
+			int i = parse->EventPlayer(EVENT_BOT_COMMAND, c, bot_message, 0);
 			if (i == 0 && !RuleB(Chat, SuppressCommandErrors)) {
 				c->Message(Chat::Red, "Bot command '%s' not recognized.", bot_message.c_str());
 			}

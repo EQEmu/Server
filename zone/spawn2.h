@@ -36,7 +36,7 @@ public:
 		uint16 cond_id = SC_AlwaysEnabled, int16 min_value = 0, bool in_enabled = true, EmuAppearance anim = eaStanding);
 	~Spawn2();
 
-	void	LoadGrid();
+	void	LoadGrid(int start_wp = 0);
 	void	Enable() { enabled = true; }
 	void	Disable();
 	bool	Enabled() { return enabled; }
