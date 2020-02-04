@@ -294,7 +294,7 @@ RULE_BOOL(Pathing, Find, true, "Enable pathing for FindPerson requests from the 
 RULE_BOOL(Pathing, Fear, true, "Enable pathing for fear")
 RULE_REAL(Pathing, NavmeshStepSize, 100.0f, "")
 RULE_REAL(Pathing, ShortMovementUpdateRange, 130.0f, "")
-RULE_INT(Pathing, MaxNavmeshNodes, 4092)
+RULE_INT(Pathing, MaxNavmeshNodes, 4092, "Max navmesh nodes in a traversable path")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Watermap)
