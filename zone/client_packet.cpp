@@ -4643,43 +4643,16 @@ void Client::Handle_OP_Consent(const EQApplicationPacket *app)
 {
 	if (app->size<64) {
 		Consent_Struct* c = (Consent_Struct*)app->pBuffer;
-		if (strcmp(c->name, GetName()) != 0) {
-			auto pack = new ServerPacket(ServerOP_Consent, sizeof(ServerOP_Consent_Struct));
-			ServerOP_Consent_Struct* scs = (ServerOP_Consent_Struct*)pack->pBuffer;
-			strcpy(scs->grantname, c->name);
-			strcpy(scs->ownername, GetName());
-			scs->message_string_id = 0;
-			scs->permission = 1;
-			scs->zone_id = zone->GetZoneID();
-			scs->instance_id = zone->GetInstanceID();
-			//consent_list.push_back(scs->grantname);
-			worldserver.SendPacket(pack);
-			safe_delete(pack);
-		}
-		else {
-			MessageString(Chat::White, CONSENT_YOURSELF);
-		}
+		ConsentCorpses(c->name, false);
 	}
-	return;
 }
 
 void Client::Handle_OP_ConsentDeny(const EQApplicationPacket *app)
 {
 	if (app->size<64) {
 		Consent_Struct* c = (Consent_Struct*)app->pBuffer;
-		auto pack = new ServerPacket(ServerOP_Consent, sizeof(ServerOP_Consent_Struct));
-		ServerOP_Consent_Struct* scs = (ServerOP_Consent_Struct*)pack->pBuffer;
-		strcpy(scs->grantname, c->name);
-		strcpy(scs->ownername, GetName());
-		scs->message_string_id = 0;
-		scs->permission = 0;
-		scs->zone_id = zone->GetZoneID();
-		scs->instance_id = zone->GetInstanceID();
-		//consent_list.remove(scs->grantname);
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
+		ConsentCorpses(c->name, true);
 	}
-	return;
 }
 
 void Client::Handle_OP_Consider(const EQApplicationPacket *app)
@@ -13319,6 +13292,21 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 			m_pp.showhelm = (sa->parameter == 1);
 			entity_list.QueueClients(this, app, true);
 		}
+	}
+	else if (sa->type == AT_GroupConsent)
+	{
+		m_pp.groupAutoconsent = (sa->parameter == 1);
+		ConsentCorpses("Group", (sa->parameter != 1));
+	}
+	else if (sa->type == AT_RaidConsent)
+	{
+		m_pp.raidAutoconsent = (sa->parameter == 1);
+		ConsentCorpses("Raid", (sa->parameter != 1));
+	}
+	else if (sa->type == AT_GuildConsent)
+	{
+		m_pp.guildAutoconsent = (sa->parameter == 1);
+		ConsentCorpses("Guild", (sa->parameter != 1));
 	}
 	else {
 		std::cout << "Unknown SpawnAppearance type: 0x" << std::hex << std::setw(4) << std::setfill('0') << sa->type << std::dec

@@ -1442,50 +1442,65 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	}
 	case ServerOP_Consent: {
 		ServerOP_Consent_Struct* s = (ServerOP_Consent_Struct*)pack->pBuffer;
-		Client* client = entity_list.GetClientByName(s->grantname);
-		if (client) {
-			if (s->permission == 1)
-				client->consent_list.push_back(s->ownername);
-			else
-				client->consent_list.remove(s->ownername);
 
-			auto outapp =
-				new EQApplicationPacket(OP_ConsentResponse, sizeof(ConsentResponse_Struct));
-			ConsentResponse_Struct* crs = (ConsentResponse_Struct*)outapp->pBuffer;
-			strcpy(crs->grantname, s->grantname);
-			strcpy(crs->ownername, s->ownername);
-			crs->permission = s->permission;
-			strcpy(crs->zonename, "all zones");
-			client->QueuePacket(outapp);
-			safe_delete(outapp);
+		bool found_corpse = false;
+		for (auto const& it : entity_list.GetCorpseList()) {
+			if (it.second->IsPlayerCorpse() && strcmp(it.second->GetOwnerName(), s->ownername) == 0) {
+				if (s->consent_type == EQEmu::consent::Normal) {
+					if (s->permission == 1) {
+						it.second->AddConsentName(s->grantname);
+					}
+					else {
+						it.second->RemoveConsentName(s->grantname);
+					}
+				}
+				else if (s->consent_type == EQEmu::consent::Group) {
+					it.second->SetConsentGroupID(s->consent_id);
+				}
+				else if (s->consent_type == EQEmu::consent::Raid) {
+					it.second->SetConsentRaidID(s->consent_id);
+				}
+				else if (s->consent_type == EQEmu::consent::Guild) {
+					it.second->SetConsentGuildID(s->consent_id);
+				}
+				found_corpse = true;
+			}
 		}
-		else {
-			// target not found
 
-			// Message string id's likely to be used here are:
-			// CONSENT_YOURSELF = 399
-			// CONSENT_INVALID_NAME = 397
-			// TARGET_NOT_FOUND = 101
-
-			auto scs_pack =
-				new ServerPacket(ServerOP_Consent_Response, sizeof(ServerOP_Consent_Struct));
-			ServerOP_Consent_Struct* scs = (ServerOP_Consent_Struct*)scs_pack->pBuffer;
-			strcpy(scs->grantname, s->grantname);
-			strcpy(scs->ownername, s->ownername);
-			scs->permission = s->permission;
-			scs->zone_id = s->zone_id;
-			scs->instance_id = s->instance_id;
-			scs->message_string_id = TARGET_NOT_FOUND;
-			worldserver.SendPacket(scs_pack);
-			safe_delete(scs_pack);
+		if (found_corpse) {
+			// forward the grant/deny message for this zone to both owner and granted
+			auto outapp = new ServerPacket(ServerOP_Consent_Response, sizeof(ServerOP_Consent_Struct));
+			ServerOP_Consent_Struct* scs = (ServerOP_Consent_Struct*)outapp->pBuffer;
+			memcpy(outapp->pBuffer, s, sizeof(ServerOP_Consent_Struct));
+			if (zone) {
+				strn0cpy(scs->zonename, zone->GetLongName(), sizeof(scs->zonename));
+			}
+			worldserver.SendPacket(outapp);
+			safe_delete(outapp);
 		}
 		break;
 	}
 	case ServerOP_Consent_Response: {
 		ServerOP_Consent_Struct* s = (ServerOP_Consent_Struct*)pack->pBuffer;
-		Client* client = entity_list.GetClientByName(s->ownername);
-		if (client) {
-			client->MessageString(Chat::White, s->message_string_id);
+		Client* owner_client = entity_list.GetClientByName(s->ownername);
+		Client* grant_client = nullptr;
+		if (s->consent_type == EQEmu::consent::Normal) {
+			grant_client = entity_list.GetClientByName(s->grantname);
+		}
+		if (owner_client || grant_client) {
+			auto outapp = new EQApplicationPacket(OP_ConsentResponse, sizeof(ConsentResponse_Struct));
+			ConsentResponse_Struct* crs = (ConsentResponse_Struct*)outapp->pBuffer;
+			strn0cpy(crs->grantname, s->grantname, sizeof(crs->grantname));
+			strn0cpy(crs->ownername, s->ownername, sizeof(crs->ownername));
+			crs->permission = s->permission;
+			strn0cpy(crs->zonename, s->zonename, sizeof(crs->zonename));
+			if (owner_client) {
+				owner_client->QueuePacket(outapp); // confirmation message to the owner
+			}
+			if (grant_client) {
+				grant_client->QueuePacket(outapp); // message to the client being granted/denied
+			}
+			safe_delete(outapp);
 		}
 		break;
 	}

@@ -401,6 +401,7 @@
 9145|2019_12_24_banned_ips_update.sql|SHOW TABLES LIKE 'Banned_IPs'|not_empty|
 9146|2020_01_10_character_soft_deletes.sql|SHOW COLUMNS FROM `character_data` LIKE 'deleted_at'|empty|
 9147|2020_01_24_grid_centerpoint_wp.sql|SHOW COLUMNS FROM `grid_entries` LIKE 'centerpoint'|empty|
+9148|2020_01_28_corpse_guild_consent_id.sql|SHOW COLUMNS FROM `character_corpses` LIKE 'guild_consent_id'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
