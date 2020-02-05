@@ -526,6 +526,7 @@ RULE_INT(NPC, NPCGatePercent, 20, "% at which the NPC Will attempt to gate at")
 RULE_BOOL(NPC, NPCGateNearBind, false, "Will NPC attempt to gate when near bind location?")
 RULE_INT(NPC, NPCGateDistanceBind, 75, "Distance from bind before NPC will attempt to gate")
 RULE_BOOL(NPC, NPCHealOnGate, true, "Will the NPC Heal on Gate")
+RULE_BOOL(NPC, UseMeditateBasedManaRegen, false, "Based NPC ooc regen on Meditate skill")
 RULE_REAL(NPC, NPCHealOnGateAmount, 25, "How much the npc will heal on gate if enabled")
 RULE_CATEGORY_END()
 
