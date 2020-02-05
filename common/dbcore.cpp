@@ -115,14 +115,14 @@ MySQLRequestResult DBcore::QueryDatabase(const char *query, uint32 querylen, boo
 		auto errorBuffer = new char[MYSQL_ERRMSG_SIZE];
 		snprintf(errorBuffer, MYSQL_ERRMSG_SIZE, "#%i: %s", mysql_errno(&mysql), mysql_error(&mysql));
 
-		/* Implement Logging at the Root */
+		/**
+		 * Error logging
+		 */
 		if (mysql_errno(&mysql) > 0 && strlen(query) > 0) {
-			if (LogSys.log_settings[Logs::MySQLError].is_category_enabled == 1)
-				Log(Logs::General, Logs::MySQLError, "%i: %s \n %s", mysql_errno(&mysql), mysql_error(&mysql), query);
+			LogMySQLError("[{}] [{}]\n[{}]", mysql_errno(&mysql), mysql_error(&mysql), query);
 		}
 
 		return MySQLRequestResult(nullptr, 0, 0, 0, 0, mysql_errno(&mysql), errorBuffer);
-
 	}
 
 	// successful query. get results.
@@ -143,9 +143,7 @@ MySQLRequestResult DBcore::QueryDatabase(const char *query, uint32 querylen, boo
 
 	if (LogSys.log_settings[Logs::MySQLQuery].is_category_enabled == 1) {
 		if ((strncasecmp(query, "select", 6) == 0)) {
-			LogF(
-				Logs::General,
-				Logs::MySQLQuery,
+			LogMySQLQuery(
 				"{0} ({1} row{2} returned) ({3}s)",
 				query,
 				requestResult.RowCount(),
@@ -154,9 +152,7 @@ MySQLRequestResult DBcore::QueryDatabase(const char *query, uint32 querylen, boo
 			);
 		}
 		else {
-			LogF(
-				Logs::General,
-				Logs::MySQLQuery,
+			LogMySQLQuery(
 				"{0} ({1} row{2} affected) ({3}s)",
 				query,
 				requestResult.RowsAffected(),
