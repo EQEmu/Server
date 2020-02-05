@@ -494,6 +494,7 @@ RULE_INT(Combat, NPCAssistCapTimer, 6000, "Time in milliseconds a NPC will take 
 RULE_BOOL(Combat, UseRevampHandToHand, false, "use h2h revamped dmg/delays I believe this was implemented during SoF")
 RULE_BOOL(Combat, ClassicMasterWu, false, "classic master wu uses a random special, modern doesn't")
 RULE_INT(Combat, LevelToStopDamageCaps, 0, "1 will effectively disable them, 20 should give basically same results as old incorrect system")
+RULE_INT(Combat, LevelToStopACTwinkControl, 50, "1 will effectively disable it, 50 should give basically same results as current system")
 RULE_BOOL(Combat, ClassicNPCBackstab, false, "true disables npc facestab - npcs get normal attack if not behind")
 RULE_BOOL(Combat, UseNPCDamageClassLevelMods, true, "Uses GetClassLevelDamageMod calc in npc_scale_manager")
 RULE_BOOL(Combat, UseExtendedPoisonProcs, false, "Allow old school poisons to last until characrer zones, at a lower proc rate")
