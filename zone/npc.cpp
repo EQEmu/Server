@@ -778,17 +778,22 @@ bool NPC::Process()
 		}
 
 		if (GetMana() < GetMaxMana()) {
-			int32 npc_idle_mana_regen_bonus = 2;
-			uint16 meditate_skill = GetSkill(EQEmu::skills::SkillMeditate);
-			if (!IsEngaged() && meditate_skill > 0) {
-				uint8 clevel = GetLevel();
-				npc_idle_mana_regen_bonus =
-					(((meditate_skill / 10) +
-					(clevel - (clevel / 4))) / 4) + 4;
+			if (RuleB(NPC, UseMeditateBasedManaRegen)) {
+				int32 npc_idle_mana_regen_bonus = 2;
+				uint16 meditate_skill = GetSkill(EQEmu::skills::SkillMeditate);
+				if (!IsEngaged() && meditate_skill > 0) {
+					uint8 clevel = GetLevel();
+					npc_idle_mana_regen_bonus =
+						(((meditate_skill / 10) +
+						(clevel - (clevel / 4))) / 4) + 4;
+				}
+				SetMana(GetMana() + mana_regen + npc_idle_mana_regen_bonus);
 			}
-			SetMana(GetMana() + mana_regen + npc_idle_mana_regen_bonus);
+			else {
+				SetMana(GetMana() + mana_regen + npc_sitting_regen_bonus);
+			}
 		}
-
+		
 		SendHPUpdate();
 
 		if (zone->adv_data && !p_depop) {
