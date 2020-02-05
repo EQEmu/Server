@@ -123,7 +123,9 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_tick",
 	"event_spawn_zone",
 	"event_death_zone",
-	"event_use_skill"
+	"event_use_skill",
+	"event_combine_validate",
+	"event_bot_command"
 };
 
 extern Zone *zone;
@@ -206,6 +208,8 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_RESPAWN] = handle_player_respawn;
 	PlayerArgumentDispatch[EVENT_UNHANDLED_OPCODE] = handle_player_packet;
 	PlayerArgumentDispatch[EVENT_USE_SKILL] = handle_player_use_skill;
+	PlayerArgumentDispatch[EVENT_COMBINE_VALIDATE] = handle_player_combine_validate;
+	PlayerArgumentDispatch[EVENT_BOT_COMMAND] = handle_player_bot_command;
 
 	ItemArgumentDispatch[EVENT_ITEM_CLICK] = handle_item_click;
 	ItemArgumentDispatch[EVENT_ITEM_CLICK_CAST] = handle_item_click;

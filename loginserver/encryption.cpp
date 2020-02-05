@@ -21,6 +21,10 @@
 
 #endif
 
+/**
+ * @param mode
+ * @return
+ */
 std::string GetEncryptionByModeId(uint32 mode)
 {
 	switch (mode) {
@@ -57,6 +61,13 @@ std::string GetEncryptionByModeId(uint32 mode)
 	}
 }
 
+/**
+ * @param buffer_in
+ * @param buffer_in_sz
+ * @param buffer_out
+ * @param enc
+ * @return
+ */
 const char *eqcrypt_block(const char *buffer_in, size_t buffer_in_sz, char *buffer_out, bool enc)
 {
 #ifdef EQEMU_USE_MBEDTLS
@@ -125,6 +136,10 @@ const char *eqcrypt_block(const char *buffer_in, size_t buffer_in_sz, char *buff
 	return buffer_out;
 }
 
+/**
+ * @param msg
+ * @return
+ */
 std::string eqcrypt_md5(const std::string &msg)
 {
 	std::string ret;
@@ -159,6 +174,10 @@ std::string eqcrypt_md5(const std::string &msg)
 	return ret;
 }
 
+/**
+ * @param msg
+ * @return
+ */
 std::string eqcrypt_sha1(const std::string &msg)
 {
 	std::string ret;
@@ -193,6 +212,10 @@ std::string eqcrypt_sha1(const std::string &msg)
 	return ret;
 }
 
+/**
+ * @param msg
+ * @return
+ */
 std::string eqcrypt_sha512(const std::string &msg)
 {
 	std::string ret;

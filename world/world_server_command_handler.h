@@ -1,5 +1,3 @@
-#include <utility>
-
 /**
  * EQEmulator: Everquest Server Emulator
  * Copyright (C) 2001-2019 EQEmulator Development Team (https://github.com/EQEmu/Server)
@@ -20,36 +18,19 @@
  *
  */
 
+#include "iostream"
+#include "../common/cli/eqemu_command_handler.h"
 
-#ifndef EQEMU_LOGINSERVER_H
-#define EQEMU_LOGINSERVER_H
+#ifndef EQEMU_WORLD_SERVER_COMMAND_HANDLER_H
+#define EQEMU_WORLD_SERVER_COMMAND_HANDLER_H
 
-#include "../common/json_config.h"
-#include "database.h"
-#include "encryption.h"
-#include "options.h"
-#include "server_manager.h"
-#include "client_manager.h"
-#include "loginserver_webserver.h"
-
-/**
- * Login server struct, contains every variable for the server that needs to exist outside the scope of main()
- */
-struct LoginServer
-{
-public:
-
-	LoginServer() : db(nullptr), server_manager(nullptr) {
-
-	}
-
-	EQ::JsonConfigFile                 config;
-	Database                           *db;
-	LoginserverWebserver::TokenManager *token_manager{};
-	Options                            options;
-	ServerManager                      *server_manager;
-	ClientManager                      *client_manager{};
+namespace WorldserverCommandHandler {
+	void CommandHandler(int argc, char **argv);
+	void Version(int argc, char **argv, argh::parser &cmd, std::string &description);
+	void DatabaseVersion(int argc, char **argv, argh::parser &cmd, std::string &description);
+	void DatabaseSetAccountStatus(int argc, char **argv, argh::parser &cmd, std::string &description);
+	void DatabaseGetSchema(int argc, char **argv, argh::parser &cmd, std::string &description);
 };
 
-#endif
 
+#endif //EQEMU_WORLD_SERVER_COMMAND_HANDLER_H

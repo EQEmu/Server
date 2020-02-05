@@ -1812,6 +1812,43 @@ XS(XS__summonallplayercorpses) {
 	XSRETURN(1);
 }
 
+XS(XS__getplayercorpsecount);
+XS(XS__getplayercorpsecount) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getplayercorpsecount(uint32 char_id)");
+
+	uint32 RETVAL;
+	dXSTARG;
+
+	uint32 char_id = (int) SvIV(ST(0));
+
+	RETVAL = quest_manager.getplayercorpsecount(char_id);
+	XSprePUSH;
+	PUSHu((IV) RETVAL);
+
+	XSRETURN(1);
+}
+
+XS(XS__getplayercorpsecountbyzoneid);
+XS(XS__getplayercorpsecountbyzoneid) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::getplayercorpsecountbyzoneid(uint32 char_id, uint32 zone_id)");
+
+	uint32 RETVAL;
+	dXSTARG;
+
+	uint32 char_id = (int) SvIV(ST(0));
+	uint32 zone_id = (int)SvIV(ST(1));
+
+	RETVAL = quest_manager.getplayercorpsecountbyzoneid(char_id, zone_id);
+	XSprePUSH;
+	PUSHu((IV) RETVAL);
+
+	XSRETURN(1);
+}
+
 XS(XS__getplayerburiedcorpsecount);
 XS(XS__getplayerburiedcorpsecount) {
 	dXSARGS;
@@ -3907,6 +3944,8 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "getguildnamebyid"), XS__getguildnamebyid, file);
 	newXS(strcpy(buf, "getlevel"), XS__getlevel, file);
 	newXS(strcpy(buf, "getplayerburiedcorpsecount"), XS__getplayerburiedcorpsecount, file);
+	newXS(strcpy(buf, "getplayercorpsecount"), XS__getplayercorpsecount, file);
+	newXS(strcpy(buf, "getplayercorpsecountbyzoneid"), XS__getplayercorpsecountbyzoneid, file);
 	newXS(strcpy(buf, "gettaskactivitydonecount"), XS__gettaskactivitydonecount, file);
 	newXS(strcpy(buf, "givecash"), XS__givecash, file);
 	newXS(strcpy(buf, "gmmove"), XS__gmmove, file);

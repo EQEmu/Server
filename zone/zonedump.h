@@ -44,7 +44,7 @@ struct NPCType
 	uint16	race;
 	uint8	class_;
 	uint8	bodytype;	// added for targettype support
-	uint8	deity;		//not loaded from DB
+	uint32	deity;		//not loaded from DB
 	uint8	level;
 	uint32	npc_id;
 	uint8	texture;

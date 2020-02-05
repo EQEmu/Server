@@ -905,6 +905,8 @@ void Client::CompleteConnect()
 	entity_list.RefreshClientXTargets(this);
 
 	worldserver.RequestTellQueue(GetName());
+
+	entity_list.ScanCloseMobs(close_mobs, this);
 }
 
 // connecting opcode handlers
@@ -4641,43 +4643,16 @@ void Client::Handle_OP_Consent(const EQApplicationPacket *app)
 {
 	if (app->size<64) {
 		Consent_Struct* c = (Consent_Struct*)app->pBuffer;
-		if (strcmp(c->name, GetName()) != 0) {
-			auto pack = new ServerPacket(ServerOP_Consent, sizeof(ServerOP_Consent_Struct));
-			ServerOP_Consent_Struct* scs = (ServerOP_Consent_Struct*)pack->pBuffer;
-			strcpy(scs->grantname, c->name);
-			strcpy(scs->ownername, GetName());
-			scs->message_string_id = 0;
-			scs->permission = 1;
-			scs->zone_id = zone->GetZoneID();
-			scs->instance_id = zone->GetInstanceID();
-			//consent_list.push_back(scs->grantname);
-			worldserver.SendPacket(pack);
-			safe_delete(pack);
-		}
-		else {
-			MessageString(Chat::White, CONSENT_YOURSELF);
-		}
+		ConsentCorpses(c->name, false);
 	}
-	return;
 }
 
 void Client::Handle_OP_ConsentDeny(const EQApplicationPacket *app)
 {
 	if (app->size<64) {
 		Consent_Struct* c = (Consent_Struct*)app->pBuffer;
-		auto pack = new ServerPacket(ServerOP_Consent, sizeof(ServerOP_Consent_Struct));
-		ServerOP_Consent_Struct* scs = (ServerOP_Consent_Struct*)pack->pBuffer;
-		strcpy(scs->grantname, c->name);
-		strcpy(scs->ownername, GetName());
-		scs->message_string_id = 0;
-		scs->permission = 0;
-		scs->zone_id = zone->GetZoneID();
-		scs->instance_id = zone->GetInstanceID();
-		//consent_list.remove(scs->grantname);
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
+		ConsentCorpses(c->name, true);
 	}
-	return;
 }
 
 void Client::Handle_OP_Consider(const EQApplicationPacket *app)
@@ -8286,7 +8261,18 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 			if (GetTarget() && GetTarget()->IsNPC()) {
 				if (silentsaylink) {
 					parse->EventNPC(EVENT_SAY, GetTarget()->CastToNPC(), this, response.c_str(), 0);
-					parse->EventPlayer(EVENT_SAY, this, response.c_str(), 0);
+
+					if (response[0] == '#' && parse->PlayerHasQuestSub(EVENT_COMMAND)) {
+						parse->EventPlayer(EVENT_COMMAND, this, response.c_str(), 0);
+					}
+#ifdef BOTS
+					else if (response[0] == '^' && parse->PlayerHasQuestSub(EVENT_BOT_COMMAND)) {
+						parse->EventPlayer(EVENT_BOT_COMMAND, this, response.c_str(), 0);
+					}
+#endif
+					else {
+						parse->EventPlayer(EVENT_SAY, this, response.c_str(), 0);
+					}
 				}
 				else {
 					Message(Chat::LightGray, "You say, '%s'", response.c_str());
@@ -8296,7 +8282,17 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 			}
 			else {
 				if (silentsaylink) {
-					parse->EventPlayer(EVENT_SAY, this, response.c_str(), 0);
+					if (response[0] == '#' && parse->PlayerHasQuestSub(EVENT_COMMAND)) {
+						parse->EventPlayer(EVENT_COMMAND, this, response.c_str(), 0);
+					}
+#ifdef BOTS
+					else if (response[0] == '^' && parse->PlayerHasQuestSub(EVENT_BOT_COMMAND)) {
+						parse->EventPlayer(EVENT_BOT_COMMAND, this, response.c_str(), 0);
+					}
+#endif
+					else {
+						parse->EventPlayer(EVENT_SAY, this, response.c_str(), 0);
+					}
 				}
 				else {
 					Message(Chat::LightGray, "You say, '%s'", response.c_str());
@@ -11107,6 +11103,11 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 				break;
 			}
 
+			if (player_to_invite_group && player_to_invite_group->IsGroupMember(this)) {
+				MessageString(Chat::Red, ALREADY_IN_PARTY);
+				break;
+			}
+
 			if (player_to_invite_group && !player_to_invite_group->IsLeader(player_to_invite)) {
 				Message(Chat::Red, "You can only invite an ungrouped player or group leader to join your raid.");
 				break;
@@ -13292,6 +13293,21 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 			entity_list.QueueClients(this, app, true);
 		}
 	}
+	else if (sa->type == AT_GroupConsent)
+	{
+		m_pp.groupAutoconsent = (sa->parameter == 1);
+		ConsentCorpses("Group", (sa->parameter != 1));
+	}
+	else if (sa->type == AT_RaidConsent)
+	{
+		m_pp.raidAutoconsent = (sa->parameter == 1);
+		ConsentCorpses("Raid", (sa->parameter != 1));
+	}
+	else if (sa->type == AT_GuildConsent)
+	{
+		m_pp.guildAutoconsent = (sa->parameter == 1);
+		ConsentCorpses("Guild", (sa->parameter != 1));
+	}
 	else {
 		std::cout << "Unknown SpawnAppearance type: 0x" << std::hex << std::setw(4) << std::setfill('0') << sa->type << std::dec
 			<< " value: 0x" << std::hex << std::setw(8) << std::setfill('0') << sa->parameter << std::dec << std::endl;
@@ -14139,16 +14155,16 @@ void Client::Handle_OP_TradeRequest(const EQApplicationPacket *app)
 #else
 	else if (tradee && (tradee->IsNPC() || tradee->IsBot())) {
 #endif
-		//npcs always accept
-		trade->Start(msg->to_mob_id);
-
-		auto outapp = new EQApplicationPacket(OP_TradeRequestAck, sizeof(TradeRequest_Struct));
-		TradeRequest_Struct* acc = (TradeRequest_Struct*)outapp->pBuffer;
-		acc->from_mob_id = msg->to_mob_id;
-		acc->to_mob_id = msg->from_mob_id;
-		FastQueuePacket(&outapp);
-		safe_delete(outapp);
-	}
+        if (!tradee->IsEngaged()) {
+            trade->Start(msg->to_mob_id);
+            EQApplicationPacket *outapp = new EQApplicationPacket(OP_TradeRequestAck, sizeof(TradeRequest_Struct));
+            TradeRequest_Struct *acc = (TradeRequest_Struct *) outapp->pBuffer;
+            acc->from_mob_id = msg->to_mob_id;
+            acc->to_mob_id = msg->from_mob_id;
+            FastQueuePacket(&outapp);
+            safe_delete(outapp);
+        }
+    }
 	return;
 	}
 

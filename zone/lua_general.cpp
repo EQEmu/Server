@@ -549,6 +549,14 @@ void lua_summon_all_player_corpses(uint32 char_id, float x, float y, float z, fl
 	quest_manager.summonallplayercorpses(char_id, glm::vec4(x, y, z, h));
 }
 
+int lua_get_player_corpse_count(uint32 char_id) {
+	return database.CountCharacterCorpses(char_id);
+}
+
+int lua_get_player_corpse_count_by_zone_id(uint32 char_id, uint32 zone_id) {
+	return database.CountCharacterCorpsesByZoneID(char_id, zone_id);
+}
+
 int lua_get_player_buried_corpse_count(uint32 char_id) {
 	return quest_manager.getplayerburiedcorpsecount(char_id);
 }
@@ -571,7 +579,7 @@ void lua_task_selector(luabind::adl::object table) {
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				cur_value = luabind::object_cast<int>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 			}
 		} else {
 			count = i - 1;
@@ -601,7 +609,7 @@ void lua_enable_task(luabind::adl::object table) {
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				cur_value = luabind::object_cast<int>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 			}
 		} else {
 			count = i - 1;
@@ -628,7 +636,7 @@ void lua_disable_task(luabind::adl::object table) {
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				cur_value = luabind::object_cast<int>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 			}
 		} else {
 			count = i - 1;
@@ -1156,7 +1164,7 @@ void lua_add_spawn_point(luabind::adl::object table) {
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				spawn2_id = luabind::object_cast<uint32>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 				return;
 			}
 		} else {
@@ -1167,7 +1175,7 @@ void lua_add_spawn_point(luabind::adl::object table) {
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				spawngroup_id = luabind::object_cast<uint32>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 				return;
 			}
 		} else {
@@ -1178,7 +1186,7 @@ void lua_add_spawn_point(luabind::adl::object table) {
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				x = luabind::object_cast<float>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 				return;
 			}
 		} else {
@@ -1189,7 +1197,7 @@ void lua_add_spawn_point(luabind::adl::object table) {
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				y = luabind::object_cast<float>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 				return;
 			}
 		} else {
@@ -1200,7 +1208,7 @@ void lua_add_spawn_point(luabind::adl::object table) {
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				z = luabind::object_cast<float>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 				return;
 			}
 		} else {
@@ -1211,7 +1219,7 @@ void lua_add_spawn_point(luabind::adl::object table) {
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				heading = luabind::object_cast<float>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 				return;
 			}
 		} else {
@@ -1222,7 +1230,7 @@ void lua_add_spawn_point(luabind::adl::object table) {
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				respawn = luabind::object_cast<uint32>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 				return;
 			}
 		} else {
@@ -1233,7 +1241,7 @@ void lua_add_spawn_point(luabind::adl::object table) {
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				variance = luabind::object_cast<uint32>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 				return;
 			}
 		} else {
@@ -1244,7 +1252,7 @@ void lua_add_spawn_point(luabind::adl::object table) {
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				timeleft = luabind::object_cast<uint32>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 			}
 		}
 
@@ -1252,7 +1260,7 @@ void lua_add_spawn_point(luabind::adl::object table) {
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				grid = luabind::object_cast<uint32>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 			}
 		}
 
@@ -1260,7 +1268,7 @@ void lua_add_spawn_point(luabind::adl::object table) {
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				condition_id = luabind::object_cast<int>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 			}
 		}
 
@@ -1268,7 +1276,7 @@ void lua_add_spawn_point(luabind::adl::object table) {
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				condition_min_value = luabind::object_cast<int>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 			}
 		}
 
@@ -1276,7 +1284,7 @@ void lua_add_spawn_point(luabind::adl::object table) {
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				enabled = luabind::object_cast<bool>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 			}
 		}
 
@@ -1284,7 +1292,7 @@ void lua_add_spawn_point(luabind::adl::object table) {
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
 				animation = luabind::object_cast<int>(cur);
-			} catch(luabind::cast_failed) {
+			} catch(luabind::cast_failed &) {
 			}
 		}
 
@@ -1399,7 +1407,7 @@ void lua_update_zone_header(std::string type, std::string value) {
 		try { \
 			npc_type->name = luabind::object_cast<c_type>(cur); \
 		} \
-		catch(luabind::cast_failed) { \
+		catch(luabind::cast_failed &) { \
 			npc_type->size = default_value; \
 		} \
 	} \
@@ -1415,7 +1423,7 @@ void lua_update_zone_header(std::string type, std::string value) {
 			std::string tmp = luabind::object_cast<std::string>(cur); \
 			strncpy(npc_type->name, tmp.c_str(), str_length); \
 		} \
-		catch(luabind::cast_failed) { \
+		catch(luabind::cast_failed &) { \
 			strncpy(npc_type->name, default_value, str_length); \
 		} \
 	} \
@@ -1663,6 +1671,8 @@ luabind::scope lua_register_general() {
 		luabind::def("toggle_spawn_event", &lua_toggle_spawn_event),
 		luabind::def("summon_buried_player_corpse", &lua_summon_buried_player_corpse),
 		luabind::def("summon_all_player_corpses", &lua_summon_all_player_corpses),
+		luabind::def("get_player_corpse_count", &lua_get_player_corpse_count),
+		luabind::def("get_player_corpse_count_by_zone_id", &lua_get_player_corpse_count_by_zone_id),
 		luabind::def("get_player_buried_corpse_count", &lua_get_player_buried_corpse_count),
 		luabind::def("bury_player_corpse", &lua_bury_player_corpse),
 		luabind::def("task_selector", &lua_task_selector),

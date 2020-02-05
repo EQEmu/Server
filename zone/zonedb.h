@@ -47,6 +47,7 @@ struct wplist {
 	float z;
 	int pause;
 	float heading;
+	bool centerpoint;
 };
 
 #pragma pack(1)
@@ -356,6 +357,8 @@ public:
 	bool		DeleteCharacterCorpse(uint32 dbid);
 	bool		SummonAllCharacterCorpses(uint32 char_id, uint32 dest_zoneid, uint16 dest_instanceid, const glm::vec4& position);
 	bool		SummonAllGraveyardCorpses(uint32 cur_zoneid, uint32 dest_zoneid, uint16 dest_instanceid, const glm::vec4& position);
+	int			CountCharacterCorpses(uint32 char_id);
+	int			CountCharacterCorpsesByZoneID(uint32 char_id, uint32 zone_id);
 	bool		UnburyCharacterCorpse(uint32 dbid, uint32 new_zoneid, uint16 dest_instanceid, const glm::vec4& position);
 	bool		LoadCharacterCorpses(uint32 iZoneID, uint16 iInstanceID);
 	bool		DeleteGraveyard(uint32 zone_id, uint32 graveyard_id);
@@ -364,8 +367,9 @@ public:
 	uint32		SendCharacterCorpseToGraveyard(uint32 dbid, uint32 zoneid, uint16 instanceid, const glm::vec4& position);
 	uint32		CreateGraveyardRecord(uint32 graveyard_zoneid, const glm::vec4& position);
 	uint32		AddGraveyardIDToZone(uint32 zone_id, uint32 graveyard_id);
-	uint32		SaveCharacterCorpse(uint32 charid, const char* charname, uint32 zoneid, uint16 instanceid, PlayerCorpse_Struct* dbpc, const glm::vec4& position);
-	uint32		UpdateCharacterCorpse(uint32 dbid, uint32 charid, const char* charname, uint32 zoneid, uint16 instanceid, PlayerCorpse_Struct* dbpc, const glm::vec4& position, bool rezzed = false);
+	uint32		SaveCharacterCorpse(uint32 charid, const char* charname, uint32 zoneid, uint16 instanceid, PlayerCorpse_Struct* dbpc, const glm::vec4& position, uint32 guildid);
+	uint32		UpdateCharacterCorpse(uint32 dbid, uint32 charid, const char* charname, uint32 zoneid, uint16 instanceid, PlayerCorpse_Struct* dbpc, const glm::vec4& position, uint32 guildid, bool rezzed = false);
+	uint32		UpdateCharacterCorpseConsent(uint32 charid, uint32 guildid);
 	uint32		GetFirstCorpseID(uint32 char_id);
 	uint32		GetCharacterCorpseCount(uint32 char_id);
 	uint32		GetCharacterCorpseID(uint32 char_id, uint8 corpse);
@@ -432,6 +436,7 @@ public:
 	void        AssignGrid(Client *client, int grid, int spawn2id);
 	int			GetHighestGrid(uint32 zoneid);
 	int			GetHighestWaypoint(uint32 zoneid, uint32 gridid);
+	int			GetRandomWaypointLocFromGrid(glm::vec4 &loc, uint16 zoneid, int grid);
 
 	/* NPCs  */
 

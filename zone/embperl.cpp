@@ -137,10 +137,10 @@ void Embperl::DoInit() {
 	try {
 		init_eval_file();
 	}
-	catch(const char *err)
+	catch(std::string e)
 	{
 		//remember... lasterr() is no good if we crap out here, in construction
-		LogQuests("perl error: [{}]", err);
+		LogQuests("Perl Error [{}]", e);
 		throw "failed to install eval_file hook";
 	}
 
@@ -177,9 +177,9 @@ void Embperl::DoInit() {
 		perl_command = "main::eval_file('plugin', '" + Config->PluginPlFile + "');";
 		eval_pv(perl_command.c_str(), FALSE);
 	}
-	catch(const char *err)
+	catch(std::string e)
 	{
-		LogQuests("Warning - [{}]: [{}]", Config->PluginPlFile.c_str(), err);
+		LogQuests("Warning [{}]: [{}]", Config->PluginPlFile, e);
 	}
 	try
 	{
@@ -195,9 +195,9 @@ void Embperl::DoInit() {
 			"}";
 		eval_pv(perl_command.c_str(),FALSE);
 	}
-	catch(const char *err)
+	catch(std::string e)
 	{
-		LogQuests("Perl warning: [{}]", err);
+		LogQuests("Warning [{}]", e);
 	}
 #endif //EMBPERL_PLUGIN
 	in_use = false;
@@ -237,7 +237,7 @@ void Embperl::init_eval_file(void)
 {
 	eval_pv(
 		"our %Cache;"
-		"no warnings;"
+		"no warnings 'all';"
 		"use Symbol qw(delete_package);"
 		"sub eval_file {"
 			"my($package, $filename) = @_;"
@@ -315,7 +315,7 @@ int Embperl::dosub(const char * subname, const std::vector<std::string> * args, 
 	{
 		std::string errmsg = "Perl runtime error: ";
 		errmsg += SvPVX(ERRSV);
-		throw errmsg.c_str();
+		throw errmsg;
 	}
 
 	return ret_value;

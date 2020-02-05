@@ -1467,12 +1467,20 @@ bool Mob::CanUseAlternateAdvancementRank(AA::Rank *rank) {
 		}
 	}
 
-	if(IsClient()) {
-		if(rank->expansion && !(CastToClient()->GetPP().expansions & (1 << (rank->expansion - 1)))) {
+	if (IsClient()) {
+		if (rank->expansion && !(CastToClient()->GetPP().expansions & (1 << (rank->expansion - 1)))) {
 			return false;
 		}
-	} else {
-		if(rank->expansion && !(RuleI(World, ExpansionSettings) & (1 << (rank->expansion - 1)))) {
+	}
+#ifdef BOTS
+	else if (IsBot()) {
+		if (rank->expansion && !(RuleI(Bots, BotExpansionSettings) & (1 << (rank->expansion - 1)))) {
+			return false;
+		}
+	}
+#endif
+	else {
+		if (rank->expansion && !(RuleI(World, ExpansionSettings) & (1 << (rank->expansion - 1)))) {
 			return false;
 		}
 	}

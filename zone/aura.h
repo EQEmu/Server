@@ -73,7 +73,7 @@ private:
 	int m_owner;
 	int aura_id; // spell ID of the aura spell -1 if aura isn't from a casted spell
 	int spell_id; // spell we cast
-	int distance; // distance we remove
+	float distance; // distance we remove
 	Timer remove_timer; // when we depop
 	Timer process_timer; // rate limit process calls
 	Timer cast_timer; // some auras pulse

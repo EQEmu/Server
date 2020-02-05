@@ -607,7 +607,7 @@ typedef enum {
 #define SE_LimitSpellGroup				385	// implemented - Limits to spell group(ie type 3 reuse reduction augs that are class specific and thus all share s SG)
 #define SE_CastOnCurer					386 // implemented - Casts a spell on the person curing
 #define SE_CastOnCure					387 // implemented - Casts a spell on the cured person
-//#define SE_SummonCorpseZone			388 // *not implemented - summons a corpse from any zone(nec AA)
+#define SE_SummonCorpseZone				388 // implemented - summons a corpse from any zone(nec AA)
 #define SE_FcTimerRefresh				389 // implemented - Refresh spell icons
 //#define SE_FcTimerLockout				390 // *not implemented - Sets recast timers to specific value, focus limited.
 #define SE_LimitManaMax					391	// implemented

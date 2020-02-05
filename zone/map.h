@@ -47,7 +47,7 @@ public:
 #ifdef USE_MAP_MMFS
 	bool Load(std::string filename, bool force_mmf_overwrite = false);
 #else
-	bool Load(std::string filename);
+	bool Load(const std::string& filename);
 #endif
 
 	static Map *LoadMapFile(std::string file);

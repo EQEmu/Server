@@ -967,6 +967,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 							uint16 mana_used, uint32 inventory_slot, int16 resist_adjust)
 {
 	bool IsFromItem = false;
+	EQEmu::ItemInstance *item = nullptr;
 
 	if(IsClient() && slot != CastingSlot::Item && slot != CastingSlot::PotionBelt && spells[spell_id].recast_time > 1000) { // 10 is item
 		if(!CastToClient()->GetPTimers().Expired(&database, pTimerSpellStart + spell_id, false)) {
@@ -981,10 +982,10 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	if(IsClient() && (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt))
 	{
 		IsFromItem = true;
-		EQEmu::ItemInstance *itm = CastToClient()->GetInv().GetItem(inventory_slot);
-		if(itm && itm->GetItem()->RecastDelay > 0)
+		item = CastToClient()->GetInv().GetItem(inventory_slot);
+		if(item && item->GetItem()->RecastDelay > 0)
 		{
-			if(!CastToClient()->GetPTimers().Expired(&database, (pTimerItemStart + itm->GetItem()->RecastType), false)) {
+			if(!CastToClient()->GetPTimers().Expired(&database, (pTimerItemStart + item->GetItem()->RecastType), false)) {
 				MessageString(Chat::Red, SPELL_RECAST);
 				LogSpells("Casting of [{}] canceled: item spell reuse timer not expired", spell_id);
 				StopCasting();
@@ -1150,7 +1151,13 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	// first check for component reduction
 	if(IsClient()) {
 		int reg_focus = CastToClient()->GetFocusEffect(focusReagentCost,spell_id);//Client only
-		if(zone->random.Roll(reg_focus)) {
+		/* it seems something causes some items not to consume reagents, it's not click type or temp flag
+		 * it maybe cast time being instant, which I had a hard time disproving, so lets do that
+		 * Items that might prove this wrong: Mystic Cloak (1057), Moss Mask (1400), and a bunch others
+		 */
+		if (item && item->GetItem() && item->GetItem()->CastTime == 0) {
+			LogSpells("Spell [{}]: Casted from instant clicky, prevent reagent consumption", spell_id);
+		} else if(zone->random.Roll(reg_focus)) {
 			LogSpells("Spell [{}]: Reagent focus item prevented reagent consumption ([{}] chance)", spell_id, reg_focus);
 		} else {
 			if(reg_focus > 0)
@@ -1298,17 +1305,16 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 		&& inventory_slot != 0xFFFFFFFF)	// 10 is an item
 	{
 		bool fromaug = false;
-		const EQEmu::ItemInstance* inst = CastToClient()->GetInv()[inventory_slot];
 		EQEmu::ItemData* augitem = nullptr;
 		uint32 recastdelay = 0;
 		uint32 recasttype = 0;
 
 		while (true) {
-			if (inst == nullptr)
+			if (item == nullptr)
 				break;
 
 			for (int r = EQEmu::invaug::SOCKET_BEGIN; r <= EQEmu::invaug::SOCKET_END; r++) {
-				const EQEmu::ItemInstance* aug_i = inst->GetAugment(r);
+				const EQEmu::ItemInstance* aug_i = item->GetAugment(r);
 
 				if (!aug_i)
 					continue;
@@ -1346,18 +1352,18 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 			}
 		}
 
-		if (inst && inst->IsClassCommon() && (inst->GetItem()->Click.Effect == spell_id) && inst->GetCharges() || fromaug)
+		if (item && item->IsClassCommon() && (item->GetItem()->Click.Effect == spell_id) && item->GetCharges() || fromaug)
 		{
-			//const ItemData* item = inst->GetItem();
-			int16 charges = inst->GetItem()->MaxCharges;
+			//const ItemData* item = item->GetItem();
+			int16 charges = item->GetItem()->MaxCharges;
 
 			if(fromaug) { charges = -1; } //Don't destroy the parent item
 
 			if(charges > -1) {	// charged item, expend a charge
-				LogSpells("Spell [{}]: Consuming a charge from item [{}] ([{}]) which had [{}]/[{}] charges", spell_id, inst->GetItem()->Name, inst->GetItem()->ID, inst->GetCharges(), inst->GetItem()->MaxCharges);
+				LogSpells("Spell [{}]: Consuming a charge from item [{}] ([{}]) which had [{}]/[{}] charges", spell_id, item->GetItem()->Name, item->GetItem()->ID, item->GetCharges(), item->GetItem()->MaxCharges);
 				DeleteChargeFromSlot = inventory_slot;
 			} else {
-				LogSpells("Spell [{}]: Cast from unlimited charge item [{}] ([{}]) ([{}] charges)", spell_id, inst->GetItem()->Name, inst->GetItem()->ID, inst->GetItem()->MaxCharges);
+				LogSpells("Spell [{}]: Cast from unlimited charge item [{}] ([{}]) ([{}] charges)", spell_id, item->GetItem()->Name, item->GetItem()->ID, item->GetItem()->MaxCharges);
 			}
 		}
 		else
@@ -3449,9 +3455,9 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 	// 1 = PCs, 2 = NPCs
 	if (spells[spell_id].pcnpc_only_flag && spells[spell_id].targettype != ST_AETargetHateList &&
 	    spells[spell_id].targettype != ST_HateList) {
-		if (spells[spell_id].pcnpc_only_flag == 1 && !spelltar->IsClient() && !spelltar->IsMerc())
+		if (spells[spell_id].pcnpc_only_flag == 1 && !spelltar->IsClient() && !spelltar->IsMerc() && !spelltar->IsBot())
 			return false;
-		else if (spells[spell_id].pcnpc_only_flag == 2 && (spelltar->IsClient() || spelltar->IsMerc()))
+		else if (spells[spell_id].pcnpc_only_flag == 2 && (spelltar->IsClient() || spelltar->IsMerc() || spelltar->IsBot()))
 			return false;
 	}
 
@@ -4793,24 +4799,32 @@ int16 Mob::CalcFearResistChance()
 	return resistchance;
 }
 
-float Mob::GetAOERange(uint16 spell_id) {
-	float range;
+/**
+ * @param spell_id
+ * @return
+ */
+float Mob::GetAOERange(uint16 spell_id)
+{
+	float range = spells[spell_id].aoerange;
 
-	range = spells[spell_id].aoerange;
-	if(range == 0)	//for TGB spells, they prolly do not have an aoe range
+	/**
+	 * For TGB
+	 */
+	if (range == 0) {
 		range = spells[spell_id].range;
-	if(range == 0)
-		range = 10;	//something....
-
-	if(IsBardSong(spell_id) && IsBeneficialSpell(spell_id)) {
-		//Live AA - Extended Notes, SionachiesCrescendo
-		float song_bonus = static_cast<float>(aabonuses.SongRange + spellbonuses.SongRange + itembonuses.SongRange);
-		range += range*song_bonus /100.0f;
 	}
 
-	range = GetActSpellRange(spell_id, range);
+	if (range == 0) {
+		range = 10;
+	}
 
-	return(range);
+	if (IsBardSong(spell_id) && IsBeneficialSpell(spell_id)) {
+		//Live AA - Extended Notes, SionachiesCrescendo
+		float song_bonus = static_cast<float>(aabonuses.SongRange + spellbonuses.SongRange + itembonuses.SongRange);
+		range += range * song_bonus / 100.0f;
+	}
+
+	return GetActSpellRange(spell_id, range);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

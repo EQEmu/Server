@@ -27,6 +27,12 @@
 #include <fmt/format.h>
 #endif
 
+#ifdef _WINDOWS
+#include <ctype.h>
+#include <functional>
+#include <algorithm>
+#endif
+
 #include "types.h"
 
 //std::string based
@@ -37,6 +43,38 @@ std::vector<std::string> split(std::string str_to_split, char delimiter);
 const std::string StringFormat(const char* format, ...);
 const std::string vStringFormat(const char* format, va_list args);
 std::string implode(std::string glue, std::vector<std::string> src);
+
+/**
+ * @param str
+ * @param chars
+ * @return
+ */
+inline std::string &ltrim(std::string &str, const std::string &chars = "\t\n\v\f\r ")
+{
+	str.erase(0, str.find_first_not_of(chars));
+	return str;
+}
+
+/**
+ * @param str
+ * @param chars
+ * @return
+ */
+inline std::string &rtrim(std::string &str, const std::string &chars = "\t\n\v\f\r ")
+{
+	str.erase(str.find_last_not_of(chars) + 1);
+	return str;
+}
+
+/**
+ * @param str
+ * @param chars
+ * @return
+ */
+inline std::string &trim(std::string &str, const std::string &chars = "\t\n\v\f\r ")
+{
+	return ltrim(rtrim(str, chars), chars);
+}
 
 template <typename T>
 std::string implode(const std::string &glue, const std::pair<char, char> &encapsulation, const std::vector<T> &src)

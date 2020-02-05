@@ -10,10 +10,34 @@
 #include <stdio.h>
 #include <string.h>
 
+/**
+ * @param name
+ * @return
+ */
+inline bool file_exists(const std::string& name) {
+	std::ifstream f(name.c_str());
+	return f.good();
+}
+
+/**
+ * @param zone_name
+ * @return
+ */
 WaterMap* WaterMap::LoadWaterMapfile(std::string zone_name) {
 	std::transform(zone_name.begin(), zone_name.end(), zone_name.begin(), ::tolower);
-		
-	std::string file_path = Config->MapDir + "water/" + zone_name + std::string(".wtr");
+
+	std::string filename;
+	if (file_exists("maps")) {
+		filename = "maps";
+	}
+	else if (file_exists("Maps")) {
+		filename = "Maps";
+	}
+	else {
+		filename = Config->MapDir;
+	}
+
+	std::string file_path = filename + "/water/" + zone_name + std::string(".wtr");
 	LogDebug("Attempting to load water map with path [{}]", file_path.c_str());
 	FILE *f = fopen(file_path.c_str(), "rb");
 	if(f) {

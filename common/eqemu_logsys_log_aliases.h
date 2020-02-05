@@ -491,6 +491,76 @@
         OutF(LogSys, Logs::Detail, Logs::Status, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
+#define LogAIScanClose(message, ...) do {\
+    if (LogSys.log_settings[Logs::AIScanClose].is_category_enabled == 1)\
+        OutF(LogSys, Logs::General, Logs::AIScanClose, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogAIScanCloseDetail(message, ...) do {\
+    if (LogSys.log_settings[Logs::AIScanClose].is_category_enabled == 1)\
+        OutF(LogSys, Logs::Detail, Logs::AIScanClose, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogAIYellForHelp(message, ...) do {\
+    if (LogSys.log_settings[Logs::AIYellForHelp].is_category_enabled == 1)\
+        OutF(LogSys, Logs::General, Logs::AIYellForHelp, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogAIYellForHelpDetail(message, ...) do {\
+    if (LogSys.log_settings[Logs::AIYellForHelp].is_category_enabled == 1)\
+        OutF(LogSys, Logs::Detail, Logs::AIYellForHelp, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogAICastBeneficialClose(message, ...) do {\
+    if (LogSys.log_settings[Logs::AICastBeneficialClose].is_category_enabled == 1)\
+        OutF(LogSys, Logs::General, Logs::AICastBeneficialClose, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogAICastBeneficialCloseDetail(message, ...) do {\
+    if (LogSys.log_settings[Logs::AICastBeneficialClose].is_category_enabled == 1)\
+        OutF(LogSys, Logs::Detail, Logs::AICastBeneficialClose, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogAoeCast(message, ...) do {\
+    if (LogSys.log_settings[Logs::AoeCast].is_category_enabled == 1)\
+        OutF(LogSys, Logs::General, Logs::AoeCast, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogAoeCastDetail(message, ...) do {\
+    if (LogSys.log_settings[Logs::AoeCast].is_category_enabled == 1)\
+        OutF(LogSys, Logs::Detail, Logs::AoeCast, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogEntityManagement(message, ...) do {\
+    if (LogSys.log_settings[Logs::EntityManagement].is_category_enabled == 1)\
+        OutF(LogSys, Logs::General, Logs::EntityManagement, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogEntityManagementDetail(message, ...) do {\
+    if (LogSys.log_settings[Logs::EntityManagement].is_category_enabled == 1)\
+        OutF(LogSys, Logs::Detail, Logs::EntityManagement, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogFlee(message, ...) do {\
+    if (LogSys.log_settings[Logs::Flee].is_category_enabled == 1)\
+        OutF(LogSys, Logs::General, Logs::Flee, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogFleeDetail(message, ...) do {\
+    if (LogSys.log_settings[Logs::Flee].is_category_enabled == 1)\
+        OutF(LogSys, Logs::Detail, Logs::Flee, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogAura(message, ...) do {\
+    if (LogSys.log_settings[Logs::Aura].is_category_enabled == 1)\
+        OutF(LogSys, Logs::General, Logs::Aura, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogAuraDetail(message, ...) do {\
+    if (LogSys.log_settings[Logs::Aura].is_category_enabled == 1)\
+        OutF(LogSys, Logs::Detail, Logs::Aura, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
 #define Log(debug_level, log_category, message, ...) do {\
     if (LogSys.log_settings[log_category].is_category_enabled == 1)\
         LogSys.Out(debug_level, log_category, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
@@ -780,6 +850,48 @@
 } while (0)
 
 #define LogStatusDetail(message, ...) do {\
+} while (0)
+
+#define LogAIScanClose(message, ...) do {\
+} while (0)
+
+#define LogAIScanCloseDetail(message, ...) do {\
+} while (0)
+
+#define LogAIYellForHelp(message, ...) do {\
+} while (0)
+
+#define LogAIYellForHelpDetail(message, ...) do {\
+} while (0)
+
+#define LogAICastBeneficialClose(message, ...) do {\
+} while (0)
+
+#define LogAICastBeneficialCloseDetail(message, ...) do {\
+} while (0)
+
+#define LogAoeCast(message, ...) do {\
+} while (0)
+
+#define LogAoeCastDetail(message, ...) do {\
+} while (0)
+
+#define LogEntityManagement(message, ...) do {\
+} while (0)
+
+#define LogEntityManagementDetail(message, ...) do {\
+} while (0)
+
+#define LogFlee(message, ...) do {\
+} while (0)
+
+#define LogFleeDetail(message, ...) do {\
+} while (0)
+
+#define LogAura(message, ...) do {\
+} while (0)
+
+#define LogAuraDetail(message, ...) do {\
 } while (0)
 
 #define Log(debug_level, log_category, message, ...) do {\

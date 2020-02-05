@@ -92,35 +92,43 @@ XS(XS_EQEmuIO_PRINT)
 //        Perl_croak(aTHX_ "Usage: EQEmuIO::PRINT(@strings)"); 
 
 	int r;
-	for(r = 1; r < items; r++) {
+	for (r = 1; r < items; r++) {
 		char *str = SvPV_nolen(ST(r));
 		char *cur = str;
-		
+
 		/* Strip newlines from log message 'str' */
 		*std::remove(str, str + strlen(str), '\n') = '\0';
 
 		std::string log_string = str;
-		if (log_string.find("did not return a true") != std::string::npos)
-			return;;
+
+		if (log_string.find("did not return a true") != std::string::npos) {
+			return;
+		}
+
+		if (log_string.find("is experimental") != std::string::npos) {
+			return;
+		}
 
 		int i;
 		int pos = 0;
 		int len = 0;
-		for(i = 0; *cur != '\0'; i++, cur++) {
-			if(*cur == '\n') {
-				Log(Logs::General, Logs::Quests, str);
+
+		for (i = 0; *cur != '\0'; i++, cur++) {
+			if (*cur == '\n') {
+				LogQuests("{}", str);
 				len = 0;
-				pos = i+1;
-			} else {
+				pos = i + 1;
+			}
+			else {
 				len++;
 			}
 		}
-		if(len > 0) {
-			Log(Logs::General, Logs::Quests, str);
+		if (!log_string.empty()) {
+			LogQuests("{}", log_string);
 		}
- 	}
- 	
-    XSRETURN_EMPTY; 
+	}
+
+	XSRETURN_EMPTY;
 }
 #endif //EMBPERL_IO_CAPTURE
 

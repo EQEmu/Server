@@ -1,3 +1,4 @@
+
 /*	EQEMu: Everquest Server Emulator
 	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemu.org)
 
@@ -168,6 +169,10 @@ public:
 	inline virtual bool InZone() const { return true; }
 
 	void DisplayInfo(Mob *mob);
+
+	std::unordered_map<uint16, Mob *> close_mobs;
+	Timer mob_scan_close;
+	Timer mob_check_moving_timer;
 
 	//Somewhat sorted: needs documenting!
 
@@ -490,8 +495,8 @@ public:
 	inline Mob* GetTarget() const { return target; }
 	virtual void SetTarget(Mob* mob);
 	inline bool HasTargetReflection() const { return (target && target != this && target->target == this); }
-	virtual inline float GetHPRatio() const { return max_hp == 0 ? 0 : ((float)current_hp/max_hp*100); }
-	virtual inline int GetIntHPRatio() const { return max_hp == 0 ? 0 : static_cast<int>(current_hp * 100 / max_hp); }
+	virtual inline float GetHPRatio() const { return max_hp == 0 ? 0 : ((float) current_hp / max_hp * 100); }
+	virtual inline int GetIntHPRatio() const { return max_hp == 0 ? 0 : static_cast<int>(GetHPRatio()); }
 	inline int32 GetAC() const { return AC; }
 	inline virtual int32 GetATK() const { return ATK + itembonuses.ATK + spellbonuses.ATK; }
 	inline virtual int32 GetATKBonus() const { return itembonuses.ATK + spellbonuses.ATK; }
@@ -619,8 +624,7 @@ public:
 
 	//AI
 	static uint32 GetLevelCon(uint8 mylevel, uint8 iOtherLevel);
-	inline uint32 GetLevelCon(uint8 iOtherLevel) const {
-		return this ? GetLevelCon(GetLevel(), iOtherLevel) : CON_GRAY; }
+	inline uint32 GetLevelCon(uint8 iOtherLevel) const { return GetLevelCon(GetLevel(), iOtherLevel); }
 	virtual void AddToHateList(Mob* other, uint32 hate = 0, int32 damage = 0, bool iYellForHelp = true,
 		bool bFrenzy = false, bool iBuffTic = false, uint16 spell_id = SPELL_UNKNOWN, bool pet_comand = false);
 	bool RemoveFromHateList(Mob* mob);
@@ -968,7 +972,7 @@ public:
 	void SetEntityVariable(const char *id, const char *m_var);
 	bool EntityVariableExists(const char *id);
 
-	void AI_Event_Engaged(Mob* attacker, bool iYellForHelp = true);
+	void AI_Event_Engaged(Mob* attacker, bool yell_for_help = true);
 	void AI_Event_NoLongerEngaged();
 
 	FACTION_VALUE GetSpecialFactionCon(Mob* iOther);
@@ -1188,8 +1192,8 @@ public:
 	int32 GetManaRegen() const;
 
 
-	// Bots HealRotation methods
 #ifdef BOTS
+	// Bots HealRotation methods
 	bool IsHealRotationTarget() { return (m_target_of_heal_rotation.use_count() && m_target_of_heal_rotation.get()); }
 	bool JoinHealRotationTargetPool(std::shared_ptr<HealRotation>* heal_rotation);
 	bool LeaveHealRotationTargetPool();
@@ -1200,6 +1204,11 @@ public:
 	float HealRotationExtendedHealFrequency();
 
 	const std::shared_ptr<HealRotation>* TargetOfHealRotation() const { return &m_target_of_heal_rotation; }
+
+
+	// not Bots HealRotation methods
+	void SetManualFollow(bool flag) { m_manual_follow = flag; }
+	bool GetManualFollow() const { return m_manual_follow; }
 #endif
 
 protected:
@@ -1517,6 +1526,7 @@ protected:
 
 	int8 last_hp_percent;
 	int32 last_hp;
+	int32 last_max_hp;
 
 	int cur_wp;
 	glm::vec4 m_CurrentWayPoint;
@@ -1581,6 +1591,8 @@ private:
 
 #ifdef BOTS
 	std::shared_ptr<HealRotation> m_target_of_heal_rotation;
+
+	bool m_manual_follow;
 #endif
 
 };

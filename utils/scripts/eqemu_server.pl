@@ -516,13 +516,20 @@ sub check_for_input {
 }
 
 sub check_for_world_bootup_database_update {
-    if ($OS eq "Windows") {
-        @db_version = split(': ', `world db_version`);
-    }
-    if ($OS eq "Linux") {
-        @db_version = split(': ', `./world db_version`);
+
+    my $world_path = "world";
+    if (-e "bin/world") {
+        $world_path = "bin/world";
     }
 
+    #::: Get Binary DB version
+    if ($OS eq "Windows") {
+        @db_version = split(': ', `$world_path db_version`);
+    }
+    if ($OS eq "Linux") {
+        @db_version = split(': ', `./$world_path db_version`);
+    }
+    
     $binary_database_version = trim($db_version[1]);
     $local_database_version  = trim(get_mysql_result("SELECT version FROM db_version LIMIT 1"));
 
@@ -806,7 +813,7 @@ sub fetch_utility_scripts {
 
 sub setup_bots {
     if ($OS eq "Windows") {
-        fetch_latest_windows_binaries_bots();
+        fetch_latest_windows_appveyor_bots();
     }
     if ($OS eq "Linux") {
         build_linux_source("bots");
@@ -814,7 +821,7 @@ sub setup_bots {
     bots_db_management();
     run_database_check();
 
-    print "Bots should be setup, run your server and the #bot command should be available in-game\n";
+    print "Bots should be setup, run your server and the bot command should be available in-game (type '^help')\n";
 }
 
 sub show_menu_prompt {
@@ -1686,7 +1693,7 @@ sub fetch_server_dlls {
 
 sub fetch_peq_db_full {
     print "[Install] Downloading latest PEQ Database... Please wait...\n";
-    get_remote_file("http://edit.peqtgc.com/weekly/peq_beta.zip", "updates_staged/peq_beta.zip", 1);
+    get_remote_file("http://edit.projecteq.net/weekly/peq_beta.zip", "updates_staged/peq_beta.zip", 1);
     print "[Install] Downloaded latest PEQ Database... Extracting...\n";
     unzip('updates_staged/peq_beta.zip', 'updates_staged/peq_db/');
     my $start_dir = "updates_staged/peq_db";
@@ -1821,6 +1828,8 @@ sub quest_files_fetch {
     if ($fc == 0) {
         print "[Update] No Quest Updates found... \n\n";
     }
+	
+    rmtree("updates_staged/");
 }
 
 sub lua_modules_fetch {
@@ -2207,11 +2216,18 @@ sub get_bots_db_version {
 }
 
 sub bots_db_management {
+
+    my $world_path = "world";
+    if (-e "bin/world") {
+        $world_path = "bin/world";
+    }
+
+    #::: Get Binary DB version
     if ($OS eq "Windows") {
-        @db_version = split(': ', `world db_version`);
+        @db_version = split(': ', `$world_path db_version`);
     }
     if ($OS eq "Linux") {
-        @db_version = split(': ', `./world db_version`);
+        @db_version = split(': ', `./$world_path db_version`);
     }
 
     #::: Main Binary Database version

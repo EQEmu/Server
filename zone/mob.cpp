@@ -116,7 +116,9 @@ Mob::Mob(
 	m_specialattacks(eSpecialAttacks::None),
 	attack_anim_timer(1000),
 	position_update_melee_push_timer(500),
-	hate_list_cleanup_timer(6000)
+	hate_list_cleanup_timer(6000),
+	mob_scan_close(6000),
+	mob_check_moving_timer(1000)
 {
 	mMovementManager = &MobMovementManager::Get();
 	mMovementManager->AddMob(this);
@@ -184,6 +186,7 @@ Mob::Mob(
 
 	last_hp_percent = 0;
 	last_hp         = 0;
+	last_max_hp     = 0;
 
 	current_speed = base_runspeed;
 
@@ -453,6 +456,12 @@ Mob::Mob(
 	PrimaryAggro = false;
 	AssistAggro = false;
 	npc_assist_cap = 0;
+
+#ifdef BOTS
+	m_manual_follow = false;
+#endif
+
+	mob_scan_close.Trigger();
 }
 
 Mob::~Mob()
@@ -461,34 +470,43 @@ Mob::~Mob()
 
 	AI_Stop();
 	if (GetPet()) {
-		if (GetPet()->Charmed())
+		if (GetPet()->Charmed()) {
 			GetPet()->BuffFadeByEffect(SE_Charm);
-		else
+		}
+		else {
 			SetPet(0);
+		}
 	}
 
 	EQApplicationPacket app;
 	CreateDespawnPacket(&app, !IsCorpse());
-	Corpse* corpse = entity_list.GetCorpseByID(GetID());
-	if(!corpse || (corpse && !corpse->IsPlayerCorpse()))
+	Corpse *corpse = entity_list.GetCorpseByID(GetID());
+	if (!corpse || (corpse && !corpse->IsPlayerCorpse())) {
 		entity_list.QueueClients(this, &app, true);
+	}
 
 	entity_list.RemoveFromTargets(this, true);
 
-	if(trade) {
+	if (trade) {
 		Mob *with = trade->With();
-		if(with && with->IsClient()) {
+		if (with && with->IsClient()) {
 			with->CastToClient()->FinishTrade(with);
 			with->trade->Reset();
 		}
 		delete trade;
 	}
 
-	if(HasTempPetsActive()){
+	if (HasTempPetsActive()) {
 		entity_list.DestroyTempPets(this);
 	}
+	
 	entity_list.UnMarkNPC(GetID());
 	UninitializeBuffSlots();
+
+	entity_list.RemoveMobFromCloseLists(this);
+	entity_list.RemoveAuraFromMobs(this);
+
+	close_mobs.clear();
 
 #ifdef BOTS
 	LeaveHealRotationTargetPool();
@@ -594,7 +612,7 @@ int Mob::_GetWalkSpeed() const {
 	runspeedcap += itembonuses.IncreaseRunSpeedCap + spellbonuses.IncreaseRunSpeedCap + aabonuses.IncreaseRunSpeedCap;
 	aa_mod += aabonuses.BaseMovementSpeed;
 
-	if (IsClient()) {
+	if (IsClient() && CastToClient()->GetHorseId()) {
 		Mob *horse = entity_list.GetMob(CastToClient()->GetHorseId());
 		if (horse) {
 			speed_mod = horse->GetBaseRunspeed();
@@ -652,7 +670,7 @@ int Mob::_GetRunSpeed() const {
 		{
 			speed_mod = 325;
 		}
-		else
+		else if (CastToClient()->GetHorseId())
 		{
 			Mob* horse = entity_list.GetMob(CastToClient()->GetHorseId());
 			if(horse)
@@ -1317,6 +1335,16 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 	 * If our HP is different from last HP update call - let's update selves
 	 */
 	if (IsClient()) {
+
+		// delay to allow the client to catch up on buff states
+		if (max_hp != last_max_hp) {
+
+			last_max_hp = max_hp;
+			CastToClient()->hp_self_update_throttle_timer.Trigger();
+
+			return;
+		}
+
 		if (current_hp != last_hp || force_update_all) {
 
 			/**
@@ -1324,10 +1352,12 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 			 */
 			if (this->CastToClient()->hp_self_update_throttle_timer.Check() || force_update_all) {
 				Log(Logs::General, Logs::HPUpdate,
-					"Mob::SendHPUpdate :: Update HP of self (%s) HP: %i last: %i skip_self: %s",
+					"Mob::SendHPUpdate :: Update HP of self (%s) HP: %i/%i last: %i/%i skip_self: %s",
 					this->GetCleanName(),
 					current_hp,
+					max_hp,
 					last_hp,
+					last_max_hp,
 					(skip_self ? "true" : "false")
 				);
 
@@ -1354,7 +1384,7 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 		}
 	}
 
-	int8 current_hp_percent = static_cast<int8>(max_hp == 0 ? 0 : static_cast<int>(current_hp * 100 / max_hp));
+	auto current_hp_percent = GetIntHPRatio();
 
 	Log(Logs::General,
 		Logs::HPUpdate,

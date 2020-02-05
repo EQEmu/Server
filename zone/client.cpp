@@ -123,49 +123,50 @@ Client::Client(EQStreamInterface* ieqs)
 	0,
 	0
 	),
-	hpupdate_timer(2000),
-	camp_timer(29000),
-	process_timer(100),
-	consume_food_timer(CONSUMPTION_TIMER),
-	zoneinpacket_timer(1000),
-	linkdead_timer(RuleI(Zone,ClientLinkdeadMS)),
-	dead_timer(2000),
-	global_channel_timer(1000),
-	shield_timer(500),
-	fishing_timer(8000),
-	endupkeep_timer(1000),
-	forget_timer(0),
-	autosave_timer(RuleI(Character, AutosaveIntervalS) * 1000),
-	client_scan_npc_aggro_timer(RuleI(Aggro, ClientAggroCheckInterval) * 1000),
-	client_zone_wide_full_position_update_timer(5 * 60 * 1000),
-	tribute_timer(Tribute_duration),
-	proximity_timer(ClientProximity_interval),
-	TaskPeriodic_Timer(RuleI(TaskSystem, PeriodicCheckTimer) * 1000),
-	charm_update_timer(6000),
-	rest_timer(1),
-	charm_class_attacks_timer(3000),
-	charm_cast_timer(3500),
-	qglobal_purge_timer(30000),
-	TrackingTimer(2000),
-	RespawnFromHoverTimer(0),
-	merc_timer(RuleI(Mercs, UpkeepIntervalMS)),
-	ItemTickTimer(10000),
-	ItemQuestTimer(500),
-	anon_toggle_timer(250),
-	afk_toggle_timer(250),
-	helm_toggle_timer(250),
-	aggro_meter_timer(AGGRO_METER_UPDATE_MS),
-	m_Proximity(FLT_MAX, FLT_MAX, FLT_MAX), //arbitrary large number
+  hpupdate_timer(2000),
+  camp_timer(29000),
+  process_timer(100),
+  consume_food_timer(CONSUMPTION_TIMER),
+  zoneinpacket_timer(1000),
+  linkdead_timer(RuleI(Zone,ClientLinkdeadMS)),
+  dead_timer(2000),
+  global_channel_timer(1000),
+  shield_timer(500),
+  fishing_timer(8000),
+  endupkeep_timer(1000),
+  forget_timer(0),
+  autosave_timer(RuleI(Character, AutosaveIntervalS) * 1000),
+  client_scan_npc_aggro_timer(RuleI(Aggro, ClientAggroCheckInterval) * 1000),
+  client_zone_wide_full_position_update_timer(5 * 60 * 1000),
+  tribute_timer(Tribute_duration),
+  proximity_timer(ClientProximity_interval),
+  TaskPeriodic_Timer(RuleI(TaskSystem, PeriodicCheckTimer) * 1000),
+  charm_update_timer(6000),
+  rest_timer(1),
+  charm_class_attacks_timer(3000),
+  charm_cast_timer(3500),
+  qglobal_purge_timer(30000),
+  TrackingTimer(2000),
+  RespawnFromHoverTimer(0),
+  merc_timer(RuleI(Mercs, UpkeepIntervalMS)),
+  ItemTickTimer(10000),
+  ItemQuestTimer(500),
+  anon_toggle_timer(250),
+  afk_toggle_timer(250),
+  helm_toggle_timer(250),
+  aggro_meter_timer(AGGRO_METER_UPDATE_MS),
+  m_Proximity(FLT_MAX, FLT_MAX, FLT_MAX), //arbitrary large number
 	m_ZoneSummonLocation(-2.0f,-2.0f,-2.0f),
-	m_AutoAttackPosition(0.0f, 0.0f, 0.0f, 0.0f),
-	m_AutoAttackTargetLocation(0.0f, 0.0f, 0.0f),
-	last_region_type(RegionTypeUnsupported),
-	m_dirtyautohaters(false),
-	npc_close_scan_timer(6000),
-	hp_self_update_throttle_timer(300),
-	hp_other_update_throttle_timer(500),
-	position_update_timer(10000),
-	tmSitting(0)
+  m_AutoAttackPosition(0.0f, 0.0f, 0.0f, 0.0f),
+  m_AutoAttackTargetLocation(0.0f, 0.0f, 0.0f),
+  last_region_type(RegionTypeUnsupported),
+  m_dirtyautohaters(false),
+  mob_close_scan_timer(6000),
+  hp_self_update_throttle_timer(300),
+  hp_other_update_throttle_timer(500),
+  position_update_timer(10000),
+  consent_throttle_timer(2000),
+  tmSitting(0)
 {
 
 	for (int client_filter = 0; client_filter < _FilterCount; client_filter++)
@@ -356,6 +357,7 @@ Client::Client(EQStreamInterface* ieqs)
 	bot_owner_options[booSpawnMessageClassSpecific] = true;
 	bot_owner_options[booAltCombat] = RuleB(Bots, AllowOwnerOptionAltCombat);
 	bot_owner_options[booAutoDefend] = RuleB(Bots, AllowOwnerOptionAutoDefend);
+	bot_owner_options[booBuffCounter] = false;
 
 	SetBotPulling(false);
 	SetBotPrecombat(false);
@@ -1105,39 +1107,55 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 	case ChatChannel_Say: { /* Say */
 		if(message[0] == COMMAND_CHAR) {
 			if(command_dispatch(this, message) == -2) {
-				if(parse->PlayerHasQuestSub(EVENT_COMMAND)) {
+				if (parse->PlayerHasQuestSub(EVENT_COMMAND)) {
 					int i = parse->EventPlayer(EVENT_COMMAND, this, message, 0);
-					if(i == 0 && !RuleB(Chat, SuppressCommandErrors)) {
+					if (i == 0 && !RuleB(Chat, SuppressCommandErrors)) {
 						Message(Chat::Red, "Command '%s' not recognized.", message);
 					}
-				} else {
-					if(!RuleB(Chat, SuppressCommandErrors))
+				}
+				else if (parse->PlayerHasQuestSub(EVENT_SAY)) {
+					int i = parse->EventPlayer(EVENT_SAY, this, message, 0);
+					if (i == 0 && !RuleB(Chat, SuppressCommandErrors)) {
 						Message(Chat::Red, "Command '%s' not recognized.", message);
+					}
+				}
+				else {
+					if (!RuleB(Chat, SuppressCommandErrors)) {
+						Message(Chat::Red, "Command '%s' not recognized.", message);
+					}
 				}
 			}
 			break;
 		}
 
-		if (EQEmu::ProfanityManager::IsCensorshipActive())
-			EQEmu::ProfanityManager::RedactMessage(message);
-
 #ifdef BOTS
 		if (message[0] == BOT_COMMAND_CHAR) {
 			if (bot_command_dispatch(this, message) == -2) {
-				if (parse->PlayerHasQuestSub(EVENT_COMMAND)) {
-					int i = parse->EventPlayer(EVENT_COMMAND, this, message, 0);
+				if (parse->PlayerHasQuestSub(EVENT_BOT_COMMAND)) {
+					int i = parse->EventPlayer(EVENT_BOT_COMMAND, this, message, 0);
+					if (i == 0 && !RuleB(Chat, SuppressCommandErrors)) {
+						Message(Chat::Red, "Bot command '%s' not recognized.", message);
+					}
+				}
+				else if (parse->PlayerHasQuestSub(EVENT_SAY)) {
+					int i = parse->EventPlayer(EVENT_SAY, this, message, 0);
 					if (i == 0 && !RuleB(Chat, SuppressCommandErrors)) {
 						Message(Chat::Red, "Bot command '%s' not recognized.", message);
 					}
 				}
 				else {
-					if (!RuleB(Chat, SuppressCommandErrors))
+					if (!RuleB(Chat, SuppressCommandErrors)) {
 						Message(Chat::Red, "Bot command '%s' not recognized.", message);
+					}
 				}
 			}
 			break;
 		}
 #endif
+
+		if (EQEmu::ProfanityManager::IsCensorshipActive()) {
+			EQEmu::ProfanityManager::RedactMessage(message);
+		}
 
 		Mob* sender = this;
 		if (GetPet() && GetTarget() == GetPet() && GetPet()->FindType(SE_VoiceGraft))
@@ -6237,6 +6255,52 @@ void Client::DragCorpses()
 	}
 }
 
+void Client::ConsentCorpses(std::string consent_name, bool deny)
+{
+	if (strcasecmp(consent_name.c_str(), GetName()) == 0) {
+		MessageString(Chat::Red, CONSENT_YOURSELF);
+	}
+	else if (!consent_throttle_timer.Check()) {
+		MessageString(Chat::Red, CONSENT_WAIT);
+	}
+	else {
+		auto pack = new ServerPacket(ServerOP_Consent, sizeof(ServerOP_Consent_Struct));
+		ServerOP_Consent_Struct* scs = (ServerOP_Consent_Struct*)pack->pBuffer;
+		strn0cpy(scs->grantname, consent_name.c_str(), sizeof(scs->grantname));
+		strn0cpy(scs->ownername, GetName(), sizeof(scs->ownername));
+		strn0cpy(scs->zonename, "Unknown", sizeof(scs->zonename));
+		scs->permission = deny ? 0 : 1;
+		scs->zone_id = zone->GetZoneID();
+		scs->instance_id = zone->GetInstanceID();
+		scs->consent_type = EQEmu::consent::Normal;
+		scs->consent_id = 0;
+		if (strcasecmp(scs->grantname, "group") == 0) {
+			if (!deny) {
+				Group* grp = GetGroup();
+				scs->consent_id = grp ? grp->GetID() : 0;
+			}
+			scs->consent_type = EQEmu::consent::Group;
+		}
+		else if (strcasecmp(scs->grantname, "raid") == 0) {
+			if (!deny) {
+				Raid* raid = GetRaid();
+				scs->consent_id = raid ? raid->GetID() : 0;
+			}
+			scs->consent_type = EQEmu::consent::Raid;
+		}
+		else if (strcasecmp(scs->grantname, "guild") == 0) {
+			if (!deny) {
+				scs->consent_id = GuildID();
+			}
+			scs->consent_type = EQEmu::consent::Guild;
+			// update all corpses in db so buried/unloaded corpses see new consent id
+			database.UpdateCharacterCorpseConsent(CharacterID(), scs->consent_id);
+		}
+		worldserver.SendPacket(pack);
+		safe_delete(pack);
+	}
+}
+
 void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_override, int pet_count, int pet_duration)
 {
 	if(!target || !IsValidSpell(spell_id) || this->GetID() == target->GetID())
@@ -6742,11 +6806,22 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 	GetRawACNoShield(shield_ac);
 
 	std::string skill_list[] = {
-		"1H Blunt","1H Slashing","2H Blunt","2H Slashing","Abjuration","Alteration","Apply Poison","Archery","Backstab","Bind Wound","Bash","Block","Brass Instruments","Channeling","Conjuration",
-		"Defense","Disarm","Disarm Traps","Divination","Dodge","Double Attack","Dragon Punch","Dual Wield","Eagle Strike","Evocation","Feign Death","Flying Kick","Forage","Hand To Hand","Hide","Kick",
-		"Meditate","Mend","Offense","Parry","Pick Lock","Piercing","Riposte","Round Kick","Safe Fall","Sense Heading","Singing","Sneak","Specialize Abjuration","Specialize Alteration","Specialize Conjuration",
-		"Specialize Divination","Specialize Evocation","Pick Pockets","Stringed_Instruments","Swimming","Throwing","Tiger Claw","Tracking","Wind Instruments","Fishing","Make Poison","Tinkering","Research","Alchemy",
-		"Baking","Tailoring","Sense Traps","Blacksmithing","Fletching","Brewing","Alcohol_Tolerance","Begging","Jewelry Making","Pottery","Percussion Instruments","Intimidation","Berserking","Taunt","Frenzy"
+		"1H Blunt","1H Slashing","2H Blunt","2H Slashing","Abjuration",
+		"Alteration","Apply Poison","Archery","Backstab","Bind Wound",
+		"Bash","Block","Brass Instruments","Channeling","Conjuration",
+		"Defense","Disarm","Disarm Traps","Divination","Dodge",
+		"Double Attack","Dragon Punch","Dual Wield","Eagle Strike","Evocation",
+		"Feign Death","Flying Kick","Forage","Hand To Hand","Hide",
+		"Kick","Meditate","Mend","Offense","Parry",
+		"Pick Lock","1H Piercing","Riposte","Round Kick","Safe Fall",
+		"Sense Heading","Singing","Sneak","Specialize Abjuration","Specialize Alteration",
+		"Specialize Conjuration","Specialize Divination","Specialize Evocation","Pick Pockets","Stringed Instruments",
+		"Swimming","Throwing","Tiger Claw","Tracking","Wind Instruments",
+		"Fishing","Make Poison","Tinkering","Research","Alchemy",
+		"Baking","Tailoring","Sense Traps","Blacksmithing","Fletching",
+		"Brewing","Alcohol_Tolerance","Begging","Jewelry Making","Pottery",
+		"Percussion Instruments","Intimidation","Berserking","Taunt","Frenzy",
+		"Remove Traps","Triple Attack","2H Piercing"
 	};
 
 	std::string skill_mods = "";
@@ -8505,13 +8580,13 @@ void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold,
 	memset(outapp->pBuffer, 0, sizeof(QuestReward_Struct));
 	QuestReward_Struct* qr = (QuestReward_Struct*)outapp->pBuffer;
 
-	qr->mob_id = target->GetID();		// Entity ID for the from mob name
+	qr->mob_id = target ? target->GetID() : 0;		// Entity ID for the from mob name
 	qr->target_id = GetID();			// The Client ID (this)
 	qr->copper = copper;
 	qr->silver = silver;
 	qr->gold = gold;
 	qr->platinum = platinum;
-	qr->item_id = itemid;
+	qr->item_id[0] = itemid;
 	qr->exp_reward = exp;
 
 	if (copper > 0 || silver > 0 || gold > 0 || platinum > 0)
@@ -8522,7 +8597,7 @@ void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold,
 
 	if (faction)
 	{
-		if (target->IsNPC())
+		if (target && target->IsNPC())
 		{
 			int32 nfl_id = target->CastToNPC()->GetNPCFactionID();
 			SetFactionLevel(CharacterID(), nfl_id, GetBaseClass(), GetBaseRace(), GetDeity(), true);
@@ -8533,6 +8608,42 @@ void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold,
 
 	if (exp > 0)
 		AddEXP(exp);
+
+	QueuePacket(outapp, true, Client::CLIENT_CONNECTED);
+	safe_delete(outapp);
+}
+
+void Client::QuestReward(Mob* target, const QuestReward_Struct &reward, bool faction)
+{
+	auto outapp = new EQApplicationPacket(OP_Sound, sizeof(QuestReward_Struct));
+	memset(outapp->pBuffer, 0, sizeof(QuestReward_Struct));
+	QuestReward_Struct* qr = (QuestReward_Struct*)outapp->pBuffer;
+
+	memcpy(qr, &reward, sizeof(QuestReward_Struct));
+
+	// not set in caller because reasons
+	qr->mob_id = target ? target->GetID() : 0;		// Entity ID for the from mob name
+
+	if (reward.copper > 0 || reward.silver > 0 || reward.gold > 0 || reward.platinum > 0)
+		AddMoneyToPP(reward.copper, reward.silver, reward.gold, reward.platinum, false);
+
+	for (int i = 0; i < QUESTREWARD_COUNT; ++i)
+		if (reward.item_id[i] > 0)
+			SummonItem(reward.item_id[i], 0, 0, 0, 0, 0, 0, false, EQEmu::invslot::slotCursor);
+
+	if (faction)
+	{
+		if (target && target->IsNPC())
+		{
+			int32 nfl_id = target->CastToNPC()->GetNPCFactionID();
+			SetFactionLevel(CharacterID(), nfl_id, GetBaseClass(), GetBaseRace(), GetDeity(), true);
+			qr->faction = target->CastToNPC()->GetPrimaryFaction();
+			qr->faction_mod = 1; // Too lazy to get real value, not sure if this is even used by client anyhow.
+		}
+	}
+
+	if (reward.exp_reward> 0)
+		AddEXP(reward.exp_reward);
 
 	QueuePacket(outapp, true, Client::CLIENT_CONNECTED);
 	safe_delete(outapp);

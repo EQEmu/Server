@@ -309,40 +309,42 @@ void Client::GoFish()
 
 		if(food_id == 0) {
 			int index = zone->random.Int(0, MAX_COMMON_FISH_IDS-1);
-			food_id = common_fish_ids[index];
+			food_id = (RuleB(Character, UseNoJunkFishing) ? 13019 : common_fish_ids[index]);
 		}
 
 		const EQEmu::ItemData* food_item = database.GetItem(food_id);
+		if (food_item) {
 
-		if (food_item->ItemType  != EQEmu::item::ItemTypeFood) {
-			MessageString(Chat::Skills, FISHING_SUCCESS);
-		}
-		else {
-			MessageString(Chat::Skills, FISHING_SUCCESS_FISH_NAME, food_item->Name);
-		}
-
-		EQEmu::ItemInstance* inst = database.CreateItem(food_item, 1);
-		if(inst != nullptr) {
-			if(CheckLoreConflict(inst->GetItem()))
-			{
-				MessageString(Chat::White, DUP_LORE);
-				safe_delete(inst);
+			if (food_item->ItemType != EQEmu::item::ItemTypeFood) {
+				MessageString(Chat::Skills, FISHING_SUCCESS);
 			}
-			else
-			{
-				PushItemOnCursor(*inst);
-				SendItemPacket(EQEmu::invslot::slotCursor, inst, ItemPacketLimbo);
-				if(RuleB(TaskSystem, EnableTaskSystem))
-					UpdateTasksForItem(ActivityFish, food_id);
-
-				safe_delete(inst);
-				inst = m_inv.GetItem(EQEmu::invslot::slotCursor);
+			else {
+				MessageString(Chat::Skills, FISHING_SUCCESS_FISH_NAME, food_item->Name);
 			}
 
-			if(inst) {
-				std::vector<EQEmu::Any> args;
-				args.push_back(inst);
-				parse->EventPlayer(EVENT_FISH_SUCCESS, this, "", inst->GetID(), &args);
+			EQEmu::ItemInstance* inst = database.CreateItem(food_item, 1);
+			if (inst != nullptr) {
+				if (CheckLoreConflict(inst->GetItem()))
+				{
+					MessageString(Chat::White, DUP_LORE);
+					safe_delete(inst);
+				}
+				else
+				{
+					PushItemOnCursor(*inst);
+					SendItemPacket(EQEmu::invslot::slotCursor, inst, ItemPacketLimbo);
+					if (RuleB(TaskSystem, EnableTaskSystem))
+						UpdateTasksForItem(ActivityFish, food_id);
+
+					safe_delete(inst);
+					inst = m_inv.GetItem(EQEmu::invslot::slotCursor);
+				}
+
+				if (inst) {
+					std::vector<EQEmu::Any> args;
+					args.push_back(inst);
+					parse->EventPlayer(EVENT_FISH_SUCCESS, this, "", inst->GetID(), &args);
+				}
 			}
 		}
 	}

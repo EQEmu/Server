@@ -295,6 +295,7 @@ int command_init(void)
 		command_add("npcstats", "- Show stats about target NPC", 80, command_npcstats) ||
 		command_add("npctype_cache",  "[id] or all - Clears the npc type cache for either the id or all npcs.",  250, command_npctype_cache) ||
 		command_add("npctypespawn", "[npctypeid] [factionid] - Spawn an NPC from the db", 10, command_npctypespawn) ||
+		command_add("nudge", "- Nudge your target's current position by specific values", 80, command_nudge) ||
 		command_add("nukebuffs", "- Strip all buffs on you or your target", 50, command_nukebuffs) ||
 		command_add("nukeitem", "[itemid] - Remove itemid from your player target's inventory", 150, command_nukeitem) ||
 		command_add("object", "List|Add|Edit|Move|Rotate|Copy|Save|Undo|Delete - Manipulate static and tradeskill objects within the zone", 100, command_object) ||
@@ -781,6 +782,12 @@ void command_help(Client *c, const Seperator *sep)
 			continue;
 		commands_shown++;
 		c->Message(Chat::White, "	%c%s %s",  COMMAND_CHAR, cur->first.c_str(), cur->second->desc == nullptr?"":cur->second->desc);
+	}
+	if (parse->PlayerHasQuestSub(EVENT_COMMAND)) {
+		int i = parse->EventPlayer(EVENT_COMMAND, c, sep->msg, 0);
+		if (i >= 1) {
+			commands_shown += i;
+		}
 	}
 	c->Message(Chat::White, "%d command%s listed.",  commands_shown, commands_shown!=1?"s":"");
 
@@ -2166,25 +2173,6 @@ void command_spoff(Client *c, const Seperator *sep)
 	safe_delete(outapp);
 }
 
-void command_itemtest(Client *c, const Seperator *sep)
-{
-	char chBuffer[8192] = {0};
-	//Using this to determine new item layout
-	FILE* f = nullptr;
-	if (!(f = fopen("c:\\EQEMUcvs\\ItemDump.txt",  "rb"))) {
-		c->Message(Chat::Red, "Error: Could not open c:\\EQEMUcvs\\ItemDump.txt");
-		return;
-	}
-
-	fread(chBuffer, sizeof(chBuffer), sizeof(char), f);
-	fclose(f);
-
-	auto outapp = new EQApplicationPacket(OP_ItemLinkResponse, strlen(chBuffer) + 5);
-	memcpy(&outapp->pBuffer[4], chBuffer, strlen(chBuffer));
-	c->QueuePacket(outapp);
-	safe_delete(outapp);
-}
-
 void command_gassign(Client *c, const Seperator *sep)
 {
 	if (sep->IsNumber(1) && c->GetTarget() && c->GetTarget()->IsNPC() && c->GetTarget()->CastToNPC()->GetSpawnPointID() > 0) {
@@ -2502,6 +2490,7 @@ void command_grid(Client *c, const Seperator *sep)
 	else {
 		c->Message(Chat::White, "Usage: #grid add/delete grid_num wandertype pausetype");
 		c->Message(Chat::White, "Usage: #grid max - displays the highest grid ID used in this zone (for add)");
+		c->Message(Chat::White, "Usage: #grid show - displays wp nodes as boxes");
 	}
 }
 
@@ -2554,7 +2543,7 @@ void command_size(Client *c, const Seperator *sep)
 		else if (!target)
 			c->Message(Chat::White,"Error: this command requires a target");
 		else {
-			uint16 Race = target->GetRace();
+			uint16 Race = target->GetModel();
 			uint8 Gender = target->GetGender();
 			uint8 Texture = 0xFF;
 			uint8 HelmTexture = 0xFF;
@@ -3125,6 +3114,81 @@ void command_npctypespawn(Client *c, const Seperator *sep)
 	else
 		c->Message(Chat::White, "Usage: #npctypespawn npctypeid factionid");
 
+}
+
+void command_nudge(Client* c, const Seperator* sep)
+{
+	if (sep->arg[1][0] == 0) {
+		c->Message(Chat::White, "Usage: #nudge [x=f] [y=f] [z=f] [h=f] (partial/mixed arguments allowed)");
+	}
+	else {
+
+		auto target = c->GetTarget();
+		if (!target) {
+
+			c->Message(Chat::Yellow, "This command requires a target.");
+			return;
+		}
+		if (target->IsMoving()) {
+
+			c->Message(Chat::Yellow, "This command requires a stationary target.");
+			return;
+		}
+
+		glm::vec4 position_offset(0.0f, 0.0f, 0.0f, 0.0f);
+		for (auto index = 1; index <= 4; ++index) {
+
+			if (!sep->arg[index]) {
+				continue;
+			}
+
+			Seperator argsep(sep->arg[index], '=');
+			if (!argsep.arg[1][0]) {
+				continue;
+			}
+
+			switch (argsep.arg[0][0]) {
+			case 'x':
+				position_offset.x = atof(argsep.arg[1]);
+				break;
+			case 'y':
+				position_offset.y = atof(argsep.arg[1]);
+				break;
+			case 'z':
+				position_offset.z = atof(argsep.arg[1]);
+				break;
+			case 'h':
+				position_offset.w = atof(argsep.arg[1]);
+				break;
+			default:
+				break;
+			}
+		}
+
+		const auto& current_position = target->GetPosition();
+		glm::vec4 new_position(
+			(current_position.x + position_offset.x),
+			(current_position.y + position_offset.y),
+			(current_position.z + position_offset.z),
+			(current_position.w + position_offset.w)
+		);
+
+		target->GMMove(new_position.x, new_position.y, new_position.z, new_position.w);
+
+		c->Message(
+			Chat::White,
+			"Nudging '%s' to {%1.3f, %1.3f, %1.3f, %1.2f} (adjustment: {%1.3f, %1.3f, %1.3f, %1.2f})",
+			target->GetName(),
+			new_position.x,
+			new_position.y,
+			new_position.z,
+			new_position.w,
+			position_offset.x,
+			position_offset.y,
+			position_offset.z,
+			position_offset.w
+		);
+	}
 }
 
 void command_heal(Client *c, const Seperator *sep)
@@ -4176,10 +4240,15 @@ void command_corpsefix(Client *c, const Seperator *sep)
 
 void command_reloadworld(Client *c, const Seperator *sep)
 {
-	c->Message(Chat::White, "Reloading quest cache and repopping zones worldwide.");
+	int world_repop = atoi(sep->arg[1]);
+	if (world_repop == 0)
+		c->Message(Chat::White, "Reloading quest cache worldwide.");
+	else
+		c->Message(Chat::White, "Reloading quest cache and repopping zones worldwide.");
+	
 	auto pack = new ServerPacket(ServerOP_ReloadWorld, sizeof(ReloadWorld_Struct));
 	ReloadWorld_Struct* RW = (ReloadWorld_Struct*) pack->pBuffer;
-	RW->Option = ((atoi(sep->arg[1]) == 1) ? 1 : 0);
+	RW->Option = world_repop;
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
 }
@@ -7471,7 +7540,7 @@ void command_ipban(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "Usage: #ipban [xxx.xxx.xxx.xxx]");
 	} else {
 		if(database.AddBannedIP(sep->arg[1], c->GetName())) {
-			c->Message(Chat::White, "%s has been successfully added to the Banned_IPs table by %s", sep->arg[1], c->GetName());
+			c->Message(Chat::White, "%s has been successfully added to the banned_ips table by %s", sep->arg[1], c->GetName());
 		} else {
 			c->Message(Chat::White, "IPBan Failed (IP address is possibly already in the table?)");
 		}
@@ -13182,8 +13251,8 @@ void command_bot(Client *c, const Seperator *sep)
 	}
 	
 	if (bot_command_dispatch(c, bot_message.c_str()) == -2) {
-		if (parse->PlayerHasQuestSub(EVENT_COMMAND)) {
-			int i = parse->EventPlayer(EVENT_COMMAND, c, bot_message, 0);
+		if (parse->PlayerHasQuestSub(EVENT_BOT_COMMAND)) {
+			int i = parse->EventPlayer(EVENT_BOT_COMMAND, c, bot_message, 0);
 			if (i == 0 && !RuleB(Chat, SuppressCommandErrors)) {
 				c->Message(Chat::Red, "Bot command '%s' not recognized.", bot_message.c_str());
 			}

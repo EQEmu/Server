@@ -233,6 +233,20 @@ bool Spawn2::Process() {
 		}
 
 		currentnpcid = npcid;
+
+		glm::vec4 loc(x, y, z, heading);
+		int starting_wp = 0;
+		if (spawn_group->wp_spawns && grid_ > 0)
+		{
+			glm::vec4 wploc;
+			starting_wp = database.GetRandomWaypointLocFromGrid(wploc, zone->GetZoneID(), grid_);
+			if (wploc.x != 0.0f || wploc.y != 0.0f || wploc.z != 0.0f)
+			{
+				loc = wploc;
+				Log(Logs::General, Logs::Spawns, "spawning at random waypoint #%i loc: (%.3f, %.3f, %.3f).", starting_wp , loc.x, loc.y, loc.z);
+			}
+		}
+
 		NPC *npc = new NPC(tmp, this, glm::vec4(x, y, z, heading), GravityBehavior::Water);
 
 		npc->mod_prespawn(this);
@@ -275,7 +289,7 @@ bool Spawn2::Process() {
 				z
 			);
 
-			LoadGrid();
+			LoadGrid(starting_wp);
 		}
 		else {
 			LogSpawns("Spawn2 [{}]: Group [{}] spawned [{}] ([{}]) at ([{}], [{}], [{}]). Grid loading delayed",
@@ -302,7 +316,7 @@ void Spawn2::Disable()
 	enabled = false;
 }
 
-void Spawn2::LoadGrid() {
+void Spawn2::LoadGrid(int start_wp) {
 	if (!npcthis)
 		return;
 	if (grid_ < 1)
@@ -311,8 +325,8 @@ void Spawn2::LoadGrid() {
 		return;
 	//dont set an NPC's grid until its loaded for them.
 	npcthis->SetGrid(grid_);
-	npcthis->AssignWaypoints(grid_);
-	LogSpawns("Spawn2 [{}]: Loading grid [{}] for [{}]", spawn2_id, grid_, npcthis->GetName());
+	npcthis->AssignWaypoints(grid_, start_wp);
+	LogSpawns("Spawn2 [{}]: Loading grid [{}] for [{}]; starting wp is [{}]", spawn2_id, grid_, npcthis->GetName(), start_wp);
 }
 
 /*

@@ -251,26 +251,12 @@ bool Client::Process() {
 			}
 		}
 
-		/* Build a close range list of NPC's  */
-		if (npc_close_scan_timer.Check()) {
-			close_mobs.clear();
-			//Force spawn updates when traveled far 
-			bool force_spawn_updates = false;
-			float client_update_range = (RuleI(Range, ClientForceSpawnUpdateRange) *  RuleI(Range, ClientForceSpawnUpdateRange));
-			float scan_range = (RuleI(Range, ClientNPCScan) * RuleI(Range, ClientNPCScan));
-			auto &mob_list = entity_list.GetMobList();
-			for (auto itr = mob_list.begin(); itr != mob_list.end(); ++itr) {
-				Mob* mob = itr->second;
-				float distance = DistanceSquared(m_Position, mob->GetPosition());
-				if (mob->IsNPC()) {
-					if (distance <= scan_range) {
-						close_mobs.insert(std::pair<Mob *, float>(mob, distance));
-					}
-					else if ((mob->GetAggroRange() * mob->GetAggroRange()) > scan_range) {
-						close_mobs.insert(std::pair<Mob *, float>(mob, distance));
-					}
-				}
-			}
+		/**
+		 * Scan close range mobs
+		 * Used in aggro checks
+		 */
+		if (mob_close_scan_timer.Check()) {
+			entity_list.ScanCloseMobs(close_mobs, this);
 		}
 		
 		bool may_use_attacks = false;
@@ -593,7 +579,7 @@ bool Client::Process() {
 	if (zone->CanDoCombat() && ret && !GetFeigned() && client_scan_npc_aggro_timer.Check()) {
 		int npc_scan_count = 0;
 		for (auto & close_mob : close_mobs) {
-			Mob *mob = close_mob.first;
+			Mob *mob = close_mob.second;
 
 			if (!mob)
 				continue;

@@ -37,6 +37,7 @@
 #include <sstream>
 #include <numeric>
 #include <cassert>
+#include <cinttypes>
 
 
 namespace RoF2
@@ -3548,7 +3549,7 @@ namespace RoF2
 			{
 				eq->items[i].Unknown18 = 0;
 				if (i < 80) {
-					snprintf(eq->items[i].SerialNumber, sizeof(eq->items[i].SerialNumber), "%016d", emu->SerialNumber[i]);
+					snprintf(eq->items[i].SerialNumber, sizeof(eq->items[i].SerialNumber), "%016" PRId64, emu->SerialNumber[i]);
 					eq->ItemCost[i] = emu->ItemCost[i];
 				}
 				else {

@@ -399,7 +399,7 @@ void EQ::Net::DaybreakConnection::Process()
 
 		ProcessQueue();
 	}
-	catch (std::exception ex) {
+	catch (std::exception &ex) {
 		if (m_owner->m_on_error_message) {
 			m_owner->m_on_error_message(fmt::format("Error processing connection: {0}", ex.what()));
 		}

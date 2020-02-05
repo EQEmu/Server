@@ -107,7 +107,7 @@ public:
 
 	bool	AddToNameFilter(const char* name);
 	bool	CreateCharacter(uint32 account_id, char* name, uint16 gender, uint16 race, uint16 class_, uint8 str, uint8 sta, uint8 cha, uint8 dex, uint8 int_, uint8 agi, uint8 wis, uint8 face);
-	bool	DeleteCharacter(char* name);
+	bool	DeleteCharacter(char* character_name);
 	bool	MoveCharacterToZone(const char* charname, const char* zonename);
 	bool	MoveCharacterToZone(const char* charname, const char* zonename,uint32 zoneid);
 	bool	MoveCharacterToZone(uint32 iCharID, const char* iZonename);
@@ -120,7 +120,7 @@ public:
 
 	/* General Information Queries */
 
-	bool	AddBannedIP(char* bannedIP, const char* notes); //Add IP address to the Banned_IPs table.
+	bool	AddBannedIP(char* bannedIP, const char* notes); //Add IP address to the banned_ips table.
 	bool	AddGMIP(char* ip_address, char* name);
 	bool	CheckBannedIPs(const char* loginIP); //Check incoming connection against banned IP table.
 	bool	CheckGMIPs(const char* loginIP, uint32 account_id);
@@ -179,6 +179,7 @@ public:
 	bool	DeleteAccount(const char *name, const char* loginserver);
 	bool	GetLiveChar(uint32 account_id, char* cname);
 	bool	SetAccountStatus(const char* name, int16 status);
+	bool	SetAccountStatus(const std::string& account_name, int16 status);
 	bool	SetLocalPassword(uint32 accid, const char* password);
 	bool	UpdateLiveChar(char* charname, uint32 account_id);
 

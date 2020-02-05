@@ -45,6 +45,7 @@
 #include "eq_packet_structs.h"
 #include "extprofile.h"
 #include "string_util.h"
+#include "database_schema.h"
 
 extern Client client;
 
@@ -124,7 +125,7 @@ uint32 Database::CheckLogin(const char* name, const char* password, const char *
 //Get Banned IP Address List - Only return false if the incoming connection's IP address is not present in the banned_ips table.
 bool Database::CheckBannedIPs(const char* loginIP)
 {
-	std::string query = StringFormat("SELECT ip_address FROM Banned_IPs WHERE ip_address='%s'", loginIP);
+	std::string query = StringFormat("SELECT ip_address FROM banned_ips WHERE ip_address='%s'", loginIP);
 
 	auto results = QueryDatabase(query);
 
@@ -140,7 +141,7 @@ bool Database::CheckBannedIPs(const char* loginIP)
 }
 
 bool Database::AddBannedIP(char* bannedIP, const char* notes) {
-	std::string query = StringFormat("INSERT into Banned_IPs SET ip_address='%s', notes='%s'", bannedIP, notes);
+	std::string query = StringFormat("INSERT into banned_ips SET ip_address='%s', notes='%s'", bannedIP, notes);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		return false;
@@ -293,6 +294,37 @@ bool Database::SetAccountStatus(const char* name, int16 status) {
 	return true;
 }
 
+/**
+ * @param account_name
+ * @param status
+ * @return
+ */
+bool Database::SetAccountStatus(const std::string& account_name, int16 status)
+{
+	LogInfo("Account [{}] is attempting to be set to status [{}]", account_name, status);
+
+	std::string query = fmt::format(
+		SQL(
+			UPDATE account SET status = {} WHERE name = '{}'
+		),
+		status,
+		account_name
+	);
+
+	auto results = QueryDatabase(query);
+
+	if (!results.Success()) {
+		return false;
+	}
+
+	if (results.RowsAffected() == 0) {
+		LogWarning("Account [{}] does not exist!", account_name);
+		return false;
+	}
+
+	return true;
+}
+
 /* This initially creates the character during character create */
 bool Database::ReserveName(uint32 account_id, char* name) {
 	std::string query = StringFormat("SELECT `account_id`, `name` FROM `character_data` WHERE `name` = '%s'", name);
@@ -307,70 +339,81 @@ bool Database::ReserveName(uint32 account_id, char* name) {
 	query = StringFormat("INSERT INTO `character_data` SET `account_id` = %i, `name` = '%s'", account_id, name);
 	results = QueryDatabase(query);
 	if (!results.Success() || results.ErrorMessage() != ""){ return false; }
+	
+	// Put character into the default guild if rule is being used.
+	int guild_id = RuleI(Character, DefaultGuild);
+
+	if (guild_id != 0) {
+		int character_id=results.LastInsertedID();
+		if (character_id > -1) {
+			query = StringFormat("INSERT INTO `guild_members` SET `char_id` = %i, `guild_id` = '%i'", character_id, guild_id);
+			results = QueryDatabase(query);
+			if (!results.Success() || results.ErrorMessage() != ""){
+				LogInfo("Could not put character [{}] into default Guild", name);
+			}
+		}
+	}
+	
 	return true;
 }
 
-/*
-	Delete the character with the name "name"
-	returns false on failure, true otherwise
-*/
-bool Database::DeleteCharacter(char *name) {
-	uint32 charid = 0;
-	if(!name ||	!strlen(name)) {
+/**
+ * @param character_name
+ * @return
+ */
+bool Database::DeleteCharacter(char *character_name) {
+	uint32 character_id = 0;
+	if(!character_name || !strlen(character_name)) {
 		LogInfo("DeleteCharacter: request to delete without a name (empty char slot)");
 		return false;
 	}
-	LogInfo("Database::DeleteCharacter name : [{}]", name);
 
-	/* Get id from character_data before deleting record so we can clean up the rest of the tables */
-	std::string query = StringFormat("SELECT `id` from `character_data` WHERE `name` = '%s'", name);
-	auto results = QueryDatabase(query);
-	for (auto row = results.begin(); row != results.end(); ++row) { charid = atoi(row[0]); }
-	if (charid <= 0){
-		LogError("Database::DeleteCharacter :: Character ({}) not found, stopping delete...", name);
+	std::string query   = StringFormat("SELECT `id` from `character_data` WHERE `name` = '%s'", character_name);
+	auto        results = QueryDatabase(query);
+	for (auto   row     = results.begin(); row != results.end(); ++row) {
+		character_id = atoi(row[0]);
+	}
+
+	if (character_id <= 0) {
+		LogError("DeleteCharacter | Invalid Character ID [{}]", character_name);
 		return false;
 	}
 
-	query = StringFormat("DELETE FROM `quest_globals` WHERE `charid` = '%d'", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_activities` WHERE `charid` = '%d'", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_enabledtasks` WHERE `charid` = '%d'", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_tasks` WHERE `charid` = '%d'", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `completed_tasks` WHERE `charid` = '%d'", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `friends` WHERE `charid` = '%d'", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `mail` WHERE `charid` = '%d'", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `timers` WHERE `char_id` = '%d'", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `inventory` WHERE `charid` = '%d'", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `char_recipe_list` WHERE `char_id` = '%d'", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `adventure_stats` WHERE `player_id` ='%d'", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `zone_flags` WHERE `charID` = '%d'", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `titles` WHERE `char_id` = '%d'", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `player_titlesets` WHERE `char_id` = '%d'", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `keyring` WHERE `char_id` = '%d'", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `faction_values` WHERE `char_id` = '%d'", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `instance_list_player` WHERE `charid` = '%d'", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_data` WHERE `id` = '%d'", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_skills` WHERE `id` = %u", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_languages` WHERE `id` = %u", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_bind` WHERE `id` = %u", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_alternate_abilities` WHERE `id` = %u", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_currency` WHERE `id` = %u", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_data` WHERE `id` = %u", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_spells` WHERE `id` = %u", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_memmed_spells` WHERE `id` = %u", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_disciplines` WHERE `id` = %u", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_material` WHERE `id` = %u", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_tribute` WHERE `id` = %u", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_bandolier` WHERE `id` = %u", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_potionbelt` WHERE `id` = %u", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_inspect_messages` WHERE `id` = %u", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_leadership_abilities` WHERE `id` = %u", charid); QueryDatabase(query);
-	query = StringFormat("DELETE FROM `character_alt_currency` WHERE `char_id` = '%d'", charid); QueryDatabase(query);
+	std::string delete_type = "hard-deleted";
+	if (RuleB(Character, SoftDeletes)) {
+		delete_type       = "soft-deleted";
+		std::string query = fmt::format(
+			SQL(
+				UPDATE
+				character_data
+				SET
+				name = SUBSTRING(CONCAT(name, '-deleted-', UNIX_TIMESTAMP()), 1, 64),
+				deleted_at = NOW()
+				WHERE
+				id = '{}'
+			),
+			character_id
+		);
+
+		QueryDatabase(query);
+
+		return true;
+	}
+
+	LogInfo("DeleteCharacter | Character [{}] ({}) is being [{}]", character_name, character_id, delete_type);
+
+	for (const auto& iter : DatabaseSchema::GetCharacterTables()) {
+		std::string table_name               = iter.first;
+		std::string character_id_column_name = iter.second;
+
+		QueryDatabase(fmt::format("DELETE FROM {} WHERE {} = {}", table_name, character_id_column_name, character_id));
+	}
+
 #ifdef BOTS
-	query = StringFormat("DELETE FROM `guild_members` WHERE `char_id` = '%d' AND GetMobTypeById(%i) = 'C'", charid); // note: only use of GetMobTypeById()
-#else
-	query = StringFormat("DELETE FROM `guild_members` WHERE `char_id` = '%d'", charid);
-#endif
+	query = StringFormat("DELETE FROM `guild_members` WHERE `char_id` = '%d' AND GetMobTypeById(%i) = 'C'", character_id); // note: only use of GetMobTypeById()
 	QueryDatabase(query);
+#endif
+
 
 	return true;
 }
@@ -652,6 +695,7 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 		pp->RestTimer					  // " RestTimer)                 "
 	);
 	auto results = QueryDatabase(query);
+
 	/* Save Bind Points */
 	query = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, slot)"
 		" VALUES (%u, %u, %u, %f, %f, %f, %f, %i), "

@@ -31,23 +31,27 @@ extern std::vector<RaceClassAllocation> character_create_allocations;
 extern std::vector<RaceClassCombos> character_create_race_class_combos;
 
 
-// the current stuff is at the bottom of this function
-void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **outApp, uint32 clientVersionBit)
+/**
+ * @param account_id
+ * @param out_app
+ * @param client_version_bit
+ */
+void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **out_app, uint32 client_version_bit)
 {
-	/* Set Character Creation Limit */
-	EQEmu::versions::ClientVersion client_version = EQEmu::versions::ConvertClientVersionBitToClientVersion(clientVersionBit);
+	EQEmu::versions::ClientVersion
+		   client_version  = EQEmu::versions::ConvertClientVersionBitToClientVersion(client_version_bit);
 	size_t character_limit = EQEmu::constants::StaticLookup(client_version)->CharacterCreationLimit;
-	
-	// Validate against absolute server max
-	if (character_limit > EQEmu::constants::CHARACTER_CREATION_LIMIT)
+
+	if (character_limit > EQEmu::constants::CHARACTER_CREATION_LIMIT) {
 		character_limit = EQEmu::constants::CHARACTER_CREATION_LIMIT;
+	}
 
 	// Force Titanium clients to use '8'
-	if (client_version == EQEmu::versions::ClientVersion::Titanium)
+	if (client_version == EQEmu::versions::ClientVersion::Titanium) {
 		character_limit = 8;
-	
-	/* Get Character Info */
-	std::string cquery = StringFormat(
+	}
+
+	std::string character_list_query = StringFormat(
 		"SELECT                     "
 		"`id`,                      "  // 0
 		"name,                      "  // 1
@@ -71,237 +75,281 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 		"zone_id		            "  // 19
 		"FROM                       "
 		"character_data             "
-		"WHERE `account_id` = %i ORDER BY `name` LIMIT %u", accountID, character_limit);
-	auto results = database.QueryDatabase(cquery);
+		"WHERE `account_id` = %i AND deleted_at IS NULL ORDER BY `name` LIMIT %u",
+		account_id,
+		character_limit
+	);
+
+	auto results = database.QueryDatabase(character_list_query);
 
 	size_t character_count = results.RowCount();
 	if (character_count == 0) {
-		*outApp = new EQApplicationPacket(OP_SendCharInfo, sizeof(CharacterSelect_Struct));
-		CharacterSelect_Struct *cs = (CharacterSelect_Struct *)(*outApp)->pBuffer;
-		cs->CharCount = 0;
+		*out_app                   = new EQApplicationPacket(OP_SendCharInfo, sizeof(CharacterSelect_Struct));
+		CharacterSelect_Struct *cs = (CharacterSelect_Struct *) (*out_app)->pBuffer;
+		cs->CharCount  = 0;
 		cs->TotalChars = character_limit;
 		return;
 	}
 
 	size_t packet_size = sizeof(CharacterSelect_Struct) + (sizeof(CharacterSelectEntry_Struct) * character_count);
-	*outApp = new EQApplicationPacket(OP_SendCharInfo, packet_size);
+	*out_app = new EQApplicationPacket(OP_SendCharInfo, packet_size);
 
-	unsigned char *buff_ptr = (*outApp)->pBuffer;
-	CharacterSelect_Struct *cs = (CharacterSelect_Struct *)buff_ptr;
+	unsigned char          *buff_ptr = (*out_app)->pBuffer;
+	CharacterSelect_Struct *cs       = (CharacterSelect_Struct *) buff_ptr;
 
-	cs->CharCount = character_count;
+	cs->CharCount  = character_count;
 	cs->TotalChars = character_limit;
 
 	buff_ptr += sizeof(CharacterSelect_Struct);
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		CharacterSelectEntry_Struct *cse = (CharacterSelectEntry_Struct *)buff_ptr;
-		PlayerProfile_Struct pp;
-		EQEmu::InventoryProfile inv;
+		CharacterSelectEntry_Struct *p_character_select_entry_struct = (CharacterSelectEntry_Struct *) buff_ptr;
+		PlayerProfile_Struct        player_profile_struct;
+		EQEmu::InventoryProfile     inventory_profile;
 
-		pp.SetPlayerProfileVersion(EQEmu::versions::ConvertClientVersionToMobVersion(client_version));
-		inv.SetInventoryVersion(client_version);
-		inv.SetGMInventory(true); // charsel can not interact with items..but, no harm in setting to full expansion support
+		player_profile_struct.SetPlayerProfileVersion(EQEmu::versions::ConvertClientVersionToMobVersion(client_version));
+		inventory_profile.SetInventoryVersion(client_version);
+		inventory_profile.SetGMInventory(true); // charsel can not interact with items..but, no harm in setting to full expansion support
 
-		uint32 character_id = (uint32)atoi(row[0]);
-		uint8 has_home = 0;
-		uint8 has_bind = 0;
+		uint32 character_id = (uint32) atoi(row[0]);
+		uint8  has_home     = 0;
+		uint8  has_bind     = 0;
 
-		memset(&pp, 0, sizeof(PlayerProfile_Struct));
-		
-		/* Fill CharacterSelectEntry_Struct */
-		memset(cse->Name, 0, sizeof(cse->Name));
-		strcpy(cse->Name, row[1]);
-		cse->Class = (uint8)atoi(row[4]);
-		cse->Race = (uint32)atoi(row[3]);
-		cse->Level = (uint8)atoi(row[5]);
-		cse->ShroudClass = cse->Class;
-		cse->ShroudRace = cse->Race;
-		cse->Zone = (uint16)atoi(row[19]);
-		cse->Instance = 0;
-		cse->Gender = (uint8)atoi(row[2]);
-		cse->Face = (uint8)atoi(row[15]);
+		memset(&player_profile_struct, 0, sizeof(PlayerProfile_Struct));
 
-		for (uint32 matslot = 0; matslot < EQEmu::textures::materialCount; matslot++) {	// Processed below
-			cse->Equip[matslot].Material = 0;
-			cse->Equip[matslot].Unknown1 = 0;
-			cse->Equip[matslot].EliteModel = 0;
-			cse->Equip[matslot].HerosForgeModel = 0;
-			cse->Equip[matslot].Unknown2 = 0;
-			cse->Equip[matslot].Color = 0;
-		}						
+		memset(p_character_select_entry_struct->Name, 0, sizeof(p_character_select_entry_struct->Name));
+		strcpy(p_character_select_entry_struct->Name, row[1]);
+		p_character_select_entry_struct->Class       = (uint8) atoi(row[4]);
+		p_character_select_entry_struct->Race        = (uint32) atoi(row[3]);
+		p_character_select_entry_struct->Level       = (uint8) atoi(row[5]);
+		p_character_select_entry_struct->ShroudClass = p_character_select_entry_struct->Class;
+		p_character_select_entry_struct->ShroudRace  = p_character_select_entry_struct->Race;
+		p_character_select_entry_struct->Zone        = (uint16) atoi(row[19]);
+		p_character_select_entry_struct->Instance    = 0;
+		p_character_select_entry_struct->Gender      = (uint8) atoi(row[2]);
+		p_character_select_entry_struct->Face        = (uint8) atoi(row[15]);
 
-		cse->Unknown15 = 0xFF;
-		cse->Unknown19 = 0xFF;
-		cse->DrakkinTattoo = (uint32)atoi(row[17]);
-		cse->DrakkinDetails = (uint32)atoi(row[18]);
-		cse->Deity = (uint32)atoi(row[6]);
-		cse->PrimaryIDFile = 0;							// Processed Below
-		cse->SecondaryIDFile = 0;						// Processed Below
-		cse->HairColor = (uint8)atoi(row[9]);
-		cse->BeardColor = (uint8)atoi(row[10]);
-		cse->EyeColor1 = (uint8)atoi(row[11]);
-		cse->EyeColor2 = (uint8)atoi(row[12]);
-		cse->HairStyle = (uint8)atoi(row[13]);
-		cse->Beard = (uint8)atoi(row[14]);
-		cse->GoHome = 0;								// Processed Below
-		cse->Tutorial = 0;								// Processed Below
-		cse->DrakkinHeritage = (uint32)atoi(row[16]);
-		cse->Unknown1 = 0;
-		cse->Enabled = 1;
-		cse->LastLogin = (uint32)atoi(row[7]);			// RoF2 value: 1212696584
-		cse->Unknown2 = 0;
-		/* Fill End */
+		for (uint32 material_slot = 0; material_slot < EQEmu::textures::materialCount; material_slot++) {
+			p_character_select_entry_struct->Equip[material_slot].Material        = 0;
+			p_character_select_entry_struct->Equip[material_slot].Unknown1        = 0;
+			p_character_select_entry_struct->Equip[material_slot].EliteModel      = 0;
+			p_character_select_entry_struct->Equip[material_slot].HerosForgeModel = 0;
+			p_character_select_entry_struct->Equip[material_slot].Unknown2        = 0;
+			p_character_select_entry_struct->Equip[material_slot].Color           = 0;
+		}
+
+		p_character_select_entry_struct->Unknown15       = 0xFF;
+		p_character_select_entry_struct->Unknown19       = 0xFF;
+		p_character_select_entry_struct->DrakkinTattoo   = (uint32) atoi(row[17]);
+		p_character_select_entry_struct->DrakkinDetails  = (uint32) atoi(row[18]);
+		p_character_select_entry_struct->Deity           = (uint32) atoi(row[6]);
+		p_character_select_entry_struct->PrimaryIDFile   = 0;                            // Processed Below
+		p_character_select_entry_struct->SecondaryIDFile = 0;                        // Processed Below
+		p_character_select_entry_struct->HairColor       = (uint8) atoi(row[9]);
+		p_character_select_entry_struct->BeardColor      = (uint8) atoi(row[10]);
+		p_character_select_entry_struct->EyeColor1       = (uint8) atoi(row[11]);
+		p_character_select_entry_struct->EyeColor2       = (uint8) atoi(row[12]);
+		p_character_select_entry_struct->HairStyle       = (uint8) atoi(row[13]);
+		p_character_select_entry_struct->Beard           = (uint8) atoi(row[14]);
+		p_character_select_entry_struct->GoHome          = 0;                                // Processed Below
+		p_character_select_entry_struct->Tutorial        = 0;                                // Processed Below
+		p_character_select_entry_struct->DrakkinHeritage = (uint32) atoi(row[16]);
+		p_character_select_entry_struct->Unknown1        = 0;
+		p_character_select_entry_struct->Enabled         = 1;
+		p_character_select_entry_struct->LastLogin       = (uint32) atoi(row[7]);            // RoF2 value: 1212696584
+		p_character_select_entry_struct->Unknown2        = 0;
 
 		if (RuleB(World, EnableReturnHomeButton)) {
 			int now = time(nullptr);
-			if ((now - atoi(row[7])) >= RuleI(World, MinOfflineTimeToReturnHome))
-				cse->GoHome = 1;
+			if ((now - atoi(row[7])) >= RuleI(World, MinOfflineTimeToReturnHome)) {
+				p_character_select_entry_struct->GoHome = 1;
+			}
 		}
 
-		if (RuleB(World, EnableTutorialButton) && (cse->Level <= RuleI(World, MaxLevelForTutorial))) {
-			cse->Tutorial = 1;
+		if (RuleB(World, EnableTutorialButton) && (p_character_select_entry_struct->Level <= RuleI(World, MaxLevelForTutorial))) {
+			p_character_select_entry_struct->Tutorial = 1;
 		}
 
-		/* Set Bind Point Data for any character that may possibly be missing it for any reason */
-		cquery = StringFormat("SELECT `zone_id`, `instance_id`, `x`, `y`, `z`, `heading`, `slot` FROM `character_bind`  WHERE `id` = %i LIMIT 5", character_id);
-		auto results_bind = database.QueryDatabase(cquery);
-		auto bind_count = results_bind.RowCount();
-		for (auto row_b = results_bind.begin(); row_b != results_bind.end(); ++row_b) {
+		/**
+		 * Bind
+		 */
+		character_list_query = StringFormat(
+			"SELECT `zone_id`, `instance_id`, `x`, `y`, `z`, `heading`, `slot` FROM `character_bind`  WHERE `id` = %i LIMIT 5",
+			character_id
+		);
+		auto      results_bind = database.QueryDatabase(character_list_query);
+		auto      bind_count   = results_bind.RowCount();
+		for (auto row_b        = results_bind.begin(); row_b != results_bind.end(); ++row_b) {
 			if (row_b[6] && atoi(row_b[6]) == 4) {
 				has_home = 1;
 				// If our bind count is less than 5, we need to actually make use of this data so lets parse it
 				if (bind_count < 5) {
-					pp.binds[4].zoneId = atoi(row_b[0]);
-					pp.binds[4].instance_id = atoi(row_b[1]);
-					pp.binds[4].x = atof(row_b[2]);
-					pp.binds[4].y = atof(row_b[3]);
-					pp.binds[4].z = atof(row_b[4]);
-					pp.binds[4].heading = atof(row_b[5]);
+					player_profile_struct.binds[4].zoneId      = atoi(row_b[0]);
+					player_profile_struct.binds[4].instance_id = atoi(row_b[1]);
+					player_profile_struct.binds[4].x           = atof(row_b[2]);
+					player_profile_struct.binds[4].y           = atof(row_b[3]);
+					player_profile_struct.binds[4].z           = atof(row_b[4]);
+					player_profile_struct.binds[4].heading     = atof(row_b[5]);
 				}
 			}
-			if (row_b[6] && atoi(row_b[6]) == 0){ has_bind = 1; }
+			if (row_b[6] && atoi(row_b[6]) == 0) { has_bind = 1; }
 		}
 
 		if (has_home == 0 || has_bind == 0) {
-			cquery = StringFormat("SELECT `zone_id`, `bind_id`, `x`, `y`, `z` FROM `start_zones` WHERE `player_class` = %i AND `player_deity` = %i AND `player_race` = %i",
-				cse->Class, cse->Deity, cse->Race);
-			auto results_bind = database.QueryDatabase(cquery);
-			for (auto row_d = results_bind.begin(); row_d != results_bind.end(); ++row_d) {
+			character_list_query = StringFormat(
+				"SELECT `zone_id`, `bind_id`, `x`, `y`, `z` FROM `start_zones` WHERE `player_class` = %i AND `player_deity` = %i AND `player_race` = %i",
+				p_character_select_entry_struct->Class,
+				p_character_select_entry_struct->Deity,
+				p_character_select_entry_struct->Race
+			);
+			auto      results_bind = database.QueryDatabase(character_list_query);
+			for (auto row_d        = results_bind.begin(); row_d != results_bind.end(); ++row_d) {
 				/* If a bind_id is specified, make them start there */
 				if (atoi(row_d[1]) != 0) {
-					pp.binds[4].zoneId = (uint32)atoi(row_d[1]);
-					GetSafePoints(pp.binds[4].zoneId, 0, &pp.binds[4].x, &pp.binds[4].y, &pp.binds[4].z);
+					player_profile_struct.binds[4].zoneId = (uint32) atoi(row_d[1]);
+					GetSafePoints(player_profile_struct.binds[4].zoneId, 0, &player_profile_struct.binds[4].x, &player_profile_struct.binds[4].y, &player_profile_struct.binds[4].z);
 				}
-				/* Otherwise, use the zone and coordinates given */
+					/* Otherwise, use the zone and coordinates given */
 				else {
-					pp.binds[4].zoneId = (uint32)atoi(row_d[0]);
+					player_profile_struct.binds[4].zoneId = (uint32) atoi(row_d[0]);
 					float x = atof(row_d[2]);
 					float y = atof(row_d[3]);
 					float z = atof(row_d[4]);
-					if (x == 0 && y == 0 && z == 0){ GetSafePoints(pp.binds[4].zoneId, 0, &x, &y, &z); }
-					pp.binds[4].x = x; pp.binds[4].y = y; pp.binds[4].z = z;
+					if (x == 0 && y == 0 && z == 0) { GetSafePoints(player_profile_struct.binds[4].zoneId, 0, &x, &y, &z); }
+					player_profile_struct.binds[4].x = x;
+					player_profile_struct.binds[4].y = y;
+					player_profile_struct.binds[4].z = z;
 				}
 			}
-			pp.binds[0] = pp.binds[4];
+			player_profile_struct.binds[0] = player_profile_struct.binds[4];
 			/* If no home bind set, set it */
 			if (has_home == 0) {
-				std::string query = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, slot)"
+				std::string query        = StringFormat(
+					"REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, slot)"
 					" VALUES (%u, %u, %u, %f, %f, %f, %f, %i)",
-					character_id, pp.binds[4].zoneId, 0, pp.binds[4].x, pp.binds[4].y, pp.binds[4].z, pp.binds[4].heading, 4);
-				auto results_bset = QueryDatabase(query);
+					character_id,
+					player_profile_struct.binds[4].zoneId,
+					0,
+					player_profile_struct.binds[4].x,
+					player_profile_struct.binds[4].y,
+					player_profile_struct.binds[4].z,
+					player_profile_struct.binds[4].heading,
+					4
+				);
+				auto        results_bset = QueryDatabase(query);
 			}
 			/* If no regular bind set, set it */
 			if (has_bind == 0) {
-				std::string query = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, slot)"
+				std::string query        = StringFormat(
+					"REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, slot)"
 					" VALUES (%u, %u, %u, %f, %f, %f, %f, %i)",
-					character_id, pp.binds[0].zoneId, 0, pp.binds[0].x, pp.binds[0].y, pp.binds[0].z, pp.binds[0].heading, 0);
-				auto results_bset = QueryDatabase(query);
+					character_id,
+					player_profile_struct.binds[0].zoneId,
+					0,
+					player_profile_struct.binds[0].x,
+					player_profile_struct.binds[0].y,
+					player_profile_struct.binds[0].z,
+					player_profile_struct.binds[0].heading,
+					0
+				);
+				auto        results_bset = QueryDatabase(query);
 			}
 		}
 		/* If our bind count is less than 5, then we have null data that needs to be filled in. */
 		if (bind_count < 5) {
 			// we know that home and main bind must be valid here, so we don't check those
 			// we also use home to fill in the null data like live does.
-			for (int i = 1; i < 4;  i++) {
-				if (pp.binds[i].zoneId != 0) // we assume 0 is the only invalid one ...
+			for (int i = 1; i < 4; i++) {
+				if (player_profile_struct.binds[i].zoneId != 0) { // we assume 0 is the only invalid one ...
 					continue;
+				}
 
-				std::string query = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, slot)"
+				std::string query        = StringFormat(
+					"REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, slot)"
 					" VALUES (%u, %u, %u, %f, %f, %f, %f, %i)",
-					character_id, pp.binds[4].zoneId, 0, pp.binds[4].x, pp.binds[4].y, pp.binds[4].z, pp.binds[4].heading, i);
-				auto results_bset = QueryDatabase(query);
+					character_id,
+					player_profile_struct.binds[4].zoneId,
+					0,
+					player_profile_struct.binds[4].x,
+					player_profile_struct.binds[4].y,
+					player_profile_struct.binds[4].z,
+					player_profile_struct.binds[4].heading,
+					i
+				);
+				auto        results_bset = QueryDatabase(query);
 			}
 		}
-		/* Bind End */
 
-		/* Load Character Material Data for Char Select */
-		cquery = StringFormat("SELECT slot, red, green, blue, use_tint, color FROM `character_material` WHERE `id` = %u", character_id);
-		auto results_b = database.QueryDatabase(cquery); uint8 slot = 0;
-		for (auto row_b = results_b.begin(); row_b != results_b.end(); ++row_b) {
+		character_list_query = StringFormat(
+			"SELECT slot, red, green, blue, use_tint, color FROM `character_material` WHERE `id` = %u",
+			character_id
+		);
+		auto      results_b = database.QueryDatabase(character_list_query);
+		uint8     slot      = 0;
+		for (auto row_b     = results_b.begin(); row_b != results_b.end(); ++row_b) {
 			slot = atoi(row_b[0]);
-			pp.item_tint.Slot[slot].Red = atoi(row_b[1]);
-			pp.item_tint.Slot[slot].Green = atoi(row_b[2]);
-			pp.item_tint.Slot[slot].Blue = atoi(row_b[3]);
-			pp.item_tint.Slot[slot].UseTint = atoi(row_b[4]);
+			player_profile_struct.item_tint.Slot[slot].Red     = atoi(row_b[1]);
+			player_profile_struct.item_tint.Slot[slot].Green   = atoi(row_b[2]);
+			player_profile_struct.item_tint.Slot[slot].Blue    = atoi(row_b[3]);
+			player_profile_struct.item_tint.Slot[slot].UseTint = atoi(row_b[4]);
 		}
-		/* Character Material Data End */
 
-		/* Load Inventory */
-		// If we ensure that the material data is updated appropriately, we can do away with inventory loads
-		if (GetCharSelInventory(accountID, cse->Name, &inv)) {
-			const EQEmu::ItemData* item = nullptr;
-			const EQEmu::ItemInstance* inst = nullptr;
-			int16 invslot = 0;
+		if (GetCharSelInventory(account_id, p_character_select_entry_struct->Name, &inventory_profile)) {
+			const EQEmu::ItemData     *item          = nullptr;
+			const EQEmu::ItemInstance *inst          = nullptr;
+			int16 inventory_slot = 0;
 
 			for (uint32 matslot = EQEmu::textures::textureBegin; matslot < EQEmu::textures::materialCount; matslot++) {
-				invslot = EQEmu::InventoryProfile::CalcSlotFromMaterial(matslot);
-				if (invslot == INVALID_INDEX) { continue; }
-				inst = inv.GetItem(invslot);
-				if (inst == nullptr) { continue; }
+				inventory_slot = EQEmu::InventoryProfile::CalcSlotFromMaterial(matslot);
+				if (inventory_slot == INVALID_INDEX) { continue; }
+				inst = inventory_profile.GetItem(inventory_slot);
+				if (inst == nullptr) {
+					continue;
+				}
 				item = inst->GetItem();
-				if (item == nullptr) { continue; }
+				if (item == nullptr) {
+					continue;
+				}
 
 				if (matslot > 6) {
-					uint32 idfile = 0;
+					uint32 item_id_file = 0;
 					// Weapon Models 
 					if (inst->GetOrnamentationIDFile() != 0) {
-						idfile = inst->GetOrnamentationIDFile();
-						cse->Equip[matslot].Material = idfile;
+						item_id_file = inst->GetOrnamentationIDFile();
+						p_character_select_entry_struct->Equip[matslot].Material = item_id_file;
 					}
 					else {
 						if (strlen(item->IDFile) > 2) {
-							idfile = atoi(&item->IDFile[2]);
-							cse->Equip[matslot].Material = idfile;
+							item_id_file = atoi(&item->IDFile[2]);
+							p_character_select_entry_struct->Equip[matslot].Material = item_id_file;
 						}
 					}
 					if (matslot == EQEmu::textures::weaponPrimary) {
-						cse->PrimaryIDFile = idfile;
+						p_character_select_entry_struct->PrimaryIDFile = item_id_file;
 					}
 					else {
-						cse->SecondaryIDFile = idfile;
+						p_character_select_entry_struct->SecondaryIDFile = item_id_file;
 					}
 				}
 				else {
 					uint32 color = 0;
-					if (pp.item_tint.Slot[matslot].UseTint) {
-						color = pp.item_tint.Slot[matslot].Color;
+					if (player_profile_struct.item_tint.Slot[matslot].UseTint) {
+						color = player_profile_struct.item_tint.Slot[matslot].Color;
 					}
 					else {
 						color = inst->GetColor();
 					}
 
 					// Armor Materials/Models
-					cse->Equip[matslot].Material = item->Material;
-					cse->Equip[matslot].EliteModel = item->EliteMaterial;
-					cse->Equip[matslot].HerosForgeModel = inst->GetOrnamentHeroModel(matslot);
-					cse->Equip[matslot].Color = color;
+					p_character_select_entry_struct->Equip[matslot].Material        = item->Material;
+					p_character_select_entry_struct->Equip[matslot].EliteModel      = item->EliteMaterial;
+					p_character_select_entry_struct->Equip[matslot].HerosForgeModel = inst->GetOrnamentHeroModel(matslot);
+					p_character_select_entry_struct->Equip[matslot].Color           = color;
 				}
 			}
 		}
 		else {
-			printf("Error loading inventory for %s\n", cse->Name);
+			printf("Error loading inventory for %s\n", p_character_select_entry_struct->Name);
 		}
-		/* Load Inventory End */
 
 		buff_ptr += sizeof(CharacterSelectEntry_Struct);
 	}

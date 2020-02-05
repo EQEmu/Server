@@ -514,6 +514,50 @@ void handle_player_use_skill(QuestInterface *parse, lua_State* L, Client* client
 	lua_setfield(L, -2, "skill_level");
 }
 
+void handle_player_combine_validate(QuestInterface* parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
+									std::vector<EQEmu::Any>* extra_pointers) {
+	Seperator sep(data.c_str());
+	lua_pushinteger(L, extra_data);
+	lua_setfield(L, -2, "recipe_id");
+
+	lua_pushstring(L, sep.arg[0]);
+	lua_setfield(L, -2, "validate_type");
+
+	int zone_id = -1;
+	int tradeskill_id = -1;
+	if (strcmp(sep.arg[0], "check_zone") == 0) {
+		zone_id = std::stoi(sep.arg[1]);
+	}
+	else if (strcmp(sep.arg[0], "check_tradeskill") == 0) {
+		tradeskill_id = std::stoi(sep.arg[1]);
+	}
+
+	lua_pushinteger(L, zone_id);
+	lua_setfield(L, -2, "zone_id");
+
+	lua_pushinteger(L, tradeskill_id);
+	lua_setfield(L, -2, "tradeskill_id");
+}
+
+void handle_player_bot_command(QuestInterface* parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
+	std::vector<EQEmu::Any>* extra_pointers) {
+	Seperator sep(data.c_str(), ' ', 10, 100, true);
+	std::string bot_command(sep.arg[0] + 1);
+	lua_pushstring(L, bot_command.c_str());
+	lua_setfield(L, -2, "bot_command");
+
+	luabind::adl::object args = luabind::newtable(L);
+	int max_args = sep.GetMaxArgNum();
+	for (int i = 1; i < max_args; ++i) {
+		if (strlen(sep.arg[i]) > 0) {
+			args[i] = std::string(sep.arg[i]);
+		}
+	}
+
+	args.push(L);
+	lua_setfield(L, -2, "args");
+}
+
 //Item
 void handle_item_click(QuestInterface *parse, lua_State* L, Client* client, EQEmu::ItemInstance* item, Mob *mob, std::string data, uint32 extra_data,
 					   std::vector<EQEmu::Any> *extra_pointers) {

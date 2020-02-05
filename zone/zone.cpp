@@ -1997,7 +1997,6 @@ const char *Zone::GetSpellBlockedMessage(uint32 spell_id, const glm::vec3 &locat
 			if (spell_id != blocked_spells[x].spellid && blocked_spells[x].spellid != 0) {
 				continue;
 			}
-
 			switch (blocked_spells[x].type) {
 				case ZoneBlockedSpellTypes::ZoneWide: {
 					return blocked_spells[x].message;
@@ -2033,21 +2032,21 @@ void Zone::SetInstanceTimer(uint32 new_duration)
 
 void Zone::LoadLDoNTraps()
 {
-	const std::string query = "SELECT id, type, spell_id, skill, locked FROM ldon_trap_templates";
-    auto results = database.QueryDatabase(query);
-    if (!results.Success()) {
+	const std::string query   = "SELECT id, type, spell_id, skill, locked FROM ldon_trap_templates";
+	auto              results = database.QueryDatabase(query);
+	if (!results.Success()) {
 		return;
-    }
+	}
 
-    for (auto row = results.begin();row != results.end(); ++row) {
-	    auto lt = new LDoNTrapTemplate;
-	    lt->id = atoi(row[0]);
-	    lt->type = (LDoNChestTypes)atoi(row[1]);
-	    lt->spell_id = atoi(row[2]);
-	    lt->skill = atoi(row[3]);
-	    lt->locked = atoi(row[4]);
-	    ldon_trap_list[lt->id] = lt;
-    }
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		auto lt = new LDoNTrapTemplate;
+		lt->id       = atoi(row[0]);
+		lt->type     = (LDoNChestTypes) atoi(row[1]);
+		lt->spell_id = atoi(row[2]);
+		lt->skill    = atoi(row[3]);
+		lt->locked   = atoi(row[4]);
+		ldon_trap_list[lt->id] = lt;
+	}
 
 }
 
