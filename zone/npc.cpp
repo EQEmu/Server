@@ -793,7 +793,7 @@ bool NPC::Process()
 				SetMana(GetMana() + mana_regen + npc_sitting_regen_bonus);
 			}
 		}
-		
+
 		SendHPUpdate();
 
 		if (zone->adv_data && !p_depop) {
