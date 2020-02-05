@@ -339,6 +339,21 @@ bool Database::ReserveName(uint32 account_id, char* name) {
 	query = StringFormat("INSERT INTO `character_data` SET `account_id` = %i, `name` = '%s'", account_id, name);
 	results = QueryDatabase(query);
 	if (!results.Success() || results.ErrorMessage() != ""){ return false; }
+	
+	// Put character into the default guild if rule is being used.
+	int guild_id = RuleI(Character, DefaultGuild);
+
+	if (guild_id != 0) {
+		int character_id=results.LastInsertedID();
+		if (character_id > -1) {
+			query = StringFormat("INSERT INTO `guild_members` SET `char_id` = %i, `guild_id` = '%i'", character_id, guild_id);
+			results = QueryDatabase(query);
+			if (!results.Success() || results.ErrorMessage() != ""){
+				LogInfo("Could not put character [{}] into default Guild", name);
+			}
+		}
+	}
+	
 	return true;
 }
 
