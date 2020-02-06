@@ -518,7 +518,7 @@ void ZoneDatabase::LoadGlobalLoot()
 			auto bodytypes = SplitString(row[9], '|');
 
 			for (auto &b : bodytypes)
-				e.AddRule(GlobalLoot::RuleTypes::Class, std::stoi(b));
+				e.AddRule(GlobalLoot::RuleTypes::BodyType, std::stoi(b));
 		}
 
 		zone->AddGlobalLootEntry(e);
