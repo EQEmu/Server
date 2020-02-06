@@ -3704,7 +3704,7 @@ struct SendAA_Struct {
 /*0088*/	uint32 aa_expansion;
 /*0092*/	uint32 special_category;
 /*0096*/	uint8 shroud;
-/*0097*/	uint8 unknown97;
+/*0097*/	uint8 reset_on_death; // timer is reset on death -- guess
 /*0098*/	uint32 total_abilities;
 /*0102*/	AA_Ability abilities[0];
 };

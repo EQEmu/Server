@@ -1023,6 +1023,24 @@ void Client::ResetAlternateAdvancementTimers() {
 	safe_delete(outapp);
 }
 
+void Client::ResetOnDeathAlternateAdvancement() {
+	for (const auto &aa : aa_ranks) {
+		auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(aa.first, aa.second.first);
+		auto ability = ability_rank.first;
+		auto rank = ability_rank.second;
+
+		if (!ability)
+			continue;
+
+		if (!rank)
+			continue;
+
+		// since they're dying, we just need to clear the DB
+		if (ability->reset_on_death)
+			p_timers.Clear(&database, rank->spell_type + pTimerAAStart);
+	}
+}
+
 void Client::PurchaseAlternateAdvancementRank(int rank_id) {
 	AA::Rank *rank = zone->GetAlternateAdvancementRank(rank_id);
 	if(!rank) {
@@ -1646,7 +1664,7 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 	LogInfo("Loading Alternate Advancement Abilities");
 	abilities.clear();
 	std::string query = "SELECT id, name, category, classes, races, deities, drakkin_heritage, status, type, charges, "
-		"grant_only, first_rank_id FROM aa_ability WHERE enabled = 1";
+		"grant_only, reset_on_death, first_rank_id FROM aa_ability WHERE enabled = 1";
 	auto results = QueryDatabase(query);
 	if(results.Success()) {
 		for(auto row = results.begin(); row != results.end(); ++row) {
@@ -1663,7 +1681,8 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 			ability->type = atoi(row[8]);
 			ability->charges = atoi(row[9]);
 			ability->grant_only = atoi(row[10]) != 0 ? true : false;
-			ability->first_rank_id = atoi(row[11]);
+			ability->reset_on_death = atoi(row[11]) != 0 ? true : false;
+			ability->first_rank_id = atoi(row[12]);
 			ability->first = nullptr;
 
 			abilities[ability->id] = std::unique_ptr<AA::Ability>(ability);
