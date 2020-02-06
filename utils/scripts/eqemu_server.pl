@@ -2180,6 +2180,7 @@ sub bots_db_management {
     
     if ($local_database_version > $binary_database_version) {
         print "[Update] Bots database version is ahead of current binaries...\n";
+        return;
     }
     
     run_database_check();
