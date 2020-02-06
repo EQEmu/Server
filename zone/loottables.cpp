@@ -482,7 +482,6 @@ void ZoneDatabase::LoadGlobalLoot()
 				continue;
 		}
 
-
 		GlobalLootEntry e(atoi(row[0]), atoi(row[1]), row[2] ? row[2] : "");
 
 		auto min_level = atoi(row[3]);
