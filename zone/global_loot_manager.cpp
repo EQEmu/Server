@@ -1,6 +1,9 @@
 #include "global_loot_manager.h"
 #include "npc.h"
 #include "client.h"
+#include "zone.h"
+
+extern Zone *zone;
 
 std::vector<int> GlobalLootManager::GetGlobalLootTables(NPC *mob) const
 {
@@ -77,6 +80,12 @@ bool GlobalLootEntry::PassesRules(NPC *mob) const
 			bBodyType = true; // we must pass BodyType
 			if (mob->GetBodyType() == r.value)
 				bPassesBodyType = true;
+			break;
+		case GlobalLoot::RuleTypes::HotZone: // value == 0 must not be hot_zone, value != must be hot_zone
+			if (zone->IsHotzone() && !r.value)
+				return false;
+			if (!zone->IsHotzone() && r.value)
+				return false;
 			break;
 		default:
 			break;

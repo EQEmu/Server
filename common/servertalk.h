@@ -866,10 +866,12 @@ struct SpawnPlayerCorpse_Struct {
 struct ServerOP_Consent_Struct {
 	char grantname[64];
 	char ownername[64];
+	char zonename[32];
 	uint8 permission;
 	uint32 zone_id;
 	uint16 instance_id;
-	uint32 message_string_id;
+	uint8  consent_type; // 0 = normal, 1 = group, 2 = raid, 3 = guild
+	uint32 consent_id;
 };
 
 struct ReloadTasks_Struct {

@@ -1057,110 +1057,42 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		break;
 	}
 	case ServerOP_Consent: {
-		// Message string id's likely to be used here are:
-		// CONSENT_YOURSELF = 399
-		// CONSENT_INVALID_NAME = 397
-		// TARGET_NOT_FOUND = 101
-		ZoneServer* zs;
-		ServerOP_Consent_Struct* s = (ServerOP_Consent_Struct*)pack->pBuffer;
-		ClientListEntry* cle = client_list.FindCharacter(s->grantname);
-		if (cle) {
-			if (cle->instance() != 0)
-			{
-				zs = zoneserver_list.FindByInstanceID(cle->instance());
-				if (zs) {
-					zs->SendPacket(pack);
-				}
-				else
-				{
-					auto pack = new ServerPacket(ServerOP_Consent_Response, sizeof(ServerOP_Consent_Struct));
-					ServerOP_Consent_Struct* scs = (ServerOP_Consent_Struct*)pack->pBuffer;
-					strcpy(scs->grantname, s->grantname);
-					strcpy(scs->ownername, s->ownername);
-					scs->permission = s->permission;
-					scs->zone_id = s->zone_id;
-					scs->instance_id = s->instance_id;
-					scs->message_string_id = 101;
-					zs = zoneserver_list.FindByInstanceID(s->instance_id);
-					if (zs) {
-						zs->SendPacket(pack);
-					}
-					else {
-						LogInfo("Unable to locate zone record for instance id [{}] in zoneserver list for ServerOP_Consent_Response operation", s->instance_id);
-					}
-					safe_delete(pack);
-				}
-			}
-			else
-			{
-				zs = zoneserver_list.FindByZoneID(cle->zone());
-				if (zs) {
-					zs->SendPacket(pack);
-				}
-				else {
-					// send target not found back to requester
-					auto pack = new ServerPacket(ServerOP_Consent_Response, sizeof(ServerOP_Consent_Struct));
-					ServerOP_Consent_Struct* scs = (ServerOP_Consent_Struct*)pack->pBuffer;
-					strcpy(scs->grantname, s->grantname);
-					strcpy(scs->ownername, s->ownername);
-					scs->permission = s->permission;
-					scs->zone_id = s->zone_id;
-					scs->message_string_id = 101;
-					zs = zoneserver_list.FindByZoneID(s->zone_id);
-					if (zs) {
-						zs->SendPacket(pack);
-					}
-					else {
-						LogInfo("Unable to locate zone record for zone id [{}] in zoneserver list for ServerOP_Consent_Response operation", s->zone_id);
-					}
-					safe_delete(pack);
-				}
-			}
-		}
-		else {
-			// send target not found back to requester
-			auto pack = new ServerPacket(ServerOP_Consent_Response, sizeof(ServerOP_Consent_Struct));
-			ServerOP_Consent_Struct* scs = (ServerOP_Consent_Struct*)pack->pBuffer;
-			strcpy(scs->grantname, s->grantname);
-			strcpy(scs->ownername, s->ownername);
-			scs->permission = s->permission;
-			scs->zone_id = s->zone_id;
-			scs->message_string_id = 397;
-			zs = zoneserver_list.FindByZoneID(s->zone_id);
-			if (zs) {
-				zs->SendPacket(pack);
-			}
-			else {
-				LogInfo("Unable to locate zone record for zone id [{}] in zoneserver list for ServerOP_Consent_Response operation", s->zone_id);
-			}
-			safe_delete(pack);
-		}
+		zoneserver_list.SendPacket(pack); // update corpses in all zones
 		break;
 	}
 	case ServerOP_Consent_Response: {
-		// Message string id's likely to be used here are:
-		// CONSENT_YOURSELF = 399
-		// CONSENT_INVALID_NAME = 397
-		// TARGET_NOT_FOUND = 101
 		ServerOP_Consent_Struct* s = (ServerOP_Consent_Struct*)pack->pBuffer;
-		if (s->instance_id != 0)
-		{
-			ZoneServer* zs = zoneserver_list.FindByInstanceID(s->instance_id);
-			if (zs) {
-				zs->SendPacket(pack);
-			}
-			else {
-				LogInfo("Unable to locate zone record for instance id [{}] in zoneserver list for ServerOP_Consent_Response operation", s->instance_id);
-			}
+
+		ZoneServer* owner_zs = nullptr;
+		if (s->instance_id == 0) {
+			owner_zs = zoneserver_list.FindByZoneID(s->zone_id);
 		}
-		else
-		{
-			ZoneServer* zs = zoneserver_list.FindByZoneID(s->zone_id);
-			if (zs) {
-				zs->SendPacket(pack);
-			}
-			else {
-				LogInfo("Unable to locate zone record for zone id [{}] in zoneserver list for ServerOP_Consent_Response operation", s->zone_id);
+		else {
+			owner_zs = zoneserver_list.FindByInstanceID(s->instance_id);
+		}
+
+		if (owner_zs) {
+			owner_zs->SendPacket(pack);
+		}
+		else {
+			LogInfo("Unable to locate zone record for zone id [{}] or instance id [{}] in zoneserver list for ServerOP_Consent_Response operation", s->zone_id, s->instance_id);
+		}
+
+		if (s->consent_type == EQEmu::consent::Normal) {
+			// send the message to the client being granted or denied permission
+			ClientListEntry* cle = client_list.FindCharacter(s->grantname);
+			if (cle) {
+				ZoneServer* granted_zs = nullptr;
+				if (cle->instance() == 0) {
+					granted_zs = zoneserver_list.FindByZoneID(cle->zone());
+				}
+				else {
+					granted_zs = zoneserver_list.FindByInstanceID(cle->instance());
+				}
+				// avoid sending twice if owner and granted are in same zone
+				if (granted_zs && granted_zs != owner_zs) {
+					granted_zs->SendPacket(pack);
+				}
 			}
 		}
 		break;

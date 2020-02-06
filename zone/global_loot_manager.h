@@ -17,6 +17,7 @@ enum class RuleTypes {
 	BodyType = 4,
 	Rare = 5,
 	Raid = 6,
+	HotZone = 7,
 	Max
 };
 

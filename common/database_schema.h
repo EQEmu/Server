@@ -22,17 +22,76 @@
 #define EQEMU_DATABASE_SCHEMA_H
 
 #include <vector>
+#include <map>
 
 namespace DatabaseSchema {
 
 	/**
-	 * Gets player tables
+	 * Character-specific tables
+	 *
+	 * Does not included related meta-data tables such as 'guilds', 'accounts'
+	 * @return
+	 */
+	static std::map<std::string, std::string> GetCharacterTables()
+	{
+		return {
+			{"adventure_stats",                "player_id"},
+			{"buyer",                          "charid"},
+			{"char_recipe_list",               "char_id"},
+			{"character_activities",           "charid"},
+			{"character_alt_currency",         "char_id"},
+			{"character_alternate_abilities",  "id"},
+			{"character_auras",                "id"},
+			{"character_bandolier",            "id"},
+			{"character_bind",                 "id"},
+			{"character_buffs",                "character_id"},
+			{"character_corpses",              "id"},
+			{"character_currency",             "id"},
+			{"character_data",                 "id"},
+			{"character_disciplines",          "id"},
+			{"character_enabledtasks",         "charid"},
+			{"character_inspect_messages",     "id"},
+			{"character_item_recast",          "id"},
+			{"character_languages",            "id"},
+			{"character_leadership_abilities", "id"},
+			{"character_material",             "id"},
+			{"character_memmed_spells",        "id"},
+			{"character_pet_buffs",            "char_id"},
+			{"character_pet_info",             "char_id"},
+			{"character_pet_inventory",        "char_id"},
+			{"character_potionbelt",           "id"},
+			{"character_skills",               "id"},
+			{"character_spells",               "id"},
+			{"character_tasks",                "charid"},
+			{"character_tribute",              "id"},
+			{"completed_tasks",                "charid"},
+			{"data_buckets",                   "id"},
+			{"faction_values",                 "char_id"},
+			{"friends",                        "charid"},
+			{"guild_members",                  "char_id"},
+			{"guilds",                         "id"},
+			{"instance_list_player",           "id"},
+			{"inventory",                      "charid"},
+			{"inventory_snapshots",            "charid"},
+			{"keyring",                        "char_id"},
+			{"mail",                           "charid"},
+			{"player_titlesets",               "char_id"},
+			{"quest_globals",                  "charid"},
+			{"timers",                         "char_id"},
+			{"titles",                         "char_id"},
+			{"trader",                         "char_id"},
+			{"zone_flags",                     "charID"}
+		};
+	}
+
+	/**
+	 * Gets all player and meta-data tables
 	 *
 	 * @return
 	 */
 	static std::vector<std::string> GetPlayerTables()
 	{
-		std::vector<std::string> tables = {
+		return {
 			"account",
 			"account_ip",
 			"account_flags",
@@ -91,8 +150,6 @@ namespace DatabaseSchema {
 			"trader_audit",
 			"zone_flags"
 		};
-
-		return tables;
 	}
 
 	/**
@@ -102,7 +159,7 @@ namespace DatabaseSchema {
 	 */
 	static std::vector<std::string> GetContentTables()
 	{
-		std::vector<std::string> tables = {
+		return {
 			"aa_ability",
 			"aa_actions",
 			"aa_effects",
@@ -188,8 +245,6 @@ namespace DatabaseSchema {
 			"zone_server",
 			"zoneserver_auth",
 		};
-
-		return tables;
 	}
 
 	/**
@@ -199,7 +254,7 @@ namespace DatabaseSchema {
 	 */
 	static std::vector<std::string> GetServerTables()
 	{
-		std::vector<std::string> tables = {
+		return {
 			"banned_ips",
 			"bugs",
 			"bug_reports",
@@ -225,8 +280,6 @@ namespace DatabaseSchema {
 			"saylink",
 			"variables",
 		};
-
-		return tables;
 	}
 
 	/**
@@ -237,7 +290,7 @@ namespace DatabaseSchema {
 	 */
 	static std::vector<std::string> GetStateTables()
 	{
-		std::vector<std::string> tables = {
+		return {
 			"adventure_members",
 			"chatchannels",
 			"group_id",
@@ -253,8 +306,6 @@ namespace DatabaseSchema {
 			"spell_buckets",
 			"spell_globals",
 		};
-
-		return tables;
 	}
 
 	/**
@@ -264,15 +315,13 @@ namespace DatabaseSchema {
 	 */
 	static std::vector<std::string> GetLoginTables()
 	{
-		std::vector<std::string> tables = {
+		return {
 			"login_accounts",
 			"login_api_tokens",
 			"login_server_admins",
 			"login_server_list_types",
 			"login_world_servers",
 		};
-
-		return tables;
 	}
 
 	/**
@@ -282,12 +331,10 @@ namespace DatabaseSchema {
 	 */
 	static std::vector<std::string> GetVersionTables()
 	{
-		std::vector<std::string> tables = {
+		return {
 			"db_version",
 			"inventory_versions",
 		};
-
-		return tables;
 	}
 
 }

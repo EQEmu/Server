@@ -73,7 +73,7 @@ void Corpse::SendLootReqErrorPacket(Client* client, LootResponse response) {
 	safe_delete(outapp);
 }
 
-Corpse* Corpse::LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std::string in_charname, const glm::vec4& position, std::string time_of_death, bool rezzed, bool was_at_graveyard) {
+Corpse* Corpse::LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std::string in_charname, const glm::vec4& position, std::string time_of_death, bool rezzed, bool was_at_graveyard, uint32 guild_consent_id) {
 	uint32 item_count = database.GetCharacterCorpseItemCount(in_dbid);
 	auto buffer =
 	    new char[sizeof(PlayerCorpse_Struct) + (item_count * sizeof(player_lootitem::ServerLootItem_Struct))];
@@ -138,6 +138,7 @@ Corpse* Corpse::LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std:
 	pc->drakkin_details = pcs->drakkin_details;
 	pc->IsRezzed(rezzed);
 	pc->become_npc = false;
+	pc->consented_guild_id = guild_consent_id;
 
 	pc->UpdateEquipmentLight(); // itemlist populated above..need to determine actual values
 	
@@ -281,6 +282,18 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 	for (i = 0; i < MAX_LOOTERS; i++){
 		allowed_looters[i] = 0;
 	}
+
+	if (client->AutoConsentGroupEnabled()) {
+		Group* grp = client->GetGroup();
+		consented_group_id = grp ? grp->GetID() : 0;
+	}
+
+	if (client->AutoConsentRaidEnabled()) {
+		Raid* raid = client->GetRaid();
+		consented_raid_id = raid ? raid->GetID() : 0;
+	}
+
+	consented_guild_id = client->AutoConsentGuildEnabled() ? client->GuildID() : 0;
 
 	is_corpse_changed		= true;
 	rez_experience			= in_rezexp;
@@ -611,11 +624,11 @@ bool Corpse::Save() {
 
 	/* Create New Corpse*/
 	if (corpse_db_id == 0) {
-		corpse_db_id = database.SaveCharacterCorpse(char_id, corpse_name, zone->GetZoneID(), zone->GetInstanceID(), dbpc, m_Position);
+		corpse_db_id = database.SaveCharacterCorpse(char_id, corpse_name, zone->GetZoneID(), zone->GetInstanceID(), dbpc, m_Position, consented_guild_id);
 	}
 	/* Update Corpse Data */
 	else{
-		corpse_db_id = database.UpdateCharacterCorpse(corpse_db_id, char_id, corpse_name, zone->GetZoneID(), zone->GetInstanceID(), dbpc, m_Position, IsRezzed());
+		corpse_db_id = database.UpdateCharacterCorpse(corpse_db_id, char_id, corpse_name, zone->GetZoneID(), zone->GetInstanceID(), dbpc, m_Position, consented_guild_id, IsRezzed());
 	}
 
 	safe_delete_array(dbpc);
@@ -645,6 +658,25 @@ void Corpse::DepopNPCCorpse() {
 
 void Corpse::DepopPlayerCorpse() {
 	player_corpse_depop = true;
+}
+
+void Corpse::AddConsentName(std::string consent_player_name)
+{
+	for (const auto& consented_player_name : consented_player_names) {
+		if (strcasecmp(consented_player_name.c_str(), consent_player_name.c_str()) == 0) {
+			return;
+		}
+	}
+	consented_player_names.emplace_back(consent_player_name);
+}
+
+void Corpse::RemoveConsentName(std::string consent_player_name)
+{
+	consented_player_names.erase(std::remove_if(consented_player_names.begin(), consented_player_names.end(),
+		[consent_player_name](const std::string& consented_player_name) {
+			return strcasecmp(consented_player_name.c_str(), consent_player_name.c_str()) == 0;
+		}
+	), consented_player_names.end());
 }
 
 uint32 Corpse::CountItems() {
@@ -1434,29 +1466,50 @@ bool Corpse::Summon(Client* client, bool spell, bool CheckDistance) {
 				is_corpse_changed = true;
 			}
 			else {
-				client->Message(Chat::White, "Corpse is too far away.");
+				client->MessageString(Chat::Red, CORPSE_TOO_FAR);
 				return false;
 			}
 		}
 		else
 		{
 			bool consented = false;
-			std::list<std::string>::iterator itr;
-			for(itr = client->consent_list.begin(); itr != client->consent_list.end(); ++itr) {
-				if(strcmp(this->GetOwnerName(), itr->c_str()) == 0) {
-					if (!CheckDistance || (DistanceSquaredNoZ(m_Position, client->GetPosition()) <= dist2)) {
-						GMMove(client->GetX(), client->GetY(), client->GetZ());
-						is_corpse_changed = true;
-					}
-					else {
-						client->Message(Chat::White, "Corpse is too far away.");
-						return false;
-					}
+			for (const auto& consented_player_name : consented_player_names) {
+				if (strcasecmp(client->GetName(), consented_player_name.c_str()) == 0) {
+					consented = true;
+					break;
+				}
+			}
+
+			if (!consented && consented_guild_id && consented_guild_id != GUILD_NONE) {
+				if (client->GuildID() == consented_guild_id) {
 					consented = true;
 				}
 			}
-			if(!consented) {
-				client->Message(Chat::White, "You do not have permission to move this corpse.");
+			if (!consented && consented_group_id) {
+				Group* grp = client->GetGroup();
+				if (grp && grp->GetID() == consented_group_id) {
+					consented = true;
+				}
+			}
+			if (!consented && consented_raid_id) {
+				Raid* raid = client->GetRaid();
+				if (raid && raid->GetID() == consented_raid_id) {
+					consented = true;
+				}
+			}
+
+			if (consented) {
+				if (!CheckDistance || (DistanceSquaredNoZ(m_Position, client->GetPosition()) <= dist2)) {
+					GMMove(client->GetX(), client->GetY(), client->GetZ());
+					is_corpse_changed = true;
+				}
+				else {
+					client->MessageString(Chat::Red, CORPSE_TOO_FAR);
+					return false;
+				}
+			}
+			else {
+				client->MessageString(Chat::Red, CONSENT_DENIED);
 				return false;
 			}
 		}
