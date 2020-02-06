@@ -4341,7 +4341,7 @@ struct SendAA_Struct {
 /*0104*/	uint32 special_category;
 /*0108*/	uint8 shroud;
 /*0109*/	uint8 unknown109;
-/*0110*/	uint8 layonhands; // 1 for lay on hands -- doesn't seem to matter?
+/*0110*/	uint8 reset_on_death; // timer is reset on death
 /*0111*/	uint8 unknown111;
 /*0112*/	uint32 total_abilities;
 /*0116*/	AA_Ability abilities[0];

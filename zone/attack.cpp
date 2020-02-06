@@ -1853,6 +1853,11 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQEmu::skills::Sk
 	}
 
 	/*
+	Reset AA reuse timers that need to be, live-like this is only Lay on Hands
+	*/
+	ResetOnDeathAlternateAdvancement();
+
+	/*
 	Finally, send em home
 
 	We change the mob variables, not pp directly, because Save() will copy
