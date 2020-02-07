@@ -1858,6 +1858,12 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQEmu::skills::Sk
 	ResetOnDeathAlternateAdvancement();
 
 	/*
+	Reset reuse timer for classic skill based Lay on Hands (For tit I guess)
+	*/
+	if (GetClass() == PALADIN) // we could check if it's not expired I guess, but should be fine not to
+		p_timers.Clear(&database, pTimerLayHands);
+
+	/*
 	Finally, send em home
 
 	We change the mob variables, not pp directly, because Save() will copy
