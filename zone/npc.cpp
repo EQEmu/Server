@@ -2200,7 +2200,13 @@ void NPC::SetLevel(uint8 in_level, bool command)
 	if(in_level > level)
 		SendLevelAppearance();
 	level = in_level;
-	SendAppearancePacket(AT_WhoLevel, in_level);
+	SendAppearancePacket(AT_WhoLevel, in_level);	
+	
+	int r;
+	for (r = 0; r <= EQEmu::skills::HIGHEST_SKILL; r++) {
+		skills[r] = database.GetSkillCap(GetClass(), (EQEmu::skills::SkillType)r, level);
+	}
+
 }
 
 void NPC::ModifyNPCStat(const char *identifier, const char *new_value)
