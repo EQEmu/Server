@@ -1263,7 +1263,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 					return;
 				}
 			}
-			else if (!RuleB(Character, PetsUseReagents) && IsEffectInSpell(spell_id, SE_SummonPet)) {
+			else if (!RuleB(Character, PetsUseReagents) && (IsEffectInSpell(spell_id, SE_SummonPet) || IsEffectInSpell(spell_id, SE_NecPet))) {
 				//bypass reagent cost
 			}
 			else if (!bard_song_mode)
