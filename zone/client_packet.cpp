@@ -8653,7 +8653,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 		}
 		else if (inst->IsClassCommon())
 		{
-			if (item->ItemType == EQEmu::item::ItemTypeSpell && (strstr((const char*)item->Name, "Tome of ") || strstr((const char*)item->Name, "Skill: ")))
+			if (!RuleB(Skills, RequireTomeHandin) && item->ItemType == EQEmu::item::ItemTypeSpell && (strstr((const char*)item->Name, "Tome of ") || strstr((const char*)item->Name, "Skill: ")))
 			{
 				DeleteItemInInventory(slot_id, 1, true);
 				TrainDiscipline(item->ID);

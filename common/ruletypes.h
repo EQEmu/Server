@@ -197,6 +197,7 @@ RULE_INT(Skills, SwimmingStartValue, 100, "")
 RULE_BOOL(Skills, TrainSenseHeading, false, "")
 RULE_INT(Skills, SenseHeadingStartValue, 200, "")
 RULE_BOOL(Skills, SelfLanguageLearning, true, "")
+RULE_BOOL(Skills, RequireTomeHandin, false, "Disable click-to-learn and force turnin to Guild Master")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Pets)
