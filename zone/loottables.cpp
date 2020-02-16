@@ -464,7 +464,7 @@ void NPC::CheckGlobalLootTables()
 void ZoneDatabase::LoadGlobalLoot()
 {
 	auto query = StringFormat("SELECT id, loottable_id, description, min_level, max_level, rare, raid, race, "
-				  "class, bodytype, zone FROM global_loot WHERE enabled = 1");
+				  "class, bodytype, zone, hot_zone FROM global_loot WHERE enabled = 1");
 
 	auto results = QueryDatabase(query);
 	if (!results.Success() || results.RowCount() == 0)
@@ -518,8 +518,12 @@ void ZoneDatabase::LoadGlobalLoot()
 			auto bodytypes = SplitString(row[9], '|');
 
 			for (auto &b : bodytypes)
-				e.AddRule(GlobalLoot::RuleTypes::Class, std::stoi(b));
+				e.AddRule(GlobalLoot::RuleTypes::BodyType, std::stoi(b));
 		}
+
+		// null is not used
+		if (row[11])
+			e.AddRule(GlobalLoot::RuleTypes::HotZone, atoi(row[11]));
 
 		zone->AddGlobalLootEntry(e);
 	}

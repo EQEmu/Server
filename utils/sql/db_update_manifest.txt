@@ -402,6 +402,8 @@
 9146|2020_01_10_character_soft_deletes.sql|SHOW COLUMNS FROM `character_data` LIKE 'deleted_at'|empty|
 9147|2020_01_24_grid_centerpoint_wp.sql|SHOW COLUMNS FROM `grid_entries` LIKE 'centerpoint'|empty|
 9148|2020_01_28_corpse_guild_consent_id.sql|SHOW COLUMNS FROM `character_corpses` LIKE 'guild_consent_id'|empty|
+9149|2020_02_06_globalloot.sql|SHOW COLUMNS FROM `global_loot` LIKE 'hot_zone'|empty|
+9150|2020_02_06_aa_reset_on_death.sql|SHOW COLUMNS FROM `aa_ability` LIKE 'reset_on_death'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
