@@ -2206,6 +2206,22 @@ void NPC::SetLevel(uint8 in_level, bool command)
 	for (r = 0; r <= EQEmu::skills::HIGHEST_SKILL; r++) {
 		skills[r] = database.GetSkillCap(GetClass(), (EQEmu::skills::SkillType)r, level);
 	}
+	// some overrides -- really we need to be able to set skills for mobs in the DB
+	// There are some known low level SHM/BST pets that do not follow this, which supports
+	// the theory of needing to be able to set skills for each mob separately
+	if (!IsBot()) {
+		if (level > 50) {
+			skills[EQEmu::skills::SkillDoubleAttack] = 250;
+			skills[EQEmu::skills::SkillDualWield] = 250;
+		}
+		else if (level > 3) {
+			skills[EQEmu::skills::SkillDoubleAttack] = level * 5;
+			skills[EQEmu::skills::SkillDualWield] = skills[EQEmu::skills::SkillDoubleAttack];
+		}
+		else {
+			skills[EQEmu::skills::SkillDoubleAttack] = level * 5;
+		}
+	}
 
 }
 
