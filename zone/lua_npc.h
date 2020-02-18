@@ -134,6 +134,7 @@ public:
 	void SetSimpleRoamBox(float box_size);
 	void SetSimpleRoamBox(float box_size, float move_distance);
 	void SetSimpleRoamBox(float box_size, float move_distance, int move_delay);
+	void RecalculateSkills();
 };
 
 #endif
