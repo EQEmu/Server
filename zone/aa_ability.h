@@ -50,6 +50,7 @@ public:
 	int drakkin_heritage;
 	int status;
 	bool grant_only;
+	bool reset_on_death;
 	int type;
 	int charges;
 	int first_rank_id;
