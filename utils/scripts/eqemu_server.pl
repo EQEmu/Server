@@ -2302,21 +2302,21 @@ sub run_database_check {
         #::: Match type update
         if ($match_type eq "contains") {
             if (trim(get_mysql_result($query_check)) =~ /$match_text/i) {
-                print "[Database] running update: " . $val . " '" . $file_name . "' \n";
+                print "[Database] Applying update [" . $val . "]:[" . $file_name . "]\n";
                 print get_mysql_result_from_file("db_update/$file_name");
             }
             else {
-                print "[Database] has update (" . $val . ") '" . $file_name . "' \n";
+                print "[Database] Has update [" . $val . "]:[" . $file_name . "]\n";
             }
             print_match_debug();
             print_break();
         }
         if ($match_type eq "missing") {
             if (get_mysql_result($query_check) =~ /$match_text/i) {
-                print "[Database] has update (" . $val . ") '" . $file_name . "' \n";
+                print "[Database] Has update [" . $val . "]:[" . $file_name . "]\n";
             }
             else {
-                print "[Database] running update: " . $val . " '" . $file_name . "' \n";
+                print "[Database] Applying update [" . $val . "]:[" . $file_name . "]\n";
                 print get_mysql_result_from_file("db_update/$file_name");
             }
             print_match_debug();
@@ -2324,22 +2324,22 @@ sub run_database_check {
         }
         if ($match_type eq "empty") {
             if (get_mysql_result($query_check) eq "") {
-                print "[Database] running update: " . $val . " '" . $file_name . "' \n";
+                print "[Database] Applying update [" . $val . "]:[" . $file_name . "]\n";
                 print get_mysql_result_from_file("db_update/$file_name");
             }
             else {
-                print "[Database] has update (" . $val . ") '" . $file_name . "' \n";
+                print "[Database] Has update [" . $val . "]:[" . $file_name . "' \n";
             }
             print_match_debug();
             print_break();
         }
         if ($match_type eq "not_empty") {
             if (get_mysql_result($query_check) ne "") {
-                print "[Database] running update: " . $val . " '" . $file_name . "' \n";
+                print "[Database] Applying update [" . $val . "]:[" . $file_name . "]\n";
                 print get_mysql_result_from_file("db_update/$file_name");
             }
             else {
-                print "[Database] has update (" . $val . ") '" . $file_name . "' \n";
+                print "[Database] Has update [" . $val . "]:[" . $file_name . "]\n";
             }
             print_match_debug();
             print_break();
@@ -2362,10 +2362,10 @@ sub run_database_check {
     }
     
     if ($bots_db_management == 1) {
-        print "[Database] Bots database update cycle complete at version: " . get_bots_db_version() . "\n";
+        print "[Database] Bots database update cycle complete at version [" . get_bots_db_version() . "]\n";
     }
     else {
-        print "[Database] Database update cycle complete at version: " . get_main_db_version() . "\n";
+        print "[Database] Mainstream database update cycle complete at version [" . get_main_db_version() . "]\n";
     }
 }
 
