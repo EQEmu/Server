@@ -1294,7 +1294,6 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 
 	//consume ammo
 	DeleteItemInInventory(ammo_slot, 1, true);
-	CheckIncreaseSkill(EQEmu::skills::SkillThrowing, GetTarget());
 	CommonBreakInvisibleFromCombat();
 }
 
