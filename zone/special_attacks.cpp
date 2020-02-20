@@ -1408,6 +1408,9 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQEmu::ItemInstance *RangeWeapon
 		else
 			TrySkillProc(other, EQEmu::skills::SkillThrowing, 0, false, EQEmu::invslot::slotRange);
 	}
+	if (IsClient()) {
+		CastToClient()->CheckIncreaseSkill(EQEmu::skills::SkillThrowing, GetTarget());
+	}
 }
 
 void Mob::SendItemAnimation(Mob *to, const EQEmu::ItemData *item, EQEmu::skills::SkillType skillInUse, float velocity) {
