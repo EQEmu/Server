@@ -1,0 +1,68 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "make",
+            "type": "shell",
+            "command": "cd build && make",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "cmake",
+            "type": "shell",
+            "command": "mkdir -p build && cd build && cmake -DEQEMU_BUILD_LOGIN=ON -DEQEMU_BUILD_LUA=ON -G 'Unix Makefiles' ..",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher":{
+                "owner": "cpp",
+                "fileLocation": "relative",
+                "pattern":[
+                    {
+                        "regexp": "([\\w+|\\\\]*\\.\\w+)\\((\\d+)\\)\\: (warning|error) (.*)$",
+                        "file": 1,
+                        "location": 2,
+                        "severity": 3,
+                        "message": 4
+                    }
+                ]
+            }
+        },
+        {
+            "label": "zone",
+            "type": "shell",
+            "command": "cd build/bin && ./zone",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "loginserver",
+            "type": "shell",
+            "command": "cd build/bin && ./loginserver",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "world",
+            "type": "shell",
+            "command": "cd build/bin && ./world",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
+        }
+    ]
+}
