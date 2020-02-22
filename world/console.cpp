@@ -802,9 +802,9 @@ void ConsoleIpLookup(
 	const std::vector<std::string> &args
 )
 {
-	if (args.size() > 0) {
+	if (!args.empty()) {
 		WorldConsoleTCPConnection console_connection(connection);
-		client_list.SendCLEList(connection->Admin(), 0, &console_connection, args[0].c_str());
+		client_list.SendCLEList(connection->Admin(), nullptr, &console_connection, args[0].c_str());
 	}
 }
 
@@ -860,6 +860,34 @@ void ConsoleReloadWorld(
  * @param command
  * @param args
  */
+void ConsoleReloadZoneQuests(
+	EQ::Net::ConsoleServerConnection *connection,
+	const std::string &command,
+	const std::vector<std::string> &args
+)
+{
+	if (args.empty()) {
+		connection->SendLine("[zone_short_name] required as argument");
+		return;
+	}
+
+	std::string zone_short_name = args[0];
+
+	connection->SendLine(fmt::format("Reloading Zone [{}]...", zone_short_name));
+
+	auto pack               = new ServerPacket(ServerOP_HotReloadQuests, sizeof(HotReloadQuestsStruct));
+	auto *hot_reload_quests = (HotReloadQuestsStruct *) pack->pBuffer;
+	strn0cpy(hot_reload_quests->zone_short_name, (char *) zone_short_name.c_str(), 200);
+
+	zoneserver_list.SendPacket(pack);
+	safe_delete(pack);
+}
+
+/**
+ * @param connection
+ * @param command
+ * @param args
+ */
 void ConsoleQuit(
 	EQ::Net::ConsoleServerConnection *connection,
 	const std::string &command,
@@ -892,18 +920,19 @@ void RegisterConsoleFunctions(std::unique_ptr<EQ::Net::ConsoleServer>& console)
 	console->RegisterCall("md5", 50, "md5", std::bind(ConsoleMd5, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("ooc", 50, "ooc [message]", std::bind(ConsoleOOC, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("reloadworld", 200, "reloadworld", std::bind(ConsoleReloadWorld, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-	console->RegisterCall("setpass", 200, "setpass [accountname] [newpass]", std::bind(ConsoleSetPass, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	console->RegisterCall("reloadzonequests", 200, "reloadzonequests [zone_short_name]", std::bind(ConsoleReloadZoneQuests, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	console->RegisterCall("setpass", 200, "setpass [account_name] [new_password]", std::bind(ConsoleSetPass, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("signalcharbyname", 50, "signalcharbyname charname ID", std::bind(ConsoleSignalCharByName, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("tell", 50, "tell [name] [message]", std::bind(ConsoleTell, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("unlock", 150, "unlock", std::bind(ConsoleUnlock, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-	console->RegisterCall("uptime", 50, "uptime [zoneID#]", std::bind(ConsoleUptime, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	console->RegisterCall("uptime", 50, "uptime [zone_server_id]", std::bind(ConsoleUptime, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("version", 50, "version", std::bind(ConsoleVersion, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("who", 50, "who", std::bind(ConsoleWho, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("whoami", 50, "whoami", std::bind(ConsoleWhoami, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("worldshutdown", 200, "worldshutdown", std::bind(ConsoleWorldShutdown, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-	console->RegisterCall("zonebootup", 150, "zonebootup [ZoneServerID] [zonename]", std::bind(ConsoleZoneBootup, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-	console->RegisterCall("zonelock", 150, "zonelock [list|lock|unlock] [zonename]", std::bind(ConsoleZoneLock, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-	console->RegisterCall("zoneshutdown", 150, "zoneshutdown [zonename or ZoneServerID]", std::bind(ConsoleZoneShutdown, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	console->RegisterCall("zonebootup", 150, "zonebootup [zone_server_id] [zone_short_name]", std::bind(ConsoleZoneBootup, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	console->RegisterCall("zonelock", 150, "zonelock [list|lock|unlock] [zone_short_name]", std::bind(ConsoleZoneLock, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	console->RegisterCall("zoneshutdown", 150, "zoneshutdown [zone_short_name or zone_server_id]", std::bind(ConsoleZoneShutdown, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("zonestatus", 50, "zonestatus", std::bind(ConsoleZoneStatus, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));console->RegisterCall("ping", 50, "ping", std::bind(ConsoleNull, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("quit", 50, "quit", std::bind(ConsoleQuit, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("exit", 50, "exit", std::bind(ConsoleQuit, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));

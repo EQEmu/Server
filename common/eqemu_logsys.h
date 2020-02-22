@@ -114,6 +114,7 @@ namespace Logs {
 		EntityManagement,
 		Flee,
 		Aura,
+		HotReload,
 		MaxCategoryID /* Don't Remove this */
 	};
 
@@ -187,6 +188,7 @@ namespace Logs {
 		"Entity Management",
 		"Flee",
 		"Aura",
+		"HotReload",
 	};
 }
 

@@ -51,6 +51,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "worldserver.h"
 #include "zone.h"
 #include "zone_config.h"
+#include "zone_reload.h"
 
 
 extern EntityList entity_list;
@@ -1945,12 +1946,37 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			iter++;
 		}
 	}
+
 	case ServerOP_ReloadWorld:
 	{
-		ReloadWorld_Struct* RW = (ReloadWorld_Struct*)pack->pBuffer;
+		auto* reload_world = (ReloadWorld_Struct*)pack->pBuffer;
 		if (zone) {
-			zone->ReloadWorld(RW->Option);
+			zone->ReloadWorld(reload_world->Option);
 		}
+		break;
+	}
+
+	case ServerOP_HotReloadQuests:
+	{
+		if (!zone) {
+			break;
+		}
+
+		auto *hot_reload_quests = (HotReloadQuestsStruct *) pack->pBuffer;
+
+		LogHotReloadDetail(
+			"Receiving request [HotReloadQuests] | request_zone [{}] current_zone [{}]",
+			hot_reload_quests->zone_short_name,
+			zone->GetShortName()
+		);
+
+		std::string request_zone_short_name = hot_reload_quests->zone_short_name;
+		std::string local_zone_short_name   = zone->GetShortName();
+
+		if (request_zone_short_name == local_zone_short_name || request_zone_short_name == "all"){
+			zone->SetQuestHotReloadQueued(true);
+		}
+
 		break;
 	}
 

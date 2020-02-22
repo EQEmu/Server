@@ -55,6 +55,7 @@
 #include "mob_movement_manager.h"
 #include "npc_scale_manager.h"
 #include "../common/data_verification.h"
+#include "zone_reload.h"
 
 #include <time.h>
 #include <ctime>
@@ -771,6 +772,7 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	autoshutdown_timer((RuleI(Zone, AutoShutdownDelay))),
 	clientauth_timer(AUTHENTICATION_TIMEOUT * 1000),
 	spawn2_timer(1000),
+	hot_reload_timer(1000),
 	qglobal_purge_timer(30000),
 	hotzone_timer(120000),
 	m_SafePoint(0.0f,0.0f,0.0f),
@@ -874,6 +876,7 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	mMovementManager = &MobMovementManager::Get();
 
 	SetNpcPositionUpdateDistance(0);
+	SetQuestHotReloadQueued(false);
 }
 
 Zone::~Zone() {
@@ -1231,6 +1234,27 @@ bool Zone::Process() {
 		}
 	}
 
+	if (hot_reload_timer.Check() && IsQuestHotReloadQueued()) {
+
+		LogHotReloadDetail("Hot reload timer check...");
+
+		bool perform_reload = true;
+
+		if (RuleB(HotReload, QuestsRepopWhenPlayersNotInCombat)) {
+			for (auto &it : entity_list.GetClientList()) {
+				auto client = it.second;
+				if (client->GetAggroCount() > 0) {
+					perform_reload = false;
+					break;
+				}
+			}
+		}
+
+		if (perform_reload) {
+			ZoneReload::HotReloadQuests();
+		}
+	}
+
 	if(initgrids_timer.Check()) {
 		//delayed grid loading stuff.
 		initgrids_timer.Disable();
@@ -1540,7 +1564,6 @@ void Zone::RepopClose(const glm::vec4& client_position, uint32 repop_distance)
 
 void Zone::Repop(uint32 delay)
 {
-
 	if (!Depop()) {
 		return;
 	}
@@ -2421,4 +2444,14 @@ void Zone::CalculateNpcUpdateDistanceSpread()
 		update_distance,
 		combined_spread
 	);
+}
+
+bool Zone::IsQuestHotReloadQueued() const
+{
+	return quest_hot_reload_queued;
+}
+
+void Zone::SetQuestHotReloadQueued(bool in_quest_hot_reload_queued)
+{
+	quest_hot_reload_queued = in_quest_hot_reload_queued;
 }

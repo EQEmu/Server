@@ -768,6 +768,12 @@ RULE_CATEGORY(Logging)
 RULE_BOOL(Logging, PrintFileFunctionAndLine, false, "Ex: [World Server] [net.cpp::main:309] Loading variables...")
 RULE_CATEGORY_END()
 
+RULE_CATEGORY(HotReload)
+RULE_BOOL(HotReload, QuestsRepopWithReload, true, "When a hot reload is triggered, the zone will repop")
+RULE_BOOL(HotReload, QuestsRepopWhenPlayersNotInCombat, true, "When a hot reload is triggered, the zone will repop when no clients are in combat")
+RULE_BOOL(HotReload, QuestsResetTimersWithReload, true, "When a hot reload is triggered, quest timers will be reset")
+RULE_CATEGORY_END()
+
 #undef RULE_CATEGORY
 #undef RULE_INT
 #undef RULE_REAL
