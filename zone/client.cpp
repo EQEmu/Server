@@ -6112,8 +6112,8 @@ void Client::MarkSingleCompassLoc(float in_x, float in_y, float in_z, uint8 coun
 {
 
 	auto outapp = new EQApplicationPacket(OP_DzCompass, sizeof(ExpeditionInfo_Struct) +
-								sizeof(ExpeditionCompassEntry_Struct) * count);
-	ExpeditionCompass_Struct *ecs = (ExpeditionCompass_Struct*)outapp->pBuffer;
+								sizeof(DynamicZoneCompassEntry_Struct) * count);
+	DynamicZoneCompass_Struct *ecs = (DynamicZoneCompass_Struct*)outapp->pBuffer;
 	//ecs->clientid = GetID();
 	ecs->count = count;
 
