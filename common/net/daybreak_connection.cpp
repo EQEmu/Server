@@ -1047,12 +1047,14 @@ void EQ::Net::DaybreakConnection::Compress(Packet &p, size_t offset, size_t leng
 	uint8_t new_buffer[2048] = { 0 };
 	uint8_t *buffer = (uint8_t*)p.Data() + offset;
 	uint32_t new_length = 0;
+	bool send_uncompressed = true;
 
 	if (length > 30) {
 		new_length = Deflate(buffer, (uint32_t)length, new_buffer + 1, 2048) + 1;
 		new_buffer[0] = 0x5a;
+		send_uncompressed = (new_length > length);
 	}
-	else {
+	if (send_uncompressed) {
 		memcpy(new_buffer + 1, buffer, length);
 		new_buffer[0] = 0xa5;
 		new_length = length + 1;
@@ -1380,7 +1382,7 @@ void EQ::Net::DaybreakConnection::InternalQueuePacket(Packet &p, int stream_id, 
 	}
 
 	auto stream = &m_streams[stream_id];
-	auto max_raw_size = m_max_packet_size - m_crc_bytes - DaybreakReliableHeader::size();
+	auto max_raw_size = m_max_packet_size - m_crc_bytes - DaybreakReliableHeader::size() - 1; // -1 for compress flag
 	size_t length = p.Length();
 	if (length > max_raw_size) {
 		DaybreakReliableFragmentHeader first_header;
