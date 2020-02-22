@@ -476,6 +476,8 @@ public:
 
 	inline bool IsSkipAutoScale() const { return skip_auto_scale; }
 
+	void RecalculateSkills();
+
 protected:
 
 	const NPCType*	NPCTypedata;

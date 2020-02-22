@@ -547,6 +547,12 @@ void Lua_NPC::SetSimpleRoamBox(float box_size, float move_distance, int move_del
 	self->SetSimpleRoamBox(box_size, move_distance, move_delay);
 }
 
+void Lua_NPC::RecalculateSkills()
+{
+	Lua_Safe_Call_Void();
+	self->RecalculateSkills();
+}
+
 luabind::scope lua_register_npc() {
 	return luabind::class_<Lua_NPC, Lua_Mob>("NPC")
 		.def(luabind::constructor<>())
@@ -657,7 +663,8 @@ luabind::scope lua_register_npc() {
 		.def("MerchantOpenShop", (void(Lua_NPC::*)(void))&Lua_NPC::MerchantOpenShop)
 		.def("MerchantCloseShop", (void(Lua_NPC::*)(void))&Lua_NPC::MerchantCloseShop)
 		.def("GetRawAC", (int(Lua_NPC::*)(void))&Lua_NPC::GetRawAC)
-		.def("GetAvoidanceRating", &Lua_NPC::GetAvoidanceRating);
+		.def("GetAvoidanceRating", &Lua_NPC::GetAvoidanceRating)
+		.def("RecalculateSkills", (void(Lua_NPC::*)(void))&Lua_NPC::RecalculateSkills);
 }
 
 #endif

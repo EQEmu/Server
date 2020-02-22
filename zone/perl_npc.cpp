@@ -2451,6 +2451,28 @@ XS(XS_NPC_SetSimpleRoamBox) {
 	XSRETURN_EMPTY;
 }
 
+
+XS(XS_NPC_RecalculateSkills); /* prototype to pass -Wmissing-prototypes */
+XS(XS_NPC_RecalculateSkills) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: NPC::RecalculateSkills(THIS)");
+	{
+		NPC    *THIS;
+
+		if (sv_derived_from(ST(0), "NPC")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(NPC *, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type NPC");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		THIS->RecalculateSkills();
+	}
+	XSRETURN_EMPTY;
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -2565,6 +2587,7 @@ XS(boot_NPC) {
 	newXSproto(strcpy(buf, "ClearLastName"), XS_NPC_ClearLastName, file, "$");
 	newXSproto(strcpy(buf, "GetCombatState"), XS_NPC_GetCombatState, file, "$");
 	newXSproto(strcpy(buf, "SetSimpleRoamBox"), XS_NPC_SetSimpleRoamBox, file, "$$;$$");
+	newXSproto(strcpy(buf, "RecalculateSkills"), XS_NPC_RecalculateSkills, file, "$");
 	XSRETURN_YES;
 }
 
