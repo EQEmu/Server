@@ -24,7 +24,6 @@
 void ZoneReload::HotReloadQuests()
 {
 	BenchTimer timer;
-	timer.reset();
 
 	entity_list.ClearAreas();
 
@@ -33,6 +32,7 @@ void ZoneReload::HotReloadQuests()
 	if (RuleB(HotReload, QuestsRepopWithReload)) {
 		zone->Repop(0);
 	}
+	
 	zone->SetQuestHotReloadQueued(false);
 
 	LogHotReload(
