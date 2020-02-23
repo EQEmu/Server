@@ -92,7 +92,8 @@ Mob::Mob(
 	uint8 in_bracertexture,
 	uint8 in_handtexture,
 	uint8 in_legtexture,
-	uint8 in_feettexture
+	uint8 in_feettexture,
+	uint16 in_usemodel
 ) :
 	attack_timer(2000),
 	attack_dw_timer(2000),
@@ -115,7 +116,9 @@ Mob::Mob(
 	m_specialattacks(eSpecialAttacks::None),
 	attack_anim_timer(1000),
 	position_update_melee_push_timer(500),
-	hate_list_cleanup_timer(6000)
+	hate_list_cleanup_timer(6000),
+	mob_scan_close(6000),
+	mob_check_moving_timer(1000)
 {
 	mMovementManager = &MobMovementManager::Get();
 	mMovementManager->AddMob(this);
@@ -127,6 +130,7 @@ Mob::Mob(
 	SetMoving(false);
 	moved            = false;
 	m_RewindLocation = glm::vec3();
+	m_RelativePosition = glm::vec4();
 
 	name[0] = 0;
 	orig_name[0] = 0;
@@ -147,6 +151,7 @@ Mob::Mob(
 	race          = in_race;
 	base_gender   = in_gender;
 	base_race     = in_race;
+	use_model	  = in_usemodel;
 	class_        = in_class;
 	bodytype      = in_bodytype;
 	orig_bodytype = in_bodytype;
@@ -181,6 +186,7 @@ Mob::Mob(
 
 	last_hp_percent = 0;
 	last_hp         = 0;
+	last_max_hp     = 0;
 
 	current_speed = base_runspeed;
 
@@ -450,6 +456,12 @@ Mob::Mob(
 	PrimaryAggro = false;
 	AssistAggro = false;
 	npc_assist_cap = 0;
+
+#ifdef BOTS
+	m_manual_follow = false;
+#endif
+
+	mob_scan_close.Trigger();
 }
 
 Mob::~Mob()
@@ -458,34 +470,43 @@ Mob::~Mob()
 
 	AI_Stop();
 	if (GetPet()) {
-		if (GetPet()->Charmed())
+		if (GetPet()->Charmed()) {
 			GetPet()->BuffFadeByEffect(SE_Charm);
-		else
+		}
+		else {
 			SetPet(0);
+		}
 	}
 
 	EQApplicationPacket app;
 	CreateDespawnPacket(&app, !IsCorpse());
-	Corpse* corpse = entity_list.GetCorpseByID(GetID());
-	if(!corpse || (corpse && !corpse->IsPlayerCorpse()))
+	Corpse *corpse = entity_list.GetCorpseByID(GetID());
+	if (!corpse || (corpse && !corpse->IsPlayerCorpse())) {
 		entity_list.QueueClients(this, &app, true);
+	}
 
 	entity_list.RemoveFromTargets(this, true);
 
-	if(trade) {
+	if (trade) {
 		Mob *with = trade->With();
-		if(with && with->IsClient()) {
+		if (with && with->IsClient()) {
 			with->CastToClient()->FinishTrade(with);
 			with->trade->Reset();
 		}
 		delete trade;
 	}
 
-	if(HasTempPetsActive()){
+	if (HasTempPetsActive()) {
 		entity_list.DestroyTempPets(this);
 	}
+	
 	entity_list.UnMarkNPC(GetID());
 	UninitializeBuffSlots();
+
+	entity_list.RemoveMobFromCloseLists(this);
+	entity_list.RemoveAuraFromMobs(this);
+
+	close_mobs.clear();
 
 #ifdef BOTS
 	LeaveHealRotationTargetPool();
@@ -591,7 +612,7 @@ int Mob::_GetWalkSpeed() const {
 	runspeedcap += itembonuses.IncreaseRunSpeedCap + spellbonuses.IncreaseRunSpeedCap + aabonuses.IncreaseRunSpeedCap;
 	aa_mod += aabonuses.BaseMovementSpeed;
 
-	if (IsClient()) {
+	if (IsClient() && CastToClient()->GetHorseId()) {
 		Mob *horse = entity_list.GetMob(CastToClient()->GetHorseId());
 		if (horse) {
 			speed_mod = horse->GetBaseRunspeed();
@@ -649,7 +670,7 @@ int Mob::_GetRunSpeed() const {
 		{
 			speed_mod = 325;
 		}
-		else
+		else if (CastToClient()->GetHorseId())
 		{
 			Mob* horse = entity_list.GetMob(CastToClient()->GetHorseId());
 			if(horse)
@@ -664,7 +685,7 @@ int Mob::_GetRunSpeed() const {
 	int runspeedcap = RuleI(Character,BaseRunSpeedCap);
 	runspeedcap += itembonuses.IncreaseRunSpeedCap + spellbonuses.IncreaseRunSpeedCap + aabonuses.IncreaseRunSpeedCap;
 
-	aa_mod = itembonuses.IncreaseRunSpeedCap + spellbonuses.IncreaseRunSpeedCap + aabonuses.IncreaseRunSpeedCap;
+	aa_mod += aabonuses.BaseMovementSpeed + aabonuses.movementspeed;
 	int spell_mod = spellbonuses.movementspeed + itembonuses.movementspeed;
 	int movemod = 0;
 
@@ -1112,7 +1133,7 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	ns->spawn.spawnId	= GetID();
 	ns->spawn.curHp	= static_cast<uint8>(GetHPRatio());
 	ns->spawn.max_hp	= 100;		//this field needs a better name
-	ns->spawn.race		= race;
+	ns->spawn.race		= (use_model) ? use_model : race;
 	ns->spawn.runspeed	= runspeed;
 	ns->spawn.walkspeed	= walkspeed;
 	ns->spawn.class_	= class_;
@@ -1126,7 +1147,10 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	UpdateActiveLight();
 	ns->spawn.light		= m_Light.Type[EQEmu::lightsource::LightActive];
 
-	ns->spawn.showhelm = (helmtexture && helmtexture != 0xFF) ? 1 : 0;
+	if (IsNPC() && race == ERUDITE)
+		ns->spawn.showhelm = 1;
+	else
+		ns->spawn.showhelm = (helmtexture && helmtexture != 0xFF) ? 1 : 0;
 
 	ns->spawn.invis		= (invisible || hidden) ? 1 : 0;	// TODO: load this before spawning players
 	ns->spawn.NPC		= IsClient() ? 0 : 1;
@@ -1203,7 +1227,7 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 		// Changing the second string made no visible difference
 		sprintf(ns->spawn.DestructibleName2, "%s", ns->spawn.name);
 		// Putting a string in the final one that was previously empty had no visible effect.
-		sprintf(ns->spawn.DestructibleString, "");
+		ns->spawn.DestructibleString[0] = '\0';
 
 		// Sets damage appearance level of the object.
 		ns->spawn.DestructibleAppearance = luclinface; // Was 0x00000000
@@ -1311,17 +1335,29 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 	 * If our HP is different from last HP update call - let's update selves
 	 */
 	if (IsClient()) {
+
+		// delay to allow the client to catch up on buff states
+		if (max_hp != last_max_hp) {
+
+			last_max_hp = max_hp;
+			CastToClient()->hp_self_update_throttle_timer.Trigger();
+
+			return;
+		}
+
 		if (current_hp != last_hp || force_update_all) {
 
 			/**
 			 * This is to prevent excessive packet sending under trains/fast combat
 			 */
 			if (this->CastToClient()->hp_self_update_throttle_timer.Check() || force_update_all) {
-				Log(Logs::General, Logs::HP_Update,
-					"Mob::SendHPUpdate :: Update HP of self (%s) HP: %i last: %i skip_self: %s",
+				Log(Logs::General, Logs::HPUpdate,
+					"Mob::SendHPUpdate :: Update HP of self (%s) HP: %i/%i last: %i/%i skip_self: %s",
 					this->GetCleanName(),
 					current_hp,
+					max_hp,
 					last_hp,
+					last_max_hp,
 					(skip_self ? "true" : "false")
 				);
 
@@ -1348,17 +1384,17 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 		}
 	}
 
-	int8 current_hp_percent = static_cast<int8>(max_hp == 0 ? 0 : static_cast<int>(current_hp * 100 / max_hp));
+	auto current_hp_percent = GetIntHPRatio();
 
 	Log(Logs::General,
-		Logs::HP_Update,
+		Logs::HPUpdate,
 		"Mob::SendHPUpdate :: SendHPUpdate %s HP is %i last %i",
 		this->GetCleanName(),
 		current_hp_percent,
 		last_hp_percent);
 
 	if (current_hp_percent == last_hp_percent && !force_update_all) {
-		Log(Logs::General, Logs::HP_Update, "Mob::SendHPUpdate :: Same HP - skipping update");
+		Log(Logs::General, Logs::HPUpdate, "Mob::SendHPUpdate :: Same HP - skipping update");
 		ResetHPUpdateTimer();
 		return;
 	}
@@ -1368,7 +1404,7 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 			this->CastToClient()->SendHPUpdateMarquee();
 		}
 
-		Log(Logs::General, Logs::HP_Update, "Mob::SendHPUpdate :: HP Changed - Send update");
+		Log(Logs::General, Logs::HPUpdate, "Mob::SendHPUpdate :: HP Changed - Send update");
 
 		last_hp_percent = current_hp_percent;
 	}
@@ -1430,6 +1466,25 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 		}
 	}
 
+#ifdef BOTS
+	if (GetOwner() && GetOwner()->IsBot() && GetOwner()->CastToBot()->GetBotOwner() && GetOwner()->CastToBot()->GetBotOwner()->IsClient()) {
+		auto bot_owner = GetOwner()->CastToBot()->GetBotOwner()->CastToClient();
+		if (bot_owner) {
+			bot_owner->QueuePacket(&hp_packet, false);
+			group = entity_list.GetGroupByClient(bot_owner);
+
+			if (group) {
+				group->SendHPPacketsFrom(this);
+			}
+
+			Raid *raid = entity_list.GetRaidByClient(bot_owner);
+			if (raid) {
+				raid->SendHPManaEndPacketsFrom(this);
+			}
+		}
+	}
+#endif
+
 	if (GetPet() && GetPet()->IsClient()) {
 		GetPet()->CastToClient()->QueuePacket(&hp_packet, false);
 	}
@@ -1469,17 +1524,23 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 	}
 }
 
-void Mob::StopMoving() {
+void Mob::StopMoving()
+{
 	StopNavigation();
-	if (moved)
+
+	if (moved) {
 		moved = false;
+	}
 }
 
-void Mob::StopMoving(float new_heading) {
+void Mob::StopMoving(float new_heading)
+{
 	StopNavigation();
 	RotateTo(new_heading);
-	if (moved)
+
+	if (moved) {
 		moved = false;
+	}
 }
 
 void Mob::SentPositionPacket(float dx, float dy, float dz, float dh, int anim, bool send_to_self)
@@ -1546,39 +1607,39 @@ void Mob::ShowStats(Client* client)
 	}
 	else if (IsCorpse()) {
 		if (IsPlayerCorpse()) {
-			client->Message(0, "  CharID: %i  PlayerCorpse: %i", CastToCorpse()->GetCharID(), CastToCorpse()->GetCorpseDBID());
+			client->Message(Chat::White, "  CharID: %i  PlayerCorpse: %i", CastToCorpse()->GetCharID(), CastToCorpse()->GetCorpseDBID());
 		}
 		else {
-			client->Message(0, "  NPCCorpse", GetID());
+			client->Message(Chat::White, "  NPCCorpse", GetID());
 		}
 	}
 	else {
-		client->Message(0, "  Level: %i  AC: %i  Class: %i  Size: %1.1f  Haste: %i", GetLevel(), ACSum(), GetClass(), GetSize(), GetHaste());
-		client->Message(0, "  HP: %i  Max HP: %i",GetHP(), GetMaxHP());
-		client->Message(0, "  Mana: %i  Max Mana: %i", GetMana(), GetMaxMana());
-		client->Message(0, "  Total ATK: %i  Worn/Spell ATK (Cap %i): %i", GetATK(), RuleI(Character, ItemATKCap), GetATKBonus());
-		client->Message(0, "  STR: %i  STA: %i  DEX: %i  AGI: %i  INT: %i  WIS: %i  CHA: %i", GetSTR(), GetSTA(), GetDEX(), GetAGI(), GetINT(), GetWIS(), GetCHA());
-		client->Message(0, "  MR: %i  PR: %i  FR: %i  CR: %i  DR: %i Corruption: %i PhR: %i", GetMR(), GetPR(), GetFR(), GetCR(), GetDR(), GetCorrup(), GetPhR());
-		client->Message(0, "  Race: %i  BaseRace: %i  Texture: %i  HelmTexture: %i  Gender: %i  BaseGender: %i", GetRace(), GetBaseRace(), GetTexture(), GetHelmTexture(), GetGender(), GetBaseGender());
+		client->Message(Chat::White, "  Level: %i  AC: %i  Class: %i  Size: %1.1f  Haste: %i", GetLevel(), ACSum(), GetClass(), GetSize(), GetHaste());
+		client->Message(Chat::White, "  HP: %i  Max HP: %i",GetHP(), GetMaxHP());
+		client->Message(Chat::White, "  Mana: %i  Max Mana: %i", GetMana(), GetMaxMana());
+		client->Message(Chat::White, "  Total ATK: %i  Worn/Spell ATK (Cap %i): %i", GetATK(), RuleI(Character, ItemATKCap), GetATKBonus());
+		client->Message(Chat::White, "  STR: %i  STA: %i  DEX: %i  AGI: %i  INT: %i  WIS: %i  CHA: %i", GetSTR(), GetSTA(), GetDEX(), GetAGI(), GetINT(), GetWIS(), GetCHA());
+		client->Message(Chat::White, "  MR: %i  PR: %i  FR: %i  CR: %i  DR: %i Corruption: %i PhR: %i", GetMR(), GetPR(), GetFR(), GetCR(), GetDR(), GetCorrup(), GetPhR());
+		client->Message(Chat::White, "  Race: %i  BaseRace: %i  Texture: %i  HelmTexture: %i  Gender: %i  BaseGender: %i", GetRace(), GetBaseRace(), GetTexture(), GetHelmTexture(), GetGender(), GetBaseGender());
 		if (client->Admin() >= 100)
-			client->Message(0, "  EntityID: %i  PetID: %i  OwnerID: %i AIControlled: %i Targetted: %i", GetID(), GetPetID(), GetOwnerID(), IsAIControlled(), targeted);
+			client->Message(Chat::White, "  EntityID: %i  PetID: %i  OwnerID: %i AIControlled: %i Targetted: %i", GetID(), GetPetID(), GetOwnerID(), IsAIControlled(), targeted);
 
 		if (IsNPC()) {
 			NPC *n = CastToNPC();
 			uint32 spawngroupid = 0;
 			if(n->respawn2 != 0)
 				spawngroupid = n->respawn2->SpawnGroupID();
-			client->Message(0, "  NPCID: %u  SpawnGroupID: %u Grid: %i LootTable: %u FactionID: %i SpellsID: %u ", GetNPCTypeID(),spawngroupid, n->GetGrid(), n->GetLoottableID(), n->GetNPCFactionID(), n->GetNPCSpellsID());
-			client->Message(0, "  Accuracy: %i MerchantID: %i EmoteID: %i Runspeed: %.3f Walkspeed: %.3f", n->GetAccuracyRating(), n->MerchantType, n->GetEmoteID(), static_cast<float>(0.025f * n->GetRunspeed()), static_cast<float>(0.025f * n->GetWalkspeed()));
+			client->Message(Chat::White, "  NPCID: %u  SpawnGroupID: %u Grid: %i LootTable: %u FactionID: %i SpellsID: %u ", GetNPCTypeID(),spawngroupid, n->GetGrid(), n->GetLoottableID(), n->GetNPCFactionID(), n->GetNPCSpellsID());
+			client->Message(Chat::White, "  Accuracy: %i MerchantID: %i EmoteID: %i Runspeed: %.3f Walkspeed: %.3f", n->GetAccuracyRating(), n->MerchantType, n->GetEmoteID(), static_cast<float>(0.025f * n->GetRunspeed()), static_cast<float>(0.025f * n->GetWalkspeed()));
 			n->QueryLoot(client);
 		}
 		if (IsAIControlled()) {
-			client->Message(0, "  AggroRange: %1.0f  AssistRange: %1.0f", GetAggroRange(), GetAssistRange());
+			client->Message(Chat::White, "  AggroRange: %1.0f  AssistRange: %1.0f", GetAggroRange(), GetAssistRange());
 		}
 
-		client->Message(0, "  compute_tohit: %i TotalToHit: %i", compute_tohit(EQEmu::skills::SkillHandtoHand), GetTotalToHit(EQEmu::skills::SkillHandtoHand, 0));
-		client->Message(0, "  compute_defense: %i TotalDefense: %i", compute_defense(), GetTotalDefense());
-		client->Message(0, "  offense: %i mitigation ac: %i", offense(EQEmu::skills::SkillHandtoHand), GetMitigationAC());
+		client->Message(Chat::White, "  compute_tohit: %i TotalToHit: %i", compute_tohit(EQEmu::skills::SkillHandtoHand), GetTotalToHit(EQEmu::skills::SkillHandtoHand, 0));
+		client->Message(Chat::White, "  compute_defense: %i TotalDefense: %i", compute_defense(), GetTotalDefense());
+		client->Message(Chat::White, "  offense: %i mitigation ac: %i", offense(EQEmu::skills::SkillHandtoHand), GetMitigationAC());
 	}
 }
 
@@ -1615,33 +1676,33 @@ void Mob::DoAnim(const int animnum, int type, bool ackreq, eqFilterType filter) 
 void Mob::ShowBuffs(Client* client) {
 	if(SPDAT_RECORDS <= 0)
 		return;
-	client->Message(0, "Buffs on: %s", this->GetName());
+	client->Message(Chat::White, "Buffs on: %s", this->GetName());
 	uint32 i;
 	uint32 buff_count = GetMaxTotalSlots();
 	for (i=0; i < buff_count; i++) {
 		if (buffs[i].spellid != SPELL_UNKNOWN) {
 			if (spells[buffs[i].spellid].buffdurationformula == DF_Permanent)
-				client->Message(0, "  %i: %s: Permanent", i, spells[buffs[i].spellid].name);
+				client->Message(Chat::White, "  %i: %s: Permanent", i, spells[buffs[i].spellid].name);
 			else
-				client->Message(0, "  %i: %s: %i tics left", i, spells[buffs[i].spellid].name, buffs[i].ticsremaining);
+				client->Message(Chat::White, "  %i: %s: %i tics left", i, spells[buffs[i].spellid].name, buffs[i].ticsremaining);
 
 		}
 	}
 	if (IsClient()){
-		client->Message(0, "itembonuses:");
-		client->Message(0, "Atk:%i Ac:%i HP(%i):%i Mana:%i", itembonuses.ATK, itembonuses.AC, itembonuses.HPRegen, itembonuses.HP, itembonuses.Mana);
-		client->Message(0, "Str:%i Sta:%i Dex:%i Agi:%i Int:%i Wis:%i Cha:%i",
+		client->Message(Chat::White, "itembonuses:");
+		client->Message(Chat::White, "Atk:%i Ac:%i HP(%i):%i Mana:%i", itembonuses.ATK, itembonuses.AC, itembonuses.HPRegen, itembonuses.HP, itembonuses.Mana);
+		client->Message(Chat::White, "Str:%i Sta:%i Dex:%i Agi:%i Int:%i Wis:%i Cha:%i",
 			itembonuses.STR,itembonuses.STA,itembonuses.DEX,itembonuses.AGI,itembonuses.INT,itembonuses.WIS,itembonuses.CHA);
-		client->Message(0, "SvMagic:%i SvFire:%i SvCold:%i SvPoison:%i SvDisease:%i",
+		client->Message(Chat::White, "SvMagic:%i SvFire:%i SvCold:%i SvPoison:%i SvDisease:%i",
 				itembonuses.MR,itembonuses.FR,itembonuses.CR,itembonuses.PR,itembonuses.DR);
-		client->Message(0, "DmgShield:%i Haste:%i", itembonuses.DamageShield, itembonuses.haste );
-		client->Message(0, "spellbonuses:");
-		client->Message(0, "Atk:%i Ac:%i HP(%i):%i Mana:%i", spellbonuses.ATK, spellbonuses.AC, spellbonuses.HPRegen, spellbonuses.HP, spellbonuses.Mana);
-		client->Message(0, "Str:%i Sta:%i Dex:%i Agi:%i Int:%i Wis:%i Cha:%i",
+		client->Message(Chat::White, "DmgShield:%i Haste:%i", itembonuses.DamageShield, itembonuses.haste );
+		client->Message(Chat::White, "spellbonuses:");
+		client->Message(Chat::White, "Atk:%i Ac:%i HP(%i):%i Mana:%i", spellbonuses.ATK, spellbonuses.AC, spellbonuses.HPRegen, spellbonuses.HP, spellbonuses.Mana);
+		client->Message(Chat::White, "Str:%i Sta:%i Dex:%i Agi:%i Int:%i Wis:%i Cha:%i",
 			spellbonuses.STR,spellbonuses.STA,spellbonuses.DEX,spellbonuses.AGI,spellbonuses.INT,spellbonuses.WIS,spellbonuses.CHA);
-		client->Message(0, "SvMagic:%i SvFire:%i SvCold:%i SvPoison:%i SvDisease:%i",
+		client->Message(Chat::White, "SvMagic:%i SvFire:%i SvCold:%i SvPoison:%i SvDisease:%i",
 				spellbonuses.MR,spellbonuses.FR,spellbonuses.CR,spellbonuses.PR,spellbonuses.DR);
-		client->Message(0, "DmgShield:%i Haste:%i", spellbonuses.DamageShield, spellbonuses.haste );
+		client->Message(Chat::White, "DmgShield:%i Haste:%i", spellbonuses.DamageShield, spellbonuses.haste );
 	}
 }
 
@@ -1649,15 +1710,15 @@ void Mob::ShowBuffList(Client* client) {
 	if(SPDAT_RECORDS <= 0)
 		return;
 
-	client->Message(0, "Buffs on: %s", this->GetCleanName());
+	client->Message(Chat::White, "Buffs on: %s", this->GetCleanName());
 	uint32 i;
 	uint32 buff_count = GetMaxTotalSlots();
 	for (i = 0; i < buff_count; i++) {
 		if (buffs[i].spellid != SPELL_UNKNOWN) {
 			if (spells[buffs[i].spellid].buffdurationformula == DF_Permanent)
-				client->Message(0, "  %i: %s: Permanent", i, spells[buffs[i].spellid].name);
+				client->Message(Chat::White, "  %i: %s: Permanent", i, spells[buffs[i].spellid].name);
 			else
-				client->Message(0, "  %i: %s: %i tics left", i, spells[buffs[i].spellid].name, buffs[i].ticsremaining);
+				client->Message(Chat::White, "  %i: %s: %i tics left", i, spells[buffs[i].spellid].name, buffs[i].ticsremaining);
 		}
 	}
 }
@@ -1692,151 +1753,78 @@ void Mob::SendIllusionPacket(
 	float in_size
 )
 {
+	uint8 new_texture = in_texture;
+	uint8 new_helmtexture = in_helmtexture;
+	uint8 new_haircolor;
+	uint8 new_beardcolor;
+	uint8 new_eyecolor1;
+	uint8 new_eyecolor2;
+	uint8 new_hairstyle;
+	uint8 new_luclinface;
+	uint8 new_beard;
+	uint8 new_aa_title;
+	uint32 new_drakkin_heritage;
+	uint32 new_drakkin_tattoo;
+	uint32 new_drakkin_details;
 
-	uint16 BaseRace = GetBaseRace();
-
-	if (in_race == 0) {
-		race = BaseRace;
-		if (in_gender == 0xFF) {
-			gender = GetBaseGender();
+	race = in_race;
+	if (race == 0)
+		{
+		race = (use_model) ? use_model : GetBaseRace();
 		}
-		else {
-			gender = in_gender;
+
+	if (in_gender != 0xFF)
+		{
+		gender = in_gender;
 		}
-	}
-	else {
-		race = in_race;
-		if (in_gender == 0xFF) {
-			gender = GetDefaultGender(race, gender);
+	else
+		{
+		gender = (in_race) ? GetDefaultGender(race, gender) : GetBaseGender();
 		}
-		else {
-			gender = in_gender;
+
+	if (in_texture == 0xFF && !IsPlayerRace(in_race))
+		{
+		new_texture = GetTexture();
 		}
-	}
 
-	if (in_texture == 0xFF) {
-		if (IsPlayerRace(in_race)) {
-			texture = 0xFF;
+	if (in_helmtexture == 0xFF && !IsPlayerRace(in_race))
+		{
+		new_helmtexture = GetHelmTexture();
 		}
-		else {
-			texture = GetTexture();
-		}
-	}
-	else {
-		texture = in_texture;
-	}
 
-	if (in_helmtexture == 0xFF) {
-		if (IsPlayerRace(in_race)) {
-			helmtexture = 0xFF;
-		}
-		else if (in_texture != 0xFF) {
-			helmtexture = in_texture;
-		}
-		else {
-			helmtexture = GetHelmTexture();
-		}
-	}
-	else {
-		helmtexture = in_helmtexture;
-	}
-
-	if (in_haircolor == 0xFF) {
-		haircolor = GetHairColor();
-	}
-	else {
-		haircolor = in_haircolor;
-	}
-
-	if (in_beardcolor == 0xFF) {
-		beardcolor = GetBeardColor();
-	}
-	else {
-		beardcolor = in_beardcolor;
-	}
-
-	if (in_eyecolor1 == 0xFF) {
-		eyecolor1 = GetEyeColor1();
-	}
-	else {
-		eyecolor1 = in_eyecolor1;
-	}
-
-	if (in_eyecolor2 == 0xFF) {
-		eyecolor2 = GetEyeColor2();
-	}
-	else {
-		eyecolor2 = in_eyecolor2;
-	}
-
-	if (in_hairstyle == 0xFF) {
-		hairstyle = GetHairStyle();
-	}
-	else {
-		hairstyle = in_hairstyle;
-	}
-
-	if (in_luclinface == 0xFF) {
-		luclinface = GetLuclinFace();
-	}
-	else {
-		luclinface = in_luclinface;
-	}
-
-	if (in_beard == 0xFF) {
-		beard = GetBeard();
-	}
-	else {
-		beard = in_beard;
-	}
-
-	aa_title = in_aa_title;
-
-	if (in_drakkin_heritage == 0xFFFFFFFF) {
-		drakkin_heritage = GetDrakkinHeritage();
-	}
-	else {
-		drakkin_heritage = in_drakkin_heritage;
-	}
-
-	if (in_drakkin_tattoo == 0xFFFFFFFF) {
-		drakkin_tattoo = GetDrakkinTattoo();
-	}
-	else {
-		drakkin_tattoo = in_drakkin_tattoo;
-	}
-
-	if (in_drakkin_details == 0xFFFFFFFF) {
-		drakkin_details = GetDrakkinDetails();
-	}
-	else {
-		drakkin_details = in_drakkin_details;
-	}
-
-	if (in_size <= 0.0f) {
-		size = GetSize();
-	}
-	else {
-		size = in_size;
-	}
+	new_haircolor = (in_haircolor == 0xFF) ? GetHairColor() : in_haircolor;
+	new_beardcolor = (in_beardcolor == 0xFF) ? GetBeardColor() : in_beardcolor;
+	new_eyecolor1 = (in_eyecolor1 == 0xFF) ? GetEyeColor1() : in_eyecolor1;
+	new_eyecolor2 = (in_eyecolor2 == 0xFF) ? GetEyeColor2() : in_eyecolor2;
+	new_hairstyle = (in_hairstyle == 0xFF) ? GetHairStyle() : in_hairstyle;
+	new_luclinface = (in_luclinface == 0xFF) ? GetLuclinFace() : in_luclinface;
+	new_beard = (in_beard == 0xFF) ? GetBeard() : in_beard;
+	new_drakkin_heritage = 
+		(in_drakkin_heritage == 0xFFFFFFFF) ? GetDrakkinHeritage() : in_drakkin_heritage;
+	new_drakkin_tattoo = 
+		(in_drakkin_tattoo == 0xFFFFFFFF) ? GetDrakkinTattoo() : in_drakkin_tattoo;
+	new_drakkin_details = 
+		(in_drakkin_details == 0xFFFFFFFF) ? GetDrakkinDetails() : in_drakkin_details;
+	new_aa_title = in_aa_title;
+	size = (in_size <= 0.0f) ? GetSize() : in_size;
 
 	// Reset features to Base from the Player Profile
 	if (IsClient() && in_race == 0) {
-		race             = CastToClient()->GetBaseRace();
-		gender           = CastToClient()->GetBaseGender();
-		texture          = 0xFF;
-		helmtexture      = 0xFF;
-		haircolor        = CastToClient()->GetBaseHairColor();
-		beardcolor       = CastToClient()->GetBaseBeardColor();
-		eyecolor1        = CastToClient()->GetBaseEyeColor();
-		eyecolor2        = CastToClient()->GetBaseEyeColor();
-		hairstyle        = CastToClient()->GetBaseHairStyle();
-		luclinface       = CastToClient()->GetBaseFace();
-		beard            = CastToClient()->GetBaseBeard();
-		aa_title         = 0xFF;
-		drakkin_heritage = CastToClient()->GetBaseHeritage();
-		drakkin_tattoo   = CastToClient()->GetBaseTattoo();
-		drakkin_details  = CastToClient()->GetBaseDetails();
+		race							= CastToClient()->GetBaseRace();
+		gender							= CastToClient()->GetBaseGender();
+		new_texture = texture			= 0xFF;
+		new_helmtexture = helmtexture	= 0xFF;
+		new_haircolor = haircolor		= CastToClient()->GetBaseHairColor();
+		new_beardcolor = beardcolor		= CastToClient()->GetBaseBeardColor();
+		new_eyecolor1 = eyecolor1		= CastToClient()->GetBaseEyeColor();
+		new_eyecolor2 = eyecolor2		= CastToClient()->GetBaseEyeColor();
+		new_hairstyle = hairstyle		= CastToClient()->GetBaseHairStyle();
+		new_luclinface = luclinface		= CastToClient()->GetBaseFace();
+		new_beard = beard				= CastToClient()->GetBaseBeard();
+		new_aa_title = aa_title			= 0xFF;
+		new_drakkin_heritage = drakkin_heritage	= CastToClient()->GetBaseHeritage();
+		new_drakkin_tattoo = drakkin_tattoo	= CastToClient()->GetBaseTattoo();
+		new_drakkin_details = drakkin_details	= CastToClient()->GetBaseDetails();
 		switch (race) {
 			case OGRE:
 				size = 9;
@@ -1873,18 +1861,18 @@ void Mob::SendIllusionPacket(
 	strcpy(is->charname, GetCleanName());
 	is->race             = race;
 	is->gender           = gender;
-	is->texture          = texture;
-	is->helmtexture      = helmtexture;
-	is->haircolor        = haircolor;
-	is->beardcolor       = beardcolor;
-	is->beard            = beard;
-	is->eyecolor1        = eyecolor1;
-	is->eyecolor2        = eyecolor2;
-	is->hairstyle        = hairstyle;
-	is->face             = luclinface;
-	is->drakkin_heritage = drakkin_heritage;
-	is->drakkin_tattoo   = drakkin_tattoo;
-	is->drakkin_details  = drakkin_details;
+	is->texture          = new_texture;
+	is->helmtexture      = new_helmtexture;
+	is->haircolor        = new_haircolor;
+	is->beardcolor       = new_beardcolor;
+	is->beard            = new_beard;
+	is->eyecolor1        = new_eyecolor1;
+	is->eyecolor2        = new_eyecolor2;
+	is->hairstyle        = new_hairstyle;
+	is->face             = new_luclinface;
+	is->drakkin_heritage = new_drakkin_heritage;
+	is->drakkin_tattoo   = new_drakkin_tattoo;
+	is->drakkin_details  = new_drakkin_details;
 	is->size             = size;
 
 	entity_list.QueueClients(this, outapp);
@@ -1893,22 +1881,20 @@ void Mob::SendIllusionPacket(
 	/* Refresh armor and tints after send illusion packet */
 	this->SendArmorAppearance();
 
-	Log(Logs::Detail,
-		Logs::Spells,
-		"Illusion: Race = %i, Gender = %i, Texture = %i, HelmTexture = %i, HairColor = %i, BeardColor = %i, EyeColor1 = %i, EyeColor2 = %i, HairStyle = %i, Face = %i, DrakkinHeritage = %i, DrakkinTattoo = %i, DrakkinDetails = %i, Size = %f",
+	LogSpells("Illusion: Race = [{}], Gender = [{}], Texture = [{}], HelmTexture = [{}], HairColor = [{}], BeardColor = [{}], EyeColor1 = [{}], EyeColor2 = [{}], HairStyle = [{}], Face = [{}], DrakkinHeritage = [{}], DrakkinTattoo = [{}], DrakkinDetails = [{}], Size = [{}]",
 		race,
 		gender,
-		texture,
-		helmtexture,
-		haircolor,
-		beardcolor,
-		eyecolor1,
-		eyecolor2,
-		hairstyle,
-		luclinface,
-		drakkin_heritage,
-		drakkin_tattoo,
-		drakkin_details,
+		new_texture,
+		new_helmtexture,
+		new_haircolor,
+		new_beardcolor,
+		new_eyecolor1,
+		new_eyecolor2,
+		new_hairstyle,
+		new_luclinface,
+		new_drakkin_heritage,
+		new_drakkin_tattoo,
+		new_drakkin_details,
 		size);
 }
 
@@ -2739,6 +2725,27 @@ bool Mob::PlotPositionAroundTarget(Mob* target, float &x_dest, float &y_dest, fl
 	return Result;
 }
 
+bool Mob::PlotPositionOnArcInFrontOfTarget(Mob* target, float& x_dest, float& y_dest, float& z_dest, float distance, float min_deg, float max_deg)
+{
+
+
+	return false;
+}
+
+bool Mob::PlotPositionOnArcBehindTarget(Mob* target, float& x_dest, float& y_dest, float& z_dest, float distance)
+{
+
+
+	return false;
+}
+
+bool Mob::PlotPositionBehindMeFacingTarget(Mob* target, float& x_dest, float& y_dest, float& z_dest, float min_dist, float max_dist)
+{
+
+
+	return false;
+}
+
 bool Mob::HateSummon() {
 	// check if mob has ability to summon
 	// 97% is the offical % that summoning starts on live, not 94
@@ -2781,7 +2788,7 @@ bool Mob::HateSummon() {
 	if(target)
 	{
 		if(summon_level == 1) {
-			entity_list.MessageClose(this, true, 500, MT_Say, "%s says,'You will not evade me, %s!' ", GetCleanName(), target->GetCleanName() );
+			entity_list.MessageClose(this, true, 500, Chat::Say, "%s says 'You will not evade me, %s!' ", GetCleanName(), target->GetCleanName() );
 
 			if (target->IsClient())
 				target->CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), m_Position.x, m_Position.y, m_Position.z, target->GetHeading(), 0, SummonPC);
@@ -2790,7 +2797,7 @@ bool Mob::HateSummon() {
 
 			return true;
 		} else if(summon_level == 2) {
-			entity_list.MessageClose(this, true, 500, MT_Say, "%s says,'You will not evade me, %s!'", GetCleanName(), target->GetCleanName());
+			entity_list.MessageClose(this, true, 500, Chat::Say, "%s says 'You will not evade me, %s!'", GetCleanName(), target->GetCleanName());
 			GMMove(target->GetX(), target->GetY(), target->GetZ());
 		}
 	}
@@ -2861,10 +2868,10 @@ void Mob::WipeHateList()
 	}
 }
 
-uint32 Mob::RandomTimer(int min,int max) {
+uint32 Mob::RandomTimer(int min, int max)
+{
 	int r = 14000;
-	if(min != 0 && max != 0 && min < max)
-	{
+	if (min != 0 && max != 0 && min < max) {
 		r = zone->random.Int(min, max);
 	}
 	return r;
@@ -2907,7 +2914,7 @@ void Mob::Say(const char *format, ...)
 		talker = this;
 	}
 
-	entity_list.MessageClose_StringID(
+	entity_list.MessageCloseString(
 		talker, false, 200, 10,
 		GENERIC_SAY, GetCleanName(), buf
 	);
@@ -2916,48 +2923,50 @@ void Mob::Say(const char *format, ...)
 //
 // this is like the above, but the first parameter is a string id
 //
-void Mob::Say_StringID(uint32 string_id, const char *message3, const char *message4, const char *message5, const char *message6, const char *message7, const char *message8, const char *message9)
+void Mob::SayString(uint32 string_id, const char *message3, const char *message4, const char *message5, const char *message6, const char *message7, const char *message8, const char *message9)
 {
 	char string_id_str[10];
 
 	snprintf(string_id_str, 10, "%d", string_id);
 
-	entity_list.MessageClose_StringID(this, false, 200, 10,
+	entity_list.MessageCloseString(
+		this, false, 200, 10,
 		GENERIC_STRINGID_SAY, GetCleanName(), string_id_str, message3, message4, message5,
 		message6, message7, message8, message9
 	);
 }
 
-void Mob::Say_StringID(uint32 type, uint32 string_id, const char *message3, const char *message4, const char *message5, const char *message6, const char *message7, const char *message8, const char *message9)
+void Mob::SayString(uint32 type, uint32 string_id, const char *message3, const char *message4, const char *message5, const char *message6, const char *message7, const char *message8, const char *message9)
 {
 	char string_id_str[10];
 
 	snprintf(string_id_str, 10, "%d", string_id);
 
-	entity_list.MessageClose_StringID(this, false, 200, type,
+	entity_list.MessageCloseString(
+		this, false, 200, type,
 		GENERIC_STRINGID_SAY, GetCleanName(), string_id_str, message3, message4, message5,
 		message6, message7, message8, message9
 	);
 }
 
-void Mob::SayTo_StringID(Client *to, uint32 string_id, const char *message3, const char *message4, const char *message5, const char *message6, const char *message7, const char *message8, const char *message9)
+void Mob::SayString(Client *to, uint32 string_id, const char *message3, const char *message4, const char *message5, const char *message6, const char *message7, const char *message8, const char *message9)
 {
 	if (!to)
 		return;
 
 	auto string_id_str = std::to_string(string_id);
 
-	to->Message_StringID(10, GENERIC_STRINGID_SAY, GetCleanName(), string_id_str.c_str(), message3, message4, message5, message6, message7, message8, message9);
+	to->MessageString(Chat::NPCQuestSay, GENERIC_STRINGID_SAY, GetCleanName(), string_id_str.c_str(), message3, message4, message5, message6, message7, message8, message9);
 }
 
-void Mob::SayTo_StringID(Client *to, uint32 type, uint32 string_id, const char *message3, const char *message4, const char *message5, const char *message6, const char *message7, const char *message8, const char *message9)
+void Mob::SayString(Client *to, uint32 type, uint32 string_id, const char *message3, const char *message4, const char *message5, const char *message6, const char *message7, const char *message8, const char *message9)
 {
 	if (!to)
 		return;
 
 	auto string_id_str = std::to_string(string_id);
 
-	to->Message_StringID(type, GENERIC_STRINGID_SAY, GetCleanName(), string_id_str.c_str(), message3, message4, message5, message6, message7, message8, message9);
+	to->MessageString(type, GENERIC_STRINGID_SAY, GetCleanName(), string_id_str.c_str(), message3, message4, message5, message6, message7, message8, message9);
 }
 
 void Mob::Shout(const char *format, ...)
@@ -2969,7 +2978,7 @@ void Mob::Shout(const char *format, ...)
 	vsnprintf(buf, 1000, format, ap);
 	va_end(ap);
 
-	entity_list.Message_StringID(this, false, MT_Shout,
+	entity_list.MessageString(this, false, Chat::Shout,
 		GENERIC_SHOUT, GetCleanName(), buf);
 }
 
@@ -2982,13 +2991,19 @@ void Mob::Emote(const char *format, ...)
 	vsnprintf(buf, 1000, format, ap);
 	va_end(ap);
 
-	entity_list.MessageClose_StringID(this, false, 200, 10,
-		GENERIC_EMOTE, GetCleanName(), buf);
+	entity_list.MessageCloseString(
+		this, false, 200, 10,
+		GENERIC_EMOTE, GetCleanName(), buf
+	);
 }
 
-void Mob::QuestJournalledSay(Client *QuestInitiator, const char *str)
+void Mob::QuestJournalledSay(Client *QuestInitiator, const char *str, Journal::Options &opts)
 {
-		entity_list.QuestJournalledSayClose(this, QuestInitiator, 200, GetCleanName(), str);
+	// just in case
+	if (opts.target_spawn_id == 0 && QuestInitiator)
+		opts.target_spawn_id = QuestInitiator->GetID();
+
+	entity_list.QuestJournalledSayClose(this, 200, GetCleanName(), str, opts);
 }
 
 const char *Mob::GetCleanName()
@@ -3108,7 +3123,7 @@ void Mob::ExecWeaponProc(const EQEmu::ItemInstance *inst, uint16 spell_id, Mob *
 	if(!IsValidSpell(spell_id)) { // Check for a valid spell otherwise it will crash through the function
 		if(IsClient()){
 			Message(0, "Invalid spell proc %u", spell_id);
-			Log(Logs::Detail, Logs::Spells, "Player %s, Weapon Procced invalid spell %u", this->GetName(), spell_id);
+			LogSpells("Player [{}], Weapon Procced invalid spell [{}]", this->GetName(), spell_id);
 		}
 		return;
 	}
@@ -3223,6 +3238,10 @@ void Mob::SetTarget(Mob *mob)
 		if (this->CastToClient()->admin > 200) {
 			this->DisplayInfo(mob);
 		}
+
+#ifdef BOTS
+		CastToClient()->SetBotPrecombat(false); // Any change in target will nullify this flag (target == mob checked above)
+#endif
 	}
 
 	if (IsPet() && GetOwner() && GetOwner()->IsClient()) {
@@ -3637,7 +3656,7 @@ void Mob::TryTwincast(Mob *caster, Mob *target, uint32 spell_id)
 		{
 			if(zone->random.Roll(focus))
 			{
-				Message(MT_Spells,"You twincast %s!",spells[spell_id].name);
+				Message(Chat::Spells,"You twincast %s!", spells[spell_id].name);
 				SpellFinished(spell_id, target, EQEmu::spells::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
 			}
 		}
@@ -4457,10 +4476,11 @@ void Mob::DoKnockback(Mob *caster, uint32 pushback, uint32 pushup)
 		spu->delta_y	= FloatToEQ13(static_cast<float>(new_y));
 		spu->delta_z	= FloatToEQ13(static_cast<float>(pushup));
 		spu->heading	= FloatToEQ12(GetHeading());
-		spu->padding0002	=0;
-		spu->padding0006	=7;
-		spu->padding0014	=0x7f;
-		spu->padding0018	=0x5df27;
+		// for ref: these were not passed on to other 5 clients while on Titanium standard (change to RoF2 standard: 11/16/2019)
+		//eq->padding0002 = 0;
+		//eq->padding0006 = 0x7;
+		//eq->padding0014 = 0x7F;
+		//eq->padding0018 = 0x5dF27;
 		spu->animation = 0;
 		spu->delta_heading = FloatToEQ10(0);
 		outapp_push->priority = 6;
@@ -4674,7 +4694,7 @@ void Mob::MeleeLifeTap(int32 damage) {
 	if(lifetap_amt && damage > 0){
 
 		lifetap_amt = damage * lifetap_amt / 100;
-		Log(Logs::Detail, Logs::Combat, "Melee lifetap healing for %d damage.", damage);
+		LogCombat("Melee lifetap healing for [{}] damage", damage);
 
 		if (lifetap_amt > 0)
 			HealDamage(lifetap_amt); //Heal self for modified damage amount.
@@ -4840,7 +4860,24 @@ void Mob::RemoveNimbusEffect(int effectid)
 }
 
 bool Mob::IsBoat() const {
-	return (race == 72 || race == 73 || race == 114 || race == 404 || race == 550 || race == 551 || race == 552);
+
+	return (
+		race == RACE_SHIP_72 ||
+		race == RACE_LAUNCH_73 ||
+		race == RACE_GHOST_SHIP_114 ||
+		race == RACE_SHIP_404 ||
+		race == RACE_MERCHANT_SHIP_550 ||
+		race == RACE_PIRATE_SHIP_551 ||
+		race == RACE_GHOST_SHIP_552
+	);
+}
+
+bool Mob::IsControllableBoat() const {
+
+	return (
+		race == RACE_BOAT_141 ||
+		race == RACE_ROWBOAT_502
+	);
 }
 
 void Mob::SetBodyType(bodyType new_body, bool overwrite_orig) {
@@ -4955,16 +4992,16 @@ void Mob::SlowMitigation(Mob* caster)
 	if (GetSlowMitigation() && caster && caster->IsClient())
 	{
 		if ((GetSlowMitigation() > 0) && (GetSlowMitigation() < 26))
-			caster->Message_StringID(MT_SpellFailure, SLOW_MOSTLY_SUCCESSFUL);
+			caster->MessageString(Chat::SpellFailure, SLOW_MOSTLY_SUCCESSFUL);
 
 		else if ((GetSlowMitigation() >= 26) && (GetSlowMitigation() < 74))
-			caster->Message_StringID(MT_SpellFailure, SLOW_PARTIALLY_SUCCESSFUL);
+			caster->MessageString(Chat::SpellFailure, SLOW_PARTIALLY_SUCCESSFUL);
 
 		else if ((GetSlowMitigation() >= 74) && (GetSlowMitigation() < 101))
-			caster->Message_StringID(MT_SpellFailure, SLOW_SLIGHTLY_SUCCESSFUL);
+			caster->MessageString(Chat::SpellFailure, SLOW_SLIGHTLY_SUCCESSFUL);
 
 		else if (GetSlowMitigation() > 100)
-			caster->Message_StringID(MT_SpellFailure, SPELL_OPPOSITE_EFFECT);
+			caster->MessageString(Chat::SpellFailure, SPELL_OPPOSITE_EFFECT);
 	}
 }
 

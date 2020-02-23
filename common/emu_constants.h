@@ -77,6 +77,10 @@ namespace EQEmu
 
 	} // namespace invtype
 
+	namespace DevTools {
+		const int32 GM_ACCOUNT_STATUS_LEVEL = 150;
+	}
+
 	namespace popupresponse {
 		const int32 SERVER_INTERNAL_USE_BASE = 2000000000;
 		const int32 MOB_INFO_DISMISS         = 2000000001;
@@ -306,6 +310,21 @@ namespace EQEmu
 		CategoryID CategoryNameToCategoryID(const char* category_name);
 
 	} // namespace bug
+
+	enum WaypointStatus : int {
+		RoamBoxPauseInProgress = -3,
+		QuestControlNoGrid = -2,
+		QuestControlGrid = -1
+	};
+
+	namespace consent {
+		enum eConsentType : uint8 {
+			Normal = 0,
+			Group,
+			Raid,
+			Guild
+		};
+	}; // namespace consent
 
 } /*EQEmu*/
 

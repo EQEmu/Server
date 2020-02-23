@@ -44,7 +44,7 @@ struct NPCType
 	uint16	race;
 	uint8	class_;
 	uint8	bodytype;	// added for targettype support
-	uint8	deity;		//not loaded from DB
+	uint32	deity;		//not loaded from DB
 	uint8	level;
 	uint32	npc_id;
 	uint8	texture;
@@ -143,7 +143,10 @@ struct NPCType
 	bool	untargetable;
 	bool	skip_global_loot;
 	bool	rare_spawn;
+	bool	skip_auto_scale; // just so it doesn't mess up bots or mercs, probably should add to DB too just in case
 	int8	stuck_behavior;
+	uint16	use_model;
+	int8	flymode;
 };
 
 namespace player_lootitem {

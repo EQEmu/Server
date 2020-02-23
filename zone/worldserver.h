@@ -38,7 +38,7 @@ public:
 
 	void HandleMessage(uint16 opcode, const EQ::Net::Packet &p);
 
-	bool SendChannelMessage(Client* from, const char* to, uint8 chan_num, uint32 guilddbid, uint8 language, const char* message, ...);
+	bool SendChannelMessage(Client* from, const char* to, uint8 chan_num, uint32 guilddbid, uint8 language, uint8 lang_skill, const char* message, ...);
 	bool SendEmoteMessage(const char* to, uint32 to_guilddbid, uint32 type, const char* message, ...);
 	bool SendEmoteMessage(const char* to, uint32 to_guilddbid, int16 to_minstatus, uint32 type, const char* message, ...);
 	bool SendVoiceMacro(Client* From, uint32 Type, char* Target, uint32 MacroNumber, uint32 GroupOrRaidID = 0);
@@ -72,7 +72,10 @@ private:
 	uint32 cur_groupid;
 	uint32 last_groupid;
 
+	void OnKeepAlive(EQ::Timer *t);
+
 	std::unique_ptr<EQ::Net::ServertalkClient> m_connection;
+	std::unique_ptr<EQ::Timer> m_keepalive;
 };
 #endif
 

@@ -336,6 +336,10 @@ int32 Client::CalcMaxHP()
 			current_hp = curHP_cap;
 		}
 	}
+
+	// hack fix for client health not reflecting server value
+	last_max_hp = 0;
+
 	return max_hp;
 }
 
@@ -576,7 +580,7 @@ int32 Client::CalcMaxMana()
 				break;
 			}
 		default: {
-				Log(Logs::Detail, Logs::Spells, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
+				LogSpells("Invalid Class [{}] in CalcMaxMana", GetCasterClass());
 				max_mana = 0;
 				break;
 			}
@@ -594,7 +598,7 @@ int32 Client::CalcMaxMana()
 			current_mana = curMana_cap;
 		}
 	}
-	Log(Logs::Detail, Logs::Spells, "Client::CalcMaxMana() called for %s - returning %d", GetName(), max_mana);
+	LogSpells("Client::CalcMaxMana() called for [{}] - returning [{}]", GetName(), max_mana);
 	return max_mana;
 }
 
@@ -610,14 +614,13 @@ int32 Client::CalcBaseMana()
 		case 'I':
 			WisInt = GetINT();
 			if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+				ConvertedWisInt = WisInt;
+				int over200 = WisInt;
 				if (WisInt > 100) {
-					ConvertedWisInt = (((WisInt - 100) * 5 / 2) + 100);
-					if (WisInt > 201) {
-						ConvertedWisInt -= ((WisInt - 201) * 5 / 4);
+					if (WisInt > 200) {
+						over200 = (WisInt - 200) / -2 + WisInt;
 					}
-				}
-				else {
-					ConvertedWisInt = WisInt;
+					ConvertedWisInt = (3 * over200 - 300) / 2 + over200;
 				}
 				auto base_data = database.GetBaseData(GetLevel(), GetClass());
 				if (base_data) {
@@ -643,14 +646,13 @@ int32 Client::CalcBaseMana()
 		case 'W':
 			WisInt = GetWIS();
 			if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+				ConvertedWisInt = WisInt;
+				int over200 = WisInt;
 				if (WisInt > 100) {
-					ConvertedWisInt = (((WisInt - 100) * 5 / 2) + 100);
-					if (WisInt > 201) {
-						ConvertedWisInt -= ((WisInt - 201) * 5 / 4);
+					if (WisInt > 200) {
+						over200 = (WisInt - 200) / -2 + WisInt;
 					}
-				}
-				else {
-					ConvertedWisInt = WisInt;
+					ConvertedWisInt = (3 * over200 - 300) / 2 + over200;
 				}
 				auto base_data = database.GetBaseData(GetLevel(), GetClass());
 				if (base_data) {
@@ -678,13 +680,13 @@ int32 Client::CalcBaseMana()
 				break;
 			}
 		default: {
-				Log(Logs::General, Logs::None, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
+				LogDebug("Invalid Class [{}] in CalcMaxMana", GetCasterClass());
 				max_m = 0;
 				break;
 			}
 	}
 	#if EQDEBUG >= 11
-	Log(Logs::General, Logs::None, "Client::CalcBaseMana() called for %s - returning %d", GetName(), max_m);
+	LogDebug("Client::CalcBaseMana() called for [{}] - returning [{}]", GetName(), max_m);
 	#endif
 	return max_m;
 }
@@ -1597,8 +1599,9 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id) const
 		effectmod = 10;
 	if (!nocap && effectmod > effectmodcap) // if the cap is calculated to be 0 using new rules, no cap.
 		effectmod = effectmodcap;
-	Log(Logs::Detail, Logs::Spells, "%s::GetInstrumentMod() spell=%d mod=%d modcap=%d\n", GetName(), spell_id,
-		effectmod, effectmodcap);
+
+	LogSpells("[{}]::GetInstrumentMod() spell=[{}] mod=[{}] modcap=[{}]\n", GetName(), spell_id, effectmod, effectmodcap);
+
 	return effectmod;
 }
 

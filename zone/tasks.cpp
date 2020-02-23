@@ -54,31 +54,34 @@ TaskManager::~TaskManager() {
 	}
 }
 
-bool TaskManager::LoadTaskSets() {
+bool TaskManager::LoadTaskSets()
+{
 
 	// Clear all task sets in memory. Done so we can reload them on the fly if required by just calling
 	// this method again.
-	for(int i=0; i<MAXTASKSETS; i++)
+	for (int i = 0; i < MAXTASKSETS; i++)
 		TaskSets[i].clear();
 
-    std::string query = StringFormat("SELECT `id`, `taskid` from `tasksets` "
-                                    "WHERE `id` > 0 AND `id` < %i "
-                                    "AND `taskid` >= 0 AND `taskid` < %i "
-                                    "ORDER BY `id`, `taskid` ASC",
-                                    MAXTASKSETS, MAXTASKS);
-    auto results = database.QueryDatabase(query);
-    if (!results.Success()) {
-        Log(Logs::General, Logs::Error, "[TASKS]Error in TaskManager::LoadTaskSets: %s", results.ErrorMessage().c_str());
+	std::string query   = StringFormat(
+		"SELECT `id`, `taskid` from `tasksets` "
+		"WHERE `id` > 0 AND `id` < %i "
+		"AND `taskid` >= 0 AND `taskid` < %i "
+		"ORDER BY `id`, `taskid` ASC",
+		MAXTASKSETS, MAXTASKS
+	);
+	auto        results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		LogError("Error in TaskManager::LoadTaskSets: [{}]", results.ErrorMessage().c_str());
 		return false;
-    }
+	}
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-        int taskSet = atoi(row[0]);
-        int taskID = atoi(row[1]);
+		int taskSet = atoi(row[0]);
+		int taskID  = atoi(row[1]);
 
-        TaskSets[taskSet].push_back(taskID);
-        Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] Adding TaskID %4i to TaskSet %4i", taskID, taskSet);
-    }
+		TaskSets[taskSet].push_back(taskID);
+		Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] Adding TaskID %4i to TaskSet %4i", taskID, taskSet);
+	}
 
 	return true;
 }
@@ -130,7 +133,7 @@ bool TaskManager::LoadTasks(int singleTask)
 
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-		Log(Logs::General, Logs::Error, ERR_MYSQLERROR, results.ErrorMessage().c_str());
+		LogError(ERR_MYSQLERROR, results.ErrorMessage().c_str());
 		return false;
 	}
 
@@ -139,8 +142,7 @@ bool TaskManager::LoadTasks(int singleTask)
 
 		if ((taskID <= 0) || (taskID >= MAXTASKS)) {
 			// This shouldn't happen, as the SELECT is bounded by MAXTASKS
-			Log(Logs::General, Logs::Error,
-			    "[TASKS]Task ID %i out of range while loading tasks from database", taskID);
+			LogError("[TASKS]Task ID [{}] out of range while loading tasks from database", taskID);
 			continue;
 		}
 
@@ -188,7 +190,7 @@ bool TaskManager::LoadTasks(int singleTask)
 				 singleTask, MAXACTIVITIESPERTASK);
 	results = database.QueryDatabase(query);
 	if (!results.Success()) {
-		Log(Logs::General, Logs::Error, ERR_MYSQLERROR, results.ErrorMessage().c_str());
+		LogError(ERR_MYSQLERROR, results.ErrorMessage().c_str());
 		return false;
 	}
 
@@ -200,16 +202,12 @@ bool TaskManager::LoadTasks(int singleTask)
 
 		if ((taskID <= 0) || (taskID >= MAXTASKS) || (activityID < 0) || (activityID >= MAXACTIVITIESPERTASK)) {
 			// This shouldn't happen, as the SELECT is bounded by MAXTASKS
-			Log(Logs::General, Logs::Error,
-			    "[TASKS]Task or Activity ID (%i, %i) out of range while loading "
-			    "activities from database",
-			    taskID, activityID);
+			LogError("[TASKS]Task or Activity ID ([{}], [{}]) out of range while loading activities from database", taskID, activityID);
 			continue;
 		}
 
 		if (Tasks[taskID] == nullptr) {
-			Log(Logs::General, Logs::Error,
-			    "[TASKS]Activity for non-existent task (%i, %i) while loading activities from database",
+			LogError("[TASKS]Activity for non-existent task ([{}], [{}]) while loading activities from database",
 			    taskID, activityID);
 			continue;
 		}
@@ -227,8 +225,7 @@ bool TaskManager::LoadTasks(int singleTask)
 		// ERR_NOTASK errors.
 		// Change to (activityID != (Tasks[taskID]->ActivityCount + 1)) to index from 1
 		if (activityID != Tasks[taskID]->ActivityCount) {
-			Log(Logs::General, Logs::Error,
-			    "[TASKS]Activities for Task %i are not sequential starting at 0. Not loading task.", taskID,
+			LogError("[TASKS]Activities for Task [{}] are not sequential starting at 0. Not loading task", taskID,
 			    activityID);
 			Tasks[taskID] = nullptr;
 			continue;
@@ -318,7 +315,7 @@ bool TaskManager::SaveClientState(Client *c, ClientTaskState *state)
 				    state->ActiveTasks[task].AcceptedTime);
 				auto results = database.QueryDatabase(query);
 				if (!results.Success()) {
-					Log(Logs::General, Logs::Error, ERR_MYSQLERROR, results.ErrorMessage().c_str());
+					LogError(ERR_MYSQLERROR, results.ErrorMessage().c_str());
 				} else {
 					state->ActiveTasks[task].Updated = false;
 				}
@@ -362,7 +359,7 @@ bool TaskManager::SaveClientState(Client *c, ClientTaskState *state)
 			auto results = database.QueryDatabase(query);
 
 			if (!results.Success()) {
-				Log(Logs::General, Logs::Error, ERR_MYSQLERROR, results.ErrorMessage().c_str());
+				LogError(ERR_MYSQLERROR, results.ErrorMessage().c_str());
 				continue;
 			}
 
@@ -398,7 +395,7 @@ bool TaskManager::SaveClientState(Client *c, ClientTaskState *state)
 		    StringFormat(completedTaskQuery, characterID, state->CompletedTasks[i].CompletedTime, taskID, -1);
 		auto results = database.QueryDatabase(query);
 		if (!results.Success()) {
-			Log(Logs::General, Logs::Error, ERR_MYSQLERROR, results.ErrorMessage().c_str());
+			LogError(ERR_MYSQLERROR, results.ErrorMessage().c_str());
 			continue;
 		}
 
@@ -416,7 +413,7 @@ bool TaskManager::SaveClientState(Client *c, ClientTaskState *state)
 					     taskID, j);
 			results = database.QueryDatabase(query);
 			if (!results.Success())
-				Log(Logs::General, Logs::Error, ERR_MYSQLERROR, results.ErrorMessage().c_str());
+				LogError(ERR_MYSQLERROR, results.ErrorMessage().c_str());
 		}
 	}
 
@@ -467,7 +464,7 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state)
 					 characterID);
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-		Log(Logs::General, Logs::Error, "[TASKS]Error in TaskManager::LoadClientState load Tasks: %s",
+		LogError("[TASKS]Error in TaskManager::LoadClientState load Tasks: [{}]",
 		    results.ErrorMessage().c_str());
 		return false;
 	}
@@ -478,21 +475,19 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state)
 		TaskType type = static_cast<TaskType>(atoi(row[2]));
 
 		if ((taskID < 0) || (taskID >= MAXTASKS)) {
-			Log(Logs::General, Logs::Error,
-			    "[TASKS]Task ID %i out of range while loading character tasks from database", taskID);
+			LogError("[TASKS]Task ID [{}] out of range while loading character tasks from database", taskID);
 			continue;
 		}
 
 		auto task_info = state->GetClientTaskInfo(type, slot);
 
 		if (task_info == nullptr) {
-			Log(Logs::General, Logs::Error,
-			    "[TASKS] Slot %i out of range while loading character tasks from database", slot);
+			LogError("[TASKS] Slot [{}] out of range while loading character tasks from database", slot);
 			continue;
 		}
 
 		if (task_info->TaskID != TASKSLOTEMPTY) {
-			Log(Logs::General, Logs::Error, "[TASKS] Slot %i for Task %is is already occupied.", slot,
+			LogError("[TASKS] Slot [{}] for Task [{}]s is already occupied", slot,
 			    taskID);
 			continue;
 		}
@@ -526,7 +521,7 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state)
 			     characterID);
 	results = database.QueryDatabase(query);
 	if (!results.Success()) {
-		Log(Logs::General, Logs::Error, "[TASKS]Error in TaskManager::LoadClientState load Activities: %s",
+		LogError("[TASKS]Error in TaskManager::LoadClientState load Activities: [{}]",
 		    results.ErrorMessage().c_str());
 		return false;
 	}
@@ -534,15 +529,13 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state)
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		int taskID = atoi(row[0]);
 		if ((taskID < 0) || (taskID >= MAXTASKS)) {
-			Log(Logs::General, Logs::Error,
-			    "[TASKS]Task ID %i out of range while loading character activities from database", taskID);
+			LogError("[TASKS]Task ID [{}] out of range while loading character activities from database", taskID);
 			continue;
 		}
 
 		int activityID = atoi(row[1]);
 		if ((activityID < 0) || (activityID >= MAXACTIVITIESPERTASK)) {
-			Log(Logs::General, Logs::Error,
-			    "[TASKS]Activity ID %i out of range while loading character activities from database",
+			LogError("[TASKS]Activity ID [{}] out of range while loading character activities from database",
 			    activityID);
 			continue;
 		}
@@ -559,8 +552,7 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state)
 					task_info = &state->ActiveQuests[i];
 
 		if (task_info == nullptr) {
-			Log(Logs::General, Logs::Error,
-			    "[TASKS]Activity %i found for task %i which client does not have.", activityID, taskID);
+			LogError("[TASKS]Activity [{}] found for task [{}] which client does not have", activityID, taskID);
 			continue;
 		}
 
@@ -588,8 +580,7 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state)
 				     characterID);
 		results = database.QueryDatabase(query);
 		if (!results.Success()) {
-			Log(Logs::General, Logs::Error,
-			    "[TASKS]Error in TaskManager::LoadClientState load completed tasks: %s",
+			LogError("[TASKS]Error in TaskManager::LoadClientState load completed tasks: [{}]",
 			    results.ErrorMessage().c_str());
 			return false;
 		}
@@ -606,8 +597,7 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state)
 
 			int taskID = atoi(row[0]);
 			if ((taskID <= 0) || (taskID >= MAXTASKS)) {
-				Log(Logs::General, Logs::Error,
-				    "[TASKS]Task ID %i out of range while loading completed tasks from database",
+				LogError("[TASKS]Task ID [{}] out of range while loading completed tasks from database",
 				    taskID);
 				continue;
 			}
@@ -618,8 +608,7 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state)
 			// completed.
 			int activityID = atoi(row[1]);
 			if ((activityID < -1) || (activityID >= MAXACTIVITIESPERTASK)) {
-				Log(Logs::General, Logs::Error,
-				    "[TASKS]Activity ID %i out of range while loading completed tasks from database",
+				LogError("[TASKS]Activity ID [{}] out of range while loading completed tasks from database",
 				    activityID);
 				continue;
 			}
@@ -660,7 +649,7 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state)
 			     characterID, MAXTASKS);
 	results = database.QueryDatabase(query);
 	if (!results.Success()) {
-		Log(Logs::General, Logs::Error, "[TASKS]Error in TaskManager::LoadClientState load enabled tasks: %s",
+		LogError("[TASKS]Error in TaskManager::LoadClientState load enabled tasks: [{}]",
 		    results.ErrorMessage().c_str());
 	} else {
 		for (auto row = results.begin(); row != results.end(); ++row) {
@@ -678,12 +667,12 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state)
 		if (taskID == TASKSLOTEMPTY)
 			continue;
 		if (!Tasks[taskID]) {
-			c->Message(13,
+			c->Message(Chat::Red,
 				   "Active Task Slot %i, references a task (%i), that does not exist. "
 				   "Removing from memory. Contact a GM to resolve this.",
 				   i, taskID);
 
-			Log(Logs::General, Logs::Error, "[TASKS]Character %i has task %i which does not exist.",
+			LogError("[TASKS]Character [{}] has task [{}] which does not exist",
 			    characterID, taskID);
 			state->ActiveTasks[i].TaskID = TASKSLOTEMPTY;
 			continue;
@@ -691,14 +680,12 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state)
 		for (int j = 0; j < Tasks[taskID]->ActivityCount; j++) {
 
 			if (state->ActiveTasks[i].Activity[j].ActivityID != j) {
-				c->Message(13,
+				c->Message(Chat::Red,
 					   "Active Task %i, %s. Activity count does not match expected value."
 					   "Removing from memory. Contact a GM to resolve this.",
 					   taskID, Tasks[taskID]->Title.c_str());
 
-				Log(Logs::General, Logs::Error,
-				    "[TASKS]Fatal error in character %i task state. Activity %i for "
-				    "Task %i either missing from client state or from task.",
+				LogError("[TASKS]Fatal error in character [{}] task state. Activity [{}] for Task [{}] either missing from client state or from task",
 				    characterID, j, taskID);
 				state->ActiveTasks[i].TaskID = TASKSLOTEMPTY;
 				break;
@@ -1001,7 +988,7 @@ void TaskManager::TaskSetSelector(Client *c, ClientTaskState *state, Mob *mob, i
 		return;
 
 	if (TaskSets[TaskSetID].empty()) {
-		mob->SayTo_StringID(c, CC_Yellow, MAX_ACTIVE_TASKS, c->GetName()); // I think this is suppose to be yellow
+		mob->SayString(c, Chat::Yellow, MAX_ACTIVE_TASKS, c->GetName()); // I think this is suppose to be yellow
 		return;
 	}
 
@@ -1033,7 +1020,7 @@ void TaskManager::TaskSetSelector(Client *c, ClientTaskState *state, Mob *mob, i
 	if (TaskListIndex > 0) {
 		SendTaskSelector(c, mob, TaskListIndex, TaskList);
 	} else {
-		mob->SayTo_StringID(c, CC_Yellow, MAX_ACTIVE_TASKS, c->GetName()); // check color, I think this might be only for (Shared) Tasks, w/e -- think should be yellow
+		mob->SayString(c, Chat::Yellow, MAX_ACTIVE_TASKS, c->GetName()); // check color, I think this might be only for (Shared) Tasks, w/e -- think should be yellow
 	}
 
 	return;
@@ -1065,7 +1052,7 @@ void TaskManager::TaskQuestSetSelector(Client *c, ClientTaskState *state, Mob *m
 	if (TaskListIndex > 0) {
 		SendTaskSelector(c, mob, TaskListIndex, TaskList);
 	} else {
-		mob->SayTo_StringID(c, CC_Yellow, MAX_ACTIVE_TASKS, c->GetName()); // check color, I think this might be only for (Shared) Tasks, w/e -- think should be yellow
+		mob->SayString(c, Chat::Yellow, MAX_ACTIVE_TASKS, c->GetName()); // check color, I think this might be only for (Shared) Tasks, w/e -- think should be yellow
 	}
 
 	return;
@@ -1266,18 +1253,18 @@ void TaskManager::ExplainTask(Client*c, int TaskID) {
 	if(!c) return;
 
 	if((TaskID<=0) || (TaskID>=MAXTASKS)) {
-		c->Message(0, "TaskID out-of-range.");
+		c->Message(Chat::White, "TaskID out-of-range.");
 		return;
 	}
 
 	if(Tasks[TaskID] == nullptr) {
-		c->Message(0, "Task does not exist.");
+		c->Message(Chat::White, "Task does not exist.");
 		return;
 	}
 
 	char Explanation[1000], *ptr;
-	c->Message(0, "Task %4i: Title: %s", TaskID, Tasks[TaskID]->Description.c_str());
-	c->Message(0, "%3i Activities", Tasks[TaskID]->ActivityCount);
+	c->Message(Chat::White, "Task %4i: Title: %s", TaskID, Tasks[TaskID]->Description.c_str());
+	c->Message(Chat::White, "%3i Activities", Tasks[TaskID]->ActivityCount);
 	ptr = Explanation;
 	for(int i=0; i<Tasks[TaskID]->ActivityCount; i++) {
 
@@ -1936,7 +1923,7 @@ void ClientTaskState::IncrementDoneCount(Client *c, TaskInformation *Task, int T
 		// Send the updated task/activity list to the client
 		taskmanager->SendSingleActiveTaskToClient(c, *info, TaskComplete, false);
 		// Inform the client the task has been updated, both by a chat message
-		c->Message(0, "Your task '%s' has been updated.", Task->Title.c_str());
+		c->Message(Chat::White, "Your task '%s' has been updated.", Task->Title.c_str());
 
 		if(Task->Activity[ActivityID].GoalMethod != METHODQUEST) {
 			if (!ignore_quest_update){
@@ -2001,7 +1988,7 @@ void ClientTaskState::RewardTask(Client *c, TaskInformation *Task) {
 				c->SummonItem(Task->RewardID);
 				Item = database.GetItem(Task->RewardID);
 				if(Item)
-					c->Message(15, "You receive %s as a reward.", Item->Name);
+					c->Message(Chat::Yellow, "You receive %s as a reward.", Item->Name);
 			}
 			break;
 		}
@@ -2012,7 +1999,7 @@ void ClientTaskState::RewardTask(Client *c, TaskInformation *Task) {
 				c->SummonItem(RewardList[i]);
 				Item = database.GetItem(RewardList[i]);
 				if(Item)
-					c->Message(15, "You receive %s as a reward.", Item->Name);
+					c->Message(Chat::Yellow, "You receive %s as a reward.", Item->Name);
 			}
 			break;
 		}
@@ -2024,7 +2011,7 @@ void ClientTaskState::RewardTask(Client *c, TaskInformation *Task) {
 	}
 
 	if (!Task->completion_emote.empty())
-		c->SendColoredText(CC_Yellow, Task->completion_emote); // unsure if they use this packet or color, should work
+		c->SendColoredText(Chat::Yellow, Task->completion_emote); // unsure if they use this packet or color, should work
 
 	// just use normal NPC faction ID stuff
 	if (Task->faction_reward)
@@ -2081,7 +2068,7 @@ void ClientTaskState::RewardTask(Client *c, TaskInformation *Task) {
 			CashMessage += " copper";
 		}
 		CashMessage += " pieces.";
-		c->Message(15,CashMessage.c_str());
+		c->Message(Chat::Yellow,CashMessage.c_str());
 	}
 	int32 EXPReward = Task->XPReward;
 	if(EXPReward > 0) {
@@ -2306,12 +2293,12 @@ void ClientTaskState::ResetTaskActivity(Client *c, int TaskID, int ActivityID)
 
 void ClientTaskState::ShowClientTasks(Client *c)
 {
-	c->Message(0, "Task Information:");
+	c->Message(Chat::White, "Task Information:");
 	if (ActiveTask.TaskID != TASKSLOTEMPTY) {
-		c->Message(0, "Task: %i %s", ActiveTask.TaskID, taskmanager->Tasks[ActiveTask.TaskID]->Title.c_str());
-		c->Message(0, "  Description: [%s]\n", taskmanager->Tasks[ActiveTask.TaskID]->Description.c_str());
+		c->Message(Chat::White, "Task: %i %s", ActiveTask.TaskID, taskmanager->Tasks[ActiveTask.TaskID]->Title.c_str());
+		c->Message(Chat::White, "  Description: [%s]\n", taskmanager->Tasks[ActiveTask.TaskID]->Description.c_str());
 		for (int j = 0; j < taskmanager->GetActivityCount(ActiveTask.TaskID); j++) {
-			c->Message(0, "  Activity: %2d, DoneCount: %2d, Status: %d (0=Hidden, 1=Active, 2=Complete)",
+			c->Message(Chat::White, "  Activity: %2d, DoneCount: %2d, Status: %d (0=Hidden, 1=Active, 2=Complete)",
 				   ActiveTask.Activity[j].ActivityID, ActiveTask.Activity[j].DoneCount,
 				   ActiveTask.Activity[j].State);
 		}
@@ -2321,11 +2308,11 @@ void ClientTaskState::ShowClientTasks(Client *c)
 		if (ActiveQuests[i].TaskID == TASKSLOTEMPTY)
 			continue;
 
-		c->Message(0, "Quest: %i %s", ActiveQuests[i].TaskID,
+		c->Message(Chat::White, "Quest: %i %s", ActiveQuests[i].TaskID,
 			   taskmanager->Tasks[ActiveQuests[i].TaskID]->Title.c_str());
-		c->Message(0, "  Description: [%s]\n", taskmanager->Tasks[ActiveQuests[i].TaskID]->Description.c_str());
+		c->Message(Chat::White, "  Description: [%s]\n", taskmanager->Tasks[ActiveQuests[i].TaskID]->Description.c_str());
 		for (int j = 0; j < taskmanager->GetActivityCount(ActiveQuests[i].TaskID); j++) {
-			c->Message(0, "  Activity: %2d, DoneCount: %2d, Status: %d (0=Hidden, 1=Active, 2=Complete)",
+			c->Message(Chat::White, "  Activity: %2d, DoneCount: %2d, Status: %d (0=Hidden, 1=Active, 2=Complete)",
 				   ActiveQuests[i].Activity[j].ActivityID, ActiveQuests[i].Activity[j].DoneCount,
 				   ActiveQuests[i].Activity[j].State);
 		}
@@ -3171,7 +3158,7 @@ void ClientTaskState::RemoveTask(Client *c, int sequenceNumber, TaskType type)
 					 characterID, task_id);
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
-		Log(Logs::General, Logs::Error, "[TASKS] Error in CientTaskState::CancelTask %s",
+		LogError("[TASKS] Error in CientTaskState::CancelTask [{}]",
 		    results.ErrorMessage().c_str());
 		return;
 	}
@@ -3181,7 +3168,7 @@ void ClientTaskState::RemoveTask(Client *c, int sequenceNumber, TaskType type)
 			     task_id, static_cast<int>(type));
 	results = database.QueryDatabase(query);
 	if (!results.Success())
-		Log(Logs::General, Logs::Error, "[TASKS] Error in CientTaskState::CancelTask %s",
+		LogError("[TASKS] Error in CientTaskState::CancelTask [{}]",
 		    results.ErrorMessage().c_str());
 
 	Log(Logs::General, Logs::Tasks, "[UPDATE] CancelTask: %s", query.c_str());
@@ -3204,14 +3191,14 @@ void ClientTaskState::RemoveTask(Client *c, int sequenceNumber, TaskType type)
 void ClientTaskState::AcceptNewTask(Client *c, int TaskID, int NPCID, bool enforce_level_requirement)
 {
 	if (!taskmanager || TaskID < 0 || TaskID >= MAXTASKS) {
-		c->Message(13, "Task system not functioning, or TaskID %i out of range.", TaskID);
+		c->Message(Chat::Red, "Task system not functioning, or TaskID %i out of range.", TaskID);
 		return;
 	}
 
 	auto task = taskmanager->Tasks[TaskID];
 
 	if (task == nullptr) {
-		c->Message(13, "Invalid TaskID %i", TaskID);
+		c->Message(Chat::Red, "Invalid TaskID %i", TaskID);
 		return;
 	}
 
@@ -3235,7 +3222,7 @@ void ClientTaskState::AcceptNewTask(Client *c, int TaskID, int NPCID, bool enfor
 	}
 
 	if (max_tasks) {
-		c->Message(13, "You already have the maximum allowable number of active tasks (%i)", MAXACTIVEQUESTS);
+		c->Message(Chat::Red, "You already have the maximum allowable number of active tasks (%i)", MAXACTIVEQUESTS);
 		return;
 	}
 
@@ -3243,14 +3230,14 @@ void ClientTaskState::AcceptNewTask(Client *c, int TaskID, int NPCID, bool enfor
 	if (task->type == TaskType::Quest) {
 		for (int i = 0; i < MAXACTIVEQUESTS; i++) {
 			if (ActiveQuests[i].TaskID == TaskID) {
-				c->Message(13, "You have already been assigned this task.");
+				c->Message(Chat::Red, "You have already been assigned this task.");
 				return;
 			}
 		}
 	}
 
 	if (enforce_level_requirement && !taskmanager->AppropriateLevel(TaskID, c->GetLevel())) {
-		c->Message(13, "You are outside the level range of this task.");
+		c->Message(Chat::Red, "You are outside the level range of this task.");
 		return;
 	}
 
@@ -3287,7 +3274,7 @@ void ClientTaskState::AcceptNewTask(Client *c, int TaskID, int NPCID, bool enfor
 
 	// This shouldn't happen unless there is a bug in the handling of ActiveTaskCount somewhere
 	if (active_slot == nullptr) {
-		c->Message(13, "You already have the maximum allowable number of active tasks (%i)", MAXACTIVEQUESTS);
+		c->Message(Chat::Red, "You already have the maximum allowable number of active tasks (%i)", MAXACTIVEQUESTS);
 		return;
 	}
 
@@ -3309,14 +3296,14 @@ void ClientTaskState::AcceptNewTask(Client *c, int TaskID, int NPCID, bool enfor
 		ActiveTaskCount++;
 
 	taskmanager->SendSingleActiveTaskToClient(c, *active_slot, false, true);
-	c->Message(0, "You have been assigned the task '%s'.", taskmanager->Tasks[TaskID]->Title.c_str());
+	c->Message(Chat::White, "You have been assigned the task '%s'.", taskmanager->Tasks[TaskID]->Title.c_str());
 
 	std::string buf = std::to_string(TaskID);
 
 	NPC *npc = entity_list.GetID(NPCID)->CastToNPC();
 	if(!npc) {
-		c->Message(clientMessageYellow, "Task Giver ID is %i", NPCID);
-		c->Message(clientMessageError, "Unable to find NPC to send EVENT_TASKACCEPTED to. Report this bug.");
+		c->Message(Chat::Yellow, "Task Giver ID is %i", NPCID);
+		c->Message(Chat::Red, "Unable to find NPC to send EVENT_TASKACCEPTED to. Report this bug.");
 		return;
 	}
 

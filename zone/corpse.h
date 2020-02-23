@@ -48,7 +48,7 @@ class Corpse : public Mob {
 	Corpse(uint32 in_corpseid, uint32 in_charid, const char* in_charname, ItemList* in_itemlist, uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_plat, const glm::vec4& position, float in_size, uint8 in_gender, uint16 in_race, uint8 in_class, uint8 in_deity, uint8 in_level, uint8 in_texture, uint8 in_helmtexture, uint32 in_rezexp, bool wasAtGraveyard = false);
 
 	~Corpse();
-	static Corpse* LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std::string in_charname, const glm::vec4& position, std::string time_of_death, bool rezzed, bool was_at_graveyard);
+	static Corpse* LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std::string in_charname, const glm::vec4& position, std::string time_of_death, bool rezzed, bool was_at_graveyard, uint32 guild_consent_id);
 
 	/* Corpse: General */
 	virtual bool	Death(Mob* killerMob, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill) { return true; }
@@ -74,6 +74,11 @@ class Corpse : public Mob {
 	uint32			GetDecayTime()				{ if (!corpse_decay_timer.Enabled()) return 0xFFFFFFFF; else return corpse_decay_timer.GetRemainingTime(); }
 	uint32			GetRezTime()				{ if (!corpse_rez_timer.Enabled()) return 0; else return corpse_rez_timer.GetRemainingTime(); }
 	void			SetDecayTimer(uint32 decay_time);
+	void			SetConsentGroupID(uint32 group_id) { if (IsPlayerCorpse()) { consented_group_id = group_id; } }
+	void			SetConsentRaidID(uint32 raid_id)   { if (IsPlayerCorpse()) { consented_raid_id = raid_id; } }
+	void			SetConsentGuildID(uint32 guild_id) { if (IsPlayerCorpse()) { consented_guild_id = guild_id; } }
+	void			AddConsentName(std::string consent_player_name);
+	void			RemoveConsentName(std::string consent_player_name);
 
 	void			Delete();
 	void			Bury();
@@ -142,6 +147,9 @@ private:
 	int32		player_kill_item; /* Determines if Player Kill Item */
 	uint32		corpse_db_id; /* Corpse Database ID (Player Corpse) */
 	uint32		char_id; /* Character ID */
+	uint32		consented_group_id = 0;
+	uint32		consented_raid_id  = 0;
+	uint32		consented_guild_id = 0;
 	ItemList	itemlist; /* Internal Item list used for corpses */
 	uint32		copper;
 	uint32		silver;
@@ -160,6 +168,7 @@ private:
 	Timer		corpse_graveyard_timer;
 	Timer		loot_cooldown_timer; /* Delay between loot actions on the corpse entity */
 	EQEmu::TintProfile item_tint;
+	std::vector<std::string> consented_player_names;
 
 	LootRequestType	loot_request_type;
 };

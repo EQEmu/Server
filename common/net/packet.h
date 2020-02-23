@@ -89,9 +89,9 @@ namespace EQ {
 		public:
 			StaticPacket(void *data, size_t size) { m_data = data; m_data_length = size; m_max_data_length = size; }
 			virtual ~StaticPacket() { }
-			StaticPacket(const StaticPacket &o) { m_data = o.m_data; m_data_length = o.m_data_length; }
+			StaticPacket(const StaticPacket &o) { m_data = o.m_data; m_data_length = o.m_data_length; m_max_data_length = o.m_max_data_length; }
 			StaticPacket& operator=(const StaticPacket &o) { m_data = o.m_data; m_data_length = o.m_data_length; return *this; }
-			StaticPacket(StaticPacket &&o) { m_data = o.m_data; m_data_length = o.m_data_length; }
+			StaticPacket(StaticPacket &&o) noexcept { m_data = o.m_data; m_data_length = o.m_data_length; }
 
 			virtual const void *Data() const { return m_data; }
 			virtual void *Data() { return m_data; }
@@ -112,7 +112,7 @@ namespace EQ {
 		public:
 			DynamicPacket() { }
 			virtual ~DynamicPacket() { }
-			DynamicPacket(DynamicPacket &&o) { m_data = std::move(o.m_data); }
+			DynamicPacket(DynamicPacket &&o) noexcept { m_data = std::move(o.m_data); }
 			DynamicPacket(const DynamicPacket &o) { m_data = o.m_data; }
 			DynamicPacket& operator=(const DynamicPacket &o) { m_data = o.m_data; return *this; }
 

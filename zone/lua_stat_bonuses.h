@@ -91,6 +91,7 @@ public:
 	int32 Getskillmod(int idx) const;
 	int32 Getskillmodmax(int idx) const;
 	int Geteffective_casting_level() const;
+	int Getadjusted_casting_skill() const;
 	int Getreflect_chance() const;
 	uint32 GetsingingMod() const;
 	uint32 GetAmplification() const;

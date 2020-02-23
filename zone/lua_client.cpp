@@ -47,7 +47,7 @@ bool Lua_Client::InZone() {
 
 void Lua_Client::Kick() {
 	Lua_Safe_Call_Void();
-	self->Kick();
+	self->Kick("Lua Quest");
 }
 
 void Lua_Client::Disconnect() {
@@ -550,6 +550,16 @@ void Lua_Client::UnmemSpellAll(bool update_client) {
 	self->UnmemSpellAll(update_client);
 }
 
+uint16 Lua_Client::FindMemmedSpellBySlot(int slot) {
+	Lua_Safe_Call_Int();
+	return self->FindMemmedSpellBySlot(slot);
+}
+
+int Lua_Client::MemmedCount() {
+	Lua_Safe_Call_Int();
+	return self->MemmedCount();
+}
+
 void Lua_Client::ScribeSpell(int spell_id, int slot) {
 	Lua_Safe_Call_Void();
 	self->ScribeSpell(spell_id, slot);
@@ -615,9 +625,19 @@ void Lua_Client::UntrainDiscAll(bool update_client) {
 	self->UntrainDiscAll(update_client);
 }
 
+bool Lua_Client::IsStanding() {
+	Lua_Safe_Call_Bool();
+	return self->IsStanding();
+}
+
 bool Lua_Client::IsSitting() {
 	Lua_Safe_Call_Bool();
 	return self->IsSitting();
+}
+
+bool Lua_Client::IsCrouching() {
+	Lua_Safe_Call_Bool();
+	return self->IsCrouching();
 }
 
 void Lua_Client::SetFeigned(bool v) {
@@ -1045,6 +1065,11 @@ void Lua_Client::AddLevelBasedExp(int exp_pct, int max_level) {
 	self->AddLevelBasedExp(exp_pct, max_level);
 }
 
+void Lua_Client::AddLevelBasedExp(int exp_pct, int max_level, bool ignore_mods) {
+	Lua_Safe_Call_Void();
+	self->AddLevelBasedExp(exp_pct, max_level, ignore_mods);
+}
+
 void Lua_Client::IncrementAA(int aa) {
 	Lua_Safe_Call_Void();
 	self->IncrementAlternateAdvancementRank(aa);
@@ -1188,6 +1213,16 @@ void Lua_Client::Signal(uint32 id) {
 void Lua_Client::AddAlternateCurrencyValue(uint32 currency, int amount) {
 	Lua_Safe_Call_Void();
 	self->AddAlternateCurrencyValue(currency, amount, 1);
+}
+
+void Lua_Client::SetAlternateCurrencyValue(uint32 currency, int amount) {
+	Lua_Safe_Call_Void();
+	self->SetAlternateCurrencyValue(currency, amount);
+}
+
+int Lua_Client::GetAlternateCurrencyValue(uint32 currency) {
+	Lua_Safe_Call_Int();
+	return self->GetAlternateCurrencyValue(currency);
 }
 
 void Lua_Client::SendWebLink(const char *site) {
@@ -1350,59 +1385,87 @@ void Lua_Client::QuestReward(Lua_Mob target, luabind::adl::object reward) {
 		return;
 	}
 
-	uint32 copper = 0;
-	uint32 silver = 0;
-	uint32 gold = 0;
-	uint32 platinum = 0;
-	uint32 itemid = 0;
-	uint32 exp = 0;
+	QuestReward_Struct quest_reward;
+	quest_reward.mob_id = 0;
+	quest_reward.target_id = self->GetID();
+	quest_reward.copper = 0;
+	quest_reward.silver = 0;
+	quest_reward.gold = 0;
+	quest_reward.platinum = 0;
+	quest_reward.exp_reward = 0;
+	quest_reward.faction = 0;
+	quest_reward.faction_mod = 0;
 	bool faction = false;
+	std::fill(std::begin(quest_reward.item_id), std::end(quest_reward.item_id), -1);
 
 	auto cur = reward["copper"];
 	if (luabind::type(cur) != LUA_TNIL) {
 		try {
-			copper = luabind::object_cast<uint32>(cur);
-		} catch (luabind::cast_failed) {
+			quest_reward.copper = luabind::object_cast<uint32>(cur);
+		} catch (luabind::cast_failed &) {
 		}
 	}
 
 	cur = reward["silver"];
 	if (luabind::type(cur) != LUA_TNIL) {
 		try {
-			silver = luabind::object_cast<uint32>(cur);
-		} catch (luabind::cast_failed) {
+			quest_reward.silver = luabind::object_cast<uint32>(cur);
+		} catch (luabind::cast_failed &) {
 		}
 	}
 
 	cur = reward["gold"];
 	if (luabind::type(cur) != LUA_TNIL) {
 		try {
-			gold = luabind::object_cast<uint32>(cur);
-		} catch (luabind::cast_failed) {
+			quest_reward.gold = luabind::object_cast<uint32>(cur);
+		} catch (luabind::cast_failed &) {
 		}
 	}
 
 	cur = reward["platinum"];
 	if (luabind::type(cur) != LUA_TNIL) {
 		try {
-			platinum = luabind::object_cast<uint32>(cur);
-		} catch (luabind::cast_failed) {
+			quest_reward.platinum = luabind::object_cast<uint32>(cur);
+		} catch (luabind::cast_failed &) {
 		}
 	}
 
 	cur = reward["itemid"];
 	if (luabind::type(cur) != LUA_TNIL) {
 		try {
-			itemid = luabind::object_cast<uint32>(cur);
-		} catch (luabind::cast_failed) {
+			quest_reward.item_id[0] = luabind::object_cast<uint32>(cur);
+		} catch (luabind::cast_failed &) {
+		}
+	}
+
+	// if you define both an itemid and items table, the itemid is thrown away
+	// should we error?
+	cur = reward["items"];
+	if (luabind::type(cur) == LUA_TTABLE) {
+		try {
+			// assume they defined a compatible table
+			for (int i = 1; i <= QUESTREWARD_COUNT; ++i) {
+				auto item = cur[i];
+				int cur_value = -1;
+				if (luabind::type(item) != LUA_TNIL) {
+					try {
+						cur_value = luabind::object_cast<uint32>(item);
+					} catch (luabind::cast_failed &) {
+					}
+				} else {
+					break;
+				}
+				quest_reward.item_id[i - 1] = cur_value;
+			}
+		} catch (luabind::cast_failed &) {
 		}
 	}
 
 	cur = reward["exp"];
 	if (luabind::type(cur) != LUA_TNIL) {
 		try {
-			exp = luabind::object_cast<uint32>(cur);
-		} catch (luabind::cast_failed) {
+			quest_reward.exp_reward = luabind::object_cast<uint32>(cur);
+		} catch (luabind::cast_failed &) {
 		}
 	}
 
@@ -1410,11 +1473,11 @@ void Lua_Client::QuestReward(Lua_Mob target, luabind::adl::object reward) {
 	if (luabind::type(cur) != LUA_TNIL) {
 		try {
 			faction = luabind::object_cast<bool>(cur);
-		} catch (luabind::cast_failed) {
+		} catch (luabind::cast_failed &) {
 		}
 	}
 
-	self->QuestReward(target, copper, silver, gold, platinum, itemid, exp, faction);
+	self->QuestReward(target, quest_reward, faction);
 }
 
 bool Lua_Client::IsDead() {
@@ -1495,6 +1558,18 @@ void Lua_Client::SetSecondaryWeaponOrnamentation(uint32 model_id) {
 	Lua_Safe_Call_Void();
 	self->SetSecondaryWeaponOrnamentation(model_id);
 }
+
+void Lua_Client::SetClientMaxLevel(int value) {
+	Lua_Safe_Call_Void();
+	self->SetClientMaxLevel(value);
+}
+
+int Lua_Client::GetClientMaxLevel() {
+	Lua_Safe_Call_Int();
+	return self->GetClientMaxLevel();
+}
+
+
 
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
@@ -1608,6 +1683,8 @@ luabind::scope lua_register_client() {
 		.def("UnmemSpellBySpellID", (void(Lua_Client::*)(int32))&Lua_Client::UnmemSpellBySpellID)
 		.def("UnmemSpellAll", (void(Lua_Client::*)(void))&Lua_Client::UnmemSpellAll)
 		.def("UnmemSpellAll", (void(Lua_Client::*)(bool))&Lua_Client::UnmemSpellAll)
+		.def("FindMemmedSpellBySlot", (uint16(Lua_Client::*)(int))&Lua_Client::FindMemmedSpellBySlot)
+		.def("MemmedCount", (int(Lua_Client::*)(void))&Lua_Client::MemmedCount)
 		.def("ScribeSpell", (void(Lua_Client::*)(int,int))&Lua_Client::ScribeSpell)
 		.def("ScribeSpell", (void(Lua_Client::*)(int,int,bool))&Lua_Client::ScribeSpell)
 		.def("UnscribeSpell", (void(Lua_Client::*)(int))&Lua_Client::UnscribeSpell)
@@ -1621,7 +1698,9 @@ luabind::scope lua_register_client() {
 		.def("UntrainDisc", (void(Lua_Client::*)(int,bool))&Lua_Client::UntrainDisc)
 		.def("UntrainDiscAll", (void(Lua_Client::*)(void))&Lua_Client::UntrainDiscAll)
 		.def("UntrainDiscAll", (void(Lua_Client::*)(bool))&Lua_Client::UntrainDiscAll)
+		.def("IsStanding", (bool(Lua_Client::*)(void))&Lua_Client::IsStanding)
 		.def("IsSitting", (bool(Lua_Client::*)(void))&Lua_Client::IsSitting)
+		.def("IsCrouching", (bool(Lua_Client::*)(void))&Lua_Client::IsCrouching)
 		.def("SetFeigned", (void(Lua_Client::*)(bool))&Lua_Client::SetFeigned)
 		.def("GetFeigned", (bool(Lua_Client::*)(void))&Lua_Client::GetFeigned)
 		.def("AutoSplitEnabled", (bool(Lua_Client::*)(void))&Lua_Client::AutoSplitEnabled)
@@ -1707,6 +1786,7 @@ luabind::scope lua_register_client() {
 		.def("GetIP", (uint32(Lua_Client::*)(void))&Lua_Client::GetIP)
 		.def("AddLevelBasedExp", (void(Lua_Client::*)(int))&Lua_Client::AddLevelBasedExp)
 		.def("AddLevelBasedExp", (void(Lua_Client::*)(int,int))&Lua_Client::AddLevelBasedExp)
+		.def("AddLevelBasedExp", (void(Lua_Client::*)(int,int,bool))&Lua_Client::AddLevelBasedExp)
 		.def("IncrementAA", (void(Lua_Client::*)(int))&Lua_Client::IncrementAA)
 		.def("GrantAlternateAdvancementAbility", (bool(Lua_Client::*)(int, int))&Lua_Client::GrantAlternateAdvancementAbility)
 		.def("GrantAlternateAdvancementAbility", (bool(Lua_Client::*)(int, int, bool))&Lua_Client::GrantAlternateAdvancementAbility)
@@ -1736,6 +1816,8 @@ luabind::scope lua_register_client() {
 		.def("OpenLFGuildWindow", (void(Lua_Client::*)(void))&Lua_Client::OpenLFGuildWindow)
 		.def("Signal", (void(Lua_Client::*)(uint32))&Lua_Client::Signal)
 		.def("AddAlternateCurrencyValue", (void(Lua_Client::*)(uint32,int))&Lua_Client::AddAlternateCurrencyValue)
+		.def("SetAlternateCurrencyValue", (void(Lua_Client::*)(uint32,int))&Lua_Client::SetAlternateCurrencyValue)
+		.def("GetAlternateCurrencyValue", (int(Lua_Client::*)(uint32))&Lua_Client::GetAlternateCurrencyValue)
 		.def("SendWebLink", (void(Lua_Client::*)(const char *))&Lua_Client::SendWebLink)
 		.def("HasSpellScribed", (bool(Lua_Client::*)(int))&Lua_Client::HasSpellScribed)
 		.def("SetAccountFlag", (void(Lua_Client::*)(std::string,std::string))&Lua_Client::SetAccountFlag)
@@ -1778,7 +1860,9 @@ luabind::scope lua_register_client() {
 		.def("EnableAreaEndRegen", &Lua_Client::EnableAreaEndRegen)
 		.def("DisableAreaEndRegen", &Lua_Client::DisableAreaEndRegen)
 		.def("EnableAreaRegens", &Lua_Client::EnableAreaRegens)
-		.def("DisableAreaRegens", &Lua_Client::DisableAreaRegens);
+		.def("DisableAreaRegens", &Lua_Client::DisableAreaRegens)
+		.def("SetClientMaxLevel", (void(Lua_Client::*)(int))&Lua_Client::SetClientMaxLevel)
+		.def("GetClientMaxLevel", (int(Lua_Client::*)(void))&Lua_Client::GetClientMaxLevel);
 }
 
 luabind::scope lua_register_inventory_where() {

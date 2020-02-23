@@ -155,12 +155,31 @@ XS(XS__say); // prototype to pass -Wmissing-prototypes
 XS(XS__say) {
 	dXSARGS;
 
-	if (items == 1)
-		quest_manager.say(SvPV_nolen(ST(0)));
-	else if (items == 2)
-		quest_manager.say(SvPV_nolen(ST(0)), (int) SvIV(ST(1)));
-	else
-		Perl_croak(aTHX_ "Usage: quest::say(string message, int language_id])");
+	Journal::Options opts;
+	// we currently default to these
+	opts.speak_mode = Journal::SpeakMode::Say;
+	opts.journal_mode = Journal::Mode::Log2;
+	opts.language = 0;
+	opts.message_type = Chat::NPCQuestSay;
+	if (items == 0 || items > 5) {
+		Perl_croak(aTHX_ "Usage: quest::say(string message, [int language_id], [int message_type], [int speak_mode], [int journal_mode])");
+	} else if (items == 2) {
+		opts.language = (int)SvIV(ST(1));
+	} else if (items == 3) {
+		opts.language = (int)SvIV(ST(1));
+		opts.message_type = (int)SvIV(ST(2));
+	} else if (items == 4) {
+		opts.language = (int)SvIV(ST(1));
+		opts.message_type = (int)SvIV(ST(2));
+		opts.speak_mode = (Journal::SpeakMode)SvIV(ST(3));
+	} else if (items == 5) {
+		opts.language = (int)SvIV(ST(1));
+		opts.message_type = (int)SvIV(ST(2));
+		opts.speak_mode = (Journal::SpeakMode)SvIV(ST(3));
+		opts.journal_mode = (Journal::Mode)SvIV(ST(4));
+	}
+
+	quest_manager.say(SvPV_nolen(ST(0)), opts);
 
 	XSRETURN_EMPTY;
 }
@@ -207,8 +226,7 @@ XS(XS__spawn);
 XS(XS__spawn) {
 	dXSARGS;
 	if (items != 6)
-		Perl_croak(aTHX_
-		           "Usage: quest::spawn(int npc_type_id, int grid_id, int int_unused, float x, float y, float z)");
+		Perl_croak(aTHX_ "Usage: quest::spawn(int npc_type_id, int grid_id, int int_unused, float x, float y, float z)");
 
 	uint16 RETVAL;
 	dXSTARG;
@@ -230,8 +248,7 @@ XS(XS__spawn2);
 XS(XS__spawn2) {
 	dXSARGS;
 	if (items != 7)
-		Perl_croak(aTHX_
-		           "Usage: quest::spawn2(int npc_type_id, int grid_id, int int_unused, float x, float y, float z, float heading)");
+		Perl_croak(aTHX_ "Usage: quest::spawn2(int npc_type_id, int grid_id, int int_unused, float x, float y, float z, float heading)");
 
 	uint16 RETVAL;
 	dXSTARG;
@@ -253,8 +270,7 @@ XS(XS__unique_spawn);
 XS(XS__unique_spawn) {
 	dXSARGS;
 	if (items != 6 && items != 7)
-		Perl_croak(aTHX_
-		           "Usage: quest::unique_spawn(int npc_type_id, int grid_id, int int_unused, float x, float y, float z, [float heading])");
+		Perl_croak(aTHX_ "Usage: quest::unique_spawn(int npc_type_id, int grid_id, int int_unused, float x, float y, float z, [float heading])");
 
 	uint16 RETVAL;
 	dXSTARG;
@@ -356,71 +372,98 @@ XS(XS__getinventoryslotid) {
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: quest::getinventoryslotid(string identifier)");
 
-	int16 RETVAL;
+	int16 RETVAL = EQEmu::invslot::SLOT_INVALID;
 	dXSTARG;
 
 	std::string identifier = (Const_char *)SvPV_nolen(ST(0));
 	for (std::string::size_type i = 0; i < identifier.length(); ++i)
 		identifier[i] = std::tolower(identifier[i]);
 
-	if (identifier == "invalid")                   RETVAL = EQEmu::invslot::SLOT_INVALID;
-	else if (identifier == "cursor")               RETVAL = EQEmu::invslot::slotCursor;
-	else if (identifier == "possessions.begin")    RETVAL = EQEmu::invslot::POSSESSIONS_BEGIN;
-	else if (identifier == "possessions.end")      RETVAL = EQEmu::invslot::POSSESSIONS_END;
-	else if (identifier == "bank.begin")           RETVAL = EQEmu::invslot::BANK_BEGIN;
-	else if (identifier == "bank.end")             RETVAL = EQEmu::invslot::BANK_END;
-	else if (identifier == "sharedbank.begin")     RETVAL = EQEmu::invslot::SHARED_BANK_BEGIN;
-	else if (identifier == "sharedbank.end")       RETVAL = EQEmu::invslot::SHARED_BANK_END;
-	else if (identifier == "generalbags.begin")    RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN;
-	else if (identifier == "generalbags.end")      RETVAL = EQEmu::invbag::GENERAL_BAGS_END;
-	else if (identifier == "cursorbag.begin")      RETVAL = EQEmu::invbag::CURSOR_BAG_BEGIN;
-	else if (identifier == "cursorbag.end")        RETVAL = EQEmu::invbag::CURSOR_BAG_END;
-	else if (identifier == "bankbags.begin")       RETVAL = EQEmu::invbag::BANK_BAGS_BEGIN;
-	else if (identifier == "bankbags.end")         RETVAL = EQEmu::invbag::BANK_BAGS_END;
-	else if (identifier == "sharedbankbags.begin") RETVAL = EQEmu::invbag::SHARED_BANK_BAGS_BEGIN;
-	else if (identifier == "sharedbankbags.end")   RETVAL = EQEmu::invbag::SHARED_BANK_BAGS_END;
-	else if (identifier == "bagslot.begin")        RETVAL = EQEmu::invbag::SLOT_BEGIN;
-	else if (identifier == "bagslot.end")          RETVAL = EQEmu::invbag::SLOT_END;
-	else if (identifier == "augsocket.begin")      RETVAL = EQEmu::invaug::SOCKET_BEGIN;
-	else if (identifier == "augsocket.end")        RETVAL = EQEmu::invaug::SOCKET_END;
-	else if (identifier == "equipment.begin")      RETVAL = EQEmu::invslot::EQUIPMENT_BEGIN;
-	else if (identifier == "equipment.end")        RETVAL = EQEmu::invslot::EQUIPMENT_END;
-	else if (identifier == "general.begin")        RETVAL = EQEmu::invslot::GENERAL_BEGIN;
-	else if (identifier == "general.end")          RETVAL = EQEmu::invslot::GENERAL_END;
-	else if (identifier == "charm")                RETVAL = EQEmu::invslot::slotCharm;
-	else if (identifier == "ear1")                 RETVAL = EQEmu::invslot::slotEar1;
-	else if (identifier == "head")                 RETVAL = EQEmu::invslot::slotHead;
-	else if (identifier == "face")                 RETVAL = EQEmu::invslot::slotFace;
-	else if (identifier == "ear2")                 RETVAL = EQEmu::invslot::slotEar2;
-	else if (identifier == "neck")                 RETVAL = EQEmu::invslot::slotNeck;
-	else if (identifier == "shoulders")            RETVAL = EQEmu::invslot::slotShoulders;
-	else if (identifier == "arms")                 RETVAL = EQEmu::invslot::slotArms;
-	else if (identifier == "back")                 RETVAL = EQEmu::invslot::slotBack;
-	else if (identifier == "wrist1")               RETVAL = EQEmu::invslot::slotWrist1;
-	else if (identifier == "wrist2")               RETVAL = EQEmu::invslot::slotWrist2;
-	else if (identifier == "range")                RETVAL = EQEmu::invslot::slotRange;
-	else if (identifier == "hands")                RETVAL = EQEmu::invslot::slotHands;
-	else if (identifier == "primary")              RETVAL = EQEmu::invslot::slotPrimary;
-	else if (identifier == "secondary")            RETVAL = EQEmu::invslot::slotSecondary;
-	else if (identifier == "finger1")              RETVAL = EQEmu::invslot::slotFinger1;
-	else if (identifier == "finger2")              RETVAL = EQEmu::invslot::slotFinger2;
-	else if (identifier == "chest")                RETVAL = EQEmu::invslot::slotChest;
-	else if (identifier == "legs")                 RETVAL = EQEmu::invslot::slotLegs;
-	else if (identifier == "feet")                 RETVAL = EQEmu::invslot::slotFeet;
-	else if (identifier == "waist")                RETVAL = EQEmu::invslot::slotWaist;
-	else if (identifier == "powersource")          RETVAL = EQEmu::invslot::slotPowerSource;
-	else if (identifier == "ammo")                 RETVAL = EQEmu::invslot::slotAmmo;
-	else if (identifier == "general1")             RETVAL = EQEmu::invslot::slotGeneral1;
-	else if (identifier == "general2")             RETVAL = EQEmu::invslot::slotGeneral2;
-	else if (identifier == "general3")             RETVAL = EQEmu::invslot::slotGeneral3;
-	else if (identifier == "general4")             RETVAL = EQEmu::invslot::slotGeneral4;
-	else if (identifier == "general5")             RETVAL = EQEmu::invslot::slotGeneral5;
-	else if (identifier == "general6")             RETVAL = EQEmu::invslot::slotGeneral6;
-	else if (identifier == "general7")             RETVAL = EQEmu::invslot::slotGeneral7;
-	else if (identifier == "general8")             RETVAL = EQEmu::invslot::slotGeneral8;
-	else if (identifier == "general9")             RETVAL = EQEmu::invslot::slotGeneral9;
-	else if (identifier == "general10")            RETVAL = EQEmu::invslot::slotGeneral10;
-	else                                           RETVAL = EQEmu::invslot::SLOT_INVALID;
+	if (identifier.find('.') == std::string::npos) {
+		if (identifier == "invalid")                    RETVAL = EQEmu::invslot::SLOT_INVALID;
+		else if (identifier == "charm")                 RETVAL = EQEmu::invslot::slotCharm;
+		else if (identifier == "ear1")                  RETVAL = EQEmu::invslot::slotEar1;
+		else if (identifier == "head")                  RETVAL = EQEmu::invslot::slotHead;
+		else if (identifier == "face")                  RETVAL = EQEmu::invslot::slotFace;
+		else if (identifier == "ear2")                  RETVAL = EQEmu::invslot::slotEar2;
+		else if (identifier == "neck")                  RETVAL = EQEmu::invslot::slotNeck;
+		else if (identifier == "shoulders")             RETVAL = EQEmu::invslot::slotShoulders;
+		else if (identifier == "arms")                  RETVAL = EQEmu::invslot::slotArms;
+		else if (identifier == "back")                  RETVAL = EQEmu::invslot::slotBack;
+		else if (identifier == "wrist1")                RETVAL = EQEmu::invslot::slotWrist1;
+		else if (identifier == "wrist2")                RETVAL = EQEmu::invslot::slotWrist2;
+		else if (identifier == "range")                 RETVAL = EQEmu::invslot::slotRange;
+		else if (identifier == "hands")                 RETVAL = EQEmu::invslot::slotHands;
+		else if (identifier == "primary")               RETVAL = EQEmu::invslot::slotPrimary;
+		else if (identifier == "secondary")             RETVAL = EQEmu::invslot::slotSecondary;
+		else if (identifier == "finger1")               RETVAL = EQEmu::invslot::slotFinger1;
+		else if (identifier == "finger2")               RETVAL = EQEmu::invslot::slotFinger2;
+		else if (identifier == "chest")                 RETVAL = EQEmu::invslot::slotChest;
+		else if (identifier == "legs")                  RETVAL = EQEmu::invslot::slotLegs;
+		else if (identifier == "feet")                  RETVAL = EQEmu::invslot::slotFeet;
+		else if (identifier == "waist")                 RETVAL = EQEmu::invslot::slotWaist;
+		else if (identifier == "powersource")           RETVAL = EQEmu::invslot::slotPowerSource;
+		else if (identifier == "ammo")                  RETVAL = EQEmu::invslot::slotAmmo;
+		else if (identifier == "general1")              RETVAL = EQEmu::invslot::slotGeneral1;
+		else if (identifier == "general2")              RETVAL = EQEmu::invslot::slotGeneral2;
+		else if (identifier == "general3")              RETVAL = EQEmu::invslot::slotGeneral3;
+		else if (identifier == "general4")              RETVAL = EQEmu::invslot::slotGeneral4;
+		else if (identifier == "general5")              RETVAL = EQEmu::invslot::slotGeneral5;
+		else if (identifier == "general6")              RETVAL = EQEmu::invslot::slotGeneral6;
+		else if (identifier == "general7")              RETVAL = EQEmu::invslot::slotGeneral7;
+		else if (identifier == "general8")              RETVAL = EQEmu::invslot::slotGeneral8;
+		else if (identifier == "general9")              RETVAL = EQEmu::invslot::slotGeneral9;
+		else if (identifier == "general10")             RETVAL = EQEmu::invslot::slotGeneral10;
+		else if (identifier == "cursor")                RETVAL = EQEmu::invslot::slotCursor;
+		else if (identifier == "tradeskill")            RETVAL = EQEmu::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE;
+		else if (identifier == "augment")               RETVAL = EQEmu::invslot::SLOT_AUGMENT_GENERIC_RETURN;
+	}
+	else {
+		if (identifier == "possessions.begin")          RETVAL = EQEmu::invslot::POSSESSIONS_BEGIN;
+		else if (identifier == "possessions.end")       RETVAL = EQEmu::invslot::POSSESSIONS_END;
+		else if (identifier == "equipment.begin")       RETVAL = EQEmu::invslot::EQUIPMENT_BEGIN;
+		else if (identifier == "equipment.end")         RETVAL = EQEmu::invslot::EQUIPMENT_END;
+		else if (identifier == "general.begin")         RETVAL = EQEmu::invslot::GENERAL_BEGIN;
+		else if (identifier == "general.end")           RETVAL = EQEmu::invslot::GENERAL_END;
+		else if (identifier == "possessionsbags.begin") RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN;
+		else if (identifier == "possessionsbags.end")   RETVAL = EQEmu::invbag::CURSOR_BAG_END;
+		else if (identifier == "generalbags.begin")     RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN;
+		else if (identifier == "generalbags.end")       RETVAL = EQEmu::invbag::GENERAL_BAGS_END;
+		else if (identifier == "general1bag.begin")     RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN;
+		else if (identifier == "general1bag.end")       RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 9;
+		else if (identifier == "general2bag.begin")     RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 10;
+		else if (identifier == "general2bag.end")       RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 19;
+		else if (identifier == "general3bag.begin")     RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 20;
+		else if (identifier == "general3bag.end")       RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 29;
+		else if (identifier == "general4bag.begin")     RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 30;
+		else if (identifier == "general4bag.end")       RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 39;
+		else if (identifier == "general5bag.begin")     RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 40;
+		else if (identifier == "general5bag.end")       RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 49;
+		else if (identifier == "general6bag.begin")     RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 50;
+		else if (identifier == "general6bag.end")       RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 59;
+		else if (identifier == "general7bag.begin")     RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 60;
+		else if (identifier == "general7bag.end")       RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 69;
+		else if (identifier == "general8bag.begin")     RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 70;
+		else if (identifier == "general8bag.end")       RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 79;
+		else if (identifier == "general9bag.begin")     RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 80;
+		else if (identifier == "general9bag.end")       RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 89;
+		else if (identifier == "general10bag.begin")    RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 90;
+		else if (identifier == "general10bag.end")      RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 99;
+		else if (identifier == "cursorbag.begin")       RETVAL = EQEmu::invbag::CURSOR_BAG_BEGIN;
+		else if (identifier == "cursorbag.end")         RETVAL = EQEmu::invbag::CURSOR_BAG_END;
+		else if (identifier == "bank.begin")            RETVAL = EQEmu::invslot::BANK_BEGIN;
+		else if (identifier == "bank.end")              RETVAL = EQEmu::invslot::BANK_END;
+		else if (identifier == "bankbags.begin")        RETVAL = EQEmu::invbag::BANK_BAGS_BEGIN;
+		else if (identifier == "bankbags.end")          RETVAL = EQEmu::invbag::BANK_BAGS_END;
+		else if (identifier == "sharedbank.begin")      RETVAL = EQEmu::invslot::SHARED_BANK_BEGIN;
+		else if (identifier == "sharedbank.end")        RETVAL = EQEmu::invslot::SHARED_BANK_END;
+		else if (identifier == "sharedbankbags.begin")  RETVAL = EQEmu::invbag::SHARED_BANK_BAGS_BEGIN;
+		else if (identifier == "sharedbankbags.end")    RETVAL = EQEmu::invbag::SHARED_BANK_BAGS_END;
+		else if (identifier == "bagslot.begin")         RETVAL = EQEmu::invbag::SLOT_BEGIN;
+		else if (identifier == "bagslot.end")           RETVAL = EQEmu::invbag::SLOT_END;
+		else if (identifier == "augsocket.begin")       RETVAL = EQEmu::invaug::SOCKET_BEGIN;
+		else if (identifier == "augsocket.end")         RETVAL = EQEmu::invaug::SOCKET_END;
+	}
 
 	XSprePUSH; PUSHu((IV)RETVAL);
 
@@ -1296,8 +1339,7 @@ XS(XS__targlobal);
 XS(XS__targlobal) {
 	dXSARGS;
 	if (items != 6)
-		Perl_croak(aTHX_
-		           "Usage: quest::targlobal(stirng key, string value, string duration, int npc_id, int chararacter_id, int zone_id)");
+		Perl_croak(aTHX_ "Usage: quest::targlobal(stirng key, string value, string duration, int npc_id, int chararacter_id, int zone_id)");
 
 	char *key       = (char *) SvPV_nolen(ST(0));
 	char *str_value = (char *) SvPV_nolen(ST(1));
@@ -1392,8 +1434,7 @@ XS(XS__moveto);
 XS(XS__moveto) {
 	dXSARGS;
 	if (items != 3 && items != 4 && items != 5)
-		Perl_croak(aTHX_
-		           "Usage: quest::moveto(float x, float y, float z, [float heading], [bool save_guard_location])");
+		Perl_croak(aTHX_ "Usage: quest::moveto(float x, float y, float z, [float heading], [bool save_guard_location])");
 
 	float x = (float) SvNV(ST(0));
 	float y = (float) SvNV(ST(1));
@@ -1542,8 +1583,7 @@ XS(XS__set_proximity);
 XS(XS__set_proximity) {
 	dXSARGS;
 	if (items != 4 && items != 6 && items != 7)
-		Perl_croak(aTHX_
-		           "Usage: quest::set_proximity(float min_x, float max_x, float min_y, float max_y, [float min_z], [float max_z], [say])");
+		Perl_croak(aTHX_ "Usage: quest::set_proximity(float min_x, float max_x, float min_y, float max_y, [float min_z], [float max_z], [say])");
 
 	float min_x = (float) SvNV(ST(0));
 	float max_x = (float) SvNV(ST(1));
@@ -1624,8 +1664,7 @@ XS(XS__spawn_condition);
 XS(XS__spawn_condition) {
 	dXSARGS;
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_
-		           "Usage: quest::spawn_condition(string zone_short, [int instance_id], uint16 condition_id, int16 value)");
+		Perl_croak(aTHX_ "Usage: quest::spawn_condition(string zone_short, [int instance_id], uint16 condition_id, int16 value)");
 
 	if (items == 3) {
 		char   *zone_short  = (char *) SvPV_nolen(ST(0));
@@ -1682,8 +1721,7 @@ XS(XS__toggle_spawn_event);
 XS(XS__toggle_spawn_event) {
 	dXSARGS;
 	if (items != 4)
-		Perl_croak(aTHX_
-		           "Usage: quest::toggle_spawn_event(uint32 event_id, [bool is_enabled = false], [bool is_strict = false], [bool reset_base = false])");
+		Perl_croak(aTHX_ "Usage: quest::toggle_spawn_event(uint32 event_id, [bool is_enabled = false], [bool is_strict = false], [bool reset_base = false])");
 
 	uint32 event_id   = (int) SvIV(ST(0));
 	bool   is_enabled = ((int) SvIV(ST(1))) == 0 ? false : true;
@@ -1744,8 +1782,7 @@ XS(XS__summonburiedplayercorpse);
 XS(XS__summonburiedplayercorpse) {
 	dXSARGS;
 	if (items != 5)
-		Perl_croak(aTHX_
-		           "Usage: quest::summonburiedplayercorpse(uint32 char_id, float dest_x, float dest_y, float dest_z, float dest_heading)");
+		Perl_croak(aTHX_ "Usage: quest::summonburiedplayercorpse(uint32 char_id, float dest_x, float dest_y, float dest_z, float dest_heading)");
 
 	bool   RETVAL;
 	uint32 char_id  = (int) SvIV(ST(0));
@@ -1762,8 +1799,7 @@ XS(XS__summonallplayercorpses);
 XS(XS__summonallplayercorpses) {
 	dXSARGS;
 	if (items != 5)
-		Perl_croak(aTHX_
-		           "Usage: quest::summonallplayercorpses(int char_id, float dest_x, float dest_y, float dest_z, float dest_heading)");
+		Perl_croak(aTHX_ "Usage: quest::summonallplayercorpses(int char_id, float dest_x, float dest_y, float dest_z, float dest_heading)");
 
 	bool   RETVAL;
 	uint32 char_id  = (int) SvIV(ST(0));
@@ -1773,6 +1809,43 @@ XS(XS__summonallplayercorpses) {
 
 	ST(0)           = boolSV(RETVAL);
 	sv_2mortal(ST(0));
+	XSRETURN(1);
+}
+
+XS(XS__getplayercorpsecount);
+XS(XS__getplayercorpsecount) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getplayercorpsecount(uint32 char_id)");
+
+	uint32 RETVAL;
+	dXSTARG;
+
+	uint32 char_id = (int) SvIV(ST(0));
+
+	RETVAL = quest_manager.getplayercorpsecount(char_id);
+	XSprePUSH;
+	PUSHu((IV) RETVAL);
+
+	XSRETURN(1);
+}
+
+XS(XS__getplayercorpsecountbyzoneid);
+XS(XS__getplayercorpsecountbyzoneid) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::getplayercorpsecountbyzoneid(uint32 char_id, uint32 zone_id)");
+
+	uint32 RETVAL;
+	dXSTARG;
+
+	uint32 char_id = (int) SvIV(ST(0));
+	uint32 zone_id = (int)SvIV(ST(1));
+
+	RETVAL = quest_manager.getplayercorpsecountbyzoneid(char_id, zone_id);
+	XSprePUSH;
+	PUSHu((IV) RETVAL);
+
 	XSRETURN(1);
 }
 
@@ -2019,8 +2092,7 @@ XS(XS__playerfeature);
 XS(XS__playerfeature) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_
-		           "Usage: quest::playerfeature(string feature [race|gender|texture|helm|haircolor|beardcolor|eyecolor1|eyecolor2|hair|face|beard|heritage|tatoo|details|size], int setting)");
+		Perl_croak(aTHX_ "Usage: quest::playerfeature(string feature [race|gender|texture|helm|haircolor|beardcolor|eyecolor1|eyecolor2|hair|face|beard|heritage|tatoo|details|size], int setting)");
 
 	char *str_value = (char *) SvPV_nolen(ST(0));
 	int  int_value  = (int) SvIV(ST(1));
@@ -2034,8 +2106,7 @@ XS(XS__npcfeature);
 XS(XS__npcfeature) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_
-		           "Usage: quest::npcfeature(string feature [race|gender|texture|helm|haircolor|beardcolor|eyecolor1|eyecolor2|hair|face|beard|heritage|tatoo|details|size], int value)");
+		Perl_croak(aTHX_ "Usage: quest::npcfeature(string feature [race|gender|texture|helm|haircolor|beardcolor|eyecolor1|eyecolor2|hair|face|beard|heritage|tatoo|details|size], int value)");
 
 	char *str_value = (char *) SvPV_nolen(ST(0));
 	int  int_value  = (int) SvIV(ST(1));
@@ -2262,8 +2333,7 @@ XS(XS__updatetaskactivity) {
 		}
 		quest_manager.updatetaskactivity(task_id, activity_id, count, ignore_quest_update);
 	} else {
-		Perl_croak(aTHX_
-		           "Usage: quest::updatetaskactivity(int task_id, int activity_id, [int count], [bool ignore_quest_update = false])");
+		Perl_croak(aTHX_ "Usage: quest::updatetaskactivity(int task_id, int activity_id, [int count], [bool ignore_quest_update = false])");
 	}
 
 	XSRETURN_EMPTY;
@@ -2551,8 +2621,7 @@ XS(XS__popup) {
 	int duration = 0;
 
 	if ((items < 2) || (items > 5))
-		Perl_croak(aTHX_
-		           "Usage: quest::popup(string window_title, string message, int popup_id, int buttons, int duration)");
+		Perl_croak(aTHX_ "Usage: quest::popup(string window_title, string message, int popup_id, int buttons, int duration)");
 
 	if (items >= 3)
 		popup_id = (int) SvIV(ST(2));
@@ -2633,8 +2702,7 @@ XS(XS__CreateGroundObject);
 XS(XS__CreateGroundObject) {
 	dXSARGS;
 	if (items != 5 && items != 6)
-		Perl_croak(aTHX_
-		           "Usage: quest::creategroundobject(int item_id, float x, float y, float z, float heading, [uint32 decay_time-ms = 300000])");
+		Perl_croak(aTHX_ "Usage: quest::creategroundobject(int item_id, float x, float y, float z, float heading, [uint32 decay_time-ms = 300000])");
 
 	int    item_id = (int) SvIV(ST(0));
 	float  x       = (float) SvNV(ST(1));
@@ -2657,8 +2725,7 @@ XS(XS__CreateGroundObjectFromModel);
 XS(XS__CreateGroundObjectFromModel) {
 	dXSARGS;
 	if (items < 5 || items > 7)
-		Perl_croak(aTHX_
-		           "Usage: quest::creategroundobjectfrommodel(string model_name, float x, float y, float z, float heading, [int object_type], [uint32 decay_time-ms = 300000])");
+		Perl_croak(aTHX_ "Usage: quest::creategroundobjectfrommodel(string model_name, float x, float y, float z, float heading, [int object_type], [uint32 decay_time-ms = 300000])");
 
 	char   *modelname  = (char *) SvPV_nolen(ST(0));
 	float  x           = (float) SvNV(ST(1));
@@ -2683,8 +2750,7 @@ XS(XS__CreateDoor);
 XS(XS__CreateDoor) {
 	dXSARGS;
 	if (items < 5 || items > 7)
-		Perl_croak(aTHX_
-		           "Usage: quest::createdoor(string model_name, float x, float y, float z, float heading, [int object_type = 58], [int size = 100])");
+		Perl_croak(aTHX_ "Usage: quest::createdoor(string model_name, float x, float y, float z, float heading, [int object_type = 58], [int size = 100])");
 
 	char   *modelname  = (char *) SvPV_nolen(ST(0));
 	float  x           = (float) SvNV(ST(1));
@@ -3013,8 +3079,7 @@ XS(XS__MovePCInstance);
 XS(XS__MovePCInstance) {
 	dXSARGS;
 	if (items != 5 && items != 6)
-		Perl_croak(aTHX_
-		           "Usage: quest::MovePCInstance(int zone_id, int instance_id, float x, float y, float z, [float heading])");
+		Perl_croak(aTHX_ "Usage: quest::MovePCInstance(int zone_id, int instance_id, float x, float y, float z, [float heading])");
 
 	int   zone_id    = (int) SvIV(ST(0));
 	int   instanceid = (int) SvIV(ST(1));
@@ -3267,8 +3332,7 @@ XS(XS__wearchange);
 XS(XS__wearchange) {
 	dXSARGS;
 	if (items < 2)
-		Perl_croak(aTHX_
-		           "Usage: quest::wearchange(uint8 slot, uint16 texture_id, [uint32 hero_forge_model_id = 0], [uint32 elite_material_id = 0])");
+		Perl_croak(aTHX_ "Usage: quest::wearchange(uint8 slot, uint16 texture_id, [uint32 hero_forge_model_id = 0], [uint32 elite_material_id = 0])");
 
 	uint8  slot       = (int) SvUV(ST(0));
 	uint16 texture_id = (int) SvUV(ST(1));
@@ -3516,8 +3580,7 @@ XS(XS__crosszonesetentityvariablebynpctypeid) {
 	dXSARGS;
 
 	if (items != 3)
-		Perl_croak(aTHX_
-		           "Usage: quest::crosszonesetentityvariablebynpctypeid(int npc_type_id, string key, string value)");
+		Perl_croak(aTHX_ "Usage: quest::crosszonesetentityvariablebynpctypeid(int npc_type_id, string key, string value)");
 
 	if (items == 3) {
 		uint32     npc_type_id = (uint32) SvIV(ST(0));
@@ -3534,8 +3597,7 @@ XS(XS__crosszonesetentityvariablebyclientname) {
 	dXSARGS;
 
 	if (items != 3)
-		Perl_croak(aTHX_
-		           "Usage: quest::crosszonesetentityvariablebyclientname(string client_name, string key, string value)");
+		Perl_croak(aTHX_ "Usage: quest::crosszonesetentityvariablebyclientname(string client_name, string key, string value)");
 
 	if (items == 3) {
 		const char *client_name = (const char *) SvPV_nolen(ST(0));
@@ -3567,8 +3629,7 @@ XS(XS__worldwidemarquee);
 XS(XS__worldwidemarquee) {
 	dXSARGS;
 	if (items != 6)
-		Perl_croak(aTHX_
-		           "Usage: quest::worldwidemarquee(uint32 color_id, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, string message)");
+		Perl_croak(aTHX_ "Usage: quest::worldwidemarquee(uint32 color_id, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, string message)");
 
 	if (items == 6) {
 		uint32 color_id = (uint32) SvIV(ST(0));
@@ -3580,6 +3641,25 @@ XS(XS__worldwidemarquee) {
 		quest_manager.WorldWideMarquee(color_id, priority, fade_in, fade_out, duration, message);
 	}
 
+	XSRETURN_EMPTY;
+}
+
+XS(XS__log);
+XS(XS__log) {
+	dXSARGS;
+	if (items != 1 && items != 2) {
+		Perl_croak(aTHX_ "Usage: quest::log(uint8 log_category, string message)");
+	}
+	else {
+		uint8       log_category = (uint8)SvIV(ST(0));
+		std::string log_message = (std::string) SvPV_nolen(ST(1));
+		
+		if (log_category >= Logs::MaxCategoryID) {
+			return;
+		}
+
+		Log(Logs::General, log_category, log_message.c_str());
+	}
 	XSRETURN_EMPTY;
 }
 
@@ -3599,15 +3679,30 @@ XS(XS__debug) {
 			return;
 
 		if (debug_level == Logs::General) {
-			Log(Logs::General, Logs::QuestDebug, log_message);
+			Log(Logs::General, Logs::QuestDebug, log_message.c_str());
 		} else if (debug_level == Logs::Moderate) {
-			Log(Logs::Moderate, Logs::QuestDebug, log_message);
+			Log(Logs::Moderate, Logs::QuestDebug, log_message.c_str());
 		} else if (debug_level == Logs::Detail) {
-			Log(Logs::Detail, Logs::QuestDebug, log_message);
+			Log(Logs::Detail, Logs::QuestDebug, log_message.c_str());
 		}
 	}
 	XSRETURN_EMPTY;
 }
+
+XS(XS__log_combat);
+XS(XS__log_combat) {
+	dXSARGS;
+	if (items != 1) {
+		Perl_croak(aTHX_ "Usage: quest::log_combat(string message)");
+	}
+	else {
+
+		std::string log_message = (std::string) SvPV_nolen(ST(0));
+		Log(Logs::General, Logs::Combat, log_message.c_str());
+	}
+	XSRETURN_EMPTY;
+}
+
 
 XS(XS__UpdateZoneHeader);
 XS(XS__UpdateZoneHeader) {
@@ -3728,7 +3823,7 @@ EXTERN_C XS(boot_quest) {
 	file[255] = '\0';
 
 	if (items != 1)
-		Log(Logs::General, Logs::Error, "boot_quest does not take any arguments.");
+		LogError("boot_quest does not take any arguments");
 
 	char buf[128];    //shouldent have any function names longer than this.
 
@@ -3849,6 +3944,8 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "getguildnamebyid"), XS__getguildnamebyid, file);
 	newXS(strcpy(buf, "getlevel"), XS__getlevel, file);
 	newXS(strcpy(buf, "getplayerburiedcorpsecount"), XS__getplayerburiedcorpsecount, file);
+	newXS(strcpy(buf, "getplayercorpsecount"), XS__getplayercorpsecount, file);
+	newXS(strcpy(buf, "getplayercorpsecountbyzoneid"), XS__getplayercorpsecountbyzoneid, file);
 	newXS(strcpy(buf, "gettaskactivitydonecount"), XS__gettaskactivitydonecount, file);
 	newXS(strcpy(buf, "givecash"), XS__givecash, file);
 	newXS(strcpy(buf, "gmmove"), XS__gmmove, file);
@@ -3865,6 +3962,8 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "itemlink"), XS__itemlink, file);
 	newXS(strcpy(buf, "lasttaskinset"), XS__lasttaskinset, file);
 	newXS(strcpy(buf, "level"), XS__level, file);
+	newXS(strcpy(buf, "log"), XS__log, file);
+	newXS(strcpy(buf, "log_combat"), XS__log_combat, file);
 	newXS(strcpy(buf, "me"), XS__me, file);
 	newXS(strcpy(buf, "modifynpcstat"), XS__ModifyNPCStat, file);
 	newXS(strcpy(buf, "movegrp"), XS__movegrp, file);

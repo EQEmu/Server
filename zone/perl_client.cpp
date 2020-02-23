@@ -174,7 +174,7 @@ XS(XS_Client_Kick) {
 		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->Kick();
+		THIS->Kick("Perl Quest");
 	}
 	XSRETURN_EMPTY;
 }
@@ -961,8 +961,7 @@ XS(XS_Client_SetEXP); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetEXP) {
 	dXSARGS;
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_
-		           "Usage: Client::SetEXP(THIS, uint32 experience_points, uint32 aa_experience_points, [bool resexp=false])");
+		Perl_croak(aTHX_ "Usage: Client::SetEXP(THIS, uint32 experience_points, uint32 aa_experience_points, [bool resexp=false])");
 	{
 		Client *THIS;
 		uint32 set_exp  = (uint32) SvUV(ST(1));
@@ -992,8 +991,7 @@ XS(XS_Client_SetBindPoint); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetBindPoint) {
 	dXSARGS;
 	if (items < 1 || items > 6)
-		Perl_croak(aTHX_
-		           "Usage: Client::SetBindPoint(THIS, int to_zone = -1, int to_instance = 0, float new_x = 0.0f, float new_y = 0.0f, float new_z = 0.0f)");
+		Perl_croak(aTHX_ "Usage: Client::SetBindPoint(THIS, int to_zone = -1, int to_instance = 0, float new_x = 0.0f, float new_y = 0.0f, float new_z = 0.0f)");
 	{
 		Client *THIS;
 		int   to_zone;
@@ -1231,20 +1229,18 @@ XS(XS_Client_MovePC) {
 			THIS->MovePC(zoneID, x, y, z, heading);
 		} else {
 			if (THIS->IsMerc()) {
-				Log(Logs::Detail, Logs::None,
-				    "[CLIENT] Perl(XS_Client_MovePC) attempted to process a type Merc reference");
-			} else if (THIS->IsNPC()) {
-				Log(Logs::Detail, Logs::None,
-				    "[CLIENT] Perl(XS_Client_MovePC) attempted to process a type NPC reference");
+				LogDebug("[CLIENT] Perl(XS_Client_MovePC) attempted to process a type Merc reference");
 			}
 #ifdef BOTS
-				else if (THIS->IsBot()) {
-					Log(Logs::Detail, Logs::None, "[CLIENT] Perl(XS_Client_MovePC) attempted to process a type Bot reference");
-				}
+			else if (THIS->IsBot()) {
+				LogDebug("[CLIENT] Perl(XS_Client_MovePC) attempted to process a type Bot reference");
+			}
 #endif
+			else if (THIS->IsNPC()) {
+				LogDebug("[CLIENT] Perl(XS_Client_MovePC) attempted to process a type NPC reference");
+			}
 			else {
-				Log(Logs::Detail, Logs::None,
-				    "[CLIENT] Perl(XS_Client_MovePC) attempted to process an Unknown type reference");
+				LogDebug("[CLIENT] Perl(XS_Client_MovePC) attempted to process an Unknown type reference");
 			}
 
 			Perl_croak(aTHX_ "THIS is not of type Client");
@@ -1258,8 +1254,7 @@ XS(XS_Client_MovePCInstance); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_MovePCInstance) {
 	dXSARGS;
 	if (items != 7)
-		Perl_croak(aTHX_
-		           "Usage: Client::MovePCInstance(THIS, uint32 zone_id, uint32 instance_id, float x, float y, float z, float heading)");
+		Perl_croak(aTHX_ "Usage: Client::MovePCInstance(THIS, uint32 zone_id, uint32 instance_id, float x, float y, float z, float heading)");
 	{
 		Client *THIS;
 		uint32 zoneID     = (uint32) SvUV(ST(1));
@@ -1281,20 +1276,18 @@ XS(XS_Client_MovePCInstance) {
 			THIS->MovePC(zoneID, instanceID, x, y, z, heading);
 		} else {
 			if (THIS->IsMerc()) {
-				Log(Logs::Detail, Logs::None,
-				    "[CLIENT] Perl(XS_Client_MovePCInstance) attempted to process a type Merc reference");
-			} else if (THIS->IsNPC()) {
-				Log(Logs::Detail, Logs::None,
-				    "[CLIENT] Perl(XS_Client_MovePCInstance) attempted to process a type NPC reference");
+				LogDebug("[CLIENT] Perl(XS_Client_MovePCInstance) attempted to process a type Merc reference");
 			}
 #ifdef BOTS
-				else if (THIS->IsBot()) {
-					Log(Logs::Detail, Logs::None, "[CLIENT] Perl(XS_Client_MovePCInstance) attempted to process a type Bot reference");
-				}
+			else if (THIS->IsBot()) {
+				LogDebug("[CLIENT] Perl(XS_Client_MovePCInstance) attempted to process a type Bot reference");
+			}
 #endif
+			else if (THIS->IsNPC()) {
+				LogDebug("[CLIENT] Perl(XS_Client_MovePCInstance) attempted to process a type NPC reference");
+			}
 			else {
-				Log(Logs::Detail, Logs::None,
-				    "[CLIENT] Perl(XS_Client_MovePCInstance) attempted to process an Unknown type reference");
+				LogDebug("[CLIENT] Perl(XS_Client_MovePCInstance) attempted to process an Unknown type reference");
 			}
 
 			Perl_croak(aTHX_ "THIS is not of type Client");
@@ -1331,8 +1324,7 @@ XS(XS_Client_GetFactionLevel); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetFactionLevel) {
 	dXSARGS;
 	if (items != 8)
-		Perl_croak(aTHX_
-		           "Usage: Client::GetFactionLevel(THIS, uint32 character_id, uint32 npc_id, uint32 player_race_id, uint32 player_class_id, uint32 player_deity_id, uint32 player_faction_id, Mob*)");
+		Perl_croak(aTHX_ "Usage: Client::GetFactionLevel(THIS, uint32 character_id, uint32 npc_id, uint32 player_race_id, uint32 player_class_id, uint32 player_deity_id, uint32 player_faction_id, Mob*)");
 	{
 		Client *THIS;
 		FACTION_VALUE RETVAL;
@@ -1372,8 +1364,7 @@ XS(XS_Client_SetFactionLevel); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetFactionLevel) {
 	dXSARGS;
 	if (items != 6)
-		Perl_croak(aTHX_
-		           "Usage: Client::SetFactionLevel(THIS, uint32 character_id, uint32 npc_id, uint8 character_class, uint8 character_race, uint8 character_deity)");
+		Perl_croak(aTHX_ "Usage: Client::SetFactionLevel(THIS, uint32 character_id, uint32 npc_id, uint8 character_class, uint8 character_race, uint8 character_deity)");
 	{
 		Client *THIS;
 		uint32 char_id    = (uint32) SvUV(ST(1));
@@ -1399,8 +1390,7 @@ XS(XS_Client_SetFactionLevel2); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetFactionLevel2) {
 	dXSARGS;
 	if (items < 7 || items > 8)
-		Perl_croak(aTHX_
-		           "Usage: Client::SetFactionLevel2(THIS, uint32 character_id, int32 faction_id, uint8 character_class, uint8 character_race, uint8 character_deity, int32 value, uint8 temp)");
+		Perl_croak(aTHX_ "Usage: Client::SetFactionLevel2(THIS, uint32 character_id, int32 faction_id, uint8 character_class, uint8 character_race, uint8 character_deity, int32 value, uint8 temp)");
 	{
 		Client *THIS;
 		uint32 char_id    = (uint32) SvUV(ST(1));
@@ -1720,8 +1710,7 @@ XS(XS_Client_AddMoneyToPP); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_AddMoneyToPP) {
 	dXSARGS;
 	if (items != 6)
-		Perl_croak(aTHX_
-		           "Usage: Client::AddMoneyToPP(THIS, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, bool update_client)");
+		Perl_croak(aTHX_ "Usage: Client::AddMoneyToPP(THIS, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, bool update_client)");
 	{
 		Client *THIS;
 		uint32 copper       = (uint32) SvUV(ST(1));
@@ -2404,6 +2393,57 @@ XS(XS_Client_UnmemSpellAll) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_FindMemmedSpellBySlot); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_FindMemmedSpellBySlot) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::FindMemmedSpellBySlot(THIS, int slot)");
+	{
+		Client *THIS;
+		uint16 RETVAL;
+		dXSTARG;
+		int slot = SvIV(ST(1));
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Client *, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->FindMemmedSpellBySlot(slot);
+		XSprePUSH;
+		PUSHu((UV) RETVAL);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Client_MemmedCount); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_MemmedCount) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Client::MemmedCount(THIS)");
+	{
+		Client *THIS;
+		uint32  RETVAL;
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Client *, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->MemmedCount();
+		XSprePUSH;
+		PUSHu((UV) RETVAL);		
+	}
+	XSRETURN(1);
+}
+
 XS(XS_Client_ScribeSpell); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_ScribeSpell) {
 	dXSARGS;
@@ -2596,6 +2636,32 @@ XS(XS_Client_UntrainDiscAll) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_IsStanding); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_IsStanding)
+{
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Client::IsStanding(THIS)");
+	{
+		Client *		THIS;
+		bool		RETVAL;
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->IsStanding();
+		ST(0) = boolSV(RETVAL);
+		sv_2mortal(ST(0));
+	}
+	XSRETURN(1);
+}
+
 XS(XS_Client_IsSitting); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_IsSitting) {
 	dXSARGS;
@@ -2614,6 +2680,32 @@ XS(XS_Client_IsSitting) {
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->IsSitting();
+		ST(0) = boolSV(RETVAL);
+		sv_2mortal(ST(0));
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Client_IsCrouching); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_IsCrouching)
+{
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Client::IsCrouching(THIS)");
+	{
+		Client *		THIS;
+		bool		RETVAL;
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->IsCrouching();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
@@ -2988,8 +3080,7 @@ XS(XS_Client_DeleteItemInInventory); /* prototype to pass -Wmissing-prototypes *
 XS(XS_Client_DeleteItemInInventory) {
 	dXSARGS;
 	if (items < 2 || items > 4)
-		Perl_croak(aTHX_
-		           "Usage: Client::DeleteItemInInventory(THIS, int16 slot_id, [int8 quantity = 0], [bool client_update = false])");
+		Perl_croak(aTHX_ "Usage: Client::DeleteItemInInventory(THIS, int16 slot_id, [int8 quantity = 0], [bool client_update = false])");
 	{
 		Client *THIS;
 		int16  slot_id = (int16) SvIV(ST(1));
@@ -3025,8 +3116,7 @@ XS(XS_Client_SummonItem); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SummonItem) {
 	dXSARGS;
 	if (items < 2 || items > 10)
-		Perl_croak(aTHX_
-		           "Usage: Client::SummonItem(THIS, uint32 item_id, [int16 charges = -1], [bool attune = false], [uint32 aug1 = 0], [uint32 aug2 = 0], [uint32 aug3 = 0], [uint32 aug4 = 0], [uint32 aug5 = 0], [uint16 slot_id = cursor])");
+		Perl_croak(aTHX_ "Usage: Client::SummonItem(THIS, uint32 item_id, [int16 charges = -1], [bool attune = false], [uint32 aug1 = 0], [uint32 aug2 = 0], [uint32 aug3 = 0], [uint32 aug4 = 0], [uint32 aug5 = 0], [uint16 slot_id = cursor])");
 	{
 		Client *THIS;
 		uint32 item_id = (uint32) SvUV(ST(1));
@@ -4678,12 +4768,13 @@ XS(XS_Client_GetIP) {
 XS(XS_Client_AddLevelBasedExp);
 XS(XS_Client_AddLevelBasedExp) {
 	dXSARGS;
-	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Client::AddLevelBasedExp(THIS, uint8 exp_percentage, uint8 max_level = 0)");
+	if (items < 2 || items > 4)
+		Perl_croak(aTHX_ "Usage: Client::AddLevelBasedExp(THIS, uint8 exp_percentage, uint8 max_level = 0, bool ignore_mods = false)");
 	{
 		Client *THIS;
 		uint8 exp_percentage = (uint8) SvUV(ST(1));
 		uint8 max_level      = 0;
+		bool ignore_mods	 = false;
 
 		if (sv_derived_from(ST(0), "Client")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -4695,8 +4786,11 @@ XS(XS_Client_AddLevelBasedExp) {
 
 		if (items > 2)
 			max_level = (uint8) SvUV(ST(2));
+		
+		if (items > 3)
+			ignore_mods = (bool) SvTRUE(ST(3));
 
-		THIS->AddLevelBasedExp(exp_percentage, max_level);
+		THIS->AddLevelBasedExp(exp_percentage, max_level, ignore_mods);
 	}
 	XSRETURN_EMPTY;
 }
@@ -4727,8 +4821,7 @@ XS(XS_Client_GrantAlternateAdvancementAbility); /* prototype to pass -Wmissing-p
 XS(XS_Client_GrantAlternateAdvancementAbility) {
 	dXSARGS;
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_
-		           "Usage: Client::GrantAlternateAdvancementAbility(THIS, int aa_id, int points, [bool ignore_cost = false])");
+		Perl_croak(aTHX_ "Usage: Client::GrantAlternateAdvancementAbility(THIS, int aa_id, int points, [bool ignore_cost = false])");
 	{
 		Client *THIS;
 		bool RETVAL;
@@ -4885,8 +4978,7 @@ XS(XS_Client_UpdateTaskActivity); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_UpdateTaskActivity) {
 	dXSARGS;
 	if (items < 4)
-		Perl_croak(aTHX_
-		           "Usage: Client::UpdateTaskActivity(THIS, int task_id, int activity_id, int count, [bool ignore_quest_update = false])");
+		Perl_croak(aTHX_ "Usage: Client::UpdateTaskActivity(THIS, int task_id, int activity_id, int count, [bool ignore_quest_update = false])");
 	{
 		bool ignore_quest_update = false;
 
@@ -4945,8 +5037,7 @@ XS(XS_Client_AssignTask); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_AssignTask) {
 	dXSARGS;
 	if (items != 3 && items != 4)
-		Perl_croak(aTHX_
-		           "Usage: Client::AssignTask(THIS, int task_id, int npc_id, [bool enforce_level_requirement = false])");
+		Perl_croak(aTHX_ "Usage: Client::AssignTask(THIS, int task_id, int npc_id, [bool enforce_level_requirement = false])");
 	{
 		Client *THIS;
 		int  TaskID                    = (int) SvIV(ST(1));
@@ -5455,6 +5546,55 @@ XS(XS_Client_AddAlternateCurrencyValue) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_SetAlternateCurrencyValue); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_SetAlternateCurrencyValue) {
+	dXSARGS;
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: Client::SetAlternateCurrencyValue(THIS, uint32 currency_id, int32 amount)");
+	{
+		Client *THIS;
+		uint32 currency_id = (uint32) SvUV(ST(1));
+		int32  amount      = (int32) SvUV(ST(2));
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Client *, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		THIS->SetAlternateCurrencyValue(currency_id, amount);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_GetAlternateCurrencyValue); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_GetAlternateCurrencyValue) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::GetAlternateCurrencyValue(THIS, uint32 currency_id)");
+	{
+		Client *THIS;
+		uint32 currency_id = (uint32) SvUV(ST(1));
+		int32  RETVAL 	   = 0;
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Client *, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->GetAlternateCurrencyValue(currency_id);
+		XSprePUSH;
+		PUSHi((IV) RETVAL);
+	}
+	XSRETURN(1);
+}
+
 XS(XS_Client_SendWebLink); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SendWebLink) {
 	dXSARGS;
@@ -5808,8 +5948,7 @@ XS(XS_Client_SendMarqueeMessage); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SendMarqueeMessage) {
 	dXSARGS;
 	if (items != 7)
-		Perl_croak(aTHX_
-		           "Usage: Client::SendMarqueeMessage(THIS, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, string msg)");
+		Perl_croak(aTHX_ "Usage: Client::SendMarqueeMessage(THIS, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, string msg)");
 	{
 		Client *THIS;
 		uint32      type     = (uint32) SvUV(ST(1));
@@ -5988,8 +6127,7 @@ XS(XS_Client_QuestReward); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_QuestReward) {
 	dXSARGS;
 	if (items < 1 || items > 9)
-		Perl_croak(aTHX_
-		           "Usage: Client::QuestReward(THIS, int32 mob, int32 copper, int32 silver, int32 gold, int32 platinum, int32 item_id, int32 exp, [bool faction = false])");
+		Perl_croak(aTHX_ "Usage: Client::QuestReward(THIS, int32 mob, int32 copper, int32 silver, int32 gold, int32 platinum, int32 item_id, int32 exp, [bool faction = false])");
 	{
 		Client *THIS;
 		Mob    *mob = nullptr;
@@ -6089,8 +6227,7 @@ XS(XS_Client_Popup2); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_Popup2) {
 	dXSARGS;
 	if (items < 3 || items > 10)
-		Perl_croak(aTHX_
-		           "Usage: Client::SendFullPopup(THIS, string title, string text, uint32 popup_id, uint32 negative_id, uint32 buttons, uint32 duration, string button_name_0, string button_name_1, uint32 sound_controls)");
+		Perl_croak(aTHX_ "Usage: Client::SendFullPopup(THIS, string title, string text, uint32 popup_id, uint32 negative_id, uint32 buttons, uint32 duration, string button_name_0, string button_name_1, uint32 sound_controls)");
 	{
 		Client *THIS;
 		char   *Title = (char *) SvPV_nolen(ST(1));
@@ -6180,6 +6317,56 @@ XS(XS_Client_SetSecondaryWeaponOrnamentation)
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_SetClientMaxLevel); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_SetClientMaxLevel) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::SetClientMaxLevel(THIS, int in_level)");
+	{
+		Client* THIS;
+		int in_level = (int)SvUV(ST(1));
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client*, tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		THIS->SetClientMaxLevel(in_level);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_GetClientMaxLevel); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_GetClientMaxLevel) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Client::GetClientMaxLevel(THIS)");
+	{
+		Client* THIS;
+		int RETVAL;
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client*, tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->GetClientMaxLevel();
+		XSprePUSH;
+		PUSHu((UV)RETVAL);
+	}
+	XSRETURN(1);
+}
+
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -6206,7 +6393,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "AddAlternateCurrencyValue"), XS_Client_AddAlternateCurrencyValue, file, "$$$");
 	newXSproto(strcpy(buf, "AddCrystals"), XS_Client_AddCrystals, file, "$$");
 	newXSproto(strcpy(buf, "AddEXP"), XS_Client_AddEXP, file, "$$;$$");
-	newXSproto(strcpy(buf, "AddLevelBasedExp"), XS_Client_AddLevelBasedExp, file, "$$;$");
+	newXSproto(strcpy(buf, "AddLevelBasedExp"), XS_Client_AddLevelBasedExp, file, "$$;$$");
 	newXSproto(strcpy(buf, "AddMoneyToPP"), XS_Client_AddMoneyToPP, file, "$$$$$$");
 	newXSproto(strcpy(buf, "AddPVPPoints"), XS_Client_AddPVPPoints, file, "$$");
 	newXSproto(strcpy(buf, "AddSkill"), XS_Client_AddSkill, file, "$$$");
@@ -6243,6 +6430,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GetAccountFlag"), XS_Client_GetAccountFlag, file, "$$");
 	newXSproto(strcpy(buf, "GetAggroCount"), XS_Client_GetAggroCount, file, "$");
 	newXSproto(strcpy(buf, "GetAllMoney"), XS_Client_GetAllMoney, file, "$");
+	newXSproto(strcpy(buf, "GetAlternateCurrencyValue"), XS_Client_GetAlternateCurrencyValue, file, "$$");
 	newXSproto(strcpy(buf, "GetAnon"), XS_Client_GetAnon, file, "$");
 	newXSproto(strcpy(buf, "GetAugmentAt"), XS_Client_GetAugmentAt, file, "$$$");
 	newXSproto(strcpy(buf, "GetAugmentIDAt"), XS_Client_GetAugmentIDAt, file, "$$$");
@@ -6262,6 +6450,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GetBindZoneID"), XS_Client_GetBindZoneID, file, "$$");
 	newXSproto(strcpy(buf, "GetCarriedMoney"), XS_Client_GetCarriedMoney, file, "$");
 	newXSproto(strcpy(buf, "GetCharacterFactionLevel"), XS_Client_GetCharacterFactionLevel, file, "$$");
+	newXSproto(strcpy(buf, "GetClientMaxLevel"), XS_Client_GetClientMaxLevel, file, "$");
 	newXSproto(strcpy(buf, "GetClientVersion"), XS_Client_GetClientVersion, file, "$");
 	newXSproto(strcpy(buf, "GetClientVersionBit"), XS_Client_GetClientVersionBit, file, "$");
 	newXSproto(strcpy(buf, "GetCorpseCount"), XS_Client_GetCorpseCount, file, "$");
@@ -6338,7 +6527,9 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "IsLD"), XS_Client_IsLD, file, "$");
 	newXSproto(strcpy(buf, "IsMedding"), XS_Client_IsMedding, file, "$");
 	newXSproto(strcpy(buf, "IsRaidGrouped"), XS_Client_IsRaidGrouped, file, "$");
+	newXSproto(strcpy(buf, "IsStanding"), XS_Client_IsStanding, file, "$");
 	newXSproto(strcpy(buf, "IsSitting"), XS_Client_IsSitting, file, "$");
+	newXSproto(strcpy(buf, "IsCrouching"), XS_Client_IsCrouching, file, "$");
 	newXSproto(strcpy(buf, "IsTaskActive"), XS_Client_IsTaskActive, file, "$$");
 	newXSproto(strcpy(buf, "IsTaskActivityActive"), XS_Client_IsTaskActivityActive, file, "$$$");
 	newXSproto(strcpy(buf, "IsTaskCompleted"), XS_Client_IsTaskCompleted, file, "$$");
@@ -6378,6 +6569,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "SetAAPoints"), XS_Client_SetAAPoints, file, "$$");
 	newXSproto(strcpy(buf, "SetAATitle"), XS_Client_SetAATitle, file, "$$;$");
 	newXSproto(strcpy(buf, "SetAccountFlag"), XS_Client_SetAccountFlag, file, "$$");
+	newXSproto(strcpy(buf, "SetAlternateCurrencyValue"), XS_Client_SetAlternateCurrencyValue, file, "$$$");
 	newXSproto(strcpy(buf, "SetBaseClass"), XS_Client_SetBaseClass, file, "$$");
 	newXSproto(strcpy(buf, "SetBaseGender"), XS_Client_SetBaseGender, file, "$$");
 	newXSproto(strcpy(buf, "SetBaseRace"), XS_Client_SetBaseRace, file, "$$");
@@ -6385,6 +6577,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "SetBecomeNPCLevel"), XS_Client_SetBecomeNPCLevel, file, "$$");
 	newXSproto(strcpy(buf, "SetBindPoint"), XS_Client_SetBindPoint, file, "$;$$$$$");
 	newXSproto(strcpy(buf, "SetConsumption"), XS_Client_SetConsumption, file, "$$$");
+	newXSproto(strcpy(buf, "SetClientMaxLevel"), XS_Client_SetClientMaxLevel, file, "$$");
 	newXSproto(strcpy(buf, "SetCustomItemData"), XS_Client_SetCustomItemData, file, "$$$$");
 	newXSproto(strcpy(buf, "SetDeity"), XS_Client_SetDeity, file, "$$");
 	newXSproto(strcpy(buf, "SetDueling"), XS_Client_SetDueling, file, "$$");
@@ -6424,6 +6617,8 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "UnmemSpell"), XS_Client_UnmemSpell, file, "$$;$");
 	newXSproto(strcpy(buf, "UnmemSpellAll"), XS_Client_UnmemSpellAll, file, "$;$");
 	newXSproto(strcpy(buf, "UnmemSpellBySpellID"), XS_Client_UnmemSpellBySpellID, file, "$$");
+	newXSproto(strcpy(buf, "FindMemmedSpellBySlot"), XS_Client_FindMemmedSpellBySlot, file, "$$");
+	newXSproto(strcpy(buf, "MemmedCount"), XS_Client_MemmedCount, file, "$");
 	newXSproto(strcpy(buf, "UnscribeSpell"), XS_Client_UnscribeSpell, file, "$$;$");
 	newXSproto(strcpy(buf, "UnscribeSpellAll"), XS_Client_UnscribeSpellAll, file, "$;$");
 	newXSproto(strcpy(buf, "UntrainDisc"), XS_Client_UntrainDisc, file, "$$;$");

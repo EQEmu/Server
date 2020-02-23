@@ -137,15 +137,15 @@ void Embperl::DoInit() {
 	try {
 		init_eval_file();
 	}
-	catch(const char *err)
+	catch(std::string e)
 	{
 		//remember... lasterr() is no good if we crap out here, in construction
-		Log(Logs::General, Logs::Quests, "perl error: %s", err);
+		LogQuests("Perl Error [{}]", e);
 		throw "failed to install eval_file hook";
 	}
 
 #ifdef EMBPERL_IO_CAPTURE
-	Log(Logs::General, Logs::Quests, "Tying perl output to eqemu logs");
+	LogQuests("Tying perl output to eqemu logs");
 	//make a tieable class to capture IO and pass it into EQEMuLog
 	eval_pv(
 		"package EQEmuIO; "
@@ -170,16 +170,16 @@ void Embperl::DoInit() {
 		,FALSE
 	);
 
-	Log(Logs::General, Logs::Quests, "Loading perlemb plugins.");
+	LogQuests("Loading perlemb plugins");
 	try
 	{
 		std::string perl_command;
 		perl_command = "main::eval_file('plugin', '" + Config->PluginPlFile + "');";
 		eval_pv(perl_command.c_str(), FALSE);
 	}
-	catch(const char *err)
+	catch(std::string e)
 	{
-		Log(Logs::General, Logs::Quests, "Warning - %s: %s", Config->PluginPlFile.c_str(), err);
+		LogQuests("Warning [{}]: [{}]", Config->PluginPlFile, e);
 	}
 	try
 	{
@@ -195,9 +195,9 @@ void Embperl::DoInit() {
 			"}";
 		eval_pv(perl_command.c_str(),FALSE);
 	}
-	catch(const char *err)
+	catch(std::string e)
 	{
-		Log(Logs::General, Logs::Quests, "Perl warning: %s", err);
+		LogQuests("Warning [{}]", e);
 	}
 #endif //EMBPERL_PLUGIN
 	in_use = false;
@@ -237,7 +237,7 @@ void Embperl::init_eval_file(void)
 {
 	eval_pv(
 		"our %Cache;"
-		"no warnings;"
+		"no warnings 'all';"
 		"use Symbol qw(delete_package);"
 		"sub eval_file {"
 			"my($package, $filename) = @_;"
@@ -315,7 +315,7 @@ int Embperl::dosub(const char * subname, const std::vector<std::string> * args, 
 	{
 		std::string errmsg = "Perl runtime error: ";
 		errmsg += SvPVX(ERRSV);
-		throw errmsg.c_str();
+		throw errmsg;
 	}
 
 	return ret_value;

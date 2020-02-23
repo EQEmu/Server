@@ -23,50 +23,66 @@
 #include <map>
 #include <list>
 
-class SpawnEntry
-{
+class SpawnEntry {
 public:
-	SpawnEntry(uint32 in_NPCType, int in_chance, uint8 in_npc_spawn_limit );
-	~SpawnEntry() { }
+	SpawnEntry(uint32 in_NPCType, int in_chance, uint16 in_filter, uint8 in_npc_spawn_limit);
+	~SpawnEntry() {}
 	uint32 NPCType;
-	int chance;
+	int    chance;
+	uint16 condition_value_filter;
 
 	//this is a cached value from npc_types, for speed
 	uint8 npc_spawn_limit; //max # of this entry which can be spawned in this zone
 };
 
-class SpawnGroup
-{
+class SpawnGroup {
 public:
-	SpawnGroup(uint32 in_id, char* name, int in_group_spawn_limit, float dist, float maxx, float minx, float maxy, float miny, int delay_in, int despawn_in, uint32 despawn_timer_in, int min_delay_in );
+	SpawnGroup(
+		uint32 in_id,
+		char *name,
+		int in_group_spawn_limit,
+		float dist,
+		float maxx,
+		float minx,
+		float maxy,
+		float miny,
+		int delay_in,
+		int despawn_in,
+		uint32 despawn_timer_in,
+		int min_delay_in,
+		bool wp_spawns_in
+	);
+
 	~SpawnGroup();
-	uint32 GetNPCType();
-	void AddSpawnEntry( SpawnEntry* newEntry );
+	uint32 GetNPCType(uint16 condition_value_filter=1);
+	void AddSpawnEntry(SpawnEntry *newEntry);
 	uint32 id;
-	float roamdist;
-	float roambox[4];
-	int min_delay;
-	int delay;
-	int despawn;
+	bool wp_spawns;			// if true, spawn NPCs at a random waypoint location (if spawnpoint has a grid) instead of the spawnpoint's loc
+	float  roamdist;
+	float  roambox[4];
+	int    min_delay;
+	int    delay;
+	int    despawn;
 	uint32 despawn_timer;
 private:
 	char name_[120];
-	std::list<SpawnEntry*> list_;
+	std::list<SpawnEntry *> list_;
 	uint8 group_spawn_limit; //max # of this entry which can be spawned by this group
 };
 
-class SpawnGroupList
-{
+class SpawnGroupList {
 public:
-	SpawnGroupList() { }
+	SpawnGroupList() {}
 	~SpawnGroupList();
 
-	void AddSpawnGroup(SpawnGroup* newGroup);
-	SpawnGroup* GetSpawnGroup(uint32 id);
+	void AddSpawnGroup(SpawnGroup *new_group);
+	SpawnGroup *GetSpawnGroup(uint32 id);
 	bool RemoveSpawnGroup(uint32 in_id);
+	void ClearSpawnGroups();
+	void ReloadSpawnGroups();
 private:
 	//LinkedList<SpawnGroup*> list_;
-	std::map<uint32, SpawnGroup*> groups;
+	std::map<uint32, SpawnGroup *> m_spawn_groups;
 };
 
 #endif

@@ -885,7 +885,7 @@ struct PlayerProfile_Struct //23576 Octets
 /*00060*/ BindStruct binds[5];			// Bind points (primary is first)
 /*00160*/ uint32  deity;				// deity
 /*00164*/ uint32  intoxication;			// Alcohol level (in ticks till sober?)
-/*00168*/ uint32  spellSlotRefresh[spells::SPELL_GEM_COUNT]; // Refresh time (millis) - 4 Octets Each
+/*00168*/ uint32  spellSlotRefresh[spells::SPELL_GEM_PROFILE_SIZE]; // Refresh time (millis) - 4 Octets Each
 /*00208*/ uint32  abilitySlotRefresh;
 /*00212*/ uint8   haircolor;			// Player hair color
 /*00213*/ uint8   beardcolor;			// Player beard color
@@ -912,7 +912,7 @@ struct PlayerProfile_Struct //23576 Octets
 /*04173*/ uint8 unknown02264[147];		// was [139]
 /*04312*/ uint32   spell_book[spells::SPELLBOOK_SIZE];	// List of the Spells in spellbook 480 = 60 pages
 /*06232*/ uint8   unknown4184[128];		// was [136]
-/*06396*/ uint32   mem_spells[spells::SPELL_GEM_COUNT]; // List of spells memorized
+/*06396*/ uint32   mem_spells[spells::SPELL_GEM_PROFILE_SIZE]; // List of spells memorized
 /*06436*/ uint8 unknown04396[28];		//#### uint8 unknown04396[32]; in Titanium ####[28]
 /*06464*/ uint32  platinum;				// Platinum Pieces on player
 /*06468*/ uint32  gold;					// Gold Pieces on player
@@ -1373,21 +1373,21 @@ struct RespawnWindow_Struct {
 
 struct PlayerPositionUpdateServer_Struct
 {
-/*0000*/ uint16   spawn_id;			// Entity ID of the Spawn/Player
-/*0002*/ signed   padding0000:12;	// ***Placeholder
-		 signed   x_pos:19;			// x coord
-		 signed   padding0290:1;	// ***Placeholder
-/*0006*/ signed   delta_x:13;		// change in x
-		 signed   delta_y:13;		// change in y
-		 signed   padding0294:6;	// ***Placeholder
-/*0010*/ signed   z_pos:19;			// z coord
-		 signed   delta_heading:10;	// change in heading
-		 signed   padding0298:3;	// ***Placeholder
-/*0014*/ signed   y_pos:19;			// y coord
-		 signed   delta_z:13;		// change in z
-/*0022*/ signed   animation:10;		// animation
-		 unsigned heading:12;		// heading
-		 signed   padding0302:10;	// ***Placeholder
+/*0000*/	uint16		spawn_id;			// Entity ID of the Spawn/Player
+/*0002*/	signed		padding0000 : 12;	// ***Placeholder
+			signed		x_pos : 19;			// x coord
+			signed		padding0290 : 1;	// ***Placeholder
+/*0006*/	signed		delta_x : 13;		// change in x
+			signed		delta_y : 13;		// change in y
+			signed		padding0294 : 6;	// ***Placeholder
+/*0010*/	signed		z_pos : 19;			// z coord
+			signed		delta_heading : 10;	// change in heading
+			signed		padding0298 : 3;	// ***Placeholder
+/*0014*/	signed		y_pos : 19;			// y coord
+			signed		delta_z : 13;		// change in z
+/*0022*/	signed		animation : 10;		// animation
+			unsigned	heading : 12;		// heading
+			signed		padding0302 : 10;	// ***Placeholder
 /*0026*/
 };
 
@@ -1399,20 +1399,20 @@ struct PlayerPositionUpdateServer_Struct
 */
 struct PlayerPositionUpdateClient_Struct
 {
-/*0000*/ uint16 spawn_id;			// Player's Entity ID - Verified
-/*0002*/ uint16	sequence;			//increments one each packet - Verified
-/*0004*/ uint8 unknown0004[4];		// ***Placeholder
-/*0008*/ float delta_z;				// Change in z
-/*0012*/ float x_pos;				// x coord - Verified
-/*0016*/ signed delta_heading:10;	// Change in heading
-		 signed animation:10;		// Animation
-         unsigned padding0028:12;	// Seems to always be 0
-/*0020*/ float y_pos;				// y coord - Verified
-/*0024*/ float delta_x;				// Change in x
-/*0028*/ unsigned heading:12;		// Directional heading - Verified
-         unsigned padding0032:20;	// ***Placeholder - Some Static Number
-/*0032*/ float delta_y;				// Change in y
-/*0036*/ float z_pos;				// z coord - Verified
+/*0000*/	uint16		spawn_id;			// Player's Entity ID - Verified
+/*0002*/	uint16		sequence;			//increments one each packet - Verified
+/*0004*/	uint8		unknown0004[4];		// ***Placeholder
+/*0008*/	float		delta_z;			// Change in z
+/*0012*/	float		x_pos;				// x coord - Verified
+/*0016*/	signed		delta_heading : 10;	// Change in heading
+			signed		animation : 10;		// Animation
+			unsigned	padding0028 : 12;	// Seems to always be 0
+/*0020*/	float		y_pos;				// y coord - Verified
+/*0024*/	float		delta_x;			// Change in x
+/*0028*/	unsigned	heading : 12;		// Directional heading - Verified
+			unsigned	padding0032 : 20;	// ***Placeholder - Some Static Number
+/*0032*/	float		delta_y;			// Change in y
+/*0036*/	float		z_pos;				// z coord - Verified
 /*0040*/
 };
 
@@ -3704,7 +3704,7 @@ struct SendAA_Struct {
 /*0088*/	uint32 aa_expansion;
 /*0092*/	uint32 special_category;
 /*0096*/	uint8 shroud;
-/*0097*/	uint8 unknown97;
+/*0097*/	uint8 reset_on_death; // timer is reset on death -- guess
 /*0098*/	uint32 total_abilities;
 /*0102*/	AA_Ability abilities[0];
 };
@@ -3768,7 +3768,7 @@ struct AnnoyingZoneUnknown_Struct {
 };
 
 struct LoadSpellSet_Struct {
-	uint32 spell[spells::SPELL_GEM_COUNT];
+	uint32 spell[spells::SPELL_GEM_PROFILE_SIZE];
 	uint32 unknown;
 };
 

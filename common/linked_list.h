@@ -278,12 +278,6 @@ void LinkedListIterator<TYPE>::Replace(const TYPE& new_data)
 template<class TYPE>
 void LinkedListIterator<TYPE>::Reset()
 {
-	if (!(&list))
-	{
-		current_element=0;
-		return;
-	}
-
 	if (dir == FORWARD)
 	{
 		current_element = list.first;

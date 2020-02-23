@@ -19,7 +19,7 @@
 #define LAUNCHERLIST_H_
 
 #include "../common/types.h"
-#include "../net/servertalk_server_connection.h"
+#include "../common/net/servertalk_server_connection.h"
 #include <map>
 #include <vector>
 #include <string>

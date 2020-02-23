@@ -84,7 +84,9 @@ public:
 		err.insert(err.end(), errors_.begin(), errors_.end());
 	}
 
-	virtual void AddError(std::string error) { 
+	virtual void AddError(std::string error) {
+		LogQuests("{}", error);
+
 		errors_.push_back(error);
 		if(errors_.size() > 30) {
 			errors_.pop_front();

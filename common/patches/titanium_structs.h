@@ -1197,20 +1197,20 @@ struct BecomeCorpse_Struct {
 */
 struct PlayerPositionUpdateServer_Struct
 {
-/*0000*/ uint16		spawn_id;
-/*0002*/ int32		delta_heading:10,  // change in heading
-         			x_pos:19,             // x coord
-         			padding0002:3;    // ***Placeholder
-/*0006*/ int32		y_pos:19,             // y coord
-         			animation:10,     // animation
-         			padding0006:3;    // ***Placeholder
-/*0010*/ int32		z_pos:19,             // z coord
-         			delta_y:13;        // change in y
-/*0014*/ int32		delta_x:13,        // change in x
-        			heading:12,       // heading
-         			padding0014:7;    // ***Placeholder
-/*0018*/ int32		delta_z:13,        // change in z
-         			padding0018:19;   // ***Placeholder
+/*0000*/	uint16	spawn_id;
+/*0002*/	int32	delta_heading : 10,	// change in heading
+					x_pos : 19,			// x coord
+					padding0002 : 3;	// ***Placeholder
+/*0006*/	int32	y_pos : 19,			// y coord
+					animation : 10,		// animation
+					padding0006 : 3;	// ***Placeholder
+/*0010*/	int32	z_pos : 19,			// z coord
+					delta_y : 13;		// change in y
+/*0014*/	int32	delta_x : 13,		// change in x
+					heading : 12,		// heading
+					padding0014 : 7;	// ***Placeholder
+/*0018*/	int32	delta_z : 13,		// change in z
+					padding0018 : 19;	// ***Placeholder
 /*0022*/
 };
 
@@ -1222,20 +1222,20 @@ struct PlayerPositionUpdateServer_Struct
 */
 struct PlayerPositionUpdateClient_Struct
 {
-/*0000*/ uint16	spawn_id;
-/*0022*/ uint16	sequence;	//increments one each packet
-/*0004*/ float y_pos;                 // y coord
-/*0008*/ float delta_z;            // Change in z
-/*0016*/ float delta_x;            // Change in x
-/*0012*/ float delta_y;            // Change in y
-/*0020*/ int32 animation:10,     // animation
-         		delta_heading:10,  // change in heading
-         		padding0020:12;   // ***Placeholder (mostly 1)
-/*0024*/ float x_pos;                 // x coord
-/*0028*/ float z_pos;                 // z coord
-/*0034*/ uint16 heading:12,     // Directional heading
-         		padding0004:4;  // ***Placeholder
-/*0032*/ uint8 unknown0006[2];  // ***Placeholder
+/*0000*/	uint16	spawn_id;
+/*0022*/	uint16	sequence;			// increments one each packet
+/*0004*/	float	y_pos;				// y coord
+/*0008*/	float	delta_z;			// Change in z
+/*0016*/	float	delta_x;			// Change in x
+/*0012*/	float	delta_y;			// Change in y
+/*0020*/	int32	animation : 10,		// animation
+					delta_heading : 10,	// change in heading
+					padding0020 : 12;	// ***Placeholder (mostly 1)
+/*0024*/	float	x_pos;				// x coord
+/*0028*/	float	z_pos;				// z coord
+/*0034*/	uint16	heading : 12,		// Directional heading
+					padding0004 : 4;	// ***Placeholder
+/*0032*/	uint8	unknown0006[2];		// ***Placeholder
 /*0036*/
 };
 

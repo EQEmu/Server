@@ -30,7 +30,7 @@ void CullPoints(std::vector<FindPerson_Point> &points) {
 
 			if (zone->zonemap->CheckLoS(glm::vec3(p.x, p.y, p.z), glm::vec3(p2.x, p2.y, p2.z))) {
 				points.erase(points.begin() + i + 1);
-				Log(Logs::General, Logs::Status, "Culled find path point %u, connecting %u->%u instead.", i + 1, i, i + 2);
+				LogInfo("Culled find path point [{}], connecting [{}]->[{}] instead", i + 1, i, i + 2);
 			}
 			else {
 				break;
@@ -50,7 +50,7 @@ void Client::SendPathPacket(const std::vector<FindPerson_Point> &points) {
 		auto points = EQEmu::any_cast<std::vector<FindPerson_Point>>(result);
 		if (points.size() < 2) {
 			if (Admin() > 10) {
-				Message(MT_System, "Too few points");
+				Message(Chat::System, "Too few points");
 			}
 		
 			EQApplicationPacket outapp(OP_FindPersonReply, 0);
@@ -60,7 +60,7 @@ void Client::SendPathPacket(const std::vector<FindPerson_Point> &points) {
 		
 		if (points.size() > 36) {
 			if (Admin() > 10) {
-				Message(MT_System, "Too many points %u", points.size());
+				Message(Chat::System, "Too many points %u", points.size());
 			}
 		
 			EQApplicationPacket outapp(OP_FindPersonReply, 0);
@@ -69,7 +69,7 @@ void Client::SendPathPacket(const std::vector<FindPerson_Point> &points) {
 		}
 		
 		if (Admin() > 10) {
-			Message(MT_System, "Total points %u", points.size());
+			Message(Chat::System, "Total points %u", points.size());
 		}
 		
 		int len = sizeof(FindPersonResult_Struct) + (points.size() + 1) * sizeof(FindPerson_Point);

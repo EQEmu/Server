@@ -4,6 +4,7 @@
 #include "../eqemu_logsys.h"
 #include "../servertalk.h"
 #include "../rulesys.h"
+#include <fmt/format.h>
 
 EQ::Net::ConsoleServerConnection::ConsoleServerConnection(ConsoleServer *parent, std::shared_ptr<TCPConnection> connection)
 {
@@ -115,17 +116,21 @@ bool EQ::Net::ConsoleServerConnection::SendChannelMessage(const ServerChannelMes
 	}
 
 	switch (scm->chan_num) {
-		if (RuleB(Chat, ServerWideAuction)) {
-			case 4: {
+		case 4: {
+			if (RuleB(Chat, ServerWideAuction)) {
 				QueueMessage(fmt::format("{0} auctions, '{1}'", scm->from, scm->message));
 				break;
+			} else { // I think we want default action in this case?
+				return false;
 			}
 		}
 
-		if (RuleB(Chat, ServerWideOOC)) {
-			case 5: {
+		case 5: {
+			if (RuleB(Chat, ServerWideOOC)) {
 				QueueMessage(fmt::format("{0} says ooc, '{1}'", scm->from, scm->message));
 				break;
+			} else { // I think we want default action in this case?
+				return false;
 			}
 		}
 

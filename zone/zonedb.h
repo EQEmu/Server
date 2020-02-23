@@ -11,6 +11,10 @@
 #include "aa_ability.h"
 #include "event_codes.h"
 
+#ifdef BOTS
+#include "bot_database.h"
+#endif
+
 class Client;
 class Corpse;
 class Merc;
@@ -43,6 +47,7 @@ struct wplist {
 	float z;
 	int pause;
 	float heading;
+	bool centerpoint;
 };
 
 #pragma pack(1)
@@ -352,6 +357,8 @@ public:
 	bool		DeleteCharacterCorpse(uint32 dbid);
 	bool		SummonAllCharacterCorpses(uint32 char_id, uint32 dest_zoneid, uint16 dest_instanceid, const glm::vec4& position);
 	bool		SummonAllGraveyardCorpses(uint32 cur_zoneid, uint32 dest_zoneid, uint16 dest_instanceid, const glm::vec4& position);
+	int			CountCharacterCorpses(uint32 char_id);
+	int			CountCharacterCorpsesByZoneID(uint32 char_id, uint32 zone_id);
 	bool		UnburyCharacterCorpse(uint32 dbid, uint32 new_zoneid, uint16 dest_instanceid, const glm::vec4& position);
 	bool		LoadCharacterCorpses(uint32 iZoneID, uint16 iInstanceID);
 	bool		DeleteGraveyard(uint32 zone_id, uint32 graveyard_id);
@@ -360,8 +367,9 @@ public:
 	uint32		SendCharacterCorpseToGraveyard(uint32 dbid, uint32 zoneid, uint16 instanceid, const glm::vec4& position);
 	uint32		CreateGraveyardRecord(uint32 graveyard_zoneid, const glm::vec4& position);
 	uint32		AddGraveyardIDToZone(uint32 zone_id, uint32 graveyard_id);
-	uint32		SaveCharacterCorpse(uint32 charid, const char* charname, uint32 zoneid, uint16 instanceid, PlayerCorpse_Struct* dbpc, const glm::vec4& position);
-	uint32		UpdateCharacterCorpse(uint32 dbid, uint32 charid, const char* charname, uint32 zoneid, uint16 instanceid, PlayerCorpse_Struct* dbpc, const glm::vec4& position, bool rezzed = false);
+	uint32		SaveCharacterCorpse(uint32 charid, const char* charname, uint32 zoneid, uint16 instanceid, PlayerCorpse_Struct* dbpc, const glm::vec4& position, uint32 guildid);
+	uint32		UpdateCharacterCorpse(uint32 dbid, uint32 charid, const char* charname, uint32 zoneid, uint16 instanceid, PlayerCorpse_Struct* dbpc, const glm::vec4& position, uint32 guildid, bool rezzed = false);
+	uint32		UpdateCharacterCorpseConsent(uint32 charid, uint32 guildid);
 	uint32		GetFirstCorpseID(uint32 char_id);
 	uint32		GetCharacterCorpseCount(uint32 char_id);
 	uint32		GetCharacterCorpseID(uint32 char_id, uint8 corpse);
@@ -382,7 +390,21 @@ public:
 	bool	LoadAlternateAdvancement(Client *c);
 
 	/* Zone related   */
-	bool		GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct *data, bool &can_bind, bool &can_combat, bool &can_levitate, bool &can_castoutdoor, bool &is_city, bool &is_hotzone, bool &allow_mercs, uint8 &zone_type, int &ruleset, char **map_filename);
+	bool		GetZoneCFG(
+		uint32 zoneid, 
+		uint16 instance_id, 
+		NewZone_Struct *data, 
+		bool &can_bind, 
+		bool &can_combat, 
+		bool &can_levitate, 
+		bool &can_castoutdoor, 
+		bool &is_city, 
+		bool &is_hotzone, 
+		bool &allow_mercs, 
+		double &max_movement_update_range, 
+		uint8 &zone_type, 
+		int &ruleset, 
+		char **map_filename);
 	bool		SaveZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct* zd);
 	bool		LoadStaticZonePoints(LinkedList<ZonePoint*>* zone_point_list,const char* zonename, uint32 version);
 	bool		UpdateZoneSafeCoords(const char* zonename, const glm::vec3& location);
@@ -391,7 +413,7 @@ public:
 
 	/* Spawns and Spawn Points  */
 	bool		LoadSpawnGroups(const char* zone_name, uint16 version, SpawnGroupList* spawn_group_list);
-	bool		LoadSpawnGroupsByID(int spawngroupid, SpawnGroupList* spawn_group_list);
+	bool		LoadSpawnGroupsByID(int spawn_group_id, SpawnGroupList* spawn_group_list);
 	bool		PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spawn2_list, int16 version, uint32 repopdelay = 0);
 	bool		PopulateZoneSpawnListClose(uint32 zoneid, LinkedList<Spawn2*> &spawn2_list, int16 version, const glm::vec4& client_position, uint32 repop_distance);
 	Spawn2*		LoadSpawn2(LinkedList<Spawn2*> &spawn2_list, uint32 spawn2id, uint32 timeleft);
@@ -414,6 +436,7 @@ public:
 	void        AssignGrid(Client *client, int grid, int spawn2id);
 	int			GetHighestGrid(uint32 zoneid);
 	int			GetHighestWaypoint(uint32 zoneid, uint32 gridid);
+	int			GetRandomWaypointLocFromGrid(glm::vec4 &loc, uint16 zoneid, int grid);
 
 	/* NPCs  */
 
@@ -534,6 +557,11 @@ public:
 
 	/* Things which really dont belong here... */
 	int16	CommandRequirement(const char* commandname);
+
+#ifdef BOTS
+	// bot database add-on to eliminate the need for a second database connection
+	BotDatabase botdb;
+#endif
 
 protected:
 	void ZDBInitVars();

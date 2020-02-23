@@ -24,8 +24,12 @@
 /**
  * @param npc 
  */
-void NpcScaleManager::ScaleNPC(NPC * npc)
+void NpcScaleManager::ScaleNPC(NPC *npc)
 {
+	if (npc->IsSkipAutoScale()) {
+		return;
+	}
+
 	int8 npc_type       = GetNPCScalingType(npc);
 	int  npc_level      = npc->GetLevel();
 	bool is_auto_scaled = IsAutoScaled(npc);
@@ -33,7 +37,8 @@ void NpcScaleManager::ScaleNPC(NPC * npc)
 	global_npc_scale scale_data = GetGlobalScaleDataForTypeLevel(npc_type, npc_level);
 
 	if (!scale_data.level) {
-		Log(Logs::General, Logs::NPCScaling, "NPC: %s - scaling data not found for type: %i level: %i",
+		LogNPCScaling(
+			"NPC: [{}] - scaling data not found for type: [{}] level: [{}]",
 			npc->GetCleanName(),
 			npc_type,
 			npc_level
@@ -42,7 +47,7 @@ void NpcScaleManager::ScaleNPC(NPC * npc)
 		return;
 	}
 
-	if (npc->GetAC() == 0) {
+	if (npc->GetAC() == 0 && is_auto_scaled) {
 		npc->ModifyNPCStat("ac", std::to_string(scale_data.ac).c_str());
 	}
 	if (npc->GetMaxHP() == 0) {
@@ -94,11 +99,11 @@ void NpcScaleManager::ScaleNPC(NPC * npc)
 	if (npc->GetDR() == 0) {
 		npc->ModifyNPCStat("dr", std::to_string(scale_data.disease_resist).c_str());
 	}
-	if (npc->GetCorrup() == 0) {
-		npc->ModifyNPCStat("cr", std::to_string(scale_data.corruption_resist).c_str());
+	if (npc->GetCorrup() == 0 && is_auto_scaled) {
+		npc->ModifyNPCStat("cor", std::to_string(scale_data.corruption_resist).c_str());
 	}
-	if (npc->GetPhR() == 0) {
-		npc->ModifyNPCStat("pr", std::to_string(scale_data.physical_resist).c_str());
+	if (npc->GetPhR() == 0 && is_auto_scaled) {
+		npc->ModifyNPCStat("phr", std::to_string(scale_data.physical_resist).c_str());
 	}
 	if (npc->GetMinDMG() == 0 && npc->GetMaxDMG() == 0) {
 		int min_dmg = scale_data.min_dmg;
@@ -106,11 +111,7 @@ void NpcScaleManager::ScaleNPC(NPC * npc)
 			int32 class_level_damage_mod = GetClassLevelDamageMod(npc->GetLevel(), npc->GetClass());
 			min_dmg = (min_dmg * class_level_damage_mod) / 220;
 
-			Log(Logs::Moderate,
-				Logs::NPCScaling,
-				"ClassLevelDamageMod::min_dmg base: %i calc: %i",
-				scale_data.min_dmg,
-				min_dmg);
+			LogNPCScaling("ClassLevelDamageMod::min_dmg base: [{}] calc: [{}]", scale_data.min_dmg, min_dmg);
 		}
 
 		npc->ModifyNPCStat("min_hit", std::to_string(min_dmg).c_str());
@@ -121,17 +122,12 @@ void NpcScaleManager::ScaleNPC(NPC * npc)
 			int32 class_level_damage_mod = GetClassLevelDamageMod(npc->GetLevel(), npc->GetClass());
 			max_dmg = (scale_data.max_dmg * class_level_damage_mod) / 220;
 
-			Log(Logs::Moderate,
-				Logs::NPCScaling,
-				"ClassLevelDamageMod::max_dmg base: %i calc: %i",
-				scale_data.max_dmg,
-				max_dmg
-			);
+			LogNPCScaling("ClassLevelDamageMod::max_dmg base: [{}] calc: [{}]", scale_data.max_dmg, max_dmg);
 		}
 
 		npc->ModifyNPCStat("max_hit", std::to_string(max_dmg).c_str());
 	}
-	if (npc->GetHPRegen() == 0) {
+	if (npc->GetHPRegen() == 0 && is_auto_scaled) {
 		npc->ModifyNPCStat("hp_regen", std::to_string(scale_data.hp_regen_rate).c_str());
 	}
 	if (npc->GetAttackDelay() == 0) {
@@ -157,14 +153,14 @@ void NpcScaleManager::ScaleNPC(NPC * npc)
 			}
 		}
 
-		Log(Logs::General,
-			Logs::NPCScaling,
-			"(%s) level: %i type: %i Auto: %s Setting: %s",
+		LogNPCScaling(
+			"([{}]) level: [{}] type: [{}] Auto: [{}] Setting: [{}]",
 			npc->GetCleanName(),
 			npc_level,
 			npc_type,
 			(is_auto_scaled ? "true" : "false"),
-			scale_log.c_str());
+			scale_log.c_str()
+		);
 	}
 }
 
@@ -246,7 +242,7 @@ bool NpcScaleManager::LoadScaleData()
 		);
 	}
 
-	Log(Logs::General, Logs::NPCScaling, "Global Base Scaling Data Loaded...");
+	LogNPCScaling("Global Base Scaling Data Loaded");
 
 	return true;
 }
@@ -416,12 +412,12 @@ int8 NpcScaleManager::GetNPCScalingType(NPC *&npc)
 {
 	std::string npc_name = npc->GetName();
 
-	if (npc->IsRareSpawn() || npc_name.find('#') != std::string::npos || isupper(npc_name[0])) {
-		return 1;
-	}
-
 	if (npc->IsRaidTarget()) {
 		return 2;
+	}
+
+	if (npc->IsRareSpawn() || npc_name.find('#') != std::string::npos || isupper(npc_name[0])) {
+		return 1;
 	}
 
 	return 0;
@@ -486,10 +482,8 @@ bool NpcScaleManager::ApplyGlobalBaseScalingToNPCStatically(NPC *&npc)
 	global_npc_scale scale_data = GetGlobalScaleDataForTypeLevel(npc_type, npc_level);
 
 	if (!scale_data.level) {
-		Log(
-			Logs::General,
-			Logs::NPCScaling,
-			"NpcScaleManager::ApplyGlobalBaseScalingToNPCStatically NPC: %s - scaling data not found for type: %i level: %i",
+		LogNPCScaling(
+			"NpcScaleManager::ApplyGlobalBaseScalingToNPCStatically NPC: [{}] - scaling data not found for type: [{}] level: [{}]",
 			npc->GetCleanName(),
 			npc_type,
 			npc_level
@@ -574,10 +568,8 @@ bool NpcScaleManager::ApplyGlobalBaseScalingToNPCDynamically(NPC *&npc)
 	global_npc_scale scale_data = GetGlobalScaleDataForTypeLevel(npc_type, npc_level);
 
 	if (!scale_data.level) {
-		Log(
-			Logs::General,
-			Logs::NPCScaling,
-			"NpcScaleManager::ApplyGlobalBaseScalingToNPCDynamically NPC: %s - scaling data not found for type: %i level: %i",
+		LogNPCScaling(
+			"NpcScaleManager::ApplyGlobalBaseScalingToNPCDynamically NPC: [{}] - scaling data not found for type: [{}] level: [{}]",
 			npc->GetCleanName(),
 			npc_type,
 			npc_level

@@ -42,7 +42,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 {
 	if (!user || !in_augment)
 	{
-		Log(Logs::General, Logs::Error, "Client or AugmentItem_Struct not set in Object::HandleAugmentation");
+		LogError("Client or AugmentItem_Struct not set in Object::HandleAugmentation");
 		return;
 	}
 
@@ -80,7 +80,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 
 				if (itemsFound != 2)
 				{
-					user->Message(13, "Error: Too many/few items in augmentation container.");
+					user->Message(Chat::Red, "Error: Too many/few items in augmentation container.");
 					return;
 				}
 			}
@@ -89,8 +89,8 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 
 	if(!container)
 	{
-		Log(Logs::General, Logs::Error, "Player tried to augment an item without a container set.");
-		user->Message(13, "Error: This item is not a container!");
+		LogError("Player tried to augment an item without a container set");
+		user->Message(Chat::Red, "Error: This item is not a container!");
 		return;
 	}
 
@@ -115,7 +115,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 		{
 			// Either 2 augmentable items found or none found
 			// This should never occur due to client restrictions, but prevent in case of a hack
-			user->Message(13, "Error: Must be 1 augmentable item in the sealer");
+			user->Message(Chat::Red, "Error: Must be 1 augmentable item in the sealer");
 			return;
 		}
 	}
@@ -124,11 +124,11 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 		// This happens if the augment button is clicked more than once quickly while augmenting
 		if (!container->GetItem(0))
 		{
-			user->Message(13, "Error: No item in slot 0 of sealer");
+			user->Message(Chat::Red, "Error: No item in slot 0 of sealer");
 		}
 		if (!container->GetItem(1))
 		{
-			user->Message(13, "Error: No item in slot 1 of sealer");
+			user->Message(Chat::Red, "Error: No item in slot 1 of sealer");
 		}
 		return;
 	}
@@ -160,7 +160,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 		}
 		else
 		{
-			user->Message(13, "Error: No available slot for augment");
+			user->Message(Chat::Red, "Error: No available slot for augment");
 		}
 	}
 	else
@@ -169,8 +169,8 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 		bool isSolvent = auged_with->GetItem()->ItemType == EQEmu::item::ItemTypeAugmentationSolvent;
 		if (!isSolvent && auged_with->GetItem()->ItemType != EQEmu::item::ItemTypeAugmentationDistiller)
 		{
-			Log(Logs::General, Logs::Error, "Player tried to remove an augment without a solvent or distiller.");
-			user->Message(13, "Error: Missing an augmentation solvent or distiller for removing this augment.");
+			LogError("Player tried to remove an augment without a solvent or distiller");
+			user->Message(Chat::Red, "Error: Missing an augmentation solvent or distiller for removing this augment.");
 
 			return;
 		}
@@ -179,8 +179,8 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 		if (aug) {
 			if (!isSolvent && auged_with->GetItem()->ID != aug->GetItem()->AugDistiller)
 			{
-				Log(Logs::General, Logs::Error, "Player tried to safely remove an augment with the wrong distiller (item %u vs expected %u).", auged_with->GetItem()->ID, aug->GetItem()->AugDistiller);
-				user->Message(13, "Error: Wrong augmentation distiller for safely removing this augment.");
+				LogError("Player tried to safely remove an augment with the wrong distiller (item [{}] vs expected [{}])", auged_with->GetItem()->ID, aug->GetItem()->AugDistiller);
+				user->Message(Chat::Red, "Error: Wrong augmentation distiller for safely removing this augment.");
 				return;
 			}
 			std::vector<EQEmu::Any> args;
@@ -252,7 +252,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Object *worldo)
 {
 	if (!user || !in_combine) {
-		Log(Logs::General, Logs::Error, "Client or NewCombine_Struct not set in Object::HandleCombine");
+		LogError("Client or NewCombine_Struct not set in Object::HandleCombine");
 		return;
 	}
 
@@ -266,7 +266,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 
 	if (in_combine->container_slot == EQEmu::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE) {
 		if(!worldo) {
-			user->Message(13, "Error: Server is not aware of the tradeskill container you are attempting to use");
+			user->Message(Chat::Red, "Error: Server is not aware of the tradeskill container you are attempting to use");
 			return;
 		}
 		c_type = worldo->m_type;
@@ -291,7 +291,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	}
 
 	if (!inst || !inst->IsType(EQEmu::item::ItemClassBag)) {
-		user->Message(13, "Error: Server does not recognize specified tradeskill container");
+		user->Message(Chat::Red, "Error: Server does not recognize specified tradeskill container");
 		return;
 	}
 
@@ -304,12 +304,12 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 			user->DeleteItemInInventory(EQEmu::InventoryProfile::CalcSlotId(in_combine->container_slot, 0), 0, true);
 			container->Clear();
 			user->SummonItem(new_weapon->ID, inst->GetCharges(), inst->GetAugmentItemID(0), inst->GetAugmentItemID(1), inst->GetAugmentItemID(2), inst->GetAugmentItemID(3), inst->GetAugmentItemID(4), inst->GetAugmentItemID(5), inst->IsAttuned(), EQEmu::invslot::slotCursor, container->GetItem()->Icon, atoi(container->GetItem()->IDFile + 2));
-			user->Message_StringID(4, TRANSFORM_COMPLETE, inst->GetItem()->Name);
+			user->MessageString(Chat::LightBlue, TRANSFORM_COMPLETE, inst->GetItem()->Name);
 			if (RuleB(Inventory, DeleteTransformationMold))
 				user->DeleteItemInInventory(in_combine->container_slot, 0, true);
 		}
 		else if (inst) {
-			user->Message_StringID(4, TRANSFORM_FAILED, inst->GetItem()->Name);
+			user->MessageString(Chat::LightBlue, TRANSFORM_FAILED, inst->GetItem()->Name);
 		}
 		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 		user->QueuePacket(outapp);
@@ -324,10 +324,10 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 			user->DeleteItemInInventory(EQEmu::InventoryProfile::CalcSlotId(in_combine->container_slot, 0), 0, true);
 			container->Clear();
 			user->SummonItem(new_weapon->ID, inst->GetCharges(), inst->GetAugmentItemID(0), inst->GetAugmentItemID(1), inst->GetAugmentItemID(2), inst->GetAugmentItemID(3), inst->GetAugmentItemID(4), inst->GetAugmentItemID(5), inst->IsAttuned(), EQEmu::invslot::slotCursor, 0, 0);
-			user->Message_StringID(4, TRANSFORM_COMPLETE, inst->GetItem()->Name);
+			user->MessageString(Chat::LightBlue, TRANSFORM_COMPLETE, inst->GetItem()->Name);
 		}
 		else if (inst) {
-			user->Message_StringID(4, DETRANSFORM_FAILED, inst->GetItem()->Name);
+			user->MessageString(Chat::LightBlue, DETRANSFORM_FAILED, inst->GetItem()->Name);
 		}
 		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 		user->QueuePacket(outapp);
@@ -337,7 +337,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 
 	DBTradeskillRecipe_Struct spec;
 	if (!database.GetTradeRecipe(container, c_type, some_id, user->CharacterID(), &spec)) {
-		user->Message_StringID(MT_Emote,TRADESKILL_NOCOMBINE);
+		user->MessageString(Chat::Emote,TRADESKILL_NOCOMBINE);
 		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 		user->QueuePacket(outapp);
 		safe_delete(outapp);
@@ -352,7 +352,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	// bit 6 (0x20): unlisted recipe flag
 	if ((spec.must_learn&0xF) == 1 && !spec.has_learnt) {
 		// Made up message for the client. Just giving a DNC is the other option.
-		user->Message(4, "You need to learn how to combine these first.");
+		user->Message(Chat::LightBlue, "You need to learn how to combine these first.");
 		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 		user->QueuePacket(outapp);
 		safe_delete(outapp);
@@ -361,7 +361,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	// Character does not have the required skill.
 	if(spec.skill_needed > 0 && user->GetSkill(spec.tradeskill) < spec.skill_needed ) {
 		// Notify client.
-		user->Message(4, "You are not skilled enough.");
+		user->Message(Chat::LightBlue, "You are not skilled enough.");
 		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 		user->QueuePacket(outapp);
 		safe_delete(outapp);
@@ -371,25 +371,34 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	//changing from a switch to string of if's since we don't need to iterate through all of the skills in the SkillType enum
 	if (spec.tradeskill == EQEmu::skills::SkillAlchemy) {
 		if (user_pp.class_ != SHAMAN) {
-			user->Message(13, "This tradeskill can only be performed by a shaman.");
+			user->Message(Chat::Red, "This tradeskill can only be performed by a shaman.");
 			return;
 		}
 		else if (user_pp.level < MIN_LEVEL_ALCHEMY) {
-			user->Message(13, "You cannot perform alchemy until you reach level %i.", MIN_LEVEL_ALCHEMY);
+			user->Message(Chat::Red, "You cannot perform alchemy until you reach level %i.", MIN_LEVEL_ALCHEMY);
 			return;
 		}
 	}
 	else if (spec.tradeskill == EQEmu::skills::SkillTinkering) {
 		if (user_pp.race != GNOME) {
-			user->Message(13, "Only gnomes can tinker.");
+			user->Message(Chat::Red, "Only gnomes can tinker.");
 			return;
 		}
 	}
 	else if (spec.tradeskill == EQEmu::skills::SkillMakePoison) {
 		if (user_pp.class_ != ROGUE) {
-			user->Message(13, "Only rogues can mix poisons.");
+			user->Message(Chat::Red, "Only rogues can mix poisons.");
 			return;
 		}
+	}
+
+	// final check for any additional quest requirements .. "check_zone" in this case - exported as variable [validate_type]
+	if (parse->EventPlayer(EVENT_COMBINE_VALIDATE, user, fmt::format("check_zone {}", zone->GetZoneID()), spec.recipe_id) != 0) {
+		user->Message(Chat::Emote, "You cannot make this combine because the location requirement has not been met.");
+		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+		user->QueuePacket(outapp);
+		safe_delete(outapp);
+		return;
 	}
 
 	// Send acknowledgement packets to client
@@ -422,7 +431,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	// Update Made count
 	if (success) {
 		if (!spec.has_learnt && ((spec.must_learn&0x10) != 0x10)) {
-			user->Message_StringID(4, TRADESKILL_LEARN_RECIPE, spec.name.c_str());
+			user->MessageString(Chat::LightBlue, TRADESKILL_LEARN_RECIPE, spec.name.c_str());
 		}
 		database.UpdateRecipeMadecount(spec.recipe_id, user->CharacterID(), spec.madecount+1);
 	}
@@ -433,7 +442,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	if(success && spec.replace_container) {
 		if(worldcontainer){
 			//should report this error, but we dont have the recipe ID, so its not very useful
-			Log(Logs::General, Logs::Error, "Replace container combine executed in a world container.");
+			LogError("Replace container combine executed in a world container");
 		}
 		else
 			user->DeleteItemInInventory(in_combine->container_slot, 0, true);
@@ -459,7 +468,7 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 	//ask the database for the recipe to make sure it exists...
 	DBTradeskillRecipe_Struct spec;
 	if (!database.GetTradeRecipe(rac->recipe_id, rac->object_type, rac->some_id, user->CharacterID(), &spec)) {
-		Log(Logs::General, Logs::Error, "Unknown recipe for HandleAutoCombine: %u\n", rac->recipe_id);
+		LogError("Unknown recipe for HandleAutoCombine: [{}]\n", rac->recipe_id);
 		user->QueuePacket(outapp);
 		safe_delete(outapp);
 		return;
@@ -469,7 +478,7 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 	// This shouldn't happen.
 	if ((spec.must_learn&0xf) && !spec.has_learnt) {
 		// Made up message for the client. Just giving a DNC is the other option.
-		user->Message(4, "You need to learn how to combine these first.");
+		user->Message(Chat::LightBlue, "You need to learn how to combine these first.");
 		user->QueuePacket(outapp);
 		safe_delete(outapp);
 		return;
@@ -488,14 +497,14 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 	}
 
 	if(results.RowCount() < 1) {
-		Log(Logs::General, Logs::Error, "Error in HandleAutoCombine: no components returned");
+		LogError("Error in HandleAutoCombine: no components returned");
 		user->QueuePacket(outapp);
 		safe_delete(outapp);
 		return;
 	}
 
 	if(results.RowCount() > 10) {
-		Log(Logs::General, Logs::Error, "Error in HandleAutoCombine: too many components returned (%u)", results.RowCount());
+		LogError("Error in HandleAutoCombine: too many components returned ([{}])", results.RowCount());
 		user->QueuePacket(outapp);
 		safe_delete(outapp);
 		return;
@@ -540,13 +549,13 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 
 		safe_delete(outapp);
 
-		user->Message_StringID(MT_Skills, TRADESKILL_MISSING_COMPONENTS);
+		user->MessageString(Chat::Skills, TRADESKILL_MISSING_COMPONENTS);
 
 		for (auto it = MissingItems.begin(); it != MissingItems.end(); ++it) {
 			const EQEmu::ItemData* item = database.GetItem(*it);
 
 			if(item)
-				user->Message_StringID(MT_Skills, TRADESKILL_MISSING_ITEM, item->Name);
+				user->MessageString(Chat::Skills, TRADESKILL_MISSING_ITEM, item->Name);
 		}
 
 		return;
@@ -593,7 +602,7 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 
 	if (success) {
 		if (!spec.has_learnt && ((spec.must_learn & 0x10) != 0x10)) {
-			user->Message_StringID(4, TRADESKILL_LEARN_RECIPE, spec.name.c_str());
+			user->MessageString(Chat::LightBlue, TRADESKILL_LEARN_RECIPE, spec.name.c_str());
 		}
 		database.UpdateRecipeMadecount(spec.recipe_id, user->CharacterID(), spec.madecount+1);
 	}
@@ -706,7 +715,7 @@ void Client::TradeskillSearchResults(const std::string &query, unsigned long obj
 		return; //search gave no results... not an error
 
 	if(results.ColumnCount() != 6) {
-		Log(Logs::General, Logs::Error, "Error in TradeskillSearchResults query '%s': Invalid column count in result", query.c_str());
+		LogError("Error in TradeskillSearchResults query [{}]: Invalid column count in result", query.c_str());
 		return;
 	}
 
@@ -756,12 +765,12 @@ void Client::SendTradeskillDetails(uint32 recipe_id) {
 	}
 
 	if(results.RowCount() < 1) {
-		Log(Logs::General, Logs::Error, "Error in SendTradeskillDetails: no components returned");
+		LogError("Error in SendTradeskillDetails: no components returned");
 		return;
 	}
 
 	if(results.RowCount() > 10) {
-		Log(Logs::General, Logs::Error, "Error in SendTradeskillDetails: too many components returned (%u)", results.RowCount());
+		LogError("Error in SendTradeskillDetails: too many components returned ([{}])", results.RowCount());
 		return;
 	}
 
@@ -940,7 +949,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	//handle caps
 	if(spec->nofail) {
 		chance = 100;	//cannot fail.
-		Log(Logs::Detail, Logs::Tradeskills, "...This combine cannot fail.");
+		LogTradeskills("This combine cannot fail");
 	} else if(over_trivial >= 0) {
 		// At reaching trivial the chance goes to 95% going up an additional
 		// percent for every 40 skillpoints above the trivial.
@@ -951,7 +960,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 		// above critical still stands.
 		// Mastery modifier is: 10%/25%/50% for rank one/two/three
 		chance = 95.0f + (float(user_skill - spec->trivial) / 40.0f);
-		Message_StringID(MT_Emote, TRADESKILL_TRIVIAL);
+		MessageString(Chat::Emote, TRADESKILL_TRIVIAL);
 	} else if(chance < 5) {
 		// Minimum chance is always 5
 		chance = 5;
@@ -960,8 +969,8 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 		chance = 95;
 	}
 
-	Log(Logs::Detail, Logs::Tradeskills, "...Current skill: %d , Trivial: %d , Success chance: %f percent", user_skill , spec->trivial , chance);
-	Log(Logs::Detail, Logs::Tradeskills, "...Bonusstat: %d , INT: %d , WIS: %d , DEX: %d , STR: %d", bonusstat , GetINT() , GetWIS() , GetDEX() , GetSTR());
+	LogTradeskills("Current skill: [{}] , Trivial: [{}] , Success chance: [{}] percent", user_skill , spec->trivial , chance);
+	LogTradeskills("Bonusstat: [{}] , INT: [{}] , WIS: [{}] , DEX: [{}] , STR: [{}]", bonusstat , GetINT() , GetWIS() , GetDEX() , GetSTR());
 
 	float res = zone->random.Real(0, 99);
 	int aa_chance = 0;
@@ -973,32 +982,56 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	chance = mod_tradeskill_chance(chance, spec);
 
 	if (((spec->tradeskill==75) || GetGM() || (chance > res)) || zone->random.Roll(aa_chance)) {
+
 		success_modifier = 1;
 
-		if(over_trivial < 0)
+		if (over_trivial < 0) {
 			CheckIncreaseTradeskill(bonusstat, stat_modifier, skillup_modifier, success_modifier, spec->tradeskill);
+		}
 
-		Message_StringID(4, TRADESKILL_SUCCEED, spec->name.c_str());
+		MessageString(Chat::LightBlue, TRADESKILL_SUCCEED, spec->name.c_str());
 
-		Log(Logs::Detail, Logs::Tradeskills, "Tradeskill success");
+		LogTradeskills("Tradeskill success");
 
 		itr = spec->onsuccess.begin();
 		while(itr != spec->onsuccess.end() && !spec->quest) {
-			//should we check this crap?
+
 			SummonItem(itr->first, itr->second);
 			item = database.GetItem(itr->first);
-			if (this->GetGroup()) {
-				entity_list.MessageGroup(this, true, MT_Skills, "%s has successfully fashioned %s!", GetName(), item->Name);
+			if (item) {
+				if (GetGroup()) {
+					entity_list.MessageGroup(this, true, Chat::Skills, "%s has successfully fashioned %s!", GetName(), item->Name);
+				}
+			}
+			else {
+				Log(
+					Logs::General,
+					Logs::Tradeskills,
+					StringFormat(
+						"Failure (null item pointer [id: %u, qty: %u]) :: recipe_id:%i tskillid:%i trivial:%i chance:%4.2f  in zoneid:%i instid:%i",
+						itr->first,
+						itr->second,
+						spec->recipe_id,
+						spec->tradeskill,
+						spec->trivial,
+						chance,
+						this->GetZoneID(),
+						this->GetInstanceID()
+					).c_str()
+				);
 			}
 
 			/* QS: Player_Log_Trade_Skill_Events */
-			if (RuleB(QueryServ, PlayerLogTradeSkillEvents)){
+			if (RuleB(QueryServ, PlayerLogTradeSkillEvents)) {
+
 				std::string event_desc = StringFormat("Success :: fashioned recipe_id:%i tskillid:%i trivial:%i chance:%4.2f  in zoneid:%i instid:%i", spec->recipe_id, spec->tradeskill, spec->trivial, chance, this->GetZoneID(), this->GetInstanceID());
 				QServ->PlayerLogEvent(Player_Log_Trade_Skill_Events, this->CharacterID(), event_desc);
 			}
 
-			if(RuleB(TaskSystem, EnableTaskSystem))
+			if (RuleB(TaskSystem, EnableTaskSystem)) {
 				UpdateTasksForItem(ActivityTradeSkill, itr->first, itr->second);
+			}
+
 			++itr;
 		}
 		return(true);
@@ -1010,12 +1043,12 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 		if(over_trivial < 0)
 			CheckIncreaseTradeskill(bonusstat, stat_modifier, skillup_modifier, success_modifier, spec->tradeskill);
 
-		Message_StringID(MT_Emote,TRADESKILL_FAILED);
+		MessageString(Chat::Emote,TRADESKILL_FAILED);
 
-		Log(Logs::Detail, Logs::Tradeskills, "Tradeskill failed");
+		LogTradeskills("Tradeskill failed");
 			if (this->GetGroup())
 		{
-			entity_list.MessageGroup(this,true,MT_Skills,"%s was unsuccessful in %s tradeskill attempt.",GetName(),this->GetGender() == 0 ? "his" : this->GetGender() == 1 ? "her" : "its");
+			entity_list.MessageGroup(this, true, Chat::Skills,"%s was unsuccessful in %s tradeskill attempt.",GetName(),this->GetGender() == 0 ? "his" : this->GetGender() == 1 ? "her" : "its");
 
 		}
 
@@ -1091,9 +1124,9 @@ void Client::CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float
 			NotifyNewTitlesAvailable();
 	}
 
-	Log(Logs::Detail, Logs::Tradeskills, "...skillup_modifier: %f , success_modifier: %d , stat modifier: %d", skillup_modifier , success_modifier , stat_modifier);
-	Log(Logs::Detail, Logs::Tradeskills, "...Stage1 chance was: %f percent", chance_stage1);
-	Log(Logs::Detail, Logs::Tradeskills, "...Stage2 chance was: %f percent. 0 percent means stage1 failed", chance_stage2);
+	LogTradeskills("skillup_modifier: [{}] , success_modifier: [{}] , stat modifier: [{}]", skillup_modifier , success_modifier , stat_modifier);
+	LogTradeskills("Stage1 chance was: [{}] percent", chance_stage1);
+	LogTradeskills("Stage2 chance was: [{}] percent. 0 percent means stage1 failed", chance_stage2);
 }
 
 bool ZoneDatabase::GetTradeRecipe(const EQEmu::ItemInstance* container, uint8 c_type, uint32 some_id,
@@ -1146,8 +1179,8 @@ bool ZoneDatabase::GetTradeRecipe(const EQEmu::ItemInstance* container, uint8 c_
                                     buf2.c_str(), containers.c_str(), count, sum);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		Log(Logs::General, Logs::Error, "Error in GetTradeRecipe search, query: %s", query.c_str());
-		Log(Logs::General, Logs::Error, "Error in GetTradeRecipe search, error: %s", results.ErrorMessage().c_str());
+		LogError("Error in GetTradeRecipe search, query: [{}]", query.c_str());
+		LogError("Error in GetTradeRecipe search, error: [{}]", results.ErrorMessage().c_str());
 		return false;
 	}
 
@@ -1168,7 +1201,7 @@ bool ZoneDatabase::GetTradeRecipe(const EQEmu::ItemInstance* container, uint8 c_
 
             //length limit on buf2
             if(index == 214) { //Maximum number of recipe matches (19 * 215 = 4096)
-                Log(Logs::General, Logs::Error, "GetTradeRecipe warning: Too many matches. Unable to search all recipe entries. Searched %u of %u possible entries.", index + 1, results.RowCount());
+        LogError("GetTradeRecipe warning: Too many matches. Unable to search all recipe entries. Searched [{}] of [{}] possible entries", index + 1, results.RowCount());
                 break;
             }
         }
@@ -1180,8 +1213,8 @@ bool ZoneDatabase::GetTradeRecipe(const EQEmu::ItemInstance* container, uint8 c_
                             "AND sum(tre.item_id * tre.componentcount) = %u", buf2.c_str(), count, sum);
 		results = QueryDatabase(query);
         if (!results.Success()) {
-            Log(Logs::General, Logs::Error, "Error in GetTradeRecipe, re-query: %s", query.c_str());
-            Log(Logs::General, Logs::Error, "Error in GetTradeRecipe, error: %s", results.ErrorMessage().c_str());
+      LogError("Error in GetTradeRecipe, re-query: [{}]", query.c_str());
+      LogError("Error in GetTradeRecipe, error: [{}]", results.ErrorMessage().c_str());
             return false;
         }
     }
@@ -1189,36 +1222,45 @@ bool ZoneDatabase::GetTradeRecipe(const EQEmu::ItemInstance* container, uint8 c_
     if (results.RowCount() < 1)
         return false;
 
-	if(results.RowCount() > 1) {
+	if (results.RowCount() > 1) {
 		//The recipe is not unique, so we need to compare the container were using.
 		uint32 containerId = 0;
 
-		if(some_id) //Standard container
+		if (some_id) { //Standard container
 			containerId = some_id;
-		else if(c_type)//World container
+		}
+		else if (c_type) {//World container
 			containerId = c_type;
-		else //Invalid container
+		}
+		else { //Invalid container
 			return false;
+		}
 
-		query = StringFormat("SELECT tre.recipe_id "
-                            "FROM tradeskill_recipe_entries AS tre "
-                            "WHERE tre.recipe_id IN (%s) "
-                            "AND tre.item_id = %u;", buf2.c_str(), containerId);
-        results = QueryDatabase(query);
+		query   = StringFormat(
+			"SELECT tre.recipe_id "
+			"FROM tradeskill_recipe_entries AS tre "
+			"WHERE tre.recipe_id IN (%s) "
+			"AND tre.item_id = %u;", buf2.c_str(), containerId
+		);
+		results = QueryDatabase(query);
 		if (!results.Success()) {
-			Log(Logs::General, Logs::Error, "Error in GetTradeRecipe, re-query: %s", query.c_str());
-			Log(Logs::General, Logs::Error, "Error in GetTradeRecipe, error: %s", results.ErrorMessage().c_str());
+			LogError("Error in GetTradeRecipe, re-query: [{}]", query.c_str());
+			LogError("Error in GetTradeRecipe, error: [{}]", results.ErrorMessage().c_str());
 			return false;
 		}
 
-		if(results.RowCount() == 0) { //Recipe contents matched more than 1 recipe, but not in this container
-			Log(Logs::General, Logs::Error, "Combine error: Incorrect container is being used!");
+		if (results.RowCount() == 0) { //Recipe contents matched more than 1 recipe, but not in this container
+			LogError("Combine error: Incorrect container is being used!");
 			return false;
 		}
 
-		if (results.RowCount() > 1) //Recipe contents matched more than 1 recipe in this container
-			Log(Logs::General, Logs::Error, "Combine error: Recipe is not unique! %u matches found for container %u. Continuing with first recipe match.", results.RowCount(), containerId);
-
+		if (results.RowCount() > 1) { //Recipe contents matched more than 1 recipe in this container
+			LogError(
+				"Combine error: Recipe is not unique! [{}] matches found for container [{}]. Continuing with first recipe match",
+				results.RowCount(),
+				containerId
+			);
+		}
 	}
 
 	auto row = results.begin();
@@ -1288,8 +1330,8 @@ bool ZoneDatabase::GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id
                                     char_id, (unsigned long)recipe_id, containers.c_str());
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		Log(Logs::General, Logs::Error, "Error in GetTradeRecipe, query: %s", query.c_str());
-		Log(Logs::General, Logs::Error, "Error in GetTradeRecipe, error: %s", results.ErrorMessage().c_str());
+		LogError("Error in GetTradeRecipe, query: [{}]", query.c_str());
+		LogError("Error in GetTradeRecipe, error: [{}]", results.ErrorMessage().c_str());
 		return false;
 	}
 
@@ -1324,7 +1366,7 @@ bool ZoneDatabase::GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id
 	}
 
 	if(results.RowCount() < 1 && !spec->quest) {
-		Log(Logs::General, Logs::Error, "Error in GetTradeRecept success: no success items returned");
+		LogError("Error in GetTradeRecept success: no success items returned");
 		return false;
 	}
 
@@ -1391,7 +1433,7 @@ void Client::LearnRecipe(uint32 recipeID)
 	}
 
 	if (results.RowCount() != 1) {
-		Log(Logs::General, Logs::Normal, "Client::LearnRecipe - RecipeID: %d had %d occurences.", recipeID, results.RowCount());
+		LogInfo("Client::LearnRecipe - RecipeID: [{}] had [{}] occurences", recipeID, results.RowCount());
 		return;
 	}
 
@@ -1404,7 +1446,7 @@ void Client::LearnRecipe(uint32 recipeID)
     if (row[1] != nullptr)
         return;
 
-    Message_StringID(4, TRADESKILL_LEARN_RECIPE, row[0]);
+    MessageString(Chat::LightBlue, TRADESKILL_LEARN_RECIPE, row[0]);
     // Actually learn the recipe now
 	query = StringFormat("INSERT INTO char_recipe_list "
                         "SET recipe_id = %u, char_id = %u, madecount = 0 "

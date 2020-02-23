@@ -24,10 +24,12 @@ namespace EQ
 			void Read(const char *data, size_t count);
 			void Write(const char *data, size_t count);
 
+			bool IsConnected() const;
 			std::string LocalIP() const;
 			int LocalPort() const;
 			std::string RemoteIP() const;
 			int RemotePort() const;
+
 		private:
 			TCPConnection();
 

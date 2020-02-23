@@ -84,6 +84,7 @@ class EQEmuConfig
 		// From <files/>
 		std::string SpellsFile;
 		std::string OpCodesFile;
+		std::string MailOpCodesFile;
 		std::string PluginPlFile;
 
 		// From <directories/>
@@ -164,7 +165,7 @@ class EQEmuConfig
 				fconfig >> _config->_root;
 				_config->parse_config();
 			}
-			catch (std::exception) {
+			catch (std::exception &) {
 				return false;
 			}			
 			return true;

@@ -35,6 +35,8 @@ static const uint32 MAX_MERC = 100;
 static const uint32 MAX_MERC_GRADES = 10;
 static const uint32 MAX_MERC_STANCES = 10;
 static const uint32 BLOCKED_BUFF_COUNT = 20;
+static const uint32 QUESTREWARD_COUNT = 8;
+static const uint32 ADVANCED_LORE_LENGTH = 8192;
 
 
 /*
@@ -1188,6 +1190,20 @@ struct SpecialMesg_Struct
 /*24*/	char	message[1];				// What is being said?
 };
 
+struct SpecialMesgHeader_Struct
+{
+/*00*/	char	SpeakMode;				// 2 shouts, 4 %1 %2, 3 %2, 5 tells group, 0 copy, default says
+/*01*/	char	JournalMode;			// 1 and 2 go to journal
+/*02*/	char	language;
+/*03*/	uint32	msg_type;				// Color of text (see MT_*** below)
+/*07*/	uint32	target_spawn_id;		// Who is it being said to?
+/*11*/ // speaker's name
+/*xx*/ // unknown, location, client doesn't care
+/*xx*/ // unknown
+/*xx*/ // unknown
+/*xx*/ // message
+};
+
 /*
 ** When somebody changes what they're wearing or give a pet a weapon (model changes)
 ** Length: 19 Bytes
@@ -1344,21 +1360,24 @@ struct BecomeCorpse_Struct {
 */
 struct PlayerPositionUpdateServer_Struct
 {
-/*0000*/ uint16		spawn_id;
-/*0002*/ int32		delta_heading:10,	// change in heading
-					x_pos:19,			// x coord
-					padding0002:3;		// ***Placeholder
-/*0006*/ int32		y_pos:19,			// y coord
-					animation:10,		// animation
-					padding0006:3;		// ***Placeholder
-/*0010*/ int32		z_pos:19,			// z coord
-					delta_y:13;			// change in y
-/*0014*/ int32		delta_x:13,			// change in x
-					heading:12,			// heading
-					padding0014:7;		// ***Placeholder
-/*0018*/ int32		delta_z:13,			// change in z
-					padding0018:19;		// ***Placeholder
-/*0022*/
+/*0000*/	uint16		spawn_id;
+/*0002*/	uint16		vehicle_id;
+/*0004*/	signed		padding0004 : 12;
+			signed		y_pos : 19;			// y coord
+			unsigned	padding : 1;
+/*0008*/	signed		delta_z : 13;		// change in z
+			signed		delta_x : 13;		// change in x
+			signed		padding0008 : 6;
+/*0012*/	signed		x_pos : 19;			// x coord
+			unsigned	heading : 12;		// heading
+			signed		padding0016 : 1;
+/*0016*/	signed		delta_heading : 10;	// change in heading
+			signed		z_pos : 19;			// z coord
+			signed		padding0020 : 3;
+/*0020*/	signed		animation : 10;		// animation
+			signed		delta_y : 13;		// change in y
+			signed		padding0024 : 9;
+/*0024*/
 };
 
 /*
@@ -1369,21 +1388,23 @@ struct PlayerPositionUpdateServer_Struct
 */
 struct PlayerPositionUpdateClient_Struct
 {
-/*0000*/ uint16	spawn_id;
-/*0002*/ uint16	sequence;			//increments one each packet
-/*0004*/ float	y_pos;				// y coord
-/*0008*/ float	delta_z;			// Change in z
-/*0012*/ float	delta_x;			// Change in x
-/*0016*/ float	delta_y;			// Change in y
-/*0020*/ int32	animation:10,		// animation
-				delta_heading:10,	// change in heading
-				padding0020:12;		// ***Placeholder (mostly 1)
-/*0024*/ float	x_pos;				// x coord
-/*0028*/ float	z_pos;				// z coord
-/*0032*/ uint16	heading:12,			// Directional heading
-				padding0004:4;		// ***Placeholder
-/*0034*/ uint8	unknown0006[2];		// ***Placeholder
-/*0036*/
+/*0000*/	uint16		sequence;			// increments one each packet - Verified
+/*0002*/	uint16		spawn_id;			// Player's spawn id
+/*0004*/	uint16		vehicle_id;			// Player's vehicle spawn id
+/*0006*/	uint8		unknown0004[4];		// ***Placeholder
+/*0010*/	float		delta_x;			// Change in x
+/*0014*/	unsigned	heading : 12;		// Directional heading
+			unsigned	padding0040 : 20;	// ***Placeholder
+/*0018*/	float		x_pos;				// x coord (2nd loc value)
+/*0022*/	float		delta_z;			// Change in z
+/*0026*/	float		z_pos;				// z coord (3rd loc value)
+/*0030*/	float		y_pos;				// y coord (1st loc value)
+/*0034*/	unsigned	animation : 10;		// ***Placeholder
+			unsigned	padding0024 : 22;	// animation
+/*0038*/	float		delta_y;			// Change in y
+/*0042*/	signed		delta_heading : 10;	// change in heading
+			unsigned	padding0041 : 22;	// ***Placeholder
+/*0046*/
 };
 
 struct SpawnPositionUpdate_Struct
@@ -2161,14 +2182,7 @@ struct QuestReward_Struct
 	/*024*/ uint32	silver;		// Gives silver to the client
 	/*028*/ uint32	gold;		// Gives gold to the client
 	/*032*/ uint32	platinum;	// Gives platinum to the client
-	/*036*/ uint32	item_id;
-	/*040*/ uint32	unknown040;
-	/*044*/ uint32	unknown044;
-	/*048*/ uint32	unknown048;
-	/*052*/ uint32	unknown052;
-	/*056*/ uint32	unknown056;
-	/*060*/ uint32	unknown060;
-	/*064*/ uint32	unknown064;
+	/*036*/ int32	item_id[QUESTREWARD_COUNT];	// -1 for nothing
 	/*068*/
 };
 
@@ -2951,6 +2965,12 @@ struct	ItemViewRequest_Struct {
 /*032*/	char	unknown032[12];	//probably includes loregroup & evolving info. see Client::MakeItemLink() in zone/inventory.cpp:469
 /*044*/	uint16	icon;
 /*046*/	char	unknown046[2];
+};
+
+struct ItemAdvancedLoreText_Struct {
+	int32	item_id;
+	char	item_name[64];
+	char	advanced_lore[ADVANCED_LORE_LENGTH];
 };
 
 struct	LDONItemViewRequest_Struct {

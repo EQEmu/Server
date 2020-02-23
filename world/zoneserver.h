@@ -19,9 +19,9 @@
 #define ZONESERVER_H
 
 #include "world_tcp_connection.h"
-#include "../net/servertalk_server.h"
-#include "../event/timer.h"
-#include "../timer.h"
+#include "../common/net/servertalk_server.h"
+#include "../common/event/timer.h"
+#include "../common/timer.h"
 #include "console.h"
 #include <string.h>
 #include <string>
@@ -57,6 +57,7 @@ public:
 	const char*			GetCompileTime() const{ return compiled; }
 	void				SetCompile(char* in_compile){ strcpy(compiled,in_compile); }
 	inline uint32		GetZoneID() const	{ return zone_server_zone_id; }
+	inline bool         IsConnected() const { return tcpc->Handle() ? tcpc->Handle()->IsConnected() : false; }
 	inline std::string	GetIP() const		{ return tcpc->Handle() ? tcpc->Handle()->RemoteIP() : ""; }
 	inline uint16		GetPort() const		{ return tcpc->Handle() ? tcpc->Handle()->RemotePort() : 0; }
 	inline const char*	GetCAddress() const	{ return client_address; }

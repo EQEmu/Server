@@ -22,6 +22,7 @@
 #include "skills.h"
 
 #define SPELL_UNKNOWN 0xFFFF
+#define POISON_PROC 0xFFFE
 #define SPELLBOOK_UNKNOWN 0xFFFFFFFF		//player profile spells are 32 bit
 
 //some spell IDs which will prolly change, but are needed
@@ -590,7 +591,7 @@ typedef enum {
 #define SE_CorruptionCounter			369	// implemented
 #define SE_ResistCorruption				370	// implemented
 #define SE_AttackSpeed4					371 // implemented - stackable slow effect 'Inhibit Melee'
-#define SE_ForageSkill					372	// *not implemented[AA] Will increase the skill cap for those that have the Forage skill and grant the skill and raise the cap to those that do not.
+#define SE_ForageSkill					372	// implemented[AA] Will increase the skill cap for those that have the Forage skill and grant the skill and raise the cap to those that do not.
 #define SE_CastOnFadeEffectAlways		373 // implemented - Triggers if fades after natural duration OR from rune/numhits fades.
 #define SE_ApplyEffect					374 // implemented
 #define SE_DotCritDmgIncrease			375	// implemented - Increase damage of DoT critical amount
@@ -606,7 +607,7 @@ typedef enum {
 #define SE_LimitSpellGroup				385	// implemented - Limits to spell group(ie type 3 reuse reduction augs that are class specific and thus all share s SG)
 #define SE_CastOnCurer					386 // implemented - Casts a spell on the person curing
 #define SE_CastOnCure					387 // implemented - Casts a spell on the cured person
-//#define SE_SummonCorpseZone			388 // *not implemented - summons a corpse from any zone(nec AA)
+#define SE_SummonCorpseZone				388 // implemented - summons a corpse from any zone(nec AA)
 #define SE_FcTimerRefresh				389 // implemented - Refresh spell icons
 //#define SE_FcTimerLockout				390 // *not implemented - Sets recast timers to specific value, focus limited.
 #define SE_LimitManaMax					391	// implemented

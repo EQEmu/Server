@@ -203,6 +203,10 @@ int EQ::Net::TCPConnection::LocalPort() const
 
 std::string EQ::Net::TCPConnection::RemoteIP() const
 {
+	if (!m_socket) {
+		return "";
+	}
+
 	sockaddr_storage addr;
 	int addr_len = sizeof(addr);
 	uv_tcp_getpeername(m_socket, (sockaddr*)&addr, &addr_len);
@@ -220,6 +224,10 @@ std::string EQ::Net::TCPConnection::RemoteIP() const
 
 int EQ::Net::TCPConnection::RemotePort() const
 {
+	if (!m_socket) {
+		return 0;
+	}
+
 	sockaddr_storage addr;
 	int addr_len = sizeof(addr);
 	uv_tcp_getpeername(m_socket, (sockaddr*)&addr, &addr_len);
@@ -235,4 +243,12 @@ int EQ::Net::TCPConnection::RemotePort() const
 	}
 
 	return 0;
+}
+
+/**
+ * @return
+ */
+bool EQ::Net::TCPConnection::IsConnected() const
+{
+	return m_socket != nullptr;
 }

@@ -29,6 +29,7 @@
 
 #include "position.h"
 #include "zonedump.h"
+#include "common.h"
 
 class Encounter;
 class Beacon;
@@ -108,6 +109,7 @@ public:
 	const Beacon	*CastToBeacon() const;
 	const Encounter *CastToEncounter() const;
 
+	inline const uint16& GetInitialId() const { return initial_id; }
 	inline const uint16& GetID() const { return id; }
 	inline const time_t& GetSpawnTimeStamp() const { return spawn_timestamp; }
 
@@ -116,14 +118,22 @@ public:
 
 #ifdef BOTS
 	Bot* CastToBot();
+	const Bot* CastToBot() const;
 #endif
 
 protected:
 	friend class EntityList;
-	inline virtual void SetID(uint16 set_id) { id = set_id; }
+	inline virtual void SetID(uint16 set_id) {
+		id = set_id;
+
+		if (initial_id == 0 && set_id > 0) {
+			initial_id = set_id;
+		}
+	}
 	uint32 pDBAsyncWorkID;
 private:
 	uint16 id;
+	uint16 initial_id;
 	time_t spawn_timestamp;
 };
 
@@ -174,6 +184,7 @@ public:
 	}
 	Client *GetClientByCharID(uint32 iCharID);
 	Client *GetClientByWID(uint32 iWID);
+	Client *GetClientByLSID(uint32 iLSID);
 	Client *GetClient(uint32 ip, uint16 port);
 	Client *GetRandomClient(const glm::vec3& location, float Distance, Client *ExcludeClient = nullptr);
 	Group *GetGroupByMob(Mob* mob);
@@ -281,7 +292,8 @@ public:
 	bool	RemoveTrap(uint16 delete_id);
 	bool	RemoveObject(uint16 delete_id);
 	bool	RemoveProximity(uint16 delete_npc_id);
-	bool	RemoveMobFromClientCloseLists(Mob *mob);
+	bool	RemoveMobFromCloseLists(Mob *mob);
+	void    RemoveAuraFromMobs(Mob *aura);
 	void	RemoveAllMobs();
 	void	RemoveAllClients();
 	void	RemoveAllNPCs();
@@ -318,14 +330,42 @@ public:
 	void	MessageStatus(uint32 to_guilddbid, int to_minstatus, uint32 type, const char* message, ...);
 	void	MessageClose(Mob* sender, bool skipsender, float dist, uint32 type, const char* message, ...);
 	void	FilteredMessageClose(Mob* sender, bool skipsender, float dist, uint32 type, eqFilterType filter, const char* message, ...);
-	void	Message_StringID(Mob *sender, bool skipsender, uint32 type, uint32 string_id, const char* message1=0,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0);
-	void	FilteredMessage_StringID(Mob *sender, bool skipsender, uint32 type, eqFilterType filter, uint32 string_id, const char* message1=0,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0);
-	void	MessageClose_StringID(Mob *sender, bool skipsender, float dist, uint32 type, uint32 string_id, const char* message1=0,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0);
-	void	FilteredMessageClose_StringID(Mob *sender, bool skipsender, float dist, uint32 type, eqFilterType filter, uint32 string_id, const char* message1=0,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0);
-	void	ChannelMessageFromWorld(const char* from, const char* to, uint8 chan_num, uint32 guilddbid, uint8 language, const char* message);
+	void	MessageString(Mob *sender, bool skipsender, uint32 type, uint32 string_id, const char* message1=0,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0);
+	void	FilteredMessageString(Mob *sender, bool skipsender, uint32 type, eqFilterType filter, uint32 string_id, const char* message1=0,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0);
+	void	MessageCloseString(
+		Mob *sender,
+		bool skipsender,
+		float dist,
+		uint32 type,
+		uint32 string_id,
+		const char *message1 = 0,
+		const char *message2 = 0,
+		const char *message3 = 0,
+		const char *message4 = 0,
+		const char *message5 = 0,
+		const char *message6 = 0,
+		const char *message7 = 0,
+		const char *message8 = 0,
+		const char *message9 = 0);
+	void	FilteredMessageCloseString(
+		Mob *sender,
+		bool skipsender,
+		float dist,
+		uint32 type,
+		eqFilterType filter,
+		uint32 string_id,
+		const char *message1 = 0,
+		const char *message2 = 0,
+		const char *message3 = 0,
+		const char *message4 = 0,
+		const char *message5 = 0,
+		const char *message6 = 0,
+		const char *message7 = 0,
+		const char *message8 = 0,
+		const char *message9 = 0);
+	void	ChannelMessageFromWorld(const char* from, const char* to, uint8 chan_num, uint32 guilddbid, uint8 language, uint8 lang_skill, const char* message);
 	void	ChannelMessage(Mob* from, uint8 chan_num, uint8 language, const char* message, ...);
 	void	ChannelMessage(Mob* from, uint8 chan_num, uint8 language, uint8 lang_skill, const char* message, ...);
-	void	ChannelMessageSend(Mob* to, uint8 chan_num, uint8 language, const char* message, ...);
 	void	SendZoneSpawns(Client*);
 	void	SendZonePVPUpdates(Client *);
 	void	SendZoneSpawnsBulk(Client* client);
@@ -337,7 +377,7 @@ public:
 	void	SendNimbusEffects(Client *c);
 	void	SendUntargetable(Client *c);
 	void	DuelMessage(Mob* winner, Mob* loser, bool flee);
-	void	QuestJournalledSayClose(Mob *sender, Client *QuestIntiator, float dist, const char* mobname, const char* message);
+	void	QuestJournalledSayClose(Mob *sender, float dist, const char* mobname, const char* message, Journal::Options &opts);
 	void	GroupMessage(uint32 gid, const char *from, const char *message);
 	void	ExpeditionWarning(uint32 minutes_left);
 
@@ -345,7 +385,7 @@ public:
 	void	RemoveFromXTargets(Mob* mob);
 	void	RemoveFromAutoXTargets(Mob* mob);
 	void	ReplaceWithTarget(Mob* pOldMob, Mob*pNewTarget);
-	void	QueueCloseClients(Mob* sender, const EQApplicationPacket* app, bool ignore_sender=false, float dist=200, Mob* SkipThisMob = 0, bool ackreq = true,eqFilterType filter=FilterNone);
+	void	QueueCloseClients(Mob* sender, const EQApplicationPacket* app, bool ignore_sender=false, float distance=200, Mob* skipped_mob = 0, bool is_ack_required = true, eqFilterType filter=FilterNone);
 	void	QueueClients(Mob* sender, const EQApplicationPacket* app, bool ignore_sender=false, bool ackreq = true);
 	void	QueueClientsStatus(Mob* sender, const EQApplicationPacket* app, bool ignore_sender = false, uint8 minstatus = 0, uint8 maxstatus = 0);
 	void	QueueClientsGuild(Mob* sender, const EQApplicationPacket* app, bool ignore_sender = false, uint32 guildeqid = 0);
@@ -357,11 +397,24 @@ public:
 	void	QueueToGroupsForNPCHealthAA(Mob* sender, const EQApplicationPacket* app);
 	void	QueueManaged(Mob* sender, const EQApplicationPacket* app, bool ignore_sender=false, bool ackreq = true);
 
-	void	AEAttack(Mob *attacker, float dist, int Hand = EQEmu::invslot::slotPrimary, int count = 0, bool IsFromSpell = false);
-	void	AETaunt(Client *caster, float range=0, int32 bonus_hate=0);
-	void	AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster = true, int16 resist_adjust = 0, int *max_targets = nullptr);
-	void	MassGroupBuff(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster = true);
-	void	AEBardPulse(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster = true);
+	void AEAttack(
+		Mob *attacker,
+		float distance,
+		int Hand = EQEmu::invslot::slotPrimary,
+		int count = 0,
+		bool is_from_spell = false
+	);
+	void AETaunt(Client *caster, float range = 0, int32 bonus_hate = 0);
+	void AESpell(
+		Mob *caster,
+		Mob *center,
+		uint16 spell_id,
+		bool affect_caster = true,
+		int16 resist_adjust = 0,
+		int *max_targets = nullptr
+	);
+	void MassGroupBuff(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster = true);
+	void AEBardPulse(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster = true);
 
 	//trap stuff
 	Mob*	GetTrapTrigger(Trap* trap);
@@ -412,11 +465,7 @@ public:
 	bool	LimitCheckBoth(uint32 npc_type, uint32 spawngroup_id, int group_count, int type_count);
 	bool	LimitCheckName(const char* npc_name);
 
-	void	CheckClientAggro(Client *around);
-	Mob*	AICheckNPCtoNPCAggro(Mob* sender, float iAggroRange, float iAssistRange);
 	int		GetHatedCount(Mob *attacker, Mob *exclude, bool inc_gray_con);
-	void	AIYellForHelp(Mob* sender, Mob* attacker);
-	bool	AICheckCloseBeneficialSpells(NPC* caster, uint8 iChance, float iRange, uint32 iSpellTypes);
 	bool	Merc_AICheckCloseBeneficialSpells(Merc* caster, uint8 iChance, float iRange, uint32 iSpellTypes);
 	Mob*	GetTargetForMez(Mob* caster);
 	uint32	CheckNPCsClose(Mob *center);
@@ -464,17 +513,21 @@ public:
 	inline const std::unordered_map<uint16, Object *> &GetObjectList() { return object_list; }
 	inline const std::unordered_map<uint16, Doors *> &GetDoorsList() { return door_list; }
 
+	std::unordered_map<uint16, Mob *> &GetCloseMobList(Mob *mob, float distance = 0);
+
 	void	DepopAll(int NPCTypeID, bool StartSpawnTimer = true);
 
 	uint16 GetFreeID();
 	void RefreshAutoXTargets(Client *c);
 	void RefreshClientXTargets(Client *c);
 	void SendAlternateAdvancementStats();
+	void ScanCloseMobs(std::unordered_map<uint16, Mob *> &close_mobs, Mob *scanning_mob);
 
 	void GetTrapInfo(Client* client);
 	bool IsTrapGroupSpawned(uint32 trap_id, uint8 group);
 	void UpdateAllTraps(bool respawn, bool repopnow = false);
 	void ClearTrapPointers();
+
 protected:
 	friend class Zone;
 	void	Depop(bool StartSpawnTimer = false);
@@ -507,6 +560,13 @@ private:
 	std::list<Area> area_list;
 	std::queue<uint16> free_ids;
 
+	Timer object_timer;
+	Timer door_timer;
+	Timer corpse_timer;
+	Timer group_timer;
+	Timer raid_timer;
+	Timer trap_timer;
+
 	// Please Do Not Declare Any EntityList Class Members After This Comment
 #ifdef BOTS
 	public:
@@ -515,10 +575,13 @@ private:
 		Mob* GetMobByBotID(uint32 botID);
 		Bot* GetBotByBotID(uint32 botID);
 		Bot* GetBotByBotName(std::string botName);
+		Client* GetBotOwnerByBotEntityID(uint16 entityID);
 		std::list<Bot*> GetBotsByBotOwnerCharacterID(uint32 botOwnerCharacterID);
 
 		bool Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, float iRange, uint32 iSpellTypes); // TODO: Evaluate this closesly in hopes to eliminate
 		void ShowSpawnWindow(Client* client, int Distance, bool NamedOnly); // TODO: Implement ShowSpawnWindow in the bot class but it needs entity list stuff
+	
+		void ScanCloseClientMobs(std::unordered_map<uint16, Mob*>& close_mobs, Mob* scanning_mob);
 	private:
 		std::list<Bot*> bot_list;
 #endif

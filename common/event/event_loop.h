@@ -9,7 +9,7 @@ namespace EQ
 	{
 	public:
 		static EventLoop &Get() {
-			static EventLoop inst;
+			static thread_local EventLoop inst;
 			return inst;
 		}
 
@@ -19,6 +19,10 @@ namespace EQ
 
 		void Process() {
 			uv_run(&m_loop, UV_RUN_NOWAIT);
+		}
+
+		void Run() {
+			uv_run(&m_loop, UV_RUN_DEFAULT);
 		}
 
 		uv_loop_t* Handle() { return &m_loop; }
