@@ -183,6 +183,7 @@ IPathfinder::IPath PathfinderNavmesh::FindPath(const glm::vec3 &start, const glm
 			auto dist = DistanceSquared(epos, current_location);
 			if (dist < 10000.0f) {
 				stuck = true;
+			}
 		}
 	
 		int n_straight_polys;
