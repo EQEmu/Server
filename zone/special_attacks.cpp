@@ -1294,7 +1294,6 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 
 	//consume ammo
 	DeleteItemInInventory(ammo_slot, 1, true);
-	CheckIncreaseSkill(EQEmu::skills::SkillThrowing, GetTarget());
 	CommonBreakInvisibleFromCombat();
 }
 
@@ -1407,6 +1406,9 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQEmu::ItemInstance *RangeWeapon
 			TrySkillProc(other, EQEmu::skills::SkillThrowing, ReuseTime);
 		else
 			TrySkillProc(other, EQEmu::skills::SkillThrowing, 0, false, EQEmu::invslot::slotRange);
+	}
+	if (IsClient()) {
+		CastToClient()->CheckIncreaseSkill(EQEmu::skills::SkillThrowing, GetTarget());
 	}
 }
 
