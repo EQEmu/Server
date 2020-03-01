@@ -17,6 +17,8 @@
 *.out
 *.app
 
+.bash_history
+
 # CMake
 CMakeCache.txt
 CMakeFiles
