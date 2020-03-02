@@ -118,6 +118,7 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	  attacked_timer(CombatEventTimer_expire),
 	  swarm_timer(100),
 	  classattack_timer(1000),
+	  monkattack_timer(1000),
 	  knightattack_timer(1000),
 	  assist_timer(AIassistcheck_delay),
 	  qglobal_purge_timer(30000),
@@ -307,7 +308,15 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	// some overrides -- really we need to be able to set skills for mobs in the DB
 	// There are some known low level SHM/BST pets that do not follow this, which supports
 	// the theory of needing to be able to set skills for each mob separately
-	if (!IsBot()) {
+	if (IsBot()) {
+		if (GetClass() != PALADIN && GetClass() != SHADOWKNIGHT) {
+			knightattack_timer.Disable();
+		}
+		else if (GetClass() != MONK || GetLevel() < 10) {
+			monkattack_timer.Disable();
+		}
+	}
+	else {
 		if (moblevel > 50) {
 			skills[EQEmu::skills::SkillDoubleAttack] = 250;
 			skills[EQEmu::skills::SkillDualWield] = 250;

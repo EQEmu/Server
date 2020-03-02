@@ -2257,6 +2257,7 @@ bool BotDatabase::SaveOwnerOption(const uint32 owner_id, size_t type, const bool
 	case Client::booAltCombat:
 	case Client::booAutoDefend:
 	case Client::booBuffCounter:
+	case Client::booMonkWuMessage:
 	{
 		query = fmt::format(
 			"REPLACE INTO `bot_owner_options`(`owner_id`, `option_type`, `option_value`) VALUES ('{}', '{}', '{}')",
