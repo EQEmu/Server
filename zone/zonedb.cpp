@@ -2506,7 +2506,8 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		"npc_types.rare_spawn, "
 		"npc_types.stuck_behavior, "
 		"npc_types.model, "
-		"npc_types.flymode "
+		"npc_types.flymode, "
+		"npc_types.always_aggros_foes "
 		"FROM npc_types %s",
 		where_condition.c_str()
 	);
@@ -2703,11 +2704,12 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		temp_npctype_data->charm_avoidance_rating = atoi(row[105]);
 		temp_npctype_data->charm_atk              = atoi(row[106]);
 
-		temp_npctype_data->skip_global_loot = atoi(row[107]) != 0;
-		temp_npctype_data->rare_spawn       = atoi(row[108]) != 0;
-		temp_npctype_data->stuck_behavior   = atoi(row[109]);
-		temp_npctype_data->use_model        = atoi(row[110]);
-		temp_npctype_data->flymode          = atoi(row[111]);
+		temp_npctype_data->skip_global_loot 	= atoi(row[107]) != 0;
+		temp_npctype_data->rare_spawn       	= atoi(row[108]) != 0;
+		temp_npctype_data->stuck_behavior   	= atoi(row[109]);
+		temp_npctype_data->use_model        	= atoi(row[110]);
+		temp_npctype_data->flymode          	= atoi(row[111]);
+		temp_npctype_data->always_aggros_foes	= atoi(row[112]);
 
 		temp_npctype_data->skip_auto_scale = false; // hardcoded here for now
 
