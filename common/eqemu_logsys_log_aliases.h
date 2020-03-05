@@ -561,6 +561,16 @@
         OutF(LogSys, Logs::Detail, Logs::Aura, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
+#define LogHotReload(message, ...) do {\
+    if (LogSys.log_settings[Logs::HotReload].is_category_enabled == 1)\
+        OutF(LogSys, Logs::General, Logs::HotReload, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogHotReloadDetail(message, ...) do {\
+    if (LogSys.log_settings[Logs::HotReload].is_category_enabled == 1)\
+        OutF(LogSys, Logs::Detail, Logs::HotReload, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
 #define Log(debug_level, log_category, message, ...) do {\
     if (LogSys.log_settings[log_category].is_category_enabled == 1)\
         LogSys.Out(debug_level, log_category, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
@@ -892,6 +902,12 @@
 } while (0)
 
 #define LogAuraDetail(message, ...) do {\
+} while (0)
+
+#define LogHotReload(message, ...) do {\
+} while (0)
+
+#define LogHotReloadDetail(message, ...) do {\
 } while (0)
 
 #define Log(debug_level, log_category, message, ...) do {\

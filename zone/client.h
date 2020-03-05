@@ -1646,6 +1646,7 @@ public:
 		booAltCombat,
 		booAutoDefend,
 		booBuffCounter,
+		booMonkWuMessage,
 		_booCount
 	};
 

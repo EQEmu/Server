@@ -3929,6 +3929,16 @@ void bot_command_owner_option(Client *c, const Seperator *sep)
 					"<td><c \"#888888\">(toggles)</td>"
 				"</tr>"
 				"<tr>"
+					"<td><c \"#CCCCCC\">monkwumessage</td>"
+					"<td><c \"#00CC00\">enable <c \"#CCCCCC\">| <c \"#00CC00\">disable</td>"
+					"<td><c \"#888888\">displays monk wu trigger messages</td>"
+				"</tr>"
+				"<tr>"
+					"<td></td>"
+					"<td><c \"#00CCCC\">null</td>"
+					"<td><c \"#888888\">(toggles)</td>"
+				"</tr>"
+				"<tr>"
 					"<td><c \"#CCCCCC\">current</td>"
 					"<td></td>"
 					"<td><c \"#888888\">show current settings</td>"
@@ -4103,6 +4113,22 @@ void bot_command_owner_option(Client *c, const Seperator *sep)
 
 		c->Message(m_action, "Bot 'buff counter' is now %s.", (c->GetBotOption(Client::booBuffCounter) == true ? "enabled" : "disabled"));
 	}
+	else if (!owner_option.compare("monkwumessage")) {
+
+		if (!argument.compare("enable")) {
+			c->SetBotOption(Client::booMonkWuMessage, true);
+		}
+		else if (!argument.compare("disable")) {
+			c->SetBotOption(Client::booMonkWuMessage, false);
+		}
+		else {
+			c->SetBotOption(Client::booMonkWuMessage, !c->GetBotOption(Client::booMonkWuMessage));
+		}
+
+		database.botdb.SaveOwnerOption(c->CharacterID(), Client::booMonkWuMessage, c->GetBotOption(Client::booMonkWuMessage));
+
+		c->Message(m_action, "Bot 'monk wu message' is now %s.", (c->GetBotOption(Client::booMonkWuMessage) == true ? "enabled" : "disabled"));
+	}
 	else if (!owner_option.compare("current")) {
 		
 		std::string window_title = "Current Bot Owner Options Settings";
@@ -4112,13 +4138,14 @@ void bot_command_owner_option(Client *c, const Seperator *sep)
 					"<td><c \"#FFFFFF\">Option<br>------</td>"
 					"<td><c \"#00FF00\">Argument<br>-------</td>"
 				"</tr>"
-				"<tr>" "<td><c \"#CCCCCC\">deathmarquee</td>" "<td><c \"#00CC00\">{}</td>" "</tr>"
-				"<tr>" "<td><c \"#CCCCCC\">statsupdate</td>"  "<td><c \"#00CC00\">{}</td>" "</tr>"
-				"<tr>" "<td><c \"#CCCCCC\">spawnmessage</td>" "<td><c \"#00CC00\">{}</td>" "</tr>"
-				"<tr>" "<td><c \"#CCCCCC\">spawnmessage</td>" "<td><c \"#00CC00\">{}</td>" "</tr>"
-				"<tr>" "<td><c \"#CCCCCC\">altcombat</td>"    "<td><c \"#00CC00\">{}</td>" "</tr>"
-				"<tr>" "<td><c \"#CCCCCC\">autodefend</td>"   "<td><c \"#00CC00\">{}</td>" "</tr>"
-				"<tr>" "<td><c \"#CCCCCC\">buffcounter</td>"  "<td><c \"#00CC00\">{}</td>" "</tr>"
+				"<tr>" "<td><c \"#CCCCCC\">deathmarquee</td>"   "<td><c \"#00CC00\">{}</td>" "</tr>"
+				"<tr>" "<td><c \"#CCCCCC\">statsupdate</td>"    "<td><c \"#00CC00\">{}</td>" "</tr>"
+				"<tr>" "<td><c \"#CCCCCC\">spawnmessage</td>"   "<td><c \"#00CC00\">{}</td>" "</tr>"
+				"<tr>" "<td><c \"#CCCCCC\">spawnmessage</td>"   "<td><c \"#00CC00\">{}</td>" "</tr>"
+				"<tr>" "<td><c \"#CCCCCC\">altcombat</td>"      "<td><c \"#00CC00\">{}</td>" "</tr>"
+				"<tr>" "<td><c \"#CCCCCC\">autodefend</td>"     "<td><c \"#00CC00\">{}</td>" "</tr>"
+				"<tr>" "<td><c \"#CCCCCC\">buffcounter</td>"    "<td><c \"#00CC00\">{}</td>" "</tr>"
+				"<tr>" "<td><c \"#CCCCCC\">monkwumessage</td>"  "<td><c \"#00CC00\">{}</td>" "</tr>"
 			"</table>",
 			(c->GetBotOption(Client::booDeathMarquee) ? "enabled" : "disabled"),
 			(c->GetBotOption(Client::booStatsUpdate) ? "enabled" : "disabled"),
@@ -4126,7 +4153,8 @@ void bot_command_owner_option(Client *c, const Seperator *sep)
 			(c->GetBotOption(Client::booSpawnMessageClassSpecific) ? "class" : "default"),
 			(RuleB(Bots, AllowOwnerOptionAltCombat) ? (c->GetBotOption(Client::booAltCombat) ? "enabled" : "disabled") : "restricted"),
 			(RuleB(Bots, AllowOwnerOptionAutoDefend) ? (c->GetBotOption(Client::booAutoDefend) ? "enabled" : "disabled") : "restricted"),
-			(c->GetBotOption(Client::booBuffCounter) ? "enabled" : "disabled")
+			(c->GetBotOption(Client::booBuffCounter) ? "enabled" : "disabled"),
+			(c->GetBotOption(Client::booMonkWuMessage) ? "enabled" : "disabled")
 		);
 		
 		c->SendPopupToClient(window_title.c_str(), window_text.c_str());

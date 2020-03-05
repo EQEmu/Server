@@ -204,6 +204,7 @@ public:
 
 	time_t weather_timer;
 	Timer  spawn2_timer;
+	Timer  hot_reload_timer;
 
 	uint8  weather_intensity;
 	uint8  zone_weather;
@@ -269,6 +270,9 @@ public:
 	void UpdateHotzone();
 	void UpdateQGlobal(uint32 qid, QGlobal newGlobal);
 	void weatherSend(Client *client = nullptr);
+
+	bool IsQuestHotReloadQueued() const;
+	void SetQuestHotReloadQueued(bool in_quest_hot_reload_queued);
 
 	WaterMap *watermap;
 	ZonePoint *GetClosestZonePoint(const glm::vec3 &location, uint32 to, Client *client, float max_distance = 40000.0f);
@@ -340,6 +344,9 @@ private:
 	bool      m_ucss_available;
 	bool      staticzone;
 	bool      zone_has_current_time;
+	bool      quest_hot_reload_queued;
+
+private:
 	double    max_movement_update_range;
 	char      *long_name;
 	char      *map_name;

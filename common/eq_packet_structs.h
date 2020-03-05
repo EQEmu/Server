@@ -36,6 +36,7 @@ static const uint32 MAX_MERC_GRADES = 10;
 static const uint32 MAX_MERC_STANCES = 10;
 static const uint32 BLOCKED_BUFF_COUNT = 20;
 static const uint32 QUESTREWARD_COUNT = 8;
+static const uint32 ADVANCED_LORE_LENGTH = 8192;
 
 
 /*
@@ -2964,6 +2965,12 @@ struct	ItemViewRequest_Struct {
 /*032*/	char	unknown032[12];	//probably includes loregroup & evolving info. see Client::MakeItemLink() in zone/inventory.cpp:469
 /*044*/	uint16	icon;
 /*046*/	char	unknown046[2];
+};
+
+struct ItemAdvancedLoreText_Struct {
+	int32	item_id;
+	char	item_name[64];
+	char	advanced_lore[ADVANCED_LORE_LENGTH];
 };
 
 struct	LDONItemViewRequest_Struct {
