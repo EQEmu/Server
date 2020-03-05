@@ -13327,13 +13327,17 @@ void Client::Handle_OP_Split(const EQApplicationPacket *app)
 	Split_Struct *split = (Split_Struct *)app->pBuffer;
 	//Per the note above, Im not exactly sure what to do on error
 	//to notify the client of the error...
-	if (!isgrouped) {
-		Message(Chat::Red, "You can not split money if you're not in a group.");
-		return;
-	}
-	Group *cgroup = GetGroup();
-	if (cgroup == nullptr) {
-		//invalid group, not sure if we should say more...
+
+	Group *group = nullptr;
+	Raid *raid = nullptr;
+
+	if (IsRaidGrouped())
+		raid = GetRaid();
+	else if (IsGrouped())
+		group = GetGroup();
+
+	// is there an actual error message for this?
+	if (raid == nullptr && group == nullptr) {
 		Message(Chat::Red, "You can not split money if you're not in a group.");
 		return;
 	}
@@ -13345,7 +13349,11 @@ void Client::Handle_OP_Split(const EQApplicationPacket *app)
 		Message(Chat::Red, "You do not have enough money to do that split.");
 		return;
 	}
-	cgroup->SplitMoney(split->copper, split->silver, split->gold, split->platinum);
+
+	if (raid)
+		raid->SplitMoney(raid->GetGroup(this), split->copper, split->silver, split->gold, split->platinum);
+	else if (group)
+		group->SplitMoney(split->copper, split->silver, split->gold, split->platinum);
 
 	return;
 
