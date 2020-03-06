@@ -579,7 +579,7 @@ public:
 	inline const GravityBehavior GetFlyMode() const { return flymode; }
 	bool IsBoat() const;
 	bool IsControllableBoat() const;
-	inline const bool AlwaysAggrosFoes() const { return always_aggros_foes; }
+	inline const bool AlwaysAggro() const { return always_aggro; }
 
 	//Group
 	virtual bool HasRaid() = 0;
@@ -1391,7 +1391,7 @@ protected:
 	Timer ranged_timer;
 	float attack_speed; //% increase/decrease in attack speed (not haste)
 	int attack_delay; //delay between attacks in 10ths of seconds
-	bool always_aggros_foes;
+	bool always_aggro;
 	int16 slow_mitigation; // Allows for a slow mitigation (100 = 100%, 50% = 50%)
 	Timer tic_timer;
 	Timer mana_timer;

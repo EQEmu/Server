@@ -262,7 +262,7 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 	0,								  // uint8		in_legtexture,
 	0,								  // uint8		in_feettexture,
 	0,								  // uint8		in_usemodel,
-	0								  // bool		in_always_aggros_foes
+	0								  // bool		in_always_aggro
 	),
 	corpse_decay_timer(RuleI(Character, CorpseDecayTimeMS)),
 	corpse_rez_timer(RuleI(Character, CorpseResTimeMS)),
