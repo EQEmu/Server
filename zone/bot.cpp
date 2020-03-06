@@ -6421,32 +6421,52 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 
 	bool taunt_time = taunt_timer.Check();
 	bool ca_time = classattack_timer.Check(false);
+	bool ma_time = monkattack_timer.Check(false);
 	bool ka_time = knightattack_timer.Check(false);
-	if((taunt_time || ca_time || ka_time) && !IsAttackAllowed(target))
+
+	if (taunt_time) {
+
+		// Bots without this skill shouldn't be 'checking' on this timer..let's just disable it and avoid the extra IsAttackAllowed() checks
+		// Note: this is done here instead of NPC::ctor() because taunt skill can be acquired during level ups (the timer is re-enabled in CalcBotStats())
+		if (!GetSkill(EQEmu::skills::SkillTaunt)) {
+
+			taunt_timer.Disable();
+			return;
+		}
+
+		if (!IsAttackAllowed(target)) {
+			return;
+		}
+	}
+
+	if ((ca_time || ma_time || ka_time) && !IsAttackAllowed(target)) {
 		return;
+	}
 
 	if(ka_time){
-		int knightreuse = 1000;
+		
 		switch(GetClass()){
-			case SHADOWKNIGHT:
-			case SHADOWKNIGHTGM: {
+			case SHADOWKNIGHT: {
 				CastSpell(SPELL_NPC_HARM_TOUCH, target->GetID());
-				knightreuse = (HarmTouchReuseTime * 1000);
+				knightattack_timer.Start(HarmTouchReuseTime * 1000);
+
 				break;
 			}
-			case PALADIN:
-			case PALADINGM: {
+			case PALADIN: {
 				if(GetHPRatio() < 20) {
 					CastSpell(SPELL_LAY_ON_HANDS, GetID());
-					knightreuse = (LayOnHandsReuseTime * 1000);
+					knightattack_timer.Start(LayOnHandsReuseTime * 1000);
 				}
-				else
-					knightreuse = 2000;
+				else {
+					knightattack_timer.Start(2000);
+				}
 
+				break;
+			}
+			default: {
 				break;
 			}
 		}
-		knightattack_timer.Start(knightreuse);
 	}
 
 	if(taunting && target && target->IsNPC() && taunt_time) {
@@ -6457,8 +6477,66 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 		}
 	}
 
-	if(!ca_time)
+	if (ma_time) {
+		switch (GetClass()) {
+		case MONK: {
+			int reuse = (MonkSpecialAttack(target, EQEmu::skills::SkillTigerClaw) - 1);
+			
+			// Live AA - Technique of Master Wu
+			int wuchance = itembonuses.DoubleSpecialAttack + spellbonuses.DoubleSpecialAttack + aabonuses.DoubleSpecialAttack;
+
+			if (wuchance) {
+				const int MonkSPA[5] = {
+					EQEmu::skills::SkillFlyingKick,
+					EQEmu::skills::SkillDragonPunch,
+					EQEmu::skills::SkillEagleStrike,
+					EQEmu::skills::SkillTigerClaw,
+					EQEmu::skills::SkillRoundKick
+				};
+				int extra = 0;
+				// always 1/4 of the double attack chance, 25% at rank 5 (100/4)
+				while (wuchance > 0) {
+					if (zone->random.Roll(wuchance)) {
+						++extra;
+					}
+					else {
+						break;
+					}
+					wuchance /= 4;
+				}
+
+				Mob* bo = GetBotOwner();
+				if (bo && bo->IsClient() && bo->CastToClient()->GetBotOption(Client::booMonkWuMessage)) {
+
+					bo->Message(
+						GENERIC_EMOTE,
+						"The spirit of Master Wu fills %s!  %s gains %d additional attack(s).",
+						GetCleanName(),
+						GetCleanName(),
+						extra
+					);
+				}
+
+				auto classic = RuleB(Combat, ClassicMasterWu);
+				while (extra) {
+					MonkSpecialAttack(GetTarget(), (classic ? MonkSPA[zone->random.Int(0, 4)] : EQEmu::skills::SkillTigerClaw));
+					--extra;
+				}
+			}
+
+			float HasteModifier = (GetHaste() * 0.01f);
+			monkattack_timer.Start((reuse * 1000) / HasteModifier);
+
+			break;
+		}
+		default:
+			break;;
+		}
+	}
+
+	if (!ca_time) {
 		return;
+	}
 
 	float HasteModifier = (GetHaste() * 0.01f);
 	uint16 skill_to_use = -1;
@@ -6493,18 +6571,22 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 			}
 			break;
 		case MONK:
-			if(GetLevel() >= 30)
+			if (GetLevel() >= 30) {
 				skill_to_use = EQEmu::skills::SkillFlyingKick;
-			else if(GetLevel() >= 25)
+			}
+			else if (GetLevel() >= 25) {
 				skill_to_use = EQEmu::skills::SkillDragonPunch;
-			else if(GetLevel() >= 20)
+			}
+			else if (GetLevel() >= 20) {
 				skill_to_use = EQEmu::skills::SkillEagleStrike;
-			else if(GetLevel() >= 10)
-				skill_to_use = EQEmu::skills::SkillTigerClaw;
-			else if(GetLevel() >= 5)
+			}
+			else if (GetLevel() >= 5) {
 				skill_to_use = EQEmu::skills::SkillRoundKick;
-			else
+			}
+			else {
 				skill_to_use = EQEmu::skills::SkillKick;
+			}
+
 			break;
 		case ROGUE:
 			skill_to_use = EQEmu::skills::SkillBackstab;
@@ -6555,19 +6637,54 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 		}
 	}
 
-	if (skill_to_use == EQEmu::skills::SkillFlyingKick || skill_to_use == EQEmu::skills::SkillDragonPunch || skill_to_use == EQEmu::skills::SkillEagleStrike || skill_to_use == EQEmu::skills::SkillTigerClaw || skill_to_use == EQEmu::skills::SkillRoundKick) {
+	if (
+		skill_to_use == EQEmu::skills::SkillFlyingKick ||
+		skill_to_use == EQEmu::skills::SkillDragonPunch ||
+		skill_to_use == EQEmu::skills::SkillEagleStrike ||
+		skill_to_use == EQEmu::skills::SkillRoundKick
+	) {
 		reuse = (MonkSpecialAttack(target, skill_to_use) - 1);
-		MonkSpecialAttack(target, skill_to_use);
-		uint32 bDoubleSpecialAttack = (itembonuses.DoubleSpecialAttack + spellbonuses.DoubleSpecialAttack + aabonuses.DoubleSpecialAttack);
-		if(bDoubleSpecialAttack && (bDoubleSpecialAttack >= 100 || bDoubleSpecialAttack > zone->random.Int(0, 100))) {
-			int MonkSPA[5] = { EQEmu::skills::SkillFlyingKick, EQEmu::skills::SkillDragonPunch, EQEmu::skills::SkillEagleStrike, EQEmu::skills::SkillTigerClaw, EQEmu::skills::SkillRoundKick };
-			MonkSpecialAttack(target, MonkSPA[zone->random.Int(0, 4)]);
-			int TripleChance = 25;
-			if (bDoubleSpecialAttack > 100)
-				TripleChance += (TripleChance * (100 - bDoubleSpecialAttack) / 100);
+		
+		// Live AA - Technique of Master Wu
+		int wuchance = itembonuses.DoubleSpecialAttack + spellbonuses.DoubleSpecialAttack + aabonuses.DoubleSpecialAttack;
 
-			if(TripleChance > zone->random.Int(0,100))
-				MonkSpecialAttack(target, MonkSPA[zone->random.Int(0, 4)]);
+		if (wuchance) {
+			const int MonkSPA[5] = {
+				EQEmu::skills::SkillFlyingKick,
+				EQEmu::skills::SkillDragonPunch,
+				EQEmu::skills::SkillEagleStrike,
+				EQEmu::skills::SkillTigerClaw,
+				EQEmu::skills::SkillRoundKick
+			};
+			int extra = 0;
+			// always 1/4 of the double attack chance, 25% at rank 5 (100/4)
+			while (wuchance > 0) {
+				if (zone->random.Roll(wuchance)) {
+					++extra;
+				}
+				else {
+					break;
+				}
+				wuchance /= 4;
+			}
+
+			Mob* bo = GetBotOwner();
+			if (bo && bo->IsClient() && bo->CastToClient()->GetBotOption(Client::booMonkWuMessage)) {
+
+				bo->Message(
+					GENERIC_EMOTE,
+					"The spirit of Master Wu fills %s!  %s gains %d additional attack(s).",
+					GetCleanName(),
+					GetCleanName(),
+					extra
+				);
+			}
+
+			auto classic = RuleB(Combat, ClassicMasterWu);
+			while (extra) {
+				MonkSpecialAttack(GetTarget(), (classic ? MonkSPA[zone->random.Int(0, 4)] : skill_to_use));
+				--extra;
+			}
 		}
 
 		reuse *= 1000;
@@ -8964,6 +9081,12 @@ void Bot::CalcBotStats(bool showtext) {
 
 	for (int sindex = 0; sindex <= EQEmu::skills::HIGHEST_SKILL; ++sindex) {
 		skills[sindex] = database.GetSkillCap(GetClass(), (EQEmu::skills::SkillType)sindex, GetLevel());
+	}
+
+	taunt_timer.Start(1000);
+
+	if (GetClass() == MONK && GetLevel() >= 10) {
+		monkattack_timer.Start(1000);
 	}
 
 	LoadAAs();

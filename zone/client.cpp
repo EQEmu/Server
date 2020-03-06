@@ -121,7 +121,8 @@ Client::Client(EQStreamInterface* ieqs)
 	0,
 	0,
 	0,
-	0
+	0,
+	false
 	),
   hpupdate_timer(2000),
   camp_timer(29000),
@@ -358,6 +359,7 @@ Client::Client(EQStreamInterface* ieqs)
 	bot_owner_options[booAltCombat] = RuleB(Bots, AllowOwnerOptionAltCombat);
 	bot_owner_options[booAutoDefend] = RuleB(Bots, AllowOwnerOptionAutoDefend);
 	bot_owner_options[booBuffCounter] = false;
+	bot_owner_options[booMonkWuMessage] = false;
 
 	SetBotPulling(false);
 	SetBotPrecombat(false);
