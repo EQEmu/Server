@@ -728,15 +728,20 @@ void Raid::BalanceMana(int32 penalty, uint32 gid, float range, Mob* caster, int3
 }
 
 //basically the same as Group's version just with more people like a lot of non group specific raid stuff
-void Raid::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinum, Client *splitter){
+//this only functions if the member has a group in the raid. This does not support /autosplit?
+void Raid::SplitMoney(uint32 gid, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, Client *splitter)
+{
 	//avoid unneeded work
+	if (gid == RAID_GROUPLESS)
+		return;
+
 	if(copper == 0 && silver == 0 && gold == 0 && platinum == 0)
 		return;
 
 	uint32 i;
 	uint8 membercount = 0;
 	for (i = 0; i < MAX_RAID_MEMBERS; i++) {
-		if (members[i].member != nullptr) {
+		if (members[i].member != nullptr && members[i].GroupNumber == gid) {
 			membercount++;
 		}
 	}
@@ -809,11 +814,11 @@ void Raid::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinum
 	msg += " as your split";
 
 	for (i = 0; i < MAX_RAID_MEMBERS; i++) {
-		if (members[i].member != nullptr) { // If Group Member is Client
-		//I could not get MoneyOnCorpse to work, so we use this
-		members[i].member->AddMoneyToPP(cpsplit, spsplit, gpsplit, ppsplit, true);
+		if (members[i].member != nullptr && members[i].GroupNumber == gid) { // If Group Member is Client
+			//I could not get MoneyOnCorpse to work, so we use this
+			members[i].member->AddMoneyToPP(cpsplit, spsplit, gpsplit, ppsplit, true);
 
-		members[i].member->Message(Chat::Green, msg.c_str());
+			members[i].member->Message(Chat::Green, msg.c_str());
 		}
 	}
 }
