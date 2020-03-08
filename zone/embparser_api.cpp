@@ -3169,6 +3169,41 @@ XS(XS__getguildnamebyid) {
 	XSRETURN(1);
 }
 
+XS(XS__getguildidbycharid);
+XS(XS__getguildidbycharid) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getguildidbycharid(uint32 char_id)");
+	dXSTARG;
+
+	int     RETVAL;
+	uint32  char_id = (int) SvUV(ST(0));
+
+	RETVAL = quest_manager.getguildidbycharid(char_id);
+
+	XSprePUSH;
+	PUSHi((IV)RETVAL);
+
+	XSRETURN(1);
+}
+
+XS(XS__getgroupidbycharid);
+XS(XS__getgroupidbycharid) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getgroupidbycharid(uint32 char_id)");
+	dXSTARG;
+
+	int     RETVAL;
+	uint32  char_id = (int) SvUV(ST(0));
+
+	RETVAL = quest_manager.getgroupidbycharid(char_id);
+	XSprePUSH;
+	PUSHi((IV)RETVAL);
+
+	XSRETURN(1);
+}
+
 XS(XS__SetRunning);
 XS(XS__SetRunning) {
 	dXSARGS;
@@ -3942,6 +3977,8 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "getItemName"), XS_qc_getItemName, file);
 	newXS(strcpy(buf, "get_spawn_condition"), XS__get_spawn_condition, file);
 	newXS(strcpy(buf, "getguildnamebyid"), XS__getguildnamebyid, file);
+	newXS(strcpy(buf, "getguildidbycharid"), XS__getguildidbycharid, file);
+	newXS(strcpy(buf, "getgroupidbycharid"), XS__getgroupidbycharid, file);
 	newXS(strcpy(buf, "getlevel"), XS__getlevel, file);
 	newXS(strcpy(buf, "getplayerburiedcorpsecount"), XS__getplayerburiedcorpsecount, file);
 	newXS(strcpy(buf, "getplayercorpsecount"), XS__getplayercorpsecount, file);
