@@ -799,7 +799,7 @@ int Mob::ACSum()
 	// EQ math
 	ac = (ac * 4) / 3;
 	// anti-twink
-	if (IsClient() && GetLevel() < 50)
+	if (IsClient() && GetLevel() < RuleI(Combat, LevelToStopACTwinkControl))
 		ac = std::min(ac, 25 + 6 * GetLevel());
 	ac = std::max(0, ac + GetClassRaceACBonus());
 	if (IsNPC()) {
@@ -1851,6 +1851,17 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQEmu::skills::Sk
 	else {
 		BuffFadeDetrimental();
 	}
+
+	/*
+	Reset AA reuse timers that need to be, live-like this is only Lay on Hands
+	*/
+	ResetOnDeathAlternateAdvancement();
+
+	/*
+	Reset reuse timer for classic skill based Lay on Hands (For tit I guess)
+	*/
+	if (GetClass() == PALADIN) // we could check if it's not expired I guess, but should be fine not to
+		p_timers.Clear(&database, pTimerLayHands);
 
 	/*
 	Finally, send em home

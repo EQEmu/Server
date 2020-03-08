@@ -93,7 +93,8 @@ Mob::Mob(
 	uint8 in_handtexture,
 	uint8 in_legtexture,
 	uint8 in_feettexture,
-	uint16 in_usemodel
+	uint16 in_usemodel,
+	bool in_always_aggro
 ) :
 	attack_timer(2000),
 	attack_dw_timer(2000),
@@ -275,6 +276,7 @@ Mob::Mob(
 	qglobal           = 0;
 	spawned           = false;
 	rare_spawn        = false;
+	always_aggro      = in_always_aggro;
 
 	InitializeBuffSlots();
 
@@ -685,7 +687,7 @@ int Mob::_GetRunSpeed() const {
 	int runspeedcap = RuleI(Character,BaseRunSpeedCap);
 	runspeedcap += itembonuses.IncreaseRunSpeedCap + spellbonuses.IncreaseRunSpeedCap + aabonuses.IncreaseRunSpeedCap;
 
-	aa_mod = itembonuses.IncreaseRunSpeedCap + spellbonuses.IncreaseRunSpeedCap + aabonuses.IncreaseRunSpeedCap;
+	aa_mod += aabonuses.BaseMovementSpeed + aabonuses.movementspeed;
 	int spell_mod = spellbonuses.movementspeed + itembonuses.movementspeed;
 	int movemod = 0;
 

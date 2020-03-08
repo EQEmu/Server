@@ -367,8 +367,9 @@ public:
 	uint32		SendCharacterCorpseToGraveyard(uint32 dbid, uint32 zoneid, uint16 instanceid, const glm::vec4& position);
 	uint32		CreateGraveyardRecord(uint32 graveyard_zoneid, const glm::vec4& position);
 	uint32		AddGraveyardIDToZone(uint32 zone_id, uint32 graveyard_id);
-	uint32		SaveCharacterCorpse(uint32 charid, const char* charname, uint32 zoneid, uint16 instanceid, PlayerCorpse_Struct* dbpc, const glm::vec4& position);
-	uint32		UpdateCharacterCorpse(uint32 dbid, uint32 charid, const char* charname, uint32 zoneid, uint16 instanceid, PlayerCorpse_Struct* dbpc, const glm::vec4& position, bool rezzed = false);
+	uint32		SaveCharacterCorpse(uint32 charid, const char* charname, uint32 zoneid, uint16 instanceid, PlayerCorpse_Struct* dbpc, const glm::vec4& position, uint32 guildid);
+	uint32		UpdateCharacterCorpse(uint32 dbid, uint32 charid, const char* charname, uint32 zoneid, uint16 instanceid, PlayerCorpse_Struct* dbpc, const glm::vec4& position, uint32 guildid, bool rezzed = false);
+	uint32		UpdateCharacterCorpseConsent(uint32 charid, uint32 guildid);
 	uint32		GetFirstCorpseID(uint32 char_id);
 	uint32		GetCharacterCorpseCount(uint32 char_id);
 	uint32		GetCharacterCorpseID(uint32 char_id, uint8 corpse);

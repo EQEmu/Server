@@ -1,6 +1,6 @@
 /**
  * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2019 EQEmulator Development Team (https://github.com/EQEmu/Server)
+ * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,37 +18,14 @@
  *
  */
 
-#ifndef _EQEMU_VERSION_H
-#define _EQEMU_VERSION_H
-
-#define LOGIN_VERSION "0.8.0"
-#define EQEMU_PROTOCOL_VERSION "0.3.10"
-
-#define CURRENT_VERSION "2.0"
+#ifndef EQEMU_ZONE_RELOAD_H
+#define EQEMU_ZONE_RELOAD_H
 
 
-/**
- * Every time a Database SQL is added to Github increment CURRENT_BINARY_DATABASE_VERSION
- * number and make sure you update the manifest
- *
- * Manifest: https://github.com/EQEmu/Server/blob/master/utils/sql/db_update_manifest.txt
- */
+class ZoneReload {
+public:
+	static void HotReloadQuests();
+};
 
-#define CURRENT_BINARY_DATABASE_VERSION 9151
 
-#ifdef BOTS
-	#define CURRENT_BINARY_BOTS_DATABASE_VERSION 9026
-#else
-	#define CURRENT_BINARY_BOTS_DATABASE_VERSION 0 // must be 0
-#endif
-
-#define COMPILE_DATE	__DATE__
-#define COMPILE_TIME	__TIME__
-#ifndef WIN32
-	#define LAST_MODIFIED	__TIME__
-#else
-	#define LAST_MODIFIED	__TIMESTAMP__
-#endif
-
-#endif
-
+#endif //EQEMU_ZONE_RELOAD_H

@@ -379,31 +379,35 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 		ReuseTime = MonkSpecialAttack(GetTarget(), ca_atk->m_skill) - 1 - skill_reduction;
 
 		// Live AA - Technique of Master Wu
-		int wuchance =
-		    itembonuses.DoubleSpecialAttack + spellbonuses.DoubleSpecialAttack + aabonuses.DoubleSpecialAttack;
+		int wuchance = itembonuses.DoubleSpecialAttack + spellbonuses.DoubleSpecialAttack + aabonuses.DoubleSpecialAttack;
+
 		if (wuchance) {
-			const int MonkSPA[5] = {EQEmu::skills::SkillFlyingKick, EQEmu::skills::SkillDragonPunch,
-						EQEmu::skills::SkillEagleStrike, EQEmu::skills::SkillTigerClaw,
-						EQEmu::skills::SkillRoundKick};
+			const int MonkSPA[5] = {
+				EQEmu::skills::SkillFlyingKick,
+				EQEmu::skills::SkillDragonPunch,
+				EQEmu::skills::SkillEagleStrike,
+				EQEmu::skills::SkillTigerClaw,
+				EQEmu::skills::SkillRoundKick
+			};
 			int extra = 0;
 			// always 1/4 of the double attack chance, 25% at rank 5 (100/4)
 			while (wuchance > 0) {
-				if (zone->random.Roll(wuchance))
-					extra++;
-				else
+				if (zone->random.Roll(wuchance)) {
+					++extra;
+				}
+				else {
 					break;
+				}
 				wuchance /= 4;
 			}
 			// They didn't add a string ID for this.
-			std::string msg = StringFormat(
-			    "The spirit of Master Wu fills you!  You gain %d additional attack(s).", extra);
+			std::string msg = StringFormat("The spirit of Master Wu fills you!  You gain %d additional attack(s).", extra);
 			// live uses 400 here -- not sure if it's the best for all clients though
 			SendColoredText(400, msg);
 			auto classic = RuleB(Combat, ClassicMasterWu);
 			while (extra) {
-				MonkSpecialAttack(GetTarget(),
-						  classic ? MonkSPA[zone->random.Int(0, 4)] : ca_atk->m_skill);
-				extra--;
+				MonkSpecialAttack(GetTarget(), (classic ? MonkSPA[zone->random.Int(0, 4)] : ca_atk->m_skill));
+				--extra;
 			}
 		}
 
@@ -1294,7 +1298,6 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 
 	//consume ammo
 	DeleteItemInInventory(ammo_slot, 1, true);
-	CheckIncreaseSkill(EQEmu::skills::SkillThrowing, GetTarget());
 	CommonBreakInvisibleFromCombat();
 }
 
@@ -1407,6 +1410,9 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQEmu::ItemInstance *RangeWeapon
 			TrySkillProc(other, EQEmu::skills::SkillThrowing, ReuseTime);
 		else
 			TrySkillProc(other, EQEmu::skills::SkillThrowing, 0, false, EQEmu::invslot::slotRange);
+	}
+	if (IsClient()) {
+		CastToClient()->CheckIncreaseSkill(EQEmu::skills::SkillThrowing, GetTarget());
 	}
 }
 

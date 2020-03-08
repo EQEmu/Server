@@ -1,6 +1,6 @@
 /**
  * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2019 EQEmulator Development Team (https://github.com/EQEmu/Server)
+ * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,37 +18,29 @@
  *
  */
 
-#ifndef _EQEMU_VERSION_H
-#define _EQEMU_VERSION_H
+#include "zone_reload.h"
+#include "quest_parser_collection.h"
 
-#define LOGIN_VERSION "0.8.0"
-#define EQEMU_PROTOCOL_VERSION "0.3.10"
+void ZoneReload::HotReloadQuests()
+{
+	BenchTimer timer;
 
-#define CURRENT_VERSION "2.0"
+	entity_list.ClearAreas();
 
+	parse->ReloadQuests(RuleB(HotReload, QuestsResetTimersWithReload));
 
-/**
- * Every time a Database SQL is added to Github increment CURRENT_BINARY_DATABASE_VERSION
- * number and make sure you update the manifest
- *
- * Manifest: https://github.com/EQEmu/Server/blob/master/utils/sql/db_update_manifest.txt
- */
+	if (RuleB(HotReload, QuestsRepopWithReload)) {
+		zone->Repop(0);
+	}
+	
+	zone->SetQuestHotReloadQueued(false);
 
-#define CURRENT_BINARY_DATABASE_VERSION 9151
-
-#ifdef BOTS
-	#define CURRENT_BINARY_BOTS_DATABASE_VERSION 9026
-#else
-	#define CURRENT_BINARY_BOTS_DATABASE_VERSION 0 // must be 0
-#endif
-
-#define COMPILE_DATE	__DATE__
-#define COMPILE_TIME	__TIME__
-#ifndef WIN32
-	#define LAST_MODIFIED	__TIME__
-#else
-	#define LAST_MODIFIED	__TIMESTAMP__
-#endif
-
-#endif
-
+	LogHotReload(
+		"[Quests] Reloading [{}] repop [{}] reset_timers [{}] repop_when_not_in_combat [{}] Time [{:.4f}]",
+		zone->GetShortName(),
+		(RuleB(HotReload, QuestsRepopWithReload) ? "true" : "false"),
+		(RuleB(HotReload, QuestsResetTimersWithReload) ? "true" : "false"),
+		(RuleB(HotReload, QuestsRepopWhenPlayersNotInCombat) ? "true" : "false"),
+		timer.elapsed()
+	);
+}

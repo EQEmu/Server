@@ -113,11 +113,13 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	npc_type_data->handtexture,
 	npc_type_data->legtexture,
 	npc_type_data->feettexture,
-	npc_type_data->use_model
+	npc_type_data->use_model,
+	npc_type_data->always_aggro
 ),
 	  attacked_timer(CombatEventTimer_expire),
 	  swarm_timer(100),
 	  classattack_timer(1000),
+	  monkattack_timer(1000),
 	  knightattack_timer(1000),
 	  assist_timer(AIassistcheck_delay),
 	  qglobal_purge_timer(30000),
@@ -307,7 +309,15 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	// some overrides -- really we need to be able to set skills for mobs in the DB
 	// There are some known low level SHM/BST pets that do not follow this, which supports
 	// the theory of needing to be able to set skills for each mob separately
-	if (!IsBot()) {
+	if (IsBot()) {
+		if (GetClass() != PALADIN && GetClass() != SHADOWKNIGHT) {
+			knightattack_timer.Disable();
+		}
+		else if (GetClass() != MONK || GetLevel() < 10) {
+			monkattack_timer.Disable();
+		}
+	}
+	else {
 		if (moblevel > 50) {
 			skills[EQEmu::skills::SkillDoubleAttack] = 250;
 			skills[EQEmu::skills::SkillDualWield] = 250;
@@ -778,7 +788,20 @@ bool NPC::Process()
 		}
 
 		if (GetMana() < GetMaxMana()) {
-			SetMana(GetMana() + mana_regen + npc_sitting_regen_bonus);
+			if (RuleB(NPC, UseMeditateBasedManaRegen)) {
+				int32 npc_idle_mana_regen_bonus = 2;
+				uint16 meditate_skill = GetSkill(EQEmu::skills::SkillMeditate);
+				if (!IsEngaged() && meditate_skill > 0) {
+					uint8 clevel = GetLevel();
+					npc_idle_mana_regen_bonus =
+						(((meditate_skill / 10) +
+						(clevel - (clevel / 4))) / 4) + 4;
+				}
+				SetMana(GetMana() + mana_regen + npc_idle_mana_regen_bonus);
+			}
+			else {
+				SetMana(GetMana() + mana_regen + npc_sitting_regen_bonus);
+			}
 		}
 
 		SendHPUpdate();
@@ -3195,4 +3218,29 @@ void NPC::AIYellForHelp(Mob *sender, Mob *attacker)
 		}
 	}
 
+}
+
+void NPC::RecalculateSkills()
+{
+  	int r;
+	for (r = 0; r <= EQEmu::skills::HIGHEST_SKILL; r++) {
+		skills[r] = database.GetSkillCap(GetClass(), (EQEmu::skills::SkillType)r, level);
+	}
+
+	// some overrides -- really we need to be able to set skills for mobs in the DB
+	// There are some known low level SHM/BST pets that do not follow this, which supports
+	// the theory of needing to be able to set skills for each mob separately
+	if (!IsBot()) {
+		if (level > 50) {
+			skills[EQEmu::skills::SkillDoubleAttack] = 250;
+			skills[EQEmu::skills::SkillDualWield] = 250;
+		}
+		else if (level > 3) {
+			skills[EQEmu::skills::SkillDoubleAttack] = level * 5;
+			skills[EQEmu::skills::SkillDualWield] = skills[EQEmu::skills::SkillDoubleAttack];
+		}
+		else {
+			skills[EQEmu::skills::SkillDoubleAttack] = level * 5;
+		}
+	}
 }

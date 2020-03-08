@@ -197,7 +197,11 @@
 #define ServerOP_CZSetEntityVariableByClientName 0x4012
 #define ServerOP_UCSServerStatusRequest		0x4013
 #define ServerOP_UCSServerStatusReply		0x4014
-/* Query Server OP Codes */
+#define ServerOP_HotReloadQuests 0x4015
+
+/**
+ * QueryServer
+ */
 #define ServerOP_QSPlayerLogTrades					0x5010
 #define ServerOP_QSPlayerLogHandins					0x5011
 #define ServerOP_QSPlayerLogNPCKills				0x5012
@@ -866,10 +870,12 @@ struct SpawnPlayerCorpse_Struct {
 struct ServerOP_Consent_Struct {
 	char grantname[64];
 	char ownername[64];
+	char zonename[32];
 	uint8 permission;
 	uint32 zone_id;
 	uint16 instance_id;
-	uint32 message_string_id;
+	uint8  consent_type; // 0 = normal, 1 = group, 2 = raid, 3 = guild
+	uint32 consent_id;
 };
 
 struct ReloadTasks_Struct {
@@ -1349,12 +1355,16 @@ struct CZSetEntVarByClientName_Struct {
 	char m_var[256];
 };
 
-struct ReloadWorld_Struct{
+struct ReloadWorld_Struct {
 	uint32 Option;
 };
 
+struct HotReloadQuestsStruct {
+	char zone_short_name[200];
+};
+
 struct ServerRequestTellQueue_Struct {
-	char	name[64];
+	char name[64];
 };
 
 struct UCSServerStatus_Struct {

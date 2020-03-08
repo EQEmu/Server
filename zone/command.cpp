@@ -2543,7 +2543,7 @@ void command_size(Client *c, const Seperator *sep)
 		else if (!target)
 			c->Message(Chat::White,"Error: this command requires a target");
 		else {
-			uint16 Race = target->GetRace();
+			uint16 Race = target->GetModel();
 			uint8 Gender = target->GetGender();
 			uint8 Texture = 0xFF;
 			uint8 HelmTexture = 0xFF;

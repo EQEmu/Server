@@ -476,6 +476,8 @@ public:
 
 	inline bool IsSkipAutoScale() const { return skip_auto_scale; }
 
+	void RecalculateSkills();
+
 protected:
 
 	const NPCType*	NPCTypedata;
@@ -497,6 +499,7 @@ protected:
 
 	Timer	attacked_timer;		//running while we are being attacked (damaged)
 	Timer	swarm_timer;
+	Timer	monkattack_timer;	//additional timer for tiger claw usage
 	Timer	classattack_timer;
 	Timer	knightattack_timer;
 	Timer	assist_timer;		//ask for help from nearby mobs

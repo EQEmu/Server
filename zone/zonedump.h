@@ -147,6 +147,7 @@ struct NPCType
 	int8	stuck_behavior;
 	uint16	use_model;
 	int8	flymode;
+	bool	always_aggro;
 };
 
 namespace player_lootitem {

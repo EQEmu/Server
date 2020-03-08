@@ -17,7 +17,7 @@
 |:---:|:---:|:---:|
 |**Install Count**|![Windows Install Count](http://analytics.akkadius.com/?install_count&windows_count)|![Linux Install Count](http://analytics.akkadius.com/?install_count&linux_count)| 
 ### > Windows 
-* [Install](https://github.com/EQEmu/Server/wiki/Windows-Server)
+* [Install](https://eqemu.gitbook.io/server/categories/how-to-guides/installation/server-installation-windows)
 
 ### > Debian/Ubuntu/CentOS/Fedora
 * You can use curl or wget to kick off the installer (whichever your OS has)

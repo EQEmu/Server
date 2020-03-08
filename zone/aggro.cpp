@@ -139,7 +139,7 @@ void NPC::DescribeAggro(Client *towho, Mob *mob, bool verbose) {
 
 	if (RuleB(Aggro, UseLevelAggro))
 	{
-		if (GetLevel() < RuleI(Aggro, MinAggroLevel) && mob->GetLevelCon(GetLevel()) == CON_GRAY && GetBodyType() != 3)
+		if (GetLevel() < RuleI(Aggro, MinAggroLevel) && mob->GetLevelCon(GetLevel()) == CON_GRAY && GetBodyType() != 3 && !AlwaysAggro())
 		{
 			towho->Message(Chat::White, "...%s is red to me (basically)", mob->GetName(),	dist2, iAggroRange2);
 			return;
@@ -147,7 +147,7 @@ void NPC::DescribeAggro(Client *towho, Mob *mob, bool verbose) {
 	}
 	else
 	{
-		if(GetINT() > RuleI(Aggro, IntAggroThreshold) && mob->GetLevelCon(GetLevel()) == CON_GRAY ) {
+		if(GetINT() > RuleI(Aggro, IntAggroThreshold) && mob->GetLevelCon(GetLevel()) == CON_GRAY && !AlwaysAggro()) {
 			towho->Message(Chat::White, "...%s is red to me (basically)", mob->GetName(),
 			dist2, iAggroRange2);
 			return;
@@ -318,7 +318,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	//old InZone check taken care of above by !mob->CastToClient()->Connected()
 	(
 		( GetLevel() >= RuleI(Aggro, MinAggroLevel))
-		||(GetBodyType() == 3)
+		||(GetBodyType() == 3) || AlwaysAggro()
 		||( mob->IsClient() && mob->CastToClient()->IsSitting() )
 		||( mob->GetLevelCon(GetLevel()) != CON_GRAY)
 
@@ -352,6 +352,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 		//old InZone check taken care of above by !mob->CastToClient()->Connected()
 		(
 			( GetINT() <= RuleI(Aggro, IntAggroThreshold) )
+			|| AlwaysAggro()
 			||( mob->IsClient() && mob->CastToClient()->IsSitting() )
 			||( mob->GetLevelCon(GetLevel()) != CON_GRAY)
 
@@ -383,6 +384,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	LogAggro("Dist^2: [{}]\n", dist2);
 	LogAggro("Range^2: [{}]\n", iAggroRange2);
 	LogAggro("Faction: [{}]\n", fv);
+	LogAggro("AlwaysAggroFlag: [{}]\n", AlwaysAggro());
 	LogAggro("Int: [{}]\n", GetINT());
 	LogAggro("Con: [{}]\n", GetLevelCon(mob->GetLevel()));
 

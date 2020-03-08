@@ -121,7 +121,8 @@ Client::Client(EQStreamInterface* ieqs)
 	0,
 	0,
 	0,
-	0
+	0,
+	false
 	),
   hpupdate_timer(2000),
   camp_timer(29000),
@@ -165,6 +166,7 @@ Client::Client(EQStreamInterface* ieqs)
   hp_self_update_throttle_timer(300),
   hp_other_update_throttle_timer(500),
   position_update_timer(10000),
+  consent_throttle_timer(2000),
   tmSitting(0)
 {
 
@@ -357,6 +359,7 @@ Client::Client(EQStreamInterface* ieqs)
 	bot_owner_options[booAltCombat] = RuleB(Bots, AllowOwnerOptionAltCombat);
 	bot_owner_options[booAutoDefend] = RuleB(Bots, AllowOwnerOptionAutoDefend);
 	bot_owner_options[booBuffCounter] = false;
+	bot_owner_options[booMonkWuMessage] = false;
 
 	SetBotPulling(false);
 	SetBotPrecombat(false);
@@ -6251,6 +6254,52 @@ void Client::DragCorpses()
 			if (It == DraggedCorpses.end())
 				break;
 		}
+	}
+}
+
+void Client::ConsentCorpses(std::string consent_name, bool deny)
+{
+	if (strcasecmp(consent_name.c_str(), GetName()) == 0) {
+		MessageString(Chat::Red, CONSENT_YOURSELF);
+	}
+	else if (!consent_throttle_timer.Check()) {
+		MessageString(Chat::Red, CONSENT_WAIT);
+	}
+	else {
+		auto pack = new ServerPacket(ServerOP_Consent, sizeof(ServerOP_Consent_Struct));
+		ServerOP_Consent_Struct* scs = (ServerOP_Consent_Struct*)pack->pBuffer;
+		strn0cpy(scs->grantname, consent_name.c_str(), sizeof(scs->grantname));
+		strn0cpy(scs->ownername, GetName(), sizeof(scs->ownername));
+		strn0cpy(scs->zonename, "Unknown", sizeof(scs->zonename));
+		scs->permission = deny ? 0 : 1;
+		scs->zone_id = zone->GetZoneID();
+		scs->instance_id = zone->GetInstanceID();
+		scs->consent_type = EQEmu::consent::Normal;
+		scs->consent_id = 0;
+		if (strcasecmp(scs->grantname, "group") == 0) {
+			if (!deny) {
+				Group* grp = GetGroup();
+				scs->consent_id = grp ? grp->GetID() : 0;
+			}
+			scs->consent_type = EQEmu::consent::Group;
+		}
+		else if (strcasecmp(scs->grantname, "raid") == 0) {
+			if (!deny) {
+				Raid* raid = GetRaid();
+				scs->consent_id = raid ? raid->GetID() : 0;
+			}
+			scs->consent_type = EQEmu::consent::Raid;
+		}
+		else if (strcasecmp(scs->grantname, "guild") == 0) {
+			if (!deny) {
+				scs->consent_id = GuildID();
+			}
+			scs->consent_type = EQEmu::consent::Guild;
+			// update all corpses in db so buried/unloaded corpses see new consent id
+			database.UpdateCharacterCorpseConsent(CharacterID(), scs->consent_id);
+		}
+		worldserver.SendPacket(pack);
+		safe_delete(pack);
 	}
 }
 
