@@ -253,6 +253,7 @@ public:
 	const char* getguildnamebyid(int guild_id);
 	int getguildidbycharid(uint32 char_id);
 	int getgroupidbycharid(uint32 char_id);
+	int getraididbycharid(uint32 char_id);
 	void SetRunning(bool val);
 	bool IsRunning();
 	void FlyMode(GravityBehavior flymode);

@@ -3204,6 +3204,23 @@ XS(XS__getgroupidbycharid) {
 	XSRETURN(1);
 }
 
+XS(XS__getraididbycharid);
+XS(XS__getraididbycharid) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getraididbycharid(uint32 char_id)");
+	dXSTARG;
+
+	int     RETVAL;
+	uint32  char_id = (int) SvUV(ST(0));
+
+	RETVAL = quest_manager.getraididbycharid(char_id);
+	XSprePUSH;
+	PUSHi((IV)RETVAL);
+
+	XSRETURN(1);
+}
+
 XS(XS__SetRunning);
 XS(XS__SetRunning) {
 	dXSARGS;
@@ -3979,6 +3996,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "getguildnamebyid"), XS__getguildnamebyid, file);
 	newXS(strcpy(buf, "getguildidbycharid"), XS__getguildidbycharid, file);
 	newXS(strcpy(buf, "getgroupidbycharid"), XS__getgroupidbycharid, file);
+	newXS(strcpy(buf, "getraididbycharid"), XS__getraididbycharid, file);
 	newXS(strcpy(buf, "getlevel"), XS__getlevel, file);
 	newXS(strcpy(buf, "getplayerburiedcorpsecount"), XS__getplayerburiedcorpsecount, file);
 	newXS(strcpy(buf, "getplayercorpsecount"), XS__getplayercorpsecount, file);
