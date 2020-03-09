@@ -2876,6 +2876,20 @@ const char* QuestManager::getguildnamebyid(int guild_id) {
 		return("");
 }
 
+int QuestManager::getguildidbycharid(uint32 char_id) {
+    if (char_id > 0) {
+        return database.GetGuildIDByCharID(char_id);
+    }
+    return 0;
+}
+
+int QuestManager::getgroupidbycharid(uint32 char_id) {
+    if (char_id > 0) {
+        return database.GetGroupIDByCharID(char_id);
+    }
+    return 0;
+}
+
 void QuestManager::SetRunning(bool val)
 {
 	QuestManagerCurrentQuestVars();

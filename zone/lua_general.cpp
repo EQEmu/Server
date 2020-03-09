@@ -858,6 +858,14 @@ const char *lua_get_guild_name_by_id(uint32 guild_id) {
 	return quest_manager.getguildnamebyid(guild_id);
 }
 
+int lua_get_guild_id_by_char_id(uint32 char_id) {
+	return database.GetGuildIDByCharID(char_id);
+}
+
+int lua_get_group_id_by_char_id(uint32 char_id) {
+	return database.GetGroupIDByCharID(char_id);
+}
+
 uint32 lua_create_instance(const char *zone, uint32 version, uint32 duration) {
 	return quest_manager.CreateInstance(zone, version, duration);
 }
@@ -1728,6 +1736,8 @@ luabind::scope lua_register_general() {
 		luabind::def("set_data", (void(*)(std::string, std::string, std::string))&lua_set_data),
 		luabind::def("delete_data", (bool(*)(std::string))&lua_delete_data),
 		luabind::def("get_guild_name_by_id", &lua_get_guild_name_by_id),
+		luabind::def("get_guild_id_by_char_id", &lua_get_guild_id_by_char_id),
+		luabind::def("get_group_id_by_char_id", &lua_get_group_id_by_char_id),
 		luabind::def("create_instance", &lua_create_instance),
 		luabind::def("destroy_instance", &lua_destroy_instance),
 		luabind::def("update_instance_timer", &lua_update_instance_timer),
