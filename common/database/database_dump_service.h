@@ -45,16 +45,22 @@ public:
 	void SetDumpPath(const std::string &dump_path);
 	const std::string &GetDumpFileName() const;
 	void SetDumpFileName(const std::string &dump_file_name);
+	bool IsDumpQueryServerTables() const;
+	void SetDumpQueryServerTables(bool dump_query_server_tables);
+	bool IsDumpOutputToConsole() const;
+	void SetDumpOutputToConsole(bool dump_output_to_console);
 
 private:
-	bool dump_all_tables;
-	bool dump_system_tables;
-	bool dump_content_tables;
-	bool dump_player_tables;
-	bool dump_login_server_tables;
-	bool dump_with_no_data;
-	bool dump_no_table_lock;
-	bool dump_with_compression;
+	bool dump_all_tables = false;
+	bool dump_system_tables = false;
+	bool dump_content_tables = false;
+	bool dump_player_tables = false;
+	bool dump_query_server_tables = false;
+	bool dump_login_server_tables = false;
+	bool dump_with_no_data = false;
+	bool dump_no_table_lock = false;
+	bool dump_with_compression = false;
+	bool dump_output_to_console = false;
 	std::string dump_path;
 	std::string dump_file_name;
 
@@ -71,6 +77,7 @@ private:
 	bool HasCompressionBinary();
 	std::string GetDumpFileNameWithPath();
 	std::string GetSetDumpPath();
+	std::string GetQueryServTables();
 };
 
 

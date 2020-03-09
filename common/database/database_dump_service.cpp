@@ -29,10 +29,13 @@
 #include "../file_util.h"
 
 #include <ctime>
+
 #if _WIN32
 #include <windows.h>
 #else
+
 #include <sys/time.h>
+
 #endif
 
 #define DATABASE_DUMP_PATH "backups/"
@@ -162,6 +165,20 @@ std::string DatabaseDumpService::GetLoginTableList()
 /**
  * @return
  */
+std::string DatabaseDumpService::GetQueryServTables()
+{
+	std::string              tables_list;
+	std::vector<std::string> tables = DatabaseSchema::GetQueryServerTables();
+	for (const auto          &table : tables) {
+		tables_list += table + " ";
+	}
+
+	return trim(tables_list);
+}
+
+/**
+ * @return
+ */
 std::string DatabaseDumpService::GetSystemTablesList()
 {
 	std::string tables_list;
@@ -238,6 +255,10 @@ void DatabaseDumpService::Dump()
 		return;
 	}
 
+	if (IsDumpOutputToConsole()) {
+		LogSys.SilenceConsoleLogging();
+	}
+
 	LogInfo("MySQL installed [{}]", GetMySQLVersion());
 
 	SetDumpFileName(EQEmuConfig::get()->DatabaseDB + '-' + GetDumpDate());
@@ -266,23 +287,28 @@ void DatabaseDumpService::Dump()
 
 	if (!IsDumpAllTables()) {
 		if (IsDumpPlayerTables()) {
-			tables_to_dump += GetPlayerTablesList();
+			tables_to_dump += GetPlayerTablesList() + " ";
 			dump_descriptor += "-player";
 		}
 
 		if (IsDumpSystemTables()) {
-			tables_to_dump += GetSystemTablesList();
+			tables_to_dump += GetSystemTablesList() + " ";
 			dump_descriptor += "-system";
 		}
 
 		if (IsDumpContentTables()) {
-			tables_to_dump += GetContentTablesList();
+			tables_to_dump += GetContentTablesList() + " ";
 			dump_descriptor += "-content";
 		}
 
 		if (IsDumpLoginServerTables()) {
-			tables_to_dump += GetLoginTableList();
+			tables_to_dump += GetLoginTableList() + " ";
 			dump_descriptor += "-login";
+		}
+
+		if (IsDumpQueryServerTables()) {
+			tables_to_dump += GetQueryServTables();
+			dump_descriptor += "-queryserv";
 		}
 	}
 
@@ -290,19 +316,30 @@ void DatabaseDumpService::Dump()
 		SetDumpFileName(GetDumpFileName() + dump_descriptor);
 	}
 
+	/**
+	 * If we are dumping to stdout then we don't generate a file
+	 */
+	std::string pipe_file;
+	if (!IsDumpOutputToConsole()) {
+		pipe_file = fmt::format(" > {}.sql", GetDumpFileNameWithPath());
+	}
+
 	std::string execute_command = fmt::format(
-		"{} {} {} > {}.sql",
+		"{} {} {} {}",
 		GetBaseMySQLDumpCommand(),
 		options,
 		tables_to_dump,
-		GetDumpFileNameWithPath()
+		pipe_file
 	);
 
-	if (!FileUtil::exists(GetSetDumpPath())) {
+	if (!FileUtil::exists(GetSetDumpPath()) && !IsDumpOutputToConsole()) {
 		FileUtil::mkdir(GetSetDumpPath());
 	}
 
-	execute(execute_command, false);
+	std::string execution_result = execute(execute_command, IsDumpOutputToConsole());
+	if (!execution_result.empty()) {
+		std::cout << execution_result;
+	}
 
 	if (!tables_to_dump.empty()) {
 		LogInfo("Dumping Tables [{}]", tables_to_dump);
@@ -310,7 +347,7 @@ void DatabaseDumpService::Dump()
 
 	LogInfo("Database dump created at [{}.sql]", GetDumpFileNameWithPath());
 
-	if (IsDumpWithCompression()) {
+	if (IsDumpWithCompression() && !IsDumpOutputToConsole()) {
 		if (HasCompressionBinary()) {
 			LogInfo("Compression requested... Compressing dump [{}.sql]", GetDumpFileNameWithPath());
 
@@ -331,8 +368,10 @@ void DatabaseDumpService::Dump()
 		}
 	}
 
+//	LogDebug("[{}] dump-to-console", IsDumpOutputToConsole());
 //	LogDebug("[{}] dump-path", GetSetDumpPath());
 //	LogDebug("[{}] compression", (IsDumpWithCompression() ? "true" : "false"));
+//	LogDebug("[{}] query-serv", (IsDumpQueryServerTables() ? "true" : "false"));
 //	LogDebug("[{}] has-compression-binary", (HasCompressionBinary() ? "true" : "false"));
 //	LogDebug("[{}] content", (IsDumpContentTables() ? "true" : "false"));
 //	LogDebug("[{}] no-data", (IsDumpWithNoData() ? "true" : "false"));
@@ -438,4 +477,24 @@ void DatabaseDumpService::SetDumpFileName(const std::string &dump_file_name)
 const std::string &DatabaseDumpService::GetDumpFileName() const
 {
 	return dump_file_name;
+}
+
+bool DatabaseDumpService::IsDumpQueryServerTables() const
+{
+	return dump_query_server_tables;
+}
+
+void DatabaseDumpService::SetDumpQueryServerTables(bool dump_query_server_tables)
+{
+	DatabaseDumpService::dump_query_server_tables = dump_query_server_tables;
+}
+
+bool DatabaseDumpService::IsDumpOutputToConsole() const
+{
+	return dump_output_to_console;
+}
+
+void DatabaseDumpService::SetDumpOutputToConsole(bool dump_output_to_console)
+{
+	DatabaseDumpService::dump_output_to_console = dump_output_to_console;
 }
