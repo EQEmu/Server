@@ -188,12 +188,21 @@ std::string DatabaseDumpService::GetSystemTablesList()
 		tables_list += table + " ";
 	}
 
-	tables = DatabaseSchema::GetStateTables();
+	tables = DatabaseSchema::GetVersionTables();
 	for (const auto &table : tables) {
 		tables_list += table + " ";
 	}
 
-	tables = DatabaseSchema::GetVersionTables();
+	return trim(tables_list);
+}
+/**
+ * @return
+ */
+std::string DatabaseDumpService::GetStateTablesList()
+{
+	std::string tables_list;
+
+	std::vector<std::string> tables = DatabaseSchema::GetStateTables();
 	for (const auto &table : tables) {
 		tables_list += table + " ";
 	}
@@ -298,6 +307,11 @@ void DatabaseDumpService::Dump()
 		if (IsDumpSystemTables()) {
 			tables_to_dump += GetSystemTablesList() + " ";
 			dump_descriptor += "-system";
+		}
+
+		if (IsDumpStateTables()) {
+			tables_to_dump += GetStateTablesList() + " ";
+			dump_descriptor += "-state";
 		}
 
 		if (IsDumpContentTables()) {
@@ -525,4 +539,14 @@ bool DatabaseDumpService::IsDumpDropTableSyntaxOnly() const
 void DatabaseDumpService::SetDumpDropTableSyntaxOnly(bool dump_drop_table_syntax_only)
 {
 	DatabaseDumpService::dump_drop_table_syntax_only = dump_drop_table_syntax_only;
+}
+
+bool DatabaseDumpService::IsDumpStateTables() const
+{
+	return dump_state_tables;
+}
+
+void DatabaseDumpService::SetDumpStateTables(bool dump_state_tables)
+{
+	DatabaseDumpService::dump_state_tables = dump_state_tables;
 }

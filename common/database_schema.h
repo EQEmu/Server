@@ -99,8 +99,6 @@ namespace DatabaseSchema {
 			"account_rewards",
 			"adventure_details",
 			"adventure_stats",
-			"bugs",
-			"bug_reports",
 			"buyer",
 			"char_recipe_list",
 			"character_activities",
@@ -133,7 +131,6 @@ namespace DatabaseSchema {
 			"completed_tasks",
 			"data_buckets",
 			"discovered_items",
-			"eventlog",
 			"faction_values",
 			"friends",
 			"guild_bank",
@@ -149,9 +146,9 @@ namespace DatabaseSchema {
 			"petitions",
 			"player_titlesets",
 			"quest_globals",
-			"saylink",
 			"sharedbank",
-			"reports",
+			"spell_buckets",
+			"spell_globals",
 			"timers",
 			"titles",
 			"trader",
@@ -263,6 +260,7 @@ namespace DatabaseSchema {
 	{
 		return {
 			"banned_ips",
+			"chatchannels",
 			"command_settings",
 			"db_str",
 			"eqtime",
@@ -318,7 +316,9 @@ namespace DatabaseSchema {
 	{
 		return {
 			"adventure_members",
-			"chatchannels",
+			"bugs",
+			"bug_reports",
+			"eventlog",
 			"group_id",
 			"group_leaders",
 			"item_tick",
@@ -329,8 +329,9 @@ namespace DatabaseSchema {
 			"raid_leaders",
 			"raid_members",
 			"respawn_times",
-			"spell_buckets",
-			"spell_globals",
+			"reports",
+			"saylink",
+
 		};
 	}
 

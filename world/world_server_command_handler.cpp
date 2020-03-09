@@ -224,6 +224,7 @@ namespace WorldserverCommandHandler {
 			"--content-tables",
 			"--login-tables",
 			"--player-tables",
+			"--state-tables",
 			"--system-tables",
 			"--query-serv-tables",
 			"--table-structure-only",
@@ -250,13 +251,15 @@ namespace WorldserverCommandHandler {
 		/**
 		 * Set Option
 		 */
-		database_dump_service->SetDumpContentTables(cmd[{"-c", "--content-tables"}] || dump_all);
-		database_dump_service->SetDumpLoginServerTables(cmd[{"-c", "--login-tables"}] || dump_all);
-		database_dump_service->SetDumpPlayerTables(cmd[{"-c", "--player-tables"}] || dump_all);
-		database_dump_service->SetDumpSystemTables(cmd[{"-c", "--system-tables"}] || dump_all);
-		database_dump_service->SetDumpWithNoData(cmd[{"-c", "--table-structure-only"}]);
-		database_dump_service->SetDumpQueryServerTables(cmd[{"--query-serv-tables"}]);
+		database_dump_service->SetDumpContentTables(cmd[{"--content-tables"}] || dump_all);
+		database_dump_service->SetDumpLoginServerTables(cmd[{"--login-tables"}] || dump_all);
+		database_dump_service->SetDumpPlayerTables(cmd[{"--player-tables"}] || dump_all);
+		database_dump_service->SetDumpStateTables(cmd[{"--state-tables"}] || dump_all);
+		database_dump_service->SetDumpSystemTables(cmd[{"--system-tables"}] || dump_all);
+		database_dump_service->SetDumpQueryServerTables(cmd[{"--query-serv-tables"}] || dump_all);
 		database_dump_service->SetDumpAllTables(dump_all);
+
+		database_dump_service->SetDumpWithNoData(cmd[{"--table-structure-only"}]);
 		database_dump_service->SetDumpTableLock(cmd[{"--table-lock"}]);
 		database_dump_service->SetDumpWithCompression(cmd[{"--compress"}]);
 		database_dump_service->SetDumpOutputToConsole(cmd[{"--dump-output-to-console"}]);

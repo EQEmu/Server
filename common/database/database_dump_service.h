@@ -51,19 +51,22 @@ public:
 	void SetDumpOutputToConsole(bool dump_output_to_console);
 	bool IsDumpDropTableSyntaxOnly() const;
 	void SetDumpDropTableSyntaxOnly(bool dump_drop_table_syntax_only);
+	bool IsDumpStateTables() const;
+	void SetDumpStateTables(bool dump_state_tables);
 
 private:
-	bool dump_all_tables             = false;
-	bool dump_system_tables          = false;
-	bool dump_content_tables         = false;
-	bool dump_player_tables          = false;
-	bool dump_query_server_tables    = false;
-	bool dump_login_server_tables    = false;
-	bool dump_with_no_data           = false;
-	bool dump_table_lock             = false;
-	bool dump_with_compression       = false;
-	bool dump_output_to_console      = false;
-	bool dump_drop_table_syntax_only = false;
+	bool        dump_all_tables             = false;
+	bool        dump_state_tables           = false;
+	bool        dump_system_tables          = false;
+	bool        dump_content_tables         = false;
+	bool        dump_player_tables          = false;
+	bool        dump_query_server_tables    = false;
+	bool        dump_login_server_tables    = false;
+	bool        dump_with_no_data           = false;
+	bool        dump_table_lock             = false;
+	bool        dump_with_compression       = false;
+	bool        dump_output_to_console      = false;
+	bool        dump_drop_table_syntax_only = false;
 	std::string dump_path;
 	std::string dump_file_name;
 
@@ -73,6 +76,7 @@ private:
 	std::string GetBaseMySQLDumpCommand();
 	std::string GetPlayerTablesList();
 	std::string GetSystemTablesList();
+	std::string GetStateTablesList();
 	std::string GetContentTablesList();
 	std::string GetLoginTableList();
 	bool IsTarAvailable();
