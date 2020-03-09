@@ -28,6 +28,13 @@
 #include "../database_schema.h"
 #include "../file_util.h"
 
+#include <ctime>
+#if _WIN32
+#include <windows.h>
+#else
+#include <sys/time.h>
+#endif
+
 #define DATABASE_DUMP_PATH "backups/"
 
 /**
