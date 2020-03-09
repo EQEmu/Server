@@ -2180,6 +2180,22 @@ uint32 Database::GetGroupIDByCharID(uint32 character_id)
 	return atoi(row[0]);
 }
 
+uint32 Database::GetRaidIDByCharID(uint32 character_id) {
+	std::string query = fmt::format(
+		SQL(
+			SELECT raidid
+			FROM raid_members
+			WHERE charid = '{}'
+		),
+		character_id
+	);
+	auto results = QueryDatabase(query);
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		return atoi(row[0]);
+	}
+	return 0;
+}
+
 /**
  * @param log_settings
  */

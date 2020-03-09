@@ -2890,6 +2890,13 @@ int QuestManager::getgroupidbycharid(uint32 char_id) {
     return 0;
 }
 
+int QuestManager::getraididbycharid(uint32 char_id) {
+    if (char_id > 0) {
+        return database.GetRaidIDByCharID(char_id);
+    }
+    return 0;
+}
+
 void QuestManager::SetRunning(bool val)
 {
 	QuestManagerCurrentQuestVars();
