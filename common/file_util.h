@@ -1,6 +1,6 @@
 /**
  * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2019 EQEmulator Development Team (https://github.com/EQEmu/Server)
+ * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,22 +16,17 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- */
+*/
 
-#include "iostream"
-#include "../common/cli/eqemu_command_handler.h"
+#ifndef EQEMU_FILE_UTIL_H
+#define EQEMU_FILE_UTIL_H
 
-#ifndef EQEMU_WORLD_SERVER_COMMAND_HANDLER_H
-#define EQEMU_WORLD_SERVER_COMMAND_HANDLER_H
 
-namespace WorldserverCommandHandler {
-	void CommandHandler(int argc, char **argv);
-	void Version(int argc, char **argv, argh::parser &cmd, std::string &description);
-	void DatabaseVersion(int argc, char **argv, argh::parser &cmd, std::string &description);
-	void DatabaseSetAccountStatus(int argc, char **argv, argh::parser &cmd, std::string &description);
-	void DatabaseGetSchema(int argc, char **argv, argh::parser &cmd, std::string &description);
-	void DatabaseDump(int argc, char **argv, argh::parser &cmd, std::string &description);
+class FileUtil {
+public:
+	static bool exists(const std::string &name);
+	static void mkdir(const std::string& directory_name);
 };
 
 
-#endif //EQEMU_WORLD_SERVER_COMMAND_HANDLER_H
+#endif //EQEMU_FILE_UTIL_H
