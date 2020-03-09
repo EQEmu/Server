@@ -85,7 +85,8 @@ namespace DatabaseSchema {
 	}
 
 	/**
-	 * Gets all player and meta-data tables
+	 * @description Gets all player and meta-data tables
+	 * @note These tables have no content in the PEQ daily dump
 	 *
 	 * @return
 	 */
@@ -98,6 +99,8 @@ namespace DatabaseSchema {
 			"account_rewards",
 			"adventure_details",
 			"adventure_stats",
+			"bugs",
+			"bug_reports",
 			"buyer",
 			"char_recipe_list",
 			"character_activities",
@@ -129,6 +132,8 @@ namespace DatabaseSchema {
 			"character_tribute",
 			"completed_tasks",
 			"data_buckets",
+			"discovered_items",
+			"eventlog",
 			"faction_values",
 			"friends",
 			"guild_bank",
@@ -141,9 +146,12 @@ namespace DatabaseSchema {
 			"inventory_snapshots",
 			"keyring",
 			"mail",
+			"petitions",
 			"player_titlesets",
 			"quest_globals",
+			"saylink",
 			"sharedbank",
+			"reports",
 			"timers",
 			"titles",
 			"trader",
@@ -255,13 +263,9 @@ namespace DatabaseSchema {
 	{
 		return {
 			"banned_ips",
-			"bugs",
-			"bug_reports",
 			"command_settings",
 			"db_str",
-			"discovered_items",
 			"eqtime",
-			"eventlog",
 			"gm_ips",
 			"hackers",
 			"ip_exemptions",
@@ -271,12 +275,9 @@ namespace DatabaseSchema {
 			"logsys_categories",
 			"name_filter",
 			"perl_event_export_settings",
-			"petitions",
 			"profanity_list",
-			"reports",
 			"rule_sets",
 			"rule_values",
-			"saylink",
 			"variables",
 		};
 	}

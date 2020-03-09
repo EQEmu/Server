@@ -255,6 +255,10 @@ void DatabaseDumpService::Dump()
 		return;
 	}
 
+	if (IsDumpDropTableSyntaxOnly()) {
+		SetDumpOutputToConsole(true);
+	}
+
 	if (IsDumpOutputToConsole()) {
 		LogSys.SilenceConsoleLogging();
 	}
@@ -278,7 +282,7 @@ void DatabaseDumpService::Dump()
 		options += " --no-data";
 	}
 
-	if (IsDumpNoTableLock()) {
+	if (!IsDumpTableLock()) {
 		options += " --skip-lock-tables";
 	}
 
@@ -336,9 +340,22 @@ void DatabaseDumpService::Dump()
 		FileUtil::mkdir(GetSetDumpPath());
 	}
 
-	std::string execution_result = execute(execute_command, IsDumpOutputToConsole());
-	if (!execution_result.empty()) {
-		std::cout << execution_result;
+	if (IsDumpDropTableSyntaxOnly()) {
+		std::vector<std::string> tables = SplitString(tables_to_dump, ' ');
+
+		for (auto &table : tables) {
+			std::cout << "DROP TABLE `" << table << "`;" << std::endl;
+		}
+
+		if (tables_to_dump.empty()) {
+			std::cerr << "No tables were specified" << std::endl;
+		}
+	}
+	else {
+		std::string execution_result = execute(execute_command, IsDumpOutputToConsole());
+		if (!execution_result.empty()) {
+			std::cout << execution_result;
+		}
 	}
 
 	if (!tables_to_dump.empty()) {
@@ -439,14 +456,15 @@ void DatabaseDumpService::SetDumpAllTables(bool dump_all_tables)
 {
 	DatabaseDumpService::dump_all_tables = dump_all_tables;
 }
-bool DatabaseDumpService::IsDumpNoTableLock() const
+
+bool DatabaseDumpService::IsDumpTableLock() const
 {
-	return dump_no_table_lock;
+	return dump_table_lock;
 }
 
-void DatabaseDumpService::SetDumpNoTableLock(bool dump_no_table_lock)
+void DatabaseDumpService::SetDumpTableLock(bool dump_table_lock)
 {
-	DatabaseDumpService::dump_no_table_lock = dump_no_table_lock;
+	DatabaseDumpService::dump_table_lock = dump_table_lock;
 }
 
 bool DatabaseDumpService::IsDumpWithCompression() const
@@ -497,4 +515,14 @@ bool DatabaseDumpService::IsDumpOutputToConsole() const
 void DatabaseDumpService::SetDumpOutputToConsole(bool dump_output_to_console)
 {
 	DatabaseDumpService::dump_output_to_console = dump_output_to_console;
+}
+
+bool DatabaseDumpService::IsDumpDropTableSyntaxOnly() const
+{
+	return dump_drop_table_syntax_only;
+}
+
+void DatabaseDumpService::SetDumpDropTableSyntaxOnly(bool dump_drop_table_syntax_only)
+{
+	DatabaseDumpService::dump_drop_table_syntax_only = dump_drop_table_syntax_only;
 }

@@ -227,9 +227,10 @@ namespace WorldserverCommandHandler {
 			"--system-tables",
 			"--query-serv-tables",
 			"--table-structure-only",
-			"--no-table-lock",
+			"--table-lock",
 			"--dump-path=",
 			"--dump-output-to-console",
+			"--drop-table-syntax-only",
 			"--compress"
 		};
 
@@ -256,9 +257,10 @@ namespace WorldserverCommandHandler {
 		database_dump_service->SetDumpWithNoData(cmd[{"-c", "--table-structure-only"}]);
 		database_dump_service->SetDumpQueryServerTables(cmd[{"--query-serv-tables"}]);
 		database_dump_service->SetDumpAllTables(dump_all);
-		database_dump_service->SetDumpNoTableLock(cmd[{"--no-table-lock"}]);
+		database_dump_service->SetDumpTableLock(cmd[{"--table-lock"}]);
 		database_dump_service->SetDumpWithCompression(cmd[{"--compress"}]);
 		database_dump_service->SetDumpOutputToConsole(cmd[{"--dump-output-to-console"}]);
+		database_dump_service->SetDumpDropTableSyntaxOnly(cmd[{"--drop-table-syntax-only"}]);
 
 		/**
 		 * Dump
