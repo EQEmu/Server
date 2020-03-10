@@ -307,6 +307,9 @@ EntityList::EntityList()
 	raid_timer(1000),
 	trap_timer(1000)
 {
+	SetWSApiHandler(
+		[&](const EQApplicationPacket* app) {}
+	);
 	// set up ids between 1 and 1500
 	// neither client or server performs well if you have
 	// enough entities to exhaust this list
@@ -1651,6 +1654,7 @@ void EntityList::QueueClients(
 	bool ignore_sender, bool ackreq
 )
 {
+	SendPacketToWSApi(app);
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
 		Client *ent = it->second;

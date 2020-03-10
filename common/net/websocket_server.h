@@ -15,6 +15,7 @@ namespace EQ
 		{
 			SubscriptionEventNone,
 			SubscriptionEventLog,
+			SubscriptionEventClientUpdate,
 			SubscriptionEventMax
 		};
 

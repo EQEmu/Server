@@ -740,6 +740,8 @@ void MobMovementManager::SendCommandToClients(
 
 	FillCommandStruct(spu, mob, delta_x, delta_y, delta_z, delta_heading, anim);
 
+	entity_list.SendPacketToWSApi(&outapp);
+
 	if (range == ClientRangeAny) {
 		for (auto &c : _impl->Clients) {
 			if (single_client && c != single_client) {

@@ -421,6 +421,14 @@ void Spawn2::DeathReset(bool realdeath)
 	}
 }
 
+uint32 Spawn2::SpawnedNPCID()
+{
+	if (npcthis != nullptr)
+		return npcthis->GetID();
+	else
+		return -1;
+}
+
 bool ZoneDatabase::PopulateZoneSpawnListClose(uint32 zoneid, LinkedList<Spawn2*> &spawn2_list, int16 version, const glm::vec4& client_position, uint32 repop_distance)
 {
 	std::unordered_map<uint32, uint32> spawn_times;

@@ -66,6 +66,7 @@ public:
 	bool	NPCPointerValid() { return (npcthis!=nullptr); }
 	void	SetNPCPointer(NPC* n) { npcthis = n; }
 	void	SetNPCPointerNull() { npcthis = nullptr; }
+	uint32	SpawnedNPCID();
 	void	SetTimer(uint32 duration) { timer.Start(duration); }
 	uint32  GetKillCount() { return killcount; }
 protected:

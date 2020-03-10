@@ -886,15 +886,348 @@ Json::Value ApiSetLoggingLevel(EQ::Net::WebsocketServerConnection *connection, J
 	return response;
 }
 
-void RegisterApiLogEvent(std::unique_ptr<EQ::Net::WebsocketServer> &server)
+Json::Value ApiGetMobListPosition(EQ::Net::WebsocketServerConnection* connection, Json::Value params)
+{
+	if (zone->GetZoneID() == 0) {
+		throw EQ::Net::WebsocketException("Zone must be loaded to invoke this call");
+	}
+
+	Json::Value response;
+	auto& list = entity_list.GetMobList();
+
+	for (auto& iter : list) {
+		auto mob = iter.second;
+
+		Json::Value row;
+
+		row["id"] = mob->GetID();
+		row["clean_name"] = mob->GetCleanName();
+		row["x"] = mob->GetX();
+		row["y"] = mob->GetY();
+		row["z"] = mob->GetZ();
+		row["heading"] = mob->GetHeading();
+		row["is_npc"] = mob->IsNPC();
+		row["movespeed"] = mob->GetMovespeed();
+
+		response.append(row);
+	}
+
+	return response;
+}
+
+Json::Value ApiGetSpawnList(EQ::Net::WebsocketServerConnection* connection, Json::Value params)
+{
+	if (zone->GetZoneID() == 0) {
+		throw EQ::Net::WebsocketException("Zone must be loaded to invoke this call");
+	}
+
+	Json::Value response;
+	std::list<Spawn2*> list;
+	entity_list.GetSpawnList(list);
+
+	for (auto& iter : list) {
+		auto spawn = iter;
+
+		Json::Value row;
+
+		row["id"] = spawn->GetID();
+		row["spawngroup_id"] = spawn->SpawnGroupID();
+		row["x"] = spawn->GetX();
+		row["y"] = spawn->GetY();
+		row["z"] = spawn->GetZ();
+		row["heading"] = spawn->GetHeading();
+		row["spawned_npc_id"] = spawn->SpawnedNPCID();
+
+		response.append(row);
+	}
+
+	return response;
+}
+
+Json::Value ApiGetSpawnDetail(EQ::Net::WebsocketServerConnection* connection, Json::Value params)
+{
+	if (zone->GetZoneID() == 0) {
+		throw EQ::Net::WebsocketException("Zone must be loaded to invoke this call");
+	}
+
+	Json::Value response;
+	std::list<Spawn2*> list;
+	auto spawn = entity_list.GetSpawnByID(std::stoi(params[0].asString()));
+	if (spawn != nullptr) {
+		response["id"] = spawn->GetID();
+		response["spawngroup_id"] = spawn->SpawnGroupID();
+		response["x"] = spawn->GetX();
+		response["y"] = spawn->GetY();
+		response["z"] = spawn->GetZ();
+		response["heading"] = spawn->GetHeading();
+		response["spawned_npc_id"] = spawn->SpawnedNPCID();
+	}
+
+	return response;
+}
+
+Json::Value ApiGetMobDetail(EQ::Net::WebsocketServerConnection* connection, Json::Value params)
+{
+	if (zone->GetZoneID() == 0) {
+		throw EQ::Net::WebsocketException("Zone must be loaded to invoke this call");
+	}
+
+	Json::Value response;
+	auto& list = entity_list.GetMobList();
+	auto mob = entity_list.GetMobID(std::stoi(params[0].asString()));
+
+	if (mob != nullptr) {
+		/**
+			* Main
+			*/
+		response["id"] = mob->GetID();
+		response["clean_name"] = mob->GetCleanName();
+		response["x"] = mob->GetX();
+		response["y"] = mob->GetY();
+		response["z"] = mob->GetZ();
+		response["heading"] = mob->GetHeading();
+
+		/**
+			* Rest
+			*/
+		response["ac"] = mob->GetAC();
+		response["ac_softcap"] = mob->GetACSoftcap();
+		response["ac_sum"] = mob->ACSum();
+		response["active_light_type"] = mob->GetActiveLightType();
+		response["aggro_range"] = mob->GetAggroRange();
+		response["allow_beneficial"] = mob->GetAllowBeneficial();
+		response["animation"] = mob->GetAnimation();
+		response["assist_range"] = mob->GetAssistRange();
+		response["aura_slots"] = mob->GetAuraSlots();
+		response["base_fear_speed"] = mob->GetBaseFearSpeed();
+		response["base_runspeed"] = mob->GetBaseRunspeed();
+		response["base_size"] = mob->GetBaseSize();
+		response["base_walkspeed"] = mob->GetBaseWalkspeed();
+		response["beard"] = mob->GetBeard();
+		response["beard_color"] = mob->GetBeardColor();
+		response["best_melee_skill"] = mob->GetBestMeleeSkill();
+		response["calc_fear_resist_chance"] = mob->CalcFearResistChance();
+		response["calc_resist_chance_bonus"] = mob->CalcResistChanceBonus();
+		response["can_block_spell"] = mob->CanBlockSpell();
+		response["can_facestab"] = mob->CanFacestab();
+		response["casted_spell_inv_slot"] = mob->GetCastedSpellInvSlot();
+		response["casting_spell_id"] = mob->CastingSpellID();
+		response["charmed"] = mob->Charmed();
+		response["check_last_los_state"] = mob->CheckLastLosState();
+		response["class"] = mob->GetClass();
+		response["class_level_factor"] = mob->GetClassLevelFactor();
+		response["class_race_ac_bonus"] = mob->GetClassRaceACBonus();
+		response["compute_defense"] = mob->compute_defense();
+		response["count_dispellable_buffs"] = mob->CountDispellableBuffs();
+		response["cripp_blow_chance"] = mob->GetCrippBlowChance();
+		response["cur_wp"] = mob->GetCurWp();
+		response["cwp"] = mob->GetCWP();
+		response["cwpp"] = mob->GetCWPP();
+		response["divine_aura"] = mob->DivineAura();
+		response["do_casting_checks"] = mob->DoCastingChecks();
+		response["dont_buff_me_before"] = mob->DontBuffMeBefore();
+		response["dont_cure_me_before"] = mob->DontCureMeBefore();
+		response["dont_dot_me_before"] = mob->DontDotMeBefore();
+		response["dont_heal_me_before"] = mob->DontHealMeBefore();
+		response["dont_root_me_before"] = mob->DontRootMeBefore();
+		response["dont_snare_me_before"] = mob->DontSnareMeBefore();
+		response["drakkin_details"] = mob->GetDrakkinDetails();
+		response["drakkin_heritage"] = mob->GetDrakkinHeritage();
+		response["drakkin_tattoo"] = mob->GetDrakkinTattoo();
+		response["emote_id"] = mob->GetEmoteID();
+		response["equipment_light_type"] = mob->GetEquipmentLightType();
+		response["eye_color1"] = mob->GetEyeColor1();
+		response["eye_color2"] = mob->GetEyeColor2();
+		response["fear_speed"] = mob->GetFearSpeed();
+		response["flurry_chance"] = mob->GetFlurryChance();
+		response["follow_can_run"] = mob->GetFollowCanRun();
+		response["follow_distance"] = mob->GetFollowDistance();
+		response["follow_id"] = mob->GetFollowID();
+		response["gender"] = mob->GetGender();
+		response["hair_color"] = mob->GetHairColor();
+		response["hair_style"] = mob->GetHairStyle();
+		response["has_active_song"] = mob->HasActiveSong();
+		response["has_assist_aggro"] = mob->HasAssistAggro();
+		response["has_died"] = mob->HasDied();
+		response["has_disc_buff"] = mob->HasDiscBuff();
+		response["has_endur_upkeep"] = mob->HasEndurUpkeep();
+		response["has_free_aura_slots"] = mob->HasFreeAuraSlots();
+		response["has_free_trap_slots"] = mob->HasFreeTrapSlots();
+		response["has_mgb"] = mob->HasMGB();
+		response["has_numhits"] = mob->HasNumhits();
+		response["has_pet"] = mob->HasPet();
+		response["has_pet_affinity"] = mob->HasPetAffinity();
+		response["has_primary_aggro"] = mob->HasPrimaryAggro();
+		response["has_project_illusion"] = mob->HasProjectIllusion();
+		response["has_projectile_attack"] = mob->HasProjectileAttack();
+		response["has_shield_equiped"] = mob->HasShieldEquiped();
+		response["has_special_abilities"] = mob->HasSpecialAbilities();
+		response["has_tar_reflection"] = mob->HasTargetReflection();
+		response["has_temp_pets_active"] = mob->HasTempPetsActive();
+		response["has_two_hand_blunt_equiped"] = mob->HasTwoHandBluntEquiped();
+		response["has_two_hander_equipped"] = mob->HasTwoHanderEquipped();
+		response["has_virus"] = mob->HasVirus();
+		response["hate_summon"] = mob->HateSummon();
+		response["helm_texture"] = mob->GetHelmTexture();
+		response["hp"] = mob->GetHP();
+		response["improved_taunt"] = mob->ImprovedTaunt();
+		response["innate_light_type"] = mob->GetInnateLightType();
+		response["is_ai_controlled"] = mob->IsAIControlled();
+		response["is_amnesiad"] = mob->IsAmnesiad();
+		response["is_animation"] = mob->IsAnimation();
+		response["is_blind"] = mob->IsBlind();
+		response["is_casting"] = mob->IsCasting();
+		response["is_charmed"] = mob->IsCharmed();
+		response["is_destructible_object"] = mob->IsDestructibleObject();
+		response["is_engaged"] = mob->IsEngaged();
+		response["is_enraged"] = mob->IsEnraged();
+		response["is_familiar"] = mob->IsFamiliar();
+		response["is_feared"] = mob->IsFeared();
+		response["is_findable"] = mob->IsFindable();
+		response["is_focused"] = mob->IsFocused();
+		response["is_g_held"] = mob->IsGHeld();
+		response["is_grouped"] = mob->IsGrouped();
+		response["is_held"] = mob->IsHeld();
+		response["is_looting"] = mob->IsLooting();
+		response["is_melee_disabled"] = mob->IsMeleeDisabled();
+		response["is_mezzed"] = mob->IsMezzed();
+		response["is_moved"] = mob->IsMoved();
+		response["is_moving"] = mob->IsMoving();
+		response["is_no_cast"] = mob->IsNoCast();
+		response["is_off_hand_atk"] = mob->IsOffHandAtk();
+		response["is_pet_owner_client"] = mob->IsPetOwnerClient();
+		response["is_pet_regroup"] = mob->IsPetRegroup();
+		response["is_pet_stop"] = mob->IsPetStop();
+		response["is_pseudo_rooted"] = mob->IsPseudoRooted();
+		response["is_raid_grouped"] = mob->IsRaidGrouped();
+		response["is_rare_spawn"] = mob->IsRareSpawn();
+		response["is_roamer"] = mob->IsRoamer();
+		response["is_rooted"] = mob->IsRooted();
+		response["is_running"] = mob->IsRunning();
+		response["is_silenced"] = mob->IsSilenced();
+		response["is_stunned"] = mob->IsStunned();
+		response["is_tar_lock_pet"] = mob->IsTargetLockPet();
+		response["is_tarable"] = mob->IsTargetable();
+		response["is_tared"] = mob->IsTargeted();
+		response["is_temp_pet"] = mob->IsTempPet();
+		response["is_trackable"] = mob->IsTrackable();
+		response["item_hp_bonuses"] = mob->GetItemHPBonuses();
+		response["last_name"] = mob->GetLastName();
+		response["level"] = mob->GetLevel();
+		response["luclin_face"] = mob->GetLuclinFace();
+		response["mana"] = mob->GetMana();
+		response["mana_percent"] = mob->GetManaPercent();
+		response["mana_ratio"] = mob->GetManaRatio();
+		response["max_hp"] = mob->GetMaxHP();
+		response["max_mana"] = mob->GetMaxMana();
+		response["melee_mitigation"] = mob->GetMeleeMitigation();
+		response["mitigation_ac"] = mob->GetMitigationAC();
+		response["movespeed"] = mob->GetMovespeed();
+		response["name"] = mob->GetName();
+		response["next_hp_event"] = mob->GetNextHPEvent();
+		response["next_inc_hp_event"] = mob->GetNextIncHPEvent();
+		response["npc_assist_cap"] = mob->NPCAssistCap();
+		response["npc_type_id"] = mob->GetNPCTypeID();
+		response["orig_level"] = mob->GetOrigLevel();
+		response["orig_name"] = mob->GetOrigName();
+		response["owner_id"] = mob->GetOwnerID();
+		response["pet_id"] = mob->GetPetID();
+		response["pet_power"] = mob->GetPetPower();
+		response["pet_tar_lock_id"] = mob->GetPetTargetLockID();
+		response["qglobal"] = mob->GetQglobal();
+		response["race"] = mob->GetRace();
+		response["run_anim_speed"] = mob->GetRunAnimSpeed();
+		response["sanctuary"] = mob->Sanctuary();
+		response["see_hide"] = mob->SeeHide();
+		response["see_improved_hide"] = mob->SeeImprovedHide();
+		response["see_invisible"] = mob->SeeInvisible();
+		response["see_invisible_undead"] = mob->SeeInvisibleUndead();
+		response["size"] = mob->GetSize();
+		response["slow_mitigation"] = mob->GetSlowMitigation();
+		response["snared_amount"] = mob->GetSnaredAmount();
+		response["spawned"] = mob->Spawned();
+		response["spell_hp_bonuses"] = mob->GetSpellHPBonuses();
+		response["spell_light_type"] = mob->GetSpellLightType();
+		response["spell_power_distance_mod"] = mob->GetSpellPowerDistanceMod();
+		response["spell_x"] = mob->GetSpellX();
+		response["spell_y"] = mob->GetSpellY();
+		response["spell_z"] = mob->GetSpellZ();
+		response["tar_ring_x"] = mob->GetTargetRingX();
+		response["tar_ring_y"] = mob->GetTargetRingY();
+		response["tar_ring_z"] = mob->GetTargetRingZ();
+		response["temp_pet_count"] = mob->GetTempPetCount();
+		response["texture"] = mob->GetTexture();
+		response["trap_slots"] = mob->GetTrapSlots();
+		response["try_death_save"] = mob->TryDeathSave();
+		response["try_divine_save"] = mob->TryDivineSave();
+		response["try_spell_on_death"] = mob->TrySpellOnDeath();
+		response["update_active_light"] = mob->UpdateActiveLight();
+		response["wander_type"] = mob->GetWanderType();
+	}
+
+	return response;
+}
+
+void RegisterApiLogEvent(std::unique_ptr<EQ::Net::WebsocketServer>& server)
 {
 	LogSys.SetConsoleHandler(
-		[&](uint16 debug_level, uint16 log_category, const std::string &msg) {
+			[&](uint16 debug_level, uint16 log_category, const std::string& msg) {
 			Json::Value data;
-			data["debug_level"]  = debug_level;
+			data["debug_level"] = debug_level;
 			data["log_category"] = log_category;
-			data["msg"]          = msg;
+			data["msg"] = msg;
 			server->DispatchEvent(EQ::Net::SubscriptionEventLog, data, 50);
+		}
+	);
+}
+
+void RegisterApiClientUpdateEvent(std::unique_ptr<EQ::Net::WebsocketServer>& server)
+{
+	entity_list.SetWSApiHandler(
+		[&](const EQApplicationPacket* app) {
+			switch (app->GetOpcode()) {
+				case OP_ClientUpdate: {
+					auto* spu = (PlayerPositionUpdateServer_Struct*)app->pBuffer;
+					Json::Value data;
+					data["id"] = spu->spawn_id;
+					data["x"] = spu->x_pos;
+					data["y"] = spu->y_pos;
+					data["z"] = spu->z_pos;
+					data["heading"] = spu->heading;
+					data["animation"] = spu->animation;
+					data["action"] = "ClientUpdate";
+					server->DispatchEvent(EQ::Net::SubscriptionEventClientUpdate, data, 50);
+					break;
+				}
+				case OP_NewSpawn: {
+					auto* ns = (NewSpawn_Struct*)app->pBuffer;
+					char* clean_name = new char[64];
+					CleanMobName(ns->spawn.name, clean_name);
+					Json::Value data;
+					data["id"] = ns->spawn.spawnId;
+					data["name"] = clean_name;
+					data["x"] = ns->spawn.x;
+					data["y"] = ns->spawn.y;
+					data["z"] = ns->spawn.z;
+					data["heading"] = ns->spawn.heading;
+					data["npc"] = ns->spawn.NPC;
+					data["action"] = "NewSpawn";
+					server->DispatchEvent(EQ::Net::SubscriptionEventClientUpdate, data, 50);
+					break;
+				}
+				case OP_DeleteSpawn: {
+					auto* ds = (DeleteSpawn_Struct*)app->pBuffer;
+					Json::Value data;
+					data["id"] = ds->spawn_id;
+					data["action"] = "DeleteSpawn";
+					server->DispatchEvent(EQ::Net::SubscriptionEventClientUpdate, data, 50);
+					break;
+				}
+				default: {
+					//std::cout << "Sent packet " << app->GetOpcode() << std::endl;
+					break;
+				}
+			}
 		}
 	);
 }
@@ -913,6 +1246,11 @@ void RegisterApiService(std::unique_ptr<EQ::Net::WebsocketServer> &server)
 	server->SetMethodHandler("get_zone_attributes", &ApiGetZoneAttributes, 50);
 	server->SetMethodHandler("get_logsys_categories", &ApiGetLogsysCategories, 50);
 	server->SetMethodHandler("set_logging_level", &ApiSetLoggingLevel, 50);
+	server->SetMethodHandler("get_mob_list_position", &ApiGetMobListPosition, 50);
+	server->SetMethodHandler("get_spawn_list", &ApiGetSpawnList, 50);
+	server->SetMethodHandler("get_spawn_detail", &ApiGetSpawnDetail, 50);
+	server->SetMethodHandler("get_mob_detail", &ApiGetMobDetail, 50);
 
 	RegisterApiLogEvent(server);
+	RegisterApiClientUpdateEvent(server);
 }
