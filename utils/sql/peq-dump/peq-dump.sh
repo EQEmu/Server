@@ -52,7 +52,6 @@ bash -c "${world_bin} database:dump --system-tables --dump-output-to-console > $
 #############################################
 # "all" exports
 #############################################
-
 bash -c "cd ${dump_path} && ls * | grep create | sed 's/.*/source &;/' > create_all_tables.sql"
 bash -c "cd ${dump_path} && ls * | grep drop | sed 's/.*/source &;/' > drop_all_tables.sql"
 
@@ -62,7 +61,7 @@ bash -c "cd ${dump_path} && ls * | grep drop | sed 's/.*/source &;/' > drop_all_
 human_date=$(date +"%B-%d-%Y" | tr '[:upper:]' '[:lower:]')
 
 echo "Compressing..."
-bash -c "cd ${dump_path} && zip peq-latest.zip * && mv ${dump_path}peq-latest.zip /tmp/peq-latest.zip"
+bash -c "cd /tmp/ && rm peq-latest.zip && zip peq-latest.zip peq-dump/* && mv ${dump_path}peq-latest.zip /tmp/peq-latest.zip"
 
 echo "Cleaning up..."
 rm -rf ${dump_path}

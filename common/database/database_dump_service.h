@@ -80,7 +80,7 @@ private:
 	std::string GetContentTablesList();
 	std::string GetLoginTableList();
 	bool IsTarAvailable();
-	bool IsRarAvailable();
+	bool Is7ZipAvailable();
 	bool HasCompressionBinary();
 	std::string GetDumpFileNameWithPath();
 	std::string GetSetDumpPath();

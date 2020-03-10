@@ -90,14 +90,14 @@ bool DatabaseDumpService::IsTarAvailable()
 }
 
 /**
- * Windows TODO
+ * Windows
  * @return bool
  */
-bool DatabaseDumpService::IsRarAvailable()
+bool DatabaseDumpService::Is7ZipAvailable()
 {
 	std::string version_output = execute("winrar --version");
 
-	return version_output.find("todo") != std::string::npos;
+	return version_output.find("7-Zip") != std::string::npos;
 }
 
 /**
@@ -105,7 +105,7 @@ bool DatabaseDumpService::IsRarAvailable()
  */
 bool DatabaseDumpService::HasCompressionBinary()
 {
-	return IsTarAvailable() || IsRarAvailable();
+	return IsTarAvailable() || Is7ZipAvailable();
 }
 
 /**
@@ -285,7 +285,7 @@ void DatabaseDumpService::Dump()
 		config->DatabaseUsername
 	);
 
-	std::string options = "--compact --allow-keywords --extended-insert";
+	std::string options = "--allow-keywords --extended-insert";
 
 	if (IsDumpWithNoData()) {
 		options += " --no-data";
@@ -358,7 +358,7 @@ void DatabaseDumpService::Dump()
 		std::vector<std::string> tables = SplitString(tables_to_dump, ' ');
 
 		for (auto &table : tables) {
-			std::cout << "DROP TABLE `" << table << "`;" << std::endl;
+			std::cout << "DROP TABLE IF EXISTS `" << table << "`;" << std::endl;
 		}
 
 		if (tables_to_dump.empty()) {
@@ -392,6 +392,20 @@ void DatabaseDumpService::Dump()
 					)
 				);
 				LogInfo("Compressed dump created at [{}.tar.gz]", GetDumpFileNameWithPath());
+			}
+			else if (Is7ZipAvailable()) {
+				execute(
+					fmt::format(
+						"7z a -t7z {}.zip -C {} {}.sql",
+						GetDumpFileNameWithPath(),
+						GetSetDumpPath(),
+						GetDumpFileNameWithPath()
+					)
+				);
+				LogInfo("Compressed dump created at [{}.zip]", GetDumpFileNameWithPath());
+			}
+			else {
+				LogInfo("Compression requested, but no available compression binary was found");
 			}
 		}
 		else {
