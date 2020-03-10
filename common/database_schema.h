@@ -85,7 +85,8 @@ namespace DatabaseSchema {
 	}
 
 	/**
-	 * Gets all player and meta-data tables
+	 * @description Gets all player and meta-data tables
+	 * @note These tables have no content in the PEQ daily dump
 	 *
 	 * @return
 	 */
@@ -129,6 +130,7 @@ namespace DatabaseSchema {
 			"character_tribute",
 			"completed_tasks",
 			"data_buckets",
+			"discovered_items",
 			"faction_values",
 			"friends",
 			"guild_bank",
@@ -141,9 +143,12 @@ namespace DatabaseSchema {
 			"inventory_snapshots",
 			"keyring",
 			"mail",
+			"petitions",
 			"player_titlesets",
 			"quest_globals",
 			"sharedbank",
+			"spell_buckets",
+			"spell_globals",
 			"timers",
 			"titles",
 			"trader",
@@ -233,7 +238,6 @@ namespace DatabaseSchema {
 			"task_activities",
 			"tasks",
 			"tasksets",
-			"titles",
 			"tradeskill_recipe",
 			"tradeskill_recipe_entries",
 			"traps",
@@ -256,13 +260,10 @@ namespace DatabaseSchema {
 	{
 		return {
 			"banned_ips",
-			"bugs",
-			"bug_reports",
+			"chatchannels",
 			"command_settings",
 			"db_str",
-			"discovered_items",
 			"eqtime",
-			"eventlog",
 			"gm_ips",
 			"hackers",
 			"ip_exemptions",
@@ -272,13 +273,36 @@ namespace DatabaseSchema {
 			"logsys_categories",
 			"name_filter",
 			"perl_event_export_settings",
-			"petitions",
 			"profanity_list",
-			"reports",
 			"rule_sets",
 			"rule_values",
-			"saylink",
 			"variables",
+		};
+	}
+
+	/**
+	 * Gets QueryServer tables
+	 *
+	 * @return
+	 */
+	static std::vector<std::string> GetQueryServerTables()
+	{
+		return {
+			"qs_merchant_transaction_record",
+			"qs_merchant_transaction_record_entries",
+			"qs_player_aa_rate_hourly",
+			"qs_player_delete_record",
+			"qs_player_delete_record_entries",
+			"qs_player_events",
+			"qs_player_handin_record",
+			"qs_player_handin_record_entries",
+			"qs_player_move_record",
+			"qs_player_move_record_entries",
+			"qs_player_npc_kill_record",
+			"qs_player_npc_kill_record_entries",
+			"qs_player_speech",
+			"qs_player_trade_record",
+			"qs_player_trade_record_entries",
 		};
 	}
 
@@ -292,7 +316,9 @@ namespace DatabaseSchema {
 	{
 		return {
 			"adventure_members",
-			"chatchannels",
+			"bugs",
+			"bug_reports",
+			"eventlog",
 			"group_id",
 			"group_leaders",
 			"item_tick",
@@ -303,8 +329,9 @@ namespace DatabaseSchema {
 			"raid_leaders",
 			"raid_members",
 			"respawn_times",
-			"spell_buckets",
-			"spell_globals",
+			"reports",
+			"saylink",
+
 		};
 	}
 

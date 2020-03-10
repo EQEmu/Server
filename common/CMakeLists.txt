@@ -9,6 +9,7 @@ SET(common_sources
 	crash.cpp
 	crc16.cpp
 	crc32.cpp
+	database/database_dump_service.cpp
 	database.cpp
 	database_conversions.cpp
 	database_instances.cpp
@@ -31,6 +32,7 @@ SET(common_sources
 	event_sub.cpp
 	extprofile.cpp
 	faction.cpp
+	file_util.cpp
 	guild_base.cpp
 	guilds.cpp
 	inventory_profile.cpp
@@ -120,6 +122,7 @@ SET(common_headers
 	cli/argh.h
 	cli/eqemu_command_handler.h
 	cli/terminal_color.hpp
+	database/database_dump_service.h
 	data_verification.h
 	database.h
 	database_schema.h
@@ -150,6 +153,7 @@ SET(common_headers
 	event_sub.h
 	extprofile.h
 	faction.h
+	file_util.h
 	features.h
 	fixed_memory_hash_set.h
 	fixed_memory_variable_hash_set.h

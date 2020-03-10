@@ -405,6 +405,7 @@
 9149|2020_02_06_globalloot.sql|SHOW COLUMNS FROM `global_loot` LIKE 'hot_zone'|empty|
 9150|2020_02_06_aa_reset_on_death.sql|SHOW COLUMNS FROM `aa_ability` LIKE 'reset_on_death'|empty|
 9151|2020_03_05_npc_always_aggro.sql|SHOW COLUMNS FROM `npc_types` LIKE 'always_aggro'|empty|
+9152|2020_03_09_convert_myisam_to_innodb.sql|SELECT * FROM db_version WHERE version >= 9152|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

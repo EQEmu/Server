@@ -30,6 +30,7 @@ namespace WorldserverCommandHandler {
 	void DatabaseVersion(int argc, char **argv, argh::parser &cmd, std::string &description);
 	void DatabaseSetAccountStatus(int argc, char **argv, argh::parser &cmd, std::string &description);
 	void DatabaseGetSchema(int argc, char **argv, argh::parser &cmd, std::string &description);
+	void DatabaseDump(int argc, char **argv, argh::parser &cmd, std::string &description);
 };
 
 

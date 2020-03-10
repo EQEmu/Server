@@ -1,6 +1,6 @@
 /**
  * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2019 EQEmulator Development Team (https://github.com/EQEmu/Server)
+ * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,39 +16,52 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- */
+*/
 
-#ifndef _EQEMU_VERSION_H
-#define _EQEMU_VERSION_H
+#include <fstream>
+#include "file_util.h"
 
-#define LOGIN_VERSION "0.8.0"
-#define EQEMU_PROTOCOL_VERSION "0.3.10"
+#ifdef _WINDOWS
+#include <direct.h>
+#include <conio.h>
+#include <iostream>
+#include <dos.h>
+#include <windows.h>
+#include <process.h>
+#else
 
-#define CURRENT_VERSION "2.0"
+#include <unistd.h>
+#include <sys/stat.h>
 
+#endif
 
 /**
- * Every time a Database SQL is added to Github increment CURRENT_BINARY_DATABASE_VERSION
- * number and make sure you update the manifest
- *
- * Manifest: https://github.com/EQEmu/Server/blob/master/utils/sql/db_update_manifest.txt
+ * @param name
+ * @return
  */
+bool FileUtil::exists(const std::string &name)
+{
+	std::ifstream f(name.c_str());
 
-#define CURRENT_BINARY_DATABASE_VERSION 9152
+	return f.good();
+}
 
-#ifdef BOTS
-	#define CURRENT_BINARY_BOTS_DATABASE_VERSION 9026
+/**
+ * @param directory_name
+ */
+void FileUtil::mkdir(const std::string& directory_name)
+{
+
+#ifdef _WINDOWS
+	struct _stat st;
+	if (_stat(directory_name.c_str(), &st) == 0) // exists
+		return;
+	_mkdir(directory_name.c_str());
 #else
-	#define CURRENT_BINARY_BOTS_DATABASE_VERSION 0 // must be 0
+	struct stat st{};
+	if (stat(directory_name.c_str(), &st) == 0) { // exists
+		return;
+	}
+	::mkdir(directory_name.c_str(), 0755);
 #endif
-
-#define COMPILE_DATE	__DATE__
-#define COMPILE_TIME	__TIME__
-#ifndef WIN32
-	#define LAST_MODIFIED	__TIME__
-#else
-	#define LAST_MODIFIED	__TIMESTAMP__
-#endif
-
-#endif
-
+}
