@@ -50,6 +50,13 @@ bash -c "${world_bin} database:dump --content-tables --dump-output-to-console > 
 bash -c "${world_bin} database:dump --system-tables --dump-output-to-console > ${dump_path}create_tables_system.sql"
 
 #############################################
+# "all" exports
+#############################################
+
+bash -c "cd ${dump_path} && ls * | grep create | sed 's/.*/source &;/' > create_all_tables.sql"
+bash -c "cd ${dump_path} && ls * | grep drop | sed 's/.*/source &;/' > drop_all_tables.sql"
+
+#############################################
 # zip
 #############################################
 human_date=$(date +"%B-%d-%Y" | tr '[:upper:]' '[:lower:]')
