@@ -998,7 +998,7 @@ bool Zone::Init(bool iStaticZone) {
 
 	LoadAlternateAdvancement();
 
-	database.LoadGlobalLoot();
+	content_db.LoadGlobalLoot();
 
 	//Load merchant data
 	zone->GetMerchantDataForZoneLoad();
