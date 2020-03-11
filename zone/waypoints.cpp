@@ -578,7 +578,7 @@ void NPC::AssignWaypoints(int32 grid, int start_wp)
 	// Retrieve the wander and pause types for this grid
 	std::string query = StringFormat("SELECT `type`, `type2` FROM `grid` WHERE `id` = %i AND `zoneid` = %i", grid,
 		zone->GetZoneID());
-	auto results = database.QueryDatabase(query);
+	auto results = content_db.QueryDatabase(query);
 	if (!results.Success()) {
 		return;
 	}
@@ -597,7 +597,7 @@ void NPC::AssignWaypoints(int32 grid, int start_wp)
 	query = StringFormat("SELECT `x`,`y`,`z`,`pause`,`heading`, `centerpoint` "
 		"FROM grid_entries WHERE `gridid` = %i AND `zoneid` = %i "
 		"ORDER BY `number`", grid, zone->GetZoneID());
-	results = database.QueryDatabase(query);
+	results = content_db.QueryDatabase(query);
 	if (!results.Success()) {
 		return;
 	}
@@ -1148,7 +1148,7 @@ int ZoneDatabase::GetRandomWaypointLocFromGrid(glm::vec4 &loc, uint16 zoneid, in
 
 	std::string query = StringFormat("SELECT `x`,`y`,`z`,`heading` "
 		"FROM grid_entries WHERE `gridid` = %i AND `zoneid` = %u ORDER BY `number`", grid, zone->GetZoneID());
-	auto results = database.QueryDatabase(query);
+	auto results = content_db.QueryDatabase(query);
 	if (!results.Success()) {
 		Log(Logs::General, Logs::Error, "MySQL Error while trying get random waypoint loc from grid %i in zoneid %u;  %s", grid, zoneid, results.ErrorMessage().c_str());
 		return 0;

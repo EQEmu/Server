@@ -1588,7 +1588,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 		database.GetZoneName(pp.binds[4].zoneId), pp.binds[4].zoneId, pp.binds[4].x, pp.binds[4].y, pp.binds[4].z);
 
 	/* Starting Items inventory */
-	database.SetStartingItems(&pp, &inv, pp.race, pp.class_, pp.deity, pp.zone_id, pp.name, GetAdmin());
+	content_db.SetStartingItems(&pp, &inv, pp.race, pp.class_, pp.deity, pp.zone_id, pp.name, GetAdmin());
 
 	// now we give the pp and the inv we made to StoreCharacter
 	// to see if we can store it

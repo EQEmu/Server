@@ -1832,7 +1832,7 @@ void QuestManager::showgrid(int grid) {
 	std::string query = StringFormat("SELECT `x`,`y`,`z` FROM grid_entries "
                                     "WHERE `gridid` = %i AND `zoneid` = %i "
                                     "ORDER BY `number`", grid, zone->GetZoneID());
-    auto results = database.QueryDatabase(query);
+    auto results = content_db.QueryDatabase(query);
     if (!results.Success()) {
         LogQuests("Error loading grid [{}] for showgrid(): [{}]", grid, results.ErrorMessage().c_str());
 		return;

@@ -2422,10 +2422,10 @@ void command_setlsinfo(Client *c, const Seperator *sep)
 void command_grid(Client *c, const Seperator *sep)
 {
 	if (strcasecmp("max", sep->arg[1]) == 0) {
-		c->Message(Chat::White, "Highest grid ID in this zone: %d", database.GetHighestGrid(zone->GetZoneID()));
+		c->Message(Chat::White, "Highest grid ID in this zone: %d", content_db.GetHighestGrid(zone->GetZoneID()));
 	}
 	else if (strcasecmp("add", sep->arg[1]) == 0) {
-		database.ModifyGrid(c, false, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), zone->GetZoneID());
+		content_db.ModifyGrid(c, false, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), zone->GetZoneID());
 	}
 	else if (strcasecmp("show", sep->arg[1]) == 0) {
 
@@ -2445,7 +2445,7 @@ void command_grid(Client *c, const Seperator *sep)
 			target->CastToNPC()->GetGrid()
 		);
 
-		auto results = database.QueryDatabase(query);
+		auto results = content_db.QueryDatabase(query);
 		if (!results.Success()) {
 			c->Message(Chat::White, "Error querying database.");
 			c->Message(Chat::White, query.c_str());
@@ -2485,7 +2485,7 @@ void command_grid(Client *c, const Seperator *sep)
 		}
 	}
 	else if (strcasecmp("delete", sep->arg[1]) == 0) {
-		database.ModifyGrid(c, true, atoi(sep->arg[2]), 0, 0, zone->GetZoneID());
+		content_db.ModifyGrid(c, true, atoi(sep->arg[2]), 0, 0, zone->GetZoneID());
 	}
 	else {
 		c->Message(Chat::White, "Usage: #grid add/delete grid_num wandertype pausetype");
@@ -2500,18 +2500,18 @@ void command_wp(Client *c, const Seperator *sep)
 
 	if (strcasecmp("add", sep->arg[1]) == 0) {
 		if (wp == 0) //default to highest if it's left blank, or we enter 0
-			wp = database.GetHighestWaypoint(zone->GetZoneID(), atoi(sep->arg[2])) + 1;
+			wp = content_db.GetHighestWaypoint(zone->GetZoneID(), atoi(sep->arg[2])) + 1;
 		if (strcasecmp("-h", sep->arg[5]) == 0) {
-			database.AddWP(c, atoi(sep->arg[2]),wp, c->GetPosition(), atoi(sep->arg[3]),zone->GetZoneID());
+			content_db.AddWP(c, atoi(sep->arg[2]),wp, c->GetPosition(), atoi(sep->arg[3]),zone->GetZoneID());
 		}
 		else {
             auto position = c->GetPosition();
             position.w = -1;
-			database.AddWP(c, atoi(sep->arg[2]),wp, position, atoi(sep->arg[3]),zone->GetZoneID());
+			content_db.AddWP(c, atoi(sep->arg[2]),wp, position, atoi(sep->arg[3]),zone->GetZoneID());
 		}
 	}
 	else if (strcasecmp("delete", sep->arg[1]) == 0)
-		database.DeleteWaypoint(c, atoi(sep->arg[2]),wp,zone->GetZoneID());
+		content_db.DeleteWaypoint(c, atoi(sep->arg[2]),wp,zone->GetZoneID());
 	else
 		c->Message(Chat::White,"Usage: #wp add/delete grid_num pause wp_num [-h]");
 }
@@ -7111,7 +7111,7 @@ void command_wpadd(Client *c, const Seperator *sep)
 			position.w = -1;
 		}
 
-		uint32 tmp_grid = database.AddWPForSpawn(c, s2info->GetID(), position, pause, type1, type2, zone->GetZoneID());
+		uint32 tmp_grid = content_db.AddWPForSpawn(c, s2info->GetID(), position, pause, type1, type2, zone->GetZoneID());
 		if (tmp_grid) {
 			target->CastToNPC()->SetGrid(tmp_grid);
 		}
