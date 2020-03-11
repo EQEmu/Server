@@ -95,7 +95,7 @@ bool DatabaseDumpService::IsTarAvailable()
  */
 bool DatabaseDumpService::Is7ZipAvailable()
 {
-	std::string version_output = execute("winrar --version");
+	std::string version_output = execute("7z -help");
 
 	return version_output.find("7-Zip") != std::string::npos;
 }
