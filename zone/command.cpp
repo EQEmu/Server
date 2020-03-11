@@ -4136,7 +4136,7 @@ void command_findzone(Client *c, const Seperator *sep)
 		}
 	}
 
-	auto results = database.QueryDatabase(query);
+	auto results = content_db.QueryDatabase(query);
 	if (!results.Success()) {
 		c->Message(Chat::White, "Error querying database.");
 		c->Message(Chat::White, query.c_str());
@@ -4273,7 +4273,7 @@ void command_reloadlevelmods(Client *c, const Seperator *sep)
 
 void command_reloadzps(Client *c, const Seperator *sep)
 {
-	database.LoadStaticZonePoints(&zone->zone_point_list, zone->GetShortName(), zone->GetInstanceVersion());
+	content_db.LoadStaticZonePoints(&zone->zone_point_list, zone->GetShortName(), zone->GetInstanceVersion());
 	c->Message(Chat::White, "Reloading server zone_points.");
 }
 
@@ -4950,7 +4950,7 @@ void command_gmzone(Client *c, const Seperator *sep)
 		int16 min_status = 0;
 		uint8 min_level  = 0;
 
-		if (!database.GetSafePoints(
+		if (!content_db.GetSafePoints(
 			zone_short_name,
 			zone_version,
 			&target_x,
@@ -9101,7 +9101,7 @@ void command_flagedit(Client *c, const Seperator *sep) {
 	if(!strcasecmp(sep->arg[1], "listzones")) {
         std::string query = "SELECT zoneidnumber, short_name, long_name, version, flag_needed "
                             "FROM zone WHERE flag_needed != ''";
-        auto results = database.QueryDatabase(query);
+        auto results = content_db.QueryDatabase(query);
 		if (!results.Success()) {
             return;
         }
@@ -9642,8 +9642,8 @@ void command_deletegraveyard(Client *c, const Seperator *sep)
 		return;
 	}
 
-	zoneid = database.GetZoneID(sep->arg[1]);
-	graveyard_id = database.GetZoneGraveyardID(zoneid, 0);
+	zoneid = content_db.GetZoneID(sep->arg[1]);
+	graveyard_id = content_db.GetZoneGraveyardID(zoneid, 0);
 
 	if(zoneid > 0 && graveyard_id > 0) {
 		if(database.DeleteGraveyard(zoneid, graveyard_id))
@@ -12568,7 +12568,7 @@ void command_mysqltest(Client *c, const Seperator *sep)
 		t = std::clock();
 		for (i = 0; i < atoi(sep->arg[1]); i++){
 			std::string query = "SELECT * FROM `zone`";
-			auto results = database.QueryDatabase(query);
+			auto results = content_db.QueryDatabase(query);
 		}
 	}
 	LogDebug("MySQL Test Took [{}] seconds", ((float)(std::clock() - t)) / CLOCKS_PER_SEC);

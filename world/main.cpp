@@ -330,7 +330,7 @@ int main(int argc, char** argv) {
 	database.PurgeAllDeletedDataBuckets();
 
 	LogInfo("Loading zones");
-	database.LoadZoneNames();
+	content_db.LoadZoneNames();
 	LogInfo("Clearing groups");
 	database.ClearGroup();
 	LogInfo("Clearing raids");

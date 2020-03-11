@@ -108,7 +108,7 @@ bool ZoneServer::SetZone(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	if (zn)
 	{
 		strn0cpy(zone_name, zn, sizeof(zone_name));
-		if (database.GetZoneLongName((char*)zone_name, &longname, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr))
+		if (content_db.GetZoneLongName((char*)zone_name, &longname, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr))
 		{
 			strn0cpy(long_name, longname, sizeof(long_name));
 			safe_delete_array(longname);

@@ -170,7 +170,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	int16 minstatus = 0;
 	uint8 minlevel = 0;
 	char flag_needed[128];
-	if(!database.GetSafePoints(target_zone_name, database.GetInstanceVersion(target_instance_id), &safe_x, &safe_y, &safe_z, &minstatus, &minlevel, flag_needed)) {
+	if(!content_db.GetSafePoints(target_zone_name, database.GetInstanceVersion(target_instance_id), &safe_x, &safe_y, &safe_z, &minstatus, &minlevel, flag_needed)) {
 		//invalid zone...
 		Message(Chat::Red, "Invalid target zone while getting safe points.");
 		LogError("Zoning [{}]: Unable to get safe coordinates for zone [{}]", GetName(), target_zone_name);
@@ -483,7 +483,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 	char* pZoneName = nullptr;
 
 	pShortZoneName = database.GetZoneName(zoneID);
-	database.GetZoneLongName(pShortZoneName, &pZoneName);
+	content_db.GetZoneLongName(pShortZoneName, &pZoneName);
 
 	if(!pZoneName) {
 		Message(Chat::Red, "Invalid zone number specified");
@@ -831,7 +831,7 @@ void Client::SendZoneFlagInfo(Client *to) const {
 		const char *short_name = database.GetZoneName(zoneid);
 
 		char *long_name = nullptr;
-		database.GetZoneLongName(short_name, &long_name);
+		content_db.GetZoneLongName(short_name, &long_name);
 		if(long_name == nullptr)
 			long_name = empty;
 
@@ -839,7 +839,7 @@ void Client::SendZoneFlagInfo(Client *to) const {
 		int16 minstatus = 0;
 		uint8 minlevel = 0;
 		char flag_name[128];
-		if(!database.GetSafePoints(short_name, 0, &safe_x, &safe_y, &safe_z, &minstatus, &minlevel, flag_name)) {
+		if(!content_db.GetSafePoints(short_name, 0, &safe_x, &safe_y, &safe_z, &minstatus, &minlevel, flag_name)) {
 			strcpy(flag_name, "(ERROR GETTING NAME)");
 		}
 
@@ -861,7 +861,7 @@ bool Client::CanBeInZone() {
 	int16 minstatus = 0;
 	uint8 minlevel = 0;
 	char flag_needed[128];
-	if(!database.GetSafePoints(zone->GetShortName(), zone->GetInstanceVersion(), &safe_x, &safe_y, &safe_z, &minstatus, &minlevel, flag_needed)) {
+	if(!content_db.GetSafePoints(zone->GetShortName(), zone->GetInstanceVersion(), &safe_x, &safe_y, &safe_z, &minstatus, &minlevel, flag_needed)) {
 		//this should not happen...
 		LogDebug("[CLIENT] Unable to query zone info for ourself [{}]", zone->GetShortName());
 		return(false);

@@ -6407,7 +6407,7 @@ void Client::Handle_OP_GMZoneRequest(const EQApplicationPacket *app)
 		strcpy(tarzone, zname);
 
 	// this both loads the safe points and does a sanity check on zone name
-	if (!database.GetSafePoints(tarzone, 0, &tarx, &tary, &tarz, &minstatus, &minlevel)) {
+	if (!content_db.GetSafePoints(tarzone, 0, &tarx, &tary, &tarz, &minstatus, &minlevel)) {
 		tarzone[0] = 0;
 	}
 
@@ -12418,7 +12418,7 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 			zoneid = atoi(row[0]);
 
 		char* name = nullptr;
-		database.GetZoneLongName(database.GetZoneName(zoneid), &name);
+		content_db.GetZoneLongName(database.GetZoneName(zoneid), &name);
 		Message(Chat::Yellow, "%d - %s", zoneid, name);
 	}
 

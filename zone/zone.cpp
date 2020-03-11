@@ -156,7 +156,7 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	/**
 	 * Set Shutdown timer
 	 */
-	uint32 shutdown_timer = static_cast<uint32>(database.getZoneShutDownDelay(zone->GetZoneID(), zone->GetInstanceVersion()));
+	uint32 shutdown_timer = static_cast<uint32>(content_db.getZoneShutDownDelay(zone->GetZoneID(), zone->GetInstanceVersion()));
 	zone->StartShutdownTimer(shutdown_timer);
 
 	/*
@@ -811,7 +811,7 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	pvpzone = false;
 	if(database.GetServerType() == 1)
 		pvpzone = true;
-	database.GetZoneLongName(short_name, &long_name, file_name, &m_SafePoint.x, &m_SafePoint.y, &m_SafePoint.z, &pgraveyard_id, &pMaxClients);
+	content_db.GetZoneLongName(short_name, &long_name, file_name, &m_SafePoint.x, &m_SafePoint.y, &m_SafePoint.z, &pgraveyard_id, &pMaxClients);
 	if(graveyard_id() > 0)
 	{
 		LogDebug("Graveyard ID is [{}]", graveyard_id());
@@ -931,7 +931,7 @@ bool Zone::Init(bool iStaticZone) {
 	}
 
 	LogInfo("Loading static zone points");
-	if (!database.LoadStaticZonePoints(&zone_point_list, short_name, GetInstanceVersion())) {
+	if (!content_db.LoadStaticZonePoints(&zone_point_list, short_name, GetInstanceVersion())) {
 		LogError("Loading static zone points failed");
 		return false;
 	}
@@ -1019,7 +1019,7 @@ bool Zone::Init(bool iStaticZone) {
 	petition_list.ReadDatabase();
 
 	LogInfo("Loading timezone data");
-	zone->zone_time.setEQTimeZone(database.GetZoneTZ(zoneid, GetInstanceVersion()));
+	zone->zone_time.setEQTimeZone(content_db.GetZoneTZ(zoneid, GetInstanceVersion()));
 
 	LogInfo("Init Finished: ZoneID = [{}], Time Offset = [{}]", zoneid, zone->zone_time.getEQTimeZone());
 
@@ -1036,7 +1036,7 @@ void Zone::ReloadStaticData() {
 
 	LogInfo("Reloading static zone points");
 	zone_point_list.Clear();
-	if (!database.LoadStaticZonePoints(&zone_point_list, GetShortName(), GetInstanceVersion())) {
+	if (!content_db.LoadStaticZonePoints(&zone_point_list, GetShortName(), GetInstanceVersion())) {
 		LogError("Loading static zone points failed");
 	}
 
@@ -1082,19 +1082,44 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_id)
 	memset(&newzone_data, 0, sizeof(NewZone_Struct));
 	map_name = nullptr;
 
-	if(!database.GetZoneCFG(database.GetZoneID(filename), instance_id, &newzone_data, can_bind,
-		can_combat, can_levitate, can_castoutdoor, is_city, is_hotzone, allow_mercs, max_movement_update_range, zone_type, default_ruleset, &map_name))
-	{
+	if (!content_db.GetZoneCFG(
+		content_db.GetZoneID(filename),
+		instance_id,
+		&newzone_data,
+		can_bind,
+		can_combat,
+		can_levitate,
+		can_castoutdoor,
+		is_city,
+		is_hotzone,
+		allow_mercs,
+		max_movement_update_range,
+		zone_type,
+		default_ruleset,
+		&map_name
+	)) {
 		// If loading a non-zero instance failed, try loading the default
-		if (instance_id != 0)
-		{
+		if (instance_id != 0) {
 			safe_delete_array(map_name);
-			if(!database.GetZoneCFG(database.GetZoneID(filename), 0, &newzone_data, can_bind, can_combat, can_levitate, 
-				can_castoutdoor, is_city, is_hotzone, allow_mercs, max_movement_update_range, zone_type, default_ruleset, &map_name))
-				{
+			if (!content_db.GetZoneCFG(
+				content_db.GetZoneID(filename),
+				0,
+				&newzone_data,
+				can_bind,
+				can_combat,
+				can_levitate,
+				can_castoutdoor,
+				is_city,
+				is_hotzone,
+				allow_mercs,
+				max_movement_update_range,
+				zone_type,
+				default_ruleset,
+				&map_name
+			)) {
 				LogError("Error loading the Zone Config");
 				return false;
-				}
+			}
 		}
 	}
 
@@ -1107,8 +1132,9 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_id)
 	return true;
 }
 
-bool Zone::SaveZoneCFG() {
-	return database.SaveZoneCFG(GetZoneID(), GetInstanceVersion(), &newzone_data);
+bool Zone::SaveZoneCFG()
+{
+	return content_db.SaveZoneCFG(GetZoneID(), GetInstanceVersion(), &newzone_data);
 }
 
 void Zone::AddAuth(ServerZoneIncomingClient_Struct* szic) {
@@ -1487,7 +1513,7 @@ bool Zone::HasWeather()
 void Zone::StartShutdownTimer(uint32 set_time) {
 	if (set_time > autoshutdown_timer.GetRemainingTime()) {
 		if (set_time == (RuleI(Zone, AutoShutdownDelay))) {
-			set_time = static_cast<uint32>(database.getZoneShutDownDelay(GetZoneID(), GetInstanceVersion()));
+			set_time = static_cast<uint32>(content_db.getZoneShutDownDelay(GetZoneID(), GetInstanceVersion()));
 		}
 
 		autoshutdown_timer.SetTimer(set_time);
@@ -2358,7 +2384,7 @@ uint32 Zone::GetSpawnKillCount(uint32 in_spawnid) {
 void Zone::UpdateHotzone()
 {
     std::string query = StringFormat("SELECT hotzone FROM zone WHERE short_name = '%s'", GetShortName());
-    auto results = database.QueryDatabase(query);
+    auto results = content_db.QueryDatabase(query);
     if (!results.Success())
         return;
 
