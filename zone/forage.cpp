@@ -274,7 +274,7 @@ void Client::GoFish()
 		if (zone->random.Int(0, 399) <= fishing_skill ) {
 			uint32 npc_id = 0;
 			uint8 npc_chance = 0;
-			food_id = database.GetZoneFishing(m_pp.zone_id, fishing_skill, npc_id, npc_chance);
+			food_id = content_db.GetZoneFishing(m_pp.zone_id, fishing_skill, npc_id, npc_chance);
 
 			//check for add NPC
 			if (npc_chance > 0 && npc_id) {
