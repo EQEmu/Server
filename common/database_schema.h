@@ -259,14 +259,10 @@ namespace DatabaseSchema {
 	static std::vector<std::string> GetServerTables()
 	{
 		return {
-			"banned_ips",
 			"chatchannels",
 			"command_settings",
 			"db_str",
 			"eqtime",
-			"gm_ips",
-			"hackers",
-			"ip_exemptions",
 			"launcher",
 			"launcher_zones",
 			"level_exp_mods",
@@ -316,11 +312,15 @@ namespace DatabaseSchema {
 	{
 		return {
 			"adventure_members",
-			"bugs",
+			"banned_ips",
 			"bug_reports",
+			"bugs",
 			"eventlog",
+			"gm_ips",
 			"group_id",
 			"group_leaders",
+			"hackers",
+			"ip_exemptions",
 			"item_tick",
 			"lfguild",
 			"merchantlist_temp",
@@ -328,8 +328,8 @@ namespace DatabaseSchema {
 			"raid_details",
 			"raid_leaders",
 			"raid_members",
-			"respawn_times",
 			"reports",
+			"respawn_times",
 			"saylink",
 
 		};
