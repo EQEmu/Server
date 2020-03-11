@@ -402,7 +402,7 @@ void Client::ForageItem(bool guarantee) {
 		uint32 stringid = FORAGE_NOEAT;
 
 		if (zone->random.Roll(25)) {
-			foragedfood = database.GetZoneForage(m_pp.zone_id, skill_level);
+			foragedfood = content_db.GetZoneForage(m_pp.zone_id, skill_level);
 		}
 
 		//not an else in case theres no DB food
