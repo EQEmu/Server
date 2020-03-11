@@ -2117,7 +2117,7 @@ void Zone::LoadVeteranRewards()
                             "FROM veteran_reward_templates "
                             "WHERE reward_slot < 8 and claim_id > 0 "
                             "ORDER by claim_id, reward_slot";
-    auto results = database.QueryDatabase(query);
+    auto results = content_db.QueryDatabase(query);
     if (!results.Success()) {
         return;
     }
