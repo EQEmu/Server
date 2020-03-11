@@ -2093,7 +2093,7 @@ void Client::ReadBook(BookRequest_Struct *book) {
 		return;
 	}
 
-	std::string booktxt2 = database.GetBook(txtfile, &book_language);
+	std::string booktxt2 = content_db.GetBook(txtfile, &book_language);
 	int length = booktxt2.length();
 
 	if (booktxt2[0] != '\0') {
