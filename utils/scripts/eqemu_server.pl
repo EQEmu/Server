@@ -52,6 +52,10 @@ if (-e "eqemu_server_skip_update.txt") {
     $skip_self_update_check = 1;
 }
 
+if (-e "eqemu_server_skip_maps_update.txt") {
+    $skip_self_maps_update_check = 1;
+}
+
 #::: Check for script self update
 check_xml_to_json_conversion() if $ARGV[0] eq "convert_xml";
 do_self_update_check_routine() if !$skip_self_update_check;
@@ -460,7 +464,7 @@ sub do_installer_routines {
         get_remote_file($install_repository_request_url . "libmysql.dll", "libmysql.dll", 1);
     }
 
-    map_files_fetch_bulk();
+    map_files_fetch_bulk() if !$skip_self_maps_update_check;
     opcodes_fetch();
     plugins_fetch();
     quest_files_fetch();
@@ -1705,26 +1709,22 @@ sub fetch_server_dlls {
 
 sub fetch_peq_db_full {
     print "[Install] Downloading latest PEQ Database... Please wait...\n";
-    get_remote_file("http://edit.projecteq.net/weekly/peq_beta.zip", "updates_staged/peq_beta.zip", 1);
+    get_remote_file("http://db.projecteq.net/api/v1/dump/latest", "updates_staged/peq-latest.zip", 1);
     print "[Install] Downloaded latest PEQ Database... Extracting...\n";
-    unzip('updates_staged/peq_beta.zip', 'updates_staged/peq_db/');
-    my $start_dir = "updates_staged/peq_db";
+    unzip('updates_staged/peq-latest.zip', 'updates_staged/peq_db/');
+    my $start_dir = "updates_staged/peq_db/peq-dump";
     find(
         sub { push @files, $File::Find::name unless -d; },
         $start_dir
     );
     for my $file (@files) {
         $destination_file = $file;
-        $destination_file =~ s/updates_staged\/peq_db\///g;
-        if ($file =~ /peqbeta|player_tables/i) {
+        $destination_file =~ s/updates_staged\/peq_db\/peq-dump\///g;
+        if ($file =~ /create_tables_content|create_tables_login|create_tables_player|create_tables_queryserv|create_tables_state|create_tables_system/i) {
             print "[Install] DB :: Installing :: " . $destination_file . "\n";
             get_mysql_result_from_file($file);
         }
     }
-
-    #::: PEQ DB baseline version
-    print get_mysql_result("DELETE FROM db_version");
-    print get_mysql_result("INSERT INTO `db_version` (`version`) VALUES (9130);");
 }
 
 sub map_files_fetch_bulk {
