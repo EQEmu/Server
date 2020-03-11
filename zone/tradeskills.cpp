@@ -336,7 +336,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	}
 
 	DBTradeskillRecipe_Struct spec;
-	if (!database.GetTradeRecipe(container, c_type, some_id, user->CharacterID(), &spec)) {
+	if (!content_db.GetTradeRecipe(container, c_type, some_id, user->CharacterID(), &spec)) {
 		user->MessageString(Chat::Emote,TRADESKILL_NOCOMBINE);
 		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 		user->QueuePacket(outapp);
@@ -489,7 +489,7 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
                                     "FROM tradeskill_recipe_entries AS tre "
                                     "WHERE tre.componentcount > 0 AND tre.recipe_id = %u",
                                     rac->recipe_id);
-    auto results = database.QueryDatabase(query);
+    auto results = content_db.QueryDatabase(query);
 	if (!results.Success()) {
 		user->QueuePacket(outapp);
 		safe_delete(outapp);
@@ -706,7 +706,7 @@ EQEmu::skills::SkillType Object::TypeToSkill(uint32 type)
 
 void Client::TradeskillSearchResults(const std::string &query, unsigned long objtype, unsigned long someid) {
 
-    auto results = database.QueryDatabase(query);
+    auto results = content_db.QueryDatabase(query);
 	if (!results.Success()) {
 		return;
 	}
@@ -759,7 +759,7 @@ void Client::SendTradeskillDetails(uint32 recipe_id) {
                                     "LEFT JOIN items AS i ON tre.item_id = i.id "
                                     "WHERE tre.componentcount > 0 AND tre.recipe_id = %u",
                                     recipe_id);
-    auto results = database.QueryDatabase(query);
+    auto results = content_db.QueryDatabase(query);
 	if (!results.Success()) {
 		return;
 	}
@@ -1427,7 +1427,10 @@ void Client::LearnRecipe(uint32 recipeID)
                                     "FROM char_recipe_list WHERE char_id = %u) AS crl "
                                     "ON tr.id = crl.recipe_id "
                                     "WHERE tr.id = %u ;", CharacterID(), recipeID);
-    auto results = database.QueryDatabase(query);
+
+	// TODO: BOUNDARY REWRITE
+
+	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
 		return;
 	}

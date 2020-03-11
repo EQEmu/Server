@@ -557,6 +557,6 @@ void Trap::UpdateTrap(bool respawn, bool repopnow)
 	charid = 0;
 	if (respawn)
 	{
-		database.SetTrapData(this, repopnow);
+		content_db.SetTrapData(this, repopnow);
 	}
 }

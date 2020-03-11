@@ -956,7 +956,7 @@ bool Zone::Init(bool iStaticZone) {
 	}
 
 	LogInfo("Loading traps");
-	if (!database.LoadTraps(short_name, GetInstanceVersion()))
+	if (!content_db.LoadTraps(short_name, GetInstanceVersion()))
 	{
 		LogError("Loading traps failed");
 		return false;
@@ -1042,7 +1042,7 @@ void Zone::ReloadStaticData() {
 
 	LogInfo("Reloading traps");
 	entity_list.RemoveAllTraps();
-	if (!database.LoadTraps(GetShortName(), GetInstanceVersion()))
+	if (!content_db.LoadTraps(GetShortName(), GetInstanceVersion()))
 	{
 		LogError("Reloading traps failed");
 	}

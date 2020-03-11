@@ -3158,7 +3158,7 @@ bool QuestManager::EnableRecipe(uint32 recipe_id)
 {
 	bool success = false;
 	if (recipe_id > 0)
-		success = database.EnableRecipe(recipe_id);
+		success = content_db.EnableRecipe(recipe_id);
 	return (success);
 }
 
@@ -3166,7 +3166,7 @@ bool QuestManager::DisableRecipe(uint32 recipe_id)
 {
 	bool success = false;
 	if (recipe_id > 0)
-		success = database.DisableRecipe(recipe_id);
+		success = content_db.DisableRecipe(recipe_id);
 	return (success);
 }
 

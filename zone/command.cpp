@@ -12150,7 +12150,7 @@ void command_enablerecipe(Client *c, const Seperator *sep)
 			return;
 		}
 		if (recipe_id > 0) {
-			success = database.EnableRecipe(recipe_id);
+			success = content_db.EnableRecipe(recipe_id);
 			if (success) {
 				c->Message(Chat::White, "Recipe enabled.");
 			}
@@ -12177,7 +12177,7 @@ void command_disablerecipe(Client *c, const Seperator *sep)
 			return;
 		}
 		if (recipe_id > 0) {
-			success = database.DisableRecipe(recipe_id);
+			success = content_db.DisableRecipe(recipe_id);
 			if (success) {
 				c->Message(Chat::White, "Recipe disabled.");
 			}
