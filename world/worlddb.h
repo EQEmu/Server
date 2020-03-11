@@ -46,5 +46,6 @@ private:
 };
 
 extern WorldDatabase database;
+extern WorldDatabase content_db;
 
 #endif /*WORLDDB_H_*/

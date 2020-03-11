@@ -2209,7 +2209,7 @@ void Zone::DeleteQGlobal(std::string name, uint32 npcID, uint32 charID, uint32 z
 void Zone::LoadAdventureFlavor()
 {
 	const std::string query = "SELECT id, text FROM adventure_template_entry_flavor";
-	auto results = database.QueryDatabase(query);
+	auto results = content_db.QueryDatabase(query);
 	if (!results.Success()) {
 		return;
 	}

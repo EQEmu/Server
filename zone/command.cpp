@@ -8225,7 +8225,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 	if (strcasecmp(sep->arg[1], "adventure_template_id") == 0) {
         c->Message(Chat::Yellow,"NPCID %u now has field 'adventure_template_id' set to %s.",  npcTypeID, sep->argplus[2]);
 		std::string query = StringFormat("UPDATE npc_types SET adventure_template_id = '%s' WHERE id = %i",  sep->argplus[2],npcTypeID);
-		database.QueryDatabase(query);
+		content_db.QueryDatabase(query);
 		return;
 	}
 

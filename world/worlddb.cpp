@@ -27,6 +27,7 @@
 #include "sof_char_create_data.h"
 
 WorldDatabase database;
+WorldDatabase content_db;
 extern std::vector<RaceClassAllocation> character_create_allocations;
 extern std::vector<RaceClassCombos> character_create_race_class_combos;
 

@@ -137,6 +137,25 @@ void LoadDatabaseConnections()
 
 		std::exit(1);
 	}
+
+	/**
+	 * Multi-tenancy: Content database
+	 */
+	if (!Config->ContentDbHost.empty()) {
+		if (!content_db.Connect(
+			!Config->ContentDbHost.empty() ? Config->ContentDbHost.c_str() : Config->DatabaseHost.c_str(),
+			!Config->ContentDbUsername.empty() ? Config->ContentDbUsername.c_str() : Config->DatabaseUsername.c_str(),
+			!Config->ContentDbPassword.empty() ? Config->ContentDbPassword.c_str() : Config->DatabasePassword.c_str(),
+			!Config->ContentDbName.empty() ? Config->ContentDbName.c_str() : Config->DatabaseDB.c_str(),
+			Config->ContentDbPort != 0 ? Config->ContentDbPort : Config->DatabasePort
+		)) {
+			LogError("Cannot continue without a content database connection");
+			std::exit(1);
+		}
+	} else {
+		content_db.SetMysql(database.getMySQL());
+	}
+
 }
 
 void CheckForXMLConfigUpgrade()
@@ -587,6 +606,7 @@ int main(int argc, char** argv) {
 		if (InterserverTimer.Check()) {
 			InterserverTimer.Start();
 			database.ping();
+			content_db.ping();
 
 			std::string window_title = StringFormat("World: %s Clients: %i", Config->LongName.c_str(), client_list.GetClientCount());
 			UpdateWindowTitle(window_title);
