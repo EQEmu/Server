@@ -1528,7 +1528,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 		}
 	} 	
 	/* use normal starting zone logic to either get defaults, or if startzone was set, load that from the db table.*/
-	bool ValidStartZone = database.GetStartZone(&pp, cc, m_ClientVersionBit & EQEmu::versions::maskTitaniumAndEarlier);
+	bool ValidStartZone = content_db.GetStartZone(&pp, cc, m_ClientVersionBit & EQEmu::versions::maskTitaniumAndEarlier);
 
 	if (!ValidStartZone){
 		return false;

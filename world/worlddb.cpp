@@ -202,7 +202,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 				p_character_select_entry_struct->Deity,
 				p_character_select_entry_struct->Race
 			);
-			auto      results_bind = database.QueryDatabase(character_list_query);
+			auto      results_bind = content_db.QueryDatabase(character_list_query);
 			for (auto row_d        = results_bind.begin(); row_d != results_bind.end(); ++row_d) {
 				/* If a bind_id is specified, make them start there */
 				if (atoi(row_d[1]) != 0) {

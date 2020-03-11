@@ -12374,7 +12374,7 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 	std::string query = StringFormat("SELECT zone_id, bind_id, x, y, z FROM start_zones "
 		"WHERE player_class=%i AND player_deity=%i AND player_race=%i",
 		m_pp.class_, m_pp.deity, m_pp.race);
-	auto results = database.QueryDatabase(query);
+	auto results = content_db.QueryDatabase(query);
 	if (!results.Success()) {
 		LogError("No valid start zones found for /setstartcity");
 		return;
@@ -12405,7 +12405,7 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 	query = StringFormat("SELECT zone_id, bind_id FROM start_zones "
 		"WHERE player_class=%i AND player_deity=%i AND player_race=%i",
 		m_pp.class_, m_pp.deity, m_pp.race);
-	results = database.QueryDatabase(query);
+	results = content_db.QueryDatabase(query);
 	if (!results.Success())
 		return;
 
