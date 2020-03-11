@@ -2162,7 +2162,7 @@ void Zone::LoadAlternateCurrencies()
 	AltCurrencyDefinition_Struct current_currency;
 
     const std::string query = "SELECT id, item_id FROM alternate_currency";
-    auto results = database.QueryDatabase(query);
+    auto results = content_db.QueryDatabase(query);
     if (!results.Success()) {
 		return;
     }
