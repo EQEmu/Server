@@ -83,8 +83,8 @@ Doors::Doors(const char *model, const glm::vec4 &position, uint8 open_type, uint
 	strn0cpy(door_name, model, 32);
 	strn0cpy(destination_zone_name, "NONE", 32);
 
-	this->database_id = (uint32) database.GetDoorsCountPlusOne(zone->GetShortName(), zone->GetInstanceVersion());
-	this->door_id     = (uint8) database.GetDoorsDBCountPlusOne(zone->GetShortName(), zone->GetInstanceVersion());
+	this->database_id = (uint32) content_db.GetDoorsCountPlusOne(zone->GetShortName(), zone->GetInstanceVersion());
+	this->door_id     = (uint8) content_db.GetDoorsDBCountPlusOne(zone->GetShortName(), zone->GetInstanceVersion());
 
 	this->open_type               = open_type;
 	this->size                    = size;
@@ -451,7 +451,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger) {
 			if (!disable_add_to_key_ring) {
 				sender->KeyRingAdd(player_key);
 			}
-			if (database.GetZoneID(destination_zone_name) == zone->GetZoneID()) {
+			if (content_db.GetZoneID(destination_zone_name) == zone->GetZoneID()) {
 				sender->MovePC(
 						zone->GetZoneID(),
 						zone->GetInstanceID(),
@@ -462,7 +462,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger) {
 				);
 			} else {
 				sender->MovePC(
-						database.GetZoneID(destination_zone_name),
+						content_db.GetZoneID(destination_zone_name),
 						static_cast<uint32>(destination_instance_id),
 						m_Destination.x,
 						m_Destination.y,
@@ -473,7 +473,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger) {
 		}
 
 		if ((!IsDoorOpen() || open_type == 58) && (!required_key_item)) {
-			if (database.GetZoneID(destination_zone_name) == zone->GetZoneID()) {
+			if (content_db.GetZoneID(destination_zone_name) == zone->GetZoneID()) {
 				sender->MovePC(
 						zone->GetZoneID(),
 						zone->GetInstanceID(),
@@ -484,7 +484,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger) {
 				);
 			} else {
 				sender->MovePC(
-						database.GetZoneID(destination_zone_name),
+					content_db.GetZoneID(destination_zone_name),
 						static_cast<uint32>(this->destination_instance_id),
 						m_Destination.x,
 						m_Destination.y,
@@ -820,14 +820,14 @@ void Doors::SetDisableTimer(bool flag) {
 
 void Doors::CreateDatabaseEntry()
 {
-	if (database.GetDoorsDBCountPlusOne(zone->GetShortName(), zone->GetInstanceVersion()) - 1 >= 255) {
+	if (content_db.GetDoorsDBCountPlusOne(zone->GetShortName(), zone->GetInstanceVersion()) - 1 >= 255) {
 		return;
 	}
 
 	/**
 	 * Persist
 	 */
-	database.InsertDoor(
+	content_db.InsertDoor(
 		GetDoorDBID(),
 		GetDoorID(),
 		GetDoorName(),

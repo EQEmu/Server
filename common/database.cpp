@@ -1130,9 +1130,9 @@ uint32 Database::GetZoneID(const char* zonename) {
 	if (zonename == nullptr)
 		return 0;
 
-	for (auto iter = zonename_array.begin(); iter != zonename_array.end(); ++iter)
-		if (strcasecmp(iter->second.c_str(), zonename) == 0)
-			return iter->first;
+	for (auto & iter : zonename_array)
+		if (strcasecmp(iter.second.c_str(), zonename) == 0)
+			return iter.first;
 
 	return 0;
 }

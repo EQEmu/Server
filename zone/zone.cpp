@@ -743,7 +743,7 @@ void Zone::LoadZoneDoors(const char* zone, int16 version)
 	LogInfo("Loading doors for [{}] ", zone);
 
 	uint32 maxid;
-	int32 count = database.GetDoorsCount(&maxid, zone, version);
+	int32 count = content_db.GetDoorsCount(&maxid, zone, version);
 	if(count < 1) {
 		LogInfo("No doors loaded");
 		return;
@@ -751,7 +751,7 @@ void Zone::LoadZoneDoors(const char* zone, int16 version)
 
 	auto dlist = new Door[count];
 
-	if(!database.LoadDoors(count, dlist, zone, version)) {
+	if(!content_db.LoadDoors(count, dlist, zone, version)) {
 		LogError("Failed to load doors");
 		delete[] dlist;
 		return;

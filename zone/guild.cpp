@@ -408,35 +408,3 @@ void Client::GuildChangeRank(const char* name, uint32 guild_id, uint32 oldrank, 
 	SendGuildMembers(guild_id, true);
 }*/
 
-
-bool ZoneDatabase::CheckGuildDoor(uint8 doorid, uint16 guild_id, const char* zone) {
-
-	std::string query = StringFormat("SELECT guild FROM doors WHERE doorid = %i AND zone = '%s'",
-                                    doorid-128, zone);
-    auto results = QueryDatabase(query);
-    if (!results.Success()) {
-		return false;
-	}
-
-	if (results.RowCount() != 1)
-        return false;
-
-    auto row = results.begin();
-    return atoi(row[0]) == guild_id;
-}
-
-bool ZoneDatabase::SetGuildDoor(uint8 doorid,uint16 guild_id, const char* zone) {
-
-	if (doorid > 127)
-		doorid = doorid - 128;
-
-    std::string query = StringFormat("UPDATE doors SET guild = %i WHERE (doorid=%i) AND (zone='%s')",
-                                        guild_id, doorid, zone);
-    auto results = QueryDatabase(query);
-	if (!results.Success()) {
-		return false;
-	}
-
-	return (results.RowsAffected() > 0);
-}
-
