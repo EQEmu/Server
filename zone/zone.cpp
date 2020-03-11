@@ -1941,10 +1941,10 @@ void Zone::SetGraveyard(uint32 zoneid, const glm::vec4& graveyardPosition) {
 void Zone::LoadZoneBlockedSpells(uint32 zone_id)
 {
 	if (!blocked_spells) {
-		zone_total_blocked_spells = database.GetBlockedSpellsCount(zone_id);
+		zone_total_blocked_spells = content_db.GetBlockedSpellsCount(zone_id);
 		if (zone_total_blocked_spells > 0) {
 			blocked_spells = new ZoneSpellsBlocked[zone_total_blocked_spells];
-			if (!database.LoadBlockedSpells(zone_total_blocked_spells, blocked_spells, zone_id)) {
+			if (!content_db.LoadBlockedSpells(zone_total_blocked_spells, blocked_spells, zone_id)) {
 				LogError(" Failed to load blocked spells");
 				ClearBlockedSpells();
 			}
