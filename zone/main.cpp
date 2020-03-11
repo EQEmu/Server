@@ -359,7 +359,7 @@ int main(int argc, char** argv) {
 	title_manager.LoadTitles();
 
 	LogInfo("Loading tributes");
-	database.LoadTributes();
+	content_db.LoadTributes();
 
 	LogInfo("Loading corpse timers");
 	database.GetDecayTimes(npcCorpseDecayTimes);
