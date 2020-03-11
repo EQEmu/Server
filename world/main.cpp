@@ -143,11 +143,11 @@ void LoadDatabaseConnections()
 	 */
 	if (!Config->ContentDbHost.empty()) {
 		if (!content_db.Connect(
-			!Config->ContentDbHost.empty() ? Config->ContentDbHost.c_str() : Config->DatabaseHost.c_str(),
-			!Config->ContentDbUsername.empty() ? Config->ContentDbUsername.c_str() : Config->DatabaseUsername.c_str(),
-			!Config->ContentDbPassword.empty() ? Config->ContentDbPassword.c_str() : Config->DatabasePassword.c_str(),
-			!Config->ContentDbName.empty() ? Config->ContentDbName.c_str() : Config->DatabaseDB.c_str(),
-			Config->ContentDbPort != 0 ? Config->ContentDbPort : Config->DatabasePort
+			Config->ContentDbHost.c_str() ,
+			Config->ContentDbUsername.c_str(),
+			Config->ContentDbPassword.c_str(),
+			Config->ContentDbName.c_str(),
+			Config->ContentDbPort
 		)) {
 			LogError("Cannot continue without a content database connection");
 			std::exit(1);
