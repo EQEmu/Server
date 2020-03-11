@@ -69,7 +69,7 @@ bool TaskManager::LoadTaskSets()
 		"ORDER BY `id`, `taskid` ASC",
 		MAXTASKSETS, MAXTASKS
 	);
-	auto        results = database.QueryDatabase(query);
+	auto        results = content_db.QueryDatabase(query);
 	if (!results.Success()) {
 		LogError("Error in TaskManager::LoadTaskSets: [{}]", results.ErrorMessage().c_str());
 		return false;
@@ -131,7 +131,7 @@ bool TaskManager::LoadTasks(int singleTask)
 
 	const char *ERR_MYSQLERROR = "[TASKS]Error in TaskManager::LoadTasks: %s";
 
-	auto results = database.QueryDatabase(query);
+	auto results = content_db.QueryDatabase(query);
 	if (!results.Success()) {
 		LogError(ERR_MYSQLERROR, results.ErrorMessage().c_str());
 		return false;
@@ -188,7 +188,7 @@ bool TaskManager::LoadTasks(int singleTask)
 				 "`goalcount`, `delivertonpc`, `zones`, `optional` FROM `task_activities` WHERE `taskid` = "
 				 "%i AND `activityid` < %i ORDER BY taskid, activityid ASC",
 				 singleTask, MAXACTIVITIESPERTASK);
-	results = database.QueryDatabase(query);
+	results = content_db.QueryDatabase(query);
 	if (!results.Success()) {
 		LogError(ERR_MYSQLERROR, results.ErrorMessage().c_str());
 		return false;
@@ -3349,7 +3349,7 @@ bool TaskGoalListManager::LoadLists()
 	std::string query = "SELECT `listid`, COUNT(`entry`) "
 			    "FROM `goallists` GROUP by `listid` "
 			    "ORDER BY `listid`";
-	auto results = database.QueryDatabase(query);
+	auto results = content_db.QueryDatabase(query);
 	if (!results.Success()) {
 		return false;
 	}
@@ -3379,7 +3379,7 @@ bool TaskGoalListManager::LoadLists()
 				     "WHERE `listid` = %i "
 				     "ORDER BY `entry` ASC LIMIT %i",
 				     listID, size);
-		results = database.QueryDatabase(query);
+		results = content_db.QueryDatabase(query);
 		if (!results.Success()) {
 			continue;
 		}
@@ -3484,7 +3484,7 @@ bool TaskProximityManager::LoadProximities(int zoneID) {
                                     "`miny`, `maxy`, `minz`, `maxz` "
                                     "FROM `proximities` WHERE `zoneid` = %i "
                                     "ORDER BY `zoneid` ASC", zoneID);
-    auto results = database.QueryDatabase(query);
+    auto results = content_db.QueryDatabase(query);
     if (!results.Success()) {
 		return false;
     }
