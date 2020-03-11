@@ -35,13 +35,14 @@
 DBcore::DBcore()
 {
 	mysql_init(&mysql);
-	pHost     = 0;
-	pUser     = 0;
-	pPassword = 0;
-	pDatabase = 0;
-	pCompress = false;
-	pSSL      = false;
-	pStatus   = Closed;
+	pHost           = nullptr;
+	pUser           = nullptr;
+	pPassword       = nullptr;
+	pDatabase       = nullptr;
+	pCompress       = false;
+	pSSL            = false;
+	pStatus         = Closed;
+	connection_type = DATABASE_CONNECTION_DEFAULT;
 }
 
 DBcore::~DBcore()
@@ -80,6 +81,8 @@ MySQLRequestResult DBcore::QueryDatabase(const char *query, uint32 querylen, boo
 	if (pStatus != Connected) {
 		Open();
 	}
+
+
 
 	// request query. != 0 indicates some kind of error.
 	if (mysql_real_query(&mysql, query, querylen) != 0) {
@@ -256,6 +259,21 @@ bool DBcore::Open(uint32 *errnum, char *errbuf)
 		pStatus = Error;
 		return false;
 	}
+}
+
+void DBcore::SetMysql(MYSQL *mysql)
+{
+	DBcore::mysql = *mysql;
+}
+
+int8 DBcore::GetConnectionType() const
+{
+	return connection_type;
+}
+
+void DBcore::SetConnectionType(int8 connection_type)
+{
+	DBcore::connection_type = connection_type;
 }
 
 

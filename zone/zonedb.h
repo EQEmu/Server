@@ -577,6 +577,7 @@ protected:
 };
 
 extern ZoneDatabase database;
+extern ZoneDatabase content_db;
 
 #endif /*ZONEDB_H_*/
 

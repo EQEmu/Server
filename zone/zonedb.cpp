@@ -20,6 +20,7 @@
 extern Zone* zone;
 
 ZoneDatabase database;
+ZoneDatabase content_db;
 
 ZoneDatabase::ZoneDatabase()
 : SharedDatabase()

@@ -237,6 +237,29 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
+	/**
+	 * Multi-tenancy: Content Database
+	 */
+	if (!Config->ContentDbHost.empty()) {
+		if (!content_db.Connect(
+			!Config->ContentDbHost.empty() ? Config->ContentDbHost.c_str() : Config->DatabaseHost.c_str(),
+			!Config->ContentDbUsername.empty() ? Config->ContentDbUsername.c_str() : Config->DatabaseUsername.c_str(),
+			!Config->ContentDbPassword.empty() ? Config->ContentDbPassword.c_str() : Config->DatabasePassword.c_str(),
+			!Config->ContentDbName.empty() ? Config->ContentDbName.c_str() : Config->DatabaseDB.c_str(),
+			Config->ContentDbPort != 0 ? Config->ContentDbPort : Config->DatabasePort
+		)) {
+			LogError("Cannot continue without a content database connection");
+			return 1;
+		}
+	} else {
+		content_db.SetMysql(database.getMySQL());
+	}
+//
+//	auto results = content_db.QueryDatabase("SELECT id FROM items limit 10");
+//	for (auto row = results.begin(); row != results.end(); ++row) {
+//		std::cout << row[0] << std::endl;
+//	}
+
 	/* Register Log System and Settings */
 	LogSys.SetGMSayHandler(&Zone::GMSayHookCallBackProcess);
 	database.LoadLogSettings(LogSys.log_settings);
@@ -543,6 +566,7 @@ int main(int argc, char** argv) {
 		if (InterserverTimer.Check()) {
 			InterserverTimer.Start();
 			database.ping();
+			content_db.ping();
 			entity_list.UpdateWho();
 		}
 	};
