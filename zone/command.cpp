@@ -4015,7 +4015,7 @@ void command_faction(Client *c, const Seperator *sep)
 		else {
 			query = fmt::format("SELECT `id`,`name` FROM `faction_list` WHERE `name` LIKE '%{}%'", faction_filter.c_str());
 		}
-		auto results = database.QueryDatabase(query);
+		auto results = content_db.QueryDatabase(query);
 		if (!results.Success())
 			return;
 		if (results.RowCount() == 0) {
@@ -4048,7 +4048,7 @@ void command_faction(Client *c, const Seperator *sep)
 			revquery = fmt::format(
 				"SELECT id,`name`, current_value FROM faction_list INNER JOIN faction_values ON faction_list.id = faction_values.faction_id WHERE `name` like '%{}%' and char_id = {}", faction_filter.c_str(), charid);
 		}
-		auto revresults = database.QueryDatabase(revquery);
+		auto revresults = content_db.QueryDatabase(revquery);
 		if (!revresults.Success())
 			return;
 		if (revresults.RowCount() == 0) {

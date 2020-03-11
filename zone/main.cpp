@@ -353,7 +353,7 @@ int main(int argc, char** argv) {
 	guild_mgr.LoadGuilds();
 
 	LogInfo("Loading factions");
-	database.LoadFactionData();
+	content_db.LoadFactionData();
 
 	LogInfo("Loading titles");
 	title_manager.LoadTitles();
