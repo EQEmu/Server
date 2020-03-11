@@ -3093,6 +3093,14 @@ bool NPC::AICheckCloseBeneficialSpells(
 			continue;
 		}
 
+		if (!mob->CheckLosFN(caster)) {
+			continue;
+		}
+
+		if (mob->GetReverseFactionCon(caster) >= FACTION_KINDLY) {
+			continue;
+		}
+
 		LogAICastBeneficialClose(
 			"NPC [{}] Distance [{}] Cast Range [{}] Caster [{}]",
 			mob->GetCleanName(),
@@ -3100,10 +3108,6 @@ bool NPC::AICheckCloseBeneficialSpells(
 			cast_range,
 			caster->GetCleanName()
 		);
-
-		if (mob->GetReverseFactionCon(caster) >= FACTION_KINDLY) {
-			continue;
-		}
 
 		if ((spell_types & SpellType_Buff) && !RuleB(NPC, BuffFriends)) {
 			if (mob != caster) {
