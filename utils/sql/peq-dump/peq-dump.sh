@@ -21,7 +21,8 @@ echo "World path is [$world_path] bin is [$world_bin]"
 
 dump_path=/tmp/peq-dump/
 echo "Generating dump path [${dump_path}]"
-rm -rf ${dump_path} && mkdir -p ${dump_path}
+rm -rf ${dump_path}
+mkdir -p ${dump_path}
 
 #############################################
 # generate "drop_" table files
@@ -61,7 +62,7 @@ bash -c "cd ${dump_path} && ls * | grep drop | sed 's/.*/source &;/' > drop_all_
 human_date=$(date +"%B-%d-%Y" | tr '[:upper:]' '[:lower:]')
 
 echo "Compressing..."
-bash -c "cd /tmp/ && rm peq-latest.zip && zip peq-latest.zip peq-dump/* && mv ${dump_path}peq-latest.zip /tmp/peq-latest.zip"
+bash -c "cd /tmp/ && rm -rf peq-latest.zip && zip peq-latest.zip peq-dump/* && mv ${dump_path}peq-latest.zip /tmp/peq-latest.zip"
 
 echo "Cleaning up..."
 rm -rf ${dump_path}
