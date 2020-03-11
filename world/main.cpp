@@ -424,8 +424,8 @@ int main(int argc, char** argv) {
 	PurgeInstanceTimer.Start(450000);
 
 	LogInfo("Loading char create info");
-	database.LoadCharacterCreateAllocations();
-	database.LoadCharacterCreateCombos();
+	content_db.LoadCharacterCreateAllocations();
+	content_db.LoadCharacterCreateCombos();
 
 	std::unique_ptr<EQ::Net::ConsoleServer> console;
 	if (Config->TelnetEnabled) {
