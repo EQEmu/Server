@@ -49,6 +49,8 @@ int main(int argc, char **argv)
 	auto Config = EQEmuConfig::get();
 
 	SharedDatabase database;
+	SharedDatabase content_db;
+
 	LogInfo("Connecting to database");
 	if (!database.Connect(
 		Config->DatabaseHost.c_str(),
@@ -61,7 +63,24 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	/* Register Log System and Settings */
+	/**
+	 * Multi-tenancy: Content database
+	 */
+	if (!Config->ContentDbHost.empty()) {
+		if (!content_db.Connect(
+			Config->ContentDbHost.c_str() ,
+			Config->ContentDbUsername.c_str(),
+			Config->ContentDbPassword.c_str(),
+			Config->ContentDbName.c_str(),
+			Config->ContentDbPort
+		)) {
+			LogError("Cannot continue without a content database connection");
+			return 1;
+		}
+	} else {
+		content_db.SetMysql(database.getMySQL());
+	}
+
 	database.LoadLogSettings(LogSys.log_settings);
 	LogSys.StartFileLogs();
 
@@ -72,15 +91,15 @@ int main(int argc, char **argv)
 	}
 
 	if (arg_1 == "spells") {
-		ExportSpells(&database);
+		ExportSpells(&content_db);
 		return 0;
 	}
 	if (arg_1 == "skills") {
-		ExportSkillCaps(&database);
+		ExportSkillCaps(&content_db);
 		return 0;
 	}
 	if (arg_1 == "basedata") {
-		ExportBaseData(&database);
+		ExportBaseData(&content_db);
 		return 0;
 	}
 	if (arg_1 == "dbstring") {
@@ -88,9 +107,9 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
-	ExportSpells(&database);
-	ExportSkillCaps(&database);
-	ExportBaseData(&database);
+	ExportSpells(&content_db);
+	ExportSkillCaps(&content_db);
+	ExportBaseData(&content_db);
 	ExportDBStrings(&database);
 
 	LogSys.CloseFileLogs();
