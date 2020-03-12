@@ -39,8 +39,11 @@ EQEmuLogSys LogSys;
 #ifdef _WINDOWS
 #include <direct.h>
 #else
+
 #include <unistd.h>
+
 #endif
+
 #include <sys/stat.h>
 
 inline bool MakeDirectory(const std::string &directory_name)
@@ -54,7 +57,7 @@ inline bool MakeDirectory(const std::string &directory_name)
 		_mkdir(directory_name.c_str());
 		return true;
 	}
-	
+
 #else
 	struct stat st;
 	if (stat(directory_name.c_str(), &st) == 0) {
@@ -69,13 +72,14 @@ inline bool MakeDirectory(const std::string &directory_name)
 	return false;
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
 	RegisterExecutablePlatform(ExePlatformSharedMemory);
 	LogSys.LoadLogSettingsDefaults();
 	set_exception_handler();
 
 	LogInfo("Shared Memory Loader Program");
-	if(!EQEmuConfig::LoadConfig()) {
+	if (!EQEmuConfig::LoadConfig()) {
 		LogError("Unable to load configuration file");
 		return 1;
 	}
@@ -85,8 +89,11 @@ int main(int argc, char **argv) {
 	SharedDatabase database;
 	LogInfo("Connecting to database");
 	if (!database.Connect(
-		Config->DatabaseHost.c_str(), Config->DatabaseUsername.c_str(),
-		Config->DatabasePassword.c_str(), Config->DatabaseDB.c_str(), Config->DatabasePort
+		Config->DatabaseHost.c_str(),
+		Config->DatabaseUsername.c_str(),
+		Config->DatabasePassword.c_str(),
+		Config->DatabaseDB.c_str(),
+		Config->DatabasePort
 	)) {
 		LogError("Unable to connect to the database, cannot continue without a database connection");
 		return 1;
@@ -114,133 +121,136 @@ int main(int argc, char **argv) {
 	}
 
 	std::string hotfix_name = "";
-	bool load_all = true;
-	bool load_items = false;
-	bool load_factions = false;
-	bool load_loot = false;
+
+	bool load_all        = true;
+	bool load_items      = false;
+	bool load_factions   = false;
+	bool load_loot       = false;
 	bool load_skill_caps = false;
-	bool load_spells = false;
-	bool load_bd = false;
-	if(argc > 1) {
-		for(int i = 1; i < argc; ++i) {
-			switch(argv[i][0]) {	
-			case 'b':
-				if(strcasecmp("base_data", argv[i]) == 0) {
-					load_bd = true;
-					load_all = false;
-				}
-				break;
-	
-			case 'i':
-				if(strcasecmp("items", argv[i]) == 0) {
-					load_items = true;
-					load_all = false;
-				}
-				break;
-	
-			case 'f':
-				if(strcasecmp("factions", argv[i]) == 0) {
-					load_factions = true;
-					load_all = false;
-				}
-				break;
-	
-			case 'l':
-				if(strcasecmp("loot", argv[i]) == 0) {
-					load_loot = true;
-					load_all = false;
-				}
-				break;
-	
-			case 's':
-				if(strcasecmp("skill_caps", argv[i]) == 0) {
-					load_skill_caps = true;
-					load_all = false;
-				} else if(strcasecmp("spells", argv[i]) == 0) {
-					load_spells = true;
-					load_all = false;
-				}
-				break;
-			case '-': {
-				auto split = SplitString(argv[i], '=');
-				if(split.size() >= 2) {
-					auto command = split[0];
-					auto argument = split[1];
-					if(strcasecmp("-hotfix", command.c_str()) == 0) {
-						hotfix_name = argument;
-						load_all = true;
+	bool load_spells     = false;
+	bool load_bd         = false;
+
+	if (argc > 1) {
+		for (int i = 1; i < argc; ++i) {
+			switch (argv[i][0]) {
+				case 'b':
+					if (strcasecmp("base_data", argv[i]) == 0) {
+						load_bd  = true;
+						load_all = false;
 					}
+					break;
+
+				case 'i':
+					if (strcasecmp("items", argv[i]) == 0) {
+						load_items = true;
+						load_all   = false;
+					}
+					break;
+
+				case 'f':
+					if (strcasecmp("factions", argv[i]) == 0) {
+						load_factions = true;
+						load_all      = false;
+					}
+					break;
+
+				case 'l':
+					if (strcasecmp("loot", argv[i]) == 0) {
+						load_loot = true;
+						load_all  = false;
+					}
+					break;
+
+				case 's':
+					if (strcasecmp("skill_caps", argv[i]) == 0) {
+						load_skill_caps = true;
+						load_all        = false;
+					}
+					else if (strcasecmp("spells", argv[i]) == 0) {
+						load_spells = true;
+						load_all    = false;
+					}
+					break;
+				case '-': {
+					auto split = SplitString(argv[i], '=');
+					if (split.size() >= 2) {
+						auto command  = split[0];
+						auto argument = split[1];
+						if (strcasecmp("-hotfix", command.c_str()) == 0) {
+							hotfix_name = argument;
+							load_all    = true;
+						}
+					}
+					break;
 				}
-				break;
-			}
 			}
 		}
 	}
 
-	if(hotfix_name.length() > 0) {
+	if (hotfix_name.length() > 0) {
 		LogInfo("Writing data for hotfix [{}]", hotfix_name.c_str());
 	}
-	
-	if(load_all || load_items) {
+
+	if (load_all || load_items) {
 		LogInfo("Loading items");
 		try {
 			LoadItems(&database, hotfix_name);
-		} catch(std::exception &ex) {
+		} catch (std::exception &ex) {
 			LogError("{}", ex.what());
 			return 1;
 		}
 	}
-	
-	if(load_all || load_factions) {
+
+	if (load_all || load_factions) {
 		LogInfo("Loading factions");
 		try {
 			LoadFactions(&database, hotfix_name);
-		} catch(std::exception &ex) {
+		} catch (std::exception &ex) {
 			LogError("{}", ex.what());
 			return 1;
 		}
 	}
-	
-	if(load_all || load_loot) {
+
+	if (load_all || load_loot) {
 		LogInfo("Loading loot");
 		try {
 			LoadLoot(&database, hotfix_name);
-		} catch(std::exception &ex) {
+		} catch (std::exception &ex) {
 			LogError("{}", ex.what());
 			return 1;
 		}
 	}
-	
-	if(load_all || load_skill_caps) {
+
+	if (load_all || load_skill_caps) {
 		LogInfo("Loading skill caps");
 		try {
 			LoadSkillCaps(&database, hotfix_name);
-		} catch(std::exception &ex) {
+		} catch (std::exception &ex) {
 			LogError("{}", ex.what());
 			return 1;
 		}
 	}
-	
-	if(load_all || load_spells) {
+
+	if (load_all || load_spells) {
 		LogInfo("Loading spells");
 		try {
 			LoadSpells(&database, hotfix_name);
-		} catch(std::exception &ex) {
+		} catch (std::exception &ex) {
 			LogError("{}", ex.what());
 			return 1;
 		}
 	}
-	
-	if(load_all || load_bd) {
+
+	if (load_all || load_bd) {
 		LogInfo("Loading base data");
 		try {
 			LoadBaseData(&database, hotfix_name);
-		} catch(std::exception &ex) {
+		} catch (std::exception &ex) {
 			LogError("{}", ex.what());
 			return 1;
 		}
 	}
-	
+
 	LogSys.CloseFileLogs();
 	return 0;
 }
