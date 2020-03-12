@@ -176,7 +176,7 @@ bool SpawnGroupList::RemoveSpawnGroup(uint32 in_id)
 void SpawnGroupList::ReloadSpawnGroups()
 {
 	ClearSpawnGroups();
-	database.LoadSpawnGroups(zone->GetShortName(), zone->GetInstanceVersion(), &zone->spawn_group_list);
+	content_db.LoadSpawnGroups(zone->GetShortName(), zone->GetInstanceVersion(), &zone->spawn_group_list);
 }
 
 void SpawnGroupList::ClearSpawnGroups()

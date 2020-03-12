@@ -671,7 +671,7 @@ bool AdventureManager::LoadAdventureTemplates()
 			adventure_template
 		)
 	;
-    auto results = database.QueryDatabase(query);
+    auto results = content_db.QueryDatabase(query);
     if (!results.Success()) {
 		return false;
     }

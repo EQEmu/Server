@@ -9956,7 +9956,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
     }
 
 	if (strcasecmp(sep->arg[1], "testload") == 0 && atoi(sep->arg[2])!=0) {
-        database.LoadSpawnGroupsByID(atoi(sep->arg[2]),&zone->spawn_group_list);
+        content_db.LoadSpawnGroupsByID(atoi(sep->arg[2]),&zone->spawn_group_list);
         c->Message(Chat::White, "Group %i loaded successfully!",  atoi(sep->arg[2]));
         return;
     }

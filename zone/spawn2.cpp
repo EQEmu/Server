@@ -166,7 +166,7 @@ bool Spawn2::Process() {
 		}
 
 		if (spawn_group == nullptr) {
-			database.LoadSpawnGroupsByID(spawngroup_id_, &zone->spawn_group_list);
+			content_db.LoadSpawnGroupsByID(spawngroup_id_, &zone->spawn_group_list);
 			spawn_group = zone->spawn_group_list.GetSpawnGroup(spawngroup_id_);
 		}
 

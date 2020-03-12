@@ -937,13 +937,13 @@ bool Zone::Init(bool iStaticZone) {
 	}
 
 	LogInfo("Loading spawn groups");
-	if (!database.LoadSpawnGroups(short_name, GetInstanceVersion(), &spawn_group_list)) {
+	if (!content_db.LoadSpawnGroups(short_name, GetInstanceVersion(), &spawn_group_list)) {
 		LogError("Loading spawn groups failed");
 		return false;
 	}
 
 	LogInfo("Loading spawn2 points");
-	if (!database.PopulateZoneSpawnList(zoneid, spawn2_list, GetInstanceVersion()))
+	if (!content_db.PopulateZoneSpawnList(zoneid, spawn2_list, GetInstanceVersion()))
 	{
 		LogError("Loading spawn2 points failed");
 		return false;
@@ -1607,7 +1607,7 @@ void Zone::Repop(uint32 delay)
 
 	quest_manager.ClearAllTimers();
 
-	if (!database.PopulateZoneSpawnList(zoneid, spawn2_list, GetInstanceVersion(), delay))
+	if (!content_db.PopulateZoneSpawnList(zoneid, spawn2_list, GetInstanceVersion(), delay))
 		LogDebug("Error in Zone::Repop: database.PopulateZoneSpawnList failed");
 
 	initgrids_timer.Start();
