@@ -10372,7 +10372,7 @@ void command_object(Client *c, const Seperator *sep)
 					     "ORDER BY id",
 					     zone->GetZoneID(), zone->GetInstanceVersion());
 
-		auto results = database.QueryDatabase(query);
+		auto results = content_db.QueryDatabase(query);
 		if (!results.Success()) {
 			c->Message(Chat::White, "Error in objects query");
 			return;
@@ -10499,7 +10499,7 @@ void command_object(Client *c, const Seperator *sep)
 		if (id) {
 			// ID specified. Verify that it doesn't already exist.
 			query = StringFormat("SELECT COUNT(*) FROM object WHERE ID = %u", id);
-			auto results = database.QueryDatabase(query);
+			auto results = content_db.QueryDatabase(query);
 			if (results.Success() && results.RowCount() != 0) {
 				auto row = results.begin();
 				if (atoi(row[0]) > 0) // Yep, in database already.
@@ -10529,7 +10529,7 @@ void command_object(Client *c, const Seperator *sep)
 		    od.y - 0.2f, od.y + 0.2f,  // Much less processing power used this way.
 		    od.z - 0.2f, od.z + 0.2f); // It's pretty forgiving, though, allowing for close-proximity objects
 
-		auto results = database.QueryDatabase(query);
+		auto results = content_db.QueryDatabase(query);
 		if (results.Success() && results.RowCount() != 0) {
 			auto row = results.begin();
 			objectsFound = atoi(row[0]); // Number of nearby objects from database
@@ -10638,7 +10638,7 @@ void command_object(Client *c, const Seperator *sep)
 		} else {
 			// Object not found in-zone in a modifiable form. Check for valid matching circumstances.
 			std::string query = StringFormat("SELECT zoneid, version, type FROM object WHERE id = %u", id);
-			auto results = database.QueryDatabase(query);
+			auto results = content_db.QueryDatabase(query);
 			if (!results.Success() || results.RowCount() == 0) {
 				c->Message(Chat::White, "ERROR: Object %u not found", id);
 				return;
@@ -10667,7 +10667,7 @@ void command_object(Client *c, const Seperator *sep)
 				// Convert to tradeskill object temporarily for changes
 				query = StringFormat("UPDATE object SET type = %u WHERE id = %u", staticType, id);
 
-				database.QueryDatabase(query);
+				content_db.QueryDatabase(query);
 
 				c->Message(Chat::White, "Static Object %u unlocked for editing. You must zone out and back in to "
 					      "make your changes, then commit them with '#object Save'.",
@@ -10862,7 +10862,7 @@ void command_object(Client *c, const Seperator *sep)
 
 		if (!(o = entity_list.FindObject(id))) {
 			std::string query = StringFormat("SELECT zoneid, version, type FROM object WHERE id = %u", id);
-			auto results = database.QueryDatabase(query);
+			auto results = content_db.QueryDatabase(query);
 			if (!results.Success() || results.RowCount() == 0) {
 				c->Message(Chat::White, "ERROR: Object %u not found", id);
 				return;
@@ -11002,7 +11002,7 @@ void command_object(Client *c, const Seperator *sep)
 		// If this ID isn't in the database yet, it's a new object
 		bNewObject = true;
 		std::string query = StringFormat("SELECT zoneid, version, type FROM object WHERE id = %u", id);
-		auto results = database.QueryDatabase(query);
+		auto results = content_db.QueryDatabase(query);
 		if (results.Success() && results.RowCount() != 0) {
 			auto row = results.begin();
 			od.zone_id = atoi(row[0]);
@@ -11097,7 +11097,7 @@ void command_object(Client *c, const Seperator *sep)
 					     od.heading, od.object_name, od.object_type, icon, od.size,
 					     od.solidtype, od.unknown020);
 
-		results = database.QueryDatabase(query);
+		results = content_db.QueryDatabase(query);
 		if (!results.Success()) {
 			c->Message(Chat::White, "Database Error: %s", results.ErrorMessage().c_str());
 			return;
@@ -11229,7 +11229,7 @@ void command_object(Client *c, const Seperator *sep)
 					 "objectname, type, icon, unknown08, unknown10, unknown20 "
 					 "FROM object WHERE zoneid = %u) AND version = %u",
 					 od.zone_instance, zone->GetZoneID(), zone->GetInstanceVersion());
-			auto results = database.QueryDatabase(query);
+			auto results = content_db.QueryDatabase(query);
 			if (!results.Success()) {
 				c->Message(Chat::White, "Database Error: %s", results.ErrorMessage().c_str());
 				return;
@@ -11249,7 +11249,7 @@ void command_object(Client *c, const Seperator *sep)
 						 "objectname, type, icon, unknown08, unknown10, unknown20 "
 						 "FROM object WHERE id = %u AND zoneid = %u AND version = %u",
 						 od.zone_instance, id, zone->GetZoneID(), zone->GetInstanceVersion());
-		auto results = database.QueryDatabase(query);
+		auto results = content_db.QueryDatabase(query);
 		if (results.Success() && results.RowsAffected() > 0) {
 			c->Message(Chat::White, "Copied Object %u into instance version %u", id, od.zone_instance);
 			return;
@@ -11266,7 +11266,7 @@ void command_object(Client *c, const Seperator *sep)
 		// No database error returned. See if we can figure out why.
 
 		query = StringFormat("SELECT zoneid, version FROM object WHERE id = %u", id);
-		results = database.QueryDatabase(query);
+		results = content_db.QueryDatabase(query);
 		if (!results.Success())
 			return;
 
@@ -11319,7 +11319,7 @@ void command_object(Client *c, const Seperator *sep)
 							 "WHERE id = %u AND zoneid = %u "
 							 "AND version = %u LIMIT 1",
 							 id, zone->GetZoneID(), zone->GetInstanceVersion());
-			auto results = database.QueryDatabase(query);
+			auto results = content_db.QueryDatabase(query);
 
 			c->Message(Chat::White, "Object %u deleted", id);
 			return;
@@ -11330,7 +11330,7 @@ void command_object(Client *c, const Seperator *sep)
 						 "WHERE id = %u AND zoneid = %u "
 						 "AND version = %u LIMIT 1",
 						 id, zone->GetZoneID(), zone->GetInstanceVersion());
-		auto results = database.QueryDatabase(query);
+		auto results = content_db.QueryDatabase(query);
 		if (!results.Success())
 			return;
 
@@ -11346,7 +11346,7 @@ void command_object(Client *c, const Seperator *sep)
 			query = StringFormat("DELETE FROM object WHERE id = %u "
 					     "AND zoneid = %u AND version = %u LIMIT 1",
 					     id, zone->GetZoneID(), zone->GetInstanceVersion());
-			results = database.QueryDatabase(query);
+			results = content_db.QueryDatabase(query);
 
 			c->Message(Chat::White, "Object %u deleted. NOTE: This static object will remain for anyone currently in "
 				      "the zone until they next zone out and in.",
@@ -11398,7 +11398,7 @@ void command_object(Client *c, const Seperator *sep)
 						 "unknown08, unknown10, unknown20 "
 						 "FROM object WHERE id = %u",
 						 id);
-		auto results = database.QueryDatabase(query);
+		auto results = content_db.QueryDatabase(query);
 		if (!results.Success() || results.RowCount() == 0) {
 			c->Message(Chat::White, "Database Error: %s", results.ErrorMessage().c_str());
 			return;

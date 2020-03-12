@@ -292,11 +292,11 @@ bool Object::Save()
 {
 	if (m_id) {
 		// Update existing
-		database.UpdateObject(m_id, m_type, m_icon, m_data, m_inst);
+		content_db.UpdateObject(m_id, m_type, m_icon, m_data, m_inst);
 	}
 	else {
 		// Doesn't yet exist, add now
-		m_id = database.AddObject(m_type, m_icon, m_data, m_inst);
+		m_id = content_db.AddObject(m_type, m_icon, m_data, m_inst);
 	}
 
 	return true;
@@ -306,11 +306,11 @@ uint16 Object::VarSave()
 {
 	if (m_id) {
 		// Update existing
-		database.UpdateObject(m_id, m_type, m_icon, m_data, m_inst);
+		content_db.UpdateObject(m_id, m_type, m_icon, m_data, m_inst);
 	}
 	else {
 		// Doesn't yet exist, add now
-		m_id = database.AddObject(m_type, m_icon, m_data, m_inst);
+		m_id = content_db.AddObject(m_type, m_icon, m_data, m_inst);
 	}
 	return m_id;
 }
@@ -319,7 +319,7 @@ uint16 Object::VarSave()
 void Object::Delete(bool reset_state)
 {
 	if (m_id != 0) {
-		database.DeleteObject(m_id);
+		content_db.DeleteObject(m_id);
 	}
 
 	if (reset_state) {
@@ -436,7 +436,7 @@ bool Object::Process(){
 		safe_delete(outapp);
 
 		// Remove object
-		database.DeleteObject(m_id);
+		content_db.DeleteObject(m_id);
 		return false;
 	}
 
@@ -553,7 +553,7 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 		safe_delete(outapp);
 
 		// Remove object
-		database.DeleteObject(m_id);
+		content_db.DeleteObject(m_id);
 		if(!m_ground_spawn)
 			entity_list.RemoveEntity(this->GetID());
 	} else {

@@ -175,7 +175,7 @@ bool Zone::LoadZoneObjects()
 			 "unknown08, unknown10, unknown20, unknown24, unknown76, size, tilt_x, tilt_y, display_name "
 			 "FROM object WHERE zoneid = %i AND (version = %u OR version = -1)",
 			 zoneid, instanceversion);
-	auto results = database.QueryDatabase(query);
+	auto results = content_db.QueryDatabase(query);
 	if (!results.Success()) {
 		LogError("Error Loading Objects from DB: [{}]",
 			results.ErrorMessage().c_str());
