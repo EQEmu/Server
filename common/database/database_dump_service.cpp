@@ -50,7 +50,11 @@ std::string DatabaseDumpService::execute(const std::string &cmd, bool return_res
 	const char *file_name = "db-exec-result.txt";
 
 	if (return_result) {
+#ifdef _WINDOWS
+		std::system((cmd + " > " + file_name + " 2>&1").c_str());
+#else
 		std::system((cmd + " > " + file_name).c_str());
+#endif
 	}
 	else {
 		std::system((cmd).c_str());
@@ -93,11 +97,22 @@ bool DatabaseDumpService::IsTarAvailable()
  * Windows
  * @return bool
  */
-bool DatabaseDumpService::Is7ZipAvailable()
+bool DatabaseDumpService::Is7ZipAvailable(std::string &cmd)
 {
-	std::string version_output = execute("7z --help");
+	static const std::string command_list[] = { "7z --help", "\"c:/Program Files/7-Zip/7z\" --help" };
 
-	return version_output.find("7-Zip") != std::string::npos;
+	for (auto &command : command_list) {
+
+		if (execute(command).find("7-Zip") != std::string::npos) {
+
+			cmd = command;
+			cmd.erase(cmd.find(" --help"));
+
+			return true;
+		}
+	}
+
+	return false;
 }
 
 /**
@@ -105,7 +120,7 @@ bool DatabaseDumpService::Is7ZipAvailable()
  */
 bool DatabaseDumpService::HasCompressionBinary()
 {
-	return IsTarAvailable() || Is7ZipAvailable();
+	return IsTarAvailable() || Is7ZipAvailable(std::string());
 }
 
 /**
@@ -382,6 +397,8 @@ void DatabaseDumpService::Dump()
 		if (HasCompressionBinary()) {
 			LogInfo("Compression requested... Compressing dump [{}.sql]", GetDumpFileNameWithPath());
 
+			std::string command;
+
 			if (IsTarAvailable()) {
 				execute(
 					fmt::format(
@@ -393,10 +410,11 @@ void DatabaseDumpService::Dump()
 				);
 				LogInfo("Compressed dump created at [{}.tar.gz]", GetDumpFileNameWithPath());
 			}
-			else if (Is7ZipAvailable()) {
+			else if (Is7ZipAvailable(command)) {
+				command.append(" a -t7z {}.zip {}.sql");
 				execute(
 					fmt::format(
-						"7z a -t7z {}.zip {}.sql",
+						command,
 						GetDumpFileNameWithPath(),
 						GetDumpFileNameWithPath()
 					)
