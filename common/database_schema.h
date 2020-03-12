@@ -226,7 +226,6 @@ namespace DatabaseSchema {
 			"races", // not used - peq editor?
 			"skill_caps", //
 			"spawn2", //
-			"spawn_condition_values", // boundary rewrite (1)
 			"spawn_conditions", //
 			"spawn_events", //
 			"spawnentry", //
@@ -264,6 +263,7 @@ namespace DatabaseSchema {
 			"eqtime",
 			"launcher",
 			"launcher_zones",
+			"spawn_condition_values",
 			"level_exp_mods",
 			"logsys_categories",
 			"name_filter",
