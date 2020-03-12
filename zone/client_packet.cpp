@@ -789,7 +789,7 @@ void Client::CompleteConnect()
 	//enforce some rules..
 	if (!CanBeInZone()) {
 		LogDebug("[CLIENT] Kicking char from zone, not allowed here");
-		GoToSafeCoords(database.GetZoneID("arena"), 0);
+		GoToSafeCoords(content_db.GetZoneID("arena"), 0);
 		return;
 	}
 
@@ -6400,7 +6400,7 @@ void Client::Handle_OP_GMZoneRequest(const EQApplicationPacket *app)
 	uint16 zid = gmzr->zone_id;
 	if (gmzr->zone_id == 0)
 		zid = zonesummon_id;
-	const char * zname = database.GetZoneName(zid);
+	const char * zname = content_db.GetZoneName(zid);
 	if (zname == nullptr)
 		tarzone[0] = 0;
 	else
@@ -12357,7 +12357,7 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 {
 	// if the character has a start city, don't let them use the command
 	if (m_pp.binds[4].zoneId != 0 && m_pp.binds[4].zoneId != 189) {
-		Message(Chat::Yellow, "Your home city has already been set.", m_pp.binds[4].zoneId, database.GetZoneName(m_pp.binds[4].zoneId));
+		Message(Chat::Yellow, "Your home city has already been set.", m_pp.binds[4].zoneId, content_db.GetZoneName(m_pp.binds[4].zoneId));
 		return;
 	}
 
@@ -12418,7 +12418,7 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 			zoneid = atoi(row[0]);
 
 		char* name = nullptr;
-		content_db.GetZoneLongName(database.GetZoneName(zoneid), &name);
+		content_db.GetZoneLongName(content_db.GetZoneName(zoneid), &name);
 		Message(Chat::Yellow, "%d - %s", zoneid, name);
 	}
 

@@ -771,7 +771,7 @@ void AdventureManager::PlayerClickedDoor(const char *player, int zone_id, int do
 							     sizeof(ServerPlayerClickedAdventureDoorReply_Struct));
 					ServerPlayerClickedAdventureDoorReply_Struct *sr = (ServerPlayerClickedAdventureDoorReply_Struct*)pack->pBuffer;
 					strcpy(sr->player, player);
-					sr->zone_id = database.GetZoneID(t->zone);
+					sr->zone_id = content_db.GetZoneID(t->zone);
 					sr->instance_id = (*iter)->GetInstanceID();
 					sr->x = t->dest_x;
 					sr->y = t->dest_y;

@@ -129,7 +129,7 @@ bool Client::Process() {
 			CheckManaEndUpdate();
 
 		if (dead && dead_timer.Check()) {
-			database.MoveCharacterToZone(GetName(), database.GetZoneName(m_pp.binds[0].zoneId));
+			database.MoveCharacterToZone(GetName(), content_db.GetZoneName(m_pp.binds[0].zoneId));
 
 			m_pp.zone_id = m_pp.binds[0].zoneId;
 			m_pp.zoneInstance = m_pp.binds[0].instance_id;
@@ -2087,7 +2087,7 @@ void Client::HandleRespawnFromHover(uint32 Option)
 
 		m_pp.zone_id = chosen->zone_id;
 		m_pp.zoneInstance = chosen->instance_id;
-		database.MoveCharacterToZone(CharacterID(), database.GetZoneName(chosen->zone_id));
+		database.MoveCharacterToZone(CharacterID(), content_db.GetZoneName(chosen->zone_id));
 
 		Save();
 

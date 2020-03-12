@@ -1893,7 +1893,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQEmu::skills::Sk
 		dead_timer.Start(5000, true);
 		m_pp.zone_id = m_pp.binds[0].zoneId;
 		m_pp.zoneInstance = m_pp.binds[0].instance_id;
-		database.MoveCharacterToZone(this->CharacterID(), database.GetZoneName(m_pp.zone_id));
+		database.MoveCharacterToZone(this->CharacterID(), content_db.GetZoneName(m_pp.zone_id));
 		Save();
 		GoToDeath();
 	}

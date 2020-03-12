@@ -837,7 +837,7 @@ bool Corpse::Process() {
 			spc->zone_id = zone->graveyard_zoneid();
 			worldserver.SendPacket(pack);
 			safe_delete(pack);
-			LogDebug("Moved [{}] player corpse to the designated graveyard in zone [{}]", this->GetName(), database.GetZoneName(zone->graveyard_zoneid()));
+			LogDebug("Moved [{}] player corpse to the designated graveyard in zone [{}]", this->GetName(), content_db.GetZoneName(zone->graveyard_zoneid()));
 			corpse_db_id = 0;
 		}
 

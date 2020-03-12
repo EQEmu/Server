@@ -143,7 +143,7 @@ bool Adventure::Process()
 
 bool Adventure::CreateInstance()
 {
-	uint32 zone_id = database.GetZoneID(adventure_template->zone);
+	uint32 zone_id = content_db.GetZoneID(adventure_template->zone);
 	if(!zone_id)
 	{
 		return false;

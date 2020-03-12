@@ -83,7 +83,7 @@ Zone* zone = 0;
 void UpdateWindowTitle(char* iNewTitle);
 
 bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
-	const char* zonename = database.GetZoneName(iZoneID);
+	const char* zonename = content_db.GetZoneName(iZoneID);
 
 	if (iZoneID == 0 || zonename == 0)
 		return false;
@@ -186,7 +186,7 @@ bool Zone::LoadZoneObjects()
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		if (atoi(row[9]) == 0) {
 			// Type == 0 - Static Object
-			const char *shortname = database.GetZoneName(atoi(row[1]), false); // zoneid -> zone_shortname
+			const char *shortname = content_db.GetZoneName(atoi(row[1]), false); // zoneid -> zone_shortname
 
 			if (!shortname)
 				continue;
@@ -1736,7 +1736,7 @@ ZonePoint* Zone::GetClosestZonePoint(const glm::vec3& location, uint32 to, Clien
 ZonePoint* Zone::GetClosestZonePoint(const glm::vec3& location, const char* to_name, Client* client, float max_distance) {
 	if(to_name == nullptr)
 		return GetClosestZonePointWithoutZone(location.x, location.y, location.z, client, max_distance);
-	return GetClosestZonePoint(location, database.GetZoneID(to_name), client, max_distance);
+	return GetClosestZonePoint(location, content_db.GetZoneID(to_name), client, max_distance);
 }
 
 ZonePoint* Zone::GetClosestZonePointWithoutZone(float x, float y, float z, Client* client, float max_distance) {

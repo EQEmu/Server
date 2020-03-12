@@ -251,7 +251,7 @@ void ZSList::ListLockedZones(const char* to, WorldTCPConnection* connection) {
 	int x = 0;
 	for (auto &zone : pLockedZones) {
 		if (zone) {
-			connection->SendEmoteMessageRaw(to, 0, 0, 0, database.GetZoneName(zone, true));
+			connection->SendEmoteMessageRaw(to, 0, 0, 0, content_db.GetZoneName(zone, true));
 			x++;
 		}
 	}
@@ -517,7 +517,7 @@ void ZSList::SOPZoneBootup(const char* adminname, uint32 ZoneServerID, const cha
 	ZoneServer* zs = 0;
 	ZoneServer* zs2 = 0;
 	uint32 zoneid;
-	if (!(zoneid = database.GetZoneID(zonename)))
+	if (!(zoneid = content_db.GetZoneID(zonename)))
 		SendEmoteMessage(adminname, 0, 0, 0, "Error: SOP_ZoneBootup: zone '%s' not found in 'zone' table. Typo protection=ON.", zonename);
 	else {
 		if (ZoneServerID != 0)

@@ -397,7 +397,7 @@ void QuestManager::Zone(const char *zone_name) {
 		ztz->response = 0;
 		ztz->current_zone_id = zone->GetZoneID();
 		ztz->current_instance_id = zone->GetInstanceID();
-		ztz->requested_zone_id = database.GetZoneID(zone_name);
+		ztz->requested_zone_id = content_db.GetZoneID(zone_name);
 		ztz->admin = initiator->Admin();
 		strcpy(ztz->name, initiator->GetName());
 		ztz->guild_id = initiator->GuildID();
@@ -2675,7 +2675,7 @@ uint16 QuestManager::CreateInstance(const char *zone, int16 version, uint32 dura
 	QuestManagerCurrentQuestVars();
 	if(initiator)
 	{
-		uint32 zone_id = database.GetZoneID(zone);
+		uint32 zone_id = content_db.GetZoneID(zone);
 		if(zone_id == 0)
 			return 0;
 
@@ -3060,7 +3060,7 @@ uint16 QuestManager::CreateDoor(const char* model, float x, float y, float z, fl
 }
 
 int32 QuestManager::GetZoneID(const char *zone) {
-	return static_cast<int32>(database.GetZoneID(zone));
+	return static_cast<int32>(content_db.GetZoneID(zone));
 }
 
 const char* QuestManager::GetZoneLongName(const char *zone) {

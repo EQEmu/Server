@@ -616,7 +616,7 @@ void Console::ProcessCommand(const char* command) {
 				if(sep.arg[1][0]==0 || sep.arg[2][0] == 0)
 					SendMessage(1, "Usage: movechar [charactername] [zonename]");
 				else {
-					if (!database.GetZoneID(sep.arg[2]))
+					if (!content_db.GetZoneID(sep.arg[2]))
 						SendMessage(1, "Error: Zone '%s' not found", sep.arg[2]);
 					else if (!database.CheckUsedName((char*) sep.arg[1])) {
 						if (!database.MoveCharacterToZone((char*) sep.arg[1], (char*) sep.arg[2]))
@@ -711,13 +711,13 @@ void Console::ProcessCommand(const char* command) {
 					if (sep.arg[1][0] >= '0' && sep.arg[1][0] <= '9')
 						s->ZoneServerID = atoi(sep.arg[1]);
 					else
-						s->zoneid = database.GetZoneID(sep.arg[1]);
+						s->zoneid = content_db.GetZoneID(sep.arg[1]);
 
 					ZoneServer* zs = 0;
 					if (s->ZoneServerID != 0)
 						zs = zoneserver_list.FindByID(s->ZoneServerID);
 					else if (s->zoneid != 0)
-						zs = zoneserver_list.FindByName(database.GetZoneName(s->zoneid));
+						zs = zoneserver_list.FindByName(content_db.GetZoneName(s->zoneid));
 					else
 						SendMessage(1, "Error: ZoneShutdown: neither ID nor name specified");
 
@@ -828,10 +828,10 @@ void Console::ProcessCommand(const char* command) {
 					zoneserver_list.ListLockedZones(0, this);
 				}
 				else if (strcasecmp(sep.arg[1], "lock") == 0 && admin >= 101) {
-					uint16 tmp = database.GetZoneID(sep.arg[2]);
+					uint16 tmp = content_db.GetZoneID(sep.arg[2]);
 					if (tmp) {
 						if (zoneserver_list.SetLockedZone(tmp, true))
-							zoneserver_list.SendEmoteMessage(0, 0, 80, 15, "Zone locked: %s", database.GetZoneName(tmp));
+							zoneserver_list.SendEmoteMessage(0, 0, 80, 15, "Zone locked: %s", content_db.GetZoneName(tmp));
 						else
 							SendMessage(1, "Failed to change lock");
 					}
@@ -839,10 +839,10 @@ void Console::ProcessCommand(const char* command) {
 						SendMessage(1, "Usage: #zonelock lock [zonename]");
 				}
 				else if (strcasecmp(sep.arg[1], "unlock") == 0 && admin >= 101) {
-					uint16 tmp = database.GetZoneID(sep.arg[2]);
+					uint16 tmp = content_db.GetZoneID(sep.arg[2]);
 					if (tmp) {
 						if (zoneserver_list.SetLockedZone(tmp, false))
-							zoneserver_list.SendEmoteMessage(0, 0, 80, 15, "Zone unlocked: %s", database.GetZoneName(tmp));
+							zoneserver_list.SendEmoteMessage(0, 0, 80, 15, "Zone unlocked: %s", content_db.GetZoneName(tmp));
 						else
 							SendMessage(1, "Failed to change lock");
 					}

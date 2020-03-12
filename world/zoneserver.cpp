@@ -86,7 +86,7 @@ ZoneServer::~ZoneServer() {
 bool ZoneServer::SetZone(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	is_booting_up = false;
 
-	const char* zn = MakeLowerString(database.GetZoneName(iZoneID));
+	const char* zn = MakeLowerString(content_db.GetZoneName(iZoneID));
 	char*	longname;
 
 	if (iZoneID)
@@ -566,7 +566,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 
 		SetZone_Struct* szs = (SetZone_Struct*)pack->pBuffer;
 		if (szs->zoneid != 0) {
-			if (database.GetZoneName(szs->zoneid))
+			if (content_db.GetZoneName(szs->zoneid))
 				SetZone(szs->zoneid, szs->instanceid, szs->staticzone);
 			else
 				SetZone(0);
@@ -648,7 +648,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		if (s->ZoneServerID != 0)
 			zs = zoneserver_list.FindByID(s->ZoneServerID);
 		else if (s->zoneid != 0)
-			zs = zoneserver_list.FindByName(database.GetZoneName(s->zoneid));
+			zs = zoneserver_list.FindByName(content_db.GetZoneName(s->zoneid));
 		else
 			zoneserver_list.SendEmoteMessage(s->adminname, 0, 0, 0, "Error: SOP_ZoneShutdown: neither ID nor name specified");
 
@@ -660,7 +660,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	}
 	case ServerOP_ZoneBootup: {
 		ServerZoneStateChange_struct* s = (ServerZoneStateChange_struct *)pack->pBuffer;
-		zoneserver_list.SOPZoneBootup(s->adminname, s->ZoneServerID, database.GetZoneName(s->zoneid), s->makestatic);
+		zoneserver_list.SOPZoneBootup(s->adminname, s->ZoneServerID, content_db.GetZoneName(s->zoneid), s->makestatic);
 		break;
 	}
 	case ServerOP_ZoneStatus: {
@@ -1018,13 +1018,13 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			break;
 		case 1:
 			if (zoneserver_list.SetLockedZone(s->zoneID, true))
-				zoneserver_list.SendEmoteMessage(0, 0, 80, 15, "Zone locked: %s", database.GetZoneName(s->zoneID));
+				zoneserver_list.SendEmoteMessage(0, 0, 80, 15, "Zone locked: %s", content_db.GetZoneName(s->zoneID));
 			else
 				this->SendEmoteMessageRaw(s->adminname, 0, 0, 0, "Failed to change lock");
 			break;
 		case 2:
 			if (zoneserver_list.SetLockedZone(s->zoneID, false))
-				zoneserver_list.SendEmoteMessage(0, 0, 80, 15, "Zone unlocked: %s", database.GetZoneName(s->zoneID));
+				zoneserver_list.SendEmoteMessage(0, 0, 80, 15, "Zone unlocked: %s", content_db.GetZoneName(s->zoneID));
 			else
 				this->SendEmoteMessageRaw(s->adminname, 0, 0, 0, "Failed to change lock");
 			break;

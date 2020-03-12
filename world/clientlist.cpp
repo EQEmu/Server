@@ -293,7 +293,7 @@ void ClientList::SendCLEList(const int16& admin, const char* to, WorldTCPConnect
 			if (cle->LSID())
 				AppendAnyLenString(&output, &outsize, &outlen, "%s  LSID: %i  LSName: %s  WorldAdmin: %i", newline, cle->LSID(), cle->LSName(), cle->WorldAdmin());
 			if (cle->CharID())
-				AppendAnyLenString(&output, &outsize, &outlen, "%s  CharID: %i  CharName: %s  Zone: %s (%i)", newline, cle->CharID(), cle->name(), database.GetZoneName(cle->zone()), cle->zone());
+				AppendAnyLenString(&output, &outsize, &outlen, "%s  CharID: %i  CharName: %s  Zone: %s (%i)", newline, cle->CharID(), cle->name(), content_db.GetZoneName(cle->zone()), cle->zone());
 			if (outlen >= 3072) {
 				connection->SendEmoteMessageRaw(to, 0, 0, 10, output);
 				safe_delete(output);
@@ -500,7 +500,7 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 	countclients.Reset();
 	while(countclients.MoreElements()){
 		countcle = countclients.GetData();
-		const char* tmpZone = database.GetZoneName(countcle->zone());
+		const char* tmpZone = content_db.GetZoneName(countcle->zone());
 		if (
 	(countcle->Online() >= CLE_Status::Zoning) &&
 	(!countcle->GetGM() || countcle->Anon() != 1 || admin >= countcle->Admin()) &&
@@ -580,7 +580,7 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 	while(iterator.MoreElements()) {
 		cle = iterator.GetData();
 
-		const char* tmpZone = database.GetZoneName(cle->zone());
+		const char* tmpZone = content_db.GetZoneName(cle->zone());
 		if (
 	(cle->Online() >= CLE_Status::Zoning) &&
 	(!cle->GetGM() || cle->Anon() != 1 || admin >= cle->Admin()) &&
@@ -965,7 +965,7 @@ void ClientList::ConsoleSendWhoAll(const char* to, int16 admin, Who_All_Struct* 
 	iterator.Reset();
 	while (iterator.MoreElements()) {
 		cle = iterator.GetData();
-		const char* tmpZone = database.GetZoneName(cle->zone());
+		const char* tmpZone = content_db.GetZoneName(cle->zone());
 		if (
 			(cle->Online() >= CLE_Status::Zoning)
 			&& (whom == 0 || (
@@ -1282,7 +1282,7 @@ void ClientList::GetClients(const char *zone_name, std::vector<ClientListEntry *
 			iterator.Advance();
 		}
 	} else {
-		uint32 zoneid = database.GetZoneID(zone_name);
+		uint32 zoneid = content_db.GetZoneID(zone_name);
 		while(iterator.MoreElements()) {
 			ClientListEntry* tmp = iterator.GetData();
 			if(tmp->zone() == zoneid)

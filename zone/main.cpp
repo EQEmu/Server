@@ -446,7 +446,7 @@ int main(int argc, char** argv) {
 	if (!strlen(zone_name) || !strcmp(zone_name, ".")) {
 		LogInfo("Entering sleep mode");
 	}
-	else if (!Zone::Bootup(database.GetZoneID(zone_name), instance_id, true)) {
+	else if (!Zone::Bootup(content_db.GetZoneID(zone_name), instance_id, true)) {
 		LogError("Zone Bootup failed :: Zone::Bootup");
 		zone = 0;
 	}

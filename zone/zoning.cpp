@@ -156,7 +156,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	}
 
 	/* Check for Valid Zone */
-	const char *target_zone_name = database.GetZoneName(target_zone_id);
+	const char *target_zone_name = content_db.GetZoneName(target_zone_id);
 	if(target_zone_name == nullptr) {
 		//invalid zone...
 		Message(Chat::Red, "Invalid target zone ID.");
@@ -348,7 +348,7 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 	if(this->GetPet())
 		entity_list.RemoveFromHateLists(this->GetPet());
 
-	LogInfo("Zoning [{}] to: [{}] ([{}]) - ([{}]) x [{}] y [{}] z [{}]", m_pp.name, database.GetZoneName(zone_id), zone_id, instance_id, dest_x, dest_y, dest_z);
+	LogInfo("Zoning [{}] to: [{}] ([{}]) - ([{}]) x [{}] y [{}] z [{}]", m_pp.name, content_db.GetZoneName(zone_id), zone_id, instance_id, dest_x, dest_y, dest_z);
 
 	//set the player's coordinates in the new zone so they have them
 	//when they zone into it
@@ -402,7 +402,7 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 }
 
 void Client::MovePC(const char* zonename, float x, float y, float z, float heading, uint8 ignorerestrictions, ZoneMode zm) {
-	ProcessMovePC(database.GetZoneID(zonename), 0, x, y, z, heading, ignorerestrictions, zm);
+	ProcessMovePC(content_db.GetZoneID(zonename), 0, x, y, z, heading, ignorerestrictions, zm);
 }
 
 //designed for in zone moving
@@ -482,7 +482,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 	const char*	pShortZoneName = nullptr;
 	char* pZoneName = nullptr;
 
-	pShortZoneName = database.GetZoneName(zoneID);
+	pShortZoneName = content_db.GetZoneName(zoneID);
 	content_db.GetZoneLongName(pShortZoneName, &pZoneName);
 
 	if(!pZoneName) {
@@ -828,7 +828,7 @@ void Client::SendZoneFlagInfo(Client *to) const {
 	for(; cur != end; ++cur) {
 		uint32 zoneid = *cur;
 
-		const char *short_name = database.GetZoneName(zoneid);
+		const char *short_name = content_db.GetZoneName(zoneid);
 
 		char *long_name = nullptr;
 		content_db.GetZoneLongName(short_name, &long_name);

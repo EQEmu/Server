@@ -4004,7 +4004,7 @@ void Client::SendOPTranslocateConfirm(Mob *Caster, uint16 SpellID) {
 		PendingTranslocateData.heading = m_pp.binds[0].heading;
 	}
 	else {
-		PendingTranslocateData.zone_id = ts->ZoneID = database.GetZoneID(Spell.teleport_zone);
+		PendingTranslocateData.zone_id = ts->ZoneID = content_db.GetZoneID(Spell.teleport_zone);
 		PendingTranslocateData.instance_id = 0;
 		PendingTranslocateData.y = ts->y = Spell.base[0];
 		PendingTranslocateData.x = ts->x = Spell.base[1];
@@ -5286,7 +5286,7 @@ void Client::SetStartZone(uint32 zoneid, float x, float y, float z)
 	}
 
 	// check to make sure the zone is valid
-	const char *target_zone_name = database.GetZoneName(zoneid);
+	const char *target_zone_name = content_db.GetZoneName(zoneid);
 	if(target_zone_name == nullptr)
 		return;
 
