@@ -695,6 +695,7 @@ void ZoneDatabase::UpdateObject(uint32 id, uint32 type, uint32 icon, const Objec
         SaveWorldContainer(object.zone_id, id, inst);
 }
 
+//
 Ground_Spawns* ZoneDatabase::LoadGroundSpawns(uint32 zone_id, int16 version, Ground_Spawns* gs) {
 
 	std::string query = StringFormat("SELECT max_x, max_y, max_z, "

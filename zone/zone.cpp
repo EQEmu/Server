@@ -302,7 +302,7 @@ bool Zone::LoadGroundSpawns() {
 	memset(&groundspawn, 0, sizeof(groundspawn));
 	int gsindex=0;
 	LogInfo("Loading Ground Spawns from DB");
-	database.LoadGroundSpawns(zoneid, GetInstanceVersion(), &groundspawn);
+	content_db.LoadGroundSpawns(zoneid, GetInstanceVersion(), &groundspawn);
 	uint32 ix=0;
 	char* name = nullptr;
 	uint32 gsnumber=0;
