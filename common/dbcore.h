@@ -13,9 +13,6 @@
 #include <mysql.h>
 #include <string.h>
 
-const int8 DATABASE_CONNECTION_DEFAULT = 0;
-const int8 DATABASE_CONNECTION_CONTENT = 1;
-
 class DBcore {
 public:
 	enum eStatus {
@@ -35,8 +32,8 @@ public:
 	MYSQL *getMySQL() { return &mysql; }
 	void SetMysql(MYSQL *mysql);
 
-	int8 GetConnectionType() const;
-	void SetConnectionType(int8 connection_type);
+	const std::string &GetOriginHost() const;
+	void SetOriginHost(const std::string &origin_host);
 
 protected:
 	bool Open(
@@ -54,10 +51,11 @@ protected:
 private:
 	bool Open(uint32 *errnum = nullptr, char *errbuf = nullptr);
 
-	int8    connection_type;
 	MYSQL   mysql;
 	Mutex   MDatabase;
 	eStatus pStatus;
+
+	std::string origin_host;
 
 	char   *pHost;
 	char   *pUser;

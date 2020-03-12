@@ -87,6 +87,7 @@ int main(int argc, char **argv)
 	auto Config = EQEmuConfig::get();
 
 	SharedDatabase database;
+	SharedDatabase content_db;
 	LogInfo("Connecting to database");
 	if (!database.Connect(
 		Config->DatabaseHost.c_str(),
@@ -97,6 +98,24 @@ int main(int argc, char **argv)
 	)) {
 		LogError("Unable to connect to the database, cannot continue without a database connection");
 		return 1;
+	}
+
+	/**
+	 * Multi-tenancy: Content database
+	 */
+	if (!Config->ContentDbHost.empty()) {
+		if (!content_db.Connect(
+			Config->ContentDbHost.c_str() ,
+			Config->ContentDbUsername.c_str(),
+			Config->ContentDbPassword.c_str(),
+			Config->ContentDbName.c_str(),
+			Config->ContentDbPort
+		)) {
+			LogError("Cannot continue without a content database connection");
+			return 1;
+		}
+	} else {
+		content_db.SetMysql(database.getMySQL());
 	}
 
 	/* Register Log System and Settings */
@@ -194,7 +213,7 @@ int main(int argc, char **argv)
 	if (load_all || load_items) {
 		LogInfo("Loading items");
 		try {
-			LoadItems(&database, hotfix_name);
+			LoadItems(&content_db, hotfix_name);
 		} catch (std::exception &ex) {
 			LogError("{}", ex.what());
 			return 1;
@@ -204,7 +223,7 @@ int main(int argc, char **argv)
 	if (load_all || load_factions) {
 		LogInfo("Loading factions");
 		try {
-			LoadFactions(&database, hotfix_name);
+			LoadFactions(&content_db, hotfix_name);
 		} catch (std::exception &ex) {
 			LogError("{}", ex.what());
 			return 1;
@@ -214,7 +233,7 @@ int main(int argc, char **argv)
 	if (load_all || load_loot) {
 		LogInfo("Loading loot");
 		try {
-			LoadLoot(&database, hotfix_name);
+			LoadLoot(&content_db, hotfix_name);
 		} catch (std::exception &ex) {
 			LogError("{}", ex.what());
 			return 1;
@@ -224,7 +243,7 @@ int main(int argc, char **argv)
 	if (load_all || load_skill_caps) {
 		LogInfo("Loading skill caps");
 		try {
-			LoadSkillCaps(&database, hotfix_name);
+			LoadSkillCaps(&content_db, hotfix_name);
 		} catch (std::exception &ex) {
 			LogError("{}", ex.what());
 			return 1;
@@ -234,7 +253,7 @@ int main(int argc, char **argv)
 	if (load_all || load_spells) {
 		LogInfo("Loading spells");
 		try {
-			LoadSpells(&database, hotfix_name);
+			LoadSpells(&content_db, hotfix_name);
 		} catch (std::exception &ex) {
 			LogError("{}", ex.what());
 			return 1;
@@ -244,7 +263,7 @@ int main(int argc, char **argv)
 	if (load_all || load_bd) {
 		LogInfo("Loading base data");
 		try {
-			LoadBaseData(&database, hotfix_name);
+			LoadBaseData(&content_db, hotfix_name);
 		} catch (std::exception &ex) {
 			LogError("{}", ex.what());
 			return 1;

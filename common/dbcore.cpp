@@ -42,11 +42,20 @@ DBcore::DBcore()
 	pCompress       = false;
 	pSSL            = false;
 	pStatus         = Closed;
-	connection_type = DATABASE_CONNECTION_DEFAULT;
 }
 
 DBcore::~DBcore()
 {
+	/**
+	 * This prevents us from doing a double free in multi-tenancy setups where we
+	 * are re-using the default database connection pointer when we dont have an
+	 * external configuration setup ex: (content_database)
+	 */
+	std::string mysql_connection_host = mysql.host;
+	if (GetOriginHost() != mysql_connection_host) {
+		return;
+	}
+
 	mysql_close(&mysql);
 	safe_delete_array(pHost);
 	safe_delete_array(pUser);
@@ -247,6 +256,10 @@ bool DBcore::Open(uint32 *errnum, char *errbuf)
 	}
 	if (mysql_real_connect(&mysql, pHost, pUser, pPassword, pDatabase, pPort, 0, flags)) {
 		pStatus = Connected;
+
+		std::string connected_origin_host = pHost;
+		SetOriginHost(connected_origin_host);
+
 		return true;
 	}
 	else {
@@ -266,18 +279,12 @@ void DBcore::SetMysql(MYSQL *mysql)
 	DBcore::mysql = *mysql;
 }
 
-int8 DBcore::GetConnectionType() const
+const std::string &DBcore::GetOriginHost() const
 {
-	return connection_type;
+	return origin_host;
 }
 
-void DBcore::SetConnectionType(int8 connection_type)
+void DBcore::SetOriginHost(const std::string &origin_host)
 {
-	DBcore::connection_type = connection_type;
+	DBcore::origin_host = origin_host;
 }
-
-
-
-
-
-
