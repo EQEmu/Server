@@ -405,6 +405,19 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 
 	entity_list.AddNPC(npc, true, true);
 	SetPetID(npc->GetID());
+	// save updated clients petinfo
+	this->CastToClient()->Save(1);
+	//to then update name if custom is set
+	if (this->IsClient()) {
+		uint32 charid = this->CastToClient()->CharacterID();
+		std::string customName = charid == 0 ? "" : database.GetCustomPetName(charid);
+		if (customName.length() > 3)
+		{
+			npc->TempName(customName.c_str());
+		}
+	}
+
+
 	// We need to handle PetType 5 (petHatelist), add the current target to the hatelist of the pet
 
 

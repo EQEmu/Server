@@ -10127,8 +10127,10 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 		mypet->SayString(this, Chat::PetResponse, PET_GETLOST_STRING);
 		mypet->CastToNPC()->Depop();
+		this->Save(1);
 
 		//Oddly, the client (Titanium) will still allow "/pet get lost" command despite me adding the code below. If someone can figure that out, you can uncomment this code and use it.
+		// on live since aa merging to companions discipline /pet get lost is available without any aa requirement.
 		/*
 		if((mypet->GetPetType() == petAnimation && GetAA(aaAnimationEmpathy) >= 2) || mypet->GetPetType() != petAnimation) {
 		mypet->SayString(PET_GETLOST_STRING);

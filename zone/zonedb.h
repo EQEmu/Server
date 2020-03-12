@@ -451,6 +451,8 @@ public:
 	bool		SetSpecialAttkFlag(uint8 id, const char* flag);
 	bool		GetPetEntry(const char *pet_type, PetRecord *into);
 	bool		GetPoweredPetEntry(const char *pet_type, int16 petpower, PetRecord *into);
+	std::string GetCustomPetName(uint32 char_id);
+	std::string GetOriginalPetName(int petid, uint32 char_id);
 	bool		GetBasePetItems(int32 equipmentset, uint32 *items);
 	void		AddLootTableToNPC(NPC* npc, uint32 loottable_id, ItemList* itemlist, uint32* copper, uint32* silver, uint32* gold, uint32* plat);
 	void		AddLootDropToNPC(NPC* npc, uint32 lootdrop_id, ItemList* itemlist, uint8 droplimit, uint8 mindrop);

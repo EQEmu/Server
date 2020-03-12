@@ -3770,15 +3770,25 @@ void ZoneDatabase::SavePetInfo(Client *client)
 		petinfo = client->GetPetInfo(pet);
 		if (!petinfo)
 			continue;
+		
+		std::string Orig = GetOriginalPetName(pet,client->CharacterID());
+		if (Orig == "") 
+		{
+			Orig = petinfo->Name; 
+		}
+
+		if (petinfo->SpellID == 0) { //got here from  /pet getlost
+			Orig = "";
+		}
 
 		query = StringFormat("INSERT INTO `character_pet_info` "
 				"(`char_id`, `pet`, `petname`, `petpower`, `spell_id`, `hp`, `mana`, `size`) "
 				"VALUES (%u, %u, '%s', %i, %u, %u, %u, %f) "
 				"ON DUPLICATE KEY UPDATE `petname` = '%s', `petpower` = %i, `spell_id` = %u, "
 				"`hp` = %u, `mana` = %u, `size` = %f",
-				client->CharacterID(), pet, petinfo->Name, petinfo->petpower, petinfo->SpellID,
+				client->CharacterID(), pet, Orig.c_str(), petinfo->petpower, petinfo->SpellID,
 				petinfo->HP, petinfo->Mana, petinfo->size, // and now the ON DUPLICATE ENTRIES
-				petinfo->Name, petinfo->petpower, petinfo->SpellID, petinfo->HP, petinfo->Mana, petinfo->size);
+			Orig.c_str(), petinfo->petpower, petinfo->SpellID, petinfo->HP, petinfo->Mana, petinfo->size);
 		results = database.QueryDatabase(query);
 		if (!results.Success())
 			return;
@@ -3945,6 +3955,40 @@ void ZoneDatabase::LoadPetInfo(Client *client)
 		pi->Items[slot] = atoul(row[2]);
 	}
 }
+
+
+std::string ZoneDatabase::GetCustomPetName(uint32 char_id) {
+	std::string query = fmt::format("SELECT `custompetname` FROM character_pet_info WHERE `pet` = 0 and char_id = {} LIMIT 1", char_id);
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		return "";
+	}
+	if (results.RowCount() != 1)
+		return "";
+	auto row = results.begin();
+	std::string namefound;
+	namefound = row[0];
+	if (namefound.length() < 4) return "";
+	else
+		return  namefound;
+}
+
+std::string ZoneDatabase::GetOriginalPetName(int petid, uint32 char_id) {
+	std::string query = fmt::format("SELECT `petname` FROM character_pet_info WHERE `pet` = {} and char_id = {} LIMIT 1", petid, char_id);
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		return "";
+	}
+	if (results.RowCount() != 1)
+		return "";
+	auto row = results.begin();
+	std::string namefound;
+	namefound = row[0];
+	if (namefound.length() < 4) return "";
+	else
+		return  namefound;
+}
+
 
 bool ZoneDatabase::GetFactionData(FactionMods* fm, uint32 class_mod, uint32 race_mod, uint32 deity_mod, int32 faction_id) {
 	if (faction_id <= 0 || faction_id > (int32) max_faction)
