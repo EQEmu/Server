@@ -436,7 +436,7 @@ void Zone::LoadTempMerchantData() {
 		"AND se.spawngroupid = s2.spawngroupid "
 		"AND s2.zone = '%s' AND s2.version = %i "
 		"ORDER BY ml.slot					   ", GetShortName(), GetInstanceVersion());
-	auto results = database.QueryDatabase(query);
+	auto results = content_db.QueryDatabase(query);
 	if (!results.Success()) {
 		return;
 	}
@@ -509,7 +509,7 @@ void Zone::GetMerchantDataForZoneLoad() {
 		"WHERE nt.merchant_id = ml.merchantid AND nt.id = se.npcid					   "
 		"AND se.spawngroupid = s2.spawngroupid AND s2.zone = '%s' AND s2.version = %i  "
 		"ORDER BY ml.slot															   ", GetShortName(), GetInstanceVersion());
-	auto results = database.QueryDatabase(query);
+	auto results = content_db.QueryDatabase(query);
 	std::map<uint32, std::list<MerchantList> >::iterator cur;
 	uint32 npcid = 0;
 	if (results.RowCount() == 0) {
@@ -1580,7 +1580,7 @@ void Zone::RepopClose(const glm::vec4& client_position, uint32 repop_distance)
 
 	quest_manager.ClearAllTimers();
 
-	if (!database.PopulateZoneSpawnListClose(zoneid, spawn2_list, GetInstanceVersion(), client_position, repop_distance))
+	if (!content_db.PopulateZoneSpawnListClose(zoneid, spawn2_list, GetInstanceVersion(), client_position, repop_distance))
 		LogDebug("Error in Zone::Repop: database.PopulateZoneSpawnList failed");
 
 	initgrids_timer.Start();
@@ -2286,7 +2286,7 @@ void Zone::DoAdventureActions()
 	{
 		if(ds->assa_count >= RuleI(Adventure, NumberKillsForBossSpawn))
 		{
-			const NPCType* tmp = database.LoadNPCTypesData(ds->data_id);
+			const NPCType* tmp = content_db.LoadNPCTypesData(ds->data_id);
 			if(tmp)
 			{
 				NPC* npc = new NPC(tmp, nullptr, glm::vec4(ds->assa_x, ds->assa_y, ds->assa_z, ds->assa_h), GravityBehavior::Water);

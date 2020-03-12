@@ -485,6 +485,7 @@ void Database::BuryCorpsesInInstance(uint16 instance_id) {
 
 void Database::DeleteInstance(uint16 instance_id)
 {
+	// TODO: BOUNDARY REWRITE
 
 	std::string query = StringFormat("DELETE FROM instance_list WHERE id=%u", instance_id);
 	QueryDatabase(query);

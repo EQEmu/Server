@@ -193,7 +193,7 @@ void QuestManager::write(const char *file, const char *str) {
 
 Mob* QuestManager::spawn2(int npc_type, int grid, int unused, const glm::vec4& position) {
 	const NPCType* tmp = 0;
-	if (tmp = database.LoadNPCTypesData(npc_type))
+	if (tmp = content_db.LoadNPCTypesData(npc_type))
 	{
 		auto npc = new NPC(tmp, nullptr, position, GravityBehavior::Water);
 		npc->AddLootTable();
@@ -217,7 +217,7 @@ Mob* QuestManager::unique_spawn(int npc_type, int grid, int unused, const glm::v
 	}
 
 	const NPCType* tmp = 0;
-	if (tmp = database.LoadNPCTypesData(npc_type))
+	if (tmp = content_db.LoadNPCTypesData(npc_type))
 	{
 		auto npc = new NPC(tmp, nullptr, position, GravityBehavior::Water);
 		npc->AddLootTable();
@@ -252,7 +252,7 @@ Mob *QuestManager::spawn_from_spawn2(uint32 spawn2_id)
 	if (found_spawn) {
 		SpawnGroup *spawn_group = zone->spawn_group_list.GetSpawnGroup(found_spawn->SpawnGroupID());
 		if (!spawn_group) {
-			database.LoadSpawnGroupsByID(found_spawn->SpawnGroupID(), &zone->spawn_group_list);
+			content_db.LoadSpawnGroupsByID(found_spawn->SpawnGroupID(), &zone->spawn_group_list);
 			spawn_group = zone->spawn_group_list.GetSpawnGroup(found_spawn->SpawnGroupID());
 			if (!spawn_group) {
 				return nullptr;
@@ -272,7 +272,7 @@ Mob *QuestManager::spawn_from_spawn2(uint32 spawn2_id)
 			return nullptr;
 		}
 
-		const NPCType *tmp = database.LoadNPCTypesData(npcid);
+		const NPCType *tmp = content_db.LoadNPCTypesData(npcid);
 		if (!tmp) {
 			return nullptr;
 		}
@@ -1758,7 +1758,7 @@ void QuestManager::respawn(int npcTypeID, int grid) {
 	quests_running_.push(e);
 
 	const NPCType* npcType = nullptr;
-	if ((npcType = database.LoadNPCTypesData(npcTypeID)))
+	if ((npcType = content_db.LoadNPCTypesData(npcTypeID)))
 	{
 		owner = new NPC(npcType, nullptr, owner->GetPosition(), GravityBehavior::Water);
 		owner->CastToNPC()->AddLootTable();

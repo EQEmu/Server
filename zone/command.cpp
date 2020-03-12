@@ -3097,7 +3097,7 @@ void command_npctypespawn(Client *c, const Seperator *sep)
 {
 	if (sep->IsNumber(1)) {
 		const NPCType* tmp = 0;
-		if ((tmp = database.LoadNPCTypesData(atoi(sep->arg[1])))) {
+		if ((tmp = content_db.LoadNPCTypesData(atoi(sep->arg[1])))) {
 			//tmp->fixedZ = 1;
 			auto npc = new NPC(tmp, 0, c->GetPosition(), GravityBehavior::Water);
 			if (npc && sep->IsNumber(2))
@@ -4196,7 +4196,7 @@ void command_viewnpctype(Client *c, const Seperator *sep)
 	else
 	{
 		uint32 npctypeid=atoi(sep->arg[1]);
-		const NPCType* npct = database.LoadNPCTypesData(npctypeid);
+		const NPCType* npct = content_db.LoadNPCTypesData(npctypeid);
 		if (npct) {
 			c->Message(Chat::White, " NPCType Info, ");
 			c->Message(Chat::White, "  NPCTypeID: %u",  npct->npc_id);
@@ -5811,7 +5811,7 @@ void command_npcspawn(Client *c, const Seperator *sep)
 				// Option to try to create the npc_type ID within the range for the current zone (zone_id * 1000)
 				extra = 1;
 			}
-			database.NPCSpawnDB(0, zone->GetShortName(), zone->GetInstanceVersion(), c, target->CastToNPC(), extra);
+			content_db.NPCSpawnDB(0, zone->GetShortName(), zone->GetInstanceVersion(), c, target->CastToNPC(), extra);
 			c->Message(Chat::White, "%s created successfully!",  target->GetName());
 		}
 		else if (strcasecmp(sep->arg[1], "add") == 0) {
@@ -5824,20 +5824,20 @@ void command_npcspawn(Client *c, const Seperator *sep)
 				// Respawn Timer default if not set
 				extra = 1200;
 			}
-			database.NPCSpawnDB(1, zone->GetShortName(), zone->GetInstanceVersion(), c, target->CastToNPC(), extra);
+			content_db.NPCSpawnDB(1, zone->GetShortName(), zone->GetInstanceVersion(), c, target->CastToNPC(), extra);
 			c->Message(Chat::White, "%s added successfully!",  target->GetName());
 		}
 		else if (strcasecmp(sep->arg[1], "update") == 0) {
-			database.NPCSpawnDB(2, zone->GetShortName(), zone->GetInstanceVersion(), c, target->CastToNPC());
+			content_db.NPCSpawnDB(2, zone->GetShortName(), zone->GetInstanceVersion(), c, target->CastToNPC());
 			c->Message(Chat::White, "%s updated!",  target->GetName());
 		}
 		else if (strcasecmp(sep->arg[1], "remove") == 0) {
-			database.NPCSpawnDB(3, zone->GetShortName(), zone->GetInstanceVersion(), c, target->CastToNPC());
+			content_db.NPCSpawnDB(3, zone->GetShortName(), zone->GetInstanceVersion(), c, target->CastToNPC());
 			c->Message(Chat::White, "%s removed successfully from database!",  target->GetName());
 			target->Depop(false);
 		}
 		else if (strcasecmp(sep->arg[1], "delete") == 0) {
-			database.NPCSpawnDB(4, zone->GetShortName(), zone->GetInstanceVersion(), c, target->CastToNPC());
+			content_db.NPCSpawnDB(4, zone->GetShortName(), zone->GetInstanceVersion(), c, target->CastToNPC());
 			c->Message(Chat::White, "%s deleted from database!",  target->GetName());
 			target->Depop(false);
 		}
@@ -5866,7 +5866,7 @@ void command_spawnfix(Client *c, const Seperator *sep) {
 
     std::string query = StringFormat("UPDATE spawn2 SET x = '%f', y = '%f', z = '%f', heading = '%f' WHERE id = '%i'",
                                     c->GetX(), c->GetY(), c->GetZ(), c->GetHeading(),s2->GetID());
-    auto results = database.QueryDatabase(query);
+    auto results = content_db.QueryDatabase(query);
     if (!results.Success()) {
         c->Message(Chat::Red, "Update failed! MySQL gave the following error:");
         c->Message(Chat::Red, results.ErrorMessage().c_str());
@@ -8607,7 +8607,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				   c->GetTarget()->CastToNPC()->GetSpawnGroupId() );
 		std::string query = StringFormat("UPDATE spawn2 SET animation = %i " "WHERE spawngroupID = %i",  animation,
 										 c->GetTarget()->CastToNPC()->GetSpawnGroupId());
-		database.QueryDatabase(query);
+		content_db.QueryDatabase(query);
 
 		c->GetTarget()->SetAppearance(EmuAppearance(animation));
 		return;
@@ -8728,7 +8728,7 @@ void command_qglobal(Client *c, const Seperator *sep) {
 	}
 
 	if(!strcasecmp(sep->arg[1], "view")) {
-		const NPCType *type = database.LoadNPCTypesData(target->GetNPCTypeID());
+		const NPCType *type = content_db.LoadNPCTypesData(target->GetNPCTypeID());
 		if(!type)
 			c->Message(Chat::Yellow, "Invalid NPC type.");
 		else if(type->qglobal)
@@ -9725,7 +9725,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
             return;
         }
 
-        database.NPCSpawnDB(6, zone->GetShortName(), zone->GetInstanceVersion(), c, target->CastToNPC());
+        content_db.NPCSpawnDB(6, zone->GetShortName(), zone->GetInstanceVersion(), c, target->CastToNPC());
         return;
     }
 
@@ -9746,7 +9746,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
                                         (sep->arg[7]? atof(sep->arg[7]): 0),
                                         (sep->arg[8]? atof(sep->arg[8]): 0),
                                         (sep->arg[9]? atoi(sep->arg[9]): 0));
-        auto results = database.QueryDatabase(query);
+        auto results = content_db.QueryDatabase(query);
         if (!results.Success()) {
             c->Message(Chat::White, "Invalid Arguments -- MySQL gave the following error:");
             c->Message(Chat::Red, results.ErrorMessage().c_str());
@@ -9766,7 +9766,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
         std::string query = StringFormat("INSERT INTO spawnentry (spawngroupID, npcID, chance) "
                                         "VALUES (%i, %i, %i)",
                                         atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]));
-        auto results = database.QueryDatabase(query);
+        auto results = content_db.QueryDatabase(query);
         if (!results.Success()) {
             c->Message(Chat::White, "Invalid Arguments -- MySQL gave the following error:");
             c->Message(Chat::Red, results.ErrorMessage().c_str());
@@ -9789,7 +9789,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
                                         atof(sep->arg[3]), atof(sep->arg[4]), atof(sep->arg[5]),
                                         atof(sep->arg[6]), atof(sep->arg[7]), atoi(sep->arg[8]),
                                         atoi(sep->arg[2]));
-        auto results = database.QueryDatabase(query);
+        auto results = content_db.QueryDatabase(query);
         if (!results.Success()) {
             c->Message(Chat::White, "Invalid Arguments -- MySQL gave the following error:");
             c->Message(Chat::Red, results.ErrorMessage().c_str());
@@ -9811,7 +9811,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
                                         "SET dist = '0', max_x = '0', min_x = '0', "
                                         "max_y = '0', min_y = '0', delay = '0' "
                                         "WHERE id = '%i' ",  atoi(sep->arg[2]));
-        auto results = database.QueryDatabase(query);
+        auto results = content_db.QueryDatabase(query);
         if (!results.Success()) {
             c->Message(Chat::White, "Invalid Arguments -- MySQL gave the following error:");
             c->Message(Chat::Red, results.ErrorMessage().c_str());
@@ -9824,7 +9824,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
     }
 
 	if (strcasecmp(sep->arg[1], "addgroupspawn") == 0 && atoi(sep->arg[2])!=0) {
-        database.NPCSpawnDB(5, zone->GetShortName(), zone->GetInstanceVersion(), c, 0, atoi(sep->arg[2]));
+        content_db.NPCSpawnDB(5, zone->GetShortName(), zone->GetInstanceVersion(), c, 0, atoi(sep->arg[2]));
         c->Message(Chat::White, "Mob of group %i added successfully!",  atoi(sep->arg[2]));
         return;
     }
@@ -9843,7 +9843,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
         }
 
         std::string query = StringFormat("DELETE FROM spawn2 WHERE id = '%i'",  s2->GetID());
-        auto results = database.QueryDatabase(query);
+        auto results = content_db.QueryDatabase(query);
         if(!results.Success()) {
             c->Message(Chat::Red, "Update failed! MySQL gave the following error:");
             c->Message(Chat::Red, results.ErrorMessage().c_str());
@@ -9872,7 +9872,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
         std::string query = StringFormat("UPDATE spawn2 SET x = '%f', y = '%f', z = '%f', heading = '%f' "
                                         "WHERE id = '%i'",
                                         c->GetX(), c->GetY(), c->GetZ(), c->GetHeading(),s2->GetID());
-        auto results = database.QueryDatabase(query);
+        auto results = content_db.QueryDatabase(query);
         if (!results.Success()) {
             c->Message(Chat::Red, "Update failed! MySQL gave the following error:");
             c->Message(Chat::Red, results.ErrorMessage().c_str());
@@ -9912,7 +9912,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 
         std::string query = StringFormat("UPDATE spawn2 SET respawntime = %u, variance = %u "
                                         "WHERE id = '%i'",  new_rs, new_var, s2->GetID());
-        auto results = database.QueryDatabase(query);
+        auto results = content_db.QueryDatabase(query);
         if (!results.Success()) {
             c->Message(Chat::Red, "Update failed! MySQL gave the following error:");
             c->Message(Chat::Red, results.ErrorMessage().c_str());
@@ -9941,7 +9941,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
         std::string query = StringFormat("UPDATE spawn2 SET version = %i "
                                         "WHERE spawngroupID = '%i'",
                                         version, c->GetTarget()->CastToNPC()->GetSpawnGroupId());
-        auto results = database.QueryDatabase(query);
+        auto results = content_db.QueryDatabase(query);
         if (!results.Success()) {
             c->Message(Chat::Red, "Update failed! MySQL gave the following error:");
             c->Message(Chat::Red, results.ErrorMessage().c_str());

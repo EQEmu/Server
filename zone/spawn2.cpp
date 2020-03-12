@@ -192,7 +192,7 @@ bool Spawn2::Process() {
 		}
 
 		//try to find our NPC type.
-		const NPCType *tmp = database.LoadNPCTypesData(npcid);
+		const NPCType *tmp = content_db.LoadNPCTypesData(npcid);
 		if (tmp == nullptr) {
 			LogSpawns("Spawn2 [{}]: Spawn group [{}] yeilded an invalid NPC type [{}]", spawn2_id, spawngroup_id_, npcid);
 			Reset();    //try again later
@@ -431,7 +431,7 @@ bool ZoneDatabase::PopulateZoneSpawnListClose(uint32 zoneid, LinkedList<Spawn2*>
 	gettimeofday(&tv, nullptr);
 
 	/* Bulk Load NPC Types Data into the cache */
-	database.LoadNPCTypesData(0, true);
+	content_db.LoadNPCTypesData(0, true);
 
 	std::string spawn_query = StringFormat(
 		"SELECT "
@@ -535,7 +535,7 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 	gettimeofday(&tv, nullptr);
 
 	/* Bulk Load NPC Types Data into the cache */
-	database.LoadNPCTypesData(0, true);
+	content_db.LoadNPCTypesData(0, true);
 
 	std::string spawn_query = StringFormat(
 		"SELECT "
@@ -907,7 +907,7 @@ void SpawnConditionManager::UpdateDBEvent(SpawnEvent &event) {
                                     event.next.day, event.next.month,
                                     event.next.year, event.enabled? 1: 0,
                                     event.strict? 1: 0, event.id);
-	database.QueryDatabase(query);
+	content_db.QueryDatabase(query);
 }
 
 void SpawnConditionManager::UpdateDBCondition(const char* zone_name, uint32 instance_id, uint16 cond_id, int16 value) {
@@ -916,7 +916,7 @@ void SpawnConditionManager::UpdateDBCondition(const char* zone_name, uint32 inst
                                     "(id, value, zone, instance_id) "
                                     "VALUES( %u, %u, '%s', %u)",
                                     cond_id, value, zone_name, instance_id);
-    database.QueryDatabase(query);
+    content_db.QueryDatabase(query);
 }
 
 bool SpawnConditionManager::LoadDBEvent(uint32 event_id, SpawnEvent &event, std::string &zone_name) {
@@ -926,7 +926,7 @@ bool SpawnConditionManager::LoadDBEvent(uint32 event_id, SpawnEvent &event, std:
                                     "next_month, next_year, enabled, "
                                     "action, argument, strict, zone "
                                     "FROM spawn_events WHERE id = %d", event_id);
-    auto results = database.QueryDatabase(query);
+    auto results = content_db.QueryDatabase(query);
     if (!results.Success()) {
 		return false;
 	}
@@ -968,7 +968,7 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
 	std::string query = StringFormat("SELECT id, onchange, value "
                                     "FROM spawn_conditions "
                                     "WHERE zone = '%s'", zone_name);
-    auto results = database.QueryDatabase(query);
+    auto results = content_db.QueryDatabase(query);
     if (!results.Success()) {
 		return false;
     }
@@ -989,7 +989,7 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
 	query = StringFormat("SELECT id, value FROM spawn_condition_values "
                         "WHERE zone = '%s' AND instance_id = %u",
                         zone_name, instance_id);
-    results = database.QueryDatabase(query);
+    results = content_db.QueryDatabase(query);
     if (!results.Success()) {
 		spawn_conditions.clear();
 		return false;
@@ -1006,7 +1006,7 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
     query = StringFormat("SELECT id, cond_id, period, next_minute, next_hour, "
                         "next_day, next_month, next_year, enabled, action, argument, strict "
                         "FROM spawn_events WHERE zone = '%s'", zone_name);
-    results = database.QueryDatabase(query);
+    results = content_db.QueryDatabase(query);
     if (!results.Success()) {
 		return false;
     }
@@ -1376,7 +1376,7 @@ int16 SpawnConditionManager::GetCondition(const char *zone_short, uint32 instanc
 		"WHERE zone = '%s' AND instance_id = %u AND id = %d",
 		zone_short, instance_id, condition_id
 	);
-	auto        results = database.QueryDatabase(query);
+	auto        results = content_db.QueryDatabase(query);
 	if (!results.Success()) {
 		LogSpawns("Unable to query remote condition [{}] from zone [{}] in Get request", condition_id, zone_short);
 		return 0;    //dunno a better thing to do...

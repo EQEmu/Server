@@ -6205,21 +6205,21 @@ void Client::NPCSpawn(NPC *target_npc, const char *identifier, uint32 extra)
 
 	if (id == "create") {
 		// extra tries to create the npc_type ID within the range for the current zone (zone_id * 1000)
-		database.NPCSpawnDB(0, zone->GetShortName(), zone->GetInstanceVersion(), this, target_npc->CastToNPC(), extra);
+		content_db.NPCSpawnDB(0, zone->GetShortName(), zone->GetInstanceVersion(), this, target_npc->CastToNPC(), extra);
 	}
 	else if (id == "add") {
 		// extra sets the respawn timer for add
-		database.NPCSpawnDB(1, zone->GetShortName(), zone->GetInstanceVersion(), this, target_npc->CastToNPC(), extra);
+		content_db.NPCSpawnDB(1, zone->GetShortName(), zone->GetInstanceVersion(), this, target_npc->CastToNPC(), extra);
 	}
 	else if (id == "update") {
-		database.NPCSpawnDB(2, zone->GetShortName(), zone->GetInstanceVersion(), this, target_npc->CastToNPC());
+		content_db.NPCSpawnDB(2, zone->GetShortName(), zone->GetInstanceVersion(), this, target_npc->CastToNPC());
 	}
 	else if (id == "remove") {
-		database.NPCSpawnDB(3, zone->GetShortName(), zone->GetInstanceVersion(), this, target_npc->CastToNPC());
+		content_db.NPCSpawnDB(3, zone->GetShortName(), zone->GetInstanceVersion(), this, target_npc->CastToNPC());
 		target_npc->Depop(false);
 	}
 	else if (id == "delete") {
-		database.NPCSpawnDB(4, zone->GetShortName(), zone->GetInstanceVersion(), this, target_npc->CastToNPC());
+		content_db.NPCSpawnDB(4, zone->GetShortName(), zone->GetInstanceVersion(), this, target_npc->CastToNPC());
 		target_npc->Depop(false);
 	}
 	else {
@@ -6323,7 +6323,7 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 
 	NPCType *made_npc = nullptr;
 
-	const NPCType *npc_type = database.LoadNPCTypesData(pet.npc_id);
+	const NPCType *npc_type = content_db.LoadNPCTypesData(pet.npc_id);
 	if(npc_type == nullptr) {
 		LogError("Unknown npc type for doppelganger spell id: [{}]", spell_id);
 		Message(0,"Unable to find pet!");

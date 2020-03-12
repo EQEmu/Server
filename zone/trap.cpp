@@ -162,7 +162,7 @@ void Trap::Trigger(Mob* trigger)
 
 			for (i = 0; i < effectvalue2; i++)
 			{
-				if ((tmp = database.LoadNPCTypesData(effectvalue)))
+				if ((tmp = content_db.LoadNPCTypesData(effectvalue)))
 				{
 					auto randomOffset = glm::vec4(zone->random.Int(-5, 5),zone->random.Int(-5, 5),zone->random.Int(-5, 5), zone->random.Int(0, 249));
 					auto spawnPosition = randomOffset + glm::vec4(m_Position, 0.0f);
@@ -187,7 +187,7 @@ void Trap::Trigger(Mob* trigger)
 
 			for (i = 0; i < effectvalue2; i++)
 			{
-				if ((tmp = database.LoadNPCTypesData(effectvalue)))
+				if ((tmp = content_db.LoadNPCTypesData(effectvalue)))
 				{
 					auto randomOffset = glm::vec4(zone->random.Int(-2, 2), zone->random.Int(-2, 2), zone->random.Int(-2, 2), zone->random.Int(0, 249));
 					auto spawnPosition = randomOffset + glm::vec4(m_Position, 0.0f);
@@ -452,7 +452,7 @@ void Trap::CreateHiddenTrigger()
 	if(hiddenTrigger)
 		return;
 
-	const NPCType *base_type = database.LoadNPCTypesData(500);
+	const NPCType *base_type = content_db.LoadNPCTypesData(500);
 	auto make_npc = new NPCType;
 	memcpy(make_npc, base_type, sizeof(NPCType));
 	make_npc->max_hp = 100000;
