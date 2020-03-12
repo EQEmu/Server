@@ -95,7 +95,7 @@ bool DatabaseDumpService::IsTarAvailable()
  */
 bool DatabaseDumpService::Is7ZipAvailable()
 {
-	std::string version_output = execute("7z -help");
+	std::string version_output = execute("7z --help");
 
 	return version_output.find("7-Zip") != std::string::npos;
 }
@@ -396,9 +396,8 @@ void DatabaseDumpService::Dump()
 			else if (Is7ZipAvailable()) {
 				execute(
 					fmt::format(
-						"7z a -t7z {}.zip -C {} {}.sql",
+						"7z a -t7z {}.zip {}.sql",
 						GetDumpFileNameWithPath(),
-						GetSetDumpPath(),
 						GetDumpFileNameWithPath()
 					)
 				);
