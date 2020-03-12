@@ -2082,7 +2082,7 @@ void Zone::SetInstanceTimer(uint32 new_duration)
 void Zone::LoadLDoNTraps()
 {
 	const std::string query   = "SELECT id, type, spell_id, skill, locked FROM ldon_trap_templates";
-	auto              results = database.QueryDatabase(query);
+	auto              results = content_db.QueryDatabase(query);
 	if (!results.Success()) {
 		return;
 	}
@@ -2102,7 +2102,7 @@ void Zone::LoadLDoNTraps()
 void Zone::LoadLDoNTrapEntries()
 {
 	const std::string query = "SELECT id, trap_id FROM ldon_trap_entries";
-    auto results = database.QueryDatabase(query);
+    auto results = content_db.QueryDatabase(query);
     if (!results.Success()) {
 		return;
     }

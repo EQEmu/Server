@@ -1984,32 +1984,32 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	{
 		std::string hotfix_name = std::string((char*)pack->pBuffer);
 		LogInfo("Loading items");
-		if (!database.LoadItems(hotfix_name)) {
+		if (!content_db.LoadItems(hotfix_name)) {
 			LogError("Loading items failed!");
 		}
 
 		LogInfo("Loading npc faction lists");
-		if (!database.LoadNPCFactionLists(hotfix_name)) {
+		if (!content_db.LoadNPCFactionLists(hotfix_name)) {
 			LogError("Loading npcs faction lists failed!");
 		}
 
 		LogInfo("Loading loot tables");
-		if (!database.LoadLoot(hotfix_name)) {
+		if (!content_db.LoadLoot(hotfix_name)) {
 			LogError("Loading loot failed!");
 		}
 
 		LogInfo("Loading skill caps");
-		if (!database.LoadSkillCaps(std::string(hotfix_name))) {
+		if (!content_db.LoadSkillCaps(std::string(hotfix_name))) {
 			LogError("Loading skill caps failed!");
 		}
 
 		LogInfo("Loading spells");
-		if (!database.LoadSpells(hotfix_name, &SPDAT_RECORDS, &spells)) {
+		if (!content_db.LoadSpells(hotfix_name, &SPDAT_RECORDS, &spells)) {
 			LogError("Loading spells failed!");
 		}
 
 		LogInfo("Loading base data");
-		if (!database.LoadBaseData(hotfix_name)) {
+		if (!content_db.LoadBaseData(hotfix_name)) {
 			LogError("Loading base data failed!");
 		}
 		break;
