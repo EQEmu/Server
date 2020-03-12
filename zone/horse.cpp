@@ -73,7 +73,7 @@ const NPCType *Horse::BuildHorseType(uint16 spell_id) {
 	const char* fileName = spells[spell_id].teleport_zone;
 
 	std::string query = StringFormat("SELECT race, gender, texture, mountspeed FROM horses WHERE filename = '%s'", fileName);
-	auto results = database.QueryDatabase(query);
+	auto results = content_db.QueryDatabase(query);
 	if (!results.Success()) {
 		return nullptr;
 	}
