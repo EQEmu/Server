@@ -166,7 +166,7 @@ void NpcScaleManager::ScaleNPC(NPC *npc)
 
 bool NpcScaleManager::LoadScaleData()
 {
-	auto results = database.QueryDatabase(
+	auto results = content_db.QueryDatabase(
 		"SELECT "
 		"type,"
 		"level,"

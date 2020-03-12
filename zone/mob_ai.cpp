@@ -2464,12 +2464,12 @@ bool NPC::AI_AddNPCSpells(uint32 iDBSpellsID) {
 		AIautocastspell_timer->Disable();
 		return false;
 	}
-	DBnpcspells_Struct* spell_list = database.GetNPCSpells(iDBSpellsID);
+	DBnpcspells_Struct* spell_list = content_db.GetNPCSpells(iDBSpellsID);
 	if (!spell_list) {
 		AIautocastspell_timer->Disable();
 		return false;
 	}
-	DBnpcspells_Struct* parentlist = database.GetNPCSpells(spell_list->parent_list);
+	DBnpcspells_Struct* parentlist = content_db.GetNPCSpells(spell_list->parent_list);
 #if MobAI_DEBUG_Spells >= 10
 	std::string debug_msg = StringFormat("Loading NPCSpells onto %s: dbspellsid=%u, level=%u", this->GetName(), iDBSpellsID, this->GetLevel());
 	if (spell_list) {
@@ -2636,13 +2636,13 @@ bool NPC::AI_AddNPCSpellsEffects(uint32 iDBSpellsEffectsID) {
 	if (iDBSpellsEffectsID == 0)
 		return false;
 
-	DBnpcspellseffects_Struct* spell_effects_list = database.GetNPCSpellsEffects(iDBSpellsEffectsID);
+	DBnpcspellseffects_Struct* spell_effects_list = content_db.GetNPCSpellsEffects(iDBSpellsEffectsID);
 
 	if (!spell_effects_list) {
 		return false;
 	}
 
-	DBnpcspellseffects_Struct* parentlist = database.GetNPCSpellsEffects(spell_effects_list->parent_list);
+	DBnpcspellseffects_Struct* parentlist = content_db.GetNPCSpellsEffects(spell_effects_list->parent_list);
 
 	uint32 i;
 #if MobAI_DEBUG_Spells >= 10

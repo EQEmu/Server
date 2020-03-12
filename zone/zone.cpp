@@ -468,7 +468,7 @@ void Zone::LoadNewMerchantData(uint32 merchantid) {
 	std::list<MerchantList> merlist;
 	std::string query = StringFormat("SELECT item, slot, faction_required, level_required, alt_currency_cost, "
                                      "classes_required, probability FROM merchantlist WHERE merchantid=%d ORDER BY slot", merchantid);
-    auto results = database.QueryDatabase(query);
+    auto results = content_db.QueryDatabase(query);
     if (!results.Success()) {
         return;
     }
@@ -2311,7 +2311,7 @@ void Zone::LoadNPCEmotes(LinkedList<NPC_Emote_Struct*>* NPCEmoteList)
 
 	NPCEmoteList->Clear();
     const std::string query = "SELECT emoteid, event_, type, text FROM npc_emotes";
-    auto results = database.QueryDatabase(query);
+    auto results = content_db.QueryDatabase(query);
     if (!results.Success()) {
         return;
     }
