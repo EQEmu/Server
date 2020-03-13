@@ -309,7 +309,7 @@ int command_init(void)
 		command_add("path", "- view and edit pathing", 200, command_path) ||
 		command_add("peekinv", "[equip/gen/cursor/poss/limbo/curlim/trib/bank/shbank/allbank/trade/world/all] - Print out contents of your player target's inventory", 100, command_peekinv) ||
 		command_add("petname", "[newname] - Temporarily renames your pet. Leave name blank to restore the original name.", 100, command_petname) ||
-		command_add("petsetname", "[newname] - Sets a persistent name for your pet. Leave name portion blank to restore the original generated names.", 0, command_petsetname) ||
+		command_add("petsetname", "[newname] - Sets a persistent name for your pet. Leave name portion blank to restore the original generated names.", 100, command_petsetname) ||
 		command_add("peqzone", "[zonename] - Go to specified zone, if you have > 75% health", 0, command_peqzone) ||
 		command_add("permaclass", "[classnum] - Change your or your player target's class (target is disconnected)", 80, command_permaclass) ||
 		command_add("permagender", "[gendernum] - Change your or your player target's gender (zone to take effect)", 80, command_permagender) ||

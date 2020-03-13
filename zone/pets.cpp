@@ -186,9 +186,9 @@ void Mob::MakePet(uint16 spell_id, const char* pettype, const char *petname) {
 // stay equipped when the character zones. petpower of -1 means that the currently equipped petfocus
 // of a client is searched for and used instead.
 void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
-		const char *petname, float in_size) {
+	const char *petname, float in_size) {
 	// Sanity and early out checking first.
-	if(HasPet() || pettype == nullptr)
+	if (HasPet() || pettype == nullptr)
 		return;
 
 	int16 act_power = 0; // The actual pet power we'll use.
@@ -211,7 +211,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 
 	//lookup our pets table record for this type
 	PetRecord record;
-	if(!database.GetPoweredPetEntry(pettype, act_power, &record)) {
+	if (!database.GetPoweredPetEntry(pettype, act_power, &record)) {
 		Message(Chat::Red, "Unable to find data for pet %s", pettype);
 		LogError("Unable to find data for pet [{}], check pets table", pettype);
 		return;
@@ -219,7 +219,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 
 	//find the NPC data for the specified NPC type
 	const NPCType *base = database.LoadNPCTypesData(record.npc_type);
-	if(base == nullptr) {
+	if (base == nullptr) {
 		Message(Chat::Red, "Unable to load NPC data for pet %s", pettype);
 		LogError("Unable to load NPC data for pet [{}] (NPC ID [{}]), check pets and npc_types tables", pettype, record.npc_type);
 		return;
@@ -230,14 +230,14 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	memcpy(npc_type, base, sizeof(NPCType));
 
 	// If pet power is set to -1 in the DB, use stat scaling
-	if ((this->IsClient() 
+	if ((this->IsClient()
 #ifdef BOTS
 		|| this->IsBot()
 #endif
 		) && record.petpower == -1)
 	{
 		float scale_power = (float)act_power / 100.0f;
-		if(scale_power > 0)
+		if (scale_power > 0)
 		{
 			npc_type->max_hp *= (1 + scale_power);
 			npc_type->current_hp = npc_type->max_hp;
@@ -245,7 +245,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 			npc_type->level += 1 + ((int)act_power / 25) > npc_type->level + RuleR(Pets, PetPowerLevelCap) ? RuleR(Pets, PetPowerLevelCap) : 1 + ((int)act_power / 25); // gains an additional level for every 25 pet power
 			npc_type->min_dmg = (npc_type->min_dmg * (1 + (scale_power / 2)));
 			npc_type->max_dmg = (npc_type->max_dmg * (1 + (scale_power / 2)));
-			npc_type->size = npc_type->size * (1 + (scale_power / 2)) > npc_type->size * 3 ? npc_type->size * 3 : npc_type-> size * (1 + (scale_power / 2));
+			npc_type->size = npc_type->size * (1 + (scale_power / 2)) > npc_type->size * 3 ? npc_type->size * 3 : npc_type->size * (1 + (scale_power / 2));
 		}
 		record.petpower = act_power;
 	}
@@ -253,8 +253,8 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	//Live AA - Elemental Durability
 	int16 MaxHP = aabonuses.PetMaxHP + itembonuses.PetMaxHP + spellbonuses.PetMaxHP;
 
-	if (MaxHP){
-		npc_type->max_hp += (npc_type->max_hp*MaxHP)/100;
+	if (MaxHP) {
+		npc_type->max_hp += (npc_type->max_hp*MaxHP) / 100;
 		npc_type->current_hp = npc_type->max_hp;
 	}
 
@@ -272,36 +272,43 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	if (petname != nullptr) {
 		// Name was provided, use it.
 		strn0cpy(npc_type->name, petname, 64);
-	} else if (record.petnaming == 0) {
+	}
+	else if (record.petnaming == 0) {
 		strcpy(npc_type->name, this->GetCleanName());
 		npc_type->name[25] = '\0';
 		strcat(npc_type->name, "`s_pet");
-	} else if (record.petnaming == 1) {
+	}
+	else if (record.petnaming == 1) {
 		strcpy(npc_type->name, this->GetName());
 		npc_type->name[19] = '\0';
 		strcat(npc_type->name, "`s_familiar");
-	} else if (record.petnaming == 2) {
+	}
+	else if (record.petnaming == 2) {
 		strcpy(npc_type->name, this->GetName());
 		npc_type->name[21] = 0;
 		strcat(npc_type->name, "`s_Warder");
-	} else if (record.petnaming == 4) {
+	}
+	else if (record.petnaming == 4) {
 		// Keep the DB name
-	} else if (record.petnaming == 3 && IsClient()) {
+	}
+	else if (record.petnaming == 3 && IsClient()) {
 		GetRandPetName(npc_type->name);
-	} else if (record.petnaming == 5 && IsClient()) {
+	}
+	else if (record.petnaming == 5 && IsClient()) {
 		strcpy(npc_type->name, this->GetName());
 		npc_type->name[24] = '\0';
 		strcat(npc_type->name, "`s_ward");
-	} else {
+	}
+	else {
 		strcpy(npc_type->name, this->GetCleanName());
 		npc_type->name[25] = '\0';
 		strcat(npc_type->name, "`s_pet");
 	}
 
 	//handle beastlord pet appearance
-	if(record.petnaming == 2)
+	if (record.petnaming == 2)
 	{
-		switch(GetBaseRace())
+		switch (GetBaseRace())
 		{
 		case VAHSHIR:
 			npc_type->race = TIGER;
@@ -334,20 +341,20 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	}
 
 	// handle monster summoning pet appearance
-	if(record.monsterflag) {
+	if (record.monsterflag) {
 
 		uint32 monsterid = 0;
 
 		// get a random npc id from the spawngroups assigned to this zone
 		auto query = StringFormat("SELECT npcID "
-									"FROM (spawnentry INNER JOIN spawn2 ON spawn2.spawngroupID = spawnentry.spawngroupID) "
-									"INNER JOIN npc_types ON npc_types.id = spawnentry.npcID "
-									"WHERE spawn2.zone = '%s' AND npc_types.bodytype NOT IN (11, 33, 66, 67) "
-									"AND npc_types.race NOT IN (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 44, "
-									"55, 67, 71, 72, 73, 77, 78, 81, 90, 92, 93, 94, 106, 112, 114, 127, 128, "
-									"130, 139, 141, 183, 236, 237, 238, 239, 254, 266, 329, 330, 378, 379, "
-									"380, 381, 382, 383, 404, 522) "
-									"ORDER BY RAND() LIMIT 1", zone->GetShortName());
+			"FROM (spawnentry INNER JOIN spawn2 ON spawn2.spawngroupID = spawnentry.spawngroupID) "
+			"INNER JOIN npc_types ON npc_types.id = spawnentry.npcID "
+			"WHERE spawn2.zone = '%s' AND npc_types.bodytype NOT IN (11, 33, 66, 67) "
+			"AND npc_types.race NOT IN (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 44, "
+			"55, 67, 71, 72, 73, 77, 78, 81, 90, 92, 93, 94, 106, 112, 114, 127, 128, "
+			"130, 139, 141, 183, 236, 237, 238, 239, 254, 266, 329, 330, 378, 379, "
+			"380, 381, 382, 383, 404, 522) "
+			"ORDER BY RAND() LIMIT 1", zone->GetShortName());
 		auto results = database.QueryDatabase(query);
 		if (!results.Success()) {
 			safe_delete(npc_type);
@@ -365,7 +372,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 
 		// give the summoned pet the attributes of the monster we found
 		const NPCType* monster = database.LoadNPCTypesData(monsterid);
-		if(monster) {
+		if (monster) {
 			npc_type->race = monster->race;
 			npc_type->size = monster->size;
 			npc_type->texture = monster->texture;
@@ -373,7 +380,8 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 			npc_type->luclinface = monster->luclinface;
 			npc_type->helmtexture = monster->helmtexture;
 			npc_type->herosforgemodel = monster->herosforgemodel;
-		} else
+		}
+		else
 			LogError("Error loading NPC data for monster summoning pet (NPC ID [{}])", monsterid);
 
 	}
@@ -405,8 +413,8 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 
 	entity_list.AddNPC(npc, true, true);
 	SetPetID(npc->GetID());
-	
-	
+
+
 	if (this->IsClient()) {
 		// save updated clients petinfo
 		this->CastToClient()->Save(1);
@@ -418,22 +426,23 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 		{
 			npc->TempName(customName.c_str());
 		}
-
-		// We need to handle PetType 5 (petHatelist), add the current target to the hatelist of the pet
-
-		if (record.petcontrol == petTargetLock)
-		{
-			Mob* target = GetTarget();
-
-			if (target) {
-				npc->AddToHateList(target, 1);
-				npc->SetPetTargetLockID(target->GetID());
-				npc->SetSpecialAbility(IMMUNE_AGGRO, 1);
-			}
-			else
-				npc->Kill(); //On live casts spell 892 Unsummon (Kayen - Too limiting to use that for emu since pet can have more than 20k HP)
-		}
 	}
+	// We need to handle PetType 5 (petHatelist), add the current target to the hatelist of the pet
+
+	if (record.petcontrol == petTargetLock)
+	{
+		Mob* target = GetTarget();
+
+		if (target) {
+			npc->AddToHateList(target, 1);
+			npc->SetPetTargetLockID(target->GetID());
+			npc->SetSpecialAbility(IMMUNE_AGGRO, 1);
+		}
+		else
+			npc->Kill(); //On live casts spell 892 Unsummon (Kayen - Too limiting to use that for emu since pet can have more than 20k HP)
+	}
+}
+
 /* This is why the pets ghost - pets were being spawned too far away from its npc owner and some
 into walls or objects (+10), this sometimes creates the "ghost" effect. I changed to +2 (as close as I
 could get while it still looked good). I also noticed this can happen if an NPC is spawned on the same spot of another or in a related bad spot.*/

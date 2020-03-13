@@ -5663,7 +5663,7 @@ void Client::SuspendMinion()
 	else
 	{
 		uint16 SpellID = CurrentPet->GetPetSpellID();
-		std::string OrigName = database.GetOriginalPetName(0, this->character_id);
+		std::string original_name = database.GetOriginalPetName(0, this->character_id);
 		if (SpellID)
 		{
 			if (m_suspendedminion.SpellID > 0)
@@ -5694,7 +5694,7 @@ void Client::SuspendMinion()
 					CurrentPet->GetPetState(m_suspendedminion.Buffs, m_suspendedminion.Items, m_suspendedminion.Name);
 				}
 
-				strn0cpy(m_suspendedminion.Name, OrigName.c_str(), 64);
+				strn0cpy(m_suspendedminion.Name, original_name.c_str(), 64);
 				MessageString(Chat::Magenta, SUSPEND_MINION_SUSPEND, CurrentPet->GetCleanName());
 
 				CurrentPet->Depop(false);
