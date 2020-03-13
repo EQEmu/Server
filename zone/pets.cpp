@@ -405,35 +405,35 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 
 	entity_list.AddNPC(npc, true, true);
 	SetPetID(npc->GetID());
-	// save updated clients petinfo
-	this->CastToClient()->Save(1);
-	//to then update name if custom is set
+	
+	
 	if (this->IsClient()) {
+		// save updated clients petinfo
+		this->CastToClient()->Save(1);
+
+		//to then update name if custom is set
 		uint32 charid = this->CastToClient()->CharacterID();
 		std::string customName = charid == 0 ? "" : database.GetCustomPetName(charid);
 		if (customName.length() > 3)
 		{
 			npc->TempName(customName.c_str());
 		}
-	}
 
+		// We need to handle PetType 5 (petHatelist), add the current target to the hatelist of the pet
 
-	// We need to handle PetType 5 (petHatelist), add the current target to the hatelist of the pet
+		if (record.petcontrol == petTargetLock)
+		{
+			Mob* target = GetTarget();
 
-
-	if (record.petcontrol == petTargetLock)
-	{
-		Mob* target = GetTarget();
-
-		if (target){
-			npc->AddToHateList(target, 1);
-			npc->SetPetTargetLockID(target->GetID());
-			npc->SetSpecialAbility(IMMUNE_AGGRO, 1);
+			if (target) {
+				npc->AddToHateList(target, 1);
+				npc->SetPetTargetLockID(target->GetID());
+				npc->SetSpecialAbility(IMMUNE_AGGRO, 1);
+			}
+			else
+				npc->Kill(); //On live casts spell 892 Unsummon (Kayen - Too limiting to use that for emu since pet can have more than 20k HP)
 		}
-		else
-			npc->Kill(); //On live casts spell 892 Unsummon (Kayen - Too limiting to use that for emu since pet can have more than 20k HP)
 	}
-}
 /* This is why the pets ghost - pets were being spawned too far away from its npc owner and some
 into walls or objects (+10), this sometimes creates the "ghost" effect. I changed to +2 (as close as I
 could get while it still looked good). I also noticed this can happen if an NPC is spawned on the same spot of another or in a related bad spot.*/

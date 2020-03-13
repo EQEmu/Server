@@ -5599,15 +5599,15 @@ void Client::SuspendMinion()
 
 	int AALevel = GetAA(aaSuspendedMinion);
 
-	if(AALevel == 0)
+	if (AALevel == 0)
 		return;
 
-	if(GetLevel() < 62)
+	if (GetLevel() < 62)
 		return;
 
-	if(!CurrentPet)
+	if (!CurrentPet)
 	{
-		if(m_suspendedminion.SpellID > 0)
+		if (m_suspendedminion.SpellID > 0)
 		{
 			if (m_suspendedminion.SpellID >= SPDAT_RECORDS) {
 				Message(Chat::Red, "Invalid suspended minion spell id (%u).", m_suspendedminion.SpellID);
@@ -5620,13 +5620,13 @@ void Client::SuspendMinion()
 
 			CurrentPet = GetPet()->CastToNPC();
 
-			if(!CurrentPet)
+			if (!CurrentPet)
 			{
 				Message(Chat::Red, "Failed to recall suspended minion.");
 				return;
 			}
 
-			if(AALevel >= 2)
+			if (AALevel >= 2)
 			{
 				CurrentPet->SetPetState(m_suspendedminion.Buffs, m_suspendedminion.Items);
 
@@ -5664,23 +5664,23 @@ void Client::SuspendMinion()
 	{
 		uint16 SpellID = CurrentPet->GetPetSpellID();
 		std::string OrigName = database.GetOriginalPetName(0, this->character_id);
-		if(SpellID)
+		if (SpellID)
 		{
-			if(m_suspendedminion.SpellID > 0)
+			if (m_suspendedminion.SpellID > 0)
 			{
-				MessageString(Chat::Red,ONLY_ONE_PET);
+				MessageString(Chat::Red, ONLY_ONE_PET);
 
 				return;
 			}
-			else if(CurrentPet->IsEngaged())
+			else if (CurrentPet->IsEngaged())
 			{
-				MessageString(Chat::Red,SUSPEND_MINION_FIGHTING);
+				MessageString(Chat::Red, SUSPEND_MINION_FIGHTING);
 
 				return;
 			}
-			else if(entity_list.Fighting(CurrentPet))
+			else if (entity_list.Fighting(CurrentPet))
 			{
-				MessageString(Chat::Blue,SUSPEND_MINION_HAS_AGGRO);
+				MessageString(Chat::Blue, SUSPEND_MINION_HAS_AGGRO);
 			}
 			else
 			{
@@ -5693,7 +5693,7 @@ void Client::SuspendMinion()
 				if (AALevel >= 2) {
 					CurrentPet->GetPetState(m_suspendedminion.Buffs, m_suspendedminion.Items, m_suspendedminion.Name);
 				}
-				
+
 				strn0cpy(m_suspendedminion.Name, OrigName.c_str(), 64);
 				MessageString(Chat::Magenta, SUSPEND_MINION_SUSPEND, CurrentPet->GetCleanName());
 
@@ -5709,8 +5709,8 @@ void Client::SuspendMinion()
 			return;
 		}
 	}
-		//get db and struct in sync.
-		if (GetPet() && GetPet()->CastToNPC()->GetPetSpellID() && !dead) {
+	//get db and struct in sync.
+	if (GetPet() && GetPet()->CastToNPC()->GetPetSpellID() && !dead) {
 		NPC * pet = GetPet()->CastToNPC();
 		m_petinfo.SpellID = pet->CastToNPC()->GetPetSpellID();
 		m_petinfo.HP = pet->GetHP();

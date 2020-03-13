@@ -3771,14 +3771,14 @@ void ZoneDatabase::SavePetInfo(Client *client)
 		if (!petinfo)
 			continue;
 		
-		std::string Orig = GetOriginalPetName(pet,client->CharacterID());
-		if (Orig == "") 
+		std::string original_name = GetOriginalPetName(pet,client->CharacterID());
+		if (original_name.empty())
 		{
-			Orig = petinfo->Name; 
+			original_name = petinfo->Name;
 		}
 
 		if (petinfo->SpellID == 0) { //got here from  /pet getlost
-			Orig = "";
+			original_name = "";
 		}
 
 		query = StringFormat("INSERT INTO `character_pet_info` "
@@ -3786,9 +3786,9 @@ void ZoneDatabase::SavePetInfo(Client *client)
 				"VALUES (%u, %u, '%s', %i, %u, %u, %u, %f) "
 				"ON DUPLICATE KEY UPDATE `petname` = '%s', `petpower` = %i, `spell_id` = %u, "
 				"`hp` = %u, `mana` = %u, `size` = %f",
-				client->CharacterID(), pet, Orig.c_str(), petinfo->petpower, petinfo->SpellID,
+				client->CharacterID(), pet, original_name.c_str(), petinfo->petpower, petinfo->SpellID,
 				petinfo->HP, petinfo->Mana, petinfo->size, // and now the ON DUPLICATE ENTRIES
-			Orig.c_str(), petinfo->petpower, petinfo->SpellID, petinfo->HP, petinfo->Mana, petinfo->size);
+			original_name.c_str(), petinfo->petpower, petinfo->SpellID, petinfo->HP, petinfo->Mana, petinfo->size);
 		results = database.QueryDatabase(query);
 		if (!results.Success())
 			return;
