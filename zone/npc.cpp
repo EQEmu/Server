@@ -962,7 +962,7 @@ void NPC::Depop(bool StartSpawnTimer) {
 }
 
 bool NPC::DatabaseCastAccepted(int spell_id) {
-	for (int i=0; i < 12; i++) {
+	for (int i=0; i < EFFECT_COUNT; i++) {
 		switch(spells[spell_id].effectid[i]) {
 		case SE_Stamina: {
 			if(IsEngaged() && GetHPRatio() < 100)
