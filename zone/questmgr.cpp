@@ -2580,6 +2580,32 @@ int QuestManager::collectitems(uint32 item_id, bool remove)
 	return quantity;
 }
 
+int QuestManager::countitem(uint32 item_id) {
+	QuestManagerCurrentQuestVars();
+	int quantity = 0;
+	EQEmu::ItemInstance *item = nullptr;
+	static const int16 slots[][2] = {
+		{ EQEmu::invslot::POSSESSIONS_BEGIN, EQEmu::invslot::POSSESSIONS_END },
+		{ EQEmu::invbag::GENERAL_BAGS_BEGIN, EQEmu::invbag::GENERAL_BAGS_END },
+		{ EQEmu::invbag::CURSOR_BAG_BEGIN, EQEmu::invbag::CURSOR_BAG_END},
+		{ EQEmu::invslot::BANK_BEGIN, EQEmu::invslot::BANK_END },
+		{ EQEmu::invbag::BANK_BAGS_BEGIN, EQEmu::invbag::BANK_BAGS_END },
+		{ EQEmu::invslot::SHARED_BANK_BEGIN, EQEmu::invslot::SHARED_BANK_END },
+		{ EQEmu::invbag::SHARED_BANK_BAGS_BEGIN, EQEmu::invbag::SHARED_BANK_BAGS_END },
+	};
+	const size_t size = sizeof(slots) / sizeof(slots[0]);	
+	for (int slot_index = 0; slot_index < size; ++slot_index) {
+		for (int slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
+			item = initiator->GetInv().GetItem(slot_id);
+			if (item && item->GetID() == item_id) {
+				quantity += item->IsStackable() ? item->GetCharges() : 1;
+			}
+		}
+	}
+
+	return quantity;
+}
+
 void QuestManager::UpdateSpawnTimer(uint32 id, uint32 newTime)
 {
 	bool found = false;
