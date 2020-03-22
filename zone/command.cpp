@@ -1799,7 +1799,7 @@ void command_timezone(Client *c, const Seperator *sep)
 		c->Message(Chat::Red, "Setting timezone to %i h %i m",  hours, minutes);
 		uint32 ntz=(hours*60)+minutes;
 		zone->zone_time.setEQTimeZone(ntz);
-		database.SetZoneTZ(zone->GetZoneID(), zone->GetInstanceVersion(), ntz);
+		content_db.SetZoneTZ(zone->GetZoneID(), zone->GetInstanceVersion(), ntz);
 
 		// Update all clients with new TZ.
 		auto outapp = new EQApplicationPacket(OP_TimeOfDay, sizeof(TimeOfDay_Struct));
@@ -9609,11 +9609,11 @@ void command_setgraveyard(Client *c, const Seperator *sep)
 	zoneid = content_db.GetZoneID(sep->arg[1]);
 
 	if(zoneid > 0) {
-		graveyard_id = database.CreateGraveyardRecord(zoneid, t->GetPosition());
+		graveyard_id = content_db.CreateGraveyardRecord(zoneid, t->GetPosition());
 
 		if(graveyard_id > 0) {
 			c->Message(Chat::White, "Successfuly added a new record for this graveyard!");
-			if(database.AddGraveyardIDToZone(zoneid, graveyard_id) > 0) {
+			if(content_db.AddGraveyardIDToZone(zoneid, graveyard_id) > 0) {
 				c->Message(Chat::White, "Successfuly added this new graveyard for the zone %s.",  sep->arg[1]);
 				// TODO: Set graveyard data to the running zone process.
 				c->Message(Chat::White, "Done!");
@@ -9646,7 +9646,7 @@ void command_deletegraveyard(Client *c, const Seperator *sep)
 	graveyard_id = content_db.GetZoneGraveyardID(zoneid, 0);
 
 	if(zoneid > 0 && graveyard_id > 0) {
-		if(database.DeleteGraveyard(zoneid, graveyard_id))
+		if(content_db.DeleteGraveyard(zoneid, graveyard_id))
 			c->Message(Chat::White, "Successfuly deleted graveyard %u for zone %s.",  graveyard_id, sep->arg[1]);
 		else
 			c->Message(Chat::White, "Unable to delete graveyard %u for zone %s.",  graveyard_id, sep->arg[1]);

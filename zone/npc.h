@@ -269,7 +269,7 @@ public:
 	void SetNPCFactionID(int32 in)
 	{
 		npc_faction_id = in;
-		database.GetFactionIdsForNPC(npc_faction_id, &faction_list, &primary_faction);
+		content_db.GetFactionIdsForNPC(npc_faction_id, &faction_list, &primary_faction);
 	}
 
     glm::vec4 m_SpawnPoint;

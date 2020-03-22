@@ -8123,7 +8123,7 @@ void Client::SendFactionMessage(int32 tmpvalue, int32 faction_id, int32 faction_
 		faction_value = faction_before_hit;
 
 	// default to Faction# if we couldn't get the name from the ID
-	if (database.GetFactionName(faction_id, name, sizeof(name)) == false)
+	if (content_db.GetFactionName(faction_id, name, sizeof(name)) == false)
 		snprintf(name, sizeof(name), "Faction%i", faction_id);
 
 	if (tmpvalue == 0 || temp == 1 || temp == 2)
