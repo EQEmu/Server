@@ -2797,6 +2797,19 @@ XS(XS__collectitems) {
 	XSRETURN_IV(quantity);
 }
 
+XS(XS__countitem);
+XS(XS__countitem) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::countitem(int item_id)");
+
+	uint32 item_id = (int) SvIV(ST(0));
+
+	int quantity = quest_manager.countitem(item_id);
+
+	XSRETURN_IV(quantity);
+}
+
 XS(XS__UpdateSpawnTimer);
 XS(XS__UpdateSpawnTimer) {
 	dXSARGS;
@@ -3951,6 +3964,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "clearspawntimers"), XS__clearspawntimers, file);
 	newXS(strcpy(buf, "collectitems"), XS__collectitems, file);
 	newXS(strcpy(buf, "completedtasksinset"), XS__completedtasksinset, file);
+	newXS(strcpy(buf, "countitem"), XS__countitem, file);
 	newXS(strcpy(buf, "createdoor"), XS__CreateDoor, file);
 	newXS(strcpy(buf, "creategroundobject"), XS__CreateGroundObject, file);
 	newXS(strcpy(buf, "creategroundobjectfrommodel"), XS__CreateGroundObjectFromModel, file);

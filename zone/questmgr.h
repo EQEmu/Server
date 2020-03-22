@@ -219,6 +219,7 @@ public:
     int getlevel(uint8 type);
     int collectitems(uint32 item_id, bool remove);
     int collectitems_processSlot(int16 slot_id, uint32 item_id, bool remove);
+	int countitem(uint32 item_id);
     void enabletitle(int titleset);
    	bool checktitle(int titlecheck);
    	void removetitle(int titlecheck);

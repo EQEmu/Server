@@ -781,6 +781,10 @@ int lua_collect_items(uint32 item_id, bool remove) {
 	return quest_manager.collectitems(item_id, remove);
 }
 
+int lua_count_item(uint32 item_id) {
+	return quest_manager.countitem(item_id);
+}
+
 void lua_update_spawn_timer(uint32 id, uint32 new_time) {
 	quest_manager.UpdateSpawnTimer(id, new_time);
 }
@@ -1724,6 +1728,7 @@ luabind::scope lua_register_general() {
 		luabind::def("create_door", &lua_create_door),
 		luabind::def("modify_npc_stat", &lua_modify_npc_stat),
 		luabind::def("collect_items", &lua_collect_items),
+		luabind::def("count_item", &lua_count_item),
 		luabind::def("update_spawn_timer", &lua_update_spawn_timer),
 		luabind::def("merchant_set_item", (void(*)(uint32,uint32))&lua_merchant_set_item),
 		luabind::def("merchant_set_item", (void(*)(uint32,uint32,uint32))&lua_merchant_set_item),
