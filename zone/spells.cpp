@@ -3964,12 +3964,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 		if(IsClient())	// send to caster
 			CastToClient()->QueuePacket(action_packet);
 	}
-	// send to people in the area, ignoring caster and target
-	//live dosent send this to anybody but the caster
-	//entity_list.QueueCloseClients(spelltar, action_packet, true, 200, this, true, spelltar->IsClient() ? FILTER_PCSPELLS : FILTER_NPCSPELLS);
 
-	// TEMPORARY - this is the message for the spell.
-	// double message on effects that use ChangeHP - working on this
 	message_packet = new EQApplicationPacket(OP_Damage, sizeof(CombatDamage_Struct));
 	CombatDamage_Struct *cd = (CombatDamage_Struct *)message_packet->pBuffer;
 	cd->target = action->target;
@@ -3980,7 +3975,31 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 	cd->hit_heading = action->hit_heading;
 	cd->hit_pitch = action->hit_pitch;
 	cd->damage = 0;
-	if(!IsEffectInSpell(spell_id, SE_BindAffinity)){
+
+	// attack.cpp sends out messages to nearby clients for damage and Taps
+	// Here, we need to send out that type of a message to the caster if we are
+	// the caster or we're the owner of the pet that is the caster.
+	//
+	// This fixes the cases where other clients were getting duplicates of
+	// the messages sent by attack.cpp.
+
+	if (IsDamageSpell(spell_id) || IsLifetapSpell(spell_id)) {
+        	Client *client_to_notify=nullptr;
+		
+		if (IsClient()) {
+			client_to_notify=this->CastToClient();
+		}
+		else if (IsPet() && IsPetOwnerClient()) {
+			client_to_notify=GetOwner()->CastToClient();
+		}
+
+		if (client_to_notify) {
+			client_to_notify->QueuePacket(message_packet);
+		}
+	}
+
+	if(!IsEffectInSpell(spell_id, SE_BindAffinity)
+	   && !IsDamageSpell(spell_id) && !IsLifetapSpell(spell_id)){
 		entity_list.QueueCloseClients(
 			spelltar, /* Sender */
 			message_packet, /* Packet */
