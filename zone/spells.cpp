@@ -3977,7 +3977,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 	cd->damage = 0;
 
 	// attack.cpp sends out messages to nearby clients for damage and Taps
-	// Here, we need to send out that type of a message to the caster if we are
+	// Here, we only need to send out that type of a message to the caster if we are
 	// the caster or we're the owner of the pet that is the caster.
 	//
 	// This fixes the cases where other clients were getting duplicates of
