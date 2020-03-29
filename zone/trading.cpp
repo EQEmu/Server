@@ -2603,7 +2603,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 	}
 
     if(item->IsClassBag()) {
-        Message(13, "That item is a Bag.");
+        Message(Chat::Red, "That item is a Bag.");
         return;
     }
 
@@ -2979,7 +2979,7 @@ void Client::UpdateBuyLine(const EQApplicationPacket *app) {
 			Message(Chat::Red, "Buy line %s disabled as the item is NODROP.", ItemName);
 
         else if(item->IsClassBag())
-            Message(13, "Buy line %s disabled as the item is a Bag.", ItemName);
+            Message(Chat::Red, "Buy line %s disabled as the item is a Bag.", ItemName);
 
 		else if(ToggleOnOff)
 			Message(Chat::Red, "Buy line %s disabled due to insufficient funds.", ItemName);
