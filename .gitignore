@@ -38,3 +38,18 @@ submodules/*
 cmake-build-debug/
 
 .nfs.*
+
+# Visual Studio and CMAKE Generated Files
+/.vs/
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.cmake
+*.ilk
+*.pdb
+*.sln
+*.dir/
+libs/
+bin/
+/Win32
+/client_files/**/CMakeFiles/
