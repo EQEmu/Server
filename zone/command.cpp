@@ -6557,14 +6557,14 @@ void command_editmassrespawn(Client* c, const Seperator* sep)
 
 	std::string query = fmt::format(
 		SQL(
-			SELECT tc.id, ta.spawngroupID, ta.id, tc.name, ta.respawntime
-			FROM spawn2 ta
-			INNER JOIN spawnentry tb ON ta.spawngroupID = tb.spawngroupID
-			INNER JOIN npc_types tc ON tb.npcID = tc.id
-			WHERE ta.zone LIKE '{}'
-			AND ta.version = '{}'
-			AND tc.name LIKE '{}{}{}'
-			ORDER BY tc.id, ta.spawngroupID, ta.id
+			SELECT npc_types.id, spawn2.spawngroupID, spawn2.id, npc_types.name, spawn2.respawntime
+			FROM spawn2
+			INNER JOIN spawnentry ON spawn2.spawngroupID = spawnentry.spawngroupID
+			INNER JOIN npc_types ON spawnentry.npcID = npc_types.id
+			WHERE spawn2.zone LIKE '{}'
+			AND spawn2.version = '{}'
+			AND npc_types.name LIKE '{}{}{}'
+			ORDER BY npc_types.id, spawn2.spawngroupID, spawn2.id
 		),
 		zone->GetShortName(),
 		zone->GetInstanceVersion(),
@@ -6613,13 +6613,13 @@ void command_editmassrespawn(Client* c, const Seperator* sep)
 							UPDATE spawn2
 							SET respawntime = '{}'
 							WHERE id IN (
-								SELECT ta.id
-								FROM spawn2 ta
-								INNER JOIN spawnentry tb ON ta.spawngroupID = tb.spawngroupID
-								INNER JOIN npc_types tc ON tb.npcID = tc.id
-								WHERE ta.zone LIKE '{}'
-								AND ta.version = '{}'
-								AND tc.name LIKE '{}{}{}'
+								SELECT spawn2.id
+								FROM spawn2
+								INNER JOIN spawnentry ON spawn2.spawngroupID = spawnentry.spawngroupID
+								INNER JOIN npc_types ON spawnentry.npcID = npc_types.id
+								WHERE spawn2.zone LIKE '{}'
+								AND spawn2.version = '{}'
+								AND npc_types.name LIKE '{}{}{}'
 							)
 						),
 						change_respawn_seconds,
