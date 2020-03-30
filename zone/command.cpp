@@ -7274,6 +7274,13 @@ void command_itemsearch(Client *c, const Seperator *sep)
 			return;
 		}
 
+		std::vector<std::string> amounts = {
+			"1",
+			"10",
+			"100",
+			"1000"
+		};
+
 		int count = 0;
 		char sName[64];
 		char sCriteria[255];
@@ -7288,7 +7295,24 @@ void command_itemsearch(Client *c, const Seperator *sep)
 			if (pdest != nullptr) {
 				linker.SetItemData(item);
 
-				c->Message(Chat::White, "%u: %s",  item->ID, linker.GenerateLink().c_str());
+				std::string saylink_commands;
+				for (auto   &amount : amounts) {
+					saylink_commands += EQEmu::SayLinkEngine::GenerateQuestSaylink(
+						"#gi " + std::to_string(item->ID) + " " + amount,
+						false,
+						"[" + amount + "] "
+					);
+				}
+
+				c->Message(
+					Chat::White,
+					fmt::format(
+						" Summon {} [{}] [{}]",
+						saylink_commands,
+						item->ID,
+						linker.GenerateLink()
+					).c_str()
+				);
 
 				++count;
 			}
