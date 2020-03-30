@@ -24,6 +24,9 @@
 #include "../common/types.h"
 #include "../common/random.h"
 #include "../common/string_util.h"
+#include "zonedb.h"
+#include "../common/repositories/grid_repository.h"
+#include "../common/repositories/grid_entries_repository.h"
 #include "qglobals.h"
 #include "spawn2.h"
 #include "spawngroup.h"
@@ -202,6 +205,9 @@ public:
 	std::unordered_map<int, std::unique_ptr<AA::Ability>> aa_abilities;
 	std::unordered_map<int, std::unique_ptr<AA::Rank>>    aa_ranks;
 
+	std::vector<GridRepository::Grid> grids;
+	std::vector<GridEntriesRepository::GridEntry> grid_entries;
+
 	time_t weather_timer;
 	Timer  spawn2_timer;
 	Timer  hot_reload_timer;
@@ -239,6 +245,7 @@ public:
 	void LoadLDoNTrapEntries();
 	void LoadLDoNTraps();
 	void LoadLevelEXPMods();
+	void LoadGrids();
 	void LoadMercSpells();
 	void LoadMercTemplates();
 	void LoadNewMerchantData(uint32 merchantid);

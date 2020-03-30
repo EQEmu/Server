@@ -1023,6 +1023,7 @@ bool Zone::Init(bool iStaticZone) {
 
 	LogInfo("Init Finished: ZoneID = [{}], Time Offset = [{}]", zoneid, zone->zone_time.getEQTimeZone());
 
+	LoadGrids();
 	LoadTickItems();
 
 	//MODDING HOOK FOR ZONE INIT
@@ -1609,6 +1610,8 @@ void Zone::Repop(uint32 delay)
 
 	if (!content_db.PopulateZoneSpawnList(zoneid, spawn2_list, GetInstanceVersion(), delay))
 		LogDebug("Error in Zone::Repop: database.PopulateZoneSpawnList failed");
+
+	LoadGrids();
 
 	initgrids_timer.Start();
 
@@ -2480,4 +2483,10 @@ bool Zone::IsQuestHotReloadQueued() const
 void Zone::SetQuestHotReloadQueued(bool in_quest_hot_reload_queued)
 {
 	quest_hot_reload_queued = in_quest_hot_reload_queued;
+}
+
+void Zone::LoadGrids()
+{
+	grids        = GridRepository::GetZoneGrids(GetZoneID());
+	grid_entries = GridEntriesRepository::GetZoneGridEntries(GetZoneID());
 }

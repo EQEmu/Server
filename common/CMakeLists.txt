@@ -197,6 +197,8 @@ SET(common_headers
 	races.h
 	random.h
 	repositories/character_recipe_list_repository.h
+	repositories/grid_repository.h
+	repositories/grid_entries_repository.h
 	repositories/tradeskill_recipe_repository.h
 	rdtsc.h
 	rulesys.h
