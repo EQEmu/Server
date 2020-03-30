@@ -165,87 +165,76 @@ namespace DatabaseSchema {
 	static std::vector<std::string> GetContentTables()
 	{
 		return {
-			"aa_ability", // --
-			"aa_actions", // not in use?
-			"aa_effects", // not in use?
-			"aa_rank_effects", // --
-			"aa_rank_prereqs", // --
-			"aa_ranks", // --
-			"aa_required_level_cost", // not in use?
-			"adventure_template", // --
-			"adventure_template_entry", // --
-			"adventure_template_entry_flavor", // --
-			"altadv_vars", // no longer in use?
-			"alternate_currency", // --
-			"auras", // --
-			"base_data", // --
-			"blocked_spells", // --
-			"books", // --
-			"char_create_combinations", // --
-			"char_create_point_allocations", // --
-			"class_skill", // not in use?
-			"damageshieldtypes", // not in use ?
-			"doors", // --
-			"faction_base_data", // --
-			"faction_list", // --
-			"faction_list_mod", // --
-			"fear_hints", // not used
-			"fishing", // --
-			"forage", // --
-			"global_loot", // --
-			"goallists", // --
-			"graveyard", // --
-			"grid", // --
-			"grid_entries", // --
-			"ground_spawns", // --
-			"horses", // --
-			"items", // --
-			"ldon_trap_entries", // --
-			"ldon_trap_templates", // --
-			"lootdrop", // --
-			"lootdrop_entries", // --
-			"loottable", // --
-			"loottable_entries", // --
-			"merchantlist", // --
-			"npc_emotes", // --
-			"npc_faction", // --
-			"npc_faction_entries", // --
-			"npc_scale_global_base", // --
-			"npc_spells", // --
-			"npc_spells_effects", // --
-			"npc_spells_effects_entries", // --
-			"npc_spells_entries", // --
-			"npc_types", // --
-			"npc_types_metadata", // not in use?
-			"npc_types_tint", // --
-			"object", // --
-			"pets", // --
-			"pets_equipmentset", // --
-			"pets_equipmentset_entries", // --
-			"proximities", // --
-			"races", // not used - peq editor?
-			"skill_caps", // --
-			"spawn2", // --
-			"spawn_conditions", // --
-			"spawn_events", // --
-			"spawnentry", // --
-			"spawngroup", // --
-			"spells_new", // --
-			"start_zones", // --
-			"starting_items", // --
-			"task_activities", // --
-			"tasks", // --
-			"tasksets", // --
-			"tradeskill_recipe", // --
-			"tradeskill_recipe_entries", // --
-			"traps", // --
-			"tribute_levels", // --
-			"tributes", // --
-			"veteran_reward_templates", // --
-			"zone", // --
-			"zone_points", // --
-			"zone_server", // unused
-			"zoneserver_auth", // unused
+			"aa_ability",
+			"aa_rank_effects",
+			"aa_rank_prereqs",
+			"aa_ranks",
+			"adventure_template",
+			"adventure_template_entry",
+			"adventure_template_entry_flavor",
+			"alternate_currency",
+			"auras",
+			"base_data",
+			"blocked_spells",
+			"books",
+			"char_create_combinations",
+			"char_create_point_allocations",
+			"doors",
+			"faction_base_data",
+			"faction_list",
+			"faction_list_mod",
+			"fishing",
+			"forage",
+			"global_loot",
+			"goallists",
+			"graveyard",
+			"grid",
+			"grid_entries",
+			"ground_spawns",
+			"horses",
+			"items",
+			"ldon_trap_entries",
+			"ldon_trap_templates",
+			"lootdrop",
+			"lootdrop_entries",
+			"loottable",
+			"loottable_entries",
+			"merchantlist",
+			"npc_emotes",
+			"npc_faction",
+			"npc_faction_entries",
+			"npc_scale_global_base",
+			"npc_spells",
+			"npc_spells_effects",
+			"npc_spells_effects_entries",
+			"npc_spells_entries",
+			"npc_types",
+			"npc_types_tint",
+			"object",
+			"pets",
+			"pets_equipmentset",
+			"pets_equipmentset_entries",
+			"proximities",
+			"skill_caps",
+			"spawn2",
+			"spawn_conditions",
+			"spawn_events",
+			"spawnentry",
+			"spawngroup",
+			"spells_new",
+			"start_zones",
+			"starting_items",
+			"task_activities",
+			"tasks",
+			"tasksets",
+			"tradeskill_recipe",
+			"tradeskill_recipe_entries",
+			"traps",
+			"tribute_levels",
+			"tributes",
+			"veteran_reward_templates",
+			"zone",
+			"zone_points",
 		};
 	}
 
