@@ -33,6 +33,8 @@
 #include "string_ids.h"
 #include "titles.h"
 #include "zonedb.h"
+#include "../common/repositories/character_recipe_list_repository.h"
+#include "../common/repositories/tradeskill_recipe_repository.h"
 
 extern QueryServ* QServ;
 
@@ -467,7 +469,7 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 
 	//ask the database for the recipe to make sure it exists...
 	DBTradeskillRecipe_Struct spec;
-	if (!database.GetTradeRecipe(rac->recipe_id, rac->object_type, rac->some_id, user->CharacterID(), &spec)) {
+	if (!content_db.GetTradeRecipe(rac->recipe_id, rac->object_type, rac->some_id, user->CharacterID(), &spec)) {
 		LogError("Unknown recipe for HandleAutoCombine: [{}]\n", rac->recipe_id);
 		user->QueuePacket(outapp);
 		safe_delete(outapp);
@@ -704,56 +706,69 @@ EQEmu::skills::SkillType Object::TypeToSkill(uint32 type)
 	}
 }
 
-void Client::TradeskillSearchResults(const std::string &query, unsigned long objtype, unsigned long someid) {
-
-    auto results = content_db.QueryDatabase(query);
+void Client::SendTradeskillSearchResults(
+	const std::string &query,
+	unsigned long objtype,
+	unsigned long someid
+)
+{
+	auto results = content_db.QueryDatabase(query);
 	if (!results.Success()) {
 		return;
 	}
 
-	if(results.RowCount() < 1)
-		return; //search gave no results... not an error
-
-	if(results.ColumnCount() != 6) {
-		LogError("Error in TradeskillSearchResults query [{}]: Invalid column count in result", query.c_str());
+	if (results.RowCount() < 1) {
 		return;
 	}
 
-	for(auto row = results.begin(); row != results.end(); ++row) {
-		if(row == nullptr || row[0] == nullptr || row[1] == nullptr || row[2] == nullptr || row[3] == nullptr || row[5] == nullptr)
-			continue;
+	auto character_learned_recipe_list = CharacterRecipeListRepository::GetLearnedRecipeList(CharacterID());
 
-		uint32 recipe = (uint32)atoi(row[0]);
-		const char *name = row[1];
-		uint32 trivial = (uint32) atoi(row[2]);
-		uint32 comp_count = (uint32) atoi(row[3]);
-		uint32 tradeskill = (uint16) atoi(row[5]);
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		if (row == nullptr || row[0] == nullptr || row[1] == nullptr || row[2] == nullptr || row[3] == nullptr ||
+			row[5] == nullptr) {
+			continue;
+		}
+
+		uint32     recipe_id  = (uint32) atoi(row[0]);
+		const char *name      = row[1];
+		uint32     trivial    = (uint32) atoi(row[2]);
+		uint32     comp_count = (uint32) atoi(row[3]);
+		uint32     tradeskill = (uint16) atoi(row[5]);
 
 		// Skip the recipes that exceed the threshold in skill difference
 		// Recipes that have either been made before or were
 		// explicitly learned are excempt from that limit
-		if (RuleB(Skills, UseLimitTradeskillSearchSkillDiff)
-			&& ((int32)trivial - (int32)GetSkill((EQEmu::skills::SkillType)tradeskill)) > RuleI(Skills, MaxTradeskillSearchSkillDiff)
-            && row[4] == nullptr)
-				continue;
+		if (RuleB(Skills, UseLimitTradeskillSearchSkillDiff) &&
+			((int32) trivial - (int32) GetSkill((EQEmu::skills::SkillType) tradeskill)) >
+			RuleI(Skills, MaxTradeskillSearchSkillDiff)) {
 
-		auto outapp = new EQApplicationPacket(OP_RecipeReply, sizeof(RecipeReply_Struct));
+			LogTradeskills("Checking limit recipe_id [{}] name [{}]", recipe_id, name);
+
+			auto character_learned_recipe = CharacterRecipeListRepository::GetRecipe(
+				character_learned_recipe_list,
+				recipe_id
+			);
+
+			if (character_learned_recipe.made_count == 0) {
+				continue;
+			}
+		}
+
+		auto               outapp = new EQApplicationPacket(OP_RecipeReply, sizeof(RecipeReply_Struct));
 		RecipeReply_Struct *reply = (RecipeReply_Struct *) outapp->pBuffer;
 
-		reply->object_type = objtype;
-		reply->some_id = someid;
+		reply->object_type     = objtype;
+		reply->some_id         = someid;
 		reply->component_count = comp_count;
-		reply->recipe_id = recipe;
-		reply->trivial = trivial;
+		reply->recipe_id       = recipe_id;
+		reply->trivial         = trivial;
 		strn0cpy(reply->recipe_name, name, sizeof(reply->recipe_name));
 		FastQueuePacket(&outapp);
 	}
-
 }
 
 void Client::SendTradeskillDetails(uint32 recipe_id) {
 
-    //pull the list of components
 	std::string query = StringFormat("SELECT tre.item_id,tre.componentcount,i.icon,i.Name "
                                     "FROM tradeskill_recipe_entries AS tre "
                                     "LEFT JOIN items AS i ON tre.item_id = i.id "
@@ -1124,9 +1139,9 @@ void Client::CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float
 			NotifyNewTitlesAvailable();
 	}
 
-	LogTradeskills("skillup_modifier: [{}] , success_modifier: [{}] , stat modifier: [{}]", skillup_modifier , success_modifier , stat_modifier);
-	LogTradeskills("Stage1 chance was: [{}] percent", chance_stage1);
-	LogTradeskills("Stage2 chance was: [{}] percent. 0 percent means stage1 failed", chance_stage2);
+	LogTradeskills("[CheckIncreaseTradeskill] skillup_modifier: [{}] , success_modifier: [{}] , stat modifier: [{}]", skillup_modifier , success_modifier , stat_modifier);
+	LogTradeskills("[CheckIncreaseTradeskill] Stage1 chance was: [{}] percent", chance_stage1);
+	LogTradeskills("[CheckIncreaseTradeskill] Stage2 chance was: [{}] percent. 0 percent means stage1 failed", chance_stage2);
 }
 
 bool ZoneDatabase::GetTradeRecipe(const EQEmu::ItemInstance* container, uint8 c_type, uint32 some_id,
@@ -1305,29 +1320,51 @@ bool ZoneDatabase::GetTradeRecipe(const EQEmu::ItemInstance* container, uint8 c_
 	return GetTradeRecipe(recipe_id, c_type, some_id, char_id, spec);
 }
 
-bool ZoneDatabase::GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id,
-	uint32 char_id, DBTradeskillRecipe_Struct *spec)
+bool ZoneDatabase::GetTradeRecipe(
+	uint32 recipe_id,
+	uint8 c_type,
+	uint32 some_id,
+	uint32 char_id,
+	DBTradeskillRecipe_Struct *spec
+)
 {
 
-	// make where clause segment for container(s)
-	std::string containers;
-	if (some_id == 0)
-		containers = StringFormat("= %u", c_type); // world combiner so no item number
-	else
-		containers = StringFormat("IN (%u,%u)", c_type, some_id); // container in inventory
+	std::string container_where_filter;
+	if (some_id == 0) {
+		// world combiner so no item number
+		container_where_filter = StringFormat("= %u", c_type);
+	}
+	else {
+		// container in inventory
+		container_where_filter = StringFormat("IN (%u,%u)", c_type, some_id);
+	}
 
-	std::string query = StringFormat("SELECT tr.id, tr.tradeskill, tr.skillneeded, "
-                                    "tr.trivial, tr.nofail, tr.replace_container, "
-                                    "tr.name, tr.must_learn, tr.quest, crl.madecount "
-                                    "FROM tradeskill_recipe AS tr "
-                                    "INNER JOIN tradeskill_recipe_entries AS tre "
-                                    "ON tr.id = tre.recipe_id "
-                                    "LEFT JOIN (SELECT recipe_id, madecount "
-                                    "FROM char_recipe_list WHERE char_id = %u) AS crl "
-                                    "ON tr.id = crl.recipe_id "
-                                    "WHERE tr.id = %lu AND tre.item_id %s AND tr.enabled "
-                                    "GROUP BY tr.id",
-                                    char_id, (unsigned long)recipe_id, containers.c_str());
+	std::string query = StringFormat(
+		SQL (
+			SELECT
+			tradeskill_recipe.id,
+			tradeskill_recipe.tradeskill,
+			tradeskill_recipe.skillneeded,
+			tradeskill_recipe.trivial,
+			tradeskill_recipe.nofail,
+			tradeskill_recipe.replace_container,
+			tradeskill_recipe.name,
+			tradeskill_recipe.must_learn,
+			tradeskill_recipe.quest
+			FROM
+				tradeskill_recipe
+				INNER JOIN tradeskill_recipe_entries ON tradeskill_recipe.id = tradeskill_recipe_entries.recipe_id
+			WHERE
+				tradeskill_recipe.id = %lu
+				AND tradeskill_recipe_entries.item_id %s
+				AND tradeskill_recipe.enabled
+				GROUP BY
+				tradeskill_recipe.id
+			)
+		,
+		(unsigned long) recipe_id,
+		container_where_filter.c_str()
+	);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		LogError("Error in GetTradeRecipe, query: [{}]", query.c_str());
@@ -1335,27 +1372,36 @@ bool ZoneDatabase::GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id
 		return false;
 	}
 
-	if(results.RowCount() != 1)
-		return false;//just not found i guess..
+	if (results.RowCount() != 1) {
+		return false;
+	}
 
 	auto row = results.begin();
-	spec->tradeskill = (EQEmu::skills::SkillType)atoi(row[1]);
-	spec->skill_needed	= (int16)atoi(row[2]);
-	spec->trivial = (uint16)atoi(row[3]);
-	spec->nofail = atoi(row[4]) ? true : false;
-	spec->replace_container	= atoi(row[5]) ? true : false;
-	spec->name = row[6];
-	spec->must_learn = (uint8)atoi(row[7]);
-	spec->quest = atoi(row[8]) ? true : false;
 
-	if (row[9] == nullptr) {
-		spec->has_learnt = false;
-		spec->madecount = 0;
-	} else {
+	spec->tradeskill        = (EQEmu::skills::SkillType) atoi(row[1]);
+	spec->skill_needed      = (int16) atoi(row[2]);
+	spec->trivial           = (uint16) atoi(row[3]);
+	spec->nofail            = atoi(row[4]) ? true : false;
+	spec->replace_container = atoi(row[5]) ? true : false;
+	spec->name              = row[6];
+	spec->must_learn        = (uint8) atoi(row[7]);
+	spec->quest             = atoi(row[8]) ? true : false;
+	spec->has_learnt        = false;
+	spec->madecount         = 0;
+	spec->recipe_id         = recipe_id;
+
+	auto character_learned_recipe_list = CharacterRecipeListRepository::GetLearnedRecipeList(char_id);
+	auto character_learned_recipe      = CharacterRecipeListRepository::GetRecipe(
+		character_learned_recipe_list,
+		recipe_id
+	);
+
+	if (character_learned_recipe.made_count > 0) {
+		LogTradeskills("[GetTradeRecipe] made_count [{}]", character_learned_recipe.made_count);
+
 		spec->has_learnt = true;
-		spec->madecount = (uint32)atoul(row[9]);
+		spec->madecount = (uint32)character_learned_recipe.made_count;
 	}
-	spec->recipe_id = recipe_id;
 
 	//Pull the on-success items...
 	query = StringFormat("SELECT item_id,successcount FROM tradeskill_recipe_entries "
@@ -1379,33 +1425,41 @@ bool ZoneDatabase::GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id
 
     spec->onfail.clear();
 	//Pull the on-fail items...
-	query = StringFormat("SELECT item_id, failcount FROM tradeskill_recipe_entries "
-                        "WHERE failcount > 0 AND recipe_id = %u", recipe_id);
+	query   = StringFormat(
+		"SELECT item_id, failcount FROM tradeskill_recipe_entries "
+		"WHERE failcount > 0 AND recipe_id = %u", recipe_id
+	);
 	results = QueryDatabase(query);
-	if (results.Success())
-		for(auto row = results.begin(); row != results.end(); ++row) {
-			uint32 item = (uint32)atoi(row[0]);
-			uint8 num = (uint8) atoi(row[1]);
-			spec->onfail.push_back(std::pair<uint32,uint8>(item, num));
+	if (results.Success()) {
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			uint32 item = (uint32) atoi(row[0]);
+			uint8  num  = (uint8) atoi(row[1]);
+			spec->onfail.push_back(std::pair<uint32, uint8>(item, num));
 		}
+	}
 
-    spec->salvage.clear();
+	spec->salvage.clear();
 
-    // Don't bother with the query if TS is nofail
-    if (spec->nofail)
-        return true;
+	// Don't bother with the query if TS is nofail
+	if (spec->nofail) {
+		return true;
+	}
 
 	// Pull the salvage list
-	query = StringFormat("SELECT item_id, salvagecount "
-                        "FROM tradeskill_recipe_entries "
-                        "WHERE salvagecount > 0 AND recipe_id = %u", recipe_id);
-    results = QueryDatabase(query);
-	if (results.Success())
-		for(auto row = results.begin(); row != results.begin(); ++row) {
-			uint32 item = (uint32)atoi(row[0]);
-			uint8 num = (uint8)atoi(row[1]);
-			spec->salvage.push_back(std::pair<uint32,uint8>(item, num));
+	query = StringFormat(
+		"SELECT item_id, salvagecount "
+		"FROM tradeskill_recipe_entries "
+		"WHERE salvagecount > 0 AND recipe_id = %u", recipe_id
+	);
+
+	results = QueryDatabase(query);
+	if (results.Success()) {
+		for (auto row = results.begin(); row != results.begin(); ++row) {
+			uint32 item = (uint32) atoi(row[0]);
+			uint8  num  = (uint8) atoi(row[1]);
+			spec->salvage.push_back(std::pair<uint32, uint8>(item, num));
 		}
+	}
 
 	return true;
 }
@@ -1419,43 +1473,57 @@ void ZoneDatabase::UpdateRecipeMadecount(uint32 recipe_id, uint32 char_id, uint3
     QueryDatabase(query);
 }
 
-void Client::LearnRecipe(uint32 recipeID)
+void Client::LearnRecipe(uint32 recipe_id)
 {
-	std::string query = StringFormat("SELECT tr.name, crl.madecount "
-                                    "FROM tradeskill_recipe AS tr "
-                                    "LEFT JOIN (SELECT recipe_id, madecount "
-                                    "FROM char_recipe_list WHERE char_id = %u) AS crl "
-                                    "ON tr.id = crl.recipe_id "
-                                    "WHERE tr.id = %u ;", CharacterID(), recipeID);
-
-	// TODO: BOUNDARY REWRITE
+	std::string query = fmt::format(
+		SQL(
+			select
+			char_id,
+			recipe_id,
+			madecount
+				from
+				char_recipe_list
+				where
+				char_id = {}
+				and recipe_id = {}
+			LIMIT 1
+		),
+		CharacterID(),
+		recipe_id
+	);
 
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
 		return;
 	}
 
-	if (results.RowCount() != 1) {
-		LogInfo("Client::LearnRecipe - RecipeID: [{}] had [{}] occurences", recipeID, results.RowCount());
+	auto tradeskill_recipe = TradeskillRecipeRepository::GetRecipe(recipe_id);
+	if (tradeskill_recipe.id == 0) {
+		LogError("Invalid recipe [{}]", recipe_id);
 		return;
 	}
 
+	LogTradeskills(
+		"[LearnRecipe] recipe_id [{}] name [{}] learned [{}]",
+		recipe_id,
+		tradeskill_recipe.name,
+		results.RowCount()
+	);
+
 	auto row = results.begin();
+	if (results.RowCount() > 0) {
+		return;
+	}
 
-	if (row[0] == nullptr)
-        return;
+	MessageString(Chat::LightBlue, TRADESKILL_LEARN_RECIPE, tradeskill_recipe.name.c_str());
 
-	// Only give Learn message if character doesn't know the recipe
-    if (row[1] != nullptr)
-        return;
-
-    MessageString(Chat::LightBlue, TRADESKILL_LEARN_RECIPE, row[0]);
-    // Actually learn the recipe now
-	query = StringFormat("INSERT INTO char_recipe_list "
-                        "SET recipe_id = %u, char_id = %u, madecount = 0 "
-                        "ON DUPLICATE KEY UPDATE madecount = madecount;",
-                        recipeID, CharacterID());
-    results = database.QueryDatabase(query);
+	database.QueryDatabase(
+		fmt::format(
+			"REPLACE INTO char_recipe_list (recipe_id, char_id, madecount) VALUES ({}, {}, 0)",
+			recipe_id,
+			CharacterID()
+		)
+	);
 }
 
 bool Client::CanIncreaseTradeskill(EQEmu::skills::SkillType tradeskill) {

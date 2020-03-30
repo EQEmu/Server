@@ -11828,90 +11828,166 @@ void Client::Handle_OP_RecipesFavorite(const EQApplicationPacket *app)
 	if (first)	//no favorites....
 		return;
 
-	const std::string query = StringFormat("SELECT tr.id, tr.name, tr.trivial, "
-		"SUM(tre.componentcount), crl.madecount,tr.tradeskill "
-		"FROM tradeskill_recipe AS tr "
-		"LEFT JOIN tradeskill_recipe_entries AS tre ON tr.id=tre.recipe_id "
-		"LEFT JOIN (SELECT recipe_id, madecount "
-		"FROM char_recipe_list "
-		"WHERE char_id = %u) AS crl ON tr.id=crl.recipe_id "
-		"WHERE tr.enabled <> 0 AND tr.id IN (%s) "
-		"AND tr.must_learn & 0x20 <> 0x20 AND "
-		"((tr.must_learn & 0x3 <> 0 AND crl.madecount IS NOT NULL) "
-		"OR (tr.must_learn & 0x3 = 0)) "
-		"GROUP BY tr.id "
-		"HAVING sum(if(tre.item_id %s AND tre.iscontainer > 0,1,0)) > 0 AND SUM(tre.componentcount) <= %u "
-		"LIMIT 100 ", CharacterID(), favoriteIDs.c_str(), containers.c_str(), combineObjectSlots);
+	const std::string query = StringFormat(
+		SQL (
+			SELECT
+			tr.id,
+			tr.name,
+			tr.trivial,
+			SUM(tre.componentcount),
+			tr.tradeskill
+				FROM
+				tradeskill_recipe AS tr
+				LEFT JOIN tradeskill_recipe_entries AS tre ON tr.id = tre.recipe_id
+				WHERE
+				tr.enabled <> 0
+				AND tr.id IN (%s)
+				AND tr.must_learn & 0x20 <> 0x20
+				AND (
+					(
+						tr.must_learn & 0x3 <> 0
+					)
+						OR (tr.must_learn & 0x3 = 0)
+				)
+				GROUP BY
+				tr.id
+				HAVING
+				sum(
+				if(
+				tre.item_id %s
+				AND tre.iscontainer > 0,
+				1,
+				0
+			)
+			) > 0
+				AND SUM(tre.componentcount) <= %u
+				LIMIT
+				100
+		),
+		favoriteIDs.c_str(),
+		containers.c_str(),
+		combineObjectSlots
+	);
 
-	TradeskillSearchResults(query, tsf->object_type, tsf->some_id);
-	return;
+	SendTradeskillSearchResults(query, tsf->object_type, tsf->some_id);
 }
 
 void Client::Handle_OP_RecipesSearch(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(RecipesSearch_Struct)) {
-		LogError("Invalid size for RecipesSearch_Struct: Expected: [{}], Got: [{}]",
-			sizeof(RecipesSearch_Struct), app->size);
+		LogError(
+			"Invalid size for RecipesSearch_Struct: Expected: [{}], Got: [{}]",
+			sizeof(RecipesSearch_Struct),
+			app->size
+		);
+
 		return;
 	}
 
-	RecipesSearch_Struct* rss = (RecipesSearch_Struct*)app->pBuffer;
-	rss->query[55] = '\0';	//just to be sure.
+	auto* p_recipes_search_struct = (RecipesSearch_Struct*)app->pBuffer;
+	p_recipes_search_struct->query[55] = '\0';	//just to be sure.
 
+	LogTradeskills(
+		"[Handle_OP_RecipesSearch] Requested search recipes for object_type [{}] some_id [{}]",
+		p_recipes_search_struct->object_type,
+		p_recipes_search_struct->some_id
+	);
 
-	LogDebug("Requested search recipes for: [{}] - [{}]\n", rss->object_type, rss->some_id);
-
-	// make where clause segment for container(s)
-	char containers[30];
-	uint32 combineObjectSlots;
-	if (rss->some_id == 0) {
+	char   containers_where_clause[30];
+	uint32 combine_object_slots;
+	if (p_recipes_search_struct->some_id == 0) {
 		// world combiner so no item number
-		snprintf(containers, 29, "= %u", rss->object_type);
-		combineObjectSlots = 10;
+		snprintf(containers_where_clause, 29, "= %u", p_recipes_search_struct->object_type);
+		combine_object_slots = 10;
 	}
 	else {
 		// container in inventory
-		snprintf(containers, 29, "in (%u,%u)", rss->object_type, rss->some_id);
-		auto item = database.GetItem(rss->some_id);
-		if (!item)
-		{
-			LogError("Invalid container ID: [{}]. GetItem returned null. Defaulting to BagSlots = 10.\n", rss->some_id);
-			combineObjectSlots = 10;
+		snprintf(containers_where_clause, 29, "in (%u,%u)", p_recipes_search_struct->object_type, p_recipes_search_struct->some_id);
+		auto item = database.GetItem(p_recipes_search_struct->some_id);
+		if (!item) {
+			LogError(
+				"Invalid container ID: [{}]. GetItem returned null. Defaulting to BagSlots = 10.",
+				p_recipes_search_struct->some_id
+			);
+			combine_object_slots = 10;
 		}
-		else
-		{
-			combineObjectSlots = item->BagSlots;
+		else {
+			combine_object_slots = item->BagSlots;
 		}
 	}
 
-	std::string searchClause;
-
-	//omit the rlike clause if query is empty
-	if (rss->query[0] != 0) {
+	std::string search_clause;
+	if (p_recipes_search_struct->query[0] != 0) {
 		char buf[120];	//larger than 2X rss->query
-		database.DoEscapeString(buf, rss->query, strlen(rss->query));
-		searchClause = StringFormat("name rlike '%s' AND", buf);
+		database.DoEscapeString(buf, p_recipes_search_struct->query, strlen(p_recipes_search_struct->query));
+		search_clause = StringFormat("name rlike '%s' AND", buf);
 	}
 
 	//arbitrary limit of 200 recipes, makes sense to me.
-	const std::string query = StringFormat("SELECT tr.id, tr.name, tr.trivial, "
-		"SUM(tre.componentcount), crl.madecount,tr.tradeskill "
-		"FROM tradeskill_recipe AS tr "
-		"LEFT JOIN tradeskill_recipe_entries AS tre ON tr.id = tre.recipe_id "
-		"LEFT JOIN (SELECT recipe_id, madecount "
-		"FROM char_recipe_list WHERE char_id = %u) AS crl ON tr.id=crl.recipe_id "
-		"WHERE %s tr.trivial >= %u AND tr.trivial <= %u AND tr.enabled <> 0 "
-		"AND tr.must_learn & 0x20 <> 0x20 "
-		"AND ((tr.must_learn & 0x3 <> 0 "
-		"AND crl.madecount IS NOT NULL) "
-		"OR (tr.must_learn & 0x3 = 0)) "
-		"GROUP BY tr.id "
-		"HAVING sum(if(tre.item_id %s AND tre.iscontainer > 0,1,0)) > 0 AND SUM(tre.componentcount) <= %u "
-		"LIMIT 200 ",
-		CharacterID(), searchClause.c_str(),
-		rss->mintrivial, rss->maxtrivial, containers, combineObjectSlots);
-	TradeskillSearchResults(query, rss->object_type, rss->some_id);
-	return;
+	std::string query = fmt::format(
+		SQL(
+			SELECT
+			tr.id,
+			tr.name,
+			tr.trivial,
+			SUM(tre.componentcount),
+			crl.madecount,
+			tr.tradeskill
+				FROM
+				tradeskill_recipe
+				AS tr
+				LEFT
+				JOIN
+				tradeskill_recipe_entries
+				AS
+				tre
+				ON
+				tr.id = tre.recipe_id
+				LEFT JOIN(
+					SELECT
+					recipe_id,
+					madecount
+					FROM
+					char_recipe_list
+					WHERE
+				char_id = {}
+			) AS crl ON tr.id = crl.recipe_id
+				WHERE
+			    {} tr.trivial >= {}
+				AND tr.trivial <= {}
+				AND tr.enabled <> 0
+				AND tr.must_learn & 0x20 <> 0x20
+				AND (
+			(
+				tr.must_learn & 0x3 <> 0
+				AND crl.madecount IS NOT NULL
+			)
+				OR (tr.must_learn & 0x3 = 0)
+			)
+				GROUP BY
+				tr.id
+				HAVING
+				sum(
+				if (
+				tre.item_id {}
+				AND tre.iscontainer > 0,
+				1,
+				0
+			)
+			) > 0
+				AND SUM(tre.componentcount) <= {}
+				LIMIT
+				200
+		),
+		CharacterID(),
+		search_clause,
+		p_recipes_search_struct->mintrivial,
+		p_recipes_search_struct->maxtrivial,
+		containers_where_clause,
+		combine_object_slots
+	);
+
+	SendTradeskillSearchResults(query, p_recipes_search_struct->object_type, p_recipes_search_struct->some_id);
 }
 
 void Client::Handle_OP_ReloadUI(const EQApplicationPacket *app)
