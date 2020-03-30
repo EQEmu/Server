@@ -537,7 +537,10 @@ sub check_for_world_bootup_database_update {
 
     if ($binary_database_version == $local_database_version && $ARGV[0] eq "ran_from_world") {
         print "[Update] Database up to date...\n";
-        exit;
+        if (trim($db_version[2]) == 0) {
+            print "[Update] Continuing bootup\n";
+            exit;
+        }
     }
     else {
         #::: We ran world - Database needs to update, lets backup and run updates and continue world bootup
