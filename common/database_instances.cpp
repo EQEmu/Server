@@ -472,21 +472,16 @@ void Database::AssignRaidToInstance(uint32 raid_id, uint32 instance_id)
 }
 
 void Database::BuryCorpsesInInstance(uint16 instance_id) {
-	std::string query = StringFormat(
-		"UPDATE `character_corpses` "
-		"SET `is_buried` = 1, "
-		"`instance_id` = 0 "
-		"WHERE "
-		"`instance_id` = %u ",
-		instance_id
-		);
-	auto results = QueryDatabase(query);
+	QueryDatabase(
+		fmt::format(
+			"UPDATE character_corpses SET is_buried = 1, instance_id = 0 WHERE instance_id = {}",
+			instance_id
+		)
+	);
 }
 
 void Database::DeleteInstance(uint16 instance_id)
 {
-	// TODO: BOUNDARY REWRITE
-
 	std::string query = StringFormat("DELETE FROM instance_list WHERE id=%u", instance_id);
 	QueryDatabase(query);
 

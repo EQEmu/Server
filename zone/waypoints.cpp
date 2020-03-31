@@ -575,7 +575,7 @@ void NPC::AssignWaypoints(int32 grid_id, int start_wp)
 	Waypoints.clear();
 	roamer = false;
 
-	auto grid_entry = GridRepository::GetGrid(zone->grids, grid_id);
+	auto grid_entry = GridRepository::GetGrid(zone->zone_grids, grid_id);
 	if (grid_entry.id == 0) {
 		return;
 	}
@@ -588,7 +588,7 @@ void NPC::AssignWaypoints(int32 grid_id, int start_wp)
 	roamer = true;
 	max_wp = 0;	// Initialize it; will increment it for each waypoint successfully added to the list
 
-	for (auto &entry : zone->grid_entries) {
+	for (auto &entry : zone->zone_grid_entries) {
 		if (entry.gridid == grid_id) {
 			wplist new_waypoint{};
 			new_waypoint.index       = max_wp;

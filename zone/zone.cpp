@@ -419,48 +419,79 @@ uint32 Zone::GetTempMerchantQuantity(uint32 NPCID, uint32 Slot) {
 	return 0;
 }
 
-void Zone::LoadTempMerchantData() {
+void Zone::LoadTempMerchantData()
+{
 	LogInfo("Loading Temporary Merchant Lists");
-	std::string query = StringFormat(
-		"SELECT								   "
-		"DISTINCT ml.npcid,					   "
-		"ml.slot,							   "
-		"ml.charges,						   "
-		"ml.itemid							   "
-		"FROM								   "
-		"merchantlist_temp ml,				   "
-		"spawnentry se,						   "
-		"spawn2 s2							   "
-		"WHERE								   "
-		"ml.npcid = se.npcid				   "
-		"AND se.spawngroupid = s2.spawngroupid "
-		"AND s2.zone = '%s' AND s2.version = %i "
-		"ORDER BY ml.slot					   ", GetShortName(), GetInstanceVersion());
-	auto results = content_db.QueryDatabase(query);
-	if (!results.Success()) {
-		return;
-	}
-	std::map<uint32, std::list<TempMerchantList> >::iterator cur;
-	uint32 npcid = 0;
+
+	auto results = content_db.QueryDatabase(
+		fmt::format(
+			SQL(
+				SELECT
+				DISTINCT npc_types.id
+				FROM
+					npc_types
+				JOIN spawnentry ON spawnentry.npcID = npc_types.id
+				JOIN spawn2 ON spawn2.spawngroupID = spawnentry.spawngroupID
+				WHERE
+				spawn2.zone = '{}'
+				AND spawn2.version = {}
+			),
+			GetShortName(),
+			GetInstanceVersion()
+		)
+	);
+
+	std::vector<std::string> npc_ids;
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		TempMerchantList ml;
-		ml.npcid = atoul(row[0]);
-		if (npcid != ml.npcid){
-			cur = tmpmerchanttable.find(ml.npcid);
-			if (cur == tmpmerchanttable.end()) {
-				std::list<TempMerchantList> empty;
-				tmpmerchanttable[ml.npcid] = empty;
-				cur = tmpmerchanttable.find(ml.npcid);
-			}
-			npcid = ml.npcid;
-		}
-		ml.slot = atoul(row[1]);
-		ml.charges = atoul(row[2]);
-		ml.item = atoul(row[3]);
-		ml.origslot = ml.slot;
-		cur->second.push_back(ml);
+		npc_ids.push_back(row[0]);
 	}
-	pQueuedMerchantsWorkID = 0;
+
+	results = database.QueryDatabase(
+		fmt::format(
+			SQL(
+				npcid,
+				slot,
+				charges,
+				itemid
+				FROM merchantlist_temp
+				WHERE npcid IN ({})
+			),
+			implode(", ", npc_ids)
+		)
+	);
+
+	std::map<uint32, std::list<TempMerchantList> >::iterator temp_merchant_table_entry;
+
+	uint32 npc_id = 0;
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		TempMerchantList temp_merchant_list;
+		temp_merchant_list.npcid = atoul(row[0]);
+		if (npc_id != temp_merchant_list.npcid) {
+			temp_merchant_table_entry = tmpmerchanttable.find(temp_merchant_list.npcid);
+			if (temp_merchant_table_entry == tmpmerchanttable.end()) {
+				std::list<TempMerchantList> empty;
+				tmpmerchanttable[temp_merchant_list.npcid] = empty;
+				temp_merchant_table_entry = tmpmerchanttable.find(temp_merchant_list.npcid);
+			}
+			npc_id = temp_merchant_list.npcid;
+		}
+
+		temp_merchant_list.slot     = atoul(row[1]);
+		temp_merchant_list.charges  = atoul(row[2]);
+		temp_merchant_list.item     = atoul(row[3]);
+		temp_merchant_list.origslot = temp_merchant_list.slot;
+
+		LogMerchants(
+			"[LoadTempMerchantData] Loading merchant temp items npc_id [{}] slot [{}] charges [{}] item [{}] origslot [{}]",
+			npc_id,
+			temp_merchant_list.slot,
+			temp_merchant_list.charges,
+			temp_merchant_list.item,
+			temp_merchant_list.origslot
+		);
+
+		temp_merchant_table_entry->second.push_back(temp_merchant_list);
+	}
 }
 
 void Zone::LoadNewMerchantData(uint32 merchantid) {
@@ -807,7 +838,6 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	pgraveyard_id = 0;
 	pgraveyard_zoneid = 0;
 	pMaxClients = 0;
-	pQueuedMerchantsWorkID = 0;
 	pvpzone = false;
 	if(database.GetServerType() == 1)
 		pvpzone = true;
@@ -907,16 +937,18 @@ Zone::~Zone() {
 //Modified for timezones.
 bool Zone::Init(bool iStaticZone) {
 	SetStaticZone(iStaticZone);
-	
-	//load the zone config file.
-	if (!LoadZoneCFG(zone->GetShortName(), zone->GetInstanceVersion())) // try loading the zone name...
-		LoadZoneCFG(zone->GetFileName(), zone->GetInstanceVersion()); // if that fails, try the file name, then load defaults
 
-	if(RuleManager::Instance()->GetActiveRulesetID() != default_ruleset)
-	{
+	//load the zone config file.
+	if (!LoadZoneCFG(zone->GetShortName(), zone->GetInstanceVersion())) { // try loading the zone name...
+		LoadZoneCFG(
+			zone->GetFileName(),
+			zone->GetInstanceVersion()
+		);
+	} // if that fails, try the file name, then load defaults
+
+	if (RuleManager::Instance()->GetActiveRulesetID() != default_ruleset) {
 		std::string r_name = RuleManager::Instance()->GetRulesetName(&database, default_ruleset);
-		if(r_name.size() > 0)
-		{
+		if (r_name.size() > 0) {
 			RuleManager::Instance()->LoadRules(&database, r_name.c_str(), false);
 		}
 	}
@@ -980,12 +1012,11 @@ bool Zone::Init(bool iStaticZone) {
 	LogInfo("Flushing old respawn timers");
 	database.QueryDatabase("DELETE FROM `respawn_times` WHERE (`start` + `duration`) < UNIX_TIMESTAMP(NOW())");
 
-	//load up the zone's doors (prints inside)
 	zone->LoadZoneDoors(zone->GetShortName(), zone->GetInstanceVersion());
 	zone->LoadZoneBlockedSpells(zone->GetZoneID());
 
 	//clear trader items if we are loading the bazaar
-	if(strncasecmp(short_name,"bazaar",6)==0) {
+	if (strncasecmp(short_name, "bazaar", 6) == 0) {
 		database.DeleteTraderItem(0);
 		database.DeleteBuyLines(0);
 	}
@@ -2487,6 +2518,6 @@ void Zone::SetQuestHotReloadQueued(bool in_quest_hot_reload_queued)
 
 void Zone::LoadGrids()
 {
-	grids        = GridRepository::GetZoneGrids(GetZoneID());
-	grid_entries = GridEntriesRepository::GetZoneGridEntries(GetZoneID());
+	zone_grids        = GridRepository::GetZoneGrids(GetZoneID());
+	zone_grid_entries = GridEntriesRepository::GetZoneGridEntries(GetZoneID());
 }

@@ -205,8 +205,8 @@ public:
 	std::unordered_map<int, std::unique_ptr<AA::Ability>> aa_abilities;
 	std::unordered_map<int, std::unique_ptr<AA::Rank>>    aa_ranks;
 
-	std::vector<GridRepository::Grid> grids;
-	std::vector<GridEntriesRepository::GridEntry> grid_entries;
+	std::vector<GridRepository::Grid>             zone_grids;
+	std::vector<GridEntriesRepository::GridEntry> zone_grid_entries;
 
 	time_t weather_timer;
 	Timer  spawn2_timer;
@@ -372,8 +372,6 @@ private:
 	uint32    pMaxClients;
 	uint32    zoneid;
 	uint32    m_last_ucss_update;
-	uint32    pQueuedMerchantsWorkID;
-	uint32    pQueuedTempMerchantsWorkID;
 
 	GlobalLootManager                   m_global_loot;
 	LinkedList<ZoneClientAuth_Struct *> client_auth_list;

@@ -480,7 +480,7 @@ bool ZoneDatabase::PopulateZoneSpawnListClose(uint32 zoneid, LinkedList<Spawn2*>
 		zone_name,
 		version
 		);
-	results = QueryDatabase(query);
+	results = database.QueryDatabase(query);
 
 	if (!results.Success()) {
 		return false;
@@ -547,7 +547,7 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 		"WHERE instance_id = %u",
 		zone->GetInstanceID()
 	);
-	auto results = QueryDatabase(spawn_query);
+	auto results = database.QueryDatabase(spawn_query);
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		uint32 start_duration = atoi(row[1]) > 0 ? atoi(row[1]) : 0;
 		uint32 end_duration = atoi(row[2]) > 0 ? atoi(row[2]) : 0;
@@ -989,7 +989,7 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
 	query = StringFormat("SELECT id, value FROM spawn_condition_values "
                         "WHERE zone = '%s' AND instance_id = %u",
                         zone_name, instance_id);
-    results = content_db.QueryDatabase(query);
+    results = database.QueryDatabase(query);
     if (!results.Success()) {
 		spawn_conditions.clear();
 		return false;
