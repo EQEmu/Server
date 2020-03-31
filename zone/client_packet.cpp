@@ -4017,6 +4017,14 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 		//Message(Chat::Red, "You cant cast right now, you arent in control of yourself!");
 		return;
 	}
+	
+	// Hack for broken RoF2 which allows casting after a zoned IVU/IVA
+	if (invisible_undead || invisible_animals) {
+		BuffFadeByEffect(SE_InvisVsAnimals);
+		BuffFadeByEffect(SE_InvisVsUndead);
+		BuffFadeByEffect(SE_InvisVsUndead2);
+		BuffFadeByEffect(SE_Invisibility);  // Included per JJ for completeness - client handles this one atm
+	}
 
 	CastSpell_Struct* castspell = (CastSpell_Struct*)app->pBuffer;
 
