@@ -247,17 +247,10 @@ int main(int argc, char** argv) {
 	if (argc > 1) {
 		LogSys.SilenceConsoleLogging();
 
-		/**
-		 * Get Config
-		 */
 		WorldConfig::LoadConfig();
 		Config = WorldConfig::get();
 
-		/**
-		 * Load database
-		 */
 		LoadDatabaseConnections();
-
 		LogSys.EnableConsoleLogging();
 
 		WorldserverCommandHandler::CommandHandler(argc, argv);
@@ -340,12 +333,15 @@ int main(int argc, char** argv) {
 	LogInfo("Clearing inventory snapshots");
 	database.ClearInvSnapshots();
 	LogInfo("Loading items");
-	if (!database.LoadItems(hotfix_name))
-		LogError("Error: Could not load item data. But ignoring");
-	LogInfo("Loading skill caps");
-	if (!database.LoadSkillCaps(std::string(hotfix_name)))
-		LogError("Error: Could not load skill cap data. But ignoring");
 
+	if (!content_db.LoadItems(hotfix_name)) {
+		LogError("Error: Could not load item data. But ignoring");
+	}
+
+	LogInfo("Loading skill caps");
+	if (!content_db.LoadSkillCaps(std::string(hotfix_name))) {
+		LogError("Error: Could not load skill cap data. But ignoring");
+	}
 
 	LogInfo("Loading guilds");
 	guild_mgr.LoadGuilds();

@@ -78,7 +78,7 @@ public:
 		);
 	}
 
-	static TradeskillRecipe New()
+	static TradeskillRecipe NewEntity()
 	{
 		TradeskillRecipe entry;
 
@@ -107,7 +107,7 @@ public:
 			)
 		);
 
-		TradeskillRecipe tradeskill_recipe = New();
+		TradeskillRecipe tradeskill_recipe = NewEntity();
 
 		auto row = results.begin();
 		if (results.RowCount() == 0) {

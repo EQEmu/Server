@@ -22,6 +22,7 @@
 
 #include "../common/linked_list.h"
 #include "../common/timer.h"
+#include "../common/inventory_profile.h"
 //#include "zoneserver.h"
 
 #include "../common/eq_packet_structs.h"
@@ -71,6 +72,12 @@ public:
 	inline EQEmu::versions::ClientVersion	GetClientVersion()	{ return m_ClientVersion; }
 	inline ClientListEntry* GetCLE()		{ return cle; }
 	inline void			SetCLE(ClientListEntry* iCLE)			{ cle = iCLE; }
+	bool StoreCharacter(
+		uint32 account_id,
+		PlayerProfile_Struct *p_player_profile_struct,
+		EQEmu::InventoryProfile *p_inventory_profile
+	);
+
 private:
 
 	uint32	ip;

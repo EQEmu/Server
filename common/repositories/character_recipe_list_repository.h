@@ -62,7 +62,7 @@ public:
 		);
 	}
 
-	static CharacterRecipeList GetDefaults()
+	static CharacterRecipeList NewEntity()
 	{
 		CharacterRecipeList character_recipe_list_entry;
 
@@ -109,7 +109,7 @@ public:
 			}
 		}
 
-		return GetDefaults();
+		return NewEntity();
 	}
 
 };

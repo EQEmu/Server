@@ -64,7 +64,7 @@ public:
 		);
 	}
 
-	static Grid Default()
+	static Grid NewEntity()
 	{
 		Grid entry{};
 
@@ -113,7 +113,7 @@ public:
 			}
 		}
 
-		return Default();
+		return NewEntity();
 	}
 
 };

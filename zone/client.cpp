@@ -5295,8 +5295,9 @@ void Client::SetStartZone(uint32 zoneid, float x, float y, float z)
 		m_pp.binds[4].instance_id = zone->GetInstanceID();
 	}
 
-	if (x == 0 && y == 0 && z ==0)
-		database.GetSafePoints(m_pp.binds[4].zoneId, 0, &m_pp.binds[4].x, &m_pp.binds[4].y, &m_pp.binds[4].z);
+	if (x == 0 && y == 0 && z == 0) {
+		content_db.GetSafePoints(m_pp.binds[4].zoneId, 0, &m_pp.binds[4].x, &m_pp.binds[4].y, &m_pp.binds[4].z);
+	}
 	else {
 		m_pp.binds[4].x = x;
 		m_pp.binds[4].y = y;

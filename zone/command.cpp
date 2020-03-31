@@ -7141,22 +7141,51 @@ void command_summonitem(Client *c, const Seperator *sep)
 		item_status = static_cast<int16>(item->MinStatus);
 	}
 
-	if (item_status > c->Admin())
+	if (item_status > c->Admin()) {
 		c->Message(Chat::Red, "Error: Insufficient status to summon this item.");
-	else if (sep->argnum == 2 && sep->IsNumber(2))
+	}
+	else if (sep->argnum == 2 && sep->IsNumber(2)) {
 		c->SummonItem(itemid, atoi(sep->arg[2]));
-	else if (sep->argnum == 3)
+	}
+	else if (sep->argnum == 3) {
 		c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]));
-	else if (sep->argnum == 4)
+	}
+	else if (sep->argnum == 4) {
 		c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]));
-	else if (sep->argnum == 5)
+	}
+	else if (sep->argnum == 5) {
 		c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]));
-	else if (sep->argnum == 6)
-		c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]));
-	else if (sep->argnum == 7)
-		c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]), atoi(sep->arg[7]));
-	else if (sep->argnum == 8)
-		c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]), atoi(sep->arg[7]), atoi(sep->arg[8]));
+	}
+	else if (sep->argnum == 6) {
+		c->SummonItem(
+			itemid,
+			atoi(sep->arg[2]),
+			atoi(sep->arg[3]),
+			atoi(sep->arg[4]),
+			atoi(sep->arg[5]),
+			atoi(sep->arg[6]));
+	}
+	else if (sep->argnum == 7) {
+		c->SummonItem(
+			itemid,
+			atoi(sep->arg[2]),
+			atoi(sep->arg[3]),
+			atoi(sep->arg[4]),
+			atoi(sep->arg[5]),
+			atoi(sep->arg[6]),
+			atoi(sep->arg[7]));
+	}
+	else if (sep->argnum == 8) {
+		c->SummonItem(
+			itemid,
+			atoi(sep->arg[2]),
+			atoi(sep->arg[3]),
+			atoi(sep->arg[4]),
+			atoi(sep->arg[5]),
+			atoi(sep->arg[6]),
+			atoi(sep->arg[7]),
+			atoi(sep->arg[8]));
+	}
 	else {
 		c->SummonItem(itemid);
 	}
@@ -7270,7 +7299,7 @@ void command_itemsearch(Client *c, const Seperator *sep)
 				std::string saylink_commands;
 				for (auto   &amount : amounts) {
 					saylink_commands += EQEmu::SayLinkEngine::GenerateQuestSaylink(
-						"#gi " + std::to_string(item->ID) + " " + amount,
+						"#si " + std::to_string(item->ID) + " " + amount,
 						false,
 						"[" + amount + "] "
 					);

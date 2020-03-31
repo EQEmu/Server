@@ -74,7 +74,7 @@ public:
 		);
 	}
 
-	static GridEntry Default()
+	static GridEntry NewEntity()
 	{
 		GridEntry entry{};
 

@@ -81,7 +81,7 @@ public:
 		);
 	}
 
-	static SpawnGroup New()
+	static SpawnGroup NewEntity()
 	{
 		SpawnGroup entry;
 
@@ -155,7 +155,7 @@ public:
 			}
 		}
 
-		return New();
+		return NewEntity();
 	}
 
 };

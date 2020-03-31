@@ -1568,7 +1568,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	/* Overrides if we have the tutorial flag set! */
 	if (cc->tutorial && RuleB(World, EnableTutorialButton)) {
 		pp.zone_id = RuleI(World, TutorialZoneID);
-		database.GetSafePoints(pp.zone_id, 0, &pp.x, &pp.y, &pp.z);
+		content_db.GetSafePoints(pp.zone_id, 0, &pp.x, &pp.y, &pp.z);
 	}
 
 	/*  Will either be the same as home or tutorial if enabled. */
@@ -1592,7 +1592,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 
 	// now we give the pp and the inv we made to StoreCharacter
 	// to see if we can store it
-	if (!database.StoreCharacter(GetAccountID(), &pp, &inv)) {
+	if (!StoreCharacter(GetAccountID(), &pp, &inv)) {
 		LogInfo("Character creation failed: [{}]", pp.name);
 		return false;
 	}
@@ -2075,3 +2075,63 @@ void Client::SetClassLanguages(PlayerProfile_Struct *pp)
 	}
 }
 
+bool Client::StoreCharacter(
+	uint32 account_id,
+	PlayerProfile_Struct *p_player_profile_struct,
+	EQEmu::InventoryProfile *p_inventory_profile
+)
+{
+	uint32 character_id = 0;
+	char   zone[50];
+	character_id = database.GetCharacterID(p_player_profile_struct->name);
+
+	if (!character_id) {
+		LogError("StoreCharacter: no character id");
+		return false;
+	}
+
+	const char *zone_name = content_db.GetZoneName(p_player_profile_struct->zone_id);
+	if (zone_name == nullptr) {
+		/* Zone not in the DB, something to prevent crash... */
+		strn0cpy(zone, "qeynos", 49);
+		p_player_profile_struct->zone_id = 1;
+	}
+	else {
+		strn0cpy(zone, zone_name, 49);
+	}
+
+	database.SaveCharacterCreate(character_id, account_id, p_player_profile_struct);
+
+	std::string invquery;
+	for (int16  i = EQEmu::invslot::EQUIPMENT_BEGIN; i <= EQEmu::invbag::BANK_BAGS_END;) {
+		const EQEmu::ItemInstance *new_inventory_item = p_inventory_profile->GetItem(i);
+		if (new_inventory_item) {
+			invquery = StringFormat(
+				"INSERT INTO `inventory` (charid, slotid, itemid, charges, color) VALUES (%u, %i, %u, %i, %u)",
+				character_id,
+				i,
+				new_inventory_item->GetItem()->ID,
+				new_inventory_item->GetCharges(),
+				new_inventory_item->GetColor()
+			);
+
+			auto results = database.QueryDatabase(invquery);
+		}
+
+		if (i == EQEmu::invslot::slotCursor) {
+			i = EQEmu::invbag::GENERAL_BAGS_BEGIN;
+			continue;
+		}
+		else if (i == EQEmu::invbag::CURSOR_BAG_END) {
+			i = EQEmu::invslot::BANK_BEGIN;
+			continue;
+		}
+		else if (i == EQEmu::invslot::BANK_END) {
+			i = EQEmu::invbag::BANK_BAGS_BEGIN;
+			continue;
+		}
+		i++;
+	}
+
+	return true;
+}
