@@ -322,7 +322,7 @@ int main(int argc, char** argv) {
 	}
 
 	LogInfo("Loading npc faction lists");
-	if (!database.LoadNPCFactionLists(hotfix_name)) {
+	if (!content_db.LoadNPCFactionLists(hotfix_name)) {
 		LogError("Loading npcs faction lists failed!");
 		return 1;
 	}
