@@ -165,7 +165,10 @@ bool Spawn2::Process() {
 			return (true);
 		}
 
-		if (spawn_group == nullptr) {
+		/**
+		 * Wait for init grids timer because we bulk load this data before trying to fetch it individually
+		 */
+		if (spawn_group == nullptr && zone->GetInitgridsTimer().Check()) {
 			content_db.LoadSpawnGroupsByID(spawngroup_id_, &zone->spawn_group_list);
 			spawn_group = zone->spawn_group_list.GetSpawnGroup(spawngroup_id_);
 		}
@@ -916,7 +919,7 @@ void SpawnConditionManager::UpdateDBCondition(const char* zone_name, uint32 inst
                                     "(id, value, zone, instance_id) "
                                     "VALUES( %u, %u, '%s', %u)",
                                     cond_id, value, zone_name, instance_id);
-    content_db.QueryDatabase(query);
+    database.QueryDatabase(query);
 }
 
 bool SpawnConditionManager::LoadDBEvent(uint32 event_id, SpawnEvent &event, std::string &zone_name) {
@@ -1376,7 +1379,7 @@ int16 SpawnConditionManager::GetCondition(const char *zone_short, uint32 instanc
 		"WHERE zone = '%s' AND instance_id = %u AND id = %d",
 		zone_short, instance_id, condition_id
 	);
-	auto        results = content_db.QueryDatabase(query);
+	auto        results = database.QueryDatabase(query);
 	if (!results.Success()) {
 		LogSpawns("Unable to query remote condition [{}] from zone [{}] in Get request", condition_id, zone_short);
 		return 0;    //dunno a better thing to do...

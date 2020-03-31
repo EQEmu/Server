@@ -325,6 +325,14 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawn_group_id, SpawnGroupList *spawn
 	}
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
+		LogSpawnsDetail(
+			"[LoadSpawnGroupsByID] Loading spawn_group spawn_group_id [{}] name [{}] spawn_limit [{}] dist [{}]",
+			row[0],
+			row[1],
+			row[2],
+			row[3]
+		);
+
 		auto new_spawn_group = new SpawnGroup(
 			atoi(row[0]),
 			row[1],
@@ -373,6 +381,15 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawn_group_id, SpawnGroupList *spawn
 			atoi(row[2]),
 			atoi(row[3]),
 			(row[4] ? atoi(row[4]) : 0)
+		);
+
+		LogSpawnsDetail(
+			"[LoadSpawnGroupsByID] Loading spawn_entry spawn_group_id [{}] npc_id [{}] chance [{}] condition_value_filter [{}] spawn_limit [{}]",
+			row[0],
+			row[1],
+			row[2],
+			row[3],
+			row[4]
 		);
 
 		SpawnGroup *spawn_group = spawn_group_list->GetSpawnGroup(atoi(row[0]));

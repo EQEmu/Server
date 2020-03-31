@@ -1272,8 +1272,6 @@ bool Zone::Process() {
 
 		EQEmu::InventoryProfile::CleanDirty();
 
-		LogSpawns("Running Zone::Process -> Spawn2::Process");
-
 		iterator.Reset();
 		while (iterator.MoreElements()) {
 			if (iterator.GetData()->Process()) {
@@ -1598,29 +1596,6 @@ void Zone::ClearNPCTypeCache(int id) {
 	}
 }
 
-void Zone::RepopClose(const glm::vec4& client_position, uint32 repop_distance)
-{
-
-	if (!Depop())
-		return;
-
-	LinkedListIterator<Spawn2*> iterator(spawn2_list);
-
-	iterator.Reset();
-	while (iterator.MoreElements()) {
-		iterator.RemoveCurrent();
-	}
-
-	quest_manager.ClearAllTimers();
-
-	if (!content_db.PopulateZoneSpawnListClose(zoneid, spawn2_list, GetInstanceVersion(), client_position, repop_distance))
-		LogDebug("Error in Zone::Repop: database.PopulateZoneSpawnList failed");
-
-	initgrids_timer.Start();
-
-	mod_repop();
-}
-
 void Zone::Repop(uint32 delay)
 {
 	if (!Depop()) {
@@ -1640,8 +1615,19 @@ void Zone::Repop(uint32 delay)
 
 	quest_manager.ClearAllTimers();
 
-	if (!content_db.PopulateZoneSpawnList(zoneid, spawn2_list, GetInstanceVersion(), delay))
+	LogInfo("Loading spawn groups");
+	if (!content_db.LoadSpawnGroups(short_name, GetInstanceVersion(), &spawn_group_list)) {
+		LogError("Loading spawn groups failed");
+	}
+
+	LogInfo("Loading spawn conditions");
+	if (!spawn_conditions.LoadSpawnConditions(short_name, instanceid)) {
+		LogError("Loading spawn conditions failed, continuing without them");
+	}
+
+	if (!content_db.PopulateZoneSpawnList(zoneid, spawn2_list, GetInstanceVersion(), delay)) {
 		LogDebug("Error in Zone::Repop: database.PopulateZoneSpawnList failed");
+	}
 
 	LoadGrids();
 
@@ -2521,4 +2507,9 @@ void Zone::LoadGrids()
 {
 	zone_grids        = GridRepository::GetZoneGrids(GetZoneID());
 	zone_grid_entries = GridEntriesRepository::GetZoneGridEntries(GetZoneID());
+}
+
+Timer Zone::GetInitgridsTimer()
+{
+	return initgrids_timer;
 }

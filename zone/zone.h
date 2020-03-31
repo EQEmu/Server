@@ -259,7 +259,6 @@ public:
 	void RemoveAuth(const char *iCharName, const char *iLSKey);
 	void RemoveAuth(uint32 lsid);
 	void Repop(uint32 delay = 0);
-	void RepopClose(const glm::vec4 &client_position, uint32 repop_distance);
 	void RequestUCSServerStatus();
 	void ResetAuth();
 	void SetDate(uint16 year, uint8 month, uint8 day, uint8 hour, uint8 minute);
@@ -284,6 +283,8 @@ public:
 	WaterMap *watermap;
 	ZonePoint *GetClosestZonePoint(const glm::vec3 &location, uint32 to, Client *client, float max_distance = 40000.0f);
 	ZonePoint *GetClosestZonePointWithoutZone(float x, float y, float z, Client *client, float max_distance = 40000.0f);
+
+	Timer GetInitgridsTimer();
 
 	/**
 	 * GMSay Callback for LogSys
@@ -332,6 +333,7 @@ public:
 
 	double GetMaxMovementUpdateRange() const { return max_movement_update_range; }
 
+
 	/**
 	 * Modding hooks
 	 */
@@ -352,8 +354,6 @@ private:
 	bool      staticzone;
 	bool      zone_has_current_time;
 	bool      quest_hot_reload_queued;
-
-private:
 	double    max_movement_update_range;
 	char      *long_name;
 	char      *map_name;
@@ -384,7 +384,7 @@ private:
 	Timer                               autoshutdown_timer;
 	Timer                               clientauth_timer;
 	Timer                               hotzone_timer;
-	Timer                               initgrids_timer;    //delayed loading of initial grids.
+	Timer                               initgrids_timer;
 	Timer                               qglobal_purge_timer;
 	ZoneSpellsBlocked                   *blocked_spells;
 

@@ -246,7 +246,6 @@ void command_reloadworld(Client *c, const Seperator *sep);
 void command_reloadworldrules(Client *c, const Seperator *sep);
 void command_reloadzps(Client *c, const Seperator *sep);
 void command_repop(Client *c, const Seperator *sep);
-void command_repopclose(Client *c, const Seperator *sep);
 void command_resetaa(Client* c,const Seperator *sep);
 void command_resetaa_timer(Client *c, const Seperator *sep);
 void command_revoke(Client *c, const Seperator *sep);

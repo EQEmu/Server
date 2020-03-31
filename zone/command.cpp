@@ -345,7 +345,6 @@ int command_init(void)
 		command_add("reloadworld", "[0|1] - Clear quest cache (0 - no repop, 1 - repop)", 255, command_reloadworld) ||
 		command_add("reloadzps", "- Reload zone points from database", 150, command_reloadzps) ||
 		command_add("repop", "[delay] - Repop the zone with optional delay", 100, command_repop) ||
-		command_add("repopclose", "[distance in units] Repops only NPC's nearby for fast development purposes", 100, command_repopclose) ||
 		command_add("resetaa", "- Resets a Player's AA in their profile and refunds spent AA's to unspent, may disconnect player.", 200, command_resetaa) ||
 		command_add("resetaa_timer", "Command to reset AA cooldown timers.", 200, command_resetaa_timer) ||
 		command_add("revoke", "[charname] [1/0] - Makes charname unable to talk on OOC", 200, command_revoke) ||
@@ -5318,33 +5317,6 @@ void command_repop(Client *c, const Seperator *sep)
 	zone->Repop(atoi(sep->arg[timearg]) * 1000);
 
 	zone->spawn2_timer.Trigger();
-}
-
-void command_repopclose(Client *c, const Seperator *sep)
-{
-	int repop_distance = 500;
-
-	if (sep->arg[1] && strcasecmp(sep->arg[1], "force") == 0) {
-
-		LinkedListIterator<Spawn2*> iterator(zone->spawn2_list);
-		iterator.Reset();
-		while (iterator.MoreElements()) {
-			std::string query = StringFormat(
-				"DELETE FROM respawn_times WHERE id = %lu AND instance_id = %lu",
-				(unsigned long)iterator.GetData()->GetID(),
-				(unsigned long)zone->GetInstanceID()
-			);
-			auto results = database.QueryDatabase(query);
-			iterator.Advance();
-		}
-		c->Message(Chat::White, "Zone depop: Force resetting spawn timers.");
-	}
-	if (sep->IsNumber(1)) {
-		repop_distance = atoi(sep->arg[1]);
-	}
-
-	c->Message(Chat::White, "Zone depoped. Repopping NPC's within %i distance units", repop_distance);
-	zone->RepopClose(c->GetPosition(), repop_distance);
 }
 
 void command_spawnstatus(Client *c, const Seperator *sep)
