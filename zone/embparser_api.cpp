@@ -2810,6 +2810,22 @@ XS(XS__countitem) {
 	XSRETURN_IV(quantity);
 }
 
+XS(XS__getitemname);
+XS(XS__getitemname) {	
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getitemname(uint32 item_id)");
+
+	dXSTARG;
+	uint32 item_id = (int) SvIV(ST(0));
+	std::string item_name = quest_manager.getitemname(item_id);
+
+	sv_setpv(TARG, item_name.c_str());
+	XSprePUSH;
+	PUSHTARG;
+	XSRETURN(1);
+}
+
 XS(XS__UpdateSpawnTimer);
 XS(XS__UpdateSpawnTimer) {
 	dXSARGS;
@@ -4005,6 +4021,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "forcedoorclose"), XS__forcedoorclose, file);
 	newXS(strcpy(buf, "forcedooropen"), XS__forcedooropen, file);
 	newXS(strcpy(buf, "getinventoryslotid"), XS__getinventoryslotid, file);
+	newXS(strcpy(buf, "getitemname"), XS__getitemname, file);
 	newXS(strcpy(buf, "getItemName"), XS_qc_getItemName, file);
 	newXS(strcpy(buf, "get_spawn_condition"), XS__get_spawn_condition, file);
 	newXS(strcpy(buf, "getguildnamebyid"), XS__getguildnamebyid, file);

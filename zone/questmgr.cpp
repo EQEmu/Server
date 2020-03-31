@@ -2696,6 +2696,16 @@ const char* QuestManager::varlink(char* perltext, int item_id) {
 	return perltext;
 }
 
+std::string QuestManager::getitemname(uint32 item_id) {
+	const EQEmu::ItemData* item_data = database.GetItem(item_id);
+	if (!item_data) {
+		return "INVALID ITEM ID IN GETITEMNAME";
+	}
+
+	std::string item_name = item_data->Name;
+	return item_name;
+}
+
 uint16 QuestManager::CreateInstance(const char *zone, int16 version, uint32 duration)
 {
 	QuestManagerCurrentQuestVars();
