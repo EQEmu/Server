@@ -449,6 +449,7 @@ void Zone::LoadTempMerchantData()
 	results = database.QueryDatabase(
 		fmt::format(
 			SQL(
+				SELECT
 				npcid,
 				slot,
 				charges,
