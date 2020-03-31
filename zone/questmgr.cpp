@@ -906,6 +906,15 @@ bool QuestManager::isdisctome(int item_id) {
 	return(true);
 }
 
+std::string QuestManager::getspellname(uint32 spell_id) {
+	if (!IsValidSpell(spell_id)) {
+		return "INVALID SPELL ID IN GETSPELLNAME";
+	}
+
+	std::string spell_name = GetSpellName(spell_id);
+	return spell_name;
+}
+
 void QuestManager::safemove() {
 	QuestManagerCurrentQuestVars();
 	if (initiator && initiator->IsClient())
