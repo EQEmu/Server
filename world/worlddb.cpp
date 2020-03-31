@@ -746,11 +746,11 @@ bool WorldDatabase::GetCharSelInventory(uint32 account_id, char *name, EQEmu::In
 		uint32 ornament_idfile = (uint32)atoul(row[13]);
 		uint32 ornament_hero_model = (uint32)atoul(row[14]);
 
-		const EQEmu::ItemData *item = GetItem(item_id);
+		const EQEmu::ItemData *item = content_db.GetItem(item_id);
 		if (!item)
 			continue;
 
-		EQEmu::ItemInstance *inst = CreateBaseItem(item, charges);
+		EQEmu::ItemInstance *inst = content_db.CreateBaseItem(item, charges);
 
 		if (inst == nullptr)
 			continue;
