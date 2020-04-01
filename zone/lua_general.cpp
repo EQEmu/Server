@@ -938,6 +938,10 @@ void lua_remove_from_instance_by_char_id(uint32 instance_id, uint32 char_id) {
 	quest_manager.RemoveFromInstanceByCharID(instance_id, char_id);
 }
 
+bool lua_check_instance_by_char_id(uint32 instance_id, uint32 char_id) {
+	return quest_manager.CheckInstanceByCharID(instance_id, char_id);
+}
+
 void lua_remove_all_from_instance(uint32 instance_id) {
 	quest_manager.RemoveAllFromInstance(instance_id);
 }
@@ -1777,6 +1781,7 @@ luabind::scope lua_register_general() {
 		luabind::def("assign_raid_to_instance", &lua_assign_raid_to_instance),
 		luabind::def("remove_from_instance", &lua_remove_from_instance),
 		luabind::def("remove_from_instance_by_char_id", &lua_remove_from_instance_by_char_id),
+		luabind::def("check_instance_by_char_id", (bool(*)(uint16, uint32))&lua_check_instance_by_char_id),
 		luabind::def("remove_all_from_instance", &lua_remove_all_from_instance),
 		luabind::def("flag_instance_by_group_leader", &lua_flag_instance_by_group_leader),
 		luabind::def("flag_instance_by_raid_leader", &lua_flag_instance_by_raid_leader),
