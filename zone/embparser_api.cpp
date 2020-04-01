@@ -2358,7 +2358,6 @@ XS(XS__updatetaskactivity) {
 XS(XS__resettaskactivity);
 XS(XS__resettaskactivity) {
 	dXSARGS;
-	unsigned int task, activity;
 	if (items == 2) {
 		int task_id     = (int) SvIV(ST(0));
 		int activity_id = (int) SvIV(ST(1));
