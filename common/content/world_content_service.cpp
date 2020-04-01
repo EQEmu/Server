@@ -18,21 +18,24 @@
  *
  */
 
-#include "iostream"
-#include "../common/cli/eqemu_command_handler.h"
+#include "world_content_service.h"
 
-#ifndef EQEMU_WORLD_SERVER_COMMAND_HANDLER_H
-#define EQEMU_WORLD_SERVER_COMMAND_HANDLER_H
+int WorldContentService::GetCurrentExpansion() const
+{
+	return current_expansion;
+}
 
-namespace WorldserverCommandHandler {
-	void CommandHandler(int argc, char **argv);
-	void Version(int argc, char **argv, argh::parser &cmd, std::string &description);
-	void DatabaseVersion(int argc, char **argv, argh::parser &cmd, std::string &description);
-	void DatabaseSetAccountStatus(int argc, char **argv, argh::parser &cmd, std::string &description);
-	void DatabaseGetSchema(int argc, char **argv, argh::parser &cmd, std::string &description);
-	void DatabaseDump(int argc, char **argv, argh::parser &cmd, std::string &description);
-	void TestCommand(int argc, char **argv, argh::parser &cmd, std::string &description);
-};
+void WorldContentService::SetCurrentExpansion(int current_expansion)
+{
+	WorldContentService::current_expansion = current_expansion;
+}
 
+const std::vector<std::string> &WorldContentService::GetContentFlags() const
+{
+	return content_flags;
+}
 
-#endif //EQEMU_WORLD_SERVER_COMMAND_HANDLER_H
+void WorldContentService::SetContentFlags(std::vector<std::string> content_flags)
+{
+	WorldContentService::content_flags = content_flags;
+}

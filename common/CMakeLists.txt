@@ -6,6 +6,7 @@ SET(common_sources
 	cli/eqemu_command_handler.cpp
 	compression.cpp
 	condition.cpp
+	content/world_content_service.cpp
 	crash.cpp
 	crc16.cpp
 	crc32.cpp
@@ -116,6 +117,7 @@ SET(common_headers
 	classes.h
 	compression.h
 	condition.h
+	content/world_content_service.h
 	crash.h
 	crc16.h
 	crc32.h
@@ -197,6 +199,7 @@ SET(common_headers
 	races.h
 	random.h
 	repositories/character_recipe_list_repository.h
+	repositories/criteria/content_filter_criteria.h
 	repositories/grid_repository.h
 	repositories/grid_entries_repository.h
 	repositories/spawngroup_repository.h

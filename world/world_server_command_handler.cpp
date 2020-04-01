@@ -25,6 +25,9 @@
 #include "worlddb.h"
 #include "../common/database_schema.h"
 #include "../common/database/database_dump_service.h"
+#include "../common/content/world_content_service.h"
+#include "../common/repositories/criteria/content_filter_criteria.h"
+#include "../common/rulesys.h"
 
 namespace WorldserverCommandHandler {
 
@@ -53,6 +56,7 @@ namespace WorldserverCommandHandler {
 		function_map["database:set-account-status"] = &WorldserverCommandHandler::DatabaseSetAccountStatus;
 		function_map["database:schema"]             = &WorldserverCommandHandler::DatabaseGetSchema;
 		function_map["database:dump"]               = &WorldserverCommandHandler::DatabaseDump;
+		function_map["test:test"]                   = &WorldserverCommandHandler::TestCommand;
 
 		EQEmuCommand::HandleMenu(function_map, cmd, argc, argv);
 	}
@@ -269,6 +273,42 @@ namespace WorldserverCommandHandler {
 		 * Dump
 		 */
 		database_dump_service->Dump();
+	}
+
+	/**
+	 * @param argc
+	 * @param argv
+	 * @param cmd
+	 * @param description
+	 */
+	void TestCommand(int argc, char **argv, argh::parser &cmd, std::string &description)
+	{
+		description = "Test command";
+
+		if (cmd[{"-h", "--help"}]) {
+			return;
+		}
+
+		if (!RuleManager::Instance()->LoadRules(&database, "default", false)) {
+			LogInfo("No rule set configured, using default rules");
+		}
+
+		content_service.SetCurrentExpansion(RuleI(Expansion, CurrentExpansion));
+
+		std::vector<std::string> flags = {
+			"hateplane_enabled",
+			"patch_nerf_7077",
+		};
+
+		content_service.SetContentFlags(flags);
+
+		LogInfo(
+			"Current expansion is [{}] ({}) is Velious Enabled [{}] Criteria [{}]",
+			content_service.GetCurrentExpansion(),
+			Expansion::ExpansionName[content_service.GetCurrentExpansion()],
+			content_service.IsTheShardsOfVeliousEnabled() ? "true" : "false",
+			ContentFilterCriteria::apply()
+		);
 	}
 
 }

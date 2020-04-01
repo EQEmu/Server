@@ -774,6 +774,10 @@ RULE_BOOL(HotReload, QuestsRepopWhenPlayersNotInCombat, true, "When a hot reload
 RULE_BOOL(HotReload, QuestsResetTimersWithReload, true, "When a hot reload is triggered, quest timers will be reset")
 RULE_CATEGORY_END()
 
+RULE_CATEGORY(Expansion)
+RULE_INT(Expansion, CurrentExpansion, -1, "The current expansion enabled for the server [0 = Classic, 1 = Kunark etc.]")
+RULE_CATEGORY_END()
+
 #undef RULE_CATEGORY
 #undef RULE_INT
 #undef RULE_REAL
