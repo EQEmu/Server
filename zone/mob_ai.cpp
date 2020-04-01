@@ -1821,7 +1821,11 @@ void NPC::AI_SetupNextWaypoint() {
 	}
 	else {
 		pause_timer_complete = false;
-		LogPathing("We are departing waypoint [{}]", cur_wp);
+		LogPathingDetail(
+			"[{}] departing waypoint [{}]",
+			GetCleanName(),
+			cur_wp
+		);
 		//if we were under quest control (with no grid), we are done now..
 		if (cur_wp == EQEmu::WaypointStatus::QuestControlNoGrid) {
 			LogPathing("Non-grid quest mob has reached its quest ordered waypoint. Leaving pathing mode");

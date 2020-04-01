@@ -254,11 +254,6 @@ int main(int argc, char** argv) {
 	} else {
 		content_db.SetMysql(database.getMySQL());
 	}
-//
-//	auto results = content_db.QueryDatabase("SELECT id FROM items limit 10");
-//	for (auto row = results.begin(); row != results.end(); ++row) {
-//		std::cout << row[0] << std::endl;
-//	}
 
 	/* Register Log System and Settings */
 	LogSys.SetGMSayHandler(&Zone::GMSayHookCallBackProcess);
