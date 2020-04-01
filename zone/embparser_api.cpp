@@ -3108,6 +3108,25 @@ XS(XS__RemoveFromInstanceByCharID) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS__CheckInstanceByCharID);
+XS(XS__CheckInstanceByCharID) {
+	dXSARGS;
+	if (items != 2) {
+		Perl_croak(aTHX_ "Usage: quest::CheckInstanceByCharID(uint16 instance_id, uint32 char_id)");
+	}
+	
+	bool RETVAL;
+	dXSTARG;
+
+	uint16 instance_id = (int) SvUV(ST(0));
+	uint32 char_id = (int) SvUV(ST(1));
+	RETVAL = quest_manager.CheckInstanceByCharID(instance_id, char_id);
+	XSprePUSH;
+	PUSHu((IV) RETVAL);
+
+	XSRETURN(1);
+}
+
 XS(XS__RemoveAllFromInstance);
 XS(XS__RemoveAllFromInstance) {
 	dXSARGS;
@@ -3972,6 +3991,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "RemoveAllFromInstance"), XS__RemoveAllFromInstance, file);
 	newXS(strcpy(buf, "RemoveFromInstance"), XS__RemoveFromInstance, file);
 	newXS(strcpy(buf, "RemoveFromInstanceByCharID"), XS__RemoveFromInstanceByCharID, file);
+	newXS(strcpy(buf, "CheckInstanceByCharID"), XS__CheckInstanceByCharID, file);
 	newXS(strcpy(buf, "SendMail"), XS__SendMail, file);
 	newXS(strcpy(buf, "SetRunning"), XS__SetRunning, file);
 	newXS(strcpy(buf, "activespeakactivity"), XS__activespeakactivity, file);

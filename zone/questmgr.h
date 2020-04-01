@@ -245,6 +245,7 @@ public:
 	void AssignRaidToInstance(uint16 instance_id);
 	void RemoveFromInstance(uint16 instance_id);
 	void RemoveFromInstanceByCharID(uint16 instance_id, uint32 char_id);
+	bool CheckInstanceByCharID(uint16 instance_id, uint32 char_id);
 	//void RemoveGroupFromInstance(uint16 instance_id);	//potentially useful but not implmented at this time.
 	//void RemoveRaidFromInstance(uint16 instance_id);	//potentially useful but not implmented at this time.
 	void RemoveAllFromInstance(uint16 instance_id);

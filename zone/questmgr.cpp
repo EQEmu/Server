@@ -2856,6 +2856,10 @@ void QuestManager::RemoveFromInstanceByCharID(uint16 instance_id, uint32 char_id
 	database.RemoveClientFromInstance(instance_id, char_id);
 }
 
+bool QuestManager::CheckInstanceByCharID(uint16 instance_id, uint32 char_id) {
+	return database.CharacterInInstanceGroup(instance_id, char_id);
+}
+
 void QuestManager::RemoveAllFromInstance(uint16 instance_id)
 {
 	QuestManagerCurrentQuestVars();
