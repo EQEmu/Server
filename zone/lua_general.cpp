@@ -733,6 +733,10 @@ bool lua_is_task_appropriate(int task) {
 	return quest_manager.istaskappropriate(task);
 }
 
+std::string lua_get_task_name(uint32 task_id) {
+	return quest_manager.gettaskname(task_id);
+}
+
 void lua_popup(const char *title, const char *text, uint32 id, uint32 buttons, uint32 duration) {
 	quest_manager.popup(title, text, id, buttons, duration);
 }
@@ -1724,6 +1728,7 @@ luabind::scope lua_register_general() {
 		luabind::def("active_tasks_in_set", &lua_active_tasks_in_set),
 		luabind::def("completed_tasks_in_set", &lua_completed_tasks_in_set),
 		luabind::def("is_task_appropriate", &lua_is_task_appropriate),
+		luabind::def("get_task_name", (std::string(*)(uint32))&lua_get_task_name),
 		luabind::def("popup", &lua_popup),
 		luabind::def("clear_spawn_timers", &lua_clear_spawn_timers),
 		luabind::def("zone_emote", &lua_zone_emote),

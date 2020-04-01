@@ -955,6 +955,17 @@ bool TaskManager::AppropriateLevel(int TaskID, int PlayerLevel) {
 
 }
 
+std::string TaskManager::GetTaskName(uint32 task_id)
+{
+	if (task_id > 0 && task_id < MAXTASKS) {
+		if (Tasks[task_id] != nullptr) {
+			return Tasks[task_id]->Title;
+		}
+	}
+
+	return std::string();
+}
+
 int TaskManager::GetTaskMinLevel(int TaskID)
 {
 	if (Tasks[TaskID]->MinLevel)

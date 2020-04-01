@@ -214,6 +214,7 @@ public:
 	int activetasksinset(int taskset);
 	int completedtasksinset(int taskset);
 	bool istaskappropriate(int task);
+	std::string gettaskname(uint32 task_id);
     void clearspawntimers();
 	void ze(int type, const char *str);
 	void we(int type, const char *str);
