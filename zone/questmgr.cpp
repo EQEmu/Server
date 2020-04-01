@@ -2441,6 +2441,16 @@ bool QuestManager::istaskappropriate(int task) {
 	return false;
 }
 
+std::string QuestManager::gettaskname(uint32 task_id) {
+	QuestManagerCurrentQuestVars();
+
+	if (RuleB(TaskSystem, EnableTaskSystem)) {
+		return taskmanager->GetTaskName(task_id);
+	}
+
+	return std::string();
+}
+
 void QuestManager::clearspawntimers() {
 	if(!zone)
         return;

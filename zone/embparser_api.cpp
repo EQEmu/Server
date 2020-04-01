@@ -2628,6 +2628,23 @@ XS(XS__istaskappropriate) {
 	XSRETURN(1);
 }
 
+XS(XS__gettaskname);
+XS(XS__gettaskname) {
+	dXSARGS;
+	if (items != 1) {
+		Perl_croak(aTHX_ "Usage: quest::gettaskname(uint32 task_id)");
+	}
+
+	dXSTARG;
+	uint32 task_id = (int) SvIV(ST(0));
+	std::string task_name = quest_manager.gettaskname(task_id);
+
+	sv_setpv(TARG, task_name.c_str());
+	XSprePUSH;
+	PUSHTARG;
+	XSRETURN(1);
+}
+
 XS(XS__popup); // prototype to pass -Wmissing-prototypes
 XS(XS__popup) {
 	dXSARGS;
@@ -4049,6 +4066,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "getplayercorpsecount"), XS__getplayercorpsecount, file);
 	newXS(strcpy(buf, "getplayercorpsecountbyzoneid"), XS__getplayercorpsecountbyzoneid, file);
 	newXS(strcpy(buf, "gettaskactivitydonecount"), XS__gettaskactivitydonecount, file);
+	newXS(strcpy(buf, "gettaskname"), XS__gettaskname, file);
 	newXS(strcpy(buf, "givecash"), XS__givecash, file);
 	newXS(strcpy(buf, "gmmove"), XS__gmmove, file);
 	newXS(strcpy(buf, "gmsay"), XS__gmsay, file);
