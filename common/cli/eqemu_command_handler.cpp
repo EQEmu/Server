@@ -168,6 +168,11 @@ namespace EQEmuCommand {
 				 * Print section header
 				 */
 				std::string command_prefix = it.first.substr(0, it.first.find(":"));
+
+				if (command_prefix.find("test") != std::string::npos) {
+					continue;
+				}
+
 				if (command_section != command_prefix) {
 					command_section = command_prefix;
 					std::cout << termcolor::reset << command_prefix << std::endl;
