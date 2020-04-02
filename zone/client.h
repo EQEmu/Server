@@ -1293,6 +1293,8 @@ public:
 	void SendHPUpdateMarquee();
 
 	void CheckRegionTypeChanges();
+	
+	 WaterRegionType GetLastRegion() { return last_region_type; }
 
 	int32 CalcATK();
 
