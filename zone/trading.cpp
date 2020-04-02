@@ -2930,83 +2930,84 @@ void Client::ToggleBuyerMode(bool TurnOn) {
 
 void Client::UpdateBuyLine(const EQApplicationPacket *app) {
 
-	// This method is called when:
-	//
-	// /buyer mode is first turned on, once for each item
-	// A BuyLine is toggled on or off in the/buyer window.
-	//
-	char* Buf = (char*)app->pBuffer;
+    // This method is called when:
+    //
+    // /buyer mode is first turned on, once for each item
+    // A BuyLine is toggled on or off in the/buyer window.
+    //
+    char *Buf = (char *) app->pBuffer;
 
-	char ItemName[64];
+    char ItemName[64];
 
-	/*uint32 Action		=*/ VARSTRUCT_SKIP_TYPE(uint32, Buf);	//unused
-	uint32 BuySlot		= VARSTRUCT_DECODE_TYPE(uint32, Buf);
-	uint8 Unknown009	= VARSTRUCT_DECODE_TYPE(uint8, Buf);
-	uint32 ItemID		= VARSTRUCT_DECODE_TYPE(uint32, Buf);
-	/* ItemName */		VARSTRUCT_DECODE_STRING(ItemName, Buf);
-	uint32 Icon		= VARSTRUCT_DECODE_TYPE(uint32, Buf);
-	uint32 Quantity		= VARSTRUCT_DECODE_TYPE(uint32, Buf);
-	uint8 ToggleOnOff	= VARSTRUCT_DECODE_TYPE(uint8, Buf);
-	uint32 Price		= VARSTRUCT_DECODE_TYPE(uint32, Buf);
-	/*uint32 UnknownZ		=*/ VARSTRUCT_SKIP_TYPE(uint32, Buf);	//unused
-	uint32 ItemCount	= VARSTRUCT_DECODE_TYPE(uint32, Buf);
+    /*uint32 Action		=*/ VARSTRUCT_SKIP_TYPE(uint32, Buf);    //unused
+    uint32 BuySlot = VARSTRUCT_DECODE_TYPE(uint32, Buf);
+    uint8 Unknown009 = VARSTRUCT_DECODE_TYPE(uint8, Buf);
+    uint32 ItemID = VARSTRUCT_DECODE_TYPE(uint32, Buf);
+    /* ItemName */        VARSTRUCT_DECODE_STRING(ItemName, Buf);
+    uint32 Icon = VARSTRUCT_DECODE_TYPE(uint32, Buf);
+    uint32 Quantity = VARSTRUCT_DECODE_TYPE(uint32, Buf);
+    uint8 ToggleOnOff = VARSTRUCT_DECODE_TYPE(uint8, Buf);
+    uint32 Price = VARSTRUCT_DECODE_TYPE(uint32, Buf);
+    /*uint32 UnknownZ		=*/ VARSTRUCT_SKIP_TYPE(uint32, Buf);    //unused
+    uint32 ItemCount = VARSTRUCT_DECODE_TYPE(uint32, Buf);
 
-	const EQEmu::ItemData *item = database.GetItem(ItemID);
+    const EQEmu::ItemData *item = database.GetItem(ItemID);
 
-	if(!item) return;
+    if (!item) return;
 
-	bool LoreConflict = CheckLoreConflict(item);
+    bool LoreConflict = CheckLoreConflict(item);
 
-	LogTrading("UpdateBuyLine: Char: [{}] BuySlot: [{}] ItemID [{}] [{}] Quantity [{}] Toggle: [{}] Price [{}] ItemCount [{}] LoreConflict [{}]",
-					GetName(), BuySlot, ItemID, item->Name, Quantity, ToggleOnOff, Price, ItemCount, LoreConflict);
+    LogTrading(
+            "UpdateBuyLine: Char: [{}] BuySlot: [{}] ItemID [{}] [{}] Quantity [{}] Toggle: [{}] Price [{}] ItemCount [{}] LoreConflict [{}]",
+            GetName(), BuySlot, ItemID, item->Name, Quantity, ToggleOnOff, Price, ItemCount, LoreConflict);
 
-	if((item->NoDrop != 0) && (!item->IsClassBag()) && !LoreConflict && (Quantity > 0) && HasMoney(Quantity * Price) && ToggleOnOff && (ItemCount == 0)) {
-		LogTrading("Adding to database");
-		database.AddBuyLine(CharacterID(), BuySlot, ItemID, ItemName, Quantity, Price);
-		QueuePacket(app);
-	}
-	else {
-		if(ItemCount > 0)
-			Message(Chat::Red, "Buy line %s disabled as Item Compensation is not currently supported.", ItemName);
+    if ((item->NoDrop != 0) && (!item->IsClassBag()) && !LoreConflict && (Quantity > 0) && HasMoney(Quantity * Price) &&
+        ToggleOnOff && (ItemCount == 0)) {
+        LogTrading("Adding to database");
+        database.AddBuyLine(CharacterID(), BuySlot, ItemID, ItemName, Quantity, Price);
+        QueuePacket(app);
+    } else {
+        if (ItemCount > 0)
+            Message(Chat::Red, "Buy line %s disabled as Item Compensation is not currently supported.", ItemName);
 
-		else if(Quantity <= 0)
-			Message(Chat::Red, "Buy line %s disabled as the quantity is invalid.", ItemName);
+        else if (Quantity <= 0)
+            Message(Chat::Red, "Buy line %s disabled as the quantity is invalid.", ItemName);
 
-		else if(LoreConflict)
-			Message(Chat::Red, "Buy line %s disabled as the item is LORE and you have one already.", ItemName);
+        else if (LoreConflict)
+            Message(Chat::Red, "Buy line %s disabled as the item is LORE and you have one already.", ItemName);
 
-		else if(item->NoDrop == 0)
-			Message(Chat::Red, "Buy line %s disabled as the item is NODROP.", ItemName);
+        else if (item->NoDrop == 0)
+            Message(Chat::Red, "Buy line %s disabled as the item is NODROP.", ItemName);
 
-        else if(item->IsClassBag())
+        else if (item->IsClassBag())
             Message(Chat::Red, "Buy line %s disabled as the item is a Bag.", ItemName);
 
-		else if(ToggleOnOff)
-			Message(Chat::Red, "Buy line %s disabled due to insufficient funds.", ItemName);
+        else if (ToggleOnOff)
+            Message(Chat::Red, "Buy line %s disabled due to insufficient funds.", ItemName);
 
-		else
-			database.RemoveBuyLine(CharacterID(), BuySlot);
+        else
+            database.RemoveBuyLine(CharacterID(), BuySlot);
 
-		auto outapp = new EQApplicationPacket(OP_Barter, 936);
+        auto outapp = new EQApplicationPacket(OP_Barter, 936);
 
-		Buf = (char*)outapp->pBuffer;
+        Buf = (char *) outapp->pBuffer;
 
-		VARSTRUCT_ENCODE_TYPE(uint32, Buf, Barter_BuyerItemUpdate);
-		VARSTRUCT_ENCODE_TYPE(uint32, Buf, BuySlot);
-		VARSTRUCT_ENCODE_TYPE(uint8, Buf, Unknown009);
-		VARSTRUCT_ENCODE_TYPE(uint32, Buf, ItemID);
-		VARSTRUCT_ENCODE_STRING(Buf, ItemName);
-		VARSTRUCT_ENCODE_TYPE(uint32, Buf, Icon);
-		VARSTRUCT_ENCODE_TYPE(uint32, Buf, Quantity);
-		VARSTRUCT_ENCODE_TYPE(uint8, Buf, 0);				// Toggle the Buy Line off in the client
-		VARSTRUCT_ENCODE_TYPE(uint32, Buf, Price);
-		VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0x08f4);			// Unknown
-		VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0);
-		VARSTRUCT_ENCODE_STRING(Buf, GetName());
+        VARSTRUCT_ENCODE_TYPE(uint32, Buf, Barter_BuyerItemUpdate);
+        VARSTRUCT_ENCODE_TYPE(uint32, Buf, BuySlot);
+        VARSTRUCT_ENCODE_TYPE(uint8, Buf, Unknown009);
+        VARSTRUCT_ENCODE_TYPE(uint32, Buf, ItemID);
+        VARSTRUCT_ENCODE_STRING(Buf, ItemName);
+        VARSTRUCT_ENCODE_TYPE(uint32, Buf, Icon);
+        VARSTRUCT_ENCODE_TYPE(uint32, Buf, Quantity);
+        VARSTRUCT_ENCODE_TYPE(uint8, Buf, 0);                // Toggle the Buy Line off in the client
+        VARSTRUCT_ENCODE_TYPE(uint32, Buf, Price);
+        VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0x08f4);            // Unknown
+        VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0);
+        VARSTRUCT_ENCODE_STRING(Buf, GetName());
 
-		QueuePacket(outapp);
-		safe_delete(outapp);
-	}
+        QueuePacket(outapp);
+        safe_delete(outapp);
+    }
 
 }
 
