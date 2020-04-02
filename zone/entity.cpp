@@ -3295,7 +3295,6 @@ void EntityList::ClearAggro(Mob* targ)
 }
 
 //removes "targ" from all hate lists of mobs that are water only.
-//water only mobs that are fleed from to another region are healed as per live
 void EntityList::ClearWaterAggro(Mob* targ)
 {
 	Client *c = nullptr;
@@ -3312,11 +3311,6 @@ void EntityList::ClearWaterAggro(Mob* targ)
 			if (c && it->second->IsOnFeignMemory(c)) {
 				it->second->RemoveFromFeignMemory(c); //just in case we feigned
 				c->RemoveXTarget(it->second, false);
-			}
-			if (!it->second->GetHateTop()) {
-				// target fled the water and no other targets.
-				// Heal NPC as on live
-				it->second->Heal();
 			}
 		}
 	++it;
