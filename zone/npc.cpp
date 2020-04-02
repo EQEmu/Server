@@ -114,7 +114,7 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	npc_type_data->legtexture,
 	npc_type_data->feettexture,
 	npc_type_data->use_model,
-	npc_type_data->always_aggros_foes
+	npc_type_data->always_aggro
 ),
 	  attacked_timer(CombatEventTimer_expire),
 	  swarm_timer(100),
@@ -962,7 +962,7 @@ void NPC::Depop(bool StartSpawnTimer) {
 }
 
 bool NPC::DatabaseCastAccepted(int spell_id) {
-	for (int i=0; i < 12; i++) {
+	for (int i=0; i < EFFECT_COUNT; i++) {
 		switch(spells[spell_id].effectid[i]) {
 		case SE_Stamina: {
 			if(IsEngaged() && GetHPRatio() < 100)
@@ -3093,6 +3093,14 @@ bool NPC::AICheckCloseBeneficialSpells(
 			continue;
 		}
 
+		if (!mob->CheckLosFN(caster)) {
+			continue;
+		}
+
+		if (mob->GetReverseFactionCon(caster) >= FACTION_KINDLY) {
+			continue;
+		}
+
 		LogAICastBeneficialClose(
 			"NPC [{}] Distance [{}] Cast Range [{}] Caster [{}]",
 			mob->GetCleanName(),
@@ -3100,10 +3108,6 @@ bool NPC::AICheckCloseBeneficialSpells(
 			cast_range,
 			caster->GetCleanName()
 		);
-
-		if (mob->GetReverseFactionCon(caster) >= FACTION_KINDLY) {
-			continue;
-		}
 
 		if ((spell_types & SpellType_Buff) && !RuleB(NPC, BuffFriends)) {
 			if (mob != caster) {

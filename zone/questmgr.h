@@ -107,6 +107,7 @@ public:
 	void level(int newlevel);
 	void traindisc(int discipline_tome_item_id);
 	bool isdisctome(int item_id);
+	std::string getspellname(uint32 spell_id);
 	void safemove();
 	void rain(int weather);
 	void snow(int weather);
@@ -213,12 +214,15 @@ public:
 	int activetasksinset(int taskset);
 	int completedtasksinset(int taskset);
 	bool istaskappropriate(int task);
+	std::string gettaskname(uint32 task_id);
     void clearspawntimers();
 	void ze(int type, const char *str);
 	void we(int type, const char *str);
     int getlevel(uint8 type);
     int collectitems(uint32 item_id, bool remove);
     int collectitems_processSlot(int16 slot_id, uint32 item_id, bool remove);
+	int countitem(uint32 item_id);
+	std::string getitemname(uint32 item_id);
     void enabletitle(int titleset);
    	bool checktitle(int titlecheck);
    	void removetitle(int titlecheck);
@@ -242,6 +246,7 @@ public:
 	void AssignRaidToInstance(uint16 instance_id);
 	void RemoveFromInstance(uint16 instance_id);
 	void RemoveFromInstanceByCharID(uint16 instance_id, uint32 char_id);
+	bool CheckInstanceByCharID(uint16 instance_id, uint32 char_id);
 	//void RemoveGroupFromInstance(uint16 instance_id);	//potentially useful but not implmented at this time.
 	//void RemoveRaidFromInstance(uint16 instance_id);	//potentially useful but not implmented at this time.
 	void RemoveAllFromInstance(uint16 instance_id);
@@ -251,6 +256,9 @@ public:
 	const char* varlink(char* perltext, int item_id);
 	std::string saylink(char *saylink_text, bool silent, const char *link_name);
 	const char* getguildnamebyid(int guild_id);
+	int getguildidbycharid(uint32 char_id);
+	int getgroupidbycharid(uint32 char_id);
+	int getraididbycharid(uint32 char_id);
 	void SetRunning(bool val);
 	bool IsRunning();
 	void FlyMode(GravityBehavior flymode);

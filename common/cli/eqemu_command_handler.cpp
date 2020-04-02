@@ -96,7 +96,7 @@ namespace EQEmuCommand {
 						   "\nCommand" <<
 						   termcolor::reset << "\n\n" <<
 						   termcolor::green << argv[1] << arguments_string << termcolor::reset << "\n" <<
-						   termcolor::yellow << (!options_string.empty() ? "\nOptions\n" : "") <<
+						   termcolor::yellow << (!options_string.empty() ? "\nOptions\n\n" : "") <<
 						   termcolor::reset << termcolor::cyan << options_string << termcolor::reset;
 
 			std::cout << command_string.str() << std::endl;

@@ -912,7 +912,7 @@ bool BaseGuildManager::GetEntireGuild(uint32 guild_id, std::vector<CharGuildInfo
 		return(false);
 
 	//load up the rank info for each guild.
-	std::string query = StringFormat(GuildMemberBaseQuery " WHERE g.guild_id=%d", guild_id);
+	std::string query = StringFormat(GuildMemberBaseQuery " WHERE g.guild_id=%d AND c.deleted_at IS NULL", guild_id);
 	auto results = m_db->QueryDatabase(query);
 	if (!results.Success()) {
 		return false;
@@ -941,7 +941,7 @@ bool BaseGuildManager::GetCharInfo(const char *char_name, CharGuildInfo &into) {
 	m_db->DoEscapeString(esc, char_name, nl);
 
 	//load up the rank info for each guild.
-    std::string query = StringFormat(GuildMemberBaseQuery " WHERE c.name='%s'", esc);
+    std::string query = StringFormat(GuildMemberBaseQuery " WHERE c.name='%s' AND c.deleted_at IS NULL", esc);
     safe_delete_array(esc);
     auto results = m_db->QueryDatabase(query);
 	if (!results.Success()) {
@@ -969,9 +969,9 @@ bool BaseGuildManager::GetCharInfo(uint32 char_id, CharGuildInfo &into) {
 	//load up the rank info for each guild.
 	std::string query;
 #ifdef BOTS
-    query = StringFormat(GuildMemberBaseQuery " WHERE c.id=%d AND c.mob_type = 'C'", char_id);
+    query = StringFormat(GuildMemberBaseQuery " WHERE c.id=%d AND c.mob_type = 'C' AND c.deleted_at IS NULL", char_id);
 #else
-    query = StringFormat(GuildMemberBaseQuery " WHERE c.id=%d", char_id);
+    query = StringFormat(GuildMemberBaseQuery " WHERE c.id=%d AND c.deleted_at IS NULL", char_id);
 #endif
     auto results = m_db->QueryDatabase(query);
 	if (!results.Success()) {

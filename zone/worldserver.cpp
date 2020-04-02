@@ -57,7 +57,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 extern EntityList entity_list;
 extern Zone* zone;
 extern volatile bool is_zone_loaded;
-extern void CatchSignal(int);
+extern void Shutdown();
 extern WorldServer worldserver;
 extern PetitionList petition_list;
 extern uint32 numclients;
@@ -192,8 +192,15 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		if (pack->size != sizeof(ServerConnectInfo))
 			break;
 		ServerConnectInfo* sci = (ServerConnectInfo*)pack->pBuffer;
-		LogInfo("World assigned Port: [{}] for this zone", sci->port);
-		ZoneConfig::SetZonePort(sci->port);
+
+		if (sci->port == 0) {
+			LogCritical("World did not have a port to assign from this server, the port range was not large enough.");
+			Shutdown();
+		}
+		else {
+			LogInfo("World assigned Port: [{}] for this zone", sci->port);
+			ZoneConfig::SetZonePort(sci->port);
+		}
 		break;
 	}
 	case ServerOP_ChannelMessage: {
@@ -482,7 +489,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	}
 	case ServerOP_ShutdownAll: {
 		entity_list.Save();
-		CatchSignal(2);
+		Shutdown();
 		break;
 	}
 	case ServerOP_ZoneShutdown: {

@@ -1,6 +1,0 @@
-command_settings
-inventory_versions
-launcher
-rule_sets
-rule_values
-variables

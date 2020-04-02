@@ -247,13 +247,14 @@ XS(XS_Raid_SplitMoney); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_SplitMoney) {
 	dXSARGS;
 	if (items != 5)
-		Perl_croak(aTHX_ "Usage: Raid::SplitMoney(THIS, uint32 copper, uint32 silver, uint32 gold, uint32 platinum)");
+		Perl_croak(aTHX_ "Usage: Raid::SplitMoney(THIS, uint32 gid, uint32 copper, uint32 silver, uint32 gold, uint32 platinum)");
 	{
 		Raid   *THIS;
-		uint32 copper   = (uint32) SvUV(ST(1));
-		uint32 silver   = (uint32) SvUV(ST(2));
-		uint32 gold     = (uint32) SvUV(ST(3));
-		uint32 platinum = (uint32) SvUV(ST(4));
+		uint32 gid      = (uint32) SvUV(ST(1));
+		uint32 copper   = (uint32) SvUV(ST(2));
+		uint32 silver   = (uint32) SvUV(ST(3));
+		uint32 gold     = (uint32) SvUV(ST(4));
+		uint32 platinum = (uint32) SvUV(ST(5));
 
 		if (sv_derived_from(ST(0), "Raid")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -263,7 +264,7 @@ XS(XS_Raid_SplitMoney) {
 		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->SplitMoney(copper, silver, gold, platinum);
+		THIS->SplitMoney(gid, copper, silver, gold, platinum);
 	}
 	XSRETURN_EMPTY;
 }
@@ -569,7 +570,7 @@ XS(boot_Raid) {
 	newXSproto(strcpy(buf, "GetGroup"), XS_Raid_GetGroup, file, "$$");
 	newXSproto(strcpy(buf, "SplitExp"), XS_Raid_SplitExp, file, "$$$");
 	newXSproto(strcpy(buf, "GetTotalRaidDamage"), XS_Raid_GetTotalRaidDamage, file, "$$");
-	newXSproto(strcpy(buf, "SplitMoney"), XS_Raid_SplitMoney, file, "$$$$$");
+	newXSproto(strcpy(buf, "SplitMoney"), XS_Raid_SplitMoney, file, "$$$$$$");
 	newXSproto(strcpy(buf, "BalanceHP"), XS_Raid_BalanceHP, file, "$$$");
 	newXSproto(strcpy(buf, "IsLeader"), XS_Raid_IsLeader, file, "$$");
 	newXSproto(strcpy(buf, "IsGroupLeader"), XS_Raid_IsGroupLeader, file, "$$");

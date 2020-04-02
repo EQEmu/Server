@@ -92,7 +92,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/unix.h"
 #endif
 
-volatile bool RunLoops = true;
 extern volatile bool is_zone_loaded;
 
 EntityList entity_list;
@@ -577,19 +576,19 @@ int main(int argc, char** argv) {
 	return 0;
 }
 
+void Shutdown()
+{
+	Zone::Shutdown(true);
+	LogInfo("Shutting down...");
+	LogSys.CloseFileLogs();
+	EQ::EventLoop::Get().Shutdown();
+}
+
 void CatchSignal(int sig_num) {
 #ifdef _WINDOWS
 	LogInfo("Recieved signal: [{}]", sig_num);
 #endif
-	RunLoops = false;
-}
-
-void Shutdown()
-{
-	Zone::Shutdown(true);
-	RunLoops = false;
-	LogInfo("Shutting down...");
-	LogSys.CloseFileLogs();
+	Shutdown();
 }
 
 /* Update Window Title with relevant information */

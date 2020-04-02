@@ -133,6 +133,8 @@ public:
 	uint32	GetCharacterID(const char *name);
 	uint32	GetCharacterInfo(const char* iName, uint32* oAccID = 0, uint32* oZoneID = 0, uint32* oInstanceID = 0, float* oX = 0, float* oY = 0, float* oZ = 0);
 	uint32	GetGuildIDByCharID(uint32 char_id);
+	uint32  GetGroupIDByCharID(uint32 char_id);
+	uint32  GetRaidIDByCharID(uint32 char_id);
 
 	void	GetAccountName(uint32 accountid, char* name, uint32* oLSAccountID = 0);
 	void	GetCharName(uint32 char_id, char* name);

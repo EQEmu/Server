@@ -3426,6 +3426,8 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 			bool isproc, int level_override)
 {
 
+	bool is_damage_or_lifetap_spell = IsDamageSpell(spell_id) || IsLifetapSpell(spell_id);
+
 	// well we can't cast a spell on target without a target
 	if(!spelltar)
 	{
@@ -3967,9 +3969,6 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 	// send to people in the area, ignoring caster and target
 	//live dosent send this to anybody but the caster
 	//entity_list.QueueCloseClients(spelltar, action_packet, true, 200, this, true, spelltar->IsClient() ? FILTER_PCSPELLS : FILTER_NPCSPELLS);
-
-	// TEMPORARY - this is the message for the spell.
-	// double message on effects that use ChangeHP - working on this
 	message_packet = new EQApplicationPacket(OP_Damage, sizeof(CombatDamage_Struct));
 	CombatDamage_Struct *cd = (CombatDamage_Struct *)message_packet->pBuffer;
 	cd->target = action->target;
@@ -3980,7 +3979,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 	cd->hit_heading = action->hit_heading;
 	cd->hit_pitch = action->hit_pitch;
 	cd->damage = 0;
-	if(!IsEffectInSpell(spell_id, SE_BindAffinity)){
+	if(!IsEffectInSpell(spell_id, SE_BindAffinity) && !is_damage_or_lifetap_spell){
 		entity_list.QueueCloseClients(
 			spelltar, /* Sender */
 			message_packet, /* Packet */
@@ -3989,6 +3988,19 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 			0, /* Skip this mob */
 			true, /* Packet ACK */
 			(spelltar->IsClient() ? FilterPCSpells : FilterNPCSpells) /* Message Filter Type: (8 or 9) */
+		);
+	} else if (is_damage_or_lifetap_spell &&
+		(IsClient() ||
+			(HasOwner() &&
+				GetOwner()->IsClient()
+			)
+		)
+	) {
+		(HasOwner() ? GetOwner() : this)->CastToClient()->QueuePacket(
+			message_packet,
+			true,
+			Mob::CLIENT_CONNECTINGALL,
+			(spelltar->IsClient() ? FilterPCSpells : FilterNPCSpells)
 		);
 	}
 	safe_delete(action_packet);

@@ -7797,6 +7797,8 @@ FACTION_VALUE Client::GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 p_ra
 	// few optimizations
 	if (GetFeigned())
 		return FACTION_INDIFFERENT;
+	if(!zone->CanDoCombat())
+		return FACTION_INDIFFERENT;
 	if (invisible_undead && tnpc && !tnpc->SeeInvisibleUndead())
 		return FACTION_INDIFFERENT;
 	if (IsInvisible(tnpc))
