@@ -237,6 +237,11 @@ bool Mob::CheckWillAggro(Mob *mob) {
 		if (!mob->CastToClient()->ClientFinishedLoading() || mob->CastToClient()->IsHoveringForRespawn() || mob->CastToClient()->bZoning)
 			return false;
 	}
+	
+	// We don't want to aggro clients outside of water if we're water only.
+	if (mob->IsClient() && mob->CastToClient()->GetLastRegion() != RegionTypeWater && IsUnderwaterOnly()) {
+		return false;
+	}
 
 	/**
 	 * Pets shouldn't scan for aggro
