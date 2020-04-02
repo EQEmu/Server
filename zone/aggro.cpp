@@ -32,6 +32,7 @@
 #endif
 
 #include "map.h"
+#include "water_map.h"
 
 extern Zone* zone;
 //#define LOSDEBUG 6
