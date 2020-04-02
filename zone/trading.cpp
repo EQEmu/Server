@@ -2537,351 +2537,351 @@ void Client::ShowBuyLines(const EQApplicationPacket *app) {
 
 void Client::SellToBuyer(const EQApplicationPacket *app) {
 
-	char* Buf = (char *)app->pBuffer;
+    char *Buf = (char *) app->pBuffer;
 
-	char ItemName[64];
+    char ItemName[64];
 
-	/*uint32	Action		=*/ VARSTRUCT_SKIP_TYPE(uint32, Buf);	//unused
-	uint32	Quantity	= VARSTRUCT_DECODE_TYPE(uint32, Buf);
-	uint32	BuyerID		= VARSTRUCT_DECODE_TYPE(uint32, Buf);
-	uint32	BuySlot		= VARSTRUCT_DECODE_TYPE(uint32, Buf);
-	uint32	UnknownByte	= VARSTRUCT_DECODE_TYPE(uint8, Buf);
-	uint32	ItemID		= VARSTRUCT_DECODE_TYPE(uint32, Buf);
-	/* ItemName */		VARSTRUCT_DECODE_STRING(ItemName, Buf);
-	/*uint32	Unknown2	=*/ VARSTRUCT_SKIP_TYPE(uint32, Buf);	//unused
-	uint32	QtyBuyerWants	= VARSTRUCT_DECODE_TYPE(uint32, Buf);
-		UnknownByte	= VARSTRUCT_DECODE_TYPE(uint8, Buf);
-	uint32	Price		= VARSTRUCT_DECODE_TYPE(uint32, Buf);
-	/*uint32	BuyerID2	=*/ VARSTRUCT_SKIP_TYPE(uint32, Buf);	//unused
-	/*uint32	Unknown3	=*/ VARSTRUCT_SKIP_TYPE(uint32, Buf);	//unused
+    /*uint32	Action		=*/ VARSTRUCT_SKIP_TYPE(uint32, Buf);    //unused
+    uint32 Quantity = VARSTRUCT_DECODE_TYPE(uint32, Buf);
+    uint32 BuyerID = VARSTRUCT_DECODE_TYPE(uint32, Buf);
+    uint32 BuySlot = VARSTRUCT_DECODE_TYPE(uint32, Buf);
+    uint32 UnknownByte = VARSTRUCT_DECODE_TYPE(uint8, Buf);
+    uint32 ItemID = VARSTRUCT_DECODE_TYPE(uint32, Buf);
+    /* ItemName */        VARSTRUCT_DECODE_STRING(ItemName, Buf);
+    /*uint32	Unknown2	=*/ VARSTRUCT_SKIP_TYPE(uint32, Buf);    //unused
+    uint32 QtyBuyerWants = VARSTRUCT_DECODE_TYPE(uint32, Buf);
+    UnknownByte = VARSTRUCT_DECODE_TYPE(uint8, Buf);
+    uint32 Price = VARSTRUCT_DECODE_TYPE(uint32, Buf);
+    /*uint32	BuyerID2	=*/ VARSTRUCT_SKIP_TYPE(uint32, Buf);    //unused
+    /*uint32	Unknown3	=*/ VARSTRUCT_SKIP_TYPE(uint32, Buf);    //unused
 
-	const EQEmu::ItemData *item = database.GetItem(ItemID);
+    const EQEmu::ItemData *item = database.GetItem(ItemID);
 
-	if(!item || !Quantity || !Price || !QtyBuyerWants) return;
+    if (!item || !Quantity || !Price || !QtyBuyerWants) return;
 
-	if (m_inv.HasItem(ItemID, Quantity, invWhereWorn | invWherePersonal | invWhereCursor) == INVALID_INDEX) {
-		Message(Chat::Red, "You do not have %i %s on you.", Quantity, item->Name);
-		return;
-	}
+    if (m_inv.HasItem(ItemID, Quantity, invWhereWorn | invWherePersonal | invWhereCursor) == INVALID_INDEX) {
+        Message(Chat::Red, "You do not have %i %s on you.", Quantity, item->Name);
+        return;
+    }
 
 
-	Client *Buyer = entity_list.GetClientByID(BuyerID);
+    Client *Buyer = entity_list.GetClientByID(BuyerID);
 
-	if(!Buyer || !Buyer->IsBuyer()) {
-		Message(Chat::Red, "The Buyer has gone away.");
-		return;
-	}
+    if (!Buyer || !Buyer->IsBuyer()) {
+        Message(Chat::Red, "The Buyer has gone away.");
+        return;
+    }
 
-	// For Stackable items, HasSpaceForItem will try check if there is space to stack with existing stacks in
-	// the buyer inventory.
-	if(!(Buyer->GetInv().HasSpaceForItem(item, Quantity))) {
-		Message(Chat::Red, "The Buyer does not have space for %i %s", Quantity, item->Name);
-		return;
-	}
+    // For Stackable items, HasSpaceForItem will try check if there is space to stack with existing stacks in
+    // the buyer inventory.
+    if (!(Buyer->GetInv().HasSpaceForItem(item, Quantity))) {
+        Message(Chat::Red, "The Buyer does not have space for %i %s", Quantity, item->Name);
+        return;
+    }
 
-	if((static_cast<uint64>(Quantity) * static_cast<uint64>(Price)) > MAX_TRANSACTION_VALUE) {
-		Message(Chat::Red, "That would exceed the single transaction limit of %u platinum.", MAX_TRANSACTION_VALUE / 1000);
-		return;
-	}
+    if ((static_cast<uint64>(Quantity) * static_cast<uint64>(Price)) > MAX_TRANSACTION_VALUE) {
+        Message(Chat::Red, "That would exceed the single transaction limit of %u platinum.",
+                MAX_TRANSACTION_VALUE / 1000);
+        return;
+    }
 
-	if(!Buyer->HasMoney(Quantity * Price)) {
-		Message(Chat::Red, "The Buyer does not have sufficient money to purchase that quantity of %s.", item->Name);
-		Buyer->Message(Chat::Red, "%s tried to sell you %i %s, but you have insufficient funds.", GetName(), Quantity, item->Name);
-		return;
-	}
+    if (!Buyer->HasMoney(Quantity * Price)) {
+        Message(Chat::Red, "The Buyer does not have sufficient money to purchase that quantity of %s.", item->Name);
+        Buyer->Message(Chat::Red, "%s tried to sell you %i %s, but you have insufficient funds.", GetName(), Quantity,
+                       item->Name);
+        return;
+    }
 
-	if(Buyer->CheckLoreConflict(item)) {
-		Message(Chat::Red, "That item is LORE and the Buyer already has one.");
-		Buyer->Message(Chat::Red, "%s tried to sell you %s but this item is LORE and you already have one.",
-					GetName(), item->Name);
-		return;
-	}
+    if (Buyer->CheckLoreConflict(item)) {
+        Message(Chat::Red, "That item is LORE and the Buyer already has one.");
+        Buyer->Message(Chat::Red, "%s tried to sell you %s but this item is LORE and you already have one.",
+                       GetName(), item->Name);
+        return;
+    }
 
-	if(item->NoDrop == 0) {
-		Message(Chat::Red, "That item is NODROP.");
-		return;
-	}
+    if (item->NoDrop == 0) {
+        Message(Chat::Red, "That item is NODROP.");
+        return;
+    }
 
-    if(item->IsClassBag()) {
+    if (item->IsClassBag()) {
         Message(Chat::Red, "That item is a Bag.");
         return;
     }
 
-	if(!item->Stackable) {
+    if (!item->Stackable) {
 
-		for(uint32 i = 0; i < Quantity; i++) {
+        for (uint32 i = 0; i < Quantity; i++) {
 
-			int16 SellerSlot = m_inv.HasItem(ItemID, 1, invWhereWorn|invWherePersonal|invWhereCursor);
-
-			// This shouldn't happen, as we already checked there was space in the Buyer's inventory
-			if (SellerSlot == INVALID_INDEX) {
+            int16 SellerSlot = m_inv.HasItem(ItemID, 1, invWhereWorn | invWherePersonal | invWhereCursor);
 
-				if(i > 0) {
-					// Set the Quantity to the actual number we successfully transferred.
-					Quantity = i;
-					break;
-				}
-				LogError("Unexpected error while moving item from seller to buyer");
-				Message(Chat::Red, "Internal error while processing transaction.");
-				return;
-			}
+            // This shouldn't happen, as we already checked there was space in the Buyer's inventory
+            if (SellerSlot == INVALID_INDEX) {
 
-			EQEmu::ItemInstance* ItemToTransfer = m_inv.PopItem(SellerSlot);
+                if (i > 0) {
+                    // Set the Quantity to the actual number we successfully transferred.
+                    Quantity = i;
+                    break;
+                }
+                LogError("Unexpected error while moving item from seller to buyer");
+                Message(Chat::Red, "Internal error while processing transaction.");
+                return;
+            }
 
-			if(!ItemToTransfer || !Buyer->MoveItemToInventory(ItemToTransfer, true)) {
-				LogError("Unexpected error while moving item from seller to buyer");
-				Message(Chat::Red, "Internal error while processing transaction.");
+            EQEmu::ItemInstance *ItemToTransfer = m_inv.PopItem(SellerSlot);
 
-				if(ItemToTransfer)
-					safe_delete(ItemToTransfer);
+            if (!ItemToTransfer || !Buyer->MoveItemToInventory(ItemToTransfer, true)) {
+                LogError("Unexpected error while moving item from seller to buyer");
+                Message(Chat::Red, "Internal error while processing transaction.");
 
-				return;
-			}
+                if (ItemToTransfer)
+                    safe_delete(ItemToTransfer);
 
-			database.SaveInventory(CharacterID(), 0, SellerSlot);
+                return;
+            }
 
-			safe_delete(ItemToTransfer);
+            database.SaveInventory(CharacterID(), 0, SellerSlot);
 
-			// Remove the item from inventory, clientside
-			//
-			auto outapp2 = new EQApplicationPacket(OP_MoveItem, sizeof(MoveItem_Struct));
+            safe_delete(ItemToTransfer);
 
-			MoveItem_Struct* mis	= (MoveItem_Struct*)outapp2->pBuffer;
-			mis->from_slot		= SellerSlot;
-			mis->to_slot		= 0xFFFFFFFF;
-			mis->number_in_stack	= 0xFFFFFFFF;
+            // Remove the item from inventory, clientside
+            //
+            auto outapp2 = new EQApplicationPacket(OP_MoveItem, sizeof(MoveItem_Struct));
 
-			QueuePacket(outapp2);
-			safe_delete(outapp2);
+            MoveItem_Struct *mis = (MoveItem_Struct *) outapp2->pBuffer;
+            mis->from_slot = SellerSlot;
+            mis->to_slot = 0xFFFFFFFF;
+            mis->number_in_stack = 0xFFFFFFFF;
 
-		}
-	}
-	else {
-		// Stackable
-		//
-		uint32 QuantityMoved = 0;
+            QueuePacket(outapp2);
+            safe_delete(outapp2);
 
-		while(QuantityMoved < Quantity) {
+        }
+    } else {
+        // Stackable
+        //
+        uint32 QuantityMoved = 0;
 
-			// Find the slot on the seller that has a stack of at least 1 of the item
-			int16 SellerSlot = m_inv.HasItem(ItemID, 1, invWhereWorn|invWherePersonal|invWhereCursor);
+        while (QuantityMoved < Quantity) {
 
-			if (SellerSlot == INVALID_INDEX) {
-				LogError("Unexpected error while moving item from seller to buyer");
-				Message(Chat::Red, "Internal error while processing transaction.");
-				return;
-			}
+            // Find the slot on the seller that has a stack of at least 1 of the item
+            int16 SellerSlot = m_inv.HasItem(ItemID, 1, invWhereWorn | invWherePersonal | invWhereCursor);
 
-			EQEmu::ItemInstance* ItemToTransfer = m_inv.PopItem(SellerSlot);
+            if (SellerSlot == INVALID_INDEX) {
+                LogError("Unexpected error while moving item from seller to buyer");
+                Message(Chat::Red, "Internal error while processing transaction.");
+                return;
+            }
 
-			if(!ItemToTransfer) {
-				LogError("Unexpected error while moving item from seller to buyer");
-				Message(Chat::Red, "Internal error while processing transaction.");
-				return;
-			}
+            EQEmu::ItemInstance *ItemToTransfer = m_inv.PopItem(SellerSlot);
 
-			// If the stack we found has less than the quantity we are selling ...
-			if(ItemToTransfer->GetCharges() <= (Quantity - QuantityMoved)) {
-				// Transfer the entire stack
+            if (!ItemToTransfer) {
+                LogError("Unexpected error while moving item from seller to buyer");
+                Message(Chat::Red, "Internal error while processing transaction.");
+                return;
+            }
 
-				QuantityMoved += ItemToTransfer->GetCharges();
+            // If the stack we found has less than the quantity we are selling ...
+            if (ItemToTransfer->GetCharges() <= (Quantity - QuantityMoved)) {
+                // Transfer the entire stack
 
-				if(!Buyer->MoveItemToInventory(ItemToTransfer, true)) {
-					LogError("Unexpected error while moving item from seller to buyer");
-					Message(Chat::Red, "Internal error while processing transaction.");
-					safe_delete(ItemToTransfer);
-					return;
-				}
-				// Delete the entire stack from the seller's inventory
-				database.SaveInventory(CharacterID(), 0, SellerSlot);
+                QuantityMoved += ItemToTransfer->GetCharges();
 
-				safe_delete(ItemToTransfer);
+                if (!Buyer->MoveItemToInventory(ItemToTransfer, true)) {
+                    LogError("Unexpected error while moving item from seller to buyer");
+                    Message(Chat::Red, "Internal error while processing transaction.");
+                    safe_delete(ItemToTransfer);
+                    return;
+                }
+                // Delete the entire stack from the seller's inventory
+                database.SaveInventory(CharacterID(), 0, SellerSlot);
 
-				// and tell the client to do the same.
-				auto outapp2 = new EQApplicationPacket(OP_MoveItem, sizeof(MoveItem_Struct));
+                safe_delete(ItemToTransfer);
 
-				MoveItem_Struct* mis	= (MoveItem_Struct*)outapp2->pBuffer;
-				mis->from_slot		= SellerSlot;
-				mis->to_slot		= 0xFFFFFFFF;
-				mis->number_in_stack	= 0xFFFFFFFF;
+                // and tell the client to do the same.
+                auto outapp2 = new EQApplicationPacket(OP_MoveItem, sizeof(MoveItem_Struct));
 
-				QueuePacket(outapp2);
-				safe_delete(outapp2);
-			}
-			else {
-				//Move the amount we need, and put the rest of the stack back in the seller's inventory
-				//
-				int QuantityToRemoveFromStack = Quantity - QuantityMoved;
+                MoveItem_Struct *mis = (MoveItem_Struct *) outapp2->pBuffer;
+                mis->from_slot = SellerSlot;
+                mis->to_slot = 0xFFFFFFFF;
+                mis->number_in_stack = 0xFFFFFFFF;
 
-				ItemToTransfer->SetCharges(ItemToTransfer->GetCharges() - QuantityToRemoveFromStack);
+                QueuePacket(outapp2);
+                safe_delete(outapp2);
+            } else {
+                //Move the amount we need, and put the rest of the stack back in the seller's inventory
+                //
+                int QuantityToRemoveFromStack = Quantity - QuantityMoved;
 
-				m_inv.PutItem(SellerSlot, *ItemToTransfer);
+                ItemToTransfer->SetCharges(ItemToTransfer->GetCharges() - QuantityToRemoveFromStack);
 
-				database.SaveInventory(CharacterID(), ItemToTransfer, SellerSlot);
+                m_inv.PutItem(SellerSlot, *ItemToTransfer);
 
-				ItemToTransfer->SetCharges(QuantityToRemoveFromStack);
+                database.SaveInventory(CharacterID(), ItemToTransfer, SellerSlot);
 
-				if(!Buyer->MoveItemToInventory(ItemToTransfer, true)) {
-					LogError("Unexpected error while moving item from seller to buyer");
-					Message(Chat::Red, "Internal error while processing transaction.");
-					safe_delete(ItemToTransfer);
-					return;
-				}
+                ItemToTransfer->SetCharges(QuantityToRemoveFromStack);
 
-				safe_delete(ItemToTransfer);
+                if (!Buyer->MoveItemToInventory(ItemToTransfer, true)) {
+                    LogError("Unexpected error while moving item from seller to buyer");
+                    Message(Chat::Red, "Internal error while processing transaction.");
+                    safe_delete(ItemToTransfer);
+                    return;
+                }
 
-				auto outapp2 = new EQApplicationPacket(OP_DeleteItem, sizeof(MoveItem_Struct));
+                safe_delete(ItemToTransfer);
 
-				MoveItem_Struct* mis	= (MoveItem_Struct*)outapp2->pBuffer;
-				mis->from_slot			= SellerSlot;
-				mis->to_slot			= 0xFFFFFFFF;
-				mis->number_in_stack	= 0xFFFFFFFF;
+                auto outapp2 = new EQApplicationPacket(OP_DeleteItem, sizeof(MoveItem_Struct));
 
-				for(int i = 0; i < QuantityToRemoveFromStack; i++)
-					QueuePacket(outapp2);
+                MoveItem_Struct *mis = (MoveItem_Struct *) outapp2->pBuffer;
+                mis->from_slot = SellerSlot;
+                mis->to_slot = 0xFFFFFFFF;
+                mis->number_in_stack = 0xFFFFFFFF;
 
-				safe_delete(outapp2);
+                for (int i = 0; i < QuantityToRemoveFromStack; i++)
+                    QueuePacket(outapp2);
 
-				QuantityMoved = Quantity;
-			}
-		}
+                safe_delete(outapp2);
 
-	}
+                QuantityMoved = Quantity;
+            }
+        }
 
-	Buyer->TakeMoneyFromPP(Quantity * Price);
+    }
 
-	AddMoneyToPP(Quantity * Price, false);
+    Buyer->TakeMoneyFromPP(Quantity * Price);
 
-	if(RuleB(Bazaar, AuditTrail))
-		BazaarAuditTrail(GetName(), Buyer->GetName(), ItemName, Quantity, Quantity * Price, 1);
+    AddMoneyToPP(Quantity * Price, false);
 
-	// We now send a packet to the Seller, which causes it to display 'You have sold <Qty> <Item> to <Player> for <money>'
-	//
-	// The PacketLength of 1016 is from the only instance of this packet I have seen, which is from Live, November 2008
-	// The Titanium/6.2 struct is slightly different in that it appears to use fixed length strings instead of variable
-	// length as used on Live. The extra space in the packet is also likely to be used for Item compensation, if we ever
-	// implement that.
-	//
-	uint32 PacketLength = 1016;
+    if (RuleB(Bazaar, AuditTrail))
+        BazaarAuditTrail(GetName(), Buyer->GetName(), ItemName, Quantity, Quantity * Price, 1);
 
-	auto outapp = new EQApplicationPacket(OP_Barter, PacketLength);
+    // We now send a packet to the Seller, which causes it to display 'You have sold <Qty> <Item> to <Player> for <money>'
+    //
+    // The PacketLength of 1016 is from the only instance of this packet I have seen, which is from Live, November 2008
+    // The Titanium/6.2 struct is slightly different in that it appears to use fixed length strings instead of variable
+    // length as used on Live. The extra space in the packet is also likely to be used for Item compensation, if we ever
+    // implement that.
+    //
+    uint32 PacketLength = 1016;
 
-	Buf = (char *)outapp->pBuffer;
+    auto outapp = new EQApplicationPacket(OP_Barter, PacketLength);
 
-	VARSTRUCT_ENCODE_TYPE(uint32, Buf, Barter_SellerTransactionComplete);
-	VARSTRUCT_ENCODE_TYPE(uint32, Buf, Quantity);
-	VARSTRUCT_ENCODE_TYPE(uint32, Buf, Quantity * Price);
+    Buf = (char *) outapp->pBuffer;
 
-	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoD)
-	{
-		VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0);	// Think this is the upper 32 bits of a 64 bit price
-	}
+    VARSTRUCT_ENCODE_TYPE(uint32, Buf, Barter_SellerTransactionComplete);
+    VARSTRUCT_ENCODE_TYPE(uint32, Buf, Quantity);
+    VARSTRUCT_ENCODE_TYPE(uint32, Buf, Quantity * Price);
 
-	sprintf(Buf, "%s", Buyer->GetName()); Buf += 64;
+    if (ClientVersion() >= EQEmu::versions::ClientVersion::SoD) {
+        VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0);    // Think this is the upper 32 bits of a 64 bit price
+    }
 
-	VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0x00);
-	VARSTRUCT_ENCODE_TYPE(uint8, Buf, 0x01);
-	VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0x00);
+    sprintf(Buf, "%s", Buyer->GetName());
+    Buf += 64;
 
-	sprintf(Buf, "%s", ItemName); Buf += 64;
+    VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0x00);
+    VARSTRUCT_ENCODE_TYPE(uint8, Buf, 0x01);
+    VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0x00);
 
-	QueuePacket(outapp);
+    sprintf(Buf, "%s", ItemName);
+    Buf += 64;
 
-	// This next packet goes to the Buyer and produces the 'You've bought <Qty> <Item> from <Seller> for <money>'
-	//
+    QueuePacket(outapp);
 
-	Buf = (char *)outapp->pBuffer;
+    // This next packet goes to the Buyer and produces the 'You've bought <Qty> <Item> from <Seller> for <money>'
+    //
 
-	VARSTRUCT_ENCODE_TYPE(uint32, Buf, Barter_BuyerTransactionComplete);
-	VARSTRUCT_ENCODE_TYPE(uint32, Buf, Quantity);
-	VARSTRUCT_ENCODE_TYPE(uint32, Buf, Quantity * Price);
+    Buf = (char *) outapp->pBuffer;
 
-	if (Buyer->ClientVersion() >= EQEmu::versions::ClientVersion::SoD)
-	{
-		VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0);	// Think this is the upper 32 bits of a 64 bit price
-	}
+    VARSTRUCT_ENCODE_TYPE(uint32, Buf, Barter_BuyerTransactionComplete);
+    VARSTRUCT_ENCODE_TYPE(uint32, Buf, Quantity);
+    VARSTRUCT_ENCODE_TYPE(uint32, Buf, Quantity * Price);
 
-	sprintf(Buf, "%s", GetName()); Buf += 64;
+    if (Buyer->ClientVersion() >= EQEmu::versions::ClientVersion::SoD) {
+        VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0);    // Think this is the upper 32 bits of a 64 bit price
+    }
 
-	VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0x00);
-	VARSTRUCT_ENCODE_TYPE(uint8, Buf, 0x01);
-	VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0x00);
+    sprintf(Buf, "%s", GetName());
+    Buf += 64;
 
-	sprintf(Buf, "%s", ItemName); Buf += 64;
+    VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0x00);
+    VARSTRUCT_ENCODE_TYPE(uint8, Buf, 0x01);
+    VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0x00);
 
-	Buyer->QueuePacket(outapp);
+    sprintf(Buf, "%s", ItemName);
+    Buf += 64;
 
-	safe_delete(outapp);
+    Buyer->QueuePacket(outapp);
 
-	// Next we update the buyer table in the database to reflect the reduced quantity the Buyer wants to buy.
-	//
-	database.UpdateBuyLine(Buyer->CharacterID(), BuySlot, QtyBuyerWants - Quantity);
+    safe_delete(outapp);
 
-	// Next we update the Seller's Barter Window to reflect the reduced quantity the Buyer is now looking to buy.
-	//
-	auto outapp3 = new EQApplicationPacket(OP_Barter, 936);
+    // Next we update the buyer table in the database to reflect the reduced quantity the Buyer wants to buy.
+    //
+    database.UpdateBuyLine(Buyer->CharacterID(), BuySlot, QtyBuyerWants - Quantity);
 
-	Buf = (char *)outapp3->pBuffer;
+    // Next we update the Seller's Barter Window to reflect the reduced quantity the Buyer is now looking to buy.
+    //
+    auto outapp3 = new EQApplicationPacket(OP_Barter, 936);
 
-	VARSTRUCT_ENCODE_TYPE(uint32, Buf, Barter_BuyerInspectWindow);
-	VARSTRUCT_ENCODE_TYPE(uint32, Buf, BuySlot);
-	VARSTRUCT_ENCODE_TYPE(uint8, Buf, 1); // Unknown
-	VARSTRUCT_ENCODE_TYPE(uint32, Buf,ItemID);
-	VARSTRUCT_ENCODE_STRING(Buf, ItemName);
-	VARSTRUCT_ENCODE_TYPE(uint32, Buf, item->Icon);
-	VARSTRUCT_ENCODE_TYPE(uint32, Buf, QtyBuyerWants - Quantity);
+    Buf = (char *) outapp3->pBuffer;
 
-	// If the amount we have just sold completely satisfies the quantity the Buyer was looking for,
-	// setting the next byte to 0 will remove the item from the Barter Window.
-	//
-	if(QtyBuyerWants - Quantity > 0) {
-		VARSTRUCT_ENCODE_TYPE(uint8, Buf, 1); // 0 = Toggle Off, 1 = Toggle On
-	}
-	else {
-		VARSTRUCT_ENCODE_TYPE(uint8, Buf, 0); // 0 = Toggle Off, 1 = Toggle On
-	}
+    VARSTRUCT_ENCODE_TYPE(uint32, Buf, Barter_BuyerInspectWindow);
+    VARSTRUCT_ENCODE_TYPE(uint32, Buf, BuySlot);
+    VARSTRUCT_ENCODE_TYPE(uint8, Buf, 1); // Unknown
+    VARSTRUCT_ENCODE_TYPE(uint32, Buf, ItemID);
+    VARSTRUCT_ENCODE_STRING(Buf, ItemName);
+    VARSTRUCT_ENCODE_TYPE(uint32, Buf, item->Icon);
+    VARSTRUCT_ENCODE_TYPE(uint32, Buf, QtyBuyerWants - Quantity);
 
-	VARSTRUCT_ENCODE_TYPE(uint32, Buf, Price);
-	VARSTRUCT_ENCODE_TYPE(uint32, Buf, Buyer->GetID());
-	VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0);
+    // If the amount we have just sold completely satisfies the quantity the Buyer was looking for,
+    // setting the next byte to 0 will remove the item from the Barter Window.
+    //
+    if (QtyBuyerWants - Quantity > 0) {
+        VARSTRUCT_ENCODE_TYPE(uint8, Buf, 1); // 0 = Toggle Off, 1 = Toggle On
+    } else {
+        VARSTRUCT_ENCODE_TYPE(uint8, Buf, 0); // 0 = Toggle Off, 1 = Toggle On
+    }
 
-	VARSTRUCT_ENCODE_STRING(Buf, Buyer->GetName());
+    VARSTRUCT_ENCODE_TYPE(uint32, Buf, Price);
+    VARSTRUCT_ENCODE_TYPE(uint32, Buf, Buyer->GetID());
+    VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0);
 
-	QueuePacket(outapp3);
-	safe_delete(outapp3);
+    VARSTRUCT_ENCODE_STRING(Buf, Buyer->GetName());
 
-	// The next packet updates the /buyer window with the reduced quantity, and toggles the buy line off if the
-	// quantity they wanted to buy has been met.
-	//
-	auto outapp4 = new EQApplicationPacket(OP_Barter, 936);
+    QueuePacket(outapp3);
+    safe_delete(outapp3);
 
-	Buf = (char*)outapp4->pBuffer;
+    // The next packet updates the /buyer window with the reduced quantity, and toggles the buy line off if the
+    // quantity they wanted to buy has been met.
+    //
+    auto outapp4 = new EQApplicationPacket(OP_Barter, 936);
 
-	VARSTRUCT_ENCODE_TYPE(uint32, Buf, Barter_BuyerItemUpdate);
-	VARSTRUCT_ENCODE_TYPE(uint32, Buf, BuySlot);
-	VARSTRUCT_ENCODE_TYPE(uint8, Buf, 1);
-	VARSTRUCT_ENCODE_TYPE(uint32, Buf, ItemID);
-	VARSTRUCT_ENCODE_STRING(Buf, ItemName);
-	VARSTRUCT_ENCODE_TYPE(uint32, Buf, item->Icon);
-	VARSTRUCT_ENCODE_TYPE(uint32, Buf, QtyBuyerWants - Quantity);
+    Buf = (char *) outapp4->pBuffer;
 
-	if((QtyBuyerWants - Quantity) > 0) {
+    VARSTRUCT_ENCODE_TYPE(uint32, Buf, Barter_BuyerItemUpdate);
+    VARSTRUCT_ENCODE_TYPE(uint32, Buf, BuySlot);
+    VARSTRUCT_ENCODE_TYPE(uint8, Buf, 1);
+    VARSTRUCT_ENCODE_TYPE(uint32, Buf, ItemID);
+    VARSTRUCT_ENCODE_STRING(Buf, ItemName);
+    VARSTRUCT_ENCODE_TYPE(uint32, Buf, item->Icon);
+    VARSTRUCT_ENCODE_TYPE(uint32, Buf, QtyBuyerWants - Quantity);
 
-		VARSTRUCT_ENCODE_TYPE(uint8, Buf, 1); // 0 = Toggle Off, 1 = Toggle On
-	}
-	else {
-		VARSTRUCT_ENCODE_TYPE(uint8, Buf, 0); // 0 = Toggle Off, 1 = Toggle On
-	}
+    if ((QtyBuyerWants - Quantity) > 0) {
 
-	VARSTRUCT_ENCODE_TYPE(uint32, Buf, Price);
-	VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0x08f4); // Unknown
-	VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0);
-	VARSTRUCT_ENCODE_STRING(Buf, Buyer->GetName());
+        VARSTRUCT_ENCODE_TYPE(uint8, Buf, 1); // 0 = Toggle Off, 1 = Toggle On
+    } else {
+        VARSTRUCT_ENCODE_TYPE(uint8, Buf, 0); // 0 = Toggle Off, 1 = Toggle On
+    }
 
-	Buyer->QueuePacket(outapp4);
-	safe_delete(outapp4);
+    VARSTRUCT_ENCODE_TYPE(uint32, Buf, Price);
+    VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0x08f4); // Unknown
+    VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0);
+    VARSTRUCT_ENCODE_STRING(Buf, Buyer->GetName());
 
-	return;
+    Buyer->QueuePacket(outapp4);
+    safe_delete(outapp4);
+
+    return;
 }
 
 void Client::SendBuyerPacket(Client* Buyer) {
