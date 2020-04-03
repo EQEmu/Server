@@ -1,13 +1,15 @@
 #!/usr/bin/perl
-use warnings FATAL => 'all';
-no warnings 'experimental::smartmatch';
-use experimental 'smartmatch';
-
 # Author:       Akkadius
 # @file:        repository-generator.pl
 # @description: Script used to generate database repositories
 # @example      perl ~/code/utils/scripts/generators/repository-generator.pl ~/server/
 
+#############################################
+# modules
+#############################################
+use warnings FATAL => 'all';
+no warnings 'experimental::smartmatch';
+use experimental 'smartmatch';
 use File::Find;
 use Data::Dumper;
 use DBI;
@@ -49,6 +51,9 @@ if (!-e $config_path) {
     exit;
 }
 
+#############################################
+# fetch schema from world
+#############################################
 my $output          = `cd $server_path && $found_world_path database:schema`;
 my $database_schema = $json->decode($output);
 
