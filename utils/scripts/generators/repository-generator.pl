@@ -4,6 +4,7 @@ use warnings FATAL => 'all';
 # Author:       Akkadius
 # @file:        repository-generator.pl
 # @description: Script used to generate database repositories
+# @example      perl ~/code/utils/scripts/generators/repository-generator.pl ~/server/eqemu_config.json
 
 use File::Find;
 use Data::Dumper;
@@ -12,12 +13,17 @@ use Data::Dumper;
 # args
 #############################################
 my $eqemu_config                = $ARGV[0];
-my $requested_table_to_generate = $ARGV[1];
+my $requested_table_to_generate = $ARGV[1] ? $ARGV[1] : "";
 
 my $i = 0;
 while ($ARGV[$i]) {
     # print "[$i] [" . $ARGV[$i] . "]\n";
     $i++;
+}
+
+if (!-e $eqemu_config) {
+    print "Error! Config file [$eqemu_config] not found\n";
+    exit;
 }
 
 #############################################
@@ -46,24 +52,29 @@ my $pass          = $config->{"server"}{"database"}{"password"};
 my $dsn           = "dbi:mysql:$database_name:$host:3306";
 my $connect       = DBI->connect($dsn, $user, $pass);
 
-my $table_names_exec = $connect->prepare(
-    "
-        SELECT
-          TABLE_NAME
-        FROM
-          INFORMATION_SCHEMA.COLUMNS
-        WHERE
-          TABLE_SCHEMA = ?
-        GROUP BY
-          TABLE_NAME
-    ";
-
-$table_names_exec->execute($database_name, $table_to_generate);
-
 my @tables = ();
-while (my @row = $table_names_exec->fetchrow_array()) {
-    push(@tables, $row[0]);
+if ($requested_table_to_generate eq "all" || !$requested_table_to_generate) {
+
+    my $table_names_exec = $connect->prepare(
+        "
+            SELECT
+              TABLE_NAME
+            FROM
+              INFORMATION_SCHEMA.COLUMNS
+            WHERE
+              TABLE_SCHEMA = ?
+            GROUP BY
+              TABLE_NAME
+        ");
+
+    $table_names_exec->execute($database_name);
+
+    while (my @row = $table_names_exec->fetchrow_array()) {
+        push(@tables, $row[0]);
+    }
 }
+
+my $generated_repository_files = "";
 
 foreach my $table_to_generate (@tables) {
     my $ex = $connect->prepare(
@@ -263,7 +274,12 @@ foreach my $table_to_generate (@tables) {
 
     print $new_repository;
 
-    my $generated_repository = './common/repositories/' . $table_to_generate . '_repository.h';
+    my $generated_repository      = './common/repositories/' . $table_to_generate . '_repository.h';
+    my $cmake_generated_reference = $generated_repository;
+
+    $cmake_generated_reference =~ s/.\/common\///g;
+
+    $generated_repository_files .= $cmake_generated_reference . "\n";
 
     open(FH, '>', $generated_repository) or die $!;
 
@@ -271,6 +287,10 @@ foreach my $table_to_generate (@tables) {
 
     close(FH);
 }
+
+print "\n# Make sure to add generated repositories to common/CMakeLists.txt under the repositories section\n\n";
+
+print $generated_repository_files . "\n";
 
 sub trim {
     my $string = $_[0];
