@@ -18,22 +18,17 @@
  *
  */
 
-#ifndef EQEMU_INSTANCE_LIST_REPOSITORY_H
-#define EQEMU_INSTANCE_LIST_REPOSITORY_H
+#ifndef EQEMU_SAYLINK_REPOSITORY_H
+#define EQEMU_SAYLINK_REPOSITORY_H
 
 #include "../database.h"
 #include "../string_util.h"
 
-class InstanceListRepository {
+class SaylinkRepository {
 public:
-	struct InstanceList {
-		int id;
-		int zone;
-		int version;
-		int is_global;
-		int start_time;
-		int duration;
-		int never_expires;
+	struct Saylink {
+		int         id;
+		std::string phrase;
 	};
 
 	static std::string PrimaryKey()
@@ -45,12 +40,7 @@ public:
 	{
 		return {
 			"id",
-			"zone",
-			"version",
-			"is_global",
-			"start_time",
-			"duration",
-			"never_expires",
+			"phrase",
 		};
 	}
 
@@ -76,7 +66,7 @@ public:
 
 	static std::string TableName()
 	{
-		return std::string("instance_list");
+		return std::string("saylink");
 	}
 
 	static std::string BaseSelect()
@@ -97,58 +87,48 @@ public:
 		);
 	}
 
-	static InstanceList NewEntity()
+	static Saylink NewEntity()
 	{
-		InstanceList entry{};
+		Saylink entry{};
 
-		entry.id            = 0;
-		entry.zone          = 0;
-		entry.version       = 0;
-		entry.is_global     = 0;
-		entry.start_time    = 0;
-		entry.duration      = 0;
-		entry.never_expires = 0;
+		entry.id     = 0;
+		entry.phrase = "";
 
 		return entry;
 	}
 
-	static InstanceList GetInstanceListEntry(
-		const std::vector<InstanceList> &instance_lists,
-		int instance_list_id
+	static Saylink GetSaylinkEntry(
+		const std::vector<Saylink> &saylinks,
+		int saylink_id
 	)
 	{
-		for (auto &instance_list : instance_lists) {
-			if (instance_list.id == instance_list_id) {
-				return instance_list;
+		for (auto &saylink : saylinks) {
+			if (saylink.id == saylink_id) {
+				return saylink;
 			}
 		}
 
 		return NewEntity();
 	}
 
-	static InstanceList FindOne(
-		int instance_list_id
+	static Saylink FindOne(
+		int saylink_id
 	)
 	{
 		auto results = database.QueryDatabase(
 			fmt::format(
 				"{} WHERE id = {} LIMIT 1",
 				BaseSelect(),
-				instance_list_id
+				saylink_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			InstanceList entry{};
+			Saylink entry{};
 
-			entry.id            = atoi(row[0]);
-			entry.zone          = atoi(row[1]);
-			entry.version       = atoi(row[2]);
-			entry.is_global     = atoi(row[3]);
-			entry.start_time    = atoi(row[4]);
-			entry.duration      = atoi(row[5]);
-			entry.never_expires = atoi(row[6]);
+			entry.id     = atoi(row[0]);
+			entry.phrase = row[1];
 
 			return entry;
 		}
@@ -157,7 +137,7 @@ public:
 	}
 
 	static int DeleteOne(
-		int instance_list_id
+		int saylink_id
 	)
 	{
 		auto results = database.QueryDatabase(
@@ -165,7 +145,7 @@ public:
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
 				PrimaryKey(),
-				instance_list_id
+				saylink_id
 			)
 		);
 
@@ -173,19 +153,14 @@ public:
 	}
 
 	static int UpdateOne(
-		InstanceList instance_list_entry
+		Saylink saylink_entry
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(instance_list_entry.zone));
-		update_values.push_back(columns[2] + " = " + std::to_string(instance_list_entry.version));
-		update_values.push_back(columns[3] + " = " + std::to_string(instance_list_entry.is_global));
-		update_values.push_back(columns[4] + " = " + std::to_string(instance_list_entry.start_time));
-		update_values.push_back(columns[5] + " = " + std::to_string(instance_list_entry.duration));
-		update_values.push_back(columns[6] + " = " + std::to_string(instance_list_entry.never_expires));
+		update_values.push_back(columns[1] + " = '" + EscapeString(saylink_entry.phrase) + "'");
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -193,25 +168,20 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				instance_list_entry.id
+				saylink_entry.id
 			)
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static InstanceList InsertOne(
-		InstanceList instance_list_entry
+	static Saylink InsertOne(
+		Saylink saylink_entry
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(instance_list_entry.zone));
-		insert_values.push_back(std::to_string(instance_list_entry.version));
-		insert_values.push_back(std::to_string(instance_list_entry.is_global));
-		insert_values.push_back(std::to_string(instance_list_entry.start_time));
-		insert_values.push_back(std::to_string(instance_list_entry.duration));
-		insert_values.push_back(std::to_string(instance_list_entry.never_expires));
+		insert_values.push_back("'" + EscapeString(saylink_entry.phrase) + "'");
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -222,30 +192,25 @@ public:
 		);
 
 		if (results.Success()) {
-			instance_list_entry.id = results.LastInsertedID();
-			return instance_list_entry;
+			saylink_entry.id = results.LastInsertedID();
+			return saylink_entry;
 		}
 
-		instance_list_entry = InstanceListRepository::NewEntity();
+		saylink_entry = InstanceListRepository::NewEntity();
 
-		return instance_list_entry;
+		return saylink_entry;
 	}
 
 	static int InsertMany(
-		std::vector<InstanceList> instance_list_entries
+		std::vector<Saylink> saylink_entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &instance_list_entry: instance_list_entries) {
+		for (auto &saylink_entry: saylink_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(instance_list_entry.zone));
-			insert_values.push_back(std::to_string(instance_list_entry.version));
-			insert_values.push_back(std::to_string(instance_list_entry.is_global));
-			insert_values.push_back(std::to_string(instance_list_entry.start_time));
-			insert_values.push_back(std::to_string(instance_list_entry.duration));
-			insert_values.push_back(std::to_string(instance_list_entry.never_expires));
+			insert_values.push_back("'" + EscapeString(saylink_entry.phrase) + "'");
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -263,9 +228,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<InstanceList> All()
+	static std::vector<Saylink> All()
 	{
-		std::vector<InstanceList> all_entries;
+		std::vector<Saylink> all_entries;
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -277,15 +242,10 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			InstanceList entry{};
+			Saylink entry{};
 
-			entry.id            = atoi(row[0]);
-			entry.zone          = atoi(row[1]);
-			entry.version       = atoi(row[2]);
-			entry.is_global     = atoi(row[3]);
-			entry.start_time    = atoi(row[4]);
-			entry.duration      = atoi(row[5]);
-			entry.never_expires = atoi(row[6]);
+			entry.id     = atoi(row[0]);
+			entry.phrase = row[1];
 
 			all_entries.push_back(entry);
 		}
@@ -295,4 +255,4 @@ public:
 
 };
 
-#endif //EQEMU_INSTANCE_LIST_REPOSITORY_H
+#endif //EQEMU_SAYLINK_REPOSITORY_H

@@ -18,39 +18,27 @@
  *
  */
 
-#ifndef EQEMU_INSTANCE_LIST_REPOSITORY_H
-#define EQEMU_INSTANCE_LIST_REPOSITORY_H
+#ifndef EQEMU_DB_VERSION_REPOSITORY_H
+#define EQEMU_DB_VERSION_REPOSITORY_H
 
 #include "../database.h"
 #include "../string_util.h"
 
-class InstanceListRepository {
+class DbVersionRepository {
 public:
-	struct InstanceList {
-		int id;
-		int zone;
+	struct DbVersion {
 		int version;
-		int is_global;
-		int start_time;
-		int duration;
-		int never_expires;
 	};
 
 	static std::string PrimaryKey()
 	{
-		return std::string("id");
+		return std::string("");
 	}
 
 	static std::vector<std::string> Columns()
 	{
 		return {
-			"id",
-			"zone",
 			"version",
-			"is_global",
-			"start_time",
-			"duration",
-			"never_expires",
 		};
 	}
 
@@ -76,7 +64,7 @@ public:
 
 	static std::string TableName()
 	{
-		return std::string("instance_list");
+		return std::string("db_version");
 	}
 
 	static std::string BaseSelect()
@@ -97,58 +85,46 @@ public:
 		);
 	}
 
-	static InstanceList NewEntity()
+	static DbVersion NewEntity()
 	{
-		InstanceList entry{};
+		DbVersion entry{};
 
-		entry.id            = 0;
-		entry.zone          = 0;
-		entry.version       = 0;
-		entry.is_global     = 0;
-		entry.start_time    = 0;
-		entry.duration      = 0;
-		entry.never_expires = 0;
+		entry.version = 0;
 
 		return entry;
 	}
 
-	static InstanceList GetInstanceListEntry(
-		const std::vector<InstanceList> &instance_lists,
-		int instance_list_id
+	static DbVersion GetDbVersionEntry(
+		const std::vector<DbVersion> &db_versions,
+		int db_version_id
 	)
 	{
-		for (auto &instance_list : instance_lists) {
-			if (instance_list.id == instance_list_id) {
-				return instance_list;
+		for (auto &db_version : db_versions) {
+			if (db_version. == db_version_id) {
+				return db_version;
 			}
 		}
 
 		return NewEntity();
 	}
 
-	static InstanceList FindOne(
-		int instance_list_id
+	static DbVersion FindOne(
+		int db_version_id
 	)
 	{
 		auto results = database.QueryDatabase(
 			fmt::format(
 				"{} WHERE id = {} LIMIT 1",
 				BaseSelect(),
-				instance_list_id
+				db_version_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			InstanceList entry{};
+			DbVersion entry{};
 
-			entry.id            = atoi(row[0]);
-			entry.zone          = atoi(row[1]);
-			entry.version       = atoi(row[2]);
-			entry.is_global     = atoi(row[3]);
-			entry.start_time    = atoi(row[4]);
-			entry.duration      = atoi(row[5]);
-			entry.never_expires = atoi(row[6]);
+			entry.version = atoi(row[0]);
 
 			return entry;
 		}
@@ -157,7 +133,7 @@ public:
 	}
 
 	static int DeleteOne(
-		int instance_list_id
+		int db_version_id
 	)
 	{
 		auto results = database.QueryDatabase(
@@ -165,7 +141,7 @@ public:
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
 				PrimaryKey(),
-				instance_list_id
+				db_version_id
 			)
 		);
 
@@ -173,19 +149,14 @@ public:
 	}
 
 	static int UpdateOne(
-		InstanceList instance_list_entry
+		DbVersion db_version_entry
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(instance_list_entry.zone));
-		update_values.push_back(columns[2] + " = " + std::to_string(instance_list_entry.version));
-		update_values.push_back(columns[3] + " = " + std::to_string(instance_list_entry.is_global));
-		update_values.push_back(columns[4] + " = " + std::to_string(instance_list_entry.start_time));
-		update_values.push_back(columns[5] + " = " + std::to_string(instance_list_entry.duration));
-		update_values.push_back(columns[6] + " = " + std::to_string(instance_list_entry.never_expires));
+		update_values.push_back(columns[0] + " = " + std::to_string(db_version_entry.version));
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -193,25 +164,20 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				instance_list_entry.id
+				db_version_entry.
 			)
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static InstanceList InsertOne(
-		InstanceList instance_list_entry
+	static DbVersion InsertOne(
+		DbVersion db_version_entry
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(instance_list_entry.zone));
-		insert_values.push_back(std::to_string(instance_list_entry.version));
-		insert_values.push_back(std::to_string(instance_list_entry.is_global));
-		insert_values.push_back(std::to_string(instance_list_entry.start_time));
-		insert_values.push_back(std::to_string(instance_list_entry.duration));
-		insert_values.push_back(std::to_string(instance_list_entry.never_expires));
+		insert_values.push_back(std::to_string(db_version_entry.version));
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -222,30 +188,25 @@ public:
 		);
 
 		if (results.Success()) {
-			instance_list_entry.id = results.LastInsertedID();
-			return instance_list_entry;
+			db_version_entry.id = results.LastInsertedID();
+			return db_version_entry;
 		}
 
-		instance_list_entry = InstanceListRepository::NewEntity();
+		db_version_entry = InstanceListRepository::NewEntity();
 
-		return instance_list_entry;
+		return db_version_entry;
 	}
 
 	static int InsertMany(
-		std::vector<InstanceList> instance_list_entries
+		std::vector<DbVersion> db_version_entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &instance_list_entry: instance_list_entries) {
+		for (auto &db_version_entry: db_version_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(instance_list_entry.zone));
-			insert_values.push_back(std::to_string(instance_list_entry.version));
-			insert_values.push_back(std::to_string(instance_list_entry.is_global));
-			insert_values.push_back(std::to_string(instance_list_entry.start_time));
-			insert_values.push_back(std::to_string(instance_list_entry.duration));
-			insert_values.push_back(std::to_string(instance_list_entry.never_expires));
+			insert_values.push_back(std::to_string(db_version_entry.version));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -263,9 +224,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<InstanceList> All()
+	static std::vector<DbVersion> All()
 	{
-		std::vector<InstanceList> all_entries;
+		std::vector<DbVersion> all_entries;
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -277,15 +238,9 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			InstanceList entry{};
+			DbVersion entry{};
 
-			entry.id            = atoi(row[0]);
-			entry.zone          = atoi(row[1]);
-			entry.version       = atoi(row[2]);
-			entry.is_global     = atoi(row[3]);
-			entry.start_time    = atoi(row[4]);
-			entry.duration      = atoi(row[5]);
-			entry.never_expires = atoi(row[6]);
+			entry.version = atoi(row[0]);
 
 			all_entries.push_back(entry);
 		}
@@ -295,4 +250,4 @@ public:
 
 };
 
-#endif //EQEMU_INSTANCE_LIST_REPOSITORY_H
+#endif //EQEMU_DB_VERSION_REPOSITORY_H

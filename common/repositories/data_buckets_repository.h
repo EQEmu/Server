@@ -18,22 +18,19 @@
  *
  */
 
-#ifndef EQEMU_INSTANCE_LIST_REPOSITORY_H
-#define EQEMU_INSTANCE_LIST_REPOSITORY_H
+#ifndef EQEMU_DATA_BUCKETS_REPOSITORY_H
+#define EQEMU_DATA_BUCKETS_REPOSITORY_H
 
 #include "../database.h"
 #include "../string_util.h"
 
-class InstanceListRepository {
+class DataBucketsRepository {
 public:
-	struct InstanceList {
-		int id;
-		int zone;
-		int version;
-		int is_global;
-		int start_time;
-		int duration;
-		int never_expires;
+	struct DataBuckets {
+		int         id;
+		std::string key;
+		std::string value;
+		int         expires;
 	};
 
 	static std::string PrimaryKey()
@@ -45,12 +42,9 @@ public:
 	{
 		return {
 			"id",
-			"zone",
-			"version",
-			"is_global",
-			"start_time",
-			"duration",
-			"never_expires",
+			"key",
+			"value",
+			"expires",
 		};
 	}
 
@@ -76,7 +70,7 @@ public:
 
 	static std::string TableName()
 	{
-		return std::string("instance_list");
+		return std::string("data_buckets");
 	}
 
 	static std::string BaseSelect()
@@ -97,58 +91,52 @@ public:
 		);
 	}
 
-	static InstanceList NewEntity()
+	static DataBuckets NewEntity()
 	{
-		InstanceList entry{};
+		DataBuckets entry{};
 
-		entry.id            = 0;
-		entry.zone          = 0;
-		entry.version       = 0;
-		entry.is_global     = 0;
-		entry.start_time    = 0;
-		entry.duration      = 0;
-		entry.never_expires = 0;
+		entry.id      = 0;
+		entry.key     = 0;
+		entry.value   = 0;
+		entry.expires = 0;
 
 		return entry;
 	}
 
-	static InstanceList GetInstanceListEntry(
-		const std::vector<InstanceList> &instance_lists,
-		int instance_list_id
+	static DataBuckets GetDataBucketsEntry(
+		const std::vector<DataBuckets> &data_bucketss,
+		int data_buckets_id
 	)
 	{
-		for (auto &instance_list : instance_lists) {
-			if (instance_list.id == instance_list_id) {
-				return instance_list;
+		for (auto &data_buckets : data_bucketss) {
+			if (data_buckets.id == data_buckets_id) {
+				return data_buckets;
 			}
 		}
 
 		return NewEntity();
 	}
 
-	static InstanceList FindOne(
-		int instance_list_id
+	static DataBuckets FindOne(
+		int data_buckets_id
 	)
 	{
 		auto results = database.QueryDatabase(
 			fmt::format(
 				"{} WHERE id = {} LIMIT 1",
 				BaseSelect(),
-				instance_list_id
+				data_buckets_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			InstanceList entry{};
+			DataBuckets entry{};
 
-			entry.id            = atoi(row[0]);
-			entry.zone          = atoi(row[1]);
-			entry.version       = atoi(row[2]);
-			entry.is_global     = atoi(row[3]);
-			entry.start_time    = atoi(row[4]);
-			entry.duration      = atoi(row[5]);
-			entry.never_expires = atoi(row[6]);
+			entry.id      = atoi(row[0]);
+			entry.key     = row[1];
+			entry.value   = row[2];
+			entry.expires = atoi(row[3]);
 
 			return entry;
 		}
@@ -157,7 +145,7 @@ public:
 	}
 
 	static int DeleteOne(
-		int instance_list_id
+		int data_buckets_id
 	)
 	{
 		auto results = database.QueryDatabase(
@@ -165,7 +153,7 @@ public:
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
 				PrimaryKey(),
-				instance_list_id
+				data_buckets_id
 			)
 		);
 
@@ -173,19 +161,16 @@ public:
 	}
 
 	static int UpdateOne(
-		InstanceList instance_list_entry
+		DataBuckets data_buckets_entry
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(instance_list_entry.zone));
-		update_values.push_back(columns[2] + " = " + std::to_string(instance_list_entry.version));
-		update_values.push_back(columns[3] + " = " + std::to_string(instance_list_entry.is_global));
-		update_values.push_back(columns[4] + " = " + std::to_string(instance_list_entry.start_time));
-		update_values.push_back(columns[5] + " = " + std::to_string(instance_list_entry.duration));
-		update_values.push_back(columns[6] + " = " + std::to_string(instance_list_entry.never_expires));
+		update_values.push_back(columns[1] + " = '" + EscapeString(data_buckets_entry.key) + "'");
+		update_values.push_back(columns[2] + " = '" + EscapeString(data_buckets_entry.value) + "'");
+		update_values.push_back(columns[3] + " = " + std::to_string(data_buckets_entry.expires));
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -193,25 +178,22 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				instance_list_entry.id
+				data_buckets_entry.id
 			)
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static InstanceList InsertOne(
-		InstanceList instance_list_entry
+	static DataBuckets InsertOne(
+		DataBuckets data_buckets_entry
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(instance_list_entry.zone));
-		insert_values.push_back(std::to_string(instance_list_entry.version));
-		insert_values.push_back(std::to_string(instance_list_entry.is_global));
-		insert_values.push_back(std::to_string(instance_list_entry.start_time));
-		insert_values.push_back(std::to_string(instance_list_entry.duration));
-		insert_values.push_back(std::to_string(instance_list_entry.never_expires));
+		insert_values.push_back("'" + EscapeString(data_buckets_entry.key) + "'");
+		insert_values.push_back("'" + EscapeString(data_buckets_entry.value) + "'");
+		insert_values.push_back(std::to_string(data_buckets_entry.expires));
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -222,30 +204,27 @@ public:
 		);
 
 		if (results.Success()) {
-			instance_list_entry.id = results.LastInsertedID();
-			return instance_list_entry;
+			data_buckets_entry.id = results.LastInsertedID();
+			return data_buckets_entry;
 		}
 
-		instance_list_entry = InstanceListRepository::NewEntity();
+		data_buckets_entry = InstanceListRepository::NewEntity();
 
-		return instance_list_entry;
+		return data_buckets_entry;
 	}
 
 	static int InsertMany(
-		std::vector<InstanceList> instance_list_entries
+		std::vector<DataBuckets> data_buckets_entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &instance_list_entry: instance_list_entries) {
+		for (auto &data_buckets_entry: data_buckets_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(instance_list_entry.zone));
-			insert_values.push_back(std::to_string(instance_list_entry.version));
-			insert_values.push_back(std::to_string(instance_list_entry.is_global));
-			insert_values.push_back(std::to_string(instance_list_entry.start_time));
-			insert_values.push_back(std::to_string(instance_list_entry.duration));
-			insert_values.push_back(std::to_string(instance_list_entry.never_expires));
+			insert_values.push_back("'" + EscapeString(data_buckets_entry.key) + "'");
+			insert_values.push_back("'" + EscapeString(data_buckets_entry.value) + "'");
+			insert_values.push_back(std::to_string(data_buckets_entry.expires));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -263,9 +242,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<InstanceList> All()
+	static std::vector<DataBuckets> All()
 	{
-		std::vector<InstanceList> all_entries;
+		std::vector<DataBuckets> all_entries;
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -277,15 +256,12 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			InstanceList entry{};
+			DataBuckets entry{};
 
-			entry.id            = atoi(row[0]);
-			entry.zone          = atoi(row[1]);
-			entry.version       = atoi(row[2]);
-			entry.is_global     = atoi(row[3]);
-			entry.start_time    = atoi(row[4]);
-			entry.duration      = atoi(row[5]);
-			entry.never_expires = atoi(row[6]);
+			entry.id      = atoi(row[0]);
+			entry.key     = row[1];
+			entry.value   = row[2];
+			entry.expires = atoi(row[3]);
 
 			all_entries.push_back(entry);
 		}
@@ -295,4 +271,4 @@ public:
 
 };
 
-#endif //EQEMU_INSTANCE_LIST_REPOSITORY_H
+#endif //EQEMU_DATA_BUCKETS_REPOSITORY_H

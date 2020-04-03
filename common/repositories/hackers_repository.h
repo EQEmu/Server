@@ -18,22 +18,21 @@
  *
  */
 
-#ifndef EQEMU_INSTANCE_LIST_REPOSITORY_H
-#define EQEMU_INSTANCE_LIST_REPOSITORY_H
+#ifndef EQEMU_HACKERS_REPOSITORY_H
+#define EQEMU_HACKERS_REPOSITORY_H
 
 #include "../database.h"
 #include "../string_util.h"
 
-class InstanceListRepository {
+class HackersRepository {
 public:
-	struct InstanceList {
-		int id;
-		int zone;
-		int version;
-		int is_global;
-		int start_time;
-		int duration;
-		int never_expires;
+	struct Hackers {
+		int         id;
+		std::string account;
+		std::string name;
+		std::string hacked;
+		std::string zone;
+		std::string date;
 	};
 
 	static std::string PrimaryKey()
@@ -45,12 +44,11 @@ public:
 	{
 		return {
 			"id",
+			"account",
+			"name",
+			"hacked",
 			"zone",
-			"version",
-			"is_global",
-			"start_time",
-			"duration",
-			"never_expires",
+			"date",
 		};
 	}
 
@@ -76,7 +74,7 @@ public:
 
 	static std::string TableName()
 	{
-		return std::string("instance_list");
+		return std::string("hackers");
 	}
 
 	static std::string BaseSelect()
@@ -97,58 +95,56 @@ public:
 		);
 	}
 
-	static InstanceList NewEntity()
+	static Hackers NewEntity()
 	{
-		InstanceList entry{};
+		Hackers entry{};
 
-		entry.id            = 0;
-		entry.zone          = 0;
-		entry.version       = 0;
-		entry.is_global     = 0;
-		entry.start_time    = 0;
-		entry.duration      = 0;
-		entry.never_expires = 0;
+		entry.id      = 0;
+		entry.account = 0;
+		entry.name    = 0;
+		entry.hacked  = 0;
+		entry.zone    = 0;
+		entry.date    = current_timestamp();
 
 		return entry;
 	}
 
-	static InstanceList GetInstanceListEntry(
-		const std::vector<InstanceList> &instance_lists,
-		int instance_list_id
+	static Hackers GetHackersEntry(
+		const std::vector<Hackers> &hackerss,
+		int hackers_id
 	)
 	{
-		for (auto &instance_list : instance_lists) {
-			if (instance_list.id == instance_list_id) {
-				return instance_list;
+		for (auto &hackers : hackerss) {
+			if (hackers.id == hackers_id) {
+				return hackers;
 			}
 		}
 
 		return NewEntity();
 	}
 
-	static InstanceList FindOne(
-		int instance_list_id
+	static Hackers FindOne(
+		int hackers_id
 	)
 	{
 		auto results = database.QueryDatabase(
 			fmt::format(
 				"{} WHERE id = {} LIMIT 1",
 				BaseSelect(),
-				instance_list_id
+				hackers_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			InstanceList entry{};
+			Hackers entry{};
 
-			entry.id            = atoi(row[0]);
-			entry.zone          = atoi(row[1]);
-			entry.version       = atoi(row[2]);
-			entry.is_global     = atoi(row[3]);
-			entry.start_time    = atoi(row[4]);
-			entry.duration      = atoi(row[5]);
-			entry.never_expires = atoi(row[6]);
+			entry.id      = atoi(row[0]);
+			entry.account = row[1];
+			entry.name    = row[2];
+			entry.hacked  = row[3];
+			entry.zone    = row[4];
+			entry.date    = row[5];
 
 			return entry;
 		}
@@ -157,7 +153,7 @@ public:
 	}
 
 	static int DeleteOne(
-		int instance_list_id
+		int hackers_id
 	)
 	{
 		auto results = database.QueryDatabase(
@@ -165,7 +161,7 @@ public:
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
 				PrimaryKey(),
-				instance_list_id
+				hackers_id
 			)
 		);
 
@@ -173,19 +169,18 @@ public:
 	}
 
 	static int UpdateOne(
-		InstanceList instance_list_entry
+		Hackers hackers_entry
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(instance_list_entry.zone));
-		update_values.push_back(columns[2] + " = " + std::to_string(instance_list_entry.version));
-		update_values.push_back(columns[3] + " = " + std::to_string(instance_list_entry.is_global));
-		update_values.push_back(columns[4] + " = " + std::to_string(instance_list_entry.start_time));
-		update_values.push_back(columns[5] + " = " + std::to_string(instance_list_entry.duration));
-		update_values.push_back(columns[6] + " = " + std::to_string(instance_list_entry.never_expires));
+		update_values.push_back(columns[1] + " = '" + EscapeString(hackers_entry.account) + "'");
+		update_values.push_back(columns[2] + " = '" + EscapeString(hackers_entry.name) + "'");
+		update_values.push_back(columns[3] + " = '" + EscapeString(hackers_entry.hacked) + "'");
+		update_values.push_back(columns[4] + " = '" + EscapeString(hackers_entry.zone) + "'");
+		update_values.push_back(columns[5] + " = '" + EscapeString(hackers_entry.date) + "'");
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -193,25 +188,24 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				instance_list_entry.id
+				hackers_entry.id
 			)
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static InstanceList InsertOne(
-		InstanceList instance_list_entry
+	static Hackers InsertOne(
+		Hackers hackers_entry
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(instance_list_entry.zone));
-		insert_values.push_back(std::to_string(instance_list_entry.version));
-		insert_values.push_back(std::to_string(instance_list_entry.is_global));
-		insert_values.push_back(std::to_string(instance_list_entry.start_time));
-		insert_values.push_back(std::to_string(instance_list_entry.duration));
-		insert_values.push_back(std::to_string(instance_list_entry.never_expires));
+		insert_values.push_back("'" + EscapeString(hackers_entry.account) + "'");
+		insert_values.push_back("'" + EscapeString(hackers_entry.name) + "'");
+		insert_values.push_back("'" + EscapeString(hackers_entry.hacked) + "'");
+		insert_values.push_back("'" + EscapeString(hackers_entry.zone) + "'");
+		insert_values.push_back("'" + EscapeString(hackers_entry.date) + "'");
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -222,30 +216,29 @@ public:
 		);
 
 		if (results.Success()) {
-			instance_list_entry.id = results.LastInsertedID();
-			return instance_list_entry;
+			hackers_entry.id = results.LastInsertedID();
+			return hackers_entry;
 		}
 
-		instance_list_entry = InstanceListRepository::NewEntity();
+		hackers_entry = InstanceListRepository::NewEntity();
 
-		return instance_list_entry;
+		return hackers_entry;
 	}
 
 	static int InsertMany(
-		std::vector<InstanceList> instance_list_entries
+		std::vector<Hackers> hackers_entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &instance_list_entry: instance_list_entries) {
+		for (auto &hackers_entry: hackers_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(instance_list_entry.zone));
-			insert_values.push_back(std::to_string(instance_list_entry.version));
-			insert_values.push_back(std::to_string(instance_list_entry.is_global));
-			insert_values.push_back(std::to_string(instance_list_entry.start_time));
-			insert_values.push_back(std::to_string(instance_list_entry.duration));
-			insert_values.push_back(std::to_string(instance_list_entry.never_expires));
+			insert_values.push_back("'" + EscapeString(hackers_entry.account) + "'");
+			insert_values.push_back("'" + EscapeString(hackers_entry.name) + "'");
+			insert_values.push_back("'" + EscapeString(hackers_entry.hacked) + "'");
+			insert_values.push_back("'" + EscapeString(hackers_entry.zone) + "'");
+			insert_values.push_back("'" + EscapeString(hackers_entry.date) + "'");
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -263,9 +256,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<InstanceList> All()
+	static std::vector<Hackers> All()
 	{
-		std::vector<InstanceList> all_entries;
+		std::vector<Hackers> all_entries;
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -277,15 +270,14 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			InstanceList entry{};
+			Hackers entry{};
 
-			entry.id            = atoi(row[0]);
-			entry.zone          = atoi(row[1]);
-			entry.version       = atoi(row[2]);
-			entry.is_global     = atoi(row[3]);
-			entry.start_time    = atoi(row[4]);
-			entry.duration      = atoi(row[5]);
-			entry.never_expires = atoi(row[6]);
+			entry.id      = atoi(row[0]);
+			entry.account = row[1];
+			entry.name    = row[2];
+			entry.hacked  = row[3];
+			entry.zone    = row[4];
+			entry.date    = row[5];
 
 			all_entries.push_back(entry);
 		}
@@ -295,4 +287,4 @@ public:
 
 };
 
-#endif //EQEMU_INSTANCE_LIST_REPOSITORY_H
+#endif //EQEMU_HACKERS_REPOSITORY_H

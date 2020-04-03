@@ -18,22 +18,17 @@
  *
  */
 
-#ifndef EQEMU_INSTANCE_LIST_REPOSITORY_H
-#define EQEMU_INSTANCE_LIST_REPOSITORY_H
+#ifndef EQEMU_CHARACTER_INSPECT_MESSAGES_REPOSITORY_H
+#define EQEMU_CHARACTER_INSPECT_MESSAGES_REPOSITORY_H
 
 #include "../database.h"
 #include "../string_util.h"
 
-class InstanceListRepository {
+class CharacterInspectMessagesRepository {
 public:
-	struct InstanceList {
-		int id;
-		int zone;
-		int version;
-		int is_global;
-		int start_time;
-		int duration;
-		int never_expires;
+	struct CharacterInspectMessages {
+		int         id;
+		std::string inspect_message;
 	};
 
 	static std::string PrimaryKey()
@@ -45,12 +40,7 @@ public:
 	{
 		return {
 			"id",
-			"zone",
-			"version",
-			"is_global",
-			"start_time",
-			"duration",
-			"never_expires",
+			"inspect_message",
 		};
 	}
 
@@ -76,7 +66,7 @@ public:
 
 	static std::string TableName()
 	{
-		return std::string("instance_list");
+		return std::string("character_inspect_messages");
 	}
 
 	static std::string BaseSelect()
@@ -97,58 +87,48 @@ public:
 		);
 	}
 
-	static InstanceList NewEntity()
+	static CharacterInspectMessages NewEntity()
 	{
-		InstanceList entry{};
+		CharacterInspectMessages entry{};
 
-		entry.id            = 0;
-		entry.zone          = 0;
-		entry.version       = 0;
-		entry.is_global     = 0;
-		entry.start_time    = 0;
-		entry.duration      = 0;
-		entry.never_expires = 0;
+		entry.id              = 0;
+		entry.inspect_message = "";
 
 		return entry;
 	}
 
-	static InstanceList GetInstanceListEntry(
-		const std::vector<InstanceList> &instance_lists,
-		int instance_list_id
+	static CharacterInspectMessages GetCharacterInspectMessagesEntry(
+		const std::vector<CharacterInspectMessages> &character_inspect_messagess,
+		int character_inspect_messages_id
 	)
 	{
-		for (auto &instance_list : instance_lists) {
-			if (instance_list.id == instance_list_id) {
-				return instance_list;
+		for (auto &character_inspect_messages : character_inspect_messagess) {
+			if (character_inspect_messages.id == character_inspect_messages_id) {
+				return character_inspect_messages;
 			}
 		}
 
 		return NewEntity();
 	}
 
-	static InstanceList FindOne(
-		int instance_list_id
+	static CharacterInspectMessages FindOne(
+		int character_inspect_messages_id
 	)
 	{
 		auto results = database.QueryDatabase(
 			fmt::format(
 				"{} WHERE id = {} LIMIT 1",
 				BaseSelect(),
-				instance_list_id
+				character_inspect_messages_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			InstanceList entry{};
+			CharacterInspectMessages entry{};
 
-			entry.id            = atoi(row[0]);
-			entry.zone          = atoi(row[1]);
-			entry.version       = atoi(row[2]);
-			entry.is_global     = atoi(row[3]);
-			entry.start_time    = atoi(row[4]);
-			entry.duration      = atoi(row[5]);
-			entry.never_expires = atoi(row[6]);
+			entry.id              = atoi(row[0]);
+			entry.inspect_message = row[1];
 
 			return entry;
 		}
@@ -157,7 +137,7 @@ public:
 	}
 
 	static int DeleteOne(
-		int instance_list_id
+		int character_inspect_messages_id
 	)
 	{
 		auto results = database.QueryDatabase(
@@ -165,7 +145,7 @@ public:
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
 				PrimaryKey(),
-				instance_list_id
+				character_inspect_messages_id
 			)
 		);
 
@@ -173,19 +153,16 @@ public:
 	}
 
 	static int UpdateOne(
-		InstanceList instance_list_entry
+		CharacterInspectMessages character_inspect_messages_entry
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(instance_list_entry.zone));
-		update_values.push_back(columns[2] + " = " + std::to_string(instance_list_entry.version));
-		update_values.push_back(columns[3] + " = " + std::to_string(instance_list_entry.is_global));
-		update_values.push_back(columns[4] + " = " + std::to_string(instance_list_entry.start_time));
-		update_values.push_back(columns[5] + " = " + std::to_string(instance_list_entry.duration));
-		update_values.push_back(columns[6] + " = " + std::to_string(instance_list_entry.never_expires));
+		update_values.push_back(
+			columns[1] + " = '" + EscapeString(character_inspect_messages_entry.inspect_message) + "'"
+		);
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -193,25 +170,20 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				instance_list_entry.id
+				character_inspect_messages_entry.id
 			)
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static InstanceList InsertOne(
-		InstanceList instance_list_entry
+	static CharacterInspectMessages InsertOne(
+		CharacterInspectMessages character_inspect_messages_entry
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(instance_list_entry.zone));
-		insert_values.push_back(std::to_string(instance_list_entry.version));
-		insert_values.push_back(std::to_string(instance_list_entry.is_global));
-		insert_values.push_back(std::to_string(instance_list_entry.start_time));
-		insert_values.push_back(std::to_string(instance_list_entry.duration));
-		insert_values.push_back(std::to_string(instance_list_entry.never_expires));
+		insert_values.push_back("'" + EscapeString(character_inspect_messages_entry.inspect_message) + "'");
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -222,30 +194,25 @@ public:
 		);
 
 		if (results.Success()) {
-			instance_list_entry.id = results.LastInsertedID();
-			return instance_list_entry;
+			character_inspect_messages_entry.id = results.LastInsertedID();
+			return character_inspect_messages_entry;
 		}
 
-		instance_list_entry = InstanceListRepository::NewEntity();
+		character_inspect_messages_entry = InstanceListRepository::NewEntity();
 
-		return instance_list_entry;
+		return character_inspect_messages_entry;
 	}
 
 	static int InsertMany(
-		std::vector<InstanceList> instance_list_entries
+		std::vector<CharacterInspectMessages> character_inspect_messages_entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &instance_list_entry: instance_list_entries) {
+		for (auto &character_inspect_messages_entry: character_inspect_messages_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(instance_list_entry.zone));
-			insert_values.push_back(std::to_string(instance_list_entry.version));
-			insert_values.push_back(std::to_string(instance_list_entry.is_global));
-			insert_values.push_back(std::to_string(instance_list_entry.start_time));
-			insert_values.push_back(std::to_string(instance_list_entry.duration));
-			insert_values.push_back(std::to_string(instance_list_entry.never_expires));
+			insert_values.push_back("'" + EscapeString(character_inspect_messages_entry.inspect_message) + "'");
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -263,9 +230,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<InstanceList> All()
+	static std::vector<CharacterInspectMessages> All()
 	{
-		std::vector<InstanceList> all_entries;
+		std::vector<CharacterInspectMessages> all_entries;
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -277,15 +244,10 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			InstanceList entry{};
+			CharacterInspectMessages entry{};
 
-			entry.id            = atoi(row[0]);
-			entry.zone          = atoi(row[1]);
-			entry.version       = atoi(row[2]);
-			entry.is_global     = atoi(row[3]);
-			entry.start_time    = atoi(row[4]);
-			entry.duration      = atoi(row[5]);
-			entry.never_expires = atoi(row[6]);
+			entry.id              = atoi(row[0]);
+			entry.inspect_message = row[1];
 
 			all_entries.push_back(entry);
 		}
@@ -295,4 +257,4 @@ public:
 
 };
 
-#endif //EQEMU_INSTANCE_LIST_REPOSITORY_H
+#endif //EQEMU_CHARACTER_INSPECT_MESSAGES_REPOSITORY_H

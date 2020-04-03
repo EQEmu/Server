@@ -18,22 +18,21 @@
  *
  */
 
-#ifndef EQEMU_INSTANCE_LIST_REPOSITORY_H
-#define EQEMU_INSTANCE_LIST_REPOSITORY_H
+#ifndef EQEMU_LOGIN_API_TOKENS_REPOSITORY_H
+#define EQEMU_LOGIN_API_TOKENS_REPOSITORY_H
 
 #include "../database.h"
 #include "../string_util.h"
 
-class InstanceListRepository {
+class LoginApiTokensRepository {
 public:
-	struct InstanceList {
-		int id;
-		int zone;
-		int version;
-		int is_global;
-		int start_time;
-		int duration;
-		int never_expires;
+	struct LoginApiTokens {
+		int         id;
+		std::string token;
+		int         can_write;
+		int         can_read;
+		std::string created_at;
+		std::string updated_at;
 	};
 
 	static std::string PrimaryKey()
@@ -45,12 +44,11 @@ public:
 	{
 		return {
 			"id",
-			"zone",
-			"version",
-			"is_global",
-			"start_time",
-			"duration",
-			"never_expires",
+			"token",
+			"can_write",
+			"can_read",
+			"created_at",
+			"updated_at",
 		};
 	}
 
@@ -76,7 +74,7 @@ public:
 
 	static std::string TableName()
 	{
-		return std::string("instance_list");
+		return std::string("login_api_tokens");
 	}
 
 	static std::string BaseSelect()
@@ -97,58 +95,56 @@ public:
 		);
 	}
 
-	static InstanceList NewEntity()
+	static LoginApiTokens NewEntity()
 	{
-		InstanceList entry{};
+		LoginApiTokens entry{};
 
-		entry.id            = 0;
-		entry.zone          = 0;
-		entry.version       = 0;
-		entry.is_global     = 0;
-		entry.start_time    = 0;
-		entry.duration      = 0;
-		entry.never_expires = 0;
+		entry.id         = 0;
+		entry.token      = 0;
+		entry.can_write  = 0;
+		entry.can_read   = 0;
+		entry.created_at = 0;
+		entry.updated_at = current_timestamp();
 
 		return entry;
 	}
 
-	static InstanceList GetInstanceListEntry(
-		const std::vector<InstanceList> &instance_lists,
-		int instance_list_id
+	static LoginApiTokens GetLoginApiTokensEntry(
+		const std::vector<LoginApiTokens> &login_api_tokenss,
+		int login_api_tokens_id
 	)
 	{
-		for (auto &instance_list : instance_lists) {
-			if (instance_list.id == instance_list_id) {
-				return instance_list;
+		for (auto &login_api_tokens : login_api_tokenss) {
+			if (login_api_tokens.id == login_api_tokens_id) {
+				return login_api_tokens;
 			}
 		}
 
 		return NewEntity();
 	}
 
-	static InstanceList FindOne(
-		int instance_list_id
+	static LoginApiTokens FindOne(
+		int login_api_tokens_id
 	)
 	{
 		auto results = database.QueryDatabase(
 			fmt::format(
 				"{} WHERE id = {} LIMIT 1",
 				BaseSelect(),
-				instance_list_id
+				login_api_tokens_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			InstanceList entry{};
+			LoginApiTokens entry{};
 
-			entry.id            = atoi(row[0]);
-			entry.zone          = atoi(row[1]);
-			entry.version       = atoi(row[2]);
-			entry.is_global     = atoi(row[3]);
-			entry.start_time    = atoi(row[4]);
-			entry.duration      = atoi(row[5]);
-			entry.never_expires = atoi(row[6]);
+			entry.id         = atoi(row[0]);
+			entry.token      = row[1];
+			entry.can_write  = atoi(row[2]);
+			entry.can_read   = atoi(row[3]);
+			entry.created_at = row[4];
+			entry.updated_at = row[5];
 
 			return entry;
 		}
@@ -157,7 +153,7 @@ public:
 	}
 
 	static int DeleteOne(
-		int instance_list_id
+		int login_api_tokens_id
 	)
 	{
 		auto results = database.QueryDatabase(
@@ -165,7 +161,7 @@ public:
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
 				PrimaryKey(),
-				instance_list_id
+				login_api_tokens_id
 			)
 		);
 
@@ -173,19 +169,18 @@ public:
 	}
 
 	static int UpdateOne(
-		InstanceList instance_list_entry
+		LoginApiTokens login_api_tokens_entry
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(instance_list_entry.zone));
-		update_values.push_back(columns[2] + " = " + std::to_string(instance_list_entry.version));
-		update_values.push_back(columns[3] + " = " + std::to_string(instance_list_entry.is_global));
-		update_values.push_back(columns[4] + " = " + std::to_string(instance_list_entry.start_time));
-		update_values.push_back(columns[5] + " = " + std::to_string(instance_list_entry.duration));
-		update_values.push_back(columns[6] + " = " + std::to_string(instance_list_entry.never_expires));
+		update_values.push_back(columns[1] + " = '" + EscapeString(login_api_tokens_entry.token) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(login_api_tokens_entry.can_write));
+		update_values.push_back(columns[3] + " = " + std::to_string(login_api_tokens_entry.can_read));
+		update_values.push_back(columns[4] + " = '" + EscapeString(login_api_tokens_entry.created_at) + "'");
+		update_values.push_back(columns[5] + " = '" + EscapeString(login_api_tokens_entry.updated_at) + "'");
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -193,25 +188,24 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				instance_list_entry.id
+				login_api_tokens_entry.id
 			)
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static InstanceList InsertOne(
-		InstanceList instance_list_entry
+	static LoginApiTokens InsertOne(
+		LoginApiTokens login_api_tokens_entry
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(instance_list_entry.zone));
-		insert_values.push_back(std::to_string(instance_list_entry.version));
-		insert_values.push_back(std::to_string(instance_list_entry.is_global));
-		insert_values.push_back(std::to_string(instance_list_entry.start_time));
-		insert_values.push_back(std::to_string(instance_list_entry.duration));
-		insert_values.push_back(std::to_string(instance_list_entry.never_expires));
+		insert_values.push_back("'" + EscapeString(login_api_tokens_entry.token) + "'");
+		insert_values.push_back(std::to_string(login_api_tokens_entry.can_write));
+		insert_values.push_back(std::to_string(login_api_tokens_entry.can_read));
+		insert_values.push_back("'" + EscapeString(login_api_tokens_entry.created_at) + "'");
+		insert_values.push_back("'" + EscapeString(login_api_tokens_entry.updated_at) + "'");
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -222,30 +216,29 @@ public:
 		);
 
 		if (results.Success()) {
-			instance_list_entry.id = results.LastInsertedID();
-			return instance_list_entry;
+			login_api_tokens_entry.id = results.LastInsertedID();
+			return login_api_tokens_entry;
 		}
 
-		instance_list_entry = InstanceListRepository::NewEntity();
+		login_api_tokens_entry = InstanceListRepository::NewEntity();
 
-		return instance_list_entry;
+		return login_api_tokens_entry;
 	}
 
 	static int InsertMany(
-		std::vector<InstanceList> instance_list_entries
+		std::vector<LoginApiTokens> login_api_tokens_entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &instance_list_entry: instance_list_entries) {
+		for (auto &login_api_tokens_entry: login_api_tokens_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(instance_list_entry.zone));
-			insert_values.push_back(std::to_string(instance_list_entry.version));
-			insert_values.push_back(std::to_string(instance_list_entry.is_global));
-			insert_values.push_back(std::to_string(instance_list_entry.start_time));
-			insert_values.push_back(std::to_string(instance_list_entry.duration));
-			insert_values.push_back(std::to_string(instance_list_entry.never_expires));
+			insert_values.push_back("'" + EscapeString(login_api_tokens_entry.token) + "'");
+			insert_values.push_back(std::to_string(login_api_tokens_entry.can_write));
+			insert_values.push_back(std::to_string(login_api_tokens_entry.can_read));
+			insert_values.push_back("'" + EscapeString(login_api_tokens_entry.created_at) + "'");
+			insert_values.push_back("'" + EscapeString(login_api_tokens_entry.updated_at) + "'");
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -263,9 +256,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<InstanceList> All()
+	static std::vector<LoginApiTokens> All()
 	{
-		std::vector<InstanceList> all_entries;
+		std::vector<LoginApiTokens> all_entries;
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -277,15 +270,14 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			InstanceList entry{};
+			LoginApiTokens entry{};
 
-			entry.id            = atoi(row[0]);
-			entry.zone          = atoi(row[1]);
-			entry.version       = atoi(row[2]);
-			entry.is_global     = atoi(row[3]);
-			entry.start_time    = atoi(row[4]);
-			entry.duration      = atoi(row[5]);
-			entry.never_expires = atoi(row[6]);
+			entry.id         = atoi(row[0]);
+			entry.token      = row[1];
+			entry.can_write  = atoi(row[2]);
+			entry.can_read   = atoi(row[3]);
+			entry.created_at = row[4];
+			entry.updated_at = row[5];
 
 			all_entries.push_back(entry);
 		}
@@ -295,4 +287,4 @@ public:
 
 };
 
-#endif //EQEMU_INSTANCE_LIST_REPOSITORY_H
+#endif //EQEMU_LOGIN_API_TOKENS_REPOSITORY_H

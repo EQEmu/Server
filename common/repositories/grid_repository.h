@@ -103,7 +103,7 @@ public:
 	}
 
 	static Grid GetGrid(
-		const std::vector<Grid>& grids,
+		const std::vector<Grid> &grids,
 		int grid_id
 	)
 	{

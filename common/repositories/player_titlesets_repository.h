@@ -18,22 +18,18 @@
  *
  */
 
-#ifndef EQEMU_INSTANCE_LIST_REPOSITORY_H
-#define EQEMU_INSTANCE_LIST_REPOSITORY_H
+#ifndef EQEMU_PLAYER_TITLESETS_REPOSITORY_H
+#define EQEMU_PLAYER_TITLESETS_REPOSITORY_H
 
 #include "../database.h"
 #include "../string_util.h"
 
-class InstanceListRepository {
+class PlayerTitlesetsRepository {
 public:
-	struct InstanceList {
+	struct PlayerTitlesets {
 		int id;
-		int zone;
-		int version;
-		int is_global;
-		int start_time;
-		int duration;
-		int never_expires;
+		int char_id;
+		int title_set;
 	};
 
 	static std::string PrimaryKey()
@@ -45,12 +41,8 @@ public:
 	{
 		return {
 			"id",
-			"zone",
-			"version",
-			"is_global",
-			"start_time",
-			"duration",
-			"never_expires",
+			"char_id",
+			"title_set",
 		};
 	}
 
@@ -76,7 +68,7 @@ public:
 
 	static std::string TableName()
 	{
-		return std::string("instance_list");
+		return std::string("player_titlesets");
 	}
 
 	static std::string BaseSelect()
@@ -97,58 +89,50 @@ public:
 		);
 	}
 
-	static InstanceList NewEntity()
+	static PlayerTitlesets NewEntity()
 	{
-		InstanceList entry{};
+		PlayerTitlesets entry{};
 
-		entry.id            = 0;
-		entry.zone          = 0;
-		entry.version       = 0;
-		entry.is_global     = 0;
-		entry.start_time    = 0;
-		entry.duration      = 0;
-		entry.never_expires = 0;
+		entry.id        = 0;
+		entry.char_id   = 0;
+		entry.title_set = 0;
 
 		return entry;
 	}
 
-	static InstanceList GetInstanceListEntry(
-		const std::vector<InstanceList> &instance_lists,
-		int instance_list_id
+	static PlayerTitlesets GetPlayerTitlesetsEntry(
+		const std::vector<PlayerTitlesets> &player_titlesetss,
+		int player_titlesets_id
 	)
 	{
-		for (auto &instance_list : instance_lists) {
-			if (instance_list.id == instance_list_id) {
-				return instance_list;
+		for (auto &player_titlesets : player_titlesetss) {
+			if (player_titlesets.id == player_titlesets_id) {
+				return player_titlesets;
 			}
 		}
 
 		return NewEntity();
 	}
 
-	static InstanceList FindOne(
-		int instance_list_id
+	static PlayerTitlesets FindOne(
+		int player_titlesets_id
 	)
 	{
 		auto results = database.QueryDatabase(
 			fmt::format(
 				"{} WHERE id = {} LIMIT 1",
 				BaseSelect(),
-				instance_list_id
+				player_titlesets_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			InstanceList entry{};
+			PlayerTitlesets entry{};
 
-			entry.id            = atoi(row[0]);
-			entry.zone          = atoi(row[1]);
-			entry.version       = atoi(row[2]);
-			entry.is_global     = atoi(row[3]);
-			entry.start_time    = atoi(row[4]);
-			entry.duration      = atoi(row[5]);
-			entry.never_expires = atoi(row[6]);
+			entry.id        = atoi(row[0]);
+			entry.char_id   = atoi(row[1]);
+			entry.title_set = atoi(row[2]);
 
 			return entry;
 		}
@@ -157,7 +141,7 @@ public:
 	}
 
 	static int DeleteOne(
-		int instance_list_id
+		int player_titlesets_id
 	)
 	{
 		auto results = database.QueryDatabase(
@@ -165,7 +149,7 @@ public:
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
 				PrimaryKey(),
-				instance_list_id
+				player_titlesets_id
 			)
 		);
 
@@ -173,19 +157,15 @@ public:
 	}
 
 	static int UpdateOne(
-		InstanceList instance_list_entry
+		PlayerTitlesets player_titlesets_entry
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(instance_list_entry.zone));
-		update_values.push_back(columns[2] + " = " + std::to_string(instance_list_entry.version));
-		update_values.push_back(columns[3] + " = " + std::to_string(instance_list_entry.is_global));
-		update_values.push_back(columns[4] + " = " + std::to_string(instance_list_entry.start_time));
-		update_values.push_back(columns[5] + " = " + std::to_string(instance_list_entry.duration));
-		update_values.push_back(columns[6] + " = " + std::to_string(instance_list_entry.never_expires));
+		update_values.push_back(columns[1] + " = " + std::to_string(player_titlesets_entry.char_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(player_titlesets_entry.title_set));
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -193,25 +173,21 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				instance_list_entry.id
+				player_titlesets_entry.id
 			)
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static InstanceList InsertOne(
-		InstanceList instance_list_entry
+	static PlayerTitlesets InsertOne(
+		PlayerTitlesets player_titlesets_entry
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(instance_list_entry.zone));
-		insert_values.push_back(std::to_string(instance_list_entry.version));
-		insert_values.push_back(std::to_string(instance_list_entry.is_global));
-		insert_values.push_back(std::to_string(instance_list_entry.start_time));
-		insert_values.push_back(std::to_string(instance_list_entry.duration));
-		insert_values.push_back(std::to_string(instance_list_entry.never_expires));
+		insert_values.push_back(std::to_string(player_titlesets_entry.char_id));
+		insert_values.push_back(std::to_string(player_titlesets_entry.title_set));
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -222,30 +198,26 @@ public:
 		);
 
 		if (results.Success()) {
-			instance_list_entry.id = results.LastInsertedID();
-			return instance_list_entry;
+			player_titlesets_entry.id = results.LastInsertedID();
+			return player_titlesets_entry;
 		}
 
-		instance_list_entry = InstanceListRepository::NewEntity();
+		player_titlesets_entry = InstanceListRepository::NewEntity();
 
-		return instance_list_entry;
+		return player_titlesets_entry;
 	}
 
 	static int InsertMany(
-		std::vector<InstanceList> instance_list_entries
+		std::vector<PlayerTitlesets> player_titlesets_entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &instance_list_entry: instance_list_entries) {
+		for (auto &player_titlesets_entry: player_titlesets_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(instance_list_entry.zone));
-			insert_values.push_back(std::to_string(instance_list_entry.version));
-			insert_values.push_back(std::to_string(instance_list_entry.is_global));
-			insert_values.push_back(std::to_string(instance_list_entry.start_time));
-			insert_values.push_back(std::to_string(instance_list_entry.duration));
-			insert_values.push_back(std::to_string(instance_list_entry.never_expires));
+			insert_values.push_back(std::to_string(player_titlesets_entry.char_id));
+			insert_values.push_back(std::to_string(player_titlesets_entry.title_set));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -263,9 +235,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<InstanceList> All()
+	static std::vector<PlayerTitlesets> All()
 	{
-		std::vector<InstanceList> all_entries;
+		std::vector<PlayerTitlesets> all_entries;
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -277,15 +249,11 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			InstanceList entry{};
+			PlayerTitlesets entry{};
 
-			entry.id            = atoi(row[0]);
-			entry.zone          = atoi(row[1]);
-			entry.version       = atoi(row[2]);
-			entry.is_global     = atoi(row[3]);
-			entry.start_time    = atoi(row[4]);
-			entry.duration      = atoi(row[5]);
-			entry.never_expires = atoi(row[6]);
+			entry.id        = atoi(row[0]);
+			entry.char_id   = atoi(row[1]);
+			entry.title_set = atoi(row[2]);
 
 			all_entries.push_back(entry);
 		}
@@ -295,4 +263,4 @@ public:
 
 };
 
-#endif //EQEMU_INSTANCE_LIST_REPOSITORY_H
+#endif //EQEMU_PLAYER_TITLESETS_REPOSITORY_H

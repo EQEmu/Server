@@ -18,39 +18,31 @@
  *
  */
 
-#ifndef EQEMU_INSTANCE_LIST_REPOSITORY_H
-#define EQEMU_INSTANCE_LIST_REPOSITORY_H
+#ifndef EQEMU_INVENTORY_VERSIONS_REPOSITORY_H
+#define EQEMU_INVENTORY_VERSIONS_REPOSITORY_H
 
 #include "../database.h"
 #include "../string_util.h"
 
-class InstanceListRepository {
+class InventoryVersionsRepository {
 public:
-	struct InstanceList {
-		int id;
-		int zone;
+	struct InventoryVersions {
 		int version;
-		int is_global;
-		int start_time;
-		int duration;
-		int never_expires;
+		int step;
+		int bot_step;
 	};
 
 	static std::string PrimaryKey()
 	{
-		return std::string("id");
+		return std::string("");
 	}
 
 	static std::vector<std::string> Columns()
 	{
 		return {
-			"id",
-			"zone",
 			"version",
-			"is_global",
-			"start_time",
-			"duration",
-			"never_expires",
+			"step",
+			"bot_step",
 		};
 	}
 
@@ -76,7 +68,7 @@ public:
 
 	static std::string TableName()
 	{
-		return std::string("instance_list");
+		return std::string("inventory_versions");
 	}
 
 	static std::string BaseSelect()
@@ -97,58 +89,50 @@ public:
 		);
 	}
 
-	static InstanceList NewEntity()
+	static InventoryVersions NewEntity()
 	{
-		InstanceList entry{};
+		InventoryVersions entry{};
 
-		entry.id            = 0;
-		entry.zone          = 0;
-		entry.version       = 0;
-		entry.is_global     = 0;
-		entry.start_time    = 0;
-		entry.duration      = 0;
-		entry.never_expires = 0;
+		entry.version  = 0;
+		entry.step     = 0;
+		entry.bot_step = 0;
 
 		return entry;
 	}
 
-	static InstanceList GetInstanceListEntry(
-		const std::vector<InstanceList> &instance_lists,
-		int instance_list_id
+	static InventoryVersions GetInventoryVersionsEntry(
+		const std::vector<InventoryVersions> &inventory_versionss,
+		int inventory_versions_id
 	)
 	{
-		for (auto &instance_list : instance_lists) {
-			if (instance_list.id == instance_list_id) {
-				return instance_list;
+		for (auto &inventory_versions : inventory_versionss) {
+			if (inventory_versions. == inventory_versions_id) {
+				return inventory_versions;
 			}
 		}
 
 		return NewEntity();
 	}
 
-	static InstanceList FindOne(
-		int instance_list_id
+	static InventoryVersions FindOne(
+		int inventory_versions_id
 	)
 	{
 		auto results = database.QueryDatabase(
 			fmt::format(
 				"{} WHERE id = {} LIMIT 1",
 				BaseSelect(),
-				instance_list_id
+				inventory_versions_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			InstanceList entry{};
+			InventoryVersions entry{};
 
-			entry.id            = atoi(row[0]);
-			entry.zone          = atoi(row[1]);
-			entry.version       = atoi(row[2]);
-			entry.is_global     = atoi(row[3]);
-			entry.start_time    = atoi(row[4]);
-			entry.duration      = atoi(row[5]);
-			entry.never_expires = atoi(row[6]);
+			entry.version  = atoi(row[0]);
+			entry.step     = atoi(row[1]);
+			entry.bot_step = atoi(row[2]);
 
 			return entry;
 		}
@@ -157,7 +141,7 @@ public:
 	}
 
 	static int DeleteOne(
-		int instance_list_id
+		int inventory_versions_id
 	)
 	{
 		auto results = database.QueryDatabase(
@@ -165,7 +149,7 @@ public:
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
 				PrimaryKey(),
-				instance_list_id
+				inventory_versions_id
 			)
 		);
 
@@ -173,19 +157,16 @@ public:
 	}
 
 	static int UpdateOne(
-		InstanceList instance_list_entry
+		InventoryVersions inventory_versions_entry
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(instance_list_entry.zone));
-		update_values.push_back(columns[2] + " = " + std::to_string(instance_list_entry.version));
-		update_values.push_back(columns[3] + " = " + std::to_string(instance_list_entry.is_global));
-		update_values.push_back(columns[4] + " = " + std::to_string(instance_list_entry.start_time));
-		update_values.push_back(columns[5] + " = " + std::to_string(instance_list_entry.duration));
-		update_values.push_back(columns[6] + " = " + std::to_string(instance_list_entry.never_expires));
+		update_values.push_back(columns[0] + " = " + std::to_string(inventory_versions_entry.version));
+		update_values.push_back(columns[1] + " = " + std::to_string(inventory_versions_entry.step));
+		update_values.push_back(columns[2] + " = " + std::to_string(inventory_versions_entry.bot_step));
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -193,25 +174,22 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				instance_list_entry.id
+				inventory_versions_entry.
 			)
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static InstanceList InsertOne(
-		InstanceList instance_list_entry
+	static InventoryVersions InsertOne(
+		InventoryVersions inventory_versions_entry
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(instance_list_entry.zone));
-		insert_values.push_back(std::to_string(instance_list_entry.version));
-		insert_values.push_back(std::to_string(instance_list_entry.is_global));
-		insert_values.push_back(std::to_string(instance_list_entry.start_time));
-		insert_values.push_back(std::to_string(instance_list_entry.duration));
-		insert_values.push_back(std::to_string(instance_list_entry.never_expires));
+		insert_values.push_back(std::to_string(inventory_versions_entry.version));
+		insert_values.push_back(std::to_string(inventory_versions_entry.step));
+		insert_values.push_back(std::to_string(inventory_versions_entry.bot_step));
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -222,30 +200,27 @@ public:
 		);
 
 		if (results.Success()) {
-			instance_list_entry.id = results.LastInsertedID();
-			return instance_list_entry;
+			inventory_versions_entry.id = results.LastInsertedID();
+			return inventory_versions_entry;
 		}
 
-		instance_list_entry = InstanceListRepository::NewEntity();
+		inventory_versions_entry = InstanceListRepository::NewEntity();
 
-		return instance_list_entry;
+		return inventory_versions_entry;
 	}
 
 	static int InsertMany(
-		std::vector<InstanceList> instance_list_entries
+		std::vector<InventoryVersions> inventory_versions_entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &instance_list_entry: instance_list_entries) {
+		for (auto &inventory_versions_entry: inventory_versions_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(instance_list_entry.zone));
-			insert_values.push_back(std::to_string(instance_list_entry.version));
-			insert_values.push_back(std::to_string(instance_list_entry.is_global));
-			insert_values.push_back(std::to_string(instance_list_entry.start_time));
-			insert_values.push_back(std::to_string(instance_list_entry.duration));
-			insert_values.push_back(std::to_string(instance_list_entry.never_expires));
+			insert_values.push_back(std::to_string(inventory_versions_entry.version));
+			insert_values.push_back(std::to_string(inventory_versions_entry.step));
+			insert_values.push_back(std::to_string(inventory_versions_entry.bot_step));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -263,9 +238,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<InstanceList> All()
+	static std::vector<InventoryVersions> All()
 	{
-		std::vector<InstanceList> all_entries;
+		std::vector<InventoryVersions> all_entries;
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -277,15 +252,11 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			InstanceList entry{};
+			InventoryVersions entry{};
 
-			entry.id            = atoi(row[0]);
-			entry.zone          = atoi(row[1]);
-			entry.version       = atoi(row[2]);
-			entry.is_global     = atoi(row[3]);
-			entry.start_time    = atoi(row[4]);
-			entry.duration      = atoi(row[5]);
-			entry.never_expires = atoi(row[6]);
+			entry.version  = atoi(row[0]);
+			entry.step     = atoi(row[1]);
+			entry.bot_step = atoi(row[2]);
 
 			all_entries.push_back(entry);
 		}
@@ -295,4 +266,4 @@ public:
 
 };
 
-#endif //EQEMU_INSTANCE_LIST_REPOSITORY_H
+#endif //EQEMU_INVENTORY_VERSIONS_REPOSITORY_H
