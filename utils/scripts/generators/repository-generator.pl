@@ -1,41 +1,62 @@
 #!/usr/bin/perl
 use warnings FATAL => 'all';
+no warnings 'experimental::smartmatch';
+use experimental 'smartmatch';
 
 # Author:       Akkadius
 # @file:        repository-generator.pl
 # @description: Script used to generate database repositories
-# @example      perl ~/code/utils/scripts/generators/repository-generator.pl ~/server/eqemu_config.json
+# @example      perl ~/code/utils/scripts/generators/repository-generator.pl ~/server/
 
 use File::Find;
 use Data::Dumper;
+use DBI;
+use DBD::mysql;
+use JSON;
+my $json = new JSON();
 
 #############################################
 # args
 #############################################
-my $eqemu_config                = $ARGV[0];
+my $server_path                 = $ARGV[0];
+my $config_path                 = $server_path . "/eqemu_config.json";
 my $requested_table_to_generate = $ARGV[1] ? $ARGV[1] : "";
 
-my $i = 0;
-while ($ARGV[$i]) {
-    # print "[$i] [" . $ARGV[$i] . "]\n";
-    $i++;
+#############################################
+# world path
+#############################################
+my $world_path       = $server_path . "/world";
+my $world_path_bin   = $server_path . "/bin/world";
+my $found_world_path = "";
+
+if (-e $world_path) {
+    $found_world_path = $world_path;
+}
+elsif (-e $world_path_bin) {
+    $found_world_path = $world_path_bin;
 }
 
-if (!-e $eqemu_config) {
-    print "Error! Config file [$eqemu_config] not found\n";
+if ($found_world_path eq "") {
+    print "Error! Cannot find world binary!\n";
     exit;
 }
 
 #############################################
+# validate config
+#############################################
+if (!-e $config_path) {
+    print "Error! Config file [$config_path] not found\n";
+    exit;
+}
+
+my $output          = `cd $server_path && $found_world_path database:schema`;
+my $database_schema = $json->decode($output);
+
+#############################################
 # database
 #############################################
-use DBI;
-use DBD::mysql;
-use JSON;
-
-my $json = new JSON();
 my $content;
-open(my $fh, '<', $eqemu_config) or die "cannot open file $eqemu_config"; {
+open(my $fh, '<', $config_path) or die "cannot open file $config_path"; {
     local $/;
     $content = <$fh>;
 }
@@ -77,6 +98,29 @@ if ($requested_table_to_generate eq "all" || !$requested_table_to_generate) {
 my $generated_repository_files = "";
 
 foreach my $table_to_generate (@tables) {
+
+    my $table_found_in_schema = 0;
+
+    my @categories = (
+        "content_tables",
+        "version_tables",
+        "state_tables",
+        "server_tables",
+        "player_tables",
+        "login_tables",
+    );
+
+    foreach my $category (@categories) {
+        if ($table_to_generate ~~ $database_schema->{$category}) {
+            $table_found_in_schema = 1;
+        }
+    }
+
+    if ($table_found_in_schema == 0) {
+        print "Table [$table_to_generate] not found in schema, skipping\n";
+        next;
+    }
+
     my $ex = $connect->prepare(
         "
         SELECT
@@ -241,6 +285,10 @@ foreach my $table_to_generate (@tables) {
     $table_name_camel_case =~ s#(_|^)(.)#\u$2#g;
     my $primary_key         = ($table_primary_key{$table_to_generate} ? $table_primary_key{$table_to_generate} : "");
     my $database_connection = "database";
+
+    if ($table_to_generate ~~ $database_schema->{"content_tables"}) {
+        $database_connection = "content_db";
+    }
 
     chomp($column_names_quoted);
     chomp($table_struct_columns);
