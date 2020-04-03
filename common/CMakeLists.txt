@@ -109,6 +109,16 @@ SET(common_sources
 	util/directory.cpp
 	util/uuid.cpp)
 
+SET(repositories
+	repositories/character_recipe_list_repository.h
+	repositories/criteria/content_filter_criteria.h
+	repositories/grid_repository.h
+	repositories/grid_entries_repository.h
+	repositories/spawngroup_repository.h
+	repositories/tradeskill_recipe_repository.h
+	repositories/instance_list_repository.h
+	)
+
 SET(common_headers
 	any.h
 	base_packet.h
@@ -198,12 +208,6 @@ SET(common_headers
 	queue.h
 	races.h
 	random.h
-	repositories/character_recipe_list_repository.h
-	repositories/criteria/content_filter_criteria.h
-	repositories/grid_repository.h
-	repositories/grid_entries_repository.h
-	repositories/spawngroup_repository.h
-	repositories/tradeskill_recipe_repository.h
 	rdtsc.h
 	rulesys.h
 	ruletypes.h
@@ -388,7 +392,7 @@ SOURCE_GROUP(Util FILES
 
 INCLUDE_DIRECTORIES(Patches SocketLib StackWalker)
 
-ADD_LIBRARY(common ${common_sources} ${common_headers})
+ADD_LIBRARY(common ${common_sources} ${common_headers} ${repositories})
 
 IF(UNIX)
 	SET_SOURCE_FILES_PROPERTIES("SocketLib/Mime.cpp" PROPERTY COMPILE_FLAGS -Wno-unused-result)

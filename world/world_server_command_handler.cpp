@@ -28,6 +28,7 @@
 #include "../common/content/world_content_service.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
 #include "../common/rulesys.h"
+#include "../common/repositories/instance_list_repository.h"
 
 namespace WorldserverCommandHandler {
 
@@ -57,6 +58,7 @@ namespace WorldserverCommandHandler {
 		function_map["database:schema"]             = &WorldserverCommandHandler::DatabaseGetSchema;
 		function_map["database:dump"]               = &WorldserverCommandHandler::DatabaseDump;
 		function_map["test:test"]                   = &WorldserverCommandHandler::TestCommand;
+		function_map["test:repository"]             = &WorldserverCommandHandler::TestRepository;
 
 		EQEmuCommand::HandleMenu(function_map, cmd, argc, argv);
 	}
@@ -309,6 +311,98 @@ namespace WorldserverCommandHandler {
 			content_service.IsTheShardsOfVeliousEnabled() ? "true" : "false",
 			ContentFilterCriteria::apply()
 		);
+	}
+
+	/**
+	 * @param argc
+	 * @param argv
+	 * @param cmd
+	 * @param description
+	 */
+	void TestRepository(int argc, char **argv, argh::parser &cmd, std::string &description)
+	{
+		description = "Test command";
+
+		if (cmd[{"-h", "--help"}]) {
+			return;
+		}
+
+		/**
+		 * Insert one
+		 */
+		auto instance_list_entry = InstanceListRepository::NewEntity();
+
+		instance_list_entry.zone          = 999;
+		instance_list_entry.version       = 1;
+		instance_list_entry.is_global     = 1;
+		instance_list_entry.start_time    = 0;
+		instance_list_entry.duration      = 0;
+		instance_list_entry.never_expires = 1;
+
+		auto instance_list_inserted = InstanceListRepository::InsertOne(instance_list_entry);
+
+		LogInfo("Inserted ID is [{}] zone [{}]", instance_list_inserted.id, instance_list_inserted.zone);
+
+		/**
+		 * Find one
+		 */
+		auto found_instance_list = InstanceListRepository::FindOne(instance_list_inserted.id);
+
+		LogInfo("Found ID is [{}] zone [{}]", found_instance_list.id, found_instance_list.zone);
+
+		/**
+		 * Update one
+		 */
+		LogInfo("Updating instance id [{}] zone [{}]", found_instance_list.id, found_instance_list.zone);
+
+		int update_instance_list_count = InstanceListRepository::UpdateOne(found_instance_list);
+
+		found_instance_list.zone = 777;
+
+		LogInfo(
+			"Updated instance id [{}] zone [{}] affected [{}]",
+			found_instance_list.id,
+			found_instance_list.zone,
+			update_instance_list_count
+		);
+
+
+		/**
+		 * Delete one
+		 */
+		int deleted = InstanceListRepository::DeleteOne(found_instance_list.id) ;
+
+		LogInfo("Deleting one instance [{}] deleted count [{}]", found_instance_list.id, deleted);
+
+		/**
+		 * Insert many
+		 */
+		std::vector<InstanceListRepository::InstanceList> instance_lists;
+
+		auto instance_list_entry_bulk = InstanceListRepository::NewEntity();
+
+		instance_list_entry_bulk.zone          = 999;
+		instance_list_entry_bulk.version       = 1;
+		instance_list_entry_bulk.is_global     = 1;
+		instance_list_entry_bulk.start_time    = 0;
+		instance_list_entry_bulk.duration      = 0;
+		instance_list_entry_bulk.never_expires = 1;
+
+		for (int i = 0; i < 10; i++) {
+			instance_lists.push_back(instance_list_entry_bulk);
+		}
+
+		/**
+		 * Fetch all
+		 */
+		int inserted_count = InstanceListRepository::InsertMany(instance_lists);
+
+		LogInfo("Bulk insertion test, inserted [{}]", inserted_count);
+
+		for (auto &entry: InstanceListRepository::All()) {
+			LogInfo("Iterating through entry id [{}] zone [{}]", entry.id, entry.zone);
+		}
+
 	}
 
 }

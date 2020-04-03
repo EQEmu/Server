@@ -32,6 +32,7 @@ namespace WorldserverCommandHandler {
 	void DatabaseGetSchema(int argc, char **argv, argh::parser &cmd, std::string &description);
 	void DatabaseDump(int argc, char **argv, argh::parser &cmd, std::string &description);
 	void TestCommand(int argc, char **argv, argh::parser &cmd, std::string &description);
+	void TestRepository(int argc, char **argv, argh::parser &cmd, std::string &description);
 };
 
 
