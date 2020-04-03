@@ -113,13 +113,13 @@ public:
 	}
 
 	static InstanceList GetInstanceListEntry(
-		const std::vector<InstanceList> &instance_list,
+		const std::vector<InstanceList> &instance_lists,
 		int instance_list_id
 	)
 	{
-		for (auto &row : instance_list) {
-			if (row.id == instance_list_id) {
-				return row;
+		for (auto &instance_list : instance_lists) {
+			if (instance_list.id == instance_list_id) {
+				return instance_list;
 			}
 		}
 
