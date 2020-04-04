@@ -130,8 +130,8 @@ public:
 		if (results.RowCount() == 1) {
 			Books entry{};
 
-			entry.name     = row[0];
-			entry.txtfile  = row[1];
+			entry.name     = row[0] ? row[0] : "";
+			entry.txtfile  = row[1] ? row[1] : "";
 			entry.language = atoi(row[2]);
 
 			return entry;
@@ -251,8 +251,8 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Books entry{};
 
-			entry.name     = row[0];
-			entry.txtfile  = row[1];
+			entry.name     = row[0] ? row[0] : "";
+			entry.txtfile  = row[1] ? row[1] : "";
 			entry.language = atoi(row[2]);
 
 			all_entries.push_back(entry);
@@ -278,8 +278,8 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Books entry{};
 
-			entry.name     = row[0];
-			entry.txtfile  = row[1];
+			entry.name     = row[0] ? row[0] : "";
+			entry.txtfile  = row[1] ? row[1] : "";
 			entry.language = atoi(row[2]);
 
 			all_entries.push_back(entry);

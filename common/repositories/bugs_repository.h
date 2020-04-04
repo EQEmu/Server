@@ -161,17 +161,17 @@ public:
 			Bugs entry{};
 
 			entry.id     = atoi(row[0]);
-			entry.zone   = row[1];
-			entry.name   = row[2];
-			entry.ui     = row[3];
+			entry.zone   = row[1] ? row[1] : "";
+			entry.name   = row[2] ? row[2] : "";
+			entry.ui     = row[3] ? row[3] : "";
 			entry.x      = atof(row[4]);
 			entry.y      = atof(row[5]);
 			entry.z      = atof(row[6]);
-			entry.type   = row[7];
+			entry.type   = row[7] ? row[7] : "";
 			entry.flag   = atoi(row[8]);
-			entry.target = row[9];
-			entry.bug    = row[10];
-			entry.date   = row[11];
+			entry.target = row[9] ? row[9] : "";
+			entry.bug    = row[10] ? row[10] : "";
+			entry.date   = row[11] ? row[11] : "";
 			entry.status = atoi(row[12]);
 
 			return entry;
@@ -322,17 +322,17 @@ public:
 			Bugs entry{};
 
 			entry.id     = atoi(row[0]);
-			entry.zone   = row[1];
-			entry.name   = row[2];
-			entry.ui     = row[3];
+			entry.zone   = row[1] ? row[1] : "";
+			entry.name   = row[2] ? row[2] : "";
+			entry.ui     = row[3] ? row[3] : "";
 			entry.x      = atof(row[4]);
 			entry.y      = atof(row[5]);
 			entry.z      = atof(row[6]);
-			entry.type   = row[7];
+			entry.type   = row[7] ? row[7] : "";
 			entry.flag   = atoi(row[8]);
-			entry.target = row[9];
-			entry.bug    = row[10];
-			entry.date   = row[11];
+			entry.target = row[9] ? row[9] : "";
+			entry.bug    = row[10] ? row[10] : "";
+			entry.date   = row[11] ? row[11] : "";
 			entry.status = atoi(row[12]);
 
 			all_entries.push_back(entry);
@@ -359,17 +359,17 @@ public:
 			Bugs entry{};
 
 			entry.id     = atoi(row[0]);
-			entry.zone   = row[1];
-			entry.name   = row[2];
-			entry.ui     = row[3];
+			entry.zone   = row[1] ? row[1] : "";
+			entry.name   = row[2] ? row[2] : "";
+			entry.ui     = row[3] ? row[3] : "";
 			entry.x      = atof(row[4]);
 			entry.y      = atof(row[5]);
 			entry.z      = atof(row[6]);
-			entry.type   = row[7];
+			entry.type   = row[7] ? row[7] : "";
 			entry.flag   = atoi(row[8]);
-			entry.target = row[9];
-			entry.bug    = row[10];
-			entry.date   = row[11];
+			entry.target = row[9] ? row[9] : "";
+			entry.bug    = row[10] ? row[10] : "";
+			entry.date   = row[11] ? row[11] : "";
 			entry.status = atoi(row[12]);
 
 			all_entries.push_back(entry);

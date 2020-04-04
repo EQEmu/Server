@@ -159,7 +159,7 @@ public:
 			entry.slot           = atoi(row[2]);
 			entry.spell_id       = atoi(row[3]);
 			entry.caster_level   = atoi(row[4]);
-			entry.castername     = row[5];
+			entry.castername     = row[5] ? row[5] : "";
 			entry.ticsremaining  = atoi(row[6]);
 			entry.counters       = atoi(row[7]);
 			entry.numhits        = atoi(row[8]);
@@ -306,7 +306,7 @@ public:
 			entry.slot           = atoi(row[2]);
 			entry.spell_id       = atoi(row[3]);
 			entry.caster_level   = atoi(row[4]);
-			entry.castername     = row[5];
+			entry.castername     = row[5] ? row[5] : "";
 			entry.ticsremaining  = atoi(row[6]);
 			entry.counters       = atoi(row[7]);
 			entry.numhits        = atoi(row[8]);
@@ -341,7 +341,7 @@ public:
 			entry.slot           = atoi(row[2]);
 			entry.spell_id       = atoi(row[3]);
 			entry.caster_level   = atoi(row[4]);
-			entry.castername     = row[5];
+			entry.castername     = row[5] ? row[5] : "";
 			entry.ticsremaining  = atoi(row[6]);
 			entry.counters       = atoi(row[7]);
 			entry.numhits        = atoi(row[8]);

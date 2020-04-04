@@ -149,13 +149,13 @@ public:
 			GroupLeaders entry{};
 
 			entry.gid            = atoi(row[0]);
-			entry.leadername     = row[1];
-			entry.marknpc        = row[2];
-			entry.leadershipaa   = row[3];
-			entry.maintank       = row[4];
-			entry.assist         = row[5];
-			entry.puller         = row[6];
-			entry.mentoree       = row[7];
+			entry.leadername     = row[1] ? row[1] : "";
+			entry.marknpc        = row[2] ? row[2] : "";
+			entry.leadershipaa   = row[3] ? row[3] : "";
+			entry.maintank       = row[4] ? row[4] : "";
+			entry.assist         = row[5] ? row[5] : "";
+			entry.puller         = row[6] ? row[6] : "";
+			entry.mentoree       = row[7] ? row[7] : "";
 			entry.mentor_percent = atoi(row[8]);
 
 			return entry;
@@ -294,13 +294,13 @@ public:
 			GroupLeaders entry{};
 
 			entry.gid            = atoi(row[0]);
-			entry.leadername     = row[1];
-			entry.marknpc        = row[2];
-			entry.leadershipaa   = row[3];
-			entry.maintank       = row[4];
-			entry.assist         = row[5];
-			entry.puller         = row[6];
-			entry.mentoree       = row[7];
+			entry.leadername     = row[1] ? row[1] : "";
+			entry.marknpc        = row[2] ? row[2] : "";
+			entry.leadershipaa   = row[3] ? row[3] : "";
+			entry.maintank       = row[4] ? row[4] : "";
+			entry.assist         = row[5] ? row[5] : "";
+			entry.puller         = row[6] ? row[6] : "";
+			entry.mentoree       = row[7] ? row[7] : "";
 			entry.mentor_percent = atoi(row[8]);
 
 			all_entries.push_back(entry);
@@ -327,13 +327,13 @@ public:
 			GroupLeaders entry{};
 
 			entry.gid            = atoi(row[0]);
-			entry.leadername     = row[1];
-			entry.marknpc        = row[2];
-			entry.leadershipaa   = row[3];
-			entry.maintank       = row[4];
-			entry.assist         = row[5];
-			entry.puller         = row[6];
-			entry.mentoree       = row[7];
+			entry.leadername     = row[1] ? row[1] : "";
+			entry.marknpc        = row[2] ? row[2] : "";
+			entry.leadershipaa   = row[3] ? row[3] : "";
+			entry.maintank       = row[4] ? row[4] : "";
+			entry.assist         = row[5] ? row[5] : "";
+			entry.puller         = row[6] ? row[6] : "";
+			entry.mentoree       = row[7] ? row[7] : "";
 			entry.mentor_percent = atoi(row[8]);
 
 			all_entries.push_back(entry);

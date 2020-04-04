@@ -136,11 +136,11 @@ public:
 		if (results.RowCount() == 1) {
 			SpawnConditions entry{};
 
-			entry.zone     = row[0];
+			entry.zone     = row[0] ? row[0] : "";
 			entry.id       = atoi(row[1]);
 			entry.value    = atoi(row[2]);
 			entry.onchange = atoi(row[3]);
-			entry.name     = row[4];
+			entry.name     = row[4] ? row[4] : "";
 
 			return entry;
 		}
@@ -262,11 +262,11 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			SpawnConditions entry{};
 
-			entry.zone     = row[0];
+			entry.zone     = row[0] ? row[0] : "";
 			entry.id       = atoi(row[1]);
 			entry.value    = atoi(row[2]);
 			entry.onchange = atoi(row[3]);
-			entry.name     = row[4];
+			entry.name     = row[4] ? row[4] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -291,11 +291,11 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			SpawnConditions entry{};
 
-			entry.zone     = row[0];
+			entry.zone     = row[0] ? row[0] : "";
 			entry.id       = atoi(row[1]);
 			entry.value    = atoi(row[2]);
 			entry.onchange = atoi(row[3]);
-			entry.name     = row[4];
+			entry.name     = row[4] ? row[4] : "";
 
 			all_entries.push_back(entry);
 		}

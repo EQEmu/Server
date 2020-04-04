@@ -438,8 +438,6 @@ namespace WorldserverCommandHandler {
 				zone.id
 			);
 		}
-
-
 	}
 
 }

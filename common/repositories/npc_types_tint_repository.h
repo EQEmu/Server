@@ -209,7 +209,7 @@ public:
 			NpcTypesTint entry{};
 
 			entry.id            = atoi(row[0]);
-			entry.tint_set_name = row[1];
+			entry.tint_set_name = row[1] ? row[1] : "";
 			entry.red1h         = atoi(row[2]);
 			entry.grn1h         = atoi(row[3]);
 			entry.blu1h         = atoi(row[4]);
@@ -434,7 +434,7 @@ public:
 			NpcTypesTint entry{};
 
 			entry.id            = atoi(row[0]);
-			entry.tint_set_name = row[1];
+			entry.tint_set_name = row[1] ? row[1] : "";
 			entry.red1h         = atoi(row[2]);
 			entry.grn1h         = atoi(row[3]);
 			entry.blu1h         = atoi(row[4]);
@@ -487,7 +487,7 @@ public:
 			NpcTypesTint entry{};
 
 			entry.id            = atoi(row[0]);
-			entry.tint_set_name = row[1];
+			entry.tint_set_name = row[1] ? row[1] : "";
 			entry.red1h         = atoi(row[2]);
 			entry.grn1h         = atoi(row[3]);
 			entry.blu1h         = atoi(row[4]);

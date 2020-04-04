@@ -142,8 +142,8 @@ public:
 			entry.charid  = atoi(row[0]);
 			entry.npcid   = atoi(row[1]);
 			entry.zoneid  = atoi(row[2]);
-			entry.name    = row[3];
-			entry.value   = row[4];
+			entry.name    = row[3] ? row[3] : "";
+			entry.value   = row[4] ? row[4] : "";
 			entry.expdate = atoi(row[5]);
 
 			return entry;
@@ -266,8 +266,8 @@ public:
 			entry.charid  = atoi(row[0]);
 			entry.npcid   = atoi(row[1]);
 			entry.zoneid  = atoi(row[2]);
-			entry.name    = row[3];
-			entry.value   = row[4];
+			entry.name    = row[3] ? row[3] : "";
+			entry.value   = row[4] ? row[4] : "";
 			entry.expdate = atoi(row[5]);
 
 			all_entries.push_back(entry);
@@ -296,8 +296,8 @@ public:
 			entry.charid  = atoi(row[0]);
 			entry.npcid   = atoi(row[1]);
 			entry.zoneid  = atoi(row[2]);
-			entry.name    = row[3];
-			entry.value   = row[4];
+			entry.name    = row[3] ? row[3] : "";
+			entry.value   = row[4] ? row[4] : "";
 			entry.expdate = atoi(row[5]);
 
 			all_entries.push_back(entry);

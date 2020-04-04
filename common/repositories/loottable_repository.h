@@ -140,7 +140,7 @@ public:
 			Loottable entry{};
 
 			entry.id      = atoi(row[0]);
-			entry.name    = row[1];
+			entry.name    = row[1] ? row[1] : "";
 			entry.mincash = atoi(row[2]);
 			entry.maxcash = atoi(row[3]);
 			entry.avgcoin = atoi(row[4]);
@@ -273,7 +273,7 @@ public:
 			Loottable entry{};
 
 			entry.id      = atoi(row[0]);
-			entry.name    = row[1];
+			entry.name    = row[1] ? row[1] : "";
 			entry.mincash = atoi(row[2]);
 			entry.maxcash = atoi(row[3]);
 			entry.avgcoin = atoi(row[4]);
@@ -303,7 +303,7 @@ public:
 			Loottable entry{};
 
 			entry.id      = atoi(row[0]);
-			entry.name    = row[1];
+			entry.name    = row[1] ? row[1] : "";
 			entry.mincash = atoi(row[2]);
 			entry.maxcash = atoi(row[3]);
 			entry.avgcoin = atoi(row[4]);

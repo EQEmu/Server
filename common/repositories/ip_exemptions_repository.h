@@ -131,7 +131,7 @@ public:
 			IpExemptions entry{};
 
 			entry.exemption_id     = atoi(row[0]);
-			entry.exemption_ip     = row[1];
+			entry.exemption_ip     = row[1] ? row[1] : "";
 			entry.exemption_amount = atoi(row[2]);
 
 			return entry;
@@ -252,7 +252,7 @@ public:
 			IpExemptions entry{};
 
 			entry.exemption_id     = atoi(row[0]);
-			entry.exemption_ip     = row[1];
+			entry.exemption_ip     = row[1] ? row[1] : "";
 			entry.exemption_amount = atoi(row[2]);
 
 			all_entries.push_back(entry);
@@ -279,7 +279,7 @@ public:
 			IpExemptions entry{};
 
 			entry.exemption_id     = atoi(row[0]);
-			entry.exemption_ip     = row[1];
+			entry.exemption_ip     = row[1] ? row[1] : "";
 			entry.exemption_amount = atoi(row[2]);
 
 			all_entries.push_back(entry);

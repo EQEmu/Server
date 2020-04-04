@@ -174,8 +174,8 @@ public:
 			entry.char_id         = atoi(row[8]);
 			entry.status          = atoi(row[9]);
 			entry.item_id         = atoi(row[10]);
-			entry.prefix          = row[11];
-			entry.suffix          = row[12];
+			entry.prefix          = row[11] ? row[11] : "";
+			entry.suffix          = row[12] ? row[12] : "";
 			entry.title_set       = atoi(row[13]);
 
 			return entry;
@@ -339,8 +339,8 @@ public:
 			entry.char_id         = atoi(row[8]);
 			entry.status          = atoi(row[9]);
 			entry.item_id         = atoi(row[10]);
-			entry.prefix          = row[11];
-			entry.suffix          = row[12];
+			entry.prefix          = row[11] ? row[11] : "";
+			entry.suffix          = row[12] ? row[12] : "";
 			entry.title_set       = atoi(row[13]);
 
 			all_entries.push_back(entry);
@@ -377,8 +377,8 @@ public:
 			entry.char_id         = atoi(row[8]);
 			entry.status          = atoi(row[9]);
 			entry.item_id         = atoi(row[10]);
-			entry.prefix          = row[11];
-			entry.suffix          = row[12];
+			entry.prefix          = row[11] ? row[11] : "";
+			entry.suffix          = row[12] ? row[12] : "";
 			entry.title_set       = atoi(row[13]);
 
 			all_entries.push_back(entry);

@@ -173,9 +173,9 @@ public:
 			entry.type             = atoi(row[1]);
 			entry.duration         = atoi(row[2]);
 			entry.duration_code    = atoi(row[3]);
-			entry.title            = row[4];
-			entry.description      = row[5];
-			entry.reward           = row[6];
+			entry.title            = row[4] ? row[4] : "";
+			entry.description      = row[5] ? row[5] : "";
+			entry.reward           = row[6] ? row[6] : "";
 			entry.rewardid         = atoi(row[7]);
 			entry.cashreward       = atoi(row[8]);
 			entry.xpreward         = atoi(row[9]);
@@ -184,7 +184,7 @@ public:
 			entry.maxlevel         = atoi(row[12]);
 			entry.repeatable       = atoi(row[13]);
 			entry.faction_reward   = atoi(row[14]);
-			entry.completion_emote = row[15];
+			entry.completion_emote = row[15] ? row[15] : "";
 
 			return entry;
 		}
@@ -346,9 +346,9 @@ public:
 			entry.type             = atoi(row[1]);
 			entry.duration         = atoi(row[2]);
 			entry.duration_code    = atoi(row[3]);
-			entry.title            = row[4];
-			entry.description      = row[5];
-			entry.reward           = row[6];
+			entry.title            = row[4] ? row[4] : "";
+			entry.description      = row[5] ? row[5] : "";
+			entry.reward           = row[6] ? row[6] : "";
 			entry.rewardid         = atoi(row[7]);
 			entry.cashreward       = atoi(row[8]);
 			entry.xpreward         = atoi(row[9]);
@@ -357,7 +357,7 @@ public:
 			entry.maxlevel         = atoi(row[12]);
 			entry.repeatable       = atoi(row[13]);
 			entry.faction_reward   = atoi(row[14]);
-			entry.completion_emote = row[15];
+			entry.completion_emote = row[15] ? row[15] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -386,9 +386,9 @@ public:
 			entry.type             = atoi(row[1]);
 			entry.duration         = atoi(row[2]);
 			entry.duration_code    = atoi(row[3]);
-			entry.title            = row[4];
-			entry.description      = row[5];
-			entry.reward           = row[6];
+			entry.title            = row[4] ? row[4] : "";
+			entry.description      = row[5] ? row[5] : "";
+			entry.reward           = row[6] ? row[6] : "";
 			entry.rewardid         = atoi(row[7]);
 			entry.cashreward       = atoi(row[8]);
 			entry.xpreward         = atoi(row[9]);
@@ -397,7 +397,7 @@ public:
 			entry.maxlevel         = atoi(row[12]);
 			entry.repeatable       = atoi(row[13]);
 			entry.faction_reward   = atoi(row[14]);
-			entry.completion_emote = row[15];
+			entry.completion_emote = row[15] ? row[15] : "";
 
 			all_entries.push_back(entry);
 		}

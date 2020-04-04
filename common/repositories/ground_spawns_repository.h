@@ -172,10 +172,10 @@ public:
 			entry.min_x         = atof(row[6]);
 			entry.min_y         = atof(row[7]);
 			entry.heading       = atof(row[8]);
-			entry.name          = row[9];
+			entry.name          = row[9] ? row[9] : "";
 			entry.item          = atoi(row[10]);
 			entry.max_allowed   = atoi(row[11]);
-			entry.comment       = row[12];
+			entry.comment       = row[12] ? row[12] : "";
 			entry.respawn_timer = atoi(row[13]);
 
 			return entry;
@@ -337,10 +337,10 @@ public:
 			entry.min_x         = atof(row[6]);
 			entry.min_y         = atof(row[7]);
 			entry.heading       = atof(row[8]);
-			entry.name          = row[9];
+			entry.name          = row[9] ? row[9] : "";
 			entry.item          = atoi(row[10]);
 			entry.max_allowed   = atoi(row[11]);
-			entry.comment       = row[12];
+			entry.comment       = row[12] ? row[12] : "";
 			entry.respawn_timer = atoi(row[13]);
 
 			all_entries.push_back(entry);
@@ -375,10 +375,10 @@ public:
 			entry.min_x         = atof(row[6]);
 			entry.min_y         = atof(row[7]);
 			entry.heading       = atof(row[8]);
-			entry.name          = row[9];
+			entry.name          = row[9] ? row[9] : "";
 			entry.item          = atoi(row[10]);
 			entry.max_allowed   = atoi(row[11]);
-			entry.comment       = row[12];
+			entry.comment       = row[12] ? row[12] : "";
 			entry.respawn_timer = atoi(row[13]);
 
 			all_entries.push_back(entry);

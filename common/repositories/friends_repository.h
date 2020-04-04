@@ -132,7 +132,7 @@ public:
 
 			entry.charid = atoi(row[0]);
 			entry.type   = atoi(row[1]);
-			entry.name   = row[2];
+			entry.name   = row[2] ? row[2] : "";
 
 			return entry;
 		}
@@ -250,7 +250,7 @@ public:
 
 			entry.charid = atoi(row[0]);
 			entry.type   = atoi(row[1]);
-			entry.name   = row[2];
+			entry.name   = row[2] ? row[2] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -277,7 +277,7 @@ public:
 
 			entry.charid = atoi(row[0]);
 			entry.type   = atoi(row[1]);
-			entry.name   = row[2];
+			entry.name   = row[2] ? row[2] : "";
 
 			all_entries.push_back(entry);
 		}

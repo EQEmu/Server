@@ -168,7 +168,7 @@ public:
 
 			entry.id           = atoi(row[0]);
 			entry.spawngroupID = atoi(row[1]);
-			entry.zone         = row[2];
+			entry.zone         = row[2] ? row[2] : "";
 			entry.version      = atoi(row[3]);
 			entry.x            = atof(row[4]);
 			entry.y            = atof(row[5]);
@@ -337,7 +337,7 @@ public:
 
 			entry.id           = atoi(row[0]);
 			entry.spawngroupID = atoi(row[1]);
-			entry.zone         = row[2];
+			entry.zone         = row[2] ? row[2] : "";
 			entry.version      = atoi(row[3]);
 			entry.x            = atof(row[4]);
 			entry.y            = atof(row[5]);
@@ -376,7 +376,7 @@ public:
 
 			entry.id           = atoi(row[0]);
 			entry.spawngroupID = atoi(row[1]);
-			entry.zone         = row[2];
+			entry.zone         = row[2] ? row[2] : "";
 			entry.version      = atoi(row[3]);
 			entry.x            = atof(row[4]);
 			entry.y            = atof(row[5]);

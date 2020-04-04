@@ -134,9 +134,9 @@ public:
 			RuleValues entry{};
 
 			entry.ruleset_id = atoi(row[0]);
-			entry.rule_name  = row[1];
-			entry.rule_value = row[2];
-			entry.notes      = row[3];
+			entry.rule_name  = row[1] ? row[1] : "";
+			entry.rule_value = row[2] ? row[2] : "";
+			entry.notes      = row[3] ? row[3] : "";
 
 			return entry;
 		}
@@ -256,9 +256,9 @@ public:
 			RuleValues entry{};
 
 			entry.ruleset_id = atoi(row[0]);
-			entry.rule_name  = row[1];
-			entry.rule_value = row[2];
-			entry.notes      = row[3];
+			entry.rule_name  = row[1] ? row[1] : "";
+			entry.rule_value = row[2] ? row[2] : "";
+			entry.notes      = row[3] ? row[3] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -284,9 +284,9 @@ public:
 			RuleValues entry{};
 
 			entry.ruleset_id = atoi(row[0]);
-			entry.rule_name  = row[1];
-			entry.rule_value = row[2];
-			entry.notes      = row[3];
+			entry.rule_name  = row[1] ? row[1] : "";
+			entry.rule_value = row[2] ? row[2] : "";
+			entry.notes      = row[3] ? row[3] : "";
 
 			all_entries.push_back(entry);
 		}

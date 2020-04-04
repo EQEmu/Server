@@ -144,7 +144,7 @@ public:
 			entry.bandolier_slot = atoi(row[2]);
 			entry.item_id        = atoi(row[3]);
 			entry.icon           = atoi(row[4]);
-			entry.bandolier_name = row[5];
+			entry.bandolier_name = row[5] ? row[5] : "";
 
 			return entry;
 		}
@@ -271,7 +271,7 @@ public:
 			entry.bandolier_slot = atoi(row[2]);
 			entry.item_id        = atoi(row[3]);
 			entry.icon           = atoi(row[4]);
-			entry.bandolier_name = row[5];
+			entry.bandolier_name = row[5] ? row[5] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -301,7 +301,7 @@ public:
 			entry.bandolier_slot = atoi(row[2]);
 			entry.item_id        = atoi(row[3]);
 			entry.icon           = atoi(row[4]);
-			entry.bandolier_name = row[5];
+			entry.bandolier_name = row[5] ? row[5] : "";
 
 			all_entries.push_back(entry);
 		}

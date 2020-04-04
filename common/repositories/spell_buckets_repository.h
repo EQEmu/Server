@@ -131,8 +131,8 @@ public:
 			SpellBuckets entry{};
 
 			entry.spellid = atoi(row[0]);
-			entry.key     = row[1];
-			entry.value   = row[2];
+			entry.key     = row[1] ? row[1] : "";
+			entry.value   = row[2] ? row[2] : "";
 
 			return entry;
 		}
@@ -252,8 +252,8 @@ public:
 			SpellBuckets entry{};
 
 			entry.spellid = atoi(row[0]);
-			entry.key     = row[1];
-			entry.value   = row[2];
+			entry.key     = row[1] ? row[1] : "";
+			entry.value   = row[2] ? row[2] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -279,8 +279,8 @@ public:
 			SpellBuckets entry{};
 
 			entry.spellid = atoi(row[0]);
-			entry.key     = row[1];
-			entry.value   = row[2];
+			entry.key     = row[1] ? row[1] : "";
+			entry.value   = row[2] ? row[2] : "";
 
 			all_entries.push_back(entry);
 		}

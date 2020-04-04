@@ -140,11 +140,11 @@ public:
 			Hackers entry{};
 
 			entry.id      = atoi(row[0]);
-			entry.account = row[1];
-			entry.name    = row[2];
-			entry.hacked  = row[3];
-			entry.zone    = row[4];
-			entry.date    = row[5];
+			entry.account = row[1] ? row[1] : "";
+			entry.name    = row[2] ? row[2] : "";
+			entry.hacked  = row[3] ? row[3] : "";
+			entry.zone    = row[4] ? row[4] : "";
+			entry.date    = row[5] ? row[5] : "";
 
 			return entry;
 		}
@@ -273,11 +273,11 @@ public:
 			Hackers entry{};
 
 			entry.id      = atoi(row[0]);
-			entry.account = row[1];
-			entry.name    = row[2];
-			entry.hacked  = row[3];
-			entry.zone    = row[4];
-			entry.date    = row[5];
+			entry.account = row[1] ? row[1] : "";
+			entry.name    = row[2] ? row[2] : "";
+			entry.hacked  = row[3] ? row[3] : "";
+			entry.zone    = row[4] ? row[4] : "";
+			entry.date    = row[5] ? row[5] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -303,11 +303,11 @@ public:
 			Hackers entry{};
 
 			entry.id      = atoi(row[0]);
-			entry.account = row[1];
-			entry.name    = row[2];
-			entry.hacked  = row[3];
-			entry.zone    = row[4];
-			entry.date    = row[5];
+			entry.account = row[1] ? row[1] : "";
+			entry.name    = row[2] ? row[2] : "";
+			entry.hacked  = row[3] ? row[3] : "";
+			entry.zone    = row[4] ? row[4] : "";
+			entry.date    = row[5] ? row[5] : "";
 
 			all_entries.push_back(entry);
 		}

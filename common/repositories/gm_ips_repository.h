@@ -130,9 +130,9 @@ public:
 		if (results.RowCount() == 1) {
 			GmIps entry{};
 
-			entry.name       = row[0];
+			entry.name       = row[0] ? row[0] : "";
 			entry.account_id = atoi(row[1]);
-			entry.ip_address = row[2];
+			entry.ip_address = row[2] ? row[2] : "";
 
 			return entry;
 		}
@@ -248,9 +248,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			GmIps entry{};
 
-			entry.name       = row[0];
+			entry.name       = row[0] ? row[0] : "";
 			entry.account_id = atoi(row[1]);
-			entry.ip_address = row[2];
+			entry.ip_address = row[2] ? row[2] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -275,9 +275,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			GmIps entry{};
 
-			entry.name       = row[0];
+			entry.name       = row[0] ? row[0] : "";
 			entry.account_id = atoi(row[1]);
-			entry.ip_address = row[2];
+			entry.ip_address = row[2] ? row[2] : "";
 
 			all_entries.push_back(entry);
 		}

@@ -264,14 +264,14 @@ public:
 
 			entry.id               = atoi(row[0]);
 			entry.charid           = atoi(row[1]);
-			entry.charname         = row[2];
+			entry.charname         = row[2] ? row[2] : "";
 			entry.zone_id          = atoi(row[3]);
 			entry.instance_id      = atoi(row[4]);
 			entry.x                = atof(row[5]);
 			entry.y                = atof(row[6]);
 			entry.z                = atof(row[7]);
 			entry.heading          = atof(row[8]);
-			entry.time_of_death    = row[9];
+			entry.time_of_death    = row[9] ? row[9] : "";
 			entry.guild_consent_id = atoi(row[10]);
 			entry.is_rezzed        = atoi(row[11]);
 			entry.is_buried        = atoi(row[12]);
@@ -561,14 +561,14 @@ public:
 
 			entry.id               = atoi(row[0]);
 			entry.charid           = atoi(row[1]);
-			entry.charname         = row[2];
+			entry.charname         = row[2] ? row[2] : "";
 			entry.zone_id          = atoi(row[3]);
 			entry.instance_id      = atoi(row[4]);
 			entry.x                = atof(row[5]);
 			entry.y                = atof(row[6]);
 			entry.z                = atof(row[7]);
 			entry.heading          = atof(row[8]);
-			entry.time_of_death    = row[9];
+			entry.time_of_death    = row[9] ? row[9] : "";
 			entry.guild_consent_id = atoi(row[10]);
 			entry.is_rezzed        = atoi(row[11]);
 			entry.is_buried        = atoi(row[12]);
@@ -632,14 +632,14 @@ public:
 
 			entry.id               = atoi(row[0]);
 			entry.charid           = atoi(row[1]);
-			entry.charname         = row[2];
+			entry.charname         = row[2] ? row[2] : "";
 			entry.zone_id          = atoi(row[3]);
 			entry.instance_id      = atoi(row[4]);
 			entry.x                = atof(row[5]);
 			entry.y                = atof(row[6]);
 			entry.z                = atof(row[7]);
 			entry.heading          = atof(row[8]);
-			entry.time_of_death    = row[9];
+			entry.time_of_death    = row[9] ? row[9] : "";
 			entry.guild_consent_id = atoi(row[10]);
 			entry.is_rezzed        = atoi(row[11]);
 			entry.is_buried        = atoi(row[12]);

@@ -274,8 +274,8 @@ foreach my $table_to_generate (@tables) {
             $find_one_entries .= sprintf("\t\t\tentry.%-${longest_column_length}s = atof(row[%s]);\n", $column_name, $index);
         }
         else {
-            $all_entries      .= sprintf("\t\t\tentry.%-${longest_column_length}s = row[%s];\n", $column_name, $index);
-            $find_one_entries .= sprintf("\t\t\tentry.%-${longest_column_length}s = row[%s];\n", $column_name, $index);
+            $all_entries      .= sprintf("\t\t\tentry.%-${longest_column_length}s = row[%s] ? row[%s] : \"\";\n", $column_name, $index, $index);
+            $find_one_entries .= sprintf("\t\t\tentry.%-${longest_column_length}s = row[%s] ? row[%s] : \"\";\n", $column_name, $index, $index);
         }
 
         # print $column_name . "\n";

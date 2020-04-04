@@ -133,10 +133,10 @@ public:
 		if (results.RowCount() == 1) {
 			Variables entry{};
 
-			entry.varname     = row[0];
-			entry.value       = row[1];
-			entry.information = row[2];
-			entry.ts          = row[3];
+			entry.varname     = row[0] ? row[0] : "";
+			entry.value       = row[1] ? row[1] : "";
+			entry.information = row[2] ? row[2] : "";
+			entry.ts          = row[3] ? row[3] : "";
 
 			return entry;
 		}
@@ -258,10 +258,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Variables entry{};
 
-			entry.varname     = row[0];
-			entry.value       = row[1];
-			entry.information = row[2];
-			entry.ts          = row[3];
+			entry.varname     = row[0] ? row[0] : "";
+			entry.value       = row[1] ? row[1] : "";
+			entry.information = row[2] ? row[2] : "";
+			entry.ts          = row[3] ? row[3] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -286,10 +286,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Variables entry{};
 
-			entry.varname     = row[0];
-			entry.value       = row[1];
-			entry.information = row[2];
-			entry.ts          = row[3];
+			entry.varname     = row[0] ? row[0] : "";
+			entry.value       = row[1] ? row[1] : "";
+			entry.information = row[2] ? row[2] : "";
+			entry.ts          = row[3] ? row[3] : "";
 
 			all_entries.push_back(entry);
 		}

@@ -140,7 +140,7 @@ public:
 			entry.emoteid = atoi(row[1]);
 			entry.event_  = atoi(row[2]);
 			entry.type    = atoi(row[3]);
-			entry.text    = row[4];
+			entry.text    = row[4] ? row[4] : "";
 
 			return entry;
 		}
@@ -269,7 +269,7 @@ public:
 			entry.emoteid = atoi(row[1]);
 			entry.event_  = atoi(row[2]);
 			entry.type    = atoi(row[3]);
-			entry.text    = row[4];
+			entry.text    = row[4] ? row[4] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -298,7 +298,7 @@ public:
 			entry.emoteid = atoi(row[1]);
 			entry.event_  = atoi(row[2]);
 			entry.type    = atoi(row[3]);
-			entry.text    = row[4];
+			entry.text    = row[4] ? row[4] : "";
 
 			all_entries.push_back(entry);
 		}

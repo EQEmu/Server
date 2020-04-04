@@ -127,7 +127,7 @@ public:
 		if (results.RowCount() == 1) {
 			Launcher entry{};
 
-			entry.name     = row[0];
+			entry.name     = row[0] ? row[0] : "";
 			entry.dynamics = atoi(row[1]);
 
 			return entry;
@@ -244,7 +244,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Launcher entry{};
 
-			entry.name     = row[0];
+			entry.name     = row[0] ? row[0] : "";
 			entry.dynamics = atoi(row[1]);
 
 			all_entries.push_back(entry);
@@ -270,7 +270,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Launcher entry{};
 
-			entry.name     = row[0];
+			entry.name     = row[0] ? row[0] : "";
 			entry.dynamics = atoi(row[1]);
 
 			all_entries.push_back(entry);

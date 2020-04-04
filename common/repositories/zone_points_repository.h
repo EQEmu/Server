@@ -173,7 +173,7 @@ public:
 			ZonePoints entry{};
 
 			entry.id                  = atoi(row[0]);
-			entry.zone                = row[1];
+			entry.zone                = row[1] ? row[1] : "";
 			entry.version             = atoi(row[2]);
 			entry.number              = atoi(row[3]);
 			entry.y                   = atof(row[4]);
@@ -350,7 +350,7 @@ public:
 			ZonePoints entry{};
 
 			entry.id                  = atoi(row[0]);
-			entry.zone                = row[1];
+			entry.zone                = row[1] ? row[1] : "";
 			entry.version             = atoi(row[2]);
 			entry.number              = atoi(row[3]);
 			entry.y                   = atof(row[4]);
@@ -391,7 +391,7 @@ public:
 			ZonePoints entry{};
 
 			entry.id                  = atoi(row[0]);
-			entry.zone                = row[1];
+			entry.zone                = row[1] ? row[1] : "";
 			entry.version             = atoi(row[2]);
 			entry.number              = atoi(row[3]);
 			entry.y                   = atof(row[4]);

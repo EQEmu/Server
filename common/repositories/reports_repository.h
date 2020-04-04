@@ -134,9 +134,9 @@ public:
 			Reports entry{};
 
 			entry.id            = atoi(row[0]);
-			entry.name          = row[1];
-			entry.reported      = row[2];
-			entry.reported_text = row[3];
+			entry.name          = row[1] ? row[1] : "";
+			entry.reported      = row[2] ? row[2] : "";
+			entry.reported_text = row[3] ? row[3] : "";
 
 			return entry;
 		}
@@ -259,9 +259,9 @@ public:
 			Reports entry{};
 
 			entry.id            = atoi(row[0]);
-			entry.name          = row[1];
-			entry.reported      = row[2];
-			entry.reported_text = row[3];
+			entry.name          = row[1] ? row[1] : "";
+			entry.reported      = row[2] ? row[2] : "";
+			entry.reported_text = row[3] ? row[3] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -287,9 +287,9 @@ public:
 			Reports entry{};
 
 			entry.id            = atoi(row[0]);
-			entry.name          = row[1];
-			entry.reported      = row[2];
-			entry.reported_text = row[3];
+			entry.name          = row[1] ? row[1] : "";
+			entry.reported      = row[2] ? row[2] : "";
+			entry.reported_text = row[3] ? row[3] : "";
 
 			all_entries.push_back(entry);
 		}

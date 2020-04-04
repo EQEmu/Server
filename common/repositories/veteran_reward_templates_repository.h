@@ -137,7 +137,7 @@ public:
 			VeteranRewardTemplates entry{};
 
 			entry.claim_id    = atoi(row[0]);
-			entry.name        = row[1];
+			entry.name        = row[1] ? row[1] : "";
 			entry.item_id     = atoi(row[2]);
 			entry.charges     = atoi(row[3]);
 			entry.reward_slot = atoi(row[4]);
@@ -263,7 +263,7 @@ public:
 			VeteranRewardTemplates entry{};
 
 			entry.claim_id    = atoi(row[0]);
-			entry.name        = row[1];
+			entry.name        = row[1] ? row[1] : "";
 			entry.item_id     = atoi(row[2]);
 			entry.charges     = atoi(row[3]);
 			entry.reward_slot = atoi(row[4]);
@@ -292,7 +292,7 @@ public:
 			VeteranRewardTemplates entry{};
 
 			entry.claim_id    = atoi(row[0]);
-			entry.name        = row[1];
+			entry.name        = row[1] ? row[1] : "";
 			entry.item_id     = atoi(row[2]);
 			entry.charges     = atoi(row[3]);
 			entry.reward_slot = atoi(row[4]);

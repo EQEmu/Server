@@ -216,9 +216,9 @@ public:
 
 			entry.id                  = atoi(row[0]);
 			entry.doorid              = atoi(row[1]);
-			entry.zone                = row[2];
+			entry.zone                = row[2] ? row[2] : "";
 			entry.version             = atoi(row[3]);
-			entry.name                = row[4];
+			entry.name                = row[4] ? row[4] : "";
 			entry.pos_y               = atof(row[5]);
 			entry.pos_x               = atof(row[6]);
 			entry.pos_z               = atof(row[7]);
@@ -233,7 +233,7 @@ public:
 			entry.disable_timer       = atoi(row[16]);
 			entry.doorisopen          = atoi(row[17]);
 			entry.door_param          = atoi(row[18]);
-			entry.dest_zone           = row[19];
+			entry.dest_zone           = row[19] ? row[19] : "";
 			entry.dest_instance       = atoi(row[20]);
 			entry.dest_x              = atof(row[21]);
 			entry.dest_y              = atof(row[22]);
@@ -449,9 +449,9 @@ public:
 
 			entry.id                  = atoi(row[0]);
 			entry.doorid              = atoi(row[1]);
-			entry.zone                = row[2];
+			entry.zone                = row[2] ? row[2] : "";
 			entry.version             = atoi(row[3]);
-			entry.name                = row[4];
+			entry.name                = row[4] ? row[4] : "";
 			entry.pos_y               = atof(row[5]);
 			entry.pos_x               = atof(row[6]);
 			entry.pos_z               = atof(row[7]);
@@ -466,7 +466,7 @@ public:
 			entry.disable_timer       = atoi(row[16]);
 			entry.doorisopen          = atoi(row[17]);
 			entry.door_param          = atoi(row[18]);
-			entry.dest_zone           = row[19];
+			entry.dest_zone           = row[19] ? row[19] : "";
 			entry.dest_instance       = atoi(row[20]);
 			entry.dest_x              = atof(row[21]);
 			entry.dest_y              = atof(row[22]);
@@ -504,9 +504,9 @@ public:
 
 			entry.id                  = atoi(row[0]);
 			entry.doorid              = atoi(row[1]);
-			entry.zone                = row[2];
+			entry.zone                = row[2] ? row[2] : "";
 			entry.version             = atoi(row[3]);
-			entry.name                = row[4];
+			entry.name                = row[4] ? row[4] : "";
 			entry.pos_y               = atof(row[5]);
 			entry.pos_x               = atof(row[6]);
 			entry.pos_z               = atof(row[7]);
@@ -521,7 +521,7 @@ public:
 			entry.disable_timer       = atoi(row[16]);
 			entry.doorisopen          = atoi(row[17]);
 			entry.door_param          = atoi(row[18]);
-			entry.dest_zone           = row[19];
+			entry.dest_zone           = row[19] ? row[19] : "";
 			entry.dest_instance       = atoi(row[20]);
 			entry.dest_x              = atof(row[21]);
 			entry.dest_y              = atof(row[22]);

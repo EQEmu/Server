@@ -208,7 +208,7 @@ public:
 			entry.heading      = atof(row[6]);
 			entry.itemid       = atoi(row[7]);
 			entry.charges      = atoi(row[8]);
-			entry.objectname   = row[9];
+			entry.objectname   = row[9] ? row[9] : "";
 			entry.type         = atoi(row[10]);
 			entry.icon         = atoi(row[11]);
 			entry.unknown08    = atoi(row[12]);
@@ -224,7 +224,7 @@ public:
 			entry.size         = atof(row[22]);
 			entry.tilt_x       = atof(row[23]);
 			entry.tilt_y       = atof(row[24]);
-			entry.display_name = row[25];
+			entry.display_name = row[25] ? row[25] : "";
 
 			return entry;
 		}
@@ -421,7 +421,7 @@ public:
 			entry.heading      = atof(row[6]);
 			entry.itemid       = atoi(row[7]);
 			entry.charges      = atoi(row[8]);
-			entry.objectname   = row[9];
+			entry.objectname   = row[9] ? row[9] : "";
 			entry.type         = atoi(row[10]);
 			entry.icon         = atoi(row[11]);
 			entry.unknown08    = atoi(row[12]);
@@ -437,7 +437,7 @@ public:
 			entry.size         = atof(row[22]);
 			entry.tilt_x       = atof(row[23]);
 			entry.tilt_y       = atof(row[24]);
-			entry.display_name = row[25];
+			entry.display_name = row[25] ? row[25] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -471,7 +471,7 @@ public:
 			entry.heading      = atof(row[6]);
 			entry.itemid       = atoi(row[7]);
 			entry.charges      = atoi(row[8]);
-			entry.objectname   = row[9];
+			entry.objectname   = row[9] ? row[9] : "";
 			entry.type         = atoi(row[10]);
 			entry.icon         = atoi(row[11]);
 			entry.unknown08    = atoi(row[12]);
@@ -487,7 +487,7 @@ public:
 			entry.size         = atof(row[22]);
 			entry.tilt_x       = atof(row[23]);
 			entry.tilt_y       = atof(row[24]);
-			entry.display_name = row[25];
+			entry.display_name = row[25] ? row[25] : "";
 
 			all_entries.push_back(entry);
 		}

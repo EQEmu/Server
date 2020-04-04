@@ -164,9 +164,9 @@ public:
 			SpawnEvents entry{};
 
 			entry.id          = atoi(row[0]);
-			entry.zone        = row[1];
+			entry.zone        = row[1] ? row[1] : "";
 			entry.cond_id     = atoi(row[2]);
-			entry.name        = row[3];
+			entry.name        = row[3] ? row[3] : "";
 			entry.period      = atoi(row[4]);
 			entry.next_minute = atoi(row[5]);
 			entry.next_hour   = atoi(row[6]);
@@ -329,9 +329,9 @@ public:
 			SpawnEvents entry{};
 
 			entry.id          = atoi(row[0]);
-			entry.zone        = row[1];
+			entry.zone        = row[1] ? row[1] : "";
 			entry.cond_id     = atoi(row[2]);
-			entry.name        = row[3];
+			entry.name        = row[3] ? row[3] : "";
 			entry.period      = atoi(row[4]);
 			entry.next_minute = atoi(row[5]);
 			entry.next_hour   = atoi(row[6]);
@@ -367,9 +367,9 @@ public:
 			SpawnEvents entry{};
 
 			entry.id          = atoi(row[0]);
-			entry.zone        = row[1];
+			entry.zone        = row[1] ? row[1] : "";
 			entry.cond_id     = atoi(row[2]);
-			entry.name        = row[3];
+			entry.name        = row[3] ? row[3] : "";
 			entry.period      = atoi(row[4]);
 			entry.next_minute = atoi(row[5]);
 			entry.next_hour   = atoi(row[6]);

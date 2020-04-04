@@ -142,7 +142,7 @@ public:
 			entry.charid   = atoi(row[0]);
 			entry.buyslot  = atoi(row[1]);
 			entry.itemid   = atoi(row[2]);
-			entry.itemname = row[3];
+			entry.itemname = row[3] ? row[3] : "";
 			entry.quantity = atoi(row[4]);
 			entry.price    = atoi(row[5]);
 
@@ -272,7 +272,7 @@ public:
 			entry.charid   = atoi(row[0]);
 			entry.buyslot  = atoi(row[1]);
 			entry.itemid   = atoi(row[2]);
-			entry.itemname = row[3];
+			entry.itemname = row[3] ? row[3] : "";
 			entry.quantity = atoi(row[4]);
 			entry.price    = atoi(row[5]);
 
@@ -302,7 +302,7 @@ public:
 			entry.charid   = atoi(row[0]);
 			entry.buyslot  = atoi(row[1]);
 			entry.itemid   = atoi(row[2]);
-			entry.itemname = row[3];
+			entry.itemname = row[3] ? row[3] : "";
 			entry.quantity = atoi(row[4]);
 			entry.price    = atoi(row[5]);
 

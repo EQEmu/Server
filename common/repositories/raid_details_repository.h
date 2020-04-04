@@ -136,7 +136,7 @@ public:
 			entry.raidid   = atoi(row[0]);
 			entry.loottype = atoi(row[1]);
 			entry.locked   = atoi(row[2]);
-			entry.motd     = row[3];
+			entry.motd     = row[3] ? row[3] : "";
 
 			return entry;
 		}
@@ -261,7 +261,7 @@ public:
 			entry.raidid   = atoi(row[0]);
 			entry.loottype = atoi(row[1]);
 			entry.locked   = atoi(row[2]);
-			entry.motd     = row[3];
+			entry.motd     = row[3] ? row[3] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -289,7 +289,7 @@ public:
 			entry.raidid   = atoi(row[0]);
 			entry.loottype = atoi(row[1]);
 			entry.locked   = atoi(row[2]);
-			entry.motd     = row[3];
+			entry.motd     = row[3] ? row[3] : "";
 
 			all_entries.push_back(entry);
 		}

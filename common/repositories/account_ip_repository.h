@@ -134,9 +134,9 @@ public:
 			AccountIp entry{};
 
 			entry.accid    = atoi(row[0]);
-			entry.ip       = row[1];
+			entry.ip       = row[1] ? row[1] : "";
 			entry.count    = atoi(row[2]);
-			entry.lastused = row[3];
+			entry.lastused = row[3] ? row[3] : "";
 
 			return entry;
 		}
@@ -256,9 +256,9 @@ public:
 			AccountIp entry{};
 
 			entry.accid    = atoi(row[0]);
-			entry.ip       = row[1];
+			entry.ip       = row[1] ? row[1] : "";
 			entry.count    = atoi(row[2]);
-			entry.lastused = row[3];
+			entry.lastused = row[3] ? row[3] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -284,9 +284,9 @@ public:
 			AccountIp entry{};
 
 			entry.accid    = atoi(row[0]);
-			entry.ip       = row[1];
+			entry.ip       = row[1] ? row[1] : "";
 			entry.count    = atoi(row[2]);
-			entry.lastused = row[3];
+			entry.lastused = row[3] ? row[3] : "";
 
 			all_entries.push_back(entry);
 		}

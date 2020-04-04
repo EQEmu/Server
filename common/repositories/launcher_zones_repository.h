@@ -130,8 +130,8 @@ public:
 		if (results.RowCount() == 1) {
 			LauncherZones entry{};
 
-			entry.launcher = row[0];
-			entry.zone     = row[1];
+			entry.launcher = row[0] ? row[0] : "";
+			entry.zone     = row[1] ? row[1] : "";
 			entry.port     = atoi(row[2]);
 
 			return entry;
@@ -248,8 +248,8 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			LauncherZones entry{};
 
-			entry.launcher = row[0];
-			entry.zone     = row[1];
+			entry.launcher = row[0] ? row[0] : "";
+			entry.zone     = row[1] ? row[1] : "";
 			entry.port     = atoi(row[2]);
 
 			all_entries.push_back(entry);
@@ -275,8 +275,8 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			LauncherZones entry{};
 
-			entry.launcher = row[0];
-			entry.zone     = row[1];
+			entry.launcher = row[0] ? row[0] : "";
+			entry.zone     = row[1] ? row[1] : "";
 			entry.port     = atoi(row[2]);
 
 			all_entries.push_back(entry);

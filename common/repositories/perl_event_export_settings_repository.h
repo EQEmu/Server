@@ -143,7 +143,7 @@ public:
 			PerlEventExportSettings entry{};
 
 			entry.event_id          = atoi(row[0]);
-			entry.event_description = row[1];
+			entry.event_description = row[1] ? row[1] : "";
 			entry.export_qglobals   = atoi(row[2]);
 			entry.export_mob        = atoi(row[3]);
 			entry.export_zone       = atoi(row[4]);
@@ -280,7 +280,7 @@ public:
 			PerlEventExportSettings entry{};
 
 			entry.event_id          = atoi(row[0]);
-			entry.event_description = row[1];
+			entry.event_description = row[1] ? row[1] : "";
 			entry.export_qglobals   = atoi(row[2]);
 			entry.export_mob        = atoi(row[3]);
 			entry.export_zone       = atoi(row[4]);
@@ -311,7 +311,7 @@ public:
 			PerlEventExportSettings entry{};
 
 			entry.event_id          = atoi(row[0]);
-			entry.event_description = row[1];
+			entry.event_description = row[1] ? row[1] : "";
 			entry.export_qglobals   = atoi(row[2]);
 			entry.export_mob        = atoi(row[3]);
 			entry.export_zone       = atoi(row[4]);

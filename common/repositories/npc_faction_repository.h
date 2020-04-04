@@ -134,7 +134,7 @@ public:
 			NpcFaction entry{};
 
 			entry.id                    = atoi(row[0]);
-			entry.name                  = row[1];
+			entry.name                  = row[1] ? row[1] : "";
 			entry.primaryfaction        = atoi(row[2]);
 			entry.ignore_primary_assist = atoi(row[3]);
 
@@ -259,7 +259,7 @@ public:
 			NpcFaction entry{};
 
 			entry.id                    = atoi(row[0]);
-			entry.name                  = row[1];
+			entry.name                  = row[1] ? row[1] : "";
 			entry.primaryfaction        = atoi(row[2]);
 			entry.ignore_primary_assist = atoi(row[3]);
 
@@ -287,7 +287,7 @@ public:
 			NpcFaction entry{};
 
 			entry.id                    = atoi(row[0]);
-			entry.name                  = row[1];
+			entry.name                  = row[1] ? row[1] : "";
 			entry.primaryfaction        = atoi(row[2]);
 			entry.ignore_primary_assist = atoi(row[3]);
 

@@ -185,7 +185,7 @@ public:
 			Traps entry{};
 
 			entry.id                     = atoi(row[0]);
-			entry.zone                   = row[1];
+			entry.zone                   = row[1] ? row[1] : "";
 			entry.version                = atoi(row[2]);
 			entry.x                      = atoi(row[3]);
 			entry.y                      = atoi(row[4]);
@@ -196,7 +196,7 @@ public:
 			entry.effect                 = atoi(row[9]);
 			entry.effectvalue            = atoi(row[10]);
 			entry.effectvalue2           = atoi(row[11]);
-			entry.message                = row[12];
+			entry.message                = row[12] ? row[12] : "";
 			entry.skill                  = atoi(row[13]);
 			entry.level                  = atoi(row[14]);
 			entry.respawn_time           = atoi(row[15]);
@@ -378,7 +378,7 @@ public:
 			Traps entry{};
 
 			entry.id                     = atoi(row[0]);
-			entry.zone                   = row[1];
+			entry.zone                   = row[1] ? row[1] : "";
 			entry.version                = atoi(row[2]);
 			entry.x                      = atoi(row[3]);
 			entry.y                      = atoi(row[4]);
@@ -389,7 +389,7 @@ public:
 			entry.effect                 = atoi(row[9]);
 			entry.effectvalue            = atoi(row[10]);
 			entry.effectvalue2           = atoi(row[11]);
-			entry.message                = row[12];
+			entry.message                = row[12] ? row[12] : "";
 			entry.skill                  = atoi(row[13]);
 			entry.level                  = atoi(row[14]);
 			entry.respawn_time           = atoi(row[15]);
@@ -423,7 +423,7 @@ public:
 			Traps entry{};
 
 			entry.id                     = atoi(row[0]);
-			entry.zone                   = row[1];
+			entry.zone                   = row[1] ? row[1] : "";
 			entry.version                = atoi(row[2]);
 			entry.x                      = atoi(row[3]);
 			entry.y                      = atoi(row[4]);
@@ -434,7 +434,7 @@ public:
 			entry.effect                 = atoi(row[9]);
 			entry.effectvalue            = atoi(row[10]);
 			entry.effectvalue2           = atoi(row[11]);
-			entry.message                = row[12];
+			entry.message                = row[12] ? row[12] : "";
 			entry.skill                  = atoi(row[13]);
 			entry.level                  = atoi(row[14]);
 			entry.respawn_time           = atoi(row[15]);

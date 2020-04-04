@@ -138,8 +138,8 @@ public:
 
 			entry.id      = atoi(row[0]);
 			entry.unknown = atoi(row[1]);
-			entry.name    = row[2];
-			entry.descr   = row[3];
+			entry.name    = row[2] ? row[2] : "";
+			entry.descr   = row[3] ? row[3] : "";
 			entry.isguild = atoi(row[4]);
 
 			return entry;
@@ -264,8 +264,8 @@ public:
 
 			entry.id      = atoi(row[0]);
 			entry.unknown = atoi(row[1]);
-			entry.name    = row[2];
-			entry.descr   = row[3];
+			entry.name    = row[2] ? row[2] : "";
+			entry.descr   = row[3] ? row[3] : "";
 			entry.isguild = atoi(row[4]);
 
 			all_entries.push_back(entry);
@@ -293,8 +293,8 @@ public:
 
 			entry.id      = atoi(row[0]);
 			entry.unknown = atoi(row[1]);
-			entry.name    = row[2];
-			entry.descr   = row[3];
+			entry.name    = row[2] ? row[2] : "";
+			entry.descr   = row[3] ? row[3] : "";
 			entry.isguild = atoi(row[4]);
 
 			all_entries.push_back(entry);

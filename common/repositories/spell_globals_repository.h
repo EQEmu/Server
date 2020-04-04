@@ -134,9 +134,9 @@ public:
 			SpellGlobals entry{};
 
 			entry.spellid    = atoi(row[0]);
-			entry.spell_name = row[1];
-			entry.qglobal    = row[2];
-			entry.value      = row[3];
+			entry.spell_name = row[1] ? row[1] : "";
+			entry.qglobal    = row[2] ? row[2] : "";
+			entry.value      = row[3] ? row[3] : "";
 
 			return entry;
 		}
@@ -259,9 +259,9 @@ public:
 			SpellGlobals entry{};
 
 			entry.spellid    = atoi(row[0]);
-			entry.spell_name = row[1];
-			entry.qglobal    = row[2];
-			entry.value      = row[3];
+			entry.spell_name = row[1] ? row[1] : "";
+			entry.qglobal    = row[2] ? row[2] : "";
+			entry.value      = row[3] ? row[3] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -287,9 +287,9 @@ public:
 			SpellGlobals entry{};
 
 			entry.spellid    = atoi(row[0]);
-			entry.spell_name = row[1];
-			entry.qglobal    = row[2];
-			entry.value      = row[3];
+			entry.spell_name = row[1] ? row[1] : "";
+			entry.qglobal    = row[2] ? row[2] : "";
+			entry.value      = row[3] ? row[3] : "";
 
 			all_entries.push_back(entry);
 		}

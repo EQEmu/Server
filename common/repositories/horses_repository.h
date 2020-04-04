@@ -139,12 +139,12 @@ public:
 		if (results.RowCount() == 1) {
 			Horses entry{};
 
-			entry.filename   = row[0];
+			entry.filename   = row[0] ? row[0] : "";
 			entry.race       = atoi(row[1]);
 			entry.gender     = atoi(row[2]);
 			entry.texture    = atoi(row[3]);
 			entry.mountspeed = atof(row[4]);
-			entry.notes      = row[5];
+			entry.notes      = row[5] ? row[5] : "";
 
 			return entry;
 		}
@@ -272,12 +272,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Horses entry{};
 
-			entry.filename   = row[0];
+			entry.filename   = row[0] ? row[0] : "";
 			entry.race       = atoi(row[1]);
 			entry.gender     = atoi(row[2]);
 			entry.texture    = atoi(row[3]);
 			entry.mountspeed = atof(row[4]);
-			entry.notes      = row[5];
+			entry.notes      = row[5] ? row[5] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -302,12 +302,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Horses entry{};
 
-			entry.filename   = row[0];
+			entry.filename   = row[0] ? row[0] : "";
 			entry.race       = atoi(row[1]);
 			entry.gender     = atoi(row[2]);
 			entry.texture    = atoi(row[3]);
 			entry.mountspeed = atof(row[4]);
-			entry.notes      = row[5];
+			entry.notes      = row[5] ? row[5] : "";
 
 			all_entries.push_back(entry);
 		}

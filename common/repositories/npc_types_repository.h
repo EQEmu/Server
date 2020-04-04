@@ -488,8 +488,8 @@ public:
 			NpcTypes entry{};
 
 			entry.id                     = atoi(row[0]);
-			entry.name                   = row[1];
-			entry.lastname               = row[2];
+			entry.name                   = row[1] ? row[1] : "";
+			entry.lastname               = row[2] ? row[2] : "";
 			entry.level                  = atoi(row[3]);
 			entry.race                   = atoi(row[4]);
 			entry.class                  = atoi(row[5]);
@@ -514,8 +514,8 @@ public:
 			entry.mindmg                 = atoi(row[24]);
 			entry.maxdmg                 = atoi(row[25]);
 			entry.attack_count           = atoi(row[26]);
-			entry.npcspecialattks        = row[27];
-			entry.special_abilities      = row[28];
+			entry.npcspecialattks        = row[27] ? row[27] : "";
+			entry.special_abilities      = row[28] ? row[28] : "";
 			entry.aggroradius            = atoi(row[29]);
 			entry.assistradius           = atoi(row[30]);
 			entry.face                   = atoi(row[31]);
@@ -534,7 +534,7 @@ public:
 			entry.armortint_blue         = atoi(row[44]);
 			entry.d_melee_texture1       = atoi(row[45]);
 			entry.d_melee_texture2       = atoi(row[46]);
-			entry.ammo_idfile            = row[47];
+			entry.ammo_idfile            = row[47] ? row[47] : "";
 			entry.prim_melee_type        = atoi(row[48]);
 			entry.sec_melee_type         = atoi(row[49]);
 			entry.ranged_type            = atoi(row[50]);
@@ -1085,8 +1085,8 @@ public:
 			NpcTypes entry{};
 
 			entry.id                     = atoi(row[0]);
-			entry.name                   = row[1];
-			entry.lastname               = row[2];
+			entry.name                   = row[1] ? row[1] : "";
+			entry.lastname               = row[2] ? row[2] : "";
 			entry.level                  = atoi(row[3]);
 			entry.race                   = atoi(row[4]);
 			entry.class                  = atoi(row[5]);
@@ -1111,8 +1111,8 @@ public:
 			entry.mindmg                 = atoi(row[24]);
 			entry.maxdmg                 = atoi(row[25]);
 			entry.attack_count           = atoi(row[26]);
-			entry.npcspecialattks        = row[27];
-			entry.special_abilities      = row[28];
+			entry.npcspecialattks        = row[27] ? row[27] : "";
+			entry.special_abilities      = row[28] ? row[28] : "";
 			entry.aggroradius            = atoi(row[29]);
 			entry.assistradius           = atoi(row[30]);
 			entry.face                   = atoi(row[31]);
@@ -1131,7 +1131,7 @@ public:
 			entry.armortint_blue         = atoi(row[44]);
 			entry.d_melee_texture1       = atoi(row[45]);
 			entry.d_melee_texture2       = atoi(row[46]);
-			entry.ammo_idfile            = row[47];
+			entry.ammo_idfile            = row[47] ? row[47] : "";
 			entry.prim_melee_type        = atoi(row[48]);
 			entry.sec_melee_type         = atoi(row[49]);
 			entry.ranged_type            = atoi(row[50]);
@@ -1231,8 +1231,8 @@ public:
 			NpcTypes entry{};
 
 			entry.id                     = atoi(row[0]);
-			entry.name                   = row[1];
-			entry.lastname               = row[2];
+			entry.name                   = row[1] ? row[1] : "";
+			entry.lastname               = row[2] ? row[2] : "";
 			entry.level                  = atoi(row[3]);
 			entry.race                   = atoi(row[4]);
 			entry.class                  = atoi(row[5]);
@@ -1257,8 +1257,8 @@ public:
 			entry.mindmg                 = atoi(row[24]);
 			entry.maxdmg                 = atoi(row[25]);
 			entry.attack_count           = atoi(row[26]);
-			entry.npcspecialattks        = row[27];
-			entry.special_abilities      = row[28];
+			entry.npcspecialattks        = row[27] ? row[27] : "";
+			entry.special_abilities      = row[28] ? row[28] : "";
 			entry.aggroradius            = atoi(row[29]);
 			entry.assistradius           = atoi(row[30]);
 			entry.face                   = atoi(row[31]);
@@ -1277,7 +1277,7 @@ public:
 			entry.armortint_blue         = atoi(row[44]);
 			entry.d_melee_texture1       = atoi(row[45]);
 			entry.d_melee_texture2       = atoi(row[46]);
-			entry.ammo_idfile            = row[47];
+			entry.ammo_idfile            = row[47] ? row[47] : "";
 			entry.prim_melee_type        = atoi(row[48]);
 			entry.sec_melee_type         = atoi(row[49]);
 			entry.ranged_type            = atoi(row[50]);

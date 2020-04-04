@@ -185,7 +185,7 @@ public:
 			NpcSpells entry{};
 
 			entry.id                       = atoi(row[0]);
-			entry.name                     = row[1];
+			entry.name                     = row[1] ? row[1] : "";
 			entry.parent_list              = atoi(row[2]);
 			entry.attack_proc              = atoi(row[3]);
 			entry.proc_chance              = atoi(row[4]);
@@ -378,7 +378,7 @@ public:
 			NpcSpells entry{};
 
 			entry.id                       = atoi(row[0]);
-			entry.name                     = row[1];
+			entry.name                     = row[1] ? row[1] : "";
 			entry.parent_list              = atoi(row[2]);
 			entry.attack_proc              = atoi(row[3]);
 			entry.proc_chance              = atoi(row[4]);
@@ -423,7 +423,7 @@ public:
 			NpcSpells entry{};
 
 			entry.id                       = atoi(row[0]);
-			entry.name                     = row[1];
+			entry.name                     = row[1] ? row[1] : "";
 			entry.parent_list              = atoi(row[2]);
 			entry.attack_proc              = atoi(row[3]);
 			entry.proc_chance              = atoi(row[4]);

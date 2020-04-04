@@ -221,7 +221,7 @@ public:
 			AdventureTemplate entry{};
 
 			entry.id                = atoi(row[0]);
-			entry.zone              = row[1];
+			entry.zone              = row[1] ? row[1] : "";
 			entry.zone_version      = atoi(row[2]);
 			entry.is_hard           = atoi(row[3]);
 			entry.is_raid           = atoi(row[4]);
@@ -234,7 +234,7 @@ public:
 			entry.assa_y            = atof(row[11]);
 			entry.assa_z            = atof(row[12]);
 			entry.assa_h            = atof(row[13]);
-			entry.text              = row[14];
+			entry.text              = row[14] ? row[14] : "";
 			entry.duration          = atoi(row[15]);
 			entry.zone_in_time      = atoi(row[16]);
 			entry.win_points        = atoi(row[17]);
@@ -462,7 +462,7 @@ public:
 			AdventureTemplate entry{};
 
 			entry.id                = atoi(row[0]);
-			entry.zone              = row[1];
+			entry.zone              = row[1] ? row[1] : "";
 			entry.zone_version      = atoi(row[2]);
 			entry.is_hard           = atoi(row[3]);
 			entry.is_raid           = atoi(row[4]);
@@ -475,7 +475,7 @@ public:
 			entry.assa_y            = atof(row[11]);
 			entry.assa_z            = atof(row[12]);
 			entry.assa_h            = atof(row[13]);
-			entry.text              = row[14];
+			entry.text              = row[14] ? row[14] : "";
 			entry.duration          = atoi(row[15]);
 			entry.zone_in_time      = atoi(row[16]);
 			entry.win_points        = atoi(row[17]);
@@ -519,7 +519,7 @@ public:
 			AdventureTemplate entry{};
 
 			entry.id                = atoi(row[0]);
-			entry.zone              = row[1];
+			entry.zone              = row[1] ? row[1] : "";
 			entry.zone_version      = atoi(row[2]);
 			entry.is_hard           = atoi(row[3]);
 			entry.is_raid           = atoi(row[4]);
@@ -532,7 +532,7 @@ public:
 			entry.assa_y            = atof(row[11]);
 			entry.assa_z            = atof(row[12]);
 			entry.assa_h            = atof(row[13]);
-			entry.text              = row[14];
+			entry.text              = row[14] ? row[14] : "";
 			entry.duration          = atoi(row[15]);
 			entry.zone_in_time      = atoi(row[16]);
 			entry.win_points        = atoi(row[17]);

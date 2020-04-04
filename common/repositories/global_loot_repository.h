@@ -161,17 +161,17 @@ public:
 			GlobalLoot entry{};
 
 			entry.id           = atoi(row[0]);
-			entry.description  = row[1];
+			entry.description  = row[1] ? row[1] : "";
 			entry.loottable_id = atoi(row[2]);
 			entry.enabled      = atoi(row[3]);
 			entry.min_level    = atoi(row[4]);
 			entry.max_level    = atoi(row[5]);
 			entry.rare         = atoi(row[6]);
 			entry.raid         = atoi(row[7]);
-			entry.race         = row[8];
-			entry.class        = row[9];
-			entry.bodytype     = row[10];
-			entry.zone         = row[11];
+			entry.race         = row[8] ? row[8] : "";
+			entry.class        = row[9] ? row[9] : "";
+			entry.bodytype     = row[10] ? row[10] : "";
+			entry.zone         = row[11] ? row[11] : "";
 			entry.hot_zone     = atoi(row[12]);
 
 			return entry;
@@ -322,17 +322,17 @@ public:
 			GlobalLoot entry{};
 
 			entry.id           = atoi(row[0]);
-			entry.description  = row[1];
+			entry.description  = row[1] ? row[1] : "";
 			entry.loottable_id = atoi(row[2]);
 			entry.enabled      = atoi(row[3]);
 			entry.min_level    = atoi(row[4]);
 			entry.max_level    = atoi(row[5]);
 			entry.rare         = atoi(row[6]);
 			entry.raid         = atoi(row[7]);
-			entry.race         = row[8];
-			entry.class        = row[9];
-			entry.bodytype     = row[10];
-			entry.zone         = row[11];
+			entry.race         = row[8] ? row[8] : "";
+			entry.class        = row[9] ? row[9] : "";
+			entry.bodytype     = row[10] ? row[10] : "";
+			entry.zone         = row[11] ? row[11] : "";
 			entry.hot_zone     = atoi(row[12]);
 
 			all_entries.push_back(entry);
@@ -359,17 +359,17 @@ public:
 			GlobalLoot entry{};
 
 			entry.id           = atoi(row[0]);
-			entry.description  = row[1];
+			entry.description  = row[1] ? row[1] : "";
 			entry.loottable_id = atoi(row[2]);
 			entry.enabled      = atoi(row[3]);
 			entry.min_level    = atoi(row[4]);
 			entry.max_level    = atoi(row[5]);
 			entry.rare         = atoi(row[6]);
 			entry.raid         = atoi(row[7]);
-			entry.race         = row[8];
-			entry.class        = row[9];
-			entry.bodytype     = row[10];
-			entry.zone         = row[11];
+			entry.race         = row[8] ? row[8] : "";
+			entry.class        = row[9] ? row[9] : "";
+			entry.bodytype     = row[10] ? row[10] : "";
+			entry.zone         = row[11] ? row[11] : "";
 			entry.hot_zone     = atoi(row[12]);
 
 			all_entries.push_back(entry);

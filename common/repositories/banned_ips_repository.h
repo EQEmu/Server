@@ -127,8 +127,8 @@ public:
 		if (results.RowCount() == 1) {
 			BannedIps entry{};
 
-			entry.ip_address = row[0];
-			entry.notes      = row[1];
+			entry.ip_address = row[0] ? row[0] : "";
+			entry.notes      = row[1] ? row[1] : "";
 
 			return entry;
 		}
@@ -244,8 +244,8 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			BannedIps entry{};
 
-			entry.ip_address = row[0];
-			entry.notes      = row[1];
+			entry.ip_address = row[0] ? row[0] : "";
+			entry.notes      = row[1] ? row[1] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -270,8 +270,8 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			BannedIps entry{};
 
-			entry.ip_address = row[0];
-			entry.notes      = row[1];
+			entry.ip_address = row[0] ? row[0] : "";
+			entry.notes      = row[1] ? row[1] : "";
 
 			all_entries.push_back(entry);
 		}

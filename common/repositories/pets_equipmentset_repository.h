@@ -131,7 +131,7 @@ public:
 			PetsEquipmentset entry{};
 
 			entry.set_id     = atoi(row[0]);
-			entry.setname    = row[1];
+			entry.setname    = row[1] ? row[1] : "";
 			entry.nested_set = atoi(row[2]);
 
 			return entry;
@@ -252,7 +252,7 @@ public:
 			PetsEquipmentset entry{};
 
 			entry.set_id     = atoi(row[0]);
-			entry.setname    = row[1];
+			entry.setname    = row[1] ? row[1] : "";
 			entry.nested_set = atoi(row[2]);
 
 			all_entries.push_back(entry);
@@ -279,7 +279,7 @@ public:
 			PetsEquipmentset entry{};
 
 			entry.set_id     = atoi(row[0]);
-			entry.setname    = row[1];
+			entry.setname    = row[1] ? row[1] : "";
 			entry.nested_set = atoi(row[2]);
 
 			all_entries.push_back(entry);

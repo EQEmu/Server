@@ -147,7 +147,7 @@ public:
 
 			entry.char_id  = atoi(row[0]);
 			entry.pet      = atoi(row[1]);
-			entry.petname  = row[2];
+			entry.petname  = row[2] ? row[2] : "";
 			entry.petpower = atoi(row[3]);
 			entry.spell_id = atoi(row[4]);
 			entry.hp       = atoi(row[5]);
@@ -285,7 +285,7 @@ public:
 
 			entry.char_id  = atoi(row[0]);
 			entry.pet      = atoi(row[1]);
-			entry.petname  = row[2];
+			entry.petname  = row[2] ? row[2] : "";
 			entry.petpower = atoi(row[3]);
 			entry.spell_id = atoi(row[4]);
 			entry.hp       = atoi(row[5]);
@@ -317,7 +317,7 @@ public:
 
 			entry.char_id  = atoi(row[0]);
 			entry.pet      = atoi(row[1]);
-			entry.petname  = row[2];
+			entry.petname  = row[2] ? row[2] : "";
 			entry.petpower = atoi(row[3]);
 			entry.spell_id = atoi(row[4]);
 			entry.hp       = atoi(row[5]);

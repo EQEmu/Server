@@ -128,7 +128,7 @@ public:
 			Saylink entry{};
 
 			entry.id     = atoi(row[0]);
-			entry.phrase = row[1];
+			entry.phrase = row[1] ? row[1] : "";
 
 			return entry;
 		}
@@ -245,7 +245,7 @@ public:
 			Saylink entry{};
 
 			entry.id     = atoi(row[0]);
-			entry.phrase = row[1];
+			entry.phrase = row[1] ? row[1] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -271,7 +271,7 @@ public:
 			Saylink entry{};
 
 			entry.id     = atoi(row[0]);
-			entry.phrase = row[1];
+			entry.phrase = row[1] ? row[1] : "";
 
 			all_entries.push_back(entry);
 		}

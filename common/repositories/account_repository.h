@@ -179,24 +179,24 @@ public:
 			Account entry{};
 
 			entry.id             = atoi(row[0]);
-			entry.name           = row[1];
-			entry.charname       = row[2];
+			entry.name           = row[1] ? row[1] : "";
+			entry.charname       = row[2] ? row[2] : "";
 			entry.sharedplat     = atoi(row[3]);
-			entry.password       = row[4];
+			entry.password       = row[4] ? row[4] : "";
 			entry.status         = atoi(row[5]);
-			entry.ls_id          = row[6];
+			entry.ls_id          = row[6] ? row[6] : "";
 			entry.lsaccount_id   = atoi(row[7]);
 			entry.gmspeed        = atoi(row[8]);
 			entry.revoked        = atoi(row[9]);
 			entry.karma          = atoi(row[10]);
-			entry.minilogin_ip   = row[11];
+			entry.minilogin_ip   = row[11] ? row[11] : "";
 			entry.hideme         = atoi(row[12]);
 			entry.rulesflag      = atoi(row[13]);
-			entry.suspendeduntil = row[14];
+			entry.suspendeduntil = row[14] ? row[14] : "";
 			entry.time_creation  = atoi(row[15]);
 			entry.expansion      = atoi(row[16]);
-			entry.ban_reason     = row[17];
-			entry.suspend_reason = row[18];
+			entry.ban_reason     = row[17] ? row[17] : "";
+			entry.suspend_reason = row[18] ? row[18] : "";
 
 			return entry;
 		}
@@ -364,24 +364,24 @@ public:
 			Account entry{};
 
 			entry.id             = atoi(row[0]);
-			entry.name           = row[1];
-			entry.charname       = row[2];
+			entry.name           = row[1] ? row[1] : "";
+			entry.charname       = row[2] ? row[2] : "";
 			entry.sharedplat     = atoi(row[3]);
-			entry.password       = row[4];
+			entry.password       = row[4] ? row[4] : "";
 			entry.status         = atoi(row[5]);
-			entry.ls_id          = row[6];
+			entry.ls_id          = row[6] ? row[6] : "";
 			entry.lsaccount_id   = atoi(row[7]);
 			entry.gmspeed        = atoi(row[8]);
 			entry.revoked        = atoi(row[9]);
 			entry.karma          = atoi(row[10]);
-			entry.minilogin_ip   = row[11];
+			entry.minilogin_ip   = row[11] ? row[11] : "";
 			entry.hideme         = atoi(row[12]);
 			entry.rulesflag      = atoi(row[13]);
-			entry.suspendeduntil = row[14];
+			entry.suspendeduntil = row[14] ? row[14] : "";
 			entry.time_creation  = atoi(row[15]);
 			entry.expansion      = atoi(row[16]);
-			entry.ban_reason     = row[17];
-			entry.suspend_reason = row[18];
+			entry.ban_reason     = row[17] ? row[17] : "";
+			entry.suspend_reason = row[18] ? row[18] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -407,24 +407,24 @@ public:
 			Account entry{};
 
 			entry.id             = atoi(row[0]);
-			entry.name           = row[1];
-			entry.charname       = row[2];
+			entry.name           = row[1] ? row[1] : "";
+			entry.charname       = row[2] ? row[2] : "";
 			entry.sharedplat     = atoi(row[3]);
-			entry.password       = row[4];
+			entry.password       = row[4] ? row[4] : "";
 			entry.status         = atoi(row[5]);
-			entry.ls_id          = row[6];
+			entry.ls_id          = row[6] ? row[6] : "";
 			entry.lsaccount_id   = atoi(row[7]);
 			entry.gmspeed        = atoi(row[8]);
 			entry.revoked        = atoi(row[9]);
 			entry.karma          = atoi(row[10]);
-			entry.minilogin_ip   = row[11];
+			entry.minilogin_ip   = row[11] ? row[11] : "";
 			entry.hideme         = atoi(row[12]);
 			entry.rulesflag      = atoi(row[13]);
-			entry.suspendeduntil = row[14];
+			entry.suspendeduntil = row[14] ? row[14] : "";
 			entry.time_creation  = atoi(row[15]);
 			entry.expansion      = atoi(row[16]);
-			entry.ban_reason     = row[17];
-			entry.suspend_reason = row[18];
+			entry.ban_reason     = row[17] ? row[17] : "";
+			entry.suspend_reason = row[18] ? row[18] : "";
 
 			all_entries.push_back(entry);
 		}

@@ -232,7 +232,7 @@ public:
 			entry.attack_delay      = atoi(row[24]);
 			entry.spell_scale       = atoi(row[25]);
 			entry.heal_scale        = atoi(row[26]);
-			entry.special_abilities = row[27];
+			entry.special_abilities = row[27] ? row[27] : "";
 
 			return entry;
 		}
@@ -450,7 +450,7 @@ public:
 			entry.attack_delay      = atoi(row[24]);
 			entry.spell_scale       = atoi(row[25]);
 			entry.heal_scale        = atoi(row[26]);
-			entry.special_abilities = row[27];
+			entry.special_abilities = row[27] ? row[27] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -502,7 +502,7 @@ public:
 			entry.attack_delay      = atoi(row[24]);
 			entry.spell_scale       = atoi(row[25]);
 			entry.heal_scale        = atoi(row[26]);
-			entry.special_abilities = row[27];
+			entry.special_abilities = row[27] ? row[27] : "";
 
 			all_entries.push_back(entry);
 		}

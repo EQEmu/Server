@@ -833,14 +833,14 @@ public:
 			SpellsNew entry{};
 
 			entry.id                   = atoi(row[0]);
-			entry.name                 = row[1];
-			entry.player_1             = row[2];
-			entry.teleport_zone        = row[3];
-			entry.you_cast             = row[4];
-			entry.other_casts          = row[5];
-			entry.cast_on_you          = row[6];
-			entry.cast_on_other        = row[7];
-			entry.spell_fades          = row[8];
+			entry.name                 = row[1] ? row[1] : "";
+			entry.player_1             = row[2] ? row[2] : "";
+			entry.teleport_zone        = row[3] ? row[3] : "";
+			entry.you_cast             = row[4] ? row[4] : "";
+			entry.other_casts          = row[5] ? row[5] : "";
+			entry.cast_on_you          = row[6] ? row[6] : "";
+			entry.cast_on_other        = row[7] ? row[7] : "";
+			entry.spell_fades          = row[8] ? row[8] : "";
 			entry.range                = atoi(row[9]);
 			entry.aoerange             = atoi(row[10]);
 			entry.pushback             = atoi(row[11]);
@@ -1890,14 +1890,14 @@ public:
 			SpellsNew entry{};
 
 			entry.id                   = atoi(row[0]);
-			entry.name                 = row[1];
-			entry.player_1             = row[2];
-			entry.teleport_zone        = row[3];
-			entry.you_cast             = row[4];
-			entry.other_casts          = row[5];
-			entry.cast_on_you          = row[6];
-			entry.cast_on_other        = row[7];
-			entry.spell_fades          = row[8];
+			entry.name                 = row[1] ? row[1] : "";
+			entry.player_1             = row[2] ? row[2] : "";
+			entry.teleport_zone        = row[3] ? row[3] : "";
+			entry.you_cast             = row[4] ? row[4] : "";
+			entry.other_casts          = row[5] ? row[5] : "";
+			entry.cast_on_you          = row[6] ? row[6] : "";
+			entry.cast_on_other        = row[7] ? row[7] : "";
+			entry.spell_fades          = row[8] ? row[8] : "";
 			entry.range                = atoi(row[9]);
 			entry.aoerange             = atoi(row[10]);
 			entry.pushback             = atoi(row[11]);
@@ -2151,14 +2151,14 @@ public:
 			SpellsNew entry{};
 
 			entry.id                   = atoi(row[0]);
-			entry.name                 = row[1];
-			entry.player_1             = row[2];
-			entry.teleport_zone        = row[3];
-			entry.you_cast             = row[4];
-			entry.other_casts          = row[5];
-			entry.cast_on_you          = row[6];
-			entry.cast_on_other        = row[7];
-			entry.spell_fades          = row[8];
+			entry.name                 = row[1] ? row[1] : "";
+			entry.player_1             = row[2] ? row[2] : "";
+			entry.teleport_zone        = row[3] ? row[3] : "";
+			entry.you_cast             = row[4] ? row[4] : "";
+			entry.other_casts          = row[5] ? row[5] : "";
+			entry.cast_on_you          = row[6] ? row[6] : "";
+			entry.cast_on_other        = row[7] ? row[7] : "";
+			entry.spell_fades          = row[8] ? row[8] : "";
 			entry.range                = atoi(row[9]);
 			entry.aoerange             = atoi(row[10]);
 			entry.pushback             = atoi(row[11]);

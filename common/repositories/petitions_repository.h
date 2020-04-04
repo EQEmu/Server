@@ -171,12 +171,12 @@ public:
 
 			entry.dib          = atoi(row[0]);
 			entry.petid        = atoi(row[1]);
-			entry.charname     = row[2];
-			entry.accountname  = row[3];
-			entry.lastgm       = row[4];
-			entry.petitiontext = row[5];
-			entry.gmtext       = row[6];
-			entry.zone         = row[7];
+			entry.charname     = row[2] ? row[2] : "";
+			entry.accountname  = row[3] ? row[3] : "";
+			entry.lastgm       = row[4] ? row[4] : "";
+			entry.petitiontext = row[5] ? row[5] : "";
+			entry.gmtext       = row[6] ? row[6] : "";
+			entry.zone         = row[7] ? row[7] : "";
 			entry.urgency      = atoi(row[8]);
 			entry.charclass    = atoi(row[9]);
 			entry.charrace     = atoi(row[10]);
@@ -344,12 +344,12 @@ public:
 
 			entry.dib          = atoi(row[0]);
 			entry.petid        = atoi(row[1]);
-			entry.charname     = row[2];
-			entry.accountname  = row[3];
-			entry.lastgm       = row[4];
-			entry.petitiontext = row[5];
-			entry.gmtext       = row[6];
-			entry.zone         = row[7];
+			entry.charname     = row[2] ? row[2] : "";
+			entry.accountname  = row[3] ? row[3] : "";
+			entry.lastgm       = row[4] ? row[4] : "";
+			entry.petitiontext = row[5] ? row[5] : "";
+			entry.gmtext       = row[6] ? row[6] : "";
+			entry.zone         = row[7] ? row[7] : "";
 			entry.urgency      = atoi(row[8]);
 			entry.charclass    = atoi(row[9]);
 			entry.charrace     = atoi(row[10]);
@@ -384,12 +384,12 @@ public:
 
 			entry.dib          = atoi(row[0]);
 			entry.petid        = atoi(row[1]);
-			entry.charname     = row[2];
-			entry.accountname  = row[3];
-			entry.lastgm       = row[4];
-			entry.petitiontext = row[5];
-			entry.gmtext       = row[6];
-			entry.zone         = row[7];
+			entry.charname     = row[2] ? row[2] : "";
+			entry.accountname  = row[3] ? row[3] : "";
+			entry.lastgm       = row[4] ? row[4] : "";
+			entry.petitiontext = row[5] ? row[5] : "";
+			entry.gmtext       = row[6] ? row[6] : "";
+			entry.zone         = row[7] ? row[7] : "";
 			entry.urgency      = atoi(row[8]);
 			entry.charclass    = atoi(row[9]);
 			entry.charrace     = atoi(row[10]);

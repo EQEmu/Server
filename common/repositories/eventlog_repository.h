@@ -152,14 +152,14 @@ public:
 			Eventlog entry{};
 
 			entry.id              = atoi(row[0]);
-			entry.accountname     = row[1];
+			entry.accountname     = row[1] ? row[1] : "";
 			entry.accountid       = atoi(row[2]);
 			entry.status          = atoi(row[3]);
-			entry.charname        = row[4];
-			entry.target          = row[5];
-			entry.time            = row[6];
-			entry.descriptiontype = row[7];
-			entry.description     = row[8];
+			entry.charname        = row[4] ? row[4] : "";
+			entry.target          = row[5] ? row[5] : "";
+			entry.time            = row[6] ? row[6] : "";
+			entry.descriptiontype = row[7] ? row[7] : "";
+			entry.description     = row[8] ? row[8] : "";
 			entry.event_nid       = atoi(row[9]);
 
 			return entry;
@@ -301,14 +301,14 @@ public:
 			Eventlog entry{};
 
 			entry.id              = atoi(row[0]);
-			entry.accountname     = row[1];
+			entry.accountname     = row[1] ? row[1] : "";
 			entry.accountid       = atoi(row[2]);
 			entry.status          = atoi(row[3]);
-			entry.charname        = row[4];
-			entry.target          = row[5];
-			entry.time            = row[6];
-			entry.descriptiontype = row[7];
-			entry.description     = row[8];
+			entry.charname        = row[4] ? row[4] : "";
+			entry.target          = row[5] ? row[5] : "";
+			entry.time            = row[6] ? row[6] : "";
+			entry.descriptiontype = row[7] ? row[7] : "";
+			entry.description     = row[8] ? row[8] : "";
 			entry.event_nid       = atoi(row[9]);
 
 			all_entries.push_back(entry);
@@ -335,14 +335,14 @@ public:
 			Eventlog entry{};
 
 			entry.id              = atoi(row[0]);
-			entry.accountname     = row[1];
+			entry.accountname     = row[1] ? row[1] : "";
 			entry.accountid       = atoi(row[2]);
 			entry.status          = atoi(row[3]);
-			entry.charname        = row[4];
-			entry.target          = row[5];
-			entry.time            = row[6];
-			entry.descriptiontype = row[7];
-			entry.description     = row[8];
+			entry.charname        = row[4] ? row[4] : "";
+			entry.target          = row[5] ? row[5] : "";
+			entry.time            = row[6] ? row[6] : "";
+			entry.descriptiontype = row[7] ? row[7] : "";
+			entry.description     = row[8] ? row[8] : "";
 			entry.event_nid       = atoi(row[9]);
 
 			all_entries.push_back(entry);

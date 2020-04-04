@@ -148,10 +148,10 @@ public:
 			entry.msgid     = atoi(row[0]);
 			entry.charid    = atoi(row[1]);
 			entry.timestamp = atoi(row[2]);
-			entry.from      = row[3];
-			entry.subject   = row[4];
-			entry.body      = row[5];
-			entry.to        = row[6];
+			entry.from      = row[3] ? row[3] : "";
+			entry.subject   = row[4] ? row[4] : "";
+			entry.body      = row[5] ? row[5] : "";
+			entry.to        = row[6] ? row[6] : "";
 			entry.status    = atoi(row[7]);
 
 			return entry;
@@ -289,10 +289,10 @@ public:
 			entry.msgid     = atoi(row[0]);
 			entry.charid    = atoi(row[1]);
 			entry.timestamp = atoi(row[2]);
-			entry.from      = row[3];
-			entry.subject   = row[4];
-			entry.body      = row[5];
-			entry.to        = row[6];
+			entry.from      = row[3] ? row[3] : "";
+			entry.subject   = row[4] ? row[4] : "";
+			entry.body      = row[5] ? row[5] : "";
+			entry.to        = row[6] ? row[6] : "";
 			entry.status    = atoi(row[7]);
 
 			all_entries.push_back(entry);
@@ -321,10 +321,10 @@ public:
 			entry.msgid     = atoi(row[0]);
 			entry.charid    = atoi(row[1]);
 			entry.timestamp = atoi(row[2]);
-			entry.from      = row[3];
-			entry.subject   = row[4];
-			entry.body      = row[5];
-			entry.to        = row[6];
+			entry.from      = row[3] ? row[3] : "";
+			entry.subject   = row[4] ? row[4] : "";
+			entry.body      = row[5] ? row[5] : "";
+			entry.to        = row[6] ? row[6] : "";
 			entry.status    = atoi(row[7]);
 
 			all_entries.push_back(entry);

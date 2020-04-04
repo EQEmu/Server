@@ -167,8 +167,8 @@ public:
 			entry.x_diff      = atof(row[7]);
 			entry.y_diff      = atof(row[8]);
 			entry.z_diff      = atof(row[9]);
-			entry.message     = row[10];
-			entry.description = row[11];
+			entry.message     = row[10] ? row[10] : "";
+			entry.description = row[11] ? row[11] : "";
 
 			return entry;
 		}
@@ -324,8 +324,8 @@ public:
 			entry.x_diff      = atof(row[7]);
 			entry.y_diff      = atof(row[8]);
 			entry.z_diff      = atof(row[9]);
-			entry.message     = row[10];
-			entry.description = row[11];
+			entry.message     = row[10] ? row[10] : "";
+			entry.description = row[11] ? row[11] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -360,8 +360,8 @@ public:
 			entry.x_diff      = atof(row[7]);
 			entry.y_diff      = atof(row[8]);
 			entry.z_diff      = atof(row[9]);
-			entry.message     = row[10];
-			entry.description = row[11];
+			entry.message     = row[10] ? row[10] : "";
+			entry.description = row[11] ? row[11] : "";
 
 			all_entries.push_back(entry);
 		}

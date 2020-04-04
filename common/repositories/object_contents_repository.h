@@ -162,7 +162,7 @@ public:
 			entry.bagidx   = atoi(row[2]);
 			entry.itemid   = atoi(row[3]);
 			entry.charges  = atoi(row[4]);
-			entry.droptime = row[5];
+			entry.droptime = row[5] ? row[5] : "";
 			entry.augslot1 = atoi(row[6]);
 			entry.augslot2 = atoi(row[7]);
 			entry.augslot3 = atoi(row[8]);
@@ -316,7 +316,7 @@ public:
 			entry.bagidx   = atoi(row[2]);
 			entry.itemid   = atoi(row[3]);
 			entry.charges  = atoi(row[4]);
-			entry.droptime = row[5];
+			entry.droptime = row[5] ? row[5] : "";
 			entry.augslot1 = atoi(row[6]);
 			entry.augslot2 = atoi(row[7]);
 			entry.augslot3 = atoi(row[8]);
@@ -352,7 +352,7 @@ public:
 			entry.bagidx   = atoi(row[2]);
 			entry.itemid   = atoi(row[3]);
 			entry.charges  = atoi(row[4]);
-			entry.droptime = row[5];
+			entry.droptime = row[5] ? row[5] : "";
 			entry.augslot1 = atoi(row[6]);
 			entry.augslot2 = atoi(row[7]);
 			entry.augslot3 = atoi(row[8]);

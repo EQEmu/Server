@@ -149,14 +149,14 @@ public:
 			LoginAccounts entry{};
 
 			entry.id                 = atoi(row[0]);
-			entry.account_name       = row[1];
-			entry.account_password   = row[2];
-			entry.account_email      = row[3];
-			entry.source_loginserver = row[4];
-			entry.last_ip_address    = row[5];
-			entry.last_login_date    = row[6];
-			entry.created_at         = row[7];
-			entry.updated_at         = row[8];
+			entry.account_name       = row[1] ? row[1] : "";
+			entry.account_password   = row[2] ? row[2] : "";
+			entry.account_email      = row[3] ? row[3] : "";
+			entry.source_loginserver = row[4] ? row[4] : "";
+			entry.last_ip_address    = row[5] ? row[5] : "";
+			entry.last_login_date    = row[6] ? row[6] : "";
+			entry.created_at         = row[7] ? row[7] : "";
+			entry.updated_at         = row[8] ? row[8] : "";
 
 			return entry;
 		}
@@ -294,14 +294,14 @@ public:
 			LoginAccounts entry{};
 
 			entry.id                 = atoi(row[0]);
-			entry.account_name       = row[1];
-			entry.account_password   = row[2];
-			entry.account_email      = row[3];
-			entry.source_loginserver = row[4];
-			entry.last_ip_address    = row[5];
-			entry.last_login_date    = row[6];
-			entry.created_at         = row[7];
-			entry.updated_at         = row[8];
+			entry.account_name       = row[1] ? row[1] : "";
+			entry.account_password   = row[2] ? row[2] : "";
+			entry.account_email      = row[3] ? row[3] : "";
+			entry.source_loginserver = row[4] ? row[4] : "";
+			entry.last_ip_address    = row[5] ? row[5] : "";
+			entry.last_login_date    = row[6] ? row[6] : "";
+			entry.created_at         = row[7] ? row[7] : "";
+			entry.updated_at         = row[8] ? row[8] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -327,14 +327,14 @@ public:
 			LoginAccounts entry{};
 
 			entry.id                 = atoi(row[0]);
-			entry.account_name       = row[1];
-			entry.account_password   = row[2];
-			entry.account_email      = row[3];
-			entry.source_loginserver = row[4];
-			entry.last_ip_address    = row[5];
-			entry.last_login_date    = row[6];
-			entry.created_at         = row[7];
-			entry.updated_at         = row[8];
+			entry.account_name       = row[1] ? row[1] : "";
+			entry.account_password   = row[2] ? row[2] : "";
+			entry.account_email      = row[3] ? row[3] : "";
+			entry.source_loginserver = row[4] ? row[4] : "";
+			entry.last_ip_address    = row[5] ? row[5] : "";
+			entry.last_login_date    = row[6] ? row[6] : "";
+			entry.created_at         = row[7] ? row[7] : "";
+			entry.updated_at         = row[8] ? row[8] : "";
 
 			all_entries.push_back(entry);
 		}

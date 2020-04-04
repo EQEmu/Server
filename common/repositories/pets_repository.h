@@ -145,7 +145,7 @@ public:
 		if (results.RowCount() == 1) {
 			Pets entry{};
 
-			entry.type         = row[0];
+			entry.type         = row[0] ? row[0] : "";
 			entry.petpower     = atoi(row[1]);
 			entry.npcID        = atoi(row[2]);
 			entry.temp         = atoi(row[3]);
@@ -283,7 +283,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Pets entry{};
 
-			entry.type         = row[0];
+			entry.type         = row[0] ? row[0] : "";
 			entry.petpower     = atoi(row[1]);
 			entry.npcID        = atoi(row[2]);
 			entry.temp         = atoi(row[3]);
@@ -315,7 +315,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Pets entry{};
 
-			entry.type         = row[0];
+			entry.type         = row[0] ? row[0] : "";
 			entry.petpower     = atoi(row[1]);
 			entry.npcID        = atoi(row[2]);
 			entry.temp         = atoi(row[3]);

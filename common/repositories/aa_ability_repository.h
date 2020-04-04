@@ -164,7 +164,7 @@ public:
 			AaAbility entry{};
 
 			entry.id               = atoi(row[0]);
-			entry.name             = row[1];
+			entry.name             = row[1] ? row[1] : "";
 			entry.category         = atoi(row[2]);
 			entry.classes          = atoi(row[3]);
 			entry.races            = atoi(row[4]);
@@ -329,7 +329,7 @@ public:
 			AaAbility entry{};
 
 			entry.id               = atoi(row[0]);
-			entry.name             = row[1];
+			entry.name             = row[1] ? row[1] : "";
 			entry.category         = atoi(row[2]);
 			entry.classes          = atoi(row[3]);
 			entry.races            = atoi(row[4]);
@@ -367,7 +367,7 @@ public:
 			AaAbility entry{};
 
 			entry.id               = atoi(row[0]);
-			entry.name             = row[1];
+			entry.name             = row[1] ? row[1] : "";
 			entry.category         = atoi(row[2]);
 			entry.classes          = atoi(row[3]);
 			entry.races            = atoi(row[4]);

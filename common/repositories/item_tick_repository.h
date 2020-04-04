@@ -143,7 +143,7 @@ public:
 			entry.it_chance  = atoi(row[1]);
 			entry.it_level   = atoi(row[2]);
 			entry.it_id      = atoi(row[3]);
-			entry.it_qglobal = row[4];
+			entry.it_qglobal = row[4] ? row[4] : "";
 			entry.it_bagslot = atoi(row[5]);
 
 			return entry;
@@ -276,7 +276,7 @@ public:
 			entry.it_chance  = atoi(row[1]);
 			entry.it_level   = atoi(row[2]);
 			entry.it_id      = atoi(row[3]);
-			entry.it_qglobal = row[4];
+			entry.it_qglobal = row[4] ? row[4] : "";
 			entry.it_bagslot = atoi(row[5]);
 
 			all_entries.push_back(entry);
@@ -306,7 +306,7 @@ public:
 			entry.it_chance  = atoi(row[1]);
 			entry.it_level   = atoi(row[2]);
 			entry.it_id      = atoi(row[3]);
-			entry.it_qglobal = row[4];
+			entry.it_qglobal = row[4] ? row[4] : "";
 			entry.it_bagslot = atoi(row[5]);
 
 			all_entries.push_back(entry);

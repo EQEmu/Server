@@ -131,7 +131,7 @@ public:
 			NpcSpellsEffects entry{};
 
 			entry.id          = atoi(row[0]);
-			entry.name        = row[1];
+			entry.name        = row[1] ? row[1] : "";
 			entry.parent_list = atoi(row[2]);
 
 			return entry;
@@ -252,7 +252,7 @@ public:
 			NpcSpellsEffects entry{};
 
 			entry.id          = atoi(row[0]);
-			entry.name        = row[1];
+			entry.name        = row[1] ? row[1] : "";
 			entry.parent_list = atoi(row[2]);
 
 			all_entries.push_back(entry);
@@ -279,7 +279,7 @@ public:
 			NpcSpellsEffects entry{};
 
 			entry.id          = atoi(row[0]);
-			entry.name        = row[1];
+			entry.name        = row[1] ? row[1] : "";
 			entry.parent_list = atoi(row[2]);
 
 			all_entries.push_back(entry);

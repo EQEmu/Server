@@ -429,10 +429,10 @@ public:
 
 			entry.id                      = atoi(row[0]);
 			entry.account_id              = atoi(row[1]);
-			entry.name                    = row[2];
-			entry.last_name               = row[3];
-			entry.title                   = row[4];
-			entry.suffix                  = row[5];
+			entry.name                    = row[2] ? row[2] : "";
+			entry.last_name               = row[3] ? row[3] : "";
+			entry.title                   = row[4] ? row[4] : "";
+			entry.suffix                  = row[5] ? row[5] : "";
 			entry.zone_id                 = atoi(row[6]);
 			entry.zone_instance           = atoi(row[7]);
 			entry.y                       = atof(row[8]);
@@ -519,7 +519,7 @@ public:
 			entry.autosplit_enabled       = atoi(row[89]);
 			entry.lfp                     = atoi(row[90]);
 			entry.lfg                     = atoi(row[91]);
-			entry.mailkey                 = row[92];
+			entry.mailkey                 = row[92] ? row[92] : "";
 			entry.xtargets                = atoi(row[93]);
 			entry.firstlogon              = atoi(row[94]);
 			entry.e_aa_effects            = atoi(row[95]);
@@ -528,7 +528,7 @@ public:
 			entry.aa_points_spent_old     = atoi(row[98]);
 			entry.aa_points_old           = atoi(row[99]);
 			entry.e_last_invsnapshot      = atoi(row[100]);
-			entry.deleted_at              = row[101];
+			entry.deleted_at              = row[101] ? row[101] : "";
 
 			return entry;
 		}
@@ -946,10 +946,10 @@ public:
 
 			entry.id                      = atoi(row[0]);
 			entry.account_id              = atoi(row[1]);
-			entry.name                    = row[2];
-			entry.last_name               = row[3];
-			entry.title                   = row[4];
-			entry.suffix                  = row[5];
+			entry.name                    = row[2] ? row[2] : "";
+			entry.last_name               = row[3] ? row[3] : "";
+			entry.title                   = row[4] ? row[4] : "";
+			entry.suffix                  = row[5] ? row[5] : "";
 			entry.zone_id                 = atoi(row[6]);
 			entry.zone_instance           = atoi(row[7]);
 			entry.y                       = atof(row[8]);
@@ -1036,7 +1036,7 @@ public:
 			entry.autosplit_enabled       = atoi(row[89]);
 			entry.lfp                     = atoi(row[90]);
 			entry.lfg                     = atoi(row[91]);
-			entry.mailkey                 = row[92];
+			entry.mailkey                 = row[92] ? row[92] : "";
 			entry.xtargets                = atoi(row[93]);
 			entry.firstlogon              = atoi(row[94]);
 			entry.e_aa_effects            = atoi(row[95]);
@@ -1045,7 +1045,7 @@ public:
 			entry.aa_points_spent_old     = atoi(row[98]);
 			entry.aa_points_old           = atoi(row[99]);
 			entry.e_last_invsnapshot      = atoi(row[100]);
-			entry.deleted_at              = row[101];
+			entry.deleted_at              = row[101] ? row[101] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -1072,10 +1072,10 @@ public:
 
 			entry.id                      = atoi(row[0]);
 			entry.account_id              = atoi(row[1]);
-			entry.name                    = row[2];
-			entry.last_name               = row[3];
-			entry.title                   = row[4];
-			entry.suffix                  = row[5];
+			entry.name                    = row[2] ? row[2] : "";
+			entry.last_name               = row[3] ? row[3] : "";
+			entry.title                   = row[4] ? row[4] : "";
+			entry.suffix                  = row[5] ? row[5] : "";
 			entry.zone_id                 = atoi(row[6]);
 			entry.zone_instance           = atoi(row[7]);
 			entry.y                       = atof(row[8]);
@@ -1162,7 +1162,7 @@ public:
 			entry.autosplit_enabled       = atoi(row[89]);
 			entry.lfp                     = atoi(row[90]);
 			entry.lfg                     = atoi(row[91]);
-			entry.mailkey                 = row[92];
+			entry.mailkey                 = row[92] ? row[92] : "";
 			entry.xtargets                = atoi(row[93]);
 			entry.firstlogon              = atoi(row[94]);
 			entry.e_aa_effects            = atoi(row[95]);
@@ -1171,7 +1171,7 @@ public:
 			entry.aa_points_spent_old     = atoi(row[98]);
 			entry.aa_points_old           = atoi(row[99]);
 			entry.e_last_invsnapshot      = atoi(row[100]);
-			entry.deleted_at              = row[101];
+			entry.deleted_at              = row[101] ? row[101] : "";
 
 			all_entries.push_back(entry);
 		}

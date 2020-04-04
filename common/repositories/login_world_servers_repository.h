@@ -152,15 +152,15 @@ public:
 			LoginWorldServers entry{};
 
 			entry.id                        = atoi(row[0]);
-			entry.long_name                 = row[1];
-			entry.short_name                = row[2];
-			entry.tag_description           = row[3];
+			entry.long_name                 = row[1] ? row[1] : "";
+			entry.short_name                = row[2] ? row[2] : "";
+			entry.tag_description           = row[3] ? row[3] : "";
 			entry.login_server_list_type_id = atoi(row[4]);
-			entry.last_login_date           = row[5];
-			entry.last_ip_address           = row[6];
+			entry.last_login_date           = row[5] ? row[5] : "";
+			entry.last_ip_address           = row[6] ? row[6] : "";
 			entry.login_server_admin_id     = atoi(row[7]);
 			entry.is_server_trusted         = atoi(row[8]);
-			entry.note                      = row[9];
+			entry.note                      = row[9] ? row[9] : "";
 
 			return entry;
 		}
@@ -301,15 +301,15 @@ public:
 			LoginWorldServers entry{};
 
 			entry.id                        = atoi(row[0]);
-			entry.long_name                 = row[1];
-			entry.short_name                = row[2];
-			entry.tag_description           = row[3];
+			entry.long_name                 = row[1] ? row[1] : "";
+			entry.short_name                = row[2] ? row[2] : "";
+			entry.tag_description           = row[3] ? row[3] : "";
 			entry.login_server_list_type_id = atoi(row[4]);
-			entry.last_login_date           = row[5];
-			entry.last_ip_address           = row[6];
+			entry.last_login_date           = row[5] ? row[5] : "";
+			entry.last_ip_address           = row[6] ? row[6] : "";
 			entry.login_server_admin_id     = atoi(row[7]);
 			entry.is_server_trusted         = atoi(row[8]);
-			entry.note                      = row[9];
+			entry.note                      = row[9] ? row[9] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -335,15 +335,15 @@ public:
 			LoginWorldServers entry{};
 
 			entry.id                        = atoi(row[0]);
-			entry.long_name                 = row[1];
-			entry.short_name                = row[2];
-			entry.tag_description           = row[3];
+			entry.long_name                 = row[1] ? row[1] : "";
+			entry.short_name                = row[2] ? row[2] : "";
+			entry.tag_description           = row[3] ? row[3] : "";
 			entry.login_server_list_type_id = atoi(row[4]);
-			entry.last_login_date           = row[5];
-			entry.last_ip_address           = row[6];
+			entry.last_login_date           = row[5] ? row[5] : "";
+			entry.last_ip_address           = row[6] ? row[6] : "";
 			entry.login_server_admin_id     = atoi(row[7]);
 			entry.is_server_trusted         = atoi(row[8]);
-			entry.note                      = row[9];
+			entry.note                      = row[9] ? row[9] : "";
 
 			all_entries.push_back(entry);
 		}

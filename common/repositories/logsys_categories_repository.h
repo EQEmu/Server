@@ -137,7 +137,7 @@ public:
 			LogsysCategories entry{};
 
 			entry.log_category_id          = atoi(row[0]);
-			entry.log_category_description = row[1];
+			entry.log_category_description = row[1] ? row[1] : "";
 			entry.log_to_console           = atoi(row[2]);
 			entry.log_to_file              = atoi(row[3]);
 			entry.log_to_gmsay             = atoi(row[4]);
@@ -266,7 +266,7 @@ public:
 			LogsysCategories entry{};
 
 			entry.log_category_id          = atoi(row[0]);
-			entry.log_category_description = row[1];
+			entry.log_category_description = row[1] ? row[1] : "";
 			entry.log_to_console           = atoi(row[2]);
 			entry.log_to_file              = atoi(row[3]);
 			entry.log_to_gmsay             = atoi(row[4]);
@@ -295,7 +295,7 @@ public:
 			LogsysCategories entry{};
 
 			entry.log_category_id          = atoi(row[0]);
-			entry.log_category_description = row[1];
+			entry.log_category_description = row[1] ? row[1] : "";
 			entry.log_to_console           = atoi(row[2]);
 			entry.log_to_file              = atoi(row[3]);
 			entry.log_to_gmsay             = atoi(row[4]);

@@ -130,9 +130,9 @@ public:
 		if (results.RowCount() == 1) {
 			CommandSettings entry{};
 
-			entry.command = row[0];
+			entry.command = row[0] ? row[0] : "";
 			entry.access  = atoi(row[1]);
-			entry.aliases = row[2];
+			entry.aliases = row[2] ? row[2] : "";
 
 			return entry;
 		}
@@ -251,9 +251,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CommandSettings entry{};
 
-			entry.command = row[0];
+			entry.command = row[0] ? row[0] : "";
 			entry.access  = atoi(row[1]);
-			entry.aliases = row[2];
+			entry.aliases = row[2] ? row[2] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -278,9 +278,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CommandSettings entry{};
 
-			entry.command = row[0];
+			entry.command = row[0] ? row[0] : "";
 			entry.access  = atoi(row[1]);
-			entry.aliases = row[2];
+			entry.aliases = row[2] ? row[2] : "";
 
 			all_entries.push_back(entry);
 		}

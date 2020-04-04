@@ -140,11 +140,11 @@ public:
 			LoginApiTokens entry{};
 
 			entry.id         = atoi(row[0]);
-			entry.token      = row[1];
+			entry.token      = row[1] ? row[1] : "";
 			entry.can_write  = atoi(row[2]);
 			entry.can_read   = atoi(row[3]);
-			entry.created_at = row[4];
-			entry.updated_at = row[5];
+			entry.created_at = row[4] ? row[4] : "";
+			entry.updated_at = row[5] ? row[5] : "";
 
 			return entry;
 		}
@@ -273,11 +273,11 @@ public:
 			LoginApiTokens entry{};
 
 			entry.id         = atoi(row[0]);
-			entry.token      = row[1];
+			entry.token      = row[1] ? row[1] : "";
 			entry.can_write  = atoi(row[2]);
 			entry.can_read   = atoi(row[3]);
-			entry.created_at = row[4];
-			entry.updated_at = row[5];
+			entry.created_at = row[4] ? row[4] : "";
+			entry.updated_at = row[5] ? row[5] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -303,11 +303,11 @@ public:
 			LoginApiTokens entry{};
 
 			entry.id         = atoi(row[0]);
-			entry.token      = row[1];
+			entry.token      = row[1] ? row[1] : "";
 			entry.can_write  = atoi(row[2]);
 			entry.can_read   = atoi(row[3]);
-			entry.created_at = row[4];
-			entry.updated_at = row[5];
+			entry.created_at = row[4] ? row[4] : "";
+			entry.updated_at = row[5] ? row[5] : "";
 
 			all_entries.push_back(entry);
 		}

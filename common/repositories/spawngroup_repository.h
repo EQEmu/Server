@@ -161,7 +161,7 @@ public:
 			Spawngroup entry{};
 
 			entry.id            = atoi(row[0]);
-			entry.name          = row[1];
+			entry.name          = row[1] ? row[1] : "";
 			entry.spawn_limit   = atoi(row[2]);
 			entry.dist          = atof(row[3]);
 			entry.max_x         = atof(row[4]);
@@ -322,7 +322,7 @@ public:
 			Spawngroup entry{};
 
 			entry.id            = atoi(row[0]);
-			entry.name          = row[1];
+			entry.name          = row[1] ? row[1] : "";
 			entry.spawn_limit   = atoi(row[2]);
 			entry.dist          = atof(row[3]);
 			entry.max_x         = atof(row[4]);
@@ -359,7 +359,7 @@ public:
 			Spawngroup entry{};
 
 			entry.id            = atoi(row[0]);
-			entry.name          = row[1];
+			entry.name          = row[1] ? row[1] : "";
 			entry.spawn_limit   = atoi(row[2]);
 			entry.dist          = atof(row[3]);
 			entry.max_x         = atof(row[4]);

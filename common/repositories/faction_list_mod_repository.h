@@ -136,7 +136,7 @@ public:
 			entry.id         = atoi(row[0]);
 			entry.faction_id = atoi(row[1]);
 			entry.mod        = atoi(row[2]);
-			entry.mod_name   = row[3];
+			entry.mod_name   = row[3] ? row[3] : "";
 
 			return entry;
 		}
@@ -261,7 +261,7 @@ public:
 			entry.id         = atoi(row[0]);
 			entry.faction_id = atoi(row[1]);
 			entry.mod        = atoi(row[2]);
-			entry.mod_name   = row[3];
+			entry.mod_name   = row[3] ? row[3] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -289,7 +289,7 @@ public:
 			entry.id         = atoi(row[0]);
 			entry.faction_id = atoi(row[1]);
 			entry.mod        = atoi(row[2]);
-			entry.mod_name   = row[3];
+			entry.mod_name   = row[3] ? row[3] : "";
 
 			all_entries.push_back(entry);
 		}

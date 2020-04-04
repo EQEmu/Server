@@ -156,7 +156,7 @@ public:
 
 			entry.type       = atoi(row[0]);
 			entry.npc_type   = atoi(row[1]);
-			entry.name       = row[2];
+			entry.name       = row[2] ? row[2] : "";
 			entry.spell_id   = atoi(row[3]);
 			entry.distance   = atoi(row[4]);
 			entry.aura_type  = atoi(row[5]);
@@ -309,7 +309,7 @@ public:
 
 			entry.type       = atoi(row[0]);
 			entry.npc_type   = atoi(row[1]);
-			entry.name       = row[2];
+			entry.name       = row[2] ? row[2] : "";
 			entry.spell_id   = atoi(row[3]);
 			entry.distance   = atoi(row[4]);
 			entry.aura_type  = atoi(row[5]);
@@ -344,7 +344,7 @@ public:
 
 			entry.type       = atoi(row[0]);
 			entry.npc_type   = atoi(row[1]);
-			entry.name       = row[2];
+			entry.name       = row[2] ? row[2] : "";
 			entry.spell_id   = atoi(row[3]);
 			entry.distance   = atoi(row[4]);
 			entry.aura_type  = atoi(row[5]);

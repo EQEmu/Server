@@ -155,7 +155,7 @@ public:
 			entry.total_tribute  = atoi(row[4]);
 			entry.last_tribute   = atoi(row[5]);
 			entry.banker         = atoi(row[6]);
-			entry.public_note    = row[7];
+			entry.public_note    = row[7] ? row[7] : "";
 			entry.alt            = atoi(row[8]);
 
 			return entry;
@@ -300,7 +300,7 @@ public:
 			entry.total_tribute  = atoi(row[4]);
 			entry.last_tribute   = atoi(row[5]);
 			entry.banker         = atoi(row[6]);
-			entry.public_note    = row[7];
+			entry.public_note    = row[7] ? row[7] : "";
 			entry.alt            = atoi(row[8]);
 
 			all_entries.push_back(entry);
@@ -333,7 +333,7 @@ public:
 			entry.total_tribute  = atoi(row[4]);
 			entry.last_tribute   = atoi(row[5]);
 			entry.banker         = atoi(row[6]);
-			entry.public_note    = row[7];
+			entry.public_note    = row[7] ? row[7] : "";
 			entry.alt            = atoi(row[8]);
 
 			all_entries.push_back(entry);

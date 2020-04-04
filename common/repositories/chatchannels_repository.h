@@ -133,9 +133,9 @@ public:
 		if (results.RowCount() == 1) {
 			Chatchannels entry{};
 
-			entry.name      = row[0];
-			entry.owner     = row[1];
-			entry.password  = row[2];
+			entry.name      = row[0] ? row[0] : "";
+			entry.owner     = row[1] ? row[1] : "";
+			entry.password  = row[2] ? row[2] : "";
 			entry.minstatus = atoi(row[3]);
 
 			return entry;
@@ -258,9 +258,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Chatchannels entry{};
 
-			entry.name      = row[0];
-			entry.owner     = row[1];
-			entry.password  = row[2];
+			entry.name      = row[0] ? row[0] : "";
+			entry.owner     = row[1] ? row[1] : "";
+			entry.password  = row[2] ? row[2] : "";
 			entry.minstatus = atoi(row[3]);
 
 			all_entries.push_back(entry);
@@ -286,9 +286,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Chatchannels entry{};
 
-			entry.name      = row[0];
-			entry.owner     = row[1];
-			entry.password  = row[2];
+			entry.name      = row[0] ? row[0] : "";
+			entry.owner     = row[1] ? row[1] : "";
+			entry.password  = row[2] ? row[2] : "";
 			entry.minstatus = atoi(row[3]);
 
 			all_entries.push_back(entry);

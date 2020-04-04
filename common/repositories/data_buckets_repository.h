@@ -134,8 +134,8 @@ public:
 			DataBuckets entry{};
 
 			entry.id      = atoi(row[0]);
-			entry.key     = row[1];
-			entry.value   = row[2];
+			entry.key     = row[1] ? row[1] : "";
+			entry.value   = row[2] ? row[2] : "";
 			entry.expires = atoi(row[3]);
 
 			return entry;
@@ -259,8 +259,8 @@ public:
 			DataBuckets entry{};
 
 			entry.id      = atoi(row[0]);
-			entry.key     = row[1];
-			entry.value   = row[2];
+			entry.key     = row[1] ? row[1] : "";
+			entry.value   = row[2] ? row[2] : "";
 			entry.expires = atoi(row[3]);
 
 			all_entries.push_back(entry);
@@ -287,8 +287,8 @@ public:
 			DataBuckets entry{};
 
 			entry.id      = atoi(row[0]);
-			entry.key     = row[1];
-			entry.value   = row[2];
+			entry.key     = row[1] ? row[1] : "";
+			entry.value   = row[2] ? row[2] : "";
 			entry.expires = atoi(row[3]);
 
 			all_entries.push_back(entry);

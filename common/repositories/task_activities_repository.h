@@ -170,16 +170,16 @@ public:
 			entry.activityid           = atoi(row[1]);
 			entry.step                 = atoi(row[2]);
 			entry.activitytype         = atoi(row[3]);
-			entry.target_name          = row[4];
-			entry.item_list            = row[5];
-			entry.skill_list           = row[6];
-			entry.spell_list           = row[7];
-			entry.description_override = row[8];
+			entry.target_name          = row[4] ? row[4] : "";
+			entry.item_list            = row[5] ? row[5] : "";
+			entry.skill_list           = row[6] ? row[6] : "";
+			entry.spell_list           = row[7] ? row[7] : "";
+			entry.description_override = row[8] ? row[8] : "";
 			entry.goalid               = atoi(row[9]);
 			entry.goalmethod           = atoi(row[10]);
 			entry.goalcount            = atoi(row[11]);
 			entry.delivertonpc         = atoi(row[12]);
-			entry.zones                = row[13];
+			entry.zones                = row[13] ? row[13] : "";
 			entry.optional             = atoi(row[14]);
 
 			return entry;
@@ -336,16 +336,16 @@ public:
 			entry.activityid           = atoi(row[1]);
 			entry.step                 = atoi(row[2]);
 			entry.activitytype         = atoi(row[3]);
-			entry.target_name          = row[4];
-			entry.item_list            = row[5];
-			entry.skill_list           = row[6];
-			entry.spell_list           = row[7];
-			entry.description_override = row[8];
+			entry.target_name          = row[4] ? row[4] : "";
+			entry.item_list            = row[5] ? row[5] : "";
+			entry.skill_list           = row[6] ? row[6] : "";
+			entry.spell_list           = row[7] ? row[7] : "";
+			entry.description_override = row[8] ? row[8] : "";
 			entry.goalid               = atoi(row[9]);
 			entry.goalmethod           = atoi(row[10]);
 			entry.goalcount            = atoi(row[11]);
 			entry.delivertonpc         = atoi(row[12]);
-			entry.zones                = row[13];
+			entry.zones                = row[13] ? row[13] : "";
 			entry.optional             = atoi(row[14]);
 
 			all_entries.push_back(entry);
@@ -375,16 +375,16 @@ public:
 			entry.activityid           = atoi(row[1]);
 			entry.step                 = atoi(row[2]);
 			entry.activitytype         = atoi(row[3]);
-			entry.target_name          = row[4];
-			entry.item_list            = row[5];
-			entry.skill_list           = row[6];
-			entry.spell_list           = row[7];
-			entry.description_override = row[8];
+			entry.target_name          = row[4] ? row[4] : "";
+			entry.item_list            = row[5] ? row[5] : "";
+			entry.skill_list           = row[6] ? row[6] : "";
+			entry.spell_list           = row[7] ? row[7] : "";
+			entry.description_override = row[8] ? row[8] : "";
 			entry.goalid               = atoi(row[9]);
 			entry.goalmethod           = atoi(row[10]);
 			entry.goalcount            = atoi(row[11]);
 			entry.delivertonpc         = atoi(row[12]);
-			entry.zones                = row[13];
+			entry.zones                = row[13] ? row[13] : "";
 			entry.optional             = atoi(row[14]);
 
 			all_entries.push_back(entry);

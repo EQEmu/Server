@@ -134,7 +134,7 @@ public:
 			DiscoveredItems entry{};
 
 			entry.item_id         = atoi(row[0]);
-			entry.char_name       = row[1];
+			entry.char_name       = row[1] ? row[1] : "";
 			entry.discovered_date = atoi(row[2]);
 			entry.account_status  = atoi(row[3]);
 
@@ -259,7 +259,7 @@ public:
 			DiscoveredItems entry{};
 
 			entry.item_id         = atoi(row[0]);
-			entry.char_name       = row[1];
+			entry.char_name       = row[1] ? row[1] : "";
 			entry.discovered_date = atoi(row[2]);
 			entry.account_status  = atoi(row[3]);
 
@@ -287,7 +287,7 @@ public:
 			DiscoveredItems entry{};
 
 			entry.item_id         = atoi(row[0]);
-			entry.char_name       = row[1];
+			entry.char_name       = row[1] ? row[1] : "";
 			entry.discovered_date = atoi(row[2]);
 			entry.account_status  = atoi(row[3]);
 

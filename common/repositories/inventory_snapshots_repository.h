@@ -185,7 +185,7 @@ public:
 			entry.augslot5            = atoi(row[10]);
 			entry.augslot6            = atoi(row[11]);
 			entry.instnodrop          = atoi(row[12]);
-			entry.custom_data         = row[13];
+			entry.custom_data         = row[13] ? row[13] : "";
 			entry.ornamenticon        = atoi(row[14]);
 			entry.ornamentidfile      = atoi(row[15]);
 			entry.ornament_hero_model = atoi(row[16]);
@@ -356,7 +356,7 @@ public:
 			entry.augslot5            = atoi(row[10]);
 			entry.augslot6            = atoi(row[11]);
 			entry.instnodrop          = atoi(row[12]);
-			entry.custom_data         = row[13];
+			entry.custom_data         = row[13] ? row[13] : "";
 			entry.ornamenticon        = atoi(row[14]);
 			entry.ornamentidfile      = atoi(row[15]);
 			entry.ornament_hero_model = atoi(row[16]);
@@ -397,7 +397,7 @@ public:
 			entry.augslot5            = atoi(row[10]);
 			entry.augslot6            = atoi(row[11]);
 			entry.instnodrop          = atoi(row[12]);
-			entry.custom_data         = row[13];
+			entry.custom_data         = row[13] ? row[13] : "";
 			entry.ornamenticon        = atoi(row[14]);
 			entry.ornamentidfile      = atoi(row[15]);
 			entry.ornament_hero_model = atoi(row[16]);

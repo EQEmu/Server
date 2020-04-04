@@ -131,8 +131,8 @@ public:
 			AccountFlags entry{};
 
 			entry.p_accid = atoi(row[0]);
-			entry.p_flag  = row[1];
-			entry.p_value = row[2];
+			entry.p_flag  = row[1] ? row[1] : "";
+			entry.p_value = row[2] ? row[2] : "";
 
 			return entry;
 		}
@@ -249,8 +249,8 @@ public:
 			AccountFlags entry{};
 
 			entry.p_accid = atoi(row[0]);
-			entry.p_flag  = row[1];
-			entry.p_value = row[2];
+			entry.p_flag  = row[1] ? row[1] : "";
+			entry.p_value = row[2] ? row[2] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -276,8 +276,8 @@ public:
 			AccountFlags entry{};
 
 			entry.p_accid = atoi(row[0]);
-			entry.p_flag  = row[1];
-			entry.p_value = row[2];
+			entry.p_flag  = row[1] ? row[1] : "";
+			entry.p_value = row[2] ? row[2] : "";
 
 			all_entries.push_back(entry);
 		}

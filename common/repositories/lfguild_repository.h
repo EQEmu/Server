@@ -149,8 +149,8 @@ public:
 			Lfguild entry{};
 
 			entry.type       = atoi(row[0]);
-			entry.name       = row[1];
-			entry.comment    = row[2];
+			entry.name       = row[1] ? row[1] : "";
+			entry.comment    = row[2] ? row[2] : "";
 			entry.fromlevel  = atoi(row[3]);
 			entry.tolevel    = atoi(row[4]);
 			entry.classes    = atoi(row[5]);
@@ -291,8 +291,8 @@ public:
 			Lfguild entry{};
 
 			entry.type       = atoi(row[0]);
-			entry.name       = row[1];
-			entry.comment    = row[2];
+			entry.name       = row[1] ? row[1] : "";
+			entry.comment    = row[2] ? row[2] : "";
 			entry.fromlevel  = atoi(row[3]);
 			entry.tolevel    = atoi(row[4]);
 			entry.classes    = atoi(row[5]);
@@ -324,8 +324,8 @@ public:
 			Lfguild entry{};
 
 			entry.type       = atoi(row[0]);
-			entry.name       = row[1];
-			entry.comment    = row[2];
+			entry.name       = row[1] ? row[1] : "";
+			entry.comment    = row[2] ? row[2] : "";
 			entry.fromlevel  = atoi(row[3]);
 			entry.tolevel    = atoi(row[4]);
 			entry.classes    = atoi(row[5]);

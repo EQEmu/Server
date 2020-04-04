@@ -379,11 +379,11 @@ public:
 		if (results.RowCount() == 1) {
 			Zone entry{};
 
-			entry.short_name                = row[0];
+			entry.short_name                = row[0] ? row[0] : "";
 			entry.id                        = atoi(row[1]);
-			entry.file_name                 = row[2];
-			entry.long_name                 = row[3];
-			entry.map_file_name             = row[4];
+			entry.file_name                 = row[2] ? row[2] : "";
+			entry.long_name                 = row[3] ? row[3] : "";
+			entry.map_file_name             = row[4] ? row[4] : "";
 			entry.safe_x                    = atof(row[5]);
 			entry.safe_y                    = atof(row[6]);
 			entry.safe_z                    = atof(row[7]);
@@ -395,7 +395,7 @@ public:
 			entry.timezone                  = atoi(row[13]);
 			entry.maxclients                = atoi(row[14]);
 			entry.ruleset                   = atoi(row[15]);
-			entry.note                      = row[16];
+			entry.note                      = row[16] ? row[16] : "";
 			entry.underworld                = atof(row[17]);
 			entry.minclip                   = atof(row[18]);
 			entry.maxclip                   = atof(row[19]);
@@ -430,7 +430,7 @@ public:
 			entry.fog_minclip4              = atof(row[48]);
 			entry.fog_maxclip4              = atof(row[49]);
 			entry.fog_density               = atof(row[50]);
-			entry.flag_needed               = row[51];
+			entry.flag_needed               = row[51] ? row[51] : "";
 			entry.canbind                   = atoi(row[52]);
 			entry.cancombat                 = atoi(row[53]);
 			entry.canlevitate               = atoi(row[54]);
@@ -832,11 +832,11 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Zone entry{};
 
-			entry.short_name                = row[0];
+			entry.short_name                = row[0] ? row[0] : "";
 			entry.id                        = atoi(row[1]);
-			entry.file_name                 = row[2];
-			entry.long_name                 = row[3];
-			entry.map_file_name             = row[4];
+			entry.file_name                 = row[2] ? row[2] : "";
+			entry.long_name                 = row[3] ? row[3] : "";
+			entry.map_file_name             = row[4] ? row[4] : "";
 			entry.safe_x                    = atof(row[5]);
 			entry.safe_y                    = atof(row[6]);
 			entry.safe_z                    = atof(row[7]);
@@ -848,7 +848,7 @@ public:
 			entry.timezone                  = atoi(row[13]);
 			entry.maxclients                = atoi(row[14]);
 			entry.ruleset                   = atoi(row[15]);
-			entry.note                      = row[16];
+			entry.note                      = row[16] ? row[16] : "";
 			entry.underworld                = atof(row[17]);
 			entry.minclip                   = atof(row[18]);
 			entry.maxclip                   = atof(row[19]);
@@ -883,7 +883,7 @@ public:
 			entry.fog_minclip4              = atof(row[48]);
 			entry.fog_maxclip4              = atof(row[49]);
 			entry.fog_density               = atof(row[50]);
-			entry.flag_needed               = row[51];
+			entry.flag_needed               = row[51] ? row[51] : "";
 			entry.canbind                   = atoi(row[52]);
 			entry.cancombat                 = atoi(row[53]);
 			entry.canlevitate               = atoi(row[54]);
@@ -942,11 +942,11 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Zone entry{};
 
-			entry.short_name                = row[0];
+			entry.short_name                = row[0] ? row[0] : "";
 			entry.id                        = atoi(row[1]);
-			entry.file_name                 = row[2];
-			entry.long_name                 = row[3];
-			entry.map_file_name             = row[4];
+			entry.file_name                 = row[2] ? row[2] : "";
+			entry.long_name                 = row[3] ? row[3] : "";
+			entry.map_file_name             = row[4] ? row[4] : "";
 			entry.safe_x                    = atof(row[5]);
 			entry.safe_y                    = atof(row[6]);
 			entry.safe_z                    = atof(row[7]);
@@ -958,7 +958,7 @@ public:
 			entry.timezone                  = atoi(row[13]);
 			entry.maxclients                = atoi(row[14]);
 			entry.ruleset                   = atoi(row[15]);
-			entry.note                      = row[16];
+			entry.note                      = row[16] ? row[16] : "";
 			entry.underworld                = atof(row[17]);
 			entry.minclip                   = atof(row[18]);
 			entry.maxclip                   = atof(row[19]);
@@ -993,7 +993,7 @@ public:
 			entry.fog_minclip4              = atof(row[48]);
 			entry.fog_maxclip4              = atof(row[49]);
 			entry.fog_density               = atof(row[50]);
-			entry.flag_needed               = row[51];
+			entry.flag_needed               = row[51] ? row[51] : "";
 			entry.canbind                   = atoi(row[52]);
 			entry.cancombat                 = atoi(row[53]);
 			entry.canlevitate               = atoi(row[54]);

@@ -149,14 +149,14 @@ public:
 			Guilds entry{};
 
 			entry.id          = atoi(row[0]);
-			entry.name        = row[1];
+			entry.name        = row[1] ? row[1] : "";
 			entry.leader      = atoi(row[2]);
 			entry.minstatus   = atoi(row[3]);
-			entry.motd        = row[4];
+			entry.motd        = row[4] ? row[4] : "";
 			entry.tribute     = atoi(row[5]);
-			entry.motd_setter = row[6];
-			entry.channel     = row[7];
-			entry.url         = row[8];
+			entry.motd_setter = row[6] ? row[6] : "";
+			entry.channel     = row[7] ? row[7] : "";
+			entry.url         = row[8] ? row[8] : "";
 
 			return entry;
 		}
@@ -294,14 +294,14 @@ public:
 			Guilds entry{};
 
 			entry.id          = atoi(row[0]);
-			entry.name        = row[1];
+			entry.name        = row[1] ? row[1] : "";
 			entry.leader      = atoi(row[2]);
 			entry.minstatus   = atoi(row[3]);
-			entry.motd        = row[4];
+			entry.motd        = row[4] ? row[4] : "";
 			entry.tribute     = atoi(row[5]);
-			entry.motd_setter = row[6];
-			entry.channel     = row[7];
-			entry.url         = row[8];
+			entry.motd_setter = row[6] ? row[6] : "";
+			entry.channel     = row[7] ? row[7] : "";
+			entry.url         = row[8] ? row[8] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -327,14 +327,14 @@ public:
 			Guilds entry{};
 
 			entry.id          = atoi(row[0]);
-			entry.name        = row[1];
+			entry.name        = row[1] ? row[1] : "";
 			entry.leader      = atoi(row[2]);
 			entry.minstatus   = atoi(row[3]);
-			entry.motd        = row[4];
+			entry.motd        = row[4] ? row[4] : "";
 			entry.tribute     = atoi(row[5]);
-			entry.motd_setter = row[6];
-			entry.channel     = row[7];
-			entry.url         = row[8];
+			entry.motd_setter = row[6] ? row[6] : "";
+			entry.channel     = row[7] ? row[7] : "";
+			entry.url         = row[8] ? row[8] : "";
 
 			all_entries.push_back(entry);
 		}

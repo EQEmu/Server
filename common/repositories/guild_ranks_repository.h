@@ -156,7 +156,7 @@ public:
 
 			entry.guild_id     = atoi(row[0]);
 			entry.rank         = atoi(row[1]);
-			entry.title        = row[2];
+			entry.title        = row[2] ? row[2] : "";
 			entry.can_hear     = atoi(row[3]);
 			entry.can_speak    = atoi(row[4]);
 			entry.can_invite   = atoi(row[5]);
@@ -306,7 +306,7 @@ public:
 
 			entry.guild_id     = atoi(row[0]);
 			entry.rank         = atoi(row[1]);
-			entry.title        = row[2];
+			entry.title        = row[2] ? row[2] : "";
 			entry.can_hear     = atoi(row[3]);
 			entry.can_speak    = atoi(row[4]);
 			entry.can_invite   = atoi(row[5]);
@@ -341,7 +341,7 @@ public:
 
 			entry.guild_id     = atoi(row[0]);
 			entry.rank         = atoi(row[1]);
-			entry.title        = row[2];
+			entry.title        = row[2] ? row[2] : "";
 			entry.can_hear     = atoi(row[3]);
 			entry.can_speak    = atoi(row[4]);
 			entry.can_invite   = atoi(row[5]);

@@ -153,7 +153,7 @@ public:
 			entry.groupid       = atoi(row[2]);
 			entry._class        = atoi(row[3]);
 			entry.level         = atoi(row[4]);
-			entry.name          = row[5];
+			entry.name          = row[5] ? row[5] : "";
 			entry.isgroupleader = atoi(row[6]);
 			entry.israidleader  = atoi(row[7]);
 			entry.islooter      = atoi(row[8]);
@@ -298,7 +298,7 @@ public:
 			entry.groupid       = atoi(row[2]);
 			entry._class        = atoi(row[3]);
 			entry.level         = atoi(row[4]);
-			entry.name          = row[5];
+			entry.name          = row[5] ? row[5] : "";
 			entry.isgroupleader = atoi(row[6]);
 			entry.israidleader  = atoi(row[7]);
 			entry.islooter      = atoi(row[8]);
@@ -331,7 +331,7 @@ public:
 			entry.groupid       = atoi(row[2]);
 			entry._class        = atoi(row[3]);
 			entry.level         = atoi(row[4]);
-			entry.name          = row[5];
+			entry.name          = row[5] ? row[5] : "";
 			entry.isgroupleader = atoi(row[6]);
 			entry.israidleader  = atoi(row[7]);
 			entry.islooter      = atoi(row[8]);

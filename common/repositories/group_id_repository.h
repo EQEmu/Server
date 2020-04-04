@@ -135,7 +135,7 @@ public:
 
 			entry.groupid = atoi(row[0]);
 			entry.charid  = atoi(row[1]);
-			entry.name    = row[2];
+			entry.name    = row[2] ? row[2] : "";
 			entry.ismerc  = atoi(row[3]);
 
 			return entry;
@@ -254,7 +254,7 @@ public:
 
 			entry.groupid = atoi(row[0]);
 			entry.charid  = atoi(row[1]);
-			entry.name    = row[2];
+			entry.name    = row[2] ? row[2] : "";
 			entry.ismerc  = atoi(row[3]);
 
 			all_entries.push_back(entry);
@@ -282,7 +282,7 @@ public:
 
 			entry.groupid = atoi(row[0]);
 			entry.charid  = atoi(row[1]);
-			entry.name    = row[2];
+			entry.name    = row[2] ? row[2] : "";
 			entry.ismerc  = atoi(row[3]);
 
 			all_entries.push_back(entry);
