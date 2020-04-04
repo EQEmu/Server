@@ -62,8 +62,10 @@ namespace Expansion {
 	static const char *ExpansionName[ExpansionNumber::MaxId] = {
 		"Classic",
 		"The Ruins of Kunark",
+		"The Shards of Velious",
 		"The Shadows of Luclin",
 		"The Planes of Power",
+		"The Legacy of Ykesha",
 		"Lost Dungeons of Norrath",
 		"Gates of Discord",
 		"Omens of War",

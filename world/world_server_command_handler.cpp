@@ -58,6 +58,7 @@ namespace WorldserverCommandHandler {
 		function_map["database:schema"]             = &WorldserverCommandHandler::DatabaseGetSchema;
 		function_map["database:dump"]               = &WorldserverCommandHandler::DatabaseDump;
 		function_map["test:test"]                   = &WorldserverCommandHandler::TestCommand;
+		function_map["test:expansion"]              = &WorldserverCommandHandler::ExpansionTestCommand;
 		function_map["test:repository"]             = &WorldserverCommandHandler::TestRepository;
 
 		EQEmuCommand::HandleMenu(function_map, cmd, argc, argv);
@@ -286,6 +287,22 @@ namespace WorldserverCommandHandler {
 	void TestCommand(int argc, char **argv, argh::parser &cmd, std::string &description)
 	{
 		description = "Test command";
+
+		if (cmd[{"-h", "--help"}]) {
+			return;
+		}
+
+	}
+
+	/**
+	 * @param argc
+	 * @param argv
+	 * @param cmd
+	 * @param description
+	 */
+	void ExpansionTestCommand(int argc, char **argv, argh::parser &cmd, std::string &description)
+	{
+		description = "Expansion test command";
 
 		if (cmd[{"-h", "--help"}]) {
 			return;

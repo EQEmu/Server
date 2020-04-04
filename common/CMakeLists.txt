@@ -117,7 +117,7 @@ SET(repositories
 	repositories/spawngroup_repository.h
 	repositories/tradeskill_recipe_repository.h
 	repositories/instance_list_repository.h
-	)
+        repositories/zone_repository.h)
 
 SET(common_headers
 	any.h
