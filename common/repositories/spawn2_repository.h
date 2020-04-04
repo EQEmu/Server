@@ -119,7 +119,7 @@ public:
 
 		entry.id           = 0;
 		entry.spawngroupID = 0;
-		entry.zone         = 0;
+		entry.zone         = "";
 		entry.version      = 0;
 		entry.x            = 0.000000;
 		entry.y            = 0.000000;

@@ -167,7 +167,7 @@ public:
 		entry.assa_y            = 0;
 		entry.assa_z            = 0;
 		entry.assa_h            = 0;
-		entry.text              = 0;
+		entry.text              = "";
 		entry.duration          = 7200;
 		entry.zone_in_time      = 1800;
 		entry.win_points        = 0;

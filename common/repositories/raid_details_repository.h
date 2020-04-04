@@ -98,7 +98,7 @@ public:
 		entry.raidid   = 0;
 		entry.loottype = 0;
 		entry.locked   = 0;
-		entry.motd     = 0;
+		entry.motd     = "";
 
 		return entry;
 	}

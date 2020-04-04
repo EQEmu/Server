@@ -104,7 +104,7 @@ public:
 		entry.gender     = 0;
 		entry.texture    = 0;
 		entry.mountspeed = 0.75;
-		entry.notes      = 'Notes';
+		entry.notes      = "Notes";
 
 		return entry;
 	}

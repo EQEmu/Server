@@ -123,8 +123,8 @@ public:
 		entry.activitytype         = 0;
 		entry.target_name          = "";
 		entry.item_list            = "";
-		entry.skill_list           = '-1';
-		entry.spell_list           = '0';
+		entry.skill_list           = "-1";
+		entry.spell_list           = "0";
 		entry.description_override = "";
 		entry.goalid               = 0;
 		entry.goalmethod           = 0;

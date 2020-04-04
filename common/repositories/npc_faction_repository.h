@@ -96,7 +96,7 @@ public:
 		NpcFaction entry{};
 
 		entry.id                    = 0;
-		entry.name                  = 0;
+		entry.name                  = "";
 		entry.primaryfaction        = 0;
 		entry.ignore_primary_assist = 0;
 

@@ -333,7 +333,7 @@ public:
 
 		entry.id                     = 0;
 		entry.name                   = "";
-		entry.lastname               = 0;
+		entry.lastname               = "";
 		entry.level                  = 0;
 		entry.race                   = 0;
 		entry.class                  = 0;
@@ -359,7 +359,7 @@ public:
 		entry.maxdmg                 = 0;
 		entry.attack_count           = -1;
 		entry.npcspecialattks        = "";
-		entry.special_abilities      = 0;
+		entry.special_abilities      = "";
 		entry.aggroradius            = 0;
 		entry.assistradius           = 0;
 		entry.face                   = 1;
@@ -378,7 +378,7 @@ public:
 		entry.armortint_blue         = 0;
 		entry.d_melee_texture1       = 0;
 		entry.d_melee_texture2       = 0;
-		entry.ammo_idfile            = 'IT10';
+		entry.ammo_idfile            = "IT10";
 		entry.prim_melee_type        = 28;
 		entry.sec_melee_type         = 28;
 		entry.ranged_type            = 7;

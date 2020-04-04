@@ -114,17 +114,17 @@ public:
 		GlobalLoot entry{};
 
 		entry.id           = 0;
-		entry.description  = 0;
+		entry.description  = "";
 		entry.loottable_id = 0;
 		entry.enabled      = 1;
 		entry.min_level    = 0;
 		entry.max_level    = 0;
 		entry.rare         = 0;
 		entry.raid         = 0;
-		entry.race         = 0;
-		entry.class        = 0;
-		entry.bodytype     = 0;
-		entry.zone         = 0;
+		entry.race         = "";
+		entry.class        = "";
+		entry.bodytype     = "";
+		entry.zone         = "";
 		entry.hot_zone     = 0;
 
 		return entry;

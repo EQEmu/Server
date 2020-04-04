@@ -96,9 +96,9 @@ public:
 		Reports entry{};
 
 		entry.id            = 0;
-		entry.name          = 0;
-		entry.reported      = 0;
-		entry.reported_text = 0;
+		entry.name          = "";
+		entry.reported      = "";
+		entry.reported_text = "";
 
 		return entry;
 	}

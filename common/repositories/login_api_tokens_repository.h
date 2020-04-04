@@ -100,7 +100,7 @@ public:
 		LoginApiTokens entry{};
 
 		entry.id         = 0;
-		entry.token      = 0;
+		entry.token      = "";
 		entry.can_write  = 0;
 		entry.can_read   = 0;
 		entry.created_at = 0;

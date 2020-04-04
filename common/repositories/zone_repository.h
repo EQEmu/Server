@@ -259,11 +259,11 @@ public:
 	{
 		Zone entry{};
 
-		entry.short_name                = 0;
+		entry.short_name                = "";
 		entry.id                        = 0;
-		entry.file_name                 = 0;
+		entry.file_name                 = "";
 		entry.long_name                 = "";
-		entry.map_file_name             = 0;
+		entry.map_file_name             = "";
 		entry.safe_x                    = 0;
 		entry.safe_y                    = 0;
 		entry.safe_z                    = 0;
@@ -275,7 +275,7 @@ public:
 		entry.timezone                  = 0;
 		entry.maxclients                = 0;
 		entry.ruleset                   = 0;
-		entry.note                      = 0;
+		entry.note                      = "";
 		entry.underworld                = 0;
 		entry.minclip                   = 450;
 		entry.maxclip                   = 450;

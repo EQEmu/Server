@@ -94,8 +94,8 @@ public:
 		SpellBuckets entry{};
 
 		entry.spellid = 0;
-		entry.key     = 0;
-		entry.value   = 0;
+		entry.key     = "";
+		entry.value   = "";
 
 		return entry;
 	}

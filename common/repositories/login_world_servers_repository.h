@@ -113,10 +113,10 @@ public:
 		entry.tag_description           = "";
 		entry.login_server_list_type_id = 0;
 		entry.last_login_date           = 0;
-		entry.last_ip_address           = 0;
+		entry.last_ip_address           = "";
 		entry.login_server_admin_id     = 0;
 		entry.is_server_trusted         = 0;
-		entry.note                      = 0;
+		entry.note                      = "";
 
 		return entry;
 	}

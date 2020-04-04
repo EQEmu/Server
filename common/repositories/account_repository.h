@@ -131,7 +131,7 @@ public:
 		entry.sharedplat     = 0;
 		entry.password       = "";
 		entry.status         = 0;
-		entry.ls_id          = 'eqemu';
+		entry.ls_id          = "eqemu";
 		entry.lsaccount_id   = 0;
 		entry.gmspeed        = 0;
 		entry.revoked        = 0;
@@ -139,11 +139,11 @@ public:
 		entry.minilogin_ip   = "";
 		entry.hideme         = 0;
 		entry.rulesflag      = 0;
-		entry.suspendeduntil = '0000-00-00 00:00:00';
+		entry.suspendeduntil = "0000-00-00 00:00:00";
 		entry.time_creation  = 0;
 		entry.expansion      = 0;
-		entry.ban_reason     = 0;
-		entry.suspend_reason = 0;
+		entry.ban_reason     = "";
+		entry.suspend_reason = "";
 
 		return entry;
 	}

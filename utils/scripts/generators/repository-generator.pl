@@ -218,12 +218,13 @@ foreach my $table_to_generate (@tables) {
 
         my $default_value = 0;
         if ($column_default ne "NULL" && $column_default ne "") {
+            $column_default=~s/'/"/g;
             $default_value = $column_default;
         }
-        if ($column_default eq "''") {
+        elsif ($column_default eq "''") {
             $default_value = '""';
         }
-        if (trim($column_default) eq "" && $column_type =~ /text|varchar/i) {
+        elsif ((trim($column_default) eq "" || $column_default eq "NULL") && $column_type =~ /text|varchar/i) {
             $default_value = '""';
         }
 

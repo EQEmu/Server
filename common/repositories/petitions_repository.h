@@ -125,7 +125,7 @@ public:
 		entry.accountname  = "";
 		entry.lastgm       = "";
 		entry.petitiontext = "";
-		entry.gmtext       = 0;
+		entry.gmtext       = "";
 		entry.zone         = "";
 		entry.urgency      = 0;
 		entry.charclass    = 0;

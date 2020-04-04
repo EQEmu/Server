@@ -98,7 +98,7 @@ public:
 		entry.ruleset_id = 0;
 		entry.rule_name  = "";
 		entry.rule_value = "";
-		entry.notes      = 0;
+		entry.notes      = "";
 
 		return entry;
 	}

@@ -170,7 +170,7 @@ public:
 		entry.attack_delay      = 0;
 		entry.spell_scale       = 100;
 		entry.heal_scale        = 100;
-		entry.special_abilities = 0;
+		entry.special_abilities = "";
 
 		return entry;
 	}

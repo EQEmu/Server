@@ -122,7 +122,7 @@ public:
 		ZonePoints entry{};
 
 		entry.id                  = 0;
-		entry.zone                = 0;
+		entry.zone                = "";
 		entry.version             = 0;
 		entry.number              = 1;
 		entry.y                   = 0;

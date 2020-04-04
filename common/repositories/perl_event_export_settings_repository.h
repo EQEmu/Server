@@ -102,7 +102,7 @@ public:
 		PerlEventExportSettings entry{};
 
 		entry.event_id          = 0;
-		entry.event_description = 0;
+		entry.event_description = "";
 		entry.export_qglobals   = 0;
 		entry.export_mob        = 0;
 		entry.export_zone       = 0;

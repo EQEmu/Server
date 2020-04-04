@@ -152,24 +152,24 @@ public:
 		BugReports entry{};
 
 		entry.id                  = 0;
-		entry.zone                = 'Unknown';
+		entry.zone                = "Unknown";
 		entry.client_version_id   = 0;
-		entry.client_version_name = 'Unknown';
+		entry.client_version_name = "Unknown";
 		entry.account_id          = 0;
 		entry.character_id        = 0;
-		entry.character_name      = 'Unknown';
+		entry.character_name      = "Unknown";
 		entry.reporter_spoof      = 1;
 		entry.category_id         = 0;
-		entry.category_name       = 'Other';
-		entry.reporter_name       = 'Unknown';
-		entry.ui_path             = 'Unknown';
+		entry.category_name       = "Other";
+		entry.reporter_name       = "Unknown";
+		entry.ui_path             = "Unknown";
 		entry.pos_x               = 0;
 		entry.pos_y               = 0;
 		entry.pos_z               = 0;
 		entry.heading             = 0;
 		entry.time_played         = 0;
 		entry.target_id           = 0;
-		entry.target_name         = 'Unknown';
+		entry.target_name         = "Unknown";
 		entry.optional_info_mask  = 0;
 		entry._can_duplicate      = 0;
 		entry._crash_bug          = 0;
@@ -181,7 +181,7 @@ public:
 		entry.report_datetime     = current_timestamp();
 		entry.bug_status          = 0;
 		entry.last_review         = current_timestamp();
-		entry.last_reviewer       = 'None';
+		entry.last_reviewer       = "None";
 		entry.reviewer_notes      = "";
 
 		return entry;

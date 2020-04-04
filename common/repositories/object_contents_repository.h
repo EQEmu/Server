@@ -116,7 +116,7 @@ public:
 		entry.bagidx   = 0;
 		entry.itemid   = 0;
 		entry.charges  = 0;
-		entry.droptime = '0000-00-00 00:00:00';
+		entry.droptime = "0000-00-00 00:00:00";
 		entry.augslot1 = 0;
 		entry.augslot2 = 0;
 		entry.augslot3 = 0;

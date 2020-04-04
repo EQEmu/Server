@@ -98,7 +98,7 @@ public:
 		LogsysCategories entry{};
 
 		entry.log_category_id          = 0;
-		entry.log_category_description = 0;
+		entry.log_category_description = "";
 		entry.log_to_console           = 0;
 		entry.log_to_file              = 0;
 		entry.log_to_gmsay             = 0;

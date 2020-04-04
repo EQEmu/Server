@@ -92,7 +92,7 @@ public:
 		BannedIps entry{};
 
 		entry.ip_address = "";
-		entry.notes      = 0;
+		entry.notes      = "";
 
 		return entry;
 	}

@@ -562,14 +562,14 @@ public:
 		SpellsNew entry{};
 
 		entry.id                   = 0;
-		entry.name                 = 0;
-		entry.player_1             = 'BLUE_TRAIL';
-		entry.teleport_zone        = 0;
-		entry.you_cast             = 0;
-		entry.other_casts          = 0;
-		entry.cast_on_you          = 0;
-		entry.cast_on_other        = 0;
-		entry.spell_fades          = 0;
+		entry.name                 = "";
+		entry.player_1             = "BLUE_TRAIL";
+		entry.teleport_zone        = "";
+		entry.you_cast             = "";
+		entry.other_casts          = "";
+		entry.cast_on_you          = "";
+		entry.cast_on_other        = "";
+		entry.spell_fades          = "";
 		entry.range                = 100;
 		entry.aoerange             = 0;
 		entry.pushback             = 0;

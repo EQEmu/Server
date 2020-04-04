@@ -190,7 +190,7 @@ public:
 		entry.y                = 0;
 		entry.z                = 0;
 		entry.heading          = 0;
-		entry.time_of_death    = '0000-00-00 00:00:00';
+		entry.time_of_death    = "0000-00-00 00:00:00";
 		entry.guild_consent_id = 0;
 		entry.is_rezzed        = 0;
 		entry.is_buried        = 0;

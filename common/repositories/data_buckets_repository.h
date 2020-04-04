@@ -96,8 +96,8 @@ public:
 		DataBuckets entry{};
 
 		entry.id      = 0;
-		entry.key     = 0;
-		entry.value   = 0;
+		entry.key     = "";
+		entry.value   = "";
 		entry.expires = 0;
 
 		return entry;

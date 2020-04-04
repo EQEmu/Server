@@ -103,7 +103,7 @@ public:
 		entry.account = "";
 		entry.name    = "";
 		entry.hacked  = "";
-		entry.zone    = 0;
+		entry.zone    = "";
 		entry.date    = current_timestamp();
 
 		return entry;

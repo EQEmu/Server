@@ -791,7 +791,7 @@ public:
 		entry.UNK124              = 0;
 		entry.attuneable          = 0;
 		entry.nopet               = 0;
-		entry.updated             = '0000-00-00 00:00:00';
+		entry.updated             = "0000-00-00 00:00:00";
 		entry.comment             = "";
 		entry.UNK127              = 0;
 		entry.pointtype           = 0;
@@ -823,7 +823,7 @@ public:
 		entry.UNK157              = 0;
 		entry.serialized          = 0;
 		entry.verified            = 0;
-		entry.serialization       = 0;
+		entry.serialization       = "";
 		entry.source              = "";
 		entry.UNK033              = 0;
 		entry.lorefile            = "";
@@ -840,7 +840,7 @@ public:
 		entry.UNK120              = 0;
 		entry.UNK121              = 0;
 		entry.questitemflag       = 0;
-		entry.UNK132              = 0;
+		entry.UNK132              = "";
 		entry.clickunk5           = 0;
 		entry.clickunk6           = "";
 		entry.clickunk7           = 0;

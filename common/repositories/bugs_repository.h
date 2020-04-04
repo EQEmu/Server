@@ -122,7 +122,7 @@ public:
 		entry.z      = 0;
 		entry.type   = "";
 		entry.flag   = 0;
-		entry.target = 0;
+		entry.target = "";
 		entry.bug    = "";
 		entry.date   = 0;
 		entry.status = 0;

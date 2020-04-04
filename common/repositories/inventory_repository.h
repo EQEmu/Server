@@ -131,7 +131,7 @@ public:
 		entry.augslot5            = 0;
 		entry.augslot6            = 0;
 		entry.instnodrop          = 0;
-		entry.custom_data         = 0;
+		entry.custom_data         = "";
 		entry.ornamenticon        = 0;
 		entry.ornamentidfile      = 0;
 		entry.ornament_hero_model = 0;

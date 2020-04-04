@@ -109,7 +109,7 @@ public:
 		entry.account_name       = "";
 		entry.account_password   = "";
 		entry.account_email      = "";
-		entry.source_loginserver = 0;
+		entry.source_loginserver = "";
 		entry.last_ip_address    = "";
 		entry.last_login_date    = 0;
 		entry.created_at         = 0;

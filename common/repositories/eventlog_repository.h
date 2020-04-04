@@ -112,7 +112,7 @@ public:
 		entry.accountid       = 0;
 		entry.status          = 0;
 		entry.charname        = "";
-		entry.target          = 'None';
+		entry.target          = "None";
 		entry.time            = current_timestamp();
 		entry.descriptiontype = "";
 		entry.description     = "";

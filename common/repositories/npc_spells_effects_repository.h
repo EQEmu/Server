@@ -94,7 +94,7 @@ public:
 		NpcSpellsEffects entry{};
 
 		entry.id          = 0;
-		entry.name        = 0;
+		entry.name        = "";
 		entry.parent_list = 0;
 
 		return entry;

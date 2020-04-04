@@ -94,7 +94,7 @@ public:
 		IpExemptions entry{};
 
 		entry.exemption_id     = 0;
-		entry.exemption_ip     = 0;
+		entry.exemption_ip     = "";
 		entry.exemption_amount = 0;
 
 		return entry;

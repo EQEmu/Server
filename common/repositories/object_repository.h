@@ -148,7 +148,7 @@ public:
 		entry.heading      = 0;
 		entry.itemid       = 0;
 		entry.charges      = 0;
-		entry.objectname   = 0;
+		entry.objectname   = "";
 		entry.type         = 0;
 		entry.icon         = 0;
 		entry.unknown08    = 0;
@@ -164,7 +164,7 @@ public:
 		entry.size         = 100;
 		entry.tilt_x       = 0;
 		entry.tilt_y       = 0;
-		entry.display_name = 0;
+		entry.display_name = "";
 
 		return entry;
 	}

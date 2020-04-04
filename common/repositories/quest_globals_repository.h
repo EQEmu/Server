@@ -103,7 +103,7 @@ public:
 		entry.npcid   = 0;
 		entry.zoneid  = 0;
 		entry.name    = "";
-		entry.value   = '?';
+		entry.value   = "?";
 		entry.expdate = 0;
 
 		return entry;

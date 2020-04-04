@@ -104,7 +104,7 @@ public:
 		entry.bandolier_slot = 0;
 		entry.item_id        = 0;
 		entry.icon           = 0;
-		entry.bandolier_name = '0';
+		entry.bandolier_name = "0";
 
 		return entry;
 	}

@@ -116,7 +116,7 @@ public:
 		SpawnEvents entry{};
 
 		entry.id          = 0;
-		entry.zone        = 0;
+		entry.zone        = "";
 		entry.cond_id     = 0;
 		entry.name        = "";
 		entry.period      = 0;

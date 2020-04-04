@@ -130,7 +130,7 @@ public:
 		NpcSpells entry{};
 
 		entry.id                       = 0;
-		entry.name                     = 0;
+		entry.name                     = "";
 		entry.parent_list              = 0;
 		entry.attack_proc              = -1;
 		entry.proc_chance              = 3;

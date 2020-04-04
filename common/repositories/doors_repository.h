@@ -151,7 +151,7 @@ public:
 
 		entry.id                  = 0;
 		entry.doorid              = 0;
-		entry.zone                = 0;
+		entry.zone                = "";
 		entry.version             = 0;
 		entry.name                = "";
 		entry.pos_y               = 0;
@@ -168,7 +168,7 @@ public:
 		entry.disable_timer       = 0;
 		entry.doorisopen          = 0;
 		entry.door_param          = 0;
-		entry.dest_zone           = 'NONE';
+		entry.dest_zone           = "NONE";
 		entry.dest_instance       = 0;
 		entry.dest_x              = 0;
 		entry.dest_y              = 0;
