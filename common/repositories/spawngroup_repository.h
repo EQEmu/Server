@@ -17,29 +17,35 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 #ifndef EQEMU_SPAWNGROUP_REPOSITORY_H
 #define EQEMU_SPAWNGROUP_REPOSITORY_H
 
 #include "../database.h"
 #include "../string_util.h"
 
-class SpawnGroupRepository {
+class SpawngroupRepository {
 public:
-	struct SpawnGroup {
+	struct Spawngroup {
 		int         id;
 		std::string name;
 		int8        spawn_limit;
-		int         dist;
+		float       dist;
 		float       max_x;
 		float       min_x;
 		float       max_y;
 		float       min_y;
 		int         delay;
 		int         mindelay;
-		int         despawn;
+		int8        despawn;
 		int         despawn_timer;
-		int         wp_spawns;
+		int8        wp_spawns;
 	};
+
+	static std::string PrimaryKey()
+	{
+		return std::string("id");
+	}
 
 	static std::vector<std::string> Columns()
 	{
@@ -65,6 +71,21 @@ public:
 		return std::string(implode(", ", Columns()));
 	}
 
+	static std::string InsertColumnsRaw()
+	{
+		std::vector<std::string> insert_columns;
+
+		for (auto &column : Columns()) {
+			if (column == PrimaryKey()) {
+				continue;
+			}
+
+			insert_columns.push_back(column);
+		}
+
+		return std::string(implode(", ", insert_columns));
+	}
+
 	static std::string TableName()
 	{
 		return std::string("spawngroup");
@@ -72,18 +93,25 @@ public:
 
 	static std::string BaseSelect()
 	{
-		return std::string(
-			fmt::format(
-				"SELECT {} FROM {}",
-				ColumnsRaw(),
-				TableName()
-			)
+		return fmt::format(
+			"SELECT {} FROM {}",
+			ColumnsRaw(),
+			TableName()
 		);
 	}
 
-	static SpawnGroup NewEntity()
+	static std::string BaseInsert()
 	{
-		SpawnGroup entry;
+		return fmt::format(
+			"INSERT INTO {} ({}) ",
+			TableName(),
+			InsertColumnsRaw()
+		);
+	}
+
+	static Spawngroup NewEntity()
+	{
+		Spawngroup entry{};
 
 		entry.id            = 0;
 		entry.name          = "";
@@ -93,36 +121,44 @@ public:
 		entry.min_x         = 0;
 		entry.max_y         = 0;
 		entry.min_y         = 0;
-		entry.delay         = 0;
-		entry.mindelay      = 0;
+		entry.delay         = 45000;
+		entry.mindelay      = 15000;
 		entry.despawn       = 0;
-		entry.despawn_timer = 0;
+		entry.despawn_timer = 100;
 		entry.wp_spawns     = 0;
 
 		return entry;
 	}
 
-	static std::vector<SpawnGroup> GetZoneSpawnGroups(
-		const std::string &zone_short_name,
-		int zone_version
+	static Spawngroup GetSpawngroupEntry(
+		const std::vector<Spawngroup> &spawngroups,
+		int spawngroup_id
 	)
 	{
-		std::vector<SpawnGroup> spawn_groups;
+		for (auto &spawngroup : spawngroups) {
+			if (spawngroup.id == spawngroup_id) {
+				return spawngroup;
+			}
+		}
 
+		return NewEntity();
+	}
+
+	static Spawngroup FindOne(
+		int spawngroup_id
+	)
+	{
 		auto results = content_db.QueryDatabase(
 			fmt::format(
-				SQL (
-					{} INNER JOIN spawn2 ON spawn2.spawngroupID = spawngroup.id
-					WHERE spawn2.zone = '{}' and spawn2.version = {}
-				),
+				"{} WHERE id = {} LIMIT 1",
 				BaseSelect(),
-				zone_short_name,
-				zone_version
+				spawngroup_id
 			)
 		);
 
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			SpawnGroup entry{};
+		auto row = results.begin();
+		if (results.RowCount() == 1) {
+			Spawngroup entry{};
 
 			entry.id            = atoi(row[0]);
 			entry.name          = row[1];
@@ -138,27 +174,173 @@ public:
 			entry.despawn_timer = atoi(row[11]);
 			entry.wp_spawns     = atoi(row[12]);
 
-			spawn_groups.push_back(entry);
-		}
-
-		return spawn_groups;
-	}
-
-	static SpawnGroup GetGrid(
-		const std::vector<SpawnGroup> &spawn_groups,
-		int spawn_group_id
-	)
-	{
-		for (auto &row : spawn_groups) {
-			if (row.id == spawn_group_id) {
-				return row;
-			}
+			return entry;
 		}
 
 		return NewEntity();
 	}
 
-};
+	static int DeleteOne(
+		int spawngroup_id
+	)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {} = {}",
+				TableName(),
+				PrimaryKey(),
+				spawngroup_id
+			)
+		);
 
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int UpdateOne(
+		Spawngroup spawngroup_entry
+	)
+	{
+		std::vector<std::string> update_values;
+
+		auto columns = Columns();
+
+		update_values.push_back(columns[1] + " = '" + EscapeString(spawngroup_entry.name) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(spawngroup_entry.spawn_limit));
+		update_values.push_back(columns[3] + " = '" + EscapeString(spawngroup_entry.dist) + "'");
+		update_values.push_back(columns[4] + " = '" + EscapeString(spawngroup_entry.max_x) + "'");
+		update_values.push_back(columns[5] + " = '" + EscapeString(spawngroup_entry.min_x) + "'");
+		update_values.push_back(columns[6] + " = '" + EscapeString(spawngroup_entry.max_y) + "'");
+		update_values.push_back(columns[7] + " = '" + EscapeString(spawngroup_entry.min_y) + "'");
+		update_values.push_back(columns[8] + " = " + std::to_string(spawngroup_entry.delay));
+		update_values.push_back(columns[9] + " = " + std::to_string(spawngroup_entry.mindelay));
+		update_values.push_back(columns[10] + " = " + std::to_string(spawngroup_entry.despawn));
+		update_values.push_back(columns[11] + " = " + std::to_string(spawngroup_entry.despawn_timer));
+		update_values.push_back(columns[12] + " = " + std::to_string(spawngroup_entry.wp_spawns));
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"UPDATE {} SET {} WHERE {} = {}",
+				TableName(),
+				implode(", ", update_values),
+				PrimaryKey(),
+				spawngroup_entry.id
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static Spawngroup InsertOne(
+		Spawngroup spawngroup_entry
+	)
+	{
+		std::vector<std::string> insert_values;
+
+		insert_values.push_back("'" + EscapeString(spawngroup_entry.name) + "'");
+		insert_values.push_back(std::to_string(spawngroup_entry.spawn_limit));
+		insert_values.push_back("'" + EscapeString(spawngroup_entry.dist) + "'");
+		insert_values.push_back("'" + EscapeString(spawngroup_entry.max_x) + "'");
+		insert_values.push_back("'" + EscapeString(spawngroup_entry.min_x) + "'");
+		insert_values.push_back("'" + EscapeString(spawngroup_entry.max_y) + "'");
+		insert_values.push_back("'" + EscapeString(spawngroup_entry.min_y) + "'");
+		insert_values.push_back(std::to_string(spawngroup_entry.delay));
+		insert_values.push_back(std::to_string(spawngroup_entry.mindelay));
+		insert_values.push_back(std::to_string(spawngroup_entry.despawn));
+		insert_values.push_back(std::to_string(spawngroup_entry.despawn_timer));
+		insert_values.push_back(std::to_string(spawngroup_entry.wp_spawns));
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseInsert(),
+				implode(",", insert_values)
+			)
+		);
+
+		if (results.Success()) {
+			spawngroup_entry.id = results.LastInsertedID();
+			return spawngroup_entry;
+		}
+
+		spawngroup_entry = InstanceListRepository::NewEntity();
+
+		return spawngroup_entry;
+	}
+
+	static int InsertMany(
+		std::vector<Spawngroup> spawngroup_entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &spawngroup_entry: spawngroup_entries) {
+			std::vector<std::string> insert_values;
+
+			insert_values.push_back("'" + EscapeString(spawngroup_entry.name) + "'");
+			insert_values.push_back(std::to_string(spawngroup_entry.spawn_limit));
+			insert_values.push_back("'" + EscapeString(spawngroup_entry.dist) + "'");
+			insert_values.push_back("'" + EscapeString(spawngroup_entry.max_x) + "'");
+			insert_values.push_back("'" + EscapeString(spawngroup_entry.min_x) + "'");
+			insert_values.push_back("'" + EscapeString(spawngroup_entry.max_y) + "'");
+			insert_values.push_back("'" + EscapeString(spawngroup_entry.min_y) + "'");
+			insert_values.push_back(std::to_string(spawngroup_entry.delay));
+			insert_values.push_back(std::to_string(spawngroup_entry.mindelay));
+			insert_values.push_back(std::to_string(spawngroup_entry.despawn));
+			insert_values.push_back(std::to_string(spawngroup_entry.despawn_timer));
+			insert_values.push_back(std::to_string(spawngroup_entry.wp_spawns));
+
+			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+		}
+
+		std::vector<std::string> insert_values;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseInsert(),
+				implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static std::vector<Spawngroup> All()
+	{
+		std::vector<Spawngroup> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{}",
+				BaseSelect()
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			Spawngroup entry{};
+
+			entry.id            = atoi(row[0]);
+			entry.name          = row[1];
+			entry.spawn_limit   = atoi(row[2]);
+			entry.dist          = atof(row[3]);
+			entry.max_x         = atof(row[4]);
+			entry.min_x         = atof(row[5]);
+			entry.max_y         = atof(row[6]);
+			entry.min_y         = atof(row[7]);
+			entry.delay         = atoi(row[8]);
+			entry.mindelay      = atoi(row[9]);
+			entry.despawn       = atoi(row[10]);
+			entry.despawn_timer = atoi(row[11]);
+			entry.wp_spawns     = atoi(row[12]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+};
 
 #endif //EQEMU_SPAWNGROUP_REPOSITORY_H
