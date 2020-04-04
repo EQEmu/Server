@@ -31,23 +31,28 @@ namespace ContentFilterCriteria {
 		std::string criteria;
 
 		criteria += fmt::format(
-			" AND (min_expansion >= {} OR min_expansion = 0)",
+			" AND (min_expansion <= {} OR min_expansion = 0)",
 			content_service.GetCurrentExpansion()
 		);
 
 		criteria += fmt::format(
-			" AND (max_expansion <= {} OR max_expansion = 0)",
+			" AND (max_expansion >= {} OR max_expansion = 0)",
 			content_service.GetCurrentExpansion()
 		);
 
 		std::vector<std::string> flags = content_service.GetContentFlags();
-		for (auto &flag: flags) {
+		for (auto                &flag: flags) {
 			flag = "'" + flag + "'";
 		}
 
+		std::string flags_in_filter;
+		if (!flags.empty()) {
+			flags_in_filter = fmt::format("OR content_flags IN ({})", implode(", ", flags));
+		}
+
 		criteria += fmt::format(
-			" AND (content_flags IS NULL OR content_flags IN ({}))",
-			implode(", ", flags)
+			" AND (content_flags IS NULL {})",
+			flags_in_filter
 		);
 
 		return std::string(criteria);
