@@ -31,9 +31,9 @@ public:
 		std::string zone;
 		std::string name;
 		std::string ui;
-		std::string x;
-		std::string y;
-		std::string z;
+		float       x;
+		float       y;
+		float       z;
 		std::string type;
 		int8        flag;
 		std::string target;

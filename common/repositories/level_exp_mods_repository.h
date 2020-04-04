@@ -27,9 +27,9 @@
 class LevelExpModsRepository {
 public:
 	struct LevelExpMods {
-		int         level;
-		std::string exp_mod;
-		std::string aa_exp_mod;
+		int   level;
+		float exp_mod;
+		float aa_exp_mod;
 	};
 
 	static std::string PrimaryKey()

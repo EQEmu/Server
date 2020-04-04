@@ -117,6 +117,8 @@ foreach my $table_to_generate (@tables) {
     # These tables don't have a typical schema
     my @table_ignore_list = (
         "character_enabledtasks",
+        "eqtime",
+        "db_version",
         "keyring",
         "profanity_list",
         "zone_flags",
@@ -201,7 +203,7 @@ foreach my $table_to_generate (@tables) {
         my $column_key       = $row[5];
         my $column_default   = ($row[6] ? $row[6] : "");
 
-        if ($column_key eq "PRI") {
+        if ($column_key eq "PRI" || ($ordinal_position == 0 && $column_name=~/id/i)) {
             $table_primary_key{$table_name} = $column_name;
         }
 
@@ -380,8 +382,15 @@ sub translate_mysql_data_type_to_c {
     elsif ($mysql_data_type =~ /smallint/) {
         $struct_data_type = 'int16';
     }
+    elsif ($mysql_data_type =~ /bigint/) {
+        $struct_data_type = 'int';
+        # Use regular int for now until we have 64 support
+    }
     elsif ($mysql_data_type =~ /int/) {
         $struct_data_type = 'int';
+    }
+    elsif ($mysql_data_type =~ /float|double|decimal/) {
+        $struct_data_type = 'float';
     }
 
     return $struct_data_type;

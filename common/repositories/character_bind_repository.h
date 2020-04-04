@@ -27,14 +27,14 @@
 class CharacterBindRepository {
 public:
 	struct CharacterBind {
-		int         id;
-		int         slot;
-		int16       zone_id;
-		int         instance_id;
-		std::string x;
-		std::string y;
-		std::string z;
-		std::string heading;
+		int   id;
+		int   slot;
+		int16 zone_id;
+		int   instance_id;
+		float x;
+		float y;
+		float z;
+		float heading;
 	};
 
 	static std::string PrimaryKey()

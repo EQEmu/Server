@@ -35,10 +35,10 @@ public:
 		std::string suffix;
 		int         zone_id;
 		int         zone_instance;
-		std::string y;
-		std::string x;
-		std::string z;
-		std::string heading;
+		float       y;
+		float       x;
+		float       z;
+		float       heading;
 		int8        gender;
 		int16       race;
 		int8        class;

@@ -30,10 +30,10 @@ public:
 		int         id;
 		int         zoneid;
 		int16       version;
-		std::string xpos;
-		std::string ypos;
-		std::string zpos;
-		std::string heading;
+		float       xpos;
+		float       ypos;
+		float       zpos;
+		float       heading;
 		int         itemid;
 		int16       charges;
 		std::string objectname;
@@ -49,9 +49,9 @@ public:
 		int         unknown72;
 		int         unknown76;
 		int         unknown84;
-		std::string size;
-		std::string tilt_x;
-		std::string tilt_y;
+		float       size;
+		float       tilt_x;
+		float       tilt_y;
 		std::string display_name;
 	};
 

@@ -27,12 +27,12 @@
 class LoottableEntriesRepository {
 public:
 	struct LoottableEntries {
-		int         loottable_id;
-		int         lootdrop_id;
-		int8        multiplier;
-		int8        droplimit;
-		int8        mindrop;
-		std::string probability;
+		int   loottable_id;
+		int   lootdrop_id;
+		int8  multiplier;
+		int8  droplimit;
+		int8  mindrop;
+		float probability;
 	};
 
 	static std::string PrimaryKey()

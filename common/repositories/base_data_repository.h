@@ -27,16 +27,16 @@
 class BaseDataRepository {
 public:
 	struct BaseData {
-		int         level;
-		int         class;
-		std::string hp;
-		std::string mana;
-		std::string end;
-		std::string unk1;
-		std::string unk2;
-		std::string hp_fac;
-		std::string mana_fac;
-		std::string end_fac;
+		int   level;
+		int   class;
+		float hp;
+		float mana;
+		float end;
+		float unk1;
+		float unk2;
+		float hp_fac;
+		float mana_fac;
+		float end_fac;
 	};
 
 	static std::string PrimaryKey()

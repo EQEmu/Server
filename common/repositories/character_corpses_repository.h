@@ -32,10 +32,10 @@ public:
 		std::string charname;
 		int16       zone_id;
 		int16       instance_id;
-		std::string x;
-		std::string y;
-		std::string z;
-		std::string heading;
+		float       x;
+		float       y;
+		float       z;
+		float       heading;
 		std::string time_of_death;
 		int         guild_consent_id;
 		int8        is_rezzed;

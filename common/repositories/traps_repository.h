@@ -34,8 +34,8 @@ public:
 		int         y;
 		int         z;
 		int8        chance;
-		std::string maxzdiff;
-		std::string radius;
+		float       maxzdiff;
+		float       radius;
 		int         effect;
 		int         effectvalue;
 		int         effectvalue2;

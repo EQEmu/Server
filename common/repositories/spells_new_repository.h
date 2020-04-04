@@ -254,10 +254,10 @@ public:
 		int         persistdeath;
 		int         field225;
 		int         field226;
-		std::string min_dist;
-		std::string min_dist_mod;
-		std::string max_dist;
-		std::string max_dist_mod;
+		float       min_dist;
+		float       min_dist_mod;
+		float       max_dist;
+		float       max_dist_mod;
 		int         min_range;
 		int         field232;
 		int         field233;

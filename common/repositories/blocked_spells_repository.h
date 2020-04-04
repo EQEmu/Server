@@ -31,12 +31,12 @@ public:
 		int         spellid;
 		int8        type;
 		int         zoneid;
-		std::string x;
-		std::string y;
-		std::string z;
-		std::string x_diff;
-		std::string y_diff;
-		std::string z_diff;
+		float       x;
+		float       y;
+		float       z;
+		float       x_diff;
+		float       y_diff;
+		float       z_diff;
 		std::string message;
 		std::string description;
 	};

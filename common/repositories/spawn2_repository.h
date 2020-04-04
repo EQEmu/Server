@@ -31,10 +31,10 @@ public:
 		int         spawngroupID;
 		std::string zone;
 		int16       version;
-		std::string x;
-		std::string y;
-		std::string z;
-		std::string heading;
+		float       x;
+		float       y;
+		float       z;
+		float       heading;
 		int         respawntime;
 		int         variance;
 		int         pathgrid;

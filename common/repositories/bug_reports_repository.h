@@ -39,9 +39,9 @@ public:
 		std::string category_name;
 		std::string reporter_name;
 		std::string ui_path;
-		std::string pos_x;
-		std::string pos_y;
-		std::string pos_z;
+		float       pos_x;
+		float       pos_y;
+		float       pos_z;
 		int         heading;
 		int         time_played;
 		int         target_id;

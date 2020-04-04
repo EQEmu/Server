@@ -40,7 +40,7 @@ public:
 		int8        texture;
 		int8        helmtexture;
 		int         herosforgemodel;
-		std::string size;
+		float       size;
 		int         hp_regen_rate;
 		int         mana_regen_rate;
 		int         loottable_id;
@@ -78,7 +78,7 @@ public:
 		int8        prim_melee_type;
 		int8        sec_melee_type;
 		int8        ranged_type;
-		std::string runspeed;
+		float       runspeed;
 		int16       MR;
 		int16       CR;
 		int16       DR;
@@ -92,7 +92,7 @@ public:
 		int16       AC;
 		int8        npc_aggro;
 		int8        spawn_limit;
-		std::string attack_speed;
+		float       attack_speed;
 		int8        attack_delay;
 		int8        findable;
 		int         STR;
@@ -119,8 +119,8 @@ public:
 		int8        underwater;
 		int8        isquest;
 		int         emoteid;
-		std::string spellscale;
-		std::string healscale;
+		float       spellscale;
+		float       healscale;
 		int8        no_target_hotkey;
 		int8        raid_target;
 		int8        armtexture;

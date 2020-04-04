@@ -27,21 +27,21 @@
 class StartZonesRepository {
 public:
 	struct StartZones {
-		std::string x;
-		std::string y;
-		std::string z;
-		std::string heading;
-		int         zone_id;
-		int         bind_id;
-		int         player_choice;
-		int         player_class;
-		int         player_deity;
-		int         player_race;
-		int         start_zone;
-		std::string bind_x;
-		std::string bind_y;
-		std::string bind_z;
-		int8        select_rank;
+		float x;
+		float y;
+		float z;
+		float heading;
+		int   zone_id;
+		int   bind_id;
+		int   player_choice;
+		int   player_class;
+		int   player_deity;
+		int   player_race;
+		int   start_zone;
+		float bind_x;
+		float bind_y;
+		float bind_z;
+		int8  select_rank;
 	};
 
 	static std::string PrimaryKey()

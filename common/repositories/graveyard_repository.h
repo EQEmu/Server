@@ -27,12 +27,12 @@
 class GraveyardRepository {
 public:
 	struct Graveyard {
-		int         id;
-		int         zone_id;
-		std::string x;
-		std::string y;
-		std::string z;
-		std::string heading;
+		int   id;
+		int   zone_id;
+		float x;
+		float y;
+		float z;
+		float heading;
 	};
 
 	static std::string PrimaryKey()

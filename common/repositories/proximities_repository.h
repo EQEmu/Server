@@ -27,14 +27,14 @@
 class ProximitiesRepository {
 public:
 	struct Proximities {
-		int         zoneid;
-		int         exploreid;
-		std::string minx;
-		std::string maxx;
-		std::string miny;
-		std::string maxy;
-		std::string minz;
-		std::string maxz;
+		int   zoneid;
+		int   exploreid;
+		float minx;
+		float maxx;
+		float miny;
+		float maxy;
+		float minz;
+		float maxz;
 	};
 
 	static std::string PrimaryKey()

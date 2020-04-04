@@ -31,18 +31,18 @@ public:
 		std::string zone;
 		int         version;
 		int16       number;
-		std::string y;
-		std::string x;
-		std::string z;
-		std::string heading;
-		std::string target_y;
-		std::string target_x;
-		std::string target_z;
-		std::string target_heading;
+		float       y;
+		float       x;
+		float       z;
+		float       heading;
+		float       target_y;
+		float       target_x;
+		float       target_z;
+		float       target_heading;
 		int16       zoneinst;
 		int         target_zone_id;
 		int         target_instance;
-		std::string buffer;
+		float       buffer;
 		int         client_version_mask;
 	};
 

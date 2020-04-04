@@ -30,12 +30,12 @@ public:
 		int         id;
 		int         zoneid;
 		int16       version;
-		std::string max_x;
-		std::string max_y;
-		std::string max_z;
-		std::string min_x;
-		std::string min_y;
-		std::string heading;
+		float       max_x;
+		float       max_y;
+		float       max_z;
+		float       min_x;
+		float       min_y;
+		float       heading;
 		std::string name;
 		int         item;
 		int         max_allowed;

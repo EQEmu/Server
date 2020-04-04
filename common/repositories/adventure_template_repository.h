@@ -37,10 +37,10 @@ public:
 		int8        type;
 		int         type_data;
 		int16       type_count;
-		std::string assa_x;
-		std::string assa_y;
-		std::string assa_z;
-		std::string assa_h;
+		float       assa_x;
+		float       assa_y;
+		float       assa_z;
+		float       assa_h;
 		std::string text;
 		int         duration;
 		int         zone_in_time;
@@ -48,18 +48,18 @@ public:
 		int16       lose_points;
 		int8        theme;
 		int16       zone_in_zone_id;
-		std::string zone_in_x;
-		std::string zone_in_y;
+		float       zone_in_x;
+		float       zone_in_y;
 		int16       zone_in_object_id;
-		std::string dest_x;
-		std::string dest_y;
-		std::string dest_z;
-		std::string dest_h;
+		float       dest_x;
+		float       dest_y;
+		float       dest_z;
+		float       dest_h;
 		int         graveyard_zone_id;
-		std::string graveyard_x;
-		std::string graveyard_y;
-		std::string graveyard_z;
-		std::string graveyard_radius;
+		float       graveyard_x;
+		float       graveyard_y;
+		float       graveyard_z;
+		float       graveyard_radius;
 	};
 
 	static std::string PrimaryKey()

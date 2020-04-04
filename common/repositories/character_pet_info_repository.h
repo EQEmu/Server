@@ -34,7 +34,7 @@ public:
 		int         spell_id;
 		int         hp;
 		int         mana;
-		std::string size;
+		float       size;
 	};
 
 	static std::string PrimaryKey()

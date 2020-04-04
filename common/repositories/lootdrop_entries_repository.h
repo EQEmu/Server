@@ -27,15 +27,15 @@
 class LootdropEntriesRepository {
 public:
 	struct LootdropEntries {
-		int         lootdrop_id;
-		int         item_id;
-		int16       item_charges;
-		int8        equip_item;
-		std::string chance;
-		std::string disabled_chance;
-		int8        minlevel;
-		int8        maxlevel;
-		int8        multiplier;
+		int   lootdrop_id;
+		int   item_id;
+		int16 item_charges;
+		int8  equip_item;
+		float chance;
+		float disabled_chance;
+		int8  minlevel;
+		int8  maxlevel;
+		int8  multiplier;
 	};
 
 	static std::string PrimaryKey()
