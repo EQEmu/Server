@@ -47,11 +47,11 @@ namespace ContentFilterCriteria {
 
 		std::string flags_in_filter;
 		if (!flags.empty()) {
-			flags_in_filter = fmt::format("OR content_flags IN ({})", implode(", ", flags));
+			flags_in_filter = fmt::format(" OR content_flags IN ({})", implode(", ", flags));
 		}
 
 		criteria += fmt::format(
-			" AND (content_flags IS NULL {})",
+			" AND (content_flags IS NULL{})",
 			flags_in_filter
 		);
 

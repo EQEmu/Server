@@ -24,6 +24,7 @@
 #include "spawngroup.h"
 #include "zone.h"
 #include "zonedb.h"
+#include "../common/repositories/criteria/content_filter_criteria.h"
 
 extern EntityList entity_list;
 extern Zone       *zone;
@@ -209,9 +210,11 @@ bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnG
 				spawn2.spawngroupID = spawngroup.ID
 				AND
 				spawn2.version = {} and zone = '{}'
+				{}
 		),
 		version,
-		zone_name
+		zone_name,
+		ContentFilterCriteria::apply()
 	);
 
 	auto results = QueryDatabase(query);
