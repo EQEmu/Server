@@ -134,7 +134,7 @@ public:
 		int         reclevel;
 		int         recskill;
 		int         reqlevel;
-		std::string sellrate;
+		float       sellrate;
 		int         shielding;
 		int         size;
 		int         skillmodtype;

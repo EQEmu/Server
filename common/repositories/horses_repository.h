@@ -31,7 +31,7 @@ public:
 		int16       race;
 		int8        gender;
 		int8        texture;
-		std::string mountspeed;
+		float       mountspeed;
 		std::string notes;
 	};
 
