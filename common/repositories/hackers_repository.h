@@ -100,9 +100,9 @@ public:
 		Hackers entry{};
 
 		entry.id      = 0;
-		entry.account = 0;
-		entry.name    = 0;
-		entry.hacked  = 0;
+		entry.account = "";
+		entry.name    = "";
+		entry.hacked  = "";
 		entry.zone    = 0;
 		entry.date    = current_timestamp();
 

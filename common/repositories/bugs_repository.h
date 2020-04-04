@@ -114,16 +114,16 @@ public:
 		Bugs entry{};
 
 		entry.id     = 0;
-		entry.zone   = 0;
-		entry.name   = 0;
-		entry.ui     = 0;
+		entry.zone   = "";
+		entry.name   = "";
+		entry.ui     = "";
 		entry.x      = 0;
 		entry.y      = 0;
 		entry.z      = 0;
-		entry.type   = 0;
+		entry.type   = "";
 		entry.flag   = 0;
 		entry.target = 0;
-		entry.bug    = 0;
+		entry.bug    = "";
 		entry.date   = 0;
 		entry.status = 0;
 

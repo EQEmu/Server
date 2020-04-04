@@ -100,7 +100,7 @@ public:
 		entry.id      = 0;
 		entry.unknown = 0;
 		entry.name    = "";
-		entry.descr   = 0;
+		entry.descr   = "";
 		entry.isguild = 0;
 
 		return entry;

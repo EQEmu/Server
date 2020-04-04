@@ -124,7 +124,7 @@ public:
 		entry.duration         = 0;
 		entry.duration_code    = 0;
 		entry.title            = "";
-		entry.description      = 0;
+		entry.description      = "";
 		entry.reward           = "";
 		entry.rewardid         = 0;
 		entry.cashreward       = 0;

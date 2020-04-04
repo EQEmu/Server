@@ -97,7 +97,7 @@ public:
 
 		entry.groupid = 0;
 		entry.charid  = 0;
-		entry.name    = 0;
+		entry.name    = "";
 		entry.ismerc  = 0;
 
 		return entry;

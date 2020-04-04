@@ -160,9 +160,7 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(
-			columns[1] + " = '" + EscapeString(character_inspect_messages_entry.inspect_message) + "'"
-		);
+		update_values.push_back(columns[1] + " = '" + EscapeString(character_inspect_messages_entry.inspect_message) + "'");
 
 		auto results = database.QueryDatabase(
 			fmt::format(

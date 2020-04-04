@@ -107,12 +107,12 @@ public:
 
 		entry.gid            = 0;
 		entry.rid            = 0;
-		entry.marknpc        = 0;
-		entry.maintank       = 0;
-		entry.assist         = 0;
-		entry.puller         = 0;
+		entry.marknpc        = "";
+		entry.maintank       = "";
+		entry.assist         = "";
+		entry.puller         = "";
 		entry.leadershipaa   = 0;
-		entry.mentoree       = 0;
+		entry.mentoree       = "";
 		entry.mentor_percent = 0;
 
 		return entry;

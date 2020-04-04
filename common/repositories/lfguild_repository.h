@@ -106,8 +106,8 @@ public:
 		Lfguild entry{};
 
 		entry.type       = 0;
-		entry.name       = 0;
-		entry.comment    = 0;
+		entry.name       = "";
+		entry.comment    = "";
 		entry.fromlevel  = 0;
 		entry.tolevel    = 0;
 		entry.classes    = 0;

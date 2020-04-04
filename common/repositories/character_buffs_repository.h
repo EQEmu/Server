@@ -125,7 +125,7 @@ public:
 		entry.slot_id        = 0;
 		entry.spell_id       = 0;
 		entry.caster_level   = 0;
-		entry.caster_name    = 0;
+		entry.caster_name    = "";
 		entry.ticsremaining  = 0;
 		entry.counters       = 0;
 		entry.numhits        = 0;

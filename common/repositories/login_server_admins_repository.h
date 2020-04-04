@@ -104,13 +104,13 @@ public:
 		LoginServerAdmins entry{};
 
 		entry.id                      = 0;
-		entry.account_name            = 0;
-		entry.account_password        = 0;
-		entry.first_name              = 0;
-		entry.last_name               = 0;
-		entry.email                   = 0;
+		entry.account_name            = "";
+		entry.account_password        = "";
+		entry.first_name              = "";
+		entry.last_name               = "";
+		entry.email                   = "";
 		entry.registration_date       = 0;
-		entry.registration_ip_address = 0;
+		entry.registration_ip_address = "";
 
 		return entry;
 	}

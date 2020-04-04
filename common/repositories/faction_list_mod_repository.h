@@ -98,7 +98,7 @@ public:
 		entry.id         = 0;
 		entry.faction_id = 0;
 		entry.mod        = 0;
-		entry.mod_name   = 0;
+		entry.mod_name   = "";
 
 		return entry;
 	}

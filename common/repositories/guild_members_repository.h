@@ -112,7 +112,7 @@ public:
 		entry.total_tribute  = 0;
 		entry.last_tribute   = 0;
 		entry.banker         = 0;
-		entry.public_note    = 0;
+		entry.public_note    = "";
 		entry.alt            = 0;
 
 		return entry;

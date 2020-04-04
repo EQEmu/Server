@@ -94,8 +94,8 @@ public:
 		AccountFlags entry{};
 
 		entry.p_accid = 0;
-		entry.p_flag  = 0;
-		entry.p_value = 0;
+		entry.p_flag  = "";
+		entry.p_value = "";
 
 		return entry;
 	}

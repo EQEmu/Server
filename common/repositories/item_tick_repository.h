@@ -103,7 +103,7 @@ public:
 		entry.it_chance  = 0;
 		entry.it_level   = 0;
 		entry.it_id      = 0;
-		entry.it_qglobal = 0;
+		entry.it_qglobal = "";
 		entry.it_bagslot = 0;
 
 		return entry;

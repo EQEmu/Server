@@ -27,12 +27,12 @@
 class TitlesRepository {
 public:
 	struct Titles {
-		int  id;
-		int8 skill_id;
-		int  min_skill_value;
-		int  max_skill_value;
-		int  min_aa_points;
-		int  max_aa_points;
+		int         id;
+		int8        skill_id;
+		int         min_skill_value;
+		int         max_skill_value;
+		int         min_aa_points;
+		int         max_aa_points;
 		int8        class;
 		int8        gender;
 		int         char_id;
@@ -121,15 +121,14 @@ public:
 		entry.max_skill_value = -1;
 		entry.min_aa_points   = -1;
 		entry.max_aa_points   = -1;
-		entry.
-		class           = -1;
-		entry.gender    = -1;
-		entry.char_id   = -1;
-		entry.status    = -1;
-		entry.item_id   = -1;
-		entry.prefix    = "";
-		entry.suffix    = "";
-		entry.title_set = 0;
+		entry.class           = -1;
+		entry.gender          = -1;
+		entry.char_id         = -1;
+		entry.status          = -1;
+		entry.item_id         = -1;
+		entry.prefix          = "";
+		entry.suffix          = "";
+		entry.title_set       = 0;
 
 		return entry;
 	}
@@ -170,15 +169,14 @@ public:
 			entry.max_skill_value = atoi(row[3]);
 			entry.min_aa_points   = atoi(row[4]);
 			entry.max_aa_points   = atoi(row[5]);
-			entry.
-			class           = atoi(row[6]);
-			entry.gender    = atoi(row[7]);
-			entry.char_id   = atoi(row[8]);
-			entry.status    = atoi(row[9]);
-			entry.item_id   = atoi(row[10]);
-			entry.prefix    = row[11];
-			entry.suffix    = row[12];
-			entry.title_set = atoi(row[13]);
+			entry.class           = atoi(row[6]);
+			entry.gender          = atoi(row[7]);
+			entry.char_id         = atoi(row[8]);
+			entry.status          = atoi(row[9]);
+			entry.item_id         = atoi(row[10]);
+			entry.prefix          = row[11];
+			entry.suffix          = row[12];
+			entry.title_set       = atoi(row[13]);
 
 			return entry;
 		}
@@ -215,8 +213,7 @@ public:
 		update_values.push_back(columns[3] + " = " + std::to_string(titles_entry.max_skill_value));
 		update_values.push_back(columns[4] + " = " + std::to_string(titles_entry.min_aa_points));
 		update_values.push_back(columns[5] + " = " + std::to_string(titles_entry.max_aa_points));
-		update_values.push_back(columns[6] + " = " + std::to_string(titles_entry.
-		class));
+		update_values.push_back(columns[6] + " = " + std::to_string(titles_entry.class));
 		update_values.push_back(columns[7] + " = " + std::to_string(titles_entry.gender));
 		update_values.push_back(columns[8] + " = " + std::to_string(titles_entry.char_id));
 		update_values.push_back(columns[9] + " = " + std::to_string(titles_entry.status));
@@ -249,8 +246,7 @@ public:
 		insert_values.push_back(std::to_string(titles_entry.max_skill_value));
 		insert_values.push_back(std::to_string(titles_entry.min_aa_points));
 		insert_values.push_back(std::to_string(titles_entry.max_aa_points));
-		insert_values.push_back(std::to_string(titles_entry.
-		class));
+		insert_values.push_back(std::to_string(titles_entry.class));
 		insert_values.push_back(std::to_string(titles_entry.gender));
 		insert_values.push_back(std::to_string(titles_entry.char_id));
 		insert_values.push_back(std::to_string(titles_entry.status));
@@ -291,8 +287,7 @@ public:
 			insert_values.push_back(std::to_string(titles_entry.max_skill_value));
 			insert_values.push_back(std::to_string(titles_entry.min_aa_points));
 			insert_values.push_back(std::to_string(titles_entry.max_aa_points));
-			insert_values.push_back(std::to_string(titles_entry.
-			class));
+			insert_values.push_back(std::to_string(titles_entry.class));
 			insert_values.push_back(std::to_string(titles_entry.gender));
 			insert_values.push_back(std::to_string(titles_entry.char_id));
 			insert_values.push_back(std::to_string(titles_entry.status));
@@ -339,15 +334,14 @@ public:
 			entry.max_skill_value = atoi(row[3]);
 			entry.min_aa_points   = atoi(row[4]);
 			entry.max_aa_points   = atoi(row[5]);
-			entry.
-			class           = atoi(row[6]);
-			entry.gender    = atoi(row[7]);
-			entry.char_id   = atoi(row[8]);
-			entry.status    = atoi(row[9]);
-			entry.item_id   = atoi(row[10]);
-			entry.prefix    = row[11];
-			entry.suffix    = row[12];
-			entry.title_set = atoi(row[13]);
+			entry.class           = atoi(row[6]);
+			entry.gender          = atoi(row[7]);
+			entry.char_id         = atoi(row[8]);
+			entry.status          = atoi(row[9]);
+			entry.item_id         = atoi(row[10]);
+			entry.prefix          = row[11];
+			entry.suffix          = row[12];
+			entry.title_set       = atoi(row[13]);
 
 			all_entries.push_back(entry);
 		}

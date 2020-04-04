@@ -154,7 +154,7 @@ public:
 		AdventureTemplate entry{};
 
 		entry.id                = 0;
-		entry.zone              = 0;
+		entry.zone              = "";
 		entry.zone_version      = 0;
 		entry.is_hard           = 0;
 		entry.is_raid           = 0;

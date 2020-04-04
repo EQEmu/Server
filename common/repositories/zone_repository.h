@@ -262,7 +262,7 @@ public:
 		entry.short_name                = 0;
 		entry.id                        = 0;
 		entry.file_name                 = 0;
-		entry.long_name                 = 0;
+		entry.long_name                 = "";
 		entry.map_file_name             = 0;
 		entry.safe_x                    = 0;
 		entry.safe_y                    = 0;

@@ -34,7 +34,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("");
+		return std::string("id");
 	}
 
 	static std::vector<std::string> Columns()
@@ -106,7 +106,7 @@ public:
 	)
 	{
 		for (auto &character_tribute : character_tributes) {
-			if (character_tribute.== character_tribute_id) {
+			if (character_tribute.id == character_tribute_id) {
 				return character_tribute;
 			}
 		}
@@ -174,7 +174,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				character_tribute_entry.
+				character_tribute_entry.id
 			)
 		);
 

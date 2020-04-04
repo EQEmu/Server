@@ -146,7 +146,7 @@ public:
 		NpcTypesTint entry{};
 
 		entry.id            = 0;
-		entry.tint_set_name = 0;
+		entry.tint_set_name = "";
 		entry.red1h         = 0;
 		entry.grn1h         = 0;
 		entry.blu1h         = 0;

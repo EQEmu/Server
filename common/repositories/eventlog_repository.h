@@ -115,7 +115,7 @@ public:
 		entry.target          = 'None';
 		entry.time            = current_timestamp();
 		entry.descriptiontype = "";
-		entry.description     = 0;
+		entry.description     = "";
 		entry.event_nid       = 0;
 
 		return entry;

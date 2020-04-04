@@ -116,7 +116,7 @@ public:
 		AaAbility entry{};
 
 		entry.id               = 0;
-		entry.name             = 0;
+		entry.name             = "";
 		entry.category         = -1;
 		entry.classes          = 131070;
 		entry.races            = 65535;

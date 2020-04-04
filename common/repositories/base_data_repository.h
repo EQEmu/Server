@@ -27,8 +27,8 @@
 class BaseDataRepository {
 public:
 	struct BaseData {
-		int level;
-		int class;
+		int         level;
+		int         class;
 		std::string hp;
 		std::string mana;
 		std::string end;
@@ -107,9 +107,8 @@ public:
 	{
 		BaseData entry{};
 
-		entry.level = 0;
-		entry.
-		class    = 0;
+		entry.level    = 0;
+		entry.class    = 0;
 		entry.hp       = 0;
 		entry.mana     = 0;
 		entry.end      = 0;
@@ -128,7 +127,7 @@ public:
 	)
 	{
 		for (auto &base_data : base_datas) {
-			if (base_data. { class }== base_data_id) {
+			if (base_data.class == base_data_id) {
 				return base_data;
 			}
 		}
@@ -152,9 +151,8 @@ public:
 		if (results.RowCount() == 1) {
 			BaseData entry{};
 
-			entry.level = atoi(row[0]);
-			entry.
-			class    = atoi(row[1]);
+			entry.level    = atoi(row[0]);
+			entry.class    = atoi(row[1]);
 			entry.hp       = atof(row[2]);
 			entry.mana     = atof(row[3]);
 			entry.end      = atof(row[4]);
@@ -203,16 +201,14 @@ public:
 		update_values.push_back(columns[8] + " = '" + EscapeString(base_data_entry.mana_fac) + "'");
 		update_values.push_back(columns[9] + " = '" + EscapeString(base_data_entry.end_fac) + "'");
 
-		auto
-		results = content_db.QueryDatabase(
+		auto results = content_db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				base_data_entry.
-		class
-		)
+				base_data_entry.class
+			)
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
@@ -301,9 +297,8 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			BaseData entry{};
 
-			entry.level = atoi(row[0]);
-			entry.
-			class    = atoi(row[1]);
+			entry.level    = atoi(row[0]);
+			entry.class    = atoi(row[1]);
 			entry.hp       = atof(row[2]);
 			entry.mana     = atof(row[3]);
 			entry.end      = atof(row[4]);

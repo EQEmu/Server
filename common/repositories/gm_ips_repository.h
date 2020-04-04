@@ -93,9 +93,9 @@ public:
 	{
 		GmIps entry{};
 
-		entry.name       = 0;
+		entry.name       = "";
 		entry.account_id = 0;
-		entry.ip_address = 0;
+		entry.ip_address = "";
 
 		return entry;
 	}

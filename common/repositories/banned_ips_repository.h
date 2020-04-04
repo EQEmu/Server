@@ -91,7 +91,7 @@ public:
 	{
 		BannedIps entry{};
 
-		entry.ip_address = 0;
+		entry.ip_address = "";
 		entry.notes      = 0;
 
 		return entry;

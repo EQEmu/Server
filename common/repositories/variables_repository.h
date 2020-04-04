@@ -96,8 +96,8 @@ public:
 		Variables entry{};
 
 		entry.varname     = "";
-		entry.value       = 0;
-		entry.information = 0;
+		entry.value       = "";
+		entry.information = "";
 		entry.ts          = current_timestamp();
 
 		return entry;

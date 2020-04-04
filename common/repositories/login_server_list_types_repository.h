@@ -92,7 +92,7 @@ public:
 		LoginServerListTypes entry{};
 
 		entry.id          = 0;
-		entry.description = 0;
+		entry.description = "";
 
 		return entry;
 	}

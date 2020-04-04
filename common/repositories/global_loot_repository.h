@@ -122,11 +122,10 @@ public:
 		entry.rare         = 0;
 		entry.raid         = 0;
 		entry.race         = 0;
-		entry.
-		class        = 0;
-		entry.bodytype = 0;
-		entry.zone     = 0;
-		entry.hot_zone = 0;
+		entry.class        = 0;
+		entry.bodytype     = 0;
+		entry.zone         = 0;
+		entry.hot_zone     = 0;
 
 		return entry;
 	}
@@ -170,11 +169,10 @@ public:
 			entry.rare         = atoi(row[6]);
 			entry.raid         = atoi(row[7]);
 			entry.race         = row[8];
-			entry.
-			class        = row[9];
-			entry.bodytype = row[10];
-			entry.zone     = row[11];
-			entry.hot_zone = atoi(row[12]);
+			entry.class        = row[9];
+			entry.bodytype     = row[10];
+			entry.zone         = row[11];
+			entry.hot_zone     = atoi(row[12]);
 
 			return entry;
 		}
@@ -214,8 +212,7 @@ public:
 		update_values.push_back(columns[6] + " = " + std::to_string(global_loot_entry.rare));
 		update_values.push_back(columns[7] + " = " + std::to_string(global_loot_entry.raid));
 		update_values.push_back(columns[8] + " = '" + EscapeString(global_loot_entry.race) + "'");
-		update_values.push_back(columns[9] + " = '" + EscapeString(global_loot_entry.
-		class) +"'");
+		update_values.push_back(columns[9] + " = '" + EscapeString(global_loot_entry.class) + "'");
 		update_values.push_back(columns[10] + " = '" + EscapeString(global_loot_entry.bodytype) + "'");
 		update_values.push_back(columns[11] + " = '" + EscapeString(global_loot_entry.zone) + "'");
 		update_values.push_back(columns[12] + " = " + std::to_string(global_loot_entry.hot_zone));
@@ -247,8 +244,7 @@ public:
 		insert_values.push_back(std::to_string(global_loot_entry.rare));
 		insert_values.push_back(std::to_string(global_loot_entry.raid));
 		insert_values.push_back("'" + EscapeString(global_loot_entry.race) + "'");
-		insert_values.push_back("'" + EscapeString(global_loot_entry.
-		class) +"'");
+		insert_values.push_back("'" + EscapeString(global_loot_entry.class) + "'");
 		insert_values.push_back("'" + EscapeString(global_loot_entry.bodytype) + "'");
 		insert_values.push_back("'" + EscapeString(global_loot_entry.zone) + "'");
 		insert_values.push_back(std::to_string(global_loot_entry.hot_zone));
@@ -288,8 +284,7 @@ public:
 			insert_values.push_back(std::to_string(global_loot_entry.rare));
 			insert_values.push_back(std::to_string(global_loot_entry.raid));
 			insert_values.push_back("'" + EscapeString(global_loot_entry.race) + "'");
-			insert_values.push_back("'" + EscapeString(global_loot_entry.
-			class) +"'");
+			insert_values.push_back("'" + EscapeString(global_loot_entry.class) + "'");
 			insert_values.push_back("'" + EscapeString(global_loot_entry.bodytype) + "'");
 			insert_values.push_back("'" + EscapeString(global_loot_entry.zone) + "'");
 			insert_values.push_back(std::to_string(global_loot_entry.hot_zone));
@@ -335,11 +330,10 @@ public:
 			entry.rare         = atoi(row[6]);
 			entry.raid         = atoi(row[7]);
 			entry.race         = row[8];
-			entry.
-			class        = row[9];
-			entry.bodytype = row[10];
-			entry.zone     = row[11];
-			entry.hot_zone = atoi(row[12]);
+			entry.class        = row[9];
+			entry.bodytype     = row[10];
+			entry.zone         = row[11];
+			entry.hot_zone     = atoi(row[12]);
 
 			all_entries.push_back(entry);
 		}

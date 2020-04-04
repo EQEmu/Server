@@ -109,7 +109,7 @@ public:
 		entry.name        = "";
 		entry.leader      = 0;
 		entry.minstatus   = 0;
-		entry.motd        = 0;
+		entry.motd        = "";
 		entry.tribute     = 0;
 		entry.motd_setter = "";
 		entry.channel     = "";

@@ -95,7 +95,7 @@ public:
 
 		entry.id    = 0;
 		entry.type  = 0;
-		entry.value = 0;
+		entry.value = "";
 
 		return entry;
 	}

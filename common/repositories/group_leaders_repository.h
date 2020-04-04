@@ -112,7 +112,7 @@ public:
 		entry.maintank       = "";
 		entry.assist         = "";
 		entry.puller         = "";
-		entry.mentoree       = 0;
+		entry.mentoree       = "";
 		entry.mentor_percent = 0;
 
 		return entry;

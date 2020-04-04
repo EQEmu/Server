@@ -98,7 +98,7 @@ public:
 		VeteranRewardTemplates entry{};
 
 		entry.claim_id    = 0;
-		entry.name        = 0;
+		entry.name        = "";
 		entry.item_id     = 0;
 		entry.charges     = 0;
 		entry.reward_slot = 0;

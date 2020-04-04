@@ -101,7 +101,7 @@ public:
 		entry.emoteid = 0;
 		entry.event_  = 0;
 		entry.type    = 0;
-		entry.text    = 0;
+		entry.text    = "";
 
 		return entry;
 	}

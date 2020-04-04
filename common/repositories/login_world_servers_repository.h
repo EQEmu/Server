@@ -108,8 +108,8 @@ public:
 		LoginWorldServers entry{};
 
 		entry.id                        = 0;
-		entry.long_name                 = 0;
-		entry.short_name                = 0;
+		entry.long_name                 = "";
+		entry.short_name                = "";
 		entry.tag_description           = "";
 		entry.login_server_list_type_id = 0;
 		entry.last_login_date           = 0;
@@ -195,8 +195,7 @@ public:
 		update_values.push_back(columns[1] + " = '" + EscapeString(login_world_servers_entry.long_name) + "'");
 		update_values.push_back(columns[2] + " = '" + EscapeString(login_world_servers_entry.short_name) + "'");
 		update_values.push_back(columns[3] + " = '" + EscapeString(login_world_servers_entry.tag_description) + "'");
-		update_values.push_back(
-			columns[4] + " = " + std::to_string(login_world_servers_entry.login_server_list_type_id));
+		update_values.push_back(columns[4] + " = " + std::to_string(login_world_servers_entry.login_server_list_type_id));
 		update_values.push_back(columns[5] + " = '" + EscapeString(login_world_servers_entry.last_login_date) + "'");
 		update_values.push_back(columns[6] + " = '" + EscapeString(login_world_servers_entry.last_ip_address) + "'");
 		update_values.push_back(columns[7] + " = " + std::to_string(login_world_servers_entry.login_server_admin_id));

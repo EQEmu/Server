@@ -111,7 +111,7 @@ public:
 
 		entry.type       = 0;
 		entry.npc_type   = 0;
-		entry.name       = 0;
+		entry.name       = "";
 		entry.spell_id   = 0;
 		entry.distance   = 60;
 		entry.aura_type  = 1;

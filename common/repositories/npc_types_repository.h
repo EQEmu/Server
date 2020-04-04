@@ -332,7 +332,7 @@ public:
 		NpcTypes entry{};
 
 		entry.id                     = 0;
-		entry.name                   = 0;
+		entry.name                   = "";
 		entry.lastname               = 0;
 		entry.level                  = 0;
 		entry.race                   = 0;

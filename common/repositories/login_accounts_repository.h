@@ -106,11 +106,11 @@ public:
 		LoginAccounts entry{};
 
 		entry.id                 = 0;
-		entry.account_name       = 0;
-		entry.account_password   = 0;
-		entry.account_email      = 0;
+		entry.account_name       = "";
+		entry.account_password   = "";
+		entry.account_email      = "";
 		entry.source_loginserver = 0;
-		entry.last_ip_address    = 0;
+		entry.last_ip_address    = "";
 		entry.last_login_date    = 0;
 		entry.created_at         = 0;
 		entry.updated_at         = current_timestamp();

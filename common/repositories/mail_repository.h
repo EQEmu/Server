@@ -108,8 +108,8 @@ public:
 		entry.timestamp = 0;
 		entry.from      = "";
 		entry.subject   = "";
-		entry.body      = 0;
-		entry.to        = 0;
+		entry.body      = "";
+		entry.to        = "";
 		entry.status    = 0;
 
 		return entry;

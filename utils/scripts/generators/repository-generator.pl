@@ -78,9 +78,8 @@ my $pass          = $config->{"server"}{"database"}{"password"};
 my $dsn           = "dbi:mysql:$database_name:$host:3306";
 my $connect       = DBI->connect($dsn, $user, $pass);
 
-my @tables = ();
+my @tables = ($requested_table_to_generate);
 if ($requested_table_to_generate eq "all" || !$requested_table_to_generate) {
-
     my $table_names_exec = $connect->prepare(
         "
             SELECT
@@ -177,6 +176,9 @@ foreach my $table_to_generate (@tables) {
     my %table_data           = ();
     my %table_primary_key    = ();
     $ex->execute($database_name, $table_to_generate);
+
+    $table_primary_key{$table_to_generate} = "id";
+
     while (my @row           = $ex->fetchrow_array()) {
         my $column_name      = $row[0];
         my $table_name       = $row[1];
@@ -195,6 +197,9 @@ foreach my $table_to_generate (@tables) {
             $default_value = $column_default;
         }
         if ($column_default eq "''") {
+            $default_value = '""';
+        }
+        if (trim($column_default) eq "" && $column_type =~ /text|varchar/i) {
             $default_value = '""';
         }
 
@@ -275,7 +280,7 @@ foreach my $table_to_generate (@tables) {
         exit;
     }
 
-    foreach my $column (keys %{ $table_data{$table_to_generate} }) {
+    foreach my $column (keys %{$table_data{$table_to_generate}}) {
         my $column_data      = $table_data{$table_to_generate}{$column};
         my $data_type        = $column_data->[0];
         my $column_type      = $column_data->[1];

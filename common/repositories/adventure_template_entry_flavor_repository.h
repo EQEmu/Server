@@ -92,7 +92,7 @@ public:
 		AdventureTemplateEntryFlavor entry{};
 
 		entry.id   = 0;
-		entry.text = 0;
+		entry.text = "";
 
 		return entry;
 	}

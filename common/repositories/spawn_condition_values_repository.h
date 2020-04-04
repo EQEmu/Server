@@ -97,7 +97,7 @@ public:
 
 		entry.id          = 0;
 		entry.value       = 0;
-		entry.zone        = 0;
+		entry.zone        = "";
 		entry.instance_id = 0;
 
 		return entry;

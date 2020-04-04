@@ -94,7 +94,7 @@ public:
 		Books entry{};
 
 		entry.name     = "";
-		entry.txtfile  = 0;
+		entry.txtfile  = "";
 		entry.language = 0;
 
 		return entry;
