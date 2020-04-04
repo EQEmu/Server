@@ -114,10 +114,23 @@ foreach my $table_to_generate (@tables) {
         "login_tables",
     );
 
+    # These tables don't have a typical schema
+    my @table_ignore_list = (
+        "character_enabledtasks",
+        "keyring",
+        "profanity_list",
+        "zone_flags",
+    );
+
     foreach my $category (@categories) {
         if ($table_to_generate ~~ $database_schema->{$category}) {
             $table_found_in_schema = 1;
         }
+    }
+
+    if ($table_to_generate ~~ @table_ignore_list) {
+        print "Table [$table_to_generate] is on ignore list... skipping...\n";
+        $table_found_in_schema = 0;
     }
 
     if ($table_found_in_schema == 0) {

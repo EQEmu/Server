@@ -35,15 +35,15 @@ public:
 		int         status;
 		std::string ls_id;
 		int         lsaccount_id;
-		int         gmspeed;
-		int         revoked;
+		int8        gmspeed;
+		int8        revoked;
 		int         karma;
 		std::string minilogin_ip;
-		int         hideme;
-		int         rulesflag;
+		int8        hideme;
+		int8        rulesflag;
 		std::string suspendeduntil;
 		int         time_creation;
-		int         expansion;
+		int8        expansion;
 		std::string ban_reason;
 		std::string suspend_reason;
 	};
@@ -56,25 +56,25 @@ public:
 	static std::vector<std::string> Columns()
 	{
 		return {
-			"id"
-			"name"
-			"charname"
-			"sharedplat"
-			"password"
-			"status"
-			"ls_id"
-			"lsaccount_id"
-			"gmspeed"
-			"revoked"
-			"karma"
-			"minilogin_ip"
-			"hideme"
-			"rulesflag"
-			"suspendeduntil"
-			"time_creation"
-			"expansion"
-			"ban_reason"
-			"suspend_reason"
+			"id",
+			"name",
+			"charname",
+			"sharedplat",
+			"password",
+			"status",
+			"ls_id",
+			"lsaccount_id",
+			"gmspeed",
+			"revoked",
+			"karma",
+			"minilogin_ip",
+			"hideme",
+			"rulesflag",
+			"suspendeduntil",
+			"time_creation",
+			"expansion",
+			"ban_reason",
+			"suspend_reason",
 		};
 	}
 
@@ -100,7 +100,7 @@ public:
 
 	static std::string TableName()
 	{
-		return std::string("{{TABLE_NAME}}");
+		return std::string("account");
 	}
 
 	static std::string BaseSelect()
