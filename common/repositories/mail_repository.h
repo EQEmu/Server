@@ -232,7 +232,7 @@ public:
 			return mail_entry;
 		}
 
-		mail_entry = InstanceListRepository::NewEntity();
+		mail_entry = MailRepository::NewEntity();
 
 		return mail_entry;
 	}
@@ -299,6 +299,52 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<Mail> GetWhere(std::string where_filter)
+	{
+		std::vector<Mail> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			Mail entry{};
+
+			entry.msgid     = atoi(row[0]);
+			entry.charid    = atoi(row[1]);
+			entry.timestamp = atoi(row[2]);
+			entry.from      = row[3];
+			entry.subject   = row[4];
+			entry.body      = row[5];
+			entry.to        = row[6];
+			entry.status    = atoi(row[7]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

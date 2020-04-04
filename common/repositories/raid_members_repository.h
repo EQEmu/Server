@@ -238,7 +238,7 @@ public:
 			return raid_members_entry;
 		}
 
-		raid_members_entry = InstanceListRepository::NewEntity();
+		raid_members_entry = RaidMembersRepository::NewEntity();
 
 		return raid_members_entry;
 	}
@@ -307,6 +307,53 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<RaidMembers> GetWhere(std::string where_filter)
+	{
+		std::vector<RaidMembers> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			RaidMembers entry{};
+
+			entry.raidid        = atoi(row[0]);
+			entry.charid        = atoi(row[1]);
+			entry.groupid       = atoi(row[2]);
+			entry._class        = atoi(row[3]);
+			entry.level         = atoi(row[4]);
+			entry.name          = row[5];
+			entry.isgroupleader = atoi(row[6]);
+			entry.israidleader  = atoi(row[7]);
+			entry.islooter      = atoi(row[8]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

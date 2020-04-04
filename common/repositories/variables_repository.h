@@ -208,7 +208,7 @@ public:
 			return variables_entry;
 		}
 
-		variables_entry = InstanceListRepository::NewEntity();
+		variables_entry = VariablesRepository::NewEntity();
 
 		return variables_entry;
 	}
@@ -267,6 +267,48 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<Variables> GetWhere(std::string where_filter)
+	{
+		std::vector<Variables> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			Variables entry{};
+
+			entry.varname     = row[0];
+			entry.value       = row[1];
+			entry.information = row[2];
+			entry.ts          = row[3];
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

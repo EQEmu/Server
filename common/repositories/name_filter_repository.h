@@ -196,7 +196,7 @@ public:
 			return name_filter_entry;
 		}
 
-		name_filter_entry = InstanceListRepository::NewEntity();
+		name_filter_entry = NameFilterRepository::NewEntity();
 
 		return name_filter_entry;
 	}
@@ -251,6 +251,46 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<NameFilter> GetWhere(std::string where_filter)
+	{
+		std::vector<NameFilter> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			NameFilter entry{};
+
+			entry.id   = atoi(row[0]);
+			entry.name = row[1];
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

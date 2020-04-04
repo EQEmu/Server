@@ -220,7 +220,7 @@ public:
 			return loottable_entry;
 		}
 
-		loottable_entry = InstanceListRepository::NewEntity();
+		loottable_entry = LoottableRepository::NewEntity();
 
 		return loottable_entry;
 	}
@@ -283,6 +283,50 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<Loottable> GetWhere(std::string where_filter)
+	{
+		std::vector<Loottable> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			Loottable entry{};
+
+			entry.id      = atoi(row[0]);
+			entry.name    = row[1];
+			entry.mincash = atoi(row[2]);
+			entry.maxcash = atoi(row[3]);
+			entry.avgcoin = atoi(row[4]);
+			entry.done    = atoi(row[5]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

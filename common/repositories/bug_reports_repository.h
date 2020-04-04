@@ -291,9 +291,9 @@ public:
 		update_values.push_back(columns[9] + " = '" + EscapeString(bug_reports_entry.category_name) + "'");
 		update_values.push_back(columns[10] + " = '" + EscapeString(bug_reports_entry.reporter_name) + "'");
 		update_values.push_back(columns[11] + " = '" + EscapeString(bug_reports_entry.ui_path) + "'");
-		update_values.push_back(columns[12] + " = '" + EscapeString(bug_reports_entry.pos_x) + "'");
-		update_values.push_back(columns[13] + " = '" + EscapeString(bug_reports_entry.pos_y) + "'");
-		update_values.push_back(columns[14] + " = '" + EscapeString(bug_reports_entry.pos_z) + "'");
+		update_values.push_back(columns[12] + " = " + std::to_string(bug_reports_entry.pos_x));
+		update_values.push_back(columns[13] + " = " + std::to_string(bug_reports_entry.pos_y));
+		update_values.push_back(columns[14] + " = " + std::to_string(bug_reports_entry.pos_z));
 		update_values.push_back(columns[15] + " = " + std::to_string(bug_reports_entry.heading));
 		update_values.push_back(columns[16] + " = " + std::to_string(bug_reports_entry.time_played));
 		update_values.push_back(columns[17] + " = " + std::to_string(bug_reports_entry.target_id));
@@ -342,9 +342,9 @@ public:
 		insert_values.push_back("'" + EscapeString(bug_reports_entry.category_name) + "'");
 		insert_values.push_back("'" + EscapeString(bug_reports_entry.reporter_name) + "'");
 		insert_values.push_back("'" + EscapeString(bug_reports_entry.ui_path) + "'");
-		insert_values.push_back("'" + EscapeString(bug_reports_entry.pos_x) + "'");
-		insert_values.push_back("'" + EscapeString(bug_reports_entry.pos_y) + "'");
-		insert_values.push_back("'" + EscapeString(bug_reports_entry.pos_z) + "'");
+		insert_values.push_back(std::to_string(bug_reports_entry.pos_x));
+		insert_values.push_back(std::to_string(bug_reports_entry.pos_y));
+		insert_values.push_back(std::to_string(bug_reports_entry.pos_z));
 		insert_values.push_back(std::to_string(bug_reports_entry.heading));
 		insert_values.push_back(std::to_string(bug_reports_entry.time_played));
 		insert_values.push_back(std::to_string(bug_reports_entry.target_id));
@@ -376,7 +376,7 @@ public:
 			return bug_reports_entry;
 		}
 
-		bug_reports_entry = InstanceListRepository::NewEntity();
+		bug_reports_entry = BugReportsRepository::NewEntity();
 
 		return bug_reports_entry;
 	}
@@ -401,9 +401,9 @@ public:
 			insert_values.push_back("'" + EscapeString(bug_reports_entry.category_name) + "'");
 			insert_values.push_back("'" + EscapeString(bug_reports_entry.reporter_name) + "'");
 			insert_values.push_back("'" + EscapeString(bug_reports_entry.ui_path) + "'");
-			insert_values.push_back("'" + EscapeString(bug_reports_entry.pos_x) + "'");
-			insert_values.push_back("'" + EscapeString(bug_reports_entry.pos_y) + "'");
-			insert_values.push_back("'" + EscapeString(bug_reports_entry.pos_z) + "'");
+			insert_values.push_back(std::to_string(bug_reports_entry.pos_x));
+			insert_values.push_back(std::to_string(bug_reports_entry.pos_y));
+			insert_values.push_back(std::to_string(bug_reports_entry.pos_z));
 			insert_values.push_back(std::to_string(bug_reports_entry.heading));
 			insert_values.push_back(std::to_string(bug_reports_entry.time_played));
 			insert_values.push_back(std::to_string(bug_reports_entry.target_id));
@@ -491,6 +491,76 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<BugReports> GetWhere(std::string where_filter)
+	{
+		std::vector<BugReports> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			BugReports entry{};
+
+			entry.id                  = atoi(row[0]);
+			entry.zone                = row[1];
+			entry.client_version_id   = atoi(row[2]);
+			entry.client_version_name = row[3];
+			entry.account_id          = atoi(row[4]);
+			entry.character_id        = atoi(row[5]);
+			entry.character_name      = row[6];
+			entry.reporter_spoof      = atoi(row[7]);
+			entry.category_id         = atoi(row[8]);
+			entry.category_name       = row[9];
+			entry.reporter_name       = row[10];
+			entry.ui_path             = row[11];
+			entry.pos_x               = atof(row[12]);
+			entry.pos_y               = atof(row[13]);
+			entry.pos_z               = atof(row[14]);
+			entry.heading             = atoi(row[15]);
+			entry.time_played         = atoi(row[16]);
+			entry.target_id           = atoi(row[17]);
+			entry.target_name         = row[18];
+			entry.optional_info_mask  = atoi(row[19]);
+			entry._can_duplicate      = atoi(row[20]);
+			entry._crash_bug          = atoi(row[21]);
+			entry._target_info        = atoi(row[22]);
+			entry._character_flags    = atoi(row[23]);
+			entry._unknown_value      = atoi(row[24]);
+			entry.bug_report          = row[25];
+			entry.system_info         = row[26];
+			entry.report_datetime     = row[27];
+			entry.bug_status          = atoi(row[28]);
+			entry.last_review         = row[29];
+			entry.last_reviewer       = row[30];
+			entry.reviewer_notes      = row[31];
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

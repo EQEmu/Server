@@ -216,7 +216,7 @@ public:
 			return character_bandolier_entry;
 		}
 
-		character_bandolier_entry = InstanceListRepository::NewEntity();
+		character_bandolier_entry = CharacterBandolierRepository::NewEntity();
 
 		return character_bandolier_entry;
 	}
@@ -277,6 +277,50 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<CharacterBandolier> GetWhere(std::string where_filter)
+	{
+		std::vector<CharacterBandolier> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			CharacterBandolier entry{};
+
+			entry.id             = atoi(row[0]);
+			entry.bandolier_id   = atoi(row[1]);
+			entry.bandolier_slot = atoi(row[2]);
+			entry.item_id        = atoi(row[3]);
+			entry.icon           = atoi(row[4]);
+			entry.bandolier_name = row[5];
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

@@ -250,7 +250,7 @@ public:
 			return adventure_stats_entry;
 		}
 
-		adventure_stats_entry = InstanceListRepository::NewEntity();
+		adventure_stats_entry = AdventureStatsRepository::NewEntity();
 
 		return adventure_stats_entry;
 	}
@@ -323,6 +323,55 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<AdventureStats> GetWhere(std::string where_filter)
+	{
+		std::vector<AdventureStats> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			AdventureStats entry{};
+
+			entry.player_id  = atoi(row[0]);
+			entry.guk_wins   = atoi(row[1]);
+			entry.mir_wins   = atoi(row[2]);
+			entry.mmc_wins   = atoi(row[3]);
+			entry.ruj_wins   = atoi(row[4]);
+			entry.tak_wins   = atoi(row[5]);
+			entry.guk_losses = atoi(row[6]);
+			entry.mir_losses = atoi(row[7]);
+			entry.mmc_losses = atoi(row[8]);
+			entry.ruj_losses = atoi(row[9]);
+			entry.tak_losses = atoi(row[10]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

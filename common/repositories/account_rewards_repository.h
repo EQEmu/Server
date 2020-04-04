@@ -200,7 +200,7 @@ public:
 			return account_rewards_entry;
 		}
 
-		account_rewards_entry = InstanceListRepository::NewEntity();
+		account_rewards_entry = AccountRewardsRepository::NewEntity();
 
 		return account_rewards_entry;
 	}
@@ -256,6 +256,47 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<AccountRewards> GetWhere(std::string where_filter)
+	{
+		std::vector<AccountRewards> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			AccountRewards entry{};
+
+			entry.account_id = atoi(row[0]);
+			entry.reward_id  = atoi(row[1]);
+			entry.amount     = atoi(row[2]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

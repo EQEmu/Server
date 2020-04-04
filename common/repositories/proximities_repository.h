@@ -184,12 +184,12 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[2] + " = '" + EscapeString(proximities_entry.minx) + "'");
-		update_values.push_back(columns[3] + " = '" + EscapeString(proximities_entry.maxx) + "'");
-		update_values.push_back(columns[4] + " = '" + EscapeString(proximities_entry.miny) + "'");
-		update_values.push_back(columns[5] + " = '" + EscapeString(proximities_entry.maxy) + "'");
-		update_values.push_back(columns[6] + " = '" + EscapeString(proximities_entry.minz) + "'");
-		update_values.push_back(columns[7] + " = '" + EscapeString(proximities_entry.maxz) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(proximities_entry.minx));
+		update_values.push_back(columns[3] + " = " + std::to_string(proximities_entry.maxx));
+		update_values.push_back(columns[4] + " = " + std::to_string(proximities_entry.miny));
+		update_values.push_back(columns[5] + " = " + std::to_string(proximities_entry.maxy));
+		update_values.push_back(columns[6] + " = " + std::to_string(proximities_entry.minz));
+		update_values.push_back(columns[7] + " = " + std::to_string(proximities_entry.maxz));
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -210,12 +210,12 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back("'" + EscapeString(proximities_entry.minx) + "'");
-		insert_values.push_back("'" + EscapeString(proximities_entry.maxx) + "'");
-		insert_values.push_back("'" + EscapeString(proximities_entry.miny) + "'");
-		insert_values.push_back("'" + EscapeString(proximities_entry.maxy) + "'");
-		insert_values.push_back("'" + EscapeString(proximities_entry.minz) + "'");
-		insert_values.push_back("'" + EscapeString(proximities_entry.maxz) + "'");
+		insert_values.push_back(std::to_string(proximities_entry.minx));
+		insert_values.push_back(std::to_string(proximities_entry.maxx));
+		insert_values.push_back(std::to_string(proximities_entry.miny));
+		insert_values.push_back(std::to_string(proximities_entry.maxy));
+		insert_values.push_back(std::to_string(proximities_entry.minz));
+		insert_values.push_back(std::to_string(proximities_entry.maxz));
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -230,7 +230,7 @@ public:
 			return proximities_entry;
 		}
 
-		proximities_entry = InstanceListRepository::NewEntity();
+		proximities_entry = ProximitiesRepository::NewEntity();
 
 		return proximities_entry;
 	}
@@ -244,12 +244,12 @@ public:
 		for (auto &proximities_entry: proximities_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back("'" + EscapeString(proximities_entry.minx) + "'");
-			insert_values.push_back("'" + EscapeString(proximities_entry.maxx) + "'");
-			insert_values.push_back("'" + EscapeString(proximities_entry.miny) + "'");
-			insert_values.push_back("'" + EscapeString(proximities_entry.maxy) + "'");
-			insert_values.push_back("'" + EscapeString(proximities_entry.minz) + "'");
-			insert_values.push_back("'" + EscapeString(proximities_entry.maxz) + "'");
+			insert_values.push_back(std::to_string(proximities_entry.minx));
+			insert_values.push_back(std::to_string(proximities_entry.maxx));
+			insert_values.push_back(std::to_string(proximities_entry.miny));
+			insert_values.push_back(std::to_string(proximities_entry.maxy));
+			insert_values.push_back(std::to_string(proximities_entry.minz));
+			insert_values.push_back(std::to_string(proximities_entry.maxz));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -296,6 +296,52 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<Proximities> GetWhere(std::string where_filter)
+	{
+		std::vector<Proximities> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			Proximities entry{};
+
+			entry.zoneid    = atoi(row[0]);
+			entry.exploreid = atoi(row[1]);
+			entry.minx      = atof(row[2]);
+			entry.maxx      = atof(row[3]);
+			entry.miny      = atof(row[4]);
+			entry.maxy      = atof(row[5]);
+			entry.minz      = atof(row[6]);
+			entry.maxz      = atof(row[7]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

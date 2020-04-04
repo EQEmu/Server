@@ -196,7 +196,7 @@ public:
 			return ldon_trap_entries_entry;
 		}
 
-		ldon_trap_entries_entry = InstanceListRepository::NewEntity();
+		ldon_trap_entries_entry = LdonTrapEntriesRepository::NewEntity();
 
 		return ldon_trap_entries_entry;
 	}
@@ -251,6 +251,46 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<LdonTrapEntries> GetWhere(std::string where_filter)
+	{
+		std::vector<LdonTrapEntries> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			LdonTrapEntries entry{};
+
+			entry.id      = atoi(row[0]);
+			entry.trap_id = atoi(row[1]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

@@ -1398,7 +1398,7 @@ public:
 		update_values.push_back(columns[104] + " = " + std::to_string(items_entry.reclevel));
 		update_values.push_back(columns[105] + " = " + std::to_string(items_entry.recskill));
 		update_values.push_back(columns[106] + " = " + std::to_string(items_entry.reqlevel));
-		update_values.push_back(columns[107] + " = '" + EscapeString(items_entry.sellrate) + "'");
+		update_values.push_back(columns[107] + " = " + std::to_string(items_entry.sellrate));
 		update_values.push_back(columns[108] + " = " + std::to_string(items_entry.shielding));
 		update_values.push_back(columns[109] + " = " + std::to_string(items_entry.size));
 		update_values.push_back(columns[110] + " = " + std::to_string(items_entry.skillmodtype));
@@ -1702,7 +1702,7 @@ public:
 		insert_values.push_back(std::to_string(items_entry.reclevel));
 		insert_values.push_back(std::to_string(items_entry.recskill));
 		insert_values.push_back(std::to_string(items_entry.reqlevel));
-		insert_values.push_back("'" + EscapeString(items_entry.sellrate) + "'");
+		insert_values.push_back(std::to_string(items_entry.sellrate));
 		insert_values.push_back(std::to_string(items_entry.shielding));
 		insert_values.push_back(std::to_string(items_entry.size));
 		insert_values.push_back(std::to_string(items_entry.skillmodtype));
@@ -1894,7 +1894,7 @@ public:
 			return items_entry;
 		}
 
-		items_entry = InstanceListRepository::NewEntity();
+		items_entry = ItemsRepository::NewEntity();
 
 		return items_entry;
 	}
@@ -2014,7 +2014,7 @@ public:
 			insert_values.push_back(std::to_string(items_entry.reclevel));
 			insert_values.push_back(std::to_string(items_entry.recskill));
 			insert_values.push_back(std::to_string(items_entry.reqlevel));
-			insert_values.push_back("'" + EscapeString(items_entry.sellrate) + "'");
+			insert_values.push_back(std::to_string(items_entry.sellrate));
 			insert_values.push_back(std::to_string(items_entry.shielding));
 			insert_values.push_back(std::to_string(items_entry.size));
 			insert_values.push_back(std::to_string(items_entry.skillmodtype));
@@ -2515,6 +2515,329 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<Items> GetWhere(std::string where_filter)
+	{
+		std::vector<Items> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			Items entry{};
+
+			entry.id                  = atoi(row[0]);
+			entry.minstatus           = atoi(row[1]);
+			entry.Name                = row[2];
+			entry.aagi                = atoi(row[3]);
+			entry.ac                  = atoi(row[4]);
+			entry.accuracy            = atoi(row[5]);
+			entry.acha                = atoi(row[6]);
+			entry.adex                = atoi(row[7]);
+			entry.aint                = atoi(row[8]);
+			entry.artifactflag        = atoi(row[9]);
+			entry.asta                = atoi(row[10]);
+			entry.astr                = atoi(row[11]);
+			entry.attack              = atoi(row[12]);
+			entry.augrestrict         = atoi(row[13]);
+			entry.augslot1type        = atoi(row[14]);
+			entry.augslot1visible     = atoi(row[15]);
+			entry.augslot2type        = atoi(row[16]);
+			entry.augslot2visible     = atoi(row[17]);
+			entry.augslot3type        = atoi(row[18]);
+			entry.augslot3visible     = atoi(row[19]);
+			entry.augslot4type        = atoi(row[20]);
+			entry.augslot4visible     = atoi(row[21]);
+			entry.augslot5type        = atoi(row[22]);
+			entry.augslot5visible     = atoi(row[23]);
+			entry.augslot6type        = atoi(row[24]);
+			entry.augslot6visible     = atoi(row[25]);
+			entry.augtype             = atoi(row[26]);
+			entry.avoidance           = atoi(row[27]);
+			entry.awis                = atoi(row[28]);
+			entry.bagsize             = atoi(row[29]);
+			entry.bagslots            = atoi(row[30]);
+			entry.bagtype             = atoi(row[31]);
+			entry.bagwr               = atoi(row[32]);
+			entry.banedmgamt          = atoi(row[33]);
+			entry.banedmgraceamt      = atoi(row[34]);
+			entry.banedmgbody         = atoi(row[35]);
+			entry.banedmgrace         = atoi(row[36]);
+			entry.bardtype            = atoi(row[37]);
+			entry.bardvalue           = atoi(row[38]);
+			entry.book                = atoi(row[39]);
+			entry.casttime            = atoi(row[40]);
+			entry.casttime_           = atoi(row[41]);
+			entry.charmfile           = row[42];
+			entry.charmfileid         = row[43];
+			entry.classes             = atoi(row[44]);
+			entry.color               = atoi(row[45]);
+			entry.combateffects       = row[46];
+			entry.extradmgskill       = atoi(row[47]);
+			entry.extradmgamt         = atoi(row[48]);
+			entry.price               = atoi(row[49]);
+			entry.cr                  = atoi(row[50]);
+			entry.damage              = atoi(row[51]);
+			entry.damageshield        = atoi(row[52]);
+			entry.deity               = atoi(row[53]);
+			entry.delay               = atoi(row[54]);
+			entry.augdistiller        = atoi(row[55]);
+			entry.dotshielding        = atoi(row[56]);
+			entry.dr                  = atoi(row[57]);
+			entry.clicktype           = atoi(row[58]);
+			entry.clicklevel2         = atoi(row[59]);
+			entry.elemdmgtype         = atoi(row[60]);
+			entry.elemdmgamt          = atoi(row[61]);
+			entry.endur               = atoi(row[62]);
+			entry.factionamt1         = atoi(row[63]);
+			entry.factionamt2         = atoi(row[64]);
+			entry.factionamt3         = atoi(row[65]);
+			entry.factionamt4         = atoi(row[66]);
+			entry.factionmod1         = atoi(row[67]);
+			entry.factionmod2         = atoi(row[68]);
+			entry.factionmod3         = atoi(row[69]);
+			entry.factionmod4         = atoi(row[70]);
+			entry.filename            = row[71];
+			entry.focuseffect         = atoi(row[72]);
+			entry.fr                  = atoi(row[73]);
+			entry.fvnodrop            = atoi(row[74]);
+			entry.haste               = atoi(row[75]);
+			entry.clicklevel          = atoi(row[76]);
+			entry.hp                  = atoi(row[77]);
+			entry.regen               = atoi(row[78]);
+			entry.icon                = atoi(row[79]);
+			entry.idfile              = row[80];
+			entry.itemclass           = atoi(row[81]);
+			entry.itemtype            = atoi(row[82]);
+			entry.ldonprice           = atoi(row[83]);
+			entry.ldontheme           = atoi(row[84]);
+			entry.ldonsold            = atoi(row[85]);
+			entry.light               = atoi(row[86]);
+			entry.lore                = row[87];
+			entry.loregroup           = atoi(row[88]);
+			entry.magic               = atoi(row[89]);
+			entry.mana                = atoi(row[90]);
+			entry.manaregen           = atoi(row[91]);
+			entry.enduranceregen      = atoi(row[92]);
+			entry.material            = atoi(row[93]);
+			entry.herosforgemodel     = atoi(row[94]);
+			entry.maxcharges          = atoi(row[95]);
+			entry.mr                  = atoi(row[96]);
+			entry.nodrop              = atoi(row[97]);
+			entry.norent              = atoi(row[98]);
+			entry.pendingloreflag     = atoi(row[99]);
+			entry.pr                  = atoi(row[100]);
+			entry.procrate            = atoi(row[101]);
+			entry.races               = atoi(row[102]);
+			entry.range               = atoi(row[103]);
+			entry.reclevel            = atoi(row[104]);
+			entry.recskill            = atoi(row[105]);
+			entry.reqlevel            = atoi(row[106]);
+			entry.sellrate            = atof(row[107]);
+			entry.shielding           = atoi(row[108]);
+			entry.size                = atoi(row[109]);
+			entry.skillmodtype        = atoi(row[110]);
+			entry.skillmodvalue       = atoi(row[111]);
+			entry.slots               = atoi(row[112]);
+			entry.clickeffect         = atoi(row[113]);
+			entry.spellshield         = atoi(row[114]);
+			entry.strikethrough       = atoi(row[115]);
+			entry.stunresist          = atoi(row[116]);
+			entry.summonedflag        = atoi(row[117]);
+			entry.tradeskills         = atoi(row[118]);
+			entry.favor               = atoi(row[119]);
+			entry.weight              = atoi(row[120]);
+			entry.UNK012              = atoi(row[121]);
+			entry.UNK013              = atoi(row[122]);
+			entry.benefitflag         = atoi(row[123]);
+			entry.UNK054              = atoi(row[124]);
+			entry.UNK059              = atoi(row[125]);
+			entry.booktype            = atoi(row[126]);
+			entry.recastdelay         = atoi(row[127]);
+			entry.recasttype          = atoi(row[128]);
+			entry.guildfavor          = atoi(row[129]);
+			entry.UNK123              = atoi(row[130]);
+			entry.UNK124              = atoi(row[131]);
+			entry.attuneable          = atoi(row[132]);
+			entry.nopet               = atoi(row[133]);
+			entry.updated             = row[134];
+			entry.comment             = row[135];
+			entry.UNK127              = atoi(row[136]);
+			entry.pointtype           = atoi(row[137]);
+			entry.potionbelt          = atoi(row[138]);
+			entry.potionbeltslots     = atoi(row[139]);
+			entry.stacksize           = atoi(row[140]);
+			entry.notransfer          = atoi(row[141]);
+			entry.stackable           = atoi(row[142]);
+			entry.UNK134              = row[143];
+			entry.UNK137              = atoi(row[144]);
+			entry.proceffect          = atoi(row[145]);
+			entry.proctype            = atoi(row[146]);
+			entry.proclevel2          = atoi(row[147]);
+			entry.proclevel           = atoi(row[148]);
+			entry.UNK142              = atoi(row[149]);
+			entry.worneffect          = atoi(row[150]);
+			entry.worntype            = atoi(row[151]);
+			entry.wornlevel2          = atoi(row[152]);
+			entry.wornlevel           = atoi(row[153]);
+			entry.UNK147              = atoi(row[154]);
+			entry.focustype           = atoi(row[155]);
+			entry.focuslevel2         = atoi(row[156]);
+			entry.focuslevel          = atoi(row[157]);
+			entry.UNK152              = atoi(row[158]);
+			entry.scrolleffect        = atoi(row[159]);
+			entry.scrolltype          = atoi(row[160]);
+			entry.scrolllevel2        = atoi(row[161]);
+			entry.scrolllevel         = atoi(row[162]);
+			entry.UNK157              = atoi(row[163]);
+			entry.serialized          = row[164];
+			entry.verified            = row[165];
+			entry.serialization       = row[166];
+			entry.source              = row[167];
+			entry.UNK033              = atoi(row[168]);
+			entry.lorefile            = row[169];
+			entry.UNK014              = atoi(row[170]);
+			entry.svcorruption        = atoi(row[171]);
+			entry.skillmodmax         = atoi(row[172]);
+			entry.UNK060              = atoi(row[173]);
+			entry.augslot1unk2        = atoi(row[174]);
+			entry.augslot2unk2        = atoi(row[175]);
+			entry.augslot3unk2        = atoi(row[176]);
+			entry.augslot4unk2        = atoi(row[177]);
+			entry.augslot5unk2        = atoi(row[178]);
+			entry.augslot6unk2        = atoi(row[179]);
+			entry.UNK120              = atoi(row[180]);
+			entry.UNK121              = atoi(row[181]);
+			entry.questitemflag       = atoi(row[182]);
+			entry.UNK132              = row[183];
+			entry.clickunk5           = atoi(row[184]);
+			entry.clickunk6           = row[185];
+			entry.clickunk7           = atoi(row[186]);
+			entry.procunk1            = atoi(row[187]);
+			entry.procunk2            = atoi(row[188]);
+			entry.procunk3            = atoi(row[189]);
+			entry.procunk4            = atoi(row[190]);
+			entry.procunk6            = row[191];
+			entry.procunk7            = atoi(row[192]);
+			entry.wornunk1            = atoi(row[193]);
+			entry.wornunk2            = atoi(row[194]);
+			entry.wornunk3            = atoi(row[195]);
+			entry.wornunk4            = atoi(row[196]);
+			entry.wornunk5            = atoi(row[197]);
+			entry.wornunk6            = row[198];
+			entry.wornunk7            = atoi(row[199]);
+			entry.focusunk1           = atoi(row[200]);
+			entry.focusunk2           = atoi(row[201]);
+			entry.focusunk3           = atoi(row[202]);
+			entry.focusunk4           = atoi(row[203]);
+			entry.focusunk5           = atoi(row[204]);
+			entry.focusunk6           = row[205];
+			entry.focusunk7           = atoi(row[206]);
+			entry.scrollunk1          = atoi(row[207]);
+			entry.scrollunk2          = atoi(row[208]);
+			entry.scrollunk3          = atoi(row[209]);
+			entry.scrollunk4          = atoi(row[210]);
+			entry.scrollunk5          = atoi(row[211]);
+			entry.scrollunk6          = row[212];
+			entry.scrollunk7          = atoi(row[213]);
+			entry.UNK193              = atoi(row[214]);
+			entry.purity              = atoi(row[215]);
+			entry.evoitem             = atoi(row[216]);
+			entry.evoid               = atoi(row[217]);
+			entry.evolvinglevel       = atoi(row[218]);
+			entry.evomax              = atoi(row[219]);
+			entry.clickname           = row[220];
+			entry.procname            = row[221];
+			entry.wornname            = row[222];
+			entry.focusname           = row[223];
+			entry.scrollname          = row[224];
+			entry.dsmitigation        = atoi(row[225]);
+			entry.heroic_str          = atoi(row[226]);
+			entry.heroic_int          = atoi(row[227]);
+			entry.heroic_wis          = atoi(row[228]);
+			entry.heroic_agi          = atoi(row[229]);
+			entry.heroic_dex          = atoi(row[230]);
+			entry.heroic_sta          = atoi(row[231]);
+			entry.heroic_cha          = atoi(row[232]);
+			entry.heroic_pr           = atoi(row[233]);
+			entry.heroic_dr           = atoi(row[234]);
+			entry.heroic_fr           = atoi(row[235]);
+			entry.heroic_cr           = atoi(row[236]);
+			entry.heroic_mr           = atoi(row[237]);
+			entry.heroic_svcorrup     = atoi(row[238]);
+			entry.healamt             = atoi(row[239]);
+			entry.spelldmg            = atoi(row[240]);
+			entry.clairvoyance        = atoi(row[241]);
+			entry.backstabdmg         = atoi(row[242]);
+			entry.created             = row[243];
+			entry.elitematerial       = atoi(row[244]);
+			entry.ldonsellbackrate    = atoi(row[245]);
+			entry.scriptfileid        = atoi(row[246]);
+			entry.expendablearrow     = atoi(row[247]);
+			entry.powersourcecapacity = atoi(row[248]);
+			entry.bardeffect          = atoi(row[249]);
+			entry.bardeffecttype      = atoi(row[250]);
+			entry.bardlevel2          = atoi(row[251]);
+			entry.bardlevel           = atoi(row[252]);
+			entry.bardunk1            = atoi(row[253]);
+			entry.bardunk2            = atoi(row[254]);
+			entry.bardunk3            = atoi(row[255]);
+			entry.bardunk4            = atoi(row[256]);
+			entry.bardunk5            = atoi(row[257]);
+			entry.bardname            = row[258];
+			entry.bardunk7            = atoi(row[259]);
+			entry.UNK214              = atoi(row[260]);
+			entry.UNK219              = atoi(row[261]);
+			entry.UNK220              = atoi(row[262]);
+			entry.UNK221              = atoi(row[263]);
+			entry.heirloom            = atoi(row[264]);
+			entry.UNK223              = atoi(row[265]);
+			entry.UNK224              = atoi(row[266]);
+			entry.UNK225              = atoi(row[267]);
+			entry.UNK226              = atoi(row[268]);
+			entry.UNK227              = atoi(row[269]);
+			entry.UNK228              = atoi(row[270]);
+			entry.UNK229              = atoi(row[271]);
+			entry.UNK230              = atoi(row[272]);
+			entry.UNK231              = atoi(row[273]);
+			entry.UNK232              = atoi(row[274]);
+			entry.UNK233              = atoi(row[275]);
+			entry.UNK234              = atoi(row[276]);
+			entry.placeable           = atoi(row[277]);
+			entry.UNK236              = atoi(row[278]);
+			entry.UNK237              = atoi(row[279]);
+			entry.UNK238              = atoi(row[280]);
+			entry.UNK239              = atoi(row[281]);
+			entry.UNK240              = atoi(row[282]);
+			entry.UNK241              = atoi(row[283]);
+			entry.epicitem            = atoi(row[284]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

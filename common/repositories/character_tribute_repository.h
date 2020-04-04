@@ -204,7 +204,7 @@ public:
 			return character_tribute_entry;
 		}
 
-		character_tribute_entry = InstanceListRepository::NewEntity();
+		character_tribute_entry = CharacterTributeRepository::NewEntity();
 
 		return character_tribute_entry;
 	}
@@ -262,6 +262,47 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<CharacterTribute> GetWhere(std::string where_filter)
+	{
+		std::vector<CharacterTribute> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			CharacterTribute entry{};
+
+			entry.id      = atoi(row[0]);
+			entry.tier    = atoi(row[1]);
+			entry.tribute = atoi(row[2]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

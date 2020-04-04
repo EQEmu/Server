@@ -567,10 +567,10 @@ public:
 		update_values.push_back(columns[5] + " = '" + EscapeString(character_data_entry.suffix) + "'");
 		update_values.push_back(columns[6] + " = " + std::to_string(character_data_entry.zone_id));
 		update_values.push_back(columns[7] + " = " + std::to_string(character_data_entry.zone_instance));
-		update_values.push_back(columns[8] + " = '" + EscapeString(character_data_entry.y) + "'");
-		update_values.push_back(columns[9] + " = '" + EscapeString(character_data_entry.x) + "'");
-		update_values.push_back(columns[10] + " = '" + EscapeString(character_data_entry.z) + "'");
-		update_values.push_back(columns[11] + " = '" + EscapeString(character_data_entry.heading) + "'");
+		update_values.push_back(columns[8] + " = " + std::to_string(character_data_entry.y));
+		update_values.push_back(columns[9] + " = " + std::to_string(character_data_entry.x));
+		update_values.push_back(columns[10] + " = " + std::to_string(character_data_entry.z));
+		update_values.push_back(columns[11] + " = " + std::to_string(character_data_entry.heading));
 		update_values.push_back(columns[12] + " = " + std::to_string(character_data_entry.gender));
 		update_values.push_back(columns[13] + " = " + std::to_string(character_data_entry.race));
 		update_values.push_back(columns[14] + " = " + std::to_string(character_data_entry.class));
@@ -688,10 +688,10 @@ public:
 		insert_values.push_back("'" + EscapeString(character_data_entry.suffix) + "'");
 		insert_values.push_back(std::to_string(character_data_entry.zone_id));
 		insert_values.push_back(std::to_string(character_data_entry.zone_instance));
-		insert_values.push_back("'" + EscapeString(character_data_entry.y) + "'");
-		insert_values.push_back("'" + EscapeString(character_data_entry.x) + "'");
-		insert_values.push_back("'" + EscapeString(character_data_entry.z) + "'");
-		insert_values.push_back("'" + EscapeString(character_data_entry.heading) + "'");
+		insert_values.push_back(std::to_string(character_data_entry.y));
+		insert_values.push_back(std::to_string(character_data_entry.x));
+		insert_values.push_back(std::to_string(character_data_entry.z));
+		insert_values.push_back(std::to_string(character_data_entry.heading));
 		insert_values.push_back(std::to_string(character_data_entry.gender));
 		insert_values.push_back(std::to_string(character_data_entry.race));
 		insert_values.push_back(std::to_string(character_data_entry.class));
@@ -796,7 +796,7 @@ public:
 			return character_data_entry;
 		}
 
-		character_data_entry = InstanceListRepository::NewEntity();
+		character_data_entry = CharacterDataRepository::NewEntity();
 
 		return character_data_entry;
 	}
@@ -817,10 +817,10 @@ public:
 			insert_values.push_back("'" + EscapeString(character_data_entry.suffix) + "'");
 			insert_values.push_back(std::to_string(character_data_entry.zone_id));
 			insert_values.push_back(std::to_string(character_data_entry.zone_instance));
-			insert_values.push_back("'" + EscapeString(character_data_entry.y) + "'");
-			insert_values.push_back("'" + EscapeString(character_data_entry.x) + "'");
-			insert_values.push_back("'" + EscapeString(character_data_entry.z) + "'");
-			insert_values.push_back("'" + EscapeString(character_data_entry.heading) + "'");
+			insert_values.push_back(std::to_string(character_data_entry.y));
+			insert_values.push_back(std::to_string(character_data_entry.x));
+			insert_values.push_back(std::to_string(character_data_entry.z));
+			insert_values.push_back(std::to_string(character_data_entry.heading));
 			insert_values.push_back(std::to_string(character_data_entry.gender));
 			insert_values.push_back(std::to_string(character_data_entry.race));
 			insert_values.push_back(std::to_string(character_data_entry.class));
@@ -1051,6 +1051,146 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<CharacterData> GetWhere(std::string where_filter)
+	{
+		std::vector<CharacterData> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			CharacterData entry{};
+
+			entry.id                      = atoi(row[0]);
+			entry.account_id              = atoi(row[1]);
+			entry.name                    = row[2];
+			entry.last_name               = row[3];
+			entry.title                   = row[4];
+			entry.suffix                  = row[5];
+			entry.zone_id                 = atoi(row[6]);
+			entry.zone_instance           = atoi(row[7]);
+			entry.y                       = atof(row[8]);
+			entry.x                       = atof(row[9]);
+			entry.z                       = atof(row[10]);
+			entry.heading                 = atof(row[11]);
+			entry.gender                  = atoi(row[12]);
+			entry.race                    = atoi(row[13]);
+			entry.class                   = atoi(row[14]);
+			entry.level                   = atoi(row[15]);
+			entry.deity                   = atoi(row[16]);
+			entry.birthday                = atoi(row[17]);
+			entry.last_login              = atoi(row[18]);
+			entry.time_played             = atoi(row[19]);
+			entry.level2                  = atoi(row[20]);
+			entry.anon                    = atoi(row[21]);
+			entry.gm                      = atoi(row[22]);
+			entry.face                    = atoi(row[23]);
+			entry.hair_color              = atoi(row[24]);
+			entry.hair_style              = atoi(row[25]);
+			entry.beard                   = atoi(row[26]);
+			entry.beard_color             = atoi(row[27]);
+			entry.eye_color_1             = atoi(row[28]);
+			entry.eye_color_2             = atoi(row[29]);
+			entry.drakkin_heritage        = atoi(row[30]);
+			entry.drakkin_tattoo          = atoi(row[31]);
+			entry.drakkin_details         = atoi(row[32]);
+			entry.ability_time_seconds    = atoi(row[33]);
+			entry.ability_number          = atoi(row[34]);
+			entry.ability_time_minutes    = atoi(row[35]);
+			entry.ability_time_hours      = atoi(row[36]);
+			entry.exp                     = atoi(row[37]);
+			entry.aa_points_spent         = atoi(row[38]);
+			entry.aa_exp                  = atoi(row[39]);
+			entry.aa_points               = atoi(row[40]);
+			entry.group_leadership_exp    = atoi(row[41]);
+			entry.raid_leadership_exp     = atoi(row[42]);
+			entry.group_leadership_points = atoi(row[43]);
+			entry.raid_leadership_points  = atoi(row[44]);
+			entry.points                  = atoi(row[45]);
+			entry.cur_hp                  = atoi(row[46]);
+			entry.mana                    = atoi(row[47]);
+			entry.endurance               = atoi(row[48]);
+			entry.intoxication            = atoi(row[49]);
+			entry.str                     = atoi(row[50]);
+			entry.sta                     = atoi(row[51]);
+			entry.cha                     = atoi(row[52]);
+			entry.dex                     = atoi(row[53]);
+			entry.int                     = atoi(row[54]);
+			entry.agi                     = atoi(row[55]);
+			entry.wis                     = atoi(row[56]);
+			entry.zone_change_count       = atoi(row[57]);
+			entry.toxicity                = atoi(row[58]);
+			entry.hunger_level            = atoi(row[59]);
+			entry.thirst_level            = atoi(row[60]);
+			entry.ability_up              = atoi(row[61]);
+			entry.ldon_points_guk         = atoi(row[62]);
+			entry.ldon_points_mir         = atoi(row[63]);
+			entry.ldon_points_mmc         = atoi(row[64]);
+			entry.ldon_points_ruj         = atoi(row[65]);
+			entry.ldon_points_tak         = atoi(row[66]);
+			entry.ldon_points_available   = atoi(row[67]);
+			entry.tribute_time_remaining  = atoi(row[68]);
+			entry.career_tribute_points   = atoi(row[69]);
+			entry.tribute_points          = atoi(row[70]);
+			entry.tribute_active          = atoi(row[71]);
+			entry.pvp_status              = atoi(row[72]);
+			entry.pvp_kills               = atoi(row[73]);
+			entry.pvp_deaths              = atoi(row[74]);
+			entry.pvp_current_points      = atoi(row[75]);
+			entry.pvp_career_points       = atoi(row[76]);
+			entry.pvp_best_kill_streak    = atoi(row[77]);
+			entry.pvp_worst_death_streak  = atoi(row[78]);
+			entry.pvp_current_kill_streak = atoi(row[79]);
+			entry.pvp2                    = atoi(row[80]);
+			entry.pvp_type                = atoi(row[81]);
+			entry.show_helm               = atoi(row[82]);
+			entry.group_auto_consent      = atoi(row[83]);
+			entry.raid_auto_consent       = atoi(row[84]);
+			entry.guild_auto_consent      = atoi(row[85]);
+			entry.leadership_exp_on       = atoi(row[86]);
+			entry.RestTimer               = atoi(row[87]);
+			entry.air_remaining           = atoi(row[88]);
+			entry.autosplit_enabled       = atoi(row[89]);
+			entry.lfp                     = atoi(row[90]);
+			entry.lfg                     = atoi(row[91]);
+			entry.mailkey                 = row[92];
+			entry.xtargets                = atoi(row[93]);
+			entry.firstlogon              = atoi(row[94]);
+			entry.e_aa_effects            = atoi(row[95]);
+			entry.e_percent_to_aa         = atoi(row[96]);
+			entry.e_expended_aa_spent     = atoi(row[97]);
+			entry.aa_points_spent_old     = atoi(row[98]);
+			entry.aa_points_old           = atoi(row[99]);
+			entry.e_last_invsnapshot      = atoi(row[100]);
+			entry.deleted_at              = row[101];
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

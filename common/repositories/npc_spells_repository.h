@@ -310,7 +310,7 @@ public:
 			return npc_spells_entry;
 		}
 
-		npc_spells_entry = InstanceListRepository::NewEntity();
+		npc_spells_entry = NpcSpellsRepository::NewEntity();
 
 		return npc_spells_entry;
 	}
@@ -403,6 +403,65 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<NpcSpells> GetWhere(std::string where_filter)
+	{
+		std::vector<NpcSpells> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			NpcSpells entry{};
+
+			entry.id                       = atoi(row[0]);
+			entry.name                     = row[1];
+			entry.parent_list              = atoi(row[2]);
+			entry.attack_proc              = atoi(row[3]);
+			entry.proc_chance              = atoi(row[4]);
+			entry.range_proc               = atoi(row[5]);
+			entry.rproc_chance             = atoi(row[6]);
+			entry.defensive_proc           = atoi(row[7]);
+			entry.dproc_chance             = atoi(row[8]);
+			entry.fail_recast              = atoi(row[9]);
+			entry.engaged_no_sp_recast_min = atoi(row[10]);
+			entry.engaged_no_sp_recast_max = atoi(row[11]);
+			entry.engaged_b_self_chance    = atoi(row[12]);
+			entry.engaged_b_other_chance   = atoi(row[13]);
+			entry.engaged_d_chance         = atoi(row[14]);
+			entry.pursue_no_sp_recast_min  = atoi(row[15]);
+			entry.pursue_no_sp_recast_max  = atoi(row[16]);
+			entry.pursue_d_chance          = atoi(row[17]);
+			entry.idle_no_sp_recast_min    = atoi(row[18]);
+			entry.idle_no_sp_recast_max    = atoi(row[19]);
+			entry.idle_b_chance            = atoi(row[20]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

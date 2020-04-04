@@ -258,10 +258,10 @@ public:
 
 		update_values.push_back(columns[1] + " = " + std::to_string(object_entry.zoneid));
 		update_values.push_back(columns[2] + " = " + std::to_string(object_entry.version));
-		update_values.push_back(columns[3] + " = '" + EscapeString(object_entry.xpos) + "'");
-		update_values.push_back(columns[4] + " = '" + EscapeString(object_entry.ypos) + "'");
-		update_values.push_back(columns[5] + " = '" + EscapeString(object_entry.zpos) + "'");
-		update_values.push_back(columns[6] + " = '" + EscapeString(object_entry.heading) + "'");
+		update_values.push_back(columns[3] + " = " + std::to_string(object_entry.xpos));
+		update_values.push_back(columns[4] + " = " + std::to_string(object_entry.ypos));
+		update_values.push_back(columns[5] + " = " + std::to_string(object_entry.zpos));
+		update_values.push_back(columns[6] + " = " + std::to_string(object_entry.heading));
 		update_values.push_back(columns[7] + " = " + std::to_string(object_entry.itemid));
 		update_values.push_back(columns[8] + " = " + std::to_string(object_entry.charges));
 		update_values.push_back(columns[9] + " = '" + EscapeString(object_entry.objectname) + "'");
@@ -277,9 +277,9 @@ public:
 		update_values.push_back(columns[19] + " = " + std::to_string(object_entry.unknown72));
 		update_values.push_back(columns[20] + " = " + std::to_string(object_entry.unknown76));
 		update_values.push_back(columns[21] + " = " + std::to_string(object_entry.unknown84));
-		update_values.push_back(columns[22] + " = '" + EscapeString(object_entry.size) + "'");
-		update_values.push_back(columns[23] + " = '" + EscapeString(object_entry.tilt_x) + "'");
-		update_values.push_back(columns[24] + " = '" + EscapeString(object_entry.tilt_y) + "'");
+		update_values.push_back(columns[22] + " = " + std::to_string(object_entry.size));
+		update_values.push_back(columns[23] + " = " + std::to_string(object_entry.tilt_x));
+		update_values.push_back(columns[24] + " = " + std::to_string(object_entry.tilt_y));
 		update_values.push_back(columns[25] + " = '" + EscapeString(object_entry.display_name) + "'");
 
 		auto results = content_db.QueryDatabase(
@@ -303,10 +303,10 @@ public:
 
 		insert_values.push_back(std::to_string(object_entry.zoneid));
 		insert_values.push_back(std::to_string(object_entry.version));
-		insert_values.push_back("'" + EscapeString(object_entry.xpos) + "'");
-		insert_values.push_back("'" + EscapeString(object_entry.ypos) + "'");
-		insert_values.push_back("'" + EscapeString(object_entry.zpos) + "'");
-		insert_values.push_back("'" + EscapeString(object_entry.heading) + "'");
+		insert_values.push_back(std::to_string(object_entry.xpos));
+		insert_values.push_back(std::to_string(object_entry.ypos));
+		insert_values.push_back(std::to_string(object_entry.zpos));
+		insert_values.push_back(std::to_string(object_entry.heading));
 		insert_values.push_back(std::to_string(object_entry.itemid));
 		insert_values.push_back(std::to_string(object_entry.charges));
 		insert_values.push_back("'" + EscapeString(object_entry.objectname) + "'");
@@ -322,9 +322,9 @@ public:
 		insert_values.push_back(std::to_string(object_entry.unknown72));
 		insert_values.push_back(std::to_string(object_entry.unknown76));
 		insert_values.push_back(std::to_string(object_entry.unknown84));
-		insert_values.push_back("'" + EscapeString(object_entry.size) + "'");
-		insert_values.push_back("'" + EscapeString(object_entry.tilt_x) + "'");
-		insert_values.push_back("'" + EscapeString(object_entry.tilt_y) + "'");
+		insert_values.push_back(std::to_string(object_entry.size));
+		insert_values.push_back(std::to_string(object_entry.tilt_x));
+		insert_values.push_back(std::to_string(object_entry.tilt_y));
 		insert_values.push_back("'" + EscapeString(object_entry.display_name) + "'");
 
 		auto results = content_db.QueryDatabase(
@@ -340,7 +340,7 @@ public:
 			return object_entry;
 		}
 
-		object_entry = InstanceListRepository::NewEntity();
+		object_entry = ObjectRepository::NewEntity();
 
 		return object_entry;
 	}
@@ -356,10 +356,10 @@ public:
 
 			insert_values.push_back(std::to_string(object_entry.zoneid));
 			insert_values.push_back(std::to_string(object_entry.version));
-			insert_values.push_back("'" + EscapeString(object_entry.xpos) + "'");
-			insert_values.push_back("'" + EscapeString(object_entry.ypos) + "'");
-			insert_values.push_back("'" + EscapeString(object_entry.zpos) + "'");
-			insert_values.push_back("'" + EscapeString(object_entry.heading) + "'");
+			insert_values.push_back(std::to_string(object_entry.xpos));
+			insert_values.push_back(std::to_string(object_entry.ypos));
+			insert_values.push_back(std::to_string(object_entry.zpos));
+			insert_values.push_back(std::to_string(object_entry.heading));
 			insert_values.push_back(std::to_string(object_entry.itemid));
 			insert_values.push_back(std::to_string(object_entry.charges));
 			insert_values.push_back("'" + EscapeString(object_entry.objectname) + "'");
@@ -375,9 +375,9 @@ public:
 			insert_values.push_back(std::to_string(object_entry.unknown72));
 			insert_values.push_back(std::to_string(object_entry.unknown76));
 			insert_values.push_back(std::to_string(object_entry.unknown84));
-			insert_values.push_back("'" + EscapeString(object_entry.size) + "'");
-			insert_values.push_back("'" + EscapeString(object_entry.tilt_x) + "'");
-			insert_values.push_back("'" + EscapeString(object_entry.tilt_y) + "'");
+			insert_values.push_back(std::to_string(object_entry.size));
+			insert_values.push_back(std::to_string(object_entry.tilt_x));
+			insert_values.push_back(std::to_string(object_entry.tilt_y));
 			insert_values.push_back("'" + EscapeString(object_entry.display_name) + "'");
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
@@ -443,6 +443,70 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<Object> GetWhere(std::string where_filter)
+	{
+		std::vector<Object> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			Object entry{};
+
+			entry.id           = atoi(row[0]);
+			entry.zoneid       = atoi(row[1]);
+			entry.version      = atoi(row[2]);
+			entry.xpos         = atof(row[3]);
+			entry.ypos         = atof(row[4]);
+			entry.zpos         = atof(row[5]);
+			entry.heading      = atof(row[6]);
+			entry.itemid       = atoi(row[7]);
+			entry.charges      = atoi(row[8]);
+			entry.objectname   = row[9];
+			entry.type         = atoi(row[10]);
+			entry.icon         = atoi(row[11]);
+			entry.unknown08    = atoi(row[12]);
+			entry.unknown10    = atoi(row[13]);
+			entry.unknown20    = atoi(row[14]);
+			entry.unknown24    = atoi(row[15]);
+			entry.unknown60    = atoi(row[16]);
+			entry.unknown64    = atoi(row[17]);
+			entry.unknown68    = atoi(row[18]);
+			entry.unknown72    = atoi(row[19]);
+			entry.unknown76    = atoi(row[20]);
+			entry.unknown84    = atoi(row[21]);
+			entry.size         = atof(row[22]);
+			entry.tilt_x       = atof(row[23]);
+			entry.tilt_y       = atof(row[24]);
+			entry.display_name = row[25];
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

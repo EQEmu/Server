@@ -268,7 +268,7 @@ public:
 			return aa_ability_entry;
 		}
 
-		aa_ability_entry = InstanceListRepository::NewEntity();
+		aa_ability_entry = AaAbilityRepository::NewEntity();
 
 		return aa_ability_entry;
 	}
@@ -347,6 +347,58 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<AaAbility> GetWhere(std::string where_filter)
+	{
+		std::vector<AaAbility> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			AaAbility entry{};
+
+			entry.id               = atoi(row[0]);
+			entry.name             = row[1];
+			entry.category         = atoi(row[2]);
+			entry.classes          = atoi(row[3]);
+			entry.races            = atoi(row[4]);
+			entry.drakkin_heritage = atoi(row[5]);
+			entry.deities          = atoi(row[6]);
+			entry.status           = atoi(row[7]);
+			entry.type             = atoi(row[8]);
+			entry.charges          = atoi(row[9]);
+			entry.grant_only       = atoi(row[10]);
+			entry.first_rank_id    = atoi(row[11]);
+			entry.enabled          = atoi(row[12]);
+			entry.reset_on_death   = atoi(row[13]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

@@ -196,7 +196,7 @@ public:
 			return launcher_entry;
 		}
 
-		launcher_entry = InstanceListRepository::NewEntity();
+		launcher_entry = LauncherRepository::NewEntity();
 
 		return launcher_entry;
 	}
@@ -251,6 +251,46 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<Launcher> GetWhere(std::string where_filter)
+	{
+		std::vector<Launcher> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			Launcher entry{};
+
+			entry.name     = row[0];
+			entry.dynamics = atoi(row[1]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

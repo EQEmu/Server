@@ -208,7 +208,7 @@ public:
 			return skill_caps_entry;
 		}
 
-		skill_caps_entry = InstanceListRepository::NewEntity();
+		skill_caps_entry = SkillCapsRepository::NewEntity();
 
 		return skill_caps_entry;
 	}
@@ -266,6 +266,49 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<SkillCaps> GetWhere(std::string where_filter)
+	{
+		std::vector<SkillCaps> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			SkillCaps entry{};
+
+			entry.skillID = atoi(row[0]);
+			entry.class   = atoi(row[1]);
+			entry.level   = atoi(row[2]);
+			entry.cap     = atoi(row[3]);
+			entry.class_  = atoi(row[4]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

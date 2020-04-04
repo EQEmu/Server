@@ -350,7 +350,7 @@ public:
 			return npc_scale_global_base_entry;
 		}
 
-		npc_scale_global_base_entry = InstanceListRepository::NewEntity();
+		npc_scale_global_base_entry = NpcScaleGlobalBaseRepository::NewEntity();
 
 		return npc_scale_global_base_entry;
 	}
@@ -456,6 +456,72 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<NpcScaleGlobalBase> GetWhere(std::string where_filter)
+	{
+		std::vector<NpcScaleGlobalBase> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			NpcScaleGlobalBase entry{};
+
+			entry.type              = atoi(row[0]);
+			entry.level             = atoi(row[1]);
+			entry.ac                = atoi(row[2]);
+			entry.hp                = atoi(row[3]);
+			entry.accuracy          = atoi(row[4]);
+			entry.slow_mitigation   = atoi(row[5]);
+			entry.attack            = atoi(row[6]);
+			entry.strength          = atoi(row[7]);
+			entry.stamina           = atoi(row[8]);
+			entry.dexterity         = atoi(row[9]);
+			entry.agility           = atoi(row[10]);
+			entry.intelligence      = atoi(row[11]);
+			entry.wisdom            = atoi(row[12]);
+			entry.charisma          = atoi(row[13]);
+			entry.magic_resist      = atoi(row[14]);
+			entry.cold_resist       = atoi(row[15]);
+			entry.fire_resist       = atoi(row[16]);
+			entry.poison_resist     = atoi(row[17]);
+			entry.disease_resist    = atoi(row[18]);
+			entry.corruption_resist = atoi(row[19]);
+			entry.physical_resist   = atoi(row[20]);
+			entry.min_dmg           = atoi(row[21]);
+			entry.max_dmg           = atoi(row[22]);
+			entry.hp_regen_rate     = atoi(row[23]);
+			entry.attack_delay      = atoi(row[24]);
+			entry.spell_scale       = atoi(row[25]);
+			entry.heal_scale        = atoi(row[26]);
+			entry.special_abilities = row[27];
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

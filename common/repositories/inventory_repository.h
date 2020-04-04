@@ -278,7 +278,7 @@ public:
 			return inventory_entry;
 		}
 
-		inventory_entry = InstanceListRepository::NewEntity();
+		inventory_entry = InventoryRepository::NewEntity();
 
 		return inventory_entry;
 	}
@@ -360,6 +360,60 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<Inventory> GetWhere(std::string where_filter)
+	{
+		std::vector<Inventory> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			Inventory entry{};
+
+			entry.charid              = atoi(row[0]);
+			entry.slotid              = atoi(row[1]);
+			entry.itemid              = atoi(row[2]);
+			entry.charges             = atoi(row[3]);
+			entry.color               = atoi(row[4]);
+			entry.augslot1            = atoi(row[5]);
+			entry.augslot2            = atoi(row[6]);
+			entry.augslot3            = atoi(row[7]);
+			entry.augslot4            = atoi(row[8]);
+			entry.augslot5            = atoi(row[9]);
+			entry.augslot6            = atoi(row[10]);
+			entry.instnodrop          = atoi(row[11]);
+			entry.custom_data         = row[12];
+			entry.ornamenticon        = atoi(row[13]);
+			entry.ornamentidfile      = atoi(row[14]);
+			entry.ornament_hero_model = atoi(row[15]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

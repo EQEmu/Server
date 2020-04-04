@@ -226,7 +226,7 @@ public:
 			return perl_event_export_settings_entry;
 		}
 
-		perl_event_export_settings_entry = InstanceListRepository::NewEntity();
+		perl_event_export_settings_entry = PerlEventExportSettingsRepository::NewEntity();
 
 		return perl_event_export_settings_entry;
 	}
@@ -291,6 +291,51 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<PerlEventExportSettings> GetWhere(std::string where_filter)
+	{
+		std::vector<PerlEventExportSettings> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			PerlEventExportSettings entry{};
+
+			entry.event_id          = atoi(row[0]);
+			entry.event_description = row[1];
+			entry.export_qglobals   = atoi(row[2]);
+			entry.export_mob        = atoi(row[3]);
+			entry.export_zone       = atoi(row[4]);
+			entry.export_item       = atoi(row[5]);
+			entry.export_event      = atoi(row[6]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

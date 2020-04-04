@@ -212,7 +212,7 @@ public:
 			return timers_entry;
 		}
 
-		timers_entry = InstanceListRepository::NewEntity();
+		timers_entry = TimersRepository::NewEntity();
 
 		return timers_entry;
 	}
@@ -272,6 +272,49 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<Timers> GetWhere(std::string where_filter)
+	{
+		std::vector<Timers> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			Timers entry{};
+
+			entry.char_id  = atoi(row[0]);
+			entry.type     = atoi(row[1]);
+			entry.start    = atoi(row[2]);
+			entry.duration = atoi(row[3]);
+			entry.enable   = atoi(row[4]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

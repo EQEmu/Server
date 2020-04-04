@@ -220,7 +220,7 @@ public:
 			return login_api_tokens_entry;
 		}
 
-		login_api_tokens_entry = InstanceListRepository::NewEntity();
+		login_api_tokens_entry = LoginApiTokensRepository::NewEntity();
 
 		return login_api_tokens_entry;
 	}
@@ -283,6 +283,50 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<LoginApiTokens> GetWhere(std::string where_filter)
+	{
+		std::vector<LoginApiTokens> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			LoginApiTokens entry{};
+
+			entry.id         = atoi(row[0]);
+			entry.token      = row[1];
+			entry.can_write  = atoi(row[2]);
+			entry.can_read   = atoi(row[3]);
+			entry.created_at = row[4];
+			entry.updated_at = row[5];
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

@@ -214,7 +214,7 @@ public:
 			return forage_entry;
 		}
 
-		forage_entry = InstanceListRepository::NewEntity();
+		forage_entry = ForageRepository::NewEntity();
 
 		return forage_entry;
 	}
@@ -275,6 +275,49 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<Forage> GetWhere(std::string where_filter)
+	{
+		std::vector<Forage> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			Forage entry{};
+
+			entry.id     = atoi(row[0]);
+			entry.zoneid = atoi(row[1]);
+			entry.Itemid = atoi(row[2]);
+			entry.level  = atoi(row[3]);
+			entry.chance = atoi(row[4]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

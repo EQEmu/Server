@@ -238,7 +238,7 @@ public:
 			return adventure_details_entry;
 		}
 
-		adventure_details_entry = InstanceListRepository::NewEntity();
+		adventure_details_entry = AdventureDetailsRepository::NewEntity();
 
 		return adventure_details_entry;
 	}
@@ -307,6 +307,53 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<AdventureDetails> GetWhere(std::string where_filter)
+	{
+		std::vector<AdventureDetails> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			AdventureDetails entry{};
+
+			entry.id                = atoi(row[0]);
+			entry.adventure_id      = atoi(row[1]);
+			entry.instance_id       = atoi(row[2]);
+			entry.count             = atoi(row[3]);
+			entry.assassinate_count = atoi(row[4]);
+			entry.status            = atoi(row[5]);
+			entry.time_created      = atoi(row[6]);
+			entry.time_zoned        = atoi(row[7]);
+			entry.time_completed    = atoi(row[8]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

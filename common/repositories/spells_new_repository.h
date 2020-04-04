@@ -1326,10 +1326,10 @@ public:
 		update_values.push_back(columns[224] + " = " + std::to_string(spells_new_entry.persistdeath));
 		update_values.push_back(columns[225] + " = " + std::to_string(spells_new_entry.field225));
 		update_values.push_back(columns[226] + " = " + std::to_string(spells_new_entry.field226));
-		update_values.push_back(columns[227] + " = '" + EscapeString(spells_new_entry.min_dist) + "'");
-		update_values.push_back(columns[228] + " = '" + EscapeString(spells_new_entry.min_dist_mod) + "'");
-		update_values.push_back(columns[229] + " = '" + EscapeString(spells_new_entry.max_dist) + "'");
-		update_values.push_back(columns[230] + " = '" + EscapeString(spells_new_entry.max_dist_mod) + "'");
+		update_values.push_back(columns[227] + " = " + std::to_string(spells_new_entry.min_dist));
+		update_values.push_back(columns[228] + " = " + std::to_string(spells_new_entry.min_dist_mod));
+		update_values.push_back(columns[229] + " = " + std::to_string(spells_new_entry.max_dist));
+		update_values.push_back(columns[230] + " = " + std::to_string(spells_new_entry.max_dist_mod));
 		update_values.push_back(columns[231] + " = " + std::to_string(spells_new_entry.min_range));
 		update_values.push_back(columns[232] + " = " + std::to_string(spells_new_entry.field232));
 		update_values.push_back(columns[233] + " = " + std::to_string(spells_new_entry.field233));
@@ -1582,10 +1582,10 @@ public:
 		insert_values.push_back(std::to_string(spells_new_entry.persistdeath));
 		insert_values.push_back(std::to_string(spells_new_entry.field225));
 		insert_values.push_back(std::to_string(spells_new_entry.field226));
-		insert_values.push_back("'" + EscapeString(spells_new_entry.min_dist) + "'");
-		insert_values.push_back("'" + EscapeString(spells_new_entry.min_dist_mod) + "'");
-		insert_values.push_back("'" + EscapeString(spells_new_entry.max_dist) + "'");
-		insert_values.push_back("'" + EscapeString(spells_new_entry.max_dist_mod) + "'");
+		insert_values.push_back(std::to_string(spells_new_entry.min_dist));
+		insert_values.push_back(std::to_string(spells_new_entry.min_dist_mod));
+		insert_values.push_back(std::to_string(spells_new_entry.max_dist));
+		insert_values.push_back(std::to_string(spells_new_entry.max_dist_mod));
 		insert_values.push_back(std::to_string(spells_new_entry.min_range));
 		insert_values.push_back(std::to_string(spells_new_entry.field232));
 		insert_values.push_back(std::to_string(spells_new_entry.field233));
@@ -1606,7 +1606,7 @@ public:
 			return spells_new_entry;
 		}
 
-		spells_new_entry = InstanceListRepository::NewEntity();
+		spells_new_entry = SpellsNewRepository::NewEntity();
 
 		return spells_new_entry;
 	}
@@ -1846,10 +1846,10 @@ public:
 			insert_values.push_back(std::to_string(spells_new_entry.persistdeath));
 			insert_values.push_back(std::to_string(spells_new_entry.field225));
 			insert_values.push_back(std::to_string(spells_new_entry.field226));
-			insert_values.push_back("'" + EscapeString(spells_new_entry.min_dist) + "'");
-			insert_values.push_back("'" + EscapeString(spells_new_entry.min_dist_mod) + "'");
-			insert_values.push_back("'" + EscapeString(spells_new_entry.max_dist) + "'");
-			insert_values.push_back("'" + EscapeString(spells_new_entry.max_dist_mod) + "'");
+			insert_values.push_back(std::to_string(spells_new_entry.min_dist));
+			insert_values.push_back(std::to_string(spells_new_entry.min_dist_mod));
+			insert_values.push_back(std::to_string(spells_new_entry.max_dist));
+			insert_values.push_back(std::to_string(spells_new_entry.max_dist_mod));
 			insert_values.push_back(std::to_string(spells_new_entry.min_range));
 			insert_values.push_back(std::to_string(spells_new_entry.field232));
 			insert_values.push_back(std::to_string(spells_new_entry.field233));
@@ -2131,6 +2131,281 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<SpellsNew> GetWhere(std::string where_filter)
+	{
+		std::vector<SpellsNew> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			SpellsNew entry{};
+
+			entry.id                   = atoi(row[0]);
+			entry.name                 = row[1];
+			entry.player_1             = row[2];
+			entry.teleport_zone        = row[3];
+			entry.you_cast             = row[4];
+			entry.other_casts          = row[5];
+			entry.cast_on_you          = row[6];
+			entry.cast_on_other        = row[7];
+			entry.spell_fades          = row[8];
+			entry.range                = atoi(row[9]);
+			entry.aoerange             = atoi(row[10]);
+			entry.pushback             = atoi(row[11]);
+			entry.pushup               = atoi(row[12]);
+			entry.cast_time            = atoi(row[13]);
+			entry.recovery_time        = atoi(row[14]);
+			entry.recast_time          = atoi(row[15]);
+			entry.buffdurationformula  = atoi(row[16]);
+			entry.buffduration         = atoi(row[17]);
+			entry.AEDuration           = atoi(row[18]);
+			entry.mana                 = atoi(row[19]);
+			entry.effect_base_value1   = atoi(row[20]);
+			entry.effect_base_value2   = atoi(row[21]);
+			entry.effect_base_value3   = atoi(row[22]);
+			entry.effect_base_value4   = atoi(row[23]);
+			entry.effect_base_value5   = atoi(row[24]);
+			entry.effect_base_value6   = atoi(row[25]);
+			entry.effect_base_value7   = atoi(row[26]);
+			entry.effect_base_value8   = atoi(row[27]);
+			entry.effect_base_value9   = atoi(row[28]);
+			entry.effect_base_value10  = atoi(row[29]);
+			entry.effect_base_value11  = atoi(row[30]);
+			entry.effect_base_value12  = atoi(row[31]);
+			entry.effect_limit_value1  = atoi(row[32]);
+			entry.effect_limit_value2  = atoi(row[33]);
+			entry.effect_limit_value3  = atoi(row[34]);
+			entry.effect_limit_value4  = atoi(row[35]);
+			entry.effect_limit_value5  = atoi(row[36]);
+			entry.effect_limit_value6  = atoi(row[37]);
+			entry.effect_limit_value7  = atoi(row[38]);
+			entry.effect_limit_value8  = atoi(row[39]);
+			entry.effect_limit_value9  = atoi(row[40]);
+			entry.effect_limit_value10 = atoi(row[41]);
+			entry.effect_limit_value11 = atoi(row[42]);
+			entry.effect_limit_value12 = atoi(row[43]);
+			entry.max1                 = atoi(row[44]);
+			entry.max2                 = atoi(row[45]);
+			entry.max3                 = atoi(row[46]);
+			entry.max4                 = atoi(row[47]);
+			entry.max5                 = atoi(row[48]);
+			entry.max6                 = atoi(row[49]);
+			entry.max7                 = atoi(row[50]);
+			entry.max8                 = atoi(row[51]);
+			entry.max9                 = atoi(row[52]);
+			entry.max10                = atoi(row[53]);
+			entry.max11                = atoi(row[54]);
+			entry.max12                = atoi(row[55]);
+			entry.icon                 = atoi(row[56]);
+			entry.memicon              = atoi(row[57]);
+			entry.components1          = atoi(row[58]);
+			entry.components2          = atoi(row[59]);
+			entry.components3          = atoi(row[60]);
+			entry.components4          = atoi(row[61]);
+			entry.component_counts1    = atoi(row[62]);
+			entry.component_counts2    = atoi(row[63]);
+			entry.component_counts3    = atoi(row[64]);
+			entry.component_counts4    = atoi(row[65]);
+			entry.NoexpendReagent1     = atoi(row[66]);
+			entry.NoexpendReagent2     = atoi(row[67]);
+			entry.NoexpendReagent3     = atoi(row[68]);
+			entry.NoexpendReagent4     = atoi(row[69]);
+			entry.formula1             = atoi(row[70]);
+			entry.formula2             = atoi(row[71]);
+			entry.formula3             = atoi(row[72]);
+			entry.formula4             = atoi(row[73]);
+			entry.formula5             = atoi(row[74]);
+			entry.formula6             = atoi(row[75]);
+			entry.formula7             = atoi(row[76]);
+			entry.formula8             = atoi(row[77]);
+			entry.formula9             = atoi(row[78]);
+			entry.formula10            = atoi(row[79]);
+			entry.formula11            = atoi(row[80]);
+			entry.formula12            = atoi(row[81]);
+			entry.LightType            = atoi(row[82]);
+			entry.goodEffect           = atoi(row[83]);
+			entry.Activated            = atoi(row[84]);
+			entry.resisttype           = atoi(row[85]);
+			entry.effectid1            = atoi(row[86]);
+			entry.effectid2            = atoi(row[87]);
+			entry.effectid3            = atoi(row[88]);
+			entry.effectid4            = atoi(row[89]);
+			entry.effectid5            = atoi(row[90]);
+			entry.effectid6            = atoi(row[91]);
+			entry.effectid7            = atoi(row[92]);
+			entry.effectid8            = atoi(row[93]);
+			entry.effectid9            = atoi(row[94]);
+			entry.effectid10           = atoi(row[95]);
+			entry.effectid11           = atoi(row[96]);
+			entry.effectid12           = atoi(row[97]);
+			entry.targettype           = atoi(row[98]);
+			entry.basediff             = atoi(row[99]);
+			entry.skill                = atoi(row[100]);
+			entry.zonetype             = atoi(row[101]);
+			entry.EnvironmentType      = atoi(row[102]);
+			entry.TimeOfDay            = atoi(row[103]);
+			entry.classes1             = atoi(row[104]);
+			entry.classes2             = atoi(row[105]);
+			entry.classes3             = atoi(row[106]);
+			entry.classes4             = atoi(row[107]);
+			entry.classes5             = atoi(row[108]);
+			entry.classes6             = atoi(row[109]);
+			entry.classes7             = atoi(row[110]);
+			entry.classes8             = atoi(row[111]);
+			entry.classes9             = atoi(row[112]);
+			entry.classes10            = atoi(row[113]);
+			entry.classes11            = atoi(row[114]);
+			entry.classes12            = atoi(row[115]);
+			entry.classes13            = atoi(row[116]);
+			entry.classes14            = atoi(row[117]);
+			entry.classes15            = atoi(row[118]);
+			entry.classes16            = atoi(row[119]);
+			entry.CastingAnim          = atoi(row[120]);
+			entry.TargetAnim           = atoi(row[121]);
+			entry.TravelType           = atoi(row[122]);
+			entry.SpellAffectIndex     = atoi(row[123]);
+			entry.disallow_sit         = atoi(row[124]);
+			entry.deities0             = atoi(row[125]);
+			entry.deities1             = atoi(row[126]);
+			entry.deities2             = atoi(row[127]);
+			entry.deities3             = atoi(row[128]);
+			entry.deities4             = atoi(row[129]);
+			entry.deities5             = atoi(row[130]);
+			entry.deities6             = atoi(row[131]);
+			entry.deities7             = atoi(row[132]);
+			entry.deities8             = atoi(row[133]);
+			entry.deities9             = atoi(row[134]);
+			entry.deities10            = atoi(row[135]);
+			entry.deities11            = atoi(row[136]);
+			entry.deities12            = atoi(row[137]);
+			entry.deities13            = atoi(row[138]);
+			entry.deities14            = atoi(row[139]);
+			entry.deities15            = atoi(row[140]);
+			entry.deities16            = atoi(row[141]);
+			entry.field142             = atoi(row[142]);
+			entry.field143             = atoi(row[143]);
+			entry.new_icon             = atoi(row[144]);
+			entry.spellanim            = atoi(row[145]);
+			entry.uninterruptable      = atoi(row[146]);
+			entry.ResistDiff           = atoi(row[147]);
+			entry.dot_stacking_exempt  = atoi(row[148]);
+			entry.deleteable           = atoi(row[149]);
+			entry.RecourseLink         = atoi(row[150]);
+			entry.no_partial_resist    = atoi(row[151]);
+			entry.field152             = atoi(row[152]);
+			entry.field153             = atoi(row[153]);
+			entry.short_buff_box       = atoi(row[154]);
+			entry.descnum              = atoi(row[155]);
+			entry.typedescnum          = atoi(row[156]);
+			entry.effectdescnum        = atoi(row[157]);
+			entry.effectdescnum2       = atoi(row[158]);
+			entry.npc_no_los           = atoi(row[159]);
+			entry.field160             = atoi(row[160]);
+			entry.reflectable          = atoi(row[161]);
+			entry.bonushate            = atoi(row[162]);
+			entry.field163             = atoi(row[163]);
+			entry.field164             = atoi(row[164]);
+			entry.ldon_trap            = atoi(row[165]);
+			entry.EndurCost            = atoi(row[166]);
+			entry.EndurTimerIndex      = atoi(row[167]);
+			entry.IsDiscipline         = atoi(row[168]);
+			entry.field169             = atoi(row[169]);
+			entry.field170             = atoi(row[170]);
+			entry.field171             = atoi(row[171]);
+			entry.field172             = atoi(row[172]);
+			entry.HateAdded            = atoi(row[173]);
+			entry.EndurUpkeep          = atoi(row[174]);
+			entry.numhitstype          = atoi(row[175]);
+			entry.numhits              = atoi(row[176]);
+			entry.pvpresistbase        = atoi(row[177]);
+			entry.pvpresistcalc        = atoi(row[178]);
+			entry.pvpresistcap         = atoi(row[179]);
+			entry.spell_category       = atoi(row[180]);
+			entry.field181             = atoi(row[181]);
+			entry.field182             = atoi(row[182]);
+			entry.pcnpc_only_flag      = atoi(row[183]);
+			entry.cast_not_standing    = atoi(row[184]);
+			entry.can_mgb              = atoi(row[185]);
+			entry.nodispell            = atoi(row[186]);
+			entry.npc_category         = atoi(row[187]);
+			entry.npc_usefulness       = atoi(row[188]);
+			entry.MinResist            = atoi(row[189]);
+			entry.MaxResist            = atoi(row[190]);
+			entry.viral_targets        = atoi(row[191]);
+			entry.viral_timer          = atoi(row[192]);
+			entry.nimbuseffect         = atoi(row[193]);
+			entry.ConeStartAngle       = atoi(row[194]);
+			entry.ConeStopAngle        = atoi(row[195]);
+			entry.sneaking             = atoi(row[196]);
+			entry.not_extendable       = atoi(row[197]);
+			entry.field198             = atoi(row[198]);
+			entry.field199             = atoi(row[199]);
+			entry.suspendable          = atoi(row[200]);
+			entry.viral_range          = atoi(row[201]);
+			entry.songcap              = atoi(row[202]);
+			entry.field203             = atoi(row[203]);
+			entry.field204             = atoi(row[204]);
+			entry.no_block             = atoi(row[205]);
+			entry.field206             = atoi(row[206]);
+			entry.spellgroup           = atoi(row[207]);
+			entry.rank                 = atoi(row[208]);
+			entry.field209             = atoi(row[209]);
+			entry.field210             = atoi(row[210]);
+			entry.CastRestriction      = atoi(row[211]);
+			entry.allowrest            = atoi(row[212]);
+			entry.InCombat             = atoi(row[213]);
+			entry.OutofCombat          = atoi(row[214]);
+			entry.field215             = atoi(row[215]);
+			entry.field216             = atoi(row[216]);
+			entry.field217             = atoi(row[217]);
+			entry.aemaxtargets         = atoi(row[218]);
+			entry.maxtargets           = atoi(row[219]);
+			entry.field220             = atoi(row[220]);
+			entry.field221             = atoi(row[221]);
+			entry.field222             = atoi(row[222]);
+			entry.field223             = atoi(row[223]);
+			entry.persistdeath         = atoi(row[224]);
+			entry.field225             = atoi(row[225]);
+			entry.field226             = atoi(row[226]);
+			entry.min_dist             = atof(row[227]);
+			entry.min_dist_mod         = atof(row[228]);
+			entry.max_dist             = atof(row[229]);
+			entry.max_dist_mod         = atof(row[230]);
+			entry.min_range            = atoi(row[231]);
+			entry.field232             = atoi(row[232]);
+			entry.field233             = atoi(row[233]);
+			entry.field234             = atoi(row[234]);
+			entry.field235             = atoi(row[235]);
+			entry.field236             = atoi(row[236]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

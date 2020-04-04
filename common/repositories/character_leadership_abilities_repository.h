@@ -200,7 +200,7 @@ public:
 			return character_leadership_abilities_entry;
 		}
 
-		character_leadership_abilities_entry = InstanceListRepository::NewEntity();
+		character_leadership_abilities_entry = CharacterLeadershipAbilitiesRepository::NewEntity();
 
 		return character_leadership_abilities_entry;
 	}
@@ -256,6 +256,47 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<CharacterLeadershipAbilities> GetWhere(std::string where_filter)
+	{
+		std::vector<CharacterLeadershipAbilities> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			CharacterLeadershipAbilities entry{};
+
+			entry.id   = atoi(row[0]);
+			entry.slot = atoi(row[1]);
+			entry.rank = atoi(row[2]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

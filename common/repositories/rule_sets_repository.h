@@ -196,7 +196,7 @@ public:
 			return rule_sets_entry;
 		}
 
-		rule_sets_entry = InstanceListRepository::NewEntity();
+		rule_sets_entry = RuleSetsRepository::NewEntity();
 
 		return rule_sets_entry;
 	}
@@ -251,6 +251,46 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<RuleSets> GetWhere(std::string where_filter)
+	{
+		std::vector<RuleSets> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			RuleSets entry{};
+
+			entry.ruleset_id = atoi(row[0]);
+			entry.name       = row[1];
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

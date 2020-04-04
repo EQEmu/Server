@@ -212,16 +212,16 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = '" + EscapeString(start_zones_entry.x) + "'");
-		update_values.push_back(columns[1] + " = '" + EscapeString(start_zones_entry.y) + "'");
-		update_values.push_back(columns[2] + " = '" + EscapeString(start_zones_entry.z) + "'");
-		update_values.push_back(columns[3] + " = '" + EscapeString(start_zones_entry.heading) + "'");
+		update_values.push_back(columns[0] + " = " + std::to_string(start_zones_entry.x));
+		update_values.push_back(columns[1] + " = " + std::to_string(start_zones_entry.y));
+		update_values.push_back(columns[2] + " = " + std::to_string(start_zones_entry.z));
+		update_values.push_back(columns[3] + " = " + std::to_string(start_zones_entry.heading));
 		update_values.push_back(columns[4] + " = " + std::to_string(start_zones_entry.zone_id));
 		update_values.push_back(columns[5] + " = " + std::to_string(start_zones_entry.bind_id));
 		update_values.push_back(columns[10] + " = " + std::to_string(start_zones_entry.start_zone));
-		update_values.push_back(columns[11] + " = '" + EscapeString(start_zones_entry.bind_x) + "'");
-		update_values.push_back(columns[12] + " = '" + EscapeString(start_zones_entry.bind_y) + "'");
-		update_values.push_back(columns[13] + " = '" + EscapeString(start_zones_entry.bind_z) + "'");
+		update_values.push_back(columns[11] + " = " + std::to_string(start_zones_entry.bind_x));
+		update_values.push_back(columns[12] + " = " + std::to_string(start_zones_entry.bind_y));
+		update_values.push_back(columns[13] + " = " + std::to_string(start_zones_entry.bind_z));
 		update_values.push_back(columns[14] + " = " + std::to_string(start_zones_entry.select_rank));
 
 		auto results = content_db.QueryDatabase(
@@ -243,16 +243,16 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back("'" + EscapeString(start_zones_entry.x) + "'");
-		insert_values.push_back("'" + EscapeString(start_zones_entry.y) + "'");
-		insert_values.push_back("'" + EscapeString(start_zones_entry.z) + "'");
-		insert_values.push_back("'" + EscapeString(start_zones_entry.heading) + "'");
+		insert_values.push_back(std::to_string(start_zones_entry.x));
+		insert_values.push_back(std::to_string(start_zones_entry.y));
+		insert_values.push_back(std::to_string(start_zones_entry.z));
+		insert_values.push_back(std::to_string(start_zones_entry.heading));
 		insert_values.push_back(std::to_string(start_zones_entry.zone_id));
 		insert_values.push_back(std::to_string(start_zones_entry.bind_id));
 		insert_values.push_back(std::to_string(start_zones_entry.start_zone));
-		insert_values.push_back("'" + EscapeString(start_zones_entry.bind_x) + "'");
-		insert_values.push_back("'" + EscapeString(start_zones_entry.bind_y) + "'");
-		insert_values.push_back("'" + EscapeString(start_zones_entry.bind_z) + "'");
+		insert_values.push_back(std::to_string(start_zones_entry.bind_x));
+		insert_values.push_back(std::to_string(start_zones_entry.bind_y));
+		insert_values.push_back(std::to_string(start_zones_entry.bind_z));
 		insert_values.push_back(std::to_string(start_zones_entry.select_rank));
 
 		auto results = content_db.QueryDatabase(
@@ -268,7 +268,7 @@ public:
 			return start_zones_entry;
 		}
 
-		start_zones_entry = InstanceListRepository::NewEntity();
+		start_zones_entry = StartZonesRepository::NewEntity();
 
 		return start_zones_entry;
 	}
@@ -282,16 +282,16 @@ public:
 		for (auto &start_zones_entry: start_zones_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back("'" + EscapeString(start_zones_entry.x) + "'");
-			insert_values.push_back("'" + EscapeString(start_zones_entry.y) + "'");
-			insert_values.push_back("'" + EscapeString(start_zones_entry.z) + "'");
-			insert_values.push_back("'" + EscapeString(start_zones_entry.heading) + "'");
+			insert_values.push_back(std::to_string(start_zones_entry.x));
+			insert_values.push_back(std::to_string(start_zones_entry.y));
+			insert_values.push_back(std::to_string(start_zones_entry.z));
+			insert_values.push_back(std::to_string(start_zones_entry.heading));
 			insert_values.push_back(std::to_string(start_zones_entry.zone_id));
 			insert_values.push_back(std::to_string(start_zones_entry.bind_id));
 			insert_values.push_back(std::to_string(start_zones_entry.start_zone));
-			insert_values.push_back("'" + EscapeString(start_zones_entry.bind_x) + "'");
-			insert_values.push_back("'" + EscapeString(start_zones_entry.bind_y) + "'");
-			insert_values.push_back("'" + EscapeString(start_zones_entry.bind_z) + "'");
+			insert_values.push_back(std::to_string(start_zones_entry.bind_x));
+			insert_values.push_back(std::to_string(start_zones_entry.bind_y));
+			insert_values.push_back(std::to_string(start_zones_entry.bind_z));
 			insert_values.push_back(std::to_string(start_zones_entry.select_rank));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
@@ -346,6 +346,59 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<StartZones> GetWhere(std::string where_filter)
+	{
+		std::vector<StartZones> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			StartZones entry{};
+
+			entry.x             = atof(row[0]);
+			entry.y             = atof(row[1]);
+			entry.z             = atof(row[2]);
+			entry.heading       = atof(row[3]);
+			entry.zone_id       = atoi(row[4]);
+			entry.bind_id       = atoi(row[5]);
+			entry.player_choice = atoi(row[6]);
+			entry.player_class  = atoi(row[7]);
+			entry.player_deity  = atoi(row[8]);
+			entry.player_race   = atoi(row[9]);
+			entry.start_zone    = atoi(row[10]);
+			entry.bind_x        = atof(row[11]);
+			entry.bind_y        = atof(row[12]);
+			entry.bind_z        = atof(row[13]);
+			entry.select_rank   = atoi(row[14]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

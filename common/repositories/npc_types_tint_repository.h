@@ -358,7 +358,7 @@ public:
 			return npc_types_tint_entry;
 		}
 
-		npc_types_tint_entry = InstanceListRepository::NewEntity();
+		npc_types_tint_entry = NpcTypesTintRepository::NewEntity();
 
 		return npc_types_tint_entry;
 	}
@@ -467,6 +467,73 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<NpcTypesTint> GetWhere(std::string where_filter)
+	{
+		std::vector<NpcTypesTint> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			NpcTypesTint entry{};
+
+			entry.id            = atoi(row[0]);
+			entry.tint_set_name = row[1];
+			entry.red1h         = atoi(row[2]);
+			entry.grn1h         = atoi(row[3]);
+			entry.blu1h         = atoi(row[4]);
+			entry.red2c         = atoi(row[5]);
+			entry.grn2c         = atoi(row[6]);
+			entry.blu2c         = atoi(row[7]);
+			entry.red3a         = atoi(row[8]);
+			entry.grn3a         = atoi(row[9]);
+			entry.blu3a         = atoi(row[10]);
+			entry.red4b         = atoi(row[11]);
+			entry.grn4b         = atoi(row[12]);
+			entry.blu4b         = atoi(row[13]);
+			entry.red5g         = atoi(row[14]);
+			entry.grn5g         = atoi(row[15]);
+			entry.blu5g         = atoi(row[16]);
+			entry.red6l         = atoi(row[17]);
+			entry.grn6l         = atoi(row[18]);
+			entry.blu6l         = atoi(row[19]);
+			entry.red7f         = atoi(row[20]);
+			entry.grn7f         = atoi(row[21]);
+			entry.blu7f         = atoi(row[22]);
+			entry.red8x         = atoi(row[23]);
+			entry.grn8x         = atoi(row[24]);
+			entry.blu8x         = atoi(row[25]);
+			entry.red9x         = atoi(row[26]);
+			entry.grn9x         = atoi(row[27]);
+			entry.blu9x         = atoi(row[28]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

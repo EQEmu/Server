@@ -248,7 +248,7 @@ public:
 			return guild_ranks_entry;
 		}
 
-		guild_ranks_entry = InstanceListRepository::NewEntity();
+		guild_ranks_entry = GuildRanksRepository::NewEntity();
 
 		return guild_ranks_entry;
 	}
@@ -320,6 +320,55 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<GuildRanks> GetWhere(std::string where_filter)
+	{
+		std::vector<GuildRanks> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			GuildRanks entry{};
+
+			entry.guild_id     = atoi(row[0]);
+			entry.rank         = atoi(row[1]);
+			entry.title        = row[2];
+			entry.can_hear     = atoi(row[3]);
+			entry.can_speak    = atoi(row[4]);
+			entry.can_invite   = atoi(row[5]);
+			entry.can_remove   = atoi(row[6]);
+			entry.can_promote  = atoi(row[7]);
+			entry.can_demote   = atoi(row[8]);
+			entry.can_motd     = atoi(row[9]);
+			entry.can_warpeace = atoi(row[10]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

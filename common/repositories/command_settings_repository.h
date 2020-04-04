@@ -202,7 +202,7 @@ public:
 			return command_settings_entry;
 		}
 
-		command_settings_entry = InstanceListRepository::NewEntity();
+		command_settings_entry = CommandSettingsRepository::NewEntity();
 
 		return command_settings_entry;
 	}
@@ -259,6 +259,47 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<CommandSettings> GetWhere(std::string where_filter)
+	{
+		std::vector<CommandSettings> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			CommandSettings entry{};
+
+			entry.command = row[0];
+			entry.access  = atoi(row[1]);
+			entry.aliases = row[2];
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

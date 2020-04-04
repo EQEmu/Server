@@ -179,7 +179,7 @@ public:
 		update_values.push_back(columns[1] + " = " + std::to_string(horses_entry.race));
 		update_values.push_back(columns[2] + " = " + std::to_string(horses_entry.gender));
 		update_values.push_back(columns[3] + " = " + std::to_string(horses_entry.texture));
-		update_values.push_back(columns[4] + " = '" + EscapeString(horses_entry.mountspeed) + "'");
+		update_values.push_back(columns[4] + " = " + std::to_string(horses_entry.mountspeed));
 		update_values.push_back(columns[5] + " = '" + EscapeString(horses_entry.notes) + "'");
 
 		auto results = content_db.QueryDatabase(
@@ -204,7 +204,7 @@ public:
 		insert_values.push_back(std::to_string(horses_entry.race));
 		insert_values.push_back(std::to_string(horses_entry.gender));
 		insert_values.push_back(std::to_string(horses_entry.texture));
-		insert_values.push_back("'" + EscapeString(horses_entry.mountspeed) + "'");
+		insert_values.push_back(std::to_string(horses_entry.mountspeed));
 		insert_values.push_back("'" + EscapeString(horses_entry.notes) + "'");
 
 		auto results = content_db.QueryDatabase(
@@ -220,7 +220,7 @@ public:
 			return horses_entry;
 		}
 
-		horses_entry = InstanceListRepository::NewEntity();
+		horses_entry = HorsesRepository::NewEntity();
 
 		return horses_entry;
 	}
@@ -237,7 +237,7 @@ public:
 			insert_values.push_back(std::to_string(horses_entry.race));
 			insert_values.push_back(std::to_string(horses_entry.gender));
 			insert_values.push_back(std::to_string(horses_entry.texture));
-			insert_values.push_back("'" + EscapeString(horses_entry.mountspeed) + "'");
+			insert_values.push_back(std::to_string(horses_entry.mountspeed));
 			insert_values.push_back("'" + EscapeString(horses_entry.notes) + "'");
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
@@ -283,6 +283,50 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<Horses> GetWhere(std::string where_filter)
+	{
+		std::vector<Horses> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			Horses entry{};
+
+			entry.filename   = row[0];
+			entry.race       = atoi(row[1]);
+			entry.gender     = atoi(row[2]);
+			entry.texture    = atoi(row[3]);
+			entry.mountspeed = atof(row[4]);
+			entry.notes      = row[5];
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

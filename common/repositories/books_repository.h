@@ -202,7 +202,7 @@ public:
 			return books_entry;
 		}
 
-		books_entry = InstanceListRepository::NewEntity();
+		books_entry = BooksRepository::NewEntity();
 
 		return books_entry;
 	}
@@ -259,6 +259,47 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<Books> GetWhere(std::string where_filter)
+	{
+		std::vector<Books> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			Books entry{};
+
+			entry.name     = row[0];
+			entry.txtfile  = row[1];
+			entry.language = atoi(row[2]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

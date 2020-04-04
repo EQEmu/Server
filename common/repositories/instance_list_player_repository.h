@@ -196,7 +196,7 @@ public:
 			return instance_list_player_entry;
 		}
 
-		instance_list_player_entry = InstanceListRepository::NewEntity();
+		instance_list_player_entry = InstanceListPlayerRepository::NewEntity();
 
 		return instance_list_player_entry;
 	}
@@ -251,6 +251,46 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<InstanceListPlayer> GetWhere(std::string where_filter)
+	{
+		std::vector<InstanceListPlayer> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			InstanceListPlayer entry{};
+
+			entry.id     = atoi(row[0]);
+			entry.charid = atoi(row[1]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

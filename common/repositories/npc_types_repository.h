@@ -652,7 +652,7 @@ public:
 		update_values.push_back(columns[10] + " = " + std::to_string(npc_types_entry.texture));
 		update_values.push_back(columns[11] + " = " + std::to_string(npc_types_entry.helmtexture));
 		update_values.push_back(columns[12] + " = " + std::to_string(npc_types_entry.herosforgemodel));
-		update_values.push_back(columns[13] + " = '" + EscapeString(npc_types_entry.size) + "'");
+		update_values.push_back(columns[13] + " = " + std::to_string(npc_types_entry.size));
 		update_values.push_back(columns[14] + " = " + std::to_string(npc_types_entry.hp_regen_rate));
 		update_values.push_back(columns[15] + " = " + std::to_string(npc_types_entry.mana_regen_rate));
 		update_values.push_back(columns[16] + " = " + std::to_string(npc_types_entry.loottable_id));
@@ -690,7 +690,7 @@ public:
 		update_values.push_back(columns[48] + " = " + std::to_string(npc_types_entry.prim_melee_type));
 		update_values.push_back(columns[49] + " = " + std::to_string(npc_types_entry.sec_melee_type));
 		update_values.push_back(columns[50] + " = " + std::to_string(npc_types_entry.ranged_type));
-		update_values.push_back(columns[51] + " = '" + EscapeString(npc_types_entry.runspeed) + "'");
+		update_values.push_back(columns[51] + " = " + std::to_string(npc_types_entry.runspeed));
 		update_values.push_back(columns[52] + " = " + std::to_string(npc_types_entry.MR));
 		update_values.push_back(columns[53] + " = " + std::to_string(npc_types_entry.CR));
 		update_values.push_back(columns[54] + " = " + std::to_string(npc_types_entry.DR));
@@ -704,7 +704,7 @@ public:
 		update_values.push_back(columns[62] + " = " + std::to_string(npc_types_entry.AC));
 		update_values.push_back(columns[63] + " = " + std::to_string(npc_types_entry.npc_aggro));
 		update_values.push_back(columns[64] + " = " + std::to_string(npc_types_entry.spawn_limit));
-		update_values.push_back(columns[65] + " = '" + EscapeString(npc_types_entry.attack_speed) + "'");
+		update_values.push_back(columns[65] + " = " + std::to_string(npc_types_entry.attack_speed));
 		update_values.push_back(columns[66] + " = " + std::to_string(npc_types_entry.attack_delay));
 		update_values.push_back(columns[67] + " = " + std::to_string(npc_types_entry.findable));
 		update_values.push_back(columns[68] + " = " + std::to_string(npc_types_entry.STR));
@@ -731,8 +731,8 @@ public:
 		update_values.push_back(columns[89] + " = " + std::to_string(npc_types_entry.underwater));
 		update_values.push_back(columns[90] + " = " + std::to_string(npc_types_entry.isquest));
 		update_values.push_back(columns[91] + " = " + std::to_string(npc_types_entry.emoteid));
-		update_values.push_back(columns[92] + " = '" + EscapeString(npc_types_entry.spellscale) + "'");
-		update_values.push_back(columns[93] + " = '" + EscapeString(npc_types_entry.healscale) + "'");
+		update_values.push_back(columns[92] + " = " + std::to_string(npc_types_entry.spellscale));
+		update_values.push_back(columns[93] + " = " + std::to_string(npc_types_entry.healscale));
 		update_values.push_back(columns[94] + " = " + std::to_string(npc_types_entry.no_target_hotkey));
 		update_values.push_back(columns[95] + " = " + std::to_string(npc_types_entry.raid_target));
 		update_values.push_back(columns[96] + " = " + std::to_string(npc_types_entry.armtexture));
@@ -793,7 +793,7 @@ public:
 		insert_values.push_back(std::to_string(npc_types_entry.texture));
 		insert_values.push_back(std::to_string(npc_types_entry.helmtexture));
 		insert_values.push_back(std::to_string(npc_types_entry.herosforgemodel));
-		insert_values.push_back("'" + EscapeString(npc_types_entry.size) + "'");
+		insert_values.push_back(std::to_string(npc_types_entry.size));
 		insert_values.push_back(std::to_string(npc_types_entry.hp_regen_rate));
 		insert_values.push_back(std::to_string(npc_types_entry.mana_regen_rate));
 		insert_values.push_back(std::to_string(npc_types_entry.loottable_id));
@@ -831,7 +831,7 @@ public:
 		insert_values.push_back(std::to_string(npc_types_entry.prim_melee_type));
 		insert_values.push_back(std::to_string(npc_types_entry.sec_melee_type));
 		insert_values.push_back(std::to_string(npc_types_entry.ranged_type));
-		insert_values.push_back("'" + EscapeString(npc_types_entry.runspeed) + "'");
+		insert_values.push_back(std::to_string(npc_types_entry.runspeed));
 		insert_values.push_back(std::to_string(npc_types_entry.MR));
 		insert_values.push_back(std::to_string(npc_types_entry.CR));
 		insert_values.push_back(std::to_string(npc_types_entry.DR));
@@ -845,7 +845,7 @@ public:
 		insert_values.push_back(std::to_string(npc_types_entry.AC));
 		insert_values.push_back(std::to_string(npc_types_entry.npc_aggro));
 		insert_values.push_back(std::to_string(npc_types_entry.spawn_limit));
-		insert_values.push_back("'" + EscapeString(npc_types_entry.attack_speed) + "'");
+		insert_values.push_back(std::to_string(npc_types_entry.attack_speed));
 		insert_values.push_back(std::to_string(npc_types_entry.attack_delay));
 		insert_values.push_back(std::to_string(npc_types_entry.findable));
 		insert_values.push_back(std::to_string(npc_types_entry.STR));
@@ -872,8 +872,8 @@ public:
 		insert_values.push_back(std::to_string(npc_types_entry.underwater));
 		insert_values.push_back(std::to_string(npc_types_entry.isquest));
 		insert_values.push_back(std::to_string(npc_types_entry.emoteid));
-		insert_values.push_back("'" + EscapeString(npc_types_entry.spellscale) + "'");
-		insert_values.push_back("'" + EscapeString(npc_types_entry.healscale) + "'");
+		insert_values.push_back(std::to_string(npc_types_entry.spellscale));
+		insert_values.push_back(std::to_string(npc_types_entry.healscale));
 		insert_values.push_back(std::to_string(npc_types_entry.no_target_hotkey));
 		insert_values.push_back(std::to_string(npc_types_entry.raid_target));
 		insert_values.push_back(std::to_string(npc_types_entry.armtexture));
@@ -916,7 +916,7 @@ public:
 			return npc_types_entry;
 		}
 
-		npc_types_entry = InstanceListRepository::NewEntity();
+		npc_types_entry = NpcTypesRepository::NewEntity();
 
 		return npc_types_entry;
 	}
@@ -942,7 +942,7 @@ public:
 			insert_values.push_back(std::to_string(npc_types_entry.texture));
 			insert_values.push_back(std::to_string(npc_types_entry.helmtexture));
 			insert_values.push_back(std::to_string(npc_types_entry.herosforgemodel));
-			insert_values.push_back("'" + EscapeString(npc_types_entry.size) + "'");
+			insert_values.push_back(std::to_string(npc_types_entry.size));
 			insert_values.push_back(std::to_string(npc_types_entry.hp_regen_rate));
 			insert_values.push_back(std::to_string(npc_types_entry.mana_regen_rate));
 			insert_values.push_back(std::to_string(npc_types_entry.loottable_id));
@@ -980,7 +980,7 @@ public:
 			insert_values.push_back(std::to_string(npc_types_entry.prim_melee_type));
 			insert_values.push_back(std::to_string(npc_types_entry.sec_melee_type));
 			insert_values.push_back(std::to_string(npc_types_entry.ranged_type));
-			insert_values.push_back("'" + EscapeString(npc_types_entry.runspeed) + "'");
+			insert_values.push_back(std::to_string(npc_types_entry.runspeed));
 			insert_values.push_back(std::to_string(npc_types_entry.MR));
 			insert_values.push_back(std::to_string(npc_types_entry.CR));
 			insert_values.push_back(std::to_string(npc_types_entry.DR));
@@ -994,7 +994,7 @@ public:
 			insert_values.push_back(std::to_string(npc_types_entry.AC));
 			insert_values.push_back(std::to_string(npc_types_entry.npc_aggro));
 			insert_values.push_back(std::to_string(npc_types_entry.spawn_limit));
-			insert_values.push_back("'" + EscapeString(npc_types_entry.attack_speed) + "'");
+			insert_values.push_back(std::to_string(npc_types_entry.attack_speed));
 			insert_values.push_back(std::to_string(npc_types_entry.attack_delay));
 			insert_values.push_back(std::to_string(npc_types_entry.findable));
 			insert_values.push_back(std::to_string(npc_types_entry.STR));
@@ -1021,8 +1021,8 @@ public:
 			insert_values.push_back(std::to_string(npc_types_entry.underwater));
 			insert_values.push_back(std::to_string(npc_types_entry.isquest));
 			insert_values.push_back(std::to_string(npc_types_entry.emoteid));
-			insert_values.push_back("'" + EscapeString(npc_types_entry.spellscale) + "'");
-			insert_values.push_back("'" + EscapeString(npc_types_entry.healscale) + "'");
+			insert_values.push_back(std::to_string(npc_types_entry.spellscale));
+			insert_values.push_back(std::to_string(npc_types_entry.healscale));
 			insert_values.push_back(std::to_string(npc_types_entry.no_target_hotkey));
 			insert_values.push_back(std::to_string(npc_types_entry.raid_target));
 			insert_values.push_back(std::to_string(npc_types_entry.armtexture));
@@ -1211,6 +1211,166 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<NpcTypes> GetWhere(std::string where_filter)
+	{
+		std::vector<NpcTypes> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			NpcTypes entry{};
+
+			entry.id                     = atoi(row[0]);
+			entry.name                   = row[1];
+			entry.lastname               = row[2];
+			entry.level                  = atoi(row[3]);
+			entry.race                   = atoi(row[4]);
+			entry.class                  = atoi(row[5]);
+			entry.bodytype               = atoi(row[6]);
+			entry.hp                     = atoi(row[7]);
+			entry.mana                   = atoi(row[8]);
+			entry.gender                 = atoi(row[9]);
+			entry.texture                = atoi(row[10]);
+			entry.helmtexture            = atoi(row[11]);
+			entry.herosforgemodel        = atoi(row[12]);
+			entry.size                   = atof(row[13]);
+			entry.hp_regen_rate          = atoi(row[14]);
+			entry.mana_regen_rate        = atoi(row[15]);
+			entry.loottable_id           = atoi(row[16]);
+			entry.merchant_id            = atoi(row[17]);
+			entry.alt_currency_id        = atoi(row[18]);
+			entry.npc_spells_id          = atoi(row[19]);
+			entry.npc_spells_effects_id  = atoi(row[20]);
+			entry.npc_faction_id         = atoi(row[21]);
+			entry.adventure_template_id  = atoi(row[22]);
+			entry.trap_template          = atoi(row[23]);
+			entry.mindmg                 = atoi(row[24]);
+			entry.maxdmg                 = atoi(row[25]);
+			entry.attack_count           = atoi(row[26]);
+			entry.npcspecialattks        = row[27];
+			entry.special_abilities      = row[28];
+			entry.aggroradius            = atoi(row[29]);
+			entry.assistradius           = atoi(row[30]);
+			entry.face                   = atoi(row[31]);
+			entry.luclin_hairstyle       = atoi(row[32]);
+			entry.luclin_haircolor       = atoi(row[33]);
+			entry.luclin_eyecolor        = atoi(row[34]);
+			entry.luclin_eyecolor2       = atoi(row[35]);
+			entry.luclin_beardcolor      = atoi(row[36]);
+			entry.luclin_beard           = atoi(row[37]);
+			entry.drakkin_heritage       = atoi(row[38]);
+			entry.drakkin_tattoo         = atoi(row[39]);
+			entry.drakkin_details        = atoi(row[40]);
+			entry.armortint_id           = atoi(row[41]);
+			entry.armortint_red          = atoi(row[42]);
+			entry.armortint_green        = atoi(row[43]);
+			entry.armortint_blue         = atoi(row[44]);
+			entry.d_melee_texture1       = atoi(row[45]);
+			entry.d_melee_texture2       = atoi(row[46]);
+			entry.ammo_idfile            = row[47];
+			entry.prim_melee_type        = atoi(row[48]);
+			entry.sec_melee_type         = atoi(row[49]);
+			entry.ranged_type            = atoi(row[50]);
+			entry.runspeed               = atof(row[51]);
+			entry.MR                     = atoi(row[52]);
+			entry.CR                     = atoi(row[53]);
+			entry.DR                     = atoi(row[54]);
+			entry.FR                     = atoi(row[55]);
+			entry.PR                     = atoi(row[56]);
+			entry.Corrup                 = atoi(row[57]);
+			entry.PhR                    = atoi(row[58]);
+			entry.see_invis              = atoi(row[59]);
+			entry.see_invis_undead       = atoi(row[60]);
+			entry.qglobal                = atoi(row[61]);
+			entry.AC                     = atoi(row[62]);
+			entry.npc_aggro              = atoi(row[63]);
+			entry.spawn_limit            = atoi(row[64]);
+			entry.attack_speed           = atof(row[65]);
+			entry.attack_delay           = atoi(row[66]);
+			entry.findable               = atoi(row[67]);
+			entry.STR                    = atoi(row[68]);
+			entry.STA                    = atoi(row[69]);
+			entry.DEX                    = atoi(row[70]);
+			entry.AGI                    = atoi(row[71]);
+			entry._INT                   = atoi(row[72]);
+			entry.WIS                    = atoi(row[73]);
+			entry.CHA                    = atoi(row[74]);
+			entry.see_hide               = atoi(row[75]);
+			entry.see_improved_hide      = atoi(row[76]);
+			entry.trackable              = atoi(row[77]);
+			entry.isbot                  = atoi(row[78]);
+			entry.exclude                = atoi(row[79]);
+			entry.ATK                    = atoi(row[80]);
+			entry.Accuracy               = atoi(row[81]);
+			entry.Avoidance              = atoi(row[82]);
+			entry.slow_mitigation        = atoi(row[83]);
+			entry.version                = atoi(row[84]);
+			entry.maxlevel               = atoi(row[85]);
+			entry.scalerate              = atoi(row[86]);
+			entry.private_corpse         = atoi(row[87]);
+			entry.unique_spawn_by_name   = atoi(row[88]);
+			entry.underwater             = atoi(row[89]);
+			entry.isquest                = atoi(row[90]);
+			entry.emoteid                = atoi(row[91]);
+			entry.spellscale             = atof(row[92]);
+			entry.healscale              = atof(row[93]);
+			entry.no_target_hotkey       = atoi(row[94]);
+			entry.raid_target            = atoi(row[95]);
+			entry.armtexture             = atoi(row[96]);
+			entry.bracertexture          = atoi(row[97]);
+			entry.handtexture            = atoi(row[98]);
+			entry.legtexture             = atoi(row[99]);
+			entry.feettexture            = atoi(row[100]);
+			entry.light                  = atoi(row[101]);
+			entry.walkspeed              = atoi(row[102]);
+			entry.peqid                  = atoi(row[103]);
+			entry.unique_                = atoi(row[104]);
+			entry.fixed                  = atoi(row[105]);
+			entry.ignore_despawn         = atoi(row[106]);
+			entry.show_name              = atoi(row[107]);
+			entry.untargetable           = atoi(row[108]);
+			entry.charm_ac               = atoi(row[109]);
+			entry.charm_min_dmg          = atoi(row[110]);
+			entry.charm_max_dmg          = atoi(row[111]);
+			entry.charm_attack_delay     = atoi(row[112]);
+			entry.charm_accuracy_rating  = atoi(row[113]);
+			entry.charm_avoidance_rating = atoi(row[114]);
+			entry.charm_atk              = atoi(row[115]);
+			entry.skip_global_loot       = atoi(row[116]);
+			entry.rare_spawn             = atoi(row[117]);
+			entry.stuck_behavior         = atoi(row[118]);
+			entry.model                  = atoi(row[119]);
+			entry.flymode                = atoi(row[120]);
+			entry.always_aggro           = atoi(row[121]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

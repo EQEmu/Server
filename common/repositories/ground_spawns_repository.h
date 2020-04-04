@@ -210,12 +210,12 @@ public:
 
 		update_values.push_back(columns[1] + " = " + std::to_string(ground_spawns_entry.zoneid));
 		update_values.push_back(columns[2] + " = " + std::to_string(ground_spawns_entry.version));
-		update_values.push_back(columns[3] + " = '" + EscapeString(ground_spawns_entry.max_x) + "'");
-		update_values.push_back(columns[4] + " = '" + EscapeString(ground_spawns_entry.max_y) + "'");
-		update_values.push_back(columns[5] + " = '" + EscapeString(ground_spawns_entry.max_z) + "'");
-		update_values.push_back(columns[6] + " = '" + EscapeString(ground_spawns_entry.min_x) + "'");
-		update_values.push_back(columns[7] + " = '" + EscapeString(ground_spawns_entry.min_y) + "'");
-		update_values.push_back(columns[8] + " = '" + EscapeString(ground_spawns_entry.heading) + "'");
+		update_values.push_back(columns[3] + " = " + std::to_string(ground_spawns_entry.max_x));
+		update_values.push_back(columns[4] + " = " + std::to_string(ground_spawns_entry.max_y));
+		update_values.push_back(columns[5] + " = " + std::to_string(ground_spawns_entry.max_z));
+		update_values.push_back(columns[6] + " = " + std::to_string(ground_spawns_entry.min_x));
+		update_values.push_back(columns[7] + " = " + std::to_string(ground_spawns_entry.min_y));
+		update_values.push_back(columns[8] + " = " + std::to_string(ground_spawns_entry.heading));
 		update_values.push_back(columns[9] + " = '" + EscapeString(ground_spawns_entry.name) + "'");
 		update_values.push_back(columns[10] + " = " + std::to_string(ground_spawns_entry.item));
 		update_values.push_back(columns[11] + " = " + std::to_string(ground_spawns_entry.max_allowed));
@@ -243,12 +243,12 @@ public:
 
 		insert_values.push_back(std::to_string(ground_spawns_entry.zoneid));
 		insert_values.push_back(std::to_string(ground_spawns_entry.version));
-		insert_values.push_back("'" + EscapeString(ground_spawns_entry.max_x) + "'");
-		insert_values.push_back("'" + EscapeString(ground_spawns_entry.max_y) + "'");
-		insert_values.push_back("'" + EscapeString(ground_spawns_entry.max_z) + "'");
-		insert_values.push_back("'" + EscapeString(ground_spawns_entry.min_x) + "'");
-		insert_values.push_back("'" + EscapeString(ground_spawns_entry.min_y) + "'");
-		insert_values.push_back("'" + EscapeString(ground_spawns_entry.heading) + "'");
+		insert_values.push_back(std::to_string(ground_spawns_entry.max_x));
+		insert_values.push_back(std::to_string(ground_spawns_entry.max_y));
+		insert_values.push_back(std::to_string(ground_spawns_entry.max_z));
+		insert_values.push_back(std::to_string(ground_spawns_entry.min_x));
+		insert_values.push_back(std::to_string(ground_spawns_entry.min_y));
+		insert_values.push_back(std::to_string(ground_spawns_entry.heading));
 		insert_values.push_back("'" + EscapeString(ground_spawns_entry.name) + "'");
 		insert_values.push_back(std::to_string(ground_spawns_entry.item));
 		insert_values.push_back(std::to_string(ground_spawns_entry.max_allowed));
@@ -268,7 +268,7 @@ public:
 			return ground_spawns_entry;
 		}
 
-		ground_spawns_entry = InstanceListRepository::NewEntity();
+		ground_spawns_entry = GroundSpawnsRepository::NewEntity();
 
 		return ground_spawns_entry;
 	}
@@ -284,12 +284,12 @@ public:
 
 			insert_values.push_back(std::to_string(ground_spawns_entry.zoneid));
 			insert_values.push_back(std::to_string(ground_spawns_entry.version));
-			insert_values.push_back("'" + EscapeString(ground_spawns_entry.max_x) + "'");
-			insert_values.push_back("'" + EscapeString(ground_spawns_entry.max_y) + "'");
-			insert_values.push_back("'" + EscapeString(ground_spawns_entry.max_z) + "'");
-			insert_values.push_back("'" + EscapeString(ground_spawns_entry.min_x) + "'");
-			insert_values.push_back("'" + EscapeString(ground_spawns_entry.min_y) + "'");
-			insert_values.push_back("'" + EscapeString(ground_spawns_entry.heading) + "'");
+			insert_values.push_back(std::to_string(ground_spawns_entry.max_x));
+			insert_values.push_back(std::to_string(ground_spawns_entry.max_y));
+			insert_values.push_back(std::to_string(ground_spawns_entry.max_z));
+			insert_values.push_back(std::to_string(ground_spawns_entry.min_x));
+			insert_values.push_back(std::to_string(ground_spawns_entry.min_y));
+			insert_values.push_back(std::to_string(ground_spawns_entry.heading));
 			insert_values.push_back("'" + EscapeString(ground_spawns_entry.name) + "'");
 			insert_values.push_back(std::to_string(ground_spawns_entry.item));
 			insert_values.push_back(std::to_string(ground_spawns_entry.max_allowed));
@@ -347,6 +347,58 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<GroundSpawns> GetWhere(std::string where_filter)
+	{
+		std::vector<GroundSpawns> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			GroundSpawns entry{};
+
+			entry.id            = atoi(row[0]);
+			entry.zoneid        = atoi(row[1]);
+			entry.version       = atoi(row[2]);
+			entry.max_x         = atof(row[3]);
+			entry.max_y         = atof(row[4]);
+			entry.max_z         = atof(row[5]);
+			entry.min_x         = atof(row[6]);
+			entry.min_y         = atof(row[7]);
+			entry.heading       = atof(row[8]);
+			entry.name          = row[9];
+			entry.item          = atoi(row[10]);
+			entry.max_allowed   = atoi(row[11]);
+			entry.comment       = row[12];
+			entry.respawn_timer = atoi(row[13]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

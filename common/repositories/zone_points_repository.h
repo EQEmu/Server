@@ -223,18 +223,18 @@ public:
 		update_values.push_back(columns[1] + " = '" + EscapeString(zone_points_entry.zone) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(zone_points_entry.version));
 		update_values.push_back(columns[3] + " = " + std::to_string(zone_points_entry.number));
-		update_values.push_back(columns[4] + " = '" + EscapeString(zone_points_entry.y) + "'");
-		update_values.push_back(columns[5] + " = '" + EscapeString(zone_points_entry.x) + "'");
-		update_values.push_back(columns[6] + " = '" + EscapeString(zone_points_entry.z) + "'");
-		update_values.push_back(columns[7] + " = '" + EscapeString(zone_points_entry.heading) + "'");
-		update_values.push_back(columns[8] + " = '" + EscapeString(zone_points_entry.target_y) + "'");
-		update_values.push_back(columns[9] + " = '" + EscapeString(zone_points_entry.target_x) + "'");
-		update_values.push_back(columns[10] + " = '" + EscapeString(zone_points_entry.target_z) + "'");
-		update_values.push_back(columns[11] + " = '" + EscapeString(zone_points_entry.target_heading) + "'");
+		update_values.push_back(columns[4] + " = " + std::to_string(zone_points_entry.y));
+		update_values.push_back(columns[5] + " = " + std::to_string(zone_points_entry.x));
+		update_values.push_back(columns[6] + " = " + std::to_string(zone_points_entry.z));
+		update_values.push_back(columns[7] + " = " + std::to_string(zone_points_entry.heading));
+		update_values.push_back(columns[8] + " = " + std::to_string(zone_points_entry.target_y));
+		update_values.push_back(columns[9] + " = " + std::to_string(zone_points_entry.target_x));
+		update_values.push_back(columns[10] + " = " + std::to_string(zone_points_entry.target_z));
+		update_values.push_back(columns[11] + " = " + std::to_string(zone_points_entry.target_heading));
 		update_values.push_back(columns[12] + " = " + std::to_string(zone_points_entry.zoneinst));
 		update_values.push_back(columns[13] + " = " + std::to_string(zone_points_entry.target_zone_id));
 		update_values.push_back(columns[14] + " = " + std::to_string(zone_points_entry.target_instance));
-		update_values.push_back(columns[15] + " = '" + EscapeString(zone_points_entry.buffer) + "'");
+		update_values.push_back(columns[15] + " = " + std::to_string(zone_points_entry.buffer));
 		update_values.push_back(columns[16] + " = " + std::to_string(zone_points_entry.client_version_mask));
 
 		auto results = content_db.QueryDatabase(
@@ -259,18 +259,18 @@ public:
 		insert_values.push_back("'" + EscapeString(zone_points_entry.zone) + "'");
 		insert_values.push_back(std::to_string(zone_points_entry.version));
 		insert_values.push_back(std::to_string(zone_points_entry.number));
-		insert_values.push_back("'" + EscapeString(zone_points_entry.y) + "'");
-		insert_values.push_back("'" + EscapeString(zone_points_entry.x) + "'");
-		insert_values.push_back("'" + EscapeString(zone_points_entry.z) + "'");
-		insert_values.push_back("'" + EscapeString(zone_points_entry.heading) + "'");
-		insert_values.push_back("'" + EscapeString(zone_points_entry.target_y) + "'");
-		insert_values.push_back("'" + EscapeString(zone_points_entry.target_x) + "'");
-		insert_values.push_back("'" + EscapeString(zone_points_entry.target_z) + "'");
-		insert_values.push_back("'" + EscapeString(zone_points_entry.target_heading) + "'");
+		insert_values.push_back(std::to_string(zone_points_entry.y));
+		insert_values.push_back(std::to_string(zone_points_entry.x));
+		insert_values.push_back(std::to_string(zone_points_entry.z));
+		insert_values.push_back(std::to_string(zone_points_entry.heading));
+		insert_values.push_back(std::to_string(zone_points_entry.target_y));
+		insert_values.push_back(std::to_string(zone_points_entry.target_x));
+		insert_values.push_back(std::to_string(zone_points_entry.target_z));
+		insert_values.push_back(std::to_string(zone_points_entry.target_heading));
 		insert_values.push_back(std::to_string(zone_points_entry.zoneinst));
 		insert_values.push_back(std::to_string(zone_points_entry.target_zone_id));
 		insert_values.push_back(std::to_string(zone_points_entry.target_instance));
-		insert_values.push_back("'" + EscapeString(zone_points_entry.buffer) + "'");
+		insert_values.push_back(std::to_string(zone_points_entry.buffer));
 		insert_values.push_back(std::to_string(zone_points_entry.client_version_mask));
 
 		auto results = content_db.QueryDatabase(
@@ -286,7 +286,7 @@ public:
 			return zone_points_entry;
 		}
 
-		zone_points_entry = InstanceListRepository::NewEntity();
+		zone_points_entry = ZonePointsRepository::NewEntity();
 
 		return zone_points_entry;
 	}
@@ -303,18 +303,18 @@ public:
 			insert_values.push_back("'" + EscapeString(zone_points_entry.zone) + "'");
 			insert_values.push_back(std::to_string(zone_points_entry.version));
 			insert_values.push_back(std::to_string(zone_points_entry.number));
-			insert_values.push_back("'" + EscapeString(zone_points_entry.y) + "'");
-			insert_values.push_back("'" + EscapeString(zone_points_entry.x) + "'");
-			insert_values.push_back("'" + EscapeString(zone_points_entry.z) + "'");
-			insert_values.push_back("'" + EscapeString(zone_points_entry.heading) + "'");
-			insert_values.push_back("'" + EscapeString(zone_points_entry.target_y) + "'");
-			insert_values.push_back("'" + EscapeString(zone_points_entry.target_x) + "'");
-			insert_values.push_back("'" + EscapeString(zone_points_entry.target_z) + "'");
-			insert_values.push_back("'" + EscapeString(zone_points_entry.target_heading) + "'");
+			insert_values.push_back(std::to_string(zone_points_entry.y));
+			insert_values.push_back(std::to_string(zone_points_entry.x));
+			insert_values.push_back(std::to_string(zone_points_entry.z));
+			insert_values.push_back(std::to_string(zone_points_entry.heading));
+			insert_values.push_back(std::to_string(zone_points_entry.target_y));
+			insert_values.push_back(std::to_string(zone_points_entry.target_x));
+			insert_values.push_back(std::to_string(zone_points_entry.target_z));
+			insert_values.push_back(std::to_string(zone_points_entry.target_heading));
 			insert_values.push_back(std::to_string(zone_points_entry.zoneinst));
 			insert_values.push_back(std::to_string(zone_points_entry.target_zone_id));
 			insert_values.push_back(std::to_string(zone_points_entry.target_instance));
-			insert_values.push_back("'" + EscapeString(zone_points_entry.buffer) + "'");
+			insert_values.push_back(std::to_string(zone_points_entry.buffer));
 			insert_values.push_back(std::to_string(zone_points_entry.client_version_mask));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
@@ -371,6 +371,61 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<ZonePoints> GetWhere(std::string where_filter)
+	{
+		std::vector<ZonePoints> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			ZonePoints entry{};
+
+			entry.id                  = atoi(row[0]);
+			entry.zone                = row[1];
+			entry.version             = atoi(row[2]);
+			entry.number              = atoi(row[3]);
+			entry.y                   = atof(row[4]);
+			entry.x                   = atof(row[5]);
+			entry.z                   = atof(row[6]);
+			entry.heading             = atof(row[7]);
+			entry.target_y            = atof(row[8]);
+			entry.target_x            = atof(row[9]);
+			entry.target_z            = atof(row[10]);
+			entry.target_heading      = atof(row[11]);
+			entry.zoneinst            = atoi(row[12]);
+			entry.target_zone_id      = atoi(row[13]);
+			entry.target_instance     = atoi(row[14]);
+			entry.buffer              = atof(row[15]);
+			entry.client_version_mask = atoi(row[16]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

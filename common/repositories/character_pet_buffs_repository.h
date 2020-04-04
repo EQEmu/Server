@@ -246,7 +246,7 @@ public:
 			return character_pet_buffs_entry;
 		}
 
-		character_pet_buffs_entry = InstanceListRepository::NewEntity();
+		character_pet_buffs_entry = CharacterPetBuffsRepository::NewEntity();
 
 		return character_pet_buffs_entry;
 	}
@@ -317,6 +317,55 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<CharacterPetBuffs> GetWhere(std::string where_filter)
+	{
+		std::vector<CharacterPetBuffs> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			CharacterPetBuffs entry{};
+
+			entry.char_id        = atoi(row[0]);
+			entry.pet            = atoi(row[1]);
+			entry.slot           = atoi(row[2]);
+			entry.spell_id       = atoi(row[3]);
+			entry.caster_level   = atoi(row[4]);
+			entry.castername     = row[5];
+			entry.ticsremaining  = atoi(row[6]);
+			entry.counters       = atoi(row[7]);
+			entry.numhits        = atoi(row[8]);
+			entry.rune           = atoi(row[9]);
+			entry.instrument_mod = atoi(row[10]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

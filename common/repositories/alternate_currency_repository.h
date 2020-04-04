@@ -196,7 +196,7 @@ public:
 			return alternate_currency_entry;
 		}
 
-		alternate_currency_entry = InstanceListRepository::NewEntity();
+		alternate_currency_entry = AlternateCurrencyRepository::NewEntity();
 
 		return alternate_currency_entry;
 	}
@@ -251,6 +251,46 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<AlternateCurrency> GetWhere(std::string where_filter)
+	{
+		std::vector<AlternateCurrency> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			AlternateCurrency entry{};
+
+			entry.id      = atoi(row[0]);
+			entry.item_id = atoi(row[1]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

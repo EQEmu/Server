@@ -262,7 +262,7 @@ public:
 			return aa_ranks_entry;
 		}
 
-		aa_ranks_entry = InstanceListRepository::NewEntity();
+		aa_ranks_entry = AaRanksRepository::NewEntity();
 
 		return aa_ranks_entry;
 	}
@@ -339,6 +339,57 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<AaRanks> GetWhere(std::string where_filter)
+	{
+		std::vector<AaRanks> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			AaRanks entry{};
+
+			entry.id               = atoi(row[0]);
+			entry.upper_hotkey_sid = atoi(row[1]);
+			entry.lower_hotkey_sid = atoi(row[2]);
+			entry.title_sid        = atoi(row[3]);
+			entry.desc_sid         = atoi(row[4]);
+			entry.cost             = atoi(row[5]);
+			entry.level_req        = atoi(row[6]);
+			entry.spell            = atoi(row[7]);
+			entry.spell_type       = atoi(row[8]);
+			entry.recast_time      = atoi(row[9]);
+			entry.expansion        = atoi(row[10]);
+			entry.prev_id          = atoi(row[11]);
+			entry.next_id          = atoi(row[12]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

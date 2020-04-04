@@ -215,10 +215,10 @@ public:
 		update_values.push_back(columns[1] + " = " + std::to_string(spawn2_entry.spawngroupID));
 		update_values.push_back(columns[2] + " = '" + EscapeString(spawn2_entry.zone) + "'");
 		update_values.push_back(columns[3] + " = " + std::to_string(spawn2_entry.version));
-		update_values.push_back(columns[4] + " = '" + EscapeString(spawn2_entry.x) + "'");
-		update_values.push_back(columns[5] + " = '" + EscapeString(spawn2_entry.y) + "'");
-		update_values.push_back(columns[6] + " = '" + EscapeString(spawn2_entry.z) + "'");
-		update_values.push_back(columns[7] + " = '" + EscapeString(spawn2_entry.heading) + "'");
+		update_values.push_back(columns[4] + " = " + std::to_string(spawn2_entry.x));
+		update_values.push_back(columns[5] + " = " + std::to_string(spawn2_entry.y));
+		update_values.push_back(columns[6] + " = " + std::to_string(spawn2_entry.z));
+		update_values.push_back(columns[7] + " = " + std::to_string(spawn2_entry.heading));
 		update_values.push_back(columns[8] + " = " + std::to_string(spawn2_entry.respawntime));
 		update_values.push_back(columns[9] + " = " + std::to_string(spawn2_entry.variance));
 		update_values.push_back(columns[10] + " = " + std::to_string(spawn2_entry.pathgrid));
@@ -249,10 +249,10 @@ public:
 		insert_values.push_back(std::to_string(spawn2_entry.spawngroupID));
 		insert_values.push_back("'" + EscapeString(spawn2_entry.zone) + "'");
 		insert_values.push_back(std::to_string(spawn2_entry.version));
-		insert_values.push_back("'" + EscapeString(spawn2_entry.x) + "'");
-		insert_values.push_back("'" + EscapeString(spawn2_entry.y) + "'");
-		insert_values.push_back("'" + EscapeString(spawn2_entry.z) + "'");
-		insert_values.push_back("'" + EscapeString(spawn2_entry.heading) + "'");
+		insert_values.push_back(std::to_string(spawn2_entry.x));
+		insert_values.push_back(std::to_string(spawn2_entry.y));
+		insert_values.push_back(std::to_string(spawn2_entry.z));
+		insert_values.push_back(std::to_string(spawn2_entry.heading));
 		insert_values.push_back(std::to_string(spawn2_entry.respawntime));
 		insert_values.push_back(std::to_string(spawn2_entry.variance));
 		insert_values.push_back(std::to_string(spawn2_entry.pathgrid));
@@ -274,7 +274,7 @@ public:
 			return spawn2_entry;
 		}
 
-		spawn2_entry = InstanceListRepository::NewEntity();
+		spawn2_entry = Spawn2Repository::NewEntity();
 
 		return spawn2_entry;
 	}
@@ -291,10 +291,10 @@ public:
 			insert_values.push_back(std::to_string(spawn2_entry.spawngroupID));
 			insert_values.push_back("'" + EscapeString(spawn2_entry.zone) + "'");
 			insert_values.push_back(std::to_string(spawn2_entry.version));
-			insert_values.push_back("'" + EscapeString(spawn2_entry.x) + "'");
-			insert_values.push_back("'" + EscapeString(spawn2_entry.y) + "'");
-			insert_values.push_back("'" + EscapeString(spawn2_entry.z) + "'");
-			insert_values.push_back("'" + EscapeString(spawn2_entry.heading) + "'");
+			insert_values.push_back(std::to_string(spawn2_entry.x));
+			insert_values.push_back(std::to_string(spawn2_entry.y));
+			insert_values.push_back(std::to_string(spawn2_entry.z));
+			insert_values.push_back(std::to_string(spawn2_entry.heading));
 			insert_values.push_back(std::to_string(spawn2_entry.respawntime));
 			insert_values.push_back(std::to_string(spawn2_entry.variance));
 			insert_values.push_back(std::to_string(spawn2_entry.pathgrid));
@@ -355,6 +355,59 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<Spawn2> GetWhere(std::string where_filter)
+	{
+		std::vector<Spawn2> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			Spawn2 entry{};
+
+			entry.id           = atoi(row[0]);
+			entry.spawngroupID = atoi(row[1]);
+			entry.zone         = row[2];
+			entry.version      = atoi(row[3]);
+			entry.x            = atof(row[4]);
+			entry.y            = atof(row[5]);
+			entry.z            = atof(row[6]);
+			entry.heading      = atof(row[7]);
+			entry.respawntime  = atoi(row[8]);
+			entry.variance     = atoi(row[9]);
+			entry.pathgrid     = atoi(row[10]);
+			entry._condition   = atoi(row[11]);
+			entry.cond_value   = atoi(row[12]);
+			entry.enabled      = atoi(row[13]);
+			entry.animation    = atoi(row[14]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

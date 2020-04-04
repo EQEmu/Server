@@ -214,7 +214,7 @@ public:
 			return logsys_categories_entry;
 		}
 
-		logsys_categories_entry = InstanceListRepository::NewEntity();
+		logsys_categories_entry = LogsysCategoriesRepository::NewEntity();
 
 		return logsys_categories_entry;
 	}
@@ -275,6 +275,49 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<LogsysCategories> GetWhere(std::string where_filter)
+	{
+		std::vector<LogsysCategories> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			LogsysCategories entry{};
+
+			entry.log_category_id          = atoi(row[0]);
+			entry.log_category_description = row[1];
+			entry.log_to_console           = atoi(row[2]);
+			entry.log_to_file              = atoi(row[3]);
+			entry.log_to_gmsay             = atoi(row[4]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

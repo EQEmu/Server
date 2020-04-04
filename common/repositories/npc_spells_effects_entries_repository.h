@@ -232,7 +232,7 @@ public:
 			return npc_spells_effects_entries_entry;
 		}
 
-		npc_spells_effects_entries_entry = InstanceListRepository::NewEntity();
+		npc_spells_effects_entries_entry = NpcSpellsEffectsEntriesRepository::NewEntity();
 
 		return npc_spells_effects_entries_entry;
 	}
@@ -299,6 +299,52 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<NpcSpellsEffectsEntries> GetWhere(std::string where_filter)
+	{
+		std::vector<NpcSpellsEffectsEntries> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			NpcSpellsEffectsEntries entry{};
+
+			entry.id                    = atoi(row[0]);
+			entry.npc_spells_effects_id = atoi(row[1]);
+			entry.spell_effect_id       = atoi(row[2]);
+			entry.minlevel              = atoi(row[3]);
+			entry.maxlevel              = atoi(row[4]);
+			entry.se_base               = atoi(row[5]);
+			entry.se_limit              = atoi(row[6]);
+			entry.se_max                = atoi(row[7]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

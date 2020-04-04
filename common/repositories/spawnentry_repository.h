@@ -206,7 +206,7 @@ public:
 			return spawnentry_entry;
 		}
 
-		spawnentry_entry = InstanceListRepository::NewEntity();
+		spawnentry_entry = SpawnentryRepository::NewEntity();
 
 		return spawnentry_entry;
 	}
@@ -264,6 +264,48 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<Spawnentry> GetWhere(std::string where_filter)
+	{
+		std::vector<Spawnentry> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			Spawnentry entry{};
+
+			entry.spawngroupID           = atoi(row[0]);
+			entry.npcID                  = atoi(row[1]);
+			entry.chance                 = atoi(row[2]);
+			entry.condition_value_filter = atoi(row[3]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

@@ -186,10 +186,10 @@ public:
 
 		update_values.push_back(columns[2] + " = " + std::to_string(character_bind_entry.zone_id));
 		update_values.push_back(columns[3] + " = " + std::to_string(character_bind_entry.instance_id));
-		update_values.push_back(columns[4] + " = '" + EscapeString(character_bind_entry.x) + "'");
-		update_values.push_back(columns[5] + " = '" + EscapeString(character_bind_entry.y) + "'");
-		update_values.push_back(columns[6] + " = '" + EscapeString(character_bind_entry.z) + "'");
-		update_values.push_back(columns[7] + " = '" + EscapeString(character_bind_entry.heading) + "'");
+		update_values.push_back(columns[4] + " = " + std::to_string(character_bind_entry.x));
+		update_values.push_back(columns[5] + " = " + std::to_string(character_bind_entry.y));
+		update_values.push_back(columns[6] + " = " + std::to_string(character_bind_entry.z));
+		update_values.push_back(columns[7] + " = " + std::to_string(character_bind_entry.heading));
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -212,10 +212,10 @@ public:
 
 		insert_values.push_back(std::to_string(character_bind_entry.zone_id));
 		insert_values.push_back(std::to_string(character_bind_entry.instance_id));
-		insert_values.push_back("'" + EscapeString(character_bind_entry.x) + "'");
-		insert_values.push_back("'" + EscapeString(character_bind_entry.y) + "'");
-		insert_values.push_back("'" + EscapeString(character_bind_entry.z) + "'");
-		insert_values.push_back("'" + EscapeString(character_bind_entry.heading) + "'");
+		insert_values.push_back(std::to_string(character_bind_entry.x));
+		insert_values.push_back(std::to_string(character_bind_entry.y));
+		insert_values.push_back(std::to_string(character_bind_entry.z));
+		insert_values.push_back(std::to_string(character_bind_entry.heading));
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -230,7 +230,7 @@ public:
 			return character_bind_entry;
 		}
 
-		character_bind_entry = InstanceListRepository::NewEntity();
+		character_bind_entry = CharacterBindRepository::NewEntity();
 
 		return character_bind_entry;
 	}
@@ -246,10 +246,10 @@ public:
 
 			insert_values.push_back(std::to_string(character_bind_entry.zone_id));
 			insert_values.push_back(std::to_string(character_bind_entry.instance_id));
-			insert_values.push_back("'" + EscapeString(character_bind_entry.x) + "'");
-			insert_values.push_back("'" + EscapeString(character_bind_entry.y) + "'");
-			insert_values.push_back("'" + EscapeString(character_bind_entry.z) + "'");
-			insert_values.push_back("'" + EscapeString(character_bind_entry.heading) + "'");
+			insert_values.push_back(std::to_string(character_bind_entry.x));
+			insert_values.push_back(std::to_string(character_bind_entry.y));
+			insert_values.push_back(std::to_string(character_bind_entry.z));
+			insert_values.push_back(std::to_string(character_bind_entry.heading));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -296,6 +296,52 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<CharacterBind> GetWhere(std::string where_filter)
+	{
+		std::vector<CharacterBind> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			CharacterBind entry{};
+
+			entry.id          = atoi(row[0]);
+			entry.slot        = atoi(row[1]);
+			entry.zone_id     = atoi(row[2]);
+			entry.instance_id = atoi(row[3]);
+			entry.x           = atof(row[4]);
+			entry.y           = atof(row[5]);
+			entry.z           = atof(row[6]);
+			entry.heading     = atof(row[7]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

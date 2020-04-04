@@ -177,10 +177,10 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[1] + " = " + std::to_string(graveyard_entry.zone_id));
-		update_values.push_back(columns[2] + " = '" + EscapeString(graveyard_entry.x) + "'");
-		update_values.push_back(columns[3] + " = '" + EscapeString(graveyard_entry.y) + "'");
-		update_values.push_back(columns[4] + " = '" + EscapeString(graveyard_entry.z) + "'");
-		update_values.push_back(columns[5] + " = '" + EscapeString(graveyard_entry.heading) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(graveyard_entry.x));
+		update_values.push_back(columns[3] + " = " + std::to_string(graveyard_entry.y));
+		update_values.push_back(columns[4] + " = " + std::to_string(graveyard_entry.z));
+		update_values.push_back(columns[5] + " = " + std::to_string(graveyard_entry.heading));
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -202,10 +202,10 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(graveyard_entry.zone_id));
-		insert_values.push_back("'" + EscapeString(graveyard_entry.x) + "'");
-		insert_values.push_back("'" + EscapeString(graveyard_entry.y) + "'");
-		insert_values.push_back("'" + EscapeString(graveyard_entry.z) + "'");
-		insert_values.push_back("'" + EscapeString(graveyard_entry.heading) + "'");
+		insert_values.push_back(std::to_string(graveyard_entry.x));
+		insert_values.push_back(std::to_string(graveyard_entry.y));
+		insert_values.push_back(std::to_string(graveyard_entry.z));
+		insert_values.push_back(std::to_string(graveyard_entry.heading));
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -220,7 +220,7 @@ public:
 			return graveyard_entry;
 		}
 
-		graveyard_entry = InstanceListRepository::NewEntity();
+		graveyard_entry = GraveyardRepository::NewEntity();
 
 		return graveyard_entry;
 	}
@@ -235,10 +235,10 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(graveyard_entry.zone_id));
-			insert_values.push_back("'" + EscapeString(graveyard_entry.x) + "'");
-			insert_values.push_back("'" + EscapeString(graveyard_entry.y) + "'");
-			insert_values.push_back("'" + EscapeString(graveyard_entry.z) + "'");
-			insert_values.push_back("'" + EscapeString(graveyard_entry.heading) + "'");
+			insert_values.push_back(std::to_string(graveyard_entry.x));
+			insert_values.push_back(std::to_string(graveyard_entry.y));
+			insert_values.push_back(std::to_string(graveyard_entry.z));
+			insert_values.push_back(std::to_string(graveyard_entry.heading));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -283,6 +283,50 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<Graveyard> GetWhere(std::string where_filter)
+	{
+		std::vector<Graveyard> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			Graveyard entry{};
+
+			entry.id      = atoi(row[0]);
+			entry.zone_id = atoi(row[1]);
+			entry.x       = atof(row[2]);
+			entry.y       = atof(row[3]);
+			entry.z       = atof(row[4]);
+			entry.heading = atof(row[5]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

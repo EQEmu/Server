@@ -208,7 +208,7 @@ public:
 			return reports_entry;
 		}
 
-		reports_entry = InstanceListRepository::NewEntity();
+		reports_entry = ReportsRepository::NewEntity();
 
 		return reports_entry;
 	}
@@ -267,6 +267,48 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<Reports> GetWhere(std::string where_filter)
+	{
+		std::vector<Reports> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			Reports entry{};
+
+			entry.id            = atoi(row[0]);
+			entry.name          = row[1];
+			entry.reported      = row[2];
+			entry.reported_text = row[3];
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

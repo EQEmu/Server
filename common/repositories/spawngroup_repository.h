@@ -206,11 +206,11 @@ public:
 
 		update_values.push_back(columns[1] + " = '" + EscapeString(spawngroup_entry.name) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(spawngroup_entry.spawn_limit));
-		update_values.push_back(columns[3] + " = '" + EscapeString(spawngroup_entry.dist) + "'");
-		update_values.push_back(columns[4] + " = '" + EscapeString(spawngroup_entry.max_x) + "'");
-		update_values.push_back(columns[5] + " = '" + EscapeString(spawngroup_entry.min_x) + "'");
-		update_values.push_back(columns[6] + " = '" + EscapeString(spawngroup_entry.max_y) + "'");
-		update_values.push_back(columns[7] + " = '" + EscapeString(spawngroup_entry.min_y) + "'");
+		update_values.push_back(columns[3] + " = " + std::to_string(spawngroup_entry.dist));
+		update_values.push_back(columns[4] + " = " + std::to_string(spawngroup_entry.max_x));
+		update_values.push_back(columns[5] + " = " + std::to_string(spawngroup_entry.min_x));
+		update_values.push_back(columns[6] + " = " + std::to_string(spawngroup_entry.max_y));
+		update_values.push_back(columns[7] + " = " + std::to_string(spawngroup_entry.min_y));
 		update_values.push_back(columns[8] + " = " + std::to_string(spawngroup_entry.delay));
 		update_values.push_back(columns[9] + " = " + std::to_string(spawngroup_entry.mindelay));
 		update_values.push_back(columns[10] + " = " + std::to_string(spawngroup_entry.despawn));
@@ -238,11 +238,11 @@ public:
 
 		insert_values.push_back("'" + EscapeString(spawngroup_entry.name) + "'");
 		insert_values.push_back(std::to_string(spawngroup_entry.spawn_limit));
-		insert_values.push_back("'" + EscapeString(spawngroup_entry.dist) + "'");
-		insert_values.push_back("'" + EscapeString(spawngroup_entry.max_x) + "'");
-		insert_values.push_back("'" + EscapeString(spawngroup_entry.min_x) + "'");
-		insert_values.push_back("'" + EscapeString(spawngroup_entry.max_y) + "'");
-		insert_values.push_back("'" + EscapeString(spawngroup_entry.min_y) + "'");
+		insert_values.push_back(std::to_string(spawngroup_entry.dist));
+		insert_values.push_back(std::to_string(spawngroup_entry.max_x));
+		insert_values.push_back(std::to_string(spawngroup_entry.min_x));
+		insert_values.push_back(std::to_string(spawngroup_entry.max_y));
+		insert_values.push_back(std::to_string(spawngroup_entry.min_y));
 		insert_values.push_back(std::to_string(spawngroup_entry.delay));
 		insert_values.push_back(std::to_string(spawngroup_entry.mindelay));
 		insert_values.push_back(std::to_string(spawngroup_entry.despawn));
@@ -262,7 +262,7 @@ public:
 			return spawngroup_entry;
 		}
 
-		spawngroup_entry = InstanceListRepository::NewEntity();
+		spawngroup_entry = SpawngroupRepository::NewEntity();
 
 		return spawngroup_entry;
 	}
@@ -278,11 +278,11 @@ public:
 
 			insert_values.push_back("'" + EscapeString(spawngroup_entry.name) + "'");
 			insert_values.push_back(std::to_string(spawngroup_entry.spawn_limit));
-			insert_values.push_back("'" + EscapeString(spawngroup_entry.dist) + "'");
-			insert_values.push_back("'" + EscapeString(spawngroup_entry.max_x) + "'");
-			insert_values.push_back("'" + EscapeString(spawngroup_entry.min_x) + "'");
-			insert_values.push_back("'" + EscapeString(spawngroup_entry.max_y) + "'");
-			insert_values.push_back("'" + EscapeString(spawngroup_entry.min_y) + "'");
+			insert_values.push_back(std::to_string(spawngroup_entry.dist));
+			insert_values.push_back(std::to_string(spawngroup_entry.max_x));
+			insert_values.push_back(std::to_string(spawngroup_entry.min_x));
+			insert_values.push_back(std::to_string(spawngroup_entry.max_y));
+			insert_values.push_back(std::to_string(spawngroup_entry.min_y));
 			insert_values.push_back(std::to_string(spawngroup_entry.delay));
 			insert_values.push_back(std::to_string(spawngroup_entry.mindelay));
 			insert_values.push_back(std::to_string(spawngroup_entry.despawn));
@@ -339,6 +339,57 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<Spawngroup> GetWhere(std::string where_filter)
+	{
+		std::vector<Spawngroup> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			Spawngroup entry{};
+
+			entry.id            = atoi(row[0]);
+			entry.name          = row[1];
+			entry.spawn_limit   = atoi(row[2]);
+			entry.dist          = atof(row[3]);
+			entry.max_x         = atof(row[4]);
+			entry.min_x         = atof(row[5]);
+			entry.max_y         = atof(row[6]);
+			entry.min_y         = atof(row[7]);
+			entry.delay         = atoi(row[8]);
+			entry.mindelay      = atoi(row[9]);
+			entry.despawn       = atoi(row[10]);
+			entry.despawn_timer = atoi(row[11]);
+			entry.wp_spawns     = atoi(row[12]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

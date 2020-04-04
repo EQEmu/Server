@@ -282,7 +282,7 @@ public:
 			return inventory_snapshots_entry;
 		}
 
-		inventory_snapshots_entry = InstanceListRepository::NewEntity();
+		inventory_snapshots_entry = InventorySnapshotsRepository::NewEntity();
 
 		return inventory_snapshots_entry;
 	}
@@ -365,6 +365,61 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<InventorySnapshots> GetWhere(std::string where_filter)
+	{
+		std::vector<InventorySnapshots> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			InventorySnapshots entry{};
+
+			entry.time_index          = atoi(row[0]);
+			entry.charid              = atoi(row[1]);
+			entry.slotid              = atoi(row[2]);
+			entry.itemid              = atoi(row[3]);
+			entry.charges             = atoi(row[4]);
+			entry.color               = atoi(row[5]);
+			entry.augslot1            = atoi(row[6]);
+			entry.augslot2            = atoi(row[7]);
+			entry.augslot3            = atoi(row[8]);
+			entry.augslot4            = atoi(row[9]);
+			entry.augslot5            = atoi(row[10]);
+			entry.augslot6            = atoi(row[11]);
+			entry.instnodrop          = atoi(row[12]);
+			entry.custom_data         = row[13];
+			entry.ornamenticon        = atoi(row[14]);
+			entry.ornamentidfile      = atoi(row[15]);
+			entry.ornament_hero_model = atoi(row[16]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

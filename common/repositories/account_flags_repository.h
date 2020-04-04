@@ -200,7 +200,7 @@ public:
 			return account_flags_entry;
 		}
 
-		account_flags_entry = InstanceListRepository::NewEntity();
+		account_flags_entry = AccountFlagsRepository::NewEntity();
 
 		return account_flags_entry;
 	}
@@ -256,6 +256,47 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<AccountFlags> GetWhere(std::string where_filter)
+	{
+		std::vector<AccountFlags> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			AccountFlags entry{};
+
+			entry.p_accid = atoi(row[0]);
+			entry.p_flag  = row[1];
+			entry.p_value = row[2];
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

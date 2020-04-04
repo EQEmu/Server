@@ -238,7 +238,7 @@ public:
 			return guilds_entry;
 		}
 
-		guilds_entry = InstanceListRepository::NewEntity();
+		guilds_entry = GuildsRepository::NewEntity();
 
 		return guilds_entry;
 	}
@@ -307,6 +307,53 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<Guilds> GetWhere(std::string where_filter)
+	{
+		std::vector<Guilds> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			Guilds entry{};
+
+			entry.id          = atoi(row[0]);
+			entry.name        = row[1];
+			entry.leader      = atoi(row[2]);
+			entry.minstatus   = atoi(row[3]);
+			entry.motd        = row[4];
+			entry.tribute     = atoi(row[5]);
+			entry.motd_setter = row[6];
+			entry.channel     = row[7];
+			entry.url         = row[8];
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

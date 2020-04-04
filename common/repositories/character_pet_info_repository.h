@@ -189,7 +189,7 @@ public:
 		update_values.push_back(columns[4] + " = " + std::to_string(character_pet_info_entry.spell_id));
 		update_values.push_back(columns[5] + " = " + std::to_string(character_pet_info_entry.hp));
 		update_values.push_back(columns[6] + " = " + std::to_string(character_pet_info_entry.mana));
-		update_values.push_back(columns[7] + " = '" + EscapeString(character_pet_info_entry.size) + "'");
+		update_values.push_back(columns[7] + " = " + std::to_string(character_pet_info_entry.size));
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -215,7 +215,7 @@ public:
 		insert_values.push_back(std::to_string(character_pet_info_entry.spell_id));
 		insert_values.push_back(std::to_string(character_pet_info_entry.hp));
 		insert_values.push_back(std::to_string(character_pet_info_entry.mana));
-		insert_values.push_back("'" + EscapeString(character_pet_info_entry.size) + "'");
+		insert_values.push_back(std::to_string(character_pet_info_entry.size));
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -230,7 +230,7 @@ public:
 			return character_pet_info_entry;
 		}
 
-		character_pet_info_entry = InstanceListRepository::NewEntity();
+		character_pet_info_entry = CharacterPetInfoRepository::NewEntity();
 
 		return character_pet_info_entry;
 	}
@@ -249,7 +249,7 @@ public:
 			insert_values.push_back(std::to_string(character_pet_info_entry.spell_id));
 			insert_values.push_back(std::to_string(character_pet_info_entry.hp));
 			insert_values.push_back(std::to_string(character_pet_info_entry.mana));
-			insert_values.push_back("'" + EscapeString(character_pet_info_entry.size) + "'");
+			insert_values.push_back(std::to_string(character_pet_info_entry.size));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -296,6 +296,52 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<CharacterPetInfo> GetWhere(std::string where_filter)
+	{
+		std::vector<CharacterPetInfo> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			CharacterPetInfo entry{};
+
+			entry.char_id  = atoi(row[0]);
+			entry.pet      = atoi(row[1]);
+			entry.petname  = row[2];
+			entry.petpower = atoi(row[3]);
+			entry.spell_id = atoi(row[4]);
+			entry.hp       = atoi(row[5]);
+			entry.mana     = atoi(row[6]);
+			entry.size     = atof(row[7]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

@@ -344,10 +344,10 @@ public:
 		update_values.push_back(columns[2] + " = '" + EscapeString(character_corpses_entry.charname) + "'");
 		update_values.push_back(columns[3] + " = " + std::to_string(character_corpses_entry.zone_id));
 		update_values.push_back(columns[4] + " = " + std::to_string(character_corpses_entry.instance_id));
-		update_values.push_back(columns[5] + " = '" + EscapeString(character_corpses_entry.x) + "'");
-		update_values.push_back(columns[6] + " = '" + EscapeString(character_corpses_entry.y) + "'");
-		update_values.push_back(columns[7] + " = '" + EscapeString(character_corpses_entry.z) + "'");
-		update_values.push_back(columns[8] + " = '" + EscapeString(character_corpses_entry.heading) + "'");
+		update_values.push_back(columns[5] + " = " + std::to_string(character_corpses_entry.x));
+		update_values.push_back(columns[6] + " = " + std::to_string(character_corpses_entry.y));
+		update_values.push_back(columns[7] + " = " + std::to_string(character_corpses_entry.z));
+		update_values.push_back(columns[8] + " = " + std::to_string(character_corpses_entry.heading));
 		update_values.push_back(columns[9] + " = '" + EscapeString(character_corpses_entry.time_of_death) + "'");
 		update_values.push_back(columns[10] + " = " + std::to_string(character_corpses_entry.guild_consent_id));
 		update_values.push_back(columns[11] + " = " + std::to_string(character_corpses_entry.is_rezzed));
@@ -410,10 +410,10 @@ public:
 		insert_values.push_back("'" + EscapeString(character_corpses_entry.charname) + "'");
 		insert_values.push_back(std::to_string(character_corpses_entry.zone_id));
 		insert_values.push_back(std::to_string(character_corpses_entry.instance_id));
-		insert_values.push_back("'" + EscapeString(character_corpses_entry.x) + "'");
-		insert_values.push_back("'" + EscapeString(character_corpses_entry.y) + "'");
-		insert_values.push_back("'" + EscapeString(character_corpses_entry.z) + "'");
-		insert_values.push_back("'" + EscapeString(character_corpses_entry.heading) + "'");
+		insert_values.push_back(std::to_string(character_corpses_entry.x));
+		insert_values.push_back(std::to_string(character_corpses_entry.y));
+		insert_values.push_back(std::to_string(character_corpses_entry.z));
+		insert_values.push_back(std::to_string(character_corpses_entry.heading));
 		insert_values.push_back("'" + EscapeString(character_corpses_entry.time_of_death) + "'");
 		insert_values.push_back(std::to_string(character_corpses_entry.guild_consent_id));
 		insert_values.push_back(std::to_string(character_corpses_entry.is_rezzed));
@@ -466,7 +466,7 @@ public:
 			return character_corpses_entry;
 		}
 
-		character_corpses_entry = InstanceListRepository::NewEntity();
+		character_corpses_entry = CharacterCorpsesRepository::NewEntity();
 
 		return character_corpses_entry;
 	}
@@ -484,10 +484,10 @@ public:
 			insert_values.push_back("'" + EscapeString(character_corpses_entry.charname) + "'");
 			insert_values.push_back(std::to_string(character_corpses_entry.zone_id));
 			insert_values.push_back(std::to_string(character_corpses_entry.instance_id));
-			insert_values.push_back("'" + EscapeString(character_corpses_entry.x) + "'");
-			insert_values.push_back("'" + EscapeString(character_corpses_entry.y) + "'");
-			insert_values.push_back("'" + EscapeString(character_corpses_entry.z) + "'");
-			insert_values.push_back("'" + EscapeString(character_corpses_entry.heading) + "'");
+			insert_values.push_back(std::to_string(character_corpses_entry.x));
+			insert_values.push_back(std::to_string(character_corpses_entry.y));
+			insert_values.push_back(std::to_string(character_corpses_entry.z));
+			insert_values.push_back(std::to_string(character_corpses_entry.heading));
 			insert_values.push_back("'" + EscapeString(character_corpses_entry.time_of_death) + "'");
 			insert_values.push_back(std::to_string(character_corpses_entry.guild_consent_id));
 			insert_values.push_back(std::to_string(character_corpses_entry.is_rezzed));
@@ -611,6 +611,91 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<CharacterCorpses> GetWhere(std::string where_filter)
+	{
+		std::vector<CharacterCorpses> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			CharacterCorpses entry{};
+
+			entry.id               = atoi(row[0]);
+			entry.charid           = atoi(row[1]);
+			entry.charname         = row[2];
+			entry.zone_id          = atoi(row[3]);
+			entry.instance_id      = atoi(row[4]);
+			entry.x                = atof(row[5]);
+			entry.y                = atof(row[6]);
+			entry.z                = atof(row[7]);
+			entry.heading          = atof(row[8]);
+			entry.time_of_death    = row[9];
+			entry.guild_consent_id = atoi(row[10]);
+			entry.is_rezzed        = atoi(row[11]);
+			entry.is_buried        = atoi(row[12]);
+			entry.was_at_graveyard = atoi(row[13]);
+			entry.is_locked        = atoi(row[14]);
+			entry.exp              = atoi(row[15]);
+			entry.size             = atoi(row[16]);
+			entry.level            = atoi(row[17]);
+			entry.race             = atoi(row[18]);
+			entry.gender           = atoi(row[19]);
+			entry.class            = atoi(row[20]);
+			entry.deity            = atoi(row[21]);
+			entry.texture          = atoi(row[22]);
+			entry.helm_texture     = atoi(row[23]);
+			entry.copper           = atoi(row[24]);
+			entry.silver           = atoi(row[25]);
+			entry.gold             = atoi(row[26]);
+			entry.platinum         = atoi(row[27]);
+			entry.hair_color       = atoi(row[28]);
+			entry.beard_color      = atoi(row[29]);
+			entry.eye_color_1      = atoi(row[30]);
+			entry.eye_color_2      = atoi(row[31]);
+			entry.hair_style       = atoi(row[32]);
+			entry.face             = atoi(row[33]);
+			entry.beard            = atoi(row[34]);
+			entry.drakkin_heritage = atoi(row[35]);
+			entry.drakkin_tattoo   = atoi(row[36]);
+			entry.drakkin_details  = atoi(row[37]);
+			entry.wc_1             = atoi(row[38]);
+			entry.wc_2             = atoi(row[39]);
+			entry.wc_3             = atoi(row[40]);
+			entry.wc_4             = atoi(row[41]);
+			entry.wc_5             = atoi(row[42]);
+			entry.wc_6             = atoi(row[43]);
+			entry.wc_7             = atoi(row[44]);
+			entry.wc_8             = atoi(row[45]);
+			entry.wc_9             = atoi(row[46]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

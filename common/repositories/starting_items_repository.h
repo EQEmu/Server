@@ -236,7 +236,7 @@ public:
 			return starting_items_entry;
 		}
 
-		starting_items_entry = InstanceListRepository::NewEntity();
+		starting_items_entry = StartingItemsRepository::NewEntity();
 
 		return starting_items_entry;
 	}
@@ -304,6 +304,53 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<StartingItems> GetWhere(std::string where_filter)
+	{
+		std::vector<StartingItems> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			StartingItems entry{};
+
+			entry.id           = atoi(row[0]);
+			entry.race         = atoi(row[1]);
+			entry.class        = atoi(row[2]);
+			entry.deityid      = atoi(row[3]);
+			entry.zoneid       = atoi(row[4]);
+			entry.itemid       = atoi(row[5]);
+			entry.item_charges = atoi(row[6]);
+			entry.gm           = atoi(row[7]);
+			entry.slot         = atoi(row[8]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

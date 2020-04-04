@@ -179,7 +179,7 @@ public:
 		update_values.push_back(columns[2] + " = " + std::to_string(loottable_entries_entry.multiplier));
 		update_values.push_back(columns[3] + " = " + std::to_string(loottable_entries_entry.droplimit));
 		update_values.push_back(columns[4] + " = " + std::to_string(loottable_entries_entry.mindrop));
-		update_values.push_back(columns[5] + " = '" + EscapeString(loottable_entries_entry.probability) + "'");
+		update_values.push_back(columns[5] + " = " + std::to_string(loottable_entries_entry.probability));
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -203,7 +203,7 @@ public:
 		insert_values.push_back(std::to_string(loottable_entries_entry.multiplier));
 		insert_values.push_back(std::to_string(loottable_entries_entry.droplimit));
 		insert_values.push_back(std::to_string(loottable_entries_entry.mindrop));
-		insert_values.push_back("'" + EscapeString(loottable_entries_entry.probability) + "'");
+		insert_values.push_back(std::to_string(loottable_entries_entry.probability));
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -218,7 +218,7 @@ public:
 			return loottable_entries_entry;
 		}
 
-		loottable_entries_entry = InstanceListRepository::NewEntity();
+		loottable_entries_entry = LoottableEntriesRepository::NewEntity();
 
 		return loottable_entries_entry;
 	}
@@ -235,7 +235,7 @@ public:
 			insert_values.push_back(std::to_string(loottable_entries_entry.multiplier));
 			insert_values.push_back(std::to_string(loottable_entries_entry.droplimit));
 			insert_values.push_back(std::to_string(loottable_entries_entry.mindrop));
-			insert_values.push_back("'" + EscapeString(loottable_entries_entry.probability) + "'");
+			insert_values.push_back(std::to_string(loottable_entries_entry.probability));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -280,6 +280,50 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<LoottableEntries> GetWhere(std::string where_filter)
+	{
+		std::vector<LoottableEntries> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			LoottableEntries entry{};
+
+			entry.loottable_id = atoi(row[0]);
+			entry.lootdrop_id  = atoi(row[1]);
+			entry.multiplier   = atoi(row[2]);
+			entry.droplimit    = atoi(row[3]);
+			entry.mindrop      = atoi(row[4]);
+			entry.probability  = atof(row[5]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

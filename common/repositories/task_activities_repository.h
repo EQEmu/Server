@@ -272,7 +272,7 @@ public:
 			return task_activities_entry;
 		}
 
-		task_activities_entry = InstanceListRepository::NewEntity();
+		task_activities_entry = TaskActivitiesRepository::NewEntity();
 
 		return task_activities_entry;
 	}
@@ -352,6 +352,59 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<TaskActivities> GetWhere(std::string where_filter)
+	{
+		std::vector<TaskActivities> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			TaskActivities entry{};
+
+			entry.taskid               = atoi(row[0]);
+			entry.activityid           = atoi(row[1]);
+			entry.step                 = atoi(row[2]);
+			entry.activitytype         = atoi(row[3]);
+			entry.target_name          = row[4];
+			entry.item_list            = row[5];
+			entry.skill_list           = row[6];
+			entry.spell_list           = row[7];
+			entry.description_override = row[8];
+			entry.goalid               = atoi(row[9]);
+			entry.goalmethod           = atoi(row[10]);
+			entry.goalcount            = atoi(row[11]);
+			entry.delivertonpc         = atoi(row[12]);
+			entry.zones                = row[13];
+			entry.optional             = atoi(row[14]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

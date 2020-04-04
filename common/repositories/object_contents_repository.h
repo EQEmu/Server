@@ -254,7 +254,7 @@ public:
 			return object_contents_entry;
 		}
 
-		object_contents_entry = InstanceListRepository::NewEntity();
+		object_contents_entry = ObjectContentsRepository::NewEntity();
 
 		return object_contents_entry;
 	}
@@ -328,6 +328,56 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<ObjectContents> GetWhere(std::string where_filter)
+	{
+		std::vector<ObjectContents> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			ObjectContents entry{};
+
+			entry.zoneid   = atoi(row[0]);
+			entry.parentid = atoi(row[1]);
+			entry.bagidx   = atoi(row[2]);
+			entry.itemid   = atoi(row[3]);
+			entry.charges  = atoi(row[4]);
+			entry.droptime = row[5];
+			entry.augslot1 = atoi(row[6]);
+			entry.augslot2 = atoi(row[7]);
+			entry.augslot3 = atoi(row[8]);
+			entry.augslot4 = atoi(row[9]);
+			entry.augslot5 = atoi(row[10]);
+			entry.augslot6 = atoi(row[11]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

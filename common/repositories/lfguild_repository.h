@@ -236,7 +236,7 @@ public:
 			return lfguild_entry;
 		}
 
-		lfguild_entry = InstanceListRepository::NewEntity();
+		lfguild_entry = LfguildRepository::NewEntity();
 
 		return lfguild_entry;
 	}
@@ -304,6 +304,53 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<Lfguild> GetWhere(std::string where_filter)
+	{
+		std::vector<Lfguild> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			Lfguild entry{};
+
+			entry.type       = atoi(row[0]);
+			entry.name       = row[1];
+			entry.comment    = row[2];
+			entry.fromlevel  = atoi(row[3]);
+			entry.tolevel    = atoi(row[4]);
+			entry.classes    = atoi(row[5]);
+			entry.aacount    = atoi(row[6]);
+			entry.timezone   = atoi(row[7]);
+			entry.timeposted = atoi(row[8]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

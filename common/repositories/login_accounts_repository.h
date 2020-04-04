@@ -238,7 +238,7 @@ public:
 			return login_accounts_entry;
 		}
 
-		login_accounts_entry = InstanceListRepository::NewEntity();
+		login_accounts_entry = LoginAccountsRepository::NewEntity();
 
 		return login_accounts_entry;
 	}
@@ -307,6 +307,53 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<LoginAccounts> GetWhere(std::string where_filter)
+	{
+		std::vector<LoginAccounts> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			LoginAccounts entry{};
+
+			entry.id                 = atoi(row[0]);
+			entry.account_name       = row[1];
+			entry.account_password   = row[2];
+			entry.account_email      = row[3];
+			entry.source_loginserver = row[4];
+			entry.last_ip_address    = row[5];
+			entry.last_login_date    = row[6];
+			entry.created_at         = row[7];
+			entry.updated_at         = row[8];
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

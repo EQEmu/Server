@@ -200,7 +200,7 @@ public:
 			return friends_entry;
 		}
 
-		friends_entry = InstanceListRepository::NewEntity();
+		friends_entry = FriendsRepository::NewEntity();
 
 		return friends_entry;
 	}
@@ -256,6 +256,47 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<Friends> GetWhere(std::string where_filter)
+	{
+		std::vector<Friends> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			Friends entry{};
+
+			entry.charid = atoi(row[0]);
+			entry.type   = atoi(row[1]);
+			entry.name   = row[2];
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

@@ -248,7 +248,7 @@ public:
 			return character_corpse_items_entry;
 		}
 
-		character_corpse_items_entry = InstanceListRepository::NewEntity();
+		character_corpse_items_entry = CharacterCorpseItemsRepository::NewEntity();
 
 		return character_corpse_items_entry;
 	}
@@ -320,6 +320,55 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<CharacterCorpseItems> GetWhere(std::string where_filter)
+	{
+		std::vector<CharacterCorpseItems> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			CharacterCorpseItems entry{};
+
+			entry.corpse_id  = atoi(row[0]);
+			entry.equip_slot = atoi(row[1]);
+			entry.item_id    = atoi(row[2]);
+			entry.charges    = atoi(row[3]);
+			entry.aug_1      = atoi(row[4]);
+			entry.aug_2      = atoi(row[5]);
+			entry.aug_3      = atoi(row[6]);
+			entry.aug_4      = atoi(row[7]);
+			entry.aug_5      = atoi(row[8]);
+			entry.aug_6      = atoi(row[9]);
+			entry.attuned    = atoi(row[10]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

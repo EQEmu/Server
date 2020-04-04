@@ -230,7 +230,7 @@ public:
 			return pets_entry;
 		}
 
-		pets_entry = InstanceListRepository::NewEntity();
+		pets_entry = PetsRepository::NewEntity();
 
 		return pets_entry;
 	}
@@ -296,6 +296,52 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<Pets> GetWhere(std::string where_filter)
+	{
+		std::vector<Pets> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			Pets entry{};
+
+			entry.type         = row[0];
+			entry.petpower     = atoi(row[1]);
+			entry.npcID        = atoi(row[2]);
+			entry.temp         = atoi(row[3]);
+			entry.petcontrol   = atoi(row[4]);
+			entry.petnaming    = atoi(row[5]);
+			entry.monsterflag  = atoi(row[6]);
+			entry.equipmentset = atoi(row[7]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

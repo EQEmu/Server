@@ -196,7 +196,7 @@ public:
 			return adventure_template_entry_flavor_entry;
 		}
 
-		adventure_template_entry_flavor_entry = InstanceListRepository::NewEntity();
+		adventure_template_entry_flavor_entry = AdventureTemplateEntryFlavorRepository::NewEntity();
 
 		return adventure_template_entry_flavor_entry;
 	}
@@ -251,6 +251,46 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<AdventureTemplateEntryFlavor> GetWhere(std::string where_filter)
+	{
+		std::vector<AdventureTemplateEntryFlavor> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			AdventureTemplateEntryFlavor entry{};
+
+			entry.id   = atoi(row[0]);
+			entry.text = row[1];
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

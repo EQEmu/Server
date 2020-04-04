@@ -202,7 +202,7 @@ public:
 			return faction_list_entry;
 		}
 
-		faction_list_entry = InstanceListRepository::NewEntity();
+		faction_list_entry = FactionListRepository::NewEntity();
 
 		return faction_list_entry;
 	}
@@ -259,6 +259,47 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<FactionList> GetWhere(std::string where_filter)
+	{
+		std::vector<FactionList> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			FactionList entry{};
+
+			entry.id   = atoi(row[0]);
+			entry.name = row[1];
+			entry.base = atoi(row[2]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

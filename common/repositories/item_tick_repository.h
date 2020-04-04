@@ -220,7 +220,7 @@ public:
 			return item_tick_entry;
 		}
 
-		item_tick_entry = InstanceListRepository::NewEntity();
+		item_tick_entry = ItemTickRepository::NewEntity();
 
 		return item_tick_entry;
 	}
@@ -283,6 +283,50 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<ItemTick> GetWhere(std::string where_filter)
+	{
+		std::vector<ItemTick> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			ItemTick entry{};
+
+			entry.it_itemid  = atoi(row[0]);
+			entry.it_chance  = atoi(row[1]);
+			entry.it_level   = atoi(row[2]);
+			entry.it_id      = atoi(row[3]);
+			entry.it_qglobal = row[4];
+			entry.it_bagslot = atoi(row[5]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

@@ -164,8 +164,8 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(level_exp_mods_entry.exp_mod) + "'");
-		update_values.push_back(columns[2] + " = '" + EscapeString(level_exp_mods_entry.aa_exp_mod) + "'");
+		update_values.push_back(columns[1] + " = " + std::to_string(level_exp_mods_entry.exp_mod));
+		update_values.push_back(columns[2] + " = " + std::to_string(level_exp_mods_entry.aa_exp_mod));
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -186,8 +186,8 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back("'" + EscapeString(level_exp_mods_entry.exp_mod) + "'");
-		insert_values.push_back("'" + EscapeString(level_exp_mods_entry.aa_exp_mod) + "'");
+		insert_values.push_back(std::to_string(level_exp_mods_entry.exp_mod));
+		insert_values.push_back(std::to_string(level_exp_mods_entry.aa_exp_mod));
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -202,7 +202,7 @@ public:
 			return level_exp_mods_entry;
 		}
 
-		level_exp_mods_entry = InstanceListRepository::NewEntity();
+		level_exp_mods_entry = LevelExpModsRepository::NewEntity();
 
 		return level_exp_mods_entry;
 	}
@@ -216,8 +216,8 @@ public:
 		for (auto &level_exp_mods_entry: level_exp_mods_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back("'" + EscapeString(level_exp_mods_entry.exp_mod) + "'");
-			insert_values.push_back("'" + EscapeString(level_exp_mods_entry.aa_exp_mod) + "'");
+			insert_values.push_back(std::to_string(level_exp_mods_entry.exp_mod));
+			insert_values.push_back(std::to_string(level_exp_mods_entry.aa_exp_mod));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -259,6 +259,47 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<LevelExpMods> GetWhere(std::string where_filter)
+	{
+		std::vector<LevelExpMods> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			LevelExpMods entry{};
+
+			entry.level      = atoi(row[0]);
+			entry.exp_mod    = atof(row[1]);
+			entry.aa_exp_mod = atof(row[2]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

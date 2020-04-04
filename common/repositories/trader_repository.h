@@ -218,7 +218,7 @@ public:
 			return trader_entry;
 		}
 
-		trader_entry = InstanceListRepository::NewEntity();
+		trader_entry = TraderRepository::NewEntity();
 
 		return trader_entry;
 	}
@@ -280,6 +280,50 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<Trader> GetWhere(std::string where_filter)
+	{
+		std::vector<Trader> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			Trader entry{};
+
+			entry.char_id      = atoi(row[0]);
+			entry.item_id      = atoi(row[1]);
+			entry.serialnumber = atoi(row[2]);
+			entry.charges      = atoi(row[3]);
+			entry.item_cost    = atoi(row[4]);
+			entry.slot_id      = atoi(row[5]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

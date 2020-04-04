@@ -190,8 +190,8 @@ public:
 
 		update_values.push_back(columns[2] + " = " + std::to_string(lootdrop_entries_entry.item_charges));
 		update_values.push_back(columns[3] + " = " + std::to_string(lootdrop_entries_entry.equip_item));
-		update_values.push_back(columns[4] + " = '" + EscapeString(lootdrop_entries_entry.chance) + "'");
-		update_values.push_back(columns[5] + " = '" + EscapeString(lootdrop_entries_entry.disabled_chance) + "'");
+		update_values.push_back(columns[4] + " = " + std::to_string(lootdrop_entries_entry.chance));
+		update_values.push_back(columns[5] + " = " + std::to_string(lootdrop_entries_entry.disabled_chance));
 		update_values.push_back(columns[6] + " = " + std::to_string(lootdrop_entries_entry.minlevel));
 		update_values.push_back(columns[7] + " = " + std::to_string(lootdrop_entries_entry.maxlevel));
 		update_values.push_back(columns[8] + " = " + std::to_string(lootdrop_entries_entry.multiplier));
@@ -217,8 +217,8 @@ public:
 
 		insert_values.push_back(std::to_string(lootdrop_entries_entry.item_charges));
 		insert_values.push_back(std::to_string(lootdrop_entries_entry.equip_item));
-		insert_values.push_back("'" + EscapeString(lootdrop_entries_entry.chance) + "'");
-		insert_values.push_back("'" + EscapeString(lootdrop_entries_entry.disabled_chance) + "'");
+		insert_values.push_back(std::to_string(lootdrop_entries_entry.chance));
+		insert_values.push_back(std::to_string(lootdrop_entries_entry.disabled_chance));
 		insert_values.push_back(std::to_string(lootdrop_entries_entry.minlevel));
 		insert_values.push_back(std::to_string(lootdrop_entries_entry.maxlevel));
 		insert_values.push_back(std::to_string(lootdrop_entries_entry.multiplier));
@@ -236,7 +236,7 @@ public:
 			return lootdrop_entries_entry;
 		}
 
-		lootdrop_entries_entry = InstanceListRepository::NewEntity();
+		lootdrop_entries_entry = LootdropEntriesRepository::NewEntity();
 
 		return lootdrop_entries_entry;
 	}
@@ -252,8 +252,8 @@ public:
 
 			insert_values.push_back(std::to_string(lootdrop_entries_entry.item_charges));
 			insert_values.push_back(std::to_string(lootdrop_entries_entry.equip_item));
-			insert_values.push_back("'" + EscapeString(lootdrop_entries_entry.chance) + "'");
-			insert_values.push_back("'" + EscapeString(lootdrop_entries_entry.disabled_chance) + "'");
+			insert_values.push_back(std::to_string(lootdrop_entries_entry.chance));
+			insert_values.push_back(std::to_string(lootdrop_entries_entry.disabled_chance));
 			insert_values.push_back(std::to_string(lootdrop_entries_entry.minlevel));
 			insert_values.push_back(std::to_string(lootdrop_entries_entry.maxlevel));
 			insert_values.push_back(std::to_string(lootdrop_entries_entry.multiplier));
@@ -304,6 +304,53 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<LootdropEntries> GetWhere(std::string where_filter)
+	{
+		std::vector<LootdropEntries> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			LootdropEntries entry{};
+
+			entry.lootdrop_id     = atoi(row[0]);
+			entry.item_id         = atoi(row[1]);
+			entry.item_charges    = atoi(row[2]);
+			entry.equip_item      = atoi(row[3]);
+			entry.chance          = atof(row[4]);
+			entry.disabled_chance = atof(row[5]);
+			entry.minlevel        = atoi(row[6]);
+			entry.maxlevel        = atoi(row[7]);
+			entry.multiplier      = atoi(row[8]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

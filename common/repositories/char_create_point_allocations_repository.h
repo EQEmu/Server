@@ -274,7 +274,7 @@ public:
 			return char_create_point_allocations_entry;
 		}
 
-		char_create_point_allocations_entry = InstanceListRepository::NewEntity();
+		char_create_point_allocations_entry = CharCreatePointAllocationsRepository::NewEntity();
 
 		return char_create_point_allocations_entry;
 	}
@@ -355,6 +355,59 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<CharCreatePointAllocations> GetWhere(std::string where_filter)
+	{
+		std::vector<CharCreatePointAllocations> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			CharCreatePointAllocations entry{};
+
+			entry.id        = atoi(row[0]);
+			entry.base_str  = atoi(row[1]);
+			entry.base_sta  = atoi(row[2]);
+			entry.base_dex  = atoi(row[3]);
+			entry.base_agi  = atoi(row[4]);
+			entry.base_int  = atoi(row[5]);
+			entry.base_wis  = atoi(row[6]);
+			entry.base_cha  = atoi(row[7]);
+			entry.alloc_str = atoi(row[8]);
+			entry.alloc_sta = atoi(row[9]);
+			entry.alloc_dex = atoi(row[10]);
+			entry.alloc_agi = atoi(row[11]);
+			entry.alloc_int = atoi(row[12]);
+			entry.alloc_wis = atoi(row[13]);
+			entry.alloc_cha = atoi(row[14]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

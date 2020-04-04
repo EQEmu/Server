@@ -226,7 +226,7 @@ public:
 			return fishing_entry;
 		}
 
-		fishing_entry = InstanceListRepository::NewEntity();
+		fishing_entry = FishingRepository::NewEntity();
 
 		return fishing_entry;
 	}
@@ -291,6 +291,51 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<Fishing> GetWhere(std::string where_filter)
+	{
+		std::vector<Fishing> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			Fishing entry{};
+
+			entry.id          = atoi(row[0]);
+			entry.zoneid      = atoi(row[1]);
+			entry.Itemid      = atoi(row[2]);
+			entry.skill_level = atoi(row[3]);
+			entry.chance      = atoi(row[4]);
+			entry.npc_id      = atoi(row[5]);
+			entry.npc_chance  = atoi(row[6]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

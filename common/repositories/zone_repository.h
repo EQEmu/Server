@@ -500,10 +500,10 @@ public:
 		update_values.push_back(columns[2] + " = '" + EscapeString(zone_entry.file_name) + "'");
 		update_values.push_back(columns[3] + " = '" + EscapeString(zone_entry.long_name) + "'");
 		update_values.push_back(columns[4] + " = '" + EscapeString(zone_entry.map_file_name) + "'");
-		update_values.push_back(columns[5] + " = '" + EscapeString(zone_entry.safe_x) + "'");
-		update_values.push_back(columns[6] + " = '" + EscapeString(zone_entry.safe_y) + "'");
-		update_values.push_back(columns[7] + " = '" + EscapeString(zone_entry.safe_z) + "'");
-		update_values.push_back(columns[8] + " = '" + EscapeString(zone_entry.graveyard_id) + "'");
+		update_values.push_back(columns[5] + " = " + std::to_string(zone_entry.safe_x));
+		update_values.push_back(columns[6] + " = " + std::to_string(zone_entry.safe_y));
+		update_values.push_back(columns[7] + " = " + std::to_string(zone_entry.safe_z));
+		update_values.push_back(columns[8] + " = " + std::to_string(zone_entry.graveyard_id));
 		update_values.push_back(columns[9] + " = " + std::to_string(zone_entry.min_level));
 		update_values.push_back(columns[10] + " = " + std::to_string(zone_entry.min_status));
 		update_values.push_back(columns[11] + " = " + std::to_string(zone_entry.zoneidnumber));
@@ -512,40 +512,40 @@ public:
 		update_values.push_back(columns[14] + " = " + std::to_string(zone_entry.maxclients));
 		update_values.push_back(columns[15] + " = " + std::to_string(zone_entry.ruleset));
 		update_values.push_back(columns[16] + " = '" + EscapeString(zone_entry.note) + "'");
-		update_values.push_back(columns[17] + " = '" + EscapeString(zone_entry.underworld) + "'");
-		update_values.push_back(columns[18] + " = '" + EscapeString(zone_entry.minclip) + "'");
-		update_values.push_back(columns[19] + " = '" + EscapeString(zone_entry.maxclip) + "'");
-		update_values.push_back(columns[20] + " = '" + EscapeString(zone_entry.fog_minclip) + "'");
-		update_values.push_back(columns[21] + " = '" + EscapeString(zone_entry.fog_maxclip) + "'");
+		update_values.push_back(columns[17] + " = " + std::to_string(zone_entry.underworld));
+		update_values.push_back(columns[18] + " = " + std::to_string(zone_entry.minclip));
+		update_values.push_back(columns[19] + " = " + std::to_string(zone_entry.maxclip));
+		update_values.push_back(columns[20] + " = " + std::to_string(zone_entry.fog_minclip));
+		update_values.push_back(columns[21] + " = " + std::to_string(zone_entry.fog_maxclip));
 		update_values.push_back(columns[22] + " = " + std::to_string(zone_entry.fog_blue));
 		update_values.push_back(columns[23] + " = " + std::to_string(zone_entry.fog_red));
 		update_values.push_back(columns[24] + " = " + std::to_string(zone_entry.fog_green));
 		update_values.push_back(columns[25] + " = " + std::to_string(zone_entry.sky));
 		update_values.push_back(columns[26] + " = " + std::to_string(zone_entry.ztype));
-		update_values.push_back(columns[27] + " = '" + EscapeString(zone_entry.zone_exp_multiplier) + "'");
-		update_values.push_back(columns[28] + " = '" + EscapeString(zone_entry.walkspeed) + "'");
+		update_values.push_back(columns[27] + " = " + std::to_string(zone_entry.zone_exp_multiplier));
+		update_values.push_back(columns[28] + " = " + std::to_string(zone_entry.walkspeed));
 		update_values.push_back(columns[29] + " = " + std::to_string(zone_entry.time_type));
 		update_values.push_back(columns[30] + " = " + std::to_string(zone_entry.fog_red1));
 		update_values.push_back(columns[31] + " = " + std::to_string(zone_entry.fog_green1));
 		update_values.push_back(columns[32] + " = " + std::to_string(zone_entry.fog_blue1));
-		update_values.push_back(columns[33] + " = '" + EscapeString(zone_entry.fog_minclip1) + "'");
-		update_values.push_back(columns[34] + " = '" + EscapeString(zone_entry.fog_maxclip1) + "'");
+		update_values.push_back(columns[33] + " = " + std::to_string(zone_entry.fog_minclip1));
+		update_values.push_back(columns[34] + " = " + std::to_string(zone_entry.fog_maxclip1));
 		update_values.push_back(columns[35] + " = " + std::to_string(zone_entry.fog_red2));
 		update_values.push_back(columns[36] + " = " + std::to_string(zone_entry.fog_green2));
 		update_values.push_back(columns[37] + " = " + std::to_string(zone_entry.fog_blue2));
-		update_values.push_back(columns[38] + " = '" + EscapeString(zone_entry.fog_minclip2) + "'");
-		update_values.push_back(columns[39] + " = '" + EscapeString(zone_entry.fog_maxclip2) + "'");
+		update_values.push_back(columns[38] + " = " + std::to_string(zone_entry.fog_minclip2));
+		update_values.push_back(columns[39] + " = " + std::to_string(zone_entry.fog_maxclip2));
 		update_values.push_back(columns[40] + " = " + std::to_string(zone_entry.fog_red3));
 		update_values.push_back(columns[41] + " = " + std::to_string(zone_entry.fog_green3));
 		update_values.push_back(columns[42] + " = " + std::to_string(zone_entry.fog_blue3));
-		update_values.push_back(columns[43] + " = '" + EscapeString(zone_entry.fog_minclip3) + "'");
-		update_values.push_back(columns[44] + " = '" + EscapeString(zone_entry.fog_maxclip3) + "'");
+		update_values.push_back(columns[43] + " = " + std::to_string(zone_entry.fog_minclip3));
+		update_values.push_back(columns[44] + " = " + std::to_string(zone_entry.fog_maxclip3));
 		update_values.push_back(columns[45] + " = " + std::to_string(zone_entry.fog_red4));
 		update_values.push_back(columns[46] + " = " + std::to_string(zone_entry.fog_green4));
 		update_values.push_back(columns[47] + " = " + std::to_string(zone_entry.fog_blue4));
-		update_values.push_back(columns[48] + " = '" + EscapeString(zone_entry.fog_minclip4) + "'");
-		update_values.push_back(columns[49] + " = '" + EscapeString(zone_entry.fog_maxclip4) + "'");
-		update_values.push_back(columns[50] + " = '" + EscapeString(zone_entry.fog_density) + "'");
+		update_values.push_back(columns[48] + " = " + std::to_string(zone_entry.fog_minclip4));
+		update_values.push_back(columns[49] + " = " + std::to_string(zone_entry.fog_maxclip4));
+		update_values.push_back(columns[50] + " = " + std::to_string(zone_entry.fog_density));
 		update_values.push_back(columns[51] + " = '" + EscapeString(zone_entry.flag_needed) + "'");
 		update_values.push_back(columns[52] + " = " + std::to_string(zone_entry.canbind));
 		update_values.push_back(columns[53] + " = " + std::to_string(zone_entry.cancombat));
@@ -573,7 +573,7 @@ public:
 		update_values.push_back(columns[75] + " = " + std::to_string(zone_entry.snow_duration2));
 		update_values.push_back(columns[76] + " = " + std::to_string(zone_entry.snow_duration3));
 		update_values.push_back(columns[77] + " = " + std::to_string(zone_entry.snow_duration4));
-		update_values.push_back(columns[78] + " = '" + EscapeString(zone_entry.gravity) + "'");
+		update_values.push_back(columns[78] + " = " + std::to_string(zone_entry.gravity));
 		update_values.push_back(columns[79] + " = " + std::to_string(zone_entry.type));
 		update_values.push_back(columns[80] + " = " + std::to_string(zone_entry.skylock));
 		update_values.push_back(columns[81] + " = " + std::to_string(zone_entry.fast_regen_hp));
@@ -605,10 +605,10 @@ public:
 		insert_values.push_back("'" + EscapeString(zone_entry.file_name) + "'");
 		insert_values.push_back("'" + EscapeString(zone_entry.long_name) + "'");
 		insert_values.push_back("'" + EscapeString(zone_entry.map_file_name) + "'");
-		insert_values.push_back("'" + EscapeString(zone_entry.safe_x) + "'");
-		insert_values.push_back("'" + EscapeString(zone_entry.safe_y) + "'");
-		insert_values.push_back("'" + EscapeString(zone_entry.safe_z) + "'");
-		insert_values.push_back("'" + EscapeString(zone_entry.graveyard_id) + "'");
+		insert_values.push_back(std::to_string(zone_entry.safe_x));
+		insert_values.push_back(std::to_string(zone_entry.safe_y));
+		insert_values.push_back(std::to_string(zone_entry.safe_z));
+		insert_values.push_back(std::to_string(zone_entry.graveyard_id));
 		insert_values.push_back(std::to_string(zone_entry.min_level));
 		insert_values.push_back(std::to_string(zone_entry.min_status));
 		insert_values.push_back(std::to_string(zone_entry.zoneidnumber));
@@ -617,40 +617,40 @@ public:
 		insert_values.push_back(std::to_string(zone_entry.maxclients));
 		insert_values.push_back(std::to_string(zone_entry.ruleset));
 		insert_values.push_back("'" + EscapeString(zone_entry.note) + "'");
-		insert_values.push_back("'" + EscapeString(zone_entry.underworld) + "'");
-		insert_values.push_back("'" + EscapeString(zone_entry.minclip) + "'");
-		insert_values.push_back("'" + EscapeString(zone_entry.maxclip) + "'");
-		insert_values.push_back("'" + EscapeString(zone_entry.fog_minclip) + "'");
-		insert_values.push_back("'" + EscapeString(zone_entry.fog_maxclip) + "'");
+		insert_values.push_back(std::to_string(zone_entry.underworld));
+		insert_values.push_back(std::to_string(zone_entry.minclip));
+		insert_values.push_back(std::to_string(zone_entry.maxclip));
+		insert_values.push_back(std::to_string(zone_entry.fog_minclip));
+		insert_values.push_back(std::to_string(zone_entry.fog_maxclip));
 		insert_values.push_back(std::to_string(zone_entry.fog_blue));
 		insert_values.push_back(std::to_string(zone_entry.fog_red));
 		insert_values.push_back(std::to_string(zone_entry.fog_green));
 		insert_values.push_back(std::to_string(zone_entry.sky));
 		insert_values.push_back(std::to_string(zone_entry.ztype));
-		insert_values.push_back("'" + EscapeString(zone_entry.zone_exp_multiplier) + "'");
-		insert_values.push_back("'" + EscapeString(zone_entry.walkspeed) + "'");
+		insert_values.push_back(std::to_string(zone_entry.zone_exp_multiplier));
+		insert_values.push_back(std::to_string(zone_entry.walkspeed));
 		insert_values.push_back(std::to_string(zone_entry.time_type));
 		insert_values.push_back(std::to_string(zone_entry.fog_red1));
 		insert_values.push_back(std::to_string(zone_entry.fog_green1));
 		insert_values.push_back(std::to_string(zone_entry.fog_blue1));
-		insert_values.push_back("'" + EscapeString(zone_entry.fog_minclip1) + "'");
-		insert_values.push_back("'" + EscapeString(zone_entry.fog_maxclip1) + "'");
+		insert_values.push_back(std::to_string(zone_entry.fog_minclip1));
+		insert_values.push_back(std::to_string(zone_entry.fog_maxclip1));
 		insert_values.push_back(std::to_string(zone_entry.fog_red2));
 		insert_values.push_back(std::to_string(zone_entry.fog_green2));
 		insert_values.push_back(std::to_string(zone_entry.fog_blue2));
-		insert_values.push_back("'" + EscapeString(zone_entry.fog_minclip2) + "'");
-		insert_values.push_back("'" + EscapeString(zone_entry.fog_maxclip2) + "'");
+		insert_values.push_back(std::to_string(zone_entry.fog_minclip2));
+		insert_values.push_back(std::to_string(zone_entry.fog_maxclip2));
 		insert_values.push_back(std::to_string(zone_entry.fog_red3));
 		insert_values.push_back(std::to_string(zone_entry.fog_green3));
 		insert_values.push_back(std::to_string(zone_entry.fog_blue3));
-		insert_values.push_back("'" + EscapeString(zone_entry.fog_minclip3) + "'");
-		insert_values.push_back("'" + EscapeString(zone_entry.fog_maxclip3) + "'");
+		insert_values.push_back(std::to_string(zone_entry.fog_minclip3));
+		insert_values.push_back(std::to_string(zone_entry.fog_maxclip3));
 		insert_values.push_back(std::to_string(zone_entry.fog_red4));
 		insert_values.push_back(std::to_string(zone_entry.fog_green4));
 		insert_values.push_back(std::to_string(zone_entry.fog_blue4));
-		insert_values.push_back("'" + EscapeString(zone_entry.fog_minclip4) + "'");
-		insert_values.push_back("'" + EscapeString(zone_entry.fog_maxclip4) + "'");
-		insert_values.push_back("'" + EscapeString(zone_entry.fog_density) + "'");
+		insert_values.push_back(std::to_string(zone_entry.fog_minclip4));
+		insert_values.push_back(std::to_string(zone_entry.fog_maxclip4));
+		insert_values.push_back(std::to_string(zone_entry.fog_density));
 		insert_values.push_back("'" + EscapeString(zone_entry.flag_needed) + "'");
 		insert_values.push_back(std::to_string(zone_entry.canbind));
 		insert_values.push_back(std::to_string(zone_entry.cancombat));
@@ -678,7 +678,7 @@ public:
 		insert_values.push_back(std::to_string(zone_entry.snow_duration2));
 		insert_values.push_back(std::to_string(zone_entry.snow_duration3));
 		insert_values.push_back(std::to_string(zone_entry.snow_duration4));
-		insert_values.push_back("'" + EscapeString(zone_entry.gravity) + "'");
+		insert_values.push_back(std::to_string(zone_entry.gravity));
 		insert_values.push_back(std::to_string(zone_entry.type));
 		insert_values.push_back(std::to_string(zone_entry.skylock));
 		insert_values.push_back(std::to_string(zone_entry.fast_regen_hp));
@@ -700,7 +700,7 @@ public:
 			return zone_entry;
 		}
 
-		zone_entry = InstanceListRepository::NewEntity();
+		zone_entry = ZoneRepository::NewEntity();
 
 		return zone_entry;
 	}
@@ -718,10 +718,10 @@ public:
 			insert_values.push_back("'" + EscapeString(zone_entry.file_name) + "'");
 			insert_values.push_back("'" + EscapeString(zone_entry.long_name) + "'");
 			insert_values.push_back("'" + EscapeString(zone_entry.map_file_name) + "'");
-			insert_values.push_back("'" + EscapeString(zone_entry.safe_x) + "'");
-			insert_values.push_back("'" + EscapeString(zone_entry.safe_y) + "'");
-			insert_values.push_back("'" + EscapeString(zone_entry.safe_z) + "'");
-			insert_values.push_back("'" + EscapeString(zone_entry.graveyard_id) + "'");
+			insert_values.push_back(std::to_string(zone_entry.safe_x));
+			insert_values.push_back(std::to_string(zone_entry.safe_y));
+			insert_values.push_back(std::to_string(zone_entry.safe_z));
+			insert_values.push_back(std::to_string(zone_entry.graveyard_id));
 			insert_values.push_back(std::to_string(zone_entry.min_level));
 			insert_values.push_back(std::to_string(zone_entry.min_status));
 			insert_values.push_back(std::to_string(zone_entry.zoneidnumber));
@@ -730,40 +730,40 @@ public:
 			insert_values.push_back(std::to_string(zone_entry.maxclients));
 			insert_values.push_back(std::to_string(zone_entry.ruleset));
 			insert_values.push_back("'" + EscapeString(zone_entry.note) + "'");
-			insert_values.push_back("'" + EscapeString(zone_entry.underworld) + "'");
-			insert_values.push_back("'" + EscapeString(zone_entry.minclip) + "'");
-			insert_values.push_back("'" + EscapeString(zone_entry.maxclip) + "'");
-			insert_values.push_back("'" + EscapeString(zone_entry.fog_minclip) + "'");
-			insert_values.push_back("'" + EscapeString(zone_entry.fog_maxclip) + "'");
+			insert_values.push_back(std::to_string(zone_entry.underworld));
+			insert_values.push_back(std::to_string(zone_entry.minclip));
+			insert_values.push_back(std::to_string(zone_entry.maxclip));
+			insert_values.push_back(std::to_string(zone_entry.fog_minclip));
+			insert_values.push_back(std::to_string(zone_entry.fog_maxclip));
 			insert_values.push_back(std::to_string(zone_entry.fog_blue));
 			insert_values.push_back(std::to_string(zone_entry.fog_red));
 			insert_values.push_back(std::to_string(zone_entry.fog_green));
 			insert_values.push_back(std::to_string(zone_entry.sky));
 			insert_values.push_back(std::to_string(zone_entry.ztype));
-			insert_values.push_back("'" + EscapeString(zone_entry.zone_exp_multiplier) + "'");
-			insert_values.push_back("'" + EscapeString(zone_entry.walkspeed) + "'");
+			insert_values.push_back(std::to_string(zone_entry.zone_exp_multiplier));
+			insert_values.push_back(std::to_string(zone_entry.walkspeed));
 			insert_values.push_back(std::to_string(zone_entry.time_type));
 			insert_values.push_back(std::to_string(zone_entry.fog_red1));
 			insert_values.push_back(std::to_string(zone_entry.fog_green1));
 			insert_values.push_back(std::to_string(zone_entry.fog_blue1));
-			insert_values.push_back("'" + EscapeString(zone_entry.fog_minclip1) + "'");
-			insert_values.push_back("'" + EscapeString(zone_entry.fog_maxclip1) + "'");
+			insert_values.push_back(std::to_string(zone_entry.fog_minclip1));
+			insert_values.push_back(std::to_string(zone_entry.fog_maxclip1));
 			insert_values.push_back(std::to_string(zone_entry.fog_red2));
 			insert_values.push_back(std::to_string(zone_entry.fog_green2));
 			insert_values.push_back(std::to_string(zone_entry.fog_blue2));
-			insert_values.push_back("'" + EscapeString(zone_entry.fog_minclip2) + "'");
-			insert_values.push_back("'" + EscapeString(zone_entry.fog_maxclip2) + "'");
+			insert_values.push_back(std::to_string(zone_entry.fog_minclip2));
+			insert_values.push_back(std::to_string(zone_entry.fog_maxclip2));
 			insert_values.push_back(std::to_string(zone_entry.fog_red3));
 			insert_values.push_back(std::to_string(zone_entry.fog_green3));
 			insert_values.push_back(std::to_string(zone_entry.fog_blue3));
-			insert_values.push_back("'" + EscapeString(zone_entry.fog_minclip3) + "'");
-			insert_values.push_back("'" + EscapeString(zone_entry.fog_maxclip3) + "'");
+			insert_values.push_back(std::to_string(zone_entry.fog_minclip3));
+			insert_values.push_back(std::to_string(zone_entry.fog_maxclip3));
 			insert_values.push_back(std::to_string(zone_entry.fog_red4));
 			insert_values.push_back(std::to_string(zone_entry.fog_green4));
 			insert_values.push_back(std::to_string(zone_entry.fog_blue4));
-			insert_values.push_back("'" + EscapeString(zone_entry.fog_minclip4) + "'");
-			insert_values.push_back("'" + EscapeString(zone_entry.fog_maxclip4) + "'");
-			insert_values.push_back("'" + EscapeString(zone_entry.fog_density) + "'");
+			insert_values.push_back(std::to_string(zone_entry.fog_minclip4));
+			insert_values.push_back(std::to_string(zone_entry.fog_maxclip4));
+			insert_values.push_back(std::to_string(zone_entry.fog_density));
 			insert_values.push_back("'" + EscapeString(zone_entry.flag_needed) + "'");
 			insert_values.push_back(std::to_string(zone_entry.canbind));
 			insert_values.push_back(std::to_string(zone_entry.cancombat));
@@ -791,7 +791,7 @@ public:
 			insert_values.push_back(std::to_string(zone_entry.snow_duration2));
 			insert_values.push_back(std::to_string(zone_entry.snow_duration3));
 			insert_values.push_back(std::to_string(zone_entry.snow_duration4));
-			insert_values.push_back("'" + EscapeString(zone_entry.gravity) + "'");
+			insert_values.push_back(std::to_string(zone_entry.gravity));
 			insert_values.push_back(std::to_string(zone_entry.type));
 			insert_values.push_back(std::to_string(zone_entry.skylock));
 			insert_values.push_back(std::to_string(zone_entry.fast_regen_hp));
@@ -923,6 +923,130 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<Zone> GetWhere(std::string where_filter)
+	{
+		std::vector<Zone> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			Zone entry{};
+
+			entry.short_name                = row[0];
+			entry.id                        = atoi(row[1]);
+			entry.file_name                 = row[2];
+			entry.long_name                 = row[3];
+			entry.map_file_name             = row[4];
+			entry.safe_x                    = atof(row[5]);
+			entry.safe_y                    = atof(row[6]);
+			entry.safe_z                    = atof(row[7]);
+			entry.graveyard_id              = atof(row[8]);
+			entry.min_level                 = atoi(row[9]);
+			entry.min_status                = atoi(row[10]);
+			entry.zoneidnumber              = atoi(row[11]);
+			entry.version                   = atoi(row[12]);
+			entry.timezone                  = atoi(row[13]);
+			entry.maxclients                = atoi(row[14]);
+			entry.ruleset                   = atoi(row[15]);
+			entry.note                      = row[16];
+			entry.underworld                = atof(row[17]);
+			entry.minclip                   = atof(row[18]);
+			entry.maxclip                   = atof(row[19]);
+			entry.fog_minclip               = atof(row[20]);
+			entry.fog_maxclip               = atof(row[21]);
+			entry.fog_blue                  = atoi(row[22]);
+			entry.fog_red                   = atoi(row[23]);
+			entry.fog_green                 = atoi(row[24]);
+			entry.sky                       = atoi(row[25]);
+			entry.ztype                     = atoi(row[26]);
+			entry.zone_exp_multiplier       = atof(row[27]);
+			entry.walkspeed                 = atof(row[28]);
+			entry.time_type                 = atoi(row[29]);
+			entry.fog_red1                  = atoi(row[30]);
+			entry.fog_green1                = atoi(row[31]);
+			entry.fog_blue1                 = atoi(row[32]);
+			entry.fog_minclip1              = atof(row[33]);
+			entry.fog_maxclip1              = atof(row[34]);
+			entry.fog_red2                  = atoi(row[35]);
+			entry.fog_green2                = atoi(row[36]);
+			entry.fog_blue2                 = atoi(row[37]);
+			entry.fog_minclip2              = atof(row[38]);
+			entry.fog_maxclip2              = atof(row[39]);
+			entry.fog_red3                  = atoi(row[40]);
+			entry.fog_green3                = atoi(row[41]);
+			entry.fog_blue3                 = atoi(row[42]);
+			entry.fog_minclip3              = atof(row[43]);
+			entry.fog_maxclip3              = atof(row[44]);
+			entry.fog_red4                  = atoi(row[45]);
+			entry.fog_green4                = atoi(row[46]);
+			entry.fog_blue4                 = atoi(row[47]);
+			entry.fog_minclip4              = atof(row[48]);
+			entry.fog_maxclip4              = atof(row[49]);
+			entry.fog_density               = atof(row[50]);
+			entry.flag_needed               = row[51];
+			entry.canbind                   = atoi(row[52]);
+			entry.cancombat                 = atoi(row[53]);
+			entry.canlevitate               = atoi(row[54]);
+			entry.castoutdoor               = atoi(row[55]);
+			entry.hotzone                   = atoi(row[56]);
+			entry.insttype                  = atoi(row[57]);
+			entry.shutdowndelay             = atoi(row[58]);
+			entry.peqzone                   = atoi(row[59]);
+			entry.expansion                 = atoi(row[60]);
+			entry.suspendbuffs              = atoi(row[61]);
+			entry.rain_chance1              = atoi(row[62]);
+			entry.rain_chance2              = atoi(row[63]);
+			entry.rain_chance3              = atoi(row[64]);
+			entry.rain_chance4              = atoi(row[65]);
+			entry.rain_duration1            = atoi(row[66]);
+			entry.rain_duration2            = atoi(row[67]);
+			entry.rain_duration3            = atoi(row[68]);
+			entry.rain_duration4            = atoi(row[69]);
+			entry.snow_chance1              = atoi(row[70]);
+			entry.snow_chance2              = atoi(row[71]);
+			entry.snow_chance3              = atoi(row[72]);
+			entry.snow_chance4              = atoi(row[73]);
+			entry.snow_duration1            = atoi(row[74]);
+			entry.snow_duration2            = atoi(row[75]);
+			entry.snow_duration3            = atoi(row[76]);
+			entry.snow_duration4            = atoi(row[77]);
+			entry.gravity                   = atof(row[78]);
+			entry.type                      = atoi(row[79]);
+			entry.skylock                   = atoi(row[80]);
+			entry.fast_regen_hp             = atoi(row[81]);
+			entry.fast_regen_mana           = atoi(row[82]);
+			entry.fast_regen_endurance      = atoi(row[83]);
+			entry.npc_max_aggro_dist        = atoi(row[84]);
+			entry.max_movement_update_range = atoi(row[85]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

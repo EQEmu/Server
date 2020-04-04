@@ -192,14 +192,14 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[2] + " = '" + EscapeString(base_data_entry.hp) + "'");
-		update_values.push_back(columns[3] + " = '" + EscapeString(base_data_entry.mana) + "'");
-		update_values.push_back(columns[4] + " = '" + EscapeString(base_data_entry.end) + "'");
-		update_values.push_back(columns[5] + " = '" + EscapeString(base_data_entry.unk1) + "'");
-		update_values.push_back(columns[6] + " = '" + EscapeString(base_data_entry.unk2) + "'");
-		update_values.push_back(columns[7] + " = '" + EscapeString(base_data_entry.hp_fac) + "'");
-		update_values.push_back(columns[8] + " = '" + EscapeString(base_data_entry.mana_fac) + "'");
-		update_values.push_back(columns[9] + " = '" + EscapeString(base_data_entry.end_fac) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(base_data_entry.hp));
+		update_values.push_back(columns[3] + " = " + std::to_string(base_data_entry.mana));
+		update_values.push_back(columns[4] + " = " + std::to_string(base_data_entry.end));
+		update_values.push_back(columns[5] + " = " + std::to_string(base_data_entry.unk1));
+		update_values.push_back(columns[6] + " = " + std::to_string(base_data_entry.unk2));
+		update_values.push_back(columns[7] + " = " + std::to_string(base_data_entry.hp_fac));
+		update_values.push_back(columns[8] + " = " + std::to_string(base_data_entry.mana_fac));
+		update_values.push_back(columns[9] + " = " + std::to_string(base_data_entry.end_fac));
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -220,14 +220,14 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back("'" + EscapeString(base_data_entry.hp) + "'");
-		insert_values.push_back("'" + EscapeString(base_data_entry.mana) + "'");
-		insert_values.push_back("'" + EscapeString(base_data_entry.end) + "'");
-		insert_values.push_back("'" + EscapeString(base_data_entry.unk1) + "'");
-		insert_values.push_back("'" + EscapeString(base_data_entry.unk2) + "'");
-		insert_values.push_back("'" + EscapeString(base_data_entry.hp_fac) + "'");
-		insert_values.push_back("'" + EscapeString(base_data_entry.mana_fac) + "'");
-		insert_values.push_back("'" + EscapeString(base_data_entry.end_fac) + "'");
+		insert_values.push_back(std::to_string(base_data_entry.hp));
+		insert_values.push_back(std::to_string(base_data_entry.mana));
+		insert_values.push_back(std::to_string(base_data_entry.end));
+		insert_values.push_back(std::to_string(base_data_entry.unk1));
+		insert_values.push_back(std::to_string(base_data_entry.unk2));
+		insert_values.push_back(std::to_string(base_data_entry.hp_fac));
+		insert_values.push_back(std::to_string(base_data_entry.mana_fac));
+		insert_values.push_back(std::to_string(base_data_entry.end_fac));
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -242,7 +242,7 @@ public:
 			return base_data_entry;
 		}
 
-		base_data_entry = InstanceListRepository::NewEntity();
+		base_data_entry = BaseDataRepository::NewEntity();
 
 		return base_data_entry;
 	}
@@ -256,14 +256,14 @@ public:
 		for (auto &base_data_entry: base_data_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back("'" + EscapeString(base_data_entry.hp) + "'");
-			insert_values.push_back("'" + EscapeString(base_data_entry.mana) + "'");
-			insert_values.push_back("'" + EscapeString(base_data_entry.end) + "'");
-			insert_values.push_back("'" + EscapeString(base_data_entry.unk1) + "'");
-			insert_values.push_back("'" + EscapeString(base_data_entry.unk2) + "'");
-			insert_values.push_back("'" + EscapeString(base_data_entry.hp_fac) + "'");
-			insert_values.push_back("'" + EscapeString(base_data_entry.mana_fac) + "'");
-			insert_values.push_back("'" + EscapeString(base_data_entry.end_fac) + "'");
+			insert_values.push_back(std::to_string(base_data_entry.hp));
+			insert_values.push_back(std::to_string(base_data_entry.mana));
+			insert_values.push_back(std::to_string(base_data_entry.end));
+			insert_values.push_back(std::to_string(base_data_entry.unk1));
+			insert_values.push_back(std::to_string(base_data_entry.unk2));
+			insert_values.push_back(std::to_string(base_data_entry.hp_fac));
+			insert_values.push_back(std::to_string(base_data_entry.mana_fac));
+			insert_values.push_back(std::to_string(base_data_entry.end_fac));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -312,6 +312,54 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<BaseData> GetWhere(std::string where_filter)
+	{
+		std::vector<BaseData> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			BaseData entry{};
+
+			entry.level    = atoi(row[0]);
+			entry.class    = atoi(row[1]);
+			entry.hp       = atof(row[2]);
+			entry.mana     = atof(row[3]);
+			entry.end      = atof(row[4]);
+			entry.unk1     = atof(row[5]);
+			entry.unk2     = atof(row[6]);
+			entry.hp_fac   = atof(row[7]);
+			entry.mana_fac = atof(row[8]);
+			entry.end_fac  = atof(row[9]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

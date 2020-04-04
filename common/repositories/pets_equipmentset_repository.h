@@ -202,7 +202,7 @@ public:
 			return pets_equipmentset_entry;
 		}
 
-		pets_equipmentset_entry = InstanceListRepository::NewEntity();
+		pets_equipmentset_entry = PetsEquipmentsetRepository::NewEntity();
 
 		return pets_equipmentset_entry;
 	}
@@ -259,6 +259,47 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<PetsEquipmentset> GetWhere(std::string where_filter)
+	{
+		std::vector<PetsEquipmentset> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			PetsEquipmentset entry{};
+
+			entry.set_id     = atoi(row[0]);
+			entry.setname    = row[1];
+			entry.nested_set = atoi(row[2]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

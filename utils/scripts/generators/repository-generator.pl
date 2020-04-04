@@ -242,7 +242,7 @@ foreach my $table_to_generate (@tables) {
         # update one
         if ($column_key ne "PRI") {
             my $query_value = sprintf('\'" + EscapeString(%s_entry.%s) + "\'");', $table_name, $column_name);
-            if ($data_type =~ /int/) {
+            if ($data_type =~ /int|float|double|decimal/) {
                 $query_value = sprintf('" + std::to_string(%s_entry.%s));', $table_name, $column_name);
             }
 
@@ -256,7 +256,7 @@ foreach my $table_to_generate (@tables) {
         # insert one
         if ($column_key ne "PRI") {
             my $value = sprintf("\"'\" + EscapeString(%s_entry.%s) + \"'\"", $table_name, $column_name);
-            if ($data_type =~ /int/) {
+            if ($data_type =~ /int|float|double|decimal/) {
                 $value = sprintf('std::to_string(%s_entry.%s)', $table_name, $column_name);
             }
 

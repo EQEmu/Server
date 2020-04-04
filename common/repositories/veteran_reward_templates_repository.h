@@ -212,7 +212,7 @@ public:
 			return veteran_reward_templates_entry;
 		}
 
-		veteran_reward_templates_entry = InstanceListRepository::NewEntity();
+		veteran_reward_templates_entry = VeteranRewardTemplatesRepository::NewEntity();
 
 		return veteran_reward_templates_entry;
 	}
@@ -272,6 +272,49 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<VeteranRewardTemplates> GetWhere(std::string where_filter)
+	{
+		std::vector<VeteranRewardTemplates> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			VeteranRewardTemplates entry{};
+
+			entry.claim_id    = atoi(row[0]);
+			entry.name        = row[1];
+			entry.item_id     = atoi(row[2]);
+			entry.charges     = atoi(row[3]);
+			entry.reward_slot = atoi(row[4]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

@@ -208,7 +208,7 @@ public:
 			return chatchannels_entry;
 		}
 
-		chatchannels_entry = InstanceListRepository::NewEntity();
+		chatchannels_entry = ChatchannelsRepository::NewEntity();
 
 		return chatchannels_entry;
 	}
@@ -267,6 +267,48 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<Chatchannels> GetWhere(std::string where_filter)
+	{
+		std::vector<Chatchannels> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			Chatchannels entry{};
+
+			entry.name      = row[0];
+			entry.owner     = row[1];
+			entry.password  = row[2];
+			entry.minstatus = atoi(row[3]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

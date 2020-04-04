@@ -286,7 +286,7 @@ public:
 			return character_currency_entry;
 		}
 
-		character_currency_entry = InstanceListRepository::NewEntity();
+		character_currency_entry = CharacterCurrencyRepository::NewEntity();
 
 		return character_currency_entry;
 	}
@@ -371,6 +371,61 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<CharacterCurrency> GetWhere(std::string where_filter)
+	{
+		std::vector<CharacterCurrency> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			CharacterCurrency entry{};
+
+			entry.id                      = atoi(row[0]);
+			entry.platinum                = atoi(row[1]);
+			entry.gold                    = atoi(row[2]);
+			entry.silver                  = atoi(row[3]);
+			entry.copper                  = atoi(row[4]);
+			entry.platinum_bank           = atoi(row[5]);
+			entry.gold_bank               = atoi(row[6]);
+			entry.silver_bank             = atoi(row[7]);
+			entry.copper_bank             = atoi(row[8]);
+			entry.platinum_cursor         = atoi(row[9]);
+			entry.gold_cursor             = atoi(row[10]);
+			entry.silver_cursor           = atoi(row[11]);
+			entry.copper_cursor           = atoi(row[12]);
+			entry.radiant_crystals        = atoi(row[13]);
+			entry.career_radiant_crystals = atoi(row[14]);
+			entry.ebon_crystals           = atoi(row[15]);
+			entry.career_ebon_crystals    = atoi(row[16]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

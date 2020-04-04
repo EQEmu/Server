@@ -206,7 +206,7 @@ public:
 			return respawn_times_entry;
 		}
 
-		respawn_times_entry = InstanceListRepository::NewEntity();
+		respawn_times_entry = RespawnTimesRepository::NewEntity();
 
 		return respawn_times_entry;
 	}
@@ -264,6 +264,48 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<RespawnTimes> GetWhere(std::string where_filter)
+	{
+		std::vector<RespawnTimes> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			RespawnTimes entry{};
+
+			entry.id          = atoi(row[0]);
+			entry.start       = atoi(row[1]);
+			entry.duration    = atoi(row[2]);
+			entry.instance_id = atoi(row[3]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

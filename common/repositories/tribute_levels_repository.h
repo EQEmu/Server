@@ -206,7 +206,7 @@ public:
 			return tribute_levels_entry;
 		}
 
-		tribute_levels_entry = InstanceListRepository::NewEntity();
+		tribute_levels_entry = TributeLevelsRepository::NewEntity();
 
 		return tribute_levels_entry;
 	}
@@ -264,6 +264,48 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<TributeLevels> GetWhere(std::string where_filter)
+	{
+		std::vector<TributeLevels> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			TributeLevels entry{};
+
+			entry.tribute_id = atoi(row[0]);
+			entry.level      = atoi(row[1]);
+			entry.cost       = atoi(row[2]);
+			entry.item_id    = atoi(row[3]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

@@ -232,7 +232,7 @@ public:
 			return tradeskill_recipe_entries_entry;
 		}
 
-		tradeskill_recipe_entries_entry = InstanceListRepository::NewEntity();
+		tradeskill_recipe_entries_entry = TradeskillRecipeEntriesRepository::NewEntity();
 
 		return tradeskill_recipe_entries_entry;
 	}
@@ -299,6 +299,52 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<TradeskillRecipeEntries> GetWhere(std::string where_filter)
+	{
+		std::vector<TradeskillRecipeEntries> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			TradeskillRecipeEntries entry{};
+
+			entry.id             = atoi(row[0]);
+			entry.recipe_id      = atoi(row[1]);
+			entry.item_id        = atoi(row[2]);
+			entry.successcount   = atoi(row[3]);
+			entry.failcount      = atoi(row[4]);
+			entry.componentcount = atoi(row[5]);
+			entry.salvagecount   = atoi(row[6]);
+			entry.iscontainer    = atoi(row[7]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

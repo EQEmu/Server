@@ -206,7 +206,7 @@ public:
 			return merchantlist_temp_entry;
 		}
 
-		merchantlist_temp_entry = InstanceListRepository::NewEntity();
+		merchantlist_temp_entry = MerchantlistTempRepository::NewEntity();
 
 		return merchantlist_temp_entry;
 	}
@@ -264,6 +264,48 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<MerchantlistTemp> GetWhere(std::string where_filter)
+	{
+		std::vector<MerchantlistTemp> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			MerchantlistTemp entry{};
+
+			entry.npcid   = atoi(row[0]);
+			entry.slot    = atoi(row[1]);
+			entry.itemid  = atoi(row[2]);
+			entry.charges = atoi(row[3]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

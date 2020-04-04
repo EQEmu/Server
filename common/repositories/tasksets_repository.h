@@ -196,7 +196,7 @@ public:
 			return tasksets_entry;
 		}
 
-		tasksets_entry = InstanceListRepository::NewEntity();
+		tasksets_entry = TasksetsRepository::NewEntity();
 
 		return tasksets_entry;
 	}
@@ -251,6 +251,46 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<Tasksets> GetWhere(std::string where_filter)
+	{
+		std::vector<Tasksets> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			Tasksets entry{};
+
+			entry.id     = atoi(row[0]);
+			entry.taskid = atoi(row[1]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

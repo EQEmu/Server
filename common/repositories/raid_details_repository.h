@@ -208,7 +208,7 @@ public:
 			return raid_details_entry;
 		}
 
-		raid_details_entry = InstanceListRepository::NewEntity();
+		raid_details_entry = RaidDetailsRepository::NewEntity();
 
 		return raid_details_entry;
 	}
@@ -267,6 +267,48 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<RaidDetails> GetWhere(std::string where_filter)
+	{
+		std::vector<RaidDetails> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			RaidDetails entry{};
+
+			entry.raidid   = atoi(row[0]);
+			entry.loottype = atoi(row[1]);
+			entry.locked   = atoi(row[2]);
+			entry.motd     = row[3];
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

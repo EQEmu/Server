@@ -203,12 +203,12 @@ public:
 		update_values.push_back(columns[1] + " = " + std::to_string(blocked_spells_entry.spellid));
 		update_values.push_back(columns[2] + " = " + std::to_string(blocked_spells_entry.type));
 		update_values.push_back(columns[3] + " = " + std::to_string(blocked_spells_entry.zoneid));
-		update_values.push_back(columns[4] + " = '" + EscapeString(blocked_spells_entry.x) + "'");
-		update_values.push_back(columns[5] + " = '" + EscapeString(blocked_spells_entry.y) + "'");
-		update_values.push_back(columns[6] + " = '" + EscapeString(blocked_spells_entry.z) + "'");
-		update_values.push_back(columns[7] + " = '" + EscapeString(blocked_spells_entry.x_diff) + "'");
-		update_values.push_back(columns[8] + " = '" + EscapeString(blocked_spells_entry.y_diff) + "'");
-		update_values.push_back(columns[9] + " = '" + EscapeString(blocked_spells_entry.z_diff) + "'");
+		update_values.push_back(columns[4] + " = " + std::to_string(blocked_spells_entry.x));
+		update_values.push_back(columns[5] + " = " + std::to_string(blocked_spells_entry.y));
+		update_values.push_back(columns[6] + " = " + std::to_string(blocked_spells_entry.z));
+		update_values.push_back(columns[7] + " = " + std::to_string(blocked_spells_entry.x_diff));
+		update_values.push_back(columns[8] + " = " + std::to_string(blocked_spells_entry.y_diff));
+		update_values.push_back(columns[9] + " = " + std::to_string(blocked_spells_entry.z_diff));
 		update_values.push_back(columns[10] + " = '" + EscapeString(blocked_spells_entry.message) + "'");
 		update_values.push_back(columns[11] + " = '" + EscapeString(blocked_spells_entry.description) + "'");
 
@@ -234,12 +234,12 @@ public:
 		insert_values.push_back(std::to_string(blocked_spells_entry.spellid));
 		insert_values.push_back(std::to_string(blocked_spells_entry.type));
 		insert_values.push_back(std::to_string(blocked_spells_entry.zoneid));
-		insert_values.push_back("'" + EscapeString(blocked_spells_entry.x) + "'");
-		insert_values.push_back("'" + EscapeString(blocked_spells_entry.y) + "'");
-		insert_values.push_back("'" + EscapeString(blocked_spells_entry.z) + "'");
-		insert_values.push_back("'" + EscapeString(blocked_spells_entry.x_diff) + "'");
-		insert_values.push_back("'" + EscapeString(blocked_spells_entry.y_diff) + "'");
-		insert_values.push_back("'" + EscapeString(blocked_spells_entry.z_diff) + "'");
+		insert_values.push_back(std::to_string(blocked_spells_entry.x));
+		insert_values.push_back(std::to_string(blocked_spells_entry.y));
+		insert_values.push_back(std::to_string(blocked_spells_entry.z));
+		insert_values.push_back(std::to_string(blocked_spells_entry.x_diff));
+		insert_values.push_back(std::to_string(blocked_spells_entry.y_diff));
+		insert_values.push_back(std::to_string(blocked_spells_entry.z_diff));
 		insert_values.push_back("'" + EscapeString(blocked_spells_entry.message) + "'");
 		insert_values.push_back("'" + EscapeString(blocked_spells_entry.description) + "'");
 
@@ -256,7 +256,7 @@ public:
 			return blocked_spells_entry;
 		}
 
-		blocked_spells_entry = InstanceListRepository::NewEntity();
+		blocked_spells_entry = BlockedSpellsRepository::NewEntity();
 
 		return blocked_spells_entry;
 	}
@@ -273,12 +273,12 @@ public:
 			insert_values.push_back(std::to_string(blocked_spells_entry.spellid));
 			insert_values.push_back(std::to_string(blocked_spells_entry.type));
 			insert_values.push_back(std::to_string(blocked_spells_entry.zoneid));
-			insert_values.push_back("'" + EscapeString(blocked_spells_entry.x) + "'");
-			insert_values.push_back("'" + EscapeString(blocked_spells_entry.y) + "'");
-			insert_values.push_back("'" + EscapeString(blocked_spells_entry.z) + "'");
-			insert_values.push_back("'" + EscapeString(blocked_spells_entry.x_diff) + "'");
-			insert_values.push_back("'" + EscapeString(blocked_spells_entry.y_diff) + "'");
-			insert_values.push_back("'" + EscapeString(blocked_spells_entry.z_diff) + "'");
+			insert_values.push_back(std::to_string(blocked_spells_entry.x));
+			insert_values.push_back(std::to_string(blocked_spells_entry.y));
+			insert_values.push_back(std::to_string(blocked_spells_entry.z));
+			insert_values.push_back(std::to_string(blocked_spells_entry.x_diff));
+			insert_values.push_back(std::to_string(blocked_spells_entry.y_diff));
+			insert_values.push_back(std::to_string(blocked_spells_entry.z_diff));
 			insert_values.push_back("'" + EscapeString(blocked_spells_entry.message) + "'");
 			insert_values.push_back("'" + EscapeString(blocked_spells_entry.description) + "'");
 
@@ -331,6 +331,56 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<BlockedSpells> GetWhere(std::string where_filter)
+	{
+		std::vector<BlockedSpells> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			BlockedSpells entry{};
+
+			entry.id          = atoi(row[0]);
+			entry.spellid     = atoi(row[1]);
+			entry.type        = atoi(row[2]);
+			entry.zoneid      = atoi(row[3]);
+			entry.x           = atof(row[4]);
+			entry.y           = atof(row[5]);
+			entry.z           = atof(row[6]);
+			entry.x_diff      = atof(row[7]);
+			entry.y_diff      = atof(row[8]);
+			entry.z_diff      = atof(row[9]);
+			entry.message     = row[10];
+			entry.description = row[11];
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

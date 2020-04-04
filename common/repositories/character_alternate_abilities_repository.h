@@ -206,7 +206,7 @@ public:
 			return character_alternate_abilities_entry;
 		}
 
-		character_alternate_abilities_entry = InstanceListRepository::NewEntity();
+		character_alternate_abilities_entry = CharacterAlternateAbilitiesRepository::NewEntity();
 
 		return character_alternate_abilities_entry;
 	}
@@ -264,6 +264,48 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<CharacterAlternateAbilities> GetWhere(std::string where_filter)
+	{
+		std::vector<CharacterAlternateAbilities> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			CharacterAlternateAbilities entry{};
+
+			entry.id       = atoi(row[0]);
+			entry.aa_id    = atoi(row[1]);
+			entry.aa_value = atoi(row[2]);
+			entry.charges  = atoi(row[3]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

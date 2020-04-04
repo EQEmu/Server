@@ -238,7 +238,7 @@ public:
 			return group_leaders_entry;
 		}
 
-		group_leaders_entry = InstanceListRepository::NewEntity();
+		group_leaders_entry = GroupLeadersRepository::NewEntity();
 
 		return group_leaders_entry;
 	}
@@ -307,6 +307,53 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<GroupLeaders> GetWhere(std::string where_filter)
+	{
+		std::vector<GroupLeaders> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			GroupLeaders entry{};
+
+			entry.gid            = atoi(row[0]);
+			entry.leadername     = row[1];
+			entry.marknpc        = row[2];
+			entry.leadershipaa   = row[3];
+			entry.maintank       = row[4];
+			entry.assist         = row[5];
+			entry.puller         = row[6];
+			entry.mentoree       = row[7];
+			entry.mentor_percent = atoi(row[8]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

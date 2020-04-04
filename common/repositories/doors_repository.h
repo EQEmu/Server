@@ -280,10 +280,10 @@ public:
 		update_values.push_back(columns[2] + " = '" + EscapeString(doors_entry.zone) + "'");
 		update_values.push_back(columns[3] + " = " + std::to_string(doors_entry.version));
 		update_values.push_back(columns[4] + " = '" + EscapeString(doors_entry.name) + "'");
-		update_values.push_back(columns[5] + " = '" + EscapeString(doors_entry.pos_y) + "'");
-		update_values.push_back(columns[6] + " = '" + EscapeString(doors_entry.pos_x) + "'");
-		update_values.push_back(columns[7] + " = '" + EscapeString(doors_entry.pos_z) + "'");
-		update_values.push_back(columns[8] + " = '" + EscapeString(doors_entry.heading) + "'");
+		update_values.push_back(columns[5] + " = " + std::to_string(doors_entry.pos_y));
+		update_values.push_back(columns[6] + " = " + std::to_string(doors_entry.pos_x));
+		update_values.push_back(columns[7] + " = " + std::to_string(doors_entry.pos_z));
+		update_values.push_back(columns[8] + " = " + std::to_string(doors_entry.heading));
 		update_values.push_back(columns[9] + " = " + std::to_string(doors_entry.opentype));
 		update_values.push_back(columns[10] + " = " + std::to_string(doors_entry.guild));
 		update_values.push_back(columns[11] + " = " + std::to_string(doors_entry.lockpick));
@@ -296,14 +296,14 @@ public:
 		update_values.push_back(columns[18] + " = " + std::to_string(doors_entry.door_param));
 		update_values.push_back(columns[19] + " = '" + EscapeString(doors_entry.dest_zone) + "'");
 		update_values.push_back(columns[20] + " = " + std::to_string(doors_entry.dest_instance));
-		update_values.push_back(columns[21] + " = '" + EscapeString(doors_entry.dest_x) + "'");
-		update_values.push_back(columns[22] + " = '" + EscapeString(doors_entry.dest_y) + "'");
-		update_values.push_back(columns[23] + " = '" + EscapeString(doors_entry.dest_z) + "'");
-		update_values.push_back(columns[24] + " = '" + EscapeString(doors_entry.dest_heading) + "'");
+		update_values.push_back(columns[21] + " = " + std::to_string(doors_entry.dest_x));
+		update_values.push_back(columns[22] + " = " + std::to_string(doors_entry.dest_y));
+		update_values.push_back(columns[23] + " = " + std::to_string(doors_entry.dest_z));
+		update_values.push_back(columns[24] + " = " + std::to_string(doors_entry.dest_heading));
 		update_values.push_back(columns[25] + " = " + std::to_string(doors_entry.invert_state));
 		update_values.push_back(columns[26] + " = " + std::to_string(doors_entry.incline));
 		update_values.push_back(columns[27] + " = " + std::to_string(doors_entry.size));
-		update_values.push_back(columns[28] + " = '" + EscapeString(doors_entry.buffer) + "'");
+		update_values.push_back(columns[28] + " = " + std::to_string(doors_entry.buffer));
 		update_values.push_back(columns[29] + " = " + std::to_string(doors_entry.client_version_mask));
 		update_values.push_back(columns[30] + " = " + std::to_string(doors_entry.is_ldon_door));
 
@@ -330,10 +330,10 @@ public:
 		insert_values.push_back("'" + EscapeString(doors_entry.zone) + "'");
 		insert_values.push_back(std::to_string(doors_entry.version));
 		insert_values.push_back("'" + EscapeString(doors_entry.name) + "'");
-		insert_values.push_back("'" + EscapeString(doors_entry.pos_y) + "'");
-		insert_values.push_back("'" + EscapeString(doors_entry.pos_x) + "'");
-		insert_values.push_back("'" + EscapeString(doors_entry.pos_z) + "'");
-		insert_values.push_back("'" + EscapeString(doors_entry.heading) + "'");
+		insert_values.push_back(std::to_string(doors_entry.pos_y));
+		insert_values.push_back(std::to_string(doors_entry.pos_x));
+		insert_values.push_back(std::to_string(doors_entry.pos_z));
+		insert_values.push_back(std::to_string(doors_entry.heading));
 		insert_values.push_back(std::to_string(doors_entry.opentype));
 		insert_values.push_back(std::to_string(doors_entry.guild));
 		insert_values.push_back(std::to_string(doors_entry.lockpick));
@@ -346,14 +346,14 @@ public:
 		insert_values.push_back(std::to_string(doors_entry.door_param));
 		insert_values.push_back("'" + EscapeString(doors_entry.dest_zone) + "'");
 		insert_values.push_back(std::to_string(doors_entry.dest_instance));
-		insert_values.push_back("'" + EscapeString(doors_entry.dest_x) + "'");
-		insert_values.push_back("'" + EscapeString(doors_entry.dest_y) + "'");
-		insert_values.push_back("'" + EscapeString(doors_entry.dest_z) + "'");
-		insert_values.push_back("'" + EscapeString(doors_entry.dest_heading) + "'");
+		insert_values.push_back(std::to_string(doors_entry.dest_x));
+		insert_values.push_back(std::to_string(doors_entry.dest_y));
+		insert_values.push_back(std::to_string(doors_entry.dest_z));
+		insert_values.push_back(std::to_string(doors_entry.dest_heading));
 		insert_values.push_back(std::to_string(doors_entry.invert_state));
 		insert_values.push_back(std::to_string(doors_entry.incline));
 		insert_values.push_back(std::to_string(doors_entry.size));
-		insert_values.push_back("'" + EscapeString(doors_entry.buffer) + "'");
+		insert_values.push_back(std::to_string(doors_entry.buffer));
 		insert_values.push_back(std::to_string(doors_entry.client_version_mask));
 		insert_values.push_back(std::to_string(doors_entry.is_ldon_door));
 
@@ -370,7 +370,7 @@ public:
 			return doors_entry;
 		}
 
-		doors_entry = InstanceListRepository::NewEntity();
+		doors_entry = DoorsRepository::NewEntity();
 
 		return doors_entry;
 	}
@@ -388,10 +388,10 @@ public:
 			insert_values.push_back("'" + EscapeString(doors_entry.zone) + "'");
 			insert_values.push_back(std::to_string(doors_entry.version));
 			insert_values.push_back("'" + EscapeString(doors_entry.name) + "'");
-			insert_values.push_back("'" + EscapeString(doors_entry.pos_y) + "'");
-			insert_values.push_back("'" + EscapeString(doors_entry.pos_x) + "'");
-			insert_values.push_back("'" + EscapeString(doors_entry.pos_z) + "'");
-			insert_values.push_back("'" + EscapeString(doors_entry.heading) + "'");
+			insert_values.push_back(std::to_string(doors_entry.pos_y));
+			insert_values.push_back(std::to_string(doors_entry.pos_x));
+			insert_values.push_back(std::to_string(doors_entry.pos_z));
+			insert_values.push_back(std::to_string(doors_entry.heading));
 			insert_values.push_back(std::to_string(doors_entry.opentype));
 			insert_values.push_back(std::to_string(doors_entry.guild));
 			insert_values.push_back(std::to_string(doors_entry.lockpick));
@@ -404,14 +404,14 @@ public:
 			insert_values.push_back(std::to_string(doors_entry.door_param));
 			insert_values.push_back("'" + EscapeString(doors_entry.dest_zone) + "'");
 			insert_values.push_back(std::to_string(doors_entry.dest_instance));
-			insert_values.push_back("'" + EscapeString(doors_entry.dest_x) + "'");
-			insert_values.push_back("'" + EscapeString(doors_entry.dest_y) + "'");
-			insert_values.push_back("'" + EscapeString(doors_entry.dest_z) + "'");
-			insert_values.push_back("'" + EscapeString(doors_entry.dest_heading) + "'");
+			insert_values.push_back(std::to_string(doors_entry.dest_x));
+			insert_values.push_back(std::to_string(doors_entry.dest_y));
+			insert_values.push_back(std::to_string(doors_entry.dest_z));
+			insert_values.push_back(std::to_string(doors_entry.dest_heading));
 			insert_values.push_back(std::to_string(doors_entry.invert_state));
 			insert_values.push_back(std::to_string(doors_entry.incline));
 			insert_values.push_back(std::to_string(doors_entry.size));
-			insert_values.push_back("'" + EscapeString(doors_entry.buffer) + "'");
+			insert_values.push_back(std::to_string(doors_entry.buffer));
 			insert_values.push_back(std::to_string(doors_entry.client_version_mask));
 			insert_values.push_back(std::to_string(doors_entry.is_ldon_door));
 
@@ -483,6 +483,75 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<Doors> GetWhere(std::string where_filter)
+	{
+		std::vector<Doors> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			Doors entry{};
+
+			entry.id                  = atoi(row[0]);
+			entry.doorid              = atoi(row[1]);
+			entry.zone                = row[2];
+			entry.version             = atoi(row[3]);
+			entry.name                = row[4];
+			entry.pos_y               = atof(row[5]);
+			entry.pos_x               = atof(row[6]);
+			entry.pos_z               = atof(row[7]);
+			entry.heading             = atof(row[8]);
+			entry.opentype            = atoi(row[9]);
+			entry.guild               = atoi(row[10]);
+			entry.lockpick            = atoi(row[11]);
+			entry.keyitem             = atoi(row[12]);
+			entry.nokeyring           = atoi(row[13]);
+			entry.triggerdoor         = atoi(row[14]);
+			entry.triggertype         = atoi(row[15]);
+			entry.disable_timer       = atoi(row[16]);
+			entry.doorisopen          = atoi(row[17]);
+			entry.door_param          = atoi(row[18]);
+			entry.dest_zone           = row[19];
+			entry.dest_instance       = atoi(row[20]);
+			entry.dest_x              = atof(row[21]);
+			entry.dest_y              = atof(row[22]);
+			entry.dest_z              = atof(row[23]);
+			entry.dest_heading        = atof(row[24]);
+			entry.invert_state        = atoi(row[25]);
+			entry.incline             = atoi(row[26]);
+			entry.size                = atoi(row[27]);
+			entry.buffer              = atof(row[28]);
+			entry.client_version_mask = atoi(row[29]);
+			entry.is_ldon_door        = atoi(row[30]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

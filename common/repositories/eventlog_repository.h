@@ -244,7 +244,7 @@ public:
 			return eventlog_entry;
 		}
 
-		eventlog_entry = InstanceListRepository::NewEntity();
+		eventlog_entry = EventlogRepository::NewEntity();
 
 		return eventlog_entry;
 	}
@@ -315,6 +315,54 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<Eventlog> GetWhere(std::string where_filter)
+	{
+		std::vector<Eventlog> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			Eventlog entry{};
+
+			entry.id              = atoi(row[0]);
+			entry.accountname     = row[1];
+			entry.accountid       = atoi(row[2]);
+			entry.status          = atoi(row[3]);
+			entry.charname        = row[4];
+			entry.target          = row[5];
+			entry.time            = row[6];
+			entry.descriptiontype = row[7];
+			entry.description     = row[8];
+			entry.event_nid       = atoi(row[9]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

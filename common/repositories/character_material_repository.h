@@ -224,7 +224,7 @@ public:
 			return character_material_entry;
 		}
 
-		character_material_entry = InstanceListRepository::NewEntity();
+		character_material_entry = CharacterMaterialRepository::NewEntity();
 
 		return character_material_entry;
 	}
@@ -288,6 +288,51 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<CharacterMaterial> GetWhere(std::string where_filter)
+	{
+		std::vector<CharacterMaterial> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			CharacterMaterial entry{};
+
+			entry.id       = atoi(row[0]);
+			entry.slot     = atoi(row[1]);
+			entry.blue     = atoi(row[2]);
+			entry.green    = atoi(row[3]);
+			entry.red      = atoi(row[4]);
+			entry.use_tint = atoi(row[5]);
+			entry.color    = atoi(row[6]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

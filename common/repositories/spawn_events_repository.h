@@ -268,7 +268,7 @@ public:
 			return spawn_events_entry;
 		}
 
-		spawn_events_entry = InstanceListRepository::NewEntity();
+		spawn_events_entry = SpawnEventsRepository::NewEntity();
 
 		return spawn_events_entry;
 	}
@@ -347,6 +347,58 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<SpawnEvents> GetWhere(std::string where_filter)
+	{
+		std::vector<SpawnEvents> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			SpawnEvents entry{};
+
+			entry.id          = atoi(row[0]);
+			entry.zone        = row[1];
+			entry.cond_id     = atoi(row[2]);
+			entry.name        = row[3];
+			entry.period      = atoi(row[4]);
+			entry.next_minute = atoi(row[5]);
+			entry.next_hour   = atoi(row[6]);
+			entry.next_day    = atoi(row[7]);
+			entry.next_month  = atoi(row[8]);
+			entry.next_year   = atoi(row[9]);
+			entry.enabled     = atoi(row[10]);
+			entry.action      = atoi(row[11]);
+			entry.argument    = atoi(row[12]);
+			entry.strict      = atoi(row[13]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

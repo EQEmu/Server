@@ -220,7 +220,7 @@ public:
 			return faction_base_data_entry;
 		}
 
-		faction_base_data_entry = InstanceListRepository::NewEntity();
+		faction_base_data_entry = FactionBaseDataRepository::NewEntity();
 
 		return faction_base_data_entry;
 	}
@@ -283,6 +283,50 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<FactionBaseData> GetWhere(std::string where_filter)
+	{
+		std::vector<FactionBaseData> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			FactionBaseData entry{};
+
+			entry.client_faction_id = atoi(row[0]);
+			entry.min               = atoi(row[1]);
+			entry.max               = atoi(row[2]);
+			entry.unk_hero1         = atoi(row[3]);
+			entry.unk_hero2         = atoi(row[4]);
+			entry.unk_hero3         = atoi(row[5]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

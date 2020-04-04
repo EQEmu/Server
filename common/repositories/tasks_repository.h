@@ -280,7 +280,7 @@ public:
 			return tasks_entry;
 		}
 
-		tasks_entry = InstanceListRepository::NewEntity();
+		tasks_entry = TasksRepository::NewEntity();
 
 		return tasks_entry;
 	}
@@ -363,6 +363,60 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<Tasks> GetWhere(std::string where_filter)
+	{
+		std::vector<Tasks> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			Tasks entry{};
+
+			entry.id               = atoi(row[0]);
+			entry.type             = atoi(row[1]);
+			entry.duration         = atoi(row[2]);
+			entry.duration_code    = atoi(row[3]);
+			entry.title            = row[4];
+			entry.description      = row[5];
+			entry.reward           = row[6];
+			entry.rewardid         = atoi(row[7]);
+			entry.cashreward       = atoi(row[8]);
+			entry.xpreward         = atoi(row[9]);
+			entry.rewardmethod     = atoi(row[10]);
+			entry.minlevel         = atoi(row[11]);
+			entry.maxlevel         = atoi(row[12]);
+			entry.repeatable       = atoi(row[13]);
+			entry.faction_reward   = atoi(row[14]);
+			entry.completion_emote = row[15];
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

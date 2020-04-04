@@ -280,7 +280,7 @@ public:
 			return petitions_entry;
 		}
 
-		petitions_entry = InstanceListRepository::NewEntity();
+		petitions_entry = PetitionsRepository::NewEntity();
 
 		return petitions_entry;
 	}
@@ -363,6 +363,60 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<Petitions> GetWhere(std::string where_filter)
+	{
+		std::vector<Petitions> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			Petitions entry{};
+
+			entry.dib          = atoi(row[0]);
+			entry.petid        = atoi(row[1]);
+			entry.charname     = row[2];
+			entry.accountname  = row[3];
+			entry.lastgm       = row[4];
+			entry.petitiontext = row[5];
+			entry.gmtext       = row[6];
+			entry.zone         = row[7];
+			entry.urgency      = atoi(row[8]);
+			entry.charclass    = atoi(row[9]);
+			entry.charrace     = atoi(row[10]);
+			entry.charlevel    = atoi(row[11]);
+			entry.checkouts    = atoi(row[12]);
+			entry.unavailables = atoi(row[13]);
+			entry.ischeckedout = atoi(row[14]);
+			entry.senttime     = atoi(row[15]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

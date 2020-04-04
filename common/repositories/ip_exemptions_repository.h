@@ -202,7 +202,7 @@ public:
 			return ip_exemptions_entry;
 		}
 
-		ip_exemptions_entry = InstanceListRepository::NewEntity();
+		ip_exemptions_entry = IpExemptionsRepository::NewEntity();
 
 		return ip_exemptions_entry;
 	}
@@ -259,6 +259,47 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<IpExemptions> GetWhere(std::string where_filter)
+	{
+		std::vector<IpExemptions> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			IpExemptions entry{};
+
+			entry.exemption_id     = atoi(row[0]);
+			entry.exemption_ip     = row[1];
+			entry.exemption_amount = atoi(row[2]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

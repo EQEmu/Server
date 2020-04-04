@@ -284,7 +284,7 @@ public:
 			return character_buffs_entry;
 		}
 
-		character_buffs_entry = InstanceListRepository::NewEntity();
+		character_buffs_entry = CharacterBuffsRepository::NewEntity();
 
 		return character_buffs_entry;
 	}
@@ -368,6 +368,61 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<CharacterBuffs> GetWhere(std::string where_filter)
+	{
+		std::vector<CharacterBuffs> all_entries;
+
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			CharacterBuffs entry{};
+
+			entry.character_id   = atoi(row[0]);
+			entry.slot_id        = atoi(row[1]);
+			entry.spell_id       = atoi(row[2]);
+			entry.caster_level   = atoi(row[3]);
+			entry.caster_name    = row[4];
+			entry.ticsremaining  = atoi(row[5]);
+			entry.counters       = atoi(row[6]);
+			entry.numhits        = atoi(row[7]);
+			entry.melee_rune     = atoi(row[8]);
+			entry.magic_rune     = atoi(row[9]);
+			entry.persistent     = atoi(row[10]);
+			entry.dot_rune       = atoi(row[11]);
+			entry.caston_x       = atoi(row[12]);
+			entry.caston_y       = atoi(row[13]);
+			entry.caston_z       = atoi(row[14]);
+			entry.ExtraDIChance  = atoi(row[15]);
+			entry.instrument_mod = atoi(row[16]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };

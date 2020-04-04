@@ -242,8 +242,8 @@ public:
 		update_values.push_back(columns[4] + " = " + std::to_string(traps_entry.y));
 		update_values.push_back(columns[5] + " = " + std::to_string(traps_entry.z));
 		update_values.push_back(columns[6] + " = " + std::to_string(traps_entry.chance));
-		update_values.push_back(columns[7] + " = '" + EscapeString(traps_entry.maxzdiff) + "'");
-		update_values.push_back(columns[8] + " = '" + EscapeString(traps_entry.radius) + "'");
+		update_values.push_back(columns[7] + " = " + std::to_string(traps_entry.maxzdiff));
+		update_values.push_back(columns[8] + " = " + std::to_string(traps_entry.radius));
 		update_values.push_back(columns[9] + " = " + std::to_string(traps_entry.effect));
 		update_values.push_back(columns[10] + " = " + std::to_string(traps_entry.effectvalue));
 		update_values.push_back(columns[11] + " = " + std::to_string(traps_entry.effectvalue2));
@@ -282,8 +282,8 @@ public:
 		insert_values.push_back(std::to_string(traps_entry.y));
 		insert_values.push_back(std::to_string(traps_entry.z));
 		insert_values.push_back(std::to_string(traps_entry.chance));
-		insert_values.push_back("'" + EscapeString(traps_entry.maxzdiff) + "'");
-		insert_values.push_back("'" + EscapeString(traps_entry.radius) + "'");
+		insert_values.push_back(std::to_string(traps_entry.maxzdiff));
+		insert_values.push_back(std::to_string(traps_entry.radius));
 		insert_values.push_back(std::to_string(traps_entry.effect));
 		insert_values.push_back(std::to_string(traps_entry.effectvalue));
 		insert_values.push_back(std::to_string(traps_entry.effectvalue2));
@@ -310,7 +310,7 @@ public:
 			return traps_entry;
 		}
 
-		traps_entry = InstanceListRepository::NewEntity();
+		traps_entry = TrapsRepository::NewEntity();
 
 		return traps_entry;
 	}
@@ -330,8 +330,8 @@ public:
 			insert_values.push_back(std::to_string(traps_entry.y));
 			insert_values.push_back(std::to_string(traps_entry.z));
 			insert_values.push_back(std::to_string(traps_entry.chance));
-			insert_values.push_back("'" + EscapeString(traps_entry.maxzdiff) + "'");
-			insert_values.push_back("'" + EscapeString(traps_entry.radius) + "'");
+			insert_values.push_back(std::to_string(traps_entry.maxzdiff));
+			insert_values.push_back(std::to_string(traps_entry.radius));
 			insert_values.push_back(std::to_string(traps_entry.effect));
 			insert_values.push_back(std::to_string(traps_entry.effectvalue));
 			insert_values.push_back(std::to_string(traps_entry.effectvalue2));
@@ -403,6 +403,65 @@ public:
 		}
 
 		return all_entries;
+	}
+
+	static std::vector<Traps> GetWhere(std::string where_filter)
+	{
+		std::vector<Traps> all_entries;
+
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"{} WHERE {}",
+				BaseSelect(),
+				where_filter
+			)
+		);
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			Traps entry{};
+
+			entry.id                     = atoi(row[0]);
+			entry.zone                   = row[1];
+			entry.version                = atoi(row[2]);
+			entry.x                      = atoi(row[3]);
+			entry.y                      = atoi(row[4]);
+			entry.z                      = atoi(row[5]);
+			entry.chance                 = atoi(row[6]);
+			entry.maxzdiff               = atof(row[7]);
+			entry.radius                 = atof(row[8]);
+			entry.effect                 = atoi(row[9]);
+			entry.effectvalue            = atoi(row[10]);
+			entry.effectvalue2           = atoi(row[11]);
+			entry.message                = row[12];
+			entry.skill                  = atoi(row[13]);
+			entry.level                  = atoi(row[14]);
+			entry.respawn_time           = atoi(row[15]);
+			entry.respawn_var            = atoi(row[16]);
+			entry.triggered_number       = atoi(row[17]);
+			entry.group                  = atoi(row[18]);
+			entry.despawn_when_triggered = atoi(row[19]);
+			entry.undetectable           = atoi(row[20]);
+
+			all_entries.push_back(entry);
+		}
+
+		return all_entries;
+	}
+
+	static int DeleteWhere(std::string where_filter)
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE {}",
+				TableName(),
+				PrimaryKey(),
+				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
 };
