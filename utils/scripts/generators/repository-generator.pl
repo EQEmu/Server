@@ -121,6 +121,11 @@ foreach my $table_to_generate (@tables) {
         "grid_entries", # Manually created
         "tradeskill_recipe", # Manually created
         "character_recipe_list", # Manually created
+        "guild_bank",
+        "inventory_versions",
+        "raid_leaders",
+        "sharedbank",
+        "trader_audit",
         "eqtime",
         "db_version",
         "keyring",
