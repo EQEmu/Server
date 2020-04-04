@@ -28,7 +28,7 @@ namespace Expansion {
 	enum ExpansionNumber {
 		Classic = 0,
 		TheRuinsOfKunark,
-		TheShardsOfVelious,
+		TheScarsOfVelious,
 		TheShadowsOfLuclin,
 		ThePlanesOfPower,
 		TheLegacyOfYkesha,
@@ -62,7 +62,7 @@ namespace Expansion {
 	static const char *ExpansionName[ExpansionNumber::MaxId] = {
 		"Classic",
 		"The Ruins of Kunark",
-		"The Shards of Velious",
+		"The Scars of Velious",
 		"The Shadows of Luclin",
 		"The Planes of Power",
 		"The Legacy of Ykesha",
