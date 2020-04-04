@@ -56,6 +56,7 @@
 #include "npc_scale_manager.h"
 #include "../common/data_verification.h"
 #include "zone_reload.h"
+#include "../common/repositories/criteria/content_filter_criteria.h"
 
 #include <time.h>
 #include <ctime>
@@ -140,7 +141,7 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	if(iInstanceID != 0)
 	{
 		auto pack = new ServerPacket(ServerOP_AdventureZoneData, sizeof(uint16));
-		*((uint16*)pack->pBuffer) = iInstanceID; 
+		*((uint16*)pack->pBuffer) = iInstanceID;
 		worldserver.SendPacket(pack);
 		delete pack;
 	}
@@ -170,11 +171,14 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 //this really loads the objects into entity_list
 bool Zone::LoadZoneObjects()
 {
-	std::string query =
-	    StringFormat("SELECT id, zoneid, xpos, ypos, zpos, heading, itemid, charges, objectname, type, icon, "
-			 "unknown08, unknown10, unknown20, unknown24, unknown76, size, tilt_x, tilt_y, display_name "
-			 "FROM object WHERE zoneid = %i AND (version = %u OR version = -1)",
-			 zoneid, instanceversion);
+	std::string query = StringFormat(
+		"SELECT id, zoneid, xpos, ypos, zpos, heading, itemid, charges, objectname, type, icon, "
+		"unknown08, unknown10, unknown20, unknown24, unknown76, size, tilt_x, tilt_y, display_name "
+		"FROM object WHERE zoneid = %i AND (version = %u OR version = -1) %s",
+		zoneid,
+		instanceversion,
+		ContentFilterCriteria::apply().c_str()
+	);
 	auto results = content_db.QueryDatabase(query);
 	if (!results.Success()) {
 		LogError("Error Loading Objects from DB: [{}]",
@@ -523,7 +527,7 @@ void Zone::LoadNewMerchantData(uint32 merchantid) {
 
 void Zone::GetMerchantDataForZoneLoad() {
 	LogInfo("Loading Merchant Lists");
-	std::string query = StringFormat(												   
+	std::string query = StringFormat(
 		"SELECT																		   "
 		"DISTINCT ml.merchantid,													   "
 		"ml.slot,																	   "
@@ -847,7 +851,7 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	{
 		LogDebug("Graveyard ID is [{}]", graveyard_id());
 		bool GraveYardLoaded = content_db.GetZoneGraveyard(graveyard_id(), &pgraveyard_zoneid, &m_Graveyard.x, &m_Graveyard.y, &m_Graveyard.z, &m_Graveyard.w);
-		
+
 		if (GraveYardLoaded) {
 			LogDebug("Loaded a graveyard for zone [{}]: graveyard zoneid is [{}] at [{}]", short_name, graveyard_zoneid(), to_string(m_Graveyard).c_str());
 		}
