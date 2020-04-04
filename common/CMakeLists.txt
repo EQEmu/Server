@@ -146,7 +146,6 @@ SET(repositories
 	repositories/character_currency_repository.h
 	repositories/character_data_repository.h
 	repositories/character_disciplines_repository.h
-	repositories/character_enabledtasks_repository.h
 	repositories/character_inspect_messages_repository.h
 	repositories/character_item_recast_repository.h
 	repositories/character_languages_repository.h
@@ -169,10 +168,8 @@ SET(repositories
 	repositories/completed_tasks_repository.h
 	repositories/data_buckets_repository.h
 	repositories/db_str_repository.h
-	repositories/db_version_repository.h
 	repositories/discovered_items_repository.h
 	repositories/doors_repository.h
-	repositories/eqtime_repository.h
 	repositories/eventlog_repository.h
 	repositories/faction_base_data_repository.h
 	repositories/faction_list_repository.h
@@ -191,7 +188,6 @@ SET(repositories
 	repositories/group_id_repository.h
 	repositories/group_leaders_repository.h
 	repositories/guilds_repository.h
-	repositories/guild_bank_repository.h
 	repositories/guild_members_repository.h
 	repositories/guild_ranks_repository.h
 	repositories/guild_relations_repository.h
@@ -201,11 +197,9 @@ SET(repositories
 	repositories/instance_list_player_repository.h
 	repositories/inventory_repository.h
 	repositories/inventory_snapshots_repository.h
-	repositories/inventory_versions_repository.h
 	repositories/ip_exemptions_repository.h
 	repositories/items_repository.h
 	repositories/item_tick_repository.h
-	repositories/keyring_repository.h
 	repositories/launcher_repository.h
 	repositories/launcher_zones_repository.h
 	repositories/ldon_trap_entries_repository.h
@@ -244,18 +238,15 @@ SET(repositories
 	repositories/pets_equipmentset_repository.h
 	repositories/pets_equipmentset_entries_repository.h
 	repositories/player_titlesets_repository.h
-	repositories/profanity_list_repository.h
 	repositories/proximities_repository.h
 	repositories/quest_globals_repository.h
 	repositories/raid_details_repository.h
-	repositories/raid_leaders_repository.h
 	repositories/raid_members_repository.h
 	repositories/reports_repository.h
 	repositories/respawn_times_repository.h
 	repositories/rule_sets_repository.h
 	repositories/rule_values_repository.h
 	repositories/saylink_repository.h
-	repositories/sharedbank_repository.h
 	repositories/skill_caps_repository.h
 	repositories/spawn2_repository.h
 	repositories/spawnentry_repository.h
@@ -274,7 +265,6 @@ SET(repositories
 	repositories/timers_repository.h
 	repositories/titles_repository.h
 	repositories/trader_repository.h
-	repositories/trader_audit_repository.h
 	repositories/tradeskill_recipe_repository.h
 	repositories/tradeskill_recipe_entries_repository.h
 	repositories/traps_repository.h
@@ -283,7 +273,6 @@ SET(repositories
 	repositories/variables_repository.h
 	repositories/veteran_reward_templates_repository.h
 	repositories/zone_repository.h
-	repositories/zone_flags_repository.h
 	repositories/zone_points_repository.h
 )
 
