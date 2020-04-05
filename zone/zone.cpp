@@ -502,73 +502,111 @@ void Zone::LoadTempMerchantData()
 void Zone::LoadNewMerchantData(uint32 merchantid) {
 
 	std::list<MerchantList> merlist;
-	std::string query = StringFormat("SELECT item, slot, faction_required, level_required, alt_currency_cost, "
-                                     "classes_required, probability FROM merchantlist WHERE merchantid=%d ORDER BY slot", merchantid);
+
+	std::string query = fmt::format(
+		SQL(
+			SELECT
+			  item,
+			  slot,
+			  faction_required,
+			  level_required,
+			  alt_currency_cost,
+			  classes_required,
+			  probability
+			FROM
+			  merchantlist
+			WHERE
+			  merchantid = {}
+			  {}
+			ORDER BY
+			  slot
+			),
+		merchantid,
+		ContentFilterCriteria::apply()
+	);
+
     auto results = content_db.QueryDatabase(query);
     if (!results.Success()) {
         return;
-    }
+	}
 
-    for(auto row = results.begin(); row != results.end(); ++row) {
-        MerchantList ml;
-        ml.id = merchantid;
-        ml.item = atoul(row[0]);
-        ml.slot = atoul(row[1]);
-        ml.faction_required = atoul(row[2]);
-        ml.level_required = atoul(row[3]);
-        ml.alt_currency_cost = atoul(row[4]);
-        ml.classes_required = atoul(row[5]);
-		ml.probability = atoul(row[6]);
-        merlist.push_back(ml);
-    }
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		MerchantList ml;
+		ml.id                = merchantid;
+		ml.item              = atoul(row[0]);
+		ml.slot              = atoul(row[1]);
+		ml.faction_required  = atoul(row[2]);
+		ml.level_required    = atoul(row[3]);
+		ml.alt_currency_cost = atoul(row[4]);
+		ml.classes_required  = atoul(row[5]);
+		ml.probability       = atoul(row[6]);
+		merlist.push_back(ml);
+	}
 
-    merchanttable[merchantid] = merlist;
+	merchanttable[merchantid] = merlist;
 }
 
 void Zone::GetMerchantDataForZoneLoad() {
 	LogInfo("Loading Merchant Lists");
-	std::string query = StringFormat(
-		"SELECT																		   "
-		"DISTINCT ml.merchantid,													   "
-		"ml.slot,																	   "
-		"ml.item,																	   "
-		"ml.faction_required,														   "
-		"ml.level_required,															   "
-		"ml.alt_currency_cost,														   "
-		"ml.classes_required,														   "
-		"ml.probability																   "
-		"FROM																		   "
-		"merchantlist AS ml,														   "
-		"npc_types AS nt,															   "
-		"spawnentry AS se,															   "
-		"spawn2 AS s2																   "
-		"WHERE nt.merchant_id = ml.merchantid AND nt.id = se.npcid					   "
-		"AND se.spawngroupid = s2.spawngroupid AND s2.zone = '%s' AND s2.version = %i  "
-		"ORDER BY ml.slot															   ", GetShortName(), GetInstanceVersion());
+	std::string query = fmt::format(
+		SQL (
+			SELECT
+			  DISTINCT ml.merchantid,
+			  ml.slot,
+			  ml.item,
+			  ml.faction_required,
+			  ml.level_required,
+			  ml.alt_currency_cost,
+			  ml.classes_required,
+			  ml.probability
+			FROM
+			  merchantlist AS ml,
+			  npc_types AS nt,
+			  spawnentry AS se,
+			  spawn2 AS s2
+			WHERE
+			  nt.merchant_id = ml.merchantid
+			  AND nt.id = se.npcid
+			  AND se.spawngroupid = s2.spawngroupid
+			  AND s2.zone = '{}'
+			  AND s2.version = {}
+			  {}
+			ORDER BY
+			  ml.slot
+		),
+		GetShortName(),
+		GetInstanceVersion(),
+		ContentFilterCriteria::apply()
+	);
+
 	auto results = content_db.QueryDatabase(query);
-	std::map<uint32, std::list<MerchantList> >::iterator cur;
-	uint32 npcid = 0;
+
+	std::map<uint32, std::list<MerchantList> >::iterator merchant_list;
+
+	uint32 npc_id = 0;
+
 	if (results.RowCount() == 0) {
 		LogDebug("No Merchant Data found for [{}]", GetShortName());
 		return;
 	}
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		MerchantList ml;
-		ml.id = atoul(row[0]);
-		if (npcid != ml.id) {
-			cur = merchanttable.find(ml.id);
-			if (cur == merchanttable.end()) {
+		MerchantList merchant_list_entry{};
+		merchant_list_entry.id = atoul(row[0]);
+		if (npc_id != merchant_list_entry.id) {
+			merchant_list = merchanttable.find(merchant_list_entry.id);
+			if (merchant_list == merchanttable.end()) {
 				std::list<MerchantList> empty;
-				merchanttable[ml.id] = empty;
-				cur = merchanttable.find(ml.id);
+				merchanttable[merchant_list_entry.id] = empty;
+				merchant_list = merchanttable.find(merchant_list_entry.id);
 			}
-			npcid = ml.id;
+
+			npc_id = merchant_list_entry.id;
 		}
 
-		auto iter = cur->second.begin();
+		auto iter  = merchant_list->second.begin();
 		bool found = false;
-		while (iter != cur->second.end()) {
-			if ((*iter).item == ml.id) {
+		while (iter != merchant_list->second.end()) {
+			if ((*iter).item == merchant_list_entry.id) {
 				found = true;
 				break;
 			}
@@ -579,14 +617,15 @@ void Zone::GetMerchantDataForZoneLoad() {
 			continue;
 		}
 
-		ml.slot = atoul(row[1]);
-		ml.item = atoul(row[2]);
-		ml.faction_required = atoul(row[3]);
-		ml.level_required = atoul(row[4]);
-		ml.alt_currency_cost = atoul(row[5]);
-		ml.classes_required = atoul(row[6]);
-		ml.probability = atoul(row[7]);
-		cur->second.push_back(ml);
+		merchant_list_entry.slot              = atoul(row[1]);
+		merchant_list_entry.item              = atoul(row[2]);
+		merchant_list_entry.faction_required  = atoul(row[3]);
+		merchant_list_entry.level_required    = atoul(row[4]);
+		merchant_list_entry.alt_currency_cost = atoul(row[5]);
+		merchant_list_entry.classes_required  = atoul(row[6]);
+		merchant_list_entry.probability       = atoul(row[7]);
+
+		merchant_list->second.push_back(merchant_list_entry);
 	}
 
 }
