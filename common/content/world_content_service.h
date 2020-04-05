@@ -98,7 +98,7 @@ public:
 
 	bool IsClassicEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::Classic; }
 	bool IsTheRuinsOfKunarkEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::TheRuinsOfKunark; }
-	bool IsTheShardsOfVeliousEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::TheShardsOfVelious; }
+	bool IsTheScarsOfVeliousEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::TheScarsOfVelious; }
 	bool IsTheShadowsOfLuclinEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::TheShadowsOfLuclin; }
 	bool IsThePlanesOfPowerEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::ThePlanesOfPower; }
 	bool IsTheLegacyOfYkeshaEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::TheLegacyOfYkesha; }
@@ -126,7 +126,7 @@ public:
 
 	bool IsCurrentExpansionClassic() { return current_expansion == Expansion::ExpansionNumber::Classic; }
 	bool IsCurrentExpansionTheRuinsOfKunark() { return current_expansion == Expansion::ExpansionNumber::TheRuinsOfKunark; }
-	bool IsCurrentExpansionTheShardsOfVelious() { return current_expansion == Expansion::ExpansionNumber::TheShardsOfVelious; }
+	bool IsCurrentExpansionTheScarsOfVelious() { return current_expansion == Expansion::ExpansionNumber::TheScarsOfVelious; }
 	bool IsCurrentExpansionTheShadowsOfLuclin() { return current_expansion == Expansion::ExpansionNumber::TheShadowsOfLuclin; }
 	bool IsCurrentExpansionThePlanesOfPower() { return current_expansion == Expansion::ExpansionNumber::ThePlanesOfPower; }
 	bool IsCurrentExpansionTheLegacyOfYkesha() { return current_expansion == Expansion::ExpansionNumber::TheLegacyOfYkesha; }
