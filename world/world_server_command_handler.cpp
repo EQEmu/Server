@@ -325,7 +325,7 @@ namespace WorldserverCommandHandler {
 			"Current expansion is [{}] ({}) is Velious Enabled [{}] Criteria [{}]",
 			content_service.GetCurrentExpansion(),
 			Expansion::ExpansionName[content_service.GetCurrentExpansion()],
-			content_service.IsTheShardsOfVeliousEnabled() ? "true" : "false",
+			content_service.IsTheScarsOfVeliousEnabled() ? "true" : "false",
 			ContentFilterCriteria::apply()
 		);
 	}

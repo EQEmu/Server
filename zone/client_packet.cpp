@@ -61,6 +61,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "worldserver.h"
 #include "zone.h"
 #include "mob_movement_manager.h"
+#include "../common/repositories/criteria/content_filter_criteria.h"
 
 #ifdef BOTS
 #include "bot.h"
@@ -11850,6 +11851,7 @@ void Client::Handle_OP_RecipesFavorite(const EQApplicationPacket *app)
 			)
 				OR (tr.must_learn & 0x3 = 0)
 			)
+				%s
 				GROUP BY
 				tr.id
 				HAVING
@@ -11862,10 +11864,12 @@ void Client::Handle_OP_RecipesFavorite(const EQApplicationPacket *app)
 			)
 			) > 0
 				AND SUM(tre.componentcount) <= %u
+
 				LIMIT
 				100
 		),
 		favoriteIDs.c_str(),
+		ContentFilterCriteria::apply().c_str(),
 		containers.c_str(),
 		combineObjectSlots
 	);
@@ -11948,6 +11952,7 @@ void Client::Handle_OP_RecipesSearch(const EQApplicationPacket *app)
 					)
 				OR (tr.must_learn & 0x3 = 0)
 			)
+			{}
 				GROUP BY
 				tr.id
 				HAVING
@@ -11960,12 +11965,14 @@ void Client::Handle_OP_RecipesSearch(const EQApplicationPacket *app)
 			)
 			) > 0
 				AND SUM(tre.componentcount) <= {}
+
 				LIMIT
 				200
 		),
 		search_clause,
 		p_recipes_search_struct->mintrivial,
 		p_recipes_search_struct->maxtrivial,
+		ContentFilterCriteria::apply(),
 		containers_where_clause,
 		combine_object_slots
 	);
