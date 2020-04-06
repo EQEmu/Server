@@ -2946,6 +2946,17 @@ uint32 QuestManager::getcharidbyname(const char* name) {
 	return database.GetCharacterID(name);
 }
 
+int QuestManager::getcurrencyid(uint32 item_id) {
+	auto iter = zone->AlternateCurrencies.begin();
+	while (iter != zone->AlternateCurrencies.end()) {
+		if (item_id == (*iter).item_id) {
+			return (*iter).id;
+		}
+		++iter;
+	}
+	return 0;
+}
+
 const char* QuestManager::getguildnamebyid(int guild_id) {
 	if (guild_id > 0)
 		return guild_mgr.GetGuildName(guild_id);
