@@ -3231,7 +3231,6 @@ XS(XS__saylink) {
 	XSRETURN(1);
 }
 
-
 XS(XS__getcharnamebyid);
 XS(XS__getcharnamebyid) {
 	dXSARGS;
