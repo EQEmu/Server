@@ -107,7 +107,9 @@ public:
 	void level(int newlevel);
 	void traindisc(int discipline_tome_item_id);
 	bool isdisctome(int item_id);
+	std::string getracename(uint16 race_id);
 	std::string getspellname(uint32 spell_id);
+	std::string getskillname(int skill_id);
 	void safemove();
 	void rain(int weather);
 	void snow(int weather);
@@ -257,10 +259,12 @@ public:
 	std::string saylink(char *saylink_text, bool silent, const char *link_name);
 	const char* getcharnamebyid(uint32 char_id);
 	uint32 getcharidbyname(const char* name);
+	int getcurrencyid(uint32 item_id);
 	int getcurrencyitemid(int currency_id);
 	const char* getguildnamebyid(int guild_id);
 	int getguildidbycharid(uint32 char_id);
 	int getgroupidbycharid(uint32 char_id);
+	const char* getnpcnamebyid(uint32 npc_id);
 	int getraididbycharid(uint32 char_id);
 	void SetRunning(bool val);
 	bool IsRunning();
