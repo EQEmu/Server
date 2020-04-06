@@ -55,9 +55,25 @@ uint32 ZoneDatabase::GetZoneForage(uint32 ZoneID, uint8 skill) {
 	}
 
 	uint32 chancepool = 0;
-    std::string query = StringFormat("SELECT itemid, chance FROM "
-                                    "forage WHERE zoneid = '%i' and level <= '%i' "
-                                    "LIMIT %i", ZoneID, skill, FORAGE_ITEM_LIMIT);
+    std::string query = fmt::format(
+    	SQL(
+    		SELECT
+			  itemid,
+			  chance
+			FROM
+			  forage
+			WHERE
+			  zoneid = '{}'
+			  and level <= '{}'
+			  {}
+			LIMIT
+			 {}
+    		),
+    	ZoneID,
+    	skill,
+    	ContentFilterCriteria::apply(),
+    	FORAGE_ITEM_LIMIT
+	);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		return 0;
