@@ -99,7 +99,8 @@ if ($requested_table_to_generate eq "all" || !$requested_table_to_generate) {
     }
 }
 
-my $generated_repository_files = "";
+my $generated_base_repository_files = "";
+my $generated_repository_files      = "";
 
 foreach my $table_to_generate (@tables) {
 
@@ -117,9 +118,9 @@ foreach my $table_to_generate (@tables) {
     # These tables don't have a typical schema
     my @table_ignore_list = (
         "character_enabledtasks",
-        "grid", # Manually created
-        "grid_entries", # Manually created
-        "tradeskill_recipe", # Manually created
+        "grid",                  # Manually created
+        "grid_entries",          # Manually created
+        "tradeskill_recipe",     # Manually created
         "character_recipe_list", # Manually created
         "guild_bank",
         "inventory_versions",
@@ -212,13 +213,13 @@ foreach my $table_to_generate (@tables) {
         my $column_key       = $row[5];
         my $column_default   = ($row[6] ? $row[6] : "");
 
-        if ($column_key eq "PRI" || ($ordinal_position == 0 && $column_name=~/id/i)) {
+        if ($column_key eq "PRI" || ($ordinal_position == 0 && $column_name =~ /id/i)) {
             $table_primary_key{$table_name} = $column_name;
         }
 
         my $default_value = 0;
         if ($column_default ne "NULL" && $column_default ne "") {
-            $column_default=~s/'/"/g;
+            $column_default =~ s/'/"/g;
             $default_value = $column_default;
         }
         elsif ($column_default eq "''") {
@@ -286,6 +287,26 @@ foreach my $table_to_generate (@tables) {
     }
 
     #############################################
+    # base repository template
+    #############################################
+    my $base_repository_template_file = './common/repositories/template/base_repository.template';
+    my $base_repository_template      = "";
+    if (-e $base_repository_template_file) {
+        open(my $fh, '<:encoding(UTF-8)', $base_repository_template_file) or die "Could not open file '$base_repository_template_file' $!";
+
+        while (my $line               = <$fh>) {
+            $base_repository_template .= $line;
+        }
+
+        close $fh;
+    }
+
+    if (trim($base_repository_template) eq "") {
+        print "Base repository template not found! [$repository_template_file]\n";
+        exit;
+    }
+
+    #############################################
     # repository template
     #############################################
     my $repository_template_file = './common/repositories/template/repository.template';
@@ -300,19 +321,9 @@ foreach my $table_to_generate (@tables) {
         close $fh;
     }
 
-    if (trim($repository_template) eq "") {
+    if (trim($repository_template_file) eq "") {
         print "Repository template not found! [$repository_template_file]\n";
         exit;
-    }
-
-    foreach my $column (keys %{$table_data{$table_to_generate}}) {
-        my $column_data      = $table_data{$table_to_generate}{$column};
-        my $data_type        = $column_data->[0];
-        my $column_type      = $column_data->[1];
-        my $ordinal_position = $column_data->[2];
-        my $column_default   = $column_data->[3];
-
-        # print "Column [$column] data_type [$data_type] column_type [$column_type] ordinal [$ordinal_position]\n";
     }
 
     my $table_name_camel_case = $table_to_generate;
@@ -333,13 +344,34 @@ foreach my $table_to_generate (@tables) {
     chomp($insert_many_entries);
     chomp($all_entries);
 
+    use POSIX qw(strftime);
+    my $generated_date = strftime "%b%e, %Y", localtime;
+
     print "Table name CamelCase [$table_name_camel_case]\n";
     print "Table name UPPER_CASE [$table_name_upper_case]\n";
     print "Table PRIMARY KEY [$primary_key]\n";
     print "Database connection [$database_connection]\n";
 
-    my $new_repository = $repository_template;
+    # Base repository
+    my $new_base_repository = $base_repository_template;
+    $new_base_repository =~ s/\{\{TABLE_NAME_CLASS}}/$table_name_camel_case/g;
+    $new_base_repository =~ s/\{\{TABLE_NAME_UPPER}}/$table_name_upper_case/g;
+    $new_base_repository =~ s/\{\{PRIMARY_KEY_STRING}}/$primary_key/g;
+    $new_base_repository =~ s/\{\{TABLE_NAME_STRUCT}}/$table_name_camel_case/g;
+    $new_base_repository =~ s/\{\{TABLE_NAME_VAR}}/$table_to_generate/g;
+    $new_base_repository =~ s/\{\{DATABASE_CONNECTION}}/$database_connection/g;
+    $new_base_repository =~ s/\{\{DEFAULT_ENTRIES}}/$default_entries/g;
+    $new_base_repository =~ s/\{\{COLUMNS_LIST_QUOTED}}/$column_names_quoted/g;
+    $new_base_repository =~ s/\{\{TABLE_STRUCT_COLUMNS}}/$table_struct_columns/g;
+    $new_base_repository =~ s/\{\{FIND_ONE_ENTRIES}}/$find_one_entries/g;
+    $new_base_repository =~ s/\{\{UPDATE_ONE_ENTRIES}}/$update_one_entries/g;
+    $new_base_repository =~ s/\{\{INSERT_ONE_ENTRIES}}/$insert_one_entries/g;
+    $new_base_repository =~ s/\{\{INSERT_MANY_ENTRIES}}/$insert_many_entries/g;
+    $new_base_repository =~ s/\{\{ALL_ENTRIES}}/$all_entries/g;
+    $new_base_repository =~ s/\{\{GENERATED_DATE}}/$generated_date/g;
 
+    # Extended repository
+    my $new_repository = $repository_template;
     $new_repository =~ s/\{\{TABLE_NAME_CLASS}}/$table_name_camel_case/g;
     $new_repository =~ s/\{\{TABLE_NAME_UPPER}}/$table_name_upper_case/g;
     $new_repository =~ s/\{\{PRIMARY_KEY_STRING}}/$primary_key/g;
@@ -354,25 +386,41 @@ foreach my $table_to_generate (@tables) {
     $new_repository =~ s/\{\{INSERT_ONE_ENTRIES}}/$insert_one_entries/g;
     $new_repository =~ s/\{\{INSERT_MANY_ENTRIES}}/$insert_many_entries/g;
     $new_repository =~ s/\{\{ALL_ENTRIES}}/$all_entries/g;
+    $new_repository =~ s/\{\{GENERATED_DATE}}/$generated_date/g;
 
+    print $new_base_repository;
     print $new_repository;
 
+    #############################################
+    # write base repository
+    #############################################
+    my $generated_base_repository      = './common/repositories/base/base_' . $table_to_generate . '_repository.h';
+    my $cmake_generated_base_reference = $generated_base_repository;
+    $cmake_generated_base_reference =~ s/.\/common\///g;
+    $generated_base_repository_files .= $cmake_generated_base_reference . "\n";
+    open(FH, '>', $generated_base_repository) or die $!;
+    print FH $new_base_repository;
+    close(FH);
+
+    #############################################
+    # write repository
+    #############################################
     my $generated_repository      = './common/repositories/' . $table_to_generate . '_repository.h';
     my $cmake_generated_reference = $generated_repository;
-
     $cmake_generated_reference =~ s/.\/common\///g;
-
     $generated_repository_files .= $cmake_generated_reference . "\n";
-
     open(FH, '>', $generated_repository) or die $!;
-
     print FH $new_repository;
-
     close(FH);
+
 }
 
 print "\n# Make sure to add generated repositories to common/CMakeLists.txt under the repositories section\n\n";
 
+print "\n#Base repository files\n";
+print $generated_base_repository_files . "\n";
+
+print "\n#repository files\n";
 print $generated_repository_files . "\n";
 
 sub trim {

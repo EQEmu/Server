@@ -23,329 +23,45 @@
 
 #include "../database.h"
 #include "../string_util.h"
+#include "base/base_mail_repository.h"
 
-class MailRepository {
+class MailRepository: public BaseMailRepository {
 public:
-	struct Mail {
-		int         msgid;
-		int         charid;
-		int         timestamp;
-		std::string from;
-		std::string subject;
-		std::string body;
-		std::string to;
-		int8        status;
-	};
 
-	static std::string PrimaryKey()
-	{
-		return std::string("msgid");
-	}
+	/**
+	 * This file was auto generated on Apr 5, 2020 and can be modified and extended upon
+	 *
+	 * Base repository methods are automatically
+	 * generated in the "base" version of this repository. The base repository
+	 * is immutable and to be left untouched, while methods in this class
+	 * are used as extension methods for more specific persistence-layer
+     * accessors or mutators
+	 *
+	 * Base Methods (Subject to be expanded upon in time)
+	 *
+	 * InsertOne
+     * UpdateOne
+     * DeleteOne
+     * FindOne
+     * GetWhere(std::string where_filter)
+     * DeleteWhere(std::string where_filter)
+     * InsertMany
+     * All
+     *
+     * Example custom methods in a repository
+     *
+     * MailRepository::GetByZoneAndVersion(int zone_id, int zone_version)
+     * MailRepository::GetWhereNeverExpires()
+     * MailRepository::GetWhereXAndY()
+     * MailRepository::DeleteWhereXAndY()
+     *
+     * Most of the above could be covered by base methods, but if you as a developer
+     * find yourself re-using logic for other parts of the code, its best to just make a
+     * method that can be re-used easily elsewhere especially if it can use a base repository
+     * method and encapsulate filters there
+	 */
 
-	static std::vector<std::string> Columns()
-	{
-		return {
-			"msgid",
-			"charid",
-			"timestamp",
-			"from",
-			"subject",
-			"body",
-			"to",
-			"status",
-		};
-	}
-
-	static std::string ColumnsRaw()
-	{
-		return std::string(implode(", ", Columns()));
-	}
-
-	static std::string InsertColumnsRaw()
-	{
-		std::vector<std::string> insert_columns;
-
-		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
-			insert_columns.push_back(column);
-		}
-
-		return std::string(implode(", ", insert_columns));
-	}
-
-	static std::string TableName()
-	{
-		return std::string("mail");
-	}
-
-	static std::string BaseSelect()
-	{
-		return fmt::format(
-			"SELECT {} FROM {}",
-			ColumnsRaw(),
-			TableName()
-		);
-	}
-
-	static std::string BaseInsert()
-	{
-		return fmt::format(
-			"INSERT INTO {} ({}) ",
-			TableName(),
-			InsertColumnsRaw()
-		);
-	}
-
-	static Mail NewEntity()
-	{
-		Mail entry{};
-
-		entry.msgid     = 0;
-		entry.charid    = 0;
-		entry.timestamp = 0;
-		entry.from      = "";
-		entry.subject   = "";
-		entry.body      = "";
-		entry.to        = "";
-		entry.status    = 0;
-
-		return entry;
-	}
-
-	static Mail GetMailEntry(
-		const std::vector<Mail> &mails,
-		int mail_id
-	)
-	{
-		for (auto &mail : mails) {
-			if (mail.msgid == mail_id) {
-				return mail;
-			}
-		}
-
-		return NewEntity();
-	}
-
-	static Mail FindOne(
-		int mail_id
-	)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
-				BaseSelect(),
-				mail_id
-			)
-		);
-
-		auto row = results.begin();
-		if (results.RowCount() == 1) {
-			Mail entry{};
-
-			entry.msgid     = atoi(row[0]);
-			entry.charid    = atoi(row[1]);
-			entry.timestamp = atoi(row[2]);
-			entry.from      = row[3] ? row[3] : "";
-			entry.subject   = row[4] ? row[4] : "";
-			entry.body      = row[5] ? row[5] : "";
-			entry.to        = row[6] ? row[6] : "";
-			entry.status    = atoi(row[7]);
-
-			return entry;
-		}
-
-		return NewEntity();
-	}
-
-	static int DeleteOne(
-		int mail_id
-	)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"DELETE FROM {} WHERE {} = {}",
-				TableName(),
-				PrimaryKey(),
-				mail_id
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static int UpdateOne(
-		Mail mail_entry
-	)
-	{
-		std::vector<std::string> update_values;
-
-		auto columns = Columns();
-
-		update_values.push_back(columns[1] + " = " + std::to_string(mail_entry.charid));
-		update_values.push_back(columns[2] + " = " + std::to_string(mail_entry.timestamp));
-		update_values.push_back(columns[3] + " = '" + EscapeString(mail_entry.from) + "'");
-		update_values.push_back(columns[4] + " = '" + EscapeString(mail_entry.subject) + "'");
-		update_values.push_back(columns[5] + " = '" + EscapeString(mail_entry.body) + "'");
-		update_values.push_back(columns[6] + " = '" + EscapeString(mail_entry.to) + "'");
-		update_values.push_back(columns[7] + " = " + std::to_string(mail_entry.status));
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"UPDATE {} SET {} WHERE {} = {}",
-				TableName(),
-				implode(", ", update_values),
-				PrimaryKey(),
-				mail_entry.msgid
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static Mail InsertOne(
-		Mail mail_entry
-	)
-	{
-		std::vector<std::string> insert_values;
-
-		insert_values.push_back(std::to_string(mail_entry.charid));
-		insert_values.push_back(std::to_string(mail_entry.timestamp));
-		insert_values.push_back("'" + EscapeString(mail_entry.from) + "'");
-		insert_values.push_back("'" + EscapeString(mail_entry.subject) + "'");
-		insert_values.push_back("'" + EscapeString(mail_entry.body) + "'");
-		insert_values.push_back("'" + EscapeString(mail_entry.to) + "'");
-		insert_values.push_back(std::to_string(mail_entry.status));
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} VALUES ({})",
-				BaseInsert(),
-				implode(",", insert_values)
-			)
-		);
-
-		if (results.Success()) {
-			mail_entry.id = results.LastInsertedID();
-			return mail_entry;
-		}
-
-		mail_entry = MailRepository::NewEntity();
-
-		return mail_entry;
-	}
-
-	static int InsertMany(
-		std::vector<Mail> mail_entries
-	)
-	{
-		std::vector<std::string> insert_chunks;
-
-		for (auto &mail_entry: mail_entries) {
-			std::vector<std::string> insert_values;
-
-			insert_values.push_back(std::to_string(mail_entry.charid));
-			insert_values.push_back(std::to_string(mail_entry.timestamp));
-			insert_values.push_back("'" + EscapeString(mail_entry.from) + "'");
-			insert_values.push_back("'" + EscapeString(mail_entry.subject) + "'");
-			insert_values.push_back("'" + EscapeString(mail_entry.body) + "'");
-			insert_values.push_back("'" + EscapeString(mail_entry.to) + "'");
-			insert_values.push_back(std::to_string(mail_entry.status));
-
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
-		}
-
-		std::vector<std::string> insert_values;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} VALUES {}",
-				BaseInsert(),
-				implode(",", insert_chunks)
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static std::vector<Mail> All()
-	{
-		std::vector<Mail> all_entries;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{}",
-				BaseSelect()
-			)
-		);
-
-		all_entries.reserve(results.RowCount());
-
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			Mail entry{};
-
-			entry.msgid     = atoi(row[0]);
-			entry.charid    = atoi(row[1]);
-			entry.timestamp = atoi(row[2]);
-			entry.from      = row[3] ? row[3] : "";
-			entry.subject   = row[4] ? row[4] : "";
-			entry.body      = row[5] ? row[5] : "";
-			entry.to        = row[6] ? row[6] : "";
-			entry.status    = atoi(row[7]);
-
-			all_entries.push_back(entry);
-		}
-
-		return all_entries;
-	}
-
-	static std::vector<Mail> GetWhere(std::string where_filter)
-	{
-		std::vector<Mail> all_entries;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} WHERE {}",
-				BaseSelect(),
-				where_filter
-			)
-		);
-
-		all_entries.reserve(results.RowCount());
-
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			Mail entry{};
-
-			entry.msgid     = atoi(row[0]);
-			entry.charid    = atoi(row[1]);
-			entry.timestamp = atoi(row[2]);
-			entry.from      = row[3] ? row[3] : "";
-			entry.subject   = row[4] ? row[4] : "";
-			entry.body      = row[5] ? row[5] : "";
-			entry.to        = row[6] ? row[6] : "";
-			entry.status    = atoi(row[7]);
-
-			all_entries.push_back(entry);
-		}
-
-		return all_entries;
-	}
-
-	static int DeleteWhere(std::string where_filter)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"DELETE FROM {} WHERE {}",
-				TableName(),
-				PrimaryKey(),
-				where_filter
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
+	// Custom extended repository methods here
 
 };
 

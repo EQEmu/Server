@@ -23,311 +23,45 @@
 
 #include "../database.h"
 #include "../string_util.h"
+#include "base/base_login_api_tokens_repository.h"
 
-class LoginApiTokensRepository {
+class LoginApiTokensRepository: public BaseLoginApiTokensRepository {
 public:
-	struct LoginApiTokens {
-		int         id;
-		std::string token;
-		int         can_write;
-		int         can_read;
-		std::string created_at;
-		std::string updated_at;
-	};
 
-	static std::string PrimaryKey()
-	{
-		return std::string("id");
-	}
+	/**
+	 * This file was auto generated on Apr 5, 2020 and can be modified and extended upon
+	 *
+	 * Base repository methods are automatically
+	 * generated in the "base" version of this repository. The base repository
+	 * is immutable and to be left untouched, while methods in this class
+	 * are used as extension methods for more specific persistence-layer
+     * accessors or mutators
+	 *
+	 * Base Methods (Subject to be expanded upon in time)
+	 *
+	 * InsertOne
+     * UpdateOne
+     * DeleteOne
+     * FindOne
+     * GetWhere(std::string where_filter)
+     * DeleteWhere(std::string where_filter)
+     * InsertMany
+     * All
+     *
+     * Example custom methods in a repository
+     *
+     * LoginApiTokensRepository::GetByZoneAndVersion(int zone_id, int zone_version)
+     * LoginApiTokensRepository::GetWhereNeverExpires()
+     * LoginApiTokensRepository::GetWhereXAndY()
+     * LoginApiTokensRepository::DeleteWhereXAndY()
+     *
+     * Most of the above could be covered by base methods, but if you as a developer
+     * find yourself re-using logic for other parts of the code, its best to just make a
+     * method that can be re-used easily elsewhere especially if it can use a base repository
+     * method and encapsulate filters there
+	 */
 
-	static std::vector<std::string> Columns()
-	{
-		return {
-			"id",
-			"token",
-			"can_write",
-			"can_read",
-			"created_at",
-			"updated_at",
-		};
-	}
-
-	static std::string ColumnsRaw()
-	{
-		return std::string(implode(", ", Columns()));
-	}
-
-	static std::string InsertColumnsRaw()
-	{
-		std::vector<std::string> insert_columns;
-
-		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
-			insert_columns.push_back(column);
-		}
-
-		return std::string(implode(", ", insert_columns));
-	}
-
-	static std::string TableName()
-	{
-		return std::string("login_api_tokens");
-	}
-
-	static std::string BaseSelect()
-	{
-		return fmt::format(
-			"SELECT {} FROM {}",
-			ColumnsRaw(),
-			TableName()
-		);
-	}
-
-	static std::string BaseInsert()
-	{
-		return fmt::format(
-			"INSERT INTO {} ({}) ",
-			TableName(),
-			InsertColumnsRaw()
-		);
-	}
-
-	static LoginApiTokens NewEntity()
-	{
-		LoginApiTokens entry{};
-
-		entry.id         = 0;
-		entry.token      = "";
-		entry.can_write  = 0;
-		entry.can_read   = 0;
-		entry.created_at = 0;
-		entry.updated_at = current_timestamp();
-
-		return entry;
-	}
-
-	static LoginApiTokens GetLoginApiTokensEntry(
-		const std::vector<LoginApiTokens> &login_api_tokenss,
-		int login_api_tokens_id
-	)
-	{
-		for (auto &login_api_tokens : login_api_tokenss) {
-			if (login_api_tokens.id == login_api_tokens_id) {
-				return login_api_tokens;
-			}
-		}
-
-		return NewEntity();
-	}
-
-	static LoginApiTokens FindOne(
-		int login_api_tokens_id
-	)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
-				BaseSelect(),
-				login_api_tokens_id
-			)
-		);
-
-		auto row = results.begin();
-		if (results.RowCount() == 1) {
-			LoginApiTokens entry{};
-
-			entry.id         = atoi(row[0]);
-			entry.token      = row[1] ? row[1] : "";
-			entry.can_write  = atoi(row[2]);
-			entry.can_read   = atoi(row[3]);
-			entry.created_at = row[4] ? row[4] : "";
-			entry.updated_at = row[5] ? row[5] : "";
-
-			return entry;
-		}
-
-		return NewEntity();
-	}
-
-	static int DeleteOne(
-		int login_api_tokens_id
-	)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"DELETE FROM {} WHERE {} = {}",
-				TableName(),
-				PrimaryKey(),
-				login_api_tokens_id
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static int UpdateOne(
-		LoginApiTokens login_api_tokens_entry
-	)
-	{
-		std::vector<std::string> update_values;
-
-		auto columns = Columns();
-
-		update_values.push_back(columns[1] + " = '" + EscapeString(login_api_tokens_entry.token) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(login_api_tokens_entry.can_write));
-		update_values.push_back(columns[3] + " = " + std::to_string(login_api_tokens_entry.can_read));
-		update_values.push_back(columns[4] + " = '" + EscapeString(login_api_tokens_entry.created_at) + "'");
-		update_values.push_back(columns[5] + " = '" + EscapeString(login_api_tokens_entry.updated_at) + "'");
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"UPDATE {} SET {} WHERE {} = {}",
-				TableName(),
-				implode(", ", update_values),
-				PrimaryKey(),
-				login_api_tokens_entry.id
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static LoginApiTokens InsertOne(
-		LoginApiTokens login_api_tokens_entry
-	)
-	{
-		std::vector<std::string> insert_values;
-
-		insert_values.push_back("'" + EscapeString(login_api_tokens_entry.token) + "'");
-		insert_values.push_back(std::to_string(login_api_tokens_entry.can_write));
-		insert_values.push_back(std::to_string(login_api_tokens_entry.can_read));
-		insert_values.push_back("'" + EscapeString(login_api_tokens_entry.created_at) + "'");
-		insert_values.push_back("'" + EscapeString(login_api_tokens_entry.updated_at) + "'");
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} VALUES ({})",
-				BaseInsert(),
-				implode(",", insert_values)
-			)
-		);
-
-		if (results.Success()) {
-			login_api_tokens_entry.id = results.LastInsertedID();
-			return login_api_tokens_entry;
-		}
-
-		login_api_tokens_entry = LoginApiTokensRepository::NewEntity();
-
-		return login_api_tokens_entry;
-	}
-
-	static int InsertMany(
-		std::vector<LoginApiTokens> login_api_tokens_entries
-	)
-	{
-		std::vector<std::string> insert_chunks;
-
-		for (auto &login_api_tokens_entry: login_api_tokens_entries) {
-			std::vector<std::string> insert_values;
-
-			insert_values.push_back("'" + EscapeString(login_api_tokens_entry.token) + "'");
-			insert_values.push_back(std::to_string(login_api_tokens_entry.can_write));
-			insert_values.push_back(std::to_string(login_api_tokens_entry.can_read));
-			insert_values.push_back("'" + EscapeString(login_api_tokens_entry.created_at) + "'");
-			insert_values.push_back("'" + EscapeString(login_api_tokens_entry.updated_at) + "'");
-
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
-		}
-
-		std::vector<std::string> insert_values;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} VALUES {}",
-				BaseInsert(),
-				implode(",", insert_chunks)
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static std::vector<LoginApiTokens> All()
-	{
-		std::vector<LoginApiTokens> all_entries;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{}",
-				BaseSelect()
-			)
-		);
-
-		all_entries.reserve(results.RowCount());
-
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			LoginApiTokens entry{};
-
-			entry.id         = atoi(row[0]);
-			entry.token      = row[1] ? row[1] : "";
-			entry.can_write  = atoi(row[2]);
-			entry.can_read   = atoi(row[3]);
-			entry.created_at = row[4] ? row[4] : "";
-			entry.updated_at = row[5] ? row[5] : "";
-
-			all_entries.push_back(entry);
-		}
-
-		return all_entries;
-	}
-
-	static std::vector<LoginApiTokens> GetWhere(std::string where_filter)
-	{
-		std::vector<LoginApiTokens> all_entries;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} WHERE {}",
-				BaseSelect(),
-				where_filter
-			)
-		);
-
-		all_entries.reserve(results.RowCount());
-
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			LoginApiTokens entry{};
-
-			entry.id         = atoi(row[0]);
-			entry.token      = row[1] ? row[1] : "";
-			entry.can_write  = atoi(row[2]);
-			entry.can_read   = atoi(row[3]);
-			entry.created_at = row[4] ? row[4] : "";
-			entry.updated_at = row[5] ? row[5] : "";
-
-			all_entries.push_back(entry);
-		}
-
-		return all_entries;
-	}
-
-	static int DeleteWhere(std::string where_filter)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"DELETE FROM {} WHERE {}",
-				TableName(),
-				PrimaryKey(),
-				where_filter
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
+	// Custom extended repository methods here
 
 };
 

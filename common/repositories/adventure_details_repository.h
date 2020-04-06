@@ -23,338 +23,45 @@
 
 #include "../database.h"
 #include "../string_util.h"
+#include "base/base_adventure_details_repository.h"
 
-class AdventureDetailsRepository {
+class AdventureDetailsRepository: public BaseAdventureDetailsRepository {
 public:
-	struct AdventureDetails {
-		int   id;
-		int16 adventure_id;
-		int   instance_id;
-		int16 count;
-		int16 assassinate_count;
-		int8  status;
-		int   time_created;
-		int   time_zoned;
-		int   time_completed;
-	};
 
-	static std::string PrimaryKey()
-	{
-		return std::string("id");
-	}
+	/**
+	 * This file was auto generated on Apr 5, 2020 and can be modified and extended upon
+	 *
+	 * Base repository methods are automatically
+	 * generated in the "base" version of this repository. The base repository
+	 * is immutable and to be left untouched, while methods in this class
+	 * are used as extension methods for more specific persistence-layer
+     * accessors or mutators
+	 *
+	 * Base Methods (Subject to be expanded upon in time)
+	 *
+	 * InsertOne
+     * UpdateOne
+     * DeleteOne
+     * FindOne
+     * GetWhere(std::string where_filter)
+     * DeleteWhere(std::string where_filter)
+     * InsertMany
+     * All
+     *
+     * Example custom methods in a repository
+     *
+     * AdventureDetailsRepository::GetByZoneAndVersion(int zone_id, int zone_version)
+     * AdventureDetailsRepository::GetWhereNeverExpires()
+     * AdventureDetailsRepository::GetWhereXAndY()
+     * AdventureDetailsRepository::DeleteWhereXAndY()
+     *
+     * Most of the above could be covered by base methods, but if you as a developer
+     * find yourself re-using logic for other parts of the code, its best to just make a
+     * method that can be re-used easily elsewhere especially if it can use a base repository
+     * method and encapsulate filters there
+	 */
 
-	static std::vector<std::string> Columns()
-	{
-		return {
-			"id",
-			"adventure_id",
-			"instance_id",
-			"count",
-			"assassinate_count",
-			"status",
-			"time_created",
-			"time_zoned",
-			"time_completed",
-		};
-	}
-
-	static std::string ColumnsRaw()
-	{
-		return std::string(implode(", ", Columns()));
-	}
-
-	static std::string InsertColumnsRaw()
-	{
-		std::vector<std::string> insert_columns;
-
-		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
-			insert_columns.push_back(column);
-		}
-
-		return std::string(implode(", ", insert_columns));
-	}
-
-	static std::string TableName()
-	{
-		return std::string("adventure_details");
-	}
-
-	static std::string BaseSelect()
-	{
-		return fmt::format(
-			"SELECT {} FROM {}",
-			ColumnsRaw(),
-			TableName()
-		);
-	}
-
-	static std::string BaseInsert()
-	{
-		return fmt::format(
-			"INSERT INTO {} ({}) ",
-			TableName(),
-			InsertColumnsRaw()
-		);
-	}
-
-	static AdventureDetails NewEntity()
-	{
-		AdventureDetails entry{};
-
-		entry.id                = 0;
-		entry.adventure_id      = 0;
-		entry.instance_id       = -1;
-		entry.count             = 0;
-		entry.assassinate_count = 0;
-		entry.status            = 0;
-		entry.time_created      = 0;
-		entry.time_zoned        = 0;
-		entry.time_completed    = 0;
-
-		return entry;
-	}
-
-	static AdventureDetails GetAdventureDetailsEntry(
-		const std::vector<AdventureDetails> &adventure_detailss,
-		int adventure_details_id
-	)
-	{
-		for (auto &adventure_details : adventure_detailss) {
-			if (adventure_details.id == adventure_details_id) {
-				return adventure_details;
-			}
-		}
-
-		return NewEntity();
-	}
-
-	static AdventureDetails FindOne(
-		int adventure_details_id
-	)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
-				BaseSelect(),
-				adventure_details_id
-			)
-		);
-
-		auto row = results.begin();
-		if (results.RowCount() == 1) {
-			AdventureDetails entry{};
-
-			entry.id                = atoi(row[0]);
-			entry.adventure_id      = atoi(row[1]);
-			entry.instance_id       = atoi(row[2]);
-			entry.count             = atoi(row[3]);
-			entry.assassinate_count = atoi(row[4]);
-			entry.status            = atoi(row[5]);
-			entry.time_created      = atoi(row[6]);
-			entry.time_zoned        = atoi(row[7]);
-			entry.time_completed    = atoi(row[8]);
-
-			return entry;
-		}
-
-		return NewEntity();
-	}
-
-	static int DeleteOne(
-		int adventure_details_id
-	)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"DELETE FROM {} WHERE {} = {}",
-				TableName(),
-				PrimaryKey(),
-				adventure_details_id
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static int UpdateOne(
-		AdventureDetails adventure_details_entry
-	)
-	{
-		std::vector<std::string> update_values;
-
-		auto columns = Columns();
-
-		update_values.push_back(columns[1] + " = " + std::to_string(adventure_details_entry.adventure_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(adventure_details_entry.instance_id));
-		update_values.push_back(columns[3] + " = " + std::to_string(adventure_details_entry.count));
-		update_values.push_back(columns[4] + " = " + std::to_string(adventure_details_entry.assassinate_count));
-		update_values.push_back(columns[5] + " = " + std::to_string(adventure_details_entry.status));
-		update_values.push_back(columns[6] + " = " + std::to_string(adventure_details_entry.time_created));
-		update_values.push_back(columns[7] + " = " + std::to_string(adventure_details_entry.time_zoned));
-		update_values.push_back(columns[8] + " = " + std::to_string(adventure_details_entry.time_completed));
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"UPDATE {} SET {} WHERE {} = {}",
-				TableName(),
-				implode(", ", update_values),
-				PrimaryKey(),
-				adventure_details_entry.id
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static AdventureDetails InsertOne(
-		AdventureDetails adventure_details_entry
-	)
-	{
-		std::vector<std::string> insert_values;
-
-		insert_values.push_back(std::to_string(adventure_details_entry.adventure_id));
-		insert_values.push_back(std::to_string(adventure_details_entry.instance_id));
-		insert_values.push_back(std::to_string(adventure_details_entry.count));
-		insert_values.push_back(std::to_string(adventure_details_entry.assassinate_count));
-		insert_values.push_back(std::to_string(adventure_details_entry.status));
-		insert_values.push_back(std::to_string(adventure_details_entry.time_created));
-		insert_values.push_back(std::to_string(adventure_details_entry.time_zoned));
-		insert_values.push_back(std::to_string(adventure_details_entry.time_completed));
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} VALUES ({})",
-				BaseInsert(),
-				implode(",", insert_values)
-			)
-		);
-
-		if (results.Success()) {
-			adventure_details_entry.id = results.LastInsertedID();
-			return adventure_details_entry;
-		}
-
-		adventure_details_entry = AdventureDetailsRepository::NewEntity();
-
-		return adventure_details_entry;
-	}
-
-	static int InsertMany(
-		std::vector<AdventureDetails> adventure_details_entries
-	)
-	{
-		std::vector<std::string> insert_chunks;
-
-		for (auto &adventure_details_entry: adventure_details_entries) {
-			std::vector<std::string> insert_values;
-
-			insert_values.push_back(std::to_string(adventure_details_entry.adventure_id));
-			insert_values.push_back(std::to_string(adventure_details_entry.instance_id));
-			insert_values.push_back(std::to_string(adventure_details_entry.count));
-			insert_values.push_back(std::to_string(adventure_details_entry.assassinate_count));
-			insert_values.push_back(std::to_string(adventure_details_entry.status));
-			insert_values.push_back(std::to_string(adventure_details_entry.time_created));
-			insert_values.push_back(std::to_string(adventure_details_entry.time_zoned));
-			insert_values.push_back(std::to_string(adventure_details_entry.time_completed));
-
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
-		}
-
-		std::vector<std::string> insert_values;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} VALUES {}",
-				BaseInsert(),
-				implode(",", insert_chunks)
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static std::vector<AdventureDetails> All()
-	{
-		std::vector<AdventureDetails> all_entries;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{}",
-				BaseSelect()
-			)
-		);
-
-		all_entries.reserve(results.RowCount());
-
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			AdventureDetails entry{};
-
-			entry.id                = atoi(row[0]);
-			entry.adventure_id      = atoi(row[1]);
-			entry.instance_id       = atoi(row[2]);
-			entry.count             = atoi(row[3]);
-			entry.assassinate_count = atoi(row[4]);
-			entry.status            = atoi(row[5]);
-			entry.time_created      = atoi(row[6]);
-			entry.time_zoned        = atoi(row[7]);
-			entry.time_completed    = atoi(row[8]);
-
-			all_entries.push_back(entry);
-		}
-
-		return all_entries;
-	}
-
-	static std::vector<AdventureDetails> GetWhere(std::string where_filter)
-	{
-		std::vector<AdventureDetails> all_entries;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} WHERE {}",
-				BaseSelect(),
-				where_filter
-			)
-		);
-
-		all_entries.reserve(results.RowCount());
-
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			AdventureDetails entry{};
-
-			entry.id                = atoi(row[0]);
-			entry.adventure_id      = atoi(row[1]);
-			entry.instance_id       = atoi(row[2]);
-			entry.count             = atoi(row[3]);
-			entry.assassinate_count = atoi(row[4]);
-			entry.status            = atoi(row[5]);
-			entry.time_created      = atoi(row[6]);
-			entry.time_zoned        = atoi(row[7]);
-			entry.time_completed    = atoi(row[8]);
-
-			all_entries.push_back(entry);
-		}
-
-		return all_entries;
-	}
-
-	static int DeleteWhere(std::string where_filter)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"DELETE FROM {} WHERE {}",
-				TableName(),
-				PrimaryKey(),
-				where_filter
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
+	// Custom extended repository methods here
 
 };
 

@@ -23,275 +23,45 @@
 
 #include "../database.h"
 #include "../string_util.h"
+#include "base/base_adventure_template_entry_repository.h"
 
-class AdventureTemplateEntryRepository {
+class AdventureTemplateEntryRepository: public BaseAdventureTemplateEntryRepository {
 public:
-	struct AdventureTemplateEntry {
-		int id;
-		int template_id;
-	};
 
-	static std::string PrimaryKey()
-	{
-		return std::string("template_id");
-	}
+	/**
+	 * This file was auto generated on Apr 5, 2020 and can be modified and extended upon
+	 *
+	 * Base repository methods are automatically
+	 * generated in the "base" version of this repository. The base repository
+	 * is immutable and to be left untouched, while methods in this class
+	 * are used as extension methods for more specific persistence-layer
+     * accessors or mutators
+	 *
+	 * Base Methods (Subject to be expanded upon in time)
+	 *
+	 * InsertOne
+     * UpdateOne
+     * DeleteOne
+     * FindOne
+     * GetWhere(std::string where_filter)
+     * DeleteWhere(std::string where_filter)
+     * InsertMany
+     * All
+     *
+     * Example custom methods in a repository
+     *
+     * AdventureTemplateEntryRepository::GetByZoneAndVersion(int zone_id, int zone_version)
+     * AdventureTemplateEntryRepository::GetWhereNeverExpires()
+     * AdventureTemplateEntryRepository::GetWhereXAndY()
+     * AdventureTemplateEntryRepository::DeleteWhereXAndY()
+     *
+     * Most of the above could be covered by base methods, but if you as a developer
+     * find yourself re-using logic for other parts of the code, its best to just make a
+     * method that can be re-used easily elsewhere especially if it can use a base repository
+     * method and encapsulate filters there
+	 */
 
-	static std::vector<std::string> Columns()
-	{
-		return {
-			"id",
-			"template_id",
-		};
-	}
-
-	static std::string ColumnsRaw()
-	{
-		return std::string(implode(", ", Columns()));
-	}
-
-	static std::string InsertColumnsRaw()
-	{
-		std::vector<std::string> insert_columns;
-
-		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
-			insert_columns.push_back(column);
-		}
-
-		return std::string(implode(", ", insert_columns));
-	}
-
-	static std::string TableName()
-	{
-		return std::string("adventure_template_entry");
-	}
-
-	static std::string BaseSelect()
-	{
-		return fmt::format(
-			"SELECT {} FROM {}",
-			ColumnsRaw(),
-			TableName()
-		);
-	}
-
-	static std::string BaseInsert()
-	{
-		return fmt::format(
-			"INSERT INTO {} ({}) ",
-			TableName(),
-			InsertColumnsRaw()
-		);
-	}
-
-	static AdventureTemplateEntry NewEntity()
-	{
-		AdventureTemplateEntry entry{};
-
-		entry.id          = 0;
-		entry.template_id = 0;
-
-		return entry;
-	}
-
-	static AdventureTemplateEntry GetAdventureTemplateEntryEntry(
-		const std::vector<AdventureTemplateEntry> &adventure_template_entrys,
-		int adventure_template_entry_id
-	)
-	{
-		for (auto &adventure_template_entry : adventure_template_entrys) {
-			if (adventure_template_entry.template_id == adventure_template_entry_id) {
-				return adventure_template_entry;
-			}
-		}
-
-		return NewEntity();
-	}
-
-	static AdventureTemplateEntry FindOne(
-		int adventure_template_entry_id
-	)
-	{
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
-				BaseSelect(),
-				adventure_template_entry_id
-			)
-		);
-
-		auto row = results.begin();
-		if (results.RowCount() == 1) {
-			AdventureTemplateEntry entry{};
-
-			entry.id          = atoi(row[0]);
-			entry.template_id = atoi(row[1]);
-
-			return entry;
-		}
-
-		return NewEntity();
-	}
-
-	static int DeleteOne(
-		int adventure_template_entry_id
-	)
-	{
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"DELETE FROM {} WHERE {} = {}",
-				TableName(),
-				PrimaryKey(),
-				adventure_template_entry_id
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static int UpdateOne(
-		AdventureTemplateEntry adventure_template_entry_entry
-	)
-	{
-		std::vector<std::string> update_values;
-
-		auto columns = Columns();
-
-
-
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"UPDATE {} SET {} WHERE {} = {}",
-				TableName(),
-				implode(", ", update_values),
-				PrimaryKey(),
-				adventure_template_entry_entry.template_id
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static AdventureTemplateEntry InsertOne(
-		AdventureTemplateEntry adventure_template_entry_entry
-	)
-	{
-		std::vector<std::string> insert_values;
-
-
-
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"{} VALUES ({})",
-				BaseInsert(),
-				implode(",", insert_values)
-			)
-		);
-
-		if (results.Success()) {
-			adventure_template_entry_entry.id = results.LastInsertedID();
-			return adventure_template_entry_entry;
-		}
-
-		adventure_template_entry_entry = AdventureTemplateEntryRepository::NewEntity();
-
-		return adventure_template_entry_entry;
-	}
-
-	static int InsertMany(
-		std::vector<AdventureTemplateEntry> adventure_template_entry_entries
-	)
-	{
-		std::vector<std::string> insert_chunks;
-
-		for (auto &adventure_template_entry_entry: adventure_template_entry_entries) {
-			std::vector<std::string> insert_values;
-
-
-
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
-		}
-
-		std::vector<std::string> insert_values;
-
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"{} VALUES {}",
-				BaseInsert(),
-				implode(",", insert_chunks)
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static std::vector<AdventureTemplateEntry> All()
-	{
-		std::vector<AdventureTemplateEntry> all_entries;
-
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"{}",
-				BaseSelect()
-			)
-		);
-
-		all_entries.reserve(results.RowCount());
-
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			AdventureTemplateEntry entry{};
-
-			entry.id          = atoi(row[0]);
-			entry.template_id = atoi(row[1]);
-
-			all_entries.push_back(entry);
-		}
-
-		return all_entries;
-	}
-
-	static std::vector<AdventureTemplateEntry> GetWhere(std::string where_filter)
-	{
-		std::vector<AdventureTemplateEntry> all_entries;
-
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"{} WHERE {}",
-				BaseSelect(),
-				where_filter
-			)
-		);
-
-		all_entries.reserve(results.RowCount());
-
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			AdventureTemplateEntry entry{};
-
-			entry.id          = atoi(row[0]);
-			entry.template_id = atoi(row[1]);
-
-			all_entries.push_back(entry);
-		}
-
-		return all_entries;
-	}
-
-	static int DeleteWhere(std::string where_filter)
-	{
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"DELETE FROM {} WHERE {}",
-				TableName(),
-				PrimaryKey(),
-				where_filter
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
+	// Custom extended repository methods here
 
 };
 

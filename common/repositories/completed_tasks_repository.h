@@ -23,287 +23,45 @@
 
 #include "../database.h"
 #include "../string_util.h"
+#include "base/base_completed_tasks_repository.h"
 
-class CompletedTasksRepository {
+class CompletedTasksRepository: public BaseCompletedTasksRepository {
 public:
-	struct CompletedTasks {
-		int charid;
-		int completedtime;
-		int taskid;
-		int activityid;
-	};
 
-	static std::string PrimaryKey()
-	{
-		return std::string("activityid");
-	}
+	/**
+	 * This file was auto generated on Apr 5, 2020 and can be modified and extended upon
+	 *
+	 * Base repository methods are automatically
+	 * generated in the "base" version of this repository. The base repository
+	 * is immutable and to be left untouched, while methods in this class
+	 * are used as extension methods for more specific persistence-layer
+     * accessors or mutators
+	 *
+	 * Base Methods (Subject to be expanded upon in time)
+	 *
+	 * InsertOne
+     * UpdateOne
+     * DeleteOne
+     * FindOne
+     * GetWhere(std::string where_filter)
+     * DeleteWhere(std::string where_filter)
+     * InsertMany
+     * All
+     *
+     * Example custom methods in a repository
+     *
+     * CompletedTasksRepository::GetByZoneAndVersion(int zone_id, int zone_version)
+     * CompletedTasksRepository::GetWhereNeverExpires()
+     * CompletedTasksRepository::GetWhereXAndY()
+     * CompletedTasksRepository::DeleteWhereXAndY()
+     *
+     * Most of the above could be covered by base methods, but if you as a developer
+     * find yourself re-using logic for other parts of the code, its best to just make a
+     * method that can be re-used easily elsewhere especially if it can use a base repository
+     * method and encapsulate filters there
+	 */
 
-	static std::vector<std::string> Columns()
-	{
-		return {
-			"charid",
-			"completedtime",
-			"taskid",
-			"activityid",
-		};
-	}
-
-	static std::string ColumnsRaw()
-	{
-		return std::string(implode(", ", Columns()));
-	}
-
-	static std::string InsertColumnsRaw()
-	{
-		std::vector<std::string> insert_columns;
-
-		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
-			insert_columns.push_back(column);
-		}
-
-		return std::string(implode(", ", insert_columns));
-	}
-
-	static std::string TableName()
-	{
-		return std::string("completed_tasks");
-	}
-
-	static std::string BaseSelect()
-	{
-		return fmt::format(
-			"SELECT {} FROM {}",
-			ColumnsRaw(),
-			TableName()
-		);
-	}
-
-	static std::string BaseInsert()
-	{
-		return fmt::format(
-			"INSERT INTO {} ({}) ",
-			TableName(),
-			InsertColumnsRaw()
-		);
-	}
-
-	static CompletedTasks NewEntity()
-	{
-		CompletedTasks entry{};
-
-		entry.charid        = 0;
-		entry.completedtime = 0;
-		entry.taskid        = 0;
-		entry.activityid    = 0;
-
-		return entry;
-	}
-
-	static CompletedTasks GetCompletedTasksEntry(
-		const std::vector<CompletedTasks> &completed_taskss,
-		int completed_tasks_id
-	)
-	{
-		for (auto &completed_tasks : completed_taskss) {
-			if (completed_tasks.activityid == completed_tasks_id) {
-				return completed_tasks;
-			}
-		}
-
-		return NewEntity();
-	}
-
-	static CompletedTasks FindOne(
-		int completed_tasks_id
-	)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
-				BaseSelect(),
-				completed_tasks_id
-			)
-		);
-
-		auto row = results.begin();
-		if (results.RowCount() == 1) {
-			CompletedTasks entry{};
-
-			entry.charid        = atoi(row[0]);
-			entry.completedtime = atoi(row[1]);
-			entry.taskid        = atoi(row[2]);
-			entry.activityid    = atoi(row[3]);
-
-			return entry;
-		}
-
-		return NewEntity();
-	}
-
-	static int DeleteOne(
-		int completed_tasks_id
-	)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"DELETE FROM {} WHERE {} = {}",
-				TableName(),
-				PrimaryKey(),
-				completed_tasks_id
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static int UpdateOne(
-		CompletedTasks completed_tasks_entry
-	)
-	{
-		std::vector<std::string> update_values;
-
-		auto columns = Columns();
-
-
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"UPDATE {} SET {} WHERE {} = {}",
-				TableName(),
-				implode(", ", update_values),
-				PrimaryKey(),
-				completed_tasks_entry.activityid
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static CompletedTasks InsertOne(
-		CompletedTasks completed_tasks_entry
-	)
-	{
-		std::vector<std::string> insert_values;
-
-
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} VALUES ({})",
-				BaseInsert(),
-				implode(",", insert_values)
-			)
-		);
-
-		if (results.Success()) {
-			completed_tasks_entry.id = results.LastInsertedID();
-			return completed_tasks_entry;
-		}
-
-		completed_tasks_entry = CompletedTasksRepository::NewEntity();
-
-		return completed_tasks_entry;
-	}
-
-	static int InsertMany(
-		std::vector<CompletedTasks> completed_tasks_entries
-	)
-	{
-		std::vector<std::string> insert_chunks;
-
-		for (auto &completed_tasks_entry: completed_tasks_entries) {
-			std::vector<std::string> insert_values;
-
-
-
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
-		}
-
-		std::vector<std::string> insert_values;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} VALUES {}",
-				BaseInsert(),
-				implode(",", insert_chunks)
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static std::vector<CompletedTasks> All()
-	{
-		std::vector<CompletedTasks> all_entries;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{}",
-				BaseSelect()
-			)
-		);
-
-		all_entries.reserve(results.RowCount());
-
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			CompletedTasks entry{};
-
-			entry.charid        = atoi(row[0]);
-			entry.completedtime = atoi(row[1]);
-			entry.taskid        = atoi(row[2]);
-			entry.activityid    = atoi(row[3]);
-
-			all_entries.push_back(entry);
-		}
-
-		return all_entries;
-	}
-
-	static std::vector<CompletedTasks> GetWhere(std::string where_filter)
-	{
-		std::vector<CompletedTasks> all_entries;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} WHERE {}",
-				BaseSelect(),
-				where_filter
-			)
-		);
-
-		all_entries.reserve(results.RowCount());
-
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			CompletedTasks entry{};
-
-			entry.charid        = atoi(row[0]);
-			entry.completedtime = atoi(row[1]);
-			entry.taskid        = atoi(row[2]);
-			entry.activityid    = atoi(row[3]);
-
-			all_entries.push_back(entry);
-		}
-
-		return all_entries;
-	}
-
-	static int DeleteWhere(std::string where_filter)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"DELETE FROM {} WHERE {}",
-				TableName(),
-				PrimaryKey(),
-				where_filter
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
+	// Custom extended repository methods here
 
 };
 

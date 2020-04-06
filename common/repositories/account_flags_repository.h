@@ -23,281 +23,45 @@
 
 #include "../database.h"
 #include "../string_util.h"
+#include "base/base_account_flags_repository.h"
 
-class AccountFlagsRepository {
+class AccountFlagsRepository: public BaseAccountFlagsRepository {
 public:
-	struct AccountFlags {
-		int         p_accid;
-		std::string p_flag;
-		std::string p_value;
-	};
 
-	static std::string PrimaryKey()
-	{
-		return std::string("p_flag");
-	}
+	/**
+	 * This file was auto generated on Apr 5, 2020 and can be modified and extended upon
+	 *
+	 * Base repository methods are automatically
+	 * generated in the "base" version of this repository. The base repository
+	 * is immutable and to be left untouched, while methods in this class
+	 * are used as extension methods for more specific persistence-layer
+     * accessors or mutators
+	 *
+	 * Base Methods (Subject to be expanded upon in time)
+	 *
+	 * InsertOne
+     * UpdateOne
+     * DeleteOne
+     * FindOne
+     * GetWhere(std::string where_filter)
+     * DeleteWhere(std::string where_filter)
+     * InsertMany
+     * All
+     *
+     * Example custom methods in a repository
+     *
+     * AccountFlagsRepository::GetByZoneAndVersion(int zone_id, int zone_version)
+     * AccountFlagsRepository::GetWhereNeverExpires()
+     * AccountFlagsRepository::GetWhereXAndY()
+     * AccountFlagsRepository::DeleteWhereXAndY()
+     *
+     * Most of the above could be covered by base methods, but if you as a developer
+     * find yourself re-using logic for other parts of the code, its best to just make a
+     * method that can be re-used easily elsewhere especially if it can use a base repository
+     * method and encapsulate filters there
+	 */
 
-	static std::vector<std::string> Columns()
-	{
-		return {
-			"p_accid",
-			"p_flag",
-			"p_value",
-		};
-	}
-
-	static std::string ColumnsRaw()
-	{
-		return std::string(implode(", ", Columns()));
-	}
-
-	static std::string InsertColumnsRaw()
-	{
-		std::vector<std::string> insert_columns;
-
-		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
-			insert_columns.push_back(column);
-		}
-
-		return std::string(implode(", ", insert_columns));
-	}
-
-	static std::string TableName()
-	{
-		return std::string("account_flags");
-	}
-
-	static std::string BaseSelect()
-	{
-		return fmt::format(
-			"SELECT {} FROM {}",
-			ColumnsRaw(),
-			TableName()
-		);
-	}
-
-	static std::string BaseInsert()
-	{
-		return fmt::format(
-			"INSERT INTO {} ({}) ",
-			TableName(),
-			InsertColumnsRaw()
-		);
-	}
-
-	static AccountFlags NewEntity()
-	{
-		AccountFlags entry{};
-
-		entry.p_accid = 0;
-		entry.p_flag  = "";
-		entry.p_value = "";
-
-		return entry;
-	}
-
-	static AccountFlags GetAccountFlagsEntry(
-		const std::vector<AccountFlags> &account_flagss,
-		int account_flags_id
-	)
-	{
-		for (auto &account_flags : account_flagss) {
-			if (account_flags.p_flag == account_flags_id) {
-				return account_flags;
-			}
-		}
-
-		return NewEntity();
-	}
-
-	static AccountFlags FindOne(
-		int account_flags_id
-	)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
-				BaseSelect(),
-				account_flags_id
-			)
-		);
-
-		auto row = results.begin();
-		if (results.RowCount() == 1) {
-			AccountFlags entry{};
-
-			entry.p_accid = atoi(row[0]);
-			entry.p_flag  = row[1] ? row[1] : "";
-			entry.p_value = row[2] ? row[2] : "";
-
-			return entry;
-		}
-
-		return NewEntity();
-	}
-
-	static int DeleteOne(
-		int account_flags_id
-	)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"DELETE FROM {} WHERE {} = {}",
-				TableName(),
-				PrimaryKey(),
-				account_flags_id
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static int UpdateOne(
-		AccountFlags account_flags_entry
-	)
-	{
-		std::vector<std::string> update_values;
-
-		auto columns = Columns();
-
-		update_values.push_back(columns[2] + " = '" + EscapeString(account_flags_entry.p_value) + "'");
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"UPDATE {} SET {} WHERE {} = {}",
-				TableName(),
-				implode(", ", update_values),
-				PrimaryKey(),
-				account_flags_entry.p_flag
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static AccountFlags InsertOne(
-		AccountFlags account_flags_entry
-	)
-	{
-		std::vector<std::string> insert_values;
-
-		insert_values.push_back("'" + EscapeString(account_flags_entry.p_value) + "'");
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} VALUES ({})",
-				BaseInsert(),
-				implode(",", insert_values)
-			)
-		);
-
-		if (results.Success()) {
-			account_flags_entry.id = results.LastInsertedID();
-			return account_flags_entry;
-		}
-
-		account_flags_entry = AccountFlagsRepository::NewEntity();
-
-		return account_flags_entry;
-	}
-
-	static int InsertMany(
-		std::vector<AccountFlags> account_flags_entries
-	)
-	{
-		std::vector<std::string> insert_chunks;
-
-		for (auto &account_flags_entry: account_flags_entries) {
-			std::vector<std::string> insert_values;
-
-			insert_values.push_back("'" + EscapeString(account_flags_entry.p_value) + "'");
-
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
-		}
-
-		std::vector<std::string> insert_values;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} VALUES {}",
-				BaseInsert(),
-				implode(",", insert_chunks)
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static std::vector<AccountFlags> All()
-	{
-		std::vector<AccountFlags> all_entries;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{}",
-				BaseSelect()
-			)
-		);
-
-		all_entries.reserve(results.RowCount());
-
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			AccountFlags entry{};
-
-			entry.p_accid = atoi(row[0]);
-			entry.p_flag  = row[1] ? row[1] : "";
-			entry.p_value = row[2] ? row[2] : "";
-
-			all_entries.push_back(entry);
-		}
-
-		return all_entries;
-	}
-
-	static std::vector<AccountFlags> GetWhere(std::string where_filter)
-	{
-		std::vector<AccountFlags> all_entries;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} WHERE {}",
-				BaseSelect(),
-				where_filter
-			)
-		);
-
-		all_entries.reserve(results.RowCount());
-
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			AccountFlags entry{};
-
-			entry.p_accid = atoi(row[0]);
-			entry.p_flag  = row[1] ? row[1] : "";
-			entry.p_value = row[2] ? row[2] : "";
-
-			all_entries.push_back(entry);
-		}
-
-		return all_entries;
-	}
-
-	static int DeleteWhere(std::string where_filter)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"DELETE FROM {} WHERE {}",
-				TableName(),
-				PrimaryKey(),
-				where_filter
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
+	// Custom extended repository methods here
 
 };
 

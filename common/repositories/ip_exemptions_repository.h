@@ -23,284 +23,45 @@
 
 #include "../database.h"
 #include "../string_util.h"
+#include "base/base_ip_exemptions_repository.h"
 
-class IpExemptionsRepository {
+class IpExemptionsRepository: public BaseIpExemptionsRepository {
 public:
-	struct IpExemptions {
-		int         exemption_id;
-		std::string exemption_ip;
-		int         exemption_amount;
-	};
 
-	static std::string PrimaryKey()
-	{
-		return std::string("exemption_id");
-	}
+	/**
+	 * This file was auto generated on Apr 5, 2020 and can be modified and extended upon
+	 *
+	 * Base repository methods are automatically
+	 * generated in the "base" version of this repository. The base repository
+	 * is immutable and to be left untouched, while methods in this class
+	 * are used as extension methods for more specific persistence-layer
+     * accessors or mutators
+	 *
+	 * Base Methods (Subject to be expanded upon in time)
+	 *
+	 * InsertOne
+     * UpdateOne
+     * DeleteOne
+     * FindOne
+     * GetWhere(std::string where_filter)
+     * DeleteWhere(std::string where_filter)
+     * InsertMany
+     * All
+     *
+     * Example custom methods in a repository
+     *
+     * IpExemptionsRepository::GetByZoneAndVersion(int zone_id, int zone_version)
+     * IpExemptionsRepository::GetWhereNeverExpires()
+     * IpExemptionsRepository::GetWhereXAndY()
+     * IpExemptionsRepository::DeleteWhereXAndY()
+     *
+     * Most of the above could be covered by base methods, but if you as a developer
+     * find yourself re-using logic for other parts of the code, its best to just make a
+     * method that can be re-used easily elsewhere especially if it can use a base repository
+     * method and encapsulate filters there
+	 */
 
-	static std::vector<std::string> Columns()
-	{
-		return {
-			"exemption_id",
-			"exemption_ip",
-			"exemption_amount",
-		};
-	}
-
-	static std::string ColumnsRaw()
-	{
-		return std::string(implode(", ", Columns()));
-	}
-
-	static std::string InsertColumnsRaw()
-	{
-		std::vector<std::string> insert_columns;
-
-		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
-			insert_columns.push_back(column);
-		}
-
-		return std::string(implode(", ", insert_columns));
-	}
-
-	static std::string TableName()
-	{
-		return std::string("ip_exemptions");
-	}
-
-	static std::string BaseSelect()
-	{
-		return fmt::format(
-			"SELECT {} FROM {}",
-			ColumnsRaw(),
-			TableName()
-		);
-	}
-
-	static std::string BaseInsert()
-	{
-		return fmt::format(
-			"INSERT INTO {} ({}) ",
-			TableName(),
-			InsertColumnsRaw()
-		);
-	}
-
-	static IpExemptions NewEntity()
-	{
-		IpExemptions entry{};
-
-		entry.exemption_id     = 0;
-		entry.exemption_ip     = "";
-		entry.exemption_amount = 0;
-
-		return entry;
-	}
-
-	static IpExemptions GetIpExemptionsEntry(
-		const std::vector<IpExemptions> &ip_exemptionss,
-		int ip_exemptions_id
-	)
-	{
-		for (auto &ip_exemptions : ip_exemptionss) {
-			if (ip_exemptions.exemption_id == ip_exemptions_id) {
-				return ip_exemptions;
-			}
-		}
-
-		return NewEntity();
-	}
-
-	static IpExemptions FindOne(
-		int ip_exemptions_id
-	)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
-				BaseSelect(),
-				ip_exemptions_id
-			)
-		);
-
-		auto row = results.begin();
-		if (results.RowCount() == 1) {
-			IpExemptions entry{};
-
-			entry.exemption_id     = atoi(row[0]);
-			entry.exemption_ip     = row[1] ? row[1] : "";
-			entry.exemption_amount = atoi(row[2]);
-
-			return entry;
-		}
-
-		return NewEntity();
-	}
-
-	static int DeleteOne(
-		int ip_exemptions_id
-	)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"DELETE FROM {} WHERE {} = {}",
-				TableName(),
-				PrimaryKey(),
-				ip_exemptions_id
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static int UpdateOne(
-		IpExemptions ip_exemptions_entry
-	)
-	{
-		std::vector<std::string> update_values;
-
-		auto columns = Columns();
-
-		update_values.push_back(columns[1] + " = '" + EscapeString(ip_exemptions_entry.exemption_ip) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(ip_exemptions_entry.exemption_amount));
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"UPDATE {} SET {} WHERE {} = {}",
-				TableName(),
-				implode(", ", update_values),
-				PrimaryKey(),
-				ip_exemptions_entry.exemption_id
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static IpExemptions InsertOne(
-		IpExemptions ip_exemptions_entry
-	)
-	{
-		std::vector<std::string> insert_values;
-
-		insert_values.push_back("'" + EscapeString(ip_exemptions_entry.exemption_ip) + "'");
-		insert_values.push_back(std::to_string(ip_exemptions_entry.exemption_amount));
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} VALUES ({})",
-				BaseInsert(),
-				implode(",", insert_values)
-			)
-		);
-
-		if (results.Success()) {
-			ip_exemptions_entry.id = results.LastInsertedID();
-			return ip_exemptions_entry;
-		}
-
-		ip_exemptions_entry = IpExemptionsRepository::NewEntity();
-
-		return ip_exemptions_entry;
-	}
-
-	static int InsertMany(
-		std::vector<IpExemptions> ip_exemptions_entries
-	)
-	{
-		std::vector<std::string> insert_chunks;
-
-		for (auto &ip_exemptions_entry: ip_exemptions_entries) {
-			std::vector<std::string> insert_values;
-
-			insert_values.push_back("'" + EscapeString(ip_exemptions_entry.exemption_ip) + "'");
-			insert_values.push_back(std::to_string(ip_exemptions_entry.exemption_amount));
-
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
-		}
-
-		std::vector<std::string> insert_values;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} VALUES {}",
-				BaseInsert(),
-				implode(",", insert_chunks)
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static std::vector<IpExemptions> All()
-	{
-		std::vector<IpExemptions> all_entries;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{}",
-				BaseSelect()
-			)
-		);
-
-		all_entries.reserve(results.RowCount());
-
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			IpExemptions entry{};
-
-			entry.exemption_id     = atoi(row[0]);
-			entry.exemption_ip     = row[1] ? row[1] : "";
-			entry.exemption_amount = atoi(row[2]);
-
-			all_entries.push_back(entry);
-		}
-
-		return all_entries;
-	}
-
-	static std::vector<IpExemptions> GetWhere(std::string where_filter)
-	{
-		std::vector<IpExemptions> all_entries;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} WHERE {}",
-				BaseSelect(),
-				where_filter
-			)
-		);
-
-		all_entries.reserve(results.RowCount());
-
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			IpExemptions entry{};
-
-			entry.exemption_id     = atoi(row[0]);
-			entry.exemption_ip     = row[1] ? row[1] : "";
-			entry.exemption_amount = atoi(row[2]);
-
-			all_entries.push_back(entry);
-		}
-
-		return all_entries;
-	}
-
-	static int DeleteWhere(std::string where_filter)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"DELETE FROM {} WHERE {}",
-				TableName(),
-				PrimaryKey(),
-				where_filter
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
+	// Custom extended repository methods here
 
 };
 

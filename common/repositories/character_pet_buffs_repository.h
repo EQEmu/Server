@@ -23,350 +23,45 @@
 
 #include "../database.h"
 #include "../string_util.h"
+#include "base/base_character_pet_buffs_repository.h"
 
-class CharacterPetBuffsRepository {
+class CharacterPetBuffsRepository: public BaseCharacterPetBuffsRepository {
 public:
-	struct CharacterPetBuffs {
-		int         char_id;
-		int         pet;
-		int         slot;
-		int         spell_id;
-		int8        caster_level;
-		std::string castername;
-		int         ticsremaining;
-		int         counters;
-		int         numhits;
-		int         rune;
-		int8        instrument_mod;
-	};
 
-	static std::string PrimaryKey()
-	{
-		return std::string("slot");
-	}
+	/**
+	 * This file was auto generated on Apr 5, 2020 and can be modified and extended upon
+	 *
+	 * Base repository methods are automatically
+	 * generated in the "base" version of this repository. The base repository
+	 * is immutable and to be left untouched, while methods in this class
+	 * are used as extension methods for more specific persistence-layer
+     * accessors or mutators
+	 *
+	 * Base Methods (Subject to be expanded upon in time)
+	 *
+	 * InsertOne
+     * UpdateOne
+     * DeleteOne
+     * FindOne
+     * GetWhere(std::string where_filter)
+     * DeleteWhere(std::string where_filter)
+     * InsertMany
+     * All
+     *
+     * Example custom methods in a repository
+     *
+     * CharacterPetBuffsRepository::GetByZoneAndVersion(int zone_id, int zone_version)
+     * CharacterPetBuffsRepository::GetWhereNeverExpires()
+     * CharacterPetBuffsRepository::GetWhereXAndY()
+     * CharacterPetBuffsRepository::DeleteWhereXAndY()
+     *
+     * Most of the above could be covered by base methods, but if you as a developer
+     * find yourself re-using logic for other parts of the code, its best to just make a
+     * method that can be re-used easily elsewhere especially if it can use a base repository
+     * method and encapsulate filters there
+	 */
 
-	static std::vector<std::string> Columns()
-	{
-		return {
-			"char_id",
-			"pet",
-			"slot",
-			"spell_id",
-			"caster_level",
-			"castername",
-			"ticsremaining",
-			"counters",
-			"numhits",
-			"rune",
-			"instrument_mod",
-		};
-	}
-
-	static std::string ColumnsRaw()
-	{
-		return std::string(implode(", ", Columns()));
-	}
-
-	static std::string InsertColumnsRaw()
-	{
-		std::vector<std::string> insert_columns;
-
-		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
-			insert_columns.push_back(column);
-		}
-
-		return std::string(implode(", ", insert_columns));
-	}
-
-	static std::string TableName()
-	{
-		return std::string("character_pet_buffs");
-	}
-
-	static std::string BaseSelect()
-	{
-		return fmt::format(
-			"SELECT {} FROM {}",
-			ColumnsRaw(),
-			TableName()
-		);
-	}
-
-	static std::string BaseInsert()
-	{
-		return fmt::format(
-			"INSERT INTO {} ({}) ",
-			TableName(),
-			InsertColumnsRaw()
-		);
-	}
-
-	static CharacterPetBuffs NewEntity()
-	{
-		CharacterPetBuffs entry{};
-
-		entry.char_id        = 0;
-		entry.pet            = 0;
-		entry.slot           = 0;
-		entry.spell_id       = 0;
-		entry.caster_level   = 0;
-		entry.castername     = "";
-		entry.ticsremaining  = 0;
-		entry.counters       = 0;
-		entry.numhits        = 0;
-		entry.rune           = 0;
-		entry.instrument_mod = 10;
-
-		return entry;
-	}
-
-	static CharacterPetBuffs GetCharacterPetBuffsEntry(
-		const std::vector<CharacterPetBuffs> &character_pet_buffss,
-		int character_pet_buffs_id
-	)
-	{
-		for (auto &character_pet_buffs : character_pet_buffss) {
-			if (character_pet_buffs.slot == character_pet_buffs_id) {
-				return character_pet_buffs;
-			}
-		}
-
-		return NewEntity();
-	}
-
-	static CharacterPetBuffs FindOne(
-		int character_pet_buffs_id
-	)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
-				BaseSelect(),
-				character_pet_buffs_id
-			)
-		);
-
-		auto row = results.begin();
-		if (results.RowCount() == 1) {
-			CharacterPetBuffs entry{};
-
-			entry.char_id        = atoi(row[0]);
-			entry.pet            = atoi(row[1]);
-			entry.slot           = atoi(row[2]);
-			entry.spell_id       = atoi(row[3]);
-			entry.caster_level   = atoi(row[4]);
-			entry.castername     = row[5] ? row[5] : "";
-			entry.ticsremaining  = atoi(row[6]);
-			entry.counters       = atoi(row[7]);
-			entry.numhits        = atoi(row[8]);
-			entry.rune           = atoi(row[9]);
-			entry.instrument_mod = atoi(row[10]);
-
-			return entry;
-		}
-
-		return NewEntity();
-	}
-
-	static int DeleteOne(
-		int character_pet_buffs_id
-	)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"DELETE FROM {} WHERE {} = {}",
-				TableName(),
-				PrimaryKey(),
-				character_pet_buffs_id
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static int UpdateOne(
-		CharacterPetBuffs character_pet_buffs_entry
-	)
-	{
-		std::vector<std::string> update_values;
-
-		auto columns = Columns();
-
-		update_values.push_back(columns[3] + " = " + std::to_string(character_pet_buffs_entry.spell_id));
-		update_values.push_back(columns[4] + " = " + std::to_string(character_pet_buffs_entry.caster_level));
-		update_values.push_back(columns[5] + " = '" + EscapeString(character_pet_buffs_entry.castername) + "'");
-		update_values.push_back(columns[6] + " = " + std::to_string(character_pet_buffs_entry.ticsremaining));
-		update_values.push_back(columns[7] + " = " + std::to_string(character_pet_buffs_entry.counters));
-		update_values.push_back(columns[8] + " = " + std::to_string(character_pet_buffs_entry.numhits));
-		update_values.push_back(columns[9] + " = " + std::to_string(character_pet_buffs_entry.rune));
-		update_values.push_back(columns[10] + " = " + std::to_string(character_pet_buffs_entry.instrument_mod));
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"UPDATE {} SET {} WHERE {} = {}",
-				TableName(),
-				implode(", ", update_values),
-				PrimaryKey(),
-				character_pet_buffs_entry.slot
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static CharacterPetBuffs InsertOne(
-		CharacterPetBuffs character_pet_buffs_entry
-	)
-	{
-		std::vector<std::string> insert_values;
-
-		insert_values.push_back(std::to_string(character_pet_buffs_entry.spell_id));
-		insert_values.push_back(std::to_string(character_pet_buffs_entry.caster_level));
-		insert_values.push_back("'" + EscapeString(character_pet_buffs_entry.castername) + "'");
-		insert_values.push_back(std::to_string(character_pet_buffs_entry.ticsremaining));
-		insert_values.push_back(std::to_string(character_pet_buffs_entry.counters));
-		insert_values.push_back(std::to_string(character_pet_buffs_entry.numhits));
-		insert_values.push_back(std::to_string(character_pet_buffs_entry.rune));
-		insert_values.push_back(std::to_string(character_pet_buffs_entry.instrument_mod));
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} VALUES ({})",
-				BaseInsert(),
-				implode(",", insert_values)
-			)
-		);
-
-		if (results.Success()) {
-			character_pet_buffs_entry.id = results.LastInsertedID();
-			return character_pet_buffs_entry;
-		}
-
-		character_pet_buffs_entry = CharacterPetBuffsRepository::NewEntity();
-
-		return character_pet_buffs_entry;
-	}
-
-	static int InsertMany(
-		std::vector<CharacterPetBuffs> character_pet_buffs_entries
-	)
-	{
-		std::vector<std::string> insert_chunks;
-
-		for (auto &character_pet_buffs_entry: character_pet_buffs_entries) {
-			std::vector<std::string> insert_values;
-
-			insert_values.push_back(std::to_string(character_pet_buffs_entry.spell_id));
-			insert_values.push_back(std::to_string(character_pet_buffs_entry.caster_level));
-			insert_values.push_back("'" + EscapeString(character_pet_buffs_entry.castername) + "'");
-			insert_values.push_back(std::to_string(character_pet_buffs_entry.ticsremaining));
-			insert_values.push_back(std::to_string(character_pet_buffs_entry.counters));
-			insert_values.push_back(std::to_string(character_pet_buffs_entry.numhits));
-			insert_values.push_back(std::to_string(character_pet_buffs_entry.rune));
-			insert_values.push_back(std::to_string(character_pet_buffs_entry.instrument_mod));
-
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
-		}
-
-		std::vector<std::string> insert_values;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} VALUES {}",
-				BaseInsert(),
-				implode(",", insert_chunks)
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static std::vector<CharacterPetBuffs> All()
-	{
-		std::vector<CharacterPetBuffs> all_entries;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{}",
-				BaseSelect()
-			)
-		);
-
-		all_entries.reserve(results.RowCount());
-
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterPetBuffs entry{};
-
-			entry.char_id        = atoi(row[0]);
-			entry.pet            = atoi(row[1]);
-			entry.slot           = atoi(row[2]);
-			entry.spell_id       = atoi(row[3]);
-			entry.caster_level   = atoi(row[4]);
-			entry.castername     = row[5] ? row[5] : "";
-			entry.ticsremaining  = atoi(row[6]);
-			entry.counters       = atoi(row[7]);
-			entry.numhits        = atoi(row[8]);
-			entry.rune           = atoi(row[9]);
-			entry.instrument_mod = atoi(row[10]);
-
-			all_entries.push_back(entry);
-		}
-
-		return all_entries;
-	}
-
-	static std::vector<CharacterPetBuffs> GetWhere(std::string where_filter)
-	{
-		std::vector<CharacterPetBuffs> all_entries;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} WHERE {}",
-				BaseSelect(),
-				where_filter
-			)
-		);
-
-		all_entries.reserve(results.RowCount());
-
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterPetBuffs entry{};
-
-			entry.char_id        = atoi(row[0]);
-			entry.pet            = atoi(row[1]);
-			entry.slot           = atoi(row[2]);
-			entry.spell_id       = atoi(row[3]);
-			entry.caster_level   = atoi(row[4]);
-			entry.castername     = row[5] ? row[5] : "";
-			entry.ticsremaining  = atoi(row[6]);
-			entry.counters       = atoi(row[7]);
-			entry.numhits        = atoi(row[8]);
-			entry.rune           = atoi(row[9]);
-			entry.instrument_mod = atoi(row[10]);
-
-			all_entries.push_back(entry);
-		}
-
-		return all_entries;
-	}
-
-	static int DeleteWhere(std::string where_filter)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"DELETE FROM {} WHERE {}",
-				TableName(),
-				PrimaryKey(),
-				where_filter
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
+	// Custom extended repository methods here
 
 };
 

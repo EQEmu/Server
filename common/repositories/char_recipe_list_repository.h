@@ -23,281 +23,45 @@
 
 #include "../database.h"
 #include "../string_util.h"
+#include "base/base_char_recipe_list_repository.h"
 
-class CharRecipeListRepository {
+class CharRecipeListRepository: public BaseCharRecipeListRepository {
 public:
-	struct CharRecipeList {
-		int char_id;
-		int recipe_id;
-		int madecount;
-	};
 
-	static std::string PrimaryKey()
-	{
-		return std::string("recipe_id");
-	}
+	/**
+	 * This file was auto generated on Apr 5, 2020 and can be modified and extended upon
+	 *
+	 * Base repository methods are automatically
+	 * generated in the "base" version of this repository. The base repository
+	 * is immutable and to be left untouched, while methods in this class
+	 * are used as extension methods for more specific persistence-layer
+     * accessors or mutators
+	 *
+	 * Base Methods (Subject to be expanded upon in time)
+	 *
+	 * InsertOne
+     * UpdateOne
+     * DeleteOne
+     * FindOne
+     * GetWhere(std::string where_filter)
+     * DeleteWhere(std::string where_filter)
+     * InsertMany
+     * All
+     *
+     * Example custom methods in a repository
+     *
+     * CharRecipeListRepository::GetByZoneAndVersion(int zone_id, int zone_version)
+     * CharRecipeListRepository::GetWhereNeverExpires()
+     * CharRecipeListRepository::GetWhereXAndY()
+     * CharRecipeListRepository::DeleteWhereXAndY()
+     *
+     * Most of the above could be covered by base methods, but if you as a developer
+     * find yourself re-using logic for other parts of the code, its best to just make a
+     * method that can be re-used easily elsewhere especially if it can use a base repository
+     * method and encapsulate filters there
+	 */
 
-	static std::vector<std::string> Columns()
-	{
-		return {
-			"char_id",
-			"recipe_id",
-			"madecount",
-		};
-	}
-
-	static std::string ColumnsRaw()
-	{
-		return std::string(implode(", ", Columns()));
-	}
-
-	static std::string InsertColumnsRaw()
-	{
-		std::vector<std::string> insert_columns;
-
-		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
-			insert_columns.push_back(column);
-		}
-
-		return std::string(implode(", ", insert_columns));
-	}
-
-	static std::string TableName()
-	{
-		return std::string("char_recipe_list");
-	}
-
-	static std::string BaseSelect()
-	{
-		return fmt::format(
-			"SELECT {} FROM {}",
-			ColumnsRaw(),
-			TableName()
-		);
-	}
-
-	static std::string BaseInsert()
-	{
-		return fmt::format(
-			"INSERT INTO {} ({}) ",
-			TableName(),
-			InsertColumnsRaw()
-		);
-	}
-
-	static CharRecipeList NewEntity()
-	{
-		CharRecipeList entry{};
-
-		entry.char_id   = 0;
-		entry.recipe_id = 0;
-		entry.madecount = 0;
-
-		return entry;
-	}
-
-	static CharRecipeList GetCharRecipeListEntry(
-		const std::vector<CharRecipeList> &char_recipe_lists,
-		int char_recipe_list_id
-	)
-	{
-		for (auto &char_recipe_list : char_recipe_lists) {
-			if (char_recipe_list.recipe_id == char_recipe_list_id) {
-				return char_recipe_list;
-			}
-		}
-
-		return NewEntity();
-	}
-
-	static CharRecipeList FindOne(
-		int char_recipe_list_id
-	)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
-				BaseSelect(),
-				char_recipe_list_id
-			)
-		);
-
-		auto row = results.begin();
-		if (results.RowCount() == 1) {
-			CharRecipeList entry{};
-
-			entry.char_id   = atoi(row[0]);
-			entry.recipe_id = atoi(row[1]);
-			entry.madecount = atoi(row[2]);
-
-			return entry;
-		}
-
-		return NewEntity();
-	}
-
-	static int DeleteOne(
-		int char_recipe_list_id
-	)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"DELETE FROM {} WHERE {} = {}",
-				TableName(),
-				PrimaryKey(),
-				char_recipe_list_id
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static int UpdateOne(
-		CharRecipeList char_recipe_list_entry
-	)
-	{
-		std::vector<std::string> update_values;
-
-		auto columns = Columns();
-
-		update_values.push_back(columns[2] + " = " + std::to_string(char_recipe_list_entry.madecount));
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"UPDATE {} SET {} WHERE {} = {}",
-				TableName(),
-				implode(", ", update_values),
-				PrimaryKey(),
-				char_recipe_list_entry.recipe_id
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static CharRecipeList InsertOne(
-		CharRecipeList char_recipe_list_entry
-	)
-	{
-		std::vector<std::string> insert_values;
-
-		insert_values.push_back(std::to_string(char_recipe_list_entry.madecount));
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} VALUES ({})",
-				BaseInsert(),
-				implode(",", insert_values)
-			)
-		);
-
-		if (results.Success()) {
-			char_recipe_list_entry.id = results.LastInsertedID();
-			return char_recipe_list_entry;
-		}
-
-		char_recipe_list_entry = CharRecipeListRepository::NewEntity();
-
-		return char_recipe_list_entry;
-	}
-
-	static int InsertMany(
-		std::vector<CharRecipeList> char_recipe_list_entries
-	)
-	{
-		std::vector<std::string> insert_chunks;
-
-		for (auto &char_recipe_list_entry: char_recipe_list_entries) {
-			std::vector<std::string> insert_values;
-
-			insert_values.push_back(std::to_string(char_recipe_list_entry.madecount));
-
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
-		}
-
-		std::vector<std::string> insert_values;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} VALUES {}",
-				BaseInsert(),
-				implode(",", insert_chunks)
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static std::vector<CharRecipeList> All()
-	{
-		std::vector<CharRecipeList> all_entries;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{}",
-				BaseSelect()
-			)
-		);
-
-		all_entries.reserve(results.RowCount());
-
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharRecipeList entry{};
-
-			entry.char_id   = atoi(row[0]);
-			entry.recipe_id = atoi(row[1]);
-			entry.madecount = atoi(row[2]);
-
-			all_entries.push_back(entry);
-		}
-
-		return all_entries;
-	}
-
-	static std::vector<CharRecipeList> GetWhere(std::string where_filter)
-	{
-		std::vector<CharRecipeList> all_entries;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} WHERE {}",
-				BaseSelect(),
-				where_filter
-			)
-		);
-
-		all_entries.reserve(results.RowCount());
-
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharRecipeList entry{};
-
-			entry.char_id   = atoi(row[0]);
-			entry.recipe_id = atoi(row[1]);
-			entry.madecount = atoi(row[2]);
-
-			all_entries.push_back(entry);
-		}
-
-		return all_entries;
-	}
-
-	static int DeleteWhere(std::string where_filter)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"DELETE FROM {} WHERE {}",
-				TableName(),
-				PrimaryKey(),
-				where_filter
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
+	// Custom extended repository methods here
 
 };
 

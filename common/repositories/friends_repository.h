@@ -23,281 +23,45 @@
 
 #include "../database.h"
 #include "../string_util.h"
+#include "base/base_friends_repository.h"
 
-class FriendsRepository {
+class FriendsRepository: public BaseFriendsRepository {
 public:
-	struct Friends {
-		int         charid;
-		int8        type;
-		std::string name;
-	};
 
-	static std::string PrimaryKey()
-	{
-		return std::string("name");
-	}
+	/**
+	 * This file was auto generated on Apr 5, 2020 and can be modified and extended upon
+	 *
+	 * Base repository methods are automatically
+	 * generated in the "base" version of this repository. The base repository
+	 * is immutable and to be left untouched, while methods in this class
+	 * are used as extension methods for more specific persistence-layer
+     * accessors or mutators
+	 *
+	 * Base Methods (Subject to be expanded upon in time)
+	 *
+	 * InsertOne
+     * UpdateOne
+     * DeleteOne
+     * FindOne
+     * GetWhere(std::string where_filter)
+     * DeleteWhere(std::string where_filter)
+     * InsertMany
+     * All
+     *
+     * Example custom methods in a repository
+     *
+     * FriendsRepository::GetByZoneAndVersion(int zone_id, int zone_version)
+     * FriendsRepository::GetWhereNeverExpires()
+     * FriendsRepository::GetWhereXAndY()
+     * FriendsRepository::DeleteWhereXAndY()
+     *
+     * Most of the above could be covered by base methods, but if you as a developer
+     * find yourself re-using logic for other parts of the code, its best to just make a
+     * method that can be re-used easily elsewhere especially if it can use a base repository
+     * method and encapsulate filters there
+	 */
 
-	static std::vector<std::string> Columns()
-	{
-		return {
-			"charid",
-			"type",
-			"name",
-		};
-	}
-
-	static std::string ColumnsRaw()
-	{
-		return std::string(implode(", ", Columns()));
-	}
-
-	static std::string InsertColumnsRaw()
-	{
-		std::vector<std::string> insert_columns;
-
-		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
-			insert_columns.push_back(column);
-		}
-
-		return std::string(implode(", ", insert_columns));
-	}
-
-	static std::string TableName()
-	{
-		return std::string("friends");
-	}
-
-	static std::string BaseSelect()
-	{
-		return fmt::format(
-			"SELECT {} FROM {}",
-			ColumnsRaw(),
-			TableName()
-		);
-	}
-
-	static std::string BaseInsert()
-	{
-		return fmt::format(
-			"INSERT INTO {} ({}) ",
-			TableName(),
-			InsertColumnsRaw()
-		);
-	}
-
-	static Friends NewEntity()
-	{
-		Friends entry{};
-
-		entry.charid = 0;
-		entry.type   = 1;
-		entry.name   = "";
-
-		return entry;
-	}
-
-	static Friends GetFriendsEntry(
-		const std::vector<Friends> &friendss,
-		int friends_id
-	)
-	{
-		for (auto &friends : friendss) {
-			if (friends.name == friends_id) {
-				return friends;
-			}
-		}
-
-		return NewEntity();
-	}
-
-	static Friends FindOne(
-		int friends_id
-	)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
-				BaseSelect(),
-				friends_id
-			)
-		);
-
-		auto row = results.begin();
-		if (results.RowCount() == 1) {
-			Friends entry{};
-
-			entry.charid = atoi(row[0]);
-			entry.type   = atoi(row[1]);
-			entry.name   = row[2] ? row[2] : "";
-
-			return entry;
-		}
-
-		return NewEntity();
-	}
-
-	static int DeleteOne(
-		int friends_id
-	)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"DELETE FROM {} WHERE {} = {}",
-				TableName(),
-				PrimaryKey(),
-				friends_id
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static int UpdateOne(
-		Friends friends_entry
-	)
-	{
-		std::vector<std::string> update_values;
-
-		auto columns = Columns();
-
-
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"UPDATE {} SET {} WHERE {} = {}",
-				TableName(),
-				implode(", ", update_values),
-				PrimaryKey(),
-				friends_entry.name
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static Friends InsertOne(
-		Friends friends_entry
-	)
-	{
-		std::vector<std::string> insert_values;
-
-
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} VALUES ({})",
-				BaseInsert(),
-				implode(",", insert_values)
-			)
-		);
-
-		if (results.Success()) {
-			friends_entry.id = results.LastInsertedID();
-			return friends_entry;
-		}
-
-		friends_entry = FriendsRepository::NewEntity();
-
-		return friends_entry;
-	}
-
-	static int InsertMany(
-		std::vector<Friends> friends_entries
-	)
-	{
-		std::vector<std::string> insert_chunks;
-
-		for (auto &friends_entry: friends_entries) {
-			std::vector<std::string> insert_values;
-
-
-
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
-		}
-
-		std::vector<std::string> insert_values;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} VALUES {}",
-				BaseInsert(),
-				implode(",", insert_chunks)
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static std::vector<Friends> All()
-	{
-		std::vector<Friends> all_entries;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{}",
-				BaseSelect()
-			)
-		);
-
-		all_entries.reserve(results.RowCount());
-
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			Friends entry{};
-
-			entry.charid = atoi(row[0]);
-			entry.type   = atoi(row[1]);
-			entry.name   = row[2] ? row[2] : "";
-
-			all_entries.push_back(entry);
-		}
-
-		return all_entries;
-	}
-
-	static std::vector<Friends> GetWhere(std::string where_filter)
-	{
-		std::vector<Friends> all_entries;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} WHERE {}",
-				BaseSelect(),
-				where_filter
-			)
-		);
-
-		all_entries.reserve(results.RowCount());
-
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			Friends entry{};
-
-			entry.charid = atoi(row[0]);
-			entry.type   = atoi(row[1]);
-			entry.name   = row[2] ? row[2] : "";
-
-			all_entries.push_back(entry);
-		}
-
-		return all_entries;
-	}
-
-	static int DeleteWhere(std::string where_filter)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"DELETE FROM {} WHERE {}",
-				TableName(),
-				PrimaryKey(),
-				where_filter
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
+	// Custom extended repository methods here
 
 };
 

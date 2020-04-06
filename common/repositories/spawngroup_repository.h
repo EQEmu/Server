@@ -23,374 +23,45 @@
 
 #include "../database.h"
 #include "../string_util.h"
+#include "base/base_spawngroup_repository.h"
 
-class SpawngroupRepository {
+class SpawngroupRepository: public BaseSpawngroupRepository {
 public:
-	struct Spawngroup {
-		int         id;
-		std::string name;
-		int8        spawn_limit;
-		float       dist;
-		float       max_x;
-		float       min_x;
-		float       max_y;
-		float       min_y;
-		int         delay;
-		int         mindelay;
-		int8        despawn;
-		int         despawn_timer;
-		int8        wp_spawns;
-	};
 
-	static std::string PrimaryKey()
-	{
-		return std::string("id");
-	}
+	/**
+	 * This file was auto generated on Apr 5, 2020 and can be modified and extended upon
+	 *
+	 * Base repository methods are automatically
+	 * generated in the "base" version of this repository. The base repository
+	 * is immutable and to be left untouched, while methods in this class
+	 * are used as extension methods for more specific persistence-layer
+     * accessors or mutators
+	 *
+	 * Base Methods (Subject to be expanded upon in time)
+	 *
+	 * InsertOne
+     * UpdateOne
+     * DeleteOne
+     * FindOne
+     * GetWhere(std::string where_filter)
+     * DeleteWhere(std::string where_filter)
+     * InsertMany
+     * All
+     *
+     * Example custom methods in a repository
+     *
+     * SpawngroupRepository::GetByZoneAndVersion(int zone_id, int zone_version)
+     * SpawngroupRepository::GetWhereNeverExpires()
+     * SpawngroupRepository::GetWhereXAndY()
+     * SpawngroupRepository::DeleteWhereXAndY()
+     *
+     * Most of the above could be covered by base methods, but if you as a developer
+     * find yourself re-using logic for other parts of the code, its best to just make a
+     * method that can be re-used easily elsewhere especially if it can use a base repository
+     * method and encapsulate filters there
+	 */
 
-	static std::vector<std::string> Columns()
-	{
-		return {
-			"id",
-			"name",
-			"spawn_limit",
-			"dist",
-			"max_x",
-			"min_x",
-			"max_y",
-			"min_y",
-			"delay",
-			"mindelay",
-			"despawn",
-			"despawn_timer",
-			"wp_spawns",
-		};
-	}
-
-	static std::string ColumnsRaw()
-	{
-		return std::string(implode(", ", Columns()));
-	}
-
-	static std::string InsertColumnsRaw()
-	{
-		std::vector<std::string> insert_columns;
-
-		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
-			insert_columns.push_back(column);
-		}
-
-		return std::string(implode(", ", insert_columns));
-	}
-
-	static std::string TableName()
-	{
-		return std::string("spawngroup");
-	}
-
-	static std::string BaseSelect()
-	{
-		return fmt::format(
-			"SELECT {} FROM {}",
-			ColumnsRaw(),
-			TableName()
-		);
-	}
-
-	static std::string BaseInsert()
-	{
-		return fmt::format(
-			"INSERT INTO {} ({}) ",
-			TableName(),
-			InsertColumnsRaw()
-		);
-	}
-
-	static Spawngroup NewEntity()
-	{
-		Spawngroup entry{};
-
-		entry.id            = 0;
-		entry.name          = "";
-		entry.spawn_limit   = 0;
-		entry.dist          = 0;
-		entry.max_x         = 0;
-		entry.min_x         = 0;
-		entry.max_y         = 0;
-		entry.min_y         = 0;
-		entry.delay         = 45000;
-		entry.mindelay      = 15000;
-		entry.despawn       = 0;
-		entry.despawn_timer = 100;
-		entry.wp_spawns     = 0;
-
-		return entry;
-	}
-
-	static Spawngroup GetSpawngroupEntry(
-		const std::vector<Spawngroup> &spawngroups,
-		int spawngroup_id
-	)
-	{
-		for (auto &spawngroup : spawngroups) {
-			if (spawngroup.id == spawngroup_id) {
-				return spawngroup;
-			}
-		}
-
-		return NewEntity();
-	}
-
-	static Spawngroup FindOne(
-		int spawngroup_id
-	)
-	{
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
-				BaseSelect(),
-				spawngroup_id
-			)
-		);
-
-		auto row = results.begin();
-		if (results.RowCount() == 1) {
-			Spawngroup entry{};
-
-			entry.id            = atoi(row[0]);
-			entry.name          = row[1] ? row[1] : "";
-			entry.spawn_limit   = atoi(row[2]);
-			entry.dist          = atof(row[3]);
-			entry.max_x         = atof(row[4]);
-			entry.min_x         = atof(row[5]);
-			entry.max_y         = atof(row[6]);
-			entry.min_y         = atof(row[7]);
-			entry.delay         = atoi(row[8]);
-			entry.mindelay      = atoi(row[9]);
-			entry.despawn       = atoi(row[10]);
-			entry.despawn_timer = atoi(row[11]);
-			entry.wp_spawns     = atoi(row[12]);
-
-			return entry;
-		}
-
-		return NewEntity();
-	}
-
-	static int DeleteOne(
-		int spawngroup_id
-	)
-	{
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"DELETE FROM {} WHERE {} = {}",
-				TableName(),
-				PrimaryKey(),
-				spawngroup_id
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static int UpdateOne(
-		Spawngroup spawngroup_entry
-	)
-	{
-		std::vector<std::string> update_values;
-
-		auto columns = Columns();
-
-		update_values.push_back(columns[1] + " = '" + EscapeString(spawngroup_entry.name) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(spawngroup_entry.spawn_limit));
-		update_values.push_back(columns[3] + " = " + std::to_string(spawngroup_entry.dist));
-		update_values.push_back(columns[4] + " = " + std::to_string(spawngroup_entry.max_x));
-		update_values.push_back(columns[5] + " = " + std::to_string(spawngroup_entry.min_x));
-		update_values.push_back(columns[6] + " = " + std::to_string(spawngroup_entry.max_y));
-		update_values.push_back(columns[7] + " = " + std::to_string(spawngroup_entry.min_y));
-		update_values.push_back(columns[8] + " = " + std::to_string(spawngroup_entry.delay));
-		update_values.push_back(columns[9] + " = " + std::to_string(spawngroup_entry.mindelay));
-		update_values.push_back(columns[10] + " = " + std::to_string(spawngroup_entry.despawn));
-		update_values.push_back(columns[11] + " = " + std::to_string(spawngroup_entry.despawn_timer));
-		update_values.push_back(columns[12] + " = " + std::to_string(spawngroup_entry.wp_spawns));
-
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"UPDATE {} SET {} WHERE {} = {}",
-				TableName(),
-				implode(", ", update_values),
-				PrimaryKey(),
-				spawngroup_entry.id
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static Spawngroup InsertOne(
-		Spawngroup spawngroup_entry
-	)
-	{
-		std::vector<std::string> insert_values;
-
-		insert_values.push_back("'" + EscapeString(spawngroup_entry.name) + "'");
-		insert_values.push_back(std::to_string(spawngroup_entry.spawn_limit));
-		insert_values.push_back(std::to_string(spawngroup_entry.dist));
-		insert_values.push_back(std::to_string(spawngroup_entry.max_x));
-		insert_values.push_back(std::to_string(spawngroup_entry.min_x));
-		insert_values.push_back(std::to_string(spawngroup_entry.max_y));
-		insert_values.push_back(std::to_string(spawngroup_entry.min_y));
-		insert_values.push_back(std::to_string(spawngroup_entry.delay));
-		insert_values.push_back(std::to_string(spawngroup_entry.mindelay));
-		insert_values.push_back(std::to_string(spawngroup_entry.despawn));
-		insert_values.push_back(std::to_string(spawngroup_entry.despawn_timer));
-		insert_values.push_back(std::to_string(spawngroup_entry.wp_spawns));
-
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"{} VALUES ({})",
-				BaseInsert(),
-				implode(",", insert_values)
-			)
-		);
-
-		if (results.Success()) {
-			spawngroup_entry.id = results.LastInsertedID();
-			return spawngroup_entry;
-		}
-
-		spawngroup_entry = SpawngroupRepository::NewEntity();
-
-		return spawngroup_entry;
-	}
-
-	static int InsertMany(
-		std::vector<Spawngroup> spawngroup_entries
-	)
-	{
-		std::vector<std::string> insert_chunks;
-
-		for (auto &spawngroup_entry: spawngroup_entries) {
-			std::vector<std::string> insert_values;
-
-			insert_values.push_back("'" + EscapeString(spawngroup_entry.name) + "'");
-			insert_values.push_back(std::to_string(spawngroup_entry.spawn_limit));
-			insert_values.push_back(std::to_string(spawngroup_entry.dist));
-			insert_values.push_back(std::to_string(spawngroup_entry.max_x));
-			insert_values.push_back(std::to_string(spawngroup_entry.min_x));
-			insert_values.push_back(std::to_string(spawngroup_entry.max_y));
-			insert_values.push_back(std::to_string(spawngroup_entry.min_y));
-			insert_values.push_back(std::to_string(spawngroup_entry.delay));
-			insert_values.push_back(std::to_string(spawngroup_entry.mindelay));
-			insert_values.push_back(std::to_string(spawngroup_entry.despawn));
-			insert_values.push_back(std::to_string(spawngroup_entry.despawn_timer));
-			insert_values.push_back(std::to_string(spawngroup_entry.wp_spawns));
-
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
-		}
-
-		std::vector<std::string> insert_values;
-
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"{} VALUES {}",
-				BaseInsert(),
-				implode(",", insert_chunks)
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static std::vector<Spawngroup> All()
-	{
-		std::vector<Spawngroup> all_entries;
-
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"{}",
-				BaseSelect()
-			)
-		);
-
-		all_entries.reserve(results.RowCount());
-
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			Spawngroup entry{};
-
-			entry.id            = atoi(row[0]);
-			entry.name          = row[1] ? row[1] : "";
-			entry.spawn_limit   = atoi(row[2]);
-			entry.dist          = atof(row[3]);
-			entry.max_x         = atof(row[4]);
-			entry.min_x         = atof(row[5]);
-			entry.max_y         = atof(row[6]);
-			entry.min_y         = atof(row[7]);
-			entry.delay         = atoi(row[8]);
-			entry.mindelay      = atoi(row[9]);
-			entry.despawn       = atoi(row[10]);
-			entry.despawn_timer = atoi(row[11]);
-			entry.wp_spawns     = atoi(row[12]);
-
-			all_entries.push_back(entry);
-		}
-
-		return all_entries;
-	}
-
-	static std::vector<Spawngroup> GetWhere(std::string where_filter)
-	{
-		std::vector<Spawngroup> all_entries;
-
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"{} WHERE {}",
-				BaseSelect(),
-				where_filter
-			)
-		);
-
-		all_entries.reserve(results.RowCount());
-
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			Spawngroup entry{};
-
-			entry.id            = atoi(row[0]);
-			entry.name          = row[1] ? row[1] : "";
-			entry.spawn_limit   = atoi(row[2]);
-			entry.dist          = atof(row[3]);
-			entry.max_x         = atof(row[4]);
-			entry.min_x         = atof(row[5]);
-			entry.max_y         = atof(row[6]);
-			entry.min_y         = atof(row[7]);
-			entry.delay         = atoi(row[8]);
-			entry.mindelay      = atoi(row[9]);
-			entry.despawn       = atoi(row[10]);
-			entry.despawn_timer = atoi(row[11]);
-			entry.wp_spawns     = atoi(row[12]);
-
-			all_entries.push_back(entry);
-		}
-
-		return all_entries;
-	}
-
-	static int DeleteWhere(std::string where_filter)
-	{
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"DELETE FROM {} WHERE {}",
-				TableName(),
-				PrimaryKey(),
-				where_filter
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
+	// Custom extended repository methods here
 
 };
 

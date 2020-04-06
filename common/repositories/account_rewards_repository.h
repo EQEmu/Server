@@ -23,281 +23,45 @@
 
 #include "../database.h"
 #include "../string_util.h"
+#include "base/base_account_rewards_repository.h"
 
-class AccountRewardsRepository {
+class AccountRewardsRepository: public BaseAccountRewardsRepository {
 public:
-	struct AccountRewards {
-		int account_id;
-		int reward_id;
-		int amount;
-	};
 
-	static std::string PrimaryKey()
-	{
-		return std::string("reward_id");
-	}
+	/**
+	 * This file was auto generated on Apr 5, 2020 and can be modified and extended upon
+	 *
+	 * Base repository methods are automatically
+	 * generated in the "base" version of this repository. The base repository
+	 * is immutable and to be left untouched, while methods in this class
+	 * are used as extension methods for more specific persistence-layer
+     * accessors or mutators
+	 *
+	 * Base Methods (Subject to be expanded upon in time)
+	 *
+	 * InsertOne
+     * UpdateOne
+     * DeleteOne
+     * FindOne
+     * GetWhere(std::string where_filter)
+     * DeleteWhere(std::string where_filter)
+     * InsertMany
+     * All
+     *
+     * Example custom methods in a repository
+     *
+     * AccountRewardsRepository::GetByZoneAndVersion(int zone_id, int zone_version)
+     * AccountRewardsRepository::GetWhereNeverExpires()
+     * AccountRewardsRepository::GetWhereXAndY()
+     * AccountRewardsRepository::DeleteWhereXAndY()
+     *
+     * Most of the above could be covered by base methods, but if you as a developer
+     * find yourself re-using logic for other parts of the code, its best to just make a
+     * method that can be re-used easily elsewhere especially if it can use a base repository
+     * method and encapsulate filters there
+	 */
 
-	static std::vector<std::string> Columns()
-	{
-		return {
-			"account_id",
-			"reward_id",
-			"amount",
-		};
-	}
-
-	static std::string ColumnsRaw()
-	{
-		return std::string(implode(", ", Columns()));
-	}
-
-	static std::string InsertColumnsRaw()
-	{
-		std::vector<std::string> insert_columns;
-
-		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
-			insert_columns.push_back(column);
-		}
-
-		return std::string(implode(", ", insert_columns));
-	}
-
-	static std::string TableName()
-	{
-		return std::string("account_rewards");
-	}
-
-	static std::string BaseSelect()
-	{
-		return fmt::format(
-			"SELECT {} FROM {}",
-			ColumnsRaw(),
-			TableName()
-		);
-	}
-
-	static std::string BaseInsert()
-	{
-		return fmt::format(
-			"INSERT INTO {} ({}) ",
-			TableName(),
-			InsertColumnsRaw()
-		);
-	}
-
-	static AccountRewards NewEntity()
-	{
-		AccountRewards entry{};
-
-		entry.account_id = 0;
-		entry.reward_id  = 0;
-		entry.amount     = 0;
-
-		return entry;
-	}
-
-	static AccountRewards GetAccountRewardsEntry(
-		const std::vector<AccountRewards> &account_rewardss,
-		int account_rewards_id
-	)
-	{
-		for (auto &account_rewards : account_rewardss) {
-			if (account_rewards.reward_id == account_rewards_id) {
-				return account_rewards;
-			}
-		}
-
-		return NewEntity();
-	}
-
-	static AccountRewards FindOne(
-		int account_rewards_id
-	)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
-				BaseSelect(),
-				account_rewards_id
-			)
-		);
-
-		auto row = results.begin();
-		if (results.RowCount() == 1) {
-			AccountRewards entry{};
-
-			entry.account_id = atoi(row[0]);
-			entry.reward_id  = atoi(row[1]);
-			entry.amount     = atoi(row[2]);
-
-			return entry;
-		}
-
-		return NewEntity();
-	}
-
-	static int DeleteOne(
-		int account_rewards_id
-	)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"DELETE FROM {} WHERE {} = {}",
-				TableName(),
-				PrimaryKey(),
-				account_rewards_id
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static int UpdateOne(
-		AccountRewards account_rewards_entry
-	)
-	{
-		std::vector<std::string> update_values;
-
-		auto columns = Columns();
-
-		update_values.push_back(columns[2] + " = " + std::to_string(account_rewards_entry.amount));
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"UPDATE {} SET {} WHERE {} = {}",
-				TableName(),
-				implode(", ", update_values),
-				PrimaryKey(),
-				account_rewards_entry.reward_id
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static AccountRewards InsertOne(
-		AccountRewards account_rewards_entry
-	)
-	{
-		std::vector<std::string> insert_values;
-
-		insert_values.push_back(std::to_string(account_rewards_entry.amount));
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} VALUES ({})",
-				BaseInsert(),
-				implode(",", insert_values)
-			)
-		);
-
-		if (results.Success()) {
-			account_rewards_entry.id = results.LastInsertedID();
-			return account_rewards_entry;
-		}
-
-		account_rewards_entry = AccountRewardsRepository::NewEntity();
-
-		return account_rewards_entry;
-	}
-
-	static int InsertMany(
-		std::vector<AccountRewards> account_rewards_entries
-	)
-	{
-		std::vector<std::string> insert_chunks;
-
-		for (auto &account_rewards_entry: account_rewards_entries) {
-			std::vector<std::string> insert_values;
-
-			insert_values.push_back(std::to_string(account_rewards_entry.amount));
-
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
-		}
-
-		std::vector<std::string> insert_values;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} VALUES {}",
-				BaseInsert(),
-				implode(",", insert_chunks)
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static std::vector<AccountRewards> All()
-	{
-		std::vector<AccountRewards> all_entries;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{}",
-				BaseSelect()
-			)
-		);
-
-		all_entries.reserve(results.RowCount());
-
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			AccountRewards entry{};
-
-			entry.account_id = atoi(row[0]);
-			entry.reward_id  = atoi(row[1]);
-			entry.amount     = atoi(row[2]);
-
-			all_entries.push_back(entry);
-		}
-
-		return all_entries;
-	}
-
-	static std::vector<AccountRewards> GetWhere(std::string where_filter)
-	{
-		std::vector<AccountRewards> all_entries;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} WHERE {}",
-				BaseSelect(),
-				where_filter
-			)
-		);
-
-		all_entries.reserve(results.RowCount());
-
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			AccountRewards entry{};
-
-			entry.account_id = atoi(row[0]);
-			entry.reward_id  = atoi(row[1]);
-			entry.amount     = atoi(row[2]);
-
-			all_entries.push_back(entry);
-		}
-
-		return all_entries;
-	}
-
-	static int DeleteWhere(std::string where_filter)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"DELETE FROM {} WHERE {}",
-				TableName(),
-				PrimaryKey(),
-				where_filter
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
+	// Custom extended repository methods here
 
 };
 

@@ -23,383 +23,45 @@
 
 #include "../database.h"
 #include "../string_util.h"
+#include "base/base_aa_ability_repository.h"
 
-class AaAbilityRepository {
+class AaAbilityRepository: public BaseAaAbilityRepository {
 public:
-	struct AaAbility {
-		int         id;
-		std::string name;
-		int         category;
-		int         classes;
-		int         races;
-		int         drakkin_heritage;
-		int         deities;
-		int         status;
-		int         type;
-		int         charges;
-		int8        grant_only;
-		int         first_rank_id;
-		int8        enabled;
-		int8        reset_on_death;
-	};
 
-	static std::string PrimaryKey()
-	{
-		return std::string("id");
-	}
+	/**
+	 * This file was auto generated on Apr 5, 2020 and can be modified and extended upon
+	 *
+	 * Base repository methods are automatically
+	 * generated in the "base" version of this repository. The base repository
+	 * is immutable and to be left untouched, while methods in this class
+	 * are used as extension methods for more specific persistence-layer
+     * accessors or mutators
+	 *
+	 * Base Methods (Subject to be expanded upon in time)
+	 *
+	 * InsertOne
+     * UpdateOne
+     * DeleteOne
+     * FindOne
+     * GetWhere(std::string where_filter)
+     * DeleteWhere(std::string where_filter)
+     * InsertMany
+     * All
+     *
+     * Example custom methods in a repository
+     *
+     * AaAbilityRepository::GetByZoneAndVersion(int zone_id, int zone_version)
+     * AaAbilityRepository::GetWhereNeverExpires()
+     * AaAbilityRepository::GetWhereXAndY()
+     * AaAbilityRepository::DeleteWhereXAndY()
+     *
+     * Most of the above could be covered by base methods, but if you as a developer
+     * find yourself re-using logic for other parts of the code, its best to just make a
+     * method that can be re-used easily elsewhere especially if it can use a base repository
+     * method and encapsulate filters there
+	 */
 
-	static std::vector<std::string> Columns()
-	{
-		return {
-			"id",
-			"name",
-			"category",
-			"classes",
-			"races",
-			"drakkin_heritage",
-			"deities",
-			"status",
-			"type",
-			"charges",
-			"grant_only",
-			"first_rank_id",
-			"enabled",
-			"reset_on_death",
-		};
-	}
-
-	static std::string ColumnsRaw()
-	{
-		return std::string(implode(", ", Columns()));
-	}
-
-	static std::string InsertColumnsRaw()
-	{
-		std::vector<std::string> insert_columns;
-
-		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
-			insert_columns.push_back(column);
-		}
-
-		return std::string(implode(", ", insert_columns));
-	}
-
-	static std::string TableName()
-	{
-		return std::string("aa_ability");
-	}
-
-	static std::string BaseSelect()
-	{
-		return fmt::format(
-			"SELECT {} FROM {}",
-			ColumnsRaw(),
-			TableName()
-		);
-	}
-
-	static std::string BaseInsert()
-	{
-		return fmt::format(
-			"INSERT INTO {} ({}) ",
-			TableName(),
-			InsertColumnsRaw()
-		);
-	}
-
-	static AaAbility NewEntity()
-	{
-		AaAbility entry{};
-
-		entry.id               = 0;
-		entry.name             = "";
-		entry.category         = -1;
-		entry.classes          = 131070;
-		entry.races            = 65535;
-		entry.drakkin_heritage = 127;
-		entry.deities          = 131071;
-		entry.status           = 0;
-		entry.type             = 0;
-		entry.charges          = 0;
-		entry.grant_only       = 0;
-		entry.first_rank_id    = -1;
-		entry.enabled          = 1;
-		entry.reset_on_death   = 0;
-
-		return entry;
-	}
-
-	static AaAbility GetAaAbilityEntry(
-		const std::vector<AaAbility> &aa_abilitys,
-		int aa_ability_id
-	)
-	{
-		for (auto &aa_ability : aa_abilitys) {
-			if (aa_ability.id == aa_ability_id) {
-				return aa_ability;
-			}
-		}
-
-		return NewEntity();
-	}
-
-	static AaAbility FindOne(
-		int aa_ability_id
-	)
-	{
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
-				BaseSelect(),
-				aa_ability_id
-			)
-		);
-
-		auto row = results.begin();
-		if (results.RowCount() == 1) {
-			AaAbility entry{};
-
-			entry.id               = atoi(row[0]);
-			entry.name             = row[1] ? row[1] : "";
-			entry.category         = atoi(row[2]);
-			entry.classes          = atoi(row[3]);
-			entry.races            = atoi(row[4]);
-			entry.drakkin_heritage = atoi(row[5]);
-			entry.deities          = atoi(row[6]);
-			entry.status           = atoi(row[7]);
-			entry.type             = atoi(row[8]);
-			entry.charges          = atoi(row[9]);
-			entry.grant_only       = atoi(row[10]);
-			entry.first_rank_id    = atoi(row[11]);
-			entry.enabled          = atoi(row[12]);
-			entry.reset_on_death   = atoi(row[13]);
-
-			return entry;
-		}
-
-		return NewEntity();
-	}
-
-	static int DeleteOne(
-		int aa_ability_id
-	)
-	{
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"DELETE FROM {} WHERE {} = {}",
-				TableName(),
-				PrimaryKey(),
-				aa_ability_id
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static int UpdateOne(
-		AaAbility aa_ability_entry
-	)
-	{
-		std::vector<std::string> update_values;
-
-		auto columns = Columns();
-
-		update_values.push_back(columns[1] + " = '" + EscapeString(aa_ability_entry.name) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(aa_ability_entry.category));
-		update_values.push_back(columns[3] + " = " + std::to_string(aa_ability_entry.classes));
-		update_values.push_back(columns[4] + " = " + std::to_string(aa_ability_entry.races));
-		update_values.push_back(columns[5] + " = " + std::to_string(aa_ability_entry.drakkin_heritage));
-		update_values.push_back(columns[6] + " = " + std::to_string(aa_ability_entry.deities));
-		update_values.push_back(columns[7] + " = " + std::to_string(aa_ability_entry.status));
-		update_values.push_back(columns[8] + " = " + std::to_string(aa_ability_entry.type));
-		update_values.push_back(columns[9] + " = " + std::to_string(aa_ability_entry.charges));
-		update_values.push_back(columns[10] + " = " + std::to_string(aa_ability_entry.grant_only));
-		update_values.push_back(columns[11] + " = " + std::to_string(aa_ability_entry.first_rank_id));
-		update_values.push_back(columns[12] + " = " + std::to_string(aa_ability_entry.enabled));
-		update_values.push_back(columns[13] + " = " + std::to_string(aa_ability_entry.reset_on_death));
-
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"UPDATE {} SET {} WHERE {} = {}",
-				TableName(),
-				implode(", ", update_values),
-				PrimaryKey(),
-				aa_ability_entry.id
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static AaAbility InsertOne(
-		AaAbility aa_ability_entry
-	)
-	{
-		std::vector<std::string> insert_values;
-
-		insert_values.push_back("'" + EscapeString(aa_ability_entry.name) + "'");
-		insert_values.push_back(std::to_string(aa_ability_entry.category));
-		insert_values.push_back(std::to_string(aa_ability_entry.classes));
-		insert_values.push_back(std::to_string(aa_ability_entry.races));
-		insert_values.push_back(std::to_string(aa_ability_entry.drakkin_heritage));
-		insert_values.push_back(std::to_string(aa_ability_entry.deities));
-		insert_values.push_back(std::to_string(aa_ability_entry.status));
-		insert_values.push_back(std::to_string(aa_ability_entry.type));
-		insert_values.push_back(std::to_string(aa_ability_entry.charges));
-		insert_values.push_back(std::to_string(aa_ability_entry.grant_only));
-		insert_values.push_back(std::to_string(aa_ability_entry.first_rank_id));
-		insert_values.push_back(std::to_string(aa_ability_entry.enabled));
-		insert_values.push_back(std::to_string(aa_ability_entry.reset_on_death));
-
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"{} VALUES ({})",
-				BaseInsert(),
-				implode(",", insert_values)
-			)
-		);
-
-		if (results.Success()) {
-			aa_ability_entry.id = results.LastInsertedID();
-			return aa_ability_entry;
-		}
-
-		aa_ability_entry = AaAbilityRepository::NewEntity();
-
-		return aa_ability_entry;
-	}
-
-	static int InsertMany(
-		std::vector<AaAbility> aa_ability_entries
-	)
-	{
-		std::vector<std::string> insert_chunks;
-
-		for (auto &aa_ability_entry: aa_ability_entries) {
-			std::vector<std::string> insert_values;
-
-			insert_values.push_back("'" + EscapeString(aa_ability_entry.name) + "'");
-			insert_values.push_back(std::to_string(aa_ability_entry.category));
-			insert_values.push_back(std::to_string(aa_ability_entry.classes));
-			insert_values.push_back(std::to_string(aa_ability_entry.races));
-			insert_values.push_back(std::to_string(aa_ability_entry.drakkin_heritage));
-			insert_values.push_back(std::to_string(aa_ability_entry.deities));
-			insert_values.push_back(std::to_string(aa_ability_entry.status));
-			insert_values.push_back(std::to_string(aa_ability_entry.type));
-			insert_values.push_back(std::to_string(aa_ability_entry.charges));
-			insert_values.push_back(std::to_string(aa_ability_entry.grant_only));
-			insert_values.push_back(std::to_string(aa_ability_entry.first_rank_id));
-			insert_values.push_back(std::to_string(aa_ability_entry.enabled));
-			insert_values.push_back(std::to_string(aa_ability_entry.reset_on_death));
-
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
-		}
-
-		std::vector<std::string> insert_values;
-
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"{} VALUES {}",
-				BaseInsert(),
-				implode(",", insert_chunks)
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static std::vector<AaAbility> All()
-	{
-		std::vector<AaAbility> all_entries;
-
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"{}",
-				BaseSelect()
-			)
-		);
-
-		all_entries.reserve(results.RowCount());
-
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			AaAbility entry{};
-
-			entry.id               = atoi(row[0]);
-			entry.name             = row[1] ? row[1] : "";
-			entry.category         = atoi(row[2]);
-			entry.classes          = atoi(row[3]);
-			entry.races            = atoi(row[4]);
-			entry.drakkin_heritage = atoi(row[5]);
-			entry.deities          = atoi(row[6]);
-			entry.status           = atoi(row[7]);
-			entry.type             = atoi(row[8]);
-			entry.charges          = atoi(row[9]);
-			entry.grant_only       = atoi(row[10]);
-			entry.first_rank_id    = atoi(row[11]);
-			entry.enabled          = atoi(row[12]);
-			entry.reset_on_death   = atoi(row[13]);
-
-			all_entries.push_back(entry);
-		}
-
-		return all_entries;
-	}
-
-	static std::vector<AaAbility> GetWhere(std::string where_filter)
-	{
-		std::vector<AaAbility> all_entries;
-
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"{} WHERE {}",
-				BaseSelect(),
-				where_filter
-			)
-		);
-
-		all_entries.reserve(results.RowCount());
-
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			AaAbility entry{};
-
-			entry.id               = atoi(row[0]);
-			entry.name             = row[1] ? row[1] : "";
-			entry.category         = atoi(row[2]);
-			entry.classes          = atoi(row[3]);
-			entry.races            = atoi(row[4]);
-			entry.drakkin_heritage = atoi(row[5]);
-			entry.deities          = atoi(row[6]);
-			entry.status           = atoi(row[7]);
-			entry.type             = atoi(row[8]);
-			entry.charges          = atoi(row[9]);
-			entry.grant_only       = atoi(row[10]);
-			entry.first_rank_id    = atoi(row[11]);
-			entry.enabled          = atoi(row[12]);
-			entry.reset_on_death   = atoi(row[13]);
-
-			all_entries.push_back(entry);
-		}
-
-		return all_entries;
-	}
-
-	static int DeleteWhere(std::string where_filter)
-	{
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"DELETE FROM {} WHERE {}",
-				TableName(),
-				PrimaryKey(),
-				where_filter
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
+	// Custom extended repository methods here
 
 };
 

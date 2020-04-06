@@ -23,353 +23,45 @@
 
 #include "../database.h"
 #include "../string_util.h"
+#include "base/base_guild_ranks_repository.h"
 
-class GuildRanksRepository {
+class GuildRanksRepository: public BaseGuildRanksRepository {
 public:
-	struct GuildRanks {
-		int         guild_id;
-		int8        rank;
-		std::string title;
-		int8        can_hear;
-		int8        can_speak;
-		int8        can_invite;
-		int8        can_remove;
-		int8        can_promote;
-		int8        can_demote;
-		int8        can_motd;
-		int8        can_warpeace;
-	};
 
-	static std::string PrimaryKey()
-	{
-		return std::string("rank");
-	}
+	/**
+	 * This file was auto generated on Apr 5, 2020 and can be modified and extended upon
+	 *
+	 * Base repository methods are automatically
+	 * generated in the "base" version of this repository. The base repository
+	 * is immutable and to be left untouched, while methods in this class
+	 * are used as extension methods for more specific persistence-layer
+     * accessors or mutators
+	 *
+	 * Base Methods (Subject to be expanded upon in time)
+	 *
+	 * InsertOne
+     * UpdateOne
+     * DeleteOne
+     * FindOne
+     * GetWhere(std::string where_filter)
+     * DeleteWhere(std::string where_filter)
+     * InsertMany
+     * All
+     *
+     * Example custom methods in a repository
+     *
+     * GuildRanksRepository::GetByZoneAndVersion(int zone_id, int zone_version)
+     * GuildRanksRepository::GetWhereNeverExpires()
+     * GuildRanksRepository::GetWhereXAndY()
+     * GuildRanksRepository::DeleteWhereXAndY()
+     *
+     * Most of the above could be covered by base methods, but if you as a developer
+     * find yourself re-using logic for other parts of the code, its best to just make a
+     * method that can be re-used easily elsewhere especially if it can use a base repository
+     * method and encapsulate filters there
+	 */
 
-	static std::vector<std::string> Columns()
-	{
-		return {
-			"guild_id",
-			"rank",
-			"title",
-			"can_hear",
-			"can_speak",
-			"can_invite",
-			"can_remove",
-			"can_promote",
-			"can_demote",
-			"can_motd",
-			"can_warpeace",
-		};
-	}
-
-	static std::string ColumnsRaw()
-	{
-		return std::string(implode(", ", Columns()));
-	}
-
-	static std::string InsertColumnsRaw()
-	{
-		std::vector<std::string> insert_columns;
-
-		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
-			insert_columns.push_back(column);
-		}
-
-		return std::string(implode(", ", insert_columns));
-	}
-
-	static std::string TableName()
-	{
-		return std::string("guild_ranks");
-	}
-
-	static std::string BaseSelect()
-	{
-		return fmt::format(
-			"SELECT {} FROM {}",
-			ColumnsRaw(),
-			TableName()
-		);
-	}
-
-	static std::string BaseInsert()
-	{
-		return fmt::format(
-			"INSERT INTO {} ({}) ",
-			TableName(),
-			InsertColumnsRaw()
-		);
-	}
-
-	static GuildRanks NewEntity()
-	{
-		GuildRanks entry{};
-
-		entry.guild_id     = 0;
-		entry.rank         = 0;
-		entry.title        = "";
-		entry.can_hear     = 0;
-		entry.can_speak    = 0;
-		entry.can_invite   = 0;
-		entry.can_remove   = 0;
-		entry.can_promote  = 0;
-		entry.can_demote   = 0;
-		entry.can_motd     = 0;
-		entry.can_warpeace = 0;
-
-		return entry;
-	}
-
-	static GuildRanks GetGuildRanksEntry(
-		const std::vector<GuildRanks> &guild_rankss,
-		int guild_ranks_id
-	)
-	{
-		for (auto &guild_ranks : guild_rankss) {
-			if (guild_ranks.rank == guild_ranks_id) {
-				return guild_ranks;
-			}
-		}
-
-		return NewEntity();
-	}
-
-	static GuildRanks FindOne(
-		int guild_ranks_id
-	)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
-				BaseSelect(),
-				guild_ranks_id
-			)
-		);
-
-		auto row = results.begin();
-		if (results.RowCount() == 1) {
-			GuildRanks entry{};
-
-			entry.guild_id     = atoi(row[0]);
-			entry.rank         = atoi(row[1]);
-			entry.title        = row[2] ? row[2] : "";
-			entry.can_hear     = atoi(row[3]);
-			entry.can_speak    = atoi(row[4]);
-			entry.can_invite   = atoi(row[5]);
-			entry.can_remove   = atoi(row[6]);
-			entry.can_promote  = atoi(row[7]);
-			entry.can_demote   = atoi(row[8]);
-			entry.can_motd     = atoi(row[9]);
-			entry.can_warpeace = atoi(row[10]);
-
-			return entry;
-		}
-
-		return NewEntity();
-	}
-
-	static int DeleteOne(
-		int guild_ranks_id
-	)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"DELETE FROM {} WHERE {} = {}",
-				TableName(),
-				PrimaryKey(),
-				guild_ranks_id
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static int UpdateOne(
-		GuildRanks guild_ranks_entry
-	)
-	{
-		std::vector<std::string> update_values;
-
-		auto columns = Columns();
-
-		update_values.push_back(columns[2] + " = '" + EscapeString(guild_ranks_entry.title) + "'");
-		update_values.push_back(columns[3] + " = " + std::to_string(guild_ranks_entry.can_hear));
-		update_values.push_back(columns[4] + " = " + std::to_string(guild_ranks_entry.can_speak));
-		update_values.push_back(columns[5] + " = " + std::to_string(guild_ranks_entry.can_invite));
-		update_values.push_back(columns[6] + " = " + std::to_string(guild_ranks_entry.can_remove));
-		update_values.push_back(columns[7] + " = " + std::to_string(guild_ranks_entry.can_promote));
-		update_values.push_back(columns[8] + " = " + std::to_string(guild_ranks_entry.can_demote));
-		update_values.push_back(columns[9] + " = " + std::to_string(guild_ranks_entry.can_motd));
-		update_values.push_back(columns[10] + " = " + std::to_string(guild_ranks_entry.can_warpeace));
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"UPDATE {} SET {} WHERE {} = {}",
-				TableName(),
-				implode(", ", update_values),
-				PrimaryKey(),
-				guild_ranks_entry.rank
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static GuildRanks InsertOne(
-		GuildRanks guild_ranks_entry
-	)
-	{
-		std::vector<std::string> insert_values;
-
-		insert_values.push_back("'" + EscapeString(guild_ranks_entry.title) + "'");
-		insert_values.push_back(std::to_string(guild_ranks_entry.can_hear));
-		insert_values.push_back(std::to_string(guild_ranks_entry.can_speak));
-		insert_values.push_back(std::to_string(guild_ranks_entry.can_invite));
-		insert_values.push_back(std::to_string(guild_ranks_entry.can_remove));
-		insert_values.push_back(std::to_string(guild_ranks_entry.can_promote));
-		insert_values.push_back(std::to_string(guild_ranks_entry.can_demote));
-		insert_values.push_back(std::to_string(guild_ranks_entry.can_motd));
-		insert_values.push_back(std::to_string(guild_ranks_entry.can_warpeace));
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} VALUES ({})",
-				BaseInsert(),
-				implode(",", insert_values)
-			)
-		);
-
-		if (results.Success()) {
-			guild_ranks_entry.id = results.LastInsertedID();
-			return guild_ranks_entry;
-		}
-
-		guild_ranks_entry = GuildRanksRepository::NewEntity();
-
-		return guild_ranks_entry;
-	}
-
-	static int InsertMany(
-		std::vector<GuildRanks> guild_ranks_entries
-	)
-	{
-		std::vector<std::string> insert_chunks;
-
-		for (auto &guild_ranks_entry: guild_ranks_entries) {
-			std::vector<std::string> insert_values;
-
-			insert_values.push_back("'" + EscapeString(guild_ranks_entry.title) + "'");
-			insert_values.push_back(std::to_string(guild_ranks_entry.can_hear));
-			insert_values.push_back(std::to_string(guild_ranks_entry.can_speak));
-			insert_values.push_back(std::to_string(guild_ranks_entry.can_invite));
-			insert_values.push_back(std::to_string(guild_ranks_entry.can_remove));
-			insert_values.push_back(std::to_string(guild_ranks_entry.can_promote));
-			insert_values.push_back(std::to_string(guild_ranks_entry.can_demote));
-			insert_values.push_back(std::to_string(guild_ranks_entry.can_motd));
-			insert_values.push_back(std::to_string(guild_ranks_entry.can_warpeace));
-
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
-		}
-
-		std::vector<std::string> insert_values;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} VALUES {}",
-				BaseInsert(),
-				implode(",", insert_chunks)
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static std::vector<GuildRanks> All()
-	{
-		std::vector<GuildRanks> all_entries;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{}",
-				BaseSelect()
-			)
-		);
-
-		all_entries.reserve(results.RowCount());
-
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			GuildRanks entry{};
-
-			entry.guild_id     = atoi(row[0]);
-			entry.rank         = atoi(row[1]);
-			entry.title        = row[2] ? row[2] : "";
-			entry.can_hear     = atoi(row[3]);
-			entry.can_speak    = atoi(row[4]);
-			entry.can_invite   = atoi(row[5]);
-			entry.can_remove   = atoi(row[6]);
-			entry.can_promote  = atoi(row[7]);
-			entry.can_demote   = atoi(row[8]);
-			entry.can_motd     = atoi(row[9]);
-			entry.can_warpeace = atoi(row[10]);
-
-			all_entries.push_back(entry);
-		}
-
-		return all_entries;
-	}
-
-	static std::vector<GuildRanks> GetWhere(std::string where_filter)
-	{
-		std::vector<GuildRanks> all_entries;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} WHERE {}",
-				BaseSelect(),
-				where_filter
-			)
-		);
-
-		all_entries.reserve(results.RowCount());
-
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			GuildRanks entry{};
-
-			entry.guild_id     = atoi(row[0]);
-			entry.rank         = atoi(row[1]);
-			entry.title        = row[2] ? row[2] : "";
-			entry.can_hear     = atoi(row[3]);
-			entry.can_speak    = atoi(row[4]);
-			entry.can_invite   = atoi(row[5]);
-			entry.can_remove   = atoi(row[6]);
-			entry.can_promote  = atoi(row[7]);
-			entry.can_demote   = atoi(row[8]);
-			entry.can_motd     = atoi(row[9]);
-			entry.can_warpeace = atoi(row[10]);
-
-			all_entries.push_back(entry);
-		}
-
-		return all_entries;
-	}
-
-	static int DeleteWhere(std::string where_filter)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"DELETE FROM {} WHERE {}",
-				TableName(),
-				PrimaryKey(),
-				where_filter
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
+	// Custom extended repository methods here
 
 };
 

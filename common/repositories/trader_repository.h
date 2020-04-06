@@ -23,308 +23,45 @@
 
 #include "../database.h"
 #include "../string_util.h"
+#include "base/base_trader_repository.h"
 
-class TraderRepository {
+class TraderRepository: public BaseTraderRepository {
 public:
-	struct Trader {
-		int  char_id;
-		int  item_id;
-		int  serialnumber;
-		int  charges;
-		int  item_cost;
-		int8 slot_id;
-	};
 
-	static std::string PrimaryKey()
-	{
-		return std::string("slot_id");
-	}
+	/**
+	 * This file was auto generated on Apr 5, 2020 and can be modified and extended upon
+	 *
+	 * Base repository methods are automatically
+	 * generated in the "base" version of this repository. The base repository
+	 * is immutable and to be left untouched, while methods in this class
+	 * are used as extension methods for more specific persistence-layer
+     * accessors or mutators
+	 *
+	 * Base Methods (Subject to be expanded upon in time)
+	 *
+	 * InsertOne
+     * UpdateOne
+     * DeleteOne
+     * FindOne
+     * GetWhere(std::string where_filter)
+     * DeleteWhere(std::string where_filter)
+     * InsertMany
+     * All
+     *
+     * Example custom methods in a repository
+     *
+     * TraderRepository::GetByZoneAndVersion(int zone_id, int zone_version)
+     * TraderRepository::GetWhereNeverExpires()
+     * TraderRepository::GetWhereXAndY()
+     * TraderRepository::DeleteWhereXAndY()
+     *
+     * Most of the above could be covered by base methods, but if you as a developer
+     * find yourself re-using logic for other parts of the code, its best to just make a
+     * method that can be re-used easily elsewhere especially if it can use a base repository
+     * method and encapsulate filters there
+	 */
 
-	static std::vector<std::string> Columns()
-	{
-		return {
-			"char_id",
-			"item_id",
-			"serialnumber",
-			"charges",
-			"item_cost",
-			"slot_id",
-		};
-	}
-
-	static std::string ColumnsRaw()
-	{
-		return std::string(implode(", ", Columns()));
-	}
-
-	static std::string InsertColumnsRaw()
-	{
-		std::vector<std::string> insert_columns;
-
-		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
-			insert_columns.push_back(column);
-		}
-
-		return std::string(implode(", ", insert_columns));
-	}
-
-	static std::string TableName()
-	{
-		return std::string("trader");
-	}
-
-	static std::string BaseSelect()
-	{
-		return fmt::format(
-			"SELECT {} FROM {}",
-			ColumnsRaw(),
-			TableName()
-		);
-	}
-
-	static std::string BaseInsert()
-	{
-		return fmt::format(
-			"INSERT INTO {} ({}) ",
-			TableName(),
-			InsertColumnsRaw()
-		);
-	}
-
-	static Trader NewEntity()
-	{
-		Trader entry{};
-
-		entry.char_id      = 0;
-		entry.item_id      = 0;
-		entry.serialnumber = 0;
-		entry.charges      = 0;
-		entry.item_cost    = 0;
-		entry.slot_id      = 0;
-
-		return entry;
-	}
-
-	static Trader GetTraderEntry(
-		const std::vector<Trader> &traders,
-		int trader_id
-	)
-	{
-		for (auto &trader : traders) {
-			if (trader.slot_id == trader_id) {
-				return trader;
-			}
-		}
-
-		return NewEntity();
-	}
-
-	static Trader FindOne(
-		int trader_id
-	)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
-				BaseSelect(),
-				trader_id
-			)
-		);
-
-		auto row = results.begin();
-		if (results.RowCount() == 1) {
-			Trader entry{};
-
-			entry.char_id      = atoi(row[0]);
-			entry.item_id      = atoi(row[1]);
-			entry.serialnumber = atoi(row[2]);
-			entry.charges      = atoi(row[3]);
-			entry.item_cost    = atoi(row[4]);
-			entry.slot_id      = atoi(row[5]);
-
-			return entry;
-		}
-
-		return NewEntity();
-	}
-
-	static int DeleteOne(
-		int trader_id
-	)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"DELETE FROM {} WHERE {} = {}",
-				TableName(),
-				PrimaryKey(),
-				trader_id
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static int UpdateOne(
-		Trader trader_entry
-	)
-	{
-		std::vector<std::string> update_values;
-
-		auto columns = Columns();
-
-		update_values.push_back(columns[1] + " = " + std::to_string(trader_entry.item_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(trader_entry.serialnumber));
-		update_values.push_back(columns[3] + " = " + std::to_string(trader_entry.charges));
-		update_values.push_back(columns[4] + " = " + std::to_string(trader_entry.item_cost));
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"UPDATE {} SET {} WHERE {} = {}",
-				TableName(),
-				implode(", ", update_values),
-				PrimaryKey(),
-				trader_entry.slot_id
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static Trader InsertOne(
-		Trader trader_entry
-	)
-	{
-		std::vector<std::string> insert_values;
-
-		insert_values.push_back(std::to_string(trader_entry.item_id));
-		insert_values.push_back(std::to_string(trader_entry.serialnumber));
-		insert_values.push_back(std::to_string(trader_entry.charges));
-		insert_values.push_back(std::to_string(trader_entry.item_cost));
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} VALUES ({})",
-				BaseInsert(),
-				implode(",", insert_values)
-			)
-		);
-
-		if (results.Success()) {
-			trader_entry.id = results.LastInsertedID();
-			return trader_entry;
-		}
-
-		trader_entry = TraderRepository::NewEntity();
-
-		return trader_entry;
-	}
-
-	static int InsertMany(
-		std::vector<Trader> trader_entries
-	)
-	{
-		std::vector<std::string> insert_chunks;
-
-		for (auto &trader_entry: trader_entries) {
-			std::vector<std::string> insert_values;
-
-			insert_values.push_back(std::to_string(trader_entry.item_id));
-			insert_values.push_back(std::to_string(trader_entry.serialnumber));
-			insert_values.push_back(std::to_string(trader_entry.charges));
-			insert_values.push_back(std::to_string(trader_entry.item_cost));
-
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
-		}
-
-		std::vector<std::string> insert_values;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} VALUES {}",
-				BaseInsert(),
-				implode(",", insert_chunks)
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static std::vector<Trader> All()
-	{
-		std::vector<Trader> all_entries;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{}",
-				BaseSelect()
-			)
-		);
-
-		all_entries.reserve(results.RowCount());
-
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			Trader entry{};
-
-			entry.char_id      = atoi(row[0]);
-			entry.item_id      = atoi(row[1]);
-			entry.serialnumber = atoi(row[2]);
-			entry.charges      = atoi(row[3]);
-			entry.item_cost    = atoi(row[4]);
-			entry.slot_id      = atoi(row[5]);
-
-			all_entries.push_back(entry);
-		}
-
-		return all_entries;
-	}
-
-	static std::vector<Trader> GetWhere(std::string where_filter)
-	{
-		std::vector<Trader> all_entries;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} WHERE {}",
-				BaseSelect(),
-				where_filter
-			)
-		);
-
-		all_entries.reserve(results.RowCount());
-
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			Trader entry{};
-
-			entry.char_id      = atoi(row[0]);
-			entry.item_id      = atoi(row[1]);
-			entry.serialnumber = atoi(row[2]);
-			entry.charges      = atoi(row[3]);
-			entry.item_cost    = atoi(row[4]);
-			entry.slot_id      = atoi(row[5]);
-
-			all_entries.push_back(entry);
-		}
-
-		return all_entries;
-	}
-
-	static int DeleteWhere(std::string where_filter)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"DELETE FROM {} WHERE {}",
-				TableName(),
-				PrimaryKey(),
-				where_filter
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
+	// Custom extended repository methods here
 
 };
 

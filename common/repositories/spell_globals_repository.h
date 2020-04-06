@@ -23,293 +23,45 @@
 
 #include "../database.h"
 #include "../string_util.h"
+#include "base/base_spell_globals_repository.h"
 
-class SpellGlobalsRepository {
+class SpellGlobalsRepository: public BaseSpellGlobalsRepository {
 public:
-	struct SpellGlobals {
-		int         spellid;
-		std::string spell_name;
-		std::string qglobal;
-		std::string value;
-	};
 
-	static std::string PrimaryKey()
-	{
-		return std::string("spellid");
-	}
+	/**
+	 * This file was auto generated on Apr 5, 2020 and can be modified and extended upon
+	 *
+	 * Base repository methods are automatically
+	 * generated in the "base" version of this repository. The base repository
+	 * is immutable and to be left untouched, while methods in this class
+	 * are used as extension methods for more specific persistence-layer
+     * accessors or mutators
+	 *
+	 * Base Methods (Subject to be expanded upon in time)
+	 *
+	 * InsertOne
+     * UpdateOne
+     * DeleteOne
+     * FindOne
+     * GetWhere(std::string where_filter)
+     * DeleteWhere(std::string where_filter)
+     * InsertMany
+     * All
+     *
+     * Example custom methods in a repository
+     *
+     * SpellGlobalsRepository::GetByZoneAndVersion(int zone_id, int zone_version)
+     * SpellGlobalsRepository::GetWhereNeverExpires()
+     * SpellGlobalsRepository::GetWhereXAndY()
+     * SpellGlobalsRepository::DeleteWhereXAndY()
+     *
+     * Most of the above could be covered by base methods, but if you as a developer
+     * find yourself re-using logic for other parts of the code, its best to just make a
+     * method that can be re-used easily elsewhere especially if it can use a base repository
+     * method and encapsulate filters there
+	 */
 
-	static std::vector<std::string> Columns()
-	{
-		return {
-			"spellid",
-			"spell_name",
-			"qglobal",
-			"value",
-		};
-	}
-
-	static std::string ColumnsRaw()
-	{
-		return std::string(implode(", ", Columns()));
-	}
-
-	static std::string InsertColumnsRaw()
-	{
-		std::vector<std::string> insert_columns;
-
-		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
-			insert_columns.push_back(column);
-		}
-
-		return std::string(implode(", ", insert_columns));
-	}
-
-	static std::string TableName()
-	{
-		return std::string("spell_globals");
-	}
-
-	static std::string BaseSelect()
-	{
-		return fmt::format(
-			"SELECT {} FROM {}",
-			ColumnsRaw(),
-			TableName()
-		);
-	}
-
-	static std::string BaseInsert()
-	{
-		return fmt::format(
-			"INSERT INTO {} ({}) ",
-			TableName(),
-			InsertColumnsRaw()
-		);
-	}
-
-	static SpellGlobals NewEntity()
-	{
-		SpellGlobals entry{};
-
-		entry.spellid    = 0;
-		entry.spell_name = "";
-		entry.qglobal    = "";
-		entry.value      = "";
-
-		return entry;
-	}
-
-	static SpellGlobals GetSpellGlobalsEntry(
-		const std::vector<SpellGlobals> &spell_globalss,
-		int spell_globals_id
-	)
-	{
-		for (auto &spell_globals : spell_globalss) {
-			if (spell_globals.spellid == spell_globals_id) {
-				return spell_globals;
-			}
-		}
-
-		return NewEntity();
-	}
-
-	static SpellGlobals FindOne(
-		int spell_globals_id
-	)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
-				BaseSelect(),
-				spell_globals_id
-			)
-		);
-
-		auto row = results.begin();
-		if (results.RowCount() == 1) {
-			SpellGlobals entry{};
-
-			entry.spellid    = atoi(row[0]);
-			entry.spell_name = row[1] ? row[1] : "";
-			entry.qglobal    = row[2] ? row[2] : "";
-			entry.value      = row[3] ? row[3] : "";
-
-			return entry;
-		}
-
-		return NewEntity();
-	}
-
-	static int DeleteOne(
-		int spell_globals_id
-	)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"DELETE FROM {} WHERE {} = {}",
-				TableName(),
-				PrimaryKey(),
-				spell_globals_id
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static int UpdateOne(
-		SpellGlobals spell_globals_entry
-	)
-	{
-		std::vector<std::string> update_values;
-
-		auto columns = Columns();
-
-		update_values.push_back(columns[1] + " = '" + EscapeString(spell_globals_entry.spell_name) + "'");
-		update_values.push_back(columns[2] + " = '" + EscapeString(spell_globals_entry.qglobal) + "'");
-		update_values.push_back(columns[3] + " = '" + EscapeString(spell_globals_entry.value) + "'");
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"UPDATE {} SET {} WHERE {} = {}",
-				TableName(),
-				implode(", ", update_values),
-				PrimaryKey(),
-				spell_globals_entry.spellid
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static SpellGlobals InsertOne(
-		SpellGlobals spell_globals_entry
-	)
-	{
-		std::vector<std::string> insert_values;
-
-		insert_values.push_back("'" + EscapeString(spell_globals_entry.spell_name) + "'");
-		insert_values.push_back("'" + EscapeString(spell_globals_entry.qglobal) + "'");
-		insert_values.push_back("'" + EscapeString(spell_globals_entry.value) + "'");
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} VALUES ({})",
-				BaseInsert(),
-				implode(",", insert_values)
-			)
-		);
-
-		if (results.Success()) {
-			spell_globals_entry.id = results.LastInsertedID();
-			return spell_globals_entry;
-		}
-
-		spell_globals_entry = SpellGlobalsRepository::NewEntity();
-
-		return spell_globals_entry;
-	}
-
-	static int InsertMany(
-		std::vector<SpellGlobals> spell_globals_entries
-	)
-	{
-		std::vector<std::string> insert_chunks;
-
-		for (auto &spell_globals_entry: spell_globals_entries) {
-			std::vector<std::string> insert_values;
-
-			insert_values.push_back("'" + EscapeString(spell_globals_entry.spell_name) + "'");
-			insert_values.push_back("'" + EscapeString(spell_globals_entry.qglobal) + "'");
-			insert_values.push_back("'" + EscapeString(spell_globals_entry.value) + "'");
-
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
-		}
-
-		std::vector<std::string> insert_values;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} VALUES {}",
-				BaseInsert(),
-				implode(",", insert_chunks)
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static std::vector<SpellGlobals> All()
-	{
-		std::vector<SpellGlobals> all_entries;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{}",
-				BaseSelect()
-			)
-		);
-
-		all_entries.reserve(results.RowCount());
-
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			SpellGlobals entry{};
-
-			entry.spellid    = atoi(row[0]);
-			entry.spell_name = row[1] ? row[1] : "";
-			entry.qglobal    = row[2] ? row[2] : "";
-			entry.value      = row[3] ? row[3] : "";
-
-			all_entries.push_back(entry);
-		}
-
-		return all_entries;
-	}
-
-	static std::vector<SpellGlobals> GetWhere(std::string where_filter)
-	{
-		std::vector<SpellGlobals> all_entries;
-
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"{} WHERE {}",
-				BaseSelect(),
-				where_filter
-			)
-		);
-
-		all_entries.reserve(results.RowCount());
-
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			SpellGlobals entry{};
-
-			entry.spellid    = atoi(row[0]);
-			entry.spell_name = row[1] ? row[1] : "";
-			entry.qglobal    = row[2] ? row[2] : "";
-			entry.value      = row[3] ? row[3] : "";
-
-			all_entries.push_back(entry);
-		}
-
-		return all_entries;
-	}
-
-	static int DeleteWhere(std::string where_filter)
-	{
-		auto results = database.QueryDatabase(
-			fmt::format(
-				"DELETE FROM {} WHERE {}",
-				TableName(),
-				PrimaryKey(),
-				where_filter
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
+	// Custom extended repository methods here
 
 };
 

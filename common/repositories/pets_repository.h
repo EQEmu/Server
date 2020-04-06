@@ -23,326 +23,45 @@
 
 #include "../database.h"
 #include "../string_util.h"
+#include "base/base_pets_repository.h"
 
-class PetsRepository {
+class PetsRepository: public BasePetsRepository {
 public:
-	struct Pets {
-		std::string type;
-		int         petpower;
-		int         npcID;
-		int8        temp;
-		int8        petcontrol;
-		int8        petnaming;
-		int8        monsterflag;
-		int         equipmentset;
-	};
 
-	static std::string PrimaryKey()
-	{
-		return std::string("petpower");
-	}
+	/**
+	 * This file was auto generated on Apr 5, 2020 and can be modified and extended upon
+	 *
+	 * Base repository methods are automatically
+	 * generated in the "base" version of this repository. The base repository
+	 * is immutable and to be left untouched, while methods in this class
+	 * are used as extension methods for more specific persistence-layer
+     * accessors or mutators
+	 *
+	 * Base Methods (Subject to be expanded upon in time)
+	 *
+	 * InsertOne
+     * UpdateOne
+     * DeleteOne
+     * FindOne
+     * GetWhere(std::string where_filter)
+     * DeleteWhere(std::string where_filter)
+     * InsertMany
+     * All
+     *
+     * Example custom methods in a repository
+     *
+     * PetsRepository::GetByZoneAndVersion(int zone_id, int zone_version)
+     * PetsRepository::GetWhereNeverExpires()
+     * PetsRepository::GetWhereXAndY()
+     * PetsRepository::DeleteWhereXAndY()
+     *
+     * Most of the above could be covered by base methods, but if you as a developer
+     * find yourself re-using logic for other parts of the code, its best to just make a
+     * method that can be re-used easily elsewhere especially if it can use a base repository
+     * method and encapsulate filters there
+	 */
 
-	static std::vector<std::string> Columns()
-	{
-		return {
-			"type",
-			"petpower",
-			"npcID",
-			"temp",
-			"petcontrol",
-			"petnaming",
-			"monsterflag",
-			"equipmentset",
-		};
-	}
-
-	static std::string ColumnsRaw()
-	{
-		return std::string(implode(", ", Columns()));
-	}
-
-	static std::string InsertColumnsRaw()
-	{
-		std::vector<std::string> insert_columns;
-
-		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
-			insert_columns.push_back(column);
-		}
-
-		return std::string(implode(", ", insert_columns));
-	}
-
-	static std::string TableName()
-	{
-		return std::string("pets");
-	}
-
-	static std::string BaseSelect()
-	{
-		return fmt::format(
-			"SELECT {} FROM {}",
-			ColumnsRaw(),
-			TableName()
-		);
-	}
-
-	static std::string BaseInsert()
-	{
-		return fmt::format(
-			"INSERT INTO {} ({}) ",
-			TableName(),
-			InsertColumnsRaw()
-		);
-	}
-
-	static Pets NewEntity()
-	{
-		Pets entry{};
-
-		entry.type         = "";
-		entry.petpower     = 0;
-		entry.npcID        = 0;
-		entry.temp         = 0;
-		entry.petcontrol   = 0;
-		entry.petnaming    = 0;
-		entry.monsterflag  = 0;
-		entry.equipmentset = -1;
-
-		return entry;
-	}
-
-	static Pets GetPetsEntry(
-		const std::vector<Pets> &petss,
-		int pets_id
-	)
-	{
-		for (auto &pets : petss) {
-			if (pets.petpower == pets_id) {
-				return pets;
-			}
-		}
-
-		return NewEntity();
-	}
-
-	static Pets FindOne(
-		int pets_id
-	)
-	{
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
-				BaseSelect(),
-				pets_id
-			)
-		);
-
-		auto row = results.begin();
-		if (results.RowCount() == 1) {
-			Pets entry{};
-
-			entry.type         = row[0] ? row[0] : "";
-			entry.petpower     = atoi(row[1]);
-			entry.npcID        = atoi(row[2]);
-			entry.temp         = atoi(row[3]);
-			entry.petcontrol   = atoi(row[4]);
-			entry.petnaming    = atoi(row[5]);
-			entry.monsterflag  = atoi(row[6]);
-			entry.equipmentset = atoi(row[7]);
-
-			return entry;
-		}
-
-		return NewEntity();
-	}
-
-	static int DeleteOne(
-		int pets_id
-	)
-	{
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"DELETE FROM {} WHERE {} = {}",
-				TableName(),
-				PrimaryKey(),
-				pets_id
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static int UpdateOne(
-		Pets pets_entry
-	)
-	{
-		std::vector<std::string> update_values;
-
-		auto columns = Columns();
-
-		update_values.push_back(columns[2] + " = " + std::to_string(pets_entry.npcID));
-		update_values.push_back(columns[3] + " = " + std::to_string(pets_entry.temp));
-		update_values.push_back(columns[4] + " = " + std::to_string(pets_entry.petcontrol));
-		update_values.push_back(columns[5] + " = " + std::to_string(pets_entry.petnaming));
-		update_values.push_back(columns[6] + " = " + std::to_string(pets_entry.monsterflag));
-		update_values.push_back(columns[7] + " = " + std::to_string(pets_entry.equipmentset));
-
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"UPDATE {} SET {} WHERE {} = {}",
-				TableName(),
-				implode(", ", update_values),
-				PrimaryKey(),
-				pets_entry.petpower
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static Pets InsertOne(
-		Pets pets_entry
-	)
-	{
-		std::vector<std::string> insert_values;
-
-		insert_values.push_back(std::to_string(pets_entry.npcID));
-		insert_values.push_back(std::to_string(pets_entry.temp));
-		insert_values.push_back(std::to_string(pets_entry.petcontrol));
-		insert_values.push_back(std::to_string(pets_entry.petnaming));
-		insert_values.push_back(std::to_string(pets_entry.monsterflag));
-		insert_values.push_back(std::to_string(pets_entry.equipmentset));
-
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"{} VALUES ({})",
-				BaseInsert(),
-				implode(",", insert_values)
-			)
-		);
-
-		if (results.Success()) {
-			pets_entry.id = results.LastInsertedID();
-			return pets_entry;
-		}
-
-		pets_entry = PetsRepository::NewEntity();
-
-		return pets_entry;
-	}
-
-	static int InsertMany(
-		std::vector<Pets> pets_entries
-	)
-	{
-		std::vector<std::string> insert_chunks;
-
-		for (auto &pets_entry: pets_entries) {
-			std::vector<std::string> insert_values;
-
-			insert_values.push_back(std::to_string(pets_entry.npcID));
-			insert_values.push_back(std::to_string(pets_entry.temp));
-			insert_values.push_back(std::to_string(pets_entry.petcontrol));
-			insert_values.push_back(std::to_string(pets_entry.petnaming));
-			insert_values.push_back(std::to_string(pets_entry.monsterflag));
-			insert_values.push_back(std::to_string(pets_entry.equipmentset));
-
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
-		}
-
-		std::vector<std::string> insert_values;
-
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"{} VALUES {}",
-				BaseInsert(),
-				implode(",", insert_chunks)
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static std::vector<Pets> All()
-	{
-		std::vector<Pets> all_entries;
-
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"{}",
-				BaseSelect()
-			)
-		);
-
-		all_entries.reserve(results.RowCount());
-
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			Pets entry{};
-
-			entry.type         = row[0] ? row[0] : "";
-			entry.petpower     = atoi(row[1]);
-			entry.npcID        = atoi(row[2]);
-			entry.temp         = atoi(row[3]);
-			entry.petcontrol   = atoi(row[4]);
-			entry.petnaming    = atoi(row[5]);
-			entry.monsterflag  = atoi(row[6]);
-			entry.equipmentset = atoi(row[7]);
-
-			all_entries.push_back(entry);
-		}
-
-		return all_entries;
-	}
-
-	static std::vector<Pets> GetWhere(std::string where_filter)
-	{
-		std::vector<Pets> all_entries;
-
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"{} WHERE {}",
-				BaseSelect(),
-				where_filter
-			)
-		);
-
-		all_entries.reserve(results.RowCount());
-
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			Pets entry{};
-
-			entry.type         = row[0] ? row[0] : "";
-			entry.petpower     = atoi(row[1]);
-			entry.npcID        = atoi(row[2]);
-			entry.temp         = atoi(row[3]);
-			entry.petcontrol   = atoi(row[4]);
-			entry.petnaming    = atoi(row[5]);
-			entry.monsterflag  = atoi(row[6]);
-			entry.equipmentset = atoi(row[7]);
-
-			all_entries.push_back(entry);
-		}
-
-		return all_entries;
-	}
-
-	static int DeleteWhere(std::string where_filter)
-	{
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"DELETE FROM {} WHERE {}",
-				TableName(),
-				PrimaryKey(),
-				where_filter
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
+	// Custom extended repository methods here
 
 };
 

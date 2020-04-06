@@ -23,311 +23,45 @@
 
 #include "../database.h"
 #include "../string_util.h"
+#include "base/base_graveyard_repository.h"
 
-class GraveyardRepository {
+class GraveyardRepository: public BaseGraveyardRepository {
 public:
-	struct Graveyard {
-		int   id;
-		int   zone_id;
-		float x;
-		float y;
-		float z;
-		float heading;
-	};
 
-	static std::string PrimaryKey()
-	{
-		return std::string("id");
-	}
+	/**
+	 * This file was auto generated on Apr 5, 2020 and can be modified and extended upon
+	 *
+	 * Base repository methods are automatically
+	 * generated in the "base" version of this repository. The base repository
+	 * is immutable and to be left untouched, while methods in this class
+	 * are used as extension methods for more specific persistence-layer
+     * accessors or mutators
+	 *
+	 * Base Methods (Subject to be expanded upon in time)
+	 *
+	 * InsertOne
+     * UpdateOne
+     * DeleteOne
+     * FindOne
+     * GetWhere(std::string where_filter)
+     * DeleteWhere(std::string where_filter)
+     * InsertMany
+     * All
+     *
+     * Example custom methods in a repository
+     *
+     * GraveyardRepository::GetByZoneAndVersion(int zone_id, int zone_version)
+     * GraveyardRepository::GetWhereNeverExpires()
+     * GraveyardRepository::GetWhereXAndY()
+     * GraveyardRepository::DeleteWhereXAndY()
+     *
+     * Most of the above could be covered by base methods, but if you as a developer
+     * find yourself re-using logic for other parts of the code, its best to just make a
+     * method that can be re-used easily elsewhere especially if it can use a base repository
+     * method and encapsulate filters there
+	 */
 
-	static std::vector<std::string> Columns()
-	{
-		return {
-			"id",
-			"zone_id",
-			"x",
-			"y",
-			"z",
-			"heading",
-		};
-	}
-
-	static std::string ColumnsRaw()
-	{
-		return std::string(implode(", ", Columns()));
-	}
-
-	static std::string InsertColumnsRaw()
-	{
-		std::vector<std::string> insert_columns;
-
-		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
-			insert_columns.push_back(column);
-		}
-
-		return std::string(implode(", ", insert_columns));
-	}
-
-	static std::string TableName()
-	{
-		return std::string("graveyard");
-	}
-
-	static std::string BaseSelect()
-	{
-		return fmt::format(
-			"SELECT {} FROM {}",
-			ColumnsRaw(),
-			TableName()
-		);
-	}
-
-	static std::string BaseInsert()
-	{
-		return fmt::format(
-			"INSERT INTO {} ({}) ",
-			TableName(),
-			InsertColumnsRaw()
-		);
-	}
-
-	static Graveyard NewEntity()
-	{
-		Graveyard entry{};
-
-		entry.id      = 0;
-		entry.zone_id = 0;
-		entry.x       = 0;
-		entry.y       = 0;
-		entry.z       = 0;
-		entry.heading = 0;
-
-		return entry;
-	}
-
-	static Graveyard GetGraveyardEntry(
-		const std::vector<Graveyard> &graveyards,
-		int graveyard_id
-	)
-	{
-		for (auto &graveyard : graveyards) {
-			if (graveyard.id == graveyard_id) {
-				return graveyard;
-			}
-		}
-
-		return NewEntity();
-	}
-
-	static Graveyard FindOne(
-		int graveyard_id
-	)
-	{
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
-				BaseSelect(),
-				graveyard_id
-			)
-		);
-
-		auto row = results.begin();
-		if (results.RowCount() == 1) {
-			Graveyard entry{};
-
-			entry.id      = atoi(row[0]);
-			entry.zone_id = atoi(row[1]);
-			entry.x       = atof(row[2]);
-			entry.y       = atof(row[3]);
-			entry.z       = atof(row[4]);
-			entry.heading = atof(row[5]);
-
-			return entry;
-		}
-
-		return NewEntity();
-	}
-
-	static int DeleteOne(
-		int graveyard_id
-	)
-	{
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"DELETE FROM {} WHERE {} = {}",
-				TableName(),
-				PrimaryKey(),
-				graveyard_id
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static int UpdateOne(
-		Graveyard graveyard_entry
-	)
-	{
-		std::vector<std::string> update_values;
-
-		auto columns = Columns();
-
-		update_values.push_back(columns[1] + " = " + std::to_string(graveyard_entry.zone_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(graveyard_entry.x));
-		update_values.push_back(columns[3] + " = " + std::to_string(graveyard_entry.y));
-		update_values.push_back(columns[4] + " = " + std::to_string(graveyard_entry.z));
-		update_values.push_back(columns[5] + " = " + std::to_string(graveyard_entry.heading));
-
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"UPDATE {} SET {} WHERE {} = {}",
-				TableName(),
-				implode(", ", update_values),
-				PrimaryKey(),
-				graveyard_entry.id
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static Graveyard InsertOne(
-		Graveyard graveyard_entry
-	)
-	{
-		std::vector<std::string> insert_values;
-
-		insert_values.push_back(std::to_string(graveyard_entry.zone_id));
-		insert_values.push_back(std::to_string(graveyard_entry.x));
-		insert_values.push_back(std::to_string(graveyard_entry.y));
-		insert_values.push_back(std::to_string(graveyard_entry.z));
-		insert_values.push_back(std::to_string(graveyard_entry.heading));
-
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"{} VALUES ({})",
-				BaseInsert(),
-				implode(",", insert_values)
-			)
-		);
-
-		if (results.Success()) {
-			graveyard_entry.id = results.LastInsertedID();
-			return graveyard_entry;
-		}
-
-		graveyard_entry = GraveyardRepository::NewEntity();
-
-		return graveyard_entry;
-	}
-
-	static int InsertMany(
-		std::vector<Graveyard> graveyard_entries
-	)
-	{
-		std::vector<std::string> insert_chunks;
-
-		for (auto &graveyard_entry: graveyard_entries) {
-			std::vector<std::string> insert_values;
-
-			insert_values.push_back(std::to_string(graveyard_entry.zone_id));
-			insert_values.push_back(std::to_string(graveyard_entry.x));
-			insert_values.push_back(std::to_string(graveyard_entry.y));
-			insert_values.push_back(std::to_string(graveyard_entry.z));
-			insert_values.push_back(std::to_string(graveyard_entry.heading));
-
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
-		}
-
-		std::vector<std::string> insert_values;
-
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"{} VALUES {}",
-				BaseInsert(),
-				implode(",", insert_chunks)
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static std::vector<Graveyard> All()
-	{
-		std::vector<Graveyard> all_entries;
-
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"{}",
-				BaseSelect()
-			)
-		);
-
-		all_entries.reserve(results.RowCount());
-
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			Graveyard entry{};
-
-			entry.id      = atoi(row[0]);
-			entry.zone_id = atoi(row[1]);
-			entry.x       = atof(row[2]);
-			entry.y       = atof(row[3]);
-			entry.z       = atof(row[4]);
-			entry.heading = atof(row[5]);
-
-			all_entries.push_back(entry);
-		}
-
-		return all_entries;
-	}
-
-	static std::vector<Graveyard> GetWhere(std::string where_filter)
-	{
-		std::vector<Graveyard> all_entries;
-
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"{} WHERE {}",
-				BaseSelect(),
-				where_filter
-			)
-		);
-
-		all_entries.reserve(results.RowCount());
-
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			Graveyard entry{};
-
-			entry.id      = atoi(row[0]);
-			entry.zone_id = atoi(row[1]);
-			entry.x       = atof(row[2]);
-			entry.y       = atof(row[3]);
-			entry.z       = atof(row[4]);
-			entry.heading = atof(row[5]);
-
-			all_entries.push_back(entry);
-		}
-
-		return all_entries;
-	}
-
-	static int DeleteWhere(std::string where_filter)
-	{
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"DELETE FROM {} WHERE {}",
-				TableName(),
-				PrimaryKey(),
-				where_filter
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
+	// Custom extended repository methods here
 
 };
 
