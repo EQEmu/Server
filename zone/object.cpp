@@ -26,6 +26,7 @@
 
 #include "quest_parser_collection.h"
 #include "zonedb.h"
+#include "../common/repositories/criteria/content_filter_criteria.h"
 
 #include <iostream>
 
@@ -460,7 +461,7 @@ void Object::RandomSpawn(bool send_packet) {
 
 	m_data.x = zone->random.Real(m_min_x, m_max_x);
 	m_data.y = zone->random.Real(m_min_y, m_max_y);
-	
+
 	if(m_data.z == BEST_Z_INVALID) {
 		glm::vec3 me;
 		me.x = m_data.x;
@@ -470,11 +471,11 @@ void Object::RandomSpawn(bool send_packet) {
 		float best_z = zone->zonemap->FindClosestZ(me, &hit);
 		if (best_z != BEST_Z_INVALID) {
 			m_data.z = best_z + 0.1f;
-		} 
+		}
 	}
 
 	LogInfo("Object::RandomSpawn([{}]): [{}] ([{}], [{}], [{}])", m_data.object_name, m_inst->GetID(), m_data.x, m_data.y, m_data.z);
-	
+
 	respawn_timer.Disable();
 
 	if(send_packet) {
@@ -520,7 +521,7 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 				co->drop_id = 0;
 				entity_list.QueueClients(nullptr, outapp, false);
 				safe_delete(outapp);
-				
+
 				// No longer using a tradeskill object
 				sender->SetTradeskillObject(nullptr);
 				user = nullptr;
@@ -681,7 +682,7 @@ void ZoneDatabase::UpdateObject(uint32 id, uint32 type, uint32 icon, const Objec
 									"size = %f, tilt_x = %f, tilt_y = %f "
                                     "WHERE id = %i",
                                     object.zone_id, object.x, object.y, object.z, object.heading,
-                                    item_id, charges, object_name, type, icon, 
+                                    item_id, charges, object_name, type, icon,
 									object.size, object.tilt_x, object.tilt_y, id);
     safe_delete_array(object_name);
     auto results = QueryDatabase(query);
@@ -698,14 +699,20 @@ void ZoneDatabase::UpdateObject(uint32 id, uint32 type, uint32 icon, const Objec
 //
 Ground_Spawns* ZoneDatabase::LoadGroundSpawns(uint32 zone_id, int16 version, Ground_Spawns* gs) {
 
-	std::string query = StringFormat("SELECT max_x, max_y, max_z, "
-                                    "min_x, min_y, heading, name, "
-                                    "item, max_allowed, respawn_timer "
-                                    "FROM ground_spawns "
-                                    "WHERE zoneid = %i AND (version = %u OR version = -1) "
-                                    "LIMIT 50", zone_id, version);
-    auto results = QueryDatabase(query);
-    if (!results.Success()) {
+	std::string query = StringFormat(
+		"SELECT max_x, max_y, max_z, "
+		"min_x, min_y, heading, name, "
+		"item, max_allowed, respawn_timer "
+		"FROM ground_spawns "
+		"WHERE zoneid = %i AND (version = %u OR version = -1) %s "
+		"LIMIT 50",
+		zone_id,
+		version,
+		ContentFilterCriteria::apply().c_str()
+	);
+
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
 		return gs;
 	}
 

@@ -12,6 +12,7 @@
 #include "zone.h"
 #include "zonedb.h"
 #include "aura.h"
+#include "../common/repositories/criteria/content_filter_criteria.h"
 
 #include <ctime>
 #include <iostream>
@@ -83,19 +84,19 @@ bool ZoneDatabase::SaveZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct
 }
 
 bool ZoneDatabase::GetZoneCFG(
-	uint32 zoneid, 
-	uint16 instance_id, 
-	NewZone_Struct *zone_data, 
-	bool &can_bind, 
-	bool &can_combat, 
-	bool &can_levitate, 
-	bool &can_castoutdoor, 
-	bool &is_city, 
-	bool &is_hotzone, 
-	bool &allow_mercs, 
+	uint32 zoneid,
+	uint16 instance_id,
+	NewZone_Struct *zone_data,
+	bool &can_bind,
+	bool &can_combat,
+	bool &can_levitate,
+	bool &can_castoutdoor,
+	bool &is_city,
+	bool &is_hotzone,
+	bool &allow_mercs,
 	double &max_movement_update_range,
-	uint8 &zone_type, 
-	int &ruleset, 
+	uint8 &zone_type,
+	int &ruleset,
 	char **map_filename) {
 
 	*map_filename = new char[100];
@@ -165,8 +166,11 @@ bool ZoneDatabase::GetZoneCFG(
 		"fast_regen_endurance, "	 // 59
 		"npc_max_aggro_dist, "		 // 60
 		"max_movement_update_range " // 61
-		"FROM zone WHERE zoneidnumber = %i AND version = %i",
-		zoneid, instance_id);
+		"FROM zone WHERE zoneidnumber = %i AND version = %i %s",
+		zoneid,
+		instance_id,
+		ContentFilterCriteria::apply().c_str()
+	);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		strcpy(*map_filename, "default");
@@ -361,7 +365,7 @@ void ZoneDatabase::RegisterBug(BugReport_Struct* bug_report) {
 	char* type_ = nullptr;
 	char* target_ = nullptr;
 	char* bug_ = nullptr;
-	
+
 	len = strlen(bug_report->reporter_name);
 	if (len) {
 		if (len > 63) // check against db column size
@@ -427,7 +431,7 @@ void ZoneDatabase::RegisterBug(BugReport_Struct* bug_report) {
 	safe_delete_array(type_);
 	safe_delete_array(target_);
 	safe_delete_array(bug_);
-	
+
 	QueryDatabase(query);
 }
 
@@ -585,7 +589,7 @@ void ZoneDatabase::RegisterBug(Client* client, BugReport_Struct* bug_report) {
 	safe_delete_array(target_name_);
 	safe_delete_array(bug_report_);
 	safe_delete_array(system_info_);
-	
+
 	auto result = QueryDatabase(query);
 
 	// TODO: Entity dumping [RuleB(Bugs, DumpTargetEntity)]
@@ -1244,9 +1248,9 @@ bool ZoneDatabase::LoadCharacterSpellBook(uint32 character_id, PlayerProfile_Str
 		"`character_spells`		"
 		"WHERE `id` = %u ORDER BY `slot_id`", character_id);
 	auto results = database.QueryDatabase(query);
-	
+
 	/* Initialize Spells */
-	
+
 	memset(pp->spell_book, 0xFF, (sizeof(uint32) * EQEmu::spells::SPELLBOOK_SIZE));
 
 	// We have the ability to block loaded spells by max id on a per-client basis..
@@ -1262,7 +1266,7 @@ bool ZoneDatabase::LoadCharacterSpellBook(uint32 character_id, PlayerProfile_Str
 			continue;
 		if (id < 3 || id > SPDAT_RECORDS) // 3 ("Summon Corpse") is the first scribable spell in spells_us.txt
 			continue;
-		
+
 		pp->spell_book[idx] = id;
 	}
 
@@ -1606,11 +1610,11 @@ bool ZoneDatabase::SaveCharacterLeadershipAA(uint32 character_id, PlayerProfile_
 }
 
 bool ZoneDatabase::SaveCharacterData(uint32 character_id, uint32 account_id, PlayerProfile_Struct* pp, ExtendedProfile_Struct* m_epp){
-	
+
 	/* If this is ever zero - the client hasn't fully loaded and potentially crashed during zone */
 	if (account_id <= 0)
 		return false;
-	
+
 	std::string mail_key = database.GetMailKey(character_id);
 
 	clock_t t = std::clock(); /* Function timer start */
@@ -4090,9 +4094,9 @@ bool ZoneDatabase::LoadFactionData()
 	faction_array = new Faction *[max_faction + 1];
 
 	memset(faction_array, 0, (sizeof(Faction*) * (max_faction + 1)));
-	
+
 	std::vector<size_t> faction_ids;
-	
+
 	// load factions
     query = "SELECT `id`, `name`, `base` FROM `faction_list`";
 
@@ -4120,7 +4124,7 @@ bool ZoneDatabase::LoadFactionData()
 		faction_array[index]->base = atoi(fr_row[2]);
 		faction_array[index]->min = MIN_PERSONAL_FACTION;
 		faction_array[index]->max = MAX_PERSONAL_FACTION;
-		
+
 		faction_ids.push_back(index);
 	}
 
@@ -4156,7 +4160,7 @@ bool ZoneDatabase::LoadFactionData()
 	else {
 		LogInfo("Unable to load Faction Base data...");
 	}
-	
+
 	// load race, class and diety modifiers
 	query = fmt::format("SELECT `faction_id`, `mod`, `mod_name` FROM `faction_list_mod` WHERE `faction_id` IN ({})", faction_id_criteria);
 
@@ -4879,7 +4883,7 @@ uint32 ZoneDatabase::LoadSaylinkID(const char* saylink_text, bool auto_insert)
 {
 	if (!saylink_text || saylink_text[0] == '\0')
 		return 0;
-	
+
 	std::string query = StringFormat("SELECT `id` FROM `saylink` WHERE `phrase` = '%s' LIMIT 1", saylink_text);
 	auto results = QueryDatabase(query);
 	if (!results.Success())
@@ -4904,6 +4908,6 @@ uint32 ZoneDatabase::SaveSaylinkID(const char* saylink_text)
 	auto results = QueryDatabase(query);
 	if (!results.Success())
 		return 0;
-	
+
 	return results.LastInsertedID();
 }

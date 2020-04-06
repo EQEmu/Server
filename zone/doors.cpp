@@ -28,6 +28,7 @@
 #include "string_ids.h"
 #include "worldserver.h"
 #include "zonedb.h"
+#include "../common/repositories/criteria/content_filter_criteria.h"
 
 #include <iostream>
 #include <string.h>
@@ -716,10 +717,12 @@ bool ZoneDatabase::LoadDoors(int32 door_count, Door *into, const char *zone_name
 			" WHERE "
 			" 	zone = '%s'  "
 			" 	AND ( version = % u OR version = - 1 )  "
+            " %s "
 			" ORDER BY "
 			" 	doorid ASC ",
 			zone_name,
-			version
+			version,
+			ContentFilterCriteria::apply().c_str()
 	);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {

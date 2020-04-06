@@ -33,8 +33,10 @@
 #include "skill_caps.h"
 #include "spells.h"
 #include "base_data.h"
+#include "../common/content/world_content_service.h"
 
 EQEmuLogSys LogSys;
+WorldContentService content_service;
 
 #ifdef _WINDOWS
 #include <direct.h>
@@ -138,6 +140,39 @@ int main(int argc, char **argv)
 			database.QueryDatabase(query);
 		}
 	}
+
+	/**
+	 * Rules: TODO: Remove later
+	 */
+	{
+		std::string tmp;
+		if (database.GetVariable("RuleSet", tmp)) {
+			LogInfo("Loading rule set [{}]", tmp.c_str());
+			if (!RuleManager::Instance()->LoadRules(&database, tmp.c_str(), false)) {
+				LogError("Failed to load ruleset [{}], falling back to defaults", tmp.c_str());
+			}
+		}
+		else {
+			if (!RuleManager::Instance()->LoadRules(&database, "default", false)) {
+				LogInfo("No rule set configured, using default rules");
+			}
+			else {
+				LogInfo("Loaded default rule set 'default'");
+			}
+		}
+
+		EQEmu::InitializeDynamicLookups();
+		LogInfo("Initialized dynamic dictionary entries");
+	}
+
+
+	content_service.SetCurrentExpansion(RuleI(Expansion, CurrentExpansion));
+
+	LogInfo(
+		"Current expansion is [{}] ({})",
+		content_service.GetCurrentExpansion(),
+		Expansion::ExpansionName[content_service.GetCurrentExpansion()]
+	);
 
 	std::string hotfix_name = "";
 

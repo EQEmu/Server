@@ -35,6 +35,9 @@ extern QueryServ* QServ;
 extern WorldServer worldserver;
 extern Zone* zone;
 
+#include "../common/repositories/zone_repository.h"
+#include "../common/content/world_content_service.h"
+
 
 void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 #ifdef BOTS
@@ -284,6 +287,29 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 
 	//TODO: ADVENTURE ENTRANCE CHECK
 
+	/**
+	 * Expansion check
+	 */
+	auto zones = ZoneRepository::GetWhere(
+		fmt::format(
+			"expansion <= {} AND short_name = '{}'",
+			(content_service.GetCurrentExpansion() + 1),
+			target_zone_name
+		)
+	);
+
+	LogInfo(
+		"Checking zone request [{}] for expansion [{}] ({}) success [{}]",
+		target_zone_name,
+		(content_service.GetCurrentExpansion() + 1),
+		Expansion::ExpansionName[content_service.GetCurrentExpansion()],
+		!zones.empty() ? "true" : "false"
+	);
+
+	if (zones.empty()) {
+		myerror = ZONE_ERROR_NOEXPANSION;
+	}
+
 	if(myerror == 1) {
 		//we have successfully zoned
 		DoZoneSuccess(zc, target_zone_id, target_instance_id, dest_x, dest_y, dest_z, dest_h, ignorerestrictions);
@@ -530,7 +556,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			heading = m_pp.binds[0].heading;
 
 			zonesummon_ignorerestrictions = 1;
-			LogDebug("Player [{}] has died and will be zoned to bind point in zone: [{}] at LOC x=[{}], y=[{}], z=[{}], heading=[{}]", 
+			LogDebug("Player [{}] has died and will be zoned to bind point in zone: [{}] at LOC x=[{}], y=[{}], z=[{}], heading=[{}]",
 					GetName(), pZoneName, m_pp.binds[0].x, m_pp.binds[0].y, m_pp.binds[0].z, m_pp.binds[0].heading);
 			break;
 		case SummonPC:
@@ -539,8 +565,8 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			SetHeading(heading);
 			break;
 		case Rewind:
-			LogDebug("[{}] has requested a /rewind from [{}], [{}], [{}], to [{}], [{}], [{}] in [{}]", GetName(), 
-					m_Position.x, m_Position.y, m_Position.z, 
+			LogDebug("[{}] has requested a /rewind from [{}], [{}], [{}], to [{}], [{}], [{}] in [{}]", GetName(),
+					m_Position.x, m_Position.y, m_Position.z,
 					m_RewindLocation.x, m_RewindLocation.y, m_RewindLocation.z, zone->GetShortName());
 			m_ZoneSummonLocation = glm::vec3(x, y, z);
 			m_Position = glm::vec4(m_ZoneSummonLocation, 0.0f);

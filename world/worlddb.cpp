@@ -25,6 +25,7 @@
 #include <cstdlib>
 #include <vector>
 #include "sof_char_create_data.h"
+#include "../common/repositories/criteria/content_filter_criteria.h"
 
 WorldDatabase database;
 WorldDatabase content_db;
@@ -197,10 +198,11 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 
 		if (has_home == 0 || has_bind == 0) {
 			character_list_query = StringFormat(
-				"SELECT `zone_id`, `bind_id`, `x`, `y`, `z` FROM `start_zones` WHERE `player_class` = %i AND `player_deity` = %i AND `player_race` = %i",
+				"SELECT `zone_id`, `bind_id`, `x`, `y`, `z` FROM `start_zones` WHERE `player_class` = %i AND `player_deity` = %i AND `player_race` = %i %s",
 				p_character_select_entry_struct->Class,
 				p_character_select_entry_struct->Deity,
-				p_character_select_entry_struct->Race
+				p_character_select_entry_struct->Race,
+				ContentFilterCriteria::apply().c_str()
 			);
 			auto      results_bind = content_db.QueryDatabase(character_list_query);
 			for (auto row_d        = results_bind.begin(); row_d != results_bind.end(); ++row_d) {
@@ -313,7 +315,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 
 				if (matslot > 6) {
 					uint32 item_id_file = 0;
-					// Weapon Models 
+					// Weapon Models
 					if (inst->GetOrnamentationIDFile() != 0) {
 						item_id_file = inst->GetOrnamentationIDFile();
 						p_character_select_entry_struct->Equip[matslot].Material = item_id_file;
@@ -381,7 +383,7 @@ int WorldDatabase::MoveCharacterToBind(int CharID, uint8 bindnum)
 		heading = atof(row[5]);
 	}
 
-	query = StringFormat("UPDATE character_data SET zone_id = '%d', zone_instance = '%d', x = '%f', y = '%f', z = '%f', heading = '%f' WHERE id = %u", 
+	query = StringFormat("UPDATE character_data SET zone_id = '%d', zone_instance = '%d', x = '%f', y = '%f', z = '%f', heading = '%f' WHERE id = %u",
 						 zone_id, instance_id, x, y, z, heading, CharID);
 
 	results = database.QueryDatabase(query);
@@ -423,11 +425,12 @@ bool WorldDatabase::GetStartZone(
 	// see if we have an entry for start_zone. We can support both titanium & SOF+ by having two entries per class/race/deity combo with different zone_ids
 	std::string query = StringFormat(
 		"SELECT x, y, z, heading, start_zone, bind_id, bind_x, bind_y, bind_z FROM start_zones WHERE zone_id = %i "
-		"AND player_class = %i AND player_deity = %i AND player_race = %i",
+		"AND player_class = %i AND player_deity = %i AND player_race = %i %s",
 		p_char_create_struct->start_zone,
 		p_char_create_struct->class_,
 		p_char_create_struct->deity,
-		p_char_create_struct->race
+		p_char_create_struct->race,
+		ContentFilterCriteria::apply().c_str()
 	);
 
 	auto results = QueryDatabase(query);
@@ -469,7 +472,7 @@ bool WorldDatabase::GetStartZone(
 void WorldDatabase::SetSoFDefaultStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct* in_cc){
 	if (in_cc->start_zone == RuleI(World, TutorialZoneID)) {
 		in_pp->zone_id = in_cc->start_zone;
-	} 
+	}
 	else {
 		in_pp->x = in_pp->binds[0].x = -51;
 		in_pp->y = in_pp->binds[0].y = -20;

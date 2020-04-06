@@ -90,6 +90,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #else
 #include <pthread.h>
 #include "../common/unix.h"
+
+#include "../common/content/world_content_service.h"
+
 #endif
 
 volatile bool RunLoops = true;
@@ -107,6 +110,7 @@ TaskManager *taskmanager = 0;
 NpcScaleManager *npc_scale_manager;
 QuestParserCollection *parse = 0;
 EQEmuLogSys LogSys;
+WorldContentService content_service;
 const SPDat_Spell_Struct* spells;
 int32 SPDAT_RECORDS = -1;
 const ZoneConfig *Config;
@@ -391,6 +395,14 @@ int main(int argc, char** argv) {
 		EQEmu::InitializeDynamicLookups();
 		LogInfo("Initialized dynamic dictionary entries");
 	}
+
+	content_service.SetCurrentExpansion(RuleI(Expansion, CurrentExpansion));
+
+	LogInfo(
+		"Current expansion is [{}] ({})",
+		content_service.GetCurrentExpansion(),
+		Expansion::ExpansionName[content_service.GetCurrentExpansion()]
+	);
 
 #ifdef BOTS
 	LogInfo("Loading bot commands");

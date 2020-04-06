@@ -56,6 +56,7 @@
 #include "npc_scale_manager.h"
 #include "../common/data_verification.h"
 #include "zone_reload.h"
+#include "../common/repositories/criteria/content_filter_criteria.h"
 
 #include <time.h>
 #include <ctime>
@@ -140,7 +141,7 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	if(iInstanceID != 0)
 	{
 		auto pack = new ServerPacket(ServerOP_AdventureZoneData, sizeof(uint16));
-		*((uint16*)pack->pBuffer) = iInstanceID; 
+		*((uint16*)pack->pBuffer) = iInstanceID;
 		worldserver.SendPacket(pack);
 		delete pack;
 	}
@@ -170,11 +171,14 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 //this really loads the objects into entity_list
 bool Zone::LoadZoneObjects()
 {
-	std::string query =
-	    StringFormat("SELECT id, zoneid, xpos, ypos, zpos, heading, itemid, charges, objectname, type, icon, "
-			 "unknown08, unknown10, unknown20, unknown24, unknown76, size, tilt_x, tilt_y, display_name "
-			 "FROM object WHERE zoneid = %i AND (version = %u OR version = -1)",
-			 zoneid, instanceversion);
+	std::string query = StringFormat(
+		"SELECT id, zoneid, xpos, ypos, zpos, heading, itemid, charges, objectname, type, icon, "
+		"unknown08, unknown10, unknown20, unknown24, unknown76, size, tilt_x, tilt_y, display_name "
+		"FROM object WHERE zoneid = %i AND (version = %u OR version = -1) %s",
+		zoneid,
+		instanceversion,
+		ContentFilterCriteria::apply().c_str()
+	);
 	auto results = content_db.QueryDatabase(query);
 	if (!results.Success()) {
 		LogError("Error Loading Objects from DB: [{}]",
@@ -498,73 +502,111 @@ void Zone::LoadTempMerchantData()
 void Zone::LoadNewMerchantData(uint32 merchantid) {
 
 	std::list<MerchantList> merlist;
-	std::string query = StringFormat("SELECT item, slot, faction_required, level_required, alt_currency_cost, "
-                                     "classes_required, probability FROM merchantlist WHERE merchantid=%d ORDER BY slot", merchantid);
+
+	std::string query = fmt::format(
+		SQL(
+			SELECT
+			  item,
+			  slot,
+			  faction_required,
+			  level_required,
+			  alt_currency_cost,
+			  classes_required,
+			  probability
+			FROM
+			  merchantlist
+			WHERE
+			  merchantid = {}
+			  {}
+			ORDER BY
+			  slot
+			),
+		merchantid,
+		ContentFilterCriteria::apply()
+	);
+
     auto results = content_db.QueryDatabase(query);
     if (!results.Success()) {
         return;
-    }
+	}
 
-    for(auto row = results.begin(); row != results.end(); ++row) {
-        MerchantList ml;
-        ml.id = merchantid;
-        ml.item = atoul(row[0]);
-        ml.slot = atoul(row[1]);
-        ml.faction_required = atoul(row[2]);
-        ml.level_required = atoul(row[3]);
-        ml.alt_currency_cost = atoul(row[4]);
-        ml.classes_required = atoul(row[5]);
-		ml.probability = atoul(row[6]);
-        merlist.push_back(ml);
-    }
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		MerchantList ml;
+		ml.id                = merchantid;
+		ml.item              = atoul(row[0]);
+		ml.slot              = atoul(row[1]);
+		ml.faction_required  = atoul(row[2]);
+		ml.level_required    = atoul(row[3]);
+		ml.alt_currency_cost = atoul(row[4]);
+		ml.classes_required  = atoul(row[5]);
+		ml.probability       = atoul(row[6]);
+		merlist.push_back(ml);
+	}
 
-    merchanttable[merchantid] = merlist;
+	merchanttable[merchantid] = merlist;
 }
 
 void Zone::GetMerchantDataForZoneLoad() {
 	LogInfo("Loading Merchant Lists");
-	std::string query = StringFormat(												   
-		"SELECT																		   "
-		"DISTINCT ml.merchantid,													   "
-		"ml.slot,																	   "
-		"ml.item,																	   "
-		"ml.faction_required,														   "
-		"ml.level_required,															   "
-		"ml.alt_currency_cost,														   "
-		"ml.classes_required,														   "
-		"ml.probability																   "
-		"FROM																		   "
-		"merchantlist AS ml,														   "
-		"npc_types AS nt,															   "
-		"spawnentry AS se,															   "
-		"spawn2 AS s2																   "
-		"WHERE nt.merchant_id = ml.merchantid AND nt.id = se.npcid					   "
-		"AND se.spawngroupid = s2.spawngroupid AND s2.zone = '%s' AND s2.version = %i  "
-		"ORDER BY ml.slot															   ", GetShortName(), GetInstanceVersion());
+	std::string query = fmt::format(
+		SQL (
+			SELECT
+			  DISTINCT merchantlist.merchantid,
+			  merchantlist.slot,
+			  merchantlist.item,
+			  merchantlist.faction_required,
+			  merchantlist.level_required,
+			  merchantlist.alt_currency_cost,
+			  merchantlist.classes_required,
+			  merchantlist.probability
+			FROM
+			  merchantlist,
+			  npc_types,
+			  spawnentry,
+			  spawn2
+			WHERE
+			  npc_types.merchant_id = merchantlist.merchantid
+			  AND npc_types.id = spawnentry.npcid
+			  AND spawnentry.spawngroupid = spawn2.spawngroupid
+			  AND spawn2.zone = '{}'
+			  AND spawn2.version = {}
+			  {}
+			ORDER BY
+			  merchantlist.slot
+		),
+		GetShortName(),
+		GetInstanceVersion(),
+		ContentFilterCriteria::apply("merchantlist")
+	);
+
 	auto results = content_db.QueryDatabase(query);
-	std::map<uint32, std::list<MerchantList> >::iterator cur;
-	uint32 npcid = 0;
+
+	std::map<uint32, std::list<MerchantList> >::iterator merchant_list;
+
+	uint32 npc_id = 0;
+
 	if (results.RowCount() == 0) {
 		LogDebug("No Merchant Data found for [{}]", GetShortName());
 		return;
 	}
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		MerchantList ml;
-		ml.id = atoul(row[0]);
-		if (npcid != ml.id) {
-			cur = merchanttable.find(ml.id);
-			if (cur == merchanttable.end()) {
+		MerchantList merchant_list_entry{};
+		merchant_list_entry.id = atoul(row[0]);
+		if (npc_id != merchant_list_entry.id) {
+			merchant_list = merchanttable.find(merchant_list_entry.id);
+			if (merchant_list == merchanttable.end()) {
 				std::list<MerchantList> empty;
-				merchanttable[ml.id] = empty;
-				cur = merchanttable.find(ml.id);
+				merchanttable[merchant_list_entry.id] = empty;
+				merchant_list = merchanttable.find(merchant_list_entry.id);
 			}
-			npcid = ml.id;
+
+			npc_id = merchant_list_entry.id;
 		}
 
-		auto iter = cur->second.begin();
+		auto iter  = merchant_list->second.begin();
 		bool found = false;
-		while (iter != cur->second.end()) {
-			if ((*iter).item == ml.id) {
+		while (iter != merchant_list->second.end()) {
+			if ((*iter).item == merchant_list_entry.id) {
 				found = true;
 				break;
 			}
@@ -575,14 +617,15 @@ void Zone::GetMerchantDataForZoneLoad() {
 			continue;
 		}
 
-		ml.slot = atoul(row[1]);
-		ml.item = atoul(row[2]);
-		ml.faction_required = atoul(row[3]);
-		ml.level_required = atoul(row[4]);
-		ml.alt_currency_cost = atoul(row[5]);
-		ml.classes_required = atoul(row[6]);
-		ml.probability = atoul(row[7]);
-		cur->second.push_back(ml);
+		merchant_list_entry.slot              = atoul(row[1]);
+		merchant_list_entry.item              = atoul(row[2]);
+		merchant_list_entry.faction_required  = atoul(row[3]);
+		merchant_list_entry.level_required    = atoul(row[4]);
+		merchant_list_entry.alt_currency_cost = atoul(row[5]);
+		merchant_list_entry.classes_required  = atoul(row[6]);
+		merchant_list_entry.probability       = atoul(row[7]);
+
+		merchant_list->second.push_back(merchant_list_entry);
 	}
 
 }
@@ -847,7 +890,7 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	{
 		LogDebug("Graveyard ID is [{}]", graveyard_id());
 		bool GraveYardLoaded = content_db.GetZoneGraveyard(graveyard_id(), &pgraveyard_zoneid, &m_Graveyard.x, &m_Graveyard.y, &m_Graveyard.z, &m_Graveyard.w);
-		
+
 		if (GraveYardLoaded) {
 			LogDebug("Loaded a graveyard for zone [{}]: graveyard zoneid is [{}] at [{}]", short_name, graveyard_zoneid(), to_string(m_Graveyard).c_str());
 		}
@@ -1798,16 +1841,22 @@ ZonePoint* Zone::GetClosestZonePointWithoutZone(float x, float y, float z, Clien
 	return closest_zp;
 }
 
-bool ZoneDatabase::LoadStaticZonePoints(LinkedList<ZonePoint*>* zone_point_list, const char* zonename, uint32 version)
+bool ZoneDatabase::LoadStaticZonePoints(LinkedList<ZonePoint *> *zone_point_list, const char *zonename, uint32 version)
 {
 	zone_point_list->Clear();
 	zone->numzonepoints = 0;
-	std::string query = StringFormat("SELECT x, y, z, target_x, target_y, "
-					 "target_z, target_zone_id, heading, target_heading, "
-					 "number, target_instance, client_version_mask "
-					 "FROM zone_points WHERE zone='%s' AND (version=%i OR version=-1) "
-					 "ORDER BY number",
-					 zonename, version);
+
+	std::string query = StringFormat(
+		"SELECT x, y, z, target_x, target_y, "
+		"target_z, target_zone_id, heading, target_heading, "
+		"number, target_instance, client_version_mask "
+		"FROM zone_points WHERE zone='%s' AND (version=%i OR version=-1) %s"
+		"ORDER BY number",
+		zonename,
+		version,
+		ContentFilterCriteria::apply().c_str()
+	);
+
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		return false;

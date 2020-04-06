@@ -24,8 +24,10 @@
 #include "../../common/crash.h"
 #include "../../common/rulesys.h"
 #include "../../common/string_util.h"
+#include "../../common/content/world_content_service.h"
 
 EQEmuLogSys LogSys;
+WorldContentService content_service;
 
 void ImportSpells(SharedDatabase *db);
 void ImportSkillCaps(SharedDatabase *db);
@@ -87,7 +89,7 @@ int main(int argc, char **argv) {
 	ImportDBStrings(&database);
 
 	LogSys.CloseFileLogs();
-	
+
 	return 0;
 }
 
@@ -324,10 +326,10 @@ void ImportDBStrings(SharedDatabase *db) {
 		std::string sql;
 		int id, type;
 		std::string value;
-		
+
 		id = atoi(split[0].c_str());
 		type = atoi(split[1].c_str());
-		
+
 		if(split.size() >= 3) {
 			value = ::EscapeString(split[2]);
 		}

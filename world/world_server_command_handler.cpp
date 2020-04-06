@@ -59,6 +59,7 @@ namespace WorldserverCommandHandler {
 		function_map["database:schema"]             = &WorldserverCommandHandler::DatabaseGetSchema;
 		function_map["database:dump"]               = &WorldserverCommandHandler::DatabaseDump;
 		function_map["test:test"]                   = &WorldserverCommandHandler::TestCommand;
+		function_map["test:expansion"]              = &WorldserverCommandHandler::ExpansionTestCommand;
 		function_map["test:repository"]             = &WorldserverCommandHandler::TestRepository;
 		function_map["test:repository2"]            = &WorldserverCommandHandler::TestRepository2;
 
@@ -293,6 +294,22 @@ namespace WorldserverCommandHandler {
 			return;
 		}
 
+	}
+
+	/**
+	 * @param argc
+	 * @param argv
+	 * @param cmd
+	 * @param description
+	 */
+	void ExpansionTestCommand(int argc, char **argv, argh::parser &cmd, std::string &description)
+	{
+		description = "Expansion test command";
+
+		if (cmd[{"-h", "--help"}]) {
+			return;
+		}
+
 		if (!RuleManager::Instance()->LoadRules(&database, "default", false)) {
 			LogInfo("No rule set configured, using default rules");
 		}
@@ -310,7 +327,7 @@ namespace WorldserverCommandHandler {
 			"Current expansion is [{}] ({}) is Velious Enabled [{}] Criteria [{}]",
 			content_service.GetCurrentExpansion(),
 			Expansion::ExpansionName[content_service.GetCurrentExpansion()],
-			content_service.IsTheShardsOfVeliousEnabled() ? "true" : "false",
+			content_service.IsTheScarsOfVeliousEnabled() ? "true" : "false",
 			ContentFilterCriteria::apply()
 		);
 	}

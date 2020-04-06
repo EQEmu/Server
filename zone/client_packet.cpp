@@ -61,6 +61,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "worldserver.h"
 #include "zone.h"
 #include "mob_movement_manager.h"
+#include "../common/repositories/criteria/content_filter_criteria.h"
 
 #ifdef BOTS
 #include "bot.h"
@@ -599,7 +600,7 @@ void Client::CompleteConnect()
 		if (group)
 			group->SendHPManaEndPacketsTo(this);
 	}
-	
+
 
 	//bulk raid send in here eventually
 
@@ -1237,7 +1238,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	database.ClearOldRecastTimestamps(cid); /* Clear out our old recast timestamps to keep the DB clean */
 	// set to full support in case they're a gm with items in disabled expansion slots..but, have their gm flag off...
 	// item loss will occur when they use the 'empty' slots, if this is not done
-	m_inv.SetGMInventory(true); 
+	m_inv.SetGMInventory(true);
 	loaditems = database.GetInventory(cid, &m_inv); /* Load Character Inventory */
 	database.LoadCharacterBandolier(cid, &m_pp); /* Load Character Bandolier */
 	database.LoadCharacterBindPoint(cid, &m_pp); /* Load Character Bind */
@@ -1341,7 +1342,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		client_max_level = GetCharMaxLevelFromBucket();
 	}
 	SetClientMaxLevel(client_max_level);
-	
+
 	// we know our class now, so we might have to fix our consume timer!
 	if (class_ == MONK)
 		consume_food_timer.SetTimer(CONSUMPTION_MNK_TIMER);
@@ -2840,7 +2841,7 @@ void Client::Handle_OP_ApplyPoison(const EQApplicationPacket *app)
 			// rogue simply won't apply at all, no skill check done.
 
 			uint16 poison_skill = GetSkill(EQEmu::skills::SkillApplyPoison);
-			
+
 			if (ChanceRoll < (.75 + poison_skill / 1000)) {
 				ApplyPoisonSuccessResult = 1;
 				AddProcToWeapon(poison->Proc.Effect, false, (GetDEX() / 100) + 103, POISON_PROC);
@@ -3917,7 +3918,7 @@ void Client::Handle_OP_Bug(const EQApplicationPacket *app)
 		Message(0, "Bug reporting is disabled on this server.");
 		return;
 	}
-	
+
 	if (app->size != sizeof(BugReport_Struct)) {
 		printf("Wrong size of BugReport_Struct got %d expected %zu!\n", app->size, sizeof(BugReport_Struct));
 	}
@@ -4362,9 +4363,9 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 			sizeof(PlayerPositionUpdateClient_Struct), app->size);
 		return;
 	}
-	
+
 	PlayerPositionUpdateClient_Struct *ppu = (PlayerPositionUpdateClient_Struct *) app->pBuffer;
-	
+
 	/* Boat handling */
 	if (ppu->spawn_id != GetID()) {
 		/* If player is controlling boat */
@@ -4374,16 +4375,16 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 				controlling_boat_id = 0;
 				return;
 			}
-	
+
 			auto boat_delta = glm::vec4(ppu->delta_x, ppu->delta_y, ppu->delta_z, EQ10toFloat(ppu->delta_heading));
 			boat->SetDelta(boat_delta);
-	
+
 			auto outapp = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 			PlayerPositionUpdateServer_Struct *ppus = (PlayerPositionUpdateServer_Struct *) outapp->pBuffer;
 			boat->MakeSpawnUpdate(ppus);
 			entity_list.QueueCloseClients(boat, outapp, true, 300, this, false);
 			safe_delete(outapp);
-	
+
 			/* Update the boat's position on the server, without sending an update */
 			boat->GMMove(ppu->x_pos, ppu->y_pos, ppu->z_pos, EQ12toFloat(ppu->heading), false);
 			return;
@@ -4398,9 +4399,9 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 				if (cmob != nullptr) {
 					cmob->SetPosition(ppu->x_pos, ppu->y_pos, ppu->z_pos);
 					cmob->SetHeading(EQ12toFloat(ppu->heading));
-					mMovementManager->SendCommandToClients(cmob, 0.0, 0.0, 0.0, 
+					mMovementManager->SendCommandToClients(cmob, 0.0, 0.0, 0.0,
 							0.0, 0, ClientRangeAny, nullptr, this);
-					cmob->CastToNPC()->SaveGuardSpot(glm::vec4(ppu->x_pos, 
+					cmob->CastToNPC()->SaveGuardSpot(glm::vec4(ppu->x_pos,
 							ppu->y_pos, ppu->z_pos, EQ12toFloat(ppu->heading)));
 				}
 			}
@@ -4418,7 +4419,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 	// From this point forward, we need to use a new set of variables for client
 	// position.  If the client is in a boat, we need to add the boat pos and
 	// the client offset together.
-	
+
 	float	cx = ppu->x_pos;
 	float	cy = ppu->y_pos;
 	float	cz = ppu->z_pos;
@@ -4443,45 +4444,45 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 	/* Check to see if PPU should trigger an update to the rewind position. */
 	float rewind_x_diff = 0;
 	float rewind_y_diff = 0;
-	
+
 	rewind_x_diff = cx - m_RewindLocation.x;
 	rewind_x_diff *= rewind_x_diff;
 	rewind_y_diff = cy - m_RewindLocation.y;
 	rewind_y_diff *= rewind_y_diff;
-	
-	/* 
+
+	/*
 		We only need to store updated values if the player has moved.
 		If the player has moved more than units for x or y, then we'll store
 		his pre-PPU x and y for /rewind, in case he gets stuck.
 	*/
-	
+
 	if ((rewind_x_diff > 750) || (rewind_y_diff > 750))
 		m_RewindLocation = glm::vec3(m_Position);
-	
+
 	/*
 		If the PPU was a large jump, such as a cross zone gate or Call of Hero,
 			just update rewind coordinates to the new ppu coordinates. This will prevent exploitation.
 	*/
-	
+
 	if ((rewind_x_diff > 5000) || (rewind_y_diff > 5000))
 		m_RewindLocation = glm::vec3(cx, cy, cz);
-	
+
 	if (proximity_timer.Check()) {
 		entity_list.ProcessMove(this, glm::vec3(cx, cy, cz));
 		if (RuleB(TaskSystem, EnableTaskSystem) && RuleB(TaskSystem, EnableTaskProximity))
 			ProcessTaskProximities(cx, cy, cz);
-	
+
 		m_Proximity = glm::vec3(cx, cy, cz);
 	}
-	
+
 	/* Update internal state */
 	m_Delta = glm::vec4(ppu->delta_x, ppu->delta_y, ppu->delta_z, EQ10toFloat(ppu->delta_heading));
-	
+
 	if (IsTracking() && ((m_Position.x != cx) || (m_Position.y != cy))) {
 		if (zone->random.Real(0, 100) < 70)//should be good
 			CheckIncreaseSkill(EQEmu::skills::SkillTracking, nullptr, -20);
 	}
-	
+
 	/* Break Hide if moving without sneaking and set rewind timer if moved */
 	if (cy != m_Position.y || cx != m_Position.x) {
 		if ((hidden || improved_hidden) && !sneaking) {
@@ -4500,7 +4501,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 		}
 		rewind_timer.Start(30000, true);
 	}
-	
+
 	/* Handle client aggro scanning timers NPCs */
 	is_client_moving = (cy == m_Position.y && cx == m_Position.x) ? false : true;
 
@@ -4564,55 +4565,55 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 	}
 
 	int32 new_animation = ppu->animation;
-	
+
 	/* Update internal server position from what the client has sent */
 	m_Position.x = cx;
 	m_Position.y = cy;
 	m_Position.z = cz;
-	
+
 	/* Visual Debugging */
 	if (RuleB(Character, OPClientUpdateVisualDebug)) {
 		LogDebug("ClientUpdate: ppu x: [{}] y: [{}] z: [{}] h: [{}]", cx, cy, cz, new_heading);
 		this->SendAppearanceEffect(78, 0, 0, 0, 0);
 		this->SendAppearanceEffect(41, 0, 0, 0, 0);
 	}
-	
+
 	/* Only feed real time updates when client is moving */
 	if (is_client_moving || new_heading != m_Position.w || new_animation != animation) {
-	
+
 		animation = ppu->animation;
 		m_Position.w = new_heading;
-	
+
 		/* Broadcast update to other clients */
 		auto outapp = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 		PlayerPositionUpdateServer_Struct *position_update = (PlayerPositionUpdateServer_Struct *) outapp->pBuffer;
-	
+
 		MakeSpawnUpdate(position_update);
-	
+
 		if (gm_hide_me) {
 			entity_list.QueueClientsStatus(this, outapp, true, Admin(), 255);
 		} else {
 			entity_list.QueueCloseClients(this, outapp, true, RuleI(Range, ClientPositionUpdates), nullptr, true);
 		}
-	
-	
+
+
 		/* Always send position updates to group - send when beyond normal ClientPositionUpdate range */
 		Group *group = this->GetGroup();
 		Raid *raid = this->GetRaid();
-	
+
 		if (raid) {
 			raid->QueueClients(this, outapp, true, true, (RuleI(Range, ClientPositionUpdates) * -1));
 		} else if (group) {
 			group->QueueClients(this, outapp, true, true, (RuleI(Range, ClientPositionUpdates) * -1));
 		}
-	
+
 		safe_delete(outapp);
 	}
-	
+
 	if (zone->watermap) {
 		if (zone->watermap->InLiquid(glm::vec3(m_Position))) {
 			CheckIncreaseSkill(EQEmu::skills::SkillSwimming, nullptr, -17);
-	
+
 			// Dismount horses when entering water
 			if (GetHorseId() && RuleB(Character, DismountWater)) {
 				SetHorseId(0);
@@ -5749,23 +5750,23 @@ void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 		printf("Error in FindPersonRequest_Struct. Expected size of: %zu, but got: %i\n", sizeof(FindPersonRequest_Struct), app->size);
 	else {
 		FindPersonRequest_Struct* t = (FindPersonRequest_Struct*)app->pBuffer;
-	
+
 		std::vector<FindPerson_Point> points;
 		Mob* target = entity_list.GetMob(t->npc_id);
-	
+
 		if (target == nullptr) {
 			//empty length packet == not found.
 			EQApplicationPacket outapp(OP_FindPersonReply, 0);
 			QueuePacket(&outapp);
 			return;
 		}
-	
+
 		if (!RuleB(Pathing, Find) && RuleB(Bazaar, EnableWarpToTrader) && target->IsClient() && (target->CastToClient()->Trader ||
 			target->CastToClient()->Buyer)) {
 			Message(Chat::Yellow, "Moving you to Trader %s", target->GetName());
 			MovePC(zone->GetZoneID(), zone->GetInstanceID(), target->GetX(), target->GetY(), target->GetZ(), 0.0f);
 		}
-	
+
 		if (!RuleB(Pathing, Find) || !zone->pathing)
 		{
 			//fill in the path array...
@@ -5788,40 +5789,40 @@ void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 		{
 			glm::vec3 Start(GetX(), GetY(), GetZ() + (GetSize() < 6.0 ? 6 : GetSize()) * HEAD_POSITION);
 			glm::vec3 End(target->GetX(), target->GetY(), target->GetZ() + (target->GetSize() < 6.0 ? 6 : target->GetSize()) * HEAD_POSITION);
-	
+
 			bool partial = false;
 			bool stuck = false;
 			auto pathlist = zone->pathing->FindRoute(Start, End, partial, stuck);
-	
+
 			if (pathlist.empty() || partial)
 			{
 				EQApplicationPacket outapp(OP_FindPersonReply, 0);
 				QueuePacket(&outapp);
 				return;
 			}
-	
+
 			// Live appears to send the points in this order:
 			// Final destination.
 			// Current Position.
 			// rest of the points.
 			FindPerson_Point p;
-	
+
 			int PointNumber = 0;
-	
+
 			bool LeadsToTeleporter = false;
-	
+
 			auto v = pathlist.back();
-	
+
 			p.x = v.pos.x;
 			p.y = v.pos.y;
 			p.z = v.pos.z;
 			points.push_back(p);
-	
+
 			p.x = GetX();
 			p.y = GetY();
 			p.z = GetZ();
 			points.push_back(p);
-	
+
 			for (auto Iterator = pathlist.begin(); Iterator != pathlist.end(); ++Iterator)
 			{
 				if ((*Iterator).teleport) // Teleporter
@@ -5829,7 +5830,7 @@ void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 					LeadsToTeleporter = true;
 					break;
 				}
-	
+
 				glm::vec3 v = (*Iterator).pos;
 				p.x = v.x;
 				p.y = v.y;
@@ -5837,17 +5838,17 @@ void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 				points.push_back(p);
 				++PointNumber;
 			}
-	
+
 			if (!LeadsToTeleporter)
 			{
 				p.x = target->GetX();
 				p.y = target->GetY();
 				p.z = target->GetZ();
-	
+
 				points.push_back(p);
 			}
 		}
-	
+
 		SendPathPacket(points);
 	}
 }
@@ -11090,14 +11091,14 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 	{
 		case RaidCommandInviteIntoExisting:
 		case RaidCommandInvite: {
-			
+
 			Client *player_to_invite = entity_list.GetClientByName(raid_command_packet->player_name);
 
 			if (!player_to_invite)
 				break;
 
 			Group *player_to_invite_group = player_to_invite->GetGroup();
-			
+
 			if (player_to_invite->HasRaid()) {
 				Message(Chat::Red, "%s is already in a raid.", player_to_invite->GetName());
 				break;
@@ -11112,7 +11113,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 				Message(Chat::Red, "You can only invite an ungrouped player or group leader to join your raid.");
 				break;
 			}
-			
+
 			/* Send out invite to the client */
 			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
 			RaidGeneral_Struct *raid_command = (RaidGeneral_Struct*)outapp->pBuffer;
@@ -11124,7 +11125,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 			raid_command->action = 20;
 
 			player_to_invite->QueuePacket(outapp);
-			
+
 			safe_delete(outapp);
 
 			break;
@@ -11220,7 +11221,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 									}
 									if (player_invited_group->IsLeader(player_invited_group->members[x])) {
 										Client *c = nullptr;
-										
+
 										if (player_invited_group->members[x]->IsClient())
 											c = player_invited_group->members[x]->CastToClient();
 										else
@@ -11230,24 +11231,24 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 										raid->SendMakeLeaderPacketTo(raid->leadername, c);
 										raid->AddMember(c, raid_free_group_id, true, true, true);
 										raid->SendBulkRaid(c);
-										
+
 										if (raid->IsLocked()) {
 											raid->SendRaidLockTo(c);
 										}
 									}
 									else {
 										Client *c = nullptr;
-										
+
 										if (player_invited_group->members[x]->IsClient())
 											c = player_invited_group->members[x]->CastToClient();
 										else
 											continue;
-										
+
 										raid->SendRaidCreate(c);
 										raid->SendMakeLeaderPacketTo(raid->leadername, c);
 										raid->AddMember(c, raid_free_group_id);
 										raid->SendBulkRaid(c);
-										
+
 										if (raid->IsLocked()) {
 											raid->SendRaidLockTo(c);
 										}
@@ -11281,12 +11282,12 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 										c = group->members[x]->CastToClient();
 									else
 										continue;
-									
+
 									raid->SendRaidCreate(c);
 									raid->SendMakeLeaderPacketTo(raid->leadername, c);
 									raid->AddMember(c, raid_free_group_id, false, true);
 									raid->SendBulkRaid(c);
-									
+
 									if (raid->IsLocked()) {
 										raid->SendRaidLockTo(c);
 									}
@@ -11294,17 +11295,17 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 								else
 								{
 									Client *c = nullptr;
-									
+
 									if (group->members[x]->IsClient())
 										c = group->members[x]->CastToClient();
 									else
 										continue;
-									
+
 									raid->SendRaidCreate(c);
 									raid->SendMakeLeaderPacketTo(raid->leadername, c);
 									raid->AddMember(c, raid_free_group_id);
 									raid->SendBulkRaid(c);
-									
+
 									if (raid->IsLocked()) {
 										raid->SendRaidLockTo(c);
 									}
@@ -11321,7 +11322,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 						if (player_invited_group) {
 
 							raid = new Raid(player_accepting_invite);
-							
+
 							entity_list.AddRaid(raid);
 							raid->SetRaidDetails();
 							Client *addClientig = nullptr;
@@ -11345,7 +11346,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 										raid->SendMakeLeaderPacketTo(raid->leadername, c);
 										raid->AddMember(c, 0, true, true, true);
 										raid->SendBulkRaid(c);
-										
+
 										if (raid->IsLocked()) {
 											raid->SendRaidLockTo(c);
 										}
@@ -11470,7 +11471,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 							raid->SetGroupLeader(raid_command_packet->leader_name, false);
 
 							/* We were the leader of our old group */
-							if (old_group < 12) { 
+							if (old_group < 12) {
 								/* Assign new group leader if we can */
 								for (int x = 0; x < MAX_RAID_MEMBERS; x++) {
 									if (raid->members[x].GroupNumber == old_group) {
@@ -11499,7 +11500,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 												strn0cpy(raid_command_packet->playername, raid->members[x].membername, 64);
 
 												worldserver.SendPacket(pack);
-												
+
 												safe_delete(pack);
 											}
 											break;
@@ -11545,7 +11546,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 						raid->SetGroupLeader(raid_command_packet->leader_name, false);
 						for (int x = 0; x < MAX_RAID_MEMBERS; x++) {
 							if (raid->members[x].GroupNumber == oldgrp && strlen(raid->members[x].membername) > 0 && strcmp(raid->members[x].membername, raid_command_packet->leader_name) != 0){
-								
+
 								raid->SetGroupLeader(raid->members[x].membername);
 								raid->UpdateGroupAAs(oldgrp);
 
@@ -11568,7 +11569,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 									strn0cpy(raid_command->playername, raid->members[x].membername, 64);
 									raid_command->zoneid = zone->GetZoneID();
 									raid_command->instance_id = zone->GetInstanceID();
-									
+
 									worldserver.SendPacket(pack);
 									safe_delete(pack);
 								}
@@ -11583,14 +11584,14 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 					else {
 						auto pack = new ServerPacket(ServerOP_RaidGroupDisband, sizeof(ServerRaidGeneralAction_Struct));
 						ServerRaidGeneralAction_Struct* raid_command = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
-						
+
 						raid_command->rid = raid->GetID();
 						raid_command->zoneid = zone->GetZoneID();
 						raid_command->instance_id = zone->GetInstanceID();
 						strn0cpy(raid_command->playername, raid_command_packet->leader_name, 64);
 
 						worldserver.SendPacket(pack);
-						
+
 						safe_delete(pack);
 					}
 
@@ -11778,7 +11779,7 @@ void Client::Handle_OP_RecipesFavorite(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(TradeskillFavorites_Struct)) {
 		LogError("Invalid size for TradeskillFavorites_Struct: Expected: [{}], Got: [{}]",
-			sizeof(TradeskillFavorites_Struct), app->size);
+				 sizeof(TradeskillFavorites_Struct), app->size);
 		return;
 	}
 
@@ -11828,6 +11829,7 @@ void Client::Handle_OP_RecipesFavorite(const EQApplicationPacket *app)
 	if (first)	//no favorites....
 		return;
 
+	// TODO: Clean this up
 	const std::string query = StringFormat(
 		SQL (
 			SELECT
@@ -11844,11 +11846,12 @@ void Client::Handle_OP_RecipesFavorite(const EQApplicationPacket *app)
 				AND tr.id IN (%s)
 				AND tr.must_learn & 0x20 <> 0x20
 				AND (
-					(
-						tr.must_learn & 0x3 <> 0
-					)
-						OR (tr.must_learn & 0x3 = 0)
-				)
+			(
+				tr.must_learn & 0x3 <> 0
+			)
+				OR (tr.must_learn & 0x3 = 0)
+			)
+				%s
 				GROUP BY
 				tr.id
 				HAVING
@@ -11861,10 +11864,12 @@ void Client::Handle_OP_RecipesFavorite(const EQApplicationPacket *app)
 			)
 			) > 0
 				AND SUM(tre.componentcount) <= %u
+
 				LIMIT
 				100
 		),
 		favoriteIDs.c_str(),
+		ContentFilterCriteria::apply().c_str(),
 		containers.c_str(),
 		combineObjectSlots
 	);
@@ -11924,6 +11929,7 @@ void Client::Handle_OP_RecipesSearch(const EQApplicationPacket *app)
 	}
 
 	//arbitrary limit of 200 recipes, makes sense to me.
+	// TODO: Clean this up
 	std::string query = fmt::format(
 		SQL(
 			SELECT
@@ -11931,39 +11937,22 @@ void Client::Handle_OP_RecipesSearch(const EQApplicationPacket *app)
 			tr.name,
 			tr.trivial,
 			SUM(tre.componentcount),
-			crl.madecount,
 			tr.tradeskill
 				FROM
-				tradeskill_recipe
-				AS tr
-				LEFT
-				JOIN
-				tradeskill_recipe_entries
-				AS
-				tre
-				ON
-				tr.id = tre.recipe_id
-				LEFT JOIN(
-					SELECT
-					recipe_id,
-					madecount
-					FROM
-					char_recipe_list
-					WHERE
-				char_id = {}
-			) AS crl ON tr.id = crl.recipe_id
+				tradeskill_recipe AS tr
+				LEFT JOIN tradeskill_recipe_entries AS tre ON tr.id = tre.recipe_id
 				WHERE
-			    {} tr.trivial >= {}
+				{} tr.trivial >= {}
 				AND tr.trivial <= {}
 				AND tr.enabled <> 0
 				AND tr.must_learn & 0x20 <> 0x20
 				AND (
-			(
-				tr.must_learn & 0x3 <> 0
-				AND crl.madecount IS NOT NULL
-			)
+					(
+						tr.must_learn & 0x3 <> 0
+					)
 				OR (tr.must_learn & 0x3 = 0)
 			)
+			{}
 				GROUP BY
 				tr.id
 				HAVING
@@ -11976,13 +11965,14 @@ void Client::Handle_OP_RecipesSearch(const EQApplicationPacket *app)
 			)
 			) > 0
 				AND SUM(tre.componentcount) <= {}
+
 				LIMIT
 				200
 		),
-		CharacterID(),
 		search_clause,
 		p_recipes_search_struct->mintrivial,
 		p_recipes_search_struct->maxtrivial,
+		ContentFilterCriteria::apply(),
 		containers_where_clause,
 		combine_object_slots
 	);
@@ -12447,9 +12437,14 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 	uint32 zoneid = 0;
 	uint32 startCity = (uint32)strtol((const char*)app->pBuffer, nullptr, 10);
 
-	std::string query = StringFormat("SELECT zone_id, bind_id, x, y, z FROM start_zones "
-		"WHERE player_class=%i AND player_deity=%i AND player_race=%i",
-		m_pp.class_, m_pp.deity, m_pp.race);
+	std::string query = StringFormat(
+		"SELECT zone_id, bind_id, x, y, z FROM start_zones "
+		"WHERE player_class=%i AND player_deity=%i AND player_race=%i %s",
+		m_pp.class_,
+		m_pp.deity,
+		m_pp.race,
+		ContentFilterCriteria::apply().c_str()
+	);
 	auto results = content_db.QueryDatabase(query);
 	if (!results.Success()) {
 		LogError("No valid start zones found for /setstartcity");
