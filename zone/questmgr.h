@@ -107,6 +107,7 @@ public:
 	void level(int newlevel);
 	void traindisc(int discipline_tome_item_id);
 	bool isdisctome(int item_id);
+	std::string getracename(uint16 race_id);
 	std::string getspellname(uint32 spell_id);
 	void safemove();
 	void rain(int weather);

@@ -822,6 +822,22 @@ XS(XS__isdisctome) {
 	XSRETURN(1);
 }
 
+XS(XS__getracename);
+XS(XS__getracename) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getracename(uint16 race_id)");
+
+	dXSTARG;
+	uint16 race_id = (int) SvIV(ST(0));
+	std::string race_name = quest_manager.getracename(race_id);
+
+	sv_setpv(TARG, race_name.c_str());
+	XSprePUSH;
+	PUSHTARG;
+	XSRETURN(1);
+}
+
 XS(XS__getspellname);
 XS(XS__getspellname) {
 	dXSARGS;
@@ -4116,6 +4132,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "getguildidbycharid"), XS__getguildidbycharid, file);
 	newXS(strcpy(buf, "getgroupidbycharid"), XS__getgroupidbycharid, file);
 	newXS(strcpy(buf, "getraididbycharid"), XS__getraididbycharid, file);
+	newXS(strcpy(buf, "getracename"), XS__getracename, file);
 	newXS(strcpy(buf, "getspellname"), XS__getspellname, file);
 	newXS(strcpy(buf, "getlevel"), XS__getlevel, file);
 	newXS(strcpy(buf, "getplayerburiedcorpsecount"), XS__getplayerburiedcorpsecount, file);
