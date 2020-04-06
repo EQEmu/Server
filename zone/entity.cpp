@@ -3277,13 +3277,15 @@ void EntityList::Evade(Mob *who)
 void EntityList::ClearAggro(Mob* targ)
 {
 	Client *c = nullptr;
-	if (targ->IsClient())
+	if (targ->IsClient()) {
 		c = targ->CastToClient();
+	}
 	auto it = npc_list.begin();
 	while (it != npc_list.end()) {
 		if (it->second->CheckAggro(targ)) {
-			if (c)
+			if (c) {
 				c->RemoveXTarget(it->second, false);
+			}
 			it->second->RemoveFromHateList(targ);
 		}
 		if (c && it->second->IsOnFeignMemory(c)) {
@@ -3298,14 +3300,16 @@ void EntityList::ClearAggro(Mob* targ)
 void EntityList::ClearWaterAggro(Mob* targ)
 {
 	Client *c = nullptr;
-	if (targ->IsClient())
+	if (targ->IsClient()) {
 		c = targ->CastToClient();
+	}
 	auto it = npc_list.begin();
 	while (it != npc_list.end()) {
 		if (it->second->IsUnderwaterOnly()) {
 			if (it->second->CheckAggro(targ)) {
-				if (c)
+				if (c) {
 					c->RemoveXTarget(it->second, false);
+				}
 				it->second->RemoveFromHateList(targ);
 			}
 			if (c && it->second->IsOnFeignMemory(c)) {
