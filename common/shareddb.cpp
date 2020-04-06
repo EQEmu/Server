@@ -432,16 +432,25 @@ bool SharedDatabase::SetSharedPlatinum(uint32 account_id, int32 amount_to_add) {
 
 bool SharedDatabase::SetStartingItems(PlayerProfile_Struct* pp, EQEmu::InventoryProfile* inv, uint32 si_race, uint32 si_class, uint32 si_deity, uint32 si_current_zone, char* si_name, int admin_level) {
 
-	const EQEmu::ItemData* myitem;
+	const EQEmu::ItemData *myitem;
 
-    std::string query = StringFormat("SELECT itemid, item_charges, slot FROM starting_items "
-                                    "WHERE (race = %i or race = 0) AND (class = %i or class = 0) AND "
-                                    "(deityid = %i or deityid = 0) AND (zoneid = %i or zoneid = 0) AND "
-                                    "gm <= %i ORDER BY id",
-                                    si_race, si_class, si_deity, si_current_zone, admin_level);
-    auto results = QueryDatabase(query);
-    if (!results.Success())
-        return false;
+	std::string query   = StringFormat(
+		"SELECT itemid, item_charges, slot FROM starting_items "
+		"WHERE (race = %i or race = 0) AND (class = %i or class = 0) AND "
+		"(deityid = %i or deityid = 0) AND (zoneid = %i or zoneid = 0) AND "
+		"gm <= %i %s ORDER BY id",
+		si_race,
+		si_class,
+		si_deity,
+		si_current_zone,
+		admin_level,
+		ContentFilterCriteria::apply().c_str()
+	);
+
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		return false;
+	}
 
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
@@ -2129,7 +2138,7 @@ void SharedDatabase::LoadLootDrops(void *data, uint32 size) {
 	EQEmu::FixedMemoryVariableHashSet<LootDrop_Struct> hash(reinterpret_cast<uint8*>(data), size);
 	uint8 loot_drop[sizeof(LootDrop_Struct) + (sizeof(LootDropEntries_Struct) * 1260)];
 	LootDrop_Struct *ld = reinterpret_cast<LootDrop_Struct*>(loot_drop);
-	
+
 	const std::string query = fmt::format(
 		SQL(
 			SELECT
