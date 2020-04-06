@@ -925,6 +925,22 @@ void Database::GetCharName(uint32 char_id, char* name) {
 	}
 }
 
+const char* Database::GetCharNameByID(uint32 char_id) {
+	std::string query = fmt::format("SELECT `name` FROM `character_data` WHERE id = {}", char_id);
+	auto results = QueryDatabase(query);
+
+	if (!results.Success()) {
+		return "";
+	}
+
+	if (results.RowCount() == 0) {
+		return "";
+	}
+
+	auto row = results.begin();
+	return row[0];
+}
+
 bool Database::LoadVariables() {
 	auto results = QueryDatabase(StringFormat("SELECT varname, value, unix_timestamp() FROM variables where unix_timestamp(ts) >= %d", varcache.last_update));
 
