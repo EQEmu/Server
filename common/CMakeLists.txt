@@ -443,6 +443,9 @@ SET(repositories
 	repositories/veteran_reward_templates_repository.h
 	repositories/zone_repository.h
 	repositories/zone_points_repository.h
+
+	# Non-Comformative
+	repositories/character_recipe_list_repository.h
 )
 
 SET(common_headers
