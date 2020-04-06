@@ -26,32 +26,46 @@
 #include "../../string_util.h"
 
 namespace ContentFilterCriteria {
-	static std::string apply()
+	static std::string apply(std::string table_prefix = "")
 	{
 		std::string criteria;
 
+		if (!table_prefix.empty()) {
+			table_prefix = table_prefix + ".";
+		}
+
 		criteria += fmt::format(
-			" AND (min_expansion <= {} OR min_expansion = 0)",
-			content_service.GetCurrentExpansion()
+			" AND ({}min_expansion <= {} OR {}min_expansion = 0)",
+			table_prefix,
+			content_service.GetCurrentExpansion(),
+			table_prefix
 		);
 
 		criteria += fmt::format(
-			" AND (max_expansion >= {} OR max_expansion = 0)",
-			content_service.GetCurrentExpansion()
+			" AND ({}max_expansion >= {} OR {}max_expansion = 0)",
+			table_prefix,
+			content_service.GetCurrentExpansion(),
+			table_prefix
 		);
 
 		std::vector<std::string> flags = content_service.GetContentFlags();
-		for (auto                &flag: flags) {
+
+		for (auto &flag: flags) {
 			flag = "'" + flag + "'";
 		}
 
 		std::string flags_in_filter;
 		if (!flags.empty()) {
-			flags_in_filter = fmt::format(" OR content_flags IN ({})", implode(", ", flags));
+			flags_in_filter = fmt::format(
+				" OR {}content_flags IN ({})",
+				table_prefix,
+				implode(", ", flags)
+			);
 		}
 
 		criteria += fmt::format(
-			" AND (content_flags IS NULL{})",
+			" AND ({}content_flags IS NULL{})",
+			table_prefix,
 			flags_in_filter
 		);
 

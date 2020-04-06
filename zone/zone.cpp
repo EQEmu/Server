@@ -551,32 +551,32 @@ void Zone::GetMerchantDataForZoneLoad() {
 	std::string query = fmt::format(
 		SQL (
 			SELECT
-			  DISTINCT ml.merchantid,
-			  ml.slot,
-			  ml.item,
-			  ml.faction_required,
-			  ml.level_required,
-			  ml.alt_currency_cost,
-			  ml.classes_required,
-			  ml.probability
+			  DISTINCT merchantlist.merchantid,
+			  merchantlist.slot,
+			  merchantlist.item,
+			  merchantlist.faction_required,
+			  merchantlist.level_required,
+			  merchantlist.alt_currency_cost,
+			  merchantlist.classes_required,
+			  merchantlist.probability
 			FROM
-			  merchantlist AS ml,
-			  npc_types AS nt,
-			  spawnentry AS se,
-			  spawn2 AS s2
+			  merchantlist,
+			  npc_types,
+			  spawnentry,
+			  spawn2
 			WHERE
-			  nt.merchant_id = ml.merchantid
-			  AND nt.id = se.npcid
-			  AND se.spawngroupid = s2.spawngroupid
-			  AND s2.zone = '{}'
-			  AND s2.version = {}
+			  npc_types.merchant_id = merchantlist.merchantid
+			  AND npc_types.id = spawnentry.npcid
+			  AND spawnentry.spawngroupid = spawn2.spawngroupid
+			  AND spawn2.zone = '{}'
+			  AND spawn2.version = {}
 			  {}
 			ORDER BY
-			  ml.slot
+			  merchantlist.slot
 		),
 		GetShortName(),
 		GetInstanceVersion(),
-		ContentFilterCriteria::apply()
+		ContentFilterCriteria::apply("merchantlist")
 	);
 
 	auto results = content_db.QueryDatabase(query);
