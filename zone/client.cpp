@@ -8756,6 +8756,11 @@ void Client::CheckRegionTypeChanges()
 	// still same region, do nothing
 	if (last_region_type == new_region)
 		return;
+	
+	// If we got out of water clear any water aggro for water only npcs
+	if (last_region_type == RegionTypeWater) {
+		entity_list.ClearWaterAggro(this);
+	}
 
 	// region type changed
 	last_region_type = new_region;
