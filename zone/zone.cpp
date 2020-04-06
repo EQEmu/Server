@@ -1841,16 +1841,22 @@ ZonePoint* Zone::GetClosestZonePointWithoutZone(float x, float y, float z, Clien
 	return closest_zp;
 }
 
-bool ZoneDatabase::LoadStaticZonePoints(LinkedList<ZonePoint*>* zone_point_list, const char* zonename, uint32 version)
+bool ZoneDatabase::LoadStaticZonePoints(LinkedList<ZonePoint *> *zone_point_list, const char *zonename, uint32 version)
 {
 	zone_point_list->Clear();
 	zone->numzonepoints = 0;
-	std::string query = StringFormat("SELECT x, y, z, target_x, target_y, "
-					 "target_z, target_zone_id, heading, target_heading, "
-					 "number, target_instance, client_version_mask "
-					 "FROM zone_points WHERE zone='%s' AND (version=%i OR version=-1) "
-					 "ORDER BY number",
-					 zonename, version);
+
+	std::string query = StringFormat(
+		"SELECT x, y, z, target_x, target_y, "
+		"target_z, target_zone_id, heading, target_heading, "
+		"number, target_instance, client_version_mask "
+		"FROM zone_points WHERE zone='%s' AND (version=%i OR version=-1) %s"
+		"ORDER BY number",
+		zonename,
+		version,
+		ContentFilterCriteria::apply().c_str()
+	);
+
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		return false;
