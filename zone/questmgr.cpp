@@ -2935,6 +2935,10 @@ const char* QuestManager::getcharnamebyid(uint32 char_id) {
 	return "";
 }
 
+uint32 QuestManager::getcharidbyname(const char* name) {
+	return database.GetCharacterID(name);
+}
+
 const char* QuestManager::getguildnamebyid(int guild_id) {
 	if (guild_id > 0)
 		return guild_mgr.GetGuildName(guild_id);

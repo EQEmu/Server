@@ -3231,6 +3231,7 @@ XS(XS__saylink) {
 	XSRETURN(1);
 }
 
+
 XS(XS__getcharnamebyid);
 XS(XS__getcharnamebyid) {
 	dXSARGS;
@@ -3246,6 +3247,22 @@ XS(XS__getcharnamebyid) {
 	sv_setpv(TARG, RETVAL);
 	XSprePUSH;
 	PUSHTARG;
+}
+
+XS(XS__getcharidbyname);
+XS(XS__getcharidbyname) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getcharidbyname(string name)");
+	dXSTARG;
+
+	uint32 		RETVAL;
+	const char *name = (const char *) SvPV_nolen(ST(0));
+
+	RETVAL = quest_manager.getcharidbyname(name);
+	XSprePUSH;
+	PUSHu((UV)RETVAL);
+
 	XSRETURN(1);
 }
 
@@ -4090,6 +4107,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "follow"), XS__follow, file);
 	newXS(strcpy(buf, "forcedoorclose"), XS__forcedoorclose, file);
 	newXS(strcpy(buf, "forcedooropen"), XS__forcedooropen, file);
+	newXS(strcpy(buf, "getcharidbyname"), XS__getcharidbyname, file);
 	newXS(strcpy(buf, "getinventoryslotid"), XS__getinventoryslotid, file);
 	newXS(strcpy(buf, "getitemname"), XS__getitemname, file);
 	newXS(strcpy(buf, "getItemName"), XS_qc_getItemName, file);
