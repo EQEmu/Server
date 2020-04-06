@@ -28,18 +28,18 @@
 class TimersRepository: public BaseTimersRepository {
 public:
 
-	/**
-	 * This file was auto generated on Apr 5, 2020 and can be modified and extended upon
-	 *
-	 * Base repository methods are automatically
-	 * generated in the "base" version of this repository. The base repository
-	 * is immutable and to be left untouched, while methods in this class
-	 * are used as extension methods for more specific persistence-layer
+    /**
+     * This file was auto generated on Apr 5, 2020 and can be modified and extended upon
+     *
+     * Base repository methods are automatically
+     * generated in the "base" version of this repository. The base repository
+     * is immutable and to be left untouched, while methods in this class
+     * are used as extension methods for more specific persistence-layer
      * accessors or mutators
-	 *
-	 * Base Methods (Subject to be expanded upon in time)
-	 *
-	 * InsertOne
+     *
+     * Base Methods (Subject to be expanded upon in time)
+     *
+     * InsertOne
      * UpdateOne
      * DeleteOne
      * FindOne
@@ -59,7 +59,7 @@ public:
      * find yourself re-using logic for other parts of the code, its best to just make a
      * method that can be re-used easily elsewhere especially if it can use a base repository
      * method and encapsulate filters there
-	 */
+     */
 
 	// Custom extended repository methods here
 
