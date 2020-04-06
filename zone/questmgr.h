@@ -108,6 +108,7 @@ public:
 	void traindisc(int discipline_tome_item_id);
 	bool isdisctome(int item_id);
 	std::string getspellname(uint32 spell_id);
+	std::string getskillname(int skill_id);
 	void safemove();
 	void rain(int weather);
 	void snow(int weather);
