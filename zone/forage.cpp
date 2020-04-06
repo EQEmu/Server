@@ -30,6 +30,7 @@
 #include "titles.h"
 #include "water_map.h"
 #include "zonedb.h"
+#include "../common/repositories/criteria/content_filter_criteria.h"
 
 #include <iostream>
 
@@ -109,9 +110,24 @@ uint32 ZoneDatabase::GetZoneFishing(uint32 ZoneID, uint8 skill, uint32 &npc_id, 
 		chance[c]=0;
 	}
 
-    std::string query = StringFormat("SELECT itemid, chance, npc_id, npc_chance "
-                                    "FROM fishing WHERE (zoneid = '%i' || zoneid = 0) AND skill_level <= '%i'",
-                                    ZoneID, skill);
+    std::string query = fmt::format(
+    	SQL(
+    	SELECT
+		  itemid,
+		  chance,
+		  npc_id,
+		  npc_chance
+		FROM
+		  fishing
+		WHERE
+		  (zoneid = '{}' || zoneid = 0)
+		  AND skill_level <= '{}'
+		  {}
+		),
+		ZoneID,
+		skill,
+		ContentFilterCriteria::apply()
+	);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
 		return 0;
