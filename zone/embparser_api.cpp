@@ -3265,6 +3265,26 @@ XS(XS__getcharidbyname) {
 	XSRETURN(1);
 }
 
+XS(XS__getclassname);
+XS(XS__getclassname) {
+	dXSARGS;
+	if (items < 1 || items > 2)
+		Perl_croak(aTHX_ "Usage: quest::getclassname(uint8 class_id, [uint8 level = 0])");
+	dXSTARG;
+
+	std::string RETVAL;
+	uint8  class_id = (int) SvUV(ST(0));
+	uint8  level = 0;
+	if (items > 1)
+		level = (int) SvUV(ST(1));
+
+	RETVAL = quest_manager.getclassname(class_id, level);
+	sv_setpv(TARG, RETVAL.c_str());
+	XSprePUSH;
+	PUSHTARG;
+	XSRETURN(1);
+}
+
 XS(XS__getguildnamebyid);
 XS(XS__getguildnamebyid) {
 	dXSARGS;
@@ -4107,6 +4127,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "forcedoorclose"), XS__forcedoorclose, file);
 	newXS(strcpy(buf, "forcedooropen"), XS__forcedooropen, file);
 	newXS(strcpy(buf, "getcharidbyname"), XS__getcharidbyname, file);
+	newXS(strcpy(buf, "getclassname"), XS__getclassname, file);
 	newXS(strcpy(buf, "getinventoryslotid"), XS__getinventoryslotid, file);
 	newXS(strcpy(buf, "getitemname"), XS__getitemname, file);
 	newXS(strcpy(buf, "getItemName"), XS_qc_getItemName, file);

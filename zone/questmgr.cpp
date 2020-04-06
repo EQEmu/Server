@@ -2939,6 +2939,10 @@ uint32 QuestManager::getcharidbyname(const char* name) {
 	return database.GetCharacterID(name);
 }
 
+std::string QuestManager::getclassname(uint8 class_id, uint8 level) {
+	return GetClassIDName(class_id, level);
+}
+
 const char* QuestManager::getguildnamebyid(int guild_id) {
 	if (guild_id > 0)
 		return guild_mgr.GetGuildName(guild_id);
