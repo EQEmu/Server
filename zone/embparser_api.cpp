@@ -3327,7 +3327,7 @@ XS(XS__getcurrencyitemid) {
 
 	XSprePUSH;
 	PUSHi((IV)RETVAL);
-  XSRETURN(1);
+  	XSRETURN(1);
 }
 
 XS(XS__getcurrencyid);
