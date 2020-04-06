@@ -23,58 +23,45 @@
 
 #include "../database.h"
 #include "../string_util.h"
+#include "base/base_grid_repository.h"
 
-class GridRepository {
+class GridRepository : public BaseGridRepository {
 public:
-	struct Grid {
-		int id;
-		int zoneid;
-		int type;
-		int type2;
-	};
 
-	static std::vector<std::string> Columns()
-	{
-		return {
-			"id",
-			"zoneid",
-			"type",
-			"type2",
-		};
-	}
+	/**
+	 * This file was auto generated on Apr 5, 2020 and can be modified and extended upon
+	 *
+	 * Base repository methods are automatically
+	 * generated in the "base" version of this repository. The base repository
+	 * is immutable and to be left untouched, while methods in this class
+	 * are used as extension methods for more specific persistence-layer
+	 * accessors or mutators
+	 *
+	 * Base Methods (Subject to be expanded upon in time)
+	 *
+	 * InsertOne
+	 * UpdateOne
+	 * DeleteOne
+	 * FindOne
+	 * GetWhere(std::string where_filter)
+	 * DeleteWhere(std::string where_filter)
+	 * InsertMany
+	 * All
+	 *
+	 * Example custom methods in a repository
+	 *
+	 * GridRepository::GetByZoneAndVersion(int zone_id, int zone_version)
+	 * GridRepository::GetWhereNeverExpires()
+	 * GridRepository::GetWhereXAndY()
+	 * GridRepository::DeleteWhereXAndY()
+	 *
+	 * Most of the above could be covered by base methods, but if you as a developer
+	 * find yourself re-using logic for other parts of the code, its best to just make a
+	 * method that can be re-used easily elsewhere especially if it can use a base repository
+	 * method and encapsulate filters there
+	 */
 
-	static std::string ColumnsRaw()
-	{
-		return std::string(implode(", ", Columns()));
-	}
-
-	static std::string TableName()
-	{
-		return std::string("grid");
-	}
-
-	static std::string BaseSelect()
-	{
-		return std::string(
-			fmt::format(
-				"SELECT {} FROM {}",
-				ColumnsRaw(),
-				TableName()
-			)
-		);
-	}
-
-	static Grid NewEntity()
-	{
-		Grid entry{};
-
-		entry.id     = 0;
-		entry.zoneid = 0;
-		entry.type   = 0;
-		entry.type2  = 0;
-
-		return entry;
-	}
+	// Custom extended repository methods here
 
 	static std::vector<Grid> GetZoneGrids(int zone_id)
 	{
@@ -118,4 +105,4 @@ public:
 
 };
 
-#endif
+#endif //EQEMU_GRID_REPOSITORY_H

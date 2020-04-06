@@ -186,6 +186,8 @@ SET(repositories
 	repositories/base/base_gm_ips_repository.h
 	repositories/base/base_goallists_repository.h
 	repositories/base/base_graveyard_repository.h
+	repositories/base/base_grid_repository.h
+	repositories/base/base_grid_entries_repository.h
 	repositories/base/base_ground_spawns_repository.h
 	repositories/base/base_group_id_repository.h
 	repositories/base/base_group_leaders_repository.h
@@ -267,6 +269,7 @@ SET(repositories
 	repositories/base/base_timers_repository.h
 	repositories/base/base_titles_repository.h
 	repositories/base/base_trader_repository.h
+	repositories/base/base_tradeskill_recipe_repository.h
 	repositories/base/base_tradeskill_recipe_entries_repository.h
 	repositories/base/base_traps_repository.h
 	repositories/base/base_tributes_repository.h
@@ -348,6 +351,8 @@ SET(repositories
 	repositories/gm_ips_repository.h
 	repositories/goallists_repository.h
 	repositories/graveyard_repository.h
+	repositories/grid_repository.h
+	repositories/grid_entries_repository.h
 	repositories/ground_spawns_repository.h
 	repositories/group_id_repository.h
 	repositories/group_leaders_repository.h
@@ -429,6 +434,7 @@ SET(repositories
 	repositories/timers_repository.h
 	repositories/titles_repository.h
 	repositories/trader_repository.h
+	repositories/tradeskill_recipe_repository.h
 	repositories/tradeskill_recipe_entries_repository.h
 	repositories/traps_repository.h
 	repositories/tributes_repository.h
@@ -437,10 +443,6 @@ SET(repositories
 	repositories/veteran_reward_templates_repository.h
 	repositories/zone_repository.h
 	repositories/zone_points_repository.h
-
-	repositories/grid_repository.h
-	repositories/grid_entries_repository.h
-	repositories/tradeskill_recipe_repository.h
 )
 
 SET(common_headers

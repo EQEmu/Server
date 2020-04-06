@@ -2,7 +2,7 @@
 # Author:       Akkadius
 # @file:        repository-generator.pl
 # @description: Script used to generate database repositories
-# @example      perl ~/code/utils/scripts/generators/repository-generator.pl ~/server/
+# @example      perl ~/code/utils/scripts/generators/repository-generator.pl ~/server/ [table|all] [base|extended|all]
 
 #############################################
 # modules
@@ -20,9 +20,10 @@ my $json = new JSON();
 #############################################
 # args
 #############################################
-my $server_path                 = $ARGV[0];
-my $config_path                 = $server_path . "/eqemu_config.json";
-my $requested_table_to_generate = $ARGV[1] ? $ARGV[1] : "";
+my $server_path                  = $ARGV[0];
+my $config_path                  = $server_path . "/eqemu_config.json";
+my $requested_table_to_generate  = $ARGV[1] ? $ARGV[1] : "all";
+my $repository_generation_option = $ARGV[2] ? $ARGV[2] : "all";
 
 #############################################
 # world path
@@ -118,10 +119,10 @@ foreach my $table_to_generate (@tables) {
     # These tables don't have a typical schema
     my @table_ignore_list = (
         "character_enabledtasks",
-        "grid",                  # Manually created
+        # "grid",                  # Manually created
         "grid_entries",          # Manually created
-        "tradeskill_recipe",     # Manually created
-        "character_recipe_list", # Manually created
+        # "tradeskill_recipe",     # Manually created
+        # "character_recipe_list", # Manually created
         "guild_bank",
         "inventory_versions",
         "raid_leaders",
@@ -388,39 +389,48 @@ foreach my $table_to_generate (@tables) {
     $new_repository =~ s/\{\{ALL_ENTRIES}}/$all_entries/g;
     $new_repository =~ s/\{\{GENERATED_DATE}}/$generated_date/g;
 
-    print $new_base_repository;
-    print $new_repository;
+    if ($repository_generation_option eq "all" || $repository_generation_option eq "base") {
+        print $new_base_repository;
+    }
+
+    if ($repository_generation_option eq "all" || $repository_generation_option eq "extended") {
+        print $new_repository;
+    }
 
     #############################################
     # write base repository
     #############################################
-    my $generated_base_repository      = './common/repositories/base/base_' . $table_to_generate . '_repository.h';
-    my $cmake_generated_base_reference = $generated_base_repository;
-    $cmake_generated_base_reference =~ s/.\/common\///g;
-    $generated_base_repository_files .= $cmake_generated_base_reference . "\n";
-    open(FH, '>', $generated_base_repository) or die $!;
-    print FH $new_base_repository;
-    close(FH);
+    if ($repository_generation_option eq "all" || $repository_generation_option eq "base") {
+        my $generated_base_repository      = './common/repositories/base/base_' . $table_to_generate . '_repository.h';
+        my $cmake_generated_base_reference = $generated_base_repository;
+        $cmake_generated_base_reference =~ s/.\/common\///g;
+        $generated_base_repository_files .= $cmake_generated_base_reference . "\n";
+        open(FH, '>', $generated_base_repository) or die $!;
+        print FH $new_base_repository;
+        close(FH);
+    }
 
     #############################################
-    # write repository
+    # write extended repository
     #############################################
-    my $generated_repository      = './common/repositories/' . $table_to_generate . '_repository.h';
-    my $cmake_generated_reference = $generated_repository;
-    $cmake_generated_reference =~ s/.\/common\///g;
-    $generated_repository_files .= $cmake_generated_reference . "\n";
-    open(FH, '>', $generated_repository) or die $!;
-    print FH $new_repository;
-    close(FH);
+    if ($repository_generation_option eq "all" || $repository_generation_option eq "extended") {
+        my $generated_repository      = './common/repositories/' . $table_to_generate . '_repository.h';
+        my $cmake_generated_reference = $generated_repository;
+        $cmake_generated_reference =~ s/.\/common\///g;
+        $generated_repository_files .= $cmake_generated_reference . "\n";
+        open(FH, '>', $generated_repository) or die $!;
+        print FH $new_repository;
+        close(FH);
+    }
 
 }
 
 print "\n# Make sure to add generated repositories to common/CMakeLists.txt under the repositories section\n\n";
 
-print "\n#Base repository files\n";
+print "\n#Base Repositories\n";
 print $generated_base_repository_files . "\n";
 
-print "\n#repository files\n";
+print "\n#Extended Repositories\n";
 print $generated_repository_files . "\n";
 
 sub trim {

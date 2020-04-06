@@ -23,112 +23,48 @@
 
 #include "../database.h"
 #include "../string_util.h"
+#include "base/base_tradeskill_recipe_repository.h"
 
-class TradeskillRecipeRepository {
+class TradeskillRecipeRepository: public BaseTradeskillRecipeRepository {
 public:
-	struct TradeskillRecipe {
-		int         id;
-		std::string name;
-		int         tradeskill;
-		int         skillneeded;
-		int         trivial;
-		uint8       nofail;
-		int         replace_container;
-		std::string notes;
-		uint8       must_learn;
-		uint8       quest;
-		uint8       enabled;
-	};
 
-	static std::vector<std::string> Columns()
-	{
-		return {
-			"id",
-			"name",
-			"tradeskill",
-			"skillneeded",
-			"trivial",
-			"nofail",
-			"replace_container",
-			"notes",
-			"must_learn",
-			"quest",
-			"enabled",
-		};
-	}
+    /**
+     * This file was auto generated on Apr 5, 2020 and can be modified and extended upon
+     *
+     * Base repository methods are automatically
+     * generated in the "base" version of this repository. The base repository
+     * is immutable and to be left untouched, while methods in this class
+     * are used as extension methods for more specific persistence-layer
+     * accessors or mutators
+     *
+     * Base Methods (Subject to be expanded upon in time)
+     *
+     * InsertOne
+     * UpdateOne
+     * DeleteOne
+     * FindOne
+     * GetWhere(std::string where_filter)
+     * DeleteWhere(std::string where_filter)
+     * InsertMany
+     * All
+     *
+     * Example custom methods in a repository
+     *
+     * TradeskillRecipeRepository::GetByZoneAndVersion(int zone_id, int zone_version)
+     * TradeskillRecipeRepository::GetWhereNeverExpires()
+     * TradeskillRecipeRepository::GetWhereXAndY()
+     * TradeskillRecipeRepository::DeleteWhereXAndY()
+     *
+     * Most of the above could be covered by base methods, but if you as a developer
+     * find yourself re-using logic for other parts of the code, its best to just make a
+     * method that can be re-used easily elsewhere especially if it can use a base repository
+     * method and encapsulate filters there
+     */
 
-	static std::string ColumnsRaw()
-	{
-		return std::string(implode(", ", Columns()));
-	}
+	// Custom extended repository methods here
 
-	static std::string TableName()
-	{
-		return std::string("tradeskill_recipe");
-	}
 
-	static std::string BaseSelect()
-	{
-		return std::string(
-			fmt::format(
-				"SELECT {} FROM {}",
-				ColumnsRaw(),
-				TableName()
-			)
-		);
-	}
-
-	static TradeskillRecipe NewEntity()
-	{
-		TradeskillRecipe entry;
-
-		entry.id                = 0;
-		entry.name              = "";
-		entry.tradeskill        = 0;
-		entry.skillneeded       = 0;
-		entry.trivial           = 0;
-		entry.nofail            = 0;
-		entry.replace_container = 0;
-		entry.notes             = "";
-		entry.must_learn        = 0;
-		entry.quest             = 0;
-		entry.enabled           = 0;
-
-		return entry;
-	}
-
-	static TradeskillRecipe GetRecipe(int recipe_id)
-	{
-		auto results = content_db.QueryDatabase(
-			fmt::format(
-				"{} WHERE id = {}",
-				BaseSelect(),
-				recipe_id
-			)
-		);
-
-		TradeskillRecipe tradeskill_recipe = NewEntity();
-
-		auto row = results.begin();
-		if (results.RowCount() == 0) {
-			return tradeskill_recipe;
-		}
-
-		tradeskill_recipe.id                = atoi(row[0]);
-		tradeskill_recipe.name              = (row[1] ? row[1] : "");
-		tradeskill_recipe.tradeskill        = atoi(row[2]);
-		tradeskill_recipe.skillneeded       = atoi(row[3]);
-		tradeskill_recipe.trivial           = atoi(row[4]);
-		tradeskill_recipe.nofail            = atoi(row[5]);
-		tradeskill_recipe.replace_container = atoi(row[6]);
-		tradeskill_recipe.notes             = (row[7] ? row[7] : "");
-		tradeskill_recipe.must_learn        = atoi(row[8]);
-		tradeskill_recipe.quest             = atoi(row[9]);
-		tradeskill_recipe.enabled           = atoi(row[10]);
-
-		return tradeskill_recipe;
-	}
 
 };
 
-#endif
+#endif //EQEMU_TRADESKILL_RECIPE_REPOSITORY_H
