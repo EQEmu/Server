@@ -906,6 +906,10 @@ bool QuestManager::isdisctome(int item_id) {
 	return(true);
 }
 
+std::string QuestManager::getracename(uint16 race_id) {
+	return GetRaceIDName(race_id);
+}
+
 std::string QuestManager::getspellname(uint32 spell_id) {
 	if (!IsValidSpell(spell_id)) {
 		return "INVALID SPELL ID IN GETSPELLNAME";

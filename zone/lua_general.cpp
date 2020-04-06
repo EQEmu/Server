@@ -393,6 +393,10 @@ bool lua_is_disc_tome(int item_id) {
 	return quest_manager.isdisctome(item_id);
 }
 
+std::string lua_get_race_name(uint32 race_id) {
+	return quest_manager.getracename(race_id);
+}
+
 std::string lua_get_spell_name(uint32 spell_id) {
 	return quest_manager.getspellname(spell_id);
 }
@@ -1684,6 +1688,7 @@ luabind::scope lua_register_general() {
 		luabind::def("depop_zone", &lua_depop_zone),
 		luabind::def("repop_zone", &lua_repop_zone),
 		luabind::def("is_disc_tome", &lua_is_disc_tome),
+		luabind::def("get_race_name", (std::string(*)(uint16))&lua_get_race_name),
 		luabind::def("get_spell_name", (std::string(*)(uint32))&lua_get_spell_name),
 		luabind::def("get_skill_name", (std::string(*)(int))&lua_get_skill_name),
 		luabind::def("safe_move", &lua_safe_move),
