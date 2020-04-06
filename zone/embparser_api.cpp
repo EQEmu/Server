@@ -3231,6 +3231,23 @@ XS(XS__saylink) {
 	XSRETURN(1);
 }
 
+XS(XS__getcharnamebyid);
+XS(XS__getcharnamebyid) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getcharnamebyid(uint32 char_id)");
+	dXSTARG;
+
+	Const_char *RETVAL;
+	uint32     char_id = (int) SvUV(ST(0));
+
+	RETVAL = quest_manager.getcharnamebyid(char_id);
+
+	sv_setpv(TARG, RETVAL);
+	XSprePUSH;
+	PUSHTARG;
+}
+
 XS(XS__getcharidbyname);
 XS(XS__getcharidbyname) {
 	dXSARGS;
@@ -4094,6 +4111,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "getitemname"), XS__getitemname, file);
 	newXS(strcpy(buf, "getItemName"), XS_qc_getItemName, file);
 	newXS(strcpy(buf, "get_spawn_condition"), XS__get_spawn_condition, file);
+	newXS(strcpy(buf, "getcharnamebyid"), XS__getcharnamebyid, file);
 	newXS(strcpy(buf, "getguildnamebyid"), XS__getguildnamebyid, file);
 	newXS(strcpy(buf, "getguildidbycharid"), XS__getguildidbycharid, file);
 	newXS(strcpy(buf, "getgroupidbycharid"), XS__getgroupidbycharid, file);

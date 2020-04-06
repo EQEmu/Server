@@ -870,6 +870,10 @@ bool lua_delete_data(std::string bucket_key) {
 	return DataBucket::DeleteData(bucket_key);
 }
 
+const char *lua_get_char_name_by_id(uint32 char_id) {
+	return database.GetCharNameByID(char_id);
+}
+
 uint32 lua_get_char_id_by_name(const char* name) {
 	return quest_manager.getcharidbyname(name);
 }
@@ -1767,6 +1771,7 @@ luabind::scope lua_register_general() {
 		luabind::def("set_data", (void(*)(std::string, std::string))&lua_set_data),
 		luabind::def("set_data", (void(*)(std::string, std::string, std::string))&lua_set_data),
 		luabind::def("delete_data", (bool(*)(std::string))&lua_delete_data),
+		luabind::def("get_char_name_by_id", &lua_get_char_name_by_id),
 		luabind::def("get_char_id_by_name", (uint32(*)(const char*))&lua_get_char_id_by_name),
 		luabind::def("get_guild_name_by_id", &lua_get_guild_name_by_id),
 		luabind::def("get_guild_id_by_char_id", &lua_get_guild_id_by_char_id),
