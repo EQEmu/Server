@@ -46,6 +46,7 @@
 #include "clientlist.h"
 #include "wguild_mgr.h"
 #include "sof_char_create_data.h"
+#include "../common/namegenerator/namegen.h"
 
 #include <iostream>
 #include <iomanip>
@@ -533,80 +534,14 @@ bool Client::HandleNameApprovalPacket(const EQApplicationPacket *app)
 	return true;
 }
 
-bool Client::HandleGenerateRandomNamePacket(const EQApplicationPacket *app) {
-	// creates up to a 10 char name
-	char vowels[18]="aeiouyaeiouaeioe";
-	char cons[48]="bcdfghjklmnpqrstvwxzybcdgklmnprstvwbcdgkpstrkd";
-	char rndname[17]="\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
-	char paircons[33]="ngrkndstshthphsktrdrbrgrfrclcr";
-	int rndnum=emu_random.Int(0, 75),n=1;
-	bool dlc=false;
-	bool vwl=false;
-	bool dbl=false;
-	if (rndnum>63)
-	{	// rndnum is 0 - 75 where 64-75 is cons pair, 17-63 is cons, 0-16 is vowel
-		rndnum=(rndnum-61)*2;	// name can't start with "ng" "nd" or "rk"
-		rndname[0]=paircons[rndnum];
-		rndname[1]=paircons[rndnum+1];
-		n=2;
-	}
-	else if (rndnum>16)
-	{
-		rndnum-=17;
-		rndname[0]=cons[rndnum];
-	}
-	else
-	{
-		rndname[0]=vowels[rndnum];
-		vwl=true;
-	}
-	int namlen=emu_random.Int(5, 10);
-	for (int i=n;i<namlen;i++)
-	{
-		dlc=false;
-		if (vwl)	//last char was a vowel
-		{			// so pick a cons or cons pair
-			rndnum=emu_random.Int(0, 62);
-			if (rndnum>46)
-			{	// pick a cons pair
-				if (i>namlen-3)	// last 2 chars in name?
-				{	// name can only end in cons pair "rk" "st" "sh" "th" "ph" "sk" "nd" or "ng"
-					rndnum=emu_random.Int(0, 7)*2;
-				}
-				else
-				{	// pick any from the set
-					rndnum=(rndnum-47)*2;
-				}
-				rndname[i]=paircons[rndnum];
-				rndname[i+1]=paircons[rndnum+1];
-				dlc=true;	// flag keeps second letter from being doubled below
-				i+=1;
-			}
-			else
-			{	// select a single cons
-				rndname[i]=cons[rndnum];
-			}
-		}
-		else
-		{		// select a vowel
-			rndname[i]=vowels[emu_random.Int(0, 16)];
-		}
-		vwl=!vwl;
-		if (!dbl && !dlc)
-		{	// one chance at double letters in name
-			if (!emu_random.Int(0, i+9))	// chances decrease towards end of name
-			{
-				rndname[i+1]=rndname[i];
-				dbl=true;
-				i+=1;
-			}
-		}
-	}
+bool Client::HandleGenerateRandomNamePacket(const EQApplicationPacket *app)
+{
+	NameGen::Generator generator("!Bvss");
+	std::string random_name = generator.toString();
 
-	rndname[0]=toupper(rndname[0]);
-	NameGeneration_Struct* ngs = (NameGeneration_Struct*)app->pBuffer;
-	memset(ngs->name,0,64);
-	strcpy(ngs->name,rndname);
+	auto *ngs = (NameGeneration_Struct *) app->pBuffer;
+	memset(ngs->name, 0, 64);
+	strcpy(ngs->name, random_name.c_str());
 
 	QueuePacket(app);
 	return true;

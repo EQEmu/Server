@@ -1,7 +1,3 @@
-ALTER TABLE `aa_actions` ENGINE=InnoDB;
-ALTER TABLE `aa_effects` ENGINE=InnoDB;
-ALTER TABLE `aa_required_level_cost` ENGINE=InnoDB;
-ALTER TABLE `aa_timers` ENGINE=InnoDB;
 ALTER TABLE `account_flags` ENGINE=InnoDB;
 ALTER TABLE `account_ip` ENGINE=InnoDB;
 ALTER TABLE `account` ENGINE=InnoDB;

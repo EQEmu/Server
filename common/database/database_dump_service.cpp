@@ -50,7 +50,11 @@ std::string DatabaseDumpService::execute(const std::string &cmd, bool return_res
 	const char *file_name = "db-exec-result.txt";
 
 	if (return_result) {
+#ifdef _WINDOWS
+		std::system((cmd + " > " + file_name + " 2>&1").c_str());
+#else
 		std::system((cmd + " > " + file_name).c_str());
+#endif
 	}
 	else {
 		std::system((cmd).c_str());
@@ -95,7 +99,7 @@ bool DatabaseDumpService::IsTarAvailable()
  */
 bool DatabaseDumpService::Is7ZipAvailable()
 {
-	std::string version_output = execute("7z -help");
+	std::string version_output = execute("7z --help");
 
 	return version_output.find("7-Zip") != std::string::npos;
 }
@@ -396,9 +400,8 @@ void DatabaseDumpService::Dump()
 			else if (Is7ZipAvailable()) {
 				execute(
 					fmt::format(
-						"7z a -t7z {}.zip -C {} {}.sql",
+						"7z a -t7z {}.zip {}.sql",
 						GetDumpFileNameWithPath(),
-						GetSetDumpPath(),
 						GetDumpFileNameWithPath()
 					)
 				);

@@ -906,6 +906,31 @@ bool QuestManager::isdisctome(int item_id) {
 	return(true);
 }
 
+std::string QuestManager::getracename(uint16 race_id) {
+	return GetRaceIDName(race_id);
+}
+
+std::string QuestManager::getspellname(uint32 spell_id) {
+	if (!IsValidSpell(spell_id)) {
+		return "INVALID SPELL ID IN GETSPELLNAME";
+	}
+
+	std::string spell_name = GetSpellName(spell_id);
+	return spell_name;
+}
+
+std::string QuestManager::getskillname(int skill_id) {
+	if (skill_id >= 0 && skill_id < EQEmu::skills::SkillCount) {
+		std::map<EQEmu::skills::SkillType, std::string> Skills = EQEmu::skills::GetSkillTypeMap();
+		for (auto skills_iter : Skills) {
+			if (skill_id == skills_iter.first) {
+				return skills_iter.second;
+			}
+		}
+	}
+	return std::string();
+}
+
 void QuestManager::safemove() {
 	QuestManagerCurrentQuestVars();
 	if (initiator && initiator->IsClient())
@@ -2432,6 +2457,16 @@ bool QuestManager::istaskappropriate(int task) {
 	return false;
 }
 
+std::string QuestManager::gettaskname(uint32 task_id) {
+	QuestManagerCurrentQuestVars();
+
+	if (RuleB(TaskSystem, EnableTaskSystem)) {
+		return taskmanager->GetTaskName(task_id);
+	}
+
+	return std::string();
+}
+
 void QuestManager::clearspawntimers() {
 	if(!zone)
         return;
@@ -2580,6 +2615,32 @@ int QuestManager::collectitems(uint32 item_id, bool remove)
 	return quantity;
 }
 
+int QuestManager::countitem(uint32 item_id) {
+	QuestManagerCurrentQuestVars();
+	int quantity = 0;
+	EQEmu::ItemInstance *item = nullptr;
+	static const int16 slots[][2] = {
+		{ EQEmu::invslot::POSSESSIONS_BEGIN, EQEmu::invslot::POSSESSIONS_END },
+		{ EQEmu::invbag::GENERAL_BAGS_BEGIN, EQEmu::invbag::GENERAL_BAGS_END },
+		{ EQEmu::invbag::CURSOR_BAG_BEGIN, EQEmu::invbag::CURSOR_BAG_END},
+		{ EQEmu::invslot::BANK_BEGIN, EQEmu::invslot::BANK_END },
+		{ EQEmu::invbag::BANK_BAGS_BEGIN, EQEmu::invbag::BANK_BAGS_END },
+		{ EQEmu::invslot::SHARED_BANK_BEGIN, EQEmu::invslot::SHARED_BANK_END },
+		{ EQEmu::invbag::SHARED_BANK_BAGS_BEGIN, EQEmu::invbag::SHARED_BANK_BAGS_END },
+	};
+	const size_t size = sizeof(slots) / sizeof(slots[0]);	
+	for (int slot_index = 0; slot_index < size; ++slot_index) {
+		for (int slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
+			item = initiator->GetInv().GetItem(slot_id);
+			if (item && item->GetID() == item_id) {
+				quantity += item->IsStackable() ? item->GetCharges() : 1;
+			}
+		}
+	}
+
+	return quantity;
+}
+
 void QuestManager::UpdateSpawnTimer(uint32 id, uint32 newTime)
 {
 	bool found = false;
@@ -2668,6 +2729,23 @@ const char* QuestManager::varlink(char* perltext, int item_id) {
 	strcpy(perltext, linker.GenerateLink().c_str());
 
 	return perltext;
+}
+
+std::string QuestManager::getitemname(uint32 item_id) {
+	const EQEmu::ItemData* item_data = database.GetItem(item_id);
+	if (!item_data) {
+		return "INVALID ITEM ID IN GETITEMNAME";
+	}
+
+	std::string item_name = item_data->Name;
+	return item_name;
+}
+
+const char *QuestManager::getnpcnamebyid(uint32 npc_id) {
+	if (npc_id > 0) {
+		return database.GetNPCNameByID(npc_id);
+	}
+	return "";
 }
 
 uint16 QuestManager::CreateInstance(const char *zone, int16 version, uint32 duration)
@@ -2811,6 +2889,10 @@ void QuestManager::RemoveFromInstanceByCharID(uint16 instance_id, uint32 char_id
 	database.RemoveClientFromInstance(instance_id, char_id);
 }
 
+bool QuestManager::CheckInstanceByCharID(uint16 instance_id, uint32 char_id) {
+	return database.CharacterInInstanceGroup(instance_id, char_id);
+}
+
 void QuestManager::RemoveAllFromInstance(uint16 instance_id)
 {
 	QuestManagerCurrentQuestVars();
@@ -2867,6 +2949,28 @@ std::string QuestManager::saylink(char *saylink_text, bool silent, const char *l
 	QuestManagerCurrentQuestVars();
 
 	return EQEmu::SayLinkEngine::GenerateQuestSaylink(saylink_text, silent, link_name);
+}
+
+const char* QuestManager::getcharnamebyid(uint32 char_id) {
+	if (char_id > 0) {
+		return database.GetCharNameByID(char_id);
+	}
+	return "";
+}
+
+uint32 QuestManager::getcharidbyname(const char* name) {
+	return database.GetCharacterID(name);
+}
+
+int QuestManager::getcurrencyid(uint32 item_id) {
+	auto iter = zone->AlternateCurrencies.begin();
+	while (iter != zone->AlternateCurrencies.end()) {
+		if (item_id == (*iter).item_id) {
+			return (*iter).id;
+		}
+		++iter;
+	}
+	return 0;
 }
 
 const char* QuestManager::getguildnamebyid(int guild_id) {

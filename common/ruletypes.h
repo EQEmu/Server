@@ -161,6 +161,7 @@ RULE_BOOL(Character, DismountWater, true, "Dismount horses when entering water")
 RULE_BOOL(Character, UseNoJunkFishing, false, "Disregards junk items when fishing")
 RULE_BOOL(Character, SoftDeletes, true, "When characters are deleted in character select, they are only soft deleted")
 RULE_INT(Character, DefaultGuild, 0, "If not 0, new characters placed into the guild # indicated")
+RULE_BOOL(Character, ProcessFearedProximity, false, "Processes proximity checks when feared")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)

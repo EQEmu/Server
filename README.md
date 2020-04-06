@@ -1,7 +1,7 @@
 # EQEmulator Core Server
-|Travis CI (Linux)|Appveyor w/ Bots (Windows)   |Appveyor w/o Bots (Windows)   |
+|Travis CI (Linux)|Appveyor (Windows x86)   |Appveyor (Windows x64)   |
 |:---:|:---:|:---:| 
-|[![Linux CI](https://travis-ci.org/EQEmu/Server.svg?branch=master)](https://travis-ci.org/EQEmu/Server)   |[![Build status](https://ci.appveyor.com/api/projects/status/scr25kmntx36c1ub/branch/master?svg=true)](https://ci.appveyor.com/project/KimLS/server-87crp/branch/master)   |[![Build status](https://ci.appveyor.com/api/projects/status/mdwbr4o9l6mxqofj/branch/master?svg=true)](https://ci.appveyor.com/project/KimLS/server-w0pq2/branch/master)   |
+|[![Linux CI](https://travis-ci.org/EQEmu/Server.svg?branch=master)](https://travis-ci.org/EQEmu/Server)   |[![Build status](https://ci.appveyor.com/api/projects/status/v3utuu0dttm2cqd0?svg=true)](https://ci.appveyor.com/project/KimLS/server)   |[![Build status](https://ci.appveyor.com/api/projects/status/scr25kmntx36c1ub?svg=true)](https://ci.appveyor.com/project/KimLS/server-87crp)   |
 
 ***
 
