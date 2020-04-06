@@ -2858,6 +2858,22 @@ XS(XS__getitemname) {
 	XSRETURN(1);
 }
 
+XS(XS__getnpcnamebyid);
+XS(XS__getnpcnamebyid) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getnpcnamebyid(uint32 npc_id)");
+
+	dXSTARG;
+	uint32 npc_id = (int) SvIV(ST(0));
+	const char *npc_name = quest_manager.getnpcnamebyid(npc_id);
+
+	sv_setpv(TARG, npc_name);
+	XSprePUSH;
+	PUSHTARG;
+	XSRETURN(1);
+}
+
 XS(XS__UpdateSpawnTimer);
 XS(XS__UpdateSpawnTimer) {
 	dXSARGS;
@@ -4110,6 +4126,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "getinventoryslotid"), XS__getinventoryslotid, file);
 	newXS(strcpy(buf, "getitemname"), XS__getitemname, file);
 	newXS(strcpy(buf, "getItemName"), XS_qc_getItemName, file);
+	newXS(strcpy(buf, "getnpcnamebyid"), XS__getnpcnamebyid, file);
 	newXS(strcpy(buf, "get_spawn_condition"), XS__get_spawn_condition, file);
 	newXS(strcpy(buf, "getcharnamebyid"), XS__getcharnamebyid, file);
 	newXS(strcpy(buf, "getguildnamebyid"), XS__getguildnamebyid, file);

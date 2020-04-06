@@ -890,6 +890,10 @@ int lua_get_group_id_by_char_id(uint32 char_id) {
 	return database.GetGroupIDByCharID(char_id);
 }
 
+const char *lua_get_npc_name_by_id(uint32 npc_id) {
+	return quest_manager.getnpcnamebyid(npc_id);
+}
+
 int lua_get_raid_id_by_char_id(uint32 char_id) {
 	return database.GetRaidIDByCharID(char_id);
 }
@@ -1776,6 +1780,7 @@ luabind::scope lua_register_general() {
 		luabind::def("get_guild_name_by_id", &lua_get_guild_name_by_id),
 		luabind::def("get_guild_id_by_char_id", &lua_get_guild_id_by_char_id),
 		luabind::def("get_group_id_by_char_id", &lua_get_group_id_by_char_id),
+		luabind::def("get_npc_name_by_id", &lua_get_npc_name_by_id),
 		luabind::def("get_raid_id_by_char_id", &lua_get_raid_id_by_char_id),
 		luabind::def("create_instance", &lua_create_instance),
 		luabind::def("destroy_instance", &lua_destroy_instance),
