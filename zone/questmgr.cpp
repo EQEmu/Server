@@ -915,6 +915,18 @@ std::string QuestManager::getspellname(uint32 spell_id) {
 	return spell_name;
 }
 
+std::string QuestManager::getskillname(int skill_id) {
+	if (skill_id >= 0 && skill_id < EQEmu::skills::SkillCount) {
+		std::map<EQEmu::skills::SkillType, std::string> Skills = EQEmu::skills::GetSkillTypeMap();
+		for (auto skills_iter : Skills) {
+			if (skill_id == skills_iter.first) {
+				return skills_iter.second;
+			}
+		}
+	}
+	return std::string();
+}
+
 void QuestManager::safemove() {
 	QuestManagerCurrentQuestVars();
 	if (initiator && initiator->IsClient())
