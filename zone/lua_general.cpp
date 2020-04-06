@@ -887,7 +887,11 @@ uint32 lua_get_char_id_by_name(const char* name) {
 }
 
 int lua_get_currency_id(uint32 item_id) {
-	return quest_manager.getcurrencyid(item_id);
+	return quest_manager.getcurrencyid(item_id)
+}
+
+int lua_get_currency_item_id(int currency_id) {
+	return quest_manager.getcurrencyitemid(currency_id);
 }
 
 const char *lua_get_guild_name_by_id(uint32 guild_id) {
@@ -1792,6 +1796,7 @@ luabind::scope lua_register_general() {
 		luabind::def("get_char_name_by_id", &lua_get_char_name_by_id),
 		luabind::def("get_char_id_by_name", (uint32(*)(const char*))&lua_get_char_id_by_name),
 		luabind::def("get_currency_id", &lua_get_currency_id),
+		luabind::def("get_currency_item_id", &lua_get_currency_item_id),
 		luabind::def("get_guild_name_by_id", &lua_get_guild_name_by_id),
 		luabind::def("get_guild_id_by_char_id", &lua_get_guild_id_by_char_id),
 		luabind::def("get_group_id_by_char_id", &lua_get_group_id_by_char_id),

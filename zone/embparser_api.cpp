@@ -3313,6 +3313,23 @@ XS(XS__getcharidbyname) {
 	XSRETURN(1);
 }
 
+XS(XS__getcurrencyitemid);
+XS(XS__getcurrencyitemid) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getcurrencyitemid(int currency_id)");
+	dXSTARG;
+
+	int RETVAL;
+	int currency_id = (int) SvUV(ST(0));
+
+	RETVAL = quest_manager.getcurrencyitemid(currency_id);
+
+	XSprePUSH;
+	PUSHi((IV)RETVAL);
+  	XSRETURN(1);
+}
+
 XS(XS__getcurrencyid);
 XS(XS__getcurrencyid) {
 	dXSARGS;
@@ -3326,7 +3343,6 @@ XS(XS__getcurrencyid) {
 	RETVAL = quest_manager.getcurrencyid(item_id);
 	XSprePUSH;
 	PUSHi((IV)RETVAL);
-
 	XSRETURN(1);
 }
 
@@ -4179,6 +4195,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "getnpcnamebyid"), XS__getnpcnamebyid, file);
 	newXS(strcpy(buf, "get_spawn_condition"), XS__get_spawn_condition, file);
 	newXS(strcpy(buf, "getcharnamebyid"), XS__getcharnamebyid, file);
+	newXS(strcpy(buf, "getcurrencyitemid"), XS__getcurrencyitemid, file);
 	newXS(strcpy(buf, "getguildnamebyid"), XS__getguildnamebyid, file);
 	newXS(strcpy(buf, "getguildidbycharid"), XS__getguildidbycharid, file);
 	newXS(strcpy(buf, "getgroupidbycharid"), XS__getgroupidbycharid, file);

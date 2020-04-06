@@ -260,6 +260,7 @@ public:
 	const char* getcharnamebyid(uint32 char_id);
 	uint32 getcharidbyname(const char* name);
 	int getcurrencyid(uint32 item_id);
+	int getcurrencyitemid(int currency_id);
 	const char* getguildnamebyid(int guild_id);
 	int getguildidbycharid(uint32 char_id);
 	int getgroupidbycharid(uint32 char_id);

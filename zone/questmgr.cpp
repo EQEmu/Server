@@ -2973,6 +2973,18 @@ int QuestManager::getcurrencyid(uint32 item_id) {
 	return 0;
 }
 
+int QuestManager::getcurrencyitemid(int currency_id) {
+	if (currency_id > 0) {
+		auto iter = zone->AlternateCurrencies.begin();
+		while (iter != zone->AlternateCurrencies.end()) {
+			if (currency_id == (*iter).id) {
+				return (*iter).item_id;
+			}
+			++iter;
+		}
+	return 0;
+}
+
 const char* QuestManager::getguildnamebyid(int guild_id) {
 	if (guild_id > 0)
 		return guild_mgr.GetGuildName(guild_id);
