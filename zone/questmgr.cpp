@@ -2962,6 +2962,10 @@ uint32 QuestManager::getcharidbyname(const char* name) {
 	return database.GetCharacterID(name);
 }
 
+std::string QuestManager::getclassname(uint8 class_id, uint8 level) {
+	return GetClassIDName(class_id, level);
+}
+
 int QuestManager::getcurrencyid(uint32 item_id) {
 	auto iter = zone->AlternateCurrencies.begin();
 	while (iter != zone->AlternateCurrencies.end()) {
