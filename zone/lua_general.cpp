@@ -895,7 +895,7 @@ std::string lua_get_class_name(uint8 class_id, uint8 level) {
 }
 
 int lua_get_currency_id(uint32 item_id) {
-	return quest_manager.getcurrencyid(item_id)
+	return quest_manager.getcurrencyid(item_id);
 }
 
 int lua_get_currency_item_id(int currency_id) {
