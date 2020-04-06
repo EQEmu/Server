@@ -2928,6 +2928,10 @@ std::string QuestManager::saylink(char *saylink_text, bool silent, const char *l
 	return EQEmu::SayLinkEngine::GenerateQuestSaylink(saylink_text, silent, link_name);
 }
 
+uint32 QuestManager::getcharidbyname(const char* name) {
+	return database.GetCharacterID(name);
+}
+
 const char* QuestManager::getguildnamebyid(int guild_id) {
 	if (guild_id > 0)
 		return guild_mgr.GetGuildName(guild_id);
