@@ -3358,7 +3358,7 @@ XS(XS__getcurrencyid) {
 	dXSTARG;
 
 	int 		RETVAL;
-	uint32      item_id = (int) SvUV(ST(0));;
+	uint32      item_id = (int) SvUV(ST(0));
 
 	RETVAL = quest_manager.getcurrencyid(item_id);
 	XSprePUSH;

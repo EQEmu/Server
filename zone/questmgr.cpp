@@ -2986,6 +2986,7 @@ int QuestManager::getcurrencyitemid(int currency_id) {
 			}
 			++iter;
 		}
+	}
 	return 0;
 }
 
