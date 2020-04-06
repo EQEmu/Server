@@ -993,7 +993,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	aa_chance = spellbonuses.ReduceTradeskillFail[spec->tradeskill] + itembonuses.ReduceTradeskillFail[spec->tradeskill] + aabonuses.ReduceTradeskillFail[spec->tradeskill];
 
 	const EQEmu::ItemData* item = nullptr;
-	
+
 	chance = mod_tradeskill_chance(chance, spec);
 
 	if (((spec->tradeskill==75) || GetGM() || (chance > res)) || zone->random.Roll(aa_chance)) {
@@ -1497,7 +1497,7 @@ void Client::LearnRecipe(uint32 recipe_id)
 		return;
 	}
 
-	auto tradeskill_recipe = TradeskillRecipeRepository::GetRecipe(recipe_id);
+	auto tradeskill_recipe = TradeskillRecipeRepository::FindOne(recipe_id);
 	if (tradeskill_recipe.id == 0) {
 		LogError("Invalid recipe [{}]", recipe_id);
 		return;
@@ -1542,8 +1542,8 @@ bool Client::CanIncreaseTradeskill(EQEmu::skills::SkillType tradeskill) {
 	uint8 Tailoring = (GetRawSkill(EQEmu::skills::SkillTailoring) > 200) ? 1 : 0;
 	uint8 SkillTotal = Baking + Smithing + Brewing + Fletching + Jewelry + Pottery + Tailoring; //Tradeskills above 200
 	//New Tanaan AA: Each level allows an additional tradeskill above 200 (first one is free)
-	uint8 aaLevel = spellbonuses.TradeSkillMastery + itembonuses.TradeSkillMastery + aabonuses.TradeSkillMastery; 
-	
+	uint8 aaLevel = spellbonuses.TradeSkillMastery + itembonuses.TradeSkillMastery + aabonuses.TradeSkillMastery;
+
 	switch (tradeskill) {
 	case EQEmu::skills::SkillBaking:
 	case EQEmu::skills::SkillBlacksmithing:

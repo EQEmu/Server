@@ -29,6 +29,7 @@
 #include "../common/repositories/criteria/content_filter_criteria.h"
 #include "../common/rulesys.h"
 #include "../common/repositories/instance_list_repository.h"
+#include "../common/repositories/zone_repository.h"
 
 namespace WorldserverCommandHandler {
 
@@ -60,6 +61,7 @@ namespace WorldserverCommandHandler {
 		function_map["test:test"]                   = &WorldserverCommandHandler::TestCommand;
 		function_map["test:expansion"]              = &WorldserverCommandHandler::ExpansionTestCommand;
 		function_map["test:repository"]             = &WorldserverCommandHandler::TestRepository;
+		function_map["test:repository2"]            = &WorldserverCommandHandler::TestRepository2;
 
 		EQEmuCommand::HandleMenu(function_map, cmd, argc, argv);
 	}
@@ -387,7 +389,7 @@ namespace WorldserverCommandHandler {
 		/**
 		 * Delete one
 		 */
-		int deleted = InstanceListRepository::DeleteOne(found_instance_list.id) ;
+		int deleted = InstanceListRepository::DeleteOne(found_instance_list.id);
 
 		LogInfo("Deleting one instance [{}] deleted count [{}]", found_instance_list.id, deleted);
 
@@ -416,10 +418,43 @@ namespace WorldserverCommandHandler {
 
 		LogInfo("Bulk insertion test, inserted [{}]", inserted_count);
 
-		for (auto &entry: InstanceListRepository::All()) {
+		for (auto &entry: InstanceListRepository::GetWhere(fmt::format("zone = {}", 999))) {
 			LogInfo("Iterating through entry id [{}] zone [{}]", entry.id, entry.zone);
 		}
 
+		/**
+		 * Delete where
+		 */
+		int deleted_count = InstanceListRepository::DeleteWhere(fmt::format("zone = {}", 999));
+
+		LogInfo("Bulk deletion test, deleted [{}]", deleted_count);
+
+	}
+
+	/**
+	 * @param argc
+	 * @param argv
+	 * @param cmd
+	 * @param description
+	 */
+	void TestRepository2(int argc, char **argv, argh::parser &cmd, std::string &description)
+	{
+		description = "Test command";
+
+		if (cmd[{"-h", "--help"}]) {
+			return;
+		}
+
+		auto zones = ZoneRepository::GetWhere("short_name = 'anguish'");
+
+		for (auto &zone: zones) {
+			LogInfo(
+				"Zone [{}] long_name [{}] id [{}]",
+				zone.short_name,
+				zone.long_name,
+				zone.id
+			);
+		}
 	}
 
 }

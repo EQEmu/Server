@@ -93,6 +93,8 @@ namespace Expansion {
 class WorldContentService {
 public:
 
+	WorldContentService();
+
 	int GetCurrentExpansion() const;
 	void SetCurrentExpansion(int current_expansion);
 

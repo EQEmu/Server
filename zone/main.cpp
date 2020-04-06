@@ -91,9 +91,10 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include <pthread.h>
 #include "../common/unix.h"
 
+#endif
+
 #include "../common/content/world_content_service.h"
 
-#endif
 
 volatile bool RunLoops = true;
 extern volatile bool is_zone_loaded;

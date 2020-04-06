@@ -34,6 +34,7 @@ namespace WorldserverCommandHandler {
 	void TestCommand(int argc, char **argv, argh::parser &cmd, std::string &description);
 	void ExpansionTestCommand(int argc, char **argv, argh::parser &cmd, std::string &description);
 	void TestRepository(int argc, char **argv, argh::parser &cmd, std::string &description);
+	void TestRepository2(int argc, char **argv, argh::parser &cmd, std::string &description);
 };
 
 
