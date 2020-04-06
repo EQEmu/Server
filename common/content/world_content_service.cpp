@@ -20,6 +20,11 @@
 
 #include "world_content_service.h"
 
+WorldContentService::WorldContentService()
+{
+	SetCurrentExpansion(0);
+}
+
 int WorldContentService::GetCurrentExpansion() const
 {
 	return current_expansion;
