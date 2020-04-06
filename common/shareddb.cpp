@@ -38,6 +38,7 @@
 #include "shareddb.h"
 #include "string_util.h"
 #include "eqemu_config.h"
+#include "repositories/criteria/content_filter_criteria.h"
 
 namespace ItemField
 {
@@ -567,7 +568,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQEmu::InventoryProfile *inv)
 {
 	if (!char_id || !inv)
 		return false;
-	
+
 	// Retrieve character inventory
 	std::string query =
 	    StringFormat("SELECT slotid, itemid, charges, color, augslot1, augslot2, augslot3, augslot4, augslot5, "
@@ -728,7 +729,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQEmu::InventoryProfile *inv)
 				char_id, item_id, slot_id);
 		}
 	}
-	
+
 	if (cv_conflict) {
 		char char_name[64] = "";
 		GetCharName(char_id, char_name);
@@ -1462,7 +1463,7 @@ bool SharedDatabase::GetCommandSettings(std::map<std::string, std::pair<uint8, s
 	auto results = QueryDatabase(query);
 	if (!results.Success())
 		return false;
-    
+
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		command_settings[row[0]].first = atoi(row[1]);
 		if (row[2][0] == 0)
@@ -1696,7 +1697,7 @@ bool SharedDatabase::LoadSpells(const std::string &prefix, int32 *records, const
 		auto Config = EQEmuConfig::get();
 		EQEmu::IPCMutex mutex("spells");
 		mutex.Lock();
-	
+
 		std::string file_name = Config->SharedMemDir + prefix + std::string("spells");
 		spells_mmf = std::unique_ptr<EQEmu::MemoryMappedFile>(new EQEmu::MemoryMappedFile(file_name));
 		*records = *reinterpret_cast<uint32*>(spells_mmf->Get());
@@ -1996,7 +1997,11 @@ void SharedDatabase::GetLootTableInfo(uint32 &loot_table_count, uint32 &max_loot
 	loot_table_count = 0;
 	max_loot_table = 0;
 	loot_table_entries = 0;
-	const std::string query = "SELECT COUNT(*), MAX(id), (SELECT COUNT(*) FROM loottable_entries) FROM loottable";
+	const std::string query =
+		fmt::format(
+			"SELECT COUNT(*), MAX(id), (SELECT COUNT(*) FROM loottable_entries) FROM loottable WHERE TRUE {}",
+			ContentFilterCriteria::apply()
+		);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
         return;
@@ -2017,7 +2022,11 @@ void SharedDatabase::GetLootDropInfo(uint32 &loot_drop_count, uint32 &max_loot_d
 	max_loot_drop = 0;
 	loot_drop_entries = 0;
 
-	const std::string query = "SELECT COUNT(*), MAX(id), (SELECT COUNT(*) FROM lootdrop_entries) FROM lootdrop";
+	const std::string query = fmt::format(
+		"SELECT COUNT(*), MAX(id), (SELECT COUNT(*) FROM lootdrop_entries) FROM lootdrop WHERE TRUE {}",
+		ContentFilterCriteria::apply()
+	);
+
     auto results = QueryDatabase(query);
     if (!results.Success()) {
         return;
@@ -2039,50 +2048,79 @@ void SharedDatabase::LoadLootTables(void *data, uint32 size) {
 	uint8 loot_table[sizeof(LootTable_Struct) + (sizeof(LootTableEntries_Struct) * 128)];
 	LootTable_Struct *lt = reinterpret_cast<LootTable_Struct*>(loot_table);
 
-	const std::string query = "SELECT loottable.id, loottable.mincash, loottable.maxcash, loottable.avgcoin, "
-                            "loottable_entries.lootdrop_id, loottable_entries.multiplier, loottable_entries.droplimit, "
-                            "loottable_entries.mindrop, loottable_entries.probability FROM loottable LEFT JOIN loottable_entries "
-                            "ON loottable.id = loottable_entries.loottable_id ORDER BY id";
+	const std::string query = fmt::format(
+		SQL(
+			SELECT
+			  loottable.id,
+			  loottable.mincash,
+			  loottable.maxcash,
+			  loottable.avgcoin,
+			  loottable_entries.lootdrop_id,
+			  loottable_entries.multiplier,
+			  loottable_entries.droplimit,
+			  loottable_entries.mindrop,
+			  loottable_entries.probability
+			FROM
+			  loottable
+			  LEFT JOIN loottable_entries ON loottable.id = loottable_entries.loottable_id
+			WHERE TRUE {}
+			ORDER BY
+			  id
+			),
+			ContentFilterCriteria::apply()
+		);
+
     auto results = QueryDatabase(query);
     if (!results.Success()) {
         return;
     }
 
-    uint32 current_id = 0;
-    uint32 current_entry = 0;
+	uint32 current_id    = 0;
+	uint32 current_entry = 0;
 
-    for (auto row = results.begin(); row != results.end(); ++row) {
-        uint32 id = static_cast<uint32>(atoul(row[0]));
-        if(id != current_id) {
-            if(current_id != 0)
-                hash.insert(current_id, loot_table, (sizeof(LootTable_Struct) + (sizeof(LootTableEntries_Struct) * lt->NumEntries)));
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		uint32 id = static_cast<uint32>(atoul(row[0]));
+		if (id != current_id) {
+			if (current_id != 0) {
+				hash.insert(
+					current_id,
+					loot_table,
+					(sizeof(LootTable_Struct) + (sizeof(LootTableEntries_Struct) * lt->NumEntries)));
+			}
 
-            memset(loot_table, 0, sizeof(LootTable_Struct) + (sizeof(LootTableEntries_Struct) * 128));
-            current_entry = 0;
-            current_id = id;
-            lt->mincash = static_cast<uint32>(atoul(row[1]));
-            lt->maxcash = static_cast<uint32>(atoul(row[2]));
-            lt->avgcoin = static_cast<uint32>(atoul(row[3]));
-        }
+			memset(loot_table, 0, sizeof(LootTable_Struct) + (sizeof(LootTableEntries_Struct) * 128));
+			current_entry = 0;
+			current_id    = id;
+			lt->mincash = static_cast<uint32>(atoul(row[1]));
+			lt->maxcash = static_cast<uint32>(atoul(row[2]));
+			lt->avgcoin = static_cast<uint32>(atoul(row[3]));
+		}
 
-        if(current_entry > 128)
-            continue;
+		if (current_entry > 128) {
+			continue;
+		}
 
-        if(!row[4])
-            continue;
+		if (!row[4]) {
+			continue;
+		}
 
-        lt->Entries[current_entry].lootdrop_id = static_cast<uint32>(atoul(row[4]));
-        lt->Entries[current_entry].multiplier = static_cast<uint8>(atoi(row[5]));
-        lt->Entries[current_entry].droplimit = static_cast<uint8>(atoi(row[6]));
-        lt->Entries[current_entry].mindrop = static_cast<uint8>(atoi(row[7]));
-        lt->Entries[current_entry].probability = static_cast<float>(atof(row[8]));
+		lt->Entries[current_entry].lootdrop_id = static_cast<uint32>(atoul(row[4]));
+		lt->Entries[current_entry].multiplier  = static_cast<uint8>(atoi(row[5]));
+		lt->Entries[current_entry].droplimit   = static_cast<uint8>(atoi(row[6]));
+		lt->Entries[current_entry].mindrop     = static_cast<uint8>(atoi(row[7]));
+		lt->Entries[current_entry].probability = static_cast<float>(atof(row[8]));
 
-        ++(lt->NumEntries);
-        ++current_entry;
-    }
+		++(lt->NumEntries);
+		++current_entry;
+	}
 
-    if(current_id != 0)
-        hash.insert(current_id, loot_table, (sizeof(LootTable_Struct) + (sizeof(LootTableEntries_Struct) * lt->NumEntries)));
+	if (current_id != 0) {
+		hash.insert(
+			current_id,
+			loot_table,
+			(sizeof(LootTable_Struct) + (sizeof(LootTableEntries_Struct) * lt->NumEntries))
+		);
+	}
 
 }
 
@@ -2091,11 +2129,29 @@ void SharedDatabase::LoadLootDrops(void *data, uint32 size) {
 	EQEmu::FixedMemoryVariableHashSet<LootDrop_Struct> hash(reinterpret_cast<uint8*>(data), size);
 	uint8 loot_drop[sizeof(LootDrop_Struct) + (sizeof(LootDropEntries_Struct) * 1260)];
 	LootDrop_Struct *ld = reinterpret_cast<LootDrop_Struct*>(loot_drop);
+	
+	const std::string query = fmt::format(
+		SQL(
+			SELECT
+			  lootdrop.id,
+			  lootdrop_entries.item_id,
+			  lootdrop_entries.item_charges,
+			  lootdrop_entries.equip_item,
+			  lootdrop_entries.chance,
+			  lootdrop_entries.minlevel,
+			  lootdrop_entries.maxlevel,
+			  lootdrop_entries.multiplier
+			FROM
+			  lootdrop
+			  JOIN lootdrop_entries ON lootdrop.id = lootdrop_entries.lootdrop_id
+			WHERE
+			  TRUE {}
+			ORDER BY
+			  lootdrop_id
+		),
+		ContentFilterCriteria::apply()
+	);
 
-	const std::string query = "SELECT lootdrop.id, lootdrop_entries.item_id, lootdrop_entries.item_charges, "
-                            "lootdrop_entries.equip_item, lootdrop_entries.chance, lootdrop_entries.minlevel, "
-                            "lootdrop_entries.maxlevel, lootdrop_entries.multiplier FROM lootdrop JOIN lootdrop_entries "
-                            "ON lootdrop.id = lootdrop_entries.lootdrop_id ORDER BY lootdrop_id";
     auto results = QueryDatabase(query);
     if (!results.Success()) {
 		return;
