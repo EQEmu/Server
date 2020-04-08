@@ -77,7 +77,6 @@ SET(common_sources
 	unix.cpp
 	platform.cpp
 	json/jsoncpp.cpp
-	namegenerator/namegen.cpp
 	net/console_server.cpp
 	net/console_server_connection.cpp
 	net/crc32.cpp
@@ -222,7 +221,6 @@ SET(common_headers
 	event/timer.h
 	json/json.h
 	json/json-forwards.h
-	namegenerator/namegen.h
 	net/console_server.h
 	net/console_server_connection.h
 	net/crc32.h
