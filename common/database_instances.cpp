@@ -381,7 +381,7 @@ uint16 Database::GetInstanceVersion(uint16 instance_id) {
 	return atoi(row[0]);
 }
 
-uint32 Database::GetTimeRemainingInstance(uint16 instance_id, bool is_perma)
+uint32 Database::GetTimeRemainingInstance(uint16 instance_id, bool &is_perma)
 {
 	uint32 start_time = 0;
 	uint32 duration = 0;

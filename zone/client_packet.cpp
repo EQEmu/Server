@@ -823,15 +823,14 @@ void Client::CompleteConnect()
 		);
 	}
 
-	if (zone && zone->GetInstanceID() > 0) {
+	if (zone && zone->GetInstanceTimer()) {
 
-		uint32 remaining_time_seconds = database.GetTimeRemainingInstance(zone->GetInstanceID());
+		bool   is_permanent           = false;
+		uint32 remaining_time_seconds = database.GetTimeRemainingInstance(zone->GetInstanceID(), is_permanent);
 		uint32 day                    = (remaining_time_seconds / 86400);
 		uint32 hour                   = (remaining_time_seconds / 3600) % 24;
 		uint32 minute                 = (remaining_time_seconds / 60) % 60;
 		uint32 second                 = (remaining_time_seconds / 1) % 60;
-
-		LogInfo("Remaining time seconds [{}]", remaining_time_seconds);
 
 		if (day) {
 			Message(

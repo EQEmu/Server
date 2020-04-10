@@ -159,7 +159,7 @@ public:
 	uint16 GetInstanceID(const char* zone, uint32 charid, int16 version);
 	uint16 GetInstanceID(uint32 zone, uint32 charid, int16 version);
 	uint16 GetInstanceVersion(uint16 instance_id);
-	uint32 GetTimeRemainingInstance(uint16 instance_id, bool is_perma = false);
+	uint32 GetTimeRemainingInstance(uint16 instance_id, bool &is_perma);
 	uint32 VersionFromInstanceID(uint16 instance_id);
 	uint32 ZoneIDFromInstanceID(uint16 instance_id);
 
