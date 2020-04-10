@@ -194,6 +194,11 @@ bool Database::GetUnusedInstanceID(uint16 &instance_id)
 		return true;
 	}
 
+	if (instance_id < max_reserved_instance_id) {
+		instance_id = max_reserved_instance_id;
+		return true;
+	}
+
 	query   = StringFormat("SELECT id FROM instance_list where id > %u ORDER BY id", max_reserved_instance_id);
 	results = QueryDatabase(query);
 
