@@ -90,6 +90,11 @@ void Lua_Client::SetPVP(bool v) {
 	self->SetPVP(v);
 }
 
+void Lua_Client::SendToGuildHall() {
+	Lua_Safe_Call_Void();
+	self->SendToGuildHall();
+}
+
 bool Lua_Client::GetPVP() {
 	Lua_Safe_Call_Bool();
 	return self->GetPVP();
@@ -1584,6 +1589,7 @@ luabind::scope lua_register_client() {
 		.def("Disconnect", (void(Lua_Client::*)(void))&Lua_Client::Disconnect)
 		.def("IsLD", (bool(Lua_Client::*)(void))&Lua_Client::IsLD)
 		.def("WorldKick", (void(Lua_Client::*)(void))&Lua_Client::WorldKick)
+		.def("SendToGuildHall", (void(Lua_Client::*)(void))&Lua_Client::SendToGuildHall)
 		.def("GetAnon", (bool(Lua_Client::*)(void))&Lua_Client::GetAnon)
 		.def("Duck", (void(Lua_Client::*)(void))&Lua_Client::Duck)
 		.def("Stand", (void(Lua_Client::*)(void))&Lua_Client::Stand)

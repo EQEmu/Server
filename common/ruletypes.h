@@ -270,7 +270,6 @@ RULE_INT(Zone, PEQZoneDebuff1, 4454, "First debuff casted by #peqzone Default is
 RULE_INT(Zone, PEQZoneDebuff2, 2209, "Second debuff casted by #peqzone Default is Tendrils of Apathy")
 RULE_BOOL(Zone, UsePEQZoneDebuffs, true, "Will determine if #peqzone will debuff players or not when used")
 RULE_REAL(Zone, HotZoneBonus, 0.75, "")
-RULE_INT(Zone, ReservedInstances, 30, "Will reserve this many instance ids for globals... probably not a good idea to change this while a server is running")
 RULE_INT(Zone, EbonCrystalItemID, 40902, "")
 RULE_INT(Zone, RadiantCrystalItemID, 40903, "")
 RULE_BOOL(Zone, LevelBasedEXPMods, false, "Allows you to use the level_exp_mods table in consideration to your players EXP hits")
@@ -773,6 +772,12 @@ RULE_CATEGORY(HotReload)
 RULE_BOOL(HotReload, QuestsRepopWithReload, true, "When a hot reload is triggered, the zone will repop")
 RULE_BOOL(HotReload, QuestsRepopWhenPlayersNotInCombat, true, "When a hot reload is triggered, the zone will repop when no clients are in combat")
 RULE_BOOL(HotReload, QuestsResetTimersWithReload, true, "When a hot reload is triggered, quest timers will be reset")
+RULE_CATEGORY_END()
+
+RULE_CATEGORY(Instances)
+RULE_INT(Instances, ReservedInstances, 30, "Will reserve this many instance ids for globals... probably not a good idea to change this while a server is running")
+RULE_BOOL(Instances, RecycleInstanceIds, true, "Will recycle free instance ids instead of gradually running out at 32k")
+RULE_INT(Instances, GuildHallExpirationDays, 90, "Amount of days before a Guild Hall instance expires")
 RULE_CATEGORY_END()
 
 #undef RULE_CATEGORY

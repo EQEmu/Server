@@ -633,6 +633,7 @@ public:
 	void MovePC(uint32 zoneID, float x, float y, float z, float heading, uint8 ignorerestrictions = 0, ZoneMode zm = ZoneSolicited);
 	void MovePC(float x, float y, float z, float heading, uint8 ignorerestrictions = 0, ZoneMode zm = ZoneSolicited);
 	void MovePC(uint32 zoneID, uint32 instanceID, float x, float y, float z, float heading, uint8 ignorerestrictions = 0, ZoneMode zm = ZoneSolicited);
+	void SendToGuildHall();
 	void AssignToInstance(uint16 instance_id);
 	void RemoveFromInstance(uint16 instance_id);
 	void WhoAll();
@@ -691,7 +692,7 @@ public:
 
 	int GetClientMaxLevel() const { return client_max_level; }
 	void SetClientMaxLevel(int max_level) { client_max_level = max_level; }
-	
+
 	void CheckManaEndUpdate();
 	void SendManaUpdate();
 	void SendEnduranceUpdate();
@@ -1293,7 +1294,7 @@ public:
 	void SendHPUpdateMarquee();
 
 	void CheckRegionTypeChanges();
-	
+
 	 WaterRegionType GetLastRegion() { return last_region_type; }
 
 	int32 CalcATK();
@@ -1635,9 +1636,9 @@ private:
 	bool InterrogateInventory_error(int16 head, int16 index, const EQEmu::ItemInstance* inst, const EQEmu::ItemInstance* parent, int depth);
 
 	int client_max_level;
-	
+
 #ifdef BOTS
-	
+
 public:
 	enum BotOwnerOption : size_t {
 		booDeathMarquee,
@@ -1654,7 +1655,7 @@ public:
 
 	bool GetBotOption(BotOwnerOption boo) const;
 	void SetBotOption(BotOwnerOption boo, bool flag = true);
-	
+
 	bool GetBotPulling() { return m_bot_pulling; }
 	void SetBotPulling(bool flag = true) { m_bot_pulling = flag; }
 

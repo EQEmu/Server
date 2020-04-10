@@ -159,7 +159,7 @@ public:
 	uint16 GetInstanceID(const char* zone, uint32 charid, int16 version);
 	uint16 GetInstanceID(uint32 zone, uint32 charid, int16 version);
 	uint16 GetInstanceVersion(uint16 instance_id);
-	uint32 GetTimeRemainingInstance(uint16 instance_id, bool &is_perma);
+	uint32 GetTimeRemainingInstance(uint16 instance_id, bool is_perma = false);
 	uint32 VersionFromInstanceID(uint16 instance_id);
 	uint32 ZoneIDFromInstanceID(uint16 instance_id);
 
@@ -196,19 +196,19 @@ public:
 
 	void	GetAccountFromID(uint32 id, char* oAccountName, int16* oStatus);
 	void	SetAgreementFlag(uint32 acctid);
-	
+
 	int		GetIPExemption(std::string account_ip);
 
 	int		GetInstanceID(uint32 char_id, uint32 zone_id);
 
 
 	/* Groups */
-	
+
 	char*	GetGroupLeaderForLogin(const char* name,char* leaderbuf);
 	char*	GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* maintank = nullptr, char* assist = nullptr, char* puller = nullptr, char *marknpc = nullptr, char *mentoree = nullptr, int *mentor_percent = nullptr, GroupLeadershipAA_Struct* GLAA = nullptr);
-	
+
 	uint32	GetGroupID(const char* name);
-	
+
 	void	ClearGroup(uint32 gid = 0);
 	void	ClearGroupLeader(uint32 gid = 0);
 	void	SetGroupID(const char* name, uint32 id, uint32 charid, uint32 ismerc = false);
