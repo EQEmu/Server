@@ -585,7 +585,7 @@ void Database::PurgeExpiredInstances()
 			FROM
 				instance_list
 			where
-			(start_time + duration) <= (UNIX_TIMESTAMP() + 86400)
+			(start_time + duration) <= (UNIX_TIMESTAMP() - 86400)
 			and never_expires = 0
 		);
 
