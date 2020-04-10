@@ -825,7 +825,7 @@ void Client::CompleteConnect()
 
 	if (zone && zone->GetInstanceID() > 0) {
 
-		uint32 remaining_time_seconds = zone->GetInstanceTimeRemaining();
+		uint32 remaining_time_seconds = database.GetTimeRemainingInstance(zone->GetInstanceID());
 		uint32 day                    = (remaining_time_seconds / 86400);
 		uint32 hour                   = (remaining_time_seconds / 3600) % 24;
 		uint32 minute                 = (remaining_time_seconds / 60) % 60;

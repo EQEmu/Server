@@ -1018,10 +1018,6 @@ bool Zone::Init(bool iStaticZone) {
 	petition_list.ClearPetitions();
 	petition_list.ReadDatabase();
 
-	if (zone->GetInstanceID() > 0) {
-		zone->SetInstanceTimeRemaining(database.GetTimeRemainingInstance(zone->GetInstanceID()));
-	}
-
 	LogInfo("Loading timezone data");
 	zone->zone_time.setEQTimeZone(database.GetZoneTZ(zoneid, GetInstanceVersion()));
 
