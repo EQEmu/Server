@@ -9315,7 +9315,7 @@ void Client::SendToGuildHall()
 			return;
 		}
 
-		if (!database.CreateInstance(instance_id, zone_id, 0, expiration_time)) {
+		if (!database.CreateInstance(instance_id, zone_id, 1, expiration_time)) {
 			Message(Chat::Red, "Server was unable to create a new instance.");
 			return;
 		}
