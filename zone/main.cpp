@@ -395,7 +395,10 @@ int main(int argc, char** argv) {
 		LogInfo("Initialized dynamic dictionary entries");
 	}
 
-	content_service.SetCurrentExpansion(RuleI(Expansion, CurrentExpansion));
+	int current_expansion = RuleI(Expansion, CurrentExpansion);
+	if (current_expansion >= Expansion::Classic && current_expansion <= Expansion::MaxId) {
+		content_service.SetCurrentExpansion(current_expansion);
+	}
 
 	LogInfo(
 		"Current expansion is [{}] ({})",
