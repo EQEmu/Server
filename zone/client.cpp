@@ -1918,7 +1918,7 @@ void Client::CheckManaEndUpdate() {
 			else if (group) {
 				group->SendEndurancePacketFrom(this);
 			}
-			
+
 			auto endurance_packet = new EQApplicationPacket(OP_EnduranceUpdate, sizeof(EnduranceUpdate_Struct));
 			EnduranceUpdate_Struct* endurance_update = (EnduranceUpdate_Struct*)endurance_packet->pBuffer;
 			endurance_update->cur_end = GetEndurance();
@@ -8756,7 +8756,7 @@ void Client::CheckRegionTypeChanges()
 	// still same region, do nothing
 	if (last_region_type == new_region)
 		return;
-	
+
 	// If we got out of water clear any water aggro for water only npcs
 	if (last_region_type == RegionTypeWater) {
 		entity_list.ClearWaterAggro(this);
@@ -9203,7 +9203,7 @@ void Client::SetSecondaryWeaponOrnamentation(uint32 model_id)
 		secondary_item->SetOrnamentationIDFile(model_id);
 		SendItemPacket(EQEmu::invslot::slotSecondary, secondary_item, ItemPacketTrade);
 		WearChange(EQEmu::textures::weaponSecondary, static_cast<uint16>(model_id), 0);
-		
+
 		Message(Chat::Yellow, "Your secondary weapon appearance has been modified");
 	}
 }
@@ -9292,3 +9292,41 @@ void Client::SetBotOption(BotOwnerOption boo, bool flag) {
 }
 
 #endif
+
+void Client::SendToGuildHall()
+{
+	std::string zone_short_name = "guildhall";
+	uint32      zone_id         = database.GetZoneID(zone_short_name.c_str());
+	if (zone_id == 0) {
+		return;
+	}
+
+	uint32      expiration_time         = (RuleI(Instances, GuildHallExpirationDays) * 86400);
+	uint16      instance_id             = 0;
+	std::string guild_hall_instance_key = fmt::format("guild-hall-instance-{}", GuildID());
+	std::string instance_data           = DataBucket::GetData(guild_hall_instance_key);
+	if (!instance_data.empty() && std::stoi(instance_data) > 0) {
+		instance_id = std::stoi(instance_data);
+	}
+
+	if (instance_id <= 0) {
+		if (!database.GetUnusedInstanceID(instance_id)) {
+			Message(Chat::Red, "Server was unable to find a free instance id.");
+			return;
+		}
+
+		if (!database.CreateInstance(instance_id, zone_id, 1, expiration_time)) {
+			Message(Chat::Red, "Server was unable to create a new instance.");
+			return;
+		}
+
+		DataBucket::SetData(
+			guild_hall_instance_key,
+			std::to_string(instance_id),
+			std::to_string(expiration_time)
+		);
+	}
+
+	AssignToInstance(instance_id);
+	MovePC(345, instance_id, -1.00, -1.00, 3.34, 0, 1);
+}

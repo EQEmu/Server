@@ -39,6 +39,7 @@ public:
 	void Disconnect();
 	bool IsLD();
 	void WorldKick();
+	void SendToGuildHall();
 	bool GetAnon();
 	void Duck();
 	void Stand();
