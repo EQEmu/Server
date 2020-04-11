@@ -20,7 +20,7 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
+ * This repository was automatically generated on Apr11, 2020 and is NOT
  * to be modified directly. Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
@@ -41,7 +41,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("entry");
+		return std::string("listid");
 	}
 
 	static std::vector<std::string> Columns()
@@ -111,7 +111,7 @@ public:
 	)
 	{
 		for (auto &goallists : goallistss) {
-			if (goallists.entry == goallists_id) {
+			if (goallists.listid == goallists_id) {
 				return goallists;
 			}
 		}
@@ -168,7 +168,8 @@ public:
 
 		auto columns = Columns();
 
-
+		update_values.push_back(columns[0] + " = " + std::to_string(goallists_entry.listid));
+		update_values.push_back(columns[1] + " = " + std::to_string(goallists_entry.entry));
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -176,7 +177,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				goallists_entry.entry
+				goallists_entry.listid
 			)
 		);
 
@@ -189,7 +190,8 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
-
+		insert_values.push_back(std::to_string(goallists_entry.listid));
+		insert_values.push_back(std::to_string(goallists_entry.entry));
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -200,7 +202,7 @@ public:
 		);
 
 		if (results.Success()) {
-			goallists_entry.id = results.LastInsertedID();
+			goallists_entry.listid = results.LastInsertedID();
 			return goallists_entry;
 		}
 
@@ -218,7 +220,8 @@ public:
 		for (auto &goallists_entry: goallists_entries) {
 			std::vector<std::string> insert_values;
 
-
+			insert_values.push_back(std::to_string(goallists_entry.listid));
+			insert_values.push_back(std::to_string(goallists_entry.entry));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}

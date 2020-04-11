@@ -30,7 +30,8 @@ Copyright (C) 2001-2008 EQEMu Development Team (http://eqemulator.net)
 #include "../common/rulesys.h"
 #include "../common/string_util.h"
 #include "../common/say_link.h"
-
+#include "zonedb.h"
+#include "../common/repositories/goallists_repository.h"
 #include "client.h"
 #include "entity.h"
 #include "mob.h"
@@ -972,7 +973,7 @@ int TaskManager::GetTaskMinLevel(int TaskID)
 	{
 		return Tasks[TaskID]->MinLevel;
 	}
-		
+
 	return -1;
 }
 
@@ -3370,42 +3371,44 @@ bool TaskGoalListManager::LoadLists()
 
 	TaskGoalLists.reserve(NumberOfLists);
 
-	int listIndex = 0;
+	int list_index = 0;
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		int listID = atoi(row[0]);
+		int listID   = atoi(row[0]);
 		int listSize = atoi(row[1]);
+
 		TaskGoalLists.push_back({listID, 0, 0});
 
-		TaskGoalLists[listIndex].GoalItemEntries.reserve(listSize);
+		TaskGoalLists[list_index].GoalItemEntries.reserve(listSize);
 
-		listIndex++;
+		list_index++;
 	}
 
-	for (int listIndex = 0; listIndex < NumberOfLists; listIndex++) {
+	auto goal_lists = GoallistsRepository::GetWhere("TRUE ORDER BY listid, entry ASC");
 
-		int listID = TaskGoalLists[listIndex].ListID;
-		auto size = TaskGoalLists[listIndex].GoalItemEntries.capacity(); // this was only done for manual memory management, shouldn't need to do this
-		query = StringFormat("SELECT `entry` from `goallists` "
-				     "WHERE `listid` = %i "
-				     "ORDER BY `entry` ASC LIMIT %i",
-				     listID, size);
-		results = content_db.QueryDatabase(query);
-		if (!results.Success()) {
-			continue;
-		}
+	for (list_index = 0; list_index < NumberOfLists; list_index++) {
 
-		for (auto row = results.begin(); row != results.end(); ++row) {
+		int  list_id = TaskGoalLists[list_index].ListID;
 
-			int entry = atoi(row[0]);
+		for (auto &entry: goal_lists) {
+			if (entry.listid == list_id) {
+				if (entry.entry < TaskGoalLists[list_index].Min) {
+					TaskGoalLists[list_index].Min = entry.entry;
+				}
 
-			if (entry < TaskGoalLists[listIndex].Min)
-				TaskGoalLists[listIndex].Min = entry;
+				if (entry.entry > TaskGoalLists[list_index].Max) {
+					TaskGoalLists[list_index].Max = entry.entry;
+				}
 
-			if (entry > TaskGoalLists[listIndex].Max)
-				TaskGoalLists[listIndex].Max = entry;
+				TaskGoalLists[list_index].GoalItemEntries.push_back(entry.entry);
 
-			TaskGoalLists[listIndex].GoalItemEntries.push_back(entry);
+				LogTasksDetail(
+					"Goal list index [{}] loading list [{}] entry [{}]",
+					list_index,
+					list_id,
+					entry.entry
+				);
+			}
 		}
 	}
 
