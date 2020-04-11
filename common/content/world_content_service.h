@@ -25,6 +25,8 @@
 #include <vector>
 
 namespace Expansion {
+	static const int EXPANSION_ALL = -1;
+
 	enum ExpansionNumber {
 		Classic = 0,
 		TheRuinsOfKunark,
@@ -95,6 +97,7 @@ public:
 
 	WorldContentService();
 
+	std::string GetCurrentExpansionName();
 	int GetCurrentExpansion() const;
 	void SetCurrentExpansion(int current_expansion);
 

@@ -290,24 +290,26 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	/**
 	 * Expansion check
 	 */
-	auto zones = ZoneRepository::GetWhere(
-		fmt::format(
-			"expansion <= {} AND short_name = '{}'",
+	if (content_service.GetCurrentExpansion() >= Expansion::Classic && !GetGM()) {
+		auto zones = ZoneRepository::GetWhere(
+			fmt::format(
+				"expansion <= {} AND short_name = '{}'",
+				(content_service.GetCurrentExpansion() + 1),
+				target_zone_name
+			)
+		);
+
+		LogInfo(
+			"Checking zone request [{}] for expansion [{}] ({}) success [{}]",
+			target_zone_name,
 			(content_service.GetCurrentExpansion() + 1),
-			target_zone_name
-		)
-	);
+			content_service.GetCurrentExpansionName(),
+			!zones.empty() ? "true" : "false"
+		);
 
-	LogInfo(
-		"Checking zone request [{}] for expansion [{}] ({}) success [{}]",
-		target_zone_name,
-		(content_service.GetCurrentExpansion() + 1),
-		Expansion::ExpansionName[content_service.GetCurrentExpansion()],
-		!zones.empty() ? "true" : "false"
-	);
-
-	if (zones.empty()) {
-		myerror = ZONE_ERROR_NOEXPANSION;
+		if (zones.empty()) {
+			myerror = ZONE_ERROR_NOEXPANSION;
+		}
 	}
 
 	if(myerror == 1) {

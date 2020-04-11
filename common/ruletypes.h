@@ -776,7 +776,7 @@ RULE_BOOL(HotReload, QuestsResetTimersWithReload, true, "When a hot reload is tr
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Expansion)
-RULE_INT(Expansion, CurrentExpansion, 0, "The current expansion enabled for the server [0 = Classic, 1 = Kunark etc.]")
+RULE_INT(Expansion, CurrentExpansion, -1, "The current expansion enabled for the server [-1 = ALL, 0 = Classic, 1 = Kunark etc.]")
 RULE_CATEGORY_END()
 
 #undef RULE_CATEGORY

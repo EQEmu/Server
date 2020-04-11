@@ -22,7 +22,7 @@
 
 WorldContentService::WorldContentService()
 {
-	SetCurrentExpansion(0);
+	SetCurrentExpansion(Expansion::EXPANSION_ALL);
 }
 
 int WorldContentService::GetCurrentExpansion() const
@@ -43,4 +43,17 @@ const std::vector<std::string> &WorldContentService::GetContentFlags() const
 void WorldContentService::SetContentFlags(std::vector<std::string> content_flags)
 {
 	WorldContentService::content_flags = content_flags;
+}
+
+std::string WorldContentService::GetCurrentExpansionName()
+{
+	if (content_service.GetCurrentExpansion() == Expansion::EXPANSION_ALL) {
+		return "All Expansions";
+	}
+
+	if (current_expansion >= Expansion::Classic && current_expansion <= Expansion::MaxId) {
+		return Expansion::ExpansionName[content_service.GetCurrentExpansion()];
+	}
+
+	return "Unknown Expansion";
 }
