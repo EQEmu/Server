@@ -7,6 +7,7 @@
 #include <list>
 #include <map>
 
+#include "../common/content/world_content_service.h"
 #include "../common/timer.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/classes.h"
@@ -1457,6 +1458,226 @@ void lua_update_zone_header(std::string type, std::string value) {
 	quest_manager.UpdateZoneHeader(type, value);
 }
 
+/**
+ * Expansions
+ */
+
+bool lua_is_classic_enabled() {
+	return content_service.IsClassicEnabled();
+}
+
+bool lua_is_the_ruins_of_kunark_enabled() {
+	return content_service.IsTheRuinsOfKunarkEnabled();
+}
+
+bool lua_is_the_scars_of_velious_enabled() {
+	return content_service.IsTheScarsOfVeliousEnabled();
+}
+
+bool lua_is_the_shadows_of_luclin_enabled() {
+	return content_service.IsTheShadowsOfLuclinEnabled();
+}
+
+bool lua_is_the_planes_of_power_enabled() {
+	return content_service.IsThePlanesOfPowerEnabled();
+}
+
+bool lua_is_the_legacy_of_ykesha_enabled() {
+	return content_service.IsTheLegacyOfYkeshaEnabled();
+}
+
+bool lua_is_lost_dungeons_of_norrath_enabled() {
+	return content_service.IsLostDungeonsOfNorrathEnabled();
+}
+
+bool lua_is_gates_of_discord_enabled() {
+	return content_service.IsGatesOfDiscordEnabled();
+}
+
+bool lua_is_omens_of_war_enabled() {
+	return content_service.IsOmensOfWarEnabled();
+}
+
+bool lua_is_dragons_of_norrath_enabled() {
+	return content_service.IsDragonsOfNorrathEnabled();
+}
+
+bool lua_is_depths_of_darkhollow_enabled() {
+	return content_service.IsDepthsOfDarkhollowEnabled();
+}
+
+bool lua_is_prophecy_of_ro_enabled() {
+	return content_service.IsProphecyOfRoEnabled();
+}
+
+bool lua_is_the_serpents_spine_enabled() {
+	return content_service.IsTheSerpentsSpineEnabled();
+}
+
+bool lua_is_the_buried_sea_enabled() {
+	return content_service.IsTheBuriedSeaEnabled();
+}
+
+bool lua_is_secrets_of_faydwer_enabled() {
+	return content_service.IsSecretsOfFaydwerEnabled();
+}
+
+bool lua_is_seeds_of_destruction_enabled() {
+	return content_service.IsSeedsOfDestructionEnabled();
+}
+
+bool lua_is_underfoot_enabled() {
+	return content_service.IsUnderfootEnabled();
+}
+
+bool lua_is_house_of_thule_enabled() {
+	return content_service.IsHouseOfThuleEnabled();
+}
+
+bool lua_is_veil_of_alaris_enabled() {
+	return content_service.IsVeilOfAlarisEnabled();
+}
+
+bool lua_is_rain_of_fear_enabled() {
+	return content_service.IsRainOfFearEnabled();
+}
+
+bool lua_is_call_of_the_forsaken_enabled() {
+	return content_service.IsCallOfTheForsakenEnabled();
+}
+
+bool lua_is_the_darkend_sea_enabled() {
+	return content_service.IsTheDarkendSeaEnabled();
+}
+
+bool lua_is_the_broken_mirror_enabled() {
+	return content_service.IsTheBrokenMirrorEnabled();
+}
+
+bool lua_is_empires_of_kunark_enabled() {
+	return content_service.IsEmpiresOfKunarkEnabled();
+}
+
+bool lua_is_ring_of_scale_enabled() {
+	return content_service.IsRingOfScaleEnabled();
+}
+
+bool lua_is_the_burning_lands_enabled() {
+	return content_service.IsTheBurningLandsEnabled();
+}
+
+bool lua_is_torment_of_velious_enabled() {
+	return content_service.IsTormentOfVeliousEnabled();
+}
+
+bool lua_is_current_expansion_classic() {
+	return content_service.IsCurrentExpansionClassic();
+}
+
+bool lua_is_current_expansion_the_ruins_of_kunark() {
+	return content_service.IsCurrentExpansionTheRuinsOfKunark();
+}
+
+bool lua_is_current_expansion_the_scars_of_velious() {
+	return content_service.IsCurrentExpansionTheScarsOfVelious();
+}
+
+bool lua_is_current_expansion_the_shadows_of_luclin() {
+	return content_service.IsCurrentExpansionTheShadowsOfLuclin();
+}
+
+bool lua_is_current_expansion_the_planes_of_power() {
+	return content_service.IsCurrentExpansionThePlanesOfPower();
+}
+
+bool lua_is_current_expansion_the_legacy_of_ykesha() {
+	return content_service.IsCurrentExpansionTheLegacyOfYkesha();
+}
+
+bool lua_is_current_expansion_lost_dungeons_of_norrath() {
+	return content_service.IsCurrentExpansionLostDungeonsOfNorrath();
+}
+
+bool lua_is_current_expansion_gates_of_discord() {
+	return content_service.IsCurrentExpansionGatesOfDiscord();
+}
+
+bool lua_is_current_expansion_omens_of_war() {
+	return content_service.IsCurrentExpansionOmensOfWar();
+}
+
+bool lua_is_current_expansion_dragons_of_norrath() {
+	return content_service.IsCurrentExpansionDragonsOfNorrath();
+}
+
+bool lua_is_current_expansion_depths_of_darkhollow() {
+	return content_service.IsCurrentExpansionDepthsOfDarkhollow();
+}
+
+bool lua_is_current_expansion_prophecy_of_ro() {
+	return content_service.IsCurrentExpansionProphecyOfRo();
+}
+
+bool lua_is_current_expansion_the_serpents_spine() {
+	return content_service.IsCurrentExpansionTheSerpentsSpine();
+}
+
+bool lua_is_current_expansion_the_buried_sea() {
+	return content_service.IsCurrentExpansionTheBuriedSea();
+}
+
+bool lua_is_current_expansion_secrets_of_faydwer() {
+	return content_service.IsCurrentExpansionSecretsOfFaydwer();
+}
+
+bool lua_is_current_expansion_seeds_of_destruction() {
+	return content_service.IsCurrentExpansionSeedsOfDestruction();
+}
+
+bool lua_is_current_expansion_underfoot() {
+	return content_service.IsCurrentExpansionUnderfoot();
+}
+
+bool lua_is_current_expansion_house_of_thule() {
+	return content_service.IsCurrentExpansionHouseOfThule();
+}
+
+bool lua_is_current_expansion_veil_of_alaris() {
+	return content_service.IsCurrentExpansionVeilOfAlaris();
+}
+
+bool lua_is_current_expansion_rain_of_fear() {
+	return content_service.IsCurrentExpansionRainOfFear();
+}
+
+bool lua_is_current_expansion_call_of_the_forsaken() {
+	return content_service.IsCurrentExpansionCallOfTheForsaken();
+}
+
+bool lua_is_current_expansion_the_darkend_sea() {
+	return content_service.IsCurrentExpansionTheDarkendSea();
+}
+
+bool lua_is_current_expansion_the_broken_mirror() {
+	return content_service.IsCurrentExpansionTheBrokenMirror();
+}
+
+bool lua_is_current_expansion_empires_of_kunark() {
+	return content_service.IsCurrentExpansionEmpiresOfKunark();
+}
+
+bool lua_is_current_expansion_ring_of_scale() {
+	return content_service.IsCurrentExpansionRingOfScale();
+}
+
+bool lua_is_current_expansion_the_burning_lands() {
+	return content_service.IsCurrentExpansionTheBurningLands();
+}
+
+bool lua_is_current_expansion_torment_of_velious() {
+	return content_service.IsCurrentExpansionTormentOfVelious();
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -1866,7 +2087,65 @@ luabind::scope lua_register_general() {
 		luabind::def("log", (void(*)(int, std::string))&lua_log),
 		luabind::def("debug", (void(*)(std::string))&lua_debug),
 		luabind::def("debug", (void(*)(std::string, int))&lua_debug),
-		luabind::def("log_combat", (void(*)(std::string))&lua_log_combat)
+		luabind::def("log_combat", (void(*)(std::string))&lua_log_combat),
+
+		/**
+		 * Expansions
+		 */
+		luabind::def("is_classic_enabled", &lua_is_classic_enabled),
+		luabind::def("is_the_ruins_of_kunark_enabled", &lua_is_the_ruins_of_kunark_enabled),
+		luabind::def("is_the_scars_of_velious_enabled", &lua_is_the_scars_of_velious_enabled),
+		luabind::def("is_the_shadows_of_luclin_enabled", &lua_is_the_shadows_of_luclin_enabled),
+		luabind::def("is_the_planes_of_power_enabled", &lua_is_the_planes_of_power_enabled),
+		luabind::def("is_the_legacy_of_ykesha_enabled", &lua_is_the_legacy_of_ykesha_enabled),
+		luabind::def("is_lost_dungeons_of_norrath_enabled", &lua_is_lost_dungeons_of_norrath_enabled),
+		luabind::def("is_gates_of_discord_enabled", &lua_is_gates_of_discord_enabled),
+		luabind::def("is_omens_of_war_enabled", &lua_is_omens_of_war_enabled),
+		luabind::def("is_dragons_of_norrath_enabled", &lua_is_dragons_of_norrath_enabled),
+		luabind::def("is_depths_of_darkhollow_enabled", &lua_is_depths_of_darkhollow_enabled),
+		luabind::def("is_prophecy_of_ro_enabled", &lua_is_prophecy_of_ro_enabled),
+		luabind::def("is_the_serpents_spine_enabled", &lua_is_the_serpents_spine_enabled),
+		luabind::def("is_the_buried_sea_enabled", &lua_is_the_buried_sea_enabled),
+		luabind::def("is_secrets_of_faydwer_enabled", &lua_is_secrets_of_faydwer_enabled),
+		luabind::def("is_seeds_of_destruction_enabled", &lua_is_seeds_of_destruction_enabled),
+		luabind::def("is_underfoot_enabled", &lua_is_underfoot_enabled),
+		luabind::def("is_house_of_thule_enabled", &lua_is_house_of_thule_enabled),
+		luabind::def("is_veil_of_alaris_enabled", &lua_is_veil_of_alaris_enabled),
+		luabind::def("is_rain_of_fear_enabled", &lua_is_rain_of_fear_enabled),
+		luabind::def("is_call_of_the_forsaken_enabled", &lua_is_call_of_the_forsaken_enabled),
+		luabind::def("is_the_darkend_sea_enabled", &lua_is_the_darkend_sea_enabled),
+		luabind::def("is_the_broken_mirror_enabled", &lua_is_the_broken_mirror_enabled),
+		luabind::def("is_empires_of_kunark_enabled", &lua_is_empires_of_kunark_enabled),
+		luabind::def("is_ring_of_scale_enabled", &lua_is_ring_of_scale_enabled),
+		luabind::def("is_the_burning_lands_enabled", &lua_is_the_burning_lands_enabled),
+		luabind::def("is_torment_of_velious_enabled", &lua_is_torment_of_velious_enabled),
+		luabind::def("is_current_expansion_classic", &lua_is_current_expansion_classic),
+		luabind::def("is_current_expansion_the_ruins_of_kunark", &lua_is_current_expansion_the_ruins_of_kunark),
+		luabind::def("is_current_expansion_the_scars_of_velious", &lua_is_current_expansion_the_scars_of_velious),
+		luabind::def("is_current_expansion_the_shadows_of_luclin", &lua_is_current_expansion_the_shadows_of_luclin),
+		luabind::def("is_current_expansion_the_planes_of_power", &lua_is_current_expansion_the_planes_of_power),
+		luabind::def("is_current_expansion_the_legacy_of_ykesha", &lua_is_current_expansion_the_legacy_of_ykesha),
+		luabind::def("is_current_expansion_lost_dungeons_of_norrath", &lua_is_current_expansion_lost_dungeons_of_norrath),
+		luabind::def("is_current_expansion_gates_of_discord", &lua_is_current_expansion_gates_of_discord),
+		luabind::def("is_current_expansion_omens_of_war", &lua_is_current_expansion_omens_of_war),
+		luabind::def("is_current_expansion_dragons_of_norrath", &lua_is_current_expansion_dragons_of_norrath),
+		luabind::def("is_current_expansion_depths_of_darkhollow", &lua_is_current_expansion_depths_of_darkhollow),
+		luabind::def("is_current_expansion_prophecy_of_ro", &lua_is_current_expansion_prophecy_of_ro),
+		luabind::def("is_current_expansion_the_serpents_spine", &lua_is_current_expansion_the_serpents_spine),
+		luabind::def("is_current_expansion_the_buried_sea", &lua_is_current_expansion_the_buried_sea),
+		luabind::def("is_current_expansion_secrets_of_faydwer", &lua_is_current_expansion_secrets_of_faydwer),
+		luabind::def("is_current_expansion_seeds_of_destruction", &lua_is_current_expansion_seeds_of_destruction),
+		luabind::def("is_current_expansion_underfoot", &lua_is_current_expansion_underfoot),
+		luabind::def("is_current_expansion_house_of_thule", &lua_is_current_expansion_house_of_thule),
+		luabind::def("is_current_expansion_veil_of_alaris", &lua_is_current_expansion_veil_of_alaris),
+		luabind::def("is_current_expansion_rain_of_fear", &lua_is_current_expansion_rain_of_fear),
+		luabind::def("is_current_expansion_call_of_the_forsaken", &lua_is_current_expansion_call_of_the_forsaken),
+		luabind::def("is_current_expansion_the_darkend_sea", &lua_is_current_expansion_the_darkend_sea),
+		luabind::def("is_current_expansion_the_broken_mirror", &lua_is_current_expansion_the_broken_mirror),
+		luabind::def("is_current_expansion_empires_of_kunark", &lua_is_current_expansion_empires_of_kunark),
+		luabind::def("is_current_expansion_ring_of_scale", &lua_is_current_expansion_ring_of_scale),
+		luabind::def("is_current_expansion_the_burning_lands", &lua_is_current_expansion_the_burning_lands),
+		luabind::def("is_current_expansion_torment_of_velious", &lua_is_current_expansion_torment_of_velious)
 	];
 }
 
