@@ -163,10 +163,6 @@ Mob::Mob(
 	size          = in_size;
 	base_size     = size;
 	runspeed      = in_runspeed;
-	// neotokyo: sanity check
-	if (runspeed < 0 || runspeed > 20) {
-		runspeed = 1.25f;
-	}
 
 	// clients -- todo movement this doesn't take into account gm speed we need to fix that.
 	base_runspeed = (int)((float)runspeed * 40.0f);
