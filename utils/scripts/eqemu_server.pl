@@ -59,7 +59,6 @@ if (-e "eqemu_server_skip_maps_update.txt") {
 #::: Check for script self update
 check_xml_to_json_conversion() if $ARGV[0] eq "convert_xml";
 do_self_update_check_routine() if !$skip_self_update_check;
-get_windows_wget();
 get_perl_version();
 if (-e "eqemu_config.json") {
     read_eqemu_config_json();
@@ -456,11 +455,11 @@ sub do_installer_routines {
 
     #::: Download assets
     if ($OS eq "Windows") {
-        # fetch_latest_windows_binaries();
-        fetch_latest_windows_appveyor();
+        fetch_latest_windows_binaries();
+        # fetch_latest_windows_appveyor();
         get_remote_file($install_repository_request_url . "lua51.dll", "lua51.dll", 1);
-        get_remote_file($install_repository_request_url . "zlib1.dll", "zlib1.dll", 1);
-		get_remote_file($install_repository_request_url . "zlib1.pdb", "zlib1.pdb", 1);
+        #get_remote_file($install_repository_request_url . "zlib1.dll", "zlib1.dll", 1); # No longer required
+		#get_remote_file($install_repository_request_url . "zlib1.pdb", "zlib1.pdb", 1);
         get_remote_file($install_repository_request_url . "libmysql.dll", "libmysql.dll", 1);
     }
 
@@ -636,13 +635,6 @@ sub get_perl_version {
         no warnings 'uninitialized';
     }
     no warnings;
-}
-
-sub get_windows_wget {
-    if (!-e "wget.exe" && $OS eq "Windows") {
-        eval "use LWP::Simple qw(getstore);";
-        getstore("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/wget.exe", "wget.exe");
-    }
 }
 
 sub do_self_update_check_routine {
@@ -1258,9 +1250,14 @@ sub get_remote_file {
     }
 
     #::: wget -O db_update/db_update_manifest.txt https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/db_update_manifest.txt
-    $wget = `wget -N --no-cache --cache=no --no-check-certificate --quiet -O $destination_file $request_url`;
+    if ($OS eq "Linux") {
+        $wget = `wget -N --no-cache --cache=no --no-check-certificate --quiet -O $destination_file $request_url`;
+    }
+    elsif ($OS eq "Windows") {
+        $wget = `powershell -Command "Invoke-WebRequest $request_url -OutFile $destination_file"`
+    }
     print "[Download] Saved: (" . $destination_file . ") from " . $request_url . "\n" if !$silent_download;
-    if ($wget =~ /unable to resolve/i) {
+    if (($OS eq "Linux" && $wget =~ /unable to resolve/i) || ($OS eq "Windows" && $wget =~ /404/i || $wget =~ /could not be resolved/i) ) {
         print "Error, no connection or failed request...\n\n";
         #die;
     }
@@ -1442,11 +1439,11 @@ sub copy_file {
 
 sub fetch_latest_windows_appveyor {
     print "[Update] Fetching Latest Windows Binaries (unstable) from Appveyor... \n";
-    get_remote_file("https://ci.appveyor.com/api/projects/KimLS/server/artifacts/eqemu-x86-no-bots.zip", "updates_staged/eqemu-x86-no-bots.zip", 1);
+    get_remote_file("https://ci.appveyor.com/api/projects/KimLS/server-87crp/artifacts/build_x64.zip", "updates_staged/build_x64.zip", 1);
 
     print "[Update] Fetched Latest Windows Binaries (unstable) from Appveyor... \n";
     print "[Update] Extracting... --- \n";
-    unzip('updates_staged/eqemu-x86-no-bots.zip', 'updates_staged/binaries/');
+    unzip('updates_staged/build_x64.zip', 'updates_staged/binaries/');
     my @files;
     my $start_dir = "updates_staged/binaries";
     find(
@@ -1705,8 +1702,8 @@ sub check_windows_firewall_rules {
 sub fetch_server_dlls {
     print "[Download] Fetching lua51.dll, zlib1.dll, zlib1.pdb, libmysql.dll...\n";
     get_remote_file($install_repository_request_url . "lua51.dll", "lua51.dll", 1);
-    get_remote_file($install_repository_request_url . "zlib1.dll", "zlib1.dll", 1);
-	get_remote_file($install_repository_request_url . "zlib1.pdb", "zlib1.pdb", 1);
+    #get_remote_file($install_repository_request_url . "zlib1.dll", "zlib1.dll", 1);
+	#get_remote_file($install_repository_request_url . "zlib1.pdb", "zlib1.pdb", 1);
     get_remote_file($install_repository_request_url . "libmysql.dll", "libmysql.dll", 1);
 }
 
