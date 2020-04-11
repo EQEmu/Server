@@ -248,6 +248,7 @@ namespace DatabaseSchema {
 		return {
 			"chatchannels",
 			"command_settings",
+			"content_flags",
 			"db_str",
 			"eqtime",
 			"launcher",

@@ -53,6 +53,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #ifdef BOTS
 #include "bot_command.h"
 #endif
+#include "zonedb.h"
 #include "zone_config.h"
 #include "titles.h"
 #include "guild_mgr.h"
@@ -68,6 +69,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/net/eqstream.h"
 #include "../common/net/servertalk_server.h"
 #include "../common/content/world_content_service.h"
+#include "../common/repositories/content_flags_repository.h"
 
 #include <iostream>
 #include <string>
@@ -395,16 +397,22 @@ int main(int argc, char** argv) {
 		LogInfo("Initialized dynamic dictionary entries");
 	}
 
-	int current_expansion = RuleI(Expansion, CurrentExpansion);
-	if (current_expansion >= Expansion::Classic && current_expansion <= Expansion::MaxId) {
-		content_service.SetCurrentExpansion(current_expansion);
+	content_service.SetExpansionContext();
+
+	std::vector<std::string> set_content_flags;
+	auto                     content_flags = ContentFlagsRepository::GetWhere("enabled = 1");
+	set_content_flags.reserve(content_flags.size());
+
+	for (auto &flags: content_flags) {
+		set_content_flags.push_back(flags.flag_name);
+
+		LogInfo(
+			"Enabling content-flag [{}]",
+			flags.flag_name
+		);
 	}
 
-	LogInfo(
-		"Current expansion is [{}] ({})",
-		content_service.GetCurrentExpansion(),
-		content_service.GetCurrentExpansionName()
-	);
+	content_service.SetContentFlags(set_content_flags);
 
 #ifdef BOTS
 	LogInfo("Loading bot commands");

@@ -18,6 +18,8 @@
  *
  */
 
+#define PLATFORM_WORLD 1
+
 #include "../common/global_define.h"
 
 #include <iostream>
@@ -221,7 +223,7 @@ void RegisterLoginservers()
 
 /**
  * World process entrypoint
- * 
+ *
  * @param argc
  * @param argv
  * @return

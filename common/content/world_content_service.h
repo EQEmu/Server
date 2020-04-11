@@ -163,6 +163,7 @@ private:
 public:
 	const std::vector<std::string> &GetContentFlags() const;
 	void SetContentFlags(std::vector<std::string> content_flags);
+	void SetExpansionContext();
 };
 
 extern WorldContentService content_service;

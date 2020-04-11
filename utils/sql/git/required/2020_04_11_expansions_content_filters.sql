@@ -80,3 +80,6 @@ ALTER TABLE `zone_points` ADD `content_flags` varchar(100) NULL;
 
 -- pok books
 update doors set min_expansion = 4 where name like '%POKTELE%';
+
+-- content flags
+CREATE TABLE `content_flags` (`id` int AUTO_INCREMENT,`flag_name` varchar(75),`enabled` tinyint,`notes` text, PRIMARY KEY (id));

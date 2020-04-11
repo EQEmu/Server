@@ -19,6 +19,10 @@
  */
 
 #include "world_content_service.h"
+#include "../database.h"
+#include "../rulesys.h"
+#include "../eqemu_logsys.h"
+
 
 WorldContentService::WorldContentService()
 {
@@ -28,6 +32,20 @@ WorldContentService::WorldContentService()
 int WorldContentService::GetCurrentExpansion() const
 {
 	return current_expansion;
+}
+
+void WorldContentService::SetExpansionContext()
+{
+	int expansion = RuleI(Expansion, CurrentExpansion);
+	if (expansion >= Expansion::Classic && expansion <= Expansion::MaxId) {
+		content_service.SetCurrentExpansion(expansion);
+	}
+
+	LogInfo(
+		"Current expansion is [{}] ({})",
+		GetCurrentExpansion(),
+		GetCurrentExpansionName()
+	);
 }
 
 void WorldContentService::SetCurrentExpansion(int current_expansion)

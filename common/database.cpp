@@ -339,7 +339,7 @@ bool Database::ReserveName(uint32 account_id, char* name) {
 	query = StringFormat("INSERT INTO `character_data` SET `account_id` = %i, `name` = '%s'", account_id, name);
 	results = QueryDatabase(query);
 	if (!results.Success() || results.ErrorMessage() != ""){ return false; }
-	
+
 	// Put character into the default guild if rule is being used.
 	int guild_id = RuleI(Character, DefaultGuild);
 
@@ -353,7 +353,7 @@ bool Database::ReserveName(uint32 account_id, char* name) {
 			}
 		}
 	}
-	
+
 	return true;
 }
 
@@ -512,96 +512,96 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 		"guild_auto_consent,"
 		"RestTimer) "
 		"VALUES ("
-		"%u,"  // id					
-		"%u,"  // account_id			
-		"'%s',"  // `name`				
-		"'%s',"  // last_name			
-		"%u,"  // gender				
-		"%u,"  // race					
-		"%u,"  // class					
-		"%u,"  // `level`				
-		"%u,"  // deity					
-		"%u,"  // birthday				
-		"%u,"  // last_login			
-		"%u,"  // time_played			
-		"%u,"  // pvp_status			
-		"%u,"  // level2				
-		"%u,"  // anon					
-		"%u,"  // gm					
-		"%u,"  // intoxication			
-		"%u,"  // hair_color			
-		"%u,"  // beard_color			
-		"%u,"  // eye_color_1			
-		"%u,"  // eye_color_2			
-		"%u,"  // hair_style			
-		"%u,"  // beard					
-		"%u,"  // ability_time_seconds	
-		"%u,"  // ability_number		
-		"%u,"  // ability_time_minutes	
-		"%u,"  // ability_time_hours	
-		"'%s',"  // title				
-		"'%s',"  // suffix				
-		"%u,"  // exp					
-		"%u,"  // points				
-		"%u,"  // mana					
-		"%u,"  // cur_hp				
-		"%u,"  // str					
-		"%u,"  // sta					
-		"%u,"  // cha					
-		"%u,"  // dex					
-		"%u,"  // `int`					
-		"%u,"  // agi					
-		"%u,"  // wis					
-		"%u,"  // face					
-		"%f,"  // y						
-		"%f,"  // x						
-		"%f,"  // z						
-		"%f,"  // heading				
-		"%u,"  // pvp2					
-		"%u,"  // pvp_type				
-		"%u,"  // autosplit_enabled		
-		"%u,"  // zone_change_count		
-		"%u,"  // drakkin_heritage		
-		"%u,"  // drakkin_tattoo		
-		"%u,"  // drakkin_details		
-		"%i,"  // toxicity				
-		"%i,"  // hunger_level			
-		"%i,"  // thirst_level			
-		"%u,"  // ability_up			
-		"%u,"  // zone_id				
-		"%u,"  // zone_instance			
-		"%u,"  // leadership_exp_on		
-		"%u,"  // ldon_points_guk		
-		"%u,"  // ldon_points_mir		
-		"%u,"  // ldon_points_mmc		
-		"%u,"  // ldon_points_ruj		
-		"%u,"  // ldon_points_tak		
-		"%u,"  // ldon_points_available	
+		"%u,"  // id
+		"%u,"  // account_id
+		"'%s',"  // `name`
+		"'%s',"  // last_name
+		"%u,"  // gender
+		"%u,"  // race
+		"%u,"  // class
+		"%u,"  // `level`
+		"%u,"  // deity
+		"%u,"  // birthday
+		"%u,"  // last_login
+		"%u,"  // time_played
+		"%u,"  // pvp_status
+		"%u,"  // level2
+		"%u,"  // anon
+		"%u,"  // gm
+		"%u,"  // intoxication
+		"%u,"  // hair_color
+		"%u,"  // beard_color
+		"%u,"  // eye_color_1
+		"%u,"  // eye_color_2
+		"%u,"  // hair_style
+		"%u,"  // beard
+		"%u,"  // ability_time_seconds
+		"%u,"  // ability_number
+		"%u,"  // ability_time_minutes
+		"%u,"  // ability_time_hours
+		"'%s',"  // title
+		"'%s',"  // suffix
+		"%u,"  // exp
+		"%u,"  // points
+		"%u,"  // mana
+		"%u,"  // cur_hp
+		"%u,"  // str
+		"%u,"  // sta
+		"%u,"  // cha
+		"%u,"  // dex
+		"%u,"  // `int`
+		"%u,"  // agi
+		"%u,"  // wis
+		"%u,"  // face
+		"%f,"  // y
+		"%f,"  // x
+		"%f,"  // z
+		"%f,"  // heading
+		"%u,"  // pvp2
+		"%u,"  // pvp_type
+		"%u,"  // autosplit_enabled
+		"%u,"  // zone_change_count
+		"%u,"  // drakkin_heritage
+		"%u,"  // drakkin_tattoo
+		"%u,"  // drakkin_details
+		"%i,"  // toxicity
+		"%i,"  // hunger_level
+		"%i,"  // thirst_level
+		"%u,"  // ability_up
+		"%u,"  // zone_id
+		"%u,"  // zone_instance
+		"%u,"  // leadership_exp_on
+		"%u,"  // ldon_points_guk
+		"%u,"  // ldon_points_mir
+		"%u,"  // ldon_points_mmc
+		"%u,"  // ldon_points_ruj
+		"%u,"  // ldon_points_tak
+		"%u,"  // ldon_points_available
 		"%u,"  // tribute_time_remaining
-		"%u,"  // show_helm				
-		"%u,"  // career_tribute_points	
-		"%u,"  // tribute_points		
-		"%u,"  // tribute_active		
-		"%u,"  // endurance				
-		"%u,"  // group_leadership_exp	
-		"%u,"  // raid_leadership_exp	
+		"%u,"  // show_helm
+		"%u,"  // career_tribute_points
+		"%u,"  // tribute_points
+		"%u,"  // tribute_active
+		"%u,"  // endurance
+		"%u,"  // group_leadership_exp
+		"%u,"  // raid_leadership_exp
 		"%u,"  // group_leadership_point
 		"%u,"  // raid_leadership_points
-		"%u,"  // air_remaining			
-		"%u,"  // pvp_kills				
-		"%u,"  // pvp_deaths			
-		"%u,"  // pvp_current_points	
-		"%u,"  // pvp_career_points		
-		"%u,"  // pvp_best_kill_streak	
+		"%u,"  // air_remaining
+		"%u,"  // pvp_kills
+		"%u,"  // pvp_deaths
+		"%u,"  // pvp_current_points
+		"%u,"  // pvp_career_points
+		"%u,"  // pvp_best_kill_streak
 		"%u,"  // pvp_worst_death_streak
 		"%u,"  // pvp_current_kill_strea
-		"%u,"  // aa_points_spent		
-		"%u,"  // aa_exp				
-		"%u,"  // aa_points				
-		"%u,"  // group_auto_consent	
-		"%u,"  // raid_auto_consent		
-		"%u,"  // guild_auto_consent	
-		"%u"  // RestTimer				
+		"%u,"  // aa_points_spent
+		"%u,"  // aa_exp
+		"%u,"  // aa_points
+		"%u,"  // group_auto_consent
+		"%u,"  // raid_auto_consent
+		"%u,"  // guild_auto_consent
+		"%u"  // RestTimer
 		")",
 		character_id,					  // " id,                        "
 		account_id,						  // " account_id,                "
@@ -2178,6 +2178,9 @@ uint32 Database::GetRaidIDByCharID(uint32 character_id) {
  */
 void Database::LoadLogSettings(EQEmuLogSys::LogSettings *log_settings)
 {
+
+	std::cout << "We're hitting this eh " << std::endl;
+
 	std::string query =
 					"SELECT "
 					"log_category_id, "

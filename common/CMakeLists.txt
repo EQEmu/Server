@@ -166,6 +166,7 @@ SET(repositories
 	repositories/base/base_char_create_point_allocations_repository.h
 	repositories/base/base_char_recipe_list_repository.h
 	repositories/base/base_completed_tasks_repository.h
+	repositories/base/base_content_flags_repository.h
 	repositories/base/base_data_buckets_repository.h
 	repositories/base/base_db_str_repository.h
 	repositories/base/base_discovered_items_repository.h
@@ -323,6 +324,7 @@ SET(repositories
 	repositories/char_create_point_allocations_repository.h
 	repositories/char_recipe_list_repository.h
 	repositories/completed_tasks_repository.h
+	repositories/content_flags_repository.h
 	repositories/data_buckets_repository.h
 	repositories/db_str_repository.h
 	repositories/discovered_items_repository.h

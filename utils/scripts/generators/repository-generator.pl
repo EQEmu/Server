@@ -100,6 +100,10 @@ if ($requested_table_to_generate eq "all" || !$requested_table_to_generate) {
     }
 }
 
+if ($requested_table_to_generate ne "all") {
+    @tables = ($requested_table_to_generate);
+}
+
 my $generated_base_repository_files = "";
 my $generated_repository_files      = "";
 
