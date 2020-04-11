@@ -2178,9 +2178,6 @@ uint32 Database::GetRaidIDByCharID(uint32 character_id) {
  */
 void Database::LoadLogSettings(EQEmuLogSys::LogSettings *log_settings)
 {
-
-	std::cout << "We're hitting this eh " << std::endl;
-
 	std::string query =
 					"SELECT "
 					"log_category_id, "
