@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -43,7 +43,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("slot");
+		return std::string("npcid");
 	}
 
 	static std::vector<std::string> Columns()
@@ -117,7 +117,7 @@ public:
 	)
 	{
 		for (auto &merchantlist_temp : merchantlist_temps) {
-			if (merchantlist_temp.slot == merchantlist_temp_id) {
+			if (merchantlist_temp.npcid == merchantlist_temp_id) {
 				return merchantlist_temp;
 			}
 		}
@@ -176,6 +176,8 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(merchantlist_temp_entry.npcid));
+		update_values.push_back(columns[1] + " = " + std::to_string(merchantlist_temp_entry.slot));
 		update_values.push_back(columns[2] + " = " + std::to_string(merchantlist_temp_entry.itemid));
 		update_values.push_back(columns[3] + " = " + std::to_string(merchantlist_temp_entry.charges));
 
@@ -185,7 +187,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				merchantlist_temp_entry.slot
+				merchantlist_temp_entry.npcid
 			)
 		);
 
@@ -198,6 +200,8 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(merchantlist_temp_entry.npcid));
+		insert_values.push_back(std::to_string(merchantlist_temp_entry.slot));
 		insert_values.push_back(std::to_string(merchantlist_temp_entry.itemid));
 		insert_values.push_back(std::to_string(merchantlist_temp_entry.charges));
 
@@ -210,7 +214,7 @@ public:
 		);
 
 		if (results.Success()) {
-			merchantlist_temp_entry.id = results.LastInsertedID();
+			merchantlist_temp_entry.npcid = results.LastInsertedID();
 			return merchantlist_temp_entry;
 		}
 
@@ -228,6 +232,8 @@ public:
 		for (auto &merchantlist_temp_entry: merchantlist_temp_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(merchantlist_temp_entry.npcid));
+			insert_values.push_back(std::to_string(merchantlist_temp_entry.slot));
 			insert_values.push_back(std::to_string(merchantlist_temp_entry.itemid));
 			insert_values.push_back(std::to_string(merchantlist_temp_entry.charges));
 

@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -180,6 +180,7 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(logsys_categories_entry.log_category_id));
 		update_values.push_back(columns[1] + " = '" + EscapeString(logsys_categories_entry.log_category_description) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(logsys_categories_entry.log_to_console));
 		update_values.push_back(columns[3] + " = " + std::to_string(logsys_categories_entry.log_to_file));
@@ -204,6 +205,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(logsys_categories_entry.log_category_id));
 		insert_values.push_back("'" + EscapeString(logsys_categories_entry.log_category_description) + "'");
 		insert_values.push_back(std::to_string(logsys_categories_entry.log_to_console));
 		insert_values.push_back(std::to_string(logsys_categories_entry.log_to_file));
@@ -218,7 +220,7 @@ public:
 		);
 
 		if (results.Success()) {
-			logsys_categories_entry.id = results.LastInsertedID();
+			logsys_categories_entry.log_category_id = results.LastInsertedID();
 			return logsys_categories_entry;
 		}
 
@@ -236,6 +238,7 @@ public:
 		for (auto &logsys_categories_entry: logsys_categories_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(logsys_categories_entry.log_category_id));
 			insert_values.push_back("'" + EscapeString(logsys_categories_entry.log_category_description) + "'");
 			insert_values.push_back(std::to_string(logsys_categories_entry.log_to_console));
 			insert_values.push_back(std::to_string(logsys_categories_entry.log_to_file));

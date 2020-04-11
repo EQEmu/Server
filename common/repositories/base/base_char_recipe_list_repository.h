@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -42,7 +42,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("recipe_id");
+		return std::string("char_id");
 	}
 
 	static std::vector<std::string> Columns()
@@ -114,7 +114,7 @@ public:
 	)
 	{
 		for (auto &char_recipe_list : char_recipe_lists) {
-			if (char_recipe_list.recipe_id == char_recipe_list_id) {
+			if (char_recipe_list.char_id == char_recipe_list_id) {
 				return char_recipe_list;
 			}
 		}
@@ -172,6 +172,8 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(char_recipe_list_entry.char_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(char_recipe_list_entry.recipe_id));
 		update_values.push_back(columns[2] + " = " + std::to_string(char_recipe_list_entry.madecount));
 
 		auto results = database.QueryDatabase(
@@ -180,7 +182,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				char_recipe_list_entry.recipe_id
+				char_recipe_list_entry.char_id
 			)
 		);
 
@@ -193,6 +195,8 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(char_recipe_list_entry.char_id));
+		insert_values.push_back(std::to_string(char_recipe_list_entry.recipe_id));
 		insert_values.push_back(std::to_string(char_recipe_list_entry.madecount));
 
 		auto results = database.QueryDatabase(
@@ -204,7 +208,7 @@ public:
 		);
 
 		if (results.Success()) {
-			char_recipe_list_entry.id = results.LastInsertedID();
+			char_recipe_list_entry.char_id = results.LastInsertedID();
 			return char_recipe_list_entry;
 		}
 
@@ -222,6 +226,8 @@ public:
 		for (auto &char_recipe_list_entry: char_recipe_list_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(char_recipe_list_entry.char_id));
+			insert_values.push_back(std::to_string(char_recipe_list_entry.recipe_id));
 			insert_values.push_back(std::to_string(char_recipe_list_entry.madecount));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");

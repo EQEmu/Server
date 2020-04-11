@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -44,7 +44,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("id");
+		return std::string("zone");
 	}
 
 	static std::vector<std::string> Columns()
@@ -120,7 +120,7 @@ public:
 	)
 	{
 		for (auto &spawn_conditions : spawn_conditionss) {
-			if (spawn_conditions.id == spawn_conditions_id) {
+			if (spawn_conditions.zone == spawn_conditions_id) {
 				return spawn_conditions;
 			}
 		}
@@ -180,6 +180,8 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = '" + EscapeString(spawn_conditions_entry.zone) + "'");
+		update_values.push_back(columns[1] + " = " + std::to_string(spawn_conditions_entry.id));
 		update_values.push_back(columns[2] + " = " + std::to_string(spawn_conditions_entry.value));
 		update_values.push_back(columns[3] + " = " + std::to_string(spawn_conditions_entry.onchange));
 		update_values.push_back(columns[4] + " = '" + EscapeString(spawn_conditions_entry.name) + "'");
@@ -190,7 +192,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				spawn_conditions_entry.id
+				spawn_conditions_entry.zone
 			)
 		);
 
@@ -203,6 +205,8 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back("'" + EscapeString(spawn_conditions_entry.zone) + "'");
+		insert_values.push_back(std::to_string(spawn_conditions_entry.id));
 		insert_values.push_back(std::to_string(spawn_conditions_entry.value));
 		insert_values.push_back(std::to_string(spawn_conditions_entry.onchange));
 		insert_values.push_back("'" + EscapeString(spawn_conditions_entry.name) + "'");
@@ -216,7 +220,7 @@ public:
 		);
 
 		if (results.Success()) {
-			spawn_conditions_entry.id = results.LastInsertedID();
+			spawn_conditions_entry.zone = results.LastInsertedID();
 			return spawn_conditions_entry;
 		}
 
@@ -234,6 +238,8 @@ public:
 		for (auto &spawn_conditions_entry: spawn_conditions_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back("'" + EscapeString(spawn_conditions_entry.zone) + "'");
+			insert_values.push_back(std::to_string(spawn_conditions_entry.id));
 			insert_values.push_back(std::to_string(spawn_conditions_entry.value));
 			insert_values.push_back(std::to_string(spawn_conditions_entry.onchange));
 			insert_values.push_back("'" + EscapeString(spawn_conditions_entry.name) + "'");

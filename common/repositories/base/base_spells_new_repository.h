@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -1108,6 +1108,7 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(spells_new_entry.id));
 		update_values.push_back(columns[1] + " = '" + EscapeString(spells_new_entry.name) + "'");
 		update_values.push_back(columns[2] + " = '" + EscapeString(spells_new_entry.player_1) + "'");
 		update_values.push_back(columns[3] + " = '" + EscapeString(spells_new_entry.teleport_zone) + "'");
@@ -1364,6 +1365,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(spells_new_entry.id));
 		insert_values.push_back("'" + EscapeString(spells_new_entry.name) + "'");
 		insert_values.push_back("'" + EscapeString(spells_new_entry.player_1) + "'");
 		insert_values.push_back("'" + EscapeString(spells_new_entry.teleport_zone) + "'");
@@ -1628,6 +1630,7 @@ public:
 		for (auto &spells_new_entry: spells_new_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(spells_new_entry.id));
 			insert_values.push_back("'" + EscapeString(spells_new_entry.name) + "'");
 			insert_values.push_back("'" + EscapeString(spells_new_entry.player_1) + "'");
 			insert_values.push_back("'" + EscapeString(spells_new_entry.teleport_zone) + "'");

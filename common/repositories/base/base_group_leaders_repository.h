@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -196,6 +196,7 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(group_leaders_entry.gid));
 		update_values.push_back(columns[1] + " = '" + EscapeString(group_leaders_entry.leadername) + "'");
 		update_values.push_back(columns[2] + " = '" + EscapeString(group_leaders_entry.marknpc) + "'");
 		update_values.push_back(columns[3] + " = '" + EscapeString(group_leaders_entry.leadershipaa) + "'");
@@ -224,6 +225,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(group_leaders_entry.gid));
 		insert_values.push_back("'" + EscapeString(group_leaders_entry.leadername) + "'");
 		insert_values.push_back("'" + EscapeString(group_leaders_entry.marknpc) + "'");
 		insert_values.push_back("'" + EscapeString(group_leaders_entry.leadershipaa) + "'");
@@ -242,7 +244,7 @@ public:
 		);
 
 		if (results.Success()) {
-			group_leaders_entry.id = results.LastInsertedID();
+			group_leaders_entry.gid = results.LastInsertedID();
 			return group_leaders_entry;
 		}
 
@@ -260,6 +262,7 @@ public:
 		for (auto &group_leaders_entry: group_leaders_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(group_leaders_entry.gid));
 			insert_values.push_back("'" + EscapeString(group_leaders_entry.leadername) + "'");
 			insert_values.push_back("'" + EscapeString(group_leaders_entry.marknpc) + "'");
 			insert_values.push_back("'" + EscapeString(group_leaders_entry.leadershipaa) + "'");

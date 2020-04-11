@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -45,7 +45,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("buyslot");
+		return std::string("charid");
 	}
 
 	static std::vector<std::string> Columns()
@@ -123,7 +123,7 @@ public:
 	)
 	{
 		for (auto &buyer : buyers) {
-			if (buyer.buyslot == buyer_id) {
+			if (buyer.charid == buyer_id) {
 				return buyer;
 			}
 		}
@@ -184,6 +184,8 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(buyer_entry.charid));
+		update_values.push_back(columns[1] + " = " + std::to_string(buyer_entry.buyslot));
 		update_values.push_back(columns[2] + " = " + std::to_string(buyer_entry.itemid));
 		update_values.push_back(columns[3] + " = '" + EscapeString(buyer_entry.itemname) + "'");
 		update_values.push_back(columns[4] + " = " + std::to_string(buyer_entry.quantity));
@@ -195,7 +197,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				buyer_entry.buyslot
+				buyer_entry.charid
 			)
 		);
 
@@ -208,6 +210,8 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(buyer_entry.charid));
+		insert_values.push_back(std::to_string(buyer_entry.buyslot));
 		insert_values.push_back(std::to_string(buyer_entry.itemid));
 		insert_values.push_back("'" + EscapeString(buyer_entry.itemname) + "'");
 		insert_values.push_back(std::to_string(buyer_entry.quantity));
@@ -222,7 +226,7 @@ public:
 		);
 
 		if (results.Success()) {
-			buyer_entry.id = results.LastInsertedID();
+			buyer_entry.charid = results.LastInsertedID();
 			return buyer_entry;
 		}
 
@@ -240,6 +244,8 @@ public:
 		for (auto &buyer_entry: buyer_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(buyer_entry.charid));
+			insert_values.push_back(std::to_string(buyer_entry.buyslot));
 			insert_values.push_back(std::to_string(buyer_entry.itemid));
 			insert_values.push_back("'" + EscapeString(buyer_entry.itemname) + "'");
 			insert_values.push_back(std::to_string(buyer_entry.quantity));

@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -50,7 +50,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("slot");
+		return std::string("char_id");
 	}
 
 	static std::vector<std::string> Columns()
@@ -138,7 +138,7 @@ public:
 	)
 	{
 		for (auto &character_pet_buffs : character_pet_buffss) {
-			if (character_pet_buffs.slot == character_pet_buffs_id) {
+			if (character_pet_buffs.char_id == character_pet_buffs_id) {
 				return character_pet_buffs;
 			}
 		}
@@ -204,6 +204,9 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(character_pet_buffs_entry.char_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(character_pet_buffs_entry.pet));
+		update_values.push_back(columns[2] + " = " + std::to_string(character_pet_buffs_entry.slot));
 		update_values.push_back(columns[3] + " = " + std::to_string(character_pet_buffs_entry.spell_id));
 		update_values.push_back(columns[4] + " = " + std::to_string(character_pet_buffs_entry.caster_level));
 		update_values.push_back(columns[5] + " = '" + EscapeString(character_pet_buffs_entry.castername) + "'");
@@ -219,7 +222,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				character_pet_buffs_entry.slot
+				character_pet_buffs_entry.char_id
 			)
 		);
 
@@ -232,6 +235,9 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(character_pet_buffs_entry.char_id));
+		insert_values.push_back(std::to_string(character_pet_buffs_entry.pet));
+		insert_values.push_back(std::to_string(character_pet_buffs_entry.slot));
 		insert_values.push_back(std::to_string(character_pet_buffs_entry.spell_id));
 		insert_values.push_back(std::to_string(character_pet_buffs_entry.caster_level));
 		insert_values.push_back("'" + EscapeString(character_pet_buffs_entry.castername) + "'");
@@ -250,7 +256,7 @@ public:
 		);
 
 		if (results.Success()) {
-			character_pet_buffs_entry.id = results.LastInsertedID();
+			character_pet_buffs_entry.char_id = results.LastInsertedID();
 			return character_pet_buffs_entry;
 		}
 
@@ -268,6 +274,9 @@ public:
 		for (auto &character_pet_buffs_entry: character_pet_buffs_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(character_pet_buffs_entry.char_id));
+			insert_values.push_back(std::to_string(character_pet_buffs_entry.pet));
+			insert_values.push_back(std::to_string(character_pet_buffs_entry.slot));
 			insert_values.push_back(std::to_string(character_pet_buffs_entry.spell_id));
 			insert_values.push_back(std::to_string(character_pet_buffs_entry.caster_level));
 			insert_values.push_back("'" + EscapeString(character_pet_buffs_entry.castername) + "'");

@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -44,7 +44,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("isguild");
+		return std::string("id");
 	}
 
 	static std::vector<std::string> Columns()
@@ -120,7 +120,7 @@ public:
 	)
 	{
 		for (auto &tributes : tributess) {
-			if (tributes.isguild == tributes_id) {
+			if (tributes.id == tributes_id) {
 				return tributes;
 			}
 		}
@@ -180,9 +180,11 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(tributes_entry.id));
 		update_values.push_back(columns[1] + " = " + std::to_string(tributes_entry.unknown));
 		update_values.push_back(columns[2] + " = '" + EscapeString(tributes_entry.name) + "'");
 		update_values.push_back(columns[3] + " = '" + EscapeString(tributes_entry.descr) + "'");
+		update_values.push_back(columns[4] + " = " + std::to_string(tributes_entry.isguild));
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -190,7 +192,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				tributes_entry.isguild
+				tributes_entry.id
 			)
 		);
 
@@ -203,9 +205,11 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(tributes_entry.id));
 		insert_values.push_back(std::to_string(tributes_entry.unknown));
 		insert_values.push_back("'" + EscapeString(tributes_entry.name) + "'");
 		insert_values.push_back("'" + EscapeString(tributes_entry.descr) + "'");
+		insert_values.push_back(std::to_string(tributes_entry.isguild));
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -234,9 +238,11 @@ public:
 		for (auto &tributes_entry: tributes_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(tributes_entry.id));
 			insert_values.push_back(std::to_string(tributes_entry.unknown));
 			insert_values.push_back("'" + EscapeString(tributes_entry.name) + "'");
 			insert_values.push_back("'" + EscapeString(tributes_entry.descr) + "'");
+			insert_values.push_back(std::to_string(tributes_entry.isguild));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}

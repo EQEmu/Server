@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -43,7 +43,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("ismerc");
+		return std::string("groupid");
 	}
 
 	static std::vector<std::string> Columns()
@@ -117,7 +117,7 @@ public:
 	)
 	{
 		for (auto &group_id : group_ids) {
-			if (group_id.ismerc == group_id_id) {
+			if (group_id.groupid == group_id_id) {
 				return group_id;
 			}
 		}
@@ -176,7 +176,10 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(group_id_entry.groupid));
+		update_values.push_back(columns[1] + " = " + std::to_string(group_id_entry.charid));
 		update_values.push_back(columns[2] + " = '" + EscapeString(group_id_entry.name) + "'");
+		update_values.push_back(columns[3] + " = " + std::to_string(group_id_entry.ismerc));
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -184,7 +187,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				group_id_entry.ismerc
+				group_id_entry.groupid
 			)
 		);
 
@@ -197,7 +200,10 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(group_id_entry.groupid));
+		insert_values.push_back(std::to_string(group_id_entry.charid));
 		insert_values.push_back("'" + EscapeString(group_id_entry.name) + "'");
+		insert_values.push_back(std::to_string(group_id_entry.ismerc));
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -208,7 +214,7 @@ public:
 		);
 
 		if (results.Success()) {
-			group_id_entry.id = results.LastInsertedID();
+			group_id_entry.groupid = results.LastInsertedID();
 			return group_id_entry;
 		}
 
@@ -226,7 +232,10 @@ public:
 		for (auto &group_id_entry: group_id_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(group_id_entry.groupid));
+			insert_values.push_back(std::to_string(group_id_entry.charid));
 			insert_values.push_back("'" + EscapeString(group_id_entry.name) + "'");
+			insert_values.push_back(std::to_string(group_id_entry.ismerc));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}

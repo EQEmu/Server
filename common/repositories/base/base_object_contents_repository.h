@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -51,7 +51,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("bagidx");
+		return std::string("parentid");
 	}
 
 	static std::vector<std::string> Columns()
@@ -141,7 +141,7 @@ public:
 	)
 	{
 		for (auto &object_contents : object_contentss) {
-			if (object_contents.bagidx == object_contents_id) {
+			if (object_contents.parentid == object_contents_id) {
 				return object_contents;
 			}
 		}
@@ -209,6 +209,8 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[0] + " = " + std::to_string(object_contents_entry.zoneid));
+		update_values.push_back(columns[1] + " = " + std::to_string(object_contents_entry.parentid));
+		update_values.push_back(columns[2] + " = " + std::to_string(object_contents_entry.bagidx));
 		update_values.push_back(columns[3] + " = " + std::to_string(object_contents_entry.itemid));
 		update_values.push_back(columns[4] + " = " + std::to_string(object_contents_entry.charges));
 		update_values.push_back(columns[5] + " = '" + EscapeString(object_contents_entry.droptime) + "'");
@@ -225,7 +227,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				object_contents_entry.bagidx
+				object_contents_entry.parentid
 			)
 		);
 
@@ -239,6 +241,8 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(object_contents_entry.zoneid));
+		insert_values.push_back(std::to_string(object_contents_entry.parentid));
+		insert_values.push_back(std::to_string(object_contents_entry.bagidx));
 		insert_values.push_back(std::to_string(object_contents_entry.itemid));
 		insert_values.push_back(std::to_string(object_contents_entry.charges));
 		insert_values.push_back("'" + EscapeString(object_contents_entry.droptime) + "'");
@@ -258,7 +262,7 @@ public:
 		);
 
 		if (results.Success()) {
-			object_contents_entry.id = results.LastInsertedID();
+			object_contents_entry.parentid = results.LastInsertedID();
 			return object_contents_entry;
 		}
 
@@ -277,6 +281,8 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(object_contents_entry.zoneid));
+			insert_values.push_back(std::to_string(object_contents_entry.parentid));
+			insert_values.push_back(std::to_string(object_contents_entry.bagidx));
 			insert_values.push_back(std::to_string(object_contents_entry.itemid));
 			insert_values.push_back(std::to_string(object_contents_entry.charges));
 			insert_values.push_back("'" + EscapeString(object_contents_entry.droptime) + "'");

@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -45,7 +45,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("bandolier_slot");
+		return std::string("id");
 	}
 
 	static std::vector<std::string> Columns()
@@ -123,7 +123,7 @@ public:
 	)
 	{
 		for (auto &character_bandolier : character_bandoliers) {
-			if (character_bandolier.bandolier_slot == character_bandolier_id) {
+			if (character_bandolier.id == character_bandolier_id) {
 				return character_bandolier;
 			}
 		}
@@ -184,6 +184,9 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(character_bandolier_entry.id));
+		update_values.push_back(columns[1] + " = " + std::to_string(character_bandolier_entry.bandolier_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(character_bandolier_entry.bandolier_slot));
 		update_values.push_back(columns[3] + " = " + std::to_string(character_bandolier_entry.item_id));
 		update_values.push_back(columns[4] + " = " + std::to_string(character_bandolier_entry.icon));
 		update_values.push_back(columns[5] + " = '" + EscapeString(character_bandolier_entry.bandolier_name) + "'");
@@ -194,7 +197,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				character_bandolier_entry.bandolier_slot
+				character_bandolier_entry.id
 			)
 		);
 
@@ -207,6 +210,9 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(character_bandolier_entry.id));
+		insert_values.push_back(std::to_string(character_bandolier_entry.bandolier_id));
+		insert_values.push_back(std::to_string(character_bandolier_entry.bandolier_slot));
 		insert_values.push_back(std::to_string(character_bandolier_entry.item_id));
 		insert_values.push_back(std::to_string(character_bandolier_entry.icon));
 		insert_values.push_back("'" + EscapeString(character_bandolier_entry.bandolier_name) + "'");
@@ -238,6 +244,9 @@ public:
 		for (auto &character_bandolier_entry: character_bandolier_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(character_bandolier_entry.id));
+			insert_values.push_back(std::to_string(character_bandolier_entry.bandolier_id));
+			insert_values.push_back(std::to_string(character_bandolier_entry.bandolier_slot));
 			insert_values.push_back(std::to_string(character_bandolier_entry.item_id));
 			insert_values.push_back(std::to_string(character_bandolier_entry.icon));
 			insert_values.push_back("'" + EscapeString(character_bandolier_entry.bandolier_name) + "'");

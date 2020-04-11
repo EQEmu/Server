@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -216,6 +216,7 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(aa_ability_entry.id));
 		update_values.push_back(columns[1] + " = '" + EscapeString(aa_ability_entry.name) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(aa_ability_entry.category));
 		update_values.push_back(columns[3] + " = " + std::to_string(aa_ability_entry.classes));
@@ -249,6 +250,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(aa_ability_entry.id));
 		insert_values.push_back("'" + EscapeString(aa_ability_entry.name) + "'");
 		insert_values.push_back(std::to_string(aa_ability_entry.category));
 		insert_values.push_back(std::to_string(aa_ability_entry.classes));
@@ -290,6 +292,7 @@ public:
 		for (auto &aa_ability_entry: aa_ability_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(aa_ability_entry.id));
 			insert_values.push_back("'" + EscapeString(aa_ability_entry.name) + "'");
 			insert_values.push_back(std::to_string(aa_ability_entry.category));
 			insert_values.push_back(std::to_string(aa_ability_entry.classes));

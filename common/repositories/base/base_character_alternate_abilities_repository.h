@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -43,7 +43,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("aa_id");
+		return std::string("id");
 	}
 
 	static std::vector<std::string> Columns()
@@ -117,7 +117,7 @@ public:
 	)
 	{
 		for (auto &character_alternate_abilities : character_alternate_abilitiess) {
-			if (character_alternate_abilities.aa_id == character_alternate_abilities_id) {
+			if (character_alternate_abilities.id == character_alternate_abilities_id) {
 				return character_alternate_abilities;
 			}
 		}
@@ -176,6 +176,8 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(character_alternate_abilities_entry.id));
+		update_values.push_back(columns[1] + " = " + std::to_string(character_alternate_abilities_entry.aa_id));
 		update_values.push_back(columns[2] + " = " + std::to_string(character_alternate_abilities_entry.aa_value));
 		update_values.push_back(columns[3] + " = " + std::to_string(character_alternate_abilities_entry.charges));
 
@@ -185,7 +187,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				character_alternate_abilities_entry.aa_id
+				character_alternate_abilities_entry.id
 			)
 		);
 
@@ -198,6 +200,8 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(character_alternate_abilities_entry.id));
+		insert_values.push_back(std::to_string(character_alternate_abilities_entry.aa_id));
 		insert_values.push_back(std::to_string(character_alternate_abilities_entry.aa_value));
 		insert_values.push_back(std::to_string(character_alternate_abilities_entry.charges));
 
@@ -228,6 +232,8 @@ public:
 		for (auto &character_alternate_abilities_entry: character_alternate_abilities_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(character_alternate_abilities_entry.id));
+			insert_values.push_back(std::to_string(character_alternate_abilities_entry.aa_id));
 			insert_values.push_back(std::to_string(character_alternate_abilities_entry.aa_value));
 			insert_values.push_back(std::to_string(character_alternate_abilities_entry.charges));
 

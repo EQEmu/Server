@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -43,7 +43,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("faction_id");
+		return std::string("char_id");
 	}
 
 	static std::vector<std::string> Columns()
@@ -117,7 +117,7 @@ public:
 	)
 	{
 		for (auto &faction_values : faction_valuess) {
-			if (faction_values.faction_id == faction_values_id) {
+			if (faction_values.char_id == faction_values_id) {
 				return faction_values;
 			}
 		}
@@ -176,6 +176,8 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(faction_values_entry.char_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(faction_values_entry.faction_id));
 		update_values.push_back(columns[2] + " = " + std::to_string(faction_values_entry.current_value));
 		update_values.push_back(columns[3] + " = " + std::to_string(faction_values_entry.temp));
 
@@ -185,7 +187,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				faction_values_entry.faction_id
+				faction_values_entry.char_id
 			)
 		);
 
@@ -198,6 +200,8 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(faction_values_entry.char_id));
+		insert_values.push_back(std::to_string(faction_values_entry.faction_id));
 		insert_values.push_back(std::to_string(faction_values_entry.current_value));
 		insert_values.push_back(std::to_string(faction_values_entry.temp));
 
@@ -210,7 +214,7 @@ public:
 		);
 
 		if (results.Success()) {
-			faction_values_entry.id = results.LastInsertedID();
+			faction_values_entry.char_id = results.LastInsertedID();
 			return faction_values_entry;
 		}
 
@@ -228,6 +232,8 @@ public:
 		for (auto &faction_values_entry: faction_values_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(faction_values_entry.char_id));
+			insert_values.push_back(std::to_string(faction_values_entry.faction_id));
 			insert_values.push_back(std::to_string(faction_values_entry.current_value));
 			insert_values.push_back(std::to_string(faction_values_entry.temp));
 

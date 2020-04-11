@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -284,7 +284,7 @@ public:
 		);
 
 		if (results.Success()) {
-			petitions_entry.id = results.LastInsertedID();
+			petitions_entry.dib = results.LastInsertedID();
 			return petitions_entry;
 		}
 

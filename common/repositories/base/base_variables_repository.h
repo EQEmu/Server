@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -176,6 +176,7 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = '" + EscapeString(variables_entry.varname) + "'");
 		update_values.push_back(columns[1] + " = '" + EscapeString(variables_entry.value) + "'");
 		update_values.push_back(columns[2] + " = '" + EscapeString(variables_entry.information) + "'");
 		update_values.push_back(columns[3] + " = '" + EscapeString(variables_entry.ts) + "'");
@@ -199,6 +200,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back("'" + EscapeString(variables_entry.varname) + "'");
 		insert_values.push_back("'" + EscapeString(variables_entry.value) + "'");
 		insert_values.push_back("'" + EscapeString(variables_entry.information) + "'");
 		insert_values.push_back("'" + EscapeString(variables_entry.ts) + "'");
@@ -212,7 +214,7 @@ public:
 		);
 
 		if (results.Success()) {
-			variables_entry.id = results.LastInsertedID();
+			variables_entry.varname = results.LastInsertedID();
 			return variables_entry;
 		}
 
@@ -230,6 +232,7 @@ public:
 		for (auto &variables_entry: variables_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back("'" + EscapeString(variables_entry.varname) + "'");
 			insert_values.push_back("'" + EscapeString(variables_entry.value) + "'");
 			insert_values.push_back("'" + EscapeString(variables_entry.information) + "'");
 			insert_values.push_back("'" + EscapeString(variables_entry.ts) + "'");

@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -42,7 +42,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("slot");
+		return std::string("set_id");
 	}
 
 	static std::vector<std::string> Columns()
@@ -114,7 +114,7 @@ public:
 	)
 	{
 		for (auto &pets_equipmentset_entries : pets_equipmentset_entriess) {
-			if (pets_equipmentset_entries.slot == pets_equipmentset_entries_id) {
+			if (pets_equipmentset_entries.set_id == pets_equipmentset_entries_id) {
 				return pets_equipmentset_entries;
 			}
 		}
@@ -172,6 +172,8 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(pets_equipmentset_entries_entry.set_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(pets_equipmentset_entries_entry.slot));
 		update_values.push_back(columns[2] + " = " + std::to_string(pets_equipmentset_entries_entry.item_id));
 
 		auto results = content_db.QueryDatabase(
@@ -180,7 +182,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				pets_equipmentset_entries_entry.slot
+				pets_equipmentset_entries_entry.set_id
 			)
 		);
 
@@ -193,6 +195,8 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(pets_equipmentset_entries_entry.set_id));
+		insert_values.push_back(std::to_string(pets_equipmentset_entries_entry.slot));
 		insert_values.push_back(std::to_string(pets_equipmentset_entries_entry.item_id));
 
 		auto results = content_db.QueryDatabase(
@@ -204,7 +208,7 @@ public:
 		);
 
 		if (results.Success()) {
-			pets_equipmentset_entries_entry.id = results.LastInsertedID();
+			pets_equipmentset_entries_entry.set_id = results.LastInsertedID();
 			return pets_equipmentset_entries_entry;
 		}
 
@@ -222,6 +226,8 @@ public:
 		for (auto &pets_equipmentset_entries_entry: pets_equipmentset_entries_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(pets_equipmentset_entries_entry.set_id));
+			insert_values.push_back(std::to_string(pets_equipmentset_entries_entry.slot));
 			insert_values.push_back(std::to_string(pets_equipmentset_entries_entry.item_id));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");

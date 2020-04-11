@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -44,7 +44,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("activityid");
+		return std::string("charid");
 	}
 
 	static std::vector<std::string> Columns()
@@ -120,7 +120,7 @@ public:
 	)
 	{
 		for (auto &character_activities : character_activitiess) {
-			if (character_activities.activityid == character_activities_id) {
+			if (character_activities.charid == character_activities_id) {
 				return character_activities;
 			}
 		}
@@ -180,6 +180,9 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(character_activities_entry.charid));
+		update_values.push_back(columns[1] + " = " + std::to_string(character_activities_entry.taskid));
+		update_values.push_back(columns[2] + " = " + std::to_string(character_activities_entry.activityid));
 		update_values.push_back(columns[3] + " = " + std::to_string(character_activities_entry.donecount));
 		update_values.push_back(columns[4] + " = " + std::to_string(character_activities_entry.completed));
 
@@ -189,7 +192,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				character_activities_entry.activityid
+				character_activities_entry.charid
 			)
 		);
 
@@ -202,6 +205,9 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(character_activities_entry.charid));
+		insert_values.push_back(std::to_string(character_activities_entry.taskid));
+		insert_values.push_back(std::to_string(character_activities_entry.activityid));
 		insert_values.push_back(std::to_string(character_activities_entry.donecount));
 		insert_values.push_back(std::to_string(character_activities_entry.completed));
 
@@ -214,7 +220,7 @@ public:
 		);
 
 		if (results.Success()) {
-			character_activities_entry.id = results.LastInsertedID();
+			character_activities_entry.charid = results.LastInsertedID();
 			return character_activities_entry;
 		}
 
@@ -232,6 +238,9 @@ public:
 		for (auto &character_activities_entry: character_activities_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(character_activities_entry.charid));
+			insert_values.push_back(std::to_string(character_activities_entry.taskid));
+			insert_values.push_back(std::to_string(character_activities_entry.activityid));
 			insert_values.push_back(std::to_string(character_activities_entry.donecount));
 			insert_values.push_back(std::to_string(character_activities_entry.completed));
 

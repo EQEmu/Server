@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -46,7 +46,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("slot");
+		return std::string("id");
 	}
 
 	static std::vector<std::string> Columns()
@@ -126,7 +126,7 @@ public:
 	)
 	{
 		for (auto &character_material : character_materials) {
-			if (character_material.slot == character_material_id) {
+			if (character_material.id == character_material_id) {
 				return character_material;
 			}
 		}
@@ -188,6 +188,7 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[1] + " = " + std::to_string(character_material_entry.slot));
 		update_values.push_back(columns[2] + " = " + std::to_string(character_material_entry.blue));
 		update_values.push_back(columns[3] + " = " + std::to_string(character_material_entry.green));
 		update_values.push_back(columns[4] + " = " + std::to_string(character_material_entry.red));
@@ -200,7 +201,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				character_material_entry.slot
+				character_material_entry.id
 			)
 		);
 
@@ -213,6 +214,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(character_material_entry.slot));
 		insert_values.push_back(std::to_string(character_material_entry.blue));
 		insert_values.push_back(std::to_string(character_material_entry.green));
 		insert_values.push_back(std::to_string(character_material_entry.red));
@@ -246,6 +248,7 @@ public:
 		for (auto &character_material_entry: character_material_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(character_material_entry.slot));
 			insert_values.push_back(std::to_string(character_material_entry.blue));
 			insert_values.push_back(std::to_string(character_material_entry.green));
 			insert_values.push_back(std::to_string(character_material_entry.red));

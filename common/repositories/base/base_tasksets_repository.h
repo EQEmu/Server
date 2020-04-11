@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -41,7 +41,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("taskid");
+		return std::string("id");
 	}
 
 	static std::vector<std::string> Columns()
@@ -111,7 +111,7 @@ public:
 	)
 	{
 		for (auto &tasksets : tasksetss) {
-			if (tasksets.taskid == tasksets_id) {
+			if (tasksets.id == tasksets_id) {
 				return tasksets;
 			}
 		}
@@ -168,7 +168,8 @@ public:
 
 		auto columns = Columns();
 
-
+		update_values.push_back(columns[0] + " = " + std::to_string(tasksets_entry.id));
+		update_values.push_back(columns[1] + " = " + std::to_string(tasksets_entry.taskid));
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -176,7 +177,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				tasksets_entry.taskid
+				tasksets_entry.id
 			)
 		);
 
@@ -189,7 +190,8 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
-
+		insert_values.push_back(std::to_string(tasksets_entry.id));
+		insert_values.push_back(std::to_string(tasksets_entry.taskid));
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -218,7 +220,8 @@ public:
 		for (auto &tasksets_entry: tasksets_entries) {
 			std::vector<std::string> insert_values;
 
-
+			insert_values.push_back(std::to_string(tasksets_entry.id));
+			insert_values.push_back(std::to_string(tasksets_entry.taskid));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}

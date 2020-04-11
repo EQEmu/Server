@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -43,7 +43,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("slot");
+		return std::string("char_id");
 	}
 
 	static std::vector<std::string> Columns()
@@ -117,7 +117,7 @@ public:
 	)
 	{
 		for (auto &character_pet_inventory : character_pet_inventorys) {
-			if (character_pet_inventory.slot == character_pet_inventory_id) {
+			if (character_pet_inventory.char_id == character_pet_inventory_id) {
 				return character_pet_inventory;
 			}
 		}
@@ -176,6 +176,9 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(character_pet_inventory_entry.char_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(character_pet_inventory_entry.pet));
+		update_values.push_back(columns[2] + " = " + std::to_string(character_pet_inventory_entry.slot));
 		update_values.push_back(columns[3] + " = " + std::to_string(character_pet_inventory_entry.item_id));
 
 		auto results = database.QueryDatabase(
@@ -184,7 +187,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				character_pet_inventory_entry.slot
+				character_pet_inventory_entry.char_id
 			)
 		);
 
@@ -197,6 +200,9 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(character_pet_inventory_entry.char_id));
+		insert_values.push_back(std::to_string(character_pet_inventory_entry.pet));
+		insert_values.push_back(std::to_string(character_pet_inventory_entry.slot));
 		insert_values.push_back(std::to_string(character_pet_inventory_entry.item_id));
 
 		auto results = database.QueryDatabase(
@@ -208,7 +214,7 @@ public:
 		);
 
 		if (results.Success()) {
-			character_pet_inventory_entry.id = results.LastInsertedID();
+			character_pet_inventory_entry.char_id = results.LastInsertedID();
 			return character_pet_inventory_entry;
 		}
 
@@ -226,6 +232,9 @@ public:
 		for (auto &character_pet_inventory_entry: character_pet_inventory_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(character_pet_inventory_entry.char_id));
+			insert_values.push_back(std::to_string(character_pet_inventory_entry.pet));
+			insert_values.push_back(std::to_string(character_pet_inventory_entry.slot));
 			insert_values.push_back(std::to_string(character_pet_inventory_entry.item_id));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");

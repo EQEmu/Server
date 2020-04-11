@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -44,7 +44,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("taskid");
+		return std::string("charid");
 	}
 
 	static std::vector<std::string> Columns()
@@ -120,7 +120,7 @@ public:
 	)
 	{
 		for (auto &character_tasks : character_taskss) {
-			if (character_tasks.taskid == character_tasks_id) {
+			if (character_tasks.charid == character_tasks_id) {
 				return character_tasks;
 			}
 		}
@@ -180,6 +180,8 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(character_tasks_entry.charid));
+		update_values.push_back(columns[1] + " = " + std::to_string(character_tasks_entry.taskid));
 		update_values.push_back(columns[2] + " = " + std::to_string(character_tasks_entry.slot));
 		update_values.push_back(columns[3] + " = " + std::to_string(character_tasks_entry.type));
 		update_values.push_back(columns[4] + " = " + std::to_string(character_tasks_entry.acceptedtime));
@@ -190,7 +192,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				character_tasks_entry.taskid
+				character_tasks_entry.charid
 			)
 		);
 
@@ -203,6 +205,8 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(character_tasks_entry.charid));
+		insert_values.push_back(std::to_string(character_tasks_entry.taskid));
 		insert_values.push_back(std::to_string(character_tasks_entry.slot));
 		insert_values.push_back(std::to_string(character_tasks_entry.type));
 		insert_values.push_back(std::to_string(character_tasks_entry.acceptedtime));
@@ -216,7 +220,7 @@ public:
 		);
 
 		if (results.Success()) {
-			character_tasks_entry.id = results.LastInsertedID();
+			character_tasks_entry.charid = results.LastInsertedID();
 			return character_tasks_entry;
 		}
 
@@ -234,6 +238,8 @@ public:
 		for (auto &character_tasks_entry: character_tasks_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(character_tasks_entry.charid));
+			insert_values.push_back(std::to_string(character_tasks_entry.taskid));
 			insert_values.push_back(std::to_string(character_tasks_entry.slot));
 			insert_values.push_back(std::to_string(character_tasks_entry.type));
 			insert_values.push_back(std::to_string(character_tasks_entry.acceptedtime));

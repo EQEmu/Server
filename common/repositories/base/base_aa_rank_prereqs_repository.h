@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -42,7 +42,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("aa_id");
+		return std::string("rank_id");
 	}
 
 	static std::vector<std::string> Columns()
@@ -114,7 +114,7 @@ public:
 	)
 	{
 		for (auto &aa_rank_prereqs : aa_rank_prereqss) {
-			if (aa_rank_prereqs.aa_id == aa_rank_prereqs_id) {
+			if (aa_rank_prereqs.rank_id == aa_rank_prereqs_id) {
 				return aa_rank_prereqs;
 			}
 		}
@@ -172,6 +172,8 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(aa_rank_prereqs_entry.rank_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(aa_rank_prereqs_entry.aa_id));
 		update_values.push_back(columns[2] + " = " + std::to_string(aa_rank_prereqs_entry.points));
 
 		auto results = content_db.QueryDatabase(
@@ -180,7 +182,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				aa_rank_prereqs_entry.aa_id
+				aa_rank_prereqs_entry.rank_id
 			)
 		);
 
@@ -193,6 +195,8 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(aa_rank_prereqs_entry.rank_id));
+		insert_values.push_back(std::to_string(aa_rank_prereqs_entry.aa_id));
 		insert_values.push_back(std::to_string(aa_rank_prereqs_entry.points));
 
 		auto results = content_db.QueryDatabase(
@@ -204,7 +208,7 @@ public:
 		);
 
 		if (results.Success()) {
-			aa_rank_prereqs_entry.id = results.LastInsertedID();
+			aa_rank_prereqs_entry.rank_id = results.LastInsertedID();
 			return aa_rank_prereqs_entry;
 		}
 
@@ -222,6 +226,8 @@ public:
 		for (auto &aa_rank_prereqs_entry: aa_rank_prereqs_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(aa_rank_prereqs_entry.rank_id));
+			insert_values.push_back(std::to_string(aa_rank_prereqs_entry.aa_id));
 			insert_values.push_back(std::to_string(aa_rank_prereqs_entry.points));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");

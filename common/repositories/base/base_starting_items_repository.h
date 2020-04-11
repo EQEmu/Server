@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -51,7 +51,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("race");
+		return std::string("id");
 	}
 
 	static std::vector<std::string> Columns()
@@ -141,7 +141,7 @@ public:
 	)
 	{
 		for (auto &starting_items : starting_itemss) {
-			if (starting_items.race == starting_items_id) {
+			if (starting_items.id == starting_items_id) {
 				return starting_items;
 			}
 		}
@@ -208,6 +208,7 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[1] + " = " + std::to_string(starting_items_entry.race));
 		update_values.push_back(columns[2] + " = " + std::to_string(starting_items_entry.class));
 		update_values.push_back(columns[3] + " = " + std::to_string(starting_items_entry.deityid));
 		update_values.push_back(columns[4] + " = " + std::to_string(starting_items_entry.zoneid));
@@ -225,7 +226,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				starting_items_entry.race
+				starting_items_entry.id
 			)
 		);
 
@@ -238,6 +239,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(starting_items_entry.race));
 		insert_values.push_back(std::to_string(starting_items_entry.class));
 		insert_values.push_back(std::to_string(starting_items_entry.deityid));
 		insert_values.push_back(std::to_string(starting_items_entry.zoneid));
@@ -276,6 +278,7 @@ public:
 		for (auto &starting_items_entry: starting_items_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(starting_items_entry.race));
 			insert_values.push_back(std::to_string(starting_items_entry.class));
 			insert_values.push_back(std::to_string(starting_items_entry.deityid));
 			insert_values.push_back(std::to_string(starting_items_entry.zoneid));

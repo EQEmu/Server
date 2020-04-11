@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -43,7 +43,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("ip");
+		return std::string("accid");
 	}
 
 	static std::vector<std::string> Columns()
@@ -117,7 +117,7 @@ public:
 	)
 	{
 		for (auto &account_ip : account_ips) {
-			if (account_ip.ip == account_ip_id) {
+			if (account_ip.accid == account_ip_id) {
 				return account_ip;
 			}
 		}
@@ -176,6 +176,8 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(account_ip_entry.accid));
+		update_values.push_back(columns[1] + " = '" + EscapeString(account_ip_entry.ip) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(account_ip_entry.count));
 		update_values.push_back(columns[3] + " = '" + EscapeString(account_ip_entry.lastused) + "'");
 
@@ -185,7 +187,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				account_ip_entry.ip
+				account_ip_entry.accid
 			)
 		);
 
@@ -198,6 +200,8 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(account_ip_entry.accid));
+		insert_values.push_back("'" + EscapeString(account_ip_entry.ip) + "'");
 		insert_values.push_back(std::to_string(account_ip_entry.count));
 		insert_values.push_back("'" + EscapeString(account_ip_entry.lastused) + "'");
 
@@ -210,7 +214,7 @@ public:
 		);
 
 		if (results.Success()) {
-			account_ip_entry.id = results.LastInsertedID();
+			account_ip_entry.accid = results.LastInsertedID();
 			return account_ip_entry;
 		}
 
@@ -228,6 +232,8 @@ public:
 		for (auto &account_ip_entry: account_ip_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(account_ip_entry.accid));
+			insert_values.push_back("'" + EscapeString(account_ip_entry.ip) + "'");
 			insert_values.push_back(std::to_string(account_ip_entry.count));
 			insert_values.push_back("'" + EscapeString(account_ip_entry.lastused) + "'");
 

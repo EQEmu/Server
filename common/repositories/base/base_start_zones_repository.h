@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -57,7 +57,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("player_race");
+		return std::string("player_choice");
 	}
 
 	static std::vector<std::string> Columns()
@@ -159,7 +159,7 @@ public:
 	)
 	{
 		for (auto &start_zones : start_zoness) {
-			if (start_zones.player_race == start_zones_id) {
+			if (start_zones.player_choice == start_zones_id) {
 				return start_zones;
 			}
 		}
@@ -238,6 +238,10 @@ public:
 		update_values.push_back(columns[3] + " = " + std::to_string(start_zones_entry.heading));
 		update_values.push_back(columns[4] + " = " + std::to_string(start_zones_entry.zone_id));
 		update_values.push_back(columns[5] + " = " + std::to_string(start_zones_entry.bind_id));
+		update_values.push_back(columns[6] + " = " + std::to_string(start_zones_entry.player_choice));
+		update_values.push_back(columns[7] + " = " + std::to_string(start_zones_entry.player_class));
+		update_values.push_back(columns[8] + " = " + std::to_string(start_zones_entry.player_deity));
+		update_values.push_back(columns[9] + " = " + std::to_string(start_zones_entry.player_race));
 		update_values.push_back(columns[10] + " = " + std::to_string(start_zones_entry.start_zone));
 		update_values.push_back(columns[11] + " = " + std::to_string(start_zones_entry.bind_x));
 		update_values.push_back(columns[12] + " = " + std::to_string(start_zones_entry.bind_y));
@@ -253,7 +257,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				start_zones_entry.player_race
+				start_zones_entry.player_choice
 			)
 		);
 
@@ -272,6 +276,10 @@ public:
 		insert_values.push_back(std::to_string(start_zones_entry.heading));
 		insert_values.push_back(std::to_string(start_zones_entry.zone_id));
 		insert_values.push_back(std::to_string(start_zones_entry.bind_id));
+		insert_values.push_back(std::to_string(start_zones_entry.player_choice));
+		insert_values.push_back(std::to_string(start_zones_entry.player_class));
+		insert_values.push_back(std::to_string(start_zones_entry.player_deity));
+		insert_values.push_back(std::to_string(start_zones_entry.player_race));
 		insert_values.push_back(std::to_string(start_zones_entry.start_zone));
 		insert_values.push_back(std::to_string(start_zones_entry.bind_x));
 		insert_values.push_back(std::to_string(start_zones_entry.bind_y));
@@ -290,7 +298,7 @@ public:
 		);
 
 		if (results.Success()) {
-			start_zones_entry.id = results.LastInsertedID();
+			start_zones_entry.player_choice = results.LastInsertedID();
 			return start_zones_entry;
 		}
 
@@ -314,6 +322,10 @@ public:
 			insert_values.push_back(std::to_string(start_zones_entry.heading));
 			insert_values.push_back(std::to_string(start_zones_entry.zone_id));
 			insert_values.push_back(std::to_string(start_zones_entry.bind_id));
+			insert_values.push_back(std::to_string(start_zones_entry.player_choice));
+			insert_values.push_back(std::to_string(start_zones_entry.player_class));
+			insert_values.push_back(std::to_string(start_zones_entry.player_deity));
+			insert_values.push_back(std::to_string(start_zones_entry.player_race));
 			insert_values.push_back(std::to_string(start_zones_entry.start_zone));
 			insert_values.push_back(std::to_string(start_zones_entry.bind_x));
 			insert_values.push_back(std::to_string(start_zones_entry.bind_y));

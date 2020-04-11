@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -50,7 +50,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("slot");
+		return std::string("merchantid");
 	}
 
 	static std::vector<std::string> Columns()
@@ -138,7 +138,7 @@ public:
 	)
 	{
 		for (auto &merchantlist : merchantlists) {
-			if (merchantlist.slot == merchantlist_id) {
+			if (merchantlist.merchantid == merchantlist_id) {
 				return merchantlist;
 			}
 		}
@@ -204,6 +204,8 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(merchantlist_entry.merchantid));
+		update_values.push_back(columns[1] + " = " + std::to_string(merchantlist_entry.slot));
 		update_values.push_back(columns[2] + " = " + std::to_string(merchantlist_entry.item));
 		update_values.push_back(columns[3] + " = " + std::to_string(merchantlist_entry.faction_required));
 		update_values.push_back(columns[4] + " = " + std::to_string(merchantlist_entry.level_required));
@@ -220,7 +222,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				merchantlist_entry.slot
+				merchantlist_entry.merchantid
 			)
 		);
 
@@ -233,6 +235,8 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(merchantlist_entry.merchantid));
+		insert_values.push_back(std::to_string(merchantlist_entry.slot));
 		insert_values.push_back(std::to_string(merchantlist_entry.item));
 		insert_values.push_back(std::to_string(merchantlist_entry.faction_required));
 		insert_values.push_back(std::to_string(merchantlist_entry.level_required));
@@ -252,7 +256,7 @@ public:
 		);
 
 		if (results.Success()) {
-			merchantlist_entry.id = results.LastInsertedID();
+			merchantlist_entry.merchantid = results.LastInsertedID();
 			return merchantlist_entry;
 		}
 
@@ -270,6 +274,8 @@ public:
 		for (auto &merchantlist_entry: merchantlist_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(merchantlist_entry.merchantid));
+			insert_values.push_back(std::to_string(merchantlist_entry.slot));
 			insert_values.push_back(std::to_string(merchantlist_entry.item));
 			insert_values.push_back(std::to_string(merchantlist_entry.faction_required));
 			insert_values.push_back(std::to_string(merchantlist_entry.level_required));

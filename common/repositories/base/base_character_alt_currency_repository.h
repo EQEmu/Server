@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -42,7 +42,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("currency_id");
+		return std::string("char_id");
 	}
 
 	static std::vector<std::string> Columns()
@@ -114,7 +114,7 @@ public:
 	)
 	{
 		for (auto &character_alt_currency : character_alt_currencys) {
-			if (character_alt_currency.currency_id == character_alt_currency_id) {
+			if (character_alt_currency.char_id == character_alt_currency_id) {
 				return character_alt_currency;
 			}
 		}
@@ -172,6 +172,8 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(character_alt_currency_entry.char_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(character_alt_currency_entry.currency_id));
 		update_values.push_back(columns[2] + " = " + std::to_string(character_alt_currency_entry.amount));
 
 		auto results = database.QueryDatabase(
@@ -180,7 +182,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				character_alt_currency_entry.currency_id
+				character_alt_currency_entry.char_id
 			)
 		);
 
@@ -193,6 +195,8 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(character_alt_currency_entry.char_id));
+		insert_values.push_back(std::to_string(character_alt_currency_entry.currency_id));
 		insert_values.push_back(std::to_string(character_alt_currency_entry.amount));
 
 		auto results = database.QueryDatabase(
@@ -204,7 +208,7 @@ public:
 		);
 
 		if (results.Success()) {
-			character_alt_currency_entry.id = results.LastInsertedID();
+			character_alt_currency_entry.char_id = results.LastInsertedID();
 			return character_alt_currency_entry;
 		}
 
@@ -222,6 +226,8 @@ public:
 		for (auto &character_alt_currency_entry: character_alt_currency_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(character_alt_currency_entry.char_id));
+			insert_values.push_back(std::to_string(character_alt_currency_entry.currency_id));
 			insert_values.push_back(std::to_string(character_alt_currency_entry.amount));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");

@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -48,7 +48,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("start_zone");
+		return std::string("race");
 	}
 
 	static std::vector<std::string> Columns()
@@ -132,7 +132,7 @@ public:
 	)
 	{
 		for (auto &char_create_combinations : char_create_combinationss) {
-			if (char_create_combinations.start_zone == char_create_combinations_id) {
+			if (char_create_combinations.race == char_create_combinations_id) {
 				return char_create_combinations;
 			}
 		}
@@ -197,6 +197,10 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[0] + " = " + std::to_string(char_create_combinations_entry.allocation_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(char_create_combinations_entry.race));
+		update_values.push_back(columns[2] + " = " + std::to_string(char_create_combinations_entry.class));
+		update_values.push_back(columns[3] + " = " + std::to_string(char_create_combinations_entry.deity));
+		update_values.push_back(columns[4] + " = " + std::to_string(char_create_combinations_entry.start_zone));
 		update_values.push_back(columns[5] + " = " + std::to_string(char_create_combinations_entry.expansions_req));
 		update_values.push_back(columns[6] + " = " + std::to_string(char_create_combinations_entry.min_expansion));
 		update_values.push_back(columns[7] + " = " + std::to_string(char_create_combinations_entry.max_expansion));
@@ -208,7 +212,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				char_create_combinations_entry.start_zone
+				char_create_combinations_entry.race
 			)
 		);
 
@@ -222,6 +226,10 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(char_create_combinations_entry.allocation_id));
+		insert_values.push_back(std::to_string(char_create_combinations_entry.race));
+		insert_values.push_back(std::to_string(char_create_combinations_entry.class));
+		insert_values.push_back(std::to_string(char_create_combinations_entry.deity));
+		insert_values.push_back(std::to_string(char_create_combinations_entry.start_zone));
 		insert_values.push_back(std::to_string(char_create_combinations_entry.expansions_req));
 		insert_values.push_back(std::to_string(char_create_combinations_entry.min_expansion));
 		insert_values.push_back(std::to_string(char_create_combinations_entry.max_expansion));
@@ -236,7 +244,7 @@ public:
 		);
 
 		if (results.Success()) {
-			char_create_combinations_entry.id = results.LastInsertedID();
+			char_create_combinations_entry.race = results.LastInsertedID();
 			return char_create_combinations_entry;
 		}
 
@@ -255,6 +263,10 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(char_create_combinations_entry.allocation_id));
+			insert_values.push_back(std::to_string(char_create_combinations_entry.race));
+			insert_values.push_back(std::to_string(char_create_combinations_entry.class));
+			insert_values.push_back(std::to_string(char_create_combinations_entry.deity));
+			insert_values.push_back(std::to_string(char_create_combinations_entry.start_zone));
 			insert_values.push_back(std::to_string(char_create_combinations_entry.expansions_req));
 			insert_values.push_back(std::to_string(char_create_combinations_entry.min_expansion));
 			insert_values.push_back(std::to_string(char_create_combinations_entry.max_expansion));

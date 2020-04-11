@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -43,7 +43,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("level");
+		return std::string("tribute_id");
 	}
 
 	static std::vector<std::string> Columns()
@@ -117,7 +117,7 @@ public:
 	)
 	{
 		for (auto &tribute_levels : tribute_levelss) {
-			if (tribute_levels.level == tribute_levels_id) {
+			if (tribute_levels.tribute_id == tribute_levels_id) {
 				return tribute_levels;
 			}
 		}
@@ -176,6 +176,8 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(tribute_levels_entry.tribute_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(tribute_levels_entry.level));
 		update_values.push_back(columns[2] + " = " + std::to_string(tribute_levels_entry.cost));
 		update_values.push_back(columns[3] + " = " + std::to_string(tribute_levels_entry.item_id));
 
@@ -185,7 +187,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				tribute_levels_entry.level
+				tribute_levels_entry.tribute_id
 			)
 		);
 
@@ -198,6 +200,8 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(tribute_levels_entry.tribute_id));
+		insert_values.push_back(std::to_string(tribute_levels_entry.level));
 		insert_values.push_back(std::to_string(tribute_levels_entry.cost));
 		insert_values.push_back(std::to_string(tribute_levels_entry.item_id));
 
@@ -210,7 +214,7 @@ public:
 		);
 
 		if (results.Success()) {
-			tribute_levels_entry.id = results.LastInsertedID();
+			tribute_levels_entry.tribute_id = results.LastInsertedID();
 			return tribute_levels_entry;
 		}
 
@@ -228,6 +232,8 @@ public:
 		for (auto &tribute_levels_entry: tribute_levels_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(tribute_levels_entry.tribute_id));
+			insert_values.push_back(std::to_string(tribute_levels_entry.level));
 			insert_values.push_back(std::to_string(tribute_levels_entry.cost));
 			insert_values.push_back(std::to_string(tribute_levels_entry.item_id));
 

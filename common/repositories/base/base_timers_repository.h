@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -44,7 +44,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("type");
+		return std::string("char_id");
 	}
 
 	static std::vector<std::string> Columns()
@@ -120,7 +120,7 @@ public:
 	)
 	{
 		for (auto &timers : timerss) {
-			if (timers.type == timers_id) {
+			if (timers.char_id == timers_id) {
 				return timers;
 			}
 		}
@@ -180,6 +180,8 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(timers_entry.char_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(timers_entry.type));
 		update_values.push_back(columns[2] + " = " + std::to_string(timers_entry.start));
 		update_values.push_back(columns[3] + " = " + std::to_string(timers_entry.duration));
 		update_values.push_back(columns[4] + " = " + std::to_string(timers_entry.enable));
@@ -190,7 +192,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				timers_entry.type
+				timers_entry.char_id
 			)
 		);
 
@@ -203,6 +205,8 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(timers_entry.char_id));
+		insert_values.push_back(std::to_string(timers_entry.type));
 		insert_values.push_back(std::to_string(timers_entry.start));
 		insert_values.push_back(std::to_string(timers_entry.duration));
 		insert_values.push_back(std::to_string(timers_entry.enable));
@@ -216,7 +220,7 @@ public:
 		);
 
 		if (results.Success()) {
-			timers_entry.id = results.LastInsertedID();
+			timers_entry.char_id = results.LastInsertedID();
 			return timers_entry;
 		}
 
@@ -234,6 +238,8 @@ public:
 		for (auto &timers_entry: timers_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(timers_entry.char_id));
+			insert_values.push_back(std::to_string(timers_entry.type));
 			insert_values.push_back(std::to_string(timers_entry.start));
 			insert_values.push_back(std::to_string(timers_entry.duration));
 			insert_values.push_back(std::to_string(timers_entry.enable));

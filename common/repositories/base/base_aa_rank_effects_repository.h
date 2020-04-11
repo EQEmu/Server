@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -44,7 +44,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("slot");
+		return std::string("rank_id");
 	}
 
 	static std::vector<std::string> Columns()
@@ -120,7 +120,7 @@ public:
 	)
 	{
 		for (auto &aa_rank_effects : aa_rank_effectss) {
-			if (aa_rank_effects.slot == aa_rank_effects_id) {
+			if (aa_rank_effects.rank_id == aa_rank_effects_id) {
 				return aa_rank_effects;
 			}
 		}
@@ -180,6 +180,8 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(aa_rank_effects_entry.rank_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(aa_rank_effects_entry.slot));
 		update_values.push_back(columns[2] + " = " + std::to_string(aa_rank_effects_entry.effect_id));
 		update_values.push_back(columns[3] + " = " + std::to_string(aa_rank_effects_entry.base1));
 		update_values.push_back(columns[4] + " = " + std::to_string(aa_rank_effects_entry.base2));
@@ -190,7 +192,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				aa_rank_effects_entry.slot
+				aa_rank_effects_entry.rank_id
 			)
 		);
 
@@ -203,6 +205,8 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(aa_rank_effects_entry.rank_id));
+		insert_values.push_back(std::to_string(aa_rank_effects_entry.slot));
 		insert_values.push_back(std::to_string(aa_rank_effects_entry.effect_id));
 		insert_values.push_back(std::to_string(aa_rank_effects_entry.base1));
 		insert_values.push_back(std::to_string(aa_rank_effects_entry.base2));
@@ -216,7 +220,7 @@ public:
 		);
 
 		if (results.Success()) {
-			aa_rank_effects_entry.id = results.LastInsertedID();
+			aa_rank_effects_entry.rank_id = results.LastInsertedID();
 			return aa_rank_effects_entry;
 		}
 
@@ -234,6 +238,8 @@ public:
 		for (auto &aa_rank_effects_entry: aa_rank_effects_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(aa_rank_effects_entry.rank_id));
+			insert_values.push_back(std::to_string(aa_rank_effects_entry.slot));
 			insert_values.push_back(std::to_string(aa_rank_effects_entry.effect_id));
 			insert_values.push_back(std::to_string(aa_rank_effects_entry.base1));
 			insert_values.push_back(std::to_string(aa_rank_effects_entry.base2));

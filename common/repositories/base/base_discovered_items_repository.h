@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -176,6 +176,7 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(discovered_items_entry.item_id));
 		update_values.push_back(columns[1] + " = '" + EscapeString(discovered_items_entry.char_name) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(discovered_items_entry.discovered_date));
 		update_values.push_back(columns[3] + " = " + std::to_string(discovered_items_entry.account_status));
@@ -199,6 +200,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(discovered_items_entry.item_id));
 		insert_values.push_back("'" + EscapeString(discovered_items_entry.char_name) + "'");
 		insert_values.push_back(std::to_string(discovered_items_entry.discovered_date));
 		insert_values.push_back(std::to_string(discovered_items_entry.account_status));
@@ -212,7 +214,7 @@ public:
 		);
 
 		if (results.Success()) {
-			discovered_items_entry.id = results.LastInsertedID();
+			discovered_items_entry.item_id = results.LastInsertedID();
 			return discovered_items_entry;
 		}
 
@@ -230,6 +232,7 @@ public:
 		for (auto &discovered_items_entry: discovered_items_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(discovered_items_entry.item_id));
 			insert_values.push_back("'" + EscapeString(discovered_items_entry.char_name) + "'");
 			insert_values.push_back(std::to_string(discovered_items_entry.discovered_date));
 			insert_values.push_back(std::to_string(discovered_items_entry.account_status));

@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -49,7 +49,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("class");
+		return std::string("level");
 	}
 
 	static std::vector<std::string> Columns()
@@ -135,7 +135,7 @@ public:
 	)
 	{
 		for (auto &base_data : base_datas) {
-			if (base_data.class == base_data_id) {
+			if (base_data.level == base_data_id) {
 				return base_data;
 			}
 		}
@@ -200,6 +200,8 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(base_data_entry.level));
+		update_values.push_back(columns[1] + " = " + std::to_string(base_data_entry.class));
 		update_values.push_back(columns[2] + " = " + std::to_string(base_data_entry.hp));
 		update_values.push_back(columns[3] + " = " + std::to_string(base_data_entry.mana));
 		update_values.push_back(columns[4] + " = " + std::to_string(base_data_entry.end));
@@ -215,7 +217,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				base_data_entry.class
+				base_data_entry.level
 			)
 		);
 
@@ -228,6 +230,8 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(base_data_entry.level));
+		insert_values.push_back(std::to_string(base_data_entry.class));
 		insert_values.push_back(std::to_string(base_data_entry.hp));
 		insert_values.push_back(std::to_string(base_data_entry.mana));
 		insert_values.push_back(std::to_string(base_data_entry.end));
@@ -246,7 +250,7 @@ public:
 		);
 
 		if (results.Success()) {
-			base_data_entry.id = results.LastInsertedID();
+			base_data_entry.level = results.LastInsertedID();
 			return base_data_entry;
 		}
 
@@ -264,6 +268,8 @@ public:
 		for (auto &base_data_entry: base_data_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(base_data_entry.level));
+			insert_values.push_back(std::to_string(base_data_entry.class));
 			insert_values.push_back(std::to_string(base_data_entry.hp));
 			insert_values.push_back(std::to_string(base_data_entry.mana));
 			insert_values.push_back(std::to_string(base_data_entry.end));

@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -43,7 +43,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("rule_name");
+		return std::string("ruleset_id");
 	}
 
 	static std::vector<std::string> Columns()
@@ -117,7 +117,7 @@ public:
 	)
 	{
 		for (auto &rule_values : rule_valuess) {
-			if (rule_values.rule_name == rule_values_id) {
+			if (rule_values.ruleset_id == rule_values_id) {
 				return rule_values;
 			}
 		}
@@ -176,6 +176,8 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(rule_values_entry.ruleset_id));
+		update_values.push_back(columns[1] + " = '" + EscapeString(rule_values_entry.rule_name) + "'");
 		update_values.push_back(columns[2] + " = '" + EscapeString(rule_values_entry.rule_value) + "'");
 		update_values.push_back(columns[3] + " = '" + EscapeString(rule_values_entry.notes) + "'");
 
@@ -185,7 +187,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				rule_values_entry.rule_name
+				rule_values_entry.ruleset_id
 			)
 		);
 
@@ -198,6 +200,8 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(rule_values_entry.ruleset_id));
+		insert_values.push_back("'" + EscapeString(rule_values_entry.rule_name) + "'");
 		insert_values.push_back("'" + EscapeString(rule_values_entry.rule_value) + "'");
 		insert_values.push_back("'" + EscapeString(rule_values_entry.notes) + "'");
 
@@ -210,7 +214,7 @@ public:
 		);
 
 		if (results.Success()) {
-			rule_values_entry.id = results.LastInsertedID();
+			rule_values_entry.ruleset_id = results.LastInsertedID();
 			return rule_values_entry;
 		}
 
@@ -228,6 +232,8 @@ public:
 		for (auto &rule_values_entry: rule_values_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(rule_values_entry.ruleset_id));
+			insert_values.push_back("'" + EscapeString(rule_values_entry.rule_name) + "'");
 			insert_values.push_back("'" + EscapeString(rule_values_entry.rule_value) + "'");
 			insert_values.push_back("'" + EscapeString(rule_values_entry.notes) + "'");
 

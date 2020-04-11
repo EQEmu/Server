@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -42,7 +42,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("recast_type");
+		return std::string("id");
 	}
 
 	static std::vector<std::string> Columns()
@@ -114,7 +114,7 @@ public:
 	)
 	{
 		for (auto &character_item_recast : character_item_recasts) {
-			if (character_item_recast.recast_type == character_item_recast_id) {
+			if (character_item_recast.id == character_item_recast_id) {
 				return character_item_recast;
 			}
 		}
@@ -172,6 +172,8 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(character_item_recast_entry.id));
+		update_values.push_back(columns[1] + " = " + std::to_string(character_item_recast_entry.recast_type));
 		update_values.push_back(columns[2] + " = " + std::to_string(character_item_recast_entry.timestamp));
 
 		auto results = database.QueryDatabase(
@@ -180,7 +182,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				character_item_recast_entry.recast_type
+				character_item_recast_entry.id
 			)
 		);
 
@@ -193,6 +195,8 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(character_item_recast_entry.id));
+		insert_values.push_back(std::to_string(character_item_recast_entry.recast_type));
 		insert_values.push_back(std::to_string(character_item_recast_entry.timestamp));
 
 		auto results = database.QueryDatabase(
@@ -222,6 +226,8 @@ public:
 		for (auto &character_item_recast_entry: character_item_recast_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(character_item_recast_entry.id));
+			insert_values.push_back(std::to_string(character_item_recast_entry.recast_type));
 			insert_values.push_back(std::to_string(character_item_recast_entry.timestamp));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");

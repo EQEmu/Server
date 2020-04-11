@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -47,7 +47,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("petpower");
+		return std::string("type");
 	}
 
 	static std::vector<std::string> Columns()
@@ -129,7 +129,7 @@ public:
 	)
 	{
 		for (auto &pets : petss) {
-			if (pets.petpower == pets_id) {
+			if (pets.type == pets_id) {
 				return pets;
 			}
 		}
@@ -192,6 +192,8 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = '" + EscapeString(pets_entry.type) + "'");
+		update_values.push_back(columns[1] + " = " + std::to_string(pets_entry.petpower));
 		update_values.push_back(columns[2] + " = " + std::to_string(pets_entry.npcID));
 		update_values.push_back(columns[3] + " = " + std::to_string(pets_entry.temp));
 		update_values.push_back(columns[4] + " = " + std::to_string(pets_entry.petcontrol));
@@ -205,7 +207,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				pets_entry.petpower
+				pets_entry.type
 			)
 		);
 
@@ -218,6 +220,8 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back("'" + EscapeString(pets_entry.type) + "'");
+		insert_values.push_back(std::to_string(pets_entry.petpower));
 		insert_values.push_back(std::to_string(pets_entry.npcID));
 		insert_values.push_back(std::to_string(pets_entry.temp));
 		insert_values.push_back(std::to_string(pets_entry.petcontrol));
@@ -234,7 +238,7 @@ public:
 		);
 
 		if (results.Success()) {
-			pets_entry.id = results.LastInsertedID();
+			pets_entry.type = results.LastInsertedID();
 			return pets_entry;
 		}
 
@@ -252,6 +256,8 @@ public:
 		for (auto &pets_entry: pets_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back("'" + EscapeString(pets_entry.type) + "'");
+			insert_values.push_back(std::to_string(pets_entry.petpower));
 			insert_values.push_back(std::to_string(pets_entry.npcID));
 			insert_values.push_back(std::to_string(pets_entry.temp));
 			insert_values.push_back(std::to_string(pets_entry.petcontrol));

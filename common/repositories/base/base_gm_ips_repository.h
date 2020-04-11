@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -42,7 +42,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("ip_address");
+		return std::string("account_id");
 	}
 
 	static std::vector<std::string> Columns()
@@ -114,7 +114,7 @@ public:
 	)
 	{
 		for (auto &gm_ips : gm_ipss) {
-			if (gm_ips.ip_address == gm_ips_id) {
+			if (gm_ips.account_id == gm_ips_id) {
 				return gm_ips;
 			}
 		}
@@ -173,6 +173,8 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[0] + " = '" + EscapeString(gm_ips_entry.name) + "'");
+		update_values.push_back(columns[1] + " = " + std::to_string(gm_ips_entry.account_id));
+		update_values.push_back(columns[2] + " = '" + EscapeString(gm_ips_entry.ip_address) + "'");
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -180,7 +182,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				gm_ips_entry.ip_address
+				gm_ips_entry.account_id
 			)
 		);
 
@@ -194,6 +196,8 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back("'" + EscapeString(gm_ips_entry.name) + "'");
+		insert_values.push_back(std::to_string(gm_ips_entry.account_id));
+		insert_values.push_back("'" + EscapeString(gm_ips_entry.ip_address) + "'");
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -204,7 +208,7 @@ public:
 		);
 
 		if (results.Success()) {
-			gm_ips_entry.id = results.LastInsertedID();
+			gm_ips_entry.account_id = results.LastInsertedID();
 			return gm_ips_entry;
 		}
 
@@ -223,6 +227,8 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back("'" + EscapeString(gm_ips_entry.name) + "'");
+			insert_values.push_back(std::to_string(gm_ips_entry.account_id));
+			insert_values.push_back("'" + EscapeString(gm_ips_entry.ip_address) + "'");
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}

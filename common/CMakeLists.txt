@@ -132,10 +132,8 @@ SET(repositories
 	repositories/base/base_adventure_template_entry_flavor_repository.h
 	repositories/base/base_alternate_currency_repository.h
 	repositories/base/base_auras_repository.h
-	repositories/base/base_banned_ips_repository.h
 	repositories/base/base_base_data_repository.h
 	repositories/base/base_blocked_spells_repository.h
-	repositories/base/base_books_repository.h
 	repositories/base/base_bugs_repository.h
 	repositories/base/base_bug_reports_repository.h
 	repositories/base/base_buyer_repository.h
@@ -164,12 +162,9 @@ SET(repositories
 	repositories/base/base_character_skills_repository.h
 	repositories/base/base_character_spells_repository.h
 	repositories/base/base_character_tasks_repository.h
-	repositories/base/base_character_tribute_repository.h
 	repositories/base/base_char_create_combinations_repository.h
 	repositories/base/base_char_create_point_allocations_repository.h
 	repositories/base/base_char_recipe_list_repository.h
-	repositories/base/base_chatchannels_repository.h
-	repositories/base/base_command_settings_repository.h
 	repositories/base/base_completed_tasks_repository.h
 	repositories/base/base_data_buckets_repository.h
 	repositories/base/base_db_str_repository.h
@@ -197,7 +192,6 @@ SET(repositories
 	repositories/base/base_guild_ranks_repository.h
 	repositories/base/base_guild_relations_repository.h
 	repositories/base/base_hackers_repository.h
-	repositories/base/base_horses_repository.h
 	repositories/base/base_instance_list_repository.h
 	repositories/base/base_instance_list_player_repository.h
 	repositories/base/base_inventory_repository.h
@@ -205,8 +199,6 @@ SET(repositories
 	repositories/base/base_ip_exemptions_repository.h
 	repositories/base/base_items_repository.h
 	repositories/base/base_item_tick_repository.h
-	repositories/base/base_launcher_repository.h
-	repositories/base/base_launcher_zones_repository.h
 	repositories/base/base_ldon_trap_entries_repository.h
 	repositories/base/base_ldon_trap_templates_repository.h
 	repositories/base/base_level_exp_mods_repository.h
@@ -297,10 +289,8 @@ SET(repositories
 	repositories/adventure_template_entry_flavor_repository.h
 	repositories/alternate_currency_repository.h
 	repositories/auras_repository.h
-	repositories/banned_ips_repository.h
 	repositories/base_data_repository.h
 	repositories/blocked_spells_repository.h
-	repositories/books_repository.h
 	repositories/bugs_repository.h
 	repositories/bug_reports_repository.h
 	repositories/buyer_repository.h
@@ -329,12 +319,9 @@ SET(repositories
 	repositories/character_skills_repository.h
 	repositories/character_spells_repository.h
 	repositories/character_tasks_repository.h
-	repositories/character_tribute_repository.h
 	repositories/char_create_combinations_repository.h
 	repositories/char_create_point_allocations_repository.h
 	repositories/char_recipe_list_repository.h
-	repositories/chatchannels_repository.h
-	repositories/command_settings_repository.h
 	repositories/completed_tasks_repository.h
 	repositories/data_buckets_repository.h
 	repositories/db_str_repository.h
@@ -362,7 +349,6 @@ SET(repositories
 	repositories/guild_ranks_repository.h
 	repositories/guild_relations_repository.h
 	repositories/hackers_repository.h
-	repositories/horses_repository.h
 	repositories/instance_list_repository.h
 	repositories/instance_list_player_repository.h
 	repositories/inventory_repository.h
@@ -370,8 +356,6 @@ SET(repositories
 	repositories/ip_exemptions_repository.h
 	repositories/items_repository.h
 	repositories/item_tick_repository.h
-	repositories/launcher_repository.h
-	repositories/launcher_zones_repository.h
 	repositories/ldon_trap_entries_repository.h
 	repositories/ldon_trap_templates_repository.h
 	repositories/level_exp_mods_repository.h

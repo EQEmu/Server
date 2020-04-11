@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -50,7 +50,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("rank");
+		return std::string("guild_id");
 	}
 
 	static std::vector<std::string> Columns()
@@ -138,7 +138,7 @@ public:
 	)
 	{
 		for (auto &guild_ranks : guild_rankss) {
-			if (guild_ranks.rank == guild_ranks_id) {
+			if (guild_ranks.guild_id == guild_ranks_id) {
 				return guild_ranks;
 			}
 		}
@@ -204,6 +204,8 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(guild_ranks_entry.guild_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(guild_ranks_entry.rank));
 		update_values.push_back(columns[2] + " = '" + EscapeString(guild_ranks_entry.title) + "'");
 		update_values.push_back(columns[3] + " = " + std::to_string(guild_ranks_entry.can_hear));
 		update_values.push_back(columns[4] + " = " + std::to_string(guild_ranks_entry.can_speak));
@@ -220,7 +222,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				guild_ranks_entry.rank
+				guild_ranks_entry.guild_id
 			)
 		);
 
@@ -233,6 +235,8 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(guild_ranks_entry.guild_id));
+		insert_values.push_back(std::to_string(guild_ranks_entry.rank));
 		insert_values.push_back("'" + EscapeString(guild_ranks_entry.title) + "'");
 		insert_values.push_back(std::to_string(guild_ranks_entry.can_hear));
 		insert_values.push_back(std::to_string(guild_ranks_entry.can_speak));
@@ -252,7 +256,7 @@ public:
 		);
 
 		if (results.Success()) {
-			guild_ranks_entry.id = results.LastInsertedID();
+			guild_ranks_entry.guild_id = results.LastInsertedID();
 			return guild_ranks_entry;
 		}
 
@@ -270,6 +274,8 @@ public:
 		for (auto &guild_ranks_entry: guild_ranks_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(guild_ranks_entry.guild_id));
+			insert_values.push_back(std::to_string(guild_ranks_entry.rank));
 			insert_values.push_back("'" + EscapeString(guild_ranks_entry.title) + "'");
 			insert_values.push_back(std::to_string(guild_ranks_entry.can_hear));
 			insert_values.push_back(std::to_string(guild_ranks_entry.can_speak));

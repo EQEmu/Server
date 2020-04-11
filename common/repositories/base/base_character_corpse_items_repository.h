@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -50,7 +50,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("equip_slot");
+		return std::string("corpse_id");
 	}
 
 	static std::vector<std::string> Columns()
@@ -138,7 +138,7 @@ public:
 	)
 	{
 		for (auto &character_corpse_items : character_corpse_itemss) {
-			if (character_corpse_items.equip_slot == character_corpse_items_id) {
+			if (character_corpse_items.corpse_id == character_corpse_items_id) {
 				return character_corpse_items;
 			}
 		}
@@ -204,6 +204,8 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(character_corpse_items_entry.corpse_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(character_corpse_items_entry.equip_slot));
 		update_values.push_back(columns[2] + " = " + std::to_string(character_corpse_items_entry.item_id));
 		update_values.push_back(columns[3] + " = " + std::to_string(character_corpse_items_entry.charges));
 		update_values.push_back(columns[4] + " = " + std::to_string(character_corpse_items_entry.aug_1));
@@ -220,7 +222,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				character_corpse_items_entry.equip_slot
+				character_corpse_items_entry.corpse_id
 			)
 		);
 
@@ -233,6 +235,8 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(character_corpse_items_entry.corpse_id));
+		insert_values.push_back(std::to_string(character_corpse_items_entry.equip_slot));
 		insert_values.push_back(std::to_string(character_corpse_items_entry.item_id));
 		insert_values.push_back(std::to_string(character_corpse_items_entry.charges));
 		insert_values.push_back(std::to_string(character_corpse_items_entry.aug_1));
@@ -252,7 +256,7 @@ public:
 		);
 
 		if (results.Success()) {
-			character_corpse_items_entry.id = results.LastInsertedID();
+			character_corpse_items_entry.corpse_id = results.LastInsertedID();
 			return character_corpse_items_entry;
 		}
 
@@ -270,6 +274,8 @@ public:
 		for (auto &character_corpse_items_entry: character_corpse_items_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(character_corpse_items_entry.corpse_id));
+			insert_values.push_back(std::to_string(character_corpse_items_entry.equip_slot));
 			insert_values.push_back(std::to_string(character_corpse_items_entry.item_id));
 			insert_values.push_back(std::to_string(character_corpse_items_entry.charges));
 			insert_values.push_back(std::to_string(character_corpse_items_entry.aug_1));

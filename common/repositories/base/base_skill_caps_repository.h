@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -44,7 +44,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("class_");
+		return std::string("skillID");
 	}
 
 	static std::vector<std::string> Columns()
@@ -120,7 +120,7 @@ public:
 	)
 	{
 		for (auto &skill_caps : skill_capss) {
-			if (skill_caps.class_ == skill_caps_id) {
+			if (skill_caps.skillID == skill_caps_id) {
 				return skill_caps;
 			}
 		}
@@ -180,7 +180,11 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(skill_caps_entry.skillID));
+		update_values.push_back(columns[1] + " = " + std::to_string(skill_caps_entry.class));
+		update_values.push_back(columns[2] + " = " + std::to_string(skill_caps_entry.level));
 		update_values.push_back(columns[3] + " = " + std::to_string(skill_caps_entry.cap));
+		update_values.push_back(columns[4] + " = " + std::to_string(skill_caps_entry.class_));
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -188,7 +192,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				skill_caps_entry.class_
+				skill_caps_entry.skillID
 			)
 		);
 
@@ -201,7 +205,11 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(skill_caps_entry.skillID));
+		insert_values.push_back(std::to_string(skill_caps_entry.class));
+		insert_values.push_back(std::to_string(skill_caps_entry.level));
 		insert_values.push_back(std::to_string(skill_caps_entry.cap));
+		insert_values.push_back(std::to_string(skill_caps_entry.class_));
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -212,7 +220,7 @@ public:
 		);
 
 		if (results.Success()) {
-			skill_caps_entry.id = results.LastInsertedID();
+			skill_caps_entry.skillID = results.LastInsertedID();
 			return skill_caps_entry;
 		}
 
@@ -230,7 +238,11 @@ public:
 		for (auto &skill_caps_entry: skill_caps_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(skill_caps_entry.skillID));
+			insert_values.push_back(std::to_string(skill_caps_entry.class));
+			insert_values.push_back(std::to_string(skill_caps_entry.level));
 			insert_values.push_back(std::to_string(skill_caps_entry.cap));
+			insert_values.push_back(std::to_string(skill_caps_entry.class_));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}

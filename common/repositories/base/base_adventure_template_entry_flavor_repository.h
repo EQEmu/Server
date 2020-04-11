@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -168,6 +168,7 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(adventure_template_entry_flavor_entry.id));
 		update_values.push_back(columns[1] + " = '" + EscapeString(adventure_template_entry_flavor_entry.text) + "'");
 
 		auto results = content_db.QueryDatabase(
@@ -189,6 +190,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(adventure_template_entry_flavor_entry.id));
 		insert_values.push_back("'" + EscapeString(adventure_template_entry_flavor_entry.text) + "'");
 
 		auto results = content_db.QueryDatabase(
@@ -218,6 +220,7 @@ public:
 		for (auto &adventure_template_entry_flavor_entry: adventure_template_entry_flavor_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(adventure_template_entry_flavor_entry.id));
 			insert_values.push_back("'" + EscapeString(adventure_template_entry_flavor_entry.text) + "'");
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");

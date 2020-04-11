@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -172,6 +172,7 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(pets_equipmentset_entry.set_id));
 		update_values.push_back(columns[1] + " = '" + EscapeString(pets_equipmentset_entry.setname) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(pets_equipmentset_entry.nested_set));
 
@@ -194,6 +195,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(pets_equipmentset_entry.set_id));
 		insert_values.push_back("'" + EscapeString(pets_equipmentset_entry.setname) + "'");
 		insert_values.push_back(std::to_string(pets_equipmentset_entry.nested_set));
 
@@ -206,7 +208,7 @@ public:
 		);
 
 		if (results.Success()) {
-			pets_equipmentset_entry.id = results.LastInsertedID();
+			pets_equipmentset_entry.set_id = results.LastInsertedID();
 			return pets_equipmentset_entry;
 		}
 
@@ -224,6 +226,7 @@ public:
 		for (auto &pets_equipmentset_entry: pets_equipmentset_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(pets_equipmentset_entry.set_id));
 			insert_values.push_back("'" + EscapeString(pets_equipmentset_entry.setname) + "'");
 			insert_values.push_back(std::to_string(pets_equipmentset_entry.nested_set));
 

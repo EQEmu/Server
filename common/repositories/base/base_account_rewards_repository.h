@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -42,7 +42,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("reward_id");
+		return std::string("account_id");
 	}
 
 	static std::vector<std::string> Columns()
@@ -114,7 +114,7 @@ public:
 	)
 	{
 		for (auto &account_rewards : account_rewardss) {
-			if (account_rewards.reward_id == account_rewards_id) {
+			if (account_rewards.account_id == account_rewards_id) {
 				return account_rewards;
 			}
 		}
@@ -172,6 +172,8 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(account_rewards_entry.account_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(account_rewards_entry.reward_id));
 		update_values.push_back(columns[2] + " = " + std::to_string(account_rewards_entry.amount));
 
 		auto results = database.QueryDatabase(
@@ -180,7 +182,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				account_rewards_entry.reward_id
+				account_rewards_entry.account_id
 			)
 		);
 
@@ -193,6 +195,8 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(account_rewards_entry.account_id));
+		insert_values.push_back(std::to_string(account_rewards_entry.reward_id));
 		insert_values.push_back(std::to_string(account_rewards_entry.amount));
 
 		auto results = database.QueryDatabase(
@@ -204,7 +208,7 @@ public:
 		);
 
 		if (results.Success()) {
-			account_rewards_entry.id = results.LastInsertedID();
+			account_rewards_entry.account_id = results.LastInsertedID();
 			return account_rewards_entry;
 		}
 
@@ -222,6 +226,8 @@ public:
 		for (auto &account_rewards_entry: account_rewards_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(account_rewards_entry.account_id));
+			insert_values.push_back(std::to_string(account_rewards_entry.reward_id));
 			insert_values.push_back(std::to_string(account_rewards_entry.amount));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");

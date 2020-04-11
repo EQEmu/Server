@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -44,7 +44,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("faction_id");
+		return std::string("npc_faction_id");
 	}
 
 	static std::vector<std::string> Columns()
@@ -120,7 +120,7 @@ public:
 	)
 	{
 		for (auto &npc_faction_entries : npc_faction_entriess) {
-			if (npc_faction_entries.faction_id == npc_faction_entries_id) {
+			if (npc_faction_entries.npc_faction_id == npc_faction_entries_id) {
 				return npc_faction_entries;
 			}
 		}
@@ -180,6 +180,8 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(npc_faction_entries_entry.npc_faction_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(npc_faction_entries_entry.faction_id));
 		update_values.push_back(columns[2] + " = " + std::to_string(npc_faction_entries_entry.value));
 		update_values.push_back(columns[3] + " = " + std::to_string(npc_faction_entries_entry.npc_value));
 		update_values.push_back(columns[4] + " = " + std::to_string(npc_faction_entries_entry.temp));
@@ -190,7 +192,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				npc_faction_entries_entry.faction_id
+				npc_faction_entries_entry.npc_faction_id
 			)
 		);
 
@@ -203,6 +205,8 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(npc_faction_entries_entry.npc_faction_id));
+		insert_values.push_back(std::to_string(npc_faction_entries_entry.faction_id));
 		insert_values.push_back(std::to_string(npc_faction_entries_entry.value));
 		insert_values.push_back(std::to_string(npc_faction_entries_entry.npc_value));
 		insert_values.push_back(std::to_string(npc_faction_entries_entry.temp));
@@ -216,7 +220,7 @@ public:
 		);
 
 		if (results.Success()) {
-			npc_faction_entries_entry.id = results.LastInsertedID();
+			npc_faction_entries_entry.npc_faction_id = results.LastInsertedID();
 			return npc_faction_entries_entry;
 		}
 
@@ -234,6 +238,8 @@ public:
 		for (auto &npc_faction_entries_entry: npc_faction_entries_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(npc_faction_entries_entry.npc_faction_id));
+			insert_values.push_back(std::to_string(npc_faction_entries_entry.faction_id));
 			insert_values.push_back(std::to_string(npc_faction_entries_entry.value));
 			insert_values.push_back(std::to_string(npc_faction_entries_entry.npc_value));
 			insert_values.push_back(std::to_string(npc_faction_entries_entry.temp));

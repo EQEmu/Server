@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -204,6 +204,7 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(adventure_stats_entry.player_id));
 		update_values.push_back(columns[1] + " = " + std::to_string(adventure_stats_entry.guk_wins));
 		update_values.push_back(columns[2] + " = " + std::to_string(adventure_stats_entry.mir_wins));
 		update_values.push_back(columns[3] + " = " + std::to_string(adventure_stats_entry.mmc_wins));
@@ -234,6 +235,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(adventure_stats_entry.player_id));
 		insert_values.push_back(std::to_string(adventure_stats_entry.guk_wins));
 		insert_values.push_back(std::to_string(adventure_stats_entry.mir_wins));
 		insert_values.push_back(std::to_string(adventure_stats_entry.mmc_wins));
@@ -254,7 +256,7 @@ public:
 		);
 
 		if (results.Success()) {
-			adventure_stats_entry.id = results.LastInsertedID();
+			adventure_stats_entry.player_id = results.LastInsertedID();
 			return adventure_stats_entry;
 		}
 
@@ -272,6 +274,7 @@ public:
 		for (auto &adventure_stats_entry: adventure_stats_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(adventure_stats_entry.player_id));
 			insert_values.push_back(std::to_string(adventure_stats_entry.guk_wins));
 			insert_values.push_back(std::to_string(adventure_stats_entry.mir_wins));
 			insert_values.push_back(std::to_string(adventure_stats_entry.mmc_wins));

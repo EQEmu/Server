@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -54,7 +54,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("activityid");
+		return std::string("taskid");
 	}
 
 	static std::vector<std::string> Columns()
@@ -150,7 +150,7 @@ public:
 	)
 	{
 		for (auto &task_activities : task_activitiess) {
-			if (task_activities.activityid == task_activities_id) {
+			if (task_activities.taskid == task_activities_id) {
 				return task_activities;
 			}
 		}
@@ -220,6 +220,8 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(task_activities_entry.taskid));
+		update_values.push_back(columns[1] + " = " + std::to_string(task_activities_entry.activityid));
 		update_values.push_back(columns[2] + " = " + std::to_string(task_activities_entry.step));
 		update_values.push_back(columns[3] + " = " + std::to_string(task_activities_entry.activitytype));
 		update_values.push_back(columns[4] + " = '" + EscapeString(task_activities_entry.target_name) + "'");
@@ -240,7 +242,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				task_activities_entry.activityid
+				task_activities_entry.taskid
 			)
 		);
 
@@ -253,6 +255,8 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(task_activities_entry.taskid));
+		insert_values.push_back(std::to_string(task_activities_entry.activityid));
 		insert_values.push_back(std::to_string(task_activities_entry.step));
 		insert_values.push_back(std::to_string(task_activities_entry.activitytype));
 		insert_values.push_back("'" + EscapeString(task_activities_entry.target_name) + "'");
@@ -276,7 +280,7 @@ public:
 		);
 
 		if (results.Success()) {
-			task_activities_entry.id = results.LastInsertedID();
+			task_activities_entry.taskid = results.LastInsertedID();
 			return task_activities_entry;
 		}
 
@@ -294,6 +298,8 @@ public:
 		for (auto &task_activities_entry: task_activities_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(task_activities_entry.taskid));
+			insert_values.push_back(std::to_string(task_activities_entry.activityid));
 			insert_values.push_back(std::to_string(task_activities_entry.step));
 			insert_values.push_back(std::to_string(task_activities_entry.activitytype));
 			insert_values.push_back("'" + EscapeString(task_activities_entry.target_name) + "'");

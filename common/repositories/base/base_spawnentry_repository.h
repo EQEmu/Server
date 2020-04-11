@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -43,7 +43,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("npcID");
+		return std::string("spawngroupID");
 	}
 
 	static std::vector<std::string> Columns()
@@ -117,7 +117,7 @@ public:
 	)
 	{
 		for (auto &spawnentry : spawnentrys) {
-			if (spawnentry.npcID == spawnentry_id) {
+			if (spawnentry.spawngroupID == spawnentry_id) {
 				return spawnentry;
 			}
 		}
@@ -176,6 +176,8 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(spawnentry_entry.spawngroupID));
+		update_values.push_back(columns[1] + " = " + std::to_string(spawnentry_entry.npcID));
 		update_values.push_back(columns[2] + " = " + std::to_string(spawnentry_entry.chance));
 		update_values.push_back(columns[3] + " = " + std::to_string(spawnentry_entry.condition_value_filter));
 
@@ -185,7 +187,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				spawnentry_entry.npcID
+				spawnentry_entry.spawngroupID
 			)
 		);
 
@@ -198,6 +200,8 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(spawnentry_entry.spawngroupID));
+		insert_values.push_back(std::to_string(spawnentry_entry.npcID));
 		insert_values.push_back(std::to_string(spawnentry_entry.chance));
 		insert_values.push_back(std::to_string(spawnentry_entry.condition_value_filter));
 
@@ -210,7 +214,7 @@ public:
 		);
 
 		if (results.Success()) {
-			spawnentry_entry.id = results.LastInsertedID();
+			spawnentry_entry.spawngroupID = results.LastInsertedID();
 			return spawnentry_entry;
 		}
 
@@ -228,6 +232,8 @@ public:
 		for (auto &spawnentry_entry: spawnentry_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(spawnentry_entry.spawngroupID));
+			insert_values.push_back(std::to_string(spawnentry_entry.npcID));
 			insert_values.push_back(std::to_string(spawnentry_entry.chance));
 			insert_values.push_back(std::to_string(spawnentry_entry.condition_value_filter));
 

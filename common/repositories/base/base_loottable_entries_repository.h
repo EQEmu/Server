@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -45,7 +45,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("lootdrop_id");
+		return std::string("loottable_id");
 	}
 
 	static std::vector<std::string> Columns()
@@ -123,7 +123,7 @@ public:
 	)
 	{
 		for (auto &loottable_entries : loottable_entriess) {
-			if (loottable_entries.lootdrop_id == loottable_entries_id) {
+			if (loottable_entries.loottable_id == loottable_entries_id) {
 				return loottable_entries;
 			}
 		}
@@ -184,6 +184,8 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(loottable_entries_entry.loottable_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(loottable_entries_entry.lootdrop_id));
 		update_values.push_back(columns[2] + " = " + std::to_string(loottable_entries_entry.multiplier));
 		update_values.push_back(columns[3] + " = " + std::to_string(loottable_entries_entry.droplimit));
 		update_values.push_back(columns[4] + " = " + std::to_string(loottable_entries_entry.mindrop));
@@ -195,7 +197,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				loottable_entries_entry.lootdrop_id
+				loottable_entries_entry.loottable_id
 			)
 		);
 
@@ -208,6 +210,8 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(loottable_entries_entry.loottable_id));
+		insert_values.push_back(std::to_string(loottable_entries_entry.lootdrop_id));
 		insert_values.push_back(std::to_string(loottable_entries_entry.multiplier));
 		insert_values.push_back(std::to_string(loottable_entries_entry.droplimit));
 		insert_values.push_back(std::to_string(loottable_entries_entry.mindrop));
@@ -222,7 +226,7 @@ public:
 		);
 
 		if (results.Success()) {
-			loottable_entries_entry.id = results.LastInsertedID();
+			loottable_entries_entry.loottable_id = results.LastInsertedID();
 			return loottable_entries_entry;
 		}
 
@@ -240,6 +244,8 @@ public:
 		for (auto &loottable_entries_entry: loottable_entries_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(loottable_entries_entry.loottable_id));
+			insert_values.push_back(std::to_string(loottable_entries_entry.lootdrop_id));
 			insert_values.push_back(std::to_string(loottable_entries_entry.multiplier));
 			insert_values.push_back(std::to_string(loottable_entries_entry.droplimit));
 			insert_values.push_back(std::to_string(loottable_entries_entry.mindrop));

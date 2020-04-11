@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -45,7 +45,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("slot_id");
+		return std::string("char_id");
 	}
 
 	static std::vector<std::string> Columns()
@@ -123,7 +123,7 @@ public:
 	)
 	{
 		for (auto &trader : traders) {
-			if (trader.slot_id == trader_id) {
+			if (trader.char_id == trader_id) {
 				return trader;
 			}
 		}
@@ -184,10 +184,12 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(trader_entry.char_id));
 		update_values.push_back(columns[1] + " = " + std::to_string(trader_entry.item_id));
 		update_values.push_back(columns[2] + " = " + std::to_string(trader_entry.serialnumber));
 		update_values.push_back(columns[3] + " = " + std::to_string(trader_entry.charges));
 		update_values.push_back(columns[4] + " = " + std::to_string(trader_entry.item_cost));
+		update_values.push_back(columns[5] + " = " + std::to_string(trader_entry.slot_id));
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -195,7 +197,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				trader_entry.slot_id
+				trader_entry.char_id
 			)
 		);
 
@@ -208,10 +210,12 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(trader_entry.char_id));
 		insert_values.push_back(std::to_string(trader_entry.item_id));
 		insert_values.push_back(std::to_string(trader_entry.serialnumber));
 		insert_values.push_back(std::to_string(trader_entry.charges));
 		insert_values.push_back(std::to_string(trader_entry.item_cost));
+		insert_values.push_back(std::to_string(trader_entry.slot_id));
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -222,7 +226,7 @@ public:
 		);
 
 		if (results.Success()) {
-			trader_entry.id = results.LastInsertedID();
+			trader_entry.char_id = results.LastInsertedID();
 			return trader_entry;
 		}
 
@@ -240,10 +244,12 @@ public:
 		for (auto &trader_entry: trader_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(trader_entry.char_id));
 			insert_values.push_back(std::to_string(trader_entry.item_id));
 			insert_values.push_back(std::to_string(trader_entry.serialnumber));
 			insert_values.push_back(std::to_string(trader_entry.charges));
 			insert_values.push_back(std::to_string(trader_entry.item_cost));
+			insert_values.push_back(std::to_string(trader_entry.slot_id));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}

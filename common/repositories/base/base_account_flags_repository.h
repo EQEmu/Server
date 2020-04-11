@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -42,7 +42,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("p_flag");
+		return std::string("p_accid");
 	}
 
 	static std::vector<std::string> Columns()
@@ -114,7 +114,7 @@ public:
 	)
 	{
 		for (auto &account_flags : account_flagss) {
-			if (account_flags.p_flag == account_flags_id) {
+			if (account_flags.p_accid == account_flags_id) {
 				return account_flags;
 			}
 		}
@@ -172,6 +172,8 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(account_flags_entry.p_accid));
+		update_values.push_back(columns[1] + " = '" + EscapeString(account_flags_entry.p_flag) + "'");
 		update_values.push_back(columns[2] + " = '" + EscapeString(account_flags_entry.p_value) + "'");
 
 		auto results = database.QueryDatabase(
@@ -180,7 +182,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				account_flags_entry.p_flag
+				account_flags_entry.p_accid
 			)
 		);
 
@@ -193,6 +195,8 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(account_flags_entry.p_accid));
+		insert_values.push_back("'" + EscapeString(account_flags_entry.p_flag) + "'");
 		insert_values.push_back("'" + EscapeString(account_flags_entry.p_value) + "'");
 
 		auto results = database.QueryDatabase(
@@ -204,7 +208,7 @@ public:
 		);
 
 		if (results.Success()) {
-			account_flags_entry.id = results.LastInsertedID();
+			account_flags_entry.p_accid = results.LastInsertedID();
 			return account_flags_entry;
 		}
 
@@ -222,6 +226,8 @@ public:
 		for (auto &account_flags_entry: account_flags_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(account_flags_entry.p_accid));
+			insert_values.push_back("'" + EscapeString(account_flags_entry.p_flag) + "'");
 			insert_values.push_back("'" + EscapeString(account_flags_entry.p_value) + "'");
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");

@@ -79,7 +79,7 @@ my $pass          = $config->{"server"}{"database"}{"password"};
 my $dsn           = "dbi:mysql:$database_name:$host:3306";
 my $connect       = DBI->connect($dsn, $user, $pass);
 
-my @tables = ($requested_table_to_generate);
+my @tables = ();
 if ($requested_table_to_generate eq "all" || !$requested_table_to_generate) {
     my $table_names_exec = $connect->prepare(
         "
@@ -120,7 +120,7 @@ foreach my $table_to_generate (@tables) {
     my @table_ignore_list = (
         "character_enabledtasks",
         # "grid",                  # Manually created
-        "grid_entries",          # Manually created
+        "grid_entries", # Manually created
         # "tradeskill_recipe",     # Manually created
         # "character_recipe_list", # Manually created
         "guild_bank",
@@ -160,7 +160,8 @@ foreach my $table_to_generate (@tables) {
           COLUMN_TYPE,
           ORDINAL_POSITION,
           COLUMN_KEY,
-          COLUMN_DEFAULT
+          COLUMN_DEFAULT,
+          EXTRA
         FROM
           INFORMATION_SCHEMA.COLUMNS
         WHERE
@@ -203,8 +204,6 @@ foreach my $table_to_generate (@tables) {
     my %table_primary_key    = ();
     $ex->execute($database_name, $table_to_generate);
 
-    $table_primary_key{$table_to_generate} = "id";
-
     while (my @row           = $ex->fetchrow_array()) {
         my $column_name      = $row[0];
         my $table_name       = $row[1];
@@ -213,9 +212,12 @@ foreach my $table_to_generate (@tables) {
         my $ordinal_position = $row[4];
         my $column_key       = $row[5];
         my $column_default   = ($row[6] ? $row[6] : "");
+        my $extra            = ($row[7] ? $row[7] : "");
 
-        if ($column_key eq "PRI" || ($ordinal_position == 0 && $column_name =~ /id/i)) {
-            $table_primary_key{$table_name} = $column_name;
+        if (!$table_primary_key{$table_name}) {
+            if (($column_key eq "PRI" && $data_type =~/int/) || ($ordinal_position == 0 && $column_name =~ /id/i)) {
+                $table_primary_key{$table_name} = $column_name;
+            }
         }
 
         my $default_value = 0;
@@ -242,7 +244,7 @@ foreach my $table_to_generate (@tables) {
         $column_names_quoted .= sprintf("\t\t\t\"%s\",\n", $column_name);
 
         # update one
-        if ($column_key ne "PRI") {
+        if ($extra ne "auto_increment") {
             my $query_value = sprintf('\'" + EscapeString(%s_entry.%s) + "\'");', $table_name, $column_name);
             if ($data_type =~ /int|float|double|decimal/) {
                 $query_value = sprintf('" + std::to_string(%s_entry.%s));', $table_name, $column_name);
@@ -256,7 +258,7 @@ foreach my $table_to_generate (@tables) {
         }
 
         # insert one
-        if ($column_key ne "PRI") {
+        if ($extra ne "auto_increment") {
             my $value = sprintf("\"'\" + EscapeString(%s_entry.%s) + \"'\"", $table_name, $column_name);
             if ($data_type =~ /int|float|double|decimal/) {
                 $value = sprintf('std::to_string(%s_entry.%s)', $table_name, $column_name);
@@ -285,6 +287,12 @@ foreach my $table_to_generate (@tables) {
         # print "table_name [$table_name] column_name [$column_name] data_type [$data_type] column_type [$column_type]\n";
 
         $index++;
+
+    }
+
+    if (!$table_primary_key{$table_to_generate}) {
+        print "Table primary key [$table_to_generate] has no primary key! Skipping... \n";
+        next;
     }
 
     #############################################
@@ -303,7 +311,7 @@ foreach my $table_to_generate (@tables) {
     }
 
     if (trim($base_repository_template) eq "") {
-        print "Base repository template not found! [$repository_template_file]\n";
+        print "Base repository template not found! [$base_repository_template_file]\n";
         exit;
     }
 

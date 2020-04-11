@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -168,6 +168,7 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = '" + EscapeString(launcher_entry.name) + "'");
 		update_values.push_back(columns[1] + " = " + std::to_string(launcher_entry.dynamics));
 
 		auto results = database.QueryDatabase(
@@ -189,6 +190,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back("'" + EscapeString(launcher_entry.name) + "'");
 		insert_values.push_back(std::to_string(launcher_entry.dynamics));
 
 		auto results = database.QueryDatabase(
@@ -200,7 +202,7 @@ public:
 		);
 
 		if (results.Success()) {
-			launcher_entry.id = results.LastInsertedID();
+			launcher_entry.name = results.LastInsertedID();
 			return launcher_entry;
 		}
 
@@ -218,6 +220,7 @@ public:
 		for (auto &launcher_entry: launcher_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back("'" + EscapeString(launcher_entry.name) + "'");
 			insert_values.push_back(std::to_string(launcher_entry.dynamics));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");

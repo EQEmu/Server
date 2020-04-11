@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -48,7 +48,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("item_id");
+		return std::string("lootdrop_id");
 	}
 
 	static std::vector<std::string> Columns()
@@ -132,7 +132,7 @@ public:
 	)
 	{
 		for (auto &lootdrop_entries : lootdrop_entriess) {
-			if (lootdrop_entries.item_id == lootdrop_entries_id) {
+			if (lootdrop_entries.lootdrop_id == lootdrop_entries_id) {
 				return lootdrop_entries;
 			}
 		}
@@ -196,6 +196,8 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(lootdrop_entries_entry.lootdrop_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(lootdrop_entries_entry.item_id));
 		update_values.push_back(columns[2] + " = " + std::to_string(lootdrop_entries_entry.item_charges));
 		update_values.push_back(columns[3] + " = " + std::to_string(lootdrop_entries_entry.equip_item));
 		update_values.push_back(columns[4] + " = " + std::to_string(lootdrop_entries_entry.chance));
@@ -210,7 +212,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				lootdrop_entries_entry.item_id
+				lootdrop_entries_entry.lootdrop_id
 			)
 		);
 
@@ -223,6 +225,8 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(lootdrop_entries_entry.lootdrop_id));
+		insert_values.push_back(std::to_string(lootdrop_entries_entry.item_id));
 		insert_values.push_back(std::to_string(lootdrop_entries_entry.item_charges));
 		insert_values.push_back(std::to_string(lootdrop_entries_entry.equip_item));
 		insert_values.push_back(std::to_string(lootdrop_entries_entry.chance));
@@ -240,7 +244,7 @@ public:
 		);
 
 		if (results.Success()) {
-			lootdrop_entries_entry.id = results.LastInsertedID();
+			lootdrop_entries_entry.lootdrop_id = results.LastInsertedID();
 			return lootdrop_entries_entry;
 		}
 
@@ -258,6 +262,8 @@ public:
 		for (auto &lootdrop_entries_entry: lootdrop_entries_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(lootdrop_entries_entry.lootdrop_id));
+			insert_values.push_back(std::to_string(lootdrop_entries_entry.item_id));
 			insert_values.push_back(std::to_string(lootdrop_entries_entry.item_charges));
 			insert_values.push_back(std::to_string(lootdrop_entries_entry.equip_item));
 			insert_values.push_back(std::to_string(lootdrop_entries_entry.chance));

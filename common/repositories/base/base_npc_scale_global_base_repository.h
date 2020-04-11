@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -67,7 +67,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("level");
+		return std::string("type");
 	}
 
 	static std::vector<std::string> Columns()
@@ -189,7 +189,7 @@ public:
 	)
 	{
 		for (auto &npc_scale_global_base : npc_scale_global_bases) {
-			if (npc_scale_global_base.level == npc_scale_global_base_id) {
+			if (npc_scale_global_base.type == npc_scale_global_base_id) {
 				return npc_scale_global_base;
 			}
 		}
@@ -272,6 +272,8 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(npc_scale_global_base_entry.type));
+		update_values.push_back(columns[1] + " = " + std::to_string(npc_scale_global_base_entry.level));
 		update_values.push_back(columns[2] + " = " + std::to_string(npc_scale_global_base_entry.ac));
 		update_values.push_back(columns[3] + " = " + std::to_string(npc_scale_global_base_entry.hp));
 		update_values.push_back(columns[4] + " = " + std::to_string(npc_scale_global_base_entry.accuracy));
@@ -305,7 +307,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				npc_scale_global_base_entry.level
+				npc_scale_global_base_entry.type
 			)
 		);
 
@@ -318,6 +320,8 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(npc_scale_global_base_entry.type));
+		insert_values.push_back(std::to_string(npc_scale_global_base_entry.level));
 		insert_values.push_back(std::to_string(npc_scale_global_base_entry.ac));
 		insert_values.push_back(std::to_string(npc_scale_global_base_entry.hp));
 		insert_values.push_back(std::to_string(npc_scale_global_base_entry.accuracy));
@@ -354,7 +358,7 @@ public:
 		);
 
 		if (results.Success()) {
-			npc_scale_global_base_entry.id = results.LastInsertedID();
+			npc_scale_global_base_entry.type = results.LastInsertedID();
 			return npc_scale_global_base_entry;
 		}
 
@@ -372,6 +376,8 @@ public:
 		for (auto &npc_scale_global_base_entry: npc_scale_global_base_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(npc_scale_global_base_entry.type));
+			insert_values.push_back(std::to_string(npc_scale_global_base_entry.level));
 			insert_values.push_back(std::to_string(npc_scale_global_base_entry.ac));
 			insert_values.push_back(std::to_string(npc_scale_global_base_entry.hp));
 			insert_values.push_back(std::to_string(npc_scale_global_base_entry.accuracy));

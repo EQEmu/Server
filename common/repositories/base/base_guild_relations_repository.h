@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -42,7 +42,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("guild2");
+		return std::string("guild1");
 	}
 
 	static std::vector<std::string> Columns()
@@ -114,7 +114,7 @@ public:
 	)
 	{
 		for (auto &guild_relations : guild_relationss) {
-			if (guild_relations.guild2 == guild_relations_id) {
+			if (guild_relations.guild1 == guild_relations_id) {
 				return guild_relations;
 			}
 		}
@@ -172,6 +172,8 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(guild_relations_entry.guild1));
+		update_values.push_back(columns[1] + " = " + std::to_string(guild_relations_entry.guild2));
 		update_values.push_back(columns[2] + " = " + std::to_string(guild_relations_entry.relation));
 
 		auto results = database.QueryDatabase(
@@ -180,7 +182,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				guild_relations_entry.guild2
+				guild_relations_entry.guild1
 			)
 		);
 
@@ -193,6 +195,8 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(guild_relations_entry.guild1));
+		insert_values.push_back(std::to_string(guild_relations_entry.guild2));
 		insert_values.push_back(std::to_string(guild_relations_entry.relation));
 
 		auto results = database.QueryDatabase(
@@ -204,7 +208,7 @@ public:
 		);
 
 		if (results.Success()) {
-			guild_relations_entry.id = results.LastInsertedID();
+			guild_relations_entry.guild1 = results.LastInsertedID();
 			return guild_relations_entry;
 		}
 
@@ -222,6 +226,8 @@ public:
 		for (auto &guild_relations_entry: guild_relations_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(guild_relations_entry.guild1));
+			insert_values.push_back(std::to_string(guild_relations_entry.guild2));
 			insert_values.push_back(std::to_string(guild_relations_entry.relation));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");

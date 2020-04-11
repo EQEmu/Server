@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -47,7 +47,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("exploreid");
+		return std::string("zoneid");
 	}
 
 	static std::vector<std::string> Columns()
@@ -129,7 +129,7 @@ public:
 	)
 	{
 		for (auto &proximities : proximitiess) {
-			if (proximities.exploreid == proximities_id) {
+			if (proximities.zoneid == proximities_id) {
 				return proximities;
 			}
 		}
@@ -192,6 +192,8 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(proximities_entry.zoneid));
+		update_values.push_back(columns[1] + " = " + std::to_string(proximities_entry.exploreid));
 		update_values.push_back(columns[2] + " = " + std::to_string(proximities_entry.minx));
 		update_values.push_back(columns[3] + " = " + std::to_string(proximities_entry.maxx));
 		update_values.push_back(columns[4] + " = " + std::to_string(proximities_entry.miny));
@@ -205,7 +207,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				proximities_entry.exploreid
+				proximities_entry.zoneid
 			)
 		);
 
@@ -218,6 +220,8 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(proximities_entry.zoneid));
+		insert_values.push_back(std::to_string(proximities_entry.exploreid));
 		insert_values.push_back(std::to_string(proximities_entry.minx));
 		insert_values.push_back(std::to_string(proximities_entry.maxx));
 		insert_values.push_back(std::to_string(proximities_entry.miny));
@@ -234,7 +238,7 @@ public:
 		);
 
 		if (results.Success()) {
-			proximities_entry.id = results.LastInsertedID();
+			proximities_entry.zoneid = results.LastInsertedID();
 			return proximities_entry;
 		}
 
@@ -252,6 +256,8 @@ public:
 		for (auto &proximities_entry: proximities_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(proximities_entry.zoneid));
+			insert_values.push_back(std::to_string(proximities_entry.exploreid));
 			insert_values.push_back(std::to_string(proximities_entry.minx));
 			insert_values.push_back(std::to_string(proximities_entry.maxx));
 			insert_values.push_back(std::to_string(proximities_entry.miny));

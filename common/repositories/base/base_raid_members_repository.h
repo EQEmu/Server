@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -197,6 +197,7 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[0] + " = " + std::to_string(raid_members_entry.raidid));
+		update_values.push_back(columns[1] + " = " + std::to_string(raid_members_entry.charid));
 		update_values.push_back(columns[2] + " = " + std::to_string(raid_members_entry.groupid));
 		update_values.push_back(columns[3] + " = " + std::to_string(raid_members_entry._class));
 		update_values.push_back(columns[4] + " = " + std::to_string(raid_members_entry.level));
@@ -225,6 +226,7 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(raid_members_entry.raidid));
+		insert_values.push_back(std::to_string(raid_members_entry.charid));
 		insert_values.push_back(std::to_string(raid_members_entry.groupid));
 		insert_values.push_back(std::to_string(raid_members_entry._class));
 		insert_values.push_back(std::to_string(raid_members_entry.level));
@@ -242,7 +244,7 @@ public:
 		);
 
 		if (results.Success()) {
-			raid_members_entry.id = results.LastInsertedID();
+			raid_members_entry.charid = results.LastInsertedID();
 			return raid_members_entry;
 		}
 
@@ -261,6 +263,7 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(raid_members_entry.raidid));
+			insert_values.push_back(std::to_string(raid_members_entry.charid));
 			insert_values.push_back(std::to_string(raid_members_entry.groupid));
 			insert_values.push_back(std::to_string(raid_members_entry._class));
 			insert_values.push_back(std::to_string(raid_members_entry.level));

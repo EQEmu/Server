@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -48,7 +48,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("name");
+		return std::string("type");
 	}
 
 	static std::vector<std::string> Columns()
@@ -132,7 +132,7 @@ public:
 	)
 	{
 		for (auto &lfguild : lfguilds) {
-			if (lfguild.name == lfguild_id) {
+			if (lfguild.type == lfguild_id) {
 				return lfguild;
 			}
 		}
@@ -196,6 +196,8 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(lfguild_entry.type));
+		update_values.push_back(columns[1] + " = '" + EscapeString(lfguild_entry.name) + "'");
 		update_values.push_back(columns[2] + " = '" + EscapeString(lfguild_entry.comment) + "'");
 		update_values.push_back(columns[3] + " = " + std::to_string(lfguild_entry.fromlevel));
 		update_values.push_back(columns[4] + " = " + std::to_string(lfguild_entry.tolevel));
@@ -210,7 +212,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				lfguild_entry.name
+				lfguild_entry.type
 			)
 		);
 
@@ -223,6 +225,8 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(lfguild_entry.type));
+		insert_values.push_back("'" + EscapeString(lfguild_entry.name) + "'");
 		insert_values.push_back("'" + EscapeString(lfguild_entry.comment) + "'");
 		insert_values.push_back(std::to_string(lfguild_entry.fromlevel));
 		insert_values.push_back(std::to_string(lfguild_entry.tolevel));
@@ -240,7 +244,7 @@ public:
 		);
 
 		if (results.Success()) {
-			lfguild_entry.id = results.LastInsertedID();
+			lfguild_entry.type = results.LastInsertedID();
 			return lfguild_entry;
 		}
 
@@ -258,6 +262,8 @@ public:
 		for (auto &lfguild_entry: lfguild_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(lfguild_entry.type));
+			insert_values.push_back("'" + EscapeString(lfguild_entry.name) + "'");
 			insert_values.push_back("'" + EscapeString(lfguild_entry.comment) + "'");
 			insert_values.push_back(std::to_string(lfguild_entry.fromlevel));
 			insert_values.push_back(std::to_string(lfguild_entry.tolevel));

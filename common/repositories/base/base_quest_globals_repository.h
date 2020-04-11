@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -45,7 +45,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("name");
+		return std::string("charid");
 	}
 
 	static std::vector<std::string> Columns()
@@ -123,7 +123,7 @@ public:
 	)
 	{
 		for (auto &quest_globals : quest_globalss) {
-			if (quest_globals.name == quest_globals_id) {
+			if (quest_globals.charid == quest_globals_id) {
 				return quest_globals;
 			}
 		}
@@ -184,6 +184,10 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(quest_globals_entry.charid));
+		update_values.push_back(columns[1] + " = " + std::to_string(quest_globals_entry.npcid));
+		update_values.push_back(columns[2] + " = " + std::to_string(quest_globals_entry.zoneid));
+		update_values.push_back(columns[3] + " = '" + EscapeString(quest_globals_entry.name) + "'");
 		update_values.push_back(columns[4] + " = '" + EscapeString(quest_globals_entry.value) + "'");
 		update_values.push_back(columns[5] + " = " + std::to_string(quest_globals_entry.expdate));
 
@@ -193,7 +197,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				quest_globals_entry.name
+				quest_globals_entry.charid
 			)
 		);
 
@@ -206,6 +210,10 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(quest_globals_entry.charid));
+		insert_values.push_back(std::to_string(quest_globals_entry.npcid));
+		insert_values.push_back(std::to_string(quest_globals_entry.zoneid));
+		insert_values.push_back("'" + EscapeString(quest_globals_entry.name) + "'");
 		insert_values.push_back("'" + EscapeString(quest_globals_entry.value) + "'");
 		insert_values.push_back(std::to_string(quest_globals_entry.expdate));
 
@@ -218,7 +226,7 @@ public:
 		);
 
 		if (results.Success()) {
-			quest_globals_entry.id = results.LastInsertedID();
+			quest_globals_entry.charid = results.LastInsertedID();
 			return quest_globals_entry;
 		}
 
@@ -236,6 +244,10 @@ public:
 		for (auto &quest_globals_entry: quest_globals_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(quest_globals_entry.charid));
+			insert_values.push_back(std::to_string(quest_globals_entry.npcid));
+			insert_values.push_back(std::to_string(quest_globals_entry.zoneid));
+			insert_values.push_back("'" + EscapeString(quest_globals_entry.name) + "'");
 			insert_values.push_back("'" + EscapeString(quest_globals_entry.value) + "'");
 			insert_values.push_back(std::to_string(quest_globals_entry.expdate));
 

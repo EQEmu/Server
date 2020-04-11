@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -43,7 +43,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("instance_id");
+		return std::string("id");
 	}
 
 	static std::vector<std::string> Columns()
@@ -117,7 +117,7 @@ public:
 	)
 	{
 		for (auto &spawn_condition_values : spawn_condition_valuess) {
-			if (spawn_condition_values.instance_id == spawn_condition_values_id) {
+			if (spawn_condition_values.id == spawn_condition_values_id) {
 				return spawn_condition_values;
 			}
 		}
@@ -176,7 +176,10 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(spawn_condition_values_entry.id));
 		update_values.push_back(columns[1] + " = " + std::to_string(spawn_condition_values_entry.value));
+		update_values.push_back(columns[2] + " = '" + EscapeString(spawn_condition_values_entry.zone) + "'");
+		update_values.push_back(columns[3] + " = " + std::to_string(spawn_condition_values_entry.instance_id));
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -184,7 +187,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				spawn_condition_values_entry.instance_id
+				spawn_condition_values_entry.id
 			)
 		);
 
@@ -197,7 +200,10 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(spawn_condition_values_entry.id));
 		insert_values.push_back(std::to_string(spawn_condition_values_entry.value));
+		insert_values.push_back("'" + EscapeString(spawn_condition_values_entry.zone) + "'");
+		insert_values.push_back(std::to_string(spawn_condition_values_entry.instance_id));
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -226,7 +232,10 @@ public:
 		for (auto &spawn_condition_values_entry: spawn_condition_values_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(spawn_condition_values_entry.id));
 			insert_values.push_back(std::to_string(spawn_condition_values_entry.value));
+			insert_values.push_back("'" + EscapeString(spawn_condition_values_entry.zone) + "'");
+			insert_values.push_back(std::to_string(spawn_condition_values_entry.instance_id));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}

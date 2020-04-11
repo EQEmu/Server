@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -55,7 +55,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("slotid");
+		return std::string("charid");
 	}
 
 	static std::vector<std::string> Columns()
@@ -153,7 +153,7 @@ public:
 	)
 	{
 		for (auto &inventory : inventorys) {
-			if (inventory.slotid == inventory_id) {
+			if (inventory.charid == inventory_id) {
 				return inventory;
 			}
 		}
@@ -224,6 +224,8 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(inventory_entry.charid));
+		update_values.push_back(columns[1] + " = " + std::to_string(inventory_entry.slotid));
 		update_values.push_back(columns[2] + " = " + std::to_string(inventory_entry.itemid));
 		update_values.push_back(columns[3] + " = " + std::to_string(inventory_entry.charges));
 		update_values.push_back(columns[4] + " = " + std::to_string(inventory_entry.color));
@@ -245,7 +247,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				inventory_entry.slotid
+				inventory_entry.charid
 			)
 		);
 
@@ -258,6 +260,8 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(inventory_entry.charid));
+		insert_values.push_back(std::to_string(inventory_entry.slotid));
 		insert_values.push_back(std::to_string(inventory_entry.itemid));
 		insert_values.push_back(std::to_string(inventory_entry.charges));
 		insert_values.push_back(std::to_string(inventory_entry.color));
@@ -282,7 +286,7 @@ public:
 		);
 
 		if (results.Success()) {
-			inventory_entry.id = results.LastInsertedID();
+			inventory_entry.charid = results.LastInsertedID();
 			return inventory_entry;
 		}
 
@@ -300,6 +304,8 @@ public:
 		for (auto &inventory_entry: inventory_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(inventory_entry.charid));
+			insert_values.push_back(std::to_string(inventory_entry.slotid));
 			insert_values.push_back(std::to_string(inventory_entry.itemid));
 			insert_values.push_back(std::to_string(inventory_entry.charges));
 			insert_values.push_back(std::to_string(inventory_entry.color));

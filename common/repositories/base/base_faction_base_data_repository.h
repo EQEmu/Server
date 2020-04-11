@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -184,6 +184,7 @@ public:
 
 		auto columns = Columns();
 
+		update_values.push_back(columns[0] + " = " + std::to_string(faction_base_data_entry.client_faction_id));
 		update_values.push_back(columns[1] + " = " + std::to_string(faction_base_data_entry.min));
 		update_values.push_back(columns[2] + " = " + std::to_string(faction_base_data_entry.max));
 		update_values.push_back(columns[3] + " = " + std::to_string(faction_base_data_entry.unk_hero1));
@@ -209,6 +210,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(faction_base_data_entry.client_faction_id));
 		insert_values.push_back(std::to_string(faction_base_data_entry.min));
 		insert_values.push_back(std::to_string(faction_base_data_entry.max));
 		insert_values.push_back(std::to_string(faction_base_data_entry.unk_hero1));
@@ -224,7 +226,7 @@ public:
 		);
 
 		if (results.Success()) {
-			faction_base_data_entry.id = results.LastInsertedID();
+			faction_base_data_entry.client_faction_id = results.LastInsertedID();
 			return faction_base_data_entry;
 		}
 
@@ -242,6 +244,7 @@ public:
 		for (auto &faction_base_data_entry: faction_base_data_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(faction_base_data_entry.client_faction_id));
 			insert_values.push_back(std::to_string(faction_base_data_entry.min));
 			insert_values.push_back(std::to_string(faction_base_data_entry.max));
 			insert_values.push_back(std::to_string(faction_base_data_entry.unk_hero1));

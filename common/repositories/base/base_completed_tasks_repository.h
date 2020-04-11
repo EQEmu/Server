@@ -20,8 +20,8 @@
  */
 
 /**
- * This repository was automatically generated on Apr 5, 2020 and is NOT
- * to be modified directly. Any repository modifications are meant to be made to
+ * This repository was automatically generated and is NOT to be modified directly.
+ * Any repository modifications are meant to be made to
  * the repository extending the base. Any modifications to base repositories are to
  * be made by the generator only
  */
@@ -43,7 +43,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("activityid");
+		return std::string("charid");
 	}
 
 	static std::vector<std::string> Columns()
@@ -117,7 +117,7 @@ public:
 	)
 	{
 		for (auto &completed_tasks : completed_taskss) {
-			if (completed_tasks.activityid == completed_tasks_id) {
+			if (completed_tasks.charid == completed_tasks_id) {
 				return completed_tasks;
 			}
 		}
@@ -176,7 +176,10 @@ public:
 
 		auto columns = Columns();
 
-
+		update_values.push_back(columns[0] + " = " + std::to_string(completed_tasks_entry.charid));
+		update_values.push_back(columns[1] + " = " + std::to_string(completed_tasks_entry.completedtime));
+		update_values.push_back(columns[2] + " = " + std::to_string(completed_tasks_entry.taskid));
+		update_values.push_back(columns[3] + " = " + std::to_string(completed_tasks_entry.activityid));
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -184,7 +187,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				completed_tasks_entry.activityid
+				completed_tasks_entry.charid
 			)
 		);
 
@@ -197,7 +200,10 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
-
+		insert_values.push_back(std::to_string(completed_tasks_entry.charid));
+		insert_values.push_back(std::to_string(completed_tasks_entry.completedtime));
+		insert_values.push_back(std::to_string(completed_tasks_entry.taskid));
+		insert_values.push_back(std::to_string(completed_tasks_entry.activityid));
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -208,7 +214,7 @@ public:
 		);
 
 		if (results.Success()) {
-			completed_tasks_entry.id = results.LastInsertedID();
+			completed_tasks_entry.charid = results.LastInsertedID();
 			return completed_tasks_entry;
 		}
 
@@ -226,7 +232,10 @@ public:
 		for (auto &completed_tasks_entry: completed_tasks_entries) {
 			std::vector<std::string> insert_values;
 
-
+			insert_values.push_back(std::to_string(completed_tasks_entry.charid));
+			insert_values.push_back(std::to_string(completed_tasks_entry.completedtime));
+			insert_values.push_back(std::to_string(completed_tasks_entry.taskid));
+			insert_values.push_back(std::to_string(completed_tasks_entry.activityid));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
