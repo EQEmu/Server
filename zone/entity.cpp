@@ -1992,18 +1992,12 @@ Raid *EntityList::GetRaidByClient(Client* client)
 
 	iterator = raid_list.begin();
 
-	bool found_raid = false;
 	while (iterator != raid_list.end()) {
-		if (found_raid) {
-			return client->p_raid_instance;
-		}
-
 		for (auto & member : (*iterator)->members) {
 			if (member.member) {
 				if (member.member == client) {
 					client->p_raid_instance = *iterator;
-					found_raid = true;
-					break;
+					return *iterator;
 				}
 			}
 		}
