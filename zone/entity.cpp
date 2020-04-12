@@ -1995,7 +1995,7 @@ Raid *EntityList::GetRaidByClient(Client* client)
 	bool found_raid = false;
 	while (iterator != raid_list.end()) {
 		if (found_raid) {
-			break;
+			return client->p_raid_instance;
 		}
 
 		for (auto & member : (*iterator)->members) {
@@ -2011,7 +2011,7 @@ Raid *EntityList::GetRaidByClient(Client* client)
 		++iterator;
 	}
 
-	return client->p_raid_instance;
+	return nullptr;
 }
 
 Raid *EntityList::GetRaidByMob(Mob *mob)
