@@ -2011,7 +2011,7 @@ Raid *EntityList::GetRaidByClient(Client* client)
 		++iterator;
 	}
 
-	return nullptr;
+	return client->p_raid_instance;
 }
 
 Raid *EntityList::GetRaidByMob(Mob *mob)

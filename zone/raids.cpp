@@ -1045,6 +1045,8 @@ void Raid::SendRaidRemove(const char *who, Client *to)
 	{
 		if(strcmp(members[x].membername, who) == 0)
 		{
+			members[x].member->p_raid_instance = nullptr;
+
 			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
 			RaidGeneral_Struct *rg = (RaidGeneral_Struct*)outapp->pBuffer;
 			rg->action = raidRemove2;
@@ -1064,6 +1066,8 @@ void Raid::SendRaidRemoveAll(const char *who)
 	{
 		if(strcmp(members[x].membername, who) == 0)
 		{
+			members[x].member->p_raid_instance = nullptr;
+
 			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
 			RaidGeneral_Struct *rg = (RaidGeneral_Struct*)outapp->pBuffer;
 			rg->action = raidRemove2;
@@ -1079,8 +1083,9 @@ void Raid::SendRaidRemoveAll(const char *who)
 
 void Raid::SendRaidDisband(Client *to)
 {
-	if(!to)
+	if (!to) {
 		return;
+	}
 
 	auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
 	RaidGeneral_Struct *rg = (RaidGeneral_Struct*)outapp->pBuffer;
