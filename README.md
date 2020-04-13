@@ -52,7 +52,7 @@ forum, although pull requests will be much quicker and easier on all parties.
 
 ## Resources
 - [EQEmulator Forums](http://www.eqemulator.org/forums)
-- [EQEmulator Wiki](https://github.com/EQEmu/Server/wiki)
+- [EQEmulator Wiki](https://eqemu.gitbook.io/)
 
 ## Related Repositories
 * [ProjectEQ Quests](https://github.com/ProjectEQ/projecteqquests)
