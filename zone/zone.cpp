@@ -734,7 +734,7 @@ void Zone::Shutdown(bool quiet)
 
 	if (RuleB(Zone, KillProcessOnDynamicShutdown)) {
 		LogInfo("[KillProcessOnDynamicShutdown] Shutting down");
-		std::exit(EXIT_SUCCESS);
+		EQ::EventLoop::Get().Shutdown();
 	}
 }
 
