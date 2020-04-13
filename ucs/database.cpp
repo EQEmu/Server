@@ -320,7 +320,7 @@ void Database::SendHeaders(Client *client)
 	int unknownField3 = 1;
 	int characterID   = FindCharacter(client->MailBoxName().c_str());
 
-	LogInfo("Sendheaders for [{}], CharID is [{}]", client->MailBoxName().c_str(), characterID);
+	LogDebug("Sendheaders for [{}], CharID is [{}]", client->MailBoxName().c_str(), characterID);
 
 	if (characterID <= 0) {
 		return;

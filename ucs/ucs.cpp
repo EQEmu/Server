@@ -70,7 +70,7 @@ int main() {
 	// Check every minute for unused channels we can delete
 	//
 	Timer ChannelListProcessTimer(60000);
-	Timer ClientConnectionPruneTimer(1000);
+	Timer ClientConnectionPruneTimer(60000);
 
 	Timer InterserverTimer(INTERSERVER_TIMER); // does auto-reconnect
 
