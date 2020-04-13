@@ -822,6 +822,22 @@ XS(XS__isdisctome) {
 	XSRETURN(1);
 }
 
+XS(XS__getracename);
+XS(XS__getracename) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getracename(uint16 race_id)");
+
+	dXSTARG;
+	uint16 race_id = (int) SvIV(ST(0));
+	std::string race_name = quest_manager.getracename(race_id);
+
+	sv_setpv(TARG, race_name.c_str());
+	XSprePUSH;
+	PUSHTARG;
+	XSRETURN(1);
+}
+
 XS(XS__getspellname);
 XS(XS__getspellname) {
 	dXSARGS;
@@ -833,6 +849,22 @@ XS(XS__getspellname) {
 	std::string spell_name = quest_manager.getspellname(spell_id);
 
 	sv_setpv(TARG, spell_name.c_str());
+	XSprePUSH;
+	PUSHTARG;
+	XSRETURN(1);
+}
+
+XS(XS__getskillname);
+XS(XS__getskillname) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getskillname(int skill_id)");
+
+	dXSTARG;
+	int skill_id = (int) SvIV(ST(0));
+	std::string skill_name = quest_manager.getskillname(skill_id);
+
+	sv_setpv(TARG, skill_name.c_str());
 	XSprePUSH;
 	PUSHTARG;
 	XSRETURN(1);
@@ -2858,6 +2890,22 @@ XS(XS__getitemname) {
 	XSRETURN(1);
 }
 
+XS(XS__getnpcnamebyid);
+XS(XS__getnpcnamebyid) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getnpcnamebyid(uint32 npc_id)");
+
+	dXSTARG;
+	uint32 npc_id = (int) SvIV(ST(0));
+	const char *npc_name = quest_manager.getnpcnamebyid(npc_id);
+
+	sv_setpv(TARG, npc_name);
+	XSprePUSH;
+	PUSHTARG;
+	XSRETURN(1);
+}
+
 XS(XS__UpdateSpawnTimer);
 XS(XS__UpdateSpawnTimer) {
 	dXSARGS;
@@ -3228,6 +3276,93 @@ XS(XS__saylink) {
 	sv_setpv(TARG, RETVAL.c_str());
 	XSprePUSH;
 	PUSHTARG;
+	XSRETURN(1);
+}
+
+XS(XS__getcharnamebyid);
+XS(XS__getcharnamebyid) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getcharnamebyid(uint32 char_id)");
+	dXSTARG;
+
+	Const_char *RETVAL;
+	uint32     char_id = (int) SvUV(ST(0));
+
+	RETVAL = quest_manager.getcharnamebyid(char_id);
+
+	sv_setpv(TARG, RETVAL);
+	XSprePUSH;
+	PUSHTARG;
+}
+
+XS(XS__getcharidbyname);
+XS(XS__getcharidbyname) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getcharidbyname(string name)");
+	dXSTARG;
+
+	uint32 		RETVAL;
+	const char *name = (const char *) SvPV_nolen(ST(0));
+
+	RETVAL = quest_manager.getcharidbyname(name);
+	XSprePUSH;
+	PUSHu((UV)RETVAL);
+
+	XSRETURN(1);
+}
+
+XS(XS__getclassname);
+XS(XS__getclassname) {
+	dXSARGS;
+	if (items < 1 || items > 2)
+		Perl_croak(aTHX_ "Usage: quest::getclassname(uint8 class_id, [uint8 level = 0])");
+	dXSTARG;
+
+	std::string RETVAL;
+	uint8  class_id = (int) SvUV(ST(0));
+	uint8  level = 0;
+	if (items > 1)
+		level = (int) SvUV(ST(1));
+
+	RETVAL = quest_manager.getclassname(class_id, level);
+	sv_setpv(TARG, RETVAL.c_str());
+	XSprePUSH;
+	PUSHTARG;
+  XSRETURN(1);
+}
+
+XS(XS__getcurrencyitemid);
+XS(XS__getcurrencyitemid) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getcurrencyitemid(int currency_id)");
+	dXSTARG;
+
+	int RETVAL;
+	int currency_id = (int) SvUV(ST(0));
+
+	RETVAL = quest_manager.getcurrencyitemid(currency_id);
+
+	XSprePUSH;
+	PUSHi((IV)RETVAL);
+  	XSRETURN(1);
+}
+
+XS(XS__getcurrencyid);
+XS(XS__getcurrencyid) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getcurrencyid(uint32 item_id)");
+	dXSTARG;
+
+	int 		RETVAL;
+	uint32      item_id = (int) SvUV(ST(0));
+
+	RETVAL = quest_manager.getcurrencyid(item_id);
+	XSprePUSH;
+	PUSHi((IV)RETVAL);
 	XSRETURN(1);
 }
 
@@ -4072,15 +4207,23 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "follow"), XS__follow, file);
 	newXS(strcpy(buf, "forcedoorclose"), XS__forcedoorclose, file);
 	newXS(strcpy(buf, "forcedooropen"), XS__forcedooropen, file);
+	newXS(strcpy(buf, "getcharidbyname"), XS__getcharidbyname, file);
+	newXS(strcpy(buf, "getclassname"), XS__getclassname, file);
+	newXS(strcpy(buf, "getcurrencyid"), XS__getcurrencyid, file);
 	newXS(strcpy(buf, "getinventoryslotid"), XS__getinventoryslotid, file);
 	newXS(strcpy(buf, "getitemname"), XS__getitemname, file);
 	newXS(strcpy(buf, "getItemName"), XS_qc_getItemName, file);
+	newXS(strcpy(buf, "getnpcnamebyid"), XS__getnpcnamebyid, file);
 	newXS(strcpy(buf, "get_spawn_condition"), XS__get_spawn_condition, file);
+	newXS(strcpy(buf, "getcharnamebyid"), XS__getcharnamebyid, file);
+	newXS(strcpy(buf, "getcurrencyitemid"), XS__getcurrencyitemid, file);
 	newXS(strcpy(buf, "getguildnamebyid"), XS__getguildnamebyid, file);
 	newXS(strcpy(buf, "getguildidbycharid"), XS__getguildidbycharid, file);
 	newXS(strcpy(buf, "getgroupidbycharid"), XS__getgroupidbycharid, file);
 	newXS(strcpy(buf, "getraididbycharid"), XS__getraididbycharid, file);
+	newXS(strcpy(buf, "getracename"), XS__getracename, file);
 	newXS(strcpy(buf, "getspellname"), XS__getspellname, file);
+	newXS(strcpy(buf, "getskillname"), XS__getskillname, file);
 	newXS(strcpy(buf, "getlevel"), XS__getlevel, file);
 	newXS(strcpy(buf, "getplayerburiedcorpsecount"), XS__getplayerburiedcorpsecount, file);
 	newXS(strcpy(buf, "getplayercorpsecount"), XS__getplayercorpsecount, file);

@@ -393,8 +393,16 @@ bool lua_is_disc_tome(int item_id) {
 	return quest_manager.isdisctome(item_id);
 }
 
+std::string lua_get_race_name(uint32 race_id) {
+	return quest_manager.getracename(race_id);
+}
+
 std::string lua_get_spell_name(uint32 spell_id) {
 	return quest_manager.getspellname(spell_id);
+}
+
+std::string lua_get_skill_name(int skill_id) {
+	return quest_manager.getskillname(skill_id);
 }
 
 void lua_safe_move() {
@@ -870,6 +878,30 @@ bool lua_delete_data(std::string bucket_key) {
 	return DataBucket::DeleteData(bucket_key);
 }
 
+const char *lua_get_char_name_by_id(uint32 char_id) {
+	return database.GetCharNameByID(char_id);
+}
+
+uint32 lua_get_char_id_by_name(const char* name) {
+	return quest_manager.getcharidbyname(name);
+}
+
+std::string lua_get_class_name(uint8 class_id) {
+	return quest_manager.getclassname(class_id);
+}
+
+std::string lua_get_class_name(uint8 class_id, uint8 level) {
+	return quest_manager.getclassname(class_id, level);
+}
+
+int lua_get_currency_id(uint32 item_id) {
+	return quest_manager.getcurrencyid(item_id);
+}
+
+int lua_get_currency_item_id(int currency_id) {
+	return quest_manager.getcurrencyitemid(currency_id);
+}
+
 const char *lua_get_guild_name_by_id(uint32 guild_id) {
 	return quest_manager.getguildnamebyid(guild_id);
 }
@@ -880,6 +912,10 @@ int lua_get_guild_id_by_char_id(uint32 char_id) {
 
 int lua_get_group_id_by_char_id(uint32 char_id) {
 	return database.GetGroupIDByCharID(char_id);
+}
+
+const char *lua_get_npc_name_by_id(uint32 npc_id) {
+	return quest_manager.getnpcnamebyid(npc_id);
 }
 
 int lua_get_raid_id_by_char_id(uint32 char_id) {
@@ -1664,7 +1700,9 @@ luabind::scope lua_register_general() {
 		luabind::def("depop_zone", &lua_depop_zone),
 		luabind::def("repop_zone", &lua_repop_zone),
 		luabind::def("is_disc_tome", &lua_is_disc_tome),
+		luabind::def("get_race_name", (std::string(*)(uint16))&lua_get_race_name),
 		luabind::def("get_spell_name", (std::string(*)(uint32))&lua_get_spell_name),
+		luabind::def("get_skill_name", (std::string(*)(int))&lua_get_skill_name),
 		luabind::def("safe_move", &lua_safe_move),
 		luabind::def("rain", &lua_rain),
 		luabind::def("snow", &lua_snow),
@@ -1763,9 +1801,16 @@ luabind::scope lua_register_general() {
 		luabind::def("set_data", (void(*)(std::string, std::string))&lua_set_data),
 		luabind::def("set_data", (void(*)(std::string, std::string, std::string))&lua_set_data),
 		luabind::def("delete_data", (bool(*)(std::string))&lua_delete_data),
+		luabind::def("get_char_name_by_id", &lua_get_char_name_by_id),
+		luabind::def("get_char_id_by_name", (uint32(*)(const char*))&lua_get_char_id_by_name),
+		luabind::def("get_class_name", (std::string(*)(uint8))&lua_get_class_name),
+		luabind::def("get_class_name", (std::string(*)(uint8,uint8))&lua_get_class_name),
+		luabind::def("get_currency_id", &lua_get_currency_id),
+		luabind::def("get_currency_item_id", &lua_get_currency_item_id),
 		luabind::def("get_guild_name_by_id", &lua_get_guild_name_by_id),
 		luabind::def("get_guild_id_by_char_id", &lua_get_guild_id_by_char_id),
 		luabind::def("get_group_id_by_char_id", &lua_get_group_id_by_char_id),
+		luabind::def("get_npc_name_by_id", &lua_get_npc_name_by_id),
 		luabind::def("get_raid_id_by_char_id", &lua_get_raid_id_by_char_id),
 		luabind::def("create_instance", &lua_create_instance),
 		luabind::def("destroy_instance", &lua_destroy_instance),
