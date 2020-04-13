@@ -108,7 +108,7 @@ void Database::GetAccountStatus(Client *client)
 {
 
 	std::string query = StringFormat(
-		"SELECT `status`, `hideme`, `karma`, `revoked` FROM `account` WHERE `id` = '%i' LIMIT 1",
+		"SELECT `status`, `hideme`, `karma`, `revoked` FROM `account` WHERE `id` = %i LIMIT 1",
 		client->GetAccountID()
 	);
 
@@ -173,7 +173,7 @@ int Database::FindAccount(const char *characterName, Client *client)
 
 	query = StringFormat(
 		"SELECT `id`, `name`, `level` FROM `character_data` "
-		"WHERE `account_id` = %i AND `name` != '%s'",
+		"WHERE `account_id` = %i AND `name` != '%s' AND deleted_at is NULL",
 		accountID, characterName
 	);
 
