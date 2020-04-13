@@ -1985,18 +1985,14 @@ Raid *EntityList::GetRaidByID(uint32 id)
 Raid *EntityList::GetRaidByClient(Client* client)
 {
 	if (client->p_raid_instance) {
-		LogInfo("returning cached raid instance pointer");
 		return client->p_raid_instance;
 	}
 
-	LogInfo("fetching raid instance pointer");
-
 	std::list<Raid *>::iterator iterator;
-
 	iterator = raid_list.begin();
 
 	while (iterator != raid_list.end()) {
-		for (auto & member : (*iterator)->members) {
+		for (auto &member : (*iterator)->members) {
 			if (member.member) {
 				if (member.member == client) {
 					client->p_raid_instance = *iterator;
