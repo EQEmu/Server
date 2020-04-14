@@ -18,6 +18,7 @@
 #include "lua_client.h"
 #include "lua_npc.h"
 #include "lua_entity_list.h"
+#include "lua_expedition.h"
 #include "quest_parser_collection.h"
 #include "questmgr.h"
 #include "qglobals.h"
@@ -2170,6 +2171,18 @@ void lua_set_content_flag(std::string flag_name, bool enabled){
 	ZoneStore::SetContentFlag(flag_name, enabled);
 }
 
+Lua_Expedition lua_get_expedition() {
+	return quest_manager.GetExpeditionForCurrentInstance();
+}
+
+Lua_Expedition lua_get_expedition_by_char_id(uint32 char_id) {
+	return quest_manager.GetExpeditionByCharID(char_id);
+}
+
+Lua_Expedition lua_get_expedition_by_instance_id(uint32 instance_id) {
+	return quest_manager.GetExpeditionByInstanceID(instance_id);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -2765,7 +2778,11 @@ luabind::scope lua_register_general() {
 		 * Content flags
 		 */
 		luabind::def("is_content_flag_enabled", (bool(*)(std::string))&lua_is_content_flag_enabled),
-		luabind::def("set_content_flag", (void(*)(std::string, bool))&lua_set_content_flag)
+		luabind::def("set_content_flag", (void(*)(std::string, bool))&lua_set_content_flag),
+
+		luabind::def("get_expedition", (Lua_Expedition(*)())&lua_get_expedition),
+		luabind::def("get_expedition_by_char_id", (Lua_Expedition(*)(uint32 char_id))&lua_get_expedition_by_char_id),
+		luabind::def("get_expedition_by_instance_id", (Lua_Expedition(*)(uint32 instance_id))&lua_get_expedition_by_instance_id)
 	];
 }
 

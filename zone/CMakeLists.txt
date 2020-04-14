@@ -52,6 +52,7 @@ SET(zone_sources
 	lua_encounter.cpp
 	lua_entity.cpp
 	lua_entity_list.cpp
+	lua_expedition.cpp
 	lua_general.cpp
 	lua_group.cpp
 	lua_hate_list.cpp
@@ -195,6 +196,7 @@ SET(zone_headers
 	lua_encounter.h
 	lua_entity.h
 	lua_entity_list.h
+	lua_expedition.h
 	lua_general.h
 	lua_group.h
 	lua_hate_list.h
