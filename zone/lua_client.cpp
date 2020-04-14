@@ -4,7 +4,9 @@
 #include <luabind/luabind.hpp>
 
 #include "client.h"
+#include "expedition_lockout_timer.h"
 #include "lua_client.h"
+#include "lua_expedition.h"
 #include "lua_npc.h"
 #include "lua_item.h"
 #include "lua_iteminst.h"
@@ -1644,7 +1646,76 @@ int Lua_Client::GetClientMaxLevel() {
 	return self->GetClientMaxLevel();
 }
 
+Lua_Expedition Lua_Client::CreateExpedition(std::string name, uint32 min_players, uint32 max_players) {
+	Lua_Safe_Call_Class(Lua_Expedition);
+	return self->CreateExpedition(name, min_players, max_players);
+}
 
+Lua_Expedition Lua_Client::CreateExpedition(std::string name, uint32 min_players, uint32 max_players, bool has_replay_timer) {
+	Lua_Safe_Call_Class(Lua_Expedition);
+	return self->CreateExpedition(name, min_players, max_players, has_replay_timer);
+}
+
+Lua_Expedition Lua_Client::GetExpedition() {
+	Lua_Safe_Call_Class(Lua_Expedition);
+	return self->GetExpedition();
+}
+
+luabind::object Lua_Client::GetExpeditionLockouts(lua_State* L)
+{
+	auto lua_table = luabind::newtable(L);
+	if (d_)
+	{
+		auto self = reinterpret_cast<NativeType*>(d_);
+		auto lockouts = self->GetExpeditionLockouts();
+
+		for (const auto& lockout : lockouts)
+		{
+			auto lockout_table = lua_table[lockout.GetExpeditionName()];
+			if (luabind::type(lockout_table) != LUA_TTABLE)
+			{
+				lockout_table = luabind::newtable(L);
+			}
+			lockout_table[lockout.GetEventName()] = lockout.GetSecondsRemaining();
+		}
+	}
+	return lua_table;
+}
+
+luabind::object Lua_Client::GetExpeditionLockouts(lua_State* L, std::string expedition_name)
+{
+	auto lua_table = luabind::newtable(L);
+	if (d_)
+	{
+		auto self = reinterpret_cast<NativeType*>(d_);
+		auto lockouts = self->GetExpeditionLockouts();
+
+		for (const auto& lockout : lockouts)
+		{
+			if (lockout.GetExpeditionName() == expedition_name)
+			{
+				lua_table[lockout.GetEventName()] = lockout.GetSecondsRemaining();
+			}
+		}
+	}
+	return lua_table;
+}
+
+void Lua_Client::AddExpeditionLockout(std::string expedition_name, std::string event_name, uint32 seconds) {
+	Lua_Safe_Call_Void();
+	self->AddNewExpeditionLockout(expedition_name, event_name, seconds);
+}
+
+void Lua_Client::RemoveExpeditionLockout(std::string expedition_name, std::string event_name) {
+	Lua_Safe_Call_Void();
+	self->RemoveExpeditionLockout(expedition_name, event_name, true);
+	self->SendExpeditionLockoutTimers();
+}
+
+bool Lua_Client::HasExpeditionLockout(std::string expedition_name, std::string event_name) {
+	Lua_Safe_Call_Bool();
+	return self->HasExpeditionLockout(expedition_name, event_name);
+}
 
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
@@ -1952,7 +2023,15 @@ luabind::scope lua_register_client() {
 		.def("EnableAreaRegens", &Lua_Client::EnableAreaRegens)
 		.def("DisableAreaRegens", &Lua_Client::DisableAreaRegens)
 		.def("SetClientMaxLevel", (void(Lua_Client::*)(int))&Lua_Client::SetClientMaxLevel)
-		.def("GetClientMaxLevel", (int(Lua_Client::*)(void))&Lua_Client::GetClientMaxLevel);
+		.def("GetClientMaxLevel", (int(Lua_Client::*)(void))&Lua_Client::GetClientMaxLevel)
+		.def("CreateExpedition", (Lua_Expedition(Lua_Client::*)(std::string, uint32, uint32))&Lua_Client::CreateExpedition)
+		.def("CreateExpedition", (Lua_Expedition(Lua_Client::*)(std::string, uint32, uint32, bool))&Lua_Client::CreateExpedition)
+		.def("GetExpedition", (Lua_Expedition(Lua_Client::*)(void))&Lua_Client::GetExpedition)
+		.def("GetExpeditionLockouts", (luabind::object(Lua_Client::*)(lua_State* L))&Lua_Client::GetExpeditionLockouts)
+		.def("GetExpeditionLockouts", (luabind::object(Lua_Client::*)(lua_State* L, std::string))&Lua_Client::GetExpeditionLockouts)
+		.def("AddExpeditionLockout", (void(Lua_Client::*)(std::string, std::string, uint32))&Lua_Client::AddExpeditionLockout)
+		.def("RemoveExpeditionLockout", (void(Lua_Client::*)(std::string, std::string))&Lua_Client::RemoveExpeditionLockout)
+		.def("HasExpeditionLockout", (bool(Lua_Client::*)(std::string, std::string))&Lua_Client::HasExpeditionLockout);
 }
 
 luabind::scope lua_register_inventory_where() {
