@@ -37,6 +37,7 @@
 #include "../common/string_util.h"
 #include "../common/eqemu_logsys.h"
 
+#include "expedition.h"
 #include "guild_mgr.h"
 #include "map.h"
 #include "npc.h"
@@ -1182,6 +1183,9 @@ bool Zone::Init(bool iStaticZone) {
 
 	petition_list.ClearPetitions();
 	petition_list.ReadDatabase();
+
+	LogInfo("Loading active Expeditions");
+	Expedition::CacheAllFromDatabase();
 
 	LogInfo("Loading timezone data");
 	zone->zone_time.setEQTimeZone(content_db.GetZoneTZ(zoneid, GetInstanceVersion()));
@@ -2699,3 +2703,7 @@ void Zone::SetInstanceTimeRemaining(uint32 instance_time_remaining)
 	Zone::instance_time_remaining = instance_time_remaining;
 }
 
+bool Zone::IsZone(uint32 zone_id, uint16 instance_id) const
+{
+	return (zoneid == zone_id && instanceid == instance_id);
+}

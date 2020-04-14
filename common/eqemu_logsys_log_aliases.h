@@ -601,6 +601,21 @@
         OutF(LogSys, Logs::Detail, Logs::Loot, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
+#define LogExpeditions(message, ...) do {\
+    if (LogSys.log_settings[Logs::Expeditions].is_category_enabled == 1)\
+        OutF(LogSys, Logs::General, Logs::Expeditions, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogExpeditionsModerate(message, ...) do {\
+    if (LogSys.log_settings[Logs::Expeditions].is_category_enabled == 1)\
+        OutF(LogSys, Logs::Moderate, Logs::Expeditions, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogExpeditionsDetail(message, ...) do {\
+    if (LogSys.log_settings[Logs::Expeditions].is_category_enabled == 1)\
+        OutF(LogSys, Logs::Detail, Logs::Expeditions, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
 #define Log(debug_level, log_category, message, ...) do {\
     if (LogSys.log_settings[log_category].is_category_enabled == 1)\
         LogSys.Out(debug_level, log_category, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
@@ -950,6 +965,15 @@
 } while (0)
 
 #define LogZonePointsDetail(message, ...) do {\
+} while (0)
+
+#define LogExpeditions(message, ...) do {\
+} while (0)
+
+#define LogExpeditionsModerate(message, ...) do {\
+} while (0)
+
+#define LogExpeditionsDetail(message, ...) do {\
 } while (0)
 
 #define Log(debug_level, log_category, message, ...) do {\

@@ -44,6 +44,7 @@
 #include "../common/spdat.h"
 #include "../common/string_util.h"
 #include "event_codes.h"
+#include "expedition.h"
 #include "guild_mgr.h"
 #include "map.h"
 #include "petitions.h"
@@ -560,6 +561,12 @@ bool Client::Process() {
 			client_state = CLIENT_LINKDEAD;
 			AI_Start(CLIENT_LD_TIMEOUT);
 			SendAppearancePacket(AT_Linkdead, 1);
+
+			Expedition* expedition = GetExpedition();
+			if (expedition)
+			{
+				expedition->SetMemberStatus(this, ExpeditionMemberStatus::LinkDead);
+			}
 		}
 	}
 
@@ -641,6 +648,11 @@ bool Client::Process() {
 					myraid->MemberZoned(this);
 				}
 			}
+			Expedition* expedition = GetExpedition();
+			if (expedition && !bZoning)
+			{
+				expedition->SetMemberStatus(this, ExpeditionMemberStatus::Offline);
+			}
 			OnDisconnect(false);
 			return false;
 		}
@@ -681,6 +693,12 @@ void Client::OnDisconnect(bool hard_disconnect) {
 
 		if (MyRaid)
 			MyRaid->MemberZoned(this);
+
+		Expedition* expedition = GetExpedition();
+		if (expedition)
+		{
+			expedition->SetMemberStatus(this, ExpeditionMemberStatus::Offline);
+		}
 
 		parse->EventPlayer(EVENT_DISCONNECT, this, "", 0);
 

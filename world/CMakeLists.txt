@@ -9,6 +9,7 @@ SET(world_sources
 	console.cpp
 	eql_config.cpp
 	eqemu_api_world_data_service.cpp
+	expedition.cpp
 	launcher_link.cpp
 	launcher_list.cpp
 	lfplist.cpp
@@ -39,6 +40,7 @@ SET(world_headers
 	console.h
 	eql_config.h
 	eqemu_api_world_data_service.h
+	expedition.h
 	launcher_link.h
 	launcher_list.h
 	lfplist.h

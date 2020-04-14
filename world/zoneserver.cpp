@@ -36,6 +36,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "ucs.h"
 #include "queryserv.h"
 #include "world_store.h"
+#include "expedition.h"
 
 extern ClientList client_list;
 extern GroupLFPList LFPGroupList;
@@ -1353,6 +1354,44 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			break;
 
 		cle->ProcessTellQueue();
+		break;
+	}
+	case ServerOP_CZClientMessage:
+	{
+		auto buf = reinterpret_cast<ServerCZClientMessage_Struct*>(pack->pBuffer);
+		client_list.SendPacket(buf->character_name, pack);
+		break;
+	}
+	case ServerOP_CZClientMessageString:
+	{
+		auto buf = reinterpret_cast<ServerCZClientMessageString_Struct*>(pack->pBuffer);
+		client_list.SendPacket(buf->character_name, pack);
+		break;
+	}
+	case ServerOP_ExpeditionCreate:
+	case ServerOP_ExpeditionDeleted:
+	case ServerOP_ExpeditionLeaderChanged:
+	case ServerOP_ExpeditionLockout:
+	case ServerOP_ExpeditionMemberChange:
+	case ServerOP_ExpeditionMemberSwap:
+	case ServerOP_ExpeditionMemberStatus:
+	{
+		zoneserver_list.SendPacket(pack);
+		break;
+	}
+	case ServerOP_ExpeditionGetOnlineMembers:
+	{
+		Expedition::GetOnlineMembers(pack);
+		break;
+	}
+	case ServerOP_ExpeditionDzAddPlayer:
+	{
+		Expedition::AddPlayer(pack);
+		break;
+	}
+	case ServerOP_ExpeditionDzMakeLeader:
+	{
+		Expedition::MakeLeader(pack);
 		break;
 	}
 	default:

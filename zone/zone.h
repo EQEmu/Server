@@ -81,6 +81,7 @@ struct item_tick_struct {
 };
 
 class Client;
+class Expedition;
 class Map;
 class Mob;
 class WaterMap;
@@ -129,6 +130,7 @@ public:
 	bool IsPVPZone() { return pvpzone; }
 	bool IsSpellBlocked(uint32 spell_id, const glm::vec3 &location);
 	bool IsUCSServerAvailable() { return m_ucss_available; }
+	bool IsZone(uint32 zone_id, uint16 instance_id) const;
 	bool LoadGroundSpawns();
 	bool LoadZoneCFG(const char *filename, uint16 instance_id);
 	bool LoadZoneObjects();
@@ -216,6 +218,8 @@ public:
 
 	std::vector<GridRepository::Grid>             zone_grids;
 	std::vector<GridEntriesRepository::GridEntry> zone_grid_entries;
+
+	std::unordered_map<uint32, std::unique_ptr<Expedition>> expedition_cache;
 
 	time_t weather_timer;
 	Timer  spawn2_timer;

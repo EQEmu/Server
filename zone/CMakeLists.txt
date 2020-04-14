@@ -30,6 +30,10 @@ SET(zone_sources
 	encounter.cpp
 	entity.cpp
 	exp.cpp
+	expedition.cpp
+	expedition_database.cpp
+	expedition_lockout_timer.cpp
+	expedition_request.cpp
 	fastmath.cpp
 	fearpath.cpp
 	forage.cpp
@@ -172,6 +176,10 @@ SET(zone_headers
 	entity.h
 	errmsg.h
 	event_codes.h
+	expedition.h
+	expedition_database.h
+	expedition_lockout_timer.h
+	expedition_request.h
 	fastmath.h
 	forage.h
 	global_loot_manager.h
