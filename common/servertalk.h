@@ -140,6 +140,18 @@
 #define ServerOP_LFPUpdate			0x0213
 #define ServerOP_LFPMatches			0x0214
 #define ServerOP_ClientVersionSummary 0x0215
+
+#define ServerOP_ExpeditionCreate           0x0400
+#define ServerOP_ExpeditionDeleted          0x0401
+#define ServerOP_ExpeditionLeaderChanged    0x0402
+#define ServerOP_ExpeditionLockout          0x0403
+#define ServerOP_ExpeditionMemberChange     0x0404
+#define ServerOP_ExpeditionMemberSwap       0x0405
+#define ServerOP_ExpeditionMemberStatus     0x0406
+#define ServerOP_ExpeditionGetOnlineMembers 0x0407
+#define ServerOP_ExpeditionDzAddPlayer      0x0408
+#define ServerOP_ExpeditionDzMakeLeader     0x0409
+
 #define ServerOP_LSInfo				0x1000
 #define ServerOP_LSStatus			0x1001
 #define ServerOP_LSClientAuthLeg	0x1002
@@ -257,6 +269,8 @@
 #define ServerOP_CZTaskRemoveGroup 0x4560
 #define ServerOP_CZTaskRemoveRaid 0x4561
 #define ServerOP_CZTaskRemoveGuild 0x4562
+#define ServerOP_CZClientMessage 0x4563
+#define ServerOP_CZClientMessageString 0x4564
 
 #define ServerOP_WWAssignTask 0x4750
 #define ServerOP_WWCastSpell 0x4751
@@ -1956,6 +1970,87 @@ struct UCSServerStatus_Struct {
 		};
 		uint32 timestamp;
 	};
+};
+
+struct ServerCZClientMessage_Struct {
+	uint16 chat_type;
+	char   character_name[64];
+	uint32 message_size;
+	char   message[1];
+};
+
+struct ServerCZClientMessageString_Struct {
+	uint32 string_id;
+	uint16 chat_type;
+	char   character_name[64];
+	uint32 string_params_size;
+	char   string_params[1]; // null delimited
+};
+
+struct ServerExpeditionID_Struct {
+	uint32 expedition_id;
+	uint32 sender_zone_id;
+	uint32 sender_instance_id;
+};
+
+struct ServerExpeditionMemberChange_Struct {
+	uint32 expedition_id;
+	uint32 sender_zone_id;
+	uint16 sender_instance_id;
+	uint8  removed; // 0: added, 1: removed
+	uint32 char_id;
+	char   char_name[64];
+};
+
+struct ServerExpeditionMemberSwap_Struct {
+	uint32 expedition_id;
+	uint32 sender_zone_id;
+	uint16 sender_instance_id;
+	uint32 add_char_id;
+	uint32 remove_char_id;
+	char   add_char_name[64];
+	char   remove_char_name[64];
+};
+
+struct ServerExpeditionMemberStatus_Struct {
+	uint32 expedition_id;
+	uint32 sender_zone_id;
+	uint16 sender_instance_id;
+	uint8  status; // 0: unknown 1: Online 2: Offline 3: In Dynamic Zone 4: Link Dead
+	uint32 character_id;
+};
+
+struct ServerExpeditionCharacterEntry_Struct {
+	uint32 character_id;
+	uint32 character_zone_id;
+	uint16 character_instance_id;
+	uint8  character_online; // 0: offline 1: online
+};
+
+struct ServerExpeditionCharacters_Struct {
+	uint32 expedition_id;
+	uint32 sender_zone_id;
+	uint16 sender_instance_id;
+	uint32 count;
+	ServerExpeditionCharacterEntry_Struct entries[0];
+};
+
+struct ServerExpeditionLockout_Struct {
+	uint32 expedition_id;
+	uint64 expire_time;
+	uint32 duration;
+	uint32 sender_zone_id;
+	uint16 sender_instance_id;
+	uint8  remove;
+	char   event_name[256];
+};
+
+struct ServerDzCommand_Struct {
+	uint32 expedition_id;
+	uint8  is_char_online;     // 0: target name is offline, 1: online
+	char   requester_name[64];
+	char   target_name[64];
+	char   remove_name[64];    // used for swap command
 };
 
 #pragma pack()

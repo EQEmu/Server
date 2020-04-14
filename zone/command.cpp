@@ -60,6 +60,7 @@
 
 #include "data_bucket.h"
 #include "command.h"
+#include "expedition.h"
 #include "guild_mgr.h"
 #include "map.h"
 #include "qglobals.h"
@@ -198,6 +199,7 @@ int command_init(void)
 		command_add("disarmtrap",  "Analog for ldon disarm trap for the newer clients since we still don't have it working.", 80, command_disarmtrap) ||
 		command_add("distance", "- Reports the distance between you and your target.",  80, command_distance) ||
 		command_add("doanim", "[animnum] [type] - Send an EmoteAnim for you or your target", 50, command_doanim) ||
+		command_add("dz", "Manage expeditions and dynamic zone instances", 80, command_dz) ||
 		command_add("editmassrespawn", "[name-search] [second-value] - Mass (Zone wide) NPC respawn timer editing command", 100, command_editmassrespawn) ||
 		command_add("emote", "['name'/'world'/'zone'] [type] [message] - Send an emote message", 80, command_emote) ||
 		command_add("emotesearch", "Searches NPC Emotes", 80, command_emotesearch) ||
@@ -6823,6 +6825,58 @@ void command_doanim(Client *c, const Seperator *sep)
 				c->GetTarget()->DoAnim(atoi(sep->arg[1]),atoi(sep->arg[2]));
 		else
 			c->DoAnim(atoi(sep->arg[1]),atoi(sep->arg[2]));
+}
+
+void command_dz(Client* c, const Seperator* sep)
+{
+	if (!c || !zone) {
+		return;
+	}
+
+	if (strcasecmp(sep->arg[1], "cache") == 0)
+	{
+		if (strcasecmp(sep->arg[2], "list") == 0)
+		{
+			c->Message(Chat::White, "Total Active Expeditions: [%u]", static_cast<uint32>(zone->expedition_cache.size()));
+			for (const auto& expedition : zone->expedition_cache)
+			{
+				c->Message(
+					Chat::White, "Expedition id: [%u]: leader: [%s] instance id: [%u] members: [%u]",
+					expedition.second->GetID(),
+					expedition.second->GetLeaderName().c_str(),
+					expedition.second->GetInstanceID(),
+					expedition.second->GetMemberCount()
+				);
+			}
+		}
+		else if (strcasecmp(sep->arg[2], "reload") == 0)
+		{
+			Expedition::CacheAllFromDatabase();
+			c->Message(Chat::White, "Reloaded [%u] expeditions to cache from database.", static_cast<uint32>(zone->expedition_cache.size()));
+		}
+	}
+	else if (strcasecmp(sep->arg[1], "destroy") == 0)
+	{
+		if (sep->IsNumber(2))
+		{
+			auto expedition_id = std::strtoul(sep->arg[2], nullptr, 10);
+			if (expedition_id)
+			{
+				auto expedition = Expedition::FindCachedExpeditionByID(expedition_id);
+				if (expedition)
+				{
+					expedition->RemoveAllMembers();
+				}
+			}
+		}
+	}
+	else
+	{
+		c->Message(Chat::White, "#dz usage:");
+		c->Message(Chat::White, "#dz cache list - list expeditions in current zone cache");
+		c->Message(Chat::White, "#dz cache reload - reload zone cache from database");
+		c->Message(Chat::White, "#dz destroy <expedition_id> - destroy expedition globally (must be in cache)");
+	}
 }
 
 void command_editmassrespawn(Client* c, const Seperator* sep)

@@ -88,6 +88,7 @@ union semun {
 #include "queryserv.h"
 #include "web_interface.h"
 #include "console.h"
+#include "expedition.h"
 
 #include "../common/net/servertalk_server.h"
 #include "../zone/data_bucket.h"
@@ -429,6 +430,10 @@ int main(int argc, char** argv) {
 	Timer PurgeInstanceTimer(450000);
 	PurgeInstanceTimer.Start(450000);
 
+	LogInfo("Purging expired expeditions");
+	Expedition::PurgeEmptyExpeditions(); //database.PurgeExpiredExpeditions();
+	Expedition::PurgeExpiredCharacterLockouts();
+
 	LogInfo("Loading char create info");
 	content_db.LoadCharacterCreateAllocations();
 	content_db.LoadCharacterCreateCombos();
@@ -599,6 +604,8 @@ int main(int argc, char** argv) {
 		if (PurgeInstanceTimer.Check()) {
 			database.PurgeExpiredInstances();
 			database.PurgeAllDeletedDataBuckets();
+			Expedition::PurgeEmptyExpeditions();
+			Expedition::PurgeExpiredCharacterLockouts();
 		}
 
 		if (EQTimeTimer.Check()) {

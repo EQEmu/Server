@@ -21,6 +21,8 @@
 class Client;
 class EQApplicationPacket;
 class EQStream;
+class Expedition;
+class ExpeditionLockoutTimer;
 class Group;
 class NPC;
 class Object;
@@ -283,6 +285,7 @@ public:
 	uint8 SlotConvert(uint8 slot,bool bracer=false);
 	void MessageString(uint32 type, uint32 string_id, uint32 distance = 0);
 	void MessageString(uint32 type, uint32 string_id, const char* message,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0, uint32 distance = 0);
+	void MessageString(const ServerCZClientMessageString_Struct* msg);
 	bool FilteredMessageCheck(Mob *sender, eqFilterType filter);
 	void FilteredMessageString(Mob *sender, uint32 type, eqFilterType filter, uint32 string_id);
 	void FilteredMessageString(Mob *sender, uint32 type, eqFilterType filter,
@@ -1103,6 +1106,31 @@ public:
 
 	void MarkSingleCompassLoc(float in_x, float in_y, float in_z, uint8 count=1);
 
+	// cross zone client messaging helpers (null client argument will fallback to messaging by name)
+	static void SendCrossZoneMessage(
+		Client* client, const std::string& client_name, uint16_t chat_type, const std::string& message);
+	static void SendCrossZoneMessageString(
+		Client* client, const std::string& client_name, uint16_t chat_type,
+		uint32_t string_id, const std::initializer_list<std::string>& parameters = {});
+
+	void AddExpeditionLockout(const ExpeditionLockoutTimer& lockout, bool update_db = false);
+	void AddNewExpeditionLockout(const std::string& expedition_name, const std::string& event_name, uint32_t duration);
+	Expedition* CreateExpedition(std::string name, uint32 min_players, uint32 max_players, bool has_replay_timer = false);
+	Expedition* GetExpedition() const;
+	uint32 GetExpeditionID() const { return m_expedition_id; }
+	const ExpeditionLockoutTimer* GetExpeditionLockout(const std::string& expedition_name, const std::string& event_name, bool include_expired = false) const;
+	const std::vector<ExpeditionLockoutTimer>& GetExpeditionLockouts() const { return m_expedition_lockouts; };
+	std::vector<ExpeditionLockoutTimer> GetExpeditionLockouts(const std::string& expedition_name);
+	uint32 GetPendingExpeditionInviteID() const { return m_pending_expedition_invite_id; }
+	bool HasExpeditionLockout(const std::string& expedition_name, const std::string& event_name, bool include_expired = false);
+	bool IsInExpedition() const { return m_expedition_id != 0; }
+	void RemoveExpeditionLockout(const std::string& expedition_name, const std::string& event_name, bool update_db = false);
+	void SetPendingExpeditionInvite(uint32 id) { m_pending_expedition_invite_id = id; }
+	void SendExpeditionLockoutTimers();
+	void SetExpeditionID(uint32 expedition_id) { m_expedition_id = expedition_id; };
+	void UpdateExpeditionInfoAndLockouts();
+	void DzListTimers();
+
 	void CalcItemScale();
 	bool CalcItemScale(uint32 slot_x, uint32 slot_y); // behavior change: 'slot_y' is now [RANGE]_END and not [RANGE]_END + 1
 	void DoItemEnterZone();
@@ -1656,6 +1684,11 @@ private:
 	bool InterrogateInventory_error(int16 head, int16 index, const EQ::ItemInstance* inst, const EQ::ItemInstance* parent, int depth);
 
 	int client_max_level;
+
+	uint32 m_expedition_id = 0;
+	uint32 m_pending_expedition_invite_id = 0;
+	Expedition* m_expedition = nullptr;
+	std::vector<ExpeditionLockoutTimer> m_expedition_lockouts;
 
 #ifdef BOTS
 
