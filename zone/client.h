@@ -1304,6 +1304,8 @@ public:
 	void SetLastPositionBeforeBulkUpdate(glm::vec4 in_last_position_before_bulk_update);
 	glm::vec4 &GetLastPositionBeforeBulkUpdate();
 
+	Raid *p_raid_instance;
+
 protected:
 	friend class Mob;
 	void CalcItemBonuses(StatBonuses* newbon);
@@ -1343,6 +1345,7 @@ protected:
 	char *adv_data;
 
 private:
+
 	eqFilterMode ClientFilters[_FilterCount];
 	int32 HandlePacket(const EQApplicationPacket *app);
 	void OPTGB(const EQApplicationPacket *app);

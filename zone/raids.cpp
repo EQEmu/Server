@@ -177,6 +177,7 @@ void Raid::RemoveMember(const char *characterName)
 	if(client) {
 		client->SetRaidGrouped(false);
 		client->LeaveRaidXTargets(this);
+		client->p_raid_instance = nullptr;
 	}
 
 	auto pack = new ServerPacket(ServerOP_RaidRemove, sizeof(ServerRaidGeneralAction_Struct));
@@ -1078,8 +1079,9 @@ void Raid::SendRaidRemoveAll(const char *who)
 
 void Raid::SendRaidDisband(Client *to)
 {
-	if(!to)
+	if (!to) {
 		return;
+	}
 
 	auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
 	RaidGeneral_Struct *rg = (RaidGeneral_Struct*)outapp->pBuffer;
@@ -1614,7 +1616,7 @@ void Raid::SendHPManaEndPacketsFrom(Mob *mob)
 		return;
 
 	uint32 group_id = 0;
-	
+
 	if(mob->IsClient())
 		group_id = this->GetGroup(mob->CastToClient());
 
@@ -1622,7 +1624,7 @@ void Raid::SendHPManaEndPacketsFrom(Mob *mob)
 	EQApplicationPacket outapp(OP_MobManaUpdate, sizeof(MobManaUpdate_Struct));
 
 	mob->CreateHPPacket(&hpapp);
-	
+
 	for(int x = 0; x < MAX_RAID_MEMBERS; x++) {
 		if(members[x].member) {
 			if(!mob->IsClient() || ((members[x].member != mob->CastToClient()) && (members[x].GroupNumber == group_id))) {
@@ -1633,7 +1635,7 @@ void Raid::SendHPManaEndPacketsFrom(Mob *mob)
 					mana_update->spawn_id = mob->GetID();
 					mana_update->mana = mob->GetManaPercent();
 					members[x].member->QueuePacket(&outapp, false);
-					
+
 					outapp.SetOpcode(OP_MobEnduranceUpdate);
 					MobEnduranceUpdate_Struct *endurance_update = (MobEnduranceUpdate_Struct *)outapp.pBuffer;
 					endurance_update->endurance = mob->GetEndurancePercent();

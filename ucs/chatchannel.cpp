@@ -47,8 +47,13 @@ ChatChannel::ChatChannel(std::string inName, std::string inOwner, std::string in
 
 	Moderated = false;
 
-	LogInfo("New ChatChannel created: Name: [[{}]], Owner: [[{}]], Password: [[{}]], MinStatus: [{}]",
-		Name.c_str(), Owner.c_str(), Password.c_str(), MinimumStatus);
+	LogDebug(
+		"New ChatChannel created: Name: [[{}]], Owner: [[{}]], Password: [[{}]], MinStatus: [{}]",
+		Name.c_str(),
+		Owner.c_str(),
+		Password.c_str(),
+		MinimumStatus
+	);
 
 }
 
@@ -154,7 +159,7 @@ void ChatChannelList::SendAllChannels(Client *c) {
 
 void ChatChannelList::RemoveChannel(ChatChannel *Channel) {
 
-	LogInfo("RemoveChannel([{}])", Channel->GetName().c_str());
+	LogDebug("RemoveChannel ([{}])", Channel->GetName().c_str());
 
 	LinkedListIterator<ChatChannel*> iterator(ChatChannels);
 
@@ -175,7 +180,7 @@ void ChatChannelList::RemoveChannel(ChatChannel *Channel) {
 
 void ChatChannelList::RemoveAllChannels() {
 
-	LogInfo("RemoveAllChannels");
+	LogDebug("RemoveAllChannels");
 
 	LinkedListIterator<ChatChannel*> iterator(ChatChannels);
 
@@ -242,7 +247,7 @@ void ChatChannel::AddClient(Client *c) {
 
 	int AccountStatus = c->GetAccountStatus();
 
-	LogInfo("Adding [{}] to channel [{}]", c->GetName().c_str(), Name.c_str());
+	LogDebug("Adding [{}] to channel [{}]", c->GetName().c_str(), Name.c_str());
 
 	LinkedListIterator<Client*> iterator(ClientsInChannel);
 
@@ -267,7 +272,7 @@ bool ChatChannel::RemoveClient(Client *c) {
 
 	if(!c) return false;
 
-	LogInfo("RemoveClient [{}] from channel [{}]", c->GetName().c_str(), GetName().c_str());
+	LogDebug("RemoveClient [{}] from channel [{}]", c->GetName().c_str(), GetName().c_str());
 
 	bool HideMe = c->GetHideMe();
 
@@ -304,7 +309,7 @@ bool ChatChannel::RemoveClient(Client *c) {
 		if((Password.length() == 0) || (RuleI(Channels, DeleteTimer) == 0))
 			return false;
 
-		LogInfo("Starting delete timer for empty password protected channel [{}]", Name.c_str());
+		LogDebug("Starting delete timer for empty password protected channel [{}]", Name.c_str());
 
 		DeleteTimer.Start(RuleI(Channels, DeleteTimer) * 60000);
 	}
@@ -402,7 +407,7 @@ void ChatChannel::SendMessageToChannel(std::string Message, Client* Sender) {
 
 		if(ChannelClient)
 		{
-			LogInfo("Sending message to [{}] from [{}]",
+			LogDebug("Sending message to [{}] from [{}]",
 				ChannelClient->GetName().c_str(), Sender->GetName().c_str());
 
 			if (cv_messages[static_cast<uint32>(ChannelClient->GetClientVersion())].length() == 0) {
@@ -505,7 +510,7 @@ ChatChannel *ChatChannelList::AddClientToChannel(std::string ChannelName, Client
 		return nullptr;
 	}
 
-	LogInfo("AddClient to channel [[{}]] with password [[{}]]", NormalisedName.c_str(), Password.c_str());
+	LogDebug("AddClient to channel [[{}]] with password [[{}]]", NormalisedName.c_str(), Password.c_str());
 
 	ChatChannel *RequiredChannel = FindChannel(NormalisedName);
 
@@ -581,7 +586,7 @@ void ChatChannelList::Process() {
 
 		if(CurrentChannel && CurrentChannel->ReadyToDelete()) {
 
-			LogInfo("Empty temporary password protected channel [{}] being destroyed",
+			LogDebug("Empty temporary password protected channel [{}] being destroyed",
 				CurrentChannel->GetName().c_str());
 
 			RemoveChannel(CurrentChannel);
@@ -597,7 +602,7 @@ void ChatChannel::AddInvitee(const std::string &Invitee)
 	if (!IsInvitee(Invitee)) {
 		Invitees.push_back(Invitee);
 
-		LogInfo("Added [{}] as invitee to channel [{}]", Invitee.c_str(), Name.c_str());
+		LogDebug("Added [{}] as invitee to channel [{}]", Invitee.c_str(), Name.c_str());
 	}
 
 }
@@ -608,7 +613,7 @@ void ChatChannel::RemoveInvitee(std::string Invitee)
 
 	if(it != std::end(Invitees)) {
 		Invitees.erase(it);
-		LogInfo("Removed [{}] as invitee to channel [{}]", Invitee.c_str(), Name.c_str());
+		LogDebug("Removed [{}] as invitee to channel [{}]", Invitee.c_str(), Name.c_str());
 	}
 }
 

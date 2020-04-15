@@ -61,7 +61,7 @@ void WorldServer::ProcessMessage(uint16 opcode, EQ::Net::Packet &p)
 	ServerPacket tpack(opcode, p);
 	ServerPacket *pack = &tpack;
 
-	LogInfo("Received Opcode: {:#04x}", opcode);
+	LogNetcode("Received Opcode: {:#04x}", opcode);
 
 	switch (opcode)
 	{

@@ -256,6 +256,7 @@ Client::Client(EQStreamInterface* ieqs)
 	TotalSecondsPlayed = 0;
 	keyring.clear();
 	bind_sight_target = nullptr;
+	p_raid_instance = nullptr;
 	mercid = 0;
 	mercSlot = 0;
 	InitializeMercInfo();

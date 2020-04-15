@@ -498,7 +498,7 @@ void EntityList::MobProcess()
 		size_t sz = mob_list.size();
 
 #ifdef IDLE_WHEN_EMPTY
-		if (numclients > 0 || 
+		if (numclients > 0 ||
 			mob->GetWanderType() == 4 || mob->GetWanderType() == 6) {
 			// Normal processing, or assuring that spawns that should
 			// path and depop do that.  Otherwise all of these type mobs
@@ -931,12 +931,12 @@ bool EntityList::MakeDoorSpawnPacket(EQApplicationPacket *app, Client *client)
 			memcpy(new_door.name, door->GetDoorName(), 32);
 
 			auto position = door->GetPosition();
-			
+
 			new_door.xPos = position.x;
 			new_door.yPos = position.y;
 			new_door.zPos = position.z;
 			new_door.heading = position.w;
-			
+
 			new_door.incline = door->GetIncline();
 			new_door.size = door->GetSize();
 			new_door.doorId = door->GetDoorID();
@@ -1984,17 +1984,26 @@ Raid *EntityList::GetRaidByID(uint32 id)
 
 Raid *EntityList::GetRaidByClient(Client* client)
 {
-	std::list<Raid *>::iterator iterator;
+	if (client->p_raid_instance) {
+		return client->p_raid_instance;
+	}
 
+	std::list<Raid *>::iterator iterator;
 	iterator = raid_list.begin();
 
 	while (iterator != raid_list.end()) {
-		for (int x = 0; x < MAX_RAID_MEMBERS; x++)
-			if ((*iterator)->members[x].member)
-				if((*iterator)->members[x].member == client)
+		for (auto &member : (*iterator)->members) {
+			if (member.member) {
+				if (member.member == client) {
+					client->p_raid_instance = *iterator;
 					return *iterator;
+				}
+			}
+		}
+
 		++iterator;
 	}
+
 	return nullptr;
 }
 

@@ -143,7 +143,7 @@ public:
 	void SetConnectionType(char c);
 	ConnectionType GetConnectionType() { return TypeOfConnection; }
 	EQEmu::versions::ClientVersion GetClientVersion() { return ClientVersion_; }
-	
+
 	inline bool IsMailConnection() { return (TypeOfConnection == ConnectionTypeMail) || (TypeOfConnection == ConnectionTypeCombined); }
 	void SendNotification(int MailBoxNumber, std::string From, std::string Subject, int MessageID);
 	void ChangeMailBox(int NewMailBox);
@@ -151,6 +151,7 @@ public:
 	void SendFriends();
 	int GetCharID();
 	void SendUptime();
+	void SendKeepAlive();
 
 private:
 	unsigned int CurrentMailBox;
@@ -183,6 +184,7 @@ public:
 	void	Process();
 	void	CloseAllConnections();
 	Client *FindCharacter(std::string CharacterName);
+	void	CheckForStaleConnectionsAll();
 	void	CheckForStaleConnections(Client *c);
 	Client *IsCharacterOnline(std::string CharacterName);
 	void ProcessOPMailCommand(Client *c, std::string CommandString);
