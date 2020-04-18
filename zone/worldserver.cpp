@@ -1881,9 +1881,11 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	}
 	case ServerOP_UCSServerStatusReply:
 	{
-		auto ucsss = (UCSServerStatus_Struct*)pack->pBuffer;
-		if (zone)
+		auto ucsss = (UCSServerStatus_Struct *) pack->pBuffer;
+		if (zone) {
 			zone->SetUCSServerAvailable((ucsss->available != 0), ucsss->timestamp);
+			LogInfo("UCS Server is now [{}]", (ucsss->available == 1 ? "online" : "offline"));
+		}
 		break;
 	}
 	case ServerOP_CZSetEntityVariableByNPCTypeID:

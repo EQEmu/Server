@@ -3979,6 +3979,8 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 	cd->hit_heading = action->hit_heading;
 	cd->hit_pitch = action->hit_pitch;
 	cd->damage = 0;
+
+	auto spellOwner = GetOwnerOrSelf();
 	if(!IsEffectInSpell(spell_id, SE_BindAffinity) && !is_damage_or_lifetap_spell){
 		entity_list.QueueCloseClients(
 			spelltar, /* Sender */
@@ -3989,14 +3991,8 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 			true, /* Packet ACK */
 			(spelltar->IsClient() ? FilterPCSpells : FilterNPCSpells) /* Message Filter Type: (8 or 9) */
 		);
-	} else if (is_damage_or_lifetap_spell &&
-		(IsClient() ||
-			(HasOwner() &&
-				GetOwner()->IsClient()
-			)
-		)
-	) {
-		(HasOwner() ? GetOwner() : this)->CastToClient()->QueuePacket(
+	} else if (is_damage_or_lifetap_spell && spellOwner->IsClient()) {
+		spellOwner->CastToClient()->QueuePacket(
 			message_packet,
 			true,
 			Mob::CLIENT_CONNECTINGALL,

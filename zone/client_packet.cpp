@@ -819,35 +819,45 @@ void Client::CompleteConnect()
 		database.QueryDatabase(
 			StringFormat(
 				"UPDATE `character_data` SET `last_login` = UNIX_TIMESTAMP() WHERE id = %u",
-				this->CharacterID()
+				CharacterID()
 			)
 		);
 	}
 
-	if (zone) {
-		if (zone->GetInstanceTimer()) {
-			uint32 ttime = zone->GetInstanceTimer()->GetRemainingTime();
-			uint32 day = (ttime / 86400000);
-			uint32 hour = (ttime / 3600000) % 24;
-			uint32 minute = (ttime / 60000) % 60;
-			uint32 second = (ttime / 1000) % 60;
-			if (day) {
-				Message(Chat::Yellow, "%s(%u) will expire in %u days, %u hours, %u minutes, and %u seconds.",
-					zone->GetLongName(), zone->GetInstanceID(), day, hour, minute, second);
-			}
-			else if (hour) {
-				Message(Chat::Yellow, "%s(%u) will expire in %u hours, %u minutes, and %u seconds.",
-					zone->GetLongName(), zone->GetInstanceID(), hour, minute, second);
-			}
-			else if (minute) {
-				Message(Chat::Yellow, "%s(%u) will expire in %u minutes, and %u seconds.",
-					zone->GetLongName(), zone->GetInstanceID(), minute, second);
-			}
-			else {
-				Message(Chat::Yellow, "%s(%u) will expire in in %u seconds.",
-					zone->GetLongName(), zone->GetInstanceID(), second);
-			}
+	if (zone && zone->GetInstanceTimer()) {
+
+		bool   is_permanent           = false;
+		uint32 remaining_time_seconds = database.GetTimeRemainingInstance(zone->GetInstanceID(), is_permanent);
+		uint32 day                    = (remaining_time_seconds / 86400);
+		uint32 hour                   = (remaining_time_seconds / 3600) % 24;
+		uint32 minute                 = (remaining_time_seconds / 60) % 60;
+		uint32 second                 = (remaining_time_seconds / 1) % 60;
+
+		if (day) {
+			Message(
+				Chat::Yellow, "%s (%u) will expire in %u days, %u hours, %u minutes, and %u seconds.",
+				zone->GetLongName(), zone->GetInstanceID(), day, hour, minute, second
+			);
 		}
+		else if (hour) {
+			Message(
+				Chat::Yellow, "%s (%u) will expire in %u hours, %u minutes, and %u seconds.",
+				zone->GetLongName(), zone->GetInstanceID(), hour, minute, second
+			);
+		}
+		else if (minute) {
+			Message(
+				Chat::Yellow, "%s (%u) will expire in %u minutes, and %u seconds.",
+				zone->GetLongName(), zone->GetInstanceID(), minute, second
+			);
+		}
+		else {
+			Message(
+				Chat::Yellow, "%s (%u) will expire in in %u seconds.",
+				zone->GetLongName(), zone->GetInstanceID(), second
+			);
+		}
+
 	}
 
 	SendRewards();
@@ -4018,7 +4028,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 		//Message(Chat::Red, "You cant cast right now, you arent in control of yourself!");
 		return;
 	}
-	
+
 	// Hack for broken RoF2 which allows casting after a zoned IVU/IVA
 	if (invisible_undead || invisible_animals) {
 		BuffFadeByEffect(SE_InvisVsAnimals);

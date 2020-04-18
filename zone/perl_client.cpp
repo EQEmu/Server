@@ -245,6 +245,27 @@ XS(XS_Client_WorldKick) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_SendToGuildHall); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_SendToGuildHall) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Client::SendToGuildHall(THIS)");
+	{
+		Client *THIS;
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Client *, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		THIS->SendToGuildHall();
+	}
+	XSRETURN_EMPTY;
+}
+
 XS(XS_Client_GetAnon); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetAnon) {
 	dXSARGS;
@@ -2439,7 +2460,7 @@ XS(XS_Client_MemmedCount) {
 
 		RETVAL = THIS->MemmedCount();
 		XSprePUSH;
-		PUSHu((UV) RETVAL);		
+		PUSHu((UV) RETVAL);
 	}
 	XSRETURN(1);
 }
@@ -4786,7 +4807,7 @@ XS(XS_Client_AddLevelBasedExp) {
 
 		if (items > 2)
 			max_level = (uint8) SvUV(ST(2));
-		
+
 		if (items > 3)
 			ignore_mods = (bool) SvTRUE(ST(3));
 
@@ -6564,6 +6585,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "SendSound"), XS_Client_SendSound, file, "$");
 	newXSproto(strcpy(buf, "SendSpellAnim"), XS_Client_SendSpellAnim, file, "$$$");
 	newXSproto(strcpy(buf, "SendTargetCommand"), XS_Client_SendTargetCommand, file, "$$");
+	newXSproto(strcpy(buf, "SendToGuildHall"), XS_Client_SendToGuildHall, file, "$");
 	newXSproto(strcpy(buf, "SendWebLink"), XS_Client_SendWebLink, file, "$:$");
 	newXSproto(strcpy(buf, "SendZoneFlagInfo"), XS_Client_SendZoneFlagInfo, file, "$$");
 	newXSproto(strcpy(buf, "SetAAPoints"), XS_Client_SetAAPoints, file, "$$");

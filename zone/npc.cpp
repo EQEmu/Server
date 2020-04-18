@@ -694,11 +694,6 @@ void NPC::RemoveCash() {
 
 bool NPC::Process()
 {
-	if (IsStunned() && stunned_timer.Check()) {
-		Mob::UnStun();
-		this->spun_timer.Disable();
-	}
-
 	if (p_depop)
 	{
 		Mob* owner = entity_list.GetMob(this->ownerid);
@@ -710,6 +705,11 @@ bool NPC::Process()
 			this->petid = 0;
 		}
 		return false;
+	}
+	
+	if (IsStunned() && stunned_timer.Check()) {
+		Mob::UnStun();
+		this->spun_timer.Disable();
 	}
 
 	SpellProcess();

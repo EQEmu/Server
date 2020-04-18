@@ -584,7 +584,6 @@ void Zone::GetMerchantDataForZoneLoad() {
 	std::map<uint32, std::list<MerchantList> >::iterator merchant_list;
 
 	uint32 npc_id = 0;
-
 	if (results.RowCount() == 0) {
 		LogDebug("No Merchant Data found for [{}]", GetShortName());
 		return;
@@ -809,7 +808,7 @@ void Zone::Shutdown(bool quiet)
 
 	if (RuleB(Zone, KillProcessOnDynamicShutdown)) {
 		LogInfo("[KillProcessOnDynamicShutdown] Shutting down");
-		std::exit(EXIT_SUCCESS);
+		EQ::EventLoop::Get().Shutdown();
 	}
 }
 
@@ -2561,4 +2560,14 @@ void Zone::LoadGrids()
 Timer Zone::GetInitgridsTimer()
 {
 	return initgrids_timer;
+}
+
+uint32 Zone::GetInstanceTimeRemaining() const
+{
+	return instance_time_remaining;
+}
+
+void Zone::SetInstanceTimeRemaining(uint32 instance_time_remaining)
+{
+	Zone::instance_time_remaining = instance_time_remaining;
 }

@@ -285,6 +285,8 @@ public:
 	ZonePoint *GetClosestZonePointWithoutZone(float x, float y, float z, Client *client, float max_distance = 40000.0f);
 
 	Timer GetInitgridsTimer();
+	uint32 GetInstanceTimeRemaining() const;
+	void SetInstanceTimeRemaining(uint32 instance_time_remaining);
 
 	/**
 	 * GMSay Callback for LogSys
@@ -368,6 +370,7 @@ private:
 	uint8     zone_type;
 	uint16    instanceversion;
 	uint32    instanceid;
+	uint32    instance_time_remaining;
 	uint32    pgraveyard_id, pgraveyard_zoneid;
 	uint32    pMaxClients;
 	uint32    zoneid;

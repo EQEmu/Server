@@ -70,17 +70,18 @@ int main() {
 	// Check every minute for unused channels we can delete
 	//
 	Timer ChannelListProcessTimer(60000);
+	Timer ClientConnectionPruneTimer(60000);
 
 	Timer InterserverTimer(INTERSERVER_TIMER); // does auto-reconnect
 
 	LogInfo("Starting EQEmu Universal Chat Server");
 
-	if (!ucsconfig::LoadConfig()) { 
-		LogInfo("Loading server configuration failed"); 
+	if (!ucsconfig::LoadConfig()) {
+		LogInfo("Loading server configuration failed");
 		return 1;
 	}
 
-	Config = ucsconfig::get(); 
+	Config = ucsconfig::get();
 
 	WorldShortName = Config->ShortName;
 
@@ -144,19 +145,26 @@ int main() {
 
 	worldserver = new WorldServer;
 
-	while(RunLoops) {
+	auto loop_fn = [&](EQ::Timer* t) {
 
 		Timer::SetCurrentTime();
 
 		g_Clientlist->Process();
 
-		if(ChannelListProcessTimer.Check())
+		if (ChannelListProcessTimer.Check()) {
 			ChannelList->Process();
+		}
 
-		EQ::EventLoop::Get().Process();
+		if (ClientConnectionPruneTimer.Check()) {
+			g_Clientlist->CheckForStaleConnectionsAll();
+		}
 
-		Sleep(5);
-	}
+	};
+
+	EQ::Timer process_timer(loop_fn);
+	process_timer.Start(32, true);
+
+	EQ::EventLoop::Get().Run();
 
 	ChannelList->RemoveAllChannels();
 
