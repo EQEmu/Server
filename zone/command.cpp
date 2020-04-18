@@ -6837,22 +6837,24 @@ void command_dz(Client* c, const Seperator* sep)
 	{
 		if (strcasecmp(sep->arg[2], "list") == 0)
 		{
-			c->Message(Chat::White, "Total Active Expeditions: [%u]", static_cast<uint32>(zone->expedition_cache.size()));
+			c->Message(Chat::White, fmt::format("Total Active Expeditions: [{}]", zone->expedition_cache.size()).c_str());
 			for (const auto& expedition : zone->expedition_cache)
 			{
-				c->Message(
-					Chat::White, "Expedition id: [%u]: leader: [%s] instance id: [%u] members: [%u]",
+				c->Message(Chat::White, fmt::format(
+					"Expedition id: [{}]: leader: [{}] instance id: [{}] members: [{}]",
 					expedition.second->GetID(),
-					expedition.second->GetLeaderName().c_str(),
+					expedition.second->GetLeaderName(),
 					expedition.second->GetInstanceID(),
 					expedition.second->GetMemberCount()
-				);
+				).c_str());
 			}
 		}
 		else if (strcasecmp(sep->arg[2], "reload") == 0)
 		{
 			Expedition::CacheAllFromDatabase();
-			c->Message(Chat::White, "Reloaded [%u] expeditions to cache from database.", static_cast<uint32>(zone->expedition_cache.size()));
+			c->Message(Chat::White, fmt::format(
+				"Reloaded [{}] expeditions to cache from database.", zone->expedition_cache.size()
+			).c_str());
 		}
 	}
 	else if (strcasecmp(sep->arg[1], "destroy") == 0)
@@ -6870,12 +6872,53 @@ void command_dz(Client* c, const Seperator* sep)
 			}
 		}
 	}
+	else if (strcasecmp(sep->arg[1], "list") == 0)
+	{
+		std::string query = SQL(
+			SELECT
+				dynamic_zones.type,
+				instance_list.id,
+				instance_list.zone,
+				instance_list.version,
+				instance_list.start_time,
+				instance_list.duration,
+				COUNT(instance_list.id) member_count
+			FROM dynamic_zones
+				INNER JOIN instance_list ON dynamic_zones.instance_id = instance_list.id
+				LEFT JOIN instance_list_player ON instance_list.id = instance_list_player.id
+			GROUP BY instance_list.id;
+		);
+
+		auto results = database.QueryDatabase(query);
+		if (results.Success())
+		{
+			c->Message(Chat::White, fmt::format("Total Dynamic Zones: [{}]", results.RowCount()).c_str());
+			for (auto row = results.begin(); row != results.end(); ++row)
+			{
+				auto start_time = strtoul(row[4], nullptr, 10);
+				auto duration = strtoul(row[5], nullptr, 10);
+				auto expire_time = std::chrono::system_clock::from_time_t(start_time + duration);
+				bool is_expired = std::chrono::system_clock::now() > expire_time;
+
+				c->Message(Chat::White, fmt::format(
+					"type: [{}] instance: [{}] zone: [{}] version: [{}] members: [{}] expired: [{}]",
+					strtoul(row[0], nullptr, 10),
+					strtoul(row[1], nullptr, 10),
+					strtoul(row[2], nullptr, 10),
+					strtoul(row[3], nullptr, 10),
+					strtoul(row[6], nullptr, 10),
+					is_expired
+				).c_str());
+			}
+		}
+	}
 	else
 	{
 		c->Message(Chat::White, "#dz usage:");
 		c->Message(Chat::White, "#dz cache list - list expeditions in current zone cache");
 		c->Message(Chat::White, "#dz cache reload - reload zone cache from database");
 		c->Message(Chat::White, "#dz destroy <expedition_id> - destroy expedition globally (must be in cache)");
+		c->Message(Chat::White, "#dz list - list all dynamic zones with corresponding instance ids from database");
 	}
 }
 

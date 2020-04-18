@@ -22,6 +22,7 @@ SET(zone_sources
 	corpse.cpp
 	data_bucket.cpp
 	doors.cpp
+	dynamiczone.cpp
 	effects.cpp
 	embparser.cpp
 	embparser_api.cpp
@@ -170,6 +171,7 @@ SET(zone_headers
 	corpse.h
 	data_bucket.h
 	doors.h
+	dynamiczone.h
 	embparser.h
 	embperl.h
 	embxs.h

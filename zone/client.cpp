@@ -43,6 +43,7 @@ extern volatile bool RunLoops;
 #include "expedition.h"
 #include "expedition_database.h"
 #include "expedition_lockout_timer.h"
+#include "expedition_request.h"
 #include "position.h"
 #include "worldserver.h"
 #include "zonedb.h"
@@ -267,6 +268,7 @@ Client::Client(EQStreamInterface* ieqs)
 	InitializeMercInfo();
 	SetMerc(0);
 	if (RuleI(World, PVPMinLevel) > 0 && level >= RuleI(World, PVPMinLevel) && m_pp.pvp == 0) SetPVP(true, false);
+	dynamiczone_removal_timer.Disable();
 
 	//for good measure:
 	memset(&m_pp, 0, sizeof(m_pp));
@@ -6141,24 +6143,19 @@ void Client::CheckEmoteHail(Mob *target, const char* message)
 
 void Client::MarkSingleCompassLoc(float in_x, float in_y, float in_z, uint8 count)
 {
-	uint32 entry_size = sizeof(DynamicZoneCompassEntry_Struct) * count;
-	auto outapp = new EQApplicationPacket(OP_DzCompass, sizeof(DynamicZoneCompass_Struct) + entry_size);
-	auto outbuf = reinterpret_cast<DynamicZoneCompass_Struct*>(outapp->pBuffer);
-
-	outbuf->client_id = 0;
-	outbuf->count = count;
-
-	if (count) {
-		outbuf->entries[0].dz_zone_id = 0;
-		outbuf->entries[0].dz_instance_id = 0;
-		outbuf->entries[0].dz_type = 0;
-		outbuf->entries[0].x = in_x;
-		outbuf->entries[0].y = in_y;
-		outbuf->entries[0].z = in_z;
+	if (count == 0)
+	{
+		m_quest_compass.zone_id = 0;
+	}
+	else
+	{
+		m_quest_compass.zone_id = zone ? zone->GetZoneID() : 0;
+		m_quest_compass.x = in_x;
+		m_quest_compass.y = in_y;
+		m_quest_compass.z = in_z;
 	}
 
-	FastQueuePacket(&outapp);
-	safe_delete(outapp);
+	SendDzCompassUpdate();
 }
 
 void Client::SendZonePoints()
@@ -9553,6 +9550,8 @@ void Client::UpdateExpeditionInfoAndLockouts()
 {
 	// this is processed by client after entering a zone
 	// todo: live re-invites if client zoned with a pending invite window open
+	SendDzCompassUpdate();
+
 	auto expedition = GetExpedition();
 	if (expedition)
 	{
@@ -9560,7 +9559,7 @@ void Client::UpdateExpeditionInfoAndLockouts()
 
 		// live only adds lockouts obtained during the active expedition to new
 		// members once they zone into the expedition's dynamic zone instance
-		if (zone && /*zone->GetInstanceID() && zone->GetInstanceID()*/zone->GetZoneID() == expedition->GetInstanceID())
+		if (expedition->GetDynamicZone().IsCurrentZoneDzInstance())
 		{
 			ExpeditionDatabase::AssignPendingLockouts(CharacterID(), expedition->GetName());
 			expedition->SetMemberStatus(this, ExpeditionMemberStatus::InDynamicZone);
@@ -9570,13 +9569,17 @@ void Client::UpdateExpeditionInfoAndLockouts()
 			expedition->SetMemberStatus(this, ExpeditionMemberStatus::Online);
 		}
 	}
+
 	Expedition::LoadAllClientLockouts(this);
 }
 
 Expedition* Client::CreateExpedition(
-	std::string name, uint32 min_players, uint32 max_players, bool has_replay_timer)
+	std::string zone_name, uint32 version, uint32 duration,
+	std::string expedition_name, uint32 min_players, uint32 max_players, bool has_replay_timer)
 {
-	return Expedition::TryCreate(this, name, min_players, max_players, has_replay_timer);
+	DynamicZone dz_instance{ zone_name, version, duration, DynamicZoneType::Expedition };
+	ExpeditionRequest request{ expedition_name, min_players, max_players, has_replay_timer };
+	return Expedition::TryCreate(this, dz_instance, request);
 }
 
 Expedition* Client::GetExpedition() const
@@ -9603,30 +9606,6 @@ std::vector<ExpeditionLockoutTimer> Client::GetExpeditionLockouts(const std::str
 		}
 	}
 	return lockouts;
-}
-
-void Client::DzListTimers()
-{
-	// only lists player's current replay timer lockouts, not all event lockouts
-	bool found = false;
-	for (const auto& lockout : m_expedition_lockouts)
-	{
-		if (lockout.IsReplayTimer())
-		{
-			found = true;
-			auto time_remaining = lockout.GetDaysHoursMinutesRemaining();
-			MessageString(
-				Chat::Yellow, DZLIST_REPLAY_TIMER,
-				time_remaining.days.c_str(), time_remaining.hours.c_str(), time_remaining.mins.c_str(),
-				lockout.GetExpeditionName().c_str()
-			);
-		}
-	}
-
-	if (!found)
-	{
-		MessageString(Chat::Yellow, EXPEDITION_NO_TIMERS);
-	}
 }
 
 void Client::AddExpeditionLockout(const ExpeditionLockoutTimer& lockout, bool update_db)
@@ -9732,4 +9711,202 @@ void Client::SendExpeditionLockoutTimers()
 		memcpy(outbuf->timers, lockout_entries.data(), lockout_entries_size);
 	}
 	QueuePacket(outapp.get());
+}
+
+void Client::DzListTimers()
+{
+	// only lists player's current replay timer lockouts, not all event lockouts
+	bool found = false;
+	for (const auto& lockout : m_expedition_lockouts)
+	{
+		if (lockout.IsReplayTimer())
+		{
+			found = true;
+			auto time_remaining = lockout.GetDaysHoursMinutesRemaining();
+			MessageString(
+				Chat::Yellow, DZLIST_REPLAY_TIMER,
+				time_remaining.days.c_str(), time_remaining.hours.c_str(), time_remaining.mins.c_str(),
+				lockout.GetExpeditionName().c_str()
+			);
+		}
+	}
+
+	if (!found)
+	{
+		MessageString(Chat::Yellow, EXPEDITION_NO_TIMERS);
+	}
+}
+
+void Client::SetDzRemovalTimer(bool enable_timer)
+{
+	uint32_t timer_ms = RuleI(DynamicZone, ClientRemovalDelayMS);
+
+	LogDynamicZones(
+		"Character [{}] instance [{}] removal timer enabled: [{}] delay (ms): [{}]",
+		CharacterID(), zone ? zone->GetInstanceID() : 0, enable_timer, timer_ms
+	);
+
+	if (enable_timer)
+	{
+		dynamiczone_removal_timer.Start(timer_ms);
+	}
+	else
+	{
+		dynamiczone_removal_timer.Disable();
+	}
+}
+
+void Client::SendDzCompassUpdate()
+{
+	// a client may be associated with multiple dynamic zones with compasses
+	// in the same zone. any systems that use dynamic zones need checked here
+	std::vector<DynamicZoneCompassEntry_Struct> compass_entries;
+
+	Expedition* expedition = GetExpedition();
+	if (expedition)
+	{
+		auto compass = expedition->GetDynamicZone().GetCompassLocation();
+		if (zone && zone->GetZoneID() == compass.zone_id)
+		{
+			DynamicZoneCompassEntry_Struct entry;
+			entry.dz_zone_id = static_cast<uint16_t>(expedition->GetDynamicZone().GetZoneID());
+			entry.dz_instance_id = static_cast<uint16_t>(expedition->GetDynamicZone().GetInstanceID());
+			entry.dz_type = static_cast<uint8_t>(expedition->GetDynamicZone().GetType());
+			entry.x = compass.x;
+			entry.y = compass.y;
+			entry.z = compass.z;
+
+			compass_entries.emplace_back(entry);
+		}
+	}
+
+	// todo: shared tasks, missions, and quests with an associated dz
+
+	// compass set via MarkSingleCompassLocation()
+	if (zone && zone->GetZoneID() == m_quest_compass.zone_id)
+	{
+		DynamicZoneCompassEntry_Struct entry;
+		entry.dz_zone_id = 0;
+		entry.dz_instance_id = 0;
+		entry.dz_type = 0;
+		entry.x = m_quest_compass.x;
+		entry.y = m_quest_compass.y;
+		entry.z = m_quest_compass.z;
+
+		compass_entries.emplace_back(entry);
+	}
+
+	uint32 count = static_cast<uint32_t>(compass_entries.size());
+	uint32 entries_size = sizeof(DynamicZoneCompassEntry_Struct) * count;
+	uint32 outsize = sizeof(DynamicZoneCompass_Struct) + entries_size;
+	auto outapp = std::unique_ptr<EQApplicationPacket>(new EQApplicationPacket(OP_DzCompass, outsize));
+	auto outbuf = reinterpret_cast<DynamicZoneCompass_Struct*>(outapp->pBuffer);
+	outbuf->client_id = 0;
+	outbuf->count = count;
+	memcpy(outbuf->entries, compass_entries.data(), entries_size);
+
+	QueuePacket(outapp.get());
+}
+
+void Client::GoToDzSafeReturnOrBind(const DynamicZoneLocation& safereturn)
+{
+	LogDynamicZonesDetail(
+		"Sending character [{}] in zone [{}]:[{}] to safereturn [{}] at ([{}], [{}], [{}], [{}]) or bind",
+		CharacterID(),
+		zone ? zone->GetZoneID() : 0,
+		zone ? zone->GetInstanceID() : 0,
+		safereturn.zone_id,
+		safereturn.x,
+		safereturn.y,
+		safereturn.z,
+		safereturn.heading
+	);
+
+	if (safereturn.zone_id == 0)
+	{
+		GoToBind();
+	}
+	else
+	{
+		MovePC(safereturn.zone_id, 0, safereturn.x, safereturn.y, safereturn.z, safereturn.heading);
+	}
+}
+
+void Client::MovePCDynamicZone(uint32 zone_id)
+{
+	if (zone_id == 0)
+	{
+		return;
+	}
+
+	// check client systems for any associated dynamic zones to the requested zone id
+	std::vector<DynamicZoneChooseZoneEntry_Struct> client_dzs;
+	DynamicZone single_dz;
+
+	Expedition* expedition = GetExpedition();
+	if (expedition && expedition->GetDynamicZone().GetZoneID() == zone_id)
+	{
+		single_dz = expedition->GetDynamicZone();
+
+		DynamicZoneChooseZoneEntry_Struct dz;
+		dz.dz_zone_id = expedition->GetDynamicZone().GetZoneID();
+		dz.dz_instance_id = expedition->GetDynamicZone().GetInstanceID();
+		dz.dz_type = static_cast<uint8_t>(expedition->GetDynamicZone().GetType());
+		//dz.unknown_id2 = expedition->GetDynamicZone().GetRealID();
+		strn0cpy(dz.description, expedition->GetName().c_str(), sizeof(dz.description));
+		strn0cpy(dz.leader_name, expedition->GetLeaderName().c_str(), sizeof(dz.leader_name));
+
+		client_dzs.emplace_back(dz);
+	}
+
+	// todo: check for Missions (Shared Tasks), Quests, or Tasks that have associated dzs to zone_id
+
+	if (client_dzs.empty())
+	{
+		MessageString(Chat::Red, DYNAMICZONE_WAY_IS_BLOCKED); // unconfirmed message
+	}
+	else if (client_dzs.size() == 1)
+	{
+		if (single_dz.GetInstanceID() == 0)
+		{
+			LogDynamicZones("Character [{}] has dz for zone [{}] with no instance id", CharacterID(), zone_id);
+		}
+		else
+		{
+			DynamicZoneLocation zonein = single_dz.GetZoneInLocation();
+			ZoneMode zone_mode = ZoneMode::ZoneToSafeCoords;
+			if (single_dz.HasZoneInLocation())
+			{
+				zone_mode = ZoneMode::ZoneSolicited;
+			}
+			MovePC(zone_id, single_dz.GetInstanceID(), zonein.x, zonein.y, zonein.z, zonein.heading, 0, zone_mode);
+		}
+	}
+	else if (client_dzs.size() > 1)
+	{
+		LogDynamicZonesDetail(
+			"Sending DzSwitchListWnd to character [{}] associated with [{}] dynamic zone(s)",
+			CharacterID(), client_dzs.size()
+		);
+
+		// more than one dynamic zone to this zone, send out the switchlist window
+		// note that this will most likely crash clients if they've reloaded the ui
+		// this occurs on live as well so it may just be a long lasting client bug
+		uint32 count = static_cast<uint32_t>(client_dzs.size());
+		uint32 entries_size = sizeof(DynamicZoneChooseZoneEntry_Struct) * count;
+		uint32 outsize = sizeof(DynamicZoneChooseZone_Struct) + entries_size;
+		auto outapp = std::unique_ptr<EQApplicationPacket>(new EQApplicationPacket(OP_DzChooseZone, outsize));
+		auto outbuf = reinterpret_cast<DynamicZoneChooseZone_Struct*>(outapp->pBuffer);
+		outbuf->client_id = 0;
+		outbuf->count = count;
+		memcpy(outbuf->choices, client_dzs.data(), entries_size);
+
+		QueuePacket(outapp.get());
+	}
+}
+
+void Client::MovePCDynamicZone(const std::string& zone_name)
+{
+	auto zone_id = ZoneID(zone_name.c_str());
+	MovePCDynamicZone(zone_id);
 }

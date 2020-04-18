@@ -2909,8 +2909,16 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	case ServerOP_ExpeditionGetOnlineMembers:
 	case ServerOP_ExpeditionDzAddPlayer:
 	case ServerOP_ExpeditionDzMakeLeader:
+	case ServerOP_ExpeditionDzCompass:
+	case ServerOP_ExpeditionDzSafeReturn:
+	case ServerOP_ExpeditionDzZoneIn:
 	{
 		Expedition::HandleWorldMessage(pack);
+		break;
+	}
+	case ServerOP_DzCharacterChange:
+	{
+		DynamicZone::HandleWorldMessage(pack);
 		break;
 	}
 	default: {

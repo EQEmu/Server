@@ -26,17 +26,17 @@
 #include <fmt/core.h>
 
 uint32_t ExpeditionDatabase::InsertExpedition(
-	const std::string& expedition_name, uint32_t leader_id,
+	uint32_t instance_id, const std::string& expedition_name, uint32_t leader_id,
 	uint32_t min_players, uint32_t max_players, bool has_replay_lockout)
 {
 	LogExpeditionsDetail("Inserting new expedition [{}] leader [{}]", expedition_name, leader_id);
 
 	std::string query = fmt::format(SQL(
 		INSERT INTO expedition_details
-			(expedition_name, leader_id, min_players, max_players, has_replay_timer)
+			(instance_id, expedition_name, leader_id, min_players, max_players, has_replay_timer)
 		VALUES
-			('{}', {}, {}, {}, {});
-	), expedition_name, leader_id, min_players, max_players, has_replay_lockout);
+			({}, '{}', {}, {}, {}, {});
+	), instance_id, expedition_name, leader_id, min_players, max_players, has_replay_lockout);
 
 	auto results = database.QueryDatabase(query);
 	if (!results.Success())

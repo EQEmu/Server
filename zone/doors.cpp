@@ -207,6 +207,8 @@ void Doors::HandleClick(Client* sender, uint8 trigger) {
 		}
 	}
 
+	// todo: if IsDzDoor() call Client::MovePCDynamicZone(target_zone_id) (for systems that use dzs)
+
 	uint32 required_key_item       = GetKeyItem();
 	uint8  disable_add_to_key_ring = GetNoKeyring();
 	uint32 player_has_key          = 0;

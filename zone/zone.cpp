@@ -1491,7 +1491,14 @@ bool Zone::Process() {
 		{
 			if(Instance_Timer->Check())
 			{
-				entity_list.GateAllClients();
+				// if this is a dynamic zone instance notify system associated with it
+				Expedition* expedition = Expedition::FindExpeditionByInstanceID(GetInstanceID());
+				if (expedition)
+				{
+					expedition->RemoveAllMembers(false, false); // entity list will teleport clients out immediately
+				}
+				// todo: move corpses to non-instanced version of dz at same coords (if no graveyard)
+				entity_list.GateAllClientsToSafeReturn();
 				database.DeleteInstance(GetInstanceID());
 				Instance_Shutdown_Timer = new Timer(20000); //20 seconds
 			}
