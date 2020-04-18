@@ -34,17 +34,22 @@ namespace ContentFilterCriteria {
 			table_prefix = table_prefix + ".";
 		}
 
+		int current_expansion_filter_criteria = content_service.GetCurrentExpansion();
+		if (current_expansion_filter_criteria == Expansion::EXPANSION_ALL) {
+			current_expansion_filter_criteria = Expansion::EXPANSION_FILTER_MAX;
+		}
+
 		criteria += fmt::format(
 			" AND ({}min_expansion <= {} OR {}min_expansion = 0)",
 			table_prefix,
-			content_service.GetCurrentExpansion(),
+			current_expansion_filter_criteria,
 			table_prefix
 		);
 
 		criteria += fmt::format(
 			" AND ({}max_expansion >= {} OR {}max_expansion = 0)",
 			table_prefix,
-			content_service.GetCurrentExpansion(),
+			current_expansion_filter_criteria,
 			table_prefix
 		);
 

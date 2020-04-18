@@ -25,7 +25,8 @@
 #include <vector>
 
 namespace Expansion {
-	static const int EXPANSION_ALL = -1;
+	static const int EXPANSION_ALL        = -1;
+	static const int EXPANSION_FILTER_MAX = 99;
 
 	enum ExpansionNumber {
 		Classic = 0,
