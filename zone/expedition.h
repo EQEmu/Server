@@ -21,6 +21,7 @@
 #ifndef EXPEDITION_H
 #define EXPEDITION_H
 
+#include "dynamiczone.h"
 #include "expedition_lockout_timer.h"
 #include <cstdint>
 #include <memory>
@@ -37,16 +38,6 @@ class ServerPacket;
 
 extern const char* const DZ_YOU_NOT_ASSIGNED;
 extern const char* const EXPEDITION_OTHER_BELONGS;
-
-enum class DynamicZoneType : uint8_t // DynamicZoneActiveType
-{
-	None = 0,
-	Expedition,
-	Tutorial,
-	Task,
-	Mission,
-	Quest
-};
 
 enum class ExpeditionMemberStatus : uint8_t
 {
@@ -73,11 +64,12 @@ class Expedition
 {
 public:
 	Expedition() = delete;
-	Expedition(uint32_t id, std::string expedition_name, const ExpeditionMember& leader,
+	Expedition(
+		uint32_t id, const DynamicZone& dz, std::string expedition_name, const ExpeditionMember& leader,
 		uint32_t min_players, uint32_t max_players, bool replay_timer);
 
-	static Expedition* TryCreate(
-		Client* requester, std::string name, uint32_t min_players, uint32_t max_players, bool replay_timer);
+	static Expedition* TryCreate(Client* requester, DynamicZone& dynamiczone, ExpeditionRequest& request);
+
 	static void CacheFromDatabase(uint32_t expedition_id);
 	static bool CacheAllFromDatabase();
 	static void CacheExpeditions(MySQLRequestResult& results);
@@ -89,10 +81,12 @@ public:
 	static void HandleWorldMessage(ServerPacket* pack);
 
 	uint32_t GetID() const { return m_id; }
+	uint16_t GetInstanceID() const { return m_dynamiczone.GetInstanceID(); }
 	uint32_t GetLeaderID() const { return m_leader.char_id; }
 	uint32_t GetMinPlayers() const { return m_min_players; }
 	uint32_t GetMaxPlayers() const { return m_max_players; }
 	uint32_t GetMemberCount() const { return static_cast<uint32_t>(m_members.size()); }
+	const DynamicZone& GetDynamicZone() const { return m_dynamiczone; }
 	const std::string& GetName() const { return m_expedition_name; }
 	const std::string& GetLeaderName() const { return m_leader.name; }
 	const std::unordered_map<std::string, ExpeditionLockoutTimer>& GetLockouts() const { return m_lockouts; }
@@ -101,7 +95,7 @@ public:
 	bool AddMember(const std::string& add_char_name, uint32_t add_char_id);
 	bool HasMember(const std::string& name);
 	bool HasMember(uint32_t character_id);
-	void RemoveAllMembers();
+	void RemoveAllMembers(bool enable_removal_timers = true, bool update_dz_expire_time = true);
 	bool RemoveMember(const std::string& remove_char_name);
 	void SetMemberStatus(Client* client, ExpeditionMemberStatus status);
 	void SetNewLeader(uint32_t new_leader_id, const std::string& new_leader_name);
@@ -125,19 +119,18 @@ public:
 	void DzQuit(Client* requester);
 	void DzKickPlayers(Client* requester);
 
-#if 0
-	bool AssignInstance(uint32_t instance_id, bool update_db = true);
-	uint32_t CreateInstance(std::string zone, uint32_t version, uint32_t duration); // m_dynamiczone
-#endif
-	uint32_t GetInstanceID() const { return 77; /*return m_instance_id;*/ } // todo: GetDynamicZoneID()
-	DynamicZoneType GetType() const { return DynamicZoneType::Expedition; } // m_dynamiczone
+	void SetDzCompass(uint32_t zone_id, float x, float y, float z, bool update_db = false);
+	void SetDzCompass(const std::string& zone_name, float x, float y, float z, bool update_db = false);
+	void SetDzSafeReturn(uint32_t zone_id, float x, float y, float z, float heading, bool update_db = false);
+	void SetDzSafeReturn(const std::string& zone_name, float x, float y, float z, float heading, bool update_db = false);
+	void SetDzZoneInLocation(float x, float y, float z, float heading, bool update_db = false);
 
 	static const uint32_t REPLAY_TIMER_ID;
 	static const uint32_t EVENT_TIMER_ID;
 
 private:
 	void AddInternalLockout(ExpeditionLockoutTimer&& lockout_timer);
-	void AddInternalMember(const std::string& char_name, uint32_t char_id, bool is_current_member = true, bool offline = false);
+	void AddInternalMember(const std::string& char_name, uint32_t char_id, ExpeditionMemberStatus status, bool is_current_member = true);
 	bool ChooseNewLeader();
 	bool ConfirmLeaderCommand(Client* requester);
 	void LoadMembers();
@@ -152,6 +145,7 @@ private:
 	void SendClientExpeditionInvite(Client* client, const std::string& inviter_name, const std::string& swap_remove_name);
 	void SendLeaderMessage(Client* leader_client, uint16_t chat_type, uint32_t string_id, const std::initializer_list<std::string>& parameters = {});
 	void SendUpdatesToZoneMembers(bool clear = false);
+	void SendWorldDzLocationUpdate(uint16_t server_opcode, const DynamicZoneLocation& location);
 	void SendWorldExpeditionUpdate(bool destroyed = false);
 	void SendWorldGetOnlineMembers();
 	void SendWorldAddPlayerInvite(const std::string& inviter_name, const std::string& swap_remove_name, const std::string& add_name);
@@ -174,11 +168,11 @@ private:
 	std::unique_ptr<EQApplicationPacket> CreateLeaderNamePacket();
 
 	uint32_t    m_id               = 0;
-	//uint32_t    m_instance_id      = 0; // todo: DynamicZone m_dynamiczone
 	uint32_t    m_min_players      = 0;
 	uint32_t    m_max_players      = 0;
 	bool        m_has_replay_timer = false;
 	std::string m_expedition_name;
+	DynamicZone m_dynamiczone { DynamicZoneType::Expedition };
 	ExpeditionMember m_leader;
 	std::vector<ExpeditionMember> m_members; // current members
 	std::unordered_set<uint32_t> m_member_id_history; // track past members to allow invites for replay timer bypass

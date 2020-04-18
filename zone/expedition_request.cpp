@@ -38,10 +38,8 @@ struct ExpeditionRequestConflict
 };
 
 ExpeditionRequest::ExpeditionRequest(
-	Client* requester, std::string expedition_name, uint32_t min_players,
-	uint32_t max_players, bool has_replay_timer
+	std::string expedition_name, uint32_t min_players, uint32_t max_players, bool has_replay_timer
 ) :
-	m_requester(requester),
 	m_expedition_name(expedition_name),
 	m_min_players(min_players),
 	m_max_players(max_players),
@@ -49,8 +47,9 @@ ExpeditionRequest::ExpeditionRequest(
 {
 }
 
-bool ExpeditionRequest::Validate()
+bool ExpeditionRequest::Validate(Client* requester)
 {
+	m_requester = requester;
 	if (!m_requester)
 	{
 		return false;
@@ -353,7 +352,7 @@ bool ExpeditionRequest::IsPlayerCountValidated(uint32_t member_count)
 	bool requirements_met = true;
 
 	auto bypass_status = RuleI(Expedition, MinStatusToBypassPlayerCountRequirements);
-	auto gm_bypass = (m_requester->GetGM() && m_requester->Admin() >= bypass_status);
+	auto gm_bypass = (m_requester && m_requester->GetGM() && m_requester->Admin() >= bypass_status);
 
 	if (!gm_bypass && (member_count < m_min_players || member_count > m_max_players))
 	{

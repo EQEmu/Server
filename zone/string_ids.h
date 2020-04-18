@@ -299,6 +299,7 @@
 #define EXPEDITION_REPLAY_TIMER     3504    //%1 cannot be added to this expedition for another %2D:%3H:%4M since they have recently played in this area.
 #define EXPEDITION_AVAILABLE        3507    //%1 is now available to you.
 #define DZADD_INVITE                3508    //Sending an invitation to: %1.
+#define DZ_PREVENT_ENTERING         3510    //A strange magical presence prevents you from entering.  It's too dangerous to enter at the moment.
 #define DZADD_INVITE_FAIL           3511    //%1 could not be invited to join you.
 #define UNABLE_RETRIEVE_LEADER      3512    //Unable to retrieve information on the leader to check permissions.
 #define EXPEDITION_NOT_LEADER       3513    //You are not the expedition leader, only %1 can issue this command.
@@ -314,6 +315,7 @@
 #define EXPEDITION_INVITE_ERROR     3524    //%1 accepted your offer to join your expedition but could not due to error(s).
 #define EXPEDITION_INVITE_DECLINED  3525    //%1 has declined your offer to join your expedition.
 #define EXPEDITION_ASKED_TO_JOIN    3527    //%1 has asked you to join the expedition:  %2.        Would you like to join?
+#define DYNAMICZONE_WAY_IS_BLOCKED  3528    //The way is blocked to you.  Perhaps you would be able to enter if there was a reason to come here.
 #define EXPEDITION_NO_TIMERS        3529    //You have no outstanding timers.
 #define EXPEDITION_MIN_REMAIN       3551    //You only have %1 minutes remaining before this expedition comes to an end.
 #define EXPEDITION_LEADER           3552    //Expedition Leader: %1

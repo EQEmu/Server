@@ -25,7 +25,7 @@ class ServerPacket;
 
 namespace Expedition
 {
-	void PurgeEmptyExpeditions();
+	void PurgeExpiredExpeditions();
 	void PurgeExpiredCharacterLockouts();
 	void AddPlayer(ServerPacket* pack);
 	void MakeLeader(ServerPacket* pack);

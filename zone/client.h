@@ -54,6 +54,7 @@ namespace EQ
 #include "aggromanager.h"
 
 #include "common.h"
+#include "dynamiczone.h"
 #include "merc.h"
 #include "mob.h"
 #include "qglobals.h"
@@ -1116,10 +1117,13 @@ public:
 
 	void AddExpeditionLockout(const ExpeditionLockoutTimer& lockout, bool update_db = false);
 	void AddNewExpeditionLockout(const std::string& expedition_name, const std::string& event_name, uint32_t duration);
-	Expedition* CreateExpedition(std::string name, uint32 min_players, uint32 max_players, bool has_replay_timer = false);
+	Expedition* CreateExpedition(
+		std::string zone_name, uint32 version, uint32 duration, std::string expedition_name,
+		uint32 min_players, uint32 max_players, bool has_replay_timer = false);
 	Expedition* GetExpedition() const;
 	uint32 GetExpeditionID() const { return m_expedition_id; }
-	const ExpeditionLockoutTimer* GetExpeditionLockout(const std::string& expedition_name, const std::string& event_name, bool include_expired = false) const;
+	const ExpeditionLockoutTimer* GetExpeditionLockout(
+		const std::string& expedition_name, const std::string& event_name, bool include_expired = false) const;
 	const std::vector<ExpeditionLockoutTimer>& GetExpeditionLockouts() const { return m_expedition_lockouts; };
 	std::vector<ExpeditionLockoutTimer> GetExpeditionLockouts(const std::string& expedition_name);
 	uint32 GetPendingExpeditionInviteID() const { return m_pending_expedition_invite_id; }
@@ -1131,6 +1135,11 @@ public:
 	void SetExpeditionID(uint32 expedition_id) { m_expedition_id = expedition_id; };
 	void UpdateExpeditionInfoAndLockouts();
 	void DzListTimers();
+	void SetDzRemovalTimer(bool enable_timer);
+	void SendDzCompassUpdate();
+	void GoToDzSafeReturnOrBind(const DynamicZoneLocation& safereturn);
+	void MovePCDynamicZone(uint32 zone_id);
+	void MovePCDynamicZone(const std::string& zone_name);
 
 	void CalcItemScale();
 	bool CalcItemScale(uint32 slot_x, uint32 slot_y); // behavior change: 'slot_y' is now [RANGE]_END and not [RANGE]_END + 1
@@ -1585,6 +1594,7 @@ private:
 	Timer hp_other_update_throttle_timer; /* This is to keep clients from DOSing the server with macros that change client targets constantly */
 	Timer position_update_timer; /* Timer used when client hasn't updated within a 10 second window */
 	Timer consent_throttle_timer;
+	Timer dynamiczone_removal_timer;
 
 	glm::vec3 m_Proximity;
 	glm::vec4 last_position_before_bulk_update;
@@ -1688,8 +1698,8 @@ private:
 
 	uint32 m_expedition_id = 0;
 	uint32 m_pending_expedition_invite_id = 0;
-	Expedition* m_expedition = nullptr;
 	std::vector<ExpeditionLockoutTimer> m_expedition_lockouts;
+	DynamicZoneLocation m_quest_compass;
 
 #ifdef BOTS
 

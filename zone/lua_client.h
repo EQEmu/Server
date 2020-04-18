@@ -339,14 +339,16 @@ public:
 	void SetClientMaxLevel(int value);
 	int GetClientMaxLevel();
 
-	Lua_Expedition  CreateExpedition(std::string name, uint32 min_players, uint32 max_players);
-	Lua_Expedition  CreateExpedition(std::string name, uint32 min_players, uint32 max_players, bool has_replay_timer);
+	Lua_Expedition  CreateExpedition(std::string zone_name, uint32 version, uint32 duration, std::string expedition_name, uint32 min_players, uint32 max_players);
+	Lua_Expedition  CreateExpedition(std::string zone_name, uint32 version, uint32 duration, std::string expedition_name, uint32 min_players, uint32 max_players, bool has_replay_timer);
 	Lua_Expedition  GetExpedition();
 	luabind::object GetExpeditionLockouts(lua_State* L);
 	luabind::object GetExpeditionLockouts(lua_State* L, std::string expedition_name);
 	void            AddExpeditionLockout(std::string expedition_name, std::string event_name, uint32 seconds);
 	void            RemoveExpeditionLockout(std::string expedition_name, std::string event_name);
 	bool            HasExpeditionLockout(std::string expedition_name, std::string event_name);
+	void            MovePCDynamicZone(uint32 zone_id);
+	void            MovePCDynamicZone(std::string zone_name);
 };
 
 #endif

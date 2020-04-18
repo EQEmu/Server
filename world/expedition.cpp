@@ -30,23 +30,27 @@
 extern ClientList client_list;
 extern ZSList zoneserver_list;
 
-void Expedition::PurgeEmptyExpeditions()
+void Expedition::PurgeExpiredExpeditions()
 {
 	std::string query = SQL(
 		DELETE expedition FROM expedition_details expedition
+			LEFT JOIN instance_list ON expedition.instance_id = instance_list.id
 			LEFT JOIN (
 				SELECT expedition_id, COUNT(IF(is_current_member = TRUE, 1, NULL)) member_count
 				FROM expedition_members
 				GROUP BY expedition_id
 			) AS expedition_members
 			ON expedition_members.expedition_id = expedition.id
-		WHERE expedition_members.expedition_id IS NULL OR expedition_members.member_count <= 0
+		WHERE
+			expedition.instance_id IS NULL
+			OR expedition_members.member_count = 0
+			OR (instance_list.start_time + instance_list.duration) <= UNIX_TIMESTAMP();
 	);
 
 	auto results = database.QueryDatabase(query);
 	if (!results.Success())
 	{
-		LogExpeditions("Failed to purge empty expeditions");
+		LogExpeditions("Failed to purge expired and empty expeditions");
 	}
 }
 

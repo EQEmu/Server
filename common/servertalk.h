@@ -151,6 +151,11 @@
 #define ServerOP_ExpeditionGetOnlineMembers 0x0407
 #define ServerOP_ExpeditionDzAddPlayer      0x0408
 #define ServerOP_ExpeditionDzMakeLeader     0x0409
+#define ServerOP_ExpeditionDzCompass        0x040a
+#define ServerOP_ExpeditionDzSafeReturn     0x040b
+#define ServerOP_ExpeditionDzZoneIn         0x040c
+
+#define ServerOP_DzCharacterChange          0x0450
 
 #define ServerOP_LSInfo				0x1000
 #define ServerOP_LSStatus			0x1001
@@ -2051,6 +2056,25 @@ struct ServerDzCommand_Struct {
 	char   requester_name[64];
 	char   target_name[64];
 	char   remove_name[64];    // used for swap command
+};
+
+struct ServerDzLocation_Struct {
+	uint32 owner_id;           // system associated with the dz (expedition, shared task, etc)
+	uint16 dz_zone_id;
+	uint16 dz_instance_id;
+	uint32 sender_zone_id;
+	uint16 sender_instance_id;
+	uint32 zone_id;            // compass or safereturn zone id
+	float  y;
+	float  x;
+	float  z;
+	float  heading;
+};
+
+struct ServerDzCharacter_Struct {
+	uint16 instance_id;
+	uint8  remove; // 0: added 1: removed
+	uint32 character_id;
 };
 
 #pragma pack()

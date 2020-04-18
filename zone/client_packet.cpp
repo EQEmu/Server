@@ -5637,9 +5637,30 @@ void Client::Handle_OP_DzAddPlayer(const EQApplicationPacket *app)
 
 void Client::Handle_OP_DzChooseZoneReply(const EQApplicationPacket *app)
 {
-	// todo: implement
-	LogExpeditionsModerate("Handle_OP_DzChooseZoneReply");
 	auto dzmsg = reinterpret_cast<DynamicZoneChooseZoneReply_Struct*>(app->pBuffer);
+	LogDynamicZones(
+		"Character [{}] chose DynamicZone [{}]:[{}] type: [{}] with system id: [{}]",
+		CharacterID(), dzmsg->dz_zone_id, dzmsg->dz_instance_id, dzmsg->dz_type, dzmsg->unknown_id2
+	);
+
+	if (!dzmsg->dz_instance_id || !database.VerifyInstanceAlive(dzmsg->dz_instance_id, CharacterID()))
+	{
+		// live just no-ops this without a message
+		LogDynamicZones(
+			"Character [{}] chose invalid DynamicZone [{}]:[{}] or is no longer a member",
+			CharacterID(), dzmsg->dz_zone_id, dzmsg->dz_instance_id
+		);
+		return;
+	}
+
+	DynamicZone dz = DynamicZone::LoadDzFromDatabase(dzmsg->dz_instance_id);
+	DynamicZoneLocation loc = dz.GetZoneInLocation();
+	ZoneMode zone_mode = ZoneMode::ZoneToSafeCoords;
+	if (dz.HasZoneInLocation())
+	{
+		zone_mode = ZoneMode::ZoneSolicited;
+	}
+	MovePC(dzmsg->dz_zone_id, dzmsg->dz_instance_id, loc.x, loc.y, loc.z, loc.heading, 0, zone_mode);
 }
 
 void Client::Handle_OP_DzExpeditionInviteResponse(const EQApplicationPacket *app)

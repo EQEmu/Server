@@ -431,7 +431,7 @@ int main(int argc, char** argv) {
 	PurgeInstanceTimer.Start(450000);
 
 	LogInfo("Purging expired expeditions");
-	Expedition::PurgeEmptyExpeditions(); //database.PurgeExpiredExpeditions();
+	Expedition::PurgeExpiredExpeditions();
 	Expedition::PurgeExpiredCharacterLockouts();
 
 	LogInfo("Loading char create info");
@@ -604,7 +604,7 @@ int main(int argc, char** argv) {
 		if (PurgeInstanceTimer.Check()) {
 			database.PurgeExpiredInstances();
 			database.PurgeAllDeletedDataBuckets();
-			Expedition::PurgeEmptyExpeditions();
+			Expedition::PurgeExpiredExpeditions();
 			Expedition::PurgeExpiredCharacterLockouts();
 		}
 

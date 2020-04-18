@@ -38,7 +38,6 @@ namespace luabind {
 	using adl::object;
 }
 
-luabind::scope lua_register_dynamiczone_types();
 luabind::scope lua_register_expedition();
 luabind::scope lua_register_expedition_member_status();
 
@@ -57,15 +56,22 @@ public:
 	void            AddLockout(std::string event_name, uint32_t seconds);
 	void            AddReplayLockout(uint32_t seconds);
 	uint32_t        GetID();
+	int             GetInstanceID();
 	std::string     GetLeaderName();
 	uint32_t        GetMemberCount();
 	luabind::object GetMembers(lua_State* L);
 	std::string     GetName();
-	int             GetType();
+	int             GetSecondsRemaining();
+	int             GetZoneID();
 	luabind::object GetLockouts(lua_State* L);
 	bool            HasLockout(std::string event_name);
 	bool            HasReplayLockout();
 	void            RemoveLockout(std::string event_name);
+	void            SetCompass(uint32 zone_id, float x, float y, float z);
+	void            SetCompass(std::string zone_name, float x, float y, float z);
+	void            SetSafeReturn(uint32 zone_id, float x, float y, float z, float heading);
+	void            SetSafeReturn(std::string zone_name, float x, float y, float z, float heading);
+	void            SetZoneInLocation(float x, float y, float z, float heading);
 };
 
 #endif // LUA_EQEMU

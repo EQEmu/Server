@@ -36,7 +36,7 @@ class MySQLRequestResult;
 namespace ExpeditionDatabase
 {
 	uint32_t InsertExpedition(
-		const std::string& expedition_name, uint32_t leader_id,
+		uint32_t instance_id, const std::string& expedition_name, uint32_t leader_id,
 		uint32_t min_players, uint32_t max_players, bool has_replay_lockout);
 	MySQLRequestResult LoadExpedition(uint32_t expedition_id);
 	MySQLRequestResult LoadAllExpeditions();

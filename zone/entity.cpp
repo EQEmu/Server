@@ -5202,3 +5202,26 @@ std::unordered_map<uint16, Mob *> &EntityList::GetCloseMobList(Mob *mob, float d
 	return mob_list;
 }
 
+void EntityList::GateAllClientsToSafeReturn()
+{
+	DynamicZone dz;
+	if (zone)
+	{
+		dz = DynamicZone::LoadDzFromDatabase(zone->GetInstanceID());
+
+		LogDynamicZones(
+			"Sending all clients in zone: [{}] instance: [{}] to dz safereturn or bind",
+			zone->GetZoneID(), zone->GetInstanceID()
+		);
+	}
+
+	for (const auto& client_list_iter : client_list)
+	{
+		Client* client = client_list_iter.second;
+		if (client)
+		{
+			// falls back to gating clients to bind if dz invalid
+			client->GoToDzSafeReturnOrBind(dz.GetSafeReturnLocation());
+		}
+	}
+}

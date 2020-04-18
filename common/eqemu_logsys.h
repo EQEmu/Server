@@ -119,6 +119,7 @@ namespace Logs {
 		ZonePoints,
 		Loot,
 		Expeditions,
+		DynamicZones,
 		MaxCategoryID /* Don't Remove this */
 	};
 
@@ -197,6 +198,7 @@ namespace Logs {
 		"ZonePoints",
 		"Loot",
 		"Expeditions",
+		"DynamicZones",
 	};
 }
 

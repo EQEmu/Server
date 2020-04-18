@@ -37,14 +37,17 @@ struct ExpeditionMember;
 class ExpeditionRequest
 {
 public:
-	ExpeditionRequest(Client* requester, std::string expedition_name,
-		uint32_t min_players, uint32_t max_players, bool has_replay_timer);
+	ExpeditionRequest(std::string expedition_name, uint32_t min_players, uint32_t max_players, bool has_replay_timer);
 
-	bool Validate();
+	bool Validate(Client* requester);
 
+	const std::string& GetExpeditionName() const { return m_expedition_name; }
 	Client* GetLeaderClient() const { return m_leader; }
 	uint32_t GetLeaderID() const { return m_leader_id; }
 	const std::string& GetLeaderName() const { return m_leader_name; }
+	uint32_t GetMinPlayers() const { return m_min_players; }
+	uint32_t GetMaxPlayers() const { return m_max_players; }
+	bool HasReplayTimer() const { return m_has_replay_timer; }
 	std::vector<ExpeditionMember> TakeMembers() && { return std::move(m_members); }
 	std::unordered_map<std::string, ExpeditionLockoutTimer> TakeLockouts() && { return std::move(m_lockouts); }
 
