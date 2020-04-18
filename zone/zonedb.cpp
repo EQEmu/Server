@@ -755,27 +755,37 @@ void ZoneDatabase::SaveWorldContainer(uint32 zone_id, uint32 parent_id, const EQ
             }
         }
 
-        std::string query = StringFormat("REPLACE INTO object_contents "
-                                        "(zoneid, parentid, bagidx, itemid, charges, "
-                                        "augslot1, augslot2, augslot3, augslot4, augslot5, augslot6, droptime) "
-                                        "VALUES (%i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, now())",
-                                        zone_id, parent_id, index, item_id, inst->GetCharges(),
-										augslot[0], augslot[1], augslot[2], augslot[3], augslot[4], augslot[5]);
-        auto results = QueryDatabase(query);
-        if (!results.Success())
-      LogError("Error in ZoneDatabase::SaveWorldContainer: [{}]", results.ErrorMessage().c_str());
+		std::string query   = StringFormat(
+			"REPLACE INTO object_contents "
+			"(zoneid, parentid, bagidx, itemid, charges, "
+			"augslot1, augslot2, augslot3, augslot4, augslot5, augslot6, droptime) "
+			"VALUES (%i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, now())",
+			zone_id, parent_id, index, item_id, inst->GetCharges(),
+			augslot[0], augslot[1], augslot[2], augslot[3], augslot[4], augslot[5]
+		);
 
-    }
+		auto results = database.QueryDatabase(query);
+		if (!results.Success()) {
+			LogError("Error in ZoneDatabase::SaveWorldContainer: [{}]", results.ErrorMessage().c_str());
+		}
+
+	}
 
 }
 
 // Remove all child objects inside a world container (i.e., forge, bag dropped to ground, etc)
 void ZoneDatabase::DeleteWorldContainer(uint32 parent_id, uint32 zone_id)
 {
-	std::string query = StringFormat("DELETE FROM object_contents WHERE parentid = %i AND zoneid = %i", parent_id, zone_id);
-    auto results = QueryDatabase(query);
-	if (!results.Success())
+	std::string query = StringFormat(
+		"DELETE FROM object_contents WHERE parentid = %i AND zoneid = %i",
+		parent_id,
+		zone_id
+	);
+
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
 		LogError("Error in ZoneDatabase::DeleteWorldContainer: [{}]", results.ErrorMessage().c_str());
+	}
 
 }
 

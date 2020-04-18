@@ -652,9 +652,10 @@ uint32 ZoneDatabase::AddObject(uint32 type, uint32 icon, const Object_Struct& ob
 		return 0;
 	}
 
-    // Save container contents, if container
-	if (inst && inst->IsType(EQEmu::item::ItemClassBag))
-        SaveWorldContainer(object.zone_id, database_id, inst);
+	// Save container contents, if container
+	if (inst && inst->IsType(EQEmu::item::ItemClassBag)) {
+		SaveWorldContainer(object.zone_id, database_id, inst);
+	}
 
 	return database_id;
 }
