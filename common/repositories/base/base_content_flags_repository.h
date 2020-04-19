@@ -176,7 +176,6 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(content_flags_entry.id));
 		update_values.push_back(columns[1] + " = '" + EscapeString(content_flags_entry.flag_name) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(content_flags_entry.enabled));
 		update_values.push_back(columns[3] + " = '" + EscapeString(content_flags_entry.notes) + "'");
@@ -200,7 +199,6 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(content_flags_entry.id));
 		insert_values.push_back("'" + EscapeString(content_flags_entry.flag_name) + "'");
 		insert_values.push_back(std::to_string(content_flags_entry.enabled));
 		insert_values.push_back("'" + EscapeString(content_flags_entry.notes) + "'");
@@ -232,7 +230,6 @@ public:
 		for (auto &content_flags_entry: content_flags_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(content_flags_entry.id));
 			insert_values.push_back("'" + EscapeString(content_flags_entry.flag_name) + "'");
 			insert_values.push_back(std::to_string(content_flags_entry.enabled));
 			insert_values.push_back("'" + EscapeString(content_flags_entry.notes) + "'");
@@ -314,8 +311,19 @@ public:
 			fmt::format(
 				"DELETE FROM {} WHERE {}",
 				TableName(),
-				PrimaryKey(),
 				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int Truncate()
+	{
+		auto results = database.QueryDatabase(
+			fmt::format(
+				"TRUNCATE TABLE {}",
+				TableName()
 			)
 		);
 

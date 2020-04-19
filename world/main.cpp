@@ -93,6 +93,7 @@ union semun {
 #include "../zone/data_bucket.h"
 #include "world_server_command_handler.h"
 #include "../common/content/world_content_service.h"
+#include "../common/repositories/merchantlist_temp_repository.h"
 
 ClientList client_list;
 GroupLFPList LFPGroupList;
@@ -341,6 +342,9 @@ int main(int argc, char** argv) {
 	LogInfo("Clearing inventory snapshots");
 	database.ClearInvSnapshots();
 	LogInfo("Loading items");
+
+	LogInfo("Purging player sold merchant items");
+	MerchantlistTempRepository::Truncate();
 
 	if (!content_db.LoadItems(hotfix_name)) {
 		LogError("Error: Could not load item data. But ignoring");

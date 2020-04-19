@@ -314,7 +314,6 @@ public:
 			fmt::format(
 				"DELETE FROM {} WHERE {}",
 				TableName(),
-				PrimaryKey(),
 				where_filter
 			)
 		);

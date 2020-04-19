@@ -47,7 +47,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("type");
+		return std::string("petpower");
 	}
 
 	static std::vector<std::string> Columns()
@@ -129,7 +129,7 @@ public:
 	)
 	{
 		for (auto &pets : petss) {
-			if (pets.type == pets_id) {
+			if (pets.petpower == pets_id) {
 				return pets;
 			}
 		}
@@ -207,7 +207,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				pets_entry.type
+				pets_entry.petpower
 			)
 		);
 
@@ -238,7 +238,7 @@ public:
 		);
 
 		if (results.Success()) {
-			pets_entry.type = results.LastInsertedID();
+			pets_entry.petpower = results.LastInsertedID();
 			return pets_entry;
 		}
 
@@ -350,8 +350,19 @@ public:
 			fmt::format(
 				"DELETE FROM {} WHERE {}",
 				TableName(),
-				PrimaryKey(),
 				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int Truncate()
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"TRUNCATE TABLE {}",
+				TableName()
 			)
 		);
 

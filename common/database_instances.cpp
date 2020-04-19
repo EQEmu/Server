@@ -320,7 +320,7 @@ uint16 Database::GetInstanceID(const char* zone, uint32 character_id, int16 vers
 		"AND instance_list.id = instance_list_player.id "
 		"AND instance_list_player.charid = %u "
 		"LIMIT 1 ",
-		content_db.GetZoneID(zone),
+		GetZoneID(zone),
 		version,
 		character_id
 	);

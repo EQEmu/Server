@@ -365,8 +365,19 @@ public:
 			fmt::format(
 				"DELETE FROM {} WHERE {}",
 				TableName(),
-				PrimaryKey(),
 				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int Truncate()
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"TRUNCATE TABLE {}",
+				TableName()
 			)
 		);
 

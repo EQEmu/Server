@@ -44,7 +44,7 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("zone");
+		return std::string("id");
 	}
 
 	static std::vector<std::string> Columns()
@@ -120,7 +120,7 @@ public:
 	)
 	{
 		for (auto &spawn_conditions : spawn_conditionss) {
-			if (spawn_conditions.zone == spawn_conditions_id) {
+			if (spawn_conditions.id == spawn_conditions_id) {
 				return spawn_conditions;
 			}
 		}
@@ -192,7 +192,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				spawn_conditions_entry.zone
+				spawn_conditions_entry.id
 			)
 		);
 
@@ -220,7 +220,7 @@ public:
 		);
 
 		if (results.Success()) {
-			spawn_conditions_entry.zone = results.LastInsertedID();
+			spawn_conditions_entry.id = results.LastInsertedID();
 			return spawn_conditions_entry;
 		}
 
@@ -323,8 +323,19 @@ public:
 			fmt::format(
 				"DELETE FROM {} WHERE {}",
 				TableName(),
-				PrimaryKey(),
 				where_filter
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int Truncate()
+	{
+		auto results = content_db.QueryDatabase(
+			fmt::format(
+				"TRUNCATE TABLE {}",
+				TableName()
 			)
 		);
 
