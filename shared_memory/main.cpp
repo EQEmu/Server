@@ -171,7 +171,7 @@ int main(int argc, char **argv)
 	LogInfo(
 		"Current expansion is [{}] ({})",
 		content_service.GetCurrentExpansion(),
-		Expansion::ExpansionName[content_service.GetCurrentExpansion()]
+		content_service.GetCurrentExpansionName()
 	);
 
 	std::string hotfix_name = "";

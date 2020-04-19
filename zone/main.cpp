@@ -313,7 +313,7 @@ int main(int argc, char** argv) {
 	}
 
 	LogInfo("Loading zone names");
-	
+
 	// Load to both context for now... this needs to be cleaned up as this has always been cludgy
 	content_db.LoadZoneNames();
 	database.zonename_array = content_db.zonename_array;
