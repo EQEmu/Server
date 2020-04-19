@@ -313,6 +313,8 @@ int main(int argc, char** argv) {
 	}
 
 	LogInfo("Loading zone names");
+	// Load to both context for now... this needs to be cleaned up and is not the right way to do this
+	database.LoadZoneNames();
 	content_db.LoadZoneNames();
 
 	LogInfo("Loading items");
