@@ -327,9 +327,11 @@ int main(int argc, char** argv) {
 	database.PurgeAllDeletedDataBuckets();
 
 	LogInfo("Loading zones");
-	// Load to both context for now... this needs to be cleaned up and is not the right way to do this
-	database.LoadZoneNames();
+
+	// Load to both context for now... this needs to be cleaned up as this has always been cludgy
 	content_db.LoadZoneNames();
+	database.zonename_array = content_db.zonename_array;
+
 	LogInfo("Clearing groups");
 	database.ClearGroup();
 	LogInfo("Clearing raids");

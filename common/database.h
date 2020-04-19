@@ -275,8 +275,9 @@ public:
 	/* EQEmuLogSys */
 	void	LoadLogSettings(EQEmuLogSys::LogSettings* log_settings);
 
-private:
 	std::map<uint32,std::string>	zonename_array;
+
+private:
 
 	Mutex Mvarcache;
 	VarCache_Struct varcache;
