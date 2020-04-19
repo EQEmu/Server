@@ -258,27 +258,38 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		return;
 	}
 
-	EQEmu::InventoryProfile& user_inv = user->GetInv();
-	PlayerProfile_Struct& user_pp = user->GetPP();
-	EQEmu::ItemInstance* container = nullptr;
-	EQEmu::ItemInstance* inst = nullptr;
-	uint8 c_type = 0xE8;
-	uint32 some_id = 0;
-	bool worldcontainer=false;
+	LogTradeskills(
+		"[HandleCombine] container_slot [{}] guildtribute_slot [{}]",
+		in_combine->container_slot,
+		in_combine->guildtribute_slot
+	);
+
+	EQEmu::InventoryProfile &user_inv  = user->GetInv();
+	PlayerProfile_Struct    &user_pp   = user->GetPP();
+	EQEmu::ItemInstance     *container = nullptr;
+	EQEmu::ItemInstance     *inst      = nullptr;
+
+	uint8  c_type         = 0xE8;
+	uint32 some_id        = 0;
+	bool   worldcontainer = false;
 
 	if (in_combine->container_slot == EQEmu::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE) {
 		if(!worldo) {
-			user->Message(Chat::Red, "Error: Server is not aware of the tradeskill container you are attempting to use");
+			user->Message(
+				Chat::Red,
+				"Error: Server is not aware of the tradeskill container you are attempting to use"
+			);
 			return;
 		}
-		c_type = worldo->m_type;
-		inst = worldo->m_inst;
-		worldcontainer=true;
+		c_type         = worldo->m_type;
+		inst           = worldo->m_inst;
+		worldcontainer = true;
 		// if we're a world container with an item, use that too
 		if (inst) {
-			const EQEmu::ItemData* item = inst->GetItem();
-			if (item)
+			const EQEmu::ItemData *item = inst->GetItem();
+			if (item) {
 				some_id = item->ID;
+			}
 		}
 	}
 	else {
@@ -299,16 +310,30 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 
 	container = inst;
 	if (container->GetItem() && container->GetItem()->BagType == EQEmu::item::BagTypeTransformationmold) {
-		const EQEmu::ItemInstance* inst = container->GetItem(0);
-		bool AllowAll = RuleB(Inventory, AllowAnyWeaponTransformation);
+		const EQEmu::ItemInstance *inst    = container->GetItem(0);
+		bool                      AllowAll = RuleB(Inventory, AllowAnyWeaponTransformation);
 		if (inst && EQEmu::ItemInstance::CanTransform(inst->GetItem(), container->GetItem(), AllowAll)) {
-			const EQEmu::ItemData* new_weapon = inst->GetItem();
+			const EQEmu::ItemData *new_weapon = inst->GetItem();
 			user->DeleteItemInInventory(EQEmu::InventoryProfile::CalcSlotId(in_combine->container_slot, 0), 0, true);
 			container->Clear();
-			user->SummonItem(new_weapon->ID, inst->GetCharges(), inst->GetAugmentItemID(0), inst->GetAugmentItemID(1), inst->GetAugmentItemID(2), inst->GetAugmentItemID(3), inst->GetAugmentItemID(4), inst->GetAugmentItemID(5), inst->IsAttuned(), EQEmu::invslot::slotCursor, container->GetItem()->Icon, atoi(container->GetItem()->IDFile + 2));
+			user->SummonItem(
+				new_weapon->ID,
+				inst->GetCharges(),
+				inst->GetAugmentItemID(0),
+				inst->GetAugmentItemID(1),
+				inst->GetAugmentItemID(2),
+				inst->GetAugmentItemID(3),
+				inst->GetAugmentItemID(4),
+				inst->GetAugmentItemID(5),
+				inst->IsAttuned(),
+				EQEmu::invslot::slotCursor,
+				container->GetItem()->Icon,
+				atoi(container->GetItem()->IDFile + 2)
+			);
 			user->MessageString(Chat::LightBlue, TRANSFORM_COMPLETE, inst->GetItem()->Name);
-			if (RuleB(Inventory, DeleteTransformationMold))
+			if (RuleB(Inventory, DeleteTransformationMold)) {
 				user->DeleteItemInInventory(in_combine->container_slot, 0, true);
+			}
 		}
 		else if (inst) {
 			user->MessageString(Chat::LightBlue, TRANSFORM_FAILED, inst->GetItem()->Name);
@@ -316,10 +341,20 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 		user->QueuePacket(outapp);
 		safe_delete(outapp);
+
+		LogTradeskills(
+			"[HandleCombine] inst_item [{}] container_item [{}]",
+			inst->GetItem()->ID,
+			container->GetItem()->ID
+		);
+
 		return;
 	}
 
 	if (container->GetItem() && container->GetItem()->BagType == EQEmu::item::BagTypeDetransformationmold) {
+
+		LogTradeskillsDetail("[HandleCombine] Check 1");
+
 		const EQEmu::ItemInstance* inst = container->GetItem(0);
 		if (inst && inst->GetOrnamentationIcon() && inst->GetOrnamentationIcon()) {
 			const EQEmu::ItemData* new_weapon = inst->GetItem();
@@ -339,6 +374,9 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 
 	DBTradeskillRecipe_Struct spec;
 	if (!content_db.GetTradeRecipe(container, c_type, some_id, user->CharacterID(), &spec)) {
+
+		LogTradeskillsDetail("[HandleCombine] Check 2");
+
 		user->MessageString(Chat::Emote,TRADESKILL_NOCOMBINE);
 		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 		user->QueuePacket(outapp);
@@ -352,7 +390,10 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	// bit 2 (0x02): can try to experiment but not useable for auto-combine until learnt
 	// bit 5 (0x10): no learn message, use unlisted flag to prevent it showing up on search
 	// bit 6 (0x20): unlisted recipe flag
-	if ((spec.must_learn&0xF) == 1 && !spec.has_learnt) {
+	if ((spec.must_learn & 0xF) == 1 && !spec.has_learnt) {
+
+		LogTradeskillsDetail("[HandleCombine] Check 3");
+
 		// Made up message for the client. Just giving a DNC is the other option.
 		user->Message(Chat::LightBlue, "You need to learn how to combine these first.");
 		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
@@ -362,6 +403,9 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	}
 	// Character does not have the required skill.
 	if(spec.skill_needed > 0 && user->GetSkill(spec.tradeskill) < spec.skill_needed ) {
+
+		LogTradeskillsDetail("Check 4");
+
 		// Notify client.
 		user->Message(Chat::LightBlue, "You are not skilled enough.");
 		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
@@ -441,18 +485,21 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	// Replace the container on success if required.
 	//
 
-	if(success && spec.replace_container) {
-		if(worldcontainer){
+	if (success && spec.replace_container) {
+		if (worldcontainer) {
 			//should report this error, but we dont have the recipe ID, so its not very useful
 			LogError("Replace container combine executed in a world container");
 		}
-		else
+		else {
 			user->DeleteItemInInventory(in_combine->container_slot, 0, true);
+		}
 	}
-	if (success)
+	if (success) {
 		parse->EventPlayer(EVENT_COMBINE_SUCCESS, user, spec.name.c_str(), spec.recipe_id);
-	else
+	}
+	else {
 		parse->EventPlayer(EVENT_COMBINE_FAILURE, user, spec.name.c_str(), spec.recipe_id);
+	}
 }
 
 void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac) {
@@ -1144,45 +1191,71 @@ void Client::CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float
 	LogTradeskills("[CheckIncreaseTradeskill] Stage2 chance was: [{}] percent. 0 percent means stage1 failed", chance_stage2);
 }
 
-bool ZoneDatabase::GetTradeRecipe(const EQEmu::ItemInstance* container, uint8 c_type, uint32 some_id,
-	uint32 char_id, DBTradeskillRecipe_Struct *spec)
+bool ZoneDatabase::GetTradeRecipe(
+	const EQEmu::ItemInstance *container,
+	uint8 c_type,
+	uint32 some_id,
+	uint32 char_id,
+	DBTradeskillRecipe_Struct *spec
+)
 {
-	if (container == nullptr)
+	if (container == nullptr) {
+		LogTradeskills("[GetTradeRecipe] Container null");
 		return false;
+	}
 
 	std::string containers;// make where clause segment for container(s)
-	if (some_id == 0)
+	if (some_id == 0) {
 		containers = StringFormat("= %u", c_type); // world combiner so no item number
-	else
-		containers = StringFormat("IN (%u,%u)", c_type, some_id); // container in inventory
+	}
+	else {
+		containers = StringFormat("IN (%u,%u)", c_type, some_id);
+	} // container in inventory
 
 	//Could prolly watch for stacks in this loop and handle them properly...
 	//just increment sum and count accordingly
-	bool first = true;
+	bool        first = true;
 	std::string buf2;
-	uint32 count = 0;
-	uint32 sum = 0;
-	for (uint8 i = 0; i < 10; i++) { // <watch> TODO: need to determine if this is bound to world/item container size
-		const EQEmu::ItemInstance* inst = container->GetItem(i);
-		if (!inst)
-            continue;
+	uint32      count = 0;
+	uint32      sum   = 0;
+	for (uint8  i     = 0; i < 10; i++) { // <watch> TODO: need to determine if this is bound to world/item container size
 
-		const EQEmu::ItemData* item = GetItem(inst->GetItem()->ID);
-        if (!item)
-            continue;
+		LogTradeskills("[GetTradeRecipe] Fetching item [{}]", i);
 
-        if(first) {
-            buf2 += StringFormat("%d", item->ID);
-            first = false;
-        } else
-            buf2 += StringFormat(",%d", item->ID);
+		const EQEmu::ItemInstance *inst = container->GetItem(i);
+		if (!inst) {
+			continue;
+		}
 
-        sum += item->ID;
-        count++;
+		const EQEmu::ItemData *item = database.GetItem(inst->GetItem()->ID);
+		if (!item) {
+			LogTradeskills("[GetTradeRecipe] item [{}] not found!", inst->GetItem()->ID);
+			continue;
+		}
+
+		if (first) {
+			buf2 += StringFormat("%d", item->ID);
+			first = false;
+		}
+		else {
+			buf2 += StringFormat(",%d", item->ID);
+		}
+
+		sum += item->ID;
+		count++;
+
+		LogTradeskills(
+			"[GetTradeRecipe] Item in container index [{}] item [{}] found [{}]",
+			i,
+			item->ID,
+			count
+		);
 	}
 
-	if(count == 0)
-		return false;	//no items == no recipe
+	//no items == no recipe
+	if (count == 0) {
+		return false;
+	}
 
 	std::string query = StringFormat("SELECT tre.recipe_id "
                                     "FROM tradeskill_recipe_entries AS tre "
@@ -1294,28 +1367,33 @@ bool ZoneDatabase::GetTradeRecipe(const EQEmu::ItemInstance* container, uint8 c_
         return GetTradeRecipe(recipe_id, c_type, some_id, char_id, spec);
     }
 
-	if (results.RowCount() == 0)
-        return GetTradeRecipe(recipe_id, c_type, some_id, char_id, spec);
+	if (results.RowCount() == 0) {
+		return GetTradeRecipe(recipe_id, c_type, some_id, char_id, spec);
+	}
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-        int ccnt = 0;
+		int ccnt = 0;
 
 		for (int x = EQEmu::invbag::SLOT_BEGIN; x < EQEmu::invtype::WORLD_SIZE; x++) {
-            const EQEmu::ItemInstance* inst = container->GetItem(x);
-            if(!inst)
-                continue;
+			const EQEmu::ItemInstance *inst = container->GetItem(x);
+			if (!inst) {
+				continue;
+			}
 
-			const EQEmu::ItemData* item = GetItem(inst->GetItem()->ID);
-            if (!item)
-                continue;
+			const EQEmu::ItemData *item = database.GetItem(inst->GetItem()->ID);
+			if (!item) {
+				continue;
+			}
 
-            if(item->ID == atoi(row[0]))
-                ccnt++;
-        }
+			if (item->ID == atoi(row[0])) {
+				ccnt++;
+			}
+		}
 
-        if(ccnt != atoi(row[1]))
-            return false;
-    }
+		if (ccnt != atoi(row[1])) {
+			return false;
+		}
+	}
 
 	return GetTradeRecipe(recipe_id, c_type, some_id, char_id, spec);
 }
