@@ -507,7 +507,7 @@ bool ZoneDatabase::PopulateZoneSpawnListClose(uint32 zoneid, LinkedList<Spawn2*>
 		if (mob_distance > repop_distance)
 			continue;
 
-		new_spawn = new Spawn2(							   // 
+		new_spawn = new Spawn2(							   //
 			atoi(row[0]), 								   // uint32 in_spawn2_id
 			atoi(row[1]), 								   // uint32 spawngroup_id
 			atof(row[2]), 								   // float in_x
@@ -595,14 +595,14 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 
-		uint32 spawn_time_left = 0; 
-		Spawn2* new_spawn = 0; 
+		uint32 spawn_time_left = 0;
+		Spawn2* new_spawn = 0;
 		bool perl_enabled = atoi(row[11]) == 1 ? true : false;
 
 		if (spawn_times.count(atoi(row[0])) != 0)
 			spawn_time_left = spawn_times[atoi(row[0])];
 
-		new_spawn = new Spawn2(							   // 
+		new_spawn = new Spawn2(							   //
 			atoi(row[0]), 								   // uint32 in_spawn2_id
 			atoi(row[1]), 								   // uint32 spawngroup_id
 			atof(row[2]), 								   // float in_x
@@ -910,7 +910,7 @@ void SpawnConditionManager::UpdateDBEvent(SpawnEvent &event) {
                                     event.next.day, event.next.month,
                                     event.next.year, event.enabled? 1: 0,
                                     event.strict? 1: 0, event.id);
-	content_db.QueryDatabase(query);
+	database.QueryDatabase(query);
 }
 
 void SpawnConditionManager::UpdateDBCondition(const char* zone_name, uint32 instance_id, uint16 cond_id, int16 value) {
@@ -929,7 +929,7 @@ bool SpawnConditionManager::LoadDBEvent(uint32 event_id, SpawnEvent &event, std:
                                     "next_month, next_year, enabled, "
                                     "action, argument, strict, zone "
                                     "FROM spawn_events WHERE id = %d", event_id);
-    auto results = content_db.QueryDatabase(query);
+    auto results = database.QueryDatabase(query);
     if (!results.Success()) {
 		return false;
 	}
@@ -1009,7 +1009,7 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
     query = StringFormat("SELECT id, cond_id, period, next_minute, next_hour, "
                         "next_day, next_month, next_year, enabled, action, argument, strict "
                         "FROM spawn_events WHERE zone = '%s'", zone_name);
-    results = content_db.QueryDatabase(query);
+    results = database.QueryDatabase(query);
     if (!results.Success()) {
 		return false;
     }

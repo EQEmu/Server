@@ -159,7 +159,7 @@ public:
 		int spawn_events_id
 	)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = database.QueryDatabase(
 			fmt::format(
 				"{} WHERE id = {} LIMIT 1",
 				BaseSelect(),
@@ -196,7 +196,7 @@ public:
 		int spawn_events_id
 	)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = database.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
@@ -230,7 +230,7 @@ public:
 		update_values.push_back(columns[12] + " = " + std::to_string(spawn_events_entry.argument));
 		update_values.push_back(columns[13] + " = " + std::to_string(spawn_events_entry.strict));
 
-		auto results = content_db.QueryDatabase(
+		auto results = database.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
@@ -263,7 +263,7 @@ public:
 		insert_values.push_back(std::to_string(spawn_events_entry.argument));
 		insert_values.push_back(std::to_string(spawn_events_entry.strict));
 
-		auto results = content_db.QueryDatabase(
+		auto results = database.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
@@ -309,7 +309,7 @@ public:
 
 		std::vector<std::string> insert_values;
 
-		auto results = content_db.QueryDatabase(
+		auto results = database.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
@@ -324,7 +324,7 @@ public:
 	{
 		std::vector<SpawnEvents> all_entries;
 
-		auto results = content_db.QueryDatabase(
+		auto results = database.QueryDatabase(
 			fmt::format(
 				"{}",
 				BaseSelect()
@@ -361,7 +361,7 @@ public:
 	{
 		std::vector<SpawnEvents> all_entries;
 
-		auto results = content_db.QueryDatabase(
+		auto results = database.QueryDatabase(
 			fmt::format(
 				"{} WHERE {}",
 				BaseSelect(),
@@ -397,7 +397,7 @@ public:
 
 	static int DeleteWhere(std::string where_filter)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = database.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {}",
 				TableName(),
