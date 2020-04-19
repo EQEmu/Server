@@ -34,6 +34,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #define strcasecmp	_stricmp
 #else
 #include "unix.h"
+#include "../zone/zonedb.h"
 #include <netinet/in.h>
 #include <sys/time.h>
 #endif
@@ -319,10 +320,10 @@ uint16 Database::GetInstanceID(const char* zone, uint32 character_id, int16 vers
 		"AND instance_list.id = instance_list_player.id "
 		"AND instance_list_player.charid = %u "
 		"LIMIT 1 ",
-		GetZoneID(zone),
+		content_db.GetZoneID(zone),
 		version,
 		character_id
-		);
+	);
 	auto results = QueryDatabase(query);
 
 	if (!results.Success())

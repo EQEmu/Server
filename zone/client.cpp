@@ -9298,7 +9298,7 @@ void Client::SetBotOption(BotOwnerOption boo, bool flag) {
 void Client::SendToGuildHall()
 {
 	std::string zone_short_name = "guildhall";
-	uint32      zone_id         = database.GetZoneID(zone_short_name.c_str());
+	uint32      zone_id         = content_db.GetZoneID(zone_short_name.c_str());
 	if (zone_id == 0) {
 		return;
 	}

@@ -24,7 +24,7 @@
 	2.	Add the function in this file.
 	3.	In the command_init function you must add a call to command_add
 		for your function.
-		
+
 	Notes: If you want an alias for your command, add an entry to the
 	`command_settings` table in your database. The access level you
 	set with command_add is the default setting if the command isn't
@@ -497,7 +497,7 @@ int command_init(void)
 					working_cl_iter.first.c_str()
 				);
 			}
-			
+
 			continue;
 		}
 
@@ -507,7 +507,7 @@ int command_init(void)
 			working_cl_iter.first.c_str(),
 			cs_iter->second.first
 		);
-		
+
 		if (cs_iter->second.second.empty()) {
 			continue;
 		}
@@ -522,7 +522,7 @@ int command_init(void)
 					"command_init(): Warning: Alias [{}] already exists as a command - skipping!",
 					alias_iter.c_str()
 				);
-				
+
 				continue;
 			}
 
@@ -1289,7 +1289,7 @@ void command_peqzone(Client *c, const Seperator *sep)
 	if (sep->IsNumber(1))
 	{
 		zoneid = atoi(sep->arg[1]);
-		destzone = database.GetPEQZone(zoneid, 0);
+		destzone = content_db.GetPEQZone(zoneid, 0);
 		if(destzone == 0){
 			c->Message(Chat::Red, "You cannot use this command to enter that zone!");
 			return;
@@ -1307,7 +1307,7 @@ void command_peqzone(Client *c, const Seperator *sep)
 	}
 	else {
 		zoneid = content_db.GetZoneID(sep->arg[1]);
-		destzone = database.GetPEQZone(zoneid, 0);
+		destzone = content_db.GetPEQZone(zoneid, 0);
 		if(zoneid == 0) {
 			c->Message(Chat::White, "Unable to locate zone '%s'",  sep->arg[1]);
 			return;
@@ -4245,7 +4245,7 @@ void command_reloadworld(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "Reloading quest cache worldwide.");
 	else
 		c->Message(Chat::White, "Reloading quest cache and repopping zones worldwide.");
-	
+
 	auto pack = new ServerPacket(ServerOP_ReloadWorld, sizeof(ReloadWorld_Struct));
 	ReloadWorld_Struct* RW = (ReloadWorld_Struct*) pack->pBuffer;
 	RW->Option = world_repop;
@@ -6578,7 +6578,7 @@ void command_editmassrespawn(Client* c, const Seperator* sep)
 		if (change_respawn_seconds > 0) {
 
 			if (change_apply) {
-				
+
 				results = database.QueryDatabase(
 					fmt::format(
 						SQL(
@@ -7949,7 +7949,7 @@ void command_npceditmass(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "#npceditmass search_column [exact_match: =]search_value change_column change_value (apply)");
 		return;
 	}
-	
+
 	std::string query = SQL(
 		SELECT
 				COLUMN_NAME
@@ -8070,7 +8070,7 @@ void command_npceditmass(Client *c, const Seperator *sep)
 				continue;
 			}
 		}
-		
+
 		c->Message(
 			Chat::Yellow,
 			fmt::format(
@@ -13413,7 +13413,7 @@ void command_bot(Client *c, const Seperator *sep)
 		bot_message = bot_message.substr(bot_message.find_first_not_of("#bot"));
 		bot_message[0] = BOT_COMMAND_CHAR;
 	}
-	
+
 	if (bot_command_dispatch(c, bot_message.c_str()) == -2) {
 		if (parse->PlayerHasQuestSub(EVENT_BOT_COMMAND)) {
 			int i = parse->EventPlayer(EVENT_BOT_COMMAND, c, bot_message, 0);

@@ -327,6 +327,8 @@ int main(int argc, char** argv) {
 	database.PurgeAllDeletedDataBuckets();
 
 	LogInfo("Loading zones");
+	// Load to both context for now... this needs to be cleaned up
+	database.LoadZoneNames();
 	content_db.LoadZoneNames();
 	LogInfo("Clearing groups");
 	database.ClearGroup();
