@@ -51,7 +51,11 @@ DBcore::~DBcore()
 	 * are re-using the default database connection pointer when we dont have an
 	 * external configuration setup ex: (content_database)
 	 */
-	std::string mysql_connection_host = mysql.host;
+	std::string mysql_connection_host;
+	if (mysql.host) {
+		mysql_connection_host = mysql.host;
+	}
+
 	if (GetOriginHost() != mysql_connection_host) {
 		return;
 	}
