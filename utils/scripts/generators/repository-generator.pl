@@ -457,10 +457,10 @@ sub translate_mysql_data_type_to_c {
 
     my $struct_data_type = "std::string";
     if ($mysql_data_type =~ /tinyint/) {
-        $struct_data_type = 'int8';
+        $struct_data_type = 'int';
     }
     elsif ($mysql_data_type =~ /smallint/) {
-        $struct_data_type = 'int16';
+        $struct_data_type = 'int';
     }
     elsif ($mysql_data_type =~ /bigint/) {
         $struct_data_type = 'int';

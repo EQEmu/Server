@@ -1,20 +1,22 @@
-/*	EQEMu: Everquest Server Emulator
-Copyright (C) 2001-2016 EQEMu Development Team (http://eqemu.org)
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY except by those people which sell it, which
-are required to give you total support for your newly bought product;
-without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-*/
+/**
+ * EQEmulator: Everquest Server Emulator
+ * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; version 2 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY except by those people which sell it, which
+ * are required to give you total support for your newly bought product;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
 
 #define DONT_SHARED_OPCODES
 #define PLATFORM_ZONE 1
@@ -93,6 +95,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #else
 #include <pthread.h>
 #include "../common/unix.h"
+#include "zone_store.h"
 
 #endif
 
@@ -101,6 +104,7 @@ extern volatile bool is_zone_loaded;
 
 EntityList entity_list;
 WorldServer worldserver;
+ZoneStore zone_store;
 uint32 numclients = 0;
 char errorname[32];
 extern Zone* zone;
@@ -318,6 +322,8 @@ int main(int argc, char** argv) {
 	content_db.LoadZoneNames();
 	database.zonename_array = content_db.zonename_array;
 
+	zone_store.LoadZonesStore();
+
 	LogInfo("Loading items");
 	if (!database.LoadItems(hotfix_name)) {
 		LogError("Loading items failed!");
@@ -373,7 +379,7 @@ int main(int argc, char** argv) {
 
 	LogInfo("Loading commands");
 	int retval = command_init();
-	if (retval<0)
+	if (retval < 0)
 		LogError("Command loading failed");
 	else
 		LogInfo("{} commands loaded", retval);
@@ -466,7 +472,7 @@ int main(int argc, char** argv) {
 	if (!strlen(zone_name) || !strcmp(zone_name, ".")) {
 		LogInfo("Entering sleep mode");
 	}
-	else if (!Zone::Bootup(content_db.GetZoneID(zone_name), instance_id, true)) {
+	else if (!Zone::Bootup(ZoneID(zone_name), instance_id, true)) {
 		LogError("Zone Bootup failed :: Zone::Bootup");
 		zone = 0;
 	}

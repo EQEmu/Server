@@ -335,7 +335,6 @@ public:
 
 	double GetMaxMovementUpdateRange() const { return max_movement_update_range; }
 
-
 	/**
 	 * Modding hooks
 	 */

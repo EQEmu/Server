@@ -249,7 +249,7 @@ public:
 	bool	LoadPTimers(uint32 charid, PTimerList &into);
 	bool	LoadZoneNames();
 
-	const char*	GetZoneName(uint32 zoneID, bool ErrorUnknown = false);
+	const char*	GetZoneName(uint32 zone_id, bool ErrorUnknown = false);
 
 	uint32	GetZoneGraveyardID(uint32 zone_id, uint32 version);
 	uint32	GetZoneID(const char* zonename);
