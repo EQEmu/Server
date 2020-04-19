@@ -38,12 +38,12 @@ public:
 		int         id;
 		int         zoneid;
 		int         Itemid;
-		int16       skill_level;
-		int16       chance;
+		int         skill_level;
+		int         chance;
 		int         npc_id;
 		int         npc_chance;
-		int8        min_expansion;
-		int8        max_expansion;
+		int         min_expansion;
+		int         max_expansion;
 		std::string content_flags;
 	};
 

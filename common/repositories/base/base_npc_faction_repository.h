@@ -38,7 +38,7 @@ public:
 		int         id;
 		std::string name;
 		int         primaryfaction;
-		int8        ignore_primary_assist;
+		int         ignore_primary_assist;
 	};
 
 	static std::string PrimaryKey()

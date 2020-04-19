@@ -38,7 +38,7 @@ public:
 		int         id;
 		int         spawngroupID;
 		std::string zone;
-		int16       version;
+		int         version;
 		float       x;
 		float       y;
 		float       z;
@@ -48,8 +48,8 @@ public:
 		int         pathgrid;
 		int         _condition;
 		int         cond_value;
-		int8        enabled;
-		int8        animation;
+		int         enabled;
+		int         animation;
 	};
 
 	static std::string PrimaryKey()

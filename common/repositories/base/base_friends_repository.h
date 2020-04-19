@@ -36,7 +36,7 @@ class BaseFriendsRepository {
 public:
 	struct Friends {
 		int         charid;
-		int8        type;
+		int         type;
 		std::string name;
 	};
 

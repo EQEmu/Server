@@ -40,7 +40,7 @@ public:
 		int         it_level;
 		int         it_id;
 		std::string it_qglobal;
-		int8        it_bagslot;
+		int         it_bagslot;
 	};
 
 	static std::string PrimaryKey()

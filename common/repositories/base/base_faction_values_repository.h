@@ -35,10 +35,10 @@
 class BaseFactionValuesRepository {
 public:
 	struct FactionValues {
-		int   char_id;
-		int   faction_id;
-		int16 current_value;
-		int8  temp;
+		int char_id;
+		int faction_id;
+		int current_value;
+		int temp;
 	};
 
 	static std::string PrimaryKey()

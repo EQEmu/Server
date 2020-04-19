@@ -38,13 +38,13 @@ public:
 		int         merchantid;
 		int         slot;
 		int         item;
-		int16       faction_required;
-		int8        level_required;
-		int16       alt_currency_cost;
+		int         faction_required;
+		int         level_required;
+		int         alt_currency_cost;
 		int         classes_required;
 		int         probability;
-		int8        min_expansion;
-		int8        max_expansion;
+		int         min_expansion;
+		int         max_expansion;
 		std::string content_flags;
 	};
 

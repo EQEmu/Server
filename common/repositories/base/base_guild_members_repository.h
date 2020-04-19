@@ -37,13 +37,13 @@ public:
 	struct GuildMembers {
 		int         char_id;
 		int         guild_id;
-		int8        rank;
-		int8        tribute_enable;
+		int         rank;
+		int         tribute_enable;
 		int         total_tribute;
 		int         last_tribute;
-		int8        banker;
+		int         banker;
 		std::string public_note;
-		int8        alt;
+		int         alt;
 	};
 
 	static std::string PrimaryKey()

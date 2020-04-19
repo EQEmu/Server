@@ -38,24 +38,24 @@ public:
 		int         id;
 		std::string name;
 		int         parent_list;
-		int16       attack_proc;
-		int8        proc_chance;
-		int16       range_proc;
-		int16       rproc_chance;
-		int16       defensive_proc;
-		int16       dproc_chance;
+		int         attack_proc;
+		int         proc_chance;
+		int         range_proc;
+		int         rproc_chance;
+		int         defensive_proc;
+		int         dproc_chance;
 		int         fail_recast;
 		int         engaged_no_sp_recast_min;
 		int         engaged_no_sp_recast_max;
-		int8        engaged_b_self_chance;
-		int8        engaged_b_other_chance;
-		int8        engaged_d_chance;
+		int         engaged_b_self_chance;
+		int         engaged_b_other_chance;
+		int         engaged_d_chance;
 		int         pursue_no_sp_recast_min;
 		int         pursue_no_sp_recast_max;
-		int8        pursue_d_chance;
+		int         pursue_d_chance;
 		int         idle_no_sp_recast_min;
 		int         idle_no_sp_recast_max;
-		int8        idle_b_chance;
+		int         idle_b_chance;
 	};
 
 	static std::string PrimaryKey()

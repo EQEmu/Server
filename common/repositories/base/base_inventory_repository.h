@@ -38,7 +38,7 @@ public:
 		int         charid;
 		int         slotid;
 		int         itemid;
-		int16       charges;
+		int         charges;
 		int         color;
 		int         augslot1;
 		int         augslot2;
@@ -46,7 +46,7 @@ public:
 		int         augslot4;
 		int         augslot5;
 		int         augslot6;
-		int8        instnodrop;
+		int         instnodrop;
 		std::string custom_data;
 		int         ornamenticon;
 		int         ornamentidfile;

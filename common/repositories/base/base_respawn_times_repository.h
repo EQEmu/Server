@@ -35,10 +35,10 @@
 class BaseRespawnTimesRepository {
 public:
 	struct RespawnTimes {
-		int   id;
-		int   start;
-		int   duration;
-		int16 instance_id;
+		int id;
+		int start;
+		int duration;
+		int instance_id;
 	};
 
 	static std::string PrimaryKey()

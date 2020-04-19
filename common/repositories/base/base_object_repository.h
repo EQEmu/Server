@@ -37,13 +37,13 @@ public:
 	struct Object {
 		int         id;
 		int         zoneid;
-		int16       version;
+		int         version;
 		float       xpos;
 		float       ypos;
 		float       zpos;
 		float       heading;
 		int         itemid;
-		int16       charges;
+		int         charges;
 		std::string objectname;
 		int         type;
 		int         icon;

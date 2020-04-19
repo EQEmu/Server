@@ -38,7 +38,7 @@ public:
 		std::string zone;
 		int         id;
 		int         value;
-		int8        onchange;
+		int         onchange;
 		std::string name;
 	};
 

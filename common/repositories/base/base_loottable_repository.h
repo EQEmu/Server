@@ -40,9 +40,9 @@ public:
 		int         mincash;
 		int         maxcash;
 		int         avgcoin;
-		int8        done;
-		int8        min_expansion;
-		int8        max_expansion;
+		int         done;
+		int         min_expansion;
+		int         max_expansion;
 		std::string content_flags;
 	};
 

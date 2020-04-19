@@ -45,10 +45,10 @@ public:
 		int         status;
 		int         type;
 		int         charges;
-		int8        grant_only;
+		int         grant_only;
 		int         first_rank_id;
-		int8        enabled;
-		int8        reset_on_death;
+		int         enabled;
+		int         reset_on_death;
 	};
 
 	static std::string PrimaryKey()

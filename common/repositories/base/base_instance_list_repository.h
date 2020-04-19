@@ -35,13 +35,13 @@
 class BaseInstanceListRepository {
 public:
 	struct InstanceList {
-		int  id;
-		int  zone;
-		int8 version;
-		int8 is_global;
-		int  start_time;
-		int  duration;
-		int8 never_expires;
+		int id;
+		int zone;
+		int version;
+		int is_global;
+		int start_time;
+		int duration;
+		int never_expires;
 	};
 
 	static std::string PrimaryKey()

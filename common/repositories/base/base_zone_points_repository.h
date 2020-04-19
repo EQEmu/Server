@@ -38,7 +38,7 @@ public:
 		int         id;
 		std::string zone;
 		int         version;
-		int16       number;
+		int         number;
 		float       y;
 		float       x;
 		float       z;
@@ -47,13 +47,13 @@ public:
 		float       target_x;
 		float       target_z;
 		float       target_heading;
-		int16       zoneinst;
+		int         zoneinst;
 		int         target_zone_id;
 		int         target_instance;
 		float       buffer;
 		int         client_version_mask;
-		int8        min_expansion;
-		int8        max_expansion;
+		int         min_expansion;
+		int         max_expansion;
 		std::string content_flags;
 	};
 

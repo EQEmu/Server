@@ -35,11 +35,11 @@
 class BaseTimersRepository {
 public:
 	struct Timers {
-		int  char_id;
-		int  type;
-		int  start;
-		int  duration;
-		int8 enable;
+		int char_id;
+		int type;
+		int start;
+		int duration;
+		int enable;
 	};
 
 	static std::string PrimaryKey()

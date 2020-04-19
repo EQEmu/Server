@@ -35,9 +35,9 @@
 class BaseCharacterLeadershipAbilitiesRepository {
 public:
 	struct CharacterLeadershipAbilities {
-		int   id;
-		int16 slot;
-		int16 rank;
+		int id;
+		int slot;
+		int rank;
 	};
 
 	static std::string PrimaryKey()

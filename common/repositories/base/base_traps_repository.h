@@ -37,11 +37,11 @@ public:
 	struct Traps {
 		int         id;
 		std::string zone;
-		int16       version;
+		int         version;
 		int         x;
 		int         y;
 		int         z;
-		int8        chance;
+		int         chance;
 		float       maxzdiff;
 		float       radius;
 		int         effect;
@@ -52,12 +52,12 @@ public:
 		int         level;
 		int         respawn_time;
 		int         respawn_var;
-		int8        triggered_number;
-		int8        group;
-		int8        despawn_when_triggered;
-		int8        undetectable;
-		int8        min_expansion;
-		int8        max_expansion;
+		int         triggered_number;
+		int         group;
+		int         despawn_when_triggered;
+		int         undetectable;
+		int         min_expansion;
+		int         max_expansion;
 		std::string content_flags;
 	};
 

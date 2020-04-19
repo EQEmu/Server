@@ -37,7 +37,7 @@ public:
 	struct ContentFlags {
 		int         id;
 		std::string flag_name;
-		int8        enabled;
+		int         enabled;
 		std::string notes;
 	};
 

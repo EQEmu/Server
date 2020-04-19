@@ -37,8 +37,8 @@ public:
 	struct NpcEmotes {
 		int         id;
 		int         emoteid;
-		int8        event_;
-		int8        type;
+		int         event_;
+		int         type;
 		std::string text;
 	};
 

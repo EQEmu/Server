@@ -35,10 +35,10 @@
 class BaseMerchantlistTempRepository {
 public:
 	struct MerchantlistTemp {
-		int  npcid;
-		int8 slot;
-		int  itemid;
-		int  charges;
+		int npcid;
+		int slot;
+		int itemid;
+		int charges;
 	};
 
 	static std::string PrimaryKey()

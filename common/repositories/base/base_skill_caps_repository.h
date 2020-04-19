@@ -35,11 +35,11 @@
 class BaseSkillCapsRepository {
 public:
 	struct SkillCaps {
-		int8 skillID;
-		int8 class;
-		int8 level;
-		int  cap;
-		int8 class_;
+		int skillID;
+		int class;
+		int level;
+		int cap;
+		int class_;
 	};
 
 	static std::string PrimaryKey()

@@ -40,15 +40,15 @@ public:
 		int         cond_id;
 		std::string name;
 		int         period;
-		int8        next_minute;
-		int8        next_hour;
-		int8        next_day;
-		int8        next_month;
+		int         next_minute;
+		int         next_hour;
+		int         next_day;
+		int         next_month;
 		int         next_year;
-		int8        enabled;
-		int8        action;
+		int         enabled;
+		int         action;
 		int         argument;
-		int8        strict;
+		int         strict;
 	};
 
 	static std::string PrimaryKey()

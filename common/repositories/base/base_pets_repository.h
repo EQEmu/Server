@@ -38,10 +38,10 @@ public:
 		std::string type;
 		int         petpower;
 		int         npcID;
-		int8        temp;
-		int8        petcontrol;
-		int8        petnaming;
-		int8        monsterflag;
+		int         temp;
+		int         petcontrol;
+		int         petnaming;
+		int         monsterflag;
 		int         equipmentset;
 	};
 

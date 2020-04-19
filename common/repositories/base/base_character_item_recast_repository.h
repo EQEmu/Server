@@ -35,9 +35,9 @@
 class BaseCharacterItemRecastRepository {
 public:
 	struct CharacterItemRecast {
-		int   id;
-		int16 recast_type;
-		int   timestamp;
+		int id;
+		int recast_type;
+		int timestamp;
 	};
 
 	static std::string PrimaryKey()

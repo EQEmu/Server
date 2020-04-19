@@ -35,14 +35,14 @@
 class BaseNpcSpellsEffectsEntriesRepository {
 public:
 	struct NpcSpellsEffectsEntries {
-		int   id;
-		int   npc_spells_effects_id;
-		int16 spell_effect_id;
-		int8  minlevel;
-		int8  maxlevel;
-		int   se_base;
-		int   se_limit;
-		int   se_max;
+		int id;
+		int npc_spells_effects_id;
+		int spell_effect_id;
+		int minlevel;
+		int maxlevel;
+		int se_base;
+		int se_limit;
+		int se_max;
 	};
 
 	static std::string PrimaryKey()

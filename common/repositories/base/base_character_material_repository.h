@@ -35,13 +35,13 @@
 class BaseCharacterMaterialRepository {
 public:
 	struct CharacterMaterial {
-		int  id;
-		int8 slot;
-		int8 blue;
-		int8 green;
-		int8 red;
-		int8 use_tint;
-		int  color;
+		int id;
+		int slot;
+		int blue;
+		int green;
+		int red;
+		int use_tint;
+		int color;
 	};
 
 	static std::string PrimaryKey()

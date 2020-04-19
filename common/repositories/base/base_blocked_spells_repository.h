@@ -37,7 +37,7 @@ public:
 	struct BlockedSpells {
 		int         id;
 		int         spellid;
-		int8        type;
+		int         type;
 		int         zoneid;
 		float       x;
 		float       y;

@@ -37,9 +37,9 @@ public:
 	struct LogsysCategories {
 		int         log_category_id;
 		std::string log_category_description;
-		int16       log_to_console;
-		int16       log_to_file;
-		int16       log_to_gmsay;
+		int         log_to_console;
+		int         log_to_file;
+		int         log_to_gmsay;
 	};
 
 	static std::string PrimaryKey()

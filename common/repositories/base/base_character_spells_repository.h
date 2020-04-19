@@ -35,9 +35,9 @@
 class BaseCharacterSpellsRepository {
 public:
 	struct CharacterSpells {
-		int   id;
-		int16 slot_id;
-		int16 spell_id;
+		int id;
+		int slot_id;
+		int spell_id;
 	};
 
 	static std::string PrimaryKey()

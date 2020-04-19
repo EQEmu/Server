@@ -49,7 +49,7 @@ public:
 		int         charlevel;
 		int         checkouts;
 		int         unavailables;
-		int8        ischeckedout;
+		int         ischeckedout;
 		int         senttime;
 	};
 

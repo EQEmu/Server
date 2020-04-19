@@ -35,10 +35,10 @@
 class BaseSpawnentryRepository {
 public:
 	struct Spawnentry {
-		int   spawngroupID;
-		int   npcID;
-		int16 chance;
-		int   condition_value_filter;
+		int spawngroupID;
+		int npcID;
+		int chance;
+		int condition_value_filter;
 	};
 
 	static std::string PrimaryKey()

@@ -39,7 +39,7 @@ public:
 		int         unknown;
 		std::string name;
 		std::string descr;
-		int8        isguild;
+		int         isguild;
 	};
 
 	static std::string PrimaryKey()

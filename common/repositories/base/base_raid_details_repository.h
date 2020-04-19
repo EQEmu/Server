@@ -37,7 +37,7 @@ public:
 	struct RaidDetails {
 		int         raidid;
 		int         loottype;
-		int8        locked;
+		int         locked;
 		std::string motd;
 	};
 

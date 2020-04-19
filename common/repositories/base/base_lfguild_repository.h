@@ -35,11 +35,11 @@
 class BaseLfguildRepository {
 public:
 	struct Lfguild {
-		int8        type;
+		int         type;
 		std::string name;
 		std::string comment;
-		int8        fromlevel;
-		int8        tolevel;
+		int         fromlevel;
+		int         tolevel;
 		int         classes;
 		int         aacount;
 		int         timezone;

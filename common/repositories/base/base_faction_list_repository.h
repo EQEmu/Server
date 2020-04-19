@@ -37,7 +37,7 @@ public:
 	struct FactionList {
 		int         id;
 		std::string name;
-		int16       base;
+		int         base;
 	};
 
 	static std::string PrimaryKey()

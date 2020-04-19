@@ -35,11 +35,11 @@
 class BaseNpcFactionEntriesRepository {
 public:
 	struct NpcFactionEntries {
-		int  npc_faction_id;
-		int  faction_id;
-		int  value;
-		int8 npc_value;
-		int8 temp;
+		int npc_faction_id;
+		int faction_id;
+		int value;
+		int npc_value;
+		int temp;
 	};
 
 	static std::string PrimaryKey()

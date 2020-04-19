@@ -35,9 +35,9 @@
 class BaseGuildRelationsRepository {
 public:
 	struct GuildRelations {
-		int  guild1;
-		int  guild2;
-		int8 relation;
+		int guild1;
+		int guild2;
+		int relation;
 	};
 
 	static std::string PrimaryKey()

@@ -39,13 +39,13 @@ public:
 		int         pet;
 		int         slot;
 		int         spell_id;
-		int8        caster_level;
+		int         caster_level;
 		std::string castername;
 		int         ticsremaining;
 		int         counters;
 		int         numhits;
 		int         rune;
-		int8        instrument_mod;
+		int         instrument_mod;
 	};
 
 	static std::string PrimaryKey()

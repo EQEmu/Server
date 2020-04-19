@@ -36,7 +36,7 @@ class BaseSpawnConditionValuesRepository {
 public:
 	struct SpawnConditionValues {
 		int         id;
-		int8        value;
+		int         value;
 		std::string zone;
 		int         instance_id;
 	};

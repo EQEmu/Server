@@ -49,9 +49,9 @@ public:
 		float       bind_x;
 		float       bind_y;
 		float       bind_z;
-		int8        select_rank;
-		int8        min_expansion;
-		int8        max_expansion;
+		int         select_rank;
+		int         min_expansion;
+		int         max_expansion;
 		std::string content_flags;
 	};
 

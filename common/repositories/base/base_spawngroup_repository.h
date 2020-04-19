@@ -37,7 +37,7 @@ public:
 	struct Spawngroup {
 		int         id;
 		std::string name;
-		int8        spawn_limit;
+		int         spawn_limit;
 		float       dist;
 		float       max_x;
 		float       min_x;
@@ -45,9 +45,9 @@ public:
 		float       min_y;
 		int         delay;
 		int         mindelay;
-		int8        despawn;
+		int         despawn;
 		int         despawn_timer;
-		int8        wp_spawns;
+		int         wp_spawns;
 	};
 
 	static std::string PrimaryKey()

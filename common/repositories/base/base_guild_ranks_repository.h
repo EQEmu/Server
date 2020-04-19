@@ -36,16 +36,16 @@ class BaseGuildRanksRepository {
 public:
 	struct GuildRanks {
 		int         guild_id;
-		int8        rank;
+		int         rank;
 		std::string title;
-		int8        can_hear;
-		int8        can_speak;
-		int8        can_invite;
-		int8        can_remove;
-		int8        can_promote;
-		int8        can_demote;
-		int8        can_motd;
-		int8        can_warpeace;
+		int         can_hear;
+		int         can_speak;
+		int         can_invite;
+		int         can_remove;
+		int         can_promote;
+		int         can_demote;
+		int         can_motd;
+		int         can_warpeace;
 	};
 
 	static std::string PrimaryKey()

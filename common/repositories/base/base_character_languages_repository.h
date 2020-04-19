@@ -35,9 +35,9 @@
 class BaseCharacterLanguagesRepository {
 public:
 	struct CharacterLanguages {
-		int   id;
-		int16 lang_id;
-		int16 value;
+		int id;
+		int lang_id;
+		int value;
 	};
 
 	static std::string PrimaryKey()

@@ -38,12 +38,12 @@ public:
 		int         raidid;
 		int         charid;
 		int         groupid;
-		int8        _class;
-		int8        level;
+		int         _class;
+		int         level;
 		std::string name;
-		int8        isgroupleader;
-		int8        israidleader;
-		int8        islooter;
+		int         isgroupleader;
+		int         israidleader;
+		int         islooter;
 	};
 
 	static std::string PrimaryKey()

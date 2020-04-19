@@ -35,9 +35,9 @@
 class BaseCharacterAurasRepository {
 public:
 	struct CharacterAuras {
-		int  id;
-		int8 slot;
-		int  spell_id;
+		int id;
+		int slot;
+		int spell_id;
 	};
 
 	static std::string PrimaryKey()

@@ -35,11 +35,11 @@
 class BaseCharacterActivitiesRepository {
 public:
 	struct CharacterActivities {
-		int  charid;
-		int  taskid;
-		int  activityid;
-		int  donecount;
-		int8 completed;
+		int charid;
+		int taskid;
+		int activityid;
+		int donecount;
+		int completed;
 	};
 
 	static std::string PrimaryKey()

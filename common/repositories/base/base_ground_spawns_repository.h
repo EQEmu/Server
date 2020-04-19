@@ -37,7 +37,7 @@ public:
 	struct GroundSpawns {
 		int         id;
 		int         zoneid;
-		int16       version;
+		int         version;
 		float       max_x;
 		float       max_y;
 		float       max_z;
@@ -49,8 +49,8 @@ public:
 		int         max_allowed;
 		std::string comment;
 		int         respawn_timer;
-		int8        min_expansion;
-		int8        max_expansion;
+		int         min_expansion;
+		int         max_expansion;
 		std::string content_flags;
 	};
 

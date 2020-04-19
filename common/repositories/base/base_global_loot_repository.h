@@ -38,18 +38,18 @@ public:
 		int         id;
 		std::string description;
 		int         loottable_id;
-		int8        enabled;
+		int         enabled;
 		int         min_level;
 		int         max_level;
-		int8        rare;
-		int8        raid;
+		int         rare;
+		int         raid;
 		std::string race;
 		std::string class;
 		std::string bodytype;
 		std::string zone;
-		int8        hot_zone;
-		int8        min_expansion;
-		int8        max_expansion;
+		int         hot_zone;
+		int         min_expansion;
+		int         max_expansion;
 		std::string content_flags;
 	};
 

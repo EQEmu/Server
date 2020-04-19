@@ -43,11 +43,11 @@ public:
 		float       y;
 		float       z;
 		std::string type;
-		int8        flag;
+		int         flag;
 		std::string target;
 		std::string bug;
 		std::string date;
-		int8        status;
+		int         status;
 	};
 
 	static std::string PrimaryKey()

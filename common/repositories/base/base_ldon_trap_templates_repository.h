@@ -35,11 +35,11 @@
 class BaseLdonTrapTemplatesRepository {
 public:
 	struct LdonTrapTemplates {
-		int   id;
-		int8  type;
-		int16 spell_id;
-		int16 skill;
-		int8  locked;
+		int id;
+		int type;
+		int spell_id;
+		int skill;
+		int locked;
 	};
 
 	static std::string PrimaryKey()

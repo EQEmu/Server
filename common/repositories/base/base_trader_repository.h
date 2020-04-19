@@ -35,12 +35,12 @@
 class BaseTraderRepository {
 public:
 	struct Trader {
-		int  char_id;
-		int  item_id;
-		int  serialnumber;
-		int  charges;
-		int  item_cost;
-		int8 slot_id;
+		int char_id;
+		int item_id;
+		int serialnumber;
+		int charges;
+		int item_cost;
+		int slot_id;
 	};
 
 	static std::string PrimaryKey()

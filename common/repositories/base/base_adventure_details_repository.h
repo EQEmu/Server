@@ -35,15 +35,15 @@
 class BaseAdventureDetailsRepository {
 public:
 	struct AdventureDetails {
-		int   id;
-		int16 adventure_id;
-		int   instance_id;
-		int16 count;
-		int16 assassinate_count;
-		int8  status;
-		int   time_created;
-		int   time_zoned;
-		int   time_completed;
+		int id;
+		int adventure_id;
+		int instance_id;
+		int count;
+		int assassinate_count;
+		int status;
+		int time_created;
+		int time_zoned;
+		int time_completed;
 	};
 
 	static std::string PrimaryKey()

@@ -37,17 +37,17 @@ public:
 	struct TradeskillRecipe {
 		int         id;
 		std::string name;
-		int16       tradeskill;
-		int16       skillneeded;
-		int16       trivial;
-		int8        nofail;
-		int8        replace_container;
+		int         tradeskill;
+		int         skillneeded;
+		int         trivial;
+		int         nofail;
+		int         replace_container;
 		std::string notes;
-		int8        must_learn;
-		int8        quest;
-		int8        enabled;
-		int8        min_expansion;
-		int8        max_expansion;
+		int         must_learn;
+		int         quest;
+		int         enabled;
+		int         min_expansion;
+		int         max_expansion;
 		std::string content_flags;
 	};
 

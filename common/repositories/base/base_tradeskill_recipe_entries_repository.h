@@ -35,14 +35,14 @@
 class BaseTradeskillRecipeEntriesRepository {
 public:
 	struct TradeskillRecipeEntries {
-		int  id;
-		int  recipe_id;
-		int  item_id;
-		int8 successcount;
-		int8 failcount;
-		int8 componentcount;
-		int8 salvagecount;
-		int8 iscontainer;
+		int id;
+		int recipe_id;
+		int item_id;
+		int successcount;
+		int failcount;
+		int componentcount;
+		int salvagecount;
+		int iscontainer;
 	};
 
 	static std::string PrimaryKey()

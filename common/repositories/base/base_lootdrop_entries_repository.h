@@ -37,13 +37,13 @@ public:
 	struct LootdropEntries {
 		int   lootdrop_id;
 		int   item_id;
-		int16 item_charges;
-		int8  equip_item;
+		int   item_charges;
+		int   equip_item;
 		float chance;
 		float disabled_chance;
-		int8  minlevel;
-		int8  maxlevel;
-		int8  multiplier;
+		int   minlevel;
+		int   maxlevel;
+		int   multiplier;
 	};
 
 	static std::string PrimaryKey()

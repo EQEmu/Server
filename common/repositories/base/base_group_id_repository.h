@@ -38,7 +38,7 @@ public:
 		int         groupid;
 		int         charid;
 		std::string name;
-		int8        ismerc;
+		int         ismerc;
 	};
 
 	static std::string PrimaryKey()

@@ -35,9 +35,9 @@
 class BaseCharacterDisciplinesRepository {
 public:
 	struct CharacterDisciplines {
-		int   id;
-		int16 slot_id;
-		int16 disc_id;
+		int id;
+		int slot_id;
+		int disc_id;
 	};
 
 	static std::string PrimaryKey()

@@ -41,8 +41,8 @@ public:
 		int         deity;
 		int         start_zone;
 		int         expansions_req;
-		int8        min_expansion;
-		int8        max_expansion;
+		int         min_expansion;
+		int         max_expansion;
 		std::string content_flags;
 	};
 

@@ -36,16 +36,16 @@ class BaseCharacterBuffsRepository {
 public:
 	struct CharacterBuffs {
 		int         character_id;
-		int8        slot_id;
-		int16       spell_id;
-		int8        caster_level;
+		int         slot_id;
+		int         spell_id;
+		int         caster_level;
 		std::string caster_name;
 		int         ticsremaining;
 		int         counters;
 		int         numhits;
 		int         melee_rune;
 		int         magic_rune;
-		int8        persistent;
+		int         persistent;
 		int         dot_rune;
 		int         caston_x;
 		int         caston_y;

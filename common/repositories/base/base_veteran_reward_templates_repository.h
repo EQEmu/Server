@@ -38,8 +38,8 @@ public:
 		int         claim_id;
 		std::string name;
 		int         item_id;
-		int16       charges;
-		int8        reward_slot;
+		int         charges;
+		int         reward_slot;
 	};
 
 	static std::string PrimaryKey()

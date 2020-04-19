@@ -38,10 +38,10 @@ public:
 		int         id;
 		int         zoneid;
 		int         Itemid;
-		int16       level;
-		int16       chance;
-		int8        min_expansion;
-		int8        max_expansion;
+		int         level;
+		int         chance;
+		int         min_expansion;
+		int         max_expansion;
 		std::string content_flags;
 	};
 

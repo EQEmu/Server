@@ -39,7 +39,7 @@ public:
 		int         parentid;
 		int         bagidx;
 		int         itemid;
-		int16       charges;
+		int         charges;
 		std::string droptime;
 		int         augslot1;
 		int         augslot2;

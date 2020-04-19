@@ -37,11 +37,11 @@ public:
 	struct PerlEventExportSettings {
 		int         event_id;
 		std::string event_description;
-		int16       export_qglobals;
-		int16       export_mob;
-		int16       export_zone;
-		int16       export_item;
-		int16       export_event;
+		int         export_qglobals;
+		int         export_mob;
+		int         export_zone;
+		int         export_item;
+		int         export_event;
 	};
 
 	static std::string PrimaryKey()

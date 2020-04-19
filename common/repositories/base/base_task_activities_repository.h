@@ -38,7 +38,7 @@ public:
 		int         taskid;
 		int         activityid;
 		int         step;
-		int8        activitytype;
+		int         activitytype;
 		std::string target_name;
 		std::string item_list;
 		std::string skill_list;
@@ -49,7 +49,7 @@ public:
 		int         goalcount;
 		int         delivertonpc;
 		std::string zones;
-		int8        optional;
+		int         optional;
 	};
 
 	static std::string PrimaryKey()

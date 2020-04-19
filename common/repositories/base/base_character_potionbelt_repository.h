@@ -35,10 +35,10 @@
 class BaseCharacterPotionbeltRepository {
 public:
 	struct CharacterPotionbelt {
-		int  id;
-		int8 potion_id;
-		int  item_id;
-		int  icon;
+		int id;
+		int potion_id;
+		int item_id;
+		int icon;
 	};
 
 	static std::string PrimaryKey()

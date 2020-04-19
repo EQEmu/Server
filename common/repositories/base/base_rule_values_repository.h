@@ -35,7 +35,7 @@
 class BaseRuleValuesRepository {
 public:
 	struct RuleValues {
-		int8        ruleset_id;
+		int         ruleset_id;
 		std::string rule_name;
 		std::string rule_value;
 		std::string notes;

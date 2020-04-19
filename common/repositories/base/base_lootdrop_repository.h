@@ -37,8 +37,8 @@ public:
 	struct Lootdrop {
 		int         id;
 		std::string name;
-		int8        min_expansion;
-		int8        max_expansion;
+		int         min_expansion;
+		int         max_expansion;
 		std::string content_flags;
 	};
 

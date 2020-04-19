@@ -36,19 +36,19 @@ class BaseTasksRepository {
 public:
 	struct Tasks {
 		int         id;
-		int8        type;
+		int         type;
 		int         duration;
-		int8        duration_code;
+		int         duration_code;
 		std::string title;
 		std::string description;
 		std::string reward;
 		int         rewardid;
 		int         cashreward;
 		int         xpreward;
-		int8        rewardmethod;
-		int8        minlevel;
-		int8        maxlevel;
-		int8        repeatable;
+		int         rewardmethod;
+		int         minlevel;
+		int         maxlevel;
+		int         repeatable;
 		int         faction_reward;
 		std::string completion_emote;
 	};

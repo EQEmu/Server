@@ -37,7 +37,7 @@ public:
 	struct FactionListMod {
 		int         id;
 		int         faction_id;
-		int16       mod;
+		int         mod;
 		std::string mod_name;
 	};
 

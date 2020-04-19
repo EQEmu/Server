@@ -36,8 +36,8 @@ class BaseCharacterBandolierRepository {
 public:
 	struct CharacterBandolier {
 		int         id;
-		int8        bandolier_id;
-		int8        bandolier_slot;
+		int         bandolier_id;
+		int         bandolier_slot;
 		int         item_id;
 		int         icon;
 		std::string bandolier_name;

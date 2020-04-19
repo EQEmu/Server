@@ -41,11 +41,11 @@ public:
 		int         deityid;
 		int         zoneid;
 		int         itemid;
-		int8        item_charges;
-		int8        gm;
+		int         item_charges;
+		int         gm;
 		int         slot;
-		int8        min_expansion;
-		int8        max_expansion;
+		int         min_expansion;
+		int         max_expansion;
 		std::string content_flags;
 	};
 

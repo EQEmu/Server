@@ -37,9 +37,9 @@ public:
 	struct LoottableEntries {
 		int   loottable_id;
 		int   lootdrop_id;
-		int8  multiplier;
-		int8  droplimit;
-		int8  mindrop;
+		int   multiplier;
+		int   droplimit;
+		int   mindrop;
 		float probability;
 	};
 

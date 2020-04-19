@@ -37,7 +37,7 @@ public:
 	struct CharacterBind {
 		int   id;
 		int   slot;
-		int16 zone_id;
+		int   zone_id;
 		int   instance_id;
 		float x;
 		float y;

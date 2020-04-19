@@ -36,23 +36,23 @@ class BaseDoorsRepository {
 public:
 	struct Doors {
 		int         id;
-		int16       doorid;
+		int         doorid;
 		std::string zone;
-		int16       version;
+		int         version;
 		std::string name;
 		float       pos_y;
 		float       pos_x;
 		float       pos_z;
 		float       heading;
-		int16       opentype;
-		int16       guild;
-		int16       lockpick;
+		int         opentype;
+		int         guild;
+		int         lockpick;
 		int         keyitem;
-		int8        nokeyring;
-		int16       triggerdoor;
-		int16       triggertype;
-		int8        disable_timer;
-		int16       doorisopen;
+		int         nokeyring;
+		int         triggerdoor;
+		int         triggertype;
+		int         disable_timer;
+		int         doorisopen;
 		int         door_param;
 		std::string dest_zone;
 		int         dest_instance;
@@ -62,12 +62,12 @@ public:
 		float       dest_heading;
 		int         invert_state;
 		int         incline;
-		int16       size;
+		int         size;
 		float       buffer;
 		int         client_version_mask;
-		int16       is_ldon_door;
-		int8        min_expansion;
-		int8        max_expansion;
+		int         is_ldon_door;
+		int         min_expansion;
+		int         max_expansion;
 		std::string content_flags;
 	};
 

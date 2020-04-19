@@ -42,7 +42,7 @@ public:
 		std::string subject;
 		std::string body;
 		std::string to;
-		int8        status;
+		int         status;
 	};
 
 	static std::string PrimaryKey()

@@ -36,21 +36,21 @@ class BaseTitlesRepository {
 public:
 	struct Titles {
 		int         id;
-		int8        skill_id;
+		int         skill_id;
 		int         min_skill_value;
 		int         max_skill_value;
 		int         min_aa_points;
 		int         max_aa_points;
-		int8        class;
-		int8        gender;
+		int         class;
+		int         gender;
 		int         char_id;
 		int         status;
 		int         item_id;
 		std::string prefix;
 		std::string suffix;
 		int         title_set;
-		int8        min_expansion;
-		int8        max_expansion;
+		int         min_expansion;
+		int         max_expansion;
 		std::string content_flags;
 	};
 

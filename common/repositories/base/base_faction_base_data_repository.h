@@ -35,12 +35,12 @@
 class BaseFactionBaseDataRepository {
 public:
 	struct FactionBaseData {
-		int16 client_faction_id;
-		int16 min;
-		int16 max;
-		int16 unk_hero1;
-		int16 unk_hero2;
-		int16 unk_hero3;
+		int client_faction_id;
+		int min;
+		int max;
+		int unk_hero1;
+		int unk_hero2;
+		int unk_hero3;
 	};
 
 	static std::string PrimaryKey()

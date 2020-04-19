@@ -38,7 +38,7 @@ public:
 		int         id;
 		std::string name;
 		int         leader;
-		int16       minstatus;
+		int         minstatus;
 		std::string motd;
 		int         tribute;
 		std::string motd_setter;

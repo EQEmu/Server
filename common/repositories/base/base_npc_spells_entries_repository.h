@@ -35,18 +35,18 @@
 class BaseNpcSpellsEntriesRepository {
 public:
 	struct NpcSpellsEntries {
-		int   id;
-		int   npc_spells_id;
-		int16 spellid;
-		int   type;
-		int8  minlevel;
-		int8  maxlevel;
-		int16 manacost;
-		int   recast_delay;
-		int16 priority;
-		int   resist_adjust;
-		int16 min_hp;
-		int16 max_hp;
+		int id;
+		int npc_spells_id;
+		int spellid;
+		int type;
+		int minlevel;
+		int maxlevel;
+		int manacost;
+		int recast_delay;
+		int priority;
+		int resist_adjust;
+		int min_hp;
+		int max_hp;
 	};
 
 	static std::string PrimaryKey()

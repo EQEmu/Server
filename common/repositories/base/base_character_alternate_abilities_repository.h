@@ -35,10 +35,10 @@
 class BaseCharacterAlternateAbilitiesRepository {
 public:
 	struct CharacterAlternateAbilities {
-		int   id;
-		int16 aa_id;
-		int16 aa_value;
-		int16 charges;
+		int id;
+		int aa_id;
+		int aa_value;
+		int charges;
 	};
 
 	static std::string PrimaryKey()
