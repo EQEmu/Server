@@ -25,6 +25,7 @@
 #include "../common/random.h"
 #include "../common/string_util.h"
 #include "zonedb.h"
+#include "zone_store.h"
 #include "../common/repositories/grid_repository.h"
 #include "../common/repositories/grid_entries_repository.h"
 #include "qglobals.h"

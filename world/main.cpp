@@ -94,7 +94,9 @@ union semun {
 #include "world_server_command_handler.h"
 #include "../common/content/world_content_service.h"
 #include "../common/repositories/merchantlist_temp_repository.h"
+#include "world_store.h"
 
+WorldStore world_store;
 ClientList client_list;
 GroupLFPList LFPGroupList;
 ZSList zoneserver_list;
@@ -329,9 +331,7 @@ int main(int argc, char** argv) {
 
 	LogInfo("Loading zones");
 
-	// Load to both context for now... this needs to be cleaned up as this has always been cludgy
-	content_db.LoadZoneNames();
-	database.zonename_array = content_db.zonename_array;
+	world_store.LoadZones();
 
 	LogInfo("Clearing groups");
 	database.ClearGroup();

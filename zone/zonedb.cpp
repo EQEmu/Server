@@ -11,6 +11,7 @@
 #include "merc.h"
 #include "zone.h"
 #include "zonedb.h"
+#include "zone_store.h"
 #include "aura.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
 
@@ -3566,7 +3567,7 @@ void ZoneDatabase::ListAllInstances(Client* client, uint32 charid)
     client->Message(Chat::White, "%s is part of the following instances:", name);
 
     for (auto row = results.begin(); row != results.end(); ++row) {
-        client->Message(Chat::White, "%s - id: %lu, version: %lu", content_db.GetZoneName(atoi(row[1])),
+        client->Message(Chat::White, "%s - id: %lu, version: %lu", ZoneName(atoi(row[1])),
 				(unsigned long)atoi(row[0]), (unsigned long)atoi(row[2]));
     }
 }

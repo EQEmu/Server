@@ -26,6 +26,7 @@
 #include <vector>
 #include "sof_char_create_data.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
+#include "world_store.h"
 
 WorldDatabase database;
 WorldDatabase content_db;
@@ -209,7 +210,13 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 				/* If a bind_id is specified, make them start there */
 				if (atoi(row_d[1]) != 0) {
 					player_profile_struct.binds[4].zoneId = (uint32) atoi(row_d[1]);
-					GetSafePoints(player_profile_struct.binds[4].zoneId, 0, &player_profile_struct.binds[4].x, &player_profile_struct.binds[4].y, &player_profile_struct.binds[4].z);
+					content_db.GetSafePoints(
+						ZoneName(player_profile_struct.binds[4].zoneId),
+						0,
+						&player_profile_struct.binds[4].x,
+						&player_profile_struct.binds[4].y,
+						&player_profile_struct.binds[4].z
+					);
 				}
 					/* Otherwise, use the zone and coordinates given */
 				else {
@@ -217,7 +224,15 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 					float x = atof(row_d[2]);
 					float y = atof(row_d[3]);
 					float z = atof(row_d[4]);
-					if (x == 0 && y == 0 && z == 0) { content_db.GetSafePoints(player_profile_struct.binds[4].zoneId, 0, &x, &y, &z); }
+					if (x == 0 && y == 0 && z == 0) {
+						content_db.GetSafePoints(
+							ZoneName(player_profile_struct.binds[4].zoneId),
+							0,
+							&x,
+							&y,
+							&z
+						);
+					}
 					player_profile_struct.binds[4].x = x;
 					player_profile_struct.binds[4].y = y;
 					player_profile_struct.binds[4].z = z;
@@ -459,11 +474,24 @@ bool WorldDatabase::GetStartZone(
 	}
 
 	if (p_player_profile_struct->x == 0 && p_player_profile_struct->y == 0 && p_player_profile_struct->z == 0) {
-		content_db.GetSafePoints(p_player_profile_struct->zone_id, 0, &p_player_profile_struct->x, &p_player_profile_struct->y, &p_player_profile_struct->z);
+		content_db.GetSafePoints(
+			ZoneName(p_player_profile_struct->zone_id),
+			0,
+			&p_player_profile_struct->x,
+			&p_player_profile_struct->y,
+			&p_player_profile_struct->z
+		);
 	}
 
-	if (p_player_profile_struct->binds[0].x == 0 && p_player_profile_struct->binds[0].y == 0 && p_player_profile_struct->binds[0].z == 0) {
-		content_db.GetSafePoints(p_player_profile_struct->binds[0].zoneId, 0, &p_player_profile_struct->binds[0].x, &p_player_profile_struct->binds[0].y, &p_player_profile_struct->binds[0].z);
+	if (p_player_profile_struct->binds[0].x == 0 && p_player_profile_struct->binds[0].y == 0 &&
+		p_player_profile_struct->binds[0].z == 0) {
+		content_db.GetSafePoints(
+			ZoneName(p_player_profile_struct->binds[0].zoneId),
+			0,
+			&p_player_profile_struct->binds[0].x,
+			&p_player_profile_struct->binds[0].y,
+			&p_player_profile_struct->binds[0].z
+		);
 	}
 
 	return true;

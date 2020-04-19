@@ -1171,7 +1171,7 @@ void command_zone(Client *c, const Seperator *sep)
 			return;
 		}
 
-		zoneid = content_db.GetZoneID(sep->arg[1]);
+		zoneid = ZoneID(sep->arg[1]);
 		if(zoneid == 0) {
 			c->Message(Chat::White, "Unable to locate zone '%s'",  sep->arg[1]);
 			return;
@@ -1306,7 +1306,7 @@ void command_peqzone(Client *c, const Seperator *sep)
 		return;
 	}
 	else {
-		zoneid = content_db.GetZoneID(sep->arg[1]);
+		zoneid = ZoneID(sep->arg[1]);
 		destzone = content_db.GetPEQZone(zoneid, 0);
 		if(zoneid == 0) {
 			c->Message(Chat::White, "Unable to locate zone '%s'",  sep->arg[1]);
@@ -1344,7 +1344,7 @@ void command_movechar(Client *c, const Seperator *sep)
 		if (tmp)
 		{
 			if (c->Admin() >= commandMovecharSelfOnly || tmp == c->AccountID())
-				if (!database.MoveCharacterToZone((char*) sep->arg[1], (char*) sep->arg[2]))
+				if (!database.MoveCharacterToZone((char*) sep->arg[1], ZoneID(sep->arg[2])))
 					c->Message(Chat::White, "Character Move Failed!");
 				else
 					c->Message(Chat::White, "Character has been moved.");
@@ -2105,7 +2105,7 @@ void command_zheader(Client *c, const Seperator *sep)
 	if(sep->arg[1][0]==0) {
 		c->Message(Chat::White, "Usage: #zheader <zone name>");
 	}
-	else if(content_db.GetZoneID(sep->argplus[1])==0)
+	else if(ZoneID(sep->argplus[1])==0)
 		c->Message(Chat::White, "Invalid Zone Name: %s",  sep->argplus[1]);
 	else {
 
@@ -4290,7 +4290,7 @@ void command_zoneshutdown(Client *c, const Seperator *sep)
 		if (sep->arg[1][0] >= '0' && sep->arg[1][0] <= '9')
 			s->ZoneServerID = atoi(sep->arg[1]);
 		else
-			s->zoneid = content_db.GetZoneID(sep->arg[1]);
+			s->zoneid = ZoneID(sep->arg[1]);
 		worldserver.SendPacket(pack);
 		safe_delete(pack);
 	}
@@ -4308,7 +4308,7 @@ void command_zonebootup(Client *c, const Seperator *sep)
 		ServerZoneStateChange_struct* s = (ServerZoneStateChange_struct *) pack->pBuffer;
 		s->ZoneServerID = atoi(sep->arg[1]);
 		strcpy(s->adminname, c->GetName());
-		s->zoneid = content_db.GetZoneID(sep->arg[2]);
+		s->zoneid = ZoneID(sep->arg[2]);
 		s->makestatic = (bool) (strcasecmp(sep->arg[3], "static") == 0);
 		worldserver.SendPacket(pack);
 		safe_delete(pack);
@@ -4491,7 +4491,7 @@ void command_zonelock(Client *c, const Seperator *sep)
 		worldserver.SendPacket(pack);
 	}
 	else if (strcasecmp(sep->arg[1], "lock") == 0 && c->Admin() >= commandLockZones) {
-		uint16 tmp = content_db.GetZoneID(sep->arg[2]);
+		uint16 tmp = ZoneID(sep->arg[2]);
 		if (tmp) {
 			s->op = 1;
 			s->zoneID = tmp;
@@ -4501,7 +4501,7 @@ void command_zonelock(Client *c, const Seperator *sep)
 			c->Message(Chat::White, "Usage: #zonelock lock [zonename]");
 	}
 	else if (strcasecmp(sep->arg[1], "unlock") == 0 && c->Admin() >= commandLockZones) {
-		uint16 tmp = content_db.GetZoneID(sep->arg[2]);
+		uint16 tmp = ZoneID(sep->arg[2]);
 		if (tmp) {
 			s->op = 2;
 			s->zoneID = tmp;
@@ -4908,7 +4908,7 @@ void command_gmzone(Client *c, const Seperator *sep)
 	const char  *zone_short_name       = sep->arg[1];
 	auto        zone_version           = static_cast<uint32>(sep->arg[2] ? atoi(sep->arg[2]) : 0);
 	std::string identifier             = "gmzone";
-	uint32      zone_id                = content_db.GetZoneID(zone_short_name);
+	uint32      zone_id                = ZoneID(zone_short_name);
 	uint32      duration               = 100000000;
 	uint16      instance_id            = 0;
 
@@ -9206,7 +9206,7 @@ void command_flagedit(Client *c, const Seperator *sep) {
 		if(sep->arg[2][0] != '\0') {
 			zoneid = atoi(sep->arg[2]);
 			if(zoneid < 1) {
-				zoneid = content_db.GetZoneID(sep->arg[2]);
+				zoneid = ZoneID(sep->arg[2]);
 			}
 		}
 		if(zoneid < 1) {
@@ -9231,7 +9231,7 @@ void command_flagedit(Client *c, const Seperator *sep) {
 			return;
 		}
 
-        c->Message(Chat::Yellow, "Success! Zone %s now requires a flag, named %s",  content_db.GetZoneName(zoneid), flag_name);
+        c->Message(Chat::Yellow, "Success! Zone %s now requires a flag, named %s",  ZoneName(zoneid), flag_name);
         return;
 	}
 
@@ -9240,7 +9240,7 @@ void command_flagedit(Client *c, const Seperator *sep) {
 		if(sep->arg[2][0] != '\0') {
 			zoneid = atoi(sep->arg[2]);
 			if(zoneid < 1) {
-				zoneid = content_db.GetZoneID(sep->arg[2]);
+				zoneid = ZoneID(sep->arg[2]);
 			}
 		}
 
@@ -9258,7 +9258,7 @@ void command_flagedit(Client *c, const Seperator *sep) {
 			return;
 		}
 
-        c->Message(Chat::Yellow, "Success! Zone %s no longer requires a flag.",  content_db.GetZoneName(zoneid));
+        c->Message(Chat::Yellow, "Success! Zone %s no longer requires a flag.",  ZoneName(zoneid));
         return;
 	}
 
@@ -9282,7 +9282,7 @@ void command_flagedit(Client *c, const Seperator *sep) {
 		if(sep->arg[2][0] != '\0') {
 			zoneid = atoi(sep->arg[2]);
 			if(zoneid < 1) {
-				zoneid = content_db.GetZoneID(sep->arg[2]);
+				zoneid = ZoneID(sep->arg[2]);
 			}
 		}
 		if(zoneid < 1) {
@@ -9305,7 +9305,7 @@ void command_flagedit(Client *c, const Seperator *sep) {
 		if(sep->arg[2][0] != '\0') {
 			zoneid = atoi(sep->arg[2]);
 			if(zoneid < 1) {
-				zoneid = content_db.GetZoneID(sep->arg[2]);
+				zoneid = ZoneID(sep->arg[2]);
 			}
 		}
 		if(zoneid < 1) {
@@ -9770,7 +9770,7 @@ void command_setgraveyard(Client *c, const Seperator *sep)
 		return;
 	}
 
-	zoneid = content_db.GetZoneID(sep->arg[1]);
+	zoneid = ZoneID(sep->arg[1]);
 
 	if(zoneid > 0) {
 		graveyard_id = content_db.CreateGraveyardRecord(zoneid, t->GetPosition());
@@ -9806,7 +9806,7 @@ void command_deletegraveyard(Client *c, const Seperator *sep)
 		return;
 	}
 
-	zoneid = content_db.GetZoneID(sep->arg[1]);
+	zoneid = ZoneID(sep->arg[1]);
 	graveyard_id = content_db.GetZoneGraveyardID(zoneid, 0);
 
 	if(zoneid > 0 && graveyard_id > 0) {
@@ -10211,12 +10211,12 @@ void command_instance(Client *c, const Seperator *sep)
 		}
 		else
 		{
-			zone_id = content_db.GetZoneID(sep->arg[2]);
+			zone_id = ZoneID(sep->arg[2]);
 		}
 
 		uint32 version = atoi(sep->arg[3]);
 		uint32 duration = atoi(sep->arg[4]);
-		zn = content_db.GetZoneName(zone_id);
+		zn = ZoneName(zone_id);
 
 		if(!zn)
 		{
@@ -10371,7 +10371,7 @@ void command_setstartzone(Client *c, const Seperator *sep)
 		startzone = 0;
 	}
 	else {
-		startzone = content_db.GetZoneID(sep->arg[1]);
+		startzone = ZoneID(sep->arg[1]);
 		if(startzone == 0) {
 			c->Message(Chat::White, "Unable to locate zone '%s'",  sep->arg[1]);
 			return;

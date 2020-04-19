@@ -25,6 +25,7 @@
 
 #include "client.h"
 #include "zonedb.h"
+#include "zone_store.h"
 
 class Client;
 

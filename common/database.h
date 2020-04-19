@@ -108,9 +108,8 @@ public:
 	bool	AddToNameFilter(const char* name);
 	bool	CreateCharacter(uint32 account_id, char* name, uint16 gender, uint16 race, uint16 class_, uint8 str, uint8 sta, uint8 cha, uint8 dex, uint8 int_, uint8 agi, uint8 wis, uint8 face);
 	bool	DeleteCharacter(char* character_name);
-	bool	MoveCharacterToZone(const char* charname, const char* zonename);
-	bool	MoveCharacterToZone(const char* charname, const char* zonename,uint32 zoneid);
-	bool	MoveCharacterToZone(uint32 iCharID, const char* iZonename);
+	bool	MoveCharacterToZone(const char* charname, uint32 zone_id);
+	bool	MoveCharacterToZone(uint32 character_id, uint32 zone_id);
 	bool	ReserveName(uint32 account_id, char* name);
 	bool	SaveCharacterCreate(uint32 character_id, uint32 account_id, PlayerProfile_Struct* pp);
 	bool	SetHackerFlag(const char* accountname, const char* charactername, const char* hacked);
@@ -155,7 +154,6 @@ public:
 	bool VerifyInstanceAlive(uint16 instance_id, uint32 char_id);
 	bool VerifyZoneInstance(uint32 zone_id, uint16 instance_id);
 
-	uint16 GetInstanceID(const char* zone, uint32 charid, int16 version);
 	uint16 GetInstanceID(uint32 zone, uint32 charid, int16 version);
 	uint16 GetInstanceVersion(uint16 instance_id);
 	uint32 GetTimeRemainingInstance(uint16 instance_id, bool &is_perma);
@@ -243,16 +241,11 @@ public:
 	/* General Queries */
 
 	bool	GetSafePoints(const char* short_name, uint32 version, float* safe_x = 0, float* safe_y = 0, float* safe_z = 0, int16* minstatus = 0, uint8* minlevel = 0, char *flag_needed = nullptr);
-	bool	GetSafePoints(uint32 zoneID, uint32 version, float* safe_x = 0, float* safe_y = 0, float* safe_z = 0, int16* minstatus = 0, uint8* minlevel = 0, char *flag_needed = nullptr) { return GetSafePoints(GetZoneName(zoneID), version, safe_x, safe_y, safe_z, minstatus, minlevel, flag_needed); }
 	bool	GetZoneGraveyard(const uint32 graveyard_id, uint32* graveyard_zoneid = 0, float* graveyard_x = 0, float* graveyard_y = 0, float* graveyard_z = 0, float* graveyard_heading = 0);
 	bool	GetZoneLongName(const char* short_name, char** long_name, char* file_name = 0, float* safe_x = 0, float* safe_y = 0, float* safe_z = 0, uint32* graveyard_id = 0, uint32* maxclients = 0);
 	bool	LoadPTimers(uint32 charid, PTimerList &into);
-	bool	LoadZoneNames();
-
-	const char*	GetZoneName(uint32 zone_id, bool ErrorUnknown = false);
 
 	uint32	GetZoneGraveyardID(uint32 zone_id, uint32 version);
-	uint32	GetZoneID(const char* zonename);
 
 	uint8	GetPEQZone(uint32 zoneID, uint32 version);
 	uint8	GetRaceSkill(uint8 skillid, uint8 in_race);
@@ -274,8 +267,6 @@ public:
 
 	/* EQEmuLogSys */
 	void	LoadLogSettings(EQEmuLogSys::LogSettings* log_settings);
-
-	std::map<uint32,std::string>	zonename_array;
 
 private:
 

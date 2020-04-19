@@ -43,6 +43,7 @@ extern volatile bool RunLoops;
 #include "position.h"
 #include "worldserver.h"
 #include "zonedb.h"
+#include "zone_store.h"
 #include "petitions.h"
 #include "command.h"
 #include "water_map.h"
@@ -4005,7 +4006,7 @@ void Client::SendOPTranslocateConfirm(Mob *Caster, uint16 SpellID) {
 		PendingTranslocateData.heading = m_pp.binds[0].heading;
 	}
 	else {
-		PendingTranslocateData.zone_id = ts->ZoneID = content_db.GetZoneID(Spell.teleport_zone);
+		PendingTranslocateData.zone_id = ts->ZoneID = ZoneID(Spell.teleport_zone);
 		PendingTranslocateData.instance_id = 0;
 		PendingTranslocateData.y = ts->y = Spell.base[0];
 		PendingTranslocateData.x = ts->x = Spell.base[1];
@@ -5287,7 +5288,7 @@ void Client::SetStartZone(uint32 zoneid, float x, float y, float z)
 	}
 
 	// check to make sure the zone is valid
-	const char *target_zone_name = content_db.GetZoneName(zoneid);
+	const char *target_zone_name = ZoneName(zoneid);
 	if(target_zone_name == nullptr)
 		return;
 
@@ -5297,7 +5298,7 @@ void Client::SetStartZone(uint32 zoneid, float x, float y, float z)
 	}
 
 	if (x == 0 && y == 0 && z == 0) {
-		content_db.GetSafePoints(m_pp.binds[4].zoneId, 0, &m_pp.binds[4].x, &m_pp.binds[4].y, &m_pp.binds[4].z);
+		content_db.GetSafePoints(ZoneName(m_pp.binds[4].zoneId), 0, &m_pp.binds[4].x, &m_pp.binds[4].y, &m_pp.binds[4].z);
 	}
 	else {
 		m_pp.binds[4].x = x;
@@ -9298,7 +9299,7 @@ void Client::SetBotOption(BotOwnerOption boo, bool flag) {
 void Client::SendToGuildHall()
 {
 	std::string zone_short_name = "guildhall";
-	uint32      zone_id         = content_db.GetZoneID(zone_short_name.c_str());
+	uint32      zone_id         = ZoneID(zone_short_name.c_str());
 	if (zone_id == 0) {
 		return;
 	}

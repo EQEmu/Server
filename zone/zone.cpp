@@ -84,7 +84,7 @@ Zone* zone = 0;
 void UpdateWindowTitle(char* iNewTitle);
 
 bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
-	const char* zonename = content_db.GetZoneName(iZoneID);
+	const char* zonename = ZoneName(iZoneID);
 
 	if (iZoneID == 0 || zonename == 0)
 		return false;
@@ -190,7 +190,7 @@ bool Zone::LoadZoneObjects()
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		if (atoi(row[9]) == 0) {
 			// Type == 0 - Static Object
-			const char *shortname = content_db.GetZoneName(atoi(row[1]), false); // zoneid -> zone_shortname
+			const char *shortname = ZoneName(atoi(row[1]), false); // zoneid -> zone_shortname
 
 			if (!shortname)
 				continue;
@@ -1158,7 +1158,7 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_id)
 	map_name = nullptr;
 
 	if (!content_db.GetZoneCFG(
-		content_db.GetZoneID(filename),
+		ZoneID(filename),
 		instance_id,
 		&newzone_data,
 		can_bind,
@@ -1177,7 +1177,7 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_id)
 		if (instance_id != 0) {
 			safe_delete_array(map_name);
 			if (!content_db.GetZoneCFG(
-				content_db.GetZoneID(filename),
+				ZoneID(filename),
 				0,
 				&newzone_data,
 				can_bind,
@@ -1799,7 +1799,7 @@ ZonePoint* Zone::GetClosestZonePoint(const glm::vec3& location, uint32 to, Clien
 ZonePoint* Zone::GetClosestZonePoint(const glm::vec3& location, const char* to_name, Client* client, float max_distance) {
 	if(to_name == nullptr)
 		return GetClosestZonePointWithoutZone(location.x, location.y, location.z, client, max_distance);
-	return GetClosestZonePoint(location, content_db.GetZoneID(to_name), client, max_distance);
+	return GetClosestZonePoint(location, ZoneID(to_name), client, max_distance);
 }
 
 ZonePoint* Zone::GetClosestZonePointWithoutZone(float x, float y, float z, Client* client, float max_distance) {

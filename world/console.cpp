@@ -30,6 +30,7 @@
 #include "../common/string_util.h"
 #include "../common/md5.h"
 #include "eqemu_api_world_data_service.h"
+#include "world_store.h"
 #include <fmt/format.h>
 
 extern ClientList      client_list;
@@ -541,7 +542,7 @@ void ConsoleZoneShutdown(
 			s->ZoneServerID = atoi(args[0].c_str());
 		}
 		else {
-			s->zoneid = content_db.GetZoneID(args[0].c_str());
+			s->zoneid = ZoneID(args[0].c_str());
 		}
 
 		ZoneServer *zs = 0;
@@ -549,7 +550,7 @@ void ConsoleZoneShutdown(
 			zs = zoneserver_list.FindByID(s->ZoneServerID);
 		}
 		else if (s->zoneid != 0) {
-			zs = zoneserver_list.FindByName(content_db.GetZoneName(s->zoneid));
+			zs = zoneserver_list.FindByName(ZoneName(s->zoneid));
 		}
 		else {
 			connection->SendLine("Error: ZoneShutdown: neither ID nor name specified");
@@ -633,10 +634,10 @@ void ConsoleZoneLock(
 			return;
 		}
 
-		uint16 tmp = content_db.GetZoneID(args[1].c_str());
+		uint16 tmp = ZoneID(args[1].c_str());
 		if (tmp) {
 			if (zoneserver_list.SetLockedZone(tmp, true)) {
-				zoneserver_list.SendEmoteMessage(0, 0, 80, 15, "Zone locked: %s", content_db.GetZoneName(tmp));
+				zoneserver_list.SendEmoteMessage(0, 0, 80, 15, "Zone locked: %s", ZoneName(tmp));
 			}
 			else {
 				connection->SendLine("Failed to change lock");
@@ -651,10 +652,10 @@ void ConsoleZoneLock(
 			return;
 		}
 
-		uint16 tmp = content_db.GetZoneID(args[1].c_str());
+		uint16 tmp = ZoneID(args[1].c_str());
 		if (tmp) {
 			if (zoneserver_list.SetLockedZone(tmp, false)) {
-				zoneserver_list.SendEmoteMessage(0, 0, 80, 15, "Zone unlocked: %s", content_db.GetZoneName(tmp));
+				zoneserver_list.SendEmoteMessage(0, 0, 80, 15, "Zone unlocked: %s", ZoneName(tmp));
 			}
 			else {
 				connection->SendLine("Failed to change lock");

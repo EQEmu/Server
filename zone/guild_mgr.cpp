@@ -24,6 +24,7 @@
 #include "guild_mgr.h"
 #include "worldserver.h"
 #include "zonedb.h"
+#include "zone_store.h"
 
 ZoneGuildManager guild_mgr;
 GuildBankManager *GuildBanks;

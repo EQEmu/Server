@@ -58,6 +58,7 @@ namespace EQEmu
 #include "questmgr.h"
 #include "zone.h"
 #include "zonedb.h"
+#include "zone_store.h"
 
 #ifdef _WINDOWS
 	// since windows defines these within windef.h (which windows.h include)

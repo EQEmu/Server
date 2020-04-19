@@ -306,36 +306,6 @@ bool Database::VerifyZoneInstance(uint32 zone_id, uint16 instance_id)
 	return true;
 }
 
-uint16 Database::GetInstanceID(const char* zone, uint32 character_id, int16 version) {
-
-	std::string query = StringFormat(
-		"SELECT "
-		"instance_list.id "
-		"FROM "
-		"instance_list, "
-		"instance_list_player "
-		"WHERE "
-		"instance_list.zone = %u "
-		"AND instance_list.version = %u "
-		"AND instance_list.id = instance_list_player.id "
-		"AND instance_list_player.charid = %u "
-		"LIMIT 1 ",
-		GetZoneID(zone),
-		version,
-		character_id
-	);
-	auto results = QueryDatabase(query);
-
-	if (!results.Success())
-		return 0;
-
-	if (results.RowCount() == 0)
-		return 0;
-
-	auto row = results.begin();
-	return atoi(row[0]);
-}
-
 uint16 Database::GetInstanceID(uint32 zone, uint32 character_id, int16 version)
 {
 	if (!zone)

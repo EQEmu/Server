@@ -35,6 +35,7 @@
 #include "worldserver.h"
 #include "zone.h"
 #include "zonedb.h"
+#include "zone_store.h"
 
 #include <iostream>
 #include <limits.h>
@@ -397,7 +398,7 @@ void QuestManager::Zone(const char *zone_name) {
 		ztz->response = 0;
 		ztz->current_zone_id = zone->GetZoneID();
 		ztz->current_instance_id = zone->GetInstanceID();
-		ztz->requested_zone_id = content_db.GetZoneID(zone_name);
+		ztz->requested_zone_id = ZoneID(zone_name);
 		ztz->admin = initiator->Admin();
 		strcpy(ztz->name, initiator->GetName());
 		ztz->guild_id = initiator->GuildID();
@@ -639,9 +640,9 @@ void QuestManager::resumetimer(const char *timer_name) {
 
 bool QuestManager::ispausedtimer(const char *timer_name) {
 	QuestManagerCurrentQuestVars();
-	
+
 	std::list<PausedTimer>::iterator pcur = PTimerList.begin(), pend;
-	
+
 	pend = PTimerList.end();
 	while (pcur != pend)
 	{
@@ -1017,7 +1018,7 @@ uint16 QuestManager::scribespells(uint8 max_level, uint8 min_level) {
 				((spell_id >= 0 && spell_id < SPDAT_RECORDS) ? spells[spell_id].name : "Out-of-range"),
 				spell_id
 			);
-			
+
 			break;
 		}
 		if (spell_id < 0 || spell_id >= SPDAT_RECORDS) {
@@ -1940,7 +1941,7 @@ int QuestManager::getplayercorpsecount(uint32 char_id) {
 		return database.CountCharacterCorpses(char_id);
 	}
 	return 0;
-	
+
 }
 
 int QuestManager::getplayercorpsecountbyzoneid(uint32 char_id, uint32 zone_id) {
@@ -2628,7 +2629,7 @@ int QuestManager::countitem(uint32 item_id) {
 		{ EQEmu::invslot::SHARED_BANK_BEGIN, EQEmu::invslot::SHARED_BANK_END },
 		{ EQEmu::invbag::SHARED_BANK_BAGS_BEGIN, EQEmu::invbag::SHARED_BANK_BAGS_END },
 	};
-	const size_t size = sizeof(slots) / sizeof(slots[0]);	
+	const size_t size = sizeof(slots) / sizeof(slots[0]);
 	for (int slot_index = 0; slot_index < size; ++slot_index) {
 		for (int slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
 			item = initiator->GetInv().GetItem(slot_id);
@@ -2753,7 +2754,7 @@ uint16 QuestManager::CreateInstance(const char *zone, int16 version, uint32 dura
 	QuestManagerCurrentQuestVars();
 	if(initiator)
 	{
-		uint32 zone_id = content_db.GetZoneID(zone);
+		uint32 zone_id = ZoneID(zone);
 		if(zone_id == 0)
 			return 0;
 
@@ -2806,10 +2807,10 @@ uint32 QuestManager::GetInstanceTimer() {
 uint32 QuestManager::GetInstanceTimerByID(uint16 instance_id) {
 	if (instance_id == 0)
 		return 0;
-	
+
 	std::string query = StringFormat("SELECT ((start_time + duration) - UNIX_TIMESTAMP()) AS `remaining` FROM `instance_list` WHERE `id` = %lu", (unsigned long)instance_id);
 	auto results = database.QueryDatabase(query);
-	
+
 	if (results.Success()) {
 		auto row = results.begin();
 		uint32 timer = atoi(row[0]);
@@ -2823,13 +2824,13 @@ uint16 QuestManager::GetInstanceID(const char *zone, int16 version)
 	QuestManagerCurrentQuestVars();
 	if (initiator)
 	{
-		return database.GetInstanceID(zone, initiator->CharacterID(), version);
+		return database.GetInstanceID(ZoneID(zone), initiator->CharacterID(), version);
 	}
 	return 0;
 }
 
 uint16 QuestManager::GetInstanceIDByCharID(const char *zone, int16 version, uint32 char_id) {
-	return database.GetInstanceID(zone, char_id, version);
+	return database.GetInstanceID(ZoneID(zone), char_id, version);
 }
 
 void QuestManager::AssignToInstance(uint16 instance_id)
@@ -3181,7 +3182,7 @@ uint16 QuestManager::CreateDoor(const char* model, float x, float y, float z, fl
 }
 
 int32 QuestManager::GetZoneID(const char *zone) {
-	return static_cast<int32>(content_db.GetZoneID(zone));
+	return static_cast<int32>(ZoneID(zone));
 }
 
 const char* QuestManager::GetZoneLongName(const char *zone) {

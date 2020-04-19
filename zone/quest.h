@@ -19,6 +19,7 @@
 #define __QUEST_H__
 
 #include "zonedb.h"
+#include "zone_store.h"
 
 typedef struct _tag_quest_entry{
 	char	*m_pQuestName;

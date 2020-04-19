@@ -56,6 +56,7 @@
 #include "bot_command.h"
 #endif
 #include "zonedb.h"
+#include "zone_store.h"
 #include "zone_config.h"
 #include "titles.h"
 #include "guild_mgr.h"
@@ -318,11 +319,7 @@ int main(int argc, char** argv) {
 
 	LogInfo("Loading zone names");
 
-	// Load to both context for now... this needs to be cleaned up as this has always been cludgy
-	content_db.LoadZoneNames();
-	database.zonename_array = content_db.zonename_array;
-
-	zone_store.LoadZonesStore();
+	zone_store.LoadZones();
 
 	LogInfo("Loading items");
 	if (!database.LoadItems(hotfix_name)) {
@@ -474,7 +471,7 @@ int main(int argc, char** argv) {
 	}
 	else if (!Zone::Bootup(ZoneID(zone_name), instance_id, true)) {
 		LogError("Zone Bootup failed :: Zone::Bootup");
-		zone = 0;
+		zone = nullptr;
 	}
 
 	//register all the patches we have avaliable with the stream identifier.

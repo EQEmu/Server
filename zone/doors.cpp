@@ -28,6 +28,7 @@
 #include "string_ids.h"
 #include "worldserver.h"
 #include "zonedb.h"
+#include "zone_store.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
 
 #include <iostream>
@@ -452,7 +453,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger) {
 			if (!disable_add_to_key_ring) {
 				sender->KeyRingAdd(player_key);
 			}
-			if (content_db.GetZoneID(destination_zone_name) == zone->GetZoneID()) {
+			if (ZoneID(destination_zone_name) == zone->GetZoneID()) {
 				sender->MovePC(
 						zone->GetZoneID(),
 						zone->GetInstanceID(),
@@ -463,7 +464,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger) {
 				);
 			} else {
 				sender->MovePC(
-						content_db.GetZoneID(destination_zone_name),
+						ZoneID(destination_zone_name),
 						static_cast<uint32>(destination_instance_id),
 						m_Destination.x,
 						m_Destination.y,
@@ -474,7 +475,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger) {
 		}
 
 		if ((!IsDoorOpen() || open_type == 58) && (!required_key_item)) {
-			if (content_db.GetZoneID(destination_zone_name) == zone->GetZoneID()) {
+			if (ZoneID(destination_zone_name) == zone->GetZoneID()) {
 				sender->MovePC(
 						zone->GetZoneID(),
 						zone->GetInstanceID(),
@@ -485,7 +486,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger) {
 				);
 			} else {
 				sender->MovePC(
-					content_db.GetZoneID(destination_zone_name),
+					ZoneID(destination_zone_name),
 						static_cast<uint32>(this->destination_instance_id),
 						m_Destination.x,
 						m_Destination.y,

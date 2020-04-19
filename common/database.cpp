@@ -1082,50 +1082,6 @@ bool Database::GetZoneGraveyard(const uint32 graveyard_id, uint32* graveyard_zon
 	return true;
 }
 
-bool Database::LoadZoneNames() {
-	std::string query("SELECT zoneidnumber, short_name FROM zone");
-
-	auto results = QueryDatabase(query);
-
-	if (!results.Success())
-	{
-		return false;
-	}
-
-	for (auto row= results.begin();row != results.end();++row)
-	{
-		uint32 zoneid = atoi(row[0]);
-		std::string zonename = row[1];
-		zonename_array.insert(std::pair<uint32,std::string>(zoneid,zonename));
-	}
-
-	return true;
-}
-
-uint32 Database::GetZoneID(const char* zonename) {
-
-	if (zonename == nullptr)
-		return 0;
-
-	for (auto & iter : zonename_array)
-		if (strcasecmp(iter.second.c_str(), zonename) == 0)
-			return iter.first;
-
-	return 0;
-}
-
-const char* Database::GetZoneName(uint32 zoneID, bool ErrorUnknown) {
-	auto iter = zonename_array.find(zoneID);
-
-	if (iter != zonename_array.end())
-		return iter->second.c_str();
-
-	if (ErrorUnknown)
-		return "UNKNOWN";
-
-	return 0;
-}
-
 uint8 Database::GetPEQZone(uint32 zoneID, uint32 version){
 
 	std::string query = StringFormat("SELECT peqzone from zone where zoneidnumber='%i' AND (version=%i OR version=0) ORDER BY version DESC", zoneID, version);
@@ -1342,29 +1298,31 @@ uint8 Database::GetServerType() {
 	return atoi(row[0]);
 }
 
-bool Database::MoveCharacterToZone(const char* charname, const char* zonename, uint32 zoneid) {
-	if(zonename == nullptr || strlen(zonename) == 0)
-		return false;
+bool Database::MoveCharacterToZone(uint32 character_id, uint32 zone_id)
+{
+	std::string query = StringFormat(
+		"UPDATE `character_data` SET `zone_id` = %i, `x` = -1, `y` = -1, `z` = -1 WHERE `id` = %i",
+		zone_id,
+		character_id
+	);
 
-	std::string query = StringFormat("UPDATE `character_data` SET `zone_id` = %i, `x` = -1, `y` = -1, `z` = -1 WHERE `name` = '%s'", zoneid, charname);
 	auto results = QueryDatabase(query);
 
 	if (!results.Success()) {
 		return false;
 	}
 
-	if (results.RowsAffected() == 0)
-		return false;
-
-	return true;
+	return results.RowsAffected() != 0;
 }
 
-bool Database::MoveCharacterToZone(const char* charname, const char* zonename) {
-	return MoveCharacterToZone(charname, zonename, GetZoneID(zonename));
-}
+bool Database::MoveCharacterToZone(const char *charname, uint32 zone_id)
+{
+	std::string query = StringFormat(
+		"UPDATE `character_data` SET `zone_id` = %i, `x` = -1, `y` = -1, `z` = -1 WHERE `name` = '%s'",
+		zone_id,
+		charname
+	);
 
-bool Database::MoveCharacterToZone(uint32 iCharID, const char* iZonename) {
-	std::string query = StringFormat("UPDATE `character_data` SET `zone_id` = %i, `x` = -1, `y` = -1, `z` = -1 WHERE `id` = %i", GetZoneID(iZonename), iCharID);
 	auto results = QueryDatabase(query);
 
 	if (!results.Success()) {

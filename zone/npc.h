@@ -23,6 +23,7 @@
 #include "mob.h"
 #include "qglobals.h"
 #include "zonedb.h"
+#include "zone_store.h"
 #include "zonedump.h"
 
 #include <deque>
@@ -512,7 +513,7 @@ protected:
 
 	uint32	npc_spells_id;
 	uint8	casting_spell_AIindex;
-	
+
 	uint32*	pDontCastBefore_casting_spell;
 	std::vector<AISpells_Struct> AIspells;
 	bool HasAISpell;

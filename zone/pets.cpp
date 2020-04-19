@@ -27,6 +27,7 @@
 
 #include "pets.h"
 #include "zonedb.h"
+#include "zone_store.h"
 
 #include <string>
 
@@ -230,7 +231,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	memcpy(npc_type, base, sizeof(NPCType));
 
 	// If pet power is set to -1 in the DB, use stat scaling
-	if ((this->IsClient() 
+	if ((this->IsClient()
 #ifdef BOTS
 		|| this->IsBot()
 #endif
@@ -620,7 +621,7 @@ void NPC::SetPetState(SpellBuff_Struct *pet_buffs, uint32 *items) {
 
 		if (item2) {
 			bool noDrop=(item2->NoDrop == 0); // Field is reverse logic
-			bool petCanHaveNoDrop = (RuleB(Pets, CanTakeNoDrop) && 
+			bool petCanHaveNoDrop = (RuleB(Pets, CanTakeNoDrop) &&
 				_CLIENTPET(this) && GetPetType() <= petOther);
 
 			if (!noDrop || petCanHaveNoDrop) {

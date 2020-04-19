@@ -28,6 +28,7 @@
 #include "string_ids.h"
 #include "worldserver.h"
 #include "zonedb.h"
+#include "zone_store.h"
 #include "position.h"
 
 float Mob::GetActSpellRange(uint16 spell_id, float range, bool IsBard)
@@ -554,7 +555,7 @@ int Client::GetDiscSlotBySpellID(int32 spellid)
 		if(m_pp.disciplines.values[i] == spellid)
 			return i;
 	}
-	
+
 	return -1;
 }
 

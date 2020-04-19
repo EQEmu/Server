@@ -18,17 +18,17 @@
  *
  */
 
-#include "zone_store.h"
+#include "world_store.h"
 
-ZoneStore::ZoneStore() = default;
-ZoneStore::~ZoneStore() = default;
+WorldStore::WorldStore() = default;
+WorldStore::~WorldStore()= default;
 
-void ZoneStore::LoadZones()
+void WorldStore::LoadZones()
 {
 	zones = ZoneRepository::All();
 }
 
-uint32 ZoneStore::GetZoneID(const char *in_zone_name)
+uint32 WorldStore::GetZoneID(const char *in_zone_name)
 {
 	if (in_zone_name == nullptr) {
 		return 0;
@@ -39,7 +39,7 @@ uint32 ZoneStore::GetZoneID(const char *in_zone_name)
 	return GetZoneID(zone_name);
 }
 
-uint32 ZoneStore::GetZoneID(std::string zone_name)
+uint32 WorldStore::GetZoneID(std::string zone_name)
 {
 	for (auto &z: zones) {
 		if (z.short_name == zone_name) {
@@ -55,7 +55,7 @@ uint32 ZoneStore::GetZoneID(std::string zone_name)
  * @param error_unknown
  * @return
  */
-const char *ZoneStore::GetZoneName(uint32 zone_id, bool error_unknown)
+const char *WorldStore::GetZoneName(uint32 zone_id, bool error_unknown)
 {
 	for (auto &z: zones) {
 		if (z.zoneidnumber == zone_id) {
@@ -74,7 +74,7 @@ const char *ZoneStore::GetZoneName(uint32 zone_id, bool error_unknown)
  * @param zone_id
  * @return
  */
-std::string ZoneStore::GetZoneName(uint32 zone_id)
+std::string WorldStore::GetZoneName(uint32 zone_id)
 {
 	for (auto &z: zones) {
 		if (z.zoneidnumber == zone_id) {
@@ -89,7 +89,7 @@ std::string ZoneStore::GetZoneName(uint32 zone_id)
  * @param zone_id
  * @return
  */
-std::string ZoneStore::GetZoneLongName(uint32 zone_id)
+std::string WorldStore::GetZoneLongName(uint32 zone_id)
 {
 	for (auto &z: zones) {
 		if (z.zoneidnumber == zone_id) {
@@ -105,7 +105,7 @@ std::string ZoneStore::GetZoneLongName(uint32 zone_id)
  * @param version
  * @return
  */
-ZoneRepository::Zone ZoneStore::GetZone(uint32 zone_id, int version)
+ZoneRepository::Zone WorldStore::GetZone(uint32 zone_id, int version)
 {
 	for (auto &z: zones) {
 		if (z.zoneidnumber == zone_id && z.version == version) {
@@ -120,7 +120,7 @@ ZoneRepository::Zone ZoneStore::GetZone(uint32 zone_id, int version)
  * @param in_zone_name
  * @return
  */
-ZoneRepository::Zone ZoneStore::GetZone(const char *in_zone_name)
+ZoneRepository::Zone WorldStore::GetZone(const char *in_zone_name)
 {
 	for (auto &z: zones) {
 		if (z.short_name == in_zone_name) {

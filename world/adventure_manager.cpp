@@ -10,6 +10,7 @@
 #include "zonelist.h"
 #include "clientlist.h"
 #include "cliententry.h"
+#include "world_store.h"
 #include <sstream>
 #include <stdio.h>
 
@@ -771,7 +772,7 @@ void AdventureManager::PlayerClickedDoor(const char *player, int zone_id, int do
 							     sizeof(ServerPlayerClickedAdventureDoorReply_Struct));
 					ServerPlayerClickedAdventureDoorReply_Struct *sr = (ServerPlayerClickedAdventureDoorReply_Struct*)pack->pBuffer;
 					strcpy(sr->player, player);
-					sr->zone_id = content_db.GetZoneID(t->zone);
+					sr->zone_id = ZoneID(t->zone);
 					sr->instance_id = (*iter)->GetInstanceID();
 					sr->x = t->dest_x;
 					sr->y = t->dest_y;
