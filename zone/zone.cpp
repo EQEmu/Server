@@ -369,7 +369,7 @@ int Zone::SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charg
 	std::list<TempMerchantList> tmp_merlist = tmpmerchanttable[npcid];
 	std::list<TempMerchantList>::const_iterator tmp_itr;
 	TempMerchantList ml;
-	uint32 first_empty_slot=0; // Save 1st vacant slot while searching..
+	uint32 first_empty_slot = 0; // Save 1st vacant slot while searching..
 	bool found = false;
 
 	for (tmp_itr = tmp_merlist.begin(); tmp_itr != tmp_merlist.end(); ++tmp_itr) {
@@ -429,7 +429,7 @@ int Zone::SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charg
 		}			
 		slots.sort();
 		std::list<int>::const_iterator slots_itr;
-		uint32 first_empty_slot=0;
+		uint32 first_empty_slot = 0;
 		uint32 idx = temp_slot_index;
 		for (slots_itr = slots.begin(); slots_itr != slots.end(); ++slots_itr) {
 			if (!first_empty_slot && *slots_itr > idx) {
