@@ -398,9 +398,11 @@ int Zone::SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charg
 					ml.charges = charges;
 					LogInventory("new charges is [{}] charges", ml.charges);
 				}
+				
 				if (!ml.origslot) {
 					ml.origslot = ml.slot;
 				}
+				
 				if (charges > 0) {
 					database.SaveMerchantTemp(npcid, ml.origslot, item, ml.charges);
 					tmp_merlist.push_back(ml);
