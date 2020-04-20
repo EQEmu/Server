@@ -19,28 +19,35 @@
 #include "spells.h"
 #include "../common/global_define.h"
 #include "../common/shareddb.h"
-#include "../common/ipc_mutex.h"
-#include "../common/memory_mapped_file.h"
-#include "../common/eqemu_exception.h"
 #include "../common/spdat.h"
+#include "../common/shared/shared_memory.h"
+#include "../common/shared/shared_memory_map.h"
+
+namespace eqs = eq::shared;
 
 void LoadSpells(SharedDatabase *database, const std::string &prefix) {
-	EQEmu::IPCMutex mutex("spells");
-	mutex.Lock();
-	int records = database->GetMaxSpellID() + 1;
-	if(records == 0) {
-		EQ_EXCEPT("Shared Memory", "Unable to get any spells from the database.");
+	int records = database->GetSpellCount();
+	int max_spell_id = database->GetMaxSpellID() + 1;
+	auto size = records * sizeof(SPDat_Spell_Struct) * 125 / 100 + (64 * 1024);
+	eqs::shared_memory shared("shared/spells", size);
+
+	auto spells_result = shared.map<eqs::unordered_map<int, SPDat_Spell_Struct>>("spells");
+	if (!spells_result) {
+		//todo: get rid of the exceptions entirely.
+		EQ_EXCEPT("Shared Memory", "Unable to map shared memory");
 	}
 
-	uint32 size = records * sizeof(SPDat_Spell_Struct) + sizeof(uint32);
+	auto max_spell_id_result = shared.map<int>("max_spell_id");
+	if (!max_spell_id_result) {
+		EQ_EXCEPT("Shared Memory", "Unable to map shared memory");
+	}
 
-	auto Config = EQEmuConfig::get();
-	std::string file_name = Config->SharedMemDir + prefix + std::string("spells");
-	EQEmu::MemoryMappedFile mmf(file_name, size);
-	mmf.ZeroFile();
+	eqs::unordered_map<int, SPDat_Spell_Struct>& spells_shm = spells_result.value();
+	int& max_spell_id_shm = max_spell_id_result.value();
+	max_spell_id_shm = max_spell_id;
 
-	void *ptr = mmf.Get();
-	database->LoadSpells(ptr, records);
-	mutex.Unlock();
+	database->LoadSpells([&spells_shm](const SPDat_Spell_Struct &spell) {
+		spells_shm.insert_or_assign(spell.id, spell);
+	});
 }
 

@@ -1656,21 +1656,19 @@ uint8 SharedDatabase::GetTrainLevel(uint8 Class_, EQEmu::skills::SkillType Skill
 	return ret;
 }
 
-void SharedDatabase::LoadDamageShieldTypes(SPDat_Spell_Struct* sp, int32 iMaxSpellID) {
+int SharedDatabase::LoadDamageShieldType(int spell_id) {
 
-	std::string query = StringFormat("SELECT `spellid`, `type` FROM `damageshieldtypes` WHERE `spellid` > 0 "
-                                    "AND `spellid` <= %i", iMaxSpellID);
+	std::string query = StringFormat("SELECT `type` FROM `damageshieldtypes` WHERE `spellid` = %i", spell_id);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        return;
+        return 0;
     }
 
-    for(auto row = results.begin(); row != results.end(); ++row) {
-        int spellID = atoi(row[0]);
-        if((spellID > 0) && (spellID <= iMaxSpellID))
-            sp[spellID].DamageShieldType = atoi(row[1]);
+    for(auto &row : results) {
+        return atoi(row[0]);
     }
 
+	return 0;
 }
 
 const EvolveInfo* SharedDatabase::GetEvolveInfo(uint32 loregroup) {
@@ -1685,6 +1683,18 @@ int SharedDatabase::GetMaxSpellID() {
     }
 
     auto row = results.begin();
+
+	return atoi(row[0]);
+}
+
+int SharedDatabase::GetSpellCount() {
+	std::string query = "SELECT COUNT(id) FROM spells_new";
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		return -1;
+	}
+
+	auto row = results.begin();
 
 	return atoi(row[0]);
 }
@@ -1710,175 +1720,163 @@ bool SharedDatabase::LoadSpells(const std::string &prefix, int32 *records, const
 	return true;
 }
 
-void SharedDatabase::LoadSpells(void *data, int max_spells) {
-	*(uint32*)data = max_spells;
-	SPDat_Spell_Struct *sp = reinterpret_cast<SPDat_Spell_Struct*>((char*)data + sizeof(uint32));
-
+void SharedDatabase::LoadSpells(std::function<void(const SPDat_Spell_Struct & sp)> on_load) {
 	const std::string query = "SELECT * FROM spells_new ORDER BY id ASC";
     auto results = QueryDatabase(query);
     if (!results.Success()) {
         return;
     }
-
+	
     if(results.ColumnCount() <= SPELL_LOAD_FIELD_COUNT) {
 		LogSpells("Fatal error loading spells: Spell field count < SPELL_LOAD_FIELD_COUNT([{}])", SPELL_LOAD_FIELD_COUNT);
 		return;
     }
 
-    int tempid = 0;
-    int counter = 0;
+    for (auto &row : results) {
+		SPDat_Spell_Struct sp;
 
-    for (auto row = results.begin(); row != results.end(); ++row) {
-        tempid = atoi(row[0]);
-        if(tempid >= max_spells) {
-      LogSpells("Non fatal error: spell.id >= max_spells, ignoring");
-            continue;
-        }
+		sp.id = atoi(row[0]);
+		strn0cpy(sp.name, row[1], sizeof(sp.name));
+		strn0cpy(sp.player_1, row[2], sizeof(sp.player_1));
+		strn0cpy(sp.teleport_zone, row[3], sizeof(sp.teleport_zone));
+		strn0cpy(sp.you_cast, row[4], sizeof(sp.you_cast));
+		strn0cpy(sp.other_casts, row[5], sizeof(sp.other_casts));
+		strn0cpy(sp.cast_on_you, row[6], sizeof(sp.cast_on_you));
+		strn0cpy(sp.cast_on_other, row[7], sizeof(sp.cast_on_other));
+		strn0cpy(sp.spell_fades, row[8], sizeof(sp.spell_fades));
 
-        ++counter;
-        sp[tempid].id = tempid;
-        strn0cpy(sp[tempid].name, row[1], sizeof(sp[tempid].name));
-        strn0cpy(sp[tempid].player_1, row[2], sizeof(sp[tempid].player_1));
-		strn0cpy(sp[tempid].teleport_zone, row[3], sizeof(sp[tempid].teleport_zone));
-		strn0cpy(sp[tempid].you_cast, row[4], sizeof(sp[tempid].you_cast));
-		strn0cpy(sp[tempid].other_casts, row[5], sizeof(sp[tempid].other_casts));
-		strn0cpy(sp[tempid].cast_on_you, row[6], sizeof(sp[tempid].cast_on_you));
-		strn0cpy(sp[tempid].cast_on_other, row[7], sizeof(sp[tempid].cast_on_other));
-		strn0cpy(sp[tempid].spell_fades, row[8], sizeof(sp[tempid].spell_fades));
+		sp.range = static_cast<float>(atof(row[9]));
+		sp.aoerange = static_cast<float>(atof(row[10]));
+		sp.pushback = static_cast<float>(atof(row[11]));
+		sp.pushup = static_cast<float>(atof(row[12]));
+		sp.cast_time = atoi(row[13]);
+		sp.recovery_time = atoi(row[14]);
+		sp.recast_time = atoi(row[15]);
+		sp.buffdurationformula = atoi(row[16]);
+		sp.buffduration = atoi(row[17]);
+		sp.AEDuration = atoi(row[18]);
+		sp.mana = atoi(row[19]);
 
-		sp[tempid].range=static_cast<float>(atof(row[9]));
-		sp[tempid].aoerange=static_cast<float>(atof(row[10]));
-		sp[tempid].pushback=static_cast<float>(atof(row[11]));
-		sp[tempid].pushup=static_cast<float>(atof(row[12]));
-		sp[tempid].cast_time=atoi(row[13]);
-		sp[tempid].recovery_time=atoi(row[14]);
-		sp[tempid].recast_time=atoi(row[15]);
-		sp[tempid].buffdurationformula=atoi(row[16]);
-		sp[tempid].buffduration=atoi(row[17]);
-		sp[tempid].AEDuration=atoi(row[18]);
-		sp[tempid].mana=atoi(row[19]);
+		int y = 0;
+		for (y = 0; y < EFFECT_COUNT; y++)
+			sp.base[y] = atoi(row[20 + y]); // effect_base_value
 
-		int y=0;
-		for(y=0; y< EFFECT_COUNT;y++)
-			sp[tempid].base[y]=atoi(row[20+y]); // effect_base_value
+		for (y = 0; y < EFFECT_COUNT; y++)
+			sp.base2[y] = atoi(row[32 + y]); // effect_limit_value
 
-		for(y=0; y < EFFECT_COUNT; y++)
-			sp[tempid].base2[y]=atoi(row[32+y]); // effect_limit_value
+		for (y = 0; y < EFFECT_COUNT; y++)
+			sp.max[y] = atoi(row[44 + y]);
 
-		for(y=0; y< EFFECT_COUNT;y++)
-			sp[tempid].max[y]=atoi(row[44+y]);
+		for (y = 0; y < 4; y++)
+			sp.components[y] = atoi(row[58 + y]);
 
-		for(y=0; y< 4;y++)
-			sp[tempid].components[y]=atoi(row[58+y]);
+		for (y = 0; y < 4; y++)
+			sp.component_counts[y] = atoi(row[62 + y]);
 
-		for(y=0; y< 4;y++)
-			sp[tempid].component_counts[y]=atoi(row[62+y]);
+		for (y = 0; y < 4; y++)
+			sp.NoexpendReagent[y] = atoi(row[66 + y]);
 
-		for(y=0; y< 4;y++)
-			sp[tempid].NoexpendReagent[y]=atoi(row[66+y]);
+		for (y = 0; y < EFFECT_COUNT; y++)
+			sp.formula[y] = atoi(row[70 + y]);
 
-		for(y=0; y< EFFECT_COUNT;y++)
-			sp[tempid].formula[y]=atoi(row[70+y]);
+		sp.goodEffect = atoi(row[83]);
+		sp.Activated = atoi(row[84]);
+		sp.resisttype = atoi(row[85]);
 
-		sp[tempid].goodEffect=atoi(row[83]);
-		sp[tempid].Activated=atoi(row[84]);
-		sp[tempid].resisttype=atoi(row[85]);
+		for (y = 0; y < EFFECT_COUNT; y++)
+			sp.effectid[y] = atoi(row[86 + y]);
 
-		for(y=0; y< EFFECT_COUNT;y++)
-			sp[tempid].effectid[y]=atoi(row[86+y]);
-
-		sp[tempid].targettype = (SpellTargetType) atoi(row[98]);
-		sp[tempid].basediff=atoi(row[99]);
+		sp.targettype = (SpellTargetType)atoi(row[98]);
+		sp.basediff = atoi(row[99]);
 
 		int tmp_skill = atoi(row[100]);;
 
 		if (tmp_skill < 0 || tmp_skill > EQEmu::skills::HIGHEST_SKILL)
-			sp[tempid].skill = EQEmu::skills::SkillBegging; /* not much better we can do. */ // can probably be changed to client-based 'SkillNone' once activated
-        else
-			sp[tempid].skill = (EQEmu::skills::SkillType) tmp_skill;
+			sp.skill = EQEmu::skills::SkillBegging; /* not much better we can do. */ // can probably be changed to client-based 'SkillNone' once activated
+		else
+			sp.skill = (EQEmu::skills::SkillType) tmp_skill;
 
-		sp[tempid].zonetype=atoi(row[101]);
-		sp[tempid].EnvironmentType=atoi(row[102]);
-		sp[tempid].TimeOfDay=atoi(row[103]);
+		sp.zonetype = atoi(row[101]);
+		sp.EnvironmentType = atoi(row[102]);
+		sp.TimeOfDay = atoi(row[103]);
 
-		for(y=0; y < PLAYER_CLASS_COUNT;y++)
-			sp[tempid].classes[y]=atoi(row[104+y]);
+		for (y = 0; y < PLAYER_CLASS_COUNT; y++)
+			sp.classes[y] = atoi(row[104 + y]);
 
-		sp[tempid].CastingAnim=atoi(row[120]);
-		sp[tempid].SpellAffectIndex=atoi(row[123]);
-		sp[tempid].disallow_sit=atoi(row[124]);
-		sp[tempid].diety_agnostic=atoi(row[125]);
+		sp.CastingAnim = atoi(row[120]);
+		sp.SpellAffectIndex = atoi(row[123]);
+		sp.disallow_sit = atoi(row[124]);
+		sp.diety_agnostic = atoi(row[125]);
 
 		for (y = 0; y < 16; y++)
-			sp[tempid].deities[y]=atoi(row[126+y]);
+			sp.deities[y] = atoi(row[126 + y]);
 
-		sp[tempid].new_icon=atoi(row[144]);
-		sp[tempid].uninterruptable=atoi(row[146]) != 0;
-		sp[tempid].ResistDiff=atoi(row[147]);
-		sp[tempid].dot_stacking_exempt = atoi(row[148]) != 0;
-		sp[tempid].RecourseLink = atoi(row[150]);
-		sp[tempid].no_partial_resist = atoi(row[151]) != 0;
+		sp.new_icon = atoi(row[144]);
+		sp.uninterruptable = atoi(row[146]) != 0;
+		sp.ResistDiff = atoi(row[147]);
+		sp.dot_stacking_exempt = atoi(row[148]) != 0;
+		sp.RecourseLink = atoi(row[150]);
+		sp.no_partial_resist = atoi(row[151]) != 0;
 
-		sp[tempid].short_buff_box = atoi(row[154]);
-		sp[tempid].descnum = atoi(row[155]);
-		sp[tempid].typedescnum = atoi(row[156]);
-		sp[tempid].effectdescnum = atoi(row[157]);
+		sp.short_buff_box = atoi(row[154]);
+		sp.descnum = atoi(row[155]);
+		sp.typedescnum = atoi(row[156]);
+		sp.effectdescnum = atoi(row[157]);
 
-		sp[tempid].npc_no_los = atoi(row[159]) != 0;
-		sp[tempid].reflectable = atoi(row[161]) != 0;
-		sp[tempid].bonushate=atoi(row[162]);
+		sp.npc_no_los = atoi(row[159]) != 0;
+		sp.reflectable = atoi(row[161]) != 0;
+		sp.bonushate = atoi(row[162]);
 
-		sp[tempid].ldon_trap = atoi(row[165]) != 0;
-		sp[tempid].EndurCost=atoi(row[166]);
-		sp[tempid].EndurTimerIndex=atoi(row[167]);
-		sp[tempid].IsDisciplineBuff = atoi(row[168]) != 0;
-		sp[tempid].HateAdded=atoi(row[173]);
-		sp[tempid].EndurUpkeep=atoi(row[174]);
-		sp[tempid].numhitstype = atoi(row[175]);
-		sp[tempid].numhits = atoi(row[176]);
-		sp[tempid].pvpresistbase=atoi(row[177]);
-		sp[tempid].pvpresistcalc=atoi(row[178]);
-		sp[tempid].pvpresistcap=atoi(row[179]);
-		sp[tempid].spell_category=atoi(row[180]);
-		sp[tempid].pcnpc_only_flag=atoi(row[183]);
-		sp[tempid].cast_not_standing = atoi(row[184]) != 0;
-		sp[tempid].can_mgb=atoi(row[185]);
-		sp[tempid].dispel_flag = atoi(row[186]);
-		sp[tempid].MinResist = atoi(row[189]);
-		sp[tempid].MaxResist = atoi(row[190]);
-		sp[tempid].viral_targets = atoi(row[191]);
-		sp[tempid].viral_timer = atoi(row[192]);
-		sp[tempid].NimbusEffect = atoi(row[193]);
-		sp[tempid].directional_start = static_cast<float>(atoi(row[194]));
-		sp[tempid].directional_end = static_cast<float>(atoi(row[195]));
-		sp[tempid].sneak = atoi(row[196]) != 0;
-		sp[tempid].not_focusable = atoi(row[197]) != 0;
-		sp[tempid].no_detrimental_spell_aggro = atoi(row[198]) != 0;
-		sp[tempid].suspendable = atoi(row[200]) != 0;
-		sp[tempid].viral_range = atoi(row[201]);
-		sp[tempid].songcap = atoi(row[202]);
-		sp[tempid].no_block = atoi(row[205]);
-		sp[tempid].spellgroup=atoi(row[207]);
-		sp[tempid].rank = atoi(row[208]);
-		sp[tempid].no_resist=atoi(row[209]);
-		sp[tempid].CastRestriction = atoi(row[211]);
-		sp[tempid].AllowRest = atoi(row[212]) != 0;
-		sp[tempid].InCombat = atoi(row[213]) != 0;
-		sp[tempid].OutofCombat = atoi(row[214]) != 0;
-		sp[tempid].override_crit_chance = atoi(row[217]);
-		sp[tempid].aemaxtargets = atoi(row[218]);
-		sp[tempid].no_heal_damage_item_mod = atoi(row[219]);
-		sp[tempid].persistdeath = atoi(row[224]) != 0;
-		sp[tempid].min_dist = atof(row[227]);
-		sp[tempid].min_dist_mod = atof(row[228]);
-		sp[tempid].max_dist = atof(row[229]);
-		sp[tempid].max_dist_mod = atof(row[230]);
-		sp[tempid].min_range = static_cast<float>(atoi(row[231]));
-		sp[tempid].no_remove = atoi(row[232]) != 0;
-		sp[tempid].DamageShieldType = 0;
+		sp.ldon_trap = atoi(row[165]) != 0;
+		sp.EndurCost = atoi(row[166]);
+		sp.EndurTimerIndex = atoi(row[167]);
+		sp.IsDisciplineBuff = atoi(row[168]) != 0;
+		sp.HateAdded = atoi(row[173]);
+		sp.EndurUpkeep = atoi(row[174]);
+		sp.numhitstype = atoi(row[175]);
+		sp.numhits = atoi(row[176]);
+		sp.pvpresistbase = atoi(row[177]);
+		sp.pvpresistcalc = atoi(row[178]);
+		sp.pvpresistcap = atoi(row[179]);
+		sp.spell_category = atoi(row[180]);
+		sp.pcnpc_only_flag = atoi(row[183]);
+		sp.cast_not_standing = atoi(row[184]) != 0;
+		sp.can_mgb = atoi(row[185]);
+		sp.dispel_flag = atoi(row[186]);
+		sp.MinResist = atoi(row[189]);
+		sp.MaxResist = atoi(row[190]);
+		sp.viral_targets = atoi(row[191]);
+		sp.viral_timer = atoi(row[192]);
+		sp.NimbusEffect = atoi(row[193]);
+		sp.directional_start = static_cast<float>(atoi(row[194]));
+		sp.directional_end = static_cast<float>(atoi(row[195]));
+		sp.sneak = atoi(row[196]) != 0;
+		sp.not_focusable = atoi(row[197]) != 0;
+		sp.no_detrimental_spell_aggro = atoi(row[198]) != 0;
+		sp.suspendable = atoi(row[200]) != 0;
+		sp.viral_range = atoi(row[201]);
+		sp.songcap = atoi(row[202]);
+		sp.no_block = atoi(row[205]);
+		sp.spellgroup = atoi(row[207]);
+		sp.rank = atoi(row[208]);
+		sp.no_resist = atoi(row[209]);
+		sp.CastRestriction = atoi(row[211]);
+		sp.AllowRest = atoi(row[212]) != 0;
+		sp.InCombat = atoi(row[213]) != 0;
+		sp.OutofCombat = atoi(row[214]) != 0;
+		sp.override_crit_chance = atoi(row[217]);
+		sp.aemaxtargets = atoi(row[218]);
+		sp.no_heal_damage_item_mod = atoi(row[219]);
+		sp.persistdeath = atoi(row[224]) != 0;
+		sp.min_dist = atof(row[227]);
+		sp.min_dist_mod = atof(row[228]);
+		sp.max_dist = atof(row[229]);
+		sp.max_dist_mod = atof(row[230]);
+		sp.min_range = static_cast<float>(atoi(row[231]));
+		sp.no_remove = atoi(row[232]) != 0;
+		sp.DamageShieldType = LoadDamageShieldType(sp.id); //ideally we could do this with a simple join but we need to formalize the table first.
+		on_load(sp);
     }
-
-    LoadDamageShieldTypes(sp, max_spells);
 }
 
 int SharedDatabase::GetMaxBaseDataLevel() {

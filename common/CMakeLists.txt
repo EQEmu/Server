@@ -151,6 +151,7 @@ SET(common_headers
 	eqtime.h
 	errmsg.h
 	event_sub.h
+	expected.h
 	extprofile.h
 	faction.h
 	file_util.h
@@ -267,6 +268,13 @@ SET(common_headers
 	patches/uf_limits.h
 	patches/uf_ops.h
 	patches/uf_structs.h
+	shared/shared_memory.h
+	shared/shared_memory_error.h
+	shared/shared_memory_handle.h
+	shared/shared_memory_list.h
+	shared/shared_memory_map.h
+	shared/shared_memory_string.h
+	shared/shared_memory_vector.h
 	StackWalker/StackWalker.h
 	util/memory_stream.h
 	util/directory.h
@@ -363,6 +371,16 @@ SOURCE_GROUP(Patches FILES
 	patches/titanium_limits.cpp
 	patches/uf.cpp
 	patches/uf_limits.cpp
+)
+
+SOURCE_GROUP(shared FILES
+	shared/shared_memory.h
+	shared/shared_memory_error.h
+	shared/shared_memory_handle.h
+	shared/shared_memory_list.h
+	shared/shared_memory_map.h
+	shared/shared_memory_string.h
+	shared/shared_memory_vector.h
 )
 
 SOURCE_GROUP(StackWalker FILES
