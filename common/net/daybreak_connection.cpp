@@ -605,6 +605,8 @@ void EQ::Net::DaybreakConnection::ProcessDecodedPacket(const Packet &p)
 					ProcessDecodedPacket(StaticPacket(current, subpacket_length));
 					current += subpacket_length;
 				}
+
+				break;
 			}
 
 			case OP_SessionRequest:
