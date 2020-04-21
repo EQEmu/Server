@@ -179,6 +179,7 @@ namespace DatabaseSchema {
 			"books",
 			"char_create_combinations",
 			"char_create_point_allocations",
+			"damageshieldtypes",
 			"doors",
 			"faction_base_data",
 			"faction_list",
