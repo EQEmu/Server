@@ -13106,24 +13106,83 @@ void command_databuckets(Client *c, const Seperator *sep)
 void command_who(Client *c, const Seperator *sep)
 {
 	std::string query =
-		"SELECT\n"
-		"    character_data.account_id,\n"
-		"    character_data.name,\n"
-		"    character_data.zone_id,\n"
-		"    COALESCE((select zone.short_name from zone where zoneidnumber = character_data.zone_id LIMIT 1), \"Not Found\") as zone_name,\n"
-		"    character_data.zone_instance,\n"
-		"    COALESCE((select guilds.name from guilds where id = ((select guild_id from guild_members where char_id = character_data.id))), \"\") as guild_name,\n"
-		"    character_data.level,\n"
-		"    character_data.race,\n"
-		"    character_data.class,\n"
-		"    COALESCE((select account.status from account where account.id = character_data.account_id LIMIT 1), 0) as account_status,\n"
-		"    COALESCE((select account.name from account where account.id = character_data.account_id LIMIT 1), \"\") as account_name,\n"
-		"    COALESCE((select account_ip.ip from account_ip where account_ip.accid = character_data.account_id ORDER BY account_ip.lastused DESC LIMIT 1), \"\") as account_ip\n"
-		"FROM\n"
-		"    character_data\n"
-		"WHERE\n"
-		"    last_login > (UNIX_TIMESTAMP() - 600)\n"
-  		"ORDER BY character_data.name;";
+		SQL (
+			SELECT
+			  character_data.account_id,
+			  character_data.name,
+			  character_data.zone_id,
+			  character_data.zone_instance,
+			  COALESCE(
+				(
+				  select
+					guilds.name
+				  from
+					guilds
+				  where
+					id = (
+					  (
+						select
+						  guild_id
+						from
+						  guild_members
+						where
+						  char_id = character_data.id
+					  )
+					)
+				),
+				""
+			  ) as guild_name,
+			  character_data.level,
+			  character_data.race,
+			  character_data.class,
+			  COALESCE(
+				(
+				  select
+					account.status
+				  from
+					account
+				  where
+					account.id = character_data.account_id
+				  LIMIT
+					1
+				), 0
+			  ) as account_status,
+			  COALESCE(
+				(
+				  select
+					account.name
+				  from
+					account
+				  where
+					account.id = character_data.account_id
+				  LIMIT
+					1
+				),
+				0
+			  ) as account_name,
+			  COALESCE(
+				(
+				  select
+					account_ip.ip
+				  from
+					account_ip
+				  where
+					account_ip.accid = character_data.account_id
+				  ORDER BY
+					account_ip.lastused DESC
+				  LIMIT
+					1
+				),
+				""
+			  ) as account_ip
+			FROM
+			  character_data
+			WHERE
+			  last_login > (UNIX_TIMESTAMP() - 600)
+			ORDER BY
+			  character_data.name;
+			)
+		;
 
 	auto results = database.QueryDatabase(query);
 	if (!results.Success())
@@ -13146,19 +13205,18 @@ void command_who(Client *c, const Seperator *sep)
 	c->Message(Chat::Magenta, "--------------------");
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		auto        account_id      = static_cast<uint32>(atoi(row[0]));
-		std::string player_name     = row[1];
-		auto        zone_id         = static_cast<uint32>(atoi(row[2]));
-		std::string zone_short_name = row[3];
-		auto        zone_instance   = static_cast<uint32>(atoi(row[4]));
-		std::string guild_name      = row[5];
-		auto        player_level    = static_cast<uint32>(atoi(row[6]));
-		auto        player_race     = static_cast<uint32>(atoi(row[7]));
-		auto        player_class    = static_cast<uint32>(atoi(row[8]));
-		auto        account_status  = static_cast<uint32>(atoi(row[9]));
-		std::string account_name    = row[10];
-		std::string account_ip      = row[11];
-
+		auto        account_id          = static_cast<uint32>(atoi(row[0]));
+		std::string player_name         = row[1];
+		auto        zone_id             = static_cast<uint32>(atoi(row[2]));
+		std::string zone_short_name     = ZoneName(zone_id);
+		auto        zone_instance       = static_cast<uint32>(atoi(row[3]));
+		std::string guild_name          = row[4];
+		auto        player_level        = static_cast<uint32>(atoi(row[5]));
+		auto        player_race         = static_cast<uint32>(atoi(row[6]));
+		auto        player_class        = static_cast<uint32>(atoi(row[7]));
+		auto        account_status      = static_cast<uint32>(atoi(row[8]));
+		std::string account_name        = row[9];
+		std::string account_ip          = row[10];
 		std::string base_class_name     = GetClassIDName(static_cast<uint8>(player_class), 1);
 		std::string displayed_race_name = GetRaceIDName(static_cast<uint16>(player_race));
 
