@@ -736,7 +736,10 @@ Ground_Spawns* ZoneDatabase::LoadGroundSpawns(uint32 zone_id, int16 version, Gro
 
 void ZoneDatabase::DeleteObject(uint32 id)
 {
-	// delete record of object
+	if (id == 0) {
+		return;
+	}
+
 	std::string query = StringFormat("DELETE FROM object WHERE id = %i", id);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
