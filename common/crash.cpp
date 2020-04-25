@@ -118,6 +118,11 @@ void set_exception_handler() {
 #include <unistd.h>
 #include <sys/fcntl.h>
 
+#ifdef __FreeBSD__
+#include <signal.h>
+#include <sys/stat.h>
+#endif
+
 void print_trace()
 {
 	auto uid = geteuid();

@@ -431,8 +431,10 @@ int main(int argc, char** argv) {
 	EQStreamIdentifier stream_identifier;
 	RegisterAllPatches(stream_identifier);
 
-#ifndef WIN32
+#ifdef __linux__
 	LogDebug("Main thread running with thread id [{}]", pthread_self());
+#elsif defined(__FreeBSD__)
+	LogDebug("Main thread running with thread id [{}]", pthread_getthreadid_np());
 #endif
 
 	bool worldwasconnected       = worldserver.Connected();
