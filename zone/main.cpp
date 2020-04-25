@@ -92,6 +92,10 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/unix.h"
 #endif
 
+#ifdef __FreeBSD__
+#include <pthread_np.h>
+#endif
+
 extern volatile bool is_zone_loaded;
 
 EntityList entity_list;
@@ -433,7 +437,7 @@ int main(int argc, char** argv) {
 
 #ifdef __linux__
 	LogDebug("Main thread running with thread id [{}]", pthread_self());
-#elsif defined(__FreeBSD__)
+#elif defined(__FreeBSD__)
 	LogDebug("Main thread running with thread id [{}]", pthread_getthreadid_np());
 #endif
 
