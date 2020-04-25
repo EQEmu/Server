@@ -266,6 +266,14 @@ bool Zone::LoadZoneObjects()
 		data.tilt_y = atof(row[18]);
 		data.unknown084 = 0;
 
+
+		glm::vec3 position;
+		position.x = data.x;
+		position.y = data.y;
+		position.z = data.z;
+
+		data.z = zone->zonemap->FindBestZ(position, nullptr);
+
 		EQEmu::ItemInstance *inst = nullptr;
 		// FatherNitwit: this dosent seem to work...
 		// tradeskill containers do not have an itemid of 0... at least what I am seeing
@@ -341,7 +349,7 @@ void Zone::DumpMerchantList(uint32 npcid) {
 
 	for (tmp_itr = tmp_merlist.begin(); tmp_itr != tmp_merlist.end(); ++tmp_itr) {
 		ml = *tmp_itr;
-		
+
 		LogInventory("slot[{}] Orig[{}] Item[{}] Charges[{}]", ml.slot, ml.origslot, ml.item, ml.charges);
 	}
 }
@@ -378,7 +386,7 @@ int Zone::SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charg
 
 	for (tmp_itr = tmp_merlist.begin(); tmp_itr != tmp_merlist.end(); ++tmp_itr) {
 		ml = *tmp_itr;
-		
+
 		if (ml.item == item) {
 			found = true;
 			LogInventory("Item found in temp list at [{}] with [{}] charges", ml.origslot, ml.charges);
@@ -402,11 +410,11 @@ int Zone::SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charg
 					ml.charges = charges;
 					LogInventory("new charges is [{}] charges", ml.charges);
 				}
-				
+
 				if (!ml.origslot) {
 					ml.origslot = ml.slot;
 				}
-				
+
 				if (charges > 0) {
 					database.SaveMerchantTemp(npcid, ml.origslot, item, ml.charges);
 					tmp_merlist.push_back(ml);
@@ -432,7 +440,7 @@ int Zone::SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charg
 		for (tmp_itr = tmp_merlist.begin(); tmp_itr != tmp_merlist.end(); ++tmp_itr) {
 			ml3 = *tmp_itr;
 			slots.push_back(ml3.origslot);
-		}			
+		}
 		slots.sort();
 		std::list<int>::const_iterator slots_itr;
 		uint32 first_empty_slot = 0;
@@ -445,7 +453,7 @@ int Zone::SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charg
 			}
 
 			++idx;
-		}			
+		}
 
 		first_empty_slot = idx;
 
@@ -454,7 +462,7 @@ int Zone::SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charg
 		for (tmp_itr = tmp_merlist.begin(); tmp_itr != tmp_merlist.end(); ++tmp_itr) {
 			ml3 = *tmp_itr;
 			slots.push_back(ml3.slot);
-		}			
+		}
 		slots.sort();
 		uint32 first_empty_mslot=0;
 		idx = temp_slot_index;
@@ -466,7 +474,7 @@ int Zone::SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charg
 			}
 
 			++idx;
-		}			
+		}
 
 		first_empty_mslot = idx;
 
