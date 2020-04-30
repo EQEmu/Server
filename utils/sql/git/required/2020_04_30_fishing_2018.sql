@@ -1,3 +1,4 @@
 /* Update all non-magical fishing poles to expendable per 2018 patch */
 
-UPDATE items SET expendablearrow = 1 where id in (9969, 9666, 16863, 13100, 84004, 25154, 22857, 46996);
+ALTER TABLE items RENAME COLUMN unk219 TO sub_type;
+UPDATE items SET unk219 = !magic WHERE itemtype = 36;
