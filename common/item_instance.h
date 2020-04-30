@@ -103,7 +103,7 @@ namespace EQEmu
 		bool IsAugmentSlotAvailable(int32 augtype, uint8 slot) const;
 		inline int32 GetAugmentType() const { return ((m_item) ? m_item->AugType : 0); }
 
-		inline bool IsExpendable() const { return ((m_item) ? ((m_item->Click.Type == item::ItemEffectExpendable) || (m_item->ItemType == item::ItemTypePotion) || (m_item->ExpendableArrow == 1)) : false); }
+		inline bool IsExpendable() const { return ((m_item) ? ((m_item->Click.Type == item::ItemEffectExpendable) || (m_item->ItemType == item::ItemTypePotion)) : false); }
 
 		//
 		// Contents
