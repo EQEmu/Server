@@ -34,8 +34,8 @@ public:
 	int GetGroup(Lua_Client c);
 	void SplitExp(uint32 exp, Lua_Mob other);
 	uint32 GetTotalRaidDamage(Lua_Mob other);
-	void SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinum);
-	void SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinum, Lua_Client splitter);
+	void SplitMoney(uint32 gid, uint32 copper, uint32 silver, uint32 gold, uint32 platinum);
+	void SplitMoney(uint32 gid, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, Lua_Client splitter);
 	void BalanceHP(int penalty, uint32 group_id);
 	bool IsLeader(const char *c);
 	bool IsLeader(Lua_Client c);

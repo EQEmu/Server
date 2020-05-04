@@ -32,6 +32,7 @@
 #endif
 
 #include "map.h"
+#include "water_map.h"
 
 extern Zone* zone;
 //#define LOSDEBUG 6
@@ -236,6 +237,11 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	if (mob->IsClient()) {
 		if (!mob->CastToClient()->ClientFinishedLoading() || mob->CastToClient()->IsHoveringForRespawn() || mob->CastToClient()->bZoning)
 			return false;
+	}
+	
+	// We don't want to aggro clients outside of water if we're water only.
+	if (mob->IsClient() && mob->CastToClient()->GetLastRegion() != RegionTypeWater && IsUnderwaterOnly()) {
+		return false;
 	}
 
 	/**

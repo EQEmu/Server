@@ -694,11 +694,6 @@ void NPC::RemoveCash() {
 
 bool NPC::Process()
 {
-	if (IsStunned() && stunned_timer.Check()) {
-		Mob::UnStun();
-		this->spun_timer.Disable();
-	}
-
 	if (p_depop)
 	{
 		Mob* owner = entity_list.GetMob(this->ownerid);
@@ -710,6 +705,11 @@ bool NPC::Process()
 			this->petid = 0;
 		}
 		return false;
+	}
+	
+	if (IsStunned() && stunned_timer.Check()) {
+		Mob::UnStun();
+		this->spun_timer.Disable();
 	}
 
 	SpellProcess();
@@ -962,7 +962,7 @@ void NPC::Depop(bool StartSpawnTimer) {
 }
 
 bool NPC::DatabaseCastAccepted(int spell_id) {
-	for (int i=0; i < 12; i++) {
+	for (int i=0; i < EFFECT_COUNT; i++) {
 		switch(spells[spell_id].effectid[i]) {
 		case SE_Stamina: {
 			if(IsEngaged() && GetHPRatio() < 100)
@@ -3093,6 +3093,14 @@ bool NPC::AICheckCloseBeneficialSpells(
 			continue;
 		}
 
+		if (!mob->CheckLosFN(caster)) {
+			continue;
+		}
+
+		if (mob->GetReverseFactionCon(caster) >= FACTION_KINDLY) {
+			continue;
+		}
+
 		LogAICastBeneficialClose(
 			"NPC [{}] Distance [{}] Cast Range [{}] Caster [{}]",
 			mob->GetCleanName(),
@@ -3100,10 +3108,6 @@ bool NPC::AICheckCloseBeneficialSpells(
 			cast_range,
 			caster->GetCleanName()
 		);
-
-		if (mob->GetReverseFactionCon(caster) >= FACTION_KINDLY) {
-			continue;
-		}
 
 		if ((spell_types & SpellType_Buff) && !RuleB(NPC, BuffFriends)) {
 			if (mob != caster) {

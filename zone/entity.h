@@ -447,6 +447,7 @@ public:
 
 	void	Process();
 	void	ClearAggro(Mob* targ);
+	void    ClearWaterAggro(Mob* targ);
 	void	ClearFeignAggro(Mob* targ);
 	void	ClearZoneFeignAggro(Client* targ);
 	void	AggroZone(Mob* who, uint32 hate = 0);

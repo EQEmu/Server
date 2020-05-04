@@ -633,6 +633,7 @@ public:
 	void MovePC(uint32 zoneID, float x, float y, float z, float heading, uint8 ignorerestrictions = 0, ZoneMode zm = ZoneSolicited);
 	void MovePC(float x, float y, float z, float heading, uint8 ignorerestrictions = 0, ZoneMode zm = ZoneSolicited);
 	void MovePC(uint32 zoneID, uint32 instanceID, float x, float y, float z, float heading, uint8 ignorerestrictions = 0, ZoneMode zm = ZoneSolicited);
+	void SendToGuildHall();
 	void AssignToInstance(uint16 instance_id);
 	void RemoveFromInstance(uint16 instance_id);
 	void WhoAll();
@@ -691,7 +692,7 @@ public:
 
 	int GetClientMaxLevel() const { return client_max_level; }
 	void SetClientMaxLevel(int max_level) { client_max_level = max_level; }
-	
+
 	void CheckManaEndUpdate();
 	void SendManaUpdate();
 	void SendEnduranceUpdate();
@@ -1294,12 +1295,16 @@ public:
 
 	void CheckRegionTypeChanges();
 
+	 WaterRegionType GetLastRegion() { return last_region_type; }
+
 	int32 CalcATK();
 
 	uint32 trapid; //ID of trap player has triggered. This is cleared when the player leaves the trap's radius, or it despawns.
 
 	void SetLastPositionBeforeBulkUpdate(glm::vec4 in_last_position_before_bulk_update);
 	glm::vec4 &GetLastPositionBeforeBulkUpdate();
+
+	Raid *p_raid_instance;
 
 protected:
 	friend class Mob;
@@ -1340,6 +1345,7 @@ protected:
 	char *adv_data;
 
 private:
+
 	eqFilterMode ClientFilters[_FilterCount];
 	int32 HandlePacket(const EQApplicationPacket *app);
 	void OPTGB(const EQApplicationPacket *app);
@@ -1633,9 +1639,9 @@ private:
 	bool InterrogateInventory_error(int16 head, int16 index, const EQEmu::ItemInstance* inst, const EQEmu::ItemInstance* parent, int depth);
 
 	int client_max_level;
-	
+
 #ifdef BOTS
-	
+
 public:
 	enum BotOwnerOption : size_t {
 		booDeathMarquee,
@@ -1652,7 +1658,7 @@ public:
 
 	bool GetBotOption(BotOwnerOption boo) const;
 	void SetBotOption(BotOwnerOption boo, bool flag = true);
-	
+
 	bool GetBotPulling() { return m_bot_pulling; }
 	void SetBotPulling(bool flag = true) { m_bot_pulling = flag; }
 

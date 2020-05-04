@@ -415,6 +415,7 @@ int main(int argc, char** argv) {
 		RegisterConsoleFunctions(console);
 	}
 
+	zoneserver_list.Init();
 	std::unique_ptr<EQ::Net::ServertalkServer> server_connection;
 	server_connection.reset(new EQ::Net::ServertalkServer());
 

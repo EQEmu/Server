@@ -2913,23 +2913,33 @@ void Client::SendItemPacket(int16 slot_id, const EQEmu::ItemInstance* inst, Item
 	if (!inst)
 		return;
 
-	if (slot_id <= EQEmu::invslot::POSSESSIONS_END && slot_id >= EQEmu::invslot::POSSESSIONS_BEGIN) {
-		if ((((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask) == 0)
-			return;
-	}
-	else if (slot_id <= EQEmu::invbag::GENERAL_BAGS_END && slot_id >= EQEmu::invbag::GENERAL_BAGS_BEGIN) {
-		auto temp_slot = EQEmu::invslot::GENERAL_BEGIN + ((slot_id - EQEmu::invbag::GENERAL_BAGS_BEGIN) / EQEmu::invbag::SLOT_COUNT);
-		if ((((uint64)1 << temp_slot) & GetInv().GetLookup()->PossessionsBitmask) == 0)
-			return;
-	}
-	else if (slot_id <= EQEmu::invslot::BANK_END && slot_id >= EQEmu::invslot::BANK_BEGIN) {
-		if ((slot_id - EQEmu::invslot::BANK_BEGIN) >= GetInv().GetLookup()->InventoryTypeSize.Bank)
-			return;
-	}
-	else if (slot_id <= EQEmu::invbag::BANK_BAGS_END && slot_id >= EQEmu::invbag::BANK_BAGS_BEGIN) {
-		auto temp_slot = (slot_id - EQEmu::invbag::BANK_BAGS_BEGIN) / EQEmu::invbag::SLOT_COUNT;
-		if (temp_slot >= GetInv().GetLookup()->InventoryTypeSize.Bank)
-			return;
+	if (packet_type != ItemPacketMerchant) {
+		if (slot_id <= EQEmu::invslot::POSSESSIONS_END && slot_id >= EQEmu::invslot::POSSESSIONS_BEGIN) {
+			if ((((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask) == 0) {
+				LogError("Item not sent to merchant : slot [{}]", slot_id);
+				return;
+			}
+		}
+		else if (slot_id <= EQEmu::invbag::GENERAL_BAGS_END && slot_id >= EQEmu::invbag::GENERAL_BAGS_BEGIN) {
+			auto temp_slot = EQEmu::invslot::GENERAL_BEGIN + ((slot_id - EQEmu::invbag::GENERAL_BAGS_BEGIN) / EQEmu::invbag::SLOT_COUNT);
+			if ((((uint64)1 << temp_slot) & GetInv().GetLookup()->PossessionsBitmask) == 0) {
+				LogError("Item not sent to merchant2 : slot [{}]", slot_id);
+				return;
+			}
+		}
+		else if (slot_id <= EQEmu::invslot::BANK_END && slot_id >= EQEmu::invslot::BANK_BEGIN) {
+			if ((slot_id - EQEmu::invslot::BANK_BEGIN) >= GetInv().GetLookup()->InventoryTypeSize.Bank) {
+				LogError("Item not sent to merchant3 : slot [{}]", slot_id);
+				return;
+			}
+		}
+		else if (slot_id <= EQEmu::invbag::BANK_BAGS_END && slot_id >= EQEmu::invbag::BANK_BAGS_BEGIN) {
+			auto temp_slot = (slot_id - EQEmu::invbag::BANK_BAGS_BEGIN) / EQEmu::invbag::SLOT_COUNT;
+			if (temp_slot >= GetInv().GetLookup()->InventoryTypeSize.Bank) {
+				LogError("Item not sent to merchant4 : slot [{}]", slot_id);
+				return;
+			}
+		}
 	}
 
 	// Serialize item into |-delimited string (Titanium- uses '|' delimiter .. newer clients use pure data serialization)

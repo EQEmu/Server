@@ -3703,7 +3703,7 @@ void ZoneDatabase::LoadBuffs(Client *client)
 		if (!IsValidSpell(buffs[index].spellid))
 			continue;
 
-		for (int effectIndex = 0; effectIndex < 12; ++effectIndex) {
+		for (int effectIndex = 0; effectIndex < EFFECT_COUNT; ++effectIndex) {
 
 			if (spells[buffs[index].spellid].effectid[effectIndex] == SE_Charm) {
 				buffs[index].spellid = SPELL_UNKNOWN;

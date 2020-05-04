@@ -714,7 +714,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 	EQApplicationPacket *outapp;
 	uint32 tmpaccid = 0;
 	charid = database.GetCharacterInfo(char_name, &tmpaccid, &zone_id, &instance_id);
-	if (charid == 0 || tmpaccid != GetAccountID()) {
+	if (charid == 0) {
 		LogInfo("Could not get CharInfo for [{}]", char_name);
 		eqs->Close();
 		return true;

@@ -163,6 +163,7 @@ public:
 	inline void ShowNPCGlobalLoot(Client *to, NPC *who) { m_global_loot.ShowNPCGlobalLoot(to, who); }
 	inline void ShowZoneGlobalLoot(Client *to) { m_global_loot.ShowZoneGlobalLoot(to); }
 	int GetZoneTotalBlockedSpells() { return zone_total_blocked_spells; }
+	void DumpMerchantList(uint32 npcid);
 	int SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charges, bool sold = false);
 	int32 MobsAggroCount() { return aggroedmobs; }
 
@@ -278,6 +279,9 @@ public:
 	ZonePoint *GetClosestZonePoint(const glm::vec3 &location, uint32 to, Client *client, float max_distance = 40000.0f);
 	ZonePoint *GetClosestZonePointWithoutZone(float x, float y, float z, Client *client, float max_distance = 40000.0f);
 
+	uint32 GetInstanceTimeRemaining() const;
+	void SetInstanceTimeRemaining(uint32 instance_time_remaining);
+
 	/**
 	 * GMSay Callback for LogSys
 	 *
@@ -361,6 +365,7 @@ private:
 	uint8     zone_type;
 	uint16    instanceversion;
 	uint32    instanceid;
+	uint32    instance_time_remaining;
 	uint32    pgraveyard_id, pgraveyard_zoneid;
 	uint32    pMaxClients;
 	uint32    zoneid;
