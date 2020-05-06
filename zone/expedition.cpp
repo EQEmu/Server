@@ -532,11 +532,12 @@ bool Expedition::RemoveMember(const std::string& remove_char_name)
 	SendWorldMemberChanged(member.name, member.char_id, true);
 
 	// live always sends a leader update but we can send only if leader changes
-	if (!m_members.empty() && member.char_id == m_leader.char_id)
+	if (member.char_id == m_leader.char_id)
 	{
 		ChooseNewLeader();
 	}
-	else if (m_members.empty())
+
+	if (m_members.empty())
 	{
 		// cache removal will occur in world message handler
 		ExpeditionDatabase::DeleteExpedition(m_id);
@@ -1178,8 +1179,12 @@ void Expedition::ProcessMemberRemoved(std::string removed_char_name, uint32_t re
 			{
 				ExpeditionDatabase::DeletePendingLockouts(member_client->CharacterID());
 				member_client->SetExpeditionID(0);
-				member_client->SendDzCompassUpdate();
-				member_client->QueuePacket(CreateInfoPacket(true).get());
+				if (!m_dynamiczone.IsCurrentZoneDzInstance())
+				{
+					// live doesn't clear expedition info on clients removed while inside dz
+					member_client->SendDzCompassUpdate();
+					member_client->QueuePacket(CreateInfoPacket(true).get());
+				}
 				member_client->MessageString(
 					Chat::Yellow, EXPEDITION_REMOVED, it->name.c_str(), m_expedition_name.c_str()
 				);
@@ -1217,7 +1222,35 @@ void Expedition::ProcessLockoutUpdate(
 			{
 				member_client->RemoveExpeditionLockout(m_expedition_name, event_name);
 			}
-			member_client->SendExpeditionLockoutTimers(); // full client lockout list update
+			member_client->SendExpeditionLockoutTimers();
+		}
+	}
+
+	// if this is the expedition's dz instance, all clients inside the zone need
+	// to receive added lockouts. this is done on live to avoid exploits where
+	// members leave the expedition but haven't been kicked from zone yet
+	if (m_dynamiczone.IsCurrentZoneDzInstance())
+	{
+		std::vector<ExpeditionMember> non_members;
+		for (const auto& client_iter : entity_list.GetClientList())
+		{
+			Client* client = client_iter.second;
+			if (client && client->GetExpeditionID() != GetID())
+			{
+				non_members.emplace_back(ExpeditionMember{ client->CharacterID(), client->GetName() });
+
+				if (!remove) {
+					client->AddExpeditionLockout(lockout);
+				} else {
+					client->RemoveExpeditionLockout(m_expedition_name, event_name);
+				}
+				client->SendExpeditionLockoutTimers();
+			}
+		}
+
+		if (!remove && !non_members.empty()) // expedition members were already updated in db
+		{
+			ExpeditionDatabase::InsertMembersLockout(non_members, lockout);
 		}
 	}
 }

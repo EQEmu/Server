@@ -161,14 +161,11 @@ bool Client::Process() {
 		if (TaskPeriodic_Timer.Check() && taskstate)
 			taskstate->TaskPeriodicChecks(this);
 
-		if (dynamiczone_removal_timer.Check())
+		if (dynamiczone_removal_timer.Check() && zone && zone->GetInstanceID() != 0)
 		{
 			dynamiczone_removal_timer.Disable();
-			if (zone && zone->GetInstanceID() != 0)
-			{
-				DynamicZone dz = DynamicZone::LoadDzFromDatabase(zone->GetInstanceID());
-				GoToDzSafeReturnOrBind(dz.GetSafeReturnLocation());
-			}
+			DynamicZone dz = DynamicZone::LoadDzFromDatabase(zone->GetInstanceID());
+			GoToDzSafeReturnOrBind(dz.GetSafeReturnLocation());
 		}
 
 		if (linkdead_timer.Check()) {
