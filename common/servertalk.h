@@ -156,6 +156,7 @@
 #define ServerOP_ExpeditionDzZoneIn         0x040c
 
 #define ServerOP_DzCharacterChange          0x0450
+#define ServerOP_DzRemoveAllCharacters      0x0451
 
 #define ServerOP_LSInfo				0x1000
 #define ServerOP_LSStatus			0x1001
@@ -2072,6 +2073,7 @@ struct ServerDzLocation_Struct {
 };
 
 struct ServerDzCharacter_Struct {
+	uint16 zone_id;
 	uint16 instance_id;
 	uint8  remove; // 0: added 1: removed
 	uint32 character_id;

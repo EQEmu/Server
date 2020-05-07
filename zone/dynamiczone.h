@@ -83,7 +83,7 @@ public:
 	bool     IsCurrentZoneDzInstance() const;
 	bool     IsInstanceID(uint32_t instance_id) const;
 	bool     IsValid() const { return m_instance_id != 0; }
-	void     RemoveAllCharacters();
+	void     RemoveAllCharacters(bool enable_removal_timers = true);
 	void     RemoveCharacter(uint32_t character_id);
 	void     SendInstanceCharacterChange(uint32_t character_id, bool removed);
 	void     SetCompass(const DynamicZoneLocation& location, bool update_db = false);
