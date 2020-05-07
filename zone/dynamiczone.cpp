@@ -353,13 +353,40 @@ void DynamicZone::RemoveCharacter(uint32_t character_id)
 	SendInstanceCharacterChange(character_id, true); // start client kick timer
 }
 
-void DynamicZone::RemoveAllCharacters()
+void DynamicZone::RemoveAllCharacters(bool enable_removal_timers)
 {
-	// caller has to notify clients of instance change since we don't hold members here
-	if (m_instance_id != 0)
+	if (GetInstanceID() == 0)
 	{
-		database.RemoveClientsFromInstance(m_instance_id);
+		return;
 	}
+
+	if (enable_removal_timers)
+	{
+		// just remove all clients in bulk instead of only characters assigned to the instance
+		if (IsCurrentZoneDzInstance())
+		{
+			for (const auto& client_iter : entity_list.GetClientList())
+			{
+				if (client_iter.second)
+				{
+					client_iter.second->SetDzRemovalTimer(true);
+				}
+			}
+		}
+		else if (GetInstanceID() != 0)
+		{
+			uint32_t packsize = sizeof(ServerDzCharacter_Struct);
+			auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_DzRemoveAllCharacters, packsize));
+			auto packbuf = reinterpret_cast<ServerDzCharacter_Struct*>(pack->pBuffer);
+			packbuf->zone_id = GetZoneID();
+			packbuf->instance_id = GetInstanceID();
+			packbuf->remove = true;
+			packbuf->character_id = 0;
+			worldserver.SendPacket(pack.get());
+		}
+	}
+
+	database.RemoveClientsFromInstance(GetInstanceID());
 }
 
 void DynamicZone::SaveInstanceMembersToDatabase(const std::unordered_set<uint32_t> character_ids)
@@ -402,6 +429,7 @@ void DynamicZone::SendInstanceCharacterChange(uint32_t character_id, bool remove
 		uint32_t packsize = sizeof(ServerDzCharacter_Struct);
 		auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_DzCharacterChange, packsize));
 		auto packbuf = reinterpret_cast<ServerDzCharacter_Struct*>(pack->pBuffer);
+		packbuf->zone_id = GetZoneID();
 		packbuf->instance_id = GetInstanceID();
 		packbuf->remove = removed;
 		packbuf->character_id = character_id;
@@ -500,6 +528,22 @@ void DynamicZone::HandleWorldMessage(ServerPacket* pack)
 		if (client)
 		{
 			client->SetDzRemovalTimer(buf->remove); // instance kick timer
+		}
+		break;
+	}
+	case ServerOP_DzRemoveAllCharacters:
+	{
+		auto buf = reinterpret_cast<ServerDzCharacter_Struct*>(pack->pBuffer);
+		if (buf->remove)
+		{
+			for (const auto& client_list_iter : entity_list.GetClientList())
+			{
+				Client* client = client_list_iter.second;
+				if (client)
+				{
+					client->SetDzRemovalTimer(true);
+				}
+			}
 		}
 		break;
 	}

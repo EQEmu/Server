@@ -494,16 +494,7 @@ bool Expedition::AddMember(const std::string& add_char_name, uint32_t add_char_i
 
 void Expedition::RemoveAllMembers(bool enable_removal_timers, bool update_dz_expire_time)
 {
-	m_dynamiczone.RemoveAllCharacters();
-
-	if (enable_removal_timers)
-	{
-		// expedition holds member list (not dz) so inform dz members to start kick timers
-		for (const auto& member : m_members)
-		{
-			m_dynamiczone.SendInstanceCharacterChange(member.char_id, true);
-		}
-	}
+	m_dynamiczone.RemoveAllCharacters(enable_removal_timers);
 
 	if (update_dz_expire_time && RuleB(Expedition, EmptyDzShutdownEnabled))
 	{
