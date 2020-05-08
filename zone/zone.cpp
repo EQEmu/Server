@@ -330,81 +330,156 @@ bool Zone::LoadGroundSpawns() {
 	return(true);
 }
 
-int Zone::SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charges, bool sold) {
-	int freeslot = 0;
-	std::list<MerchantList> merlist = merchanttable[merchantid];
-	std::list<MerchantList>::const_iterator itr;
-	uint32 i = 1;
-	for (itr = merlist.begin(); itr != merlist.end(); ++itr) {
-		MerchantList ml = *itr;
-		if (ml.item == item)
-			return 0;
-
-		// Account for merchant lists with gaps in them.
-		if (ml.slot >= i)
-			i = ml.slot + 1;
-	}
+void Zone::DumpMerchantList(uint32 npcid) {
 	std::list<TempMerchantList> tmp_merlist = tmpmerchanttable[npcid];
 	std::list<TempMerchantList>::const_iterator tmp_itr;
-	bool update_charges = false;
 	TempMerchantList ml;
-	while (freeslot == 0 && !update_charges) {
-		freeslot = i;
-		for (tmp_itr = tmp_merlist.begin(); tmp_itr != tmp_merlist.end(); ++tmp_itr) {
-			ml = *tmp_itr;
-			if (ml.item == item) {
-				update_charges = true;
-				freeslot = 0;
-				break;
-			}
-			if ((ml.slot == i) || (ml.origslot == i)) {
-				freeslot = 0;
-			}
-		}
-		i++;
+
+	for (tmp_itr = tmp_merlist.begin(); tmp_itr != tmp_merlist.end(); ++tmp_itr) {
+		ml = *tmp_itr;
+		
+		LogInventory("slot[{}] Orig[{}] Item[{}] Charges[{}]", ml.slot, ml.origslot, ml.item, ml.charges);
 	}
-	if (update_charges) {
+}
+
+int Zone::SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charges, bool sold) {
+
+	LogInventory("Transaction of [{}] [{}]", charges, item);
+	//DumpMerchantList(npcid);
+	// Iterate past main items.
+	// If the item being transacted is in this list, return 0;
+	std::list<MerchantList> merlist = merchanttable[merchantid];
+	std::list<MerchantList>::const_iterator itr;
+	uint32 temp_slot_index = 1;
+	for (itr = merlist.begin(); itr != merlist.end(); ++itr) {
+		MerchantList ml = *itr;
+		if (ml.item == item) {
+			return 0;
+		}
+
+		// Account for merchant lists with gaps in them.
+		if (ml.slot >= temp_slot_index) {
+			temp_slot_index = ml.slot + 1;
+		}
+	}
+
+	LogInventory("Searching Temporary List.  Main list ended at [{}]", temp_slot_index-1);
+
+	// Now search the temporary list.
+	std::list<TempMerchantList> tmp_merlist = tmpmerchanttable[npcid];
+	std::list<TempMerchantList>::const_iterator tmp_itr;
+	TempMerchantList ml;
+	uint32 first_empty_slot = 0; // Save 1st vacant slot while searching..
+	bool found = false;
+
+	for (tmp_itr = tmp_merlist.begin(); tmp_itr != tmp_merlist.end(); ++tmp_itr) {
+		ml = *tmp_itr;
+		
+		if (ml.item == item) {
+			found = true;
+			LogInventory("Item found in temp list at [{}] with [{}] charges", ml.origslot, ml.charges);
+			break;
+		}
+	}
+
+	if (found) {
 		tmp_merlist.clear();
 		std::list<TempMerchantList> oldtmp_merlist = tmpmerchanttable[npcid];
 		for (tmp_itr = oldtmp_merlist.begin(); tmp_itr != oldtmp_merlist.end(); ++tmp_itr) {
 			TempMerchantList ml2 = *tmp_itr;
 			if(ml2.item != item)
 				tmp_merlist.push_back(ml2);
+			else {
+				if (sold) {
+					LogInventory("Total charges is [{}] + [{}] charges", ml.charges, charges);
+					ml.charges = ml.charges + charges;
+				}
+				else {
+					ml.charges = charges;
+					LogInventory("new charges is [{}] charges", ml.charges);
+				}
+				
+				if (!ml.origslot) {
+					ml.origslot = ml.slot;
+				}
+				
+				if (charges > 0) {
+					database.SaveMerchantTemp(npcid, ml.origslot, item, ml.charges);
+					tmp_merlist.push_back(ml);
+				}
+				else {
+					database.DeleteMerchantTemp(npcid, ml.origslot);
+				}
+			}
 		}
-		if (sold)
-			ml.charges = ml.charges + charges;
-		else
-			ml.charges = charges;
-		if (!ml.origslot)
-			ml.origslot = ml.slot;
-		if (charges > 0) {
-			database.SaveMerchantTemp(npcid, ml.origslot, item, ml.charges);
-			tmp_merlist.push_back(ml);
-		}
-		else {
-			database.DeleteMerchantTemp(npcid, ml.origslot);
-		}
+
 		tmpmerchanttable[npcid] = tmp_merlist;
-
-		if (sold)
-			return ml.slot;
-
+		//DumpMerchantList(npcid);
+		return ml.slot;
 	}
-	if (freeslot) {
-		if (charges < 0) //sanity check only, shouldnt happen
+	else {
+		if (charges < 0) { //sanity check only, shouldnt happen
 			charges = 0x7FFF;
-		database.SaveMerchantTemp(npcid, freeslot, item, charges);
+		}
+
+		// Find an ununsed db slot #
+		std::list<int> slots;
+		TempMerchantList ml3;
+		for (tmp_itr = tmp_merlist.begin(); tmp_itr != tmp_merlist.end(); ++tmp_itr) {
+			ml3 = *tmp_itr;
+			slots.push_back(ml3.origslot);
+		}			
+		slots.sort();
+		std::list<int>::const_iterator slots_itr;
+		uint32 first_empty_slot = 0;
+		uint32 idx = temp_slot_index;
+		for (slots_itr = slots.begin(); slots_itr != slots.end(); ++slots_itr) {
+			if (!first_empty_slot && *slots_itr > idx) {
+				LogInventory("Popped [{}]", *slots_itr);
+				LogInventory("First Gap Found at [{}]", idx);
+				break;
+			}
+
+			++idx;
+		}			
+
+		first_empty_slot = idx;
+
+		// Find an ununsed mslot
+		slots.clear();
+		for (tmp_itr = tmp_merlist.begin(); tmp_itr != tmp_merlist.end(); ++tmp_itr) {
+			ml3 = *tmp_itr;
+			slots.push_back(ml3.slot);
+		}			
+		slots.sort();
+		uint32 first_empty_mslot=0;
+		idx = temp_slot_index;
+		for (slots_itr = slots.begin(); slots_itr != slots.end(); ++slots_itr) {
+			if (!first_empty_mslot && *slots_itr > idx) {
+				LogInventory("Popped [{}]", *slots_itr);
+				LogInventory("First Gap Found at [{}]", idx);
+				break;
+			}
+
+			++idx;
+		}			
+
+		first_empty_mslot = idx;
+
+		database.SaveMerchantTemp(npcid, first_empty_slot, item, charges);
 		tmp_merlist = tmpmerchanttable[npcid];
 		TempMerchantList ml2;
 		ml2.charges = charges;
+		LogInventory("Adding slot [{}] with [{}] charges.", first_empty_mslot, charges);
 		ml2.item = item;
 		ml2.npcid = npcid;
-		ml2.slot = freeslot;
-		ml2.origslot = ml2.slot;
+		ml2.slot = first_empty_mslot;
+		ml2.origslot = first_empty_slot;
 		tmp_merlist.push_back(ml2);
 		tmpmerchanttable[npcid] = tmp_merlist;
+		//DumpMerchantList(npcid);
+		return ml2.slot;
 	}
-	return freeslot;
 }
 
 uint32 Zone::GetTempMerchantQuantity(uint32 NPCID, uint32 Slot) {
@@ -413,8 +488,10 @@ uint32 Zone::GetTempMerchantQuantity(uint32 NPCID, uint32 Slot) {
 	std::list<TempMerchantList>::const_iterator Iterator;
 
 	for (Iterator = TmpMerchantList.begin(); Iterator != TmpMerchantList.end(); ++Iterator)
-		if ((*Iterator).slot == Slot)
+		if ((*Iterator).slot == Slot) {
+			LogInventory("Slot [{}] has [{}] charges.", Slot, (*Iterator).charges);
 			return (*Iterator).charges;
+		}
 
 	return 0;
 }
