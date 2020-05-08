@@ -5522,7 +5522,7 @@ XS(XS_Client_OpenLFGuildWindow) {
 	XSRETURN_EMPTY;
 }
 
-XS(XS_NotifyNewTitlesAvailable); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_NotifyNewTitlesAvailable); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_NotifyNewTitlesAvailable) {
 	dXSARGS;
 	if (items != 1)
