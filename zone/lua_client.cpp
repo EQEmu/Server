@@ -1210,6 +1210,11 @@ void Lua_Client::OpenLFGuildWindow() {
 	self->OpenLFGuildWindow();
 }
 
+void Lua_Client::NotifyNewTitlesAvailable() {
+	Lua_Safe_Call_Void();
+	self->NotifyNewTitlesAvailable();
+}
+
 void Lua_Client::Signal(uint32 id) {
 	Lua_Safe_Call_Void();
 	self->Signal(id);
@@ -1820,6 +1825,7 @@ luabind::scope lua_register_client() {
 		.def("GetAllMoney", (uint64(Lua_Client::*)(void))&Lua_Client::GetAllMoney)
 		.def("GetMoney", (uint32(Lua_Client::*)(uint8, uint8))&Lua_Client::GetMoney)
 		.def("OpenLFGuildWindow", (void(Lua_Client::*)(void))&Lua_Client::OpenLFGuildWindow)
+		.def("NotifyNewTitlesAvailable", (void(Lua_Client::*)(void))&Lua_Client::NotifyNewTitlesAvailable)
 		.def("Signal", (void(Lua_Client::*)(uint32))&Lua_Client::Signal)
 		.def("AddAlternateCurrencyValue", (void(Lua_Client::*)(uint32,int))&Lua_Client::AddAlternateCurrencyValue)
 		.def("SetAlternateCurrencyValue", (void(Lua_Client::*)(uint32,int))&Lua_Client::SetAlternateCurrencyValue)
