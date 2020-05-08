@@ -128,8 +128,11 @@ Expedition* Expedition::TryCreate(
 
 		expedition->SaveMembers(request);
 		expedition->SaveLockouts(request);
-		expedition->SendUpdatesToZoneMembers();
-		expedition->SendWorldExpeditionUpdate(); // cache in other zones
+
+		auto inserted = zone->expedition_cache.emplace(expedition_id, std::move(expedition));
+
+		inserted.first->second->SendUpdatesToZoneMembers();
+		inserted.first->second->SendWorldExpeditionUpdate(); // cache in other zones
 
 		Client* leader_client = request.GetLeaderClient();
 
@@ -137,7 +140,6 @@ Expedition* Expedition::TryCreate(
 			leader_client, leader.name, Chat::Yellow, EXPEDITION_AVAILABLE, { request.GetExpeditionName() }
 		);
 
-		auto inserted = zone->expedition_cache.emplace(expedition_id, std::move(expedition));
 		return inserted.first->second.get();
 	}
 
