@@ -341,6 +341,7 @@ public:
 
 	Lua_Expedition  CreateExpedition(std::string zone_name, uint32 version, uint32 duration, std::string expedition_name, uint32 min_players, uint32 max_players);
 	Lua_Expedition  CreateExpedition(std::string zone_name, uint32 version, uint32 duration, std::string expedition_name, uint32 min_players, uint32 max_players, bool has_replay_timer);
+	Lua_Expedition  CreateExpedition(std::string zone_name, uint32 version, uint32 duration, std::string expedition_name, uint32 min_players, uint32 max_players, bool has_replay_timer, bool disable_messages);
 	Lua_Expedition  GetExpedition();
 	luabind::object GetExpeditionLockouts(lua_State* L);
 	luabind::object GetExpeditionLockouts(lua_State* L, std::string expedition_name);

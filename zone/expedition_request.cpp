@@ -38,12 +38,14 @@ struct ExpeditionRequestConflict
 };
 
 ExpeditionRequest::ExpeditionRequest(
-	std::string expedition_name, uint32_t min_players, uint32_t max_players, bool has_replay_timer
+	std::string expedition_name, uint32_t min_players, uint32_t max_players,
+	bool has_replay_timer, bool disable_messages
 ) :
 	m_expedition_name(expedition_name),
 	m_min_players(min_players),
 	m_max_players(max_players),
-	m_has_replay_timer(has_replay_timer)
+	m_has_replay_timer(has_replay_timer),
+	m_disable_messages(disable_messages)
 {
 }
 
@@ -288,11 +290,18 @@ bool ExpeditionRequest::CheckMembersForConflicts(MySQLRequestResult& results, bo
 void ExpeditionRequest::SendLeaderMessage(
 	uint16_t chat_type, uint32_t string_id, const std::initializer_list<std::string>& parameters)
 {
-	Client::SendCrossZoneMessageString(m_leader, m_leader_name, chat_type, string_id, parameters);
+	if (!m_disable_messages)
+	{
+		Client::SendCrossZoneMessageString(m_leader, m_leader_name, chat_type, string_id, parameters);
+	}
 }
 
 void ExpeditionRequest::SendLeaderMemberInExpedition(const std::string& member_name, bool is_solo)
 {
+	if (m_disable_messages) {
+		return;
+	}
+
 	if (is_solo)
 	{
 		SendLeaderMessage(Chat::Red, EXPEDITION_YOU_BELONG);
@@ -307,7 +316,7 @@ void ExpeditionRequest::SendLeaderMemberInExpedition(const std::string& member_n
 void ExpeditionRequest::SendLeaderMemberReplayLockout(
 	const std::string& member_name, const ExpeditionLockoutTimer& lockout, bool is_solo)
 {
-	if (lockout.GetSecondsRemaining() <= 0)
+	if (m_disable_messages || lockout.GetSecondsRemaining() <= 0)
 	{
 		return;
 	}
@@ -330,7 +339,7 @@ void ExpeditionRequest::SendLeaderMemberReplayLockout(
 void ExpeditionRequest::SendLeaderMemberEventLockout(
 	const std::string& member_name, const ExpeditionLockoutTimer& lockout)
 {
-	if (lockout.GetSecondsRemaining() <= 0)
+	if (m_disable_messages || lockout.GetSecondsRemaining() <= 0)
 	{
 		return;
 	}

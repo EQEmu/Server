@@ -1656,6 +1656,11 @@ Lua_Expedition Lua_Client::CreateExpedition(std::string zone_name, uint32 versio
 	return self->CreateExpedition(zone_name, version, duration, expedition_name, min_players, max_players, has_replay_timer);
 }
 
+Lua_Expedition Lua_Client::CreateExpedition(std::string zone_name, uint32 version, uint32 duration, std::string expedition_name, uint32 min_players, uint32 max_players, bool has_replay_timer, bool disable_messages) {
+	Lua_Safe_Call_Class(Lua_Expedition);
+	return self->CreateExpedition(zone_name, version, duration, expedition_name, min_players, max_players, has_replay_timer, disable_messages);
+}
+
 Lua_Expedition Lua_Client::GetExpedition() {
 	Lua_Safe_Call_Class(Lua_Expedition);
 	return self->GetExpedition();
@@ -2036,6 +2041,7 @@ luabind::scope lua_register_client() {
 		.def("GetClientMaxLevel", (int(Lua_Client::*)(void))&Lua_Client::GetClientMaxLevel)
 		.def("CreateExpedition", (Lua_Expedition(Lua_Client::*)(std::string, uint32, uint32, std::string, uint32, uint32))&Lua_Client::CreateExpedition)
 		.def("CreateExpedition", (Lua_Expedition(Lua_Client::*)(std::string, uint32, uint32, std::string, uint32, uint32, bool))&Lua_Client::CreateExpedition)
+		.def("CreateExpedition", (Lua_Expedition(Lua_Client::*)(std::string, uint32, uint32, std::string, uint32, uint32, bool, bool))&Lua_Client::CreateExpedition)
 		.def("GetExpedition", (Lua_Expedition(Lua_Client::*)(void))&Lua_Client::GetExpedition)
 		.def("GetExpeditionLockouts", (luabind::object(Lua_Client::*)(lua_State* L))&Lua_Client::GetExpeditionLockouts)
 		.def("GetExpeditionLockouts", (luabind::object(Lua_Client::*)(lua_State* L, std::string))&Lua_Client::GetExpeditionLockouts)
