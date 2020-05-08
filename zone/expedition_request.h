@@ -58,6 +58,7 @@ private:
 	bool CanRaidRequest(Raid* raid);
 	bool CanGroupRequest(Group* group);
 	bool CheckMembersForConflicts(MySQLRequestResult& results, bool is_solo);
+	std::string GetGroupLeaderName(uint32_t group_id);
 	bool IsPlayerCountValidated(uint32_t member_count);
 	bool LoadLeaderLockouts();
 	void SendLeaderMemberInExpedition(const std::string& member_name, bool is_solo);

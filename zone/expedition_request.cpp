@@ -120,7 +120,8 @@ bool ExpeditionRequest::CanGroupRequest(Group* group)
 	{
 		m_leader = group->GetLeader()->CastToClient();
 	}
-	m_leader_name = group->GetLeaderName();
+	// Group::GetLeaderName() is broken if group formed across zones, ask database instead
+	m_leader_name = m_leader ? m_leader->GetName() : GetGroupLeaderName(group->GetID()); // group->GetLeaderName();
 	m_leader_id = m_leader ? m_leader->CharacterID() : database.GetCharacterID(m_leader_name.c_str());
 
 	uint32_t count = 0;
@@ -140,6 +141,13 @@ bool ExpeditionRequest::CanGroupRequest(Group* group)
 	}
 
 	return ValidateMembers(query_member_names, count);
+}
+
+std::string ExpeditionRequest::GetGroupLeaderName(uint32_t group_id)
+{
+	char leader_name_buffer[64] = { 0 };
+	database.GetGroupLeadershipInfo(group_id, leader_name_buffer);
+	return std::string(leader_name_buffer);
 }
 
 bool ExpeditionRequest::ValidateMembers(const std::string& query_member_names, uint32_t member_count)
