@@ -1530,6 +1530,20 @@ void Expedition::SendWorldGetOnlineMembers()
 	worldserver.SendPacket(pack.get());
 }
 
+void Expedition::RemoveAllCharacterLockouts(std::string character_name, std::string expedition_name)
+{
+	uint32_t pack_size = sizeof(ServerExpeditionCharacterName_Struct);
+	auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_ExpeditionRemoveCharLockouts, pack_size));
+	auto buf = reinterpret_cast<ServerExpeditionCharacterName_Struct*>(pack->pBuffer);
+	strn0cpy(buf->character_name, character_name.c_str(), sizeof(buf->character_name));
+	buf->expedition_name[0] = '\0';
+	if (!expedition_name.empty())
+	{
+		strn0cpy(buf->expedition_name, expedition_name.c_str(), sizeof(buf->expedition_name));
+	}
+	worldserver.SendPacket(pack.get());
+}
+
 void Expedition::HandleWorldMessage(ServerPacket* pack)
 {
 	switch (pack->opcode)
@@ -1716,6 +1730,16 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 					expedition->SetDzZoneInLocation(buf->x, buf->y, buf->z, buf->heading, false);
 				}
 			}
+		}
+		break;
+	}
+	case ServerOP_ExpeditionRemoveCharLockouts:
+	{
+		auto buf = reinterpret_cast<ServerExpeditionCharacterName_Struct*>(pack->pBuffer);
+		Client* client = entity_list.GetClientByName(buf->character_name);
+		if (client)
+		{
+			client->RemoveAllExpeditionLockouts(buf->expedition_name);
 		}
 		break;
 	}

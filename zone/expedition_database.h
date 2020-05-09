@@ -45,6 +45,8 @@ namespace ExpeditionDatabase
 	MySQLRequestResult LoadExpeditionMembers(uint32_t expedition_id);
 	MySQLRequestResult LoadValidationData(const std::string& character_names_query, const std::string& expedition_name);
 	void DeleteAllMembers(uint32_t expedition_id);
+	void DeleteAllCharacterLockouts(uint32_t character_id);
+	void DeleteAllCharacterLockouts(uint32_t character_id, const std::string& expedition_name);
 	void DeleteCharacterLockout(uint32_t character_id, const std::string& expedition_name, const std::string& event_name);
 	void DeleteExpedition(uint32_t expedition_id);
 	void DeleteLockout(uint32_t expedition_id, const std::string& event_name);
