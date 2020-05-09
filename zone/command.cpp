@@ -6900,15 +6900,18 @@ void command_dz(Client* c, const Seperator* sep)
 				auto expire_time = std::chrono::system_clock::from_time_t(start_time + duration);
 				bool is_expired = std::chrono::system_clock::now() > expire_time;
 
-				c->Message(Chat::White, fmt::format(
-					"type: [{}] instance: [{}] zone: [{}] version: [{}] members: [{}] expired: [{}]",
-					strtoul(row[0], nullptr, 10),
-					strtoul(row[1], nullptr, 10),
-					strtoul(row[2], nullptr, 10),
-					strtoul(row[3], nullptr, 10),
-					strtoul(row[6], nullptr, 10),
-					is_expired
-				).c_str());
+				if (!is_expired || strcasecmp(sep->arg[2], "all") == 0)
+				{
+					c->Message(Chat::White, fmt::format(
+						"type: [{}] instance: [{}] zone: [{}] version: [{}] members: [{}] expired: [{}]",
+						strtoul(row[0], nullptr, 10),
+						strtoul(row[1], nullptr, 10),
+						strtoul(row[2], nullptr, 10),
+						strtoul(row[3], nullptr, 10),
+						strtoul(row[6], nullptr, 10),
+						is_expired
+					).c_str());
+				}
 			}
 		}
 	}
@@ -6929,7 +6932,7 @@ void command_dz(Client* c, const Seperator* sep)
 		c->Message(Chat::White, "#dz cache list - list expeditions in current zone cache");
 		c->Message(Chat::White, "#dz cache reload - reload zone cache from database");
 		c->Message(Chat::White, "#dz destroy <expedition_id> - destroy expedition globally (must be in cache)");
-		c->Message(Chat::White, "#dz list - list all dynamic zones with corresponding instance ids from database");
+		c->Message(Chat::White, "#dz list [all] - list dynamic zones from database -- 'all' includes expired");
 		c->Message(Chat::White, "#dz lockouts remove <char_name> - delete all of character's expedition lockouts");
 		c->Message(Chat::White, "#dz lockouts remove <char_name> \"<expedition_name>\" - delete lockouts by expedition");
 	}
